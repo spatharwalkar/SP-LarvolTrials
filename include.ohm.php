@@ -160,12 +160,7 @@ function ohm($id, $auto = false, $fullpage = false, $direct = true, $li = false)
 			{
 				continue;
 			}
-			// fixed the issue coming in bumb description url for &sect in $section_id
-			if($df=="bomb_explain"){
-				$cellMeta[$set['entity1']][$set['entity2']][$df] = htmlentities($set[$df]);
-			}else{
-				$cellMeta[$set['entity1']][$set['entity2']][$df] = $set[$df];
-			}
+			$cellMeta[$set['entity1']][$set['entity2']][$df] = $set[$df];
 		}
 	}
 	
