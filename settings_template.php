@@ -1,0 +1,28 @@
+<?php
+/* Database login settings.
+	You must change these to point to the correct database.
+*/
+define('DB_SERVER', '127.0.0.1');
+define('DB_NAME', 'clinicaltrials');
+define('DB_USER', 'clinical_user');
+define('DB_PASS', 'password1234');
+
+/* YOURLS options.
+	You must change these to reflect how you set up YOURLS
+*/
+define('YOURLS_USER', 'root');
+define('YOURLS_PASS', 'password');
+define('YOURLS_URL', 'http://localhost/s/yourls-api.php');
+
+/* Miscellaneous site options.
+	Customize these however you wish.
+*/
+define('SITE_NAME','Clinical Trials');	//name used by the site to refer to itself in communiction with users
+
+//Don't change these
+define('HASH_ALGO', 'tiger192,4');
+ini_set('magic_quotes_gpc','Off');
+ini_set('magic_quotes_runtime','Off');
+ini_set('magic_quotes_sybase','Off');
+ini_set('register_globals','0');
+?>

@@ -1,0 +1,1 @@
+function delsure(){ return confirm("Deleting an item will purge all associated data. Are you sure?"); }

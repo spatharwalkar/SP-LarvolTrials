@@ -1,0 +1,36 @@
+@charset "utf-8";
+
+body{
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:13px;
+	font-weight:bold;
+}
+td,th{
+	vertical-align:top;
+}
+th{
+	text-align:center;
+}
+.status{
+	color:#F00;
+}
+dl{
+	font-weight:normal;
+	margin:0 0 6em 20px;
+}
+dd,dt{
+	float:left;
+}
+dd{
+	display:inline;
+}
+dt{
+	display:block;
+	clear:both;
+	width:150px;
+}
+iframe{
+	height:1.2em;
+	width:5em;
+	border:0;margin:0;padding:0;
+}
