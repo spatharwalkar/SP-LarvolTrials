@@ -1,5 +1,5 @@
 <?php
-require_once('db.php');//x
+require_once('db.php');
 if(!$db->loggedIn() || ($db->user->userlevel!='admin' && $db->user->userlevel!='root'))
 {
 	header('Location: ' . urlPath() . 'index.php');
