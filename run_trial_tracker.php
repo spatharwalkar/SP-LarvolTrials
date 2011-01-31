@@ -34,7 +34,7 @@ $trials = array();
 while($trial = mysql_fetch_array($res))
 {
 	$nct = getNCT($trial['nctid'],$time,$edited);
-	if (!is_array($nct)) {
+	if (!is_array($nct)) { 
 		$nct=array();
 		$trial['NCT/intervention_name'] = '(study not in database)';
 	}
@@ -57,24 +57,50 @@ $out = '<table border="1" class="MsoNormalTable"'
 	. '<th>Randomized Controlled Trial</th>'
 	. '<th>Data Release</th></tr>';
 
-ksort($trials);
+
 foreach($trials as $nctid => $trial) {
+
 	if (is_array($trial['NCT/intervention_name'])) {
 		$intervention_name = implode(', ',$trial['NCT/intervention_name']);
 	}else{
 		$intervention_name = $trial['NCT/intervention_name'];
 	}
 	if ($intervention_name == '') $intervention_name = '(no intervention)';
-	$end_date = ($trial['NCT/completion_date'])?$trial['NCT/completion_date']:$trial['NCT/primary_completion_date'];
+
+	$end_date =		($trial['NCT/completion_date'])?$trial['NCT/completion_date']:$trial['NCT/primary_completion_date'];
+
+	
+	//checking if the field 'NCT/collaborator' has more than one value.
+	if(is_array($trial['NCT/collaborator'])) {
+		$collaborator = implode(',', $trial['NCT/collaborator']);
+	} else {
+		$collaborator = $trial['NCT/collaborator'];
+	}
+
+	//checking if the field 'NCT/lead_sponsor' has more than one value.
+	if(is_array($trial['NCT/lead_sponsor'])) {
+		$lead_sponsor = implode(',', $trial['NCT/lead_sponsor']);
+	} else {
+		$lead_sponsor = $trial['NCT/lead_sponsor'];
+	}
+
+	//checking if the field 'NCT/enrollment' has more than one value.
+	if(is_array($trial['NCT/enrollment'])) {
+		$enrollment = implode(',', $trial['NCT/enrollment']);
+	} else {
+		$enrollment = $trial['NCT/enrollment'];
+	}
+
 	$out .= '<tr><td><a href="http://clinicaltrials.gov/ct2/show/' . padnct($trial['nctid']) . '">'
 		. padnct($nctid) . '</a></td>'
 		. '<td>' . $intervention_name . '</td>'
 		. '<td>' . $trial['tumor_type'] . '</td>'
 		. '<td>' . $trial['patient_population'] . '</td>'
 		. '<td>' . $trial['trials_details'] . '</td>'
-		. '<td style="'.((in_array('NCT/lead_sponsor',$trial['changedFields']))?'background-color:#FF8080;':'').'">' . $trial['NCT/lead_sponsor'] . '</td>'
-		. '<td style="'.((in_array('NCT/collaborator',$trial['changedFields']))?'background-color:#FF8080;':'').'">' . $trial['NCT/collaborator'] . '</td>'
-		. '<td style="'.((in_array('NCT/enrollment',$trial['changedFields']))?'background-color:#FF8080;':'').'">' . $trial['NCT/enrollment'] . '</td>'
+		. '<td style="'.((in_array('NCT/lead_sponsor',$trial['changedFields']))?'background-color:#FF8080;':'').'">' . $lead_sponsor . '</td>'
+		. '<td style="'.((in_array('NCT/collaborator',$trial['changedFields']))?'background-color:#FF8080;':'').'">' . $collaborator . '</td>'
+		. '<td style="'.((in_array('NCT/enrollment',$trial['changedFields']))?'background-color:#FF8080;':'').'">' . 
+$enrollment . '</td>'
 		. '<td style="'.((in_array('NCT/start_date',$trial['changedFields']))?'background-color:#FF8080;':'').'">' . $trial['NCT/start_date'] . '</td>'
 		. '<td>' . $end_date . '</td>'
 		. '<td style="'.((in_array('NCT/overall_status',$trial['changedFields']))?'background-color:#FF8080;':'').'">' . $trial['NCT/overall_status'] . '</td>'
@@ -115,12 +141,12 @@ function getNCT($nct_id,$time,$changesChecker)
 	$param->value = $nct_id;
 
 	$fieldnames = array('nct_id','intervention_name','lead_sponsor','collaborator','enrollment','start_date','completion_date','primary_completion_date','overall_status','phase');
-	foreach($fieldnames as $name) {
+	foreach($fieldnames as $name) { 
 		$list[] = fieldNameToPaddedId($name);
 	}
 
 	$res = search(array($param),$list,NULL,strtotime($time));
-//	echo '<pre style="background-color:80FF80;">'.print_r($res,true).'</pre>';
+	//echo '<pre style="background-color:80FF80;">'.print_r($res,true).'</pre>';
 
 	foreach($res as $stu) $study = $stu;
 
@@ -128,7 +154,7 @@ function getNCT($nct_id,$time,$changesChecker)
 //	echo '<pre>'.print_r($studycatData,true).'</pre>';
 
 	$sql="SELECT DISTINCT `df`.`name` AS `fieldname`, `dv`.`studycat` FROM `data_values` `dv` LEFT JOIN `data_fields` `df` ON (`df`.`id`=`dv`.`field`) WHERE `df`.`name` IN ('".join("','",$fieldnames)."') AND `studycat`='".$studycatData['studycat']."' AND (`dv`.`superceded`<'".date('Y-m-d',strtotime($time))."' AND `dv`.`superceded`>='".date('Y-m-d',strtotime($changesChecker,strtotime($time)))."')";
-//	echo '<p>'.$sql.'</p>';
+//echo '<p>'.$sql.'</p>';
 //	echo '<p>Time: '.$time.'; '.date('Y-m-d H:i:s',strtotime($time)).'</p>';
 //	echo date('Y-m-d H:i:s',strtotime('today'));
 
@@ -137,7 +163,7 @@ function getNCT($nct_id,$time,$changesChecker)
 	while ($row=mysql_fetch_assoc($changedFields)){
 		$study['changedFields'][]='NCT/'.$row['fieldname'];
 	}
-//	echo '<pre style="background-color:FF8080;">'.print_r($study,true).'</pre>';
+
 
 	return $study;
 }
