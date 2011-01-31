@@ -11,6 +11,19 @@
 </style>
 </head>
 <body>
+<?php
+if(isset($_POST['update']))
+{
+	echo('<fieldset><legend>Output</legend><pre>');
+	$rev = '';
+	if(strlen($_POST['revision']) && is_numeric($_POST['revision']))
+		$rev = ' -r' . (int)$_POST['revision'];
+	$cmd = 'svn update' . $rev;
+	echo('<span class="cmd">' . $cmd . '</span>' . "\n");
+	system($cmd);
+	echo('</pre></fieldset>');
+}
+?>
 <fieldset><legend>Status</legend><pre><?php
 echo('Repository '); system('svn info -r HEAD | grep -i "Last Changed Rev"');
 echo('Live site  '); system('svn info | grep -i "Last Changed Rev"');
@@ -23,16 +36,4 @@ system('svn status');
   <input type="submit" name="update" value="Update" /> <input type="text" name="revision" /><br />
 </fieldset>
 </form>
-<fieldset><legend>Output</legend><pre><?php
-if(isset($_POST['update']))
-{
-	$rev = '';
-	if(strlen($_POST['revision']) && is_numeric($_POST['revision']))
-		$rev = ' -r' . (int)$_POST['revision'];
-	$cmd = 'svn update' . $rev;
-	echo('<span class="cmd">' . $cmd . '</span>' . "\n");
-	system($cmd);
-}
-
-?>
-</pre></fieldset></body></html>
+</body></html>
