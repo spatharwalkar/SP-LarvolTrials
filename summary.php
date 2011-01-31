@@ -15,23 +15,52 @@ $param->field = 'larvol_id';
 $param->action = 'search';
 $param->value = $id;
 
-$doc = file_get_contents('templates/summary.htm');
-$list = array('larvol_id','_'.getFieldId('NCT','nct_id'));
-foreach($db->types as $field => $type)
+$doc = file_get_contents('templates/summary.htm'); 
+
+foreach($db->types as $field=>$type)
 {
-	if(strpos($doc,'#' . $field . '#') !== false) $list[] = $field;
+	//if(!array_key_exists('larvol_id',$list)) 
+	$list[] = $field;
 }
-$res = search(array($param),$list,1,true);
+
+$override = array(1);
+$res = search(array($param),$list,1,strtotime(date('Y-m-d H:i:s')));
 $study;
-foreach($res as $stu) $study = $stu;
+foreach($res as $stu) $study = $stu; 
 $study['NCT/nct_id'] = padnct($study['NCT/nct_id']);
+
 $values = array();
-foreach($list as $i => $field)
+$fields = array();
+
+foreach($study as $key=>$val)
 {
-	$values[] = ($study->{$field} === NULL) ? '' : (is_array($study->{$field}) ? implode(', ', $study->{$field}) : $study->{$field});
-	$list[$i] = '#' . $field . '#';
+	if($val != NULL) { 
+		if(is_array($val)) {
+			$values[$key] = implode(', ', $val );	
+		} else {
+			$values[$key] = $val ;
+		}
+
+		if($key == "NCT/primary_outcome_measure" || $key == "NCT/secondary_outcome_measure") {
+			$key = substr($key,0,-8);
+		}
+		if(strpos($key, "NCT/") !== false) {
+			$fields[$key] = "%#(.*?)".substr($key,4)."(.*?)#%";
+			//regex to match field names(which contains NCT as a prefix) and values in the template file
+
+		} else {
+			$fields[$key] = "%#(.*?)".$key."(.*?)#%";//regex to match the field names(which does not contain NCT as a prefix) and values in the template file
+		}
+		
+		
+	} 
 }
-$doc = str_replace($list, $values, $doc);
+
+/*from inwards to outwards 
+first preg_replace to replace the replacements text from the template file with the matched values from the db
+second preg_replace to empty the replacement text for which a match has not been found.
+*/
+$doc = preg_replace("%#(.*?)#%", "",preg_replace($fields, $values, $doc));
 
 //Send headers for file download
 header("Pragma: public");
