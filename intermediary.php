@@ -35,7 +35,9 @@ $results = $excel_params['count'];
 if($excel_params['params'] === NULL)
 {
 	if(!isset($_GET['leading'])) die('No search terms and no ID list');
-	$leadingIDs = unpack('l*', gzinflate(base64_decode($_GET['leading'])));
+	$packedLeadingIDs = gzinflate(base64_decode($_GET['leading']));
+	$leadingIDs = unpack('l*', $packedLeadingIDs);
+	if($packedLeadingIDs === false) $leadingIDs = array();
 	$sp = new SearchParam();
 	$sp->field = 'larvol_id';
 	$sp->action = 'search';
