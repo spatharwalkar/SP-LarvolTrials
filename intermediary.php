@@ -26,18 +26,23 @@ require_once('krumo/class.krumo.php');
 require_once('db.php');
 require_once('include.search.php');
 
-if(!isset($_GET['params'])) die('cell not set');
+//if(!isset($_GET['params'])) die('cell not set');	//sometimes links are missing this. Quick fix is to stop checking for it.
 $excel_params = unserialize(gzinflate(base64_decode($_GET['params'])));
 $gentime = $excel_params['rundate'];
 $name = $excel_params['name'];
 $time_machine = $excel_params['time'];
 $results = $excel_params['count'];
+
 if($excel_params['params'] === NULL)
 {
 	if(!isset($_GET['leading'])) die('No search terms and no ID list');
 	$packedLeadingIDs = gzinflate(base64_decode($_GET['leading']));
 	$leadingIDs = unpack('l*', $packedLeadingIDs);
 	if($packedLeadingIDs === false) $leadingIDs = array();
+	if($excel_params === false)
+	{
+		$results = count($leadingIDs);
+	}
 	$sp = new SearchParam();
 	$sp->field = 'larvol_id';
 	$sp->action = 'search';
@@ -89,7 +94,7 @@ $pages = ceil($results / $db->set['results_per_page']);
 $last = ($page*$db->set['results_per_page']>$results) ? $results : $pend;
 
 //echo('Results of ' . $name . '<br />run on ' . $gentime);
-echo('Results of report run on ' . $gentime);
+if(strlen($gentime)) echo('Results of report run on ' . $gentime);
 
 $pager='';
 if($results > $db->set['results_per_page'])
