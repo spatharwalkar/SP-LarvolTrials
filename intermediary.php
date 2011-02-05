@@ -26,7 +26,7 @@ require_once('krumo/class.krumo.php');
 require_once('db.php');
 require_once('include.search.php');
 
-//if(!isset($_GET['params'])) die('cell not set');	//sometimes links are missing this. Quick fix is to stop checking for it.
+if(!isset($_GET['params'])) die('cell not set');	//sometimes links are missing this. Quick fix is to stop checking for it.
 $excel_params = unserialize(gzinflate(base64_decode($_GET['params'])));
 $gentime = $excel_params['rundate'];
 $name = $excel_params['name'];
