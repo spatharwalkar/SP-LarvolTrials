@@ -16,7 +16,7 @@ $SEARCH_ERR = NULL;
 			OR $list is (false), in which case the SQL query is returned.
 */
 function search($params=array(),$list=array('overall_status','brief_title'),$page=1,$time=NULL,$override=array())
-{
+{ 
 	if($time !== NULL) $time = '"' . date('Y-m-d H:i:s',$time) . '"';
 	$optimizer_hints = ($_GET['priority'] == 'high') ? 'HIGH_PRIORITY ' : '';
 	
@@ -41,13 +41,13 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 	$normal_sort = array();
 	$global_sort = array();
 	$strong_exclusions = array();
-	try{
+	try{ 
 		foreach($params as $param)
 		{
 			$global = (is_array($param->field) ? $param->field[0][0] : $param->field[0]) != '_';
 			$type = $db->types[(is_array($param->field) ? $param->field[0] : $param->field)];
 			switch($param->action)
-			{
+			{ 
 				//all that needs to be stored for sort args is the field number and type
 				//store a separate sortargs for global fields that just stores the field name
 				case 'ascending':
@@ -71,14 +71,14 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 				case 'require':
 				case 'search':
 				if($global)
-				{
+				{ 
 					$param->field = '`clinical_study`.' . $param->field;
 					if($param->action == 'require')
 					{
 						$global_conditions[] = $param->field . ' IS NOT NULL';
-					}else{
+					}else{ 
 						switch($type)
-						{
+						{ 
 							//rangeable
 							case 'date':
 							case 'datetime':
@@ -111,7 +111,8 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 								$global_conditions[] = 'NOT ' . textEqual($param->field,$param->negate);
 						}
 					}
-				}else{
+					
+				}else{ 
 					$field;
 					if(is_array($param->field))	//take the underscore off the field "name" to get the ID
 					{
@@ -122,9 +123,9 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 					if($param->action == 'require')
 					{
 						$normal_conditions[] = $field . ' AND dv.val_' . $type . ' IS NOT NULL';
-					}else{
+					}else{  
 						switch($type)
-						{
+						{ 
 							//rangeable
 							case 'date':
 							case 'int':
@@ -226,9 +227,9 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 			. 'LEFT JOIN data_cats_in_study AS i ON dv.studycat=i.id '
 			. 'LEFT JOIN clinical_study ON i.larvol_id=clinical_study.larvol_id) WHERE ' . $cond . ' AND ';
 		if($time === NULL)
-		{
+		{ 
 			$query .= 'dv.superceded IS NULL ';
-		}else{
+		}else{ 
 			$query .= 'dv.added<' . $time . ' AND (dv.superceded>' . $time . ' OR dv.superceded IS NULL) ';
 		}
 		$bigquery[] = $query;
@@ -262,7 +263,7 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 		}
 		$strong_exclusions[$key] = $query;
 	}
-	//var_dump($bigquery);exit;
+	
 	if(!empty($strong_exclusions))
 	{
 		//if there are ONLY strong exclusions, there won't be a WHERE clause yet at this point
@@ -270,9 +271,10 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 		$bigquery .=  $prefix . 'clinical_study.larvol_id NOT IN(' . implode(' UNION ', $strong_exclusions) . ')';
 	}
 	if(!empty($override))
-	{
+	{ 
 		mysql_query('DROP TABLE IF EXISTS ulid');
 		mysql_query('CREATE TEMPORARY TABLE ulid (larvol_id int NOT NULL)');
+		
 		mysql_query('INSERT INTO ulid VALUES ' . implode(',', parenthesize($override)));
 		$bigquery .= ' UNION SELECT larvol_id FROM ulid';
 	}
@@ -285,7 +287,7 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 		$row = mysql_fetch_assoc($res) or die('Total not found.');
 		return $row['ctotal'];
 	}
-	//var_dump($bigquery);exit;
+	//var_dump($list);exit;
 	if($list === false)	//option to return the SQL query
 	{
 		return $bigquery;
@@ -311,11 +313,14 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 	}
 	$sorting = !empty($normal_sort) || !empty($global_sort);
 	if(!$sorting)	$bigquery .= $limit;	//Can only limit if we're not sorting.
+	
 	$res = mysql_query($bigquery);
 	if($res === false) return softDie('Bad SQL query on search: ' . $bigquery . "<br />\n" . mysql_error());
+	
 	while($row = mysql_fetch_assoc($res)) $resid_set[] = $row['larvol_id'];
+	
 	if($sorting)
-	{
+	{ 
 		$timereq = '';
 		if($time === NULL)
 		{
@@ -349,13 +354,14 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 		}
 	}
 	//At this point $query contains all the conditions and gets us the right ID list with limits for result page
+	
 	$recordsData = getRecords($resid_set,$list,$time);
 	$retdata = array();
 	foreach($resid_set as $id) $retdata[$id] = $recordsData[$id];
 	return $retdata;
 }
 
-function getField($params, $field) {
+function getField($params, $field) { 
 	$id = '_'.getFieldId('NCT', $field);
 	foreach ($params as $param) {
 		$fields = is_array($param->field) ? $param->field :
@@ -388,10 +394,35 @@ function applyBackboneAgent($ids, $term) {
 	return $result;
 }
 
+function getActiveCount($all_ids) {
+
+	$ids = implode(', ',$all_ids);
+	$overallStatusId = getFieldId("NCT", "overall_status");
+	$activeStatuses = getEnumvalId($overallStatusId, "Active, not recruiting").",".
+	getEnumvalId($overallStatusId, "Not yet recruiting").",".
+	getEnumvalId($overallStatusId, "Recruiting").",".
+	getEnumvalId($overallStatusId, "Enrolling by invitation").",".
+	getEnumvalId($overallStatusId, "Active, not recruiting").",".
+	getEnumvalId($overallStatusId, "Available");
+	
+	$past = "'".date("Y-m-d H:i:s", time() - (int)(0.1*1.5*24*3600))."'";
+	
+	$query = "SELECT i.larvol_id,dv.field,dv.val_enum AS id FROM data_values AS dv
+					LEFT JOIN data_cats_in_study AS i ON dv.studycat=i.id
+					WHERE i.larvol_id IN (".$ids.") AND dv.field = ".$overallStatusId." AND
+					dv.val_enum IN (".$activeStatuses.") AND dv.added < ".$past." AND dv.superceded IS NULL";
+	$res = mysql_query($query);
+	$id_set = array();
+	if($res === false) return softDie('Bad SQL query on active status : ' . $query . "<br />\n" . mysql_error());
+	while($row = mysql_fetch_array($res)) $id_set[] = $row['id'];
+	
+	return count($id_set);
+}
+
 function getBomb($ids) {
 	if (count($ids) == 0)
 		return "";
-	$overallStatusId = getFieldId("NCT", "overall_status");
+	$overallStatusId = getFieldId("NCT", "overall_status");//echo "<pre>";print_r($ids);exit;
 	$phaseId = getFieldId("NCT","phase");
 	$terminatedId = getEnumvalId($overallStatusId, "Terminated");
 	$suspendedId = getEnumvalId($overallStatusId, "Suspended");
@@ -437,7 +468,7 @@ function highPass($v){return substr($v,1);}
 //return an array of study maps corresponding to $ids, with only $fields populated
 function getRecords($ids,$fields,$time)
 {
-	//var_dump($fields);@flush();exit;
+	
 	global $db;
 	$result = array();
 	if(empty($ids)) return $result;
@@ -491,7 +522,7 @@ function getRecords($ids,$fields,$time)
 				. 'data_categories.`name` AS "category" FROM ' . $table
 				. ' WHERE ' . $time
 				. ' AND data_values.`field` IN(' . implode(',', $fields) . ') AND larvol_id IN(' . implode(',', $ids) . ')';
-		//var_dump($query);@flush();exit;
+		
 		$res = mysql_query($query);
 		if($res === false) return softDie('Bad SQL query getting data for result set<br />'.$query.'<br />'.mysql_error());
 		while($row = mysql_fetch_assoc($res))
@@ -511,7 +542,7 @@ function getRecords($ids,$fields,$time)
 				$result[$id][$place] = $val;
 			}
 		}
-	}
+	}//var_dump($result);@flush();exit;
 	return $result;
 }
 
@@ -870,4 +901,17 @@ function validateInputPCRE($post)
 	}
 }
 //alexvp end
+
+/**
+Added by Piyadarshini on 14 feb 2011
+   * cmpdate()
+   * @param int $a
+   * @param int $b
+   * date comparison callback used in run_heatmap.php, run_competitor.php
+**/
+function cmpdate($a, $b) {
+	if ($a == $b) return 0;
+	    return (strtotime($a) < strtotime($b))? -1 : 1;
+}
+
 ?>
