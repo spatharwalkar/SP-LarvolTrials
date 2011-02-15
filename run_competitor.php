@@ -121,29 +121,44 @@ function runCompetitor($id, $return = false)
 		$sp->value = $res['id'];
 		$hasPhase[$pkey] = $sp;
 	}
-
 	$results = array();
 	foreach($searchdata as $row => $rowData)
 	{
 		foreach($rowData as $column => $cell)
 		{
+			$time_machine = array();//unsetting the array for every cell.
 			//get searchdata
-			$action = array_merge($oversearch['action'], $columnsearch[$column]['action'],
+			$action = array_merge_recursive($oversearch['action'], $columnsearch[$column]['action'],
 									$rowsearch[$row]['action'], $cell['action']);
-			$searchval = array_merge($oversearch['searchval'], $columnsearch[$column]['searchval'],
+			$searchval = array_merge_recursive($oversearch['searchval'], $columnsearch[$column]['searchval'],
 									$rowsearch[$row]['searchval'], $cell['searchval']);
-			$negate = array_merge($oversearch['negate'], $columnsearch[$column]['negate'],
+			$negate = array_merge_recursive($oversearch['negate'], $columnsearch[$column]['negate'],
 									$rowsearch[$row]['negate'], $cell['negate']);
-			$multifields = array_merge(array_values($oversearch['multifields']), array_values($columnsearch[$column]['multifields']),
-										array_values($rowsearch[$row]['multifields']), array_values($cell['multifields']));
-			$multivalue = array_merge(!empty($oversearch['multifields']) ? array_values($oversearch['multivalue']) : array(),
+			$multifields = array_merge_recursive(array_values($oversearch['multifields']), 
+												array_values($columnsearch[$column]['multifields']),
+												array_values($rowsearch[$row]['multifields']), 
+												array_values($cell['multifields']));
+			$multivalue = array_merge_recursive(!empty($oversearch['multifields']) ? array_values($oversearch['multivalue']) : array(),
 							!empty($columnsearch[$column]['multifields']) ? array_values($columnsearch[$column]['multivalue']):array(),
 							!empty($rowsearch[$row]['multifields']) ? array_values($rowsearch[$row]['multivalue']) : array(),
 							!empty($cell['multifields']) ? array_values($cell['multivalue']) : array());
-			$time_machine = strlen($cell['time_machine']) ? $cell['time_machine'] :
-							strlen($rowsearch[$row]['time_machine']) ? $rowsearch[$row]['time_machine'] :
-							strlen($columnsearch[$column]['time_machine']) ? $columnsearch[$column]['time_machine'] :
-							strlen($oversearch['time_machine']) ? $oversearch['time_machine'] : $now;
+							
+			//in case of any one of the array has timemachine parameters defined
+			if(strlen($cell['time_machine']) || strlen($rowsearch[$row]['time_machine']) || 
+								strlen($columnsearch[$column]['time_machine']) || strlen($oversearch['time_machine'])) {
+					
+					array_push($time_machine, $cell['time_machine'], $rowsearch[$row]['time_machine'], 
+					$columnsearch[$column]['time_machine'], $oversearch['time_machine']);
+					
+					$time_machine = array_filter($time_machine);	//removing empt values of the array
+					usort($time_machine, "cmpdate"); //sorting the array
+					sort($time_machine); //sorting the array further for time precision
+					$time_machine = end($time_machine); //getting the latest date
+		
+			} else { //in case of timemachine  parameters not defined
+				$time_machine = $now;
+			}
+							
 			$override = $oversearch['override'] . ',' . $columnsearch[$column]['override'] . ','
 						. $rowsearch[$row]['override'] . ',' . $cell['override'];
 			$override = explode(',', $override);
@@ -278,8 +293,6 @@ function runCompetitor($id, $return = false)
 			}
 		}
 	}
-
-	
 
 	// Create excel file object
 	$objPHPExcel = new PHPExcel();
