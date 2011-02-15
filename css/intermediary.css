@@ -34,3 +34,23 @@ iframe{
 	width:5em;
 	border:0;margin:0;padding:0;
 }
+.permSel select{
+	float:right;
+	margin-bottom:.1em;
+}
+
+.permSel{
+	height:1.2em;
+	display:block;
+	overflow:hidden;
+	background-color: #55bbee;
+}
+
+.permSel:hover,.permSel.hover{
+	height:auto;
+}
+.manage 	{ font-weight: normal; }
+.manage td 	{ width:33%; }
+.manage td span	{ color: #00B050; font-weight:bold; }
+.manage th  { padding:5px; text-align:left; background-color: #8064A2; color: #FFF;font-weight:bold; text-decoration:none; }
+.manage th a{ color: #FFF; text-decoration:none; }
