@@ -16,13 +16,14 @@ if(isset($_GET['direct_run_heatmap_id'])) runHeatmap((int)$_GET['direct_run_heat
 	If $return is true, the file is returned from this function
 	If $return is false, it will go to the browser in a download.
 */
+
 function runHeatmap($id, $return = false)
 {
 	global $now;
 	global $db;
 	global $SEARCH_ERR;
 	if(!$return)
-	{
+	{ 
 		ignore_user_abort(true);
 		//the connection-close code is only here because the connection_closed check we do later doesn't work (PHP bug)
 		//so we have to just assume it's closed. And of course close it here to safeguard that assumption.
@@ -40,15 +41,17 @@ function runHeatmap($id, $return = false)
 	$nodata = array('action'=>array(), 'searchval'=>array(), 'negate'=>array(), 'multifields'=>array(), 'multivalue'=>array());
 
 	//get report name
-	$query = 'SELECT name,footnotes,description,searchdata,bomb,backbone_agent FROM rpt_heatmap WHERE id=' . $id . ' LIMIT 1';
+	$query = 'SELECT name,footnotes,description,searchdata,bomb,backbone_agent,count_only_active  FROM rpt_heatmap WHERE id=' . $id . ' LIMIT 1';
 	$resu = mysql_query($query) or tex('Bad SQL query getting report name');
-	$resu = mysql_fetch_array($resu) or tex('Report not found.');
+	$resu = mysql_fetch_array($resu) or tex('Report not found.'); 
 	$name = $resu['name'];
 	$footnotes = $resu['footnotes'];
 	$description = $resu['description'];
 	$oversearch = ($resu['searchdata']===NULL?$nodata:removeNullSearchdata(unserialize(base64_decode($resu['searchdata']))));
+	
 	$bomb = $resu['bomb'] == 'Y';
 	$backboneAgent = $resu['backbone_agent'] == 'Y';
+	$countactive = $resu['count_only_active'] == 'Y';
 	unset($oversearch['search']);
 	unset($oversearch['display']);
 	unset($oversearch['page']);
@@ -68,12 +71,11 @@ function runHeatmap($id, $return = false)
 		${$var}[$header['num']] = $header['header'];
 		$ovar = $header['type'] . 'search';
 		$unpacked = unserialize(base64_decode($header['searchdata']));
-		if(!is_array($unpacked['multifields'])) $unpacked['multifields'] = array();
+		if(!is_array($unpacked['multifields'])) $unpacked['multifields'] = array(); 
 		${$ovar}[$header['num']] = ($header['searchdata']===NULL ?
 											$nodata :
 											removeNullSearchdata($unpacked));
 	}
-	
 	//start progress bar
 	$pid = NULL;
 	if(!$return)
@@ -92,10 +94,12 @@ function runHeatmap($id, $return = false)
 	{
 		if(!isset($searchdata[$cell['row']])) $searchdata[$cell['row']] = array();
 		$unpack = unserialize(base64_decode($cell['searchdata']));
-		$searchdata[$cell['row']][$cell['column']] = removeNullSearchdata($unpack);
-	}
+		$searchdata[$cell['row']][$cell['column']] = removeNullSearchdata($unpack);	
+	} 
+	
 	$maxrow = max(array_keys($rowsearch));
 	$maxcol = max(array_keys($columnsearch));
+	
 	for($row = 1; $row <= $maxrow; ++$row)
 		for($col = 1; $col <= $maxcol; ++$col)
 			if(!isset($searchdata[$row][$col]))
@@ -104,7 +108,7 @@ function runHeatmap($id, $return = false)
 	//get search results
 	$phases = array('N/A', 'Phase 0', 'Phase 0/Phase 1', 'Phase 1', 'Phase 1/Phase 2', 'Phase 2',
 					'Phase 2/Phase 3', 'Phase 3', 'Phase 3/Phase 4', 'Phase 4');
-	$phasenums = array(); foreach($phases as $k => $p) $phasenums[$k] = str_ireplace(array('phase',' '),'',$p);
+	$phasenums = array(); foreach($phases as $k => $p)  $phasenums[$k] = str_ireplace(array('phase',' '),'',$p);
 	//$p_colors = array('DDDDDD', 'BBDDDD', 'AADDEE', '99DDFF', 'DDFF99', 'FFFF00', 'FFCC00', 'FF9900', 'FF7711', 'FF4422');
 	$p_colors = array('BFBFBF', '00CCFF', '99CC00', '99CC00', 'FFFF00', 'FFFF00', 'FF9900', 'FF9900', 'FF0000', 'FF0000');
 	$phase_fid = getFieldId('NCT','phase');
@@ -124,29 +128,45 @@ function runHeatmap($id, $return = false)
 
 	$results = array();
 	foreach($searchdata as $row => $rowData)
-	{
+	{ 
 		foreach($rowData as $column => $cell)
-		{
+		{ 
+			$time_machine = array();//unsetting the array for every cell.
 			//get searchdata
-			$action = array_merge($oversearch['action'], $columnsearch[$column]['action'],
-									$rowsearch[$row]['action'], $cell['action']);
-			$searchval = array_merge($oversearch['searchval'], $columnsearch[$column]['searchval'],
+			$action = array_merge_recursive($oversearch['action'], $columnsearch[$column]['action'],
+									$rowsearch[$column]['action'], $cell['action']);
+			$searchval = array_merge_recursive($oversearch['searchval'], $columnsearch[$column]['searchval'],
 									$rowsearch[$row]['searchval'], $cell['searchval']);
-			$negate = array_merge($oversearch['negate'], $columnsearch[$column]['negate'],
+			$negate = array_merge_recursive($oversearch['negate'], $columnsearch[$column]['negate'],
 									$rowsearch[$row]['negate'], $cell['negate']);
-			$multifields = array_merge(array_values($oversearch['multifields']), array_values($columnsearch[$column]['multifields']),
-										array_values($rowsearch[$row]['multifields']), array_values($cell['multifields']));
-			$multivalue = array_merge(!empty($oversearch['multifields']) ? array_values($oversearch['multivalue']) : array(),
+			$multifields = array_merge_recursive(array_values($oversearch['multifields']), 
+													array_values($columnsearch[$column]['multifields']),
+													array_values($rowsearch[$row]['multifields']), 
+													array_values($cell['multifields']));
+			$multivalue = array_merge_recursive(!empty($oversearch['multifields']) ? array_values($oversearch['multivalue']) : array(),
 							!empty($columnsearch[$column]['multifields']) ? array_values($columnsearch[$column]['multivalue']):array(),
 							!empty($rowsearch[$row]['multifields']) ? array_values($rowsearch[$row]['multivalue']) : array(),
 							!empty($cell['multifields']) ? array_values($cell['multivalue']) : array());
-			$time_machine = strlen($cell['time_machine']) ? $cell['time_machine'] :
-							strlen($rowsearch[$row]['time_machine']) ? $rowsearch[$row]['time_machine'] :
-							strlen($columnsearch[$column]['time_machine']) ? $columnsearch[$column]['time_machine'] :
-							strlen($oversearch['time_machine']) ? $oversearch['time_machine'] : $now;
+				
+			//in case of any one of the array has timemachine parameters defined
+			if(strlen($cell['time_machine']) || strlen($rowsearch[$row]['time_machine']) || 
+								strlen($columnsearch[$column]['time_machine']) || strlen($oversearch['time_machine'])) {
+					
+					array_push($time_machine, $cell['time_machine'], $rowsearch[$row]['time_machine'], 
+					$columnsearch[$column]['time_machine'], $oversearch['time_machine']);
+					$time_machine = array_filter($time_machine);	//removing empt values of the array
+					usort($time_machine, "cmpdate"); //sorting the array
+					sort($time_machine); //sorting the array further for time precision
+					$time_machine = end($time_machine); //getting the latest date
+		
+			} else { //in case of timemachine  parameters not defined
+				$time_machine = $now;
+			}
+			
 			$override = $oversearch['override'] . ',' . $columnsearch[$column]['override'] . ','
 						. $rowsearch[$row]['override'] . ',' . $cell['override'];
 			$override = explode(',', $override);
+			
 			if($override === false)
 			{
 				$override = array();
@@ -178,8 +198,10 @@ function runHeatmap($id, $return = false)
 			$results[$row][$column] = new Result();
 			
 			mysql_query('BEGIN') or tex("Couldn't begin SQL transaction");
-			//get record IDs
+			
+			//get record IDs 
 			$all_ids = search($params,array(),NULL,$time_machine,$override);
+			
 			if($all_ids === false)
 			{
 				mysql_query('ROLLBACK');
@@ -193,14 +215,23 @@ function runHeatmap($id, $return = false)
 					return false;
 				}
 			}
+			
 			$all_ids = array_keys($all_ids);
-			if ($backboneAgent) {
+			
+			if ($backboneAgent) { 
 				$agent = getBackboneAgent($params);
 				if ($agent != null)
 					$all_ids = applyBackboneAgent($all_ids, $agent->value);
 			}
-			$rescount = count($all_ids);
+			
+			if($countactive) {
+				$rescount = getActiveCount($all_ids);
+			} else {
+				$rescount = count($all_ids); 
+			}
+			
 			$results[$row][$column]->num = $rescount;
+			
 			if ($bomb)
 				$results[$row][$column]->bomb = getBomb($all_ids);
 			else
@@ -208,7 +239,7 @@ function runHeatmap($id, $return = false)
 			
 			//get maximum phase
 			if($rescount)
-			{
+			{ 
 				$datetime = '"' . date('Y-m-d H:i:s',$time_machine) . '"';
 				$query = 'SELECT MAX(val_enum) AS "phase" FROM data_values AS dv '
 						. 'LEFT JOIN data_cats_in_study AS i ON dv.studycat=i.id '
@@ -235,9 +266,10 @@ function runHeatmap($id, $return = false)
 			-
 			*/
 			
+			
 			//fill in hyperlink
 			if($rescount < 500)
-			{
+			{ 
 				//pass all IDs
 				$packedIDs = '';
 				if($rescount > 0)
@@ -254,7 +286,10 @@ function runHeatmap($id, $return = false)
 																		   'time' => $time_machine,
 																		   'name' => substr($name,0,40),
 																		   'rundate' => date("Y-m-d H:i:s",$now),
-																		   'count' => $rescount)))));
+																		   'count' => $rescount,
+																		   'rowlabel' => $rows[$row],
+																		   'columnlabel' =>$columns[$column])))));
+																		   
 				$results[$row][$column]->reportname = substr($name,0,40);
 				$results[$row][$column]->rundate = date("Y-m-d H:i:s",$now);
 				$results[$row][$column]->time_machine = $time_machine;
@@ -265,7 +300,8 @@ function runHeatmap($id, $return = false)
 																		   'time' => $time_machine,
 																		   'name' => substr($name,0,40),
 																		   'rundate' => date("Y-m-d H:i:s",$now),
-																		   'count' => $rescount)))));
+																		   'rowlabel' => $rows[$row],
+																		   'columnlabel' =>$columns[$column])))));
 				$results[$row][$column]->reportname = substr($name,0,40);
 				$results[$row][$column]->rundate = date("Y-m-d H:i:s",$now);
 				$results[$row][$column]->time_machine = $time_machine;
@@ -278,9 +314,6 @@ function runHeatmap($id, $return = false)
 			}
 		}
 	}
-
-	
-
 	// Create excel file object
 	$objPHPExcel = new PHPExcel();
 
@@ -315,12 +348,12 @@ function runHeatmap($id, $return = false)
 			$sheet->getStyle($cell)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID);
 			$sheet->getStyle($cell)->getFill()->getStartColor()->setRGB($color);
 			if($result->num)
-			{
+			{ 
 				$clink = urlPath() . 'intermediary.php?' . $result->{'link'};
 				$clink = addYourls($clink,$result->reportname);
 				$sheet->SetCellValue($cell, $result->num);
 				$sheet->getCell($cell)->getHyperlink()->setUrl($clink);
-			}else{
+			}else{ 
 				$sheet->SetCellValue($cell, ' ');
 			}
 			
@@ -342,6 +375,7 @@ function runHeatmap($id, $return = false)
 			}
 		}
 	}
+	
 	$row = count($rows) + 1;
 	$sheet->SetCellValue('A' . ++$row, '');
 	$sheet->SetCellValue('A' . ++$row, 'Report name:');
