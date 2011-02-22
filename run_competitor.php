@@ -63,7 +63,7 @@ function runCompetitor($id, $return = false)
 	$resu = mysql_query($query) or tex('Bad SQL query getting headers');
 	while($header = mysql_fetch_array($resu))
 	{
-		if(!strlen($header['header'])) $header['header'] = '.';
+		if(!strlen($header['header'])) $header['header'] = $header['type'] . ' ' . $header['num'];
 		$var = $header['type'] . 's';
 		${$var}[$header['num']] = $header['header'];
 		$ovar = $header['type'] . 'search';
@@ -128,21 +128,29 @@ function runCompetitor($id, $return = false)
 		{
 			$time_machine = array();//unsetting the array for every cell.
 			//get searchdata
-			$action = array_merge_recursive($oversearch['action'], $columnsearch[$column]['action'],
-									$rowsearch[$row]['action'], $cell['action']);
-			$searchval = array_merge_recursive($oversearch['searchval'], $columnsearch[$column]['searchval'],
-									$rowsearch[$row]['searchval'], $cell['searchval']);
-			$negate = array_merge_recursive($oversearch['negate'], $columnsearch[$column]['negate'],
-									$rowsearch[$row]['negate'], $cell['negate']);
-			$multifields = array_merge_recursive(array_values($oversearch['multifields']), 
-												array_values($columnsearch[$column]['multifields']),
-												array_values($rowsearch[$row]['multifields']), 
-												array_values($cell['multifields']));
-			$multivalue = array_merge_recursive(!empty($oversearch['multifields']) ? array_values($oversearch['multivalue']) : array(),
-							!empty($columnsearch[$column]['multifields']) ? array_values($columnsearch[$column]['multivalue']):array(),
-							!empty($rowsearch[$row]['multifields']) ? array_values($rowsearch[$row]['multivalue']) : array(),
-							!empty($cell['multifields']) ? array_values($cell['multivalue']) : array());
-							
+			$globalparams = array('action' => $oversearch['action'], 'searchval' => $oversearch['searchval'], 
+									'negate' => $oversearch['negate'], 'multifields' => $oversearch['multifields'], 
+									'multivalue' => $oversearch['multivalue']);
+			$globalparams = prepareParams($globalparams);
+			
+			$columnparams = array('action' => $columnsearch[$column]['action'], 'searchval' => $columnsearch[$column]['searchval'],
+									'negate' => $columnsearch[$column]['negate'], 
+									'multifields' => $columnsearch[$column]['multifields'], 
+									'multivalue' => $columnsearch[$column]['multivalue']);
+			$columnparams = prepareParams($columnparams);
+									
+			$rowparams = array('action' => $rowsearch[$row]['action'], 'searchval' => $rowsearch[$row]['searchval'], 
+									'negate' => $rowsearch[$row]['negate'],
+									'multifields' => $rowsearch[$row]['multifields'], 
+									'multivalue' => $rowsearch[$row]['multivalue']);
+			$rowparams = prepareParams($rowparams);
+			
+			$cellparams = array('action' => $cell['action'], 'searchval' => $cell['searchval'], 
+									'negate' => $cell['negate'], 'multifields' => $cell['multifields'], 
+									'multivalue' => $cell['multivalue']);
+			$cellparams = prepareParams($cellparams);
+			$params = array_merge($globalparams, $columnparams, $rowparams, $cellparams);
+			
 			//in case of any one of the array has timemachine parameters defined
 			if(strlen($cell['time_machine']) || strlen($rowsearch[$row]['time_machine']) || 
 								strlen($columnsearch[$column]['time_machine']) || strlen($oversearch['time_machine'])) {
@@ -177,13 +185,9 @@ function runCompetitor($id, $return = false)
 					}
 				}
 			}
-
-			$params = array('action' => $action, 'searchval' => $searchval, 'negate' => $negate,
-							'multifields' => $multifields, 'multivalue' => $multivalue);
-			if(array_filter_recursive($params,'nonempty') == array_filter_recursive($nodata,'nonempty')) continue;
-			if(array_filter_recursive($params,'nonempty') == array_filter_recursive($oversearch,'nonempty')) continue;
-			//array_walk_recursive($params,ref_mysql_escape);
-			$params = prepareParams($params);
+			
+			if(empty($params))	continue;
+			if(array_filter_recursive($params,'nonempty') == array_filter_recursive($globalparams,'nonempty')) continue;
 			foreach($params as $key => $sp)	//remove sorts
 			{
 				if(in_array($sp->action,array('ascending','descending'))) unset($params[$key]);
