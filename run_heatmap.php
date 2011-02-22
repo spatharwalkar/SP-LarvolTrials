@@ -66,12 +66,12 @@ function runHeatmap($id, $return = false)
 	$resu = mysql_query($query) or tex('Bad SQL query getting headers');
 	while($header = mysql_fetch_array($resu))
 	{
-		if(!strlen($header['header'])) $header['header'] = '.';
+		if(!strlen($header['header'])) $header['header'] = $header['type'] . ' ' . $header['num'];
 		$var = $header['type'] . 's';
 		${$var}[$header['num']] = $header['header'];
 		$ovar = $header['type'] . 'search';
 		$unpacked = unserialize(base64_decode($header['searchdata']));
-		if(!is_array($unpacked['multifields'])) $unpacked['multifields'] = array();
+		if(!is_array($unpacked['multifields'])) $unpacked['multifields'] = array(); 
 		${$ovar}[$header['num']] = ($header['searchdata']===NULL ?
 											$nodata :
 											removeNullSearchdata($unpacked));
@@ -125,32 +125,56 @@ function runHeatmap($id, $return = false)
 	-
 	-
 	*/
-
 	$results = array();
 	foreach($searchdata as $row => $rowData)
 	{ 
 		foreach($rowData as $column => $cell)
 		{ 
+			$time_machine = array();//unsetting the array for every cell.
+			
 			//get searchdata
-			$action = array_merge($oversearch['action'], $columnsearch[$column]['action'],
-									$rowsearch[$row]['action'], $cell['action']);
-			$searchval = array_merge($oversearch['searchval'], $columnsearch[$column]['searchval'],
-									$rowsearch[$row]['searchval'], $cell['searchval']);
-			$negate = array_merge($oversearch['negate'], $columnsearch[$column]['negate'],
-									$rowsearch[$row]['negate'], $cell['negate']);
-			$multifields = array_merge(array_values($oversearch['multifields']), array_values($columnsearch[$column]['multifields']),
-										array_values($rowsearch[$row]['multifields']), array_values($cell['multifields']));
-			$multivalue = array_merge(!empty($oversearch['multifields']) ? array_values($oversearch['multivalue']) : array(),
-							!empty($columnsearch[$column]['multifields']) ? array_values($columnsearch[$column]['multivalue']):array(),
-							!empty($rowsearch[$row]['multifields']) ? array_values($rowsearch[$row]['multivalue']) : array(),
-							!empty($cell['multifields']) ? array_values($cell['multivalue']) : array());
-			$time_machine = strlen($cell['time_machine']) ? $cell['time_machine'] :
-							strlen($rowsearch[$row]['time_machine']) ? $rowsearch[$row]['time_machine'] :
-							strlen($columnsearch[$column]['time_machine']) ? $columnsearch[$column]['time_machine'] :
-							strlen($oversearch['time_machine']) ? $oversearch['time_machine'] : $now;
+			$globalparams = array('action' => $oversearch['action'], 'searchval' => $oversearch['searchval'], 
+									'negate' => $oversearch['negate'], 'multifields' => $oversearch['multifields'], 
+									'multivalue' => $oversearch['multivalue']);
+			$globalparams = prepareParams($globalparams);
+			
+			$columnparams = array('action' => $columnsearch[$column]['action'], 'searchval' => $columnsearch[$column]['searchval'],
+									'negate' => $columnsearch[$column]['negate'], 
+									'multifields' => $columnsearch[$column]['multifields'], 
+									'multivalue' => $columnsearch[$column]['multivalue']);
+			$columnparams = prepareParams($columnparams);
+									
+			$rowparams = array('action' => $rowsearch[$row]['action'], 'searchval' => $rowsearch[$row]['searchval'], 
+									'negate' => $rowsearch[$row]['negate'],
+									'multifields' => $rowsearch[$row]['multifields'], 
+									'multivalue' => $rowsearch[$row]['multivalue']);
+			$rowparams = prepareParams($rowparams);
+			
+			$cellparams = array('action' => $cell['action'], 'searchval' => $cell['searchval'], 
+									'negate' => $cell['negate'], 'multifields' => $cell['multifields'], 
+									'multivalue' => $cell['multivalue']);
+			$cellparams = prepareParams($cellparams);
+			$params = array_merge($globalparams, $columnparams, $rowparams, $cellparams);
+			
+			//in case of any one of the array has timemachine parameters defined
+			if(strlen($cell['time_machine']) || strlen($rowsearch[$row]['time_machine']) || 
+								strlen($columnsearch[$column]['time_machine']) || strlen($oversearch['time_machine'])) {
+					
+					array_push($time_machine, $cell['time_machine'], $rowsearch[$row]['time_machine'], 
+					$columnsearch[$column]['time_machine'], $oversearch['time_machine']);
+					$time_machine = array_filter($time_machine);	//removing empt values of the array
+					usort($time_machine, "cmpdate"); //sorting the array
+					sort($time_machine); //sorting the array further for time precision
+					$time_machine = end($time_machine); //getting the latest date
+		
+			} else { //in case of timemachine  parameters not defined
+				$time_machine = $now;
+			}
+			
 			$override = $oversearch['override'] . ',' . $columnsearch[$column]['override'] . ','
 						. $rowsearch[$row]['override'] . ',' . $cell['override'];
 			$override = explode(',', $override);
+			
 			if($override === false)
 			{
 				$override = array();
@@ -166,13 +190,9 @@ function runHeatmap($id, $return = false)
 					}
 				}
 			}
-
-			$params = array('action' => $action, 'searchval' => $searchval, 'negate' => $negate,
-							'multifields' => $multifields, 'multivalue' => $multivalue);
-			if(array_filter_recursive($params,'nonempty') == array_filter_recursive($nodata,'nonempty')) continue;
-			if(array_filter_recursive($params,'nonempty') == array_filter_recursive($oversearch,'nonempty')) continue;
-			//array_walk_recursive($params,ref_mysql_escape);
-			$params = prepareParams($params);
+			
+			if(empty($params))	continue;
+			if(array_filter_recursive($params,'nonempty') == array_filter_recursive($globalparams,'nonempty')) continue;
 			foreach($params as $key => $sp)	//remove sorts
 			{
 				if(in_array($sp->action,array('ascending','descending'))) unset($params[$key]);
@@ -185,7 +205,6 @@ function runHeatmap($id, $return = false)
 			
 			//get record IDs 
 			$all_ids = search($params,array(),NULL,$time_machine,$override);
-			
 			if($all_ids === false)
 			{
 				mysql_query('ROLLBACK');
@@ -199,6 +218,7 @@ function runHeatmap($id, $return = false)
 					return false;
 				}
 			}
+			
 			$all_ids = array_keys($all_ids);
 			
 			if ($backboneAgent) { 
@@ -208,21 +228,20 @@ function runHeatmap($id, $return = false)
 			}
 			
 			if($countactive) {
-				$rescount = getActiveCount();
+				$rescount = getActiveCount($all_ids);
 			} else {
 				$rescount = count($all_ids); 
 			}
 			
 			$results[$row][$column]->num = $rescount;
-			
 			if ($bomb)
-				$results[$row][$column]->bomb = getBomb($all_ids);
+				 $results[$row][$column]->bomb = getBomb($all_ids);
 			else
 				$results[$row][$column]->bomb = "";
-			
+				
 			//get maximum phase
 			if($rescount)
-			{
+			{ 
 				$datetime = '"' . date('Y-m-d H:i:s',$time_machine) . '"';
 				$query = 'SELECT MAX(val_enum) AS "phase" FROM data_values AS dv '
 						. 'LEFT JOIN data_cats_in_study AS i ON dv.studycat=i.id '
@@ -249,10 +268,9 @@ function runHeatmap($id, $return = false)
 			-
 			*/
 			
-			
 			//fill in hyperlink
 			if($rescount < 500)
-			{
+			{ 
 				//pass all IDs
 				$packedIDs = '';
 				if($rescount > 0)
@@ -269,7 +287,10 @@ function runHeatmap($id, $return = false)
 																		   'time' => $time_machine,
 																		   'name' => substr($name,0,40),
 																		   'rundate' => date("Y-m-d H:i:s",$now),
-																		   'count' => $rescount)))));
+																		   'count' => $rescount,
+																		   'rowlabel' => $rows[$row],
+																		   'columnlabel' =>$columns[$column])))));
+																		   
 				$results[$row][$column]->reportname = substr($name,0,40);
 				$results[$row][$column]->rundate = date("Y-m-d H:i:s",$now);
 				$results[$row][$column]->time_machine = $time_machine;
@@ -280,7 +301,8 @@ function runHeatmap($id, $return = false)
 																		   'time' => $time_machine,
 																		   'name' => substr($name,0,40),
 																		   'rundate' => date("Y-m-d H:i:s",$now),
-																		   'count' => $rescount)))));
+																		   'rowlabel' => $rows[$row],
+																		   'columnlabel' =>$columns[$column])))));
 				$results[$row][$column]->reportname = substr($name,0,40);
 				$results[$row][$column]->rundate = date("Y-m-d H:i:s",$now);
 				$results[$row][$column]->time_machine = $time_machine;
@@ -293,7 +315,7 @@ function runHeatmap($id, $return = false)
 			}
 		}
 	}
-	//exit;
+	
 	// Create excel file object
 	$objPHPExcel = new PHPExcel();
 
@@ -336,7 +358,6 @@ function runHeatmap($id, $return = false)
 			}else{ 
 				$sheet->SetCellValue($cell, ' ');
 			}
-			
 			if($result->bomb != "")
 			{
 				$drawing = new PHPExcel_Worksheet_Drawing();
@@ -355,6 +376,7 @@ function runHeatmap($id, $return = false)
 			}
 		}
 	}
+	
 	$row = count($rows) + 1;
 	$sheet->SetCellValue('A' . ++$row, '');
 	$sheet->SetCellValue('A' . ++$row, 'Report name:');
@@ -382,7 +404,7 @@ function runHeatmap($id, $return = false)
 
 	//Send download or return contents
 	if(!$return)
-	{
+	{ 
 		header("Pragma: public");
 		header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
 		header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
@@ -391,6 +413,7 @@ function runHeatmap($id, $return = false)
 		header("Content-Type: application/download");
 		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 		header("Content-Disposition: attachment;filename=" . substr($name,0,20) . '_' . date('Y-m-d_H.i.s') . '.xlsx');
+		
 		header("Content-Transfer-Encoding: binary ");
 		$objWriter->save('php://output');
 		@flush();
