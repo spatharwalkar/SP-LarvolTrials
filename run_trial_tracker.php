@@ -14,12 +14,15 @@ $id = mysql_real_escape_string($_GET['id']);
 if(!is_numeric($id)) tex('non-numeric id!');
 
 //get report name
-$query = 'SELECT name,time,edited FROM rpt_trial_tracker WHERE id=' . $id . ' LIMIT 1';
+$query = 'SELECT name,time,edited,output_template FROM rpt_trial_tracker WHERE id=' . $id . ' LIMIT 1';
 $resu = mysql_query($query) or tex('Bad SQL query getting report name');
 $resu = mysql_fetch_array($resu) or tex('Report not found.');
-$name = $resu['name'];
-$time='today';
-$edited='today';
+
+$name 	= $resu['name'];
+$time	= 'today';
+$edited	= 'today';
+$type 	= $resu['output_template'];
+
 if (trim($resu['time'])!=''){
 	$time=$resu['time'];
 }
@@ -40,75 +43,274 @@ while($trial = mysql_fetch_array($res))
 	}
 	$trials[$trial['nctid']] = array_merge($nct, $trial);
 }
+if($type == 'Plain') {
 
-$out = '<table border="1" class="MsoNormalTable"'
-	. '<tr><th>NCTID</th>'
-	. '<th>Intervention</th>'
-	. '<th>Tumor Type</th>'
-	. '<th>Patient Population</th>'
-	. '<th>Trials Details</th>'
-	. '<th>Lead Sponsor</th>'
-	. '<th>Collaborator</th>'
-	. '<th>Enrollment</th>'
-	. '<th>Start Date</th>'
-	. '<th>End Date</th>'
-	. '<th>Overall Status</th>'
-	. '<th>Phase</th>'
-	. '<th>Randomized Controlled Trial</th>'
-	. '<th>Data Release</th></tr>';
+	$out = '<table border="1" class="MsoNormalTable"'
+		. '<tr><th>NCTID</th>'
+		. '<th>Intervention</th>'
+		. '<th>Tumor Type</th>'
+		. '<th>Patient Population</th>'
+		. '<th>Trials Details</th>'
+		. '<th>Lead Sponsor</th>'
+		. '<th>Collaborator</th>'
+		. '<th>Enrollment</th>'
+		. '<th>Start Date</th>'
+		. '<th>End Date</th>'
+		. '<th>Overall Status</th>'
+		. '<th>Phase</th>'
+		. '<th>Randomized Controlled Trial</th>'
+		. '<th>Data Release</th></tr>';
 
-
-foreach($trials as $nctid => $trial) {
-
-	if (is_array($trial['NCT/intervention_name'])) {
-		$intervention_name = implode(', ',$trial['NCT/intervention_name']);
-	}else{
-		$intervention_name = $trial['NCT/intervention_name'];
-	}
-	if ($intervention_name == '') $intervention_name = '(no intervention)';
-
-	$end_date =		($trial['NCT/completion_date'])?$trial['NCT/completion_date']:$trial['NCT/primary_completion_date'];
-
+	foreach($trials as $nctid => $trial) {
 	
-	//checking if the field 'NCT/collaborator' has more than one value.
-	if(is_array($trial['NCT/collaborator'])) {
-		$collaborator = implode(',', $trial['NCT/collaborator']);
-	} else {
-		$collaborator = $trial['NCT/collaborator'];
+		if (is_array($trial['NCT/intervention_name'])) {
+			$intervention_name = implode(', ',$trial['NCT/intervention_name']);
+		}else{
+			$intervention_name = $trial['NCT/intervention_name'];
+		}
+		if ($intervention_name == '') $intervention_name = '(no intervention)';
+	
+		$end_date =		($trial['NCT/completion_date'])?$trial['NCT/completion_date']:$trial['NCT/primary_completion_date'];
+	
+		
+		//checking if the field 'NCT/collaborator' has more than one value.
+		if(is_array($trial['NCT/collaborator'])) {
+			$collaborator = implode(',', $trial['NCT/collaborator']);
+		} else {
+			$collaborator = $trial['NCT/collaborator'];
+		}
+	
+		//checking if the field 'NCT/lead_sponsor' has more than one value.
+		if(is_array($trial['NCT/lead_sponsor'])) {
+			$lead_sponsor = implode(',', $trial['NCT/lead_sponsor']);
+		} else {
+			$lead_sponsor = $trial['NCT/lead_sponsor'];
+		}
+	
+		//checking if the field 'NCT/enrollment' has more than one value.
+		if(is_array($trial['NCT/enrollment'])) {
+			$enrollment = implode(',', $trial['NCT/enrollment']);
+		} else {
+			$enrollment = $trial['NCT/enrollment'];
+		}
+	
+		$out .= '<tr><td><a href="http://clinicaltrials.gov/ct2/show/' . padnct($trial['nctid']) . '">'
+			. padnct($nctid) . '</a></td>'
+			. '<td>' . $intervention_name . '</td>'
+			. '<td>' . $trial['tumor_type'] . '</td>'
+			. '<td>' . $trial['patient_population'] . '</td>'
+			. '<td>' . $trial['trials_details'] . '</td>'
+			. '<td style="'.((in_array('NCT/lead_sponsor',$trial['changedFields']))?'background-color:#FF8080;':'').'">' . $lead_sponsor . '</td>'
+			. '<td style="'.((in_array('NCT/collaborator',$trial['changedFields']))?'background-color:#FF8080;':'').'">' . $collaborator . '</td>'
+			. '<td style="'.((in_array('NCT/enrollment',$trial['changedFields']))?'background-color:#FF8080;':'').'">' . 
+	$enrollment . '</td>'
+			. '<td style="'.((in_array('NCT/start_date',$trial['changedFields']))?'background-color:#FF8080;':'').'">' . $trial['NCT/start_date'] . '</td>'
+			. '<td>' . $end_date . '</td>'
+			. '<td style="'.((in_array('NCT/overall_status',$trial['changedFields']))?'background-color:#FF8080;':'').'">' . $trial['NCT/overall_status'] . '</td>'
+			. '<td style="'.((in_array('NCT/phase',$trial['changedFields']))?'background-color:#FF8080;':'').'">' . str_replace('Phase ', 'P', $trial['NCT/phase']) . '</td>'
+			. '<td>' . $trial['randomized_controlled_trial'] . '</td>'
+			. '<td>' . $trial['data_release'] . '</td></tr>';
 	}
+} else {
+		
+	$out = '<table border="2" width="100%" cellpadding="5" cellspacing="0" class="manage">'
+		. '<tr><th rowspan="2" width="2%" nowrap="nowrap">Tumor Type</th>'
+		. '<th rowspan="2" width="5%" nowrap="nowrap">Patient Population<br/>(linked to details)</th>'
+		. '<th rowspan="2" width="25%" nowrap="nowrap">Trials Details</th>'
+		. '<th rowspan="2" width="10%">Sponsor</th>'
+		. '<th rowspan="2" width="3%">Size</th>'
+		. '<th rowspan="2" width="15%">Start-End</th>'
+		. '<th rowspan="2" width="10%" nowrap="nowrap">Status<br/><span style="color:#ff0000;">[Weekly Update]</span></th>'
+		. '<th rowspan="2" width="3%">Ph</th>'
+		. '<th width="30%" nowrap="nowrap" colspan="36">Projected Completion</th></tr>'
+		. '<tr><th width="10%" colspan="12">2010</th><th width="10%" colspan="12">2011</th><th width="10%" colspan="12">2012</th></tr>';
 
-	//checking if the field 'NCT/lead_sponsor' has more than one value.
-	if(is_array($trial['NCT/lead_sponsor'])) {
-		$lead_sponsor = implode(',', $trial['NCT/lead_sponsor']);
-	} else {
-		$lead_sponsor = $trial['NCT/lead_sponsor'];
+	foreach($trials as $nctid => $trial) {
+	
+		$end_date =		($trial['NCT/completion_date']) ? $trial['NCT/completion_date'] : $trial['NCT/primary_completion_date'];
+		
+		//checking if the field 'NCT/lead_sponsor' has more than one value.
+		if(is_array($trial['NCT/lead_sponsor'])) {
+			$lead_sponsor = implode(',', $trial['NCT/lead_sponsor']);
+		} else {
+			$lead_sponsor = $trial['NCT/lead_sponsor'];
+		}
+	
+		//checking if the field 'NCT/enrollment' has more than one value.
+		if(is_array($trial['NCT/enrollment'])) {
+			$enrollment = implode(',', $trial['NCT/enrollment']);
+		} else {
+			$enrollment = $trial['NCT/enrollment'];
+		}
+			
+		$phase_arr = array('N/A'=>'#bfbfbf','0'=>'#44cbf5','0/1'=>'#99CC00','1'=>'#99CC00','1/2'=>'#ffff00','2'=>'#ffff00',
+						'2/3'=>'#ff9900','3'=>'#ff9900','3/4'=>'#ff0000','4'=>'#ff0000');
+		
+		$ph = str_replace('Phase ', '', $trial['NCT/phase']);
+		$phase = ($trial['NCT/phase']=='N/A') ? $ph : ('P' . $ph);
+		
+		$str = '';
+				
+		if(date('Y',strtotime($trial['NCT/start_date'])) < 2010) {
+	
+			if(date('Y',strtotime($end_date)) < 2010) {
+			
+				$str = '<td colspan="12">&nbsp;</td><td colspan="12">&nbsp;</td><td colspan="12">&nbsp;</td>';
+						
+			
+			} else if(date('Y',strtotime($end_date)) == 2010) { 
+			
+				$str = '<td colspan="' . date('m',strtotime($end_date)) 
+						. '" style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>'
+						. '<td colspan="' . (12-date('m',strtotime($end_date))) . '">&nbsp;</td>'
+						. '<td colspan="12">&nbsp;</td>'
+						. '<td colspan="12">&nbsp;</td>';
+	
+			} else if(date('Y',strtotime($end_date)) == 2011) {
+			 
+				$str = '<td colspan="12" style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>'
+						. '<td colspan="' . date('m',strtotime($end_date))  
+						. '" style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>'
+						. '<td colspan="' . (12-date('m',strtotime($end_date))) . '">&nbsp;</td>'
+						. '<td colspan="12">&nbsp;</td>';
+			
+			} else if(date('Y',strtotime($end_date)) == 2012) {
+			 
+				$str = '<td colspan="12" style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>'
+						.'<td colspan="12" style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>'
+						. '<td colspan="' . date('m',strtotime($end_date)) . '" style="background-color:' 
+						. $phase_arr[$ph] . '">&nbsp;</td>'
+						. '<td colspan="' . (12-date('m',strtotime($end_date))) . '">&nbsp;</td>';
+			
+			} else {
+			
+				$str = '<td colspan="12" style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>'
+						. '<td colspan="12" style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>'
+						. '<td colspan="12" style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>';
+
+			}		
+		
+		
+		} else if(date('Y',strtotime($trial['NCT/start_date'])) == 2010) {
+		
+			$val = getColspan($trial['NCT/start_date'], $end_date);
+			if(date('Y',strtotime($end_date)) == 2010) {
+			
+				$str = '<td colspan="' . date('m',strtotime($trial['NCT/start_date'])) . '">&nbsp;</td>'
+						. '<td colspan="' . (12-date('m',strtotime($trial['NCT/start_date']))) 
+						. '" style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>'
+						. '<td colspan="12">&nbsp;</td>'
+						. '<td colspan="12">&nbsp;</td>';
+						
+			
+			} else if(date('Y',strtotime($end_date)) == 2011) {
+			 
+				if(date('m',strtotime($end_date)) >= 12) {
+					$str = '<td colspan="' . date('m',strtotime($trial['NCT/start_date'])) . '">&nbsp;</td>'
+						. '<td colspan="' . $val . '" style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>'
+						. '<td colspan="12">&nbsp;</td>';
+	
+				} else {
+					$str = '<td colspan="' . date('m',strtotime($trial['NCT/start_date'])) . '">&nbsp;</td>'
+						. '<td colspan="' . $val . '" style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>'
+						. '<td colspan="' . (12-date('m',strtotime($end_date))) . '">&nbsp;</td>'
+						. '<td colspan="12">&nbsp;</td>';
+	
+				}
+	
+			
+			} else if(date('Y',strtotime($end_date)) == 2012) {
+			
+				 if(date('m',strtotime($end_date)) >= 12) {
+				 
+					$str = '<td colspan="' . date('m',strtotime($trial['NCT/start_date'])) . '">&nbsp;</td>'
+						. '<td colspan="' . $val . '" style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>';
+	
+				 } else {
+				 
+					$str = '<td colspan="' . date('m',strtotime($trial['NCT/start_date'])) . '">&nbsp;</td>'
+						. '<td colspan="12" style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>'
+						. '<td colspan="' . $val . '" style="background-color:' 
+						. $phase_arr[$ph] . '">&nbsp;</td>'
+						. '<td colspan="' . (12-date('m',strtotime($end_date))) . '">&nbsp;</td>';
+				 }
+			
+			
+			} else {
+			
+				$str = '<td colspan="12" style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>'
+				. '<td colspan="12" style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>'
+				. '<td colspan="12" style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>';
+
+			}
+
+		
+		
+		
+		
+		} else if(date('Y',strtotime($trial['NCT/start_date'])) == 2011) {
+			
+			$val = getColspan($trial['NCT/start_date'], $end_date);
+			if(date('Y',strtotime($end_date)) == 2011) {
+			
+				if(date('m',strtotime($end_date)) >= 12) { echo "hii";
+				
+					$str = '<td colspan="12">&nbsp;</td>'
+						. '<td colspan="' . date('m',strtotime($trial['NCT/start_date'])) . '">&nbsp;</td>'
+						. '<td colspan="' . $val . '"  style="background-color:' 
+						. $phase_arr[$ph] . '">&nbsp;</td>'
+						. '<td colspan="' . (12-($val+date('m',strtotime($trial['NCT/start_date'])))) . '">&nbsp;</td>'
+						. '<td colspan="12">&nbsp;</td>';
+
+				} else { echo "noo";
+				
+					$str = '<td colspan="12">&nbsp;</td>'
+						. '<td colspan="' . date('m',strtotime($trial['NCT/start_date'])) . '">&nbsp;</td>'
+						. '<td colspan="' . $val . '"  style="background-color:' 
+						. $phase_arr[$ph] . '">&nbsp;</td>'
+						. '<td colspan="' . (12-($val+date('m',strtotime($trial['NCT/start_date'])))) . '">&nbsp;</td>'
+						. '<td colspan="12">&nbsp;</td>';
+
+				}
+							
+			} else if(date('Y',strtotime($end_date)) == 2012) {
+			
+				if(date('m',strtotime($end_date)) >= 12) {
+				
+					$str = '<td colspan="12">&nbsp;</td>'
+						. '<td colspan="' . date('m',strtotime($trial['NCT/start_date'])) . '">&nbsp;</td>'
+						. '<td colspan="' . $val . '" style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>';
+
+				} else {
+				
+					$str = '<td colspan="12">&nbsp;</td>'
+						. '<td colspan="' . date('m',strtotime($trial['NCT/start_date'])) . '">&nbsp;</td>'
+						. '<td colspan="' . $val . '" style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>'
+						. '<td colspan="' . (24 -($val+date('m',strtotime($trial['NCT/start_date'])))) . '">&nbsp;</td>';
+
+				}
+
+			} else {
+				$str = '<td colspan="12">&nbsp;</td>'
+						. '<td colspan="' . date('m',strtotime($trial['NCT/start_date'])) . '">&nbsp;</td>'
+						. '<td colspan="' . (24-date('m',strtotime($trial['NCT/start_date']))) 
+						. '"  style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>';
+			}
+		}
+		
+		$out .= '<tr><td>' . $trial['tumor_type'] . '</td>'
+				. '<td><a href="http://clinicaltrials.gov/ct2/show/' . padnct($trial['nctid']) . '">' 
+				. $trial['patient_population'] . '</a></td>'
+				. '<td>' . $trial['trials_details'] . '</td>'
+				. '<td>' . $lead_sponsor . '</td>'
+				. '<td>' . $enrollment . '</td>'
+				. '<td nowrap="nowrap">' . date('m/y',strtotime($trial['NCT/start_date'])) . '-' 
+				. date('m/y',strtotime($end_date)) . '</td>'
+				. '<td>' . $trial['NCT/overall_status'] . '</td>'
+				. '<td style="background-color:' . $phase_arr[$ph] . '">' . $phase . '</td>'
+				. $str .'</tr>';
 	}
-
-	//checking if the field 'NCT/enrollment' has more than one value.
-	if(is_array($trial['NCT/enrollment'])) {
-		$enrollment = implode(',', $trial['NCT/enrollment']);
-	} else {
-		$enrollment = $trial['NCT/enrollment'];
-	}
-
-	$out .= '<tr><td><a href="http://clinicaltrials.gov/ct2/show/' . padnct($trial['nctid']) . '">'
-		. padnct($nctid) . '</a></td>'
-		. '<td>' . $intervention_name . '</td>'
-		. '<td>' . $trial['tumor_type'] . '</td>'
-		. '<td>' . $trial['patient_population'] . '</td>'
-		. '<td>' . $trial['trials_details'] . '</td>'
-		. '<td style="'.((in_array('NCT/lead_sponsor',$trial['changedFields']))?'background-color:#FF8080;':'').'">' . $lead_sponsor . '</td>'
-		. '<td style="'.((in_array('NCT/collaborator',$trial['changedFields']))?'background-color:#FF8080;':'').'">' . $collaborator . '</td>'
-		. '<td style="'.((in_array('NCT/enrollment',$trial['changedFields']))?'background-color:#FF8080;':'').'">' . 
-$enrollment . '</td>'
-		. '<td style="'.((in_array('NCT/start_date',$trial['changedFields']))?'background-color:#FF8080;':'').'">' . $trial['NCT/start_date'] . '</td>'
-		. '<td>' . $end_date . '</td>'
-		. '<td style="'.((in_array('NCT/overall_status',$trial['changedFields']))?'background-color:#FF8080;':'').'">' . $trial['NCT/overall_status'] . '</td>'
-		. '<td style="'.((in_array('NCT/phase',$trial['changedFields']))?'background-color:#FF8080;':'').'">' . str_replace('Phase ', 'P', $trial['NCT/phase']) . '</td>'
-		. '<td>' . $trial['randomized_controlled_trial'] . '</td>'
-		. '<td>' . $trial['data_release'] . '</td></tr>';
 }
-
 $out .= '</table>';
 
 //Just show HTML if debugging
@@ -183,4 +385,12 @@ function fieldNameToPaddedId($name)
 	return '_' . $res['data_field_id'];
 }
 
+//get difference between two dates in months
+function getColspan($start_dt, $end_dt) {
+
+	$diff = floor((strtotime($end_dt)-strtotime($start_dt))/2628000);
+	return $diff;
+
+}
 ?>
+
