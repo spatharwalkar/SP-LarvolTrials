@@ -113,10 +113,10 @@ if($type == 'Plain') {
 	}
 } else {
 		
-	$out = '<table border="2" width="100%" cellpadding="5" cellspacing="0" class="manage">'
+	$out = '<table border="0" width="100%" cellpadding="5" cellspacing="0" class="manage">'
 		. '<tr><th rowspan="2" width="2%" nowrap="nowrap">Tumor Type</th>'
 		. '<th rowspan="2" width="5%" nowrap="nowrap">Patient Population<br/>(linked to details)</th>'
-		. '<th rowspan="2" width="25%" nowrap="nowrap">Trials Details</th>'
+		. '<th rowspan="2" width="25%" nowrap="nowrap">Trial Details</th>'
 		. '<th rowspan="2" width="10%">Sponsor</th>'
 		. '<th rowspan="2" width="3%">Size</th>'
 		. '<th rowspan="2" width="15%">Start-End</th>'
@@ -191,6 +191,8 @@ if($type == 'Plain') {
 			}		
 		
 		
+		
+		
 		} else if(date('Y',strtotime($trial['NCT/start_date'])) == 2010) {
 		
 			$val = getColspan($trial['NCT/start_date'], $end_date);
@@ -203,6 +205,7 @@ if($type == 'Plain') {
 						. '<td colspan="12">&nbsp;</td>';
 						
 			
+			
 			} else if(date('Y',strtotime($end_date)) == 2011) {
 			 
 				if(date('m',strtotime($end_date)) >= 12) {
@@ -213,27 +216,29 @@ if($type == 'Plain') {
 				} else {
 					$str = '<td colspan="' . date('m',strtotime($trial['NCT/start_date'])) . '">&nbsp;</td>'
 						. '<td colspan="' . $val . '" style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>'
-						. '<td colspan="' . (12-date('m',strtotime($end_date))) . '">&nbsp;</td>'
+						. '<td colspan="' . (24-($val+date('m',strtotime($trial['NCT/start_date'])))) . '">&nbsp;</td>'
 						. '<td colspan="12">&nbsp;</td>';
 	
 				}
 	
+			
 			
 			} else if(date('Y',strtotime($end_date)) == 2012) {
 			
 				 if(date('m',strtotime($end_date)) >= 12) {
 				 
 					$str = '<td colspan="' . date('m',strtotime($trial['NCT/start_date'])) . '">&nbsp;</td>'
-						. '<td colspan="' . $val . '" style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>';
+						. '<td colspan="' . (36-date('m',strtotime($trial['NCT/start_date']))) 
+						. '" style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>';
 	
 				 } else {
 				 
 					$str = '<td colspan="' . date('m',strtotime($trial['NCT/start_date'])) . '">&nbsp;</td>'
-						. '<td colspan="12" style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>'
 						. '<td colspan="' . $val . '" style="background-color:' 
 						. $phase_arr[$ph] . '">&nbsp;</td>'
-						. '<td colspan="' . (12-date('m',strtotime($end_date))) . '">&nbsp;</td>';
+						. '<td colspan="' . (36-($val+date('m',strtotime($trial['NCT/start_date'])))) . '">&nbsp;</td>';
 				 }
+			
 			
 			
 			} else {
@@ -241,9 +246,7 @@ if($type == 'Plain') {
 				$str = '<td colspan="12" style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>'
 				. '<td colspan="12" style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>'
 				. '<td colspan="12" style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>';
-
 			}
-
 		
 		
 		
@@ -253,16 +256,15 @@ if($type == 'Plain') {
 			$val = getColspan($trial['NCT/start_date'], $end_date);
 			if(date('Y',strtotime($end_date)) == 2011) {
 			
-				if(date('m',strtotime($end_date)) >= 12) { echo "hii";
+				if(date('m',strtotime($end_date)) >= 12) { 
 				
 					$str = '<td colspan="12">&nbsp;</td>'
 						. '<td colspan="' . date('m',strtotime($trial['NCT/start_date'])) . '">&nbsp;</td>'
 						. '<td colspan="' . $val . '"  style="background-color:' 
 						. $phase_arr[$ph] . '">&nbsp;</td>'
-						. '<td colspan="' . (12-($val+date('m',strtotime($trial['NCT/start_date'])))) . '">&nbsp;</td>'
 						. '<td colspan="12">&nbsp;</td>';
 
-				} else { echo "noo";
+				} else {  
 				
 					$str = '<td colspan="12">&nbsp;</td>'
 						. '<td colspan="' . date('m',strtotime($trial['NCT/start_date'])) . '">&nbsp;</td>'
@@ -273,13 +275,18 @@ if($type == 'Plain') {
 
 				}
 							
+			
+			
 			} else if(date('Y',strtotime($end_date)) == 2012) {
 			
 				if(date('m',strtotime($end_date)) >= 12) {
 				
 					$str = '<td colspan="12">&nbsp;</td>'
 						. '<td colspan="' . date('m',strtotime($trial['NCT/start_date'])) . '">&nbsp;</td>'
-						. '<td colspan="' . $val . '" style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>';
+						. (($val >= 24) ? '<td colspan="' . (24 - date('m',strtotime($trial['NCT/start_date']))) 
+						. '" style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>' :
+						'<td colspan="' . $val . '" style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>');
+						//. '<td colspan="' . (24 -($val+date('m',strtotime($trial['NCT/start_date'])))) . '">&nbsp;</td>';
 
 				} else {
 				
@@ -388,7 +395,7 @@ function fieldNameToPaddedId($name)
 //get difference between two dates in months
 function getColspan($start_dt, $end_dt) {
 
-	$diff = floor((strtotime($end_dt)-strtotime($start_dt))/2628000);
+	$diff = ceil((strtotime($end_dt)-strtotime($start_dt))/2628000);
 	return $diff;
 
 }
