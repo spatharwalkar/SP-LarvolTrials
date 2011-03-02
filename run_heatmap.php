@@ -234,14 +234,16 @@ function runHeatmap($id, $return = false)
 			}
 			
 			$results[$row][$column]->num = $rescount;
+			
 			if ($bomb)
 				 $results[$row][$column]->bomb = getBomb($all_ids);
 			else
 				$results[$row][$column]->bomb = "";
 				
+			
 			//get maximum phase
 			if($rescount)
-			{ 
+			{  
 				$datetime = '"' . date('Y-m-d H:i:s',$time_machine) . '"';
 				$query = 'SELECT MAX(val_enum) AS "phase" FROM data_values AS dv '
 						. 'LEFT JOIN data_cats_in_study AS i ON dv.studycat=i.id '
@@ -258,7 +260,7 @@ function runHeatmap($id, $return = false)
 					if($key === false) $key = 0;
 				}
 				$results[$row][$column]->color = $p_colors[$key];
-			}
+			} 
 			
 			/*
 				In CD this part does a second search for IDs
@@ -273,10 +275,18 @@ function runHeatmap($id, $return = false)
 			{ 
 				//pass all IDs
 				$packedIDs = '';
-				if($rescount > 0)
-				{
+				
+				if($countactive) { //for count active no need to check count more than 0 in order to link even if count is zero
+				
 					$evcode = '$packedIDs = pack("l*",' . implode(',', $all_ids) . ');';
 					eval($evcode);
+					
+				} else {
+					if($rescount > 0)
+					{
+						$evcode = '$packedIDs = pack("l*",' . implode(',', $all_ids) . ');';
+						eval($evcode);
+					}
 				}
 				$results[$row][$column]->{'link'} = 'leading='
 					. rawurlencode(base64_encode(gzdeflate($packedIDs)));
@@ -294,7 +304,7 @@ function runHeatmap($id, $return = false)
 				$results[$row][$column]->reportname = substr($name,0,40);
 				$results[$row][$column]->rundate = date("Y-m-d H:i:s",$now);
 				$results[$row][$column]->time_machine = $time_machine;
-			}else{
+			}else{ 
 				//pass search terms and metadata
 				$results[$row][$column]->{'link'} = 'params='
 					. rawurlencode(base64_encode(gzdeflate(serialize(array('params' => $params,
@@ -349,15 +359,27 @@ function runHeatmap($id, $return = false)
 			$color = ($result->color === NULL) ? 'DDDDDD' : $result->color;
 			$sheet->getStyle($cell)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID);
 			$sheet->getStyle($cell)->getFill()->getStartColor()->setRGB($color);
-			if($result->num)
-			{ 
+			
+			if($countactive) {//for count active no need to check count more than 0 in order to link even if count is zero
+			
 				$clink = urlPath() . 'intermediary.php?' . $result->{'link'};
 				$clink = addYourls($clink,$result->reportname);
 				$sheet->SetCellValue($cell, $result->num);
 				$sheet->getCell($cell)->getHyperlink()->setUrl($clink);
-			}else{ 
-				$sheet->SetCellValue($cell, ' ');
-			}
+					
+			} else {
+			
+				if($result->num)
+				{ 
+					$clink = urlPath() . 'intermediary.php?' . $result->{'link'};
+					$clink = addYourls($clink,$result->reportname);
+					$sheet->SetCellValue($cell, $result->num);
+					$sheet->getCell($cell)->getHyperlink()->setUrl($clink);
+				}else{ 
+					$sheet->SetCellValue($cell, ' ');
+				}
+				
+			} 
 			if($result->bomb != "")
 			{
 				$drawing = new PHPExcel_Worksheet_Drawing();
@@ -376,7 +398,7 @@ function runHeatmap($id, $return = false)
 			}
 		}
 	}
-	
+	//exit;
 	$row = count($rows) + 1;
 	$sheet->SetCellValue('A' . ++$row, '');
 	$sheet->SetCellValue('A' . ++$row, 'Report name:');
