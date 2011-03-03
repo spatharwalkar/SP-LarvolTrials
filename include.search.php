@@ -18,28 +18,22 @@ $SEARCH_ERR = NULL;
 function search($params=array(),$list=array('overall_status','brief_title'),$page=1,$time=NULL,$override=array())
 { 
 	if($time !== NULL) $time = '"' . date('Y-m-d H:i:s',$time) . '"';
+	$timecond='';
+	if($time === NULL)
+	{
+		$timecond = 'dv.superceded IS NULL ';
+	}else{
+		$timecond = 'dv.added<' . $time . ' AND (dv.superceded>' . $time . ' OR dv.superceded IS NULL) ';
+	}
 	$optimizer_hints = ($_GET['priority'] == 'high') ? 'HIGH_PRIORITY ' : '';
 	
-	/*
-	New QUERY strategy:
-	Split the conditions into separate queries, retrieve all IDs, and merge together
-		SELECT clinical_study.larvol_id
-		FROM
-		(data_values AS dv 
-		 	LEFT JOIN data_cats_in_study AS i ON dv.studycat=i.id
-			LEFT JOIN clinical_study ON i.larvol_id=clinical_study.larvol_id
-		)
-		WHERE `field`=13 AND val_enum IN(6,7) AND superceded IS NULL;
-	...do this for each condition, merge using "in("
-	*/
+	//avoid screwing up the params for the caller, considering objects are references
 	foreach($params as $key => $value) $params[$key] = clone $value;
 
 	global $db;
 	global $SEARCH_ERR;
-	$normal_conditions = array();
-	$global_conditions = array();
-	$normal_sort = array();
-	$global_sort = array();
+	$conditions = array();	//includes 'requires' and 'weak exclusions'
+	$g_conds = array();		//same as $conditions but for global fields
 	$strong_exclusions = array();
 	try{ 
 		foreach($params as $param)
@@ -48,40 +42,37 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 			$type = $db->types[(is_array($param->field) ? $param->field[0] : $param->field)];
 			switch($param->action)
 			{ 
-				//all that needs to be stored for sort args is the field number and type
-				//store a separate sortargs for global fields that just stores the field name
 				case 'ascending':
 				if($global)
 				{
-					$global_sort[] = '`clinical_study`.' . $param->field;
+					//todo:sort ascending on global field
 				}else{
-					$normal_sort[substr($param->field,1)] = $type;
+					//todo:sort ascending on categorized field
 				}
 				break;
 				
 				case 'descending':
 				if($global)
 				{
-					$global_sort[] = '`clinical_study`.' . $param->field . ' DESC';
+					//todo:sort descending on global field
 				}else{
-					$normal_sort[substr($param->field,1)] = $type . ' DESC';
+					//todo:sort descending on categorized field
 				}
 				break;
 				
 				case 'require':
 				case 'search':
 				if($global)
-				{ 
-					$param->field = '`clinical_study`.' . $param->field;
+				{
+					$field = '`clinical_study`.`' . $param->field . '`';
 					if($param->action == 'require')
 					{
-						$global_conditions[] = $param->field . ' IS NOT NULL';
-					}else{ 
+						$g_conds[] = $field . ' IS NOT NULL';
+					}else{  //in this case we're searching
 						switch($type)
 						{ 
 							//rangeable
 							case 'date':
-							case 'datetime':
 							case 'int':
 							$ORd = explode(' OR ', $param->value);
 							foreach($ORd as $key => $term)
@@ -89,30 +80,39 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 								if(strpos($term, ' TO ') !== false)
 								{
 									$range = explode(' TO ', $term);
-									$ORd[$key] = '(' . $param->field . ' BETWEEN ' . $range[0] . ' AND ' . $range[1] . ')';
+									$ORd[$key] = '(' . $field . ' BETWEEN ' . $range[0] . ' AND ' . $range[1] . ')';
 								}else{
-									$ORd[$key] = '(' . $param->field . '=' . $term . ')';
+									$ORd[$key] = '(' . $field . '=' . $term . ')';
 								}
 							}
 							$cond = implode(' OR ', $ORd);
-							$global_conditions[] = ($param->negate ? 'NOT ' : '') . '(' . $cond . ')';
+							if($param->negate) $cond = 'NOT (' . $cond . ')';
+							$g_conds[]=$cond;
 							break;
 							//normal
-							case 'tinyint':
+							case 'bool':
+							$cond = $field . '=' . $param->value;
+							if($param->negate) $cond = 'NOT (' . $cond . ')';
+							$g_conds[]=$cond;
+							break;
+							//enum is special
 							case 'enum':
-							$eq = is_array($param->value) ? (' IN("' . implode('","',$param->value) . '")') : ('=' . $param->value);
-							$global_conditions[] = $param->field . ($param->negate ? ' NOT' : '') . $eq;
+							$cond = $field
+								. (is_array($param->value) ? (' IN("'.implode('","',$param->value).'")') : ('="'.$param->value.'"'));
+							if($param->negate) $cond = 'NOT (' . $cond . ')';
+							$g_conds[] = $cond;
 							break;
 							//regexable
 							case 'varchar':
 							case 'text':
-							if(strlen($param->value)) $global_conditions[] = textEqual($param->field,$param->value);
+							if(strlen($param->value)) $g_conds[] = textEqual($field,$param->value);
 							if($param->negate !== false && strlen($param->negate))
-								$global_conditions[] = 'NOT ' . textEqual($param->field,$param->negate);
+							{
+								$g_conds[] = 'NOT (' . textEqual($field,$param->negate) . ')';
+							}
 						}
 					}
-					
-				}else{ 
+				}else{	//non-global field
 					$field;
 					if(is_array($param->field))	//take the underscore off the field "name" to get the ID
 					{
@@ -122,8 +122,8 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 					}
 					if($param->action == 'require')
 					{
-						$normal_conditions[] = $field . ' AND dv.val_' . $type . ' IS NOT NULL';
-					}else{  
+						$conditions[] = $field . ' AND dv.val_' . $type . ' IS NOT NULL';
+					}else{  //in this case we're searching
 						switch($type)
 						{ 
 							//rangeable
@@ -147,7 +147,7 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 								$strong_exclusions[] = $cond;
 							}else{
 								if($param->negate) $cond = 'NOT (' . $cond . ')';
-								$normal_conditions[] = $cond;
+								$conditions[] = $cond;
 							}
 							break;
 							//normal
@@ -158,19 +158,20 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 								$strong_exclusions[] = $cond;
 							}else{
 								if($param->negate) $cond = 'NOT (' . $cond . ')';
-								$normal_conditions[] = $cond;
+								$conditions[] = $cond;
 							}
 							break;
 							//enum is special
 							case 'enum':
-							$enumq = is_array($param->value) ? (' IN(' . implode(',',$param->value) . ')') : ('=' . $param->value);
+							$enumq = is_array($param->value) ? (' IN("'.implode('","',$param->value).'")') : ('="'.$param->value.'"');
 							$cond = $field . ' AND dv.val_enum' . $enumq;
 							if($param->negate && $param->strong)
 							{
 								$strong_exclusions[] = $cond;
 							}else{
 								if($param->negate) $cond = $field . ' AND NOT (dv.val_enum' . $enumq . ')';
-								$normal_conditions[] = $cond;
+								//if($param->negate) $cond = 'NOT (' . $cond . ')';
+								$conditions[] = $cond;
 							}
 							break;
 							//regexable
@@ -179,31 +180,34 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 							if(!is_array($param->field))	//normal single-field param
 							{
 								if(strlen($param->value))
-									$normal_conditions[] = $field . ' AND ' . textEqual('dv.val_' . $type,$param->value);
+									$conditions[] = $field . ' AND ' . textEqual('dv.val_' . $type,$param->value);
 								if($param->negate !== false && strlen($param->negate))
 								{
 									if($param->strong)
 									{
 										$strong_exclusions[] = $field . ' AND ' . textEqual('dv.val_' . $type,$param->negate);
 									}else{
-										$normal_conditions[] = $field . ' AND NOT ' . textEqual('dv.val_' . $type,$param->negate);
+										//$conditions[] = 'NOT (' . $field . ' AND ' . textEqual('dv.val_' . $type,$param->negate) . ')';
+										$conditions[] = $field . ' AND NOT ' . textEqual('dv.val_' . $type,$param->negate);
 									}
 								}
 							}else{	//Merge varchar and text multifields
 								if(strlen($param->value))
 								{
-									$normal_conditions[] = $field . ' AND (' . textEqual('dv.val_text',$param->value) . ' OR '
+									$conditions[] = $field . ' AND (' . textEqual('dv.val_text',$param->value) . ' OR '
 														. textEqual('dv.val_varchar',$param->value) . ')';
 								}
 								if($param->negate !== false && strlen($param->negate))
 								{
 									if($param->strong)
 									{
-										$strong_exclusions[] = $field . ' AND (' . textEqual('dv.val_text',$param->value) . ' OR '
-														. textEqual('dv.val_varchar',$param->value) . ')';
+										$strong_exclusions[] = $field . ' AND (' . textEqual('dv.val_text',$param->negate) . ' OR '
+														. textEqual('dv.val_varchar',$param->negate) . ')';
 									}else{
-										$normal_conditions[] = $field . ' AND NOT (' . textEqual('dv.val_text',$param->value) . ' OR '
+										$conditions[] = $field . ' AND NOT (' . textEqual('dv.val_text',$param->value) . ' OR '
 														. textEqual('dv.val_varchar',$param->value) . ')';
+										/*$conditions[] = 'NOT (' . $field . ' AND (' . textEqual('dv.val_text',$param->negate) . ' OR '
+														. textEqual('dv.val_varchar',$param->negate) . '))';*/
 									}
 								}
 							}
@@ -218,76 +222,111 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 		return softDie($e->getMessage());
 	}
 	
+	/*One condition that would normally go in one of the chains must
+		be pulled out and done separately or else performance will be poor
+	*/
+	$lone_cond = '';
+	if(!empty($conditions))
+	{
+		$key = max(array_keys($conditions));
+		$lone_cond = $conditions[$key] . ' AND ' . $timecond;
+		unset($conditions[$key]);
+	}else if(!empty($g_conds)){
+		$key = max(array_keys($g_conds));
+		$lone_cond = $g_conds[$key];
+		unset($g_conds[$key]);
+	}else if(!empty($strong_exclusions)){
+		$lone_cond = 1;
+		//$key = max(array_keys($strong_exclusions));
+		//$lone_cond = 'NOT (' . $strong_exclusions[$key] . ' AND ' . $timecond . ')';
+		//unset($strong_exclusions[$key]);
+	}else{
+		$lone_cond = NULL;
+	}
+	
 	//execute the queries and gather results
-	$resid_set = array();
-	$bigquery = array();
-	foreach($normal_conditions as $cond)
+	foreach($conditions as $i => $cond)
 	{
-		$query = 'SELECT ' . $optimizer_hints . 'DISTINCT clinical_study.larvol_id AS "larvol_id" FROM (data_values AS dv '
-			. 'LEFT JOIN data_cats_in_study AS i ON dv.studycat=i.id '
-			. 'LEFT JOIN clinical_study ON i.larvol_id=clinical_study.larvol_id) WHERE ' . $cond . ' AND ';
-		if($time === NULL)
-		{ 
-			$query .= 'dv.superceded IS NULL ';
-		}else{ 
-			$query .= 'dv.added<' . $time . ' AND (dv.superceded>' . $time . ' OR dv.superceded IS NULL) ';
-		}
-		$bigquery[] = $query;
+		$query = 'SET @conds_' . $i . ' := '
+				. '(SELECT GROUP_CONCAT(DISTINCT i.larvol_id) AS "larvol_id" '
+				. 'FROM (data_values AS dv LEFT JOIN data_cats_in_study AS i ON dv.studycat=i.id) WHERE ' . $cond . ' AND ';
+		$query .= $timecond;
+		if($i > 0) $query .= 'AND FIND_IN_SET(i.larvol_id, @conds_' . ($i-1) . ') > 0';
+		$query .= ')';
+		//var_dump($query);
+		$res = mysql_query($query); if($res === false) return softDie('Bad SQL query applying search condition: ' . $query);
 	}
-	foreach($global_conditions as $cond)
+	
+	foreach($g_conds as $i => $cond)
 	{
-		$query = 'SELECT larvol_id FROM clinical_study WHERE ' . $cond;
-		$bigquery[] = $query;
-	}
-	if(empty($normal_conditions) && empty($global_conditions))
-	{
-		$bigquery = 'SELECT larvol_id FROM clinical_study ';
-	}
-
-	if(is_array($bigquery))
-	{
-		$cap = '';
-		for($i=1; $i < count($bigquery); ++$i) $cap .= ')';
-		$bigquery = implode(' AND clinical_study.larvol_id IN(',$bigquery) . $cap;
-	}
-	foreach($strong_exclusions as $key => $cond)
-	{
-		$query = 'SELECT ' . $optimizer_hints . 'DISTINCT clinical_study.larvol_id AS "larvol_id" FROM (data_values AS dv '
-			. 'LEFT JOIN data_cats_in_study AS i ON dv.studycat=i.id '
-			. 'LEFT JOIN clinical_study ON i.larvol_id=clinical_study.larvol_id) WHERE ' . $cond . ' AND ';
-		if($time === NULL)
-		{
-			$query .= 'dv.superceded IS NULL ';
-		}else{
-			$query .= 'dv.added<' . $time . ' AND (dv.superceded>' . $time . ' OR dv.superceded IS NULL) ';
-		}
-		$strong_exclusions[$key] = $query;
+		$ii = $i + count($conditions);
+		$query = 'SET @conds_' . $ii . ' := '
+				. '(SELECT GROUP_CONCAT(larvol_id) FROM clinical_study WHERE ' . $cond;
+		if($ii > 0) $query .= 'AND FIND_IN_SET(larvol_id, @conds_' . ($ii-1) . ') > 0';
+		$query .= ')';
+		$res = mysql_query($query);
+		if($res === false) return softDie('Bad SQL query applying search condition (global field)'.mysql_error().$query);
 	}
 	
 	if(!empty($strong_exclusions))
 	{
-		//if there are ONLY strong exclusions, there won't be a WHERE clause yet at this point
-		$prefix = (empty($normal_conditions) && empty($global_conditions)) ? ' WHERE ' : ' AND ';
-		$bigquery .=  $prefix . 'clinical_study.larvol_id NOT IN(' . implode(' UNION ', $strong_exclusions) . ')';
+		$seq = array();
+		foreach($strong_exclusions as $cond)
+		{
+			$query = 'SELECT DISTINCT i.larvol_id AS "larvol_id" FROM '
+					. '(data_values AS dv LEFT JOIN data_cats_in_study AS i ON dv.studycat=i.id) WHERE ' . $cond . ' AND ';
+			$query .= $timecond;
+			$seq[] = $query;
+		}
+		$seq = 'SET @seq_union := (SELECT GROUP_CONCAT(larvol_id) as "larvol_id" FROM ('
+				. implode(' UNION ',$seq) . ') AS resultset)';
+		$seq = mysql_query($seq); if($seq === false) return softDie('Bad SQL query applying strong exclusions');
 	}
+	
+	$bigquery;
 	if(!empty($override))
 	{ 
 		mysql_query('DROP TABLE IF EXISTS ulid');
 		mysql_query('CREATE TEMPORARY TABLE ulid (larvol_id int NOT NULL)');
 		
 		mysql_query('INSERT INTO ulid VALUES ' . implode(',', parenthesize($override)));
-		$bigquery .= ' UNION SELECT larvol_id FROM ulid';
+		//$bigquery = ' UNION SELECT larvol_id FROM ulid';
+		$bigquery = ' OR larvol_id IN(SELECT larvol_id FROM ulid)';
 	}
-	
+
+	if($lone_cond === NULL)	//in this case, there were no search parameters
+	{
+		$bigquery = 'SELECT larvol_id FROM clinical_study';
+	}else{	//There were search parameters, so use them in the main query
+		$bigconds = array();
+		$bigconds[] = '(' . $lone_cond . ')';
+		if(!empty($conditions) || !empty($g_conds))
+			$bigconds[] = 'FIND_IN_SET(i.larvol_id, @conds_' . (count($conditions)+count($g_conds)-1) . ') > 0';
+		if(!empty($strong_exclusions))
+			$bigconds[] = 'NOT FIND_IN_SET(i.larvol_id, @seq_union ) > 0';
+		if(empty($bigconds))
+		{
+			$bigconds = '1';
+		}else{
+			$bigconds = implode(' AND ', $bigconds);
+		}
+		$bigquery = 'SELECT DISTINCT i.larvol_id AS "larvol_id" FROM '
+					. '(data_values AS dv '
+					. 'LEFT JOIN data_cats_in_study AS i ON dv.studycat=i.id '
+					. 'LEFT JOIN clinical_study ON i.larvol_id=clinical_study.larvol_id) '
+					. 'WHERE (' . $bigconds . ')' . $bigquery;
+	}
+
+
 	if($list === NULL)	//option to return total number of records instead of full search results
 	{
 		$bigquery = 'SELECT COUNT(larvol_id) AS "ctotal" FROM (' . $bigquery . ') AS resultset';
 		$res = mysql_query($bigquery);
-		if($res === false) return softDie('Bad SQL query on search: ' . $bigquery . "<br />\n" . mysql_error());
+		if($res === false) return softDie('Bad SQL query on count search: ' . $bigquery . "<br />\n" . mysql_error());
 		$row = mysql_fetch_assoc($res) or die('Total not found.');
 		return $row['ctotal'];
 	}
-	//var_dump($list);exit;
+
 	if($list === false)	//option to return the SQL query
 	{
 		return $bigquery;
@@ -311,75 +350,41 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 		}
 		$limit = ' LIMIT ' . $limit;
 	}
-	$sorting = !empty($normal_sort) || !empty($global_sort);
-	if(!$sorting)	$bigquery .= $limit;	//Can only limit if we're not sorting.
-	
+	$bigquery .= $limit;
+	//var_dump($bigquery);exit;
+	//Do search and get result IDs for the page
 	$res = mysql_query($bigquery);
 	if($res === false) return softDie('Bad SQL query on search: ' . $bigquery . "<br />\n" . mysql_error());
-	
+	$resid_set = array();
 	while($row = mysql_fetch_assoc($res)) $resid_set[] = $row['larvol_id'];
-	
-	if($sorting)
-	{ 
-		$timereq = '';
-		if($time === NULL)
-		{
-			$timereq = 'dv.superceded IS NULL ';
-		}else{
-			$timereq = 'dv.added<' . $time . ' AND (dv.superceded>' . $time . ' OR dv.superceded IS NULL) ';
-		}
-		foreach($normal_sort as $field => $type)
-		{
-			$query = 'SELECT clinical_study.larvol_id FROM '
-				. 'data_values AS dv LEFT JOIN data_cats_in_study AS i ON dv.studycat=i.id '
-				. 'LEFT JOIN clinical_study ON i.larvol_id=clinical_study.larvol_id '
-				. 'WHERE ' . $timereq . 'AND `field` = 56 AND clinical_study.larvol_id IN('
-				. implode(',', $resid_set) . ') ORDER BY dv.val_' . $type . ' ' . $limit;
-			$resid_set = array();
-			$res = mysql_query($query);
-			if($res === false) return softDie('Bad SQL query on sort: ' . $query . "<br />\n" . mysql_error());
-			while($row = mysql_fetch_assoc($res)) $resid_set[] = $row['larvol_id'];
-			break;
-		}
-		if(empty($normal_sort))
-		foreach($global_sort as $field)
-		{
-			$query = 'SELECT larvol_id FROM clinical_study WHERE larvol_id IN(' . implode(',', $resid_set)
-						. ') ORDER BY ' . $field . ' ' . $limit;
-			$resid_set = array();
-			$res = mysql_query($query);
-			if($res === false) return softDie('Bad SQL query on sort: ' . $query . "<br />\n" . mysql_error());
-			while($row = mysql_fetch_assoc($res)) $resid_set[] = $row['larvol_id'];
-			break;
-		}
-	}
-	//At this point $query contains all the conditions and gets us the right ID list with limits for result page
-	
+	//get requested data for the page
 	$recordsData = getRecords($resid_set,$list,$time);
 	$retdata = array();
-	foreach($resid_set as $id) $retdata[$id] = $recordsData[$id];
+	foreach($resid_set as $id) $retdata[$id] = $recordsData[$id];	//preserve sorting
 	return $retdata;
 }
 
-function getField($params, $field) { 
+//todo: this probably should not be NCT-centric
+function getField($params, $field)
+{ 
 	$id = '_'.getFieldId('NCT', $field);
-	foreach ($params as $param) {
-		$fields = is_array($param->field) ? $param->field :
-			array($param->field);
-		foreach ($fields as $field)
-			if ($field == $id)
-				return $param;
+	foreach ($params as $param)
+	{
+		$fields = is_array($param->field) ? $param->field : array($param->field);
+		foreach($fields as $field)
+			if($field == $id) return $param;
 	}
 	return null;
 }
 
-function getBackboneAgent($params) {
+function getBackboneAgent($params)
+{
 	return getField($params, "intervention_name");
 }
 
-function applyBackboneAgent($ids, $term) {
-	if (count($ids) == 0)
-		return array();
+function applyBackboneAgent($ids, $term)
+{
+	if(count($ids) == 0) return array();
 	$ids = implode(",", $ids);
 	$interventionId = getFieldId("NCT", "intervention_name");
 	$rs = mysql_query("SELECT DISTINCT i.larvol_id AS id
@@ -394,8 +399,8 @@ function applyBackboneAgent($ids, $term) {
 	return $result;
 }
 
-function getActiveCount($all_ids) {
-
+function getActiveCount($all_ids)
+{
 	$ids = implode(', ',$all_ids);
 	$overallStatusId = getFieldId("NCT", "overall_status");
 	$activeStatuses = getEnumvalId($overallStatusId, "Active, not recruiting").",".
@@ -419,7 +424,8 @@ function getActiveCount($all_ids) {
 	return count($id_set);
 }
 
-function getBomb($ids) {
+function getBomb($ids)
+{
 	if (count($ids) == 0)
 		return "";
 	$overallStatusId = getFieldId("NCT", "overall_status");//echo "<pre>";print_r($ids);exit;
@@ -462,13 +468,12 @@ function getBomb($ids) {
 		return "sb";
 	return "lb";
 }
-//Helper for above and below. Convert to anonymous function when gentoo gets php 5.3 support
+//Helper for above and below. todo: convert to anonymous function now that gentoo has php 5.3 support
 function highPass($v){return substr($v,1);}
 
 //return an array of study maps corresponding to $ids, with only $fields populated
 function getRecords($ids,$fields,$time)
 {
-	
 	global $db;
 	$result = array();
 	if(empty($ids)) return $result;
@@ -542,7 +547,7 @@ function getRecords($ids,$fields,$time)
 				$result[$id][$place] = $val;
 			}
 		}
-	}//var_dump($result);@flush();exit;
+	}
 	return $result;
 }
 

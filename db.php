@@ -23,6 +23,7 @@ class DatabaseManager
 	{
 		$this->db_link = mysql_connect(DB_SERVER,DB_USER,DB_PASS) or die("Error connecting to database server!");
 		mysql_select_db(DB_NAME) or die("Could not find database on server!");
+		mysql_query('SET SESSION group_concat_max_len = 1000000') or die("Couldn't set group_concat_max_len");
 		
 		@$this->types = unserialize(file_get_contents('cache/types.dat'));
 		if($this->types === false) $this->refreshTypes();

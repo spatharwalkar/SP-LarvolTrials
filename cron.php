@@ -93,7 +93,7 @@ if(!count($fetch))
 	{
 		$filename = 'fetch_' . $s . '.php';
 		echo('Invoking ' . $filename . '...</pre>' . $nl);
-		$_GET['days'] = ceil(($now - $lastrun) / 60 / 60 / 24) + 2;
+		$_GET['days'] = max(ceil(($now-$lastrun)/60/60/24)+2, 30);
 		require_once($filename);
 		echo($nl . '<pre>Done with ' . $filename . '.' . $nl);		
 	}
