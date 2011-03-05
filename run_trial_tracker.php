@@ -43,77 +43,18 @@ while($trial = mysql_fetch_array($res))
 	}
 	$trials[$trial['nctid']] = array_merge($nct, $trial);
 }
-if($type == 'Plain') {
 
-	$out = '<table border="1" class="MsoNormalTable"'
-		. '<tr><th>NCTID</th>'
-		. '<th>Intervention</th>'
-		. '<th>Tumor Type</th>'
-		. '<th>Patient Population</th>'
-		. '<th>Trials Details</th>'
-		. '<th>Lead Sponsor</th>'
-		. '<th>Collaborator</th>'
-		. '<th>Enrollment</th>'
-		. '<th>Start Date</th>'
-		. '<th>End Date</th>'
-		. '<th>Overall Status</th>'
-		. '<th>Phase</th>'
-		. '<th>Randomized Controlled Trial</th>'
-		. '<th>Data Release</th></tr>';
-
-	foreach($trials as $nctid => $trial) {
-	
-		if (is_array($trial['NCT/intervention_name'])) {
-			$intervention_name = implode(', ',$trial['NCT/intervention_name']);
-		}else{
-			$intervention_name = $trial['NCT/intervention_name'];
-		}
-		if ($intervention_name == '') $intervention_name = '(no intervention)';
-	
-		$end_date =		($trial['NCT/completion_date'])?$trial['NCT/completion_date']:$trial['NCT/primary_completion_date'];
-	
-		
-		//checking if the field 'NCT/collaborator' has more than one value.
-		if(is_array($trial['NCT/collaborator'])) {
-			$collaborator = implode(',', $trial['NCT/collaborator']);
-		} else {
-			$collaborator = $trial['NCT/collaborator'];
-		}
-	
-		//checking if the field 'NCT/lead_sponsor' has more than one value.
-		if(is_array($trial['NCT/lead_sponsor'])) {
-			$lead_sponsor = implode(',', $trial['NCT/lead_sponsor']);
-		} else {
-			$lead_sponsor = $trial['NCT/lead_sponsor'];
-		}
-	
-		//checking if the field 'NCT/enrollment' has more than one value.
-		if(is_array($trial['NCT/enrollment'])) {
-			$enrollment = implode(',', $trial['NCT/enrollment']);
-		} else {
-			$enrollment = $trial['NCT/enrollment'];
-		}
-	
-		$out .= '<tr><td><a href="http://clinicaltrials.gov/ct2/show/' . padnct($trial['nctid']) . '">'
-			. padnct($nctid) . '</a></td>'
-			. '<td>' . $intervention_name . '</td>'
-			. '<td>' . $trial['tumor_type'] . '</td>'
-			. '<td>' . $trial['patient_population'] . '</td>'
-			. '<td>' . $trial['trials_details'] . '</td>'
-			. '<td style="'.((in_array('NCT/lead_sponsor',$trial['changedFields']))?'background-color:#FF8080;':'').'">' . $lead_sponsor . '</td>'
-			. '<td style="'.((in_array('NCT/collaborator',$trial['changedFields']))?'background-color:#FF8080;':'').'">' . $collaborator . '</td>'
-			. '<td style="'.((in_array('NCT/enrollment',$trial['changedFields']))?'background-color:#FF8080;':'').'">' . 
-	$enrollment . '</td>'
-			. '<td style="'.((in_array('NCT/start_date',$trial['changedFields']))?'background-color:#FF8080;':'').'">' . $trial['NCT/start_date'] . '</td>'
-			. '<td>' . $end_date . '</td>'
-			. '<td style="'.((in_array('NCT/overall_status',$trial['changedFields']))?'background-color:#FF8080;':'').'">' . $trial['NCT/overall_status'] . '</td>'
-			. '<td style="'.((in_array('NCT/phase',$trial['changedFields']))?'background-color:#FF8080;':'').'">' . str_replace('Phase ', 'P', $trial['NCT/phase']) . '</td>'
-			. '<td>' . $trial['randomized_controlled_trial'] . '</td>'
-			. '<td>' . $trial['data_release'] . '</td></tr>';
-	}
-} else {
-		
-	$out = '<table border="0" width="100%" cellpadding="5" cellspacing="0" class="manage">'
+if($type == 'Color A') {
+		$out = "<head>
+				<style type='text/css'>
+				.manage {color:#000080; border-top: 1px solid #000080; color:#000080;color:#000; 
+						border-left: 1px solid #000080; font-family:Calibri; mso-fareast-font-family:Calibri;}
+				.manage th {color:#000080; border-right: 1px solid #000080;border-bottom: 1px solid #000080;}
+				.manage td {color:#000080;color:#000; border-right: 1px solid #000080;border-bottom: 1px solid #000080;}
+				</style>
+				</head>";
+				
+	$out .= '<table border="0" width="100%" cellpadding="5" cellspacing="0" class="manage">'
 		. '<tr><th rowspan="2" width="2%" nowrap="nowrap">Tumor Type</th>'
 		. '<th rowspan="2" width="5%" nowrap="nowrap">Patient Population<br/>(linked to details)</th>'
 		. '<th rowspan="2" width="25%" nowrap="nowrap">Trial Details</th>'
@@ -316,6 +257,75 @@ if($type == 'Plain') {
 				. '<td>' . $trial['NCT/overall_status'] . '</td>'
 				. '<td style="background-color:' . $phase_arr[$ph] . '">' . $phase . '</td>'
 				. $str .'</tr>';
+	}
+}
+else {
+
+	$out = '<table border="1" class="MsoNormalTable"'
+		. '<tr><th>NCTID</th>'
+		. '<th>Intervention</th>'
+		. '<th>Tumor Type</th>'
+		. '<th>Patient Population</th>'
+		. '<th>Trials Details</th>'
+		. '<th>Lead Sponsor</th>'
+		. '<th>Collaborator</th>'
+		. '<th>Enrollment</th>'
+		. '<th>Start Date</th>'
+		. '<th>End Date</th>'
+		. '<th>Overall Status</th>'
+		. '<th>Phase</th>'
+		. '<th>Randomized Controlled Trial</th>'
+		. '<th>Data Release</th></tr>';
+
+	foreach($trials as $nctid => $trial) {
+	
+		if (is_array($trial['NCT/intervention_name'])) {
+			$intervention_name = implode(', ',$trial['NCT/intervention_name']);
+		}else{
+			$intervention_name = $trial['NCT/intervention_name'];
+		}
+		if ($intervention_name == '') $intervention_name = '(no intervention)';
+	
+		$end_date =		($trial['NCT/completion_date'])?$trial['NCT/completion_date']:$trial['NCT/primary_completion_date'];
+	
+		
+		//checking if the field 'NCT/collaborator' has more than one value.
+		if(is_array($trial['NCT/collaborator'])) {
+			$collaborator = implode(',', $trial['NCT/collaborator']);
+		} else {
+			$collaborator = $trial['NCT/collaborator'];
+		}
+	
+		//checking if the field 'NCT/lead_sponsor' has more than one value.
+		if(is_array($trial['NCT/lead_sponsor'])) {
+			$lead_sponsor = implode(',', $trial['NCT/lead_sponsor']);
+		} else {
+			$lead_sponsor = $trial['NCT/lead_sponsor'];
+		}
+	
+		//checking if the field 'NCT/enrollment' has more than one value.
+		if(is_array($trial['NCT/enrollment'])) {
+			$enrollment = implode(',', $trial['NCT/enrollment']);
+		} else {
+			$enrollment = $trial['NCT/enrollment'];
+		}
+	
+		$out .= '<tr><td><a href="http://clinicaltrials.gov/ct2/show/' . padnct($trial['nctid']) . '">'
+			. padnct($nctid) . '</a></td>'
+			. '<td>' . $intervention_name . '</td>'
+			. '<td>' . $trial['tumor_type'] . '</td>'
+			. '<td>' . $trial['patient_population'] . '</td>'
+			. '<td>' . $trial['trials_details'] . '</td>'
+			. '<td style="'.((in_array('NCT/lead_sponsor',$trial['changedFields']))?'background-color:#FF8080;':'').'">' . $lead_sponsor . '</td>'
+			. '<td style="'.((in_array('NCT/collaborator',$trial['changedFields']))?'background-color:#FF8080;':'').'">' . $collaborator . '</td>'
+			. '<td style="'.((in_array('NCT/enrollment',$trial['changedFields']))?'background-color:#FF8080;':'').'">' . 
+	$enrollment . '</td>'
+			. '<td style="'.((in_array('NCT/start_date',$trial['changedFields']))?'background-color:#FF8080;':'').'">' . $trial['NCT/start_date'] . '</td>'
+			. '<td>' . $end_date . '</td>'
+			. '<td style="'.((in_array('NCT/overall_status',$trial['changedFields']))?'background-color:#FF8080;':'').'">' . $trial['NCT/overall_status'] . '</td>'
+			. '<td style="'.((in_array('NCT/phase',$trial['changedFields']))?'background-color:#FF8080;':'').'">' . str_replace('Phase ', 'P', $trial['NCT/phase']) . '</td>'
+			. '<td>' . $trial['randomized_controlled_trial'] . '</td>'
+			. '<td>' . $trial['data_release'] . '</td></tr>';
 	}
 }
 $out .= '</table>';
