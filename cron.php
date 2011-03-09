@@ -35,7 +35,7 @@ echo($nl . '<html><pre>Running main schedule executor.' . $nl . 'Current time ' 
 mysql_query('BEGIN') or die("Couldn't begin SQL transaction");
 $schedule = array();
 $fetch = array();
-$query = 'SELECT `id`,`name`,`fetch`,`runtimes`,`lastrun`,`emails` FROM schedule WHERE runtimes!=0';
+$query = 'SELECT `id`,`name`,`fetch`,`runtimes`,`lastrun`,`emails`,`format` FROM schedule WHERE runtimes!=0';
 $res = mysql_query($query) or die('Bad SQL Query getting schedule');
 $tasks = array(); while($row = mysql_fetch_assoc($res)) $tasks[] = $row;
 foreach($tasks as $row)	//determine what has to run
@@ -124,7 +124,7 @@ foreach($schedule as $item)
 		}
 		
 		try{
-			$files[$row2['name']] = runHeatmap($row['heatmap'], true);
+			$files[$row2['name']] = runHeatmap($row['heatmap'], true, $item['format']);
 		}catch(Exception $e){
 			$files[$row2['name']] = messageInExcel('Report failed with message: ' . $e->getMessage());
 		}
@@ -146,7 +146,7 @@ foreach($schedule as $item)
 		}
 		
 		try{
-			$files[$row2['name']] = runCompetitor($row['competitor'], true);
+			$files[$row2['name']] = runCompetitor($row['competitor'], true, $item['format']);
 		}catch(Exception $e){
 			$files[$row2['name']] = messageInExcel('Report failed with message: ' . $e->getMessage());
 		}

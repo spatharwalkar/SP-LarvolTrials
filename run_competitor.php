@@ -15,8 +15,9 @@ if(isset($_GET['direct_run_competitor_id'])) runCompetitor((int)$_GET['direct_ru
 /* Runs the competitordashboard with the given ID, outputs to Excel
 	If $return is true, the file is returned from this function
 	If $return is false, it will go to the browser in a download.
+	$format is 'xlsx' to generate report in Excel format, 'doc' to generate report in Word format
 */
-function runCompetitor($id, $return = false)
+function runCompetitor($id, $return = false, $format = 'xlsx')
 {
 	global $now;
 	global $db;
@@ -40,13 +41,13 @@ function runCompetitor($id, $return = false)
 	$nodata = array('action' => array(), 'searchval' => array(), 'negate' => array(), 'multifields' => array(), 'multivalue' => '');
 
 	//get report name
-	$query = 'SELECT name,footnotes,description,searchdata FROM rpt_competitor WHERE id=' . $id . ' LIMIT 1';
+	$query = 'SELECT name,footnotes,description,searchdata,id FROM rpt_competitor WHERE id=' . $id . ' LIMIT 1';
 	$resu = mysql_query($query) or tex('Bad SQL query getting report name');
-	$resu = mysql_fetch_array($resu) or tex('Report not found.');
-	$name = $resu['name'];
-	$footnotes = $resu['footnotes'];
-	$description = $resu['description'];
-	$oversearch = ($resu['searchdata']===NULL?$nodata:removeNullSearchdata(unserialize(base64_decode($resu['searchdata']))));
+	$info = mysql_fetch_array($resu) or tex('Report not found.');
+	$name = $info['name'];
+	$footnotes = $info['footnotes'];
+	$description = $info['description'];
+	$oversearch = ($info['searchdata']===NULL?$nodata:removeNullSearchdata(unserialize(base64_decode($info['searchdata']))));
 	/* grab options in heatmap
 	*/
 	unset($oversearch['search']);
@@ -83,6 +84,7 @@ function runCompetitor($id, $return = false)
 		mysql_query($query);
 		$pid = mysql_insert_id();
 	}
+	$info['pid'] = $pid;
 
 	//get searchdata
 	$searchdata = array();
@@ -297,7 +299,92 @@ function runCompetitor($id, $return = false)
 			}
 		}
 	}
+	if ($format == 'xlsx')
+		return competitorAsExcel($info, $rows, $columns, $results, $return, $phases);
+	else
+		return competitorAsWord($info, $rows, $columns, $results, $return, $phases);
 
+}
+
+function competitorAsWord($info, $rows, $columns, $results, $return, $phases) {
+	global $now, $db;
+	$name = $info['name'];
+	$footnotes = $info['footnotes'];
+	$description = $info['description'];
+	if(strlen($name) == 0) $name = 'Report ' . $id;
+	$pid = $info['pid'];
+
+	$out = '<table border="1" cellpadding="0" cellspacing="0"><tr><td>&nbsp;</td>';
+	foreach ($columns as $header) {
+		$out .= '<td>'.htmlspecialchars($header).'</td>';
+	}
+	$out .= '</tr>';
+	foreach ($rows as $row => $header) {
+		$out .= '<tr><td>'.htmlspecialchars($header).'</td>';
+		foreach ($columns as $col => $a) {
+			if (isset($results[$row][$col])) {
+				$result = $results[$row][$col];
+				if ($result->num) {
+					$clink = urlPath() . 'intermediary.php?' . $result->{'link'};
+					$clink = addYourls($clink, $result->reportname);
+					$out .= '<td><a href="'.$clink.'">'.htmlspecialchars($phases[$result->phase]).'</a></td>';
+					continue;
+				}
+			}
+			$out .= '<td>&nbsp;</td>';
+		}
+		$out .= '</tr>';
+	}
+	$out .= '</table><br>';
+	$out .= 'Report name: '.htmlspecialchars(substr($name,0,250)).'<br>';
+	$out .= 'Footnotes: '.htmlspecialchars($footnotes).'<br>';
+	$out .= 'Description: '.htmlspecialchars($description).'<br>';
+	$out .= 'Runtime: '.date('Y-m-d H:i:s', $now);
+
+	$template = file_get_contents('templates/general.htm');
+	$out = str_replace('#content#', $out, $template);
+
+	if ($return) {
+		return $out;
+	}
+	else {
+		header("Pragma: public");
+		header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
+		header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+		header("Cache-Control: no-cache, must-revalidate, post-check=0, pre-check=0");
+		header("Content-Type: application/force-download");
+		header("Content-Type: application/download");
+		header("Content-Type: application/msword");
+		header("Content-Disposition: attachment;filename=" . substr($name,0,20) . '_' . date('Y-m-d_H.i.s') . '.doc');
+		header("Content-Transfer-Encoding: binary ");
+		echo($out);
+		@flush();
+
+		ob_start();
+		mysql_query('DELETE FROM progress WHERE id=' . $pid . ' LIMIT 1');
+		$mail = new PHPMailer();
+		$from = 'no-reply@' . $_SERVER['SERVER_NAME'];
+		if(strlen($_SERVER['SERVER_NAME'])) $mail->SetFrom($from);
+		$mail->AddAddress($db->user->email);
+		$mail->Subject = SITE_NAME . ' manual report ' . date("Y-m-d H.i.s", $now) . ' - ' . substr($name,0,20);
+		$mail->Body = 'Attached is the report you generated earlier.';
+		$mail->AddStringAttachment($out,
+					   substr($name,0,20).'_'.date('Y-m-d_H.i.s', $now).'.doc',
+					   'base64',
+					   'Content-Type: application/msword');
+		@$mail->Send();
+		ob_end_clean();
+		exit;
+	}
+}
+
+function competitorAsExcel($info, $rows, $columns, $results, $return, $phases) {
+	global $now, $db;
+	$name = $info['name'];
+	$footnotes = $info['footnotes'];
+	$description = $info['description'];
+	if(strlen($name) == 0) $name = 'Report ' . $id;
+	
 	// Create excel file object
 	$objPHPExcel = new PHPExcel();
 

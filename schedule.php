@@ -24,7 +24,7 @@ function editor()
 	if(!isset($_GET['id'])) return;
 	$id = mysql_real_escape_string(htmlspecialchars($_GET['id']));
 	if(!is_numeric($id)) return;
-	$query = 'SELECT `name`,`fetch`,`runtimes`,`emails` FROM schedule WHERE id=' . $id . ' LIMIT 1';
+	$query = 'SELECT `name`,`fetch`,`runtimes`,`emails`,`format` FROM schedule WHERE id=' . $id . ' LIMIT 1';
 	$res = mysql_query($query) or die('Bad SQL query getting item'.mysql_error()."<br />".$query);
 	$rpt = mysql_fetch_assoc($res) or die('Item not found.');
 	$out = '<form action="schedule.php" method="post"><fieldset class="schedule"><legend>Edit schedule item ' . $id . '</legend>'
@@ -76,6 +76,7 @@ function editor()
 	$out .= '<label>Run these reports: ' . makeDropdown('reports',$reports,10,$selectedreports,true) . '</label><br clear="all"/>'
 			. '<label>Send output to these emails (comma-delimited): <input type="text" name="emails" value="'
 			. htmlspecialchars($rpt['emails']) . '"/></label><br clear="all"/>';
+	$out .= '<label>Format: '.makeDropdown('format', getEnumValues('schedule', 'format'), false, $rpt['format']).'</label><br clear="all"/>';
 	$hours = array();
 	$days = array();
 	for($power = 0; $power < 24; ++$power)
@@ -118,7 +119,8 @@ function postEd()
 		$name = mysql_real_escape_string($_POST['name']);
 		$emails = mysql_real_escape_string($_POST['emails']);
 		$fetch = mysql_real_escape_string($_POST['fetch']);
-		$query = 'UPDATE schedule SET `name`="' . $name . '",emails="' . $emails . '",`fetch`="' . $fetch . '",runtimes=' . $runtimes
+		$format = mysql_real_escape_string($_POST['format']);
+		$query = 'UPDATE schedule SET `name`="' . $name . '",emails="' . $emails . '",`fetch`="' . $fetch . '",runtimes=' . $runtimes . ',format="' . $format . '"'
 					. ' WHERE id=' . $id . ' LIMIT 1';
 		mysql_query($query) or die('Bad SQL Query saving item');
 		$query = 'DELETE FROM schedule_competitor WHERE schedule=' . $id;

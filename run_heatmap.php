@@ -15,9 +15,10 @@ if(isset($_GET['direct_run_heatmap_id'])) runHeatmap((int)$_GET['direct_run_heat
 /* Runs the heatmap with the given ID, outputs to Excel
 	If $return is true, the file is returned from this function
 	If $return is false, it will go to the browser in a download.
+	$format is "xlsx" for Excel and "doc" for Word
 */
 
-function runHeatmap($id, $return = false)
+function runHeatmap($id, $return = false, $format = "xlsx")
 {
 	global $now;
 	global $db;
@@ -41,17 +42,17 @@ function runHeatmap($id, $return = false)
 	$nodata = array('action'=>array(), 'searchval'=>array(), 'negate'=>array(), 'multifields'=>array(), 'multivalue'=>array());
 
 	//get report name
-	$query = 'SELECT name,footnotes,description,searchdata,bomb,backbone_agent,count_only_active  FROM rpt_heatmap WHERE id=' . $id . ' LIMIT 1';
+	$query = 'SELECT name,footnotes,description,searchdata,bomb,backbone_agent,count_only_active,id  FROM rpt_heatmap WHERE id=' . $id . ' LIMIT 1';
 	$resu = mysql_query($query) or tex('Bad SQL query getting report name');
-	$resu = mysql_fetch_array($resu) or tex('Report not found.'); 
-	$name = $resu['name'];
-	$footnotes = $resu['footnotes'];
-	$description = $resu['description'];
-	$oversearch = ($resu['searchdata']===NULL?$nodata:removeNullSearchdata(unserialize(base64_decode($resu['searchdata']))));
+	$info = mysql_fetch_array($resu) or tex('Report not found.'); 
+	$name = $info['name'];
+	$footnotes = $info['footnotes'];
+	$description = $info['description'];
+	$oversearch = ($info['searchdata']===NULL?$nodata:removeNullSearchdata(unserialize(base64_decode($info['searchdata']))));
 	
-	$bomb = $resu['bomb'] == 'Y';
-	$backboneAgent = $resu['backbone_agent'] == 'Y';
-	$countactive = $resu['count_only_active'] == 'Y';
+	$bomb = $info['bomb'] == 'Y';
+	$backboneAgent = $info['backbone_agent'] == 'Y';
+	$countactive = $info['count_only_active'] == 'Y';
 	unset($oversearch['search']);
 	unset($oversearch['display']);
 	unset($oversearch['page']);
@@ -324,7 +325,125 @@ function runHeatmap($id, $return = false)
 			}
 		}
 	}
+
+	$info["pid"] = $pid;
+	if ($format == "xlsx")
+		return heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $phasenums);
+	else
+		return heatmapAsWord($info, $rows, $columns, $results, $p_colors, $return, $phasenums);
+
+}
+
+function heatmapAsWord($info, $rows, $columns, $results, $p_colors, $return, $phasenums) {
+	global $now, $db;
+	$countactive = $info['count_only_active'] == 'Y';
+	$footnotes = $info['footnotes'];
+	$description = $info['description'];
+	$name = $info['name'];
+	if(strlen($name) == 0) $name = 'Report ' . $info['id'];
+	$pid = $info["pid"];
+
+	$out = '<table border="1" cellpadding="0" cellspacing="0">';
+	$out .= '<tr><td>&nbsp;</td>';
+	foreach ($columns as $header) {
+		$out .= '<td>'.htmlspecialchars($header).'</td>';
+	}
+	$out .= '</tr>';
+	foreach ($rows as $row => $header) {
+		$out .= '<tr><td>'.htmlspecialchars($header).'</td>';
+		foreach ($columns as $col => $a) {
+			if (isset($results[$row][$col])) {
+				$result = $results[$row][$col];
+				$color = ($result->color === NULL) ? 'DDDDDD' : $result->color;
+				$out .= '<td bgcolor="'.$color.'">';
+				if($result->bomb != '')
+				{
+					if ($result->bomb == 'sb') {
+						$file = 'sbomb.png';
+						$alt = 'small bomb';
+					}
+					else {
+						$file = 'lbomb.png';
+						$alt = 'large bomb';
+					}
+					$image = getimagesize(dirname(__FILE__).DIRECTORY_SEPARATOR."images".DIRECTORY_SEPARATOR.$file);
+					$out .= '<img src="http://'.$_SERVER['HTTP_HOST'].dirname($_SERVER['PHP_SELF']).'/images/'.$file.'" alt="'.$alt.'" '.$image[3].'>';
+				}
+				if($countactive || $result->num) {
+					$clink = urlPath() . 'intermediary.php?' . $result->{'link'};
+					$clink = addYourls($clink, $result->reportname);
+					$out .= '<a href="'.$clink.'">'.htmlspecialchars($result->num).'</a>';
+				} else {
+					$out .= '&nbsp;';
+				}
+				$out .= '</td>';
+			}
+			else
+				$out .= '<td>&nbsp;</td>';
+		}
+		$out .= '</tr>';
+	}
+	$out .= '</table><br>';
 	
+	$out .= 'Report name: '.substr($name,0,250).'<br>';
+	$out .= 'Footnotes: '.htmlspecialchars($footnotes).'<br>';
+	$out .= 'Description: '.htmlspecialchars($description).'<br>';
+	$out .= 'Runtime: '.date("Y-m-d H:i:s", $now).'<br><br>';
+	$out .= 'Legend:<br>';
+	$out .= '<table border="1" cellspacing="0" cellpadding="0"><tr>';
+	$width = (int)(100/count($p_colors));
+	foreach($p_colors as $key => $color)
+	{
+		$out .= '<td bgcolor="'.$color.'" width="'.$width.'%" align="center">'.$phasenums[$key].'</td>';
+	}
+	$out .= '</tr></table>';
+
+	$template = file_get_contents('templates/general.htm');
+	$out = str_replace('#content#', $out, $template);
+
+	if ($return) {
+		return $out;
+	}
+	else {
+		header("Pragma: public");
+		header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
+		header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+		header("Cache-Control: no-cache, must-revalidate, post-check=0, pre-check=0");
+		header("Content-Type: application/force-download");
+		header("Content-Type: application/download");
+		header("Content-Type: application/msword");
+		header("Content-Disposition: attachment;filename=" . substr($name,0,20) . '_' . date('Y-m-d_H.i.s') . '.doc');
+		header("Content-Transfer-Encoding: binary ");
+		echo($out);
+		@flush();
+
+		ob_start();
+		mysql_query('DELETE FROM progress WHERE id=' . $pid . ' LIMIT 1');
+		$mail = new PHPMailer();
+		$from = 'no-reply@' . $_SERVER['SERVER_NAME'];
+		if(strlen($_SERVER['SERVER_NAME'])) $mail->SetFrom($from);
+		$mail->AddAddress($db->user->email);
+		$mail->Subject = SITE_NAME . ' manual report ' . date("Y-m-d H.i.s", $now) . ' - ' . substr($name,0,20);
+		$mail->Body = 'Attached is the report you generated earlier.';
+		$mail->AddStringAttachment($out,
+					   substr($name,0,20).'_'.date('Y-m-d_H.i.s', $now).'.doc',
+					   'base64',
+					   'Content-Type: application/msword');
+		@$mail->Send();
+		ob_end_clean();
+		exit;
+	}
+}
+
+function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $phasenums) {
+	global $now, $db;
+	$countactive = $info['count_only_active'] == 'Y';
+	$footnotes = $info['footnotes'];
+	$description = $info['description'];
+	$name = $info['name'];
+	if(strlen($name) == 0) $name = 'Report ' . $info['id'];
+	$pid = $info["pid"];
+
 	// Create excel file object
 	$objPHPExcel = new PHPExcel();
 
@@ -382,7 +501,7 @@ function runHeatmap($id, $return = false)
 			if($result->bomb != "")
 			{
 				$drawing = new PHPExcel_Worksheet_Drawing();
-				if($result->num == "sb")
+				if($result->bomb == "sb")
 				{
 					$drawing->setName("small bomb");
 					$drawing->setDescription("small bomb");

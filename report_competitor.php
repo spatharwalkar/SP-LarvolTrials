@@ -11,7 +11,9 @@ if(isset($_GET['run']))
 	$id = mysql_real_escape_string($_GET['run']);
 	if(is_numeric($id))
 	{
-		runCompetitor($id);
+		$format = 'xlsx';
+		if (isset($_GET['format'])) $format = $_GET['format'];
+		runCompetitor($id, false, $format);
 		exit;
 	}
 }
@@ -123,6 +125,9 @@ function editor()
 			. 'onclick="updateProgress(\'competitor\');document.getElementById(\'runbuttons\').style.display=\'none\'">'
 			. '<input type="image" name="getexcel" src="images/excel_fire.png" title="Run w. HIGH PRIORITY" style="border:0;"/></a>';
 	}
+	$out .= ' &nbsp; <a href="report_competitor.php?run=' . $id . '&format=word" target="runframe" '
+		. 'onclick="updateProgress(\'competitor\');document.getElementById(\'runbuttons\').style.display=\'none\'">'
+		. '<img src="images/word.png" title="Word" style="border:0;"></a>';
 	$out .= '</div><iframe style="width:0;height:0;" name="runframe"></iframe>'
 		. '<div id="progress"></div><div class="info" id="success"></div>'
 		. '<br style="margin-top:55px;"/>'

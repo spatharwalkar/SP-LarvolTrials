@@ -11,7 +11,9 @@ if(isset($_GET['run']))
 	$id = mysql_real_escape_string($_GET['run']);
 	if(is_numeric($id))
 	{
-		runHeatmap($id);
+		$format = 'xlsx';
+		if (isset($_GET['format'])) $format = $_GET['format'];
+		runHeatmap($id, false, $format);
 		exit;
 	}
 }
@@ -125,6 +127,9 @@ function editor()
 			. 'onclick="updateProgress(\'heatmap\');document.getElementById(\'runbuttons\').style.display=\'none\'">'
 			. '<input type="image" name="getexcel" src="images/excel_fire.png" title="Run w. HIGH PRIORITY" style="border:0;"/></a>';
 	}
+	$out .= ' &nbsp; <a href="report_heatmap.php?run=' . $id . '&format=doc'
+		. '" target="runframe" onclick="updateProgress(\'heatmap\');document.getElementById(\'runbuttons\').style.display=\'none\'">'
+		. '<img src="images/word.png" title="Word" style="border:0"></a>';
 	$out .= '</div><iframe style="width:0;height:0;" name="runframe"></iframe>'
 		. '<div id="progress"></div><div class="info" id="success"></div>'
 		. '<br style="margin-top:55px;"/>'
