@@ -242,7 +242,7 @@ function runHeatmap($id, $return = false)
 				
 			
 			//get maximum phase
-			if($rescount)
+			if((!$countactive && $rescount) || ($countactive))
 			{  
 				$datetime = '"' . date('Y-m-d H:i:s',$time_machine) . '"';
 				$query = 'SELECT MAX(val_enum) AS "phase" FROM data_values AS dv '
@@ -261,7 +261,6 @@ function runHeatmap($id, $return = false)
 				}
 				$results[$row][$column]->color = $p_colors[$key];
 			} 
-			
 			/*
 				In CD this part does a second search for IDs
 			-
