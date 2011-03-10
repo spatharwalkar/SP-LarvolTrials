@@ -130,7 +130,7 @@ function editor()
 	$out .= ' &nbsp; <a href="report_heatmap.php?run=' . $id . '&format=doc'
 		. '" target="runframe" onclick="updateProgress(\'heatmap\');document.getElementById(\'runbuttons\').style.display=\'none\'">'
 		. '<img src="images/word.png" title="Word" style="border:0"></a>';
-	$out .= '</div><iframe style="width:0;height:0;" name="runframe"></iframe>'
+	$out .= '</div><iframe style="width:10em;height:2em;" name="runframe"></iframe>'
 		. '<div id="progress"></div><div class="info" id="success"></div>'
 		. '<br style="margin-top:55px;"/>'
 		. '<form action="report_heatmap.php" method="post"><fieldset><legend>Edit report ' . $id . '</legend>'

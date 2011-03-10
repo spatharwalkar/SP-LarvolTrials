@@ -215,8 +215,8 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 				{
 					return messageInExcel("Search (count) failed." . $SEARCH_ERR);
 				}else{
-					//return softDie("Search (count) failed." . $SEARCH_ERR);
-					return false;
+					return softDie("Search (count) failed." . $SEARCH_ERR);
+					//return false;
 				}
 			}
 			
