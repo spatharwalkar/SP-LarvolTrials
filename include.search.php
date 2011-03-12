@@ -401,6 +401,7 @@ function applyBackboneAgent($ids, $term)
 
 function getActiveCount($all_ids)
 {
+	if(!is_array($all_ids) || empty($all_ids)) return 0;
 	$ids = implode(', ',$all_ids);
 	$overallStatusId = getFieldId("NCT", "overall_status");
 	$activeStatuses = getEnumvalId($overallStatusId, "Active, not recruiting").",".
@@ -410,7 +411,7 @@ function getActiveCount($all_ids)
 	getEnumvalId($overallStatusId, "Active, not recruiting").",".
 	getEnumvalId($overallStatusId, "Available");
 	
-	$past = "'".date("Y-m-d H:i:s", time() - (int)(0.1*1.5*24*3600))."'";
+	$past = "'" . date("Y-m-d H:i:s", time() - (int)(0.1*1.5*24*3600)) . "'";
 	
 	$query = "SELECT i.larvol_id,dv.field,dv.val_enum AS id FROM data_values AS dv
 					LEFT JOIN data_cats_in_study AS i ON dv.studycat=i.id

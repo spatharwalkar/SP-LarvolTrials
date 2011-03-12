@@ -245,20 +245,24 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 			//get maximum phase
 			if((!$countactive && $rescount) || ($countactive))
 			{  
-				$datetime = '"' . date('Y-m-d H:i:s',$time_machine) . '"';
-				$query = 'SELECT MAX(val_enum) AS "phase" FROM data_values AS dv '
-						. 'LEFT JOIN data_cats_in_study AS i ON dv.studycat=i.id '
-						. 'LEFT JOIN clinical_study ON i.larvol_id=clinical_study.larvol_id WHERE '
-						. 'dv.added<' . $datetime . ' AND (dv.superceded>' . $datetime . ' OR dv.superceded IS NULL) '
-						. 'AND `field`=' . $phase_fid . ' AND clinical_study.larvol_id IN(' . implode(',', $all_ids) . ')';
-				$res = mysql_query($query) or tex('Bad SQL query getting maximum phase '.$query."\n" . mysql_error());
-				$res = mysql_fetch_assoc($res);
 				$key = 0;
-				if($res !== false)
+				if(is_array($all_ids) && !empty($all_ids))
 				{
-					$phase = $res['phase'];
-					$key = array_search($phase, $phase_enumvals);
-					if($key === false) $key = 0;
+					$datetime = '"' . date('Y-m-d H:i:s',$time_machine) . '"';
+					$query = 'SELECT MAX(val_enum) AS "phase" FROM data_values AS dv '
+							. 'LEFT JOIN data_cats_in_study AS i ON dv.studycat=i.id '
+							. 'LEFT JOIN clinical_study ON i.larvol_id=clinical_study.larvol_id WHERE '
+							. 'dv.added<' . $datetime . ' AND (dv.superceded>' . $datetime . ' OR dv.superceded IS NULL) '
+							. 'AND `field`=' . $phase_fid . ' AND clinical_study.larvol_id IN(' . implode(',', $all_ids) . ')';
+					$res = mysql_query($query) or tex('Bad SQL query getting maximum phase '.$query."\n" . mysql_error());
+					$res = mysql_fetch_assoc($res);
+					
+					if($res !== false)
+					{
+						$phase = $res['phase'];
+						$key = array_search($phase, $phase_enumvals);
+						if($key === false) $key = 0;
+					}
 				}
 				$results[$row][$column]->color = $p_colors[$key];
 			} 
