@@ -49,8 +49,11 @@ iframe{
 .permSel:hover,.permSel.hover{
 	height:auto;
 }
-.manage 	{ font-weight: normal; }
-.manage td 	{ width:33%; }
-.manage td span	{ color: #00B050; font-weight:bold; }
-.manage th  { padding:5px; text-align:left; background-color: #8064A2; color: #FFF;font-weight:bold; text-decoration:none; }
-.manage th a{ color: #FFF; text-decoration:none; }
+
+
+.title		{background-color:#8064A2; color:#FFFFFF;font-size:15px;font-weight:bold;}
+.title	a	{color:#FFFFFF;text-decoration:none;}
+.title	a:hover	{color:#FFFFFF;text-decoration:underline;}
+.manage 	{font-weight:normal;}
+.manage th	{color:#0000FF;}
+

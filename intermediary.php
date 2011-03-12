@@ -380,7 +380,7 @@ echo ('</td></tr><tr><td>Sort by</td><td><select name="sort">'
 	. '</form>');
 	
 echo '<table width="100%" border="0" cellpadding="3" cellspacing="2" class="manage">'
-	 . '<tr><th width="2%">No.</th><th width="20%">Title</th><th width="8%">Phase</th>'
+	 . '<tr><th colspan="2" width="22%">Title</th><th width="8%">Phase</th>'
 	 . '<th width="10%">Enrollment</th><th width="10%">Status</th>'
 	 . '<th width="15%">Conditions</th><th width="15%">Interventions</th><th width="10%">Primary Database</th>'
 	 . '<th width="10%">Study Dates</th></tr>';
@@ -396,8 +396,8 @@ if(count($$var) > 0) {
 		for($woo=0;$woo<2;$woo++)
 			unset_nulls(${$var}[$i]);
 			
-		echo '<tr><td>' . ($pstart + $relrank++) . '.</td>'
-				. '<td class="title"><a href="http://clinicaltrials.gov/ct2/show/' 
+		echo '<tr>'//<td>' . ($pstart + $relrank++) . '.</td>'
+				. '<td colspan="2" class="title"><a href="http://clinicaltrials.gov/ct2/show/' 
 				. ${$var}[$i]['NCT/nct_id'] . '">' . ${$var}[$i]['NCT/brief_title']. '</a></td>';
 		
 		foreach($displist as $dname => $fqname)
@@ -461,4 +461,5 @@ echo('</table><br/>');
 echo($pager);
 echo('</body></html>');
 ?>
+
 
