@@ -41,11 +41,11 @@ function userAdder()
 	$out = '<form action="admin_users.php" method="post" name="newuser" style="float:right;"><fieldset>'
 			. '<legend>Create new account</legend>'
 			. '<label>Username:<br /><input name="username" type="text" value="' . $username . '" />'
-			. '<span class="error">' . $error['username'] . '</span></label><br clear="all"/>'
+			. '<span class="error">' . (!empty($error['username']) ? $error['username'] : '') . '</span></label><br clear="all"/>'
 			. '<label>Email address:<br /><input name="email" type="text" value="' . $email . '" />'
-			. '<span class="error">' . $error['email'] . '</span></label><br clear="all"/>'
+			. '<span class="error">' . (!empty($error['email']) ? $error['email'] : '') . '</span></label><br clear="all"/>'
 			. '<label>Userlevel:<br />' . userlevelDropdown(-1,$userlevel)
-			. '<span class="error">' . $error['userlevel'] . '</span></label><br clear="all"/>'
+			. '<span class="error">' . (!empty($error['userlevel']) ? $error['userlevel'] : '') . '</span></label><br clear="all"/>'
 			. '<input type="submit" name="submit" value="Submit" /></fieldset></form>';
 	return $out;
 }

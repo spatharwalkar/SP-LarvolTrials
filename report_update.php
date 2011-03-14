@@ -42,7 +42,7 @@ function postEd()
 {
 	global $crit;
 	global $db;
-	$id = mysql_real_escape_string($_POST['id']);
+	$id = (isset($_POST['id'])) ? mysql_real_escape_string($_POST['id']) : '';
 	if(!is_numeric($id)) return;
 	
 	if(isset($_POST['save']))

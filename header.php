@@ -13,7 +13,7 @@
 <script type="text/javascript" src="date/jquery.date_input.js"></script>
 <script type="text/javascript" src="date/init.js"></script>
 <script type="text/javascript" src="krumo/krumo.js"></script>
-<?php echo($_GET['header']); ?>
+<?php if($_GET && isset($_GET['header'])) { echo($_GET['header']); } ?>
 </head>
 <body>
 <?php

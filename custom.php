@@ -39,13 +39,15 @@ echo('</body></html>');
 function processList()
 {
 	global $db;
-	if(!is_array($_POST['cat_del'])) return;
-	
-	foreach($_POST['cat_del'] as $id => $n)
+	if(isset($_POST['cat_del']) && !is_array($_POST['cat_del'])) return;
+	if($_POST)
 	{
-		$query = 'DELETE FROM data_categories WHERE id=' . mysql_real_escape_string($id)
-				. ' AND name NOT IN("' . implode('","', $db->sourceCats) . '") LIMIT 1';
-		mysql_query($query) or die('Bad SQL query deleting category'.$query);
+		foreach($_POST['cat_del'] as $id => $n)
+		{
+			$query = 'DELETE FROM data_categories WHERE id=' . mysql_real_escape_string($id)
+					. ' AND name NOT IN("' . implode('","', $db->sourceCats) . '") LIMIT 1';
+			mysql_query($query) or die('Bad SQL query deleting category'.$query);
+		}
 	}
 }
 
@@ -86,6 +88,7 @@ function processEditor()
 	global $db;
 	global $types;
 	global $uploadmsg;
+	global $now;
 	$DTnow = date('Y-m-d H:i:s',$now);
 	$errors = array();
 	$id = -1;

@@ -81,12 +81,12 @@ function editor()
 
 	foreach($trials as $num => $trial)
 	{
-		$out .= '<tr><td><input type="text" name="trials[' . $num . '][nctid]" value="' . padnct($trial[nctid]) . '" /></td>'
-			. '<td>' . makeDropdown('trials[' . $num . '][tumor_type]',getEnumValues('rpt_trial_tracker_trials','tumor_type'),false,$trial[tumor_type],false) . '</td>'
-			. '<td><input type="text" name="trials[' . $num . '][patient_population]" value="' . $trial[patient_population] . '" /></td>'
-			. '<td><input type="text" name="trials[' . $num . '][trials_details]" value="' . $trial[trials_details] . '" /></td>'
-			. '<td><input type="text" name="trials[' . $num . '][randomized_controlled_trial]" value="' . $trial[randomized_controlled_trial] . '" /></td>'
-			. '<td><input type="text" name="trials[' . $num . '][data_release]" value="' . $trial[data_release] . '" /></td></tr>';
+		$out .= '<tr><td><input type="text" name="trials[' . $num . '][nctid]" value="' . padnct($trial['nctid']) . '" /></td>'
+			. '<td>' . makeDropdown('trials[' . $num . '][tumor_type]',getEnumValues('rpt_trial_tracker_trials','tumor_type'),false,$trial['tumor_type'],false) . '</td>'
+			. '<td><input type="text" name="trials[' . $num . '][patient_population]" value="' . $trial['patient_population'] . '" /></td>'
+			. '<td><input type="text" name="trials[' . $num . '][trials_details]" value="' . $trial['trials_details'] . '" /></td>'
+			. '<td><input type="text" name="trials[' . $num . '][randomized_controlled_trial]" value="' . $trial['randomized_controlled_trial'] . '" /></td>'
+			. '<td><input type="text" name="trials[' . $num . '][data_release]" value="' . $trial['data_release'] . '" /></td></tr>';
 	}	
 	$out .= '</table></fieldset></form>';
 	return $out;

@@ -14,11 +14,11 @@ echo('<form name="inspectform" method="get" action="inspect.php">'
 			. '<input type="text" name="larvol_id" /> &nbsp; <input type="submit" name="inspect" value="Lookup" />'
 			. '</fieldset></form>');
 mysql_query('BEGIN');
-if(is_numeric($_POST['larvol_id']))
+if($_POST && is_numeric($_POST['larvol_id']))
 {
 	$_GET['larvol_id'] = $_POST['larvol_id'];
 }
-if(is_numeric($_GET['larvol_id']))
+if($_GET && is_numeric($_GET['larvol_id']))
 {
 	if($db->user->userlevel != 'user') customPost();
 	

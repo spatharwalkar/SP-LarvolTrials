@@ -44,7 +44,7 @@ if(isset($_POST['report']))
 	if(is_numeric($rowc)) $row = $rowc;
 	if(is_numeric($colc)) $col = $colc;
 }
-if($_GET['dontedit']) $rmode=false;
+if(isset($_GET['dontedit'])) $rmode=false;
 
 //check for competitor mode
 $competitor = NULL;
@@ -75,7 +75,7 @@ if(isset($_POST['competitor']))
 	if(is_numeric($rowc)) $row = $rowc;
 	if(is_numeric($colc)) $col = $colc;
 }
-if($_GET['dontedit']) $cmode=false;
+if(isset($_GET['dontedit'])) $cmode=false;
 
 
 //check for update scan mode
@@ -154,8 +154,13 @@ echo('<input type="hidden" name="getVars" value="' . $get . '" />');
 
 echo('<br clear="all" />');
 echo('<fieldset><legend>Enter search parameters</legend>');
-$tm_oldval = isset($_GET['time_machine']) ? $_GET['time_machine'] : $_POST['time_machine'];
-$over_oldval = isset($_GET['override']) ? $_GET['override'] : $_POST['override'];
+$tm_oldval = "";
+$over_oldval = "";
+if($_GET || $_POST)
+{
+	$tm_oldval = isset($_GET['time_machine']) ? $_GET['time_machine'] : $_POST['time_machine'];
+	$over_oldval = isset($_GET['override']) ? $_GET['override'] : $_POST['override'];
+}
 echo('<fieldset style="float:left;width:25em;"><legend>Time machine</legend>'
 	. 'Enter a date (time optional) to search on; leave blank for current data (fastest)<br />'
 	. '<input type="text" name="time_machine" value="' . $tm_oldval . '"/></fieldset>');
@@ -304,8 +309,9 @@ function multiField($allowedType = 'varchar')
 {
 	global $db;
 	global $rmode;
+	$out = '';
 	$numericField = in_array($allowedType, array('int', 'date'));
-	if(!is_array($_POST['multifields'])) $_POST['multifields'] = array($_POST['multifields']);
+	if($_POST && !is_array($_POST['multifields'])) $_POST['multifields'] = array($_POST['multifields']);
 	$out .= '<fieldset><legend>Multi Field (' . $allowedType . ')</legend>'
 			. '<table cellspacing="2" cellpadding="2">'
 			. '<tr><th scope="col"' . ($numericField ? ' class="numeric"' : '') .'>Search Fields?</th>'
@@ -618,7 +624,7 @@ function listSearchProc()
 		if($row === false) return;	//In this case, either the ID is invalid or it doesn't belong to the current user.
 		$_POST = unserialize(base64_decode($row['searchdata']));
 	}
-	if(is_numeric($_GET['rload']))	//load search from heatmap
+	if(isset($_GET['rload']) && is_numeric($_GET['rload']))	//load search from heatmap
 	{
 		$ssid = mysql_real_escape_string($_GET['rload']);
 		$query = '';
@@ -649,7 +655,7 @@ function listSearchProc()
 		if($row === false) return;	//In this case, the item doesn't exist
 		$_POST = unserialize(base64_decode($row['searchdata']));
 	}
-	if(is_numeric($_GET['cload']))	//load search from competitordashboard
+	if(isset($_GET['cload']) && is_numeric($_GET['cload']))	//load search from competitordashboard
 	{
 		$ssid = mysql_real_escape_string($_GET['cload']);
 		$query = '';
@@ -684,7 +690,7 @@ function listSearchProc()
 		$_POST['action']['phase'] = 'search';
 		$_POST['searchval']['phase'] = array(urldecode($_GET['phase']));
 	}
-	if(is_numeric($_GET['urep']) && !isset($_GET['load']))	//load search from update scan
+	if(isset($_GET['urep']) && is_numeric($_GET['urep']) && !isset($_GET['load']))	//load search from update scan
 	{
 		$ssid = mysql_real_escape_string($_GET['urep']);
 		$query = 'SELECT searchdata FROM rpt_update WHERE id=' . $ssid . ' LIMIT 1';

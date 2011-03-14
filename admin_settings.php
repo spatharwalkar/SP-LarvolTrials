@@ -38,7 +38,7 @@ function settingsControl()
 	}
 	
 	$out = '<form name="settingsform" method="post" action="admin_settings.php"><fieldset><legend>Settings Management</legend>';
-	if($res === false)
+	if(isset($res) && $res === false)
 	{
 		$out .= 'No Settings.';
 	}else{

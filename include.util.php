@@ -4,13 +4,13 @@
 */
 function genPrint()
 {
-	$info = $_SERVER['REMOTE_ADDR'] .','.		//User info from the web server. Should be reliable.
+	$info = $_SERVER['REMOTE_ADDR']/* .','.		//User info from the web server. Should be reliable.
 			$_SERVER['REMOTE_HOST'] .','.
 			$_SERVER['HTTP_CLIENT_IP'] .','.	//HTTP headers. These are direct from the client and somewhat unreliable.
 			$_SERVER['HTTP_X_FORWARDED_FOR'] .','.
 			$_SERVER['HTTP_X_FORWARDED_HOST'] .','.
 			$_SERVER['HTTP_X_FORWARDED_SERVER'] .','.
-			$_SERVER['HTTP_FROM'] /*.','.
+			$_SERVER['HTTP_FROM'] .','.
 			$_SERVER['HTTP_USER_AGENT']*/;	//Useragent string. Also not too reliable, but plenty obscure.
 	return hash(HASH_ALGO, $info);
 }
@@ -186,7 +186,7 @@ function nrescnq($val)
 //turns a numeric NCTID into the full form including the string "NCT" and the leading zeroes
 function padnct($id)
 {
-	if(substr($val,0,3) == 'NCT') return ($id);
+	if(isset($val) && substr($val,0,3) == 'NCT') return ($id);
 	return 'NCT' . sprintf("%08s",$id);
 }
 
