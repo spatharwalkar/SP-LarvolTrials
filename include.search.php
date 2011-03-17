@@ -251,7 +251,7 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 				. '(SELECT GROUP_CONCAT(DISTINCT i.larvol_id) AS "larvol_id" '
 				. 'FROM (data_values AS dv LEFT JOIN data_cats_in_study AS i ON dv.studycat=i.id) WHERE ' . $cond . ' AND ';
 		$query .= $timecond;
-		if($i > 0) $query .= 'AND FIND_IN_SET(i.larvol_id, @conds_' . ($i-1) . ') > 0';
+		if($i > 0) $query .= ' AND FIND_IN_SET(i.larvol_id, @conds_' . ($i-1) . ') > 0';
 		$query .= ')';
 		//var_dump($query);
 		$res = mysql_query($query); if($res === false) return softDie('Bad SQL query applying search condition: ' . $query);
