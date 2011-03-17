@@ -262,7 +262,7 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 		$ii = $i + count($conditions);
 		$query = 'SET @conds_' . $ii . ' := '
 				. '(SELECT GROUP_CONCAT(larvol_id) FROM clinical_study WHERE ' . $cond;
-		if($ii > 0) $query .= 'AND FIND_IN_SET(larvol_id, @conds_' . ($ii-1) . ') > 0';
+		if($ii > 0) $query .= ' AND FIND_IN_SET(larvol_id, @conds_' . ($ii-1) . ') > 0';
 		$query .= ')';
 		$res = mysql_query($query);
 		if($res === false) return softDie('Bad SQL query applying search condition (global field)'.mysql_error().$query);
