@@ -1,4 +1,4 @@
-<?php
+<?php 
 require_once('db.php');
 if((!$db->loggedIn() || !isset($_GET['id'])) && !isset($_GET['noheaders']))
 {
@@ -35,7 +35,7 @@ $query = 'SELECT * FROM rpt_trial_tracker_trials WHERE report=' . $id;
 $res = mysql_query($query) or die('Bad SQL query getting report trials');
 $trials = array();
 while($trial = mysql_fetch_array($res))
-{
+{echo $trial['nctid'];
 	$nct = getNCT($trial['nctid'],$time,$edited);
 	if (!is_array($nct)) { 
 		$nct=array();
@@ -58,13 +58,14 @@ if($type == 'Color A') {
 		. '<tr><th rowspan="2" width="2%" nowrap="nowrap">Tumor Type</th>'
 		. '<th rowspan="2" width="5%" nowrap="nowrap">Patient Population<br/>(linked to details)</th>'
 		. '<th rowspan="2" width="25%" nowrap="nowrap">Trial Details</th>'
-		. '<th rowspan="2" width="10%">Sponsor</th>'
+		. '<th rowspan="2" width="8%">Sponsor</th>'
 		. '<th rowspan="2" width="3%">Size</th>'
 		. '<th rowspan="2" width="15%">Start-End</th>'
 		. '<th rowspan="2" width="10%" nowrap="nowrap">Status<br/><span style="color:#ff0000;">[Weekly Update]</span></th>'
-		. '<th rowspan="2" width="3%">Ph</th>'
+		. '<th rowspan="2" width="5%">Ph</th>'
 		. '<th width="30%" nowrap="nowrap" colspan="36">Projected Completion</th></tr>'
-		. '<tr><th width="10%" colspan="12">2010</th><th width="10%" colspan="12">2011</th><th width="10%" colspan="12">2012</th></tr>';
+		. '<tr><th width="10%" colspan="12">' .(date('Y')-1). '</th><th width="10%" colspan="12">' .date('Y')
+		. '</th><th width="10%" colspan="12">' .(date('Y')+1). '</th></tr>';
 
 	foreach($trials as $nctid => $trial) {
 	
@@ -92,14 +93,14 @@ if($type == 'Color A') {
 		
 		$str = '';
 				
-		if(date('Y',strtotime($trial['NCT/start_date'])) < 2010) {
+		if(date('Y',strtotime($trial['NCT/start_date'])) < (date('Y')-1)) {
 	
-			if(date('Y',strtotime($end_date)) < 2010) {
+			if(date('Y',strtotime($end_date)) < (date('Y')-1)) {
 			
 				$str = '<td colspan="12">&nbsp;</td><td colspan="12">&nbsp;</td><td colspan="12">&nbsp;</td>';
 						
 			
-			} else if(date('Y',strtotime($end_date)) == 2010) { 
+			} else if(date('Y',strtotime($end_date)) == (date('Y')-1)) { 
 			
 				$str = '<td colspan="' . date('m',strtotime($end_date)) 
 						. '" style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>'
@@ -107,7 +108,7 @@ if($type == 'Color A') {
 						. '<td colspan="12">&nbsp;</td>'
 						. '<td colspan="12">&nbsp;</td>';
 	
-			} else if(date('Y',strtotime($end_date)) == 2011) {
+			} else if(date('Y',strtotime($end_date)) == date('Y')) {
 			 
 				$str = '<td colspan="12" style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>'
 						. '<td colspan="' . date('m',strtotime($end_date))  
@@ -115,7 +116,7 @@ if($type == 'Color A') {
 						. '<td colspan="' . (12-date('m',strtotime($end_date))) . '">&nbsp;</td>'
 						. '<td colspan="12">&nbsp;</td>';
 			
-			} else if(date('Y',strtotime($end_date)) == 2012) {
+			} else if(date('Y',strtotime($end_date)) == (date('Y')+1)) {
 			 
 				$str = '<td colspan="12" style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>'
 						.'<td colspan="12" style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>'
@@ -132,22 +133,18 @@ if($type == 'Color A') {
 			}		
 		
 		
-		
-		
-		} else if(date('Y',strtotime($trial['NCT/start_date'])) == 2010) {
+		} else if(date('Y',strtotime($trial['NCT/start_date'])) == (date('Y')-1)) {
 		
 			$val = getColspan($trial['NCT/start_date'], $end_date);
-			if(date('Y',strtotime($end_date)) == 2010) {
+			if(date('Y',strtotime($end_date)) == (date('Y')-1)) {
 			
 				$str = '<td colspan="' . date('m',strtotime($trial['NCT/start_date'])) . '">&nbsp;</td>'
 						. '<td colspan="' . (12-date('m',strtotime($trial['NCT/start_date']))) 
 						. '" style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>'
 						. '<td colspan="12">&nbsp;</td>'
 						. '<td colspan="12">&nbsp;</td>';
-						
 			
-			
-			} else if(date('Y',strtotime($end_date)) == 2011) {
+			} else if(date('Y',strtotime($end_date)) == date('Y')) {
 			 
 				if(date('m',strtotime($end_date)) >= 12) {
 					$str = '<td colspan="' . date('m',strtotime($trial['NCT/start_date'])) . '">&nbsp;</td>'
@@ -161,10 +158,8 @@ if($type == 'Color A') {
 						. '<td colspan="12">&nbsp;</td>';
 	
 				}
-	
 			
-			
-			} else if(date('Y',strtotime($end_date)) == 2012) {
+			} else if(date('Y',strtotime($end_date)) == (date('Y')+1)) {
 			
 				 if(date('m',strtotime($end_date)) >= 12) {
 				 
@@ -180,8 +175,6 @@ if($type == 'Color A') {
 						. '<td colspan="' . (36-($val+date('m',strtotime($trial['NCT/start_date'])))) . '">&nbsp;</td>';
 				 }
 			
-			
-			
 			} else {
 			
 				$str = '<td colspan="12" style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>'
@@ -189,13 +182,10 @@ if($type == 'Color A') {
 				. '<td colspan="12" style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>';
 			}
 		
-		
-		
-		
-		} else if(date('Y',strtotime($trial['NCT/start_date'])) == 2011) {
+		} else if(date('Y',strtotime($trial['NCT/start_date'])) == date('Y')) {
 			
 			$val = getColspan($trial['NCT/start_date'], $end_date);
-			if(date('Y',strtotime($end_date)) == 2011) {
+			if(date('Y',strtotime($end_date)) == date('Y')) {
 			
 				if(date('m',strtotime($end_date)) >= 12) { 
 				
@@ -215,10 +205,8 @@ if($type == 'Color A') {
 						. '<td colspan="12">&nbsp;</td>';
 
 				}
-							
 			
-			
-			} else if(date('Y',strtotime($end_date)) == 2012) {
+			} else if(date('Y',strtotime($end_date)) == (date('Y')+1)) {
 			
 				if(date('m',strtotime($end_date)) >= 12) {
 				
@@ -227,7 +215,6 @@ if($type == 'Color A') {
 						. (($val >= 24) ? '<td colspan="' . (24 - date('m',strtotime($trial['NCT/start_date']))) 
 						. '" style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>' :
 						'<td colspan="' . $val . '" style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>');
-						//. '<td colspan="' . (24 -($val+date('m',strtotime($trial['NCT/start_date'])))) . '">&nbsp;</td>';
 
 				} else {
 				
@@ -250,13 +237,17 @@ if($type == 'Color A') {
 				. '<td><a href="http://clinicaltrials.gov/ct2/show/' . padnct($trial['nctid']) . '">' 
 				. $trial['patient_population'] . '</a></td>'
 				. '<td>' . $trial['trials_details'] . '</td>'
-				. '<td>' . $lead_sponsor . '</td>'
-				. '<td>' . $enrollment . '</td>'
-				. '<td nowrap="nowrap">' . date('m/y',strtotime($trial['NCT/start_date'])) . '-' 
+				. '<td style="'.((in_array('NCT/lead_sponsor',$trial['changedFields']))?'background-color:#FF8080;':'').'">' 
+				. $lead_sponsor . '</td>'
+				. '<td style="'.((in_array('NCT/enrollment',$trial['changedFields']))?'background-color:#FF8080;':'').'">' 
+				. $enrollment . '</td>'
+				. '<td nowrap="nowrap" style="' . ((in_array('NCT/start_date',$trial['changedFields'])) ? 'background-color:#FF8080;':'') . '">' . date('m/y',strtotime($trial['NCT/start_date'])) . '-' 
 				. date('m/y',strtotime($end_date)) . '</td>'
-				. '<td>' . $trial['NCT/overall_status'] . '</td>'
-				. '<td style="background-color:' . $phase_arr[$ph] . '">' . $phase . '</td>'
-				. $str .'</tr>';
+				. '<td style="'.((in_array('NCT/overall_status',$trial['changedFields']))?'background-color:#FF8080;':'').'">' 
+				. $trial['NCT/overall_status'] . '</td>'
+				. '<td style="background-color:' . $phase_arr[$ph] . ';' 
+				. (in_array('NCT/phase',$trial['changedFields']) ? ('border-collapse: collapse;border:2px solid #FF8080;') : '' ) . '">' . $phase . '</td>'
+				. $str . '</tr>';
 	}
 }
 else {
@@ -370,7 +361,7 @@ function getNCT($nct_id,$time,$changesChecker)
 	foreach($res as $stu) $study = $stu;
 
 	$studycatData=mysql_fetch_assoc(mysql_query("SELECT `dv`.`studycat` FROM `data_values` `dv` LEFT JOIN `data_cats_in_study` `dc` ON (`dc`.`id`=`dv`.`studycat`) WHERE `dv`.`field`='1' AND `dv`.`val_int`='".$nct_id."' AND `dc`.`larvol_id`='".$study['larvol_id']."'"));
-//	echo '<pre>'.print_r($studycatData,true).'</pre>';
+	//echo '<pre>'.print_r($studycatData,true).'</pre>';exit;
 
 	$sql="SELECT DISTINCT `df`.`name` AS `fieldname`, `dv`.`studycat` FROM `data_values` `dv` LEFT JOIN `data_fields` `df` ON (`df`.`id`=`dv`.`field`) WHERE `df`.`name` IN ('".join("','",$fieldnames)."') AND `studycat`='".$studycatData['studycat']."' AND (`dv`.`superceded`<'".date('Y-m-d',strtotime($time))."' AND `dv`.`superceded`>='".date('Y-m-d',strtotime($changesChecker,strtotime($time)))."')";
 //echo '<p>'.$sql.'</p>';
@@ -410,4 +401,5 @@ function getColspan($start_dt, $end_dt) {
 
 }
 ?>
+
 

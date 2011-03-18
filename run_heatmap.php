@@ -166,7 +166,7 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 					$time_machine = array_filter($time_machine);	//removing empt values of the array
 					usort($time_machine, "cmpdate"); //sorting the array
 					sort($time_machine); //sorting the array further for time precision
-					$time_machine = end($time_machine); //getting the latest date
+					$time_machine = strtotime(end($time_machine)); //getting the latest date
 		
 			} else { //in case of timemachine  parameters not defined
 				$time_machine = $now;
@@ -229,7 +229,7 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 			}
 			
 			if($countactive) {
-				$rescount = getActiveCount($all_ids);
+				$rescount = getActiveCount($all_ids, $time_machine);
 			} else {
 				$rescount = count($all_ids); 
 			}

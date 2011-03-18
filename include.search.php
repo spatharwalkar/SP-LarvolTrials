@@ -399,8 +399,9 @@ function applyBackboneAgent($ids, $term)
 	return $result;
 }
 
-function getActiveCount($all_ids)
+function getActiveCount($all_ids, $time)
 {
+	$time = '"' . date('Y-m-d H:i:s',$time) . '"';
 	if(!is_array($all_ids) || empty($all_ids)) return 0;
 	$ids = implode(', ',$all_ids);
 	$overallStatusId = getFieldId("NCT", "overall_status");
@@ -411,12 +412,11 @@ function getActiveCount($all_ids)
 	getEnumvalId($overallStatusId, "Active, not recruiting").",".
 	getEnumvalId($overallStatusId, "Available");
 	
-	$past = "'" . date("Y-m-d H:i:s", time() - (int)(0.1*1.5*24*3600)) . "'";
-	
 	$query = "SELECT i.larvol_id,dv.field,dv.val_enum AS id FROM data_values AS dv
 					LEFT JOIN data_cats_in_study AS i ON dv.studycat=i.id
 					WHERE i.larvol_id IN (".$ids.") AND dv.field = ".$overallStatusId." AND
-					dv.val_enum IN (".$activeStatuses.") AND dv.added < ".$past." AND dv.superceded IS NULL";
+					dv.val_enum IN (".$activeStatuses.") AND dv.added < " . $time 
+					. " AND ( dv.superceded>" . $time . " OR dv.superceded IS NULL) ";
 	$res = mysql_query($query);
 	$id_set = array();
 	if($res === false) return softDie('Bad SQL query on active status : ' . $query . "<br />\n" . mysql_error());

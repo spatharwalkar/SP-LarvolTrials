@@ -50,10 +50,10 @@ iframe{
 	height:auto;
 }
 
-
-.title		{background-color:#8064A2; color:#FFFFFF;font-size:15px;font-weight:bold;}
-.title	a	{color:#FFFFFF;text-decoration:none;}
+.title			{background-color:#8064A2; color:#FFFFFF;font-size:15px;font-weight:bold;}
+.title	a		{color:#FFFFFF;text-decoration:none;}
 .title	a:hover	{color:#FFFFFF;text-decoration:underline;}
-.manage 	{font-weight:normal;}
-.manage th	{color:#0000FF;}
+.manage 		{font-weight:normal;border-top:1px solid blue;border-left:1px solid blue;}
+.manage th		{color:#0000FF;border-right:1px solid blue;border-bottom:1px solid blue;}
+.manage td		{border-right:1px solid blue;border-bottom:1px solid blue;}
 
