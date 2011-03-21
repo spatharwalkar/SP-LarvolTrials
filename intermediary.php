@@ -132,6 +132,7 @@ $fid['enrollment_type'] 	= '_' . getFieldId('NCT', 'enrollment_type');
 $fid['start_date'] 			= '_' . getFieldId('NCT', 'start_date');
 $fid['primary_completion_date'] = '_' . getFieldId('NCT', 'primary_completion_date');
 $fid['completion_date'] 	= '_' . getFieldId('NCT', 'completion_date');
+$fid['acronym'] 			= '_' . getFieldId('NCT', 'acronym');
 
 $displist = array('Enrollment' => 'NCT/enrollment', 'Status' => 'NCT/overall_status', 
 								'Conditions' => 'NCT/condition', 'Interventions' => 'NCT/intervention_name',
@@ -165,7 +166,7 @@ if($_GET['list'] == 'inactive') { $inactflag = 1;  // checking if any of the ina
 } else if($_GET['list'] == 'all') { $allflag = 1; } // checking if any of the all filters are set
 else { $actflag = 1;} // checking if any of the active filters are set
 
-	
+//echo "<pre>";print_r($arr);
 foreach($arr as $key=>$val) { 
 
 if($val['NCT/overall_status'] == 'Not yet recruiting' || $val['NCT/overall_status'] == 'Recruiting' || 
@@ -349,7 +350,7 @@ echo('<form method="get" action="intermediary.php">'
 echo ('<br/><input type="radio" name="list" value="inactive" ' .
 	($_GET['list']=='inactive' ? ' checked="checked"' : '')
 	. 'onchange="javascript: applyfilter(this.value);" />&nbsp;<span style="color: #FF0000;">'
-	.$totinactivecount.' InactiveRecords </span>');
+	.$totinactivecount.' Inactive Records</span>');
 	if(!empty($inactivephase)) { 
 		echo '(Highest Phase: ' . ((count($inactivephase) > 1) ? max($inactivephase) : $inactivephase[0]) . ')';
 	}
@@ -396,15 +397,25 @@ if(count($$var) > 0) {
 	$start = $pstart-1;
 	$end = $last;
 	for($i=$start;$i<$last;$i++) 
-	{ 
+	{ 	
 		${$var}[$i]['NCT/nct_id'] = padnct(${$var}[$i]['NCT/nct_id']);
 		for($woo=0;$woo<2;$woo++)
 			unset_nulls(${$var}[$i]);
 		
-		
-		$end_date =	(${$var}[$i]['NCT/completion_date']) ? ${$var}[$i]['NCT/completion_date'] : 
-					${$var}[$i]['NCT/primary_completion_date'];
-					
+
+		if(${$var}[$i]["NCT/primary_completion_date"] != '' && ${$var}[$i]["NCT/completion_date"] != '') {
+			$end_date =	${$var}[$i]["NCT/completion_date"];
+			
+		} else if(${$var}[$i]["NCT/primary_completion_date"] != '') {
+			$end_date =	${$var}[$i]["NCT/primary_completion_date"];
+			
+		} else if(${$var}[$i]["NCT/completion_date"] != '') {
+			$end_date =	${$var}[$i]["NCT/completion_date"];
+			
+		} else {
+			$end_date =	'';
+		}
+
 		$phase_arr = array('N/A'=>'#bfbfbf','0'=>'#44cbf5','0/1'=>'#99CC00','1'=>'#99CC00','1/2'=>'#ffff00','2'=>'#ffff00',
 				'2/3'=>'#ff9900','3'=>'#ff9900','3/4'=>'#ff0000','4'=>'#ff0000');
 		$ph = str_replace('Phase ', '', ${$var}[$i]['NCT/phase']);
@@ -413,7 +424,11 @@ if(count($$var) > 0) {
 	
 		echo '<tr>'//<td>' . ($pstart + $relrank++) . '.</td>'
 				. '<td class="title"><a href="http://clinicaltrials.gov/ct2/show/' 
-				. ${$var}[$i]['NCT/nct_id'] . '">' . ${$var}[$i]['NCT/brief_title']. '</a></td>';
+				. ${$var}[$i]['NCT/nct_id'] . '">' . ${$var}[$i]['NCT/brief_title'];
+		if(${$var}[$i]['NCT/acronym'] != '') {
+			echo '&nbsp;('.${$var}[$i]['NCT/acronym'].')';
+		}
+		echo '</a></td>';
 		
 		foreach($displist as $dname => $fqname)
 		{ 
@@ -425,43 +440,42 @@ if(count($$var) > 0) {
 				
 					if(${$var}[$i]["NCT/enrollment_type"] != '') {
 					
-						if(${$var}[$i]["NCT/enrollment_type"] == 'Anticipated') {
-							echo '<span style="color:#333333;font-weight:bold;">' . ${$var}[$i]["NCT/enrollment_type"] 
-								. '<br/>' . $val . '</span>';
-								
-						} else {
+						if(${$var}[$i]["NCT/enrollment_type"] == 'Anticipated') { 
+							echo '<span style="color:gray;font-weight:bold;" title="' 
+							. ${$var}[$i]["NCT/enrollment_type"] . '">'	. $val . '</span>';
+						} else { 
 							echo $val . ' ('.${$var}[$i]["NCT/enrollment_type"].')';
 						}
-					} 
+					} else {
+						echo $val;
+					}
 				
 				echo '</td>';  
 			
+			
 			}else if($fqname == "NCT/start_date") {
 			
-				echo '<td nowrap="nowrap" style="background-color:#EDEAFF;">' . 
-				date('m/Y',strtotime(${$var}[$i]["NCT/start_date"])) 
-				. (${$var}[$i]["NCT/primary_completion_date"] != '' ? 
-				(' -- '. date('m/Y',strtotime(${$var}[$i]["NCT/primary_completion_date"]))) : '' );
+				echo '<td nowrap="nowrap" style="background-color:#EDEAFF;">' . date('m/Y',strtotime(${$var}[$i]["NCT/start_date"]))
+				.($end_date != '' ? ' -- ' : '') . date('m/Y',strtotime($end_date));
 				
-				if(${$var}[$i]["NCT/start_date"] != '' && ${$var}[$i]["NCT/primary_completion_date"] != '') { 
+				/*$val = floor((strtotime(${$var}[$i]["NCT/primary_completion_date"]) - 
+				strtotime(${$var}[$i]["NCT/start_date"])) / (30*60*60*24) );
 				
-					$val = floor((strtotime(${$var}[$i]["NCT/primary_completion_date"]) - 
-					strtotime(${$var}[$i]["NCT/start_date"])) / (30*60*60*24) );
+				if(strtotime(${$var}[$i]["NCT/primary_completion_date"]) < strtotime(date('Y-m-d')) ) {
+					echo '<br/>(Est. completion: <span> Complete</span>)';
+				} else {
 					
-					/*if(strtotime(${$var}[$i]["NCT/primary_completion_date"]) < strtotime(date('Y-m-d')) ) {
-						echo '<br/>(Est. completion: <span> Complete</span>)';
+					if($val < 12) {
+						echo '<br/>(Est. completion: <span style="color:#FF0000">' .$val. 'm</span>)';
+					} else if($val > 36) {
+						echo '<br/>(Est. completion: <span> >3 years</span>)';
 					} else {
-						
-						if($val < 12) {
-							echo '<br/>(Est. completion: <span style="color:#FF0000">' .$val. 'm</span>)';
-						} else if($val > 36) {
-							echo '<br/>(Est. completion: <span> >3 years</span>)';
-						} else {
-							echo '<br/>(Est. completion: <span>' .$val. 'm</span>)';
-						}
-					}*/
-				}
+						echo '<br/>(Est. completion: <span>' .$val. 'm</span>)';
+					}
+				}*/
+				
 				echo '</td>';
+			
 			
 			} else if($fqname == "NCT/overall_status") {
 				echo '<td style="background-color:#D8D3E0;">' . $val . ' </td>';
@@ -477,7 +491,7 @@ if(count($$var) > 0) {
 				echo '<td style="background-color:'.$phase_arr[$ph].'">' . $phase . '</td>';
 			
 			
-			} else {
+			} else { 
 				echo '<td style="background-color:#EDEAFF;">' . (is_array($val) ? implode(', ', $val) : $val) . '</td>';
 			}
 			
@@ -521,6 +535,7 @@ if(count($$var) > 0) {
 						. '<td colspan="12" style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>';
 
 			}		
+		
 		
 		
 		} else if(date('Y',strtotime(${$var}[$i]['NCT/start_date'])) == (date('Y')-1)) {
@@ -570,6 +585,7 @@ if(count($$var) > 0) {
 				. '<td colspan="12" style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>'
 				. '<td colspan="12" style="background-color:' . $phase_arr[$ph] . '">&nbsp;</td>';
 			}
+		
 		
 		} else if(date('Y',strtotime(${$var}[$i]['NCT/start_date'])) == date('Y')) {
 
