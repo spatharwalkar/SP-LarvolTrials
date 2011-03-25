@@ -336,7 +336,7 @@ function getCompletionChart($start_month, $start_year, $end_month, $end_year, $c
 			 
 			 	if($end_month == 12) {
 					$value = '<td style="background-color:' . $bg_color . '" colspan="12">&nbsp;</td>'
-					. '<td "' . $style . '" colspan="12">&nbsp;</td>'
+					. '<td style="background-color:' . $bg_color . '" colspan="12">&nbsp;</td>'
 					. '<td colspan="12">&nbsp;</td>';
 				} else {
 					$value = '<td style="background-color:' . $bg_color . '" colspan="12">&nbsp;</td>'
@@ -389,7 +389,7 @@ function getCompletionChart($start_month, $start_year, $end_month, $end_year, $c
 			
 				$value = (($st != 0) ? '<td colspan="' . $st . '">&nbsp;</td>' : '')
 					. '<td style="background-color:' . $bg_color . '" colspan="' . $val . '">&nbsp;</td>'
-					. (((36 - ($val+$st)) != 0) ? '<td colspan="' .((36 - ($val+$st)) != 0) . '">&nbsp;</td>' : '');
+					. (((36 - ($val+$st)) != 0) ? '<td colspan="' .(36 - ($val+$st)) . '">&nbsp;</td>' : '');
 		
 			} else {
 				$value = '<td style="background-color:' . $bg_color . '" colspan="12">&nbsp;</td>'
