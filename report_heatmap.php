@@ -296,10 +296,11 @@ function postEd()
 		$description = mysql_real_escape_string($res['description']);
 		$bomb = mysql_real_escape_string($res['bomb']);
 		$backboneAgent = mysql_real_escape_string($res['backbone_agent']);
+		$countonlyactive = mysql_real_escape_string($res['count_only_active']);
 		$query = 'INSERT INTO rpt_heatmap SET name="Copy of ' . (strlen($oldname) ? $oldname : ('report '.$id)) . '",user='
 				. $db->user->id . ',footnotes="' . $footnotes . '",description="' . $description . '"'
 				. ($searchdata !== NULL ? ',searchdata="' . $searchdata . '"' : '')
-				. ',bomb="'.$bomb.'",backbone_agent="'.$backboneAgent.'"';
+				. ',bomb="'.$bomb.'",backbone_agent="'.$backboneAgent.'",count_only_active="'.$countonlyactive.'"';
 		mysql_query($query) or die('Bad SQL Query saving name');
 		$newid = mysql_insert_id();
 		$tables = array('rpt_heatmap_headers','rpt_heatmap_cells');
