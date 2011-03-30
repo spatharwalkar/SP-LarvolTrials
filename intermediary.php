@@ -398,7 +398,8 @@ echo ('</td><td width="5%" nowrap="nowrap">Sort by</td><td width="25%"><select n
 	. '<input type="hidden" name="leading" value="' . $_GET['leading'] . '"/>'
 	. '</form>');
 	
-echo '<table width="100%" border="0 " cellpadding="5" cellspacing="0" class="manage">'
+echo '<div style="font-size:10px;text-align:right;padding:5px;">Work in Progress</div>'
+ . '<table width="100%" border="0 " cellpadding="5" cellspacing="0" class="manage">'
  . '<tr><th rowspan="2" width="30%">Title</th>'
  . '<th rowspan="2" width="12%">N</th><th rowspan="2" width="14%">Status</th>'
  . '<th rowspan="2" width="15%">Conditions</th><th rowspan="2" width="15%">Interventions</th>'
