@@ -37,9 +37,8 @@ if($db->loggedIn())
 			. '</div>');
 	}
 	echo('::<div class="drop">Reports<br />'
-		. '<a href="report_heatmap.php">Heatmaps</a><br />'
+		. '<a href="report_heatmap.php">Heatmap</a><br />'
 		. '<a href="report_update.php">Update Scan</a><br />'
-		. '<a href="report_competitor.php">Competitor Dashboard</a><br />'
 		. '<a href="report_trial_tracker.php">Trial Tracker</a>'
 		. '</div>');
 	echo('</div>Welcome, <a href="profile.php">'

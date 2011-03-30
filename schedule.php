@@ -48,19 +48,8 @@ function editor()
 	{
 		$reports['u' . $row['id']] = 'Update Scan ' . $row['id'] . ': ' . $row['name'];
 	}
-	$query = 'SELECT id,`name` FROM rpt_competitor'; // . ' WHERE user IS NULL OR user=' . $db->user->id;
-	$res = mysql_query($query) or die('Bad SQL query getting competitordashboard names');
-	while($row = mysql_fetch_assoc($res))
-	{
-		$reports['c' . $row['id']] = 'CompetitorDashboard ' . $row['id'] . ': ' . $row['name'];
-	}
+
 	$selectedreports = array();
-	$query = 'SELECT competitor FROM schedule_competitor WHERE schedule=' . $id;
-	$res = mysql_query($query) or die('Bad SQL query getting associated comps');
-	while($row = mysql_fetch_assoc($res))
-	{
-		$selectedreports[] = 'c' . $row['competitor'];
-	}
 	$query = 'SELECT heatmap FROM schedule_heatmaps WHERE schedule=' . $id;
 	$res = mysql_query($query) or die('Bad SQL query getting associated heatmaps');
 	while($row = mysql_fetch_assoc($res))
@@ -123,8 +112,6 @@ function postEd()
 		$query = 'UPDATE schedule SET `name`="' . $name . '",emails="' . $emails . '",`fetch`="' . $fetch . '",runtimes=' . $runtimes . ',format="' . $format . '"'
 					. ' WHERE id=' . $id . ' LIMIT 1';
 		mysql_query($query) or die('Bad SQL Query saving item');
-		$query = 'DELETE FROM schedule_competitor WHERE schedule=' . $id;
-		mysql_query($query) or die('Bad SQL query updating report associations');
 		$query = 'DELETE FROM schedule_heatmaps WHERE schedule=' . $id;
 		mysql_query($query) or die('Bad SQL query updating report associations2');
 		$query = 'DELETE FROM schedule_updatescans WHERE schedule=' . $id;
@@ -143,9 +130,6 @@ function postEd()
 					break;
 					case 'u':
 					$query .= 'schedule_updatescans SET updatescan=' . $num;
-					break;
-					case 'c':
-					$query .= 'schedule_competitor SET competitor=' . $num;
 				}
 				$query .= ',schedule=' . $id;
 				mysql_query($query) or die('Bad SQL query saving report associations'.mysql_error().'<br />'.$query);

@@ -11,7 +11,6 @@ if(!flock($fp, LOCK_EX | LOCK_NB))	die("Previous instance still running from pre
 require_once('db.php');
 require_once('run_updatereport.php');
 require_once('run_heatmap.php');
-require_once('run_competitor.php');
 
 require_once('PHPExcel.php');
 require_once('PHPExcel/Writer/Excel2007.php');
@@ -125,28 +124,6 @@ foreach($schedule as $item)
 		
 		try{
 			$files[$row2['name']] = runHeatmap($row['heatmap'], true, $item['format']);
-		}catch(Exception $e){
-			$files[$row2['name']] = messageInExcel('Report failed with message: ' . $e->getMessage());
-		}
-	}
-	
-	$query = 'SELECT competitor FROM schedule_competitor WHERE schedule=' . $item['id'];
-	$res = mysql_query($query) or die('Bad SQL query getting competitordashboards for item | ' . mysql_error() . ' | ' . $query);
-	$results = array();	while($row = mysql_fetch_assoc($res)) $results[] = $row;
-	foreach($results as $row)
-	{
-		echo('Item indicates CD ' . $row['competitor'] . $nl);
-		$query = 'SELECT name FROM rpt_competitor WHERE id=' . $row['competitor'] . ' LIMIT 1';
-		$res2 = mysql_query($query) or die('Bad SQL query getting report name');
-		$row2 = mysql_fetch_assoc($res2);
-		if($row2 === false)
-		{
-			echo('CD not found.' . $nl);
-			continue;
-		}
-		
-		try{
-			$files[$row2['name']] = runCompetitor($row['competitor'], true, $item['format']);
 		}catch(Exception $e){
 			$files[$row2['name']] = messageInExcel('Report failed with message: ' . $e->getMessage());
 		}
