@@ -42,7 +42,8 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 	$nodata = array('action'=>array(), 'searchval'=>array(), 'negate'=>array(), 'multifields'=>array(), 'multivalue'=>array());
 
 	//get report name
-	$query = 'SELECT name,footnotes,description,searchdata,bomb,backbone_agent,count_only_active,id  FROM rpt_heatmap WHERE id=' . $id . ' LIMIT 1';
+	$query = 'SELECT name,footnotes,description,searchdata,bomb,backbone_agent,count_only_active,id  FROM rpt_heatmap WHERE id=' 
+	. $id . ' LIMIT 1';
 	$resu = mysql_query($query) or tex('Bad SQL query getting report name');
 	$info = mysql_fetch_array($resu) or tex('Report not found.'); 
 	$name = $info['name'];
@@ -228,9 +229,11 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 					$all_ids = applyBackboneAgent($all_ids, $agent->value);
 			}
 			
+			$rescount = '';
 			if($countactive) {
-				$rescount = getActiveCount($all_ids, $time_machine);
-			} else {
+				if(is_array($all_ids) && !empty($all_ids))
+					$rescount = getActiveCount($all_ids, $time_machine);
+			} else {	
 				$rescount = count($all_ids); 
 			}
 			
@@ -241,7 +244,6 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 			else
 				$results[$row][$column]->bomb = "";
 				
-			//echo "==>".$results[$row][$column]->bomb;exit;
 			//get maximum phase
 			if($countactive || $rescount)
 			{  
@@ -280,12 +282,19 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 				//pass all IDs
 				$packedIDs = '';
 				
-				if($countactive || $rescount) { 
-				//for count active no need to check count more than 0 in order to link even if count is zero
+				if($countactive) { //for count active no need to check count more than 0 in order to link even if count is zero
+				
+					if(is_array($all_ids) && !empty($all_ids)) {
+					
+						$evcode = '$packedIDs = pack("l*",' . implode(',', $all_ids) . ');';
+						eval($evcode);
+					}
+					
+				} else if($rescount > 0) {
 					$evcode = '$packedIDs = pack("l*",' . implode(',', $all_ids) . ');';
 					eval($evcode);
-					
-				} 
+				}
+				
 				$results[$row][$column]->{'link'} = 'leading='
 					. rawurlencode(base64_encode(gzdeflate($packedIDs)));
 				
@@ -369,13 +378,28 @@ function heatmapAsWord($info, $rows, $columns, $results, $p_colors, $return, $ph
 					$image = getimagesize(dirname(__FILE__).DIRECTORY_SEPARATOR."images".DIRECTORY_SEPARATOR.$file);
 					$out .= '<img src="http://'.$_SERVER['HTTP_HOST'].dirname($_SERVER['PHP_SELF']).'/images/'.$file.'" alt="'.$alt.'" '.$image[3].'>';
 				}
-				if($countactive || $result->num) {
+				
+				if($countactive) {
+				//for count active no need to check if count is more than 0 in order to provide link
+					if(strlen($result->num)) { 
+					
+						$clink = urlPath() . 'intermediary.php?' . $result->{'link'};
+						$clink = addYourls($clink, $result->reportname);
+						$out .= '<a href="'.$clink.'">'.htmlspecialchars($result->num).'</a>';
+					} else {
+						$out .= htmlspecialchars($result->num);
+					}
+				
+				} else if($result->num) {
+				
 					$clink = urlPath() . 'intermediary.php?' . $result->{'link'};
 					$clink = addYourls($clink, $result->reportname);
 					$out .= '<a href="'.$clink.'">'.htmlspecialchars($result->num).'</a>';
+				
 				} else {
 					$out .= '&nbsp;';
 				}
+				
 				$out .= '</td>';
 			}
 			else
@@ -478,8 +502,18 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 			$sheet->getStyle($cell)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID);
 			$sheet->getStyle($cell)->getFill()->getStartColor()->setRGB($color);
 			
-			if($countactive || $result->num) {
-				//for count active no need to check count more than 0 in order to link even if count is zero
+			if($countactive) {
+				//for count active no need to check if count is more than 0 in order to provide link
+				if(strlen($result->num)) { 
+				
+					$clink = urlPath() . 'intermediary.php?' . $result->{'link'};
+					$clink = addYourls($clink,$result->reportname);
+					$sheet->getCell($cell)->getHyperlink()->setUrl($clink);
+				}
+				$sheet->SetCellValue($cell, $result->num);
+				
+			} else if($result->num) {
+				
 				$clink = urlPath() . 'intermediary.php?' . $result->{'link'};
 				$clink = addYourls($clink,$result->reportname);
 				$sheet->SetCellValue($cell, $result->num);
@@ -487,7 +521,8 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 					
 			} else {
 				$sheet->SetCellValue($cell, ' ');
-			} 
+			}
+			
 			if($result->bomb != "")
 			{
 				$drawing = new PHPExcel_Worksheet_Drawing();
