@@ -244,7 +244,7 @@ function searchControl($fieldname, $alias=false)
 	global $crit;
 	global $lock;
 	global $lockd;
-	$checked = $crit['watch'][$fieldname] ? true : false;	
+	$checked = (isset($crit['watch'][$fieldname]) && $crit['watch'][$fieldname]) ? true : false;	
 
 	$f='';
 	if($alias === false)
@@ -261,13 +261,13 @@ function searchControl($fieldname, $alias=false)
 			. ($checked?'checked="checked" ':'') . $lockd . '/></th>'
 			. '<th width="150">' . $f . '</th>'
 			. '<td><input type="checkbox" name="req_from[' . $fieldname . ']" '
-				. ($crit['req_from'][$fieldname]?'checked="checked" ':'') . $lockd . '/>'
+				. ((isset($crit['req_from'][$fieldname])&& $crit['req_from'][$fieldname])?'checked="checked" ':'') . $lockd . '/>'
 				. '<input type="text" name="from[' . $fieldname . ']" value="'
-				. htmlspecialchars($crit['from'][$fieldname]) . '"' . $lockd . '/></td>'
+				. htmlspecialchars(isset($crit['from'][$fieldname])?$crit['from'][$fieldname]:'') . '"' . $lockd . '/></td>'
 			. '<td><input type="checkbox" name="req_to[' . $fieldname . ']" '
-				. ($crit['req_to'][$fieldname]?'checked="checked" ':'') . $lockd . '/>'
+				. ((isset($crit['req_to'][$fieldname]) && $crit['req_to'][$fieldname])?'checked="checked" ':'') . $lockd . '/>'
 				. '<input type="text" name="to[' . $fieldname . ']" value="'
-				. htmlspecialchars($crit['to'][$fieldname]) . '"' . $lockd . '/></td>'
+				. htmlspecialchars(isset($crit['to'][$fieldname])?$crit['to'][$fieldname]:'') . '"' . $lockd . '/></td>'
 			. '</tr>';
 	return $out;
 }

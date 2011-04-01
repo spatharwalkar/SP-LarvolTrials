@@ -209,9 +209,9 @@ echo('<script type="text/javascript" src="checkall.js"></script>');
 			if($ok) $list[] = $field;
 		}
 	}
-
-	$time_machine = strlen($_POST['time_machine']) ? strtotime($_POST['time_machine']) : NULL;
-	$override = $_POST['override'];
+	$timeMachinePost = (isset($_POST['time_machine']))?$_POST['time_machine']:null;
+	$time_machine = strlen($timeMachinePost) ? strtotime($timeMachinePost) : NULL;
+	$override = (isset($_POST['override']))?$_POST['override']:null;
 	$override_arr = explode(',', $override);
 	if($override_arr === false)
 	{
@@ -272,7 +272,8 @@ echo('<script type="text/javascript" src="checkall.js"></script>');
 			. '<input name="time" type="hidden" value="' . base64_encode($time_machine) . '" />'
 			. '<input name="override" type="hidden" value="' . base64_encode($override) . '" />'
 			. '<input type="image" src="images/xml.png" /></form>');
-	echo('<form method="post" action="' . ($_POST['simple']?'search_simple.php':'search.php') . '">'
+		$simplePost = (isset($_POST['simple']))?$_POST['simple']:'';	
+	echo('<form method="post" action="' . ($simplePost?'search_simple.php':'search.php') . '">'
 			. '<input name="oldsearch" type="hidden" value="' . base64_encode(serialize($_POST)) . '" />'
 			. '<input type="submit" name="back2s" value="Back to search" /></form>');
 	echo('<br clear="all" /><p>Follow the link above any result to see the full record.</p>');
@@ -311,7 +312,7 @@ function multiField($allowedType = 'varchar')
 	global $rmode;
 	$out = '';
 	$numericField = in_array($allowedType, array('int', 'date'));
-	if($_POST && !is_array($_POST['multifields'])) $_POST['multifields'] = array($_POST['multifields']);
+	if(isset($_POST['multifields']) && $_POST && !is_array($_POST['multifields'])) $_POST['multifields'] = array($_POST['multifields']);
 	$out .= '<fieldset><legend>Multi Field (' . $allowedType . ')</legend>'
 			. '<table cellspacing="2" cellpadding="2">'
 			. '<tr><th scope="col"' . ($numericField ? ' class="numeric"' : '') .'>Search Fields?</th>'
@@ -345,9 +346,10 @@ function multiField($allowedType = 'varchar')
 			$oldval = 'selected="selected"';
 		$out .= '<option value="' . $field . '"' . $oldval . '>' . $disp . '</option>';
 	}
+	$multiValuePost = (isset($_POST['multivalue'][$allowedType]))? $_POST['multivalue'][$allowedType]:'';
 	$out .= '</select>'
 			. '</td><td><input type="text" name="multivalue[' . $allowedType . ']" value="'
-			. htmlspecialchars($_POST['multivalue'][$allowedType])
+			. htmlspecialchars($multiValuePost)
 			. '"/></td></tr></table>'
 			. '</fieldset>';
 	return $out;
@@ -390,8 +392,10 @@ function searchControl($fieldname, $alias=false, $checked=false, $multi=false)
 {
 	global $db;
 	if((isset($_GET['load']) || isset($_POST['searchname'])) && $checked !== 1)
-		$checked = $_POST['display'][$fieldname] ? true : false;	
-	
+	{
+		$displayPost = (isset($_POST['display'][$fieldname]))?$_POST['display'][$fieldname]:null;
+		$checked = $displayPost ? true : false;	
+	}
 	$enumvals = NULL;
 	$CFid = NULL;
 	$numericField = false;
@@ -474,31 +478,43 @@ function searchControl($fieldname, $alias=false, $checked=false, $multi=false)
 	}
 	if(!isset($_POST['action'][$fieldname])) $_POST['action'][$fieldname] = '0';
 	$acs = array($_POST['action'][$fieldname] => ' checked="checked"');
+	
+	$acsAscending = (isset($acs['ascending'])) ? $acs['ascending'] : '';
+	$acsDescending = (isset($acs['descending'])) ? $acs['descending'] : '';
+	$acsRequire = (isset($acs['require'])) ? $acs['require'] : '';
+	$acsSearch = (isset($acs['search'])) ? $acs['search'] : '';
+	
 	$out = '<tr><th><input type="checkbox" class="dispCheck" name="display[' . $fieldname . ']" '
 			. ($checked?'checked="checked" ':'') . ($checked === 1 ? 'disabled="disabled" ' : '') . '/></th>'
 			. '<th' . ($numericField ? ' class="numeric"' : '') . '>' . $f . '</th>'
 			. '<td><input type="radio" name="action[' . $fieldname . ']" value="0"' . $acs['0'] . ' />'
 			. '<img src="images/nop.png" alt="No Action"/></td>'
-			. '<td><input type="radio" name="action[' . $fieldname . ']" value="ascending"' . $acs['ascending'] . ' />'
+			. '<td><input type="radio" name="action[' . $fieldname . ']" value="ascending"' . $acsAscending . ' />'
 			. '<img src="images/asc.png" alt="Sort Ascending" title="Ascending"/></td>'
-			. '<td><input type="radio" name="action[' . $fieldname . ']" value="descending"' . $acs['descending'] . ' />'
+			. '<td><input type="radio" name="action[' . $fieldname . ']" value="descending"' . $acsDescending . ' />'
 			. '<img src="images/des.png" alt="Sort Descending" title="Descending"/></td> '
-			. '<td> &nbsp;<input type="radio" name="action[' . $fieldname . ']" value="require"' . $acs['require'] . ' />'
+			. '<td> &nbsp;<input type="radio" name="action[' . $fieldname . ']" value="require"' . $acsRequire . ' />'
 			. '<img src="images/check.png" alt="Require"/></td> '
-			. '<td class="psval"><input type="radio" name="action[' . $fieldname . ']" value="search"' . $acs['search'] . ' />'
+			. '<td class="psval"><input type="radio" name="action[' . $fieldname . ']" value="search"' . $acsSearch . ' />'
 			. '<img src="images/search.png" alt="Search on:"/>:';
+	$searchValPost = (isset($_POST['searchval'][$fieldname])) ? $_POST['searchval'][$fieldname] : '';
 	if($enumvals === NULL)
 	{
+		
 		$out .= '<input type="text" name="searchval[' . $fieldname . ']" value="'
-					. htmlspecialchars($_POST['searchval'][$fieldname]) . '"/>';
+					. htmlspecialchars($searchValPost) . '"/>';
 	}else{
 		$size = ($multi === false) ? ((count($enumvals)>2)?3:false) : $multi;
-		$out .= makeDropdown('searchval[' . $fieldname . ']', $enumvals, $size, $_POST['searchval'][$fieldname], $CFid!==NULL);
+		$out .= makeDropdown('searchval[' . $fieldname . ']', $enumvals, $size, $searchValPost, $CFid!==NULL);
 	}
+	
+	$negatePost = (isset($_POST['negate'][$fieldname])) ? $_POST['negate'][$fieldname] : '';
+	$weakPost = (isset($_POST['weak'][$fieldname])) ? $_POST['weak'][$fieldname] : '';
+	
 	$out .= '</td><th class="not"><input type="' . ($regex ? 'text' : 'checkbox') . '" name="negate[' . $fieldname . ']" '
-			. ($regex ? ('value="' . $_POST['negate'][$fieldname] . '"') : ($_POST['negate'][$fieldname]?'checked="checked"':''))
+			. ($regex ? ('value="' . $negatePost . '"') : ($negatePost?'checked="checked"':''))
 			. '/></th><th class="not"><input type="checkbox" name="weak[' . $fieldname . ']" '
-			. ($_POST['weak'][$fieldname]?'checked="checked"':'') . '/></th></tr>';
+			. ($weakPost?'checked="checked"':'') . '/></th></tr>';
 	return $out;
 }
 
@@ -515,8 +531,16 @@ function openSection($name)
 function saveSearchForm()
 {
 	global $db;
+	if(isset($_POST['searchname']))
+	{
+		$searchName = $_POST['searchname'];
+	}else
+	{
+		$searchName = '';
+	}
+	
 	$out = '<fieldset><legend>Save search parameters</legend>Name: <input type="text" name="searchname" value="'
-			. htmlspecialchars($_POST['searchname']) . '"/> ';
+			. htmlspecialchars($searchName) . '"/> ';
 	if($db->user->userlevel != 'user')
 	{
 		$out .= '<input type="submit" value="Save (normal)"/> <input type="submit" name="saveglobal" value="Save (global)"/>';

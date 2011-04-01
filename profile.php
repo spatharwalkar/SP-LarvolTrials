@@ -13,7 +13,8 @@ if(isset($_POST['submit2']))
 }
 if(isset($_POST['submit']))
 {
-	$result = $db->setPersonalInfo($_POST['email'], $_POST['getupdates']);
+	$getupdatesPost  = (isset($_POST['getupdates']))?$_POST['getupdates']:null;
+	$result = $db->setPersonalInfo($_POST['email'], $getupdatesPost);
 	if($result !== true) $errors = $result;
 }
 
@@ -29,7 +30,8 @@ if(isset($_POST['submit']) && !count($errors))
 ?>
     <label>Account email address:<br />
       <input name="email" type="text" value="<?php echo($db->user->email); ?>" />
-      <div class="error"><?php echo($errors['email']); ?></div>
+      <?php $errorsEmail = (isset($errors['email']))?$errors['email']:'';?>
+      <div class="error"><?php echo $errorsEmail; ?></div>
     </label><br />
     <input type="submit" name="submit" id="submit" value="Submit" />
 <?php
@@ -46,16 +48,22 @@ if(isset($_POST['submit2']) && !count($errors))
 }else{
 ?>
     <label>Old Password:<br />
-      <input name="oldp" type="password" id="oldp" value="<?php echo($_POST['oldp']); ?>" />
-      <div class="error"><?php echo($errors['oldp']); ?></div>
+    	<?php $oldpPost = (isset($_POST['oldp']))?$_POST['oldp']:'';?>
+      <input name="oldp" type="password" id="oldp" value="<?php echo $oldpPost; ?>" />
+      <?php $oldpErrors = (isset($errors['oldp']))?$errors['oldp']:'';?>
+      <div class="error"><?php echo $oldpErrors; ?></div>
     </label><br />
     <label>New Password:<br />
-      <input name="newp" type="password" id="newp" value="<?php echo($_POST['newp']); ?>" />
-      <div class="error"><?php echo($errors['newp']); ?></div>
+    <?php $newpPost = (isset($_POST['newp']))?$_POST['newp']:'';?>
+      <input name="newp" type="password" id="newp" value="<?php echo $newpPost; ?>" />
+       <?php $newpErrors = (isset($errors['newp']))?$errors['newp']:'';?>
+      <div class="error"><?php echo $newpErrors; ?></div>
     </label><br />
     <label>New Password (confirm):<br />
-      <input name="newpcon" type="password" id="newpcon" value="<?php echo($_POST['newpcon']); ?>" />
-      <div class="error"><?php echo($errors['newpcon']); ?></div>
+    <?php $newpconPost = (isset($_POST['newpcon']))?$_POST['newpcon']:'';?>
+    <?php $newpconErrors = (isset($errors['newpcon']))?$errors['newpcon']:'';?>
+      <input name="newpcon" type="password" id="newpcon" value="<?php echo $newpconPost; ?>" />
+      <div class="error"><?php echo $newpconErrors; ?></div>
     </label><br />
     <input type="submit" name="submit2" id="submit2" value="Submit" />
 <?php

@@ -164,30 +164,37 @@ function searchControl($fieldname, $alias=false, $checked=false, $multi=false)
 		$f = $alias;
 	}
 	if(!isset($_POST['action'][$fieldname])) $_POST['action'][$fieldname] = '0';
+	$acsAscending = (isset($acs['ascending']))?$acs['ascending']:'';
+	$acsDescending = (isset($acs['descending']))?$acs['descending']:'';
+	$acsRequire = (isset($acs['require']))?$acs['require']:'';
+	$acsSearch = (isset($acs['search']))?$acs['search']:'';
 	$acs = array($_POST['action'][$fieldname] => ' checked="checked"');
 	$out = '<tr><th><input type="checkbox" class="dispCheck" name="display[' . $fieldname . ']" '
 			. ($checked?'checked="checked" ':'') . ($checked === 1 ? 'disabled="disabled" ' : '') . '/></th>'
 			. '<th' . ($numericField ? ' class="numeric"' : '') . '>' . $f . '</th>'
 			. '<td><input type="radio" name="action[' . $fieldname . ']" value="0"' . $acs['0'] . ' />'
 			. '<img src="images/nop.png" alt="No Action"/></td>'
-			. '<td><input type="radio" name="action[' . $fieldname . ']" value="ascending"' . $acs['ascending'] . ' />'
+			. '<td><input type="radio" name="action[' . $fieldname . ']" value="ascending"' . $acsAscending . ' />'
 			. '<img src="images/asc.png" alt="Sort Ascending" title="Ascending"/></td>'
-			. '<td><input type="radio" name="action[' . $fieldname . ']" value="descending"' . $acs['descending'] . ' />'
+			. '<td><input type="radio" name="action[' . $fieldname . ']" value="descending"' . $acsDescending . ' />'
 			. '<img src="images/des.png" alt="Sort Descending" title="Descending"/></td> '
-			. '<td> &nbsp;<input type="radio" name="action[' . $fieldname . ']" value="require"' . $acs['require'] . ' />'
+			. '<td> &nbsp;<input type="radio" name="action[' . $fieldname . ']" value="require"' . $acsRequire . ' />'
 			. '<img src="images/check.png" alt="Require"/></td> '
-			. '<td class="psval"><input type="radio" name="action[' . $fieldname . ']" value="search"' . $acs['search'] . ' />'
+			. '<td class="psval"><input type="radio" name="action[' . $fieldname . ']" value="search"' . $acsSearch . ' />'
 			. '<img src="images/search.png" alt="Search on:"/>:';
 	if($enumvals === NULL)
 	{
+		$searchvalPost = (isset($_POST['searchval'][$fieldname]))?$_POST['searchval'][$fieldname]:null;
 		$out .= '<input type="text" name="searchval[' . $fieldname . ']" value="'
-					. htmlspecialchars($_POST['searchval'][$fieldname]) . '"/>';
+					. htmlspecialchars($searchvalPost) . '"/>';
 	}else{
+		$searchvalPost = (isset($_POST['searchval'][$fieldname]))?$_POST['searchval'][$fieldname]:null;
 		$size = ($multi === false) ? ((count($enumvals)>2)?3:false) : $multi;
-		$out .= makeDropdown('searchval[' . $fieldname . ']', $enumvals, $size, $_POST['searchval'][$fieldname], $CFid!==NULL);
+		$out .= makeDropdown('searchval[' . $fieldname . ']', $enumvals, $size, $searchvalPost, $CFid!==NULL);
 	}
+	$negatePost = (isset($_POST['negate'][$fieldname]))?$_POST['negate'][$fieldname]:null;
 	$out .= '</td><th class="not"><input type="' . ($regex ? 'text' : 'checkbox') . '" name="negate[' . $fieldname . ']" '
-			. ($regex ? ('value="' . $_POST['negate'][$fieldname] . '"') : ($_POST['negate'][$fieldname]?'checked="checked"':''))
+			. ($regex ? ('value="' . $negatePost . '"') : ($negatePost?'checked="checked"':''))
 			. '/></th></tr>';
 	return $out;
 }
@@ -205,8 +212,9 @@ function openSection($name)
 function saveSearchForm()
 {
 	global $db;
+	$searchnamePost = (isset($_POST['searchname']))?$_POST['searchname']:'';
 	$out = '<fieldset><legend>Save search parameters</legend>Name: <input type="text" name="searchname" value="'
-			. htmlspecialchars($_POST['searchname']) . '"/> ';
+			. htmlspecialchars($searchnamePost) . '"/> ';
 	if($db->user->userlevel != 'user')
 	{
 		$out .= '<input type="submit" value="Save (normal)"/> <input type="submit" name="saveglobal" value="Save (global)"/>';
@@ -267,7 +275,9 @@ function listSearchProc()
 		if($row === false) return;	//In this case, either the ID is invalid or it doesn't belong to the current user.
 		$_POST = unserialize(base64_decode($row['searchdata']));
 	}
-	if(is_numeric($_GET['rload']) && is_numeric($_GET['row']) && is_numeric($_GET['col']))
+	$rowGet = (isset($_GET['row']))?$_GET['row']:'';
+	$colGet = (isset($_GET['col']))?$_GET['col']:'';
+	if(is_numeric($rowGet) && is_numeric($rowGet) && is_numeric($colGet))
 	{
 		$ssid = mysql_real_escape_string($_GET['rload']);
 		$rrow = mysql_real_escape_string($_GET['row']);

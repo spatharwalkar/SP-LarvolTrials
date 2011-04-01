@@ -74,9 +74,12 @@ function customPost()
 	global $now;
 	global $db;
 	$DTnow = date('Y-m-d H:i:s',$now);
-	$id = mysql_real_escape_string($_POST['larvol_id']);
+	$larvolIdPost = (isset($_POST['larvol_id']))?$_POST['larvol_id']:null;
+	$id = mysql_real_escape_string($larvolIdPost);
 	if(!is_numeric($id)) return;
-	if(is_array($_POST['cats']))
+	
+	$catsPost  = (isset($_POST['cats']))?$_POST['cats']:null;
+	if(is_array($catsPost))
 	{
 		$newcats = array_map('mysql_real_escape_string',$_POST['cats']);
 		mysql_query('BEGIN') or die("Couldn't begin SQL transaction");
@@ -150,7 +153,7 @@ function customPost()
 			{
 				$dp = trim($dp);
 				$dp = str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $dp);
-				$dp = ereg_replace(" {2,}", ' ',$dp);
+				$dp = preg_replace(" {2,}", ' ',$dp);
 				$test_oldvals[$key] = $dp;
 				if($dp == '' || $dp === NULL) unset($test_oldvals[$key]);
 			}
@@ -158,7 +161,7 @@ function customPost()
 			{
 				$dp = trim($dp);
 				$dp = str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $dp);
-				$dp = ereg_replace(" {2,}", ' ',$dp);
+				$dp = preg_replace(" {2,}", ' ',$dp);
 				$test_val[$key] = $dp;
 				if($dp == '' || $dp === NULL) unset($test_val[$key]);
 			}

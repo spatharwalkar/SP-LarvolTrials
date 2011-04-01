@@ -25,7 +25,9 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 	}else{
 		$timecond = 'dv.added<' . $time . ' AND (dv.superceded>' . $time . ' OR dv.superceded IS NULL) ';
 	}
-	$optimizer_hints = ($_GET['priority'] == 'high') ? 'HIGH_PRIORITY ' : '';
+	
+	$priorityGet = (isset($_GET['priority']))? $_GET['priority'] : '';
+	$optimizer_hints = ($priorityGet == 'high') ? 'HIGH_PRIORITY ' : '';
 	
 	//avoid screwing up the params for the caller, considering objects are references
 	foreach($params as $key => $value) $params[$key] = clone $value;
@@ -846,50 +848,51 @@ function validateInputPCRE($post)
     global $db;
 
     $badFields=array();
-
-	foreach($post['action'] as $field => $action)
+	if(isset($post['action']) && is_array($post['action']))
 	{
-	    //skip not valid fields
-		if(!in_array($action,array('search')) || !array_key_exists($field,$db->types))
-			continue;
-
-		//skip ! text or varchar
-		$fldType=$db->types[$field];
-		if( ($fldType!="text") AND ($fldType!="varchar")) 
-			continue;
-
-		$mask=$post['searchval'][$field];
-		$pcre = strlen($mask) > 1
-			&& $mask[0] == '/'
-			&& ($mask[strlen($mask)-1] == '/' || ($mask[strlen($mask)-2] == '/' && strlen($mask) > 2));
-
-		$mask2=$post['negate'][$field];
-		$pcre2 = strlen($mask2) > 1
-			&& $mask2[0] == '/'
-			&& ($mask2[strlen($mask2)-1] == '/' || ($mask2[strlen($mask2)-2] == '/' && strlen($mask2) > 2));
-
-		if($pcre && !validateMaskPCRE($mask))
+		foreach($post['action'] as $field => $action)
 		{
-			//need in field name !
-			$CFid = substr($field,1);
-			$query = 'SELECT name FROM data_fields WHERE id=' . $CFid;
-			$res = mysql_query($query) or die('Bad SQL query getting field name for '.$CFid);
-			list($fieldName)=mysql_fetch_row($res);
-			$fieldName=str_replace("_"," ",$fieldName);
-			$badFields[$fieldName]=$mask;
-		}
-		if($pcre2 && !validateMaskPCRE($mask2))
-		{
-			//need in field name !
-			$CFid = substr($field,1);
-			$query = 'SELECT name FROM data_fields WHERE id=' . $CFid;
-			$res = mysql_query($query) or die('Bad SQL query getting field name for '.$CFid);
-			list($fieldName)=mysql_fetch_row($res);
-			$fieldName=str_replace("_"," ",$fieldName);
-			$badFields[$fieldName]=$mask2;
+		    //skip not valid fields
+			if(!in_array($action,array('search')) || !array_key_exists($field,$db->types))
+				continue;
+	
+			//skip ! text or varchar
+			$fldType=$db->types[$field];
+			if( ($fldType!="text") AND ($fldType!="varchar")) 
+				continue;
+	
+			$mask=$post['searchval'][$field];
+			$pcre = strlen($mask) > 1
+				&& $mask[0] == '/'
+				&& ($mask[strlen($mask)-1] == '/' || ($mask[strlen($mask)-2] == '/' && strlen($mask) > 2));
+	
+			$mask2=$post['negate'][$field];
+			$pcre2 = strlen($mask2) > 1
+				&& $mask2[0] == '/'
+				&& ($mask2[strlen($mask2)-1] == '/' || ($mask2[strlen($mask2)-2] == '/' && strlen($mask2) > 2));
+	
+			if($pcre && !validateMaskPCRE($mask))
+			{
+				//need in field name !
+				$CFid = substr($field,1);
+				$query = 'SELECT name FROM data_fields WHERE id=' . $CFid;
+				$res = mysql_query($query) or die('Bad SQL query getting field name for '.$CFid);
+				list($fieldName)=mysql_fetch_row($res);
+				$fieldName=str_replace("_"," ",$fieldName);
+				$badFields[$fieldName]=$mask;
+			}
+			if($pcre2 && !validateMaskPCRE($mask2))
+			{
+				//need in field name !
+				$CFid = substr($field,1);
+				$query = 'SELECT name FROM data_fields WHERE id=' . $CFid;
+				$res = mysql_query($query) or die('Bad SQL query getting field name for '.$CFid);
+				list($fieldName)=mysql_fetch_row($res);
+				$fieldName=str_replace("_"," ",$fieldName);
+				$badFields[$fieldName]=$mask2;
+			}
 		}
 	}
-
 	if($badFields)
 	{
 	    $getVars=isset($_POST['getVars'])?$_POST['getVars']:"";
