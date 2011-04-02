@@ -79,8 +79,8 @@ $time_machine 	= $excel_params['time'];
 $results 		= $excel_params['count'];
 $rowlabel 		= $excel_params['rowlabel'];
 $columnlabel 	= $excel_params['columnlabel'];
-$bomb			= $excel_params['bomb'];
-
+$bomb			= $excel_params['bomb'];  //added for bomb indication
+$edited			= $excel_params['edited']; //added for highlighting changes
 
 if($excel_params['params'] === NULL)
 { 
@@ -159,6 +159,7 @@ $inactfilterarr = array('wh'=>'Withheld', 'afm'=>'Approved for marketing',
 						
 //options added for third option as 'All'
 $allarray 	= array();$allfilterarr = array();$allcount = 0;
+
 $allfilterarr = array_merge($actfilterarr, $inactfilterarr);
 
 
@@ -171,6 +172,19 @@ else { $actflag = 1;} // checking if any of the active filters are set
 $current_yr	= date('Y');
 $second_yr	= date('Y')+1;
 $third_yr	= date('Y')+2;
+
+//checking if these has been edited to highlight changes
+$new_arr = array();
+foreach($arr as $key=>$val) {
+
+	$nct = getNCT($val['NCT/nct_id'], $gentime, $edited); 
+	if (!is_array($nct)) { 
+		$nct=array();
+		$val['NCT/intervention_name'] = '(study not in database)';
+	}
+
+	$new_arr = array_merge($nct, $val);
+}
 
 foreach($arr as $key=>$val) { 
 
@@ -358,24 +372,25 @@ echo('<br clear="all"/><br/>');
 echo('<form method="get" action="intermediary.php">'
 	.'<table border="0" width="50%" cellpadding="5" cellspacing="2" height="auto">'
     .'<tr><td width="5%">List</td><td width="25%" nowrap="nowrap">'
-	. '<input type="radio" name="list" checked="checked" value="active" onchange="javascript: applyfilter(this.value);" />'
-	. '&nbsp;<span style="color: #00B050;">'
-	. $totactivecount.' Active Records </span>');
+	. '<input type="radio" id="actlist" name="list" checked="checked" value="active" '
+	. 'onchange="javascript: applyfilter(this.value);" />'
+	. '&nbsp;<label for="actlist"><span style="color: #00B050;">'
+	. $totactivecount.' Active Records </span></label>');
 	if(!empty($activephase)) { 
 		echo ' (Highest Phase: ' . ((count($activephase) > 1) ? max($activephase) : $activephase[0]) . ')';
 	} 
 	
-echo ('<br/><input type="radio" name="list" value="inactive" ' .
-	($_GET['list']=='inactive' ? ' checked="checked"' : '')
-	. 'onchange="javascript: applyfilter(this.value);" />&nbsp;<span style="color: #FF0000;">'
-	.$totinactivecount.' Inactive Records</span>');
+echo ('<br/><input type="radio" id="inactlist" name="list" value="inactive" ' 
+	. ($_GET['list']=='inactive' ? ' checked="checked"' : '')
+	. 'onchange="javascript: applyfilter(this.value);" />&nbsp;<label for="inactlist"><span style="color: #FF0000;">'
+	. $totinactivecount.' Inactive Records</span></label>');
 	if(!empty($inactivephase)) { 
 		echo ' (Highest Phase: ' . ((count($inactivephase) > 1) ? max($inactivephase) : $inactivephase[0]) . ')';
 	}
 	
-echo ('<br/><input type="radio" name="list" value="all" ' .
+echo ('<br/><input type="radio" id="alllist" name="list" value="all" ' .
 	($_GET['list']=='all' ? ' checked="checked"' : '')
-	. 'onchange="javascript: applyfilter(this.value);" />&nbsp;' . count($arr) . ' All Records ');	
+	. 'onchange="javascript: applyfilter(this.value);" />&nbsp;<label for="alllist">' . count($arr) . ' All Records </label>');	
 	
 echo ('</td><td width="5%" nowrap="nowrap">Sort by</td><td width="25%"><select name="sort">'
     .'<option'
@@ -389,7 +404,8 @@ echo ('</td><td width="5%" nowrap="nowrap">Sort by</td><td width="25%"><select n
     . '<option value="overall_statusd"' .($_GET['sort']=='overall_statusd' ? ' selected="selected"' : '') 
 	. '>overall_status (Desc)</option>'
     . '</select></td>'
-	. '<td width="5%">Filter</td><td nowrap="nowrap"  width="25%" id="filteropt" style="font-size: 11px;border: 1px solid black;">'
+	. '<td width="5%" nowrap="nowrap" >Show Only</td>'
+	. '<td nowrap="nowrap" width="25%" id="filteropt" style="font-size: 11px;border: 1px solid black;">'
     . (isset($_GET["list"]) ? ${$_GET["list"].'status'} : $activestatus)
     . '</td></tr>'
 	. '<tr><td colspan="6"><input type="submit" value="Show"/></td></tr>'
@@ -398,7 +414,7 @@ echo ('</td><td width="5%" nowrap="nowrap">Sort by</td><td width="25%"><select n
 	. '<input type="hidden" name="leading" value="' . $_GET['leading'] . '"/>'
 	. '</form>');
 	
-echo '<div style="font-size:10px;text-align:right;padding:5px;">Work in Progress</div>'
+echo '<div style="text-align:right;padding:5px;font-weight:normal;color:#ff0000;">Interface Work In Progress</div>'
  . '<table width="100%" border="0 " cellpadding="5" cellspacing="0" class="manage">'
  . '<tr><th rowspan="2" width="30%">Title</th>'
  . '<th rowspan="2" width="12%">N</th><th rowspan="2" width="14%">Status</th>'
@@ -421,7 +437,7 @@ if(count($$var) > 0) {
 		for($woo=0;$woo<2;$woo++)
 			unset_nulls(${$var}[$i]);
 		
-		//end date is calculated by giving precedence than primary completion date to completion if it exists
+		//end date is calculated by giving precedence to completion date(if it exists) than primary completion date  
 		$end_date = getEndDate(${$var}[$i]["NCT/primary_completion_date"], ${$var}[$i]["NCT/completion_date"]);
 
 		$phase_arr = array('N/A'=>'#bfbfbf','0'=>'#44cbf5','0/1'=>'#99CC00','1'=>'#99CC00','1/2'=>'#ffff00','2'=>'#ffff00',
@@ -432,8 +448,6 @@ if(count($$var) > 0) {
 		$start_year = date('Y',strtotime(${$var}[$i]['NCT/start_date']));
 		$end_month = date('m',strtotime($end_date));
 		$end_year = date('Y',strtotime($end_date));
-
-		//$diff = ceil((strtotime($end_date)-strtotime(${$var}[$i]['NCT/start_date']))/2628000);
 	
 		echo '<tr>'//<td>' . ($pstart + $relrank++) . '.</td>'
 			. '<td class="title"><a href="http://clinicaltrials.gov/ct2/show/' 
@@ -448,14 +462,18 @@ if(count($$var) > 0) {
 			$val = ${$var}[$i][$fqname];
 			
 			if($fqname == "NCT/enrollment"){ 
-			
-				echo '<td nowrap="nowrap" style="background-color:#D8D3E0;text-align:center;">';
+				
+				echo '<td nowrap="nowrap" style="background-color:#D8D3E0;text-align:center;'
+				. (in_array('NCT/enrollment',$new_arr['edited']) ? ('border:2px solid #FF8080;') : '' ) . ' ">';
 				
 					if(${$var}[$i]["NCT/enrollment_type"] != '') {
 					
 						if(${$var}[$i]["NCT/enrollment_type"] == 'Anticipated') { 
 							echo '<span style="color:gray;font-weight:bold;" title="' 
 							. ${$var}[$i]["NCT/enrollment_type"] . '">'	. $val . '</span>';
+							
+						} else if(${$var}[$i]["NCT/enrollment_type"] == 'Actual') {
+							echo $val;
 						} else { 
 							echo $val . ' ('.${$var}[$i]["NCT/enrollment_type"].')';
 						}
@@ -468,7 +486,8 @@ if(count($$var) > 0) {
 			
 			}else if($fqname == "NCT/start_date") {
 			
-				echo '<td nowrap="nowrap" style="background-color:#EDEAFF;">' 
+				echo '<td nowrap="nowrap" style="background-color:#EDEAFF;" '
+				. (in_array('NCT/start_date',$new_arr['edited']) ? ('border:2px solid #FF8080;') : '' ) . ' ">' 
 				. date('m/Y',strtotime(${$var}[$i]["NCT/start_date"]))
 				. ($end_date != '' ? (' -- ' . date('m/Y',strtotime($end_date))) : '');
 				
@@ -490,20 +509,29 @@ if(count($$var) > 0) {
 				
 				echo '</td>';
 			
-			
 			} else if($fqname == "NCT/overall_status") {
-				echo '<td style="background-color:#D8D3E0;">' . $val . ' </td>';
+				echo '<td style="background-color:#D8D3E0;' 
+				. (in_array('NCT/overall_status',$new_arr['edited']) ? ('border:2px solid #FF8080;') : '' ) . ' ">' 
+				. $val . ' </td>';
 			
-			} else if($fqname == "NCT/condition" || $fqname == "NCT/intervention_name") {
+			} else if($fqname == "NCT/condition") {
 				
-				echo '<td style="background-color:#EDEAFF;">' . (is_array($val) ? implode(', ', $val) : $val) . '</td>';
+				echo '<td style="background-color:#EDEAFF;' 
+				. (in_array('NCT/condition',$new_arr['edited']) ? ('border:2px solid #FF8080;') : '' ) . ' ">' 
+				. (is_array($val) ? implode(', ', $val) : $val) . '</td>';
+				
+			} else if($fqname == "NCT/intervention_name") {
+				
+				echo '<td style="background-color:#EDEAFF; ' 
+				. (in_array('NCT/intervention_name',$new_arr['edited']) ? ('border:2px solid #FF8080;') : '' )
+				. ' ">' . (is_array($val) ? implode(', ', $val) : $val) . '</td>';
 				
 			} else if($fqname == "NCT/phase") {
 			
-				
 				$phase = (${$var}[$i]['NCT/phase']=='N/A') ? $ph : ('P' . $ph);
-				echo '<td style="background-color:'.$phase_arr[$ph].'">' . $phase . '</td>';
-			
+				echo '<td style="background-color:'.$phase_arr[$ph] . ';'
+				. (in_array('NCT/phase',$new_arr['edited']) ? ('border:2px solid #FF8080;') : '' ) . ' ">'
+				. $phase . '</td>';
 			
 			} else { 
 				echo '<td style="background-color:#EDEAFF;">' . (is_array($val) ? implode(', ', $val) : $val) . '</td>';
@@ -635,6 +663,57 @@ function getCompletionChart($start_month, $start_year, $end_month, $end_year, $c
 			
 		} 
 	return $value;
+}
+
+//return NCT fields given an NCTID
+function getNCT($nct_id,$time,$edited)
+{	
+	$param = new SearchParam();
+	$param->field = fieldNameToPaddedId('nct_id');
+	$param->action = 'search';
+	$param->value = $nct_id;
+	
+	$fieldnames = array('nct_id', 'brief_title', 'enrollment', 'enrollment_type', 'acronym', 'start_date', 'completion_date',
+	'primary_completion_date', 'overall_status', 'condition', 'intervention_name', 'phase');
+	
+	foreach($fieldnames as $name) { 
+		$list[] = fieldNameToPaddedId($name);
+	}
+	$res = search(array($param),$list,NULL,strtotime($time));
+	//echo '<pre style="background-color:80FF80;">'.print_r($res,true).'</pre>';
+
+	foreach($res as $stu) $study = $stu;
+
+	$studycatData=mysql_fetch_assoc(mysql_query("SELECT `dv`.`studycat` FROM `data_values` `dv` LEFT JOIN `data_cats_in_study` `dc` ON (`dc`.`id`=`dv`.`studycat`) WHERE `dv`.`field`='1' AND `dv`.`val_int`='".$nct_id."' AND `dc`.`larvol_id`='"
+	.$study['larvol_id']."'"));
+	
+	//echo "<pre>";print_r($studycatData);
+	
+	$sql="SELECT DISTINCT `df`.`name` AS `fieldname`, `dv`.`studycat` FROM `data_values` `dv` LEFT JOIN `data_fields` `df` ON (`df`.`id`=`dv`.`field`) WHERE `df`.`name` IN ('".join("','",$fieldnames)."') AND `studycat`='".$studycatData['studycat']."' AND (`dv`.`superceded`<'".date('Y-m-d',strtotime($time))."' AND `dv`.`superceded`>=" . $edited . ")";
+
+    $changedFields = mysql_query($sql);
+	$study['edited'] = array();
+	
+	while ($row=mysql_fetch_assoc($changedFields)){
+		$study['edited'][]='NCT/'.$row['fieldname'];
+	}
+
+	return $study;
+}
+
+//Get field IDs for names
+// - for the $list argument, search() takes IDs prepended with a padding character (stripped by highPass())
+// - didn't find the alternative, so I wrote this
+function fieldNameToPaddedId($name)
+{
+	$query = 'SELECT data_fields.id AS data_field_id FROM '
+		. 'data_fields LEFT JOIN data_categories ON data_fields.category=data_categories.id '
+		. 'WHERE data_fields.name="' . $name . '" AND data_categories.name="NCT" LIMIT 1';
+	$res = mysql_query($query);
+	if($res === false) tex('Bad SQL query getting field ID of ' . $name);
+	$res = mysql_fetch_assoc($res);
+	if($res === false) tex('NCT schema not found!');
+	return '_' . $res['data_field_id'];
 }
 
 ?>
