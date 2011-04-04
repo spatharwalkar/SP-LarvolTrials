@@ -41,8 +41,6 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 	if(!is_numeric($id)) tex('non-numeric id!');
 	$nodata = array('action'=>array(), 'searchval'=>array(), 'negate'=>array(), 'multifields'=>array(), 'multivalue'=>array());
 
-	$edited	= " DATE_SUB('".date("Y-m-d",$now)."',INTERVAL 2 WEEK) ";
-
 	//get report name
 	$query = 'SELECT name,footnotes,description,searchdata,bomb,backbone_agent,count_only_active,id  FROM rpt_heatmap WHERE id=' . $id . ' LIMIT 1';
 	$resu = mysql_query($query) or tex('Bad SQL query getting report name');
@@ -55,10 +53,6 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 	$bomb 			= $info['bomb'] == 'Y';
 	$backboneAgent 	= $info['backbone_agent'] == 'Y';
 	$countactive 	= $info['count_only_active'] == 'Y';
-	
-	if(trim($info['edited']) != '') {
-		$edited = " DATEDIFF('".date("Y-m-d",$now)."', '".date("Y-m-d",strtotime($info['edited']))."') ";
-	}
 	
 	unset($oversearch['search']);
 	unset($oversearch['display']);
@@ -312,8 +306,7 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 																		   'count' => $rescount,
 																		   'rowlabel' => $rows[$row],
 																		   'columnlabel' =>$columns[$column],
-																		   'bomb' => $results[$row][$column]->bomb,
-																		   'edited' => $edited)))));
+																		   'bomb' => $results[$row][$column]->bomb)))));
 																		   
 				$results[$row][$column]->reportname = substr($name,0,40);
 				$results[$row][$column]->rundate = date("Y-m-d H:i:s",$now);
@@ -327,8 +320,7 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 																		   'rundate' => date("Y-m-d H:i:s",$now),
 																		   'rowlabel' => $rows[$row],
 																		   'columnlabel' =>$columns[$column],
-																		   'bomb' => $results[$row][$column]->bomb,
-																		   'edited' => $edited)))));
+																		   'bomb' => $results[$row][$column]->bomb)))));
 				$results[$row][$column]->reportname = substr($name,0,40);
 				$results[$row][$column]->rundate = date("Y-m-d H:i:s",$now);
 				$results[$row][$column]->time_machine = $time_machine;
@@ -441,6 +433,7 @@ function heatmapAsWord($info, $rows, $columns, $results, $p_colors, $return, $ph
 		header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
 		header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
 		header("Cache-Control: no-cache, must-revalidate, post-check=0, pre-check=0");
+
 		header("Content-Type: application/force-download");
 		header("Content-Type: application/download");
 		header("Content-Type: application/msword");

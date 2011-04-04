@@ -19,52 +19,56 @@ session_start();
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
   })();
   
+  //<![CDATA[
   function applyfilter(value) {
- 
+ 	
 	  if(value == 'inactive') {
 	  
 	  document.getElementById('filteropt').innerHTML = 
-		  '<input type="checkbox" name="wh" id="wh" value="1" /><label for="wh">Withheld</label><br/>'+
-		  '<input type="checkbox" name="afm" id="afm" value="1" /><label for="afm">Approved for marketing</label><br/>' +
-		  '<input type="checkbox" name="tna" id="tna" value="1" /><label for="tna">Temporarily not available</label><br/>' + 
-		  '<input type="checkbox" name="nla" id="nla" value="1" /><label for="nla">No Longer Available</label><br/>' + 
-		  '<input type="checkbox" name="wd" id="wd" value="1" /><label for="wd">Withdrawn</label><br/>' + 
-		  '<input type="checkbox" name="t" id="t" value="1" /><label for="t">Terminated</label><br/>' +
-		  '<input type="checkbox" name="s" id="s" value="1" /><label for="s">Suspended</label><br/>' +
-		  '<input type="checkbox" name="c" id="c" value="1" /><label for="c">Completed</label><br/>';
+		  "<input type='checkbox' name='wh' value='1' />Withheld<br/>"+
+		 "<input type='checkbox' name='afm' value='1' />Approved for marketing<br/>" +
+		 "<input type='checkbox' name='tna' value='1' />Temporarily not available<br/>" + 
+		 "<input type='checkbox' name='nla' value='1' />No Longer Available<br/>" + 
+		 "<input type='checkbox' name='wd' value='1' />Withdrawn<br/>" + 
+		 "<input type='checkbox' name='t' value='1' />Terminated<br/>" +
+		 "<input type='checkbox' name='s' value='1' />Suspended<br/>" +
+		 "<input type='checkbox' name='c' value='1' />Completed<br/>";
 	  
 	  } else if(value == 'active') {
 	  
 	  document.getElementById('filteropt').innerHTML = 
-		  '<input type="checkbox" name="nyr" id="nyr" value="1" /><label for="nyr">Not yet recruiting</label><br/>' +
-		  '<input type="checkbox" name="r" id="r" value="1" /><label for="r">Recruiting</label><br/>' + 
-		  '<input type="checkbox" name="ebi" id="ebi" value="1" /><label for="ebi">Enrolling by invitation</label><br/>' + 
-		  '<input type="checkbox" name="anr" id="anr" value="1" /><label for="anr">Active, not recruiting</label><br/>' + 
-		  '<input type="checkbox" name="a" id="a" value="1" /><label for="a">Available</label><br/>' ;
+		  '<input type="checkbox" name="nyr" value="1" />Not yet recruiting<br/>' +
+		  '<input type="checkbox" name="r" value="1" />Recruiting<br/>' + 
+		  '<input type="checkbox" name="ebi" value="1" />Enrolling by invitation<br/>' + 
+		  '<input type="checkbox" name="anr" value="1" />Active, not recruiting<br/>' + 
+		  '<input type="checkbox" name="a" value="1" />Available<br/>' ;
 	  
 	  } else {
 	  
 	  document.getElementById('filteropt').innerHTML = 
-		  '<input type="checkbox" name="wh" id="wh" value="1" /><label for="wh">Withheld</label><br/>'+
-		  '<input type="checkbox" name="afm" id="afm" value="1" /><label for="afm">Approved for marketing</label><br/>' +
-		  '<input type="checkbox" name="tna" id="tna" value="1" /><label for="tna">Temporarily not available</label><br/>' + 
-		  '<input type="checkbox" name="nla" id="nla" value="1" /><label for="nla">No Longer Available</label><br/>' + 
-		  '<input type="checkbox" name="wd" id="wd" value="1" /><label for="wd">Withdrawn</label><br/>' + 
-		  '<input type="checkbox" name="t" id="t" value="1" /><label for="t">Terminated</label><br/>' +
-		  '<input type="checkbox" name="s" id="s" value="1" /><label for="s">Suspended</label><br/>' +
-		  '<input type="checkbox" name="c" id="c" value="1" /><label for="c">Completed</label><br/>' +
-		  '<input type="checkbox" name="nyr" id="nyr" value="1" /><label for="nyr">Not yet recruiting</label><br/>' +
-		  '<input type="checkbox" name="r" id="r" value="1" /><label for="r">Recruiting</label><br/>' + 
-		  '<input type="checkbox" name="ebi" id="ebi" value="1" /><label for="ebi">Enrolling by invitation</label><br/>' + 
-		  '<input type="checkbox" name="anr" id="anr" value="1" /><label for="anr">Active, not recruiting</label><br/>' + 
-		  '<input type="checkbox" name="a" id="a" value="1" /><label for="a">Available</label><br/>' ;
+		  '<input type="checkbox" name="wh" value="1" />Withheld<br/>'+
+		  '<input type="checkbox" name="afm" value="1" />Approved for marketing<br/>' +
+		  '<input type="checkbox" name="tna" value="1" />Temporarily not available<br/>' + 
+		  '<input type="checkbox" name="nla" value="1" />No Longer Available<br/>' + 
+		  '<input type="checkbox" name="wd" value="1" />Withdrawn<br/>' + 
+		  '<input type="checkbox" name="t" value="1" />Terminated<br/>' +
+		  '<input type="checkbox" name="s" value="1" />Suspended<br/>' +
+		  '<input type="checkbox" name="c" value="1" />Completed<br/>' +
+		  '<input type="checkbox" name="nyr" value="1" />Not yet recruiting<br/>' +
+		  '<input type="checkbox" name="r" value="1" />Recruiting<br/>' + 
+		  '<input type="checkbox" name="ebi" value="1" />Enrolling by invitation<br/>' + 
+		  '<input type="checkbox" name="anr" value="1" />Active, not recruiting<br/>' + 
+		  '<input type="checkbox" name="a" value="1" />Available<br/>' ;
 
 	  }
   }
+  //]]>
+
 </script>
 </head>
 <body>
-<div style="text-align:center;"><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" /></div><br />
+<div style="text-align:center;"><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" />
+</div><br />
 <?php
 require_once('krumo/class.krumo.php');
 require_once('db.php');
@@ -80,7 +84,6 @@ $results 		= $excel_params['count'];
 $rowlabel 		= $excel_params['rowlabel'];
 $columnlabel 	= $excel_params['columnlabel'];
 $bomb			= $excel_params['bomb'];  //added for bomb indication
-$edited			= $excel_params['edited']; //added for highlighting changes
 
 if($excel_params['params'] === NULL)
 { 
@@ -159,11 +162,13 @@ $inactfilterarr = array('wh'=>'Withheld', 'afm'=>'Approved for marketing',
 						
 //options added for third option as 'All'
 $allarray 	= array();$allfilterarr = array();$allcount = 0;
-
 $allfilterarr = array_merge($actfilterarr, $inactfilterarr);
 
-
 $actflag = 0;$inactflag = 0;$allflag = 0;
+$edited = ' -2 weeks '; //added for highlighting changes
+
+if(isset($_GET['edited']))
+	$edited = htmlspecialchars(mysql_real_escape_string(trim($_GET['edited'])));
 
 if($_GET['list'] == 'inactive') { $inactflag = 1;  // checking if any of the inactive filters are set
 } else if($_GET['list'] == 'all') { $allflag = 1; } // checking if any of the all filters are set
@@ -271,33 +276,34 @@ $var = (isset($_GET["list"])) ? ($_GET["list"].'array') : 'activearray' ;
 $count = count($$var);
 
 
-$activestatus 		= '<input type="checkbox" name="nyr" id="nyr" value="1" ' 
-					.($_GET['nyr'] ? ' checked="checked"' : ''). ' /><label for="nyr">Not yet recruiting</label><br/>'
-					.'<input type="checkbox" name="r" id="r" value="1" ' 
-					.($_GET['r'] ? ' checked="checked"' : ''). ' /><label for="r">Recruiting</label><br/>'
-					.'<input type="checkbox" name="ebi" id="ebi" value="1" ' 
-					.($_GET['ebi'] ? ' checked="checked"' : ''). ' /><label for="ebi">Enrolling by invitation</label><br/>'
-					.'<input type="checkbox" name="anr" id="anr" value="1"' 
-					.($_GET['anr'] ? ' checked="checked"' : ''). '  /><label for="anr">Active, not recruiting</label><br/>'
-					.'<input type="checkbox" name="a" id="a" value="1" ' 
-					.($_GET['a'] ? ' checked="checked"' : ''). ' /><label for="a">Available</label><br/>';
+$activestatus 		= '<input type="checkbox" name="nyr" value="1" ' 
+					.($_GET['nyr'] ? ' checked="checked"' : ''). ' />Not yet recruiting<br/>'
+					.'<input type="checkbox" name="r" value="1" ' 
+					.($_GET['r'] ? ' checked="checked"' : ''). ' />Recruiting<br/>'
+					.'<input type="checkbox" name="ebi" value="1" ' 
+					.($_GET['ebi'] ? ' checked="checked"' : ''). ' />Enrolling by invitation<br/>'
+					.'<input type="checkbox" name="anr" value="1"' 
+					.($_GET['anr'] ? ' checked="checked"' : ''). '  />Active, not recruiting<br/>'
+					.'<input type="checkbox" name="a" value="1" ' 
+					.($_GET['a'] ? ' checked="checked"' : ''). ' />Available<br/>';
 					
-$inactivestatus 	= '<input type="checkbox" name="wh" id="wh" value="1" ' 
-					.($_GET['wh'] ? ' checked="checked"' : ''). ' /><label for="wh">Withheld</label><br/>'
-					.'<input type="checkbox" name="afm" id="afm" value="1" ' 
-					.($_GET['afm'] ? ' checked="checked"' : ''). ' /><label for="afm">Approved for marketing</label><br/>'
-					.'<input type="checkbox" name="tna" id="tna" value="1" ' 
-					.($_GET['tna'] ? ' checked="checked"' : ''). '/><label for="tna">Temporarily not available</label><br/>'
-					.'<input type="checkbox" name="nla" id="nla" value="1" ' 
-					.($_GET['nla'] ? ' checked="checked"' : ''). '/><label for="nla">No Longer Available</label><br/>'
-					.'<input type="checkbox" name="wd" id="wd" value="1" ' 
-					.($_GET['wd'] ? ' checked="checked"' : ''). '/><label for="wd">Withdrawn</label><br/>'
-					.'<input type="checkbox" name="t" id="t" value="1" ' 
-					.($_GET['t'] ? ' checked="checked"' : ''). '/><label for="t">Terminated</label><br/>'
-					.'<input type="checkbox" name="s" id="s" value="1" ' 
-					.($_GET['s'] ? ' checked="checked"' : ''). '/><label for="s">Suspended</label><br/>'
-					.'<input type="checkbox" name="c" id="c" value="1" ' 
-					.($_GET['c'] ? ' checked="checked"' : ''). '/><label for="c">Completed</label><br/>';
+$inactivestatus 	= '<input type="checkbox" name="wh" value="1" ' 
+					.($_GET['wh'] ? ' checked="checked"' : ''). ' />Withheld<br/>'
+					.'<input type="checkbox" name="afm" value="1" ' 
+					.($_GET['afm'] ? ' checked="checked"' : ''). ' />Approved for marketing<br/>'
+					.'<input type="checkbox" name="tna" value="1" ' 
+					.($_GET['tna'] ? ' checked="checked"' : ''). '/>Temporarily not available<br/>'
+					.'<input type="checkbox" name="nla" value="1" ' 
+					.($_GET['nla'] ? ' checked="checked"' : ''). '/>No Longer Available<br/>'
+					.'<input type="checkbox" name="wd" value="1" ' 
+					.($_GET['wd'] ? ' checked="checked"' : ''). '/>Withdrawn<br/>'
+					.'<input type="checkbox" name="t" value="1" ' 
+					.($_GET['t'] ? ' checked="checked"' : ''). '/>Terminated<br/>'
+					.'<input type="checkbox" name="s" value="1" ' 
+					.($_GET['s'] ? ' checked="checked"' : ''). '/>Suspended<br/>'
+					.'<input type="checkbox" name="c" value="1" ' 
+					.($_GET['c'] ? ' checked="checked"' : ''). '/>Completed<br/>';
+					
 					
 $allstatus = $activestatus . $inactivestatus;
 
@@ -333,7 +339,7 @@ if($count > $db->set['results_per_page'])
 	if($_GET['sort'] == 'phased') $sort = '&amp;sort=phased';
 	if($_GET['sort'] == 'enrollmentd') $sort = '&amp;sort=enrollmentd';
 	if($_GET['sort'] == 'overall_statusd') $sort = '&amp;sort=overall_statusd';
-	
+	$sort .= '&amp;edited='.htmlspecialchars(trim($edited));
 	if(isset($_GET['list'])) { 
 		$sort .= '&amp;list='.$_GET['list']; 
 	} else {
@@ -343,7 +349,8 @@ if($count > $db->set['results_per_page'])
 	foreach($actfilterarr as $k=>$v) { if(isset($_GET[$k])) $sort .= '&amp;'.$k.'=1'; }
 	foreach($inactfilterarr as $k=>$v) { if(isset($_GET[$k])) $sort .= '&amp;'.$k.'=1'; }
 	foreach($allfilterarr as $k=>$v) { if(isset($_GET[$k])) $sort .= '&amp;'.$k.'=1'; }
-
+	
+	
 	/*echo('<h3>Found ' . $results . ' studies - Displaying '.$count. (($_GET["active"]) ? (' '.$_GET["active"]) : ' active' ) 
 	.' results</h3>');*/
 	if($pstart > 1)
@@ -370,7 +377,7 @@ if($count > $db->set['results_per_page'])
 
 echo('<br clear="all"/><br/>');
 echo('<form method="get" action="intermediary.php">'
-	.'<table border="0" width="50%" cellpadding="5" cellspacing="2" height="auto">'
+	.'<table border="0" width="50%" cellpadding="5" cellspacing="2">'
     .'<tr><td width="5%">List</td><td width="25%" nowrap="nowrap">'
 	. '<input type="radio" id="actlist" name="list" checked="checked" value="active" '
 	. 'onchange="javascript: applyfilter(this.value);" />'
@@ -407,9 +414,9 @@ echo ('</td><td width="5%" nowrap="nowrap">Sort by</td><td width="25%"><select n
 	. '<td width="5%" nowrap="nowrap" >Show Only</td>'
 	. '<td nowrap="nowrap" width="25%" id="filteropt" style="font-size: 11px;border: 1px solid black;">'
     . (isset($_GET["list"]) ? ${$_GET["list"].'status'} : $activestatus)
-    . '</td></tr>'
-	. '<tr><td colspan="6"><input type="submit" value="Show"/></td></tr>'
-	. '</table>'
+    . '</td><td nowrap="nowrap">Find changes after: </td>'
+	. '<td><input type="text" id="edited" name="edited" value="' . $edited . '" /></td></tr>'
+	. '<tr><td colspan="8"><input type="submit" value="Show"/></td></tr></table>'
 	. '<input type="hidden" name="params" value="' . $_GET['params'] . '"/>'
 	. '<input type="hidden" name="leading" value="' . $_GET['leading'] . '"/>'
 	. '</form>');
@@ -486,7 +493,7 @@ if(count($$var) > 0) {
 			
 			}else if($fqname == "NCT/start_date") {
 			
-				echo '<td nowrap="nowrap" style="background-color:#EDEAFF;" '
+				echo '<td nowrap="nowrap" style="background-color:#EDEAFF; '
 				. (in_array('NCT/start_date',$new_arr['edited']) ? ('border:2px solid #FF8080;') : '' ) . ' ">' 
 				. date('m/Y',strtotime(${$var}[$i]["NCT/start_date"]))
 				. ($end_date != '' ? (' -- ' . date('m/Y',strtotime($end_date))) : '');
@@ -688,8 +695,9 @@ function getNCT($nct_id,$time,$edited)
 	.$study['larvol_id']."'"));
 	
 	//echo "<pre>";print_r($studycatData);
-	
-	$sql="SELECT DISTINCT `df`.`name` AS `fieldname`, `dv`.`studycat` FROM `data_values` `dv` LEFT JOIN `data_fields` `df` ON (`df`.`id`=`dv`.`field`) WHERE `df`.`name` IN ('".join("','",$fieldnames)."') AND `studycat`='".$studycatData['studycat']."' AND (`dv`.`superceded`<'".date('Y-m-d',strtotime($time))."' AND `dv`.`superceded`>=" . $edited . ")";
+	//echo "<br/>===>".$edited."<===>".strtotime($edited)."<==>".date('Y-m-d',strtotime($time));
+	$sql="SELECT DISTINCT `df`.`name` AS `fieldname`, `dv`.`studycat` FROM `data_values` `dv` LEFT JOIN `data_fields` `df` ON (`df`.`id`=`dv`.`field`) WHERE `df`.`name` IN ('".join("','",$fieldnames)."') AND `studycat`='".$studycatData['studycat']."' AND (`dv`.`superceded`<'".date('Y-m-d',strtotime($time))."' AND `dv`.`superceded`>= '" 
+	. date('Y-m-d',strtotime($edited,strtotime($time))) . "')";
 
     $changedFields = mysql_query($sql);
 	$study['edited'] = array();

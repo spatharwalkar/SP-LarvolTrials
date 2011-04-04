@@ -69,7 +69,7 @@ function editor()
 	if(!isset($_GET['id'])) return;
 	$id = mysql_real_escape_string(htmlspecialchars($_GET['id']));
 	if(!is_numeric($id)) return;
-	$query = 'SELECT name,user,footnotes,description,searchdata,bomb,backbone_agent,count_only_active,edited FROM rpt_heatmap WHERE id=' . $id . ' LIMIT 1';
+	$query = 'SELECT name,user,footnotes,description,searchdata,bomb,backbone_agent,count_only_active FROM rpt_heatmap WHERE id=' . $id . ' LIMIT 1';
 	$res = mysql_query($query) or die('Bad SQL query getting report');
 	$res = mysql_fetch_array($res) or die('Report not found.');
 	$rptu = $res['user'];
@@ -80,7 +80,7 @@ function editor()
 	$bomb = $res['bomb'];
 	$backboneAgent = $res['backbone_agent'];
 	$countonlyactive = $res['count_only_active'];
-	$edited = $res['edited'];
+	
 	$unisearchdata = $res['searchdata'] !== NULL;
 	$query = 'SELECT `header`,`num`,`type`,searchdata FROM rpt_heatmap_headers WHERE report=' . $id . ' ORDER BY num ASC';
 	$res = mysql_query($query) or die('Bad SQL query getting report headers');
@@ -136,8 +136,7 @@ function editor()
 		. '<form action="report_heatmap.php" method="post"><fieldset><legend>Edit report ' . $id . '</legend>'
 		. '<input type="hidden" name="id" value="' . $id . '" />'
 		. '<label>Name: <input type="text" name="reportname" value="' . htmlspecialchars($name)
-		. '"/></label><label>Find changes after: <input type="text" id="editedfrom" name="editedfrom" value="' 
-		. htmlspecialchars($edited) . '" /></label>';
+		. '"/></label>';
 	if($db->user->userlevel != 'user')
 	{
 		$out .= ' Ownership: '
@@ -287,7 +286,7 @@ function postEd()
 	if(isset($_POST['reportcopy']))
 	{
 		mysql_query('BEGIN') or die("Couldn't begin SQL transaction");
-		$query = 'SELECT name,footnotes,description,searchdata,bomb,backbone_agent,count_only_active,edited FROM rpt_heatmap WHERE id=' . $id . ' LIMIT 1';
+		$query = 'SELECT name,footnotes,description,searchdata,bomb,backbone_agent,count_only_active FROM rpt_heatmap WHERE id=' . $id . ' LIMIT 1';
 		$res = mysql_query($query) or die('Bad SQL Query getting old data');
 		$res = mysql_fetch_array($res);
 		if($res === false) return; //not found
@@ -379,15 +378,16 @@ function postEd()
 		$query = 'UPDATE rpt_heatmap SET name="' . mysql_real_escape_string($_POST['reportname']) . '",user=' . $owner
 					. ',footnotes="' . $footnotes . '",description="' . $description . '",bomb="'
 					. $bomb . '",backbone_agent="'.$backboneAgent.'"' . ',count_only_active="'.$countonlyactive.'"' 
-					. ',edited="' . mysql_real_escape_string($_POST['editedfrom']) . '" WHERE id=' . $id . ' LIMIT 1';
+					. ' WHERE id=' . $id . ' LIMIT 1';
 		mysql_query($query) or die('Bad SQL Query saving name');
 		foreach($types as $t)
 		{
 			if(isset($_POST[$t."s"])) {
 				foreach($_POST[$t."s"] as $num => $header)
 				{
-					$query = 'UPDATE rpt_heatmap_headers SET header="' . mysql_real_escape_string($header) . '" WHERE report=' . $id
-								. ' AND num=' . $num . ' AND type="' . $t . '" LIMIT 1';
+					$query = 'UPDATE rpt_heatmap_headers SET header="' . mysql_real_escape_string($header) 
+					. '" WHERE report=' . $id
+					. ' AND num=' . $num . ' AND type="' . $t . '" LIMIT 1';
 					mysql_query($query) or die('Bad SQL Query saving headers');
 				}
 			}
@@ -667,7 +667,7 @@ function postRL()
 	global $db;
 	if(isset($_POST['makenew']))
 	{ 
-		mysql_query('INSERT INTO rpt_heatmap SET name="",edited="-2 weeks", user=' . $db->user->id) or die('Bad SQL query creating report');
+		mysql_query('INSERT INTO rpt_heatmap SET name="", user=' . $db->user->id) or die('Bad SQL query creating report');
 		$_GET['id'] = mysql_insert_id();
 		$id = $_GET['id'];
 
