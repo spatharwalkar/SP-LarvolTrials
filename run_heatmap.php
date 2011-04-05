@@ -20,6 +20,30 @@ if(isset($_GET['direct_run_heatmap_id'])) runHeatmap((int)$_GET['direct_run_heat
 
 function runHeatmap($id, $return = false, $format = "xlsx")
 {
+	if($return)
+	{
+		//Get variables corresponding to the primary key in reports_status
+		if(isset($_GET['run_id']))
+		{
+			$run_id = (int)$_GET['run_id'];
+		}else{
+			die('Need to set $_GET[\'run_id\']');
+		}
+		
+		if(isset($_GET['report_type']))
+		{
+			$report_type = (int)$_GET['report_type'];
+		}else{
+			die('Need to set $_GET[\'report_type\']');
+		}
+		
+		if(isset($_GET['type_id']))
+		{
+			$type_id = (int)$_GET['type_id'];
+		}else{
+			die('Need to set $_GET[\'type_id\']');
+		}
+	}
 	global $now;
 	global $db;
 	global $SEARCH_ERR;
@@ -86,6 +110,12 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 				. (count($rows) * count($columns)) . ',note=' . $id;
 		mysql_query($query);
 		$pid = mysql_insert_id();
+	}
+	else
+	{
+		$query = 'UPDATE reports_status SET update_time="' . date("Y-m-d H:i:s",strtotime('now')).'", total="'.(count($rows) * count($columns)).
+		'", progress="0" WHERE run_id="' .$run_id .'" AND report_type ="0" AND type_id="' .$type_id .'"';
+		$res = mysql_query($query) or die('Bad SQL Query updating heatmap report total. Error: '.mysql_error());
 	}
 
 	//get searchdata
@@ -330,6 +360,14 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 			{
 				mysql_query('UPDATE progress SET progress=progress+1 WHERE id=' . $pid . ' LIMIT 1');
 				if(mysql_affected_rows() == 0) exit;
+			}
+			else
+			{
+				$query = 'UPDATE reports_status SET update_time="' . date("Y-m-d H:i:s",strtotime('now')).
+				'", progress=progress+1 WHERE run_id="' .$run_id .'" AND report_type ="0" AND type_id="' .$type_id .'"';
+				$res = mysql_query($query) or die('Bad SQL Query updating heatmap report progress. Error: '.mysql_error());
+				if(mysql_affected_rows() == 0) exit;
+				sleep(20);
 			}
 		}
 	}

@@ -33,7 +33,8 @@ if($db->loggedIn())
 			. '<a href="admin_users.php">Users</a><br />'
 			. '<a href="custom.php">Field editor</a><br />'
 			. '<a href="schedule.php">Scheduler</a><br />'
-			. '<a href="admin_settings.php">Settings</a><br />'
+			. '<a href="status.php">Status</a><br />'
+			. '<a href="admin_settings.php">Settings</a><br />'			
 			. '</div>');
 	}
 	echo('::<div class="drop">Reports<br />'

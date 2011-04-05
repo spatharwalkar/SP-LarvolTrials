@@ -15,8 +15,40 @@ ini_set('max_execution_time','36000');	//10 hours
 */
 function runUpdateReport($id, $return = false)
 {
+	if($return)
+	{
+		//Get variables corresponding to the primary key in reports_status
+		if(isset($_GET['run_id']))
+		{
+			$run_id = (int)$_GET['run_id'];
+		}else{
+			die('Need to set $_GET[\'run_id\']');
+		}
+		
+		if(isset($_GET['report_type']))
+		{
+			$report_type = (int)$_GET['report_type'];
+		}else{
+			die('Need to set $_GET[\'report_type\']');
+		}
+		
+		if(isset($_GET['type_id']))
+		{
+			$type_id = (int)$_GET['type_id'];
+		}else{
+			die('Need to set $_GET[\'type_id\']');
+		}
+	}
+	
+	if($return)
+	{
+		$query = 'UPDATE reports_status SET update_time="' . date("Y-m-d H:i:s",strtotime('now')).'", total="0'.
+		'", progress="0" WHERE run_id="' .$run_id .'" AND report_type ="2" AND type_id="' .$type_id .'"';
+		$res = mysql_query($query) or die('Bad SQL Query updating updatescan report total. Error: '.mysql_error());
+	}
+	
 	if(!is_numeric($id)) return;
-	if(mysql_query('BEGIN') === false) return softDie("Couldn't begin SQL transaction");
+	//if(mysql_query('BEGIN') === false) return softDie("Couldn't begin SQL transaction");
 	$query = 'SELECT name,start,end,criteria,searchdata,getnew,footnotes,description FROM rpt_update WHERE id=' . $id . ' LIMIT 1';
 	$res = mysql_query($query); if($res === false) return softDie('Bad SQL query getting report setup');
 	$rpt = mysql_fetch_assoc($res); if($rpt === false) return softDie('Report not found');
@@ -179,6 +211,14 @@ function runUpdateReport($id, $return = false)
 	$fid_lastcd = getFieldId('NCT','lastchanged_date');
 	$nct_data = array_unique(array_map('lid_from_rkey', array_keys($results)));
 	if(count($nct_data)) $nct_data = array_combine($nct_data, $nct_data);
+	
+	if($return)
+	{
+		$query = 'UPDATE reports_status SET update_time="' . date("Y-m-d H:i:s",strtotime('now')).'", total="'.(count($nct_data)).
+		'", progress="0" WHERE run_id="' .$run_id .'" AND report_type ="2" AND type_id="' .$type_id .'"';
+		$res = mysql_query($query) or die('Bad SQL Query updating updatescan report total. Error: '.mysql_error());
+	}
+	
 	foreach($nct_data as $larvol_id => $val)
 	{
 		$template = array('nct_id' => array(), 'phase' => array(), 'intervention_name' => array(), 'title' => array(),
@@ -202,9 +242,17 @@ function runUpdateReport($id, $return = false)
 			$nct_data[$larvol_id][$fieldname][] = $row[$type];
 		}
 		if($template == $nct_data[$larvol_id]) unset($nct_data[$larvol_id]);
+		
+		if($return)
+		{
+			$query = 'UPDATE reports_status SET update_time="' . date("Y-m-d H:i:s",strtotime('now')).
+			'", progress=progress+1 WHERE run_id="' .$run_id .'" AND report_type ="2" AND type_id="' .$type_id .'"';
+			$res = mysql_query($query) or die('Bad SQL Query updating updatescan report progress. Error: '.mysql_error());
+			if(mysql_affected_rows() == 0) exit;
+		}
 	}
 	
-	if(mysql_query('COMMIT') === false) return softDie("Couldn't commit SQL transaction");
+	//if(mysql_query('COMMIT') === false) return softDie("Couldn't commit SQL transaction");
 
 	// Create excel file object
 	$objPHPExcel = new PHPExcel();
