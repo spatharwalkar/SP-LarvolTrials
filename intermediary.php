@@ -68,7 +68,8 @@ session_start();
 </head>
 <body>
 <div style="text-align:center;"><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" />
-</div><br />
+</div><br/>
+<div style="text-align:center;font-weight:normal;color:#ff0000;">Interface Work In Progress</div><br/>
 <?php
 require_once('krumo/class.krumo.php');
 require_once('db.php');
@@ -316,7 +317,8 @@ $last = ($page*$db->set['results_per_page']>$count) ? $count : $pend;
 //echo('Results of ' . $name . '<br />run on ' . $gentime);
 
 //displaying row label and column label
-echo('<center style="font-size: 18px;"><u>Results for ' . $rowlabel . ' in ' . $columnlabel . '</u></center><br/><br/>');
+echo ('<center style="font-size: 18px;"><u>Results for ' 
+		. htmlformat($rowlabel) . ' in ' . htmlformat($columnlabel) . '</u></center><br/><br/>');
 //<br/>Results of report run on ' . $gentime
 //$bomb = 'lb';
 
@@ -370,7 +372,7 @@ if($count > $db->set['results_per_page'])
 			. '&amp;page=' . ($page+1) . '&amp;leading=' . rawurlencode($_GET['leading'])
 			. $sort . '">Next Page (' . ($pstart+$db->set['results_per_page']) . '-' . $nextlast . ') &gt;&gt;</a>';
 	}
-	echo($pager);
+	echo ($pager);
 }/*else{
 	echo('<h3>Displaying ' . $count . (($_GET["active"]) ? (' '.$_GET["active"]) : ' active' ) .' results</h3>');
 }*/
@@ -421,8 +423,7 @@ echo ('</td><td width="5%" nowrap="nowrap">Sort by</td><td width="25%"><select n
 	. '<input type="hidden" name="leading" value="' . $_GET['leading'] . '"/>'
 	. '</form>');
 	
-echo '<div style="text-align:right;padding:5px;font-weight:normal;color:#ff0000;">Interface Work In Progress</div>'
- . '<table width="100%" border="0 " cellpadding="5" cellspacing="0" class="manage">'
+echo '<table width="100%" border="0 " cellpadding="5" cellspacing="0" class="manage">'
  . '<tr><th rowspan="2" width="30%">Title</th>'
  . '<th rowspan="2" width="12%">N</th><th rowspan="2" width="14%">Status</th>'
  . '<th rowspan="2" width="15%">Conditions</th><th rowspan="2" width="15%">Interventions</th>'
@@ -458,16 +459,20 @@ if(count($$var) > 0) {
 	
 		echo '<tr>'//<td>' . ($pstart + $relrank++) . '.</td>'
 			. '<td class="title"><a href="http://clinicaltrials.gov/ct2/show/' 
-			. ${$var}[$i]['NCT/nct_id'] . '">' . ${$var}[$i]['NCT/brief_title'];
+			. ${$var}[$i]['NCT/nct_id'] . '">' . htmlformat(${$var}[$i]['NCT/brief_title']);
 			if(${$var}[$i]['NCT/acronym'] != '') {
-				echo '&nbsp;('.${$var}[$i]['NCT/acronym'].')';
+				echo '&nbsp;(' . htmlformat(${$var}[$i]['NCT/acronym']) . ')';
 			}
 		echo '</a></td>';
 		
 		foreach($displist as $dname => $fqname)
 		{ 
 			$val = ${$var}[$i][$fqname];
-			
+			if( is_array( $val ) )
+				$val = htmlformat(implode(', ', $val));
+			else
+				$val = htmlformat($val); 
+				
 			if($fqname == "NCT/enrollment"){ 
 				
 				echo '<td nowrap="nowrap" style="background-color:#D8D3E0;text-align:center;'
@@ -482,7 +487,7 @@ if(count($$var) > 0) {
 						} else if(${$var}[$i]["NCT/enrollment_type"] == 'Actual') {
 							echo $val;
 						} else { 
-							echo $val . ' ('.${$var}[$i]["NCT/enrollment_type"].')';
+							echo $val . ' (' . ${$var}[$i]["NCT/enrollment_type"] . ')';
 						}
 					} else {
 						echo $val;
@@ -517,31 +522,30 @@ if(count($$var) > 0) {
 				echo '</td>';
 			
 			} else if($fqname == "NCT/overall_status") {
+			
 				echo '<td style="background-color:#D8D3E0;' 
-				. (in_array('NCT/overall_status',$new_arr['edited']) ? ('border:2px solid #FF8080;') : '' ) . ' ">' 
-				. $val . ' </td>';
+				. (in_array('NCT/overall_status',$new_arr['edited']) ? ('border:2px solid #FF8080;') : '' ) . ' ">' . $val . ' </td>';
 			
 			} else if($fqname == "NCT/condition") {
 				
 				echo '<td style="background-color:#EDEAFF;' 
-				. (in_array('NCT/condition',$new_arr['edited']) ? ('border:2px solid #FF8080;') : '' ) . ' ">' 
-				. (is_array($val) ? implode(', ', $val) : $val) . '</td>';
+				. (in_array('NCT/condition',$new_arr['edited']) ? ('border:2px solid #FF8080;') : '' ) . ' ">' . $val . '</td>';
 				
 			} else if($fqname == "NCT/intervention_name") {
 				
 				echo '<td style="background-color:#EDEAFF; ' 
-				. (in_array('NCT/intervention_name',$new_arr['edited']) ? ('border:2px solid #FF8080;') : '' )
-				. ' ">' . (is_array($val) ? implode(', ', $val) : $val) . '</td>';
+				. (in_array('NCT/intervention_name',$new_arr['edited']) ? ('border:2px solid #FF8080;') : '' ) . ' ">' 
+				. $val . '</td>';
 				
 			} else if($fqname == "NCT/phase") {
 			
-				$phase = (${$var}[$i]['NCT/phase']=='N/A') ? $ph : ('P' . $ph);
+				$phase = (${$var}[$i][$fqname] == 'N/A') ? $ph : ('P' . $ph);
 				echo '<td style="background-color:'.$phase_arr[$ph] . ';'
 				. (in_array('NCT/phase',$new_arr['edited']) ? ('border:2px solid #FF8080;') : '' ) . ' ">'
 				. $phase . '</td>';
 			
 			} else { 
-				echo '<td style="background-color:#EDEAFF;">' . (is_array($val) ? implode(', ', $val) : $val) . '</td>';
+				echo '<td style="background-color:#EDEAFF;">' . $val . '</td>';
 			}
 			
 		}
@@ -724,6 +728,11 @@ function fieldNameToPaddedId($name)
 	return '_' . $res['data_field_id'];
 }
 
+//Get html content by passing through htmlspecialchars
+function htmlformat($str)
+{
+	return htmlspecialchars($str);
+}
 ?>
 
 
