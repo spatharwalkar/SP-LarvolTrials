@@ -33,13 +33,20 @@ echo('</body></html>');
 function statMon()
 {
 	global $db;
-	$query = 'SELECT id,progress,max,note FROM progress WHERE what="heatmap" AND user=' . $db->user->id;
+	$query = 'SELECT id,progress,max,lastUpdate,note,TIME_TO_SEC(TIMEDIFF(NOW(),lastUpdate)) as expire FROM progress WHERE what="heatmap" AND user=' . $db->user->id;
 	$res = mysql_query($query) or die('Bad SQL query getting status');
 	if(mysql_num_rows($res) == 0) return;
-	
 	$out = '<form action="report_heatmap.php" method="post"><fieldset><legend>Status Monitor</legend><dl>';
 	while($row = mysql_fetch_assoc($res))
 	{
+		$expireTime = $row['expire'];
+		if($expireTime > 600)
+		{
+		$query = 'DELETE FROM progress WHERE id=' . mysql_real_escape_string($row['id']) . ' LIMIT 1';
+		mysql_query($query) or die('Bad report ID for cancelling run');
+		continue;
+		}
+		//print_r($row);die;
 		$query2 = 'SELECT name FROM rpt_heatmap WHERE id=' . $row['note'];
 		$res2 = mysql_query($query2) or die('Bad SQL query getting report name');
 		$res2 = mysql_fetch_assoc($res2);

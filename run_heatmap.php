@@ -78,6 +78,12 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 	$backboneAgent 	= $info['backbone_agent'] == 'Y';
 	$countactive 	= $info['count_only_active'] == 'Y';
 	
+	//options selected array
+	$optionsSelected = array();
+	$optionsSelected['bomb'] = $bomb;
+	$optionsSelected['backboneAgent'] = $backboneAgent;
+	$optionsSelected['countactive'] = $countactive;
+	
 	unset($oversearch['search']);
 	unset($oversearch['display']);
 	unset($oversearch['page']);
@@ -374,13 +380,13 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 
 	$info["pid"] = $pid;
 	if ($format == "xlsx")
-		return heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $phasenums);
+		return heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $phasenums,$optionsSelected);
 	else
-		return heatmapAsWord($info, $rows, $columns, $results, $p_colors, $return, $phasenums);
+		return heatmapAsWord($info, $rows, $columns, $results, $p_colors, $return, $phasenums,$optionsSelected);
 
 }
 
-function heatmapAsWord($info, $rows, $columns, $results, $p_colors, $return, $phasenums) {
+function heatmapAsWord($info, $rows, $columns, $results, $p_colors, $return, $phasenums,$optionsSelected=array()) {
 	global $now, $db;
 	$countactive = $info['count_only_active'] == 'Y';
 	$footnotes = $info['footnotes'];
@@ -451,6 +457,13 @@ function heatmapAsWord($info, $rows, $columns, $results, $p_colors, $return, $ph
 	$out .= 'Footnotes: '.htmlspecialchars($footnotes).'<br>';
 	$out .= 'Description: '.htmlspecialchars($description).'<br>';
 	$out .= 'Runtime: '.date("Y-m-d H:i:s", $now).'<br><br>';
+	if(count($optionsSelected)>1)
+	{
+		$options =  ($optionsSelected['bomb']==1)?'Bomb, ':'';
+		$options .= ($optionsSelected['backboneAgent']==1)?'Backbone Agent, ':'';
+		$options .= ($optionsSelected['countactive']==1)?'Count only active ':'';
+		$out .= 'Options Selected: '.$options.'<br><br>';
+	}
 	$out .= 'Legend:<br>';
 	$out .= '<table border="1" cellspacing="0" cellpadding="0"><tr>';
 	$width = (int)(100/count($p_colors));
@@ -498,7 +511,7 @@ function heatmapAsWord($info, $rows, $columns, $results, $p_colors, $return, $ph
 	}
 }
 
-function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $phasenums) {
+function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $phasenums,$optionsSelected=array()) {
 	global $now, $db;
 	$countactive = $info['count_only_active'] == 'Y';
 	$footnotes = $info['footnotes'];
@@ -592,6 +605,15 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 	$sheet->SetCellValue('A' . ++$row, 'Runtime:');
 	$sheet->SetCellValue('B' . $row++, date("Y-m-d H:i:s", $now));
 
+	if(count($optionsSelected)>1)
+	{
+		$options =  ($optionsSelected['bomb']==1)?'Bomb, ':'';
+		$options .= ($optionsSelected['backboneAgent']==1)?'Backbone Agent, ':'';
+		$options .= ($optionsSelected['countactive']==1)?'Count only active ':'';
+		$sheet->SetCellValue('A' . ++$row, 'Options Selected:');
+		$sheet->SetCellValue('B' . $row++, $options);
+	}	
+	
 	$sheet->SetCellValue('A' . $row, 'Legend:');
 	$col = 'A';
 	foreach($p_colors as $key => $color)
