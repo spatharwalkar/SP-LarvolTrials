@@ -379,7 +379,7 @@ if($count > $db->set['results_per_page'])
 
 echo('<br clear="all"/><br/>');
 echo('<form method="get" action="intermediary.php">'
-	.'<table border="0" width="50%" cellpadding="5" cellspacing="2">'
+	.'<table border="0" width="90%" cellpadding="5" cellspacing="2">'
     .'<tr><td width="5%">List</td><td width="25%" nowrap="nowrap">'
 	. '<input type="radio" id="actlist" name="list" checked="checked" value="active" '
 	. 'onchange="javascript: applyfilter(this.value);" />'
@@ -424,7 +424,7 @@ echo ('</td><td width="5%" nowrap="nowrap">Sort by</td><td width="25%"><select n
 	. '</form>');
 	
 echo '<table width="100%" border="0 " cellpadding="5" cellspacing="0" class="manage">'
- . '<tr><th rowspan="2" width="30%">Title</th>'
+ . '<tr><th rowspan="2" width="33%">Title</th>'
  . '<th rowspan="2" width="12%">N</th><th rowspan="2" width="14%">Status</th>'
  . '<th rowspan="2" width="15%">Conditions</th><th rowspan="2" width="15%">Interventions</th>'
  . '<th rowspan="2" width="10%">Study Dates</th><th rowspan="2" width="4%">Ph</th>'
@@ -458,12 +458,12 @@ if(count($$var) > 0) {
 		$end_year = date('Y',strtotime($end_date));
 	
 		echo '<tr>'//<td>' . ($pstart + $relrank++) . '.</td>'
-			. '<td class="title"><a href="http://clinicaltrials.gov/ct2/show/' 
+			. '<td class="title"><div class="rowcollapse"><a href="http://clinicaltrials.gov/ct2/show/' 
 			. ${$var}[$i]['NCT/nct_id'] . '">' . htmlformat(${$var}[$i]['NCT/brief_title']);
 			if(${$var}[$i]['NCT/acronym'] != '') {
 				echo '&nbsp;(' . htmlformat(${$var}[$i]['NCT/acronym']) . ')';
 			}
-		echo '</a></td>';
+		echo '</a></div></td>';
 		
 		foreach($displist as $dname => $fqname)
 		{ 
@@ -476,7 +476,8 @@ if(count($$var) > 0) {
 			if($fqname == "NCT/enrollment"){ 
 				
 				echo '<td nowrap="nowrap" style="background-color:#D8D3E0;text-align:center;'
-				. (in_array('NCT/enrollment',$new_arr['edited']) ? ('border:2px solid #FF8080;') : '' ) . ' ">';
+				. (in_array('NCT/enrollment',$new_arr['edited']) ? ('border:2px solid #FF8080;') : '' ) 
+				. ' "><div class="rowcollapse">';
 				
 					if(${$var}[$i]["NCT/enrollment_type"] != '') {
 					
@@ -493,13 +494,14 @@ if(count($$var) > 0) {
 						echo $val;
 					}
 				
-				echo '</td>';  
+				echo '</div></td>';  
 			
 			
 			}else if($fqname == "NCT/start_date") {
 			
 				echo '<td nowrap="nowrap" style="background-color:#EDEAFF; '
-				. (in_array('NCT/start_date',$new_arr['edited']) ? ('border:2px solid #FF8080;') : '' ) . ' ">' 
+				. (in_array('NCT/start_date',$new_arr['edited']) ? ('border:2px solid #FF8080;') : '' ) 
+				. ' "><div class="rowcollapse">' 
 				. date('m/Y',strtotime(${$var}[$i]["NCT/start_date"]))
 				. ($end_date != '' ? (' -- ' . date('m/Y',strtotime($end_date))) : '');
 				
@@ -519,33 +521,38 @@ if(count($$var) > 0) {
 					}
 				}*/
 				
-				echo '</td>';
+				echo '</div></td>';
 			
 			} else if($fqname == "NCT/overall_status") {
 			
 				echo '<td style="background-color:#D8D3E0;' 
-				. (in_array('NCT/overall_status',$new_arr['edited']) ? ('border:2px solid #FF8080;') : '' ) . ' ">' . $val . ' </td>';
+				. (in_array('NCT/overall_status',$new_arr['edited']) ? ('border:2px solid #FF8080;') : '' ) 
+				. ' "><div class="rowcollapse">' 
+				. $val . '</div></td>';
 			
 			} else if($fqname == "NCT/condition") {
 				
 				echo '<td style="background-color:#EDEAFF;' 
-				. (in_array('NCT/condition',$new_arr['edited']) ? ('border:2px solid #FF8080;') : '' ) . ' ">' . $val . '</td>';
+				. (in_array('NCT/condition',$new_arr['edited']) ? ('border:2px solid #FF8080;') : '' ) 
+				. ' "><div class="rowcollapse">' . $val . '</div></td>';
 				
 			} else if($fqname == "NCT/intervention_name") {
 				
 				echo '<td style="background-color:#EDEAFF; ' 
-				. (in_array('NCT/intervention_name',$new_arr['edited']) ? ('border:2px solid #FF8080;') : '' ) . ' ">' 
-				. $val . '</td>';
+				. (in_array('NCT/intervention_name',$new_arr['edited']) ? ('border:2px solid #FF8080;') : '' ) 
+				. ' "><div class="rowcollapse">' 
+				. $val . '</div></td>';
 				
 			} else if($fqname == "NCT/phase") {
 			
 				$phase = (${$var}[$i][$fqname] == 'N/A') ? $ph : ('P' . $ph);
 				echo '<td style="background-color:'.$phase_arr[$ph] . ';'
-				. (in_array('NCT/phase',$new_arr['edited']) ? ('border:2px solid #FF8080;') : '' ) . ' ">'
-				. $phase . '</td>';
+				. (in_array('NCT/phase',$new_arr['edited']) ? ('border:2px solid #FF8080;') : '' ) 
+				. ' "><div class="rowcollapse">' . $phase . '</div></td>';
 			
 			} else { 
-				echo '<td style="background-color:#EDEAFF;">' . $val . '</td>';
+				echo '<td style="background-color:#EDEAFF;"><div class="rowcollapse">' 
+				. $val . '</div></td>';
 			}
 			
 		}
