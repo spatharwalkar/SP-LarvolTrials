@@ -302,6 +302,7 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 	$orderby = array();
 	if(!empty($sorts))
 	{
+		$catjoin = ($lone_cond === NULL) ? 'clinical_study' : 'i';
 		$sortcats = array();
 		foreach($sorts as &$sort)
 		{
@@ -316,7 +317,7 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 		foreach($sortcats as $cat)
 		{
 			$sft = 'i_s' . $cat;
-			$sortjoins .= ' LEFT JOIN data_cats_in_study as ' . $sft . ' ON ' . $sft . '.larvol_id=i.larvol_id AND '
+			$sortjoins .= ' LEFT JOIN data_cats_in_study as ' . $sft . ' ON ' . $sft . '.larvol_id=' . $catjoin . '.larvol_id AND '
 						. $sft . '.category=1';
 		}unset($cat);
 		foreach($sorts as $sort)
@@ -338,7 +339,7 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 
 	if($lone_cond === NULL)	//in this case, there were no search parameters
 	{
-		$bigquery = 'SELECT larvol_id FROM clinical_study';
+		$bigquery = 'SELECT clinical_study.larvol_id FROM clinical_study' . $sortjoins;
 	}else{	//There were search parameters, so use them in the main query
 		$bigconds = array();
 		$bigconds[] = '(' . $lone_cond . ')';
