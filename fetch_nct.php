@@ -46,7 +46,6 @@ if(count($ids) == 0)
 	echo(count($ids) . ' new records out of ' . $reportednew . '.' . "\n<br />");
 	//Get and import the XML for all these new records
 	echo('Fetching record content...' . "\n<br />");
-	$progress_count=0;
 	foreach($ids as $id => $one)
 	{
 		echo('Getting XML for ' . $id . '... - ');
@@ -65,8 +64,7 @@ if(count($ids) == 0)
 				echo('Record imported.' . "\n<br />");
 			}
 		}
-		$progress_count++;
-		$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s",strtotime('now'))	. '",add_items_progress="' . $progress_count.'" WHERE update_id="'.$_GET['update_id'].'"';
+		$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s",strtotime('now'))	. '",add_items_progress=add_items_progress+1 WHERE update_id="'.$_GET['update_id'].'"';
 		$res = mysql_query($query) or die('Unable to update running');
 	}
 	
@@ -86,9 +84,6 @@ if(count($ids) == 0)
 	//Now that we have all updated NCTIDs from all pages, throw out the ones we already have the latest version of
 	echo('Checking which records are not already updated on our side...' . "\n<br />");
 	$reportednew = count($ids);
-	
-	$query = 'UPDATE update_status SET update_items_total="' . count($ids)	. '",update_items_start_time="' . date("Y-m-d H:i:s",strtotime('now')).'" WHERE update_id="'.$_GET['update_id'].'"';
-	$res = mysql_query($query) or die('Unable to update running'.mysql_error());
 	
 	//Find out the ID of the field for lastchanged_date
 	$query = 'SELECT data_fields.id AS "last_id" '
@@ -124,9 +119,12 @@ if(count($ids) == 0)
 	}
 
 	echo(count($ids) . ' new updates out of ' . $reportednew . '.' . "\n<br />");
+	
+	$query = 'UPDATE update_status SET update_items_total="' . count($ids)	. '",update_items_start_time="' . date("Y-m-d H:i:s",strtotime('now')).'" WHERE update_id="'.$_GET['update_id'].'"';
+	$res = mysql_query($query) or die('Unable to update running'.mysql_error());
+	
 	//Get and import the XML for all these new records
 	echo('Fetching record content...' . "\n<br />");
-	$progress_count=0;
 	foreach($ids as $id => $one)
 	{
 		echo('Getting XML for ' . $id . '... - ');
@@ -145,8 +143,7 @@ if(count($ids) == 0)
 				echo('Record imported.' . "\n<br />");
 			}
 		}
-		$progress_count++;
-		$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s",strtotime('now'))	. '",update_items_progress="' . $progress_count.'" WHERE update_id="'.$_GET['update_id'].'"';
+		$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s",strtotime('now'))	. '",update_items_progress=update_items_progress+1 WHERE update_id="'.$_GET['update_id'].'"';
 		$res = mysql_query($query) or die('Unable to update running');
 	}
 	
@@ -155,7 +152,7 @@ if(count($ids) == 0)
 	
 }
 echo('Done with updated items.' . "\n<br />" . "\n<br />");
-echo('Done with everything.');
+echo('Done with new and updated items.');
 
 //returned array maps the IDs to lastchanged dates
 function getIDs($type)
