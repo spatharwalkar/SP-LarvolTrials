@@ -37,6 +37,8 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 	$conditions = array();	//includes 'requires' and 'weak exclusions'
 	$g_conds = array();		//same as $conditions but for global fields
 	$strong_exclusions = array();
+	$sorts = array();	//array of Sort objects for sorting on normal fields
+	$g_sorts = array();	//array of global field names to sort on (including DESC for descending)
 	try{ 
 		foreach($params as $param)
 		{
@@ -47,18 +49,18 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 				case 'ascending':
 				if($global)
 				{
-					//todo:sort ascending on global field
+					$g_sorts[] = '`' . $param->field . '`';
 				}else{
-					//todo:sort ascending on categorized field
+					$sorts[] = new Sort(substr($param->field,1));
 				}
 				break;
 				
 				case 'descending':
 				if($global)
 				{
-					//todo:sort descending on global field
+					$g_sorts[] = '`' . $param->field . '` DESC';
 				}else{
-					//todo:sort descending on categorized field
+					$sorts[] = new Sort(substr($param->field,1),true);
 				}
 				break;
 				
@@ -286,7 +288,7 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 	}
 	
 	$bigquery;
-	if(!empty($override))
+	if(!empty($override))	//if there are nct overrides, start building the bigquery to include them now
 	{ 
 		mysql_query('DROP TABLE IF EXISTS ulid');
 		mysql_query('CREATE TEMPORARY TABLE ulid (larvol_id int NOT NULL)');
@@ -294,6 +296,44 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 		mysql_query('INSERT INTO ulid VALUES ' . implode(',', parenthesize($override)));
 		//$bigquery = ' UNION SELECT larvol_id FROM ulid';
 		$bigquery = ' OR larvol_id IN(SELECT larvol_id FROM ulid)';
+	}
+
+	$sortjoins = '';
+	$orderby = array();
+	if(!empty($sorts))
+	{
+		$sortcats = array();
+		foreach($sorts as &$sort)
+		{
+			$query = 'SELECT category,`type` FROM data_fields WHERE id=' . $sort->field . ' LIMIT 1';
+			$res = mysql_query($query); if($res === false) return softDie('Bad SQL query getting category of field for sorting');
+			$res = mysql_fetch_assoc($res); if($res === false) return softDie('Sort field not found.');
+			$sort->type = $res['type'];
+			$cat = $res['category'];
+			$sortcats[$cat] = $cat;
+			$sort->category = $cat;
+		}unset($sort);
+		foreach($sortcats as $cat)
+		{
+			$sft = 'i_s' . $cat;
+			$sortjoins .= ' LEFT JOIN data_cats_in_study as ' . $sft . ' ON ' . $sft . '.larvol_id=i.larvol_id AND '
+						. $sft . '.category=1';
+		}unset($cat);
+		foreach($sorts as $sort)
+		{
+			$sft = 'dv_s' . $sort->field;
+			$esft = $sft . '_e';
+			$sortjoins .= ' LEFT JOIN data_values as ' . $sft . ' ON i_s' . $sort->category . '.id='
+						. $sft . '.studycat AND ' . $sft . '.`field`=' . $sort->field . ' AND ' . str_replace('dv',$sft,$timecond);
+			$by = $sft . '.val_' . $sort->type;
+			if($sort->type == 'enum')
+			{
+				$sortjoins .= ' LEFT JOIN data_enumvals AS ' . $esft . ' ON ' . $esft . '.id=' . $sft . '.val_enum';
+				$by = $esft . '.`value`';
+			}
+			if($sort->desc) $by .= ' DESC';
+			$orderby[] = $by;
+		}unset($sort);
 	}
 
 	if($lone_cond === NULL)	//in this case, there were no search parameters
@@ -315,10 +355,9 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 		$bigquery = 'SELECT DISTINCT i.larvol_id AS "larvol_id" FROM '
 					. '(data_values AS dv '
 					. 'LEFT JOIN data_cats_in_study AS i ON dv.studycat=i.id '
-					. 'LEFT JOIN clinical_study ON i.larvol_id=clinical_study.larvol_id) '
-					. 'WHERE (' . $bigconds . ')' . $bigquery;
+					. 'LEFT JOIN clinical_study ON i.larvol_id=clinical_study.larvol_id)' . $sortjoins
+					. ' WHERE (' . $bigconds . ')' . $bigquery;
 	}
-
 
 	if($list === NULL)	//option to return total number of records instead of full search results
 	{
@@ -332,6 +371,12 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 	if($list === false)	//option to return the SQL query
 	{
 		return $bigquery;
+	}
+
+	if(!empty($g_sorts) || !empty($orderby))
+	{
+		$orderby = implode(',', array_merge($g_sorts,$orderby));
+		$bigquery .= ' ORDER BY ' . $orderby;
 	}
 
 	//apply limit
@@ -830,7 +875,20 @@ class dataDiff
 	public $newval;
 }
 
-//alexvp added function 
+//Information needed to do a sort on a Normal Field
+class Sort
+{
+	public $field;		//field number in data_fields
+	public $desc = false;	//true if sort is descending
+	public $category;
+	public $type;
+	function __construct($field, $desc = false)
+	{
+		$this->field = $field;
+		$this->desc = $desc;
+	}
+}
+
 function validateMaskPCRE($s)
 {
     $s=addslashes($s);
@@ -912,7 +970,6 @@ function validateInputPCRE($post)
 //alexvp end
 
 /**
-Added by Piyadarshini on 14 feb 2011
    * cmpdate()
    * @param int $a
    * @param int $b
