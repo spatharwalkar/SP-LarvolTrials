@@ -1,6 +1,8 @@
 <?php
 require_once('db.php');
 
+
+
 $SEARCH_ERR = NULL;
 
 /* Searches the database. Assumes input is already valid/escaped
@@ -17,6 +19,9 @@ $SEARCH_ERR = NULL;
 */
 function search($params=array(),$list=array('overall_status','brief_title'),$page=1,$time=NULL,$override=array())
 { 
+	//logger variable in db.php
+	global $logger;
+	
 	if($time !== NULL) $time = '"' . date('Y-m-d H:i:s',$time) . '"';
 	$timecond='';
 	if($time === NULL)
@@ -258,7 +263,14 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 		if($i > 0) $query .= ' AND FIND_IN_SET(i.larvol_id, @conds_' . ($i-1) . ') > 0';
 		$query .= ')';
 		//var_dump($query);
+		$time_start = microtime(true);
 		$res = mysql_query($query); if($res === false) return softDie('Bad SQL query applying search condition: ' . $query);
+		$time_end = microtime(true);
+		$time_taken = $time_end-$time_start;
+		$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments:execute the queries and gather results';
+		$logger->info($log);
+		unset($log);
+		//
 	}
 	
 	foreach($g_conds as $i => $cond)
@@ -268,7 +280,14 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 				. '(SELECT GROUP_CONCAT(larvol_id) FROM clinical_study WHERE ' . $cond;
 		if($ii > 0) $query .= ' AND FIND_IN_SET(larvol_id, @conds_' . ($ii-1) . ') > 0';
 		$query .= ')';
+		$time_start = micotime(true);
 		$res = mysql_query($query);
+		$time_end = microtime(true);
+		$time_taken = $time_end-$time_start;
+		$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments:global conditions loop';
+		$logger->info($log);
+		unset($log);
+		
 		if($res === false) return softDie('Bad SQL query applying search condition (global field)'.mysql_error().$query);
 	}
 	
@@ -284,16 +303,46 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 		}
 		$seq = 'SET @seq_union := (SELECT GROUP_CONCAT(larvol_id) as "larvol_id" FROM ('
 				. implode(' UNION ',$seq) . ') AS resultset)';
+		$time_start = microtime(true);
 		$seq = mysql_query($seq); if($seq === false) return softDie('Bad SQL query applying strong exclusions');
+		$time_end = microtime(true);
+		$time_taken = $time_end-$time_start;
+		$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$seq.'#Comments:strong exclusions present';
+		$logger->info($log);
+		unset($log);
+		
 	}
 	
 	$bigquery;
 	if(!empty($override))	//if there are nct overrides, start building the bigquery to include them now
 	{ 
-		mysql_query('DROP TABLE IF EXISTS ulid');
-		mysql_query('CREATE TEMPORARY TABLE ulid (larvol_id int NOT NULL)');
+		$drop_query = 'DROP TABLE IF EXISTS ulid';
+		$time_start = microtime(true);
+		mysql_query($drop_query);
+		$time_end = microtime(true);
+		$time_taken = $time_end-$time_start;
+		$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$drop_query.'#Comments:overrides dropping table ulid';
+		$logger->info($log);
+		unset($log);
 		
-		mysql_query('INSERT INTO ulid VALUES ' . implode(',', parenthesize($override)));
+		$create_temp_query = 'CREATE TEMPORARY TABLE ulid (larvol_id int NOT NULL)';
+		$time_start = microtime(true);
+		mysql_query($create_temp_query);
+		$time_end = microtime(true);
+		$time_taken = $time_end-$time_start;
+		$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$create_temp_query.'#Comments:overrides, creating temporary table ulid';
+		$logger->info($log);
+		unset($log);	
+		
+		$insert_query = 'INSERT INTO ulid VALUES ' . implode(',', parenthesize($override));//temp variable only for logging purpose
+		$time_start = microtime(true);
+		mysql_query($insert_query);
+		$time_end = microtime(true);
+		$time_taken = $time_end-$time_start;
+		$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$insert_query.'#Comments:overrides,inserting into ulid';
+		$logger->info($log);
+		unset($log);	
+		
 		//$bigquery = ' UNION SELECT larvol_id FROM ulid';
 		$bigquery = ' OR larvol_id IN(SELECT larvol_id FROM ulid)';
 	}
@@ -363,7 +412,15 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 	if($list === NULL)	//option to return total number of records instead of full search results
 	{
 		$bigquery = 'SELECT COUNT(larvol_id) AS "ctotal" FROM (' . $bigquery . ') AS resultset';
+		$time_start = microtime(true);
 		$res = mysql_query($bigquery);
+		$time_end = microtime(true);
+		$time_taken = $time_end-$time_start;
+		$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$bigquery.'#Comments:option to return total number of records instead of full search results';
+		$logger->info($log);
+		unset($log);	
+				
+		
 		if($res === false) return softDie('Bad SQL query on count search: ' . $bigquery . "<br />\n" . mysql_error());
 		$row = mysql_fetch_assoc($res) or die('Total not found.');
 		return $row['ctotal'];
@@ -401,7 +458,14 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 	$bigquery .= $limit;
 	//var_dump($bigquery);exit;
 	//Do search and get result IDs for the page
+	$time_start = microtime(true);
 	$res = mysql_query($bigquery);
+	$time_end = microtime(true);
+	$time_taken = $time_end-$time_start;
+	$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$bigquery.'#Comments:do search and get result IDs for the page';
+	$logger->info($log);
+	unset($log);	
+	
 	if($res === false) return softDie('Bad SQL query on search: ' . $bigquery . "<br />\n" . mysql_error());
 	$resid_set = array();
 	while($row = mysql_fetch_assoc($res)) $resid_set[] = $row['larvol_id'];
@@ -432,15 +496,27 @@ function getBackboneAgent($params)
 
 function applyBackboneAgent($ids, $term)
 {
+	//logger variable in db.php
+	global $logger;	
+	
 	if(count($ids) == 0) return array();
 	$ids = implode(",", $ids);
 	$interventionId = getFieldId("NCT", "intervention_name");
-	$rs = mysql_query("SELECT DISTINCT i.larvol_id AS id
-	FROM data_cats_in_study AS i
-	INNER JOIN data_values AS dv ON i.id = dv.studycat AND
-		dv.field = ".$interventionId."
-	WHERE i.larvol_id IN (".$ids.") AND dv.superceded IS NULL AND
-		dv.val_varchar <> '".mysql_real_escape_string($term)."'");
+	$apply_backbone_agent_query = "SELECT DISTINCT i.larvol_id AS id
+			FROM data_cats_in_study AS i
+			INNER JOIN data_values AS dv ON i.id = dv.studycat AND
+			dv.field = ".$interventionId."
+			WHERE i.larvol_id IN (".$ids.") AND dv.superceded IS NULL AND
+			dv.val_varchar <> '".mysql_real_escape_string($term)."'";
+	$time_start = microtime(true);
+	$rs = mysql_query($apply_backbone_agent_query);
+	
+	$time_end = microtime(true);
+	$time_taken = $time_end-$time_start;
+	$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$apply_backbone_agent_query.'#Comments:apply backbone agent';
+	$logger->info($log);
+	unset($log);	
+	
 	$result = array();
 	while ($row = mysql_fetch_assoc($rs))
 		$result[] = $row["id"];
@@ -465,7 +541,14 @@ function getActiveCount($all_ids, $time)
 					WHERE i.larvol_id IN (".$ids.") AND dv.field = ".$overallStatusId." AND
 					dv.val_enum IN (".$activeStatuses.") AND dv.added < " . $time 
 					. " AND ( dv.superceded>" . $time . " OR dv.superceded IS NULL) ";
+	$time_start = microtime(true);					
 	$res = mysql_query($query);
+	$time_end = microtime(true);
+	$time_taken = $time_end-$time_start;
+	$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments:get active count';
+	$logger->info($log);
+	unset($log);	
+	
 	$id_set = array();
 	if($res === false) return softDie('Bad SQL query on active status : ' . $query . "<br />\n" . mysql_error());
 	while($row = mysql_fetch_array($res)) $id_set[] = $row['id'];
@@ -475,6 +558,9 @@ function getActiveCount($all_ids, $time)
 
 function getBomb($ids)
 {
+	//logger variable in db.php
+	global $logger;
+		
 	if (count($ids) == 0)
 		return "";
 	$overallStatusId = getFieldId("NCT", "overall_status");//echo "<pre>";print_r($ids);exit;
@@ -487,32 +573,57 @@ function getBomb($ids)
 		getEnumvalId($overallStatusId, "Enrolling by invitation");
 	$ids = implode(",", $ids);
 	$past = "'".date("Y-m-d H:i:s", time() - (int)(0.1*1.5*24*3600))."'";
-	$rs = mysql_query("SELECT i.larvol_id AS id FROM data_values AS dv
-	LEFT JOIN data_cats_in_study AS i ON dv.studycat=i.id
-	WHERE dv.field = ".$overallStatusId." AND
-		dv.val_enum IN (".$terminatedId.",".$suspendedId.") AND
-		i.larvol_id IN (".$ids.") AND dv.added < ".$past." AND
-		dv.superceded IS NULL");
+	
+	$get_bomb_query1 = "SELECT i.larvol_id AS id FROM data_values AS dv
+			LEFT JOIN data_cats_in_study AS i ON dv.studycat=i.id
+			WHERE dv.field = ".$overallStatusId." AND
+			dv.val_enum IN (".$terminatedId.",".$suspendedId.") AND
+			i.larvol_id IN (".$ids.") AND dv.added < ".$past." AND
+			dv.superceded IS NULL";
+	$time_start = microtime(true);	
+	$rs = mysql_query($get_bomb_query1);
+	$time_end = microtime(true);
+	$time_taken = $time_end-$time_start;
+	$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$get_bomb_query1.'#Comments:get trial rows';
+	$logger->info($log);
+	unset($log);	
+	
 	$trials = array();
 	while ($row = mysql_fetch_assoc($rs))
 		$trials[] = $row["id"];
 	if (count($trials) == 0)
 		return "";
 	$trials = implode(",", $trials);
-	$rs = mysql_query("SELECT MAX(val_enum) AS phase FROM data_values AS dv
-	LEFT JOIN data_cats_in_study AS i ON dv.studycat=i.id
-	WHERE dv.field = ".$phaseId." AND dv.superceded IS NULL AND
-		i.larvol_id IN (".$ids.") AND i.larvol_id NOT IN (".$trials.")");
+	$get_bomb_query2 = "SELECT MAX(val_enum) AS phase FROM data_values AS dv
+			LEFT JOIN data_cats_in_study AS i ON dv.studycat=i.id
+			WHERE dv.field = ".$phaseId." AND dv.superceded IS NULL AND
+			i.larvol_id IN (".$ids.") AND i.larvol_id NOT IN (".$trials.")";
+	$time_start = microtime(true);
+	$rs = mysql_query($get_bomb_query2);
 	$row = mysql_fetch_assoc($rs);
+	$time_end = microtime(true);
+	$time_taken = $time_end-$time_start;
+	$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$get_bomb_query2.'#Comments:get phase';
+	$logger->info($log);
+	unset($log);	
+	
 	$phase = $row["phase"];
-	$rs = mysql_query("SELECT 1 FROM data_values AS dv1
-	INNER JOIN data_cats_in_study AS i ON dv1.studycat=i.id
-	INNER JOIN data_values AS dv2 ON dv2.studycat=i.id
-	WHERE dv1.field = ".$phaseId." AND dv1.superceded IS NULL AND
-		dv1.val_enum = ".$phase." AND i.larvol_id IN (".$ids.") AND
-		i.larvol_id NOT IN (".$trials.") AND
-		dv2.field = ".$overallStatusId." AND dv2.superceded IS NULL AND
-		dv2.val_enum IN (".$bombStatuses.")");
+	$get_bomb_query3 = "SELECT 1 FROM data_values AS dv1
+			INNER JOIN data_cats_in_study AS i ON dv1.studycat=i.id
+			INNER JOIN data_values AS dv2 ON dv2.studycat=i.id
+			WHERE dv1.field = ".$phaseId." AND dv1.superceded IS NULL AND
+			dv1.val_enum = ".$phase." AND i.larvol_id IN (".$ids.") AND
+			i.larvol_id NOT IN (".$trials.") AND
+			dv2.field = ".$overallStatusId." AND dv2.superceded IS NULL AND
+			dv2.val_enum IN (".$bombStatuses.")";
+	$time_start = microtime(true);
+	$rs = mysql_query($get_bomb_query3);
+	$time_end = microtime(true);
+	$time_taken = $time_end-$time_start;
+	$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$get_bomb_query3.'#Comments:find sb or lb';
+	$logger->info($log);
+	unset($log);	
+	
 	if (mysql_fetch_assoc($rs))
 		return "sb";
 	return "lb";
@@ -523,7 +634,10 @@ function highPass($v){return substr($v,1);}
 //return an array of study maps corresponding to $ids, with only $fields populated
 function getRecords($ids,$fields,$time)
 {
+	
 	global $db;
+	//logger variable in db.php
+	global $logger;	
 	$result = array();
 	if(empty($ids)) return $result;
 	$global = array('larvol_id');
@@ -548,7 +662,15 @@ function getRecords($ids,$fields,$time)
 	}
 	$fields = array_map('highPass', $fields);
 	$query = 'SELECT ' . implode(',', $global) . ' FROM clinical_study WHERE larvol_id IN(' . implode(',', $ids) . ')';
+	
+	$time_start = microtime(true);
 	$res = mysql_query($query);
+	$time_end = microtime(true);
+	$time_taken = $time_end-$time_start;
+	$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments:get records query 1';
+	$logger->info($log);
+	unset($log);	
+		
 	if($res === false) return softDie('Bad SQL query getting global fields for result list<br />'.$query);
 	while($row = mysql_fetch_assoc($res))
 	{
@@ -577,7 +699,16 @@ function getRecords($ids,$fields,$time)
 				. ' WHERE ' . $time
 				. ' AND data_values.`field` IN(' . implode(',', $fields) . ') AND larvol_id IN(' . implode(',', $ids) . ')';
 		
+				
+		$time_start = microtime(true);
 		$res = mysql_query($query);
+		$time_end = microtime(true);
+		$time_taken = $time_end-$time_start;
+		$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments:get records query 2';
+		$logger->info($log);
+		unset($log);	
+		
+		
 		if($res === false) return softDie('Bad SQL query getting data for result set<br />'.$query.'<br />'.mysql_error());
 		while($row = mysql_fetch_assoc($res))
 		{	
@@ -628,10 +759,21 @@ function storeParams($params)
 //returns false on failure.
 function getFieldId($category,$name)
 {
+	//logger variable in db.php
+	global $logger;	
+	
 	$query = 'SELECT data_fields.id AS "id" '
 		. 'FROM data_fields LEFT JOIN data_categories ON data_fields.category=data_categories.id '
 		. 'WHERE data_fields.name="' . $name . '" AND data_categories.name="' . $category . '" LIMIT 1';
+		
+	$time_start = microtime(true);
 	$res = mysql_query($query);
+	$time_end = microtime(true);
+	$time_taken = $time_end-$time_start;
+	$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments:get field id query 2';
+	$logger->info($log);
+	unset($log);	
+	
 	if($res === false) return softDie('Bad SQL query getting field ID of ' . $category . '/' . $name);
 	$res = mysql_fetch_assoc($res);
 	if($res === false) return softDie('Field ' . $name . ' not found in category ' . $category . '!');
@@ -641,9 +783,19 @@ function getFieldId($category,$name)
 //gets the ID of an enum value (from data_enumvals) given the field ID and string value
 function getEnumvalId($fieldId,$value)
 {
+	//logger variable in db.php
+	global $logger;	
+	
 	if($value === NULL || $value === 'NULL') return 'NULL';
 	$query = 'SELECT id FROM data_enumvals WHERE `field`=' . $fieldId . ' AND `value`="' . $value . '" LIMIT 1';
+	$time_start = microtime(true);
 	$res = mysql_query($query);
+	$time_end = microtime(true);
+	$time_taken = $time_end-$time_start;
+	$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments:get enum val id';
+	$logger->info($log);
+	unset($log);	
+		
 	if($res === false) return softDie('Bad SQL query getting ID of enumval ' . $value . ' in field ' . $fieldId);
 	$res = mysql_fetch_assoc($res);
 	if($res === false) return softDie('Enumval ' . $value . ' invalid for field ' . $fieldId . '!');
@@ -811,13 +963,23 @@ function prepareParams($post)
 //converts an nct_id to a larvol_id. Returns boolean false on failure.
 function nctidToLarvolid($id)
 {
+	//logger variable in db.php
+	global $logger;	
+
 	$id = (int)$id;
 	if(!is_numeric($id)) return false;
 	$field = getFieldId('NCT','nct_id');
 	if($field === false) return false;
 	$query = 'SELECT larvol_id FROM data_values LEFT JOIN data_cats_in_study ON data_values.studycat=data_cats_in_study.id'
 			. ' WHERE superceded IS NULL AND `field`=' . $field . ' AND val_int=' . ((int)unpadnct($id)) . ' LIMIT 1';
+	$time_start = microtime(true);
 	$res = mysql_query($query);
+	$time_end = microtime(true);
+	$time_taken = $time_end-$time_start;
+	$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments:nctid to larvol id';
+	$logger->info($log);
+	unset($log);	
+	
 	if($res === false) return false;
 	$res = mysql_fetch_assoc($res);
 	if($res === false) return false;
@@ -892,10 +1054,19 @@ class Sort
 
 function validateMaskPCRE($s)
 {
-    $s=addslashes($s);
+	//logger variable in db.php
+	global $logger;	
+	
+	$s=addslashes($s);
 	$query = "SELECT PREG_CHECK('$s')";
 
+	$time_start = microtime(true);
 	$res = mysql_query($query);
+	$time_end = microtime(true);
+	$time_taken = $time_end-$time_start;
+	$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments:validateMaskPCRE';
+	$logger->info($log);
+	unset($log);	
 	if($res === false) return softDie('Bad SQL query on search: ' . $query . "<br />\n" . mysql_error());
 
 	list($check)=mysql_fetch_row($res);
@@ -905,6 +1076,8 @@ function validateMaskPCRE($s)
 function validateInputPCRE($post)
 {
     global $db;
+	//logger variable in db.php
+	global $logger;	    
 
     $badFields=array();
 	if(isset($post['action']) && is_array($post['action']))
@@ -935,7 +1108,13 @@ function validateInputPCRE($post)
 				//need in field name !
 				$CFid = substr($field,1);
 				$query = 'SELECT name FROM data_fields WHERE id=' . $CFid;
+				$time_start = microtime(true);
 				$res = mysql_query($query) or die('Bad SQL query getting field name for '.$CFid);
+				$time_end = microtime(true);
+				$time_taken = $time_end-$time_start;
+				$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments:validateInputPCRE query 1';
+				$logger->info($log);
+				unset($log);	
 				list($fieldName)=mysql_fetch_row($res);
 				$fieldName=str_replace("_"," ",$fieldName);
 				$badFields[$fieldName]=$mask;
@@ -945,7 +1124,13 @@ function validateInputPCRE($post)
 				//need in field name !
 				$CFid = substr($field,1);
 				$query = 'SELECT name FROM data_fields WHERE id=' . $CFid;
+				$time_start = microtime(true);
 				$res = mysql_query($query) or die('Bad SQL query getting field name for '.$CFid);
+				$time_end = microtime(true);
+				$time_taken = $time_end-$time_start;
+				$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments:validateInputPCRE query 2';
+				$logger->info($log);
+				unset($log);	
 				list($fieldName)=mysql_fetch_row($res);
 				$fieldName=str_replace("_"," ",$fieldName);
 				$badFields[$fieldName]=$mask2;
