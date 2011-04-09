@@ -46,6 +46,7 @@ if(count($ids) == 0)
 	echo(count($ids) . ' new records out of ' . $reportednew . '.' . "\n<br />");
 	//Get and import the XML for all these new records
 	echo('Fetching record content...' . "\n<br />");
+	$progress_count=0;
 	foreach($ids as $id => $one)
 	{
 		echo('Getting XML for ' . $id . '... - ');
@@ -64,7 +65,8 @@ if(count($ids) == 0)
 				echo('Record imported.' . "\n<br />");
 			}
 		}
-		$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s",strtotime('now'))	. '",add_items_progress=add_items_progress+1 WHERE update_id="'.$_GET['update_id'].'"';
+		$progress_count++;
+		$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s",strtotime('now'))	. '",add_items_progress="' . $progress_count.'" WHERE update_id="'.$_GET['update_id'].'"';
 		$res = mysql_query($query) or die('Unable to update running');
 	}
 	
@@ -125,6 +127,7 @@ if(count($ids) == 0)
 	
 	//Get and import the XML for all these new records
 	echo('Fetching record content...' . "\n<br />");
+	$progress_count=0;
 	foreach($ids as $id => $one)
 	{
 		echo('Getting XML for ' . $id . '... - ');
@@ -143,7 +146,8 @@ if(count($ids) == 0)
 				echo('Record imported.' . "\n<br />");
 			}
 		}
-		$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s",strtotime('now'))	. '",update_items_progress=update_items_progress+1 WHERE update_id="'.$_GET['update_id'].'"';
+		$progress_count++;
+		$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s",strtotime('now'))	. '",update_items_progress="' . $progress_count.'" WHERE update_id="'.$_GET['update_id'].'"';
 		$res = mysql_query($query) or die('Unable to update running');
 	}
 	
