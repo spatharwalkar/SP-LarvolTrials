@@ -8,55 +8,38 @@ body{
 td,th{
 	vertical-align:top;
 }
-th{
-	text-align:center;
-}
-.status{
-	color:#F00;
-}
-dl{
-	font-weight:normal;
-	margin:0 0 6em 20px;
-}
-dd,dt{
-	float:left;
-}
-dd{
-	display:inline;
-}
-dt{
-	display:block;
-	clear:both;
-	width:150px;
-}
-iframe{
-	height:1.2em;
-	width:5em;
-	border:0;margin:0;padding:0;
-}
-.permSel select{
-	float:right;
-	margin-bottom:.1em;
-}
 
-.permSel{
-	height:1.2em;
-	display:block;
+.drop{
+	height:4.4em;
+	display:inline-block;
+	float:none;
+	vertical-align:top;
+	text-align:left;
+	background-color:#55bbee;
+	opacity:0.92;
+	filter:alpha(opacity=92);
 	overflow:hidden;
-	background-color: #55bbee;
+	padding:0 2px 0 2px;
+	position:relative;
+	z-index:99;
 }
 
-.permSel:hover,.permSel.hover{
-	height:auto;
-}
+.drop .text					{clear:both;text-align:center;padding:10px;}
+.drop:hover, .drop.hover	{height:auto;overflow:visible;}
 
 
+.block 				{float:left;padding:10px;}
+.text 				{clear:both;text-align:center;padding-bottom:10px;}
+.clear 				{clear:both;}
 
-.title				{background-color:#8064A2; color:#FFFFFF;font-size:15px;font-weight:bold;}
-.title	a			{color:#FFFFFF;text-decoration:none;position: relative;display:block;}
-.title	a:hover		{color:#FFFFFF;text-decoration:underline;}
+.title				{background-color:#EDEAFF;}
+.title	a			{text-decoration:none;color:#000000;}
+.title	a:hover		{text-decoration:none;color:#000000;}
 .manage 			{font-weight:normal;border-top:1px solid blue;border-left:1px solid blue;}
-.manage th			{color:#0000FF;border-right:1px solid blue;border-bottom:1px solid blue;}
-.manage td			{border-right:1px solid blue;border-bottom:1px solid blue;	margin-bottom:0;padding-bottom:0;overflow:hidden;}
-.rowcollapse 		{vertical-align:top;max-height:2.7em;overflow:visible;padding-bottom:0;margin-bottom:0;}
+.manage th			{color:#0000FF;border-right:1px solid blue;border-bottom:1px solid blue;white-space:nowrap;}
+.manage td			{border-right:1px solid blue;border-bottom:1px solid blue;	margin:0;padding:0;overflow:hidden;}
+.rowcollapse 		{vertical-align:top;max-height:2.5em;overflow:visible;padding-top:0;margin:0;}
 .rowcollapse:hover 	{max-height:none;}
+.message			{font-weight:normal;color:#ff0000;float:left;margin-top:20px;width:155px;}
+.bomb				{font-size:11px;float:left;margin-top:20px;width:180px;text-align:center;}
+.result				{font-size:18px;margin-top:15px;text-decoration:underline;float:left;text-align:right;}
