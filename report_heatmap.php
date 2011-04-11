@@ -76,7 +76,7 @@ function editor()
 	if(!isset($_GET['id'])) return;
 	$id = mysql_real_escape_string(htmlspecialchars($_GET['id']));
 	if(!is_numeric($id)) return;
-	$query = 'SELECT name,user,footnotes,description,searchdata,bomb,backbone_agent,count_only_active FROM rpt_heatmap WHERE id=' . $id . ' LIMIT 1';
+	$query = 'SELECT name,user,footnotes,description,searchdata,bomb,backbone_agent,count_only_active,category FROM rpt_heatmap WHERE id=' . $id . ' LIMIT 1';
 	$res = mysql_query($query) or die('Bad SQL query getting report');
 	$res = mysql_fetch_array($res) or die('Report not found.');
 	$rptu = $res['user'];
@@ -87,6 +87,7 @@ function editor()
 	$bomb = $res['bomb'];
 	$backboneAgent = $res['backbone_agent'];
 	$countonlyactive = $res['count_only_active'];
+	$category = $res['category'];
 	
 	$unisearchdata = $res['searchdata'] !== NULL;
 	$query = 'SELECT `header`,`num`,`type`,searchdata FROM rpt_heatmap_headers WHERE report=' . $id . ' ORDER BY num ASC';
@@ -143,7 +144,9 @@ function editor()
 		. '<form action="report_heatmap.php" method="post"><fieldset><legend>Edit report ' . $id . '</legend>'
 		. '<input type="hidden" name="id" value="' . $id . '" />'
 		. '<label>Name: <input type="text" name="reportname" value="' . htmlspecialchars($name)
-		. '"/></label>';
+		. '"/></label>'
+		. '<label>Category: <input type="text" name="reportcategory" value="' . htmlspecialchars($category)
+		. '"/></label>';		
 	if($db->user->userlevel != 'user')
 	{
 		$out .= ' Ownership: '
@@ -384,7 +387,7 @@ function postEd()
 		
 		$query = 'UPDATE rpt_heatmap SET name="' . mysql_real_escape_string($_POST['reportname']) . '",user=' . $owner
 					. ',footnotes="' . $footnotes . '",description="' . $description . '",bomb="'
-					. $bomb . '",backbone_agent="'.$backboneAgent.'"' . ',count_only_active="'.$countonlyactive.'"' 
+					. $bomb . '",backbone_agent="'.$backboneAgent.'"' . ',count_only_active="'.$countonlyactive.'"' . ',category="'.mysql_real_escape_string($_POST['reportcategory']).'"' 
 					. ' WHERE id=' . $id . ' LIMIT 1';
 		mysql_query($query) or die('Bad SQL Query saving name');
 		foreach($types as $t)
@@ -651,18 +654,36 @@ function reportList()
 			. '<input type="submit" name="makenew" value="Create new" style="float:none;" /></form><br clear="all"/>'
 			. '<form name="reportlist" method="post" action="report_heatmap.php" class="lisep" onsubmit="return delsure();">'
 			. '<fieldset><legend>Select Report</legend><ul>';
-	$query = 'SELECT id,name,user FROM rpt_heatmap WHERE user IS NULL OR user=' . $db->user->id . ' ORDER BY user';
+	$query = 'SELECT id,name,user,category FROM rpt_heatmap WHERE user IS NULL OR user=' . $db->user->id . ' ORDER BY user';
 	$res = mysql_query($query) or die('Bad SQL query retrieving report names');
-	while($row = mysql_fetch_array($res))
+	$res1 = mysql_query($query) or die('Bad SQL query retrieving report names');
+	$categoryArr  = array('');
+	$outArr = array();
+	while($row = mysql_fetch_array($res1))
 	{
-		$ru = $row['user'];
-		$out .= '<li' . ($ru === NULL ? ' class="global"' : '') . '><a href="report_heatmap.php?id=' . $row['id'] . '">'
-				. htmlspecialchars(strlen($row['name'])>0?$row['name']:('(report '.$row['id'].')')) . '</a>';
-		if($ru == $db->user->id || ($ru === NULL && $db->user->userlevel != 'user'))
+		if($row['category'])
+		$categoryArr[$row['category']] = $row['category'];
+		$outArr[] = $row;
+	}
+	sort($categoryArr);
+	
+	foreach($categoryArr as $category)
+	{
+		$out .= '<li>'.ucwords(strtolower($category)).'<ul>';
+		foreach($outArr as $row)
 		{
-			$out .= ' &nbsp; &nbsp; &nbsp; <input type="image" name="delrep[' . $row['id']. ']" src="images/not.png" title="Delete"/>';
+			if($row['category']== $category)
+			{
+				$out .= '<li' . ($ru === NULL ? ' class="global"' : '') . '><a href="report_heatmap.php?id=' . $row['id'] . '">'
+						. htmlspecialchars(strlen($row['name'])>0?$row['name']:('(report '.$row['id'].')')) . '</a>';
+				if($ru == $db->user->id || ($ru === NULL && $db->user->userlevel != 'user'))
+				{
+					$out .= ' &nbsp; &nbsp; &nbsp; <input type="image" name="delrep[' . $row['id']. ']" src="images/not.png" title="Delete"/>';
+				}
+				$out .= '</li>';				
+			}
 		}
-		$out .= '</li>';
+		$out .='</ul></li>';
 	}
 	$out .= '</ul></fieldset></form></div>';
 	return $out;
