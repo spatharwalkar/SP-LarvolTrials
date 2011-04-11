@@ -20,6 +20,7 @@ if(isset($_GET['direct_run_heatmap_id'])) runHeatmap((int)$_GET['direct_run_heat
 
 function runHeatmap($id, $return = false, $format = "xlsx")
 {
+	global $logger;
 	if($return)
 	{
 		//Get variables corresponding to the primary key in reports_status
@@ -27,21 +28,27 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 		{
 			$run_id = (int)$_GET['run_id'];
 		}else{
-			die('Need to set $_GET[\'run_id\']');
+			$logger = 'Need to set $_GET[\'run_id\']';
+			$logger->fatal($log);
+			die($log);
 		}
 		
 		if(isset($_GET['report_type']))
 		{
 			$report_type = (int)$_GET['report_type'];
 		}else{
-			die('Need to set $_GET[\'report_type\']');
+			$log = 'Need to set $_GET[\'report_type\']';
+			$logger->fatal($log);
+			die($log);
 		}
 		
 		if(isset($_GET['type_id']))
 		{
 			$type_id = (int)$_GET['type_id'];
 		}else{
-			die('Need to set $_GET[\'type_id\']');
+			$log = 'Need to set $_GET[\'type_id\']';
+			$logger->fatal($log);
+			die($log);
 		}
 	}
 	global $now;

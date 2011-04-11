@@ -17,7 +17,14 @@ echo('</body></html>');
 function settingsControl()
 {
 	global $db;
-	mysql_query('BEGIN') or die("Couldn't begin SQL transaction for settings mgmt");
+	global $logger;
+	
+	if(! mysql_query('BEGIN'))
+	{
+		$log = "Couldn't begin SQL transaction for settings mgmt";
+		$logger->fatal($log);
+		die($log);
+	}
 
 	if(isset($_POST['settingsedit_save']))
 	{
@@ -30,7 +37,12 @@ function settingsControl()
 			if(trim($value)!='')
 			{
 				$query = 'UPDATE settings SET value="' . $value . '" WHERE name="'. $settings . '" LIMIT 1';
-				mysql_query($query) or die('Bad SQL query for saving edits to settings');
+				if(!mysql_query($query))
+				{
+					$log = 'Bad SQL query for saving edits to settings';
+					$logger->fatal($log);
+					die($log);
+				}
 				$db->set[$settings] = $value;
 			}
 		}
@@ -51,7 +63,12 @@ function settingsControl()
 		$out .='<tr><td colspan="2"><input type="submit" name="settingsedit_save" value="Save edits" /></td></tr>';
 		$out .= '</table>';
 	}
-	mysql_query('COMMIT') or die("Couldn't commit SQL transaction for settings mgmt");
+	if(!mysql_query('COMMIT'))
+	{
+		$log = "Couldn't commit SQL transaction for settings mgmt";
+		$logger->fatal($log);
+		die($log);
+	}
 	return $out . '</fieldset></form>';
 }
 
