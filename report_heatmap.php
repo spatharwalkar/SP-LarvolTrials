@@ -672,6 +672,7 @@ function reportList()
 		$out .= '<li>'.ucwords(strtolower($category)).'<ul>';
 		foreach($outArr as $row)
 		{
+			$ru = $row['user'];
 			if($row['category']== $category)
 			{
 				$out .= '<li' . ($ru === NULL ? ' class="global"' : '') . '><a href="report_heatmap.php?id=' . $row['id'] . '">'
