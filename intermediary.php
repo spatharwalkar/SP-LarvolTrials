@@ -191,18 +191,16 @@ $third_yr	= date('Y')+2;
 
 //checking if these has been edited to highlight changes
 $new_arr = array();
-foreach($arr as $key=>$val) {
+
+foreach($arr as $key=>$val) { 
 
 	$nct = getNCT($val['NCT/nct_id'], $gentime, $edited); 
 	if (!is_array($nct)) { 
 		$nct=array();
 		$val['NCT/intervention_name'] = '(study not in database)';
 	}
-
-	$new_arr = array_merge($nct, $val);
-}
-
-foreach($arr as $key=>$val) { 
+	$id = 'NCT' . str_pad($val['NCT/nct_id'],8,0,STR_PAD_LEFT);
+	$new_arr[$id] = array_merge($nct, $val);
 
 if($val['NCT/overall_status'] == 'Not yet recruiting' || $val['NCT/overall_status'] == 'Recruiting' || 
 		$val['NCT/overall_status'] == 'Enrolling by invitation' || $val['NCT/overall_status'] == 'Active, not recruiting' || 
@@ -487,10 +485,11 @@ if(count($$var) > 0) {
 				}
 				
 		echo '</a></div></td>';
-		
+		$highlight_arr = '';
 		foreach($displist as $dname => $fqname)
 		{ 
 			$val = ${$var}[$i][$fqname];
+			$highlight_arr = ${$var}[$i]['NCT/nct_id'];
 			if( is_array( $val ) )
 				$val = htmlformat(implode(', ', $val));
 			else
@@ -499,7 +498,7 @@ if(count($$var) > 0) {
 			if($fqname == "NCT/enrollment"){ 
 				
 				echo '<td nowrap="nowrap" style="background-color:#D8D3E0;text-align:center;'
-					. (in_array('NCT/enrollment',$new_arr['edited']) ? ('border:2px solid #FF8080;') : '' ) . ' ">'
+					. (in_array('NCT/enrollment',$new_arr[$highlight_arr]['edited']) ? ('border:2px solid #FF8080;') : '' ) . ' ">'
 					. '<div class="rowcollapse">';
 				
 					if(${$var}[$i]["NCT/enrollment_type"] != '') {
@@ -522,7 +521,7 @@ if(count($$var) > 0) {
 			} else if($fqname == "NCT/start_date") {
 			
 				echo '<td style="background-color:#EDEAFF; '
-					. (in_array('NCT/start_date',$new_arr['edited']) ? ('border:2px solid #FF8080;') : '' ) 
+					. (in_array('NCT/start_date', $new_arr[$highlight_arr]['edited']) ? ('border:2px solid #FF8080;') : '' ) 
 					. ' "><div class="rowcollapse">' . date('m/y',strtotime(${$var}[$i]["NCT/start_date"])) . '</div></td>';
 				
 				/*$val = floor((strtotime(${$var}[$i]["NCT/primary_completion_date"]) - 
@@ -543,7 +542,7 @@ if(count($$var) > 0) {
 				
 				echo '<td style="background-color:#EDEAFF; ';
 					if($end_date != '') {
-						echo (in_array($end_date,$new_arr['edited']) ? ('border:2px solid #FF8080;') : '' ) 
+						echo (in_array($end_date, $new_arr[$highlight_arr]['edited']) ? ('border:2px solid #FF8080;') : '' ) 
 						. '><div class="rowcollapse">' . date('m/y',strtotime($end_date)) . '</div></td>';
 					} else {
 						echo '" >&nbsp;</td>';
@@ -552,27 +551,27 @@ if(count($$var) > 0) {
 			} else if($fqname == "NCT/overall_status") {
 			
 				echo '<td style="background-color:#D8D3E0;' 
-					. (in_array('NCT/overall_status',$new_arr['edited']) ? ('border:2px solid #FF8080;') : '' ) 
+					. (in_array('NCT/overall_status', $new_arr[$highlight_arr]['edited']) ? ('border:2px solid #FF8080;') : '' ) 
 					. ' "><div class="rowcollapse">' 
 					. $val . '</div></td>';
 			
 			} else if($fqname == "NCT/condition") {
 				
 				echo '<td style="background-color:#EDEAFF;' 
-					. (in_array('NCT/condition',$new_arr['edited']) ? ('border:2px solid #FF8080;') : '' ) . ' ">'
+					. (in_array('NCT/condition', $new_arr[$highlight_arr]['edited']) ? ('border:2px solid #FF8080;') : '' ) . ' ">'
 					. '<div class="rowcollapse">' . $val . '</div></td>';
 				
 			} else if($fqname == "NCT/intervention_name") {
 				
 				echo '<td style="background-color:#EDEAFF; ' 
-					. (in_array('NCT/intervention_name',$new_arr['edited']) ? ('border:2px solid #FF8080;') : '' ) . ' ">'
+					. (in_array('NCT/intervention_name', $new_arr[$highlight_arr]['edited']) ? ('border:2px solid #FF8080;') : '' ) . ' ">'
 					. '<div class="rowcollapse">' . $val . '</div></td>';
 				
 			} else if($fqname == "NCT/phase") {
 			
 				$phase = (${$var}[$i][$fqname] == 'N/A') ? $ph : ('P' . $ph);
 				echo '<td style="background-color:'.$phase_arr[$ph] . ';'
-					. (in_array('NCT/phase',$new_arr['edited']) ? ('border:2px solid #FF8080;') : '' ) . ' ">'
+					. (in_array('NCT/phase',$new_arr[$highlight_arr]['edited']) ? ('border:2px solid #FF8080;') : '' ) . ' ">'
 					. '<div class="rowcollapse">' . $phase . '</div></td>';
 			
 			} else { 
@@ -735,8 +734,8 @@ function getNCT($nct_id,$time,$edited)
     $changedFields = mysql_query($sql);
 	$study['edited'] = array();
 	
-	while ($row=mysql_fetch_assoc($changedFields)){
-		$study['edited'][]='NCT/'.$row['fieldname'];
+	while ($row=mysql_fetch_assoc($changedFields)){ 
+		$study['edited'][] = 'NCT/'.$row['fieldname'];
 	}
 
 	return $study;
