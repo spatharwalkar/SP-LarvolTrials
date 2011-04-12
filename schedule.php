@@ -36,11 +36,27 @@ function editor()
 			. makeDropdown('fetch',getEnumValues('schedule','fetch'),false,$rpt['fetch'])
 			. '</label><br clear="all"/>';
 	$reports = array();
-	$query = 'SELECT id,`name` FROM rpt_heatmap'; // . ' WHERE user IS NULL OR user=' . $db->user->id;
+	$query = 'SELECT id,`name`,`category` FROM rpt_heatmap'; // . ' WHERE user IS NULL OR user=' . $db->user->id;
 	$res = mysql_query($query) or die('Bad SQL query getting heatmap names');
+	$reportsArr = array();
+	$categoryArr = array();
 	while($row = mysql_fetch_assoc($res))
 	{
-		$reports['h' . $row['id']] = 'Heatmap ' . $row['id'] . ': ' . $row['name'];
+		$reportsArr[] = $row;
+		$categoryArr[$row['category']] = $row['category'];
+
+	}
+	sort($categoryArr);
+	foreach($categoryArr as $category)
+	{
+		$i=0;
+		foreach($reportsArr as $row)
+		{
+			if($i==0)
+			$reports['-'.$category] = $category;
+			if($row['category']==$category)
+			$reports['h' . $row['id']] = '&nbsp;&nbsp;&nbsp;&nbsp;Heatmap ' . $row['id'] . ': ' . $row['name'];
+		}		
 	}
 	$query = 'SELECT id,`name` FROM rpt_update'; // . ' WHERE user IS NULL OR user=' . $db->user->id;
 	$res = mysql_query($query) or die('Bad SQL query getting update-scan names');
@@ -120,6 +136,7 @@ function postEd()
 		{
 			foreach($_POST['reports'] as $rep)
 			{
+				$continueFlag = 0;
 				$type = substr($rep, 0, 1);
 				$num = substr($rep, 1);
 				$query = 'INSERT INTO ';
@@ -130,7 +147,12 @@ function postEd()
 					break;
 					case 'u':
 					$query .= 'schedule_updatescans SET updatescan=' . $num;
+					default:
+					$continueFlag=1;
+					break;
 				}
+				if($continueFlag == 1)
+				continue;
 				$query .= ',schedule=' . $id;
 				mysql_query($query) or die('Bad SQL query saving report associations'.mysql_error().'<br />'.$query);
 			}
