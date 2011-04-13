@@ -228,7 +228,6 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 	
 	}catch(Exception $e){
 		$SEARCH_ERR = $e->getMessage();
-		$logger->warn($e->getMessage());
 		return softDie($e->getMessage());
 	}
 	
@@ -269,7 +268,6 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 		if($res === false)
 		{
 			$log = 'Bad SQL query applying search condition: ' . $query;
-			$logger->warn($log);
 			return softDie($log);	
 		}
 		$time_end = microtime(true);
@@ -298,9 +296,7 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 		if($res === false)
 		{
 			$log = 'Bad SQL query applying search condition (global field)'.mysql_error().$query;
-			$logger->warn($log);
 			return softDie($log);
-			unset($log);
 		}
 	}
 	
@@ -321,7 +317,6 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 		if($seq === false)
 		{
 			$log = 'Bad SQL query applying strong exclusions';
-			$logger->warn($log);
 			return softDie($log);
 		}
 		$time_end = microtime(true);
@@ -379,17 +374,13 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 			if($res === false)
 			{
 				$log = 'Bad SQL query getting category of field for sorting';
-				$logger->warn($log);
 				return softDie($log);
-				unset($log);
 			}
 			$res = mysql_fetch_assoc($res);
 			if($res === false)
 			{
 				$log = 'Sort field not found.';
-				$logger->warn($log);
 				return softDie($log);
-				unset($log);
 			}
 			$sort->type = $res['type'];
 			$cat = $res['category'];
@@ -457,9 +448,7 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 		if($res === false)
 		{
 			$log = 'Bad SQL query on count search: ' . $bigquery . "<br />\n" . mysql_error();
-			$logger->warn($log);
 			return softDie($log);
-			unset($log);
 		}
 		$row = mysql_fetch_assoc($res);
 		if($row === false)
@@ -516,9 +505,7 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 	if($res === false)
 	{
 		$log = 'Bad SQL query on search: ' . $bigquery . "<br />\n" . mysql_error();
-		$logger->warn($log);
 		return softDie($log);
-		unset($log);
 	}
 	$resid_set = array();
 	while($row = mysql_fetch_assoc($res)) $resid_set[] = $row['larvol_id'];
@@ -609,9 +596,7 @@ function getActiveCount($all_ids, $time)
 	if($res === false)
 	{
 		$log = 'Bad SQL query on active status : ' . $query . "<br />\n" . mysql_error();
-		$logger->warn($log);
 		return softDie($log);
-		unset($log);
 	}
 	while($row = mysql_fetch_array($res)) $id_set[] = $row['id'];
 	
@@ -736,9 +721,7 @@ function getRecords($ids,$fields,$time)
 	if($res === false)
 	{
 		$log = 'Bad SQL query getting global fields for result list<br />'.$query;
-		$logger->warn($log);
 		return softDie($log);
-		unset($log);
 	}
 	while($row = mysql_fetch_assoc($res))
 	{
@@ -780,9 +763,7 @@ function getRecords($ids,$fields,$time)
 		if($res === false)
 		{
 			$log = 'Bad SQL query getting data for result set<br />'.$query.'<br />'.mysql_error();
-			$logger->warn($log);
 			return softDie($log);
-			unset($log);
 		}
 		while($row = mysql_fetch_assoc($res))
 		{	
@@ -851,17 +832,13 @@ function getFieldId($category,$name)
 	if($res === false)
 	{
 		$log = 'Bad SQL query getting field ID of ' . $category . '/' . $name;
-		$logger->warn($log);
 		return softDie($log);
-		unset($log);
 	}
 	$res = mysql_fetch_assoc($res);
 	if($res === false)
 	{
 		$log = 'Field ' . $name . ' not found in category ' . $category . '!';
-		$logger->warn($log);
 		return softDie($log);
-		unset($log);
 	}
 	return $res['id'];
 }
@@ -885,17 +862,13 @@ function getEnumvalId($fieldId,$value)
 	if($res === false)
 	{
 		$log = 'Bad SQL query getting ID of enumval ' . $value . ' in field ' . $fieldId;
-		$logger->warn($log);
 		return softDie($log);
-		unset($log);
 	}
 	$res = mysql_fetch_assoc($res);
 	if($res === false)
 	{
 		$log = 'Enumval ' . $value . ' invalid for field ' . $fieldId . '!';
-		$logger->warn($log);
 		return softDie($log);
-		unset($log);
 	}
 	return $res['id'];
 }
@@ -1168,9 +1141,7 @@ function validateMaskPCRE($s)
 	if($res === false)
 	{
 		$log = 'Bad SQL query on search: ' . $query . "<br />\n" . mysql_error();
-		$logger->warn($log);
 		return softDie($log);
-		unset($log);
 	}
 
 	list($check)=mysql_fetch_row($res);
@@ -1269,7 +1240,8 @@ function validateInputPCRE($post)
 			. '<input name="oldsearch" type="hidden" value="' . base64_encode(serialize($_POST)) . '" />'
 			. '<input type="submit" name="back2s" value="Edit Search" /></form>');
 			
-		$logger->fatal('Bad fields present. Correct next regular expression');
+			//is a special case -- this one should only have a log level of Warn instead of the standard Fatal.
+			$logger->warn('Bad fields present. Correct next regular expression');
 	    die();
 	}
 }

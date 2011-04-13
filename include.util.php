@@ -1,4 +1,5 @@
 <?php
+require_once('db.php');
 /* Generates a 'fingerprint' from the current user.
 	Is conceptually equivalent to using their IP address, but contains more information for increased security.
 */
@@ -292,7 +293,14 @@ function tex($msg)
 
 function softDie($out)
 {
-	mysql_query('ROLLBACK') or die("Couldn't rollback changes");
+	global $logger;
+	$logger->error($out);
+	if(!mysql_query('ROLLBACK'))
+	{
+		$log = "Couldn't rollback changes";
+		$logger->fatal($log);
+		die($log);
+	}
 	echo($out);
 	return false;
 }
