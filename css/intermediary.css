@@ -24,22 +24,84 @@ td,th{
 	z-index:99;
 }
 
-.drop .text					{clear:both;text-align:center;padding:10px;}
-.drop:hover, .drop.hover	{height:auto;overflow:visible;}
+.drop .text{
+	clear:both;
+	text-align:center;
+	padding:10px;
+}
 
+.drop:hover, .drop.hover{
+	height:auto;
+	overflow:visible;
+}
 
-.block 				{float:left;padding:10px;}
-.text 				{clear:both;text-align:center;padding-bottom:10px;}
-.clear 				{clear:both;}
+.block{
+	float:left;
+	padding:10px;
+}
 
-.title				{background-color:#EDEAFF;}
-.title	a			{text-decoration:none;color:#000000;}
-.title	a:hover		{text-decoration:none;color:#000000;}
-.manage 			{font-weight:normal;border-top:1px solid blue;border-left:1px solid blue;}
-.manage th			{color:#0000FF;border-right:1px solid blue;border-bottom:1px solid blue;white-space:nowrap;}
-.manage td			{border-right:1px solid blue;border-bottom:1px solid blue;	margin:0;padding:0;overflow:hidden;}
-.rowcollapse 		{vertical-align:top;max-height:2.5em;overflow:visible;padding-top:0;margin:0;}
-.rowcollapse:hover 	{max-height:none;}
-.message			{font-weight:normal;color:#ff0000;float:left;margin-top:20px;width:155px;}
-.bomb				{font-size:11px;float:left;margin-top:20px;width:180px;text-align:center;}
-.result				{font-size:18px;margin-top:15px;text-decoration:underline;float:left;text-align:right;}
+.text{
+	clear:both;
+	text-align:center;
+	padding-bottom:10px;
+}
+
+.clear{
+	clear:both;
+}
+
+.title{
+	background-color:#EDEAFF;
+}
+.title	a			{
+	text-decoration:none;
+	color:#000000;
+}
+.title	a:hover{
+	text-decoration:none;
+	color:#000000;
+}
+.manage{
+	font-weight:normal;
+	border-top:1px solid blue;
+	border-left:1px solid blue;
+}
+.manage th{
+	color:#0000FF;
+	border-right:1px solid blue;
+	border-bottom:1px solid blue;
+	white-space:nowrap;
+}
+.manage td{
+	border-right:1px solid blue;
+	border-bottom:1px solid blue;	
+	margin:0;
+	padding:0;
+	overflow:hidden;
+}
+.rowcollapse{
+	vertical-align:top;
+	max-height:2.5em;
+	overflow:visible;
+	padding-top:0;
+	margin:0;
+}
+.rowcollapse:hover{
+	max-height:none;
+}
+.message{
+	font-weight:normal;
+	color:#ff0000;
+	float:left;
+	margin-top:20px;
+	padding: 0 7px;
+	width:155px;
+}
+.bomb{
+	font-size:11px;
+	float:left;
+	margin-top:20px;
+	padding: 0 7px;
+	width:auto;
+	text-align:center;
+}

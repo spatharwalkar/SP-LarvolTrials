@@ -67,9 +67,10 @@ session_start();
 </script>
 </head>
 <body>
-<div style="text-align:center;"><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" />
+<!--<div style="text-align:center;"><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" />
 </div><br/>
 <div style="text-align:center;font-weight:normal;color:#ff0000;">Interface Work In Progress</div><br/>
+-->
 <?php
 require_once('krumo/class.krumo.php');
 require_once('db.php');
@@ -185,7 +186,6 @@ if($_GET['list'] == 'inactive') { $inactflag = 1;  // checking if any of the ina
 else { $actflag = 1;} // checking if any of the active filters are set
 
 $current_yr	= date('Y');
-
 $second_yr	= date('Y')+1;
 $third_yr	= date('Y')+2;
 
@@ -326,20 +326,23 @@ $last = ($page*$db->set['results_per_page']>$count) ? $count : $pend;
 
 //echo('Results of ' . $name . '<br />run on ' . $gentime);
 
-//displaying row label and column label
-echo ('<center style="font-size: 18px;"><u>Results for ' 
-		. htmlformat($rowlabel) . ' in ' . htmlformat($columnlabel) . '</u></center><br/><br/>');
-//<br/>Results of report run on ' . $gentime
-//$bomb = 'lb';
+echo '<div style="height:75px;width:100%;">'
+		. '<div style="float:left;"><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" id="header" /></div>'
+		. '<div class="message">Interface Work In Progress</div>';
 
 if($bomb != '') {
 	$bomb_type_arr = array('sb'=>'small', 'lb'=>'large');
 	$bomb_img_arr = array('sb'=>'sbomb.png', 'lb'=>'lbomb.png');
 	
-	echo '<div style="font-size:11px;">'
+	echo '<div class="bomb">'
 		. '<span><img src="./images/' . $bomb_img_arr[$bomb] . '" style="vertical-align:middle;" /></span>'
 		. '&nbsp;This cell has a ' . $bomb_type_arr[$bomb] . ' <a href="./help/bomb.html">bomb</a></div>';
 }
+
+//displaying row label and column label
+echo ('<center style="font-size: 18px;"><u>Results for ' 
+		. htmlformat($rowlabel) . ' in ' . htmlformat($columnlabel) . '</u></center><br/><br/>');
+//<br/>Results of report run on ' . $gentime
 
 $pager='';
 if($count > $db->set['results_per_page'])
@@ -387,6 +390,7 @@ if($count > $db->set['results_per_page'])
 	echo('<h3>Displaying ' . $count . (($_GET["active"]) ? (' '.$_GET["active"]) : ' active' ) .' results</h3>');
 }*/
 
+$dispcnt = (isset($_GET["list"]) ? ($_GET["list"].'count') : 'activecount' );
 echo('<br clear="all"/><br/>');
 echo('<form method="get" action="intermediary.php"><div style="height:100px;">'
     .'<div class="block"><div class="text">List</div>'
@@ -433,10 +437,10 @@ echo ('<div class="block"><div class="text">Sort by</div>'
 		. '<div class="block"><div class="text">Find changes after: </div>'
 		. '<input type="text" id="edited" name="edited" value="' . $edited . '" /></div></div>'
 		. '<div class="clear"></div>'
-		. '<div><input type="submit" value="Show"/>'
+		. '<div><input type="submit" value="Show"/>&nbsp;'
 		. '<input type="hidden" name="params" value="' . $_GET['params'] . '"/>'
 		. '<input type="hidden" name="leading" value="' . $_GET['leading'] . '"/>'
-		. '</div>'
+		.  $$dispcnt . '&nbsp;Records</div>'
 		. '</form><br/><br/>');
 	
 echo '<table width="100%" border="0" cellpadding="4" cellspacing="0" class="manage">'
@@ -449,7 +453,7 @@ echo '<table width="100%" border="0" cellpadding="4" cellspacing="0" class="mana
 		 . '<th colspan="12">' . $second_yr . '</th>'
 		 . '<th colspan="12">' . $third_yr . '</th></tr>';
 
-	 
+
 $relrank = 0;
 if(count($$var) > 0) {
 	
@@ -762,5 +766,3 @@ function htmlformat($str)
 	return htmlspecialchars($str);
 }
 ?>
-
-
