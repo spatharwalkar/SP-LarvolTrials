@@ -74,7 +74,14 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 
 	//get report name
 	$query = 'SELECT name,footnotes,description,searchdata,bomb,backbone_agent,count_only_active,id  FROM rpt_heatmap WHERE id=' . $id . ' LIMIT 1';
+	$time_start = microtime(true);
 	$resu = mysql_query($query) or tex('Bad SQL query getting report name');
+	$time_end = microtime(true);
+	$time_taken = $time_end-$time_start;
+	$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments:function runHeatmap() get report name and other data.';
+	$logger->info($log);
+	unset($log);
+	
 	$info = mysql_fetch_array($resu) or tex('Report not found.'); 
 	$name = $info['name'];
 	$footnotes = $info['footnotes'];
@@ -102,7 +109,13 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 	$rowsearch = array();
 	$columnsearch = array();
 	$query = 'SELECT `header`,`num`,`type`,searchdata FROM rpt_heatmap_headers WHERE report=' . $id;
+	$time_start = microtime(true);
 	$resu = mysql_query($query) or tex('Bad SQL query getting headers');
+	$time_end = microtime(true);
+	$time_taken = $time_end-$time_start;
+	$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments:function runHeatmap() get headers.';
+	$logger->info($log);
+	unset($log);	
 	while($header = mysql_fetch_array($resu))
 	{
 		if(!strlen($header['header'])) $header['header'] = $header['type'] . ' ' . $header['num'];
@@ -128,13 +141,25 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 	{
 		$query = 'UPDATE reports_status SET update_time="' . date("Y-m-d H:i:s",strtotime('now')).'", total="'.(count($rows) * count($columns)).
 		'", progress="0" WHERE run_id="' .$run_id .'" AND report_type ="0" AND type_id="' .$type_id .'"';
-		$res = mysql_query($query) or die('Bad SQL Query updating heatmap report total. Error: '.mysql_error());
+		$res = if(!mysql_query($query))
+		{
+			$log = 'Bad SQL Query updating heatmap report total. Error: '.mysql_error();
+			$logger->fatal($log);
+			die($log);
+		}
 	}
 
 	//get searchdata
 	$searchdata = array();
 	$query = 'SELECT `row`,`column`,`searchdata` FROM rpt_heatmap_cells WHERE report=' . $id;
+	$time_start = microtime(true);
 	$resu = mysql_query($query) or tex('Bad SQL query getting searchdata');
+	$time_end = microtime(true);
+	$time_taken = $time_end-$time_start;
+	$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments:function runHeatmap() get searchdata.';
+	$logger->info($log);
+	unset($log);
+	
 	while($cell = mysql_fetch_array($resu))
 	{
 		if(!isset($searchdata[$cell['row']])) $searchdata[$cell['row']] = array();
@@ -161,7 +186,14 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 	foreach($phases as $pkey => $pval)
 	{
 		$query = 'SELECT id FROM data_enumvals WHERE field=' . $phase_fid . ' AND value="' . $pval . '"';
-		$res = mysql_query($query);	if($res === false) return softDie('Bad SQL query getting a phase enum value');
+		$time_start = microtime(true);
+		$res = mysql_query($query);
+		$time_end = microtime(true);
+		$time_taken = $time_end-$time_start;
+		$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments:function runHeatmap() get phase enum value.';
+		$logger->info($log);
+		unset($log);
+		if($res === false) return softDie('Bad SQL query getting a phase enum value');
 		$res = mysql_fetch_assoc($res); if($res === false) return softDie('Phase not found.');
 		$phase_enumvals[$pkey] = $res['id'];
 	}
@@ -298,7 +330,14 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 							. 'LEFT JOIN clinical_study ON i.larvol_id=clinical_study.larvol_id WHERE '
 							. 'dv.added<' . $datetime . ' AND (dv.superceded>' . $datetime . ' OR dv.superceded IS NULL) '
 							. 'AND `field`=' . $phase_fid . ' AND clinical_study.larvol_id IN(' . implode(',', $all_ids) . ')';
+					$time_start = microtime(true);
 					$res = mysql_query($query) or tex('Bad SQL query getting maximum phase '.$query."\n" . mysql_error());
+					$time_end = microtime(true);
+					$time_taken = $time_end-$time_start;
+					$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments:function runHeatmap() get maximum phase.';
+					$logger->info($log);
+					unset($log);
+					
 					$res = mysql_fetch_assoc($res);
 					
 					if($res !== false)
@@ -378,7 +417,13 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 			{
 				$query = 'UPDATE reports_status SET update_time="' . date("Y-m-d H:i:s",strtotime('now')).
 				'", progress=progress+1 WHERE run_id="' .$run_id .'" AND report_type ="0" AND type_id="' .$type_id .'"';
-				$res = mysql_query($query) or die('Bad SQL Query updating heatmap report progress. Error: '.mysql_error());
+				$res = mysql_query($query)
+				if($res === false)
+				{
+					$log = 'Bad SQL Query updating heatmap report progress. Error: '.mysql_error();
+					$logger->fatal($log);
+					die($log);
+				}
 				if(mysql_affected_rows() == 0) exit;
 				sleep(20);
 			}

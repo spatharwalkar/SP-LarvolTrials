@@ -15,6 +15,7 @@ ini_set('max_execution_time','36000');	//10 hours
 */
 function runUpdateReport($id, $return = false)
 {
+	global $logger;
 	if($return)
 	{
 		//Get variables corresponding to the primary key in reports_status
@@ -22,21 +23,27 @@ function runUpdateReport($id, $return = false)
 		{
 			$run_id = (int)$_GET['run_id'];
 		}else{
-			die('Need to set $_GET[\'run_id\']');
+			$log = 'Need to set $_GET[\'run_id\']';
+			$logger->fatal($log);
+			die($log);
 		}
 		
 		if(isset($_GET['report_type']))
 		{
 			$report_type = (int)$_GET['report_type'];
 		}else{
-			die('Need to set $_GET[\'report_type\']');
+			$log = 'Need to set $_GET[\'report_type\']';
+			$logger->fatal($log);
+			die($log);			
 		}
 		
 		if(isset($_GET['type_id']))
 		{
 			$type_id = (int)$_GET['type_id'];
 		}else{
-			die('Need to set $_GET[\'type_id\']');
+			$log = 'Need to set $_GET[\'type_id\']';
+			$logger->fatal($log);
+			die($log);				
 		}
 	}
 	
@@ -44,13 +51,27 @@ function runUpdateReport($id, $return = false)
 	{
 		$query = 'UPDATE reports_status SET update_time="' . date("Y-m-d H:i:s",strtotime('now')).'", total="0'.
 		'", progress="0" WHERE run_id="' .$run_id .'" AND report_type ="2" AND type_id="' .$type_id .'"';
-		$res = mysql_query($query) or die('Bad SQL Query updating updatescan report total. Error: '.mysql_error());
+		$res = mysql_query($query);
+		if($res ===false)
+		{
+			$log = 'Bad SQL Query updating updatescan report total. Error: '.mysql_error();
+			$logger->fatal($log);
+			die($log);
+		}
 	}
 	
 	if(!is_numeric($id)) return;
 	//if(mysql_query('BEGIN') === false) return softDie("Couldn't begin SQL transaction");
 	$query = 'SELECT name,start,end,criteria,searchdata,getnew,footnotes,description FROM rpt_update WHERE id=' . $id . ' LIMIT 1';
-	$res = mysql_query($query); if($res === false) return softDie('Bad SQL query getting report setup');
+	$time_start = microtime(true);
+	$res = mysql_query($query);
+	$time_end = microtime(true);
+	$time_taken = $time_end-$time_start;
+	$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments:run_updatereport.php get report setup.';
+	$logger->info($log);
+	unset($log);
+	
+	if($res === false) return softDie('Bad SQL query getting report setup');
 	$rpt = mysql_fetch_assoc($res); if($rpt === false) return softDie('Report not found');
 	$name = strlen($rpt['name']) ? $rpt['name'] : 'Report ' . $id;
 	$footnotes = $rpt['footnotes'];
@@ -131,7 +152,15 @@ function runUpdateReport($id, $return = false)
 				. 'LEFT JOIN data_enumvals AS de ON d1.val_enum=de.id '
 				. 'LEFT JOIN data_fields ON d1.`field`=data_fields.id'
 				. $conds;
-		$res = mysql_query($query); if($res === false) return softDie('Bad SQL query getting changes for right larvol_id,time,field');
+		$time_start = microtime(true);
+		$res = mysql_query($query);
+		$time_end = microtime(true);
+		$time_taken = $time_end-$time_start;
+		$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments:run_updatereport.php get changes for right larvol_id,time,field.';
+		$logger->info($log);
+		unset($log);
+		
+		if($res === false) return softDie('Bad SQL query getting changes for right larvol_id,time,field');
 		while($row = mysql_fetch_assoc($res))
 		{
 			$type = $row['type'];
@@ -171,7 +200,15 @@ function runUpdateReport($id, $return = false)
 					. 'data_values LEFT JOIN data_enumvals ON data_values.val_enum=data_enumvals.id '
 					. 'WHERE data_values.`field`=' . $fid . ' AND data_values.studycat=' . $studycat
 					. ' AND data_values.added="' . $row['superceded'] . '"';
-			$res2 = mysql_query($query2); if($res2 === false) return softDie('Bad SQL query checking change-to');
+			$time_start = microtime(true);		
+			$res2 = mysql_query($query2);
+			$time_end = microtime(true);
+			$time_taken = $time_end-$time_start;
+			$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$query2.'#Comments:run_updatereport.php checking change-to.';
+			$logger->info($log);
+			unset($log);
+			
+			if($res2 === false) return softDie('Bad SQL query checking change-to');
 			$toVals = array();
 			while($row2 = mysql_fetch_assoc($res2))
 			{
@@ -196,7 +233,15 @@ function runUpdateReport($id, $return = false)
 	{
 		$query = 'SELECT larvol_id,import_time FROM clinical_study WHERE import_time' . $timecond;
 		if(strlen($searchcond)) $query .= ' AND ' . $searchcond;
-		$res = mysql_query($query); if($res === false) return softDie('Bad SQL query getting new records');
+		$time_start = microtime(true);
+		$res = mysql_query($query);
+		$time_end = microtime(true);
+		$time_taken = $time_end-$time_start;
+		$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$query2.'#Comments:run_updatereport.php check for new records.';
+		$logger->info($log);
+		unset($log);
+		
+		if($res === false) return softDie('Bad SQL query getting new records');
 		while($row = mysql_fetch_assoc($res))
 		{
 			$results[$row['larvol_id'] . '.NULL.' . $row['import_time']] = false;
@@ -216,7 +261,13 @@ function runUpdateReport($id, $return = false)
 	{
 		$query = 'UPDATE reports_status SET update_time="' . date("Y-m-d H:i:s",strtotime('now')).'", total="'.(count($nct_data)).
 		'", progress="0" WHERE run_id="' .$run_id .'" AND report_type ="2" AND type_id="' .$type_id .'"';
-		$res = mysql_query($query) or die('Bad SQL Query updating updatescan report total. Error: '.mysql_error());
+		$res = mysql_query($query);
+		if($res === false)
+		{
+			$log  = 'Bad SQL Query updating updatescan report total. Error: '.mysql_error();
+			$logger->fatal($log);
+			die($log);
+		}
 	}
 	
 	foreach($nct_data as $larvol_id => $val)
@@ -234,7 +285,15 @@ function runUpdateReport($id, $return = false)
 				. 'WHERE data_cats_in_study.larvol_id=' . $larvol_id . ' AND superceded IS NULL AND '
 				. 'data_values.`field` IN('
 				. implode(',', array($fid_nctid, $fid_phase, $fid_intname, $fid_title, $fid_firstrd, $fid_lastcd)) . ')';
-		$res = mysql_query($query); if($res === false) return softDie('Bad SQL query getting nct-data');
+		$time_start = microtime(true);
+		$res = mysql_query($query);
+		$time_end = microtime(true);
+		$time_taken = $time_end-$time_start;
+		$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$query2.'#Comments:run_updatereport.php get nct-data.';
+		$logger->info($log);
+		unset($log);
+		
+		if($res === false) return softDie('Bad SQL query getting nct-data');
 		while($row = mysql_fetch_assoc($res))
 		{
 			$type = $row['type'];
@@ -247,7 +306,13 @@ function runUpdateReport($id, $return = false)
 		{
 			$query = 'UPDATE reports_status SET update_time="' . date("Y-m-d H:i:s",strtotime('now')).
 			'", progress=progress+1 WHERE run_id="' .$run_id .'" AND report_type ="2" AND type_id="' .$type_id .'"';
-			$res = mysql_query($query) or die('Bad SQL Query updating updatescan report progress. Error: '.mysql_error());
+			$res = mysql_query($query);
+			if($res === false)
+			{
+				$log = 'Bad SQL Query updating updatescan report progress. Error: '.mysql_error();
+				$logger->fatal($log);
+				die($log);
+			}
 			if(mysql_affected_rows() == 0) exit;
 		}
 	}

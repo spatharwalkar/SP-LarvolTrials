@@ -288,6 +288,8 @@ function parenthesize($arr)
 //throws an exception with the given message
 function tex($msg)
 {
+	global $logger;
+	$logger->error($log);
 	throw new Exception($msg);
 }
 

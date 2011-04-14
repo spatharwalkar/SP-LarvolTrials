@@ -1,5 +1,7 @@
 <?php 
 require_once('db.php');
+
+
 if((!$db->loggedIn() || !isset($_GET['id'])) && !isset($_GET['noheaders']))
 {
 	header('Location: ' . urlPath() . 'index.php');
@@ -13,9 +15,17 @@ ini_set('max_execution_time','36000');	//10 hours
 $id = mysql_real_escape_string($_GET['id']);
 if(!is_numeric($id)) tex('non-numeric id!');
 
+global $logger;
 //get report name
 $query = 'SELECT name,time,edited,output_template FROM rpt_trial_tracker WHERE id=' . $id . ' LIMIT 1';
+$time_start = microtime(true);
 $resu = mysql_query($query) or tex('Bad SQL query getting report name');
+$time_end = microtime(true);
+$time_taken = $time_end-$time_start;
+$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments:run_trial_tracker.php get report name.';
+$logger->info($log);
+unset($log);
+
 $resu = mysql_fetch_array($resu) or tex('Report not found.');
 
 $name 	= $resu['name'];
@@ -33,7 +43,20 @@ if (trim($resu['edited'])!=''){
 if(strlen($name) == 0) $name = 'Report ' . $id;
 
 $query = 'SELECT * FROM rpt_trial_tracker_trials WHERE report=' . $id;
-$res = mysql_query($query) or die('Bad SQL query getting report trials');
+$time_start = microtime(true);
+$res = mysql_query($query);
+$time_end = microtime(true);
+$time_taken = $time_end-$time_start;
+$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments:run_trial_tracker.php get report trials.';
+$logger->info($log);
+unset($log);
+
+if($res === false)
+{
+	$log = 'Bad SQL query getting report trials';
+	$logger->fatal($log);
+	die($log);
+}
 $trials = array();
 while($trial = mysql_fetch_array($res))
 {
@@ -244,6 +267,7 @@ echo($doc);
 //return NCT fields given an NCTID
 function getNCT($nct_id,$time,$changesChecker)
 {	
+	global $logger;
 	$param = new SearchParam();
 	$param->field = fieldNameToPaddedId('nct_id');
 	$param->action = 'search';
@@ -258,12 +282,28 @@ function getNCT($nct_id,$time,$changesChecker)
 
 	foreach($res as $stu) $study = $stu;
 
-	$studycatData=mysql_fetch_assoc(mysql_query("SELECT `dv`.`studycat` FROM `data_values` `dv` LEFT JOIN `data_cats_in_study` `dc` ON (`dc`.`id`=`dv`.`studycat`) WHERE `dv`.`field`='1' AND `dv`.`val_int`='".$nct_id."' AND `dc`.`larvol_id`='".$study['larvol_id']."'"));
+	$q = "SELECT `dv`.`studycat` FROM `data_values` `dv` LEFT JOIN `data_cats_in_study` `dc` ON (`dc`.`id`=`dv`.`studycat`) WHERE `dv`.`field`='1' AND `dv`.`val_int`='".$nct_id."' AND `dc`.`larvol_id`='".$study['larvol_id']."'";
+	$time_start  = micrtotime(true);
+	$res = mysql_query($q);
+	$time_end = microtime(true);
+	$time_taken = $time_end-$time_start;
+	$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$q.'#Comments:run_trial_tracker.php function getNCT() get studycat,dc.';
+	$logger->info($log);
+	unset($log);
+	
+	$studycatData=mysql_fetch_assoc($res);
 	
 
 	$sql="SELECT DISTINCT `df`.`name` AS `fieldname`, `dv`.`studycat` FROM `data_values` `dv` LEFT JOIN `data_fields` `df` ON (`df`.`id`=`dv`.`field`) WHERE `df`.`name` IN ('".join("','",$fieldnames)."') AND `studycat`='".$studycatData['studycat']."' AND (`dv`.`superceded`<'".date('Y-m-d',strtotime($time))."' AND `dv`.`superceded`>='".date('Y-m-d',strtotime($changesChecker,strtotime($time)))."')";
 
+	$time_start  = micrtotime(true);
     $changedFields=mysql_query($sql);
+	$time_end = microtime(true);
+	$time_taken = $time_end-$time_start;
+	$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$sql.'#Comments:run_trial_tracker.php function getNCT() get distinct name,studycat.';
+	$logger->info($log);
+	unset($log);
+    
 	$study['changedFields']=array();
 	while ($row=mysql_fetch_assoc($changedFields)){
 		$study['changedFields'][]='NCT/'.$row['fieldname'];
@@ -278,10 +318,18 @@ function getNCT($nct_id,$time,$changesChecker)
 // - didn't find the alternative, so I wrote this
 function fieldNameToPaddedId($name)
 {
+	global $logger;
 	$query = 'SELECT data_fields.id AS data_field_id FROM '
 		. 'data_fields LEFT JOIN data_categories ON data_fields.category=data_categories.id '
 		. 'WHERE data_fields.name="' . $name . '" AND data_categories.name="NCT" LIMIT 1';
+	$time_start = microtime(true);
 	$res = mysql_query($query);
+	$time_end = microtime(true);
+	$time_taken = $time_end-$time_start;
+	$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments:run_trial_tracker.php function fieldNameToPaddedId() get NCT schema.';
+	$logger->info($log);
+	unset($log);
+	
 	if($res === false) tex('Bad SQL query getting field ID of ' . $name);
 	$res = mysql_fetch_assoc($res);
 	if($res === false) tex('NCT schema not found!');
