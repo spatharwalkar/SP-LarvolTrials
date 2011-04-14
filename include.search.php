@@ -89,8 +89,10 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 								if(strpos($term, ' TO ') !== false)
 								{
 									$range = explode(' TO ', $term);
+									if($type == 'date') $range = array_map(function($dt){return '"'.$dt.'"';},$range);
 									$ORd[$key] = '(' . $field . ' BETWEEN ' . $range[0] . ' AND ' . $range[1] . ')';
 								}else{
+									if($type == 'date') $term = '"' . $term . '"';
 									$ORd[$key] = '(' . $field . '=' . $term . ')';
 								}
 							}
@@ -144,8 +146,10 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 								if(strpos($term, ' TO ') !== false)
 								{
 									$range = explode(' TO ', $term);
+									if($type == 'date') $range = array_map(function($dt){return '"'.$dt.'"';},$range);
 									$ORd[$key] = '(dv.val_' . $type . ' BETWEEN ' . $range[0] . ' AND ' . $range[1] . ')';
 								}else{
+									if($type == 'date') $term = '"' . $term . '"';
 									$ORd[$key] = '(dv.val_' . $type . '=' . $term . ')';
 								}
 							}
