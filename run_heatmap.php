@@ -141,7 +141,7 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 	{
 		$query = 'UPDATE reports_status SET update_time="' . date("Y-m-d H:i:s",strtotime('now')).'", total="'.(count($rows) * count($columns)).
 		'", progress="0" WHERE run_id="' .$run_id .'" AND report_type ="0" AND type_id="' .$type_id .'"';
-		$res = if(!mysql_query($query))
+		if(!mysql_query($query))
 		{
 			$log = 'Bad SQL Query updating heatmap report total. Error: '.mysql_error();
 			$logger->fatal($log);
@@ -417,7 +417,7 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 			{
 				$query = 'UPDATE reports_status SET update_time="' . date("Y-m-d H:i:s",strtotime('now')).
 				'", progress=progress+1 WHERE run_id="' .$run_id .'" AND report_type ="0" AND type_id="' .$type_id .'"';
-				$res = mysql_query($query)
+				$res = mysql_query($query);
 				if($res === false)
 				{
 					$log = 'Bad SQL Query updating heatmap report progress. Error: '.mysql_error();
