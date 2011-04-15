@@ -37,6 +37,9 @@
 *		sent to the corresponding ID with the report attached.
 */
 
+//require_once('OB_FileWriter.php');
+ini_set('error_reporting', E_ALL ^ E_NOTICE);
+ini_set('display_errors', 1);
 
 //Definition of constants for states
 define('READY', 1);
@@ -69,7 +72,6 @@ ini_set('memory_limit','-1');
 ini_set('max_execution_time','360000');	//100 hours
 sleep(1);	//ensure that we always check and run things after (and not during) the scheduled time
 
-
 //Keep checking in current process till all updates & reports are running/completed
 while(1)
 {
@@ -80,6 +82,41 @@ while(1)
 	{
 		//Wait till child process completes execution/crashes
 		pcntl_waitpid($pid, $status, WUNTRACED);
+		/*
+		//In case any file generated in child process
+		//if(count($files))
+		//{
+			//Send mail with attached report
+			//$query = 'SELECT emails FROM schedule WHERE id=' . $run_ids[$current_run_item] . ' LIMIT 1';
+			//$res = mysql_query($query) or die('Bad SQL query getting email id');
+			//$item = mysql_fetch_assoc($res);
+			$item['emails']='kiytu77@gmail.com';
+					
+			echo(' Sending to: ' . $item['emails'] . ' ... ');
+			$mail = new PHPMailer();
+			$from = 'no-reply@' . $_SERVER['SERVER_NAME'];
+			if(strlen($_SERVER['SERVER_NAME'])) $mail->SetFrom($from);
+			$emails = explode(',', $item['emails']);
+			foreach($emails as $email) $mail->AddAddress($email);
+			$mail->Subject = SITE_NAME . ' scheduled reports ' . date("Y-m-d H.i.s") . ' - ' . $row['name'];
+			$mail->Body = 'Attached are all reports indicated in the schedule item ' . $row['name'];
+			/-*
+			foreach($files as $fname => $file)
+			{
+				$mail->AddStringAttachment($file,
+										   substr($fname,0,20).'_'.date('Y-m-d_H.i.s').'.xlsx',
+										   'base64',
+										   'Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');		
+			}
+			*-/
+			@$mail->Send();
+				echo(' -Mail sent.' . $nl);
+		//}
+		//else
+		//{
+		//	echo(' -No files to send.' . $nl);
+		//}
+		*/
 		if ($status==1)
 		{
 			echo ($nl."Continuing execution...".$nl.$nl);
@@ -97,6 +134,8 @@ while(1)
 	}
 	else
 	{
+		//$obfw = new OB_FileWriter('log.txt');
+		//$obfw->start();
 		//Get the PID of child process
 		$pid=getmypid();
 		/************************************ Step 1 ****************************************/
@@ -473,6 +512,8 @@ while(1)
 		{
 			echo('An update is already running.' . $nl);
 			//No other activities can run in parallel when update is already running
+			echo "testing write to file";
+		//$obfw->end();
 			posix_kill(getmypid(),2);
 		}
 		else if($all_updates_complete==1)
@@ -487,6 +528,8 @@ while(1)
 			{
 				echo('Report is currently running, cannot start update.' . $nl);
 				//Update cannot run when report is running
+				echo "testing write to file";
+		//$obfw->end();
 				posix_kill(getmypid(),2);
 			}
 			
@@ -550,6 +593,8 @@ while(1)
 		if(!count($run_ids))
 		{
 			echo('No report scheduled.' . $nl);
+			echo "testing write to file";
+		//$obfw->end();
 			posix_kill(getmypid(),2);
 		}
 		else if(in_array(READY,$run_status)||in_array(CANCELLED,$run_status))
@@ -580,6 +625,8 @@ while(1)
 			if($run_flag==0)
 			{
 				echo("All scheduled reports are currently running.");
+				echo "testing write to file";
+		//$obfw->end();
 				posix_kill(getmypid(),2);
 			}
 		}
@@ -596,6 +643,8 @@ while(1)
 			else
 				echo('No report scheduled.' . $nl);
 			
+			echo "testing write to file";
+		//$obfw->end();
 			posix_kill(getmypid(),2);
 		}
 		
@@ -604,6 +653,8 @@ while(1)
 		{
 			//Update has priority, no new report generation is started if update is 'ready to run'
 			echo('Update waiting, new report generation will not be started.' . $nl);
+			echo "testing write to file";
+		//$obfw->end();
 			posix_kill(getmypid(),2);
 		}
 		
@@ -669,7 +720,6 @@ while(1)
 		}
 		
 		echo('Report generated for - '.$rtype_name. ' ' . $run_ids[$current_run_item] . $nl);
-		
 		//Send mail with attached report
 		$query = 'SELECT emails FROM schedule WHERE id=' . $run_ids[$current_run_item] . ' LIMIT 1';
 		$res = mysql_query($query) or die('Bad SQL query getting report name');
@@ -692,7 +742,7 @@ while(1)
 										   'base64',
 										   'Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');		
 			}
-			@$mail->Send();
+			$mail->Send();
 				echo(' -Mail sent.' . $nl);
 		}
 		else
@@ -700,6 +750,8 @@ while(1)
 			echo(' -No files to send.' . $nl);
 		}
 		/************************************ Step 4 ****************************************/
+		echo "testing write to file";
+		//$obfw->end();
 		posix_kill(getmypid(),1);
 	}
 }
