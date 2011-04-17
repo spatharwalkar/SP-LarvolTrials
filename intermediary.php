@@ -67,10 +67,6 @@ session_start();
 </script>
 </head>
 <body>
-<!--<div style="text-align:center;"><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" />
-</div><br/>
-<div style="text-align:center;font-weight:normal;color:#ff0000;">Interface Work In Progress</div><br/>
--->
 <?php
 require_once('krumo/class.krumo.php');
 require_once('db.php');
@@ -176,10 +172,16 @@ $allarray 	= array();$allfilterarr = array();$allcount = 0;
 $allfilterarr = array_merge($actfilterarr, $inactfilterarr);
 
 $actflag = 0;$inactflag = 0;$allflag = 0;
-$edited = ' -2 weeks '; //added for highlighting changes
 
-if(isset($_GET['edited']))
-	$edited = htmlspecialchars(mysql_real_escape_string(trim($_GET['edited'])));
+//added for highlighting changes
+if($_GET['edited'] == 'oneweek') {
+	$edited = ' -1 week ';
+} else if($_GET['edited'] == 'onemonth') {
+	$edited = ' -1 month ';
+} else {
+	$edited = ' -1 week ';
+}
+
 
 if($_GET['list'] == 'inactive') { $inactflag = 1;  // checking if any of the inactive filters are set
 } else if($_GET['list'] == 'all') { $allflag = 1; } // checking if any of the all filters are set
@@ -324,25 +326,21 @@ $pend = $pstart + $db->set['results_per_page'] - 1;
 $pages = ceil($count / $db->set['results_per_page']);
 $last = ($page*$db->set['results_per_page']>$count) ? $count : $pend;
 
-//echo('Results of ' . $name . '<br />run on ' . $gentime);
-
-echo '<div style="height:75px;width:100%;">'
-		. '<div style="float:left;"><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" id="header" /></div>'
-		. '<div class="message">Interface Work In Progress</div>';
-
-if($bomb != '') {
-	$bomb_type_arr = array('sb'=>'small', 'lb'=>'large');
-	$bomb_img_arr = array('sb'=>'sbomb.png', 'lb'=>'lbomb.png');
+echo ('<table width="100%"><tr><td><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" /></td>'
+	. '<td nowrap="nowrap"><span style="color:#ff0000;font-weight:normal;">Interface Work In Progress</span>');
 	
-	echo '<div class="bomb">'
-		. '<span><img src="./images/' . $bomb_img_arr[$bomb] . '" style="vertical-align:middle;" /></span>'
-		. '&nbsp;This cell has a ' . $bomb_type_arr[$bomb] . ' <a href="./help/bomb.html">bomb</a></div>';
-}
+	if($bomb != '') {
+		$bomb_type_arr = array('sb'=>'small', 'lb'=>'large');
+		$bomb_img_arr = array('sb'=>'sbomb.png', 'lb'=>'lbomb.png');
+	
+		echo ('<span><img src="./images/' . $bomb_img_arr[$bomb] . '" alt="Bomb"  /></span>'
+			. '&nbsp;This cell has a ' . $bomb_type_arr[$bomb] . ' <a href="./help/bomb.html">bomb</a>');
+	}
 
 //displaying row label and column label
-echo ('<center style="font-size: 18px;"><u>Results for ' 
-		. htmlformat($rowlabel) . ' in ' . htmlformat($columnlabel) . '</u></center><br/><br/>');
-//<br/>Results of report run on ' . $gentime
+echo ('</td><td class="result">Results for ' . htmlformat($rowlabel) . ' in ' . htmlformat($columnlabel) . '</td>'
+		. '</tr></table>');
+	
 
 $pager='';
 if($count > $db->set['results_per_page'])
@@ -365,9 +363,6 @@ if($count > $db->set['results_per_page'])
 	foreach($inactfilterarr as $k=>$v) { if(isset($_GET[$k])) $sort .= '&amp;'.$k.'=1'; }
 	foreach($allfilterarr as $k=>$v) { if(isset($_GET[$k])) $sort .= '&amp;'.$k.'=1'; }
 	
-	
-	/*echo('<h3>Found ' . $results . ' studies - Displaying '.$count. (($_GET["active"]) ? (' '.$_GET["active"]) : ' active' ) 
-	.' results</h3>');*/
 	if($pstart > 1)
 	{
 		$pager .= '<a href="intermediary.php?params=' . rawurlencode($_GET['params'])
@@ -386,9 +381,7 @@ if($count > $db->set['results_per_page'])
 			. $sort . '">Next Page (' . ($pstart+$db->set['results_per_page']) . '-' . $nextlast . ') &gt;&gt;</a>';
 	}
 	echo ($pager);
-}/*else{
-	echo('<h3>Displaying ' . $count . (($_GET["active"]) ? (' '.$_GET["active"]) : ' active' ) .' results</h3>');
-}*/
+}
 
 $dispcnt = (isset($_GET["list"]) ? ($_GET["list"].'count') : 'activecount' );
 echo('<br clear="all"/><br/>');
@@ -434,24 +427,34 @@ echo ('<div class="block"><div class="text">Sort by</div>'
 		. '<span id="filteropt">'
 		. (isset($_GET["list"]) ? ${$_GET["list"].'status'} : $activestatus)
 		. '</span></div>'
-		. '<div class="block"><div class="text">Find changes after: </div>'
-		. '<input type="text" id="edited" name="edited" value="' . $edited . '" /></div></div>'
-		. '<div class="clear"></div>'
+		. '<div class="block"><div class="text">Find changes from: </div>'
+		. '<input type="radio" id="oneweek" name="edited" value="oneweek" ' 
+		. ((!isset($_GET['edited']) || $_GET['edited'] == 'oneweek') ? 'checked="checked"' : '' ) . ' />'
+		. '<label for="oneweek">1 Week</label><br/>'
+		. '<input type="radio" id="onemonth" name="edited" value="onemonth" ' 
+		. (($_GET['edited'] == 'onemonth') ? 'checked="checked"' : '' ) . ' />'
+		. '<label for="onemonth">1 Month</label>'
+		. '</div></div>'
+		. '<br/><br/>'
 		. '<div><input type="submit" value="Show"/>&nbsp;'
 		. '<input type="hidden" name="params" value="' . $_GET['params'] . '"/>'
 		. '<input type="hidden" name="leading" value="' . $_GET['leading'] . '"/>'
 		.  $$dispcnt . '&nbsp;Records</div>'
-		. '</form><br/><br/>');
+		. '</form>');
 	
 echo '<table width="100%" border="0" cellpadding="4" cellspacing="0" class="manage">'
-		 . '<tr><th rowspan="2" width="33%">Title</th>'
-		 . '<th rowspan="2">N</th><th rowspan="2">Status</th>'
-		 . '<th rowspan="2" width="15%">Conditions</th><th rowspan="2" width="15%">Interventions</th>'
-		 . '<th rowspan="2" width="5%">Start Date</th><th rowspan="2" width="5%">End Date</th><th rowspan="2">Ph</th>'
-		 . '<th width="30%" nowrap="nowrap" colspan="36">Projected Completion</th></tr>'
-		 . '<tr><th colspan="12">' . $current_yr . '</th>'
-		 . '<th colspan="12">' . $second_yr . '</th>'
-		 . '<th colspan="12">' . $third_yr . '</th></tr>';
+		 . '<tr><th rowspan="2" style="width:280px;">Title</th>'
+		 . '<th rowspan="2" style="width:28px;" title="gray values are anticipated and black values are actual">N</th>'
+		 . '<th rowspan="2" style="width:55px;">Status</th>'
+		 . '<th rowspan="2" style="width:130px;">Conditions</th>'
+		 . '<th rowspan="2" style="width:130px;">Interventions</th>'
+		 . '<th rowspan="2" style="width:29px;" title="MM/YY">Start</th>'
+		 . '<th rowspan="2" style="width:27px;" title="MM/YY">End</th>'
+		 . '<th rowspan="2" style="width:14px;">Ph</th>'
+		 . '<th colspan="36" style="width:135px;"><div style="white-space:nowrap;">Projected Completion</div></th></tr>'
+		 . '<tr><th colspan="12" style="width:40px;">' . $current_yr . '</th>'
+		 . '<th colspan="12" style="width:40px;">' . $second_yr . '</th>'
+		 . '<th colspan="12" style="width:40px;">' . $third_yr . '</th></tr>';
 
 
 $relrank = 0;
@@ -466,7 +469,7 @@ if(count($$var) > 0) {
 			unset_nulls(${$var}[$i]);
 		
 		//end date is calculated by giving precedence to completion date(if it exists) than primary completion date  
-		$end_date = getEndDate(${$var}[$i]["NCT/primary_completion_date"], ${$var}[$i]["NCT/completion_date"]);
+		$end_date = getEndDate(${$var}[$i]["NCT/primary_completion_date"], ${$var}[$i]["NCT/completion_date"]);/*'2013-01-01';*/
 
 		$phase_arr = array('N/A'=>'#bfbfbf','0'=>'#44cbf5','0/1'=>'#99CC00','1'=>'#99CC00','1/2'=>'#ffff00','2'=>'#ffff00',
 				'2/3'=>'#ff9900','3'=>'#ff9900','3/4'=>'#ff0000','4'=>'#ff0000');
@@ -480,10 +483,11 @@ if(count($$var) > 0) {
 		echo '<tr>'//<td>' . ($pstart + $relrank++) . '.</td>'
 			. '<td class="title"><div class="rowcollapse"><a href="http://clinicaltrials.gov/ct2/show/' 
 			. ${$var}[$i]['NCT/nct_id'] . '">';
-			
+		
 				if(${$var}[$i]['NCT/acronym'] != '') {
-					echo '<span title="' . htmlformat(${$var}[$i]['NCT/brief_title']) . '">' 
-							. htmlformat(${$var}[$i]['NCT/acronym']) . '</span>';
+					echo '<b>' . htmlformat(${$var}[$i]['NCT/acronym']) 
+						. '</b>&nbsp;' . htmlformat(${$var}[$i]['NCT/brief_title']);
+							
 				} else {
 					echo htmlformat(${$var}[$i]['NCT/brief_title']);
 				}
@@ -502,17 +506,17 @@ if(count($$var) > 0) {
 			if($fqname == "NCT/enrollment"){ 
 				
 				echo '<td nowrap="nowrap" style="background-color:#D8D3E0;text-align:center;'
-					. (in_array('NCT/enrollment',$new_arr[$highlight_arr]['edited']) ? ('border:2px solid #FF8080;') : '' ) . ' ">'
+					. (in_array('NCT/enrollment',$new_arr[$highlight_arr]['edited']) ? ('border:2px solid #FF0000;') : '' ) . ' ">'
 					. '<div class="rowcollapse">';
 				
 					if(${$var}[$i]["NCT/enrollment_type"] != '') {
 					
 						if(${$var}[$i]["NCT/enrollment_type"] == 'Anticipated') { 
-							echo '<span style="color:gray;font-weight:bold;" title="' 
-							. ${$var}[$i]["NCT/enrollment_type"] . '">'	. $val . '</span>';
+							echo '<span style="color:gray;font-weight:bold;">'	. $val . '</span>';
 							
 						} else if(${$var}[$i]["NCT/enrollment_type"] == 'Actual') {
-							echo '<span title="' .${$var}[$i]["NCT/enrollment_type"] . '">' . $val . '</span>';
+							echo $val;
+							
 						} else { 
 							echo $val . ' (' . ${$var}[$i]["NCT/enrollment_type"] . ')';
 						}
@@ -525,7 +529,7 @@ if(count($$var) > 0) {
 			} else if($fqname == "NCT/start_date") {
 			
 				echo '<td style="background-color:#EDEAFF; '
-					. (in_array('NCT/start_date', $new_arr[$highlight_arr]['edited']) ? ('border:2px solid #FF8080;') : '' ) 
+					. (in_array('NCT/start_date', $new_arr[$highlight_arr]['edited']) ? ('border:2px solid #FF0000;') : '' ) 
 					. ' "><div class="rowcollapse">' . date('m/y',strtotime(${$var}[$i]["NCT/start_date"])) . '</div></td>';
 				
 				/*$val = floor((strtotime(${$var}[$i]["NCT/primary_completion_date"]) - 
@@ -546,8 +550,8 @@ if(count($$var) > 0) {
 				
 				echo '<td style="background-color:#EDEAFF; ';
 					if($end_date != '') {
-						echo (in_array($end_date, $new_arr[$highlight_arr]['edited']) ? ('border:2px solid #FF8080;') : '' ) 
-						. '><div class="rowcollapse">' . date('m/y',strtotime($end_date)) . '</div></td>';
+						echo (in_array($end_date, $new_arr[$highlight_arr]['edited']) ? ('border:2px solid #FF0000;') : '' ) 
+						. '"><div class="rowcollapse">' . date('m/y',strtotime($end_date)) . '</div></td>';
 					} else {
 						echo '" >&nbsp;</td>';
 					}
@@ -555,27 +559,27 @@ if(count($$var) > 0) {
 			} else if($fqname == "NCT/overall_status") {
 			
 				echo '<td style="background-color:#D8D3E0;' 
-					. (in_array('NCT/overall_status', $new_arr[$highlight_arr]['edited']) ? ('border:2px solid #FF8080;') : '' ) 
+					. (in_array('NCT/overall_status', $new_arr[$highlight_arr]['edited']) ? ('border:2px solid #FF0000;') : '' ) 
 					. ' "><div class="rowcollapse">' 
 					. $val . '</div></td>';
 			
 			} else if($fqname == "NCT/condition") {
 				
 				echo '<td style="background-color:#EDEAFF;' 
-					. (in_array('NCT/condition', $new_arr[$highlight_arr]['edited']) ? ('border:2px solid #FF8080;') : '' ) . ' ">'
+					. (in_array('NCT/condition', $new_arr[$highlight_arr]['edited']) ? ('border:2px solid #FF0000;') : '' ) . ' ">'
 					. '<div class="rowcollapse">' . $val . '</div></td>';
 				
 			} else if($fqname == "NCT/intervention_name") {
 				
 				echo '<td style="background-color:#EDEAFF; ' 
-					. (in_array('NCT/intervention_name', $new_arr[$highlight_arr]['edited']) ? ('border:2px solid #FF8080;') : '' ) . ' ">'
+					. (in_array('NCT/intervention_name', $new_arr[$highlight_arr]['edited']) ? ('border:2px solid #FF0000;') : '' ) . ' ">'
 					. '<div class="rowcollapse">' . $val . '</div></td>';
 				
 			} else if($fqname == "NCT/phase") {
 			
 				$phase = (${$var}[$i][$fqname] == 'N/A') ? $ph : ('P' . $ph);
 				echo '<td style="background-color:'.$phase_arr[$ph] . ';'
-					. (in_array('NCT/phase',$new_arr[$highlight_arr]['edited']) ? ('border:2px solid #FF8080;') : '' ) . ' ">'
+					. (in_array('NCT/phase',$new_arr[$highlight_arr]['edited']) ? ('border:2px solid #FF0000;') : '' ) . ' ">'
 					. '<div class="rowcollapse">' . $phase . '</div></td>';
 			
 			} else { 
@@ -592,7 +596,7 @@ if(count($$var) > 0) {
 	}
 	
 }else {
-	echo '<tr><th colspan="45" style="text-align: left;"> No record found. </th></tr>';
+	echo '<tr><th colspan="44" style="text-align: left;"> No record found. </th></tr>';
 }
 echo('</table><br/>');
 echo($pager);
@@ -634,12 +638,18 @@ function getCompletionChart($start_month, $start_year, $end_month, $end_year, $c
 			} else if($end_year == $current_yr) { 
 			
 				if($end_month == 12) {
+				
 					$value = '<td style="background-color:' . $bg_color . '" colspan="' . $end_month . '">&nbsp;</td>'
 					. '<td colspan="12">&nbsp;</td><td colspan="12">&nbsp;</td>';
-				} else {
-					$value = '<td style="background-color:' . $bg_color . '" colspan="' . $end_month . '">&nbsp;</td>'
-					. '<td colspan="' . (12-$end_month) . '">&nbsp;</td>'
-					. '<td colspan="12">&nbsp;</td><td colspan="12">&nbsp;</td>';
+					
+				} else { 
+				
+					$value = '<td style="background-color:' . $bg_color 
+					. '" colspan="' . $end_month . '"><div>&nbsp;</div></td>'
+					. '<td style="width:'.(12-$end_month).'px" colspan="' . (12-$end_month) . '">&nbsp;</td>'
+					. '<td colspan="12"><div style="width:40px;">&nbsp;</div></td>'
+					. '<td colspan="12"><div style="width:40px;">&nbsp;</div></td>';
+					
 				}
 			} else if($end_year == $second_yr) { 
 			 
@@ -672,8 +682,6 @@ function getCompletionChart($start_month, $start_year, $end_month, $end_year, $c
 						. '<td colspan="12" style="background-color:' . $bg_color . '">&nbsp;</td>'
 						. '<td colspan="12" style="background-color:' . $bg_color . '">&nbsp;</td>';
 			}		
-		
-		
 		
 		} else if($start_year == $current_yr) {
 		
