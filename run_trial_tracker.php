@@ -283,7 +283,7 @@ function getNCT($nct_id,$time,$changesChecker)
 	foreach($res as $stu) $study = $stu;
 
 	$q = "SELECT `dv`.`studycat` FROM `data_values` `dv` LEFT JOIN `data_cats_in_study` `dc` ON (`dc`.`id`=`dv`.`studycat`) WHERE `dv`.`field`='1' AND `dv`.`val_int`='".$nct_id."' AND `dc`.`larvol_id`='".$study['larvol_id']."'";
-	$time_start  = micrtotime(true);
+	$time_start  = microtime(true);
 	$res = mysql_query($q);
 	$time_end = microtime(true);
 	$time_taken = $time_end-$time_start;
@@ -296,7 +296,7 @@ function getNCT($nct_id,$time,$changesChecker)
 
 	$sql="SELECT DISTINCT `df`.`name` AS `fieldname`, `dv`.`studycat` FROM `data_values` `dv` LEFT JOIN `data_fields` `df` ON (`df`.`id`=`dv`.`field`) WHERE `df`.`name` IN ('".join("','",$fieldnames)."') AND `studycat`='".$studycatData['studycat']."' AND (`dv`.`superceded`<'".date('Y-m-d',strtotime($time))."' AND `dv`.`superceded`>='".date('Y-m-d',strtotime($changesChecker,strtotime($time)))."')";
 
-	$time_start  = micrtotime(true);
+	$time_start  = microtime(true);
     $changedFields=mysql_query($sql);
 	$time_end = microtime(true);
 	$time_taken = $time_end-$time_start;
