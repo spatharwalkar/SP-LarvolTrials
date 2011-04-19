@@ -289,7 +289,7 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 				. '(SELECT GROUP_CONCAT(larvol_id) FROM clinical_study WHERE ' . $cond;
 		if($ii > 0) $query .= ' AND FIND_IN_SET(larvol_id, @conds_' . ($ii-1) . ') > 0';
 		$query .= ')';
-		$time_start = micotime(true);
+		$time_start = microtime(true);
 		$res = mysql_query($query);
 		$time_end = microtime(true);
 		$time_taken = $time_end-$time_start;
