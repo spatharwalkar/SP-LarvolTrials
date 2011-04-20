@@ -382,8 +382,8 @@ echo "<div class=\"container\">";
 		echo "</table>";
 	}
 			
-	echo "<br>";
-	echo "<br>";
+	echo "<br/>";
+	echo "<br/>";
 	
 	echo "<table width=\"100%\" class=\"event\">";
 		echo "<tr>";
