@@ -296,7 +296,7 @@ function postEd()
 	if(isset($_POST['reportcopy']))
 	{
 		mysql_query('BEGIN') or die("Couldn't begin SQL transaction");
-		$query = 'SELECT name,footnotes,description,searchdata,bomb,backbone_agent,count_only_active FROM rpt_heatmap WHERE id=' . $id . ' LIMIT 1';
+		$query = 'SELECT name,footnotes,description,searchdata,bomb,backbone_agent,count_only_active,category FROM rpt_heatmap WHERE id=' . $id . ' LIMIT 1';
 		$res = mysql_query($query) or die('Bad SQL Query getting old data');
 		$res = mysql_fetch_array($res);
 		if($res === false) return; //not found
@@ -308,10 +308,11 @@ function postEd()
 		$bomb = mysql_real_escape_string($res['bomb']);
 		$backboneAgent = mysql_real_escape_string($res['backbone_agent']);
 		$countonlyactive = mysql_real_escape_string($res['count_only_active']);
+		$category = mysql_real_escape_string($res['category']);
 		$query = 'INSERT INTO rpt_heatmap SET name="Copy of ' . (strlen($oldname) ? $oldname : ('report '.$id)) . '",user='
 				. $db->user->id . ',footnotes="' . $footnotes . '",description="' . $description . '"'
 				. ($searchdata !== NULL ? ',searchdata="' . $searchdata . '"' : '')
-				. ',bomb="'.$bomb.'",backbone_agent="'.$backboneAgent.'",count_only_active="'.$countonlyactive.'"';
+				. ',bomb="'.$bomb.'",backbone_agent="'.$backboneAgent.'",count_only_active="'.$countonlyactive.'",category="'.$category.'"';
 				
 		mysql_query($query) or die('Bad SQL Query saving name');
 		$newid = mysql_insert_id();
