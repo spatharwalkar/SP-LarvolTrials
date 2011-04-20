@@ -238,9 +238,12 @@ function listSearchForm()
 	if($rmode) $repq = '&report=' . $report . '&row=' . $row . '&col=' . $col;
 	
 	$out = '<form method="post" action="search_simple.php" class="lisep" style="float:right;z-index:100">'
-			. '<fieldset><legend>Load saved search</legend><ul>';
+			. '<fieldset><legend>Load saved search</legend>';
 	$query = 'SELECT id,name,user FROM saved_searches WHERE user=' . $db->user->id . ' OR user IS NULL ORDER BY user';
 	$res = mysql_query($query) or die('Bad SQL query getting saved search list');
+	$num_rows = mysql_num_rows($res);
+	if($num_rows>0)
+	$out.='<ul>';
 	while($ss = mysql_fetch_assoc($res))
 	{
 		$global = $ss['user'] === NULL;
@@ -257,7 +260,9 @@ function listSearchForm()
 				. '</li>';
 
 	}
-	$out .= '</ul></fieldset></form>';
+	if($num_rows>0)
+	$out.='</ul>';	
+	$out .= '</fieldset></form>';
 	return $out;
 }
 
