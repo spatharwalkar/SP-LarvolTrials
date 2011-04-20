@@ -635,6 +635,56 @@ function postEd()
 		}
 
 	    validateInputPCRE($_POST);//alexvp added 
+	    
+	    //start simulate a test search before proceeding implementation of sql shield function here.
+	$page = 0;
+	if(isset($_POST['page']))
+	{
+		$page = $_POST['page'];
+		if(isset($_POST['back'])) $page--;
+		if(isset($_POST['next'])) $page++;
+		if(isset($_POST['jump'])) $page = $_POST['jumpno'];
+	}
+	if($page < 1) $page = 1;
+	if(isset($_POST['oldsearch']))
+	{
+		$_POST = unserialize(base64_decode($_POST['oldsearch']));
+	}
+	//array_walk_recursive($_POST,ref_mysql_escape);	//breaks regex by escaping backslashes
+	$params = prepareParams($_POST);
+	$list = array();
+	if(is_array($_POST['display']))
+	{
+		foreach($_POST['display'] as $field => $ok)
+		{
+			if(!array_key_exists($field,$db->types)) continue;
+			if($ok) $list[] = $field;
+		}
+	}
+	$timeMachinePost = (isset($_POST['time_machine']))?$_POST['time_machine']:null;
+	$time_machine = strlen($timeMachinePost) ? strtotime($timeMachinePost) : NULL;
+	$override = (isset($_POST['override']))?$_POST['override']:null;
+	$override_arr = explode(',', $override);
+	if($override_arr === false)
+	{
+		$override_arr = array();
+	}else{
+		foreach($override_arr as $key => $value)
+		{
+			$value = nctidToLarvolid($value);
+			if($value === false)
+			{
+				unset($override_arr[$key]);
+			}else{
+				$override_arr[$key] = $value;
+			}
+		}
+	}
+	storeParams(array('params' => $params, 'time' => $time_machine, 'override' => $override_arr));
+	//first  run the search in test mode 
+	search($params,$list,$page,$time_machine,$override_arr,1);	    
+	    //end simulate a test search before proceeding implementation of sql shield function here.	
+	    
 
 		unset($_POST['row']);
 		unset($_POST['col']);

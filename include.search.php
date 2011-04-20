@@ -17,7 +17,7 @@ $SEARCH_ERR = NULL;
 		UNLESS $list is NULL, in which case the search returns the number of records matching the search
 			OR $list is (false), in which case the SQL query is returned.
 */
-function search($params=array(),$list=array('overall_status','brief_title'),$page=1,$time=NULL,$override=array())
+function search($params=array(),$list=array('overall_status','brief_title'),$page=1,$time=NULL,$override=array(),$test=null)
 { 
 	//logger variable in db.php
 	global $logger;
@@ -225,7 +225,7 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 								}
 							}
 						}
-					}
+					}	
 				}
 			}
 		}
@@ -233,6 +233,30 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 	}catch(Exception $e){
 		$SEARCH_ERR = $e->getMessage();
 		return softDie($e->getMessage());
+	}
+	
+	//prechecking search conditions before going for executing large search queries if search() is run in test mode
+	if($test)
+	{
+		if(!precheckSearchSql($conditions, $g_conds, $strong_exclusions))
+		{
+	
+		    $getVars=isset($_POST['getVars'])?$_POST['getVars']:"";
+			echo "<h2>";
+			echo "Please, correct search parameters.";
+			echo "</h2>";
+			echo('<form method="post" action="' . ($_POST['simple']?'search_simple.php':'search.php') . '?'.$getVars.'">'
+				. '<input name="oldsearch" type="hidden" value="' . base64_encode(serialize($_POST)) . '" />'
+				. '<input type="submit" name="back2s" value="Edit Search" /></form>');
+				
+				//is a special case -- this one should only have a log level of Warn instead of the standard Fatal.
+				$logger->warn('Bad fields present. Correct search parameters');
+		    die();
+		
+		}else
+		{
+			return true;
+		}
 	}
 	
 	/*One condition that would normally go in one of the chains must
@@ -256,7 +280,7 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 	}else{
 		$lone_cond = NULL;
 	}
-	
+
 	//execute the queries and gather results
 	foreach($conditions as $i => $cond)
 	{
@@ -1157,7 +1181,6 @@ function validateInputPCRE($post)
     global $db;
 	//logger variable in db.php
 	global $logger;	    
-
     $badFields=array();
 	if(isset($post['action']) && is_array($post['action']))
 	{
@@ -1230,6 +1253,15 @@ function validateInputPCRE($post)
 			}
 		}
 	}
+	if(isset($post['multivalue']) && is_array($post['multivalue']) && $post['multivalue']['varchar+text']);
+	{
+		$mask = $post['multivalue']['varchar+text'];
+		$pcre = strlen($mask) > 1
+			&& $mask[0] == '/'
+			&& ($mask[strlen($mask)-1] == '/' || ($mask[strlen($mask)-2] == '/' && strlen($mask) > 2));
+		if($pcre)
+		$badFields['varchar+text']=$mask;
+	}
 	if($badFields)
 	{
 	    $getVars=isset($_POST['getVars'])?$_POST['getVars']:"";
@@ -1260,6 +1292,65 @@ function validateInputPCRE($post)
 function cmpdate($a, $b) {
 	if ($a == $b) return 0;
 	    return (strtotime($a) < strtotime($b))? -1 : 1;
+}
+
+/**
+ * 
+ * @name precheckSearchSql
+ * @tutorial Function simulates search params for errors prior to executing the big search queries.
+ * The parameters are arrays which hold the different search parameters.
+ * Sample queries are generated and executed for all the 3 parameters and if any of them fails search is not proceeded.
+ * @param array $conditions
+ * @param array $g_conds
+ * @param array $strong_exclusions
+ * @author Jithu Thomas
+ */
+
+function precheckSearchSql($conditions,$g_conds,$strong_exclusions)
+{
+	global $db;
+	if(isset($conditions) && is_array($conditions) && count($conditions)>0)
+	{
+		$tmpSql = 'SELECT 1 FROM data_values dv WHERE';
+		$where = '';		
+		foreach($conditions as $tmp)
+		{
+			$where .= ' '.$tmp.' ';
+		}
+		$tmpSql .=$where.' LIMIT 0';
+		echo $tmpSql;die;
+		if(!mysql_query($tmpSql))
+		return false;
+	}
+	
+	if(isset($g_conds) && is_array($g_conds) && count($g_conds)>0)
+	{
+		$tmpSql = 'SELECT 1 FROM clinical_study WHERE';
+		$where = '';
+		foreach($g_conds as $tmp)
+		{
+			$where .= ' '.$tmp.' ';
+		}
+		$tmpSql .=$where.' LIMIT 0';
+		if(!mysql_query($tmpSql))
+		return false;
+	}	
+	
+	if(isset($strong_exclusions) && is_array($strong_exclusions) && count($strong_exclusions)>0)
+	{
+		$tmpSql = 'SELECT 1 FROM data_values dv WHERE';
+		$where = '';		
+		foreach($strong_exclusions as $tmp)
+		{
+			$where .= ' '.$tmp.' ';
+		}
+		$tmpSql .=$where.' LIMIT 0';
+		if(!mysql_query($tmpSql))
+		return false;
+	}	
+
+	//if all the above condtions are a go.
+	return true;
 }
 
 ?>
