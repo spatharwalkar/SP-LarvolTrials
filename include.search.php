@@ -17,7 +17,7 @@ $SEARCH_ERR = NULL;
 		UNLESS $list is NULL, in which case the search returns the number of records matching the search
 			OR $list is (false), in which case the SQL query is returned.
 */
-function search($params=array(),$list=array('overall_status','brief_title'),$page=1,$time=NULL,$override=array(),$test=null)
+function search($params=array(),$list=array('overall_status','brief_title'),$page=1,$time=NULL,$override=array(),$test=false)
 { 
 	//logger variable in db.php
 	global $logger;
@@ -236,7 +236,7 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 	}
 	
 	//prechecking search conditions before going for executing large search queries if search() is run in test mode
-	if($test)
+	if($test == true)
 	{
 		if(!precheckSearchSql($conditions, $g_conds, $strong_exclusions))
 		{

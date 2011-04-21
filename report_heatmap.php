@@ -637,15 +637,6 @@ function postEd()
 	    validateInputPCRE($_POST);//alexvp added 
 	    
 	    //start simulate a test search before proceeding implementation of sql shield function here.
-	$page = 0;
-	if(isset($_POST['page']))
-	{
-		$page = $_POST['page'];
-		if(isset($_POST['back'])) $page--;
-		if(isset($_POST['next'])) $page++;
-		if(isset($_POST['jump'])) $page = $_POST['jumpno'];
-	}
-	if($page < 1) $page = 1;
 	if(isset($_POST['oldsearch']))
 	{
 		$_POST = unserialize(base64_decode($_POST['oldsearch']));
@@ -680,9 +671,8 @@ function postEd()
 			}
 		}
 	}
-	storeParams(array('params' => $params, 'time' => $time_machine, 'override' => $override_arr));
 	//first  run the search in test mode 
-	search($params,$list,$page,$time_machine,$override_arr,1);	    
+	search($params,$list,$page,$time_machine,$override_arr,true);	    
 	    //end simulate a test search before proceeding implementation of sql shield function here.	
 	    
 

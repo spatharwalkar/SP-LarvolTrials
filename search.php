@@ -230,7 +230,7 @@ echo('<script type="text/javascript" src="checkall.js"></script>');
 	}
 	storeParams(array('params' => $params, 'time' => $time_machine, 'override' => $override_arr));
 	//first  run the search in test mode 
-	search($params,$list,$page,$time_machine,$override_arr,1);
+	search($params,$list,$page,$time_machine,$override_arr,true);
 	$res = search($params,$list,$page,$time_machine,$override_arr);
 	if($res === false)
 		die('<br />Search failed. Tell development how you enountered this error, including the above message, if any. '
