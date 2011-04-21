@@ -1,6 +1,10 @@
 <?php
 header('P3P: CP="CAO PSA OUR"');
 session_start();
+require_once('krumo/class.krumo.php');
+require_once('db.php');
+require_once('include.search.php');
+
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -68,10 +72,6 @@ session_start();
 </head>
 <body>
 <?php
-require_once('krumo/class.krumo.php');
-require_once('db.php');
-require_once('include.search.php');
-
 if(!isset($_GET['params'])) die('cell not set');
 
 $excel_params 	= unserialize(gzinflate(base64_decode($_GET['params'])));
@@ -496,6 +496,7 @@ if(count($$var) > 0) {
 		$highlight_arr = '';
 		foreach($displist as $dname => $fqname)
 		{ 
+			$attr = ' " ';
 			$val = ${$var}[$i][$fqname];
 			$highlight_arr = ${$var}[$i]['NCT/nct_id'];
 			if( is_array( $val ) )
@@ -505,8 +506,10 @@ if(count($$var) > 0) {
 			
 			if($fqname == "NCT/enrollment"){ 
 				
-				echo '<td nowrap="nowrap" style="background-color:#D8D3E0;text-align:center;'
-					. (in_array('NCT/enrollment',$new_arr[$highlight_arr]['edited']) ? ('border:2px solid #FF0000;') : '' ) . ' ">'
+				if(in_array('NCT/enrollment',$new_arr[$highlight_arr]['edited']))
+					$attr = 'border:2px solid #FF3333;" title="' . $new_arr[$highlight_arr]['edited'][$fqname] . '" ';
+					
+				echo '<td nowrap="nowrap" style="background-color:#D8D3E0;text-align:center; ' . $attr . ' >'
 					. '<div class="rowcollapse">';
 				
 					if(${$var}[$i]["NCT/enrollment_type"] != '') {
@@ -528,9 +531,11 @@ if(count($$var) > 0) {
 			
 			} else if($fqname == "NCT/start_date") {
 			
-				echo '<td style="background-color:#EDEAFF; '
-					. (in_array('NCT/start_date', $new_arr[$highlight_arr]['edited']) ? ('border:2px solid #FF0000;') : '' ) 
-					. ' "><div class="rowcollapse">' . date('m/y',strtotime(${$var}[$i]["NCT/start_date"])) . '</div></td>';
+				if(in_array('NCT/start_date',$new_arr[$highlight_arr]['edited']))
+					$attr = 'border:2px solid #FF3333;" title="' . $new_arr[$highlight_arr]['edited'][$fqname] . '" ';
+
+				echo '<td style="background-color:#EDEAFF; ' . $attr . ' >'
+					. '<div class="rowcollapse">' . date('m/y',strtotime(${$var}[$i]["NCT/start_date"])) . '</div></td>';
 				
 				/*$val = floor((strtotime(${$var}[$i]["NCT/primary_completion_date"]) - 
 				strtotime(${$var}[$i]["NCT/start_date"])) / (30*60*60*24) );
@@ -548,38 +553,48 @@ if(count($$var) > 0) {
 					}
 				}*/
 				
-				echo '<td style="background-color:#EDEAFF; ';
+				if(in_array(end_date,$new_arr[$highlight_arr]['edited']))
+					$attr = 'border:2px solid #FF3333;" title="' . $new_arr[$highlight_arr]['edited'][$fqname] . '" ';
+					
+				echo '<td style="background-color:#EDEAFF; ' . $attr . '>';
 					if($end_date != '') {
-						echo (in_array($end_date, $new_arr[$highlight_arr]['edited']) ? ('border:2px solid #FF0000;') : '' ) 
-						. '"><div class="rowcollapse">' . date('m/y',strtotime($end_date)) . '</div></td>';
+						echo '<div class="rowcollapse">' . date('m/y',strtotime($end_date)) . '</div></td>';
 					} else {
-						echo '" >&nbsp;</td>';
+						echo '"&nbsp;</td>';
 					}
 			
 			} else if($fqname == "NCT/overall_status") {
+		
+				if(in_array('NCT/overall_status',$new_arr[$highlight_arr]['edited']))
+					$attr = 'border:2px solid #FF3333;" title="' . $new_arr[$highlight_arr]['edited'][$fqname] . '" ';
+
 			
-				echo '<td style="background-color:#D8D3E0;' 
-					. (in_array('NCT/overall_status', $new_arr[$highlight_arr]['edited']) ? ('border:2px solid #FF0000;') : '' ) 
-					. ' "><div class="rowcollapse">' 
-					. $val . '</div></td>';
+				echo '<td style="background-color:#D8D3E0; ' . $attr . '>'  
+					. '<div class="rowcollapse">' . $val . '</div></td>';
 			
 			} else if($fqname == "NCT/condition") {
-				
-				echo '<td style="background-color:#EDEAFF;' 
-					. (in_array('NCT/condition', $new_arr[$highlight_arr]['edited']) ? ('border:2px solid #FF0000;') : '' ) . ' ">'
+			
+				if(in_array('NCT/condition',$new_arr[$highlight_arr]['edited']))
+					$attr = 'border:2px solid #FF3333;" title="' . $new_arr[$highlight_arr]['edited'][$fqname] . '" ';
+
+				echo '<td style="background-color:#EDEAFF; ' . $attr . '>'
 					. '<div class="rowcollapse">' . $val . '</div></td>';
 				
 			} else if($fqname == "NCT/intervention_name") {
-				
-				echo '<td style="background-color:#EDEAFF; ' 
-					. (in_array('NCT/intervention_name', $new_arr[$highlight_arr]['edited']) ? ('border:2px solid #FF0000;') : '' ) . ' ">'
+			
+				if(in_array('NCT/intervention_name',$new_arr[$highlight_arr]['edited']))
+					$attr = 'border:2px solid #FF3333;" title="' . $new_arr[$highlight_arr]['edited'][$fqname] . '" ';
+
+				echo '<td style="background-color:#EDEAFF; ' . $attr . '>'
 					. '<div class="rowcollapse">' . $val . '</div></td>';
 				
 			} else if($fqname == "NCT/phase") {
 			
+				if(in_array('NCT/phase',$new_arr[$highlight_arr]['edited']))
+					$attr = 'border:2px solid #FF3333;" title="' . $new_arr[$highlight_arr]['edited'][$fqname] . '" ';
+
 				$phase = (${$var}[$i][$fqname] == 'N/A') ? $ph : ('P' . $ph);
-				echo '<td style="background-color:'.$phase_arr[$ph] . ';'
-					. (in_array('NCT/phase',$new_arr[$highlight_arr]['edited']) ? ('border:2px solid #FF0000;') : '' ) . ' ">'
+				echo '<td style="background-color:'.$phase_arr[$ph] . $attr . '>'
 					. '<div class="rowcollapse">' . $phase . '</div></td>';
 			
 			} else { 
@@ -739,7 +754,7 @@ function getNCT($nct_id,$time,$edited)
 	$studycatData=mysql_fetch_assoc(mysql_query("SELECT `dv`.`studycat` FROM `data_values` `dv` LEFT JOIN `data_cats_in_study` `dc` ON (`dc`.`id`=`dv`.`studycat`) WHERE `dv`.`field`='1' AND `dv`.`val_int`='".$nct_id."' AND `dc`.`larvol_id`='"
 	.$study['larvol_id']."'"));
 	
-	$sql="SELECT DISTINCT `df`.`name` AS `fieldname`, `dv`.`studycat` FROM `data_values` `dv` LEFT JOIN `data_fields` `df` ON (`df`.`id`=`dv`.`field`) WHERE `df`.`name` IN ('" . join("','",$fieldnames) . "') AND `studycat`='" . $studycatData['studycat'] 
+	$sql="SELECT DISTINCT `df`.`name` AS `fieldname`, `df`.`id` AS `fieldid`, `df`.`type` AS `fieldtype`, `dv`.`studycat`, dv.* FROM `data_values` `dv` LEFT JOIN `data_fields` `df` ON (`df`.`id`=`dv`.`field`) WHERE `df`.`name` IN ('" . join("','",$fieldnames) . "') AND `studycat`='" . $studycatData['studycat'] 
 	. "' AND (`dv`.`superceded`<'" . date('Y-m-d',strtotime($time)) . "' AND `dv`.`superceded`>= '" 
 	. date('Y-m-d',strtotime($edited,strtotime($time))) . "')";
 
@@ -748,6 +763,23 @@ function getNCT($nct_id,$time,$edited)
 	
 	while ($row=mysql_fetch_assoc($changedFields)){ 
 		$study['edited'][] = 'NCT/'.$row['fieldname'];
+		
+		
+		//getting previous value for updated trials
+		if($row['fieldtype'] == 'enum') {
+		
+			$result = mysql_query('SELECT value FROM data_enumvals WHERE `field`=' . $row['fieldid'] 
+			. ' AND `id` = "' . mysql_real_escape_string($row['val_'.$row['fieldtype']]) . '" LIMIT 1');
+			if($result === false) return softDie('Bad SQL query getting enumval value');
+			$result = mysql_fetch_array($result);
+			if($result === false) return softDie('Invalid enumval value for field');
+			
+			$val = $result['value'];
+		} else {
+			$val = $row['val_'.$row['fieldtype']];
+		}
+		$study['edited']['NCT/'.$row['fieldname']] = $val;
+		
 	}
 
 	return $study;
@@ -772,5 +804,8 @@ function fieldNameToPaddedId($name)
 function htmlformat($str)
 {
 	return htmlspecialchars($str);
+}
+
+function getPrevValue() {
 }
 ?>

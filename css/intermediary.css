@@ -85,7 +85,7 @@ td,th {
 }
 .rowcollapse {
 	vertical-align:top;
-	max-height:2.5em;
+	max-height:1.2em;
 	overflow:visible;
 	padding-top:0;
 	margin:0;
@@ -114,4 +114,12 @@ td,th {
 	font-weight:bold;
 	text-decoration:underline;
 	font-size:18px;
+}
+
+.typeone {
+	background-color:#EDEAFF;
+}
+
+.typetwo {
+	background-color:#D8D3E0;
 }
