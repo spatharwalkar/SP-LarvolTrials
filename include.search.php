@@ -1318,7 +1318,6 @@ function precheckSearchSql($conditions,$g_conds,$strong_exclusions)
 			$where .= ' '.$tmp.' ';
 		}
 		$tmpSql .=$where.' LIMIT 0';
-		echo $tmpSql;die;
 		if(!mysql_query($tmpSql))
 		return false;
 	}
