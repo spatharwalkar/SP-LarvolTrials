@@ -225,7 +225,7 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 								}
 							}
 						}
-					}	
+					}
 				}
 			}
 		}
@@ -280,7 +280,7 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 	}else{
 		$lone_cond = NULL;
 	}
-
+	
 	//execute the queries and gather results
 	foreach($conditions as $i => $cond)
 	{
@@ -538,7 +538,9 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 	$resid_set = array();
 	while($row = mysql_fetch_assoc($res)) $resid_set[] = $row['larvol_id'];
 	//get requested data for the page
+	
 	$recordsData = getRecords($resid_set,$list,$time);
+	
 	$retdata = array();
 	foreach($resid_set as $id) $retdata[$id] = $recordsData[$id];	//preserve sorting
 	return $retdata;
@@ -793,24 +795,31 @@ function getRecords($ids,$fields,$time)
 			$log = 'Bad SQL query getting data for result set<br />'.$query.'<br />'.mysql_error();
 			return softDie($log);
 		}
+		$i = 0;
 		while($row = mysql_fetch_assoc($res))
-		{	
+		{
+	
 			$id = $row['larvol_id'];
 			$place = $row['category'] . '/' . $row['name'];
 			$val = $row[$row['type']];
+			//print('<pre>');
+			//print_r($result);
 			if(isset($result[$id][$place]))
 			{
+			  // print_r( $result[$id][$place]);
 				if(is_array($result[$id][$place]))
 				{
-					$result[$id][$place][$id] = $val;
+					 $result[$id][$place][$i] = $val;
 				}else{
-					$result[$id][$place] = array($result[$id][$place], $val);
+					$result[$id][$place][$i] = array($result[$id][$place], $val);
 				}
 			}else{
-				$result[$id][$place] = $val;
+				$result[$id][$place][$i] = $val;
 			}
+			$i++;
 		}
 	}
+	
 	return $result;
 }
 
@@ -953,6 +962,7 @@ function fieldsplit($f, $alias = true)
 //Takes an array of raw searchdata and removes the non-action elements
 function removeNullSearchdata($data)
 {
+	if(!is_array($data)){ return ;  }
 	$search = $data['search'];
 	$display = $data['display'];
 	$action = $data['action'];
@@ -1181,6 +1191,7 @@ function validateInputPCRE($post)
     global $db;
 	//logger variable in db.php
 	global $logger;	    
+
     $badFields=array();
 	if(isset($post['action']) && is_array($post['action']))
 	{

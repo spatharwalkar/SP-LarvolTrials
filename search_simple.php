@@ -80,8 +80,9 @@ echo('</body></html>');
 function searchControl($fieldname, $alias=false, $checked=false, $multi=false)
 {
 	global $db;
+	
 	if((isset($_GET['load']) || isset($_POST['searchname'])) && $checked !== 1)
-		$checked = $_POST['display'][$fieldname] ? true : false;	
+		$checked = isset($_POST['display'][$fieldname]) ? true : false;	
 	
 	$enumvals = NULL;
 	$CFid = NULL;

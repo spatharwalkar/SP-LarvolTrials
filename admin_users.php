@@ -62,8 +62,20 @@ function userControl()
 		foreach($_POST['useredit_save'] as $id => $apstr)
 		{
 			$id = mysql_real_escape_string($id);
-			$email = mysql_real_escape_string($_POST['useredit_email'][$id]);
-			$userlevel = $_POST['useredit_userlevel'][$id];
+			if(isset($_POST['useredit_email'][$id])){
+			      $email = mysql_real_escape_string($_POST['useredit_email'][$id]);
+			 }
+		     else{
+			    $email = "";
+			   }
+			if(isset($_POST['useredit_userlevel'][$id])){
+			    $userlevel = $_POST['useredit_userlevel'][$id];
+			}
+			else
+			{
+			  $userlevel = "";
+			
+			}
 			if(!in_array($userlevel,$levels))
 			{
 				$userlevel = '';
@@ -91,7 +103,7 @@ function userControl()
 				}
 				mysql_query('COMMIT') or die("Couldn't commit transaction");
 			}
-			if($_POST['useredit_del'][$id])
+			if(isset($_POST['useredit_del'][$id]))
 			{
 				$no_root = ' AND userlevel!="root"';
 				$query = 'DELETE FROM users WHERE id=' . $id . $no_root . ' LIMIT 1';

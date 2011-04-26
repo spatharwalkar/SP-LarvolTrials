@@ -10,7 +10,7 @@ require_once('include.search.php');
 $id = mysql_real_escape_string($_GET['id']);
 if(!is_numeric($id)) die('non-numeric id!');
 $type = 'heatmap';
-if($_GET['type'] == 'competitor') $type = 'competitor';
+if(isset($_GET['type']) && $_GET['type'] == 'competitor') $type = 'competitor';
 
 $doc = file_get_contents('templates/general.htm');
 

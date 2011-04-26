@@ -61,7 +61,7 @@ function statMon()
 //process POST for status monitor
 function postSM()
 {
-	if(!isset($_POST['stop'])) return;
+	if(!isset($_POST['stop']) || !is_array($_POST['stop'])) return;
 	foreach($_POST['stop'] as $id => $ok)
 	{
 		$query = 'DELETE FROM progress WHERE id=' . mysql_real_escape_string($id) . ' LIMIT 1';
@@ -289,6 +289,7 @@ function postEd()
 	$res = mysql_query($query) or die('Bad SQL query getting user for report id');
 	$res = mysql_fetch_assoc($res);
 	if($res === false) continue;
+	if(count($res)==0){ die('Not found.'); }
 	$rptu = $res['user'];
 	if($rptu !== NULL && $rptu != $db->user->id) return;
 
@@ -380,8 +381,8 @@ function postEd()
 	{
 		$footnotes = mysql_real_escape_string($_POST['footnotes']);
 		$description = mysql_real_escape_string($_POST['description']);
-		$options = $_POST['options'];
-		$owner = $_POST['own'] == 'global' ? 'NULL' : $db->user->id;
+		$options = isset($_POST['options'])?$_POST['options']:NULL;
+		$owner = (isset($_POST['own']) && $_POST['own'] == 'global' )? 'NULL' : $db->user->id;
 		$bomb = is_array($options) && in_array("bomb", $options) ? 'Y' : 'N';
 		$backboneAgent = is_array($options) && in_array("backbone_agent", $options) ? 'Y' : 'N';
 		$countonlyactive = is_array($options) && in_array("count_only_active", $options) ? 'Y' : 'N';
@@ -569,7 +570,7 @@ function postEd()
 		}		
 	}
 	
-	if(isset($_POST['delete']) || is_array($_POST['delete']))
+	if(isset($_POST['delete']) && is_array($_POST['delete']))
 	{
 		foreach($_POST['delete'] as $co => $val)
 		{

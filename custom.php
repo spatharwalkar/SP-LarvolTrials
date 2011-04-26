@@ -40,7 +40,7 @@ function processList()
 {
 	global $db;
 	if(isset($_POST['cat_del']) && !is_array($_POST['cat_del'])) return;
-	if($_POST)
+	if(isset($_POST['cat_del']))
 	{
 		foreach($_POST['cat_del'] as $id => $n)
 		{
@@ -111,7 +111,7 @@ function processEditor()
 			$query = 'UPDATE data_categories SET name="' . mysql_real_escape_string($_POST['name'])
 					. '" WHERE id=' . $id . ' LIMIT 1';
 			mysql_query($query) or die('Bad SQL query updating category');
-			if(is_array($_POST['fieldname']))
+			if(isset($_POST['fieldname']) && is_array($_POST['fieldname']))
 			{
 				foreach($_POST['fieldname'] as $fieldId => $fieldname)
 				{
@@ -340,6 +340,7 @@ function fieldEditor()
 
 function getFields($id)
 {
+	$catd = array();
 	$query = 'SELECT id,name,type FROM data_fields WHERE category=' . $id;
 	$res = mysql_query($query) or die('Bad SQL query getting fields in category');
 	while($row = mysql_fetch_assoc($res))

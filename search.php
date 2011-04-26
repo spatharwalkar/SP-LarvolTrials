@@ -158,8 +158,12 @@ $tm_oldval = "";
 $over_oldval = "";
 if($_GET || $_POST)
 {
-	$tm_oldval = isset($_GET['time_machine']) ? $_GET['time_machine'] : $_POST['time_machine'];
-	$over_oldval = isset($_GET['override']) ? $_GET['override'] : $_POST['override'];
+
+  
+	$tm_oldval = isset($_GET['time_machine']) ? $_GET['time_machine'] : (isset($_POST['time_machine'])?$_POST['time_machine']: '');
+	$over_oldval = isset($_GET['override']) ? $_GET['override'] : (isset($_POST['override'])?$_POST['override']:'');
+	
+	
 }
 echo('<fieldset style="float:left;width:25em;"><legend>Time machine</legend>'
 	. 'Enter a date (time optional) to search on; leave blank for current data (fastest)<br />'
@@ -191,7 +195,7 @@ echo('<script type="text/javascript" src="checkall.js"></script>');
 		$page = $_POST['page'];
 		if(isset($_POST['back'])) $page--;
 		if(isset($_POST['next'])) $page++;
-		if(isset($_POST['jump'])) $page = $_POST['jumpno'];
+		if(isset($_POST['jump'])) $page = isset($_POST['jumpno'])?$_POST['jumpno']:0;
 	}
 	if($page < 1) $page = 1;
 	if(isset($_POST['oldsearch']))
@@ -201,7 +205,7 @@ echo('<script type="text/javascript" src="checkall.js"></script>');
 	//array_walk_recursive($_POST,ref_mysql_escape);	//breaks regex by escaping backslashes
 	$params = prepareParams($_POST);
 	$list = array();
-	if(is_array($_POST['display']))
+	if(isset($_POST['display']) && is_array($_POST['display']))
 	{
 		foreach($_POST['display'] as $field => $ok)
 		{
@@ -232,6 +236,7 @@ echo('<script type="text/javascript" src="checkall.js"></script>');
 	//first  run the search in test mode 
 	search($params,$list,$page,$time_machine,$override_arr,true);
 	$res = search($params,$list,$page,$time_machine,$override_arr);
+	
 	if($res === false)
 		die('<br />Search failed. Tell development how you enountered this error, including the above message, if any. '
 				. 'Go back to continue.');
@@ -285,10 +290,12 @@ echo('<script type="text/javascript" src="checkall.js"></script>');
 		$type = 'SrcNotFound';
 		$source_id = '';
 		$link = '';
+		
+		
 		if(isset($study['NCT/nct_id']))
 		{
 			$type = 'NCT';
-			$source_id = padnct($study['NCT/nct_id']);
+			$source_id = padnct($study['NCT/nct_id'][0]);
 			$link = 'http://clinicaltrials.gov/ct2/show/';
 		}
 		if(isset($study['PubMed/PMID']))
@@ -300,6 +307,8 @@ echo('<script type="text/javascript" src="checkall.js"></script>');
 		for($woo=0;$woo<2;$woo++) unset_nulls($study);
 		echo('<a href="inspect.php?larvol_id=' . $id . '">Study ' . $id
 			. '</a><b>:</b> <a href="' . $link . $source_id . '">' . $source_id . ' [' . $type . ']</a><br />');
+			
+			
 		krumo($study);
 	}
 }

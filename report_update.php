@@ -64,11 +64,11 @@ function postEd()
 			$end = 'NULL';
 
 		$crit = array();
-		$crit['watch'] = $_POST['watch'];
-		$crit['from'] = $_POST['from'];
-		$crit['req_from'] = $_POST['req_from'];
-		$crit['to'] = $_POST['to'];
-		$crit['req_to'] = $_POST['req_to'];
+		$crit['watch'] = isset($_POST['watch'])?$_POST['watch']:'';
+		$crit['from'] = isset($_POST['from'])?$_POST['from']:'';
+		$crit['req_from'] = isset($_POST['req_from'])?$_POST['req_from']:'';
+		$crit['to'] = isset($_POST['to'])?$_POST['to']:'';
+		$crit['req_to'] = isset($_POST['req_to']) ? $_POST['req_to'] : '';
 		unset_nulls($crit);
 		$crit = base64_encode(serialize($crit));
 		$query = 'UPDATE rpt_update SET name=' . $name . ',getnew=' . $getnew . ',start=' . $start . ',end=' . $end
@@ -124,7 +124,7 @@ function urEditor()
 	$description = htmlspecialchars($res['description']);
 	$getnew = $res['getnew'] == 1;
 	$crit = array();
-	if($res['criteria'] !== NULL)
+	if(isset($res['criteria']) && $res['criteria'] !== NULL)
 	{
 		$crit = unserialize(base64_decode($res['criteria']));
 	}
@@ -151,7 +151,7 @@ function urEditor()
 	$out .= '<br />Date range (blank=unbounded):'
 			. '<input type="text" name="start" value="' . $start . '" class="date_input"' . $lockd . '/> to '
 			. '<input type="text" name="end" value="' . $end . '" class="date_input"' . $lockd . '/><br />Search criteria: ';
-	if($res['searchdata'] !== NULL)
+	if(isset($res['searchdata']) && $res['searchdata'] !== NULL)
 	{
 		$out .= '[Search] <a href="search.php?'	. 'urep=' . $id . '">' . ($lock ? 'View' : 'Edit') . '</a>';
 		if(!$lock)
@@ -336,7 +336,7 @@ function postRL()
 	if(isset($_POST['setactive']))
 	{
 		mysql_query('DELETE FROM rpt_update_recieve WHERE user=' . $db->user->id) or die('Bad SQL query clearing status');
-		if(is_array($_POST['active']))
+		if(isset($_POST['active']) && is_array($_POST['active']))
 		{
 			foreach($_POST['active'] as $id)
 			{
