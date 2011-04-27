@@ -71,21 +71,25 @@ require_once('include.search.php');
 	//<![CDATA[
 	function doSorting(type) {
 	
-		/*if(type == 'status') {*/
 		
-			var value = document.getElementById(type).value;
-			if(value == "") {
+		var value = document.getElementById(type).value;
+		
+		if(document.getElementById('sortorder').value == '')
+			document.getElementById('sortorder').value = type[0];
+		else
+			document.getElementById('sortorder').value = document.getElementById('sortorder').value+'-'+type[0];
+		if(value == "") {
+		
+			document.getElementById(type).value = "desc";
 			
-				document.getElementById(type).value = "desc";
-				
-			} else if(value == "desc") {
+		} else if(value == "desc") {
+		
+			document.getElementById(type).value = "asc";
 			
-				document.getElementById(type).value = "asc";
-				
-			} else {
-			
-				document.getElementById(type).value = "";
-			}
+		} else {
+		
+			document.getElementById(type).value = "";
+		}
 				
 		document.getElementById('frmOtt').submit();	
 	}
@@ -125,6 +129,33 @@ if($excel_params === false)
 	$results = count($leadingIDs);
 }
 
+//getting the order of aort
+$v = explode("-",$_GET['sortorder']);
+if(count($v) <= 3) {
+
+	if(count($v) == 3) {
+		
+		${$v[0]} = 'style="width:14px;height:14px;"';
+		${$v[1]} = 'style="width:10px;height:10px;"';
+		${$v[2]} = 'style="width:7px;height:7px;"';
+	 }
+	 if(count($v) == 2) {
+		${$v[0]} = 'style="width:14px;height:14px;"';
+		${$v[1]} = 'style="width:10px;height:10px;"';
+	}
+	if(count($v) == 1) 
+		${$v[0]} = 'style="width:14px;height:14px;"';
+	
+	
+} elseif(count($v) > 3) {
+
+	${$v[0]} = 'style="width:14px;height:14px;"';
+	${$v[1]} = 'style="width:10px;height:10px;"';
+	${$v[2]} = 'style="width:7px;height:7px;"';
+
+}
+
+
 $page = 1;
 if(isset($_GET['page'])) $page = mysql_real_escape_string($_GET['page']);
 if(isset($_GET['jump']) && isset($_GET['jumpno'])) $page = mysql_real_escape_string($_GET['jumpno']);
@@ -135,24 +166,6 @@ if(isset($_GET['next'])) ++$page;
 
 $nodata = array('action' => array(), 'searchval' => array());
 
-/*$params = array();
-if($_GET['sort'] == 'phase' || $_GET['sort'] == 'enrollment' || $_GET['sort'] == 'overall_status'
-	|| $_GET['sort'] == 'phased' || $_GET['sort'] == 'enrollmentd' || $_GET['sort'] == 'overall_statusd')
-{
-	$sp = new SearchParam();
-	$realfieldname = ((substr($_GET['sort'], -1) == 'd') ? (substr($_GET['sort'],0,strlen($_GET['sort'])-1)) : $_GET['sort']);
-	$sp->field = '_' . getFieldId('NCT', $realfieldname);
-	$sp->action = ((substr($_GET['sort'], -1) == 'd') ? 'descending' : 'ascending');
-	$params[] = $sp;
-	
-} else {//Changed the default sort from "none" to: descending by phase 
-
-	$sp = new SearchParam();
-	$sp->field = '_' . getFieldId('NCT', 'phase');
-	$sp->action = 'descending';
-	$params[] = $sp;
-
-}*/
 
 $statusparams = array();$enrollparams = array();$phaseparams = array();
 if(isset($_GET['status']) && $_GET['status'] != '') {
@@ -299,6 +312,7 @@ if($inactflag == 1) {
 			|| isset($_GET['wh']) || isset($_GET['afm']) || isset($_GET['tna']) || isset($_GET['nla']) || isset($_GET['wd']) 
 			|| isset($_GET['t']) || isset($_GET['s']) || isset($_GET['c'])) {	
 			
+
 			$vall = implode(",",array_keys($allfilterarr, $val['NCT/overall_status']));
 			if(array_key_exists($vall, $_GET)) {
 				$allcount++;
@@ -335,7 +349,6 @@ if($inactflag == 1) {
 $var = (isset($_GET["list"])) ? ($_GET["list"].'array') : 'activearray' ; 
 
 $count = count($$var);
-
 
 $activestatus 		= '<input type="checkbox" name="nyr" value="1" ' 
 					.($_GET['nyr'] ? ' checked="checked"' : ''). ' />Not yet recruiting<br/>'
@@ -393,13 +406,6 @@ $pager='';
 if($count > $db->set['results_per_page'])
 {
 	$sort = '';
-	/*if($_GET['sort'] == 'phase') $sort = '&amp;sort=phase';
-	if($_GET['sort'] == 'enrollment') $sort = '&amp;sort=enrollment';
-	if($_GET['sort'] == 'overall_status') $sort = '&amp;sort=overall_status';
-	if($_GET['sort'] == 'phased') $sort = '&amp;sort=phased';
-	if($_GET['sort'] == 'enrollmentd') $sort = '&amp;sort=enrollmentd';
-	if($_GET['sort'] == 'overall_statusd') $sort = '&amp;sort=overall_statusd';*/
-	
 	if($_GET['enrolment'] == 'overall_status') $sort = '&amp;enrolment=asc';
 	if($_GET['enrolment'] == 'phased') $sort = '&amp;enrolment=desc';
 	if($_GET['status'] == 'asc') $sort = '&amp;status=asc';
@@ -466,25 +472,10 @@ echo ('<br/><input type="radio" id="alllist" name="list" value="all" ' .
 
 echo '<input type="hidden" id="status" name="status" value="' . $_GET['status'] . '" />' .
 		'<input type="hidden" id="phase" name="phase" value="' . $_GET['phase'] . '" />' .
-		'<input type="hidden" id="enrollment" name="enrollment" value="' . $_GET['enrollment'] . '" />';	
+		'<input type="hidden" id="enrollment" name="enrollment" value="' . $_GET['enrollment'] . '" />' .
+		'<input type="hidden" id="sortorder" name="sortorder" value="' . $_GET['sortorder'] . '" />';	
 		
-echo ('<div class="block"><div class="text">Sort by</div>'
-		/*.'<select name="sort"><option'
-		. ($_GET['sort']!='phase' && $_GET['sort']!='enrollment' && $_GET['sort']!='overall_status' ? ' selected="selected"' : '')
-		. '>none</option>'
-		. '<option value="phase"' . ($_GET['sort']=='phase' ? ' selected="selected"' : '') . '>phase</option>'
-		. '<option value="enrollment"' . ($_GET['sort']=='enrollment' ? ' selected="selected"' : '') . '>enrollment</option>'
-		. '<option value="overall_status"'.($_GET['sort']=='overall_status' ? ' selected="selected"' : '') 
-		. '>overall_status</option>'
-		. '<option value="phased"' . (($_GET['sort']=='phased' || !isset($_GET['sort'])) ? ' selected="selected"' : '') 
-		. '>phase (Desc)</option>'
-		. '<option value="enrollmentd"' . ($_GET['sort']=='enrollmentd' ? ' selected="selected"' : '') 
-		. '>enrollment (Desc)</option>'
-		. '<option value="overall_statusd"' .($_GET['sort']=='overall_statusd' ? ' selected="selected"' : '') 
-		. '>overall_status (Desc)</option>'
-		. '</select>'*/
-		. '</div>'
-		. '<div class="drop"><div class="text">Show Only</div>'
+		echo ('<div class="drop"><div class="text">Show Only</div>'
 		. '<span id="filteropt">'
 		. (isset($_GET["list"]) ? ${$_GET["list"].'status'} : $activestatus)
 		. '</span></div>'
@@ -503,7 +494,7 @@ echo ('<div class="block"><div class="text">Sort by</div>'
 		.  $$dispcnt . '&nbsp;Records</div>'
 		. '</form>');
 	
-echo '<table width="100%" border="0" cellpadding="4" cellspacing="0" class="manage">'
+	echo '<table width="100%" border="0" cellpadding="4" cellspacing="0" class="manage">'
 		 . '<tr><th rowspan="2" style="width:280px;">Title</th>'
 		 . '<th style="width:28px;" title="gray values are anticipated and black values are actual">'
 		 . '<a href="javascript: void(0);" onclick="javascript: doSorting(\'enrollment\');">N</a></th>'
@@ -519,27 +510,27 @@ echo '<table width="100%" border="0" cellpadding="4" cellspacing="0" class="mana
 		 . '<tr><th>';
 		 
 			 if($_GET['enrollment'] == 'desc') {
-				echo '<img src="images/des.png" alt="desc" border="0" ' . $e_style . ' />';
+				echo '<img src="images/des.png" alt="desc" border="0" ' . $e . ' />';
 			 } else if($_GET['enrollment'] == 'asc') {
-				echo '<img src="./images/asc.png" alt="asc" border="0" ' . $e_style . ' />';
+				echo '<img src="./images/asc.png" alt="asc" border="0" ' . $e . ' />';
 			 } else { 
 				echo '';
 			 }
 		 echo '</th><th>';
 		 
 			 if($_GET['status'] == 'desc') {
-				echo '<img src="images/des.png" alt="desc" border="0" ' . $o_style . ' />';
+				echo '<img src="images/des.png" alt="desc" border="0" ' . $s . ' />';
 			 } else if($_GET['status'] == 'asc') {
-				echo '<img src="./images/asc.png" alt="asc" border="0" ' . $o_style . ' />';
+				echo '<img src="./images/asc.png" alt="asc" border="0" ' . $s . ' />';
 			 } else { 
 				echo '';
 			 }
 		 echo '</th><th>';
 		
 		 	if($_GET['phase'] == 'desc') {
-				echo '<img src="images/des.png" alt="desc" border="0" ' . $p_style . ' />';
+				echo '<img src="images/des.png" alt="desc" border="0" ' . $p . ' />';
 			 } else if($_GET['phase'] == 'asc') {
-				echo '<img src="./images/asc.png" alt="asc" border="0" ' . $p_style . ' />';
+				echo '<img src="./images/asc.png" alt="asc" border="0" ' . $p . ' />';
 			 } else { 
 				echo '';
 			 }
