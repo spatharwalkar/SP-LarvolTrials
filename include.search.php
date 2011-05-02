@@ -1270,7 +1270,7 @@ function validateInputPCRE($post)
 		$pcre = strlen($mask) > 1
 			&& $mask[0] == '/'
 			&& ($mask[strlen($mask)-1] == '/' || ($mask[strlen($mask)-2] == '/' && strlen($mask) > 2));
-		if($pcre)
+		if($pcre && !validateMaskPCRE($mask))
 		$badFields['varchar+text']=$mask;
 	}
 	if($badFields)
