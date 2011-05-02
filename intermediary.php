@@ -10,7 +10,7 @@ require_once('include.search.php');
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>Search Results</title>
+<title>Online Trial Tracker</title>
 <link href="css/intermediary.css" rel="stylesheet" type="text/css" media="all" />
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -147,7 +147,7 @@ if($excel_params === false)
 	$results = count($leadingIDs);
 }
 $params = array();
-
+$e_style = '';$p_style = '';
 if(!isset($_GET['enrollment']) && !isset($_GET['status']) && !isset($_GET['startdate']) && !isset($_GET['enddate']) 
 && !isset($_GET['phase'])) {
 
@@ -156,6 +156,12 @@ if(!isset($_GET['enrollment']) && !isset($_GET['status']) && !isset($_GET['start
 	$sp->action = 'descending';
 	$params[] = $sp;
 
+	$sp = new SearchParam();
+	$sp->field = '_' . getFieldId('NCT', 'completion_date');
+	$sp->action = 'ascending';
+	$params[] = $sp;
+	$p_style = 'style="width:14px;height:14px;"';
+	$e_style = 'style="width:12px;height:12px;"';
 }
 
 $sortorder = array();
@@ -167,7 +173,7 @@ if(isset($_GET['sortorder']) && $_GET['sortorder'] != '') {
 	foreach($sortorder as $v) {
 
 		$fieldname = array('enrollment' => 'enrollment', 'phase' => 'phase', 'status' =>'overall_status', 
-			'startdate' => 'start_date','enddate' => 'primary_completion_date');
+			'startdate' => 'start_date','enddate' => 'completion_date');
 		$sp = new SearchParam();
 		$sp->field = '_' . getFieldId('NCT', $fieldname[$v]);
 		$sp->action = ($_GET[$v] == 'des' ) ? 'descending' : 'ascending';
@@ -386,6 +392,7 @@ $pend = $pstart + $db->set['results_per_page'] - 1;
 $pages = ceil($count / $db->set['results_per_page']);
 $last = ($page*$db->set['results_per_page']>$count) ? $count : $pend;
 
+
 echo ('<table width="100%"><tr><td><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" />'
 	. '</td><td nowrap="nowrap"><span style="color:#ff0000;font-weight:normal;">Interface Work In Progress</span>');
 	
@@ -519,27 +526,33 @@ echo '<table width="100%" border="0" cellpadding="4" cellspacing="0" class="mana
 		 
 		if(isset($_GET['enrollment']) && $_GET['enrollment'] != '') {
 			$img_style = array_search('enrollment', $sortorder);
-			echo "<img src='images/".$_GET['enrollment'].".png' ".$imgscale[$img_style]." border='0' />";
+			echo "<img src='images/".$_GET['enrollment'].".png' ".$imgscale[$img_style]." border='0' alt='Sort' />";
 		}
 		 echo '</th><th>';
 		if(isset($_GET['status']) && $_GET['status'] != '') {
 			$img_style = array_search('status', $sortorder);
-			echo "<img src='images/".$_GET['status'].".png' ".$imgscale[$img_style]." border='0' />";
+			echo "<img src='images/".$_GET['status'].".png' ".$imgscale[$img_style]." border='0' alt='Sort' />";
 		}
 		 echo '</th><th>';
 		if(isset($_GET['startdate']) && $_GET['startdate'] != '') {
 			$img_style = array_search('startdate', $sortorder);
-			echo "<img src='images/".$_GET['startdate'].".png' ".$imgscale[$img_style]." border='0' />";
+			echo "<img src='images/".$_GET['startdate'].".png' ".$imgscale[$img_style]." border='0' alt='Sort' />";
 		}
 		 echo '</th><th>';
+		if($e_style != '') {
+			echo "<img src='images/asc.png' " . $e_style . " border='0' alt='Sort' />";
+		}
 		if(isset($_GET['enddate']) && $_GET['enddate'] != '') {
 			$img_style = array_search('enddate', $sortorder);
-			echo "<img src='images/".$_GET['enddate'].".png' ".$imgscale[$img_style]." border='0' />";
+			echo "<img src='images/".$_GET['enddate'].".png' ".$imgscale[$img_style]." border='0' alt='Sort' />";
 		}
-		 echo '</th><th>';
+		echo '</th><th>';
+		if($p_style != '') {
+			echo "<img src='images/des.png' " . $p_style . " border='0' alt='Sort' />";
+		}
 		if(isset($_GET['phase']) && $_GET['phase'] != '') {
 			$img_style = array_search('phase', $sortorder);
-			echo "<img src='images/".$_GET['phase'].".png' ".$imgscale[$img_style]." border='0' />";
+			echo "<img src='images/".$_GET['phase'].".png' ".$imgscale[$img_style]." border='0' alt='Sort' />";
 		}
 		 echo '</th><th colspan="12" style="width:26px;padding-left:0;padding-right:0;">' . $current_yr . '</th>'
 		 . '<th colspan="12" style="width:26px;padding-left:0;padding-right:0;">' . $second_yr . '</th>'
@@ -690,7 +703,12 @@ if(count($$var) > 0) {
 				if(in_array('NCT/lead_sponsor', $new_arr[$highlight_arr]['edited']) || 
 					in_array('NCT/collaborator', $new_arr[$highlight_arr]['edited'])) {
 						$attr = 'class="highlight" title="' . $new_arr[$highlight_arr]['edited'][$fqname] . '" '; }
-						
+				
+				if(is_array($val))		
+					$val = implode(', ', $val);
+				else
+					$val = $val;
+					
 				echo '<td style="background-color:#EDEAFF;" ' . $attr . '>'
 					. '<div class="rowcollapse">' . $val . ' <span style="color:gray;"> ' . ${$var}[$i]["NCT/collaborator"] 
 					. ' </span></div></td>';
@@ -743,6 +761,7 @@ function getColspan($start_dt, $end_dt) {
 //calculating the project completion chart in which the year ranges from the current year and next-to-next year
 function getCompletionChart($start_month, $start_year, $end_month, $end_year, $current_yr, $second_yr, $third_yr, $bg_color, $start_date, $end_date){
 
+
 		if($start_year < $current_yr) {
 			
 			if($end_year < $current_yr) {
@@ -792,9 +811,9 @@ function getCompletionChart($start_month, $start_year, $end_month, $end_year, $c
 			 
 			} else { 
 				$value = '<td colspan="12" style="background-color:' . $bg_color . '">&nbsp;</td>'
-						. '<td colspan="12" style="background-color:' . $bg_color . '">&nbsp;</td>'
-						. '<td colspan="12" style="background-color:' . $bg_color . '">&nbsp;</td>';
-			}		
+					. '<td colspan="12" style="background-color:' . $bg_color . '">&nbsp;</td>'
+					. '<td colspan="12" style="background-color:' . $bg_color . '">&nbsp;</td>';
+			}	
 		
 		} else if($start_year == $current_yr) {
 		
@@ -821,8 +840,10 @@ function getCompletionChart($start_month, $start_year, $end_month, $end_year, $c
 					. '<td style="background-color:' . $bg_color . '" colspan="' . $val . '">&nbsp;</td>'
 					. (((36 - ($val+$st)) != 0) ? '<td colspan="' .(36 - ($val+$st)) . '">&nbsp;</td>' : '');
 		
-			} else {
-				$value = '<td style="background-color:' . $bg_color . '" colspan="12">&nbsp;</td>'
+			} else if($end_year > $third_yr){
+			
+				$value = (($st != 0) ? '<td colspan="' . $st . '">&nbsp;</td>' : '')
+					. '<td style="background-color:' . $bg_color . '" colspan="' . (12 - $st) . '">&nbsp;</td>'
 					. '<td style="background-color:' . $bg_color . '" colspan="12">&nbsp;</td>'
 					. '<td style="background-color:' . $bg_color . '" colspan="12">&nbsp;</td>';
 			}
