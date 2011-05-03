@@ -385,8 +385,8 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 		$logger->info($log);
 		unset($log);	
 		
-		//$bigquery = ' UNION SELECT larvol_id FROM ulid';
-		$bigquery = ' OR larvol_id IN(SELECT larvol_id FROM ulid)';
+		$bigquery = ' UNION SELECT larvol_id FROM ulid';
+		//$bigquery = ' OR larvol_id IN(SELECT larvol_id FROM ulid)';//slow
 	}
 
 	$sortjoins = '';
