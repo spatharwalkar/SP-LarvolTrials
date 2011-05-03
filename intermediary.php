@@ -38,6 +38,7 @@ require_once('include.search.php');
 		 "<input type='checkbox' name='s' value='1' />Suspended<br/>" +
 		 "<input type='checkbox' name='c' value='1' />Completed<br/>";
 	  
+	  
 	  } else if(value == 'active') {
 	  
 	  document.getElementById('filteropt').innerHTML = 
@@ -46,6 +47,7 @@ require_once('include.search.php');
 		  '<input type="checkbox" name="ebi" value="1" />Enrolling by invitation<br/>' + 
 		  '<input type="checkbox" name="anr" value="1" />Active, not recruiting<br/>' + 
 		  '<input type="checkbox" name="a" value="1" />Available<br/>' ;
+	  
 	  
 	  } else {
 	  
@@ -85,6 +87,7 @@ require_once('include.search.php');
 				document.getElementById('sortorder').value = type+"##";
 			}
 			
+		
 		} else if(value == "des") {
 		
 			document.getElementById(type).value = "asc";
@@ -97,6 +100,7 @@ require_once('include.search.php');
 				document.getElementById('sortorder').value = type+"##";
 			}
 			
+		
 		} else {
 			
 			if(document.getElementById('sortorder').value != '') { 
@@ -304,6 +308,7 @@ foreach($arr as $key=>$val) {
 					$inactivearray[] = $val;	
 			}
 		}
+	
 	} else if($allflag == 1) { 
 		if($val['NCT/overall_status'] == 'Not yet recruiting' || $val['NCT/overall_status'] == 'Recruiting' || 
 				$val['NCT/overall_status'] == 'Enrolling by invitation' || $val['NCT/overall_status'] == 'Active, not recruiting' || 
@@ -391,6 +396,7 @@ $pstart = ($page-1) * $db->set['results_per_page'] + 1;
 $pend = $pstart + $db->set['results_per_page'] - 1;
 $pages = ceil($count / $db->set['results_per_page']);
 $last = ($page*$db->set['results_per_page']>$count) ? $count : $pend;
+
 
 
 echo ('<table width="100%"><tr><td><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" />'
@@ -658,8 +664,6 @@ if(count($$var) > 0) {
 						echo '&nbsp;</td>';
 					}
 			
-			
-			
 			} else if($fqname == "NCT/overall_status") {
 		
 				if(in_array('NCT/overall_status',$new_arr[$highlight_arr]['edited']))
@@ -704,13 +708,18 @@ if(count($$var) > 0) {
 					in_array('NCT/collaborator', $new_arr[$highlight_arr]['edited'])) {
 						$attr = 'class="highlight" title="' . $new_arr[$highlight_arr]['edited'][$fqname] . '" '; }
 				
+				if(is_array(${$var}[$i]["NCT/collaborator"]))
+					$collab_v = implode(", ", ${$var}[$i]["NCT/collaborator"]);
+				else
+					$collab_v = ${$var}[$i]["NCT/collaborator"];
+					
 				if(is_array($val))		
 					$val = implode(', ', $val);
 				else
 					$val = $val;
 					
 				echo '<td style="background-color:#EDEAFF;" ' . $attr . '>'
-					. '<div class="rowcollapse">' . $val . ' <span style="color:gray;"> ' . ${$var}[$i]["NCT/collaborator"] 
+					. '<div class="rowcollapse">' . $val . ' <span style="color:gray;"> ' . $collab_v 
 					. ' </span></div></td>';
 				
 			} else { 
@@ -727,7 +736,7 @@ if(count($$var) > 0) {
 	}
 	
 }else {
-	echo '<tr><th colspan="44" style="text-align: left;"> No record found. </th></tr>';
+	echo '<tr><th colspan="45" style="text-align: left;"> No record found. </th></tr>';
 }
 echo('</table><br/>');
 echo($pager);
