@@ -295,7 +295,7 @@ echo('<script type="text/javascript" src="checkall.js"></script>');
 		if(isset($study['NCT/nct_id']))
 		{
 			$type = 'NCT';
-			$source_id = padnct($study['NCT/nct_id'][0]);
+			$source_id = padnct($study['NCT/nct_id']);
 			$link = 'http://clinicaltrials.gov/ct2/show/';
 		}
 		if(isset($study['PubMed/PMID']))

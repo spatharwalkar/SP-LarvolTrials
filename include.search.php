@@ -789,34 +789,34 @@ function getRecords($ids,$fields,$time)
 		$logger->info($log);
 		unset($log);	
 		
-		
 		if($res === false)
 		{
 			$log = 'Bad SQL query getting data for result set<br />'.$query.'<br />'.mysql_error();
 			return softDie($log);
 		}
-		$i = 0;
+
 		while($row = mysql_fetch_assoc($res))
 		{
-	
 			$id = $row['larvol_id'];
-			$place = $row['category'] . '/' . $row['name'];
+			$place = $row['category'] . '/' . $row['name']; //fully qualified field name
 			$val = $row[$row['type']];
-			//print('<pre>');
-			//print_r($result);
+			//check if we already have a value for this field and ID
 			if(isset($result[$id][$place]))
 			{
-			  // print_r( $result[$id][$place]);
+				//now we know the value will have to be an array
+				//check if there are already multiple values here
 				if(is_array($result[$id][$place]))
 				{
-					 $result[$id][$place][$i] = $val;
+					//Add the new value to the existing array
+					 $result[$id][$place][] = $val;
 				}else{
-					$result[$id][$place][$i] = array($result[$id][$place], $val);
+					//Existing value was singular, so we turn it into an array and add the new value.
+					$result[$id][$place] = array($result[$id][$place], $val);
 				}
 			}else{
-				$result[$id][$place][$i] = $val;
+				//No previous value, so this value goes in the slot by itself.
+				$result[$id][$place] = $val;
 			}
-			$i++;
 		}
 	}
 	
