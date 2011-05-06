@@ -2,7 +2,6 @@
 require_once('db.php');
 
 
-
 $SEARCH_ERR = NULL;
 
 /* Searches the database. Assumes input is already valid/escaped
@@ -1072,8 +1071,7 @@ function prepareParams($post)
 //converts an nct_id to a larvol_id. Returns boolean false on failure.
 function nctidToLarvolid($id)
 {
-	//logger variable in db.php
-	global $logger;	
+	global $logger;
 
 	$id = (int)$id;
 	if(!is_numeric($id)) return false;
@@ -1087,7 +1085,7 @@ function nctidToLarvolid($id)
 	$time_taken = $time_end-$time_start;
 	$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments:nctid to larvol id';
 	$logger->info($log);
-	unset($log);	
+	unset($log);
 	
 	if($res === false) return false;
 	$res = mysql_fetch_assoc($res);
