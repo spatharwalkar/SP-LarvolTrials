@@ -4,7 +4,6 @@ session_start();
 require_once('krumo/class.krumo.php');
 require_once('db.php');
 require_once('include.search.php');
-
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -22,7 +21,8 @@ require_once('include.search.php');
     ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
   })();
-  
+</script>
+<script type="text/javascript" language="javascript"> 
   //<![CDATA[
   function applyfilter(value) {
  	
@@ -39,6 +39,7 @@ require_once('include.search.php');
 		 "<input type='checkbox' name='c' value='1' />Completed<br/>";
 	  
 	  
+	  
 	  } else if(value == 'active') {
 	  
 	  document.getElementById('filteropt').innerHTML = 
@@ -47,6 +48,7 @@ require_once('include.search.php');
 		  '<input type="checkbox" name="ebi" value="1" />Enrolling by invitation<br/>' + 
 		  '<input type="checkbox" name="anr" value="1" />Active, not recruiting<br/>' + 
 		  '<input type="checkbox" name="a" value="1" />Available<br/>' ;
+	  
 	  
 	  
 	  } else {
@@ -79,7 +81,7 @@ require_once('include.search.php');
 		
 			document.getElementById(type).value = "des";
 			if(document.getElementById('sortorder').value != '') {
-				v = (document.getElementById('sortorder').value).split('##');
+				var v = document.getElementById('sortorder').value;
 				if(v.indexOf(type) == -1) {
 					document.getElementById('sortorder').value = document.getElementById('sortorder').value+type+"##";
 				}
@@ -92,7 +94,7 @@ require_once('include.search.php');
 		
 			document.getElementById(type).value = "asc";
 			if(document.getElementById('sortorder').value != '') {
-				v = (document.getElementById('sortorder').value).split('##');
+				var v = document.getElementById('sortorder').value;
 				if(v.indexOf(type) == -1) {
 					document.getElementById('sortorder').value = document.getElementById('sortorder').value+type+"##";
 				}
@@ -152,8 +154,10 @@ if($excel_params === false)
 }
 $params = array();
 $e_style = '';$p_style = '';
-if(!isset($_GET['enrollment']) && !isset($_GET['status']) && !isset($_GET['startdate']) && !isset($_GET['enddate']) 
-&& !isset($_GET['phase'])) {
+
+if((!isset($_GET['enrollment']) || $_GET['enrollment'] == '') && (!isset($_GET['status']) || $_GET['status'] == '') && 
+(!isset($_GET['startdate']) || $_GET['startdate'] == '') && (!isset($_GET['enddate'])  || $_GET['enddate'] == '')
+&& (!isset($_GET['phase']) || $_GET['phase'] == '')) {
 
 	$sp = new SearchParam();
 	$sp->field = '_' . getFieldId('NCT', 'phase');
@@ -183,7 +187,6 @@ if(isset($_GET['sortorder']) && $_GET['sortorder'] != '') {
 		$sp->action = ($_GET[$v] == 'des' ) ? 'descending' : 'ascending';
 		$params[] = $sp;
 	}
-
 }
 
 $imgscale = array('style="width:14px;height:14px;"', 'style="width:12px;height:12px;"', 'style="width:10px;height:10px;"', 
@@ -223,7 +226,18 @@ $params = array_merge($params, $excel_params);
 //$res = search($params,$fid,$page,$time_machine);
 
 //differentiating betwen active and inactive category of records.
-$arr = search($params,$fid,NULL,$time_machine);
+$arrr = search($params,$fid,NULL,$time_machine);
+$arr = array();
+
+foreach($arrr as $k => $v) {
+	foreach($v as $kk => $vv) {
+	
+		if($kk != 'NCT/condition' && $kk != 'NCT/intervention_name' && 'NCT/lead_sponsor')
+			$arr[$k][$kk] = (is_array($vv)) ? implode(' ', $vv) : $vv;
+		else
+			$arr[$k][$kk] = (is_array($vv)) ? implode(', ', $vv) : $vv;
+	}
+}
 
 $activecount 	= 0;$totactivecount	= 0;
 $activephase 	= array();$activearray 	= array();
@@ -264,97 +278,112 @@ $new_arr = array();
 
 foreach($arr as $key=>$val) { 
 
-	$nct = getNCT($val['NCT/nct_id'], $gentime, $edited); 
+	$nct = getNCT($val['NCT/nct_id'], $val['larvol_id'], $gentime, $edited); 
 	
 	if (!is_array($nct)) { 
 		$nct=array();
 		$val['NCT/intervention_name'] = '(study not in database)';
 	}
 	
-	$id = padnct($val['NCT/nct_id']);
-	$new_arr[$id] = array_merge($nct, $val);
+	$fin_arr[$val['NCT/nct_id']] = array_merge($nct, $val);
+}
+
+foreach($fin_arr as $key => $new_arr)	 {
 	
-	if($val['NCT/overall_status'] == 'Not yet recruiting' || $val['NCT/overall_status'] == 'Recruiting' || 
-			$val['NCT/overall_status'] == 'Enrolling by invitation' || $val['NCT/overall_status'] == 'Active, not recruiting' || 
-			$val['NCT/overall_status'] == 'Available') {
-			
-		$activephase[] = $val['NCT/phase'];
+	if($new_arr['NCT/overall_status'] == 'Not yet recruiting' || $new_arr['NCT/overall_status'] == 'Recruiting' || 
+			$new_arr['NCT/overall_status'] == 'Enrolling by invitation' || 
+			$new_arr['NCT/overall_status'] == 'Active, not recruiting' || 
+			$new_arr['NCT/overall_status'] == 'Available') {
+	
+		$activephase[] = $new_arr['NCT/phase'];
 		$totactivecount++;
 		
 	} else { 
-	
-		$inactivephase[] = $val['NCT/phase'];
+			
+		$inactivephase[] = $new_arr['NCT/phase'];
 		$totinactivecount++;
 	}
 	
 	if($inactflag == 1) { 
-	
-		if($val['NCT/overall_status'] == 'Withheld' || $val['NCT/overall_status'] == 'Approved for marketing' || 
-				$val['NCT/overall_status'] == 'Temporarily not available' || $val['NCT/overall_status'] == 'No Longer Available' || 
-				$val['NCT/overall_status'] == 'Withdrawn' || $val['NCT/overall_status'] == 'Terminated' || 
-				$val['NCT/overall_status'] == 'Suspended' || $val['NCT/overall_status'] == 'Completed') {
+		
+		if($new_arr['NCT/overall_status'] == 'Withheld' || $new_arr['NCT/overall_status'] == 'Approved for marketing' || 
+				$new_arr['NCT/overall_status'] == 'Temporarily not available' 
+				|| $new_arr['NCT/overall_status'] == 'No Longer Available' || 
+				$new_arr['NCT/overall_status'] == 'Withdrawn' || $new_arr['NCT/overall_status'] == 'Terminated' || 
+				$new_arr['NCT/overall_status'] == 'Suspended' || $new_arr['NCT/overall_status'] == 'Completed') {
 				
 			if(isset($_GET['wh']) || isset($_GET['afm']) || isset($_GET['tna']) || isset($_GET['nla']) || isset($_GET['wd']) 
 				|| isset($_GET['t']) || isset($_GET['s']) || isset($_GET['c'])) {
 				
-				$vall = implode(",",array_keys($inactfilterarr, $val['NCT/overall_status']));
+				$vall = implode(",",array_keys($inactfilterarr, $new_arr['NCT/overall_status']));
 				if(array_key_exists($vall, $_GET)) {
 				
 					$inactivecount++;
-					$inactivearray[] = $val;	
+					$inactivearray[] = $new_arr;	
 				} 
 			} else {
 					$inactivecount++;
-					$inactivearray[] = $val;	
+					$inactivearray[] = $new_arr;	
 			}
 		}
 	
+	
+	
 	} else if($allflag == 1) { 
-		if($val['NCT/overall_status'] == 'Not yet recruiting' || $val['NCT/overall_status'] == 'Recruiting' || 
-				$val['NCT/overall_status'] == 'Enrolling by invitation' || $val['NCT/overall_status'] == 'Active, not recruiting' || 
-				$val['NCT/overall_status'] == 'Available' || $val['NCT/overall_status'] == 'Withheld' || 
-				$val['NCT/overall_status'] == 'Approved for marketing' || $val['NCT/overall_status'] == 'Temporarily not available' || 
-				$val['NCT/overall_status'] == 'No Longer Available' || $val['NCT/overall_status'] == 'Withdrawn' || 
-				$val['NCT/overall_status'] == 'Terminated' || $val['NCT/overall_status'] == 'Suspended' || 
-				$val['NCT/overall_status'] == 'Completed') {
+		if($new_arr['NCT/overall_status'] == 'Not yet recruiting' || 
+				$new_arr['NCT/overall_status'] == 'Recruiting' || 
+				$new_arr['NCT/overall_status'] == 'Enrolling by invitation' || 
+				$new_arr['NCT/overall_status'] == 'Active, not recruiting' || 
+				$new_arr['NCT/overall_status'] == 'Available' || 
+				$new_arr['NCT/overall_status'] == 'Withheld' || 
+				$new_arr['NCT/overall_status'] == 'Approved for marketing' || 
+				$new_arr['NCT/overall_status'] == 'Temporarily not available' || 
+				$new_arr['NCT/overall_status'] == 'No Longer Available' || 
+				$new_arr['NCT/overall_status'] == 'Withdrawn' || 
+				$new_arr['NCT/overall_status'] == 'Terminated' || 
+				$new_arr['NCT/overall_status'] == 'Suspended' || 
+				$new_arr['NCT/overall_status'] == 'Completed') {
 				
 				if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) || isset($_GET['a']) 
 				|| isset($_GET['wh']) || isset($_GET['afm']) || isset($_GET['tna']) || isset($_GET['nla']) || isset($_GET['wd']) 
 				|| isset($_GET['t']) || isset($_GET['s']) || isset($_GET['c'])) {	
 				
-				$vall = implode(",",array_keys($allfilterarr, $val['NCT/overall_status']));
+				$vall = implode(",",array_keys($allfilterarr, $new_arr['NCT/overall_status']));
 				if(array_key_exists($vall, $_GET)) {
 					$allcount++;
-					$allarray[] = $val;	
+					$allarray[] = $new_arr;	
 				} 
 			} else {
 				$allcount++;
-				$allarray[] = $val;	
+				$allarray[] = $new_arr;	
 			}
 		}	
+	
+	
+	
 	} else {
 	
-			if($val['NCT/overall_status'] == 'Not yet recruiting' || $val['NCT/overall_status'] == 'Recruiting' || 
-				$val['NCT/overall_status'] == 'Enrolling by invitation' || 
-				$val['NCT/overall_status'] == 'Active, not recruiting' || 
-				$val['NCT/overall_status'] == 'Available') {
+			if($new_arr['NCT/overall_status'] == 'Not yet recruiting' || 
+				$new_arr['NCT/overall_status'] == 'Recruiting' || 
+				$new_arr['NCT/overall_status'] == 'Enrolling by invitation' || 
+				$new_arr['NCT/overall_status'] == 'Active, not recruiting' || 
+				$new_arr['NCT/overall_status'] == 'Available') {
 				
 				if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) || isset($_GET['a'])) {
 				
-					$vall = implode(",",array_keys($actfilterarr, $val['NCT/overall_status']));
+					$vall = implode(",",array_keys($actfilterarr, $new_arr['NCT/overall_status']));
 					if(array_key_exists($vall, $_GET)) { 
 						$activecount++;
-						$activearray[] = $val;	
+						$activearray[] = $new_arr;	
 					} 
 				} else {
 					$activecount++;
-					$activearray[] = $val;	
+					$activearray[] = $new_arr;	
 				}	
 			}
 		}
 
 }
-
 //checking which type of records(active/inactiv) needs to b shown
 $var = (isset($_GET["list"])) ? ($_GET["list"].'array') : 'activearray' ; 
 
@@ -397,8 +426,6 @@ $pend = $pstart + $db->set['results_per_page'] - 1;
 $pages = ceil($count / $db->set['results_per_page']);
 $last = ($page*$db->set['results_per_page']>$count) ? $count : $pend;
 
-
-
 echo ('<table width="100%"><tr><td><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" />'
 	. '</td><td nowrap="nowrap"><span style="color:#ff0000;font-weight:normal;">Interface Work In Progress</span>');
 	
@@ -418,12 +445,11 @@ $pager='';
 if($count > $db->set['results_per_page'])
 {
 	$sort = '';
-	if(isset($_GET['enrolment']) && $_GET['enrolment'] != '') $sort .= '&amp;enrolment='.$_GET['status'];
+	if(isset($_GET['enrollment']) && $_GET['enrollment'] != '') $sort .= '&amp;enrollment='.$_GET['enrollment'];
 	if(isset($_GET['status']) && $_GET['status'] != '') $sort .= '&amp;status='.$_GET['status'];
 	if(isset($_GET['phase']) && $_GET['phase'] != '') $sort .= '&amp;phase='.$_GET['phase'];
 	if(isset($_GET['startdate']) && $_GET['startdate'] != '') $sort .= '&amp;startdate='.$_GET['startdate'];
 	if(isset($_GET['enddate']) && $_GET['enddate'] != '') $sort .= '&amp;enddate='.$_GET['enddate'];
-	
 	
 	if(isset($_GET['sortorder']) && $_GET['sortorder'] != '') $sort .= '&amp;sortorder=' . urlencode($_GET['sortorder']);
 
@@ -459,6 +485,7 @@ if($count > $db->set['results_per_page'])
 }
 
 $dispcnt = (isset($_GET["list"]) ? ($_GET["list"].'count') : 'activecount' );
+
 echo('<br clear="all"/><br/>');
 echo('<form id="frmOtt" name="frmOtt" method="get" action="intermediary.php"><div style="height:100px;">'
     .'<div class="block"><div class="text">List</div>'
@@ -564,7 +591,6 @@ echo '<table width="100%" border="0" cellpadding="4" cellspacing="0" class="mana
 		 . '<th colspan="12" style="width:26px;padding-left:0;padding-right:0;">' . $second_yr . '</th>'
 		 . '<th colspan="12" style="width:26px;padding-left:0;padding-right:0;">' . $third_yr . '</th></tr>';
 
-
 $relrank = 0;
 if(count($$var) > 0) {
 	
@@ -572,7 +598,9 @@ if(count($$var) > 0) {
 	$end = $last;
 	for($i=$start;$i<$last;$i++) 
 	{ 	
-		$highlight_arr =  padnct(${$var}[$i]['NCT/nct_id']);
+		
+		$highlight_arr =  ${$var}[$i]['NCT/nct_id'];
+		
 		for($woo=0;$woo<2;$woo++)
 			unset_nulls(${$var}[$i]);
 		
@@ -590,7 +618,8 @@ if(count($$var) > 0) {
 		$end_year = date('Y',strtotime($end_date));
 	
 		$attr_one = '';$attr_two = '';
-		if(in_array('NCT/brief_title',$new_arr[$highlight_arr]['edited'])) {
+
+		if(isset($fin_arr[$highlight_arr]['edited']['NCT/brief_title'])) {
 			$attr_one = ' highlight';
 			$attr_two = 'title="' . $new_arr[$highlight_arr]['edited']['NCT/brief_title'] . '" ';
 		}
@@ -602,7 +631,6 @@ if(count($$var) > 0) {
 				if(isset(${$var}[$i]['NCT/acronym']) && ${$var}[$i]['NCT/acronym'] != '') {
 					echo '<b>' . htmlformat(${$var}[$i]['NCT/acronym']) 
 						. '</b>&nbsp;' . htmlformat(${$var}[$i]['NCT/brief_title']);
-							
 				} else {
 					echo htmlformat(${$var}[$i]['NCT/brief_title']);
 				}
@@ -612,16 +640,11 @@ if(count($$var) > 0) {
 		foreach($displist as $dname => $fqname)
 		{ 
 			$attr = ' ';
-			$val = ${$var}[$i][$fqname];
-			
-			if( is_array( $val ) )
-				$val = htmlformat(implode(', ', $val));
-			else
-				$val = htmlformat($val); 
-			
+			$val = htmlformat(${$var}[$i][$fqname]);
+					
 			if($fqname == "NCT/enrollment"){ 
 				
-				if(in_array('NCT/enrollment',$new_arr[$highlight_arr]['edited']))
+				if(isset($new_arr[$highlight_arr]['edited']))
 					$attr = 'class="highlight" title="' . $new_arr[$highlight_arr]['edited'][$fqname] . '" ';
 					
 				echo '<td nowrap="nowrap" style="background-color:#D8D3E0;text-align:center;" ' . $attr . ' >'
@@ -647,14 +670,14 @@ if(count($$var) > 0) {
 			
 			} else if($fqname == "NCT/start_date") {
 			
-				if(in_array('NCT/start_date',$new_arr[$highlight_arr]['edited']))
+				if(is_array($new_arr[$highlight_arr]['edited']))
 					$attr = 'class="highlight" title="' . $new_arr[$highlight_arr]['edited'][$fqname] . '" ';
 
 				echo '<td style="background-color:#EDEAFF;" ' . $attr . ' >'
 					. '<div class="rowcollapse">' . date('m/y',strtotime(${$var}[$i]["NCT/start_date"])) . '</div></td>';
 				
-				if(in_array('NCT/completion_date',$new_arr[$highlight_arr]['edited']) || 
-					in_array('NCT/primary_completion_date',$new_arr[$highlight_arr]['edited'])) {
+					if(isset($new_arr[$highlight_arr]['edited']['NCT/completion_date']) || 
+					isset($new_arr[$highlight_arr]['edited']['NCT/primary_completion_date'])) {
 					$attr = 'class="highlight" title="' . $new_arr[$highlight_arr]['edited'][$fqname] . '" '; }
 					
 				echo '<td style="background-color:#EDEAFF;" ' . $attr . '>';
@@ -664,62 +687,54 @@ if(count($$var) > 0) {
 						echo '&nbsp;</td>';
 					}
 			
+			
+			
 			} else if($fqname == "NCT/overall_status") {
 		
-				if(in_array('NCT/overall_status',$new_arr[$highlight_arr]['edited']))
-					$attr = 'class="highlight" title="' . $new_arr[$highlight_arr]['edited'][$fqname] . '" ';
-
-			
-				echo '<td style="background-color:#D8D3E0;" ' . $attr . '>'  
+				if(isset($fin_arr[$highlight_arr]['edited']['NCT/overall_status'])) 
+					$attr = 'class="highlight" title="' . $fin_arr[$highlight_arr]['edited'][$fqname] . '" ';
+				
+				if(in_array($val, $actfilterarr))
+					$attr .= 'style="background-color:#D8D3E0"';
+				else
+					$attr .= 'style="background-color:#EDEAFF"';
+					
+				echo '<td ' . $attr . '>'  
 					. '<div class="rowcollapse">' . $val . '</div></td>';
-			
 			
 			} else if($fqname == "NCT/condition") {
 			
-				if(in_array('NCT/condition',$new_arr[$highlight_arr]['edited']))
+				if(isset($new_arr[$highlight_arr]['edited']['NCT/condition']))
 					$attr = 'class="highlight" title="' . $new_arr[$highlight_arr]['edited'][$fqname] . '" ';
 
 				echo '<td style="background-color:#EDEAFF;" ' . $attr . '>'
 					. '<div class="rowcollapse">' . $val . '</div></td>';
 				
-			
 			} else if($fqname == "NCT/intervention_name") {
 			
-				if(in_array('NCT/intervention_name',$new_arr[$highlight_arr]['edited']))
+				if(isset($new_arr[$highlight_arr]['edited']['NCT/intervention_name']))
 					$attr = 'class="highlight" title="' . $new_arr[$highlight_arr]['edited'][$fqname] . '" ';
 
 				echo '<td style="background-color:#EDEAFF;" ' . $attr . '>'
 					. '<div class="rowcollapse">' . $val . '</div></td>';
 				
-			
 			} else if($fqname == "NCT/phase") {
 			
-				if(in_array('NCT/phase',$new_arr[$highlight_arr]['edited']))
+				if(isset($new_arr[$highlight_arr]['edited']['NCT/phase']))
 					$attr = 'class="highlight" title="' . $new_arr[$highlight_arr]['edited'][$fqname] . '" ';
 
 				$phase = (${$var}[$i][$fqname] == 'N/A') ? $ph : ('P' . $ph);
 				echo '<td style="background-color:'.$phase_arr[$ph] . '"' . $attr . '>'
 					. '<div class="rowcollapse">' . $phase . '</div></td>';
 			
-			
 			} else if($fqname == "NCT/lead_sponsor") { 
 			
-				if(in_array('NCT/lead_sponsor', $new_arr[$highlight_arr]['edited']) || 
-					in_array('NCT/collaborator', $new_arr[$highlight_arr]['edited'])) {
+				if(isset($new_arr[$highlight_arr]['edited']['NCT/lead_sponsor']) || 
+				isset($new_arr[$highlight_arr]['edited']['NCT/collaborator'])) {
 						$attr = 'class="highlight" title="' . $new_arr[$highlight_arr]['edited'][$fqname] . '" '; }
 				
-				if(is_array(${$var}[$i]["NCT/collaborator"]))
-					$collab_v = implode(", ", ${$var}[$i]["NCT/collaborator"]);
-				else
-					$collab_v = ${$var}[$i]["NCT/collaborator"];
-					
-				if(is_array($val))		
-					$val = implode(', ', $val);
-				else
-					$val = $val;
-					
 				echo '<td style="background-color:#EDEAFF;" ' . $attr . '>'
-					. '<div class="rowcollapse">' . $val . ' <span style="color:gray;"> ' . $collab_v 
+					. '<div class="rowcollapse">' . $val . ' <span style="color:gray;"> ' . ${$var}[$i]["NCT/collaborator"] 
 					. ' </span></div></td>';
 				
 			} else { 
@@ -862,25 +877,15 @@ function getCompletionChart($start_month, $start_year, $end_month, $end_year, $c
 }
 
 //return NCT fields given an NCTID
-function getNCT($nct_id,$time,$edited)
+function getNCT($nct_id,$larvol_id,$time,$edited)
 {	
-	$param = new SearchParam();
-	$param->field = fieldNameToPaddedId('nct_id');
-	$param->action = 'search';
-	$param->value = $nct_id;
-	
+	$study = array();
+
 	$fieldnames = array('nct_id', 'brief_title', 'enrollment', 'enrollment_type', 'acronym', 'start_date', 'completion_date',
 	'primary_completion_date', 'overall_status', 'condition', 'intervention_name', 'phase', 'lead_sponsor', 'collaborator');
-	
-	foreach($fieldnames as $name) { 
-		$list[] = fieldNameToPaddedId($name);
-	}
-	$res = search(array($param),$list,NULL,strtotime($time));
-
-	foreach($res as $stu) $study = $stu;
 
 	$studycatData=mysql_fetch_assoc(mysql_query("SELECT `dv`.`studycat` FROM `data_values` `dv` LEFT JOIN `data_cats_in_study` `dc` ON (`dc`.`id`=`dv`.`studycat`) WHERE `dv`.`field`='1' AND `dv`.`val_int`='".$nct_id."' AND `dc`.`larvol_id`='"
-	.$study['larvol_id']."'"));
+	.$larvol_id."'"));
 	
 	$sql="SELECT DISTINCT `df`.`name` AS `fieldname`, `df`.`id` AS `fieldid`, `df`.`type` AS `fieldtype`, `dv`.`studycat`, dv.* FROM `data_values` `dv` LEFT JOIN `data_fields` `df` ON (`df`.`id`=`dv`.`field`) WHERE `df`.`name` IN ('" . join("','",$fieldnames) . "') AND `studycat`='" . $studycatData['studycat'] 
 	. "' AND (`dv`.`superceded`<'" . date('Y-m-d',strtotime($time)) . "' AND `dv`.`superceded`>= '" 
@@ -891,7 +896,6 @@ function getNCT($nct_id,$time,$edited)
 	
 	while ($row=mysql_fetch_assoc($changedFields)){ 
 		$study['edited'][] = 'NCT/'.$row['fieldname'];
-		
 		
 		//getting previous value for updated trials
 		if($row['fieldtype'] == 'enum') {
@@ -906,10 +910,10 @@ function getNCT($nct_id,$time,$edited)
 		} else {
 			$val = $row['val_'.$row['fieldtype']];
 		}
-		$study['edited']['NCT/'.$row['fieldname']] = $val;
+		
+		$study['edited']['NCT/'.$row['fieldname']] = ($val != '') ? $val : 'No previous value';
 		
 	}
-
 	return $study;
 }
 
