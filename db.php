@@ -379,4 +379,89 @@ class CustomField
 	}
 }
 
+class sourceCategories
+{
+	public $sourceArr;
+	public $source;
+	public $sourceId;
+	public $sourceIdArr;
+
+	function __construct($var)
+	{
+		$this->sourceArr = array(
+		
+							'0'=>array(
+											'categoryName'=>'NCT',
+											'id_field_name'=>'NCT',
+											'link_base'=>'nct_id'
+										),
+							'1'=>array(
+											'categoryName'=>'PubMed',
+											'id_field_name'=>'PubMed',
+											'link_base'=>'PMID'
+										)										
+							
+						);
+		if(isset($var) && is_array($var))
+		{
+			$index = $var[0];
+			$val = $var[1];
+			$flag = 0;
+			foreach($this->sourceArr as $arr)
+			{
+				if($arr[$index] == $val)
+				{
+					$this->source = $arr;
+					break;
+				}
+			}
+			if(is_array(($this->source)))
+			{
+				return $this->source;
+			}
+			else 
+			{
+				die('Invalid params sent or source index not found.');
+			}
+		}
+		else
+		{
+			die('Index Name of categoryName or id_field_name or link_base and its value is eg: array("categoryName","NCT") needed to initialise the object.');
+		}
+		
+	}
+	//todo stub function gets source id of the already set source from db. 
+	public function getSourceId()
+	{
+		global $db;
+		$query = "select id from data_fields where name='".$this->source['link_base']."'";
+		$result  = mysql_query($query) or die('Bad sql Query '.$query);
+		$this->sourceId = mysql_fetch_row($result);
+		$this->sourceId = $this->sourceId[0];
+		
+	}
+	
+	//todo stub function will return all sourceId's from db.
+	public function getAllSourceIds()
+	{
+		global $db;
+		$tmp = array();
+		foreach($this->sourceArr as $arr)
+		{
+			$tmp[]= "'".$arr['link_base']."'";
+		}
+		echo $query  = "select id from data_fields where name in(".implode(',',$tmp).")";
+		$result = mysql_query($query) or die('Bad sql Query '.$query);
+		while ($row = mysql_fetch_array($result,MYSQL_NUM))
+		{
+			$this->sourceIdArr[] = $row[0];
+		}
+		
+		
+		
+	}
+	
+
+}
+
 ?>

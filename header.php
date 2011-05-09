@@ -25,7 +25,12 @@ echo('<a href="index.php" style="text-align:center;display:block;width:100%;">'
 if($db->loggedIn())
 {
 	echo('Search (<a href="search.php">Main</a>,<a href="search_simple.php">Simple</a>) :: <a href="inspect.php">ID Lookup</a>');
-	echo(' :: <a href="import.php">XML Import</a> ');
+	echo(' :: ');
+	echo('<div class="drop">Import<br/>'
+	.'<a href="import.php">XML Import</a><br/>'
+	.'<a href="entry.php">Manual Entry</a>'
+	.'</div>');
+	
 	if($db->user->userlevel=='admin'||$db->user->userlevel=='root')
 	{
 		echo('::');

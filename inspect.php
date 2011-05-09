@@ -24,8 +24,7 @@ if($_GET && is_numeric($_GET['larvol_id']))
 	
 	$id = mysql_real_escape_string($_GET['larvol_id']);	
 	$res = getRecordData($id);
-	
-	if($res === NULL)
+	if(!checkOrphanTrials($id))
 	{
 		echo('<p class="error">' . $id . ': ID not found.</p>');
 	}else{
@@ -334,6 +333,43 @@ function customFields($id)
 	if(count($currentCats) > 0 && !$limiter) $out .= '<input type="submit" name="savedata" value="Save edits" />';
 	$out .= '</fieldset></form>';
 	echo($out);
+}
+
+/**
+ * 
+ * @name checkOrphanTrials
+ * @tutorial Function checks whether a larvol_id is an orphaned trials in the clinical trials table. 
+ * The records can be orphaned if it doesn't have any source fields eg: nct_id or pmid  fields related to them. 
+ * Orphan condition also exists if the source ids are entered or present and still more data is needed to be filled.
+ * Minimum requirement for it is the existance of a larvol_id in the clinical_studies table.
+ * @param int $id corresponds to larvol_id in the clinical_studies table.
+ * @author Jithu Thomas
+ * 
+ */
+function checkOrphanTrials($id)
+{
+	$query = "SELECT COUNT(clinical_study.larvol_id) as cnt FROM clinical_study WHERE larvol_id NOT IN(     SELECT data_cats_in_study.larvol_id FROM data_values LEFT JOIN data_cats_in_study ON data_values.studycat=data_cats_in_study.id WHERE `field` IN(1,124)) AND clinical_study.larvol_id=$id";
+	$res = mysql_query($query) or die('Bad SQL query getting field no source category larvol ids');
+	$count  = mysql_fetch_row($res);
+	$count = $count[0];
+	if($count>0)
+	{
+		return true;
+	}
+	else
+	{
+		$query = "select count(larvol_id) as cnt from clinical_study where larvol_id=$id";
+		$res = mysql_query($query) or die('Bad SQL query getting field larvol_id');
+		$count  = mysql_fetch_row($res);
+		$count = $count[0];
+		if($count>0)
+		{
+			return true;
+		}		
+	}
+	//if not returning true return false
+	return false; 
+	
 }
 
 ?>
