@@ -921,6 +921,8 @@ function textEqual($field,$value)
 	    $result=validateMaskPCRE($value);
 	    if(!$result)
 	    	throw new Exception("Bad regex: $field = $value", 6);
+	    	
+	    	$value = mysql_real_escape_string($value);
 		return 'PREG_RLIKE("' . $value . '",' . $field . ')';
 	}else{
 		return $field . '="' . $value . '"';
@@ -1321,12 +1323,9 @@ function precheckSearchSql($conditions,$g_conds,$strong_exclusions)
 	if(isset($conditions) && is_array($conditions) && count($conditions)>0)
 	{
 		$tmpSql = 'SELECT 1 FROM data_values dv WHERE';
-		$where = '';		
-		foreach($conditions as $tmp)
-		{
-			$where .= ' '.$tmp.' AND ';
-		}
-		$where = substr($where,0,-5);
+		$where = '';	
+		$conditions = array_map(function($dt){return ' '.$dt;},$conditions);		
+		$where = implode(' AND ',$conditions);
 		$tmpSql .=$where.' LIMIT 0';
 		if(!mysql_query($tmpSql))
 		return false;
@@ -1336,11 +1335,8 @@ function precheckSearchSql($conditions,$g_conds,$strong_exclusions)
 	{
 		$tmpSql = 'SELECT 1 FROM clinical_study WHERE';
 		$where = '';
-		foreach($g_conds as $tmp)
-		{
-			$where .= ' '.$tmp.' AND ';
-		}
-		$where = substr($where,0,-5);
+		$g_conds = array_map(function($dt){return ' '.$dt;},$g_conds);	
+		$where = implode(' AND ',$g_conds);
 		$tmpSql .=$where.' LIMIT 0';
 		if(!mysql_query($tmpSql))
 		return false;
@@ -1349,12 +1345,10 @@ function precheckSearchSql($conditions,$g_conds,$strong_exclusions)
 	if(isset($strong_exclusions) && is_array($strong_exclusions) && count($strong_exclusions)>0)
 	{
 		$tmpSql = 'SELECT 1 FROM data_values dv WHERE';
-		$where = '';		
-		foreach($strong_exclusions as $tmp)
-		{
-			$where .= ' '.$tmp.' AND ';
-		}
-		$where = substr($where,0,-5);
+		$where = '';	
+		$strong_exclusions = array_map(function($dt){return ' '.$dt;},$strong_exclusions);	
+		$where = implode(' AND ',$strong_exclusions);
+		//$where = substr($where,0,-5);
 		$tmpSql .=$where.' LIMIT 0';
 		if(!mysql_query($tmpSql))
 		return false;
