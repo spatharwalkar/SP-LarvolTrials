@@ -1338,8 +1338,9 @@ function precheckSearchSql($conditions,$g_conds,$strong_exclusions)
 		$where = '';
 		foreach($g_conds as $tmp)
 		{
-			$where .= ' '.$tmp.' ';
+			$where .= ' '.$tmp.' AND ';
 		}
+		$where = substr($where,0,-5);
 		$tmpSql .=$where.' LIMIT 0';
 		if(!mysql_query($tmpSql))
 		return false;
@@ -1351,8 +1352,9 @@ function precheckSearchSql($conditions,$g_conds,$strong_exclusions)
 		$where = '';		
 		foreach($strong_exclusions as $tmp)
 		{
-			$where .= ' '.$tmp.' ';
+			$where .= ' '.$tmp.' AND ';
 		}
+		$where = substr($where,0,-5);
 		$tmpSql .=$where.' LIMIT 0';
 		if(!mysql_query($tmpSql))
 		return false;
