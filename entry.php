@@ -38,9 +38,13 @@ if($_POST['add_new_record'])
 Studies with no source category entry
 
 <?php
-$source = new sourceCategories(array('categoryName','PubMed'));
-$source->getAllSourceIds();
-$query = "SELECT clinical_study.larvol_id FROM clinical_study WHERE larvol_id NOT IN(     SELECT data_cats_in_study.larvol_id FROM data_values LEFT JOIN data_cats_in_study ON data_values.studycat=data_cats_in_study.id WHERE `field` IN(".implode(',',$source->sourceIdArr)."))";
+$sourceIds = null;
+foreach($db->sources as $source)
+{
+	$sourceIds[] =  $source->getSourceId();
+}
+$sourceIds = implode(',',$sourceIds);
+$query = "SELECT clinical_study.larvol_id FROM clinical_study WHERE larvol_id NOT IN(     SELECT data_cats_in_study.larvol_id FROM data_values LEFT JOIN data_cats_in_study ON data_values.studycat=data_cats_in_study.id WHERE `field` IN(".$sourceIds."))";
 $res = mysql_query($query) or die('Bad SQL query getting field enumvals');
 while($rw = mysql_fetch_assoc($res))
 {
