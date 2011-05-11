@@ -15,7 +15,12 @@ ini_set('max_execution_time','36000');	//10 hours
 */
 function runUpdateReport($id, $return = false)
 {
+	//variables used for report status
+	global $run_id;
+	global $report_type;
+	global $type_id;
 	global $logger;
+	/*
 	if($return)
 	{
 		//Get variables corresponding to the primary key in reports_status
@@ -46,7 +51,7 @@ function runUpdateReport($id, $return = false)
 			die($log);				
 		}
 	}
-	
+	*/
 	if($return)
 	{
 		$query = 'UPDATE reports_status SET update_time="' . date("Y-m-d H:i:s",strtotime('now')).'", total="0'.

@@ -4,12 +4,26 @@ require_once('include.import.php');
 
 if(isset($_GET['maxrun'])) ini_set('max_execution_time','36000');	//10 hours
 $days = 0;
+/*
 if(isset($_GET['days']))
 {
 	$days = (int)$_GET['days'];
 }else{
 	die('Need to set $_GET[\'days\']');
 }
+
+$update_id=$_GET['update_id'];
+*/
+
+if(isset($days_to_fetch))
+{
+	$days = (int)$days_to_fetch;
+}else{
+	die('Need to set $days_to_fetch');
+}
+
+
+//echo $days." ".$update_id;
 
 //Find out the ID of the field for nct_id, and the ID of the "NCT" category.
 $query = 'SELECT data_fields.id AS "nct_id",data_categories.id AS "nct_cat" FROM '
@@ -41,7 +55,7 @@ if(count($ids) == 0)
 		//This is the reason we stored the IDs as keys instead of values -- we don't need an array search to unset them
 		unset($ids[padnct($row['nct_id'])]);
 	}
-	$query = 'UPDATE update_status SET add_items_total="' . count($ids)	. '",add_items_start_time="' . date("Y-m-d H:i:s",strtotime('now')).'" WHERE update_id="'.$_GET['update_id'].'"';
+	$query = 'UPDATE update_status SET add_items_total="' . count($ids)	. '",add_items_start_time="' . date("Y-m-d H:i:s",strtotime('now')).'" WHERE update_id="'.$update_id.'"';
 	$res = mysql_query($query) or die('Unable to update running'.mysql_error());
 	echo(count($ids) . ' new records out of ' . $reportednew . '.' . "\n<br />");
 	//Get and import the XML for all these new records
@@ -66,11 +80,11 @@ if(count($ids) == 0)
 			}
 		}
 		$progress_count++;
-		$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s",strtotime('now'))	. '",add_items_progress="' . $progress_count.'" WHERE update_id="'.$_GET['update_id'].'"';
+		$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s",strtotime('now'))	. '",add_items_progress="' . $progress_count.'" WHERE update_id="'.$update_id.'"';
 		$res = mysql_query($query) or die('Unable to update running');
 	}
 	
-	$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s",strtotime('now'))	. '",add_items_complete_time ="' . date("Y-m-d H:i:s",strtotime('now')).'" WHERE update_id="'.$_GET['update_id'].'"';
+	$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s",strtotime('now'))	. '",add_items_complete_time ="' . date("Y-m-d H:i:s",strtotime('now')).'" WHERE update_id="'.$update_id.'"';
 	$res = mysql_query($query) or die('Unable to update running');
 	
 }
@@ -122,7 +136,7 @@ if(count($ids) == 0)
 
 	echo(count($ids) . ' new updates out of ' . $reportednew . '.' . "\n<br />");
 	
-	$query = 'UPDATE update_status SET update_items_total="' . count($ids)	. '",update_items_start_time="' . date("Y-m-d H:i:s",strtotime('now')).'" WHERE update_id="'.$_GET['update_id'].'"';
+	$query = 'UPDATE update_status SET update_items_total="' . count($ids)	. '",update_items_start_time="' . date("Y-m-d H:i:s",strtotime('now')).'" WHERE update_id="'.$update_id.'"';
 	$res = mysql_query($query) or die('Unable to update running'.mysql_error());
 	
 	//Get and import the XML for all these new records
@@ -147,11 +161,11 @@ if(count($ids) == 0)
 			}
 		}
 		$progress_count++;
-		$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s",strtotime('now'))	. '",update_items_progress="' . $progress_count.'" WHERE update_id="'.$_GET['update_id'].'"';
+		$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s",strtotime('now'))	. '",update_items_progress="' . $progress_count.'" WHERE update_id="'.$update_id.'"';
 		$res = mysql_query($query) or die('Unable to update running');
 	}
 	
-	$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s",strtotime('now'))	. '",update_items_complete_time ="' . date("Y-m-d H:i:s",strtotime('now')).'" WHERE update_id="'.$_GET['update_id'].'"';
+	$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s",strtotime('now'))	. '",update_items_complete_time ="' . date("Y-m-d H:i:s",strtotime('now')).'" WHERE update_id="'.$update_id.'"';
 	$res = mysql_query($query) or die('Unable to update running');
 	
 }

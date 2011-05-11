@@ -41,7 +41,7 @@ if(isset($_GET['pid']))
 		{
 			$query = 'DELETE FROM update_status WHERE update_id="' . $_GET['upid'].'"';
 			$res = mysql_query($query) or die('Bad SQL Query deleting update status');
-		}
+		}		
 	}
 	else if(isset($_GET['runid']))
 	{
@@ -62,6 +62,25 @@ if(isset($_GET['pid']))
 		{
 			$query = 'DELETE FROM reports_status WHERE process_id="'.$_GET['pid'].'" AND run_id="' . $_GET['runid'].'" AND report_type="' . $_GET['rpttyp'].'" AND type_id="' . $_GET['typeid'].'"';
 			$res = mysql_query($query) or die('Bad SQL Query deleting from report status');
+		}
+	}
+}
+else
+{
+	if(isset($_GET['upid']))
+	{
+		if($_GET['action']==4)
+		{			
+			$query = 'UPDATE update_status SET status="'.CANCELLED.'" WHERE update_id="' . $_GET['upid'].'"';
+			$res = mysql_query($query) or die('Bad SQL Query setting update cancelled status');
+		}
+	}
+	elseif(isset($_GET['runid']))
+	{
+		if($_GET['action']==4)
+		{
+			$query = 'UPDATE reports_status SET status="'.CANCELLED.'" WHERE run_id="' . $_GET['runid'].'" AND report_type="' . $_GET['rpttyp'].'" AND type_id="' . $_GET['typeid'].'"';
+			$res = mysql_query($query) or die('Bad SQL Query setting report cancelled status');
 		}
 	}
 }
@@ -241,77 +260,71 @@ echo "<div class=\"container\">";
 				echo "<td width=\"16%\" align=\"left\" class=\"head\">Last update time</td>";
 				echo "<td width=\"19%\" align=\"left\" class=\"head\">New Records</td>";
 				echo "<td width=\"19%\" align=\"left\" class=\"head\">Update Records</td>";
-				if($nct_status['status']==RUNNING||$nct_status['status']==ERROR||$nct_status['status']==CANCELLED)
-					echo "<td width=\"5%\" align=\"center\" class=\"head\">Action</td>";
+				echo "<td width=\"5%\" align=\"center\" class=\"head\">Action</td>";
 			echo "</tr>";
-			if ($nct_status['status']==READY)
-			{
-				echo "<tr>";
-					echo "<td align=\"left\" class=\"norm\">".$status[$nct_status['status']]."</td>";
-					echo "<td align=\"left\" class=\"norm\">NA</td>";
-					echo "<td align=\"left\" class=\"norm\">NA</td>";
-					echo "<td align=\"left\" class=\"norm\">NA</td>";
-					echo "<td align=\"left\" class=\"norm\">";
-						echo "<span class=\"progressBar\" id=\"nct_new\">0%</span>";
-					echo "</td>";
-					echo "<td align=\"left\" class=\"norm\">";
-						echo "<span class=\"progressBar\" id=\"nct_update\">0%</span>";
-					echo "</td>";
-					echo "<td align=\"center\" class=\"norm\"></td>";
-				echo "</tr>";
-			}
-			else
-			{
-				echo "<tr>";
-					echo "<td align=\"left\" class=\"norm\">".$status[$nct_status['status']]."</td>";
-					echo "<td align=\"left\" class=\"norm\">".$nct_status['start_time']."</td>";
-					echo "<td align=\"left\" class=\"norm\">".$nct_status['timediff']."</td>";
-					echo "<td align=\"left\" class=\"norm\">".$nct_status['updated_time']."</td>";
-					if($nct_status['add_items_start_time']!="0000-00-00 00:00:00"&&$nct_status['add_items_complete_time']=="0000-00-00 00:00:00"&&$nct_status['status']==COMPLETED)
-						$nct_add_progress=100;
-					else
-						$nct_add_progress=number_format(($nct_status['add_items_total']==0?0:(($nct_status['add_items_progress'])*100/$nct_status['add_items_total'])),2);
-						
-					if($nct_status['update_items_start_time']!="0000-00-00 00:00:00"&&$nct_status['update_items_complete_time']=="0000-00-00 00:00:00"&&$nct_status['status']==COMPLETED)
-						$nct_update_progress=100;
-					else
-						$nct_update_progress=number_format(($nct_status['update_items_total']==0?0:(($nct_status['update_items_progress'])*100/$nct_status['update_items_total'])),2);
+			echo "<tr>";
+				echo "<td align=\"left\" class=\"norm\">".$status[$nct_status['status']]."</td>";
+				echo "<td align=\"left\" class=\"norm\">".$nct_status['start_time']."</td>";
+				echo "<td align=\"left\" class=\"norm\">".$nct_status['timediff']."</td>";
+				echo "<td align=\"left\" class=\"norm\">".$nct_status['updated_time']."</td>";
+				if($nct_status['add_items_start_time']!="0000-00-00 00:00:00"&&$nct_status['add_items_complete_time']!="0000-00-00 00:00:00"&&$nct_status['status']==COMPLETED)
+					$nct_add_progress=100;
+				else
+					$nct_add_progress=number_format(($nct_status['add_items_total']==0?0:(($nct_status['add_items_progress'])*100/$nct_status['add_items_total'])),2);
 					
-					//echo $nct_status['update_items_complete_time'];
-					
-					echo "<td align=\"left\" class=\"norm\">";
-						echo "<span class=\"progressBar\" id=\"nct_new\">".$nct_add_progress."%</span>";
+				if($nct_status['update_items_start_time']!="0000-00-00 00:00:00"&&$nct_status['update_items_complete_time']!="0000-00-00 00:00:00"&&$nct_status['status']==COMPLETED)
+					$nct_update_progress=100;
+				else
+					$nct_update_progress=number_format(($nct_status['update_items_total']==0?0:(($nct_status['update_items_progress'])*100/$nct_status['update_items_total'])),2);
+				
+				//echo $nct_status['update_items_complete_time'];
+				
+				echo "<td align=\"left\" class=\"norm\">";
+					echo "<span class=\"progressBar\" id=\"nct_new\">".$nct_add_progress."%</span>";
+				echo "</td>";
+				echo "<td align=\"left\" class=\"norm\">";
+					echo "<span class=\"progressBar\" id=\"nct_update\">".$nct_update_progress."</span>";
+				echo "</td>";
+				if($nct_status['status']==READY)
+				{
+					echo "<td align=\"center\" class=\"norm\">";
+					echo '<a href="status.php?action=4&amp;upid='.$nct_status['update_id']. 
+					'"><img src="images/not.png" title="Cancel" border=0/></a>';
 					echo "</td>";
-					echo "<td align=\"left\" class=\"norm\">";
-						echo "<span class=\"progressBar\" id=\"nct_update\">".$nct_update_progress."</span>";
+				}
+				elseif($nct_status['status']==RUNNING)
+				{
+					echo "<td align=\"center\" class=\"norm\">";
+					echo '<a href="status.php?action=2&amp;upid='.$nct_status['update_id'].'&amp;pid=' . $nct_status['process_id'] . 
+					'"><img src="images/not.png" title="Cancel" border=0/></a>';
 					echo "</td>";
-					if($nct_status['status']==RUNNING)
-					{
-						echo "<td align=\"center\" class=\"norm\">";
-						echo '<a href="status.php?action=2&upid='.$nct_status['update_id'].'&pid=' . $nct_status['process_id'] . 
-						'"><input type="image" name="delete[x.x]" src="images/not.png" title="Cancel"/></a>';
-						echo "</td>";
-					}
-					else if($nct_status['status']==ERROR||$nct_status['status']==CANCELLED)
-					{
-						echo "<td align=\"center\" class=\"norm\">";
-						echo '<a href="status.php?action=1&upid='.$nct_status['update_id'].'&pid=' . $nct_status['process_id'] . 
-						'"><input type="image" name="add[x.x]" src="images/check.png" title="Add"/></a> ';
-						echo '<a href="status.php?action=3&upid='.$nct_status['update_id'].'&pid=' . $nct_status['process_id'] . 
-						'"><input type="image" name="delete[x.x]" src="images/not.png" title="Delete"/></a>';
-						echo "</td>";
-					}
-				echo "</tr>";
-			}
+				}
+				elseif($nct_status['status']==COMPLETED)
+				{
+					echo "<td align=\"center\" class=\"norm\">";
+					echo '<a href="status.php?action=3&amp;upid='.$nct_status['update_id'].'&amp;pid=' . $nct_status['process_id'] . 
+					'"><img src="images/not.png" title="Delete" border=0/></a>';
+					echo "</td>";
+				}
+				else if($nct_status['status']==ERROR||$nct_status['status']==CANCELLED)
+				{
+					echo "<td align=\"center\" class=\"norm\">";
+					echo '<a href="status.php?action=1&amp;upid='.$nct_status['update_id'].'&amp;pid=' . $nct_status['process_id'] . 
+					'"><img src="images/check.png" title="Add" border=0/></a> ';
+					echo '<a href="status.php?action=3&amp;upid='.$nct_status['update_id'].'&amp;pid=' . $nct_status['process_id'] . 
+					'"><img src="images/not.png" title="Delete" border=0/></a>';
+					echo "</td>";
+				}
+			echo "</tr>";
 		echo "</table>";
 	}
 	if(count($pubmed_status)!=0)
 	{
 		echo "<table width=\"100%\" class=\"event\">";
-		echo "<tr>";
-			echo "<th width=\"100%\" align=\"center\" class=\"head2\" >pubmed database</th>";
-		echo "</tr>";
-	echo "</table>";
+			echo "<tr>";
+				echo "<th width=\"100%\" align=\"center\" class=\"head2\" >pubmed database</th>";
+			echo "</tr>";
+		echo "</table>";
 		echo "<table width=\"100%\" class=\"event\">";
 			echo "<tr>";
 				echo "<td width=\"10%\" align=\"left\" class=\"head\">Status</td>";
@@ -320,65 +333,60 @@ echo "<div class=\"container\">";
 				echo "<td width=\"16%\" align=\"left\" class=\"head\">Last update time</td>";
 				echo "<td width=\"19%\" align=\"left\" class=\"head\">New Records</td>";
 				echo "<td width=\"19%\" align=\"left\" class=\"head\">Update Records</td>";
-				if($pubmed_status['status']==RUNNING||$pubmed_status['status']==ERROR||$pubmed_status['status']==CANCELLED)
-					echo "<td width=\"5%\" align=\"center\" class=\"head\">Action</td>";
+				echo "<td width=\"5%\" align=\"center\" class=\"head\">Action</td>";
 			echo "</tr>";
-			if ($pubmed_status['status']==READY)
-			{
-				echo "<tr>";
-					echo "<td align=\"left\" class=\"norm\">".$status[$pubmed_status['status']]."</td>";
-					echo "<td align=\"left\" class=\"norm\">NA</td>";
-					echo "<td align=\"left\" class=\"norm\">NA</td>";
-					echo "<td align=\"left\" class=\"norm\">NA</td>";
-					echo "<td align=\"left\" class=\"norm\">";
-						echo "<span class=\"progressBar\" id=\"pubmed_new\">0%</span>";
-					echo "</td>";
-					echo "<td align=\"left\" class=\"norm\">";
-						echo "<span class=\"progressBar\" id=\"pubmed_update\">0%</span>";
-					echo "</td>";
-				echo "</tr>";
-			}
+			if($pubmed_status['add_items_start_time']!="0000-00-00 00:00:00"&&$pubmed_status['add_items_complete_time']!="0000-00-00 00:00:00"&&$pubmed_status['status']==COMPLETED)
+					$pubmed_add_progress=100;
 			else
+				$pubmed_add_progress=number_format(($pubmed_status['add_items_total']==0?"0":(($pubmed_status['add_items_progress'])*100/$pubmed_status['add_items_total'])),2);
+				
+			if($pubmed_status['update_items_start_time']!="0000-00-00 00:00:00"&&$pubmed_status['update_items_complete_time']!="0000-00-00 00:00:00"&&$pubmed_status['status']==COMPLETED)
+				$pubmed_update_progress=100;
+			else
+				$pubmed_update_progress=number_format(($pubmed_status['update_items_total']==0?"0":(($pubmed_status['update_items_progress'])*100/$pubmed_status['update_items_total'])),2);
+			
+			echo "<tr>";
+			echo "<td align=\"left\" class=\"norm\">".$status[$pubmed_status['status']]."</td>";
+			echo "<td align=\"left\" class=\"norm\">".$pubmed_status['start_time']."</td>";
+			echo "<td align=\"left\" class=\"norm\">".$pubmed_status['timediff']."</td>";
+			echo "<td align=\"left\" class=\"norm\">".$pubmed_status['updated_time']."</td>";
+			echo "<td align=\"left\" class=\"norm\">";
+				echo "<span class=\"progressBar\" id=\"pubmed_new\">".$pubmed_add_progress."%</span>";
+			echo "</td>";
+			echo "<td align=\"left\" class=\"norm\">";
+				echo "<span class=\"progressBar\" id=\"pubmed_update\">".$pubmed_update_progress."%</span>";
+			echo "</td>";
+			if($pubmed_status['status']==READY)
 			{
-				if($pubmed_status['add_items_start_time']!="0000-00-00 00:00:00"&&$pubmed_status['add_items_complete_time']=="0000-00-00 00:00:00"&&$pubmed_status['status']==COMPLETED)
-						$pubmed_add_progress=100;
-					else
-						$pubmed_add_progress=number_format(($pubmed_status['add_items_total']==0?"0":(($pubmed_status['add_items_progress'])*100/$pubmed_status['add_items_total'])),2);
-						
-					if($pubmed_status['update_items_start_time']!="0000-00-00 00:00:00"&&$pubmed_status['update_items_complete_time']=="0000-00-00 00:00:00"&&$pubmed_status['status']==COMPLETED)
-						$pubmed_update_progress=100;
-					else
-						$pubmed_update_progress=number_format(($pubmed_status['update_items_total']==0?"0":(($pubmed_status['update_items_progress'])*100/$pubmed_status['update_items_total'])),2);
-					
-					echo "<tr>";
-					echo "<td align=\"left\" class=\"norm\">".$status[$pubmed_status['status']]."</td>";
-					echo "<td align=\"left\" class=\"norm\">".$pubmed_status['start_time']."</td>";
-					echo "<td align=\"left\" class=\"norm\">".$pubmed_status['timediff']."</td>";
-					echo "<td align=\"left\" class=\"norm\">".$pubmed_status['updated_time']."</td>";
-					echo "<td align=\"left\" class=\"norm\">";
-						echo "<span class=\"progressBar\" id=\"pubmed_new\">".$pubmed_add_progress."%</span>";
-					echo "</td>";
-					echo "<td align=\"left\" class=\"norm\">";
-						echo "<span class=\"progressBar\" id=\"pubmed_update\">".$pubmed_update_progress."%</span>";
-					echo "</td>";
-					if($pubmed_status['status']==RUNNING)
-					{
-						echo "<td align=\"center\" class=\"norm\">";
-						echo '<a href="status.php?action=2&upid='.$pubmed_status['update_id'].'&pid=' . $pubmed_status['process_id'] . 
-						'"><input type="image" name="delete[x.x]" src="images/not.png" title="Cancel"/></a>';
-						echo "</td>";
-					}
-					else if($pubmed_status['status']==ERROR||$pubmed_status['status']==CANCELLED)
-					{
-						echo "<td align=\"center\" class=\"norm\">";
-						echo '<a href="status.php?action=1&upid='.$pubmed_status['update_id'].'&pid=' . $pubmed_status['process_id'] . 
-						'"><input type="image" name="add[x.x]" src="images/check.png" title="Add"/></a> ';
-						echo '<a href="status.php?action=3&upid='.$pubmed_status['update_id'].'&pid=' . $pubmed_status['process_id'] . 
-						'"><input type="image" name="delete[x.x]" src="images/not.png" title="Delete"/></a>';
-						echo "</td>";
-					}
-				echo "</tr>";
+				echo "<td align=\"center\" class=\"norm\">";
+				echo '<a href="status.php?action=4&amp;upid='.$pubmed_status['update_id'].
+				'"><img src="images/not.png" title="Cancel" border=0/></a>';
+				echo "</td>";
 			}
+			elseif($pubmed_status['status']==RUNNING)
+			{
+				echo "<td align=\"center\" class=\"norm\">";
+				echo '<a href="status.php?action=2&amp;upid='.$pubmed_status['update_id'].'&amp;pid=' . $pubmed_status['process_id'] . 
+				'"><img src="images/not.png" title="Cancel" border=0/></a>';
+				echo "</td>";
+			}
+			elseif($pubmed_status['status']==COMPLETED)
+			{
+				echo "<td align=\"center\" class=\"norm\">";
+				echo '<a href="status.php?action=3&amp;upid='.$pubmed_status['update_id'].'&amp;pid=' . $pubmed_status['process_id'] . 
+				'"><img src="images/not.png" title="Delete" border=0/></a>';
+				echo "</td>";
+			}
+			else if($pubmed_status['status']==ERROR||$pubmed_status['status']==CANCELLED)
+			{
+				echo "<td align=\"center\" class=\"norm\">";
+				echo '<a href="status.php?action=1&amp;upid='.$pubmed_status['update_id'].'&amp;pid=' . $pubmed_status['process_id'] . 
+				'"><img src="images/check.png" title="Add" border=0/></a> ';
+				echo '<a href="status.php?action=3&amp;upid='.$pubmed_status['update_id'].'&amp;pid=' . $pubmed_status['process_id'] . 
+				'"><img src="images/not.png" title="Delete" border=0/></a>';
+				echo "</td>";
+			}
+			echo "</tr>";
 		echo "</table>";
 	}
 			
@@ -391,16 +399,7 @@ echo "<div class=\"container\">";
 		echo "</tr>";
 	echo "</table>";
 	if(count($heatmap_status)>0)
-	{
-		$hm_running=0;
-		for($i=0;$i < count($heatmap_status);$i++)
-		{
-			if($heatmap_status[$i]['status']==RUNNING)
-				$hm_running=1;
-			else if($heatmap_status[$i]['status']==ERROR||$heatmap_status[$i]['status']==CANCELLED)
-				$hm_running=2;
-		}
-				
+	{				
 		echo "<table width=\"100%\" class=\"event\">";
 			echo "<tr>";
 				echo "<th width=\"100%\" align=\"center\" class=\"head2\" >Heatmap</th>";
@@ -415,74 +414,55 @@ echo "<div class=\"container\">";
 				echo "<td width=\"15%\" align=\"left\" class=\"head\">Excution run time</td>";
 				echo "<td width=\"17%\" align=\"left\" class=\"head\">Last update time</td>";
 				echo "<td width=\"18%\" align=\"left\" class=\"head\">Progress</td>";
-				if($hm_running==1||$hm_running=2)
-					echo "<td width=\"5%\" align=\"center\" class=\"head\">Action</td>";
+				echo "<td width=\"5%\" align=\"center\" class=\"head\">Action</td>";
 			echo "</tr>";
 				
 			for($i=0;$i < count($heatmap_status);$i++)
 			{
-				if($heatmap_status[$i]['status']==READY)
-				{
-					echo "</tr>";
-						echo "<td align=\"left\" class=\"norm\">".$schedule_item[($heatmap_status[$i]['run_id'])]."</td>";
-						echo "<td align=\"left\" class=\"norm\">".$heatmap_status[$i]['type_id']."</td>";
-						echo "<td align=\"left\" class=\"norm\">".$status[$heatmap_status[$i]['status']]."</td>";
-						echo "<td align=\"left\" class=\"norm\">NA</td>";
-						echo "<td align=\"left\" class=\"norm\">NA</td>";
-						echo "<td align=\"left\" class=\"norm\">NA</td>";
-						echo "<td align=\"left\" class=\"norm\">";
-							echo "<span class=\"progressBar\" id=\"heatmap$i\">0%</span>";
-						echo "</td>";
-						if($heatmap_status[$i]['status']!=RUNNING||$heatmap_status[$i]['status']!=ERROR||$heatmap_status[$i]['status']!=CANCELLED)
-						{
-							echo "<td align=\"center\" class=\"norm\"></td>";
-						}
-					echo "</tr>";
-				}
-				else
-				{
-					echo "</tr>";
-						echo "<td align=\"left\" class=\"norm\">".$schedule_item[($heatmap_status[$i]['run_id'])]."</td>";
-						echo "<td align=\"left\" class=\"norm\">".$heatmap_status[$i]['type_id']."</td>";
-						echo "<td align=\"left\" class=\"norm\">".$status[$heatmap_status[$i]['status']]."</td>";
-						echo "<td align=\"left\" class=\"norm\">".$heatmap_status[$i]['start_time']."</td>";
-						echo "<td align=\"left\" class=\"norm\">".$heatmap_status[$i]['timediff']."</td>";
-						echo "<td align=\"left\" class=\"norm\">".$heatmap_status[$i]['update_time']."</td>";
-						echo "<td align=\"left\" class=\"norm\">";
-							echo "<span class=\"progressBar\" id=\"heatmap$i\">".number_format(($heatmap_status[$i]['total']==0?"0":(($heatmap_status[$i]['progress'])*100/$heatmap_status[$i]['total'])),2)."%</span>";
-						echo "</td>";
-						echo "<td align=\"center\" class=\"norm\">";
-						if($heatmap_status[$i]['status']==RUNNING)
-						{
-							echo '<a href="status.php?action=2&runid='.$heatmap_status[$i]['run_id'].'&typeid='.$heatmap_status[$i]['type_id'].'&rpttyp='.$heatmap_status[$i]['report_type'].
-							'&pid=' . $heatmap_status[$i]['process_id'] . '">';
-							echo '<input type="image" name="delete[x.x]" src="images/not.png" title="Cancel"/></a>';
-						}
-						else if($heatmap_status[$i]['status']==ERROR||$heatmap_status[$i]['status']==CANCELLED)
-						{
-							echo '<a href="status.php?action=1&runid='.$heatmap_status[$i]['run_id'].'&typeid='.$heatmap_status[$i]['type_id'].'&rpttyp='.$heatmap_status[$i]['report_type'].
-							'&pid=' . $heatmap_status[$i]['process_id'] . '">';
-							echo '<input type="image" name="add[x.x]" src="images/check.png" title="Add"/></a> ';
-							echo '<a href="status.php?action=3&runid='.$heatmap_status[$i]['run_id'].'&typeid='.$heatmap_status[$i]['type_id'].'&rpttyp='.$heatmap_status[$i]['report_type'].
-							'&pid=' . $heatmap_status[$i]['process_id'] . '">';
-							echo '<input type="image" name="delete[x.x]" src="images/not.png" title="Delete"/></a>';
-						}
-						echo "</td>";
-					echo "</tr>";
-				}
+				echo "<tr>";
+					echo "<td align=\"left\" class=\"norm\">".$schedule_item[($heatmap_status[$i]['run_id'])]."</td>";
+					echo "<td align=\"left\" class=\"norm\">".$heatmap_status[$i]['type_id']."</td>";
+					echo "<td align=\"left\" class=\"norm\">".$status[$heatmap_status[$i]['status']]."</td>";
+					echo "<td align=\"left\" class=\"norm\">".$heatmap_status[$i]['start_time']."</td>";
+					echo "<td align=\"left\" class=\"norm\">".$heatmap_status[$i]['timediff']."</td>";
+					echo "<td align=\"left\" class=\"norm\">".$heatmap_status[$i]['update_time']."</td>";
+					echo "<td align=\"left\" class=\"norm\">";
+						echo "<span class=\"progressBar\" id=\"heatmap$i\">".number_format(($heatmap_status[$i]['total']==0?"0":(($heatmap_status[$i]['progress'])*100/$heatmap_status[$i]['total'])),2)."%</span>";
+					echo "</td>";
+					echo "<td align=\"center\" class=\"norm\">";
+					if($heatmap_status[$i]['status']==READY)
+					{
+						echo '<a href="status.php?action=4&amp;runid='.$heatmap_status[$i]['run_id'].'&amp;typeid='.$heatmap_status[$i]['type_id'].'&amp;rpttyp='.$heatmap_status[$i]['report_type']. '">';
+						echo '<img src="images/not.png" title="Cancel" border=0/></a>';
+					}
+					elseif($heatmap_status[$i]['status']==RUNNING)
+					{
+						echo '<a href="status.php?action=2&amp;runid='.$heatmap_status[$i]['run_id'].'&amp;typeid='.$heatmap_status[$i]['type_id'].'&amp;rpttyp='.$heatmap_status[$i]['report_type'].
+						'&amp;pid=' . $heatmap_status[$i]['process_id'] . '">';
+						echo '<img src="images/not.png" title="Cancel" border=0/></a>';
+					}
+					elseif($heatmap_status[$i]['status']==COMPLETED)
+					{
+						echo '<a href="status.php?action=3&amp;runid='.$heatmap_status[$i]['run_id'].'&amp;typeid='.$heatmap_status[$i]['type_id'].'&amp;rpttyp='.$heatmap_status[$i]['report_type'].
+						'&amp;pid=' . $heatmap_status[$i]['process_id'] . '">';
+						echo '<img src="images/not.png" title="Delete" border=0/></a>';
+					}
+					else if($heatmap_status[$i]['status']==ERROR||$heatmap_status[$i]['status']==CANCELLED)
+					{
+						echo '<a href="status.php?action=1&amp;runid='.$heatmap_status[$i]['run_id'].'&amp;typeid='.$heatmap_status[$i]['type_id'].'&amp;rpttyp='.$heatmap_status[$i]['report_type'].
+						'&amp;pid=' . $heatmap_status[$i]['process_id'] . '">';
+						echo '<img src="images/check.png" title="Add" border=0/></a> ';
+						echo '<a href="status.php?action=3&amp;runid='.$heatmap_status[$i]['run_id'].'&amp;typeid='.$heatmap_status[$i]['type_id'].'&amp;rpttyp='.$heatmap_status[$i]['report_type'].
+						'&amp;pid=' . $heatmap_status[$i]['process_id'] . '">';
+						echo '<img src="images/not.png" title="Delete" border=0/></a>';
+					}
+					echo "</td>";
+				echo "</tr>";
 			}
 		echo "</table>";
 	}
 	if(count($updatescan_status)>0)
 	{
-		$us_running=0;
-		for($i=0;$i < count($updatescan_status);$i++)
-		{
-			if($updatescan_status[$i]['status']==RUNNING)
-				$us_running=1;
-			else if($updatescan_status[$i]['status']==ERROR||$updatescan_status[$i]['status']==CANCELLED)
-				$us_running=2;
-		}
 		echo "<table width=\"100%\" class=\"event\">";
 			echo "<tr>";
 				echo "<th width=\"100%\" align=\"center\" class=\"head2\" >Update Scan</th>";
@@ -497,60 +477,48 @@ echo "<div class=\"container\">";
 				echo "<td width=\"15%\" align=\"left\" class=\"head\">Excution run time</td>";
 				echo "<td width=\"17%\" align=\"left\" class=\"head\">Last update time</td>";
 				echo "<td width=\"18%\" align=\"left\" class=\"head\">Progress</td>";
-				if($us_running==1||$us_running=2)
-					echo "<td width=\"5%\" align=\"center\" class=\"head\">Action</td>";
+				echo "<td width=\"5%\" align=\"center\" class=\"head\">Action</td>";
 			echo "</tr>";
 				
 			for($i=0;$i < count($updatescan_status);$i++)
 			{
-				if($updatescan_status[$i]['status']==READY)
-				{
-					echo "</tr>";
-						echo "<td align=\"left\" class=\"norm\">".$schedule_item[($updatescan_status[$i]['run_id'])]."</td>";
-						echo "<td align=\"left\" class=\"norm\">".$updatescan_status[$i]['type_id']."</td>";
-						echo "<td align=\"left\" class=\"norm\">".$status[$updatescan_status[$i]['status']]."</td>";
-						echo "<td align=\"left\" class=\"norm\">NA</td>";
-						echo "<td align=\"left\" class=\"norm\">NA</td>";
-						echo "<td align=\"left\" class=\"norm\">NA</td>";
-						echo "<td align=\"left\" class=\"norm\">";
-							echo "<span class=\"progressBar\" id=\"updatescan$i\">0%</span>";
-						echo "</td>";
-						if($updatescan_status[$i]['status']!=RUNNING||$updatescan_status[$i]['status']!=ERROR||$updatescan_status[$i]['status']!=CANCELLED)
-						{
-							echo "<td align=\"center\" class=\"norm\"></td>";
-						}
-					echo "</tr>";
-				}
-				else
-				{
-					echo "</tr>";
-						echo "<td align=\"left\" class=\"norm\">".$schedule_item[($updatescan_status[$i]['run_id'])]."</td>";
-						echo "<td align=\"left\" class=\"norm\">".$updatescan_status[$i]['type_id']."</td>";
-						echo "<td align=\"left\" class=\"norm\">".$status[$updatescan_status[$i]['status']]."</td>";
-						echo "<td align=\"left\" class=\"norm\">".$updatescan_status[$i]['start_time']."</td>";
-						echo "<td align=\"left\" class=\"norm\">".$updatescan_status[$i]['timediff']."</td>";
-						echo "<td align=\"left\" class=\"norm\">".$updatescan_status[$i]['update_time']."</td>";
-						echo "<td align=\"left\" class=\"norm\">";
-							echo "<span class=\"progressBar\" id=\"updatescan$i\">".number_format(($updatescan_status[$i]['total']==0?"0":(($updatescan_status[$i]['progress'])*100/$updatescan_status[$i]['total'])),2)."%</span>";
-						echo "</td>";
-						echo "<td align=\"center\" class=\"norm\">";
-						if($updatescan_status[$i]['status']==RUNNING)
-						{
-							echo '<a href="status.php?action=2&runid='.$updatescan_status[$i]['run_id'].'&typeid='.$updatescan_status[$i]['type_id'].'&rpttyp='.$updatescan_status[$i]['report_type'].
-							'&pid=' . $updatescan_status[$i]['process_id'] . '"><input type="image" name="delete[x.x]" src="images/not.png" title="Cancel"/></a>';
-						}
-						else if($updatescan_status[$i]['status']==ERROR||$updatescan_status[$i]['status']==CANCELLED)
-						{
-							echo '<a href="status.php?action=1&runid='.$updatescan_status[$i]['run_id'].'&typeid='.$updatescan_status[$i]['type_id'].'&rpttyp='.$updatescan_status[$i]['report_type'].
-							'&pid=' . $updatescan_status[$i]['process_id'] . '">';
-							echo '<input type="image" name="add[x.x]" src="images/check.png" title="Add"/></a> ';
-							echo '<a href="status.php?action=3&runid='.$updatescan_status[$i]['run_id'].'&typeid='.$updatescan_status[$i]['type_id'].'&rpttyp='.$updatescan_status[$i]['report_type'].
-							'&pid=' . $updatescan_status[$i]['process_id'] . '">';
-							echo '<input type="image" name="delete[x.x]" src="images/not.png" title="Delete"/></a>';
-						}
-						echo "</td>";
-					echo "</tr>";
-				}
+				echo "<tr>";
+					echo "<td align=\"left\" class=\"norm\">".$schedule_item[($updatescan_status[$i]['run_id'])]."</td>";
+					echo "<td align=\"left\" class=\"norm\">".$updatescan_status[$i]['type_id']."</td>";
+					echo "<td align=\"left\" class=\"norm\">".$status[$updatescan_status[$i]['status']]."</td>";
+					echo "<td align=\"left\" class=\"norm\">".$updatescan_status[$i]['start_time']."</td>";
+					echo "<td align=\"left\" class=\"norm\">".$updatescan_status[$i]['timediff']."</td>";
+					echo "<td align=\"left\" class=\"norm\">".$updatescan_status[$i]['update_time']."</td>";
+					echo "<td align=\"left\" class=\"norm\">";
+						echo "<span class=\"progressBar\" id=\"updatescan$i\">".number_format(($updatescan_status[$i]['total']==0?"0":(($updatescan_status[$i]['progress'])*100/$updatescan_status[$i]['total'])),2)."%</span>";
+					echo "</td>";
+					echo "<td align=\"center\" class=\"norm\">";
+					if($updatescan_status[$i]['status']==READY)
+					{
+						echo '<a href="status.php?action=4&amp;runid='.$updatescan_status[$i]['run_id'].'&amp;typeid='.$updatescan_status[$i]['type_id'].'&amp;rpttyp='.$updatescan_status[$i]['report_type'].'"><img src="images/not.png" title="Cancel" border=0/></a>';
+					}
+					elseif($updatescan_status[$i]['status']==RUNNING)
+					{
+						echo '<a href="status.php?action=2&amp;runid='.$updatescan_status[$i]['run_id'].'&amp;typeid='.$updatescan_status[$i]['type_id'].'&amp;rpttyp='.$updatescan_status[$i]['report_type'].
+						'&amp;pid=' . $updatescan_status[$i]['process_id'] . '"><img src="images/not.png" title="Cancel" border=0/></a>';
+					}
+					elseif($updatescan_status[$i]['status']==COMPLETED)
+					{
+						echo '<a href="status.php?action=3&amp;runid='.$updatescan_status[$i]['run_id'].'&amp;typeid='.$updatescan_status[$i]['type_id'].'&amp;rpttyp='.$updatescan_status[$i]['report_type'].
+						'&amp;pid=' . $updatescan_status[$i]['process_id'] . '">';
+						echo '<img src="images/not.png" title="Delete" border=0/></a>';
+					}
+					else if($updatescan_status[$i]['status']==ERROR||$updatescan_status[$i]['status']==CANCELLED)
+					{
+						echo '<a href="status.php?action=1&amp;runid='.$updatescan_status[$i]['run_id'].'&amp;typeid='.$updatescan_status[$i]['type_id'].'&amp;rpttyp='.$updatescan_status[$i]['report_type'].
+						'&amp;pid=' . $updatescan_status[$i]['process_id'] . '">';
+						echo '<img src="images/check.png" title="Add" border=0/></a> ';
+						echo '<a href="status.php?action=3&amp;runid='.$updatescan_status[$i]['run_id'].'&amp;typeid='.$updatescan_status[$i]['type_id'].'&amp;rpttyp='.$updatescan_status[$i]['report_type'].
+						'&amp;pid=' . $updatescan_status[$i]['process_id'] . '">';
+						echo '<img src="images/not.png" title="Delete" border=0/></a>';
+					}
+					echo "</td>";
+				echo "</tr>";
 			}
 		echo "</table>";
 	}
@@ -586,7 +554,7 @@ echo "<div class=\"container\">";
 			{
 				if($comdash_status[$i]['status']==READY)
 				{
-					echo "</tr>";
+					echo "<tr>";
 						echo "<td align=\"left\" class=\"norm\">".$schedule_item[($comdash_status[$i]['run_id'])]."</td>";
 						echo "<td align=\"left\" class=\"norm\">".$comdash_status[$i]['type_id']."</td>";
 						echo "<td align=\"left\" class=\"norm\">".$status[$comdash_status[$i]['status']]."</td>";
@@ -604,7 +572,7 @@ echo "<div class=\"container\">";
 				}
 				else
 				{
-					echo "</tr>";
+					echo "<tr>";
 					echo "<td align=\"left\" class=\"norm\">".$schedule_item[($comdash_status[$i]['run_id'])]."</td>";
 						echo "<td align=\"left\" class=\"norm\">".$comdash_status[$i]['type_id']."</td>";
 						echo "<td align=\"left\" class=\"norm\">".$status[$comdash_status[$i]['status']]."</td>";
@@ -617,8 +585,8 @@ echo "<div class=\"container\">";
 						echo "<td align=\"center\" class=\"norm\">";
 						if($comdash_status[$i]['status']==RUNNING)
 						{
-							echo '<a href="status.php?runid='.$comdash_status[$i]['run_id'].'&typeid='.$comdash_status[$i]['type_id'].'&rpttyp='.$comdash_status[$i]['report_type'].
-							'&pid=' . $comdash_status[$i]['process_id'] . '"><input type="image" name="delete[x.x]" src="images/not.png" title="Cancel"/></a>';
+							echo '<a href="status.php?runid='.$comdash_status[$i]['run_id'].'&amp;typeid='.$comdash_status[$i]['type_id'].'&amp;rpttyp='.$comdash_status[$i]['report_type'].
+							'&amp;pid=' . $comdash_status[$i]['process_id'] . '"><img src="images/not.png" title="Cancel"/></a>';
 						}
 						echo "</td>";
 					echo "</tr>";
@@ -628,7 +596,6 @@ echo "<div class=\"container\">";
 	}
 	*/
 echo "</div>";
-
 echo "</body>";
 echo "</html>";
 ?>

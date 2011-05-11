@@ -2,13 +2,24 @@
 require_once('db.php');
 require_once('include.import.php');
 
+global $days_to_fetch;
+global $update_id;
+
 if(isset($_GET['maxrun'])) ini_set('max_execution_time','36000');	//10 hours
 $days = 0;
+/*
 if(isset($_GET['days']))
 {
 	$days = (int)$_GET['days'];
 }else{
 	die('Need to set $_GET[\'days\']');
+}
+*/
+if(isset($days_to_fetch))
+{
+	$days = (int)$days_to_fetch;
+}else{
+	die('Need to set $days_to_fetch');
 }
 
 //Find out the ID of the field for PMID, and the ID of the "PubMed" category.
