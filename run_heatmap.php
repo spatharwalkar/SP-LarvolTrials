@@ -20,10 +20,6 @@ if(isset($_GET['direct_run_heatmap_id'])) runHeatmap((int)$_GET['direct_run_heat
 
 function runHeatmap($id, $return = false, $format = "xlsx")
 {
-	//variables used for report status
-	global $run_id;
-	global $report_type;
-	global $type_id;
 	global $logger;
 	/*
 	if($return)
@@ -158,7 +154,7 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 	}
 
 	//get searchdata
-	$searchdata = array();$coldata = array();
+	$searchdata = array();
 	$query = 'SELECT `row`,`column`,`searchdata` FROM rpt_heatmap_cells WHERE report=' . $id;
 	$time_start = microtime(true);
 	$resu = mysql_query($query) or tex('Bad SQL query getting searchdata');
@@ -173,7 +169,6 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 		if(!isset($searchdata[$cell['row']])) $searchdata[$cell['row']] = array();
 		$unpack = unserialize(base64_decode($cell['searchdata']));
 		$searchdata[$cell['row']][$cell['column']] = removeNullSearchdata($unpack);	
-		$coldata[$cell['column']][$cell['row']] = removeNullSearchdata($unpack);	
 	} 
 	
 	$maxrow = max(array_keys($rowsearch));
@@ -213,124 +208,6 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 	*/
 	$results = array();
 	
-	//added for Stacked Trial Tracker
-	//creating column link
-	$collink = array();
-	foreach($coldata as $col => $colData) {
-	
-		foreach($colData as $row => $cell) {
-		
-			$c_time_machine = array();//unsetting the array for every cell.
-			$c_columnparams = array('action' => $columnsearch[$col]['action'], 'searchval' => $columnsearch[$col]['searchval'], 
-									'negate' => $columnsearch[$col]['negate'],
-									'multifields' => $columnsearch[$col]['multifields'], 
-									'multivalue' => $columnsearch[$col]['multivalue']);
-			$c_columnparams = prepareParams($c_columnparams);
-			
-			$c_cellparams = array('action' => $cell['action'],'searchval' => $cell['searchval'], 
-									'negate' => $cell['negate'], 'multifields' => $cell['multifields'], 
-									'multivalue' => $cell['multivalue']);
-			$c_cellparams = prepareParams($c_cellparams);
-			
-			$c_params = array_merge($c_columnparams, $c_cellparams);
-			
-			//in case of any one of the array has timemachine parameters defined
-			if(strlen($searchdata[$row][$col]['time_machine']) || strlen($columnsearch[$col]['time_machine'])) {
-					
-					array_push($c_time_machine, $cell['time_machine'], $columnsearch[$col]['time_machine']);
-					$c_time_machine = array_filter($c_time_machine);	//removing empt values of the array
-					usort($c_time_machine, "cmpdate"); //sorting the array
-					sort($c_time_machine); //sorting the array further for time precision
-					$c_time_machine = strtotime(end($c_time_machine)); //getting the latest date
-		
-			} else { //in case of timemachine  parameters not defined
-				$c_time_machine = $now;
-			}
-			$c_override = $columnsearch[$col]['override'] . ',' . $cell['override'];
-			$c_override = explode(',', $c_override);
-			
-			if($c_override === false)
-			{
-				$c_override = array();
-			}else{
-				foreach($c_override as $key => $value)
-				{
-					$value = nctidToLarvolid($value);
-					if($value === false)
-					{
-						unset($c_override[$key]);
-					}else{
-						$c_override[$key] = $value;
-					}
-				}
-			}
-			
-			foreach($c_params as $key => $sp)	//remove sorts
-			{
-				if(in_array($sp->action,array('ascending','descending'))) unset($c_params[$key]);
-			}
-			
-			if(!isset($collink[$col])) $rowlink[$col] = array();
-			$collink[$col][$row] = new Result();
-
-			$c_ids = search($c_params,array(),NULL,$c_time_machine,$c_override);
-			$c_ids = array_keys($c_ids);
-			
-			if ($backboneAgent) { 
-				$agent = getBackboneAgent($c_params);
-				if ($agent != null)
-					$c_ids = applyBackboneAgent($c_ids, $agent->value);
-			}
-			$c_count = '';
-			if($countactive) {
-				if(is_array($c_ids) && !empty($c_ids))
-					$c_count = getActiveCount($c_ids, $c_time_machine);
-			} else {	
-				$c_count = count($c_ids); 
-			}
-			
-			$collink[$col][$row]->num = $c_count;
-			
-			if ($bomb)
-				 $c_bomb = getBomb($c_ids);
-			else
-				$c_bomb = "";
-
-			//fill in hyperlink
-			if($c_count < 500)
-			{
-				//pass all IDs
-				$packedIDs = '';
-				if($countactive) { //for count active no need to check count more than 0 in order to link even if count is zero
-					if(is_array($c_ids) && !empty($c_ids)) {
-					
-						$evcode = '$packedIDs = pack("l*",' . implode(',', $c_ids) . ');';
-						eval($evcode);
-					}
-				} else if($c_count > 0) {
-				
-					$evcode = '$packedIDs = pack("l*",' . implode(',', $c_ids) . ');';
-					eval($evcode);
-				}
-				$collink[$col][$row]->{'link'} = "&leading[$row]=" . rawurlencode(base64_encode(gzdeflate($packedIDs)));
-				$collink[$col][$row]->{'link'} .= "&params[$row]=" 
-					. rawurlencode(base64_encode(gzdeflate(serialize(array('params' => NULL,
-																		   'time' => $c_time_machine,
-																		   'count' => $c_count,
-																		   'rowlabel' =>$rows[$row],
-																		   'bomb' => $c_bomb)))));
-			} else {
-				//pass search terms and metadata
-				$collink[$col][$row]->{'link'} .= "&params[$row]="
-					. rawurlencode(base64_encode(gzdeflate(serialize(array('params' => $params,
-																		   'time' => $c_time_machine,
-																		   'rowlabel' =>$rows[$row],
-																		   'bomb' => $c_bomb)))));
-			}
-		}
-	}
-	
-	$rowlink = array();
 	foreach($searchdata as $row => $rowData)
 	{ 
 		foreach($rowData as $column => $cell)
@@ -362,19 +239,6 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 			$cellparams = prepareParams($cellparams);
 			$params = array_merge($globalparams, $columnparams, $rowparams, $cellparams);
 			
-			//added for Stacked Trial Tracker
-			$r_time_machine = array();//unsetting the array for every cell.
-			$r_rowparams = array('action' => $rowsearch[$row]['action'], 'searchval' => $rowsearch[$row]['searchval'], 
-									'negate' => $rowsearch[$row]['negate'],'multifields' => $rowsearch[$row]['multifields'], 
-									'multivalue' => $rowsearch[$row]['multivalue']);
-			$r_rowparams = prepareParams($r_rowparams);
-			
-			$r_cellparams = array('action' => $cell['action'], 'searchval' => $cell['searchval'], 'negate' => $cell['negate'], 
-									'multifields' => $cell['multifields'], 'multivalue' => $cell['multivalue']);
-			$r_cellparams = prepareParams($r_cellparams);
-			
-			$r_params = array_merge($r_rowparams, $r_cellparams);
-			
 			//in case of any one of the array has timemachine parameters defined
 			if(strlen($cell['time_machine']) || strlen($rowsearch[$row]['time_machine']) || 
 								strlen($columnsearch[$column]['time_machine']) || strlen($oversearch['time_machine'])) {
@@ -389,20 +253,7 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 			} else { //in case of timemachine  parameters not defined
 				$time_machine = $now;
 			}
-			
-			//in case of any one of the array has timemachine parameters defined
-			if(strlen($cell['time_machine']) || strlen($rowsearch[$row]['time_machine'])) {
 					
-					array_push($r_time_machine, $cell['time_machine'], $rowsearch[$row]['time_machine']);
-					$r_time_machine = array_filter($r_time_machine);	//removing empt values of the array
-					usort($r_time_machine, "cmpdate"); //sorting the array
-					sort($r_time_machine); //sorting the array further for time precision
-					$r_time_machine = strtotime(end($r_time_machine)); //getting the latest date
-		
-			} else { //in case of timemachine  parameters not defined
-				$r_time_machine = $now;
-			}
-			
 			$override = $oversearch['override'] . ',' . $columnsearch[$column]['override'] . ','
 						. $rowsearch[$row]['override'] . ',' . $cell['override'];
 			$override = explode(',', $override);
@@ -423,25 +274,6 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 				}
 			}
 
-			$r_override = $rowsearch[$row]['override'] . ',' . $cell['override'];
-			$r_override = explode(',', $r_override);
-			
-			if($r_override === false)
-			{
-				$r_override = array();
-			}else{
-				foreach($r_override as $key => $value)
-				{
-					$value = nctidToLarvolid($value);
-					if($value === false)
-					{
-						unset($r_override[$key]);
-					}else{
-						$r_override[$key] = $value;
-					}
-				}
-			}
-			
 			if(empty($params))	continue;
 			if(array_filter_recursive($params,'nonempty') == array_filter_recursive($globalparams,'nonempty')) continue;
 			foreach($params as $key => $sp)	//remove sorts
@@ -449,22 +281,13 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 				if(in_array($sp->action,array('ascending','descending'))) unset($params[$key]);
 			}
 			
-			foreach($r_params as $key => $sp)	//remove sorts
-			{
-				if(in_array($sp->action,array('ascending','descending'))) unset($r_params[$key]);
-			}
-
 			if(!isset($results[$row])) $results[$row] = array();
 			$results[$row][$column] = new Result();
 
-			if(!isset($rowlink[$row])) $rowlink[$row] = array();
-			$rowlink[$row][$column] = new Result();
-			
 			mysql_query('BEGIN') or tex("Couldn't begin SQL transaction");
 			
 			//get record IDs 
 			$all_ids = search($params,array(),NULL,$time_machine,$override);
-			$r_ids = search($r_params,array(),NULL,$r_time_machine,$r_override);
 			
 			if($all_ids === false)
 			{
@@ -481,40 +304,29 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 			}
 			
 			$all_ids = array_keys($all_ids);
-			$r_ids = array_keys($r_ids);
 			
 			if ($backboneAgent) { 
 				$agent = getBackboneAgent($params);
 				if ($agent != null)
 					$all_ids = applyBackboneAgent($all_ids, $agent->value);
-				
-				$r_agent = getBackboneAgent($r_params);
-				if ($r_agent != null)
-					$r_ids = applyBackboneAgent($r_ids, $r_agent->value);
 			}
 			
-			$rescount = '';$r_count = '';
+			$rescount = '';
 			if($countactive) {
 				if(is_array($all_ids) && !empty($all_ids))
 					$rescount = getActiveCount($all_ids, $time_machine);
 					
-				if(is_array($r_ids) && !empty($r_ids))
-					$r_count = getActiveCount($r_ids, $r_time_machine);
 			} else {
 				
 				$rescount = count($all_ids); 
-				$r_count = count($r_ids); 
 			}
 			
 			$results[$row][$column]->num = $rescount;
-			$rowlink[$row][$column]->num = $r_count;
 			
 			if ($bomb) {
 				 $results[$row][$column]->bomb = getBomb($all_ids);
-				 $r_bomb = getBomb($r_ids);
 			} else {
 				$results[$row][$column]->bomb = "";
-				$r_bomb = "";
 			}
 				
 			//get maximum phase
@@ -607,37 +419,6 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 				$results[$row][$column]->time_machine = $time_machine;
 			}
 			
-			
-			if($r_count < 500) {
-			
-				//pass all IDs
-				$packedIDs = '';
-				if($countactive) { //for count active no need to check count more than 0 in order to link even if count is zero
-					if(is_array($r_ids) && !empty($r_ids)) {
-					
-						$evcode = '$packedIDs = pack("l*",' . implode(',', $r_ids) . ');';
-						eval($evcode);
-					}
-				} else if($r_count > 0) {
-					$evcode = '$packedIDs = pack("l*",' . implode(',', $r_ids) . ');';
-					eval($evcode);
-				}
-				$rowlink[$row][$column]->{'link'} = "&leading[$column]=" . rawurlencode(base64_encode(gzdeflate($packedIDs)));
-				$rowlink[$row][$column]->{'link'} .= "&params[$column]="
-							. rawurlencode(base64_encode(gzdeflate(serialize(array('params' => NULL,
-																		   'time' => $r_time_machine,
-																		   'count' => $r_count,
-																		   'columnlabel' =>$columns[$column],
-																		   'bomb' => $r_bomb)))));
-			} else {
-				$rowlink[$row][$column]->{'link'} = "&params[$column]="
-					. rawurlencode(base64_encode(gzdeflate(serialize(array('params' => $r_params,
-																		   'time' => $r_time_machine,
-																		   'columnlabel' =>$columns[$column],
-																		   'bomb' => $r_bomb)))));
-
-			}
-			
 			mysql_query('COMMIT') or tex("Couldn't commit SQL transaction");
 			if(!$return)
 			{
@@ -663,7 +444,7 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 
 	$info["pid"] = $pid;
 	if ($format == "xlsx")
-	return heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $phasenums,$optionsSelected, $rowlink, $collink);
+	return heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $phasenums,$optionsSelected);
 	else
 		return heatmapAsWord($info, $rows, $columns, $results, $p_colors, $return, $phasenums,$optionsSelected);
 
@@ -794,7 +575,7 @@ function heatmapAsWord($info, $rows, $columns, $results, $p_colors, $return, $ph
 	}
 }
 
-function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $phasenums,$optionsSelected=array(), $rowlink, $collink) {
+function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $phasenums,$optionsSelected=array()) {
 	global $now, $db;
 	$countactive = $info['count_only_active'] == 'Y';
 	$footnotes = $info['footnotes'];
@@ -820,7 +601,9 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 	
 	foreach($rows as $row => $header)
 	{
-		$link = '';$r_flag = false;
+	
+		//added for Stacked Trial Tracker
+		$link = '';$flag = false;
 		$link	= urlPath() . 'intermediary.php?';
 		$link	.= 'cparams=' . rawurlencode(base64_encode(gzdeflate(serialize(array('type' => 'row',
 																		'name' => substr($name,0,40),
@@ -829,26 +612,36 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 		foreach($columns as $k => $v) {	
 		
 			if($countactive) {
-				if(strlen($rowlink[$row][$k]->num)) {
-					$link	.= $rowlink[$row][$k]->{'link'};
-					$r_flag = true;
+			
+				if(strlen($results[$row][$k]->num)) {
+
+					$link .= '&' . 
+					str_replace('params', "params[$k]", str_replace('leading', "leading[$k]", $results[$row][$k]->{'link'}));
+					$flag = true;
+					
 				}
-			} else if($rowlink[$row][$k]->num) {
-				$link	.= $rowlink[$row][$k]->{'link'};
-				$r_flag = true;
+			} else if($results[$row][$k]->num) {
+
+				$link .= '&' . 
+				str_replace('params', "params[$k]", str_replace('leading', "leading[$k]", $results[$row][$k]->{'link'}));
+				$flag = true;
+					
 			}
-		}																
-		$rlink = addYourls($link,$results->reportname);
-		
+			
+		}
+															
+		$link = addYourls($link,$results->reportname);
 		$cell = 'A' . ($row+1);
 		$sheet->SetCellValue($cell, $header);
-		if($r_flag == true)
-			$sheet->getCell($cell)->getHyperlink()->setUrl($rlink);
+		if($flag == true)
+			$sheet->getCell($cell)->getHyperlink()->setUrl($link);
 	}
 	
 	foreach($columns as $col => $header)
 	{
-		$link = '';$c_flag = false;
+
+		//added for Stacked Trial Tracker
+		$link = '';$flag = false;
 		$link	= urlPath() . 'intermediary.php?';
 		$link	.= 'cparams=' . rawurlencode(base64_encode(gzdeflate(serialize(array('type' => 'col',
 																		'name' => substr($name,0,40),
@@ -857,24 +650,28 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 		foreach($rows as $k => $v) {	
 		
 			if($countactive) {
-				if(strlen($collink[$col][$k]->num)) {
-					$link	.= $collink[$col][$k]->{'link'};
-					$c_flag = true;
+				if(strlen($results[$k][$col]->num)) {
+				
+					$link .= '&' . 
+					str_replace('params', "params[$k]", str_replace('leading', "leading[$k]", $results[$k][$col]->{'link'}));
+					$flag = true;
+					
 				}
-			} else if($collink[$col][$k]->num) {
-				$link	.= $collink[$col][$k]->{'link'};
-				$c_flag = true;
+			} else if($results[$k][$col]->num) {
+			
+				$link .= '&' . 
+				str_replace('params', "params[$k]", str_replace('leading', "leading[$k]", $results[$k][$col]->{'link'}));
+				$flag = true;
 			}
+			
 		}																
-		$colink = addYourls($link,$results->reportname);
+		$link = addYourls($link,$results->reportname);
 		$cell = num2char($col) . '1';
 		$sheet->SetCellValue($cell, $header);
-		if($c_flag == true)
-			$sheet->getCell($cell)->getHyperlink()->setUrl($colink);
+		if($flag == true)
+			$sheet->getCell($cell)->getHyperlink()->setUrl($link);
 	}
-	/*echo "<pre>";print_r($rowlink);
-	echo "<pre>";print_r($collink);
-	exit;*/
+	
 	foreach($results as $row => $rowData)
 	{
 		foreach($rowData as $col => $result)

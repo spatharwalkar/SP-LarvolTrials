@@ -168,6 +168,11 @@ class ContentManager
 	private $type;
 	private $page;
 	private $results_per_page;
+	private $dispcount;
+	private $activecount;
+	private $allcount;
+	private $inactivecount;
+
 	
 	public function __construct() {
 	
@@ -224,6 +229,11 @@ class ContentManager
 		$this->current_yr	= date('Y');
 		$this->second_yr	= date('Y')+1;
 		$this->third_yr		= date('Y')+2;
+
+		$this->activecount = 0;
+		$this->allcount = 0;
+		$this->inactivecount = 0;
+
 		$this->type = (isset($_GET["list"])) ? ($_GET["list"].'array') : 'activearray' ;
 		if(isset($_GET['list']) && $_GET['list'] == 'inactive') { 
 			$this->inactflag = 1; 		// checking if any of the inactive filters are set
@@ -234,6 +244,7 @@ class ContentManager
 		} else { 
 			$this->actflag = 1; 		// checking if any of the active filters are set
 		}
+		
 	}
 	
 	function setSortParams() {
@@ -286,20 +297,21 @@ class ContentManager
 
 	}
 	
-	function commonControls() {
+	function commonControls($count, $act, $inact, $all) {
 	
 		echo ('<div style="height:100px;"><div class="block"><div class="text">List</div>'
 			. '<input type="radio" id="actlist" name="list" checked="checked" value="active" '
 			. 'onchange="javascript: applyfilter(this.value);" />'
-			. '&nbsp;<label for="actlist"><span style="color: #00B050;">'
+			. '&nbsp;<label for="actlist"><span style="color: #00B050;"> ' . $act
 			. ' Active Records </span></label>'
 			. '<br/><input type="radio" id="inactlist" name="list" value="inactive" ' 
 			. ((isset($_GET['list']) && $_GET['list'] == 'inactive') ? ' checked="checked"' : '')
 			. 'onchange="javascript: applyfilter(this.value);" />&nbsp;<label for="inactlist">'
-			. '<span style="color: #FF0000;">&nbsp;Inactive Records</span></label>'
+			. '<span style="color: #FF0000;"> ' . $inact
+			. ' Inactive Records</span></label>'
 			. '<br/><input type="radio" id="alllist" name="list" value="all"' 
 			. ((isset($_GET['list']) && $_GET['list'] == 'all') ? ' checked="checked"' : '')
-			. 'onchange="javascript: applyfilter(this.value);" />&nbsp;<label for="alllist">'
+			. 'onchange="javascript: applyfilter(this.value);" />&nbsp;<label for="alllist"> ' . $all
 			. ' All Records </label></div>'
 			. '<input type="hidden" id="status" name="status" value="' . (isset($_GET['status']) ? $_GET['status'] : '') . '" />' 
 			. '<input type="hidden" id="phase" name="phase" value="' . (isset($_GET['phase']) ? $_GET['phase'] : '') . '" />' 
@@ -321,8 +333,9 @@ class ContentManager
 			. '<input type="radio" id="onemonth" name="edited" value="onemonth" ' 
 			. ((isset($_GET['edited']) && $_GET['edited'] == 'onemonth') ? 'checked="checked"' : '' ) . ' />'
 			. '<label for="onemonth">1 Month</label>'
-			. '</div></div><br/><div><input type="submit" value="Show"/>'
-			. '<br/><br clear="all" />');
+			. '</div></div><br/><div><input type="submit" value="Show"/>&nbsp;');
+			 if(strlen($count)) { echo $count . '&nbsp;Records'; }
+			echo ('<br/><br clear="all" />');
 	
 	}
 	
@@ -417,7 +430,7 @@ class ContentManager
 			echo ('</td><td class="result">Results for ' . htmlformat($t) . '</td>' . '</tr></table>');
 			echo('<br clear="all"/>');		
 			echo('<form id="frmOtt" name="frmOtt" method="get" action="intermediary.php">');
-			$this->commonControls();
+			$this->commonControls(NULL, NULL, NULL, NULL);
 			echo ('<input type="hidden" name="cparams" value="' . $_GET['cparams'] . '"/>');
 			
 			
@@ -432,9 +445,6 @@ class ContentManager
 				$bomb = ''; $time_machine = '';
 				$totinactivecount = 0;
 				$totactivecount = 0;
-				$activecount = 0;
-				$allcount = 0;
-				$inactivecount = 0;
 				
 				$this->inactivearray 	= array();
 				$this->allarray			= array();
@@ -512,11 +522,11 @@ class ContentManager
 								$vall = implode(",",array_keys($this->inactfilterarr, $new_arr['NCT/overall_status']));
 								if(array_key_exists($vall, $_GET)) {
 									$this->inactivearray[] = $new_arr;	
-									$inactivecount++;
+									$this->inactivecount++;
 								} 
 							} else {
 									$this->inactivearray[] = $new_arr;
-									$inactivecount++;	
+									$this->inactivecount++;	
 							}
 						}
 					
@@ -532,11 +542,11 @@ class ContentManager
 								$vall = implode(",",array_keys($this->allfilterarr, $new_arr['NCT/overall_status']));
 								if(array_key_exists($vall, $_GET)) {
 									$this->allarray[] = $new_arr;
-									$allcount++;	
+									$this->allcount++;	
 								} 
 							} else {
 								$this->allarray[] = $new_arr;
-								$allcount++;	
+								$this->allcount++;	
 							}
 						}	
 					
@@ -548,11 +558,11 @@ class ContentManager
 								$vall = implode(",",array_keys($this->actfilterarr, $new_arr['NCT/overall_status']));
 								if(array_key_exists($vall, $_GET)) { 
 									$this->activearray[] = $new_arr;
-									$activecount++;	
+									$this->activecount++;	
 								} 
 							} else {
 								$this->activearray[] = $new_arr;
-								$activecount++;	
+								$this->activecount++;	
 							}	
 						}
 					}
@@ -564,9 +574,10 @@ class ContentManager
 				$this->pstart 	= ($page[$pk]-1) * $this->results_per_page + 1;
 				$this->pend 	= $this->pstart + $this->results_per_page - 1;
 				$this->pages 	= ceil($count / $this->results_per_page);
+
 				$this->last 	= ($page[$pk] * $this->results_per_page > $count) ? $count : $this->pend;
 				
-				if($count > 1)
+				if($count > $this->results_per_page)
 					$this->pagination($pk, $page[$pk], $count, $_GET['params'][$pk], $_GET['leading'][$pk], 'stack');
 
 				if($bomb != '') {
@@ -604,9 +615,6 @@ class ContentManager
 
 			$totinactivecount = 0;
 			$totactivecount = 0;
-			$activecount = 0;
-			$allcount = 0;
-			$inactivecount = 0;
 
 			$excel_params 	= unserialize(gzinflate(base64_decode($_GET['params'])));
 			$rowlabel 		= $excel_params['rowlabel'];
@@ -652,10 +660,6 @@ class ContentManager
 		
 			echo('<br clear="all"/><br/>');		
 			echo('<form id="frmOtt" name="frmOtt" method="get" action="intermediary.php">');
-			$this->commonControls();
-			echo ('<input type="hidden" name="params" value="' . $_GET['params'] . '"/>'
-					. '<input type="hidden" name="leading" value="' . $_GET['leading'] . '"/>');
-			$this->displayHeader();
 			
 			$arr = array();
 			//differentiating betwen active and inactive category of records.
@@ -695,11 +699,11 @@ class ContentManager
 							$vall = implode(",",array_keys($this->inactfilterarr, $new_arr['NCT/overall_status']));
 							if(array_key_exists($vall, $_GET)) {
 								$this->inactivearray[] = $new_arr;
-								$inactivecount++;		
+								$this->inactivecount++;		
 							} 
 						} else {
 								$this->inactivearray[] = $new_arr;
-								$inactivecount++;	
+								$this->inactivecount++;	
 						}
 					}
 				
@@ -714,12 +718,14 @@ class ContentManager
 						
 						$vall = implode(",",array_keys($this->allfilterarr, $new_arr['NCT/overall_status']));
 						if(array_key_exists($vall, $_GET)) {
+						
 							$this->allarray[] = $new_arr;
-							$allcount++;	
+							$this->allcount++;	
 						} 
 					} else {
+					
 						$this->allarray[] = $new_arr;	
-						$allcount++;
+						$this->allcount++;
 					}
 				}	
 			
@@ -728,20 +734,28 @@ class ContentManager
 					if(in_array($new_arr['NCT/overall_status'], $this->actfilterarr) ) {
 						if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) 
 						|| isset($_GET['a'])) {
+						
 							$vall = implode(",",array_keys($this->actfilterarr, $new_arr['NCT/overall_status']));
 							if(array_key_exists($vall, $_GET)) { 
+							
 								$this->activearray[] = $new_arr;
-								$activecount++;	
+								$this->activecount++;	
 							} 
 						} else {
+						
 							$this->activearray[] = $new_arr;	
-							$activecount++;
+							$this->activecount++;
 						}	
 					}
 				}
 			}
 			$count = count($this->{$this->type});
 			
+			$this->commonControls($count, $totactivecount, $totinactivecount, ($totactivecount + $totinactivecount));
+			echo ('<input type="hidden" name="params" value="' . $_GET['params'] . '"/>'
+					. '<input type="hidden" name="leading" value="' . $_GET['leading'] . '"/>');
+			$this->displayHeader();
+
 			$this->pstart 	= '';$this->last = '';$this->pend = '';$this->pages = '';
 			
 			$this->pstart 	= ($page-1) * $this->results_per_page + 1;
@@ -749,14 +763,14 @@ class ContentManager
 			$this->pages 	= ceil($count / $this->results_per_page);
 			$this->last 	= ($page * $this->results_per_page > $count) ? $count : $this->pend;
 
-			if($count > 1)
+			if($count > $this->results_per_page)
 				$this->pagination(NULL, $page, $count, $_GET['params'], $_GET['leading'], 'normal');
 
-			echo('<br clear="all"/><br/>');	
+			/*echo('<br clear="all"/><br/>');	
 			echo ("<span style='color: #00B050;'>" . $totactivecount . " Active Records</span>&nbsp;&nbsp;&nbsp;" 
 					. "<span style='color: #FF0000;'>" . $totinactivecount . " Inactive Records</span>&nbsp;&nbsp;&nbsp;" 
 					. ($totactivecount + $totinactivecount) . " All Records ");
-			echo('<br clear="all"/><br/>');	
+			echo('<br clear="all"/><br/>');	*/
 
 			if($count > 0) {
 			
@@ -831,10 +845,7 @@ class ContentManager
 }
 
 function displayContent($params, $fieldlist, $time_machine, $type_arr, $edited, $gentime, $start, $last, $phase_arr, $fin_arr, $actfilterarr, $current_yr, $second_yr, $third_yr) {
-	//echo "<br/><pre>==>";print_r($type_arr);
-	//echo "<br/><pre>==>";print_r($fin_arr);
-	//echo $start . $last;exit;
-	//echo "<br/><pre>==>";print_r($fieldlist);
+	
 	$start = $start -1;
 	for($i=$start;$i<$last;$i++) 
 	{
