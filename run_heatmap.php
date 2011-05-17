@@ -20,6 +20,10 @@ if(isset($_GET['direct_run_heatmap_id'])) runHeatmap((int)$_GET['direct_run_heat
 
 function runHeatmap($id, $return = false, $format = "xlsx")
 {
+	//variables used for report status
+	global $run_id;
+	global $report_type;
+	global $type_id;
 	global $logger;
 	/*
 	if($return)
