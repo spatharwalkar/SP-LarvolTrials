@@ -110,17 +110,18 @@ if(!isset($_GET['cparams']) && !isset($_GET['params'])) die('cell not set');
 <?php
 $content = new ContentManager();
 $content->setSortParams();
+$content->getChangeRange();
 $content->chkType();
 
 class ContentManager 
 {
 	
-	private $params 		= array();
+	private $params 	= array();
 	private $fid 		= array();
-	private $allfilterarr = array();
+	private $allfilterarr 	= array();
 	private $sortorder;
-	private $sort_params = array();
-	private $sortimg = array();
+	private $sort_params 	= array();
+	private $sortimg 	= array();
 	private $displist 	= array('Enrollment' => 'NCT/enrollment', 'Status' => 'NCT/overall_status', 
 								'Sponsor' => 'NCT/lead_sponsor', 'Conditions' => 'NCT/condition', 
 								'Interventions' => 'NCT/intervention_name','Study Dates' => 'NCT/start_date', 
@@ -239,9 +240,9 @@ class ContentManager
 	function setSortParams() {
 	
 		$sortorder = array();
-		if(!isset($_GET['sortorder'])) {
+		if(!isset($_GET['sortorder'])) { 
 			$this->sort_params = "ph-des##ed-asc##sd-asc##os-asc##en-asc##";
-		} else {
+		} else {	
 			$this->sort_params = $_GET['sortorder'];
 		}
 		$this->sortorder = array_filter(explode("##", $this->sort_params));
@@ -252,7 +253,7 @@ class ContentManager
 		$fieldname = array('en' => 'enrollment', 'ph' => 'phase', 'os' =>'overall_status', 
 				'sd' => 'start_date','ed' => 'completion_date');
 							
-		foreach($sortorder as $k => $v) {
+		foreach($this->sortorder as $k => $v) {
 				
 			$typ = substr($v, (strpos($v, '-')+1));
 			$v = substr($v, 0, strpos($v, '-'));
@@ -261,6 +262,7 @@ class ContentManager
 			$sp->action = ($typ == 'des') ? 'descending' : 'ascending';
 			$this->params[] = $sp;
 		}
+		
 	}
 	
 	function getChangeRange() {
@@ -331,17 +333,9 @@ class ContentManager
 	function pagination($cntr = NULL, $page, $count, $params, $leading, $tt_type) {
 		
 		$pager = '';
-		//if(isset($_GET['jump']) && isset($_GET['jumpno'])) $this->page = mysql_real_escape_string($_GET['jumpno']);
-		//if(isset($_GET['back'])) --$page;
-		//if(isset($_GET['next'])) ++$page;
-		
 		$sort = '';
+		
 		if(isset($_GET['list'])) $sort .= '&amp;list='.$_GET['list']; else $sort .= '&amp;list=active'; 
-		if(isset($_GET['enrolment']) && $_GET['enrolment'] != '') $sort .= '&amp;enrolment='.$_GET['status'];
-		if(isset($_GET['status']) && $_GET['status'] != '') $sort .= '&amp;status='.$_GET['status'];
-		if(isset($_GET['phase']) && $_GET['phase'] != '') $sort .= '&amp;phase='.$_GET['phase'];
-		if(isset($_GET['startdate']) && $_GET['startdate'] != '') $sort .= '&amp;startdate='.$_GET['startdate'];
-		if(isset($_GET['enddate']) && $_GET['enddate'] != '') $sort .= '&amp;enddate='.$_GET['enddate'];
 		if(isset($_GET['sortorder']) && $_GET['sortorder'] != '') $sort .= '&amp;sortorder=' . rawurlencode($_GET['sortorder']);
 		if(isset($_GET['institution']) && $_GET['institution'] != '') { 
 			
@@ -415,7 +409,7 @@ class ContentManager
 		echo ('<table width="100%"><tr><td>'
 			. '<img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" />'
 			. '</td><td nowrap="nowrap"><span style="color:#ff0000;font-weight:normal;">Interface Work In Progress</span>');
-		
+			
 		//displaying row label and column label
 		if(isset($_GET['cparams']))	{
 		
@@ -513,8 +507,7 @@ class ContentManager
 						$nct=array();
 						$val['NCT/intervention_name'] = '(study not in database)';
 					}
-					//$nct['edited'][] = 'NCT/enrollment';
-					//$nct['edited']['NCT/enrollment'] = '100';
+					
 					if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) {
 					
 						if(!empty($nct['edited']))
@@ -631,8 +624,12 @@ class ContentManager
 			if(isset($_GET['page'])) $page = mysql_real_escape_string($_GET['page']);
 			if(!is_numeric($page)) die('non-numeric page');
 
-			$totinactivecount = 0;$totactivecount = 0;$excel_params = array();$fin_arr = array();
-			$activephase 	= array();$inactivephase = array();$ins_params = array();
+			$totinactivecount = 0;$totactivecount = 0;
+			$excel_params 	= array();
+			$ins_params 	= array();
+			$fin_arr 		= array();
+			$activephase 	= array();
+			$inactivephase 	= array();
 			
 			$excel_params 	= unserialize(gzinflate(base64_decode($_GET['params'])));
 			$rowlabel 		= $excel_params['rowlabel'];
@@ -683,8 +680,8 @@ class ContentManager
 				$sp->action = 'search';
 				$sp->value 	= $_GET['institution'];
 				$ins_params = array($sp);
+			
 			}
-					
 			$params = array_merge($this->params, $excel_params, $ins_params);
 			
 			echo('<br clear="all"/><br/>');		
@@ -704,6 +701,7 @@ class ContentManager
 						$arr[$k][$kk] = (is_array($vv)) ? implode(', ', $vv) : $vv;
 				}
 			}
+			
 			foreach($arr as $key=>$val) { 
 			
 				$nct = getNCT($val['NCT/nct_id'], $val['larvol_id'], $this->gentime, $this->edited); 
@@ -796,8 +794,10 @@ class ContentManager
 			
 			$this->commonControls($count, $totactivecount, $totinactivecount, ($totactivecount + $totinactivecount), 
 			$activephase, $inactivephase);
+			
 			echo ('<input type="hidden" name="params" value="' . $_GET['params'] . '"/>'
 					. '<input type="hidden" name="leading" value="' . $_GET['leading'] . '"/>');
+					
 			$this->displayHeader();
 
 			$this->pstart 	= '';$this->last = '';$this->pend = '';$this->pages = '';
@@ -815,7 +815,7 @@ class ContentManager
 			displayContent($params,$this->displist, $time_machine, $this->{$this->type}, $this->edited, $gentime, $this->pstart,
 			$this->last, $this->phase_arr, $fin_arr, $this->actfilterarr, $this->current_yr, $this->second_yr, $this->third_yr);
 				
-			}else {
+			} else {
 			
 				echo ('<tr><th colspan="45" style="text-align: left;"> No record found. </th></tr>');
 			}
@@ -903,6 +903,7 @@ function displayContent($params, $fieldlist, $time_machine, $type_arr, $edited, 
 		$end_date = getEndDate($type_arr[$i]["NCT/primary_completion_date"], $type_arr[$i]["NCT/completion_date"]);
 		$ph = str_replace('Phase ', '', $type_arr[$i]['NCT/phase']);
 		
+
 		$start_month = date('m',strtotime($type_arr[$i]['NCT/start_date']));
 		$start_year = date('Y',strtotime($type_arr[$i]['NCT/start_date']));
 		$end_month = date('m',strtotime($end_date));
@@ -910,7 +911,7 @@ function displayContent($params, $fieldlist, $time_machine, $type_arr, $edited, 
 	
 		$attr_one = '';$attr_two = '';
 		
-		if(isset($fin_arr[$nctid]['edited']['NCT/brief_title'])) {
+		if(isset($fin_arr[$nctid]['edited']) && in_array('NCT/brief_title',$fin_arr[$nctid]['edited'])) {
 			$attr_one = ' highlight';
 			$attr_two = 'title="' . $fin_arr[$nctid]['edited']['NCT/brief_title'] . '" ';
 		}
@@ -934,7 +935,7 @@ function displayContent($params, $fieldlist, $time_machine, $type_arr, $edited, 
 			$val = htmlformat($type_arr[$i][$v]);
 			if($v == "NCT/enrollment"){
 			
-				if(isset($fin_arr[$nctid]['edited']['NCT/enrollment']))
+				if(isset($fin_arr[$nctid]['edited']) && in_array('NCT/enrollment',$fin_arr[$nctid]['edited']))
 					$attr = 'class="highlight" title="' . $fin_arr[$nctid]['edited'][$v] . '" ';
 					
 				echo '<td nowrap="nowrap" style="background-color:#D8D3E0;text-align:center;" ' . $attr . ' >'
@@ -958,15 +959,24 @@ function displayContent($params, $fieldlist, $time_machine, $type_arr, $edited, 
 				
 			} else if($v == "NCT/start_date") {
 				
-				if(is_array($fin_arr[$nctid]['edited']['NCT/start_date']))
+				if(isset($fin_arr[$nctid]['edited']) && in_array('NCT/start_date', $fin_arr[$nctid]['edited']))
 					$attr = 'class="highlight" title="' . $fin_arr[$nctid]['edited'][$v] . '" ';
 
 				echo '<td style="background-color:#EDEAFF;" ' . $attr . ' >'
 					. '<div class="rowcollapse">' . date('m/y',strtotime($type_arr[$i]["NCT/start_date"])) . '</div></td>';
 				
-				if(isset($fin_arr[$nctid]['edited']['NCT/completion_date']) || 
-					isset($fin_arr[$nctid]['edited']['NCT/primary_completion_date'])) {
-					$attr = 'class="highlight" title="' . $fin_arr[$nctid]['edited'][$v] . '" '; }
+				if(isset($fin_arr[$nctid]['edited']) && (in_array('NCT/completion_date', $fin_arr[$nctid]['edited']) 
+					|| in_array('NCT/primary_completion_date', $fin_arr[$nctid]['edited']))) {
+					
+					$attr = ' class="highlight" title="';
+					if(in_array('NCT/primary_completion_date', $fin_arr[$nctid]['edited']))
+						$attr .= $fin_arr[$nctid]['edited']['NCT/primary_completion_date'] . ' ';
+					
+					if(in_array('NCT/completion_date', $fin_arr[$nctid]['edited']))
+						$attr .= $fin_arr[$nctid]['edited']['NCT/completion_date'];
+					
+					$attr .= '" ';
+				}
 					
 				echo '<td style="background-color:#EDEAFF;" ' . $attr . '>';
 					if($end_date != '') {
@@ -977,7 +987,7 @@ function displayContent($params, $fieldlist, $time_machine, $type_arr, $edited, 
 					
 			} else if($v == "NCT/overall_status") {
 		
-				if(isset($fin_arr[$nctid]['edited']['NCT/overall_status']))  
+				if(isset($fin_arr[$nctid]['edited']) && in_array('NCT/overall_status', $fin_arr[$nctid]['edited']))
 					$attr = 'class="highlight" title="' . $fin_arr[$nctid]['edited'][$v] . '" ';
 				
 				if(in_array($val, $actfilterarr))
@@ -990,7 +1000,7 @@ function displayContent($params, $fieldlist, $time_machine, $type_arr, $edited, 
 			
 			} else if($v == "NCT/condition") {
 			
-				if(isset($fin_arr[$nctid]['edited']['NCT/condition']))
+				if(isset($fin_arr[$nctid]['edited']) && in_array('NCT/condition', $fin_arr[$nctid]['edited']))
 					$attr = 'class="highlight" title="' . $fin_arr[$nctid]['edited'][$v] . '" ';
 
 				echo '<td style="background-color:#EDEAFF;" ' . $attr . '>'
@@ -998,7 +1008,7 @@ function displayContent($params, $fieldlist, $time_machine, $type_arr, $edited, 
 					
 			} else if($v == "NCT/intervention_name") {
 			
-				if(isset($fin_arr[$nctid]['edited']['NCT/intervention_name']))
+				if(isset($fin_arr[$nctid]['edited']) && in_array('NCT/intervention_name', $fin_arr[$nctid]['edited']))
 					$attr = 'class="highlight" title="' . $fin_arr[$nctid]['edited'][$v] . '" ';
 
 				echo '<td style="background-color:#EDEAFF;" ' . $attr . '>'
@@ -1006,7 +1016,7 @@ function displayContent($params, $fieldlist, $time_machine, $type_arr, $edited, 
 				
 			} else if($v == "NCT/phase") {
 			
-				if(isset($fin_arr[$nctid]['edited']['NCT/phase']))
+				if(isset($fin_arr[$nctid]['edited']) && in_array('NCT/phase', $fin_arr[$nctid]['edited']))
 					$attr = 'class="highlight" title="' . $fin_arr[$nctid]['edited'][$v] . '" ';
 
 				$phase = ($type_arr[$i][$v] == 'N/A') ? $ph : ('P' . $ph);
@@ -1015,9 +1025,19 @@ function displayContent($params, $fieldlist, $time_machine, $type_arr, $edited, 
 			
 			} else if($v == "NCT/lead_sponsor") { 
 			
-				if(isset($fin_arr[$nctid]['edited']['NCT/lead_sponsor']) || 
-				isset($fin_arr[$nctid]['edited']['NCT/collaborator'])) {
-						$attr = 'class="highlight" title="' . $fin_arr[$nctid]['edited'][$v] . '" '; }
+			
+				if(isset($fin_arr[$nctid]['edited']) && (in_array('NCT/lead_sponsor', $fin_arr[$nctid]['edited']) 
+					|| in_array('NCT/collaborator', $fin_arr[$nctid]['edited']))) {
+					
+					$attr = ' class="highlight" title="';
+					if(in_array('NCT/lead_sponsor', $fin_arr[$nctid]['edited']))
+						$attr .= $fin_arr[$nctid]['edited']['NCT/lead_sponsor'] . ' ';
+					
+					if(in_array('NCT/collaborator', $fin_arr[$nctid]['edited']))
+						$attr .= $fin_arr[$nctid]['edited']['NCT/collaborator'];
+					
+					$attr .= '" ';
+				}
 				
 				echo '<td style="background-color:#EDEAFF;" ' . $attr . '>'
 					. '<div class="rowcollapse">' . $val . ' <span style="color:gray;"> ' . $type_arr[$i]["NCT/collaborator"] 
@@ -1165,18 +1185,20 @@ function getNCT($nct_id,$larvol_id,$time,$edited)
 	$studycatData=mysql_fetch_assoc(mysql_query("SELECT `dv`.`studycat` FROM `data_values` `dv` LEFT JOIN `data_cats_in_study` `dc` ON (`dc`.`id`=`dv`.`studycat`) WHERE `dv`.`field`='1' AND `dv`.`val_int`='".$nct_id."' AND `dc`.`larvol_id`='"
 	.$larvol_id."'"));
 	
-	$sql="SELECT DISTINCT `df`.`name` AS `fieldname`, `df`.`id` AS `fieldid`, `df`.`type` AS `fieldtype`, `dv`.`studycat`, dv.* FROM `data_values` `dv` LEFT JOIN `data_fields` `df` ON (`df`.`id`=`dv`.`field`) WHERE `df`.`name` IN ('" . join("','",$fieldnames) . "') AND `studycat`='" . $studycatData['studycat'] 
+	$sql="SELECT DISTINCT `df`.`name` AS `fieldname`, `df`.`id` AS `fieldid`, `df`.`type` AS `fieldtype`, `dv`.`studycat`, dv.* FROM `data_values` `dv` LEFT JOIN `data_fields` `df` ON (`df`.`id`=`dv`.`field`) WHERE `df`.`name` IN ('" 
+	. join("','",$fieldnames) . "') AND `studycat`='" . $studycatData['studycat'] 
 	. "' AND (`dv`.`superceded`<'" . date('Y-m-d',strtotime($time)) . "' AND `dv`.`superceded`>= '" 
 	. date('Y-m-d',strtotime($edited,strtotime($time))) . "')";
 
     $changedFields = mysql_query($sql);
 	$study['edited'] = array();
 	
-	while ($row=mysql_fetch_assoc($changedFields)){ 
+	while ($row=mysql_fetch_assoc($changedFields)){  
+	
 		$study['edited'][] = 'NCT/'.$row['fieldname'];
 		
 		//getting previous value for updated trials
-		if($row['fieldtype'] == 'enum') {
+		if($row['fieldtype'] == 'enum') { 
 		
 			$result = mysql_query('SELECT value FROM data_enumvals WHERE `field`=' . $row['fieldid'] 
 			. ' AND `id` = "' . mysql_real_escape_string($row['val_'.$row['fieldtype']]) . '" LIMIT 1');
@@ -1185,13 +1207,16 @@ function getNCT($nct_id,$larvol_id,$time,$edited)
 			if($result === false) return softDie('Invalid enumval value for field');
 			
 			$val = $result['value'];
-		} else {
+		} else {	
 			$val = $row['val_'.$row['fieldtype']];
 		}
-		
-		$study['edited']['NCT/'.$row['fieldname']] = ($val != '') ? $val : 'No previous value';
+		if(isset($val) && $val != '')
+			$study['edited']['NCT/'.$row['fieldname']] = $val;
+		else 
+			$study['edited']['NCT/'.$row['fieldname']] = 'No previous value';
 		
 	}
+	
 	return $study;
 }
 
