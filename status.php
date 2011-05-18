@@ -20,66 +20,66 @@ define('ERROR', 3);
 define('CANCELLED', 4);
 define('COMPLETED', 0);
 
-if(isset($_GET['pid']))
+if(isset($_POST['pid']))
 {
-	if(isset($_GET['upid']))
+	if(isset($_POST['upid']))
 	{
-		if($_GET['action']==1)
+		if($_POST['action']==1)
 		{
-			$query = 'UPDATE update_status SET status="'.READY.'" WHERE update_id="' . $_GET['upid'].'"';
+			$query = 'UPDATE update_status SET status="'.READY.'" WHERE update_id="' . $_POST['upid'].'"';
 			$res = mysql_query($query) or die('Bad SQL Query setting update ready status');
 		}
-		else if($_GET['action']==2)
+		else if($_POST['action']==2)
 		{
-			$cmd = "kill ".$_GET['pid'];
+			$cmd = "kill ".$_POST['pid'];
 			exec($cmd, $output, $result);
 			
-			$query = 'UPDATE update_status SET status="'.CANCELLED.'" WHERE update_id="' . $_GET['upid'].'"';
+			$query = 'UPDATE update_status SET status="'.CANCELLED.'" WHERE update_id="' . $_POST['upid'].'"';
 			$res = mysql_query($query) or die('Bad SQL Query setting update cancelled status');
 		}
-		else if($_GET['action']==3)
+		else if($_POST['action']==3)
 		{
-			$query = 'DELETE FROM update_status WHERE update_id="' . $_GET['upid'].'"';
+			$query = 'DELETE FROM update_status WHERE update_id="' . $_POST['upid'].'"';
 			$res = mysql_query($query) or die('Bad SQL Query deleting update status');
 		}		
 	}
-	else if(isset($_GET['runid']))
+	else if(isset($_POST['runid']))
 	{
-		if($_GET['action']==1)
+		if($_POST['action']==1)
 		{
-			$query = 'UPDATE reports_status SET status="'.READY.'" WHERE process_id="'.$_GET['pid'].'" AND run_id="' . $_GET['runid'].'" AND report_type="' . $_GET['rpttyp'].'" AND type_id="' . $_GET['typeid'].'"';
+			$query = 'UPDATE reports_status SET status="'.READY.'" WHERE process_id="'.$_POST['pid'].'" AND run_id="' . $_POST['runid'].'" AND report_type="' . $_POST['rpttyp'].'" AND type_id="' . $_POST['typeid'].'"';
 			$res = mysql_query($query) or die('Bad SQL Query setting report error status');
 		}
-		else if($_GET['action']==2)
+		else if($_POST['action']==2)
 		{
-			$cmd = "kill ".$_GET['pid'];
+			$cmd = "kill ".$_POST['pid'];
 			exec($cmd, $output, $result);
 			
-			$query = 'UPDATE reports_status SET status="'.CANCELLED.'" WHERE process_id="'.$_GET['pid'].'" AND run_id="' . $_GET['runid'].'" AND report_type="' . $_GET['rpttyp'].'" AND type_id="' . $_GET['typeid'].'"';
+			$query = 'UPDATE reports_status SET status="'.CANCELLED.'" WHERE process_id="'.$_POST['pid'].'" AND run_id="' . $_POST['runid'].'" AND report_type="' . $_POST['rpttyp'].'" AND type_id="' . $_POST['typeid'].'"';
 			$res = mysql_query($query) or die('Bad SQL Query setting report cancelled status');
 		}
-		else if($_GET['action']==3)
+		else if($_POST['action']==3)
 		{
-			$query = 'DELETE FROM reports_status WHERE process_id="'.$_GET['pid'].'" AND run_id="' . $_GET['runid'].'" AND report_type="' . $_GET['rpttyp'].'" AND type_id="' . $_GET['typeid'].'"';
+			$query = 'DELETE FROM reports_status WHERE process_id="'.$_POST['pid'].'" AND run_id="' . $_POST['runid'].'" AND report_type="' . $_POST['rpttyp'].'" AND type_id="' . $_POST['typeid'].'"';
 			$res = mysql_query($query) or die('Bad SQL Query deleting from report status');
 		}
 	}
 }
 else
 {
-	if(isset($_GET['upid']))
+	if(isset($_POST['upid']))
 	{
-		if($_GET['action']==4)
+		if($_POST['action']==4)
 		{			
-			$query = 'UPDATE update_status SET status="'.CANCELLED.'" WHERE update_id="' . $_GET['upid'].'"';
+			$query = 'UPDATE update_status SET status="'.CANCELLED.'" WHERE update_id="' . $_POST['upid'].'"';
 			$res = mysql_query($query) or die('Bad SQL Query setting update cancelled status');
 		}
 	}
-	elseif(isset($_GET['runid']))
+	elseif(isset($_POST['runid']))
 	{
-		if($_GET['action']==4)
+		if($_POST['action']==4)
 		{
-			$query = 'UPDATE reports_status SET status="'.CANCELLED.'" WHERE run_id="' . $_GET['runid'].'" AND report_type="' . $_GET['rpttyp'].'" AND type_id="' . $_GET['typeid'].'"';
+			$query = 'UPDATE reports_status SET status="'.CANCELLED.'" WHERE run_id="' . $_POST['runid'].'" AND report_type="' . $_POST['rpttyp'].'" AND type_id="' . $_POST['typeid'].'"';
 			$res = mysql_query($query) or die('Bad SQL Query setting report cancelled status');
 		}
 	}
@@ -288,31 +288,50 @@ echo "<div class=\"container\">";
 				if($nct_status['status']==READY)
 				{
 					echo "<td align=\"center\" class=\"norm\">";
-					echo '<a href="status.php?action=4&amp;upid='.$nct_status['update_id']. 
-					'"><img src="images/not.png" title="Cancel" border=0/></a>';
+					echo '<form method="post" action="status.php">';
+					echo '<input type="hidden" name="action" value="4">';
+					echo '<input type="hidden" name="upid" value="'.$nct_status['update_id'].'">';
+					echo '<input type="image" src="images/not.png" title="Cancel" style="border=0px;">';
+					echo '</form>';
 					echo "</td>";
 				}
 				elseif($nct_status['status']==RUNNING)
 				{
 					echo "<td align=\"center\" class=\"norm\">";
-					echo '<a href="status.php?action=2&amp;upid='.$nct_status['update_id'].'&amp;pid=' . $nct_status['process_id'] . 
-					'"><img src="images/not.png" title="Cancel" border=0/></a>';
+					echo '<form method="post" action="status.php">';
+					echo '<input type="hidden" name="action" value="2">';
+					echo '<input type="hidden" name="upid" value="'.$nct_status['update_id'].'">';
+					echo '<input type="hidden" name="pid" value="'.$nct_status['process_id'].'">';
+					echo '<input type="image" src="images/not.png" title="Cancel" style="border=0px;">';
+					echo '</form>';
 					echo "</td>";
 				}
 				elseif($nct_status['status']==COMPLETED)
 				{
 					echo "<td align=\"center\" class=\"norm\">";
-					echo '<a href="status.php?action=3&amp;upid='.$nct_status['update_id'].'&amp;pid=' . $nct_status['process_id'] . 
-					'"><img src="images/not.png" title="Delete" border=0/></a>';
+					echo '<form method="post" action="status.php">';
+					echo '<input type="hidden" name="action" value="3">';
+					echo '<input type="hidden" name="upid" value="'.$nct_status['update_id'].'">';
+					echo '<input type="hidden" name="pid" value="'.$nct_status['process_id'].'">';
+					echo '<input type="image" src="images/not.png" title="Delete" style="border=0px;">';
+					echo '</form>';
 					echo "</td>";
 				}
 				else if($nct_status['status']==ERROR||$nct_status['status']==CANCELLED)
 				{
 					echo "<td align=\"center\" class=\"norm\">";
-					echo '<a href="status.php?action=1&amp;upid='.$nct_status['update_id'].'&amp;pid=' . $nct_status['process_id'] . 
-					'"><img src="images/check.png" title="Add" border=0/></a> ';
-					echo '<a href="status.php?action=3&amp;upid='.$nct_status['update_id'].'&amp;pid=' . $nct_status['process_id'] . 
-					'"><img src="images/not.png" title="Delete" border=0/></a>';
+					echo '<form method="post" action="status.php">';
+					echo '<input type="hidden" name="action" value="1">';
+					echo '<input type="hidden" name="upid" value="'.$nct_status['update_id'].'">';
+					echo '<input type="hidden" name="pid" value="'.$nct_status['process_id'].'">';
+					echo '<input type="image" src="images/check.png" title="Add" style="border=0px;">';
+					echo '</form>';
+					echo '<form method="post" action="status.php">';
+					echo '<input type="hidden" name="action" value="3">';
+					echo '<input type="hidden" name="upid" value="'.$nct_status['update_id'].'">';
+					echo '<input type="hidden" name="pid" value="'.$nct_status['process_id'].'">';
+					echo '<input type="image" src="images/not.png" title="Delete" style="border=0px;">';
+					echo '</form>';
 					echo "</td>";
 				}
 			echo "</tr>";
@@ -359,31 +378,51 @@ echo "<div class=\"container\">";
 			if($pubmed_status['status']==READY)
 			{
 				echo "<td align=\"center\" class=\"norm\">";
-				echo '<a href="status.php?action=4&amp;upid='.$pubmed_status['update_id'].
-				'"><img src="images/not.png" title="Cancel" border=0/></a>';
+				echo '<form method="post" action="status.php">';
+				echo '<input type="hidden" name="action" value="4">';
+				echo '<input type="hidden" name="upid" value="'.$pubmed_status['update_id'].'">';
+				echo '<input type="image" src="images/not.png" title="Cancel" style="border=0px;">';
+				echo '</form>';
 				echo "</td>";
 			}
 			elseif($pubmed_status['status']==RUNNING)
 			{
 				echo "<td align=\"center\" class=\"norm\">";
-				echo '<a href="status.php?action=2&amp;upid='.$pubmed_status['update_id'].'&amp;pid=' . $pubmed_status['process_id'] . 
-				'"><img src="images/not.png" title="Cancel" border=0/></a>';
+				echo '<form method="post" action="status.php">';
+				echo '<input type="hidden" name="action" value="2">';
+				echo '<input type="hidden" name="upid" value="'.$pubmed_status['update_id'].'">';
+				echo '<input type="hidden" name="pid" value="'.$pubmed_status['process_id'].'">';
+				echo '<input type="image" src="images/not.png" title="Cancel" style="border=0px;">';
+				echo '</form>';
 				echo "</td>";
 			}
 			elseif($pubmed_status['status']==COMPLETED)
 			{
 				echo "<td align=\"center\" class=\"norm\">";
-				echo '<a href="status.php?action=3&amp;upid='.$pubmed_status['update_id'].'&amp;pid=' . $pubmed_status['process_id'] . 
-				'"><img src="images/not.png" title="Delete" border=0/></a>';
+				echo '<form method="post" action="status.php">';
+				echo '<input type="hidden" name="action" value="3">';
+				echo '<input type="hidden" name="upid" value="'.$pubmed_status['update_id'].'">';
+				echo '<input type="hidden" name="pid" value="'.$pubmed_status['process_id'].'">';
+				echo '<input type="image" src="images/not.png" title="Delete" style="border=0px;">';
+				echo '</form>';
 				echo "</td>";
 			}
 			else if($pubmed_status['status']==ERROR||$pubmed_status['status']==CANCELLED)
 			{
 				echo "<td align=\"center\" class=\"norm\">";
-				echo '<a href="status.php?action=1&amp;upid='.$pubmed_status['update_id'].'&amp;pid=' . $pubmed_status['process_id'] . 
-				'"><img src="images/check.png" title="Add" border=0/></a> ';
-				echo '<a href="status.php?action=3&amp;upid='.$pubmed_status['update_id'].'&amp;pid=' . $pubmed_status['process_id'] . 
-				'"><img src="images/not.png" title="Delete" border=0/></a>';
+				echo '<form method="post" action="status.php">';
+				echo '<input type="hidden" name="action" value="1">';
+				echo '<input type="hidden" name="upid" value="'.$pubmed_status['update_id'].'">';
+				echo '<input type="hidden" name="pid" value="'.$pubmed_status['process_id'].'">';
+				echo '<input type="image" src="images/check.png" title="Add" style="border=0px;">';
+				echo '</form>';
+				echo '<form method="post" action="status.php">';
+				echo '<input type="hidden" name="action" value="3">';
+				echo '<input type="hidden" name="upid" value="'.$pubmed_status['update_id'].'">';
+				echo '<input type="hidden" name="pid" value="'.$pubmed_status['process_id'].'">';
+				echo '<button><img style="border=0px;" src="images/not.png" title="Delete" /></button>';
+				echo '<input type="image" src="images/not.png" title="Delete" style="border=0px;">';
+				echo '</form>';
 				echo "</td>";
 			}
 			echo "</tr>";
@@ -432,29 +471,54 @@ echo "<div class=\"container\">";
 					echo "<td align=\"center\" class=\"norm\">";
 					if($heatmap_status[$i]['status']==READY)
 					{
-						echo '<a href="status.php?action=4&amp;runid='.$heatmap_status[$i]['run_id'].'&amp;typeid='.$heatmap_status[$i]['type_id'].'&amp;rpttyp='.$heatmap_status[$i]['report_type']. '">';
-						echo '<img src="images/not.png" title="Cancel" border=0/></a>';
+						echo '<form method="post" action="status.php">';
+						echo '<input type="hidden" name="action" value="4">';
+						echo '<input type="hidden" name="runid" value="'.$heatmap_status[$i]['run_id'].'">';
+						echo '<input type="hidden" name="typeid" value="'.$heatmap_status[$i]['type_id'].'">';
+						echo '<input type="hidden" name="rpttyp" value="'.$heatmap_status[$i]['report_type'].'">';
+						echo '<input type="image" src="images/not.png" title="Cancel" style="border=0px;">';
+						echo '</form>';
 					}
 					elseif($heatmap_status[$i]['status']==RUNNING)
 					{
-						echo '<a href="status.php?action=2&amp;runid='.$heatmap_status[$i]['run_id'].'&amp;typeid='.$heatmap_status[$i]['type_id'].'&amp;rpttyp='.$heatmap_status[$i]['report_type'].
-						'&amp;pid=' . $heatmap_status[$i]['process_id'] . '">';
-						echo '<img src="images/not.png" title="Cancel" border=0/></a>';
+						echo '<form method="post" action="status.php">';
+						echo '<input type="hidden" name="action" value="2">';
+						echo '<input type="hidden" name="runid" value="'.$heatmap_status[$i]['run_id'].'">';
+						echo '<input type="hidden" name="typeid" value="'.$heatmap_status[$i]['type_id'].'">';
+						echo '<input type="hidden" name="rpttyp" value="'.$heatmap_status[$i]['report_type'].'">';
+						echo '<input type="hidden" name="pid" value="'.$heatmap_status[$i]['process_id'].'">';
+						echo '<input type="image" src="images/not.png" title="Cancel" style="border=0px;">';
+						echo '</form>';
 					}
 					elseif($heatmap_status[$i]['status']==COMPLETED)
 					{
-						echo '<a href="status.php?action=3&amp;runid='.$heatmap_status[$i]['run_id'].'&amp;typeid='.$heatmap_status[$i]['type_id'].'&amp;rpttyp='.$heatmap_status[$i]['report_type'].
-						'&amp;pid=' . $heatmap_status[$i]['process_id'] . '">';
-						echo '<img src="images/not.png" title="Delete" border=0/></a>';
+						echo '<form method="post" action="status.php">';
+						echo '<input type="hidden" name="action" value="3">';
+						echo '<input type="hidden" name="runid" value="'.$heatmap_status[$i]['run_id'].'">';
+						echo '<input type="hidden" name="typeid" value="'.$heatmap_status[$i]['type_id'].'">';
+						echo '<input type="hidden" name="rpttyp" value="'.$heatmap_status[$i]['report_type'].'">';
+						echo '<input type="hidden" name="pid" value="'.$heatmap_status[$i]['process_id'].'">';
+						echo '<input type="image" src="images/not.png" title="Delete" style="border=0px;">';
+						echo '</form>';
 					}
 					else if($heatmap_status[$i]['status']==ERROR||$heatmap_status[$i]['status']==CANCELLED)
 					{
-						echo '<a href="status.php?action=1&amp;runid='.$heatmap_status[$i]['run_id'].'&amp;typeid='.$heatmap_status[$i]['type_id'].'&amp;rpttyp='.$heatmap_status[$i]['report_type'].
-						'&amp;pid=' . $heatmap_status[$i]['process_id'] . '">';
-						echo '<img src="images/check.png" title="Add" border=0/></a> ';
-						echo '<a href="status.php?action=3&amp;runid='.$heatmap_status[$i]['run_id'].'&amp;typeid='.$heatmap_status[$i]['type_id'].'&amp;rpttyp='.$heatmap_status[$i]['report_type'].
-						'&amp;pid=' . $heatmap_status[$i]['process_id'] . '">';
-						echo '<img src="images/not.png" title="Delete" border=0/></a>';
+						echo '<form method="post" action="status.php">';
+						echo '<input type="hidden" name="action" value="1">';
+						echo '<input type="hidden" name="runid" value="'.$heatmap_status[$i]['run_id'].'">';
+						echo '<input type="hidden" name="typeid" value="'.$heatmap_status[$i]['type_id'].'">';
+						echo '<input type="hidden" name="rpttyp" value="'.$heatmap_status[$i]['report_type'].'">';
+						echo '<input type="hidden" name="pid" value="'.$heatmap_status[$i]['process_id'].'">';
+						echo '<input type="image" src="images/check.png" title="Add" style="border=0px;">';
+						echo '</form>';
+						echo '<form method="post" action="status.php">';
+						echo '<input type="hidden" name="action" value="3">';
+						echo '<input type="hidden" name="runid" value="'.$heatmap_status[$i]['run_id'].'">';
+						echo '<input type="hidden" name="typeid" value="'.$heatmap_status[$i]['type_id'].'">';
+						echo '<input type="hidden" name="rpttyp" value="'.$heatmap_status[$i]['report_type'].'">';
+						echo '<input type="hidden" name="pid" value="'.$heatmap_status[$i]['process_id'].'">';
+						echo '<input type="image" src="images/not.png" title="Delete" style="border=0px;">';
+						echo '</form>';
 					}
 					echo "</td>";
 				echo "</tr>";
@@ -495,27 +559,54 @@ echo "<div class=\"container\">";
 					echo "<td align=\"center\" class=\"norm\">";
 					if($updatescan_status[$i]['status']==READY)
 					{
-						echo '<a href="status.php?action=4&amp;runid='.$updatescan_status[$i]['run_id'].'&amp;typeid='.$updatescan_status[$i]['type_id'].'&amp;rpttyp='.$updatescan_status[$i]['report_type'].'"><img src="images/not.png" title="Cancel" border=0/></a>';
+						echo '<form method="post" action="status.php">';
+						echo '<input type="hidden" name="action" value="4">';
+						echo '<input type="hidden" name="runid" value="'.$updatescan_status[$i]['run_id'].'">';
+						echo '<input type="hidden" name="typeid" value="'.$updatescan_status[$i]['type_id'].'">';
+						echo '<input type="hidden" name="rpttyp" value="'.$updatescan_status[$i]['report_type'].'">';
+						echo '<input type="image" src="images/not.png" title="Cancel" style="border=0px;">';
+						echo '</form>';
 					}
 					elseif($updatescan_status[$i]['status']==RUNNING)
 					{
-						echo '<a href="status.php?action=2&amp;runid='.$updatescan_status[$i]['run_id'].'&amp;typeid='.$updatescan_status[$i]['type_id'].'&amp;rpttyp='.$updatescan_status[$i]['report_type'].
-						'&amp;pid=' . $updatescan_status[$i]['process_id'] . '"><img src="images/not.png" title="Cancel" border=0/></a>';
+						echo '<form method="post" action="status.php">';
+						echo '<input type="hidden" name="action" value="2">';
+						echo '<input type="hidden" name="runid" value="'.$updatescan_status[$i]['run_id'].'">';
+						echo '<input type="hidden" name="typeid" value="'.$updatescan_status[$i]['type_id'].'">';
+						echo '<input type="hidden" name="rpttyp" value="'.$updatescan_status[$i]['report_type'].'">';
+						echo '<input type="hidden" name="pid" value="'.$updatescan_status[$i]['process_id'].'">';
+						echo '<input type="image" src="images/not.png" title="Cancel" style="border=0px;">';
+						echo '</form>';
 					}
 					elseif($updatescan_status[$i]['status']==COMPLETED)
 					{
-						echo '<a href="status.php?action=3&amp;runid='.$updatescan_status[$i]['run_id'].'&amp;typeid='.$updatescan_status[$i]['type_id'].'&amp;rpttyp='.$updatescan_status[$i]['report_type'].
-						'&amp;pid=' . $updatescan_status[$i]['process_id'] . '">';
-						echo '<img src="images/not.png" title="Delete" border=0/></a>';
+						echo '<form method="post" action="status.php">';
+						echo '<input type="hidden" name="action" value="3">';
+						echo '<input type="hidden" name="runid" value="'.$updatescan_status[$i]['run_id'].'">';
+						echo '<input type="hidden" name="typeid" value="'.$updatescan_status[$i]['type_id'].'">';
+						echo '<input type="hidden" name="rpttyp" value="'.$updatescan_status[$i]['report_type'].'">';
+						echo '<input type="hidden" name="pid" value="'.$updatescan_status[$i]['process_id'].'">';
+						echo '<input type="image" src="images/not.png" title="Delete" style="border=0px;">';
+						echo '</form>';
 					}
 					else if($updatescan_status[$i]['status']==ERROR||$updatescan_status[$i]['status']==CANCELLED)
 					{
-						echo '<a href="status.php?action=1&amp;runid='.$updatescan_status[$i]['run_id'].'&amp;typeid='.$updatescan_status[$i]['type_id'].'&amp;rpttyp='.$updatescan_status[$i]['report_type'].
-						'&amp;pid=' . $updatescan_status[$i]['process_id'] . '">';
-						echo '<img src="images/check.png" title="Add" border=0/></a> ';
-						echo '<a href="status.php?action=3&amp;runid='.$updatescan_status[$i]['run_id'].'&amp;typeid='.$updatescan_status[$i]['type_id'].'&amp;rpttyp='.$updatescan_status[$i]['report_type'].
-						'&amp;pid=' . $updatescan_status[$i]['process_id'] . '">';
-						echo '<img src="images/not.png" title="Delete" border=0/></a>';
+						echo '<form method="post" action="status.php">';
+						echo '<input type="hidden" name="action" value="1">';
+						echo '<input type="hidden" name="runid" value="'.$updatescan_status[$i]['run_id'].'">';
+						echo '<input type="hidden" name="typeid" value="'.$updatescan_status[$i]['type_id'].'">';
+						echo '<input type="hidden" name="rpttyp" value="'.$updatescan_status[$i]['report_type'].'">';
+						echo '<input type="hidden" name="pid" value="'.$updatescan_status[$i]['process_id'].'">';
+						echo '<input type="image" src="images/check.png" title="Add" style="border=0px;">';
+						echo '</form>';
+						echo '<form method="post" action="status.php">';
+						echo '<input type="hidden" name="action" value="3">';
+						echo '<input type="hidden" name="runid" value="'.$updatescan_status[$i]['run_id'].'">';
+						echo '<input type="hidden" name="typeid" value="'.$updatescan_status[$i]['type_id'].'">';
+						echo '<input type="hidden" name="rpttyp" value="'.$updatescan_status[$i]['report_type'].'">';
+						echo '<input type="hidden" name="pid" value="'.$updatescan_status[$i]['process_id'].'">';
+						echo '<input type="image" src="images/not.png" title="Delete" style="border=0px;">';
+						echo '</form>';
 					}
 					echo "</td>";
 				echo "</tr>";
