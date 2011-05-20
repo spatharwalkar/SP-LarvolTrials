@@ -215,6 +215,7 @@ class ContentManager
 		$this->fid['primary_completion_date'] 	= '_' . getFieldId('NCT', 'primary_completion_date');
 		$this->fid['completion_date'] 			= '_' . getFieldId('NCT', 'completion_date');
 		$this->fid['acronym'] 					= '_' . getFieldId('NCT', 'acronym');
+		//$this->fid['added'] 					= 'added';
 		
 		$this->current_yr	= date('Y');
 		$this->second_yr	= date('Y')+1;
@@ -337,6 +338,8 @@ class ContentManager
 		
 		if(isset($_GET['list'])) $sort .= '&amp;list='.$_GET['list']; else $sort .= '&amp;list=active'; 
 		if(isset($_GET['sortorder']) && $_GET['sortorder'] != '') $sort .= '&amp;sortorder=' . rawurlencode($_GET['sortorder']);
+		if(isset($_GET['ins_params']) && $_GET['ins_params'] != '') $sort .= '&amp;ins_params=' 
+		. rawurlencode($_GET['ins_params']);
 		if(isset($_GET['institution']) && $_GET['institution'] != '') { 
 			
 			foreach($_GET['institution'] as $k => $v)
@@ -410,7 +413,6 @@ class ContentManager
 			. '<img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" />'
 			. '</td><td nowrap="nowrap"><span style="color:#ff0000;font-weight:normal;">Interface Work In Progress</span>');
 			
-		//displaying row label and column label
 		if(isset($_GET['cparams']))	{
 		
 			$page = array();$ins_params = array();
@@ -444,7 +446,9 @@ class ContentManager
 				if(!is_numeric($page[$pk])) die('non-numeric page');
 
 				$excel_params = array();$params = array();
-				$arr = array();$fin_arr = array();$arrr = array();
+				$arr = array();$fin_arr = array();
+				$arrr = array();$trial_arr = array();
+				
 				$bomb = ''; $time_machine = '';
 				$totinactivecount = 0;
 				$totactivecount = 0;
@@ -520,6 +524,8 @@ class ContentManager
 						$totactivecount++;
 					else
 						$totinactivecount++;
+					
+					$trial_arr[] = $val['NCT/nct_id'] . ', ' . $val['larvol_id'];
 				}
 				
 				foreach($fin_arr as $key => $new_arr){
@@ -608,12 +614,12 @@ class ContentManager
 				
 				if($count > 0) {
 			
-					displayContent($params,$this->displist, $time_machine, $this->{$this->type}, $this->edited, $gentime, 
+					displayContent($params,$this->displist, $time_machine, $this->{$this->type}, $this->edited, $this->gentime, 
 					$this->pstart, $this->last, $this->phase_arr, $fin_arr, $this->actfilterarr, $this->current_yr, 
-					$this->second_yr, $this->third_yr);
+					$this->second_yr, $this->third_yr, $trial_arr);
 				
 				} else 
-					echo ('<tr><th colspan="45" style="text-align: left;"> No record found. </th></tr>');
+					echo ('<tr><th colspan="45" class="norecord" align="left">No record found.</th></tr>');
 				
 				echo('</table><br/><br/>');
 			}
@@ -642,7 +648,7 @@ class ContentManager
 			$results 		= $excel_params['count'];
 			
 			if($bomb != '') {
-				//$bomb = 'sb';
+				
 				echo ('<span><img src="./images/' . $this->bomb_img_arr[$bomb] . '" alt="Bomb"  /></span>'
 					. '&nbsp;This cell has a ' . $this->bomb_type_arr[$bomb] . ' <a href="./help/bomb.html">bomb</a>');
 			}
@@ -687,9 +693,8 @@ class ContentManager
 			echo('<br clear="all"/><br/>');		
 			echo('<form id="frmOtt" name="frmOtt" method="get" action="intermediary.php">');
 			
-			$arr = array();
+			$arr = array();$trial_arr = array();
 			
-			//differentiating betwen active and inactive category of records.
 			$arrr = search($params,$this->fid,NULL,$time_machine);
 			
 			foreach($arrr as $k => $v) {
@@ -703,8 +708,9 @@ class ContentManager
 			}
 			
 			foreach($arr as $key=>$val) { 
-			
+				
 				$nct = getNCT($val['NCT/nct_id'], $val['larvol_id'], $this->gentime, $this->edited); 
+				
 				if (!is_array($nct)) { 
 					$nct=array();
 					$val['NCT/intervention_name'] = '(study not in database)';
@@ -726,6 +732,23 @@ class ContentManager
 					$totinactivecount++;
 					$inactivephase[] = $val['NCT/phase'];
 				}
+				
+				$trial_arr[] = $val['NCT/nct_id'] . ', ' . $val['larvol_id'];
+			}
+			
+			/********************************************************
+			Variables set for count when filtered by institution_type
+			**********************************************************/
+			if(isset($_GET['ins_params']) && $_GET['ins_params'] != '') {
+			
+				$insparams = $_GET['ins_params'];
+			
+			} else {
+			
+				$insparams = rawurlencode(base64_encode(gzdeflate(serialize(array('actphase' => $activephase,
+																	'inactphase' => $inactivephase,
+																	'actcnt' => $totactivecount,
+																	'inactcnt' => $totinactivecount)))));
 			}
 			
 			foreach($fin_arr as $key => $new_arr) {
@@ -792,11 +815,21 @@ class ContentManager
 			
 			$count = count($this->{$this->type});
 			
-			$this->commonControls($count, $totactivecount, $totinactivecount, ($totactivecount + $totinactivecount), 
-			$activephase, $inactivephase);
+			if(isset($_GET['institution']) && $_GET['institution'] != '') {
+			
+				$ins = unserialize(gzinflate(base64_decode(rawurldecode($insparams))));
+				
+				$this->commonControls($count, $ins['actcnt'], $ins['inactcnt'], 
+				($ins['actcnt'] + $ins['inactcnt']), $ins['actphase'], $ins['inactphase']);
+
+			} else {
+				$this->commonControls($count, $totactivecount, $totinactivecount, ($totactivecount + $totinactivecount), 
+				$activephase, $inactivephase);
+			}
 			
 			echo ('<input type="hidden" name="params" value="' . $_GET['params'] . '"/>'
-					. '<input type="hidden" name="leading" value="' . $_GET['leading'] . '"/>');
+					. '<input type="hidden" name="leading" value="' . $_GET['leading'] . '"/>'
+					. '<input type="hidden" name="ins_params" value="' . $insparams . '" />');
 					
 			$this->displayHeader();
 
@@ -812,12 +845,13 @@ class ContentManager
 
 			if($count > 0) {
 			
-			displayContent($params,$this->displist, $time_machine, $this->{$this->type}, $this->edited, $gentime, $this->pstart,
-			$this->last, $this->phase_arr, $fin_arr, $this->actfilterarr, $this->current_yr, $this->second_yr, $this->third_yr);
+			displayContent($params,$this->displist, $time_machine, $this->{$this->type}, $this->edited, $this->gentime, 
+			$this->pstart, $this->last, $this->phase_arr, $fin_arr, $this->actfilterarr, 
+			$this->current_yr, $this->second_yr, $this->third_yr, $trial_arr);
 				
 			} else {
 			
-				echo ('<tr><th colspan="45" style="text-align: left;"> No record found. </th></tr>');
+				echo ('<tr><th colspan="45" class="norecord" align="left">No record found.</th></tr>');
 			}
 		}
 		
@@ -840,9 +874,9 @@ class ContentManager
 			 . '<a href="javascript: void(0);" onclick="javascript: doSorting(\'ed\');">End</a></th>'
 			 . '<th style="width:16px;">'
 			 . '<a href="javascript: void(0);" onclick="javascript: doSorting(\'ph\');">Ph</a></th>'
-			 . '<th colspan="36" style="width:72px;"><div style="white-space:nowrap;">'
-			 . 'Projected<br/>Completion</div></th></tr>'
-			 . '<tr><th>');
+			 . '<th colspan="36" style="width:72px;" class="rightborder">'
+			 . '<div style="white-space:nowrap;">&nbsp;</div></th></tr>'
+			 . '<tr class="secondrow"><th>');
 		
 		if(array_key_exists('en', $this->sortimg)) {
 		
@@ -883,17 +917,21 @@ class ContentManager
 			echo "<img src='images/".$img.".png' ".$this->imgscale[$img_style]." border='0' alt='Sort' />";
 		}
 		
-		echo ('</th><th colspan="12" style="width:26px;padding-left:0;padding-right:0;">' . $this->current_yr . '</th>'
-			 . '<th colspan="12" style="width:26px;padding-left:0;padding-right:0;">' . $this->second_yr . '</th>'
-			 . '<th colspan="12" style="width:26px;padding-left:0;padding-right:0;">' . $this->third_yr . '</th></tr>');
+		echo ('</th><th colspan="12">' . $this->current_yr . '</th>'
+			 . '<th colspan="12">' . $this->second_yr . '</th>'
+			 . '<th colspan="12" class="rightborder">' . $this->third_yr . '</th></tr>');
 
 	}
 
 }
 
-function displayContent($params, $fieldlist, $time_machine, $type_arr, $edited, $gentime, $start, $last, $phase_arr, $fin_arr, $actfilterarr, $current_yr, $second_yr, $third_yr) {
+function displayContent($params, $fieldlist, $time_machine, $type_arr, $edited, $gentime, $start, $last, $phase_arr, $fin_arr, $actfilterarr, $current_yr, $second_yr, $third_yr, $trial_arr) {
 	
 	$start = $start -1;
+	
+	$newtrial =array();
+	$newtrial = chkNewTrial($trial_arr, $gentime, $edited);
+	
 	for($i=$start;$i<$last;$i++) 
 	{
 	
@@ -903,22 +941,26 @@ function displayContent($params, $fieldlist, $time_machine, $type_arr, $edited, 
 		$end_date = getEndDate($type_arr[$i]["NCT/primary_completion_date"], $type_arr[$i]["NCT/completion_date"]);
 		$ph = str_replace('Phase ', '', $type_arr[$i]['NCT/phase']);
 		
-
 		$start_month = date('m',strtotime($type_arr[$i]['NCT/start_date']));
 		$start_year = date('Y',strtotime($type_arr[$i]['NCT/start_date']));
 		$end_month = date('m',strtotime($end_date));
 		$end_year = date('Y',strtotime($end_date));
 	
-		$attr_one = '';$attr_two = '';
+		$attr_one = '';$attr_two = '';$attr_three = '';$flag = NULL;
+		
+		if(in_array($nctid, $newtrial)) {
+			$attr_three = ' class="newtrial" ';
+			$flag = 1;
+		}
 		
 		if(isset($fin_arr[$nctid]['edited']) && in_array('NCT/brief_title',$fin_arr[$nctid]['edited'])) {
 			$attr_one = ' highlight';
 			$attr_two = 'title="' . $fin_arr[$nctid]['edited']['NCT/brief_title'] . '" ';
 		}
-		echo '<tr>'
-			. '<td class="title' . $attr_one . '" ' . $attr_two . '>' 
-			. '<div class="rowcollapse"><a href="http://clinicaltrials.gov/ct2/show/' 
-			. $pnctid . '">';
+		echo '<tr ' . $attr_three . '>'
+			. '<td class="title' . $attr_one . '" ' . $attr_two 
+			. (in_array($nctid, $newtrial) ? 'style="border-left:1px solid #FF3333;"' : '' ) . '>' 
+			. '<div class="rowcollapse"><a href="http://clinicaltrials.gov/ct2/show/' . $pnctid . '">';
 		
 				if(isset($type_arr[$i]['NCT/acronym']) && $type_arr[$i]['NCT/acronym'] != '') {
 					echo '<b>' . htmlformat($type_arr[$i]['NCT/acronym']) 
@@ -1020,7 +1062,8 @@ function displayContent($params, $fieldlist, $time_machine, $type_arr, $edited, 
 					$attr = 'class="highlight" title="' . $fin_arr[$nctid]['edited'][$v] . '" ';
 
 				$phase = ($type_arr[$i][$v] == 'N/A') ? $ph : ('P' . $ph);
-				echo '<td style="background-color:'.$phase_arr[$ph] . '"' . $attr . '>'
+				echo '<td style="background-color:' . $phase_arr[$ph] . '; ' 
+					. (in_array($nctid, $newtrial) ? 'border-right:1px solid #FF3333;' : '' ) . '" ' . $attr . '>'
 					. '<div class="rowcollapse">' . $phase . '</div></td>';
 			
 			} else if($v == "NCT/lead_sponsor") { 
@@ -1048,7 +1091,7 @@ function displayContent($params, $fieldlist, $time_machine, $type_arr, $edited, 
 		
 		//getting the project completion chart
 		echo $str = getCompletionChart($start_month, $start_year, $end_month, $end_year, $current_yr, $second_yr, $third_yr, 
-		$phase_arr[$ph], $type_arr[$i]['NCT/start_date'], $end_date);
+		$phase_arr[$ph], $type_arr[$i]['NCT/start_date'], $end_date, $flag);
 			//krumo($study);
 		echo '</tr>';
 
@@ -1081,60 +1124,71 @@ function getColspan($start_dt, $end_dt) {
 }
 
 //calculating the project completion chart in which the year ranges from the current year and next-to-next year
-function getCompletionChart($start_month, $start_year, $end_month, $end_year, $current_yr, $second_yr, $third_yr, $bg_color, $start_date, $end_date){
+function getCompletionChart($start_month, $start_year, $end_month, $end_year, $current_yr, $second_yr, $third_yr, $bg_color, $start_date, $end_date, $flag){
 
-
+		$attr = '';
+		$attr_two = '';
+		
+		if($flag == 1) {
+			$attr = 'class="chartborder"';
+			$attr_two = 'class="rightborder chartborder"';
+		} else {
+			$attr_two = 'class="rightborder"';
+		}
+		
 		if($start_year < $current_yr) {
 			
 			if($end_year < $current_yr) {
-				$value = '<td colspan="12">&nbsp;</td><td colspan="12">&nbsp;</td><td colspan="12">&nbsp;</td>';
-			
+				$value = '<td colspan="12" ' . $attr . '>&nbsp;</td>'
+				. '<td colspan="12" ' . $attr . '>&nbsp;</td>'
+				. '<td colspan="12" ' . $attr_two . '>&nbsp;</td>';
+			  
 			} else if($end_year == $current_yr) { 
 			
 				if($end_month == 12) {
 				
-					$value = '<td style="background-color:' . $bg_color . '" colspan="' . $end_month . '">&nbsp;</td>'
-					. '<td colspan="12">&nbsp;</td><td colspan="12">&nbsp;</td>';
+					$value = '<td '. $attr .' style="background-color:' . $bg_color . '" colspan="' . $end_month . '">&nbsp;</td>'
+					. '<td colspan="12"' . $attr . '>&nbsp;</td><td colspan="12" ' . $attr_two . '>&nbsp;</td>';
 					
 				} else { 
 				
 					$value = '<td style="background-color:' . $bg_color 
-					. '" colspan="' . $end_month . '"><div>&nbsp;</div></td>'
-					. '<td style="width:'.(12-$end_month).'px" colspan="' . (12-$end_month) . '">&nbsp;</td>'
-					. '<td colspan="12"><div style="width:40px;">&nbsp;</div></td>'
-					. '<td colspan="12"><div style="width:40px;">&nbsp;</div></td>';
+					. '" colspan="' . $end_month . '"' . $attr . '><div>&nbsp;</div></td>'
+					. '<td style="width:'.(12-$end_month).'px" colspan="' . (12-$end_month) . '"' . $attr . '>&nbsp;</td>'
+					. '<td colspan="12"' . $attr . '><div style="width:40px;">&nbsp;</div></td>'
+					. '<td colspan="12" ' . $attr_two . '><div style="width:40px;">&nbsp;</div></td>';
 					
 				}
 			} else if($end_year == $second_yr) { 
 			 
 			 	if($end_month == 12) {
-					$value = '<td style="background-color:' . $bg_color . '" colspan="12">&nbsp;</td>'
-					. '<td style="background-color:' . $bg_color . '" colspan="12">&nbsp;</td>'
-					. '<td colspan="12">&nbsp;</td>';
+					$value = '<td style="background-color:' . $bg_color . '" colspan="12"' . $attr . '>&nbsp;</td>'
+					. '<td style="background-color:' . $bg_color . '" colspan="12"' . $attr . '>&nbsp;</td>'
+					. '<td colspan="12" ' . $attr_two . '>&nbsp;</td>';
 				} else {
-					$value = '<td style="background-color:' . $bg_color . '" colspan="12">&nbsp;</td>'
-					. '<td style="background-color:' . $bg_color . '" colspan="' . $end_month . '">&nbsp;</td>'
-					. '<td colspan="' . (12-$end_month) . '">&nbsp;</td>'
-					. '<td colspan="12">&nbsp;</td>';
+					$value = '<td style="background-color:' . $bg_color . '" colspan="12"' . $attr . '>&nbsp;</td>'
+					. '<td style="background-color:' . $bg_color . '" colspan="' . $end_month . '"' . $attr . '>&nbsp;</td>'
+					. '<td colspan="' . (12-$end_month) . '"' . $attr . '>&nbsp;</td>'
+					. '<td colspan="12" ' . $attr_two . '>&nbsp;</td>';
 				}
 		
 			} else if($end_year == $third_yr) { 
 			
 			 	if($end_month == 12) {
-					$value = '<td style="background-color:' . $bg_color . '" colspan="12">&nbsp;</td>'
-					. '<td style="background-color:' . $bg_color . '" colspan="12">&nbsp;</td>'
-					. '<td style="background-color:' . $bg_color . '" colspan="12">&nbsp;</td>';
+					$value = '<td style="background-color:' . $bg_color . '" colspan="12"' . $attr . '>&nbsp;</td>'
+					. '<td style="background-color:' . $bg_color . '" colspan="12"' . $attr . '>&nbsp;</td>'
+					. '<td style="background-color:' . $bg_color . '" colspan="12" ' . $attr_two . '>&nbsp;</td>';
 				} else {
-					$value = '<td style="background-color:' . $bg_color . '" colspan="12">&nbsp;</td>'
-					. '<td style="background-color:' . $bg_color . '" colspan="12">&nbsp;</td>'
-					. '<td style="background-color:' . $bg_color . '" colspan="' . $end_month . '">&nbsp;</td><td colspan="' 
-					. (12-$end_month) . '">&nbsp;</td>';
+					$value = '<td style="background-color:' . $bg_color . '" colspan="12"' . $attr . '>&nbsp;</td>'
+					. '<td style="background-color:' . $bg_color . '" colspan="12"' . $attr . '>&nbsp;</td>'
+					. '<td style="background-color:' . $bg_color . '" colspan="' . $end_month . '"' . $attr . '>&nbsp;</td>'
+					. '<td colspan="' . (12-$end_month) . '" ' . $attr_two . '>&nbsp;</td>';
 				}
 			 
 			} else { 
-				$value = '<td colspan="12" style="background-color:' . $bg_color . '">&nbsp;</td>'
-					. '<td colspan="12" style="background-color:' . $bg_color . '">&nbsp;</td>'
-					. '<td colspan="12" style="background-color:' . $bg_color . '">&nbsp;</td>';
+				$value = '<td colspan="12" style="background-color:' . $bg_color . '"' . $attr . '>&nbsp;</td>'
+					. '<td colspan="12" style="background-color:' . $bg_color . '"' . $attr . '>&nbsp;</td>'
+					. '<td colspan="12" style="background-color:' . $bg_color . '" ' . $attr_two . '>&nbsp;</td>';
 			}	
 		
 		} else if($start_year == $current_yr) {
@@ -1143,40 +1197,64 @@ function getCompletionChart($start_month, $start_year, $end_month, $end_year, $c
 			$st = $start_month-1;
 			if($end_year == $current_yr) {
 				
-				$value = (($st != 0) ? '<td colspan="' . $st . '">&nbsp;</td>' : '')
-					. '<td style="background-color:' . $bg_color . '" colspan="' . $val . '">&nbsp;</td>'
-					. (((12 - ($st+$val)) != 0) ? '<td colspan="' .(12 - ($st+$val)) . '">&nbsp;</td>' : '')
-					. '<td colspan="12">&nbsp;</td>'
-					. '<td colspan="12">&nbsp;</td>';
+				$value = (($st != 0) ? '<td colspan="' . $st . '"' . $attr . '>&nbsp;</td>' : '')
+					. '<td style="background-color:' . $bg_color . '" colspan="' . $val . '"' . $attr . '>&nbsp;</td>'
+					. (((12 - ($st+$val)) != 0) ? '<td colspan="' .(12 - ($st+$val)) . '"' . $attr . '>&nbsp;</td>' : '')
+					. '<td colspan="12"' . $attr . '>&nbsp;</td>'
+					. '<td colspan="12" ' . $attr_two . '>&nbsp;</td>';
 			
 			} else if($end_year == $second_yr) { 
 			 
-				$value = (($st != 0) ? '<td colspan="' . $st . '">&nbsp;</td>' : '')
-					. '<td style="background-color:' . $bg_color . '" colspan="' . $val . '">&nbsp;</td>'
-					. (((24 - ($val+$st)) != 0) ? '<td colspan="' .(24 - ($val+$st)) . '">&nbsp;</td>' : '')
-					. '<td colspan="12">&nbsp;</td>';
+				$value = (($st != 0) ? '<td colspan="' . $st . '"' . $attr . '>&nbsp;</td>' : '')
+					. '<td style="background-color:' . $bg_color . '" colspan="' . $val . '"' . $attr . '>&nbsp;</td>'
+					. (((24 - ($val+$st)) != 0) ? '<td colspan="' .(24 - ($val+$st)) . '"' . $attr . '>&nbsp;</td>' : '')
+					. '<td colspan="12" ' . $attr_two . '>&nbsp;</td>';
 		
 			} else if($end_year == $third_yr) {
 					
-				$value = (($st != 0) ? '<td colspan="' . $st . '">&nbsp;</td>' : '')
-					. '<td style="background-color:' . $bg_color . '" colspan="' . $val . '">&nbsp;</td>'
-					. (((36 - ($val+$st)) != 0) ? '<td colspan="' .(36 - ($val+$st)) . '">&nbsp;</td>' : '');
+				$value = (($st != 0) ? '<td colspan="' . $st . '"' . $attr . '>&nbsp;</td>' : '')
+					. '<td style="background-color:' . $bg_color . '" colspan="' . $val . '"' . $attr . '>&nbsp;</td>'
+					. (((36 - ($val+$st)) != 0) ? '<td colspan="' .(36 - ($val+$st)) . '" ' . $attr_two . '>&nbsp;</td>' : '');
 		
 			} else if($end_year > $third_yr){
 			
-				$value = (($st != 0) ? '<td colspan="' . $st . '">&nbsp;</td>' : '')
-					. '<td style="background-color:' . $bg_color . '" colspan="' . (12 - $st) . '">&nbsp;</td>'
-					. '<td style="background-color:' . $bg_color . '" colspan="12">&nbsp;</td>'
-					. '<td style="background-color:' . $bg_color . '" colspan="12">&nbsp;</td>';
+				$value = (($st != 0) ? '<td colspan="' . $st . '"' . $attr . '>&nbsp;</td>' : '')
+					. '<td style="background-color:' . $bg_color . '" colspan="' . (12 - $st) . '"' . $attr . '>&nbsp;</td>'
+					. '<td style="background-color:' . $bg_color . '" colspan="12"' . $attr . '>&nbsp;</td>'
+					. '<td style="background-color:' . $bg_color . '" colspan="12" ' . $attr_two . '>&nbsp;</td>';
 			}
 			
 		} 
 	return $value;
 }
 
+//checking if a trial is new
+function chkNewTrial($id_arr, $time,$edited) {
+	
+	$newTrial = array();
+	foreach($id_arr as $val) {
+	
+		$val = explode(', ',$val);
+		$studycatData=mysql_fetch_assoc(mysql_query("SELECT `dv`.`studycat` FROM `data_values` `dv` LEFT JOIN 
+		`data_cats_in_study` `dc` ON (`dc`.`id`=`dv`.`studycat`) WHERE `dv`.`field`='1' AND `dv`.`val_int`='" 
+		. $val[0] . "' AND `dc`.`larvol_id`='" . $val[1]  . "'"));
+		
+		$sql = mysql_query("SELECT `dv`.`id`, `dv`.`added` FROM `data_values` `dv` WHERE `studycat`='" 
+				. $studycatData['studycat'] . "' AND (`dv`.`added`>='" . date('Y-m-d',strtotime($edited,strtotime($time))) 
+				. "' AND `dv`.`added`<= '" . date('Y-m-d',strtotime($time)) . "' AND dv.superceded IS NULL )");
+	
+		if(mysql_num_rows($sql) >= 1) {
+			$newTrial[] = $val[0];
+		}
+	}
+	//$newTrial[] = '601900';
+	return $newTrial;
+}
+
 //return NCT fields given an NCTID
 function getNCT($nct_id,$larvol_id,$time,$edited)
 {	
+
 	$study = array();
 
 	$fieldnames = array('nct_id', 'brief_title', 'enrollment', 'enrollment_type', 'acronym', 'start_date', 'completion_date',
@@ -1211,7 +1289,7 @@ function getNCT($nct_id,$larvol_id,$time,$edited)
 			$val = $row['val_'.$row['fieldtype']];
 		}
 		if(isset($val) && $val != '')
-			$study['edited']['NCT/'.$row['fieldname']] = $val;
+			$study['edited']['NCT/'.$row['fieldname']] = 'Previous value: ' . $val;
 		else 
 			$study['edited']['NCT/'.$row['fieldname']] = 'No previous value';
 		

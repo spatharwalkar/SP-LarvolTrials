@@ -66,19 +66,35 @@ td,th {
 }
 
 .highlight {
-	border:2px solid #FF3333;
-	outline:2px solid #FF3333;
+	border:2px solid #FF3333!important;
 }
 
-.manage, .manage td, .manage th {
-	border:1px solid blue;
-	border-collapse: collapse;
-}
 .manage {
 	font-weight:normal;
 	table-layout:fixed;
 }
+
+.manage td {
+	margin:0;
+	padding:0;
+	overflow:hidden;
+}
+
+.manage td{
+	border-left:1px solid blue;
+	border-bottom:1px solid blue;
+}
+
+.newtrial td {
+	border-top:2px solid #FF3333;
+	border-bottom:2px solid #FF3333;
+}
+
 .manage th {
+
+	border-top:1px solid blue;
+	border-bottom:1px solid blue;
+	border-left:1px solid blue;
 	color:#0000FF;
 	text-decoration:none;
 	white-space:nowrap;
@@ -87,11 +103,7 @@ td,th {
 .manage th a{
 	text-decoration:none;
 }
-.manage td {
-	margin:0;
-	padding:0;
-	overflow:hidden;
-}
+
 .rowcollapse {
 	vertical-align:top;
 	max-height:1.1em;
@@ -133,3 +145,24 @@ td,th {
 	background-color:#D8D3E0;
 }
 
+.secondrow th{
+	width:26px;
+	padding-left:0;
+	padding-right:0;
+	border-top:0!important;
+}
+
+.rightborder {
+	border-right: 1px solid blue;
+}
+
+.chartborder {
+	border-top:0!important;
+	border-bottom:1px solid blue!important;
+}
+
+.norecord {
+	border-bottom: 1px solid blue!important; 
+	border-right: 1px solid blue!important;
+	border-top:0!important;
+}
