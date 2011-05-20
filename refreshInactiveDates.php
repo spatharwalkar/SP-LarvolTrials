@@ -12,9 +12,13 @@ if(!$db->loggedIn())
 //url parameter web=1 is needed to call the script from browser
 if($_GET['web']==1)
 {
+	$timeStart = microtime(true);
 	$larvolId = ($_GET['id'])?$_GET['id']:null;
 	$action = ($larvolId)?'search':'';
 	refreshInactiveDates($larvolId,$action);
+	$timeEnd = microtime(true);
+	$timeTaken = $timeEnd-$timeStart;
+	echo '<br/>Time Taken : '.$timeTaken;
 }
 
 
@@ -123,11 +127,15 @@ function applyInactiveDate($arr=array())
 			$addedDate = $addedDate[0];
 			
 			$inactiveDate = $addedDate;
-			
+
 			
 		}
 		
+		if($inactiveDate =='0000-00-00' || $inactiveDate=='')
+		$query  = "update clinical_study set inactive_date=null where larvol_id=$larvolId";
+		else
 		$query  = "update clinical_study set inactive_date='".$inactiveDate."' where larvol_id=$larvolId";
+		
 		if(mysql_query($query))
 		{
 			$flag=1;
