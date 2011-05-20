@@ -9,52 +9,63 @@ if(!$db->loggedIn())
 	exit;
 }
 
-$larvolId = ($_GET['id'])?$_GET['id']:null;
-$action = ($larvolId)?'search':'require';
-
-$param = new SearchParam();
-$param->field = 'larvol_id';
-$param->action = $action;
-$param->value = $larvolId;
-$param->strong = 1;
-$time = time('now');
-
-$prm = array($param);
-
-$fieldnames = array('overall_status','brief_title','completion_date','primary_completion_date','overall_status');
-foreach($fieldnames as $name)
-{ 
-	
-	$param = new SearchParam();
-	$param->field = fieldNameToPaddedId($name);
-	$param->action = 'require';
-	$param->value = '';
-	$param->strong = 1;
-	$prm[] = $param;
-	$list[] = fieldNameToPaddedId($name);
-
-}	
-	$time = time('now');	
-//$list = array('_1','_124');
-
-$res = search($prm,$list,NULL,NULL);
-applyInactiveDate($res);
-
-//Get field IDs for names
-// - for the $list argument, search() takes IDs prepended with a padding character (stripped by highPass())
-// - didn't find the alternative, so I wrote this
-function fieldNameToPaddedId($name)
+//url parameter web=1 is needed to call the script from browser
+if($_GET['web']==1)
 {
-	$query = 'SELECT data_fields.id AS data_field_id FROM '
-		. 'data_fields LEFT JOIN data_categories ON data_fields.category=data_categories.id '
-		. 'WHERE data_fields.name="' . $name . '" AND data_categories.name="NCT" LIMIT 1';
-	$res = mysql_query($query);
-	if($res === false) tex('Bad SQL query getting field ID of ' . $name);
-	$res = mysql_fetch_assoc($res);
-	if($res === false) tex('NCT schema not found!');
-	return '_' . $res['data_field_id'];
+	$larvolId = ($_GET['id'])?$_GET['id']:null;
+	$action = ($larvolId)?'search':'';
+	refreshInactiveDates($larvolId,$action);
 }
 
+
+/**
+ * 
+ * @name applyInactiveDate
+ * @tutorial Search function used to get the overall_status,completion_date and primary_completion_date values.
+ * If larvolId is present function searches for the specific larvolId and updates inactiveDate.
+ * If no larvolId is present all available larvolId's are listed and updates inactiveDate
+ * @param int $larvolId 
+ * @param $action It is either empty string or search. Search is used for individual larvolIds
+ * @author Jithu Thomas
+ * 
+ */
+function refreshInactiveDates($larvolId,$action)
+{
+	$param = new SearchParam();
+	$param->field = 'larvol_id';
+	$param->action = $action;
+	$param->value = $larvolId;
+	$param->strong = 1;
+	
+	$prm = array($param);
+	
+	$fieldnames = array('overall_status','completion_date','primary_completion_date','overall_status');
+	foreach($fieldnames as $name)
+	{ 
+		
+		$param = new SearchParam();
+		$param->field = '_'.getFieldId('NCT',$name);
+		$param->action ='';
+		$param->value = '';
+		$param->strong = 1;
+		$prm[] = $param;
+		$list[] = $param->field;
+	
+	}	
+
+	
+	$res = search($prm,$list,NULL,NULL);
+	applyInactiveDate($res);
+}
+
+
+/**
+ * 
+ * @name applyInactiveDate
+ * @tutorial Function applies derived field inactive_date for each search result array passed.
+ * @param array $arr is an array of search result from the search() function.
+ * @author Jithu Thomas
+ */
 function applyInactiveDate($arr=array())
 {
 	global $db;
