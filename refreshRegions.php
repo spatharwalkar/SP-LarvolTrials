@@ -3,41 +3,64 @@ require_once('krumo/class.krumo.php');
 require_once('db.php');
 require_once('include.search.php');
 require_once('include.import.php');
+require_once ('refreshInactiveDates.php');
 if(!$db->loggedIn())
 {
 	header('Location: ' . urlPath() . 'index.php');
 	exit;
 }
 
-$larvolId = ($_GET['id'])?$_GET['id']:null;
-$action = ($larvolId)?'search':'require';
+//url parameter web=1 is needed to call the script from browser
+if($_GET['region']==1)
+{
+	$timeStart = microtime(true);
+	$larvolId = ($_GET['id'])?$_GET['id']:null;
+	$action = ($larvolId)?'search':'';
+	refreshRegions($larvolId,$action);
+	$timeEnd = microtime(true);
+	$timeTaken = $timeEnd-$timeStart;
+	echo '<br/>Time Taken : '.$timeTaken;
+}
 
-$param = new SearchParam();
-$param->field = 'larvol_id';
-$param->action = $action;
-$param->value = $larvolId;
-$param->strong = 1;
-$time = time('now');
-
-$prm = array($param);
-
-$fieldnames = array('location_country');
-foreach($fieldnames as $name)
-{ 
-	
+/**
+ * 
+ * @name refreshRegions
+ * @tutorial Search function used to get the location_country.
+ * If larvolId is present function searches for the specific larvolId and updates regions.
+ * If no larvolId is present all available larvolId's are listed and updates inactiveDate
+ * @param int $larvolId 
+ * @param $action It is either empty string or search. Search is used for individual larvolIds
+ * @author Jithu Thomas
+ * 
+ */
+function refreshRegions($larvolId,$action)
+{
 	$param = new SearchParam();
-	$param->field = fieldNameToPaddedId($name);
-	$param->action = 'require';
-	$param->value = '';
+	$param->field = 'larvol_id';
+	$param->action = $action;
+	$param->value = $larvolId;
 	$param->strong = 1;
-	$prm[] = $param;
-	$list[] = fieldNameToPaddedId($name);
+	
+	$prm = array($param);
+	
+	$fieldnames = array('location_country');
+	foreach($fieldnames as $name)
+	{ 
+		
+		$param = new SearchParam();
+		$param->field = '_'.getFieldId('NCT',$name);
+		$param->action ='';
+		$param->value = '';
+		$param->strong = 1;
+		$prm[] = $param;
+		$list[] = $param->field;
+	
+	}	
 
+	
+	$res = search($prm,$list,NULL,NULL);
+	applyRegions($res);
 }	
-
-$res = search($prm,$list,NULL,NULL);
-
-applyRegions($res);
 
 function applyRegions($arr)
 {
@@ -91,20 +114,6 @@ function applyRegions($arr)
 	}	
 }
 
-//Get field IDs for names
-// - for the $list argument, search() takes IDs prepended with a padding character (stripped by highPass())
-// - didn't find the alternative, so I wrote this
-function fieldNameToPaddedId($name)
-{
-	$query = 'SELECT data_fields.id AS data_field_id FROM '
-		. 'data_fields LEFT JOIN data_categories ON data_fields.category=data_categories.id '
-		. 'WHERE data_fields.name="' . $name . '" AND data_categories.name="NCT" LIMIT 1';
-	$res = mysql_query($query);
-	if($res === false) tex('Bad SQL query getting field ID of ' . $name);
-	$res = mysql_fetch_assoc($res);
-	if($res === false) tex('NCT schema not found!');
-	return '_' . $res['data_field_id'];
-}
 
 function regionMapping()
 {
