@@ -24,7 +24,7 @@ if($_GET['web']==1)
 
 /**
  * 
- * @name applyInactiveDate
+ * @name refreshInactiveDates
  * @tutorial Search function used to get the overall_status,completion_date and primary_completion_date values.
  * If larvolId is present function searches for the specific larvolId and updates inactiveDate.
  * If no larvolId is present all available larvolId's are listed and updates inactiveDate

@@ -1,5 +1,6 @@
 <?php
 require_once('db.php');
+require_once ('refreshInactiveDates.php');
 
 $instMap = institutionMapping();
 
@@ -94,6 +95,9 @@ function addNCT($rec)
 	}
 	$query = 'UPDATE clinical_study SET institution_type="' . $institution_type . '" WHERE larvol_id=' . $larvol_id . ' LIMIT 1';
 	if(mysql_query($query) === false) return softDie('Bad SQL query recording institution type');
+	
+	//update inactive_date values.
+	refreshInactiveDates($larvol_id, 'search');
 	
 	//Go through the parsed XML structure and pick out the data
 	$record_data =array('brief_title' => $rec->brief_title,
