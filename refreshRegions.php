@@ -27,7 +27,7 @@ if($_GET['region']==1)
  * @name refreshRegions
  * @tutorial Search function used to get the location_country.
  * If larvolId is present function searches for the specific larvolId and updates regions.
- * If no larvolId is present all available larvolId's are listed and updates inactiveDate
+ * If no larvolId is present all available larvolId's are listed and updates regions
  * @param int $larvolId 
  * @param $action It is either empty string or search. Search is used for individual larvolIds
  * @author Jithu Thomas
@@ -61,7 +61,13 @@ function refreshRegions($larvolId,$action)
 	$res = search($prm,$list,NULL,NULL);
 	applyRegions($res);
 }	
-
+/**
+ * 
+ * @name applyInactiveDate
+ * @tutorial Function applies derived field regions for each search result array passed.
+ * @param array $arr is an array of search result from the search() function.
+ * @author Jithu Thomas
+ */
 function applyRegions($arr)
 {
 	global $db;
