@@ -47,6 +47,7 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 		foreach($params as $param)
 		{
 			$global = (is_array($param->field) ? $param->field[0][0] : $param->field[0]) != '_';
+			
 			$type = $db->types[(is_array($param->field) ? $param->field[0] : $param->field)];
 			switch($param->action)
 			{ 
@@ -175,7 +176,8 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 							break;
 							//enum is special
 							case 'enum':
-							$enumq = is_array($param->value) ? (' IN("'.implode('","',$param->value).'")') : ('="'.$param->value.'"');
+							$enumq = is_array($param->value) ? (' IN("'.implode('","',$param->value).'")') : ('="'
+							.$param->value.'"');
 							$cond = $field . ' AND dv.val_enum' . $enumq;
 							if($param->negate && $param->strong)
 							{
@@ -452,7 +454,7 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 			$bigconds = '1';
 		}else{
 			$bigconds = implode(' AND ', $bigconds);
-		}
+		}$bigquery = '';
 		$bigquery = 'SELECT DISTINCT i.larvol_id AS "larvol_id" FROM '
 					. '(data_values AS dv '
 					. 'LEFT JOIN data_cats_in_study AS i ON dv.studycat=i.id '
@@ -736,6 +738,16 @@ function getRecords($ids,$fields,$time)
 		$global[] = 'last_change';
 		unset($fields[$k]);
 	}
+	if(($k = array_search('inactive_date',$fields)) !== false)
+	{
+		$global[] = 'inactive_date';
+		unset($fields[$k]);
+	}
+	if(($k = array_search('region',$fields)) !== false)
+	{
+		$global[] = 'region';
+		unset($fields[$k]);
+	}
 	$fields = array_map('highPass', $fields);
 	$query = 'SELECT ' . implode(',', $global) . ' FROM clinical_study WHERE larvol_id IN(' . implode(',', $ids) . ')';
 	
@@ -921,8 +933,6 @@ function textEqual($field,$value)
 	    $result=validateMaskPCRE($value);
 	    if(!$result)
 	    	throw new Exception("Bad regex: $field = $value", 6);
-	    	
-	    	$value = mysql_real_escape_string($value);
 		return 'PREG_RLIKE("' . $value . '",' . $field . ')';
 	}else{
 		return $field . '="' . $value . '"';
@@ -1323,9 +1333,11 @@ function precheckSearchSql($conditions,$g_conds,$strong_exclusions)
 	if(isset($conditions) && is_array($conditions) && count($conditions)>0)
 	{
 		$tmpSql = 'SELECT 1 FROM data_values dv WHERE';
-		$where = '';	
-		$conditions = array_map(function($dt){return ' '.$dt;},$conditions);		
-		$where = implode(' AND ',$conditions);
+		$where = '';		
+		foreach($conditions as $tmp)
+		{
+			$where .= ' '.$tmp.' ';
+		}
 		$tmpSql .=$where.' LIMIT 0';
 		if(!mysql_query($tmpSql))
 		return false;
@@ -1335,8 +1347,10 @@ function precheckSearchSql($conditions,$g_conds,$strong_exclusions)
 	{
 		$tmpSql = 'SELECT 1 FROM clinical_study WHERE';
 		$where = '';
-		$g_conds = array_map(function($dt){return ' '.$dt;},$g_conds);	
-		$where = implode(' AND ',$g_conds);
+		foreach($g_conds as $tmp)
+		{
+			$where .= ' '.$tmp.' ';
+		}
 		$tmpSql .=$where.' LIMIT 0';
 		if(!mysql_query($tmpSql))
 		return false;
@@ -1345,10 +1359,11 @@ function precheckSearchSql($conditions,$g_conds,$strong_exclusions)
 	if(isset($strong_exclusions) && is_array($strong_exclusions) && count($strong_exclusions)>0)
 	{
 		$tmpSql = 'SELECT 1 FROM data_values dv WHERE';
-		$where = '';	
-		$strong_exclusions = array_map(function($dt){return ' '.$dt;},$strong_exclusions);	
-		$where = implode(' AND ',$strong_exclusions);
-		//$where = substr($where,0,-5);
+		$where = '';		
+		foreach($strong_exclusions as $tmp)
+		{
+			$where .= ' '.$tmp.' ';
+		}
 		$tmpSql .=$where.' LIMIT 0';
 		if(!mysql_query($tmpSql))
 		return false;

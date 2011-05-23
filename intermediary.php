@@ -122,7 +122,7 @@ class ContentManager
 	private $sortorder;
 	private $sort_params 	= array();
 	private $sortimg 	= array();
-	private $displist 	= array('Enrollment' => 'NCT/enrollment', 'Status' => 'NCT/overall_status', 
+	private $displist 	= array('Enrollment' => 'NCT/enrollment','Region' => 'region', 'Status' => 'NCT/overall_status', 
 								'Sponsor' => 'NCT/lead_sponsor', 'Conditions' => 'NCT/condition', 
 								'Interventions' => 'NCT/intervention_name','Study Dates' => 'NCT/start_date', 
 								'Phase' => 'NCT/phase');
@@ -215,7 +215,8 @@ class ContentManager
 		$this->fid['primary_completion_date'] 	= '_' . getFieldId('NCT', 'primary_completion_date');
 		$this->fid['completion_date'] 			= '_' . getFieldId('NCT', 'completion_date');
 		$this->fid['acronym'] 					= '_' . getFieldId('NCT', 'acronym');
-		//$this->fid['added'] 					= 'added';
+		$this->fid['inactive_date']				= 'inactive_date';
+		$this->fid['region']					= 'region';
 		
 		$this->current_yr	= date('Y');
 		$this->second_yr	= date('Y')+1;
@@ -259,7 +260,12 @@ class ContentManager
 			$typ = substr($v, (strpos($v, '-')+1));
 			$v = substr($v, 0, strpos($v, '-'));
 			$sp = new SearchParam();
-			$sp->field = '_' . getFieldId('NCT', $fieldname[$v]);
+			
+			if($v == 'ed')
+				$sp->field = 'inactive_date';
+			else	
+				$sp->field = '_' . getFieldId('NCT', $fieldname[$v]);
+				
 			$sp->action = ($typ == 'des') ? 'descending' : 'ascending';
 			$this->params[] = $sp;
 		}
@@ -309,11 +315,11 @@ class ContentManager
 			. '</span></div>'
 			. '&nbsp;&nbsp;<div class="drop"><div class="text">Show Only</div>');
 			
-			foreach($enumvals as $k => $v){ 
-				echo '<input type="checkbox" id="' . $v . '" name="institution[]" value="' . $v . '" '
-				. ((isset($_GET['institution']) && in_array($v, $_GET['institution'])) ? 'checked="checked"' : '' ) . '/>&nbsp;' 
-				. '<label for="'.$v.'">' .$v . '</label><br/>';
-			}
+		foreach($enumvals as $k => $v){ 
+			echo '<input type="checkbox" id="' . $v . '" name="institution[]" value="' . $v . '" '
+			. ((isset($_GET['institution']) && in_array($v, $_GET['institution'])) ? 'checked="checked"' : '' ) . '/>&nbsp;' 
+			. '<label for="'.$v.'">' .$v . '</label><br/>';
+		}
 		echo ('</div>'
 			. '<div class="block"><div class="text">Find changes from: </div>'
 			. '<input type="radio" id="oneweek" name="edited" value="oneweek" ' 
@@ -445,7 +451,10 @@ class ContentManager
 				if(isset($_GET['pg'][$pk])) $page[$pk] = mysql_real_escape_string($_GET['pg'][$pk]); 
 				if(!is_numeric($page[$pk])) die('non-numeric page');
 
-				$excel_params = array();$params = array();
+				$excel_params 	= array();
+				$params 		= array();
+				$endate_params	= array();
+				$region_params	= array();
 				$arr = array();$fin_arr = array();
 				$arrr = array();$trial_arr = array();
 				
@@ -484,7 +493,19 @@ class ContentManager
 					$results = count($leadingIDs);
 				}
 				
-				$params = array_merge($this->params, $excel_params, $ins_params);
+				$sp = new SearchParam();
+				$sp->field 	= 'inactive_date';
+				$sp->action = 'require';
+				$sp->value 	= $leadingIDs;
+				$endate_params = array($sp);
+
+				$sp = new SearchParam();
+				$sp->field 	= 'region';
+				$sp->action = 'search';
+				$sp->value 	= implode(' OR ', $leadingIDs);
+				$region_params = array($sp);
+
+				$params = array_merge($this->params, $excel_params, $endate_params, $ins_params);
 				
 				echo ('<input type="hidden" name="params['.$pk.']" value="' . $_GET['params'][$pk] . '"/>'
 						. '<input type="hidden" name="leading['.$pk.']" value="' . $_GET['leading'][$pk] . '"/>');
@@ -633,6 +654,8 @@ class ContentManager
 			$totinactivecount = 0;$totactivecount = 0;
 			$excel_params 	= array();
 			$ins_params 	= array();
+			$endate_params	= array();
+			$region_params	= array();
 			$fin_arr 		= array();
 			$activephase 	= array();
 			$inactivephase 	= array();
@@ -677,18 +700,28 @@ class ContentManager
 				$results = count($leadingIDs);
 			}
 			
+			$sp = new SearchParam();
+			$sp->field 	= 'inactive_date';
+			$sp->action = 'require';
+			$sp->value 	= $leadingIDs;
+			$endate_params = array($sp);
+
+			$sp = new SearchParam();
+			$sp->field 	= 'region';
+			$sp->action = 'search';
+			$sp->value 	= implode(' OR ', $leadingIDs);
+			$region_params = array($sp);
+
 			if(isset($_GET['institution']) && $_GET['institution'] != '') {
-				
 				array_push($this->fid, 'institution_type');
-				
 				$sp = new SearchParam();
 				$sp->field 	= 'institution_type';
 				$sp->action = 'search';
 				$sp->value 	= $_GET['institution'];
 				$ins_params = array($sp);
-			
 			}
-			$params = array_merge($this->params, $excel_params, $ins_params);
+			
+			$params = array_merge($this->params, $excel_params, $endate_params, $region_params, $ins_params);
 			
 			echo('<br clear="all"/><br/>');		
 			echo('<form id="frmOtt" name="frmOtt" method="get" action="intermediary.php">');
@@ -696,7 +729,7 @@ class ContentManager
 			$arr = array();$trial_arr = array();
 			
 			$arrr = search($params,$this->fid,NULL,$time_machine);
-			
+			//echo "<pre>";print_r($arrr);exit;
 			foreach($arrr as $k => $v) {
 				foreach($v as $kk => $vv) {
 				
@@ -851,7 +884,7 @@ class ContentManager
 				
 			} else {
 			
-				echo ('<tr><th colspan="45" class="norecord" align="left">No record found.</th></tr>');
+				echo ('<tr><th colspan="46" class="norecord" align="left">No record found.</th></tr>');
 			}
 		}
 		
@@ -863,16 +896,17 @@ class ContentManager
 			 . '<tr><th rowspan="2" style="width:220px;">Title</th>'
 			 . '<th style="width:28px;" title="gray values are anticipated and black values are actual">'
 			 . '<a href="javascript: void(0);" onclick="javascript: doSorting(\'en\');">N</a></th>'
+			 . '<th rowspan="2" style="width:45px;">Region</th>'
 			 . '<th style="width:55px;">'
 			 . '<a href="javascript: void(0);" onclick="javascript: doSorting(\'os\');">Status</a></th>'
 			 . '<th rowspan="2" style="width:130px;">Sponsor</th>'
-			 . '<th rowspan="2" style="width:130px;">Conditions</th>'
-			 . '<th rowspan="2" style="width:130px;">Interventions</th>'
+			 . '<th rowspan="2" style="width:120px;">Conditions</th>'
+			 . '<th rowspan="2" style="width:120px;">Interventions</th>'
 			 . '<th style="width:29px;" title="MM/YY">'
 			 . '<a href="javascript: void(0);" onclick="javascript: doSorting(\'sd\');">Start</a></th>'
-			 . '<th style="width:27px;" title="MM/YY">'
+			 . '<th style="width:29px;" title="MM/YY">'
 			 . '<a href="javascript: void(0);" onclick="javascript: doSorting(\'ed\');">End</a></th>'
-			 . '<th style="width:16px;">'
+			 . '<th style="width:22px;">'
 			 . '<a href="javascript: void(0);" onclick="javascript: doSorting(\'ph\');">Ph</a></th>'
 			 . '<th colspan="36" style="width:72px;" class="rightborder">'
 			 . '<div style="white-space:nowrap;">&nbsp;</div></th></tr>'
@@ -938,7 +972,6 @@ function displayContent($params, $fieldlist, $time_machine, $type_arr, $edited, 
 		$nctid =  $type_arr[$i]['NCT/nct_id'];
 		$pnctid =  padnct($type_arr[$i]['NCT/nct_id']);
 		
-		$end_date = getEndDate($type_arr[$i]["NCT/primary_completion_date"], $type_arr[$i]["NCT/completion_date"]);
 		$ph = str_replace('Phase ', '', $type_arr[$i]['NCT/phase']);
 		
 		$start_month = date('m',strtotime($type_arr[$i]['NCT/start_date']));
@@ -1021,8 +1054,9 @@ function displayContent($params, $fieldlist, $time_machine, $type_arr, $edited, 
 				}
 					
 				echo '<td style="background-color:#EDEAFF;" ' . $attr . '>';
-					if($end_date != '') {
-						echo '<div class="rowcollapse">' . date('m/y',strtotime($end_date)) . '</div></td>';
+					if($type_arr[$i]["inactive_date"] != '' || $type_arr[$i]["inactive_date"] != NULL) {
+						echo '<div class="rowcollapse">' . date('m/y',strtotime($type_arr[$i]["inactive_date"]))
+						. '</div></td>';
 					} else {
 						echo '&nbsp;</td>';
 					}
@@ -1086,6 +1120,8 @@ function displayContent($params, $fieldlist, $time_machine, $type_arr, $edited, 
 					. '<div class="rowcollapse">' . $val . ' <span style="color:gray;"> ' . $type_arr[$i]["NCT/collaborator"] 
 					. ' </span></div></td>';
 				
+			} else if($v == 'region') {
+				echo '<td><div class="rowcollapse">' . $val . '</div></td>';
 			}
 		}
 		
@@ -1098,23 +1134,6 @@ function displayContent($params, $fieldlist, $time_machine, $type_arr, $edited, 
 	}
 }
 	
-//calculating the end-date of a trial by giving precedence to completion than primary completion date
-function getEndDate($primary_date, $date) {
-
-	if($primary_date != '' && $date != '') {
-		return $date;
-		
-	} else if($date != '') {
-		return $date;
-		
-	} else if($primary_date != '') {
-		return $primary_date;
-		
-	} else {
-		return '';
-	}
-}
-
 //get difference between two dates in months
 function getColspan($start_dt, $end_dt) {
 	
