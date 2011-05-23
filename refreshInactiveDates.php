@@ -1,4 +1,5 @@
 <?php
+ini_set('max_execution_time','360000');	//100 hours
 require_once('krumo/class.krumo.php');
 require_once('db.php');
 require_once('include.search.php');
@@ -15,12 +16,48 @@ if($_GET['web']==1)
 	$timeStart = microtime(true);
 	$larvolId = ($_GET['id'])?$_GET['id']:null;
 	$action = ($larvolId)?'search':'';
-	refreshInactiveDates($larvolId,$action);
+	if($larvolId)
+	{
+		$fieldArr = calculateDateFieldIds();
+		refreshInactiveDates($larvolId,$action,$fieldArr);
+	}
+	else
+	{
+		refreshLarvolIds();
+	}
 	$timeEnd = microtime(true);
 	$timeTaken = $timeEnd-$timeStart;
 	echo '<br/>Time Taken : '.$timeTaken;
 }
 
+function refreshLarvolIds()
+{
+	global $db;
+	
+	//calculate field Ids and store in an array since it requires db call
+	$fieldArr = calculateDateFieldIds();
+
+	$query = "select larvol_id from clinical_study";
+	$res = mysql_query($query);
+	while($row = mysql_fetch_array($res))
+	{
+		$larvolId = $row['larvol_id'];
+		echo 'Larvol Id :'.$larvolId.'<br/>';
+		refreshInactiveDates($larvolId, 'search',$fieldArr);
+	}
+}
+
+
+function calculateDateFieldIds()
+{
+	$fieldnames = array('completion_date','primary_completion_date','overall_status');
+	$fieldArr = array();
+	foreach($fieldnames as $name)
+	{
+		$fieldArr[$name] = getFieldId('NCT',$name);
+	}
+	return $fieldArr;
+}
 
 /**
  * 
@@ -33,7 +70,7 @@ if($_GET['web']==1)
  * @author Jithu Thomas
  * 
  */
-function refreshInactiveDates($larvolId,$action)
+function refreshInactiveDates($larvolId,$action,$fieldArr)
 {
 	$param = new SearchParam();
 	$param->field = 'larvol_id';
@@ -43,12 +80,12 @@ function refreshInactiveDates($larvolId,$action)
 	
 	$prm = array($param);
 	
-	$fieldnames = array('overall_status','completion_date','primary_completion_date','overall_status');
+	$fieldnames = array('completion_date','primary_completion_date','overall_status');
 	foreach($fieldnames as $name)
 	{ 
 		
 		$param = new SearchParam();
-		$param->field = '_'.getFieldId('NCT',$name);
+		$param->field = '_'.$fieldArr[$name];
 		$param->action ='';
 		$param->value = '';
 		$param->strong = 1;
@@ -148,7 +185,7 @@ function applyInactiveDate($arr=array())
 	if($flag == 1)
 	{
 		mysql_query('COMMIT') or die('Cannot commit transaction');
-		echo 'Transaction commited successfully.';
+		echo 'Transaction commited successfully.<br/>';
 	}
 	
 	
