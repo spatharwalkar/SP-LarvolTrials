@@ -97,7 +97,7 @@ function addNCT($rec)
 	if(mysql_query($query) === false) return softDie('Bad SQL query recording institution type');
 	
 	//update inactive_date values.
-	refreshInactiveDates($larvol_id, 'search');
+	//refreshInactiveDates($larvol_id, 'search');
 	
 	//Go through the parsed XML structure and pick out the data
 	$record_data =array('brief_title' => $rec->brief_title,
