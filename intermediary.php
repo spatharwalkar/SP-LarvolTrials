@@ -729,7 +729,7 @@ class ContentManager
 			$arr = array();$trial_arr = array();
 			
 			$arrr = search($params,$this->fid,NULL,$time_machine);
-			//echo "<pre>";print_r($arrr);exit;
+			
 			foreach($arrr as $k => $v) {
 				foreach($v as $kk => $vv) {
 				
@@ -976,8 +976,8 @@ function displayContent($params, $fieldlist, $time_machine, $type_arr, $edited, 
 		
 		$start_month = date('m',strtotime($type_arr[$i]['NCT/start_date']));
 		$start_year = date('Y',strtotime($type_arr[$i]['NCT/start_date']));
-		$end_month = date('m',strtotime($end_date));
-		$end_year = date('Y',strtotime($end_date));
+		$end_month = date('m',strtotime($type_arr[$i]["inactive_date"]));
+		$end_year = date('Y',strtotime($type_arr[$i]["inactive_date"]));
 	
 		$attr_one = '';$attr_two = '';$attr_three = '';$flag = NULL;
 		
@@ -1127,7 +1127,7 @@ function displayContent($params, $fieldlist, $time_machine, $type_arr, $edited, 
 		
 		//getting the project completion chart
 		echo $str = getCompletionChart($start_month, $start_year, $end_month, $end_year, $current_yr, $second_yr, $third_yr, 
-		$phase_arr[$ph], $type_arr[$i]['NCT/start_date'], $end_date, $flag);
+		$phase_arr[$ph], $type_arr[$i]['NCT/start_date'], $type_arr[$i]['inactive_date'], $flag);
 			//krumo($study);
 		echo '</tr>';
 
