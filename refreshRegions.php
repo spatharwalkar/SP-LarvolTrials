@@ -10,16 +10,52 @@ if(!$db->loggedIn())
 	exit;
 }
 
-//url parameter web=1 is needed to call the script from browser
+//url parameter region=1 is needed to call the script from browser
 if($_GET['region']==1)
 {
 	$timeStart = microtime(true);
 	$larvolId = ($_GET['id'])?$_GET['id']:null;
 	$action = ($larvolId)?'search':'';
-	refreshRegions($larvolId,$action);
+	if($larvolId)
+	{
+		$fieldArr = calculateRegionFieldIds();
+		refreshRegions($larvolId,$action,$fieldArr);
+	}
+	else
+	{
+		refreshRegionLarvolIds();
+	}
 	$timeEnd = microtime(true);
 	$timeTaken = $timeEnd-$timeStart;
 	echo '<br/>Time Taken : '.$timeTaken;
+}
+
+function refreshRegionLarvolIds()
+{
+	global $db;
+	
+	//calculate field Ids and store in an array since it requires db call
+	$fieldArr = calculateRegionFieldIds();
+
+	$query = "select larvol_id from clinical_study";
+	$res = mysql_query($query);
+	while($row = mysql_fetch_array($res))
+	{
+		$larvolId = $row['larvol_id'];
+		echo 'Larvol Id :'.$larvolId.'<br/>';
+		refreshRegions($larvolId, 'search',$fieldArr);
+	}
+}
+
+function calculateRegionFieldIds()
+{
+	$fieldnames = array('location_country');
+	$fieldArr = array();
+	foreach($fieldnames as $name)
+	{
+		$fieldArr[$name] = getFieldId('NCT',$name);
+	}
+	return $fieldArr;
 }
 
 /**
@@ -29,11 +65,12 @@ if($_GET['region']==1)
  * If larvolId is present function searches for the specific larvolId and updates regions.
  * If no larvolId is present all available larvolId's are listed and updates regions
  * @param int $larvolId 
- * @param $action It is either empty string or search. Search is used for individual larvolIds
+ * @param var $action It is either empty string or search. Search is used for individual larvolIds
+ * @param array $fieldArr field arrays are calculated seperately to avoid unnecessary db calls for repeated calls to this function.
  * @author Jithu Thomas
  * 
  */
-function refreshRegions($larvolId,$action)
+function refreshRegions($larvolId,$action,$fieldArr)
 {
 	$param = new SearchParam();
 	$param->field = 'larvol_id';
@@ -48,7 +85,7 @@ function refreshRegions($larvolId,$action)
 	{ 
 		
 		$param = new SearchParam();
-		$param->field = '_'.getFieldId('NCT',$name);
+		$param->field = '_'.$fieldArr[$name];
 		$param->action ='';
 		$param->value = '';
 		$param->strong = 1;
@@ -78,7 +115,7 @@ function applyRegions($arr)
 	}
 	else 
 	{
-		die('No records to update');
+		softdie('No records to update.<br/>');
 	}	
 	
 	$flag = 0;
@@ -116,7 +153,7 @@ function applyRegions($arr)
 	if($flag == 1)
 	{
 		mysql_query('COMMIT') or die('Cannot commit transaction');
-		echo 'Transaction commited successfully.';
+		echo 'Transaction commited successfully.<br/>';
 	}	
 }
 
