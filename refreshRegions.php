@@ -3,7 +3,6 @@ require_once('krumo/class.krumo.php');
 require_once('db.php');
 require_once('include.search.php');
 require_once('include.import.php');
-require_once ('refreshInactiveDates.php');
 if(!$db->loggedIn())
 {
 	header('Location: ' . urlPath() . 'index.php');
@@ -96,7 +95,27 @@ function refreshRegions($larvolId,$action,$fieldArr)
 
 	
 	$res = search($prm,$list,NULL,NULL);
-	applyRegions($res);
+	if(count($res)>0)
+	{
+		applyRegions($res);
+	}
+	else
+	{
+		mysql_query('BEGIN') or softdie('Cannot begin transaction');
+		echo 'Starting transaction.<br/>';	
+		$query  = "update clinical_study set region=null where larvol_id=$larvolId";	
+		if(mysql_query($query))
+		{
+			mysql_query('COMMIT') or softdie('Cannot commit transaction');
+			echo 'Transaction commited successfully.<br/>';			
+		}
+		else
+		{
+			softdie('Cannot update region. '.$query);
+		}			
+	}
+	
+	
 }	
 /**
  * 
@@ -113,28 +132,57 @@ function applyRegions($arr)
 		mysql_query('BEGIN') or die('Cannot begin transaction');
 		echo 'Starting transaction.<br/>';
 	}
-	else 
+/*	else 
 	{
 		softdie('No records to update.<br/>');
-	}	
+	}*/	
 	
 	$flag = 0;
 	$flag1 = 0;
+	$flag2 = 0;
 	$regionArr = regionMapping();
 	foreach($arr as $res)
 	{	
 		$larvolId = $res['larvol_id'];
 		$locationCountry = $res['NCT/location_country'];
 		if(is_array($locationCountry))
-		$locationCountry = $locationCountry[0];
+		{
+			$tmp1 = array();
+			foreach($locationCountry as $tmp)
+			{
+				$tmp1[] = $tmp;
+			}
+			$tmp1 = array_unique($tmp1);
+			$locationCountry = $tmp1;
+		}
+		$tmp1 = array();
 		foreach($regionArr as $countryName=>$code)
 		{
-			if($countryName == $locationCountry)
+			if(is_array($locationCountry))
 			{
-				$flag1 = 1;
-				break;
+				foreach($locationCountry as $tmp)
+				{
+					if($countryName == $tmp)
+					{
+						$flag1=1;
+						$flag2=1;
+						$tmp1[] = $code;
+						
+					}
+				}
+				
+			}
+			else
+			{
+				if($countryName == $locationCountry)
+				{
+					$flag1 = 1;
+					break;
+				}
 			}
 		}
+		if($flag2 ==1)
+		$code = implode(',',$tmp1);
 		if($flag1 != 1)
 		$code = 'other';
 		
@@ -147,12 +195,12 @@ function applyRegions($arr)
 		}
 		else
 		{
-			die('Cannot update inactive_date. '.$query);
+			softdie('Cannot update region. '.$query);
 		}		
 	}
 	if($flag == 1)
 	{
-		mysql_query('COMMIT') or die('Cannot commit transaction');
+		mysql_query('COMMIT') or softdie('Cannot commit transaction');
 		echo 'Transaction commited successfully.<br/>';
 	}	
 }
