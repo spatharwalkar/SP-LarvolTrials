@@ -1,8 +1,11 @@
 <?php
 require_once('db.php');
-require_once ('refreshInactiveDates.php');
+require_once ('include.derived.php');
 
 $instMap = institutionMapping();
+
+//calculate field Ids and store in an array since it requires db call
+$fieldArr = calculateDateFieldIds();
 
 //Adds a new record of any recognized type from a simpleXML object.
 //Autodetects the type if none is specified.
@@ -284,10 +287,14 @@ function addNCT($rec)
 	}
 
 	//import everything
+
 	foreach($record_data as $fieldname => $value)
 		if(!addval($studycat, $nct_cat, $fieldname, $value))
 			return softDie('Data error in ' . $nct_id . '.');
+
 	mysql_query('COMMIT') or die("Couldn't commit SQL transaction to create records from XML");
+	global $fieldArr;
+	refreshInactiveDates($larvol_id, 'search',$fieldArr);		
 	return true;
 }
 

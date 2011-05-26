@@ -1,5 +1,5 @@
 <?php
-//core script for all inactive date updates.
+//core script for all region updates.
 require_once 'include.derived.php';
 
 $timeStart = microtime(true);
