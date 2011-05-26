@@ -58,15 +58,16 @@ td,th {
 }
 .title	a {
 	text-decoration:none;
-	color:#000000;
+	/*color:#000000;*/
 }
 .title	a:hover{
 	text-decoration:none;
-	color:#000000;
+	/*color:#000000;*/
 }
 
 .highlight {
-	border:2px solid #FF3333!important;
+	/*border:2px solid #FF3333!important;*/
+	color:#FF0000!important;
 }
 
 .manage {
@@ -86,8 +87,7 @@ td,th {
 }
 
 .newtrial td {
-	border-top:2px solid #FF3333;
-	border-bottom:2px solid #FF3333;
+	color:#FF0000!important;
 }
 
 .manage th {
@@ -165,4 +165,19 @@ td,th {
 	border-bottom: 1px solid blue!important; 
 	border-right: 1px solid blue!important;
 	border-top:0!important;
+}
+
+.upm {
+	line-height:0.5em!important;
+	overflow:visible;
+}
+
+.box_rotate {
+margin-top:2px;
+-moz-transform: rotate(90deg);
+/* FF3.5+ / -o-transform: rotate(90deg); / Opera 10.5 / -webkit-transform: rotate(90deg); / Saf3.1+, Chrome / filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=0.083); / IE6,IE7 / -ms-filter: "progid:DXImageTransform.Microsoft.BasicImage(rotation=0.083)"; / IE8 */ 
+-moz-transform: rotate(90deg);  /* FF3.5+ */        
+-o-transform: rotate(90deg);  /* Opera 10.5 */   -webkit-transform: rotate(90deg);  /* Saf3.1+, Chrome */              
+filter:  progid:DXImageTransform.Microsoft.BasicImage(rotation=1);  /* IE6,IE7  allows only 1, 2, 3 */          
+-ms-filter: "progid:DXImageTransform.Microsoft.BasicImage(rotation=1)"; /* IE8  allows only 1 2 or 3*/ 
 }
