@@ -96,9 +96,6 @@ function addNCT($rec)
 	$query = 'UPDATE clinical_study SET institution_type="' . $institution_type . '" WHERE larvol_id=' . $larvol_id . ' LIMIT 1';
 	if(mysql_query($query) === false) return softDie('Bad SQL query recording institution type');
 	
-	//update inactive_date values.
-	//refreshInactiveDates($larvol_id, 'search');
-	
 	//Go through the parsed XML structure and pick out the data
 	$record_data =array('brief_title' => $rec->brief_title,
 						'official_title' => $rec->official_title,
@@ -407,6 +404,11 @@ function esc($type, $value)
 //Some data need to be changed a little to fit in the database
 function normalize($type, $value)
 {
+// DW
+    $value = preg_replace( '/\s+/', ' ', trim( $value ) );         
+    if ($value == " " || $value == "") return NULL;
+// DW
+        
 	if(!strlen($value) || $value === NULL) return NULL;
 	switch($type)
 	{

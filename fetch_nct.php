@@ -4,22 +4,17 @@ require_once('include.import.php');
 
 if(isset($_GET['maxrun'])) ini_set('max_execution_time','36000');	//10 hours
 $days = 0;
-/*
+
 if(isset($_GET['days']))
 {
-	$days = (int)$_GET['days'];
-}else{
-	die('Need to set $_GET[\'days\']');
+	$days_to_fetch = (int)$_GET['days'];
 }
 
-$update_id=$_GET['update_id'];
-*/
-
-if(isset($days_to_fetch))
+if(isset($days_to_fetch))	//$days_to_fetch comes from cron.php normally
 {
 	$days = (int)$days_to_fetch;
 }else{
-	die('Need to set $days_to_fetch');
+	die('Need to set $days_to_fetch or $_GET[' . "'days'" . ']');
 }
 
 
