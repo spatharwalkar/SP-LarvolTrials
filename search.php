@@ -176,6 +176,8 @@ echo(openSection('Global fields')
 		. searchControl('larvol_id',false,1)
 		. searchControl('import_time')
 		. searchControl('institution_type', 'Institution Type (same as "Funded By" in ct.gov)')
+		. searchControl('inactive_date')
+		. searchControl('region')
 		. '</table>'
 		. '</fieldset>');
 echo(CFCSearchControls());
