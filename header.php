@@ -28,7 +28,8 @@ if($db->loggedIn())
 	echo(' :: ');
 	echo('<div class="drop">Import<br/>'
 	.'<a href="import.php">XML Import</a><br/>'
-	.'<a href="entry.php">Manual Entry</a>'
+	.'<a href="entry.php">Trial Entry</a>'
+	.'<a href="upm.php">UPM</a>'
 	.'</div>');
 	
 	if($db->user->userlevel=='admin'||$db->user->userlevel=='root')

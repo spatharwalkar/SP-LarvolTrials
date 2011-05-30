@@ -367,4 +367,12 @@ function array_filter_recursive($input, $callback = NULL)
 	}
     return array_filter($input, $callback);
 }
+
+//ergonomic print_r for development cases
+function pr($arr)
+{
+	echo '<pre>';
+	print_r($arr);
+	echo '</pre>';
+}
 ?>
