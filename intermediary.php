@@ -5,6 +5,9 @@ require_once('krumo/class.krumo.php');
 require_once('db.php');
 require_once('include.search.php');
 if(!isset($_GET['cparams']) && !isset($_GET['params'])) die('cell not set');
+ini_set('max_execution_time','36000');	//10 hours
+set_time_limit(0);
+ignore_user_abort(1);
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -484,6 +487,18 @@ class ContentManager
 					$sp->value = implode(' OR ', $leadingIDs);
 					$excel_params = array($sp);
 
+					$sp = new SearchParam();
+					$sp->field 	= 'inactive_date';
+					$sp->action = 'search';
+					$sp->value 	= implode(' OR ', $leadingIDs);
+					$endate_params = array($sp);
+	
+					$sp = new SearchParam();
+					$sp->field 	= 'region';
+					$sp->action = 'search';
+					$sp->value 	= implode(' OR ', $leadingIDs);
+					$region_params = array($sp);
+
 				} else {	
 					$excel_params = $excel_params['params'];
 				}
@@ -493,18 +508,6 @@ class ContentManager
 					$results = count($leadingIDs);
 				}
 				
-				$sp = new SearchParam();
-				$sp->field 	= 'inactive_date';
-				$sp->action = 'require';
-				$sp->value 	= $leadingIDs;
-				$endate_params = array($sp);
-
-				$sp = new SearchParam();
-				$sp->field 	= 'region';
-				$sp->action = 'search';
-				$sp->value 	= implode(' OR ', $leadingIDs);
-				$region_params = array($sp);
-
 				$params = array_merge($this->params, $excel_params, $endate_params, $ins_params);
 				
 				echo ('<input type="hidden" name="params['.$pk.']" value="' . $_GET['params'][$pk] . '"/>'
@@ -513,7 +516,7 @@ class ContentManager
 				$this->displayHeader();
 				
 				$arrr = search($params,$this->fid,NULL,$time_machine);
-
+				
 				foreach($arrr as $k => $v) {
 			
 					foreach($v as $kk => $vv) {
@@ -525,28 +528,27 @@ class ContentManager
 					}
 				}
 				
+				$nct = array();
+				
 				foreach($arr as $key => $val) { 
-			
-					$nct = getNCT($val['NCT/nct_id'], $val['larvol_id'], $this->gentime, $this->edited); 
-					if (!is_array($nct)) { 
-						$nct=array();
-						$val['NCT/intervention_name'] = '(study not in database)';
-					}
+					
+					//checking for updated and new trials
+					$nct[$val['NCT/nct_id']] = getNCT($val['NCT/nct_id'], $val['larvol_id'], $this->gentime, $this->edited);
+					$trial_arr[] = $val['NCT/nct_id'] . ', ' . $val['larvol_id']; 
 					
 					if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) {
+				
+						if(!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y')
+							$fin_arr[$val['NCT/nct_id']] = array_merge($nct[$val['NCT/nct_id']], $val);
 					
-						if(!empty($nct['edited']))
-							$fin_arr[$val['NCT/nct_id']] = array_merge($nct, $val);
 					} else {
-						$fin_arr[$val['NCT/nct_id']] = array_merge($nct, $val);
-					}	
+						$fin_arr[$val['NCT/nct_id']] = array_merge($nct[$val['NCT/nct_id']], $val);
+					}
 					
 					if(in_array($val['NCT/overall_status'],$this->actfilterarr))
 						$totactivecount++;
 					else
 						$totinactivecount++;
-					
-					$trial_arr[] = $val['NCT/nct_id'] . ', ' . $val['larvol_id'];
 				}
 				
 				foreach($fin_arr as $key => $new_arr){
@@ -640,7 +642,7 @@ class ContentManager
 					$this->second_yr, $this->third_yr, $trial_arr);
 				
 				} else 
-					echo ('<tr><th colspan="45" class="norecord" align="left">No record found.</th></tr>');
+					echo ('<tr><th colspan="47" class="norecord" align="left">No record found.</th></tr>');
 				
 				echo('</table><br/><br/>');
 			}
@@ -651,7 +653,9 @@ class ContentManager
 			if(isset($_GET['page'])) $page = mysql_real_escape_string($_GET['page']);
 			if(!is_numeric($page)) die('non-numeric page');
 
-			$totinactivecount = 0;$totactivecount = 0;
+			$totinactivecount = 0;
+			$totactivecount = 0;
+			
 			$excel_params 	= array();
 			$ins_params 	= array();
 			$endate_params	= array();
@@ -659,6 +663,7 @@ class ContentManager
 			$fin_arr 		= array();
 			$activephase 	= array();
 			$inactivephase 	= array();
+			
 			
 			$excel_params 	= unserialize(gzinflate(base64_decode($_GET['params'])));
 			$rowlabel 		= $excel_params['rowlabel'];
@@ -673,7 +678,7 @@ class ContentManager
 			if($bomb != '') {
 				
 				echo ('<span><img src="./images/' . $this->bomb_img_arr[$bomb] . '" alt="Bomb"  /></span>'
-					. '&nbsp;This cell has a ' . $this->bomb_type_arr[$bomb] . ' <a href="./help/bomb.html">bomb</a>');
+				. '&nbsp;This cell has a ' . $this->bomb_type_arr[$bomb] . ' <a href="./help/bomb.html">bomb</a>');
 			}
 			
 			echo ('</td><td class="result">Results for ' . htmlformat($rowlabel) . ' in ' . htmlformat($columnlabel) . '</td>'
@@ -690,8 +695,20 @@ class ContentManager
 				$sp->action = 'search';
 				$sp->value = implode(' OR ', $leadingIDs);
 				$excel_params = array($sp);
+				
+				$sp = new SearchParam();
+				$sp->field 	= 'inactive_date';
+				$sp->action = 'search';
+				$sp->value 	= implode(' OR ', $leadingIDs);
+				$endate_params = array($sp);
+	
+				$sp = new SearchParam();
+				$sp->field 	= 'region';
+				$sp->action = 'search';
+				$sp->value 	= implode(' OR ', $leadingIDs);
+				$region_params = array($sp);
 
-			}else{
+			} else {
 				$excel_params = $excel_params['params'];
 			}
 			
@@ -700,17 +717,6 @@ class ContentManager
 				$results = count($leadingIDs);
 			}
 			
-			$sp = new SearchParam();
-			$sp->field 	= 'inactive_date';
-			$sp->action = 'search';
-			$sp->value 	= implode(' OR ', $leadingIDs);
-			$endate_params = array($sp);
-
-			$sp = new SearchParam();
-			$sp->field 	= 'region';
-			$sp->action = 'search';
-			$sp->value 	= implode(' OR ', $leadingIDs);
-			$region_params = array($sp);
 
 			if(isset($_GET['institution']) && $_GET['institution'] != '') {
 				array_push($this->fid, 'institution_type');
@@ -726,7 +732,9 @@ class ContentManager
 			echo('<br clear="all"/><br/>');		
 			echo('<form id="frmOtt" name="frmOtt" method="get" action="intermediary.php">');
 			
-			$arr = array();$trial_arr = array();
+			$arr = array();
+			$nct = array();
+			$trial_arr = array();
 			
 			$arrr = search($params,$this->fid,NULL,$time_machine);
 			
@@ -740,22 +748,20 @@ class ContentManager
 				}
 			}
 			
-			foreach($arr as $key=>$val) { 
+			foreach($arr as $key => $val) { 
+			
+				//checking for updated and new trials
+				$nct[$val['NCT/nct_id']] = getNCT($val['NCT/nct_id'], $val['larvol_id'], $this->gentime, $this->edited);
 				
-				$nct = getNCT($val['NCT/nct_id'], $val['larvol_id'], $this->gentime, $this->edited); 
-				
-				if (!is_array($nct)) { 
-					$nct=array();
-					$val['NCT/intervention_name'] = '(study not in database)';
-				}
-				
+				$trial_arr[] = $val['NCT/nct_id'] . ', ' . $val['larvol_id']; 
 				if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) {
 				
-					if(!empty($nct['edited']))
-						$fin_arr[$val['NCT/nct_id']] = array_merge($nct, $val);
+					if(!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y')
+						$fin_arr[$val['NCT/nct_id']] = array_merge($nct[$val['NCT/nct_id']], $val);
+					
 				} else {
 				
-					$fin_arr[$val['NCT/nct_id']] = array_merge($nct, $val);
+					$fin_arr[$val['NCT/nct_id']] = array_merge($nct[$val['NCT/nct_id']], $val);
 				}	
 				
 				if(in_array($val['NCT/overall_status'],$this->actfilterarr)) {
@@ -766,12 +772,11 @@ class ContentManager
 					$inactivephase[] = $val['NCT/phase'];
 				}
 				
-				$trial_arr[] = $val['NCT/nct_id'] . ', ' . $val['larvol_id']; 
 			}
 			
-			/********************************************************
-			Variables set for count when filtered by institution_type
-			**********************************************************/
+			/*--------------------------------------------------------
+			|Variables set for count when filtered by institution_type
+			---------------------------------------------------------*/
 			if(isset($_GET['ins_params']) && $_GET['ins_params'] != '') {
 			
 				$insparams = $_GET['ins_params'];
@@ -908,7 +913,7 @@ class ContentManager
 			 . '<a href="javascript: void(0);" onclick="javascript: doSorting(\'ed\');">End</a></th>'
 			 . '<th style="width:22px;">'
 			 . '<a href="javascript: void(0);" onclick="javascript: doSorting(\'ph\');">Ph</a></th>'
-			 . '<th rowspan="2"><div class="box_rotate">result</div></th>'
+			 . '<th rowspan="2" style="width:8px;padding:5px;"><div class="box_rotate">result</div></th>'
 			 . '<th colspan="36" style="width:72px;" class="rightborder">'
 			 . '<div style="white-space:nowrap;">&nbsp;</div></th></tr>'
 			 . '<tr class="secondrow"><th>');
@@ -963,9 +968,7 @@ class ContentManager
 function displayContent($params, $fieldlist, $time_machine, $type_arr, $edited, $gentime, $start, $last, $phase_arr, $fin_arr, $actfilterarr, $current_yr, $second_yr, $third_yr, $trial_arr) {
 	
 	$start = $start -1;
-	//echo "<pre>";print_r($trial_arr);
-	$newtrial = array();$upmDetails = array();
-	$newtrial = chkNewTrial($trial_arr, $gentime, $edited);
+	$upmDetails = array();
 	$upmDetails = getCorrespondingUPM($trial_arr);
 	
 	for($i=$start;$i<$last;$i++) 
@@ -973,7 +976,6 @@ function displayContent($params, $fieldlist, $time_machine, $type_arr, $edited, 
 	
 		$rowspan = 1;
 		$nctid =  $type_arr[$i]['NCT/nct_id'];
-		$pnctid =  padnct($type_arr[$i]['NCT/nct_id']);
 		
 		$ph = str_replace('Phase ', '', $type_arr[$i]['NCT/phase']);
 		
@@ -982,61 +984,77 @@ function displayContent($params, $fieldlist, $time_machine, $type_arr, $edited, 
 		$end_month = date('m',strtotime($type_arr[$i]["inactive_date"]));
 		$end_year = date('Y',strtotime($type_arr[$i]["inactive_date"]));
 	
-		$attr_one = '';$attr_two = '';$attr_three = '';
-		$lineheight = '';$enroll_style = 'color:gray;';
-		$title_color = 'style="color:#000000;"';
+		$lineheight = '';
 		
-		if(in_array($nctid, $newtrial)) {
+		$enroll_style = 'color:gray;';
+		$title_link_color = '#000000;';
 		
-			$attr_three = ' class="newtrial" ';
-			$title_color = 'style="color:red;"';
-			$enroll_style = 'color:#973535;';
-
-		}
-		
+		$attr = ' ';
 		if(isset($fin_arr[$nctid]['edited']) && in_array('NCT/brief_title',$fin_arr[$nctid]['edited'])) {
-			$attr_one = ' highlight';
-			$attr_two = 'title="' . $fin_arr[$nctid]['edited']['NCT/brief_title'] . '" ';
+			$attr = ' highlight" title="' . $fin_arr[$nctid]['edited']['NCT/brief_title'];
+			$title_link_color = '#FF0000;';
+		} else if($fin_arr[$nctid]['new'] == 'y') {
+			$attr = '" title="New record';
+			$title_link_color = '#FF0000;';
 		}
 		
 		if(isset($upmDetails[$nctid])) {
 			
 			$rowspan = count($upmDetails[$nctid])+1;
-			if($rowspan > 3)
-				$lineheight = 'line-height:'.(0.4/$rowspan). 'em;';
-			else
-				$lineheight = 'line-height:0.4em;';
+			$lineheight = '';
 		}
 		
-		echo '<tr ' . $attr_three . ' >'
-			. '<td rowspan="' . $rowspan . '" class="title' . $attr_one . '" ' . $attr_two . '>' 
-			. '<div class="rowcollapse"><a ' . $title_color . ' href="http://clinicaltrials.gov/ct2/show/' . $pnctid . '">';
+		if($i%2 == 1) {
 		
-				if(isset($type_arr[$i]['NCT/acronym']) && $type_arr[$i]['NCT/acronym'] != '') {
-					echo '<b>' . htmlformat($type_arr[$i]['NCT/acronym']) 
-						. '</b>&nbsp;' . htmlformat($type_arr[$i]['NCT/brief_title']);
-							
-				} else {
-					echo htmlformat($type_arr[$i]['NCT/brief_title']);
-				}
+			$row_type_one = 'alttitle';
+			$row_type_two = 'altrow';
+			$regtype = 'altregion';
+			
+		} else {
+		
+			$row_type_one = 'title';
+			$row_type_two = 'row';
+			$regtype = 'region';
+		}	
+		
+		echo '<tr ' . (($fin_arr[$nctid]['new'] == 'y') ? 'class="newtrial" ' : ''). ' >'
+		. '<td rowspan="' . $rowspan . '" class="' . $row_type_one . ' ' . $attr . '">' 
+		. '<div class="rowcollapse"><a style="color:' . $title_link_color 
+		. '" href="http://clinicaltrials.gov/ct2/show/' . padnct($nctid) . '">';
+		
+		if(isset($type_arr[$i]['NCT/acronym']) && $type_arr[$i]['NCT/acronym'] != '') {
+			echo '<b>' . htmlformat($type_arr[$i]['NCT/acronym']) 
+				. '</b>&nbsp;' . htmlformat($type_arr[$i]['NCT/brief_title']);
+					
+		} else {
+			echo htmlformat($type_arr[$i]['NCT/brief_title']);
+		}
 				
-		echo '</a></div></td>';
+		echo ('</a></div></td>');
+		
 		foreach($fieldlist as $k => $v) {
 		
 			$attr = ' ';
 			$val = htmlformat($type_arr[$i][$v]);
 			if($v == "NCT/enrollment"){
 			
-				if(isset($fin_arr[$nctid]['edited']) && in_array('NCT/enrollment',$fin_arr[$nctid]['edited']))
-					$attr = 'class="highlight" title="' . $fin_arr[$nctid]['edited'][$v] . '" ';
+				if(isset($fin_arr[$nctid]['edited']) && in_array($v,$fin_arr[$nctid]['edited'])) {
+				
+					$attr = ' highlight" title="' . $fin_arr[$nctid]['edited'][$v];
+					$enroll_style = 'color:#973535;';
 					
-				echo '<td nowrap="nowrap" rowspan="' . $rowspan . '" style="background-color:#D8D3E0;text-align:center;" ' 
-				. $attr . ' ><div class="rowcollapse">';
+				}	else if($fin_arr[$nctid]['new'] == 'y') {
+				
+					$attr = '" title="New record';
+					$enroll_style = 'color:#973535;';
+				}
+				echo '<td nowrap="nowrap" rowspan="' . $rowspan . '" class="' . $row_type_two 
+				. $attr . '"><div class="rowcollapse">';
 				
 					if($type_arr[$i]["NCT/enrollment_type"] != '') {
 					
 						if($type_arr[$i]["NCT/enrollment_type"] == 'Anticipated') { 
-							echo '<span style="font-weight:bold;' . $enroll_style . '">'	. $val . '</span>';
+							echo '<span style="font-weight:bold;' . $enroll_style . '">' . $val . '</span>';
 							
 						} else if($type_arr[$i]["NCT/enrollment_type"] == 'Actual') {
 							echo $val;
@@ -1046,45 +1064,50 @@ function displayContent($params, $fieldlist, $time_machine, $type_arr, $edited, 
 						}
 					} else {
 						echo $val;
-
 					}
 				echo '</div></td>';  
 				
 			} else if($v == "NCT/start_date") {
 				
-				if(isset($fin_arr[$nctid]['edited']) && in_array('NCT/start_date', $fin_arr[$nctid]['edited']))
-					$attr = 'class="highlight" title="' . $fin_arr[$nctid]['edited'][$v] . '" ';
-
-				echo '<td rowspan="' . $rowspan . '" style="background-color:#EDEAFF;" ' . $attr . ' >'
+				if(isset($fin_arr[$nctid]['edited']) && in_array($v, $fin_arr[$nctid]['edited'])) {
+					$attr = ' highlight" title="' . $fin_arr[$nctid]['edited'][$v] ;
+				} else if($fin_arr[$nctid]['new'] == 'y') {
+					$attr = '" title="New record';
+				}
+				
+				echo '<td rowspan="' . $rowspan . '" class="' . $row_type_one . $attr . '" >'
 					. '<div class="rowcollapse">' . date('m/y',strtotime($type_arr[$i]["NCT/start_date"])) . '</div></td>';
 				
 				if(isset($fin_arr[$nctid]['edited']) && (in_array('NCT/completion_date', $fin_arr[$nctid]['edited']) 
 					|| in_array('NCT/primary_completion_date', $fin_arr[$nctid]['edited']))) {
 					
-					$attr = ' class="highlight" title="';
+					$attr = ' highlight" title="';
 					if(in_array('NCT/primary_completion_date', $fin_arr[$nctid]['edited']))
 						$attr .= $fin_arr[$nctid]['edited']['NCT/primary_completion_date'] . ' ';
 					
 					if(in_array('NCT/completion_date', $fin_arr[$nctid]['edited']))
 						$attr .= $fin_arr[$nctid]['edited']['NCT/completion_date'];
 					
-					$attr .= '" ';
+					$attr .= '';
+				} else if($fin_arr[$nctid]['new'] == 'y') {
+					$attr = '" title="New record';
 				}
 					
-				echo '<td rowspan="' . $rowspan . '" style="background-color:#EDEAFF;" ' . $attr . '>';
-					if($type_arr[$i]["inactive_date"] != '' || $type_arr[$i]["inactive_date"] != NULL) {
-						echo '<div class="rowcollapse">' . date('m/y',strtotime($type_arr[$i]["inactive_date"]))
-						. '</div></td>';
-					} else {
-						echo '&nbsp;</td>';
-					}
-					
+				echo '<td rowspan="' . $rowspan . '" class="' . $row_type_one . $attr . '">';
+				if($type_arr[$i]["inactive_date"] != '' || $type_arr[$i]["inactive_date"] != NULL) {
+					echo '<div class="rowcollapse">' . date('m/y',strtotime($type_arr[$i]["inactive_date"]))
+					. '</div></td>';
+				} else {
+					echo '&nbsp;</td>';
+				}
 			
 			} else if($v == "NCT/overall_status") {
 		
-				if(isset($fin_arr[$nctid]['edited']) && in_array('NCT/overall_status', $fin_arr[$nctid]['edited']))
+				if(isset($fin_arr[$nctid]['edited']) && in_array($v, $fin_arr[$nctid]['edited'])) {
 					$attr = 'class="highlight" title="' . $fin_arr[$nctid]['edited'][$v] . '" ';
-				
+				} else if($fin_arr[$nctid]['new'] == 'y') {
+				 	$attr = 'title="New record"' ;
+				} 
 				if(in_array($val, $actfilterarr))
 					$attr .= 'style="background-color:#D8D3E0"';
 				else
@@ -1096,63 +1119,77 @@ function displayContent($params, $fieldlist, $time_machine, $type_arr, $edited, 
 			
 			} else if($v == "NCT/condition") {
 			
-				if(isset($fin_arr[$nctid]['edited']) && in_array('NCT/condition', $fin_arr[$nctid]['edited']))
-					$attr = 'class="highlight" title="' . $fin_arr[$nctid]['edited'][$v] . '" ';
-
-				echo '<td rowspan="' . $rowspan . '" style="background-color:#EDEAFF;" ' . $attr . '>'
+				if(isset($fin_arr[$nctid]['edited']) && in_array($v, $fin_arr[$nctid]['edited'])) {
+					$attr = ' highlight" title="' . $fin_arr[$nctid]['edited'][$v];
+				} else if($fin_arr[$nctid]['new'] == 'y') {
+					$attr = '" title="New record';
+				}
+				
+				echo '<td rowspan="' . $rowspan . '" class="' . $row_type_one . $attr . '">'
 					. '<div class="rowcollapse">' . $val . '</div></td>';
 					
 			
 			} else if($v == "NCT/intervention_name") {
 			
-				if(isset($fin_arr[$nctid]['edited']) && in_array('NCT/intervention_name', $fin_arr[$nctid]['edited']))
-					$attr = 'class="highlight" title="' . $fin_arr[$nctid]['edited'][$v] . '" ';
-
-				echo '<td rowspan="' . $rowspan . '" style="background-color:#EDEAFF;" ' . $attr . '>'
+				if(isset($fin_arr[$nctid]['edited']) && in_array($v, $fin_arr[$nctid]['edited'])){
+					$attr = ' highlight" title="' . $fin_arr[$nctid]['edited'][$v];
+				} else if($fin_arr[$nctid]['new'] == 'y') {
+					$attr = '" title="New record';
+				}
+				
+				echo '<td rowspan="' . $rowspan . '" class="' . $row_type_one . $attr . '">'
 					. '<div class="rowcollapse">' . $val . '</div></td>';
 				
 			
 			} else if($v == "NCT/phase") {
 			
-				if(isset($fin_arr[$nctid]['edited']) && in_array('NCT/phase', $fin_arr[$nctid]['edited']))
+				if(isset($fin_arr[$nctid]['edited']) && in_array($v, $fin_arr[$nctid]['edited'])) {
 					$attr = 'class="highlight" title="' . $fin_arr[$nctid]['edited'][$v] . '" ';
-
+				} else if($fin_arr[$nctid]['new'] == 'y') {
+					$attr = 'title="New record"';
+				}
 				$phase = ($type_arr[$i][$v] == 'N/A') ? $ph : ('P' . $ph);
-				echo '<td rowspan="' . $rowspan . '" style="background-color:' . $phase_arr[$ph] . '; ' . $attr . '>'
+				echo '<td rowspan="' . $rowspan . '" style="background-color:' . $phase_arr[$ph] . ';" ' . $attr . '>'
 					. '<div class="rowcollapse">' . $phase . '</div></td>';
 			
 			
 			} else if($v == "NCT/lead_sponsor") { 
 			
 			
-				if(isset($fin_arr[$nctid]['edited']) && (in_array('NCT/lead_sponsor', $fin_arr[$nctid]['edited']) 
+				if(isset($fin_arr[$nctid]['edited']) && (in_array($v, $fin_arr[$nctid]['edited']) 
 					|| in_array('NCT/collaborator', $fin_arr[$nctid]['edited']))) {
 					
-					$attr = ' class="highlight" title="';
-					if(in_array('NCT/lead_sponsor', $fin_arr[$nctid]['edited']))
-						$attr .= $fin_arr[$nctid]['edited']['NCT/lead_sponsor'] . ' ';
+					$attr = ' highlight" title="';
+					if(in_array($v, $fin_arr[$nctid]['edited']))
+						$attr .= $fin_arr[$nctid]['edited'][$v] . ' ';
 					
-					if(in_array('NCT/collaborator', $fin_arr[$nctid]['edited']))
+					if(in_array('NCT/collaborator', $fin_arr[$nctid]['edited'])) {
 						$attr .= $fin_arr[$nctid]['edited']['NCT/collaborator'];
-					
-					$attr .= '" ';
+						$enroll_style = 'color:#973535;';
+					}
+					$attr .= '';
+				} else if($fin_arr[$nctid]['new'] == 'y') {
+					$attr = '" title="New record';
 				}
-				
-				echo '<td rowspan="' . $rowspan . '" style="background-color:#EDEAFF;" ' . $attr . '>'
+				echo '<td rowspan="' . $rowspan . '" class="' . $row_type_one . $attr . '">'
 					. '<div class="rowcollapse">' . $val . ' <span style="' . $enroll_style . '"> ' 
-					. $type_arr[$i]["NCT/collaborator"] 
-					. ' </span></div></td>';
+					. $type_arr[$i]["NCT/collaborator"] . ' </span></div></td>';
 				
 			} else if($v == 'region') {
-				echo '<td rowspan="' . $rowspan . '"><div class="rowcollapse">' . $val . '</div></td>';
+			
+				if($fin_arr[$nctid]['new'] == 'y') 
+					$attr = 'title="New record"';
+				
+				echo '<td class="' . $regtype . '" rowspan="' . $rowspan . '" ' . $attr . '>'
+				. '<div class="rowcollapse">' . $val . '</div></td>';
 			} 
 		}
 		
-		echo '<td></td>';
-		//getting the project completion chart
+		echo ('<td>&nbsp;</td>');
+		
+		//rendering project completion chart
 		echo $str = getCompletionChart($start_month, $start_year, $end_month, $end_year, $current_yr, $second_yr, $third_yr, 
 		$phase_arr[$ph], $type_arr[$i]['NCT/start_date'], $type_arr[$i]['inactive_date'], $lineheight);
-		//krumo($study);
 		
 		echo '</tr>';
 		
@@ -1160,104 +1197,121 @@ function displayContent($params, $fieldlist, $time_machine, $type_arr, $edited, 
 		
 			foreach($upmDetails[$nctid] as $k => $v) { 
 			
-				$str = '';$diamond = '';
+				$str = '';$ed_year = '';
 				$st_month = date('m',strtotime($v[2]));
 				$st_year = date('Y',strtotime($v[2]));
 				$ed_month = date('m',strtotime($v[3]));
 				$ed_year = date('Y',strtotime($v[3]));
 				$upm_link = $v[1];
 				$upm_title = 'title="' . htmlformat($v[0]) . '"';
-		
-				if($ed_year < $current_yr) $diamond = '&diams;'; 
+				$class = ($k > 0) ? 'class="upmcollapse"'  : 'class="firstupm"';
+				$diamond_arr = array();
+				
+				for($j=0;$j<count($upmDetails[$nctid]);$j++){
+				
+					$dt = date('Y',strtotime($upmDetails[$nctid][$j][3]));
+					if($dt < $current_yr)
+						$diamond_arr[$j] = $dt;
+				}
+				asort($diamond_arr);
+				
 				echo ('<tr>');
-				echo ('<td style="' . $lineheight . '" ' . $upm_title .'>'
-				. '<a href="' . $upm_link . '"><div style="text-align:center;color:#000;">' . $diamond . '</div></a></td>');
+				if($k == 0) {
+				
+					echo ('<td rowspan="' . count($upmDetails[$nctid]) . '" style="text-align:center;">');
+					
+					if(!empty($diamond_arr)) {
+					
+						$latest = array_search(end($diamond_arr), $diamond_arr);
+						$upm_link = $upmDetails[$nctid][$latest][1];
+						$upm_title = 'title="' . htmlformat($upmDetails[$nctid][$latest][0]) . '"';
+						
+						echo '<a href="' . $upm_link . '" style="color:#000;"><div ' 
+						. $upm_title . '>&diams;</div></a>';
+						
+					} else {
+						echo '<div>&nbsp;</div>';
+					}	
+					echo ('</td>');
+				}
+				//rendering upm (upcoming project completion) chart
 				echo $str = getUPMChart($st_month, $st_year, $ed_month, $ed_year, $current_yr, $second_yr, $third_yr, $v[2], 
-				$v[3], $lineheight, $upm_link, $upm_title);
+				$v[3], $upm_link, $upm_title, $class);
 				echo '</tr>';
 			}
 		}
 	}
 }
 
-function getUPMChart($start_month, $start_year, $end_month, $end_year, $current_yr, $second_yr, $third_yr, $start_date, $end_date, $lineheight, $upm_link, $upm_title)
+function getUPMChart($start_month, $start_year, $end_month, $end_year, $current_yr, $second_yr, $third_yr, $start_date, $end_date, $upm_link, $upm_title, $class)
 {
 	
 	$attr_two = 'class="rightborder"';
 	if($start_year < $current_yr) {
-		
+
+		$val = getColspan($start_date, $end_date);
+		$st = $start_month-1;
+
 		if($end_year < $current_yr) {
-			$value = '<td colspan="12" style="' . $lineheight . '">&nbsp;</td>'
-			. '<td colspan="12" style="' . $lineheight . '">&nbsp;</td>'
-			. '<td colspan="12" ' . $attr_two . ' style="' . $lineheight . '">&nbsp;</td>';
+		
+			$value = '<td colspan="12" style="' . $lineheight . '"><div ' . $class . '>&nbsp;</div></td>'
+			. '<td colspan="12" style="' . $lineheight . '"><div ' . $class . '>&nbsp;</div></td>'
+			. '<td colspan="12" ' . $attr_two . ' style="' . $lineheight . '"><div ' . $class . '>&nbsp;</div></td>';
 		  
 		} else if($end_year == $current_yr) { 
 		
 			if($end_month == 12) {
 			
-				$value = '<td style="background-color:#D8D3E0;'. $lineheight .'" colspan="' . $end_month . '" ' . $upm_title .' >'
-				. '<a href="' . $upm_link . '"><div>&nbsp;</div></a></td>'
-				. '<td colspan="12" style="' . $lineheight . '">&nbsp;</td><td colspan="12" ' . $attr_two 
-				. ' style="' . $lineheight . '">&nbsp;</td>';
+				$value = '<td style="background-color:#9966FF;'. $lineheight .'" colspan="' . $end_month . '">'
+				. '<a href="' . $upm_link . '"><div ' . $class . $upm_title . '>&nbsp;</div></a></td>'
+				. '<td colspan="12" style="' . $lineheight . '"><div ' . $class . '></div></td>'
+				. '<td colspan="12" ' . $attr_two . ' style="' . $lineheight . '"><div ' . $class . '></div></td>';
 				
 			} else { 
 			
-				$value = '<td style="background-color:#D8D3E0;' . $lineheight . '" colspan="' . $end_month . '" ' . $upm_title 
-				.' >'
-				. '<a href="' . $upm_link . '"><div>&nbsp;</div></a></td>'
-				. '<td style="width:'.(12-$end_month).'px;' . $lineheight . '" colspan="' . (12-$end_month) . '">&nbsp;</td>'
-				. '<td colspan="12" style="' . $lineheight . '"><div style="width:40px;">&nbsp;</div></td>'
-				. '<td colspan="12" ' . $attr_two . ' style="' . $lineheight . '"><div style="width:40px;">&nbsp;</div></td>';
+				$value = '<td style="background-color:#9966FF;' . $lineheight . '" colspan="' . $end_month . '">' 
+				. '<a href="' . $upm_link . '"><div ' . $class . $upm_title . '>&nbsp;</div></a></td>'
+				. '<td style="width:'.(12-$end_month).'px;' . $lineheight . '" colspan="' . (12-$end_month) 
+				. '"><div ' . $class . '></div></td>'
+				. '<td colspan="12" style="' . $lineheight . '"><div ' . $class . '></div></td>'
+				. '<td colspan="12" ' . $attr_two . ' style="' . $lineheight . '"><div ' . $class . '></div></td>';
 				
 			}
 		} else if($end_year == $second_yr) { 
 		 
 			if($end_month == 12) {
 			
-				$value = '<td style="background-color:#D8D3E0;'. $lineheight .'" colspan="12" ' . $upm_title .' >'
-				. '<a href="' . $upm_link . '"><div>&nbsp;</div></a></td>'
-				. '<td style="background-color:#D8D3E0;'. $lineheight .'" colspan="12" ' . $upm_title .' >'
-				. '<a href="' . $upm_link . '"><div>&nbsp;</div></a></td>'
-				. '<td colspan="12" ' . $attr_two . ' style="' . $lineheight . '">&nbsp;</td>';
+				$value = '<td style="background-color:#9966FF;'. $lineheight .'" colspan="24">'
+				. '<a href="' . $upm_link . '"><div ' . $class . $upm_title . '>&nbsp;</div></a></td>'
+				. '<td colspan="12" ' . $attr_two . ' style="' . $lineheight . '"><div ' . $class . '></div></td>';
 				
 			} else {
 			
-				$value = '<td style="background-color:#D8D3E0;'. $lineheight .'" colspan="12" ' . $upm_title .' >'
-				. '<a href="' . $upm_link . '"><div>&nbsp;</div></a></td>'
-				. '<td style="background-color:#D8D3E0;'. $lineheight .'" colspan="' . $end_month . '" ' . $upm_title .' >'
-				. '<a href="' . $upm_link . '"><div>&nbsp;</div></a></td>'
-				. '<td colspan="' . (12-$end_month) . '" style="' . $lineheight . '">&nbsp;</td>'
-				. '<td colspan="12" ' . $attr_two . ' style="' . $lineheight . '">&nbsp;</td>';
+				$value = '<td style="background-color:#9966FF;'. $lineheight .'" colspan="' . (12+$end_month) . '">' 
+				. '<a href="' . $upm_link . '"><div ' . $class . $upm_title . '>&nbsp;</div></a></td>'
+				. '<td colspan="' . (12-$end_month) . '" style="' . $lineheight . '"><div ' . $class . '></div></td>'
+				. '<td colspan="12" ' . $attr_two . ' style="' . $lineheight . '"><div ' . $class . '></div></td>';
 				
 			}
 	
 		} else if($end_year == $third_yr) { 
-		
+			
 			if($end_month == 12) {
 			
-				$value = '<td style="background-color:#D8D3E0;'. $lineheight .'" colspan="12" ' . $upm_title .' >'
-				. '<a href="' . $upm_link . '"><div>&nbsp;</div></a></td>'
-				. '<td style="background-color:#D8D3E0;'. $lineheight .'" colspan="12" ' . $upm_title .' >'
-				. '<a href="' . $upm_link . '"><div>&nbsp;</div></a></td>'
-				. '<td style="background-color:#D8D3E0;'. $lineheight .'" colspan="12" ' . $attr_two . ' ' . $upm_title .' >'
-				. '<a href="' . $upm_link . '"><div>&nbsp;</div></a></td>';
+				$value = '<td ' . $class . ' style="background-color:#9966FF;'. $lineheight .'" colspan="36" ' 
+				. $attr_two . '>' . '<a href="' . $upm_link . '"><div ' . $class . $upm_title . '>&nbsp;</div></a></td>';
+				
 			} else {
-				$value = '<td style="background-color:#D8D3E0;'. $lineheight .'" colspan="12" ' . $upm_title .' >'
-				. '<a href="' . $upm_link . '"><div>&nbsp;</div></a></td>'
-				. '<td style="background-color:#D8D3E0;'. $lineheight .'" colspan="12" ' . $upm_title .' >'
-				. '<a href="' . $upm_link . '"><div>&nbsp;</div></a></td>'
-				. '<td style="background-color:#D8D3E0;'. $lineheight .'" colspan="' . $end_month . '" ' . $upm_title .' >'
-				. '<a href="' . $upm_link . '"><div>&nbsp;</div></a></td>'
-				. '<td colspan="' . (12-$end_month) . '" ' . $attr_two . ' style="' . $lineheight . '">&nbsp;</td>';
+				$value = '<td style="background-color:#9966FF;'. $lineheight .'" colspan="' . (24+$end_month) . '" ' 
+				. $class . '>' . '<a href="' . $upm_link . '"><div ' . $class . $upm_title . '>&nbsp;</div></a></td>'
+				. '<td colspan="' . (12-$end_month) . '" ' . $attr_two . ' style="' . $lineheight 
+				. '"><div ' . $class . '></div></td>';
 			}
 		 
-		} else { 
-			$value = '<td colspan="12" style="background-color:#D8D3E0;'. $lineheight .'" ' . $upm_title .' >'
-				. '<a href="' . $upm_link . '"><div>&nbsp;</div></a></td>'
-				. '<td colspan="12" style="background-color:#D8D3E0;'. $lineheight .'" ' . $upm_title .' >'
-				. '<a href="' . $upm_link . '"><div>&nbsp;</div></a></td>'
-				. '<td colspan="12" style="background-color:#D8D3E0;'. $lineheight .'" ' . $attr_two . ' ' . $upm_title .' >'
-				. '<a href="' . $upm_link . '"><div>&nbsp;</div></a></td>';
+		} else {
+		 
+			$value = '<td colspan="36" style="background-color:#9966FF;'. $lineheight .'" ' . $attr_two . ' >' 
+			. '<a href="' . $upm_link . '"><div ' . $class . $upm_title . '></div></a></td>';
 		}	
 	
 	} else if($start_year == $current_yr) {
@@ -1266,40 +1320,39 @@ function getUPMChart($start_month, $start_year, $end_month, $end_year, $current_
 		$st = $start_month-1;
 		if($end_year == $current_yr) {
 			
-			$value = (($st != 0) ? '<td colspan="' . $st . '" style="' . $lineheight . '">&nbsp;</td>' : '')
-				. '<td style="background-color:#D8D3E0;'. $lineheight .'" colspan="' . $val . '" ' . $upm_title .' >'
-				. '<a href="' . $upm_link . '"><div>&nbsp;</div></a></td>'
+			$value = (($st != 0) ? '<td colspan="' . $st . '" style="' . $lineheight . '"></td>' : '')
+				. '<td style="background-color:#9966FF;'. $lineheight .'" colspan="' . $val . '">'
+				. '<a href="' . $upm_link . '"><div ' . $class . $upm_title . '>&nbsp;</div></a></td>'
 				. (((12 - ($st+$val)) != 0) ? '<td colspan="' .(12 - ($st+$val)) . '"  style="' . $lineheight 
-				. '">&nbsp;</td>' : '')
-				. '<td colspan="12" style="' . $lineheight . '">&nbsp;</td>'
-				. '<td colspan="12" ' . $attr_two . ' style="' . $lineheight . '">&nbsp;</td>';
+				. '"><div ' . $class . '></div></td>' : '')
+				. '<td colspan="12" style="' . $lineheight . '"><div ' . $class . '></div></td>'
+				. '<td colspan="12" ' . $attr_two . ' style="' . $lineheight . '"><div ' . $class . '></div></td>';
 		
 		} else if($end_year == $second_yr) { 
 		 
-			$value = (($st != 0) ? '<td colspan="' . $st . '" style="' . $lineheight . '">&nbsp;</td>' : '')
-				. '<td style="background-color:#D8D3E0;'. $lineheight .'" colspan="' . $val . '" ' . $upm_title .' >'
-				. '<a href="' . $upm_link . '"><div>&nbsp;</div></a></td>'
+			$value = (($st != 0) ? '<td colspan="' . $st . '" style="' . $lineheight . '"><div ' . $class 
+				. '></div></td>' : '')
+				. '<td style="background-color:#9966FF;'. $lineheight .'" colspan="' . $val . '">'
+				. '<a href="' . $upm_link . '"><div ' . $class . $upm_title .' >&nbsp;</div></a></td>'
 				. (((24 - ($val+$st)) != 0) ? '<td colspan="' .(24 - ($val+$st)) . '" style="' . $lineheight 
-				. '">&nbsp;</td>' : '')
-				. '<td colspan="12" ' . $attr_two . ' style="' . $lineheight . '">&nbsp;</td>';
+				. '"><div ' . $class . '></div></td>' : '')
+				. '<td colspan="12" ' . $attr_two . ' style="' . $lineheight . '"><div ' . $class . '></div></td>';
 	
 		} else if($end_year == $third_yr) {
 				
-			$value = (($st != 0) ? '<td colspan="' . $st . '" style="' . $lineheight . '">&nbsp;</td>' : '')
-				. '<td style="background-color:#D8D3E0;'. $lineheight .'" colspan="' . $val . '" ' . $upm_title .' >'
-				. '<a href="' . $upm_link . '"><div>&nbsp;</div></a></td>'
+			$value = (($st != 0) ? '<td colspan="' . $st . '" style="' . $lineheight . '"><div ' . $class 
+				. '></div></td>' : '')
+				. '<td style="background-color:#9966FF;'. $lineheight .'" colspan="' . $val . '">'
+				. '<a href="' . $upm_link . '"><div ' . $class . $upm_title .'>&nbsp;</div></a></td>'
 				. (((36 - ($val+$st)) != 0) ? '<td colspan="' .(36 - ($val+$st)) . '" ' . $attr_two 
-				. '  style="' . $lineheight . '">&nbsp;</td>' : '');
+				. '  style="' . $lineheight . '"><div ' . $class . '></div></td>' : '');
 	
 		} else if($end_year > $third_yr){
 		
-			$value = (($st != 0) ? '<td colspan="' . $st . '" style="' . $lineheight . '">&nbsp;</td>' : '')
-				. '<td style="background-color:#D8D3E0;'. $lineheight .'" colspan="' . (12 - $st) . '"  ' . $upm_title .' >'
-				. '<a href="' . $upm_link . '"><div>&nbsp;</div></a></td>'
-				. '<td style="background-color:#D8D3E0;'. $lineheight .'" colspan="12" ' . $upm_title .' >'
-				. '<a href="' . $upm_link . '"><div>&nbsp;</div></a></td>'
-				. '<td style="background-color:#D8D3E0;'. $lineheight .'" colspan="12" ' . $attr_two . ' ' . $upm_title .' >'
-				. '<a href="' . $upm_link . '"><div>&nbsp;</div></a></td>';
+			$value = (($st != 0) ? '<td colspan="' . $st . '" style="' . $lineheight . '"><div ' . $class 
+				. '></div></td>' : '')
+				. '<td style="background-color:#9966FF;'. $lineheight .'" colspan="' . (36 - $st) . '" ' . $attr_two . '>' 
+				. '<a href="' . $upm_link . '"><div ' . $class . $upm_title . '>&nbsp;</div></a></td>';
 		}
 		
 	} 
@@ -1347,12 +1400,13 @@ function getCompletionChart($start_month, $start_year, $end_month, $end_year, $c
 		} else if($end_year == $second_yr) { 
 		 
 			if($end_month == 12) {
-				$value = '<td style="background-color:' . $bg_color . ';' . $lineheight . '" colspan="12">&nbsp;</td>'
-				. '<td style="background-color:' . $bg_color . ';' . $lineheight . '" colspan="12">&nbsp;</td>'
+			
+				$value = '<td style="background-color:' . $bg_color . ';' . $lineheight . '" colspan="24">&nbsp;</td>'
 				. '<td colspan="12" ' . $attr_two . ' style="' . $lineheight . '">&nbsp;</td>';
+				
 			} else {
-				$value = '<td style="background-color:' . $bg_color . ';' . $lineheight . '" colspan="12">&nbsp;</td>'
-				. '<td style="background-color:' . $bg_color . ';' . $lineheight . '" colspan="' . $end_month . '">&nbsp;</td>'
+				$value = '<td style="background-color:' . $bg_color . ';' . $lineheight . '" colspan="' . (12+$end_month) 
+				. '">&nbsp;</td>'
 				. '<td colspan="' . (12-$end_month) . '" style="' . $lineheight . '">&nbsp;</td>'
 				. '<td colspan="12" ' . $attr_two . ' style="' . $lineheight . '">&nbsp;</td>';
 			}
@@ -1360,20 +1414,19 @@ function getCompletionChart($start_month, $start_year, $end_month, $end_year, $c
 		} else if($end_year == $third_yr) { 
 		
 			if($end_month == 12) {
-				$value = '<td style="background-color:' . $bg_color . ';' . $lineheight . '" colspan="12">&nbsp;</td>'
-				. '<td style="background-color:' . $bg_color . ';' . $lineheight . '" colspan="12">&nbsp;</td>'
-				. '<td style="background-color:' . $bg_color . ';' . $lineheight . '" colspan="12" ' . $attr_two . '>&nbsp;</td>';
+			
+				$value = '<td style="background-color:' . $bg_color . ';' . $lineheight . '" colspan="36" ' . $attr_two 
+				. '>&nbsp;</td>';
+				
 			} else {
-				$value = '<td style="background-color:' . $bg_color . ';' . $lineheight . '" colspan="12">&nbsp;</td>'
-				. '<td style="background-color:' . $bg_color . ';' . $lineheight . '" colspan="12">&nbsp;</td>'
-				. '<td style="background-color:' . $bg_color . ';' . $lineheight . '" colspan="' . $end_month . '">&nbsp;</td>'
+				$value = '<td style="background-color:' . $bg_color . ';' . $lineheight . '" colspan="' . (24+$end_month) 
+				. '">&nbsp;</td>'
 				. '<td colspan="' . (12-$end_month) . '" ' . $attr_two . ' style="'.$lineheight.'">&nbsp;</td>';
 			}
 		 
 		} else { 
-			$value = '<td colspan="12" style="background-color:' . $bg_color . ';' . $lineheight . '">&nbsp;</td>'
-				. '<td colspan="12" style="background-color:' . $bg_color . ';' . $lineheight . '">&nbsp;</td>'
-				. '<td colspan="12" style="background-color:' . $bg_color . ';' . $lineheight . '" ' . $attr_two . '>&nbsp;</td>';
+			$value = '<td colspan="36" style="background-color:' . $bg_color . ';' . $lineheight . '" ' . $attr_two 
+			. '>&nbsp;</td>';
 		}	
 	
 	} else if($start_year == $current_yr) {
@@ -1407,9 +1460,8 @@ function getCompletionChart($start_month, $start_year, $end_month, $end_year, $c
 		} else if($end_year > $third_yr){
 		
 			$value = (($st != 0) ? '<td colspan="' . $st . '" style="' . $lineheight . '">&nbsp;</td>' : '')
-				. '<td style="background-color:' . $bg_color . ';' . $lineheight . '" colspan="' . (12 - $st) . '">&nbsp;</td>'
-				. '<td style="background-color:' . $bg_color . ';' . $lineheight . '" colspan="12">&nbsp;</td>'
-				. '<td style="background-color:' . $bg_color . ';' . $lineheight . '" colspan="12" ' . $attr_two . '>&nbsp;</td>';
+				. '<td style="background-color:' . $bg_color . ';' . $lineheight . '" colspan="' . (36 - $st) . '" ' 
+				. $attr_two . '>&nbsp;</td>';
 		}
 		
 	} 
@@ -1434,54 +1486,26 @@ function getCorrespondingUPM($id_arr) {
 		}
 		
 	}
-	//echo "<pre>";print_r($upm);
 	return $upm;
-}
-
-//checking if a trial is new
-function chkNewTrial($id_arr, $time,$edited) {
-	
-	$newTrial = array();
-	foreach($id_arr as $val) {
-	
-		$val = explode(', ',$val);
-		$studycatData=mysql_fetch_assoc(mysql_query("SELECT `dv`.`studycat` FROM `data_values` `dv` LEFT JOIN 
-		`data_cats_in_study` `dc` ON (`dc`.`id`=`dv`.`studycat`) WHERE `dv`.`field`='1' AND `dv`.`val_int`='" 
-		. $val[0] . "' AND `dc`.`larvol_id`='" . $val[1]  . "'"));
-		
-		$sql = mysql_query("SELECT `dv`.`id`, `dv`.`added` FROM `data_values` `dv` WHERE `studycat`='" 
-				. $studycatData['studycat'] . "' AND (`dv`.`added`>='" . date('Y-m-d',strtotime($edited,strtotime($time))) 
-				. "' AND `dv`.`added`<= '" . date('Y-m-d',strtotime($time)) . "' AND dv.superceded IS NULL )");
-	
-		if(mysql_num_rows($sql) >= 1) {
-			$newTrial[] = $val[0];
-		}
-	}
-	//$newTrial[] = '601900';
-	return $newTrial;
 }
 
 //return NCT fields given an NCTID
 function getNCT($nct_id,$larvol_id,$time,$edited)
 {	
-
-	$study = array();
-
+	$study = array('edited' => array(), 'new' => 'n');
+	
 	$fieldnames = array('nct_id', 'brief_title', 'enrollment', 'enrollment_type', 'acronym', 'start_date', 'completion_date',
 	'primary_completion_date', 'overall_status', 'condition', 'intervention_name', 'phase', 'lead_sponsor', 'collaborator');
 
 	$studycatData=mysql_fetch_assoc(mysql_query("SELECT `dv`.`studycat` FROM `data_values` `dv` LEFT JOIN `data_cats_in_study` `dc` ON (`dc`.`id`=`dv`.`studycat`) WHERE `dv`.`field`='1' AND `dv`.`val_int`='".$nct_id."' AND `dc`.`larvol_id`='"
 	.$larvol_id."'"));
 	
-	$sql="SELECT DISTINCT `df`.`name` AS `fieldname`, `df`.`id` AS `fieldid`, `df`.`type` AS `fieldtype`, `dv`.`studycat`, dv.* FROM `data_values` `dv` LEFT JOIN `data_fields` `df` ON (`df`.`id`=`dv`.`field`) WHERE `df`.`name` IN ('" 
+	$res = mysql_query("SELECT DISTINCT `df`.`name` AS `fieldname`, `df`.`id` AS `fieldid`, `df`.`type` AS `fieldtype`, `dv`.`studycat`, dv.* FROM `data_values` `dv` LEFT JOIN `data_fields` `df` ON (`df`.`id`=`dv`.`field`) WHERE `df`.`name` IN ('" 
 	. join("','",$fieldnames) . "') AND `studycat`='" . $studycatData['studycat'] 
 	. "' AND (`dv`.`superceded`<'" . date('Y-m-d',strtotime($time)) . "' AND `dv`.`superceded`>= '" 
-	. date('Y-m-d',strtotime($edited,strtotime($time))) . "')";
+	. date('Y-m-d',strtotime($edited,strtotime($time))) . "')");
 
-    $changedFields = mysql_query($sql);
-	$study['edited'] = array();
-	
-	while ($row=mysql_fetch_assoc($changedFields)){  
+	while ($row = mysql_fetch_assoc($res)) { 
 	
 		$study['edited'][] = 'NCT/'.$row['fieldname'];
 		
@@ -1505,6 +1529,13 @@ function getNCT($nct_id,$larvol_id,$time,$edited)
 		
 	}
 	
+	$result = mysql_query("SELECT `dv`.`id`, `dv`.`added` FROM `data_values` `dv` WHERE `studycat`='" 
+			. $studycatData['studycat'] . "' AND (`dv`.`added`>='" . date('Y-m-d',strtotime($edited,strtotime($time))) 
+			. "' AND `dv`.`added`<= '" . date('Y-m-d',strtotime($time)) . "' AND dv.superceded IS NULL )");
+
+	if(mysql_num_rows($result) >= 1) {
+		$study['new'] = 'y';
+	} 
 	return $study;
 }
 
