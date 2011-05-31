@@ -25,7 +25,7 @@ $page = 0;
 
 
 //controller
-	pr($_POST);
+	//pr($_POST);
 	
 //save operation
 if($_POST['save']=='Save')
@@ -34,8 +34,42 @@ if($_POST['save']=='Save')
 }
 //
 
+//import controller
+if(isset($_FILES['uploadedfile']) && $_FILES['uploadedfile']['size']>1)
+{
+	$tsv = $_FILES['uploadedfile']['tmp_name'];
+	$row = file($tsv,FILE_IGNORE_NEW_LINES|FILE_SKIP_EMPTY_LINES);
+	$success = 0;
+	$fail = 0;
+	foreach($row as $k=>$v)
+	{
+		if($k==0)
+		{
+			$importKeys = explode("\t",$v);
+		}
+		else 
+		{
+			$importVal = explode("\t",$v);
+			$importVal = array_map(function ($v){return "'".mysql_real_escape_string($v)."'";},$importVal);
+			if(saveUpm(null,1,$importKeys,$importVal,$k))
+			{
+				$success ++;
+			}
+			else 
+			{			
+				$fail ++;
+			}
+		}
+
+	}
+	echo 'Imported '.$success.' records, Failed entries '.$fail;
+}
+
 //pagination
 upmPagination($page,$limit);
+//pagination controller
+
+
 //normal listing
 echo '<br/>';
 echo '<div class="clr">';
@@ -45,6 +79,11 @@ if($_POST['add_new_record']=='Add New Record' || $_GET['id'])
 	echo '<div>';
 	addEditUpm($id);
 	echo '</div>';
+}
+
+if($_POST['import']=='Import' || $_POST['uploadedfile'])
+{
+	importUpm();
 }
 
 upmListing($page,$limit);
@@ -205,8 +244,24 @@ function am2($v,$dbVal)
 	return '<option value="'.$v.'">'.$v.'</option>';
 }
 
-function saveUpm($post)
+function saveUpm($post,$import=0,$importKeys=array(),$importVal=array(),$line=null)
 {
+	//import save
+	if($import ==1)
+	{
+		$query = "insert into upm (".implode(',',$importKeys).") values (".implode(',',$importVal).")";
+		if(mysql_query($query))
+		{
+		return true;
+		}
+		else
+		{
+			softdie('Cannot import row data at line '.$line.'<br/>');
+			return false;
+		}
+		
+	}
+	
 	$id = ($post['id'])?$post['id']:null;	
 	if(!$id)//insert
 	{
@@ -254,7 +309,12 @@ function importUpm()
 {
 	echo '<div class="clr">';
 	echo '<fieldset>';
+	echo '<form name="upm_import" method="post" enctype="multipart/form-data" action="upm.php">';
+	echo '<input name="uploadedfile" type="file" /><br />
+		 <input type="submit"  value="Upload File" />';
+	echo '</form>';
 	echo '</fieldset>';
 	echo '</div>';	
+
 }
 echo '</html>';
