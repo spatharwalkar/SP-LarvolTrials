@@ -696,18 +696,6 @@ class ContentManager
 				$sp->value = implode(' OR ', $leadingIDs);
 				$excel_params = array($sp);
 				
-				$sp = new SearchParam();
-				$sp->field 	= 'inactive_date';
-				$sp->action = 'search';
-				$sp->value 	= implode(' OR ', $leadingIDs);
-				$endate_params = array($sp);
-	
-				$sp = new SearchParam();
-				$sp->field 	= 'region';
-				$sp->action = 'search';
-				$sp->value 	= implode(' OR ', $leadingIDs);
-				$region_params = array($sp);
-
 			} else {
 				$excel_params = $excel_params['params'];
 			}
