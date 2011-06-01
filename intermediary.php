@@ -456,8 +456,6 @@ class ContentManager
 
 				$excel_params 	= array();
 				$params 		= array();
-				$endate_params	= array();
-				$region_params	= array();
 				$arr = array();$fin_arr = array();
 				$arrr = array();$trial_arr = array();
 				
@@ -487,18 +485,6 @@ class ContentManager
 					$sp->value = implode(' OR ', $leadingIDs);
 					$excel_params = array($sp);
 
-					$sp = new SearchParam();
-					$sp->field 	= 'inactive_date';
-					$sp->action = 'search';
-					$sp->value 	= implode(' OR ', $leadingIDs);
-					$endate_params = array($sp);
-	
-					$sp = new SearchParam();
-					$sp->field 	= 'region';
-					$sp->action = 'search';
-					$sp->value 	= implode(' OR ', $leadingIDs);
-					$region_params = array($sp);
-
 				} else {	
 					$excel_params = $excel_params['params'];
 				}
@@ -508,7 +494,7 @@ class ContentManager
 					$results = count($leadingIDs);
 				}
 				
-				$params = array_merge($this->params, $excel_params, $endate_params, $ins_params);
+				$params = array_merge($this->params, $excel_params, $ins_params);
 				
 				echo ('<input type="hidden" name="params['.$pk.']" value="' . $_GET['params'][$pk] . '"/>'
 						. '<input type="hidden" name="leading['.$pk.']" value="' . $_GET['leading'][$pk] . '"/>');
@@ -658,8 +644,6 @@ class ContentManager
 			
 			$excel_params 	= array();
 			$ins_params 	= array();
-			$endate_params	= array();
-			$region_params	= array();
 			$fin_arr 		= array();
 			$activephase 	= array();
 			$inactivephase 	= array();
@@ -715,7 +699,7 @@ class ContentManager
 				$ins_params = array($sp);
 			}
 			
-			$params = array_merge($this->params, $excel_params, $endate_params, $region_params, $ins_params);
+			$params = array_merge($this->params, $excel_params, $ins_params);
 			
 			echo('<br clear="all"/><br/>');		
 			echo('<form id="frmOtt" name="frmOtt" method="get" action="intermediary.php">');
