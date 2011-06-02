@@ -16,17 +16,17 @@ echo '<div class="error">Under Development</div>';
 
 //declare all globals
 global $db;
-
+global $page;
 //set docs per list
 $limit = 50;
 $totalCount = getTotalUpmCount();
 $maxPage = $totalCount%$limit;
-$page = 0;
+if(!isset($_POST['oldval']))
+$page=0;
 
 
-//controller
-	//pr($_POST);
-	
+
+
 //save operation
 if($_POST['save']=='Save')
 {
@@ -66,7 +66,7 @@ if(isset($_FILES['uploadedfile']) && $_FILES['uploadedfile']['size']>1)
 }
 
 //pagination
-upmPagination($page,$limit);
+upmPagination($limit);
 //pagination controller
 
 
@@ -86,31 +86,46 @@ if($_POST['import']=='Import' || $_POST['uploadedfile'])
 	importUpm();
 }
 
-upmListing($page,$limit);
+$start = $page*$limit;
+upmListing($start,$limit);
 echo '</div>';
 
 
 
 
-function upmPagination($page,$limit)
+function upmPagination($limit)
 {
-		$visualPage = $page+1;
+	global $page;	
+	
+	if(isset($_POST['next']))
+	$page = $_POST['oldval']+1;
+	elseif(isset($_POST['back']))
+	$page = $_POST['oldval']-1;	
+	elseif(isset($_POST['jump']))
+	$page = $_POST['jumpno']-1;
+	
+	
+	$visualPage = $page+1;
+	
+	$oldVal = $page;
+		
 		$pend  = $visualPage*$limit;
+		$pstart = (($pend - $limit+1)>0)?$pend - $limit+1:0;
 		echo('<form name="pager" method="post" action="upm.php"><fieldset>'
 	//		 	. '<legend>Page ' . $page . ' of ' . ceil($results / $db->set['results_per_page'])
 			 	. '<legend>Page ' . $visualPage . ' '
 	//			. ': records ' . $pstart . '-' . (($page*$db->set['results_per_page']>$results)?$results:$pend) . ' of ' . $results
-				. ': records '.$visualPage.'-'.$pend.' of <iframe src="upmSearchCount.php?web=1"></iframe>'
+				. ': records '.$pstart.'-'.$pend.' of <iframe src="upmSearchCount.php?web=1"></iframe>'
 				. '</legend>'
 				. '<input type="submit" name="jump" value="Jump" style="width:0;height:0;border:0;padding:0;margin:0;"/> '
 				. '<input name="page" type="hidden" value="' . $page . '" /><input name="search" type="hidden" value="1" />'
-				. ($pstart > 1 ? '<input type="submit" name="back" value="&lt; Back" />' : '')
+				. ($pstart > 1 ? '<input type="submit" name="back" value="&lt; Back" onclick="javascript:history(-1);return false;" />' : '')
 				. ' <input type="text" name="jumpno" value="' . $visualPage . '" size="6" />'
 				. '<input type="submit" name="jump" value="Jump" /> '
-				//. ($pend < $results ? '<input type="submit" name="next" value="Next &gt;" />' : '')
 				. '<input type="submit" name="next" value="Next &gt;" />'
 				. '<input type="submit" value="Add New Record" name="add_new_record">'
 				. '<input type="submit" value="Import" name="import">'
+				. '<input type="hidden" value="'.$oldVal.'" name="oldval">'
 				. '</fieldset></form>');
 
 				
@@ -246,6 +261,7 @@ function am2($v,$dbVal)
 
 function saveUpm($post,$import=0,$importKeys=array(),$importVal=array(),$line=null)
 {
+	global $now;
 	//import save
 	if($import ==1)
 	{
@@ -272,6 +288,16 @@ function saveUpm($post,$import=0,$importKeys=array(),$importVal=array(),$line=nu
 	}
 	else//update
 	{
+		$query = "select * from upm where id=$id";
+		$res = mysql_query($query)or softdie('Updating invalid row');
+		while($row = mysql_fetch_assoc($res))
+		{
+			$historyArr = $row;
+		}
+		array_push($historyArr,date('Y-m-d',$now));
+		$historyArr = array_map(am,array_keys($historyArr),$historyArr);
+		$query = "insert into upm_history values (".implode(',',$historyArr).")";
+		mysql_query($query)or softdie('Cannot update history for upm id '.$historyArr['id']);
 		$post = array_map(am1,array_keys($post),array_values($post));
 		array_pop($post);		
 		$query = "update upm set ".implode(',',$post)." where id=".$id;
