@@ -1045,7 +1045,7 @@ function displayContent($params, $fieldlist, $time_machine, $type_arr, $edited, 
 				echo '<td rowspan="' . $rowspan . '" class="' . $row_type_one . $attr . '" >'
 					. '<div class="rowcollapse">' . date('m/y',strtotime($type_arr[$i]["NCT/start_date"])) . '</div></td>';
 				
-				
+				$attr = '';
 				if($fin_arr[$nctid]['new'] == 'y') 
 					$attr = ' title="New record" ';
 					
@@ -1439,6 +1439,7 @@ function getNCT($nct_id,$larvol_id,$time,$edited)
 		$study['edited'][] = 'NCT/'.$row['fieldname'];
 		
 		//getting previous value for updated trials
+
 		if($row['fieldtype'] == 'enum') { 
 		
 			$result = mysql_query('SELECT value FROM data_enumvals WHERE `field`=' . $row['fieldid'] 
