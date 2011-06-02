@@ -5,9 +5,6 @@ require_once('krumo/class.krumo.php');
 require_once('db.php');
 require_once('include.search.php');
 if(!isset($_GET['cparams']) && !isset($_GET['params'])) die('cell not set');
-ini_set('max_execution_time','36000');	//10 hours
-set_time_limit(0);
-ignore_user_abort(1);
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -348,8 +345,8 @@ class ContentManager
 		
 		if(isset($_GET['list'])) $sort .= '&amp;list='.$_GET['list']; else $sort .= '&amp;list=active'; 
 		if(isset($_GET['sortorder']) && $_GET['sortorder'] != '') $sort .= '&amp;sortorder=' . rawurlencode($_GET['sortorder']);
-		if(isset($_GET['ins_params']) && $_GET['ins_params'] != '') $sort .= '&amp;ins_params=' 
-		. rawurlencode($_GET['ins_params']);
+		if(isset($_GET['instparams']) && $_GET['instparams'] != '') $sort .= '&amp;instparams=' 
+		. rawurlencode($_GET['instparams']);
 		if(isset($_GET['institution']) && $_GET['institution'] != '') { 
 			
 			foreach($_GET['institution'] as $k => $v)
@@ -649,7 +646,6 @@ class ContentManager
 			$activephase 	= array();
 			$inactivephase 	= array();
 			
-			
 			$excel_params 	= unserialize(gzinflate(base64_decode($_GET['params'])));
 			$rowlabel 		= $excel_params['rowlabel'];
 			$columnlabel 	= $excel_params['columnlabel'];
@@ -690,7 +686,6 @@ class ContentManager
 				$results = count($leadingIDs);
 			}
 			
-
 			if(isset($_GET['institution']) && $_GET['institution'] != '') {
 				array_push($this->fid, 'institution_type');
 				$sp = new SearchParam();
@@ -726,6 +721,10 @@ class ContentManager
 				//checking for updated and new trials
 				$nct[$val['NCT/nct_id']] = getNCT($val['NCT/nct_id'], $val['larvol_id'], $this->gentime, $this->edited);
 				
+				if (!is_array($nct[$val['NCT/nct_id']])) { 
+					$nct=array();
+					$val['NCT/intervention_name'] = '(study not in database)';
+				}
 				$trial_arr[] = $val['NCT/nct_id'] . ', ' . $val['larvol_id']; 
 				if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) {
 				
@@ -750,9 +749,9 @@ class ContentManager
 			/*--------------------------------------------------------
 			|Variables set for count when filtered by institution_type
 			---------------------------------------------------------*/
-			if(isset($_GET['ins_params']) && $_GET['ins_params'] != '') {
+			if(isset($_GET['instparams']) && $_GET['instparams'] != '') {
 			
-				$insparams = $_GET['ins_params'];
+				$insparams = $_GET['instparams'];
 			
 			} else {
 			
@@ -840,7 +839,7 @@ class ContentManager
 			
 			echo ('<input type="hidden" name="params" value="' . $_GET['params'] . '"/>'
 					. '<input type="hidden" name="leading" value="' . $_GET['leading'] . '"/>'
-					. '<input type="hidden" name="ins_params" value="' . $insparams . '" />');
+					. '<input type="hidden" name="instparams" value="' . $insparams . '" />');
 					
 			$this->displayHeader();
 
@@ -862,7 +861,7 @@ class ContentManager
 				
 			} else {
 			
-				echo ('<tr><th colspan="46" class="norecord" align="left">No record found.</th></tr>');
+				echo ('<tr><th colspan="47" class="norecord" align="left">No record found.</th></tr>');
 			}
 		}
 		
@@ -981,13 +980,11 @@ function displayContent($params, $fieldlist, $time_machine, $type_arr, $edited, 
 		
 			$row_type_one = 'alttitle';
 			$row_type_two = 'altrow';
-			$regtype = 'altregion';
 			
 		} else {
 		
 			$row_type_one = 'title';
 			$row_type_two = 'row';
-			$regtype = 'region';
 		}	
 		
 		echo '<tr ' . (($fin_arr[$nctid]['new'] == 'y') ? 'class="newtrial" ' : ''). ' >'
@@ -1077,16 +1074,14 @@ function displayContent($params, $fieldlist, $time_machine, $type_arr, $edited, 
 			} else if($v == "NCT/overall_status") {
 		
 				if(isset($fin_arr[$nctid]['edited']) && in_array($v, $fin_arr[$nctid]['edited'])) {
-					$attr = 'class="highlight" title="' . $fin_arr[$nctid]['edited'][$v] . '" ';
+					$attr = 'class="highlight ' . $row_type_two . ' " title="' . $fin_arr[$nctid]['edited'][$v] . '" ';
 				} else if($fin_arr[$nctid]['new'] == 'y') {
-				 	$attr = 'title="New record"' ;
-				} 
-				if(in_array($val, $actfilterarr))
-					$attr .= 'style="background-color:#D8D3E0"';
-				else
-					$attr .= 'style="background-color:#EDEAFF"';
+				 	$attr = 'title="New record" class="' . $row_type_two . '"' ;
+				} else {
+					$attr = 'class="' . $row_type_two . '"';
+				}
 					
-				echo '<td ' . $attr . 'rowspan="' . $rowspan . '">'  
+				echo '<td ' . $attr . ' rowspan="' . $rowspan . '">'  
 					. '<div class="rowcollapse">' . $val . '</div></td>';
 			
 			
@@ -1153,7 +1148,7 @@ function displayContent($params, $fieldlist, $time_machine, $type_arr, $edited, 
 				if($fin_arr[$nctid]['new'] == 'y') 
 					$attr = 'title="New record"';
 				
-				echo '<td class="' . $regtype . '" rowspan="' . $rowspan . '" ' . $attr . '>'
+				echo '<td class="' . $row_type_one . '" rowspan="' . $rowspan . '" ' . $attr . '>'
 				. '<div class="rowcollapse">' . $val . '</div></td>';
 			} 
 		}
@@ -1178,35 +1173,11 @@ function displayContent($params, $fieldlist, $time_machine, $type_arr, $edited, 
 				$upm_link = $v[1];
 				$upm_title = 'title="' . htmlformat($v[0]) . '"';
 				$class = ($k > 0) ? 'class="upmcollapse"'  : 'class="firstupm"';
-				$diamond_arr = array();
-				
-				for($j=0;$j<count($upmDetails[$nctid]);$j++){
-				
-					$dt = date('Y',strtotime($upmDetails[$nctid][$j][3]));
-					if($dt < $current_yr)
-						$diamond_arr[$j] = $dt;
-				}
-				asort($diamond_arr);
 				
 				echo ('<tr>');
-				if($k == 0) {
+				echo ('<td style="text-align:center;' . (($k < count($upmDetails[$nctid])-1) ? 'border-bottom:0;' : '' ) 
+				. '"><a href="' . $upm_link . '" style="color:#000;"><div ' . $upm_title . '>&diams;</div></a></td>');
 				
-					echo ('<td rowspan="' . count($upmDetails[$nctid]) . '" style="text-align:center;">');
-					
-					if(!empty($diamond_arr)) {
-					
-						$latest = array_search(end($diamond_arr), $diamond_arr);
-						$upm_link = $upmDetails[$nctid][$latest][1];
-						$upm_title = 'title="' . htmlformat($upmDetails[$nctid][$latest][0]) . '"';
-						
-						echo '<a href="' . $upm_link . '" style="color:#000;"><div ' 
-						. $upm_title . '>&diams;</div></a>';
-						
-					} else {
-						echo '<div>&nbsp;</div>';
-					}	
-					echo ('</td>');
-				}
 				//rendering upm (upcoming project completion) chart
 				echo $str = getUPMChart($st_month, $st_year, $ed_month, $ed_year, $current_yr, $second_yr, $third_yr, $v[2], 
 				$v[3], $upm_link, $upm_title, $class);
@@ -1450,6 +1421,7 @@ function getCorrespondingUPM($id_arr) {
 		$val = explode(', ',$val);
 		$result = mysql_query("SELECT corresponding_trial, event_description, event_link, start_date, end_date 
 					FROM upm WHERE corresponding_trial = '" . $val[0] . "' ");
+
 		
 		while($row = mysql_fetch_assoc($result)) {
 			$upm[$row['corresponding_trial']][] = array($row['event_description'], 
@@ -1502,9 +1474,12 @@ function getNCT($nct_id,$larvol_id,$time,$edited)
 		
 	}
 	
-	$result = mysql_query("SELECT `dv`.`id`, `dv`.`added` FROM `data_values` `dv` WHERE `studycat`='" 
-			. $studycatData['studycat'] . "' AND (`dv`.`added`>='" . date('Y-m-d',strtotime($edited,strtotime($time))) 
-			. "' AND `dv`.`added`<= '" . date('Y-m-d',strtotime($time)) . "' AND dv.superceded IS NULL )");
+	$sql = "SELECT `clinical_study`.`larvol_id` FROM `clinical_study` WHERE `clinical_study`.`import_time` <= '" 
+		. date('Y-m-d',strtotime($time)) . "' AND `clinical_study`.`larvol_id` = '" .  $larvol_id
+		. "' AND `clinical_study`.`import_time` >= '" 
+		. date('Y-m-d',strtotime($edited,strtotime($time))) . "' ";
+		
+	$result = mysql_query($sql);		
 
 	if(mysql_num_rows($result) >= 1) {
 		$study['new'] = 'y';
@@ -1532,5 +1507,4 @@ function htmlformat($str)
 {
 	return htmlspecialchars($str);
 }
-
 ?>
