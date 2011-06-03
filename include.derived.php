@@ -1,17 +1,8 @@
 <?php
-ini_set('max_execution_time','360000');	//100 hours
 require_once('db.php');
 require_once('include.search.php');
-if(!$db->loggedIn())
-{
-	header('Location: ' . urlPath() . 'index.php');
-	exit;
-}
-
 
 //start inactive date functions
-
-
 function refreshLarvolIds()
 {
 	global $db;

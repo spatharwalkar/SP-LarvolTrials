@@ -6,6 +6,9 @@ if(!$db->loggedIn() || ($db->user->userlevel!='admin' && $db->user->userlevel!='
 	exit;
 }
 require_once('include.search.php');
+
+ini_set('max_execution_time','360000');	//100 hours
+
 $mapping = institutionMapping();
 echo('Processing...<br />');
 
