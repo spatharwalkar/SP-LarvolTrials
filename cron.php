@@ -60,7 +60,7 @@ define('COMPLETED', 0);
 $max_process_per_item=1;
 
 //Mapping of type code to name
-$rtype_name=array(0=>"Heatmap","CD","Updatescan");
+$rtype_name=array(0=>"Heatmap","Updatescan");
 
 require_once('db.php');
 require_once('run_updatereport.php');
@@ -505,56 +505,6 @@ if($current_tasks_count==0)
 						}
 					}
 					
-					//Check if scheduled item has any competitordashboard reports
-					$query = 'SELECT competitor FROM schedule_competitor WHERE schedule=' . $item['id'];
-					$res = mysql_query($query) or die('Bad SQL query getting competitordashboards for item | ' . mysql_error() . ' | ' . $query);
-					$results = array();	while($row = mysql_fetch_assoc($res)) $results[] = $row;
-					foreach($results as $row)
-					{
-						$query = 'SELECT name FROM rpt_competitor WHERE id=' . $row['competitor'] . ' LIMIT 1';
-						$res2 = mysql_query($query) or die('Bad SQL query getting report name. Error: '.mysql_error());
-						$row2 = mysql_fetch_assoc($res2);
-						if($row2 === false)
-						{
-							echo('CD not found.' . $nl);
-							continue;
-						}
-						$query = 'SELECT * FROM reports_status WHERE report_type="1" AND run_id="' . $item['id']	. '" AND type_id="' . $row['competitor']	. '"';
-						$res3=mysql_query($query) or die('Bad SQL query getting report_status. Error: '.mysql_error());
-						$row3 = mysql_fetch_assoc($res3);
-						if($row3['status']==READY)
-						{
-							echo('Entry to generate report already present - CD ' . $row['competitor'] . $nl);
-						}
-						else if($row3['status']==RUNNING)
-						{
-							echo('Report already running - CD ' . $row['competitor'] . $nl);
-						}
-						else if($row3['status']==CANCELLED)
-						{
-							//echo('Report requeued after cancellation - CD ' . $row['competitor'] . $nl);
-							echo('Report was cancelled during previous execution - CD ' . $row['competitor'] . $nl);
-							echo ('Please add the report manaully from Status page to ensure it runs '. $nl);
-						}
-						else if($row3['status']==ERROR)
-						{
-							echo ('Report encountered an error during previous execution - CD ' . $row['competitor'] . $nl);
-							echo ('Please add the report manaully from Status page to ensure it runs '. $nl);
-						}
-						else
-						{
-							//Delete the previously completed report entry if it exists
-							$query = 'DELETE FROM reports_status WHERE report_type="1" AND run_id="' . $item['id']	. '" AND type_id="' . $row['competitor']	. '"';
-							$res5=mysql_query($query);
-							if($res5==1)
-								echo('Deleted previous entry to generate report - CD ' . $row['competitor'] . $nl);
-							
-							//Add new entry with status ready
-							$query = 'INSERT INTO reports_status SET run_id="' . $item['id']	.'",type_id="' . $row['competitor']	. '",report_type="1",status="'.READY.'"';
-							$res4 = mysql_query($query) or die('Bad SQL query updating report_status. Error: '.mysql_error());
-							echo('Adding entry to generate report - CD ' . $row['competitor'] . $nl);
-						}
-					}
 					
 					//Check if scheduled item has any updatescan reports
 					$query = 'SELECT updatescan FROM schedule_updatescans WHERE schedule=' . $item['id'];
@@ -785,24 +735,6 @@ if($current_tasks_count==0)
 				$res = mysql_query($query) or die('Bad SQL Query updating heatmap report status to done');
 			}
 			else if($run_rpttype[$current_run_item]==1)
-			{
-				$query = 'SELECT name FROM rpt_competitor WHERE id=' . $run_typids[$current_run_item] . ' LIMIT 1';
-				$res = mysql_query($query) or die('Bad SQL query getting report name');
-				$row = mysql_fetch_assoc($res);
-				
-				$query = 'UPDATE reports_status SET start_time="' . date("Y-m-d H:i:s",strtotime('now')).'",status="'.RUNNING.'", process_id="'.$pid.'" WHERE run_id="' .$run_ids[$current_run_item] .'" AND report_type ="1" AND type_id="' .$run_typids[$current_run_item] .'"';
-				$res = mysql_query($query) or die('Bad SQL Query updating CD report status to running');
-				
-				try{
-						$files[$row['name']] = runCompetitor($run_typids[$current_run_item], true);
-					}catch(Exception $e){
-						$files[$row['name']] = messageInExcel('Report failed with message: ' . $e->getMessage());
-					}
-					
-				$query = 'UPDATE reports_status SET update_time="' . date("Y-m-d H:i:s",strtotime('now')).'",complete_time="' . date("Y-m-d H:i:s",strtotime('now')).'",status="'.COMPLETED.'" WHERE run_id="' .$run_ids[$current_run_item] .'" AND report_type ="1" AND type_id="' .$run_typids[$current_run_item] .'"';
-				$res = mysql_query($query) or die('Bad SQL Query updating CD report status to done');
-			}
-			else if($run_rpttype[$current_run_item]==2)
 			{
 				$query = 'SELECT name FROM rpt_update WHERE id=' . $run_typids[$current_run_item] . ' LIMIT 1';
 				$res = mysql_query($query) or die('Bad SQL query getting report name');
@@ -1154,57 +1086,7 @@ elseif($current_tasks_count==1)
 						}
 					}
 					
-					//Check if scheduled item has any competitordashboard reports
-					$query = 'SELECT competitor FROM schedule_competitor WHERE schedule=' . $item['id'];
-					$res = mysql_query($query) or die('Bad SQL query getting competitordashboards for item | ' . mysql_error() . ' | ' . $query);
-					$results = array();	while($row = mysql_fetch_assoc($res)) $results[] = $row;
-					foreach($results as $row)
-					{
-						$query = 'SELECT name FROM rpt_competitor WHERE id=' . $row['competitor'] . ' LIMIT 1';
-						$res2 = mysql_query($query) or die('Bad SQL query getting report name. Error: '.mysql_error());
-						$row2 = mysql_fetch_assoc($res2);
-						if($row2 === false)
-						{
-							echo('CD not found.' . $nl);
-							continue;
-						}
-						$query = 'SELECT * FROM reports_status WHERE report_type="1" AND run_id="' . $item['id']	. '" AND type_id="' . $row['competitor']	. '"';
-						$res3=mysql_query($query) or die('Bad SQL query getting report_status. Error: '.mysql_error());
-						$row3 = mysql_fetch_assoc($res3);
-						if($row3['status']==READY)
-						{
-							echo('Entry to generate report already present - CD ' . $row['competitor'] . $nl);
-						}
-						else if($row3['status']==RUNNING)
-						{
-							echo('Report already running - CD ' . $row['competitor'] . $nl);
-						}
-						else if($row3['status']==CANCELLED)
-						{
-							//echo('Report requeued after cancellation - CD ' . $row['competitor'] . $nl);
-							echo('Report was cancelled during previous execution - CD ' . $row['competitor'] . $nl);
-							echo ('Please add the report manaully from Status page to ensure it runs '. $nl);
-						}
-						else if($row3['status']==ERROR)
-						{
-							echo ('Report encountered an error during previous execution - CD ' . $row['competitor'] . $nl);
-							echo ('Please add the report manaully from Status page to ensure it runs '. $nl);
-						}
-						else
-						{
-							//Delete the previously completed report entry if it exists
-							$query = 'DELETE FROM reports_status WHERE report_type="1" AND run_id="' . $item['id']	. '" AND type_id="' . $row['competitor']	. '"';
-							$res5=mysql_query($query);
-							if($res5==1)
-								echo('Deleted previous entry to generate report - CD ' . $row['competitor'] . $nl);
-							
-							//Add new entry with status ready
-							$query = 'INSERT INTO reports_status SET run_id="' . $item['id']	.'",type_id="' . $row['competitor']	. '",report_type="1",status="'.READY.'"';
-							$res4 = mysql_query($query) or die('Bad SQL query updating report_status. Error: '.mysql_error());
-							echo('Adding entry to generate report - CD ' . $row['competitor'] . $nl);
-						}
-					}
-					
+			
 					//Check if scheduled item has any updatescan reports
 					$query = 'SELECT updatescan FROM schedule_updatescans WHERE schedule=' . $item['id'];
 					$res = mysql_query($query) or die('Bad SQL query getting updatescans for item. Error: '.mysql_error());
@@ -1434,24 +1316,6 @@ elseif($current_tasks_count==1)
 				$res = mysql_query($query) or die('Bad SQL Query updating heatmap report status to done');
 			}
 			else if($run_rpttype[$current_run_item]==1)
-			{
-				$query = 'SELECT name FROM rpt_competitor WHERE id=' . $run_typids[$current_run_item] . ' LIMIT 1';
-				$res = mysql_query($query) or die('Bad SQL query getting report name');
-				$row = mysql_fetch_assoc($res);
-				
-				$query = 'UPDATE reports_status SET start_time="' . date("Y-m-d H:i:s",strtotime('now')).'",status="'.RUNNING.'", process_id="'.$pid.'" WHERE run_id="' .$run_ids[$current_run_item] .'" AND report_type ="1" AND type_id="' .$run_typids[$current_run_item] .'"';
-				$res = mysql_query($query) or die('Bad SQL Query updating CD report status to running');
-				
-				try{
-						$files[$row['name']] = runCompetitor($run_typids[$current_run_item], true);
-					}catch(Exception $e){
-						$files[$row['name']] = messageInExcel('Report failed with message: ' . $e->getMessage());
-					}
-					
-				$query = 'UPDATE reports_status SET update_time="' . date("Y-m-d H:i:s",strtotime('now')).'",complete_time="' . date("Y-m-d H:i:s",strtotime('now')).'",status="'.COMPLETED.'" WHERE run_id="' .$run_ids[$current_run_item] .'" AND report_type ="1" AND type_id="' .$run_typids[$current_run_item] .'"';
-				$res = mysql_query($query) or die('Bad SQL Query updating CD report status to done');
-			}
-			else if($run_rpttype[$current_run_item]==2)
 			{
 				$query = 'SELECT name FROM rpt_update WHERE id=' . $run_typids[$current_run_item] . ' LIMIT 1';
 				$res = mysql_query($query) or die('Bad SQL query getting report name');
@@ -1814,56 +1678,6 @@ elseif($current_tasks_count>1)
 									}
 								}
 								
-								//Check if scheduled item has any competitordashboard reports
-								$query = 'SELECT competitor FROM schedule_competitor WHERE schedule=' . $item['id'];
-								$res = mysql_query($query) or die('Bad SQL query getting competitordashboards for item | ' . mysql_error() . ' | ' . $query);
-								$results = array();	while($row = mysql_fetch_assoc($res)) $results[] = $row;
-								foreach($results as $row)
-								{
-									$query = 'SELECT name FROM rpt_competitor WHERE id=' . $row['competitor'] . ' LIMIT 1';
-									$res2 = mysql_query($query) or die('Bad SQL query getting report name. Error: '.mysql_error());
-									$row2 = mysql_fetch_assoc($res2);
-									if($row2 === false)
-									{
-										echo('CD not found.' . $nl);
-										continue;
-									}
-									$query = 'SELECT * FROM reports_status WHERE report_type="1" AND run_id="' . $item['id']	. '" AND type_id="' . $row['competitor']	. '"';
-									$res3=mysql_query($query) or die('Bad SQL query getting report_status. Error: '.mysql_error());
-									$row3 = mysql_fetch_assoc($res3);
-									if($row3['status']==READY)
-									{
-										echo('Entry to generate report already present - CD ' . $row['competitor'] . $nl);
-									}
-									else if($row3['status']==RUNNING)
-									{
-										echo('Report already running - CD ' . $row['competitor'] . $nl);
-									}
-									else if($row3['status']==CANCELLED)
-									{
-										//echo('Report requeued after cancellation - CD ' . $row['competitor'] . $nl);
-										echo('Report was cancelled during previous execution - CD ' . $row['competitor'] . $nl);
-										echo ('Please add the report manaully from Status page to ensure it runs '. $nl);
-									}
-									else if($row3['status']==ERROR)
-									{
-										echo ('Report encountered an error during previous execution - CD ' . $row['competitor'] . $nl);
-										echo ('Please add the report manaully from Status page to ensure it runs '. $nl);
-									}
-									else
-									{
-										//Delete the previously completed report entry if it exists
-										$query = 'DELETE FROM reports_status WHERE report_type="1" AND run_id="' . $item['id']	. '" AND type_id="' . $row['competitor']	. '"';
-										$res5=mysql_query($query);
-										if($res5==1)
-											echo('Deleted previous entry to generate report - CD ' . $row['competitor'] . $nl);
-										
-										//Add new entry with status ready
-										$query = 'INSERT INTO reports_status SET run_id="' . $item['id']	.'",type_id="' . $row['competitor']	. '",report_type="1",status="'.READY.'"';
-										$res4 = mysql_query($query) or die('Bad SQL query updating report_status. Error: '.mysql_error());
-										echo('Adding entry to generate report - CD ' . $row['competitor'] . $nl);
-									}
-								}
 								
 								//Check if scheduled item has any updatescan reports
 								$query = 'SELECT updatescan FROM schedule_updatescans WHERE schedule=' . $item['id'];
@@ -2094,24 +1908,6 @@ elseif($current_tasks_count>1)
 							$res = mysql_query($query) or die('Bad SQL Query updating heatmap report status to done');
 						}
 						else if($run_rpttype[$current_run_item]==1)
-						{
-							$query = 'SELECT name FROM rpt_competitor WHERE id=' . $run_typids[$current_run_item] . ' LIMIT 1';
-							$res = mysql_query($query) or die('Bad SQL query getting report name');
-							$row = mysql_fetch_assoc($res);
-							
-							$query = 'UPDATE reports_status SET start_time="' . date("Y-m-d H:i:s",strtotime('now')).'",status="'.RUNNING.'", process_id="'.$pid.'" WHERE run_id="' .$run_ids[$current_run_item] .'" AND report_type ="1" AND type_id="' .$run_typids[$current_run_item] .'"';
-							$res = mysql_query($query) or die('Bad SQL Query updating CD report status to running');
-							
-							try{
-									$files[$row['name']] = runCompetitor($run_typids[$current_run_item], true);
-								}catch(Exception $e){
-									$files[$row['name']] = messageInExcel('Report failed with message: ' . $e->getMessage());
-								}
-								
-							$query = 'UPDATE reports_status SET update_time="' . date("Y-m-d H:i:s",strtotime('now')).'",complete_time="' . date("Y-m-d H:i:s",strtotime('now')).'",status="'.COMPLETED.'" WHERE run_id="' .$run_ids[$current_run_item] .'" AND report_type ="1" AND type_id="' .$run_typids[$current_run_item] .'"';
-							$res = mysql_query($query) or die('Bad SQL Query updating CD report status to done');
-						}
-						else if($run_rpttype[$current_run_item]==2)
 						{
 							$query = 'SELECT name FROM rpt_update WHERE id=' . $run_typids[$current_run_item] . ' LIMIT 1';
 							$res = mysql_query($query) or die('Bad SQL query getting report name');
@@ -2464,57 +2260,7 @@ elseif($current_tasks_count>1)
 										
 									}
 								}
-								
-								//Check if scheduled item has any competitordashboard reports
-								$query = 'SELECT competitor FROM schedule_competitor WHERE schedule=' . $item['id'];
-								$res = mysql_query($query) or die('Bad SQL query getting competitordashboards for item | ' . mysql_error() . ' | ' . $query);
-								$results = array();	while($row = mysql_fetch_assoc($res)) $results[] = $row;
-								foreach($results as $row)
-								{
-									$query = 'SELECT name FROM rpt_competitor WHERE id=' . $row['competitor'] . ' LIMIT 1';
-									$res2 = mysql_query($query) or die('Bad SQL query getting report name. Error: '.mysql_error());
-									$row2 = mysql_fetch_assoc($res2);
-									if($row2 === false)
-									{
-										echo('CD not found.' . $nl);
-										continue;
-									}
-									$query = 'SELECT * FROM reports_status WHERE report_type="1" AND run_id="' . $item['id']	. '" AND type_id="' . $row['competitor']	. '"';
-									$res3=mysql_query($query) or die('Bad SQL query getting report_status. Error: '.mysql_error());
-									$row3 = mysql_fetch_assoc($res3);
-									if($row3['status']==READY)
-									{
-										echo('Entry to generate report already present - CD ' . $row['competitor'] . $nl);
-									}
-									else if($row3['status']==RUNNING)
-									{
-										echo('Report already running - CD ' . $row['competitor'] . $nl);
-									}
-									else if($row3['status']==CANCELLED)
-									{
-										//echo('Report requeued after cancellation - CD ' . $row['competitor'] . $nl);
-										echo('Report was cancelled during previous execution - CD ' . $row['competitor'] . $nl);
-										echo ('Please add the report manaully from Status page to ensure it runs '. $nl);
-									}
-									else if($row3['status']==ERROR)
-									{
-										echo ('Report encountered an error during previous execution - CD ' . $row['competitor'] . $nl);
-										echo ('Please add the report manaully from Status page to ensure it runs '. $nl);
-									}
-									else
-									{
-										//Delete the previously completed report entry if it exists
-										$query = 'DELETE FROM reports_status WHERE report_type="1" AND run_id="' . $item['id']	. '" AND type_id="' . $row['competitor']	. '"';
-										$res5=mysql_query($query);
-										if($res5==1)
-											echo('Deleted previous entry to generate report - CD ' . $row['competitor'] . $nl);
-										
-										//Add new entry with status ready
-										$query = 'INSERT INTO reports_status SET run_id="' . $item['id']	.'",type_id="' . $row['competitor']	. '",report_type="1",status="'.READY.'"';
-										$res4 = mysql_query($query) or die('Bad SQL query updating report_status. Error: '.mysql_error());
-										echo('Adding entry to generate report - CD ' . $row['competitor'] . $nl);
-									}
-								}
+
 								
 								//Check if scheduled item has any updatescan reports
 								$query = 'SELECT updatescan FROM schedule_updatescans WHERE schedule=' . $item['id'];
@@ -2745,24 +2491,6 @@ elseif($current_tasks_count>1)
 							$res = mysql_query($query) or die('Bad SQL Query updating heatmap report status to done');
 						}
 						else if($run_rpttype[$current_run_item]==1)
-						{
-							$query = 'SELECT name FROM rpt_competitor WHERE id=' . $run_typids[$current_run_item] . ' LIMIT 1';
-							$res = mysql_query($query) or die('Bad SQL query getting report name');
-							$row = mysql_fetch_assoc($res);
-							
-							$query = 'UPDATE reports_status SET start_time="' . date("Y-m-d H:i:s",strtotime('now')).'",status="'.RUNNING.'", process_id="'.$pid.'" WHERE run_id="' .$run_ids[$current_run_item] .'" AND report_type ="1" AND type_id="' .$run_typids[$current_run_item] .'"';
-							$res = mysql_query($query) or die('Bad SQL Query updating CD report status to running');
-							
-							try{
-									$files[$row['name']] = runCompetitor($run_typids[$current_run_item], true);
-								}catch(Exception $e){
-									$files[$row['name']] = messageInExcel('Report failed with message: ' . $e->getMessage());
-								}
-								
-							$query = 'UPDATE reports_status SET update_time="' . date("Y-m-d H:i:s",strtotime('now')).'",complete_time="' . date("Y-m-d H:i:s",strtotime('now')).'",status="'.COMPLETED.'" WHERE run_id="' .$run_ids[$current_run_item] .'" AND report_type ="1" AND type_id="' .$run_typids[$current_run_item] .'"';
-							$res = mysql_query($query) or die('Bad SQL Query updating CD report status to done');
-						}
-						else if($run_rpttype[$current_run_item]==2)
 						{
 							$query = 'SELECT name FROM rpt_update WHERE id=' . $run_typids[$current_run_item] . ' LIMIT 1';
 							$res = mysql_query($query) or die('Bad SQL query getting report name');
@@ -3117,56 +2845,6 @@ elseif($current_tasks_count>1)
 								}
 							}
 							
-							//Check if scheduled item has any competitordashboard reports
-							$query = 'SELECT competitor FROM schedule_competitor WHERE schedule=' . $item['id'];
-							$res = mysql_query($query) or die('Bad SQL query getting competitordashboards for item | ' . mysql_error() . ' | ' . $query);
-							$results = array();	while($row = mysql_fetch_assoc($res)) $results[] = $row;
-							foreach($results as $row)
-							{
-								$query = 'SELECT name FROM rpt_competitor WHERE id=' . $row['competitor'] . ' LIMIT 1';
-								$res2 = mysql_query($query) or die('Bad SQL query getting report name. Error: '.mysql_error());
-								$row2 = mysql_fetch_assoc($res2);
-								if($row2 === false)
-								{
-									echo('CD not found.' . $nl);
-									continue;
-								}
-								$query = 'SELECT * FROM reports_status WHERE report_type="1" AND run_id="' . $item['id']	. '" AND type_id="' . $row['competitor']	. '"';
-								$res3=mysql_query($query) or die('Bad SQL query getting report_status. Error: '.mysql_error());
-								$row3 = mysql_fetch_assoc($res3);
-								if($row3['status']==READY)
-								{
-									echo('Entry to generate report already present - CD ' . $row['competitor'] . $nl);
-								}
-								else if($row3['status']==RUNNING)
-								{
-									echo('Report already running - CD ' . $row['competitor'] . $nl);
-								}
-								else if($row3['status']==CANCELLED)
-								{
-									//echo('Report requeued after cancellation - CD ' . $row['competitor'] . $nl);
-									echo('Report was cancelled during previous execution - CD ' . $row['competitor'] . $nl);
-									echo ('Please add the report manaully from Status page to ensure it runs '. $nl);
-								}
-								else if($row3['status']==ERROR)
-								{
-									echo ('Report encountered an error during previous execution - CD ' . $row['competitor'] . $nl);
-									echo ('Please add the report manaully from Status page to ensure it runs '. $nl);
-								}
-								else
-								{
-									//Delete the previously completed report entry if it exists
-									$query = 'DELETE FROM reports_status WHERE report_type="1" AND run_id="' . $item['id']	. '" AND type_id="' . $row['competitor']	. '"';
-									$res5=mysql_query($query);
-									if($res5==1)
-										echo('Deleted previous entry to generate report - CD ' . $row['competitor'] . $nl);
-									
-									//Add new entry with status ready
-									$query = 'INSERT INTO reports_status SET run_id="' . $item['id']	.'",type_id="' . $row['competitor']	. '",report_type="1",status="'.READY.'"';
-									$res4 = mysql_query($query) or die('Bad SQL query updating report_status. Error: '.mysql_error());
-									echo('Adding entry to generate report - CD ' . $row['competitor'] . $nl);
-								}
-							}
 							
 							//Check if scheduled item has any updatescan reports
 							$query = 'SELECT updatescan FROM schedule_updatescans WHERE schedule=' . $item['id'];
@@ -3397,24 +3075,6 @@ elseif($current_tasks_count>1)
 						$res = mysql_query($query) or die('Bad SQL Query updating heatmap report status to done');
 					}
 					else if($run_rpttype[$current_run_item]==1)
-					{
-						$query = 'SELECT name FROM rpt_competitor WHERE id=' . $run_typids[$current_run_item] . ' LIMIT 1';
-						$res = mysql_query($query) or die('Bad SQL query getting report name');
-						$row = mysql_fetch_assoc($res);
-						
-						$query = 'UPDATE reports_status SET start_time="' . date("Y-m-d H:i:s",strtotime('now')).'",status="'.RUNNING.'", process_id="'.$pid.'" WHERE run_id="' .$run_ids[$current_run_item] .'" AND report_type ="1" AND type_id="' .$run_typids[$current_run_item] .'"';
-						$res = mysql_query($query) or die('Bad SQL Query updating CD report status to running');
-						
-						try{
-								$files[$row['name']] = runCompetitor($run_typids[$current_run_item], true);
-							}catch(Exception $e){
-								$files[$row['name']] = messageInExcel('Report failed with message: ' . $e->getMessage());
-							}
-							
-						$query = 'UPDATE reports_status SET update_time="' . date("Y-m-d H:i:s",strtotime('now')).'",complete_time="' . date("Y-m-d H:i:s",strtotime('now')).'",status="'.COMPLETED.'" WHERE run_id="' .$run_ids[$current_run_item] .'" AND report_type ="1" AND type_id="' .$run_typids[$current_run_item] .'"';
-						$res = mysql_query($query) or die('Bad SQL Query updating CD report status to done');
-					}
-					else if($run_rpttype[$current_run_item]==2)
 					{
 						$query = 'SELECT name FROM rpt_update WHERE id=' . $run_typids[$current_run_item] . ' LIMIT 1';
 						$res = mysql_query($query) or die('Bad SQL query getting report name');
@@ -3769,57 +3429,6 @@ elseif($current_tasks_count>1)
 							}
 						}
 						
-						//Check if scheduled item has any competitordashboard reports
-						$query = 'SELECT competitor FROM schedule_competitor WHERE schedule=' . $item['id'];
-						$res = mysql_query($query) or die('Bad SQL query getting competitordashboards for item | ' . mysql_error() . ' | ' . $query);
-						$results = array();	while($row = mysql_fetch_assoc($res)) $results[] = $row;
-						foreach($results as $row)
-						{
-							$query = 'SELECT name FROM rpt_competitor WHERE id=' . $row['competitor'] . ' LIMIT 1';
-							$res2 = mysql_query($query) or die('Bad SQL query getting report name. Error: '.mysql_error());
-							$row2 = mysql_fetch_assoc($res2);
-							if($row2 === false)
-							{
-								echo('CD not found.' . $nl);
-								continue;
-							}
-							$query = 'SELECT * FROM reports_status WHERE report_type="1" AND run_id="' . $item['id']	. '" AND type_id="' . $row['competitor']	. '"';
-							$res3=mysql_query($query) or die('Bad SQL query getting report_status. Error: '.mysql_error());
-							$row3 = mysql_fetch_assoc($res3);
-							if($row3['status']==READY)
-							{
-								echo('Entry to generate report already present - CD ' . $row['competitor'] . $nl);
-							}
-							else if($row3['status']==RUNNING)
-							{
-								echo('Report already running - CD ' . $row['competitor'] . $nl);
-							}
-							else if($row3['status']==CANCELLED)
-							{
-								//echo('Report requeued after cancellation - CD ' . $row['competitor'] . $nl);
-								echo('Report was cancelled during previous execution - CD ' . $row['competitor'] . $nl);
-								echo ('Please add the report manaully from Status page to ensure it runs '. $nl);
-							}
-							else if($row3['status']==ERROR)
-							{
-								echo ('Report encountered an error during previous execution - CD ' . $row['competitor'] . $nl);
-								echo ('Please add the report manaully from Status page to ensure it runs '. $nl);
-							}
-							else
-							{
-								//Delete the previously completed report entry if it exists
-								$query = 'DELETE FROM reports_status WHERE report_type="1" AND run_id="' . $item['id']	. '" AND type_id="' . $row['competitor']	. '"';
-								$res5=mysql_query($query);
-								if($res5==1)
-									echo('Deleted previous entry to generate report - CD ' . $row['competitor'] . $nl);
-								
-								//Add new entry with status ready
-								$query = 'INSERT INTO reports_status SET run_id="' . $item['id']	.'",type_id="' . $row['competitor']	. '",report_type="1",status="'.READY.'"';
-								$res4 = mysql_query($query) or die('Bad SQL query updating report_status. Error: '.mysql_error());
-								echo('Adding entry to generate report - CD ' . $row['competitor'] . $nl);
-							}
-						}
-						
 						//Check if scheduled item has any updatescan reports
 						$query = 'SELECT updatescan FROM schedule_updatescans WHERE schedule=' . $item['id'];
 						$res = mysql_query($query) or die('Bad SQL query getting updatescans for item. Error: '.mysql_error());
@@ -4050,24 +3659,6 @@ elseif($current_tasks_count>1)
 					$res = mysql_query($query) or die('Bad SQL Query updating heatmap report status to done');
 				}
 				else if($run_rpttype[$current_run_item]==1)
-				{
-					$query = 'SELECT name FROM rpt_competitor WHERE id=' . $run_typids[$current_run_item] . ' LIMIT 1';
-					$res = mysql_query($query) or die('Bad SQL query getting report name');
-					$row = mysql_fetch_assoc($res);
-					
-					$query = 'UPDATE reports_status SET start_time="' . date("Y-m-d H:i:s",strtotime('now')).'",status="'.RUNNING.'", process_id="'.$pid.'" WHERE run_id="' .$run_ids[$current_run_item] .'" AND report_type ="1" AND type_id="' .$run_typids[$current_run_item] .'"';
-					$res = mysql_query($query) or die('Bad SQL Query updating CD report status to running');
-					
-					try{
-							$files[$row['name']] = runCompetitor($run_typids[$current_run_item], true);
-						}catch(Exception $e){
-							$files[$row['name']] = messageInExcel('Report failed with message: ' . $e->getMessage());
-						}
-						
-					$query = 'UPDATE reports_status SET update_time="' . date("Y-m-d H:i:s",strtotime('now')).'",complete_time="' . date("Y-m-d H:i:s",strtotime('now')).'",status="'.COMPLETED.'" WHERE run_id="' .$run_ids[$current_run_item] .'" AND report_type ="1" AND type_id="' .$run_typids[$current_run_item] .'"';
-					$res = mysql_query($query) or die('Bad SQL Query updating CD report status to done');
-				}
-				else if($run_rpttype[$current_run_item]==2)
 				{
 					$query = 'SELECT name FROM rpt_update WHERE id=' . $run_typids[$current_run_item] . ' LIMIT 1';
 					$res = mysql_query($query) or die('Bad SQL query getting report name');
