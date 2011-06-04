@@ -225,7 +225,7 @@ echo('<script type="text/javascript" src="checkall.js"></script>');
 	}else{
 		foreach($override_arr as $key => $value)
 		{
-			$value = nctidToLarvolid($value);
+			$value = nctidToLarvolid(unpadnct($value));
 			if($value === false)
 			{
 				unset($override_arr[$key]);

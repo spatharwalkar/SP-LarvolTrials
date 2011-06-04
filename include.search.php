@@ -454,7 +454,11 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 			$bigconds = '1';
 		}else{
 			$bigconds = implode(' AND ', $bigconds);
-		}$bigquery = '';
+		}
+		if(!isset($bigquery))  
+		{
+			$bigquery = '';
+		}
 		$bigquery = 'SELECT DISTINCT i.larvol_id AS "larvol_id" FROM '
 					. '(data_values AS dv '
 					. 'LEFT JOIN data_cats_in_study AS i ON dv.studycat=i.id '
@@ -1334,10 +1338,8 @@ function precheckSearchSql($conditions,$g_conds,$strong_exclusions)
 	{
 		$tmpSql = 'SELECT 1 FROM data_values dv WHERE';
 		$where = '';		
-		foreach($conditions as $tmp)
-		{
-			$where .= ' '.$tmp.' ';
-		}
+		$conditions = array_map(function($dt){return ' '.$dt;},$conditions);		
+		$where = implode(' AND ',$conditions);
 		$tmpSql .=$where.' LIMIT 0';
 		if(!mysql_query($tmpSql))
 		return false;
@@ -1347,10 +1349,8 @@ function precheckSearchSql($conditions,$g_conds,$strong_exclusions)
 	{
 		$tmpSql = 'SELECT 1 FROM clinical_study WHERE';
 		$where = '';
-		foreach($g_conds as $tmp)
-		{
-			$where .= ' '.$tmp.' ';
-		}
+		$g_conds = array_map(function($dt){return ' '.$dt;},$g_conds);	
+		$where = implode(' AND ',$g_conds);
 		$tmpSql .=$where.' LIMIT 0';
 		if(!mysql_query($tmpSql))
 		return false;
@@ -1360,10 +1360,8 @@ function precheckSearchSql($conditions,$g_conds,$strong_exclusions)
 	{
 		$tmpSql = 'SELECT 1 FROM data_values dv WHERE';
 		$where = '';		
-		foreach($strong_exclusions as $tmp)
-		{
-			$where .= ' '.$tmp.' ';
-		}
+		$strong_exclusions = array_map(function($dt){return ' '.$dt;},$strong_exclusions);	
+		$where = implode(' AND ',$strong_exclusions);
 		$tmpSql .=$where.' LIMIT 0';
 		if(!mysql_query($tmpSql))
 		return false;
