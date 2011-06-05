@@ -1006,7 +1006,7 @@ class ContentManager
 			}
 			
 		} else {
-			echo ('<tr><td colspan="41">No record found.</td></tr>');
+			echo ('<tr><td colspan="41" class="norecord" align="left">No record found.</td></tr>');
 		}
 		
 		echo ('</table><br/><br/>');
