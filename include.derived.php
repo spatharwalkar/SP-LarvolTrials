@@ -2,7 +2,14 @@
 require_once('db.php');
 require_once('include.search.php');
 
-//start inactive date functions
+
+/**
+ * @name refreshLarvolIds
+ * @tutorial start inactive date functions.
+ * Calling this function all the available larvol_id's
+ *  are retrieved and Inactive dates are updated.
+ * @author Jithu Thomas
+ */
 function refreshLarvolIds()
 {
 	global $db;
@@ -20,7 +27,12 @@ function refreshLarvolIds()
 	}
 }
 
-
+/**
+ * @name calculateDateFieldIds
+ * @tutorial Calculate the field id's of fields required
+ * for calculating inactive dates
+ * @author Jithu Thomas
+ */
 function calculateDateFieldIds()
 {
 	$fieldnames = array('completion_date','primary_completion_date','overall_status');
@@ -33,7 +45,6 @@ function calculateDateFieldIds()
 }
 
 /**
- * 
  * @name refreshInactiveDates
  * @tutorial Search function used to get the overall_status,completion_date and primary_completion_date values.
  * If larvolId is present function searches for the specific larvolId and updates inactiveDate.
@@ -41,7 +52,6 @@ function calculateDateFieldIds()
  * @param int $larvolId 
  * @param $action It is either empty string or search. Search is used for individual larvolIds
  * @author Jithu Thomas
- * 
  */
 function refreshInactiveDates($larvolId,$action,$fieldArr)
 {
@@ -74,7 +84,6 @@ function refreshInactiveDates($larvolId,$action,$fieldArr)
 
 
 /**
- * 
  * @name applyInactiveDate
  * @tutorial Function applies derived field inactive_date for each search result array passed.
  * @param array $arr is an array of search result from the search() function.
@@ -169,7 +178,12 @@ function applyInactiveDate($arr=array())
 
 
 //start region functions
-
+/**
+ * @name refreshRegionLarvolIds
+ * @tutorial Calling this function all the available larvol_id's
+ * are retrieved and Inactive dates are updated.
+ * @author Jithu Thomas
+ */
 function refreshRegionLarvolIds()
 {
 	global $db;
@@ -187,6 +201,12 @@ function refreshRegionLarvolIds()
 	}
 }
 
+/**
+ * @name calculateRegionFieldIds
+ * @tutorial Calculate the field id's of fields required
+ * for calculating regions
+ * @author Jithu Thomas
+ */
 function calculateRegionFieldIds()
 {
 	$fieldnames = array('location_country');
@@ -259,7 +279,6 @@ function refreshRegions($larvolId,$action,$fieldArr)
 	
 }	
 /**
- * 
  * @name applyInactiveDate
  * @tutorial Function applies derived field regions for each search result array passed.
  * @param array $arr is an array of search result from the search() function.
@@ -288,15 +307,15 @@ function applyRegions($arr)
 		$locationCountry = $res['NCT/location_country'];
 		if(is_array($locationCountry))
 		{
-			$tmp1 = array();
-			foreach($locationCountry as $tmp)
+			$countryArr = array();
+			foreach($locationCountry as $country)
 			{
-				$tmp1[] = $tmp;
+				$countryArr[] = $country;
 			}
-			$tmp1 = array_unique($tmp1);
-			$locationCountry = $tmp1;
+			$countryArr = array_unique($countryArr);
+			$locationCountry = $countryArr;
 		}
-		$tmp1 = array();
+		$codeArr = array();
 		foreach($regionArr as $countryName=>$code)
 		{
 			if(is_array($locationCountry))
@@ -307,7 +326,7 @@ function applyRegions($arr)
 					{
 						$flag1=1;
 						$flag2=1;
-						$tmp1[] = $code;
+						$codeArr[] = $code;
 						
 					}
 				}
@@ -323,7 +342,7 @@ function applyRegions($arr)
 			}
 		}
 		if($flag2 ==1)
-		$code = implode(',',array_unique($tmp1));
+		$code = implode(',',array_unique($codeArr));
 		if($flag1 != 1)
 		$code = 'other';
 		
@@ -346,75 +365,36 @@ function applyRegions($arr)
 	}	
 }
 
-
+/**
+ * @name regionMapping
+ * @tutorial Returns an array of all regions mapped with with countries and corresponding 
+ * larvol region field defenitions. Reads all .txt files from the directory derived/region.
+ * File name convention for retreiving $regionEntry which is stored in db is eg: us.txt will have db entry US and au_nz will have entry AU/NZ.
+ * @author Jithu Thomas
+ */
 function regionMapping()
 {
-	static $row = null;
-	static $auNz = null;
-	static $eu = null;
-	static $ca = null;
-	static $jp = null;
-	static $us = null;
-	static $uk = null;
-	
-	if($row == null)
-	$row = file('institutions/row.txt',FILE_IGNORE_NEW_LINES|FILE_SKIP_EMPTY_LINES);
-	
-	if($auNz == null)
-	$auNz = file('institutions/au_nz.txt',FILE_IGNORE_NEW_LINES|FILE_SKIP_EMPTY_LINES);
-	
-	if($eu == null)
-	$eu = file('institutions/eu.txt',FILE_IGNORE_NEW_LINES|FILE_SKIP_EMPTY_LINES);
-	
-	if($ca == null)
-	$ca = file('institutions/ca.txt',FILE_IGNORE_NEW_LINES|FILE_SKIP_EMPTY_LINES);
-	
-	if($jp == null)
-	$jp = file('institutions/jp.txt',FILE_IGNORE_NEW_LINES|FILE_SKIP_EMPTY_LINES);	
-	
-	if($us == null)
-	$us = file('institutions/us.txt',FILE_IGNORE_NEW_LINES|FILE_SKIP_EMPTY_LINES);	
-	
-	if($uk == null)	
-	$uk = file('institutions/uk.txt',FILE_IGNORE_NEW_LINES|FILE_SKIP_EMPTY_LINES);	
-	
 	$out = array();
-	
-	foreach($row as $tmp)
+	if ($handle = opendir('derived/region'))
 	{
-		$out[$tmp] = 'ROW';
+	    while (false !== ($file = readdir($handle)))
+	    {
+	        if (substr($file,-4)=='.txt')
+	        {
+	            $regionEntry = strtoupper(str_replace('_','/',substr($file,0,strpos($file,'.txt'))));
+	            $regionFile = file('derived/region/'.$file,FILE_IGNORE_NEW_LINES|FILE_SKIP_EMPTY_LINES);
+	        	foreach($regionFile as $countryList)
+				{
+					$out[$countryList] = $regionEntry;
+				}	            
+	        }
+	    }
+	    closedir($handle);
 	}
-	
-	foreach($auNz as $tmp)
+	else
 	{
-		$out[$tmp] = 'AU/NZ';
+		die('Cannot open directory derived/region.');
 	}
-	
-	foreach($eu as $tmp)
-	{
-		$out[$tmp] = 'EU';
-	}
-
-	foreach($ca as $tmp)
-	{
-		$out[$tmp] = 'CA';
-	}
-
-
-	foreach($jp as $tmp)
-	{
-		$out[$tmp] = 'JP';
-	}
-
-	foreach($us as $tmp)
-	{
-		$out[$tmp] = 'US';
-	}
-
-	foreach($uk as $tmp)
-	{
-		$out[$tmp] = 'UK';
-	}		
 	
 	return $out;
 	
