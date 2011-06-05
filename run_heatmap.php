@@ -110,6 +110,7 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 	unset($oversearch['page']);
 	if(strlen($name) == 0) $name = 'Report ' . $id;
 
+	$intervention_name_field_id = '_' . getFieldId('NCT', 'intervention_name');
 	//Get headers
 	$rows = array();
 	$columns = array();
@@ -211,7 +212,6 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 	-
 	*/
 	$results = array();
-	
 	foreach($searchdata as $row => $rowData)
 	{ 
 		foreach($rowData as $column => $cell)
@@ -372,6 +372,16 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 			-
 			*/
 			
+			$cell_upm = array();
+			if(in_array($intervention_name_field_id,$cell['multifields']['varchar+text'])) {
+				
+				$cell_upm[] = $cell['multivalue']['varchar+text'];
+			}
+			if(array_key_exists($intervention_name_field_id,$cell['searchval'])) {
+				
+				$cell_upm[] = $cell['searchval'][$intervention_name_field_id];
+			}
+			
 			//fill in hyperlink
 			if($rescount < 500)
 			{ 	
@@ -403,7 +413,8 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 																		   'count' => $rescount,
 																		   'rowlabel' => $rows[$row],
 																		   'columnlabel' =>$columns[$column],
-																		   'bomb' => $results[$row][$column]->bomb)))));
+																		   'bomb' => $results[$row][$column]->bomb,
+																		   'upm' => $cell_upm)))));
 																		   
 				$results[$row][$column]->reportname = substr($name,0,40);
 				$results[$row][$column]->rundate = date("Y-m-d H:i:s",$now);
@@ -417,7 +428,8 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 																		   'rundate' => date("Y-m-d H:i:s",$now),
 																		   'rowlabel' => $rows[$row],
 																		   'columnlabel' =>$columns[$column],
-																		   'bomb' => $results[$row][$column]->bomb)))));
+																		   'bomb' => $results[$row][$column]->bomb,
+																		   'upm' => $cell_upm)))));
 				$results[$row][$column]->reportname = substr($name,0,40);
 				$results[$row][$column]->rundate = date("Y-m-d H:i:s",$now);
 				$results[$row][$column]->time_machine = $time_machine;
@@ -445,7 +457,7 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 			}
 		}
 	}
-
+	
 	$info["pid"] = $pid;
 	if ($format == "xlsx")
 	return heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $phasenums,$optionsSelected);
@@ -669,7 +681,7 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 			}
 			
 		}																
-		$link = addYourls($link,$results->reportname);
+		$link = addYourls($link,substr($name,0,40));
 		$cell = num2char($col) . '1';
 		$sheet->SetCellValue($cell, $header);
 		if($flag == true)
