@@ -211,7 +211,7 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 	-
 	-
 	*/
-	$results = array();
+	$results = array();$row_upms = array();
 	foreach($searchdata as $row => $rowData)
 	{ 
 		foreach($rowData as $column => $cell)
@@ -373,13 +373,16 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 			*/
 			
 			$cell_upm = array();
-			if(in_array($intervention_name_field_id,$cell['multifields']['varchar+text'])) {
+			if(isset($cell['multifields']['varchar+text']) && 
+			in_array($intervention_name_field_id,$cell['multifields']['varchar+text'])) {
 				
 				$cell_upm[] = $cell['multivalue']['varchar+text'];
+				$row_upms[$row][]  = $cell['multivalue']['varchar+text'];
 			}
-			if(array_key_exists($intervention_name_field_id,$cell['searchval'])) {
+			if(isset($cell['searchval']) && array_key_exists($intervention_name_field_id,$cell['searchval'])) {
 				
 				$cell_upm[] = $cell['searchval'][$intervention_name_field_id];
+				$row_upms[$row][]  = $cell['searchval'][$intervention_name_field_id];
 			}
 			
 			//fill in hyperlink
@@ -460,7 +463,7 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 	
 	$info["pid"] = $pid;
 	if ($format == "xlsx")
-	return heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $phasenums,$optionsSelected);
+		return heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $phasenums,$optionsSelected, $row_upms);
 	else
 		return heatmapAsWord($info, $rows, $columns, $results, $p_colors, $return, $phasenums,$optionsSelected);
 
@@ -591,7 +594,8 @@ function heatmapAsWord($info, $rows, $columns, $results, $p_colors, $return, $ph
 	}
 }
 
-function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $phasenums,$optionsSelected=array()) {
+function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $phasenums,$optionsSelected=array(), $row_upms) {
+
 	global $now, $db;
 	$countactive = $info['count_only_active'] == 'Y';
 	$footnotes = $info['footnotes'];
@@ -624,11 +628,11 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 		$link	.= 'cparams=' . rawurlencode(base64_encode(gzdeflate(serialize(array('type' => 'row',
 																		'name' => substr($name,0,40),
 																		'rundate' => date("Y-m-d H:i:s",$now),
-																		'rowlabel' => $rows[$row])))));
+																		'rowlabel' => $rows[$row],
+																		'rowupm' => $row_upms[$row])))));
 		foreach($columns as $k => $v) {	
 		
 			if($countactive) {
-			
 				if(strlen($results[$row][$k]->num)) {
 
 					$link .= '&' . 
@@ -641,7 +645,6 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 				$link .= '&' . 
 				str_replace('params', "params[$k]", str_replace('leading', "leading[$k]", $results[$row][$k]->{'link'}));
 				$flag = true;
-					
 			}
 			
 		}

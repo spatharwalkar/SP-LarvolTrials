@@ -446,6 +446,10 @@ class ContentManager
 				$ins_params = array($sp);
 			}
 
+			if($c_params['type'] == 'row' && isset($c_params['rowupm']) && !empty($c_params['rowupm'])) {
+				$this->getNonAssocUpm($c_params['rowupm']);
+			}
+			
 			foreach($_GET['params'] as $pk => $pv) {
 				
 				$page[$pk] = 1;
@@ -826,6 +830,7 @@ class ContentManager
 			
 			$count = count($this->{$this->type});
 			
+
 			if(isset($_GET['institution']) && $_GET['institution'] != '') {
 			
 				$ins = unserialize(gzinflate(base64_decode(rawurldecode($insparams))));
@@ -842,7 +847,7 @@ class ContentManager
 					. '<input type="hidden" name="leading" value="' . $_GET['leading'] . '"/>'
 					. '<input type="hidden" name="instparams" value="' . $insparams . '" />');
 			
-			if(isset($non_assoc_upm_params) && $non_assoc_upm_params != '') {
+			if(isset($non_assoc_upm_params) && !empty($non_assoc_upm_params)) {
 				$this->getNonAssocUpm($non_assoc_upm_params);
 			}
 
@@ -941,25 +946,25 @@ class ContentManager
 	}
 	
 	function getNonAssocUpm($non_assoc_upm_params) {
-	
-		$record_arr = array();
-		echo ('<table width="100%" border="0" cellpadding="4" cellspacing="0" class="manage">'
-			. '<tr><th rowspan="2" style="width:200px;">Event Description</th>'
-			. '<th rowspan="2" style="width:100px;">Milestone Type</th>'
-			. '<th rowspan="2" style="width:75px;">Status</th>'
-			. '<th rowspan="2" style="width:29px;">Start</th>'
-			. '<th rowspan="2" style="width:29px;">End</th>'
-			. '<th colspan="36" class="rightborder" style="width:72px;">&nbsp;</th>'
-			. '</tr><tr class="secondrow">'
-			. '<th colspan="12">' . $this->current_yr . '</th>'
-			. '<th colspan="12">' . $this->second_yr . '</th>'
-			. '<th colspan="12" class="rightborder">' . $this->third_yr . '</th>'
-			. '</tr>');
 		
+		$record_arr = array();
 		$record_arr = getNonAssocUpmRecords($non_assoc_upm_params);
 		if(!empty($record_arr)) {
 		
 			$cntr = 0;
+			echo ('<table width="100%" border="0" cellpadding="4" cellspacing="0" class="manage">'
+				. '<tr><th rowspan="2" style="width:200px;">Event Description</th>'
+				. '<th rowspan="2" style="width:100px;">Milestone Type</th>'
+				. '<th rowspan="2" style="width:75px;">Status</th>'
+				. '<th rowspan="2" style="width:29px;">Start</th>'
+				. '<th rowspan="2" style="width:29px;">End</th>'
+				. '<th colspan="36" class="rightborder" style="width:72px;">&nbsp;</th>'
+				. '</tr><tr class="secondrow">'
+				. '<th colspan="12">' . $this->current_yr . '</th>'
+				. '<th colspan="12">' . $this->second_yr . '</th>'
+				. '<th colspan="12" class="rightborder">' . $this->third_yr . '</th>'
+				. '</tr>');
+
 			foreach($record_arr as $key => $val) {
 			
 				if($cntr%2 == 1) {
@@ -1005,14 +1010,9 @@ class ContentManager
 				$cntr++;
 			}
 			
-		} else {
-			echo ('<tr><td colspan="41" class="norecord" align="left">No record found.</td></tr>');
-		}
-		
-		echo ('</table><br/><br/>');
-			
+			echo ('</table><br/><br/>');
+		} 
 	}
-
 }
 
 function displayContent($params, $fieldlist, $time_machine, $type_arr, $edited, $gentime, $start, $last, $phase_arr, $fin_arr, $actfilterarr, $current_yr, $second_yr, $third_yr, $trial_arr) {
@@ -1578,23 +1578,25 @@ function getNonAssocUpmRecords($non_assoc_upm_params) {
 		$where .= ' (PREG_RLIKE("' . $val . '",product)) OR ';
 		
 /*echo "<br/>==>"."SELECT `event_description`, `event_link`, `event_type`, `start_date`, `start_date_type`, `end_date`, `end_date_type` FROM `upm` WHERE `corresponding_trial` IS NULL AND " . substr($where,0,-4);
-exit;*/		
+//exit;		
+*/
 $res = mysql_query("SELECT `event_description`, `event_link`, `event_type`, `start_date`, `start_date_type`, `end_date`, `end_date_type` FROM `upm` WHERE `corresponding_trial` IS NULL AND " . substr($where,0,-4));
 	
 	$i = 0;
-	while($row = mysql_fetch_assoc($res)) { 
-	
-		$upms[$i]['event_description'] = $row['event_description'];
-		$upms[$i]['event_link'] = $row['event_link'];
-		$upms[$i]['event_type'] = $row['event_type'];
-		$upms[$i]['start_date'] = $row['start_date'];
-		$upms[$i]['start_date_type'] = $row['start_date_type'];
-		$upms[$i]['end_date'] 	= $row['end_date'];
-		$upms[$i]['end_date_type'] = $row['end_date_type'];
+	if(mysql_num_rows($res) > 0){
+		while($row = mysql_fetch_assoc($res)) { 
 		
-		$i++;
+			$upms[$i]['event_description'] = $row['event_description'];
+			$upms[$i]['event_link'] = $row['event_link'];
+			$upms[$i]['event_type'] = $row['event_type'];
+			$upms[$i]['start_date'] = $row['start_date'];
+			$upms[$i]['start_date_type'] = $row['start_date_type'];
+			$upms[$i]['end_date'] 	= $row['end_date'];
+			$upms[$i]['end_date_type'] = $row['end_date_type'];
+			
+			$i++;
+		}
 	}
-	//echo "<pre>";print_r($upms);
 	return $upms;
 }
 ?>
