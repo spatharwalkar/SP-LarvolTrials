@@ -70,9 +70,10 @@ upmPagination($limit);
 //pagination controller
 
 
-//normal listing
+
 echo '<br/>';
 echo '<div class="clr">';
+//add edit form.
 if($_POST['add_new_record']=='Add New Record' || $_GET['id'])
 {
 	$id = ($_GET['id'])?$_GET['id']:null;
@@ -81,18 +82,25 @@ if($_POST['add_new_record']=='Add New Record' || $_GET['id'])
 	echo '</div>';
 }
 
+//import controller
 if($_POST['import']=='Import' || $_POST['uploadedfile'])
 {
 	importUpm();
 }
 
+//normal upm listing
 $start = $page*$limit;
 upmListing($start,$limit);
 echo '</div>';
+echo '</html>';
 
 
-
-
+/**
+ * @name upmPagination
+ * @tutorial Provides pagination output for the upm input page.
+ * @param int $limit The total limit of records defined in the controller.
+ * @author Jithu Thomas
+ */
 function upmPagination($limit)
 {
 	global $page;	
@@ -133,6 +141,13 @@ echo '<br/>';
 	
 }
 
+/**
+ * @name upmListing
+ * @tutorial Provides output of all the upm entries in the upm table based on the params $start and $limit
+ * @param int $start Start value of sql select query.
+ * @param int $limit The total limit of records defined in the controller.
+ * @author Jithu Thomas
+ */
 function upmListing($start=0,$limit=50)
 {
 $query = "select * from upm limit $start, $limit";
@@ -203,6 +218,12 @@ echo '</table>';
 echo '<br/>';
 }
 
+/**
+ * @name addEditUpm
+ * @tutorial Provides output of the insert/edit form.
+ * @param int $id If the param $id is present edit option is activated.
+ * @author Jithu Thomas
+ */
 function addEditUpm($id)
 {
 	if($id)
@@ -259,6 +280,16 @@ function am2($v,$dbVal)
 	return '<option value="'.$v.'">'.$v.'</option>';
 }
 
+/**
+ * @name saveUpm
+ * @tutorial Saves the upm entry/edit forms and inputs from the tab seperated file inputs.
+ * @param array $post Post array.
+ * @param int $import =0 for normal form save and = 1 for tab seperated input.
+ * @param array $importKeys Keys for import relates to the fields in the upm table.
+ * @param array $importVal Values for each column in the upm table corresponds to a single line in hte import file.
+ * @param int $line Line number for error and notice usage. Related to import functionality.
+ * @author Jithu Thomas
+ */
 function saveUpm($post,$import=0,$importKeys=array(),$importVal=array(),$line=null)
 {
 	global $now;
@@ -304,9 +335,16 @@ function saveUpm($post,$import=0,$importKeys=array(),$importVal=array(),$line=nu
 		mysql_query($query)or die('Cannot update upm entry');		
 	}
 }
-/*
- * 
- * */
+
+/**
+ * @name input_tag
+ * @tutorial Helper function for creating input tag based on the type of the field input.
+ * Enum fields give select field html and other fields now return input tag.
+ * @param array $row each row of a select column query.
+ * @param int $dbVal Value taken for each field during edit.
+ * If db value is there, the default value of that field is populated with that value.
+ * @author Jithu Thomas
+ */
 function input_tag($row,$dbVal)
 {
 	$type = $row['Type'];
@@ -331,6 +369,12 @@ function input_tag($row,$dbVal)
 	}
 }
 
+
+/**
+ * @name importUpm
+ * @tutorial Outputs the upm import form.
+ * @author Jithu Thomas
+ */
 function importUpm()
 {
 	echo '<div class="clr">';
@@ -343,4 +387,3 @@ function importUpm()
 	echo '</div>';	
 
 }
-echo '</html>';
