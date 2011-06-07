@@ -342,7 +342,7 @@ function applyRegions($arr)
 			}
 		}
 		if($flag2 ==1)
-		$code = implode(',',array_unique($codeArr));
+		$code = implode(', ',array_unique($codeArr));
 		if($flag1 != 1)
 		$code = 'other';
 		
