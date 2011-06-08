@@ -454,9 +454,12 @@ class ContentManager
 			if($c_params['type'] == 'row') {
 			
 				$row_upm_arr = array();
-				if(is_array($_GET['rowupm']) && !empty($_GET['rowupm'])) {
-					foreach($_GET['rowupm'] as $k => $v)
-						$row_upm_arr[$k] = unserialize(gzinflate(base64_decode($v)));
+				if(is_array($_GET['rowupm'])) {
+					foreach($_GET['rowupm'] as $k => $v) {
+						$val = unserialize(gzinflate(base64_decode($v)));
+						if($val != '')
+							$row_upm_arr[$k] = $val;
+					}
 				}	
 				$this->getNonAssocUpm($row_upm_arr);
 			}
@@ -1548,7 +1551,6 @@ function getNCT($nct_id,$larvol_id,$time,$edited)
 		
 		//getting previous value for updated trials
 		if($row['fieldtype'] == 'enum') { 
-
 		
 			$result = mysql_query('SELECT value FROM data_enumvals WHERE `field`=' . $row['fieldid'] 
 			. ' AND `id` = "' . mysql_real_escape_string($row['val_'.$row['fieldtype']]) . '" LIMIT 1');
