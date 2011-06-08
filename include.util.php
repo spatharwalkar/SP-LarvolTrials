@@ -307,6 +307,21 @@ function softDie($out)
 	return false;
 }
 
+//Log all data errors while importing data from ct.gov
+function logDataErr($out)
+{
+	global $logger;
+	$logger->error($out);
+	if(!mysql_query('ROLLBACK'))
+	{
+		$log = "Couldn't rollback changes";
+		$logger->fatal($log);
+		die($log);
+	}
+	echo($out);
+	return true;
+}
+
 //Add a URL to the internal URL shortening service
 function addYourls($url,$title='',$keyword='')
 {

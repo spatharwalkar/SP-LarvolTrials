@@ -290,7 +290,7 @@ function addNCT($rec)
 
 	foreach($record_data as $fieldname => $value)
 		if(!addval($studycat, $nct_cat, $fieldname, $value))
-			return softDie('Data error in ' . padnct($nct_id) . '-- Field: ' . $fieldname . 'Value: ' . $value);//todo:change to error log, not die
+			logDataErr('Data error - NCTID:' . padnct($nct_id) . ', Field Name:' . $fieldname . ', Value: ' . $value);//Log in errorlog
 
 	mysql_query('COMMIT') or die("Couldn't commit SQL transaction to create records from XML");
 	global $fieldArr;
