@@ -358,7 +358,7 @@ class Result
 //pass an array of these to the search function
 class SearchParam
 {
-	public $field;	// field name -- for those in sub tables concat table name with forward slash, ex. locations/status
+	public $field;	// field name -- for non-global fields, the ID form is needed, ex. "_24"
 	public $action;	// "search" (search), "ascending" (sort ascending), "descending" (sort descending), "require" (is not null)
 	public $value;	// the value to search for
 	public $negate = false;	// exclude value from a search rather than include
