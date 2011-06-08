@@ -20,6 +20,7 @@ if(isset($_GET['direct_run_heatmap_id'])) runHeatmap((int)$_GET['direct_run_heat
 
 function runHeatmap($id, $return = false, $format = "xlsx")
 {
+
 	//variables used for report status
 	global $run_id;
 	global $report_type;
@@ -211,7 +212,8 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 	-
 	-
 	*/
-	$results = array();$row_upms = array();
+	$results = array();
+	$row_upms = array();$col_upms = array();
 	foreach($searchdata as $row => $rowData)
 	{ 
 		foreach($rowData as $column => $cell)
@@ -377,12 +379,14 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 			in_array($intervention_name_field_id,$cell['multifields']['varchar+text'])) {
 				
 				$cell_upm[] = $cell['multivalue']['varchar+text'];
-				$row_upms[$row][]  = $cell['multivalue']['varchar+text'];
+				$row_upms[$row][$column]  = $cell['multivalue']['varchar+text'];
+				$col_upms[$row][$column] = $cell['multivalue']['varchar+text'];
 			}
 			if(isset($cell['searchval']) && array_key_exists($intervention_name_field_id,$cell['searchval'])) {
 				
 				$cell_upm[] = $cell['searchval'][$intervention_name_field_id];
-				$row_upms[$row][]  = $cell['searchval'][$intervention_name_field_id];
+				$row_upms[$row][$column]  = $cell['searchval'][$intervention_name_field_id];
+				$col_upms[$row][$column] = $cell['searchval'][$intervention_name_field_id];
 			}
 			
 			//fill in hyperlink
@@ -463,7 +467,7 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 	
 	$info["pid"] = $pid;
 	if ($format == "xlsx")
-		return heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $phasenums,$optionsSelected, $row_upms);
+	return heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $phasenums,$optionsSelected, $row_upms, $col_upms);
 	else
 		return heatmapAsWord($info, $rows, $columns, $results, $p_colors, $return, $phasenums,$optionsSelected);
 
@@ -594,7 +598,7 @@ function heatmapAsWord($info, $rows, $columns, $results, $p_colors, $return, $ph
 	}
 }
 
-function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $phasenums,$optionsSelected=array(), $row_upms) {
+function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $phasenums,$optionsSelected=array(), $row_upms, $col_upms) {
 
 	global $now, $db;
 	$countactive = $info['count_only_active'] == 'Y';
@@ -624,31 +628,47 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 	
 		//added for Stacked Trial Tracker
 		$link = '';$flag = false;
+		/*parameter set to display msg in OTT that all records couldnt be shown due to yourls link limit and the 
+		exceeding ones are truncated. - by default set to N*/
+		$t_link = rawurlencode(base64_encode(gzdeflate(serialize('n'))));
+
 		$link	= urlPath() . 'intermediary.php?';
 		$link	.= 'cparams=' . rawurlencode(base64_encode(gzdeflate(serialize(array('type' => 'row',
 																		'name' => substr($name,0,40),
 																		'rundate' => date("Y-m-d H:i:s",$now),
-																		'rowlabel' => $rows[$row],
-																		'rowupm' => $row_upms[$row])))));
+																		'rowlabel' => $rows[$row])))));
+		
 		foreach($columns as $k => $v) {	
 		
+			$sub_link = '';
 			if($countactive) {
 				if(strlen($results[$row][$k]->num)) {
 
-					$link .= '&' . 
+					$sub_link .= '&' . 
 					str_replace('params', "params[$k]", str_replace('leading', "leading[$k]", $results[$row][$k]->{'link'}));
+					$sub_link .= "&rowupm[$k]=" . rawurlencode(base64_encode(gzdeflate(serialize($row_upms[$row][$k]))));
 					$flag = true;
 					
 				}
 			} else if($results[$row][$k]->num) {
 
-				$link .= '&' . 
+				$sub_link .= '&' . 
 				str_replace('params', "params[$k]", str_replace('leading', "leading[$k]", $results[$row][$k]->{'link'}));
+				$sub_link .= "&rowupm[$k]=" . rawurlencode(base64_encode(gzdeflate(serialize($row_upms[$row][$k]))));
 				$flag = true;
 			}
-			
+				
+			//total link limit - 2000 and length of truncate msg param - 20, (2000-20) = 1980
+			if((strlen($link) + strlen($sub_link)) < 1980){ 
+				$link .= $sub_link;
+			} else {
+				//in case the link is exceeding the limit and has been truncated, parameter is set to Y.
+				$t_link = rawurlencode(base64_encode(gzdeflate(serialize('y'))));
+			}
+
 		}
-															
+		
+		$link .= '&trunc=' . $t_link;															
 		$link = addYourls($link,$results->reportname);
 		$cell = 'A' . ($row+1);
 		$sheet->SetCellValue($cell, $header);
@@ -661,35 +681,55 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 
 		//added for Stacked Trial Tracker
 		$link = '';$flag = false;
+		
+		/*parameter set to display msg in OTT that all records couldnt be shown due to yourls link limit and the 
+		exceeding ones are truncated. - by default set to N*/
+		$t_link = rawurlencode(base64_encode(gzdeflate(serialize('n'))));
+		
 		$link	= urlPath() . 'intermediary.php?';
 		$link	.= 'cparams=' . rawurlencode(base64_encode(gzdeflate(serialize(array('type' => 'col',
 																		'name' => substr($name,0,40),
 																		'rundate' => date("Y-m-d H:i:s",$now),
 																		'columnlabel' => $columns[$col])))));
+		
 		foreach($rows as $k => $v) {	
 		
+			$sub_link = '';
 			if($countactive) {
 				if(strlen($results[$k][$col]->num)) {
 				
-					$link .= '&' . 
+					$sub_link .= '&' . 
 					str_replace('params', "params[$k]", str_replace('leading', "leading[$k]", $results[$k][$col]->{'link'}));
+					$sub_link .= "&colupm[$k]=" . rawurlencode(base64_encode(gzdeflate(serialize($col_upms[$k][$col]))));
 					$flag = true;
 					
 				}
 			} else if($results[$k][$col]->num) {
 			
-				$link .= '&' . 
+				$sub_link .= '&' . 
 				str_replace('params', "params[$k]", str_replace('leading', "leading[$k]", $results[$k][$col]->{'link'}));
+				$sub_link .= "&colupm[$k]=" . rawurlencode(base64_encode(gzdeflate(serialize($col_upms[$k][$col]))));
 				$flag = true;
 			}
 			
-		}																
-		$link = addYourls($link,substr($name,0,40));
+			//total link limit - 2000 and length of truncate msg param - 20, (2000-20) = 1980
+			if((strlen($link) + strlen($sub_link)) < 1980){ 
+				$link .= $sub_link;
+			} else {
+				//in case the link is exceeding the limit and has been truncated, parameter is set to Y.
+				$t_link = rawurlencode(base64_encode(gzdeflate(serialize('y'))));
+			}
+			
+		}
+		
+		$link .= '&trunc=' . $t_link;		
+		$link = addYourls($link,$results->reportname);
 		$cell = num2char($col) . '1';
 		$sheet->SetCellValue($cell, $header);
 		if($flag == true)
 			$sheet->getCell($cell)->getHyperlink()->setUrl($link);
 	}
+	
 	
 	foreach($results as $row => $rowData)
 	{
@@ -740,7 +780,7 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 		}
 	}
 	
-	//exit;
+	
 	$row = count($rows) + 1;
 	$sheet->SetCellValue('A' . ++$row, '');
 	$sheet->SetCellValue('A' . ++$row, 'Report name:');

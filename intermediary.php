@@ -338,7 +338,7 @@ class ContentManager
 	
 	}
 	
-	function pagination($cntr = NULL, $page, $count, $params, $leading, $tt_type) {
+	function pagination($cntr = NULL, $page, $count, $params, $leading, $tt_type, $stacktype) {
 		
 		$pager = '';
 		$sort = '';
@@ -371,10 +371,15 @@ class ContentManager
 				$url .= '&leading['.$k.']=' . rawurlencode($_GET['leading'][$k]) . '&params['.$k.']=' 
 				. rawurlencode($_GET['params'][$k]);
 				
+				if($stacktype == 'row') 
+					$url .= '&rowupm['.$k.']=' . rawurlencode($_GET['rowupm'][$k]); 
+				elseif($stacktype == 'col')
+					$url .= '&colupm['.$k.']=' . rawurlencode($_GET['colupm'][$k]); 
+					
 				if(isset($_GET['pg'][$k]) && $k != $cntr)
-					$url .= '&pg['.$k.']='.$_GET['pg'][$k];
+					$url .= '&pg['.$k.']=' . $_GET['pg'][$k];
 			}
-			
+			$url .= '&trunc=' . $_GET['trunc'];
 			if($this->pstart > 1)
 			{
 				$pager .= '<a href="intermediary.php?cparams=' . rawurlencode($_GET['cparams']) . $url
@@ -445,9 +450,15 @@ class ContentManager
 				$sp->value 	= $_GET['institution'];
 				$ins_params = array($sp);
 			}
-
-			if($c_params['type'] == 'row' && isset($c_params['rowupm']) && !empty($c_params['rowupm'])) {
-				$this->getNonAssocUpm($c_params['rowupm']);
+			
+			if($c_params['type'] == 'row') {
+			
+				$row_upm_arr = array();
+				if(is_array($_GET['rowupm']) && !empty($_GET['rowupm'])) {
+					foreach($_GET['rowupm'] as $k => $v)
+						$row_upm_arr[$k] = unserialize(gzinflate(base64_decode($v)));
+				}	
+				$this->getNonAssocUpm($row_upm_arr);
 			}
 			
 			foreach($_GET['params'] as $pk => $pv) {
@@ -499,8 +510,23 @@ class ContentManager
 				$params = array_merge($this->params, $excel_params, $ins_params);
 				
 				echo ('<input type="hidden" name="params['.$pk.']" value="' . $_GET['params'][$pk] . '"/>'
-						. '<input type="hidden" name="leading['.$pk.']" value="' . $_GET['leading'][$pk] . '"/>');
+						. '<input type="hidden" name="leading['.$pk.']" value="' . $_GET['leading'][$pk] . '"/>'
+						.  '<input type="hidden" name="trunc" value="' . $_GET['trunc'] . '"/>');
 				
+				if($c_params['type'] == 'row') {
+					echo ('<input type="hidden" name="rowupm['.$pk.']" value="' . $_GET['rowupm'][$pk] . '"/>');
+				} else if($c_params['type'] == 'col'){
+					echo ('<input type="hidden" name="colupm['.$pk.']" value="' . $_GET['colupm'][$pk] . '"/>');
+				}
+				
+				if($c_params['type'] == 'col') { 
+				
+					echo('<br clear="all"/><br/>');
+					$val = unserialize(gzinflate(base64_decode($_GET['colupm'][$pk])));
+					if($val != '')
+						$this->getNonAssocUpm(array($val));
+				}
+
 				$this->displayHeader();
 				
 				$arrr = search($params,$this->fid,NULL,$time_machine);
@@ -606,7 +632,8 @@ class ContentManager
 				$this->last 	= ($page[$pk] * $this->results_per_page > $count) ? $count : $this->pend;
 				
 				if($count > $this->results_per_page)
-					$this->pagination($pk, $page[$pk], $count, $_GET['params'][$pk], $_GET['leading'][$pk], 'stack');
+					$this->pagination($pk, $page[$pk], $count, $_GET['params'][$pk], $_GET['leading'][$pk], 'stack', 
+					$c_params['type']);
 
 				if($bomb != '') {
 					//$bomb = 'sb';
@@ -616,7 +643,6 @@ class ContentManager
 					
 				}
 				
-				echo('<br clear="all"/><br/>');	
 				echo ("<span style='color: #00B050;'>" . $totactivecount . " Active Records</span>&nbsp;&nbsp;&nbsp;"
 						. "<span style='color: #FF0000;'>" . $totinactivecount . " Inactive Records</span>&nbsp;&nbsp;&nbsp;" 
 						. ($totactivecount + $totinactivecount) . " All Records ");
@@ -633,6 +659,11 @@ class ContentManager
 					echo ('<tr><th colspan="47" class="norecord" align="left">No record found.</th></tr>');
 				
 				echo('</table><br/><br/>');
+				
+			}
+			if(isset($_GET['trunc'])) {
+				$t = unserialize(gzinflate(base64_decode($_GET['trunc'])));
+				if($t == 'y') echo ('<span style="font-size:10px;color:red;">Note: all data could not be shown</span>');
 			}
 			
 		} else {
@@ -830,7 +861,6 @@ class ContentManager
 			
 			$count = count($this->{$this->type});
 			
-
 			if(isset($_GET['institution']) && $_GET['institution'] != '') {
 			
 				$ins = unserialize(gzinflate(base64_decode(rawurldecode($insparams))));
@@ -861,7 +891,7 @@ class ContentManager
 			$this->last 	= ($page * $this->results_per_page > $count) ? $count : $this->pend;
 
 			if($count > $this->results_per_page)
-				$this->pagination(NULL, $page, $count, $_GET['params'], $_GET['leading'], 'normal');
+				$this->pagination(NULL, $page, $count, $_GET['params'], $_GET['leading'], 'normal', NULL);
 
 			if($count > 0) {
 			
@@ -1518,6 +1548,7 @@ function getNCT($nct_id,$larvol_id,$time,$edited)
 		
 		//getting previous value for updated trials
 		if($row['fieldtype'] == 'enum') { 
+
 		
 			$result = mysql_query('SELECT value FROM data_enumvals WHERE `field`=' . $row['fieldid'] 
 			. ' AND `id` = "' . mysql_real_escape_string($row['val_'.$row['fieldtype']]) . '" LIMIT 1');
@@ -1577,9 +1608,6 @@ function getNonAssocUpmRecords($non_assoc_upm_params) {
 	foreach($non_assoc_upm_params as $key => $val)
 		$where .= ' (PREG_RLIKE("' . $val . '",product)) OR ';
 		
-/*echo "<br/>==>"."SELECT `event_description`, `event_link`, `event_type`, `start_date`, `start_date_type`, `end_date`, `end_date_type` FROM `upm` WHERE `corresponding_trial` IS NULL AND " . substr($where,0,-4);
-//exit;		
-*/
 $res = mysql_query("SELECT `event_description`, `event_link`, `event_type`, `start_date`, `start_date_type`, `end_date`, `end_date_type` FROM `upm` WHERE `corresponding_trial` IS NULL AND " . substr($where,0,-4));
 	
 	$i = 0;
