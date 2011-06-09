@@ -11,7 +11,7 @@ $fieldArr = calculateDateFieldIds();
 //Autodetects the type if none is specified.
 function addRecord($in, $type='unspec')
 {
-	static $types = array('clinical_study' => 'nct', 'PubmedArticle' => 'pubmed');
+	static $types = array('clinical_study' => 'nct', 'PubmedArticle' => 'pubmed', 'EudraCT' => 'EudraCT');
 	$type = strtolower($type);
 	if($type == 'unspec') $type = $types[$in->getName()];
 	
@@ -21,6 +21,8 @@ function addRecord($in, $type='unspec')
 		return addNCT($in);
 		case 'pubmed':
 		return addPubmed($in);
+		case 'eudract':
+		return addEudraCT($in);
 	}
 	return false;
 }
@@ -298,6 +300,95 @@ function addNCT($rec)
 	return true;
 }
 
+
+
+// DW Add or update a EudraCT record 
+function addEudraCT($rec) {
+
+    global $db;
+    global $instMap;
+    global $now;
+    if ($rec === false)
+        return false;
+
+    $DTnow = date('Y-m-d H:i:s', $now);
+    
+    // TODO:  Since same eud number is stored for multiple countries.. Need to make the
+    // id of the case the number + countrys
+    
+    // Get Coutry
+    $i = strpos($rec['competent_authority'][0], "-");
+    $country = substr($rec['competent_authority'][0], 0, $i);
+    
+    $eud_id = $rec['eudract_number'][0] . "-" . $country;
+    
+//    $eud_id = $rec['eudract_number'][0];
+    echo "<br>EUD ID: " . $eud_id . "<br>";
+
+    //Find out the ID of the field for eudract_number, and the ID of the "EudraCT" category.
+    static $id_field = NULL;
+    static $eud_cat = NULL;
+    if ($id_field === NULL || $nct_cat === NULL) {
+        $query = 'SELECT data_fields.id AS "eudract_id",data_categories.id AS "eud_cat" FROM '
+                . 'data_fields LEFT JOIN data_categories ON data_fields.category=data_categories.id '
+                . 'WHERE data_fields.name="eudract_id" AND data_categories.name="EudraCT" LIMIT 1';
+        $res = mysql_query($query);
+        if ($res === false)
+            return softDie('Bad SQL query getting field ID of eudract_id');
+        $res = mysql_fetch_assoc($res);
+        if ($res === false)
+            return softDie('EUD schema not found!');
+        $id_field = $res['eudract_id'];
+        $eud_cat = $res['eud_cat'];
+    }
+
+    mysql_query('BEGIN') or die("Couldn't begin SQL transaction to create record from XML");
+    //Detect if this record already exists (if not, add it, and associate it with the category NCT)
+    //Then, get the larvol_id and the ID of the studycat it has for NCT.
+    $query = 'SELECT studycat,larvol_id FROM '
+            . 'data_values LEFT JOIN data_cats_in_study ON data_values.studycat=data_cats_in_study.id '
+            . 'WHERE field=' . $id_field . ' AND val_varchar="' . $eud_id . '" LIMIT 1';
+    $res = mysql_query($query);
+    if ($res === false)
+        return softDie('Bad SQL query determining existence of record');
+    $res = mysql_fetch_assoc($res);
+    $exists = $res !== false;
+
+    $studycat = NULL;
+    $larvol_id = NULL;
+    if ($exists) {
+        $studycat = $res['studycat'];
+        $larvol_id = $res['larvol_id'];
+    } else {
+        $query = 'INSERT INTO clinical_study SET import_time="' . date('Y-m-d H:i:s', $now) . '"';
+        if (mysql_query($query) === false)
+            return softDie('Bad SQL query adding new record');
+        $larvol_id = mysql_insert_id();
+        $query = 'INSERT INTO data_cats_in_study SET larvol_id=' . $larvol_id . ',category=' . $eud_cat;
+        if (mysql_query($query) === false)
+            return softDie('Bad SQL query adding new record to category');
+        $studycat = mysql_insert_id();
+        $query = 'INSERT INTO data_values SET field=' . $id_field . ',`added`="' . $DTnow . '",studycat=' . $studycat
+                . ',val_varchar="' . $eud_id . '"';
+        if (mysql_query($query) === false)
+            return softDie('Bad SQL query adding eud_id');
+    }
+
+    echo "StudyCat: " . $studycat . ":<br>";
+    //import everything
+    foreach ($rec as $fieldname => $value) {
+        if ($fieldname != "") {
+            //         foreach ($value as $valueitem) {
+            //  echo "Field: " . $fieldname . ", Value: " . $valueitem . "<br>";
+            if (!addval($studycat, $eud_cat, $fieldname, $value))
+                return softDie('Data error in ' . $eud_id . '. Fieldname: ' . $fieldname . ': ' . $value);
+            //          }
+        }
+    }
+    mysql_query('COMMIT') or die("Couldn't commit SQL transaction to create records from XML");
+    return true;
+}
+
 // Add or update a PubMed record from a SimpleXML object.
 function addPubmed($rec)
 {
@@ -429,8 +520,22 @@ function normalize($type, $value)
 		
 		case 'int':
 		case 'bool':
-		return (int)$value;
+            if ($value == "Yes") {
+                return 1;
+            } else {
+                return (int) $value;
+            }
 	}
+}
+
+// To avoid out of index errors for eud.
+function get_key($arr, $key) {
+    /*    if ($key == "Country")
+      {
+      echo "Country: " . $arr[$key];
+      }
+     */
+    return isset($arr[$key]) ? $arr[$key] : null;
 }
 
 ?>

@@ -22,8 +22,9 @@ class DatabaseManager
 	public $set = array(); // array that holds settings from the "settings" table in the DB
 	public $user = NULL; //NULL = login status unknown. false = Not logged in. [User]object = logged in
 	public $types = array();
-	public $sourceCats = array('NCT', 'PubMed');
-	public $sourceIdFields = array('NCT/nct_id', 'PubMed/PMID');
+        // DW Added Eudra
+	public $sourceCats = array('NCT', 'PubMed', 'EudraCT');
+	public $sourceIdFields = array('NCT/nct_id', 'PubMed/PMID', 'EudraCT/eudract_id');
 	public $sources;
 	
 	// On making an instance, connect to the database.
@@ -41,7 +42,9 @@ class DatabaseManager
 		$this->reloadSettings();
 		$this->sources[] = new sourceCategories('NCT','nct_id','http://clinicaltrials.gov/ct2/show/');
 		$this->sources[] = new sourceCategories('PubMed', 'PMID', 'http://www.ncbi.nlm.nih.gov/pubmed/');		
-	}
+                $this->sources[] = new sourceCategories('EudraCT','eudract_id','https://www.clinicaltrialsregister.eu/ctr-search/index.xhtml');
+                
+        }
 	
 	/* Refreshes the disk cache of XML field types from the database's information_schema
 		and also updates this object's "types" member.

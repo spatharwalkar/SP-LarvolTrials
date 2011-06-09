@@ -13,9 +13,6 @@ $last_id = 0;
 $id_field = 0;
 
 // Get Days
-if (isset($_GET['maxrun']))
-    ini_set('max_execution_time', '36000'); //10 hours
-
 
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
@@ -163,5 +160,5 @@ echo('<br>End Parsing Archive Page for ' . $id);
 $query = 'UPDATE update_status SET end_time="' . date("Y-m-d H:i:s", strtotime('now')) . '" WHERE update_id="' . $update_id . '"';
 $res = mysql_query($query) or die('Unable to update running' . mysql_error());
 
-echo('<br>Done with everything.');
+echo('<br>Finished with this ID.<br />');
 ?>  
