@@ -438,7 +438,8 @@ class ContentManager
 			echo('<br clear="all"/>');		
 			echo('<form id="frmOtt" name="frmOtt" method="get" action="intermediary.php">');
 			$this->commonControls(NULL, NULL, NULL, NULL, NULL, NULL);
-			echo ('<input type="hidden" name="cparams" value="' . $_GET['cparams'] . '"/>');
+			echo ('<input type="hidden" name="cparams" value="' . $_GET['cparams'] . '"/>'
+					. '<input type="hidden" name="trunc" value="' . $_GET['trunc'] . '"/>');
 			
 			if(isset($_GET['institution']) && $_GET['institution'] != '') {
 				
@@ -454,14 +455,13 @@ class ContentManager
 			if($c_params['type'] == 'row') {
 			
 				$row_upm_arr = array();
-				if(is_array($_GET['rowupm'])) {
-					foreach($_GET['rowupm'] as $k => $v) {
-						$val = unserialize(gzinflate(base64_decode($v)));
-						if($val != '')
-							$row_upm_arr[$k] = $val;
-					}
-				}	
-				$this->getNonAssocUpm($row_upm_arr);
+				foreach($_GET['rowupm'] as $k => $v) {
+					$val = unserialize(gzinflate(base64_decode($v)));
+					if($val != '')
+						$row_upm_arr[$k] = $val;
+				}
+				if(isset($row_upm_arr) && !empty($row_upm_arr))
+					$this->getNonAssocUpm($row_upm_arr);
 			}
 			
 			foreach($_GET['params'] as $pk => $pv) {
@@ -513,8 +513,7 @@ class ContentManager
 				$params = array_merge($this->params, $excel_params, $ins_params);
 				
 				echo ('<input type="hidden" name="params['.$pk.']" value="' . $_GET['params'][$pk] . '"/>'
-						. '<input type="hidden" name="leading['.$pk.']" value="' . $_GET['leading'][$pk] . '"/>'
-						.  '<input type="hidden" name="trunc" value="' . $_GET['trunc'] . '"/>');
+						. '<input type="hidden" name="leading['.$pk.']" value="' . $_GET['leading'][$pk] . '"/>');
 				
 				if($c_params['type'] == 'row') {
 					echo ('<input type="hidden" name="rowupm['.$pk.']" value="' . $_GET['rowupm'][$pk] . '"/>');
