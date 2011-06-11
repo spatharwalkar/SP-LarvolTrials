@@ -22,10 +22,9 @@ class DatabaseManager
 	public $set = array(); // array that holds settings from the "settings" table in the DB
 	public $user = NULL; //NULL = login status unknown. false = Not logged in. [User]object = logged in
 	public $types = array();
-        // DW Added Eudra
 	public $sourceCats = array('NCT', 'PubMed', 'EudraCT');
 	public $sourceIdFields = array('NCT/nct_id', 'PubMed/PMID', 'EudraCT/eudract_id');
-	public $sources;
+	public $sources;	//Stores source category information as objects instead of the old method of parallel arrays
 	
 	// On making an instance, connect to the database.
 	public function __construct()
@@ -40,11 +39,10 @@ class DatabaseManager
 		urlPath();	//update cache if necessary
 
 		$this->reloadSettings();
-		$this->sources[] = new sourceCategories('NCT','nct_id','http://clinicaltrials.gov/ct2/show/');
-		$this->sources[] = new sourceCategories('PubMed', 'PMID', 'http://www.ncbi.nlm.nih.gov/pubmed/');		
-                $this->sources[] = new sourceCategories('EudraCT','eudract_id','https://www.clinicaltrialsregister.eu/ctr-search/index.xhtml');
-                
-        }
+		$this->sources[] = new SourceCategory('NCT','nct_id','http://clinicaltrials.gov/ct2/show/');
+		$this->sources[] = new SourceCategory('PubMed', 'PMID', 'http://www.ncbi.nlm.nih.gov/pubmed/');		
+		$this->sources[] = new SourceCategory('EudraCT','eudract_id','https://www.clinicaltrialsregister.eu/ctr-search/index.xhtml?');
+	}
 	
 	/* Refreshes the disk cache of XML field types from the database's information_schema
 		and also updates this object's "types" member.
@@ -385,30 +383,26 @@ class CustomField
 	}
 }
 
-class sourceCategories
+class SourceCategory
 {
 	public $categoryName;
+	public $categoryId;
 	public $idFieldName;
+	public $idFieldId;
 	public $linkBase;
 
 	function __construct($categoryName,$idFieldName,$linkBase)
 	{
 		$this->categoryName = $categoryName;
+		$query = 'SELECT `id` FROM data_categories WHERE `name`="' . $categoryName . '" LIMIT 1';
+		$res = mysql_query($query) or die('Bad SQL query getting category ID');
+		$res = mysql_fetch_array($res) or die("Couldn't find category " . $categoryName);
+		$this->categoryId = $res['id'];
 		$this->idFieldName = $idFieldName;
+		$this->idFieldId = getFieldId($categoryName, $idFieldName);
 		$this->linkBase = $linkBase;
 		
 	}
-	//todo stub function gets source id of the already set source from db. 
-	public function getSourceId()
-	{
-		global $db;
-		$query = "select id from data_fields where name='".$this->idFieldName."'";
-		$result  = mysql_query($query) or die('Bad sql Query '.$query);
-		$tmp = mysql_fetch_row($result);
-		return $tmp[0];
-		
-	}
-	
 }
 
 ?>
