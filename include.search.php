@@ -43,6 +43,7 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 	$strong_exclusions = array();
 	$sorts = array();	//array of Sort objects for sorting on normal fields
 	$g_sorts = array();	//array of global field names to sort on (including DESC for descending)
+	$orig_ind=0; // to track the original index number of $params elements
 	try{ 
 		foreach($params as $param)
 		{
@@ -54,18 +55,18 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 				case 'ascending':
 				if($global)
 				{
-					$g_sorts[] = '`' . $param->field . '`';
+					$g_sorts[$orig_ind++] = '`' . $param->field . '`';
 				}else{
-					$sorts[] = new Sort(substr($param->field,1));
+					$sorts[$orig_ind++] = new Sort(substr($param->field,1));
 				}
 				break;
 				
 				case 'descending':
 				if($global)
 				{
-					$g_sorts[] = '`' . $param->field . '` DESC';
+					$g_sorts[$orig_ind++] = '`' . $param->field . '` DESC';
 				}else{
-					$sorts[] = new Sort(substr($param->field,1),true);
+					$sorts[$orig_ind++] = new Sort(substr($param->field,1),true);
 				}
 				break;
 				
@@ -502,7 +503,11 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 
 	if(!empty($g_sorts) || !empty($orderby))
 	{
-		$orderby = implode(',', array_merge($g_sorts,$orderby));
+
+//		$orderby = array_merge($g_sorts,$orderby);
+		$orderby = $g_sorts+$orderby;
+		ksort($orderby);
+		$orderby = implode(',', $orderby);
 		$bigquery .= ' ORDER BY ' . $orderby;
 	}
 
