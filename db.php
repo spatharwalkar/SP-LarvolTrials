@@ -399,7 +399,9 @@ class SourceCategory
 		$res = mysql_fetch_array($res);
 		$this->categoryId = $res['id'];
 		$this->idFieldName = $idFieldName;
+		ob_start();
 		$this->idFieldId = getFieldId($categoryName, $idFieldName);
+		ob_end_clean();
 		$this->linkBase = $linkBase;
 		
 	}
