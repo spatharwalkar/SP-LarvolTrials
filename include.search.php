@@ -867,39 +867,6 @@ function storeParams($params)
 	session_write_close();
 }
 
-//gets the ID of a field given the name (and category)
-//returns false on failure.
-function getFieldId($category,$name)
-{
-	//logger variable in db.php
-	global $logger;	
-	
-	$query = 'SELECT data_fields.id AS "id" '
-		. 'FROM data_fields LEFT JOIN data_categories ON data_fields.category=data_categories.id '
-		. 'WHERE data_fields.name="' . $name . '" AND data_categories.name="' . $category . '" LIMIT 1';
-		
-	$time_start = microtime(true);
-	$res = mysql_query($query);
-	$time_end = microtime(true);
-	$time_taken = $time_end-$time_start;
-	$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments:get field id query 2';
-	$logger->info($log);
-	unset($log);	
-	
-	if($res === false)
-	{
-		$log = 'Bad SQL query getting field ID of ' . $category . '/' . $name;
-		return softDie($log);
-	}
-	$res = mysql_fetch_assoc($res);
-	if($res === false)
-	{
-		$log = 'Field ' . $name . ' not found in category ' . $category . '!';
-		return softDie($log);
-	}
-	return $res['id'];
-}
-
 //gets the ID of an enum value (from data_enumvals) given the field ID and string value
 function getEnumvalId($fieldId,$value)
 {
