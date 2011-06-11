@@ -396,7 +396,7 @@ class SourceCategory
 		$this->categoryName = $categoryName;
 		$query = 'SELECT `id` FROM data_categories WHERE `name`="' . $categoryName . '" LIMIT 1';
 		$res = mysql_query($query) or die('Bad SQL query getting category ID');
-		$res = mysql_fetch_array($res) or die("Couldn't find category " . $categoryName);
+		$res = mysql_fetch_array($res);
 		$this->categoryId = $res['id'];
 		$this->idFieldName = $idFieldName;
 		$this->idFieldId = getFieldId($categoryName, $idFieldName);
