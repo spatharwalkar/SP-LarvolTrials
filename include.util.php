@@ -288,19 +288,14 @@ function parenthesize($arr)
 //throws an exception with the given message
 function tex($msg)
 {
-	global $logger;
-	$logger->error($log);
 	throw new Exception($msg);
 }
 
 function softDie($out)
 {
-	global $logger;
-	$logger->error($out);
 	if(!mysql_query('ROLLBACK'))
 	{
 		$log = "Couldn't rollback changes";
-		$logger->fatal($log);
 		die($log);
 	}
 	echo($out);
@@ -310,12 +305,9 @@ function softDie($out)
 //Log all data errors while importing data from ct.gov
 function logDataErr($out)
 {
-	global $logger;
-	$logger->error($out);
 	if(!mysql_query('ROLLBACK'))
 	{
 		$log = "Couldn't rollback changes";
-		$logger->fatal($log);
 		die($log);
 	}
 	echo($out);
