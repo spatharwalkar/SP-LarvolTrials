@@ -1010,40 +1010,43 @@ function prepareParams($post)
 			}
 		}
 	}
-	foreach($post['action'] as $field => $action)
+	if(is_array($post['action']) && !empty($post['action'])) 
 	{
-		if(!in_array($action,array('search','ascending','descending','require')) || !array_key_exists($field,$db->types))
+		foreach($post['action'] as $field => $action)
 		{
-			continue;
-		}
-		
-		$par = new SearchParam();
-		$par->field = $field;
-		$par->action = $action;
-		if($action == 'search')
-		{
-			$sval = $post['searchval'][$field];
-			if($db->types[$field] == 'date')
+			if(!in_array($action,array('search','ascending','descending','require')) || !array_key_exists($field,$db->types))
 			{
-				$svals = explode(' TO ',$sval);
-				foreach($svals as $skey => $svalue)
-				{
-					$svals[$skey] = date("Y-m-d", strtotime($svalue));
-				}
-				$sval = implode(' TO ', $svals);
-			}else if($db->types[$field] == 'datetime'){
-				$svals = explode(' TO ',$sval);
-				foreach($svals as $skey => $svalue)
-				{
-					$svals[$skey] = date("Y-m-d H:i:s", strtotime($svalue));
-				}
-				$sval = implode(' TO ', $svals);
+				continue;
 			}
-			$par->value = $sval;
+			
+			$par = new SearchParam();
+			$par->field = $field;
+			$par->action = $action;
+			if($action == 'search')
+			{
+				$sval = $post['searchval'][$field];
+				if($db->types[$field] == 'date')
+				{
+					$svals = explode(' TO ',$sval);
+					foreach($svals as $skey => $svalue)
+					{
+						$svals[$skey] = date("Y-m-d", strtotime($svalue));
+					}
+					$sval = implode(' TO ', $svals);
+				}else if($db->types[$field] == 'datetime'){
+					$svals = explode(' TO ',$sval);
+					foreach($svals as $skey => $svalue)
+					{
+						$svals[$skey] = date("Y-m-d H:i:s", strtotime($svalue));
+					}
+					$sval = implode(' TO ', $svals);
+				}
+				$par->value = $sval;
+			}
+			$par->negate = $negate[$field];
+			if(isset($post['weak'][$field])) $par->strong = false;
+			$params[] = $par;
 		}
-		$par->negate = $negate[$field];
-		if(isset($post['weak'][$field])) $par->strong = false;
-		$params[] = $par;
 	}
 	if(isset($post['multifields']) && count($post['multifields']))
 	{
