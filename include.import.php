@@ -11,7 +11,7 @@ $fieldArr = calculateDateFieldIds();
 //Autodetects the type if none is specified.
 function addRecord($in, $type='unspec')
 {
-	static $types = array('clinical_study' => 'nct', 'PubmedArticle' => 'pubmed', 'EudraCT' => 'EudraCT');
+	static $types = array('clinical_study' => 'nct', 'PubmedArticle' => 'pubmed', 'EudraCT' => 'EudraCT', 'isrctn' => 'isrctn');
 	$type = strtolower($type);
 	if($type == 'unspec') $type = $types[$in->getName()];
 	
@@ -23,6 +23,8 @@ function addRecord($in, $type='unspec')
 		return addPubmed($in);
 		case 'eudract':
 		return addEudraCT($in);
+		case 'isrctn':
+		return addisrctn($in);
 	}
 	return false;
 }
@@ -382,6 +384,85 @@ function addEudraCT($rec) {
             //  echo "Field: " . $fieldname . ", Value: " . $valueitem . "<br>";
             if (!addval($studycat, $eud_cat, $fieldname, $value))
                 return softDie('Data error in ' . $eud_id . '. Fieldname: ' . $fieldname . ': ' . $value);
+            //          }
+        }
+    }
+    mysql_query('COMMIT') or die("Couldn't commit SQL transaction to create records from XML");
+    return true;
+}
+
+// TODO DW Add or update a isrctn record !
+function addisrctn($rec) {
+
+    global $db;
+    global $instMap;
+    global $now;
+    if ($rec === false)
+        return false;
+
+    $DTnow = date('Y-m-d H:i:s', $now);
+    
+    $isr_id = $rec['isrctn_id'];
+    
+    echo "<br>ISRCTN ID: " . $isr_id . "<br>";
+
+    //Find out the ID of the field for eudract_number, and the ID of the "EudraCT" category.
+    static $id_field = NULL;
+    static $eud_cat = NULL;
+    if ($id_field === NULL || $nct_cat === NULL) {
+        $query = 'SELECT data_fields.id AS "isrctn_id",data_categories.id AS "isr_cat" FROM '
+                . 'data_fields LEFT JOIN data_categories ON data_fields.category=data_categories.id '
+                . 'WHERE data_fields.name="isrctn_id" AND data_categories.name="isrctn" LIMIT 1';
+        $res = mysql_query($query);
+        if ($res === false)
+            return softDie('Bad SQL query getting field ID of isrctn_id');
+        $res = mysql_fetch_assoc($res);
+        if ($res === false)
+            return softDie('ISR schema not found!');
+        $id_field = $res['isrctn_id'];
+        $isr_cat = $res['isr_cat'];
+    }
+
+    mysql_query('BEGIN') or die("Couldn't begin SQL transaction to create record from XML");
+    //Detect if this record already exists (if not, add it, and associate it with the category NCT)
+    //Then, get the larvol_id and the ID of the studycat it has for NCT.
+    $query = 'SELECT studycat,larvol_id FROM '
+            . 'data_values LEFT JOIN data_cats_in_study ON data_values.studycat=data_cats_in_study.id '
+            . 'WHERE field=' . $id_field . ' AND val_varchar="' . $isr_id . '" LIMIT 1';
+    $res = mysql_query($query);
+    if ($res === false)
+        return softDie('Bad SQL query determining existence of record');
+    $res = mysql_fetch_assoc($res);
+    $exists = $res !== false;
+
+    $studycat = NULL;
+    $larvol_id = NULL;
+    if ($exists) {
+        $studycat = $res['studycat'];
+        $larvol_id = $res['larvol_id'];
+    } else {
+        $query = 'INSERT INTO clinical_study SET import_time="' . date('Y-m-d H:i:s', $now) . '"';
+        if (mysql_query($query) === false)
+            return softDie('Bad SQL query adding new record');
+        $larvol_id = mysql_insert_id();
+        $query = 'INSERT INTO data_cats_in_study SET larvol_id=' . $larvol_id . ',category=' . $isr_cat;
+        if (mysql_query($query) === false)
+            return softDie('Bad SQL query adding new record to category');
+        $studycat = mysql_insert_id();
+        $query = 'INSERT INTO data_values SET field=' . $id_field . ',`added`="' . $DTnow . '",studycat=' . $studycat
+                . ',val_varchar="' . $isr_id . '"';
+        if (mysql_query($query) === false)
+            return softDie('Bad SQL query adding $isr_id');
+    }
+
+    echo "StudyCat: " . $studycat . ":<br>";
+    //import everything
+    foreach ($rec as $fieldname => $value) {
+        if ($fieldname != "") {
+            //         foreach ($value as $valueitem) {
+            //  echo "Field: " . $fieldname . ", Value: " . $valueitem . "<br>";
+            if (!addval($studycat, $isr_cat, $fieldname, $value))
+                return softDie('Data error in ' . $isr_id . '. Fieldname: ' . $fieldname . ': ' . $value);
             //          }
         }
     }

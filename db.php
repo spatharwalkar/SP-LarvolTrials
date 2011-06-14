@@ -22,8 +22,8 @@ class DatabaseManager
 	public $set = array(); // array that holds settings from the "settings" table in the DB
 	public $user = NULL; //NULL = login status unknown. false = Not logged in. [User]object = logged in
 	public $types = array();
-	public $sourceCats = array('NCT', 'PubMed', 'EudraCT');
-	public $sourceIdFields = array('NCT/nct_id', 'PubMed/PMID', 'EudraCT/eudract_id');
+	public $sourceCats = array('NCT', 'PubMed', 'EudraCT', 'isrctn');
+	public $sourceIdFields = array('NCT/nct_id', 'PubMed/PMID', 'EudraCT/eudract_id', 'isrctn/isrctn_id');
 	public $sources;	//Stores source category information as objects instead of the old method of parallel arrays
 	
 	// On making an instance, connect to the database.
@@ -42,6 +42,7 @@ class DatabaseManager
 		$this->sources[] = new SourceCategory('NCT','nct_id','http://clinicaltrials.gov/ct2/show/');
 		$this->sources[] = new SourceCategory('PubMed', 'PMID', 'http://www.ncbi.nlm.nih.gov/pubmed/');		
 		$this->sources[] = new SourceCategory('EudraCT','eudract_id','https://www.clinicaltrialsregister.eu/ctr-search/index.xhtml?');
+		$this->sources[] = new sourceCategory('isrctn','isrctn_id','http://www.controlled-trials.com/');
 	}
 	
 	/* Refreshes the disk cache of XML field types from the database's information_schema
