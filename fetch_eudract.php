@@ -349,7 +349,7 @@ echo("<br>**** Page: 1: Results Links: " . $link_count . " **** <br>");
 $pagei = 2;
 
 while ($pagei <= $pages) {
-
+	ini_set('max_execution_time', '36000'); //10 hours
     echo "<br>Starting Page: " . ($pagei) . "<br>";
 
     $url = "https://www.clinicaltrialsregister.eu/ctr-search/index.xhtml?"
