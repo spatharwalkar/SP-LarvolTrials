@@ -960,13 +960,16 @@ function removeNullSearchdata($data)
 	$multivalue = $data['multivalue'];
 	$time_machine = $data['time_machine'];
 	$override = $data['override'];
-	foreach($action as $field => $actval)
+	if(is_array($action) && !empty($action))
 	{
-		if($actval == "0")
+		foreach($action as $field => $actval)
 		{
-			unset($action[$field]);
-			unset($searchval[$field]);
-			unset($negate[$field]);
+			if($actval == "0")
+			{
+				unset($action[$field]);
+				unset($searchval[$field]);
+				unset($negate[$field]);
+			}
 		}
 	}
 	return array('search' => $search, 'display' => $display, 'action' => $action, 'searchval' => $searchval, 'negate' => $negate,
@@ -980,7 +983,7 @@ function prepareParams($post)
 	global $db;
 	$params = array();
 	$negate = array();
-	if(is_array($post['negate']))
+	if(is_array($post['negate']) && !empty($post['negate']))
 	{
 		foreach($post['negate'] as $field => $ok)
 		{
