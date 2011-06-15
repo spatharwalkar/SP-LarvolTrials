@@ -4,7 +4,6 @@ require_once('db.php');
 require_once('include.search.php');
 require_once('include.import.php');
 require_once('include.util.php');
-require_once('upmSearchCount.php');
 if(!$db->loggedIn())
 {
 	header('Location: ' . urlPath() . 'index.php');
@@ -66,7 +65,7 @@ if(isset($_FILES['uploadedfile']) && $_FILES['uploadedfile']['size']>1)
 }
 
 //pagination
-upmPagination($limit);
+upmPagination($limit,$totalCount);
 //pagination controller
 
 
@@ -101,7 +100,7 @@ echo '</html>';
  * @param int $limit The total limit of records defined in the controller.
  * @author Jithu Thomas
  */
-function upmPagination($limit)
+function upmPagination($limit,$totalCount)
 {
 	global $page;	
 	
@@ -114,16 +113,15 @@ function upmPagination($limit)
 	
 	
 	$visualPage = $page+1;
+	$maxPage = ceil($totalCount/$limit);
 	
 	$oldVal = $page;
 		
-		$pend  = $visualPage*$limit;
+		$pend  = ($visualPage*$limit)<=$totalCount?$visualPage*$limit:$totalCount;
 		$pstart = (($pend - $limit+1)>0)?$pend - $limit+1:0;
-		echo('<form name="pager" method="post" action="upm.php"><fieldset>'
-	//		 	. '<legend>Page ' . $page . ' of ' . ceil($results / $db->set['results_per_page'])
-			 	. '<legend>Page ' . $visualPage . ' '
-	//			. ': records ' . $pstart . '-' . (($page*$db->set['results_per_page']>$results)?$results:$pend) . ' of ' . $results
-				. ': records '.$pstart.'-'.$pend.' of <iframe src="upmSearchCount.php?web=1"></iframe>'
+		echo('<form name="pager" method="post" action="upm.php"><fieldset class="floatl">'
+			 	. '<legend>Page ' . $visualPage . ' of '.$maxPage
+				. ': records '.$pstart.'-'.$pend.' of '.$totalCount
 				. '</legend>'
 				. '<input type="submit" name="jump" value="Jump" style="width:0;height:0;border:0;padding:0;margin:0;"/> '
 				. '<input name="page" type="hidden" value="' . $page . '" /><input name="search" type="hidden" value="1" />'
@@ -131,10 +129,14 @@ function upmPagination($limit)
 				. ' <input type="text" name="jumpno" value="' . $visualPage . '" size="6" />'
 				. '<input type="submit" name="jump" value="Jump" /> '
 				. '<input type="submit" name="next" value="Next &gt;" />'
+				. '<input type="hidden" value="'.$oldVal.'" name="oldval">'
+				. '</fieldset>'
+				. '<fieldset class="floatl">'
+				. '<legend> Actions: </legend>'
 				. '<input type="submit" value="Add New Record" name="add_new_record">'
 				. '<input type="submit" value="Import" name="import">'
-				. '<input type="hidden" value="'.$oldVal.'" name="oldval">'
-				. '</fieldset></form>');
+				. '</fieldset>'
+				. '</form>');
 
 				
 echo '<br/>';	
@@ -228,7 +230,7 @@ function addEditUpm($id)
 {
 	if($id)
 	{
-		$query = "select * from upm where id=$id";
+		$query = "SELECT * FROM upm WHERE id=$id";
 		$res = mysql_query($query) or die('Cannot update this upm id');
 		while($row = mysql_fetch_assoc($res))
 		{
@@ -237,9 +239,16 @@ function addEditUpm($id)
 	}
 	
 	$columns = array();
-	$query = "show columns from upm";
+	$query = "SHOW COLUMNS FROM upm";
 	$res = mysql_query($query)or die('Cannot fetch column names from upm table.');
 	$i=0;
+	
+	/*	
+	$skip array if any fields in the upm table needs to be skipped when 
+	showing the upm entry form just append in this array
+	*/
+	$skipArr = array('last_update');
+	
 	echo '<div class="clr">';
 	echo '<fieldset>';
 	echo '<form name="umpInput" method="post" action="upm.php">';
@@ -250,6 +259,10 @@ function addEditUpm($id)
 		{
 			echo '<input type="hidden" name="id" value="'.$id.'"/>';
 			$i++;
+			continue;
+		}
+		if(in_array($row['Field'], $skipArr))
+		{
 			continue;
 		}
 		$dbVal = isset($upmDetails[$row['Field']])?$upmDetails[$row['Field']]:null;
@@ -312,8 +325,10 @@ function saveUpm($post,$import=0,$importKeys=array(),$importVal=array(),$line=nu
 	$id = ($post['id'])?$post['id']:null;	
 	if(!$id)//insert
 	{
+		array_pop($post);	
+		//assuming last field is last_update field.
+		array_push($post,date('Y-m-d',$now));			
 		$post = array_map(am,array_keys($post),array_values($post));
-		array_pop($post);		
 		$query = "insert into upm values(".implode(',',$post).")";
 		mysql_query($query)or die('Cannot insert upm entry');
 	}
@@ -329,8 +344,9 @@ function saveUpm($post,$import=0,$importKeys=array(),$importVal=array(),$line=nu
 		$historyArr = array_map(am,array_keys($historyArr),$historyArr);
 		$query = "insert into upm_history values (".implode(',',$historyArr).")";
 		mysql_query($query)or softdie('Cannot update history for upm id '.$historyArr['id']);
+		array_pop($post);	
+		$post['last_update'] = date('Y-m-d',$now);
 		$post = array_map(am1,array_keys($post),array_values($post));
-		array_pop($post);		
 		$query = "update upm set ".implode(',',$post)." where id=".$id;
 		mysql_query($query)or die('Cannot update upm entry');		
 	}
@@ -386,4 +402,17 @@ function importUpm()
 	echo '</fieldset>';
 	echo '</div>';	
 
+}
+/**
+ * @name getTotalUpmCount
+ * @tutorial Outputs the total upm count.
+ * @author Jithu Thomas
+ */
+function getTotalUpmCount()
+{
+global $db;
+$query = "select count(id) as cnt from upm";
+$res = mysql_query($query);
+$count = mysql_fetch_row($res);
+return $count[0];
 }
