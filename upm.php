@@ -293,6 +293,7 @@ function am2($v,$dbVal)
 	return '<option value="'.$v.'">'.$v.'</option>';
 }
 
+
 /**
  * @name saveUpm
  * @tutorial Saves the upm entry/edit forms and inputs from the tab seperated file inputs.
@@ -326,10 +327,10 @@ function saveUpm($post,$import=0,$importKeys=array(),$importVal=array(),$line=nu
 	if(!$id)//insert
 	{
 		array_pop($post);	
-		//assuming last field is last_update field.
-		array_push($post,date('Y-m-d',$now));			
-		$post = array_map(am,array_keys($post),array_values($post));
-		$query = "insert into upm values(".implode(',',$post).")";
+		$post['last_update'] = 	date('Y-m-d',$now);		
+		$postKeys = array_keys($post);
+		$post = array_map(am,$postKeys,array_values($post));
+		$query = "insert into upm (".implode(',',$postKeys).") values(".implode(',',$post).")";
 		mysql_query($query)or die('Cannot insert upm entry');
 	}
 	else//update
@@ -340,10 +341,17 @@ function saveUpm($post,$import=0,$importKeys=array(),$importVal=array(),$line=nu
 		{
 			$historyArr = $row;
 		}
-		array_push($historyArr,date('Y-m-d',$now));
+		//copy new index added from last_update for the upm_history table
+		$historyArr['added'] = $historyArr['last_update'];
+		//last update not needed for upm_history
+		unset($historyArr['last_update']);
+		//superceded is the current date 
+		$historyArr['superceded']=date('Y-m-d',$now);
+		$historyArrKeys = array_keys($historyArr);		
 		$historyArr = array_map(am,array_keys($historyArr),$historyArr);
-		$query = "insert into upm_history values (".implode(',',$historyArr).")";
+		$query = "insert into upm_history (".implode(',',$historyArrKeys).") values (".implode(',',$historyArr).")";
 		mysql_query($query)or softdie('Cannot update history for upm id '.$historyArr['id']);
+		//remove post action name from insert query.
 		array_pop($post);	
 		$post['last_update'] = date('Y-m-d',$now);
 		$post = array_map(am1,array_keys($post),array_values($post));
