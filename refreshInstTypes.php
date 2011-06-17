@@ -1,5 +1,6 @@
 <?php
 require_once('db.php');
+require_once 'include.derived.php';
 if(!$db->loggedIn() || ($db->user->userlevel!='admin' && $db->user->userlevel!='root'))
 {
 	header('Location: ' . urlPath() . 'index.php');

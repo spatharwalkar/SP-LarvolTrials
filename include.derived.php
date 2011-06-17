@@ -95,7 +95,6 @@ function applyInactiveDate($arr=array())
 	if(count($arr)>0)
 	{
 		mysql_query('BEGIN') or die('Cannot being transaction');
-		echo 'Starting transaction.<br/>';
 	}
 	$flag = 0;
 	foreach($arr as $res)
@@ -167,7 +166,7 @@ function applyInactiveDate($arr=array())
 	if($flag == 1)
 	{
 		mysql_query('COMMIT') or die('Cannot commit transaction');
-		echo 'Transaction commited successfully.<br/>';
+		echo 'Inactive Date updated for Larvol Id: '.$larvolId.'.<br/>';
 	}
 	
 	
@@ -263,12 +262,11 @@ function refreshRegions($larvolId,$action,$fieldArr)
 	else
 	{
 		mysql_query('BEGIN') or softdie('Cannot begin transaction');
-		echo 'Starting transaction.<br/>';	
 		$query  = "update clinical_study set region=null where larvol_id=$larvolId";	
 		if(mysql_query($query))
 		{
 			mysql_query('COMMIT') or softdie('Cannot commit transaction');
-			echo 'Transaction commited successfully.<br/>';			
+			echo 'Region updated for Larvol Id: '.$larvolId.'.<br/>';	
 		}
 		else
 		{
@@ -290,7 +288,6 @@ function applyRegions($arr)
 	if(count($arr)>0)
 	{
 		mysql_query('BEGIN') or die('Cannot begin transaction');
-		echo 'Starting transaction.<br/>';
 	}
 /*	else 
 	{
@@ -361,7 +358,7 @@ function applyRegions($arr)
 	if($flag == 1)
 	{
 		mysql_query('COMMIT') or softdie('Cannot commit transaction');
-		echo 'Transaction commited successfully.<br/>';
+		echo 'Region updated for Larvol Id: '.$larvolId.'.<br/>';	
 	}	
 }
 
@@ -398,5 +395,36 @@ function regionMapping()
 	
 	return $out;
 	
+}
+
+/* Gets the full institution mapping from disk.
+	Search relies on the institution_type field in the database, not this.
+*/
+function institutionMapping()
+{
+	
+	$out = array();
+	if ($handle = opendir('derived/institution_type'))
+	{
+	    while (false !== ($file = readdir($handle)))
+	    {
+	        if (substr($file,-4)=='.txt')
+	        {
+	            $institutionEntry = str_replace('_','/',substr($file,0,strpos($file,'.txt')));
+	            $institutionFile = file('derived/institution_type/'.$file,FILE_IGNORE_NEW_LINES|FILE_SKIP_EMPTY_LINES);
+	        	foreach($institutionFile as $institutionList)
+				{
+					$out[$institutionList] = $institutionEntry;
+				}	            
+	        }
+	    }
+	    closedir($handle);
+	}
+	else
+	{
+		die('Cannot open directory derived/institution_type.');
+	}
+		
+	return $out;
 }
 

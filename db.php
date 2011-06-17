@@ -326,21 +326,6 @@ class DatabaseManager
 	}
 }
 
-/* Gets the full institution mapping from disk.
-	Search relies on the institution_type field in the database, not this.
-*/
-function institutionMapping()
-{
-	static $industry = NULL;
-	static $coop = NULL;
-	if($industry === NULL) $industry = file('institutions/industry.txt', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-	if($coop === NULL) $coop = file('institutions/coop.txt', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-	$out = array();
-	foreach($coop as $inst) $out[$inst] = 'coop';
-	foreach($industry as $inst) $out[$inst] = 'industry';
-	return $out;
-}
-
 class User
 {
 	public $id = NULL;
@@ -391,9 +376,12 @@ class SourceCategory
 	public $idFieldName;
 	public $idFieldId;
 	public $linkBase;
+	public $fieldId;
+	//public $categoryId;
 
 	function __construct($categoryName,$idFieldName,$linkBase)
 	{
+		global $db;
 		$this->categoryName = $categoryName;
 		$query = 'SELECT `id` FROM data_categories WHERE `name`="' . $categoryName . '" LIMIT 1';
 		$res = mysql_query($query) or die('Bad SQL query getting category ID');
@@ -405,7 +393,24 @@ class SourceCategory
 		ob_end_clean();
 		$this->linkBase = $linkBase;
 		
+		$query = "select df.id, dc.id FROM data_fields df, data_categories dc WHERE df.name='".$this->idFieldName."' and dc.name='".$this->categoryName."'";
+		$result  = mysql_query($query) or die('Bad sql Query '.$query);
+		$tmp = mysql_fetch_row($result);
+		$this->fieldId = $tmp[0];		
+		$this->categoryId = $tmp[1];
+		
 	}
+	//stub function gets source id of the already set source from db. 
+	public function getSourceId()
+	{
+		global $db;
+		$query = "select id from data_fields where name='".$this->idFieldName."'";
+		$result  = mysql_query($query) or die('Bad sql Query '.$query);
+		$tmp = mysql_fetch_row($result);
+		return $tmp[0];
+		
+	}
+	
 }
 
 ?>
