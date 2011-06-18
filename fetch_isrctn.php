@@ -85,8 +85,8 @@ $i = strpos($rowcount, " ");
 $rowcount = substr($rowcount, 0, $i);
 echo "<br>Records: " . $rowcount . "<br>";
 //Find out how many pages that is
-//$pages=ceil(($rowcount/$max));
-//echo "Pages: ".$pages. "<br>";
+$pages=ceil(($rowcount/$max));
+echo "Pages: ".$pages. "<br>";
 
 // !!!!!!!TESTING SAKE ONLY.. REMOVE TO GET REAL VALUES!!!!!!!!!
 //$rowcount = 100;
@@ -97,7 +97,8 @@ echo "<br>Records: " . $rowcount . "<br>";
 
 $links = array();
 $link_count = 0;
-while ($link_count <= $rowcount) {
+$page_count = 0;
+while ($page_count <= $pages) {
 
 	$url = "http://www.controlled-trials.com/isrctn/" . ($link_count + 1) . "/" . $max . "/3/desc/";
 	$html = curl_start($url);
@@ -149,6 +150,7 @@ while ($link_count <= $rowcount) {
 
 	// Open each Page:
 	$link_count = count($links);
+	$page_count=$page_count+1;
 }
 
 Echo "<br>Links: " . $link_count . "<br>";
