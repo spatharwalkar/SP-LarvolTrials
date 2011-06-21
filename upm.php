@@ -10,29 +10,18 @@ if(!$db->loggedIn())
 	exit;
 }
 require('header.php');
+
+//reset controller
+if($_GET['reset'])
+header('Location: ' . urlPath() . 'upm.php');
+
 echo '<div class="error">Under Development</div>';
-
-
-//declare all globals
-global $db;
-global $page;
-//set docs per list
-$limit = 50;
-$totalCount = getTotalUpmCount();
-$maxPage = $totalCount%$limit;
-if(!isset($_POST['oldval']))
-$page=0;
-
-
-
-
-//save operation
-if($_POST['save']=='Save')
+//Start controller area
+//save operation controller
+if($_GET['save']=='Save')
 {
-	saveUpm($_POST);
+	saveUpm($_GET);
 }
-//
-
 //import controller
 if(isset($_FILES['uploadedfile']) && $_FILES['uploadedfile']['size']>1)
 {
@@ -63,17 +52,26 @@ if(isset($_FILES['uploadedfile']) && $_FILES['uploadedfile']['size']>1)
 	}
 	echo 'Imported '.$success.' records, Failed entries '.$fail;
 }
+//End controller area
+
+//declare all globals
+global $db;
+global $page;
+//set docs per list
+$limit = 50;
+$totalCount = getTotalUpmCount();
+$maxPage = $totalCount%$limit;
+if(!isset($_GET['oldval']))
+$page=0;
 
 //pagination
 upmPagination($limit,$totalCount);
 //pagination controller
 
-
-
 echo '<br/>';
 echo '<div class="clr">';
 //add edit form.
-if($_POST['add_new_record']=='Add New Record' || $_GET['id'])
+if($_GET['add_new_record']=='Add New Record' || $_GET['id'])
 {
 	$id = ($_GET['id'])?$_GET['id']:null;
 	echo '<div>';
@@ -82,7 +80,7 @@ if($_POST['add_new_record']=='Add New Record' || $_GET['id'])
 }
 
 //import controller
-if($_POST['import']=='Import' || $_POST['uploadedfile'])
+if($_GET['import']=='Import' || $_GET['uploadedfile'])
 {
 	importUpm();
 }
@@ -104,12 +102,12 @@ function upmPagination($limit,$totalCount)
 {
 	global $page;	
 	
-	if(isset($_POST['next']))
-	$page = $_POST['oldval']+1;
-	elseif(isset($_POST['back']))
-	$page = $_POST['oldval']-1;	
-	elseif(isset($_POST['jump']))
-	$page = $_POST['jumpno']-1;
+	if(isset($_GET['next']))
+	$page = $_GET['oldval']+1;
+	elseif(isset($_GET['back']))
+	$page = $_GET['oldval']-1;	
+	elseif(isset($_GET['jump']))
+	$page = $_GET['jumpno']-1;
 	
 	
 	$visualPage = $page+1;
@@ -117,31 +115,85 @@ function upmPagination($limit,$totalCount)
 	
 	$oldVal = $page;
 		
-		$pend  = ($visualPage*$limit)<=$totalCount?$visualPage*$limit:$totalCount;
-		$pstart = (($pend - $limit+1)>0)?$pend - $limit+1:0;
-		echo('<form name="pager" method="post" action="upm.php"><fieldset class="floatl">'
-			 	. '<legend>Page ' . $visualPage . ' of '.$maxPage
-				. ': records '.$pstart.'-'.$pend.' of '.$totalCount
-				. '</legend>'
-				. '<input type="submit" name="jump" value="Jump" style="width:0;height:0;border:0;padding:0;margin:0;"/> '
-				. '<input name="page" type="hidden" value="' . $page . '" /><input name="search" type="hidden" value="1" />'
-				. ($pstart > 1 ? '<input type="submit" name="back" value="&lt; Back" onclick="javascript:history(-1);return false;" />' : '')
-				. ' <input type="text" name="jumpno" value="' . $visualPage . '" size="6" />'
-				. '<input type="submit" name="jump" value="Jump" /> '
-				. '<input type="submit" name="next" value="Next &gt;" />'
-				. '<input type="hidden" value="'.$oldVal.'" name="oldval">'
-				. '</fieldset>'
-				. '<fieldset class="floatl">'
-				. '<legend> Actions: </legend>'
-				. '<input type="submit" value="Add New Record" name="add_new_record">'
-				. '<input type="submit" value="Import" name="import">'
-				. '</fieldset>'
-				. '</form>');
+	$pend  = ($visualPage*$limit)<=$totalCount?$visualPage*$limit:$totalCount;
+	$pstart = (($pend - $limit+1)>0)?$pend - $limit+1:0;
+	
+	echo '<form name="pager" method="get" action="upm.php"><fieldset class="floatl">'
+		 	. '<legend>Page ' . $visualPage . ' of '.$maxPage
+			. ': records '.$pstart.'-'.$pend.' of '.$totalCount
+			. '</legend>'
+			. '<input type="submit" name="jump" value="Jump" style="width:0;height:0;border:0;padding:0;margin:0;"/> '
+			. '<input name="page" type="hidden" value="' . $page . '" /><input name="search" type="hidden" value="1" />'
+			. ($pstart > 1 ? '<input type="submit" name="back" value="&lt; Back" onclick="javascript:history(-1);return false;" />' : '')
+			. ' <input type="text" name="jumpno" value="' . $visualPage . '" size="6" />'
+			. '<input type="submit" name="jump" value="Jump" /> '
+			. '<input type="submit" name="next" value="Next &gt;" />'
+			. '<input type="hidden" value="'.$oldVal.'" name="oldval">'
+			. '</fieldset>'
+			. '<fieldset class="floatl">'
+			. '<legend> Actions: </legend>'
+			. '<input type="submit" value="Add New Record" name="add_new_record">'
+			. '<input type="submit" value="Import" name="import">'
+			. '</fieldset>';
+			
+	echo  '<fieldset class="">'
+			. '<legend> Search: </legend>';
+
+	$query = "SHOW COLUMNS FROM upm";
+	$res = mysql_query($query);
+	echo '<table>';
+	while($row = mysql_fetch_assoc($res))
+	{
+		$dbVal = null;
+		if(isset($_GET) && isset($_GET['search_'.$row['Field']]) && $_GET['search_'.$row['Field']] !='' && !isset($_GET['reset']))
+		{
+			$dbVal = $_GET['search_'.$row['Field']];
+		}
+		echo '<tr><td>'.ucwords(implode(' ',explode('_',$row['Field']))) .' : </td><td>'.input_tag($row,$dbVal,array('null_options'=>true,'name_index'=>'search')).'</td></tr>';
+	}
+	echo '<tr><td colspan="2"><input type="submit" value="Search" name="search"><input type="submit" value="Reset" name="reset"></td></tr>';
+	echo '</table>';		
+	echo '</fieldset>';		
+	$orderBy = (isset($_GET['order_by']))?$_GET['order_by']:null;
+	$currentOrderBy = $orderBy;
+	$sortArr = array('ASC','DESC','no_sort');
+	$sortOrder = null;
+	$noSort = null;
+	
+	if($orderBy)
+	{
+		foreach($sortArr as $value)
+		{
+			if($value==$_GET['sort_order'])
+			break;
+		}
+		if(current($sortArr) == '')
+		{
+			$sortOrder = $sortArr[0];
+		}	
+		elseif(current($sortArr)=='no_sort')
+		{
+			$sortOrder = null;
+			$noSort = '&no_sort=1';
+		}
+		else
+		{
+			$sortOrder = current($sortArr);
+		}
+	}
+	if($orderBy)	
+	echo '<input type="hidden" name="order_by" value="'.$orderBy.'"/>';	
+	if($noSort)
+	echo '<input type="hidden" name="no_sort" value="1"/>';
+	if($sortOrder)
+	echo '<input type="hidden" name="sort_order" value="'.$sortOrder.'"/>';			
+	echo '</form>';
 
 				
 echo '<br/>';	
 	
 }
+
 
 /**
  * @name upmListing
@@ -152,8 +204,59 @@ echo '<br/>';
  */
 function upmListing($start=0,$limit=50)
 {
-$query = "select * from upm limit $start, $limit";
-$res = mysql_query($query) or die('Cannot get upm data');
+	
+//get search params
+$where = calculateWhere();
+
+//calculate sortable fields
+$query = "SHOW COLUMNS FROM upm";
+$res = mysql_query($query);
+$sortableRows = array();
+while($row = mysql_fetch_assoc($res))
+{
+	$type = $row['Type'];
+	if(strstr($type,'int(') || $type=='date')
+	{
+		$sortableRows[] = $row['Field'];
+	}
+}
+
+$orderBy = (isset($_GET['order_by']))?' ORDER BY '.$_GET['order_by']:null;
+$currentOrderBy = $orderBy;
+$sortArr = array('ASC','DESC','no_sort');
+$sortOrder = null;
+$noSort = null;
+
+if($orderBy)
+{
+	$currentSortOrder = $_GET['sort_order'];
+	foreach($sortArr as $value)
+	{
+		if($value==$_GET['sort_order'])
+		break;
+	}
+	if(current($sortArr) == '')
+	{
+		$sortOrder = $sortArr[0];
+	}	
+	elseif(current($sortArr)=='no_sort')
+	{
+		$sortOrder = null;
+		$noSort = '&no_sort=1';
+	}
+	else
+	{
+		$sortOrder = current($sortArr);
+	}
+}
+$sortOrder = ($sortOrder ==null)?'ASC':$sortOrder;
+
+if($_GET['no_sort']!=1)
+$query = "select * from upm $where $currentOrderBy $currentSortOrder limit $start , $limit";
+else
+$query = "select * from upm $where limit $start , $limit";
+
+$res = mysql_query($query) or die('Cannot get upm data.'.$query);
 $i=0;
 $skip=0;
 echo '<div></div>';
@@ -167,8 +270,24 @@ while ($row = mysql_fetch_assoc($res))
 		echo '<tr style="text-align:center">';
 		foreach($row as $columnName=>$v)
 		{
-			echo '<th >';
+			echo '<th>';
+			$params = null;
+			$params = substr($_SERVER['REQUEST_URI'],strpos($_SERVER['REQUEST_URI'],'upm.php'));
+			$params = $params!='upm.php'?substr($params, 0,strpos($params,'order_by')-1):$params;
+			
+			$connector = $params!='upm.php'?'&':'?';
+			if($_GET['order_by']==$columnName && in_array($columnName,$sortableRows))
+			$url = urlPath().$params.$connector.'order_by='.$columnName.'&sort_order='.$sortOrder.$noSort;
+			elseif(in_array($columnName,$sortableRows))
+			$url = urlPath().$params.$connector.'order_by='.$columnName.'&sort_order=ASC';
+			else
+			$url=null;
+			
+			if($url)
+			echo '<a href="'.$url.'">';
 			echo ucwords(implode(' ',explode('_',$columnName)));
+			if($url)
+			echo '</a>';
 			echo '</th>';
 			$i++;
 		}
@@ -251,7 +370,7 @@ function addEditUpm($id)
 	
 	echo '<div class="clr">';
 	echo '<fieldset>';
-	echo '<form name="umpInput" method="post" action="upm.php">';
+	echo '<form name="umpInput" method="get" action="upm.php">';
 	echo '<table>';
 	while($row = mysql_fetch_assoc($res))
 	{
@@ -369,11 +488,13 @@ function saveUpm($post,$import=0,$importKeys=array(),$importVal=array(),$line=nu
  * If db value is there, the default value of that field is populated with that value.
  * @author Jithu Thomas
  */
-function input_tag($row,$dbVal)
+function input_tag($row,$dbVal=null,$options=array())
 {
 	$type = $row['Type'];
 	if(substr($type,0,4)=='enum')
 	$type = 'enum';
+	
+	$nameIndex = isset($options['name_index'])?$options['name_index'].'_':null; 
 	
 	switch($type)
 	{
@@ -384,11 +505,13 @@ function input_tag($row,$dbVal)
 			$type1 = str_replace($search, $replace, $type1);
 			$optionArr = explode(',',$type1);
 			$optionArr = array_map(am2,$optionArr,array_fill(0,count($optionArr),$dbVal));
-			return '<select name="'.$row['Field'].'">'.implode('',$optionArr).'</select>';
+			if($options['null_options']===true)
+			array_unshift($optionArr, '<option value="">Select</option>');
+			return '<select name="'.$nameIndex.$row['Field'].'">'.implode('',$optionArr).'</select>';
 			break;
 			
 		default:
-			return '<input type="text" value="'.$dbVal.'" name="'.$row['Field'].'"/>';
+			return '<input type="text" value="'.$dbVal.'" name="'.$nameIndex.$row['Field'].'"/>';
 			break;
 	}
 }
@@ -403,6 +526,7 @@ function importUpm()
 {
 	echo '<div class="clr">';
 	echo '<fieldset>';
+	echo '<legend> Import : </legend>';
 	echo '<form name="upm_import" method="post" enctype="multipart/form-data" action="upm.php">';
 	echo '<input name="uploadedfile" type="file" /><br />
 		 <input type="submit"  value="Upload File" />';
@@ -419,8 +543,68 @@ function importUpm()
 function getTotalUpmCount()
 {
 global $db;
-$query = "select count(id) as cnt from upm";
+$where = calculateWhere();
+$query = "select count(id) as cnt from upm $where";
 $res = mysql_query($query);
 $count = mysql_fetch_row($res);
 return $count[0];
+}
+
+/**
+ * @name calculateWhere
+ * @tutorial Outputs the WHERE query substring.
+ * @author Jithu Thomas
+ */
+function calculateWhere()
+{
+	$postKeys = array_keys($_GET);
+	$whereArr = array();
+	foreach($postKeys as $keys)
+	{
+		$explode = explode('search_',$keys);
+		if(isset($explode[1]))	
+		{
+			if(trim($_GET[$keys]) !='')
+			$whereArr[$explode[1]] = $_GET[$keys];
+		}
+		else
+		{
+			continue;
+		}
+	}
+	if(count($whereArr)>0)
+	{
+		$whereKeys = array_keys($whereArr);
+		$whereValues = array_values($whereArr);
+		$whereArr = array_map(
+							function($whereKeys,$whereValues)
+							{
+								//check search keys are regex or not.
+								$pcre = strlen($whereValues) > 1 && $whereValues[0] == '/' && ($whereValues[strlen($whereValues)-1] == '/' || ($whereValues[strlen($whereValues)-2] == '/' && strlen($whereValues) > 2));
+								//if regex pattern then check with a sample query.
+								if($pcre)
+								{
+									$result=validateMaskPCRE($whereValues);
+									if(!$result)
+									throw new Exception("Bad regex: $whereKeys = $whereValues", 6);
+									return ' PREG_RLIKE("' . $whereValues . '",' . $whereKeys . ') AND ';
+								}
+								return ' '.$whereKeys.' = '. '\''.$whereValues.'\' AND ';
+							},
+							$whereKeys,
+							$whereValues
+						);
+		
+	}
+	if(count($whereArr)>0)
+	{
+		$where = ' WHERE ';
+		$where .= implode(' ',$whereArr);
+		$where = substr($where,0,-5);
+	}
+	else
+	{
+		$where = null;
+	}
+	return $where;	
 }
