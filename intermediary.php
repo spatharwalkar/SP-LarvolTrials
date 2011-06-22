@@ -932,7 +932,7 @@ class ContentManager
 			 . '<a href="javascript: void(0);" onclick="javascript: doSorting(\'ed\');">End</a></th>'
 			 . '<th style="width:22px;">'
 			 . '<a href="javascript: void(0);" onclick="javascript: doSorting(\'ph\');">Ph</a></th>'
-			 . '<th rowspan="2" style="width:8px;padding:5px;"><div class="box_rotate">result</div></th>'
+			 . '<th rowspan="2" style="width:12px;padding:4px;"><div class="box_rotate">result</div></th>'
 			 . '<th colspan="39" class="rightborder">'
 			 . '<div style="white-space:nowrap;width:100px;">&nbsp;</div></th></tr>'
 			 . '<tr class="secondrow"><th>');

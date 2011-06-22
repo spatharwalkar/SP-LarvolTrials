@@ -11,6 +11,7 @@ td,th {
 }
 
 a, a:hover{
+	color:#0000FF;
 	text-decoration:none;
 }
 .drop {
@@ -88,6 +89,7 @@ a, a:hover{
 }
 
 .manage th a{
+	color:#0000FF;
 	text-decoration:none;
 }
 
@@ -138,21 +140,6 @@ a, a:hover{
 	border-top:0!important;
 }
 
-.upmcollapse{
-	/*display: none;
-	max-height:0em;
-	border-collapse:collapse;*/
-}
-
-/*.upmcollapse:hover{
-	display: block; 
-}
-*/
-.firstupm {
-	/*display: block;
-	max-height:0.2em; */
-}
-
 .rowcollapse:hover .upmcollapse { display: block; }
 
 .row {
@@ -174,12 +161,12 @@ a, a:hover{
 }
 
 .box_rotate {
-	height:15px;
-	writing-mode: tb-rl;
-	-webkit-transform: rotate(90deg);	
-	-moz-transform: rotate(90deg);
-	-ms-transform: rotate(90deg);
-	-o-transform: rotate(90deg);
-	transform: rotate(90deg);
+	-moz-transform: rotate(90deg); /* For Firefox */
+	-o-transform: rotate(90deg); /* For Opera */
+	-webkit-transform: rotate(90deg); /* For Safari and Chrome */
+	writing-mode: tb-rl; /* For IE */
+	max-width:20px;
+	max-height:20px;
+	margin:2px;
 }
 
