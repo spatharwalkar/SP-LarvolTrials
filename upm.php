@@ -1,4 +1,5 @@
 <?php
+
 require_once('krumo/class.krumo.php');
 require_once('db.php');
 require_once('include.search.php');
@@ -9,11 +10,13 @@ if(!$db->loggedIn())
 	header('Location: ' . urlPath() . 'index.php');
 	exit;
 }
-require('header.php');
-
 //reset controller
 if($_GET['reset'])
 header('Location: ' . urlPath() . 'upm.php');
+require('header.php');
+echo('<script type="text/javascript">
+function upmdelsure(){ return confirm("Are you sure you want to delete this upm?"); }
+</script>');
 
 echo '<div class="error">Under Development</div>';
 //Start controller area
@@ -21,6 +24,14 @@ echo '<div class="error">Under Development</div>';
 if($_GET['save']=='Save')
 {
 	saveUpm($_GET);
+}
+//delete controller
+if(isset($_GET['deleteId']) && is_numeric($_GET['deleteId']))
+{
+	deleteUpm($_GET['deleteId']);
+	$pattern = '/(\\?)(deleteId).*?(\\d+)/is';
+	$_SERVER['REQUEST_URI'] =  preg_replace($pattern, '', $_SERVER['REQUEST_URI']);
+	$_SERVER['REQUEST_URI'] = str_replace('upm.php&', 'upm.php?', $_SERVER['REQUEST_URI']);
 }
 //import controller
 if(isset($_FILES['uploadedfile']) && $_FILES['uploadedfile']['size']>1)
@@ -259,6 +270,9 @@ $query = "select * from upm $where limit $start , $limit";
 $res = mysql_query($query) or die('Cannot get upm data.'.$query);
 $i=0;
 $skip=0;
+
+$deleteParams = substr($_SERVER['REQUEST_URI'],strpos($_SERVER['REQUEST_URI'],'?')+1);
+$deleteConnector = '&';
 echo '<div></div>';
 echo '<table border="1">';
 while ($row = mysql_fetch_assoc($res))
@@ -291,6 +305,7 @@ while ($row = mysql_fetch_assoc($res))
 			echo '</th>';
 			$i++;
 		}
+		echo '<th>Action</th>';
 		echo '</tr>';
 	
 		echo '<tr style="text-align:center">';
@@ -298,6 +313,7 @@ while ($row = mysql_fetch_assoc($res))
 		{
 			if($columnName == 'id')
 			{
+				$upmId = $v;
 				echo '<td><a href="upm.php?id='.$v.'">';
 				echo $v;
 				echo '</td></a>';				
@@ -309,6 +325,7 @@ while ($row = mysql_fetch_assoc($res))
 				echo '</td>';
 			}
 		}	
+		echo '<td><a onclick="return upmdelsure();" href="upm.php?deleteId='.$upmId.'&'.$deleteParams.'"><img src="images/not.png"/ alt="Delete"></a></td>';
 		echo '</tr>';	
 	}
 	else
@@ -318,6 +335,7 @@ while ($row = mysql_fetch_assoc($res))
 		{
 			if($columnName == 'id')
 			{
+				$upmId = $v;
 				echo '<td><a href="upm.php?id='.$v.'">';
 				echo $v;
 				echo '</td></a>';				
@@ -329,6 +347,8 @@ while ($row = mysql_fetch_assoc($res))
 				echo '</td>';
 			}
 		}
+		
+		echo '<td><a onclick="return upmdelsure();" href="upm.php?deleteId='.$upmId.'&'.$deleteParams.'"><img src="images/not.png"/ alt="Delete"></a></td>';
 		echo '</tr>';				
 	}
 	
@@ -607,4 +627,18 @@ function calculateWhere()
 		$where = null;
 	}
 	return $where;	
+}
+
+/**
+ * @name deleteUpm
+ * @tutorial Deletes the upm entry for the specific id.
+ * @param $id The id field in the upm table.
+ * @author Jithu Thomas
+ */
+function deleteUpm($id)
+{
+	$query = "delete from upm where id=$id";
+	mysql_query($query) or softdie('Cannot delete upm. '.$query);
+	echo 'Successfully deleted upm.';
+	
 }
