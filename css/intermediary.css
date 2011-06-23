@@ -170,3 +170,9 @@ a, a:hover{
 	margin:2px;
 }
 
+.noborder {
+	border:hidden!important;
+	border-right: 1px solid blue!important;
+	border-top: 1px solid blue!important;
+	border-bottom: 1px solid blue!important;
+}

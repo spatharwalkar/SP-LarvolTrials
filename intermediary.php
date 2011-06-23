@@ -917,24 +917,25 @@ class ContentManager
 	function displayHeader() {
 	
 		echo ('<table width="100%" border="0" cellpadding="4" cellspacing="0" class="manage">'
-			 . '<tr><th rowspan="2" style="width:225px;">Title</th>'
+			 . '<tr><th rowspan="2" style="width:250px;">Title</th>'
 			 . '<th style="width:28px;" title="gray values are anticipated and black values are actual">'
 			 . '<a href="javascript: void(0);" onclick="javascript: doSorting(\'en\');">N</a></th>'
 			 . '<th rowspan="2" style="width:45px;" title=\'"EU" = European Union\'>Region</th>'
 			 . '<th style="width:55px;">'
 			 . '<a href="javascript: void(0);" onclick="javascript: doSorting(\'os\');">Status</a></th>'
-			 . '<th rowspan="2" style="width:130px;">Sponsor</th>'
-			 . '<th rowspan="2" style="width:108px;">Conditions</th>'
-			 . '<th rowspan="2" style="width:105px;">Interventions</th>'
-			 . '<th style="width:29px;" title="MM/YY">'
+			 . '<th rowspan="2" style="width:110px;">Sponsor</th>'
+			 . '<th rowspan="2" style="width:110px;">Conditions</th>'
+			 . '<th rowspan="2" style="width:110px;">Interventions</th>'
+			 . '<th style="width:25px;" title="MM/YY">'
 			 . '<a href="javascript: void(0);" onclick="javascript: doSorting(\'sd\');">Start</a></th>'
-			 . '<th style="width:29px;" title="MM/YY">'
+			 . '<th style="width:25px;" title="MM/YY">'
 			 . '<a href="javascript: void(0);" onclick="javascript: doSorting(\'ed\');">End</a></th>'
 			 . '<th style="width:22px;">'
 			 . '<a href="javascript: void(0);" onclick="javascript: doSorting(\'ph\');">Ph</a></th>'
 			 . '<th rowspan="2" style="width:12px;padding:4px;"><div class="box_rotate">result</div></th>'
-			 . '<th colspan="39" class="rightborder">'
-			 . '<div style="white-space:nowrap;width:100px;">&nbsp;</div></th></tr>'
+			 . '<th colspan="36" style="width:72px;">'
+			 . '<div>&nbsp;</div></th>'
+			 . '<th colspan="3" style="width:3px;" class="rightborder noborder"></th></tr>'
 			 . '<tr class="secondrow"><th>');
 		
 		if(array_key_exists('en', $this->sortimg)) {
