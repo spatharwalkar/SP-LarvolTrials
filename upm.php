@@ -367,8 +367,10 @@ echo '<br/>';
  */
 function addEditUpm($id)
 {
+	$insertEdit = 'Insert';
 	if($id)
 	{
+		$insertEdit = 'Edit';
 		$query = "SELECT * FROM upm WHERE id=$id";
 		$res = mysql_query($query) or die('Cannot update this upm id');
 		while($row = mysql_fetch_assoc($res))
@@ -390,6 +392,7 @@ function addEditUpm($id)
 	
 	echo '<div class="clr">';
 	echo '<fieldset>';
+	echo '<legend> '.$insertEdit.': </legend>';
 	echo '<form name="umpInput" method="get" action="upm.php">';
 	echo '<table>';
 	while($row = mysql_fetch_assoc($res))
@@ -418,10 +421,22 @@ function addEditUpm($id)
 
 function am($k,$v)
 {
+	$explicitNullFields = array('corresponding_trial');
+	if(in_array($k,$explicitNullFields) && $v=='')
+	{
+		$v = 'null';
+		return mysql_real_escape_string($v);
+	}
 	return "'".mysql_real_escape_string($v)."'";
 }
 function am1($k,$v)
 {
+	$explicitNullFields = array('corresponding_trial');
+	if(in_array($k,$explicitNullFields) && $v=='')
+	{
+		$v = 'null';
+		return $k."=".mysql_real_escape_string($v);
+	}	
 	return $k."='".mysql_real_escape_string($v)."'";
 }
 function am2($v,$dbVal)
@@ -430,6 +445,17 @@ function am2($v,$dbVal)
 	return '<option value="'.$v.'" selected="selcted">'.$v.'</option>';
 	else 
 	return '<option value="'.$v.'">'.$v.'</option>';
+}
+
+function validateImport($k,$v)
+{
+	$explicitNullFields = array('corresponding_trial');
+	if(in_array($k,$explicitNullFields) && !is_numeric($v))
+	{
+		
+		$v = 'null';
+	}
+	return $v;
 }
 
 
@@ -449,6 +475,7 @@ function saveUpm($post,$import=0,$importKeys=array(),$importVal=array(),$line=nu
 	//import save
 	if($import ==1)
 	{
+		$importVal = array_map(validateImport,$importKeys,$importVal);
 		$query = "insert into upm (".implode(',',$importKeys).") values (".implode(',',$importVal).")";
 		if(mysql_query($query))
 		{
