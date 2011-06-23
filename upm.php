@@ -82,7 +82,7 @@ upmPagination($limit,$totalCount);
 echo '<br/>';
 echo '<div class="clr">';
 //add edit form.
-if($_GET['add_new_record']=='Add New Record' || $_GET['id'])
+if($_GET['add_new_record']=='Add New Record' || $_GET['id'] && !$_GET['save'])
 {
 	$id = ($_GET['id'])?$_GET['id']:null;
 	echo '<div>';
