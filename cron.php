@@ -169,7 +169,8 @@ if($current_tasks_count==0)
 {
 	mysql_connect(DB_SERVER,DB_USER,DB_PASS) or die("Error connecting to database server!");
 	mysql_select_db(DB_NAME) or die("Could not find database on server!");
-	
+	//increase result length in bytes  for the GROUP_CONCAT() function  (default is 1024)
+	mysql_query('SET SESSION group_concat_max_len = 1000000') or die("Couldn't set group_concat_max_len");	
 	//Check if there are any privious tasks that are yet to be run
 	if(empty($selected_schedule_item))
 	{
@@ -797,6 +798,7 @@ elseif($current_tasks_count==1)
 {
 	mysql_connect(DB_SERVER,DB_USER,DB_PASS) or die("Error connecting to database server!");
 	mysql_select_db(DB_NAME) or die("Could not find database on server!");
+	mysql_query('SET SESSION group_concat_max_len = 1000000') or die("Couldn't set group_concat_max_len");	
 	$selected_schedule_item=$currently_scheduled_tasks[0];
 	echo ($nl."Schedule item ID selected for execution ".$selected_schedule_item.$nl.$nl);
 		
@@ -1387,6 +1389,7 @@ elseif($current_tasks_count>1)
 				sleep(15);
 				mysql_connect(DB_SERVER,DB_USER,DB_PASS) or die("Error connecting to database server!");
 				mysql_select_db(DB_NAME) or die("Could not find database on server!");
+				mysql_query('SET SESSION group_concat_max_len = 1000000') or die("Couldn't set group_concat_max_len");	
 				//$nl=$nl."parent";
 				$selected_schedule_item=$currently_scheduled_tasks[2];
 				echo ($nl."Schedule item ID selected for execution ".$selected_schedule_item.$nl.$nl);
@@ -1970,6 +1973,7 @@ elseif($current_tasks_count>1)
 				sleep(10);
 				mysql_connect(DB_SERVER,DB_USER,DB_PASS) or die("Error connecting to database server!");
 				mysql_select_db(DB_NAME) or die("Could not find database on server!");
+				mysql_query('SET SESSION group_concat_max_len = 1000000') or die("Couldn't set group_concat_max_len");	
 				//$nl=$nl."child2";
 				$selected_schedule_item=$currently_scheduled_tasks[1];
 				echo ($nl."Schedule item ID selected for execution ".$selected_schedule_item.$nl.$nl);
@@ -2554,6 +2558,7 @@ elseif($current_tasks_count>1)
 			sleep(10);
 			mysql_connect(DB_SERVER,DB_USER,DB_PASS) or die("Error connecting to database server!");
 			mysql_select_db(DB_NAME) or die("Could not find database on server!");
+			mysql_query('SET SESSION group_concat_max_len = 1000000') or die("Couldn't set group_concat_max_len");	
 			//$nl=$nl."parent";
 			$selected_schedule_item=$currently_scheduled_tasks[1];
 			echo ($nl."Schedule item ID selected for execution ".$selected_schedule_item.$nl.$nl);
@@ -3138,6 +3143,7 @@ elseif($current_tasks_count>1)
 		sleep(5);
 		mysql_connect(DB_SERVER,DB_USER,DB_PASS) or die("Error connecting to database server!");
 		mysql_select_db(DB_NAME) or die("Could not find database on server!");
+		mysql_query('SET SESSION group_concat_max_len = 1000000') or die("Couldn't set group_concat_max_len");
 		//$nl=$nl."child1";
 		$selected_schedule_item=$currently_scheduled_tasks[0];
 		echo ($nl."Schedule item ID selected for execution ".$selected_schedule_item.$nl.$nl);
