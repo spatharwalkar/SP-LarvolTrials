@@ -10,6 +10,16 @@ if(!$db->loggedIn())
 	header('Location: ' . urlPath() . 'index.php');
 	exit;
 }
+//declare all globals
+global $db;
+global $page;
+global $deleteFlag;
+//calulate delete flag
+if($db->user->userlevel == 'admin')
+$deleteFlag = 1;
+else
+$deleteFlag = null;
+
 //reset controller
 if($_GET['reset'])
 header('Location: ' . urlPath() . 'upm.php');
@@ -26,7 +36,7 @@ if($_GET['save']=='Save')
 	saveUpm($_GET);
 }
 //delete controller
-if(isset($_GET['deleteId']) && is_numeric($_GET['deleteId']))
+if(isset($_GET['deleteId']) && is_numeric($_GET['deleteId']) && $deleteFlag)
 {
 	deleteUpm($_GET['deleteId']);
 	$pattern = '/(\\?)(deleteId).*?(\\d+)/is';
@@ -65,9 +75,7 @@ if(isset($_FILES['uploadedfile']) && $_FILES['uploadedfile']['size']>1)
 }
 //End controller area
 
-//declare all globals
-global $db;
-global $page;
+
 //set docs per list
 $limit = 50;
 $totalCount = getTotalUpmCount();
@@ -170,27 +178,9 @@ function upmPagination($limit,$totalCount)
 	$sortArr = array('ASC','DESC','no_sort');
 	$sortOrder = null;
 	$noSort = null;
-	
 	if($orderBy)
 	{
-		foreach($sortArr as $value)
-		{
-			if($value==$_GET['sort_order'])
-			break;
-		}
-		if(current($sortArr) == '')
-		{
-			$sortOrder = $sortArr[0];
-		}	
-		elseif(current($sortArr)=='no_sort')
-		{
-			$sortOrder = null;
-			$noSort = '&no_sort=1';
-		}
-		else
-		{
-			$sortOrder = current($sortArr);
-		}
+		$sortOrder=$_GET['sort_order'];
 	}
 	if($orderBy)	
 	echo '<input type="hidden" name="order_by" value="'.$orderBy.'"/>';	
@@ -215,6 +205,7 @@ echo '<br/>';
  */
 function upmListing($start=0,$limit=50)
 {
+global $deleteFlag;
 	
 //get search params
 $where = calculateWhere();
@@ -249,18 +240,35 @@ if($orderBy)
 	if(current($sortArr) == '')
 	{
 		$sortOrder = $sortArr[0];
+		$sortImg = $sortOrder;
+	}
+	elseif($_GET['search'] && $_GET['sort_order']=='DESC')
+	{
+		$sortOrder=$_GET['sort_order'];
 	}	
 	elseif(current($sortArr)=='no_sort')
 	{
 		$sortOrder = null;
 		$noSort = '&no_sort=1';
+		$sortImg = $sortOrder;
 	}
 	else
 	{
 		$sortOrder = current($sortArr);
+		$sortImg = $sortOrder;
 	}
+
+
 }
-$sortOrder = ($sortOrder ==null)?'ASC':$sortOrder;
+if($sortOrder ==null && !$noSort)
+{
+'ASC';
+$sortImg = 'ASC';
+}
+else
+{
+$sortOrder;
+}
 
 if($_GET['no_sort']!=1)
 $query = "select * from upm $where $currentOrderBy $currentSortOrder limit $start , $limit";
@@ -274,7 +282,7 @@ $skip=0;
 $deleteParams = substr($_SERVER['REQUEST_URI'],strpos($_SERVER['REQUEST_URI'],'?')+1);
 $deleteConnector = '&';
 echo '<div></div>';
-echo '<table border="1">';
+echo '<table border="1" width="99%">';
 while ($row = mysql_fetch_assoc($res))
 {
 	
@@ -301,11 +309,12 @@ while ($row = mysql_fetch_assoc($res))
 			echo '<a href="'.$url.'">';
 			echo ucwords(implode(' ',explode('_',$columnName)));
 			if($url)
-			echo '</a>';
+			echo '<img src="images/'.strtolower($sortImg).'.png"/></a>';
 			echo '</th>';
 			$i++;
 		}
-		echo '<th>Action</th>';
+		if($deleteFlag)
+		echo '<th>Del</th>';
 		echo '</tr>';
 	
 		echo '<tr style="text-align:center">';
@@ -325,7 +334,8 @@ while ($row = mysql_fetch_assoc($res))
 				echo '</td>';
 			}
 		}	
-		echo '<td><a onclick="return upmdelsure();" href="upm.php?deleteId='.$upmId.'&'.$deleteParams.'"><img src="images/not.png"/ alt="Delete"></a></td>';
+		if($deleteFlag)
+		echo '<td><a onclick="return upmdelsure();" href="upm.php?deleteId='.$upmId.'&'.$deleteParams.'"><img src="images/not.png"/ alt="Delete" style="border:0"></a></td>';
 		echo '</tr>';	
 	}
 	else
@@ -347,8 +357,8 @@ while ($row = mysql_fetch_assoc($res))
 				echo '</td>';
 			}
 		}
-		
-		echo '<td><a onclick="return upmdelsure();" href="upm.php?deleteId='.$upmId.'&'.$deleteParams.'"><img src="images/not.png"/ alt="Delete"></a></td>';
+		if($deleteFlag)
+		echo '<td><a onclick="return upmdelsure();" href="upm.php?deleteId='.$upmId.'&'.$deleteParams.'"><img src="images/not.png"/ alt="Delete" style="border:0"></a></td>';
 		echo '</tr>';				
 	}
 	
