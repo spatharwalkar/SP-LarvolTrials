@@ -360,7 +360,8 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 	$bigquery;
 	if(!empty($override))	//if there are nct overrides, start building the bigquery to include them now
 	{ 
-		$drop_query = 'DROP TABLE IF EXISTS ulid';
+//		$drop_query = 'DROP TABLE IF EXISTS ulid';
+		$drop_query = 'delete from ulid where 1'; // had problems with drop table, so deleting all rows
 		$time_start = microtime(true);
 		mysql_query($drop_query);
 		$time_end = microtime(true);
