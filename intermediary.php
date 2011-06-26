@@ -458,7 +458,7 @@ class ContentManager
 				$row_upm_arr = array();
 				foreach($_GET['rowupm'] as $k => $v) {
 					$val = unserialize(gzinflate(base64_decode($v)));
-					if($val != '')
+					if($val != '' && !empty($val))
 						$row_upm_arr[$k] = $val;
 				}
 				if(isset($row_upm_arr) && !empty($row_upm_arr))
@@ -631,7 +631,7 @@ class ContentManager
 				if($c_params['type'] == 'col') { 
 					
 					$val = unserialize(gzinflate(base64_decode($_GET['colupm'][$pk])));
-					if($val != '')
+					if($val != '' && !empty($val))
 						$this->getNonAssocUpm(array($val));
 				}
 				
@@ -900,9 +900,8 @@ class ContentManager
 			$this->displayHeader();
 			if($count > 0) {
 			
-			displayContent($params,$this->displist, $time_machine, $this->{$this->type}, $this->edited, $this->gentime, 
-			$this->pstart, $this->last, $this->phase_arr, $fin_arr, $this->actfilterarr, 
-			$this->current_yr, $this->second_yr, $this->third_yr, $trial_arr);
+				displayContent($params,$this->displist, $time_machine, $this->{$this->type}, $this->edited, $this->gentime, 
+				$this->pstart, $this->last, $this->phase_arr, $fin_arr, $this->actfilterarr, $this->current_yr, $this->second_yr, $this->third_yr, $trial_arr);
 				
 			} else {
 			
@@ -1290,10 +1289,10 @@ function displayContent($params, $fieldlist, $time_machine, $type_arr, $edited, 
 				//rendering diamonds in case of end date is prior to the current year
 				echo ('<td style="text-align:center;' . (($k < count($upmDetails[$nctid])-1) ? 'border-bottom:0;' : '' ) 
 				. '">');
-				if($ed_year < $current_yr) {
+				if($upm_result_link != '' && $upm_result_link != NULL) {
 					echo ('<a href="' . $upm_result_link . '" style="color:#000;"><div ' . $upm_title . '>&diams;</div></a>');
 				} else {
-					echo '&nbsp;';
+					echo ('<div ' . $upm_title . '>⌛</div>');
 				}
 				echo ('</td>');
 				
@@ -2041,7 +2040,6 @@ function getNonAssocUpmRecords($non_assoc_upm_params) {
 	$where = '';$upms = array();
 	foreach($non_assoc_upm_params as $key => $val)
 		$where .= ' (PREG_RLIKE("' . $val . '",product)) OR ';
-
 
 /*echo "<br/>==>"."SELECT `event_description`, `event_link`, `event_type`, `start_date`, `start_date_type`, `end_date`, `end_date_type` FROM `upm` WHERE `corresponding_trial` IS NULL AND " . substr($where,0,-4);
 */

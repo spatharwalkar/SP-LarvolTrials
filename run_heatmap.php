@@ -375,6 +375,9 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 			*/
 			
 			$cell_upm = array();
+			$global_multi_upm_params = array();$col_multi_upm_params = array();$row_multi_upm_params = array();$cell_multi_upm_params = array();
+			$global_searchval_upm_params = array();$col_searchval_upm_params = array();$row_searchval_upm_params = array();$cell_searchval_upm_params = array();
+			
 			if(isset($oversearch['multifields']['varchar+text']) && 
 			in_array($intervention_name_field_id,$oversearch['multifields']['varchar+text'])) {
 				
@@ -417,6 +420,9 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 			}
 			$cell_upm[] = array_unique(array_merge($global_multi_upm_params, $col_multi_upm_params, $row_multi_upm_params, $cell_multi_upm_params,
 			$global_searchval_upm_params, $col_searchval_upm_params, $row_searchval_upm_params, $cell_searchval_upm_params));
+			foreach($cell_upm as $key => $val) {
+				$cell_upm = $val;
+			}
 			
 			$row_upms[$row][$column]	= array_unique(array_merge($global_multi_upm_params, $col_multi_upm_params, $row_multi_upm_params, $cell_multi_upm_params,
 			$global_searchval_upm_params, $col_searchval_upm_params, $row_searchval_upm_params, $cell_searchval_upm_params));
