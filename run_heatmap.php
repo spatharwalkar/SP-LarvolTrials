@@ -701,7 +701,8 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 			}
 				
 			//total link limit - 2000 and length of truncate msg param - 20, (2000-20) = 1980
-			if((strlen($link) + strlen($sub_link)) < 1980){ 
+			//new total link limit - 8180 and length of truncate msg param - 20, (8180-20) = 8160 - modified on 27 Jun 2011
+			if((strlen($link) + strlen($sub_link)) < 8160){ 
 				$link .= $sub_link;
 			} else {
 				//in case the link is exceeding the limit and has been truncated, parameter is set to Y.
