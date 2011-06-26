@@ -325,8 +325,15 @@ while ($row = mysql_fetch_assoc($res))
 				$upmId = $v;
 				echo '<td><a href="upm.php?id='.$v.'">';
 				echo $v;
-				echo '</td></a>';				
-			}
+				echo '</a></td>';				
+			}else
+			if($columnName == 'event_link' || $columnName == 'result_link')
+			{
+				$upmId = $v;
+				echo '<td nowrap style="max-width:150px;overflow:hidden"><a  href="'.$v.'">';
+				echo $v;
+				echo '</a></td>';			
+			}			
 			else 
 			{
 				echo '<td>';
@@ -348,8 +355,15 @@ while ($row = mysql_fetch_assoc($res))
 				$upmId = $v;
 				echo '<td><a href="upm.php?id='.$v.'">';
 				echo $v;
-				echo '</td></a>';				
-			}
+				echo '</a></td>';				
+			}else
+			if($columnName == 'event_link' || $columnName == 'result_link')
+			{
+				$upmId = $v;
+				echo '<td nowrap style="max-width:150px;overflow:hidden" ><a  href="'.$v.'">';
+				echo $v;
+				echo '</a></td>';				
+			}	
 			else 
 			{
 				echo '<td>';
