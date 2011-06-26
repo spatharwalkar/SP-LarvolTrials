@@ -383,24 +383,22 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 				
 				$global_multi_upm_params = array($oversearch['multivalue']['varchar+text']);
 			}
-			
 			if(isset($columnsearch[$column]['multifields']['varchar+text']) && 
 			in_array($intervention_name_field_id,$columnsearch[$column]['multifields']['varchar+text'])) {
 				
 				$col_multi_upm_params = array($columnsearch[$column]['multivalue']['varchar+text']);
 			}
-			
 			if(isset($rowsearch[$row]['multifields']['varchar+text']) && 
 			in_array($intervention_name_field_id,$rowsearch[$row]['multifields']['varchar+text'])) {
 				
 				$row_multi_upm_params = array($rowsearch[$row]['multivalue']['varchar+text']);
 			}
-			
 			if(isset($cell['multifields']['varchar+text']) && 
 			in_array($intervention_name_field_id,$cell['multifields']['varchar+text'])) {
 				
 				$cell_multi_upm_params = array($cell['multivalue']['varchar+text']);
 			}
+
 
 			if(isset($oversearch['searchval']) && array_key_exists($intervention_name_field_id,$oversearch['searchval'])) {
 				
@@ -408,16 +406,17 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 			}
 			if(isset($columnsearch[$column]['searchval']) && array_key_exists($intervention_name_field_id,$columnsearch[$column]['searchval'])) {
 				
-				$col_searchval_upm_params = array($oversearch['searchval'][$intervention_name_field_id]);
+				$col_searchval_upm_params = array($columnsearch[$column]['searchval'][$intervention_name_field_id]);
 			}
 			if(isset($rowsearch[$row]['searchval']) && array_key_exists($intervention_name_field_id,$rowsearch[$row]['searchval'])) {
 				
-				$row_searchval_upm_params = array($oversearch['searchval'][$intervention_name_field_id]);
+				$row_searchval_upm_params = array($rowsearch[$row]['searchval'][$intervention_name_field_id]);
 			}			
 			if(isset($cell['searchval']) && array_key_exists($intervention_name_field_id,$cell['searchval'])) {
 				
-				$cell_searchval_upm_params = array($oversearch['searchval'][$intervention_name_field_id]);
+				$cell_searchval_upm_params = array($cell['searchval'][$intervention_name_field_id]);
 			}
+
 			$cell_upm[] = array_unique(array_merge($global_multi_upm_params, $col_multi_upm_params, $row_multi_upm_params, $cell_multi_upm_params,
 			$global_searchval_upm_params, $col_searchval_upm_params, $row_searchval_upm_params, $cell_searchval_upm_params));
 			foreach($cell_upm as $key => $val) {
@@ -427,6 +426,7 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 			$row_upms[$row][$column]	= array_unique(array_merge($global_multi_upm_params, $col_multi_upm_params, $row_multi_upm_params, $cell_multi_upm_params,
 			$global_searchval_upm_params, $col_searchval_upm_params, $row_searchval_upm_params, $cell_searchval_upm_params));
 			
+
 			$col_upms[$row][$column]	= array_unique(array_merge($global_multi_upm_params, $col_multi_upm_params, $row_multi_upm_params, $cell_multi_upm_params,
 			$global_searchval_upm_params, $col_searchval_upm_params, $row_searchval_upm_params, $cell_searchval_upm_params));
 			
@@ -505,6 +505,8 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 			}
 		}
 	}
+	
+	
 	$info["pid"] = $pid;
 	if ($format == "xlsx")
 	return heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $phasenums,$optionsSelected, $row_upms, $col_upms);

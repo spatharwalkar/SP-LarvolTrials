@@ -424,7 +424,7 @@ class ContentManager
 		echo ('<table width="100%"><tr><td>'
 			. '<img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" />'
 			. '</td><td nowrap="nowrap"><span style="color:#ff0000;font-weight:normal;">Interface Work In Progress</span>');
-			
+		
 		if(isset($_GET['cparams']))	{
 		
 			$page = array();$ins_params = array();
@@ -457,9 +457,12 @@ class ContentManager
 			
 				$row_upm_arr = array();
 				foreach($_GET['rowupm'] as $k => $v) {
+				
 					$val = unserialize(gzinflate(base64_decode($v)));
-					if($val != '' && !empty($val))
-						$row_upm_arr[$k] = $val;
+					if($val != '' && !empty($val)) {
+						foreach($val as $vv)
+							$row_upm_arr[$k] = $vv;
+					}
 				}
 				if(isset($row_upm_arr) && !empty($row_upm_arr))
 					$this->getNonAssocUpm($row_upm_arr);
@@ -483,6 +486,7 @@ class ContentManager
 				$totinactivecount = 0;
 				$totactivecount = 0;
 				
+
 				$this->inactivearray 	= array();
 				$this->allarray			= array();
 				$this->activearray		= array();
@@ -591,6 +595,7 @@ class ContentManager
 								
 								$vall = implode(",",array_keys($this->allfilterarr, $new_arr['NCT/overall_status']));
 								if(array_key_exists($vall, $_GET)) {
+
 									$this->allarray[] = $new_arr;
 									$this->allcount++;	
 								} 
@@ -631,8 +636,8 @@ class ContentManager
 				if($c_params['type'] == 'col') { 
 					
 					$val = unserialize(gzinflate(base64_decode($_GET['colupm'][$pk])));
-					if($val != '' && !empty($val))
-						$this->getNonAssocUpm(array($val));
+					if($val != '' && !empty($val)) 
+						$this->getNonAssocUpm($val);
 				}
 				
 				if($bomb != '') {
@@ -688,6 +693,7 @@ class ContentManager
 			$inactivephase 	= array();
 			
 			$excel_params 	= unserialize(gzinflate(base64_decode($_GET['params'])));
+			
 			$rowlabel 		= $excel_params['rowlabel'];
 			$columnlabel 	= $excel_params['columnlabel'];
 			$bomb			= $excel_params['bomb'];  //added for bomb indication
@@ -2041,8 +2047,7 @@ function getNonAssocUpmRecords($non_assoc_upm_params) {
 	foreach($non_assoc_upm_params as $key => $val)
 		$where .= ' (PREG_RLIKE("' . $val . '",product)) OR ';
 
-/*echo "<br/>==>"."SELECT `event_description`, `event_link`, `event_type`, `start_date`, `start_date_type`, `end_date`, `end_date_type` FROM `upm` WHERE `corresponding_trial` IS NULL AND " . substr($where,0,-4);
-*/
+/*echo "<br/>==>"."SELECT `event_description`, `event_link`, `event_type`, `start_date`, `start_date_type`, `end_date`, `end_date_type` FROM `upm` WHERE `corresponding_trial` IS NULL AND " . substr($where,0,-4);*/
 
 $res = mysql_query("SELECT `event_description`, `event_link`, `event_type`, `start_date`, `start_date_type`, `end_date`, `end_date_type` FROM `upm` WHERE `corresponding_trial` IS NULL AND " . substr($where,0,-4));
 	
