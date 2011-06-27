@@ -1691,7 +1691,7 @@ function getUPMChart($start_month, $start_year, $end_month, $end_year, $current_
 //get difference between two dates in months
 function getColspan($start_dt, $end_dt) {
 	
-	$diff = ceil((strtotime($end_dt)-strtotime($start_dt))/2628000);
+	$diff = round((strtotime($end_dt)-strtotime($start_dt))/2628000);
 	return $diff;
 
 }
