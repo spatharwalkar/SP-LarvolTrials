@@ -1297,8 +1297,9 @@ function displayContent($params, $fieldlist, $time_machine, $type_arr, $edited, 
 				. '">');
 				if($upm_result_link != '' && $upm_result_link != NULL) {
 					echo ('<a href="' . $upm_result_link . '" style="color:#000;"><div ' . $upm_title . '>&diams;</div></a>');
-				} else {
-					echo ('<div ' . $upm_title . '>⌛</div>');
+				} 
+				if($v[3] < date('Y-m-d') && ($upm_result_link == NULL || upm_result_link == '')){
+					echo ('<div ' . $upm_title . '><img src="images/hourglass.png" border="0" /></div>');
 				}
 				echo ('</td>');
 				
