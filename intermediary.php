@@ -487,6 +487,8 @@ class ContentManager
 				$totactivecount = 0;
 				
 
+
+
 				$this->inactivearray 	= array();
 				$this->allarray			= array();
 				$this->activearray		= array();
@@ -1008,9 +1010,10 @@ class ContentManager
 				. '<th colspan="12" style="width:24px;">' . $this->third_yr . '</th>'
 				. '<th colspan="3" style="width:6px;padding:0;margin:0;" class="rightborder">+</th>'
 				. '</tr>');
-
+			
 			foreach($record_arr as $key => $val) {
 			
+				$un_status = '';
 				if($cntr%2 == 1) {
 		
 					$row_type_one = 'alttitle';
@@ -1022,11 +1025,35 @@ class ContentManager
 					$row_type_two = 'row';
 				}	
 			
-				echo ('<tr><td class="' . $row_type_one . '"><a style="color:#000;" href="' . $val['event_link'] . '">' 
-						. $val['event_description'] . '</a></td>'
-						. '<td class="' . $row_type_two . '">' . $val['event_type'] . '</td>'
-						. '<td class="' . $row_type_two . '"></td>'
-						. '<td class="' . $row_type_two . '">');
+				echo ('<tr><td class="' . $row_type_one . '"><div class="rowcollapse"><a style="color:#000;" href="' . $val['event_link'] . '">' 
+						. $val['event_description'] . '</a></div></td>'
+						. '<td class="' . $row_type_two . '"><div class="rowcollapse">' . $val['event_type'] . '</div></td>'
+						. '<td class="' . $row_type_two . '"><div class="rowcollapse">');
+				
+				if($val['start_date_type'] == 'anticipated') {
+					$un_status .= 'Upcoming';
+				}
+				if($val['end_date_type'] == 'actual') {
+					$un_status .= ', Occurred';
+				}
+				
+				if($val['end_date'] > $val['end_date_previous_value']) {
+					$un_status .= ', Delayed';
+				}
+				if(($val['end_date'] < date('Y-m-d')) && ($val['result_link'] == '' || $val['result_link'] == NULL)) {
+					$un_status .= ', Pending';
+				}
+				if($val['start_date'] < $val['start_date_previous_value']) {
+					$un_status .= ', Accelerated';
+				}
+				if(($val['start_date_previous_value'] != '' && $val['start_date_previous_value'] != NULL && $val['end_date_previous_value'] != '' && 
+				$val['end_date_previous_value'] != NULL) && (($val['start_date'] == NULL || $val['start_date'] == '' || $val['start_date'] == '0000-00-00') && 
+				($val['end_date'] == NULL || $val['end_date'] == '' || $val['end_date'] == '0000-00-00'))) {
+					$un_status .= ', Cancelled';
+				}
+				
+				echo $un_status;
+				echo ('</div></td>' . '<td class="' . $row_type_two . '"><div class="rowcollapse">');
 						
 				if($val['start_date_type'] == 'anticipated') {
 					echo '<span style="font-weight:bold;color:gray;">' . date('m/y',strtotime($val['start_date']))  . '</span>';
@@ -1034,8 +1061,7 @@ class ContentManager
 					echo date('m/y',strtotime($val['start_date']));
 				}
 				
-				echo  ('</td>'
-				. '<td class="' . $row_type_two . '">');
+				echo  ('</div></td>' . '<td class="' . $row_type_two . '"><div class="rowcollapse">');
 				
 				if($val['end_date_type'] == 'anticipated') {
 					echo '<span style="font-weight:bold;color:gray;">' . date('m/y',strtotime($val['end_date']))  . '</span>';
@@ -1043,7 +1069,7 @@ class ContentManager
 					echo date('m/y',strtotime($val['end_date']));
 				}	
 				
-				echo ('</td>');
+				echo ('</div></td>');
 				
 		echo $str = getCompletionChart(date('m',strtotime($val['start_date'])), date('Y',strtotime($val['start_date'])), 
 		date('m',strtotime($val['end_date'])), date('Y',strtotime($val['end_date'])), $this->current_yr, $this->second_yr, 
@@ -1296,7 +1322,8 @@ function displayContent($params, $fieldlist, $time_machine, $type_arr, $edited, 
 				echo ('<td style="text-align:center;' . (($k < count($upmDetails[$nctid])-1) ? 'border-bottom:0;' : '' ) 
 				. '">');
 				if($upm_result_link != '' && $upm_result_link != NULL) {
-					echo ('<a href="' . $upm_result_link . '" style="color:#000;"><div ' . $upm_title . '>&diams;</div></a>');
+					echo ('<a href="' . $upm_result_link . '" style="color:#000;"><div ' . $upm_title 
+					. '><img src="images/black-diamond.png" style="padding-top: 3px;" border="0" /></div></a>');
 				} 
 				if($v[3] < date('Y-m-d') && ($upm_result_link == NULL || upm_result_link == '')){
 					echo ('<div ' . $upm_title . '><img src="images/hourglass.png" border="0" /></div>');
@@ -2048,9 +2075,14 @@ function getNonAssocUpmRecords($non_assoc_upm_params) {
 	foreach($non_assoc_upm_params as $key => $val)
 		$where .= ' (PREG_RLIKE("' . $val . '",product)) OR ';
 
-/*echo "<br/>==>"."SELECT `event_description`, `event_link`, `event_type`, `start_date`, `start_date_type`, `end_date`, `end_date_type` FROM `upm` WHERE `corresponding_trial` IS NULL AND " . substr($where,0,-4);*/
 
-$res = mysql_query("SELECT `event_description`, `event_link`, `event_type`, `start_date`, `start_date_type`, `end_date`, `end_date_type` FROM `upm` WHERE `corresponding_trial` IS NULL AND " . substr($where,0,-4));
+	//echo "<br/>".
+	$sql = "SELECT `id`, `event_description`, `event_link`, `result_link`, `event_type`, `start_date`, `start_date_type`, `end_date`, `end_date_type`, "
+	. "(SELECT `end_date` FROM `upm_history` WHERE `upm_history`.`id` = `id` ORDER BY `added` ASC LIMIT 0,1) AS end_date_previous_value, "
+	. "(SELECT `start_date` FROM `upm_history` WHERE`upm_history`.`id` = `id` ORDER BY `added` ASC LIMIT 0,1) AS start_date_previous_value "
+	. "FROM `upm` WHERE `corresponding_trial` IS NULL AND " . substr($where,0,-4);
+	
+	$res = mysql_query($sql);
 	
 	$i = 0;
 	if(mysql_num_rows($res) > 0){
@@ -2063,6 +2095,8 @@ $res = mysql_query("SELECT `event_description`, `event_link`, `event_type`, `sta
 			$upms[$i]['start_date_type'] = $row['start_date_type'];
 			$upms[$i]['end_date'] 	= $row['end_date'];
 			$upms[$i]['end_date_type'] = $row['end_date_type'];
+			$upms[$i]['end_date_previous_value'] = $row['end_date_previous_value'];
+			$upms[$i]['start_date_previous_value'] = $row['start_date_previous_value'];
 			
 			$i++;
 		}
