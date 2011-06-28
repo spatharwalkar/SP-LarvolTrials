@@ -124,7 +124,7 @@ CREATE TABLE IF NOT EXISTS `rpt_heatmap_cells` (
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `rpt_heatmap_headers` (
-  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `report` int(10) unsigned NOT NULL,
   `header` varchar(127) COLLATE utf8_unicode_ci NOT NULL,
   `num` tinyint(3) unsigned NOT NULL,
