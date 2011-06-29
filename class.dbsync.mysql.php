@@ -119,7 +119,7 @@
             }
 
             $sql = "CREATE TABLE `{$name}` (" . implode(', ', $sql_f) . (count($primary_keys) > 0 ? ", PRIMARY KEY (`" . implode('`, `', $primary_keys) . "`)" : '') . ')';
-			echo($sql.'<br />');
+			echo($sql.';<br />');
             return true;
         }
 
@@ -136,7 +136,7 @@
             mysql_select_db($this->database, $this->dbp);
 
 			$sql = "DROP TABLE `{$table}`";
-			echo($sql.'<br />');
+			echo($sql.';<br />');
             return true;
         }
 
@@ -155,7 +155,7 @@
          **/
         function AddTableField($table, $field, $field_before = 0) {
 			$sql = "ALTER TABLE `{$table}` ADD `{$field['name']}` {$field['type']} " . ($field['null']=='YES' ? '' : 'NOT') . ' NULL' . (strlen($field['default']) > 0 ? " default '{$field['default']}'" : '') . ($field['extra'] == 'auto_increment' ? ' auto_increment' : '') . (!is_string($field_before) ? ' FIRST' : " AFTER `{$field_before}`") . ($field['key'] == 'PRI' ? ", ADD PRIMARY KEY (`{$field['name']}`)" : '');
-			echo($sql.'<br />');
+			echo($sql.';<br />');
             return true;
         }
 
@@ -172,7 +172,7 @@
          **/
         function ChangeTableField($table, $field, $new_field) {
 			$sql = "ALTER TABLE `{$table}` CHANGE `{$field}` `{$new_field['name']}` {$new_field['type']} " . ($new_field['null']=='YES' ? '' : 'NOT') . ' NULL' . (strlen($new_field['default']) > 0 ? " default '{$new_field['default']}'" : '') . ($field['extra'] == 'auto_increment' ? ' auto_increment' : '') . ($field['key'] == 'PRI' ? ", ADD PRIMARY KEY (`{$field['name']}`)" : '');
-			echo($sql.'<br />');
+			echo($sql.';<br />');
             return true;
         }
 
@@ -188,7 +188,7 @@
          **/
         function RemoveTableField($table, $field) {
 			$sql = "ALTER TABLE `{$table}` DROP `{$field}`";
-			echo($sql.'<br />');
+			echo($sql.';<br />');
             return true;
         }
 
@@ -203,7 +203,7 @@
          **/
         function ClearTablePrimaryKeys($table) {
         	$sql = "ALTER TABLE `{$table}` DROP PRIMARY KEY";
-			echo($sql.'<br />');
+			echo($sql.';<br />');
             return true;
         }
 
@@ -219,7 +219,7 @@
          **/
         function SetTablePrimaryKeys($table, $keys) {
         	$sql = "ALTER TABLE `{$table}` DROP PRIMARY KEY, ADD PRIMARY KEY (`" . implode('`, `', $keys) . "`)";
-			echo($sql.'<br />');
+			echo($sql.';<br />');
             return true;
         }
 
