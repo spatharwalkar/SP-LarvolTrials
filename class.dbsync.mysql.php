@@ -170,8 +170,10 @@
          * @access	public
          * @return 	boolean	Success
          **/
-        function ChangeTableField($table, $field, $new_field) {
-			$sql = "ALTER TABLE `{$table}` CHANGE `{$field}` `{$new_field['name']}` {$new_field['type']} " . ($new_field['null']=='YES' ? '' : 'NOT') . ' NULL' . (strlen($new_field['default']) > 0 ? " default '{$new_field['default']}'" : '') . ($field['extra'] == 'auto_increment' ? ' auto_increment' : '') . ($field['key'] == 'PRI' ? ", ADD PRIMARY KEY (`{$field['name']}`)" : '');
+        function ChangeTableField($table, $field, $new_field,$old_field=array()) {
+        	if($old_field['key']=='PRI' && $new_field['key']=='PRI')
+        	$no_primary_def_needed = 1;
+			$sql = "ALTER TABLE `{$table}` CHANGE `{$field}` `{$new_field['name']}` {$new_field['type']} " . ($new_field['null']=='YES' ? '' : 'NOT') . ' NULL' . (strlen($new_field['default']) > 0 ? " default '{$new_field['default']}'" : '') . ($new_field['extra'] == 'auto_increment' ? ' auto_increment' : '') . ($new_field['key'] == 'PRI' && $no_primary_def_needed!=1  ? ", ADD PRIMARY KEY (`{$new_field['name']}`)" : '');
 			echo($sql.';<br />');
             return true;
         }

@@ -150,9 +150,9 @@
                                 $fields_sync[$k]['key'] != $fields_home[$j]['key'] ||
                                 $fields_sync[$k]['default'] != $fields_home[$j]['default'] ||
                                 $fields_sync[$k]['extra'] != $fields_home[$j]['extra']) {
-                                if (!$db_sync->ChangeTableField($tables_home[$i], $fields_home[$j]['name'], $fields_home[$j])) {
-	                                $this->RaiseError("Could not change field <strong>{$fields_home[$j]['name']}</strong> on table <strong>{$tables_home[$i]}</strong> on database <strong>{$db_sync->database}</strong> at {$db_sync->user}@{$db_sync->host}: " . $db_sync->LastError());
-                                }
+	                                if (!$db_sync->ChangeTableField($tables_home[$i], $fields_home[$j]['name'], $fields_home[$j],$fields_sync[$k])) {
+		                                $this->RaiseError("Could not change field <strong>{$fields_home[$j]['name']}</strong> on table <strong>{$tables_home[$i]}</strong> on database <strong>{$db_sync->database}</strong> at {$db_sync->user}@{$db_sync->host}: " . $db_sync->LastError());
+	                                }
                                 $diferent_fields++;
                             }
                         }
