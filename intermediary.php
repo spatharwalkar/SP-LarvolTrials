@@ -292,7 +292,7 @@ class ContentManager
 	
 		echo ('<div style="height:100px;"><div class="block"><div class="text">List</div>'
 			. '<input type="radio" id="actlist" name="list" checked="checked" value="active" '
-			. 'onchange="javascript: applyfilter(this.value);" />'
+			. ' onchange="javascript: applyfilter(this.value);" />'
 			. '&nbsp;<label for="actlist"><span style="color: #00B050;"> ' . $act
 			. ' Active Records </span></label>');
 				if(!empty($actph)) { 
@@ -300,7 +300,7 @@ class ContentManager
 				}
 		echo ('<br/><input type="radio" id="inactlist" name="list" value="inactive" ' 
 			. ((isset($_GET['list']) && $_GET['list'] == 'inactive') ? ' checked="checked" ' : '')
-			. 'onchange="javascript: applyfilter(this.value);" />&nbsp;<label for="inactlist">'
+			. ' onchange="javascript: applyfilter(this.value);" />&nbsp;<label for="inactlist">'
 			. '<span style="color: #FF0000;"> ' . $inact
 			. ' Inactive Records</span></label>');
 				if(!empty($inactph)) { 
@@ -308,7 +308,7 @@ class ContentManager
 				}
 		echo ('<br/><input type="radio" id="alllist" name="list" value="all"' 
 			. ((isset($_GET['list']) && $_GET['list'] == 'all') ? ' checked="checked" ' : '')
-			. 'onchange="javascript: applyfilter(this.value);" />&nbsp;<label for="alllist"> ' . $all
+			. ' onchange="javascript: applyfilter(this.value);" />&nbsp;<label for="alllist"> ' . $all
 			. ' All Records </label></div>'
 			. '<input type="hidden" id="sortorder" name="sortorder" value="' . $this->sort_params . '" />'
 			. '&nbsp;<div class="drop"><div class="text">Show Only</div>'
@@ -486,6 +486,7 @@ class ContentManager
 				$totinactivecount = 0;
 				$totactivecount = 0;
 				
+
 
 
 
@@ -999,16 +1000,16 @@ class ContentManager
 		
 			$cntr = 0;
 			echo ('<table width="100%" border="0" cellpadding="4" cellspacing="0" class="manage">'
-				. '<tr><th style="width:380px;" nowrap="nowrap">'
+				. '<tr><th style="width:490px;" nowrap="nowrap">'
 				. 'Upcoming Product Milestones not associated with a specific trial</th>'
-				. '<th style="width:140px;">Milestone Type</th>'
-				. '<th style="width:140px;">Status</th>'
-				. '<th style="width:25px;" title="MM/YY">Start</th>'
-				. '<th style="width:25px;" title="MM/YY">End</th>'
+				. '<th style="width:130px;">Milestone Type</th>'
+				. '<th style="width:340px;">Status</th>'
+				. '<th style="width:30px;" title="MM/YY">Start</th>'
+				. '<th style="width:30px;" title="MM/YY">End</th>'
 				. '<th colspan="12" style="width:24px;">' . $this->current_yr . '</th>'
 				. '<th colspan="12" style="width:24px;">' . $this->second_yr . '</th>'
 				. '<th colspan="12" style="width:24px;">' . $this->third_yr . '</th>'
-				. '<th colspan="3" style="width:6px;padding:0;margin:0;" class="rightborder">+</th>'
+				. '<th colspan="3" style="width:12px;padding:0;margin:0;" class="rightborder">+</th>'
 				. '</tr>');
 			
 			foreach($record_arr as $key => $val) {
@@ -1031,28 +1032,34 @@ class ContentManager
 						. '<td class="' . $row_type_two . '"><div class="rowcollapse">');
 				
 				if($val['start_date_type'] == 'anticipated') {
-					$un_status .= 'Upcoming';
+					$un_status .= 'Upcoming, ';
 				}
 				if($val['end_date_type'] == 'actual') {
-					$un_status .= ', Occurred';
+					$un_status .= 'Occurred, ';
 				}
 				
-				if($val['end_date'] > $val['end_date_previous_value']) {
-					$un_status .= ', Delayed';
+				if(($val['end_date'] != '' && $val['end_date'] != NULL && $val['end_date'] != '0000-00-00') 
+				&& ($val['end_date_previous_value'] != '' && $val['end_date_previous_value'] != NULL && $val['end_date_previous_value'] != '0000-00-00') 
+				&& ($val['end_date'] > $val['end_date_previous_value'])) {
+					$un_status .= 'Delayed, ';
 				}
-				if(($val['end_date'] < date('Y-m-d')) && ($val['result_link'] == '' || $val['result_link'] == NULL)) {
-					$un_status .= ', Pending';
+				if(($val['end_date'] != '' && $val['end_date'] != NULL && $val['end_date'] != '0000-00-00') 
+				&& ($val['end_date'] < date('Y-m-d')) 
+				&& ($val['result_link'] == '' || $val['result_link'] == NULL)) {
+					$un_status .= 'Pending, ';
 				}
-				if($val['start_date'] < $val['start_date_previous_value']) {
-					$un_status .= ', Accelerated';
+				if(($val['start_date'] != '' && $val['start_date'] != NULL && $val['start_date'] != '0000-00-00')
+				&& ($val['start_date_previous_value'] != '' && $val['start_date_previous_value'] != NULL && $val['start_date_previous_value'] != '0000-00-00')
+				&& ($val['start_date'] < $val['start_date_previous_value'])) {
+					$un_status .= 'Accelerated, ';
 				}
 				if(($val['start_date_previous_value'] != '' && $val['start_date_previous_value'] != NULL && $val['end_date_previous_value'] != '' && 
 				$val['end_date_previous_value'] != NULL) && (($val['start_date'] == NULL || $val['start_date'] == '' || $val['start_date'] == '0000-00-00') && 
 				($val['end_date'] == NULL || $val['end_date'] == '' || $val['end_date'] == '0000-00-00'))) {
-					$un_status .= ', Cancelled';
+					$un_status .= 'Cancelled, ';
 				}
 				
-				echo $un_status;
+				echo substr($un_status,0,-2);
 				echo ('</div></td>' . '<td class="' . $row_type_two . '"><div class="rowcollapse">');
 						
 				if($val['start_date_type'] == 'anticipated') {
@@ -1322,11 +1329,11 @@ function displayContent($params, $fieldlist, $time_machine, $type_arr, $edited, 
 				echo ('<td style="text-align:center;' . (($k < count($upmDetails[$nctid])-1) ? 'border-bottom:0;' : '' ) 
 				. '">');
 				if($upm_result_link != '' && $upm_result_link != NULL) {
-					echo ('<a href="' . $upm_result_link . '" style="color:#000;"><div ' . $upm_title 
-					. '><img src="images/black-diamond.png" style="padding-top: 3px;" border="0" /></div></a>');
+					echo ('<div ' . $upm_title . '><a href="' . $upm_result_link . '" style="color:#000;">'
+					. '<img src="images/black-diamond.png" alt="diamond" style="padding-top: 3px;" border="0" /></a></div>');
 				} 
 				if($v[3] < date('Y-m-d') && ($upm_result_link == NULL || upm_result_link == '')){
-					echo ('<div ' . $upm_title . '><img src="images/hourglass.png" border="0" /></div>');
+					echo ('<div ' . $upm_title . '><img src="images/hourglass.png" alt="hourglass" border="0" /></div>');
 				}
 				echo ('</td>');
 				
@@ -1345,119 +1352,98 @@ function getUPMChart($start_month, $start_year, $end_month, $end_year, $current_
 	$attr_two = 'class="rightborder"';
 	if(($start_date == '' || $start_date == NULL) && ($end_date == '' || $end_date == NULL)) {
 	
-		$value = '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-			. '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-			. '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-			. '<td colspan="3" ' . $attr_two . '><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>';	
+		$value = '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+			. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+			. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+			. '<td colspan="3" ' . $attr_two . '><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>';	
 
 	} else if($start_date == '' || $start_date == NULL) {
 	
 		$st = $end_month-1;
 		if($end_year < $current_yr) {
 		
-			$value = '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-				. '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-				. '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-				. '<td colspan="3" ' . $attr_two . '><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>';	
+			$value = '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. '<td colspan="3" ' . $attr_two . '><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>';	
 						
 		} else if($end_year == $current_yr) {
 			
-			$value = (($st != 0) ? '<td colspan="' . $st . '"><a href="' . $upm_link . '"><div ' . $upm_title 
-				. '>&nbsp;</div></a></td>' : '')
-				. '<td style="background-color:#9966FF;width:2px;"><a href="' . $upm_link . '"><div ' . $upm_title 
-				. '>&nbsp;</div></a></td>'
-				. (((12 - ($st+1)) != 0) ? '<td colspan="' .(12 - ($st+1)) . '"><a href="' . $upm_link . '"><div ' . $upm_title 
-				. '>&nbsp;</div></a></td>' : '')
-				. '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-				. '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-				. '<td colspan="3" ' . $attr_two . '><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>';	
+			$value = (($st != 0) ? '<td colspan="' . $st . '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>' : '')
+				. '<td style="background-color:#9966FF;width:2px;"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. (((12 - ($st+1)) != 0) ? '<td colspan="' .(12 - ($st+1)) . '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>' : '')
+				. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. '<td colspan="3" ' . $attr_two . '><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>';	
 					
 		} else if($end_year == $second_yr) {
 		
-			$value = '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-				. (($st != 0) ? '<td colspan="' . $st . '"><a href="' . $upm_link . '"><div ' . $upm_title 
-				. '>&nbsp;</div></a></td>' : '')
-				. '<td style="background-color:#9966FF;width:2px;"><a href="' . $upm_link . '"><div ' . $upm_title 
-				. '>&nbsp;</div></a></td>'
-				. (((12 - ($st+1)) != 0) ? '<td colspan="' .(12 - ($st+1)) . '"><a href="' . $upm_link . '"><div ' . $upm_title 
-				. '>&nbsp;</div></a></td>' : '')
-				. '<td colspan="12">&nbsp;</td><td colspan="3" ' . $attr_two . '><a href="' . $upm_link . '"><div ' . $upm_title 
-				. '>&nbsp;</div></a></td>';
+			$value = '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. (($st != 0) ? '<td colspan="' . $st . '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>' : '')
+				. '<td style="background-color:#9966FF;width:2px;"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. (((12 - ($st+1)) != 0) ? '<td colspan="' .(12 - ($st+1)) . '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>' : '')
+				. '<td colspan="12">&nbsp;</td><td colspan="3" ' . $attr_two . '><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>';
 					
 		} else if($end_year == $third_yr) {
 		
-			$value = '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-				. '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-				. (($st != 0) ? '<td colspan="' . $st . '"><a href="' . $upm_link . '"><div ' . $upm_title 
-				. '>&nbsp;</div></a></td>' : '')
-				. '<td style="background-color:#9966FF;width:2px;"><a href="' . $upm_link . '"><div ' . $upm_title 
-				. '>&nbsp;</div></a></td>'
-				. (((12 - ($st+1)) != 0) ? '<td colspan="' .(12 - ($st+1)) . '"><a href="' . $upm_link . '"><div ' . $upm_title 
-				. '>&nbsp;</div></a></td>' : '')
-				. '<td colspan="3" ' . $attr_two . '><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>';	
+			$value = '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. (($st != 0) ? '<td colspan="' . $st . '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>' : '')
+				. '<td style="background-color:#9966FF;width:2px;"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. (((12 - ($st+1)) != 0) ? '<td colspan="' .(12 - ($st+1)) . '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>' : '')
+				. '<td colspan="3" ' . $attr_two . '><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>';	
 				
 		} else if($end_year > $third_yr){
 		
-			$value = '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-				. '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-				. '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-				. '<td colspan="3" style="background-color:#9966FF;" ' . $attr_two . '><a href="' . $upm_link 
-				. '"><div ' . $upm_title . '>&nbsp;</div></a></td>';		
+			$value = '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. '<td colspan="3" style="background-color:#9966FF;" ' . $attr_two . '><div ' . $upm_title . '><a href="' . $upm_link 
+				. '">&nbsp;</a></div></td>';		
 		}
 	} else if($end_date == '' || $end_date == NULL) {
 	
 		$st = $start_month-1;
 		if($start_year < $current_yr) {
 		
-			$value = '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-					. '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-					. '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-					. '<td colspan="3" ' . $attr_two . '><a href="' . $upm_link . '"><div ' . $upm_title 
-					. '>&nbsp;</div></a></td>';	
+			$value = '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+					. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+					. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+					. '<td colspan="3" ' . $attr_two . '><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>';	
 						
 		} else if($start_year == $current_yr) { 
 			
-			$value = (($st != 0) ? '<td colspan="' . $st . '"><a href="' . $upm_link . '"><div ' . $upm_title 
-				. '>&nbsp;</div></a></td>' : '')
-				. '<td style="background-color:#9966FF;width:2px;"><a href="' . $upm_link . '"><div ' . $upm_title 
-				. '>&nbsp;</div></a></td>'
-				. (((12 - ($st+1)) != 0) ? '<td colspan="' .(12 - ($st+1)) . '"><a href="' . $upm_link . '"><div ' . $upm_title 
-				. '>&nbsp;</div></a></td>' : '')
-				. '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-				. '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-				. '<td colspan="3" ' . $attr_two . '><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>';	
+			$value = (($st != 0) ? '<td colspan="' . $st . '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>' : '')
+				. '<td style="background-color:#9966FF;width:2px;"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. (((12 - ($st+1)) != 0) ? '<td colspan="' .(12 - ($st+1)) . '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>' : '')
+				. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. '<td colspan="3" ' . $attr_two . '><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>';	
 					
 		} else if($start_year == $second_yr) {
 		
-			$value = '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-				. (($st != 0) ? '<td colspan="' . $st . '"><a href="' . $upm_link . '"><div ' . $upm_title 
-				. '>&nbsp;</div></a></td>' : '')
-				. '<td style="background-color:#9966FF;width:2px;"><a href="' . $upm_link . '"><div ' . $upm_title 
-				. '>&nbsp;</div></a></td>'
-				. (((12 - ($st+1)) != 0) ? '<td colspan="' .(12 - ($st+1)) . '"><a href="' . $upm_link . '"><div ' . $upm_title 
-				. '>&nbsp;</div></a></td>' : '')
-				. '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-				. '<td colspan="3" ' . $attr_two . '><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>';
+			$value = '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. (($st != 0) ? '<td colspan="' . $st . '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>' : '')
+				. '<td style="background-color:#9966FF;width:2px;"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. (((12 - ($st+1)) != 0) ? '<td colspan="' .(12 - ($st+1)) . '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>' : '')
+				. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. '<td colspan="3" ' . $attr_two . '><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>';
 					
 		} else if($start_year == $third_yr) {
 		
-			$value = '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-			 	. '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-				. (($st != 0) ? '<td colspan="' . $st . '"><a href="' . $upm_link . '"><div ' . $upm_title 
-				. '>&nbsp;</div></a></td>' : '')
-				. '<td style="background-color:#9966FF;width:2px;"><a href="' . $upm_link . '"><div ' . $upm_title 
-				. '>&nbsp;</div></a></td>'
-				. (((12 - ($st+1)) != 0) ? '<td colspan="' .(12 - ($st+1)) . '"><a href="' . $upm_link . '"><div ' . $upm_title 
-				. '>&nbsp;</div></a></td>' : '')
-				. '<td colspan="3" ' . $attr_two . '><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>';	
+			$value = '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+			 	. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. (($st != 0) ? '<td colspan="' . $st . '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>' : '')
+				. '<td style="background-color:#9966FF;width:2px;"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. (((12 - ($st+1)) != 0) ? '<td colspan="' .(12 - ($st+1)) . '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>' : '')
+				. '<td colspan="3" ' . $attr_two . '><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>';	
 				
 		} else if($start_year > $third_yr){
 		
-			$value = '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-			. '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-			. '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-			. '<td colspan="3" style="background-color:#9966FF;" ' . $attr_two . '><a href="' . $upm_link . '"><div ' 
-			. $upm_title . '>&nbsp;</div></a></td>';		
+			$value = '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+			. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+			. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+			. '<td colspan="3" style="background-color:#9966FF;" ' . $attr_two . '><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>';		
 		}
 			
 	} else if($start_year < $current_yr) {
@@ -1467,30 +1453,30 @@ function getUPMChart($start_month, $start_year, $end_month, $end_year, $current_
 
 		if($end_year < $current_yr) {
 		
-			$value = '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-			. '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-			. '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-			. '<td colspan="3" ' . $attr_two . '><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>';
+			$value = '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+			. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+			. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+			. '<td colspan="3" ' . $attr_two . '><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>';
 		  
 		} else if($end_year == $current_yr) { 
 		
 			if($end_month == 12) {
 			
-				$value = '<td style="background-color:#9966FF;" colspan="' . $end_month . '">'
-				. '<a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-				. '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-				. '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-				. '<td colspan="3" ' . $attr_two . '><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>';
+				$value = '<td style="background-color:#9966FF;" colspan="' . $end_month . '">' 
+				. '<div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. '<td colspan="3" ' . $attr_two . '><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>';
 				
 			} else { 
 			
 				$value = '<td style="background-color:#9966FF;" colspan="' . $end_month . '">' 
-				. '<a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
+				. '<div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
 				. '<td style="width:'.(12-$end_month).'px;" colspan="' . (12-$end_month) 
-				. '"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-				. '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-				. '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-				. '<td colspan="3" ' . $attr_two . '><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>';
+				. '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. '<td colspan="3" ' . $attr_two . '><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>';
 				
 			}
 		} else if($end_year == $second_yr) { 
@@ -1498,18 +1484,17 @@ function getUPMChart($start_month, $start_year, $end_month, $end_year, $current_
 			if($end_month == 12) {
 			
 				$value = '<td style="background-color:#9966FF;" colspan="24">'
-				. '<a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-				. '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-				. '<td colspan="3" ' . $attr_two . '><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>';
+				. '<div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. '<td colspan="3" ' . $attr_two . '><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>';
 				
 			} else {
 			
 				$value = '<td style="background-color:#9966FF;" colspan="' . (12+$end_month) . '">' 
-				. '<a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-				. '<td colspan="' . (12-$end_month) . '"><a href="' . $upm_link . '"><div ' . $upm_title 
-				. '>&nbsp;</div></a></td>'
-				. '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-				. '<td colspan="3" ' . $attr_two . '><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>';
+				. '<div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. '<td colspan="' . (12-$end_month) . '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</div></a></td>'
+				. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. '<td colspan="3" ' . $attr_two . '><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>';
 				
 			}
 	
@@ -1518,25 +1503,23 @@ function getUPMChart($start_month, $start_year, $end_month, $end_year, $current_
 			if($end_month == 12) {
 			
 				$value = '<td style="background-color:#9966FF;" colspan="36">' 
-				. '<a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-				. '<td colspan="3" ' . $attr_two . '><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>';
+				. '<div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. '<td colspan="3" ' . $attr_two . '><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>';
 				
 			} else {
 			
-				$value = '<td style="background-color:#9966FF;" colspan="' . (24+$end_month) . '" ' 
-				. $class . '>' . '<a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-				. '<td colspan="' . (12-$end_month) . '"><a href="' . $upm_link . '"><div ' 
-				. $upm_title . '>&nbsp;</div></a></td>'
-				. '<td colspan="3" ' . $attr_two . '><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>';
+				$value = '<td style="background-color:#9966FF;" colspan="' . (24+$end_month) . '" ' . $class . '>' 
+				. '<div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. '<td colspan="' . (12-$end_month) . '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. '<td colspan="3" ' . $attr_two . '><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>';
 			}
 		 
 		} else if($end_year > $third_yr) {
 		
-			$value = '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-			. '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-			. '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-			. '<td style="background-color:#9966FF;" colspan="3" ' . $attr_two . '><a href="' . $upm_link . '"><div ' 
-			. $upm_title . '>&nbsp;</div></a></td>';
+			$value = '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+			. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+			. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+			. '<td style="background-color:#9966FF;" colspan="3" ' . $attr_two . '><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>';
 		}	
 	
 	} else if($start_year == $current_yr) {
@@ -1545,72 +1528,68 @@ function getUPMChart($start_month, $start_year, $end_month, $end_year, $current_
 		$st = $start_month-1;
 		if($end_year == $current_yr) {
 			
-			$value = (($st != 0) ? '<td colspan="' . $st . '" ><div ' . $upm_title . '>&nbsp;</div></td>' : '');
+			$value = (($st != 0) ? '<td colspan="' . $st . '" ><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>' : '');
 			
 			if($val != 0) {
 				$value .= '<td style="background-color:#9966FF;" colspan="' . $val . '">'
-						. '<a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
+						. '<div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
 						. (((12 - ($st+$val)) != 0) ? '<td colspan="' .(12 - ($st+$val)) . '"  style="' . $lineheight 
-						. '"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>' : '');
+						. '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>' : '');
 			} else {
 				$value .= '<td style="background-color:#9966FF;">'
-						. '<a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
+						. '<div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
 						. (((12 - ($st+1)) != 0) ? '<td colspan="' .(12 - ($st+1)) . '"  style="' . $lineheight 
-						. '"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>' : '');			
+						. '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>' : '');			
 			}
 			
-			$value .= '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-					. '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-					. '<td colspan="3" ' . $attr_two . '><a href="' . $upm_link . '"><div ' . $upm_title 
-					. '>&nbsp;</div></a></td>';
+			$value .= '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+					. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+					. '<td colspan="3" ' . $attr_two . '><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>';
 		
 		} else if($end_year == $second_yr) { 
 		 
-			$value = (($st != 0) ? '<td colspan="' . $st . '"><div ' . $upm_title . '>&nbsp;</div></td>' : '');
+			$value = (($st != 0) ? '<td colspan="' . $st . '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>' : '');
 			
 			if($val != 0) {
 				$value .= '<td style="background-color:#9966FF;" colspan="' . $val . '">'
-						. '<a href="' . $upm_link . '"><div ' . $upm_title .' >&nbsp;</div></a></td>'
-						. (((24 - ($val+$st)) != 0) ? '<td colspan="' .(24 - ($val+$st)) . '"><a href="' . $upm_link 
-						. '"><div ' . $upm_title . '>&nbsp;</div></a></td>' : '');
+						. '<div ' . $upm_title .' ><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+						. (((24 - ($val+$st)) != 0) ? '<td colspan="' .(24 - ($val+$st)) . '"><div ' . $upm_title . '><a href="' . $upm_link 
+						. '">&nbsp;</a></div></td>' : '');
 			} else {
 				$value .= '<td style="background-color:#9966FF;">'
-						. '<a href="' . $upm_link . '"><div ' . $upm_title .' >&nbsp;</div></a></td>'
-						. (((24 - (1+$st)) != 0) ? '<td colspan="' .(24 - (1+$st)) . '"><a href="' . $upm_link 
-						. '"><div ' . $upm_title . '>&nbsp;</div></a></td>' : '');			
+						. '<div ' . $upm_title .' ><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+						. (((24 - (1+$st)) != 0) ? '<td colspan="' .(24 - (1+$st)) . '"><div ' . $upm_title . '><a href="' . $upm_link  
+						. '">&nbsp;</a></div></td>' : '');			
 			}
 			
-			$value .= '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-					. '<td colspan="3" ' . $attr_two . '><a href="' . $upm_link . '"><div ' . $upm_title 
-					. '>&nbsp;</div></a></td>';
+			$value .= '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+					. '<td colspan="3" ' . $attr_two . '><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>';
 	
 		} else if($end_year == $third_yr) {
 				
-			$value = (($st != 0) ? '<td colspan="' . $st . '"><a href="' . $upm_link . '"><div ' . $upm_title 
-					. '>&nbsp;</div></a></td>' : '');
+			$value = (($st != 0) ? '<td colspan="' . $st . '"><div ' . $upm_title 
+					. '><a href="' . $upm_link . '">&nbsp;</a></div></td>' : '');
 				
 			if($val != 0) {
 				$value .= '<td style="background-color:#9966FF;" colspan="' . $val . '">'
-						. '<a href="' . $upm_link . '"><div ' . $upm_title .'>&nbsp;</div></a></td>'
-						. (((36 - ($val+$st)) != 0) ? '<td colspan="' .(36 - ($val+$st)) . '"><a href="' . $upm_link 
-						. '"><div ' . $upm_title . '>&nbsp;</div></a></td>' : '') ;
+						. '<div ' . $upm_title .'><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+						. (((36 - ($val+$st)) != 0) ? '<td colspan="' .(36 - ($val+$st)) . '"><div ' . $upm_title . '><a href="' . $upm_link 
+						. '">&nbsp;</a></div></td>' : '') ;
 			} else {
 				$value .= '<td style="background-color:#9966FF;">'
-						. '<a href="' . $upm_link . '"><div ' . $upm_title .'>&nbsp;</div></a></td>'
-						. (((36 - (1+$st)) != 0) ? '<td colspan="' .(36 - (1+$st)) . '"><a href="' . $upm_link 
-						. '"><div ' . $upm_title . '>&nbsp;</div></a></td>' : '') ;			
+						. '<div ' . $upm_title .'><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+						. (((36 - (1+$st)) != 0) ? '<td colspan="' .(36 - (1+$st)) . '"><div ' . $upm_title . '><a href="' . $upm_link 
+						. '">&nbsp;</a></div></td>' : '') ;			
 			}
 			
-			$value .= '<td colspan="3" ' . $attr_two . '><a href="' . $upm_link . '"><div ' . $upm_title 
-					. '>&nbsp;</div></a></td>';
+			$value .= '<td colspan="3" ' . $attr_two . '><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>';
 	
 		} else if($end_year > $third_yr){
 		
-			$value = '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-					. '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-					. '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-					. '<td style="background-color:#9966FF;" colspan="3" ' . $attr_two . '><a href="' . $upm_link 
-					. '"><div ' . $upm_title . '>&nbsp;</div></a></td>';
+			$value = '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+					. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+					. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+					. '<td style="background-color:#9966FF;" colspan="3" ' . $attr_two . '><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>';
 		}
 		
 	} else if($start_year == $second_yr) {
@@ -1619,53 +1598,48 @@ function getUPMChart($start_month, $start_year, $end_month, $end_year, $current_
 		$st = $start_month-1;
 		if($end_year == $second_yr) {
 		
-			$value = '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-					. (($st != 0) ? '<td colspan="' . $st . '"><a href="' . $upm_link . '"><div ' . $upm_title 
-					. '>&nbsp;</div></a></td>' : '');
+			$value = '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+					. (($st != 0) ? '<td colspan="' . $st . '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;/a></div><</td>' : '');
 					
 			if($val != 0) {
 				$value .= '<td style="background-color:#9966FF;" colspan="' . $val . '">'
-						. '<a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-						. (((12 - ($val+$st)) != 0) ? '<td colspan="' .(12 - ($val+$st)) . '"><a href="' . $upm_link 
-						. '"><div ' . $upm_title . '>&nbsp;</div></a></td>' : '');
+						. '<div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+						. (((12 - ($val+$st)) != 0) ? '<td colspan="' .(12 - ($val+$st)) . '"><div ' . $upm_title . '><a href="' . $upm_link 
+						. '">&nbsp;</a></div></td>' : '');
 			} else {
 				$value .= '<td style="background-color:#9966FF;">'
-						. '<a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-						. (((12 - (1+$st)) != 0) ? '<td colspan="' .(12 - (1+$st)) . '"><a href="' . $upm_link 
-						. '"><div ' . $upm_title . '>&nbsp;</div></a></td>' : '');
+						. '<div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+						. (((12 - (1+$st)) != 0) ? '<td colspan="' .(12 - (1+$st)) . '"><div ' . $upm_title . '><a href="' . $upm_link 
+						. '">&nbsp;</a></div></td>' : '');
 			}
 			
-			$value .= '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-					. '<td colspan="3" ' . $attr_two . '><a href="' . $upm_link . '"><div ' . $upm_title 
-					. '>&nbsp;</div></a></td>';		
+			$value .= '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+					. '<td colspan="3" ' . $attr_two . '><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>';		
 		
 		} else if($end_year == $third_yr) {
 		
-			$value = '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-					. (($st != 0) ? '<td colspan="' . $st . '"><a href="' . $upm_link . '"><div ' . $upm_title 
-					. '>&nbsp;</div></a></td>' : '');
+			$value = '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+					. (($st != 0) ? '<td colspan="' . $st . '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>' : '');
 					
 			if($val != 0) {
 				$value .= '<td style="background-color:#9966FF;" colspan="' . $val . '">'
-						. '<a href="' . $upm_link . '"><div ' . $upm_title .'>&nbsp;</div></a></td>'
-						. (((24 - ($val+$st)) != 0) ? '<td colspan="' .(24 - ($val+$st)) . '"><a href="' . $upm_link 
-						. '"><div ' . $upm_title . '>&nbsp;</div></a></td>' : '');
+						. '<div ' . $upm_title .'><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+						. (((24 - ($val+$st)) != 0) ? '<td colspan="' .(24 - ($val+$st)) . '"><div ' . $upm_title . '><a href="' . $upm_link 
+						. '">&nbsp;</a></div></td>' : '');
 			} else {
 				$value .= '<td style="background-color:#9966FF;">'
-						. '<a href="' . $upm_link . '"><div ' . $upm_title .'>&nbsp;</div></a></td>'
-						. (((24 - (1+$st)) != 0) ? '<td colspan="' .(24 - (1+$st)) . '"><a href="' . $upm_link 
-						. '"><div ' . $upm_title . '>&nbsp;</div></a></td>' : '');			
+						. '<div ' . $upm_title .'><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+						. (((24 - (1+$st)) != 0) ? '<td colspan="' .(24 - (1+$st)) . '"><div ' . $upm_title . '><a href="' . $upm_link 
+						. '">&nbsp;</a></div></td>' : '');			
 			}
-			$value .= '<td colspan="3" ' . $attr_two . '><a href="' . $upm_link . '"><div ' . $upm_title 
-					. '>&nbsp;</div></a></td>';
+			$value .= '<td colspan="3" ' . $attr_two . '><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>';
 
 		} else if($end_year > $third_yr) {
 		
-			$value = '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-					. '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-					. '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-					. '<td style="background-color:#9966FF;" colspan="3"><a href="' . $upm_link . '"><div ' 
-					. $upm_title . '>&nbsp;</div></a></td>';
+			$value = '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+					. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+					. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+					. '<td style="background-color:#9966FF;" colspan="3"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>';
 		}
 		
 	} else if($start_year == $third_yr) {
@@ -1674,42 +1648,40 @@ function getUPMChart($start_month, $start_year, $end_month, $end_year, $current_
 		$st = $start_month-1;	
 		if($end_year == $third_yr) {
 		
-			$value = '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-				. '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-				. (($st != 0) ? '<td colspan="' . $st . '"><a href="' . $upm_link . '"><div ' . $upm_title 
-				. '>&nbsp;</div></a></td>' : '');
+			$value = '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. (($st != 0) ? '<td colspan="' . $st . '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>' : '');
 				
 			if($val != 0) {
 				$value .= '<td style="background-color:#9966FF;" colspan="' . $val . '">'
-						. '<a href="' . $upm_link . '"><div ' . $upm_title .'>&nbsp;</div></a></td>'
-						. (((12 - ($val+$st)) != 0) ? '<td colspan="' .(12 - ($val+$st)) . '"><a href="' . $upm_link 
-						. '"><div ' . $upm_title . '>&nbsp;</div></a></td>' : '');
+						. '<div ' . $upm_title .'><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+						. (((12 - ($val+$st)) != 0) ? '<td colspan="' .(12 - ($val+$st)) . '"><div ' . $upm_title . '><a href="' . $upm_link 
+						. '">&nbsp;</a></div></td>' : '');
 			} else {
 				$value .= '<td style="background-color:#9966FF;">'
-						. '<a href="' . $upm_link . '"><div ' . $upm_title .'>&nbsp;</div></a></td>'
-						. (((12 - (1+$st)) != 0) ? '<td colspan="' .(12 - (1+$st)) . '"><a href="' . $upm_link 
-						. '"><div ' . $upm_title . '>&nbsp;</div></a></td>' : '');			
+						. '<div ' . $upm_title .'><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+						. (((12 - (1+$st)) != 0) ? '<td colspan="' .(12 - (1+$st)) . '"><div ' . $upm_title . '><a href="' . $upm_link 
+						. '">&nbsp;</a></div></td>' : '');			
 			}
 			
-			$value .= '<td colspan="3" ' . $attr_two . '><a href="' . $upm_link . '"><div ' . $upm_title 
-					. '>&nbsp;</div></a></td>';
+			$value .= '<td colspan="3" ' . $attr_two . '><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>';
 		
 		} else if($end_year > $third_yr) {
 		
-			$value = '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-				. '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-				. '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-				. '<td style="background-color:#9966FF;" colspan="3" ' . $attr_two . '><a href="' . $upm_link 
-				. '"><div ' . $upm_title . '>&nbsp;</div></a></td>';			
+			$value = '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. '<td style="background-color:#9966FF;" colspan="3" ' . $attr_two . '><div ' . $upm_title . '><a href="' . $upm_link 
+				. '">&nbsp;</a></div></td>';			
 		}
 			
 	} else if($start_year > $third_yr) {
 	
-		$value = '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-			. '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-			. '<td colspan="12"><a href="' . $upm_link . '"><div ' . $upm_title . '>&nbsp;</div></a></td>'
-			. '<td style="background-color:#9966FF;" colspan="3" ' . $attr_two . '><a href="' . $upm_link 
-			. '"><div ' . $upm_title . '>&nbsp;</div></a></td>';	
+		$value = '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+			. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+			. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+			. '<td style="background-color:#9966FF;" colspan="3" ' . $attr_two . '><div ' . $upm_title . '><a href="' . $upm_link 
+			. '">&nbsp;</a></div></td>';	
 	
 	}
 	return $value;	
@@ -2075,11 +2047,10 @@ function getNonAssocUpmRecords($non_assoc_upm_params) {
 	foreach($non_assoc_upm_params as $key => $val)
 		$where .= ' (PREG_RLIKE("' . $val . '",product)) OR ';
 
-
 	//echo "<br/>".
 	$sql = "SELECT `id`, `event_description`, `event_link`, `result_link`, `event_type`, `start_date`, `start_date_type`, `end_date`, `end_date_type`, "
-	. "(SELECT `end_date` FROM `upm_history` WHERE `upm_history`.`id` = `id` ORDER BY `added` ASC LIMIT 0,1) AS end_date_previous_value, "
-	. "(SELECT `start_date` FROM `upm_history` WHERE`upm_history`.`id` = `id` ORDER BY `added` ASC LIMIT 0,1) AS start_date_previous_value "
+	. "(SELECT `end_date` FROM `upm_history` WHERE `upm_history`.`id` = `upm`.`id` ORDER BY `added` ASC LIMIT 0,1) AS end_date_previous_value, "
+	. "(SELECT `start_date` FROM `upm_history` WHERE`upm_history`.`id` = `upm`.`id` ORDER BY `added` ASC LIMIT 0,1) AS start_date_previous_value "
 	. "FROM `upm` WHERE `corresponding_trial` IS NULL AND " . substr($where,0,-4);
 	
 	$res = mysql_query($sql);
