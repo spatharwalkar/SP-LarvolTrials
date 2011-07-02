@@ -143,10 +143,10 @@ function upmPagination($limit,$totalCount)
 			. '</legend>'
 			. '<input type="submit" name="jump" value="Jump" style="width:0;height:0;border:0;padding:0;margin:0;"/> '
 			. '<input name="page" type="hidden" value="' . $page . '" /><input name="search" type="hidden" value="1" />'
-			. ($pstart > 1 ? '<input type="submit" name="back" value="&lt; Back" onclick="javascript:history(-1);return false;" />' : '')
+			. ($pstart > 1 ? '<input type="submit" name="back" value="&lt; Back"/>' : '')
 			. ' <input type="text" name="jumpno" value="' . $visualPage . '" size="6" />'
 			. '<input type="submit" name="jump" value="Jump" /> '
-			. '<input type="submit" name="next" value="Next &gt;" />'
+			. ($visualPage<$maxPage?'<input type="submit" name="next" value="Next &gt;" />':'')
 			. '<input type="hidden" value="'.$oldVal.'" name="oldval">'
 			. '</fieldset>'
 			. '<fieldset class="floatl">'
@@ -242,10 +242,10 @@ if($orderBy)
 		$sortOrder = $sortArr[0];
 		$sortImg = $sortOrder;
 	}
-	elseif($_GET['search'] && $_GET['sort_order']=='DESC')
+/*	elseif($_GET['search'] && $_GET['sort_order']=='DESC')
 	{
 		$sortOrder=$_GET['sort_order'];
-	}	
+	}	*/
 	elseif(current($sortArr)=='no_sort')
 	{
 		$sortOrder = null;
@@ -262,7 +262,6 @@ if($orderBy)
 }
 if($sortOrder ==null && !$noSort)
 {
-'ASC';
 $sortImg = 'ASC';
 }
 else
@@ -309,7 +308,17 @@ while ($row = mysql_fetch_assoc($res))
 			echo '<a href="'.$url.'">';
 			echo ucwords(implode(' ',explode('_',$columnName)));
 			if($url)
-			echo '<img src="images/'.strtolower($sortImg).'.png"/></a>';
+			{
+				if($columnName==$_GET['order_by'])
+				{
+					$imgSort = $sortImg;
+				}
+				else
+				{
+					$imgSort = 'ASC';
+				}
+				echo '</a><a style="border:0" href="'.$url.'"><img style="border:0" src="images/'.strtolower($imgSort).'.png"/></a>';
+			}
 			echo '</th>';
 			$i++;
 		}
@@ -329,7 +338,6 @@ while ($row = mysql_fetch_assoc($res))
 			}else
 			if($columnName == 'event_link' || $columnName == 'result_link')
 			{
-				$upmId = $v;
 				echo '<td nowrap style="max-width:150px;overflow:hidden"><a  href="'.$v.'">';
 				echo $v;
 				echo '</a></td>';			
@@ -359,7 +367,6 @@ while ($row = mysql_fetch_assoc($res))
 			}else
 			if($columnName == 'event_link' || $columnName == 'result_link')
 			{
-				$upmId = $v;
 				echo '<td nowrap style="max-width:150px;overflow:hidden" ><a  href="'.$v.'">';
 				echo $v;
 				echo '</a></td>';				
