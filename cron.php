@@ -1,5 +1,8 @@
 #!/usr/bin/php -q
 <?php
+
+
+
 /*
 * ACTIVITY
 *	Updation of database and generation of reports based on Scheduler settings. Status 
@@ -297,8 +300,22 @@ if($current_tasks_count==0)
 				//If update_status is running and corresponding process ID is not running
 				if(!in_array($update_pids[$i],$running_pids))
 				{
+					switch($update_ids[$i])
+					{
+						case 0:
+						$updtname='nct';
+						break;
+						case 1:
+						$updtname='eudract';
+						break;
+						case 2:
+						$updtname='isrctn';
+						break;
+						default:
+						$updtname='nct';
+					}
 					//Update status set to 'error'
-					echo(($update_ids[$i]==0 ? "nct" : "pubmed").' database updation error. Requeueing it.' . $nl);
+					echo($updtname  .' database updation error. Requeueing it.' . $nl);
 					$query = 'UPDATE update_status SET status="'.ERROR.'",process_id="0" WHERE update_id="' . $update_ids[$i].'"';
 					$res = mysql_query($query) or die('Bad SQL Query setting update error status');
 				}
@@ -391,25 +408,39 @@ if($current_tasks_count==0)
 				$count=0;
 				foreach($fetchers as $s => $lastrun)
 				{
+					switch($s)
+					{
+						case 'nct':
+						$updtid=0;
+						break;
+						case 'eudract':
+						$updtid=1;
+						break;
+						case 'isrctn':
+						$updtid=2;
+						break;
+						default:
+						$updtid=0;
+					}
 					if($update_status[$count]==COMPLETED)
 					{
 						//Remove previous entry corresponding to completed update
-						$query = 'DELETE FROM update_status WHERE update_id="' . ($s=="nct" ? 0 : 1).'"';
+						$query = 'DELETE FROM update_status WHERE update_id="' . $updtid .'"';
 						$res = mysql_query($query) or die('Bad SQL query removing update_status entry. Error: '.mysql_error());
 						if($res==1)
 							echo('Removed previous entry for '.$s.$nl);
 						
 						//Add new entry with status ready
 						echo('Adding entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
-						$query = 'INSERT INTO update_status SET update_id="' . ($s=="nct" ? 0 : 1)	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
-					$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
+						$query = 'INSERT INTO update_status SET update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
+						$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
 					}
 					else if ($update_status[$count]==READY)
 					{
 						//Since entry with 'ready' status already exists, update it retaining the state
 					echo('Refreshing entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
-						$query = 'UPDATE update_status SET updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'" WHERE update_id="' . ($s=="nct" ? 0 : 1).'"';
-					$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
+						$query = 'UPDATE update_status SET updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'" WHERE update_id="' . $updtid .'"';
+						$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
 					}
 					else if ($update_status[$count]==CANCELLED)
 					{
@@ -431,7 +462,7 @@ if($current_tasks_count==0)
 					{
 						//Add new entry with status ready
 						echo('Adding entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
-						$query = 'INSERT INTO update_status SET update_id="' . ($s=="nct" ? 0 : 1)	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
+						$query = 'INSERT INTO update_status SET update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
 						$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
 					}
 					$count++;
@@ -622,8 +653,23 @@ if($current_tasks_count==0)
 					$query = 'UPDATE update_status SET start_time="' . date("Y-m-d H:i:s",strtotime('now')).'",status="'.RUNNING.'", process_id="'.$pid.'" WHERE update_id="' .$run_updates[$i]['update_id'] .'"';
 					$res1 = mysql_query($query) or die('Bad SQL Query setting update status to running');
 					
+					switch($run_updates[$i]['update_id'])
+					{
+						case 0:
+						$updtname='nct';
+						break;
+						case 1:
+						$updtname='eudract';
+						break;
+						case 2:
+						$updtname='isrctn';
+						break;
+						default:
+						$updtname='nct';
+					}
+					
 					//Start the update execution
-					$filename = 'fetch_' . ($run_updates[$i]['update_id']==0 ? "nct" : "pubmed") . '.php';
+					$filename = 'fetch_' . $updtname . '.php';
 					echo('Invoking ' . $filename . '...</pre>' . $nl);
 					$days_to_fetch=$run_updates[$i]['updated_days'];
 					$update_id=$run_updates[$i]['update_id'];
@@ -880,7 +926,21 @@ elseif($current_tasks_count==1)
 				if(!in_array($update_pids[$i],$running_pids))
 				{
 					//Update status set to 'error'
-					echo(($update_ids[$i]==0 ? "nct" : "pubmed").' database updation error. Requeueing it.' . $nl);
+					switch($update_ids[$i])
+					{
+						case 0:
+						$updtname='nct';
+						break;
+						case 1:
+						$updtname='eudract';
+						break;
+						case 2:
+						$updtname='isrctn';
+						break;
+						default:
+						$updtname='nct';
+					}
+					echo($updtname.' database updation error. Requeueing it.' . $nl);
 					$query = 'UPDATE update_status SET status="'.ERROR.'",process_id="0" WHERE update_id="' . $update_ids[$i].'"';
 					$res = mysql_query($query) or die('Bad SQL Query setting update error status');
 				}
@@ -973,25 +1033,40 @@ elseif($current_tasks_count==1)
 				$count=0;
 				foreach($fetchers as $s => $lastrun)
 				{
+					switch($s)
+					{
+						case 'nct':
+						$updtid=0;
+						break;
+						case 'eudract':
+						$updtid=1;
+						break;
+						case 'isrctn':
+						$updtid=2;
+						break;
+						default:
+						$updtid=0;
+						
+					}
 					if($update_status[$count]==COMPLETED)
 					{
 						//Remove previous entry corresponding to completed update
-						$query = 'DELETE FROM update_status WHERE update_id="' . ($s=="nct" ? 0 : 1).'"';
+						$query = 'DELETE FROM update_status WHERE update_id="' . $updtid .'"';
 						$res = mysql_query($query) or die('Bad SQL query removing update_status entry. Error: '.mysql_error());
 						if($res==1)
 							echo('Removed previous entry for '.$s.$nl);
 						
 						//Add new entry with status ready
 						echo('Adding entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
-						$query = 'INSERT INTO update_status SET update_id="' . ($s=="nct" ? 0 : 1)	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
-					$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
+						$query = 'INSERT INTO update_status SET update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
+						$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
 					}
 					else if ($update_status[$count]==READY)
 					{
 						//Since entry with 'ready' status already exists, update it retaining the state
 					echo('Refreshing entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
-						$query = 'UPDATE update_status SET updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'" WHERE update_id="' . ($s=="nct" ? 0 : 1).'"';
-					$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
+						$query = 'UPDATE update_status SET updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'" WHERE update_id="' . $updtid .'"';
+						$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
 					}
 					else if ($update_status[$count]==CANCELLED)
 					{
@@ -1013,7 +1088,7 @@ elseif($current_tasks_count==1)
 					{
 						//Add new entry with status ready
 						echo('Adding entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
-						$query = 'INSERT INTO update_status SET update_id="' . ($s=="nct" ? 0 : 1)	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
+						$query = 'INSERT INTO update_status SET update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
 						$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
 					}
 					$count++;
@@ -1203,9 +1278,22 @@ elseif($current_tasks_count==1)
 					//Set status to 'running' in 'update_status'
 					$query = 'UPDATE update_status SET start_time="' . date("Y-m-d H:i:s",strtotime('now')).'",status="'.RUNNING.'", process_id="'.$pid.'" WHERE update_id="' .$run_updates[$i]['update_id'] .'"';
 					$res1 = mysql_query($query) or die('Bad SQL Query setting update status to running');
-					
+					switch($run_updates[$i]['update_id'])
+					{
+						case 0:
+						$updtname='nct';
+						break;
+						case 1:
+						$updtname='eudract';
+						break;
+						case 2:
+						$updtname='isrctn';
+						break;
+						default:
+						$updtname='nct';
+					}
 					//Start the update execution
-					$filename = 'fetch_' . ($run_updates[$i]['update_id']==0 ? "nct" : "pubmed") . '.php';
+					$filename = 'fetch_' . $updtname . '.php';
 					echo('Invoking ' . $filename . '...</pre>' . $nl);
 					$days_to_fetch=$run_updates[$i]['updated_days'];
 					$update_id=$run_updates[$i]['update_id'];
@@ -1471,8 +1559,22 @@ elseif($current_tasks_count>1)
 							//If update_status is running and corresponding process ID is not running
 							if(!in_array($update_pids[$i],$running_pids))
 							{
+								switch($update_ids[$i])
+								{
+									case 0:
+									$updtname='nct';
+									break;
+									case 1:
+									$updtname='eudract';
+									break;
+									case 2:
+									$updtname='isrctn';
+									break;
+									default:
+									$updtname='nct';
+								}
 								//Update status set to 'error'
-								echo(($update_ids[$i]==0 ? "nct" : "pubmed").' database updation error. Requeueing it.' . $nl);
+								echo($updtname.' database updation error. Requeueing it.' . $nl);
 								$query = 'UPDATE update_status SET status="'.ERROR.'",process_id="0" WHERE update_id="' . $update_ids[$i].'"';
 								$res = mysql_query($query) or die('Bad SQL Query setting update error status');
 							}
@@ -1566,25 +1668,39 @@ elseif($current_tasks_count>1)
 							$count=0;
 							foreach($fetchers as $s => $lastrun)
 							{
+								switch($s)
+								{
+									case 'nct':
+									$updtid=0;
+									break;
+									case 'eudract':
+									$updtid=1;
+									break;
+									case 'isrctn':
+									$updtid=2;
+									break;
+									default:
+									$updtid=0;
+								}
 								if($update_status[$count]==COMPLETED)
 								{
 									//Remove previous entry corresponding to completed update
-									$query = 'DELETE FROM update_status WHERE update_id="' . ($s=="nct" ? 0 : 1).'"';
+									$query = 'DELETE FROM update_status WHERE update_id="' . $updtid .'"';
 									$res = mysql_query($query) or die('Bad SQL query removing update_status entry. Error: '.mysql_error());
 									if($res==1)
 										echo('Removed previous entry for '.$s.$nl);
 									
 									//Add new entry with status ready
 									echo('Adding entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
-									$query = 'INSERT INTO update_status SET update_id="' . ($s=="nct" ? 0 : 1)	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
-								$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
+									$query = 'INSERT INTO update_status SET update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
+									$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
 								}
 								else if ($update_status[$count]==READY)
 								{
 									//Since entry with 'ready' status already exists, update it retaining the state
 								echo('Refreshing entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
-									$query = 'UPDATE update_status SET updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'" WHERE update_id="' . ($s=="nct" ? 0 : 1).'"';
-								$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
+									$query = 'UPDATE update_status SET updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'" WHERE update_id="' . $updtid .'"';
+									$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
 								}
 								else if ($update_status[$count]==CANCELLED)
 								{
@@ -1606,7 +1722,7 @@ elseif($current_tasks_count>1)
 								{
 									//Add new entry with status ready
 									echo('Adding entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
-									$query = 'INSERT INTO update_status SET update_id="' . ($s=="nct" ? 0 : 1)	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
+									$query = 'INSERT INTO update_status SET update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
 									$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
 								}
 								$count++;
@@ -1798,7 +1914,21 @@ elseif($current_tasks_count>1)
 								$res1 = mysql_query($query) or die('Bad SQL Query setting update status to running');
 								
 								//Start the update execution
-								$filename = 'fetch_' . ($run_updates[$i]['update_id']==0 ? "nct" : "pubmed") . '.php';
+								switch($run_updates[$i]['update_id'])
+								{
+									case 0:
+									$updtname='nct';
+									break;
+									case 1:
+									$updtname='eudract';
+									break;
+									case 2:
+									$updtname='isrctn';
+									break;
+									default:
+									$updtname='nct';
+								}
+								$filename = 'fetch_' . $updtname . '.php';
 								echo('Invoking ' . $filename . '...</pre>' . $nl);
 								$days_to_fetch=$run_updates[$i]['updated_days'];
 								$update_id=$run_updates[$i]['update_id'];
@@ -2055,8 +2185,22 @@ elseif($current_tasks_count>1)
 							//If update_status is running and corresponding process ID is not running
 							if(!in_array($update_pids[$i],$running_pids))
 							{
+								switch($update_ids[$i])
+								{
+									case 0:
+									$updtname='nct';
+									break;
+									case 1:
+									$updtname='eudract';
+									break;
+									case 2:
+									$updtname='isrctn';
+									break;
+									default:
+									$updtname='nct';
+								}
 								//Update status set to 'error'
-								echo(($update_ids[$i]==0 ? "nct" : "pubmed").' database updation error. Requeueing it.' . $nl);
+								echo($updtname.' database updation error. Requeueing it.' . $nl);
 								$query = 'UPDATE update_status SET status="'.ERROR.'",process_id="0" WHERE update_id="' . $update_ids[$i].'"';
 								$res = mysql_query($query) or die('Bad SQL Query setting update error status');
 							}
@@ -2150,25 +2294,39 @@ elseif($current_tasks_count>1)
 							$count=0;
 							foreach($fetchers as $s => $lastrun)
 							{
+								switch($s)
+								{
+									case 'nct':
+									$updtid=0;
+									break;
+									case 'eudract':
+									$updtid=1;
+									break;
+									case 'isrctn':
+									$updtid=2;
+									break;
+									default:
+									$updtid=0;
+								}
 								if($update_status[$count]==COMPLETED)
 								{
 									//Remove previous entry corresponding to completed update
-									$query = 'DELETE FROM update_status WHERE update_id="' . ($s=="nct" ? 0 : 1).'"';
+									$query = 'DELETE FROM update_status WHERE update_id="' . $updtid .'"';
 									$res = mysql_query($query) or die('Bad SQL query removing update_status entry. Error: '.mysql_error());
 									if($res==1)
 										echo('Removed previous entry for '.$s.$nl);
 									
 									//Add new entry with status ready
 									echo('Adding entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
-									$query = 'INSERT INTO update_status SET update_id="' . ($s=="nct" ? 0 : 1)	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
-								$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
+									$query = 'INSERT INTO update_status SET update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
+									$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
 								}
 								else if ($update_status[$count]==READY)
 								{
 									//Since entry with 'ready' status already exists, update it retaining the state
 								echo('Refreshing entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
-									$query = 'UPDATE update_status SET updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'" WHERE update_id="' . ($s=="nct" ? 0 : 1).'"';
-								$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
+									$query = 'UPDATE update_status SET updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'" WHERE update_id="' . $updtid .'"';
+									$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
 								}
 								else if ($update_status[$count]==CANCELLED)
 								{
@@ -2190,7 +2348,7 @@ elseif($current_tasks_count>1)
 								{
 									//Add new entry with status ready
 									echo('Adding entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
-									$query = 'INSERT INTO update_status SET update_id="' . ($s=="nct" ? 0 : 1)	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
+									$query = 'INSERT INTO update_status SET update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
 									$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
 								}
 								$count++;
@@ -2381,12 +2539,26 @@ elseif($current_tasks_count>1)
 								$query = 'UPDATE update_status SET start_time="' . date("Y-m-d H:i:s",strtotime('now')).'",status="'.RUNNING.'", process_id="'.$pid.'" WHERE update_id="' .$run_updates[$i]['update_id'] .'"';
 								$res1 = mysql_query($query) or die('Bad SQL Query setting update status to running');
 								
+								switch($run_updates[$i]['update_id'])
+								{
+									case 0:
+									$updtname='nct';
+									break;
+									case 1:
+									$updtname='eudract';
+									break;
+									case 2:
+									$updtname='isrctn';
+									break;
+									default:
+									$updtname='nct';
+								}
 								//Start the update execution
-								$filename = 'fetch_' . ($run_updates[$i]['update_id']==0 ? "nct" : "pubmed") . '.php';
+								$filename = 'fetch_' . $updtname . '.php';
 								echo('Invoking ' . $filename . '...</pre>' . $nl);
 								$days_to_fetch=$run_updates[$i]['updated_days'];
 								$update_id=$run_updates[$i]['update_id'];
-								require_once($filename);
+								echo '<br>'.($filename). '<br>';
 								echo($nl . '<pre>Done with ' . $filename . '.' . $nl);
 								
 								//Set status to 'complete' in 'update_status'
@@ -2640,8 +2812,22 @@ elseif($current_tasks_count>1)
 						//If update_status is running and corresponding process ID is not running
 						if(!in_array($update_pids[$i],$running_pids))
 						{
+							switch($update_ids[$i])
+							{
+								case 0:
+								$updtname='nct';
+								break;
+								case 1:
+								$updtname='eudract';
+								break;
+								case 2:
+								$updtname='isrctn';
+								break;
+								default:
+								$updtname='nct';
+							}
 							//Update status set to 'error'
-							echo(($update_ids[$i]==0 ? "nct" : "pubmed").' database updation error. Requeueing it.' . $nl);
+							echo($updtname.' database updation error. Requeueing it.' . $nl);
 							$query = 'UPDATE update_status SET status="'.ERROR.'",process_id="0" WHERE update_id="' . $update_ids[$i].'"';
 							$res = mysql_query($query) or die('Bad SQL Query setting update error status');
 						}
@@ -2735,24 +2921,38 @@ elseif($current_tasks_count>1)
 						$count=0;
 						foreach($fetchers as $s => $lastrun)
 						{
+							switch($s)
+							{
+								case 'nct':
+								$updtid=0;
+								break;
+								case 'eudract':
+								$updtid=1;
+								break;
+								case 'isrctn':
+								$updtid=2;
+								break;
+								default:
+								$updtid=0;
+							}
 							if($update_status[$count]==COMPLETED)
 							{
 								//Remove previous entry corresponding to completed update
-								$query = 'DELETE FROM update_status WHERE update_id="' . ($s=="nct" ? 0 : 1).'"';
+								$query = 'DELETE FROM update_status WHERE update_id="' . $updtid .'"';
 								$res = mysql_query($query) or die('Bad SQL query removing update_status entry. Error: '.mysql_error());
 								if($res==1)
 									echo('Removed previous entry for '.$s.$nl);
 								
 								//Add new entry with status ready
 								echo('Adding entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
-								$query = 'INSERT INTO update_status SET update_id="' . ($s=="nct" ? 0 : 1)	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
+								$query = 'INSERT INTO update_status SET update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
 							$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
 							}
 							else if ($update_status[$count]==READY)
 							{
 								//Since entry with 'ready' status already exists, update it retaining the state
 							echo('Refreshing entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
-								$query = 'UPDATE update_status SET updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'" WHERE update_id="' . ($s=="nct" ? 0 : 1).'"';
+								$query = 'UPDATE update_status SET updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'" WHERE update_id="' . $updtid.'"';
 							$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
 							}
 							else if ($update_status[$count]==CANCELLED)
@@ -2775,7 +2975,7 @@ elseif($current_tasks_count>1)
 							{
 								//Add new entry with status ready
 								echo('Adding entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
-								$query = 'INSERT INTO update_status SET update_id="' . ($s=="nct" ? 0 : 1)	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
+								$query = 'INSERT INTO update_status SET update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
 								$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
 							}
 							$count++;
@@ -2967,11 +3167,26 @@ elseif($current_tasks_count>1)
 							$res1 = mysql_query($query) or die('Bad SQL Query setting update status to running');
 							
 							//Start the update execution
-							$filename = 'fetch_' . ($run_updates[$i]['update_id']==0 ? "nct" : "pubmed") . '.php';
+							switch($run_updates[$i]['update_id'])
+							{
+								case 0:
+								$updtname='nct';
+								break;
+								case 1:
+								$updtname='eudract';
+								break;
+								case 2:
+								$updtname='isrctn';
+								break;
+								default:
+								$updtname='nct';
+								break;
+							}
+							$filename = 'fetch_' . $updtname . '.php';
 							echo('Invoking ' . $filename . '...</pre>' . $nl);
 							$days_to_fetch=$run_updates[$i]['updated_days'];
 							$update_id=$run_updates[$i]['update_id'];
-							require_once($filename);
+							echo '<br>'.($filename). '<br>';
 							echo($nl . '<pre>Done with ' . $filename . '.' . $nl);
 							
 							//Set status to 'complete' in 'update_status'
@@ -3225,8 +3440,22 @@ elseif($current_tasks_count>1)
 					//If update_status is running and corresponding process ID is not running
 					if(!in_array($update_pids[$i],$running_pids))
 					{
+						switch($update_ids[$i])
+						{
+							case 0:
+							$updtname='nct';
+							break;
+							case 1:
+							$updtname='eudract';
+							break;
+							case 2:
+							$updtname='isrctn';
+							break;
+							default:
+							$updtname='nct';
+						}
 						//Update status set to 'error'
-						echo(($update_ids[$i]==0 ? "nct" : "pubmed").' database updation error. Requeueing it.' . $nl);
+						echo($updtname.' database updation error. Requeueing it.' . $nl);
 						$query = 'UPDATE update_status SET status="'.ERROR.'",process_id="0" WHERE update_id="' . $update_ids[$i].'"';
 						$res = mysql_query($query) or die('Bad SQL Query setting update error status');
 					}
@@ -3320,24 +3549,38 @@ elseif($current_tasks_count>1)
 					$count=0;
 					foreach($fetchers as $s => $lastrun)
 					{
+						switch($s)
+						{
+							case 'nct':
+							$updtid=0;
+							break;
+							case 'eudract':
+							$updtid=1;
+							break;
+							case 'isrctn':
+							$updtid=2;
+							break;
+							default:
+							$updtid=0;
+						}
 						if($update_status[$count]==COMPLETED)
 						{
 							//Remove previous entry corresponding to completed update
-							$query = 'DELETE FROM update_status WHERE update_id="' . ($s=="nct" ? 0 : 1).'"';
+							$query = 'DELETE FROM update_status WHERE update_id="' . $updtid.'"';
 							$res = mysql_query($query) or die('Bad SQL query removing update_status entry. Error: '.mysql_error());
 							if($res==1)
 								echo('Removed previous entry for '.$s.$nl);
 							
 							//Add new entry with status ready
 							echo('Adding entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
-							$query = 'INSERT INTO update_status SET update_id="' . ($s=="nct" ? 0 : 1)	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
+							$query = 'INSERT INTO update_status SET update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
 						$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
 						}
 						else if ($update_status[$count]==READY)
 						{
 							//Since entry with 'ready' status already exists, update it retaining the state
 						echo('Refreshing entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
-							$query = 'UPDATE update_status SET updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'" WHERE update_id="' . ($s=="nct" ? 0 : 1).'"';
+							$query = 'UPDATE update_status SET updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'" WHERE update_id="' . $updtid.'"';
 						$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
 						}
 						else if ($update_status[$count]==CANCELLED)
@@ -3360,7 +3603,7 @@ elseif($current_tasks_count>1)
 						{
 							//Add new entry with status ready
 							echo('Adding entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
-							$query = 'INSERT INTO update_status SET update_id="' . ($s=="nct" ? 0 : 1)	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
+							$query = 'INSERT INTO update_status SET update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
 							$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
 						}
 						$count++;
@@ -3549,13 +3792,26 @@ elseif($current_tasks_count>1)
 						//Set status to 'running' in 'update_status'
 						$query = 'UPDATE update_status SET start_time="' . date("Y-m-d H:i:s",strtotime('now')).'",status="'.RUNNING.'", process_id="'.$pid.'" WHERE update_id="' .$run_updates[$i]['update_id'] .'"';
 						$res1 = mysql_query($query) or die('Bad SQL Query setting update status to running');
-						
+						switch($run_updates[$i]['update_id'])
+						{
+							case 0:
+							$updtname='nct';
+							break;
+							case 1:
+							$updtname='eudract';
+							break;
+							case 2:
+							$updtname='isrctn';
+							break;
+							default:
+							$updtname='nct';
+						}
 						//Start the update execution
-						$filename = 'fetch_' . ($run_updates[$i]['update_id']==0 ? "nct" : "pubmed") . '.php';
+						$filename = 'fetch_' . $updtname . '.php';
 						echo('Invoking ' . $filename . '...</pre>' . $nl);
 						$days_to_fetch=$run_updates[$i]['updated_days'];
 						$update_id=$run_updates[$i]['update_id'];
-						require_once($filename);
+						echo '<br>'.($filename). '<br>';
 						echo($nl . '<pre>Done with ' . $filename . '.' . $nl);
 						
 						//Set status to 'complete' in 'update_status'

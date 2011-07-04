@@ -408,7 +408,7 @@ function addisrctn($rec) {
 
     //Find out the ID of the field for eudract_number, and the ID of the "EudraCT" category.
     static $id_field = NULL;
-    static $eud_cat = NULL;
+    static $isr_cat = NULL;
     if ($id_field === NULL || $nct_cat === NULL) {
         $query = 'SELECT data_fields.id AS "isrctn_id",data_categories.id AS "isr_cat" FROM '
                 . 'data_fields LEFT JOIN data_categories ON data_fields.category=data_categories.id '

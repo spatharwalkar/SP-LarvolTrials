@@ -194,12 +194,40 @@ ob_end_flush();
 
 $record_count = 0;
 
+//Globals
+$days = 0;
+$last_id = 0;
+$id_field = 0;
+
+if(isset($_GET['days']))
+{
+	$days_to_fetch = (int)$_GET['days'];
+}
+if(isset($days_to_fetch))	//$days_to_fetch comes from cron.php normally
+{
+	$days = (int)$days_to_fetch;
+}else{
+	die('Need to set $days_to_fetch or $_GET[' . "'days'" . ']');
+}
+
+$cron_run = isset($update_id); 	// check if being run by cron.php
+if($cron_run)
+{
+	$query = 'UPDATE update_status SET start_time="' . date("Y-m-d H:i:s", strtotime('now')) . '", updated_days='.$days.' WHERE update_id="' . $update_id . '"';
+	$res = mysql_query($query) or die('Unable to update running' . mysql_error());
+}
+
+
 // Get Days To Search
-if (isset($_GET['days'])) {
-    $days = (int) $_GET['days'];
-} else {
-    //die('Need to set $_GET[\'days\']');
-    $days = 30;
+if(isset($_GET['days']))
+{
+	$days_to_fetch = (int)$_GET['days'];
+}
+if(isset($days_to_fetch))	//$days_to_fetch comes from cron.php normally
+{
+	$days = (int)$days_to_fetch;
+}else{
+	die('Need to set $days_to_fetch or $_GET[' . "'days'" . ']');
 }
 
 // Get Dates from Dates passed in
@@ -236,6 +264,7 @@ unset($Html);
 $i = strpos($javax, "\"");
 $j = substr($javax, 0, $i);
 $javax = $j;
+
 echo("<br>retrieved javax=$javax\n");
 
 
@@ -326,15 +355,38 @@ unset($datatable);
 
 // Open each Page:
 $link_count = count($links);
+$links_count=$link_count;
 $i = 0;
+if($cron_run)
+{
+	$query = 'UPDATE update_status SET update_items_total="' . $links_count . '",update_items_start_time="' . date("Y-m-d H:i:s", strtotime('now')) . '" WHERE update_id="' . $update_id . '"';
+	$res = mysql_query($query) or die('Unable to update running' . mysql_error());
+}
+
 
 // !!!!!!! TESTING PURPOSES ONLY !!!!!!!!!/
-//$link_count = 1;
+//$link_count = 35;
 
 while ($i < $link_count) {
     $link = $links[$i];
     gotostudy($link);
     $i = $i + 1;
+	while ($i < $link_count) {
+        $link = $links[$i];
+        gotostudy($link);
+		if($cron_run)
+		{
+		  	$query = 'UPDATE update_status SET updated_time="' ;
+			$query .= date('Y-m-d H:i:s', strtotime('now')) ;
+			$query.= '",update_items_progress="' ;
+			$query.= $i ;
+			$query .= '" WHERE update_id="' ;
+			$query .= $update_id . '"';
+	        $res = mysql_query($query) or die('Unable to update running');
+		}
+		$i = $i + 1;
+    }
+
 }
 
 unset($links);
@@ -345,7 +397,7 @@ echo("<br>**** Page: 1: Results Links: " . $link_count . " **** <br>");
 // If Pages > 1 Then have to get the counts of the other pages so load those pages
 // Have to Click the search pages so JIDs will be populated.
 // !!!!!!! TESTING PURPOSES ONLY !!!!!!!!!/
-//$pages = 1;
+//$pages = 3;
 $pagei = 2;
 
 while ($pagei <= $pages) {
@@ -397,23 +449,45 @@ while ($pagei <= $pages) {
     unset($datatable);
 
     // Open each Page:
-    $link_count = count($links);
+	$link_count = count($links);
+	$links_count=$links_count+$link_count;
     $i = 0;
+	if($cron_run)
+	{
+		$query = 'UPDATE update_status SET update_items_total="' . $links_count . '",update_items_start_time="' . date("Y-m-d H:i:s", strtotime('now')) . '" WHERE update_id="' . $update_id . '"';
+		$res = mysql_query($query) or die('Unable to update running' . mysql_error());
+	}
+
 
     // !!!!!!! TESTING PURPOSES ONLY !!!!!!!!!/
-    //$link_count = 1;
+//    $link_count = 35;
 
     while ($i < $link_count) {
         $link = $links[$i];
         gotostudy($link);
-        $i = $i + 1;
+		if($cron_run)
+		{
+		  	$query = 'UPDATE update_status SET updated_time="' ;
+			$query .= date('Y-m-d H:i:s', strtotime('now')) ;
+			$query.= '",update_items_progress="' ;
+			$query.= $record_count ;
+			$query .= '" WHERE update_id="' ;
+			$query .= $update_id . '"';
+	        $res = mysql_query($query) or die('Unable to update running');
+		}
+		$i = $i + 1;
     }
 
-    unset($links);
+	unset($links);
 
     echo("<br>**** Page: " . $pagei . ": Results Links: " . $link_count . " ****<br>");
     $pagei = $pagei + 1;
 }
+if($cron_run)
+	{
+		$query = 'UPDATE update_status SET status="'.COMPLETED.'", updated_time="' . date("Y-m-d H:i:s", strtotime('now')) . '",update_items_complete_time ="' . date("Y-m-d H:i:s", strtotime('now')) . '",   end_time="' . date("Y-m-d H:i:s", strtotime('now')) . '", update_items_total="' . $record_count . '",update_items_start_time="' . date("Y-m-d H:i:s", strtotime('now')) . '" WHERE update_id="' . $update_id . '"';
+    	$res = mysql_query($query) or die('Unable to update running' . mysql_error());
+	}
 
 echo("<br>Total Processed Count=" . $record_count . "<br>");
 echo("Done");
