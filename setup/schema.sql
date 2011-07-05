@@ -306,6 +306,7 @@ CREATE TABLE IF NOT EXISTS `rpt_ott` (
   `result_set` text COLLATE utf8_unicode_ci NOT NULL,
   `created` datetime NOT NULL,
   `expiry` date DEFAULT NULL,
+  `last_referenced` datetime NOT NULL,
   PRIMARY KEY (`id`),
   KEY `result_set` (`result_set`(300))
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
