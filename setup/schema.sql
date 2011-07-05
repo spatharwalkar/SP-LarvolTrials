@@ -301,6 +301,14 @@ CREATE TABLE IF NOT EXISTS `user_permissions` (
   UNIQUE KEY `prevent_duplicate_permissions` (`name`,`level`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS `rpt_ott` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `result_set` text COLLATE utf8_unicode_ci NOT NULL,
+  `created` datetime NOT NULL,
+  `expiry` date DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `result_set` (`result_set`(300))
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 ALTER TABLE `data_cats_in_study`
   ADD CONSTRAINT `data_cats_in_study_ibfk_1` FOREIGN KEY (`larvol_id`) REFERENCES `clinical_study` (`larvol_id`) ON DELETE CASCADE ON UPDATE CASCADE,
