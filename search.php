@@ -18,6 +18,8 @@ $report = NULL;
 $row = NULL;
 $col = NULL;
 $rmode = false;
+$cat_exists = false;
+$sourceid_exists = false;
 if(isset($_GET['report']))
 {
 	$reportc = htmlspecialchars($_GET['report']);
@@ -238,7 +240,6 @@ echo('<script type="text/javascript" src="checkall.js"></script>');
 	//first  run the search in test mode 
 	search($params,$list,$page,$time_machine,$override_arr,true);
 	$res = search($params,$list,$page,$time_machine,$override_arr);
-	
 	if($res === false)
 		die('<br />Search failed. Tell development how you enountered this error, including the above message, if any. '
 				. 'Go back to continue.');
@@ -286,7 +287,6 @@ echo('<script type="text/javascript" src="checkall.js"></script>');
 			. '<input name="oldsearch" type="hidden" value="' . base64_encode(serialize($_POST)) . '" />'
 			. '<input type="submit" name="back2s" value="Back to search" /></form>');
 	echo('<br clear="all" /><p>Follow the link above any result to see the full record.</p>');
-
 	foreach($res as $id => $study)
 	{
 		$type = 'SrcNotFound';
@@ -300,11 +300,17 @@ echo('<script type="text/javascript" src="checkall.js"></script>');
 			$source_id = padnct($study['NCT/nct_id']);
 			$link = 'http://clinicaltrials.gov/ct2/show/';
 		}
-		if(isset($study['PubMed/PMID']))
+		if(isset($study['EudraCT/eudract_id']))
 		{
-			$type = 'PubMed';
-			$source_id = $study['PubMed/PMID'];
-			$link = 'http://www.ncbi.nlm.nih.gov/pubmed/';
+			$type = 'EudraCT';
+			$source_id = $study['EudraCT/eudract_id'];
+			$link = 'https://www.clinicaltrialsregister.eu/ctr-search/';
+		}
+		if(isset($study['isrctn/isrctn_id']))
+		{
+			$type = 'isrctn';
+			$source_id = $study['isrctn/isrctn_id'];
+			$link = 'http://www.controlled-trials.com/';
 		}
 		for($woo=0;$woo<2;$woo++) unset_nulls($study);
 		echo('<a href="inspect.php?larvol_id=' . $id . '">Study ' . $id
@@ -334,6 +340,7 @@ function multiField($allowedType = 'varchar')
 			. '<select name="multifields[' . $allowedType . '][]" size="4" multiple="multiple" style="max-width:inherit;">'		
 			;//. '<option value=""> </option>';
 	$typeForQuery = '"' . implode('","', explode('+', $allowedType)) . '"';
+		
 	foreach($db->types as $field => $type)
 	{
 		$disp = $field;
@@ -346,7 +353,8 @@ function multiField($allowedType = 'varchar')
 			$res = mysql_fetch_assoc($res);
 			if($res === false) continue;	//Custom field not found.
 			//in special modes, exclude fields not relevant to the mode
-			if($rmode && ($res['cat'] != 'NCT') && in_array($res['cat'], $db->sourceCats)) continue;
+			foreach($db->sources as $sourc=>$nam) { if($res['cat'] == $nam->categoryName) {$cat_exists=true; break;} else $cat_exists=false; }  
+			if($rmode && ($res['cat'] != 'NCT') && $cat_exists) continue;
 			$disp = $res['cat'] . '/' . $res['field'];
 		}
 		else if(strpos($field,'/') === false)
@@ -378,16 +386,18 @@ function CFCSearchControls()
 	$query = 'SELECT id,name FROM data_categories';
 	$res = mysql_query($query) or die('Bad SQL query getting categories');
 	$even = false;
+	
 	while($cat = mysql_fetch_assoc($res))
 	{
 		//in special modes, exclude fields not relevant to the mode
-		if($rmode && in_array($cat['name'], $db->sourceCats) && ($cat['name'] != 'NCT')) continue;
+		foreach($db->sources as $sourc=>$nam) { if($cat['name'] == $nam->categoryName) {$cat_exists=true; break;} else $cat_exists=false; }  
+		if($rmode && $cat_exists && ($cat['name'] != 'NCT')) continue;
 		$out .= openSection($cat['name']);
 		$query = 'SELECT id,name FROM data_fields WHERE category=' . $cat['id'];
 		$res2 = mysql_query($query) or die('Bad SQL query getting fields for category');
 		while($field = mysql_fetch_assoc($res2))
-		{
-			$is_id = in_array($cat['name'] . '/' . $field['name'], $db->sourceIdFields);
+		{	foreach($db->sources as $sourc=>$nam) { if( $cat['name'] . '/' . $field['name'] == $nam->categoryName.'/'.$nam->idFieldName) {$sourceid_exists=true; break;} else $sourceid_exists=false; }  
+			$is_id = $sourceid_exists;
 			$out .= searchControl('_'.$field['id'], str_replace('_',' ',$field['name']), $is_id);
 		}
 		$out .= '</table></fieldset>' . ($even ? '' : '<br clear="all" />');

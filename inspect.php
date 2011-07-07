@@ -93,12 +93,14 @@ function customPost()
 		$delcats = array();
 		foreach($newcats as $newcat) if(is_numeric($newcat) && !in_array($newcat,$oldcats)) $addcats[] = $newcat;
 		foreach($oldcats as $oldcat) if(!in_array($oldcat,$newcats)) $delcats[] = $oldcat;
+		$sourcecat=array();
+		foreach($db->sources as $sourc=>$nam) { $sourcecat[]=$nam->categoryName ; }  
 		if(count($delcats))
 		{
 			$query = 'DELETE data_cats_in_study.* FROM '
 					. 'data_cats_in_study LEFT JOIN data_categories ON data_cats_in_study.category=data_categories.id '
 					. 'WHERE larvol_id=' . $id . ' AND category IN(' . implode(',',$delcats) . ') AND data_categories.name NOT IN("'
-					. implode('","', $db->sourceCats) . '")';
+					. implode('","', $sourcecat) . '")';
 			mysql_query($query) or die('Bad SQL query removing old cats'.$query);
 		}
 		foreach($addcats as $addcat)

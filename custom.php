@@ -15,6 +15,7 @@ $uploadmsg = '';
 $types = getEnumValues('data_fields','type');
 processList();
 $editerrors = processEditor();
+$cat_exists = false;
 echo('<script type="text/javascript" src="delsure.js"></script>');
 ?>
 <div style="float:right;"><p>A note on data types: Carefully consider the data type for each field in order to make them easily searchable. Changing the type for an existing field will clear the associated data. Note that the &quot;values&quot; box in the editor only applies when the field is of type enum.</p>
@@ -39,13 +40,15 @@ echo('</body></html>');
 function processList()
 {
 	global $db;
+	$sourcecat=array();
+	foreach($db->sources as $sourc=>$nam) { $sourcecat[]=$nam->categoryName ; }  
 	if(isset($_POST['cat_del']) && !is_array($_POST['cat_del'])) return;
 	if(isset($_POST['cat_del']))
 	{
 		foreach($_POST['cat_del'] as $id => $n)
 		{
 			$query = 'DELETE FROM data_categories WHERE id=' . mysql_real_escape_string($id)
-					. ' AND name NOT IN("' . implode('","', $db->sourceCats) . '") LIMIT 1';
+					. ' AND name NOT IN("' . implode('","', $sourcecat) . '") LIMIT 1';
 			mysql_query($query) or die('Bad SQL query deleting category'.$query);
 		}
 	}
@@ -62,17 +65,18 @@ function catList()
 	$query = 'SELECT id,name FROM data_categories';
 	$res = mysql_query($query) or die('Bad SQL query getting custom categories');
 	$row = mysql_fetch_assoc($res);
+	foreach($db->sources as $sourc=>$nam) { if($row['name'] == $nam->categoryName) {$cat_exists=true; break;} else $cat_exists=false; }  
 	if($row === false)
 	{
 		$out .= '(None exist)';
 	}else{
 		$out .= '<ul>';
 		do{
-			if($db->user->userlevel != 'root' && in_array($row['name'], $db->sourceCats)) continue;
+			if($db->user->userlevel != 'root' && $cat_exists) continue;
 			$out .= '<li><a href="custom.php?edit=' . $row['id'] . '">'
 					. (strlen($row['name']) ? $row['name'] : ('(category ' . $row['id'] . ')'))
 					. ' <img src="images/edit.png" alt="edit" border="0"/> </a> &nbsp; '
-					. ( in_array($row['name'],$db->sourceCats) ? '' :
+					. ( $cat_exists ? '' :
 							('<input type="image" src="images/not.png" name="cat_del[' . $row['id'] . ']" alt="Delete"/>'))
 					. '</li>';
 		}while($row = mysql_fetch_assoc($res));
@@ -100,7 +104,8 @@ function processEditor()
 		$res = mysql_query($query) or die('Bad SQL query checking for existence of indicated record');
 		$row = mysql_fetch_assoc($res);
 		if($row === false) $id=-1;
-		if($db->user->userlevel != 'root' && in_array($row['name'], $db->sourceCats)) return;
+		foreach($db->sources as $sourc=>$nam) { if($row['name'] == $nam->categoryName) {$cat_exists=true; break;} else $cat_exists=false; }  
+		if($db->user->userlevel != 'root' && $cat_exists) return;
 		if($id == -1)	//new category
 		{
 			$query = 'INSERT INTO data_categories SET name="' . mysql_real_escape_string($_POST['name']) . '"';
