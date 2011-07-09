@@ -80,15 +80,47 @@
             mysql_select_db($this->database, $this->dbp);
 
         	$fields = array();
+        	$result_index = mysql_query("SHOW INDEX FROM {$table}",$this->dbp);
+        	$indexArr = array();
+        	while($row = mysql_fetch_assoc($result_index))
+        	{
+        		$indexArr[] = $row;
+        	}
+        	
         	$result = mysql_query("SHOW COLUMNS FROM {$table}", $this->dbp);
             while ($row = mysql_fetch_row($result)) {
+	            $KeyName = null;
+	            $Non_unique = null;
+	            $Seq_in_index = null;
+	            $Cardinality = null;
+	            $Sub_part = null;
+	            $indexFlag = false;
+				foreach($indexArr as $index)
+				{
+					if($row[0]==$index['Column_name'])
+					{
+						$KeyName = $index['Key_name'];
+						$Non_unique = $index['Non_unique'];
+						$Seq_in_index = $index['Seq_in_index'];
+						$Sub_part = $index['Sub_part'];
+						$Cardinality = $index['Cardinality'];
+						
+						$indexFlag=true;
+					}
+				}
 				$fields[] = array(
                 	'name'	  => $row[0],
                     'type'    => $row[1],
                     'null'    => $row[2],
                     'key'     => $row[3],
                     'default' => $row[4],
-                    'extra'   => $row[5]
+                    'extra'   => $row[5],
+					'Non_unique' => $Non_unique,
+					'Seq_in_index' => $Seq_in_index,
+					'Cardinality' => $Cardinality,
+					'Sub_part' => $Sub_part,
+					'indexFlag' => $indexFlag,
+					'key_primary' => $KeyName
                 );
             }
 
@@ -109,16 +141,28 @@
             mysql_select_db($this->database, $this->dbp);
 
         	$primary_keys = array();
+        	$index_keys = array();
+        	$unique_keys = array();
             $sql_f = array();
-
             for ($i = 0; $i < count($fields); $i++) {
-            	if ($fields[$i]['key'] == 'PRI') {
+            	if ($fields[$i]['key_primary'] == 'PRIMARY') {
                 	$primary_keys[] = $fields[$i]['name'];
                 }
-                $sql_f[] = "`{$fields[$i]['name']}` {$fields[$i]['type']} " . ($fields[$i]['null'] ? '' : 'NOT') . ' NULL' . (strlen($fields[$i]['default']) > 0 ? " default '{$fields[$i]['default']}'" : '') . ($fields[$i]['extra'] == 'auto_increment' ? ' auto_increment' : '');
+                if($fields[$i]['indexFlag']===true)
+                {
+                	if($fields[$i]['Non_unique']==1)
+                	{
+                		$index_keys[] = $fields[$i]['name'];
+                	}
+                	if($fields[$i]['Non_unique']==0)
+                	{
+                		$unique_keys[] = $fields[$i]['name'];
+                	}
+                }
+                $sql_f[] = "`{$fields[$i]['name']}` {$fields[$i]['type']} " . ($fields[$i]['null'] =='YES'?'' : 'NOT') . ' NULL' . (strlen($fields[$i]['default']) > 0 ? " default '{$fields[$i]['default']}'" : '') . ($fields[$i]['extra'] == 'auto_increment' ? ' auto_increment' : '');
             }
 
-            $sql = "CREATE TABLE `{$name}` (" . implode(', ', $sql_f) . (count($primary_keys) > 0 ? ", PRIMARY KEY (`" . implode('`, `', $primary_keys) . "`)" : '') . ')';
+            $sql = "CREATE TABLE `{$name}` (" . implode(', ', $sql_f) . (count($primary_keys) > 0 ? ", PRIMARY KEY (`" . implode('`, `', $primary_keys) . "`)" : '') . (count($index_keys) > 0 ? ", INDEX (`" . implode('`, `', $index_keys) . "`)" : '') . (count($unique_keys) > 0 ? ", UNIQUE (`" . implode('`, `', $unique_keys) . "`)" : '') . ')';
 			echo($sql.';<br />');
             return true;
         }
@@ -171,9 +215,15 @@
          * @return 	boolean	Success
          **/
         function ChangeTableField($table, $field, $new_field,$old_field=array()) {
+        	//special case detected for mul keys
+        	$special_mul_key = null;
+        	if($new_field['key']=='MUL' && $old_field['key']=='' && $new_field['Sub_part']!=$old_field['Sub_part'])
+        	{
+        		$special_mul_key = ', ADD KEY `'.$field.'` (`'.$field.'`('.$new_field['Sub_part'].'))';
+        	}
         	if($old_field['key']=='PRI' && $new_field['key']=='PRI')
         	$no_primary_def_needed = 1;
-			$sql = "ALTER TABLE `{$table}` CHANGE `{$field}` `{$new_field['name']}` {$new_field['type']} " . ($new_field['null']=='YES' ? '' : 'NOT') . ' NULL' . (strlen($new_field['default']) > 0 ? " default '{$new_field['default']}'" : '') . ($new_field['extra'] == 'auto_increment' ? ' auto_increment' : '') . ($new_field['key'] == 'PRI' && $no_primary_def_needed!=1  ? ", ADD PRIMARY KEY (`{$new_field['name']}`)" : '');
+			$sql = "ALTER TABLE `{$table}` CHANGE `{$field}` `{$new_field['name']}` {$new_field['type']} " . ($new_field['null']=='YES' ? '' : 'NOT') . ' NULL' . (strlen($new_field['default']) > 0 ? " default '{$new_field['default']}'" : '') . ($new_field['extra'] == 'auto_increment' ? ' auto_increment' : '') . ($new_field['key'] == 'PRI' && $no_primary_def_needed!=1  ? ", ADD PRIMARY KEY (`{$new_field['name']}`)" : '') . ($special_mul_key?$special_mul_key:'');
 			echo($sql.';<br />');
             return true;
         }
