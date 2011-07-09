@@ -1519,9 +1519,9 @@ $date_updated)
 				
 		} else if($end_year > $third_yr){
 		
-			$value = '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
-				. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
-				. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+			$value = '<td colspan="12" style="background-color:#9966FF;' . $attr . '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. '<td colspan="12" style="background-color:#9966FF;' . $attr . '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. '<td colspan="12" style="background-color:#9966FF;' . $attr . '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
 				. '<td colspan="3" style="background-color:#9966FF;' . $attr . '" ' . $attr_two . '><div ' . $upm_title . '><a href="' . $upm_link 
 				. '">&nbsp;</a></div></td>';		
 		}
@@ -1564,9 +1564,9 @@ $date_updated)
 				
 		} else if($start_year > $third_yr){
 		
-			$value = '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
-			. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
-			. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+			$value = '<td colspan="12" style="background-color:#9966FF;' . $attr . '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+			. '<td colspan="12" style="background-color:#9966FF;' . $attr . '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+			. '<td colspan="12" style="background-color:#9966FF;' . $attr . '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
 			. '<td colspan="3" style="background-color:#9966FF;' . $attr . '" ' . $attr_two . '><div ' 
 			. $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>';		
 		}
@@ -1641,9 +1641,9 @@ $date_updated)
 		 
 		} else if($end_year > $third_yr) {
 		
-			$value = '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
-			. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
-			. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+			$value = '<td colspan="12" style="background-color:#9966FF;' . $attr . '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+			. '<td colspan="12" style="background-color:#9966FF;' . $attr . '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+			. '<td colspan="12" style="background-color:#9966FF;' . $attr . '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
 			. '<td style="background-color:#9966FF;' . $attr . '" colspan="3" ' . $attr_two . '><div ' 
 			. $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>';
 		}	
@@ -1712,9 +1712,9 @@ $date_updated)
 	
 		} else if($end_year > $third_yr){
 		
-			$value = '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
-					. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
-					. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+			$value = '<td colspan="12" style="background-color:#9966FF;' . $attr . '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+					. '<td colspan="12" style="background-color:#9966FF;' . $attr . '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+					. '<td colspan="12" style="background-color:#9966FF;' . $attr . '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
 					. '<td style="background-color:#9966FF;' . $attr . '" colspan="3" ' . $attr_two . '><div '
 					. $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>';
 		}
@@ -1763,9 +1763,9 @@ $date_updated)
 
 		} else if($end_year > $third_yr) {
 		
-			$value = '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
-					. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
-					. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+			$value = '<td colspan="12" style="background-color:#9966FF;' . $attr . '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+					. '<td colspan="12" style="background-color:#9966FF;' . $attr . '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+					. '<td colspan="12" style="background-color:#9966FF;' . $attr . '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
 					. '<td style="background-color:#9966FF;' . $attr . '" colspan="3"><div ' 
 					. $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>';
 		}
@@ -1796,18 +1796,18 @@ $date_updated)
 		
 		} else if($end_year > $third_yr) {
 		
-			$value = '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
-				. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
-				. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+			$value = '<td colspan="12" style="background-color:#9966FF;' . $attr . '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. '<td colspan="12" style="background-color:#9966FF;' . $attr . '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+				. '<td colspan="12" style="background-color:#9966FF;' . $attr . '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
 				. '<td style="background-color:#9966FF;' . $attr . '" colspan="3" ' . $attr_two . '><div ' 
 				. $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>';			
 		}
 			
 	} else if($start_year > $third_yr) {
 	
-		$value = '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
-			. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
-			. '<td colspan="12"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+		$value = '<td colspan="12" style="background-color:#9966FF;' . $attr . '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+			. '<td colspan="12" style="background-color:#9966FF;' . $attr . '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
+			. '<td colspan="12" style="background-color:#9966FF;' . $attr . '"><div ' . $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>'
 			. '<td style="background-color:#9966FF;' . $attr . '" colspan="3" ' . $attr_two . '><div ' 
 			. $upm_title . '><a href="' . $upm_link . '">&nbsp;</a></div></td>';	
 	}
@@ -1865,7 +1865,9 @@ function getCompletionChart($start_month, $start_year, $end_month, $end_year, $c
 				
 		} else if($end_year > $third_yr){
 		
-			$value = '<td colspan="12">&nbsp;</td><td colspan="12">&nbsp;</td><td colspan="12">&nbsp;</td>'
+			$value = '<td colspan="12" style="background-color:' . $bg_color . ';">&nbsp;</td>'
+			. '<td colspan="12" style="background-color:' . $bg_color . ';">&nbsp;</td>'
+			. '<td colspan="12" style="background-color:' . $bg_color . ';">&nbsp;</td>'
 			. '<td colspan="3" style="background-color:' . $bg_color . ';" ' . $attr_two . '>&nbsp;</td>';		
 		}
 	} else if($end_date == '' || $end_date == NULL) {
@@ -1902,7 +1904,9 @@ function getCompletionChart($start_month, $start_year, $end_month, $end_year, $c
 				
 		} else if($start_year > $third_yr){
 		
-			$value = '<td colspan="12">&nbsp;</td><td colspan="12">&nbsp;</td><td colspan="12">&nbsp;</td>'
+			$value = '<td colspan="12" style="background-color:' . $bg_color . ';">&nbsp;</td>'
+			. '<td colspan="12" style="background-color:' . $bg_color . ';">&nbsp;</td>'
+			. '<td colspan="12" style="background-color:' . $bg_color . ';">&nbsp;</td>'
 			. '<td colspan="3" style="background-color:' . $bg_color . ';" ' . $attr_two . '>&nbsp;</td>';		
 		}
 			
@@ -1948,7 +1952,9 @@ function getCompletionChart($start_month, $start_year, $end_month, $end_year, $c
 			}
 		 
 		} else if($end_year > $third_yr) { 
-			$value = '<td colspan="12">&nbsp;</td><td colspan="12">&nbsp;</td><td colspan="12">&nbsp;</td>'
+			$value = '<td colspan="12" style="background-color:' . $bg_color . ';">&nbsp;</td>'
+			. '<td colspan="12" style="background-color:' . $bg_color . ';">&nbsp;</td>'
+			. '<td colspan="12" style="background-color:' . $bg_color . ';">&nbsp;</td>'
 			. '<td colspan="3" style="background-color:' . $bg_color . ';" ' . $attr_two . '>&nbsp;</td>';
 		}	
 	
@@ -1997,7 +2003,9 @@ function getCompletionChart($start_month, $start_year, $end_month, $end_year, $c
 	
 		} else if($end_year > $third_yr){
 		
-			$value = '<td colspan="12">&nbsp;</td><td colspan="12">&nbsp;</td><td colspan="12">&nbsp;</td>'
+			$value = '<td colspan="12" style="background-color:' . $bg_color . ';">&nbsp;</td>'
+			. '<td colspan="12" style="background-color:' . $bg_color . ';">&nbsp;</td>'
+			. '<td colspan="12" style="background-color:' . $bg_color . ';">&nbsp;</td>'
 			. '<td colspan="3" style="background-color:' . $bg_color . ';" ' . $attr_two . '>&nbsp;</td>';
 		}
 		
@@ -2032,7 +2040,9 @@ function getCompletionChart($start_month, $start_year, $end_month, $end_year, $c
 
 		} else if($end_year > $third_yr) {
 		
-			$value = '<td colspan="12">&nbsp;</td><td colspan="12">&nbsp;</td><td colspan="12">&nbsp;</td>'
+			$value = '<td colspan="12" style="background-color:' . $bg_color . ';">&nbsp;</td>'
+			. '<td colspan="12" style="background-color:' . $bg_color . ';">&nbsp;</td>'
+			. '<td colspan="12" style="background-color:' . $bg_color . ';">&nbsp;</td>'
 			. '<td colspan="3" style="background-color:' . $bg_color . ';" ' . $attr_two . '>&nbsp;</td>';
 		}
 		
@@ -2063,7 +2073,9 @@ function getCompletionChart($start_month, $start_year, $end_month, $end_year, $c
 			
 	} else if($start_year > $third_yr) {
 	
-		$value = '<td colspan="12">&nbsp;</td><td colspan="12">&nbsp;</td><td colspan="12">&nbsp;</td>'
+		$value = '<td colspan="12" style="background-color:' . $bg_color . ';">&nbsp;</td>'
+		. '<td colspan="12" style="background-color:' . $bg_color . ';">&nbsp;</td>'
+		. '<td colspan="12" style="background-color:' . $bg_color . ';">&nbsp;</td>'
 		. '<td colspan="3" style="background-color:' . $bg_color . ';" ' . $attr_two . '>&nbsp;</td>';
 	} 
 	return $value;
