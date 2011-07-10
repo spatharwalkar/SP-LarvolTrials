@@ -569,25 +569,44 @@ class PHPMailer {
     $to = implode(', ', $toArr);
 
     $params = sprintf("-oi -f %s", $this->Sender);
-    if ($this->Sender != '' && strlen(ini_get('safe_mode'))< 1) {
-      $old_from = ini_get('sendmail_from');
-      ini_set('sendmail_from', $this->Sender);
-      if ($this->SingleTo === true && count($toArr) > 1) {
-        foreach ($toArr as $key => $val) {
-          $rt = @mail($val, $this->EncodeHeader($this->SecureHeader($this->Subject)), $body, $header, $params);
-        }
-      } else {
-        $rt = @mail($to, $this->EncodeHeader($this->SecureHeader($this->Subject)), $body, $header, $params);
-      }
-    } else {
-      if ($this->SingleTo === true && count($toArr) > 1) {
-        foreach ($toArr as $key => $val) {
-          $rt = @mail($val, $this->EncodeHeader($this->SecureHeader($this->Subject)), $body, $header, $params);
-        }
-      } else {
-        $rt = @mail($to, $this->EncodeHeader($this->SecureHeader($this->Subject)), $body, $header);
-      }
-    }
+	
+	//check if email is disabled
+	if(MAIL_ENABLED)
+	{		
+		if ($this->Sender != '' && strlen(ini_get('safe_mode'))< 1) {
+		  $old_from = ini_get('sendmail_from');
+		  ini_set('sendmail_from', $this->Sender);
+		  if ($this->SingleTo === true && count($toArr) > 1) {
+			foreach ($toArr as $key => $val) {
+			  $rt = @mail($val, $this->EncodeHeader($this->SecureHeader($this->Subject)), $body, $header, $params);
+			}
+		  } else {
+			$rt = @mail($to, $this->EncodeHeader($this->SecureHeader($this->Subject)), $body, $header, $params);
+		  }
+		} else {
+		  if ($this->SingleTo === true && count($toArr) > 1) {
+			foreach ($toArr as $key => $val) {
+			  $rt = @mail($val, $this->EncodeHeader($this->SecureHeader($this->Subject)), $body, $header, $params);
+			}
+		  } else {
+			$rt = @mail($to, $this->EncodeHeader($this->SecureHeader($this->Subject)), $body, $header);
+		  }
+		}
+	}
+	else
+	{
+		//write email contents to a file if mail is disabled
+		$File = "email_text.txt";
+		$Handle = fopen($File, 'a');
+		$MyText = "\r\n"."------------------------------------------------------------"."\r\n";
+		$MyText .= 'To:'.$to ."\r\n";
+		$MyText .= 'Subject:'.$this->EncodeHeader($this->SecureHeader($this->Subject)). "\r\n";
+		$MyText .= 'Body:'.$body ."\r\n";
+		$MyText .= 'To:'.$header ."\r\n";
+		fwrite($Handle, $MyText);
+		fclose($Handle);
+	}
+	
     if (isset($old_from)) {
       ini_set('sendmail_from', $old_from);
     }
@@ -1069,6 +1088,13 @@ class PHPMailer {
   public function CreateBody() {
     $body = '';
 
+	if (!MAIL_ENABLED)
+	{
+	$body .= $this->EncodeString($this->Body, $this->Encoding);
+	return $body;	
+	}
+	
+	
     if ($this->sign_key_file) {
       $body .= $this->GetMailMIME();
     }
