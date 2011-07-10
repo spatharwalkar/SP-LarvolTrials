@@ -9,6 +9,9 @@ define('DB_PASS', 'password1234');
 //Name of secondary database for temporary usage
 define('DB_TEMP', 'LT_temp');
 
+//Enable or disable mail. If disabled, mail contents will be written to a text file.
+define('MAIL_ENABLED', true);
+
 /* YOURLS options.
 	You must change these to reflect how you set up YOURLS
 */
