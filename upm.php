@@ -250,23 +250,26 @@ if($orderBy)
 	{
 		$sortOrder = null;
 		$noSort = '&no_sort=1';
-		$sortImg = $sortOrder;
+		$sortImg = 'ASC';
 	}
 	else
 	{
 		$sortOrder = current($sortArr);
-		$sortImg = $sortOrder;
 	}
 
 
 }
-if($sortOrder ==null && !$noSort)
+if($_GET['no_sort']==1)
 {
-$sortImg = 'ASC';
+	$sortImg = '';
 }
-else
+if($_GET['sort_order']=='ASC' )
 {
-$sortOrder;
+	$sortImg = 'ASC';
+}
+if($_GET['sort_order']=='DESC' )
+{
+	$sortImg = 'DESC';
 }
 
 if($_GET['no_sort']!=1)
