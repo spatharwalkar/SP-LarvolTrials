@@ -79,6 +79,13 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 	if(!is_numeric($id)) tex('non-numeric id!');
 	$nodata = array('action'=>array(), 'searchval'=>array(), 'negate'=>array(), 'multifields'=>array(), 'multivalue'=>array());
 
+	//link generation variable
+	$link_generation_method = 'db';
+	if($link_generation_method == 'db')
+		$boundary = 5000;
+	else
+		$boundary = 500;
+				
 	//get report name
 	$query = 'SELECT name,footnotes,description,searchdata,bomb,backbone_agent,count_only_active,id  FROM rpt_heatmap WHERE id=' 
 	. $id . ' LIMIT 1';
@@ -112,6 +119,7 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 	if(strlen($name) == 0) $name = 'Report ' . $id;
 
 	$intervention_name_field_id = '_' . getFieldId('NCT', 'intervention_name');
+	
 	//Get headers
 	$rows = array();
 	$columns = array();
@@ -174,7 +182,7 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 	{
 		if(!isset($searchdata[$cell['row']])) $searchdata[$cell['row']] = array();
 		$unpack = unserialize(base64_decode($cell['searchdata']));
-		$searchdata[$cell['row']][$cell['column']] = removeNullSearchdata($unpack);	
+		$searchdata[$cell['row']][$cell['column']] = removeNullSearchdata($unpack);
 	} 
 	
 	$maxrow = max(array_keys($rowsearch));
@@ -212,14 +220,15 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 	-
 	-
 	*/
+	
 	$results = array();
 	$row_upms = array();$col_upms = array();
 	foreach($searchdata as $row => $rowData)
 	{ 
 		foreach($rowData as $column => $cell)
 		{ 
-			$time_machine = array();//unsetting the array for every cell.
 			
+			$time_machine = array();//unsetting the array for every cell.
 			//get searchdata
 			$globalparams = array('action' => $oversearch['action'], 'searchval' => $oversearch['searchval'], 
 									'negate' => $oversearch['negate'], 'multifields' => $oversearch['multifields'], 
@@ -279,7 +288,7 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 					}
 				}
 			}
-
+			
 			if(empty($params))	continue;
 			if(array_filter_recursive($params,'nonempty') == array_filter_recursive($globalparams,'nonempty')) continue;
 			foreach($params as $key => $sp)	//remove sorts
@@ -311,6 +320,9 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 			
 			$all_ids = array_keys($all_ids);
 			
+			//ids are sorted in ascending order.
+			sort($all_ids); 
+			
 			if ($backboneAgent) { 
 				$agent = getBackboneAgent($params);
 				if ($agent != null)
@@ -323,13 +335,12 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 					$rescount = getActiveCount($all_ids, $time_machine);
 					
 			} else {
-				
 				$rescount = count($all_ids); 
 			}
 			
 			$results[$row][$column]->num = $rescount;
 			
-			if ($bomb) {
+			if($bomb) {
 				 $results[$row][$column]->bomb = getBomb($all_ids);
 			} else {
 				$results[$row][$column]->bomb = "";
@@ -374,49 +385,41 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 			-
 			*/
 			
+			//Added for displaying unmatched upms in intermediary page
 			$cell_upm = array();
 			$global_multi_upm_params = array();$col_multi_upm_params = array();$row_multi_upm_params = array();$cell_multi_upm_params = array();
 			$global_searchval_upm_params = array();$col_searchval_upm_params = array();$row_searchval_upm_params = array();$cell_searchval_upm_params = array();
 			
 			if(isset($oversearch['multifields']['varchar+text']) && 
 			in_array($intervention_name_field_id,$oversearch['multifields']['varchar+text'])) {
-				
 				$global_multi_upm_params = array($oversearch['multivalue']['varchar+text']);
 			}
 			if(isset($columnsearch[$column]['multifields']['varchar+text']) && 
 			in_array($intervention_name_field_id,$columnsearch[$column]['multifields']['varchar+text'])) {
-				
 				$col_multi_upm_params = array($columnsearch[$column]['multivalue']['varchar+text']);
 			}
 			if(isset($rowsearch[$row]['multifields']['varchar+text']) && 
 			in_array($intervention_name_field_id,$rowsearch[$row]['multifields']['varchar+text'])) {
-				
 				$row_multi_upm_params = array($rowsearch[$row]['multivalue']['varchar+text']);
 			}
 			if(isset($cell['multifields']['varchar+text']) && 
 			in_array($intervention_name_field_id,$cell['multifields']['varchar+text'])) {
-				
 				$cell_multi_upm_params = array($cell['multivalue']['varchar+text']);
 			}
 
-
 			if(isset($oversearch['searchval']) && array_key_exists($intervention_name_field_id,$oversearch['searchval'])) {
-				
 				$global_searchval_upm_params = array($oversearch['searchval'][$intervention_name_field_id]);
 			}
 			if(isset($columnsearch[$column]['searchval']) && array_key_exists($intervention_name_field_id,$columnsearch[$column]['searchval'])) {
-				
 				$col_searchval_upm_params = array($columnsearch[$column]['searchval'][$intervention_name_field_id]);
 			}
 			if(isset($rowsearch[$row]['searchval']) && array_key_exists($intervention_name_field_id,$rowsearch[$row]['searchval'])) {
-				
 				$row_searchval_upm_params = array($rowsearch[$row]['searchval'][$intervention_name_field_id]);
 			}			
 			if(isset($cell['searchval']) && array_key_exists($intervention_name_field_id,$cell['searchval'])) {
-				
 				$cell_searchval_upm_params = array($cell['searchval'][$intervention_name_field_id]);
 			}
-
+			
 			$cell_upm[] = array_unique(array_merge($global_multi_upm_params, $col_multi_upm_params, $row_multi_upm_params, $cell_multi_upm_params,
 			$global_searchval_upm_params, $col_searchval_upm_params, $row_searchval_upm_params, $cell_searchval_upm_params));
 			foreach($cell_upm as $key => $val) {
@@ -426,62 +429,142 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 			$row_upms[$row][$column]	= array_unique(array_merge($global_multi_upm_params, $col_multi_upm_params, $row_multi_upm_params, $cell_multi_upm_params,
 			$global_searchval_upm_params, $col_searchval_upm_params, $row_searchval_upm_params, $cell_searchval_upm_params));
 			
-
 			$col_upms[$row][$column]	= array_unique(array_merge($global_multi_upm_params, $col_multi_upm_params, $row_multi_upm_params, $cell_multi_upm_params,
 			$global_searchval_upm_params, $col_searchval_upm_params, $row_searchval_upm_params, $cell_searchval_upm_params));
 			
+			if($link_generation_method == 'db') {
+			
+				//row labels
+				//checking whether the row header id already exists and if not inserting a new record into the rpt_ott_header table
+				$query = "SELECT `id` FROM `rpt_ott_header` WHERE `header` = '" . $rows[$row] . "' ";
+				$res = mysql_query($query) or die('Bad SQL query getting id for the header result_set');
+				if(mysql_num_rows($res) > 0) {
+					$res = mysql_fetch_assoc($res);
+					$row_id = $res['id'];
+				} else {
+					$query = "INSERT INTO `rpt_ott_header`(`header`, `created`, `last_referenced`) VALUES('" . $rows[$row] . "', NOW(), NOW()) ";
+					mysql_query($query) or die('Bad SQL Query saving result_set');
+					$row_id = mysql_insert_id();
+				}
+				
+				//column labels
+				//checking whether the column header id already exists and if not inserting a new record into the rpt_ott_header table
+				$query = "SELECT `id` FROM `rpt_ott_header` WHERE `header` = '" . $columns[$column] . "' ";
+				$res = mysql_query($query) or die('Bad SQL query getting id for the header result_set');
+				if(mysql_num_rows($res) > 0) {
+					$res = mysql_fetch_assoc($res);
+					$column_id = $res['id'];
+				} else {
+					$query = "INSERT INTO `rpt_ott_header`(`header`, `created`, `last_referenced`) VALUES('" . $columns[$column] . "', NOW(), NOW()) ";
+					mysql_query($query) or die('Bad SQL Query saving result_set');
+					$column_id = mysql_insert_id();
+				}
+								
+				$upm_id = '';
+				if(!empty($cell_upm)) {
+					natsort($cell_upm);
+					//upm values
+					$upm_result_set = implode(",",$cell_upm);
+					//checking whether the upm id already exists and if not inserting a new record into the rpt_ott_upm table
+					$query = "SELECT `id` FROM `rpt_ott_upm` WHERE `intervention_name` = '" . $upm_result_set . "' ";
+					$res = mysql_query($query) or die('Bad SQL query getting id for the upm result_set');
+					if(mysql_num_rows($res) > 0) {
+						$res = mysql_fetch_assoc($res);
+						$upm_id = $res['id'];
+					} else {
+						$query = "INSERT INTO `rpt_ott_upm`(`intervention_name`, `created`, `last_referenced`) VALUES('" . $upm_result_set . "', NOW(), NOW()) ";
+						mysql_query($query) or die('Bad SQL Query saving result_set');
+						$upm_id = mysql_insert_id();
+					}
+				}	
+			}
+			
 			//fill in hyperlink
-			if($rescount < 500)
+			if($rescount < $boundary)
 			{ 	
-				//pass all IDs
-				$packedIDs = '';
-				
-				if($countactive) { //for count active no need to check count more than 0 in order to link even if count is zero
-				
-					if(is_array($all_ids) && !empty($all_ids)) {
-					
+				if($link_generation_method == 'db') {
+					//all ids
+					$id_result_set = implode(",",$all_ids);
+					//checking whether the trials id already exists and if not inserting a new record into the rpt_ott_trials table
+					$query = "SELECT `id` FROM `rpt_ott_trials` WHERE `result_set` = '" . $id_result_set . "' ";
+					$res = mysql_query($query) or die('Bad SQL query getting id for the trials result_set');
+					if(mysql_num_rows($res) > 0) {
+						$res = mysql_fetch_assoc($res);
+						$trials_id = $res['id'];
+					} else {
+						$query = "INSERT INTO `rpt_ott_trials`(`result_set`, `created`, `last_referenced`) VALUES('" . $id_result_set . "', NOW(), NOW()) ";
+						mysql_query($query) or die('Bad SQL Query saving result_set');
+						$trials_id = mysql_insert_id();
+					}
+					$results[$row][$column]->{'link'} = 'results=' . $row_id . '.' . $column_id . '.' . $trials_id;
+					if($upm_id != '')
+						$results[$row][$column]->{'link'} .= '.' . $upm_id;
+					if($bomb)
+						$results[$row][$column]->{'link'} .= '&bomb=' . $results[$row][$column]->bomb;
+						
+					$results[$row][$column]->{'link'} .= '&time=' . $time_machine;	
+				} else {	
+					//pass all IDs
+					$packedIDs = '';
+					if($countactive) { //for count active no need to check count more than 0 in order to link even if count is zero
+						if(is_array($all_ids) && !empty($all_ids)) {
+							$evcode = '$packedIDs = pack("l*",' . implode(',', $all_ids) . ');';
+							eval($evcode);
+						}
+					} else if($rescount > 0) {
 						$evcode = '$packedIDs = pack("l*",' . implode(',', $all_ids) . ');';
 						eval($evcode);
 					}
 					
-				} else if($rescount > 0) {
-					$evcode = '$packedIDs = pack("l*",' . implode(',', $all_ids) . ');';
-					eval($evcode);
+					$results[$row][$column]->{'link'} = 'leading=' . rawurlencode(base64_encode(gzdeflate($packedIDs)));
+					//pass metadata
+					$results[$row][$column]->{'link'} .= '&params='
+						. rawurlencode(base64_encode(gzdeflate(serialize(array('params' => NULL,
+																			   'time' => $time_machine,
+																			   'rowlabel' => $rows[$row],
+																			   'columnlabel' =>$columns[$column],
+																			   'bomb' => $results[$row][$column]->bomb,
+																			   'upm' => $cell_upm)))));
 				}
-					
-				$results[$row][$column]->{'link'} = 'leading='
-					. rawurlencode(base64_encode(gzdeflate($packedIDs)));
 				
-				//pass metadata
-				$results[$row][$column]->{'link'} .= '&params='
-					. rawurlencode(base64_encode(gzdeflate(serialize(array('params' => NULL,
-																		   'time' => $time_machine,
-																		   'name' => substr($name,0,40),
-																		   'rundate' => date("Y-m-d H:i:s",$now),
-																		   'count' => $rescount,
-																		   'rowlabel' => $rows[$row],
-																		   'columnlabel' =>$columns[$column],
-																		   'bomb' => $results[$row][$column]->bomb,
-																		   'upm' => $cell_upm)))));
-																		   
-				$results[$row][$column]->reportname = substr($name,0,40);
-				$results[$row][$column]->rundate = date("Y-m-d H:i:s",$now);
-				$results[$row][$column]->time_machine = $time_machine;
-			}else{ 
-				//pass search terms and metadata
-				$results[$row][$column]->{'link'} = 'params='
-					. rawurlencode(base64_encode(gzdeflate(serialize(array('params' => $params,
-																		   'time' => $time_machine,
-																		   'name' => substr($name,0,40),
-																		   'rundate' => date("Y-m-d H:i:s",$now),
-																		   'rowlabel' => $rows[$row],
-																		   'columnlabel' =>$columns[$column],
-																		   'bomb' => $results[$row][$column]->bomb,
-																		   'upm' => $cell_upm)))));
-				$results[$row][$column]->reportname = substr($name,0,40);
-				$results[$row][$column]->rundate = date("Y-m-d H:i:s",$now);
-				$results[$row][$column]->time_machine = $time_machine;
+			} else {
+			 	
+				if($link_generation_method == 'db') {
+				
+					$search_result_set = base64_encode(serialize($params));
+					//checking whether the trials id already exists and if not inserting a new record into the rpt_ott_trials table
+					$query = "SELECT `id` FROM `rpt_ott_searchdata` WHERE `result_set` = '" . $search_result_set . "' ";
+					$res = mysql_query($query) or die('Bad SQL query getting id for the trials result_set');
+					if(mysql_num_rows($res) > 0) {
+						$res = mysql_fetch_assoc($res);
+						$searchdata_id = $res['id'];
+					} else {
+						$query = "INSERT INTO `rpt_ott_searchdata`(`result_set`, `created`, `last_referenced`) VALUES('" . $search_result_set . "', NOW(), NOW()) ";
+						mysql_query($query) or die('Bad SQL Query saving result_set');
+						$searchdata_id = mysql_insert_id();
+					}
+					
+					$results[$row][$column]->{'link'} = 'results=' . $row_id . '.' . $column_id . '.s' . $searchdata_id;
+					if($upm_id != '')
+						$results[$row][$column]->{'link'} .= '.' . $upm_id;
+					if($bomb)
+						$results[$row][$column]->{'link'} .= '&bomb=' . $results[$row][$column]->bomb;
+						
+					$results[$row][$column]->{'link'} .= '&time=' . $time_machine;	
+				} else {
+					//pass search terms and metadata
+					$results[$row][$column]->{'link'} = 'params='
+						. rawurlencode(base64_encode(gzdeflate(serialize(array('params' => $params,
+																			   'time' => $time_machine,
+																			   'rowlabel' => $rows[$row],
+																			   'columnlabel' =>$columns[$column],
+																			   'bomb' => $results[$row][$column]->bomb,
+																			   'upm' => $cell_upm)))));
+				}
 			}
+			$results[$row][$column]->reportname = substr($name,0,40);
+			$results[$row][$column]->rundate = date("Y-m-d H:i:s",$now);
+			$results[$row][$column]->time_machine = $time_machine;
 			
 			mysql_query('COMMIT') or tex("Couldn't commit SQL transaction");
 			if(!$return)
@@ -506,10 +589,9 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 		}
 	}
 	
-	
 	$info["pid"] = $pid;
 	if ($format == "xlsx")
-	return heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $phasenums,$optionsSelected, $row_upms, $col_upms);
+	return heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $phasenums,$optionsSelected, $row_upms, $col_upms, $link_generation_method);
 	else
 		return heatmapAsWord($info, $rows, $columns, $results, $p_colors, $return, $phasenums,$optionsSelected);
 
@@ -640,7 +722,7 @@ function heatmapAsWord($info, $rows, $columns, $results, $p_colors, $return, $ph
 	}
 }
 
-function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $phasenums,$optionsSelected=array(), $row_upms, $col_upms) {
+function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $phasenums,$optionsSelected=array(), $row_upms, $col_upms, $link_generation_method) {
 
 	global $now, $db;
 	$countactive = $info['count_only_active'] == 'Y';
@@ -668,111 +750,163 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 	foreach($rows as $row => $header)
 	{
 	
-		//added for Stacked Trial Tracker
-		$link = '';$flag = false;
-		/*parameter set to display msg in OTT that all records couldnt be shown due to yourls link limit and the 
-		exceeding ones are truncated. - by default set to N*/
-		$t_link = rawurlencode(base64_encode(gzdeflate(serialize('n'))));
-
 		$link	= urlPath() . 'intermediary.php?';
-		$link	.= 'cparams=' . rawurlencode(base64_encode(gzdeflate(serialize(array('type' => 'row',
-																		'name' => substr($name,0,40),
-																		'rundate' => date("Y-m-d H:i:s",$now),
-																		'rowlabel' => $rows[$row])))));
 		
-		foreach($columns as $k => $v) {	
+		if($link_generation_method == 'db') {
+			$new_sub_link = '';
+			$link	.= 'type=row';
+		} else {
+			//added for Stacked Trial Tracker
+			$flag = false;
+			//parameter set to display msg in OTT that all records couldnt be shown due to yourls link limit and the 
+			//exceeding ones are truncated. - by default set to N
+			$t_link = rawurlencode(base64_encode(gzdeflate(serialize('n'))));
+			$link	.= 'cparams=' . rawurlencode(base64_encode(gzdeflate(serialize(array('type' => 'row', 'rowlabel' => $rows[$row])))));
+		}
 		
-			$sub_link = '';
-			if($countactive) {
-				if(strlen($results[$row][$k]->num)) {
-
+		foreach($columns as $k => $v) {
+			
+			if($link_generation_method == 'db') {
+				if($countactive) {
+					if(strlen($results[$row][$k]->num)) {
+						$new_sub_link .= '&' . str_replace("results","results[$k]",$results[$row][$k]->{'link'});
+					}
+				} else if($results[$row][$k]->num) {
+					$new_sub_link .= '&' . str_replace("results","results[$k]",$results[$row][$k]->{'link'});
+				}
+			} else {
+				$sub_link = '';
+				if($countactive) {
+					if(strlen($results[$row][$k]->num)) {
+	
+						$sub_link .= '&' . 
+						str_replace('params', "params[$k]", str_replace('leading', "leading[$k]", $results[$row][$k]->{'link'}));
+						$sub_link .= "&rowupm[$k]=" . rawurlencode(base64_encode(gzdeflate(serialize($row_upms[$row][$k]))));
+						$flag = true;
+						
+					}
+				} else if($results[$row][$k]->num) {
+	
 					$sub_link .= '&' . 
 					str_replace('params', "params[$k]", str_replace('leading', "leading[$k]", $results[$row][$k]->{'link'}));
 					$sub_link .= "&rowupm[$k]=" . rawurlencode(base64_encode(gzdeflate(serialize($row_upms[$row][$k]))));
 					$flag = true;
-					
 				}
-			} else if($results[$row][$k]->num) {
-
-				$sub_link .= '&' . 
-				str_replace('params', "params[$k]", str_replace('leading', "leading[$k]", $results[$row][$k]->{'link'}));
-				$sub_link .= "&rowupm[$k]=" . rawurlencode(base64_encode(gzdeflate(serialize($row_upms[$row][$k]))));
-				$flag = true;
+				//total link limit - 2000 and length of truncate msg param - 20, (2000-20) = 1980
+				if((strlen($link) + strlen($sub_link)) < 1980){ 
+					$link .= $sub_link;
+				} else {
+					//in case the link is exceeding the limit and has been truncated, parameter is set to Y.
+					$t_link = rawurlencode(base64_encode(gzdeflate(serialize('y'))));
+				}
 			}
-				
-			//total link limit - 2000 and length of truncate msg param - 20, (2000-20) = 1980
-			if((strlen($link) + strlen($sub_link)) < 1980){ 
-				$link .= $sub_link;
-			} else {
-				//in case the link is exceeding the limit and has been truncated, parameter is set to Y.
-				$t_link = rawurlencode(base64_encode(gzdeflate(serialize('y'))));
-			}
-
 		}
 		
-		$link .= '&trunc=' . $t_link;															
-		$link = addYourls($link,$results->reportname);
-		$cell = 'A' . ($row+1);
-		$sheet->SetCellValue($cell, $header);
-		if($flag == true)
-			$sheet->getCell($cell)->getHyperlink()->setUrl($link);
+		if($link_generation_method == 'db') {
+			$new_sub_link = parse_url($new_sub_link);
+			parse_str($new_sub_link['path'], $myArray);
+			if(!empty($myArray)) {
+				foreach($myArray['results'] as $k => &$v)  {
+					if($k != 1)
+						$v = substr($v,(strpos($v, '.')+1));
+				}
+				$link .= '&results=' . implode(',', $myArray['results']) . '&time=' . $myArray['time'];
+				
+				$link = addYourls($link,$results->reportname);
+				$cell = 'A' . ($row+1);
+				$sheet->SetCellValue($cell, $header);
+				$sheet->getCell($cell)->getHyperlink()->setUrl($link);
+			}
+		} else {
+			$link .= '&trunc=' . $t_link;
+			$link = addYourls($link,$results->reportname);
+			$cell = 'A' . ($row+1);
+			$sheet->SetCellValue($cell, $header);
+			if($flag == true)
+				$sheet->getCell($cell)->getHyperlink()->setUrl($link);
+		}
+		//echo "<br/>rowstack_link==>".$link;
 	}
 	
 	foreach($columns as $col => $header)
 	{
 
-		//added for Stacked Trial Tracker
-		$link = '';$flag = false;
-		
-		/*parameter set to display msg in OTT that all records couldnt be shown due to yourls link limit and the 
-		exceeding ones are truncated. - by default set to N*/
-		$t_link = rawurlencode(base64_encode(gzdeflate(serialize('n'))));
-		
 		$link	= urlPath() . 'intermediary.php?';
-		$link	.= 'cparams=' . rawurlencode(base64_encode(gzdeflate(serialize(array('type' => 'col',
-																		'name' => substr($name,0,40),
-																		'rundate' => date("Y-m-d H:i:s",$now),
-																		'columnlabel' => $columns[$col])))));
+		
+		if($link_generation_method == 'db') {
+			$new_sub_link = '';
+			$link	.= 'type=col';		
+		} else {
+			//added for Stacked Trial Tracker
+			$flag = false;
+			/*parameter set to display msg in OTT that all records couldnt be shown due to yourls link limit and the 
+			exceeding ones are truncated. - by default set to N*/
+			$t_link = rawurlencode(base64_encode(gzdeflate(serialize('n'))));
+			$link	.= 'cparams=' . rawurlencode(base64_encode(gzdeflate(serialize(array('type' => 'col', 'columnlabel' => $columns[$col])))));
+		}
 		
 		foreach($rows as $k => $v) {	
 		
-			$sub_link = '';
-			if($countactive) {
-				if(strlen($results[$k][$col]->num)) {
+			if($link_generation_method == 'db') {
+				if($countactive) {
+					if(strlen($results[$k][$col]->num)) {
+						$new_sub_link .= '&' . str_replace("results","results[$k]",$results[$k][$col]->{'link'});
+					}
+				} else if($results[$k][$col]->num) {
+					$new_sub_link .= '&' . str_replace("results","results[$k]",$results[$k][$col]->{'link'});
+				}
+			} else {
+				$sub_link = '';
+				if($countactive) {
+					if(strlen($results[$k][$col]->num)) {
+						$sub_link .= '&' . 
+						str_replace('params', "params[$k]", str_replace('leading', "leading[$k]", $results[$k][$col]->{'link'}));
+						$sub_link .= "&colupm[$k]=" . rawurlencode(base64_encode(gzdeflate(serialize($col_upms[$k][$col]))));
+						$flag = true;
+					}
+				} else if($results[$k][$col]->num) {
 				
 					$sub_link .= '&' . 
 					str_replace('params', "params[$k]", str_replace('leading', "leading[$k]", $results[$k][$col]->{'link'}));
 					$sub_link .= "&colupm[$k]=" . rawurlencode(base64_encode(gzdeflate(serialize($col_upms[$k][$col]))));
 					$flag = true;
-					
 				}
-			} else if($results[$k][$col]->num) {
-			
-				$sub_link .= '&' . 
-				str_replace('params', "params[$k]", str_replace('leading', "leading[$k]", $results[$k][$col]->{'link'}));
-				$sub_link .= "&colupm[$k]=" . rawurlencode(base64_encode(gzdeflate(serialize($col_upms[$k][$col]))));
-				$flag = true;
+				//total link limit - 2000 and length of truncate msg param - 20, (2000-20) = 1980
+				if((strlen($link) + strlen($sub_link)) < 1980){ //echo "<br/>less<br/><br/>";
+					$link .= $sub_link;
+				} else { 
+					//in case the link is exceeding the limit and has been truncated, parameter is set to Y.
+					$t_link = rawurlencode(base64_encode(gzdeflate(serialize('y'))));
+				}
 			}
-			
-			//total link limit - 2000 and length of truncate msg param - 20, (2000-20) = 1980
-			if((strlen($link) + strlen($sub_link)) < 1980){ 
-				$link .= $sub_link;
-			} else {
-				//in case the link is exceeding the limit and has been truncated, parameter is set to Y.
-				$t_link = rawurlencode(base64_encode(gzdeflate(serialize('y'))));
-			}
-			
 		}
-
 		
-		$link .= '&trunc=' . $t_link;		
-		$link = addYourls($link,$results->reportname);
-		$cell = num2char($col) . '1';
-		$sheet->SetCellValue($cell, $header);
-		if($flag == true)
-			$sheet->getCell($cell)->getHyperlink()->setUrl($link);
+		if($link_generation_method == 'db') {
+		
+			$new_sub_link = parse_url($new_sub_link);
+			parse_str($new_sub_link['path'], $myArray);
+			if(!empty($myArray)) {
+				foreach($myArray['results'] as $k => &$v)  {
+					if($k != 1)
+						$v = substr($v,(strpos($v, '.')+1));
+				}
+				$link .= '&results=' . implode(',', $myArray['results']) . '&time=' . $myArray['time'];
+				$link = addYourls($link,$results->reportname);
+				$cell = num2char($col) . '1';
+				$sheet->SetCellValue($cell, $header);
+				$sheet->getCell($cell)->getHyperlink()->setUrl($link);
+			}
+		} else {
+			$link .= '&trunc=' . $t_link;
+			$link = addYourls($link,$results->reportname);
+			$cell = num2char($col) . '1';
+			$sheet->SetCellValue($cell, $header);
+			if($flag == true)
+				$sheet->getCell($cell)->getHyperlink()->setUrl($link);
+		}
+		//echo "<br/>colstack_link==>".$link;	
 	}
-	
+	//exit;
 	
 	foreach($results as $row => $rowData)
 	{
@@ -800,10 +934,11 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 				$sheet->SetCellValue($cell, $result->num);
 				$sheet->getCell($cell)->getHyperlink()->setUrl($clink);
 					
+
 			} else {
 				$sheet->SetCellValue($cell, ' ');
 			}
-			 
+			
 			if($result->bomb != "")
 			{
 				$drawing = new PHPExcel_Worksheet_Drawing();

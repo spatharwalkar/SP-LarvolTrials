@@ -619,6 +619,7 @@ function postEd()
 							   '",report=' . $id . ',`row`=' . $row . ',`column`=' . $col);
 			}
 		}else if(isset($_POST['row']) || isset($_POST['col'])){	//header
+		
 			$type = '';
 			$num = '';
 			if(is_numeric($_POST['row']))
@@ -634,7 +635,7 @@ function postEd()
 		}else{	//overall
 			$query = array('UPDATE rpt_heatmap SET searchdata="', '" WHERE id=' . $id . ' LIMIT 1');
 		}
-
+		
 	    validateInputPCRE($_POST);//alexvp added 
 	    
 	    //start simulate a test search before proceeding implementation of sql shield function here.
@@ -642,6 +643,7 @@ function postEd()
 	{
 		$_POST = unserialize(base64_decode($_POST['oldsearch']));
 	}
+	
 	//array_walk_recursive($_POST,ref_mysql_escape);	//breaks regex by escaping backslashes
 	$params = prepareParams($_POST);
 	$list = array();
@@ -674,15 +676,38 @@ function postEd()
 	}
 	//first  run the search in test mode 
 	search($params,$list,$page,$time_machine,$override_arr,true);	    
-	    //end simulate a test search before proceeding implementation of sql shield function here.	
-	    
+	    //end simulate a test search before proceeding implementation of sql shield function here.
+		
+		/*Start - Removing fields for which action is set to None (zero) or empty data - for ticket no. 42 over Trac*/ 
+		$_POST = removeNullSearchdata($_POST);
+		if($_POST['time_machine'] == '' || $_POST['time_machine'] == NULL)
+			unset($_POST['time_machine']);
+		
+		if($_POST['override'] == '' || $_POST['override'] == NULL)
+			unset($_POST['override']);
+			
+		if(empty($_POST['multifields']) || empty($_POST['multifields']['varchar+text'])) {
+			unset($_POST['multifields']);
+			unset($_POST['multivalue']);
+		}	
+			
+		if(empty($_POST['action']))
+			unset($_POST['action']);
 
+		if(empty($_POST['searchval']))
+			unset($_POST['searchval']);
+
+		if(empty($_POST['negate']))
+			unset($_POST['negate']);
+		/* End - Removing fields for which action is set to None (zero) or empty data - for ticket no. 42 over Trac */
+		
 		unset($_POST['row']);
 		unset($_POST['col']);
 		unset($_POST['id']);
 		unset($_POST['searchname']);
+		
 		$query = implode(base64_encode(serialize($_POST)), $query);		
-
+		
 		mysql_query($query) or die('Bad SQL query storing search');
 		mysql_query('COMMIT') or die("Couldn't commit SQL transaction");
 	}
