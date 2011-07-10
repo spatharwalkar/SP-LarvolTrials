@@ -289,6 +289,7 @@ while ($row = mysql_fetch_assoc($res))
 	{
 
 		echo '<tr style="text-align:center">';
+		$j=0;
 		foreach($row as $columnName=>$v)
 		{
 			echo '<th>';
@@ -299,8 +300,18 @@ while ($row = mysql_fetch_assoc($res))
 			$connector = $params!='upm.php'?'&':'?';
 			if($_GET['order_by']==$columnName && in_array($columnName,$sortableRows))
 			$url = urlPath().$params.$connector.'order_by='.$columnName.'&sort_order='.$sortOrder.$noSort;
-			elseif(in_array($columnName,$sortableRows))
+			elseif(in_array($columnName,$sortableRows) && ($j==0&& !isset($_GET['order_by'])))
+			{
 			$url = urlPath().$params.$connector.'order_by='.$columnName.'&sort_order=ASC';
+			}
+			elseif(in_array($columnName,$sortableRows) && $j!=0)
+			{
+				$url = urlPath().$params.$connector.'order_by='.$columnName.'&sort_order=&no_sort=1';	
+			}
+			elseif($j==0)
+			{
+				$url = urlPath().$params.$connector.'order_by='.$columnName.'&sort_order=&no_sort=1';
+			}
 			else
 			$url=null;
 			
@@ -309,17 +320,18 @@ while ($row = mysql_fetch_assoc($res))
 			echo ucwords(implode(' ',explode('_',$columnName)));
 			if($url)
 			{
-				if($columnName==$_GET['order_by'])
+				if($columnName==$_GET['order_by'] || ($j==0 && !isset($_GET['order_by'])))
 				{
 					$imgSort = $sortImg;
 				}
 				else
 				{
-					$imgSort = 'ASC';
+					$imgSort = '';
 				}
 				echo '</a><a style="border:0" href="'.$url.'"><img style="border:0" src="images/'.strtolower($imgSort).'.png"/></a>';
 			}
 			echo '</th>';
+			$j++;
 			$i++;
 		}
 		if($deleteFlag)
@@ -452,6 +464,10 @@ function addEditUpm($id)
 
 function am($k,$v)
 {
+	if($k=='corresponding_trial')
+	{
+		$v = unpadnct($v);
+	}		
 	$explicitNullFields = array('corresponding_trial');
 	if(in_array($k,$explicitNullFields) && $v=='')
 	{
@@ -463,6 +479,10 @@ function am($k,$v)
 function am1($k,$v)
 {
 	$explicitNullFields = array('corresponding_trial');
+	if($k=='corresponding_trial')
+	{
+		$v = unpadnct($v);
+	}		
 	if(in_array($k,$explicitNullFields) && $v=='')
 	{
 		$v = 'null';
@@ -480,12 +500,17 @@ function am2($v,$dbVal)
 
 function validateImport($k,$v)
 {
+	if($k=='corresponding_trial')
+	{
+		$v = unpadnct($v);
+	}	
 	$explicitNullFields = array('corresponding_trial');
 	if(in_array($k,$explicitNullFields) && !is_numeric($v))
 	{
 		
 		$v = 'null';
 	}
+
 	return $v;
 }
 
