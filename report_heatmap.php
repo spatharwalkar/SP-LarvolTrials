@@ -736,7 +736,9 @@ function reportList()
 	
 	foreach($categoryArr as $category)
 	{
-		$out .= '<li>'.ucwords(strtolower($category)).'<ul>';
+//		$out .= '<li>'.ucwords(strtolower($category)).'<ul>';
+//		keep the category as it is, without any change in letter case
+		$out .= '<li>'.$category.'<ul>';
 		foreach($outArr as $row)
 		{
 			$ru = $row['user'];
