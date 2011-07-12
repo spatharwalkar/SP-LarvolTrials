@@ -311,6 +311,38 @@ CREATE TABLE IF NOT EXISTS `rpt_ott` (
   KEY `result_set` (`result_set`(300))
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS `rpt_ott_header` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `header` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `created` datetime NOT NULL,
+  `expiry` date DEFAULT NULL,
+  `last_referenced` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY (`header`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `rpt_ott_upm` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `intervention_name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `created` datetime NOT NULL,
+  `expiry` date DEFAULT NULL,
+  `last_referenced` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY (`intervention_name`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `rpt_ott_searchdata` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `result_set` text COLLATE utf8_unicode_ci NOT NULL,
+  `created` datetime NOT NULL,
+  `expiry` date DEFAULT NULL,
+  `last_referenced` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `result_set` (`result_set`(300))
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+RENAME TABLE `clinicaltrials`.`rpt_ott` TO `clinicaltrials`.`rpt_ott_trials` ;
+
 ALTER TABLE `data_cats_in_study`
   ADD CONSTRAINT `data_cats_in_study_ibfk_1` FOREIGN KEY (`larvol_id`) REFERENCES `clinical_study` (`larvol_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `data_cats_in_study_ibfk_2` FOREIGN KEY (`category`) REFERENCES `data_categories` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
