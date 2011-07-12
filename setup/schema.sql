@@ -301,7 +301,7 @@ CREATE TABLE IF NOT EXISTS `user_permissions` (
   UNIQUE KEY `prevent_duplicate_permissions` (`name`,`level`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS `rpt_ott` (
+CREATE TABLE IF NOT EXISTS `rpt_ott_trials` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `result_set` text COLLATE utf8_unicode_ci NOT NULL,
   `created` datetime NOT NULL,
@@ -309,7 +309,7 @@ CREATE TABLE IF NOT EXISTS `rpt_ott` (
   `last_referenced` datetime NOT NULL,
   PRIMARY KEY (`id`),
   KEY `result_set` (`result_set`(300))
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `rpt_ott_header` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -340,8 +340,6 @@ CREATE TABLE IF NOT EXISTS `rpt_ott_searchdata` (
   PRIMARY KEY (`id`),
   KEY `result_set` (`result_set`(300))
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
-RENAME TABLE `clinicaltrials`.`rpt_ott` TO `clinicaltrials`.`rpt_ott_trials` ;
 
 ALTER TABLE `data_cats_in_study`
   ADD CONSTRAINT `data_cats_in_study_ibfk_1` FOREIGN KEY (`larvol_id`) REFERENCES `clinical_study` (`larvol_id`) ON DELETE CASCADE ON UPDATE CASCADE,
