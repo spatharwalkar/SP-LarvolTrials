@@ -747,6 +747,9 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 	
 	foreach($rows as $row => $header)
 	{
+		$cell = 'A' . ($row+1);
+		$sheet->SetCellValue($cell, $header);
+		
 		//added for Stacked Trial Tracker
 		$link	= urlPath() . 'intermediary.php?';
 		
@@ -799,7 +802,7 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 		if($link_generation_method == 'db') {
 			$new_sub_link = parse_url($new_sub_link);
 			parse_str($new_sub_link['path'], $myArray);
-			//echo "<pre>myArray-row==>";print_r($myArray);
+			
 			if(!empty($myArray)) {
 				foreach($myArray['results'] as $k => &$v)  {
 					$vvv = explode('.', $v);
@@ -807,19 +810,14 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 						unset($vvv[0]);//removing redundant row headers
 						$v = implode('.', $vvv);
 					}
-				}//echo "<pre>myArray-rowafter==>";print_r($myArray);
+				}
 				$link .= '&results=' . urlencode(base64_encode(gzdeflate(implode(',', $myArray['results'])))) . '&time=' . $myArray['time'];
-				
 				$link = addYourls($link,$results->reportname);
-				$cell = 'A' . ($row+1);
-				$sheet->SetCellValue($cell, $header);
 				$sheet->getCell($cell)->getHyperlink()->setUrl($link);
 			}
 		} else {
 			$link .= '&trunc=' . $t_link;
 			$link = addYourls($link,$results->reportname);
-			$cell = 'A' . ($row+1);
-			$sheet->SetCellValue($cell, $header);
 			if($flag == true)
 				$sheet->getCell($cell)->getHyperlink()->setUrl($link);
 		}
@@ -827,8 +825,12 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 	
 	foreach($columns as $col => $header)
 	{
+		$cell = num2char($col) . '1';
+		$sheet->SetCellValue($cell, $header);
+		
 		//added for Stacked Trial Tracker
 		$link	= urlPath() . 'intermediary.php?';
+		
 		if($link_generation_method == 'db') {
 			$new_sub_link = '';
 			$link	.= 'type=col';		
@@ -889,16 +891,12 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 				}
 				$link .= '&results=' . urlencode(base64_encode(gzdeflate(implode(',', $myArray['results'])))) . '&time=' . $myArray['time'];
 				$link = addYourls($link,$results->reportname);
-				$cell = num2char($col) . '1';
-				$sheet->SetCellValue($cell, $header);
 				$sheet->getCell($cell)->getHyperlink()->setUrl($link);
 			}
 			
 		} else {
 			$link .= '&trunc=' . $t_link;
 			$link = addYourls($link,$results->reportname);
-			$cell = num2char($col) . '1';
-			$sheet->SetCellValue($cell, $header);
 			if($flag == true)
 				$sheet->getCell($cell)->getHyperlink()->setUrl($link);
 		}
