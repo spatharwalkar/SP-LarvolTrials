@@ -141,9 +141,7 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 		$ovar = $header['type'] . 'search';
 		$unpacked = unserialize(base64_decode($header['searchdata']));
 		if(!is_array($unpacked['multifields'])) $unpacked['multifields'] = array(); 
-		${$ovar}[$header['num']] = ($header['searchdata']===NULL ?
-											$nodata :
-											removeNullSearchdata($unpacked));
+		${$ovar}[$header['num']] = ($header['searchdata']===NULL ? $nodata : removeNullSearchdata($unpacked));
 	}
 	//start progress bar
 	$pid = NULL;
@@ -483,8 +481,8 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 			if($rescount < $boundary)
 			{ 	
 				if($link_generation_method == 'db') {
-					//all ids
-					$id_result_set = implode(",",$all_ids);
+					
+					$id_result_set = implode(",",$all_ids);//all ids
 					//checking whether the trials id already exists and if not inserting a new record into the rpt_ott_trials table
 					$query = "SELECT `id` FROM `rpt_ott_trials` WHERE `result_set` = '" . $id_result_set . "' ";
 					$res = mysql_query($query) or die('Bad SQL query getting id for the trials result_set');
@@ -531,7 +529,7 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 			 	
 				if($link_generation_method == 'db') {
 				
-					$search_result_set = base64_encode(serialize($params));
+					$search_result_set = serialize(mysql_real_escape_string($params));
 					//checking whether the trials id already exists and if not inserting a new record into the rpt_ott_trials table
 					$query = "SELECT `id` FROM `rpt_ott_searchdata` WHERE `result_set` = '" . $search_result_set . "' ";
 					$res = mysql_query($query) or die('Bad SQL query getting id for the trials result_set');
@@ -749,14 +747,13 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 	
 	foreach($rows as $row => $header)
 	{
-	
+		//added for Stacked Trial Tracker
 		$link	= urlPath() . 'intermediary.php?';
 		
 		if($link_generation_method == 'db') {
 			$new_sub_link = '';
 			$link	.= 'type=row';
 		} else {
-			//added for Stacked Trial Tracker
 			$flag = false;
 			//parameter set to display msg in OTT that all records couldnt be shown due to yourls link limit and the 
 			//exceeding ones are truncated. - by default set to N
@@ -778,15 +775,12 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 				$sub_link = '';
 				if($countactive) {
 					if(strlen($results[$row][$k]->num)) {
-	
 						$sub_link .= '&' . 
 						str_replace('params', "params[$k]", str_replace('leading', "leading[$k]", $results[$row][$k]->{'link'}));
 						$sub_link .= "&rowupm[$k]=" . rawurlencode(base64_encode(gzdeflate(serialize($row_upms[$row][$k]))));
 						$flag = true;
-						
 					}
 				} else if($results[$row][$k]->num) {
-	
 					$sub_link .= '&' . 
 					str_replace('params', "params[$k]", str_replace('leading', "leading[$k]", $results[$row][$k]->{'link'}));
 					$sub_link .= "&rowupm[$k]=" . rawurlencode(base64_encode(gzdeflate(serialize($row_upms[$row][$k]))));
@@ -805,12 +799,16 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 		if($link_generation_method == 'db') {
 			$new_sub_link = parse_url($new_sub_link);
 			parse_str($new_sub_link['path'], $myArray);
+			//echo "<pre>myArray-row==>";print_r($myArray);
 			if(!empty($myArray)) {
 				foreach($myArray['results'] as $k => &$v)  {
-					if($k != 1)
-						$v = substr($v,(strpos($v, '.')+1));
-				}
-				$link .= '&results=' . implode(',', $myArray['results']) . '&time=' . $myArray['time'];
+					$vvv = explode('.', $v);
+					if($k != 1) {
+						unset($vvv[0]);//removing redundant row headers
+						$v = implode('.', $vvv);
+					}
+				}//echo "<pre>myArray-rowafter==>";print_r($myArray);
+				$link .= '&results=' . urlencode(base64_encode(gzdeflate(implode(',', $myArray['results'])))) . '&time=' . $myArray['time'];
 				
 				$link = addYourls($link,$results->reportname);
 				$cell = 'A' . ($row+1);
@@ -825,19 +823,16 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 			if($flag == true)
 				$sheet->getCell($cell)->getHyperlink()->setUrl($link);
 		}
-		//echo "<br/>rowstack_link==>".$link;
 	}
 	
 	foreach($columns as $col => $header)
 	{
-
+		//added for Stacked Trial Tracker
 		$link	= urlPath() . 'intermediary.php?';
-		
 		if($link_generation_method == 'db') {
 			$new_sub_link = '';
 			$link	.= 'type=col';		
 		} else {
-			//added for Stacked Trial Tracker
 			$flag = false;
 			/*parameter set to display msg in OTT that all records couldnt be shown due to yourls link limit and the 
 			exceeding ones are truncated. - by default set to N*/
@@ -865,7 +860,6 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 						$flag = true;
 					}
 				} else if($results[$k][$col]->num) {
-				
 					$sub_link .= '&' . 
 					str_replace('params', "params[$k]", str_replace('leading', "leading[$k]", $results[$k][$col]->{'link'}));
 					$sub_link .= "&colupm[$k]=" . rawurlencode(base64_encode(gzdeflate(serialize($col_upms[$k][$col]))));
@@ -887,15 +881,19 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 			parse_str($new_sub_link['path'], $myArray);
 			if(!empty($myArray)) {
 				foreach($myArray['results'] as $k => &$v)  {
-					if($k != 1)
-						$v = substr($v,(strpos($v, '.')+1));
+					$vvv = explode('.', $v);
+					if($k != 1) {
+						unset($vvv[1]);
+						$v = implode('.', $vvv);
+					}
 				}
-				$link .= '&results=' . implode(',', $myArray['results']) . '&time=' . $myArray['time'];
+				$link .= '&results=' . urlencode(base64_encode(gzdeflate(implode(',', $myArray['results'])))) . '&time=' . $myArray['time'];
 				$link = addYourls($link,$results->reportname);
 				$cell = num2char($col) . '1';
 				$sheet->SetCellValue($cell, $header);
 				$sheet->getCell($cell)->getHyperlink()->setUrl($link);
 			}
+			
 		} else {
 			$link .= '&trunc=' . $t_link;
 			$link = addYourls($link,$results->reportname);
@@ -904,9 +902,7 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 			if($flag == true)
 				$sheet->getCell($cell)->getHyperlink()->setUrl($link);
 		}
-		//echo "<br/>colstack_link==>".$link;	
 	}
-	//exit;
 	
 	foreach($results as $row => $rowData)
 	{
@@ -934,7 +930,6 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 				$sheet->SetCellValue($cell, $result->num);
 				$sheet->getCell($cell)->getHyperlink()->setUrl($clink);
 					
-
 			} else {
 				$sheet->SetCellValue($cell, ' ');
 			}
