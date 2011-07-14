@@ -892,6 +892,7 @@ class ContentManager
 			
 			foreach($arr as $key => $val) { 
 			
+				//echo "<pre>";print_r($val);
 				//checking for updated and new trials
 				$nct[$val['NCT/nct_id']] = getNCT($val['NCT/nct_id'], $val['larvol_id'], $this->time_machine, $this->edited);
 				
@@ -2259,36 +2260,32 @@ function getUnmatchedUpmChanges($record_arr, $time, $edited) {
 //return NCT fields given an NCTID
 function getNCT($nct_id,$larvol_id,$time,$edited)
 {	
+						
 	$study = array('edited' => array(), 'new' => 'n');
 	
 	$fieldnames = array('nct_id', 'brief_title', 'enrollment', 'enrollment_type', 'acronym', 'start_date', 'overall_status',
 	'condition', 'intervention_name', 'phase', 'lead_sponsor', 'collaborator');
 
-	$studycatData=mysql_fetch_assoc(mysql_query("SELECT `dv`.`studycat` FROM `data_values` `dv` LEFT JOIN `data_cats_in_study` `dc` ON (`dc`.`id`=`dv`.`studycat`) WHERE `dv`.`field`='1' AND `dv`.`val_int`='".$nct_id."' AND `dc`.`larvol_id`='"
-	.$larvol_id."'"));
-	
-	$res = mysql_query("SELECT DISTINCT `df`.`name` AS `fieldname`, `df`.`id` AS `fieldid`, `df`.`type` AS `fieldtype`, `dv`.`studycat`, dv.* FROM `data_values` `dv` LEFT JOIN `data_fields` `df` ON (`df`.`id`=`dv`.`field`) WHERE `df`.`name` IN ('" 
-	. join("','",$fieldnames) . "') AND `studycat`='" . $studycatData['studycat'] 
-	. "' AND (`dv`.`superceded`<'" . date('Y-m-d',$time) . "' AND `dv`.`superceded`>= '" 
-	. date('Y-m-d',strtotime($edited,$time)) . "')");
+	$studycatData = mysql_fetch_assoc(mysql_query("SELECT `dv`.`studycat` FROM `data_values` `dv` LEFT JOIN `data_cats_in_study` `dc` ON "
+	. "(`dc`.`id`=`dv`.`studycat`) WHERE `dv`.`field`='1' AND `dv`.`val_int`='" . $nct_id . "' AND `dc`.`larvol_id`='" .$larvol_id . "'"));
 
-	while ($row = mysql_fetch_assoc($res)) { 
-	
+	$res = mysql_query("SELECT DISTINCT `df`.`name` AS `fieldname`, `df`.`id` AS `fieldid`, `df`.`type` AS `fieldtype`, `dv`.`studycat` "
+		. "FROM `data_values` `dv` LEFT JOIN `data_fields` `df` ON (`df`.`id`=`dv`.`field`) WHERE `df`.`name` IN ('" 
+		. join("','",$fieldnames) . "') AND `studycat` = '" . $studycatData['studycat'] 
+		. "' AND (`dv`.`superceded`<'" . date('Y-m-d',$time) . "' AND `dv`.`superceded`>= '" . date('Y-m-d',strtotime($edited,$time)) . "') ");
+
+	while ($row = mysql_fetch_assoc($res)) {
+	 	
 		$study['edited'][] = 'NCT/'.$row['fieldname'];
 		
 		//getting previous value for updated trials
-		if($row['fieldtype'] == 'enum') { 
+		$val = '';
+		$result = mysql_fetch_assoc(mysql_query("SELECT `" . 'val_'.$row['fieldtype'] ."` AS value FROM `data_values` WHERE `studycat` = '" 
+		. $studycatData['studycat'] . "' AND `field` =  '" . $row['fieldid'] . "' AND (`superceded`<'" . date('Y-m-d',$time) 
+		. "' AND `superceded`>= '" . date('Y-m-d',strtotime($edited,$time)) . "') "));
 		
-			$result = mysql_query('SELECT value FROM data_enumvals WHERE `field`=' . $row['fieldid'] 
-			. ' AND `id` = "' . mysql_real_escape_string($row['val_'.$row['fieldtype']]) . '" LIMIT 1');
-			if($result === false) return softDie('Bad SQL query getting enumval value');
-			$result = mysql_fetch_array($result);
-			if($result === false) return softDie('Invalid enumval value for field');
-			
-			$val = $result['value'];
-		} else {	
-			$val = $row['val_'.$row['fieldtype']];
-		}
+		$val = $result['value'];
+		
 		if(isset($val) && $val != '')
 			$study['edited']['NCT/'.$row['fieldname']] = 'Previous value: ' . $val;
 		else 
@@ -2298,8 +2295,7 @@ function getNCT($nct_id,$larvol_id,$time,$edited)
 	
 	$sql = "SELECT `clinical_study`.`larvol_id` FROM `clinical_study` WHERE `clinical_study`.`import_time` <= '" 
 		. date('Y-m-d',$time) . "' AND `clinical_study`.`larvol_id` = '" .  $larvol_id
-		. "' AND `clinical_study`.`import_time` >= '" 
-		. date('Y-m-d',strtotime($edited,$time)) . "' ";
+		. "' AND `clinical_study`.`import_time` >= '" . date('Y-m-d',strtotime($edited,$time)) . "' ";
 		
 	$result = mysql_query($sql);		
 
