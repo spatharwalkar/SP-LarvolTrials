@@ -154,7 +154,7 @@ function ProcessChanges($id, $date, $column, $initial_date=NULL) {
         @mysql_fetch_array($fake);
     }
 
-    //print $innerHTML;
+//    print $innerHTML;
 
     unset($trs);
     unset($docpc);
@@ -274,7 +274,7 @@ function addNCT_history($rec, $id, $date) {
     $query = 'UPDATE clinical_study SET institution_type="' . $institution_type . '" WHERE larvol_id=' . $larvol_id . ' LIMIT 1';
     if (mysql_query($query) === false)
         return softDie('Bad SQL query recording institution type');
-
+	
     //Go through the parsed XML structure and pick out the data
     $record_data = array('brief_title' => $rec->brief_title->textblock,
         'official_title' => $rec->official_title->textblock,
@@ -298,8 +298,8 @@ function addNCT_history($rec, $id, $date) {
         'source' => $rec->source,
         'has_dmc' => ynbool($rec->oversight_info->has_dmc),
         'overall_status' => $rec->status_block->status,
-        'start_date' => $rec->start_date,
-        'end_date' => $rec->end_date,
+        'start_date' => $rec->start_date->date,
+        'end_date' => $rec->end_date->date,
         'completion_date' => $rec->last_follow_up_date->date,
         'primary_completion_date' => $rec->primary_compl_date->date,
         'phase' => $rec->phase_block->phase,
@@ -561,12 +561,13 @@ function addval_d($studycat, $category_id, $fieldname, $value, $date) {
           //  if (isset($val)) {
 
                 // DW Change to get rid of the nulls
-                $query = 'INSERT INTO data_values SET `added`="' . $DTnow . '",'
-                        . '`field`=' . $field . ',studycat=' . $studycat . ',val_' . $type . '=' . esc($type, $val);
+				
+					$query = 'INSERT INTO data_values SET `added`="' . $DTnow . '",'
+							. '`field`=' . $field . ',studycat=' . $studycat . ',val_' . $type . '=' . esc($type, $val);
 
-                if (mysql_query($query) === false)
-                    return softDie('Bad SQL query saving value');
-            //}
+					if (mysql_query($query) === false)
+						return softDie('Bad SQL query saving value');
+				//}
         }
         $query = 'UPDATE clinical_study SET last_change="' . $DTnow . '" '
                 . 'WHERE larvol_id=(SELECT larvol_id FROM data_cats_in_study WHERE id=' . $studycat . ') LIMIT 1';
