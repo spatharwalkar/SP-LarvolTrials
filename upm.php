@@ -282,6 +282,8 @@ $i=0;
 $skip=0;
 
 $deleteParams = substr($_SERVER['REQUEST_URI'],strpos($_SERVER['REQUEST_URI'],'?')+1);
+//remove save flag from params 
+$deleteParams = str_replace('&save=Save', '', $deleteParams);
 $deleteConnector = '&';
 echo '<div></div>';
 echo '<table border="1" width="99%">';
@@ -303,17 +305,9 @@ while ($row = mysql_fetch_assoc($res))
 			$connector = $params!='upm.php'?'&':'?';
 			if($_GET['order_by']==$columnName && in_array($columnName,$sortableRows))
 			$url = urlPath().$params.$connector.'order_by='.$columnName.'&sort_order='.$sortOrder.$noSort;
-			elseif(in_array($columnName,$sortableRows) && ($j==0&& !isset($_GET['order_by'])))
+			elseif(in_array($columnName,$sortableRows))
 			{
 			$url = urlPath().$params.$connector.'order_by='.$columnName.'&sort_order=ASC';
-			}
-			elseif(in_array($columnName,$sortableRows) && $j!=0)
-			{
-				$url = urlPath().$params.$connector.'order_by='.$columnName.'&sort_order=&no_sort=1';	
-			}
-			elseif($j==0)
-			{
-				$url = urlPath().$params.$connector.'order_by='.$columnName.'&sort_order=&no_sort=1';
 			}
 			else
 			$url=null;
