@@ -172,7 +172,6 @@ function ProcessChanges($id, $date, $column, $initial_date=NULL) {
     }
 
     unset($innerHTML);
-
     if ($initial_date == null) {
         addNCT_history($xml, $id, $date);
     } else {
@@ -247,7 +246,7 @@ function addNCT_history($rec, $id, $date) {
         if (mysql_query($query) === false)
             return softDie('Bad SQL query adding new record to category');
         $studycat = mysql_insert_id();
-        $query = 'INSERT INTO data_values SET field=' . $id_field . ',`added`="' . $DTnow . '",studycat=' . $studycat
+		$query = 'INSERT INTO data_values SET field=' . $id_field . ',`added`="' . $DTnow . '",studycat=' . $studycat
                 . ',val_int=' . $nct_id;
         if (mysql_query($query) === false)
             return softDie('Bad SQL query adding nct_id');
@@ -509,7 +508,11 @@ function addval_d($studycat, $category_id, $fieldname, $value, $date) {
         $value[$key] = normalize($type, (string) $v);
 
     //Detect if the "new" value is a change
+		if( !isset($value) ) $no_dat=true;
+	elseif( empty($value) and !is_numeric($value) ) $no_dat=true;
+	
     $query = 'SELECT id,val_' . $type . ' AS "val" FROM data_values WHERE '
+			. 'val_' . $type . ' != \'\' AND val_' . $type . ' IS NOT NULL AND '
             . 'studycat=' . $studycat . ' AND field=' . $field . ' AND superceded IS NULL';
     $res = mysql_query($query);
     if ($res === false)
@@ -534,15 +537,19 @@ function addval_d($studycat, $category_id, $fieldname, $value, $date) {
     sort($value);
     sort($oldvals);
     $change = !($value == $oldvals);
-
-    //If the new value set is different, mark the old values as old and insert the new ones.
-    if ($change) {
+	$no_dat=false;
+	if( !isset($value) ) $no_dat=true;
+	elseif( empty($value) and !is_numeric($value) ) $no_dat=true;
+	//If the new value set is different, mark the old values as old and insert the new ones.
+    if ($change and !$no_dat) {
         if (count($oldids)) {
             $query = 'UPDATE data_values SET superceded="' . $DTnow . '" WHERE id IN(' . implode(',', $oldids) . ')';
             if (mysql_query($query) === false)
                 return softDie('Bad SQL query marking old values' . mysql_error() . '<br />' . $query);
         }
-        foreach ($value as $val) {
+		
+        foreach ($value as $val) 
+		{
             if ($type == 'enum') {
                 if (!strlen($val)) {
                     $val = NULL;
@@ -558,16 +565,26 @@ function addval_d($studycat, $category_id, $fieldname, $value, $date) {
                     $val = $res['id'];
                 }
             }
-          //  if (isset($val)) {
-
-                // DW Change to get rid of the nulls
+			if( !isset($val) )
+			{
+				$no_dat=true;
 				
+			}
+			elseif( empty($val) and !is_numeric($val) )
+			{
+				$no_dat=true;
+				
+			}
+			else $no_dat=false;
+			
+            if (!is_null($val) and !$no_dat) 
+			{
 					$query = 'INSERT INTO data_values SET `added`="' . $DTnow . '",'
 							. '`field`=' . $field . ',studycat=' . $studycat . ',val_' . $type . '=' . esc($type, $val);
-
 					if (mysql_query($query) === false)
 						return softDie('Bad SQL query saving value');
-				//}
+			}
+						
         }
         $query = 'UPDATE clinical_study SET last_change="' . $DTnow . '" '
                 . 'WHERE larvol_id=(SELECT larvol_id FROM data_cats_in_study WHERE id=' . $studycat . ') LIMIT 1';

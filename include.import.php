@@ -500,6 +500,7 @@ function addval($studycat, $category_id, $fieldname, $value)
 	
 	//Detect if the "new" value is a change
 	$query = 'SELECT id,val_' . $type . ' AS "val" FROM data_values WHERE '
+			. 'val_' . $type . ' != \'\' AND val_' . $type . ' IS NOT NULL AND '
 			. 'studycat=' . $studycat . ' AND field=' . $field . ' AND superceded IS NULL';
 	$res = mysql_query($query);
 	if($res === false) return softDie('Bad SQL query getting value');
