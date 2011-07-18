@@ -6,13 +6,28 @@ if(!$db->loggedIn() || ($db->user->userlevel!='admin' && $db->user->userlevel!='
 	header('Location: ' . urlPath() . 'index.php');
 	exit;
 }
-require_once('include.search.php');
 
 ini_set('max_execution_time','360000');	//100 hours
 
-$mapping = institutionMapping();
-echo('Processing...<br />');
+$timeStart = microtime(true);
+$larvolId = ($_GET['id'])?$_GET['id']:null;
+$action = ($larvolId)?'search':'';
+if($larvolId)
+{
+	$fieldArr = calculateInstitutionTypeFieldIds();
+	refreshInstitutionType($larvolId,$action,$fieldArr);
+}
+else
+{
+	refreshInstitutionTypeLarvolIds();
+}
+$timeEnd = microtime(true);
+$timeTaken = $timeEnd-$timeStart;
+echo '<br/>Time Taken : '.$timeTaken;
 
+
+die;
+//old code
 mysql_query('BEGIN') or die("Couldn't begin SQL transaction");
 $query = 'SELECT nct_id,lead_sponsor FROM clinical_study';
 $res = mysql_query($query) or die('Bad SQL query getting studies');

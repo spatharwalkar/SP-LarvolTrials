@@ -277,7 +277,7 @@ function refreshRegions($larvolId,$action,$fieldArr)
 	
 }	
 /**
- * @name applyInactiveDate
+ * @name applyRegions
  * @tutorial Function applies derived field regions for each search result array passed.
  * @param array $arr is an array of search result from the search() function.
  * @author Jithu Thomas
@@ -397,6 +397,8 @@ function regionMapping()
 	
 }
 
+//start institution_type functions
+
 /* Gets the full institution mapping from disk.
 	Search relies on the institution_type field in the database, not this.
 */
@@ -428,3 +430,143 @@ function institutionMapping()
 	return $out;
 }
 
+/**
+ * @name refreshRegionLarvolIds
+ * @tutorial Calling this function all the available larvol_id's
+ * are retrieved and Institution Types are updated.
+ * @author Jithu Thomas
+ */
+function refreshInstitutionTypeLarvolIds()
+{
+	global $db;
+	
+	//calculate field Ids and store in an array since it requires db call
+	$fieldArr = calculateInstitutionTypeFieldIds();
+
+	$query = "select larvol_id from clinical_study";
+	$res = mysql_query($query);
+	while($row = mysql_fetch_array($res))
+	{
+		$larvolId = $row['larvol_id'];
+		refreshInstitutionType($larvolId, 'search',$fieldArr);
+	}	
+}
+
+
+/**
+ * @name calculateInstitutionTypeFieldIds
+ * @tutorial Calculate the field id's of fields required
+ * for calculating institution type
+ * @author Jithu Thomas
+ */
+function calculateInstitutionTypeFieldIds()
+{
+	$fieldnames = array('collaborator','lead_sponsor');
+	$fieldArr = array();
+	foreach($fieldnames as $name)
+	{
+		$fieldArr[$name] = getFieldId('NCT',$name);
+	}
+	return $fieldArr;
+}
+
+/**
+ * 
+ * @name refreshInstitutionType
+ * @tutorial Search function used to get the institution_type.
+ * If larvolId is present function searches for the specific larvolId and updates regions.
+ * If no larvolId is present all available larvolId's are listed and updates regions
+ * @param int $larvolId 
+ * @param var $action It is either empty string or search. Search is used for individual larvolIds
+ * @param array $fieldArr field arrays are calculated seperately to avoid unnecessary db calls for repeated calls to this function.
+ * @author Jithu Thomas
+ * 
+ */
+
+function refreshInstitutionType($larvolId,$action,$fieldArr)
+{
+	$param = new SearchParam();
+	$param->field = 'larvol_id';
+	$param->action = $action;
+	$param->value = $larvolId;
+	$param->strong = 1;
+	
+	$prm = array($param);
+	//pr($fieldArr);die;
+	$fieldnames = array('collaborator','lead_sponsor');
+	foreach($fieldnames as $name)
+	{ 
+		
+		$param = new SearchParam();
+		$param->field = '_'.$fieldArr[$name];
+		$param->action ='';
+		$param->value = '';
+		$param->strong = 1;
+		$prm[] = $param;
+		$list[] = $param->field;
+	
+	}	
+
+	
+	$res = search($prm,$list,NULL,NULL);	
+	applyInstitutionType($res);
+}
+
+/**
+ * @name applyInstitutionType
+ * @tutorial Function applies derived field institution_type for each search result array passed.
+ * @param array $arr is an array of search result from the search() function.
+ * @author Jithu Thomas
+ */
+function applyInstitutionType($arr)
+{
+	global $db;
+	foreach($arr as $arr);
+	$institution_type = 'other';
+	$all_sponsors = array();
+	$instMap = institutionMapping();
+	$larvol_id = $arr['larvol_id'];
+	//create the generic array for institution_type decision making.
+	if(isset($arr['NCT/collaborator']))
+	{
+		if(is_array($arr['NCT/collaborator']))
+		{
+			foreach($arr['NCT/collaborator'] as $sponsor)
+			{
+				$all_sponsors[] = $sponsor;
+			}
+		}
+		else
+		{
+			$all_sponsors[] = $arr['NCT/collaborator'];
+		}
+		
+	}
+	if(isset($arr['NCT/lead_sponsor']))
+	{
+		if(is_array($arr['NCT/lead_sponsor']))
+		{
+			foreach($arr['NCT/lead_sponsor'] as $sponsor)
+			{
+				$all_sponsors[] = $sponsor;
+			}
+		}
+		else
+		{
+			$all_sponsors[] = $arr['NCT/lead_sponsor'];
+		}
+		
+	}
+	foreach($all_sponsors as $a_sponsor)
+	{
+		if(strlen($a_sponsor) && isset($instMap[$a_sponsor]))
+		{
+			$institution_type = $instMap[$a_sponsor];
+			if($institution_type == 'industry') break;
+		}
+	}
+	echo 'Updating institution_type for larvol_id : '.$larvol_id.'<br/>';
+	$query = 'UPDATE clinical_study SET institution_type="' . $institution_type . '" WHERE larvol_id=' . $larvol_id . ' LIMIT 1';
+	if(mysql_query($query) === false) return softDie('Bad SQL query recording institution type<br/>');
+	
+}
