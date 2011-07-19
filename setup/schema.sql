@@ -341,6 +341,8 @@ CREATE TABLE IF NOT EXISTS `rpt_ott_searchdata` (
   KEY `result_set` (`result_set`(300))
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+ALTER TABLE `rpt_ott_header` CHANGE `header` `header` VARCHAR( 127 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL 
+
 ALTER TABLE `data_cats_in_study`
   ADD CONSTRAINT `data_cats_in_study_ibfk_1` FOREIGN KEY (`larvol_id`) REFERENCES `clinical_study` (`larvol_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `data_cats_in_study_ibfk_2` FOREIGN KEY (`category`) REFERENCES `data_categories` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;

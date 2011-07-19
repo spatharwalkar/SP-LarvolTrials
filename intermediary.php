@@ -501,12 +501,12 @@ class ContentManager
 				foreach($c_params as $k => $v) {
 					$vv = explode('.', $v);
 					if($k != 0) {
-						if(isset($vv[3])) {
-							$row_upm_arr[$k] = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[3]);
-						}
-					} else {
 						if(isset($vv[2])) {
 							$row_upm_arr[$k] = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[2]);
+						}
+					} else {
+						if(isset($vv[3])) {
+							$row_upm_arr[$k] = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[3]);
 						}
 					}
 				}
