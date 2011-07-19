@@ -452,7 +452,6 @@ class ContentManager
 			$page = array();$ins_params = array();
 			
 			if(isset($_GET['results']) && isset($_GET['type'])) {
-			
 				$c_params 	= explode(',', gzinflate(base64_decode($_GET['results'])));
 				$this->time_machine = $_GET['time'];
 				$vv = explode('.', $c_params[0]);
@@ -462,9 +461,7 @@ class ContentManager
 					$t = getLinkDetails('rpt_ott_header', 'header', 'id', $vv[0]);
 				}
 				$params_arr = $c_params;
-				
 			} else {
-			
 				$c_params 	= unserialize(gzinflate(base64_decode($_GET['cparams'])));
 				$t 			= ($c_params['type'] == 'col') ? $c_params['columnlabel'] : $c_params['rowlabel'];
 				$params_arr = $_GET['params'];
@@ -882,7 +879,6 @@ class ContentManager
 			
 			foreach($arrr as $k => $v) {
 				foreach($v as $kk => $vv) {
-				
 					if($kk != 'NCT/condition' && $kk != 'NCT/intervention_name' && 'NCT/lead_sponsor')
 						$arr[$k][$kk] = (is_array($vv)) ? implode(' ', $vv) : $vv;
 					else
@@ -1131,18 +1127,29 @@ class ContentManager
 	}
 	
 	function getNonAssocUpm($non_assoc_upm_params) {
-		
+
 		$upm_arr = array();$record_arr = array();$unmatched_upm_arr = array();
 		$upm_arr = getNonAssocUpmRecords($non_assoc_upm_params);
 		$record_arr = getUnmatchedUpmChanges($upm_arr, $this->time_machine, $this->edited);
-		
+
+		foreach($record_arr as $key => $val) {
+			if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) { 
+				if(($val['event_description'] == $val['edited']['event_description']) && ($val['event_link'] == $val['edited']['event_link']) && 
+				($val['event_type'] == $val['edited']['event_type']) && ($val['start_date'] == $val['edited']['start_date']) && 
+				($val['start_date_type'] == $val['edited']['start_date_type']) && ($val['end_date'] == $val['edited']['end_date']) && 
+				($val['end_date_type'] == $val['edited']['end_date_type'])){ 
+					unset($record_arr[$key]);
+				}
+			}			
+		}
+
 		if(!empty($record_arr)) {
 		
 			$cntr = 0;
 			echo ('<table width="100%" border="0" cellpadding="4" cellspacing="0" class="manage">'
-				. '<tr><th style="width:490px;" nowrap="nowrap">'
+				. '<tr><th style="width:494px;" nowrap="nowrap">'
 				. 'Upcoming Product Milestones not associated with a specific trial</th>'
-				. '<th style="width:130px;">Milestone Type</th>'
+				. '<th style="width:138px;">Milestone Type</th>'
 				. '<th style="width:340px;">Status</th>'
 				. '<th style="width:30px;" title="MM/YY">Start</th>'
 				. '<th style="width:30px;" title="MM/YY">End</th>'
@@ -1156,7 +1163,6 @@ class ContentManager
 			
 				$un_status = '';$class = '';$title = '';$attr = '';
 				$title_link_color = 'color:#000;';$date_style = 'color:gray;';
-				
 				
 				if($cntr%2 == 1) {
 		
@@ -2005,6 +2011,7 @@ function getCompletionChart($start_month, $start_year, $end_month, $end_year, $c
 				. '<td colspan="12">&nbsp;</td><td colspan="12">&nbsp;</td><td colspan="3" ' 
 				. $attr_two . '>&nbsp;</td>';	
 					
+
 		} else if($start_year == $second_yr) {
 		
 			$value = '<td colspan="12">&nbsp;</td>'
@@ -2233,7 +2240,6 @@ function getUnmatchedUpmChanges($record_arr, $time, $edited) {
 
 	foreach($record_arr as $key => $value) {
 	
-		//echo "<br/>==>".
 		$sql = "SELECT `id`, `event_type`, `event_description`, `event_link`, `result_link`, `start_date`, `start_date_type`, `end_date`, `end_date_type` "
 				. " FROM `upm_history` WHERE `id` = '" . $value['id'] . "' AND (`superceded` < '" . date('Y-m-d',$time) . "' AND `superceded` >= '" 
 				. date('Y-m-d',strtotime($edited,$time)) . "') ORDER BY `superceded` DESC LIMIT 0,1 ";
@@ -2253,7 +2259,6 @@ function getUnmatchedUpmChanges($record_arr, $time, $edited) {
 			
 		}
 	}
-	
 	return $record_arr;
 }
 
