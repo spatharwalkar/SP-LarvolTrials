@@ -139,21 +139,25 @@
          **/
         function CreateTable($name, $fields) {
             mysql_select_db($this->database, $this->dbp);
-
         	$primary_keys = array();
         	$index_keys = array();
         	$unique_keys = array();
+        	$special_mul_keys = null;
             $sql_f = array();
             for ($i = 0; $i < count($fields); $i++) {
             	if ($fields[$i]['key_primary'] == 'PRIMARY') {
                 	$primary_keys[] = $fields[$i]['name'];
                 }
-                if($fields[$i]['indexFlag']===true)
+                if($fields[$i]['indexFlag']===true && $fields[$i]['key_primary'] != 'PRIMARY' )
                 {
-                	if($fields[$i]['Non_unique']==1)
+                	if($fields[$i]['Non_unique']==1 &&  $fields[$i]['key']!='MUL')
                 	{
                 		$index_keys[] = $fields[$i]['name'];
                 	}
+                    if($fields[$i]['Non_unique']==1 &&  $fields[$i]['key']=='MUL')
+                	{
+                		$special_mul_key = ', KEY `'.$fields[$i]['name'].'` (`'.$fields[$i]['name'].'`('.$fields[$i]['Sub_part'].'))';
+                	}                	
                 	if($fields[$i]['Non_unique']==0)
                 	{
                 		$unique_keys[] = $fields[$i]['name'];
@@ -162,7 +166,7 @@
                 $sql_f[] = "`{$fields[$i]['name']}` {$fields[$i]['type']} " . ($fields[$i]['null'] =='YES'?'' : 'NOT') . ' NULL' . (strlen($fields[$i]['default']) > 0 ? " default '{$fields[$i]['default']}'" : '') . ($fields[$i]['extra'] == 'auto_increment' ? ' auto_increment' : '');
             }
 
-            $sql = "CREATE TABLE `{$name}` (" . implode(', ', $sql_f) . (count($primary_keys) > 0 ? ", PRIMARY KEY (`" . implode('`, `', $primary_keys) . "`)" : '') . (count($index_keys) > 0 ? ", INDEX (`" . implode('`, `', $index_keys) . "`)" : '') . (count($unique_keys) > 0 ? ", UNIQUE (`" . implode('`, `', $unique_keys) . "`)" : '') . ')';
+            $sql = "CREATE TABLE `{$name}` (" . implode(', ', $sql_f) . (count($primary_keys) > 0 ? ", PRIMARY KEY (`" . implode('`, `', $primary_keys) . "`)" : '') . (count($index_keys) > 0 ? ", INDEX (`" . implode('`, `', $index_keys) . "`)" : '') . (count($unique_keys) > 0 ? ", UNIQUE (`" . implode('`, `', $unique_keys) . "`)" : '') .  ($special_mul_key?$special_mul_key:'') . ')';
 			echo($sql.';<br />');
             return true;
         }

@@ -147,7 +147,7 @@
                         	$k = $this->GetFieldIndex($fields_sync, $fields_home[$j]['name']);
                             if ($fields_sync[$k]['type'] != $fields_home[$j]['type'] ||
                                 $fields_sync[$k]['null'] != $fields_home[$j]['null'] ||
-                                $fields_sync[$k]['key'] != $fields_home[$j]['key'] ||
+                                ($fields_sync[$k]['key'] != $fields_home[$j]['key'] && ($fields_home[$j]['key']!='UNI'&&$fields_sync[$k]['key'] !='UNI')) ||
                                 $fields_sync[$k]['default'] != $fields_home[$j]['default'] ||
                                 $fields_sync[$k]['extra'] != $fields_home[$j]['extra']) {
 	                                if (!$db_sync->ChangeTableField($tables_home[$i], $fields_home[$j]['name'], $fields_home[$j],$fields_sync[$k])) {
