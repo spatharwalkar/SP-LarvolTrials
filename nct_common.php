@@ -519,8 +519,9 @@ function addval_d($studycat, $category_id, $fieldname, $value, $date) {
         return softDie('Bad SQL query getting value');
     $oldids = array();
     $oldvals = array();
+	$t_value=array_flip($value);
     while ($row = mysql_fetch_assoc($res)) {
-        $oldids[] = $row['id'];
+        
         if ($type == 'enum' && $row['val'] !== NULL) {
             $query2 = 'SELECT `value` FROM data_enumvals WHERE id=' . $row['val'] . ' LIMIT 1';
             $res2 = mysql_query($query2);
@@ -532,10 +533,26 @@ function addval_d($studycat, $category_id, $fieldname, $value, $date) {
             $row['val'] = $res2['value'];
         }
 
-        $oldvals[] = $row['val'];
+        if ( array_key_exists($row['val'], $t_value) )
+		{
+			$tvar2=$t_value[$row['val']];
+			unset($value[$tvar2]);
+		}
+		else
+		{
+			$oldvals[] = $row['val'];
+			$oldids[] = $row['id'];
+		}
     }
+	
     sort($value);
+	$value=array_unique($value);
+	$value=array_values($value);
+
     sort($oldvals);
+	$oldvals=array_unique($oldvals);
+	$oldvals=array_values($oldvals);
+	
     $change = !($value == $oldvals);
 	$no_dat=false;
 	if( !isset($value) ) $no_dat=true;
