@@ -434,28 +434,56 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 			
 				//row labels
 				//checking whether the row header id already exists and if not inserting a new record into the rpt_ott_header table
-				$query = "SELECT `id` FROM `rpt_ott_header` WHERE `header` = '" . $rows[$row] . "' ";
-				$res = mysql_query($query) or die('Bad SQL query getting id for the header result_set');
+				$query 		= "SELECT `id` FROM `rpt_ott_header` WHERE `header` = '" . mysql_real_escape_string($rows[$row]) . "' ";
+				$time_start = microtime(true);
+				$res		= mysql_query($query) or tex('Bad SQL query getting id for the header result_set');
+				$time_end 	= microtime(true);
+				$time_taken = $time_end-$time_start;
+				$log 		= 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments: getting id for the row headers.';
+				$logger->info($log);
+				unset($log);
+				
 				if(mysql_num_rows($res) > 0) {
-					$res = mysql_fetch_assoc($res);
+					$res 	= mysql_fetch_assoc($res);
 					$row_id = $res['id'];
 				} else {
-					$query = "INSERT INTO `rpt_ott_header`(`header`, `created`, `last_referenced`) VALUES('" . $rows[$row] . "', NOW(), NOW()) ";
-					mysql_query($query) or die('Bad SQL Query saving result_set');
-					$row_id = mysql_insert_id();
+					$query 		= "INSERT INTO `rpt_ott_header`(`header`, `created`, `last_referenced`) VALUES('" . mysql_real_escape_string($rows[$row]) 
+									. "', NOW(), NOW()) ";
+					$time_start = microtime(true);
+					$res 		= mysql_query($query) or tex('Bad SQL Query saving row headers');
+					$row_id 	= mysql_insert_id();
+					$time_end 	= microtime(true);
+					$time_taken = $time_end-$time_start;
+					$log		= 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments: inserting record for row headers.';
+					$logger->info($log);
+					unset($log);
 				}
 				
 				//column labels
 				//checking whether the column header id already exists and if not inserting a new record into the rpt_ott_header table
-				$query = "SELECT `id` FROM `rpt_ott_header` WHERE `header` = '" . $columns[$column] . "' ";
-				$res = mysql_query($query) or die('Bad SQL query getting id for the header result_set');
+				$query 		= "SELECT `id` FROM `rpt_ott_header` WHERE `header` = '" . mysql_real_escape_string($columns[$column]) . "' ";
+				$time_start = microtime(true);
+				$res 		= mysql_query($query) or tex('Bad SQL query getting id for the header result_set');
+				$time_end	= microtime(true);
+				$time_taken	= $time_end-$time_start;
+				$log		= 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments: getting id for the column headers.';
+				$logger->info($log);
+				unset($log);
+				
 				if(mysql_num_rows($res) > 0) {
 					$res = mysql_fetch_assoc($res);
 					$column_id = $res['id'];
 				} else {
-					$query = "INSERT INTO `rpt_ott_header`(`header`, `created`, `last_referenced`) VALUES('" . $columns[$column] . "', NOW(), NOW()) ";
-					mysql_query($query) or die('Bad SQL Query saving result_set');
-					$column_id = mysql_insert_id();
+					$query 		= "INSERT INTO `rpt_ott_header`(`header`, `created`, `last_referenced`) VALUES('" . mysql_real_escape_string($columns[$column]) 
+									. "', NOW(), NOW()) ";
+					$time_start = microtime(true);
+					$res 		= mysql_query($query) or tex('Bad SQL Query saving column headers');
+					$column_id 	= mysql_insert_id();
+					$time_end	= microtime(true);
+					$time_taken	= $time_end-$time_start;
+					$log		= 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments: inserting record for column headers.';
+					$logger->info($log);
+					unset($log);
 				}
 								
 				$upm_id = '';
@@ -464,15 +492,29 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 					//upm values
 					$upm_result_set = implode(",",$cell_upm);
 					//checking whether the upm id already exists and if not inserting a new record into the rpt_ott_upm table
-					$query = "SELECT `id` FROM `rpt_ott_upm` WHERE `intervention_name` = '" . $upm_result_set . "' ";
-					$res = mysql_query($query) or die('Bad SQL query getting id for the upm result_set');
+					$query 		= "SELECT `id` FROM `rpt_ott_upm` WHERE `intervention_name` = '" . mysql_real_escape_string($upm_result_set) . "' ";
+					$time_start = microtime(true);
+					$res 		= mysql_query($query) or tex('Bad SQL query getting id for the upm result_set');
+					$time_end	= microtime(true);
+					$time_taken	= $time_end-$time_start;
+					$log		= 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments: getting id for upm result_set.';
+					$logger->info($log);
+					unset($log);
+					
 					if(mysql_num_rows($res) > 0) {
-						$res = mysql_fetch_assoc($res);
+						$res 	= mysql_fetch_assoc($res);
 						$upm_id = $res['id'];
 					} else {
-						$query = "INSERT INTO `rpt_ott_upm`(`intervention_name`, `created`, `last_referenced`) VALUES('" . $upm_result_set . "', NOW(), NOW()) ";
-						mysql_query($query) or die('Bad SQL Query saving result_set');
-						$upm_id = mysql_insert_id();
+						$query 		= "INSERT INTO `rpt_ott_upm`(`intervention_name`, `created`, `last_referenced`) VALUES('" 
+										. mysql_real_escape_string($upm_result_set) . "', NOW(), NOW()) ";
+						$time_start = microtime(true);
+						$res 		= mysql_query($query) or tex('Bad SQL Query saving upm result_set');
+						$upm_id 	= mysql_insert_id();
+						$time_end	= microtime(true);
+						$time_taken	= $time_end-$time_start;
+						$log		= 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments: inserting record for upm result_set.';
+						$logger->info($log);
+						unset($log);
 					}
 				}	
 			}
@@ -484,15 +526,28 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 					
 					$id_result_set = implode(",",$all_ids);//all ids
 					//checking whether the trials id already exists and if not inserting a new record into the rpt_ott_trials table
-					$query = "SELECT `id` FROM `rpt_ott_trials` WHERE `result_set` = '" . $id_result_set . "' ";
-					$res = mysql_query($query) or die('Bad SQL query getting id for the trials result_set');
+					$query 		= "SELECT `id` FROM `rpt_ott_trials` WHERE `result_set` = '" . $id_result_set . "' ";
+					$time_start = microtime(true);
+					$res 		= mysql_query($query) or tex('Bad SQL query getting id for the trials result_set');
+					$time_end	= microtime(true);
+					$time_taken	= $time_end-$time_start;
+					$log		= 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments: getting id for trials result_set.';
+					$logger->info($log);
+					unset($log);
+					
 					if(mysql_num_rows($res) > 0) {
 						$res = mysql_fetch_assoc($res);
 						$trials_id = $res['id'];
 					} else {
-						$query = "INSERT INTO `rpt_ott_trials`(`result_set`, `created`, `last_referenced`) VALUES('" . $id_result_set . "', NOW(), NOW()) ";
-						mysql_query($query) or die('Bad SQL Query saving result_set');
-						$trials_id = mysql_insert_id();
+						$query 		= "INSERT INTO `rpt_ott_trials`(`result_set`, `created`, `last_referenced`) VALUES('" . $id_result_set . "', NOW(), NOW()) ";
+						$time_start = microtime(true);
+						$res 		= mysql_query($query) or tex('Bad SQL Query saving trials result_set');
+						$trials_id 	= mysql_insert_id();
+						$time_end	= microtime(true);
+						$time_taken	= $time_end-$time_start;
+						$log		= 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments: inserting record for trials result_set.';
+						$logger->info($log);
+						unset($log);
 					}
 					$results[$row][$column]->{'link'} = 'results=' . $row_id . '.' . $column_id . '.' . $trials_id;
 					if($upm_id != '')
@@ -531,15 +586,29 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 				
 					$search_result_set = serialize(mysql_real_escape_string($params));
 					//checking whether the trials id already exists and if not inserting a new record into the rpt_ott_trials table
-					$query = "SELECT `id` FROM `rpt_ott_searchdata` WHERE `result_set` = '" . $search_result_set . "' ";
-					$res = mysql_query($query) or die('Bad SQL query getting id for the trials result_set');
+					$query 		= "SELECT `id` FROM `rpt_ott_searchdata` WHERE `result_set` = '" . $search_result_set . "' ";
+					$time_start = microtime(true);
+					$res 		= mysql_query($query) or tex('Bad SQL query getting id for the trials result_set');
+					$time_end	= microtime(true);
+					$time_taken	= $time_end-$time_start;
+					$log		= 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments: inserting record for trials result_set.';
+					$logger->info($log);
+					unset($log);
+					
 					if(mysql_num_rows($res) > 0) {
 						$res = mysql_fetch_assoc($res);
 						$searchdata_id = $res['id'];
 					} else {
-						$query = "INSERT INTO `rpt_ott_searchdata`(`result_set`, `created`, `last_referenced`) VALUES('" . $search_result_set . "', NOW(), NOW()) ";
-						mysql_query($query) or die('Bad SQL Query saving result_set');
+						$query 		= "INSERT INTO `rpt_ott_searchdata`(`result_set`, `created`, `last_referenced`) VALUES('" . $search_result_set 
+										. "', NOW(), NOW()) ";
+						$time_start = microtime(true);
+						$res 		= mysql_query($query) or tex('Bad SQL Query saving trials result_set');
 						$searchdata_id = mysql_insert_id();
+						$time_end	= microtime(true);
+						$time_taken	= $time_end-$time_start;
+						$log		= 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments: inserting record for trials result_set.';
+						$logger->info($log);
+						unset($log);
 					}
 					
 					$results[$row][$column]->{'link'} = 'results=' . $row_id . '.' . $column_id . '.s' . $searchdata_id;
