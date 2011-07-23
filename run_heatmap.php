@@ -843,15 +843,18 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 			$link	.= 'cparams=' . rawurlencode(base64_encode(gzdeflate(serialize(array('type' => 'row', 'rowlabel' => $rows[$row])))));
 		}
 		
+		$index = 0;
 		foreach($columns as $k => $v) {
 			
 			if($link_generation_method == 'db') {
 				if($countactive) {
 					if(strlen($results[$row][$k]->num)) {
-						$new_sub_link .= '&' . str_replace("results","results[$k]",$results[$row][$k]->{'link'});
+						++$index;
+						$new_sub_link .= '&' . str_replace("results","results[$index]",$results[$row][$k]->{'link'});
 					}
 				} else if($results[$row][$k]->num) {
-					$new_sub_link .= '&' . str_replace("results","results[$k]",$results[$row][$k]->{'link'});
+					++$index;
+					$new_sub_link .= '&' . str_replace("results","results[$index]",$results[$row][$k]->{'link'});
 				}
 			} else {
 				$sub_link = '';
@@ -921,15 +924,18 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 			$link	.= 'cparams=' . rawurlencode(base64_encode(gzdeflate(serialize(array('type' => 'col', 'columnlabel' => $columns[$col])))));
 		}
 		
+		$index = 0;
 		foreach($rows as $k => $v) {	
 		
 			if($link_generation_method == 'db') {
 				if($countactive) {
 					if(strlen($results[$k][$col]->num)) {
-						$new_sub_link .= '&' . str_replace("results","results[$k]",$results[$k][$col]->{'link'});
+						++$index;
+						$new_sub_link .= '&' . str_replace("results","results[$index]",$results[$k][$col]->{'link'});
 					}
 				} else if($results[$k][$col]->num) {
-					$new_sub_link .= '&' . str_replace("results","results[$k]",$results[$k][$col]->{'link'});
+					++$index;
+					$new_sub_link .= '&' . str_replace("results","results[$index]",$results[$k][$col]->{'link'});
 				}
 			} else {
 				$sub_link = '';
