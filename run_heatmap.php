@@ -524,38 +524,48 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 			{ 	
 				if($link_generation_method == 'db') {
 					
-					$id_result_set = implode(",",$all_ids);//all ids
-					//checking whether the trials id already exists and if not inserting a new record into the rpt_ott_trials table
-					$query 		= "SELECT `id` FROM `rpt_ott_trials` WHERE `result_set` = '" . $id_result_set . "' ";
-					$time_start = microtime(true);
-					$res 		= mysql_query($query) or tex('Bad SQL query getting id for the trials result_set');
-					$time_end	= microtime(true);
-					$time_taken	= $time_end-$time_start;
-					$log		= 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments: getting id for trials result_set.';
-					$logger->info($log);
-					unset($log);
-					
-					if(mysql_num_rows($res) > 0) {
-						$res = mysql_fetch_assoc($res);
-						$trials_id = $res['id'];
-					} else {
-						$query 		= "INSERT INTO `rpt_ott_trials`(`result_set`, `created`, `last_referenced`) VALUES('" . $id_result_set . "', NOW(), NOW()) ";
+					$flag = false;
+					if($countactive) { //for count active no need to check count more than 0 in order to link even if count is zero
+						if(is_array($all_ids) && !empty($all_ids)) {
+							$flag = true;
+						}
+					} else if($rescount > 0) {
+						$flag = true;
+					}
+					if($flag == true) {
+						$id_result_set = implode(",",$all_ids);//all ids
+						//checking whether the trials id already exists and if not inserting a new record into the rpt_ott_trials table
+						$query 		= "SELECT `id` FROM `rpt_ott_trials` WHERE `result_set` = '" . $id_result_set . "' ";
 						$time_start = microtime(true);
-						$res 		= mysql_query($query) or tex('Bad SQL Query saving trials result_set');
-						$trials_id 	= mysql_insert_id();
+						$res 		= mysql_query($query) or tex('Bad SQL query getting id for the trials result_set');
 						$time_end	= microtime(true);
 						$time_taken	= $time_end-$time_start;
-						$log		= 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments: inserting record for trials result_set.';
+						$log		= 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments: getting id for trials result_set.';
 						$logger->info($log);
 						unset($log);
+					
+						if(mysql_num_rows($res) > 0) {
+							$res = mysql_fetch_assoc($res);
+							$trials_id = $res['id'];
+						} else {
+							$query 		= "INSERT INTO `rpt_ott_trials`(`result_set`, `created`, `last_referenced`) VALUES('" . $id_result_set . "', NOW(), NOW()) ";
+							$time_start = microtime(true);
+							$res 		= mysql_query($query) or tex('Bad SQL Query saving trials result_set');
+							$trials_id 	= mysql_insert_id();
+							$time_end	= microtime(true);
+							$time_taken	= $time_end-$time_start;
+							$log		= 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments: inserting record for trials result_set.';
+							$logger->info($log);
+							unset($log);
+						}
+						$results[$row][$column]->{'link'} = 'results=' . $row_id . '.' . $column_id . '.' . $trials_id;
+						if($upm_id != '')
+							$results[$row][$column]->{'link'} .= '.' . $upm_id;
+						if($bomb)
+							$results[$row][$column]->{'link'} .= '&bomb=' . $results[$row][$column]->bomb;
+							
+						$results[$row][$column]->{'link'} .= '&time=' . $time_machine;	
 					}
-					$results[$row][$column]->{'link'} = 'results=' . $row_id . '.' . $column_id . '.' . $trials_id;
-					if($upm_id != '')
-						$results[$row][$column]->{'link'} .= '.' . $upm_id;
-					if($bomb)
-						$results[$row][$column]->{'link'} .= '&bomb=' . $results[$row][$column]->bomb;
-						
-					$results[$row][$column]->{'link'} .= '&time=' . $time_machine;	
 				} else {	
 					//pass all IDs
 					$packedIDs = '';
