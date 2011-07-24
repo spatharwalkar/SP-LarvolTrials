@@ -11,6 +11,7 @@ define('DB_TEMP', 'LT_temp');
 
 //Enable or disable mail. If disabled, mail contents will be written to a text file.
 define('MAIL_ENABLED', true);
+define('MAX_EMAIL_FILES', 10);  // maximum no. of email files to keep (including attachments)
 
 /* YOURLS options.
 	You must change these to reflect how you set up YOURLS

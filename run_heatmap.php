@@ -9,7 +9,6 @@ require_once('class.phpmailer.php');
 
 ini_set('memory_limit','-1');
 ini_set('max_execution_time','36000');	//10 hours
-
 if(isset($_GET['direct_run_heatmap_id'])) runHeatmap((int)$_GET['direct_run_heatmap_id'], false);
 
 /* Runs the heatmap with the given ID, outputs to Excel
@@ -789,10 +788,48 @@ function heatmapAsWord($info, $rows, $columns, $results, $p_colors, $return, $ph
 		$mail->AddAddress($db->user->email);
 		$mail->Subject = SITE_NAME . ' manual report ' . date("Y-m-d H.i.s", $now) . ' - ' . substr($name,0,20);
 		$mail->Body = 'Attached is the report you generated earlier.';
+		$current_filename=substr($name,0,20).'_'.date('Y-m-d_H.i.s', $now);
 		$mail->AddStringAttachment($out,
-					   substr($name,0,20).'_'.date('Y-m-d_H.i.s', $now).'.doc',
+					   $current_filename.'.doc',
 					   'base64',
 					   'Content-Type: application/msword');
+		
+			if(!MAIL_ENABLED)
+			{
+				if(!is_dir('email_files')) mkdir("email_files") or die("could not create directory to write.");
+				$myFile = 'email_files/'.$current_filename.'.txt';
+				$fh = fopen($myFile, 'w') or die("can't open file");
+				$MyText  = 'To:'.$db->user->email ."\r\n";
+				$MyText .= 'Subject:'.SITE_NAME . ' manual report ' .$current_filename. "\r\n\r\n";
+				$MyText .=  $mail->Body."\r\n\r\n";
+				fwrite($fh, $MyText)  or die("could not write to file");
+				fclose($fh);
+				
+				$cwd = getcwd();
+				chdir ('email_files');
+				$handle = opendir('.');
+				$files=array();
+				$cnt=0;
+				while (false !== ($file = readdir($handle))) 
+				{
+					$cnt=$cnt+1;
+					if($file<>'.' and $file<>'..') $files[(filemtime($file)+$cnt)]=$file;
+				}
+				krsort($files);
+				$i=1;
+				foreach($files as $key=>$value)
+				{
+					if($i>MAX_EMAIL_FILES) unlink($value)  or die("could not delete extra email files."); 
+					$i=$i+1;
+				}
+			
+				chdir ($cwd);
+				
+				
+			}
+					   
+					   
+					   
 		@$mail->Send();
 		ob_end_clean();
 		exit;
@@ -1102,10 +1139,45 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 			$mail->AddAddress($db->user->email);
 			$mail->Subject = SITE_NAME . ' manual report ' . date("Y-m-d H.i.s", $now) . ' - ' . substr($name,0,20);
 			$mail->Body = 'Attached is the report you generated earlier.';
+			$current_filename=substr($name,0,20).'_'.date('Y-m-d_H.i.s', $now);
 			$mail->AddStringAttachment($content,
-									   substr($name,0,20).'_'.date('Y-m-d_H.i.s', $now).'.xlsx',
+									   $current_filename.'.xlsx',
 									   'base64',
 									   'Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');		
+			
+			if(!MAIL_ENABLED)
+			{
+				if(!is_dir('email_files')) mkdir("email_files") or die("could not create directory to write.");
+				$myFile = 'email_files/'.$current_filename.'.txt';
+				$fh = fopen($myFile, 'w') or die("can't open file");
+				$MyText  = 'To:'.$db->user->email ."\r\n";
+				$MyText .= 'Subject:'.SITE_NAME . ' manual report ' .$current_filename. "\r\n\r\n";
+				$MyText .=  $mail->Body."\r\n\r\n";
+				fwrite($fh, $MyText)  or die("could not write to file");
+				fclose($fh);
+				
+				$cwd = getcwd();
+				chdir ('email_files');
+				$handle = opendir('.');
+				$files=array();
+				$cnt=0;
+				while (false !== ($file = readdir($handle))) 
+				{
+					$cnt=$cnt+1;
+					if($file<>'.' and $file<>'..') $files[(filemtime($file)+$cnt)]=$file;
+				}
+				krsort($files);
+				$i=1;
+				foreach($files as $key=>$value)
+				{
+					if($i>MAX_EMAIL_FILES) unlink($value)  or die("could not delete extra email files."); 
+					$i=$i+1;
+				}
+			
+				chdir ($cwd);
+				
+				
+			}
 			@$mail->Send();
 			ob_end_clean();
 		}

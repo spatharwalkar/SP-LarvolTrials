@@ -819,11 +819,12 @@ if($current_tasks_count==0)
 				foreach($emails as $email) $mail->AddAddress($email);
 				$mail->Subject = SITE_NAME . ' scheduled reports ' . date("Y-m-d H.i.s") . ' - ' . $sch_item['name']. ' ('.$row['name'].')';
 				$mail->Body = 'Attached is the report ' . $row['name'].' indicated in the schedule item ' . $sch_item['name'];
-				
+				$current_filename=		   substr($fname,0,20).'_'.date('Y-m-d_H.i.s');
 				foreach($files as $fname => $file)
 				{
+					$current_filename=		   substr($fname,0,20).'_'.date('Y-m-d_H.i.s');
 					$mail->AddStringAttachment($file,
-											   substr($fname,0,20).'_'.date('Y-m-d_H.i.s').'.xlsx',
+											   $current_filename.'.xlsx',
 											   'base64',
 											   'Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');		
 				}
@@ -834,6 +835,41 @@ if($current_tasks_count==0)
 			{
 				echo(' -No files to send.' . $nl);
 			}
+			
+			if(!MAIL_ENABLED)
+			{
+				if(!is_dir('email_files')) mkdir("email_files") or die("could not create directory to write.");
+				$myFile = 'email_files/'.$current_filename.'.txt';
+				$fh = fopen($myFile, 'w') or die("can't open file");
+				$MyText  = 'To:'.$emails ."\r\n";
+				$MyText .= 'Subject:'.SITE_NAME . ' scheduled reports '.$current_filename. "\r\n\r\n";
+				$MyText .=  $mail->Body."\r\n\r\n";
+				fwrite($fh, $MyText)  or die("could not write to file");
+				fclose($fh);
+				
+				$cwd = getcwd();
+				chdir ('email_files');
+				$handle = opendir('.');
+				$files=array();
+				$cnt=0;
+				while (false !== ($file = readdir($handle))) 
+				{
+					$cnt=$cnt+1;
+					if($file<>'.' and $file<>'..') $files[(filemtime($file)+$cnt)]=$file;
+				}
+				krsort($files);
+				$i=1;
+				foreach($files as $key=>$value)
+				{
+					if($i>MAX_EMAIL_FILES) unlink($value)  or die("could not delete extra email files."); 
+					$i=$i+1;
+				}
+			
+				chdir ($cwd);
+				
+				
+			}
+			
 			/************************************ Step 4 ****************************************/
 			posix_kill(getmypid(),1);
 		}

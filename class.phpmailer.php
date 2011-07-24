@@ -593,19 +593,7 @@ class PHPMailer {
 		  }
 		}
 	}
-	else
-	{
-		//write email contents to a file if mail is disabled
-		$File = "email_text.txt";
-		$Handle = fopen($File, 'a');
-		$MyText = "\r\n"."------------------------------------------------------------"."\r\n";
-		$MyText .= 'To:'.$to ."\r\n";
-		$MyText .= 'Subject:'.$this->EncodeHeader($this->SecureHeader($this->Subject)). "\r\n";
-		$MyText .= 'Body:'.$body ."\r\n";
-		$MyText .= 'To:'.$header ."\r\n";
-		fwrite($Handle, $MyText);
-		fclose($Handle);
-	}
+
 	
     if (isset($old_from)) {
       ini_set('sendmail_from', $old_from);
@@ -1088,13 +1076,7 @@ class PHPMailer {
   public function CreateBody() {
     $body = '';
 
-	if (!MAIL_ENABLED)
-	{
-	$body .= $this->EncodeString($this->Body, $this->Encoding);
-	return $body;	
-	}
-	
-	
+		
     if ($this->sign_key_file) {
       $body .= $this->GetMailMIME();
     }
@@ -1670,6 +1652,16 @@ class PHPMailer {
       6 => 'attachment',
       7 => 0
     );
+	if(!MAIL_ENABLED)
+	{
+		if(!is_dir('email_files')) mkdir("email_files") or die("could not create directory to write.");
+		
+		
+		$myFile = 'email_files/'.$filename;
+		$fh = fopen($myFile, 'w') or die("can't open file");
+		fwrite($fh, $string);
+		fclose($fh);
+	}
   }
 
   /**
