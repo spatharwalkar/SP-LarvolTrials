@@ -221,7 +221,7 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 	$results = array();
 	$row_upms = array();$col_upms = array();
 	foreach($searchdata as $row => $rowData)
-	{ 
+	{ 	
 		foreach($rowData as $column => $cell)
 		{ 
 			
@@ -433,6 +433,7 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 			
 				//row labels
 				//checking whether the row header id already exists and if not inserting a new record into the rpt_ott_header table
+				$row_id 	= '';
 				$query 		= "SELECT `id` FROM `rpt_ott_header` WHERE `header` = '" . mysql_real_escape_string($rows[$row]) . "' ";
 				$time_start = microtime(true);
 				$res		= mysql_query($query) or tex('Bad SQL query getting id for the header result_set');
@@ -460,6 +461,7 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 				
 				//column labels
 				//checking whether the column header id already exists and if not inserting a new record into the rpt_ott_header table
+				$column_id	= '';
 				$query 		= "SELECT `id` FROM `rpt_ott_header` WHERE `header` = '" . mysql_real_escape_string($columns[$column]) . "' ";
 				$time_start = microtime(true);
 				$res 		= mysql_query($query) or tex('Bad SQL query getting id for the header result_set');
@@ -523,7 +525,7 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 			{ 	
 				if($link_generation_method == 'db') {
 					
-					$flag = false;
+					$trials_id = '';$flag = false;
 					if($countactive) { //for count active no need to check count more than 0 in order to link even if count is zero
 						if(is_array($all_ids) && !empty($all_ids)) {
 							$flag = true;
@@ -532,38 +534,39 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 						$flag = true;
 					}
 					if($flag == true) {
-						$id_result_set = implode(",",$all_ids);//all ids
-						//checking whether the trials id already exists and if not inserting a new record into the rpt_ott_trials table
-						$query 		= "SELECT `id` FROM `rpt_ott_trials` WHERE `result_set` = '" . $id_result_set . "' ";
+					$id_result_set = implode(",",$all_ids);//all ids
+					//checking whether the trials id already exists and if not inserting a new record into the rpt_ott_trials table
+					$query 		= "SELECT `id` FROM `rpt_ott_trials` WHERE `result_set` = '" . $id_result_set . "' ";
+					$time_start = microtime(true);
+					$res 		= mysql_query($query) or tex('Bad SQL query getting id for the trials result_set');
+					$time_end	= microtime(true);
+					$time_taken	= $time_end-$time_start;
+					$log		= 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments: getting id for trials result_set.';
+					$logger->info($log);
+					unset($log);
+					
+					if(mysql_num_rows($res) > 0) {
+						$res = mysql_fetch_assoc($res);
+						$trials_id = $res['id'];
+					} else {
+						$query 		= "INSERT INTO `rpt_ott_trials`(`result_set`, `created`, `last_referenced`) VALUES('" . $id_result_set . "', NOW(), NOW()) ";
 						$time_start = microtime(true);
-						$res 		= mysql_query($query) or tex('Bad SQL query getting id for the trials result_set');
+						$res 		= mysql_query($query) or tex('Bad SQL Query saving trials result_set');
+						$trials_id 	= mysql_insert_id();
 						$time_end	= microtime(true);
 						$time_taken	= $time_end-$time_start;
-						$log		= 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments: getting id for trials result_set.';
+						$log		= 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments: inserting record for trials result_set.';
 						$logger->info($log);
 						unset($log);
+					}
 					
-						if(mysql_num_rows($res) > 0) {
-							$res = mysql_fetch_assoc($res);
-							$trials_id = $res['id'];
-						} else {
-							$query 		= "INSERT INTO `rpt_ott_trials`(`result_set`, `created`, `last_referenced`) VALUES('" . $id_result_set . "', NOW(), NOW()) ";
-							$time_start = microtime(true);
-							$res 		= mysql_query($query) or tex('Bad SQL Query saving trials result_set');
-							$trials_id 	= mysql_insert_id();
-							$time_end	= microtime(true);
-							$time_taken	= $time_end-$time_start;
-							$log		= 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments: inserting record for trials result_set.';
-							$logger->info($log);
-							unset($log);
-						}
-						$results[$row][$column]->{'link'} = 'results=' . $row_id . '.' . $column_id . '.' . $trials_id;
-						if($upm_id != '')
-							$results[$row][$column]->{'link'} .= '.' . $upm_id;
-						if($bomb)
-							$results[$row][$column]->{'link'} .= '&bomb=' . $results[$row][$column]->bomb;
-							
-						$results[$row][$column]->{'link'} .= '&time=' . $time_machine;	
+					$results[$row][$column]->{'link'} = 'results=' . $row_id . '.' . $column_id . '.' . $trials_id;
+					if($upm_id != '')
+						$results[$row][$column]->{'link'} .= '.' . $upm_id;
+					if($bomb)
+						$results[$row][$column]->{'link'} .= '&bomb=' . $results[$row][$column]->bomb;
+						
+					$results[$row][$column]->{'link'} .= '&time=' . $time_machine;	
 					}
 				} else {	
 					//pass all IDs
@@ -919,6 +922,7 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 		}
 		
 		if($link_generation_method == 'db') {
+		
 			$new_sub_link = parse_url($new_sub_link);
 			parse_str($new_sub_link['path'], $myArray);
 			
@@ -929,9 +933,17 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 						unset($vvv[0]);//removing redundant row headers
 						$v = implode('.', $vvv);
 					}
+					$v = count($vvv) . '.' . $v;
 				}
-				$link .= '&results=' . urlencode(base64_encode(gzdeflate(implode(',', $myArray['results'])))) . '&time=' . $myArray['time'];
-				$link = addYourls($link,$results->reportname);
+				
+				$str = implode(',', $myArray['results']);
+				$str = str_replace('.', ',', $str);
+				$evcode = '$packedIDs = pack("C*",' . $str . ');';
+				eval($evcode);				
+				$link .= '&results=' . rawurlencode(base64_encode(gzdeflate($packedIDs))) . '&time=' . $myArray['time'] . '&format=new';
+				
+				//$link .= '&results=' . urlencode(base64_encode(gzdeflate(implode(',', $myArray['results'])))) . '&time=' . $myArray['time'];
+				$link = addYourls($link,$results[$row][$k]->reportname);
 				$sheet->getCell($cell)->getHyperlink()->setUrl($link);
 			}
 		} else {
@@ -960,7 +972,7 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 			$t_link = rawurlencode(base64_encode(gzdeflate(serialize('n'))));
 			$link	.= 'cparams=' . rawurlencode(base64_encode(gzdeflate(serialize(array('type' => 'col', 'columnlabel' => $columns[$col])))));
 		}
-		
+
 		$index = 0;
 		foreach($rows as $k => $v) {	
 		
@@ -1003,16 +1015,26 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 		
 			$new_sub_link = parse_url($new_sub_link);
 			parse_str($new_sub_link['path'], $myArray);
+			
 			if(!empty($myArray)) {
-				foreach($myArray['results'] as $k => &$v)  {
+				foreach($myArray['results'] as $k => &$v) { 
 					$vvv = explode('.', $v);
 					if($k != 1) {
 						unset($vvv[1]);
 						$v = implode('.', $vvv);
 					}
+					$v = count($vvv) . '.' . $v;
 				}
-				$link .= '&results=' . urlencode(base64_encode(gzdeflate(implode(',', $myArray['results'])))) . '&time=' . $myArray['time'];
-				$link = addYourls($link,$results->reportname);
+				
+				
+				$str = implode(',', $myArray['results']);
+				$str = str_replace('.', ',', $str);
+				$evcode = '$packedIDs = pack("C*",' . $str . ');';
+				eval($evcode);
+				$link .= '&results=' . rawurlencode(base64_encode(gzdeflate($packedIDs))) . '&time=' . $myArray['time'] . '&format=new';
+				
+				//$link .= '&results=' . urlencode(base64_encode(gzdeflate(implode(',', $myArray['results'])))) . '&time=' . $myArray['time'];
+				$link = addYourls($link,$results[$k][$col]->reportname);
 				$sheet->getCell($cell)->getHyperlink()->setUrl($link);
 			}
 			

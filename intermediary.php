@@ -381,9 +381,12 @@ class ContentManager
 				}
 			}
 			
-			if(isset($_GET['pg'][$k]) && $k != $cntr)
-				$url .= '&pg['.$k.']=' . $_GET['pg'][$k];
-				
+			if(isset($_GET['pg'])) {
+				foreach($_GET['pg'] as $key => $val) {
+					$url .= '&pg['.$key.']=' . $_GET['pg'][$key];
+				}
+			}
+			
 			if($this->pstart > 1)
 			{
 				if(isset($_GET['results'])) {
@@ -392,6 +395,9 @@ class ContentManager
 				} else {
 					$pager .= '<a href="intermediary.php?cparams=' . rawurlencode($_GET['cparams']);
 				}
+				if(isset($_GET['format']) && $_GET['format'] == 'new') 
+					$pager .= '&format=' . $_GET['format'];
+					
 				$pager .= $url . '&amp;pg['.$cntr.']=' . ($page-1) . $sort . '" style="float:left;">&lt;&lt; Previous Page (' . ($this->pstart - 1) . '-' 
 					. ($this->pstart-1) . ')</a>&nbsp;&nbsp;&nbsp;';
 			}
@@ -406,6 +412,9 @@ class ContentManager
 				} else {
 					$pager .= '<a href="intermediary.php?cparams=' . rawurlencode($_GET['cparams']);
 				}
+				if(isset($_GET['format']) && $_GET['format'] == 'new') 
+					$pager .= '&format=' . $_GET['format'];
+
 				$pager .= $url . '&amp;pg['.$cntr.']=' . ($page+1) . $sort . '" style="float:left;">Next Page (' . ($this->pstart+1) 
 					. '-' . $nextlast . ') &gt;&gt;</a>';
 			}
@@ -452,8 +461,37 @@ class ContentManager
 			$page = array();$ins_params = array();
 			
 			if(isset($_GET['results']) && isset($_GET['type'])) {
-				$c_params 	= explode(',', gzinflate(base64_decode($_GET['results'])));
+			
 				$this->time_machine = $_GET['time'];
+				if(isset($_GET['format']) && $_GET['format'] == 'new') {
+					//pack encoding method used to encode data in the url
+					$results = unpack("C*", gzinflate(base64_decode(rawurldecode($_GET['results']))));
+					$three = 0;
+					$lengthcounter = 0; 
+					$string = '';
+					foreach($results as $vals)
+					{
+						if($lengthcounter == 0)
+						{
+							$lengthcounter = $vals;
+							continue;
+						}
+						$string .= $vals . '.';
+						$three++;
+						if($three == $lengthcounter)
+						{
+							$output[] = substr($string, 0, -1);
+							$three = 0;
+							$lengthcounter = 0;
+							$string = '';
+						}
+					}
+					$c_params = $output;
+				} else { 
+					//no specific encoding method used to encode data in the url
+					$c_params 	= explode(',', gzinflate(base64_decode($_GET['results'])));
+				}
+				
 				$vv = explode('.', $c_params[0]);
 				if($_GET['type'] == 'col') {
 					$t = getLinkDetails('rpt_ott_header', 'header', 'id', $vv[1]);
@@ -461,6 +499,7 @@ class ContentManager
 					$t = getLinkDetails('rpt_ott_header', 'header', 'id', $vv[0]);
 				}
 				$params_arr = $c_params;
+				
 			} else {
 				$c_params 	= unserialize(gzinflate(base64_decode($_GET['cparams'])));
 				$t 			= ($c_params['type'] == 'col') ? $c_params['columnlabel'] : $c_params['rowlabel'];
@@ -476,6 +515,9 @@ class ContentManager
 				echo ('<input type="hidden" name="results" value="' . $_GET['results'] . '"/>'
 					. '<input type="hidden" name="type" value="' . $_GET['type'] . '"/>'
 					. '<input type="hidden" name="time" value="' . $_GET['time'] . '"/>');
+				if(isset($_GET['format']) && $_GET['format'] == 'new') {
+					echo ('<input type="hidden" name="format" value="' . $_GET['format'] . '"/>');
+				}
 			} else {
 				echo ('<input type="hidden" name="cparams" value="' . $_GET['cparams'] . '"/>'
 					. '<input type="hidden" name="trunc" value="' . $_GET['trunc'] . '"/>');
@@ -523,9 +565,6 @@ class ContentManager
 			
 			foreach($params_arr as $pk => $pv) {
 				
-				if($pk != 0)
-					echo ('<hr/>');
-				
 				$page[$pk] = 1;
 				if(isset($_GET['pg'][$pk])) $page[$pk] = mysql_real_escape_string($_GET['pg'][$pk]); 
 				if(!is_numeric($page[$pk])) die('non-numeric page');
@@ -545,7 +584,6 @@ class ContentManager
 				
 				if(isset($_GET['results'])) {
 					$e 	= explode(".", $pv);
-					
 					if($_GET['type'] == 'row') {
 						if($pk != 0) {
 							$ltype 	= getLinkDetails('rpt_ott_header', 'header', 'id', $e[0]);
@@ -554,6 +592,7 @@ class ContentManager
 							$ltype 	= getLinkDetails('rpt_ott_header', 'header', 'id', $e[1]);
 							$tt = $e[2];
 						}	
+
 					} else if($_GET['type'] == 'col') {
 						if($pk != 0) {
 							$ltype 	= getLinkDetails('rpt_ott_header', 'header', 'id', $e[0]);
@@ -567,7 +606,7 @@ class ContentManager
 					if(strpos($tt, 's') !== FALSE) {
 						$excel_params = unserialize(getLinkDetails('rpt_ott_searchdata', 'result_set', 'id', substr($tt,1)));
 					} else {
-					
+						
 						$res = getLinkDetails('rpt_ott_trials', 'result_set', 'id', $tt);
 						$sp = new SearchParam();
 						$sp->field = 'larvol_id';
@@ -2370,7 +2409,7 @@ function getNonAssocUpmRecords($non_assoc_upm_params) {
 
 function getLinkDetails($tablename, $fieldname, $parameters, $param_value) {
 
-	//echo "==>".
+	///echo "==>".
 	$query = "SELECT `" . $fieldname . "` FROM " . $tablename . " WHERE " . $parameters . " = '" . mysql_real_escape_string($param_value) . "' ";
 	$res = mysql_fetch_assoc(mysql_query($query));
 	return $res[$fieldname];
