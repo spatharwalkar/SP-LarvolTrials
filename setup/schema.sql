@@ -341,6 +341,22 @@ CREATE TABLE IF NOT EXISTS `rpt_ott_searchdata` (
   KEY `result_set` (`result_set`(300))
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+ CREATE  TABLE  `larvoltrials`.`update_status_fullhistory` (  `update_id` int( 10  )  unsigned NOT  NULL ,
+ `process_id` int( 11  )  NOT  NULL DEFAULT  '0',
+ `start_time` timestamp NOT  NULL DEFAULT  '0000-00-00 00:00:00',
+ `end_time` timestamp NOT  NULL DEFAULT  '0000-00-00 00:00:00',
+ `updated_time` timestamp NOT  NULL DEFAULT  '0000-00-00 00:00:00',
+ `updated_days` tinyint( 4  )  NOT  NULL DEFAULT  '0',
+ `status` tinyint( 4  )  NOT  NULL DEFAULT  '0',
+ `update_items_total` int( 11  )  NOT  NULL DEFAULT  '0',
+`update_items_progress` int( 11 ) NOT NULL DEFAULT '0',
+ `update_items_start_time` timestamp NOT  NULL DEFAULT  '0000-00-00 00:00:00',
+ `update_items_complete_time` timestamp NOT  NULL DEFAULT  '0000-00-00 00:00:00',
+ `current_nctid` int( 11  )  NOT  NULL DEFAULT  '0',
+`max_nctid` INT( 11 ) NOT NULL DEFAULT '0',
+ PRIMARY  KEY (  `update_id`  )  ) ENGINE  = InnoDB  DEFAULT CHARSET  = utf8 COLLATE  = utf8_unicode_ci;
+
+
 ALTER TABLE `rpt_ott_header` CHANGE `header` `header` VARCHAR( 127 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL;
 
 ALTER TABLE `data_cats_in_study`
