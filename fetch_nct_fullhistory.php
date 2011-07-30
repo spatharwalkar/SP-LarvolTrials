@@ -22,30 +22,6 @@ if (isset($_GET['id'])) {
 
 $id = padnct($id);
 
-//DW
-$process_id = 20;
-
-//Get latest ID
-$query = 'select max(update_id) as update_id from update_status';
-$res = mysql_query($query);
-if ($res === false)
-    return softDie('Bad SQL query MaxUpdate');
-$res = mysql_fetch_assoc($res);
-if ($res === false)
-    return softDie('NCT schema not found!');
-$update_id = $res['update_id'];
-
-$update_id = $update_id + 1;
-
-
-//DW
-//Insert New ID
-$query = 'insert into update_status (update_id, process_id) VALUES (' . $update_id . ',' . $process_id . ') ;';
-$res = mysql_query($query) or die('Update Status Insert Failed' . mysql_error());
-
-$query = 'UPDATE update_status SET start_time="' . date("Y-m-d H:i:s", strtotime('now')) . '" WHERE update_id="' . $update_id . '"';
-$res = mysql_query($query) or die('Unable to update running' . mysql_error());
-
 //Get and import the XML for all these new records
 echo('Fetching record content...' . "\n<br />");
 $progress_count = 0;
@@ -149,7 +125,7 @@ echo($studies . " different studies (including initial) updated for case id: " .
 // See if Agent Orange is Still causing trouble if so ProcessNew
 if ($agentorange == true) {
     ProcessNew($id);
-    $agentorange = false;
+	$agentorange = false;
 }
 
 unset($ths);
