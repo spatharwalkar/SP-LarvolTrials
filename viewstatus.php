@@ -25,6 +25,12 @@ require_once('include.search.php');
 	define('ERROR', 3);
 	define('CANCELLED', 4);
 	define('COMPLETED', 0);
+
+/*	
+if(isset($_POST['runscrapper']))
+	require_once('fetch_nct_fullhistory_all.php');
+*/
+	
 if(isset($_POST['pid']))
 	{
 		if(isset($_POST['upid']))
@@ -78,17 +84,16 @@ $res = mysql_fetch_array($res) ;
 //if(isset($res['update_items_total'])) $cid = ((int)$res['current_nctid']);
 
 if(isset($res['update_items_total'])) showprogress();
-else die ('<br> Nothing to display.');
 
+/*echo " <div align=\"center\"  >
+		   <form name='scrapper' method='post' action='viewstatus.php'>
+				<input type='hidden' name='runscrapper' value='yes'> 
+				<input type=\"submit\" value=\"Run full-history scrapper\" style=\"width:226px; height:31px;\" border=\"0\">
+			</form>
+		</div> ";
+*/
 function showprogress()
 {
-
-	//Definition of constants for states
-	define('READY', 1);
-	define('RUNNING', 2);
-	define('ERROR', 3);
-	define('CANCELLED', 4);
-	define('COMPLETED', 0);
 
 	$status = array();
 	//Definition of constants for states
@@ -135,7 +140,7 @@ function showprogress()
 			
 	//Get entry corresponding to nct in 'update_status_fullhistory'
 	$query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
-						`update_items_total`,`update_items_progress`,TIMEDIFF(updated_time, start_time) AS timediff,
+						`update_items_total`,`update_items_progress`,`er_message`,TIMEDIFF(updated_time, start_time) AS timediff,
 						`update_items_complete_time` FROM update_status_fullhistory ';
 	$res = mysql_query($query) or die('Bad SQL Query getting update_status_fullhistory');
 	$nct_status = array();
@@ -169,11 +174,12 @@ function showprogress()
 			echo "</table>";
 			echo "<table width=\"100%\" class=\"event\">";
 				echo "<tr>";
-					echo "<td width=\"20%\" align=\"left\" class=\"head\">Status</td>";
-					echo "<td width=\"20%\" align=\"left\" class=\"head\">Start Time</td>";
-					echo "<td width=\"19%\" align=\"left\" class=\"head\">Excution run time</td>";
-					echo "<td width=\"19%\" align=\"left\" class=\"head\">Last update time</td>";
-					echo "<td width=\"17%\" align=\"left\" class=\"head\">Progress</td>";
+					echo "<td width=\"10%\" align=\"left\" class=\"head\">Status</td>";
+					echo "<td width=\"15%\" align=\"left\" class=\"head\">Start Time</td>";
+					echo "<td width=\"15%\" align=\"left\" class=\"head\">Excution run time</td>";
+					echo "<td width=\"15%\" align=\"left\" class=\"head\">Last update time</td>";
+					echo "<td width=\"15%\" align=\"left\" class=\"head\">Progress</td>";
+					echo "<td width=\"25%\" align=\"left\" class=\"head\">Message</td>";
 					echo "<td width=\"5%\" align=\"center\" class=\"head\">Action</td>";
 				echo "</tr>";
 				echo "<tr>";
@@ -190,6 +196,7 @@ function showprogress()
 					echo "<td align=\"left\" class=\"norm\">";
 						echo "<span class=\"progressBar\" id=\"nct_update\">".$nct_update_progress."</span>";
 					echo "</td>";
+					echo "<td align=\"left\" class=\"norm\">".$nct_status['er_message']."</td>";
 					if($nct_status['status']==READY)
 					{
 						echo "<td align=\"center\" class=\"norm\">";

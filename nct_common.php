@@ -475,11 +475,25 @@ function addNCT_history($rec, $id, $date) {
 
 
 //     //import everything
-
+	$pid = getmypid();
     foreach ($record_data as $fieldname => $value)
         if (!addval_d($studycat, $nct_cat, $fieldname, $value, $date))
+		{
+			$pid = getmypid();
+			$query = 'SELECT update_id,process_id FROM update_status_fullhistory where status="2" order by update_id desc limit 1' ;
+			$res = mysql_query($query) or die('Bad SQL query finding ready updates. Query:' . $query  );
+			$res = mysql_fetch_array($res) ;
+			if ( isset($res['update_id']) and $res['process_id'] == $pid  )
+			{
+				$msg='Data error in ' . $nct_id . '.';
+				$query = 'UPDATE update_status_fullhistory SET status="3", er_message=' . $msg .' WHERE update_id="' . $res['update_id'] .'"';
+				$res = mysql_query($query) or die('Bad SQL query finding ready updates. Query:' . $query  );
+				mysql_query('COMMIT') or die("Couldn't commit SQL transaction. Query:".$query);
+				exit;
+			}
+			else
             return softDie('Data error in ' . $nct_id . '.');
-
+		}
     mysql_query('COMMIT') or die("Couldn't commit SQL transaction to create records from XML");
     return true;
 }
@@ -578,7 +592,24 @@ function addval_d($studycat, $category_id, $fieldname, $value, $date) {
                         return softDie('Bad SQL query getting enumval id');
                     $res = mysql_fetch_array($res);
                     if ($res === false)
+					{
+						$pid = getmypid();
+						$query = 'SELECT update_id,process_id FROM update_status_fullhistory where status="2" order by update_id desc limit 1' ;
+						$res = mysql_query($query) or die('Bad SQL query finding ready updates. Query:' . $query  );
+						$res = mysql_fetch_array($res) ;
+
+						if ( isset($res['update_id']) and $res['process_id'] == $pid  )
+						{
+							$upid=$res['update_id'];
+							$msg='Error:Invalid enumval <b>' . $val . '</b> for field <b>' . $fieldname . '</b> (studycat='. $studycat .')' ;
+							$query = 'UPDATE update_status_fullhistory SET status="3", er_message="' . $msg . '" WHERE update_id= "' . $upid .'" ';
+							$res = mysql_query($query) or die('Bad SQL query finding ready updates. Query:' . $query  );
+							mysql_query('COMMIT') or die("Couldn't commit SQL transaction. Query:".$query);
+							exit;
+						}
+						else
                         return softDie('Invalid enumval "' . $val . '" for field "' . $fieldname . '"');
+					}
                     $val = $res['id'];
                 }
             }

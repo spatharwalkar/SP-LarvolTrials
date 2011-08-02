@@ -7,7 +7,8 @@ if(!$db->loggedIn() || ($db->user->userlevel!='admin' && $db->user->userlevel!='
 	header('Location: ' . urlPath() . 'index.php');
 	exit;
 }
-
+echo str_repeat ("   ", 1500);
+echo '<br>';
 global $pr_id;
 global $cid;
 global $maxid;
@@ -55,11 +56,11 @@ else
 	$cid = (isset($_GET['start']) && is_numeric($_GET['start'])) ? ((int)$_GET['start']) : 103;  // 102 is the starting NCTID in ct.gov
 
 	/***************************************************/
-//	$maxid = $cid+200;  
+	//$maxid = $cid+40;  
 	/***************************************************/
 
 	$cid_=$cid;
-
+	
 	for($totalncts=0; $cid_ <= $maxid; $cid_=$cid_+1)
 	{
 		$vl = validate_nctid($cid_,$maxid);

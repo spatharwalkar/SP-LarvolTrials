@@ -3,12 +3,10 @@
 require_once('db.php');
 require_once('include.import.php');
 require_once('nct_common.php');
-
 // DW
 ini_set('max_execution_time', '36000'); //10 hours
 ob_implicit_flush(true);
 ob_end_flush();
-
 $last_id = 0;
 $id_field = 0;
 
@@ -75,9 +73,60 @@ if (isset($cat)) {
 
     echo "<br>Deleting Existing Data<br>";
     $query = 'delete from data_values where field !=1 and studycat=' . $cat;
-    $res = mysql_query($query) or die('Unable to delete existing values' . mysql_error());
+	$res = mysql_query($query) ;
+	
+	if(!$res and ( mysql_errno() <> 1213 and mysql_errno() <> 1205 )  ) // error
+		die('Unable to delete existing values' . mysql_error() . '('. mysql_errno() .')');
+	
+	//TKV  
+	//will retry in case of lock wait time timeout  
+	if(!$res and ( mysql_errno() == 1213 or mysql_errno() == 1205 )) 
+	{
+		for ( $retries = 300; $dead_lock and $retries > 0; $retries -- )
+		{
+			$pid = getmypid();
+			$query1 = 'SELECT update_id,process_id FROM update_status_fullhistory where status="2" order by update_id desc limit 1' ;
+			$res = mysql_query($query1) or die('Bad SQL query finding ready updates. Query:' . $query1  );
+			$res = mysql_fetch_array($res) ;
+			if ( isset($res['update_id']) and $res['process_id'] == $pid  )
+			{
+				$msg='Deadlock found.  Re-trying to get lock...';
+				$query1 = 'UPDATE update_status_fullhistory SET er_message=' . $msg . ' WHERE update_id="' . $res['update_id'] .'"';
+				$res = mysql_query($query1) or die('Bad SQL query finding ready updates. Query:' . $query1  );
+			}
+			
+			
+			sleep(120); 
+			$res = mysql_query($query) ;
+			if(!$res)
+			{
+				if (mysql_errno() == 1213 or mysql_errno() == 1205) 
+				{ 
+					$dead_lock = true;
+					$retries --;
+				}
+				else 
+				{
+					$dead_lock = false;
+					die('Unable to delete existing values' . mysql_error() . '('. mysql_errno() .')');
+				}
+				
+			}
+			else 
+			{
+				$dead_lock = false;
+			}
+		}
+	
+	}
+	elseif(!$res and mysql_errno() <> 1213 and mysql_errno() <> 1205) 
+	{
+		die('Unable to delete existing values' . mysql_error() . '('. mysql_errno() .')');
+	}
+	
+	//*************
+	
 }
-
 
 $count = 0;
 $studies = 0;
