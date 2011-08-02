@@ -354,6 +354,7 @@ CREATE TABLE IF NOT EXISTS `rpt_ott_searchdata` (
  `update_items_complete_time` timestamp NOT  NULL DEFAULT  '0000-00-00 00:00:00',
  `current_nctid` int( 11  )  NOT  NULL DEFAULT  '0',
 `max_nctid` INT( 11 ) NOT NULL DEFAULT '0',
+`er_message` VARCHAR( 255 ) NOT NULL ,
  PRIMARY  KEY (  `update_id`  )  ) ENGINE  = InnoDB  DEFAULT CHARSET  = utf8 COLLATE  = utf8_unicode_ci;
 
 
