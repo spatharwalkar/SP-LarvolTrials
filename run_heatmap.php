@@ -86,17 +86,16 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 		$boundary = 500;
 				
 	//get report name
-	$query = 'SELECT name,footnotes,description,searchdata,bomb,backbone_agent,count_only_active,id  FROM rpt_heatmap WHERE id=' 
-	. $id . ' LIMIT 1';
+	$query = 'SELECT name,footnotes,description,searchdata,bomb,backbone_agent,count_only_active,id FROM rpt_heatmap WHERE id=' . $id . ' LIMIT 1';
 	$time_start = microtime(true);
-	$resu = mysql_query($query) or tex('Bad SQL query getting report name');
-	$time_end = microtime(true);
+	$resu 		= mysql_query($query) or tex('Bad SQL query getting report name and other details ' . $query);
+	$time_end 	= microtime(true);
 	$time_taken = $time_end-$time_start;
-	$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments:function runHeatmap() get report name and other data.';
+	$log 		= 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments:function runHeatmap() get report name and other details.';
 	$logger->info($log);
 	unset($log);
 	
-	$info = mysql_fetch_array($resu) or tex('Report not found.'); 
+	$info = mysql_fetch_array($resu) or tex('Report not found. ' . $query); 
 	$name = $info['name'];
 	$footnotes = $info['footnotes'];
 	$description = $info['description'];
@@ -126,10 +125,10 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 	$columnsearch = array();
 	$query = 'SELECT `header`,`num`,`type`,searchdata FROM rpt_heatmap_headers WHERE report=' . $id;
 	$time_start = microtime(true);
-	$resu = mysql_query($query) or tex('Bad SQL query getting headers');
+	$resu = mysql_query($query) or tex('Bad SQL query getting headers ' . $query);
 	$time_end = microtime(true);
 	$time_taken = $time_end-$time_start;
-	$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments:function runHeatmap() get headers.';
+	$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments:function runHeatmap() getting headers.';
 	$logger->info($log);
 	unset($log);	
 	while($header = mysql_fetch_array($resu))
@@ -153,12 +152,11 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 	}
 	else
 	{
-		$query = 'UPDATE reports_status SET update_time="' . date("Y-m-d H:i:s",strtotime('now')).'", total="'
-		.(count($rows) * count($columns)).
+		$query = 'UPDATE reports_status SET update_time="' . date("Y-m-d H:i:s",strtotime('now')).'", total="' .(count($rows) * count($columns)).
 		'", progress="0" WHERE run_id="' .$run_id .'" AND report_type ="0" AND type_id="' .$type_id .'"';
 		if(!mysql_query($query))
 		{
-			$log = 'Bad SQL Query updating heatmap report total. Error: '.mysql_error();
+			$log =  'Bad SQL Query updating heatmap report total. Error: ' . $query . "\n" . mysql_error();
 			$logger->fatal($log);
 			die($log);
 		}
@@ -168,10 +166,10 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 	$searchdata = array();
 	$query = 'SELECT `row`,`column`,`searchdata` FROM rpt_heatmap_cells WHERE report=' . $id;
 	$time_start = microtime(true);
-	$resu = mysql_query($query) or tex('Bad SQL query getting searchdata');
+	$resu = mysql_query($query) or tex('Bad SQL query getting searchdata ' . $query);
 	$time_end = microtime(true);
 	$time_taken = $time_end-$time_start;
-	$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments:function runHeatmap() get searchdata.';
+	$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments:function runHeatmap() getting searchdata.';
 	$logger->info($log);
 	unset($log);
 	
@@ -208,7 +206,7 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 		$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments:function runHeatmap() get phase enum value.';
 		$logger->info($log);
 		unset($log);
-		if($res === false) return softDie('Bad SQL query getting a phase enum value');
+		if($res === false) return softDie('Bad SQL query getting a phase enum value ' . $query);
 		$res = mysql_fetch_assoc($res); if($res === false) return softDie('Phase not found.');
 		$phase_enumvals[$pkey] = $res['id'];
 	}
@@ -356,10 +354,12 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 							. 'dv.added<' . $datetime . ' AND (dv.superceded>' . $datetime . ' OR dv.superceded IS NULL) '
 							. 'AND `field`=' . $phase_fid . ' AND clinical_study.larvol_id IN(' . implode(',', $all_ids) . ')';
 					$time_start = microtime(true);
-					$res = mysql_query($query) or tex('Bad SQL query getting maximum phase '.$query."\n" . mysql_error());
+					$res = mysql_query($query) or tex('Bad SQL query getting maximum phase for row ' . $row . ' column ' . $column . "\n" . $query 
+					. "\n" . mysql_error());
 					$time_end = microtime(true);
 					$time_taken = $time_end-$time_start;
-					$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments:function runHeatmap() get maximum phase.';
+					$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments:function runHeatmap() getting maximum phase for row '. $row . ' column ' 
+					. $column;
 					$logger->info($log);
 					unset($log);
 					
@@ -436,10 +436,11 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 				$row_id 	= '';
 				$query 		= "SELECT `id` FROM `rpt_ott_header` WHERE `header` = '" . mysql_real_escape_string($rows[$row]) . "' ";
 				$time_start = microtime(true);
-				$res		= mysql_query($query) or tex('Bad SQL query getting id for the header result_set');
+				$res		= mysql_query($query) or tex('Bad SQL query getting id for the row headers for row ' . $row . ' column ' . $column . "\n" . $query);
 				$time_end 	= microtime(true);
 				$time_taken = $time_end-$time_start;
-				$log 		= 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments: getting id for the row headers.';
+				$log 		= 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments: getting id for the row headers for row ' . $row . ' column ' 
+				. $column;
 				$logger->info($log);
 				unset($log);
 				
@@ -450,11 +451,12 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 					$query 		= "INSERT INTO `rpt_ott_header`(`header`, `created`, `last_referenced`) VALUES('" . mysql_real_escape_string($rows[$row]) 
 									. "', NOW(), NOW()) ";
 					$time_start = microtime(true);
-					$res 		= mysql_query($query) or tex('Bad SQL Query saving row headers');
+					$res 		= mysql_query($query) or tex('Bad SQL Query saving row headers for row ' . $row . ' column ' . $column . "\n" . $query);
 					$row_id 	= mysql_insert_id();
 					$time_end 	= microtime(true);
 					$time_taken = $time_end-$time_start;
-					$log		= 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments: inserting record for row headers.';
+					$log		= 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments: saving row headers for row ' . $row . ' column ' 
+					. $column;
 					$logger->info($log);
 					unset($log);
 				}
@@ -464,10 +466,11 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 				$column_id	= '';
 				$query 		= "SELECT `id` FROM `rpt_ott_header` WHERE `header` = '" . mysql_real_escape_string($columns[$column]) . "' ";
 				$time_start = microtime(true);
-				$res 		= mysql_query($query) or tex('Bad SQL query getting id for the header result_set');
+				$res 		= mysql_query($query) or tex('Bad SQL query getting id for the column headers for row ' . $row . ' column ' . $column . "\n" . $query);
 				$time_end	= microtime(true);
 				$time_taken	= $time_end-$time_start;
-				$log		= 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments: getting id for the column headers.';
+				$log		= 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments: getting id for the column headers for row ' . $row . ' column ' 
+				. $column;
 				$logger->info($log);
 				unset($log);
 				
@@ -478,11 +481,11 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 					$query 		= "INSERT INTO `rpt_ott_header`(`header`, `created`, `last_referenced`) VALUES('" . mysql_real_escape_string($columns[$column]) 
 									. "', NOW(), NOW()) ";
 					$time_start = microtime(true);
-					$res 		= mysql_query($query) or tex('Bad SQL Query saving column headers');
+					$res 		= mysql_query($query) or tex('Bad SQL Query saving column headers for row ' . $row . ' column ' . $column . "\n" . $query);
 					$column_id 	= mysql_insert_id();
 					$time_end	= microtime(true);
 					$time_taken	= $time_end-$time_start;
-					$log		= 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments: inserting record for column headers.';
+					$log		= 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments: saving column headers for row ' . $row . ' column ' . $column;
 					$logger->info($log);
 					unset($log);
 				}
@@ -495,10 +498,10 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 					//checking whether the upm id already exists and if not inserting a new record into the rpt_ott_upm table
 					$query 		= "SELECT `id` FROM `rpt_ott_upm` WHERE `intervention_name` = '" . mysql_real_escape_string($upm_result_set) . "' ";
 					$time_start = microtime(true);
-					$res 		= mysql_query($query) or tex('Bad SQL query getting id for the upm result_set');
+					$res 	= mysql_query($query) or tex('Bad SQL query getting id for the upm result_set for row ' . $row . ' column ' . $column . "\n" . $query);
 					$time_end	= microtime(true);
 					$time_taken	= $time_end-$time_start;
-					$log		= 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments: getting id for upm result_set.';
+					$log		= 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments: getting id for upm result_set for row ' . $row . ' column ' . $column;
 					$logger->info($log);
 					unset($log);
 					
@@ -509,11 +512,11 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 						$query 		= "INSERT INTO `rpt_ott_upm`(`intervention_name`, `created`, `last_referenced`) VALUES('" 
 										. mysql_real_escape_string($upm_result_set) . "', NOW(), NOW()) ";
 						$time_start = microtime(true);
-						$res 		= mysql_query($query) or tex('Bad SQL Query saving upm result_set');
+						$res 		= mysql_query($query) or tex('Bad SQL Query saving upm result_set for row ' . $row . ' column ' . $column . "\n" . $query);
 						$upm_id 	= mysql_insert_id();
 						$time_end	= microtime(true);
 						$time_taken	= $time_end-$time_start;
-						$log		= 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments: inserting record for upm result_set.';
+						$log		= 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments: saving upm result_set for row ' . $row . ' column ' . $column;
 						$logger->info($log);
 						unset($log);
 					}
@@ -538,10 +541,11 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 					//checking whether the trials id already exists and if not inserting a new record into the rpt_ott_trials table
 					$query 		= "SELECT `id` FROM `rpt_ott_trials` WHERE `result_set` = '" . $id_result_set . "' ";
 					$time_start = microtime(true);
-					$res 		= mysql_query($query) or tex('Bad SQL query getting id for the trials result_set');
+					$res 	= mysql_query($query) or tex('Bad SQL query getting id for the trials result_set for row ' . $row . ' column ' . $column . "\n" . $query);
 					$time_end	= microtime(true);
 					$time_taken	= $time_end-$time_start;
-					$log		= 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments: getting id for trials result_set.';
+					$log		= 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments: getting id for trials result_set for row ' . $row . ' column ' 
+					. $column;
 					$logger->info($log);
 					unset($log);
 					
@@ -551,11 +555,11 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 					} else {
 						$query 		= "INSERT INTO `rpt_ott_trials`(`result_set`, `created`, `last_referenced`) VALUES('" . $id_result_set . "', NOW(), NOW()) ";
 						$time_start = microtime(true);
-						$res 		= mysql_query($query) or tex('Bad SQL Query saving trials result_set');
+						$res 		= mysql_query($query) or tex('Bad SQL Query saving trials result_set for row ' . $row . ' column ' . $column . "\n" . $query);
 						$trials_id 	= mysql_insert_id();
 						$time_end	= microtime(true);
 						$time_taken	= $time_end-$time_start;
-						$log		= 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments: inserting record for trials result_set.';
+						$log		= 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments: saving trials result_set for row ' . $row . ' column ' . $column;
 						$logger->info($log);
 						unset($log);
 					}
@@ -600,10 +604,12 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 					//checking whether the trials id already exists and if not inserting a new record into the rpt_ott_trials table
 					$query 		= "SELECT `id` FROM `rpt_ott_searchdata` WHERE `result_set` = '" . $search_result_set . "' ";
 					$time_start = microtime(true);
-					$res 		= mysql_query($query) or tex('Bad SQL query getting id for the trials result_set');
+					$res 	= mysql_query($query) or tex('Bad SQL query getting id for the searchdata result_set for row ' . $row . ' column ' . $column 
+					. "\n" . $query);
 					$time_end	= microtime(true);
 					$time_taken	= $time_end-$time_start;
-					$log		= 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments: inserting record for trials result_set.';
+					$log		= 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments: getting id for the searchdata result_set for row ' . $row 
+					. ' column ' . $column;
 					$logger->info($log);
 					unset($log);
 					
@@ -614,11 +620,13 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 						$query 		= "INSERT INTO `rpt_ott_searchdata`(`result_set`, `created`, `last_referenced`) VALUES('" . $search_result_set 
 										. "', NOW(), NOW()) ";
 						$time_start = microtime(true);
-						$res 		= mysql_query($query) or tex('Bad SQL Query saving trials result_set');
+						$res 		= mysql_query($query) or tex('Bad SQL Query saving searchdata result_set for row ' . $row . ' column ' . $column 
+						. "\n" . $query);
 						$searchdata_id = mysql_insert_id();
 						$time_end	= microtime(true);
 						$time_taken	= $time_end-$time_start;
-						$log		= 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments: inserting record for trials result_set.';
+						$log		= 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments: saving searchdata result_set for row ' . $row 
+						. ' column ' . $column;
 						$logger->info($log);
 						unset($log);
 					}
@@ -658,7 +666,7 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 				$res = mysql_query($query);
 				if($res === false)
 				{
-					$log = 'Bad SQL Query updating heatmap report progress. Error: '.mysql_error();
+					$log = 'Bad SQL Query updating heatmap report progress. ' . $query . ' Error: '.mysql_error();
 					$logger->fatal($log);
 					die($log);
 				}
