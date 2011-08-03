@@ -313,7 +313,7 @@ CREATE TABLE IF NOT EXISTS `rpt_ott_trials` (
 
 CREATE TABLE IF NOT EXISTS `rpt_ott_header` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `header` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `header` varchar(177) COLLATE utf8_unicode_ci NOT NULL,
   `created` datetime NOT NULL,
   `expiry` date DEFAULT NULL,
   `last_referenced` datetime NOT NULL,
@@ -357,8 +357,6 @@ CREATE TABLE IF NOT EXISTS `rpt_ott_searchdata` (
 `er_message` VARCHAR( 255 ) NOT NULL ,
  PRIMARY  KEY (  `update_id`  )  ) ENGINE  = InnoDB  DEFAULT CHARSET  = utf8 COLLATE  = utf8_unicode_ci;
 
-
-ALTER TABLE `rpt_ott_header` CHANGE `header` `header` VARCHAR( 127 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL;
 
 ALTER TABLE `data_cats_in_study`
   ADD CONSTRAINT `data_cats_in_study_ibfk_1` FOREIGN KEY (`larvol_id`) REFERENCES `clinical_study` (`larvol_id`) ON DELETE CASCADE ON UPDATE CASCADE,
