@@ -313,7 +313,7 @@ CREATE TABLE IF NOT EXISTS `rpt_ott_trials` (
 
 CREATE TABLE IF NOT EXISTS `rpt_ott_header` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `header` varchar(177) COLLATE utf8_unicode_ci NOT NULL,
+  `header` varchar(127) COLLATE utf8_unicode_ci NOT NULL,
   `created` datetime NOT NULL,
   `expiry` date DEFAULT NULL,
   `last_referenced` datetime NOT NULL,
