@@ -573,10 +573,58 @@ function addval_d($studycat, $category_id, $fieldname, $value, $date) {
 	elseif( empty($value) and !is_numeric($value) ) $no_dat=true;
 	//If the new value set is different, mark the old values as old and insert the new ones.
     if ($change and !$no_dat) {
-        if (count($oldids)) {
+        if (count($oldids)) 
+		{
             $query = 'UPDATE data_values SET superceded="' . $DTnow . '" WHERE id IN(' . implode(',', $oldids) . ')';
-            if (mysql_query($query) === false)
-                return softDie('Bad SQL query marking old values' . mysql_error() . '<br />' . $query);
+			
+            $res1=mysql_query($query);
+			if( !$res1  and ( mysql_errno() <> 1213 and mysql_errno() <> 1205 )  ) // error
+				return softDie('Bad SQL query marking old values' . mysql_error() . '<br />' . $query);
+	
+			//TKV  
+			//will retry in case of lock wait time timeout  
+			if( !$res1 and ( mysql_errno() == 1213 or mysql_errno() == 1205 )) 
+			{
+				for ( $retries = 300; $dead_lock and $retries > 0; $retries -- )
+				{
+					$pid = getmypid();
+					$query1 = 'SELECT update_id,process_id FROM update_status_fullhistory where status="2" order by update_id desc limit 1' ;
+					$res = mysql_query($query1) or die('Bad SQL query finding ready updates. Query:' . $query1  );
+					$res = mysql_fetch_array($res) ;
+					if ( isset($res['update_id']) and $res['process_id'] == $pid  )
+					{
+						$msg='Lock wait timed out. Re-trying to get lock...';
+						$query1 = 'UPDATE update_status_fullhistory SET er_message=' . $msg . ' WHERE update_id="' . $res['update_id'] .'"';
+						$res = mysql_query($query1) or die('Bad SQL query finding ready updates. Query:' . $query1  );
+					}
+				
+				
+					sleep(10); 
+					$res = mysql_query($query) ;
+					if(!$res)
+					{
+						if (mysql_errno() == 1213 or mysql_errno() == 1205) 
+						{ 
+							$dead_lock = true;
+							$retries --;
+						}
+						else 
+						{
+							$dead_lock = false;
+							die('Unable to delete existing values' . mysql_error() . '('. mysql_errno() .')');
+						}
+						
+					}
+					else 
+					{
+						$dead_lock = false;
+					}
+				}
+			}
+			
+	
+	//*************
+            
         }
 		
         foreach ($value as $val) 
