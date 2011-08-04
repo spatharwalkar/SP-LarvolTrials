@@ -242,7 +242,7 @@ CREATE TABLE IF NOT EXISTS `update_status` (
 
 CREATE TABLE IF NOT EXISTS `upm` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `event_type` enum('data_release','upcoming_trial','regulatory_info','reimbursement_info') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'data_release',
+  `event_type` enum('Clinical','Regulatory','Commercial','Pricing/Reimbursement','Other') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'Other',
   `event_description` text COLLATE utf8_unicode_ci NOT NULL,
   `event_link` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `result_link` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
@@ -258,7 +258,7 @@ CREATE TABLE IF NOT EXISTS `upm` (
 
 CREATE TABLE IF NOT EXISTS `upm_history` (
   `id` int(10) unsigned NOT NULL,
-  `event_type` enum('data_release','upcoming_trial','regulatory_info','reimbursement_info') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'data_release',
+  `event_type` enum('Clinical','Regulatory','Commercial','Pricing/Reimbursement','Other') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'Other',
   `event_description` text COLLATE utf8_unicode_ci NOT NULL,
   `event_link` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `result_link` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
