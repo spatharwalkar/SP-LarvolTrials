@@ -101,6 +101,20 @@ function filterNewChanges($ids, &$existing) {
     return $ids;
 }
 
+function validateEnums($val) 
+{
+$eval1=$val;
+$enum1 = array('Phase 1'=>"I", 'Phase 2'=>"II", 'Phase 3'=>"III", 'Phase 4'=>"IV");
+$enum2 = array('Phase 1'=>"1", 'Phase 2'=>"2", 'Phase 3'=>"3", 'Phase 4'=>"4");
+
+$ev1=array_search($eval1,$enum1,false);
+$ev2=array_search($eval1,$enum2,false);
+if ( isset($ev1) and $ev1  )
+	return $ev1;
+else
+	return $ev2;
+}
+
 function ProcessChanges($id, $date, $column, $initial_date=NULL) {
     // Now Go To changes Site and parse differences
     $url = "http://clinicaltrials.gov/archive/" . $id . "/" . $date . "/changes";
@@ -633,6 +647,13 @@ function addval_d($studycat, $category_id, $fieldname, $value, $date) {
                 if (!strlen($val)) {
                     $val = NULL;
                 } else {
+				// evaluate enums before proceeding
+					$evl=validateEnums($val);
+					if($evl) 
+					{
+					echo '<br>New enum value "'. $evl . '" assigned instead of "' . $val . '"';
+					$val=$evl;
+					}
                     $query = 'SELECT id FROM data_enumvals WHERE `field`=' . $field . ' AND `value`="' . mysql_real_escape_string($val)
                             . '" LIMIT 1';
                     $res = mysql_query($query);
