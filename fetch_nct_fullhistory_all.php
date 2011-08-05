@@ -34,7 +34,7 @@ if ( isset($res['process_id']) )
 	$up_id= ((int)$res['update_id']);
 	$cid = ((int)$res['current_nctid']); 
 	$maxid = ((int)$res['max_nctid']); 
-	$query = 'UPDATE  update_status_fullhistory SET status= "2"  WHERE process_id = "' . $pr_id .'" ;' ;
+	$query = 'UPDATE  update_status_fullhistory SET status= "2",er_message=""  WHERE process_id = "' . $pr_id .'" ;' ;
 	$res = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory. Query:' . $query );
 	fetch_records($pid,$cid,$maxid,$up_id);
 	exit;
