@@ -782,6 +782,13 @@ function getRecords($ids,$fields,$time)
 			$result[$row['larvol_id']][$field] = $value;
 		}
 	}
+	
+	foreach($fields as $key => $value)
+	{
+		if(empty($value)) unset($fields[$key]);
+	}
+
+
 	if(count($fields))
 	{
 		if($time === NULL)

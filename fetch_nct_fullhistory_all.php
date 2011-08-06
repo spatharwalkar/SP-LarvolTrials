@@ -20,7 +20,7 @@ for($i=0;$i < count($output); $i++)
 	$exp_out=explode(" ",$output[$i]);
 	if (preg_match("/fetch_nct_fullhistory.php/i", $exp_out[11])) die('fetch_nct_fullhistory.php is already running');
 }
-ini_set('max_execution_time', '36000'); //10 hours
+ini_set('max_execution_time', '360000'); //100 hours
 ignore_user_abort(true);
 
 $query = 'SELECT * FROM update_status_fullhistory where status="1" order by update_id desc limit 1' ;
