@@ -302,7 +302,7 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 			if($all_ids === false)
 			{
 				mysql_query('ROLLBACK');
-				sleep(2);
+//				sleep(2);
 				mysql_query('DELETE FROM progress WHERE id=' . $pid . ' LIMIT 1');
 				if($return)
 				{
@@ -671,7 +671,7 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 					die($log);
 				}
 				if(mysql_affected_rows() == 0) exit;
-				sleep(20);
+//				sleep(20);
 			}
 		}
 	}
