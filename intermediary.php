@@ -13,6 +13,8 @@ if(!isset($_GET['cparams']) && !isset($_GET['params']) && !isset($_GET['results'
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <title>Online Trial Tracker</title>
 <link href="css/intermediary.css" rel="stylesheet" type="text/css" media="all" />
+<script src="scripts/jquery.js" type="text/javascript"></script>	
+<script src="scripts/func.js" type="text/javascript"></script>	
 <script type="text/javascript">
   var _gaq = _gaq || [];
   _gaq.push(['_setAccount', 'UA-18240582-3']);
@@ -25,8 +27,8 @@ if(!isset($_GET['cparams']) && !isset($_GET['params']) && !isset($_GET['results'
   })();
 </script>
 <script type="text/javascript" language="javascript"> 
-  //<![CDATA[
-  function applyfilter(value) {
+//<![CDATA[
+function applyfilter(value) {
  	
 	  if(value == 'inactive') {
 	  
@@ -72,10 +74,10 @@ if(!isset($_GET['cparams']) && !isset($_GET['params']) && !isset($_GET['results'
 
 	  }
   }
-  //]]>
+//]]>
 
-	//<![CDATA[
-	function doSorting(type) {
+//<![CDATA[
+function doSorting(type) {
 		
 		var sOrder = document.getElementById('sortorder').value;
 		
@@ -104,7 +106,7 @@ if(!isset($_GET['cparams']) && !isset($_GET['params']) && !isset($_GET['results'
 		
 		document.getElementById('frmOtt').submit();	
 	}
-	 //]]>
+//]]>
 </script>
 </head>
 <body>
@@ -163,7 +165,7 @@ class ContentManager
 	private $activecount;
 	private $allcount;
 	private $inactivecount;
-
+	private $time_machine;
 	
 	public function __construct() {
 	
@@ -290,7 +292,7 @@ class ContentManager
 	
 		$enumvals = getEnumValues('clinical_study', 'institution_type');
 	
-		echo ('<div style="height:100px;"><div class="block"><div class="text">List</div>'
+		echo ('<div style="height:100px;width:1000px;"><div class="block"><div class="text">List</div>'
 			. '<input type="radio" id="actlist" name="list" checked="checked" value="active" '
 			. ' onchange="javascript: applyfilter(this.value);" />'
 			. '&nbsp;<label for="actlist"><span style="color: #00B050;"> ' . $act
@@ -310,6 +312,17 @@ class ContentManager
 			. ((isset($_GET['list']) && $_GET['list'] == 'all') ? ' checked="checked" ' : '')
 			. ' onchange="javascript: applyfilter(this.value);" />&nbsp;<label for="alllist"> ' . $all
 			. ' All Records </label></div>'
+			. '<div class="block"><div class="text">Find changes from: </div>'
+			. '<input type="radio" id="oneweek" name="edited" value="oneweek" ' 
+			. ((!isset($_GET['edited']) || $_GET['edited'] == 'oneweek') ? 'checked="checked"' : '' ) . ' />'
+			. '<label for="oneweek">1 Week</label><br/>'
+			. '<input type="radio" id="onemonth" name="edited" value="onemonth" ' 
+			. ((isset($_GET['edited']) && $_GET['edited'] == 'onemonth') ? 'checked="checked"' : '' ) . ' />'
+			. '<label for="onemonth">1 Month</label>'
+			. '<br/><input type="checkbox" id="chkOnlyUpdated" name="chkOnlyUpdated" value="1" ' 
+			. ((isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) ? 'checked="checked"' : '') . ' />'
+			. '<label for="chkOnlyUpdated">Only Show Updated</label>'
+			. '</div>'
 			. '<input type="hidden" id="sortorder" name="sortorder" value="' . $this->sort_params . '" />'
 			. '&nbsp;<div class="drop"><div class="text">Show Only</div>'
 			. '<span id="filteropt">' . (isset($_GET["list"]) ? $this->{$_GET["list"].'status'} : $this->activestatus) 
@@ -322,23 +335,13 @@ class ContentManager
 			. '<label for="'.$v.'">' .$v . '</label><br/>';
 		}
 		echo ('</div>'
-			. '<div class="block"><div class="text">Find changes from: </div>'
-			. '<input type="radio" id="oneweek" name="edited" value="oneweek" ' 
-			. ((!isset($_GET['edited']) || $_GET['edited'] == 'oneweek') ? 'checked="checked"' : '' ) . ' />'
-			. '<label for="oneweek">1 Week</label><br/>'
-			. '<input type="radio" id="onemonth" name="edited" value="onemonth" ' 
-			. ((isset($_GET['edited']) && $_GET['edited'] == 'onemonth') ? 'checked="checked"' : '' ) . ' />'
-			. '<label for="onemonth">1 Month</label>'
-			. '<br/><input type="checkbox" id="chkOnlyUpdated" name="chkOnlyUpdated" value="1" ' 
-			. ((isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) ? 'checked="checked"' : '') . ' />'
-			. '<label for="chkOnlyUpdated">Only Show Updated</label>'
-			. '</div></div><br/><input type="submit" value="Show"/>&nbsp;');
+			. '</div><br/><input type="submit" value="Show"/>&nbsp;');
 			 if(strlen($count)) { echo $count . '&nbsp;Records'; }
 			
 	
 	}
 	
-	function pagination($cntr = NULL, $page, $count, $params, $leading, $tt_type, $stacktype) {
+	function pagination($page, $count, $params, $leading, $tt_type, $stacktype) {
 		
 		$pager = '';
 		$sort = '';
@@ -365,58 +368,54 @@ class ContentManager
 		
 		if($tt_type == 'stack') {
 			
-			$url = '';
+			$stack_url = '';
 				
-			if(!isset($_GET['results'])) {
+			if(isset($_GET['cparams'])) {
 				foreach($_GET['params'] as $k => $v) {
-					$url .= '&leading['.$k.']=' . rawurlencode($_GET['leading'][$k]) . '&params['.$k.']=' 
-					. rawurlencode($_GET['params'][$k]);
+					$stack_url .= '&leading['.$k.']=' . rawurlencode($_GET['leading'][$k]) . '&params['.$k.']=' . rawurlencode($_GET['params'][$k]);
 					
 					if($stacktype == 'row') 
-						$url .= '&rowupm['.$k.']=' . rawurlencode($_GET['rowupm'][$k]); 
+						$stack_url .= '&rowupm['.$k.']=' . rawurlencode($_GET['rowupm'][$k]); 
 					elseif($stacktype == 'col')
-						$url .= '&colupm['.$k.']=' . rawurlencode($_GET['colupm'][$k]); 
+						$stack_url .= '&colupm['.$k.']=' . rawurlencode($_GET['colupm'][$k]); 
 					
-					$url .= '&trunc=' . $_GET['trunc'];
-				}
-			}
-			
-			if(isset($_GET['pg'])) {
-				foreach($_GET['pg'] as $key => $val) {
-					$url .= '&pg['.$key.']=' . $_GET['pg'][$key];
+					if(isset($_GET['trunc']))
+						$stack_url .= '&trunc=' . $_GET['trunc'];
 				}
 			}
 			
 			if($this->pstart > 1)
 			{
 				if(isset($_GET['results'])) {
+				
 					$pager .= '<a href="intermediary.php?results=' . rawurlencode($_GET['results']) . '&type=' . rawurlencode($_GET['type']) 
-						. '&time=' . rawurlencode($_GET['time']);
-				} else {
-					$pager .= '<a href="intermediary.php?cparams=' . rawurlencode($_GET['cparams']);
+					. '&time=' . rawurlencode($_GET['time']) . '&amp;pg=' . ($page-1);
+					if(isset($_GET['format']) && $_GET['format'] == 'new') 
+						$pager .= '&format=' . $_GET['format'];
+						
+				} else if(isset($_GET['cparams'])) {
+					$pager .= '<a href="intermediary.php?cparams=' . rawurlencode($_GET['cparams']) . $stack_url . '&amp;pg=' . ($page-1);
 				}
-				if(isset($_GET['format']) && $_GET['format'] == 'new') 
-					$pager .= '&format=' . $_GET['format'];
-					
-				$pager .= $url . '&amp;pg['.$cntr.']=' . ($page-1) . $sort . '" style="float:left;">&lt;&lt; Previous Page (' . ($this->pstart - 1) . '-' 
-					. ($this->pstart-1) . ')</a>&nbsp;&nbsp;&nbsp;';
+				$pager .= $sort . '" style="float:left;">&lt;&lt; Previous Page (' . ($this->pstart - 1) . '-' . ($this->pstart-1) . ')</a>&nbsp;&nbsp;&nbsp;';
 			}
 			$pager .= '<div style="float:left;margin:0px 10px;">Studies Shown (' . $this->pstart . '-' . $this->pend . ')&nbsp;&nbsp;&nbsp;</div>';
 			if($this->pend < $count)
 			{
+				
 				$nextlast = ($this->last+1);
 				if($nextlast > $count) $nextlast = $count;
 				if(isset($_GET['results'])) {
+				
 					$pager .= '<a href="intermediary.php?results=' . rawurlencode($_GET['results']) . '&type=' . rawurlencode($_GET['type']) 
-						. '&time=' . rawurlencode($_GET['time']);
-				} else {
-					$pager .= '<a href="intermediary.php?cparams=' . rawurlencode($_GET['cparams']);
+						. '&time=' . rawurlencode($_GET['time']) . '&amp;pg=' . ($page+1);
+						
+					if(isset($_GET['format']) && $_GET['format'] == 'new') 
+					$pager .= '&format=' . $_GET['format'];	
+					
+				} else if(isset($_GET['cparams'])) {
+					$pager .= '<a href="intermediary.php?cparams=' . rawurlencode($_GET['cparams']) . $stack_url . '&amp;pg=' . ($page+1);
 				}
-				if(isset($_GET['format']) && $_GET['format'] == 'new') 
-					$pager .= '&format=' . $_GET['format'];
-
-				$pager .= $url . '&amp;pg['.$cntr.']=' . ($page+1) . $sort . '" style="float:left;">Next Page (' . ($this->pstart+1) 
-					. '-' . $nextlast . ') &gt;&gt;</a>';
+				$pager .= $sort . '" style="float:left;">Next Page (' . ($this->pstart+1) . '-' . $nextlast . ') &gt;&gt;</a>';
 			}
 		
 		} else {
@@ -450,379 +449,438 @@ class ContentManager
 
 	}
 	
-	function chkType() {
-	
-		echo ('<table width="100%"><tr><td>'
-			. '<img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" />'
-			. '</td><td nowrap="nowrap"><span style="color:#ff0000;font-weight:normal;">Interface Work In Progress</span>');
-			
-		if(isset($_GET['cparams']) || (isset($_GET['results']) && isset($_GET['type']))) {
+	function processParams() {
 		
-			$page = array();$ins_params = array();
+		$return_param	= array();
+		$return_param['fin_arr'] = array();
+		$return_param['upmDetails'] = array();
+		$ins_params		= array();
+		$return_param['showRecordsCnt'] = 0;
+		
+		if(isset($_GET['results']) && isset($_GET['type'])) {
 			
-			if(isset($_GET['results']) && isset($_GET['type'])) {
-			
-				$this->time_machine = $_GET['time'];
-				if(isset($_GET['format']) && $_GET['format'] == 'new') {
-					//pack encoding method used to encode data in the url
-					$results = unpack("C*", gzinflate(base64_decode(rawurldecode($_GET['results']))));
-					$three = 0;
-					$lengthcounter = 0; 
-					$string = '';
-					foreach($results as $vals)
-					{
-						if($lengthcounter == 0)
-						{
-							$lengthcounter = $vals;
-							continue;
-						}
-						$string .= $vals . '.';
-						$three++;
-						if($three == $lengthcounter)
-						{
-							$output[] = substr($string, 0, -1);
-							$three = 0;
-							$lengthcounter = 0;
-							$string = '';
-						}
-					}
-					$c_params = $output;
-				} else { 
-					//no specific encoding method used to encode data in the url
-					$c_params 	= explode(',', gzinflate(base64_decode($_GET['results'])));
-				}
-				
-				$vv = explode('.', $c_params[0]);
-				if($_GET['type'] == 'col') {
-					$t = getLinkDetails('rpt_ott_header', 'header', 'id', $vv[1]);
-				} else if($_GET['type'] == 'row') {
-					$t = getLinkDetails('rpt_ott_header', 'header', 'id', $vv[0]);
-				}
-				$params_arr = $c_params;
-				
-			} else {
-				$c_params 	= unserialize(gzinflate(base64_decode($_GET['cparams'])));
-				$t 			= ($c_params['type'] == 'col') ? $c_params['columnlabel'] : $c_params['rowlabel'];
-				$params_arr = $_GET['params'];
-			}
-			
-			$stack_type = ($c_params['type'] == 'col') ? 'rowlabel' : 'columnlabel';
-			
-			echo ('</td><td class="result">Results for ' . htmlformat($t) . '</td>' . '</tr></table>');
-			echo('<br clear="all"/>');		
-			echo('<form id="frmOtt" name="frmOtt" method="get" action="intermediary.php">');
-			if(isset($_GET['results']) && $_GET['type']) {
-				echo ('<input type="hidden" name="results" value="' . $_GET['results'] . '"/>'
+			$this->time_machine = $_GET['time'];
+			echo ('<input type="hidden" name="results" value="' . $_GET['results'] . '"/>'
 					. '<input type="hidden" name="type" value="' . $_GET['type'] . '"/>'
 					. '<input type="hidden" name="time" value="' . $_GET['time'] . '"/>');
-				if(isset($_GET['format']) && $_GET['format'] == 'new') {
-					echo ('<input type="hidden" name="format" value="' . $_GET['format'] . '"/>');
+			if(isset($_GET['format']) && $_GET['format'] == 'new') {
+			
+				echo ('<input type="hidden" name="format" value="' . $_GET['format'] . '"/>');
+				//pack encoding method used to encode data in the url
+				$results = unpack("C*", gzinflate(base64_decode(rawurldecode($_GET['results']))));
+				$three = 0;
+				$lengthcounter = 0; 
+				$string = '';
+				foreach($results as $vals)
+				{
+					if($lengthcounter == 0)
+					{
+						$lengthcounter = $vals;
+						continue;
+					}
+					$string .= $vals . '.';
+					$three++;
+					if($three == $lengthcounter)
+					{
+						$output[] = substr($string, 0, -1);
+						$three = 0;
+						$lengthcounter = 0;
+						$string = '';
+					}
+				}
+				$return_param['c_params'] = $output;
+			} else { 
+				//no specific encoding method i.e. only implode used to encode data in the url
+				$return_param['c_params'] = explode(',', gzinflate(base64_decode($_GET['results'])));
+			}
+			
+			$vv = explode('.', $return_param['c_params'][0]);
+			if($_GET['type'] == 'col') {
+				$t = getLinkDetails('rpt_ott_header', 'header', 'id', $vv[1]);
+			} else if($_GET['type'] == 'row') {
+				$t = getLinkDetails('rpt_ott_header', 'header', 'id', $vv[0]);
+			}
+			$params_arr = $return_param['c_params'];
+				
+		} else {
+		
+			echo ('<input type="hidden" name="cparams" value="' . $_GET['cparams'] . '"/>'
+					. '<input type="hidden" name="trunc" value="' . $_GET['trunc'] . '"/>');
+			$return_param['c_params'] 	= unserialize(gzinflate(base64_decode($_GET['cparams'])));
+			$t 	= ($return_param['c_params']['type'] == 'col') ? $return_param['c_params']['columnlabel'] : $return_param['c_params']['rowlabel'];
+			$params_arr = $_GET['params'];
+		}
+		
+		if(isset($_GET['institution']) && $_GET['institution'] != '') {
+				
+			array_push($this->fid, 'institution_type');
+			$sp = new SearchParam();
+			$sp->field 	= 'institution_type';
+			$sp->action = 'search';
+			$sp->value 	= $_GET['institution'];
+			$ins_params = array($sp);
+		}
+		$stack_type = ($return_param['c_params']['type'] == 'col') ? 'rowlabel' : 'columnlabel';
+		echo ('</td><td class="result">Results for ' . htmlformat($t) . '</td>' . '</tr></table>');
+		echo('<br clear="all"/>');
+		foreach($params_arr as $pk => $pv) {
+		
+			$excel_params 	= array();
+			$params = array();
+			$arr 	= array();
+			$arrr 	= array();
+			$return_param['fin_arr'][$pk] = array();
+			$totinactivecount = 0; 
+			$totactivecount	 = 0; 
+			
+			//New Link Method
+			if(isset($_GET['results'])) {
+				$e 	= explode(".", $pv);
+				
+				//Retrieving headers
+				if($_GET['type'] == 'row') {
+					if($pk != 0) {
+						$return_param['ltype'][$pk] 	= htmlentities(getLinkDetails('rpt_ott_header', 'header', 'id', $e[0]));
+						$tt = $e[1];
+					} else {
+						$return_param['ltype'][$pk] 	= htmlentities(getLinkDetails('rpt_ott_header', 'header', 'id', $e[1]));
+						$tt = $e[2];
+					}	
+				} else if($_GET['type'] == 'col') {
+					if($pk != 0) {
+						$return_param['ltype'][$pk] 	= htmlentities(getLinkDetails('rpt_ott_header', 'header', 'id', $e[0]));
+						$tt = $e[1];
+					} else {
+						$return_param['ltype'][$pk] 	= htmlentities(getLinkDetails('rpt_ott_header', 'header', 'id', $e[0]));
+						$tt = $e[2];
+					}	
+				}
+				
+				//Retrieving params
+				if(strpos($tt, 's') !== FALSE) {
+					$excel_params = unserialize(getLinkDetails('rpt_ott_searchdata', 'result_set', 'id', substr($tt,1)));
+				} else {
+					
+					$res = getLinkDetails('rpt_ott_trials', 'result_set', 'id', $tt);
+					$sp = new SearchParam();
+					$sp->field = 'larvol_id';
+					$sp->action = 'search';
+					$sp->value = str_replace(',', ' OR ', $res);
+					$excel_params = array($sp);
 				}
 			} else {
-				echo ('<input type="hidden" name="cparams" value="' . $_GET['cparams'] . '"/>'
-					. '<input type="hidden" name="trunc" value="' . $_GET['trunc'] . '"/>');
-			}
-			$this->commonControls(NULL, NULL, NULL, NULL, NULL, NULL);
-			echo('<br clear="all"/><br/>');
-			if(isset($_GET['institution']) && $_GET['institution'] != '') {
-				
-				array_push($this->fid, 'institution_type');
-				
-				$sp = new SearchParam();
-				$sp->field 	= 'institution_type';
-				$sp->action = 'search';
-				$sp->value 	= $_GET['institution'];
-				$ins_params = array($sp);
-			}
 			
-			$row_upm_arr = array();
-			if(isset($_GET['results']) && $_GET['type'] == 'row') { 
-				foreach($c_params as $k => $v) {
-					$vv = explode('.', $v);
-					if($k != 0) {
-						if(isset($vv[2])) {
-							$row_upm_arr[$k] = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[2]);
-						}
-					} else {
-						if(isset($vv[3])) {
-							$row_upm_arr[$k] = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[3]);
-						}
-					}
-				}
-			} else if(isset($_GET['cparams'])) {
-				if($c_params['type'] == 'row' && isset($_GET['rowupm'])) {
-					foreach($_GET['rowupm'] as $k => $v) {
-						$val = unserialize(gzinflate(base64_decode($v)));
-						if($val != '' && !empty($val)) {
-							foreach($val as $vv)
-								$row_upm_arr[$k] = $vv;
-						}
-					}
-				}
-			}
-			if(isset($row_upm_arr) && !empty($row_upm_arr))
-				$this->getNonAssocUpm($row_upm_arr);
+				$excel_params = unserialize(gzinflate(base64_decode($pv)));
+				$this->time_machine 	= $excel_params['time'];
+				$return_param['ltype'][$pk]	= htmlentities($excel_params[$stack_type]);
 			
-			foreach($params_arr as $pk => $pv) {
-				
-				$page[$pk] = 1;
-				if(isset($_GET['pg'][$pk])) $page[$pk] = mysql_real_escape_string($_GET['pg'][$pk]); 
-				if(!is_numeric($page[$pk])) die('non-numeric page');
-
-				$excel_params 	= array();$params = array();
-				$arr 	= array();$fin_arr 		= array();
-				$arrr 	= array();$trial_arr	= array();
-				$upmDetails = array();
-				
-				$bomb = ''; $time_machine = '';
-				$totinactivecount = 0;
-				$totactivecount = 0;
-				
-				$this->inactivearray 	= array();
-				$this->allarray			= array();
-				$this->activearray		= array();
-				
-				if(isset($_GET['results'])) {
-					$e 	= explode(".", $pv);
-					if($_GET['type'] == 'row') {
-						if($pk != 0) {
-							$ltype 	= getLinkDetails('rpt_ott_header', 'header', 'id', $e[0]);
-							$tt = $e[1];
-						} else {
-							$ltype 	= getLinkDetails('rpt_ott_header', 'header', 'id', $e[1]);
-							$tt = $e[2];
-						}	
-
-					} else if($_GET['type'] == 'col') {
-						if($pk != 0) {
-							$ltype 	= getLinkDetails('rpt_ott_header', 'header', 'id', $e[0]);
-							$tt = $e[1];
-						} else {
-							$ltype 	= getLinkDetails('rpt_ott_header', 'header', 'id', $e[0]);
-							$tt = $e[2];
-						}	
-					}
+				if($excel_params['params'] === NULL)
+				{ 	
+					$packedLeadingIDs = gzinflate(base64_decode($_GET['leading'][$pk]));
+					$leadingIDs = unpack('l*', $packedLeadingIDs);
+					if($packedLeadingIDs === false) $leadingIDs = array();
 					
-					if(strpos($tt, 's') !== FALSE) {
-						$excel_params = unserialize(getLinkDetails('rpt_ott_searchdata', 'result_set', 'id', substr($tt,1)));
-					} else {
-						
-						$res = getLinkDetails('rpt_ott_trials', 'result_set', 'id', $tt);
-						$sp = new SearchParam();
-						$sp->field = 'larvol_id';
-						$sp->action = 'search';
-						$sp->value = str_replace(',', ' OR ', $res);
-						$excel_params = array($sp);
+					$sp = new SearchParam();
+					$sp->field = 'larvol_id';
+					$sp->action = 'search';
+					$sp->value = implode(' OR ', $leadingIDs);
+					$excel_params = array($sp);
+
+				} else {	
+					$excel_params = $excel_params['params'];
+				}
+				echo ('<input type="hidden" name="params['.$pk.']" value="' . $_GET['params'][$pk] . '"/>'
+						. '<input type="hidden" name="leading['.$pk.']" value="' . $_GET['leading'][$pk] . '"/>');
+				
+				if($c_params['type'] == 'row') {
+					echo ('<input type="hidden" name="rowupm['.$pk.']" value="' . $_GET['rowupm'][$pk] . '"/>');
+				} else if($c_params['type'] == 'col'){
+					echo ('<input type="hidden" name="colupm['.$pk.']" value="' . $_GET['colupm'][$pk] . '"/>');
+				}
+			}
+			
+			
+			$params = array_merge($this->params, $excel_params, $ins_params);
+			$arrr = search($params,$this->fid,NULL,$this->time_machine);
+			
+			//Added to consolidate the data returned in an mutidimensional array format as opposed to earlier 
+			//when it was not returned in an mutidimensional array format.
+			foreach($arrr as $k => $v) {
+				foreach($v as $kk => $vv) {
+					if($kk != 'NCT/condition' && $kk != 'NCT/intervention_name' && 'NCT/lead_sponsor')
+						$arr[$k][$kk] = (is_array($vv)) ? implode(' ', $vv) : $vv;
+					else
+						$arr[$k][$kk] = (is_array($vv)) ? implode(', ', $vv) : $vv;
+				}
+			}
+			
+			//Process to check for changes/updates in trials, matched & unmatched upms.
+			
+			foreach($arr as $key => $val) { 
+				
+				$nct = array();$trial_arr	= array();$allUpmDetails = array();
+				
+				//checking for updated and new trials
+				$nct[$val['NCT/nct_id']] = getNCT($val['NCT/nct_id'], $val['larvol_id'], $this->time_machine, $this->edited);
+				$trial_arr[] = $val['NCT/nct_id'] . ', ' . $val['larvol_id'];
+				 
+				//checking for updated and new unmatched upms.
+				$allUpmDetails[$val['NCT/nct_id']] = getCorrespondingUPM($val['NCT/nct_id'], $this->time_machine, $this->edited);
+
+				if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) {
+			
+					if(!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y')
+						$return_param['fin_arr'][$pk][$val['NCT/nct_id']] = array_merge($nct[$val['NCT/nct_id']], $val);
+				
+					foreach($allUpmDetails[$val['NCT/nct_id']] as $kk => $vv) {
+						if(isset($vv['edited']) && !empty($vv['edited'])) {
+							$return_param['upmDetails'][$pk][$val['NCT/nct_id']][] = $vv;
+						}
 					}
 				} else {
-				
-					$excel_params = unserialize(gzinflate(base64_decode($pv)));
-					$this->time_machine = $excel_params['time'];
-					$ltype 		= $excel_params[$stack_type];
-					$bomb	 	= $excel_params['bomb'];
-				
-					if($excel_params['params'] === NULL)
-					{ 	
-						$packedLeadingIDs = gzinflate(base64_decode($_GET['leading'][$pk]));
-						$leadingIDs = unpack('l*', $packedLeadingIDs);
-						if($packedLeadingIDs === false) $leadingIDs = array();
-						
-						$sp = new SearchParam();
-						$sp->field = 'larvol_id';
-						$sp->action = 'search';
-						$sp->value = implode(' OR ', $leadingIDs);
-						$excel_params = array($sp);
-	
-					} else {	
-						$excel_params = $excel_params['params'];
-					}
-					echo ('<input type="hidden" name="params['.$pk.']" value="' . $_GET['params'][$pk] . '"/>'
-							. '<input type="hidden" name="leading['.$pk.']" value="' . $_GET['leading'][$pk] . '"/>');
-					
-					if($c_params['type'] == 'row') {
-						echo ('<input type="hidden" name="rowupm['.$pk.']" value="' . $_GET['rowupm'][$pk] . '"/>');
-					} else if($c_params['type'] == 'col'){
-						echo ('<input type="hidden" name="colupm['.$pk.']" value="' . $_GET['colupm'][$pk] . '"/>');
-					}
+					$return_param['fin_arr'][$pk][$val['NCT/nct_id']] = array_merge($nct[$val['NCT/nct_id']], $val);
+					$return_param['upmDetails'][$pk][$val['NCT/nct_id']] = $allUpmDetails[$val['NCT/nct_id']];
 				}
 				
-				$params = array_merge($this->params, $excel_params, $ins_params);
-				$arrr = search($params,$this->fid,NULL,$this->time_machine);
-				
-				foreach($arrr as $k => $v) {
+				if(in_array($val['NCT/overall_status'],$this->actfilterarr)) {
+					$totactivecount++;
+					$return_param['activephase'][] = $val['NCT/phase'];
+				} else {
+					$totinactivecount++;
+					$return_param['inactivephase'][] = $val['NCT/phase'];
+				}
+			}
 			
-					foreach($v as $kk => $vv) {
-					
-						if($kk != 'NCT/condition' && $kk != 'NCT/intervention_name' && 'NCT/lead_sponsor')
-							$arr[$k][$kk] = (is_array($vv)) ? implode(' ', $vv) : $vv;
-						else
-							$arr[$k][$kk] = (is_array($vv)) ? implode(', ', $vv) : $vv;
-					}
-				}
+			foreach($return_param['fin_arr'][$pk] as $key => $new_arr){
 				
-				$nct = array();
-				foreach($arr as $key => $val) { 
+				if($this->inactflag == 1) { 
 					
-					//checking for updated and new trials
-					$nct[$val['NCT/nct_id']] = getNCT($val['NCT/nct_id'], $val['larvol_id'], $this->time_machine, $this->edited);
-					$trial_arr[] = $val['NCT/nct_id'] . ', ' . $val['larvol_id']; 
-					
-					//checking for updated and new unmatched upms.
-					$allUpmDetails[$val['NCT/nct_id']] = getCorrespondingUPM($val['NCT/nct_id'], $this->time_machine, $this->edited);
-					
-					if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) {
-				
-						if(!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y')
-							$fin_arr[$val['NCT/nct_id']] = array_merge($nct[$val['NCT/nct_id']], $val);
-					
-						foreach($allUpmDetails[$val['NCT/nct_id']] as $kk => $vv) {
-							if(isset($vv['edited']) && !empty($vv['edited'])) {
-								$upmDetails[$val['NCT/nct_id']][] = $vv;
-							}
+					if(in_array($new_arr['NCT/overall_status'], $this->inactfilterarr)) {
+							
+						if(isset($_GET['wh']) || isset($_GET['afm']) || isset($_GET['tna']) || isset($_GET['nla']) 
+						|| isset($_GET['wd']) || isset($_GET['t']) || isset($_GET['s']) || isset($_GET['c'])) {
+							
+							$vall = implode(",",array_keys($this->inactfilterarr, $new_arr['NCT/overall_status']));
+							if(array_key_exists($vall, $_GET)) {
+								$return_param['inactivearray'][$pk][] = $new_arr;	
+							} 
+						} else {
+								$return_param['inactivearray'][$pk][] = $new_arr;
 						}
-					} else {
-						$fin_arr[$val['NCT/nct_id']] = array_merge($nct[$val['NCT/nct_id']], $val);
-						$upmDetails[$val['NCT/nct_id']] = $allUpmDetails[$val['NCT/nct_id']];
 					}
-					
-					if(in_array($val['NCT/overall_status'],$this->actfilterarr))
-						$totactivecount++;
-					else
-						$totinactivecount++;
-				}
 				
-				foreach($fin_arr as $key => $new_arr){
-					
-					if($this->inactflag == 1) { 
-						
-						if(in_array($new_arr['NCT/overall_status'], $this->inactfilterarr)) {
-								
-							if(isset($_GET['wh']) || isset($_GET['afm']) || isset($_GET['tna']) || isset($_GET['nla']) 
-							|| isset($_GET['wd']) || isset($_GET['t']) || isset($_GET['s']) || isset($_GET['c'])) {
-								
-								$vall = implode(",",array_keys($this->inactfilterarr, $new_arr['NCT/overall_status']));
-								if(array_key_exists($vall, $_GET)) {
-									$this->inactivearray[] = $new_arr;	
-									$this->inactivecount++;
-								} 
-							} else {
-									$this->inactivearray[] = $new_arr;
-									$this->inactivecount++;	
-							}
-						}
-					
-					} else if($this->allflag == 1) { 
-					
-						if(in_array($new_arr['NCT/overall_status'], $this->allfilterarr)) {
-								
-								if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) 
-								|| isset($_GET['a']) || isset($_GET['wh']) || isset($_GET['afm']) || isset($_GET['tna']) 
-								|| isset($_GET['nla']) || isset($_GET['wd']) || isset($_GET['t']) || isset($_GET['s']) 
-								|| isset($_GET['c'])) {	
-								
-								$vall = implode(",",array_keys($this->allfilterarr, $new_arr['NCT/overall_status']));
-								if(array_key_exists($vall, $_GET)) {
-
-									$this->allarray[] = $new_arr;
-									$this->allcount++;	
-								} 
-							} else {
-								$this->allarray[] = $new_arr;
-								$this->allcount++;	
-							}
-						}	
-					
-					} else {
-					
-						if(in_array($new_arr['NCT/overall_status'], $this->actfilterarr) ) {
+				} else if($this->allflag == 1) { 
+				
+					if(in_array($new_arr['NCT/overall_status'], $this->allfilterarr)) {
+							
 							if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) 
-							|| isset($_GET['a'])) {
-								$vall = implode(",",array_keys($this->actfilterarr, $new_arr['NCT/overall_status']));
-								if(array_key_exists($vall, $_GET)) { 
-									$this->activearray[] = $new_arr;
-									$this->activecount++;	
-								} 
-							} else {
-								$this->activearray[] = $new_arr;
-								$this->activecount++;	
-							}	
+							|| isset($_GET['a']) || isset($_GET['wh']) || isset($_GET['afm']) || isset($_GET['tna']) 
+							|| isset($_GET['nla']) || isset($_GET['wd']) || isset($_GET['t']) || isset($_GET['s']) 
+							|| isset($_GET['c'])) {	
+							
+							$vall = implode(",",array_keys($this->allfilterarr, $new_arr['NCT/overall_status']));
+							if(array_key_exists($vall, $_GET)) {
+								$return_param['allarray'][$pk][] = $new_arr;
+							} 
+						} else {
+							$return_param['allarray'][$pk][] = $new_arr;
 						}
+					}	
+				
+				} else {
+				
+					if(in_array($new_arr['NCT/overall_status'], $this->actfilterarr) ) {
+						if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) 
+						|| isset($_GET['a'])) {
+							$vall = implode(",",array_keys($this->actfilterarr, $new_arr['NCT/overall_status']));
+							if(array_key_exists($vall, $_GET)) { 
+								$return_param['activearray'][$pk][] = $new_arr;
+							} 
+						} else {
+							$return_param['activearray'][$pk][] = $new_arr;
+						}	
 					}
 				}
-				
-				$count = count($this->{$this->type});
-				$this->pstart 	= '';$this->last = '';$this->pend = '';$this->pages = '';
-				
-				$this->pstart 	= ($page[$pk]-1) * $this->results_per_page + 1;
-				$this->pend 	= $this->pstart + $this->results_per_page - 1;
-				$this->pages 	= ceil($count / $this->results_per_page);
-				$this->last 	= ($page[$pk] * $this->results_per_page > $count) ? $count : $this->pend;
-				
-				echo $ltype;
-				echo('<br clear="all"/>');
-				if(isset($_GET['results']) && $_GET['type'] == 'col') { 
-				
-					$c = explode('.', $c_params[$pk]);
-					if($pk != 0) {
-						if(isset($c[2])) {
-							$val = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $c[2]);
-							$this->getNonAssocUpm(array($val));
-						}
-					} else {
-						if(isset($c[3])) {
-							$val = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $c[3]);
-							$this->getNonAssocUpm(array($val));
-						}
-					}
-				} else if(isset($_GET['cparams']) && $c_params['type'] == 'col') { 
-					
-					$val = unserialize(gzinflate(base64_decode($_GET['colupm'][$pk])));
-					if($val != '' && !empty($val)) 
-						$this->getNonAssocUpm($val);
-				}
-				
-				if($bomb != '') {
-					//$bomb = 'lb';
-					echo ('<span><img src="./images/' . $this->bomb_img_arr[$bomb] . '" alt="Bomb"  /></span>'
-						. '&nbsp;This cell has a ' . $this->bomb_type_arr[$bomb] . ' <a href="./help/bomb.html">bomb</a>');
-					echo('<br clear="all"/>');
-					
-				}
-				
-				echo ("<span style='color: #00B050;'>" . $totactivecount . " Active Records</span>&nbsp;&nbsp;&nbsp;"
-						. "<span style='color: #FF0000;'>" . $totinactivecount . " Inactive Records</span>&nbsp;&nbsp;&nbsp;" 
-						. ($totactivecount + $totinactivecount) . " All Records ");
-					
-				//Pagination	
-				if($count > $this->results_per_page) {
-					echo('<br clear="all"/>');
-					if(isset($_GET['results']) && isset($_GET['type'])) {
-						$this->pagination($pk, $page[$pk], $count, $c_params, $_GET['time'], 'stack', $_GET['type']);
-					} else {
-						$this->pagination($pk, $page[$pk], $count, $_GET['params'][$pk], $_GET['leading'][$pk], 'stack', $c_params['type']);
-					}
-				}	
-				$this->displayHeader();
-				if($count > 0) {
+			}
+			$return_param['eachCount'][$pk] = count($return_param[$this->type][$pk]);
+			$return_param['showRecordsCnt'] += count($return_param[$this->type][$pk]);//exit;
+			$return_param['stack_inactive_count'] 	= $return_param['stack_inactive_count'] + $totinactivecount;
+			$return_param['stack_active_count']		= $return_param['stack_active_count'] + $totactivecount;
+			$return_param['stack_total_count']		= $return_param['stack_total_count'] + ($totinactivecount + $totactivecount);
 			
-					displayContent($params,$this->displist, $this->{$this->type}, $this->edited, $this->time_machine, 
-					$this->pstart, $this->last, $this->phase_arr, $fin_arr, $this->actfilterarr, $this->current_yr, 
-					$this->second_yr, $this->third_yr, $upmDetails);
+		}
+		
+		/*--------------------------------------------------------
+		|Variables set for count when filtered by institution_type
+		---------------------------------------------------------*/
+		if(isset($_GET['instparams']) && $_GET['instparams'] != '') {
+			$return_param['insparams'] = $_GET['instparams'];
+		} else {
+			$return_param['insparams']  = rawurlencode(base64_encode(gzdeflate(serialize(array('actphase' => $return_param['activephase'], 
+												'inactphase' => $return_param['inactivephase'],'actcnt' => $return_param['stack_active_count'],
+												'inactcnt' => $return_param['stack_inactive_count'])))));
+		}
+		
+		//echo "return_param==><pre>";print_r($return_param['eachCount']);
+		return $return_param;
+	}
+	
+	function chkType() {
+	
+		$process_params = array();
+		echo('<form id="frmOtt" name="frmOtt" method="get" action="intermediary.php">');
+		echo ('<table width="100%"><tr><td><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" />'
+				. '</td><td nowrap="nowrap"><span style="color:#ff0000;font-weight:normal;">Interface Work In Progress</span>');
+		
+		//Stacked Ott.	
+		if(isset($_GET['cparams']) || (isset($_GET['results']) && isset($_GET['type']))) {
+			
+			//Process the get parameters and extract the information
+			$process_params = $this->processParams();
+			
+			if(isset($_GET['institution']) && $_GET['institution'] != '') {
+				$ins = unserialize(gzinflate(base64_decode(rawurldecode($process_params['insparams']))));
+				$this->commonControls($process_params['showRecordsCnt'], $ins['actcnt'], $ins['inactcnt'], ($ins['actcnt'] + $ins['inactcnt']), $ins['actphase'], 
+				$ins['inactphase']);
+			} else {
+				$this->commonControls($process_params['showRecordsCnt'], $process_params['stack_active_count'], $process_params['stack_inactive_count'], 
+				$process_params['stack_total_count'],
+				$process_params['activephase'], $process_params['inactivephase']);
+			}
+			echo('<br clear="all"/><br/>');
+			echo ('<input type="hidden" name="instparams" value="' . $process_params['insparams']. '" />');	
+
+			//Pagination
+			$page = 1;
+			$this->pstart 	= '';$this->last = '';$this->pend = '';$this->pages = '';
+			if(isset($_GET['pg'])) $page = mysql_real_escape_string($_GET['pg']); 
+			if(!is_numeric($page)) die('non-numeric page');
+			$count = max($process_params['eachCount']);
+			
+			$this->pstart 	= ($page-1) * $this->results_per_page + 1;
+			$this->pend 	= $this->pstart + $this->results_per_page - 1;
+			$this->pages 	= ceil($count / $this->results_per_page);
+			$this->last 	= ($page * $this->results_per_page > $count) ? $count : $this->pend;
+			
+			if($count > $this->results_per_page) {
+				if(isset($_GET['results']) && isset($_GET['type'])) {
+					$this->pagination($page, $count, NULL, NULL, 'stack', $_GET['type']);
+				} else {
+					$this->pagination($page, $count, NULL, NULL, 'stack', $process_params['c_params']['type']);
+				}
+			}
 				
-				} else 
-					echo ('<tr><th colspan="50" class="norecord" align="left">No record found.</th></tr>');
+			$this->displayHeader();
+			foreach($process_params['c_params'] as $pk => $pv) {
+				
+				//Unmatched Upms for Row Stacked Upms.
+				$row_upm_arr = array();$upm_string = '';$row_upm_flag = false;
+				if(isset($_GET['results']) && $_GET['type'] == 'row') { 
+					foreach($process_params['c_params'] as $k => $v) {
+						$vv = explode('.', $v);
+						if($k != 0) {
+							if(isset($vv[2])) { $row_upm_arr[$k] = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[2]); }
+						} else {
+							if(isset($vv[3])) { $row_upm_arr[$k] = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[3]); }
+						}
+					}
+					$row_upm_flag = true;
+				} else if(isset($_GET['cparams'])) {
+					if(isset($_GET['rowupm']) && $c_params['type'] == 'row') {
+						foreach($_GET['rowupm'] as $k => $v) {
+							$val = unserialize(gzinflate(base64_decode($v)));
+							if(isset($val) && $val != '' && !empty($val)) {
+								foreach($val as $vv) { $row_upm_arr[$k] = $vv; }
+							}
+						}
+						$row_upm_flag = true;
+					}
+				}
+				if(isset($row_upm_arr) && !empty($row_upm_arr)) {
+					$upm_string = $this->getNonAssocUpm($row_upm_arr, 'rowupm');
+					if($upm_string != '' && $pk == 0) {
+						echo ('<tr class="trialtitles">'
+								. '<td colspan="50" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
+								. 'style="border-bottom:1px solid blue" onclick="sh(this,\'rowupm\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+								. '</td></tr>' . $upm_string);
+					} 
+				}
+				
+				//Displayiong header titles for Row Stacked Otts.
+				if($row_upm_flag == true) { 
+					if((isset($_GET['pg']) && $_GET['pg'] <= $process_params['eachCount'][$pk]) || (!isset($_GET['pg']))) {
+						echo ('<tr><td colspan="50" class="notopbottomborder leftrightborderblue sectiontitles">' 
+						. trim($process_params['ltype'][$pk]) . '</td></tr>');
+					}
+				} 
+				
+				//Unmatched Upms for Column Stacked Upms.
+				if(isset($_GET['results']) && $_GET['type'] == 'col') { 
 					
+					$upm_value = '';$upm_string = '';
+					$c = explode('.', $process_params['c_params'][$pk]);
+					if($pk != 0) {
+						if(isset($c[2])) { $upm_value = $c[2]; }
+					} else {
+						if(isset($c[3])) { $upm_value = $c[3]; }
+					}
+					if(isset($upm_value) && $upm_value != '' && !empty($upm_value)) {
+						$val = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $upm_value);
+						$upm_string = $this->getNonAssocUpm(array($val), $pk);
+					} 
+					if($upm_string != '') {
+						echo ('<tr class="trialtitles">'
+								. '<td colspan="50" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
+								. 'style="border-bottom:1px solid blue" onclick="sh(this,\'' . $pk . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+								. trim($process_params['ltype'][$pk]) . '</td></tr>' . $upm_string);
+					} else {
+						if((isset($_GET['pg']) && $_GET['pg'] <= $process_params['eachCount'][$pk]) || (!isset($_GET['pg']))) {
+							echo ('<tr><td colspan="50" class="notopbottomborder leftrightborderblue sectiontitles">' 
+							. trim($process_params['ltype'][$pk]) . '</td></tr>');
+						}
+					}
+				} else if(isset($_GET['cparams']) && $process_params['c_params']['type'] == 'col') { 
+					
+					$upm_string = '';
+					$val = unserialize(gzinflate(base64_decode($_GET['colupm'][$pk])));
+					if(isset($val) && $val != '' && !empty($val)) {
+						$upm_string = $this->getNonAssocUpm($val, $pk);
+					}
+					if($upm_string != '') {
+						echo ('<tr class="trialtitles">'
+								. '<td colspan="50" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
+								. 'style="border-bottom:1px solid blue" onclick="sh(this,\'' . $pk . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+								. trim($process_params['ltype'][$pk]) . '</td></tr>' . $upm_string);
+					} else {
+						if((isset($_GET['pg']) && $_GET['pg'] <= $process_params['eachCount'][$pk]) || (!isset($_GET['pg']))) {
+							echo ('<tr><td colspan="50" class="notopbottomborder leftrightborderblue sectiontitles">' 
+							. trim($process_params['ltype'][$pk]) . '</td></tr>');
+						}
+					}
+				}
 				
-				echo('</table><br/>');
+				if($process_params['eachCount'][$pk] > 0) {
+					
+					$last 	= ($page * $this->results_per_page > $process_params['eachCount'][$pk]) ? $process_params['eachCount'][$pk] : $this->pend;
+					displayContent($this->displist, $process_params[$this->type][$pk], $this->edited, $this->time_machine, $this->pstart, $last, 
+					$this->phase_arr, $process_params['fin_arr'][$pk], $this->actfilterarr, $this->current_yr, $this->second_yr, $this->third_yr,
+					$process_params['upmDetails'][$pk]);
+				} else  {
+					if(!isset($_GET['pg'])) {
+						echo ('<tr><th colspan="50" class="norecord" align="left">No record found.</th></tr>');
+					}
+				}
+				
 			}
 			if(isset($_GET['trunc'])) {
 				$t = unserialize(gzinflate(base64_decode($_GET['trunc'])));
 				if($t == 'y') echo ('<span style="font-size:10px;color:red;">Note: all data could not be shown</span>');
 			}
+			echo('</table>');
 			echo ('</form>');
 			
 		} else {
-		
+			
 			$page = 1;
 			if(isset($_GET['page'])) $page = mysql_real_escape_string($_GET['page']);
 			if(!is_numeric($page)) die('non-numeric page');
@@ -847,9 +905,9 @@ class ContentManager
 					$non_assoc_upm_params	= array(getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $excel_params[3]));
 				}
 				
-				if(strpos($excel_params[2], 's') !== FALSE) {
-					$res = getLinkDetails('rpt_ott_searchdata', 'result_set', 'id', $excel_params[2]);
-					$excel_params = base64_decode(unserialize($res['`result_set`']));
+				if(strpos($excel_params[2], 's') !== FALSE) { 
+					$res = getLinkDetails('rpt_ott_searchdata', 'result_set', 'id', substr($excel_params[2],1));
+					$excel_params = unserialize($res);
 				} else {
 					$res = getLinkDetails('rpt_ott_trials', 'result_set', 'id', $excel_params[2]);
 					$sp = new SearchParam();
@@ -1042,18 +1100,10 @@ class ContentManager
 			$count = count($this->{$this->type});
 			
 			if(isset($_GET['institution']) && $_GET['institution'] != '') {
-			
 				$ins = unserialize(gzinflate(base64_decode(rawurldecode($insparams))));
-				$cnt = $ins['actcnt'];
 				$this->commonControls($count, $ins['actcnt'], $ins['inactcnt'], ($ins['actcnt'] + $ins['inactcnt']), $ins['actphase'], $ins['inactphase']);
-				$cnt = ($ins['actcnt'] + $ins['inactcnt']);
-
 			} else {
-			
-				$cnt = $totactivecount;
 				$this->commonControls($count, $totactivecount, $totinactivecount, ($totactivecount + $totinactivecount), $activephase, $inactivephase);
-				$cnt = ($totactivecount + $totinactivecount);
-						
 			}
 			echo ('<br/><br clear="all" />');
 			
@@ -1068,10 +1118,6 @@ class ContentManager
 			}
 			echo ('<input type="hidden" name="instparams" value="' . $insparams . '" />');
 			
-			if(isset($non_assoc_upm_params) && !empty($non_assoc_upm_params)) {
-				$this->getNonAssocUpm($non_assoc_upm_params);
-			}
-
 			$this->pstart 	= '';$this->last = '';$this->pend = '';$this->pages = '';
 			
 			$this->pstart 	= ($page-1) * $this->results_per_page + 1;
@@ -1081,14 +1127,23 @@ class ContentManager
 
 			if($count > $this->results_per_page) {
 				if(isset($_GET['results']))
-					$this->pagination(NULL, $page, $count, $_GET['results'], $_GET['time'], 'normal', NULL);
+					$this->pagination($page, $count, $_GET['results'], $_GET['time'], 'normal', NULL);
 				else 
-					$this->pagination(NULL, $page, $count, $_GET['params'], $_GET['leading'], 'normal', NULL);
+					$this->pagination($page, $count, $_GET['params'], $_GET['leading'], 'normal', NULL);
 			}
 			$this->displayHeader();
+			if(isset($non_assoc_upm_params) && !empty($non_assoc_upm_params)) {
+				$upm_string = $this->getNonAssocUpm($non_assoc_upm_params, 'ott');
+				if($upm_string != '') {
+					echo ('<tr class="trialtitles">'
+							. '<td colspan="50" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
+							. 'style="border-bottom:1px solid blue" onclick="sh(this,\'ott\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+							. '</td></tr>' . $upm_string);
+				} 
+			}
 			if($count > 0) {
 			
-				displayContent($params,$this->displist, $this->{$this->type}, $this->edited, $this->time_machine, 
+				displayContent($this->displist, $this->{$this->type}, $this->edited, $this->time_machine, 
 				$this->pstart, $this->last, $this->phase_arr, $fin_arr, $this->actfilterarr, $this->current_yr, $this->second_yr, $this->third_yr, $upmDetails);
 				
 			} else {
@@ -1171,11 +1226,10 @@ class ContentManager
 
 	}
 	
-	function getNonAssocUpm($non_assoc_upm_params) {
-
-		$upm_arr = array();$record_arr = array();$unmatched_upm_arr = array();
-		$upm_arr = getNonAssocUpmRecords($non_assoc_upm_params);
+	function getNonAssocUpm($non_assoc_upm_params, $trialheader) {
 		
+		$upm_arr = array();$record_arr = array();$unmatched_upm_arr = array();$upm_string = '';
+		$upm_arr = getNonAssocUpmRecords($non_assoc_upm_params);
 		$record_arr = getUnmatchedUpmChanges($upm_arr, $this->time_machine, $this->edited);
 		
 		foreach($record_arr as $key => $val) {
@@ -1186,7 +1240,7 @@ class ContentManager
 					if( ($val['event_description'] == $val['edited']['event_description']) && ($val['event_link'] == $val['edited']['event_link']) && 
 					($val['event_type'] == $val['edited']['event_type']) && ($val['start_date'] == $val['edited']['start_date']) && 
 					($val['start_date_type'] == $val['edited']['start_date_type']) && ($val['end_date'] == $val['edited']['end_date']) && 
-					($val['end_date_type'] == $val['edited']['end_date_type']) ){ echo 'yesss';
+					($val['end_date_type'] == $val['edited']['end_date_type']) ){ 
 						unset($record_arr[$key]);
 					} 
 				} else if(empty($val['edited']) && $val['new'] == 'n') {
@@ -1198,23 +1252,25 @@ class ContentManager
 		if(!empty($record_arr)) {
 		
 			$cntr = 0;
-			echo ('<table width="100%" border="0" cellpadding="4" cellspacing="0" class="manage">'
-				. '<tr><th style="width:494px;" nowrap="nowrap">'
-				. 'Upcoming Product Milestones not associated with a specific trial</th>'
-				. '<th style="width:138px;">Milestone Type</th>'
-				. '<th style="width:340px;">Status</th>'
-				. '<th style="width:30px;" title="MM/YY">Start</th>'
-				. '<th style="width:30px;" title="MM/YY">End</th>'
-				. '<th colspan="12" style="width:24px;">' . $this->current_yr . '</th>'
-				. '<th colspan="12" style="width:24px;">' . $this->second_yr . '</th>'
-				. '<th colspan="12" style="width:24px;">' . $this->third_yr . '</th>'
-				. '<th colspan="3" style="width:12px;padding:0;margin:0;" class="rightborder">+</th>'
-				. '</tr>');
+			$upm_string .= '<tr class="upms ' . $trialheader . '">'
+							. '<th colspan="3" nowrap="nowrap">Upcoming Product Milestones not associated with a specific trial</th>'
+							. '<th colspan="3">Milestone Type</th>'
+							. '<th colspan="2">Status</th>'
+							. '<th title="MM/YY">Start</th>'
+							. '<th title="MM/YY" colspan="2">End</th>'
+							. '<th colspan="12">' . $this->current_yr . '</th>'
+							. '<th colspan="12">' . $this->second_yr . '</th>'
+							. '<th colspan="12">' . $this->third_yr . '</th>'
+							. '<th colspan="3" class="rightborder">+</th>'
+							. '</tr>';
 			
 			foreach($record_arr as $key => $val) {
 			
-				$unassoc_upm_status = '';$class = '';$title = '';$attr = '';
-				$title_link_color = 'color:#000;';$date_style = 'color:gray;';
+				$unassoc_upm_status = '';
+				$title = '';$attr = '';
+				$class = 'class = "upms ' . $trialheader . '" ';
+				$title_link_color = 'color:#000;';
+				$date_style = 'color:gray;';
 				
 				if($cntr%2 == 1) {
 		
@@ -1229,10 +1285,10 @@ class ContentManager
 				
 				//Highlighting the whole row in case of new trials
 				if($val['new'] == 'y') {
-					$class = 'class = "newtrial"';
+					$class = 'class="upms newtrial ' . $trialheader . '" ';
 				}
 				
-				echo ('<tr ' . $class . '>');
+				$upm_string .= '<tr ' . $class . '>';
 				
 				if(!empty($val['edited']) && $val['edited']['event_description'] != $val['event_description']) {
 				
@@ -1247,8 +1303,9 @@ class ContentManager
 					$title = ' title = "New record" ';
 				}
 				
-				echo ('<td class="' . $row_type_one .  $attr . '" ' . $title . '><div class="rowcollapse"><a style="' . $title_link_color 
-						. '" href="' . $val['event_link'] . '">' . $val['event_description'] . '</a></div></td>');
+				$upm_string .= '<td colspan="3" class="' . $row_type_one .  $attr . ' titleupm titleupmodd txtleft" ' . $title 
+							. '><div class="rowcollapse"><a style="' . $title_link_color . '" href="' . $val['event_link'] . '">' 
+							. $val['event_description'] . '</a></div></td>';
 				
 				$title = '';$attr = '';	
 				if(!empty($val['edited']) && $val['edited']['event_type'] != $val['event_type']) {
@@ -1262,8 +1319,8 @@ class ContentManager
 				} else if($val['new'] == 'y') {
 					$title = ' title = "New record" ';
 				}
-				echo ('<td class="' . $row_type_two . $attr . '" ' . $title . '><div class="rowcollapse">' . $val['event_type'] . '</div></td>'
-						. '<td class="' . $row_type_two . '"><div class="rowcollapse">');
+				$upm_string .= '<td colspan="3" class="' . $row_type_two . $attr . ' titleupmodd" ' . $title . '><div class="rowcollapse">' 
+						. $val['event_type'] . '</div></td>' . '<td colspan="2" class="' . $row_type_two . ' titleupmodd"><div class="rowcollapse">';
 				
 				if($val['start_date_type'] == 'anticipated') {
 					$unassoc_upm_status .= 'Upcoming, ';
@@ -1291,8 +1348,8 @@ class ContentManager
 					$unassoc_upm_status .= 'Cancelled, ';
 				}
 				
-				echo substr($unassoc_upm_status,0,-2);
-				echo ('</div></td>');
+				$upm_string .= substr($unassoc_upm_status,0,-2);
+				$upm_string .= '</div></td>';
 				
 				$title = '';$attr = '';	
 				if(!empty($val['edited']) && $val['edited']['start_date'] != $val['start_date']){
@@ -1322,14 +1379,14 @@ class ContentManager
 					$date_style = 'color:#973535;'; 
 				}
 								
-				echo ('<td class="' . $row_type_two . $attr . '" ' . $title . '><div class="rowcollapse">');
+				$upm_string .= '<td  class="' . $row_type_two . $attr . ' titleupmodd" ' . $title . '><div class="rowcollapse">';
 				if($val['start_date_type'] == 'anticipated') {
-					echo '<span style="font-weight:bold;' . $date_style . '">' . date('m/y',strtotime($val['start_date']))  . '</span>';
+					$upm_string .= '<span style="font-weight:bold;' . $date_style . '">' . date('m/y',strtotime($val['start_date']))  . '</span>';
 				} else {
-					echo date('m/y',strtotime($val['start_date']));
+					$upm_string .= date('m/y',strtotime($val['start_date']));
 				}
 				
-				echo ('</div></td>');
+				$upm_string .= '</div></td>';
 				
 				$title = '';$attr = '';	
 				if(!empty($val['edited']) && $val['edited']['end_date'] != $val['end_date']){
@@ -1358,31 +1415,30 @@ class ContentManager
 					$date_style = 'color:#973535;'; 
 				}
 				
-				echo ('<td class="' . $row_type_two . $attr . '" ' . $title . '><div class="rowcollapse">');
+				$upm_string .= '<td colspan="2" class="' . $row_type_two . $attr . ' titleupmodd" ' . $title . '><div class="rowcollapse">';
 				if($val['end_date_type'] == 'anticipated') {
-					echo '<span style="font-weight:bold;' . $date_style . '">' . date('m/y',strtotime($val['end_date']))  . '</span>';
+					$upm_string .= '<span style="font-weight:bold;' . $date_style . '">' . date('m/y',strtotime($val['end_date']))  . '</span>';
 				} else {
-					echo date('m/y',strtotime($val['end_date']));
+					$upm_string .=  date('m/y',strtotime($val['end_date']));
 				}	
 				
-				echo ('</div></td>');
+				$upm_string .= '</div></td>';
 				
-		echo $str = getCompletionChart(date('m',strtotime($val['start_date'])), date('Y',strtotime($val['start_date'])), 
+		$upm_string .= getCompletionChart(date('m',strtotime($val['start_date'])), date('Y',strtotime($val['start_date'])), 
 		date('m',strtotime($val['end_date'])), date('Y',strtotime($val['end_date'])), $this->current_yr, $this->second_yr, 
 		$this->third_yr, '#9966FF', $val['start_date'], $val['end_date']);
 		
-				echo ('</tr>');
+				$upm_string .= '</tr>';
 				
 				$cntr++;
 			}
-			
-			echo ('</table><br/>');
 		} 
+		return $upm_string;
 	}
 }
 
-function displayContent($params, $fieldlist, $type_arr, $edited, $gentime, $start, $last, $phase_arr, $fin_arr, $actfilterarr, $current_yr, $second_yr, $third_yr, $upmDetails) {
-	
+function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last, $phase_arr, $fin_arr, $actfilterarr, $current_yr, $second_yr, $third_yr, $upmDetails) 
+{
 	$start = $start -1;
 	
 	for($i=$start;$i<$last;$i++) 
@@ -2426,7 +2482,7 @@ function getUnmatchedUpmChanges($record_arr, $time, $edited) {
 
 function getLinkDetails($tablename, $fieldname, $parameters, $param_value) {
 
-	///echo "==>".
+	//echo "==>".
 	$query = "SELECT `" . $fieldname . "` FROM " . $tablename . " WHERE " . $parameters . " = '" . mysql_real_escape_string($param_value) . "' ";
 	$res = mysql_fetch_assoc(mysql_query($query));
 	return $res[$fieldname];

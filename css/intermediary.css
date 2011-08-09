@@ -17,8 +17,9 @@ a, a:hover{
 }
 .drop {
 	height:4.4em;
+	margin: 0 0 0 4px;
 	display:inline-block;
-	float:none;
+	/*float:left;*/
 	vertical-align:top;
 	text-align:left;
 	background-color:#ffffff;
@@ -45,7 +46,7 @@ a, a:hover{
 
 .block {
 	float:left;
-	padding:10px;
+	padding:0 10px 10px 10px;
 }
 
 .text {
@@ -94,7 +95,7 @@ a, a:hover{
 	text-decoration:none;
 }
 
-.newtrial td {
+.newtrial td,  .newtrial td a{
 	color:#FF0000!important;
 }
 
@@ -176,4 +177,134 @@ a, a:hover{
 	border-right: 1px solid blue!important;
 	border-top: 1px solid blue!important;
 	border-bottom: 1px solid blue!important;
+}
+.new {
+	height:1.2em;
+	width: 310px;
+	border:1px solid black;
+}
+
+.new ul{
+	list-style:none;
+	margin:5px;
+	padding:0px;
+}
+
+.new ul li{
+	width: 130px;
+	float:left;
+	margin:2px;
+}
+
+/*changes*/
+.w740p{
+	width:750px;
+}
+tr.btopblue td{
+	border-top:1px solid blue;
+}
+.w250p{
+	width:250px;
+}
+.w28p{
+	width:28px;
+}
+.w45p{
+	width:45px;
+}
+.w55p{
+	width:55px;
+}
+.w110p{
+	width:110px;
+}
+.w25p{
+	width:25px;
+}
+.w22p{
+	width:22px;
+}
+.w24p{
+	width:24px;
+}
+.w12p{
+	width:12px;
+}
+.w0p{
+	width:0px;
+}
+.p4{
+	padding:4px;
+}
+.notopbottomborder{
+	border-top:none!important;
+}
+.borderbottom{
+	border-bottom: 1px solid blue!important;
+}
+.leftrightborderblue{
+	border-right: 1px solid blue!important;
+	border-left: 1px solid blue!important;	
+}
+.sectiontitles{
+    font-family: Arial,Helvetica,sans-serif;
+    font-size: 13px;
+    font-weight: bold;
+    background-color: rgb(213,230,211);
+}
+.zeroborder{
+	border-bottom:none!important;
+	border-top:none!important;
+	border-left:none!important;
+	border-right:none!important;
+}
+.norightborder{
+	border-right:none!important;
+}
+.upmheader{
+	color:#0000FF;
+	font-weight:bold;
+}
+.rowcollapseupm {
+	vertical-align:top;
+	max-height:1.3em;
+	overflow:visible;
+	padding-top:0;
+	margin:0;
+}
+.rowcollapseupm:hover {
+	max-height:none;
+}
+
+.upmpointer{
+	background-image: url('../images/up.png');
+	background-repeat: no-repeat;
+	background-position:left center; 
+}
+
+.titleupmodd{
+	background-color:#C5E5FA;
+}	
+.titleupmeven{
+	background-color:#95C7E8;
+}
+tr.upms td, tr.upms th{
+	text-decoration:none;
+	white-space:nowrap;
+	text-align: center;
+}
+
+tr.upms th{
+	color:#0000FF;
+	font-weight:normal!important;
+	border-top:none!important;
+}
+
+tr.upms td.txtleft{
+	text-align: left;
+}
+
+tr.upms td a{
+	color:#0000FF;
+	text-decoration:none;
 }
