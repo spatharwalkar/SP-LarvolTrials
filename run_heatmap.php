@@ -947,7 +947,7 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 				
 				$str = implode(',', $myArray['results']);
 				$str = str_replace('.', ',', $str);
-				$evcode = '$packedIDs = pack("C*",' . $str . ');';
+				$evcode = '$packedIDs = pack("l*",' . $str . ');';
 				eval($evcode);				
 				$link .= '&results=' . rawurlencode(base64_encode(gzdeflate($packedIDs))) . '&time=' . $myArray['time'] . '&format=new';
 				
@@ -1038,7 +1038,7 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 				
 				$str = implode(',', $myArray['results']);
 				$str = str_replace('.', ',', $str);
-				$evcode = '$packedIDs = pack("C*",' . $str . ');';
+				$evcode = '$packedIDs = pack("l*",' . $str . ');';
 				eval($evcode);
 				$link .= '&results=' . rawurlencode(base64_encode(gzdeflate($packedIDs))) . '&time=' . $myArray['time'] . '&format=new';
 				

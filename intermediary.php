@@ -467,7 +467,7 @@ class ContentManager
 			
 				echo ('<input type="hidden" name="format" value="' . $_GET['format'] . '"/>');
 				//pack encoding method used to encode data in the url
-				$results = unpack("C*", gzinflate(base64_decode(rawurldecode($_GET['results']))));
+				$results = unpack("l*", gzinflate(base64_decode(rawurldecode($_GET['results']))));
 				$three = 0;
 				$lengthcounter = 0; 
 				$string = '';
@@ -808,7 +808,7 @@ class ContentManager
 				
 				//Displayiong header titles for Row Stacked Otts.
 				if($row_upm_flag == true) { 
-					if((isset($_GET['pg']) && $_GET['pg'] <= $process_params['eachCount'][$pk]) || (!isset($_GET['pg']))) {
+					if((isset($_GET['pg']) && $process_params['eachCount'][$pk] >= $this->pstart) || (!isset($_GET['pg']))) {
 						echo ('<tr><td colspan="50" class="notopbottomborder leftrightborderblue sectiontitles">' 
 						. trim($process_params['ltype'][$pk]) . '</td></tr>');
 					}
@@ -834,7 +834,7 @@ class ContentManager
 								. 'style="border-bottom:1px solid blue" onclick="sh(this,\'' . $pk . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
 								. trim($process_params['ltype'][$pk]) . '</td></tr>' . $upm_string);
 					} else {
-						if((isset($_GET['pg']) && $_GET['pg'] <= $process_params['eachCount'][$pk]) || (!isset($_GET['pg']))) {
+						if((isset($_GET['pg']) && $process_params['eachCount'][$pk] >= $this->pstart) || (!isset($_GET['pg']))) {
 							echo ('<tr><td colspan="50" class="notopbottomborder leftrightborderblue sectiontitles">' 
 							. trim($process_params['ltype'][$pk]) . '</td></tr>');
 						}
@@ -1840,6 +1840,7 @@ function getCompletionChart($start_month, $start_year, $end_month, $end_year, $c
 				$value = '<td style="background-color:' . $bg_color . ';" colspan="' . (24+$end_month) . '">&nbsp;</td>'
 				. '<td colspan="' . (12-$end_month) . '">&nbsp;</td>'
 				. '<td colspan="3" ' . $attr_two . '>&nbsp;</td>';
+
 			}
 		 
 		} else if($end_year > $third_yr) { 
