@@ -872,6 +872,7 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 	$sheet = $objPHPExcel->getActiveSheet();
 	$sheet->setTitle(substr($name,0,20));
 	
+	ksort($rows);ksort($columns);
 	foreach($rows as $row => $header)
 	{
 		$cell = 'A' . ($row+1);
