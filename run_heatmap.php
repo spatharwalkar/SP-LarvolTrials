@@ -600,7 +600,7 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 			 	
 				if($link_generation_method == 'db') {
 				
-					$search_result_set = mysql_real_escape_string(serialize($params));
+					$search_result_set = base64_encode(gzdeflate(mysql_real_escape_string(serialize($params))));
 					//checking whether the trials id already exists and if not inserting a new record into the rpt_ott_trials table
 					$query 		= "SELECT `id` FROM `rpt_ott_searchdata` WHERE `result_set` = '" . $search_result_set . "' ";
 					$time_start = microtime(true);
@@ -946,7 +946,7 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 				}
 				
 				$str = implode(',', $myArray['results']);
-				$str = str_replace('.', ',', $str);
+				$str = str_replace('.', ',', str_replace('s', 0x73, $str));
 				$evcode = '$packedIDs = pack("l*",' . $str . ');';
 				eval($evcode);				
 				$link .= '&results=' . rawurlencode(base64_encode(gzdeflate($packedIDs))) . '&time=' . $myArray['time'] . '&format=new';
@@ -1037,7 +1037,7 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 				
 				
 				$str = implode(',', $myArray['results']);
-				$str = str_replace('.', ',', $str);
+				$str = str_replace('.', ',', str_replace('s', 0x73, $str));
 				$evcode = '$packedIDs = pack("l*",' . $str . ');';
 				eval($evcode);
 				$link .= '&results=' . rawurlencode(base64_encode(gzdeflate($packedIDs))) . '&time=' . $myArray['time'] . '&format=new';

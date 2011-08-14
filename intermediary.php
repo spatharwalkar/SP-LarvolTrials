@@ -557,8 +557,12 @@ class ContentManager
 				}
 				
 				//Retrieving params
-				if(strpos($tt, 's') !== FALSE) {
-					$excel_params = unserialize(getLinkDetails('rpt_ott_searchdata', 'result_set', 'id', substr($tt,1)));
+				$searchdata = substr($tt,0,3);
+				if(chr($searchdata) == 's') {
+				
+					$search_data_content = getLinkDetails('rpt_ott_searchdata', 'result_set', 'id', substr($tt,3));
+					$excel_params = unserialize(stripslashes(gzinflate(base64_decode($search_data_content))));
+					
 				} else {
 					
 					$res = getLinkDetails('rpt_ott_trials', 'result_set', 'id', $tt);
