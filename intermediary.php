@@ -911,7 +911,7 @@ class ContentManager
 				
 				if(strpos($excel_params[2], 's') !== FALSE) { 
 					$res = getLinkDetails('rpt_ott_searchdata', 'result_set', 'id', substr($excel_params[2],1));
-					$excel_params = unserialize($res);
+					$excel_params = unserialize(stripslashes(gzinflate(base64_decode($res))));
 				} else {
 					$res = getLinkDetails('rpt_ott_trials', 'result_set', 'id', $excel_params[2]);
 					$sp = new SearchParam();
