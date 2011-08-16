@@ -355,6 +355,7 @@ CREATE TABLE IF NOT EXISTS `rpt_ott_searchdata` (
  `current_nctid` int( 11  )  NOT  NULL DEFAULT  '0',
 `max_nctid` INT( 11 ) NOT NULL DEFAULT '0',
 `er_message` VARCHAR( 255 ) NOT NULL ,
+`trial_type` VARCHAR( 255 ) NULL DEFAULT NULL ,
  PRIMARY  KEY (  `update_id`  )  ) ENGINE  = InnoDB  DEFAULT CHARSET  = utf8 COLLATE  = utf8_unicode_ci;
 
 
