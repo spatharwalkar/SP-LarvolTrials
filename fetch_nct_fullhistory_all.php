@@ -39,7 +39,7 @@ ignore_user_abort(true);
 if($_POST['mode']=='web') $nct_ids=get_nctids_from_web();
 if(!isset($nct_ids))
 {
-	$query = 'SELECT * FROM update_status_fullhistory where status="1" order by update_id desc limit 1' ;
+	$query = 'SELECT * FROM update_status_fullhistory where status="1" and trial_type="NCT" order by update_id desc limit 1' ;
 	$res = mysql_query($query) or die('Bad SQL query finding ready updates ');
 	$res = mysql_fetch_array($res) ;
 }	
@@ -104,9 +104,9 @@ else
 
 	if ($totalncts > 0)
 	{
-	$query = 'INSERT into update_status_fullhistory (update_id,process_id,status,update_items_total,start_time,max_nctid) 
+	$query = 'INSERT into update_status_fullhistory (update_id,process_id,status,update_items_total,start_time,max_nctid,trial_type) 
 			  VALUES ("'.$up_id.'","'. $pid .'","'. 2 .'",
-			  "' . $totalncts . '","'. date("Y-m-d H:i:s", strtotime('now')) .'", "'. $maxid .'"  ) ;';
+			  "' . $totalncts . '","'. date("Y-m-d H:i:s", strtotime('now')) .'", "'. $maxid .'", "NCT"  ) ;';
 	$res = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory. Query:' . $query);
 	}
 	else die("No valid nctids found.");
@@ -118,7 +118,7 @@ else
 
 function fetch_records($pr_id,$cid,$maxid,$up_id)
 { 	
-	$query = 'SELECT update_items_progress,update_items_total FROM update_status_fullhistory WHERE update_id="' . $up_id .'" limit 1 ;' ;
+	$query = 'SELECT update_items_progress,update_items_total FROM update_status_fullhistory WHERE update_id="' . $up_id .'" and trial_type="NCT" limit 1 ;' ;
 	$res = mysql_query($query) or die('Bad SQL query selecting row from update_status_fullhistory ');
 	$res = mysql_fetch_array($res) ;
 	if ( isset($res['update_items_progress'] ) and $res['update_items_progress'] > 0 ) $updtd_items=((int)$res['update_items_progress']); else $updtd_items=0;
@@ -135,7 +135,7 @@ function fetch_records($pr_id,$cid,$maxid,$up_id)
 		$_GET['id'] = $cid;
 		require('fetch_nct_fullhistory.php');
 		++$i;
-		$query = ' UPDATE  update_status_fullhistory SET process_id = "'. $pr_id  .'" , update_items_progress= "' . ( ($tot_items >= $updtd_items+$i) ? ($updtd_items+$i) : $tot_items  ) . '" , status="2", current_nctid="'. $cid .'", updated_time="' . date("Y-m-d H:i:s", strtotime('now'))  . '" WHERE update_id="' . $up_id .'" ;' ;
+		$query = ' UPDATE  update_status_fullhistory SET process_id = "'. $pr_id  .'" , update_items_progress= "' . ( ($tot_items >= $updtd_items+$i) ? ($updtd_items+$i) : $tot_items  ) . '" , status="2", current_nctid="'. $cid .'", updated_time="' . date("Y-m-d H:i:s", strtotime('now'))  . '" WHERE update_id="' . $up_id .'" and trial_type="NCT"  ;' ;
 		$res = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory. Query:' . $query);
 		@flush();
 		}

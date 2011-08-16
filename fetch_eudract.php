@@ -1,8 +1,8 @@
 <?php
-
 require_once('db.php');
 require_once('include.import.php');
-
+echo '.<br>';
+echo str_repeat ("   ", 3500);
 $mapping = array(
     'EudraCT Number:' => 'eudract_number',
     'National Competent Authority:' => 'competent_authority',
@@ -199,53 +199,70 @@ $days = 0;
 $last_id = 0;
 $id_field = 0;
 
-if(isset($_GET['days']))
+
+
+/*
+	$query = '  * FROM update_status_fullhistory where status="1" and trial_type="EUDRACT" order by update_id desc limit 1' ;
+	$res = mysql_query($query) or die('Bad SQL query finding ready updates ');
+	$res = mysql_fetch_array($res) ;
+
+	if ( isset($res['update_id']) )
 {
-	$days_to_fetch = (int)$_GET['days'];
+	
+	$pid = getmypid();
+	$up_id= ((int)$res['update_id']);
+	$cid = ((int)$res['update_items_progress']); 
+	$maxid = ((int)$res['update_items_total']); 
+	$query = 'UPDATE  update_status_fullhistory SET status= "2",er_message=""  WHERE update_id = "' . $up_id .'" ;' ;
+	$res = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory. Query:' . $query );
 }
-if(isset($days_to_fetch))	//$days_to_fetch comes from cron.php normally
+*/
+
+
+
+
+if(isset($_GET['days']) or isset($days_to_fetch))
 {
-	$days = (int)$days_to_fetch;
-}else{
-	die('Need to set $days_to_fetch or $_GET[' . "'days'" . ']');
-}
+	
+	if(isset($_GET['days']))
+	{
+		$days_to_fetch = (int)$_GET['days'];
+	}
+	if(isset($days_to_fetch))	//$days_to_fetch comes from cron.php normally
+	{
+		$days = (int)$days_to_fetch;
+	}
 
-$cron_run = isset($update_id); 	// check if being run by cron.php
-if($cron_run)
+	$cron_run = isset($update_id); 	// check if being run by cron.php
+	if($cron_run)
+	{
+		$query = 'UPDATE update_status SET start_time="' . date("Y-m-d H:i:s", strtotime('now')) . '", updated_days='.$days.' WHERE update_id="' . $update_id . '"';
+		$res = mysql_query($query) or die('Unable to update running' . mysql_error());
+	}
+
+	// Get Dates from Dates passed in
+	$bd = '-' . $days . ' days';
+	$now = time();
+	$begin_now = strtotime($bd);
+	$end_date = date("Y-m-d", $now);
+	$start_date = date("Y-m-d", $begin_now);
+
+	echo("Starting Search From: " . $start_date . " to " . $end_date . "<br>");
+}
+else
 {
-	$query = 'UPDATE update_status SET start_time="' . date("Y-m-d H:i:s", strtotime('now')) . '", updated_days='.$days.' WHERE update_id="' . $update_id . '"';
-	$res = mysql_query($query) or die('Unable to update running' . mysql_error());
+	$end_date = "";
+	$start_date = "";
+	ini_set('max_execution_time', '360000'); //100 hours
+//	ignore_user_abort(true);
+	echo("Starting full refreshing of EudraCT") ;
 }
-
-
-// Get Days To Search
-if(isset($_GET['days']))
-{
-	$days_to_fetch = (int)$_GET['days'];
-}
-if(isset($days_to_fetch))	//$days_to_fetch comes from cron.php normally
-{
-	$days = (int)$days_to_fetch;
-}else{
-	die('Need to set $days_to_fetch or $_GET[' . "'days'" . ']');
-}
-
-// Get Dates from Dates passed in
-$bd = '-' . $days . ' days';
-$now = time();
-$begin_now = strtotime($bd);
-$end_date = date("Y-m-d", $now);
-$start_date = date("Y-m-d", $begin_now);
-
-echo("Starting Search From: " . $start_date . " to " . $end_date . "<br>");
-
 $Url = "https://www.clinicaltrialsregister.eu/ctr-search/index.xhtml";
 
 //*********
 // FIRST CONNECT: GET ID
 // ********
 // 
-
 $Html = curl_start($Url);
 
 // Get ID
@@ -268,28 +285,28 @@ $javax = $j;
 echo("<br>retrieved javax=$javax\n");
 
 
+
 //*********
 // SECOND CONNECT: GET SEARCH
 // ********
 // 
 // How we have javax id... Now submit search
 
-
 $url = "https://www.clinicaltrialsregister.eu/ctr-search/index.xhtml?"
-        . "ctrSearchForm=ctrSearchForm"
-        . "&searchStrId="
-        . "&advancedSearchPanel=true"
-        . "&countryId="
-        . "&populationAgeId="
-        . "&trialPhaseId="
-        . "&trialStatusId="
-        . "&from_calInputDate=" . $start_date
-        . "&from_calInputCurrentDate=05%2F2011"
-        . "&to_calInputDate=" . $end_date
-        . "&to_calInputCurrentDate=05%2F2011"
-        . "&searchButtonId=searchButtonId"
-        . "&javax.faces.ViewState=j_id" . $javax
-        . "&AJAXREQUEST=_viewRoot&";
+		. "ctrSearchForm=ctrSearchForm"
+		. "&searchStrId="
+		. "&advancedSearchPanel=true"
+		. "&countryId="
+		. "&populationAgeId="
+		. "&trialPhaseId="
+		. "&trialStatusId="
+		. "&from_calInputDate=" . $start_date
+		. "&from_calInputCurrentDate=05%2F2011"
+		. "&to_calInputDate=" . $end_date
+		. "&to_calInputCurrentDate=05%2F2011"
+		. "&searchButtonId=searchButtonId"
+		. "&javax.faces.ViewState=j_id" . $javax
+		. "&AJAXREQUEST=_viewRoot&";
 
 
 $Html = curl_start($url);
@@ -300,12 +317,12 @@ $Html = curl_start($url);
 $linesHtml = preg_split('/\n/', $Html);
 foreach ($linesHtml as $lineHtml) {
 
-    if (strpos($lineHtml, 'Displaying page 1 of') !== false) {
-        $pages = substr($lineHtml, strpos($lineHtml, 'Displaying page 1 of ') + 21, 120);
-        $i = strpos($pages, ".");
-        $pages = substr($pages, 0, $i);
-        echo("<br>retrieved pages=$pages<br>");
-    }
+	if (strpos($lineHtml, 'Displaying page 1 of') !== false) {
+		$pages = substr($lineHtml, strpos($lineHtml, 'Displaying page 1 of ') + 21, 120);
+		$i = strpos($pages, ".");
+		$pages = substr($pages, 0, $i);
+		echo("<br>retrieved pages=$pages<br>");
+	}
 }
 
 unset($linesHtml);
@@ -315,29 +332,29 @@ unset($lineHtml);
 // Now Get Links And Process
 $doc = new DOMDocument();
 for ($done = false, $tries = 0; $done == false && $tries < 5; $tries++) {
-    echo('.');
-    $done = @$doc->loadHTML($Html);
+	echo('.');
+	$done = @$doc->loadHTML($Html);
 }
 unset($Html);
 
 $tables = $doc->getElementsByTagName('span');
 $datatable = NULL;
 foreach ($tables as $table) {
-    foreach ($table->attributes as $attr) {
+	foreach ($table->attributes as $attr) {
 
-        if ($attr->name == 'id' && $attr->value == 'results') {
-            $right = true;
-            break;
-        }
-    }
-    if ($right == true) {
-        $datatable = $table;
-        break;
-    }
+		if ($attr->name == 'id' && $attr->value == 'results') {
+			$right = true;
+			break;
+		}
+	}
+	if ($right == true) {
+		$datatable = $table;
+		break;
+	}
 }
 if ($datatable == NULL) {
-    echo('<br>No Span Results Found.' . "\n<br />");
-    exit();
+	echo('<br>No Span Results Found.' . "\n<br />");
+	exit();
 }
 unset($tables);
 
@@ -345,14 +362,13 @@ $links = array();
 //Now that we found the table, go through its TDs to find the ones with NCTIDs
 $tds = $datatable->getElementsByTagName('a');
 foreach ($tds as $td) {
-    foreach ($td->attributes as $attr) {
-        if ($attr->name == 'id') {
-            $links[] = $attr->value;
-        }
-    }
+	foreach ($td->attributes as $attr) {
+		if ($attr->name == 'id') {
+			$links[] = $attr->value;
+		}
+	}
 }
 unset($datatable);
-
 // Open each Page:
 $link_count = count($links);
 $links_count=$link_count;
@@ -367,38 +383,66 @@ if($cron_run)
 // !!!!!!! TESTING PURPOSES ONLY !!!!!!!!!/
 //$link_count = 35;
 
-while ($i < $link_count) {
-    $link = $links[$i];
-    gotostudy($link);
-    $i = $i + 1;
+$query = 'SELECT * FROM update_status_fullhistory where status="1" and trial_type="EUDRACT" order by update_id desc limit 1' ;
+$res = mysql_query($query) or die('Bad SQL query finding ready updates ');
+$res = mysql_fetch_array($res) ;
+$newrecord=true;	
+if ( isset($res['process_id']) )
+{
+	$pid = getmypid();
+	$pr_id = $pid;
+	$up_id= ((int)$res['update_id']);
+	$pagei = ((int)$res['update_items_progress']); 
+	$maxid = ((int)$res['update_items_total']); 
+	$query = 'UPDATE  update_status_fullhistory SET status= "2",er_message="", process_id = "'.$pr_id.'"  WHERE update_id = "' . $up_id .'" ;' ;
+	$res = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory. Query:' . $query );
+	$newrecord=false;
+
+}
+elseif ( $_GET['pages'] ) $pagei=$_GET['pages'];
+else 
+{
+	$newrecord=true;
+	$pagei = 2;
 	while ($i < $link_count) {
-        $link = $links[$i];
-        gotostudy($link);
-		if($cron_run)
-		{
-		  	$query = 'UPDATE update_status SET updated_time="' ;
-			$query .= date('Y-m-d H:i:s', strtotime('now')) ;
-			$query.= '",update_items_progress="' ;
-			$query.= $i ;
-			$query .= '" WHERE update_id="' ;
-			$query .= $update_id . '"';
-	        $res = mysql_query($query) or die('Unable to update running');
-		}
+		$link = $links[$i];
+		gotostudy($link);
 		$i = $i + 1;
-    }
+		while ($i < $link_count) {
+			$link = $links[$i];
+			gotostudy($link);
+			if($cron_run)
+			{
+				$query = 'UPDATE update_status SET updated_time="' ;
+				$query .= date('Y-m-d H:i:s', strtotime('now')) ;
+				$query.= '",update_items_progress="' ;
+				$query.= $i ;
+				$query.= '",current_nctid="' ;
+				$query.= $i ;
+				$query .= '" WHERE update_id="' ;
+				$query .= $update_id . '"';
+				$res = mysql_query($query) or die('Unable to update running');
+			}
+			$i = $i + 1;
+		}
+
+	}
+	unset($links);
+
+	echo("<br>**** Page: 1: Results Links: " . $link_count . " **** <br>");
+	echo str_repeat ("   ", 4500);
+	
 
 }
 
-unset($links);
-
-echo("<br>**** Page: 1: Results Links: " . $link_count . " **** <br>");
-
 // Go to Additional Pages.
-// If Pages > 1 Then have to get the counts of the other pages so load those pages
-// Have to Click the search pages so JIDs will be populated.
-// !!!!!!! TESTING PURPOSES ONLY !!!!!!!!!/
-//$pages = 3;
-$pagei = 2;
+	// If Pages > 1 Then have to get the counts of the other pages so load those pages
+	// Have to Click the search pages so JIDs will be populated.
+	// !!!!!!! TESTING PURPOSES ONLY !!!!!!!!!/
+//	$pages = 3;
+
+
+
 
 while ($pagei <= $pages) {
 	ini_set('max_execution_time', '36000'); //10 hours
@@ -471,6 +515,8 @@ while ($pagei <= $pages) {
 			$query .= date('Y-m-d H:i:s', strtotime('now')) ;
 			$query.= '",update_items_progress="' ;
 			$query.= $record_count ;
+			$query.= '",current_nctid="' ;
+			$query.= $record_count ;
 			$query .= '" WHERE update_id="' ;
 			$query .= $update_id . '"';
 	        $res = mysql_query($query) or die('Unable to update running');
@@ -479,6 +525,28 @@ while ($pagei <= $pages) {
     }
 
 	unset($links);
+	
+	if($newrecord)
+	{
+		$query = 'SELECT MAX(update_id) AS maxid FROM update_status_fullhistory' ;
+		$res = mysql_query($query) or die('Bad SQL query finding highest update id');
+		$res = mysql_fetch_array($res) ;
+		$up_id = (isset($res['maxid'])) ? ((int)$res['maxid'])+1 : 1;
+		$fid = getFieldId('EudraCT','eudract_id');
+		$pid = getmypid();
+	
+		$query = 'INSERT into update_status_fullhistory (update_id,process_id,status,update_items_total,start_time,max_nctid,trial_type) 
+			  VALUES ("'.$up_id.'","'. $pid .'","'. 2 .'",
+			  "' . $pages . '","'. date("Y-m-d H:i:s", strtotime('now')) .'", "'. $pages .'", "EUDRACT"  ) ;';
+		$res = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory. Query:' . $query);
+		$newrecord=false;
+	}
+	else
+	{
+		$query = ' UPDATE  update_status_fullhistory SET update_items_progress= "' . $pagei . '" , status="2", current_nctid="'. $page_i .'", updated_time="' . date("Y-m-d H:i:s", strtotime('now'))  . '" WHERE update_id="' . $up_id .'" ;' ;
+		$res = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory. Query:' . $query);
+	}
+	
 
     echo("<br>**** Page: " . $pagei . ": Results Links: " . $link_count . " ****<br>");
     $pagei = $pagei + 1;
@@ -487,6 +555,11 @@ if($cron_run)
 	{
 		$query = 'UPDATE update_status SET status="'.COMPLETED.'", updated_time="' . date("Y-m-d H:i:s", strtotime('now')) . '",update_items_complete_time ="' . date("Y-m-d H:i:s", strtotime('now')) . '",   end_time="' . date("Y-m-d H:i:s", strtotime('now')) . '", update_items_total="' . $record_count . '",update_items_start_time="' . date("Y-m-d H:i:s", strtotime('now')) . '" WHERE update_id="' . $update_id . '"';
     	$res = mysql_query($query) or die('Unable to update running' . mysql_error());
+	}
+else
+	{
+		$query = ' UPDATE  update_status_fullhistory SET status="0",  updated_time="' . date("Y-m-d H:i:s", strtotime('now'))  . '" WHERE update_id="' . $up_id .'" ;' ;
+		$res = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory. Query:' . $query);
 	}
 
 echo("<br>Total Processed Count=" . $record_count . "<br>");

@@ -1,7 +1,8 @@
 <?php
 require_once('db.php');
 require_once('include.import.php');
-	
+echo '.<br>';
+echo str_repeat ("   ", 3500);	
 $mapping = array(
 	'ISRCTN' => 'isrctn_id',
 	'ClinicalTrials.gov identifier' => 'clinicaltrials_id',
@@ -49,7 +50,6 @@ $mapping = array(
 	'Last edited' => 'last_edit',
 	'Date ISRCTN assigned' => 'assigned_date'
 );
-
 $address_counter = 0;
 // DW
 ini_set('max_execution_time', '36000'); //10 hours
@@ -117,19 +117,51 @@ $pages=ceil(($rowcount/$max));
 echo "Pages: ".$pages. "<br>";
 
 // !!!!!!!TESTING SAKE ONLY.. REMOVE TO GET REAL VALUES!!!!!!!!!
-//$rowcount = 50;
-//$pages=1;
+//$rowcount = 20;
+//$pages=2;
 //*********
 // SECOND CONNECT: Get all links on Pages
 // ********
 
 $links = array();
+/**************/
+$query = 'SELECT * FROM update_status_fullhistory where status="1" and trial_type="ISRCTN" order by update_id desc limit 1' ;
+$res = mysql_query($query) or die('Bad SQL query finding ready updates ');
+$res = mysql_fetch_array($res) ;
+$newrecord=true;	
+if ( isset($res['process_id']) )
+{
+	$pid = getmypid();
+	$pr_id = $pid;
+	$up_id= ((int)$res['update_id']);
+	$page_count = ((int)$res['update_items_progress']);
+	$current_record=$page_count;	
+	$page_count = floor(($page_count/100));
+	$maxid = ((int)$res['update_items_total']); 
+	$query = 'UPDATE  update_status_fullhistory SET status= "2",er_message="", process_id = "'.$pr_id.'"  WHERE update_id = "' . $up_id .'" ;' ;
+	$res = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory. Query:' . $query );
+	$newrecord=false;
+	
+}
+elseif ( isset($_GET['pages']) ) 
+{
+	$current_record=$_GET['pages'];
+	$page_count = floor(($current_record/100));
+//	$newrecord=false;
+}
+else 
+{
+/*******************/
+	$current_record=0;
+	$page_count = 0;
+	$newrecord=true;
+}
+
 $link_count = 0;
-$page_count = 0;
 while ($page_count <= $pages) 
 {
-	$url = "http://www.controlled-trials.com/isrctn/" . ($link_count + 1) . "/" . $max . "/3/desc/";
-	$html = curl_start($url);
+	$url = "http://www.controlled-trials.com/isrctn/" . ($link_count + $current_record + 1) . "/" . $max . "/3/desc/";
+		$html = curl_start($url);
 
 	// GET LINKS
 	$doc = new DOMDocument();
@@ -177,6 +209,7 @@ while ($page_count <= $pages)
 
 	// Open each Page:
 	$link_count = count($links);
+	//$link_count += $current_record;
 	$page_count=$page_count+1;
 	echo '<br>Processing page '.$page_count.' of '.$pages.'<br>';
 }
@@ -188,11 +221,12 @@ $i = 0;
 // THIRD CONNECT: Get Each Study
 // ********
 // !!!!!!!For Testing PURPOSES REMOVE!!!!!!!!!!
-//$link_count = 25;
+//$link_count = 150;
 $progress_count=0;
 while ($i < $link_count) {
 	$link = $links[$i];
 	gotostudy($link);
+	$i2= $i + $current_record ;
 	if($cron_run)
 		{
 		  	$query = 'UPDATE update_status SET updated_time="' ;
@@ -203,7 +237,30 @@ while ($i < $link_count) {
 			$query .= $update_id . '"';
 	        $res = mysql_query($query) or die('Unable to update running');
 		}
+
 	$i = $i + 1;
+	if($newrecord)
+	{
+		$query = 'SELECT MAX(update_id) AS maxid FROM update_status_fullhistory' ;
+		$res = mysql_query($query) or die('Bad SQL query finding highest update id');
+		$res = mysql_fetch_array($res) ;
+		$up_id = (isset($res['maxid'])) ? ((int)$res['maxid'])+1 : 1;
+		$fid = getFieldId('isrctn','isrctn_id');
+		$pid = getmypid();
+	
+		$query = 'INSERT into update_status_fullhistory (update_id,process_id,status,update_items_total,start_time,max_nctid,trial_type) 
+			  VALUES ("'.$up_id.'","'. $pid .'","'. 2 .'",
+			  "' . $rowcount . '","'. date("Y-m-d H:i:s", strtotime('now')) .'", "'. $rowcount .'", "ISRCTN"  ) ;';
+		$res = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory. Query:' . $query);
+		$newrecord=false;
+	}
+	else
+	{
+		$query = ' UPDATE  update_status_fullhistory SET update_items_progress= "' . $i2 . '" , status="2", current_nctid="'. $i2 .'", updated_time="' . date("Y-m-d H:i:s", strtotime('now'))  . '" WHERE update_id="' . $up_id .'" ;' ;
+		$res = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory. Query:' . $query);
+	}
+	
+	
 }
 
 if($cron_run)
@@ -212,6 +269,12 @@ if($cron_run)
     	$query = 'UPDATE update_status SET status="'.COMPLETED.'", updated_time="' . date("Y-m-d H:i:s", strtotime('now')) . '",update_items_complete_time ="' . date("Y-m-d H:i:s", strtotime('now')) . '",   end_time="' . date("Y-m-d H:i:s", strtotime('now')) . '"  WHERE update_id="' . $update_id . '"';
 	    $res = mysql_query($query) or die('Unable to update running');
 	}
+else
+	{
+		$query = ' UPDATE  update_status_fullhistory SET status="0",  updated_time="' . date("Y-m-d H:i:s", strtotime('now'))  . '" WHERE update_id="' . $up_id .'" ;' ;
+		$res = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory. Query:' . $query);
+	}
+
 
 echo("<br>Total Processed Count=" . $link_count . "<br>");
 echo("Done");
@@ -259,7 +322,6 @@ function curl_start($url) {
 function gotostudy($link) {
 
 	$html = curl_start($link);
-
 	// Create Dom
 	$doc = new DOMDocument();
 	for ($done = false, $tries = 0; $done == false && $tries < 5; $tries++) {
@@ -303,6 +365,9 @@ function gotostudy($link) {
 	echo ("Finished Processing: " . $study['isrctn_id'][0] . "- Values Parsed: " . $values . "<br>");
 	unset($study);
 	$progress_count++;
+	
+	echo str_repeat ("   ", 3500);	
+
 
 }
 
