@@ -108,12 +108,16 @@ function validateEnums($val)
 			return substr($eval1,1,-1);
 	$enum1 = array('Phase 1'=>"I", 'Phase 2'=>"II", 'Phase 3'=>"III", 'Phase 4'=>"IV");
 	$enum2 = array('Phase 1'=>"1", 'Phase 2'=>"2", 'Phase 3'=>"3", 'Phase 4'=>"4", 'Phase 2/Phase 3'=>"Phase 2-3");
+	$enum3 = array('Phase 1'=>"PHASE I", 'Phase 2'=>"PHASE II", 'Phase 3'=>"PHASE III", 'Phase 4'=>"PHASE IV");
 	$ev1=array_search($eval1,$enum1,false);
 	$ev2=array_search($eval1,$enum2,false);
+	$ev3=array_search($eval1,$enum3,false);
 	if ( isset($ev1) and $ev1  )
 		return $ev1;
-	else
+	elseif (isset($ev2) and $ev2  )
 		return $ev2;
+	else
+		return $ev3;
 }
 
 function ProcessChanges($id, $date, $column, $initial_date=NULL) {
