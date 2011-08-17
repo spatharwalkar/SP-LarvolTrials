@@ -786,7 +786,7 @@ function heatmapAsWord($info, $rows, $columns, $results, $p_colors, $return, $ph
 		header("Content-Type: application/force-download");
 		header("Content-Type: application/download");
 		header("Content-Type: application/msword");
-		header("Content-Disposition: attachment;filename=" . substr($name,0,20) . '_' . date('Y-m-d_H.i.s') . '.doc');
+		header('Content-Disposition: attachment;filename="' . substr($name,0,20) . '_' . date('Y-m-d_H.i.s') . '.doc"');
 		header("Content-Transfer-Encoding: binary ");
 		echo($out);
 		@flush();
@@ -1149,7 +1149,7 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 		header("Content-Type: application/force-download");
 		header("Content-Type: application/download");
 		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-		header("Content-Disposition: attachment;filename=" . substr($name,0,20) . '_' . date('Y-m-d_H.i.s') . '.xlsx');
+		header('Content-Disposition: attachment;filename="' . substr($name,0,20) . '_' . date('Y-m-d_H.i.s') . '.xlsx"');
 		
 		header("Content-Transfer-Encoding: binary ");
 		$objWriter->save('php://output');

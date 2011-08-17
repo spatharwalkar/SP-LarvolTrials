@@ -1,11 +1,3 @@
-<?php
-header('P3P: CP="CAO PSA OUR"');
-session_start();
-require_once('krumo/class.krumo.php');
-require_once('db.php');
-require_once('include.search.php');
-if(!isset($_GET['cparams']) && !isset($_GET['params']) && !isset($_GET['results'])) die('cell not set');
-?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -396,13 +388,14 @@ class ContentManager
 				} else if(isset($_GET['cparams'])) {
 					$pager .= '<a href="intermediary.php?cparams=' . rawurlencode($_GET['cparams']) . $stack_url . '&amp;pg=' . ($page-1);
 				}
-				$pager .= $sort . '" style="float:left;">&lt;&lt; Previous Page (' . ($this->pstart - 1) . '-' . ($this->pstart-1) . ')</a>&nbsp;&nbsp;&nbsp;';
+				$pager .= $sort . '" style="float:left;">&lt;&lt; Previous Page (' . ($this->pstart - $this->results_per_page) . '-' . ($this->pstart-1) 
+				. ')</a>&nbsp;&nbsp;&nbsp;';
 			}
 			$pager .= '<div style="float:left;margin:0px 10px;">Studies Shown (' . $this->pstart . '-' . $this->pend . ')&nbsp;&nbsp;&nbsp;</div>';
 			if($this->pend < $count)
 			{
 				
-				$nextlast = ($this->last+1);
+				$nextlast = ($this->last+$this->results_per_page);
 				if($nextlast > $count) $nextlast = $count;
 				if(isset($_GET['results'])) {
 				
@@ -415,7 +408,7 @@ class ContentManager
 				} else if(isset($_GET['cparams'])) {
 					$pager .= '<a href="intermediary.php?cparams=' . rawurlencode($_GET['cparams']) . $stack_url . '&amp;pg=' . ($page+1);
 				}
-				$pager .= $sort . '" style="float:left;">Next Page (' . ($this->pstart+1) . '-' . $nextlast . ') &gt;&gt;</a>';
+				$pager .= $sort . '" style="float:left;">Next Page (' . ($this->pstart+$this->results_per_page) . '-' . $nextlast . ') &gt;&gt;</a>';
 			}
 		
 		} else {
@@ -427,13 +420,14 @@ class ContentManager
 				} else {
 					$pager .= '<a href="intermediary.php?params=' . rawurlencode($params) . '&amp;page=' . ($page-1) . '&amp;leading=' . rawurlencode($leading);
 				}
-				$pager .= $sort . '" style="float:left;">&lt;&lt; Previous Page (' . ($this->pstart - 1) . '-' . ($this->pstart-1) . ')</a>&nbsp;&nbsp;&nbsp;';
+				$pager .= $sort . '" style="float:left;">&lt;&lt; Previous Page (' . ($this->pstart - $this->results_per_page) . '-' . ($this->pstart-1) 
+				. ')</a>&nbsp;&nbsp;&nbsp;';
 			}
 			$pager .= '<div style="float:left;margin:0px 10px;">Studies Shown (' . $this->pstart . '-' . $this->pend . ')</div>';
 			
 			if($this->pend < $count)
 			{
-				$nextlast = ($this->last+1);
+				$nextlast = ($this->last+$this->results_per_page);
 				if($nextlast > $count) $nextlast = $count;
 				if(isset($_GET['results'])) {
 					$pager .= '<a href="intermediary.php?results=' . rawurlencode($params) . '&amp;page=' . ($page+1) . '&amp;time=' 
@@ -442,7 +436,7 @@ class ContentManager
 					$pager .= '<a href="intermediary.php?params=' . rawurlencode($params) . '&amp;page=' . ($page+1) . '&amp;leading=' 
 					. rawurlencode($leading);
 				}
-				$pager .= $sort . '" style="float:left;">Next Page (' . ($this->pstart+1) . '-' . $nextlast . ') &gt;&gt;</a>';
+				$pager .= $sort . '" style="float:left;">Next Page (' . ($this->pstart+$this->results_per_page) . '-' . $nextlast . ') &gt;&gt;</a>';
 			}
 		}
 		echo $pager;
