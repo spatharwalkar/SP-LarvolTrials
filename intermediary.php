@@ -1,3 +1,11 @@
+<?php
+header('P3P: CP="CAO PSA OUR"');
+session_start();
+require_once('krumo/class.krumo.php');
+require_once('db.php');
+require_once('include.search.php');
+if(!isset($_GET['cparams']) && !isset($_GET['params']) && !isset($_GET['results'])) die('cell not set');
+?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
