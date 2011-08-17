@@ -38,11 +38,45 @@ $dbsync = new DBSync();
 $dbsync->SetHomeDatabase(DB_TEMP, 'mysql', DB_SERVER, DB_USER, DB_PASS);
 $dbsync->AddSyncDatabase(DB_NAME, 'mysql', DB_SERVER, DB_USER, DB_PASS);
 $dbsync->Sync();
+echo('</fieldset><br />Done. <ul><li>If these differences were caused by an update, compare the above changes to what is called for by recent code commits, and if correct, execute them.</li><li>If these differences are due to your own schema changes, update the setup script (setup/schema.sql) to include them, then re-run this page to ensure there are no differences before you commit your code.</li></ul>');
+?>
+<br/>
+Data changes based on data.sql
+<br/>
+<fieldset class="code"><legend>SQL</legend>
+<?php 
+//data.sql import
+mysql_connect(DB_SERVER,DB_USER,DB_PASS) or die("Error connecting to database server!");
+mysql_select_db(DB_TEMP) or die("Could not find database on server!");
+$dataScript = file_get_contents('setup/data.sql');
+$dataScript = explode(';',$dataScript);
+foreach($dataScript as $data)
+{
+	$data = trim($data);
+	if(empty($data)) continue;
+	$res = mysql_query($data);
+	if($res === false)
+	{
+		echo("Couldn't import data from file! Bad query: ");
+		var_dump($stat);
+		exit;
+	}
+}
+mysql_close();
+echo '<pre>';
+$dbsync->syncDataTables('set',array('data_categories','data_fields','data_enumvals','user_permissions'));
+$dbsync->syncData();
 
+?>
+</fieldset>
+<br />Done. <ul><li>Re-run the script again to make sure no more related data are needed to be inserted or not.</li></ul>
+
+</body>
+</html>
+<?php 
+//delete temp db created.
 mysql_connect(DB_SERVER,DB_USER,DB_PASS) or die("Error connecting to database server!");
 mysql_query('DROP DATABASE ' . DB_TEMP) or die("Couldn't drop database: " . mysql_error());
 mysql_close();
-echo('</fieldset><br />Done. <ul><li>If these differences were caused by an update, compare the above changes to what is called for by recent code commits, and if correct, execute them.</li><li>If these differences are due to your own schema changes, update the setup script (setup/schema.sql) to include them, then re-run this page to ensure there are no differences before you commit your code.</li></ul>');
+
 ?>
-</body>
-</html>

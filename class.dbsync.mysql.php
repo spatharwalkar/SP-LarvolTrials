@@ -289,5 +289,157 @@
         function LastError() {
         	return mysql_error($this->dbp);
         }
+       /**
+         * DBSync_mysql::getData()
+		 * @tutorial Returns all data for the table
+         * @access	public
+         * @return 	mysql result 
+         * @author Jithu Thomas
+         **/
+        function getData($table)
+        {
+        	switch($table)
+        	{
+        		case 'data_fields':
+        			$sql = "SELECT df . * , dc.name AS dcname FROM `$this->database`.data_fields df LEFT JOIN `$this->database`.data_categories dc ON df.category = dc.id";
+        			break;
+        		case 'data_enumvals':
+        			$sql = "SELECT de . * , df.name AS dfname FROM `$this->database`.data_enumvals de LEFT JOIN `$this->database`.data_fields df ON df.id = de.field";
+        			break;
+        			
+        		default:
+        			$sql = 'select * from `'.$this->database.'`.'.$table.'`';
+        			break;
+        			
+        	}
+        	$result = mysql_query($sql,$this->dbp);
+        	while($row = mysql_fetch_assoc($result))
+        	{
+        		$out[] = $row;
+        	}
+        	return $out;
+        }  
+        
+       /**
+         * DBSync_mysql::simpleInsert()
+		 * @tutorial Returns insert query for data sync
+         * @param string $table
+         * @param array $columns
+         * @param array $values
+         * @access	public
+         * @return 	string query
+         * @author Jithu Thomas
+         **/
+        function simpleInsert($table,$columns,$values)
+        {
+        	$values = array_map(function($val){
+        		if(!is_array($val))
+        		$val = array($val);
+        		if(is_array($val)&& count($val)>0)
+        		{
+        			$val = array_map(function($tmp){
+        				return '\''.mysql_escape_string($tmp).'\'';
+        			},$val);
+        			$val = implode(',',$val);
+        		}
+        		return '('.$val.')';
+        	},$values);
+        	$sql = 'INSERT INTO `'.$table.'` ('.implode(',',$columns).') VALUES '.implode(',',$values).';<br>';
+        	echo $sql;
+        }
+
+	     /**
+         * DBSync_mysql::simpleDelete()
+		 * @tutorial Returns delete query for data sync
+         * @param string $table
+         * @param array $columns
+         * @param array $values
+         * @access	public
+         * @return 	string query
+         * @author Jithu Thomas
+         **/
+        function simpleDelete($table,$values)
+        {
+        	$values = array_map(function($val){
+        		foreach($val as $ky=>$value)
+        		{
+        			$tmp[] = "`$ky` = '".mysql_escape_string($value)."'";
+        		}
+        		return implode(' AND ',$tmp);
+        	},$values);
+        	if(count($values)>1)
+        	$sql = 'DELETE FROM `'.$table.'` WHERE '.implode(' OR ',$values).';<br>';
+        	else
+        	$sql = 'DELETE FROM `'.$table.'` WHERE '.implode(' ',$values).';<br>';
+        	echo $sql;
+        }  
+
+	     /**
+         * DBSync_mysql::categoryIdMap()
+		 * @tutorial provides a name/id for data_fields/data_categories as per input Arr
+         * @param array $insertArr
+         * @param string $home
+         * @param string $sync
+         * @param string $table
+         * @access	public
+         * @return 	array with mapped values
+         * @author Jithu Thomas
+         **/
+        function categoryIdMap($insertArr,$home,$sync,$table)
+        {
+	        switch($table)
+	        {
+	        	case 'data_fields':
+	        		$name = 'dcname';
+	        		$newName = 'category';
+	        		break;
+	        	case 'data_enumvals':
+	        		$name = 'dfname';
+	        		$newName = 'field';
+	        		break;	        			
+	        		
+	        }        	
+		
+        	$tmp = array();
+        	$categoryIds = array();
+        	if(count($insertArr)>0)
+        	{
+				$categoryIds = array_map(function($arr,$name){
+					return $arr[$name];
+				},$insertArr,array_fill(0,count($insertArr),$name));
+				$categoryIds = array_unique($categoryIds);
+        	}
+			foreach ($categoryIds as $oldCat)
+			{
+				switch($table)
+	        	{
+	        		case 'data_fields':
+	        			$query = "SELECT id FROM $sync.data_categories WHERE name='$oldCat'";
+	        			break;
+	        		case 'data_enumvals':
+	        			$query = "SELECT id FROM $sync.data_fields WHERE name='$oldCat'";
+	        			break;	        			
+	        			
+	        	}				
+				//get category names from the home db table
+				//and get id details from the sync db for new category ids
+				$result = mysql_query($query,$this->dbp);
+				if(mysql_num_rows($result)>0)
+				{
+					$row = mysql_fetch_row($result);
+					$map[] = $row[0];
+				}
+			}
+			foreach($insertArr as $ky=>$arr)
+			{
+					$arr[$newName] = str_replace($categoryIds,$map,$arr[$name]);
+					unset($arr[$name]);
+					if($arr[$newName]=='')
+					continue;
+					$tmp[$ky] = $arr;
+					
+			}
+			return $tmp;
+        }         
     }
 ?>

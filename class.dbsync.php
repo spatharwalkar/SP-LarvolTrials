@@ -14,6 +14,7 @@
 	class DBSync {
     	var $home = array();
         var $sync = array();
+        private $syncDataTables = array();
 
         /**
          * DBSync::DBSync()
@@ -100,7 +101,6 @@
         	if (count($this->sync) == 0) {
             	$this->RaiseError('No Sync Databases defined. Use AddSyncDatabase() to add Sync Databases.');
             }
-
             for ($i = 0; $i < count($this->sync); $i++) {
             	$this->SyncDatabases($this->home, $this->sync[$i]);
             }
@@ -289,6 +289,160 @@
         	echo "<h3>Error</h3><hr />\n" .
                  $description;
 			exit(1);
+        }
+        
+       	/**
+         * DBSync::syncDataTables()
+         * @tutorial Set or get sync tables for data sync
+         * @access	private
+         * @param String $method get or set
+         * @param Array $tables used in $method='set'
+         * @return 	array/boolean 
+         * @author Jithu Thomas
+         **/     
+        public function syncDataTables($method='get',$tables=array())
+        {     
+        	if($method=='set')
+        	{
+        		if(count($tables)>0 && is_array($tables))
+        		{
+        			$this->syncDataTables = $tables;
+        			return true;
+        		}
+        		else
+        		{
+        			$this->RaiseError('Sync data tables not set correctly.');
+        		}	
+        	}
+        	if($method=='get')
+        	{
+        	    if(count($this->syncDataTables)>0 && is_array($this->syncDataTables))
+        		{
+        			return $this->syncDataTables;
+        		}
+        		else
+        		{
+        			$this->RaiseError('Sync data tables not set correctly.');
+        		}        		
+        	}
+        }   
+        
+        /**
+         * DBSync::syncData()
+         * @tutorial Sync databases data with the home database
+         * Data bases home and sync are already assigned before running
+         * the function
+         * @access	private
+         * @return 	boolean		Success
+         * @author Jithu Thomas
+         **/     
+        public function syncData()
+        {
+        	echo '<pre>';
+        	if(!$this->home->ok && count($this->sync) && !$this->sync[0]->ok)
+        	{
+        		$this->RaiseError('Home or Sync Database not set properly.');
+        	}
+            for ($i = 0; $i < count($this->sync); $i++)
+            {
+            	$this->syncDataIndividual($this->home, $this->sync[$i]);
+            }        	
+        	
+        }
+           
+                /**
+         * DBSync::syncDataIndividual()
+         * @tutorial Sync one database data with the home database
+         * @access	private
+         * @return 	boolean		Success
+         * @author Jithu Thomas
+         **/     
+        private function syncDataIndividual(&$dbHome,&$dbSync)
+        {        
+        	foreach($this->syncDataTables('get') as $table)
+        	{
+	        	$homeData = $dbHome->getData($table);
+	        	$syncData = $dbSync->getData($table);
+	        	$insertArr = array();
+	        	$deleteArr = array();
+	        	switch($table)
+	        	{
+	        		case 'data_categories':
+	        			$fields = array('name');
+	        			break;
+	        		case 'data_enumvals' : 
+	        			$fields = array('dfname','value');
+	        			break;
+	        		case 'data_fields' :
+	        			$fields = array('name','type','dcname'); 
+
+	        			break;
+	        		case 'user_permissions' :
+	        			$fields = array('name','type','level'); 
+	        			break;	        			
+	        	}
+                $homeDataUniqueArr = $this->createUniqueValArray($homeData, $fields);
+        		$syncDataUniqueArr = $this->createUniqueValArray($syncData, $fields);
+        		$insertArr = array_diff($homeDataUniqueArr,$syncDataUniqueArr);
+        		$deleteArr = array_diff($syncDataUniqueArr,$homeDataUniqueArr);     
+        		$home = $dbHome->database;
+        		$sync = $dbSync->database;
+        	    if(is_array($insertArr) && count($insertArr)>0)
+        		{
+        			$insertArr = $this->createUniqueValArray($insertArr, $fields,'explode');
+        		}
+        			
+				if($table=='data_fields')
+				{
+					$insertArr = $dbHome->categoryIdMap($insertArr,$home,$sync,$table);
+					$deleteArr = $dbHome->categoryIdMap($deleteArr,$home,$sync,$table);
+        			$fields = array('name','type','category'); 						
+				}
+				if($table == 'data_enumvals')
+				{
+					$insertArr = $dbHome->categoryIdMap($insertArr,$home,$sync,$table);
+					$deleteArr = $dbHome->categoryIdMap($deleteArr,$home,$sync,$table);
+        			$fields = array('value','field'); 						
+				}
+				if(is_array($insertArr) && count($insertArr)>0)
+        		{					     
+        			$dbHome->simpleInsert($table,$fields,$insertArr);	
+        		}
+        	    if(is_array($deleteArr) && count($deleteArr)>0)
+        		{
+        			$deleteArr = $this->createUniqueValArray($deleteArr, $fields,'explode');
+        			$dbHome->simpleDelete($table,$deleteArr);
+        		}
+        	}
+        }
+        
+        public function createUniqueValArray($dataArr,$fields=array(),$action='implode',$glue='_::_')
+        {
+        	$returnArr = array();
+        	foreach($dataArr as $arr)
+        	{
+        		$unique = null;
+        		$uniqueArr = array();
+        		switch($action)
+        		{
+        			case 'implode':
+		        		foreach($fields as $field)
+		        		{
+		        			$uniqueArr[] = $arr[$field];
+		        		}
+		        		$returnArr[] = implode($glue,$uniqueArr);
+	        			break;
+        			case 'explode':
+        				$tmpArr = explode($glue,$arr);
+        				foreach($fields as $ky=>$field)
+		        		{
+		        			$uniqueArr[$field] = $tmpArr[$ky];
+		        		} 
+		        		$returnArr[] =  $uniqueArr; 				
+        				break;
+        		}
+        	}
+        	return $returnArr;
         }
     }
 ?>
