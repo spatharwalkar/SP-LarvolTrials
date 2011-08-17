@@ -254,7 +254,7 @@ else
 	$end_date = "";
 	$start_date = "";
 	ini_set('max_execution_time', '360000'); //100 hours
-//	ignore_user_abort(true);
+	ignore_user_abort(true);
 	echo("Starting full refreshing of EudraCT") ;
 }
 $Url = "https://www.clinicaltrialsregister.eu/ctr-search/index.xhtml";

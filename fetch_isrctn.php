@@ -52,7 +52,8 @@ $mapping = array(
 );
 $address_counter = 0;
 // DW
-ini_set('max_execution_time', '36000'); //10 hours
+ini_set('max_execution_time', '360000'); //100 hours
+ignore_user_abort(true);
 ob_implicit_flush(true);
 ob_end_flush();
 
