@@ -91,7 +91,7 @@ if( (isset($res['update_items_total'])) or (isset($res2['update_items_total'])) 
 
 
 /*echo " <div align=\"center\"  >
-		   <form name='scrapper' method='post' action='viewstatus.php'>
+		   <form name='scrapper' method='post' action='scrapers.php'>
 				<input type='hidden' name='runscrapper' value='yes'> 
 				<input type=\"submit\" value=\"Run full-history scrapper\" style=\"width:226px; height:31px;\" border=\"0\">
 			</form>
@@ -247,7 +247,7 @@ function showprogress()
 					if($nct_status['status']==READY)
 					{
 						echo "<td align=\"center\" class=\"norm\">";
-						echo '<form method="post" action="viewstatus.php">';
+						echo '<form method="post" action="scrapers.php">';
 						echo '<input type="hidden" name="action" value="4">';
 						echo '<input type="hidden" name="upid" value="'.$nct_status['update_id'].'">';
 						//echo '<input type="image" src="images/not.png" title="Cancel" style="border=0px;">';
@@ -257,7 +257,7 @@ function showprogress()
 					elseif($nct_status['status']==RUNNING)
 					{
 						echo "<td align=\"center\" class=\"norm\">";
-						echo '<form method="post" action="viewstatus.php">';
+						echo '<form method="post" action="scrapers.php">';
 						echo '<input type="hidden" name="action" value="2">';
 						echo '<input type="hidden" name="upid" value="'.$nct_status['update_id'].'">';
 						echo '<input type="hidden" name="pid" value="'.$nct_status['process_id'].'">';
@@ -268,7 +268,7 @@ function showprogress()
 					elseif($nct_status['status']==COMPLETED)
 					{
 						echo "<td align=\"center\" class=\"norm\">";
-						echo '<form method="post" action="viewstatus.php">';
+						echo '<form method="post" action="scrapers.php">';
 						echo '<input type="hidden" name="action" value="3">';
 						echo '<input type="hidden" name="upid" value="'.$nct_status['update_id'].'">';
 						echo '<input type="hidden" name="pid" value="'.$nct_status['process_id'].'">';
@@ -279,13 +279,13 @@ function showprogress()
 					else if($nct_status['status']==ERROR||$nct_status['status']==CANCELLED)
 					{
 						echo "<td align=\"center\" class=\"norm\">";
-						echo '<form method="post" action="viewstatus.php">';
+						echo '<form method="post" action="scrapers.php">';
 						echo '<input type="hidden" name="action" value="1">';
 						echo '<input type="hidden" name="upid" value="'.$nct_status['update_id'].'">';
 						echo '<input type="hidden" name="pid" value="'.$nct_status['process_id'].'">';
 						echo '<input type="image" src="images/check.png" title="Add" style="border=0px;">';
 						echo '</form>';
-						echo '<form method="post" action="viewstatus.php">';
+						echo '<form method="post" action="scrapers.php">';
 						echo '<input type="hidden" name="action" value="3">';
 						echo '<input type="hidden" name="upid" value="'.$nct_status['update_id'].'">';
 						echo '<input type="hidden" name="pid" value="'.$nct_status['process_id'].'">';
@@ -347,7 +347,7 @@ function showprogress()
 					if($eudract_status['status']==READY)
 					{
 						echo "<td align=\"center\" class=\"norm\">";
-						echo '<form method="post" action="viewstatus.php">';
+						echo '<form method="post" action="scrapers.php">';
 						echo '<input type="hidden" name="action" value="4">';
 						echo '<input type="hidden" name="upid" value="'.$eudract_status['update_id'].'">';
 						//echo '<input type="image" src="images/not.png" title="Cancel" style="border=0px;">';
@@ -357,7 +357,7 @@ function showprogress()
 					elseif($eudract_status['status']==RUNNING)
 					{
 						echo "<td align=\"center\" class=\"norm\">";
-						echo '<form method="post" action="viewstatus.php">';
+						echo '<form method="post" action="scrapers.php">';
 						echo '<input type="hidden" name="action" value="2">';
 						echo '<input type="hidden" name="upid" value="'.$eudract_status['update_id'].'">';
 						echo '<input type="hidden" name="pid" value="'.$eudract_status['process_id'].'">';
@@ -368,7 +368,7 @@ function showprogress()
 					elseif($eudract_status['status']==COMPLETED)
 					{
 						echo "<td align=\"center\" class=\"norm\">";
-						echo '<form method="post" action="viewstatus.php">';
+						echo '<form method="post" action="scrapers.php">';
 						echo '<input type="hidden" name="action" value="3">';
 						echo '<input type="hidden" name="upid" value="'.$eudract_status['update_id'].'">';
 						echo '<input type="hidden" name="pid" value="'.$eudract_status['process_id'].'">';
@@ -379,13 +379,13 @@ function showprogress()
 					else if($eudract_status['status']==ERROR||$eudract_status['status']==CANCELLED)
 					{
 						echo "<td align=\"center\" class=\"norm\">";
-						echo '<form method="post" action="viewstatus.php">';
+						echo '<form method="post" action="scrapers.php">';
 						echo '<input type="hidden" name="action" value="1">';
 						echo '<input type="hidden" name="upid" value="'.$eudract_status['update_id'].'">';
 						echo '<input type="hidden" name="pid" value="'.$eudract_status['process_id'].'">';
 						echo '<input type="image" src="images/check.png" title="Add" style="border=0px;">';
 						echo '</form>';
-						echo '<form method="post" action="viewstatus.php">';
+						echo '<form method="post" action="scrapers.php">';
 						echo '<input type="hidden" name="action" value="3">';
 						echo '<input type="hidden" name="upid" value="'.$eudract_status['update_id'].'">';
 						echo '<input type="hidden" name="pid" value="'.$eudract_status['process_id'].'">';
@@ -451,7 +451,7 @@ function showprogress()
 					if($isrctn_status['status']==READY)
 					{
 						echo "<td align=\"center\" class=\"norm\">";
-						echo '<form method="post" action="viewstatus.php">';
+						echo '<form method="post" action="scrapers.php">';
 						echo '<input type="hidden" name="action" value="4">';
 						echo '<input type="hidden" name="upid" value="'.$isrctn_status['update_id'].'">';
 						//echo '<input type="image" src="images/not.png" title="Cancel" style="border=0px;">';
@@ -461,7 +461,7 @@ function showprogress()
 					elseif($isrctn_status['status']==RUNNING)
 					{
 						echo "<td align=\"center\" class=\"norm\">";
-						echo '<form method="post" action="viewstatus.php">';
+						echo '<form method="post" action="scrapers.php">';
 						echo '<input type="hidden" name="action" value="2">';
 						echo '<input type="hidden" name="upid" value="'.$isrctn_status['update_id'].'">';
 						echo '<input type="hidden" name="pid" value="'.$isrctn_status['process_id'].'">';
@@ -472,7 +472,7 @@ function showprogress()
 					elseif($isrctn_status['status']==COMPLETED)
 					{
 						echo "<td align=\"center\" class=\"norm\">";
-						echo '<form method="post" action="viewstatus.php">';
+						echo '<form method="post" action="scrapers.php">';
 						echo '<input type="hidden" name="action" value="3">';
 						echo '<input type="hidden" name="upid" value="'.$isrctn_status['update_id'].'">';
 						echo '<input type="hidden" name="pid" value="'.$isrctn_status['process_id'].'">';
@@ -483,13 +483,13 @@ function showprogress()
 					else if($isrctn_status['status']==ERROR||$isrctn_status['status']==CANCELLED)
 					{
 						echo "<td align=\"center\" class=\"norm\">";
-						echo '<form method="post" action="viewstatus.php">';
+						echo '<form method="post" action="scrapers.php">';
 						echo '<input type="hidden" name="action" value="1">';
 						echo '<input type="hidden" name="upid" value="'.$isrctn_status['update_id'].'">';
 						echo '<input type="hidden" name="pid" value="'.$isrctn_status['process_id'].'">';
 						echo '<input type="image" src="images/check.png" title="Add" style="border=0px;">';
 						echo '</form>';
-						echo '<form method="post" action="viewstatus.php">';
+						echo '<form method="post" action="scrapers.php">';
 						echo '<input type="hidden" name="action" value="3">';
 						echo '<input type="hidden" name="upid" value="'.$isrctn_status['update_id'].'">';
 						echo '<input type="hidden" name="pid" value="'.$isrctn_status['process_id'].'">';
