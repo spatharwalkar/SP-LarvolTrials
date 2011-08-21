@@ -1,4 +1,10 @@
 <?php
+//initiate logging actions
+require_once dirname(__FILE__).'/log4php/Logger.php';
+Logger::configure(dirname(__FILE__).'/log4php/larvol.properties');
+$logger = Logger::getLogger('tlg');
+//	
+
 require_once('settings.php');
 require_once('include.util.php');
 
@@ -7,11 +13,6 @@ $db->loggedIn();	//check login status and load userinfo
 $now = strtotime('now');
 
 
-//initiate logging actions
-require_once dirname(__FILE__).'/log4php/Logger.php';
-Logger::configure(dirname(__FILE__).'/log4php/larvol.properties');
-$logger = Logger::getLogger('tlg');
-//	
 
 /* Abstracts mundane database access and manages login. 
 	You shouldn't instantiate this class on your own -- an instance is made when it is included.
