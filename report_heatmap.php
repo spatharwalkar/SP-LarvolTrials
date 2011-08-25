@@ -719,8 +719,9 @@ function reportList()
 	global $db;
 	$out = '<div style="display:block;float:left;"><form method="post" action="report_heatmap.php" class="lisep">'
 			. '<input type="submit" name="makenew" value="Create new" style="float:none;" /></form><br clear="all"/>'
-			. '<form name="reportlist" method="post" action="report_heatmap.php" class="lisep" onsubmit="return delsure();">'
-			. '<fieldset><legend>Select Report</legend><ul>';
+			. '<form name="reportlist" method="post" action="report_heatmap.php" class="lisep" onsubmit="return chkbox(this);">'
+			. '<fieldset><legend>Select Report</legend>';
+	$out .= '<div class="tar">Del</div><ul>';
 	$query = 'SELECT id,name,user,category FROM rpt_heatmap WHERE user IS NULL OR user=' . $db->user->id . ' ORDER BY user';
 	$res = mysql_query($query) or die('Bad SQL query retrieving report names');
 	$res1 = mysql_query($query) or die('Bad SQL query retrieving report names');
@@ -736,8 +737,8 @@ function reportList()
 	
 	foreach($categoryArr as $category)
 	{
-//		$out .= '<li>'.ucwords(strtolower($category)).'<ul>';
-//		keep the category as it is, without any change in letter case
+		//		$out .= '<li>'.ucwords(strtolower($category)).'<ul>';
+		//		keep the category as it is, without any change in letter case
 		$out .= '<li>'.$category.'<ul>';
 		foreach($outArr as $row)
 		{
@@ -748,14 +749,15 @@ function reportList()
 						. htmlspecialchars(strlen($row['name'])>0?$row['name']:('(report '.$row['id'].')')) . '</a>';
 				if($ru == $db->user->id || ($ru === NULL && $db->user->userlevel != 'user'))
 				{
-					$out .= ' &nbsp; &nbsp; &nbsp; <input type="image" name="delrep[' . $row['id']. ']" src="images/not.png" title="Delete"/>';
+					$out .= ' &nbsp; &nbsp; &nbsp; <label class="lbldel"><input type="checkbox" class="delrep" name="delrep[' . $row['id']. ']" title="Delete"/></label>';
 				}
 				$out .= '</li>';				
 			}
 		}
 		$out .='</ul></li>';
 	}
-	$out .= '</ul></fieldset></form></div>';
+	$out .= '</ul>';
+	$out .='<div class="tar"><input type="submit" value="Delete" title="Delete"/></div></fieldset></form></div>';
 	return $out;
 }
 

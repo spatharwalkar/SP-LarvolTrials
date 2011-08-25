@@ -249,4 +249,18 @@ iframe{
 .floatl{
 	float:left;
 	}
+.lbldel{
+	background-color:red;
+	float:right;
+	padding:0;
+}
+.lbldelc{
+	background-color:red;
+	float:center;
+	padding:0;
+}
+.tar{
+	text-align:right;
+	font-weight:bold;
+}
 	

@@ -293,11 +293,12 @@ function reportList($disperr)
 				. '</a></li></ul></td><th>';
 		if($row['user'] !== NULL || ($row['user'] == NULL && $db->user->userlevel != 'user'))
 		{
-			$out .= '<input type="image" name="delrep[' . $row['id']
-					. ']" src="images/not.png" title="Delete" onclick="return delsure();"/>';
+			$out .= '<label class="lbldelc"><input type="checkbox" class="delrep" name="delrep[' . $row['id']
+					. ']" title="Delete" /></label>';
 		}
 		$out .= '</th></tr>';
 	}
+	$out .= '<tr><th>&nbsp;</th><th><div class="tar"><input type="submit" value="Delete" title="Delete" onclick="return chkbox();"/></div></th></tr>';
 	mysql_query('COMMIT') or die("Couldn't commit SQL transaction");
 	$out .= '</table><br />';
 	if(strlen($disperr)) $out .= '<br clear="all"/><span class="error">' . $disperr . '</span>';
