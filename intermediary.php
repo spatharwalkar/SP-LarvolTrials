@@ -1336,7 +1336,7 @@ class ContentManager
 				$upm_string .= '<td colspan="3" class="' . $row_type_two . $attr . ' titleupmodd" ' . $title . '><div class="rowcollapse">' 
 						. $val['event_type'] . '</div></td>' . '<td colspan="2" class="' . $row_type_two . ' titleupmodd"><div class="rowcollapse">';
 				
-				if($val['start_date_type'] == 'anticipated') {
+				if($val['start_date_type'] == 'anticipated' && ($val['start_date'] > date('Y-m-d'))) {
 					$unassoc_upm_status .= 'Upcoming, ';
 				}
 				if($val['end_date_type'] == 'actual') {
@@ -1344,7 +1344,7 @@ class ContentManager
 				}
 				if(($val['end_date'] != '' && $val['end_date'] != NULL && $val['end_date'] != '0000-00-00') 
 				&& ($val['end_date_previous_value'] != '' && $val['end_date_previous_value'] != NULL && $val['end_date_previous_value'] != '0000-00-00') 
-				&& ($val['end_date'] > $val['end_date_previous_value'])) {
+				&& ($val['end_date'] > $val['end_date_previous_value']) && ($val['end_date'] > date('Y-m-d'))) {
 					$unassoc_upm_status .= 'Delayed, ';
 				}
 				if(($val['end_date'] != '' && $val['end_date'] != NULL && $val['end_date'] != '0000-00-00') 
