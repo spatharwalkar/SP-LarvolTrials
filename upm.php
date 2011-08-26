@@ -611,7 +611,8 @@ function input_tag($row,$dbVal=null,$options=array())
 			break;
 			
 		default:
-			return '<input type="text" value="'.$dbVal.'" name="'.$nameIndex.$row['Field'].'"/>';
+			$dateinput = (strpos($row['Field'], 'date') !== false) ? ' class="jdpicker"' : '';
+			return '<input type="text" value="'.$dbVal.'" name="'.$nameIndex.$row['Field'].'"' . $dateinput . '/>';
 			break;
 	}
 }
