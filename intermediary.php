@@ -975,7 +975,6 @@ class ContentManager
 			}
 			echo ('</td><td class="result">Results for ' . htmlformat($rowlabel) . ' in ' . htmlformat($columnlabel) . '</td>' . '</tr></table>');
 			echo('<br clear="all"/><br/>');		
-			echo('<form id="frmOtt" name="frmOtt" method="get" action="intermediary.php">');
 			
 			$arr = array();
 			$nct = array();
