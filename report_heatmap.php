@@ -1,5 +1,6 @@
 <?php
 require_once('db.php');
+require_once('report_common.php');
 if(!$db->loggedIn())
 {
 	header('Location: ' . urlPath() . 'index.php');
@@ -24,7 +25,7 @@ echo('<script type="text/javascript" src="delsure.js"></script>');
 postRL();
 postEd();
 postSM();
-echo(reportList());
+echo(reportListCommon('rpt_heatmap'));
 echo(statMon());
 echo(editor());
 echo('</body></html>');
@@ -711,54 +712,6 @@ function postEd()
 		mysql_query($query) or die('Bad SQL query storing search');
 		mysql_query('COMMIT') or die("Couldn't commit SQL transaction");
 	}
-}
-
-//return html for the report list
-function reportList()
-{
-	global $db;
-	$out = '<div style="display:block;float:left;"><form method="post" action="report_heatmap.php" class="lisep">'
-			. '<input type="submit" name="makenew" value="Create new" style="float:none;" /></form><br clear="all"/>'
-			. '<form name="reportlist" method="post" action="report_heatmap.php" class="lisep" onsubmit="return chkbox(this);">'
-			. '<fieldset><legend>Select Report</legend>';
-	$out .= '<div class="tar">Del</div><ul>';
-	$query = 'SELECT id,name,user,category FROM rpt_heatmap WHERE user IS NULL OR user=' . $db->user->id . ' ORDER BY user';
-	$res = mysql_query($query) or die('Bad SQL query retrieving report names');
-	$res1 = mysql_query($query) or die('Bad SQL query retrieving report names');
-	$categoryArr  = array('');
-	$outArr = array();
-	while($row = mysql_fetch_array($res1))
-	{
-		if($row['category'])
-		$categoryArr[$row['category']] = $row['category'];
-		$outArr[] = $row;
-	}
-	sort($categoryArr);
-	
-	foreach($categoryArr as $category)
-	{
-		//		$out .= '<li>'.ucwords(strtolower($category)).'<ul>';
-		//		keep the category as it is, without any change in letter case
-		$out .= '<li>'.$category.'<ul>';
-		foreach($outArr as $row)
-		{
-			$ru = $row['user'];
-			if($row['category']== $category)
-			{
-				$out .= '<li' . ($ru === NULL ? ' class="global"' : '') . '><a href="report_heatmap.php?id=' . $row['id'] . '">'
-						. htmlspecialchars(strlen($row['name'])>0?$row['name']:('(report '.$row['id'].')')) . '</a>';
-				if($ru == $db->user->id || ($ru === NULL && $db->user->userlevel != 'user'))
-				{
-					$out .= ' &nbsp; &nbsp; &nbsp; <label class="lbldel"><input type="checkbox" class="delrep" name="delrep[' . $row['id']. ']" title="Delete"/></label>';
-				}
-				$out .= '</li>';				
-			}
-		}
-		$out .='</ul></li>';
-	}
-	$out .= '</ul>';
-	$out .='<div class="tar"><input type="submit" value="Delete" title="Delete"/></div></fieldset></form></div>';
-	return $out;
 }
 
 //processes POST for report list

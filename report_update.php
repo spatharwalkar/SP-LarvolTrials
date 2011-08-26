@@ -1,6 +1,7 @@
 <?php
 require_once('krumo/class.krumo.php');
 require_once('db.php');
+require_once('report_common.php');
 if(!$db->loggedIn())
 {
 	header('Location: ' . urlPath() . 'index.php');
@@ -29,7 +30,7 @@ $lockd = '';
 postEd();
 $err = postRL();
 searchPost();
-echo(reportList($err));
+echo(reportListCommon('rpt_update',$err));
 
 ?><p>Click on a scan name to load that update scan. Once one is loaded, you can click on the Excel icon to run it and download the output.</p><?php
 
@@ -272,40 +273,6 @@ function searchControl($fieldname, $alias=false)
 	return $out;
 }
 
-//return html for the report list
-function reportList($disperr)
-{
-	global $db;
-	global $activeUpdated;
-	$out = '<div style="display:block;float:left;"><form method="post" action="report_update.php" class="lisep">'
-			. '<input type="submit" name="makenew" value="Create new" style="float:none;" /></form><br clear="all"/>'
-			. '<form name="reportlist" method="post" action="report_update.php" class="lisep">'
-			. '<fieldset><legend>Select UpdateReport</legend>';
-	mysql_query('BEGIN') or die("Couldn't begin SQL transaction");
-	$query = 'SELECT id,name,user FROM rpt_update WHERE user IS NULL or user=' . $db->user->id . ' ORDER BY user';
-	$res = mysql_query($query) or die('Bad SQL query retrieving updatereport names');
-	$out .= '<table width="100%" class="items"><tr><th>Load</th><th>Del</th></tr>';
-	while($row = mysql_fetch_array($res))
-	{
-		$out .= '<tr><td><ul class="tablelist"><li class="' . ($row['user'] === NULL ? 'global' : '')
-				. '"><a href="report_update.php?id=' . $row['id'] . '">'
-				. htmlspecialchars(strlen($row['name'])>0?$row['name']:('(report '.$row['id'].')'))
-				. '</a></li></ul></td><th>';
-		if($row['user'] !== NULL || ($row['user'] == NULL && $db->user->userlevel != 'user'))
-		{
-			$out .= '<label class="lbldelc"><input type="checkbox" class="delrep" name="delrep[' . $row['id']
-					. ']" title="Delete" /></label>';
-		}
-		$out .= '</th></tr>';
-	}
-	$out .= '<tr><th>&nbsp;</th><th><div class="tar"><input type="submit" value="Delete" title="Delete" onclick="return chkbox();"/></div></th></tr>';
-	mysql_query('COMMIT') or die("Couldn't commit SQL transaction");
-	$out .= '</table><br />';
-	if(strlen($disperr)) $out .= '<br clear="all"/><span class="error">' . $disperr . '</span>';
-	if(strlen($activeUpdated)) $out .= '<br clear="all"/><span class="info">Selections updated!</span>';
-	$out .= '</fieldset></form></div>';
-	return $out;
-}
 
 /*processes POST for report list
 	Return an error string

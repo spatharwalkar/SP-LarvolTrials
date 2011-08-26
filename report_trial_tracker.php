@@ -1,5 +1,6 @@
 <?php
 require_once('db.php');
+require_once('report_common.php');
 if(!$db->loggedIn())
 {
 	header('Location: ' . urlPath() . 'index.php');
@@ -12,7 +13,7 @@ echo('<script type="text/javascript" src="delsure.js"></script>');
 
 postRL();
 postEd();
-echo(reportList());
+echo(reportListCommon('rpt_trial_tracker'));
 echo(editor());
 echo('</body></html>');
 
@@ -178,34 +179,6 @@ function postEd()
 			mysql_query($query) or die('Bad SQL Query saving trials');
 		}
 	}
-}
-
-//return html for the report list
-function reportList()
-{
-	global $db;
-	$out = '<div style="display:block;float:left;"><form method="post" action="report_trial_tracker.php" class="lisep">'
-			. '<input type="submit" name="makenew" value="Create new" style="float:none;" /></form><br clear="all"/>'
-			. '<form name="reportlist" method="post" action="report_trial_tracker.php" class="lisep" onsubmit="return chkbox();">'
-			. '<fieldset><legend>Select Report</legend>';
-	$out .= '<div class="tar">Del</div><ul>';
-	$query = 'SELECT id,name,user FROM rpt_trial_tracker WHERE user IS NULL OR user=' . $db->user->id . ' ORDER BY user';
-	$res = mysql_query($query) or die('Bad SQL query retrieving report names');
-	while($row = mysql_fetch_array($res))
-	{
-		$ru = $row['user'];
-		$out .= '<li' . ($ru === NULL ? ' class="global"' : '') . '><a href="report_trial_tracker.php?id=' . $row['id'] . '">'
-				. htmlspecialchars(strlen($row['name'])>0?$row['name']:('(report '.$row['id'].')')) . '</a>';
-		if($ru == $db->user->id || ($ru === NULL && $db->user->userlevel != 'user'))
-		{
-			$out .= ' &nbsp; &nbsp; &nbsp; <label class="lbldel"><input type="checkbox" class="delrep" name="delrep[' . $row['id']
-				. ']" title="Delete"/></label>';
-		}
-		$out .= '</li>';
-	}
-	$out .= '</ul>';
-	$out .='<div class="tar"><input type="submit" value="Delete" title="Delete"/></div></fieldset></form></div>';
-	return $out;
 }
 
 //processes POST for report list
