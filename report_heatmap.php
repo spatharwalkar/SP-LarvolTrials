@@ -142,7 +142,7 @@ function editor()
 	$out .= '</div><iframe style="width:500px;height:4em;" name="runframe"></iframe>'
 		. '<div id="progress"></div><div class="info" id="success"></div>'
 		. '<br style="margin-top:55px;"/>'
-		. '<form action="report_heatmap.php" method="post"><fieldset><legend>Edit report ' . $id . '</legend>'
+		. '<form action="report_heatmap.php" onsubmit="return chkbox(0,\'delrepe\');" method="post"><fieldset><legend>Edit report ' . $id . '</legend>'
 		. '<input type="hidden" name="id" value="' . $id . '" />'
 		. '<label>Name: <input type="text" name="reportname" value="' . htmlspecialchars($name)
 		. '"/></label>'
@@ -174,12 +174,12 @@ function editor()
 			. '<br /><table class="reportcell"><tr><th>';
 	if($unisearchdata)
 	{
-		$out .= '[Search] <a href="search.php?'
+		$out .= 'Search: [Full] <a href="search.php?'
 				. htmlspecialchars('report=' . $id . '&rload=' . $id) . '">'
 				. '<img src="images/edit.png" alt="Edit" title="Edit"/></a> - '
-				. '<input type="image" name="delete[x.x]" src="images/not.png" title="Delete"/>';
+				. '<label class="lbldel"><input class="delrepe" type="checkbox" name="delete[x.x]" title="Delete"/></label>';
 	}else{
-		$out .= '[Empty] <a href="search.php?'
+		$out .= 'Search: [Empty] <a href="search.php?'
 				. htmlspecialchars('report=' . $id)
 				. '"><img src="images/add.png" alt="Add" title="Add"/></a>';
 	}
@@ -190,10 +190,10 @@ function editor()
 		$out .= '<th><input type="text" name="columns[' . $col . ']" value="' . $val . '" /><br />';
 		if($columnsearches[$col])
 		{
-			$out .= '[Search] <a href="search.php?'
+			$out .= 'Search: [Full] <a href="search.php?'
 					. htmlspecialchars('report=' . $id . '&col=' . $col . '&rload=' . $id) . '">'
 					. '<img src="images/edit.png" alt="Edit" title="Edit"/></a> - '
-					. '<input type="image" name="delete[' . ('x.'.$col) . ']" src="images/not.png" title="Delete"/>';
+					. '<label class="lbldel"><input class="delrepe" type="checkbox" name="delete[' . ('x.'.$col) . ']" title="Delete"/></label>';
 			
 			// LEFT ARROW?
 			if($col > 1) $out .= ' <input type="image" name="move_col_left[' . $col . ']" src="images/left.png" title="Left"/>';
@@ -202,7 +202,7 @@ function editor()
 				$out .= ' <input type="image" name="move_col_right[' . $col . ']" src="images/right.png" title="Right"/>';	
 			
 		}else{
-			$out .= '[Empty] <a href="search.php?'
+			$out .= 'Search: [Empty] <a href="search.php?'
 					. htmlspecialchars('report=' . $id . '&col=' . $col)
 					. '"><img src="images/add.png" alt="Add" title="Add"/></a>';
 			
@@ -220,10 +220,10 @@ function editor()
 		$out .= '<tr><th><input type="text" name="rows[' . $row . ']" value="' . $rval . '" /><br />';
 		if($rowsearches[$row])
 		{
-			$out .= '[Search] <a href="search.php?'
+			$out .= 'Search: [Full] <a href="search.php?'
 					. htmlspecialchars('report=' . $id . '&row=' . $row . '&rload=' . $id) . '">'
 					. '<img src="images/edit.png" alt="Edit" title="Edit"/></a> - '
-					. '<input type="image" name="delete[' . ($row.'.x') . ']" src="images/not.png" title="Delete"/>';
+					. '<label class="lbldel"><input class="delrepe" type="checkbox" name="delete[' . ($row.'.x') . ']" title="Delete"/></label>';
 		
 			// UP ARROW?
 			if($row > 1) $out .= ' <input type="image" name="move_row_up[' . $row . ']" src="images/asc.png" title="Up"/>';	
@@ -231,7 +231,7 @@ function editor()
 			if($row < $max_row['num'])
 				$out .= ' <input type="image" name="move_row_down[' . $row . ']" src="images/des.png" title="Down"/>';
 		}else{
-			$out .= '[Empty] <a href="search.php?'
+			$out .= 'Search: [Empty] <a href="search.php?'
 					. htmlspecialchars('report=' . $id . '&row=' . $row)
 					. '"><img src="images/add.png" alt="Add" title="Add"/></a>';
 			
@@ -247,12 +247,12 @@ function editor()
 			$out .= '<td>';
 			if(isset($searchdata[$row]) && isset($searchdata[$row][$col]))
 			{
-				$out .= '[Search] <a href="search.php?'
+				$out .= 'Search: [Full] <a href="search.php?'
 						. htmlspecialchars('report=' . $id . '&row=' . $row . '&col=' . $col . '&rload=' . $id) . '">'
 						. '<img src="images/edit.png" alt="Edit" title="Edit"/></a> - '
-						. '<input type="image" name="delete[' . ($row.'.'.$col) . ']" src="images/not.png" title="Delete"/>';
+						. '<label class="lbldel"><input class="delrepe" type="checkbox" name="delete[' . ($row.'.'.$col) . ']" title="Delete"/></label>';
 			}else{
-				$out .= '[Empty] <a href="search.php?'
+				$out .= 'Search: [Empty] <a href="search.php?'
 						. htmlspecialchars('report=' . $id . '&row=' . $row . '&col=' . $col)
 						. '"><img src="images/add.png" alt="Add" title="Add"/></a>';
 			}
