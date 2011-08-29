@@ -368,9 +368,9 @@
         		return implode(' AND ',$tmp);
         	},$values);
         	if(count($values)>1)
-        	$sql = 'DELETE FROM `'.$table.'` WHERE '.implode(' OR ',$values).';<br>';
+        	$sql = 'DELETE FROM `'.$table.'` WHERE '.implode(' OR ',$values).' LIMIT '.count($values).';<br>';
         	else
-        	$sql = 'DELETE FROM `'.$table.'` WHERE '.implode(' ',$values).';<br>';
+        	$sql = 'DELETE FROM `'.$table.'` WHERE '.implode(' ',$values).' LIMIT 1;<br>';
         	echo $sql;
         }  
 
