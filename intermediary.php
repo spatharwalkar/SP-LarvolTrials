@@ -2554,13 +2554,13 @@ function getNonAssocUpmRecords($non_assoc_upm_params) {
 	
 	$where = '';$upms = array();
 	foreach($non_assoc_upm_params as $key => $val){
-		$where .= textEqual('product',$val);
+		$where .= textEqual('product',$val) . ' OR ';
 	}
 	
 	$sql = "SELECT `id`, `event_description`, `event_link`, `result_link`, `event_type`, `start_date`, `start_date_type`, `end_date`, `end_date_type`, "
 	. "(SELECT `end_date` FROM `upm_history` WHERE `upm_history`.`id` = `upm`.`id` ORDER BY `added` ASC LIMIT 0,1) AS end_date_previous_value, "
 	. "(SELECT `start_date` FROM `upm_history` WHERE`upm_history`.`id` = `upm`.`id` ORDER BY `added` ASC LIMIT 0,1) AS start_date_previous_value "
-	. "FROM `upm` WHERE (`corresponding_trial` IS NULL) AND " . $where;
+	. "FROM `upm` WHERE (`corresponding_trial` IS NULL) AND " . substr($where,0,-4);
 	 
 	$res = mysql_query($sql)  or tex('Bad SQL query getting unmatched upms ' . $sql);
 	
