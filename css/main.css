@@ -259,6 +259,10 @@ iframe{
 	float:center;
 	padding:0;
 }
+.lbldeln{
+	background-color:red;
+	padding:0;
+}
 .tar{
 	text-align:right;
 	font-weight:bold;

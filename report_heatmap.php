@@ -165,9 +165,7 @@ function editor()
 	{
 		$out .= '<input type="submit" name="reportsave" value="Save edits" /> | '
 			. '<input type="submit" name="addrow" value="More rows" /> | '
-			. '<input type="submit" name="delrow" value="Less rows" /> | '
-			. '<input type="submit" name="addcolumn" value="More columns" /> | '
-			. '<input type="submit" name="delcolumn" value="Less columns" /> | ';
+			. '<input type="submit" name="addcolumn" value="More columns" /> | ';
 	}
 	$out .= '<input type="submit" name="reportcopy" value="Copy into new" /> | '
 			. '<a href="report_inputcheck.php?id=' . $id . '">Input check</a>'
@@ -190,27 +188,35 @@ function editor()
 		$out .= '<th><input type="text" name="columns[' . $col . ']" value="' . $val . '" /><br />';
 		if($columnsearches[$col])
 		{
-			$out .= 'Search: [Full] <a href="search.php?'
-					. htmlspecialchars('report=' . $id . '&col=' . $col . '&rload=' . $id) . '">'
-					. '<img src="images/edit.png" alt="Edit" title="Edit"/></a> - '
-					. '<label class="lbldel"><input class="delrepe" type="checkbox" name="delete[' . ('x.'.$col) . ']" title="Delete"/></label>';
 			
+			$out .= 'Column : '.$col.' ';
 			// LEFT ARROW?
 			if($col > 1) $out .= ' <input type="image" name="move_col_left[' . $col . ']" src="images/left.png" title="Left"/>';
 			// RIGHT ARROW?
 			if($col < $max_column['num'])
 				$out .= ' <input type="image" name="move_col_right[' . $col . ']" src="images/right.png" title="Right"/>';	
+			$out .='&nbsp;&nbsp;';	
+			$out .= '<label class="lbldeln"><input class="delrepe" type="checkbox" name="deletecol[' . $col . ']" title="Delete Column '.$col.'"/></label>';
+			$out .='<br/>';
+			$out .= 'Search: [Full] <a href="search.php?'
+					. htmlspecialchars('report=' . $id . '&col=' . $col . '&rload=' . $id) . '">'
+					. '<img src="images/edit.png" alt="Edit" title="Edit"/></a> - '
+					. '<label class="lbldel"><input class="delrepe" type="checkbox" name="delete[' . ('x.'.$col) . ']" title="Delete"/></label>';
 			
 		}else{
-			$out .= 'Search: [Empty] <a href="search.php?'
-					. htmlspecialchars('report=' . $id . '&col=' . $col)
-					. '"><img src="images/add.png" alt="Add" title="Add"/></a>';
-			
+			$out .= 'Column : '.$col.' ';
 			// LEFT ARROW?
 			if($col > 1) $out .= ' <input type="image" name="move_col_left[' . $col . ']" src="images/left.png" title="Left"/>';
 			// RIGHT ARROW?
 			if($col < $max_column['num'])
 				$out .= ' <input type="image" name="move_col_right[' . $col . ']" src="images/right.png" title="Right"/>';
+			$out .='&nbsp;&nbsp;';	
+			$out .= '<label class="lbldeln"><input class="delrepe" type="checkbox" name="deletecol[' . $col . ']" title="Delete Column '.$col.'"/></label>';
+			$out .='<br/>';
+			$out .= 'Search: [Empty] <a href="search.php?'
+					. htmlspecialchars('report=' . $id . '&col=' . $col)
+					. '"><img src="images/add.png" alt="Add" title="Add"/></a>';
+			
 		}
 		$out .= '</th>';
 	}
@@ -220,26 +226,33 @@ function editor()
 		$out .= '<tr><th><input type="text" name="rows[' . $row . ']" value="' . $rval . '" /><br />';
 		if($rowsearches[$row])
 		{
-			$out .= 'Search: [Full] <a href="search.php?'
-					. htmlspecialchars('report=' . $id . '&row=' . $row . '&rload=' . $id) . '">'
-					. '<img src="images/edit.png" alt="Edit" title="Edit"/></a> - '
-					. '<label class="lbldel"><input class="delrepe" type="checkbox" name="delete[' . ($row.'.x') . ']" title="Delete"/></label>';
-		
+			$out .= 'Row : '.$row.' ';
 			// UP ARROW?
 			if($row > 1) $out .= ' <input type="image" name="move_row_up[' . $row . ']" src="images/asc.png" title="Up"/>';	
 			// DOWN ARROW?
 			if($row < $max_row['num'])
 				$out .= ' <input type="image" name="move_row_down[' . $row . ']" src="images/des.png" title="Down"/>';
+				
+			$out .='&nbsp;&nbsp;';	
+			$out .= '<label class="lbldeln"><input class="delrepe" type="checkbox" name="deleterow[' . $row . ']" title="Delete Column '.$row.'"/></label>';
+			$out .= '<br/>';
+			$out .= 'Search: [Full] <a href="search.php?'
+					. htmlspecialchars('report=' . $id . '&row=' . $row . '&rload=' . $id) . '">'
+					. '<img src="images/edit.png" alt="Edit" title="Edit"/></a> - '
+					. '<label class="lbldel"><input class="delrepe" type="checkbox" name="delete[' . ($row.'.x') . ']" title="Delete"/></label>';
 		}else{
-			$out .= 'Search: [Empty] <a href="search.php?'
-					. htmlspecialchars('report=' . $id . '&row=' . $row)
-					. '"><img src="images/add.png" alt="Add" title="Add"/></a>';
-			
+			$out .= 'Row : '.$row.' ';
 			// UP ARROW?
 			if($row > 1) $out .= ' <input type="image" name="move_row_up[' . $row . ']" src="images/asc.png" title="Up"/>';
 			// DOWN ARROW?
 			if($row < $max_row['num'])
 				$out .= ' <input type="image" name="move_row_down[' . $row . ']" src="images/des.png" title="Down"/>';
+			$out .='&nbsp;&nbsp;';	
+			$out .= '<label class="lbldeln"><input class="delrepe" type="checkbox" name="deleterow[' . $row . ']" title="Delete Column '.$row.'"/></label>';
+			$out .='<br/>';
+			$out .= 'Search: [Empty] <a href="search.php?'
+					. htmlspecialchars('report=' . $id . '&row=' . $row)
+					. '"><img src="images/add.png" alt="Add" title="Add"/></a>';
 		}
 		$out .= '</th>';
 		foreach($columns as $col => $cval)
@@ -250,7 +263,7 @@ function editor()
 				$out .= 'Search: [Full] <a href="search.php?'
 						. htmlspecialchars('report=' . $id . '&row=' . $row . '&col=' . $col . '&rload=' . $id) . '">'
 						. '<img src="images/edit.png" alt="Edit" title="Edit"/></a> - '
-						. '<label class="lbldel"><input class="delrepe" type="checkbox" name="delete[' . ($row.'.'.$col) . ']" title="Delete"/></label>';
+						. '<label class="lbldeln"><input class="delrepe" type="checkbox" name="delete[' . ($row.'.'.$col) . ']" title="Delete"/></label>';
 			}else{
 				$out .= 'Search: [Empty] <a href="search.php?'
 						. htmlspecialchars('report=' . $id . '&row=' . $row . '&col=' . $col)
@@ -602,6 +615,74 @@ function postEd()
 			mysql_query($query) or die('Bad SQL Query removing search');
 		}
 	}
+	if((isset($_POST['deleterow']) && is_array($_POST['deleterow'])) || (isset($_POST['deletecol']) && is_array($_POST['deletecol'])))
+	{	
+		mysql_query('BEGIN');
+		if(isset($_POST['deleterow']) && is_array($_POST['deleterow']))
+		{
+			foreach($_POST['deleterow'] as $delRow=>$stat)
+			{
+				//delete the row
+				$query = "DELETE FROM `rpt_heatmap_headers` WHERE report= $id AND `num` = $delRow AND `type` = 'row'";
+				mysql_query($query) or die ('Bad SQL Query removing column.');
+				//delete associated cells
+				$query = "DELETE FROM `rpt_heatmap_cells` WHERE `report`= $id AND `row` =$delRow";
+				mysql_query($query) or die ('Bad SQL Query removing cell entries based on row.<br/>'.$query);		
+				
+			}
+			//after all delete rows reorder rows
+			$query = "SELECT num FROM `rpt_heatmap_headers` WHERE `report` = $id AND `type` = 'row' ORDER BY `num` ASC";
+			$result = mysql_query($query);
+			$cnt = mysql_num_rows($result);
+			if($cnt>0)
+			{
+				$i=1;
+				while($row = mysql_fetch_assoc($result))
+				{
+					$query = "UPDATE `rpt_heatmap_headers` set `num` = $i WHERE `report` = $id and `type` = 'row' AND `num` = ".$row['num'];
+					mysql_query($query) or die ('Bad SQL Query updating rows with new values after delete row/s operation.<br/>'.$query);
+					//update cells too with new row value
+					$query = "UPDATE `rpt_heatmap_cells` set `row` = $i WHERE `report` = $id AND `row` = ".$row['num'];
+					mysql_query($query) or die ('Bad SQL Query updating rows in cells with new values after delete row/s operation.<br/>'.$query);					
+					$i++;
+				}
+			}
+			
+		}
+		if(isset($_POST['deletecol']) && is_array($_POST['deletecol']))
+		{
+			foreach($_POST['deletecol'] as $delCol=>$stat)
+			{
+				//delete the column
+				$query = "DELETE FROM `rpt_heatmap_headers` WHERE `report`= $id AND `num` = $delCol AND `type` = 'column'";
+				mysql_query($query) or die ('Bad SQL Query removing column.');
+				//delete associated column
+				$query = "DELETE FROM `rpt_heatmap_cells` WHERE `report`= $id AND `column` =$delCol";
+				mysql_query($query) or die ('Bad SQL Query removing cell entries based on column.<br/>'.$query);
+			}	
+			//after all delete columns reorder columns
+			$query = "SELECT num FROM `rpt_heatmap_headers` WHERE `report` = $id AND `type` = 'column' ORDER BY `num` ASC";
+			$result = mysql_query($query);
+			$cnt = 0;
+			$cnt = mysql_num_rows($result);
+			if($cnt>0)
+			{
+				$i=1;
+				while($row = mysql_fetch_assoc($result))
+				{
+					$query = "UPDATE `rpt_heatmap_headers` set `num` = $i WHERE `report` = $id and `type` = 'column' AND `num` = ".$row['num'];
+					mysql_query($query) or die ('Bad SQL Query updating columns with new values after delete row/s operation.<br/>'.$query);
+					//update cells too with new column value
+					$query = "UPDATE `rpt_heatmap_cells` set `column` = $i WHERE `report` = $id AND `column` = ".$row['num'];
+					mysql_query($query) or die ('Bad SQL Query updating columns in cells with new values after delete row/s operation.<br/>'.$query);
+					$i++;
+				}
+			}				
+		}
+		
+		mysql_query('COMMIT');
+	}
+
 	
 	if(isset($_POST['search']))	//add search to report
 	{
