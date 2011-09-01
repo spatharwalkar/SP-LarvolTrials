@@ -412,3 +412,5 @@ ALTER TABLE `upm_history`
 ALTER TABLE `user_grants`
   ADD CONSTRAINT `user_grants_ibfk_1` FOREIGN KEY (`user`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `user_grants_ibfk_2` FOREIGN KEY (`permission`) REFERENCES `user_permissions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `upm`
+  ADD INDEX ( `product` );
