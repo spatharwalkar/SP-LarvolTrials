@@ -16,6 +16,7 @@
 <script type="text/javascript" src="scripts/date/jquery.jdpicker.js"></script>
 <script type="text/javascript" src="date/init.js"></script>
 <script type="text/javascript" src="krumo/krumo.js"></script>
+<script type="text/javascript" src="scripts/autosuggest/jquery.autocomplete-min.js"></script>
 <?php if($_GET && isset($_GET['header'])) { echo($_GET['header']); } ?>
 </head>
 <body>

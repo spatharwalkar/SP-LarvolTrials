@@ -24,10 +24,21 @@ $deleteFlag = null;
 if($_GET['reset'])
 header('Location: ' . urlPath() . 'upm.php');
 require('header.php');
-echo('<script type="text/javascript">
-function upmdelsure(){ return confirm("Are you sure you want to delete this upm?"); }
-</script>');
+?>
 
+<script type="text/javascript">
+function upmdelsure(){ return confirm("Are you sure you want to delete this upm?"); }
+$(document).ready(function(){
+	var options, a,b;
+	jQuery(function(){
+	  options = { serviceUrl:'autosuggest.php' };
+	  a = $('#product').autocomplete(options);
+	  b = $('#search_product').autocomplete(options);
+	});
+});
+</script>
+
+<?php
 echo '<div class="error">Under Development</div>';
 //Start controller area
 //save operation controller
@@ -612,7 +623,7 @@ function input_tag($row,$dbVal=null,$options=array())
 			
 		default:
 			$dateinput = (strpos($row['Field'], 'date') !== false) ? ' class="jdpicker"' : '';
-			return '<input type="text" value="'.$dbVal.'" name="'.$nameIndex.$row['Field'].'"' . $dateinput . '/>';
+			return '<input type="text" value="'.$dbVal.'" name="'.$nameIndex.$row['Field'].'" id="'.$nameIndex.$row['Field'].'"' . $dateinput . '/>';
 			break;
 	}
 }
