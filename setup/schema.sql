@@ -414,3 +414,5 @@ ALTER TABLE `user_grants`
   ADD CONSTRAINT `user_grants_ibfk_2` FOREIGN KEY (`permission`) REFERENCES `user_permissions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `upm`
   ADD INDEX ( `product` );
+ALTER TABLE `clinical_study`
+	  CHANGE `institution_type` `institution_type` ENUM( 'industry_lead_sponsor', 'industry_collaborator', 'coop', 'other' );

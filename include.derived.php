@@ -523,7 +523,8 @@ function applyInstitutionType($arr)
 	global $db;
 	foreach($arr as $arr);
 	$institution_type = 'other';
-	$all_sponsors = array();
+	$lead_sponsors = array();
+	$collaborators = array();
 	$instMap = institutionMapping();
 	$larvol_id = $arr['larvol_id'];
 	//create the generic array for institution_type decision making.
@@ -533,12 +534,12 @@ function applyInstitutionType($arr)
 		{
 			foreach($arr['NCT/collaborator'] as $sponsor)
 			{
-				$all_sponsors[] = $sponsor;
+				$collaborators[] = $sponsor;
 			}
 		}
 		else
 		{
-			$all_sponsors[] = $arr['NCT/collaborator'];
+			$collaborators[] = $arr['NCT/collaborator'];
 		}
 		
 	}
@@ -548,25 +549,44 @@ function applyInstitutionType($arr)
 		{
 			foreach($arr['NCT/lead_sponsor'] as $sponsor)
 			{
-				$all_sponsors[] = $sponsor;
+				$lead_sponsors[] = $sponsor;
 			}
 		}
 		else
 		{
-			$all_sponsors[] = $arr['NCT/lead_sponsor'];
+			$lead_sponsors[] = $arr['NCT/lead_sponsor'];
 		}
 		
 	}
-	foreach($all_sponsors as $a_sponsor)
+	foreach($lead_sponsors as $a_sponsor)
 	{
 		if(strlen($a_sponsor) && isset($instMap[$a_sponsor]))
 		{
 			$institution_type = $instMap[$a_sponsor];
-			if($institution_type == 'industry') break;
+			if($institution_type == 'industry')
+			{
+				$institution_type = 'industry_lead_sponsor';
+				break;
+			} 
 		}
+	}
+	if($institution_type != 'industry_lead_sponsor')
+	{
+		foreach($collaborators as $a_sponsor)
+		{
+			if(strlen($a_sponsor) && isset($instMap[$a_sponsor]))
+			{
+				$institution_type = $instMap[$a_sponsor];
+				if($institution_type == 'industry')
+				{
+					$institution_type = 'industry_collaborator';
+					break;
+				} 
+			}
+		}		
 	}
 	echo 'Updating institution_type for larvol_id : '.$larvol_id.'<br/>';
 	$query = 'UPDATE clinical_study SET institution_type="' . $institution_type . '" WHERE larvol_id=' . $larvol_id . ' LIMIT 1';
-	if(mysql_query($query) === false) return softDie('Bad SQL query recording institution type<br/>');
+	if(mysql_query($query) === false) return softDie('Bad SQL query recording institution type<br/>'.$query);
 	
 }
