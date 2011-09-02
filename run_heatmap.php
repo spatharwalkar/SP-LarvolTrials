@@ -17,7 +17,7 @@ if(isset($_GET['direct_run_heatmap_id'])) runHeatmap((int)$_GET['direct_run_heat
 	$format is "xlsx" for Excel and "doc" for Word
 */
 
-function runHeatmap($id, $return = false, $format = "xlsx")
+function runHeatmap($id, $return = false, $format = "xlsx", $expire = false)
 {
 
 	//variables used for report status
@@ -448,8 +448,15 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 					$res 	= mysql_fetch_assoc($res);
 					$row_id = $res['id'];
 				} else {
-					$query 		= "INSERT INTO `rpt_ott_header`(`header`, `created`, `last_referenced`) VALUES('" . mysql_real_escape_string($rows[$row]) 
+					
+					if($expire) {
+						$query 		= "INSERT INTO `rpt_ott_header`(`header`, `created`, `expiry`, `last_referenced`) VALUES('" 
+									. mysql_real_escape_string($rows[$row]) . "', NOW(), '" . date('Y-m-d',strtotime('+2 weeks',$now)) . "' , NOW()) ";
+					} else {
+						
+						$query 		= "INSERT INTO `rpt_ott_header`(`header`, `created`, `last_referenced`) VALUES('" . mysql_real_escape_string($rows[$row]) 
 									. "', NOW(), NOW()) ";
+					}
 					$time_start = microtime(true);
 					$res 		= mysql_query($query) or tex('Bad SQL Query saving row headers for row ' . $row . ' column ' . $column . "\n" . $query);
 					$row_id 	= mysql_insert_id();
@@ -478,8 +485,13 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 					$res = mysql_fetch_assoc($res);
 					$column_id = $res['id'];
 				} else {
-					$query 		= "INSERT INTO `rpt_ott_header`(`header`, `created`, `last_referenced`) VALUES('" . mysql_real_escape_string($columns[$column]) 
+					if($expire) {
+						$query 		= "INSERT INTO `rpt_ott_header`(`header`, `created`, `expiry`, `last_referenced`) VALUES('" 
+									. mysql_real_escape_string($columns[$column]) . "', NOW(), '" . date('Y-m-d',strtotime('+2 weeks',$now)) . "', NOW()) ";
+					} else {
+						$query 		= "INSERT INTO `rpt_ott_header`(`header`, `created`, `last_referenced`) VALUES('" . mysql_real_escape_string($columns[$column]) 
 									. "', NOW(), NOW()) ";
+					}
 					$time_start = microtime(true);
 					$res 		= mysql_query($query) or tex('Bad SQL Query saving column headers for row ' . $row . ' column ' . $column . "\n" . $query);
 					$column_id 	= mysql_insert_id();
@@ -509,8 +521,13 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 						$res 	= mysql_fetch_assoc($res);
 						$upm_id = $res['id'];
 					} else {
-						$query 		= "INSERT INTO `rpt_ott_upm`(`intervention_name`, `created`, `last_referenced`) VALUES('" 
+						if($expire) {
+							$query 		= "INSERT INTO `rpt_ott_upm`(`intervention_name`, `created`, `expiry`, `last_referenced`) VALUES('" 
+										. mysql_real_escape_string($upm_result_set) . "', NOW(), '" . date('Y-m-d',strtotime('+2 weeks',$now)) . "', NOW()) ";
+						} else {
+							$query 		= "INSERT INTO `rpt_ott_upm`(`intervention_name`, `created`, `last_referenced`) VALUES('" 
 										. mysql_real_escape_string($upm_result_set) . "', NOW(), NOW()) ";
+						}
 						$time_start = microtime(true);
 						$res 		= mysql_query($query) or tex('Bad SQL Query saving upm result_set for row ' . $row . ' column ' . $column . "\n" . $query);
 						$upm_id 	= mysql_insert_id();
@@ -553,7 +570,12 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 						$res = mysql_fetch_assoc($res);
 						$trials_id = $res['id'];
 					} else {
-						$query 		= "INSERT INTO `rpt_ott_trials`(`result_set`, `created`, `last_referenced`) VALUES('" . $id_result_set . "', NOW(), NOW()) ";
+						if($expire) {
+							$query 		= "INSERT INTO `rpt_ott_trials`(`result_set`, `created`, `expiry`, `last_referenced`) VALUES('" . $id_result_set 
+										. "', NOW(), '" . date('Y-m-d',strtotime('+2 weeks',$now)) . "', NOW()) ";
+						} else {
+							$query 		= "INSERT INTO `rpt_ott_trials`(`result_set`, `created`, `last_referenced`) VALUES('" . $id_result_set . "', NOW(), NOW()) ";
+						}
 						$time_start = microtime(true);
 						$res 		= mysql_query($query) or tex('Bad SQL Query saving trials result_set for row ' . $row . ' column ' . $column . "\n" . $query);
 						$trials_id 	= mysql_insert_id();
@@ -617,8 +639,13 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 						$res = mysql_fetch_assoc($res);
 						$searchdata_id = $res['id'];
 					} else {
-						$query 		= "INSERT INTO `rpt_ott_searchdata`(`result_set`, `created`, `last_referenced`) VALUES('" . $search_result_set 
+						if($expire) {
+							$query 		= "INSERT INTO `rpt_ott_searchdata`(`result_set`, `created`, `expiry`, `last_referenced`) VALUES('" . $search_result_set 
+										. "', NOW(), '" . date('Y-m-d',strtotime('+2 weeks',$now)) . "', NOW()) ";
+						} else {
+							$query 		= "INSERT INTO `rpt_ott_searchdata`(`result_set`, `created`, `last_referenced`) VALUES('" . $search_result_set 
 										. "', NOW(), NOW()) ";
+						}
 						$time_start = microtime(true);
 						$res 		= mysql_query($query) or tex('Bad SQL Query saving searchdata result_set for row ' . $row . ' column ' . $column 
 						. "\n" . $query);
@@ -678,7 +705,7 @@ function runHeatmap($id, $return = false, $format = "xlsx")
 	
 	$info["pid"] = $pid;
 	if ($format == "xlsx")
-	return heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $phasenums,$optionsSelected, $row_upms, $col_upms, $link_generation_method);
+		return heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $phasenums,$optionsSelected, $row_upms, $col_upms, $link_generation_method);
 	else
 		return heatmapAsWord($info, $rows, $columns, $results, $p_colors, $return, $phasenums,$optionsSelected);
 

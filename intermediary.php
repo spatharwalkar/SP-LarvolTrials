@@ -110,7 +110,7 @@ function doSorting(type) {
 </script>
 </head>
 <body>
-<?php
+<?php 
 $content = new ContentManager();
 $content->setSortParams();
 $content->getChangeRange();
@@ -165,11 +165,14 @@ class ContentManager
 	private $allcount;
 	private $inactivecount;
 	private $time_machine;
+	private $loggedIn;
 	
 	public function __construct() {
 	
 		$db = new DatabaseManager();
 		$this->results_per_page = $db->set['results_per_page'];
+		$this->loggedIn	= $db->loggedIn();
+		$this->now = $now;
 		
 		$this->activestatus = '<input type="checkbox" name="nyr" value="1" ' 
 			.(isset($_GET['nyr']) ? ' checked="checked"' : ''). ' />Not yet recruiting<br/>'
@@ -497,17 +500,24 @@ class ContentManager
 			
 			$vv = explode('.', $return_param['c_params'][0]);
 			if($_GET['type'] == 'col') {
-				$t = getLinkDetails('rpt_ott_header', 'header', 'id', $vv[1]);
+				
+				$res = getLinkDetails('rpt_ott_header', 'header', 'id', $vv[1]);
+				$t = $res['header'];
+				$link_expiry_date = $res['expiry'];
+				
 			} else if($_GET['type'] == 'row') {
-				$t = getLinkDetails('rpt_ott_header', 'header', 'id', $vv[0]);
+			
+				$res = getLinkDetails('rpt_ott_header', 'header', 'id', $vv[0]);
+				$t = $res['header'];
+				$link_expiry_date = $res['expiry'];
 			}
 			$return_param['params_arr'] = $return_param['c_params'];
 				
 		} else {
 		
-				$return_param['c_params'] 	= unserialize(gzinflate(base64_decode($_GET['cparams'])));
-				$stack_type = ($return_param['c_params']['type'] == 'col') ? 'rowlabel' : 'columnlabel';
-				$t 	= ($return_param['c_params']['type'] == 'col') ? $return_param['c_params']['columnlabel'] : $return_param['c_params']['rowlabel'];
+			$return_param['c_params'] 	= unserialize(gzinflate(base64_decode($_GET['cparams'])));
+			$stack_type = ($return_param['c_params']['type'] == 'col') ? 'rowlabel' : 'columnlabel';
+			$t 	= ($return_param['c_params']['type'] == 'col') ? $return_param['c_params']['columnlabel'] : $return_param['c_params']['rowlabel'];
 				
 			echo ('<input type="hidden" name="cparams" value="' . $_GET['cparams'] . '"/>'
 					. '<input type="hidden" name="trunc" value="' . $_GET['trunc'] . '"/>');
@@ -522,7 +532,6 @@ class ContentManager
 				}		
 			}
 			
-			//echo "<pre>";print_r($_GET);
 			$return_param['params_arr'] = $_GET['params'];
 		}
 		
@@ -545,28 +554,41 @@ class ContentManager
 			$arr 	= array();
 			$arrr 	= array();
 			$return_param['fin_arr'][$pk] = array();
+			$return_param['link_expiry_date'][$pk] = array();
 			$totinactivecount = 0; 
 			$totactivecount	 = 0; 
 			
 			//New Link Method
 			if(isset($_GET['results'])) {
+			
 				$e 	= explode(".", $pv);
-				
+				$return_param['link_expiry_date'][$pk][] = $link_expiry_date;
 				//Retrieving headers
 				if($_GET['type'] == 'row') {
+				
 					if($pk != 0) {
-						$return_param['ltype'][$pk] 	= htmlentities(getLinkDetails('rpt_ott_header', 'header', 'id', $e[0]));
+						$res = getLinkDetails('rpt_ott_header', 'header', 'id', $e[0]);
+						$return_param['link_expiry_date'][$pk][] = $res['expiry'];
+						$return_param['ltype'][$pk] = htmlentities($res['header']);
 						$tt = $e[1];
 					} else {
-						$return_param['ltype'][$pk] 	= htmlentities(getLinkDetails('rpt_ott_header', 'header', 'id', $e[1]));
+						$res = getLinkDetails('rpt_ott_header', 'header', 'id', $e[1]);
+						$return_param['link_expiry_date'][$pk][] = $res['expiry'];
+						$return_param['ltype'][$pk] = htmlentities($res['header']);
 						$tt = $e[2];
 					}	
+					
 				} else if($_GET['type'] == 'col') {
+				
 					if($pk != 0) {
-						$return_param['ltype'][$pk] 	= htmlentities(getLinkDetails('rpt_ott_header', 'header', 'id', $e[0]));
+						$res = getLinkDetails('rpt_ott_header', 'header', 'id', $e[0]);
+						$return_param['link_expiry_date'][$pk][] = $res['expiry'];
+						$return_param['ltype'][$pk] = htmlentities($res['header']);
 						$tt = $e[1];
 					} else {
-						$return_param['ltype'][$pk] 	= htmlentities(getLinkDetails('rpt_ott_header', 'header', 'id', $e[0]));
+						$res = getLinkDetails('rpt_ott_header', 'header', 'id', $e[0]);
+						$return_param['link_expiry_date'][$pk][] = $res['expiry'];
+						$return_param['ltype'][$pk] = htmlentities($res['header']);
 						$tt = $e[2];
 					}	
 				}
@@ -574,17 +596,19 @@ class ContentManager
 				//Retrieving params
 				$searchdata = substr($tt,0,3);
 				if(chr($searchdata) == 's') {
-				
-					$search_data_content = getLinkDetails('rpt_ott_searchdata', 'result_set', 'id', substr($tt,3));
+					$res = getLinkDetails('rpt_ott_searchdata', 'result_set', 'id', substr($tt,3));
+					$return_param['link_expiry_date'][$pk][] = $res['expiry'];
+					$search_data_content = $res['result_set'];
 					$excel_params = unserialize(stripslashes(gzinflate(base64_decode($search_data_content))));
 					
 				} else {
 					
 					$res = getLinkDetails('rpt_ott_trials', 'result_set', 'id', $tt);
+					$return_param['link_expiry_date'][$pk][] = $res['expiry'];
 					$sp = new SearchParam();
 					$sp->field = 'larvol_id';
 					$sp->action = 'search';
-					$sp->value = str_replace(',', ' OR ', $res);
+					$sp->value = str_replace(',', ' OR ', $res['result_set']);
 					$excel_params = array($sp);
 				}
 			} else {
@@ -735,7 +759,8 @@ class ContentManager
 	
 	function chkType() {
 	
-		$process_params = array();
+		global $now;
+		$process_params = array();$process_params['link_expiry_date'] = array();
 		echo('<form id="frmOtt" name="frmOtt" method="get" action="intermediary.php">');
 		echo ('<table width="100%"><tr><td><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" />'
 				. '</td><td nowrap="nowrap"><span style="color:#ff0000;font-weight:normal;">Interface Work In Progress</span>');
@@ -752,8 +777,7 @@ class ContentManager
 				$ins['inactphase']);
 			} else {
 				$this->commonControls($process_params['showRecordsCnt'], $process_params['stack_active_count'], $process_params['stack_inactive_count'], 
-				$process_params['stack_total_count'],
-				$process_params['activephase'], $process_params['inactivephase']);
+				$process_params['stack_total_count'], $process_params['activephase'], $process_params['inactivephase']);
 			}
 			echo('<br clear="all"/><br/>');
 			echo ('<input type="hidden" name="instparams" value="' . $process_params['insparams']. '" />');	
@@ -777,9 +801,11 @@ class ContentManager
 					$this->pagination($page, $count, NULL, NULL, 'stack', $process_params['c_params']['type']);
 				}
 			}
-				
+			
 			$this->displayHeader();$index = 0;
-			foreach($process_params['params_arr'] as $pk => $pv) {
+			
+			$first_ids[] = explode('.',$process_params['c_params'][0]);
+			foreach($process_params['params_arr'] as $pk => $pv) { 
 				
 				//Unmatched Upms for Row Stacked Upms.
 				$row_upm_arr = array();$upm_string = '';$row_upm_flag = false;
@@ -787,9 +813,17 @@ class ContentManager
 					foreach($process_params['c_params'] as $k => $v) {
 						$vv = explode('.', $v);
 						if($k != 0) {
-							if(isset($vv[2])) { $row_upm_arr[$k] = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[2]); }
+							if(isset($vv[2])) { 
+								$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[2]); 
+								$process_params['link_expiry_date'][$pk][] = $res['expiry'];
+								$row_upm_arr[$k] = $res['intervention_name'];
+							}
 						} else {
-							if(isset($vv[3])) { $row_upm_arr[$k] = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[3]); }
+							if(isset($vv[3])) { 
+								$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[3]); 
+								$process_params['link_expiry_date'][$pk][] = $res['expiry'];
+								$row_upm_arr[$k] = $res['intervention_name'];
+							}
 						}
 					}
 					$row_upm_flag = true;
@@ -835,7 +869,8 @@ class ContentManager
 					}
 					if(isset($upm_value) && $upm_value != '' && !empty($upm_value)) {
 						$val = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $upm_value);
-						$upm_string = $this->getNonAssocUpm(array($val), $pk);
+						$process_params['link_expiry_date'][$pk][] = $val['expiry'];
+						$upm_string = $this->getNonAssocUpm(array($val['intervention_name']), $pk);
 					} 
 					if($upm_string != '') {
 						echo ('<tr class="trialtitles">'
@@ -848,6 +883,7 @@ class ContentManager
 							. trim($process_params['ltype'][$pk]) . '</td></tr>');
 						}
 					}
+					
 				} else if(isset($_GET['cparams']) && $process_params['c_params']['type'] == 'col') { 
 					
 					$upm_string = '';
@@ -880,13 +916,97 @@ class ContentManager
 					}
 				}
 				$index++;
+				
+				if(!empty($process_params['link_expiry_date'][$pk])) {
+						
+					$process_params['link_expiry_date'][$pk] = array_unique(array_filter($process_params['link_expiry_date'][$pk]));
+					usort($process_params['link_expiry_date'][$pk], "cmpdate");
+						
+					if(!empty($process_params['link_expiry_date'][$pk])) {
+					
+					if(($process_params['link_expiry_date'][$pk][0] < date('Y-m-d', $now)) || 
+					($process_params['link_expiry_date'][$pk][0] < date('Y-m-d',strtotime('+1 week',$now)))) {
+							
+						$ids = array();	
+						$ids = explode('.', $process_params['params_arr'][$pk]);
+								
+								if($pk != 0) {
+									
+									if($_GET['type'] == 'col') {
+									
+										$row_header_id = $ids[0];
+										$col_header_id = $first_ids[1];
+										
+										if(chr(substr($ids[1],0,3)) == 's') 
+											$trial_id = substr($ids[1],3);
+										else
+											$trial_id = $ids[1];
+											
+										$upm_id = ((isset($ids[2]) && !empty($ids[2])) ? $ids[2] : '');
+										
+									} elseif($_GET['type'] == 'row') {
+									
+										$row_header_id = $first_ids[0];
+										$col_header_id = $ids[0];
+										
+										if(chr(substr($ids[1],0,3)) == 's') 
+											$trial_id = substr($ids[1],3);
+										else
+											$trial_id = $ids[1];
+											
+										$upm_id = ((isset($ids[2]) && !empty($ids[2])) ? $ids[2] : '');
+									}
+								} else {
+									$row_header_id = $ids[0];
+									$col_header_id = $ids[1];
+									
+									if(chr(substr($ids[2],0,3)) == 's') 
+										$trial_id = substr($ids[2],3);
+									else
+										$trial_id = $ids[2];
+										
+									$upm_id = ((isset($ids[3]) && !empty($ids[3])) ? $ids[3] : '');
+								}
+								
+								$query = "UPDATE `rpt_ott_header` SET `expiry` = '" . date('Y-m-d',strtotime('+1 week',$now)) . "' WHERE id = '" 
+								. $row_header_id . "' ";
+								$res = mysql_query($query) or tex('Bad SQL Query setting expiry date for row header' . "\n" . $query);
+						
+								$query = "UPDATE `rpt_ott_header` SET `expiry` = '" . date('Y-m-d',strtotime('+1 week',$now)) . "' WHERE id = '" 
+								. $col_header_id . "' ";
+								$res = mysql_query($query) or tex('Bad SQL Query setting expiry date for column header' . "\n" . $query);
+						
+								$query = "UPDATE `rpt_ott_trials` SET `expiry` = '" . date('Y-m-d',strtotime('+1 week',$now)) . "' WHERE id = '" 
+								. $trial_id . "' ";
+								$res = mysql_query($query) or tex('Bad SQL Query setting expiry date for trials result set' . "\n" . $query);
+						
+								if(isset($upm_id) && $upm_id != '') {
+									$query = "UPDATE `rpt_ott_upm` SET `expiry` = '" . date('Y-m-d',strtotime('+1 week',$now)) . "' WHERE id = '" 
+									. $upm_id . "' ";
+									$res = mysql_query($query) or tex('Bad SQL Query setting expiry date for upms' . "\n" . $query);
+								}
+								
+							}
+						}
+					}
 			}
+			
 			if(isset($_GET['trunc'])) {
 				$t = unserialize(gzinflate(base64_decode($_GET['trunc'])));
 				if($t == 'y') echo ('<span style="font-size:10px;color:red;">Note: all data could not be shown</span>');
 			}
-			echo('</table>');
+			echo('</table><br/>');
 			echo ('</form>');
+			
+			$link_expiry_date = array();
+			foreach($process_params['link_expiry_date'] as $key => $value)
+				foreach($value as $kkey => $vvalue)
+					$link_expiry_date[] = $vvalue;
+
+			//Expiry feature for new link method
+			if(!empty($link_expiry_date) && ($this->loggedIn)) {
+				echo '<span style="font-size:10px;color:red;">Expires on: ' . $link_expiry_date[0]  . '</span>';
+			}
 			
 		} else {
 			
@@ -902,27 +1022,40 @@ class ContentManager
 			$fin_arr 		= array();
 			$activephase 	= array();
 			$inactivephase 	= array();
-			
+			$link_expiry_date	= array();
 			if(isset($_GET['results'])) {
 			
 				$excel_params 	= explode(".", $_GET['results']);
 				
-				$rowlabel = getLinkDetails('rpt_ott_header', 'header', 'id', $excel_params[0]);;
-				$columnlabel = getLinkDetails('rpt_ott_header', 'header', 'id', $excel_params[1]);
+				$res = getLinkDetails('rpt_ott_header', 'header', 'id', $excel_params[0]);
+				$rowlabel = $res['header'];
+				$link_expiry_date[] = $res['expiry'];
+				
+				$res = getLinkDetails('rpt_ott_header', 'header', 'id', $excel_params[1]);
+				$columnlabel = $res['header'];
+				$link_expiry_date[] = $res['expiry'];
 				
 				if(isset($excel_params[3])) {
-					$non_assoc_upm_params	= array(getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $excel_params[3]));
+					$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $excel_params[3]);
+					$non_assoc_upm_params= array($res['intervention_name']);//array(getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $excel_params[3]));
+					$link_expiry_date[]	= $res['expiry'];
 				}
 				
-				if(strpos($excel_params[2], 's') !== FALSE) { 
+				$searchdata = substr($excel_params[2],0,3);
+				if(chr($searchdata) == 's') {
+				
 					$res = getLinkDetails('rpt_ott_searchdata', 'result_set', 'id', substr($excel_params[2],1));
-					$excel_params = unserialize(stripslashes(gzinflate(base64_decode($res))));
+					$excel_params = unserialize(stripslashes(gzinflate(base64_decode($res['result_set']))));
+					$link_expiry_date[] = $res['expiry'];
+					
 				} else {
+				
 					$res = getLinkDetails('rpt_ott_trials', 'result_set', 'id', $excel_params[2]);
+					$link_expiry_date[] = $res['expiry'];
 					$sp = new SearchParam();
 					$sp->field = 'larvol_id';
 					$sp->action = 'search';
-					$sp->value = str_replace(',', ' OR ', $res);
+					$sp->value = str_replace(',', ' OR ', $res['result_set']);
 					$excel_params = array($sp);
 				}
 				$bomb = (isset($_GET['bomb'])) ? $_GET['bomb'] : '';
@@ -960,7 +1093,6 @@ class ContentManager
 			}
 			if(isset($_GET['institution']) && $_GET['institution'] != '') {
 				array_push($this->fid, 'institution_type');
-
 
 
 				$sp = new SearchParam();
@@ -1162,12 +1294,47 @@ class ContentManager
 			
 				echo ('<tr><th colspan="50" class="norecord" align="left">No record found.</th></tr>');
 			}
-			echo('</table><br/><br/>');
+			echo('</table><br/>');
 			echo ('</form>');
+			
+			//Expiry feature for new link method
+			if(!empty($link_expiry_date)) {
+				$link_expiry_date = array_unique(array_filter($link_expiry_date));
+				usort($link_expiry_date, "cmpdate");echo "<pre>";print_r($link_expiry_date);
+				if(!empty($link_expiry_date)) {
+				
+					if($this->loggedIn) {
+						echo '<span style="font-size:10px;color:red;">Expires on: ' . $link_expiry_date[0]  . '</span>';
+					}
+					
+					$ids = explode(".", $_GET['results']);
+					if(($link_expiry_date[0] < date('Y-m-d', $now)) || ($link_expiry_date[0] < date('Y-m-d',strtotime('+1 week',$now)))) {
+					
+						$query = "UPDATE `rpt_ott_header` SET `expiry` = '" . date('Y-m-d',strtotime('+1 week',$now)) . "' WHERE id = '" . $ids[0] . "' ";
+						$res = mysql_query($query) or tex('Bad SQL Query setting expiry date for row header' . "\n" . $query);
+						
+						$query = "UPDATE `rpt_ott_header` SET `expiry` = '" . date('Y-m-d',strtotime('+1 week',$now)) . "' WHERE id = '" . $ids[1] . "' ";
+						$res = mysql_query($query) or tex('Bad SQL Query setting expiry date for col header' . "\n" . $query);
+						
+						if(chr(substr($ids[2],0,3)) == 's') {
+							$query = "UPDATE `rpt_ott_searchdata` SET `expiry` = '" . date('Y-m-d',strtotime('+1 week',$now)) . "' WHERE id = '" 
+							. $ids[2] . "' ";
+						} else {
+							$query = "UPDATE `rpt_ott_trials` SET `expiry` = '" . date('Y-m-d',strtotime('+1 week',$now)) . "' WHERE id = '" 
+							. $ids[2] . "' ";
+						}
+						$res = mysql_query($query) or tex('Bad SQL Query setting expiry date for trials result set' . "\n" . $query);
+						
+						if(isset($ids[3]) && $ids[3] != '') {
+							$query = "UPDATE `rpt_ott_upm` SET `expiry` = '" . date('Y-m-d',strtotime('+1 week',$now)) . "' WHERE id = '" . $ids[3] . "' ";
+							$res = mysql_query($query) or tex('Bad SQL Query setting expiry date for upms' . "\n" . $query);
+						}
+						
+					}
+				}
+			}
 		}
-		
 	}
-
 	function displayHeader() {
 	
 		echo ('<table width="100%" border="0" cellpadding="4" cellspacing="0" class="manage">'
@@ -1431,7 +1598,6 @@ class ContentManager
 						. ' ' . $val['edited']['end_date_type'] . '" '; 
 					} else {
 						$title = ' title="No Previous value" ';
-
 					}
 				} else if($val['new'] == 'y') {
 					$title = ' title = "New record" ';
@@ -2621,9 +2787,10 @@ function getUnmatchedUpmChanges($record_arr, $time, $edited) {
 
 function getLinkDetails($tablename, $fieldname, $parameters, $param_value) {
 
-	$query = "SELECT `" . $fieldname . "` FROM " . $tablename . " WHERE " . $parameters . " = '" . mysql_real_escape_string($param_value) . "' ";
+	$query = "SELECT `" . $fieldname . "`, `expiry` FROM " . $tablename . " WHERE " . $parameters . " = '" . mysql_real_escape_string($param_value) . "' ";
 	$res = mysql_fetch_assoc(mysql_query($query));
-	return $res[$fieldname];
+	
+	return $res;
 }
 ?>
 </body>

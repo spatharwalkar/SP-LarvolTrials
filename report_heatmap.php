@@ -8,13 +8,14 @@ if(!$db->loggedIn())
 }
 require_once('run_heatmap.php');
 if(isset($_GET['run']))
-{
+{	
 	$id = mysql_real_escape_string($_GET['run']);
 	if(is_numeric($id))
 	{
-		$format = 'xlsx';
+		$format = 'xlsx';$expire = false;
 		if (isset($_GET['format'])) $format = $_GET['format'];
-		runHeatmap($id, false, $format);
+		if(isset($_GET['expire'])) $expire = true;
+		runHeatmap($id, false, $format, $expire);
 		exit;
 	}
 }
@@ -127,19 +128,25 @@ function editor()
 	}
 	$out = '<script type="text/javascript" src="progress/progress.js"></script>'
 		. '<div id="runbuttons"><a href="report_heatmap.php?run=' . $id
-		.'" target="runframe" onclick="updateProgress(\'heatmap\');document.getElementById(\'runbuttons\').style.display=\'none\'">'
+		. (($category == 'test' || $category == 'Test') ? '&expire=y' : '' )
+		. '" target="runframe" onclick="updateProgress(\'heatmap\');document.getElementById(\'runbuttons\').style.display=\'none\'">'
 		. '<img src="images/excel.png" title="Run" style="border:0;"/></a>';
 	if($db->user->userlevel != 'user')	//high-priority button
 	{
 		$out .= ' &nbsp; <a href="report_heatmap.php?run=' . $id
+			. (($category == 'test' || $category == 'Test') ? '&expire=y' : '' )
 			. '&priority=high" target="runframe" '
 			. 'onclick="updateProgress(\'heatmap\');document.getElementById(\'runbuttons\').style.display=\'none\'">'
 			. '<input type="image" name="getexcel" src="images/excel_fire.png" title="Run w. HIGH PRIORITY" style="border:0;"/></a>';
 	}
 	$out .= ' &nbsp; <a href="report_heatmap.php?run=' . $id . '&format=doc'
+		. (($category == 'test' || $category == 'Test') ? '&expire=y' : '' )	
 		. '" target="runframe" onclick="updateProgress(\'heatmap\');document.getElementById(\'runbuttons\').style.display=\'none\'">'
 		. '<img src="images/word.png" title="Word" style="border:0"></a>';
-	$out .= '</div><iframe style="width:500px;height:4em;" name="runframe"></iframe>'
+	$out .= '<div class="expiry" title="Allow OTT links to expire"><input type="checkbox" id="chkExpire" name="chkExpire" ' 
+		. (($category == 'test' || $category == 'Test') ? 'checked="checked"' : '' ) . ' />'
+		. '<label for="chkExpire">Test</label></div></div>'
+		. '<iframe style="width:500px;height:4em;" name="runframe"></iframe>'
 		. '<div id="progress"></div><div class="info" id="success"></div>'
 		. '<br style="margin-top:55px;"/>'
 		. '<form action="report_heatmap.php" onsubmit="return chkbox(0,\'delrepe\');" method="post"><fieldset><legend>Edit report ' . $id . '</legend>'
