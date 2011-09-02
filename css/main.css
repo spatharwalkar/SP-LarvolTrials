@@ -272,4 +272,13 @@ iframe{
 .autocomplete .selected { background:#F0F0F0; }
 .autocomplete div { padding:2px 5px; white-space:nowrap; }
 .autocomplete strong { font-weight:normal; color:#3399FF; }
+.expiry {
+	float:right;
+	margin: 12px 610px 0px 0px;
+	
+}
+
+.expiry label {
+	background-color:#fff;
+}
 	
