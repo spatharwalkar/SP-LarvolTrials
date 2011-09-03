@@ -259,46 +259,46 @@ iframe{
 	float:center;
 	padding:0;
 }
-.lbldeln{
-	background-color:red;
-	padding:0;
-}
 .tar{
 	text-align:right;
 	font-weight:bold;
 }
-.autocomplete-w1 { 
+
+.autocomplete-w1 
+{ 
 	background:url(./images/shadow.png) no-repeat bottom right; 
 	position:absolute; 
 	top:0px; 
 	left:0px; 
-	margin:8px 0 0 6px; /* IE6 fix: */ _background:none; _margin:0; 
+	margin:8px 0 0 6px; 
+	/* IE6 fix: */ _background:none; _margin:0; 
 }
-
-.autocomplete { 
+.autocomplete 
+{ 
 	border:1px solid #999; 
 	background:#FFF; 
 	cursor:default; 
 	text-align:left; 
 	max-height:350px; 
 	overflow:auto; 
-	margin:-6px 6px 6px -6px; /* IE6 specific: */ _height:350px;  _margin:0; _overflow-x:hidden; 
+	margin:-6px 6px 6px -6px; 
+	/* IE6 specific: */ 
+	_height:350px;  
+	_margin:0;
+	_overflow-x:hidden;
 }
-
 .autocomplete .selected { 
 	background:#F0F0F0; 
 }
-
 .autocomplete div { 
 	padding:2px 5px; 
 	white-space:nowrap; 
 }
-
 .autocomplete strong { 
 	font-weight:normal; 
 	color:#3399FF; 
 }
-
+	
 .expiry {
 	float:right;
 	margin: 12px 610px 0px 0px;

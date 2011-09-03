@@ -595,7 +595,7 @@ class ContentManager
 				
 				//Retrieving params
 				$searchdata = substr($tt,0,3);
-				if(chr($searchdata) == 's') {
+				if(dechex($searchdata) == '73' && chr($searchdata) == 's') {
 					$res = getLinkDetails('rpt_ott_searchdata', 'result_set', 'id', substr($tt,3));
 					$return_param['link_expiry_date'][$pk][] = $res['expiry'];
 					$search_data_content = $res['result_set'];
@@ -927,7 +927,7 @@ class ContentManager
 					if(($process_params['link_expiry_date'][$pk][0] < date('Y-m-d', $now)) || 
 					($process_params['link_expiry_date'][$pk][0] < date('Y-m-d',strtotime('+1 week',$now)))) {
 							
-						$ids = array();	
+						$ids = array();	$searchdata = '';
 						$ids = explode('.', $process_params['params_arr'][$pk]);
 								
 								if($pk != 0) {
@@ -937,7 +937,8 @@ class ContentManager
 										$row_header_id = $ids[0];
 										$col_header_id = $first_ids[1];
 										
-										if(chr(substr($ids[1],0,3)) == 's') 
+										$searchdata = substr($ids[1],0,3);
+										if(dechex($searchdata) == '73' && chr($searchdata) == 's') 
 											$trial_id = substr($ids[1],3);
 										else
 											$trial_id = $ids[1];
@@ -949,7 +950,8 @@ class ContentManager
 										$row_header_id = $first_ids[0];
 										$col_header_id = $ids[0];
 										
-										if(chr(substr($ids[1],0,3)) == 's') 
+										$searchdata = substr($ids[1],0,3);
+										if(dechex($searchdata) == '73' && chr($searchdata) == 's') 
 											$trial_id = substr($ids[1],3);
 										else
 											$trial_id = $ids[1];
@@ -960,7 +962,8 @@ class ContentManager
 									$row_header_id = $ids[0];
 									$col_header_id = $ids[1];
 									
-									if(chr(substr($ids[2],0,3)) == 's') 
+									$searchdata = substr($ids[2],0,3);
+									if(dechex($searchdata) == '73' && chr($searchdata) == 's') 
 										$trial_id = substr($ids[2],3);
 									else
 										$trial_id = $ids[2];
@@ -1041,8 +1044,7 @@ class ContentManager
 					$link_expiry_date[]	= $res['expiry'];
 				}
 				
-				$searchdata = substr($excel_params[2],0,3);
-				if(chr($searchdata) == 's') {
+				if(strpos($excel_params[2],'s') !== FALSE) {
 				
 					$res = getLinkDetails('rpt_ott_searchdata', 'result_set', 'id', substr($excel_params[2],1));
 					$excel_params = unserialize(stripslashes(gzinflate(base64_decode($res['result_set']))));
@@ -1300,7 +1302,7 @@ class ContentManager
 			//Expiry feature for new link method
 			if(!empty($link_expiry_date)) {
 				$link_expiry_date = array_unique(array_filter($link_expiry_date));
-				usort($link_expiry_date, "cmpdate");echo "<pre>";print_r($link_expiry_date);
+				usort($link_expiry_date, "cmpdate");
 				if(!empty($link_expiry_date)) {
 				
 					if($this->loggedIn) {
@@ -1316,7 +1318,7 @@ class ContentManager
 						$query = "UPDATE `rpt_ott_header` SET `expiry` = '" . date('Y-m-d',strtotime('+1 week',$now)) . "' WHERE id = '" . $ids[1] . "' ";
 						$res = mysql_query($query) or tex('Bad SQL Query setting expiry date for col header' . "\n" . $query);
 						
-						if(chr(substr($ids[2],0,3)) == 's') {
+						if(strpos($ids[2],'s') !== FALSE) {
 							$query = "UPDATE `rpt_ott_searchdata` SET `expiry` = '" . date('Y-m-d',strtotime('+1 week',$now)) . "' WHERE id = '" 
 							. $ids[2] . "' ";
 						} else {
