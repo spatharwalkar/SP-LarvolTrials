@@ -337,7 +337,7 @@ class ContentManager
 			. '<label for="'.$v.'">' .$v . '</label><br/>';
 		}
 		echo ('</div>'
-			. '</div><br/><input type="submit" value="Show"/>&nbsp;');
+			. '</div><br/><input id="addtoright" type="submit" value="Show"/>&nbsp;');
 			 if(strlen($count)) { echo $count . '&nbsp;Records'; }
 			
 	
@@ -844,7 +844,7 @@ class ContentManager
 					if($upm_string != '' && $index == 0) {
 						echo ('<tr class="trialtitles">'
 								. '<td colspan="50" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
-								. 'style="border-bottom:1px solid blue" onclick="sh(this,\'rowupm\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+								. 'style="border-bottom:1px solid blue;background-image: url(\'images/up.png\');background-repeat: no-repeat;background-position:left center; " onclick="sh(this,\'rowupm\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
 								. '</td></tr>' . $upm_string);
 					} 
 				}
@@ -875,7 +875,7 @@ class ContentManager
 					if($upm_string != '') {
 						echo ('<tr class="trialtitles">'
 								. '<td colspan="50" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
-								. 'style="border-bottom:1px solid blue" onclick="sh(this,\'' . $pk . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+								. 'style="border-bottom:1px solid blue;background-image: url(\'images/up.png\');background-repeat: no-repeat;background-position:left center; " onclick="sh(this,\'' . $pk . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
 								. trim($process_params['ltype'][$pk]) . '</td></tr>' . $upm_string);
 					} else {
 						if((isset($_GET['pg']) && $process_params['eachCount'][$pk] >= $this->pstart) || (!isset($_GET['pg']))) {
@@ -894,7 +894,7 @@ class ContentManager
 					if($upm_string != '') {
 						echo ('<tr class="trialtitles">'
 								. '<td colspan="50" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
-								. 'style="border-bottom:1px solid blue" onclick="sh(this,\'' . $pk . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+								. 'style="border-bottom:1px solid blue;background-image: url(\'images/up.png\');background-repeat: no-repeat;background-position:left center; " onclick="sh(this,\'' . $pk . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
 								. trim($process_params['ltype'][$pk]) . '</td></tr>' . $upm_string);
 					} else {
 						if((isset($_GET['pg']) && $_GET['pg'] <= $process_params['eachCount'][$pk]) || (!isset($_GET['pg']))) {
@@ -1283,7 +1283,7 @@ class ContentManager
 				if($upm_string != '') {
 					echo ('<tr class="trialtitles">'
 							. '<td colspan="50" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
-							. 'style="border-bottom:1px solid blue" onclick="sh(this,\'ott\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+							. 'style="border-bottom:1px solid blue;background-image: url(\'images/up.png\');background-repeat: no-repeat;background-position:left center; " onclick="sh(this,\'ott\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
 							. '</td></tr>' . $upm_string);
 				} 
 			}

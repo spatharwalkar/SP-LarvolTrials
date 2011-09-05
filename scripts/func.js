@@ -1,12 +1,17 @@
 $(document).ready(function(){
 	$('.upms').hide();
-	
+	$('#addtoright').after('&nbsp;&nbsp;&nbsp;<span id="addedtoright" onclick="sh(this,0,1);">All Unmatched UPMs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>');
+	$('#addedtoright').css('background-image','url(\'./images/up.png\')')
+	.css('background-repeat','no-repeat')
+	.css('background-position','right center')
+	.css('border','1px solid')
+	.css('padding','2px');
 });
 
-function sh(obj,key)
+function sh(obj,key,all)
 {
-	var dir = $(obj).css('background-image').toString().search(/up.png/i);
-	if(dir>0)
+	var updown = $(obj).css('background-image').toString().search(/up.png/i);
+	if(updown>0)
 		{
 			dir = 'url(\'./images/down.png\')';
 		}
@@ -14,6 +19,55 @@ function sh(obj,key)
 		{
 			dir = 'url(\'./images/up.png\')';
 		}
-	$(obj).css('background-image',dir);
-	$('.upms.'+key).toggle();
+	if(all==undefined)
+	{	
+		$(obj).css('background-image',dir);
+		$('#addedtoright').css('background-image',scansh());
+		if(updown>0)
+		{	
+			$('.upms.'+key).show();
+		}
+		else
+		{
+			$('.upms.'+key).hide();	
+		}
+	}
+	if(all==1)
+	{
+		$('.upmpointer').css('background-image',dir);
+		$('#addedtoright').css('background-image',scansh());
+		if(updown>0)
+		$('.upms').show();
+		else
+		$('.upms').hide();
+	}
+}
+function scansh()
+{
+	var upflag=0;
+	var downflag=0;
+	$('.upmpointer').each(function(){
+		var dir = $(this).css('background-image').toString().search(/up.png/i);
+		if(dir>0)
+			{
+				upflag=1;
+				dir = 'url(\'./images/down.png\')';
+			}
+		else
+			{
+				downflag=1;
+				dir = 'url(\'./images/up.png\')';
+			}
+	});
+	if(downflag==1)
+		{
+			dir = 'url(\'./images/down.png\')';
+			return dir;
+		}
+	if(upflag==1)
+	{
+		dir = 'url(\'./images/up.png\')';
+		return dir;
+	}	
+
 }
