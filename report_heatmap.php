@@ -143,9 +143,9 @@ function editor()
 		. (($category == 'test' || $category == 'Test') ? '&expire=y' : '' )	
 		. '" target="runframe" onclick="updateProgress(\'heatmap\');document.getElementById(\'runbuttons\').style.display=\'none\'">'
 		. '<img src="images/word.png" title="Word" style="border:0"></a>';
-	$out .= '<div class="expiry" title="Allow OTT links to expire"><input type="checkbox" id="chkExpire" name="chkExpire" ' 
+	$out .= '</div><div class="expiry" title="Allow OTT links to expire"><input type="checkbox" id="chkExpire" name="chkExpire" ' 
 		. (($category == 'test' || $category == 'Test') ? 'checked="checked"' : '' ) . ' />'
-		. '<label for="chkExpire">Test</label></div></div>'
+		. '<label for="chkExpire">Test</label></div>'
 		. '<iframe style="width:500px;height:4em;" name="runframe"></iframe>'
 		. '<div id="progress"></div><div class="info" id="success"></div>'
 		. '<br style="margin-top:55px;"/>'
