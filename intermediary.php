@@ -337,9 +337,9 @@ class ContentManager
 			. '<label for="'.$v.'">' .$v . '</label><br/>';
 		}
 		echo ('</div>'
-			. '</div><br/><input id="addtoright" type="submit" value="Show"/>&nbsp;');
+			. '</div><br/><input  type="submit" value="Show"/>&nbsp;');
 			 if(strlen($count)) { echo $count . '&nbsp;Records'; }
-			
+		echo '<span id="addtoright"></span>';	
 	
 	}
 	
