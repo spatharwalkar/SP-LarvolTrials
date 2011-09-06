@@ -1,11 +1,12 @@
 $(document).ready(function(){
 	$('.upms').hide();
-	$('#addtoright').after('&nbsp;&nbsp;&nbsp;<span id="addedtoright" onclick="sh(this,0,1);">All Unmatched UPMs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>');
+	$('#addtoright').after('&nbsp;&nbsp;&nbsp;<span id="addedtoright" onclick="sh(this,0,1);">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;All Unmatched UPMs</span>');
 	$('#addedtoright').css('background-image','url(\'./images/up.png\')')
 	.css('background-repeat','no-repeat')
-	.css('background-position','right center')
+	.css('background-position','left center')
 	.css('border','1px solid')
-	.css('padding','2px');
+	.css('padding','2px')
+	.css('margin-left','200px');
 });
 
 function sh(obj,key,all)
