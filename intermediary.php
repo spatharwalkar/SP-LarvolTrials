@@ -749,6 +749,10 @@ class ContentManager
 		if(isset($_GET['instparams']) && $_GET['instparams'] != '') {
 			$return_param['insparams'] = $_GET['instparams'];
 		} else {
+		
+			$return_param['inactivephase']	= array_unique(array_filter($return_param['inactivephase']));
+			$return_param['activephase']	= array_unique(array_filter($return_param['activephase']));
+			
 			$return_param['insparams']  = rawurlencode(base64_encode(gzdeflate(serialize(array('actphase' => $return_param['activephase'], 
 												'inactphase' => $return_param['inactivephase'],'actcnt' => $return_param['stack_active_count'],
 												'inactcnt' => $return_param['stack_inactive_count'])))));
@@ -912,7 +916,7 @@ class ContentManager
 					$process_params['upmDetails'][$pk]);
 				} else  {
 					if(!isset($_GET['pg'])) {
-						echo ('<tr><th colspan="50" class="norecord" align="left">No record found.</th></tr>');
+						echo ('<tr><th colspan="50" class="norecord" align="left"><div class="rowcollapse">No trials found.</div></th></tr>');
 					}
 				}
 				$index++;
@@ -1293,8 +1297,7 @@ class ContentManager
 				$this->pstart, $this->last, $this->phase_arr, $fin_arr, $this->actfilterarr, $this->current_yr, $this->second_yr, $this->third_yr, $upmDetails);
 				
 			} else {
-			
-				echo ('<tr><th colspan="50" class="norecord" align="left">No record found.</th></tr>');
+				echo ('<tr><th colspan="50" class="norecord" align="left"><div class="rowcollapse">No trials found.</div></th></tr>');
 			}
 			echo('</table><br/>');
 			echo ('</form>');
@@ -1343,7 +1346,7 @@ class ContentManager
 			 . '<tr><th rowspan="2" style="width:250px;">Title</th>'
 			 . '<th style="width:28px;" title="gray values are anticipated and black values are actual">'
 			 . '<a href="javascript: void(0);" onclick="javascript: doSorting(\'en\');">N</a></th>'
-			 . '<th rowspan="2" style="width:45px;" title=\'"EU" = European Union\'>Region</th>'
+			 . '<th rowspan="2" style="width:45px;" title="&quot;EU&quot; = European Union&nbsp;&quot;ROW&quot; = Rest of World">Region</th>'
 			 . '<th style="width:55px;">'
 			 . '<a href="javascript: void(0);" onclick="javascript: doSorting(\'os\');">Status</a></th>'
 			 . '<th rowspan="2" style="width:110px;">Sponsor</th>'
@@ -1513,7 +1516,7 @@ class ContentManager
 				if($val['start_date_type'] == 'anticipated' && ($val['start_date'] > date('Y-m-d', $now))) {
 					$unassoc_upm_status .= 'Upcoming, ';
 				}
-				if($val['end_date_type'] == 'actual') {
+				if($val['end_date_type'] == 'actual' && $val['result_link'] != NULL && $val['result_link'] != '') {
 					$unassoc_upm_status .= 'Occurred, ';
 				}
 				if(($val['end_date'] != '' && $val['end_date'] != NULL && $val['end_date'] != '0000-00-00') 
@@ -1991,6 +1994,11 @@ function getCompletionChart($start_month, $start_year, $end_month, $end_year, $c
 				. '<td colspan="3" style="background-color:' . $bg_color . ';" ' . $attr_two . '>&nbsp;</td>';
 		}
 			
+	} else if($end_year < $start_year) {
+	
+		$value = '<td colspan="12">&nbsp;</td><td colspan="12">&nbsp;</td>'
+					. '<td colspan="12">&nbsp;</td><td colspan="3" ' . $attr_two . '>&nbsp;</td>';
+					
 	} else if($start_year < $current_yr) {
 		
 		if($end_year < $current_yr) {
@@ -2323,6 +2331,11 @@ $date_updated)
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>';
 		}
 			
+	} else if($end_year < $start_year) {
+	
+		$value = '<td colspan="12">&nbsp;</td><td colspan="12">&nbsp;</td>'
+					. '<td colspan="12">&nbsp;</td><td colspan="3" ' . $attr_two . '>&nbsp;</td>';
+					
 	} else if($start_year < $current_yr) {
 
 		$val = getColspan($start_date, $end_date);
