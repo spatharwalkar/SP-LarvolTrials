@@ -59,13 +59,13 @@ while($row = mysql_fetch_assoc($res))
 				}
 			}
 			
-			if(strlen($p->value))
+			if(!empty($p->value))
 			{
 				if(is_array($p->value)) $p->value = implode(' OR ', $p->value);
 				$paramstr .= ' <tt style="color:blue;">' . $p->value . '</tt>';
 			}
-			if(strlen($p->value) && strlen($p->negate)) $paramstr .= ' and';
-			if(strlen($p->negate)) $paramstr .= ' not <tt style="color:blue;">' . $p->negate . '</tt>';
+			if(!empty($p->value) && !empty($p->negate)) $paramstr .= ' and';
+			if(!empty($p->negate)) $paramstr .= ' not <tt style="color:blue;">' . $p->negate . '</tt>';
 		}
 		$paramstr .= '<br>';
 	}
