@@ -940,7 +940,7 @@ class ContentManager
 					$c = explode('.', $process_params['c_params'][$pk]);
 					if($pk != 0) {
 					
-						if($vv[1] == '-1' || $vv[1] == '-2') {
+						if($c[1] == '-1' || $c[1] == '-2') {
 							if(isset($c[3])) { $upm_value = $c[3]; }
 						} else {
 							if(isset($c[2])) { $upm_value = $c[2]; }
@@ -948,7 +948,7 @@ class ContentManager
 						
 					} else {
 					
-						if($vv[2] == '-1' || $vv[2] == '-2') {
+						if($c[2] == '-1' || $c[2] == '-2') {
 							if(isset($c[4])) { $upm_value = $c[4]; }
 						} else {
 							if(isset($c[3])) { $upm_value = $c[3]; }
@@ -2120,7 +2120,7 @@ function getCompletionChart($start_month, $start_year, $end_month, $end_year, $c
 				. '<td colspan="3" style="background-color:' . $bg_color . ';" ' . $attr_two . '>&nbsp;</td>';
 		}
 			
-	} else if($end_year < $start_year) {
+	} else if($end_date < $start_date) {
 	
 		$value = '<td colspan="12">&nbsp;</td><td colspan="12">&nbsp;</td>'
 					. '<td colspan="12">&nbsp;</td><td colspan="3" ' . $attr_two . '>&nbsp;</td>';
@@ -2457,7 +2457,7 @@ $date_updated)
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>';
 		}
 			
-	} else if($end_year < $start_year) {
+	} else if($end_date < $start_date) {
 	
 		$value = '<td colspan="12">&nbsp;</td><td colspan="12">&nbsp;</td>'
 					. '<td colspan="12">&nbsp;</td><td colspan="3" ' . $attr_two . '>&nbsp;</td>';
