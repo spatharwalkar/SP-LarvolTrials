@@ -586,7 +586,13 @@ function runHeatmap($id, $return = false, $format = "xlsx", $expire = false)
 						unset($log);
 					}
 					
-					$results[$row][$column]->{'link'} = 'results=' . $row_id . '.' . $column_id . '.' . $trials_id;
+					//$results[$row][$column]->{'link'} = 'results=' . $row_id . '.' . $column_id . '.' . $trials_id;
+					
+					/*added a separator(to identify whether it is from searchdata table ot trials result set table) 
+					for both the cases - ids count greater and less than the set boundary 
+					as compared to earlier when the separator was added only when the ids count crossed the boundary. */
+					$results[$row][$column]->{'link'} = 'results=' . $row_id . '.' . $column_id . '.-1.' . $trials_id;
+					
 					if($upm_id != '')
 						$results[$row][$column]->{'link'} .= '.' . $upm_id;
 					if($bomb)
@@ -658,7 +664,11 @@ function runHeatmap($id, $return = false, $format = "xlsx", $expire = false)
 						unset($log);
 					}
 					
-					$results[$row][$column]->{'link'} = 'results=' . $row_id . '.' . $column_id . '.s' . $searchdata_id;
+					//$results[$row][$column]->{'link'} = 'results=' . $row_id . '.' . $column_id . '.s' . $searchdata_id;
+					/*added the separator as a separate parameter as compared to earlier 
+					where it was appended in the beginning of the searchdata id. (see line above i.e. line no. 668) */
+					$results[$row][$column]->{'link'} = 'results=' . $row_id . '.' . $column_id . '.-2.' . $searchdata_id;
+					
 					if($upm_id != '')
 						$results[$row][$column]->{'link'} .= '.' . $upm_id;
 					if($bomb)
@@ -973,7 +983,12 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 				}
 				
 				$str = implode(',', $myArray['results']);
-				$str = str_replace('.', ',', str_replace('s', 0x73, $str));
+				
+				//$str = str_replace('.', ',', str_replace('s', 0x73, $str));
+				//removing the hexadecimal conversion of the separator as the separator is now sent in integer format as a separate parameter
+				//see line no. 594 and 670
+				$str = str_replace('.', ',', $str);
+				
 				$evcode = '$packedIDs = pack("l*",' . $str . ');';
 				eval($evcode);				
 				$link .= '&results=' . rawurlencode(base64_encode(gzdeflate($packedIDs))) . '&time=' . $myArray['time'] . '&format=new';
@@ -1064,7 +1079,12 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 				
 				
 				$str = implode(',', $myArray['results']);
-				$str = str_replace('.', ',', str_replace('s', 0x73, $str));
+				
+				//$str = str_replace('.', ',', str_replace('s', 0x73, $str));
+				//removing the hexadecimal conversion of the separator as the separator is now sent in integer format as a separate parameter
+				//see line no. 594 and 670
+				$str = str_replace('.', ',', $str);
+				
 				$evcode = '$packedIDs = pack("l*",' . $str . ');';
 				eval($evcode);
 				$link .= '&results=' . rawurlencode(base64_encode(gzdeflate($packedIDs))) . '&time=' . $myArray['time'] . '&format=new';

@@ -561,7 +561,7 @@ class ContentManager
 			//New Link Method
 			if(isset($_GET['results'])) {
 			
-				$e 	= explode(".", $pv);
+				$e 	= explode(".", $pv);$identifier_for_result_set; = '';
 				$return_param['link_expiry_date'][$pk][] = $link_expiry_date;
 				//Retrieving headers
 				if($_GET['type'] == 'row') {
@@ -570,12 +570,26 @@ class ContentManager
 						$res = getLinkDetails('rpt_ott_header', 'header', 'id', $e[0]);
 						$return_param['link_expiry_date'][$pk][] = $res['expiry'];
 						$return_param['ltype'][$pk] = htmlentities($res['header']);
-						$tt = $e[1];
+						//$tt = $e[1];
+						//result set separator as a separate parameter and maintaining backward compatibility
+						if($e[1] == '-1' || $e[1] == '-2') {
+							$tt = $e[2];
+							$identifier_for_result_set = $e[1];
+						} else {
+							$tt = $e[1];
+						}
 					} else {
 						$res = getLinkDetails('rpt_ott_header', 'header', 'id', $e[1]);
 						$return_param['link_expiry_date'][$pk][] = $res['expiry'];
 						$return_param['ltype'][$pk] = htmlentities($res['header']);
-						$tt = $e[2];
+						//$tt = $e[2];
+						//result set separator as a separate parameter and maintaining backward compatibility
+						if($e[2] == '-1' || $e[2] == '-2') {
+							$tt = $e[3];
+							$identifier_for_result_set = $e[2];
+						} else {
+							$tt = $e[2];
+						}
 					}	
 					
 				} else if($_GET['type'] == 'col') {
@@ -584,32 +598,70 @@ class ContentManager
 						$res = getLinkDetails('rpt_ott_header', 'header', 'id', $e[0]);
 						$return_param['link_expiry_date'][$pk][] = $res['expiry'];
 						$return_param['ltype'][$pk] = htmlentities($res['header']);
-						$tt = $e[1];
+						//$tt = $e[1];
+						//result set separator as a separate parameter and maintaining backward compatibility
+						if($e[1] == '-1' || $e[1] == '-2') {
+							$tt = $e[2];
+							$identifier_for_result_set = $e[1];
+						} else {
+							$tt = $e[1];
+						}
 					} else {
 						$res = getLinkDetails('rpt_ott_header', 'header', 'id', $e[0]);
 						$return_param['link_expiry_date'][$pk][] = $res['expiry'];
 						$return_param['ltype'][$pk] = htmlentities($res['header']);
-						$tt = $e[2];
+						//$tt = $e[2];
+						//result set separator as a separate parameter and maintaining backward compatibility
+						if($e[2] == '-1' || $e[2] == '-2') {
+							$tt = $e[3];
+							$identifier_for_result_set = $e[2];
+						} else {
+							$tt = $e[2];
+						}
 					}	
 				}
 				
 				//Retrieving params
-				$searchdata = substr($tt,0,3);
-				if(dechex($searchdata) == '73' && chr($searchdata) == 's') {
-					$res = getLinkDetails('rpt_ott_searchdata', 'result_set', 'id', substr($tt,3));
-					$return_param['link_expiry_date'][$pk][] = $res['expiry'];
-					$search_data_content = $res['result_set'];
-					$excel_params = unserialize(stripslashes(gzinflate(base64_decode($search_data_content))));
+				//result set separator as a separate parameter and maintaining backward compatibility
+				if($identifier_for_result_set == '-1' || $identifier_for_result_set == '-2'){
+				
+					if($identifier_for_result_set == '-2') {
+					
+						$res = getLinkDetails('rpt_ott_searchdata', 'result_set', 'id', $tt);
+						$return_param['link_expiry_date'][$pk][] = $res['expiry'];
+						$search_data_content = $res['result_set'];
+						$excel_params = unserialize(stripslashes(gzinflate(base64_decode($search_data_content))));
+						
+					} else if($identifier_for_result_set == '-1') {
+					
+						$res = getLinkDetails('rpt_ott_trials', 'result_set', 'id', $tt);
+						$return_param['link_expiry_date'][$pk][] = $res['expiry'];
+						$sp = new SearchParam();
+						$sp->field = 'larvol_id';
+						$sp->action = 'search';
+						$sp->value = str_replace(',', ' OR ', $res['result_set']);
+						$excel_params = array($sp);
+					}
 					
 				} else {
-					
-					$res = getLinkDetails('rpt_ott_trials', 'result_set', 'id', $tt);
-					$return_param['link_expiry_date'][$pk][] = $res['expiry'];
-					$sp = new SearchParam();
-					$sp->field = 'larvol_id';
-					$sp->action = 'search';
-					$sp->value = str_replace(',', ' OR ', $res['result_set']);
-					$excel_params = array($sp);
+				
+					$searchdata = substr($tt,0,3);
+					if(dechex($searchdata) == '73' && chr($searchdata) == 's') {
+						$res = getLinkDetails('rpt_ott_searchdata', 'result_set', 'id', substr($tt,3));
+						$return_param['link_expiry_date'][$pk][] = $res['expiry'];
+						$search_data_content = $res['result_set'];
+						$excel_params = unserialize(stripslashes(gzinflate(base64_decode($search_data_content))));
+						
+					} else {
+						
+						$res = getLinkDetails('rpt_ott_trials', 'result_set', 'id', $tt);
+						$return_param['link_expiry_date'][$pk][] = $res['expiry'];
+						$sp = new SearchParam();
+						$sp->field = 'larvol_id';
+						$sp->action = 'search';
+						$sp->value = str_replace(',', ' OR ', $res['result_set']);
+						$excel_params = array($sp);
+					}
 				}
 			} else {
 			
@@ -817,17 +869,37 @@ class ContentManager
 					foreach($process_params['c_params'] as $k => $v) {
 						$vv = explode('.', $v);
 						if($k != 0) {
-							if(isset($vv[2])) { 
-								$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[2]); 
-								$process_params['link_expiry_date'][$pk][] = $res['expiry'];
-								$row_upm_arr[$k] = $res['intervention_name'];
+							//result set separator as a separate parameter and maintaining backward compatibility
+							if($vv[1] == '-1' || $vv[1] == '-2') {
+								if(isset($vv[3])) { 
+									$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[3]); 
+									$process_params['link_expiry_date'][$pk][] = $res['expiry'];
+									$row_upm_arr[$k] = $res['intervention_name'];
+								}
+							} else {
+								if(isset($vv[2])) { 
+									$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[2]); 
+									$process_params['link_expiry_date'][$pk][] = $res['expiry'];
+									$row_upm_arr[$k] = $res['intervention_name'];
+								}
 							}
+							
 						} else {
-							if(isset($vv[3])) { 
-								$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[3]); 
-								$process_params['link_expiry_date'][$pk][] = $res['expiry'];
-								$row_upm_arr[$k] = $res['intervention_name'];
+							//result set separator as a separate parameter and maintaining backward compatibility
+							if($vv[2] == '-1' || $vv[2] == '-2') {
+								if(isset($vv[4])) { 
+									$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[4]); 
+									$process_params['link_expiry_date'][$pk][] = $res['expiry'];
+									$row_upm_arr[$k] = $res['intervention_name'];
+								}
+							} else {
+								if(isset($vv[3])) { 
+									$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[3]); 
+									$process_params['link_expiry_date'][$pk][] = $res['expiry'];
+									$row_upm_arr[$k] = $res['intervention_name'];
+								}
 							}
+							
 						}
 					}
 					$row_upm_flag = true;
@@ -867,9 +939,20 @@ class ContentManager
 					$upm_value = '';$upm_string = '';
 					$c = explode('.', $process_params['c_params'][$pk]);
 					if($pk != 0) {
-						if(isset($c[2])) { $upm_value = $c[2]; }
+					
+						if($vv[1] == '-1' || $vv[1] == '-2') {
+							if(isset($c[3])) { $upm_value = $c[3]; }
+						} else {
+							if(isset($c[2])) { $upm_value = $c[2]; }
+						}
+						
 					} else {
-						if(isset($c[3])) { $upm_value = $c[3]; }
+					
+						if($vv[2] == '-1' || $vv[2] == '-2') {
+							if(isset($c[4])) { $upm_value = $c[4]; }
+						} else {
+							if(isset($c[3])) { $upm_value = $c[3]; }
+						}
 					}
 					if(isset($upm_value) && $upm_value != '' && !empty($upm_value)) {
 						$val = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $upm_value);
@@ -941,38 +1024,54 @@ class ContentManager
 										$row_header_id = $ids[0];
 										$col_header_id = $first_ids[1];
 										
-										$searchdata = substr($ids[1],0,3);
-										if(dechex($searchdata) == '73' && chr($searchdata) == 's') 
-											$trial_id = substr($ids[1],3);
-										else
-											$trial_id = $ids[1];
-											
-										$upm_id = ((isset($ids[2]) && !empty($ids[2])) ? $ids[2] : '');
+										if($ids[1] == '-1' || $ids[1] == '-2') {
+											$trial_id = $ids[2];
+											$upm_id = ((isset($ids[3]) && !empty($ids[3])) ? $ids[3] : '');
+										} else {
+										
+											$searchdata = substr($ids[1],0,3);
+											if(dechex($searchdata) == '73' && chr($searchdata) == 's') 
+												$trial_id = substr($ids[1],3);
+											else
+												$trial_id = $ids[1];
+												
+											$upm_id = ((isset($ids[2]) && !empty($ids[2])) ? $ids[2] : '');
+										}
 										
 									} elseif($_GET['type'] == 'row') {
 									
 										$row_header_id = $first_ids[0];
 										$col_header_id = $ids[0];
 										
-										$searchdata = substr($ids[1],0,3);
-										if(dechex($searchdata) == '73' && chr($searchdata) == 's') 
-											$trial_id = substr($ids[1],3);
-										else
-											$trial_id = $ids[1];
-											
-										$upm_id = ((isset($ids[2]) && !empty($ids[2])) ? $ids[2] : '');
+										if($ids[1] == '-1' || $ids[1] == '-2') {
+											$trial_id = $ids[2];
+											$upm_id = ((isset($ids[3]) && !empty($ids[3])) ? $ids[3] : '');
+										} else {
+											$searchdata = substr($ids[1],0,3);
+											if(dechex($searchdata) == '73' && chr($searchdata) == 's') 
+												$trial_id = substr($ids[1],3);
+											else
+												$trial_id = $ids[1];
+												
+											$upm_id = ((isset($ids[2]) && !empty($ids[2])) ? $ids[2] : '');
+										}
 									}
 								} else {
 									$row_header_id = $ids[0];
 									$col_header_id = $ids[1];
 									
-									$searchdata = substr($ids[2],0,3);
-									if(dechex($searchdata) == '73' && chr($searchdata) == 's') 
-										$trial_id = substr($ids[2],3);
-									else
-										$trial_id = $ids[2];
-										
-									$upm_id = ((isset($ids[3]) && !empty($ids[3])) ? $ids[3] : '');
+									if($ids[2] == '-1' || $ids[2] == '-2') {
+										$trial_id = $ids[3];
+										$upm_id = ((isset($ids[4]) && !empty($ids[4])) ? $ids[4] : '');
+									} else {
+										$searchdata = substr($ids[2],0,3);
+										if(dechex($searchdata) == '73' && chr($searchdata) == 's') 
+											$trial_id = substr($ids[2],3);
+										else
+											$trial_id = $ids[2];
+											
+										$upm_id = ((isset($ids[3]) && !empty($ids[3])) ? $ids[3] : '');
+									}
 								}
 								
 								$query = "UPDATE `rpt_ott_header` SET `expiry` = '" . date('Y-m-d',strtotime('+1 week',$now)) . "' WHERE id = '" 
@@ -1042,27 +1141,54 @@ class ContentManager
 				$columnlabel = $res['header'];
 				$link_expiry_date[] = $res['expiry'];
 				
-				if(isset($excel_params[3])) {
-					$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $excel_params[3]);
-					$non_assoc_upm_params= array($res['intervention_name']);//array(getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $excel_params[3]));
-					$link_expiry_date[]	= $res['expiry'];
+				if($excel_params[2] == '-1' || $excel_params[2] == '-2') {
+					if(isset($excel_params[4])) {
+						$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $excel_params[4]);
+						$non_assoc_upm_params= array($res['intervention_name']);
+						$link_expiry_date[]	= $res['expiry'];
+					} 
+				} else {
+					if(isset($excel_params[3])) {
+						$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $excel_params[3]);
+						$non_assoc_upm_params= array($res['intervention_name']);
+						$link_expiry_date[]	= $res['expiry'];
+					}
 				}
 				
-				if(strpos($excel_params[2],'s') !== FALSE) {
-				
-					$res = getLinkDetails('rpt_ott_searchdata', 'result_set', 'id', substr($excel_params[2],1));
-					$excel_params = unserialize(stripslashes(gzinflate(base64_decode($res['result_set']))));
-					$link_expiry_date[] = $res['expiry'];
+				if($excel_params[2] == '-1' || $excel_params[2] == '-2') { 
+					if($excel_params[2] == '-2') {
 					
+						$res = getLinkDetails('rpt_ott_searchdata', 'result_set', 'id', $excel_params[3]);
+						$excel_params = unserialize(stripslashes(gzinflate(base64_decode($res['result_set']))));
+						$link_expiry_date[] = $res['expiry'];
+						
+					} else if($excel_params[2] == '-1') { 
+					
+						$res = getLinkDetails('rpt_ott_trials', 'result_set', 'id', $excel_params[3]);
+						$link_expiry_date[] = $res['expiry'];
+						$sp = new SearchParam();
+						$sp->field = 'larvol_id';
+						$sp->action = 'search';
+						$sp->value = str_replace(',', ' OR ', $res['result_set']);
+						$excel_params = array($sp);
+					}
 				} else {
-				
-					$res = getLinkDetails('rpt_ott_trials', 'result_set', 'id', $excel_params[2]);
-					$link_expiry_date[] = $res['expiry'];
-					$sp = new SearchParam();
-					$sp->field = 'larvol_id';
-					$sp->action = 'search';
-					$sp->value = str_replace(',', ' OR ', $res['result_set']);
-					$excel_params = array($sp);
+					if(strpos($excel_params[2],'s') !== FALSE) {
+					
+						$res = getLinkDetails('rpt_ott_searchdata', 'result_set', 'id', substr($excel_params[2],1));
+						$excel_params = unserialize(stripslashes(gzinflate(base64_decode($res['result_set']))));
+						$link_expiry_date[] = $res['expiry'];
+						
+					} else {
+					
+						$res = getLinkDetails('rpt_ott_trials', 'result_set', 'id', $excel_params[2]);
+						$link_expiry_date[] = $res['expiry'];
+						$sp = new SearchParam();
+						$sp->field = 'larvol_id';
+						$sp->action = 'search';
+						$sp->value = str_replace(',', ' OR ', $res['result_set']);
+						$excel_params = array($sp);
+					}
 				}
 				$bomb = (isset($_GET['bomb'])) ? $_GET['bomb'] : '';
 				$this->time_machine = $_GET['time'];
