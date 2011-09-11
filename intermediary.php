@@ -561,7 +561,7 @@ class ContentManager
 			//New Link Method
 			if(isset($_GET['results'])) {
 			
-				$e 	= explode(".", $pv);$identifier_for_result_set; = '';
+				$e 	= explode(".", $pv);$identifier_for_result_set = '';
 				$return_param['link_expiry_date'][$pk][] = $link_expiry_date;
 				//Retrieving headers
 				if($_GET['type'] == 'row') {
