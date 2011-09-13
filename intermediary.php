@@ -843,7 +843,7 @@ class ContentManager
 			$this->pstart 	= '';$this->last = '';$this->pend = '';$this->pages = '';
 			if(isset($_GET['pg'])) $page = mysql_real_escape_string($_GET['pg']); 
 			if(!is_numeric($page)) die('non-numeric page');
-			$count = max($process_params['eachCount']);
+			$count = $process_params['showRecordsCnt'];
 			
 			$this->pstart 	= ($page-1) * $this->results_per_page + 1;
 			$this->pend 	= $this->pstart + $this->results_per_page - 1;

@@ -968,6 +968,8 @@ function removeNullSearchdata($data)
 	$multivalue = $data['multivalue'];
 	$time_machine = $data['time_machine'];
 	$override = $data['override'];
+	$weak = $data['weak'];
+	
 	if(is_array($action) && !empty($action))
 	{
 		foreach($action as $field => $actval)
@@ -982,12 +984,12 @@ function removeNullSearchdata($data)
 	}
 	return array('search' => $search, 'display' => $display, 'action' => $action, 'searchval' => $searchval, 'negate' => $negate,
 				 'page' => $page, 'multifields' => $multifields, 'multivalue' => $multivalue, 'time_machine' => $time_machine,
-				 'override' => $override);
+				 'override' => $override, 'weak' => $weak);
 }
 
 //takes postdata from search form, returns an array of searchparams ready to feed into the search
 function prepareParams($post)
-{
+{	
 	global $db;
 	$params = array();
 	$negate = array();
