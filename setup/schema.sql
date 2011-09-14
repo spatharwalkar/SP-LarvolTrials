@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS `clinical_study` (
   `larvol_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `institution_type` enum('industry','coop','other') CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT 'other',
+  `institution_type` ENUM( 'industry_lead_sponsor', 'industry_collaborator', 'coop', 'other' ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT 'other',
   `import_time` datetime NOT NULL,
   `last_change` datetime NOT NULL,
   `region` varchar(63) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -253,7 +253,8 @@ CREATE TABLE IF NOT EXISTS `upm` (
   `end_date` date DEFAULT NULL,
   `end_date_type` enum('anticipated','actual') COLLATE utf8_unicode_ci NOT NULL,
   `last_update` date NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `product` (`product`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `upm_history` (
@@ -412,7 +413,3 @@ ALTER TABLE `upm_history`
 ALTER TABLE `user_grants`
   ADD CONSTRAINT `user_grants_ibfk_1` FOREIGN KEY (`user`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `user_grants_ibfk_2` FOREIGN KEY (`permission`) REFERENCES `user_permissions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE `upm`
-  ADD INDEX ( `product` );
-ALTER TABLE `clinical_study`
-	  CHANGE `institution_type` `institution_type` ENUM( 'industry_lead_sponsor', 'industry_collaborator', 'coop', 'other' );
