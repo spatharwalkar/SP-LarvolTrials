@@ -1,0 +1,266 @@
+@charset "utf-8";
+/* CSS Document */
+
+body{
+	margin-top:0;
+	font-family:Verdana, Geneva, sans-serif;
+	font-size:small;
+	margin:0;padding:0;
+}
+
+#header{
+	margin:0 auto 0 auto;
+	border:0;
+}
+
+#bar{
+	width:100%;
+	background-color:#CCC;
+	text-align:right;
+	font-size:large;
+	height:1.2em;
+}
+
+#nav{
+	float:left;
+	font-size:80%;
+	font-family:Arial,Helvetica,sans-serif;
+	line-height:135%;
+	height:1.2em;
+}
+
+.drop{
+	height:1.4em;
+	display:inline-block;
+	float:none;
+	vertical-align:top;
+	text-align:center;
+	background-color:#C0C0DB;
+	opacity:0.92;
+	filter:alpha(opacity=92);
+	overflow:hidden;
+	margin:0 2px 0 2px;
+	padding:0 2px 0 2px;
+	position:relative;
+	z-index:99;
+	border:#000 thin solid;
+}
+
+.drop:hover, .drop.hover{
+	height:auto;
+	overflow:visible;
+}
+
+.drop a{
+	display:inline-block;
+	text-align:center;
+	width:100%;
+}
+
+.drop a:hover, .drop a.hover{
+	background-color:#CCE;
+}
+
+.numeric{
+	background-color:#0F9;
+}
+
+form{
+	float:left;
+	margin:1em;
+}
+
+label{
+	display:inline-block;
+	padding:2px;
+	margin-bottom:2px;
+}
+
+.schedule label{
+	margin:0 5px 5px 0;
+}
+
+form div{
+	display:block;
+	padding:0 3px 5px 3px;
+	margin-bottom:1px;
+}
+
+.info{
+	font-size:smaller;
+	color:#00F;
+}
+
+td,th,label,form dd{
+	background-color:#DDF;
+}
+
+div.error,.error{
+	color:#F00;
+	background-color:transparent;
+	width:150px;
+}
+
+table{
+	border-spacing: 1px;
+	background-color: white;
+	margin:-3px -2px -2px -3px;
+}
+
+.limit{
+	max-width:375px;
+}
+
+.search{
+	margin:0;
+	padding:0;
+}
+
+.search input, .search select{
+	margin:0;padding:0;
+}
+
+.ftext{
+	background-color:#9FA;
+}
+
+td img,th img,li img,li input{
+	width:14px;
+	height:14px;
+}
+
+.global{
+	list-style:square;
+}
+
+.tablelist{
+	margin:0;padding-left:1.1em;
+	height:1em;
+}
+
+.search fieldset, fieldset fieldset{
+	float:left;
+	margin:1px;
+	padding:2px;
+}
+
+.search td{
+	text-align:left;
+	white-space:normal;
+}
+
+.search select,.search input{
+	max-width:150px;
+}
+
+.not{
+	background-color:#F88;
+}
+
+.not input{
+	max-width:90px;
+}
+
+div,p,a{
+	text-align:left;
+}
+
+.anno select{
+	float:right;
+}
+
+form dt{
+	background-color:#EEF;
+}
+
+form dd{
+	padding:3px;
+	margin-bottom:1em;
+}
+
+.req{
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:75%;
+}
+
+.lisep li{
+	margin-bottom:0.5em;
+}
+
+.lisep input{
+	float:right;
+}
+
+.lisep td ul{
+	white-space:nowrap;
+}
+
+.onebutton,.onebutton input{
+	border:0;padding:0;
+}
+
+.onebutton input{
+	margin:0;
+}
+
+.onebutton{
+	margin:10px;
+}
+
+.reportcell th{
+	text-decoration:none;
+	font-weight:normal;
+}
+
+.reportcell img{
+	border:0;margin:0;padding:0;
+}
+
+#progress{
+	font-weight:bold;
+	overflow:visible;
+	white-space:nowrap;
+	background-color:#DDF;
+}
+
+iframe{
+	height:1.2em;
+	width:5em;
+	border:0;margin:0;padding:0;
+}
+
+.permSel select{
+	float:right;
+	margin-bottom:.1em;
+}
+
+.permSel{
+	height:1.7em;
+	display:block;
+	overflow:hidden;
+}
+
+.permSel:hover,.permSel.hover{
+	height:auto;
+}
+.clr{
+	clear:both;
+}
+.floatl{
+	float:left;
+	}
+.lbldel{
+	background-color:red;
+	float:right;
+	padding:0;
+}
+.lbldelc{
+	background-color:red;
+	float:center;
+	padding:0;
+}
+.tar{
+	text-align:right;
+	font-weight:bold;
+}
+	
