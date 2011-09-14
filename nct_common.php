@@ -3,6 +3,91 @@
 error_reporting(E_ERROR);
 $tab = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
 
+$mapping = array(
+    'study_id-org_name' => 'study_id_org_name', //new
+    'study_id-org_full_name' => 'study_id_org_full_name', //new
+    'study_id-org_study_id' => 'org_study_id', //new
+//    'study_id-nct_id' => 'nct_id',
+    'is_fda_regulated' => 'is_fda_regulated', //new
+    'is_section_801' => 'is_section_801', //new
+    'delayed_posting' => 'delayed_posting', //new
+    'brief_title-textblock' => 'brief_title',
+    'official_title-textblock' => 'official_title',
+    'study_sponsor-sponsor-agency' => 'collaborator',  //added collaborator
+    'study_sponsor-lead_sponsor-agency' => 'lead_sponsor',
+    'resp_party-name_title' => 'responsible_party_name_title',
+    'resp_party-organization' => 'responsible_party_organization',
+    'oversight_info-regulatory_authority' => 'oversight_authority',
+    'oversight_info-has_dmc' => 'has_dmc',
+    'brief_summary-textblock' => 'brief_summary',
+    'detailed_descr-textblock' => 'detailed_description',
+    'status_block-status' => 'overall_status',
+    'status_block-date' => 'verification_date',
+    'start_date-date' => 'start_date',
+    'end_date-date' => 'end_date',
+    'last_follow_up_date' => 'completion_date_type',
+    'last_follow_up_date-date' => 'completion_date', // check
+    'primary_compl_date_type' => 'primary_completion_date_type',
+    'primary_compl_date-date' => 'primary_completion_date', // check
+    'phase_block-phase' => 'phase',
+    'study_type' => 'study_type',
+    'design' => 'study_design',
+    'number_of_arms' => 'number_of_arms',
+    'primary_outcome-measure' => 'primary_outcome_measure',
+    'primary_outcome-time_frame' => 'primary_outcome_timeframe',
+    'primary_outcome-safety_issue' => 'primary_outcome_safety_issue',
+    'secondary_outcome-measure' => 'secondary_outcome_measure',
+    'secondary_outcome-time_frame' => 'secondary_outcome_timeframe',
+    'secondary_outcome-safety_issue' => 'secondary_outcome_safety_issue',
+    'measure-time_frame' => 'primary_outcome_timeframe',
+    'measure-safety_issue' => 'primary_outcome_safety_issue',
+    'enrollment' => 'enrollment',
+    'enrollment_type' => 'enrollment_type',
+    'condition' => 'condition',
+    'arm_group-arm_group_label' => 'arm_group_label',
+    'arm_group-other_name' => 'arm_group_other_name', //new
+    'arm_group-arm_type' => 'arm_group_type',
+    'arm_group-description-textblock' => 'arm_group_description',
+    'intervention-intervent_type' => 'intervention_type',
+    'intervention-primary_name' => 'intervention_name',
+    'intervention-description-textblock' => 'intervention_description',
+    'eligibility-criteria-textblock' => 'criteria',
+    'eligibility-healthy_volunteers' => 'healthy_volunteers',
+    'eligibility-gender' => 'gender',
+    'eligibility-minimum_age' => 'minimum_age',
+    'eligibility-maximum_age' => 'maximum_age',
+    'investigator-role' => 'investigator_role',
+    'investigator-name' => 'investigator_name',
+    'investigator-affiliation-agency' => 'investigator_degrees',  //chg  
+    'contact-name' => 'contact_name',
+    'contact-phone' => 'contact_phone',
+    'contact-phone_ext' => 'contact_phone_ext',
+    'contact-email' => 'contact_email',
+    'location-facility-name' => 'location_name',
+    'location-facility-address-city' => 'location_city',
+    'location-facility-address-state' => 'location_state',
+    'location-facility-address-zip' => 'location_zip',
+    'location-facility-address-country' => 'location_country',
+    'location-status' => 'location_status',
+    'location-contact-name' => 'location_contact_name',
+    'location-contact-phone' => 'location_contact_phone',    
+    'location-contact-email' => 'location_contact_email',
+    'see_also-annotation-textblock' => 'link_description', //chg 
+    'see_also-url' => 'link_url', //chg 
+    'keyword' => 'keyword', //new
+    'initial_release_date' => 'firstreceived_date',
+    'last_release_date' => 'lastchanged_date',
+    'init_results_release_date' => 'primary_completion_date',
+//  *********************
+//  ADDED truncated ones
+//  *********************
+    'email' => 'contact_email',
+    'description-textblock' => 'intervention_description',
+    'study_id-secondary_id' => 'secondary_id',
+);
+
+$level = array();
+
 //returned array maps the IDs to lastchanged dates
 function getIDs($type) {
     global $days;
@@ -265,10 +350,18 @@ function addNCT_history($rec, $id, $date) {
         if (mysql_query($query) === false)
             return softDie('Bad SQL query adding new record to category');
         $studycat = mysql_insert_id();
-		$query = 'INSERT INTO data_values SET field=' . $id_field . ',`added`="' . $DTnow . '",studycat=' . $studycat
+        
+        $no_dat=false;
+	if( !isset($nct_id) ) $no_dat=true;
+	elseif( empty($nct_id) and !is_numeric($nct_id) ) $no_dat=true;        
+        
+        if($no_dat == false)
+        {
+            $query = 'INSERT INTO data_values SET field=' . $id_field . ',`added`="' . $DTnow . '",studycat=' . $studycat
                 . ',val_int=' . $nct_id;
-        if (mysql_query($query) === false)
+            if (mysql_query($query) === false)
             return softDie('Bad SQL query adding nct_id');
+        }
     }
 
     //Determine institution type
@@ -309,9 +402,9 @@ function addNCT_history($rec, $id, $date) {
         'enrollment_type' => $rec->enrollment['type'],
         'sampling_method' => $rec->eligibility->sampling_method,
         'rank' => $rec['rank'],
-        'org_study_id' => $rec->status_block->study_id->org_study_id,
+        'org_study_id' => $rec->study_id->org_study_id,
         'download_date' => substr($rec->required_header->download_date, strpos($rec->required_header->download_date, ' on ') + 4),
-        'acronym' => $rec->status_block->acronym,
+        'acronym' => $rec->acronym,
         'lead_sponsor' => $rec->study_sponsor->lead_sponsor->agency,
         'source' => $rec->source,
         'has_dmc' => ynbool($rec->oversight_info->has_dmc),
@@ -326,8 +419,8 @@ function addNCT_history($rec, $id, $date) {
         'number_of_groups' => $rec->number_of_groups,
         'enrollment' => $rec->enrollment,
         'gender' => strtolower($rec->eligibility->gender),
-        'minimum_age' => strtoyears($rec->eligibility->minimum_age),
-        'maximum_age' => strtoyears($rec->eligibility->maximum_age),
+        'minimum_age' => $rec->eligibility->minimum_age,
+        'maximum_age' => $rec->eligibility->maximum_age,
         'healthy_volunteers' => ynbool($rec->eligibility->healthy_volunteers),
 //        'contact_name' => $rec->contact->name,
 //        'contact_degrees' => $rec->contact->degrees,
@@ -361,7 +454,7 @@ function addNCT_history($rec, $id, $date) {
     }
 
     $record_data['secondary_id'] = array();
-    foreach ($rec->id_info->secondary_id as $sid)
+    foreach ($rec->study_id->secondary_id as $sid)
         $record_data['secondary_id'][] = $sid;
     $record_data['nct_alias'] = array();
     foreach ($rec->id_info->nct_alias as $nal)
@@ -408,7 +501,7 @@ function addNCT_history($rec, $id, $date) {
     foreach ($rec->intervention as $inter) {
         $record_data['intervention_name'][] = $inter->primary_name;
         $record_data['intervention_description'][] = $inter->description->textblock;
-        $record_data['intervention_type'][] = $inter->intervention_type;
+        $record_data['intervention_type'][] = $inter->intervent_type;
         foreach ($inter->arm_group_label as $agl)
             $record_data['arm_group_label'][] = $agl;
         foreach ($inter->other_name as $oname)
@@ -418,10 +511,10 @@ function addNCT_history($rec, $id, $date) {
     $record_data['overall_official_degrees'] = array();
     $record_data['overall_official_role'] = array();
     $record_data['overall_official_affiliation'] = array();
-    foreach ($rec->overall_official as $oa) {
-        $record_data['overall_official_name'][] = assemble(' ', array($oa->first_name, $oa->middle_name, $oa->last_name));
+    foreach ($rec->investigator as $oa) {
+        $record_data['overall_official_name'][] = $oa->name;
         $record_data['overall_official_degrees'][] = $oa->degrees;
-        $record_data['overall_official_affiliation'][] = $oa->affiliation;
+        $record_data['overall_official_affiliation'][] = $oa->affiliation->agency;
         $record_data['overall_official_role'][] = $oa->role;
     }
     $record_data['location_name'] = array();
@@ -465,6 +558,7 @@ function addNCT_history($rec, $id, $date) {
         $record_data['location_backup_phone'][] = $loc->contact_backup->phone;
         $record_data['location_backup_phone_ext'][] = $loc->contact_backup->phone_ext;
         $record_data['location_backup_email'][] = $loc->contact_backup->email;
+        
         foreach ($loc->investigator as $inv) {
             $record_data['investigator_name'][] = assemble(' ', array($inv->first_name, $inv->middle_name, $inv->last_name));
             $record_data['investigator_degrees'][] = $inv->degrees;
@@ -473,9 +567,9 @@ function addNCT_history($rec, $id, $date) {
     }
     $record_data['link_url'] = array();
     $record_data['link_description'] = array();
-    foreach ($rec->{'link'} as $lnk) {
+    foreach ($rec->see_also as $lnk) {
         $record_data['link_url'][] = $lnk->url;
-        $record_data['link_description'][] = $lnk->description;
+        $record_data['link_description'][] = $lnk->annotation->textblock;
     }
     $record_data['reference_citation'] = array();
     $record_data['reference_PMID'] = array();
@@ -714,6 +808,522 @@ function addval_d($studycat, $category_id, $fieldname, $value, $date) {
             return softDie('Bad SQL query recording changetime');
     }
     return true;
+}
+
+function ProcessDiffChanges($id, $date) {
+
+    global $level;
+    // Now Go To changes Site and parse differences
+    $url = "http://clinicaltrials.gov/archive/" . $id . "/" . $date . "/changes";
+
+    $docpc = new DOMDocument();
+    echo $tab . '<hr>Parsing Archive Changes Page for ' . $id . ' and Date: ' . $date . '... - ';
+
+    echo $url . " - <br>";
+    $time = date("h:i:s A"); 
+    echo 'Time: ' . $time . '</br>';
+    $nct_id = unpadnct($id);
+
+    //Find out the ID of the field for nct_id, and the ID of the "NCT" category.
+    static $nct_cat = NULL;
+    static $id_field = NULL;
+    if ($nct_cat === NULL) {
+        $query = 'SELECT data_fields.id AS "nct_id",data_categories.id AS "nct_cat" FROM '
+                . 'data_fields LEFT JOIN data_categories ON data_fields.category=data_categories.id '
+                . 'WHERE data_fields.name="nct_id" AND data_categories.name="NCT" LIMIT 1';
+        $res = mysql_query($query);
+        if ($res === false)
+            return softDie('Bad SQL query getting field ID of nct_id');
+        $res = mysql_fetch_assoc($res);
+        if ($res === false)
+            return softDie('NCT schema not found!');
+        $nct_cat = $res['nct_cat'];
+        $id_field = $res['nct_id'];
+    }
+
+    // Get StudyCat
+    $studycat = null;
+    $query = 'SELECT studycat FROM '
+            . 'data_values LEFT JOIN data_cats_in_study ON data_values.studycat=data_cats_in_study.id '
+            . 'WHERE field=' . $id_field . ' AND val_int=' . $nct_id . ' LIMIT 1';
+    $res = mysql_query($query);
+    if ($res === false)
+        return softDie('Bad SQL query determining existence of record');
+    $res = mysql_fetch_assoc($res);
+    $exists = $res !== false;
+    $studycat = NULL;
+    if ($exists) {
+        $studycat = $res['studycat'];
+        echo "StudyCat: " . $studycat . "<br>";
+    } else {
+        echo "Unable to Find StudyCat in DB";
+        return;
+    }
+
+    for ($done = false, $tries = 0; $done == false && $tries < 5; $tries++) {
+        echo('!');
+        @$done = $docpc->loadHTMLFile($url);
+    }    
+    
+    $div = $docpc->getElementsByTagName('table');
+    // Get Second Table
+    unset($docpc);
+    
+    $datatable = NULL;
+    $tablecount=0;
+    foreach ($div as $table) {
+        $right = false;
+        foreach ($table->attributes as $attr) {
+            if ($attr->name == 'class' && $attr->value == 'sdiff navLinks')
+            {
+                $tablecount=$tablecount+1;
+                if($tablecount==2)
+                {
+                    // Take Second sdiff navLinks for the trimmed version
+                    $right = true;
+                    break;                    
+                }
+            }
+        }
+        if ($right == true) {
+            $datatable = $table;
+            break;
+            
+        }
+    }
+    
+    if ($datatable == NULL) {
+        echo('End of page reached.' . "\n<br />");
+        echo('Returning Page To Continue.' . "\n<br />");
+        unset($div);
+        return;
+    }
+    unset($div);
+
+    // Have right section no look for any div that does not equal "sdiff-collapsed"
+    // Now step through the family of trs combining into most recent xml version
+    $trs = $datatable->getElementsByTagName('tr');
+    unset($datatable);    
+    
+    foreach ($trs as $tr) {
+        foreach ($tr->attributes as $attr) {
+
+            if ($attr->name == 'class' && $attr->value != "sdiff-unc") {
+                // Check to See if Add/Delete/Modify
+
+                if ($attr->name == 'class' && $attr->value == "sdiff-chg") {
+                    // Change
+                    $action = "change";
+                    prepXMP($tr, $action, $studycat, $nct_cat, $date);
+                } else if ($attr->name == 'class' && $attr->value == "sdiff-del") {
+                    //Delete
+                    $action = "delete";
+                    prepXMP($tr, $action, $studycat, $nct_cat, $date);
+                } else if ($attr->name == 'class' && $attr->value == "sdiff-add") {
+                    // Add
+                    $action = "add";
+                    prepXMP($tr, $action, $studycat, $nct_cat, $date);
+                 }
+                // Else Dont Care
+            } else {
+                // Get Structure
+                ParseStructure($tr);
+            }
+        }
+        unset($tr);
+        $fake = mysql_query('SELECT larvol_id FROM clinical_study LIMIT 1'); //keep alive
+        @mysql_fetch_array($fake);
+    }
+
+    unset($trs);
+    
+    $time = date("h:i:s A"); 
+    echo 'End Time: ' . $time . '</br>';
+
+    return;
+}
+
+function ParseStructure($data) {
+    global $level;
+
+    $divs = $data->getElementsByTagName('div');
+    $end_tag = null;
+    $last = false;
+    
+    unset($data);
+    
+    foreach ($divs as $div) {
+        foreach ($div->attributes as $attr) {
+            // Just look for start tag
+
+            if ($attr->name == 'class' && (strpos($attr->value, "sds") !== false)) {
+                pop_structure($attr->value, $div->nodeValue);
+            }
+        }
+        unset($div);
+    }
+
+    unset($divs);
+
+    return;
+}
+
+function prepXMP($data, $action, $studycat, $nct_cat, $date) {
+
+    global $level;
+    
+    // Logic for which column see if needs to be different.
+    if ($action == "change") {
+        $column = "sdiff-b";
+    } else if ($action == "add") {
+        $column = "sdiff-b";
+    } else if ($action == "delete") {
+        $column = "sdiff-a";
+    }
+
+    $right = false;
+
+    // Get Column of interest.
+    $elements = $data->getElementsByTagName('td');
+    unset($data);
+
+    foreach ($elements as $element) {
+        foreach ($element->attributes as $attr) {
+            if ($attr->name == 'class' && $attr->value == $column) {
+                $right = true;
+                break;
+            }
+            if ($right == true) {
+                $datatable = $element;
+                break;
+            }
+        }
+        if ($right == true) {
+            $datatable = $element;
+            break;
+        }
+    }
+    if ($datatable == NULL) {
+        echo('Nothing Found in Comparision ID-2');
+        unset($elements);
+        return;
+    }
+
+    $divs = $datatable->getElementsByTagName('div');
+    unset($datatable);
+    unset($elements);
+    
+    $last = false;
+
+    foreach ($divs as $div) {
+        foreach ($div->attributes as $attr) {
+            if ($attr->name == 'class' && (strpos($attr->value, "sds") !== false)) {
+                pop_structure($attr->value, $div->nodeValue);
+            } else if ($attr->name == 'class' && (strpos($attr->value, "sdz") !== false)) {
+                // Do Nothing
+                // Just End Tag
+            } else if ($attr->name == 'class' && (strpos($attr->value, "sda") !== false)) {
+                // Its a Tag Type
+                pop_structure($attr->value, $div->nodeValue);
+            } else {
+                $value = $div->nodeValue;
+                // Check to see if Value is Type
+                if (strpos($value, "type=") !== false) {
+                    $value = trim($value);
+                    $value = substr($value, 6, -1);
+                    $tag = build_key();
+                    $tag = $tag . "_type";
+                    $return = process_change($tag, $tag, $value, $nct_cat, $studycat, $date, $action);
+ 
+                } else if ($value != ">") {
+                    $tag = build_key();
+                    $return = process_change($tag, $tag, $value, $nct_cat, $studycat, $date, $action);
+                }
+            }
+        }
+        unset($div);
+    }
+
+    unset($divs);
+
+    return;
+}
+
+function stripnode($value) {
+    $value = htmlspecialchars($value);
+
+    $badchars = array("&lt;", "&gt;", "/");
+    $value = str_replace($badchars, "", $value);
+
+    return $value;
+}
+
+function getFieldName($value) {
+    $fieldname = NULL;
+    global $mapping;
+
+    $fieldname = $mapping[$value];
+
+    if ($fieldname == NULL) {
+        echo "WARNING: Unable to find fieldname: " . $value . ", match in mapping.<br>";
+    }
+
+    return $fieldname;
+}
+
+function commit_diff($studycat, $category_id, $fieldname, $value, $date, $operation) {
+    // Use Date Passed in or of the record updated instead of actual date
+    // so data matches up per Anthony.
+    $DTnow = str_replace("_", "-", $date);
+
+    //Find the field id (and get it's type) using the name
+    $query = 'SELECT id,type FROM data_fields WHERE name="' . $fieldname . '" AND category=' . $category_id . ' LIMIT 1';
+    $res = mysql_query($query);
+    if ($res === false)
+        return softDie('Bad SQL query getting field');
+    $res = mysql_fetch_assoc($res);
+    if ($res === false)
+        return softDie('Field not found.' . $query);
+    $field = $res['id'];
+    $type = $res['type'];
+
+    //normalize the input
+    if (!is_array($value))
+        $value = array($value);
+    foreach ($value as $key => $v)
+        $value[$key] = normalize($type, (string) $v);
+
+    echo "Action: " . $operation . " - ";
+    if ($operation == "delete" || $operation == "change") {
+
+        
+        $query = 'UPDATE data_values SET superceded="' . $DTnow . '" WHERE studycat=' . $studycat . ' AND superceded is NULL and field=' . $field . '';
+        if (mysql_query($query) === false)
+            return softDie('Bad SQL query marking old values' . mysql_error() . '<br />' . $query);
+    }
+
+    if ($operation == "add" || $operation == "change") {
+        foreach ($value as $val) {
+            if ($type == 'enum') {
+                if (!strlen($val)) {
+                    $val = NULL;
+                } else {
+                    $query = 'SELECT id FROM data_enumvals WHERE `field`=' . $field . ' AND `value`="' . mysql_real_escape_string($val)
+                            . '" LIMIT 1';
+                    $res = mysql_query($query);
+                    if ($res === false)
+                        return softDie('Bad SQL query getting enumval id');
+                    $res = mysql_fetch_array($res);
+                    if ($res === false)
+                        return softDie('Invalid enumval "' . $val . '" for field "' . $fieldname . '"');
+                    $val = $res['id'];
+                }
+            }
+            $query = 'INSERT INTO data_values SET `added`="' . $DTnow . '",'
+                    . '`field`=' . $field . ',studycat=' . $studycat . ',val_' . $type . '=' . esc($type, $val);
+
+            if (mysql_query($query) === false)
+                return softDie('Bad SQL query saving value');
+        }
+    }
+    $query = 'UPDATE clinical_study SET last_change="' . $DTnow . '" '
+            . 'WHERE larvol_id=(SELECT larvol_id FROM data_cats_in_study WHERE id=' . $studycat . ') LIMIT 1';
+    if (mysql_query($query) === false)
+        return softDie('Bad SQL query recording changetime');
+
+    return true;
+}
+
+function process_change($begin_tag, $end_tag, $value, $nct_cat, $studycat, $date, $action) {
+
+    $fieldname = getFieldName($begin_tag);
+
+    if ($fieldname != NULL) {
+        // Call to REPLACE
+
+        if (!commit_diff($studycat, $nct_cat, $fieldname, $value, $date, $action))
+            return softDie('Data error in ' . $studycat . '.');
+        else {
+            echo "DB Commit: " . $begin_tag . " -> " . $value . "</br>";
+        }
+
+        return 1;
+    }
+
+    return 0;
+}
+
+function build_key() {
+    global $level;
+
+    $result = implode('-', $level);
+
+    return $result;
+}
+
+function pop_structure($attr_value, $node_value) {
+    global $level;
+    
+    // Get Level
+    $holder = substr($attr_value, 3, 1);
+    // Subtract one to skip clinical-study
+    $holder = $holder - 1;
+    if ($holder >= 0) {
+        $level[$holder] = stripnode($node_value);
+    }
+    // Clear Out Rest
+    $i = $holder + 1;
+    while (isset($level[$i])) {
+        unset($level[$i]);
+        $i = $i + 1;
+    }
+    //print_r($level);
+}
+
+
+function ProcessNonEssentials($id, $date) {
+
+    global $level;
+    // Now Go To changes Site and parse differences
+    $url = "http://clinicaltrials.gov/archive/" . $id . "/" . $date . "/changes";
+
+    $docpc = new DOMDocument();
+    echo $tab . '<hr>Parsing Archive Changes Page for NONESSENTIALS - ' . $id . ' and Date: ' . $date . '... - ';
+
+    echo $url . " - <br>";
+    $time = date("h:i:s A"); 
+    echo 'Time: ' . $time . '</br>';
+    $nct_id = unpadnct($id);
+
+    //Find out the ID of the field for nct_id, and the ID of the "NCT" category.
+    static $nct_cat = NULL;
+    static $id_field = NULL;
+    if ($nct_cat === NULL) {
+        $query = 'SELECT data_fields.id AS "nct_id",data_categories.id AS "nct_cat" FROM '
+                . 'data_fields LEFT JOIN data_categories ON data_fields.category=data_categories.id '
+                . 'WHERE data_fields.name="nct_id" AND data_categories.name="NCT" LIMIT 1';
+        $res = mysql_query($query);
+        if ($res === false)
+            return softDie('Bad SQL query getting field ID of nct_id');
+        $res = mysql_fetch_assoc($res);
+        if ($res === false)
+            return softDie('NCT schema not found!');
+        $nct_cat = $res['nct_cat'];
+        $id_field = $res['nct_id'];
+    }
+
+    // Get StudyCat
+    $studycat = null;
+    $query = 'SELECT studycat FROM '
+            . 'data_values LEFT JOIN data_cats_in_study ON data_values.studycat=data_cats_in_study.id '
+            . 'WHERE field=' . $id_field . ' AND val_int=' . $nct_id . ' LIMIT 1';
+    $res = mysql_query($query);
+    if ($res === false)
+        return softDie('Bad SQL query determining existence of record');
+    $res = mysql_fetch_assoc($res);
+    $exists = $res !== false;
+    $studycat = NULL;
+    if ($exists) {
+        $studycat = $res['studycat'];
+        echo "StudyCat: " . $studycat . "<br>";
+    } else {
+        echo "Unable to Find StudyCat in DB";
+        return;
+    }
+
+    for ($done = false, $tries = 0; $done == false && $tries < 5; $tries++) {
+        echo('!');
+        @$done = $docpc->loadHTMLFile($url);
+    }    
+    
+    $div = $docpc->getElementsByTagName('table');
+    // Get Second Table
+    unset($docpc);
+    
+    $datatable = NULL;
+    $tablecount=0;
+    foreach ($div as $table) {
+        $right = false;
+        foreach ($table->attributes as $attr) {
+            if ($attr->name == 'class' && $attr->value == 'sdiff navLinks')
+            {
+                $tablecount=$tablecount+1;
+                if($tablecount==1)
+                {
+                    // Take First sdiff navLinks for the nonessential version
+                    $right = true;
+                    break;                    
+                }
+            }
+        }
+        if ($right == true) {
+            $datatable = $table;
+            break;
+            
+        }
+    }
+    
+    if ($datatable == NULL) {
+        echo('End of page reached.' . "\n<br />");
+        echo('Returning Page To Continue.' . "\n<br />");
+        unset($div);
+        return;
+    }
+    unset($div);
+
+    // Now we have right section 
+    
+    $column = "sdiff-b"; 
+    // Get Column of interest.
+    
+    $elements = $datatable->getElementsByTagName('td');
+    unset($datatable);
+  
+    foreach ($elements as $element) {
+        foreach ($element->attributes as $attr) {
+            if ($attr->name == 'class' && $attr->value == $column) {
+                $divs = $element->getElementsByTagName('div');
+                unset($element);    
+
+                // Now we have right column. Look for nonessentials.
+                foreach ($divs as $div) {
+                    foreach ($div->attributes as $attr) {
+                        if ($attr->name == 'class' && (strpos($attr->value, "sds") !== false)) {
+                            pop_structure($attr->value, $div->nodeValue);
+                        } else if ($attr->name == 'class' && (strpos($attr->value, "sdz") !== false)) {
+                            // Do Nothing
+                            // Just End Tag
+                        } else if ($attr->name == 'class' && (strpos($attr->value, "sda") !== false)) {
+                            // Its a Tag Type
+                            pop_structure($attr->value, $div->nodeValue);
+                        } else {
+                            $value = $div->nodeValue;
+
+                            // Only look for nonessentials don't care if this is a type.
+                            if ($value != ">") {
+                                $tag = build_key();
+                                // In this case only interest if tage has location- or contact- in the structure.
+                                if ((strpos($tag, "location-") !== false) || 
+                                    (strpos($tag, "keyword") !== false) || 
+                                    (strpos($tag, "contact-") !== false))
+                                {
+                                    $return = process_change($tag, $tag, $value, $nct_cat, $studycat, $date, "add");
+                                }
+                           }
+                        }
+                    }
+                    unset($div);
+                }
+            }        
+            unset($divs);
+        }
+    }
+
+    
+    $time = date("h:i:s A"); 
+    echo 'End Time: ' . $time . '</br>';
+
+    return;
 }
 
 ?>

@@ -37,6 +37,7 @@ for ($done = false, $tries = 0; $done == false && $tries < 5; $tries++) {
 
 // Get Rows with "Versions in class"
 $ths = $doc->getElementsByTagName('th');
+unset($doc);
 $loopcounter = 0;
 
 // flags
@@ -125,7 +126,6 @@ if (isset($cat)) {
 	}
 	
 	//*************
-	
 }
 
 $count = 0;
@@ -159,16 +159,23 @@ foreach ($ths as $th) {
 
                 // We struck gold "new records" process each row following
                 echo "New Date Record - Next Row <br />";
-                ProcessChanges($id, $th->nodeValue, "sdiff-b");
+                ProcessDiffChanges($id, $th->nodeValue);
+                $lastdate=$th->nodeValue;
+                //ProcessChanges($id, $th->nodeValue, "sdiff-b");
             }
         
             $count = $count + 1;
         }
         
+        unset($attr);
     }
     $studies = $studies + 1;
+    unset($th);
+    
 }
+unset($ths);
 
+echo "<hr>";
 $studies = $studies - 2;
 echo($studies . " different studies (including initial) updated for case id: " . $id);
 // See if Agent Orange is Still causing trouble if so ProcessNew
@@ -177,13 +184,17 @@ if ($agentorange == true) {
 	$agentorange = false;
 }
 
-unset($ths);
-unset($doc);
 
 echo('<br>End Parsing Archive Page for ' . $id);
+
+echo('<hr><br>Parse Current Study for all information and non essentials<br>');
+
+ProcessNonEssentials($id, $lastdate);
+
+echo('<br>Finished Parsing Current Study with this ID.<br />');
 
 $query = 'UPDATE update_status SET end_time="' . date("Y-m-d H:i:s", strtotime('now')) . '" WHERE update_id="' . $update_id . '"';
 $res = mysql_query($query) or die('Unable to update running' . mysql_error());
 
-echo('<br>Finished with this ID.<br />');
+echo('<br>Completely Finished with this ID.<br />');
 ?>  
