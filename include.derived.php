@@ -527,6 +527,7 @@ function applyInstitutionType($arr)
 	$collaborators = array();
 	$instMap = institutionMapping();
 	$larvol_id = $arr['larvol_id'];
+	if(!$larvol_id)return false;
 	//create the generic array for institution_type decision making.
 	if(isset($arr['NCT/collaborator']))
 	{
