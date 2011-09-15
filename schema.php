@@ -27,7 +27,7 @@ foreach($setupscript as $stat)
 	$res = mysql_query($stat);
 	if($res === false)
 	{
-		echo("Warning! Bad query: ");
+		echo("Warning -- Bad query: ");
 		var_dump($stat);
 	}
 }
@@ -58,7 +58,6 @@ foreach($dataScript as $data)
 	{
 		echo("Warning -- Bad query: ");
 		var_dump($stat);
-		exit;
 	}
 }
 mysql_close();
