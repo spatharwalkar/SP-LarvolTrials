@@ -15,6 +15,7 @@ if(isset($_GET['run']))
 		$format = 'xlsx';$expire = false;
 		if (isset($_GET['format'])) $format = $_GET['format'];
 		if(isset($_GET['expire'])) $expire = true;
+		ob_start();
 		runHeatmap($id, false, $format, $expire);
 		exit;
 	}

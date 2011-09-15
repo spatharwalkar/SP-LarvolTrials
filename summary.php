@@ -5,6 +5,7 @@ if(!$db->loggedIn() || !isset($_GET['id']))
 	header('Location: ' . urlPath() . 'index.php');
 	exit;
 }
+ob_start();
 require_once('include.search.php');
 
 $id = mysql_real_escape_string($_GET['id']);
@@ -61,7 +62,7 @@ first preg_replace to replace the replacements text from the template file with 
 second preg_replace to empty the replacement text for which a match has not been found.
 */
 $doc = preg_replace("%#(.*?)#%", "",preg_replace($fields, $values, $doc));
-
+ob_end_clean();
 //Send headers for file download
 header("Pragma: public");
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");

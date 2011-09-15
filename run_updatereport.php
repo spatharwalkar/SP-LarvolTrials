@@ -321,7 +321,6 @@ function runUpdateReport($id, $return = false)
 			if(mysql_affected_rows() == 0) exit;
 		}
 	}
-	
 	//if(mysql_query('COMMIT') === false) return softDie("Couldn't commit SQL transaction");
 
 	// Create excel file object
@@ -397,7 +396,7 @@ function runUpdateReport($id, $return = false)
 	
 	//Create output writer
 	$objWriter = new PHPExcel_Writer_Excel2007($objPHPExcel);
-	
+	ob_end_clean();	
 	if($return === false)
 	{
 		//Send download

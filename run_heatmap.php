@@ -815,6 +815,7 @@ function heatmapAsWord($info, $rows, $columns, $results, $p_colors, $return, $ph
 		return $out;
 	}
 	else {
+		ob_end_clean();
 		header("Pragma: public");
 		header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
 		header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
@@ -1185,10 +1186,10 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 
 	//Create output writer
 	$objWriter = new PHPExcel_Writer_Excel2007($objPHPExcel);
-
 	//Send download or return contents
 	if(!$return)
-	{ 
+	{
+		ob_end_clean(); 
 		header("Pragma: public");
 		header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
 		header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");

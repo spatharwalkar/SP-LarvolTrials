@@ -13,6 +13,7 @@ if(isset($_GET['run']))
 	$id = mysql_real_escape_string($_GET['run']);
 	if(is_numeric($id))
 	{
+		ob_start();
 		runUpdateReport($id);
 		exit;
 	}

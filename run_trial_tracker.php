@@ -7,6 +7,7 @@ if((!$db->loggedIn() || !isset($_GET['id'])) && !isset($_GET['noheaders']))
 	header('Location: ' . urlPath() . 'index.php');
 	exit;
 }
+ob_start();
 require_once('include.search.php');
 
 ini_set('memory_limit','-1');
@@ -251,7 +252,7 @@ if (isset($_GET['debug'])) {echo($out);exit;}
 $doc = file_get_contents('templates/general.htm');
 $doc = explode('#content#',$doc);
 $doc = implode($out, $doc);
-
+ob_end_clean();
 //Send headers for file download
 header("Pragma: public");
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
