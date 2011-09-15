@@ -369,6 +369,15 @@ INSERT INTO `data_fields` (`id`, `name`, `type`, `category`) VALUES
 (513, 'clinical_trial_type', 'varchar', 6),
 (514, 'trial_status', 'varchar', 6),
 (199, 'eudract_id', 'varchar', 6),
+(515, 'keyword', 'varchar', 1),
+(516, 'study_id_org_name','varchar',1),
+(517, 'study_id_org_full_name','varchar',1),
+(518, 'org_study_id','varchar',1),
+(519, 'is_fda_regulated','bool',1),
+(520, 'is_section_801','bool',1),
+(521, 'delayed_posting','bool',1),
+(522, 'arm_group_other_name','varchar',1),
+
 
 (700, 'isrctn_id', 'varchar', 7),
 (701, 'clinicaltrials_id', 'varchar', 7),
