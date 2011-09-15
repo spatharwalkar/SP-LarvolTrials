@@ -29,6 +29,7 @@ foreach($setupscript as $stat)
 	{
 		echo("Warning -- Bad query: ");
 		var_dump($stat);
+		echo("\n");
 	}
 }
 mysql_close();
