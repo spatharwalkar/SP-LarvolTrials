@@ -254,6 +254,10 @@ iframe{
 	float:right;
 	padding:0;
 }
+.lbldeln{
+	background-color:red;
+	padding:0;
+}
 .lbldelc{
 	background-color:red;
 	float:center;
