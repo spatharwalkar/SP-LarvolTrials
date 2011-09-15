@@ -56,7 +56,7 @@ foreach($dataScript as $data)
 	$res = mysql_query($data);
 	if($res === false)
 	{
-		echo("Couldn't import data from file! Bad query: ");
+		echo("Warning -- Bad query: ");
 		var_dump($stat);
 		exit;
 	}
