@@ -27,9 +27,8 @@ foreach($setupscript as $stat)
 	$res = mysql_query($stat);
 	if($res === false)
 	{
-		echo("Couldn't import DB from file! Bad query: ");
+		echo("Warning! Bad query: ");
 		var_dump($stat);
-		exit;
 	}
 }
 mysql_close();
