@@ -58,7 +58,7 @@ foreach($dataScript as $data)
 	if($res === false)
 	{
 		echo("Warning -- Bad query: ");
-		var_dump($stat);
+		var_dump($data);
 	}
 }
 mysql_close();

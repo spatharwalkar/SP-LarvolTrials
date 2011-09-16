@@ -391,6 +391,11 @@
         		{
         			$insertArr = $this->createUniqueValArray($insertArr, $fields,'explode');
         		}
+        		
+        	    if(is_array($deleteArr) && count($deleteArr)>0)
+        		{
+        			$deleteArr = $this->createUniqueValArray($deleteArr, $fields,'explode');
+        		}        		
         			
 				if($table=='data_fields')
 				{
@@ -410,7 +415,6 @@
         		}
         	    if(is_array($deleteArr) && count($deleteArr)>0)
         		{
-        			$deleteArr = $this->createUniqueValArray($deleteArr, $fields,'explode');
         			$dbHome->simpleDelete($table,$deleteArr);
         		}
         	}
