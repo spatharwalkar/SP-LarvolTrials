@@ -458,6 +458,8 @@ class ContentManager
 		$return_param	= array();
 		$return_param['fin_arr'] = array();
 		$return_param['upmDetails'] = array();
+		$return_param['inactivephase'] = array();
+		$return_param['activephase'] = array();
 		$ins_params		= array();
 		$return_param['showRecordsCnt'] = 0;
 		
@@ -843,7 +845,7 @@ class ContentManager
 			$this->pstart 	= '';$this->last = '';$this->pend = '';$this->pages = '';
 			if(isset($_GET['pg'])) $page = mysql_real_escape_string($_GET['pg']); 
 			if(!is_numeric($page)) die('non-numeric page');
-			$count = $process_params['showRecordsCnt'];
+			$count = max($process_params['eachCount']);
 			
 			$this->pstart 	= ($page-1) * $this->results_per_page + 1;
 			$this->pend 	= $this->pstart + $this->results_per_page - 1;

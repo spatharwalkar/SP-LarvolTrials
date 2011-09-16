@@ -227,25 +227,25 @@ function runHeatmap($id, $return = false, $format = "xlsx", $expire = false)
 			//get searchdata
 			$globalparams = array('action' => $oversearch['action'], 'searchval' => $oversearch['searchval'], 
 									'negate' => $oversearch['negate'], 'multifields' => $oversearch['multifields'], 
-									'multivalue' => $oversearch['multivalue']);
+									'multivalue' => $oversearch['multivalue'], 'weak' => $oversearch['weak']);
 			$globalparams = prepareParams($globalparams);
 			
 			$columnparams = array('action' => $columnsearch[$column]['action'], 
 									'searchval' => $columnsearch[$column]['searchval'],
 									'negate' => $columnsearch[$column]['negate'], 
 									'multifields' => $columnsearch[$column]['multifields'], 
-									'multivalue' => $columnsearch[$column]['multivalue']);
+									'multivalue' => $columnsearch[$column]['multivalue'], 'weak' => $columnsearch[$column]['weak']);
 			$columnparams = prepareParams($columnparams);
 									
 			$rowparams = array('action' => $rowsearch[$row]['action'], 'searchval' => $rowsearch[$row]['searchval'], 
 									'negate' => $rowsearch[$row]['negate'],
 									'multifields' => $rowsearch[$row]['multifields'], 
-									'multivalue' => $rowsearch[$row]['multivalue']);
+									'multivalue' => $rowsearch[$row]['multivalue'], 'weak' => $rowsearch[$row]['weak']);
 			$rowparams = prepareParams($rowparams);
 			
 			$cellparams = array('action' => $cell['action'], 'searchval' => $cell['searchval'], 
 									'negate' => $cell['negate'], 'multifields' => $cell['multifields'], 
-									'multivalue' => $cell['multivalue']);
+									'multivalue' => $cell['multivalue'], 'weak' => $cell['weak']);
 			$cellparams = prepareParams($cellparams);
 			$params = array_merge($globalparams, $columnparams, $rowparams, $cellparams);
 			
