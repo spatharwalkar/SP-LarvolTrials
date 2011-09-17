@@ -1,7 +1,7 @@
 <?php
 //initiate logging actions
 require_once dirname(__FILE__).'/log4php/Logger.php';
-Logger::configure(dirname(__FILE__).'/log4php/larvol.properties');
+Logger::configure(dirname(__FILE__).'/setup/log.properties');
 $logger = Logger::getLogger('tlg');
 //	
 
