@@ -155,11 +155,12 @@ if (count($ids) == 0) {
         }
         $count = 0;
 
-        foreach ($ths as $th) {
+		foreach ($ths as $th) {
             foreach ($th->attributes as $attr) {
                 if ($attr->name == 'scope' && $attr->value == 'row') {
                     if ($count == 0) {
                         // skip first line just initial version
+						$initial_date = $th->nodeValue;
                         echo "<br/>";
                     } else {
 
@@ -167,8 +168,11 @@ if (count($ids) == 0) {
                             //Process Left
                             // This means there is new stuff for us to review and store.
                             echo "<br />Processing Left Column Value for initial <br />";
-                            ProcessChanges($id, $th->nodeValue, "sdiff-a");
-
+                            //ProcessChanges($id, $th->nodeValue, "sdiff-a");
+							if(isset($initial_date))
+								ProcessChanges($id, $th->nodeValue, "sdiff-a", $initial_date);
+							else
+								ProcessChanges($id, $th->nodeValue, "sdiff-a");
                             // Set CatID for later lookup which is the studycat number.
                             $query = 'SELECT val_int AS "nct_id",studycat FROM data_values '
                                     . 'WHERE field=' . $id_field

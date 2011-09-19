@@ -276,10 +276,10 @@ function ProcessChanges($id, $date, $column, $initial_date=NULL) {
     }
 
     unset($innerHTML);
-    if ($initial_date == null) {
-        addNCT_history($xml, $id, $date);
-    } else {
-        addNCT_history($xml, $id, $initial_date);
+    if (isset($initial_date) and !empty($initial_date)) {
+		addNCT_history($xml, $id, $initial_date);
+      } else {
+		addNCT_history($xml, $id, $date);
     }
 
     echo $tab . 'End Parsing Archive Changes Page for ' . $id . ' and Date: ' . $date . '<hr>';
@@ -584,8 +584,27 @@ function addNCT_history($rec, $id, $date) {
         $record_data['results_reference_PMID'][] = $ref->reference->PMID;
     }
 
+/***** TKV
+****** Detect and pick all irregular phases that exist in one or several of the various title or description fields */
+$phases_regex='/phase 2a\/2b|phase 1b\/2a|phase 1a\/1b|Phase 1a\/b|phase 3b\/4|Phase2b\/3|phase 1b\/2|phase 2a\/b|phase 1a|phase 1b|Phase 1C|phase 2a|phase 2b|phase 3a|phase 3b/i';
+preg_match_all($phases_regex, $record_data['brief_title'], $matches);
 
+if(!count($matches[0]) >0 )
+{
+preg_match_all($phases_regex, $record_data['official_title'], $matches);
+}
+if(count($matches[0]) >0 )
+{
 
+	$cnt=count($matches[0]);
+	for ( $counter = 0; $counter <= 200; $counter ++)
+	{
+		if (isset($matches[0][$counter])) echo '<br>$matches[0]['.$counter.']='.$matches[0][$counter];
+	}
+
+	$record_data['phase']=$matches[0][0];
+}
+//****
 
 //     //import everything
 	$pid = getmypid();
@@ -747,6 +766,7 @@ function addval_d($studycat, $category_id, $fieldname, $value, $date) {
                     $val = NULL;
                 } else {
 				// evaluate enums before proceeding
+				
 					$evl=validateEnums($val);
 					if($evl) 
 					{
@@ -966,7 +986,7 @@ function ParseStructure($data) {
     unset($divs);
 
     return;
-}
+} 
 
 function prepXMP($data, $action, $studycat, $nct_cat, $date) {
 
@@ -1290,7 +1310,7 @@ function ProcessNonEssentials($id, $date) {
                     foreach ($div->attributes as $attr) {
                         if ($attr->name == 'class' && (strpos($attr->value, "sds") !== false)) {
                             pop_structure($attr->value, $div->nodeValue);
-                        } else if ($attr->name == 'class' && (strpos($attr->value, "sdz") !== false)) {
+                        } else if ($attr->name == 'class' && (strpos($attr->value, "sdz") !== false))  {
                             // Do Nothing
                             // Just End Tag
                         } else if ($attr->name == 'class' && (strpos($attr->value, "sda") !== false)) {
@@ -1298,7 +1318,7 @@ function ProcessNonEssentials($id, $date) {
                             pop_structure($attr->value, $div->nodeValue);
                         } else {
                             $value = $div->nodeValue;
-
+							echo '<br> VALUE='. $value . '<br>';
                             // Only look for nonessentials don't care if this is a type.
                             if ($value != ">") {
                                 $tag = build_key();
