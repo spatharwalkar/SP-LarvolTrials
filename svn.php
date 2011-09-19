@@ -20,6 +20,8 @@ if(isset($_POST['update']))
 		$rev = ' -r' . (int)$_POST['revision'];
 	$cmd = 'svn update' . $rev;
 	echo('<span class="cmd">' . $cmd . '</span>' . "\n");
+	//svn update command error goes to stderr . So forcing it to output from stderr to stdout.
+	$cmd .= " 2>&1";
 	system($cmd);
 	echo('</pre></fieldset>');
 }
