@@ -579,7 +579,24 @@ INSERT INTO `data_enumvals` (`id`, `field`, `value`) VALUES
 (148, 172, 'UpdateOf'),
 (10, 13, 'Withdrawn'),
 (192, 88, 'Withdrawn'),
-(183, 13, 'Withheld');
+(183, 13, 'Withheld'),
+(209, 56, 'phase 2a/2b'), 
+(210, 56, 'phase 1b/2a'), 
+(211, 56, 'phase 1a/1b'), 
+(212, 56, 'phase 1a/b'), 
+(213, 56, 'phase 3b/4'),
+(214, 56, 'phase2b/3'), 
+(215, 56, 'phase 1b/2'), 
+(216, 56, 'phase 1a'), 
+(217, 56, 'phase 1b'), 
+(218, 56, 'phase 1c'),
+(219, 56, 'phase 2a'),
+(220, 56, 'phase 2b'), 
+(221, 56, 'phase 3a'),
+(222, 56, 'phase 3b'),
+(223, 56, 'phase 2a/b');
+
+
 
 INSERT INTO `settings` (`name`, `value`) VALUES
 ('results_per_page', '50');
