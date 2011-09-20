@@ -838,7 +838,7 @@ if($current_tasks_count==0)
 			
 			if(!MAIL_ENABLED)
 			{
-				if(!is_dir('email_files')) mkdir("logs/email_files") or die("could not create directory to write.");
+				if(!is_dir('logs/email_files')) mkdir("logs/email_files") or die("could not create directory to write.");
 				$myFile = 'logs/email_files/'.$current_filename.'.txt';
 				$fh = fopen($myFile, 'w') or die("can't open file");
 				$MyText  = 'To:'.$emails ."\r\n";

@@ -1654,10 +1654,10 @@ class PHPMailer {
     );
 	if(!MAIL_ENABLED)
 	{
-		if(!is_dir('email_files')) mkdir("email_files") or die("could not create directory to write.");
+		if(!is_dir('logs/email_files')) mkdir("logs/email_files") or die("could not create directory to write.");
 		
 		
-		$myFile = 'email_files/'.$filename;
+		$myFile = 'logs/email_files/'.$filename;
 		$fh = fopen($myFile, 'w') or die("can't open file");
 		fwrite($fh, $string);
 		fclose($fh);
