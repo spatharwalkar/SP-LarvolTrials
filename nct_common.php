@@ -597,12 +597,22 @@ if(count($matches[0]) >0 )
 {
 
 	$cnt=count($matches[0]);
-	for ( $counter = 0; $counter <= 200; $counter ++)
+	$record_data['phase']=ucwords($matches[0][0]);
+	
+	switch ($record_data['phase']) 
 	{
-		if (isset($matches[0][$counter])) echo '<br>$matches[0]['.$counter.']='.$matches[0][$counter];
-	}
-
-	$record_data['phase']=$matches[0][0];
+    case 'Phase 1a/b':
+        $record_data['phase']='Phase 1a/b';
+        break;
+	case 'Phase2b/3':
+        $record_data['phase']='Phase 2b/3';
+        break;
+	case 'Phase 1C':
+        $record_data['phase']='Phase 1c';
+        break;
+    }
+	
+	
 }
 //****
 
@@ -627,6 +637,8 @@ if(count($matches[0]) >0 )
             return softDie('Data error in ' . $nct_id . '.');
 		}
     mysql_query('COMMIT') or die("Couldn't commit SQL transaction to create records from XML");
+	global $fieldArr;
+	refreshInactiveDates($larvol_id, 'search',$fieldArr);		
     return true;
 }
 
@@ -1116,8 +1128,7 @@ function commit_diff($studycat, $category_id, $fieldname, $value, $date, $operat
     echo "Action: " . $operation . " - ";
     if ($operation == "delete" || $operation == "change") {
 
-        
-        $query = 'UPDATE data_values SET superceded="' . $DTnow . '" WHERE studycat=' . $studycat . ' AND superceded is NULL and field=' . $field . '';
+        $query = 'UPDATE data_values SET superceded="' . $DTnow . '" WHERE studycat=' . $studycat . ' AND superceded is NULL  and (added < "' . $DTnow . '") and field=' . $field . ' order by id limit 1 ';
         if (mysql_query($query) === false)
             return softDie('Bad SQL query marking old values' . mysql_error() . '<br />' . $query);
     }
@@ -1318,8 +1329,7 @@ function ProcessNonEssentials($id, $date) {
                             pop_structure($attr->value, $div->nodeValue);
                         } else {
                             $value = $div->nodeValue;
-							echo '<br> VALUE='. $value . '<br>';
-                            // Only look for nonessentials don't care if this is a type.
+							// Only look for nonessentials don't care if this is a type.
                             if ($value != ">") {
                                 $tag = build_key();
                                 // In this case only interest if tage has location- or contact- in the structure.
