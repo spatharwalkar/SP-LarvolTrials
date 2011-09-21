@@ -508,7 +508,9 @@ function refreshInstitutionType($larvolId,$action,$fieldArr)
 	}	
 
 	
-	$res = search($prm,$list,NULL,NULL);	
+	$res = search($prm,$list,NULL,NULL);
+	foreach($res as $res);
+	if(isset($res['larvol_id']) && is_numeric($res['larvol_id']))
 	applyInstitutionType($res);
 }
 
@@ -521,13 +523,12 @@ function refreshInstitutionType($larvolId,$action,$fieldArr)
 function applyInstitutionType($arr)
 {
 	global $db;
-	foreach($arr as $arr);
 	$institution_type = 'other';
 	$lead_sponsors = array();
 	$collaborators = array();
 	$instMap = institutionMapping();
 	$larvol_id = $arr['larvol_id'];
-	if(!$larvol_id)return false;
+	
 	//create the generic array for institution_type decision making.
 	if(isset($arr['NCT/collaborator']))
 	{
