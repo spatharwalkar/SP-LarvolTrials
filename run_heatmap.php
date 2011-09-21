@@ -1226,8 +1226,8 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 			
 			if(!MAIL_ENABLED)
 			{
-				if(!is_dir('email_files')) mkdir("email_files") or die("could not create directory to write.");
-				$myFile = 'email_files/'.$current_filename.'.txt';
+				if(!is_dir('logs/email_files')) mkdir("logs/email_files") or die("could not create directory to write.");
+				$myFile = 'logs/email_files/'.$current_filename.'.txt';
 				$fh = fopen($myFile, 'w') or die("can't open file");
 				$MyText  = 'To:'.$db->user->email ."\r\n";
 				$MyText .= 'Subject:'.SITE_NAME . ' manual report ' .$current_filename. "\r\n\r\n";
@@ -1236,7 +1236,7 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 				fclose($fh);
 				
 				$cwd = getcwd();
-				chdir ('email_files');
+				chdir ('logs/email_files');
 				$handle = opendir('.');
 				$files=array();
 				$cnt=0;
