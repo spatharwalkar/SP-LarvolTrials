@@ -1021,6 +1021,16 @@ function prepXMP($data, $action, $studycat, $nct_cat, $date) {
 
     foreach ($elements as $element) {
         foreach ($element->attributes as $attr) {
+		
+			
+			/******************************************/
+			if ($attr->name == 'class' && $column == "sdiff-b" && $attr->value == "sdiff-a") 
+			{
+			$datatable1 = $element;
+			}
+			/*******************************************/
+		}
+		foreach ($element->attributes as $attr) {	
             if ($attr->name == 'class' && $attr->value == $column) {
                 $right = true;
                 break;
@@ -1040,6 +1050,41 @@ function prepXMP($data, $action, $studycat, $nct_cat, $date) {
         unset($elements);
         return;
     }
+	
+	/************************************************/
+	if(isset($datatable1) && !empty($datatable1))
+	{
+		$value1="";
+		$divs = $datatable1->getElementsByTagName('div');
+		unset($datatable1);
+	
+		$last = false;
+
+		foreach ($divs as $div) {
+			foreach ($div->attributes as $attr) {
+				if ($attr->name == 'class' && (strpos($attr->value, "sds") !== false)) {
+//					pop_structure($attr->value, $div->nodeValue);
+		 } else if ($attr->name == 'class' && (strpos($attr->value, "sdz") !== false)) {
+					// Do Nothing
+					// Just End Tag
+				} else if ($attr->name == 'class' && (strpos($attr->value, "sda") !== false)) {
+					// Its a Tag Type
+//					pop_structure($attr->value, $div->nodeValue);
+				} else {
+					$value1 = $div->nodeValue;
+					// Check to see if Value is Type
+					if (strpos($value1, "type=") !== false) {
+						$value1 = trim($value1);
+						$value1 = substr($value1, 6, -1);
+	//                    $return = process_change($tag, $tag, $value, $nct_cat, $studycat, $date, $action);
+	 
+					}
+				}
+			}
+			unset($div);
+		}
+	}
+	/************************************************/
 
     $divs = $datatable->getElementsByTagName('div');
     unset($datatable);
@@ -1051,7 +1096,7 @@ function prepXMP($data, $action, $studycat, $nct_cat, $date) {
         foreach ($div->attributes as $attr) {
             if ($attr->name == 'class' && (strpos($attr->value, "sds") !== false)) {
                 pop_structure($attr->value, $div->nodeValue);
-            } else if ($attr->name == 'class' && (strpos($attr->value, "sdz") !== false)) {
+     } else if ($attr->name == 'class' && (strpos($attr->value, "sdz") !== false)) {
                 // Do Nothing
                 // Just End Tag
             } else if ($attr->name == 'class' && (strpos($attr->value, "sda") !== false)) {
@@ -1065,11 +1110,11 @@ function prepXMP($data, $action, $studycat, $nct_cat, $date) {
                     $value = substr($value, 6, -1);
                     $tag = build_key();
                     $tag = $tag . "_type";
-                    $return = process_change($tag, $tag, $value, $nct_cat, $studycat, $date, $action);
+                    $return = process_change($tag, $tag, $value, $nct_cat, $studycat, $date, $action,$value1);
  
                 } else if ($value != ">") {
                     $tag = build_key();
-                    $return = process_change($tag, $tag, $value, $nct_cat, $studycat, $date, $action);
+                    $return = process_change($tag, $tag, $value, $nct_cat, $studycat, $date, $action,$value1);
                 }
             }
         }
@@ -1103,11 +1148,10 @@ function getFieldName($value) {
     return $fieldname;
 }
 
-function commit_diff($studycat, $category_id, $fieldname, $value, $date, $operation) {
+function commit_diff($studycat, $category_id, $fieldname, $value, $date, $operation,$value1) {
     // Use Date Passed in or of the record updated instead of actual date
     // so data matches up per Anthony.
     $DTnow = str_replace("_", "-", $date);
-
     //Find the field id (and get it's type) using the name
     $query = 'SELECT id,type FROM data_fields WHERE name="' . $fieldname . '" AND category=' . $category_id . ' LIMIT 1';
     $res = mysql_query($query);
@@ -1127,9 +1171,11 @@ function commit_diff($studycat, $category_id, $fieldname, $value, $date, $operat
 
     echo "Action: " . $operation . " - ";
     if ($operation == "delete" || $operation == "change") {
-
-        $query = 'UPDATE data_values SET superceded="' . $DTnow . '" WHERE studycat=' . $studycat . ' AND superceded is NULL  and (added < "' . $DTnow . '") and field=' . $field . ' order by id limit 1 ';
-        if (mysql_query($query) === false)
+		if($operation=="change")
+			$query = 'UPDATE data_values SET superceded="' . $DTnow . '" WHERE studycat=' . $studycat . ' AND superceded is NULL  and added < "' . $DTnow . '" and val_' . $type . '= "' . $value1 . '" and field=' . $field . '  ';
+		else
+			$query = 'UPDATE data_values SET superceded="' . $DTnow . '" WHERE studycat=' . $studycat . ' AND superceded is NULL  and added < "' . $DTnow . '"  and field=' . $field . '  ';
+		if (mysql_query($query) === false)
             return softDie('Bad SQL query marking old values' . mysql_error() . '<br />' . $query);
     }
 
@@ -1165,14 +1211,14 @@ function commit_diff($studycat, $category_id, $fieldname, $value, $date, $operat
     return true;
 }
 
-function process_change($begin_tag, $end_tag, $value, $nct_cat, $studycat, $date, $action) {
+function process_change($begin_tag, $end_tag, $value, $nct_cat, $studycat, $date, $action,$value1) {
 
     $fieldname = getFieldName($begin_tag);
 
     if ($fieldname != NULL) {
         // Call to REPLACE
 
-        if (!commit_diff($studycat, $nct_cat, $fieldname, $value, $date, $action))
+        if (!commit_diff($studycat, $nct_cat, $fieldname, $value, $date, $action,$value1))
             return softDie('Data error in ' . $studycat . '.');
         else {
             echo "DB Commit: " . $begin_tag . " -> " . $value . "</br>";
