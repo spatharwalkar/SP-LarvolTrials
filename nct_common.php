@@ -392,7 +392,8 @@ function addNCT_history($rec, $id, $date) {
         'brief_summary' => $rec->status_block->brief_summary->textblock,
         'detailed_description' => $rec->status_block->detailed_descr->textblock,
         'why_stopped' => $rec->why_stopped,
-        'study_design' => $rec->study_design,
+//        'study_design' => $rec->study_design,
+		'study_design' => $rec->design,
         'biospec_descr' => $rec->biospec_descr->textblock,
         'study_pop' => $rec->eligibility->study_pop->textblock,
         'criteria' => $rec->eligibility->criteria->textblock,
@@ -615,7 +616,6 @@ if(count($matches[0]) >0 )
 	
 }
 //****
-
 //     //import everything
 	$pid = getmypid();
     foreach ($record_data as $fieldname => $value)
