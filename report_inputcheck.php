@@ -1,6 +1,5 @@
 <?php
 ob_start();
-$logError = array();
 require_once('db.php');
 if(!$db->loggedIn() || !isset($_GET['id']))
 {
@@ -75,7 +74,15 @@ while($row = mysql_fetch_assoc($res))
 }
 $doc = explode('#content#',$doc);
 $doc = implode($out, $doc);
+
+global $logger;
+$log = null;
+$log = ob_get_contents();
+$log = str_replace("\n", '', $log);
+if($log)
+$logger->error($log);
 ob_end_clean();
+
 //Send headers for file download
 header("Pragma: public");
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");

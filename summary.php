@@ -62,7 +62,15 @@ first preg_replace to replace the replacements text from the template file with 
 second preg_replace to empty the replacement text for which a match has not been found.
 */
 $doc = preg_replace("%#(.*?)#%", "",preg_replace($fields, $values, $doc));
+
+global $logger;
+$log = null;
+$log = ob_get_contents();
+$log = str_replace("\n", '', $log);
+if($log)
+$logger->error($log);
 ob_end_clean();
+
 //Send headers for file download
 header("Pragma: public");
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");

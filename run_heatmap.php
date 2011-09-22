@@ -815,7 +815,15 @@ function heatmapAsWord($info, $rows, $columns, $results, $p_colors, $return, $ph
 		return $out;
 	}
 	else {
+		
+		global $logger;
+		$log = null;
+		$log = ob_get_contents();
+		$log = str_replace("\n", '', $log);
+		if($log)
+		$logger->error($log);		
 		ob_end_clean();
+		
 		header("Pragma: public");
 		header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
 		header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
@@ -1189,7 +1197,14 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 	//Send download or return contents
 	if(!$return)
 	{
+		global $logger;
+		$log = null;
+		$log = ob_get_contents();
+		$log = str_replace("\n", '', $log);
+		if($log)
+		$logger->error($log);		
 		ob_end_clean(); 
+		
 		header("Pragma: public");
 		header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
 		header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");

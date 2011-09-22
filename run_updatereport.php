@@ -396,7 +396,15 @@ function runUpdateReport($id, $return = false)
 	
 	//Create output writer
 	$objWriter = new PHPExcel_Writer_Excel2007($objPHPExcel);
+	
+	global $logger;
+	$log = null;
+	$log = ob_get_contents();
+	$log = str_replace("\n", '', $log);
+	if($log)
+	$logger->error($log);	
 	ob_end_clean();	
+	
 	if($return === false)
 	{
 		//Send download
