@@ -33,6 +33,7 @@ $mapping = array(
     'study_type' => 'study_type',
     'design' => 'study_design',
     'number_of_arms' => 'number_of_arms',
+	'primary_outcome' => 'primary_outcome_measure', //duplicate for when measure is shown as just "primary_outcome"
     'primary_outcome-measure' => 'primary_outcome_measure',
     'primary_outcome-time_frame' => 'primary_outcome_timeframe',
     'primary_outcome-safety_issue' => 'primary_outcome_safety_issue',
@@ -1135,16 +1136,11 @@ function stripnode($value) {
     return $value;
 }
 
-function getFieldName($value) {
+function getFieldName($value)
+{
     $fieldname = NULL;
     global $mapping;
-
     $fieldname = $mapping[$value];
-
-    if ($fieldname == NULL) {
-        echo "WARNING: Unable to find fieldname: " . $value . ", match in mapping.<br>";
-    }
-
     return $fieldname;
 }
 
@@ -1215,7 +1211,8 @@ function process_change($begin_tag, $end_tag, $value, $nct_cat, $studycat, $date
 
     $fieldname = getFieldName($begin_tag);
 
-    if ($fieldname != NULL) {
+    if ($fieldname != NULL)
+	{
         // Call to REPLACE
 
         if (!commit_diff($studycat, $nct_cat, $fieldname, $value, $date, $action,$value1))
@@ -1225,7 +1222,9 @@ function process_change($begin_tag, $end_tag, $value, $nct_cat, $studycat, $date
         }
 
         return 1;
-    }
+    }else{
+		 echo "WARNING: Unable to find fieldname: " . $begin_tag . ", match in mapping. Value:" . $value . "<br>";
+	}
 
     return 0;
 }
