@@ -44,6 +44,7 @@ $mapping = array(
     'measure-safety_issue' => 'primary_outcome_safety_issue',
     'enrollment' => 'enrollment',
     'enrollment_type' => 'enrollment_type',
+	'eligibility-expected_enrollment' => 'enrollment', //dupe for old field that was renamed to "enrollment"
     'condition' => 'condition',
     'arm_group-arm_group_label' => 'arm_group_label',
     'arm_group-other_name' => 'arm_group_other_name', //new
@@ -79,6 +80,8 @@ $mapping = array(
     'initial_release_date' => 'firstreceived_date',
     'last_release_date' => 'lastchanged_date',
     'init_results_release_date' => 'primary_completion_date',
+	'results-reference-citation' => 'results_reference_citation',
+	'results-reference-medline_ui' => 'results_reference_PMID',
 //  *********************
 //  ADDED truncated ones
 //  *********************
