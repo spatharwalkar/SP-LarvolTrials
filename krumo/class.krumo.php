@@ -765,7 +765,7 @@ function strleft($s1, $s2) //helper function for urlPath()
 	* @access private
 	* @static
 	*/
-	Private Static Function _dump(&$data, $name='...') {
+	Private Static Function _dump(&$data, $name='-3') {
 
 		// object ?
 		//
@@ -1216,7 +1216,7 @@ function strleft($s1, $s2) //helper function for urlPath()
 		$_extra = false;
 		$_ = $data;
 		if (strLen($data) > KRUMO_TRUNCATE_LENGTH) {
-			$_ = substr($data, 0, KRUMO_TRUNCATE_LENGTH - 3) . '...';
+			$_ = substr($data, 0, KRUMO_TRUNCATE_LENGTH - 3) . '-3';
 			$_extra = true;
 			}
 ?>
