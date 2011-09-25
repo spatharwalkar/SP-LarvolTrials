@@ -434,6 +434,10 @@
 					$row = mysql_fetch_row($result);
 					$map[] = $row[0];
 				}
+				else
+				{
+					$map[] = '';
+				}
 			}
 			foreach($insertArr as $ky=>$arr)
 			{

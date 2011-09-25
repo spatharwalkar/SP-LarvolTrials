@@ -338,7 +338,7 @@
          **/     
         public function syncData()
         {
-        	echo '<pre>';
+        	//echo '<pre>';
         	if(!$this->home->ok && count($this->sync) && !$this->sync[0]->ok)
         	{
         		$this->RaiseError('Home or Sync Database not set properly.');

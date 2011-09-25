@@ -63,7 +63,7 @@ foreach($dataScript as $data)
 }
 mysql_close();
 echo '<pre>';
-$dbsync->syncDataTables('set',array('data_categories','data_fields','data_enumvals','user_permissions'));
+$dbsync->syncDataTables('set',array('data_categories','data_enumvals','data_fields','user_permissions'));
 $dbsync->syncData();
 
 ?>
