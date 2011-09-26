@@ -18,7 +18,8 @@ if(isset($_GET['days']))
 }
 if(isset($days_to_fetch))	//$days_to_fetch comes from cron.php normally
 {
-	$days = (int)$days_to_fetch;
+//	$days = (int)$days_to_fetch;
+	$days = 30+(int)$days_to_fetch;
 }else{
 	die('Need to set $days_to_fetch or $_GET[' . "'days'" . ']');
 }

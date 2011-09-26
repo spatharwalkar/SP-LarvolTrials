@@ -1,8 +1,14 @@
 <?php
-
 error_reporting(E_ERROR);
 $tab = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
 
+$ignore_fields = array(
+	'last_data_entry',
+	'last_follow_up',
+	'last_follow_up_date_type'
+	);
+
+$ignore_fields=array_flip($ignore_fields);
 $mapping = array(
     'study_id-org_name' => 'study_id_org_name', //new
     'study_id-org_full_name' => 'study_id_org_full_name', //new
@@ -35,6 +41,7 @@ $mapping = array(
     'number_of_arms' => 'number_of_arms',
 	'primary_outcome' => 'primary_outcome_measure', //duplicate for when measure is shown as just "primary_outcome"
     'primary_outcome-measure' => 'primary_outcome_measure',
+	'measure' => 'primary_outcome_measure',
     'primary_outcome-time_frame' => 'primary_outcome_timeframe',
     'primary_outcome-safety_issue' => 'primary_outcome_safety_issue',
     'secondary_outcome-measure' => 'secondary_outcome_measure',
@@ -42,6 +49,7 @@ $mapping = array(
     'secondary_outcome-safety_issue' => 'secondary_outcome_safety_issue',
     'measure-time_frame' => 'primary_outcome_timeframe',
     'measure-safety_issue' => 'primary_outcome_safety_issue',
+	'measure-measure' => 'primary_outcome_measure',
     'enrollment' => 'enrollment',
     'enrollment_type' => 'enrollment_type',
 	'eligibility-expected_enrollment' => 'enrollment', //dupe for old field that was renamed to "enrollment"
@@ -474,6 +482,8 @@ function addNCT_history($rec, $id, $date) {
     $record_data['primary_outcome_timeframe'] = array();
     $record_data['primary_outcome_safety_issue'] = array();
     foreach ($rec->primary_outcome as $out) {
+		if(!isset($out->measure) or empty($out->measure))
+			$record_data['primary_outcome_measure'][]=$out;
         $record_data['primary_outcome_measure'][] = $out->measure;
         $record_data['primary_outcome_timeframe'][] = $out->time_frame;
         $record_data['primary_outcome_safety_issue'][] = ynbool($out->safety_issue);
@@ -588,7 +598,6 @@ function addNCT_history($rec, $id, $date) {
         $record_data['results_reference_citation'][] = $ref->reference->citation;
         $record_data['results_reference_PMID'][] = $ref->reference->PMID;
     }
-
 /***** TKV
 ****** Detect and pick all irregular phases that exist in one or several of the various title or description fields */
 $phases_regex='/phase 2a\/2b|phase 1b\/2a|phase 1a\/1b|Phase 1a\/b|phase 3b\/4|Phase2b\/3|phase 1b\/2|phase 2a\/b|phase 1a|phase 1b|Phase 1C|phase 2a|phase 2b|phase 3a|phase 3b/i';
@@ -956,7 +965,7 @@ function ProcessDiffChanges($id, $date) {
                     $action = "delete";
                     prepXMP($tr, $action, $studycat, $nct_cat, $date);
                 } else if ($attr->name == 'class' && $attr->value == "sdiff-add") {
-                    // Add
+                    // _out
                     $action = "add";
                     prepXMP($tr, $action, $studycat, $nct_cat, $date);
                  }
@@ -1143,7 +1152,17 @@ function getFieldName($value)
 {
     $fieldname = NULL;
     global $mapping;
+	global $logger;
+	global $ignore_fields;
     $fieldname = $mapping[$value];
+	$ignore=isset($ignore_fields[$value]) and !empty($ignore_fields[$value]) ;
+    if (($fieldname === NULL or !isset($fieldname) or empty($fieldname))  and !$ignore  ) 
+	{
+		$log="WARNING: Unable to find fieldname: " . $value . ", match in mapping.";
+		$logger->warn($log);
+        echo $log."<br>";
+    }
+
     return $fieldname;
 }
 
@@ -1212,9 +1231,11 @@ function commit_diff($studycat, $category_id, $fieldname, $value, $date, $operat
 
 function process_change($begin_tag, $end_tag, $value, $nct_cat, $studycat, $date, $action,$value1) {
 
+	global $logger;
     $fieldname = getFieldName($begin_tag);
+	
 
-    if ($fieldname != NULL)
+    if ($fieldname !== NULL)
 	{
         // Call to REPLACE
 
@@ -1225,10 +1246,18 @@ function process_change($begin_tag, $end_tag, $value, $nct_cat, $studycat, $date
         }
 
         return 1;
-    }else{
-		 echo "WARNING: Unable to find fieldname: " . $begin_tag . ", match in mapping. Value:" . $value . "<br>";
+    }else
+	{
+	
+		global $ignore_fields;
+		$ignore=isset($ignore_fields[$begin_tag]) and !empty($ignore_fields[$begin_tag]) ;
+		if (!$ignore  ) 
+		{
+			$log = "WARNING: Unable to find fieldname: " . $begin_tag . ", match in mapping. Value:" . $value . "<br>";
+			echo $log;
+			$logger->warn($log);
+		}
 	}
-
     return 0;
 }
 
