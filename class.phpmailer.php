@@ -1640,7 +1640,8 @@ class PHPMailer {
    * @param string $type File extension (MIME) type.
    * @return void
    */
-  public function AddStringAttachment($string, $filename, $encoding = 'base64', $type = 'application/octet-stream') {
+  public function AddStringAttachment($string, $filename, $encoding = 'base64', $type = 'application/octet-stream',$subject=null,$emails=null)
+  {
     // Append to $attachment array
     $this->attachment[] = array(
       0 => $string,
@@ -1656,11 +1657,45 @@ class PHPMailer {
 	{
 		if(!is_dir('logs/email_files')) mkdir("logs/email_files") or die("could not create directory to write.");
 		
-		
 		$myFile = 'logs/email_files/'.$filename;
 		$fh = fopen($myFile, 'w') or die("can't open file");
 		fwrite($fh, $string);
 		fclose($fh);
+		
+		if(!MAIL_ENABLED)
+			{
+				if(!$emails)
+				$emails = $db->user->email;
+				if(!is_dir('logs/email_files')) mkdir("logs/email_files") or die("could not create directory to write.");
+				$myFile = 'logs/email_files/'.$filename.'.txt';
+				$fh = fopen($myFile, 'w') or die("can't open file");
+				$MyText  = 'To:'.$emails ."\r\n";
+				$MyText .= 'Subject:'.SITE_NAME . ' '.$subject.' ' .$filename. "\r\n\r\n";
+				$MyText .=  $this->Body."\r\n\r\n";
+				fwrite($fh, $MyText)  or die("could not write to file");
+				fclose($fh);
+				
+				$cwd = getcwd();
+				chdir ('logs/email_files');
+				$handle = opendir('.');
+				$files=array();
+				$cnt=0;
+				while (false !== ($file = readdir($handle))) 
+				{
+					$cnt=$cnt+1;
+					if($file<>'.' and $file<>'..') $files[(filemtime($file)+$cnt)]=$file;
+				}
+				krsort($files);
+				$i=1;
+				foreach($files as $key=>$value)
+				{
+					if($i>MAX_EMAIL_FILES) unlink($value)  or die("could not delete extra email files."); 
+					$i=$i+1;
+				}
+			
+				chdir ($cwd);
+								
+			}		
 	}
   }
 

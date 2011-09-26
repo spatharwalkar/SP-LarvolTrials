@@ -849,43 +849,8 @@ function heatmapAsWord($info, $rows, $columns, $results, $p_colors, $return, $ph
 		$mail->AddStringAttachment($out,
 					   $current_filename.'.doc',
 					   'base64',
-					   'Content-Type: application/msword');
+					   'Content-Type: application/msword','','manual report');
 		
-			if(!MAIL_ENABLED)
-			{
-				if(!is_dir('logs/email_files')) mkdir("logs/email_files") or die("could not create directory to write.");
-				$myFile = 'logs/email_files/'.$current_filename.'.txt';
-				$fh = fopen($myFile, 'w') or die("can't open file");
-				$MyText  = 'To:'.$db->user->email ."\r\n";
-				$MyText .= 'Subject:'.SITE_NAME . ' manual report ' .$current_filename. "\r\n\r\n";
-				$MyText .=  $mail->Body."\r\n\r\n";
-				fwrite($fh, $MyText)  or die("could not write to file");
-				fclose($fh);
-				
-				$cwd = getcwd();
-				chdir ('logs/email_files');
-				$handle = opendir('.');
-				$files=array();
-				$cnt=0;
-				while (false !== ($file = readdir($handle))) 
-				{
-					$cnt=$cnt+1;
-					if($file<>'.' and $file<>'..') $files[(filemtime($file)+$cnt)]=$file;
-				}
-				krsort($files);
-				$i=1;
-				foreach($files as $key=>$value)
-				{
-					if($i>MAX_EMAIL_FILES) unlink($value)  or die("could not delete extra email files."); 
-					$i=$i+1;
-				}
-			
-				chdir ($cwd);
-				
-				
-			}
-					   
-					   
 					   
 		@$mail->Send();
 		ob_end_clean();
@@ -1237,41 +1202,8 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 			$mail->AddStringAttachment($content,
 									   $current_filename.'.xlsx',
 									   'base64',
-									   'Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');		
+									   'Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','','manual report');		
 			
-			if(!MAIL_ENABLED)
-			{
-				if(!is_dir('logs/email_files')) mkdir("logs/email_files") or die("could not create directory to write.");
-				$myFile = 'logs/email_files/'.$current_filename.'.txt';
-				$fh = fopen($myFile, 'w') or die("can't open file");
-				$MyText  = 'To:'.$db->user->email ."\r\n";
-				$MyText .= 'Subject:'.SITE_NAME . ' manual report ' .$current_filename. "\r\n\r\n";
-				$MyText .=  $mail->Body."\r\n\r\n";
-				fwrite($fh, $MyText)  or die("could not write to file");
-				fclose($fh);
-				
-				$cwd = getcwd();
-				chdir ('logs/email_files');
-				$handle = opendir('.');
-				$files=array();
-				$cnt=0;
-				while (false !== ($file = readdir($handle))) 
-				{
-					$cnt=$cnt+1;
-					if($file<>'.' and $file<>'..') $files[(filemtime($file)+$cnt)]=$file;
-				}
-				krsort($files);
-				$i=1;
-				foreach($files as $key=>$value)
-				{
-					if($i>MAX_EMAIL_FILES) unlink($value)  or die("could not delete extra email files."); 
-					$i=$i+1;
-				}
-			
-				chdir ($cwd);
-				
-				
-			}
 			@$mail->Send();
 			ob_end_clean();
 		}

@@ -826,7 +826,7 @@ if($current_tasks_count==0)
 					$mail->AddStringAttachment($file,
 											   $current_filename.'.xlsx',
 											   'base64',
-											   'Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');		
+											   'Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',$emails,'scheduled reports');		
 				}
 				$mail->Send();
 					echo(' -Mail sent.' . $nl);
@@ -836,39 +836,6 @@ if($current_tasks_count==0)
 				echo(' -No files to send.' . $nl);
 			}
 			
-			if(!MAIL_ENABLED)
-			{
-				if(!is_dir('logs/email_files')) mkdir("logs/email_files") or die("could not create directory to write.");
-				$myFile = 'logs/email_files/'.$current_filename.'.txt';
-				$fh = fopen($myFile, 'w') or die("can't open file");
-				$MyText  = 'To:'.$emails ."\r\n";
-				$MyText .= 'Subject:'.SITE_NAME . ' scheduled reports '.$current_filename. "\r\n\r\n";
-				$MyText .=  $mail->Body."\r\n\r\n";
-				fwrite($fh, $MyText)  or die("could not write to file");
-				fclose($fh);
-				
-				$cwd = getcwd();
-				chdir ('logs/email_files');
-				$handle = opendir('.');
-				$files=array();
-				$cnt=0;
-				while (false !== ($file = readdir($handle))) 
-				{
-					$cnt=$cnt+1;
-					if($file<>'.' and $file<>'..') $files[(filemtime($file)+$cnt)]=$file;
-				}
-				krsort($files);
-				$i=1;
-				foreach($files as $key=>$value)
-				{
-					if($i>MAX_EMAIL_FILES) unlink($value)  or die("could not delete extra email files."); 
-					$i=$i+1;
-				}
-			
-				chdir ($cwd);
-				
-				
-			}
 			
 			/************************************ Step 4 ****************************************/
 			posix_kill(getmypid(),1);
