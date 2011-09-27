@@ -765,7 +765,7 @@ function strleft($s1, $s2) //helper function for urlPath()
 	* @access private
 	* @static
 	*/
-	Private Static Function _dump(&$data, $name='-3') {
+	Private Static Function _dump(&$data, $name='...') {
 
 		// object ?
 		//
@@ -1027,8 +1027,18 @@ function strleft($s1, $s2) //helper function for urlPath()
 		<?php if (count($data) > 0) {?> onclick="krumo.toggle(this);"<?php } ?>
 		onmouseover="krumo.over(this);"
 		onmouseout="krumo.out(this);">
-		
-			<a class="krumo-name"><?php echo $name;?></a>:
+		<?php 
+		$dotCount = substr_count($name,'.');
+		if($dotCount>0 && $name!='...')
+		{
+			$newName = str_replace('.','',$name).'-'.substr_count($name,'.');
+		}
+		else
+		{
+			$newName = $name;
+		}
+		?>
+			<a class="krumo-name"><?php echo $newName;?></a>:
 			(<em class="krumo-type">Array, <strong class="krumo-array-length"><?php echo 
 				(count($data)==1)
 					?("1 element")
@@ -1216,7 +1226,7 @@ function strleft($s1, $s2) //helper function for urlPath()
 		$_extra = false;
 		$_ = $data;
 		if (strLen($data) > KRUMO_TRUNCATE_LENGTH) {
-			$_ = substr($data, 0, KRUMO_TRUNCATE_LENGTH - 3) . '-3';
+			$_ = substr($data, 0, KRUMO_TRUNCATE_LENGTH - 3) . '...';
 			$_extra = true;
 			}
 ?>
