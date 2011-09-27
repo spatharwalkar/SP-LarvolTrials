@@ -14,7 +14,7 @@ if($db->loggedIn())
 
 $reset_message='';
 $reset_error='';
-if($_GET && $_GET['page'] == 'reset' && $_POST && strlen($_POST['reset_username']) && strlen($_POST['reset_email']))
+if($_POST && strlen($_POST['reset_username']) && strlen($_POST['reset_email']))
 {
 	$res = $db->resetPassword($_POST['reset_username'],$_POST['reset_email']);
 	if($res === true)
