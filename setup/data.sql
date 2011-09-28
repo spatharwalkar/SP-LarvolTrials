@@ -593,7 +593,10 @@ INSERT INTO `data_enumvals` (`id`, `field`, `value`) VALUES
 (148, 172, 'UpdateOf'),
 (10, 13, 'Withdrawn'),
 (192, 88, 'Withdrawn'),
-(183, 13, 'Withheld');
+(183, 13, 'Withheld'),
+(307, 67, 'Behavior'),
+(308, 67, 'Vaccine'),
+(309, 67, 'Gene Transfer');
 
 
 
