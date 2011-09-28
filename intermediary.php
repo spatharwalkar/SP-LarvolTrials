@@ -586,6 +586,7 @@ class ContentManager
 			$params = array();
 			$arr 	= array();
 			$arrr 	= array();
+
 			$return_param['fin_arr'][$pk] = array();
 			$return_param['link_expiry_date'][$pk] = array();
 			$totinactivecount = 0; 
@@ -864,9 +865,11 @@ class ContentManager
 				$ins = unserialize(gzinflate(base64_decode(rawurldecode($process_params['insparams']))));
 				$this->commonControls($process_params['showRecordsCnt'], $ins['actcnt'], $ins['inactcnt'], ($ins['actcnt'] + $ins['inactcnt']), $ins['actphase'], 
 				$ins['inactphase']);
+				$foundcount = ($ins['actcnt'] + $ins['inactcnt']);
 			} else {
 				$this->commonControls($process_params['showRecordsCnt'], $process_params['stack_active_count'], $process_params['stack_inactive_count'], 
 				$process_params['stack_total_count'], $process_params['activephase'], $process_params['inactivephase']);
+				$foundcount = $process_params['stack_total_count'];
 			}
 			echo('<br clear="all"/><br/>');
 			echo ('<input type="hidden" name="instparams" value="' . $process_params['insparams']. '" />');	
@@ -907,13 +910,13 @@ class ContentManager
 								if(isset($vv[3])) { 
 									$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[3]); 
 									$process_params['link_expiry_date'][$pk][] = $res['expiry'];
-									$row_upm_arr[$k] = $res['intervention_name'];
+									$row_upm_arr = array_merge($row_upm_arr,explode(',',$res['intervention_name']));
 								}
 							} else {
 								if(isset($vv[2])) { 
 									$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[2]); 
 									$process_params['link_expiry_date'][$pk][] = $res['expiry'];
-									$row_upm_arr[$k] = $res['intervention_name'];
+									$row_upm_arr = array_merge($row_upm_arr,explode(',',$res['intervention_name']));
 								}
 							}
 							
@@ -923,13 +926,13 @@ class ContentManager
 								if(isset($vv[4])) { 
 									$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[4]); 
 									$process_params['link_expiry_date'][$pk][] = $res['expiry'];
-									$row_upm_arr[$k] = $res['intervention_name'];
+									$row_upm_arr = array_merge($row_upm_arr,explode(',',$res['intervention_name']));
 								}
 							} else {
 								if(isset($vv[3])) { 
 									$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[3]); 
 									$process_params['link_expiry_date'][$pk][] = $res['expiry'];
-									$row_upm_arr[$k] = $res['intervention_name'];
+									$row_upm_arr = array_merge($row_upm_arr,explode(',',$res['intervention_name']));
 								}
 							}
 							
@@ -948,7 +951,7 @@ class ContentManager
 					}
 				}
 				
-				if(isset($row_upm_arr) && !empty($row_upm_arr)) {
+				if(isset($row_upm_arr) && !empty($row_upm_arr)) { 
 					$upm_string = $this->getNonAssocUpm($row_upm_arr, 'rowupm');
 					if($upm_string != '' && $index == 0) {
 						echo ('<tr class="trialtitles">'
@@ -988,9 +991,12 @@ class ContentManager
 						}
 					}
 					if(isset($upm_value) && $upm_value != '' && !empty($upm_value)) {
+					
 						$val = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $upm_value);
 						$process_params['link_expiry_date'][$pk][] = $val['expiry'];
-						$upm_string = $this->getNonAssocUpm(array($val['intervention_name']), $pk);
+						$val['intervention_name'] = explode(',',$val['intervention_name']);
+						
+						$upm_string = $this->getNonAssocUpm($val['intervention_name'], $pk);
 					} 
 					if($upm_string != '') {
 						echo ('<tr class="trialtitles">'
@@ -1004,6 +1010,7 @@ class ContentManager
 						}
 					}
 					
+				
 				} else if(isset($_GET['cparams']) && $process_params['c_params']['type'] == 'col') { 
 					
 					$upm_string = '';
@@ -1249,14 +1256,14 @@ class ContentManager
 				if($excel_params[2] == '-1' || $excel_params[2] == '-2') {
 					if(isset($excel_params[4])) {
 						$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $excel_params[4]);
-						$non_assoc_upm_params= array($res['intervention_name']);
-						$link_expiry_date[]	= $res['expiry'];
+						$non_assoc_upm_params = explode(',',$res['intervention_name']);
+						$link_expiry_date[]	  = $res['expiry'];
 					} 
 				} else {
 					if(isset($excel_params[3])) {
 						$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $excel_params[3]);
-						$non_assoc_upm_params= array($res['intervention_name']);
-						$link_expiry_date[]	= $res['expiry'];
+						$non_assoc_upm_params = explode(',',$res['intervention_name']);
+						$link_expiry_date[]	  = $res['expiry'];
 					}
 				}
 				
@@ -1482,8 +1489,10 @@ class ContentManager
 			
 			if(isset($_GET['institution']) && $_GET['institution'] != '') {
 				$ins = unserialize(gzinflate(base64_decode(rawurldecode($insparams))));
+				$foundcount = ($ins['actcnt'] + $ins['inactcnt']);
 				$this->commonControls($count, $ins['actcnt'], $ins['inactcnt'], ($ins['actcnt'] + $ins['inactcnt']), $ins['actphase'], $ins['inactphase']);
 			} else {
+				$foundcount = ($totactivecount + $totinactivecount);
 				$this->commonControls($count, $totactivecount, $totinactivecount, ($totactivecount + $totinactivecount), $activephase, $inactivephase);
 			}
 			echo ('<br/><br clear="all" />');
@@ -1505,8 +1514,6 @@ class ContentManager
 			$this->pend 	= $this->pstart + $this->results_per_page - 1;
 			$this->pages 	= ceil($count / $this->results_per_page);
 			$this->last 	= ($page * $this->results_per_page > $count) ? $count : $this->pend;
-
-
 
 			if($count > $this->results_per_page) {
 				if(isset($_GET['results']))
@@ -2915,14 +2922,20 @@ $date_updated)
 		
 		} else if($end_year > $third_yr) {
 		
+			$value = '<td colspan="12">&nbsp;</td><td colspan="12">&nbsp;</td>' . (($st != 0) ? '<td colspan="' . $st . '">&nbsp;</td>' : '');
+			$value .= '<td colspan="' .(12 - $st) . '" style="background-color:' . $bg_color . ';">&nbsp;</td>'
+						. '<td colspan="3" style="background-color:' . $bg_color . ';" ' . $attr_two . '>&nbsp;</td>';	
+						
 			$value = '<td colspan="12"><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
 				. '<td colspan="12"><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>' 
 				. (($st != 0) ? '<td colspan="' . $st . '"><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>' : '')
-				. '<td colspan="' . (12 - $st) . '" style="' . $background_color . '' . $attr . '" ' . $attr_two . '><div ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>';
+				. '<td colspan="' . (12 - $st) . '" style="' . $background_color . '' . $attr . '"><div ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
+				. '<td colspan="3" style="' . $background_color . ' ' . $attr . '" ' . $attr_two . '><div ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>';;
 		
 		}
 			
