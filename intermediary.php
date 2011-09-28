@@ -5,6 +5,28 @@ require_once('krumo/class.krumo.php');
 require_once('db.php');
 require_once('include.search.php');
 if(!isset($_GET['cparams']) && !isset($_GET['params']) && !isset($_GET['results'])) die('cell not set');
+
+if(isset($_POST['btnDownload'])) {
+	
+	if(isset($_POST['wFormat']) && $_POST['wFormat'] == 'xml') {
+	
+		// Build XML
+		$xml = '<?xml version="1.0" encoding="UTF-8" ?>' . "\n" . '<results>' . "\n";
+		if($_POST['dOption'] == 'shown') {
+			$xml .= toXML(unserialize($_POST['xmlShownContent']));
+		} else if($_POST['dOption'] == 'all') {
+			$xml .= toXML(unserialize($_POST['xmlFullContent']));
+		}
+		$xml .= "\n" . '</results>';
+		//Send download
+		header("Content-Type: text/xml");
+		header("Content-Disposition: attachment;filename=ott.xml");
+		header("Content-Transfer-Encoding: binary ");
+		echo($xml);
+		exit;
+	}
+}
+//**************
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -25,6 +47,15 @@ if(!isset($_GET['cparams']) && !isset($_GET['params']) && !isset($_GET['results'
     ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
   })();
+  
+ function checkformat()
+{
+	if(document.getElementById("wFormat").value=="excel")
+	{
+	document.forms["frmDOptions"].action="gen_excel.php";
+	}
+} 
+  
 </script>
 <script type="text/javascript" language="javascript"> 
 //<![CDATA[
@@ -1106,6 +1137,78 @@ class ContentManager
 			echo('</table><br/>');
 			echo ('</form>');
 			
+			$shownArr = array();$foundArr = array();
+			if($process_params['showRecordsCnt'] > 0) {
+			
+				$current_type = $this->type;
+				$shownArr = array();
+				$foundArr = array();
+				
+				foreach($process_params[$current_type] as $key => $value) {
+					foreach($value as $kkey => $vvalue){
+					
+						unset($vvalue['edited']);
+						unset($vvalue['new']);
+						unset($vvalue['larvol_id']);
+						unset($vvalue['inactive_date']);
+						unset($vvalue['region']);
+						
+						foreach($vvalue as $k => $v) {
+							if(strpos($k, 'NCT/') !== FALSE) {
+							
+								$newkey = str_replace('NCT/','NCT.',$k);
+								$vvalue[$newkey] = $v;
+								unset($vvalue[$k]);
+							}
+						}
+						$shownArr[$process_params[$current_type][$key][$kkey]['NCT/nct_id']] = $vvalue;
+					}
+					
+				}
+				foreach($process_params['fin_arr'] as $key => $value) {
+					foreach($value as $kkey => $vvalue){
+					
+						unset($vvalue['edited']);
+						unset($vvalue['new']);
+						unset($vvalue['larvol_id']);
+						unset($vvalue['inactive_date']);
+						unset($vvalue['region']);
+						
+						foreach($vvalue as $k => $v) {
+							if(strpos($k, 'NCT/') !== FALSE) {
+							
+								$newkey = str_replace('NCT/','NCT.',$k);
+								$vvalue[$newkey] = $v;
+								unset($vvalue[$k]);
+							}
+						}
+						$foundArr[$kkey] = $vvalue;
+					}
+					
+				}
+				
+				foreach($shownArr as $key => &$value) {
+				
+					unset($value['edited']);
+					unset($value['new']);
+					unset($value['larvol_id']);
+					unset($value['inactive_date']);
+					unset($value['region']);
+					
+					foreach($value as $k => $v) {
+						if(strpos($k, 'NCT/') !== FALSE) {
+						
+							$newkey = str_replace('NCT/','NCT.',$k);
+							$value[$newkey] = $v;
+							unset($value[$k]);
+						}
+					}
+				}
+				
+				$this->downloadOptions($process_params['showRecordsCnt'], $foundcount, $shownArr, $foundArr);
+				echo ('<br/>');
+			}
+			
 			$link_expiry_date = array();
 			foreach($process_params['link_expiry_date'] as $key => $value)
 				foreach($value as $kkey => $vvalue)
@@ -1371,6 +1474,7 @@ class ContentManager
 							$this->activecount++;
 						}	
 					}
+
 				}
 			}
 			
@@ -1402,6 +1506,8 @@ class ContentManager
 			$this->pages 	= ceil($count / $this->results_per_page);
 			$this->last 	= ($page * $this->results_per_page > $count) ? $count : $this->pend;
 
+
+
 			if($count > $this->results_per_page) {
 				if(isset($_GET['results']))
 					$this->pagination($page, $count, $_GET['results'], $_GET['time'], 'normal', NULL);
@@ -1429,6 +1535,50 @@ class ContentManager
 			}
 			echo('</table><br/>');
 			echo ('</form>');
+			
+			$shownArr = array();
+			if($count > 0) {
+			
+				$shownArr = $this->{$this->type};
+				foreach($fin_arr as $key => &$value) {
+				
+					unset($value['edited']);
+					unset($value['new']);
+					unset($value['larvol_id']);
+					unset($value['inactive_date']);
+					unset($value['region']);
+					
+					foreach($value as $k => $v) {
+						if(strpos($k, 'NCT/') !== FALSE) {
+						
+							$newkey = str_replace('NCT/','NCT.',$k);
+							$value[$newkey] = $v;
+							unset($value[$k]);
+						}
+					}
+				}
+				foreach($shownArr as $key => &$value) {
+				
+					unset($value['edited']);
+					unset($value['new']);
+					unset($value['larvol_id']);
+					unset($value['inactive_date']);
+					unset($value['region']);
+					
+					foreach($value as $k => $v) {
+						if(strpos($k, 'NCT/') !== FALSE) {
+						
+							$newkey = str_replace('NCT/','NCT.',$k);
+							$value[$newkey] = $v;
+							unset($value[$k]);
+						}
+					}
+				}
+//				echo '<pre>shownarr='; print_r($shownArr); '</pre>';
+				
+				$this->downloadOptions($count, $foundcount, $shownArr, $fin_arr);
+				echo ('<br/>');
+			}
 			
 			//Expiry feature for new link method
 			if(!empty($link_expiry_date)) {
@@ -1760,6 +1910,28 @@ class ContentManager
 		} 
 		
 		return $upm_string;
+	}
+	
+	function downloadOptions($showncount, $foundcount, $shownlist, $foundlist) {
+	
+		echo ('<div class="drop new" style="margin:0px"><div class="newtext">Download Options</div>'
+			. '<form  id="frmDOptions" name="frmDOptions" method="post" >'
+			. '<input type="hidden" name="xmlShownContent" value="' . htmlspecialchars(serialize($shownlist)) . '" />'
+			. '<input type="hidden" name="xmlFullContent" value="' . htmlspecialchars(serialize($foundlist)) . '" />'
+			. '<input type="hidden" name="excelInput" id="excelInput" value="" />'
+			. '<input type=hidden name="shownarr" value="' . htmlspecialchars(serialize($shownlist)).'" />'
+			. '<ul><li><label>Number of Studies: </label></li>'
+			. '<li><select id="dOption" name="dOption">'
+			. '<option value="shown">' . $showncount . ' Shown Studies</option>'
+			. '<option value="all">' . $foundcount . ' Found Studies</option></select></li>'
+			. '<li><label>Which Fields: </label></li>'
+			. '<li><select id="wFields" name="wFields">'
+			. '<option>All Fields</option>'
+			. '<option>Shown Fields</option></select></li>'
+			. '<li><label>Which Format: </label></li><li><select id="wFormat" name="wFormat">'
+			. '<option selected="yes" value="xml">XML</option><option value="excel">Excel</option><option value="pdf">PDF</option></select></li></ul>'
+			. '<input type="submit" id="btnDownload" name="btnDownload" onClick="javascript:checkformat()" value="Download File" style="margin-left:8px;"  />'
+			. '</form></div>');
 	}
 }
 
@@ -2105,6 +2277,7 @@ function getCompletionChart($start_month, $start_year, $end_month, $end_year, $c
 			$value = '<td colspan="12">&nbsp;</td>'
 				. (($st != 0) ? '<td colspan="' . $st . '">&nbsp;</td>' : '')
 				. '<td style="background-color:' . $bg_color . ';width:2px;">&nbsp;</td>'
+
 				. (((12 - ($st+1)) != 0) ? '<td colspan="' .(12 - ($st+1)) . '">&nbsp;</td>' : '')
 				. '<td colspan="12">&nbsp;</td><td colspan="3" ' . $attr_two . '>&nbsp;</td>';
 					
@@ -2935,6 +3108,6 @@ function getLinkDetails($tablename, $fieldname, $parameters, $param_value) {
 	
 	return $res;
 }
-?>
+?> 
 </body>
 </html>
