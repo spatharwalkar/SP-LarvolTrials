@@ -1909,7 +1909,7 @@ class ContentManager
 	
 	function downloadOptions($showncount, $foundcount, $shownlist, $foundlist) {
 
-		echo ('<div class="drop new" style="margin:0px"><div class="newtext">Download Options</div>'
+		echo ('<div style="height:100px;"><div class="drop new" style="margin:0px"><div class="newtext">Download Options</div>'
 			. '<form  id="frmDOptions" name="frmDOptions" method="post" >'
 			. '<input type="hidden" name="xmlShownContent" value="' . htmlspecialchars(serialize($shownlist)) . '" />'
 			. '<input type="hidden" name="xmlFullContent" value="' . htmlspecialchars(serialize($foundlist)) . '" />'
@@ -1917,16 +1917,15 @@ class ContentManager
 			. '<input type=hidden name="shownarr" value="' . htmlspecialchars(serialize($shownlist)).'" />'
 			. '<ul><li><label>Number of Studies: </label></li>'
 			. '<li><select id="dOption" name="dOption">'
-			. '<option value="shown">' . $showncount . ' Shown Studies</option>'
+			. '<option value="shown" selected="yes">' . $showncount . ' Shown Studies</option>'
 			. '<option value="all">' . $foundcount . ' Found Studies</option></select></li>'
 			. '<li><label>Which Fields: </label></li>'
-			. '<li><select id="wFields" name="wFields">'
-			. '<option>All Fields</option>'
-			. '<option>Shown Fields</option></select></li>'
+			. '<li><select id="wFields" name="wFields" disabled="disabled">'
+			. '<option selected="yes">Shown Fields</option><option>All Fields</option></select></li>'
 			. '<li><label>Which Format: </label></li><li><select id="wFormat" name="wFormat">'
-			. '<option selected="yes" value="xml">XML</option><option value="excel">Excel</option><option value="pdf">PDF</option></select></li></ul>'
+			. '<option value="excel" selected="yes">Excel</option><option value="xml">XML</option><option value="pdf">PDF</option></select></li></ul>'
 			. '<input type="submit" id="btnDownload" name="btnDownload" onClick="javascript:checkformat()" value="Download File" style="margin-left:8px;"  />'
-			. '</form></div>');
+			. '</form></div></div>');
 	}
 }
 
