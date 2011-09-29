@@ -170,8 +170,11 @@ class ContentManager
 	private $inactfilterarr = array('wh'=>'Withheld', 'afm'=>'Approved for marketing',
 								'tna'=>'Temporarily not available', 'nla'=>'No Longer Available', 'wd'=>'Withdrawn', 
 								't'=>'Terminated','s'=>'Suspended', 'c'=>'Completed');
-	private $phase_arr 		= array('N/A'=>'#bfbfbf','0'=>'#44cbf5','0/1'=>'#99CC00','1'=>'#99CC00','1/2'=>'#ffff00',
-									'2'=>'#ffff00','2/3'=>'#ff9900','3'=>'#ff9900','3/4'=>'#ff0000','4'=>'#ff0000');
+	private $phase_arr 		= array('N/A'=>'#BFBFBF', '0'=>'#00CCFF', '0/1'=>'#99CC00', '1'=>'#99CC00', '1a'=>'#99CC00', '1b'=>'#99CC00', '1a/1b'=>'#99CC00', 
+					'1c'=>'#99CC00', '1/2'=>'#FFFF00', '1b/2'=>'#FFFF00', '1b/2a'=>'#FFFF00', '2'=>'#FFFF00', '2a'=>'#FFFF00', '2a/2b'=>'#FFFF00', 
+					'2a/b'=>'#FFFF00', '2b'=>'#FFFF00', '2/3'=>'#FF9900', '2b/3'=>'#FF9900','3'=>'#FF9900', '3a'=>'#FF9900', '3b'=>'#FF9900', '3/4'=>'#FF0000', 
+					'3b/4'=>'#FF0000', '4'=>'#FF0000');
+	
 	//$nodata = array('action' => array(), 'searchval' => array());
 	private $bomb_type_arr = array('sb'=>'small', 'lb'=>'large');
 	private $bomb_img_arr = array('sb'=>'sbomb.png', 'lb'=>'lbomb.png');
@@ -666,11 +669,13 @@ class ContentManager
 					
 						$res = getLinkDetails('rpt_ott_trials', 'result_set', 'id', $tt);
 						$return_param['link_expiry_date'][$pk][] = $res['expiry'];
-						$sp = new SearchParam();
-						$sp->field = 'larvol_id';
-						$sp->action = 'search';
-						$sp->value = str_replace(',', ' OR ', $res['result_set']);
-						$excel_params = array($sp);
+						if($res['result_set'] != '') {
+							$sp = new SearchParam();
+							$sp->field = 'larvol_id';
+							$sp->action = 'search';
+							$sp->value = str_replace(',', ' OR ', $res['result_set']);
+							$excel_params = array($sp);
+						} 
 						
 					}
 					
@@ -718,7 +723,9 @@ class ContentManager
 			}
 			
 			$params = array_merge($this->params, $excel_params, $ins_params);
-			$arrr = search($params,$this->fid,NULL,$this->time_machine);
+			if(!empty($excel_params)) {
+				$arrr = search($params,$this->fid,NULL,$this->time_machine);
+			}
 			
 			//Added to consolidate the data returned in an mutidimensional array format as opposed to earlier 
 			//when it was not returned in an mutidimensional array format.

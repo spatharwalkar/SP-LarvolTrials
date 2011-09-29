@@ -189,11 +189,15 @@ function runHeatmap($id, $return = false, $format = "xlsx", $expire = false)
 				$searchdata[$row][$col] = $nodata;
 
 	//get search results
-	$phases = array('N/A', 'Phase 0', 'Phase 0/Phase 1', 'Phase 1', 'Phase 1/Phase 2', 'Phase 2',
-					'Phase 2/Phase 3', 'Phase 3', 'Phase 3/Phase 4', 'Phase 4');
+	$phases = array('N/A', 'Phase 0', 'Phase 0/Phase 1', 'Phase 1', 'Phase 1a', 'Phase 1b', 'Phase 1a/1b', 'Phase 1c', 'Phase 1/Phase 2', 'Phase 1b/2', 
+					'Phase 1b/2a', 'Phase 2','Phase 2a', 'Phase 2a/2b', 'Phase 2a/b', 'Phase 2b', 'Phase 2/Phase 3', 'Phase 2b/3','Phase 3', 'Phase 3a', 
+					'Phase 3b', 'Phase 3/Phase 4', 'Phase 3b/4', 'Phase 4');
 	$phasenums = array(); foreach($phases as $k => $p)  $phasenums[$k] = str_ireplace(array('phase',' '),'',$p);
+	$phase_legend_nums = array('N/A', '0', '0/1', '1', '1/2', '2', '2/3', '3', '3/4', '4');
 	//$p_colors = array('DDDDDD', 'BBDDDD', 'AADDEE', '99DDFF', 'DDFF99', 'FFFF00', 'FFCC00', 'FF9900', 'FF7711', 'FF4422');
-	$p_colors = array('BFBFBF', '00CCFF', '99CC00', '99CC00', 'FFFF00', 'FFFF00', 'FF9900', 'FF9900', 'FF0000', 'FF0000');
+	$p_colors = array('BFBFBF', '00CCFF', '99CC00', '99CC00', '99CC00', '99CC00', '99CC00', '99CC00', 'FFFF00', 'FFFF00', 'FFFF00', 'FFFF00', 'FFFF00', 'FFFF00', 
+	'FFFF00', 'FFFF00', 'FF9900', 'FF9900', 'FF9900', 'FF9900', 'FF9900', 'FF0000', 'FF0000', 'FF0000');
+	$phase_legend_colors = array('BFBFBF', '00CCFF', '99CC00', '99CC00', 'FFFF00', 'FFFF00', 'FF9900', 'FF9900', 'FF0000', 'FF0000');
 	$phase_fid = getFieldId('NCT','phase');
 	$phase_enumvals = array();
 	foreach($phases as $pkey => $pval)
@@ -552,7 +556,9 @@ function runHeatmap($id, $return = false, $format = "xlsx", $expire = false)
 			{ 	
 				if($link_generation_method == 'db') {
 					
-					$trials_id = '';$flag = false;
+					$trials_id = '';
+					//generating the link even if there are no trials, to be able to see the matched/unmatched upms
+					/*$flag = false;
 					if($countactive) { //for count active no need to check count more than 0 in order to link even if count is zero
 						if(is_array($all_ids) && !empty($all_ids)) {
 							$flag = true;
@@ -560,7 +566,7 @@ function runHeatmap($id, $return = false, $format = "xlsx", $expire = false)
 					} else if($rescount > 0) {
 						$flag = true;
 					}
-					if($flag == true) {
+					if($flag == true) {*/
 					$id_result_set = implode(",",$all_ids);//all ids
 					//checking whether the trials id already exists and if not inserting a new record into the rpt_ott_trials table
 					$query 		= "SELECT `id` FROM `rpt_ott_trials` WHERE `result_set` = '" . $id_result_set . "' ";
@@ -606,7 +612,7 @@ function runHeatmap($id, $return = false, $format = "xlsx", $expire = false)
 						$results[$row][$column]->{'link'} .= '&bomb=' . $results[$row][$column]->bomb;
 						
 					$results[$row][$column]->{'link'} .= '&time=' . $time_machine;	
-					}
+					//}
 				} else {	
 					//pass all IDs
 					$packedIDs = '';
@@ -722,9 +728,10 @@ function runHeatmap($id, $return = false, $format = "xlsx", $expire = false)
 	
 	$info["pid"] = $pid;
 	if ($format == "xlsx")
-		return heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $phasenums,$optionsSelected, $row_upms, $col_upms, $link_generation_method);
+		return heatmapAsExcel($info, $rows, $columns, $results, $phase_legend_colors, $return, $phase_legend_nums, $optionsSelected, $row_upms, $col_upms,
+		$link_generation_method);
 	else
-		return heatmapAsWord($info, $rows, $columns, $results, $p_colors, $return, $phasenums,$optionsSelected);
+		return heatmapAsWord($info, $rows, $columns, $results, $phase_legend_colors, $return, $phase_legend_nums, $optionsSelected);
 
 }
 
@@ -914,15 +921,16 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 		foreach($columns as $k => $v) {
 			
 			if($link_generation_method == 'db') {
-				if($countactive) {
+				//generating the link even if there are no trials, to be able to see the matched/unmatched upms
+				/*if($countactive) {
 					if(strlen($results[$row][$k]->num)) {
 						++$index;
 						$new_sub_link .= '&' . str_replace("results","results[$index]",$results[$row][$k]->{'link'});
 					}
-				} else if($results[$row][$k]->num) {
+				} else if($results[$row][$k]->num) {*/
 					++$index;
 					$new_sub_link .= '&' . str_replace("results","results[$index]",$results[$row][$k]->{'link'});
-				}
+				//}
 			} else {
 				$sub_link = '';
 				if($countactive) {
@@ -1009,15 +1017,16 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 		foreach($rows as $k => $v) {	
 		
 			if($link_generation_method == 'db') {
-				if($countactive) {
+				//generating the link even if there are no trials, to be able to see the matched/unmatched upms
+				/*if($countactive) {
 					if(strlen($results[$k][$col]->num)) {
 						++$index;
 						$new_sub_link .= '&' . str_replace("results","results[$index]",$results[$k][$col]->{'link'});
 					}
-				} else if($results[$k][$col]->num) {
+				} else if($results[$k][$col]->num) {*/
 					++$index;
 					$new_sub_link .= '&' . str_replace("results","results[$index]",$results[$k][$col]->{'link'});
-				}
+				//}
 			} else {
 				$sub_link = '';
 				if($countactive) {
