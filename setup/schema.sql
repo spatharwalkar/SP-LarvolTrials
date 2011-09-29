@@ -324,7 +324,7 @@ CREATE TABLE IF NOT EXISTS `rpt_ott_header` (
 
 CREATE TABLE IF NOT EXISTS `rpt_ott_upm` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `intervention_name` varbinary(255) COLLATE utf8_unicode_ci NOT NULL,
+  `intervention_name` varbinary(255) NOT NULL,
   `created` datetime NOT NULL,
   `expiry` date DEFAULT NULL,
   `last_referenced` datetime NOT NULL,
