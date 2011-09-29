@@ -1153,13 +1153,11 @@ class ContentManager
 				
 				foreach($process_params[$current_type] as $key => $value) {
 					foreach($value as $kkey => $vvalue){
-					
 						unset($vvalue['edited']);
 						unset($vvalue['new']);
 						unset($vvalue['larvol_id']);
 						unset($vvalue['inactive_date']);
-						unset($vvalue['region']);
-						
+//						unset($vvalue['region']);
 						foreach($vvalue as $k => $v) {
 							if(strpos($k, 'NCT/') !== FALSE) {
 							
@@ -1168,19 +1166,19 @@ class ContentManager
 								unset($vvalue[$k]);
 							}
 						}
+						
 						$shownArr[$process_params[$current_type][$key][$kkey]['NCT/nct_id']] = $vvalue;
+						
 					}
 					
 				}
 				foreach($process_params['fin_arr'] as $key => $value) {
 					foreach($value as $kkey => $vvalue){
-					
 						unset($vvalue['edited']);
 						unset($vvalue['new']);
 						unset($vvalue['larvol_id']);
 						unset($vvalue['inactive_date']);
 						unset($vvalue['region']);
-						
 						foreach($vvalue as $k => $v) {
 							if(strpos($k, 'NCT/') !== FALSE) {
 							
@@ -1194,13 +1192,14 @@ class ContentManager
 					
 				}
 				
+
 				foreach($shownArr as $key => &$value) {
 				
 					unset($value['edited']);
 					unset($value['new']);
 					unset($value['larvol_id']);
 					unset($value['inactive_date']);
-					unset($value['region']);
+//					unset($value['region']);
 					
 					foreach($value as $k => $v) {
 						if(strpos($k, 'NCT/') !== FALSE) {
@@ -1581,7 +1580,6 @@ class ContentManager
 						}
 					}
 				}
-//				echo '<pre>shownarr='; print_r($shownArr); '</pre>';
 				
 				$this->downloadOptions($count, $foundcount, $shownArr, $fin_arr);
 				echo ('<br/>');
@@ -1920,7 +1918,7 @@ class ContentManager
 	}
 	
 	function downloadOptions($showncount, $foundcount, $shownlist, $foundlist) {
-	
+
 		echo ('<div class="drop new" style="margin:0px"><div class="newtext">Download Options</div>'
 			. '<form  id="frmDOptions" name="frmDOptions" method="post" >'
 			. '<input type="hidden" name="xmlShownContent" value="' . htmlspecialchars(serialize($shownlist)) . '" />'

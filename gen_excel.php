@@ -4,11 +4,10 @@ require_once('PHPExcel/Writer/Excel2007.php');
 require_once('include.excel.php');
 require_once 'PHPExcel/IOFactory.php';
 $myvar = unserialize($_POST["shownarr"]);
-
 $objPHPExcel = new PHPExcel();
 
 $objPHPExcel->setActiveSheetIndex(0);
-$objPHPExcel->getActiveSheet()->getStyle('B1:L900')->getAlignment()->setWrapText(true);
+$objPHPExcel->getActiveSheet()->getStyle('B1:K900')->getAlignment()->setWrapText(true);
 $objPHPExcel->getActiveSheet()->setCellValue('A1' , 'NCT ID');
 $objPHPExcel->getActiveSheet()->setCellValue('B1' , 'Title');
 $objPHPExcel->getActiveSheet()->setCellValue('C1' , 'N');
@@ -20,7 +19,6 @@ $objPHPExcel->getActiveSheet()->setCellValue('H1' , 'Interventions');
 $objPHPExcel->getActiveSheet()->setCellValue('I1' , 'Start');
 $objPHPExcel->getActiveSheet()->setCellValue('J1' , 'End');
 $objPHPExcel->getActiveSheet()->setCellValue('K1' , 'Ph');
-$objPHPExcel->getActiveSheet()->setCellValue('L1' , 'Result');
 
 $i=2;
 
@@ -66,15 +64,13 @@ foreach ($myvar as $key=>$value)
 	$objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($styleThinBlueBorderOutline);
 	$objPHPExcel->getActiveSheet()->getStyle('K' . ($i-1))->applyFromArray($styleThinBlueBorderOutline);
 	$objPHPExcel->getActiveSheet()->getStyle('K' . $i)->applyFromArray($styleThinBlueBorderOutline);
-	$objPHPExcel->getActiveSheet()->getStyle('L' . ($i-1))->applyFromArray($styleThinBlueBorderOutline);
-	$objPHPExcel->getActiveSheet()->getStyle('L' . $i)->applyFromArray($styleThinBlueBorderOutline);
 	$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, 'NCT' . sprintf("%08s",$value["NCT.nct_id"]));
 	$objPHPExcel->getActiveSheet()->setCellValue('B' . $i, $value["NCT.brief_title"]);
 	$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/'. $objPHPExcel->getActiveSheet()->getCell('A' . $i)->getValue() );
-	$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('Navigate to website');
+	$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('Source - ClinicalTrials.gov');
 	$objPHPExcel->getActiveSheet()->getStyle('B' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
 	if(isset($value["NCT.enrollment"])) 				$objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $value["NCT.enrollment"]);
-														$objPHPExcel->getActiveSheet()->setCellValue('D' . $i, "");
+														$objPHPExcel->getActiveSheet()->setCellValue('D' . $i, $value["region"]);
 	if(isset($value["NCT.overall_status"])) 			$objPHPExcel->getActiveSheet()->setCellValue('E' . $i, $value["NCT.overall_status"]);
 	if(isset($value["NCT.lead_sponsor"])) 				$objPHPExcel->getActiveSheet()->setCellValue('F' . $i, $value["NCT.lead_sponsor"]);
 	if(isset($value["NCT.condition"])) 					$objPHPExcel->getActiveSheet()->setCellValue('G' . $i, $value["NCT.condition"]);
@@ -82,7 +78,6 @@ foreach ($myvar as $key=>$value)
 	if(isset($value["NCT.start_date"])) 				$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, $value["NCT.start_date"]);
 	if(isset($value["NCT.primary_completion_date"])) 	$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, $value["NCT.primary_completion_date"]);
 	if(isset($value["NCT.phase"])) 						$objPHPExcel->getActiveSheet()->setCellValue('K' . $i, $value["NCT.phase"]);
-														$objPHPExcel->getActiveSheet()->setCellValue('L' . $i, "");
 	if($bgcol=="D5D3E6") $bgcol="EDEAFF"; 	else $bgcol="D5D3E6";
 	
 	$objPHPExcel->getActiveSheet()->getStyle('A' . $i .':J' .$i )->applyFromArray
@@ -105,29 +100,8 @@ foreach ($myvar as $key=>$value)
 			)
 		);
 		
-	$objPHPExcel->getActiveSheet()->getStyle('L' . $i )->applyFromArray
-		(
-			array
-			(
-				'fill' => array
-				(
-					'type'       => PHPExcel_Style_Fill::FILL_SOLID,
-					'rotation'   => 0,
-					'startcolor' => array
-					(
-						'rgb' => $bgcol
-					),
-					'endcolor'   => array
-					(
-						'rgb' => $bgcol
-					)
-				)
-			)
-		);
-		
-		
 	
-	$objPHPExcel->getActiveSheet()->getStyle('A1:L1')->applyFromArray
+	$objPHPExcel->getActiveSheet()->getStyle('A1:K1')->applyFromArray
 	(
 		array
 		(
@@ -174,9 +148,35 @@ foreach ($myvar as $key=>$value)
 			$value["NCT.overall_status"]=="Suspended" or 
 			$value["NCT.overall_status"]=="Completed"
 		)
-	)	$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':L' . $i)->getFont()->getColor()->setARGB(PHPExcel_Style_Color::COLOR_RED);
+	)	$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':K' . $i)->getFont()->getColor()->setARGB(PHPExcel_Style_Color::COLOR_RED);
+	
+	if(isset($value["NCT.phase"]) and $value["NCT.phase"]=="Phase 0")
+	{
+	
+		$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray
+		(
+			array
+			(
+				'fill' => array
+				(
+					'type'       => PHPExcel_Style_Fill::FILL_SOLID,
+					'rotation'   => 0,
+					'startcolor' => array
+					(
+						'rgb' => '00CCFF'
+					),
+					'endcolor'   => array
+					(
+						'rgb' => '00CCFF'
+					)
+				)
+			)
+		);
+	
+	
+	}
 
-	if(isset($value["NCT.phase"]) and $value["NCT.phase"]=="Phase 1")
+	if(isset($value["NCT.phase"]) and ( $value["NCT.phase"]=="Phase 1"  or $value["NCT.phase"]=="Phase 0/Phase 1"))
 	{
 	
 		$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray
@@ -201,7 +201,7 @@ foreach ($myvar as $key=>$value)
 	
 	
 	}
-	if(isset($value["NCT.phase"]) and $value["NCT.phase"]=="Phase 2")
+	if(isset($value["NCT.phase"]) and ( $value["NCT.phase"]=="Phase 2" or $value["NCT.phase"]=="Phase 1/Phase 2"))
 	{
 	
 		$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray
@@ -227,7 +227,7 @@ foreach ($myvar as $key=>$value)
 	
 	}
 	
-	if(isset($value["NCT.phase"]) and $value["NCT.phase"]=="Phase 3")
+	if(isset($value["NCT.phase"]) and ($value["NCT.phase"]=="Phase 3" or  $value["NCT.phase"]=="Phase 2/Phase 3"))
 	{
 	
 		$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray
@@ -253,7 +253,7 @@ foreach ($myvar as $key=>$value)
 	
 	}
 
-	if(isset($value["NCT.phase"]) and $value["NCT.phase"]=="Phase 4")
+	if(isset($value["NCT.phase"]) and ( $value["NCT.phase"]=="Phase 4" or $value["NCT.phase"]=="Phase 3/Phase 4"))
 	{
 	
 		$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray
@@ -284,7 +284,7 @@ foreach ($myvar as $key=>$value)
 $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(13);
 $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(35);
 $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setWidth(5);
-$objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+$objPHPExcel->getActiveSheet()->getColumnDimension('D')->setWidth(10);
 $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setWidth(12);
 $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setWidth(15);
 $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setWidth(25);
@@ -292,9 +292,8 @@ $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setWidth(35);
 $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setWidth(12);
 $objPHPExcel->getActiveSheet()->getColumnDimension('J')->setWidth(12);
 $objPHPExcel->getActiveSheet()->getColumnDimension('K')->setWidth(9);
-$objPHPExcel->getActiveSheet()->getColumnDimension('L')->setAutoSize(true);
-$objPHPExcel->getActiveSheet()->getStyle('B1:L900')->getAlignment()->setWrapText(true);
-$objPHPExcel->getActiveSheet()->getStyle('A1:L200')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_TOP);
+$objPHPExcel->getActiveSheet()->getStyle('B1:K900')->getAlignment()->setWrapText(true);
+$objPHPExcel->getActiveSheet()->getStyle('A1:K200')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_TOP);
 $objPHPExcel->getActiveSheet()->setCellValue('A1' , 'NCT ID');
 $objPHPExcel->getActiveSheet()->setTitle('Larvol Trials');
 $objPHPExcel->getActiveSheet()->getStyle('A1')->getFont()->setName('Calibri');
