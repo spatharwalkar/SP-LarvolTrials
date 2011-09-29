@@ -321,7 +321,7 @@ class ContentManager
 
 	}
 	
-	function commonControls($count, $act, $inact, $all, $actph, $inactph) {
+	function commonControls($count, $act, $inact, $all) {
 	
 		$enumvals = getEnumValues('clinical_study', 'institution_type');
 	
@@ -329,19 +329,13 @@ class ContentManager
 			. '<input type="radio" id="actlist" name="list" checked="checked" value="active" '
 			. ' onchange="javascript: applyfilter(this.value);" />'
 			. '&nbsp;<label for="actlist"><span style="color: #00B050;"> ' . $act
-			. ' Active Records </span></label>');
-				if(!empty($actph)) { 
-					echo ' (Highest Phase: ' . ((count($actph) > 1) ? max($actph) : $actph[0]) . ')';
-				}
-		echo ('<br/><input type="radio" id="inactlist" name="list" value="inactive" ' 
+			. ' Active Records </span></label>'
+			. '<br/><input type="radio" id="inactlist" name="list" value="inactive" ' 
 			. ((isset($_GET['list']) && $_GET['list'] == 'inactive') ? ' checked="checked" ' : '')
 			. ' onchange="javascript: applyfilter(this.value);" />&nbsp;<label for="inactlist">'
 			. '<span style="color: #FF0000;"> ' . $inact
-			. ' Inactive Records</span></label>');
-				if(!empty($inactph)) { 
-					echo ' (Highest Phase: ' . ((count($inactph) > 1) ? max($inactph) : $inactph[0]) . ')';
-				}
-		echo ('<br/><input type="radio" id="alllist" name="list" value="all"' 
+			. ' Inactive Records</span></label>'
+			. '<br/><input type="radio" id="alllist" name="list" value="all"' 
 			. ((isset($_GET['list']) && $_GET['list'] == 'all') ? ' checked="checked" ' : '')
 			. ' onchange="javascript: applyfilter(this.value);" />&nbsp;<label for="alllist"> ' . $all
 			. ' All Records </label></div>'
@@ -489,8 +483,6 @@ class ContentManager
 		$return_param	= array();
 		$return_param['fin_arr'] = array();
 		$return_param['upmDetails'] = array();
-		$return_param['inactivephase'] = array();
-		$return_param['activephase'] = array();
 		$ins_params		= array();
 		$return_param['showRecordsCnt'] = 0;
 		
@@ -535,13 +527,13 @@ class ContentManager
 			if($_GET['type'] == 'col') {
 				
 				$res = getLinkDetails('rpt_ott_header', 'header', 'id', $vv[1]);
-				$t = $res['header'];
+				$t = 'Area: ' . $res['header'];
 				$link_expiry_date = $res['expiry'];
 				
 			} else if($_GET['type'] == 'row') {
 			
 				$res = getLinkDetails('rpt_ott_header', 'header', 'id', $vv[0]);
-				$t = $res['header'];
+				$t = 'Product: ' . $res['header'];
 				$link_expiry_date = $res['expiry'];
 			}
 			$return_param['params_arr'] = $return_param['c_params'];
@@ -550,7 +542,11 @@ class ContentManager
 		
 			$return_param['c_params'] 	= unserialize(gzinflate(base64_decode($_GET['cparams'])));
 			$stack_type = ($return_param['c_params']['type'] == 'col') ? 'rowlabel' : 'columnlabel';
-			$t 	= ($return_param['c_params']['type'] == 'col') ? $return_param['c_params']['columnlabel'] : $return_param['c_params']['rowlabel'];
+			if($return_param['c_params']['type'] == 'col') {
+				$t = 'Area: ' . $return_param['c_params']['columnlabel'];
+			} else {
+				$t = 'Product: ' . $return_param['c_params']['rowlabel'];
+			}
 				
 			echo ('<input type="hidden" name="cparams" value="' . $_GET['cparams'] . '"/>'
 					. '<input type="hidden" name="trunc" value="' . $_GET['trunc'] . '"/>');
@@ -578,7 +574,7 @@ class ContentManager
 			$ins_params = array($sp);
 		}
 		
-		echo ('</td><td class="result">Results for ' . htmlformat($t) . '</td>' . '</tr></table>');
+		echo ('</td><td class="result">' . htmlformat($t) . '</td>' . '</tr></table>');
 		echo('<br clear="all"/>');
 		foreach($return_param['params_arr'] as $pk => $pv) {
 		
@@ -675,6 +671,7 @@ class ContentManager
 						$sp->action = 'search';
 						$sp->value = str_replace(',', ' OR ', $res['result_set']);
 						$excel_params = array($sp);
+						
 					}
 					
 				} else {
@@ -763,10 +760,8 @@ class ContentManager
 				
 				if(in_array($val['NCT/overall_status'],$this->actfilterarr)) {
 					$totactivecount++;
-					$return_param['activephase'][] = $val['NCT/phase'];
 				} else {
 					$totinactivecount++;
-					$return_param['inactivephase'][] = $val['NCT/phase'];
 				}
 			}
 			
@@ -836,11 +831,7 @@ class ContentManager
 			$return_param['insparams'] = $_GET['instparams'];
 		} else {
 		
-			$return_param['inactivephase']	= array_unique(array_filter($return_param['inactivephase']));
-			$return_param['activephase']	= array_unique(array_filter($return_param['activephase']));
-			
-			$return_param['insparams']  = rawurlencode(base64_encode(gzdeflate(serialize(array('actphase' => $return_param['activephase'], 
-												'inactphase' => $return_param['inactivephase'],'actcnt' => $return_param['stack_active_count'],
+			$return_param['insparams']  = rawurlencode(base64_encode(gzdeflate(serialize(array('actcnt' => $return_param['stack_active_count'],
 												'inactcnt' => $return_param['stack_inactive_count'])))));
 		}
 		
@@ -863,12 +854,11 @@ class ContentManager
 			
 			if(isset($_GET['institution']) && $_GET['institution'] != '') {
 				$ins = unserialize(gzinflate(base64_decode(rawurldecode($process_params['insparams']))));
-				$this->commonControls($process_params['showRecordsCnt'], $ins['actcnt'], $ins['inactcnt'], ($ins['actcnt'] + $ins['inactcnt']), $ins['actphase'], 
-				$ins['inactphase']);
+				$this->commonControls($process_params['showRecordsCnt'], $ins['actcnt'], $ins['inactcnt'], ($ins['actcnt'] + $ins['inactcnt']));
 				$foundcount = ($ins['actcnt'] + $ins['inactcnt']);
 			} else {
 				$this->commonControls($process_params['showRecordsCnt'], $process_params['stack_active_count'], $process_params['stack_inactive_count'], 
-				$process_params['stack_total_count'], $process_params['activephase'], $process_params['inactivephase']);
+				$process_params['stack_total_count']);
 				$foundcount = $process_params['stack_total_count'];
 			}
 			echo('<br clear="all"/><br/>');
@@ -1237,8 +1227,6 @@ class ContentManager
 			$excel_params 	= array();
 			$ins_params 	= array();
 			$fin_arr 		= array();
-			$activephase 	= array();
-			$inactivephase 	= array();
 			$link_expiry_date	= array();
 			if(isset($_GET['results'])) {
 			
@@ -1350,7 +1338,7 @@ class ContentManager
 				echo ('<span><img src="./images/' . $this->bomb_img_arr[$bomb] . '" alt="Bomb"  /></span>'
 				. '&nbsp;This cell has a ' . $this->bomb_type_arr[$bomb] . ' <a href="./help/bomb.html">bomb</a>');
 			}
-			echo ('</td><td class="result">Results for ' . htmlformat($rowlabel) . ' in ' . htmlformat($columnlabel) . '</td>' . '</tr></table>');
+			echo ('</td><td class="result">Product: ' . htmlformat($rowlabel) . ', Area: ' . htmlformat($columnlabel) . '</td>' . '</tr></table>');
 			echo('<br clear="all"/><br/>');		
 			
 			$arr = array();
@@ -1399,10 +1387,8 @@ class ContentManager
 				}	
 				if(in_array($val['NCT/overall_status'],$this->actfilterarr)) {
 					$totactivecount++;
-					$activephase[] = $val['NCT/phase'];
 				} else {
 					$totinactivecount++;
-					$inactivephase[] = $val['NCT/phase'];
 				}
 			}
 			
@@ -1415,10 +1401,7 @@ class ContentManager
 			
 			} else {
 			
-				$insparams = rawurlencode(base64_encode(gzdeflate(serialize(array('actphase' => $activephase,
-																	'inactphase' => $inactivephase,
-																	'actcnt' => $totactivecount,
-																	'inactcnt' => $totinactivecount)))));
+				$insparams = rawurlencode(base64_encode(gzdeflate(serialize(array('actcnt' => $totactivecount,'inactcnt' => $totinactivecount)))));
 			}
 			
 			foreach($fin_arr as $key => $new_arr) {
@@ -1489,10 +1472,10 @@ class ContentManager
 			if(isset($_GET['institution']) && $_GET['institution'] != '') {
 				$ins = unserialize(gzinflate(base64_decode(rawurldecode($insparams))));
 				$foundcount = ($ins['actcnt'] + $ins['inactcnt']);
-				$this->commonControls($count, $ins['actcnt'], $ins['inactcnt'], ($ins['actcnt'] + $ins['inactcnt']), $ins['actphase'], $ins['inactphase']);
+				$this->commonControls($count, $ins['actcnt'], $ins['inactcnt'], ($ins['actcnt'] + $ins['inactcnt']));
 			} else {
 				$foundcount = ($totactivecount + $totinactivecount);
-				$this->commonControls($count, $totactivecount, $totinactivecount, ($totactivecount + $totinactivecount), $activephase, $inactivephase);
+				$this->commonControls($count, $totactivecount, $totinactivecount, ($totactivecount + $totinactivecount));
 			}
 			echo ('<br/><br clear="all" />');
 			
