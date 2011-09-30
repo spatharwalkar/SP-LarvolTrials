@@ -141,6 +141,8 @@ a, a:hover{
 	border-right: 1px solid blue!important;
 	border-top:0!important;
 	padding:0px;
+	height:auto;
+	line-height:normal!important;
 	font-weight:normal;
 	background-color: #EDEAFF;
 	color:#000000!important;

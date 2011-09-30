@@ -1036,7 +1036,7 @@ class ContentManager
 					$process_params['upmDetails'][$pk]);
 				} else  {
 					if(!isset($_GET['pg'])) {
-						echo ('<tr><th colspan="50" class="norecord" align="left"><div class="rowcollapse">No trials found.</div></th></tr>');
+						echo ('<tr><td colspan="50" class="norecord" align="left">No trials found.</td></tr>');
 					}
 				}
 				$index++;
@@ -1527,7 +1527,7 @@ class ContentManager
 				$this->pstart, $this->last, $this->phase_arr, $fin_arr, $this->actfilterarr, $this->current_yr, $this->second_yr, $this->third_yr, $upmDetails);
 				
 			} else {
-				echo ('<tr><th colspan="50" class="norecord" align="left"><div class="rowcollapse">No trials found.</div></th></tr>');
+				echo ('<tr><th colspan="50" class="norecord" align="left">No trials found.</th></tr>');
 			}
 			echo('</table><br/>');
 			echo ('</form>');
