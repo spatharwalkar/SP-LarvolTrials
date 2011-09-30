@@ -332,12 +332,12 @@ class ContentManager
 		echo ('<div style="height:100px;width:1000px;"><div class="block"><div class="text">List</div>'
 			. '<input type="radio" id="actlist" name="list" checked="checked" value="active" '
 			. ' onchange="javascript: applyfilter(this.value);" />'
-			. '&nbsp;<label for="actlist"><span style="color: #00B050;"> ' . $act
+			. '&nbsp;<label for="actlist"><span style="color: #009900;"> ' . $act
 			. ' Active Records </span></label>'
 			. '<br/><input type="radio" id="inactlist" name="list" value="inactive" ' 
 			. ((isset($_GET['list']) && $_GET['list'] == 'inactive') ? ' checked="checked" ' : '')
 			. ' onchange="javascript: applyfilter(this.value);" />&nbsp;<label for="inactlist">'
-			. '<span style="color: ##3333C;"> ' . $inact
+			. '<span style="color: #3333CC;"> ' . $inact
 			. ' Inactive Records</span></label>'
 			. '<br/><input type="radio" id="alllist" name="list" value="all"' 
 			. ((isset($_GET['list']) && $_GET['list'] == 'all') ? ' checked="checked" ' : '')
@@ -1923,7 +1923,7 @@ class ContentManager
 	
 	function downloadOptions($showncount, $foundcount, $shownlist, $foundlist) {
 
-		echo ('<div class="drop new" style="margin:0px"><div class="newtext">Download Options</div>'
+		echo ('<div style="height:100px;"><div class="drop new" style="margin:0px"><div class="newtext">Download Options</div>'
 			. '<form  id="frmDOptions" name="frmDOptions" method="post" >'
 //			. '<input type="hidden" name="xmlShownContent" value="' . htmlspecialchars(serialize($shownlist)) . '" />'
 //			. '<input type="hidden" name="xmlFullContent" value="' . htmlspecialchars(serialize($foundlist)) . '" />'
@@ -1931,21 +1931,20 @@ class ContentManager
 //			. '<input type=hidden name="shownarr" value="' . htmlspecialchars(serialize($shownlist)).'" />'
 			. '<ul><li><label>Number of Studies: </label></li>'
 			. '<li><select id="dOption" name="dOption">'
-			. '<option value="shown">' . $showncount . ' Shown Studies</option>'
+			. '<option value="shown" selected="yes">' . $showncount . ' Shown Studies</option>'
 			. '<option value="all">' . $foundcount . ' Found Studies</option></select></li>'
 			. '<li><label>Which Fields: </label></li>'
-			. '<li><select id="wFields" name="wFields">'
-			. '<option>All Fields</option>'
-			. '<option>Shown Fields</option></select></li>'
+			. '<li><select id="wFields" name="wFields" disabled="disabled">'
+			. '<option selected="yes">Shown Fields</option><option>All Fields</option></select></li>'
 			. '<li><label>Which Format: </label></li><li><select id="wFormat" name="wFormat">'
-			. '<option selected="yes" value="xml">XML</option><option value="excel">Excel</option><option value="pdf">PDF</option></select></li></ul>'
+			. '<option value="excel" selected="yes">Excel</option><option value="xml">XML</option><option value="pdf">PDF</option></select></li></ul>'
 			. '<input type="submit" id="btnDownload" name="btnDownload" onClick="javascript:checkformat()" value="Download File" style="margin-left:8px;"  />');
 		
 		foreach($_GET as $ke => $va)
 			{
 				echo '<input type=hidden name="' . $ke . '" value="' . $va . '" />';
 			}
-			echo ( '</form></div>');
+			echo ( '</form></div></div>');
 	}
 }
 
