@@ -1345,7 +1345,7 @@ class ContentManager
 				echo ('<span><img src="./images/' . $this->bomb_img_arr[$bomb] . '" alt="Bomb"  /></span>'
 				. '&nbsp;This cell has a ' . $this->bomb_type_arr[$bomb] . ' <a href="./help/bomb.html">bomb</a>');
 			}
-			echo ('</td><td class="result">Product: ' . htmlformat($rowlabel) . ', Area: ' . htmlformat($columnlabel) . '</td>' . '</tr></table>');
+			echo ('</td><td class="result">Product: ' . htmlformat($rowlabel) . '<br />Area: ' . htmlformat($columnlabel) . '</td>' . '</tr></table>');
 			echo('<br clear="all"/><br/>');		
 			
 			$arr = array();

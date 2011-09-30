@@ -121,7 +121,7 @@ a, a:hover{
 }
 .result {
 	font-weight:bold;
-	text-decoration:underline;
+	/*text-decoration:underline;*/
 	font-size:18px;
 }
 
