@@ -331,12 +331,12 @@ class ContentManager
 		echo ('<div style="height:100px;width:1000px;"><div class="block"><div class="text">List</div>'
 			. '<input type="radio" id="actlist" name="list" checked="checked" value="active" '
 			. ' onchange="javascript: applyfilter(this.value);" />'
-			. '&nbsp;<label for="actlist"><span style="color: #00B050;"> ' . $act
+			. '&nbsp;<label for="actlist"><span style="color: #009900;"> ' . $act
 			. ' Active Records </span></label>'
 			. '<br/><input type="radio" id="inactlist" name="list" value="inactive" ' 
 			. ((isset($_GET['list']) && $_GET['list'] == 'inactive') ? ' checked="checked" ' : '')
 			. ' onchange="javascript: applyfilter(this.value);" />&nbsp;<label for="inactlist">'
-			. '<span style="color: #FF0000;"> ' . $inact
+			. '<span style="color: #3333CC;"> ' . $inact
 			. ' Inactive Records</span></label>'
 			. '<br/><input type="radio" id="alllist" name="list" value="all"' 
 			. ((isset($_GET['list']) && $_GET['list'] == 'all') ? ' checked="checked" ' : '')
