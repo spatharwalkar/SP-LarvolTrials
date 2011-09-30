@@ -331,12 +331,12 @@ class ContentManager
 		echo ('<div style="height:100px;width:1000px;"><div class="block"><div class="text">List</div>'
 			. '<input type="radio" id="actlist" name="list" checked="checked" value="active" '
 			. ' onchange="javascript: applyfilter(this.value);" />'
-			. '&nbsp;<label for="actlist"><span style="color: #009900;"> ' . $act
+			. '&nbsp;<label for="actlist"><span style="color: #00B050;"> ' . $act
 			. ' Active Records </span></label>'
 			. '<br/><input type="radio" id="inactlist" name="list" value="inactive" ' 
 			. ((isset($_GET['list']) && $_GET['list'] == 'inactive') ? ' checked="checked" ' : '')
 			. ' onchange="javascript: applyfilter(this.value);" />&nbsp;<label for="inactlist">'
-			. '<span style="color: #3333CC;"> ' . $inact
+			. '<span style="color: ##3333C;"> ' . $inact
 			. ' Inactive Records</span></label>'
 			. '<br/><input type="radio" id="alllist" name="list" value="all"' 
 			. ((isset($_GET['list']) && $_GET['list'] == 'all') ? ' checked="checked" ' : '')
@@ -1345,7 +1345,7 @@ class ContentManager
 				echo ('<span><img src="./images/' . $this->bomb_img_arr[$bomb] . '" alt="Bomb"  /></span>'
 				. '&nbsp;This cell has a ' . $this->bomb_type_arr[$bomb] . ' <a href="./help/bomb.html">bomb</a>');
 			}
-			echo ('</td><td class="result">Product: ' . htmlformat($rowlabel) . '<br />Area: ' . htmlformat($columnlabel) . '</td>' . '</tr></table>');
+			echo ('</td><td class="result">Product: ' . htmlformat($rowlabel) . '<br/>Area: ' . htmlformat($columnlabel) . '</td>' . '</tr></table>');
 			echo('<br clear="all"/><br/>');		
 			
 			$arr = array();
@@ -1527,7 +1527,7 @@ class ContentManager
 				$this->pstart, $this->last, $this->phase_arr, $fin_arr, $this->actfilterarr, $this->current_yr, $this->second_yr, $this->third_yr, $upmDetails);
 				
 			} else {
-				echo ('<tr><th colspan="50" class="norecord" align="left">No trials found.</th></tr>');
+				echo ('<tr><td colspan="50" class="norecord" align="left">No trials found.</td></tr>');
 			}
 			echo('</table><br/>');
 			echo ('</form>');
@@ -1607,6 +1607,8 @@ class ContentManager
 							$query = "UPDATE `rpt_ott_upm` SET `expiry` = '" . date('Y-m-d',strtotime('+1 week',$now)) . "' WHERE id = '" . $ids[3] . "' ";
 							$res = mysql_query($query) or tex('Bad SQL Query setting expiry date for upms' . "\n" . $query);
 						}
+
+
 						
 					}
 				}
@@ -1619,10 +1621,10 @@ class ContentManager
 			 . '<tr><th rowspan="2" style="width:250px;">Title</th>'
 			 . '<th style="width:28px;" title="gray values are anticipated and black values are actual">'
 			 . '<a href="javascript: void(0);" onclick="javascript: doSorting(\'en\');">N</a></th>'
-			 . '<th rowspan="2" style="width:45px;" title="&quot;EU&quot; = European Union&nbsp;&quot;ROW&quot; = Rest of World">Region</th>'
-			 . '<th style="width:55px;">'
+			 . '<th rowspan="2" style="width:32px;" title="&quot;EU&quot; = European Union&nbsp;&quot;ROW&quot; = Rest of World">Region</th>'
+			 . '<th style="width:105px;">'
 			 . '<a href="javascript: void(0);" onclick="javascript: doSorting(\'os\');">Status</a></th>'
-			 . '<th rowspan="2" style="width:110px;">Sponsor</th>'
+			 . '<th rowspan="2" style="width:70px;">Sponsor</th>'
 			 . '<th rowspan="2" style="width:110px;">Conditions</th>'
 			 . '<th rowspan="2" style="width:110px;">Interventions</th>'
 			 . '<th style="width:25px;" title="MM/YY">'
@@ -1712,17 +1714,6 @@ class ContentManager
 		if(!empty($record_arr)) {
 		
 			$cntr = 0;
-			$upm_string .= '<tr class="upms ' . $trialheader . '">'
-							. '<th colspan="3" nowrap="nowrap" class="titleupmodd">Upcoming Product Milestones not associated with a specific trial</th>'
-							. '<th colspan="3" class="titleupmodd">Milestone Type</th>'
-							. '<th colspan="2" class="titleupmodd">Status</th>'
-							. '<th  class="titleupmodd" title="MM/YY">Start</th>'
-							. '<th  class="titleupmodd" title="MM/YY" colspan="2">End</th>'
-							. '<th colspan="12"  class="titleupmodd">' . $this->current_yr . '</th>'
-							. '<th colspan="12" class="titleupmodd">' . $this->second_yr . '</th>'
-							. '<th colspan="12" class="titleupmodd">' . $this->third_yr . '</th>'
-							. '<th colspan="3" class="rightborder titleupmodd">+</th>'
-							. '</tr>';
 			
 			foreach($record_arr as $key => $val) {
 			
@@ -1771,20 +1762,7 @@ class ContentManager
 				}
 				$upm_string .= '</div></td>';
 				
-				$title = '';$attr = '';	
-				if(!empty($val['edited']) && $val['edited']['event_type'] != $val['event_type']) {
-				
-					$attr = ' highlight'; 
-					if($val['edited']['event_type'] != '' && $val['edited']['event_type'] != NULL)
-						$title = ' title="Previous value: '. $val['edited']['event_type'] . '" '; 
-					else
-						$title = ' title="No Previous value" ';
-						
-				} else if($val['new'] == 'y') {
-					$title = ' title = "New record" ';
-				}
-				$upm_string .= '<td colspan="3" class="' . $row_type_two . $attr . ' titleupmodd" ' . $title . '><div class="rowcollapse">' 
-						. $val['event_type'] . '</div></td>' . '<td colspan="2" class="' . $row_type_two . ' titleupmodd"><div class="rowcollapse">';
+				$upm_string .= '<td colspan="2" class="' . $row_type_two . ' titleupmodd"><div class="rowcollapse">';
 				
 				if($val['start_date_type'] == 'anticipated' && ($val['start_date'] > date('Y-m-d', $now))) {
 					$unassoc_upm_status .= 'Upcoming, ';
@@ -1797,6 +1775,7 @@ class ContentManager
 				&& ($val['end_date'] > $val['end_date_previous_value']) && ($val['end_date'] > date('Y-m-d', $now))) {
 					$unassoc_upm_status .= 'Delayed, ';
 				}
+				
 				if(($val['end_date'] != '' && $val['end_date'] != NULL && $val['end_date'] != '0000-00-00') 
 				&& ($val['end_date'] < date('Y-m-d', $now)) && ($val['result_link'] == '' || $val['result_link'] == NULL)) {
 					$unassoc_upm_status .= 'Pending, ';
@@ -1812,8 +1791,22 @@ class ContentManager
 					$unassoc_upm_status .= 'Cancelled, ';
 				}
 				
-				$upm_string .= substr($unassoc_upm_status,0,-2);
-				$upm_string .= '</div></td>';
+				$upm_string .= substr($unassoc_upm_status,0,-2) . '</div></td>';
+				
+				$title = '';$attr = '';	
+				if(!empty($val['edited']) && $val['edited']['event_type'] != $val['event_type']) {
+				
+					$attr = ' highlight'; 
+					if($val['edited']['event_type'] != '' && $val['edited']['event_type'] != NULL)
+						$title = ' title="Previous value: '. $val['edited']['event_type'] . '" '; 
+					else
+						$title = ' title="No Previous value" ';
+						
+				} else if($val['new'] == 'y') {
+					$title = ' title = "New record" ';
+				}
+				$upm_string .= '<td colspan="2" class="' . $row_type_two . $attr . ' titleupmodd" ' . $title 
+								. '><div class="rowcollapse">' . $val['event_type'] . ' Milestone</div></td>' . 
 				
 				$title = '';$attr = '';	
 				if(!empty($val['edited']) && $val['edited']['start_date'] != $val['start_date']){
@@ -1882,7 +1875,7 @@ class ContentManager
 					$date_style = 'color:#973535;'; 
 				}
 				
-				$upm_string .= '<td colspan="2" class="' . $row_type_two . $attr . ' titleupmodd" ' . $title . '><div class="rowcollapse">';
+				$upm_string .= '<td class="' . $row_type_two . $attr . ' titleupmodd" ' . $title . '><div class="rowcollapse">';
 				if($val['end_date_type'] == 'anticipated') {
 					$upm_string .= '<span style="font-weight:bold;' . $date_style . '">' 
 					. (($val['end_date'] != '' && $val['end_date'] != NULL && $val['end_date'] != '0000-00-00') ? date('m/y',strtotime($val['end_date'])) : '' ) 
@@ -1893,10 +1886,20 @@ class ContentManager
 				}	
 				
 				$upm_string .= '</div></td>';
+				$upm_string .= '<td class="titleupmodd"><div class="rowcollapse"></div></td>';
+				$upm_string .= '<td class="titleupmodd"><div class="rowcollapse"></div></td>';
 				
-		$upm_string .= getCompletionChart(date('m',strtotime($val['start_date'])), date('Y',strtotime($val['start_date'])), 
-		date('m',strtotime($val['end_date'])), date('Y',strtotime($val['end_date'])), $this->current_yr, $this->second_yr, 
-		$this->third_yr, '#9966FF', $val['start_date'], $val['end_date']);
+				
+				$upm_title = 'title="' . htmlformat($val['event_description']) . '"';
+				$date_updated = 'no';
+				if((isset($val['edited']['start_date']) && $val['start_date'] != $val['edited']['start_date']) || 
+				(isset($val['edited']['end_date']) && $val['end_date'] != $val['edited']['end_date'])) {
+					$date_updated = 'yes';
+				} 
+				
+		$upm_string .= getUPMChart(date('m',strtotime($val['start_date'])), date('Y',strtotime($val['start_date'])), 
+		date('m',strtotime($val['end_date'])), date('Y',strtotime($val['end_date'])), $this->current_yr, $this->second_yr, $this->third_yr, 
+		$val['start_date'], $val['end_date'], $val['event_link'], $upm_title, $date_updated);
 		
 				$upm_string .= '</tr>';
 				
@@ -1909,7 +1912,7 @@ class ContentManager
 	
 	function downloadOptions($showncount, $foundcount, $shownlist, $foundlist) {
 
-		echo ('<div style="height:100px;"><div class="drop new" style="margin:0px"><div class="newtext">Download Options</div>'
+		echo ('<div class="drop new" style="margin:0px"><div class="newtext">Download Options</div>'
 			. '<form  id="frmDOptions" name="frmDOptions" method="post" >'
 			. '<input type="hidden" name="xmlShownContent" value="' . htmlspecialchars(serialize($shownlist)) . '" />'
 			. '<input type="hidden" name="xmlFullContent" value="' . htmlspecialchars(serialize($foundlist)) . '" />'
@@ -1917,15 +1920,16 @@ class ContentManager
 			. '<input type=hidden name="shownarr" value="' . htmlspecialchars(serialize($shownlist)).'" />'
 			. '<ul><li><label>Number of Studies: </label></li>'
 			. '<li><select id="dOption" name="dOption">'
-			. '<option value="shown" selected="yes">' . $showncount . ' Shown Studies</option>'
+			. '<option value="shown">' . $showncount . ' Shown Studies</option>'
 			. '<option value="all">' . $foundcount . ' Found Studies</option></select></li>'
 			. '<li><label>Which Fields: </label></li>'
-			. '<li><select id="wFields" name="wFields" disabled="disabled">'
-			. '<option selected="yes">Shown Fields</option><option>All Fields</option></select></li>'
+			. '<li><select id="wFields" name="wFields">'
+			. '<option>All Fields</option>'
+			. '<option>Shown Fields</option></select></li>'
 			. '<li><label>Which Format: </label></li><li><select id="wFormat" name="wFormat">'
-			. '<option value="excel" selected="yes">Excel</option><option value="xml">XML</option><option value="pdf">PDF</option></select></li></ul>'
+			. '<option selected="yes" value="xml">XML</option><option value="excel">Excel</option><option value="pdf">PDF</option></select></li></ul>'
 			. '<input type="submit" id="btnDownload" name="btnDownload" onClick="javascript:checkformat()" value="Download File" style="margin-left:8px;"  />'
-			. '</form></div></div>');
+			. '</form></div>');
 	}
 }
 
@@ -2057,7 +2061,7 @@ function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last,
 				}
 					
 				echo '<td ' . $attr . ' rowspan="' . $rowspan . '">'  
-					. '<div class="rowcollapse">' . $val . '</div></td>';
+					. '<div class="rowcollapse">Temporarily not available</div></td>';//' . $val . '
 			
 			
 			} else if($v == "NCT/condition") {
@@ -2762,6 +2766,7 @@ $date_updated)
 					. '<td colspan="3" ' . $attr_two . '><div ' . $upm_title . '>'
 					. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>';
 		
+
 		} else if($end_year == $second_yr) { 
 		 
 			$value = (($st != 0) ? '<td colspan="' . $st . '"><div ' . $upm_title . '>'
@@ -3053,6 +3058,7 @@ function getNonAssocUpmRecords($non_assoc_upm_params) {
 			$upms[$i]['id'] = $row['id'];
 			$upms[$i]['event_description'] = htmlspecialchars($row['event_description']);
 			$upms[$i]['event_link'] = $row['event_link'];
+			$upms[$i]['result_link'] = $row['result_link'];
 			$upms[$i]['event_type'] = $row['event_type'];
 			$upms[$i]['start_date'] = $row['start_date'];
 			$upms[$i]['start_date_type'] = $row['start_date_type'];
@@ -3071,7 +3077,6 @@ function getUnmatchedUpmChanges($record_arr, $time, $edited) {
 
 	foreach($record_arr as $key => $value) {
 	
-		//echo "<br/>==>".
 		$sql = "SELECT `id`, `event_type`, `event_description`, `event_link`, `result_link`, `start_date`, `start_date_type`, `end_date`, `end_date_type` "
 				. " FROM `upm_history` WHERE `id` = '" . $value['id'] . "' AND (`superceded` < '" . date('Y-m-d',$time) . "' AND `superceded` >= '" 
 				. date('Y-m-d',strtotime($edited,$time)) . "') ORDER BY `superceded` DESC LIMIT 0,1 ";
@@ -3085,6 +3090,7 @@ function getUnmatchedUpmChanges($record_arr, $time, $edited) {
 			$record_arr[$key]['edited']['id'] = $row['id'];
 			$record_arr[$key]['edited']['event_description'] = htmlspecialchars($row['event_description']);
 			$record_arr[$key]['edited']['event_link'] = $row['event_link'];
+			$record_arr[$key]['edited']['result_link'] = $row['result_link'];
 			$record_arr[$key]['edited']['event_type'] = $row['event_type'];
 			$record_arr[$key]['edited']['start_date'] = $row['start_date'];
 			$record_arr[$key]['edited']['start_date_type'] = $row['start_date_type'];
@@ -3093,7 +3099,6 @@ function getUnmatchedUpmChanges($record_arr, $time, $edited) {
 			
 		}
 		
-		//echo "<br/>==>"."SELECT `upm_history`.`id` FROM `upm_history` WHERE `upm_history`.`id` = '" . $value['id'] . "' ";
 		$result = mysql_query("SELECT `upm_history`.`id` FROM `upm_history` WHERE `upm_history`.`id` = '" . $value['id'] . "' ");
 		if(mysql_num_rows($result) < 1)
 			$record_arr[$key]['new'] = 'y';
