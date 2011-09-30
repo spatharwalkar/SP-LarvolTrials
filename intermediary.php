@@ -4,6 +4,7 @@ session_start();
 require_once('krumo/class.krumo.php');
 require_once('db.php');
 require_once('include.search.php');
+//error_reporting(E_ALL ^ E_NOTICE);
 if(!isset($_GET['cparams']) && !isset($_GET['params']) && !isset($_GET['results'])) die('cell not set');
 
 if(isset($_POST['btnDownload'])) {
@@ -174,7 +175,7 @@ class ContentManager
 					'1c'=>'#99CC00', '1/2'=>'#FFFF00', '1b/2'=>'#FFFF00', '1b/2a'=>'#FFFF00', '2'=>'#FFFF00', '2a'=>'#FFFF00', '2a/2b'=>'#FFFF00', 
 					'2a/b'=>'#FFFF00', '2b'=>'#FFFF00', '2/3'=>'#FF9900', '2b/3'=>'#FF9900','3'=>'#FF9900', '3a'=>'#FF9900', '3b'=>'#FF9900', '3/4'=>'#FF0000', 
 					'3b/4'=>'#FF0000', '4'=>'#FF0000');
-	
+					
 	//$nodata = array('action' => array(), 'searchval' => array());
 	private $bomb_type_arr = array('sb'=>'small', 'lb'=>'large');
 	private $bomb_img_arr = array('sb'=>'sbomb.png', 'lb'=>'lbomb.png');
@@ -325,7 +326,7 @@ class ContentManager
 	}
 	
 	function commonControls($count, $act, $inact, $all) {
-	
+		
 		$enumvals = getEnumValues('clinical_study', 'institution_type');
 	
 		echo ('<div style="height:100px;width:1000px;"><div class="block"><div class="text">List</div>'
@@ -448,7 +449,6 @@ class ContentManager
 				}
 				$pager .= $sort . '" style="float:left;">Next Page (' . ($this->pstart+$this->results_per_page) . '-' . $nextlast . ') &gt;&gt;</a>';
 			}
-		
 		} else {
 		
 			if($this->pstart > 1)
@@ -462,7 +462,7 @@ class ContentManager
 				. ')</a>&nbsp;&nbsp;&nbsp;';
 			}
 			$pager .= '<div style="float:left;margin:0px 10px;">Studies Shown (' . $this->pstart . '-' . $this->pend . ')</div>';
-			
+
 			if($this->pend < $count)
 			{
 				$nextlast = ($this->last+$this->results_per_page);
@@ -524,6 +524,7 @@ class ContentManager
 			} else { 
 				//no specific encoding method i.e. only implode used to encode data in the url
 				$return_param['c_params'] = explode(',', gzinflate(base64_decode($_GET['results'])));
+				
 			}
 			
 			$vv = explode('.', $return_param['c_params'][0]);
@@ -593,7 +594,6 @@ class ContentManager
 			
 			//New Link Method
 			if(isset($_GET['results'])) {
-			
 				$e 	= explode(".", $pv);$identifier_for_result_set = '';
 				$return_param['link_expiry_date'][$pk][] = $link_expiry_date;
 				//Retrieving headers
@@ -675,8 +675,7 @@ class ContentManager
 							$sp->action = 'search';
 							$sp->value = str_replace(',', ' OR ', $res['result_set']);
 							$excel_params = array($sp);
-						} 
-						
+						}
 					}
 					
 				} else {
@@ -767,8 +766,10 @@ class ContentManager
 				
 				if(in_array($val['NCT/overall_status'],$this->actfilterarr)) {
 					$totactivecount++;
+					
 				} else {
 					$totinactivecount++;
+					
 				}
 			}
 			
@@ -855,15 +856,19 @@ class ContentManager
 		
 		//Stacked Ott.	
 		if(isset($_GET['cparams']) || (isset($_GET['results']) && isset($_GET['type']))) {
+		
 			
+
 			//Process the get parameters and extract the information
 			$process_params = $this->processParams();
 			
 			if(isset($_GET['institution']) && $_GET['institution'] != '') {
+			
 				$ins = unserialize(gzinflate(base64_decode(rawurldecode($process_params['insparams']))));
 				$this->commonControls($process_params['showRecordsCnt'], $ins['actcnt'], $ins['inactcnt'], ($ins['actcnt'] + $ins['inactcnt']));
 				$foundcount = ($ins['actcnt'] + $ins['inactcnt']);
 			} else {
+			
 				$this->commonControls($process_params['showRecordsCnt'], $process_params['stack_active_count'], $process_params['stack_inactive_count'], 
 				$process_params['stack_total_count']);
 				$foundcount = $process_params['stack_total_count'];
@@ -1149,6 +1154,7 @@ class ContentManager
 				$foundArr = array();
 				
 				foreach($process_params[$current_type] as $key => $value) {
+			
 					foreach($value as $kkey => $vvalue){
 						unset($vvalue['edited']);
 						unset($vvalue['new']);
@@ -1222,6 +1228,8 @@ class ContentManager
 				echo '<span style="font-size:10px;color:red;">Expires on: ' . $link_expiry_date[0]  . '</span>';
 			}
 			
+		
+			
 		} else {
 			
 			$page = 1;
@@ -1269,7 +1277,7 @@ class ContentManager
 						$link_expiry_date[] = $res['expiry'];
 						
 					} else if($excel_params[2] == '-1') { 
-					
+						
 						$res = getLinkDetails('rpt_ott_trials', 'result_set', 'id', $excel_params[3]);
 						$link_expiry_date[] = $res['expiry'];
 						$sp = new SearchParam();
@@ -1277,6 +1285,7 @@ class ContentManager
 						$sp->action = 'search';
 						$sp->value = str_replace(',', ' OR ', $res['result_set']);
 						$excel_params = array($sp);
+						
 					}
 				} else {
 					if(strpos($excel_params[2],'s') !== FALSE) {
@@ -1328,6 +1337,7 @@ class ContentManager
 				{
 					$results = count($leadingIDs);
 				}
+				
 			}
 			if(isset($_GET['institution']) && $_GET['institution'] != '') {
 				array_push($this->fid, 'institution_type');
@@ -1339,13 +1349,12 @@ class ContentManager
 				$sp->value 	= $_GET['institution'];
 				$ins_params = array($sp);
 			}
-			
 			$params = array_merge($this->params, $excel_params, $ins_params);
 			if($bomb != '') {
 				echo ('<span><img src="./images/' . $this->bomb_img_arr[$bomb] . '" alt="Bomb"  /></span>'
 				. '&nbsp;This cell has a ' . $this->bomb_type_arr[$bomb] . ' <a href="./help/bomb.html">bomb</a>');
 			}
-			echo ('</td><td class="result">Product: ' . htmlformat($rowlabel) . '<br/>Area: ' . htmlformat($columnlabel) . '</td>' . '</tr></table>');
+			echo ('</td><td class="result">Product: ' . htmlformat($rowlabel) . ' <br/>Area: ' . htmlformat($columnlabel) . '</td>' . '</tr></table>');
 			echo('<br clear="all"/><br/>');		
 			
 			$arr = array();
@@ -1355,7 +1364,6 @@ class ContentManager
 			$upmDetails	 	= array();
 			
 			$arrr = search($params,$this->fid,NULL,$this->time_machine);
-			
 			foreach($arrr as $k => $v) {
 				foreach($v as $kk => $vv) {
 					if($kk != 'NCT/condition' && $kk != 'NCT/intervention_name' && 'NCT/lead_sponsor')
@@ -1394,8 +1402,10 @@ class ContentManager
 				}	
 				if(in_array($val['NCT/overall_status'],$this->actfilterarr)) {
 					$totactivecount++;
+					
 				} else {
 					$totinactivecount++;
+					
 				}
 			}
 			
@@ -1409,6 +1419,7 @@ class ContentManager
 			} else {
 			
 				$insparams = rawurlencode(base64_encode(gzdeflate(serialize(array('actcnt' => $totactivecount,'inactcnt' => $totinactivecount)))));
+															
 			}
 			
 			foreach($fin_arr as $key => $new_arr) {
@@ -1571,6 +1582,7 @@ class ContentManager
 					}
 				}
 				
+			
 				$this->downloadOptions($count, $foundcount, $shownArr, $fin_arr);
 				echo ('<br/>');
 			}
@@ -1607,8 +1619,6 @@ class ContentManager
 							$query = "UPDATE `rpt_ott_upm` SET `expiry` = '" . date('Y-m-d',strtotime('+1 week',$now)) . "' WHERE id = '" . $ids[3] . "' ";
 							$res = mysql_query($query) or tex('Bad SQL Query setting expiry date for upms' . "\n" . $query);
 						}
-
-
 						
 					}
 				}
@@ -1714,7 +1724,7 @@ class ContentManager
 		if(!empty($record_arr)) {
 		
 			$cntr = 0;
-			
+						
 			foreach($record_arr as $key => $val) {
 			
 				$unassoc_upm_status = '';
@@ -1775,7 +1785,6 @@ class ContentManager
 				&& ($val['end_date'] > $val['end_date_previous_value']) && ($val['end_date'] > date('Y-m-d', $now))) {
 					$unassoc_upm_status .= 'Delayed, ';
 				}
-				
 				if(($val['end_date'] != '' && $val['end_date'] != NULL && $val['end_date'] != '0000-00-00') 
 				&& ($val['end_date'] < date('Y-m-d', $now)) && ($val['result_link'] == '' || $val['result_link'] == NULL)) {
 					$unassoc_upm_status .= 'Pending, ';
@@ -1792,6 +1801,7 @@ class ContentManager
 				}
 				
 				$upm_string .= substr($unassoc_upm_status,0,-2) . '</div></td>';
+				$upm_string .= '</div></td>';
 				
 				$title = '';$attr = '';	
 				if(!empty($val['edited']) && $val['edited']['event_type'] != $val['event_type']) {
@@ -1889,7 +1899,7 @@ class ContentManager
 				$upm_string .= '<td class="titleupmodd"><div class="rowcollapse"></div></td>';
 				$upm_string .= '<td class="titleupmodd"><div class="rowcollapse"></div></td>';
 				
-				
+	
 				$upm_title = 'title="' . htmlformat($val['event_description']) . '"';
 				$date_updated = 'no';
 				if((isset($val['edited']['start_date']) && $val['start_date'] != $val['edited']['start_date']) || 
@@ -1897,9 +1907,10 @@ class ContentManager
 					$date_updated = 'yes';
 				} 
 				
-		$upm_string .= getUPMChart(date('m',strtotime($val['start_date'])), date('Y',strtotime($val['start_date'])), 
-		date('m',strtotime($val['end_date'])), date('Y',strtotime($val['end_date'])), $this->current_yr, $this->second_yr, $this->third_yr, 
-		$val['start_date'], $val['end_date'], $val['event_link'], $upm_title, $date_updated);
+				$upm_string .= getUPMChart(date('m',strtotime($val['start_date'])), date('Y',strtotime($val['start_date'])), 
+				date('m',strtotime($val['end_date'])), date('Y',strtotime($val['end_date'])), $this->current_yr, $this->second_yr, $this->third_yr, 
+				$val['start_date'], $val['end_date'], $val['event_link'], $upm_title, $date_updated);
+		
 		
 				$upm_string .= '</tr>';
 				
@@ -1914,10 +1925,10 @@ class ContentManager
 
 		echo ('<div class="drop new" style="margin:0px"><div class="newtext">Download Options</div>'
 			. '<form  id="frmDOptions" name="frmDOptions" method="post" >'
-			. '<input type="hidden" name="xmlShownContent" value="' . htmlspecialchars(serialize($shownlist)) . '" />'
-			. '<input type="hidden" name="xmlFullContent" value="' . htmlspecialchars(serialize($foundlist)) . '" />'
+//			. '<input type="hidden" name="xmlShownContent" value="' . htmlspecialchars(serialize($shownlist)) . '" />'
+//			. '<input type="hidden" name="xmlFullContent" value="' . htmlspecialchars(serialize($foundlist)) . '" />'
 			. '<input type="hidden" name="excelInput" id="excelInput" value="" />'
-			. '<input type=hidden name="shownarr" value="' . htmlspecialchars(serialize($shownlist)).'" />'
+//			. '<input type=hidden name="shownarr" value="' . htmlspecialchars(serialize($shownlist)).'" />'
 			. '<ul><li><label>Number of Studies: </label></li>'
 			. '<li><select id="dOption" name="dOption">'
 			. '<option value="shown">' . $showncount . ' Shown Studies</option>'
@@ -1928,8 +1939,13 @@ class ContentManager
 			. '<option>Shown Fields</option></select></li>'
 			. '<li><label>Which Format: </label></li><li><select id="wFormat" name="wFormat">'
 			. '<option selected="yes" value="xml">XML</option><option value="excel">Excel</option><option value="pdf">PDF</option></select></li></ul>'
-			. '<input type="submit" id="btnDownload" name="btnDownload" onClick="javascript:checkformat()" value="Download File" style="margin-left:8px;"  />'
-			. '</form></div>');
+			. '<input type="submit" id="btnDownload" name="btnDownload" onClick="javascript:checkformat()" value="Download File" style="margin-left:8px;"  />');
+		
+		foreach($_GET as $ke => $va)
+			{
+				echo '<input type=hidden name="' . $ke . '" value="' . $va . '" />';
+			}
+			echo ( '</form></div>');
 	}
 }
 
@@ -2061,7 +2077,7 @@ function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last,
 				}
 					
 				echo '<td ' . $attr . ' rowspan="' . $rowspan . '">'  
-					. '<div class="rowcollapse">Temporarily not available</div></td>';//' . $val . '
+					.'<div class="rowcollapse">Temporarily not available</div></td>';//' . $val . '
 			
 			
 			} else if($v == "NCT/condition") {
@@ -2766,7 +2782,6 @@ $date_updated)
 					. '<td colspan="3" ' . $attr_two . '><div ' . $upm_title . '>'
 					. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>';
 		
-
 		} else if($end_year == $second_yr) { 
 		 
 			$value = (($st != 0) ? '<td colspan="' . $st . '"><div ' . $upm_title . '>'
@@ -3077,6 +3092,7 @@ function getUnmatchedUpmChanges($record_arr, $time, $edited) {
 
 	foreach($record_arr as $key => $value) {
 	
+		//echo "<br/>==>".
 		$sql = "SELECT `id`, `event_type`, `event_description`, `event_link`, `result_link`, `start_date`, `start_date_type`, `end_date`, `end_date_type` "
 				. " FROM `upm_history` WHERE `id` = '" . $value['id'] . "' AND (`superceded` < '" . date('Y-m-d',$time) . "' AND `superceded` >= '" 
 				. date('Y-m-d',strtotime($edited,$time)) . "') ORDER BY `superceded` DESC LIMIT 0,1 ";
@@ -3107,7 +3123,6 @@ function getUnmatchedUpmChanges($record_arr, $time, $edited) {
 }
 
 function getLinkDetails($tablename, $fieldname, $parameters, $param_value) {
-
 	$query = "SELECT `" . $fieldname . "`, `expiry` FROM " . $tablename . " WHERE " . $parameters . " = '" . mysql_real_escape_string($param_value) . "' ";
 	$res = mysql_fetch_assoc(mysql_query($query));
 	
