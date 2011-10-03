@@ -857,8 +857,6 @@ class ContentManager
 		//Stacked Ott.	
 		if(isset($_GET['cparams']) || (isset($_GET['results']) && isset($_GET['type']))) {
 		
-			
-
 			//Process the get parameters and extract the information
 			$process_params = $this->processParams();
 			
@@ -910,15 +908,23 @@ class ContentManager
 							//result set separator as a separate parameter and maintaining backward compatibility
 							if($vv[1] == '-1' || $vv[1] == '-2') {
 								if(isset($vv[3])) { 
-									$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[3]); 
+								
 									$process_params['link_expiry_date'][$pk][] = $res['expiry'];
-									$row_upm_arr = array_merge($row_upm_arr,explode(',',$res['intervention_name']));
+									$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[3]); 
+									if(isset($_GET['v']) && $_GET['v'] == 1)
+										$row_upm_arr = array_merge($row_upm_arr,explode('\n',$res['intervention_name']));
+									else
+										$row_upm_arr = array_merge($row_upm_arr,explode(',',$res['intervention_name']));
 								}
 							} else {
 								if(isset($vv[2])) { 
-									$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[2]); 
+								
 									$process_params['link_expiry_date'][$pk][] = $res['expiry'];
-									$row_upm_arr = array_merge($row_upm_arr,explode(',',$res['intervention_name']));
+									$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[2]); 
+									if(isset($_GET['v']) && $_GET['v'] == 1)
+										$row_upm_arr = array_merge($row_upm_arr,explode('\n',$res['intervention_name']));
+									else
+										$row_upm_arr = array_merge($row_upm_arr,explode(',',$res['intervention_name']));
 								}
 							}
 							
@@ -926,15 +932,23 @@ class ContentManager
 							//result set separator as a separate parameter and maintaining backward compatibility
 							if($vv[2] == '-1' || $vv[2] == '-2') {
 								if(isset($vv[4])) { 
-									$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[4]); 
+								
 									$process_params['link_expiry_date'][$pk][] = $res['expiry'];
-									$row_upm_arr = array_merge($row_upm_arr,explode(',',$res['intervention_name']));
+									$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[4]); 
+									if(isset($_GET['v']) && $_GET['v'] == 1)
+										$row_upm_arr = array_merge($row_upm_arr,explode('\n',$res['intervention_name']));
+									else
+										$row_upm_arr = array_merge($row_upm_arr,explode(',',$res['intervention_name']));
 								}
 							} else {
 								if(isset($vv[3])) { 
+								
 									$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[3]); 
 									$process_params['link_expiry_date'][$pk][] = $res['expiry'];
-									$row_upm_arr = array_merge($row_upm_arr,explode(',',$res['intervention_name']));
+									if(isset($_GET['v']) && $_GET['v'] == 1)
+										$row_upm_arr = array_merge($row_upm_arr,explode('\n',$res['intervention_name']));
+									else
+										$row_upm_arr = array_merge($row_upm_arr,explode(',',$res['intervention_name']));
 								}
 							}
 							
@@ -994,9 +1008,12 @@ class ContentManager
 					}
 					if(isset($upm_value) && $upm_value != '' && !empty($upm_value)) {
 					
-						$val = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $upm_value);
 						$process_params['link_expiry_date'][$pk][] = $val['expiry'];
-						$val['intervention_name'] = explode(',',$val['intervention_name']);
+						$val = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $upm_value);
+						if(isset($_GET['v']) && $_GET['v'] == 1)
+							$val['intervention_name'] = explode('\n',$val['intervention_name']);
+						else
+							$val['intervention_name'] = explode(',',$val['intervention_name']);
 						
 						$upm_string = $this->getNonAssocUpm($val['intervention_name'], $pk);
 					} 
@@ -1257,15 +1274,25 @@ class ContentManager
 				
 				if($excel_params[2] == '-1' || $excel_params[2] == '-2') {
 					if(isset($excel_params[4])) {
-						$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $excel_params[4]);
-						$non_assoc_upm_params = explode(',',$res['intervention_name']);
+					
 						$link_expiry_date[]	  = $res['expiry'];
+						$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $excel_params[4]);
+						if(isset($_GET['v']) && $_GET['v'] == 1)
+							$non_assoc_upm_params = explode('\n',$res['intervention_name']);
+						else
+							$non_assoc_upm_params = explode(',',$res['intervention_name']);
+						
 					} 
 				} else {
 					if(isset($excel_params[3])) {
-						$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $excel_params[3]);
-						$non_assoc_upm_params = explode(',',$res['intervention_name']);
+					
 						$link_expiry_date[]	  = $res['expiry'];
+						$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $excel_params[3]);
+						if(isset($_GET['v']) && $_GET['v'] == 1)
+							$non_assoc_upm_params = explode('\n',$res['intervention_name']);
+						else
+							$non_assoc_upm_params = explode(',',$res['intervention_name']);
+						
 					}
 				}
 				
@@ -1354,7 +1381,7 @@ class ContentManager
 				echo ('<span><img src="./images/' . $this->bomb_img_arr[$bomb] . '" alt="Bomb"  /></span>'
 				. '&nbsp;This cell has a ' . $this->bomb_type_arr[$bomb] . ' <a href="./help/bomb.html">bomb</a>');
 			}
-			echo ('</td><td class="result">Product: ' . htmlformat($rowlabel) . ' <br/>Area: ' . htmlformat($columnlabel) . '</td>' . '</tr></table>');
+			echo ('</td><td class="result">Area: ' . htmlformat($columnlabel) . '</td>' . '</tr></table>');
 			echo('<br clear="all"/><br/>');		
 			
 			$arr = array();
@@ -1528,7 +1555,7 @@ class ContentManager
 				if($upm_string != '') {
 					echo ('<tr class="trialtitles">'
 							. '<td colspan="50" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
-							. 'style="border-bottom:1px solid blue;background-image: url(\'images/up.png\');background-repeat: no-repeat;background-position:left center; " onclick="sh(this,\'ott\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+							. 'style="border-bottom:1px solid blue;background-image: url(\'images/up.png\');background-repeat: no-repeat;background-position:left center; " onclick="sh(this,\'ott\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . htmlformat($rowlabel)
 							. '</td></tr>' . $upm_string);
 				} 
 			}
@@ -1629,7 +1656,7 @@ class ContentManager
 	
 		echo ('<table width="100%" border="0" cellpadding="4" cellspacing="0" class="manage">'
 			 . '<tr><th rowspan="2" style="width:250px;">Title</th>'
-			 . '<th style="width:28px;" title="gray values are anticipated and black values are actual">'
+			 . '<th style="width:28px;" title="Black: Actual&nbsp;&nbsp;Gray: Anticipated&nbsp;&nbsp;Red: Change greater than 20%">'
 			 . '<a href="javascript: void(0);" onclick="javascript: doSorting(\'en\');">N</a></th>'
 			 . '<th rowspan="2" style="width:32px;" title="&quot;EU&quot; = European Union&nbsp;&quot;ROW&quot; = Rest of World">Region</th>'
 			 . '<th style="width:105px;">'
@@ -3058,10 +3085,11 @@ function getNonAssocUpmRecords($non_assoc_upm_params) {
 		$where .= textEqual('product',$val) . ' OR ';
 	}
 	
+	//echo "<br/>==>".
 	$sql = "SELECT `id`, `event_description`, `event_link`, `result_link`, `event_type`, `start_date`, `start_date_type`, `end_date`, `end_date_type`, "
 	. "(SELECT `end_date` FROM `upm_history` WHERE `upm_history`.`id` = `upm`.`id` ORDER BY `added` ASC LIMIT 0,1) AS end_date_previous_value, "
 	. "(SELECT `start_date` FROM `upm_history` WHERE`upm_history`.`id` = `upm`.`id` ORDER BY `added` ASC LIMIT 0,1) AS start_date_previous_value "
-	. "FROM `upm` WHERE (`corresponding_trial` IS NULL) AND " . substr($where,0,-4);
+	. "FROM `upm` WHERE (`corresponding_trial` IS NULL) AND ( " . substr($where,0,-4) . " ) ";
 	 
 	$res = mysql_query($sql)  or tex('Bad SQL query getting unmatched upms ' . $sql);
 	

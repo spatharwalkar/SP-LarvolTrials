@@ -517,7 +517,7 @@ function runHeatmap($id, $return = false, $format = "xlsx", $expire = false)
 				if(!empty($upm_params)) {
 					natsort($upm_params);
 					//upm values
-					$upm_result_set = implode(",",$upm_params);
+					$upm_result_set = implode("\\n",$upm_params);
 					//checking whether the upm id already exists and if not inserting a new record into the rpt_ott_upm table
 					$query 		= "SELECT `id` FROM `rpt_ott_upm` WHERE `intervention_name` = '" . mysql_real_escape_string($upm_result_set) . "' ";
 					$time_start = microtime(true);
@@ -687,7 +687,7 @@ function runHeatmap($id, $return = false, $format = "xlsx", $expire = false)
 					if($bomb)
 						$results[$row][$column]->{'link'} .= '&bomb=' . $results[$row][$column]->bomb;
 						
-					$results[$row][$column]->{'link'} .= '&time=' . $time_machine;	
+					$results[$row][$column]->{'link'} .= '&time=' . $time_machine . '&v=1';	
 				} else {
 					//pass search terms and metadata
 					$results[$row][$column]->{'link'} = 'params='
@@ -980,7 +980,7 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 				
 				$evcode = '$packedIDs = pack("l*",' . $str . ');';
 				eval($evcode);				
-				$link .= '&results=' . rawurlencode(base64_encode(gzdeflate($packedIDs))) . '&time=' . $myArray['time'] . '&format=new';
+				$link .= '&results=' . rawurlencode(base64_encode(gzdeflate($packedIDs))) . '&time=' . $myArray['time'] . '&format=new&v=1';	;
 				
 				//$link .= '&results=' . urlencode(base64_encode(gzdeflate(implode(',', $myArray['results'])))) . '&time=' . $myArray['time'];
 				$link = addYourls($link,$results[$row][$k]->reportname);
@@ -1077,7 +1077,7 @@ function heatmapAsExcel($info, $rows, $columns, $results, $p_colors, $return, $p
 				
 				$evcode = '$packedIDs = pack("l*",' . $str . ');';
 				eval($evcode);
-				$link .= '&results=' . rawurlencode(base64_encode(gzdeflate($packedIDs))) . '&time=' . $myArray['time'] . '&format=new';
+				$link .= '&results=' . rawurlencode(base64_encode(gzdeflate($packedIDs))) . '&time=' . $myArray['time'] . '&format=new&v=1';
 				
 				//$link .= '&results=' . urlencode(base64_encode(gzdeflate(implode(',', $myArray['results'])))) . '&time=' . $myArray['time'];
 				$link = addYourls($link,$results[$k][$col]->reportname);
