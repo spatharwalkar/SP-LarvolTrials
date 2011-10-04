@@ -1164,7 +1164,7 @@ class ContentManager
 				if($t == 'y') echo ('<span style="font-size:10px;color:red;">Note: all data could not be shown</span>');
 			}
 			echo('</table><br/>');
-			echo ('<input type="hidden1" id="upmstyle" name="upmstyle" value="'.$unmatched_upms_default_style.'" />');
+			echo ('<input type="hidden" id="upmstyle" name="upmstyle" value="'.$unmatched_upms_default_style.'" />');
 			echo ('</form>');
 			
 			$shownArr = array();$foundArr = array();
@@ -1568,7 +1568,7 @@ class ContentManager
 				echo ('<tr><td colspan="50" class="norecord" align="left">No trials found.</td></tr>');
 			}
 			echo('</table><br/>');
-			echo ('<input type="hidden1" id="upmstyle" name="upmstyle" value="'.$unmatched_upms_default_style.'" />');
+			echo ('<input type="hidden" id="upmstyle" name="upmstyle" value="'.$unmatched_upms_default_style.'" />');
 			echo ('</form>');
 			
 			$shownArr = array();
