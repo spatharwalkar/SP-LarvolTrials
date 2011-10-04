@@ -1,13 +1,21 @@
 $(document).ready(function(){
-	$('.upms').hide();
-	$('#addtoright').after('&nbsp;&nbsp;&nbsp;<span id="addedtoright" onclick="sh(this,0,1);">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;All Milestones</span>');
-	$('#addedtoright').css('background-image','url(\'./images/up.png\')')
+						   
+	$('#addtoright').after('&nbsp;&nbsp;&nbsp;<span id="addedtoright" onclick="sh(this,0,1);">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;All Unmatched UPMs</span>');
+	var image;
+	if($('#upmstyle').val() == 'expand') {
+		image = 'down.png';
+	} else {
+		$('.upms').hide();
+		image = 'up.png';
+	}
+	
+	$('#addedtoright').css('background-image','url(\'./images/'+image+'\')')
 	.css('background-repeat','no-repeat')
 	.css('background-position','left center')
 	.css('border','1px solid')
 	.css('padding','2px')
-	.css('cursor','pointer')
 	.css('margin-left','200px');
+	
 });
 
 function sh(obj,key,all)

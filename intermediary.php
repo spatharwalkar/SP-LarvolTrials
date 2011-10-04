@@ -902,6 +902,9 @@ class ContentManager
 				//Unmatched Upms for Row Stacked Upms.
 				$row_upm_arr = array();$upm_string = '';$row_upm_flag = false;
 				if(isset($_GET['results']) && $_GET['type'] == 'row') { 
+				
+					$unmatched_upms_default_style = 'expand';
+					$row_upm_flag = true;
 					foreach($process_params['c_params'] as $k => $v) {
 						$vv = explode('.', $v);
 						if($k != 0) {
@@ -954,7 +957,7 @@ class ContentManager
 							
 						}
 					}
-					$row_upm_flag = true;
+					
 				} else if(isset($_GET['cparams'])) {
 					if(isset($_GET['rowupm']) && $process_params['c_params']['type'] == 'row') {
 						foreach($_GET['rowupm'] as $k => $v) {
@@ -971,9 +974,9 @@ class ContentManager
 					$upm_string = $this->getNonAssocUpm($row_upm_arr, 'rowupm');
 					if($upm_string != '' && $index == 0) {
 						echo ('<tr class="trialtitles">'
-								. '<td colspan="50" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
-								. 'style="border-bottom:1px solid blue;background-image: url(\'images/up.png\');background-repeat: no-repeat;background-position:left center; " onclick="sh(this,\'rowupm\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
-								. '</td></tr>' . $upm_string);
+						. '<td colspan="50" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
+						. 'style="border-bottom:1px solid blue;background-image: url(\'images/up.png\');background-repeat: no-repeat;background-position:left center;"'
+						. 'onclick="sh(this,\'rowupm\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . '</td></tr>' . $upm_string);
 					} 
 				}
 				
@@ -988,7 +991,7 @@ class ContentManager
 				//Unmatched Upms for Column Stacked Upms.
 				if(isset($_GET['results']) && $_GET['type'] == 'col') { 
 					
-					$upm_value = '';$upm_string = '';
+					$upm_value = '';$upm_string = '';$unmatched_upms_default_style = 'collapse';
 					$c = explode('.', $process_params['c_params'][$pk]);
 					if($pk != 0) {
 					
@@ -1019,9 +1022,9 @@ class ContentManager
 					} 
 					if($upm_string != '') {
 						echo ('<tr class="trialtitles">'
-								. '<td colspan="50" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
-								. 'style="border-bottom:1px solid blue;background-image: url(\'images/up.png\');background-repeat: no-repeat;background-position:left center; " onclick="sh(this,\'' . $pk . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
-								. trim($process_params['ltype'][$pk]) . '</td></tr>' . $upm_string);
+						. '<td colspan="50" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
+						. 'style="border-bottom:1px solid blue;background-image: url(\'images/up.png\');background-repeat: no-repeat;background-position:left center;"'
+						. 'onclick="sh(this,\'' . $pk . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . trim($process_params['ltype'][$pk]) . '</td></tr>' . $upm_string);
 					} else {
 						if((isset($_GET['pg']) && $process_params['eachCount'][$pk] >= $this->pstart) || (!isset($_GET['pg']))) {
 							echo ('<tr><td colspan="50" class="notopbottomborder leftrightborderblue sectiontitles">' 
@@ -1039,9 +1042,9 @@ class ContentManager
 					}
 					if($upm_string != '') {
 						echo ('<tr class="trialtitles">'
-								. '<td colspan="50" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
-								. 'style="border-bottom:1px solid blue;background-image: url(\'images/up.png\');background-repeat: no-repeat;background-position:left center; " onclick="sh(this,\'' . $pk . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
-								. trim($process_params['ltype'][$pk]) . '</td></tr>' . $upm_string);
+						. '<td colspan="50" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
+						. 'style="border-bottom:1px solid blue;background-image: url(\'images/up.png\');background-repeat: no-repeat;background-position:left center;"'
+						. 'onclick="sh(this,\'' . $pk . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . trim($process_params['ltype'][$pk]) . '</td></tr>' . $upm_string);
 					} else {
 						if((isset($_GET['pg']) && $_GET['pg'] <= $process_params['eachCount'][$pk]) || (!isset($_GET['pg']))) {
 							echo ('<tr><td colspan="50" class="notopbottomborder leftrightborderblue sectiontitles">' 
@@ -1161,6 +1164,7 @@ class ContentManager
 				if($t == 'y') echo ('<span style="font-size:10px;color:red;">Note: all data could not be shown</span>');
 			}
 			echo('</table><br/>');
+			echo ('<input type="hidden1" id="upmstyle" name="upmstyle" value="'.$unmatched_upms_default_style.'" />');
 			echo ('</form>');
 			
 			$shownArr = array();$foundArr = array();
@@ -1249,7 +1253,7 @@ class ContentManager
 			
 		} else {
 			
-			$page = 1;
+			$page = 1;$unmatched_upms_default_style = 'expand';
 			if(isset($_GET['page'])) $page = mysql_real_escape_string($_GET['page']);
 			if(!is_numeric($page)) die('non-numeric page');
 
@@ -1272,30 +1276,6 @@ class ContentManager
 				$columnlabel = $res['header'];
 				$link_expiry_date[] = $res['expiry'];
 				
-				if($excel_params[2] == '-1' || $excel_params[2] == '-2') {
-					if(isset($excel_params[4])) {
-					
-						$link_expiry_date[]	  = $res['expiry'];
-						$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $excel_params[4]);
-						if(isset($_GET['v']) && $_GET['v'] == 1)
-							$non_assoc_upm_params = explode('\n',$res['intervention_name']);
-						else
-							$non_assoc_upm_params = explode(',',$res['intervention_name']);
-						
-					} 
-				} else {
-					if(isset($excel_params[3])) {
-					
-						$link_expiry_date[]	  = $res['expiry'];
-						$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $excel_params[3]);
-						if(isset($_GET['v']) && $_GET['v'] == 1)
-							$non_assoc_upm_params = explode('\n',$res['intervention_name']);
-						else
-							$non_assoc_upm_params = explode(',',$res['intervention_name']);
-						
-					}
-				}
-				
 				if($excel_params[2] == '-1' || $excel_params[2] == '-2') { 
 					if($excel_params[2] == '-2') {
 					
@@ -1314,6 +1294,16 @@ class ContentManager
 						$excel_params = array($sp);
 						
 					}
+					if(isset($excel_params[4])) {
+					
+						$link_expiry_date[]	  = $res['expiry'];
+						$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $excel_params[4]);
+						if(isset($_GET['v']) && $_GET['v'] == 1)
+							$non_assoc_upm_params = explode('\n',$res['intervention_name']);
+						else
+							$non_assoc_upm_params = explode(',',$res['intervention_name']);
+						
+					}
 				} else {
 					if(strpos($excel_params[2],'s') !== FALSE) {
 					
@@ -1330,6 +1320,16 @@ class ContentManager
 						$sp->action = 'search';
 						$sp->value = str_replace(',', ' OR ', $res['result_set']);
 						$excel_params = array($sp);
+					}
+					if(isset($excel_params[3])) {
+					
+						$link_expiry_date[]	  = $res['expiry'];
+						$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $excel_params[3]);
+						if(isset($_GET['v']) && $_GET['v'] == 1)
+							$non_assoc_upm_params = explode('\n',$res['intervention_name']);
+						else
+							$non_assoc_upm_params = explode(',',$res['intervention_name']);
+						
 					}
 				}
 				$bomb = (isset($_GET['bomb'])) ? $_GET['bomb'] : '';
@@ -1554,9 +1554,9 @@ class ContentManager
 				$upm_string = $this->getNonAssocUpm($non_assoc_upm_params, 'ott');
 				if($upm_string != '') {
 					echo ('<tr class="trialtitles">'
-							. '<td colspan="50" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
-							. 'style="border-bottom:1px solid blue;background-image: url(\'images/up.png\');background-repeat: no-repeat;background-position:left center; " onclick="sh(this,\'ott\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . htmlformat($rowlabel)
-							. '</td></tr>' . $upm_string);
+					. '<td colspan="50" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
+					. 'style="border-bottom:1px solid blue;background-image: url(\'images/up.png\');background-repeat: no-repeat;background-position:left center;"'
+					. 'onclick="sh(this,\'ott\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . htmlformat($rowlabel) . '</td></tr>' . $upm_string);
 				} 
 			}
 			if($count > 0) {
@@ -1568,6 +1568,7 @@ class ContentManager
 				echo ('<tr><td colspan="50" class="norecord" align="left">No trials found.</td></tr>');
 			}
 			echo('</table><br/>');
+			echo ('<input type="hidden1" id="upmstyle" name="upmstyle" value="'.$unmatched_upms_default_style.'" />');
 			echo ('</form>');
 			
 			$shownArr = array();
@@ -1922,9 +1923,21 @@ class ContentManager
 					(($val['end_date'] != '' && $val['end_date'] != NULL && $val['end_date'] != '0000-00-00') ? date('m/y',strtotime($val['end_date'])) : '');
 				}	
 				
+				$upm_string .= '</div></td><td class="titleupmodd"><div class="rowcollapse"></div></td>';
+				$upm_string .= '<td class="titleupmodd"><div class="rowcollapse">';
+				
+				if(!empty($val['edited']) && ($val['result_link'] != $val['edited']['result_link'])) {
+					if($val['result_link'] != '' && $val['result_link'] != NULL) {
+						$upm_string .= '<div ' . htmlformat($val['event_description']) . '><a href="' . $val['result_link'] . '" style="color:#000;">'
+						. '<img src="images/red-checkmark.png" alt="checkmark" style="padding-top: 3px;" border="0" /></a></div>';
+					}
+				} else {
+					if($val['result_link'] != '' && $val['result_link'] != NULL) {
+						$upm_string .= '<div ' . htmlformat($val['event_description']) . '><a href="' . $val['result_link'] . '" style="color:#000;">'
+						. '<img src="images/black-checkmark.png" alt="checkmark" style="padding-top: 3px;" border="0" /></a></div>';
+					}
+				}
 				$upm_string .= '</div></td>';
-				$upm_string .= '<td class="titleupmodd"><div class="rowcollapse"></div></td>';
-				$upm_string .= '<td class="titleupmodd"><div class="rowcollapse"></div></td>';
 				
 	
 				$upm_title = 'title="' . htmlformat($val['event_description']) . '"';
