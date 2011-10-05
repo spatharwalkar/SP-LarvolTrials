@@ -1,6 +1,6 @@
 $(document).ready(function(){
 						   
-	$('#addtoright').after('&nbsp;&nbsp;&nbsp;<span id="addedtoright" onclick="sh(this,0,1);">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;All Unmatched UPMs</span>');
+	$('#addtoright').after('&nbsp;&nbsp;&nbsp;<span id="addedtoright" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;All Unmatched UPMs</span>');
 	var image;
 	if($('#upmstyle').val() == 'expand') {
 		image = 'down.png';
@@ -16,6 +16,14 @@ $(document).ready(function(){
 	.css('padding','2px')
 	.css('margin-left','200px');
 	
+	if($('.trialtitles').length>0)
+	{
+		$('#addedtoright').attr('onclick','sh(this,0,1)').css('cursor','hand');	
+	}
+	else
+	{
+		$('#addedtoright').css('background-color','#acacac').css('cursor','default');
+	}	
 	//help tab
 	var slideout = '<div class="slide-out-div"><a class="handle" href="#help">Content</a><table cellpadding="0" cellspacing="0" class="table-slide"> <tr><td><img src="images/black-diamond.png"/></td><td>Click to view data release</td></tr> <tr><td><img src="images/red-diamond.png"/></td><td>Indicates new data relase. Click to view details</td></tr> <tr><td><img src="images/hourglass.png"/></td><td>Event has occured with results pending</td></tr> <tr><td><img src="images/lbomb.png"/></td><td>Click for anticipated milestone details</td></tr> <tr><td><img src="images/down.png"/></td><td>Click for additional milestones</td></tr> </table> </div> ';
 	$('body').append(slideout);	
