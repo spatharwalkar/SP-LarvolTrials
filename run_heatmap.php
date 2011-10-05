@@ -227,7 +227,8 @@ function runHeatmap($id, $return = false, $format = "xlsx", $expire = false)
 		foreach($rowData as $column => $cell)
 		{ 
 			
-			$time_machine = array();//unsetting the array for every cell.
+//			$time_machine = array();//unsetting the array for every cell.
+			$time_machine = $now;
 			//get searchdata
 			$globalparams = array('action' => $oversearch['action'], 'searchval' => $oversearch['searchval'], 
 									'negate' => $oversearch['negate'], 'multifields' => $oversearch['multifields'], 
@@ -262,7 +263,8 @@ function runHeatmap($id, $return = false, $format = "xlsx", $expire = false)
 					$time_machine = array_filter($time_machine);	//removing empt values of the array
 					usort($time_machine, "cmpdate"); //sorting the array
 					sort($time_machine); //sorting the array further for time precision
-					$time_machine = strtotime(end($time_machine)); //getting the latest date
+			//		$time_machine = strtotime(end($time_machine)); //getting the latest date
+					$time_machine = $now;
 		
 			} else { //in case of timemachine  parameters not defined
 				$time_machine = $now;
