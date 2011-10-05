@@ -37,6 +37,7 @@ if(isset($_POST['btnDownload'])) {
 <title>Online Trial Tracker</title>
 <link href="css/intermediary.css" rel="stylesheet" type="text/css" media="all" />
 <script src="scripts/jquery.js" type="text/javascript"></script>	
+<script src="scripts/slideout.js" type="text/javascript"></script>	
 <script src="scripts/func.js" type="text/javascript"></script>	
 <script type="text/javascript">
   var _gaq = _gaq || [];
