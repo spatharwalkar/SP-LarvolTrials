@@ -4,7 +4,7 @@ session_start();
 require_once('krumo/class.krumo.php');
 require_once('db.php');
 require_once('include.search.php');
-//error_reporting(E_ALL ^ E_NOTICE);
+error_reporting(E_ALL ^ E_NOTICE);
 if(!isset($_GET['cparams']) && !isset($_GET['params']) && !isset($_GET['results'])) die('cell not set');
 
 if(isset($_POST['btnDownload'])) {
@@ -976,7 +976,7 @@ class ContentManager
 					if($upm_string != '' && $index == 0) {
 						echo ('<tr class="trialtitles">'
 						. '<td colspan="50" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
-						. 'style="border-bottom:1px solid blue;background-image: url(\'images/up.png\');background-repeat: no-repeat;background-position:left center;"'
+					. 'style="border-bottom:1px solid blue;background-image: url(\'images/down.png\');background-repeat: no-repeat;background-position:left center;"'
 						. 'onclick="sh(this,\'rowupm\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . '</td></tr>' . $upm_string);
 					} 
 				}
@@ -1270,11 +1270,11 @@ class ContentManager
 				$excel_params 	= explode(".", $_GET['results']);
 				
 				$res = getLinkDetails('rpt_ott_header', 'header', 'id', $excel_params[0]);
-				$rowlabel = $res['header'];
+				$rowlabel = trim($res['header']);
 				$link_expiry_date[] = $res['expiry'];
 				
 				$res = getLinkDetails('rpt_ott_header', 'header', 'id', $excel_params[1]);
-				$columnlabel = $res['header'];
+				$columnlabel = trim($res['header']);
 				$link_expiry_date[] = $res['expiry'];
 				
 				if($excel_params[2] == '-1' || $excel_params[2] == '-2') { 
@@ -1369,7 +1369,6 @@ class ContentManager
 			}
 			if(isset($_GET['institution']) && $_GET['institution'] != '') {
 				array_push($this->fid, 'institution_type');
-
 
 				$sp = new SearchParam();
 				$sp->field 	= 'institution_type';
@@ -1556,9 +1555,12 @@ class ContentManager
 				if($upm_string != '') {
 					echo ('<tr class="trialtitles">'
 					. '<td colspan="50" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
-					. 'style="border-bottom:1px solid blue;background-image: url(\'images/up.png\');background-repeat: no-repeat;background-position:left center;"'
+					. 'style="border-bottom:1px solid blue;background-image: url(\'images/down.png\');background-repeat: no-repeat;background-position:left center;"'
 					. 'onclick="sh(this,\'ott\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . htmlformat($rowlabel) . '</td></tr>' . $upm_string);
 				} 
+			} else {
+				echo ('<tr><td colspan="50" class="upmpointer notopbottomborder leftrightborderblue sectiontitles">' 
+					. htmlformat($rowlabel) . '</td></tr>');
 			}
 			if($count > 0) {
 			
@@ -1990,7 +1992,7 @@ class ContentManager
 }
 
 function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last, $phase_arr, $fin_arr, $actfilterarr, $current_yr, $second_yr, $third_yr, $upmDetails) 
-{
+{	
 	$start = $start -1;
 	
 	for($i=$start;$i<$last;$i++) 
@@ -2117,7 +2119,7 @@ function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last,
 				}
 					
 				echo '<td ' . $attr . ' rowspan="' . $rowspan . '">'  
-					.'<div class="rowcollapse">Temporarily not available</div></td>';//' . $val . '
+					.'<div class="rowcollapse">' . $val . '</div></td>';
 			
 			
 			} else if($v == "NCT/condition") {
