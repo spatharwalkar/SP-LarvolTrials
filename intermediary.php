@@ -493,12 +493,12 @@ class ContentManager
 		if(isset($_GET['results']) && isset($_GET['type'])) {
 			
 			$this->time_machine = $_GET['time'];
-			echo ('<input type="hidden" name="results" value="' . $_GET['results'] . '"/>'
-					. '<input type="hidden" name="type" value="' . $_GET['type'] . '"/>'
-					. '<input type="hidden" name="time" value="' . $_GET['time'] . '"/>');
+			echo ('<input type="hidden" name="results" value="' . $_GET['results'] . '" />'
+					. '<input type="hidden" name="type" value="' . $_GET['type'] . '" />'
+					. '<input type="hidden" name="time" value="' . $_GET['time'] . '" />');
 			if(isset($_GET['format']) && $_GET['format'] == 'new') {
 			
-				echo ('<input type="hidden" name="format" value="' . $_GET['format'] . '"/>');
+				echo ('<input type="hidden" name="format" value="' . $_GET['format'] . '" />');
 				//pack encoding method used to encode data in the url
 				$results = unpack("l*", gzinflate(base64_decode(rawurldecode($_GET['results']))));
 				$three = 0;
@@ -977,7 +977,7 @@ class ContentManager
 						echo ('<tr class="trialtitles">'
 						. '<td colspan="50" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
 					. 'style="border-bottom:1px solid blue;background-image: url(\'images/down.png\');background-repeat: no-repeat;background-position:left center;"'
-						. 'onclick="sh(this,\'rowupm\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . '</td></tr>' . $upm_string);
+						. ' onclick="sh(this,\'rowupm\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . '</td></tr>' . $upm_string);
 					} 
 				}
 				
@@ -1025,7 +1025,7 @@ class ContentManager
 						echo ('<tr class="trialtitles">'
 						. '<td colspan="50" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
 						. 'style="border-bottom:1px solid blue;background-image: url(\'images/up.png\');background-repeat: no-repeat;background-position:left center;"'
-						. 'onclick="sh(this,\'' . $pk . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . trim($process_params['ltype'][$pk]) . '</td></tr>' . $upm_string);
+						. ' onclick="sh(this,\'' . $pk . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . trim($process_params['ltype'][$pk]) . '</td></tr>' . $upm_string);
 					} else {
 						if((isset($_GET['pg']) && $process_params['eachCount'][$pk] >= $this->pstart) || (!isset($_GET['pg']))) {
 							echo ('<tr><td colspan="50" class="notopbottomborder leftrightborderblue sectiontitles">' 
@@ -1045,7 +1045,7 @@ class ContentManager
 						echo ('<tr class="trialtitles">'
 						. '<td colspan="50" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
 						. 'style="border-bottom:1px solid blue;background-image: url(\'images/up.png\');background-repeat: no-repeat;background-position:left center;"'
-						. 'onclick="sh(this,\'' . $pk . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . trim($process_params['ltype'][$pk]) . '</td></tr>' . $upm_string);
+						. ' onclick="sh(this,\'' . $pk . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . trim($process_params['ltype'][$pk]) . '</td></tr>' . $upm_string);
 					} else {
 						if((isset($_GET['pg']) && $_GET['pg'] <= $process_params['eachCount'][$pk]) || (!isset($_GET['pg']))) {
 							echo ('<tr><td colspan="50" class="notopbottomborder leftrightborderblue sectiontitles">' 
@@ -1249,8 +1249,6 @@ class ContentManager
 			if(!empty($link_expiry_date) && ($this->loggedIn)) {
 				echo '<span style="font-size:10px;color:red;">Expires on: ' . $link_expiry_date[0]  . '</span>';
 			}
-			
-		
 			
 		} else {
 			
@@ -1560,7 +1558,7 @@ class ContentManager
 					echo ('<tr class="trialtitles">'
 					. '<td colspan="50" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
 					. 'style="border-bottom:1px solid blue;background-image: url(\'images/down.png\');background-repeat: no-repeat;background-position:left center;"'
-					. 'onclick="sh(this,\'ott\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . htmlformat($rowlabel) . '</td></tr>' . $upm_string);
+					. ' onclick="sh(this,\'ott\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . htmlformat($rowlabel) . '</td></tr>' . $upm_string);
 				} else {
 					echo ('<tr><td colspan="50" class="upmpointer notopbottomborder leftrightborderblue sectiontitles">' 
 					. htmlformat($rowlabel) . '</td></tr>');
@@ -1668,19 +1666,19 @@ class ContentManager
 		echo ('<table width="100%" border="0" cellpadding="4" cellspacing="0" class="manage">'
 			 . '<tr><th rowspan="2" style="width:250px;">Title</th>'
 			 . '<th style="width:28px;" title="Black: Actual&nbsp;&nbsp;Gray: Anticipated&nbsp;&nbsp;Red: Change greater than 20%">'
-			 . '<a href="javascript: void(0);" onclick="javascript: doSorting(\'en\');">N</a></th>'
+			 . '<a href="javascript:void(0);" onclick="javascript:doSorting(\'en\');">N</a></th>'
 			 . '<th rowspan="2" style="width:32px;" title="&quot;EU&quot; = European Union&nbsp;&quot;ROW&quot; = Rest of World">Region</th>'
 			 . '<th style="width:105px;">'
-			 . '<a href="javascript: void(0);" onclick="javascript: doSorting(\'os\');">Status</a></th>'
+			 . '<a href="javascript:void(0);" onclick="javascript:doSorting(\'os\');">Status</a></th>'
 			 . '<th rowspan="2" style="width:70px;">Sponsor</th>'
 			 . '<th rowspan="2" style="width:110px;">Conditions</th>'
 			 . '<th rowspan="2" style="width:110px;">Interventions</th>'
 			 . '<th style="width:25px;" title="MM/YY">'
-			 . '<a href="javascript: void(0);" onclick="javascript: doSorting(\'sd\');">Start</a></th>'
+			 . '<a href="javascript:void(0);" onclick="javascript:doSorting(\'sd\');">Start</a></th>'
 			 . '<th style="width:25px;" title="MM/YY">'
-			 . '<a href="javascript: void(0);" onclick="javascript: doSorting(\'ed\');">End</a></th>'
+			 . '<a href="javascript:void(0);" onclick="javascript:doSorting(\'ed\');">End</a></th>'
 			 . '<th style="width:22px;">'
-			 . '<a href="javascript: void(0);" onclick="javascript: doSorting(\'ph\');">Ph</a></th>'
+			 . '<a href="javascript:void(0);" onclick="javascript:doSorting(\'ph\');">Ph</a></th>'
 			 . '<th rowspan="2" style="width:12px;padding:4px;"><div class="box_rotate">result</div></th>'
 			 . '<th colspan="36" style="width:72px;">'
 			 . '<div>&nbsp;</div></th>'
@@ -1770,6 +1768,7 @@ class ContentManager
 				$class = 'class = "upms ' . $trialheader . '" ';
 				$title_link_color = 'color:#000;';
 				$date_style = 'color:gray;';
+				$upm_title = 'title="' . htmlformat($val['event_description']) . '"';
 				
 				if($cntr%2 == 1) {
 		
@@ -1804,7 +1803,7 @@ class ContentManager
 				
 				$upm_string .= '<td colspan="3" class="' . $row_type_one .  $attr . ' titleupm titleupmodd txtleft" ' . $title . '><div class="rowcollapse">';
 				if($val['event_link'] != NULL && $val['event_link'] != '') {
-					$upm_string .= '<a style="' . $title_link_color . '" href="' . $val['event_link'] . '">' . $val['event_description'] . '</a>';
+					$upm_string .= '<a style="' . $title_link_color . '" href="' . rawurlencode($val['event_link']) . '">' . $val['event_description'] . '</a>';
 				} else {
 					$upm_string .= $val['event_description'];
 				}
@@ -1839,7 +1838,6 @@ class ContentManager
 				}
 				
 				$upm_string .= substr($unassoc_upm_status,0,-2) . '</div></td>';
-				$upm_string .= '</div></td>';
 				
 				$title = '';$attr = '';	
 				if(!empty($val['edited']) && $val['edited']['event_type'] != $val['event_type']) {
@@ -1884,7 +1882,7 @@ class ContentManager
 					$date_style = 'color:#973535;'; 
 				}
 								
-				$upm_string .= '<td  class="' . $row_type_two . $attr . ' titleupmodd" ' . $title . '><div class="rowcollapse">';
+				$upm_string .= '<td  class="' . $row_type_two . $attr . ' titleupmodd txtleft" ' . $title . '><div class="rowcollapse">';
 				if($val['start_date_type'] == 'anticipated') {
 				$upm_string .= '<span style="font-weight:bold;' . $date_style . '">' 
 				. (($val['start_date'] != '' && $val['start_date'] != NULL && $val['start_date'] != '0000-00-00') ? date('m/y',strtotime($val['start_date'])) : '' )   
@@ -1923,7 +1921,7 @@ class ContentManager
 					$date_style = 'color:#973535;'; 
 				}
 				
-				$upm_string .= '<td class="' . $row_type_two . $attr . ' titleupmodd" ' . $title . '><div class="rowcollapse">';
+				$upm_string .= '<td class="' . $row_type_two . $attr . ' titleupmodd txtleft" ' . $title . '><div class="rowcollapse">';
 				if($val['end_date_type'] == 'anticipated') {
 					$upm_string .= '<span style="font-weight:bold;' . $date_style . '">' 
 					. (($val['end_date'] != '' && $val['end_date'] != NULL && $val['end_date'] != '0000-00-00') ? date('m/y',strtotime($val['end_date'])) : '' ) 
@@ -1938,19 +1936,18 @@ class ContentManager
 				
 				if(!empty($val['edited']) && ($val['result_link'] != $val['edited']['result_link'])) {
 					if($val['result_link'] != '' && $val['result_link'] != NULL) {
-						$upm_string .= '<div ' . htmlformat($val['event_description']) . '><a href="' . $val['result_link'] . '" style="color:#000;">'
+						$upm_string .= '<div ' . $upm_title . '><a href="' . rawurlencode($val['result_link']) . '" style="color:#000;">'
 						. '<img src="images/red-checkmark.png" alt="checkmark" style="padding-top: 3px;" border="0" /></a></div>';
 					}
 				} else {
 					if($val['result_link'] != '' && $val['result_link'] != NULL) {
-						$upm_string .= '<div ' . htmlformat($val['event_description']) . '><a href="' . $val['result_link'] . '" style="color:#000;">'
+						$upm_string .= '<div ' . $upm_title . '><a href="' . rawurlencode($val['result_link']) . '" style="color:#000;">'
 						. '<img src="images/black-checkmark.png" alt="checkmark" style="padding-top: 3px;" border="0" /></a></div>';
 					}
 				}
 				$upm_string .= '</div></td>';
 				
-	
-				$upm_title = 'title="' . htmlformat($val['event_description']) . '"';
+				
 				$date_updated = 'no';
 				if((isset($val['edited']['start_date']) && $val['start_date'] != $val['edited']['start_date']) || 
 				(isset($val['edited']['end_date']) && $val['end_date'] != $val['edited']['end_date'])) {
@@ -1959,7 +1956,7 @@ class ContentManager
 				
 				$upm_string .= getUPMChart(date('m',strtotime($val['start_date'])), date('Y',strtotime($val['start_date'])), 
 				date('m',strtotime($val['end_date'])), date('Y',strtotime($val['end_date'])), $this->current_yr, $this->second_yr, $this->third_yr, 
-				$val['start_date'], $val['end_date'], $val['event_link'], $upm_title, $date_updated);
+				$val['start_date'], $val['end_date'], rawurlencode($val['event_link']), $upm_title, $date_updated);
 		
 		
 				$upm_string .= '</tr>';
@@ -1974,25 +1971,25 @@ class ContentManager
 	function downloadOptions($showncount, $foundcount, $shownlist, $foundlist) {
 
 		echo ('<div style="height:100px;"><div class="drop new" style="margin:0px"><div class="newtext">Download Options</div>'
-			. '<form  id="frmDOptions" name="frmDOptions" method="post" >'
+			. '<form  id="frmDOptions" name="frmDOptions" method="post" action="">'
 //			. '<input type="hidden" name="xmlShownContent" value="' . htmlspecialchars(serialize($shownlist)) . '" />'
 //			. '<input type="hidden" name="xmlFullContent" value="' . htmlspecialchars(serialize($foundlist)) . '" />'
 			. '<input type="hidden" name="excelInput" id="excelInput" value="" />'
 //			. '<input type=hidden name="shownarr" value="' . htmlspecialchars(serialize($shownlist)).'" />'
 			. '<ul><li><label>Number of Studies: </label></li>'
 			. '<li><select id="dOption" name="dOption">'
-			. '<option value="shown" selected="yes">' . $showncount . ' Shown Studies</option>'
+			. '<option value="shown" selected="selected">' . $showncount . ' Shown Studies</option>'
 			. '<option value="all">' . $foundcount . ' Found Studies</option></select></li>'
 			. '<li><label>Which Fields: </label></li>'
 			. '<li><select id="wFields" name="wFields" disabled="disabled">'
-			. '<option selected="yes">Shown Fields</option><option>All Fields</option></select></li>'
+			. '<option selected="selected">Shown Fields</option><option>All Fields</option></select></li>'
 			. '<li><label>Which Format: </label></li><li><select id="wFormat" name="wFormat">'
-			. '<option value="excel" selected="yes">Excel</option><option value="xml">XML</option><option value="pdf">PDF</option></select></li></ul>'
-			. '<input type="submit" id="btnDownload" name="btnDownload" onClick="javascript:checkformat()" value="Download File" style="margin-left:8px;"  />');
+			. '<option value="excel" selected="selected">Excel</option><option value="xml">XML</option><option value="pdf">PDF</option></select></li></ul>'
+			. '<input type="submit" id="btnDownload" name="btnDownload" onclick="javascript:checkformat()" value="Download File" style="margin-left:8px;"  />');
 		
 		foreach($_GET as $ke => $va)
 			{
-				echo '<input type=hidden name="' . $ke . '" value="' . $va . '" />';
+				echo '<input type="hidden" name="' . $ke . '" value="' . $va . '" />';
 			}
 			echo ( '</form></div></div>');
 	}
@@ -2260,7 +2257,7 @@ function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last,
 				
 				//rendering upm (upcoming project completion) chart
 				echo $str = getUPMChart($st_month, $st_year, $ed_month, $ed_year, $current_yr, $second_yr, $third_yr, $v[2], 
-				$v[3], $upm_link, $upm_title, $date_updated);
+				$v[3], rawurlencode($upm_link), $upm_title, $date_updated);
 				echo '</tr>';
 			}
 		}
