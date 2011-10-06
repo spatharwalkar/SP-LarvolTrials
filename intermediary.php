@@ -1554,13 +1554,18 @@ class ContentManager
 			$this->displayHeader();
 			
 			if(isset($non_assoc_upm_params) && !empty($non_assoc_upm_params)) {
+			
 				$upm_string = $this->getNonAssocUpm($non_assoc_upm_params, 'ott');
 				if($upm_string != '') {
 					echo ('<tr class="trialtitles">'
 					. '<td colspan="50" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
 					. 'style="border-bottom:1px solid blue;background-image: url(\'images/down.png\');background-repeat: no-repeat;background-position:left center;"'
 					. 'onclick="sh(this,\'ott\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . htmlformat($rowlabel) . '</td></tr>' . $upm_string);
-				} 
+				} else {
+					echo ('<tr><td colspan="50" class="upmpointer notopbottomborder leftrightborderblue sectiontitles">' 
+					. htmlformat($rowlabel) . '</td></tr>');
+				}
+				 
 			} else {
 				echo ('<tr><td colspan="50" class="upmpointer notopbottomborder leftrightborderblue sectiontitles">' 
 					. htmlformat($rowlabel) . '</td></tr>');
@@ -1616,7 +1621,6 @@ class ContentManager
 					}
 				}
 				
-			
 				$this->downloadOptions($count, $foundcount, $shownArr, $fin_arr);
 				echo ('<br/>');
 			}
