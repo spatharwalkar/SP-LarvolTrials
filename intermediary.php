@@ -66,7 +66,7 @@ function applyfilter(value) {
 	  if(value == 'inactive') {
 	  
 	  document.getElementById('filteropt').innerHTML = 
-		  "<input type='checkbox' name='wh' value='1' />Withheld<br/>"+
+		 "<input type='checkbox' name='wh' value='1' />Withheld<br/>"+
 		 "<input type='checkbox' name='afm' value='1' />Approved for marketing<br/>" +
 		 "<input type='checkbox' name='tna' value='1' />Temporarily not available<br/>" + 
 		 "<input type='checkbox' name='nla' value='1' />No Longer Available<br/>" + 
@@ -80,13 +80,12 @@ function applyfilter(value) {
 	  } else if(value == 'active') {
 	  
 	  document.getElementById('filteropt').innerHTML = 
-		  '<input type="checkbox" name="nyr" value="1" />Not yet recruiting<br/>' +
-		  '<input type="checkbox" name="r" value="1" />Recruiting<br/>' + 
-		  '<input type="checkbox" name="ebi" value="1" />Enrolling by invitation<br/>' + 
-		  '<input type="checkbox" name="anr" value="1" />Active, not recruiting<br/>' + 
-		  '<input type="checkbox" name="a" value="1" />Available<br/>' ;
-	  
-	  
+		'<input type="checkbox" name="nyr" value="1" />Not yet recruiting<br/>' +
+		'<input type="checkbox" name="r" value="1" />Recruiting<br/>' + 
+		'<input type="checkbox" name="ebi" value="1" />Enrolling by invitation<br/>' + 
+		'<input type="checkbox" name="anr" value="1" />Active, not recruiting<br/>' + 
+		'<input type="checkbox" name="a" value="1" />Available<br/>' +
+		'<input type="checkbox" name="nlr" value="1" />No longer recruiting<br/>';
 	  
 	  } else {
 	  
@@ -103,7 +102,8 @@ function applyfilter(value) {
 		  '<input type="checkbox" name="r" value="1" />Recruiting<br/>' + 
 		  '<input type="checkbox" name="ebi" value="1" />Enrolling by invitation<br/>' + 
 		  '<input type="checkbox" name="anr" value="1" />Active, not recruiting<br/>' + 
-		  '<input type="checkbox" name="a" value="1" />Available<br/>' ;
+		  '<input type="checkbox" name="a" value="1" />Available<br/>' +
+		  '<input type="checkbox" name="nlr" value="1" />No longer recruiting<br/>';
 
 	  }
   }
@@ -167,7 +167,7 @@ class ContentManager
 								'style="width:6px;height:6px;"');
 								
 	private $actfilterarr 	= array('nyr'=>'Not yet recruiting', 'r'=>'Recruiting', 'ebi'=>'Enrolling by invitation', 
-								'anr'=>'Active, not recruiting', 'a'=>'Available');
+								'anr'=>'Active, not recruiting', 'a'=>'Available', 'nlr' =>'No longer recruiting');
 								
 	private $inactfilterarr = array('wh'=>'Withheld', 'afm'=>'Approved for marketing',
 								'tna'=>'Temporarily not available', 'nla'=>'No Longer Available', 'wd'=>'Withdrawn', 
@@ -219,7 +219,9 @@ class ContentManager
 			.'<input type="checkbox" name="anr" value="1"' 
 			.(isset($_GET['anr']) ? ' checked="checked"' : ''). '  />Active, not recruiting<br/>'
 			.'<input type="checkbox" name="a" value="1" ' 
-			.(isset($_GET['a']) ? ' checked="checked"' : ''). ' />Available<br/>';
+			.(isset($_GET['a']) ? ' checked="checked"' : ''). ' />Available<br/>'
+			.'<input type="checkbox" name="nlr" value="1" ' 
+			.(isset($_GET['nlr']) ? ' checked="checked"' : ''). ' />No longer recruiting<br/>';
 							
 		$this->inactivestatus = '<input type="checkbox" name="wh" value="1" ' 
 			.(isset($_GET['wh']) ? ' checked="checked"' : ''). ' />Withheld<br/>'
@@ -799,7 +801,7 @@ class ContentManager
 							if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) 
 							|| isset($_GET['a']) || isset($_GET['wh']) || isset($_GET['afm']) || isset($_GET['tna']) 
 							|| isset($_GET['nla']) || isset($_GET['wd']) || isset($_GET['t']) || isset($_GET['s']) 
-							|| isset($_GET['c'])) {	
+							|| isset($_GET['c']) || isset($_GET['nlr'])) {	
 							
 							$vall = implode(",",array_keys($this->allfilterarr, $new_arr['NCT/overall_status']));
 							if(array_key_exists($vall, $_GET)) {
@@ -814,7 +816,7 @@ class ContentManager
 				
 					if(in_array($new_arr['NCT/overall_status'], $this->actfilterarr) ) {
 						if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) 
-						|| isset($_GET['a'])) {
+						|| isset($_GET['a']) || isset($_GET['nlr'])) {
 							$vall = implode(",",array_keys($this->actfilterarr, $new_arr['NCT/overall_status']));
 							if(array_key_exists($vall, $_GET)) { 
 								$return_param['activearray'][$pk][] = $new_arr;
@@ -1476,7 +1478,7 @@ class ContentManager
 						if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) 
 						|| isset($_GET['a']) || isset($_GET['wh']) || isset($_GET['afm']) || isset($_GET['tna']) 
 						|| isset($_GET['nla']) || isset($_GET['wd']) || isset($_GET['t']) || isset($_GET['s']) 
-						|| isset($_GET['c'])) {	
+						|| isset($_GET['c']) || isset($_GET['nlr'])) {	
 						
 						$vall = implode(",",array_keys($this->allfilterarr, $new_arr['NCT/overall_status']));
 						if(array_key_exists($vall, $_GET)) {
@@ -1495,7 +1497,7 @@ class ContentManager
 			
 					if(in_array($new_arr['NCT/overall_status'], $this->actfilterarr) ) {
 						if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) 
-						|| isset($_GET['a'])) {
+						|| isset($_GET['a']) || isset($_GET['nlr'])) {
 						
 							$vall = implode(",",array_keys($this->actfilterarr, $new_arr['NCT/overall_status']));
 							if(array_key_exists($vall, $_GET)) { 
@@ -1615,6 +1617,7 @@ class ContentManager
 							$newkey = str_replace('NCT/','NCT.',$k);
 							$value[$newkey] = $v;
 							unset($value[$k]);
+
 						}
 					}
 				}
