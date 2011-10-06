@@ -1,6 +1,6 @@
 $(document).ready(function(){
 						   
-	$('#addtoright').after('&nbsp;&nbsp;&nbsp;<span id="addedtoright" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;All Unmatched UPMs</span>');
+	$('#addtoright').after('&nbsp;&nbsp;&nbsp;<span id="addedtoright" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;All Milestones</span>');
 	var image;
 	if($('#upmstyle').val() == 'expand') {
 		image = 'down.png';
