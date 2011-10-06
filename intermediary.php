@@ -1262,31 +1262,34 @@ class ContentManager
 			$totactivecount = 0;
 			
 			$excel_params 	= array();
+			$results_params = array();
 			$ins_params 	= array();
 			$fin_arr 		= array();
 			$link_expiry_date	= array();
+			$non_assoc_upm_params = array();
+			
 			if(isset($_GET['results'])) {
 			
-				$excel_params 	= explode(".", $_GET['results']);
+				$results_params 	= explode(".", $_GET['results']);
 				
-				$res = getLinkDetails('rpt_ott_header', 'header', 'id', $excel_params[0]);
+				$res = getLinkDetails('rpt_ott_header', 'header', 'id', $results_params[0]);
 				$rowlabel = trim($res['header']);
 				$link_expiry_date[] = $res['expiry'];
 				
-				$res = getLinkDetails('rpt_ott_header', 'header', 'id', $excel_params[1]);
+				$res = getLinkDetails('rpt_ott_header', 'header', 'id', $results_params[1]);
 				$columnlabel = trim($res['header']);
 				$link_expiry_date[] = $res['expiry'];
 				
-				if($excel_params[2] == '-1' || $excel_params[2] == '-2') { 
-					if($excel_params[2] == '-2') {
+				if($results_params[2] == '-1' || $results_params[2] == '-2') { 
+					if($results_params[2] == '-2') {
 					
-						$res = getLinkDetails('rpt_ott_searchdata', 'result_set', 'id', $excel_params[3]);
+						$res = getLinkDetails('rpt_ott_searchdata', 'result_set', 'id', $results_params[3]);
 						$excel_params = unserialize(stripslashes(gzinflate(base64_decode($res['result_set']))));
 						$link_expiry_date[] = $res['expiry'];
 						
-					} else if($excel_params[2] == '-1') { 
+					} else if($results_params[2] == '-1') { 
 						
-						$res = getLinkDetails('rpt_ott_trials', 'result_set', 'id', $excel_params[3]);
+						$res = getLinkDetails('rpt_ott_trials', 'result_set', 'id', $results_params[3]);
 						$link_expiry_date[] = $res['expiry'];
 						$sp = new SearchParam();
 						$sp->field = 'larvol_id';
@@ -1295,10 +1298,10 @@ class ContentManager
 						$excel_params = array($sp);
 						
 					}
-					if(isset($excel_params[4])) {
+					if(isset($results_params[4])) {
 					
 						$link_expiry_date[]	  = $res['expiry'];
-						$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $excel_params[4]);
+						$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $results_params[4]);
 						if(isset($_GET['v']) && $_GET['v'] == 1)
 							$non_assoc_upm_params = explode('\n',$res['intervention_name']);
 						else
@@ -1306,15 +1309,15 @@ class ContentManager
 						
 					}
 				} else {
-					if(strpos($excel_params[2],'s') !== FALSE) {
+					if(strpos($results_params[2],'s') !== FALSE) {
 					
-						$res = getLinkDetails('rpt_ott_searchdata', 'result_set', 'id', substr($excel_params[2],1));
+						$res = getLinkDetails('rpt_ott_searchdata', 'result_set', 'id', substr($results_params[2],1));
 						$excel_params = unserialize(stripslashes(gzinflate(base64_decode($res['result_set']))));
 						$link_expiry_date[] = $res['expiry'];
 						
 					} else {
 					
-						$res = getLinkDetails('rpt_ott_trials', 'result_set', 'id', $excel_params[2]);
+						$res = getLinkDetails('rpt_ott_trials', 'result_set', 'id', $results_params[2]);
 						$link_expiry_date[] = $res['expiry'];
 						$sp = new SearchParam();
 						$sp->field = 'larvol_id';
@@ -1322,10 +1325,10 @@ class ContentManager
 						$sp->value = str_replace(',', ' OR ', $res['result_set']);
 						$excel_params = array($sp);
 					}
-					if(isset($excel_params[3])) {
+					if(isset($results_params[3])) {
 					
 						$link_expiry_date[]	  = $res['expiry'];
-						$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $excel_params[3]);
+						$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $results_params[3]);
 						if(isset($_GET['v']) && $_GET['v'] == 1)
 							$non_assoc_upm_params = explode('\n',$res['intervention_name']);
 						else
