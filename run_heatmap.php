@@ -613,7 +613,7 @@ function runHeatmap($id, $return = false, $format = "xlsx", $expire = false)
 					if($bomb)
 						$results[$row][$column]->{'link'} .= '&bomb=' . $results[$row][$column]->bomb;
 						
-					$results[$row][$column]->{'link'} .= '&time=' . $time_machine;	
+					$results[$row][$column]->{'link'} .= '&time=' . $time_machine . '&v=1';	
 					//}
 				} else {	
 					//pass all IDs
