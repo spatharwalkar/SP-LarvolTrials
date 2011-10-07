@@ -1383,6 +1383,7 @@ if($stacked)
 				)
 			);
 
+			/*
 			if(
 				isset($value["NCT/overall_status"]) and 
 				(
@@ -1396,6 +1397,7 @@ if($stacked)
 					$value["NCT/overall_status"]=="Completed"
 				)
 			)	$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':K' . $i)->getFont()->getColor()->setARGB(PHPExcel_Style_Color::COLOR_RED);
+			*/
 			
 			if(isset($value["NCT/phase"]) and $value["NCT/phase"]=="Phase 0")
 			{
@@ -1616,6 +1618,7 @@ else
 			)
 		);
 
+		/*
 		if(
 			isset($value["NCT.overall_status"]) and 
 			(
@@ -1629,6 +1632,7 @@ else
 				$value["NCT.overall_status"]=="Completed"
 			)
 		)	$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':K' . $i)->getFont()->getColor()->setARGB(PHPExcel_Style_Color::COLOR_RED);
+		*/
 		
 		if(isset($value["NCT.phase"]) and $value["NCT.phase"]=="Phase 0")
 		{
