@@ -396,6 +396,9 @@ class ContentManager
 		else 
 			$sort .= '&amp;edited=oneweek';
 		
+		if(isset($_GET['v']) && $_GET['v'] != '')
+			$sort .= '&amp;v=' . $_GET['v'];
+			
 		foreach($this->actfilterarr as $k=>$v) { if(isset($_GET[$k])) $sort .= '&amp;'.$k.'=1'; }
 		foreach($this->inactfilterarr as $k=>$v) { if(isset($_GET[$k])) $sort .= '&amp;'.$k.'=1'; }
 		foreach($this->allfilterarr as $k=>$v) { if(isset($_GET[$k])) $sort .= '&amp;'.$k.'=1'; }
@@ -406,15 +409,15 @@ class ContentManager
 				
 			if(isset($_GET['cparams'])) {
 				foreach($_GET['params'] as $k => $v) {
-					$stack_url .= '&leading['.$k.']=' . rawurlencode($_GET['leading'][$k]) . '&params['.$k.']=' . rawurlencode($_GET['params'][$k]);
+					$stack_url .= '&amp;leading['.$k.']=' . rawurlencode($_GET['leading'][$k]) . '&amp;params['.$k.']=' . rawurlencode($_GET['params'][$k]);
 					
 					if($stacktype == 'row') 
-						$stack_url .= '&rowupm['.$k.']=' . rawurlencode($_GET['rowupm'][$k]); 
+						$stack_url .= '&amp;rowupm['.$k.']=' . rawurlencode($_GET['rowupm'][$k]); 
 					elseif($stacktype == 'col')
-						$stack_url .= '&colupm['.$k.']=' . rawurlencode($_GET['colupm'][$k]); 
+						$stack_url .= '&amp;colupm['.$k.']=' . rawurlencode($_GET['colupm'][$k]); 
 					
 					if(isset($_GET['trunc']))
-						$stack_url .= '&trunc=' . $_GET['trunc'];
+						$stack_url .= '&amp;trunc=' . $_GET['trunc'];
 				}
 			}
 			
@@ -422,10 +425,10 @@ class ContentManager
 			{
 				if(isset($_GET['results'])) {
 				
-					$pager .= '<a href="intermediary.php?results=' . rawurlencode($_GET['results']) . '&type=' . rawurlencode($_GET['type']) 
-					. '&time=' . rawurlencode($_GET['time']) . '&amp;pg=' . ($page-1);
+					$pager .= '<a href="intermediary.php?results=' . rawurlencode($_GET['results']) . '&amp;type=' . rawurlencode($_GET['type']) 
+					. '&amp;time=' . rawurlencode($_GET['time']) . '&amp;pg=' . ($page-1);
 					if(isset($_GET['format']) && $_GET['format'] == 'new') 
-						$pager .= '&format=' . $_GET['format'];
+						$pager .= '&amp;format=' . $_GET['format'];
 						
 				} else if(isset($_GET['cparams'])) {
 					$pager .= '<a href="intermediary.php?cparams=' . rawurlencode($_GET['cparams']) . $stack_url . '&amp;pg=' . ($page-1);
@@ -441,11 +444,11 @@ class ContentManager
 				if($nextlast > $count) $nextlast = $count;
 				if(isset($_GET['results'])) {
 				
-					$pager .= '<a href="intermediary.php?results=' . rawurlencode($_GET['results']) . '&type=' . rawurlencode($_GET['type']) 
-						. '&time=' . rawurlencode($_GET['time']) . '&amp;pg=' . ($page+1);
+					$pager .= '<a href="intermediary.php?results=' . rawurlencode($_GET['results']) . '&amp;type=' . rawurlencode($_GET['type']) 
+						. '&amp;time=' . rawurlencode($_GET['time']) . '&amp;pg=' . ($page+1);
 						
 					if(isset($_GET['format']) && $_GET['format'] == 'new') 
-					$pager .= '&format=' . $_GET['format'];	
+					$pager .= '&amp;format=' . $_GET['format'];	
 					
 				} else if(isset($_GET['cparams'])) {
 					$pager .= '<a href="intermediary.php?cparams=' . rawurlencode($_GET['cparams']) . $stack_url . '&amp;pg=' . ($page+1);
@@ -498,6 +501,10 @@ class ContentManager
 			echo ('<input type="hidden" name="results" value="' . $_GET['results'] . '" />'
 					. '<input type="hidden" name="type" value="' . $_GET['type'] . '" />'
 					. '<input type="hidden" name="time" value="' . $_GET['time'] . '" />');
+			
+			if(isset($_GET['v']))
+				echo ('<input type="hidden" name="v" value="' . $_GET['v'] . '" />');
+				
 			if(isset($_GET['format']) && $_GET['format'] == 'new') {
 			
 				echo ('<input type="hidden" name="format" value="' . $_GET['format'] . '" />');
@@ -1538,6 +1545,9 @@ class ContentManager
 			}
 			echo ('<input type="hidden" name="instparams" value="' . $insparams . '" />');
 			
+			if(isset($_GET['v']))
+				echo ('<input type="hidden" name="v" value="' . $_GET['v'] . '" />');
+				
 			$this->pstart 	= '';$this->last = '';$this->pend = '';$this->pages = '';
 			
 			$this->pstart 	= ($page-1) * $this->results_per_page + 1;
@@ -1806,7 +1816,7 @@ class ContentManager
 				
 				$upm_string .= '<td colspan="3" class="' . $row_type_one .  $attr . ' titleupm titleupmodd txtleft" ' . $title . '><div class="rowcollapse">';
 				if($val['event_link'] != NULL && $val['event_link'] != '') {
-					$upm_string .= '<a style="' . $title_link_color . '" href="' . rawurlencode($val['event_link']) . '">' . $val['event_description'] . '</a>';
+					$upm_string .= '<a style="' . $title_link_color . '" href="' . $val['event_link'] . '">' . $val['event_description'] . '</a>';
 				} else {
 					$upm_string .= $val['event_description'];
 				}
@@ -1939,12 +1949,12 @@ class ContentManager
 				
 				if(!empty($val['edited']) && ($val['result_link'] != $val['edited']['result_link'])) {
 					if($val['result_link'] != '' && $val['result_link'] != NULL) {
-						$upm_string .= '<div ' . $upm_title . '><a href="' . rawurlencode($val['result_link']) . '" style="color:#000;">'
+						$upm_string .= '<div ' . $upm_title . '><a href="' . $val['result_link'] . '" style="color:#000;">'
 						. '<img src="images/red-checkmark.png" alt="checkmark" style="padding-top: 3px;" border="0" /></a></div>';
 					}
 				} else {
 					if($val['result_link'] != '' && $val['result_link'] != NULL) {
-						$upm_string .= '<div ' . $upm_title . '><a href="' . rawurlencode($val['result_link']) . '" style="color:#000;">'
+						$upm_string .= '<div ' . $upm_title . '><a href="' . $val['result_link'] . '" style="color:#000;">'
 						. '<img src="images/black-checkmark.png" alt="checkmark" style="padding-top: 3px;" border="0" /></a></div>';
 					}
 				}
@@ -1959,7 +1969,7 @@ class ContentManager
 				
 				$upm_string .= getUPMChart(date('m',strtotime($val['start_date'])), date('Y',strtotime($val['start_date'])), 
 				date('m',strtotime($val['end_date'])), date('Y',strtotime($val['end_date'])), $this->current_yr, $this->second_yr, $this->third_yr, 
-				$val['start_date'], $val['end_date'], rawurlencode($val['event_link']), $upm_title, $date_updated);
+				$val['start_date'], $val['end_date'], $val['event_link'], $upm_title, $date_updated);
 		
 		
 				$upm_string .= '</tr>';
@@ -2260,7 +2270,7 @@ function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last,
 				
 				//rendering upm (upcoming project completion) chart
 				echo $str = getUPMChart($st_month, $st_year, $ed_month, $ed_year, $current_yr, $second_yr, $third_yr, $v[2], 
-				$v[3], rawurlencode($upm_link), $upm_title, $date_updated);
+				$v[3], $upm_link, $upm_title, $date_updated);
 				echo '</tr>';
 			}
 		}
