@@ -121,6 +121,12 @@ class ContentManager
 		$this->allcount = 0;
 		$this->inactivecount = 0;
 
+		
+		if((isset($_POST["dOption"])) and $_POST["dOption"]=='all')
+			{
+				$_POST['list'] = 'all';
+			}
+
 		$this->type = (isset($_POST["list"])) ? ($_POST["list"].'array') : 'activearray' ;
 		if(isset($_POST['list']) && $_POST['list'] == 'inactive') { 
 			$this->inactflag = 1; 		// checking if any of the inactive filters are set
@@ -396,15 +402,17 @@ class ContentManager
 			
 					if(!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y')
 						$return_param['fin_arr'][$pk][$val['NCT/nct_id']] = array_merge($nct[$val['NCT/nct_id']], $val);
-				
-					foreach($allUpmDetails[$val['NCT/nct_id']] as $kk => $vv) {
-						if(isset($vv['edited']) && !empty($vv['edited'])) {
-							$return_param['upmDetails'][$pk][$val['NCT/nct_id']][] = $vv;
-						}
-					}
+//******************
+//					foreach($allUpmDetails[$val['NCT/nct_id']] as $kk => $vv) {
+//						if(isset($vv['edited']) && !empty($vv['edited'])) {
+//							$return_param['upmDetails'][$pk][$val['NCT/nct_id']][] = $vv;
+//						}
+//					}
+//******************
+
 				} else {
 					$return_param['fin_arr'][$pk][$val['NCT/nct_id']] = array_merge($nct[$val['NCT/nct_id']], $val);
-					$return_param['upmDetails'][$pk][$val['NCT/nct_id']] = $allUpmDetails[$val['NCT/nct_id']];
+//					$return_param['upmDetails'][$pk][$val['NCT/nct_id']] = $allUpmDetails[$val['NCT/nct_id']];
 				}
 				
 				if(in_array($val['NCT/overall_status'],$this->actfilterarr)) {
@@ -926,12 +934,13 @@ class ContentManager
 				
 					if(!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y')
 						$fin_arr[$val['NCT/nct_id']] = array_merge($nct[$val['NCT/nct_id']], $val);
-						
+/*						
 					foreach($allUpmDetails[$val['NCT/nct_id']] as $kk => $vv) {
 						if(isset($vv['edited']) && !empty($vv['edited'])) {
 							$upmDetails[$val['NCT/nct_id']][] = $vv;
 						}
-					}	
+					}
+*/
 				} else {
 					$fin_arr[$val['NCT/nct_id']] = array_merge($nct[$val['NCT/nct_id']], $val);
 	//				$upmDetails[$val['NCT/nct_id']] = $allUpmDetails[$val['NCT/nct_id']];
