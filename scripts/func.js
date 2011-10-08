@@ -18,7 +18,7 @@ $(document).ready(function(){
 	
 	if($('.trialtitles').length>0)
 	{
-		$('#addedtoright').attr('onclick','sh(this,0,1)').css('cursor','pointer');	
+		$('#addedtoright').click(function(){sh(this,0,1);}).css('cursor','pointer');	
 	}
 	else
 	{
