@@ -618,7 +618,8 @@ function getActiveCount($all_ids, $time)
 	getEnumvalId($overallStatusId, "Recruiting").",".
 	getEnumvalId($overallStatusId, "Enrolling by invitation").",".
 	getEnumvalId($overallStatusId, "Active, not recruiting").",".
-	getEnumvalId($overallStatusId, "Available");
+	getEnumvalId($overallStatusId, "Available").",".
+	getEnumvalId($overallStatusId, "No longer recruiting");
 	
 	$query = "SELECT i.larvol_id,dv.field,dv.val_enum AS id FROM data_values AS dv
 					LEFT JOIN data_cats_in_study AS i ON dv.studycat=i.id
