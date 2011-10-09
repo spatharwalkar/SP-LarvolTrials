@@ -2,16 +2,16 @@
     $.fn.tabSlideOut = function(callerSettings) {
         var settings = $.extend({
             tabHandle: '.handle',
-            speed: 300, 
-            action: 'click',
-            tabLocation: 'left',
-            topPos: '200px',
+            speed: 100, 
+            action: 'hover',
+            tabLocation: 'right',
+            topPos: '50px',
             leftPos: '20px',
-            fixedPosition: false,
+            fixedPosition: true,
             positioning: 'absolute',
-            pathToTabImage: null,
-            imageHeight: null,
-            imageWidth: null,
+            pathToTabImage: 'images/help.png',
+            imageHeight: '106px',
+            imageWidth: '25px',
             onLoadSlideOut: false                       
         }, callerSettings||{});
 
@@ -56,7 +56,7 @@
         
         var properties = {
                     containerWidth: parseInt(obj.outerWidth(), 10) + 'px',
-                    containerHeight: '173px',
+                    containerHeight: '',
                     tabWidth: parseInt(settings.tabHandle.outerWidth(), 10) + 'px',
                     tabHeight: parseInt(settings.tabHandle.outerHeight(), 10) + 'px'
                 };

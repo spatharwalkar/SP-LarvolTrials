@@ -28,18 +28,7 @@ $(document).ready(function(){
 	var slideout = '<div class="slide-out-div"><a class="handle" href="#help">Content</a><table cellpadding="0" cellspacing="0" class="table-slide"> <tr><td><img src="images/black-diamond.png"/></td><td>Click for data release</td></tr> <tr><td><img src="images/red-diamond.png"/></td><td>Click for data release (new)</td></tr> <tr><td><img src="images/hourglass.png"/></td><td>Results pending</td></tr> <!--<tr><td><img src="images/lbomb.png"/></td><td>Click for anticipated milestone details</td></tr>--> <tr><td><img src="images/down.png"/></td><td>Click for additional milestones</td></tr> </table> </div> ';
 	$('body').append(slideout);	
     $(function(){
-        $('.slide-out-div').tabSlideOut({
-            tabHandle: '.handle',                     //class of the element that will become your tab
-            pathToTabImage: 'images/help.png', //path to the image for the tab //Optionally can be set using css
-            imageHeight: '106px',                     //height of tab image           //Optionally can be set using css
-            imageWidth: '25px',                       //width of tab image            //Optionally can be set using css
-            tabLocation: 'right',                      //side of screen where tab lives, top, right, bottom, or left
-            speed: 100,                               //speed of animation
-            action: 'click',                          //options: 'click' or 'hover', action to trigger animation
-            topPos: '50px',                          //position from the top/ use if tabLocation is left or right
-            leftPos: '20px',                          //position from left/ use if tabLocation is bottom or top
-            fixedPosition: true                     //options: true makes it stick(fixed position) on scroll
-        });
+        $('.slide-out-div').tabSlideOut();
 
     });	
 	
