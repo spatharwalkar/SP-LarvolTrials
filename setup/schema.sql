@@ -342,7 +342,7 @@ CREATE TABLE IF NOT EXISTS `rpt_ott_searchdata` (
   KEY `result_set` (`result_set`(300))
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
- CREATE  TABLE IF NOT EXISTS `update_status_fullhistory` (  `update_id` int( 10  )  unsigned NOT  NULL ,
+CREATE TABLE IF NOT EXISTS `update_status_fullhistory` (  `update_id` int( 10  )  unsigned NOT  NULL ,
  `process_id` int( 11  )  NOT  NULL DEFAULT  '0',
  `start_time` timestamp NOT  NULL DEFAULT  '0000-00-00 00:00:00',
  `end_time` timestamp NOT  NULL DEFAULT  '0000-00-00 00:00:00',
@@ -359,6 +359,27 @@ CREATE TABLE IF NOT EXISTS `rpt_ott_searchdata` (
 `trial_type` VARCHAR( 255 ) NULL DEFAULT NULL ,
  PRIMARY  KEY (  `update_id`  )  ) ENGINE  = InnoDB  DEFAULT CHARSET  = utf8 COLLATE  = utf8_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS `products` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `LI_id` varchar(63) COLLATE utf8_unicode_ci NOT NULL,
+  `name` varchar(127) COLLATE utf8_unicode_ci NOT NULL COMMENT 'matches the fieldname in the quickfind schema',
+  `searchdata` text COLLATE utf8_unicode_ci COMMENT 'contains regex',
+  `company` varchar(127) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `brand names` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `generic names` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `code names` varchar(127) COLLATE utf8_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `LI_id` (`LI_id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `areas` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(127) COLLATE utf8_unicode_ci NOT NULL COMMENT 'matches the fieldname in the quickfind schema',
+  `searchdata` text COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 ALTER TABLE `data_cats_in_study`
   ADD CONSTRAINT `data_cats_in_study_ibfk_1` FOREIGN KEY (`larvol_id`) REFERENCES `clinical_study` (`larvol_id`) ON DELETE CASCADE ON UPDATE CASCADE,
