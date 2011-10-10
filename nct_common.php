@@ -200,12 +200,12 @@ function filterNewChanges($ids, &$existing) {
 
 function validateEnums($val) 
 {
-	$eval1=$val;
+	$eval1=strtolower($val);
 	if ( isset($eval1) and ( (substr($eval1,0,1)=="'") or (substr($eval1,0,1)=='"') )  and ( (substr($eval1,-1)=="'") or (substr($eval1,-1)=='"') )  )
 			return substr($eval1,1,-1);
-	$enum1 = array('Phase 1'=>"I", 'Phase 2'=>"II", 'Phase 3'=>"III", 'Phase 4'=>"IV", 'N/A'=>"Not Applicable");
-	$enum2 = array('Phase 1'=>"1", 'Phase 2'=>"2", 'Phase 3'=>"3", 'Phase 4'=>"4", 'Phase 2/Phase 3'=>"Phase 2-3");
-	$enum3 = array('Phase 1'=>"PHASE I", 'Phase 2'=>"PHASE II", 'Phase 3'=>"PHASE III", 'Phase 4'=>"PHASE IV");
+	$enum1 = array('Phase 1'=>"i", 'Phase 2'=>"ii", 'Phase 3'=>"iii", 'Phase 4'=>"iv", 'N/A'=>"not applicable");
+	$enum2 = array('Phase 1'=>"1", 'Phase 2'=>"2", 'Phase 3'=>"3", 'Phase 4'=>"4", 'Phase 2/Phase 3'=>"phase 2-3");
+	$enum3 = array('Phase 1'=>"phase i", 'Phase 2'=>"phase ii", 'Phase 3'=>"phase iii", 'Phase 4'=>"phase iv");
 	$ev1=array_search($eval1,$enum1,false);
 	$ev2=array_search($eval1,$enum2,false);
 	$ev3=array_search($eval1,$enum3,false);
