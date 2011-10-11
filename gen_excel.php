@@ -21,11 +21,11 @@ class ContentManager
 						
 								
 	private $actfilterarr 	= array('nyr'=>'Not yet recruiting', 'r'=>'Recruiting', 'ebi'=>'Enrolling by invitation', 
-								'anr'=>'Active, not recruiting', 'a'=>'Available');
+								'anr'=>'Active, not recruiting', 'a'=>'Available','nlr' =>'No longer recruiting');
 								
 	private $inactfilterarr = array('wh'=>'Withheld', 'afm'=>'Approved for marketing',
 								'tna'=>'Temporarily not available', 'nla'=>'No Longer Available', 'wd'=>'Withdrawn', 
-								't'=>'Terminated','s'=>'Suspended', 'c'=>'Completed');
+								't'=>'Terminated','s'=>'Suspended', 'c'=>'Completed', 'empt'=>'');
 	private $phase_arr 		= array('N/A'=>'#BFBFBF', '0'=>'#00CCFF', '0/1'=>'#99CC00', '1'=>'#99CC00', '1a'=>'#99CC00', '1b'=>'#99CC00', '1a/1b'=>'#99CC00', 
 					'1c'=>'#99CC00', '1/2'=>'#FFFF00', '1b/2'=>'#FFFF00', '1b/2a'=>'#FFFF00', '2'=>'#FFFF00', '2a'=>'#FFFF00', '2a/2b'=>'#FFFF00', 
 					'2a/b'=>'#FFFF00', '2b'=>'#FFFF00', '2/3'=>'#FF9900', '2b/3'=>'#FF9900','3'=>'#FF9900', '3a'=>'#FF9900', '3b'=>'#FF9900', '3/4'=>'#FF0000', 
@@ -38,9 +38,6 @@ class ContentManager
 	private $edited;
 	private $e_style;
 	private $p_style;
-	private $activestatus;
-	private $inactivestatus;
-	private $allstatus;
 	private $actflag;
 	private $inactflag;
 	private $allflag;
@@ -64,35 +61,6 @@ class ContentManager
 		$this->loggedIn	= $db->loggedIn();
 //		$this->now = $now;
 		
-		$this->activestatus = '<input type="checkbox" name="nyr" value="1" ' 
-			.(isset($_POST['nyr']) ? ' checked="checked"' : ''). ' />Not yet recruiting<br/>'
-			.'<input type="checkbox" name="r" value="1" ' 
-			.(isset($_POST['r']) ? ' checked="checked"' : ''). ' />Recruiting<br/>'
-			.'<input type="checkbox" name="ebi" value="1" ' 
-			.(isset($_POST['ebi']) ? ' checked="checked"' : ''). ' />Enrolling by invitation<br/>'
-			.'<input type="checkbox" name="anr" value="1"' 
-			.(isset($_POST['anr']) ? ' checked="checked"' : ''). '  />Active, not recruiting<br/>'
-			.'<input type="checkbox" name="a" value="1" ' 
-			.(isset($_POST['a']) ? ' checked="checked"' : ''). ' />Available<br/>';
-							
-		$this->inactivestatus = '<input type="checkbox" name="wh" value="1" ' 
-			.(isset($_POST['wh']) ? ' checked="checked"' : ''). ' />Withheld<br/>'
-			.'<input type="checkbox" name="afm" value="1" ' 
-			.(isset($_POST['afm']) ? ' checked="checked"' : ''). ' />Approved for marketing<br/>'
-			.'<input type="checkbox" name="tna" value="1" ' 
-			.(isset($_POST['tna']) ? ' checked="checked"' : ''). '/>Temporarily not available<br/>'
-			.'<input type="checkbox" name="nla" value="1" ' 
-			.(isset($_POST['nla']) ? ' checked="checked"' : ''). '/>No Longer Available<br/>'
-			.'<input type="checkbox" name="wd" value="1" ' 
-			.(isset($_POST['wd']) ? ' checked="checked"' : ''). '/>Withdrawn<br/>'
-			.'<input type="checkbox" name="t" value="1" ' 
-			.(isset($_POST['t']) ? ' checked="checked"' : ''). '/>Terminated<br/>'
-			.'<input type="checkbox" name="s" value="1" ' 
-			.(isset($_POST['s']) ? ' checked="checked"' : ''). '/>Suspended<br/>'
-			.'<input type="checkbox" name="c" value="1" ' 
-			.(isset($_POST['c']) ? ' checked="checked"' : ''). '/>Completed<br/>';
-							
-		$this->allstatus = $this->activestatus . $this->inactivestatus;
 
 		$this->allfilterarr = array_merge($this->actfilterarr, $this->inactfilterarr);	
 		
@@ -447,7 +415,7 @@ class ContentManager
 							if(isset($_POST['nyr']) || isset($_POST['r']) || isset($_POST['ebi']) || isset($_POST['anr']) 
 							|| isset($_POST['a']) || isset($_POST['wh']) || isset($_POST['afm']) || isset($_POST['tna']) 
 							|| isset($_POST['nla']) || isset($_POST['wd']) || isset($_POST['t']) || isset($_POST['s']) 
-							|| isset($_POST['c'])) {	
+							|| isset($_POST['c']) || isset($_GET['nlr'])) {	
 							
 							$vall = implode(",",array_keys($this->allfilterarr, $new_arr['NCT/overall_status']));
 							if(array_key_exists($vall, $_POST)) {
@@ -462,7 +430,7 @@ class ContentManager
 				
 					if(in_array($new_arr['NCT/overall_status'], $this->actfilterarr) ) {
 						if(isset($_POST['nyr']) || isset($_POST['r']) || isset($_POST['ebi']) || isset($_POST['anr']) 
-						|| isset($_POST['a'])) {
+						|| isset($_POST['a']) || isset($_GET['nlr'])) {
 							$vall = implode(",",array_keys($this->actfilterarr, $new_arr['NCT/overall_status']));
 							if(array_key_exists($vall, $_POST)) { 
 								$return_param['activearray'][$pk][] = $new_arr;
@@ -990,7 +958,7 @@ class ContentManager
 						if(isset($_POST['nyr']) || isset($_POST['r']) || isset($_POST['ebi']) || isset($_POST['anr']) 
 						|| isset($_POST['a']) || isset($_POST['wh']) || isset($_POST['afm']) || isset($_POST['tna']) 
 						|| isset($_POST['nla']) || isset($_POST['wd']) || isset($_POST['t']) || isset($_POST['s']) 
-						|| isset($_POST['c'])) {	
+						|| isset($_POST['c']) || isset($_GET['nlr']) ) {	
 						
 						$vall = implode(",",array_keys($this->allfilterarr, $new_arr['NCT/overall_status']));
 						if(array_key_exists($vall, $_POST)) {
@@ -1009,7 +977,7 @@ class ContentManager
 			
 					if(in_array($new_arr['NCT/overall_status'], $this->actfilterarr) ) {
 						if(isset($_POST['nyr']) || isset($_POST['r']) || isset($_POST['ebi']) || isset($_POST['anr']) 
-						|| isset($_POST['a'])) {
+						|| isset($_POST['a']) || isset($_GET['nlr'])) {
 						
 							$vall = implode(",",array_keys($this->actfilterarr, $new_arr['NCT/overall_status']));
 							if(array_key_exists($vall, $_POST)) { 
