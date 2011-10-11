@@ -450,7 +450,7 @@ function searchControl($fieldname, $alias=false, $checked=false, $multi=false)
 			break;
 			
 			case 'enum':
-			$query = 'SELECT id,value FROM data_enumvals WHERE field=' . $CFid;
+			$query = $CFid=='56' ? 'SELECT id,value, REPLACE(value, "/", "") as sortval FROM data_enumvals  WHERE field="56" order by sortval' : 'SELECT id,value FROM data_enumvals  WHERE field=' . $CFid  ;
 			$res = mysql_query($query) or die('Bad SQL query getting field enumvals');
 			while($ev = mysql_fetch_assoc($res))
 			{
