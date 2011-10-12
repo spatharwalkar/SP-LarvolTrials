@@ -1124,9 +1124,7 @@ class ContentManager
 				} else {
 					echo '<tr><td colspan="50" class="notopbottomborder leftrightborderblue sectiontitles">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>';
 				}
-			} else {
-				echo '<tr><td colspan="50" class="notopbottomborder leftrightborderblue sectiontitles">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>';
-			}
+			} 
 			
 			if($count > 0) {
 				
