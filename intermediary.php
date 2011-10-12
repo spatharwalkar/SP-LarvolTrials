@@ -495,6 +495,9 @@ class ContentManager
 		$return_param['upmDetails'] = array();
 		$ins_params		= array();
 		$return_param['showRecordsCnt'] = 0;
+		$showRecords_inactivearray_Cnt = 0;
+		$showRecords_activearray_Cnt = 0;
+		$showRecords_allarray_Cnt = 0;
 		$return_param['stack_inactive_count'] = 0;
 		$return_param['stack_active_count'] = 0;
 		$return_param['stack_total_count'] = 0;
@@ -763,6 +766,11 @@ class ContentManager
 			$params = array_merge($this->params, $excel_params, $ins_params);
 			if(!empty($excel_params)) {
 				$arrr = search($params,$this->fid,NULL,$this->time_machine);
+				
+			} else {
+				$return_param['activearray'][] = array('section' => $pk);
+				$return_param['inactivearray'][] = array('section' => $pk);
+				$return_param['allarray'][] = array('section' => $pk);
 			}
 			
 			//Added to consolidate the data returned in an mutidimensional array format as opposed to earlier 
@@ -818,19 +826,21 @@ class ContentManager
 						$vall = implode(",",array_keys($this->inactfilterarr, $val['NCT/overall_status']));
 						if(array_key_exists($vall, $_GET)) {
 						
-							if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) {
-								if(!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y') 
-									$return_param['inactivearray'][] = array_merge($nct[$val['NCT/nct_id']], $val, array('section' => $pk));
+							if(isset($_GET['chkOnlyUpdated']) && (!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y')) {
+								$return_param['inactivearray'][] = array_merge($nct[$val['NCT/nct_id']], $val, array('section' => $pk));
+								++$showRecords_inactivearray_Cnt;
 							} else {
 								$return_param['inactivearray'][] = array_merge($val, array('section' => $pk));
+								++$showRecords_inactivearray_Cnt;
 							}
 						} 
 					} else {
-						if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) {
-							if(!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y') 
-								$return_param['inactivearray'][] = array_merge($nct[$val['NCT/nct_id']], $val, array('section' => $pk));
+						if(isset($_GET['chkOnlyUpdated']) && (!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y')) {
+							$return_param['inactivearray'][] = array_merge($nct[$val['NCT/nct_id']], $val, array('section' => $pk));
+							++$showRecords_inactivearray_Cnt;
 						} else {
 							$return_param['inactivearray'][] = array_merge($val, array('section' => $pk));
+							++$showRecords_inactivearray_Cnt;
 						}
 					}
 					
@@ -842,19 +852,22 @@ class ContentManager
 					
 						$vall = implode(",",array_keys($this->actfilterarr, $val['NCT/overall_status']));
 						if(array_key_exists($vall, $_GET)) {
-							if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) {
-								if(!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y') 
-									$return_param['activearray'][] = array_merge($nct[$val['NCT/nct_id']], $val, array('section' => $pk));
+						
+							if(isset($_GET['chkOnlyUpdated']) && (!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y')) {
+								$return_param['activearray'][] = array_merge($nct[$val['NCT/nct_id']], $val, array('section' => $pk));
+								++$showRecords_activearray_Cnt;
 							} else {
 								$return_param['activearray'][] = array_merge($val, array('section' => $pk));
+								++$showRecords_activearray_Cnt;
 							}
 						} 
 					} else {
-						if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) {
-							if(!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y') 
-								$return_param['activearray'][] = array_merge($nct[$val['NCT/nct_id']], $val, array('section' => $pk));
+						if(isset($_GET['chkOnlyUpdated']) && (!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y')) {
+							$return_param['activearray'][] = array_merge($nct[$val['NCT/nct_id']], $val, array('section' => $pk));
+							++$showRecords_activearray_Cnt;
 						} else {
 							$return_param['activearray'][] = array_merge($val, array('section' => $pk));
+							++$showRecords_activearray_Cnt;
 						}
 					}
 				}
@@ -866,25 +879,27 @@ class ContentManager
 							
 					$vall = implode(",",array_keys($this->allfilterarr, $val['NCT/overall_status']));
 					if(array_key_exists($vall, $_GET)) {
-						if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) {
-							if(!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y') 
-								$return_param['allarray'][] = array_merge($nct[$val['NCT/nct_id']], $val, array('section' => $pk));
+						if(isset($_GET['chkOnlyUpdated']) && (!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y')) {
+							$return_param['allarray'][] = array_merge($nct[$val['NCT/nct_id']], $val, array('section' => $pk));
+							++$showRecords_allarray_Cnt;
 						} else {
 							$return_param['allarray'][] = array_merge($val, array('section' => $pk));
+							++$showRecords_allarray_Cnt;
 						}
 					} 
 				} else {
-					if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) {
-						if(!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y') 
-							$return_param['allarray'][] = array_merge($nct[$val['NCT/nct_id']], $val, array('section' => $pk));
+					if(isset($_GET['chkOnlyUpdated']) && (!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y')) {
+						$return_param['allarray'][] = array_merge($nct[$val['NCT/nct_id']], $val, array('section' => $pk));
+						++$showRecords_allarray_Cnt;
 					} else {
 						$return_param['allarray'][] = array_merge($val, array('section' => $pk));
+						++$showRecords_allarray_Cnt;
 					}
 				}
 				
 			}
 			
-			$return_param['showRecordsCnt'] = count($return_param[$this->type]);
+			$return_param['showRecordsCnt'] = (isset($_GET["list"])) ? (${'showRecords_'.$_GET["list"].'array_Cnt'}) : ($showRecords_activearray_Cnt);
 			$return_param['stack_inactive_count'] 	= $return_param['stack_inactive_count'] + $totinactivecount;
 			$return_param['stack_active_count']		= $return_param['stack_active_count'] + $totactivecount;
 			$return_param['stack_total_count']		= $return_param['stack_total_count'] + ($totinactivecount + $totactivecount);
@@ -942,7 +957,11 @@ class ContentManager
 			$this->pstart 	= '';$this->last = '';$this->pend = '';$this->pages = '';
 			if(isset($_GET['pg'])) $page = mysql_real_escape_string($_GET['pg']); 
 			if(!is_numeric($page)) die('non-numeric page');
-			$count = $process_params['showRecordsCnt'];
+			
+			if($_GET['type'] == 'col')
+				$count = count($process_params[$this->type]);
+			else
+				$count = $process_params['showRecordsCnt'];
 			
 			$this->pstart 	= ($page-1) * $this->results_per_page + 1;
 			$this->pend 	= $this->pstart + $this->results_per_page - 1;
@@ -1102,7 +1121,11 @@ class ContentManager
 					. '<td colspan="50" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
 				. 'style="border-bottom:1px solid blue;background-image: url(\'images/down.png\');background-repeat: no-repeat;background-position:left center;"'
 					. ' onclick="sh(this,\'rowupm\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . '</td></tr>' . $upm_string);
-				} 
+				} else {
+					echo '<tr><td colspan="50" class="notopbottomborder leftrightborderblue sectiontitles">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>';
+				}
+			} else {
+				echo '<tr><td colspan="50" class="notopbottomborder leftrightborderblue sectiontitles">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>';
 			}
 			
 			if($count > 0) {
@@ -1128,10 +1151,15 @@ class ContentManager
 						. ' onclick="sh(this,\'' . $k . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . trim($header_details[$k]) 
 						. '</td></tr>' . $unmatched_upm_details[$k]);
 						
+						if(!isset($_GET['chkOnlyUpdated']))
+							echo ('<tr><td colspan="50" class="norecord" align="left">No trials found.</td></tr>'); 
 					}
+					
 				}
-				if(!isset($_GET['chkOnlyUpdated']))
+				
+				if($unmatched_upms_default_style == 'expand' && !isset($_GET['chkOnlyUpdated']))
 					echo ('<tr><td colspan="50" class="norecord" align="left">No trials found.</td></tr>'); 
+					
 			}
 			
 			if(isset($_GET['trunc'])) {
@@ -1988,290 +2016,319 @@ function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last,
 	$start = $start -1;
 	for($i=$start;$i<$last;$i++) 
 	{
-		$rowspan = 1;
-		$nctid =  $type_arr[$i]['NCT/nct_id'];
-		
-		$ph = str_replace('Phase ', '', trim($type_arr[$i]['NCT/phase']));
-		
-		$start_month = date('m',strtotime($type_arr[$i]['NCT/start_date']));
-		$start_year = date('Y',strtotime($type_arr[$i]['NCT/start_date']));
-		$end_month = date('m',strtotime($type_arr[$i]["inactive_date"]));
-		$end_year = date('Y',strtotime($type_arr[$i]["inactive_date"]));
-	
-		$enroll_style = 'color:gray;';
-		$title_link_color = '#000000;';
-		
-		$attr = ' ';
-		if(isset($fin_arr[$nctid]['edited']) && in_array('NCT/brief_title',$fin_arr[$nctid]['edited'])) {
-			$attr = ' highlight" title="' . $fin_arr[$nctid]['edited']['NCT/brief_title'];
-			$title_link_color = '#FF0000;';
-		} else if($fin_arr[$nctid]['new'] == 'y') {
-			$attr = '" title="New record';
-			$title_link_color = '#FF0000;';
-		}
-		
-		if(isset($upmDetails[$nctid])) {
 			
-			$rowspan = count($upmDetails[$nctid])+1;
-		}
+		if(isset($type_arr[$i]['NCT/nct_id'])) {
 		
-		if($i%2 == 1) {
-			$row_type_one = 'alttitle';
-		} else {
-			$row_type_one = 'title';
-		}	
-		
-		
-		//displaying section headers
-		if($type_arr[$i]['section'] !== $previous_section) {
-			
-			if($unmatched_upm_details[$type_arr[$i]['section']] != '') {
-			
-				if($unmatched_upms_default_style == 'expand')
-					$image = 'down';
-				else
-					$image = 'up';
-					
-			echo ('<tr class="trialtitles">'
-			. '<td colspan="50" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
-			. 'style="border-bottom:1px solid blue;background-image: url(\'images/' . $image . '.png\');background-repeat: no-repeat;background-position:left center;"'
-			. ' onclick="sh(this,\'' . $type_arr[$i]['section'] . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . trim($header_details[$type_arr[$i]['section']]) 
-			. '</td></tr>' . $unmatched_upm_details[$type_arr[$i]['section']]);
-			
-			} else {
-				echo '<tr><td colspan="50" class="notopbottomborder leftrightborderblue sectiontitles">' 
-					. trim($header_details[$type_arr[$i]['section']]) . '</td></tr>';
+			//displaying section headers
+			if($type_arr[$i]['section'] !== $previous_section) {
+				
+				if($unmatched_upm_details[$type_arr[$i]['section']] != '') {
+				
+					if($unmatched_upms_default_style == 'expand')
+						$image = 'down';
+					else
+						$image = 'up';
+				
+				echo ('<tr class="trialtitles">'
+				. '<td colspan="50" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
+				. 'style="border-bottom:1px solid blue;background-image: url(\'images/' . $image 
+				. '.png\');background-repeat: no-repeat;background-position:left center;"'
+				. ' onclick="sh(this,\'' . $type_arr[$i]['section'] . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . trim($header_details[$type_arr[$i]['section']]) 
+				. '</td></tr>' . $unmatched_upm_details[$type_arr[$i]['section']]);
+				
+				} else {
+					echo '<tr><td colspan="50" class="notopbottomborder leftrightborderblue sectiontitles">' 
+						. trim($header_details[$type_arr[$i]['section']]) . '</td></tr>';
+				}
 			}
-		}
 		
-		echo '<tr ' . (($fin_arr[$nctid]['new'] == 'y') ? 'class="newtrial" ' : ''). ' >'
-			. '<td rowspan="' . $rowspan . '" class="' . $row_type_one . ' ' . $attr . '">' 
-			. '<div class="rowcollapse"><a style="color:' . $title_link_color 
-			. '" href="http://clinicaltrials.gov/ct2/show/' . padnct($nctid) . '">';
+			$rowspan = 1;
+			$nctid =  $type_arr[$i]['NCT/nct_id'];
+			
+			$ph = str_replace('Phase ', '', trim($type_arr[$i]['NCT/phase']));
+			
+			$start_month = date('m',strtotime($type_arr[$i]['NCT/start_date']));
+			$start_year = date('Y',strtotime($type_arr[$i]['NCT/start_date']));
+			$end_month = date('m',strtotime($type_arr[$i]["inactive_date"]));
+			$end_year = date('Y',strtotime($type_arr[$i]["inactive_date"]));
 		
-		if(isset($type_arr[$i]['NCT/acronym']) && $type_arr[$i]['NCT/acronym'] != '') {
-			echo '<b>' . htmlformat($type_arr[$i]['NCT/acronym']) . '</b>&nbsp;' . htmlformat($type_arr[$i]['NCT/brief_title']);
-					
-		} else {
-			echo htmlformat($type_arr[$i]['NCT/brief_title']);
-		}
-				
-		echo ('</a></div></td>');
-		
-		foreach($fieldlist as $k => $v) {
-		
+			$enroll_style = 'color:gray;';
+			$title_link_color = '#000000;';
+			
 			$attr = ' ';
-			$val = htmlformat($type_arr[$i][$v]);
-			if($v == "NCT/enrollment"){
+			if(isset($fin_arr[$nctid]['edited']) && in_array('NCT/brief_title',$fin_arr[$nctid]['edited'])) {
+				$attr = ' highlight" title="' . $fin_arr[$nctid]['edited']['NCT/brief_title'];
+				$title_link_color = '#FF0000;';
+			} else if($fin_arr[$nctid]['new'] == 'y') {
+				$attr = '" title="New record';
+				$title_link_color = '#FF0000;';
+			}
 			
-				if(isset($fin_arr[$nctid]['edited']) && in_array($v,$fin_arr[$nctid]['edited'])) {
+			if(isset($upmDetails[$nctid])) {
 				
-					$attr = ' highlight" title="' . $fin_arr[$nctid]['edited'][$v];
-					$enroll_style = 'color:#973535;';
-					
-				}	else if($fin_arr[$nctid]['new'] == 'y') {
-				
-					$attr = '" title="New record';
-					$enroll_style = 'color:#973535;';
-				}
-				echo '<td nowrap="nowrap" rowspan="' . $rowspan . '" class="' . $row_type_one 
-				. $attr . '"><div class="rowcollapse">';
-				
-					if($type_arr[$i]["NCT/enrollment_type"] != '') {
-					
-						if($type_arr[$i]["NCT/enrollment_type"] == 'Anticipated') { 
-							echo '<span style="font-weight:bold;' . $enroll_style . '">' . $val . '</span>';
-							
-						} else if($type_arr[$i]["NCT/enrollment_type"] == 'Actual') {
-							echo $val;
-							
-						} else { 
-							echo $val . ' (' . $type_arr[$i]["NCT/enrollment_type"] . ')';
-						}
-					} else {
-						echo $val;
-					}
-				echo '</div></td>';  
-				
-			} else if($v == "NCT/start_date") {
-			
-				if(isset($fin_arr[$nctid]['edited']) && in_array($v, $fin_arr[$nctid]['edited'])) {
-					$attr = ' highlight" title="' . $fin_arr[$nctid]['edited'][$v] ;
-				} else if($fin_arr[$nctid]['new'] == 'y') {
-					$attr = '" title="New record';
-				}
-				
-				echo '<td rowspan="' . $rowspan . '" class="' . $row_type_one . $attr . '" ><div class="rowcollapse">'; 
-				if($type_arr[$i]["NCT/start_date"] != '' || $type_arr[$i]["NCT/start_date"] != NULL) {
-					echo date('m/y',strtotime($type_arr[$i]["NCT/start_date"]));
-				} else {
-					echo '&nbsp;';
-				}
-				  
-				echo '</div></td>';
-				
-				$attr = '';
-				if($fin_arr[$nctid]['new'] == 'y') 
-					$attr = ' title="New record" ';
-					
-				echo '<td rowspan="' . $rowspan . '" class="' . $row_type_one . '" ' . $attr . '><div class="rowcollapse">';
-				if($type_arr[$i]["inactive_date"] != '' || $type_arr[$i]["inactive_date"] != NULL) {
-					echo date('m/y',strtotime($type_arr[$i]["inactive_date"]));
-				} else {
-					echo '&nbsp;';
-				}
-				echo '</div></td>';
-				
-			} else if($v == "NCT/overall_status") {
+				$rowspan = count($upmDetails[$nctid])+1;
+			}
 		
-				if(isset($fin_arr[$nctid]['edited']) && in_array($v, $fin_arr[$nctid]['edited'])) {
-					$attr = 'class="highlight ' . $row_type_one . ' " title="' . $fin_arr[$nctid]['edited'][$v] . '" ';
-				} else if($fin_arr[$nctid]['new'] == 'y') {
-				 	$attr = 'title="New record" class="' . $row_type_one . '"' ;
-				} else {
-					$attr = 'class="' . $row_type_one . '"';
-				}
+			if($i%2 == 1) {
+				$row_type_one = 'alttitle';
+			} else {
+				$row_type_one = 'title';
+			}
+		
+			echo '<tr ' . (($fin_arr[$nctid]['new'] == 'y') ? 'class="newtrial" ' : ''). ' >'
+				. '<td rowspan="' . $rowspan . '" class="' . $row_type_one . ' ' . $attr . '">' 
+				. '<div class="rowcollapse"><a style="color:' . $title_link_color 
+				. '" href="http://clinicaltrials.gov/ct2/show/' . padnct($nctid) . '">';
+		
+			if(isset($type_arr[$i]['NCT/acronym']) && $type_arr[$i]['NCT/acronym'] != '') {
+				echo '<b>' . htmlformat($type_arr[$i]['NCT/acronym']) . '</b>&nbsp;' . htmlformat($type_arr[$i]['NCT/brief_title']);
+						
+			} else {
+				echo htmlformat($type_arr[$i]['NCT/brief_title']);
+			}
 					
-				echo '<td ' . $attr . ' rowspan="' . $rowspan . '">'  
-					.'<div class="rowcollapse">' . $val . '</div></td>';
+			echo ('</a></div></td>');
 			
+			foreach($fieldlist as $k => $v) {
 			
-			} else if($v == "NCT/condition") {
-			
-				if(isset($fin_arr[$nctid]['edited']) && in_array($v, $fin_arr[$nctid]['edited'])) {
-					$attr = ' highlight" title="' . $fin_arr[$nctid]['edited'][$v];
-				} else if($fin_arr[$nctid]['new'] == 'y') {
-					$attr = '" title="New record';
-				}
+				$attr = ' ';
+				$val = htmlformat($type_arr[$i][$v]);
+				if($v == "NCT/enrollment"){
 				
-				echo '<td rowspan="' . $rowspan . '" class="' . $row_type_one . $attr . '">'
-					. '<div class="rowcollapse">' . $val . '</div></td>';
+					if(isset($fin_arr[$nctid]['edited']) && in_array($v,$fin_arr[$nctid]['edited'])) {
 					
-			
-			} else if($v == "NCT/intervention_name") {
-			
-				if(isset($fin_arr[$nctid]['edited']) && in_array($v, $fin_arr[$nctid]['edited'])){
-					$attr = ' highlight" title="' . $fin_arr[$nctid]['edited'][$v];
-				} else if($fin_arr[$nctid]['new'] == 'y') {
-					$attr = '" title="New record';
-				}
-				
-				echo '<td rowspan="' . $rowspan . '" class="' . $row_type_one . $attr . '">'
-					. '<div class="rowcollapse">' . $val . '</div></td>';
-				
-			
-			} else if($v == "NCT/phase") {
-			
-				if(isset($fin_arr[$nctid]['edited']) && in_array($v, $fin_arr[$nctid]['edited'])) {
-					$attr = 'class="highlight" title="' . $fin_arr[$nctid]['edited'][$v] . '" ';
-				} else if($fin_arr[$nctid]['new'] == 'y') {
-					$attr = 'title="New record"';
-				}
-				
-				if($ph != '' && $ph !== NULL) {
-					$phase = (trim($type_arr[$i][$v]) == 'N/A') ? $ph : ('P' . $ph);
-					$ph_color = $phase_arr[$ph];
-				} else {
-					$phase = 'N/A';
-					$ph_color = $phase_arr['N/A'];
-				}
-				echo '<td rowspan="' . $rowspan . '" style="background-color:' . $ph_color . ';" ' . $attr . '>'
-					. '<div class="rowcollapse">' . $phase . '</div></td>';
-			
-			
-			} else if($v == "NCT/lead_sponsor") { 
-			
-			
-				if(isset($fin_arr[$nctid]['edited']) && (in_array($v, $fin_arr[$nctid]['edited']) 
-					|| in_array('NCT/collaborator', $fin_arr[$nctid]['edited']))) {
+						$attr = ' highlight" title="' . $fin_arr[$nctid]['edited'][$v];
+						$enroll_style = 'color:#973535;';
+						
+					}	else if($fin_arr[$nctid]['new'] == 'y') {
 					
-					$attr = ' highlight" title="';
-					if(in_array($v, $fin_arr[$nctid]['edited']))
-						$attr .= $fin_arr[$nctid]['edited'][$v] . ' ';
-					
-					if(in_array('NCT/collaborator', $fin_arr[$nctid]['edited'])) {
-						$attr .= $fin_arr[$nctid]['edited']['NCT/collaborator'];
+						$attr = '" title="New record';
 						$enroll_style = 'color:#973535;';
 					}
-					$attr .= '';
-				} else if($fin_arr[$nctid]['new'] == 'y') {
-					$attr = '" title="New record';
-
-				}
-				echo '<td rowspan="' . $rowspan . '" class="' . $row_type_one . $attr . '">'
-					. '<div class="rowcollapse">' . $val . ' <span style="' . $enroll_style . '"> ' 
-					. $type_arr[$i]["NCT/collaborator"] . ' </span></div></td>';
+					echo '<td nowrap="nowrap" rowspan="' . $rowspan . '" class="' . $row_type_one 
+					. $attr . '"><div class="rowcollapse">';
+					
+						if($type_arr[$i]["NCT/enrollment_type"] != '') {
+						
+							if($type_arr[$i]["NCT/enrollment_type"] == 'Anticipated') { 
+								echo '<span style="font-weight:bold;' . $enroll_style . '">' . $val . '</span>';
+								
+							} else if($type_arr[$i]["NCT/enrollment_type"] == 'Actual') {
+								echo $val;
+								
+							} else { 
+								echo $val . ' (' . $type_arr[$i]["NCT/enrollment_type"] . ')';
+							}
+						} else {
+							echo $val;
+						}
+					echo '</div></td>';  
+					
+				} else if($v == "NCT/start_date") {
 				
-			} else if($v == 'region') {
-			
-				if($fin_arr[$nctid]['new'] == 'y') 
-					$attr = 'title="New record"';
-				
-				echo '<td class="' . $row_type_one . '" rowspan="' . $rowspan . '" ' . $attr . '>'
-				. '<div class="rowcollapse">' . $val . '</div></td>';
-			} 
-		}
-		
-		echo ('<td>&nbsp;</td>');
-		
-		//rendering project completion chart
-		echo $str = getCompletionChart($start_month, $start_year, $end_month, $end_year, $current_yr, $second_yr, $third_yr, 
-		$ph_color, $type_arr[$i]['NCT/start_date'], $type_arr[$i]['inactive_date']);
-		
-		echo '</tr>';
-		
-		if(isset($upmDetails[$nctid]) && !empty($upmDetails[$nctid])) {
-			
-			foreach($upmDetails[$nctid] as $k => $v) { 
-			
-				$str = '';$diamond = '';
-
-				$st_month = date('m',strtotime($v[2]));
-				$st_year = date('Y',strtotime($v[2]));
-				$ed_month = date('m',strtotime($v[3]));
-				$ed_year = date('Y',strtotime($v[3]));
-				$upm_link = $v[1];
-				$upm_result_link = $v[4];
-				$upm_title = 'title="' . htmlformat($v[0]) . '"';
-				
-				echo ('<tr>');
-				
-				//rendering diamonds in case of end date is prior to the current year
-				echo ('<td style="text-align:center;' . (($k < count($upmDetails[$nctid])-1) ? 'border-bottom:0;' : '' ) . '">');
-				
-				if(!empty($upmDetails[$nctid][$k]['edited']) && ($v[4] != $upmDetails[$nctid][$k]['edited'][3])) {
-				
-					if($upm_result_link != '' && $upm_result_link != NULL) {
-						echo ('<div ' . $upm_title . '><a href="' 
-						. $upm_result_link . '" style="color:#000;">'
-						. '<img src="images/red-diamond.png" alt="diamond" style="padding-top: 3px;" border="0" /></a></div>');
+					if(isset($fin_arr[$nctid]['edited']) && in_array($v, $fin_arr[$nctid]['edited'])) {
+						$attr = ' highlight" title="' . $fin_arr[$nctid]['edited'][$v] ;
+					} else if($fin_arr[$nctid]['new'] == 'y') {
+						$attr = '" title="New record';
 					}
-				} else {
-				
-					if($upm_result_link != '' && $upm_result_link != NULL) {
-						echo ('<div ' . $upm_title . '><a href="' . $upm_result_link . '" style="color:#000;">'
-						. '<img src="images/black-diamond.png" alt="diamond" style="padding-top: 3px;" border="0" /></a></div>');
+					
+					echo '<td rowspan="' . $rowspan . '" class="' . $row_type_one . $attr . '" ><div class="rowcollapse">'; 
+					if($type_arr[$i]["NCT/start_date"] != '' || $type_arr[$i]["NCT/start_date"] != NULL) {
+						echo date('m/y',strtotime($type_arr[$i]["NCT/start_date"]));
+					} else {
+						echo '&nbsp;';
 					}
-				}
+					  
+					echo '</div></td>';
+					
+					$attr = '';
+					if($fin_arr[$nctid]['new'] == 'y') 
+						$attr = ' title="New record" ';
+						
+					echo '<td rowspan="' . $rowspan . '" class="' . $row_type_one . '" ' . $attr . '><div class="rowcollapse">';
+					if($type_arr[$i]["inactive_date"] != '' || $type_arr[$i]["inactive_date"] != NULL) {
+						echo date('m/y',strtotime($type_arr[$i]["inactive_date"]));
+					} else {
+						echo '&nbsp;';
+					}
+					echo '</div></td>';
+					
+				} else if($v == "NCT/overall_status") {
+			
+					if(isset($fin_arr[$nctid]['edited']) && in_array($v, $fin_arr[$nctid]['edited'])) {
+						$attr = 'class="highlight ' . $row_type_one . ' " title="' . $fin_arr[$nctid]['edited'][$v] . '" ';
+					} else if($fin_arr[$nctid]['new'] == 'y') {
+						$attr = 'title="New record" class="' . $row_type_one . '"' ;
+					} else {
+						$attr = 'class="' . $row_type_one . '"';
+					}
+						
+					echo '<td ' . $attr . ' rowspan="' . $rowspan . '">'  
+						.'<div class="rowcollapse">' . $val . '</div></td>';
 				
-				$date_updated = 'no';
-				if((isset($upmDetails[$nctid][$k]['edited'][4]) && $v[2] != $upmDetails[$nctid][$k]['edited'][4]) || 
-				(isset($upmDetails[$nctid][$k]['edited'][6]) && $v[3] != $upmDetails[$nctid][$k]['edited'][6])) {
-					$date_updated = 'yes';
+				
+				} else if($v == "NCT/condition") {
+				
+					if(isset($fin_arr[$nctid]['edited']) && in_array($v, $fin_arr[$nctid]['edited'])) {
+						$attr = ' highlight" title="' . $fin_arr[$nctid]['edited'][$v];
+					} else if($fin_arr[$nctid]['new'] == 'y') {
+						$attr = '" title="New record';
+					}
+					
+					echo '<td rowspan="' . $rowspan . '" class="' . $row_type_one . $attr . '">'
+						. '<div class="rowcollapse">' . $val . '</div></td>';
+						
+				
+				} else if($v == "NCT/intervention_name") {
+				
+					if(isset($fin_arr[$nctid]['edited']) && in_array($v, $fin_arr[$nctid]['edited'])){
+						$attr = ' highlight" title="' . $fin_arr[$nctid]['edited'][$v];
+					} else if($fin_arr[$nctid]['new'] == 'y') {
+						$attr = '" title="New record';
+					}
+					
+					echo '<td rowspan="' . $rowspan . '" class="' . $row_type_one . $attr . '">'
+						. '<div class="rowcollapse">' . $val . '</div></td>';
+					
+				
+				} else if($v == "NCT/phase") {
+				
+					if(isset($fin_arr[$nctid]['edited']) && in_array($v, $fin_arr[$nctid]['edited'])) {
+						$attr = 'class="highlight" title="' . $fin_arr[$nctid]['edited'][$v] . '" ';
+					} else if($fin_arr[$nctid]['new'] == 'y') {
+						$attr = 'title="New record"';
+					}
+					
+					if($ph != '' && $ph !== NULL) {
+						$phase = (trim($type_arr[$i][$v]) == 'N/A') ? $ph : ('P' . $ph);
+						$ph_color = $phase_arr[$ph];
+					} else {
+						$phase = 'N/A';
+						$ph_color = $phase_arr['N/A'];
+					}
+					echo '<td rowspan="' . $rowspan . '" style="background-color:' . $ph_color . ';" ' . $attr . '>'
+						. '<div class="rowcollapse">' . $phase . '</div></td>';
+				
+				
+				} else if($v == "NCT/lead_sponsor") { 
+				
+				
+					if(isset($fin_arr[$nctid]['edited']) && (in_array($v, $fin_arr[$nctid]['edited']) 
+						|| in_array('NCT/collaborator', $fin_arr[$nctid]['edited']))) {
+						
+						$attr = ' highlight" title="';
+						if(in_array($v, $fin_arr[$nctid]['edited']))
+							$attr .= $fin_arr[$nctid]['edited'][$v] . ' ';
+						
+						if(in_array('NCT/collaborator', $fin_arr[$nctid]['edited'])) {
+							$attr .= $fin_arr[$nctid]['edited']['NCT/collaborator'];
+							$enroll_style = 'color:#973535;';
+						}
+						$attr .= '';
+					} else if($fin_arr[$nctid]['new'] == 'y') {
+						$attr = '" title="New record';
+	
+					}
+					echo '<td rowspan="' . $rowspan . '" class="' . $row_type_one . $attr . '">'
+						. '<div class="rowcollapse">' . $val . ' <span style="' . $enroll_style . '"> ' 
+						. $type_arr[$i]["NCT/collaborator"] . ' </span></div></td>';
+					
+				} else if($v == 'region') {
+				
+					if($fin_arr[$nctid]['new'] == 'y') 
+						$attr = 'title="New record"';
+					
+					echo '<td class="' . $row_type_one . '" rowspan="' . $rowspan . '" ' . $attr . '>'
+					. '<div class="rowcollapse">' . $val . '</div></td>';
 				} 
-				
-				if(($v[3] != '' && $v[3] != NULL && $v[3] != '0000-00-00') && ($v[3] < date('Y-m-d')) && ($upm_result_link == NULL || upm_result_link == '')){
-					echo ('<div ' . $upm_title . '><img src="images/hourglass.png" alt="hourglass" border="0" /></div>');
-				}
-				echo ('</td>');
-				
-				//rendering upm (upcoming project completion) chart
-				echo $str = getUPMChart($st_month, $st_year, $ed_month, $ed_year, $current_yr, $second_yr, $third_yr, $v[2], 
-				$v[3], $upm_link, $upm_title, $date_updated);
-				echo '</tr>';
 			}
-		}
+			
+			echo ('<td>&nbsp;</td>');
+			
+			//rendering project completion chart
+			echo $str = getCompletionChart($start_month, $start_year, $end_month, $end_year, $current_yr, $second_yr, $third_yr, 
+			$ph_color, $type_arr[$i]['NCT/start_date'], $type_arr[$i]['inactive_date']);
+			
+			echo '</tr>';
 		
+			if(isset($upmDetails[$nctid]) && !empty($upmDetails[$nctid])) {
+				
+				foreach($upmDetails[$nctid] as $k => $v) { 
+				
+					$str = '';$diamond = '';
+	
+					$st_month = date('m',strtotime($v[2]));
+					$st_year = date('Y',strtotime($v[2]));
+					$ed_month = date('m',strtotime($v[3]));
+					$ed_year = date('Y',strtotime($v[3]));
+					$upm_link = $v[1];
+					$upm_result_link = $v[4];
+					$upm_title = 'title="' . htmlformat($v[0]) . '"';
+					
+					echo ('<tr>');
+					
+					//rendering diamonds in case of end date is prior to the current year
+					echo ('<td style="text-align:center;' . (($k < count($upmDetails[$nctid])-1) ? 'border-bottom:0;' : '' ) . '">');
+					
+					if(!empty($upmDetails[$nctid][$k]['edited']) && ($v[4] != $upmDetails[$nctid][$k]['edited'][3])) {
+					
+						if($upm_result_link != '' && $upm_result_link != NULL) {
+							echo ('<div ' . $upm_title . '><a href="' 
+							. $upm_result_link . '" style="color:#000;">'
+							. '<img src="images/red-diamond.png" alt="diamond" style="padding-top: 3px;" border="0" /></a></div>');
+						}
+					} else {
+					
+						if($upm_result_link != '' && $upm_result_link != NULL) {
+							echo ('<div ' . $upm_title . '><a href="' . $upm_result_link . '" style="color:#000;">'
+							. '<img src="images/black-diamond.png" alt="diamond" style="padding-top: 3px;" border="0" /></a></div>');
+						}
+					}
+					
+					$date_updated = 'no';
+					if((isset($upmDetails[$nctid][$k]['edited'][4]) && $v[2] != $upmDetails[$nctid][$k]['edited'][4]) || 
+					(isset($upmDetails[$nctid][$k]['edited'][6]) && $v[3] != $upmDetails[$nctid][$k]['edited'][6])) {
+						$date_updated = 'yes';
+					} 
+					
+					if(($v[3] != '' && $v[3] != NULL && $v[3] != '0000-00-00') && ($v[3] < date('Y-m-d')) && ($upm_result_link == NULL || upm_result_link == '')){
+						echo ('<div ' . $upm_title . '><img src="images/hourglass.png" alt="hourglass" border="0" /></div>');
+					}
+					echo ('</td>');
+					
+					//rendering upm (upcoming project completion) chart
+					echo $str = getUPMChart($st_month, $st_year, $ed_month, $ed_year, $current_yr, $second_yr, $third_yr, $v[2], 
+					$v[3], $upm_link, $upm_title, $date_updated);
+					echo '</tr>';
+				}
+			}
+		
+		} else {
+			
+			if($unmatched_upm_details[$type_arr[$i]['section']] != '') {
+				
+					if($unmatched_upms_default_style == 'expand')
+						$image = 'down';
+					else
+						$image = 'up';
+				
+				echo ('<tr class="trialtitles">'
+				. '<td colspan="50" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
+				. 'style="border-bottom:1px solid blue;background-image: url(\'images/' . $image 
+				. '.png\');background-repeat: no-repeat;background-position:left center;"'
+				. ' onclick="sh(this,\'' . $type_arr[$i]['section'] . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . trim($header_details[$type_arr[$i]['section']]) 
+				. '</td></tr>' . $unmatched_upm_details[$type_arr[$i]['section']]);
+				
+				if(!isset($_GET['chkOnlyUpdated']))
+				echo ('<tr><td colspan="50" class="norecord" align="left">No trials found.</td></tr>'); 
+				
+			} /*else {
+				echo '<tr><td colspan="50" class="notopbottomborder leftrightborderblue sectiontitles">' 
+					. trim($header_details[$type_arr[$i]['section']]) . '</td></tr>';
+			}*/
+		
+			
+		}
 		$previous_section = $type_arr[$i]['section'];
 	}
 }
