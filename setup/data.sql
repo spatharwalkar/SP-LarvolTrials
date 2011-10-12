@@ -597,8 +597,8 @@ INSERT INTO `data_enumvals` (`id`, `field`, `value`) VALUES
 (307, 67, 'Behavior'),
 (308, 67, 'Vaccine'),
 (309, 67, 'Gene Transfer'),
-(310, 67, 'Therapy'),
-(311, 67, 'Procedure/Surgery');
+(310, 67, 'Therapy');
+
 
 
 
