@@ -204,7 +204,7 @@ function validateEnums($val)
 	if ( isset($eval1) and ( (substr($eval1,0,1)=="'") or (substr($eval1,0,1)=='"') )  and ( (substr($eval1,-1)=="'") or (substr($eval1,-1)=='"') )  )
 			return substr($eval1,1,-1);
 	$enum1 = array('Phase 1'=>"i", 'Phase 2'=>"ii", 'Phase 3'=>"iii", 'Phase 4'=>"iv", 'N/A'=>"not applicable",'Procedure'=>'procedure/surgery');
-	$enum2 = array('Phase 1'=>"1", 'Phase 2'=>"2", 'Phase 3'=>"3", 'Phase 4'=>"4", 'Phase 2/Phase 3'=>"phase 2-3", 'N/A'=>"none");
+	$enum2 = array('Phase 1'=>"1", 'Phase 2'=>"2", 'Phase 3'=>"3", 'Phase 4'=>"4", 'Phase 2/Phase 3'=>"phase 2-3", 'N/A'=>"none",'Phase 0'=>'0');
 	$enum3 = array('Phase 1'=>"phase i", 'Phase 2'=>"phase ii", 'Phase 3'=>"phase iii", 'Phase 4'=>"phase iv");
 	$ev1=array_search($eval1,$enum1,false);
 	$ev2=array_search($eval1,$enum2,false);
