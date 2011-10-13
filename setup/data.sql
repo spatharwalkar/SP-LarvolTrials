@@ -559,7 +559,6 @@ INSERT INTO `data_enumvals` (`id`, `field`, `value`) VALUES
 (126, 131, 'Print-Electronic'),
 (27, 30, 'Probability Sample'),
 (187, 67, 'Procedure'),
-(59, 67, 'Procedure/Surgery Dietary Supplement'),
 (122, 130, 'Publisher'),
 (134, 151, 'Publisher'),
 (170, 186, 'Publisher'),
