@@ -34,7 +34,7 @@ global $pr_id;
 global $cid;
 global $maxid;
 
-ini_set('max_execution_time', '360000'); //100 hours
+ini_set('max_execution_time', '9000000'); //250 hours
 ignore_user_abort(true);
 if($_POST['mode']=='web') $nct_ids=get_nctids_from_web();
 if(!isset($nct_ids))
