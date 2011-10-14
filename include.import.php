@@ -548,7 +548,8 @@ function addval($studycat, $category_id, $fieldname, $value)
 					if($res === false) return softDie('Invalid enumval "' . $val . '" for field "' . $fieldname . '"');
 					$val = $res['id'];
 				}
-			}
+			} 
+			$val=normalize($type, $val);
 			$query = 'INSERT INTO data_values SET `added`="' . $DTnow . '",'
 					. '`field`=' . $field . ',studycat=' . $studycat . ',val_' . $type . '=' . esc($type, $val);
 			if(mysql_query($query) === false) return softDie('Bad SQL query saving value');

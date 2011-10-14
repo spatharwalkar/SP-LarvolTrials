@@ -3133,6 +3133,25 @@ function getNCT($nct_id,$larvol_id,$time,$edited)
 //Get html content by passing through htmlspecialchars
 function htmlformat($str)
 {
+	$str1 = str_replace('Â®','®', $str);
+	if($str1==$str)
+	$str = str_replace('®','Â®', $str);
+	$str1 = str_replace('Â©','©', $str);
+	if($str1==$str)
+	$str = str_replace('©','Â©', $str);
+	$str1 = str_replace('â„¢','™', $str);
+	if($str1==$str)
+	$str = str_replace('™','â„¢', $str);
+	$str1 = str_replace('Â£','£', $str);
+	if($str1==$str)
+	$str = str_replace('£','Â£', $str);
+	$str = str_replace('“','"', $str);
+	$str = str_replace('”','"', $str);
+	$str = str_replace('`',",", $str);
+	$str = str_replace('¼',"&#188;", $str);
+	$str = str_replace('½',"&#189;", $str);
+	$str = iconv("UTF-8","UTF-8//IGNORE",$str); 
+	
 	return htmlspecialchars($str);
 }
 

@@ -845,6 +845,7 @@ function addval_d($studycat, $category_id, $fieldname, $value, $date) {
 			
             if (!is_null($val) and !$no_dat) 
 			{
+					$val=normalize($type, $val);
 					$query = 'INSERT INTO data_values SET `added`="' . $DTnow . '",'
 							. '`field`=' . $field . ',studycat=' . $studycat . ',val_' . $type . '=' . esc($type, $val);
 					if (mysql_query($query) === false)
@@ -1271,6 +1272,7 @@ function commit_diff($studycat, $category_id, $fieldname, $value, $date, $operat
                     $val = $res['id'];
                 }
             }
+			$val=normalize($type, $val);
             $query = 'INSERT INTO data_values SET `added`="' . $DTnow . '",'
                     . '`field`=' . $field . ',studycat=' . $studycat . ',val_' . $type . '=' . esc($type, $val);
 
