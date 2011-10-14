@@ -157,10 +157,9 @@ class ContentManager
 	private $sortorder;
 	private $sort_params 	= array();
 	private $sortimg 	= array();
-	private $displist 	= array('Enrollment' => 'NCT/enrollment','Region' => 'region', 'Status' => 'NCT/overall_status', 
-								'Sponsor' => 'NCT/lead_sponsor', 'Conditions' => 'NCT/condition', 
-								'Interventions' => 'NCT/intervention_name','Study Dates' => 'NCT/start_date', 
-								'Phase' => 'NCT/phase');
+	private $displist 	= array('Enrollment' => 'NCT/enrollment','Region' => 'region', 'Interventions' => 'NCT/intervention_name', 
+								'Status' => 'NCT/overall_status', 'Sponsor' => 'NCT/lead_sponsor', 'Conditions' => 'NCT/condition', 
+								'Study Dates' => 'NCT/start_date', 'Phase' => 'NCT/phase');
 								
 	private $imgscale 	= array('style="width:14px;height:14px;"', 'style="width:12px;height:12px;"', 
 								'style="width:10px;height:10px;"', 'style="width:8px;height:8px;"', 
@@ -207,7 +206,7 @@ class ContentManager
 	public function __construct() {
 	
 		$db = new DatabaseManager();
-		$this->results_per_page = $db->set['results_per_page'];
+		$this->results_per_page = 100;//$db->set['results_per_page'];
 		$this->loggedIn	= $db->loggedIn();
 		
 		$this->activestatus = '<input type="checkbox" name="nyr" value="1" ' 
@@ -436,11 +435,12 @@ class ContentManager
 				$pager .= $sort . '" style="float:left;">&lt;&lt; Previous Page (' . ($this->pstart - $this->results_per_page) . '-' . ($this->pstart-1) 
 				. ')</a>&nbsp;&nbsp;&nbsp;';
 			}
-			$pager .= '<div style="float:left;margin:0px 10px;">Studies Shown (' . $this->pstart . '-' . $this->pend . ')&nbsp;&nbsp;&nbsp;</div>';
+			$pager .= '<div style="float:left;margin:0px 10px;">Studies Shown (' . $this->pstart . '-' . $this->last . ')&nbsp;&nbsp;&nbsp;</div>';
 			if($this->pend < $count)
 			{
 				
 				$nextlast = ($this->last+$this->results_per_page);
+				
 				if($nextlast > $count) $nextlast = $count;
 				if(isset($_GET['results'])) {
 				
@@ -467,7 +467,7 @@ class ContentManager
 				$pager .= $sort . '" style="float:left;">&lt;&lt; Previous Page (' . ($this->pstart - $this->results_per_page) . '-' . ($this->pstart-1) 
 				. ')</a>&nbsp;&nbsp;&nbsp;';
 			}
-			$pager .= '<div style="float:left;margin:0px 10px;">Studies Shown (' . $this->pstart . '-' . $this->pend . ')</div>';
+			$pager .= '<div style="float:left;margin:0px 10px;">Studies Shown (' . $this->pstart . '-' . $this->last . ')</div>';
 
 			if($this->pend < $count)
 			{
@@ -826,18 +826,25 @@ class ContentManager
 						$vall = implode(",",array_keys($this->inactfilterarr, $val['NCT/overall_status']));
 						if(array_key_exists($vall, $_GET)) {
 						
-							if(isset($_GET['chkOnlyUpdated']) && (!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y')) {
-								$return_param['inactivearray'][] = array_merge($nct[$val['NCT/nct_id']], $val, array('section' => $pk));
-								++$showRecords_inactivearray_Cnt;
+							if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) {
+							
+								if(!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y') {
+									$return_param['inactivearray'][] = array_merge($nct[$val['NCT/nct_id']], $val, array('section' => $pk));
+									++$showRecords_inactivearray_Cnt;
+								}
 							} else {
 								$return_param['inactivearray'][] = array_merge($val, array('section' => $pk));
 								++$showRecords_inactivearray_Cnt;
 							}
+							
 						} 
 					} else {
-						if(isset($_GET['chkOnlyUpdated']) && (!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y')) {
-							$return_param['inactivearray'][] = array_merge($nct[$val['NCT/nct_id']], $val, array('section' => $pk));
-							++$showRecords_inactivearray_Cnt;
+						if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) {
+						
+							if(!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y') {
+								$return_param['inactivearray'][] = array_merge($nct[$val['NCT/nct_id']], $val, array('section' => $pk));
+								++$showRecords_inactivearray_Cnt;
+							}
 						} else {
 							$return_param['inactivearray'][] = array_merge($val, array('section' => $pk));
 							++$showRecords_inactivearray_Cnt;
@@ -853,20 +860,27 @@ class ContentManager
 						$vall = implode(",",array_keys($this->actfilterarr, $val['NCT/overall_status']));
 						if(array_key_exists($vall, $_GET)) {
 						
-							if(isset($_GET['chkOnlyUpdated']) && (!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y')) {
-								$return_param['activearray'][] = array_merge($nct[$val['NCT/nct_id']], $val, array('section' => $pk));
-								++$showRecords_activearray_Cnt;
+							if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) {
+							
+								if(!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y') {
+									$return_param['activearray'][] = array_merge($nct[$val['NCT/nct_id']], $val, array('section' => $pk));
+									++$showRecords_activearray_Cnt;
+								}
 							} else {
-								$return_param['activearray'][] = array_merge($val, array('section' => $pk));
+								$return_param['activearray'][] = array_merge($nct[$val['NCT/nct_id']], $val, array('section' => $pk));
 								++$showRecords_activearray_Cnt;
 							}
 						} 
 					} else {
-						if(isset($_GET['chkOnlyUpdated']) && (!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y')) {
+					
+						if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) {
+						
+							if(!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y') {
+								$return_param['activearray'][] = array_merge($nct[$val['NCT/nct_id']], $val, array('section' => $pk));
+								++$showRecords_activearray_Cnt;
+							}
+						} else { 
 							$return_param['activearray'][] = array_merge($nct[$val['NCT/nct_id']], $val, array('section' => $pk));
-							++$showRecords_activearray_Cnt;
-						} else {
-							$return_param['activearray'][] = array_merge($val, array('section' => $pk));
 							++$showRecords_activearray_Cnt;
 						}
 					}
@@ -879,18 +893,22 @@ class ContentManager
 							
 					$vall = implode(",",array_keys($this->allfilterarr, $val['NCT/overall_status']));
 					if(array_key_exists($vall, $_GET)) {
-						if(isset($_GET['chkOnlyUpdated']) && (!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y')) {
-							$return_param['allarray'][] = array_merge($nct[$val['NCT/nct_id']], $val, array('section' => $pk));
-							++$showRecords_allarray_Cnt;
+						if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) {
+							if(!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y') {
+								$return_param['allarray'][] = array_merge($nct[$val['NCT/nct_id']], $val, array('section' => $pk));
+								++$showRecords_allarray_Cnt;
+							}
 						} else {
 							$return_param['allarray'][] = array_merge($val, array('section' => $pk));
 							++$showRecords_allarray_Cnt;
 						}
 					} 
 				} else {
-					if(isset($_GET['chkOnlyUpdated']) && (!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y')) {
-						$return_param['allarray'][] = array_merge($nct[$val['NCT/nct_id']], $val, array('section' => $pk));
-						++$showRecords_allarray_Cnt;
+					if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) {
+						if(!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y') {
+							$return_param['allarray'][] = array_merge($nct[$val['NCT/nct_id']], $val, array('section' => $pk));
+							++$showRecords_allarray_Cnt;
+						}
 					} else {
 						$return_param['allarray'][] = array_merge($val, array('section' => $pk));
 						++$showRecords_allarray_Cnt;
@@ -905,7 +923,7 @@ class ContentManager
 			$return_param['stack_total_count']		= $return_param['stack_total_count'] + ($totinactivecount + $totactivecount);
 			
 		}
-		
+		//echo '<br/>inactivearray==><pre>';print_r($return_param['inactivearray']);
 		/*--------------------------------------------------------
 		|Variables set for count when filtered by institution_type
 		---------------------------------------------------------*/
@@ -953,7 +971,7 @@ class ContentManager
 			echo ('<input type="hidden" name="instparams" value="' . $process_params['insparams']. '" />');	
 
 			//Pagination
-			$page = 1;$this->results_per_page = 250;
+			$page = 1;
 			$this->pstart 	= '';$this->last = '';$this->pend = '';$this->pages = '';
 			if(isset($_GET['pg'])) $page = mysql_real_escape_string($_GET['pg']); 
 			if(!is_numeric($page)) die('non-numeric page');
@@ -1680,11 +1698,11 @@ class ContentManager
 			 . '<th style="width:28px;" title="Black: Actual&nbsp;&nbsp;Gray: Anticipated&nbsp;&nbsp;Red: Change greater than 20%">'
 			 . '<a href="javascript:void(0);" onclick="javascript:doSorting(\'en\');">N</a></th>'
 			 . '<th rowspan="2" style="width:32px;" title="&quot;EU&quot; = European Union&nbsp;&quot;ROW&quot; = Rest of World">Region</th>'
+			 . '<th rowspan="2" style="width:110px;">Interventions</th>'
 			 . '<th style="width:105px;">'
 			 . '<a href="javascript:void(0);" onclick="javascript:doSorting(\'os\');">Status</a></th>'
 			 . '<th rowspan="2" style="width:70px;">Sponsor</th>'
 			 . '<th rowspan="2" style="width:110px;">Conditions</th>'
-			 . '<th rowspan="2" style="width:110px;">Interventions</th>'
 			 . '<th style="width:25px;" title="MM/YY">'
 			 . '<a href="javascript:void(0);" onclick="javascript:doSorting(\'sd\');">Start</a></th>'
 			 . '<th style="width:25px;" title="MM/YY">'
@@ -1775,8 +1793,7 @@ class ContentManager
 						
 			foreach($record_arr as $key => $val) {
 			
-				$unassoc_upm_status = '';
-				$title = '';$attr = '';
+				$title = '';$attr = '';$result_image = '';
 				$class = 'class = "upms ' . $trialheader . '" ';
 				$title_link_color = 'color:#000;';
 				$date_style = 'color:gray;';
@@ -1813,7 +1830,7 @@ class ContentManager
 					$title = ' title = "New record" ';
 				}
 				
-				$upm_string .= '<td colspan="3" class="' . $row_type_one .  $attr . ' titleupm titleupmodd txtleft" ' . $title . '><div class="rowcollapse">';
+				$upm_string .= '<td colspan="4" class="' . $row_type_one .  $attr . ' titleupm titleupmodd txtleft" ' . $title . '><div class="rowcollapse">';
 				if($val['event_link'] != NULL && $val['event_link'] != '') {
 					$upm_string .= '<a style="' . $title_link_color . '" href="' . $val['event_link'] . '">' . $val['event_description'] . '</a>';
 				} else {
@@ -1823,33 +1840,21 @@ class ContentManager
 				
 				$upm_string .= '<td colspan="2" class="' . $row_type_two . ' titleupmodd"><div class="rowcollapse">';
 				
-				if($val['start_date_type'] == 'anticipated' && ($val['start_date'] > date('Y-m-d', $now))) {
-					$unassoc_upm_status .= 'Upcoming, ';
-				}
-				if($val['end_date_type'] == 'actual' && $val['result_link'] != NULL && $val['result_link'] != '') {
-					$unassoc_upm_status .= 'Occurred, ';
-				}
-				if(($val['end_date'] != '' && $val['end_date'] != NULL && $val['end_date'] != '0000-00-00') 
-				&& ($val['end_date_previous_value'] != '' && $val['end_date_previous_value'] != NULL && $val['end_date_previous_value'] != '0000-00-00') 
-				&& ($val['end_date'] > $val['end_date_previous_value']) && ($val['end_date'] > date('Y-m-d', $now))) {
-					$unassoc_upm_status .= 'Delayed, ';
-				}
-				if(($val['end_date'] != '' && $val['end_date'] != NULL && $val['end_date'] != '0000-00-00') 
-				&& ($val['end_date'] < date('Y-m-d', $now)) && ($val['result_link'] == '' || $val['result_link'] == NULL)) {
-					$unassoc_upm_status .= 'Pending, ';
-				}
-				if(($val['start_date'] != '' && $val['start_date'] != NULL && $val['start_date'] != '0000-00-00')
-				&& ($val['start_date_previous_value'] != '' && $val['start_date_previous_value'] != NULL && $val['start_date_previous_value'] != '0000-00-00')
-				&& ($val['start_date'] < $val['start_date_previous_value'])) {
-					$unassoc_upm_status .= 'Accelerated, ';
-				}
-				if(($val['start_date_previous_value'] != '' && $val['start_date_previous_value'] != NULL && $val['end_date_previous_value'] != '' && 
-				$val['end_date_previous_value'] != NULL) && (($val['start_date'] == NULL || $val['start_date'] == '' || $val['start_date'] == '0000-00-00') && 
-				($val['end_date'] == NULL || $val['end_date'] == '' || $val['end_date'] == '0000-00-00'))) {
-					$unassoc_upm_status .= 'Cancelled, ';
+				if($val['result_link'] != NULL && $val['result_link'] != '') {
+					$upm_string .= 'Occurred';
+				} else {
+				
+					if($val['end_date'] == NULL || $val['end_date'] == '' || $val['end_date'] == '0000-00-00') {
+						$upm_string .= 'Cancelled';
+					} else if($val['end_date'] < date('Y-m-d', $now)) {
+						$upm_string .= 'Pending';
+					} else if($val['end_date'] > date('Y-m-d', $now)) {
+						$upm_string .= 'Upcoming';
+					}
+					
 				}
 				
-				$upm_string .= substr($unassoc_upm_status,0,-2) . '</div></td>';
+				$upm_string .= '</div></td>';
 				
 				$title = '';$attr = '';	
 				if(!empty($val['edited']) && $val['edited']['event_type'] != $val['event_type']) {
@@ -1863,8 +1868,8 @@ class ContentManager
 				} else if($val['new'] == 'y') {
 					$title = ' title = "New record" ';
 				}
-				$upm_string .= '<td colspan="2" class="' . $row_type_two . $attr . ' titleupmodd" ' . $title 
-								. '><div class="rowcollapse">' . $val['event_type'] . ' Milestone</div></td>' . 
+				$upm_string .= '<td class="' . $row_type_two . $attr . ' titleupmodd" ' . $title 
+								. '><div class="rowcollapse">' . $val['event_type'] . ' Milestone</div></td>';
 				
 				$title = '';$attr = '';	
 				if(!empty($val['edited']) && $val['edited']['start_date'] != $val['start_date']){
@@ -1948,13 +1953,15 @@ class ContentManager
 				
 				if(!empty($val['edited']) && ($val['result_link'] != $val['edited']['result_link'])) {
 					if($val['result_link'] != '' && $val['result_link'] != NULL) {
+						$result_image = (($val['event_type'] == 'Clinical Data') ? 'diamond' : 'checkmark' );
 						$upm_string .= '<div ' . $upm_title . '><a href="' . $val['result_link'] . '" style="color:#000;">'
-						. '<img src="images/red-checkmark.png" alt="checkmark" style="padding-top: 3px;" border="0" /></a></div>';
+						. '<img src="images/red-' . $result_image . '.png" alt="' . $result_image . '" style="padding-top: 3px;" border="0" /></a></div>';
 					}
 				} else {
 					if($val['result_link'] != '' && $val['result_link'] != NULL) {
+						$result_image = (($val['event_type'] == 'Clinical Data') ? 'diamond' : 'checkmark' );
 						$upm_string .= '<div ' . $upm_title . '><a href="' . $val['result_link'] . '" style="color:#000;">'
-						. '<img src="images/black-checkmark.png" alt="checkmark" style="padding-top: 3px;" border="0" /></a></div>';
+						. '<img src="images/black-' . $result_image . '.png" alt="' . $result_image . '" style="padding-top: 3px;" border="0" /></a></div>';
 					}
 				}
 				$upm_string .= '</div></td>';
@@ -2253,7 +2260,7 @@ function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last,
 				
 				foreach($upmDetails[$nctid] as $k => $v) { 
 				
-					$str = '';$diamond = '';
+					$str = '';$diamond = '';$result_image = '';
 	
 					$st_month = date('m',strtotime($v[2]));
 					$st_year = date('Y',strtotime($v[2]));
@@ -2271,15 +2278,18 @@ function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last,
 					if(!empty($upmDetails[$nctid][$k]['edited']) && ($v[4] != $upmDetails[$nctid][$k]['edited'][3])) {
 					
 						if($upm_result_link != '' && $upm_result_link != NULL) {
-							echo ('<div ' . $upm_title . '><a href="' 
-							. $upm_result_link . '" style="color:#000;">'
-							. '<img src="images/red-diamond.png" alt="diamond" style="padding-top: 3px;" border="0" /></a></div>');
+						
+							$result_image = (($val['event_type'] == 'Clinical Data') ? 'diamond' : 'checkmark' );
+							echo ('<div ' . $upm_title . '><a href="' . $upm_result_link . '" style="color:#000;">'
+							. '<img src="images/red-' . $result_image . '.png" alt="' . $result_image . '" style="padding-top: 3px;" border="0" /></a></div>');
 						}
 					} else {
 					
 						if($upm_result_link != '' && $upm_result_link != NULL) {
+						
+							$result_image = (($val['event_type'] == 'Clinical Data') ? 'diamond' : 'checkmark' );
 							echo ('<div ' . $upm_title . '><a href="' . $upm_result_link . '" style="color:#000;">'
-							. '<img src="images/black-diamond.png" alt="diamond" style="padding-top: 3px;" border="0" /></a></div>');
+							. '<img src="images/black-' . $result_image . '.png" alt="' . $result_image . '" style="padding-top: 3px;" border="0" /></a></div>');
 						}
 					}
 					
@@ -3133,23 +3143,23 @@ function getNCT($nct_id,$larvol_id,$time,$edited)
 //Get html content by passing through htmlspecialchars
 function htmlformat($str)
 {
-	$str1 = str_replace('Â®','®', $str);
+	$str1 = str_replace('Â®','ï¿½', $str);
 	if($str1==$str)
-	$str = str_replace('®','Â®', $str);
-	$str1 = str_replace('Â©','©', $str);
+	$str = str_replace('ï¿½','Â®', $str);
+	$str1 = str_replace('Â©','ï¿½', $str);
 	if($str1==$str)
-	$str = str_replace('©','Â©', $str);
-	$str1 = str_replace('â„¢','™', $str);
+	$str = str_replace('ï¿½','Â©', $str);
+	$str1 = str_replace('â„¢','ï¿½', $str);
 	if($str1==$str)
-	$str = str_replace('™','â„¢', $str);
-	$str1 = str_replace('Â£','£', $str);
+	$str = str_replace('ï¿½','â„¢', $str);
+	$str1 = str_replace('Â£','ï¿½', $str);
 	if($str1==$str)
-	$str = str_replace('£','Â£', $str);
-	$str = str_replace('“','"', $str);
-	$str = str_replace('”','"', $str);
+	$str = str_replace('ï¿½','Â£', $str);
+	$str = str_replace('ï¿½','"', $str);
+	$str = str_replace('ï¿½','"', $str);
 	$str = str_replace('`',",", $str);
-	$str = str_replace('¼',"&#188;", $str);
-	$str = str_replace('½',"&#189;", $str);
+	$str = str_replace('ï¿½',"&#188;", $str);
+	$str = str_replace('ï¿½',"&#189;", $str);
 	$str = iconv("UTF-8","UTF-8//IGNORE",$str); 
 	
 	return htmlspecialchars($str);
@@ -3194,10 +3204,8 @@ function getNonAssocUpmRecords($non_assoc_upm_params) {
 	}
 	
 	//echo "<br/>==>".
-	$sql = "SELECT `id`, `event_description`, `event_link`, `result_link`, `event_type`, `start_date`, `start_date_type`, `end_date`, `end_date_type`, "
-	. "(SELECT `end_date` FROM `upm_history` WHERE `upm_history`.`id` = `upm`.`id` ORDER BY `added` ASC LIMIT 0,1) AS end_date_previous_value, "
-	. "(SELECT `start_date` FROM `upm_history` WHERE`upm_history`.`id` = `upm`.`id` ORDER BY `added` ASC LIMIT 0,1) AS start_date_previous_value "
-	. "FROM `upm` WHERE (`corresponding_trial` IS NULL) AND ( " . substr($where,0,-4) . " ) ";
+	$sql = "SELECT `id`, `event_description`, `event_link`, `result_link`, `event_type`, `start_date`, `start_date_type`, `end_date`, `end_date_type` "
+	. "FROM `upm` WHERE (`corresponding_trial` IS NULL) AND ( " . substr($where,0,-4) . " ) ORDER BY `end_date` ASC ";
 	 
 	$res = mysql_query($sql)  or tex('Bad SQL query getting unmatched upms ' . $sql);
 	
@@ -3214,8 +3222,6 @@ function getNonAssocUpmRecords($non_assoc_upm_params) {
 			$upms[$i]['start_date_type'] = $row['start_date_type'];
 			$upms[$i]['end_date'] 	= $row['end_date'];
 			$upms[$i]['end_date_type'] = $row['end_date_type'];
-			$upms[$i]['end_date_previous_value'] = $row['end_date_previous_value'];
-			$upms[$i]['start_date_previous_value'] = $row['start_date_previous_value'];
 			
 			$i++;
 		}
@@ -3236,24 +3242,29 @@ function getUnmatchedUpmChanges($record_arr, $time, $edited) {
 		$record_arr[$key]['edited'] = array();
 		$record_arr[$key]['new'] = 'n';
 		
-		while($row = mysql_fetch_assoc($res)) {
-		
-			$record_arr[$key]['edited']['id'] = $row['id'];
-			$record_arr[$key]['edited']['event_description'] = htmlspecialchars($row['event_description']);
-			$record_arr[$key]['edited']['event_link'] = $row['event_link'];
-			$record_arr[$key]['edited']['result_link'] = $row['result_link'];
-			$record_arr[$key]['edited']['event_type'] = $row['event_type'];
-			$record_arr[$key]['edited']['start_date'] = $row['start_date'];
-			$record_arr[$key]['edited']['start_date_type'] = $row['start_date_type'];
-			$record_arr[$key]['edited']['end_date'] 	= $row['end_date'];
-			$record_arr[$key]['edited']['end_date_type'] = $row['end_date_type'];
+		if(mysql_num_rows($res) > 0) {
+			while($row = mysql_fetch_assoc($res)) {
 			
+				$record_arr[$key]['edited']['id'] = $row['id'];
+				$record_arr[$key]['edited']['event_description'] = htmlspecialchars($row['event_description']);
+				$record_arr[$key]['edited']['event_link'] = $row['event_link'];
+				$record_arr[$key]['edited']['result_link'] = $row['result_link'];
+				$record_arr[$key]['edited']['event_type'] = $row['event_type'];
+				$record_arr[$key]['edited']['start_date'] = $row['start_date'];
+				$record_arr[$key]['edited']['start_date_type'] = $row['start_date_type'];
+				$record_arr[$key]['edited']['end_date'] 	= $row['end_date'];
+				$record_arr[$key]['edited']['end_date_type'] = $row['end_date_type'];
+				
+			}
+			//$record_arr[$key]['new'] = 'y';
 		}
-		
+		//echo "<br/>==>"."SELECT `upm_history`.`id` FROM `upm_history` WHERE `upm_history`.`id` = '" . $value['id'] . "' ";
 		$result = mysql_query("SELECT `upm_history`.`id` FROM `upm_history` WHERE `upm_history`.`id` = '" . $value['id'] . "' ");
-		if(mysql_num_rows($result) < 1)
+		//echo "<br/>==>".mysql_num_rows($result);echo "<br/>ghj==>".(mysql_num_rows($result) == 0);
+		if(mysql_num_rows($result) == 0)
 			$record_arr[$key]['new'] = 'y';
 	}
+	//echo '<pre>';print_r($record_arr);
 	return $record_arr;
 }
 
