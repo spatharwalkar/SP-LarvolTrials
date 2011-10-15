@@ -5,6 +5,8 @@ require_once('PHPExcel.php');
 require_once('PHPExcel/Writer/Excel2007.php');
 require_once('include.excel.php');
 require_once 'PHPExcel/IOFactory.php';
+require_once('special_chars.php');
+
 
 ini_set('memory_limit','-1');
 ini_set('max_execution_time','300');	//5 minutes
@@ -1163,11 +1165,8 @@ function getLinkDetails($tablename, $fieldname, $parameters, $param_value) {
 }
 /********************export begins/*/
 
-
 function create_excel($process_params)
 {
-
-
 $objPHPExcel = new PHPExcel();
 $objPHPExcel->setActiveSheetIndex(0);
 $objPHPExcel->getActiveSheet()->getStyle('B1:K2000')->getAlignment()->setWrapText(true);
@@ -1280,16 +1279,39 @@ if($stacked)
 			$objPHPExcel->getActiveSheet()->getStyle('"A' . $i . ':K' . $i.'"')->applyFromArray($styleThinBlueBorderOutline);
 			$objPHPExcel->getActiveSheet()->getStyle('A1:K1')->applyFromArray($styleThinBlueBorderOutline);
 			$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, 'NCT' . sprintf("%08s",$value["NCT/nct_id"]));
+			
+			$value["NCT/brief_title"]=fix_special_chars($value["NCT/brief_title"]);
 			$objPHPExcel->getActiveSheet()->setCellValue('B' . $i, $value["NCT/brief_title"]);
+			
 			$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/'. $objPHPExcel->getActiveSheet()->getCell('A' . $i)->getValue() );
 			$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('Source - ClinicalTrials.gov');
 			$objPHPExcel->getActiveSheet()->getStyle('B' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
 			if(isset($value["NCT/enrollment"])) 				$objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $value["NCT/enrollment"]);
-																$objPHPExcel->getActiveSheet()->setCellValue('D' . $i, $value["region"]);
+			
+			$value["region"]=fix_special_chars($value["region"]);
+			$objPHPExcel->getActiveSheet()->setCellValue('D' . $i, $value["region"]);
+			
 			if(isset($value["NCT/overall_status"])) 			$objPHPExcel->getActiveSheet()->setCellValue('E' . $i, $value["NCT/overall_status"]);
-			if(isset($value["NCT/lead_sponsor"])) 				$objPHPExcel->getActiveSheet()->setCellValue('F' . $i, $value["NCT/lead_sponsor"]);
-			if(isset($value["NCT/condition"])) 					$objPHPExcel->getActiveSheet()->setCellValue('G' . $i, $value["NCT/condition"]);
-			if(isset($value["NCT/intervention_name"])) 			$objPHPExcel->getActiveSheet()->setCellValue('H' . $i, $value["NCT/intervention_name"]);
+			
+			
+			if(isset($value["NCT/lead_sponsor"])) 				
+			{
+			$value["NCT/lead_sponsor"]=fix_special_chars($value["NCT/lead_sponsor"]);
+			$objPHPExcel->getActiveSheet()->setCellValue('F' . $i, $value["NCT/lead_sponsor"]);
+			}
+			
+			if(isset($value["NCT/condition"])) 					
+			{
+			$value["NCT/condition"]=fix_special_chars($value["NCT/condition"]);
+			$objPHPExcel->getActiveSheet()->setCellValue('G' . $i, $value["NCT/condition"]);
+			}
+			
+			if(isset($value["NCT/intervention_name"])) 			
+			{
+			$value["NCT/intervention_name"]=fix_special_chars($value["NCT/intervention_name"]);
+			$objPHPExcel->getActiveSheet()->setCellValue('H' . $i, $value["NCT/intervention_name"]);
+			}
+			
 			if(isset($value["NCT/start_date"])) 				$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, $value["NCT/start_date"]);
 			if(isset($value["NCT/primary_completion_date"])) 	$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, $value["NCT/primary_completion_date"]);
 			if(isset($value["NCT/phase"])) 						$objPHPExcel->getActiveSheet()->setCellValue('K' . $i, $value["NCT/phase"]);
@@ -1515,16 +1537,37 @@ else
 		$objPHPExcel->getActiveSheet()->getStyle('"A' . $i . ':K' . $i . '"')->applyFromArray($styleThinBlueBorderOutline);
 		
 		$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, 'NCT' . sprintf("%08s",$value["NCT.nct_id"]));
+		
+		$value["NCT.brief_title"]=fix_special_chars($value["NCT.brief_title"]);
 		$objPHPExcel->getActiveSheet()->setCellValue('B' . $i, $value["NCT.brief_title"]);
+		
 		$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/'. $objPHPExcel->getActiveSheet()->getCell('A' . $i)->getValue() );
 		$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('Source - ClinicalTrials.gov');
 		$objPHPExcel->getActiveSheet()->getStyle('B' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
 		if(isset($value["NCT.enrollment"])) 				$objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $value["NCT.enrollment"]);
-															$objPHPExcel->getActiveSheet()->setCellValue('D' . $i, $value["region"]);
+		
+		$value["region"]=fix_special_chars($value["region"]);
+		$objPHPExcel->getActiveSheet()->setCellValue('D' . $i, $value["region"]);
+		
 		if(isset($value["NCT.overall_status"])) 			$objPHPExcel->getActiveSheet()->setCellValue('E' . $i, $value["NCT.overall_status"]);
-		if(isset($value["NCT.lead_sponsor"])) 				$objPHPExcel->getActiveSheet()->setCellValue('F' . $i, $value["NCT.lead_sponsor"]);
-		if(isset($value["NCT.condition"])) 					$objPHPExcel->getActiveSheet()->setCellValue('G' . $i, $value["NCT.condition"]);
-		if(isset($value["NCT.intervention_name"])) 			$objPHPExcel->getActiveSheet()->setCellValue('H' . $i, $value["NCT.intervention_name"]);
+		
+		if(isset($value["NCT.lead_sponsor"]))
+		{
+			$value["NCT.lead_sponsor"]=fix_special_chars($value["NCT.lead_sponsor"]);
+			$objPHPExcel->getActiveSheet()->setCellValue('F' . $i, $value["NCT.lead_sponsor"]);
+		}
+		
+		if(isset($value["NCT.condition"])) 					
+		{
+			$value["NCT.condition"]=fix_special_chars($value["NCT.condition"]);
+			$objPHPExcel->getActiveSheet()->setCellValue('G' . $i, $value["NCT.condition"]);
+		}
+		
+		if(isset($value["NCT.intervention_name"])) 			
+		{
+			$value["NCT.intervention_name"]=fix_special_chars($value["NCT.intervention_name"]);
+			$objPHPExcel->getActiveSheet()->setCellValue('H' . $i, $value["NCT.intervention_name"]);
+		}
 		if(isset($value["NCT.start_date"])) 				$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, $value["NCT.start_date"]);
 		if(isset($value["NCT.primary_completion_date"])) 	$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, $value["NCT.primary_completion_date"]);
 		if(isset($value["NCT.phase"])) 						$objPHPExcel->getActiveSheet()->setCellValue('K' . $i, $value["NCT.phase"]);
