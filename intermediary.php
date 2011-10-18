@@ -159,7 +159,7 @@ class ContentManager
 	private $sort_params 	= array();
 	private $sortimg 	= array();
 	private $displist 	= array('Enrollment' => 'NCT/enrollment','Region' => 'region', 'Interventions' => 'NCT/intervention_name', 
-								'Status' => 'NCT/overall_status', 'Sponsor' => 'NCT/lead_sponsor', 'Conditions' => 'NCT/condition', 
+								'Sponsor' => 'NCT/lead_sponsor', 'Status' => 'NCT/overall_status', 'Conditions' => 'NCT/condition', 
 								'Study Dates' => 'NCT/start_date', 'Phase' => 'NCT/phase');
 								
 	private $imgscale 	= array('style="width:14px;height:14px;"', 'style="width:12px;height:12px;"', 
@@ -1700,9 +1700,9 @@ class ContentManager
 			 . '<a href="javascript:void(0);" onclick="javascript:doSorting(\'en\');">N</a></th>'
 			 . '<th rowspan="2" style="width:32px;" title="&quot;EU&quot; = European Union&nbsp;&quot;ROW&quot; = Rest of World">Region</th>'
 			 . '<th rowspan="2" style="width:110px;">Interventions</th>'
+			  . '<th rowspan="2" style="width:70px;">Sponsor</th>'
 			 . '<th style="width:105px;">'
 			 . '<a href="javascript:void(0);" onclick="javascript:doSorting(\'os\');">Status</a></th>'
-			 . '<th rowspan="2" style="width:70px;">Sponsor</th>'
 			 . '<th rowspan="2" style="width:110px;">Conditions</th>'
 			 . '<th style="width:25px;" title="MM/YY">'
 			 . '<a href="javascript:void(0);" onclick="javascript:doSorting(\'sd\');">Start</a></th>'
@@ -1713,7 +1713,7 @@ class ContentManager
 			 . '<th rowspan="2" style="width:12px;padding:4px;"><div class="box_rotate">result</div></th>'
 			 . '<th colspan="36" style="width:72px;">'
 			 . '<div>&nbsp;</div></th>'
-			 . '<th colspan="3" style="width:3px;" class="rightborder noborder"></th></tr>'
+			 . '<th colspan="3" style="width:10px;padding:0px;" class="rightborder noborder"></th></tr>'
 			 . '<tr class="secondrow"><th>');
 		
 		if(array_key_exists('en', $this->sortimg)) {
@@ -1758,7 +1758,7 @@ class ContentManager
 		echo ('</th><th colspan="12" style="width:24px;">' . $this->current_yr . '</th>'
 			 . '<th colspan="12" style="width:24px;">' . $this->second_yr . '</th>'
 			 . '<th colspan="12" style="width:24px;">' . $this->third_yr . '</th>'
-			 . '<th colspan="3" style="width:28px;" class="rightborder">+</th></tr>');
+			 . '<th colspan="3" style="width:10px;" class="rightborder">+</th></tr>');
 
 	}
 	
@@ -1831,7 +1831,7 @@ class ContentManager
 					$title = ' title = "New record" ';
 				}
 				
-				$upm_string .= '<td colspan="4" class="' . $row_type_one .  $attr . ' titleupm titleupmodd txtleft" ' . $title . '><div class="rowcollapse">';
+				$upm_string .= '<td colspan="5" class="' . $row_type_one .  $attr . ' titleupm titleupmodd txtleft" ' . $title . '><div class="rowcollapse">';
 				if($val['event_link'] != NULL && $val['event_link'] != '') {
 					$upm_string .= '<a style="' . $title_link_color . '" href="' . $val['event_link'] . '">' . $val['event_description'] . '</a>';
 				} else {
@@ -1839,7 +1839,7 @@ class ContentManager
 				}
 				$upm_string .= '</div></td>';
 				
-				$upm_string .= '<td colspan="2" class="' . $row_type_two . ' titleupmodd"><div class="rowcollapse">';
+				$upm_string .= '<td class="' . $row_type_two . ' titleupmodd"><div class="rowcollapse">';
 				
 				if($val['result_link'] != NULL && $val['result_link'] != '') {
 					$upm_string .= 'Occurred';

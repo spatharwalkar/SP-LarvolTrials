@@ -25,7 +25,14 @@ $(document).ready(function(){
 		$('#addedtoright').css('background-color','#DDDDDD').css('cursor','default').css('color','#777777');
 	}	
 	//help tab
-	var slideout = '<div class="slide-out-div"><a class="handle" href="#help">Content</a><table cellpadding="0" cellspacing="0" class="table-slide"> <tr><td><img src="images/black-diamond.png"/></td><td>Click for data release</td></tr> <tr><td><img src="images/red-diamond.png"/></td><td>Click for data release (new)</td></tr> <tr><td><img src="images/hourglass.png"/></td><td>Results pending</td></tr> <!--<tr><td><img src="images/lbomb.png"/></td><td>Click for anticipated milestone details</td></tr>--> <tr><td><img src="images/down.png"/></td><td>Click for additional milestones</td></tr> </table> </div> ';
+	var slideout = '<div class="slide-out-div"><a class="handle" href="#help">Content</a><table cellpadding="0" cellspacing="0" class="table-slide">'+ 
+					'<tr><td><img src="images/black-diamond.png"/></td><td>Click for data release</td></tr>'+
+					'<tr><td><img src="images/red-diamond.png"/></td><td>Click for data release (new)</td></tr>'+
+					'<tr><td><img src="images/hourglass.png"/></td><td>Results pending</td></tr>'+
+					'<tr><td><img src="images/black-checkmark.png"/></td><td>Click for milestone result</td></tr>'+
+					'<tr><td><img src="images/red-checkmark.png"/></td><td>Click for milestone result (new)</td></tr>'+
+					'<tr><td><img src="images/down.png"/></td><td>Click for milestone details </td></tr>'+
+					'</table> </div>';	
 	$('body').append(slideout);	
     $(function(){
         $('.slide-out-div').tabSlideOut();
