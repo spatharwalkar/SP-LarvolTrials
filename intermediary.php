@@ -1137,11 +1137,12 @@ class ContentManager
 				$upm_string = $this->getNonAssocUpm($row_upm_arr, 'rowupm');
 				if($upm_string != '') {
 					echo ('<tr class="trialtitles">'
-					. '<td colspan="50" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
+					. '<td colspan="' . getColspanforNAUpm($this->loggedIn) . '" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
 				. 'style="border-bottom:1px solid blue;background-image: url(\'images/down.png\');background-repeat: no-repeat;background-position:left center;"'
 					. ' onclick="sh(this,\'rowupm\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . '</td></tr>' . $upm_string);
 				} else {
-					echo '<tr><td colspan="50" class="notopbottomborder leftrightborderblue sectiontitles">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>';
+					echo '<tr><td colspan="' . getColspanforNAUpm($this->loggedIn) 
+					. '" class="notopbottomborder leftrightborderblue sectiontitles">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>';
 				}
 			} 
 			
@@ -1162,20 +1163,20 @@ class ContentManager
 							$image = 'up';
 						
 						echo ('<tr class="trialtitles">'
-						. '<td colspan="50" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
+						. '<td colspan="' . getColspanforNAUpm($this->loggedIn) . '" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
 						. 'style="border-bottom:1px solid blue;background-image: url(\'images/' . $image 
 						. '.png\');background-repeat: no-repeat;background-position:left center;"'
 						. ' onclick="sh(this,\'' . $k . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . trim($header_details[$k]) 
 						. '</td></tr>' . $unmatched_upm_details[$k]);
 						
 						if(!isset($_GET['chkOnlyUpdated']))
-							echo ('<tr><td colspan="50" class="norecord" align="left">No trials found.</td></tr>'); 
+							echo ('<tr><td colspan="' . getColspanforNAUpm($this->loggedIn) . '" class="norecord" align="left">No trials found.</td></tr>'); 
 					}
 					
 				}
 				
 				if($unmatched_upms_default_style == 'expand' && !isset($_GET['chkOnlyUpdated']))
-					echo ('<tr><td colspan="50" class="norecord" align="left">No trials found.</td></tr>'); 
+					echo ('<tr><td colspan="' . getColspanforNAUpm($this->loggedIn) . '" class="norecord" align="left">No trials found.</td></tr>'); 
 					
 			}
 			
@@ -1596,14 +1597,15 @@ class ContentManager
 				if($unmatched_upm_details[0] != '') {
 				
 					echo ('<tr class="trialtitles">'
-					. '<td colspan="50" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
+					. '<td colspan="' . getColspanforNAUpm($this->loggedIn) . '" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
 					. 'style="border-bottom:1px solid blue;background-image: url(\'images/down.png\');background-repeat: no-repeat;background-position:left center;"'
 					. ' onclick="sh(this,\'0\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . trim($header_details[0]) . '</td></tr>' . $unmatched_upm_details[0]);
 					
 				} else {
-					echo '<tr><td colspan="50" class="notopbottomborder leftrightborderblue sectiontitles">' . trim($header_details[0]) . '</td></tr>';
+					echo '<tr><td colspan="' . getColspanforNAUpm($this->loggedIn) . '" class="notopbottomborder leftrightborderblue sectiontitles">' 
+					. trim($header_details[0]) . '</td></tr>';
 				}
-				echo ('<tr><td colspan="50" class="norecord" align="left">No trials found.</td></tr>');
+				echo ('<tr><td colspan="' . getColspanforNAUpm($this->loggedIn) . '" class="norecord" align="left">No trials found.</td></tr>');
 			}
 			echo('</table><br/>');
 			echo ('<input type="hidden" id="upmstyle" name="upmstyle" value="'.$unmatched_upms_default_style.'" />');
@@ -1695,7 +1697,9 @@ class ContentManager
 	function displayHeader() {
 	
 		echo ('<table width="100%" border="0" cellpadding="4" cellspacing="0" class="manage">'
-			 . '<tr><th rowspan="2" style="width:250px;">Title</th>'
+			 . '<tr>'
+			 . (($this->loggedIn) ? '<th rowspan="2" style="width:50px;">ID</th>' : '' )
+			 . '<th rowspan="2" style="width:230px;">Title</th>'
 			 . '<th style="width:28px;" title="Black: Actual&nbsp;&nbsp;Gray: Anticipated&nbsp;&nbsp;Red: Change greater than 20%">'
 			 . '<a href="javascript:void(0);" onclick="javascript:doSorting(\'en\');">N</a></th>'
 			 . '<th rowspan="2" style="width:32px;" title="&quot;EU&quot; = European Union&nbsp;&quot;ROW&quot; = Rest of World">Region</th>'
@@ -1778,7 +1782,6 @@ class ContentManager
 					if( ($val['event_description'] == $val['edited']['event_description']) && ($val['event_link'] == $val['edited']['event_link']) && 
 					($val['event_type'] == $val['edited']['event_type']) && ($val['start_date'] == $val['edited']['start_date']) && 
 					($val['start_date_type'] == $val['edited']['start_date_type']) && ($val['end_date'] == $val['edited']['end_date']) && 
-
 					($val['end_date_type'] == $val['edited']['end_date_type']) ){ 
 						unset($record_arr[$key]);
 					} 
@@ -1817,6 +1820,16 @@ class ContentManager
 				}
 				
 				$upm_string .= '<tr ' . $class . ' style="background-color:#000;">';
+				
+				if($this->loggedIn) {
+				
+					if($val['new'] == 'y') {
+						$title_link_color = 'color:#FF0000;';
+						$title = ' title = "New record" ';
+					}
+					$upm_string .= '<td style="text-align:left;" ' . $title .
+					 '><a style="' . $title_link_color . '" href="upm.php?search_id=' . $val['id'] . '">' . $val['id'] . '</a></td>';
+				}
 				
 				if(!empty($val['edited']) && $val['edited']['event_description'] != $val['event_description']) {
 				
@@ -1967,16 +1980,9 @@ class ContentManager
 				}
 				$upm_string .= '</div></td>';
 				
-				
-				$date_updated = 'no';
-				if((isset($val['edited']['start_date']) && $val['start_date'] != $val['edited']['start_date']) || 
-				(isset($val['edited']['end_date']) && $val['end_date'] != $val['edited']['end_date'])) {
-					$date_updated = 'yes';
-				} 
-				
 				$upm_string .= getUPMChart(date('m',strtotime($val['start_date'])), date('Y',strtotime($val['start_date'])), 
 				date('m',strtotime($val['end_date'])), date('Y',strtotime($val['end_date'])), $this->current_yr, $this->second_yr, $this->third_yr, 
-				$val['start_date'], $val['end_date'], $val['event_link'], $upm_title, $date_updated);
+				$val['start_date'], $val['end_date'], $val['event_link'], $upm_title);
 		
 		
 				$upm_string .= '</tr>';
@@ -2013,11 +2019,17 @@ class ContentManager
 			}
 			echo ( '</form></div></div>');
 	}
+	
+}
+
+function getColspanforNAUpm($loggedIn) {
+	return $colspan = (($loggedIn) ? 51 : 50 );
+	
 }
 
 function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last, $phase_arr, $fin_arr, $actfilterarr, $current_yr, $second_yr, $third_yr, $upmDetails, $header_details, $unmatched_upm_details, $unmatched_upms_default_style) 
 {	
-
+	$db = new DatabaseManager();
 	$previous_section = '';
 	$start = $start -1;
 	for($i=$start;$i<$last;$i++) 
@@ -2036,14 +2048,14 @@ function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last,
 						$image = 'up';
 				
 				echo ('<tr class="trialtitles">'
-				. '<td colspan="50" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
+				. '<td colspan="' . getColspanforNAUpm($db->loggedIn()) . '" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
 				. 'style="border-bottom:1px solid blue;background-image: url(\'images/' . $image 
 				. '.png\');background-repeat: no-repeat;background-position:left center;"'
 				. ' onclick="sh(this,\'' . $type_arr[$i]['section'] . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . trim($header_details[$type_arr[$i]['section']]) 
 				. '</td></tr>' . $unmatched_upm_details[$type_arr[$i]['section']]);
 				
 				} else {
-					echo '<tr><td colspan="50" class="notopbottomborder leftrightborderblue sectiontitles">' 
+					echo '<tr><td colspan="' . getColspanforNAUpm($db->loggedIn()) . '" class="notopbottomborder leftrightborderblue sectiontitles">' 
 						. trim($header_details[$type_arr[$i]['section']]) . '</td></tr>';
 				}
 			}
@@ -2081,8 +2093,16 @@ function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last,
 				$row_type_one = 'title';
 			}
 		
-			echo '<tr ' . (($fin_arr[$nctid]['new'] == 'y') ? 'class="newtrial" ' : ''). ' >'
-				. '<td rowspan="' . $rowspan . '" class="' . $row_type_one . ' ' . $attr . '">' 
+			echo '<tr ' . (($fin_arr[$nctid]['new'] == 'y') ? 'class="newtrial" ' : ''). ' >';
+			
+			//dispalying NCT Id for logged in users
+			if($db->loggedIn()) {
+				echo '<td class="' . $row_type_one . '" rowspan="' . $rowspan . '" ' . (($fin_arr[$nctid]['new'] == 'y') ? 'title="New record"' : '') 
+				. ' ><a style="color:' . $title_link_color . '" href="http://clinicaltrials.gov/ct2/show/' . padnct($nctid) . '">' 
+				. $type_arr[$i]['NCT/nct_id'] . '</a></td>';
+			}
+				
+			echo '<td rowspan="' . $rowspan . '" class="' . $row_type_one . ' ' . $attr . '">' 
 				. '<div class="rowcollapse"><a style="color:' . $title_link_color 
 				. '" href="http://clinicaltrials.gov/ct2/show/' . padnct($nctid) . '">';
 		
@@ -2280,7 +2300,7 @@ function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last,
 					
 						if($upm_result_link != '' && $upm_result_link != NULL) {
 						
-							$result_image = (($val['event_type'] == 'Clinical Data') ? 'diamond' : 'checkmark' );
+							$result_image = (($v[5] == 'Clinical Data') ? 'diamond' : 'checkmark' );
 							echo ('<div ' . $upm_title . '><a href="' . $upm_result_link . '" style="color:#000;">'
 							. '<img src="images/red-' . $result_image . '.png" alt="' . $result_image . '" style="padding-top: 3px;" border="0" /></a></div>');
 						}
@@ -2288,17 +2308,11 @@ function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last,
 					
 						if($upm_result_link != '' && $upm_result_link != NULL) {
 						
-							$result_image = (($val['event_type'] == 'Clinical Data') ? 'diamond' : 'checkmark' );
+							$result_image = (($v[5] == 'Clinical Data') ? 'diamond' : 'checkmark' );
 							echo ('<div ' . $upm_title . '><a href="' . $upm_result_link . '" style="color:#000;">'
 							. '<img src="images/black-' . $result_image . '.png" alt="' . $result_image . '" style="padding-top: 3px;" border="0" /></a></div>');
 						}
 					}
-					
-					$date_updated = 'no';
-					if((isset($upmDetails[$nctid][$k]['edited'][4]) && $v[2] != $upmDetails[$nctid][$k]['edited'][4]) || 
-					(isset($upmDetails[$nctid][$k]['edited'][6]) && $v[3] != $upmDetails[$nctid][$k]['edited'][6])) {
-						$date_updated = 'yes';
-					} 
 					
 					if(($v[3] != '' && $v[3] != NULL && $v[3] != '0000-00-00') && ($v[3] < date('Y-m-d')) && ($upm_result_link == NULL || upm_result_link == '')){
 						echo ('<div ' . $upm_title . '><img src="images/hourglass.png" alt="hourglass" border="0" /></div>');
@@ -2307,7 +2321,7 @@ function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last,
 					
 					//rendering upm (upcoming project completion) chart
 					echo $str = getUPMChart($st_month, $st_year, $ed_month, $ed_year, $current_yr, $second_yr, $third_yr, $v[2], 
-					$v[3], $upm_link, $upm_title, $date_updated);
+					$v[3], $upm_link, $upm_title);
 					echo '</tr>';
 				}
 			}
@@ -2322,14 +2336,14 @@ function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last,
 						$image = 'up';
 				
 				echo ('<tr class="trialtitles">'
-				. '<td colspan="50" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
+				. '<td colspan="' . getColspanforNAUpm($db->loggedIn()) . '" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
 				. 'style="border-bottom:1px solid blue;background-image: url(\'images/' . $image 
 				. '.png\');background-repeat: no-repeat;background-position:left center;"'
 				. ' onclick="sh(this,\'' . $type_arr[$i]['section'] . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . trim($header_details[$type_arr[$i]['section']]) 
 				. '</td></tr>' . $unmatched_upm_details[$type_arr[$i]['section']]);
 				
 				if(!isset($_GET['chkOnlyUpdated']))
-				echo ('<tr><td colspan="50" class="norecord" align="left">No trials found.</td></tr>'); 
+				echo ('<tr><td colspan="' . getColspanforNAUpm($db->loggedIn()) . '" class="norecord" align="left">No trials found.</td></tr>'); 
 				
 			} /*else {
 				echo '<tr><td colspan="50" class="notopbottomborder leftrightborderblue sectiontitles">' 
@@ -2613,14 +2627,12 @@ function getCompletionChart($start_month, $start_year, $end_month, $end_year, $c
 	return $value;
 }
 
-function getUPMChart($start_month, $start_year, $end_month, $end_year, $current_yr, $second_yr, $third_yr, $start_date, $end_date, $upm_link, $upm_title, 
-$date_updated)
+function getUPMChart($start_month, $start_year, $end_month, $end_year, $current_yr, $second_yr, $third_yr, $start_date, $end_date, $upm_link, $upm_title)
 {
-	$attr = '';
+	
 	$attr_two = 'class="rightborder"';
 	$background_color = 'background-color:#9966FF;';
 	
-	if($date_updated == 'yes') $attr = 'border:1px solid red;';
 	
 	if(($start_date == '' || $start_date == NULL || $start_date == '0000-00-00') && ($end_date == '' || $end_date == NULL || $end_date == '0000-00-00')) {
 	
@@ -2651,7 +2663,7 @@ $date_updated)
 			
 			$value = (($st != 0) ? '<td colspan="' . $st . '"><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>' : '')
-				. '<td style="' . $background_color . 'width:2px;' . $attr . '"><div ' . $upm_title . '>'
+				. '<td style="' . $background_color . 'width:2px;"><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
 				. (((12 - ($st+1)) != 0) ? '<td colspan="' .(12 - ($st+1)) . '"><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>' : '')
@@ -2668,7 +2680,7 @@ $date_updated)
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
 				. (($st != 0) ? '<td colspan="' . $st . '"><div ' . $upm_title . '>' 
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>' : '')
-				. '<td style="' . $background_color . 'width:2px;' . $attr . '"><div ' . $upm_title . '>'
+				. '<td style="' . $background_color . 'width:2px;"><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
 				. (((12 - ($st+1)) != 0) ? '<td colspan="' .(12 - ($st+1)) . '"><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>' : '')
@@ -2683,7 +2695,7 @@ $date_updated)
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
 				. (($st != 0) ? '<td colspan="' . $st . '"><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>' : '')
-				. '<td style="' . $background_color . 'width:2px;' . $attr . '"><div ' . $upm_title . '>'
+				. '<td style="' . $background_color . 'width:2px;"><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
 				. (((12 - ($st+1)) != 0) ? '<td colspan="' .(12 - ($st+1)) . '"><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>' : '')
@@ -2698,7 +2710,7 @@ $date_updated)
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
 				. '<td colspan="12"><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
-				. '<td colspan="3" style="' . $background_color . '' . $attr . '" ' . $attr_two . '><div ' . $upm_title . '>'
+				. '<td colspan="3" style="' . $background_color . '" ' . $attr_two . '><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>';
 		}
 	} else if($end_date == '' || $end_date == NULL || $end_date == '0000-00-00') {
@@ -2719,7 +2731,7 @@ $date_updated)
 			
 			$value = (($st != 0) ? '<td colspan="' . $st . '"><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>' : '')
-				. '<td style="' . $background_color . 'width:2px;' . $attr . '"><div ' . $upm_title . '>'
+				. '<td style="' . $background_color . 'width:2px;"><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
 				. (((12 - ($st+1)) != 0) ? '<td colspan="' .(12 - ($st+1)) . '"><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>' : '')
@@ -2736,7 +2748,7 @@ $date_updated)
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
 				. (($st != 0) ? '<td colspan="' . $st . '"><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>' : '')
-				. '<td style="' . $background_color . 'width:2px;' . $attr . '"><div ' . $upm_title . '>'
+				. '<td style="' . $background_color . 'width:2px;"><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
 				. (((12 - ($st+1)) != 0) ? '<td colspan="' .(12 - ($st+1)) . '"><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>' : '')
@@ -2753,7 +2765,7 @@ $date_updated)
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
 				. (($st != 0) ? '<td colspan="' . $st . '"><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>' : '')
-				. '<td style="' . $background_color . 'width:2px;' . $attr . '"><div ' . $upm_title . '>'
+				. '<td style="' . $background_color . 'width:2px;"><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
 				. (((12 - ($st+1)) != 0) ? '<td colspan="' .(12 - ($st+1)) . '"><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>' : '')
@@ -2768,7 +2780,7 @@ $date_updated)
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
 				. '<td colspan="12"><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
-				. '<td colspan="3" style="' . $background_color . '' . $attr . '" ' . $attr_two . '><div ' . $upm_title . '>'
+				. '<td colspan="3" style="' . $background_color . '" ' . $attr_two . '><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>';
 		}
 			
@@ -2809,7 +2821,7 @@ $date_updated)
 				
 			} else { 
 			
-				$value = '<td style="' . $background_color . '' . $attr . '" colspan="' . $end_month . '">' . '<div ' . $upm_title . '>'
+				$value = '<td style="' . $background_color . '" colspan="' . $end_month . '">' . '<div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
 				. '<td style="width:'.(12-$end_month).'px;" colspan="' . (12-$end_month) . '"><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
@@ -2825,7 +2837,7 @@ $date_updated)
 		 
 			if($end_month == 12) {
 			
-				$value = '<td style="' . $background_color . '' . $attr . '" colspan="24">' . '<div ' . $upm_title . '>'
+				$value = '<td style="' . $background_color . '" colspan="24">' . '<div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
 				. '<td colspan="12"><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
@@ -2834,7 +2846,7 @@ $date_updated)
 				
 			} else {
 			
-				$value = '<td style="' . $background_color . '' . $attr . '" colspan="' . (12+$end_month) . '">' . '<div ' . $upm_title . '>'
+				$value = '<td style="' . $background_color . '" colspan="' . (12+$end_month) . '">' . '<div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
 				. '<td colspan="' . (12-$end_month) . '"><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
@@ -2849,14 +2861,14 @@ $date_updated)
 			
 			if($end_month == 12) {
 			
-				$value = '<td style="' . $background_color . '' . $attr . '" colspan="36">' . '<div ' . $upm_title . '>'
+				$value = '<td style="' . $background_color . '" colspan="36">' . '<div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
 				. '<td colspan="3" ' . $attr_two . '><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>';
 				
 			} else {
 			
-				$value = '<td style="' . $background_color . '' . $attr . '" colspan="' . (24+$end_month) . '" ' . $class . '>' 
+				$value = '<td style="' . $background_color . '" colspan="' . (24+$end_month) . '" ' . $class . '>' 
 				. '<div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
 				. '<td colspan="' . (12-$end_month) . '"><div ' . $upm_title . '>'
@@ -2868,13 +2880,13 @@ $date_updated)
 		 
 		} else if($end_year > $third_yr) {
 		
-			$value = '<td colspan="12" style="' . $background_color . '' . $attr . '"><div ' . $upm_title . '>'
+			$value = '<td colspan="12" style="' . $background_color . '"><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
-				. '<td colspan="12" style="' . $background_color . '' . $attr . '"><div ' . $upm_title . '>'
+				. '<td colspan="12" style="' . $background_color . '"><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
-				. '<td colspan="12" style="' . $background_color . '' . $attr . '"><div ' . $upm_title . '>'
+				. '<td colspan="12" style="' . $background_color . '"><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
-				. '<td colspan="3" style="' . $background_color . '' . $attr . '" ' . $attr_two . '><div ' . $upm_title . '>'
+				. '<td colspan="3" style="' . $background_color . '" ' . $attr_two . '><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>';		
 		}	
 	
@@ -2888,13 +2900,13 @@ $date_updated)
 			. (( $upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</div></td>' : '');
 			
 			if($val != 0) {
-				$value .= '<td style="' . $background_color . '' . $attr . '" colspan="' . $val . '">'
+				$value .= '<td style="' . $background_color . '" colspan="' . $val . '">'
 						. '<div ' . $upm_title . '>'
 						. (( $upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</div></td>'
 						. (((12 - ($st+$val)) != 0) ? '<td colspan="' .(12 - ($st+$val)) . '"  style="' . $lineheight . '"><div ' . $upm_title . '>'
 						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>' : '');
 			} else {
-				$value .= '<td style="' . $background_color . '' . $attr . '">'
+				$value .= '<td style="' . $background_color . '">'
 						. '<div ' . $upm_title . '>'
 						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
 						. (((12 - ($st+1)) != 0) ? '<td colspan="' .(12 - ($st+1)) . '"  style="' . $lineheight . '"><div ' . $upm_title . '>'
@@ -2914,13 +2926,13 @@ $date_updated)
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>' : '');
 			
 			if($val != 0) {
-				$value .= '<td style="' . $background_color . '' . $attr . '" colspan="' . $val . '">'
+				$value .= '<td style="' . $background_color . '" colspan="' . $val . '">'
 						. '<div ' . $upm_title .' >'
 						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
 						. (((24 - ($val+$st)) != 0) ? '<td colspan="' .(24 - ($val+$st)) . '"><div ' . $upm_title . '>'
 						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>' : '');
 			} else {
-				$value .= '<td style="' . $background_color . '' . $attr . '">' . '<div ' . $upm_title .' >'
+				$value .= '<td style="' . $background_color . '">' . '<div ' . $upm_title .' >'
 						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
 						. (((24 - (1+$st)) != 0) ? '<td colspan="' .(24 - (1+$st)) . '"><div ' . $upm_title . '>'
 						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>' : '');			
@@ -2937,12 +2949,12 @@ $date_updated)
 					. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>' : '');
 				
 			if($val != 0) {
-				$value .= '<td style="' . $background_color . '' . $attr . '" colspan="' . $val . '">' . '<div ' . $upm_title .'>'
+				$value .= '<td style="' . $background_color . '" colspan="' . $val . '">' . '<div ' . $upm_title .'>'
 						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
 						. (((36 - ($val+$st)) != 0) ? '<td colspan="' .(36 - ($val+$st)) . '"><div ' . $upm_title . '>'
 						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>' : '') ;
 			} else {
-				$value .= '<td style="' . $background_color . '' . $attr . '">'
+				$value .= '<td style="' . $background_color . '">'
 						. '<div ' . $upm_title .'>'
 						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
 						. (((36 - (1+$st)) != 0) ? '<td colspan="' .(36 - (1+$st)) . '"><div ' . $upm_title . '>'
@@ -2955,13 +2967,13 @@ $date_updated)
 		} else if($end_year > $third_yr){
 		
 			$value = (($st != 0) ? '<td colspan="' . $st . '">&nbsp;</td>' : '');
-			$value .= '<td colspan="' .(12 - $st) . '" style="' . $background_color . '' . $attr . '"><div ' . $upm_title . '>'
+			$value .= '<td colspan="' .(12 - $st) . '" style="' . $background_color . '"><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
-				. '<td colspan="12" style="' . $background_color . '' . $attr . '"><div ' . $upm_title . '>'
+				. '<td colspan="12" style="' . $background_color . '"><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
-				. '<td colspan="12" style="' . $background_color . '' . $attr . '"><div ' . $upm_title . '>'
+				. '<td colspan="12" style="' . $background_color . '"><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
-				. '<td colspan="3" style="' . $background_color . '' . $attr . '" ' . $attr_two . '><div ' . $upm_title . '>'
+				. '<td colspan="3" style="' . $background_color . '" ' . $attr_two . '><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>';		
 		}
 		
@@ -2977,12 +2989,12 @@ $date_updated)
 					. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>' : '');
 					
 			if($val != 0) {
-				$value .= '<td style="' . $background_color . '' . $attr . '" colspan="' . $val . '">' . '<div ' . $upm_title . '>'
+				$value .= '<td style="' . $background_color . '" colspan="' . $val . '">' . '<div ' . $upm_title . '>'
 						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
 						. (((12 - ($val+$st)) != 0) ? '<td colspan="' .(12 - ($val+$st)) . '"><div ' . $upm_title . '>'
 						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>' : '');
 			} else {
-				$value .= '<td style="' . $background_color . '' . $attr . '">' . '<div ' . $upm_title . '>'
+				$value .= '<td style="' . $background_color . '">' . '<div ' . $upm_title . '>'
 						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
 						. (((12 - (1+$st)) != 0) ? '<td colspan="' .(12 - (1+$st)) . '"><div ' . $upm_title . '>'
 						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>' : '');
@@ -3001,12 +3013,12 @@ $date_updated)
 					. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>' : '');
 					
 			if($val != 0) {
-				$value .= '<td style="' . $background_color . '' . $attr . '" colspan="' . $val . '">' . '<div ' . $upm_title .'>'
+				$value .= '<td style="' . $background_color . '" colspan="' . $val . '">' . '<div ' . $upm_title .'>'
 						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
 						. (((24 - ($val+$st)) != 0) ? '<td colspan="' .(24 - ($val+$st)) . '"><div ' . $upm_title . '>'
 						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>' : '');
 			} else {
-				$value .= '<td style="' . $background_color . '' . $attr . '">' . '<div ' . $upm_title .'>'
+				$value .= '<td style="' . $background_color . '">' . '<div ' . $upm_title .'>'
 						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
 						. (((24 - (1+$st)) != 0) ? '<td colspan="' .(24 - (1+$st)) . '"><div ' . $upm_title . '>'
 						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>' : '');			
@@ -3017,11 +3029,11 @@ $date_updated)
 		} else if($end_year > $third_yr) {
 		
 			$value = '<td colspan="12">&nbsp;</td>' . (($st != 0) ? '<td colspan="' . $st . '">&nbsp;</td>' : '');
-			$value .= '<td colspan="' .(12 - $st) . '" style="' . $background_color . '' . $attr . '"><div ' . $upm_title . '>'
+			$value .= '<td colspan="' .(12 - $st) . '" style="' . $background_color . '"><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
-				. '<td colspan="12" style="' . $background_color . '' . $attr . '"><div ' . $upm_title . '>'
+				. '<td colspan="12" style="' . $background_color . '"><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
-				. '<td colspan="3" style="' . $background_color . '' . $attr . '" ' . $attr_two . '><div ' . $upm_title . '>'
+				. '<td colspan="3" style="' . $background_color . '" ' . $attr_two . '><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>';		
 		}
 		
@@ -3039,12 +3051,12 @@ $date_updated)
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>' : '');
 				
 			if($val != 0) {
-				$value .= '<td style="' . $background_color . '' . $attr . '" colspan="' . $val . '">' . '<div ' . $upm_title .'>'
+				$value .= '<td style="' . $background_color . '" colspan="' . $val . '">' . '<div ' . $upm_title .'>'
 						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
 						. (((12 - ($val+$st)) != 0) ? '<td colspan="' .(12 - ($val+$st)) . '"><div ' . $upm_title . '>'
 						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>' : '');
 			} else {
-				$value .= '<td style="' . $background_color . '' . $attr . '">' . '<div ' . $upm_title .'>' 
+				$value .= '<td style="' . $background_color . '">' . '<div ' . $upm_title .'>' 
 						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
 						. (((12 - (1+$st)) != 0) ? '<td colspan="' .(12 - (1+$st)) . '"><div ' . $upm_title . '>'
 						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>' : '');			
@@ -3065,9 +3077,9 @@ $date_updated)
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>' 
 				. (($st != 0) ? '<td colspan="' . $st . '"><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>' : '')
-				. '<td colspan="' . (12 - $st) . '" style="' . $background_color . '' . $attr . '"><div ' . $upm_title . '>'
+				. '<td colspan="' . (12 - $st) . '" style="' . $background_color . '"><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
-				. '<td colspan="3" style="' . $background_color . ' ' . $attr . '" ' . $attr_two . '><div ' . $upm_title . '>'
+				. '<td colspan="3" style="' . $background_color . '" ' . $attr_two . '><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>';;
 		
 		}
@@ -3080,7 +3092,7 @@ $date_updated)
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
 				. '<td colspan="12"><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
-				. '<td colspan="3" style="' . $background_color . '' . $attr . '" ' . $attr_two . '><div ' . $upm_title . '>'
+				. '<td colspan="3" style="' . $background_color . '" ' . $attr_two . '><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>';	
 				
 	}
@@ -3154,13 +3166,13 @@ function getCorrespondingUPM($trial_id, $time, $edited) {
 	$upm = array();
 	$values = array();
 					
-	$result = mysql_query("SELECT id, corresponding_trial, event_description, event_link, result_link, start_date, end_date 
+	$result = mysql_query("SELECT id, event_type, corresponding_trial, event_description, event_link, result_link, start_date, end_date 
 					FROM upm WHERE corresponding_trial = '" . $trial_id . "' ");
 	
 	$i = 0;			
 	while($row = mysql_fetch_assoc($result)) {
 	
-		$upm[$i] = array($row['event_description'], $row['event_link'], $row['start_date'], $row['end_date'], $row['result_link'],);
+		$upm[$i] = array($row['event_description'], $row['event_link'], $row['start_date'], $row['end_date'], $row['result_link'],$row['event_type'],);
 		
 		//Query for checking updates for upms.
 		$sql = "SELECT `id`, `event_type`, `event_description`, `event_link`, `result_link`, `start_date`, `start_date_type`, `end_date`, `end_date_type` "
@@ -3216,7 +3228,6 @@ function getUnmatchedUpmChanges($record_arr, $time, $edited) {
 
 	foreach($record_arr as $key => $value) {
 	
-		//echo "<br/>==>".
 		$sql = "SELECT `id`, `event_type`, `event_description`, `event_link`, `result_link`, `start_date`, `start_date_type`, `end_date`, `end_date_type` "
 				. " FROM `upm_history` WHERE `id` = '" . $value['id'] . "' AND (`superceded` < '" . date('Y-m-d',$time) . "' AND `superceded` >= '" 
 				. date('Y-m-d',strtotime($edited,$time)) . "') ORDER BY `superceded` DESC LIMIT 0,1 ";
@@ -3239,15 +3250,16 @@ function getUnmatchedUpmChanges($record_arr, $time, $edited) {
 				$record_arr[$key]['edited']['end_date_type'] = $row['end_date_type'];
 				
 			}
-			//$record_arr[$key]['new'] = 'y';
 		}
-		//echo "<br/>==>"."SELECT `upm_history`.`id` FROM `upm_history` WHERE `upm_history`.`id` = '" . $value['id'] . "' ";
-		$result = mysql_query("SELECT `upm_history`.`id` FROM `upm_history` WHERE `upm_history`.`id` = '" . $value['id'] . "' ");
-		//echo "<br/>==>".mysql_num_rows($result);echo "<br/>ghj==>".(mysql_num_rows($result) == 0);
-		if(mysql_num_rows($result) == 0)
+		
+		$sql = " SELECT u.id FROM `upm` u LEFT JOIN `upm_history` uh ON u.`id` = uh.`id` WHERE u.`id` = '" . $value['id'] . "' AND u.`last_update` < '" 
+				. date('Y-m-d',$time) . "' AND u.`last_update` >=  '" . date('Y-m-d',strtotime($edited,$time)) . "' AND uh.`id` IS NULL ";
+		
+		$result = mysql_query($sql);
+		if(mysql_num_rows($result) != 0)
 			$record_arr[$key]['new'] = 'y';
 	}
-	//echo '<pre>';print_r($record_arr);
+	
 	return $record_arr;
 }
 
