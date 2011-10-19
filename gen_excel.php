@@ -13,6 +13,7 @@ ini_set('max_execution_time','300');	//5 minutes
 
 if(!isset($_POST['cparams']) && !isset($_POST['params']) && !isset($_POST['results'])) return (false);
 $content = new ContentManager();
+$content->setSortParams();
 $content->chkType();
 class ContentManager 
 {
@@ -20,6 +21,9 @@ class ContentManager
 	private $params 	= array();
 	private $fid 		= array();
 	private $allfilterarr 	= array();
+	private $sortorder;
+	private $sort_params 	= array();
+	private $sortimg 	= array();
 						
 								
 	private $actfilterarr 	= array('nyr'=>'Not yet recruiting', 'r'=>'Recruiting', 'ebi'=>'Enrolling by invitation', 
@@ -123,7 +127,7 @@ class ContentManager
 		
 		$return_param	= array();
 		$return_param['fin_arr'] = array();
-		$return_param['upmDetails'] = array();
+//		$return_param['upmDetails'] = array();
 		$ins_params		= array();
 		$return_param['showRecordsCnt'] = 0;
 		
@@ -360,7 +364,8 @@ class ContentManager
 			//Process to check for changes/updates in trials, matched & unmatched upms.
 			foreach($arr as $key => $val) { 
 				
-				$nct = array();$trial_arr	= array();$allUpmDetails = array();
+				$nct = array();$trial_arr	= array();
+//				$allUpmDetails = array();
 				
 				//checking for updated and new trials
 				$nct[$val['NCT/nct_id']] = getNCT($val['NCT/nct_id'], $val['larvol_id'], $this->time_machine, $this->edited);
@@ -417,7 +422,7 @@ class ContentManager
 							if(isset($_POST['nyr']) || isset($_POST['r']) || isset($_POST['ebi']) || isset($_POST['anr']) 
 							|| isset($_POST['a']) || isset($_POST['wh']) || isset($_POST['afm']) || isset($_POST['tna']) 
 							|| isset($_POST['nla']) || isset($_POST['wd']) || isset($_POST['t']) || isset($_POST['s']) 
-							|| isset($_POST['c']) || isset($_GET['nlr'])) {	
+							|| isset($_POST['c']) || isset($_POST['nlr'])) {	
 							
 							$vall = implode(",",array_keys($this->allfilterarr, $new_arr['NCT/overall_status']));
 							if(array_key_exists($vall, $_POST)) {
@@ -432,7 +437,7 @@ class ContentManager
 				
 					if(in_array($new_arr['NCT/overall_status'], $this->actfilterarr) ) {
 						if(isset($_POST['nyr']) || isset($_POST['r']) || isset($_POST['ebi']) || isset($_POST['anr']) 
-						|| isset($_POST['a']) || isset($_GET['nlr'])) {
+						|| isset($_POST['a']) || isset($_POST['nlr'])) {
 							$vall = implode(",",array_keys($this->actfilterarr, $new_arr['NCT/overall_status']));
 							if(array_key_exists($vall, $_POST)) { 
 								$return_param['activearray'][$pk][] = $new_arr;
@@ -465,6 +470,39 @@ class ContentManager
 		return $return_param;
 	}
 	
+	function setSortParams() {
+	
+		$sortorder = array();
+		if(!isset($_POST['sortorder'])) { 
+			$this->sort_params = "ph-des##ed-asc##sd-asc##os-asc##en-asc##";
+		} else {	
+			$this->sort_params = $_POST['sortorder'];
+		}
+		$this->sortorder = array_filter(explode("##", $this->sort_params));
+		
+		foreach($this->sortorder as $k => $v)
+			$this->sortimg[substr($v,0,2)] = substr($v,3);
+		
+		$fieldname = array('en' => 'enrollment', 'ph' => 'phase', 'os' =>'overall_status', 
+				'sd' => 'start_date','ed' => 'completion_date');
+							
+		foreach($this->sortorder as $k => $v) {
+				
+			$typ = substr($v, (strpos($v, '-')+1));
+			$v = substr($v, 0, strpos($v, '-'));
+			$sp = new SearchParam();
+			
+			if($v == 'ed')
+				$sp->field = 'inactive_date';
+			else	
+				$sp->field = '_' . getFieldId('NCT', $fieldname[$v]);
+				
+			$sp->action = ($typ == 'des') ? 'descending' : 'ascending';
+			$this->params[] = $sp;
+		}
+		
+	}
+	
 	function chkType() {
 	
 		global $now;
@@ -483,7 +521,7 @@ class ContentManager
 			foreach($process_params['params_arr'] as $pk => $pv) { 
 				
 				//Unmatched Upms for Row Stacked Upms.
-				$row_upm_arr = array();$upm_string = '';$row_upm_flag = false;
+//				$row_upm_arr = array();$upm_string = '';$row_upm_flag = false;
 				if(isset($_POST['results']) && $_POST['type'] == 'row') { 
 					foreach($process_params['c_params'] as $k => $v) {
 						$vv = explode('.', $v);
@@ -491,15 +529,15 @@ class ContentManager
 							//result set separator as a separate parameter and maintaining backward compatibility
 							if($vv[1] == '-1' || $vv[1] == '-2') {
 								if(isset($vv[3])) { 
-									$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[3]); 
+//									$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[3]); 
 									$process_params['link_expiry_date'][$pk][] = $res['expiry'];
-									$row_upm_arr = array_merge($row_upm_arr,explode(',',$res['intervention_name']));
+//									$row_upm_arr = array_merge($row_upm_arr,explode(',',$res['intervention_name']));
 								}
 							} else {
 								if(isset($vv[2])) { 
-									$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[2]); 
+//									$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[2]); 
 									$process_params['link_expiry_date'][$pk][] = $res['expiry'];
-									$row_upm_arr = array_merge($row_upm_arr,explode(',',$res['intervention_name']));
+//									$row_upm_arr = array_merge($row_upm_arr,explode(',',$res['intervention_name']));
 								}
 							}
 							
@@ -507,22 +545,24 @@ class ContentManager
 							//result set separator as a separate parameter and maintaining backward compatibility
 							if($vv[2] == '-1' || $vv[2] == '-2') {
 								if(isset($vv[4])) { 
-									$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[4]); 
+//									$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[4]); 
 									$process_params['link_expiry_date'][$pk][] = $res['expiry'];
-									$row_upm_arr = array_merge($row_upm_arr,explode(',',$res['intervention_name']));
+//									$row_upm_arr = array_merge($row_upm_arr,explode(',',$res['intervention_name']));
 								}
 							} else {
 								if(isset($vv[3])) { 
-									$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[3]); 
+//									$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[3]); 
 									$process_params['link_expiry_date'][$pk][] = $res['expiry'];
-									$row_upm_arr = array_merge($row_upm_arr,explode(',',$res['intervention_name']));
+//									$row_upm_arr = array_merge($row_upm_arr,explode(',',$res['intervention_name']));
 								}
 							}
 							
 						}
 					}
-					$row_upm_flag = true;
-				} else if(isset($_POST['cparams'])) {
+//					$row_upm_flag = true;
+				} 
+/*				
+				else if(isset($_POST['cparams'])) {
 					if(isset($_POST['rowupm']) && $process_params['c_params']['type'] == 'row') {
 						foreach($_POST['rowupm'] as $k => $v) {
 							$val = unserialize(gzinflate(base64_decode($v)));
@@ -533,29 +573,29 @@ class ContentManager
 						$row_upm_flag = true;
 					}
 				}
-				
+*/				
 
 				
 				
 				//Unmatched Upms for Column Stacked Upms.
 				if(isset($_POST['results']) && $_POST['type'] == 'col') { 
 					
-					$upm_value = '';$upm_string = '';
+//					$upm_value = '';$upm_string = '';
 					$c = explode('.', $process_params['c_params'][$pk]);
 					if($pk != 0) {
 					
 						if($c[1] == '-1' || $c[1] == '-2') {
-							if(isset($c[3])) { $upm_value = $c[3]; }
+//							if(isset($c[3])) { $upm_value = $c[3]; }
 						} else {
-							if(isset($c[2])) { $upm_value = $c[2]; }
+//							if(isset($c[2])) { $upm_value = $c[2]; }
 						}
 						
 					} else {
 					
 						if($c[2] == '-1' || $c[2] == '-2') {
-							if(isset($c[4])) { $upm_value = $c[4]; }
+//							if(isset($c[4])) { $upm_value = $c[4]; }
 						} else {
-							if(isset($c[3])) { $upm_value = $c[3]; }
+//							if(isset($c[3])) { $upm_value = $c[3]; }
 						}
 					}
 					 
@@ -563,8 +603,8 @@ class ContentManager
 				
 				} else if(isset($_POST['cparams']) && $process_params['c_params']['type'] == 'col') { 
 					
-					$upm_string = '';
-					$val = unserialize(gzinflate(base64_decode($_POST['colupm'][$pk])));
+//					$upm_string = '';
+//					$val = unserialize(gzinflate(base64_decode($_POST['colupm'][$pk])));
 					
 					}
 					
@@ -598,7 +638,7 @@ class ContentManager
 										
 										if($ids[1] == '-1' || $ids[1] == '-2') {
 											$trial_id = $ids[2];
-											$upm_id = ((isset($ids[3]) && !empty($ids[3])) ? $ids[3] : '');
+//											$upm_id = ((isset($ids[3]) && !empty($ids[3])) ? $ids[3] : '');
 										} else {
 										
 											$searchdata = substr($ids[1],0,3);
@@ -607,7 +647,7 @@ class ContentManager
 											else
 												$trial_id = $ids[1];
 												
-											$upm_id = ((isset($ids[2]) && !empty($ids[2])) ? $ids[2] : '');
+//											$upm_id = ((isset($ids[2]) && !empty($ids[2])) ? $ids[2] : '');
 										}
 										
 									} elseif($_POST['type'] == 'row') {
@@ -617,7 +657,7 @@ class ContentManager
 										
 										if($ids[1] == '-1' || $ids[1] == '-2') {
 											$trial_id = $ids[2];
-											$upm_id = ((isset($ids[3]) && !empty($ids[3])) ? $ids[3] : '');
+//											$upm_id = ((isset($ids[3]) && !empty($ids[3])) ? $ids[3] : '');
 										} else {
 											$searchdata = substr($ids[1],0,3);
 											if(dechex($searchdata) == '73' && chr($searchdata) == 's') 
@@ -625,7 +665,7 @@ class ContentManager
 											else
 												$trial_id = $ids[1];
 												
-											$upm_id = ((isset($ids[2]) && !empty($ids[2])) ? $ids[2] : '');
+//											$upm_id = ((isset($ids[2]) && !empty($ids[2])) ? $ids[2] : '');
 										}
 									}
 								} else {
@@ -634,7 +674,7 @@ class ContentManager
 									
 									if($ids[2] == '-1' || $ids[2] == '-2') {
 										$trial_id = $ids[3];
-										$upm_id = ((isset($ids[4]) && !empty($ids[4])) ? $ids[4] : '');
+//										$upm_id = ((isset($ids[4]) && !empty($ids[4])) ? $ids[4] : '');
 									} else {
 										$searchdata = substr($ids[2],0,3);
 										if(dechex($searchdata) == '73' && chr($searchdata) == 's') 
@@ -642,7 +682,7 @@ class ContentManager
 										else
 											$trial_id = $ids[2];
 											
-										$upm_id = ((isset($ids[3]) && !empty($ids[3])) ? $ids[3] : '');
+//										$upm_id = ((isset($ids[3]) && !empty($ids[3])) ? $ids[3] : '');
 									}
 								}
 								
@@ -657,12 +697,13 @@ class ContentManager
 								$query = "UPDATE `rpt_ott_trials` SET `expiry` = '" . date('Y-m-d',strtotime('+1 week',$now)) . "' WHERE id = '" 
 								. $trial_id . "' ";
 								$res = mysql_query($query) or tex('Bad SQL Query setting expiry date for trials result set' . "\n" . $query);
-						
+/*						
 								if(isset($upm_id) && $upm_id != '') {
 									$query = "UPDATE `rpt_ott_upm` SET `expiry` = '" . date('Y-m-d',strtotime('+1 week',$now)) . "' WHERE id = '" 
 									. $upm_id . "' ";
 									$res = mysql_query($query) or tex('Bad SQL Query setting expiry date for upms' . "\n" . $query);
 								}
+*/
 								
 							}
 						}
@@ -777,7 +818,8 @@ class ContentManager
 				$link_expiry_date[] = $res['expiry'];
 				
 				if($excel_params[2] == '-1' || $excel_params[2] == '-2') {
-					if(isset($excel_params[4])) {
+	/*
+						if(isset($excel_params[4])) {
 						$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $excel_params[4]);
 						$non_assoc_upm_params = explode(',',$res['intervention_name']);
 						$link_expiry_date[]	  = $res['expiry'];
@@ -788,6 +830,7 @@ class ContentManager
 						$non_assoc_upm_params = explode(',',$res['intervention_name']);
 						$link_expiry_date[]	  = $res['expiry'];
 					}
+	*/	
 				}
 				
 				if($excel_params[2] == '-1' || $excel_params[2] == '-2') { 
@@ -835,7 +878,7 @@ class ContentManager
 				$columnlabel 	= $excel_params['columnlabel'];
 				$bomb			= $excel_params['bomb'];  //added for bomb indication
 				$this->time_machine = $excel_params['time'];
-				$non_assoc_upm_params	= $excel_params['upm'];
+//				$non_assoc_upm_params	= $excel_params['upm'];
 				
 				if($excel_params['params'] === NULL)
 				{ 	
@@ -874,8 +917,8 @@ class ContentManager
 			$arr = array();
 			$nct = array();
 			$trial_arr 		= array();
-			$allUpmDetails	= array();
-			$upmDetails	 	= array();
+//			$allUpmDetails	= array();
+//			$upmDetails	 	= array();
 			
 			$arrr = search($params,$this->fid,NULL,$this->time_machine);
 			
@@ -960,7 +1003,7 @@ class ContentManager
 						if(isset($_POST['nyr']) || isset($_POST['r']) || isset($_POST['ebi']) || isset($_POST['anr']) 
 						|| isset($_POST['a']) || isset($_POST['wh']) || isset($_POST['afm']) || isset($_POST['tna']) 
 						|| isset($_POST['nla']) || isset($_POST['wd']) || isset($_POST['t']) || isset($_POST['s']) 
-						|| isset($_POST['c']) || isset($_GET['nlr']) ) {	
+						|| isset($_POST['c']) || isset($_POST['nlr']) ) {	
 						
 						$vall = implode(",",array_keys($this->allfilterarr, $new_arr['NCT/overall_status']));
 						if(array_key_exists($vall, $_POST)) {
@@ -979,7 +1022,7 @@ class ContentManager
 			
 					if(in_array($new_arr['NCT/overall_status'], $this->actfilterarr) ) {
 						if(isset($_POST['nyr']) || isset($_POST['r']) || isset($_POST['ebi']) || isset($_POST['anr']) 
-						|| isset($_POST['a']) || isset($_GET['nlr'])) {
+						|| isset($_POST['a']) || isset($_POST['nlr'])) {
 						
 							$vall = implode(",",array_keys($this->actfilterarr, $new_arr['NCT/overall_status']));
 							if(array_key_exists($vall, $_POST)) { 
@@ -1090,8 +1133,10 @@ class ContentManager
 						$res = mysql_query($query) or tex('Bad SQL Query setting expiry date for trials result set' . "\n" . $query);
 						
 						if(isset($ids[3]) && $ids[3] != '') {
-							$query = "UPDATE `rpt_ott_upm` SET `expiry` = '" . date('Y-m-d',strtotime('+1 week',$now)) . "' WHERE id = '" . $ids[3] . "' ";
+/*
+						$query = "UPDATE `rpt_ott_upm` SET `expiry` = '" . date('Y-m-d',strtotime('+1 week',$now)) . "' WHERE id = '" . $ids[3] . "' ";
 							$res = mysql_query($query) or tex('Bad SQL Query setting expiry date for upms' . "\n" . $query);
+*/
 						}
 						
 					}
