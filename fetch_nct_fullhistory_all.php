@@ -151,7 +151,7 @@ echo('<br>Done with all IDs.');
 }
 function validate_nctid($ncid,$mxid)
 {
-	$query = 'select val_int from data_values where field = "1" and val_int>="'.$ncid.'" and val_int<="'.$mxid.'" limit 1 ;'; 
+	$query = 'select val_int from data_values where field = "1" and val_int>="'.$ncid.'" and val_int<="'.$mxid.'" order by val_int limit 1 ;'; 
 	//echo('<br>query=' .$query. '<br>' );
 	$res = mysql_query($query) or die('checking of NCTID  Failed. Query:' . $query );
 	$res = mysql_fetch_assoc($res);

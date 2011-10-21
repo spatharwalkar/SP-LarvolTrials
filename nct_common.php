@@ -34,8 +34,8 @@ $mapping = array(
     'last_follow_up_date' => 'completion_date_type',
     'last_follow_up_date-date' => 'completion_date', // check
     'primary_compl_date_type' => 'primary_completion_date_type',
-    'primary_compl_date-date' => 'primary_completion_date', // check
-    'phase_block-phase' => 'phase',
+	'primary_compl_date-date' => 'primary_completion_date', // check
+	'phase_block-phase' => 'phase',
     'study_type' => 'study_type',
     'design' => 'study_design',
     'number_of_arms' => 'number_of_arms',
@@ -224,7 +224,7 @@ function ProcessChanges($id, $date, $column, $initial_date=NULL) {
     $url = "http://clinicaltrials.gov/archive/" . $id . "/" . $date . "/changes";
 
     $docpc = new DOMDocument();
-    echo $tab . '<hr>Parsing Archive Changes Page for ' . $id . ' and Date: ' . $date . '... - ';
+    echo $tab . '<hr>Parsing Archive Changes Page for ' . $id . ' and Date: ' . $date . '...... - ';
 
     echo $url . " - ";
 
@@ -281,8 +281,8 @@ function ProcessChanges($id, $date, $column, $initial_date=NULL) {
     $innerHTML = htmlspecialchars_decode($innerHTML);
     // Replace the Anticipated Types with nada
     //   Watch Might have to put back in
-    //   $innerHTML = str_replace("type=\"Anticipated\"", "", $innerHTML);
-
+    //$innerHTML = str_replace("type=\"Anticipated\"", "", $innerHTML);
+	//$innerHTML = str_replace("type=\"Actual\"", "", $innerHTML);
 
     $xml = simplexml_load_string($innerHTML);
     if ($xml === false) {
@@ -914,8 +914,8 @@ function ProcessDiffChanges($id, $date) {
     for ($done = false, $tries = 0; $done == false && $tries < 5; $tries++) {
         echo('!');
         @$done = $docpc->loadHTMLFile($url);
-    }    
-    
+    }  
+	
     $div = $docpc->getElementsByTagName('table');
     // Get Second Table
     unset($docpc);
@@ -958,7 +958,7 @@ function ProcessDiffChanges($id, $date) {
     
     foreach ($trs as $tr) {
         foreach ($tr->attributes as $attr) {
-
+		
             if ($attr->name == 'class' && $attr->value != "sdiff-unc") {
                 // Check to See if Add/Delete/Modify
 
@@ -1015,8 +1015,8 @@ function ParseStructure($data) {
             // Just look for start tag
 			
 								
-            if ($attr->name == 'class' && (strpos($attr->value, "sds") !== false)) {
-                pop_structure($attr->value, $div->nodeValue);
+            if ($attr->name == 'class' && ( (strpos($attr->value, "sds") !== false)  or  (strpos($attr->value, "sda") !== false) ) ) {
+				pop_structure($attr->value, $div->nodeValue);
             }
         }
         unset($div);
@@ -1030,7 +1030,6 @@ function ParseStructure($data) {
 function prepXMP($data, $action, $studycat, $nct_cat, $date) {
 
     global $level;
-    
     // Logic for which column see if needs to be different.
     if ($action == "change") {
         $column = "sdiff-b";
@@ -1106,9 +1105,9 @@ function prepXMP($data, $action, $studycat, $nct_cat, $date) {
 					// Its a Tag Type
 //					pop_structure($attr->value, $div->nodeValue);
 				} else {
-					$value1 = $div->nodeValue;
+					$value1 = trim($div->nodeValue);
 					// Check to see if Value is Type
-					if (strpos($value1, "type=") !== false) {
+					if ( strpos('a'.$value1, "type=")  and !empty($value1)) {
 						$value1 = trim($value1);
 						$value1 = substr($value1, 6, -1);
 	//                    $return = process_change($tag, $tag, $value, $nct_cat, $studycat, $date, $action);
@@ -1127,7 +1126,10 @@ function prepXMP($data, $action, $studycat, $nct_cat, $date) {
     
     $last = false;
 
+	
+
     foreach ($divs as $div) {
+	
 	
 			$tt=strpos('a'.$div->nodeValue, "clinical_result")  ;
 			if(isset($tt) and !empty($tt))
@@ -1146,11 +1148,12 @@ function prepXMP($data, $action, $studycat, $nct_cat, $date) {
                 // Just End Tag
             } else if ($attr->name == 'class' && (strpos($attr->value, "sda") !== false)) {
                 // Its a Tag Type
-                pop_structure($attr->value, $div->nodeValue);
+				pop_structure($attr->value, $div->nodeValue);
             } else {
-                $value = $div->nodeValue;
+                $value = trim($div->nodeValue);
+				
                 // Check to see if Value is Type
-                if (strpos($value, "type=") !== false) {
+                if (  strpos('a'.$value, "type=") and !empty($value) ) {
                     $value = trim($value);
                     $value = substr($value, 6, -1);
                     $tag = build_key();
@@ -1165,7 +1168,8 @@ function prepXMP($data, $action, $studycat, $nct_cat, $date) {
 					{
                     $return = process_change($tag, $tag, $value, $nct_cat, $studycat, $date, $action,$value1);
 					}
-                } else if ($value != ">") {
+                } else if ( $value != ">" and $value != "&gt;"   ) {
+					
                     $tag = build_key();
 					$tt=strpos('a'.$tag, "clinical_result")  ;
 					if(isset($tt) and !empty($tt))
@@ -1190,11 +1194,9 @@ function prepXMP($data, $action, $studycat, $nct_cat, $date) {
 
 function stripnode($value) {
     $value = htmlspecialchars($value);
-
     $badchars = array("&lt;", "&gt;", "/");
-    $value = str_replace($badchars, "", $value);
-
-    return $value;
+	$value = str_replace($badchars, "", $value);
+	return $value;
 }
 
 function getFieldName($value)
@@ -1248,9 +1250,21 @@ function commit_diff($studycat, $category_id, $fieldname, $value, $date, $operat
     echo "Action: " . $operation . " - ";
     if ($operation == "delete" || $operation == "change") {
 		if($operation=="change")
-			$query = 'UPDATE data_values SET superceded="' . $DTnow . '" WHERE studycat=' . $studycat . ' AND superceded is NULL  and added < "' . $DTnow . '" and val_' . $type . '= "' . $value1 . '" and field=' . $field . '  ';
+		{
+			if($type=='enum') 	$value2=getEnumvalId($field, $value1);
+			else $value2=$value1;
+			if($type=='date') 	$value2='val_date';
+			
+			$query = 'UPDATE data_values SET superceded="' . $DTnow . '" WHERE studycat=' . $studycat . ' AND superceded is NULL  and added < "' . $DTnow . '" and ' ;
+			$query .= $type=="date" ? ('"' . $value2 . '"'   ) : ('val_' . $type);
+			$query .= '= "' . $value2 . '" and field=' . $field . '  ';
+			}
 		else
+		{
 			$query = 'UPDATE data_values SET superceded="' . $DTnow . '" WHERE studycat=' . $studycat . ' AND superceded is NULL  and added < "' . $DTnow . '"  and field=' . $field . '  ';
+			
+			
+		}
 		if (mysql_query($query) === false)
             return softDie('Bad SQL query marking old values' . mysql_error() . '<br />' . $query);
     }
@@ -1280,11 +1294,22 @@ function commit_diff($studycat, $category_id, $fieldname, $value, $date, $operat
                 return softDie('Bad SQL query saving value');
         }
     }
-    $query = 'UPDATE clinical_study SET last_change="' . $DTnow . '" '
-            . 'WHERE larvol_id=(SELECT larvol_id FROM data_cats_in_study WHERE id=' . $studycat . ') LIMIT 1';
+	
+    $query = 'SELECT larvol_id FROM data_cats_in_study WHERE id=' . $studycat . ' LIMIT 1';
+    $res = mysql_query($query);
+    if ($res === false)
+        return softDie('Bad SQL query getting larvol id');
+    $res = mysql_fetch_assoc($res);
+    if ($res === false)
+        return softDie('Field not found.' . $query);
+    $larvol_id = $res['larvol_id'];
+    
+	
+    $query = 'UPDATE clinical_study SET last_change="' . $DTnow . '"  WHERE larvol_id= "' . $larvol_id . '" LIMIT 1';
     if (mysql_query($query) === false)
         return softDie('Bad SQL query recording changetime');
-
+	global $fieldArr;
+	refreshInactiveDates($larvol_id, 'search',$fieldArr);		
     return true;
 }
 
@@ -1322,7 +1347,6 @@ function process_change($begin_tag, $end_tag, $value, $nct_cat, $studycat, $date
 
 function build_key() {
     global $level;
-
     $result = implode('-', $level);
 
     return $result;
@@ -1335,10 +1359,8 @@ function pop_structure($attr_value, $node_value) {
 				echo '<br> Values of clinical_result being skipped (non essential).................' . $tag .  str_repeat("   ", 500). '<br>';
 				return ;
 			}
-
-
+	if(empty($node_value)) return;
     global $level;
-    
     // Get Level
     $holder = substr($attr_value, 3, 1);
     // Subtract one to skip clinical-study
@@ -1352,7 +1374,6 @@ function pop_structure($attr_value, $node_value) {
         unset($level[$i]);
         $i = $i + 1;
     }
-    //print_r($level);
 }
 
 
@@ -1476,17 +1497,18 @@ function ProcessNonEssentials($id, $date) {
 						
 					
                         if ($attr->name == 'class' && (strpos($attr->value, "sds") !== false)) {
-                            pop_structure($attr->value, $div->nodeValue);
+						pop_structure($attr->value, $div->nodeValue);
                         } else if ($attr->name == 'class' && (strpos($attr->value, "sdz") !== false))  {
                             // Do Nothing
                             // Just End Tag
                         } else if ($attr->name == 'class' && (strpos($attr->value, "sda") !== false)) {
                             // Its a Tag Type
-                            pop_structure($attr->value, $div->nodeValue);
+							pop_structure($attr->value, $div->nodeValue);
+                            
                         } else {
-                            $value = $div->nodeValue;
+                            $value = trim($div->nodeValue);
 							// Only look for nonessentials don't care if this is a type.
-                            if ($value != ">") {
+                            if ($value != ">" and !empty($value)) {
                                 $tag = build_key();
 								
 								$tt=strpos('a'.$tag, "clinical_result")  ;
