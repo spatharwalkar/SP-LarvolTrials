@@ -1,4 +1,6 @@
 <?php
+echo '<pre>';
+print_r($_POST);
 require_once('db.php');
 require_once('report_common.php');
 if(!$db->loggedIn())
@@ -49,7 +51,6 @@ function statMon()
 		mysql_query($query) or die('Bad report ID for cancelling run');
 		continue;
 		}
-		//print_r($row);die;
 		$query2 = 'SELECT name FROM rpt_heatmap WHERE id=' . $row['note'];
 		$res2 = mysql_query($query2) or die('Bad SQL query getting report name');
 		$res2 = mysql_fetch_assoc($res2);
@@ -799,6 +800,7 @@ function postEd()
 		$query = implode(base64_encode(serialize($_POST)), $query);		
 		
 		mysql_query($query) or die('Bad SQL query storing search');
+		echo $query;
 		mysql_query('COMMIT') or die("Couldn't commit SQL transaction");
 	}
 }

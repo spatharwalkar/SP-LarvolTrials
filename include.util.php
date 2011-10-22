@@ -405,4 +405,5 @@ function getFieldId($category,$name)
 	}
 	return $res['id'];
 }
+
 ?>

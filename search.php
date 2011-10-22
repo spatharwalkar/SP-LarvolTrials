@@ -101,6 +101,17 @@ if(isset($_POST['urep']))
 		$umode = true;
 	}
 }
+//checking for areas mode
+$areasMode = false;
+if(isset($_GET['areas']))
+{
+	$areasc = mysql_real_escape_string(htmlspecialchars($_GET['areas']));
+	if(is_numeric($areasc) || isset($_GET['areas']))
+	{
+		$areasMode = true;
+		$areasId = is_numeric($_GET['areas'])?$_GET['areas']:null;
+	}
+}
 
 saveSearchPost();
 require('header.php');
@@ -129,7 +140,7 @@ echo('<p>Select the checkbox next to a field to include that field in the result
 		. '<p><a href="#" onclick="checkAll()">Select All</a> | <a href="#" onclick="uncheckAll()">Select None</a></p>');
 
 echo('<form name="searchform" method="post" class="search" action="'
-	 	. ($rmode?'report_heatmap.php':($umode?'report_update.php':($cmode?'report_competitor.php':'search.php'))) . '">');
+	 	. ($rmode?'report_heatmap.php':($umode?'report_update.php':($cmode?'report_competitor.php':($areasMode?'areas.php':'search.php')))) . '">');
 //Duplicate submit button at beginning of form to make "search" the default when user presses enter
 echo(' &nbsp; &nbsp; <input name="search" type="submit" value="Search"/>');
 if($rmode)
@@ -143,6 +154,9 @@ if($rmode)
 			. ($col!==NULL ? ('<input type="hidden" name="col" value="' . $col . '" />') : '') );
 }else if($umode){
 	echo('<input type="hidden" name="urep" value="' . $urep . '" />');
+}else if($areasMode){
+	echo '<input type="hidden" name="searchformdata" value="1" />';
+	echo '<input type="hidden" name="id" value="'.$areasId.'" />';
 }else{
 	echo(saveSearchForm());
 }
