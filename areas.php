@@ -110,7 +110,7 @@ pagePagination($limit,$totalCount,$table,$script,$ignoreFields);
 echo '<br/>';
 echo '<div class="clr">';
 //add edit form.
-if($_GET['add_new_record']=='Add New Record' || $_REQUEST['id'] && !$_GET['save'])
+if($_REQUEST['add_new_record']=='Add New Record' || $_REQUEST['id'] && !$_GET['save'])
 {
 	$id = ($_REQUEST['id'])?$_REQUEST['id']:null;
 	echo '<div>';

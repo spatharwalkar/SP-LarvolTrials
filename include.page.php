@@ -199,9 +199,9 @@ while ($row = mysql_fetch_assoc($res))
 			else
 			if($columnName == 'searchdata')
 			{
-				echo '<td><a href="search.php?'.$table.'='.$upmId.'">';
-				echo '<img src="images/edit.png" title="Edit Search Data" alt="Edit Search Data"/>	';
-				echo '</a></td>';				
+				echo '<td>';
+				echo input_tag(array('Field'=>'searchdata'),$v,array('table'=>$table,'id'=>$upmId));
+				echo '</td>';				
 			}			
 			else 
 			{
@@ -445,7 +445,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 		}
 		$postKeys = array_keys($post);
 		$post = array_map(am,$postKeys,array_values($post));
-		echo $query = "insert into $table (".implode(',',$postKeys).") values(".implode(',',$post).")";
+		$query = "insert into $table (".implode(',',$postKeys).") values(".implode(',',$post).")";
 		mysql_query($query)or die('Cannot insert '.$table.' entry');
 	}
 	else//update
@@ -479,7 +479,6 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			//remove post action name from insert query.
 			array_pop($post);
 			$post = array_map(am1,array_keys($post),array_values($post));
-			//print_r($post);die;
 		}
 		$query = "update $table set ".implode(',',$post)." where id=".$id;
 		mysql_query($query)or die('Cannot update '.$table.' entry');		

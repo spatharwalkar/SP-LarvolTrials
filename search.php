@@ -157,6 +157,10 @@ if($rmode)
 }else if($areasMode){
 	echo '<input type="hidden" name="searchformdata" value="1" />';
 	echo '<input type="hidden" name="id" value="'.$areasId.'" />';
+	if(!is_numeric($areasId))
+	{
+		echo '<input type="hidden" name="add_new_record" value="Add New Record" />';	
+	}
 }else{
 	echo(saveSearchForm());
 }
@@ -760,6 +764,32 @@ function listSearchProc()
 		if($row === false) return;	//In this case, the report cell doesn't exist
 		if($row['searchdata'] === NULL) return; //In this case, this is an add rather than an edit, so load nothing
 		$_POST = unserialize(base64_decode($row['searchdata']));
+	}
+	//prefilling areas/product search data.
+	if((isset($_GET['areas']) && is_numeric($_GET['areas'])) || (isset($_GET['product']) && is_numeric($_GET['product'])))
+	{
+		if(isset($_GET['areas']) && is_numeric($_GET['areas'])){
+			$areasOrProductId = mysql_real_escape_string($_GET['areas']);
+			$tbl = 'areas';
+		}
+		elseif(isset($_GET['product']) && is_numeric($_GET['product']))
+		{
+			$areasOrProductId = mysql_real_escape_string($_GET['product']);
+			$tbl = 'product';
+		}
+		if($areasOrProductId)
+		{
+			$query = "SELECT searchdata FROM $tbl WHERE id =$areasOrProductId";
+			$res = mysql_query($query) or die('Bad SQL query getting searchdata');
+			$row = mysql_fetch_array($res);
+			if($row === false) return;
+			$_POST = unserialize(base64_decode($row['searchdata']));
+			//print_r($_POST);DIE;
+		}
+		else
+		{
+			return;
+		}
 	}
 	if(isset($_POST['delsch']) && is_array($_POST['delsch']))
 	{
