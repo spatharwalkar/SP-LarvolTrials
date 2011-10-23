@@ -33,7 +33,7 @@ a, a:hover{
 	overflow:hidden;
 	padding:0 2px 0 2px;
 	position:relative;
-	z-index:99;
+	/*z-index:99;*/
 	width:200px;
 	border: 1px solid black;
 }
@@ -47,6 +47,7 @@ a, a:hover{
 .drop:hover, .drop.hover {
 	height:auto;
 	overflow:visible;
+	background-color:#ffffff;
 }
 
 .block {

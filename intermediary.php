@@ -368,9 +368,8 @@ class ContentManager
 			. ((isset($_GET['institution']) && in_array($v, $_GET['institution'])) ? 'checked="checked"' : '' ) . '/>&nbsp;' 
 			. '<label for="'.$v.'">' .$v . '</label><br/>';
 		}
-		echo ('</div>'
-			. '</div><br/><input  type="submit" value="Show"/>&nbsp;');
-			 if(strlen($count)) { echo $count . '&nbsp;Records'; }
+		echo ('</div></div><br/><input type="submit" value="Show"/>&nbsp;');
+		if(strlen($count)) { echo $count . '&nbsp;Records'; }
 		echo '<span id="addtoright"></span>';	
 	
 	}
@@ -1978,6 +1977,11 @@ class ContentManager
 						. '<img src="images/black-' . $result_image . '.png" alt="' . $result_image . '" style="padding-top: 3px;" border="0" /></a></div>';
 					}
 				}
+				
+				if(($val['end_date'] != '' && $val['end_date'] != NULL && $val['end_date'] != '0000-00-00') && 
+				($val['end_date'] < date('Y-m-d', $now)) && ($val['result_link'] == NULL || $val['result_link'] == '')){
+						$upm_string .= '<div ' . $upm_title . '><img src="images/hourglass.png" alt="hourglass" border="0" /></div>';
+				}
 				$upm_string .= '</div></td>';
 				
 				$upm_string .= getUPMChart(date('m',strtotime($val['start_date'])), date('Y',strtotime($val['start_date'])), 
@@ -2314,7 +2318,7 @@ function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last,
 						}
 					}
 					
-					if(($v[3] != '' && $v[3] != NULL && $v[3] != '0000-00-00') && ($v[3] < date('Y-m-d')) && ($upm_result_link == NULL || upm_result_link == '')){
+					if(($v[3] != '' && $v[3] != NULL && $v[3] != '0000-00-00') && ($v[3] < date('Y-m-d')) && ($upm_result_link == NULL || $upm_result_link == '')){
 						echo ('<div ' . $upm_title . '><img src="images/hourglass.png" alt="hourglass" border="0" /></div>');
 					}
 					echo ('</td>');
