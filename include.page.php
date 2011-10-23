@@ -390,6 +390,10 @@ function input_tag($row,$dbVal=null,$options=array())
 				$modifier = '[Empty]';
 				$delete = false;
 			}
+			if(isset($options['callFrom']) && $options['callFrom']=='addedit')
+			$modifier = $modifier;
+			else
+			$modifier = '';
 			$task = ($dbVal=='')?'Add':'Edit';
 			return '<a href="search.php?'.$table.'='.$id.'"><img src="images/'.$img.'" title="'.$task.' Search Data" alt="'.$task.' Search Data"/></a>&nbsp;'.$modifier;
 			break;
@@ -475,8 +479,9 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			//remove post action name from insert query.
 			array_pop($post);
 			$post = array_map(am1,array_keys($post),array_values($post));
+			//print_r($post);die;
 		}
-		echo $query = "update $table set ".implode(',',$post)." where id=".$id;
+		$query = "update $table set ".implode(',',$post)." where id=".$id;
 		mysql_query($query)or die('Cannot update '.$table.' entry');		
 	}
 }
@@ -626,7 +631,7 @@ function addEditUpm($id,$table,$script)
 		{
 			echo '<tr><td>'.ucwords(implode(' ',explode('_',$row['Field']))).' : </td>';
 			echo '<td>';
-			echo input_tag($row,$dbVal,array('table'=>$table,'id'=>$id));
+			echo input_tag($row,$dbVal,array('table'=>$table,'id'=>$id,'callFrom'=>'addedit'));
 			echo '</td></tr>';	
 			$i++;
 			continue;			
@@ -635,6 +640,8 @@ function addEditUpm($id,$table,$script)
 		echo '<td>'.ucwords(implode(' ',explode('_',$row['Field']))).' : </td><td>'.input_tag($row,$dbVal).'</td>';
 		echo '</tr>';
 	}
+	if($searchData)
+	echo '<input type="hidden" name="searchdata" value="'.$searchData.'">';
 	echo '<tr>&nbsp;<td></td><td><input name ="save" type="submit" value="Save"/></td>';
 	echo '</table>';
 	echo '</form>';

@@ -1,6 +1,4 @@
 <?php
-echo '<pre>';
-print_r($_POST);
 require_once('db.php');
 require_once('report_common.php');
 if(!$db->loggedIn())
