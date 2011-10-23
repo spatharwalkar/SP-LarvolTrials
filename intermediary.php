@@ -489,6 +489,7 @@ class ContentManager
 	
 	function processParams() {
 		
+		global $logger;
 		$return_param	= array();
 		$return_param['fin_arr'] = array();
 		$return_param['all_records'] = array();
@@ -851,7 +852,7 @@ class ContentManager
 						}
 					}
 					
-				} else if(in_array($val['NCT/overall_status'], $this->actfilterarr) ) {
+				} else /*if(in_array($val['NCT/overall_status'], $this->actfilterarr) )*/ {
 				
 					$totactivecount++;
 					if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) 
@@ -915,6 +916,12 @@ class ContentManager
 					}
 				}
 				
+				if(!in_array($val['NCT/overall_status'],$this->actfilterarr) && !in_array($val['NCT/overall_status'],$this->inactfilterarr) && 
+				!in_array($val['NCT/overall_status'],$this->allfilterarr)) { 
+					$log 	= 'WARN: A new value "' . $val['NCT/overall_status'] . '" (not listed in the existing rule), was encountered for field overall_status.';
+					$logger->warn($log);
+					unset($log);
+				}
 			}
 			
 			$return_param['showRecordsCnt'] = (isset($_GET["list"])) ? (${'showRecords_'.$_GET["list"].'array_Cnt'}) : ($showRecords_activearray_Cnt);
@@ -923,7 +930,7 @@ class ContentManager
 			$return_param['stack_total_count']		= $return_param['stack_total_count'] + ($totinactivecount + $totactivecount);
 			
 		}
-		//echo '<br/>inactivearray==><pre>';print_r($return_param['inactivearray']);
+		
 		/*--------------------------------------------------------
 		|Variables set for count when filtered by institution_type
 		---------------------------------------------------------*/
@@ -940,6 +947,8 @@ class ContentManager
 	function chkType() {
 	
 		global $now;
+		global $logger;
+		
 		$process_params = array();
 		$process_params['link_expiry_date'] = array();
 		$unmatched_upm_details = array();
@@ -1473,7 +1482,7 @@ class ContentManager
 						}
 					}
 					
-				} else if(in_array($val['NCT/overall_status'], $this->actfilterarr) ) {
+				} else /*if(in_array($val['NCT/overall_status'], $this->actfilterarr) )*/ {
 				
 					$totactivecount++;
 					if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) 
@@ -1521,6 +1530,13 @@ class ContentManager
 					} else {
 						$this->allarray[] = array_merge($val, array('section' => '0'));
 					}
+				}
+				
+				if(!in_array($val['NCT/overall_status'],$this->actfilterarr) && !in_array($val['NCT/overall_status'],$this->inactfilterarr) && 
+				!in_array($val['NCT/overall_status'],$this->allfilterarr)) { 
+					$log 	= 'WARN: A new value "' . $val['NCT/overall_status'] . '" (not listed in the existing rule), was encountered for field overall_status.';
+					$logger->warn($log);
+					unset($log);
 				}
 			}
 			
