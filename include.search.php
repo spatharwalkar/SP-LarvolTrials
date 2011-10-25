@@ -613,18 +613,34 @@ function getActiveCount($all_ids, $time)
 	if(!is_array($all_ids) || empty($all_ids)) return 0;
 	$ids = implode(', ',$all_ids);
 	$overallStatusId = getFieldId("NCT", "overall_status");
-	$activeStatuses = getEnumvalId($overallStatusId, "Active, not recruiting").",".
+	
+	/*$activeStatuses = getEnumvalId($overallStatusId, "Active, not recruiting").",".
 	getEnumvalId($overallStatusId, "Not yet recruiting").",".
 	getEnumvalId($overallStatusId, "Recruiting").",".
 	getEnumvalId($overallStatusId, "Enrolling by invitation").",".
 	getEnumvalId($overallStatusId, "Active, not recruiting").",".
 	getEnumvalId($overallStatusId, "Available").",".
-	getEnumvalId($overallStatusId, "No longer recruiting");
+	getEnumvalId($overallStatusId, "No longer recruiting");*/
 	
-	$query = "SELECT i.larvol_id,dv.field,dv.val_enum AS id FROM data_values AS dv
+	$inactiveStatuses = getEnumvalId($overallStatusId, "Withheld") .", ".
+	getEnumvalId($overallStatusId, "Approved for marketing") .", ".
+	getEnumvalId($overallStatusId, "Temporarily not available") .", ".
+	getEnumvalId($overallStatusId, "No Longer Available") .",".
+	getEnumvalId($overallStatusId, "Withdrawn") .",".
+	getEnumvalId($overallStatusId, "Terminated") .",".
+	getEnumvalId($overallStatusId, "Suspended") .",".
+	getEnumvalId($overallStatusId, "Completed");
+	
+	/*$query = "SELECT i.larvol_id,dv.field,dv.val_enum AS id FROM data_values AS dv
 					LEFT JOIN data_cats_in_study AS i ON dv.studycat=i.id
 					WHERE i.larvol_id IN (".$ids.") AND dv.field = ".$overallStatusId." AND
 					dv.val_enum IN (".$activeStatuses.") AND dv.added < " . $time 
+					. " AND ( dv.superceded>" . $time . " OR dv.superceded IS NULL) ";*/
+					
+	$query = "SELECT i.larvol_id,dv.field,dv.val_enum AS id FROM data_values AS dv
+					LEFT JOIN data_cats_in_study AS i ON dv.studycat=i.id
+					WHERE i.larvol_id IN (".$ids.") AND dv.field = ".$overallStatusId." AND
+					dv.val_enum NOT IN (".$inactiveStatuses.") AND dv.added < " . $time 
 					. " AND ( dv.superceded>" . $time . " OR dv.superceded IS NULL) ";
 	$time_start = microtime(true);					
 	$res = mysql_query($query);
