@@ -63,6 +63,7 @@ $deleteFlag = null;
 if($_GET['reset'])
 header('Location: ' . urlPath() . $script.'.php');
 require('header.php');
+echo('<script type="text/javascript" src="delsure.js"></script>');
 ?>
 <script type="text/javascript">
 function upmdelsure(){ return confirm("Are you sure you want to delete this area?"); }
@@ -104,7 +105,7 @@ $page=0;
 
 //pagination
 $ignoreFields = array('searchdata');
-pagePagination($limit,$totalCount,$table,$script,$ignoreFields);
+pagePagination($limit,$totalCount,$table,$script,$ignoreFields,array('import'=>false));
 //pagination controller
 
 echo '<br/>';
@@ -114,7 +115,7 @@ if($_REQUEST['add_new_record']=='Add New Record' || $_REQUEST['id'] && !$_GET['s
 {
 	$id = ($_REQUEST['id'])?$_REQUEST['id']:null;
 	echo '<div>';
-	addEditUpm($id,$table,$script);
+	addEditUpm($id,$table,$script,array("formOnSubmit"=>"onsubmit=\"return chkbox(this,'delsearch','searchdata');\""));
 	echo '</div>';
 	echo '<br/>';
 }

@@ -375,27 +375,32 @@ function input_tag($row,$dbVal=null,$options=array())
 			{
 				$img = 'edit.png';
 				$modifier = '[Modified]';
-				$delete = true;
+				$delete = '';
 			}
 			else
 			if($dbVal!='')
 			{
 				$img = 'edit.png';
 				$modifier = '[Full]';
-				$delete = true;
+				$delete = '&nbsp;<label class="lbldel" style="float:none;"><input type="checkbox" title="Delete" name="delsearch['.$id.']" class="delsearch"></label>';
 			}
 			else
 			{
 				$img = 'add.png';
 				$modifier = '[Empty]';
-				$delete = false;
+				$delete = '';
 			}
 			if(isset($options['callFrom']) && $options['callFrom']=='addedit')
-			$modifier = $modifier;
+			{
+				$modifier = $modifier;
+			}
 			else
-			$modifier = '';
+			{
+				$modifier = '';
+				$delete = '';
+			}
 			$task = ($dbVal=='')?'Add':'Edit';
-			return '<a href="search.php?'.$table.'='.$id.'"><img src="images/'.$img.'" title="'.$task.' Search Data" alt="'.$task.' Search Data"/></a>&nbsp;'.$modifier;
+			return '<a href="search.php?'.$table.'='.$id.'"><img src="images/'.$img.'" title="'.$task.' Search Data" alt="'.$task.' Search Data"/></a>&nbsp;'.$modifier.$delete;
 			break;
 			
 		default:
@@ -433,6 +438,18 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			return false;
 		}
 		
+	}
+	
+	if(isset($post['delsearch']) && is_array($post['delsearch']))
+	{
+		foreach($post['delsearch'] as $id => $ok)
+		{
+			$id = mysql_real_escape_string($id);
+			if(!is_numeric($id)) continue;
+			if($db->user->userlevel != 'user')
+				mysql_query("UPDATE $table SET searchdata='' WHERE id=$id LIMIT 1") or die('Bad SQL query deleting searchdata');
+		}
+		unset($post['delsearch']);
 	}
 	
 	$id = ($post['id'])?$post['id']:null;	
@@ -491,7 +508,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
  * @param int $limit The total limit of records defined in the controller.
  * @author Jithu Thomas
  */
-function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array())
+function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),$options=array('import'=>true))
 {
 	global $page;	
 	
@@ -525,9 +542,10 @@ function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array())
 			. '</fieldset>'
 			. '<fieldset class="floatl">'
 			. '<legend> Actions: </legend>'
-			. '<input type="submit" value="Add New Record" name="add_new_record">'
-			. '<input type="submit" value="Import" name="import">'
-			. '</fieldset>';
+			. '<input type="submit" value="Add New Record" name="add_new_record">';
+		if($options['import'])
+		echo '<input type="submit" value="Import" name="import">';
+		echo '</fieldset>';
 			
 	echo  '<fieldset class="">'
 			. '<legend> Search: </legend>';
@@ -581,10 +599,11 @@ echo '<br/>';
  * @param int $id If the param $id is present edit option is activated.
  * @author Jithu Thomas
  */
-function addEditUpm($id,$table,$script)
+function addEditUpm($id,$table,$script,$options=array())
 {
 	global $searchData;
 	$insertEdit = 'Insert';
+	$formOnSubmit = isset($options['formOnSubmit'])?$options['formOnSubmit']:null;
 	if($id)
 	{
 		$insertEdit = 'Edit';
@@ -610,7 +629,7 @@ function addEditUpm($id,$table,$script)
 	echo '<div class="clr">';
 	echo '<fieldset>';
 	echo '<legend> '.$insertEdit.': </legend>';
-	echo '<form name="umpInput" method="get" action="'.$script.'.php">';
+	echo '<form name="umpInput" '.$formOnSubmit.' method="get" action="'.$script.'.php">';
 	echo '<table>';
 	while($row = mysql_fetch_assoc($res))
 	{
