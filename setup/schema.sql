@@ -324,12 +324,12 @@ CREATE TABLE IF NOT EXISTS `rpt_ott_header` (
 
 CREATE TABLE IF NOT EXISTS `rpt_ott_upm` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `intervention_name` varbinary(255) NOT NULL,
+  `intervention_name` BLOB NOT NULL,
   `created` datetime NOT NULL,
   `expiry` date DEFAULT NULL,
   `last_referenced` datetime NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY (`intervention_name`)
+  UNIQUE KEY `intervention_name` (`intervention_name`(1000))
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `rpt_ott_searchdata` (
@@ -365,9 +365,9 @@ CREATE TABLE IF NOT EXISTS `products` (
   `name` varchar(127) COLLATE utf8_unicode_ci NOT NULL COMMENT 'matches the fieldname in the quickfind schema',
   `searchdata` text COLLATE utf8_unicode_ci COMMENT 'contains regex',
   `company` varchar(127) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `brand names` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `generic names` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `code names` varchar(127) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `brand_names` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `generic_names` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `code_names` varchar(127) COLLATE utf8_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `LI_id` (`LI_id`),
   UNIQUE KEY `name` (`name`)
