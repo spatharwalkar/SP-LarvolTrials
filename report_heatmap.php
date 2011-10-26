@@ -798,7 +798,6 @@ function postEd()
 		$query = implode(base64_encode(serialize($_POST)), $query);		
 		
 		mysql_query($query) or die('Bad SQL query storing search');
-		echo $query;
 		mysql_query('COMMIT') or die("Couldn't commit SQL transaction");
 	}
 }
