@@ -958,7 +958,9 @@ class ContentManager
 		
 		echo('<form id="frmOtt" name="frmOtt" method="get" action="intermediary.php">');
 		echo ('<table width="100%"><tr><td><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" />'
-				. '</td><td nowrap="nowrap"><span style="color:#ff0000;font-weight:normal;">Interface Work In Progress</span>');
+				. '</td><td nowrap="nowrap">'
+				. '<span style="color:#ff0000;font-weight:normal;margin-left:40px;">Interface Work In Progress</span>'
+				. '<br/><span style="font-weight:normal;">Send feedback to larvoltrials@larvol.com</span>');
 		
 		//Stacked Ott.	
 		if(isset($_GET['cparams']) || (isset($_GET['results']) && isset($_GET['type']))) {
@@ -2381,8 +2383,6 @@ function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last,
 function getColspan($start_dt, $end_dt) {
 	
 	$diff = round((strtotime($end_dt)-strtotime($start_dt))/2628000);
-
-
 	return $diff;
 
 }
@@ -2517,10 +2517,7 @@ function getCompletionChart($start_month, $start_year, $end_month, $end_year, $c
 			}
 		 
 		} else if($end_year > $third_yr) { 
-			$value = '<td colspan="12" style="background-color:' . $bg_color . ';">&nbsp;</td>'
-			. '<td colspan="12" style="background-color:' . $bg_color . ';">&nbsp;</td>'
-			. '<td colspan="12" style="background-color:' . $bg_color . ';">&nbsp;</td>'
-			. '<td colspan="3" style="background-color:' . $bg_color . ';" ' . $attr_two . '>&nbsp;</td>';		
+			$value = '<td colspan="39" style="background-color:' . $bg_color . ';" ' . $attr_two . '>&nbsp;</td>';		
 		}	
 	
 	} else if($start_year == $current_yr) {
@@ -2569,10 +2566,7 @@ function getCompletionChart($start_month, $start_year, $end_month, $end_year, $c
 		} else if($end_year > $third_yr){
 		
 			$value = (($st != 0) ? '<td colspan="' . $st . '">&nbsp;</td>' : '');
-			$value .= '<td colspan="' .(12 - $st) . '" style="background-color:' . $bg_color . ';">&nbsp;</td>'
-						. '<td colspan="12" style="background-color:' . $bg_color . ';">&nbsp;</td>'
-						. '<td colspan="12" style="background-color:' . $bg_color . ';">&nbsp;</td>'
-						. '<td colspan="3" style="background-color:' . $bg_color . ';" ' . $attr_two . '>&nbsp;</td>';		
+			$value .= '<td colspan="' .(39 - $st) . '" style="background-color:' . $bg_color . ';" ' . $attr_two . '>&nbsp;</td>';		
 		}
 		
 	} else if($start_year == $second_yr) {
@@ -2607,9 +2601,7 @@ function getCompletionChart($start_month, $start_year, $end_month, $end_year, $c
 		} else if($end_year > $third_yr) {
 		
 			$value = '<td colspan="12">&nbsp;</td>' . (($st != 0) ? '<td colspan="' . $st . '">&nbsp;</td>' : '');
-			$value .= '<td colspan="' .(12 - $st) . '" style="background-color:' . $bg_color . ';">&nbsp;</td>'
-						. '<td colspan="12" style="background-color:' . $bg_color . ';">&nbsp;</td>'
-						. '<td colspan="3" style="background-color:' . $bg_color . ';" ' . $attr_two . '>&nbsp;</td>';		
+			$value .= '<td colspan="' .(27 - $st) . '" style="background-color:' . $bg_color . ';" ' . $attr_two . '>&nbsp;</td>';		
 		}
 		
 	} else if($start_year == $third_yr) {
@@ -2634,8 +2626,7 @@ function getCompletionChart($start_month, $start_year, $end_month, $end_year, $c
 		} else if($end_year > $third_yr) {
 		
 			$value = '<td colspan="12">&nbsp;</td><td colspan="12">&nbsp;</td>' . (($st != 0) ? '<td colspan="' . $st . '">&nbsp;</td>' : '');
-			$value .= '<td colspan="' .(12 - $st) . '" style="background-color:' . $bg_color . ';">&nbsp;</td>'
-						. '<td colspan="3" style="background-color:' . $bg_color . ';" ' . $attr_two . '>&nbsp;</td>';		
+			$value .= '<td colspan="' .(15 - $st) . '" style="background-color:' . $bg_color . ';" ' . $attr_two . '>&nbsp;</td>';		
 						
 		}
 			
@@ -2901,13 +2892,7 @@ function getUPMChart($start_month, $start_year, $end_month, $end_year, $current_
 		 
 		} else if($end_year > $third_yr) {
 		
-			$value = '<td colspan="12" style="' . $background_color . '"><div ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
-				. '<td colspan="12" style="' . $background_color . '"><div ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
-				. '<td colspan="12" style="' . $background_color . '"><div ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
-				. '<td colspan="3" style="' . $background_color . '" ' . $attr_two . '><div ' . $upm_title . '>'
+			$value = '<td colspan="39" style="' . $background_color . '" ' . $attr_two . '><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>';		
 		}	
 	
@@ -2988,13 +2973,7 @@ function getUPMChart($start_month, $start_year, $end_month, $end_year, $current_
 		} else if($end_year > $third_yr){
 		
 			$value = (($st != 0) ? '<td colspan="' . $st . '">&nbsp;</td>' : '');
-			$value .= '<td colspan="' .(12 - $st) . '" style="' . $background_color . '"><div ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
-				. '<td colspan="12" style="' . $background_color . '"><div ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
-				. '<td colspan="12" style="' . $background_color . '"><div ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
-				. '<td colspan="3" style="' . $background_color . '" ' . $attr_two . '><div ' . $upm_title . '>'
+			$value .= '<td colspan="' .(39 - $st) . '" style="' . $background_color . '" ' . $attr_two . '><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>';		
 		}
 		
@@ -3050,11 +3029,7 @@ function getUPMChart($start_month, $start_year, $end_month, $end_year, $current_
 		} else if($end_year > $third_yr) {
 		
 			$value = '<td colspan="12">&nbsp;</td>' . (($st != 0) ? '<td colspan="' . $st . '">&nbsp;</td>' : '');
-			$value .= '<td colspan="' .(12 - $st) . '" style="' . $background_color . '"><div ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
-				. '<td colspan="12" style="' . $background_color . '"><div ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
-				. '<td colspan="3" style="' . $background_color . '" ' . $attr_two . '><div ' . $upm_title . '>'
+			$value .= '<td colspan="' .(27 - $st) . '" style="' . $background_color . '" ' . $attr_two . '><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>';		
 		}
 		
@@ -3088,19 +3063,13 @@ function getUPMChart($start_month, $start_year, $end_month, $end_year, $current_
 		
 		} else if($end_year > $third_yr) {
 		
-			$value = '<td colspan="12">&nbsp;</td><td colspan="12">&nbsp;</td>' . (($st != 0) ? '<td colspan="' . $st . '">&nbsp;</td>' : '');
-			$value .= '<td colspan="' .(12 - $st) . '" style="background-color:' . $bg_color . ';">&nbsp;</td>'
-						. '<td colspan="3" style="background-color:' . $bg_color . ';" ' . $attr_two . '>&nbsp;</td>';	
-						
 			$value = '<td colspan="12"><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
 				. '<td colspan="12"><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>' 
 				. (($st != 0) ? '<td colspan="' . $st . '"><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>' : '')
-				. '<td colspan="' . (12 - $st) . '" style="' . $background_color . '"><div ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>'
-				. '<td colspan="3" style="' . $background_color . '" ' . $attr_two . '><div ' . $upm_title . '>'
+				. '<td colspan="' . (15 - $st) . '" style="' . $background_color . '" ' . $attr_two . '><div ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '') . '</div></td>';;
 		
 		}
