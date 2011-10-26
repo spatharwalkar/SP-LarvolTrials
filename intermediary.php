@@ -956,7 +956,7 @@ class ContentManager
 		$header_details = array();
 		$unmatched_upms_default_style = 'collapse';
 		
-		echo('<form id="frmOtt" name="frmOtt" method="get" action="intermediary.php">');
+		echo('<form id="frmOtt" name="frmOtt" method="get" target="_self" action="intermediary.php">');
 		echo ('<table width="100%"><tr><td><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" />'
 				. '</td><td nowrap="nowrap">'
 				. '<span style="color:#ff0000;font-weight:normal;margin-left:40px;">Interface Work In Progress</span>'
@@ -2020,7 +2020,7 @@ class ContentManager
 	function downloadOptions($showncount, $foundcount, $shownlist, $foundlist) {
 
 		echo ('<div style="height:100px;"><div class="drop new" style="margin:0px"><div class="newtext">Download Options</div>'
-			. '<form  id="frmDOptions" name="frmDOptions" method="post" action="">'
+			. '<form  id="frmDOptions" name="frmDOptions" method="post" target="_self" action="">'
 //			. '<input type="hidden" name="xmlShownContent" value="' . htmlspecialchars(serialize($shownlist)) . '" />'
 //			. '<input type="hidden" name="xmlFullContent" value="' . htmlspecialchars(serialize($foundlist)) . '" />'
 			. '<input type="hidden" name="excelInput" id="excelInput" value="" />'
