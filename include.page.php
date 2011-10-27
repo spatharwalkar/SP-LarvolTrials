@@ -445,7 +445,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 	{
 		ini_set('max_execution_time','360000');	//100 hours
 		//check for insert update case
-		$query = "select id from products where LI_id='{$importVal['LI_id']}.' OR name='{$importVal['name']}' limit 1";
+		$query = "select id from products where LI_id='{$importVal['LI_id']}' OR name='{$importVal['name']}' limit 1";
 		$result = mysql_query($query);
 		$update = false;
 		ob_start();
