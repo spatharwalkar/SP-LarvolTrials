@@ -316,15 +316,16 @@ function deleteData($id,$table)
 
 /**
  * @name importUpm 
- * @tutorial Outputs the upm import form.
+ * @tutorial Outputs the table import form.
+ * Default runs for upm table
  * @author Jithu Thomas
  */
-function importUpm()
+function importUpm($script='upm',$table='upm')
 {
 	echo '<div class="clr">';
 	echo '<fieldset>';
 	echo '<legend> Import : </legend>';
-	echo '<form name="upm_import" method="post" enctype="multipart/form-data" action="upm.php">';
+	echo '<form name="'.$table.'_import" method="post" enctype="multipart/form-data" action="'.$script.'.php">';
 	echo '<input name="uploadedfile" type="file" /><br />
 		 <input type="submit"  value="Upload File" />';
 	echo '</form>';
@@ -424,13 +425,13 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 {
 	global $now;
 	//import save
-	if($import ==1)
+	if($import ==1 && $table=='upm')
 	{
 		$importVal = array_map(validateImport,$importKeys,$importVal);
 		$query = "insert into upm (".implode(',',$importKeys).") values (".implode(',',$importVal).")";
 		if(mysql_query($query))
 		{
-		return true;
+			return true;
 		}
 		else
 		{
@@ -438,6 +439,42 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			return false;
 		}
 		
+	}
+	
+	if($import==1 && $table=='products')
+	{
+		ini_set('max_execution_time','360000');	//100 hours
+		//check for insert update case
+		$query = "select id from products where LI_id='{$importVal['LI_id']}.' OR name='{$importVal['name']}' limit 1";
+		$result = mysql_query($query);
+		$update = false;
+		ob_start();
+		while($row = mysql_fetch_assoc($result))
+		{
+			$update = true;
+			$id = $row['id'];
+		}
+		ob_end_clean();
+		if($update)
+		{
+			$importVal = array_map(am1,$importKeys,array_values($importVal));
+			$query = "update $table set ".implode(',',$importVal)." where id=".$id;
+		}
+		else 
+		{
+			$importVal = array_map(function ($v){return "'".mysql_real_escape_string($v)."'";},$importVal);
+			$query = "insert into $table (".implode(',',$importKeys).") values (".implode(',',$importVal).")";
+		}
+		if(mysql_query($query))
+		{
+			return true;
+		}
+		else
+		{
+			softdie('Cannot import product id '.$importVal['LI_id'].'<br/>'.$query.'<br/>');
+			//softdie('Cannot import product id '.$importVal['LI_id'].'<br/>');
+			return false;
+		}
 	}
 	
 	if(isset($post['delsearch']) && is_array($post['delsearch']))
@@ -596,10 +633,12 @@ echo '<br/>';
 /**
  * @name addEditUpm
  * @tutorial Provides output of the insert/edit form.
- * @param int $id If the param $id is present edit option is activated.
+ * @param int $id If the param $id is present edit option is activated.	
+ * $skip array if any fields in the upm table needs to be skipped when 
+ * showing the upm entry form just append in this array
  * @author Jithu Thomas
  */
-function addEditUpm($id,$table,$script,$options=array())
+function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 {
 	global $searchData;
 	$insertEdit = 'Insert';
@@ -620,11 +659,7 @@ function addEditUpm($id,$table,$script,$options=array())
 	$res = mysql_query($query)or die('Cannot fetch column names from '.$table.' table.');
 	$i=0;
 	
-	/*	
-	$skip array if any fields in the upm table needs to be skipped when 
-	showing the upm entry form just append in this array
-	*/
-	$skipArr = array('last_update');
+
 	
 	echo '<div class="clr">';
 	echo '<fieldset>';
@@ -718,3 +753,18 @@ function validateImport($k,$v)
 
 	return $v;
 }
+
+function unzipForXmlImport($file)
+{
+    $zip = zip_open($file);
+    if(is_resource($zip))
+    {
+        while(($zip_entry = zip_read($zip)) !== false)
+        {
+            $xml = zip_entry_name($zip_entry);
+            $xmlFile = substr($file,0,strripos($file, DIRECTORY_SEPARATOR)).DIRECTORY_SEPARATOR.$xml;
+            file_put_contents($xmlFile, zip_entry_read($zip_entry, zip_entry_filesize($zip_entry)));
+            return $xmlFile;
+        }
+    }
+} 

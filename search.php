@@ -112,6 +112,17 @@ if(isset($_GET['areas']))
 		$areasId = is_numeric($_GET['areas'])?$_GET['areas']:null;
 	}
 }
+//checking for products mode
+$productsMode = false;
+if(isset($_GET['products']))
+{
+	$productsc = mysql_real_escape_string(htmlspecialchars($_GET['products']));
+	if(is_numeric($productsc) || isset($_GET['products']))
+	{
+		$productsMode = true;
+		$productsId = is_numeric($_GET['products'])?$_GET['products']:null;
+	}
+}
 
 saveSearchPost();
 require('header.php');
@@ -120,6 +131,8 @@ if($rmode) echo('<h2>This search will be stored in report ' . $report . ($row!==
 if($cmode) echo('<h2>This search will be stored in CompetitorDashboard ' . $competitor . ($row!==NULL ? (' row '.$row) : '')
 					. ($col!==NULL ? (' column '.$col) : '') . '.</h2>');
 if($umode) echo('<h2>This search will be attached to UpdateReport ' . $urep . '.</h2>');
+if($areasMode)echo '<h2>This search will be stored in areas'.(($areasId)?' id '.$areasId.'.':'.').'</h2>';
+if($productsMode)echo '<h2>This search will be stored in products'.(($productsId)?' id '.$productsId.'.':'.').'</h2>';
 listSearchProc();
 echo(listSearchForm());
 echo('<p>Select the checkbox next to a field to include that field in the results table. '
@@ -140,7 +153,7 @@ echo('<p>Select the checkbox next to a field to include that field in the result
 		. '<p><a href="#" onclick="checkAll()">Select All</a> | <a href="#" onclick="uncheckAll()">Select None</a></p>');
 
 echo('<form name="searchform" method="post" class="search" action="'
-	 	. ($rmode?'report_heatmap.php':($umode?'report_update.php':($cmode?'report_competitor.php':($areasMode?'areas.php':'search.php')))) . '">');
+	 	. ($rmode?'report_heatmap.php':($umode?'report_update.php':($cmode?'report_competitor.php':($areasMode?'areas.php':($productsMode?'products.php':'search.php'))))) . '">');
 //Duplicate submit button at beginning of form to make "search" the default when user presses enter
 echo(' &nbsp; &nbsp; <input name="search" type="submit" value="Search"/>');
 if($rmode)
@@ -158,6 +171,13 @@ if($rmode)
 	echo '<input type="hidden" name="searchformdata" value="1" />';
 	echo '<input type="hidden" name="id" value="'.$areasId.'" />';
 	if(!is_numeric($areasId))
+	{
+		echo '<input type="hidden" name="add_new_record" value="Add New Record" />';	
+	}
+}else if($productsMode){
+	echo '<input type="hidden" name="searchformdata" value="1" />';
+	echo '<input type="hidden" name="id" value="'.$productsId.'" />';
+	if(!is_numeric($productsId))
 	{
 		echo '<input type="hidden" name="add_new_record" value="Add New Record" />';	
 	}
@@ -766,16 +786,16 @@ function listSearchProc()
 		$_POST = unserialize(base64_decode($row['searchdata']));
 	}
 	//prefilling areas/product search data.
-	if((isset($_GET['areas']) && is_numeric($_GET['areas'])) || (isset($_GET['product']) && is_numeric($_GET['product'])))
+	if((isset($_GET['areas']) && is_numeric($_GET['areas'])) || (isset($_GET['products']) && is_numeric($_GET['products'])))
 	{
 		if(isset($_GET['areas']) && is_numeric($_GET['areas'])){
 			$areasOrProductId = mysql_real_escape_string($_GET['areas']);
 			$tbl = 'areas';
 		}
-		elseif(isset($_GET['product']) && is_numeric($_GET['product']))
+		elseif(isset($_GET['products']) && is_numeric($_GET['products']))
 		{
-			$areasOrProductId = mysql_real_escape_string($_GET['product']);
-			$tbl = 'product';
+			$areasOrProductId = mysql_real_escape_string($_GET['products']);
+			$tbl = 'products';
 		}
 		if($areasOrProductId)
 		{
@@ -784,7 +804,6 @@ function listSearchProc()
 			$row = mysql_fetch_array($res);
 			if($row === false) return;
 			$_POST = unserialize(base64_decode($row['searchdata']));
-			//print_r($_POST);DIE;
 		}
 		else
 		{

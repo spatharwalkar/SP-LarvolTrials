@@ -35,6 +35,7 @@ if($db->loggedIn())
 	.'<a href="entry.php">Trial Entry</a>'
 	.'<a href="upm.php">UPM</a>'
 	.'<a href="areas.php">Areas</a>'
+	.'<a href="products.php">Products</a>'
 	.'</div>');
 	
 	if($db->user->userlevel=='admin'||$db->user->userlevel=='root')

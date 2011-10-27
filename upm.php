@@ -28,7 +28,7 @@ require('header.php');
 ?>
 
 <script type="text/javascript">
-function upmdelsure(){ return confirm("Are you sure you want to delete this area?"); }
+function upmdelsure(){ return confirm("Are you sure you want to delete this upm?"); }
 $(document).ready(function(){
 	var options, a,b;
 	jQuery(function(){
@@ -40,7 +40,6 @@ $(document).ready(function(){
 </script>
 
 <?php
-echo '<div class="error">Under Development</div>';
 //Start controller area
 //save operation controller
 if($_GET['save']=='Save')
@@ -106,7 +105,7 @@ if($_GET['add_new_record']=='Add New Record' || $_GET['id'] && !$_GET['save'])
 {
 	$id = ($_GET['id'])?$_GET['id']:null;
 	echo '<div>';
-	addEditUpm($id,$table,$script);
+	addEditUpm($id,$table,$script,array(),array('last_update'));
 	echo '</div>';
 }
 
