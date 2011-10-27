@@ -31,6 +31,7 @@ $(document).ready(function(){
 					'<tr><td><img src="images/hourglass.png"/></td><td>Results pending</td></tr>'+
 					'<tr><td><img src="images/black-checkmark.png"/></td><td>Click for milestone result</td></tr>'+
 					'<tr><td><img src="images/red-checkmark.png"/></td><td>Click for milestone result (new)</td></tr>'+
+					'<tr><td><img src="images/purple-bar.png"/></td><td>Click for milestone details</td></tr>'+
 					'<tr><td><img src="images/down.png"/></td><td>Display milestones</td></tr>'+
 					'</table> </div>';	
 	$('body').append(slideout);	
