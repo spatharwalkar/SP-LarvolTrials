@@ -960,7 +960,9 @@ class ContentManager
 		echo ('<table width="100%"><tr><td><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" />'
 				. '</td><td nowrap="nowrap">'
 				. '<span style="color:#ff0000;font-weight:normal;margin-left:40px;">Interface Work In Progress</span>'
-				. '<br/><span style="font-weight:normal;">Send feedback to larvoltrials@larvol.com</span>');
+				. '<br/><span style="font-weight:normal;">Send feedback to '
+				. '<a style="display:inline" target="_self" href="mailto:larvoltrials@larvol.com">'
+				. 'larvoltrials@larvol.com</a></span>');
 		
 		//Stacked Ott.	
 		if(isset($_GET['cparams']) || (isset($_GET['results']) && isset($_GET['type']))) {
