@@ -425,13 +425,13 @@ class ContentManager
 			{
 				if(isset($_GET['results'])) {
 				
-					$pager .= '<a href="intermediary.php?results=' . rawurlencode($_GET['results']) . '&amp;type=' . rawurlencode($_GET['type']) 
+					$pager .= '<a target="_self" href="intermediary.php?results=' . rawurlencode($_GET['results']) . '&amp;type=' . rawurlencode($_GET['type']) 
 					. '&amp;time=' . rawurlencode($_GET['time']) . '&amp;pg=' . ($page-1);
 					if(isset($_GET['format']) && $_GET['format'] == 'new') 
 						$pager .= '&amp;format=' . $_GET['format'];
 						
 				} else if(isset($_GET['cparams'])) {
-					$pager .= '<a href="intermediary.php?cparams=' . rawurlencode($_GET['cparams']) . $stack_url . '&amp;pg=' . ($page-1);
+					$pager .= '<a target="_self" href="intermediary.php?cparams=' . rawurlencode($_GET['cparams']) . $stack_url . '&amp;pg=' . ($page-1);
 				}
 				$pager .= $sort . '" style="float:left;">&lt;&lt; Previous Page (' . ($this->pstart - $this->results_per_page) . '-' . ($this->pstart-1) 
 				. ')</a>&nbsp;&nbsp;&nbsp;';
@@ -445,14 +445,14 @@ class ContentManager
 				if($nextlast > $count) $nextlast = $count;
 				if(isset($_GET['results'])) {
 				
-					$pager .= '<a href="intermediary.php?results=' . rawurlencode($_GET['results']) . '&amp;type=' . rawurlencode($_GET['type']) 
+					$pager .= '<a target="_self" href="intermediary.php?results=' . rawurlencode($_GET['results']) . '&amp;type=' . rawurlencode($_GET['type']) 
 						. '&amp;time=' . rawurlencode($_GET['time']) . '&amp;pg=' . ($page+1);
 						
 					if(isset($_GET['format']) && $_GET['format'] == 'new') 
 					$pager .= '&amp;format=' . $_GET['format'];	
 					
 				} else if(isset($_GET['cparams'])) {
-					$pager .= '<a href="intermediary.php?cparams=' . rawurlencode($_GET['cparams']) . $stack_url . '&amp;pg=' . ($page+1);
+					$pager .= '<a target="_self" href="intermediary.php?cparams=' . rawurlencode($_GET['cparams']) . $stack_url . '&amp;pg=' . ($page+1);
 				}
 				$pager .= $sort . '" style="float:left;">Next Page (' . ($this->pstart+$this->results_per_page) . '-' . $nextlast . ') &gt;&gt;</a>';
 			}
@@ -461,9 +461,9 @@ class ContentManager
 			if($this->pstart > 1)
 			{
 				if(isset($_GET['results'])) {
-					$pager .= '<a href="intermediary.php?results=' . rawurlencode($params) . '&amp;page=' . ($page-1) . '&amp;time=' . rawurlencode($leading);
+					$pager .= '<a target="_self" href="intermediary.php?results=' . rawurlencode($params) . '&amp;page=' . ($page-1) . '&amp;time=' . rawurlencode($leading);
 				} else {
-					$pager .= '<a href="intermediary.php?params=' . rawurlencode($params) . '&amp;page=' . ($page-1) . '&amp;leading=' . rawurlencode($leading);
+					$pager .= '<a target="_self" href="intermediary.php?params=' . rawurlencode($params) . '&amp;page=' . ($page-1) . '&amp;leading=' . rawurlencode($leading);
 				}
 				$pager .= $sort . '" style="float:left;">&lt;&lt; Previous Page (' . ($this->pstart - $this->results_per_page) . '-' . ($this->pstart-1) 
 				. ')</a>&nbsp;&nbsp;&nbsp;';
@@ -475,10 +475,10 @@ class ContentManager
 				$nextlast = ($this->last+$this->results_per_page);
 				if($nextlast > $count) $nextlast = $count;
 				if(isset($_GET['results'])) {
-					$pager .= '<a href="intermediary.php?results=' . rawurlencode($params) . '&amp;page=' . ($page+1) . '&amp;time=' 
+					$pager .= '<a target="_self" href="intermediary.php?results=' . rawurlencode($params) . '&amp;page=' . ($page+1) . '&amp;time=' 
 					. rawurlencode($leading);
 				} else {
-					$pager .= '<a href="intermediary.php?params=' . rawurlencode($params) . '&amp;page=' . ($page+1) . '&amp;leading=' 
+					$pager .= '<a target="_self" href="intermediary.php?params=' . rawurlencode($params) . '&amp;page=' . ($page+1) . '&amp;leading=' 
 					. rawurlencode($leading);
 				}
 				$pager .= $sort . '" style="float:left;">Next Page (' . ($this->pstart+$this->results_per_page) . '-' . $nextlast . ') &gt;&gt;</a>';
@@ -1721,19 +1721,19 @@ class ContentManager
 			 . (($this->loggedIn) ? '<th rowspan="2" style="width:50px;">ID</th>' : '' )
 			 . '<th rowspan="2" style="width:230px;">Title</th>'
 			 . '<th style="width:28px;" title="Black: Actual&nbsp;&nbsp;Gray: Anticipated&nbsp;&nbsp;Red: Change greater than 20%">'
-			 . '<a href="javascript:void(0);" onclick="javascript:doSorting(\'en\');">N</a></th>'
+			 . '<a target="_self" href="javascript:void(0);" onclick="javascript:doSorting(\'en\');">N</a></th>'
 			 . '<th rowspan="2" style="width:32px;" title="&quot;EU&quot; = European Union&nbsp;&quot;ROW&quot; = Rest of World">Region</th>'
 			 . '<th rowspan="2" style="width:110px;">Interventions</th>'
 			  . '<th rowspan="2" style="width:70px;">Sponsor</th>'
 			 . '<th style="width:105px;">'
-			 . '<a href="javascript:void(0);" onclick="javascript:doSorting(\'os\');">Status</a></th>'
+			 . '<a target="_self" href="javascript:void(0);" onclick="javascript:doSorting(\'os\');">Status</a></th>'
 			 . '<th rowspan="2" style="width:110px;">Conditions</th>'
 			 . '<th style="width:25px;" title="MM/YY">'
-			 . '<a href="javascript:void(0);" onclick="javascript:doSorting(\'sd\');">Start</a></th>'
+			 . '<a target="_self" href="javascript:void(0);" onclick="javascript:doSorting(\'sd\');">Start</a></th>'
 			 . '<th style="width:25px;" title="MM/YY">'
-			 . '<a href="javascript:void(0);" onclick="javascript:doSorting(\'ed\');">End</a></th>'
+			 . '<a target="_self" href="javascript:void(0);" onclick="javascript:doSorting(\'ed\');">End</a></th>'
 			 . '<th style="width:22px;">'
-			 . '<a href="javascript:void(0);" onclick="javascript:doSorting(\'ph\');">Ph</a></th>'
+			 . '<a target="_self" href="javascript:void(0);" onclick="javascript:doSorting(\'ph\');">Ph</a></th>'
 			 . '<th rowspan="2" style="width:12px;padding:4px;"><div class="box_rotate">result</div></th>'
 			 . '<th colspan="36" style="width:72px;">'
 			 . '<div>&nbsp;</div></th>'
