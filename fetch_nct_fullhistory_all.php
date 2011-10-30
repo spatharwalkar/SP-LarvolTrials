@@ -2,6 +2,9 @@
 require_once('db.php');
 require_once('include.search.php');
 require_once('include.util.php');
+require_once('nct_common.php');
+require_once('include.import.php');
+require_once('include.import.history.php');
 
 if(!$db->loggedIn() || ($db->user->userlevel!='admin' && $db->user->userlevel!='root'))
 {
@@ -132,8 +135,7 @@ function fetch_records($pr_id,$cid,$maxid,$up_id)
 		if( isset($vl[1] )) 
 		{
 		$cid=$vl[1];
-		$_GET['id'] = $cid;
-		require('fetch_nct_fullhistory.php');
+		scrape_history($cid);
 		++$i;
 		$query = ' UPDATE  update_status_fullhistory SET process_id = "'. $pr_id  .'" , update_items_progress= "' . ( ($tot_items >= $updtd_items+$i) ? ($updtd_items+$i) : $tot_items  ) . '" , status="2", current_nctid="'. $cid .'", updated_time="' . date("Y-m-d H:i:s", strtotime('now'))  . '" WHERE update_id="' . $up_id .'" and trial_type="NCT"  ;' ;
 		$res = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory. Query:' . $query);
