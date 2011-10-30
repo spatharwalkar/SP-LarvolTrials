@@ -1,7 +1,7 @@
 <?php
 error_reporting(E_ERROR);
 $tab = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-
+$parse_retry=0;
 $ignore_fields = array(
 	'last_data_entry',
 	'last_follow_up',
@@ -170,15 +170,36 @@ function getIDs($type) {
 
 function ProcessNew($id) {
 
+	global $parse_retry;
+	global $logger;
     echo "<hr>Processing new Record " . $id . "<br/>";
 
     echo('Getting XML for ' . $id . '... - ');
     $xml = file_get_contents('http://www.clinicaltrials.gov/show/' . $id . '?displayxml=true');
     echo('Parsing XML... - ');
     $xml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOWARNING | LIBXML_NOERROR);
-    if ($xml === false) {
-        echo('Parsing failed for this record.' . "\n<br />");
-    } else {
+    if ($xml === false) 
+	{
+		/****************/
+		if($parse_retry>=5)
+		{
+			$log="ERROR: Parsing failed for url: " . 'http://www.clinicaltrials.gov/show/' . $id . '?displayxml=true' ;
+			$logger->error($log);
+			echo '<br>'. $log."<br>";
+		}
+		else
+		{
+			$log="WARNING: Parsing failed for url: " . 'http://www.clinicaltrials.gov/show/' . $id . '?displayxml=true' ;
+			$logger->warn($log);
+			echo '<br>'. $log."<br>";
+			$parse_retry ++;
+			sleep(($parse_retry*2)); 
+			ProcessNew($id);
+		}
+		/*******************/
+    } 
+	else {
+		$parse_retry=0;
         echo('Importing... - ');
         if (addRecord($xml, 'nct') === false) {
             echo('Import failed for this record.' . "\n<br />");
@@ -218,17 +239,18 @@ function validateEnums($val)
 }
 
 function ProcessChanges($id, $date, $column, $initial_date=NULL) {
-	
+	global $logger;
+	global $parse_retry;
     // Now Go To changes Site and parse differences
 	
     $url = "http://clinicaltrials.gov/archive/" . $id . "/" . $date . "/changes";
 
     $docpc = new DOMDocument();
     echo $tab . '<hr>Parsing Archive Changes Page for ' . $id . ' and Date: ' . $date . '...... - ';
-
     echo $url . " - ";
 
-    for ($done = false, $tries = 0; $done == false && $tries < 5; $tries++) {
+    for ($done = false, $tries = 0; $done == false && $tries < 5; $tries++) 
+	{
         //echo('.');
         @$done = $docpc->loadHTMLFile($url);
     }
@@ -285,10 +307,28 @@ function ProcessChanges($id, $date, $column, $initial_date=NULL) {
 	//$innerHTML = str_replace("type=\"Actual\"", "", $innerHTML);
 
     $xml = simplexml_load_string($innerHTML);
-    if ($xml === false) {
-        echo('Parsing failed for this record.' . "\n<br />");
+    if ($xml === false) 
+	{
+		/****************/
+		if($parse_retry>=5)
+		{
+			$log="ERROR: Parsing failed for url: " . $url ;
+			$logger->error($log);
+			echo '<br>'. $log."<br>";
+		}
+		else
+		{
+			$log="WARNING: Parsing failed for url: " . $url ;
+			$logger->warn($log);
+			echo '<br>'. $log."<br>";
+			$parse_retry ++;
+			sleep(($parse_retry*2)); 
+			ProcessChanges($id, $date, $column, $initial_date);
+		}
+		/*******************/
+        
     }
-
+	$parse_retry=0;
     unset($innerHTML);
     if (isset($initial_date) and !empty($initial_date)) {
 		addNCT_history($xml, $id, $initial_date);
@@ -1050,7 +1090,7 @@ function prepXMP($data, $action, $studycat, $nct_cat, $date) {
 		
 			
 			/******************************************/
-			if ($attr->name == 'class' && $column == "sdiff-b" && $attr->value == "sdiff-a") 
+			if ($attr->name == 'class' && $attr->value == $column) 
 			{
 			$datatable1 = $element;
 			}
@@ -1261,7 +1301,14 @@ function commit_diff($studycat, $category_id, $fieldname, $value, $date, $operat
 			}
 		else
 		{
-			$query = 'UPDATE data_values SET superceded="' . $DTnow . '" WHERE studycat=' . $studycat . ' AND superceded is NULL  and added < "' . $DTnow . '"  and field=' . $field . '  ';
+			if($type=='enum') 	$value2=getEnumvalId($field, $value1);
+			else $value2=$value1;
+			if($type=='date') 	$value2='val_date';
+
+			$query = 'UPDATE data_values SET superceded="' . $DTnow . '" WHERE studycat=' . $studycat . ' AND superceded is NULL  and added < "' . $DTnow . '"  and ' ;
+			$query .= $type=="date" ? ('"' . $value2 . '"'   ) : ('val_' . $type);
+			$query .= '= "' . $value2 . '" and field=' . $field . '  ';
+			
 			
 			
 		}
