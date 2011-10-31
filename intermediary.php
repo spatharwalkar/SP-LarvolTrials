@@ -612,6 +612,8 @@ class ContentManager
 			$return_param['link_expiry_date'][$pk] = array();
 			$totinactivecount = 0; 
 			$totactivecount	 = 0; 
+			$totalcount	= 0;
+			$all_ids = array();			
 			
 			//New Link Method
 			if(isset($_GET['results'])) {
@@ -818,7 +820,6 @@ class ContentManager
 					$return_param['upmDetails'][$val['NCT/nct_id']] = $allUpmDetails[$val['NCT/nct_id']];
 				}
 				
-				
 				if(in_array($val['NCT/overall_status'], $this->inactfilterarr)) {
 				
 					$totinactivecount++;
@@ -853,7 +854,7 @@ class ContentManager
 						}
 					}
 					
-				} else /*if(in_array($val['NCT/overall_status'], $this->actfilterarr) )*/ {
+				} else {
 				
 					$totactivecount++;
 					if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) 
@@ -891,7 +892,7 @@ class ContentManager
 				if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) 
 					|| isset($_GET['a']) || isset($_GET['wh']) || isset($_GET['afm']) || isset($_GET['tna']) 
 					|| isset($_GET['nla']) || isset($_GET['wd']) || isset($_GET['t']) || isset($_GET['s']) 
-					|| isset($_GET['c']) || isset($_GET['nlr'])) {	
+					|| isset($_GET['c']) || isset($_GET['nlr'])) {
 							
 					$vall = implode(",",array_keys($this->allfilterarr, $val['NCT/overall_status']));
 					if(array_key_exists($vall, $_GET)) {
@@ -923,12 +924,20 @@ class ContentManager
 					$logger->warn($log);
 					unset($log);
 				}
+				
+				//getting count of active trials from a common function used in run_heatmap.php and here
+				$all_ids[] = $val['larvol_id'];
+				sort($all_ids); 
+				$totalcount = count($all_ids);
+				$totactivecount = getActiveCount($all_ids, $this->time_machine);
+				$totinactivecount = $totalcount - $totactivecount; 
+
 			}
 			
 			$return_param['showRecordsCnt'] = (isset($_GET["list"])) ? (${'showRecords_'.$_GET["list"].'array_Cnt'}) : ($showRecords_activearray_Cnt);
 			$return_param['stack_inactive_count'] 	= $return_param['stack_inactive_count'] + $totinactivecount;
 			$return_param['stack_active_count']		= $return_param['stack_active_count'] + $totactivecount;
-			$return_param['stack_total_count']		= $return_param['stack_total_count'] + ($totinactivecount + $totactivecount);
+			$return_param['stack_total_count']		= $return_param['stack_total_count'] + $totalcount;
 			
 		}
 		
@@ -1424,14 +1433,15 @@ class ContentManager
 			
 			$allUpmDetails	= array();
 			$upmDetails	 	= array();
+			$all_ids = array();
 			
 			$arrr = search($params,$this->fid,NULL,$this->time_machine);
 			foreach($arrr as $k => $v) {
 				foreach($v as $kk => $vv) {
 					if($kk != 'NCT/condition' && $kk != 'NCT/intervention_name' && 'NCT/lead_sponsor')
-						$arr[$v['NCT/nct_id']][$kk] = (is_array($vv)) ? implode(' ', $vv) : $vv;//$arr[$k][$kk] = (is_array($vv)) ? implode(' ', $vv) : $vv;
+						$arr[$v['NCT/nct_id']][$kk] = (is_array($vv)) ? implode(' ', $vv) : $vv;
 					else
-						$arr[$v['NCT/nct_id']][$kk] = (is_array($vv)) ? implode(', ', $vv) : $vv;//$arr[$k][$kk] = (is_array($vv)) ? implode(', ', $vv) : $vv;
+						$arr[$v['NCT/nct_id']][$kk] = (is_array($vv)) ? implode(', ', $vv) : $vv;
 				}
 			}
 			
@@ -1464,7 +1474,7 @@ class ContentManager
 				
 				if(in_array($val['NCT/overall_status'],$this->inactfilterarr)) {
 				
-					$totinactivecount++;
+					//$totinactivecount++;
 					if(isset($_GET['wh']) || isset($_GET['afm']) || isset($_GET['tna']) || isset($_GET['nla']) 
 						|| isset($_GET['wd']) || isset($_GET['t']) || isset($_GET['s']) || isset($_GET['c'])) {
 							
@@ -1487,9 +1497,9 @@ class ContentManager
 						}
 					}
 					
-				} else /*if(in_array($val['NCT/overall_status'], $this->actfilterarr) )*/ {
+				} else {
 				
-					$totactivecount++;
+					//$totactivecount++;
 					if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) 
 						|| isset($_GET['a']) || isset($_GET['nlr'])) {	
 					
@@ -1543,6 +1553,8 @@ class ContentManager
 					$logger->warn($log);
 					unset($log);
 				}
+				
+				$all_ids[] = $val['larvol_id'];
 			}
 			
 			/*--------------------------------------------------------
@@ -1558,12 +1570,18 @@ class ContentManager
 															
 			}
 			
+			sort($all_ids); 
+			$totalcount = count($all_ids);
+			
+			//getting count of active trials from a common function used in run_heatmap.php and here
+			$totactivecount = getActiveCount($all_ids, $this->time_machine);
+			$totinactivecount = $totalcount - $totactivecount; 
 			$count = count($this->{$this->type});
 			
 			if(isset($_GET['institution']) && $_GET['institution'] != '') {
 				$ins = unserialize(gzinflate(base64_decode(rawurldecode($insparams))));
 				$foundcount = ($ins['actcnt'] + $ins['inactcnt']);
-				$this->commonControls($count, $ins['actcnt'], $ins['inactcnt'], ($ins['actcnt'] + $ins['inactcnt']));
+				$this->commonControls($count, $ins['actcnt'], $ins['inactcnt'], $totalcount);
 			} else {
 				$foundcount = ($totactivecount + $totinactivecount);
 				$this->commonControls($count, $totactivecount, $totinactivecount, ($totactivecount + $totinactivecount));
