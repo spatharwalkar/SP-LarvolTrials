@@ -29,12 +29,15 @@ require('header.php');
 
 <script type="text/javascript">
 function upmdelsure(){ return confirm("Are you sure you want to delete this upm?"); }
+function validateedit(){if($('#product_id').val()==''){alert('Select a proper product name from the list of suggestions.');return false}else return true;}
+function validatesearch(){if($('#search_product').val()==''){$('#search_product_id').val('');}if($('#search_product_id').val()=='' && $('#search_product').val()!=''){alert('Select a proper product name from the list of suggestions.');return false}else return true;}
 $(document).ready(function(){
 	var options, a,b;
 	jQuery(function(){
-		  options = { serviceUrl:'autosuggest.php',params:{table:<?php echo "'$table'"?>,field:'product'} };
-		  a = $('#product').autocomplete(options);
-		  b = $('#search_product').autocomplete(options);
+		  options1 = { serviceUrl:'autosuggest.php',params:{table:<?php echo "'$table'"?>,field:'product'},onSelect: function(value, data){ $('#product_id').val(data);} };
+		  options2 = { serviceUrl:'autosuggest.php',params:{table:<?php echo "'$table'"?>,field:'product'},onSelect: function(value, data){ $('#search_product_id').val(data);} };
+		  a = $('#product').autocomplete(options1);
+		  b = $('#search_product').autocomplete(options2);
 		});
 });
 </script>
@@ -44,6 +47,8 @@ $(document).ready(function(){
 //save operation controller
 if($_GET['save']=='Save')
 {
+	$_GET['product'] = $_GET['product_id'];
+	unset($_GET['product_id']);
 	saveData($_GET,$table);
 }
 //delete controller
@@ -84,6 +89,13 @@ if(isset($_FILES['uploadedfile']) && $_FILES['uploadedfile']['size']>1)
 	}
 	echo 'Imported '.$success.' records, Failed entries '.$fail;
 }
+//search controller sud come above pagination call since search is embedded in it.
+if(isset($_GET['search']) && $_GET['search']=='Search')
+{
+	$_GET['search_product'] = $_GET['search_product_id'];
+	unset($_GET['search_product_id']);
+
+}
 //End controller area
 
 
@@ -95,7 +107,7 @@ if(!isset($_GET['oldval']))
 $page=0;
 
 //pagination
-pagePagination($limit,$totalCount,$table,$script);
+pagePagination($limit,$totalCount,$table,$script,array(),array("import"=>false,"formOnSubmit"=>"onsubmit=\"return validatesearch();\""));
 //pagination controller
 
 echo '<br/>';
@@ -105,7 +117,7 @@ if($_GET['add_new_record']=='Add New Record' || $_GET['id'] && !$_GET['save'])
 {
 	$id = ($_GET['id'])?$_GET['id']:null;
 	echo '<div>';
-	addEditUpm($id,$table,$script,array(),array('last_update'));
+	addEditUpm($id,$table,$script,array("formOnSubmit"=>"onsubmit=\"return validateedit();\"",'deletebox'=>false),array('last_update'));
 	echo '</div>';
 }
 
@@ -117,6 +129,7 @@ if($_GET['import']=='Import' || $_GET['uploadedfile'])
 
 //normal upm listing
 $start = $page*$limit;
-contentListing($start,$limit,$table,$script);
+$ignoreSort = array('product');
+contentListing($start,$limit,$table,$script,array(),array(),array('delete'=>true,'ignoresort'=>$ignoreSort));
 echo '</div>';
 echo '</html>';

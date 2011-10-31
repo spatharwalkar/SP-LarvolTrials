@@ -80,14 +80,7 @@ $(document).ready(function(){
 
 <?php 
 //Start controller area
-//Start controller area
-//save operation controller
-if($_GET['save']=='Save')
-{
-	saveData($_GET,$table);
-}
-
-//delete controller
+//delete controller should come above save controller if delete box is added in the add edit form
 if(isset($_GET['deleteId']) && is_numeric($_GET['deleteId']) && $deleteFlag)
 {
 	deleteData($_GET['deleteId'],$table);
@@ -95,6 +88,12 @@ if(isset($_GET['deleteId']) && is_numeric($_GET['deleteId']) && $deleteFlag)
 	$_SERVER['REQUEST_URI'] =  preg_replace($pattern, '', $_SERVER['REQUEST_URI']);
 	$_SERVER['REQUEST_URI'] = str_replace($script.'.php&', $script.'.php?', $_SERVER['REQUEST_URI']);
 }
+//save operation controller
+if($_GET['save']=='Save')
+{
+	saveData($_GET,$table);
+}
+
 //import controller
 if(isset($_FILES['uploadedfile']) && $_FILES['uploadedfile']['size']>1)
 {
@@ -186,7 +185,7 @@ if($_REQUEST['add_new_record']=='Add New Record' || $_REQUEST['id'] && !$_GET['s
 {
 	$id = ($_REQUEST['id'])?$_REQUEST['id']:null;
 	echo '<div>';
-	addEditUpm($id,$table,$script,array("formOnSubmit"=>"onsubmit=\"return chkbox(this,'delsearch','searchdata');\""),$skipArr);
+	addEditUpm($id,$table,$script,array("formOnSubmit"=>"onsubmit=\"return chkbox(this,'delsearch','searchdata');\"",'deletebox'=>true),$skipArr);
 	echo '</div>';
 	echo '<br/>';
 }
@@ -199,6 +198,6 @@ if($_GET['import']=='Import' || $_GET['uploadedfile'])
 
 //normal upm listing
 $start = $page*$limit;
-contentListing($start,$limit,$table,$script,$skipArr);
+contentListing($start,$limit,$table,$script,$skipArr,$includeArr,array('delete'=>false));
 echo '</div>';
 echo '</html>';

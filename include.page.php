@@ -6,9 +6,11 @@
  * @param int $limit The total limit of records defined in the controller.
  * @author Jithu Thomas
  */
-function contentListing($start=0,$limit=50,$table,$script,$ignoreFields=array())
+function contentListing($start=0,$limit=50,$table,$script,$ignoreFields=array(),$includeFields=array(),$options=array('delete'=>true,'ignoresort'=>array()))
 {
 global $deleteFlag;
+if($options['delete']===false)
+$deleteFlag=false;
 	
 //get search params
 $where = calculateWhere();
@@ -22,6 +24,8 @@ while($row = mysql_fetch_assoc($res))
 	$type = $row['Type'];
 	if(strstr($type,'int(') || $type=='date')
 	{
+		if(isset($options['ignoresort']) && in_array($row['Field'],$options['ignoresort']))
+		continue;
 		$sortableRows[] = $row['Field'];
 	}
 }
@@ -75,10 +79,20 @@ if($_GET['sort_order']=='DESC' )
 	$sortImg = 'DESC';
 }
 
-if($_GET['no_sort']!=1)
-$query = "select * from $table $where $currentOrderBy $currentSortOrder limit $start , $limit";
-else
-$query = "select * from $table $where limit $start , $limit";
+if($table !='upm')
+{
+	if($_GET['no_sort']!=1)
+	$query = "select * from $table $where $currentOrderBy $currentSortOrder limit $start , $limit";
+	else
+	$query = "select * from $table $where limit $start , $limit";
+}
+elseif($table=='upm')
+{
+	if($_GET['no_sort']!=1)
+	$query = "select u.id,u.event_type,u.event_description,u.event_link,u.result_link,p.name as product,u.corresponding_trial,u.start_date,u.start_date_type,u.end_date,u.end_date_type,u.last_update from upm u left join products p on u.product=p.id $where $currentOrderBy $currentSortOrder limit $start , $limit";
+	else
+	$query = "select u.id,u.event_type,u.event_description,u.event_link,u.result_link,p.name as product,u.corresponding_trial,u.start_date,u.start_date_type,u.end_date,u.end_date_type,u.last_update from upm u left join products p on u.product=p.id $where limit $start , $limit";
+}
 
 $res = mysql_query($query) or die('Cannot get '.$table.' data.'.$query);
 $i=0;
@@ -353,6 +367,10 @@ function input_tag($row,$dbVal=null,$options=array())
 	{
 		$type = 'searchdata';
 	}
+	if(isset($options['deletebox']) && $options['deletebox'] && is_numeric($options['id']))
+	{
+		$type = 'deletebox';
+	}	
 	$nameIndex = isset($options['name_index'])?$options['name_index'].'_':null; 
 	
 	switch($type)
@@ -402,6 +420,11 @@ function input_tag($row,$dbVal=null,$options=array())
 			}
 			$task = ($dbVal=='')?'Add':'Edit';
 			return '<a href="search.php?'.$table.'='.$id.'"><img src="images/'.$img.'" title="'.$task.' Search Data" alt="'.$task.' Search Data"/></a>&nbsp;'.$modifier.$delete;
+			break;
+			
+		case 'deletebox':
+			$id = $options['id'];
+			return '&nbsp;<label class="lbldel" style="float:none;"><input type="checkbox" title="Delete" name="deleteId" value="'.$id.'" class="delsearch"></label>';
 			break;
 			
 		default:
@@ -490,6 +513,10 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 		}
 		unset($post['delsearch']);
 	}
+	if(isset($post['deleteId']))
+	{
+		unset($post['deleteId']);
+	}
 	
 	$id = ($post['id'])?$post['id']:null;	
 	if(!$id)//insert
@@ -550,7 +577,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),$options=array('import'=>true))
 {
 	global $page;	
-	
+	$formOnSubmit = isset($options['formOnSubmit'])?$options['formOnSubmit']:null;
 	if(isset($_GET['next']))
 	$page = $_GET['oldval']+1;
 	elseif(isset($_GET['back']))
@@ -567,7 +594,7 @@ function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),
 	$pend  = ($visualPage*$limit)<=$totalCount?$visualPage*$limit:$totalCount;
 	$pstart = (($pend - $limit+1)>0)?$pend - $limit+1:0;
 	
-	echo '<form name="pager" method="get" action="'.$script.'.php"><fieldset class="floatl">'
+	echo '<form name="pager" method="get" '.$formOnSubmit.' action="'.$script.'.php"><fieldset class="floatl">'
 		 	. '<legend>Page ' . $visualPage . ' of '.$maxPage
 			. ': records '.$pstart.'-'.$pend.' of '.$totalCount
 			. '</legend>'
@@ -622,6 +649,10 @@ function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),
 	echo '<input type="hidden" name="no_sort" value="1"/>';
 	if($sortOrder)
 	echo '<input type="hidden" name="sort_order" value="'.$sortOrder.'"/>';			
+	if($table == 'upm')
+	{
+		echo '<input type="hidden" id="search_product_id" name="search_product_id" value=""/>';
+	}
 	echo '</form>';
 
 				
@@ -648,11 +679,17 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 	if($id)
 	{
 		$insertEdit = 'Edit';
+		
+		if($table=='upm')
+		$query = "SELECT u.id,u.event_type,u.event_description,u.event_link,u.result_link,p.name AS product,u.corresponding_trial,u.start_date,u.start_date_type,u.end_date,u.end_date_type,u.last_update,p.id as product_id FROM upm u LEFT JOIN products p ON u.product=p.id WHERE u.id=$id";
+		else
 		$query = "SELECT * FROM $table WHERE id=$id";
-		$res = mysql_query($query) or die('Cannot update this upm id');
+		
+		$res = mysql_query($query) or die('Cannot update this '.$table.' id');
 		while($row = mysql_fetch_assoc($res))
 		{
 			$upmDetails = $row;
+			$upm_product_id = isset($upmDetails['product_id'])?$upmDetails['product_id']:null;
 		}
 	}
 	
@@ -695,8 +732,18 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		echo '<td>'.ucwords(implode(' ',explode('_',$row['Field']))).' : </td><td>'.input_tag($row,$dbVal).'</td>';
 		echo '</tr>';
 	}
+	if($options['deletebox']===true && $id)
+	{
+		echo '<tr>';
+		echo '<td>Delete : </td><td>'.input_tag(null,null,array('deletebox'=>true,'id'=>$id)).'</td>';
+		echo '</tr>';
+	}
 	if($searchData)
 	echo '<input type="hidden" name="searchdata" value="'.$searchData.'">';
+	if($table=='upm')
+	{
+		echo '<input type="hidden" id="product_id" name="product_id" value="'.$upm_product_id.'">';
+	}
 	echo '<tr>&nbsp;<td></td><td><input name ="save" type="submit" value="Save"/></td>';
 	echo '</table>';
 	echo '</form>';
