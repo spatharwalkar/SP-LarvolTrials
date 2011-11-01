@@ -3243,12 +3243,13 @@ function getNonAssocUpmRecords($non_assoc_upm_params) {
 	
 	$where = '';$upms = array();
 	foreach($non_assoc_upm_params as $key => $val){
-		$where .= textEqual('product',$val) . ' OR ';
+		$where .= textEqual('`products`.`name`',$val) . ' OR ';
 	}
 	
 	//echo "<br/>==>".
-	$sql = "SELECT `id`, `event_description`, `event_link`, `result_link`, `event_type`, `start_date`, `start_date_type`, `end_date`, `end_date_type` "
-	. "FROM `upm` WHERE (`corresponding_trial` IS NULL) AND ( " . substr($where,0,-4) . " ) ORDER BY `end_date` ASC ";
+	$sql = "SELECT `upm`.`id`, `upm`.`event_description`, `upm`.`event_link`, `upm`.`result_link`, `upm`.`event_type`, `upm`.`start_date`,
+			`upm`.`start_date_type`, `upm`.`end_date`, `upm`.`end_date_type` FROM `upm` INNER JOIN `products` ON `upm`.`product` = `products`.`id`
+			WHERE (`upm`.`corresponding_trial` IS NULL) AND ( " . substr($where,0,-4) . " ) ORDER BY `upm`.`end_date` ASC ";
 	 
 	$res = mysql_query($sql)  or tex('Bad SQL query getting unmatched upms ' . $sql);
 	
