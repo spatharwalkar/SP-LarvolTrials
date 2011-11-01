@@ -7,7 +7,6 @@ require_once('include.search.php');
 require_once('special_chars.php');
 error_reporting(E_ALL ^ E_NOTICE);
 if(!isset($_GET['cparams']) && !isset($_GET['params']) && !isset($_GET['results'])) die('cell not set');
-
 if(isset($_POST['btnDownload'])) {
 	
 	if(isset($_POST['wFormat']) && $_POST['wFormat'] == 'xml') {
@@ -804,6 +803,25 @@ class ContentManager
 
 				if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) {
 			
+					//unsetting value for field acroynm if it has a previous value and no current value
+					if(isset($nct[$val['NCT/nct_id']]['edited']['NCT/acronym']) && !isset($nct[$val['NCT/acronym']])) {
+						unset($nct[$val['NCT/nct_id']]['edited']['NCT/acronym']);
+						$acroynm_field_index = array_search('NCT/acronym', $nct[$val['NCT/nct_id']]['edited']);
+						unset($nct[$val['NCT/nct_id']]['edited'][$acroynm_field_index]);
+					}
+					
+					$prev_value = '';
+					//unsetting value for field enrollment if the change is less than 20 percent
+					if(isset($nct[$val['NCT/nct_id']]['edited']['NCT/enrollment'])) {
+						$prev_value = substr($nct[$val['NCT/nct_id']]['edited']['NCT/enrollment'],16);
+						
+						if(!getDifference($prev_value, $nct[$val['NCT/enrollment']])) {
+							unset($nct[$val['NCT/nct_id']]['edited']['NCT/enrollment']);
+							$enroll_field_index = array_search('NCT/enrollment', $nct[$val['NCT/nct_id']]['edited']);
+							unset($nct[$val['NCT/nct_id']]['edited'][$enroll_field_index]);
+						}
+					}
+					
 					if(!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y') {
 						$return_param['fin_arr'][$pk][$val['NCT/nct_id']] = array_merge($nct[$val['NCT/nct_id']], $val);
 						$return_param['all_records'][$val['NCT/nct_id']] = array_merge($nct[$val['NCT/nct_id']], $val);
@@ -1459,6 +1477,25 @@ class ContentManager
 				$allUpmDetails[$val['NCT/nct_id']] = getCorrespondingUPM($val['NCT/nct_id'], $this->time_machine, $this->edited);
 				if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) {
 				
+					//unsetting value for field acroynm if it has a previous value and no current value
+					if(isset($nct[$val['NCT/nct_id']]['edited']['NCT/acronym']) && !isset($nct[$val['NCT/acronym']])) {
+						unset($nct[$val['NCT/nct_id']]['edited']['NCT/acronym']);
+						$acroynm_field_index = array_search('NCT/acronym', $nct[$val['NCT/nct_id']]['edited']);
+						unset($nct[$val['NCT/nct_id']]['edited'][$acroynm_field_index]);
+					}
+					
+					$prev_value = '';
+					//unsetting value for field enrollment if the change is less than 20 percent
+					if(isset($nct[$val['NCT/nct_id']]['edited']['NCT/enrollment'])) { 
+						$prev_value = substr($nct[$val['NCT/nct_id']]['edited']['NCT/enrollment'],16);
+						
+						if(!getDifference($prev_value, $nct[$val['NCT/enrollment']])) {
+							unset($nct[$val['NCT/nct_id']]['edited']['NCT/enrollment']);
+							$enroll_field_index = array_search('NCT/enrollment', $nct[$val['NCT/nct_id']]['edited']);
+							unset($nct[$val['NCT/nct_id']]['edited'][$enroll_field_index]);
+						}
+					}
+					
 					if(!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y')
 						$fin_arr[$val['NCT/nct_id']] = array_merge($nct[$val['NCT/nct_id']], $val);
 						
@@ -2164,7 +2201,8 @@ function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last,
 				$val = htmlformat($type_arr[$i][$v]);
 				if($v == "NCT/enrollment"){
 				
-					if(isset($fin_arr[$nctid]['edited']) && in_array($v,$fin_arr[$nctid]['edited'])) {
+					if(isset($fin_arr[$nctid]['edited']) && in_array($v,$fin_arr[$nctid]['edited']) 
+					&& (getDifference(substr($fin_arr[$nctid]['edited']['NCT/enrollment'],16), $val))) {
 					
 						$attr = ' highlight" title="' . $fin_arr[$nctid]['edited'][$v];
 						$enroll_style = 'color:#973535;';
@@ -3278,6 +3316,16 @@ function getLinkDetails($tablename, $fieldname, $parameters, $param_value) {
 	$res = mysql_fetch_assoc(mysql_query($query));
 	
 	return $res;
+}
+
+function getDifference($value_one, $value_two) {
+
+	$diff = abs(($value_one - $value_two) / $value_one * 100);
+	$diff = round($diff);
+	if($diff > 20)
+		return true;
+	else
+		return false;
 }
 ?> 
 </body>
