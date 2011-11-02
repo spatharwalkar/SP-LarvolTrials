@@ -13,7 +13,7 @@ if($options['delete']===false)
 $deleteFlag=false;
 	
 //get search params
-$where = calculateWhere();
+$where = calculateWhere($table);
 
 //calculate sortable fields
 $query = "SHOW COLUMNS FROM $table";
@@ -89,9 +89,9 @@ if($table !='upm')
 elseif($table=='upm')
 {
 	if($_GET['no_sort']!=1)
-	$query = "select u.id,u.event_type,u.event_description,u.event_link,u.result_link,p.name as product,u.corresponding_trial,u.start_date,u.start_date_type,u.end_date,u.end_date_type,u.last_update from upm u left join products p on u.product=p.id $where $currentOrderBy $currentSortOrder limit $start , $limit";
+	$query = "select upm.id,upm.event_type,upm.event_description,upm.event_link,upm.result_link,p.name as product,upm.corresponding_trial,upm.start_date,upm.start_date_type,upm.end_date,upm.end_date_type,upm.last_update from upm left join products p on upm.product=p.id $where $currentOrderBy $currentSortOrder limit $start , $limit";
 	else
-	$query = "select u.id,u.event_type,u.event_description,u.event_link,u.result_link,p.name as product,u.corresponding_trial,u.start_date,u.start_date_type,u.end_date,u.end_date_type,u.last_update from upm u left join products p on u.product=p.id $where limit $start , $limit";
+	$query = "select upm.id,upm.event_type,upm.event_description,upm.event_link,upm.result_link,p.name as product,upm.corresponding_trial,upm.start_date,upm.start_date_type,upm.end_date,upm.end_date_type,upm.last_update from upm left join products p on upm.product=p.id $where limit $start , $limit";
 }
 
 $res = mysql_query($query) or die('Cannot get '.$table.' data.'.$query);
@@ -244,7 +244,7 @@ echo '<br/>';
  * @param $_GET['search_*
  * @author Jithu Thomas
  */
-function calculateWhere()
+function calculateWhere($table)
 {
 	$postKeys = array_keys($_GET);
 	$whereArr = array();
@@ -264,6 +264,7 @@ function calculateWhere()
 	if(count($whereArr)>0)
 	{
 		$whereKeys = array_keys($whereArr);
+		foreach($whereKeys as $k => $v) $whereKeys[$k] = $table . '.' . $v;
 		$whereValues = array_values($whereArr);
 		$whereArr = array_map(
 							function($whereKeys,$whereValues)
@@ -307,7 +308,7 @@ function calculateWhere()
 function getTotalCount($table)
 {
 	global $db;
-	$where = calculateWhere();
+	$where = calculateWhere($table);
 	$query = "select count(id) as cnt from $table $where";
 	$res = mysql_query($query);
 	$count = mysql_fetch_row($res);
