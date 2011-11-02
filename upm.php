@@ -29,8 +29,8 @@ require('header.php');
 
 <script type="text/javascript">
 function upmdelsure(){ return confirm("Are you sure you want to delete this upm?"); }
-function validateedit(){if($('#product_id').val()==''){alert('Select a proper product name from the list of suggestions.');return false}else return true;}
-function validatesearch(){if($('#search_product').val()==''){$('#search_product_id').val('');}if($('#search_product_id').val()=='' && $('#search_product').val()!=''){alert('Select a proper product name from the list of suggestions.');return false}else return true;}
+function validateedit(){if(/*$('#product_id').val()==''*/false){alert('Select a proper product name from the list of suggestions.');return false}else return true;}
+function validatesearch(){if(/*$('#search_product').val()==''*/false){$('#search_product_id').val('');}if($('#search_product_id').val()=='' && $('#search_product').val()!=''){alert('Select a proper product name from the list of suggestions.');return false}else return true;}
 $(document).ready(function(){
 	var options, a,b;
 	jQuery(function(){
