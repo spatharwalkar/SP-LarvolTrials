@@ -246,13 +246,13 @@ CREATE TABLE IF NOT EXISTS `upm` (
   `event_description` text COLLATE utf8_unicode_ci NOT NULL,
   `event_link` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `result_link` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `product` varchar(127) COLLATE utf8_unicode_ci NOT NULL,
   `corresponding_trial` int(10) unsigned DEFAULT NULL,
   `start_date` date DEFAULT NULL,
   `start_date_type` enum('anticipated','actual') COLLATE utf8_unicode_ci NOT NULL,
   `end_date` date DEFAULT NULL,
   `end_date_type` enum('anticipated','actual') COLLATE utf8_unicode_ci NOT NULL,
   `last_update` date NOT NULL,
+  `product` int(10) unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `product` (`product`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -263,7 +263,6 @@ CREATE TABLE IF NOT EXISTS `upm_history` (
   `event_description` text COLLATE utf8_unicode_ci NOT NULL,
   `event_link` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `result_link` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `product` varchar(127) COLLATE utf8_unicode_ci NOT NULL,
   `corresponding_trial` int(10) unsigned DEFAULT NULL,
   `start_date` date DEFAULT NULL,
   `start_date_type` enum('anticipated','actual') COLLATE utf8_unicode_ci NOT NULL,
@@ -271,7 +270,9 @@ CREATE TABLE IF NOT EXISTS `upm_history` (
   `end_date_type` enum('anticipated','actual') COLLATE utf8_unicode_ci NOT NULL,
   `added` date NOT NULL,
   `superceded` date NOT NULL,
-  KEY `id` (`id`)
+  `product` int(10) unsigned DEFAULT NULL,
+  KEY `id` (`id`),
+  KEY `product` (`product`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `users` (
@@ -429,8 +430,13 @@ ALTER TABLE `schedule_updatescans`
   ADD CONSTRAINT `schedule_updatescans_ibfk_2` FOREIGN KEY (`updatescan`) REFERENCES `rpt_update` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `upm_history`
+  ADD CONSTRAINT `FKproduct` FOREIGN KEY (`product`) REFERENCES `products` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `upm_history_ibfk_1` FOREIGN KEY (`id`) REFERENCES `upm` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `user_grants`
   ADD CONSTRAINT `user_grants_ibfk_1` FOREIGN KEY (`user`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `user_grants_ibfk_2` FOREIGN KEY (`permission`) REFERENCES `user_permissions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `upm`
+  ADD CONSTRAINT `FK_product` FOREIGN KEY (`product`) REFERENCES `products` (`id`) ON DELETE SET NULL ON UPDATE CASCADE; 
+  
