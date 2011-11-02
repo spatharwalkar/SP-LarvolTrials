@@ -3241,35 +3241,44 @@ function getCorrespondingUPM($trial_id, $time, $edited) {
 //get records for non associated upms
 function getNonAssocUpmRecords($non_assoc_upm_params) {
 	
-	$where = '';$upms = array();
+	$where = '';$upms = array();$i = 0;
 	foreach($non_assoc_upm_params as $key => $val){
-		$where .= textEqual('`products`.`name`',$val) . ' OR ';
+		$where .= textEqual('`name`',$val) . ' OR ' 
+				. textEqual('`brand_names`',$val) . ' OR ' 
+				. textEqual('`generic_names`',$val) . ' OR ';
 	}
 	
-	//echo "<br/>==>".
-	$sql = "SELECT `upm`.`id`, `upm`.`event_description`, `upm`.`event_link`, `upm`.`result_link`, `upm`.`event_type`, `upm`.`start_date`,
-			`upm`.`start_date_type`, `upm`.`end_date`, `upm`.`end_date_type` FROM `upm` INNER JOIN `products` ON `upm`.`product` = `products`.`id`
-			WHERE (`upm`.`corresponding_trial` IS NULL) AND ( " . substr($where,0,-4) . " ) ORDER BY `upm`.`end_date` ASC ";
-	 
-	$res = mysql_query($sql)  or tex('Bad SQL query getting unmatched upms ' . $sql);
+	$result = mysql_query("SELECT `id` FROM `products` WHERE ( " . substr($where,0,-4) . " ) ");
+	if(mysql_num_rows($result) > 0) {
 	
-	$i = 0;
-	if(mysql_num_rows($res) > 0){
-		while($row = mysql_fetch_assoc($res)) { 
+		while($rows = mysql_fetch_assoc($result)) {
+	
+		$sql = "SELECT `id`, `event_description`, `event_link`, `result_link`, `event_type`, `start_date`,
+				`start_date_type`, `end_date`, `end_date_type` FROM `upm` WHERE `corresponding_trial` IS NULL AND `product` = '" . $rows['id'] 
+				. "' ORDER BY `end_date` ASC ";
+		$res = mysql_query($sql)  or tex('Bad SQL query getting unmatched upms ' . $sql);
 		
-			$upms[$i]['id'] = $row['id'];
-			$upms[$i]['event_description'] = htmlspecialchars($row['event_description']);
-			$upms[$i]['event_link'] = $row['event_link'];
-			$upms[$i]['result_link'] = $row['result_link'];
-			$upms[$i]['event_type'] = $row['event_type'];
-			$upms[$i]['start_date'] = $row['start_date'];
-			$upms[$i]['start_date_type'] = $row['start_date_type'];
-			$upms[$i]['end_date'] 	= $row['end_date'];
-			$upms[$i]['end_date_type'] = $row['end_date_type'];
+		if(mysql_num_rows($res) > 0) {
+		
+			while($row = mysql_fetch_assoc($res)) { 
 			
-			$i++;
+				$upms[$i]['id'] = $row['id'];
+				$upms[$i]['event_description'] = htmlspecialchars($row['event_description']);
+				$upms[$i]['event_link'] = $row['event_link'];
+				$upms[$i]['result_link'] = $row['result_link'];
+				$upms[$i]['event_type'] = $row['event_type'];
+				$upms[$i]['start_date'] = $row['start_date'];
+				$upms[$i]['start_date_type'] = $row['start_date_type'];
+				$upms[$i]['end_date'] 	= $row['end_date'];
+				$upms[$i]['end_date_type'] = $row['end_date_type'];
+				
+				$i++;
+			}
 		}
+		
 	}
+	}
+	
 	return $upms;
 }
 
