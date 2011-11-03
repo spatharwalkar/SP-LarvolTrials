@@ -448,7 +448,7 @@ ALTER TABLE `products` ADD `discontinuation_status` VARCHAR( 255 ) NOT NULL AFTE
 ALTER TABLE `products` ADD `discontinuation_status_comment` VARCHAR( 255 ) NOT NULL AFTER `discontinuation_status` ;
 ALTER TABLE `products` ADD `is_key` BOOL NOT NULL AFTER `discontinuation_status_comment` ;
 ALTER TABLE `products` ADD `is_active` BOOL NOT NULL AFTER `is_key` ;
-ALTER TABLE `products` ADD `created` DATETIME NOT NULL AFTER `is_active`  
+ALTER TABLE `products` ADD `created` DATETIME NOT NULL AFTER `is_active`  ;
 ALTER TABLE `products` ADD `modified` DATETIME NOT NULL AFTER `created` ;
 ALTER TABLE `products` ADD `approvals` VARCHAR( 255 ) NOT NULL AFTER `code_names`;
 ALTER TABLE `products` ADD `xml` TEXT NOT NULL AFTER `approvals` ;
