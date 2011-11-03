@@ -440,3 +440,16 @@ ALTER TABLE `user_grants`
 ALTER TABLE `upm`
   ADD CONSTRAINT `FK_product` FOREIGN KEY (`product`) REFERENCES `products` (`id`) ON DELETE SET NULL ON UPDATE CASCADE; 
   
+ALTER TABLE `products` ADD `comments` TEXT NOT NULL AFTER `name`;
+ALTER TABLE `products` ADD `product_type` VARCHAR( 255 ) NOT NULL AFTER `comments` ;
+ALTER TABLE `products` ADD `licensing_mode` VARCHAR( 255 ) NOT NULL AFTER `product_type` ;
+ALTER TABLE `products` ADD `administration_mode` VARCHAR( 255 ) NOT NULL AFTER `licensing_mode` ;
+ALTER TABLE `products` ADD `discontinuation_status` VARCHAR( 255 ) NOT NULL AFTER `administration_mode` ;
+ALTER TABLE `products` ADD `discontinuation_status_comment` VARCHAR( 255 ) NOT NULL AFTER `discontinuation_status` ;
+ALTER TABLE `products` ADD `is_key` BOOL NOT NULL AFTER `discontinuation_status_comment` ;
+ALTER TABLE `products` ADD `is_active` BOOL NOT NULL AFTER `is_key` ;
+ALTER TABLE `products` ADD `created` DATETIME NOT NULL AFTER `is_active`  
+ALTER TABLE `products` ADD `modified` DATETIME NOT NULL AFTER `created` ;
+ALTER TABLE `products` ADD `approvals` VARCHAR( 255 ) NOT NULL AFTER `code_names`;
+ALTER TABLE `products` ADD `xml` TEXT NOT NULL AFTER `approvals` ;
+  
