@@ -364,12 +364,24 @@ CREATE TABLE IF NOT EXISTS `products` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `LI_id` varchar(63) COLLATE utf8_unicode_ci NULL,
   `name` varchar(127) COLLATE utf8_unicode_ci NOT NULL COMMENT 'matches the fieldname in the quickfind schema',
+  `comments` TEXT,
+  `product_type` VARCHAR( 255 ) DEFAULT NULL,
+  `licensing_mode` VARCHAR( 255 ) DEFAULT NULL,
+  `administration_mode` VARCHAR( 255 ) DEFAULT NULL,
+  `discontinuation_status` VARCHAR( 255 ) DEFAULT NULL,
+  `discontinuation_status_comment` VARCHAR( 255 ) DEFAULT NULL,
+  `is_key` BOOL DEFAULT NULL,
+  `is_active` BOOL DEFAULT NULL,
+  `created` DATETIME DEFAULT NULL,
+  `modified` DATETIME DEFAULT NULL,
   `searchdata` text COLLATE utf8_unicode_ci COMMENT 'contains regex',
   `company` varchar(127) COLLATE utf8_unicode_ci DEFAULT NULL,
   `brand_names` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `generic_names` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `code_names` varchar(127) COLLATE utf8_unicode_ci DEFAULT NULL,
   `search_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+ `approvals` VARCHAR( 255 ) DEFAULT NULL,
+  `xml` TEXT,  
   PRIMARY KEY (`id`),
   UNIQUE KEY `LI_id` (`LI_id`),
   UNIQUE KEY `name` (`name`)
@@ -440,17 +452,5 @@ ALTER TABLE `user_grants`
 
 ALTER TABLE `upm`
   ADD CONSTRAINT `FK_product` FOREIGN KEY (`product`) REFERENCES `products` (`id`) ON DELETE SET NULL ON UPDATE CASCADE; 
-  
-ALTER TABLE `products` ADD `comments` TEXT NOT NULL AFTER `name`;
-ALTER TABLE `products` ADD `product_type` VARCHAR( 255 ) NOT NULL AFTER `comments` ;
-ALTER TABLE `products` ADD `licensing_mode` VARCHAR( 255 ) NOT NULL AFTER `product_type` ;
-ALTER TABLE `products` ADD `administration_mode` VARCHAR( 255 ) NOT NULL AFTER `licensing_mode` ;
-ALTER TABLE `products` ADD `discontinuation_status` VARCHAR( 255 ) NOT NULL AFTER `administration_mode` ;
-ALTER TABLE `products` ADD `discontinuation_status_comment` VARCHAR( 255 ) NOT NULL AFTER `discontinuation_status` ;
-ALTER TABLE `products` ADD `is_key` BOOL NOT NULL AFTER `discontinuation_status_comment` ;
-ALTER TABLE `products` ADD `is_active` BOOL NOT NULL AFTER `is_key` ;
-ALTER TABLE `products` ADD `created` DATETIME NOT NULL AFTER `is_active`  ;
-ALTER TABLE `products` ADD `modified` DATETIME NOT NULL AFTER `created` ;
-ALTER TABLE `products` ADD `approvals` VARCHAR( 255 ) NOT NULL AFTER `code_names`;
-ALTER TABLE `products` ADD `xml` TEXT NOT NULL AFTER `approvals` ;
+
   
