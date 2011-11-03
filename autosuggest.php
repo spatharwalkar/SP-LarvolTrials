@@ -10,7 +10,7 @@ $autoSuggestTables = array('areas','upm','product');
 if(!in_array($table,$autoSuggestTables))die;
 
 if($table=='upm' && $field=='product')
-$query = "select p.id,p.name from products p where p.name like '%$search%' order by name asc";
+$query = "select p.id,p.name from products p where p.name like '%$search%' and p.is_active=1 order by name asc";
 else
 $query = "select distinct $field from $table where $field like '%$search%' order by $field asc";
 $result =  mysql_query($query);
