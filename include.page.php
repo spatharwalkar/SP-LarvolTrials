@@ -682,7 +682,7 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		$insertEdit = 'Edit';
 		
 		if($table=='upm')
-		$query = "SELECT u.id,u.event_type,u.event_description,u.event_link,u.result_link,p.name AS product,u.corresponding_trial,u.start_date,u.start_date_type,u.end_date,u.end_date_type,u.last_update,p.id as product_id FROM upm u LEFT JOIN products p ON u.product=p.id WHERE u.id=$id";
+		$query = "SELECT u.id,u.event_type,u.event_description,u.event_link,u.result_link,p.name AS product,u.corresponding_trial,u.start_date,u.start_date_type,u.end_date,u.end_date_type,u.last_update,p.id as product_id,u.oldproduct FROM upm u LEFT JOIN products p ON u.product=p.id WHERE u.id=$id";
 		else
 		$query = "SELECT * FROM $table WHERE id=$id";
 		
@@ -758,7 +758,7 @@ function am($k,$v)
 	{
 		$v = unpadnct($v);
 	}		
-	$explicitNullFields = array('corresponding_trial','event_link','result_link','start_date','end_date');
+	$explicitNullFields = array('corresponding_trial','event_link','result_link','start_date','end_date','oldproduct');
 	if(in_array($k,$explicitNullFields) && $v=='')
 	{
 		$v = 'null';
@@ -768,7 +768,7 @@ function am($k,$v)
 }
 function am1($k,$v)
 {
-	$explicitNullFields = array('corresponding_trial','event_link','result_link','start_date','end_date');
+	$explicitNullFields = array('corresponding_trial','event_link','result_link','start_date','end_date','oldproduct');
 	if($k=='corresponding_trial')
 	{
 		$v = unpadnct($v);
