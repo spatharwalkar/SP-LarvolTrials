@@ -3243,9 +3243,7 @@ function getNonAssocUpmRecords($non_assoc_upm_params) {
 	
 	$where = '';$upms = array();$i = 0;
 	foreach($non_assoc_upm_params as $key => $val){
-		$where .= textEqual('`name`',$val) . ' OR ' 
-				. textEqual('`brand_names`',$val) . ' OR ' 
-				. textEqual('`generic_names`',$val) . ' OR ';
+		$where .= textEqual('`search_name`',$val) . ' OR ';
 	}
 	
 	$result = mysql_query("SELECT `id` FROM `products` WHERE ( " . substr($where,0,-4) . " ) ");

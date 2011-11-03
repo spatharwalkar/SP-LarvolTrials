@@ -362,13 +362,14 @@ CREATE TABLE IF NOT EXISTS `update_status_fullhistory` (  `update_id` int( 10  )
 
 CREATE TABLE IF NOT EXISTS `products` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `LI_id` varchar(63) COLLATE utf8_unicode_ci NOT NULL,
+  `LI_id` varchar(63) COLLATE utf8_unicode_ci NULL,
   `name` varchar(127) COLLATE utf8_unicode_ci NOT NULL COMMENT 'matches the fieldname in the quickfind schema',
   `searchdata` text COLLATE utf8_unicode_ci COMMENT 'contains regex',
   `company` varchar(127) COLLATE utf8_unicode_ci DEFAULT NULL,
   `brand_names` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `generic_names` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `code_names` varchar(127) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `search_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `LI_id` (`LI_id`),
   UNIQUE KEY `name` (`name`)
