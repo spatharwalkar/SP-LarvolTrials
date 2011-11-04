@@ -131,28 +131,28 @@ if(isset($_FILES['uploadedfile']) && $_FILES['uploadedfile']['size']>1)
 				$company = $brandName->getElementsByTagName('name')->item(0)->nodeValue;
 			}
 		}		
-		
+		$brand_names = null;
 		foreach($product->getElementsByTagName('ProductBrandNames') as $brandNames)
 		{
 			foreach($brandNames->getElementsByTagName('ProductBrandName') as $brandName)
 			{
-				$brand_names = $brandName->getElementsByTagName('name')->item(0)->nodeValue;
+				$brand_names = ($brandName->getElementsByTagName('is_active')->item(0)->nodeValue=='True')?$brandName->getElementsByTagName('name')->item(0)->nodeValue:$brand_names;
 			}
 		}
-		
+		$generic_names = null;
 		foreach($product->getElementsByTagName('ProductGenericNames') as $brandNames)
 		{
 			foreach($brandNames->getElementsByTagName('ProductGenericName') as $brandName)
 			{
-				$generic_names = $brandName->getElementsByTagName('name')->item(0)->nodeValue;
+				$generic_names = ($brandName->getElementsByTagName('is_active')->item(0)->nodeValue=='True')?$brandName->getElementsByTagName('name')->item(0)->nodeValue:$generic_names;
 			}
 		}		
-
+		$code_names = null;
 		foreach($product->getElementsByTagName('ProductCodeNames') as $brandNames)
 		{
 			foreach($brandNames->getElementsByTagName('ProductCodeName') as $brandName)
 			{
-				$code_names = $brandName->getElementsByTagName('name')->item(0)->nodeValue;
+				$code_names = ($brandName->getElementsByTagName('is_active')->item(0)->nodeValue=='True')?$brandName->getElementsByTagName('name')->item(0)->nodeValue:$code_names;
 			}
 		}
 
