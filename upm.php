@@ -47,9 +47,24 @@ $(document).ready(function(){
 //save operation controller
 if($_GET['save']=='Save')
 {
-	$_GET['product'] = $_GET['product_id'];
+	$query = "select id from products where name='{$_GET['product']}'";
+	$res = mysql_query($query);
+	$pid = null;
+	while($row = mysql_fetch_assoc($res))
+	{
+		$pid = $row['id'];
+	}
 	unset($_GET['product_id']);
-	saveData($_GET,$table);
+	//$_GET['product'] = $_GET['product_id'];
+	if($pid)
+	{
+		$_GET['product'] = $pid;
+		saveData($_GET,$table);
+	}
+	else 
+	{
+		echo 'Cannot save data, wrong product name selected.';
+	}
 }
 //delete controller
 if(isset($_GET['deleteId']) && is_numeric($_GET['deleteId']) && $deleteFlag)
@@ -89,13 +104,7 @@ if(isset($_FILES['uploadedfile']) && $_FILES['uploadedfile']['size']>1)
 	}
 	echo 'Imported '.$success.' records, Failed entries '.$fail;
 }
-//search controller sud come above pagination call since search is embedded in it.
-if(isset($_GET['search']) && $_GET['search']=='Search')
-{
-	$_GET['search_product'] = $_GET['search_product_id'];
-	unset($_GET['search_product_id']);
 
-}
 //End controller area
 
 
@@ -109,6 +118,31 @@ $page=0;
 //pagination
 pagePagination($limit,$totalCount,$table,$script,array(),array("import"=>false,"formOnSubmit"=>"onsubmit=\"return validatesearch();\""));
 //pagination controller
+
+
+//search controller should come after pagination call since search is embedded in it.
+if(isset($_GET['search']))
+{
+	//$_GET['search_product'] = $_GET['search_product_id'];
+	//unset($_GET['search_product_id']);
+	$query = "select id from products where name='{$_GET['search_product']}'";
+	$res = mysql_query($query);
+	$pid = null;
+	while($row = mysql_fetch_assoc($res))
+	{
+		$pid = $row['id'];
+	}
+	if($pid)
+	{
+		$_GET['search_product'] = $pid;
+	}
+	else 
+	{
+		//echo 'Select a proper product name.';
+	}	
+
+}
+//end search controller
 
 echo '<br/>';
 echo '<div class="clr">';

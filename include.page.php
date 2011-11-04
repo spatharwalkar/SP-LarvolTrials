@@ -652,7 +652,7 @@ function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),
 	echo '<input type="hidden" name="sort_order" value="'.$sortOrder.'"/>';			
 	if($table == 'upm')
 	{
-		echo '<input type="hidden" id="search_product_id" name="search_product_id" value=""/>';
+		//echo '<input type="hidden" id="search_product_id" name="search_product_id" value=""/>';
 	}
 	echo '</form>';
 
@@ -682,10 +682,9 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		$insertEdit = 'Edit';
 		
 		if($table=='upm')
-		$query = "SELECT u.id,u.event_type,u.event_description,u.event_link,u.result_link,p.name AS product,u.corresponding_trial,u.start_date,u.start_date_type,u.end_date,u.end_date_type,u.last_update,p.id as product_id,u.oldproduct FROM upm u LEFT JOIN products p ON u.product=p.id WHERE u.id=$id";
+		$query = "SELECT u.id,u.event_type,u.event_description,u.event_link,u.result_link,p.name AS product,u.corresponding_trial,u.start_date,u.start_date_type,u.end_date,u.end_date_type,u.last_update,p.id as product_id FROM upm u LEFT JOIN products p ON u.product=p.id WHERE u.id=$id";
 		else
 		$query = "SELECT * FROM $table WHERE id=$id";
-		
 		$res = mysql_query($query) or die('Cannot update this '.$table.' id');
 		while($row = mysql_fetch_assoc($res))
 		{
@@ -743,7 +742,7 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 	echo '<input type="hidden" name="searchdata" value="'.$searchData.'">';
 	if($table=='upm')
 	{
-		echo '<input type="hidden" id="product_id" name="product_id" value="'.$upm_product_id.'">';
+		//echo '<input type="hidden" id="product_id" name="product_id" value="'.$upm_product_id.'">';
 	}
 	echo '<tr>&nbsp;<td></td><td><input name ="save" type="submit" value="Save"/></td>';
 	echo '</table>';
