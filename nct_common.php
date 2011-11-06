@@ -1091,7 +1091,7 @@ function prepXMP($data, $action, $studycat, $nct_cat, $date) {
 			
 			/******************************************/
 //			if ($attr->name == 'class' && $attr->value == $column) 
-			if ($attr->name == 'class' && $column == "sdiff-b" && $attr->value == "sdiff-a") 
+			if ($attr->name == 'class' && ($column == "sdiff-b" or $column == "sdiff-a") && $attr->value == "sdiff-a") 
 			{
 			$datatable1 = $element;
 			}
@@ -1121,12 +1121,11 @@ function prepXMP($data, $action, $studycat, $nct_cat, $date) {
 	/************************************************/
 	if(isset($datatable1) && !empty($datatable1))
 	{
-		$value1="";
 		$divs = $datatable1->getElementsByTagName('div');
 		unset($datatable1);
 	
 		$last = false;
-
+		$value1=array();
 		foreach ($divs as $div) {
 			$tt=strpos('a'.$div->nodeValue, "clinical_result")  ;
 			if(isset($tt) and !empty($tt))
@@ -1135,6 +1134,7 @@ function prepXMP($data, $action, $studycat, $nct_cat, $date) {
 				unset($divs);
 				return ;
 			}
+			
 			foreach ($div->attributes as $attr) {
 
 				if ($attr->name == 'class' && (strpos($attr->value, "sds") !== false)) {
@@ -1146,14 +1146,15 @@ function prepXMP($data, $action, $studycat, $nct_cat, $date) {
 					// Its a Tag Type
 //					pop_structure($attr->value, $div->nodeValue);
 				} else {
-					$value1 = trim($div->nodeValue);
+					$valu1 = trim($div->nodeValue);
 					// Check to see if Value is Type
-					if ( strpos('a'.$value1, "type=")  and !empty($value1)) {
-						$value1 = trim($value1);
-						$value1 = substr($value1, 6, -1);
+					if ( strpos('a'.$valu1, "type=")  and !empty($valu1)) {
+						$valu1 = trim($valu1);
+						$valu1 = substr($valu1, 6, -1);
 	//                    $return = process_change($tag, $tag, $value, $nct_cat, $studycat, $date, $action);
 	 
 					}
+					$value1[]=$valu1;
 				}
 			}
 			unset($div);
@@ -1168,7 +1169,7 @@ function prepXMP($data, $action, $studycat, $nct_cat, $date) {
     $last = false;
 
 	
-
+	$i=-1;
     foreach ($divs as $div) {
 	
 	
@@ -1207,7 +1208,8 @@ function prepXMP($data, $action, $studycat, $nct_cat, $date) {
 					}
 					else
 					{
-                    $return = process_change($tag, $tag, $value, $nct_cat, $studycat, $date, $action,$value1);
+					$i++;
+                    $return = process_change($tag, $tag, $value, $nct_cat, $studycat, $date, $action,$value1[$i]);
 					}
                 } else if ( $value != ">" and $value != "&gt;"   ) {
 					
@@ -1220,7 +1222,8 @@ function prepXMP($data, $action, $studycat, $nct_cat, $date) {
 					}
 					else
 					{
-						$return = process_change($tag, $tag, $value, $nct_cat, $studycat, $date, $action,$value1);
+						$i++;
+						$return = process_change($tag, $tag, $value, $nct_cat, $studycat, $date, $action,$value1[$i]);
 					}
                 }
             }
@@ -1293,17 +1296,14 @@ function commit_diff($studycat, $category_id, $fieldname, $value, $date, $operat
 		if($operation=="change")
 		{
 			if($type=='enum') 	$value2=getEnumvalId($field, $value1);
-			else $value2=$value1;
-			if($type=='date') 	$value2='val_date';
+			else $value2 = $value1;
 			
 			$query = 'UPDATE data_values SET superceded="' . $DTnow . '" WHERE studycat=' . $studycat . ' AND superceded is NULL  and added < "' . $DTnow . '" and ' ;
-			$query .= $type=="date" ? ('"' . $value2 . '"'   ) : ('val_' . $type);
-			$query .= '= "' . $value2 . '" and field=' . $field . '  ';
+			$query .=  'val_' . $type . '= "' . $value2 . '" and field=' . $field . '  ';
 			}
 		else
 		{
-			$query = 'UPDATE data_values SET superceded="' . $DTnow . '" WHERE studycat=' . $studycat . ' AND superceded is NULL  and added < "' . $DTnow . '"  and field=' . $field . '  ';
-/*
+			
 			if($type=='enum') 	$value2=getEnumvalId($field, $value1);
 			else $value2=$value1;
 			if($type=='date') 	$value2='val_date';
@@ -1311,7 +1311,8 @@ function commit_diff($studycat, $category_id, $fieldname, $value, $date, $operat
 			$query = 'UPDATE data_values SET superceded="' . $DTnow . '" WHERE studycat=' . $studycat . ' AND superceded is NULL  and added < "' . $DTnow . '"  and ' ;
 			$query .= $type=="date" ? ('"' . $value2 . '"'   ) : ('val_' . $type);
 			$query .= '= "' . $value2 . '" and field=' . $field . '  ';
-*/
+
+//			$query = 'UPDATE data_values SET superceded="' . $DTnow . '" WHERE studycat=' . $studycat . ' AND superceded is NULL  and added < "' . $DTnow . '"  and field=' . $field . '  ';
 		}
 		if (mysql_query($query) === false)
             return softDie('Bad SQL query marking old values' . mysql_error() . '<br />' . $query);
