@@ -57,6 +57,11 @@ if(isset($_POST['btnDownload'])) {
 	{
 	document.forms["frmDOptions"].action="gen_excel.php";
 	}
+	
+	if(document.getElementById("wFormat").value=="pdf")
+	{
+	document.forms["frmDOptions"].action="gen_pdf.php";
+	}
 } 
   
 </script>
