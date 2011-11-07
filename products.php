@@ -2,7 +2,6 @@
 require_once('krumo/class.krumo.php');
 require_once('db.php');
 require_once('include.search.php');
-require_once('include.import.php');
 require_once('include.util.php');
 require_once 'include.page.php';
 if(!$db->loggedIn())

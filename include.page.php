@@ -269,6 +269,7 @@ function calculateWhere($table)
 		$whereArr = array_map(
 							function($whereKeys,$whereValues)
 							{
+
 								//check search keys are regex or not.
 								$pcre = strlen($whereValues) > 1 && $whereValues[0] == '/' && ($whereValues[strlen($whereValues)-1] == '/' || ($whereValues[strlen($whereValues)-2] == '/' && strlen($whereValues) > 2));
 								//if regex pattern then check with a sample query.
@@ -279,6 +280,10 @@ function calculateWhere($table)
 									throw new Exception("Bad regex: $whereKeys = $whereValues", 6);
 									return ' PREG_RLIKE("' . $whereValues . '",' . $whereKeys . ') AND ';
 								}
+								if($whereKeys=='upm.event_description' || $whereKeys=='products.name')
+								{
+									return ' '.$whereKeys.' LIKE '. '\'%'.$whereValues.'%\' AND ';
+								}								
 								return ' '.$whereKeys.' = '. '\''.$whereValues.'\' AND ';
 							},
 							$whereKeys,
