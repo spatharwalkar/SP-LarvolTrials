@@ -173,6 +173,13 @@ while ($row = mysql_fetch_assoc($res))
 				echo '</a></td>';			
 			}
 			else
+			if($columnName == 'searchdata' && $table=='products')
+			{
+				echo '<td>';
+				echo input_tag(array('Field'=>'searchdata'),$v,array('table'=>$table,'id'=>$upmId,'callFrom'=>'contentListingProducts'));
+				echo '</td>';				
+			}			
+			else
 			if($columnName == 'searchdata')
 			{
 				echo '<td>';
@@ -210,6 +217,13 @@ while ($row = mysql_fetch_assoc($res))
 				echo $v;
 				echo '</a></td>';				
 			}	
+			else
+			if($columnName == 'searchdata' && $table=='products')
+			{
+				echo '<td>';
+				echo input_tag(array('Field'=>'searchdata'),$v,array('table'=>$table,'id'=>$upmId,'callFrom'=>'contentListingProducts'));
+				echo '</td>';				
+			}			
 			else
 			if($columnName == 'searchdata')
 			{
@@ -396,7 +410,7 @@ function input_tag($row,$dbVal=null,$options=array())
 		case 'searchdata':
 			$id = $options['id']?$options['id']:null;
 			$table = $options['table'];
-			if($searchData!='')
+			if($searchData!='' && $options['callFrom']!='contentListingProducts')
 			{
 				$img = 'edit.png';
 				$modifier = '[Modified]';
@@ -418,6 +432,10 @@ function input_tag($row,$dbVal=null,$options=array())
 			if(isset($options['callFrom']) && $options['callFrom']=='addedit')
 			{
 				$modifier = $modifier;
+			}
+			elseif(isset($options['callFrom']) && $options['callFrom']=='contentListingProducts')
+			{
+				return $modifier;
 			}
 			else
 			{

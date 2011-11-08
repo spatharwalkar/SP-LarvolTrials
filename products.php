@@ -97,7 +97,11 @@ if($_GET['save']=='Save')
 if(isset($_FILES['uploadedfile']) && $_FILES['uploadedfile']['size']>1)
 {
 	$xmlZip = $_FILES['uploadedfile']['tmp_name'];
+	$ext = array_reverse(explode('.',$_FILES['uploadedfile']['name']));
+	if($ext[0]=='zip')
 	$xml = unzipForXmlImport($xmlZip);
+	elseif($ext[0]=='xml')
+	$xml = $xmlZip;
 	$success = 0;
 	$fail = 0;
 	$k=0;
