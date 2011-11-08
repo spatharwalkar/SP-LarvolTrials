@@ -4,6 +4,7 @@ require_once('db.php');
 require_once('include.import.php');
 require_once('nct_common.php');
 require_once('include.search.php');
+require_once('preindex_trial.php');
 
 ini_set('max_execution_time', '36000'); //10 hours
 
@@ -225,7 +226,13 @@ if (count($ids) == 0) {
 
         unset($ths);
         unset($doc);
-
+		
+		/*** Preindex the trial */
+		echo '<br>Starting preindexing of '. $id . 'Time: '. date("Y-m-d H:i:s", strtotime('now')) . str_repeat (" .....",1);
+		$studyCat=getStudyCat($unid);
+		tindex($studyCat,'products');
+		tindex($studyCat,'areas');
+		echo '<br><br>Completed preindexing of '. $id . 'Time: '. date("Y-m-d H:i:s", strtotime('now')) . str_repeat (" ......",1);
         echo('End Parsing Archive Page for ' . $id);
 
         $progress_count++;

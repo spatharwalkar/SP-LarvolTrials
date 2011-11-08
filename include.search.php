@@ -557,7 +557,487 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 	return $retdata;
 }
 
-//todo: this probably should not be NCT-centric
+function search_single_trial($params=array(),$time=NULL,$studyCat=NULL,$list=array('overall_status','brief_title'))
+{ 
+	
+
+	if(is_null($studyCat))
+		$timecond = 'dv.superceded IS NULL ';
+	else
+		$timecond = '( dv.studycat="' . $studyCat . '" ) ';
+	foreach($params as $key => $value) $params[$key] = is_object($params) ?  clone $value : $value;
+
+	global $logger;
+	global $db;
+	global $SEARCH_ERR;
+	$conditions = array();	
+	$g_conds = array();		
+	$strong_exclusions = array();
+	$sorts = array();	
+	$g_sorts = array();	
+	$orig_ind=0; 
+	try{ 
+		foreach($params as $param)
+		{
+			$global = (is_array($param->field) ? $param->field[0][0] : $param->field[0]) != '_';
+			
+			$type = $db->types[(is_array($param->field) ? $param->field[0] : $param->field)];
+			switch($param->action)
+			{ 
+				case 'ascending':
+				if($global)
+				{
+					$g_sorts[$orig_ind++] = '`' . $param->field . '`';
+				}else{
+					$sorts[$orig_ind++] = new Sort(substr($param->field,1));
+				}
+				break;
+				
+				case 'descending':
+				if($global)
+				{
+					$g_sorts[$orig_ind++] = '`' . $param->field . '` DESC';
+				}else{
+					$sorts[$orig_ind++] = new Sort(substr($param->field,1),true);
+				}
+				break;
+				
+				case 'require':
+				case 'search':
+				if($global)
+				{
+					$field = '`clinical_study`.`' . $param->field . '`';
+					if($param->action == 'require')
+					{
+						$g_conds[] = $field . ' IS NOT NULL';
+					}else{  //in this case we're searching
+						switch($type)
+						{ 
+							//rangeable
+							case 'date':
+							case 'int':
+							$ORd = explode(' OR ', $param->value);
+							foreach($ORd as $key => $term)
+							{
+								if(strpos($term, ' TO ') !== false)
+								{
+									$range = explode(' TO ', $term);
+									if($type == 'date') $range = array_map(function($dt){return '"'.$dt.'"';},$range);
+									$ORd[$key] = '(' . $field . ' BETWEEN ' . $range[0] . ' AND ' . $range[1] . ')';
+								}else{
+									if($type == 'date') $term = '"' . $term . '"';
+									$ORd[$key] = '(' . $field . '=' . $term . ')';
+								}
+							}
+							$cond = implode(' OR ', $ORd);
+							if($param->negate) $cond = 'NOT (' . $cond . ')';
+							$g_conds[]=$cond;
+							break;
+							//normal
+							case 'bool':
+							$cond = $field . '=' . $param->value;
+							if($param->negate) $cond = 'NOT (' . $cond . ')';
+							$g_conds[]=$cond;
+							break;
+							//enum is special
+							case 'enum':
+							$cond = $field
+								. (is_array($param->value) ? (' IN("'.implode('","',$param->value).'")') : ('="'.$param->value.'"'));
+							if($param->negate) $cond = 'NOT (' . $cond . ')';
+							$g_conds[] = $cond;
+							break;
+							//regexable
+							case 'varchar':
+							case 'text':
+							if(strlen($param->value)) $g_conds[] = textEqual($field,$param->value);
+							if($param->negate !== false && strlen($param->negate))
+							{
+								$g_conds[] = 'NOT (' . textEqual($field,$param->negate) . ')';
+							}
+						}
+					}
+				}else{	//non-global field
+					$field;
+					if(is_array($param->field))	//take the underscore off the field "name" to get the ID
+					{
+						$field = 'dv.`field` IN(' . implode(',', array_map('highPass', $param->field)) . ')';
+					}else{
+						$field = 'dv.`field`=' . substr($param->field,1);
+					}
+					if($param->action == 'require')
+					{
+						$conditions[] = $field . ' AND dv.val_' . $type . ' IS NOT NULL';
+					}else{  //in this case we're searching
+						switch($type)
+						{ 
+							//rangeable
+							case 'date':
+							case 'int':
+							$ORd = explode(' OR ', $param->value);
+							foreach($ORd as $key => $term)
+							{
+								if(strpos($term, ' TO ') !== false)
+								{
+									$range = explode(' TO ', $term);
+									if($type == 'date') $range = array_map(function($dt){return '"'.$dt.'"';},$range);
+									$ORd[$key] = '(dv.val_' . $type . ' BETWEEN ' . $range[0] . ' AND ' . $range[1] . ')';
+								}else{
+									if($type == 'date') $term = '"' . $term . '"';
+									$ORd[$key] = '(dv.val_' . $type . '=' . $term . ')';
+								}
+							}
+							$cond = implode(' OR ', $ORd);
+							$cond = $field . ' AND (' . $cond . ')';
+							if($param->negate && $param->strong)
+							{
+								$strong_exclusions[] = $cond;
+							}else{
+								if($param->negate) $cond = 'NOT (' . $cond . ')';
+								$conditions[] = $cond;
+							}
+							break;
+							//normal
+							case 'bool':
+							$cond = $field . ' AND dv.val_bool=' . $param->value;
+							if($param->negate && $param->strong)
+							{
+								$strong_exclusions[] = $cond;
+							}else{
+								if($param->negate) $cond = 'NOT (' . $cond . ')';
+								$conditions[] = $cond;
+							}
+							break;
+							//enum is special
+							case 'enum':
+							$enumq = is_array($param->value) ? (' IN("'.implode('","',$param->value).'")') : ('="'
+							.$param->value.'"');
+							$cond = $field . ' AND dv.val_enum' . $enumq;
+							if($param->negate && $param->strong)
+							{
+								$strong_exclusions[] = $cond;
+							}else{
+								if($param->negate) $cond = $field . ' AND NOT (dv.val_enum' . $enumq . ')';
+								//if($param->negate) $cond = 'NOT (' . $cond . ')';
+								$conditions[] = $cond;
+							}
+							break;
+							//regexable
+							case 'varchar':
+							case 'text':
+							if(!is_array($param->field))	//normal single-field param
+							{
+								if(strlen($param->value))
+									$conditions[] = $field . ' AND ' . textEqual('dv.val_' . $type,$param->value);
+								if($param->negate !== false && strlen($param->negate))
+								{
+									if($param->strong)
+									{
+										$strong_exclusions[] = $field . ' AND ' . textEqual('dv.val_' . $type,$param->negate);
+									}else{
+										//$conditions[] = 'NOT (' . $field . ' AND ' . textEqual('dv.val_' . $type,$param->negate) . ')';
+										$conditions[] = $field . ' AND NOT ' . textEqual('dv.val_' . $type,$param->negate);
+									}
+								}
+							}else{	//Merge varchar and text multifields
+								if(strlen($param->value))
+								{
+									$conditions[] = $field . ' AND (' . textEqual('dv.val_text',$param->value) . ' OR '
+														. textEqual('dv.val_varchar',$param->value) . ')';
+								}
+								if($param->negate !== false && strlen($param->negate))
+								{
+									if($param->strong)
+									{
+										$strong_exclusions[] = $field . ' AND (' . textEqual('dv.val_text',$param->negate) . ' OR '
+														. textEqual('dv.val_varchar',$param->negate) . ')';
+									}else{
+										$conditions[] = $field . ' AND NOT (' . textEqual('dv.val_text',$param->value) . ' OR '
+														. textEqual('dv.val_varchar',$param->value) . ')';
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	
+	}catch(Exception $e){
+		$SEARCH_ERR = $e->getMessage();
+		return softDie($e->getMessage());
+	}
+	
+	
+	$lone_cond = '';
+	if(!empty($conditions))
+	{
+		$key = max(array_keys($conditions));
+		$lone_cond = $conditions[$key] . ' AND ' . $timecond;
+		unset($conditions[$key]);
+	}else if(!empty($g_conds)){
+		$key = max(array_keys($g_conds));
+		$lone_cond = $g_conds[$key];
+		unset($g_conds[$key]);
+	}else if(!empty($strong_exclusions)){
+		$lone_cond = 1;
+
+	}else{
+		$lone_cond = NULL;
+	}
+
+	foreach($conditions as $i => $cond)
+	{
+		$query = 'SET @conds_' . $i . ' := '
+				. '(SELECT GROUP_CONCAT(DISTINCT i.larvol_id) AS "larvol_id" '
+				. 'FROM (data_values AS dv LEFT JOIN data_cats_in_study AS i ON dv.studycat=i.id) WHERE ' . $cond . ' AND ';
+		$query .= $timecond;
+		if($i > 0) $query .= ' AND FIND_IN_SET(i.larvol_id, @conds_' . ($i-1) . ') > 0';
+		$query .= ')';
+		
+		//var_dump($query);
+		$time_start = microtime(true);
+		$res = mysql_query($query);
+		if($res === false)
+		{
+			$log = 'Bad SQL query applying search condition: ' . $query;
+			return softDie($log);	
+		}
+		$time_end = microtime(true);
+		$time_taken = $time_end-$time_start;
+		$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments:execute the queries and gather results';
+		$logger->info($log);
+		unset($log);
+		//
+	}
+	
+	foreach($g_conds as $i => $cond)
+	{
+		$ii = $i + count($conditions);
+		$query = 'SET @conds_' . $ii . ' := '
+				. '(SELECT GROUP_CONCAT(larvol_id) FROM clinical_study WHERE ' . $cond;
+		if($ii > 0) $query .= ' AND FIND_IN_SET(larvol_id, @conds_' . ($ii-1) . ') > 0';
+		$query .= ')';
+		$time_start = microtime(true);
+		$res = mysql_query($query);
+		$time_end = microtime(true);
+		$time_taken = $time_end-$time_start;
+		$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments:global conditions loop';
+		$logger->info($log);
+		unset($log);
+		
+		if($res === false)
+		{
+			$log = 'Bad SQL query applying search condition (global field)'.mysql_error().$query;
+			return softDie($log);
+		}
+	}
+	
+	if(!empty($strong_exclusions))
+	{
+		$seq = array();
+		foreach($strong_exclusions as $cond)
+		{
+			$query = 'SELECT DISTINCT i.larvol_id AS "larvol_id" FROM '
+					. '(data_values AS dv LEFT JOIN data_cats_in_study AS i ON dv.studycat=i.id) WHERE ' . $cond . ' AND ';
+			$query .= $timecond;
+			$seq[] = $query;
+		}
+		$seq = 'SET @seq_union := (SELECT GROUP_CONCAT(larvol_id) as "larvol_id" FROM ('
+				. implode(' UNION ',$seq) . ') AS resultset)';
+		$time_start = microtime(true);
+		$seq = mysql_query($seq);
+		if($seq === false)
+		{
+			$log = 'Bad SQL query applying strong exclusions';
+			return softDie($log);
+		}
+		$time_end = microtime(true);
+		$time_taken = $time_end-$time_start;
+		$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$seq.'#Comments:strong exclusions present';
+		$logger->info($log);
+		unset($log);
+		
+	}
+	
+	/*****************/
+	
+	
+	
+	$bigquery;
+	if(!empty($override))	//if there are nct overrides, start building the bigquery to include them now
+	{ 
+//		$drop_query = 'DROP TABLE IF EXISTS ulid';
+		$drop_query = 'delete from ulid where 1'; // had problems with drop table, so deleting all rows
+		$time_start = microtime(true);
+		mysql_query($drop_query);
+		$time_end = microtime(true);
+		$time_taken = $time_end-$time_start;
+		$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$drop_query.'#Comments:overrides dropping table ulid';
+		$logger->info($log);
+		unset($log);
+		
+		$create_temp_query = 'CREATE TEMPORARY TABLE ulid (larvol_id int NOT NULL)';
+		$time_start = microtime(true);
+		mysql_query($create_temp_query);
+		$time_end = microtime(true);
+		$time_taken = $time_end-$time_start;
+		$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$create_temp_query.'#Comments:overrides, creating temporary table ulid';
+		$logger->info($log);
+		unset($log);	
+		
+		$insert_query = 'INSERT INTO ulid VALUES ' . implode(',', parenthesize($override));//temp variable only for logging purpose
+		$time_start = microtime(true);
+		mysql_query($insert_query);
+		$time_end = microtime(true);
+		$time_taken = $time_end-$time_start;
+		$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$insert_query.'#Comments:overrides,inserting into ulid';
+		$logger->info($log);
+		unset($log);	
+		
+		$bigquery = ' UNION SELECT larvol_id FROM ulid';
+		//$bigquery = ' OR larvol_id IN(SELECT larvol_id FROM ulid)';//slow
+	}
+	$sortjoins = '';
+	$orderby = array();
+	if(!empty($sorts))
+	{
+		$catjoin = ($lone_cond === NULL) ? 'clinical_study' : 'i';
+		$sortcats = array();
+		foreach($sorts as &$sort)
+		{
+			$query = 'SELECT category,`type` FROM data_fields WHERE id=' . $sort->field . ' LIMIT 1';
+			$res = mysql_query($query);
+			if($res === false)
+			{
+				$log = 'Bad SQL query getting category of field for sorting';
+				return softDie($log);
+			}
+			$res = mysql_fetch_assoc($res);
+			if($res === false)
+			{
+				$log = 'Sort field not found.';
+				return softDie($log);
+			}
+			$sort->type = $res['type'];
+			$cat = $res['category'];
+			$sortcats[$cat] = $cat;
+			$sort->category = $cat;
+		}unset($sort);
+		foreach($sortcats as $cat)
+		{
+			$sft = 'i_s' . $cat;
+			$sortjoins .= ' LEFT JOIN data_cats_in_study as ' . $sft . ' ON ' . $sft . '.larvol_id=' . $catjoin . '.larvol_id AND '
+						. $sft . '.category=1';
+		}unset($cat);
+		foreach($sorts as $sort)
+		{
+			$sft = 'dv_s' . $sort->field;
+			$esft = $sft . '_e';
+			$sortjoins .= ' LEFT JOIN data_values as ' . $sft . ' ON i_s' . $sort->category . '.id='
+						. $sft . '.studycat AND ' . $sft . '.`field`=' . $sort->field . ' AND ' . str_replace('dv',$sft,$timecond);
+			$by = $sft . '.val_' . $sort->type;
+			if($sort->type == 'enum')
+			{
+				$sortjoins .= ' LEFT JOIN data_enumvals AS ' . $esft . ' ON ' . $esft . '.id=' . $sft . '.val_enum';
+				$by = $esft . '.`value`';
+			}
+			if($sort->desc) $by .= ' DESC';
+			$orderby[] = $by;
+		}unset($sort);
+	}
+
+	if($lone_cond === NULL)	//in this case, there were no search parameters
+	{
+//		$bigquery = 'SELECT clinical_study.larvol_id FROM clinical_study' . $sortjoins;
+	}else{	//There were search parameters, so use them in the main query
+		$bigconds = array();
+		$bigconds[] = '(' . $lone_cond . ')';
+		if(!empty($conditions) || !empty($g_conds))
+			$bigconds[] = '1';
+		if(!empty($strong_exclusions))
+			$bigconds[] = '1';
+		if(empty($bigconds))
+		{
+			$bigconds = '1';
+		}else{
+			$bigconds = implode(' AND ', $bigconds);
+		}
+		if(!isset($bigquery))  
+		{
+			$bigquery = '';
+		}
+		$bigquery = 'SELECT DISTINCT dv.studycat as studycat FROM '
+					. '(data_values AS dv )'
+					. $sortjoins
+					. ' WHERE (' . $bigconds . ')' . $bigquery ;
+	}
+
+
+	if(!empty($g_sorts) || !empty($orderby))
+	{
+
+//		$orderby = array_merge($g_sorts,$orderby);
+		$orderby = $g_sorts+$orderby;
+		ksort($orderby);
+		$orderby = implode(',', $orderby);
+		$bigquery .= ' ORDER BY ' . $orderby;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	/****************/
+	
+		
+	//apply limit
+	$limit = '';
+	$start = '';
+	$end = '';
+	$length = '';
+	if(!isset($bigquery))  
+		{
+			$bigquery = '';
+		}
+	
+	$bigquery .= $limit;
+	//var_dump($bigquery);exit;
+	//Do search and get result IDs for the page
+	$time_start = microtime(true);
+	$res = mysql_query($bigquery);
+	
+	$time_end = microtime(true);
+	$time_taken = $time_end-$time_start;
+	$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$bigquery.'#Comments:do search and get result IDs for the page';
+	$logger->info($log);
+	unset($log);	
+	
+	if($res === false)
+	{
+		$log = 'Bad SQL query on search:2 ' . $bigquery . "<br />\n" . mysql_error();
+		return softDie($log);
+	}
+	$resid_set = array();
+	
+
+	$row = mysql_fetch_assoc($res);
+	$resid_set[] = $row['studycat'];
+	//$resid_set = mysql_fetch_assoc($res);
+	//get requested data for the page
+	if(!isset($resid_set[0]) or !$resid_set[0] > 0 or empty($resid_set[0])) 
+	{
+		return false;
+	}
+	
+	$recordsData = getRecords($resid_set,array(),$time);
+	$retdata = array();
+	foreach($resid_set as $id) $retdata[$id] = $recordsData[$id];	
+	return $retdata;
+}
+
 function getField($params, $field)
 { 
 	$id = '_'.getFieldId('NCT', $field);
@@ -726,12 +1206,11 @@ function highPass($v){return substr($v,1);}
 //return an array of study maps corresponding to $ids, with only $fields populated
 function getRecords($ids,$fields,$time)
 {
-	
 	global $db;
 	//logger variable in db.php
 	global $logger;	
 	$result = array();
-	if(empty($ids)) return $result;
+	if(empty($ids) or !isset($ids))  return $result;
 	$global = array('larvol_id');
 	if(($k = array_search('larvol_id',$fields)) !== false)
 	{

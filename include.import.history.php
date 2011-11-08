@@ -3,6 +3,7 @@
 require_once('db.php');
 require_once('include.import.php');
 require_once('nct_common.php');
+require_once('preindex_trial.php');
 ini_set('max_execution_time', '36000'); //10 hours
 ob_implicit_flush(true);
 ob_end_flush();
@@ -189,7 +190,13 @@ function scrape_history($id)
 	echo('<hr><br>Parse Current Study for all information and non essentials<br>');
 
 	ProcessNonEssentials($id, $lastdate);
-
+	$studyCat=getStudyCat($unid);
+	echo('<br>Pre-indexing product related trials for id: ' . $id . '..........<br><br>');
+	tindex($studyCat,'products');
+	echo('<br>Pre-indexing area related trials for id: ' . $id . '.........<br><br>');
+	tindex($studyCat,'areas');
+		
+		
 	echo('<br>Finished Parsing Current Study with this ID.<br />');
 
 	$query = 'UPDATE update_status SET end_time="' . date("Y-m-d H:i:s", strtotime('now')) . '" WHERE update_id="' . $update_id . '"';
