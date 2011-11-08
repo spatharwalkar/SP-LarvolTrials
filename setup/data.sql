@@ -1,9 +1,11 @@
 INSERT INTO `data_categories` (`id`, `name`) VALUES
-(2, 'Annotations'),
 (1, 'NCT'),
+(2, 'Annotations'),
 (4, 'PubMed'),
 (6, 'EudraCT'),
-(7, 'isrctn');
+(7, 'isrctn'),
+(8, 'Products'), 
+(9, 'Areas');
 
 INSERT INTO `data_fields` (`id`, `name`, `type`, `category`) VALUES
 (1, 'nct_id', 'int', 1),
@@ -427,6 +429,7 @@ INSERT INTO `data_fields` (`id`, `name`, `type`, `category`) VALUES
 (742, 'date_applied', 'date', 7),
 (743, 'last_edit', 'date', 7),
 (744, 'assigned_date', 'date', 7);
+
 
 INSERT INTO `data_enumvals` (`id`, `field`, `value`) VALUES
 (165, 186, 'AAMC'),
