@@ -6,7 +6,7 @@ $table = mysql_real_escape_string($_GET['table']);
 $field = mysql_real_escape_string($_GET['field']);
 
 //filter input
-$autoSuggestTables = array('areas','upm','product');
+$autoSuggestTables = array('areas','upm','products');
 if(!in_array($table,$autoSuggestTables))die;
 
 if($table=='upm' && $field=='product')
@@ -40,6 +40,25 @@ $json['suggestions'] = $suggestions;
 $json['data'] = $datas;
 $data[] = $json;
 ob_end_clean();
+gzip_compression();
 echo json_encode($json);
 die;
 
+function gzip_compression() {
+
+    //If no encoding was given - then it must not be able to accept gzip pages
+    if( empty($_SERVER['HTTP_ACCEPT_ENCODING']) ) { return false; }
+
+    //If zlib is not ALREADY compressing the page - and ob_gzhandler is set
+    if (( ini_get('zlib.output_compression') == 'On'
+        OR ini_get('zlib.output_compression_level') > 0 )
+        OR ini_get('output_handler') == 'ob_gzhandler' ) {
+        return false;
+    }
+
+    //Else if zlib is loaded start the compression.
+    if ( extension_loaded( 'zlib' ) AND (strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== FALSE) ) {
+        ob_start('ob_gzhandler');
+    }
+
+}

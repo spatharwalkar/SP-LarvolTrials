@@ -70,6 +70,7 @@ $(document).ready(function(){
 	var options, a,b;
 	jQuery(function(){
 	  options = { serviceUrl:'autosuggest.php',params:{table:<?php echo "'$table'"?>,field:'name'} };
+	  if($('#name').length>0)
 	  a = $('#name').autocomplete(options);
 	  b = $('#search_name').autocomplete(options);
 	});

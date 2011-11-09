@@ -33,8 +33,9 @@ function validatesearch(){/*if($('#search_product').val()==''){$('#search_produc
 $(document).ready(function(){
 	var options, a,b;
 	jQuery(function(){
-		  options1 = { serviceUrl:'autosuggest.php',params:{table:<?php echo "'$table'"?>,field:'product'},onSelect: function(value, data){ $('#product_id').val(data);} };
-		  options2 = { serviceUrl:'autosuggest.php',params:{table:<?php echo "'$table'"?>,field:'product'},onSelect: function(value, data){ $('#search_product_id').val(data);} };
+		  options1 = { serviceUrl:'autosuggest.php',params:{table:<?php echo "'$table'"?>,field:'product'},onSelect: function(value, data){ $('#product_id').val(data);},minChars:3 };
+		  options2 = { serviceUrl:'autosuggest.php',params:{table:<?php echo "'$table'"?>,field:'product'},onSelect: function(value, data){ $('#search_product_id').val(data);},minChars:3 };
+		  if($('#product').length>0)
 		  a = $('#product').autocomplete(options1);
 		  b = $('#search_product').autocomplete(options2);
 		});
