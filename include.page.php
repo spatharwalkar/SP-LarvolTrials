@@ -380,6 +380,11 @@ function importUpm($script='upm',$table='upm')
 function input_tag($row,$dbVal=null,$options=array())
 {
 	global $searchData;
+	
+	//get general input params from options
+	$disabled = (isset($options['disabled']) && $options['disabled']===true)?'disabled="disabled"':null;
+	$altTitle = (isset($options['alttitle']))?$options['alttitle']:null;
+	
 	$type = $row['Type'];
 	if(substr($type,0,4)=='enum')
 	$type = 'enum';
@@ -448,7 +453,7 @@ function input_tag($row,$dbVal=null,$options=array())
 			
 		case 'deletebox':
 			$id = $options['id'];
-			return '&nbsp;<label class="lbldel" style="float:none;"><input type="checkbox" title="Delete" name="deleteId" value="'.$id.'" class="delsearch"></label>';
+			return '&nbsp;<label class="lbldel" style="float:none;" title="'.$altTitle.'" alt="'.$altTitle.'"><input '.$disabled.' type="checkbox" title="'.$altTitle.'" alt="'.$altTitle.'" name="deleteId" value="'.$id.'" class="delsearch"></label>';
 			break;
 			
 		default:
@@ -757,8 +762,18 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 	}
 	if($options['deletebox']===true && $id)
 	{
+		$altTitle='Delete';
+		if($script=='products')
+		{
+			$upmReferenceCount = getProductUpmAssociation($id);
+			$disabled = $upmReferenceCount>0?true:false;
+			$altTitle = $disabled?'Cannot delete product as it is linked to other upms. See References.':$altTitle;
+			echo '<tr>';
+			echo '<td>References : </td><td>'.$upmReferenceCount.' UPM</td>';
+			echo '</tr>';			
+		}
 		echo '<tr>';
-		echo '<td>Delete : </td><td>'.input_tag(null,null,array('deletebox'=>true,'id'=>$id)).'</td>';
+		echo '<td>Delete : </td><td>'.input_tag(null,null,array('deletebox'=>true,'id'=>$id,'disabled'=>$disabled,'alttitle'=>$altTitle)).'</td>';
 		echo '</tr>';
 	}
 	if($searchData)
@@ -840,3 +855,19 @@ function unzipForXmlImport($file)
         }
     }
 } 
+
+/**
+ * @name getProductUpmAssociation
+ * @tutorial Provides the upms linked to products.
+ * @param int $id product id.
+ * @author Jithu Thomas
+ */
+function getProductUpmAssociation($id)
+{
+	$query = "select count(u.id) as cnt from upm u left join products p on u.product=p.id where p.id=$id";
+	$result = mysql_query($query);
+	while($row = mysql_fetch_assoc($result))
+	{
+		return $row['cnt'];
+	}
+}
