@@ -44,8 +44,8 @@
         settings.tabHandle.css({ 
             'display': 'block',
             'textIndent' : '-99999px',
-            'outline' : 'none',
-            'position' : 'absolute'
+            'outline' : 'none'
+           // 'position' : 'absolute'
         });
         
         obj.css({
@@ -55,7 +55,7 @@
 
         
         var properties = {
-                    containerWidth: parseInt(obj.outerWidth(), 10) + 'px',
+                    containerWidth: parseInt((obj.outerWidth()-25), 10) + 'px',
                     containerHeight: '',
                     tabWidth: parseInt(settings.tabHandle.outerWidth(), 10) + 'px',
                     tabHeight: parseInt(settings.tabHandle.outerHeight(), 10) + 'px'
