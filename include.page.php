@@ -558,7 +558,15 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 		$postKeys = array_keys($post);
 		$post = array_map(am,$postKeys,array_values($post));
 		$query = "insert into $table (".implode(',',$postKeys).") values(".implode(',',$post).")";
-		mysql_query($query)or die('Cannot insert '.$table.' entry');
+		if(mysql_query($query))
+		{
+			return 1;
+		}
+		else
+		{
+			softdie('Cannot insert '.$table.' entry');
+			return 0;
+		}
 	}
 	else//update
 	{
@@ -593,7 +601,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			$post = array_map(am1,array_keys($post),array_values($post));
 		}
 		$query = "update $table set ".implode(',',$post)." where id=".$id;
-		mysql_query($query)or die('Cannot update '.$table.' entry');		
+		mysql_query($query)or softdie('Cannot update '.$table.' entry');		
 	}
 }
 
@@ -746,6 +754,11 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 			continue;
 		}
 		$dbVal = isset($upmDetails[$row['Field']])?$upmDetails[$row['Field']]:null;
+		if(isset($options['saveStatus'])&& $options['saveStatus']===0)
+		{
+			$dbVal = (isset($_GET[$row['Field']]) && $_GET[$row['Field']]!='')?$_GET[$row['Field']]:$dbVal;
+			
+		}
 		
 		if($row['Field'] == 'searchdata')
 		{

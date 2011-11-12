@@ -56,14 +56,12 @@ if($_GET['save']=='Save')
 	}
 	unset($_GET['product_id']);
 	//$_GET['product'] = $_GET['product_id'];
-	if($pid)
+	
+	$_GET['product'] = $pid;
+	$saveStatus = saveData($_GET,$table);
+	if(!$pid) 
 	{
-		$_GET['product'] = $pid;
-		saveData($_GET,$table);
-	}
-	else 
-	{
-		echo 'Cannot save data, wrong product name selected.';
+		echo '<br/>Wrong product name selected.';
 	}
 }
 //delete controller
@@ -147,11 +145,11 @@ if(isset($_GET['search']))
 echo '<br/>';
 echo '<div class="clr">';
 //add edit form.
-if($_GET['add_new_record']=='Add New Record' || $_GET['id'] && !$_GET['save'])
+if($_GET['add_new_record']=='Add New Record' || $_GET['id'] || $saveStatus===0)
 {
 	$id = ($_GET['id'])?$_GET['id']:null;
 	echo '<div>';
-	addEditUpm($id,$table,$script,array("formOnSubmit"=>"onsubmit=\"return validateedit();\"",'deletebox'=>false),array('last_update'));
+	addEditUpm($id,$table,$script,array("formOnSubmit"=>"onsubmit=\"return validateedit();\"",'deletebox'=>false,'saveStatus'=>$saveStatus),array('last_update'));
 	echo '</div>';
 }
 
