@@ -206,9 +206,11 @@ echo '<div class="clr">';
 //add edit form.
 if($_REQUEST['add_new_record']=='Add New Record' || $_REQUEST['id'] && !$_GET['save'])
 {
+	$addEditFormStyle = $mainTableStyle = 'style="width:100%"';
+	$addEditGlobalInputStyle = 'style="width:99%;min-width:200px;"';
 	$id = ($_REQUEST['id'])?$_REQUEST['id']:null;
 	echo '<div>';
-	addEditUpm($id,$table,$script,array("formOnSubmit"=>"onsubmit=\"return chkbox(this,'delsearch','searchdata');\"",'deletebox'=>true),$skipArr);
+	addEditUpm($id,$table,$script,array("formOnSubmit"=>"onsubmit=\"return chkbox(this,'delsearch','searchdata');\"",'deletebox'=>true,'formStyle'=>$addEditFormStyle,'mainTableStyle'=>$mainTableStyle,'addEditGlobalInputStyle'=>$addEditGlobalInputStyle),$skipArr);
 	echo '</div>';
 	echo '<br/>';
 }

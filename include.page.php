@@ -384,6 +384,7 @@ function input_tag($row,$dbVal=null,$options=array())
 	//get general input params from options
 	$disabled = (isset($options['disabled']) && $options['disabled']===true)?'disabled="disabled"':null;
 	$altTitle = (isset($options['alttitle']))?$options['alttitle']:null;
+	$style = (isset($options['style']))?$options['style']:null;
 	
 	$type = $row['Type'];
 	if(substr($type,0,4)=='enum')
@@ -409,7 +410,7 @@ function input_tag($row,$dbVal=null,$options=array())
 			$optionArr = array_map(am2,$optionArr,array_fill(0,count($optionArr),$dbVal));
 			if($options['null_options']===true)
 			array_unshift($optionArr, '<option value="">Select</option>');
-			return '<select name="'.$nameIndex.$row['Field'].'">'.implode('',$optionArr).'</select>';
+			return '<select '.$style.' name="'.$nameIndex.$row['Field'].'">'.implode('',$optionArr).'</select>';
 			break;
 			
 		case 'searchdata':
@@ -458,7 +459,7 @@ function input_tag($row,$dbVal=null,$options=array())
 			
 		default:
 			$dateinput = (strpos($row['Field'], 'date') !== false) ? ' class="jdpicker"' : '';
-			return '<input type="text" value="'.$dbVal.'" name="'.$nameIndex.$row['Field'].'" id="'.$nameIndex.$row['Field'].'"' . $dateinput . '/>';
+			return '<input '.$style.' type="text" value="'.$dbVal.'" name="'.$nameIndex.$row['Field'].'" id="'.$nameIndex.$row['Field'].'"' . $dateinput . '/>';
 			break;
 	}
 }
@@ -713,6 +714,9 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 	global $searchData;
 	$insertEdit = 'Insert';
 	$formOnSubmit = isset($options['formOnSubmit'])?$options['formOnSubmit']:null;
+	$formStyle = isset($options['formStyle'])?$options['formStyle']:null;
+	$mainTableStyle = isset($options['mainTableStyle'])?$options['mainTableStyle']:null;
+	$addEditGlobalInputStyle = isset($options['addEditGlobalInputStyle'])?$options['addEditGlobalInputStyle']:null;
 	if($id)
 	{
 		$insertEdit = 'Edit';
@@ -739,8 +743,8 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 	echo '<div class="clr">';
 	echo '<fieldset>';
 	echo '<legend> '.$insertEdit.': </legend>';
-	echo '<form name="umpInput" '.$formOnSubmit.' method="get" action="'.$script.'.php">';
-	echo '<table>';
+	echo '<form '.$formStyle.' name="umpInput" '.$formOnSubmit.' method="get" action="'.$script.'.php">';
+	echo '<table '.$mainTableStyle.'>';
 	while($row = mysql_fetch_assoc($res))
 	{
 		if($i==0)
@@ -770,7 +774,7 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 			continue;			
 		}			
 		echo '<tr>';
-		echo '<td>'.ucwords(implode(' ',explode('_',$row['Field']))).' : </td><td>'.input_tag($row,$dbVal).'</td>';
+		echo '<td>'.ucwords(implode(' ',explode('_',$row['Field']))).' : </td><td>'.input_tag($row,$dbVal,array('style'=>$addEditGlobalInputStyle)).'</td>';
 		echo '</tr>';
 	}
 	if($options['deletebox']===true && $id)
