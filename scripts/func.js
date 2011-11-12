@@ -25,7 +25,7 @@ $(document).ready(function(){
 		$('#addedtoright').css('background-color','#DDDDDD').css('cursor','default').css('color','#777777');
 	}	
 	//help tab
-	var slideout = '<div class="slide-out-div"><table cellpadding="0" cellspacing="0"><tr><td align="center" valign="baseline"><a class="handle" href="#help">Content</a></td><td><table cellpadding="0" cellspacing="0" class="table-slide">'+ 
+	var slideout = '<div class="slide-out-div"><table cellpadding="0" cellspacing="0"><tr><td align="center" valign="baseline"><a class="handle" href="#help">Content</a></td><td><table bgcolor="#FFFFFF" cellpadding="0" cellspacing="0" class="table-slide">'+ 
 					'<tr><td><img src="images/black-diamond.png"/></td><td>Click for data release</td></tr>'+
 					'<tr><td><img src="images/red-diamond.png"/></td><td>Click for data release (new)</td></tr>'+
 					'<tr><td><img src="images/hourglass.png"/></td><td>Results pending</td></tr>'+

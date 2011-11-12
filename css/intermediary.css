@@ -326,7 +326,7 @@ tr.upms td a{
 }
 .slide-out-div {
   width: 250px;
-  background: #fff;
+  /*background: #fff;*/
   opacity:.9;
   filter:alpha(opacity=90);
 }

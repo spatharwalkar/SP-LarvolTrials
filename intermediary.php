@@ -39,7 +39,10 @@ if(isset($_POST['btnDownload'])) {
 <link href="css/intermediary.css" rel="stylesheet" type="text/css" media="all" />
 <script src="scripts/jquery.js" type="text/javascript"></script>	
 <script src="scripts/slideout.js" type="text/javascript"></script>	
-<script src="scripts/func.js" type="text/javascript"></script>	
+<script src="scripts/func.js" type="text/javascript"></script>
+<script type="text/javascript">
+$("html").css("overflow-x", "hidden"); //for hiding help tab
+</script>	
 <script type="text/javascript">
   var _gaq = _gaq || [];
   _gaq.push(['_setAccount', 'UA-18240582-3']);
