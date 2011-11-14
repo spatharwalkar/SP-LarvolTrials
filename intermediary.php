@@ -2393,6 +2393,20 @@ function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last,
 							echo ('<div ' . $upm_title . '><a href="' . $upm_result_link . '" style="color:#000;">'
 							. '<img src="images/red-' . $result_image . '.png" alt="' . $result_image . '" style="padding-top: 3px;" border="0" /></a></div>');
 						}
+					} else if($upmDetails[$nctid][$k]['new'] == 'y') {
+					
+						$result_image = (($v[5] == 'Clinical Data') ? 'diamond' : 'checkmark' );
+						echo ('<div ' . $upm_title . '>');
+						if(upm_result_link != '' && $upm_result_link != NULL) {
+						
+							echo ('<a href="' . $upm_result_link . '" style="color:#000;"><img src="images/red-' . $result_image . '.png" alt="' 
+							. $result_image . '" style="padding-top: 3px;" border="0" /></a>');
+							
+						} else {
+							echo ('<img src="images/red-' . $result_image . '.png" alt="' . $result_image . '" style="padding-top: 3px;" border="0" />');
+						}
+						echo ('</div>');
+							
 					} else {
 					
 						if($upm_result_link != '' && $upm_result_link != NULL) {
@@ -3237,10 +3251,19 @@ function getCorrespondingUPM($trial_id, $time, $edited) {
 		$res = mysql_query($sql);
 		
 		$upm[$i]['edited'] = array();
+		$upm[$i]['new'] = 'n';
 		while($arr = mysql_fetch_assoc($res)) {
 			$upm[$i]['edited'] = array($arr['event_type'], $arr['event_description'], $arr['event_link'], $arr['result_link'], 
 									$arr['start_date'], $arr['start_date_type'], $arr['end_date'], $arr['end_date_type'],);
 		}
+		
+		$query = " SELECT u.id FROM `upm` u LEFT JOIN `upm_history` uh ON u.`id` = uh.`id` WHERE u.`id` = '" . $row['id'] . "' AND u.`last_update` < '" 
+				. date('Y-m-d',$time) . "' AND u.`last_update` >=  '" . date('Y-m-d',strtotime($edited,$time)) . "' AND uh.`id` IS NULL ";
+		
+		$ress = mysql_query($query);
+		if(mysql_num_rows($ress) != 0)
+			$upm[$i]['new'] = 'y';
+			
 		$i++;
 	}
 	return $upm;
