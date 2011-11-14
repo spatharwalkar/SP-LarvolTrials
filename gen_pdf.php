@@ -342,6 +342,8 @@ class ContentManager
 					$sp->action = 'search';
 					$sp->value = implode(' OR ', $leadingIDs);
 
+
+
 					$excel_params = array($sp);
 
 				} else {	
@@ -1065,6 +1067,7 @@ class ContentManager
 				array_push($this->fid, 'institution_type');
 				$sp = new SearchParam();
 				$sp->field 	= 'institution_type';
+
 				$sp->action = 'search';
 				$sp->value 	= $_POST['institution'];
 				$ins_params = array($sp);
@@ -1376,6 +1379,7 @@ class ContentManager
 
 	function getNonAssocUpm($non_assoc_upm_params, $trialheader,$tm,$ed) {
 		
+
 		global $now;
 
 		$upm_arr = array();$record_arr = array();$unmatched_upm_arr = array();
@@ -1734,6 +1738,8 @@ function getLinkDetails($tablename, $fieldname, $parameters, $param_value) {
 /********************export begins/*/
 function create_pdf($process_params,$upm_string,$tm,$ed)
 {
+
+ob_start();
 //$upm_string=array_unique($upm_string);
 if(isset($upm_string) and is_array($upm_string)) 
 {
@@ -1815,11 +1821,16 @@ $pdf_output.='<html>
      border-color: #000000;
 	 bgcolor: #f0f0f0;
 }
+
+body {
+font-family:Arial;
+font-size:8pt;
+}
 </style>
 <body><br><div align="center"><img src="images/Larvol-Trial-Logo-notag.png" align="center" alt="Main" width="327" height="47" id="header" /></div>
 <br><br><br>
 <table style="page-break-after:always;" width="100%" border="0" cellpadding="0" cellspacing="0">'
-			 . '<tr  bgcolor="#000000">'
+			 . '<thead><tr>'
 			 . '<th align="center" valign="middle" bgcolor="#f0f0f0" class="borderOk">ID</th>'
 			 . '<th align="center" valign="middle" bgcolor="#f0f0f0" class="borderOk">Title</th>'
 			 . '<th align="center" valign="middle" bgcolor="#f0f0f0" class="borderOk">'
@@ -1835,7 +1846,7 @@ $pdf_output.='<html>
 			 . '<th align="center" valign="middle" bgcolor="#f0f0f0" class="borderOk" title="MM/YY">'
 			 . 'End</th>'
 			 . '<th align="center" valign="middle" bgcolor="#f0f0f0" class="borderOk" >'
-			 . 'Ph</th></tr>';
+			 . 'Ph</th></tr></thead>';
 
 
 
@@ -1845,6 +1856,16 @@ if($stacked)
 	foreach ($excelarray as $key=>$value)
 	{
 	
+			if( isset($process_params['ltype'][$ii]) and isset($value['section']) and $value['section']==$ii and isset($value["NCT/brief_title"]) )  
+		{
+			
+			$pdf_output.='<tr><td align="left" colspan="11" valign="middle" bgcolor="#A2FF97" >'.$process_params['ltype'][$ii].'</td></tr>';
+				
+			$i++;
+			$ii++;
+		}
+			
+			
 			if( (isset($value['section']) or $_POST['list']== 'all') and ( isset($value["NCT/brief_title"]) and !empty($value["NCT/brief_title"]) ) )
 			{
 				
@@ -1870,8 +1891,11 @@ if($stacked)
 			$pdf_output.='<td align="center" valign="middle" bgcolor="'.$bgcol.'">'.$value["NCT/intervention_name"].'</td>';
 			
 			
-			$pdf_output.='<td align="center" valign="middle" bgcolor="'.$bgcol.'">'.$value["NCT/start_date"].'</td>';
-			$pdf_output.='<td align="center" valign="middle" bgcolor="'.$bgcol.'">'.$value["NCT/primary_completion_date"].'</td>';
+			$start_date=date('m/y',strtotime($value["NCT/start_date"]));
+			$pdf_output.='<td align="center" valign="middle" bgcolor="'.$bgcol.'">'.$start_date.'</td>';
+			
+			$primary_completion_date=date('m/y',strtotime($value["NCT/primary_completion_date"]));
+			$pdf_output.='<td align="center" valign="middle" bgcolor="'.$bgcol.'">'.$primary_completion_date.'</td>';
 			
 			
 			
@@ -1956,9 +1980,11 @@ else
 		$value["NCT.intervention_name"]=fix_special_chars($value["NCT.intervention_name"]);
 		$pdf_output.='<td align="center" valign="middle" bgcolor="'.$bgcol.'">'.$value["NCT.intervention_name"].'</td>';
 		
+		$start_date=date('m/y',strtotime($value["NCT.start_date"]));
+		$pdf_output.='<td align="center" valign="middle" bgcolor="'.$bgcol.'">'.$start_date.'</td>';
 		
-		$pdf_output.='<td align="center" valign="middle" bgcolor="'.$bgcol.'">'.$value["NCT.start_date"].'</td>';
-		$pdf_output.='<td align="center" valign="middle" bgcolor="'.$bgcol.'">'.$value["NCT.primary_completion_date"].'</td>';
+		$primary_completion_date=date('m/y',strtotime($value["NCT.primary_completion_date"]));
+		$pdf_output.='<td align="center" valign="middle" bgcolor="'.$bgcol.'">'.$primary_completion_date.'</td>';
 		
 		if(isset($value["NCT.phase"]) and $value["NCT.phase"]=="Phase 0")
 		{
@@ -2065,19 +2091,21 @@ if(isset($newupmarray) and is_array($newupmarray))
 
 	
 $pdf_output.='</tr></table></body></html>';
+
+
 require_once("dompdf/dompdf_config.inc.php");
 spl_autoload_register('DOMPDF_autoload');  
 $dompdf = new DOMPDF();
-$dompdf->set_paper( 'a3', 'portrait' ); 
+$dompdf->set_paper( 'letter', 'portrait' ); 
 $dompdf->load_html($pdf_output);
 $dompdf->render();
+ob_end_clean();
 
 $dompdf->stream("Larvol PDF_". date('Y-m-d_H.i.s') .".pdf");
 
 
 
-//	echo $pdf_output;
+	//echo $pdf_output;
 exit;
 }
-
-?> 
+?>
