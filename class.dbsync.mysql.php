@@ -87,7 +87,10 @@
         		$indexArr[] = $row;
         	}
         	
-        	$result = mysql_query("SHOW COLUMNS FROM {$table}", $this->dbp);
+        	//get foreign key associations if present for all fields in the table
+        	$foreignKeyAssoc = null;
+        	$foreignKeyAssoc = $this->listForeignKeyAssociations($this->database,$table);
+         	$result = mysql_query("SHOW COLUMNS FROM {$table}", $this->dbp);
             while ($row = mysql_fetch_row($result)) {
 	            $KeyName = null;
 	            $Non_unique = null;
@@ -108,6 +111,27 @@
 						$indexFlag=true;
 					}
 				}
+				//add foreign key data if present for that field
+				foreach($foreignKeyAssoc as $foreignKey)
+				{
+
+					if($foreignKey['foreign_key']==$row[0])
+					{
+						
+						$foreign_key = ($foreignKey['foreign_key']!='')?$foreignKey['foreign_key']:null;
+						$referenced_table_name = ($foreignKey['referenced_table_name']!='')?$foreignKey['referenced_table_name']:null;
+						$referenced_column_name = ($foreignKey['referenced_column_name']!='')?$foreignKey['referenced_column_name']:null;
+						$update_rule = ($foreignKey['update_rule']!='')?$foreignKey['update_rule']:null;
+						$delete_rule = ($foreignKey['delete_rule']!='')?$foreignKey['delete_rule']:null;
+						$constraint_name = ($foreignKey['constraint_name']!='')?$foreignKey['constraint_name']:null;
+						break;
+
+					}
+					else 
+					{
+						$foreign_key = $referenced_table_name = $referenced_column_name = $update_rule = $delete_rule = null;
+					}
+				}
 				$fields[] = array(
                 	'name'	  => $row[0],
                     'type'    => $row[1],
@@ -120,11 +144,47 @@
 					'Cardinality' => $Cardinality,
 					'Sub_part' => $Sub_part,
 					'indexFlag' => $indexFlag,
-					'key_primary' => $KeyName
+					'key_primary' => $KeyName,
+					'foreign_key' => $foreign_key,
+					'referenced_table_name' => $referenced_table_name,
+					'referenced_column_name' => $referenced_column_name,
+					'update_rule' => $update_rule,
+					'delete_rule' => $delete_rule,
+					'constraint_name' => $constraint_name
                 );
             }
-
+			
             return $fields;
+        }
+        
+        /**
+         * DBSync_mysql::listForeignKeyAssociations()
+		 * Lists all foreign keys associations
+		 * in the current table/field
+         * @param	string	$table	Table Name
+         * @param string Field Name
+         * @access	public
+         * @return 	array	Foreign Key Associations
+         * @author Jithu Thomas
+         **/        
+        function listForeignKeyAssociations($schema,$table,$field=null)
+        {
+        	$query = "SELECT distinct kcu.table_schema,kcu.table_name,kcu.column_name as 'foreign_key', kcu.referenced_table_name, kcu.referenced_column_name,rc.update_rule,rc.delete_rule,rc.constraint_name
+						FROM information_schema.key_column_usage kcu, information_schema.referential_constraints rc
+						WHERE
+						kcu.table_schema = '$schema' AND 
+						kcu.table_name = '$table' AND 
+						kcu.referenced_table_name is not null AND
+						kcu.referenced_table_name  = rc.referenced_table_name AND
+						rc.table_name = '$table' AND
+						rc.constraint_schema = '$schema';";
+        	$associations = array();
+        	$res = mysql_query($query);
+        	while($row = mysql_fetch_assoc($res))
+        	{
+        		$associations[] = $row;
+        	}
+        	return ($associations);die;
         }
 
         /**
@@ -218,23 +278,63 @@
          * @access	public
          * @return 	boolean	Success
          **/
-        function ChangeTableField($table, $field, $new_field,$old_field=array()) {
-        	//special case detected for mul keys
-        	$special_mul_key = null;
-        	$indexKey = null;
-        	if($new_field['key']=='MUL' && $old_field['key']=='' && $new_field['Sub_part']!=$old_field['Sub_part'])
+        function ChangeTableField($table, $field, $new_field,$old_field=array(),$foreignKeyCheck=0) {
+        	
+        	switch($foreignKeyCheck)
         	{
-        		$special_mul_key = ', ADD KEY `'.$field.'` (`'.$field.'`('.$new_field['Sub_part'].'))';
+	        	case 0:
+	        		
+	        	//special case detected for mul keys
+	        	$special_mul_key = null;
+	        	$indexKey = null;
+	        	if($new_field['key']=='MUL' && $old_field['key']=='' && $new_field['Sub_part']!=$old_field['Sub_part'])
+	        	{
+	        		$special_mul_key = ', ADD KEY `'.$field.'` (`'.$field.'`('.$new_field['Sub_part'].'))';
+	        	}
+	        	if($new_field['key']=='MUL' && $old_field['key']=='' && $new_field['indexFlag']==1 && $old_field['indexFlag']=='')
+	        	{
+	        		$indexKey = ', ADD INDEX (`'.$field.'`) ';
+	        	}
+	        	if($old_field['key']=='PRI' && $new_field['key']=='PRI')
+	        	$no_primary_def_needed = 1;
+				$sql = "ALTER TABLE `{$table}` CHANGE `{$field}` `{$new_field['name']}` {$new_field['type']} " . ($new_field['null']=='YES' ? '' : 'NOT') . ' NULL' . (strlen($new_field['default']) > 0 ? " default '{$new_field['default']}'" : '') . ($new_field['extra'] == 'auto_increment' ? ' auto_increment' : '') . ($new_field['key'] == 'PRI' && $no_primary_def_needed!=1  ? ", ADD PRIMARY KEY (`{$new_field['name']}`)" : '') . ($special_mul_key?$special_mul_key:''). ($indexKey?$indexKey:'');
+				echo($sql.';<br />');
+				return true;
+				break;	
+				
+	        	case 1:
+				//check for foreign key alterations after the appropriate field changes for the field (if present) is defined.
+				if($old_field['constraint_name']!='')
+				{
+					$sql = "ALTER TABLE `{$table}` DROP FOREIGN KEY `{$old_field['constraint_name']}` ;";
+					echo $sql.'<br/>';
+				}
+				$foreignKeyAlteration = true;
+				if($foreignKeyAlteration)
+				{
+					if($new_field['foreign_key']!='')
+					{
+						$constrainClause = 'ADD';
+						$constrain = $new_field['foreign_key'];
+						$constrainType = 'FOREIGN KEY';
+						$referencedTableName = $new_field['referenced_table_name'];
+						$referencedColumnName = $new_field['referenced_column_name'];
+						$deleteRule = $new_field['delete_rule'];
+						$updateRule = $new_field['update_rule'];
+						//if($constrain=='' || $referencedTableName=='' || $referencedColumnName=='' || $deleteRule=='' || $updateRule!='')return true;
+					}
+					else 
+					{
+						return true;
+					}
+					
+				}
+				if($foreignKeyAlteration)
+				$sql = "ALTER TABLE `$table` $constrainClause  $constrainType (`$constrain`) REFERENCES `$referencedTableName` (`$referencedColumnName`) ON DELETE $deleteRule ON UPDATE $updateRule;";
+				echo $sql.'<br/>';
+	            return true;
+	            break;
         	}
-        	if($new_field['key']=='MUL' && $old_field['key']=='' && $new_field['indexFlag']==1 && $old_field['indexFlag']=='')
-        	{
-        		$indexKey = ', ADD INDEX (`'.$field.'`) ';
-        	}
-        	if($old_field['key']=='PRI' && $new_field['key']=='PRI')
-        	$no_primary_def_needed = 1;
-			$sql = "ALTER TABLE `{$table}` CHANGE `{$field}` `{$new_field['name']}` {$new_field['type']} " . ($new_field['null']=='YES' ? '' : 'NOT') . ' NULL' . (strlen($new_field['default']) > 0 ? " default '{$new_field['default']}'" : '') . ($new_field['extra'] == 'auto_increment' ? ' auto_increment' : '') . ($new_field['key'] == 'PRI' && $no_primary_def_needed!=1  ? ", ADD PRIMARY KEY (`{$new_field['name']}`)" : '') . ($special_mul_key?$special_mul_key:''). ($indexKey?$indexKey:'');
-			echo($sql.';<br />');
-            return true;
         }
 
         /**

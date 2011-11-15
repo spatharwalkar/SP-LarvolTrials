@@ -143,18 +143,37 @@
 								$this->RaiseError("Could not add field <strong>{$fields_home[$j]['name']}</strong> to table <strong>{$tables_home[$i]}</strong> on database <strong>{$db_sync->database}</strong> at {$db_sync->user}@{$db_sync->host}: " . $db_sync->LastError());
                             }
                             $diferent_fields++;
-                        } else {
-                        	$k = $this->GetFieldIndex($fields_sync, $fields_home[$j]['name']);
-                            if ($fields_sync[$k]['type'] != $fields_home[$j]['type'] ||
-                                $fields_sync[$k]['null'] != $fields_home[$j]['null'] ||
-                                ($fields_sync[$k]['key'] != $fields_home[$j]['key'] && ($fields_home[$j]['key']!='UNI'&&$fields_sync[$k]['key'] !='UNI')) ||
-                                $fields_sync[$k]['default'] != $fields_home[$j]['default'] ||
-                                $fields_sync[$k]['extra'] != $fields_home[$j]['extra']) {
-	                                if (!$db_sync->ChangeTableField($tables_home[$i], $fields_home[$j]['name'], $fields_home[$j],$fields_sync[$k])) {
-		                                $this->RaiseError("Could not change field <strong>{$fields_home[$j]['name']}</strong> on table <strong>{$tables_home[$i]}</strong> on database <strong>{$db_sync->database}</strong> at {$db_sync->user}@{$db_sync->host}: " . $db_sync->LastError());
-	                                }
-                                $diferent_fields++;
-                            }
+                        } else
+                        {
+	                        	$k = $this->GetFieldIndex($fields_sync, $fields_home[$j]['name']);
+	                            if (
+		                            	$fields_sync[$k]['type'] != $fields_home[$j]['type'] ||
+		                                $fields_sync[$k]['null'] != $fields_home[$j]['null'] ||
+		                                ($fields_sync[$k]['key'] != $fields_home[$j]['key'] && ($fields_home[$j]['key']!='UNI'&&$fields_sync[$k]['key'] !='UNI')) ||
+		                                $fields_sync[$k]['default'] != $fields_home[$j]['default'] ||
+		                                $fields_sync[$k]['extra'] != $fields_home[$j]['extra'] 
+	                                )
+	                            {
+		                            if (!$db_sync->ChangeTableField($tables_home[$i], $fields_home[$j]['name'], $fields_home[$j],$fields_sync[$k])) {
+			                            $this->RaiseError("Could not change field <strong>{$fields_home[$j]['name']}</strong> on table <strong>{$tables_home[$i]}</strong> on database <strong>{$db_sync->database}</strong> at {$db_sync->user}@{$db_sync->host}: " . $db_sync->LastError());
+		                        }
+	                                $diferent_fields++;
+	                            }
+	                            if (
+		                                $fields_sync[$k]['foreign_key'] != $fields_home[$j]['foreign_key']||
+		                                $fields_sync[$k]['referenced_table_name'] != $fields_home[$j]['referenced_table_name']||
+		                                $fields_sync[$k]['referenced_column_name'] != $fields_home[$j]['referenced_column_name']||
+		                                $fields_sync[$k]['update_rule'] != $fields_home[$j]['update_rule']||
+		                                $fields_sync[$k]['delete_rule'] != $fields_home[$j]['delete_rule']
+	                            
+	                            )
+	                            {
+		                            if (!$db_sync->ChangeTableField($tables_home[$i], $fields_home[$j]['name'], $fields_home[$j],$fields_sync[$k],1)) {
+			                            $this->RaiseError("Could not change field <strong>{$fields_home[$j]['name']}</strong> on table <strong>{$tables_home[$i]}</strong> on database <strong>{$db_sync->database}</strong> at {$db_sync->user}@{$db_sync->host}: " . $db_sync->LastError());
+		                            }
+		                            $diferent_fields++;
+	                            }
+	                            
                         }
 
 		                unset($fieldnames_sync[array_shift(array_keys($fieldnames_sync, $fields_home[$j]['name']))]);
