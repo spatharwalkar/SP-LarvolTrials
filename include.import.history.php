@@ -69,15 +69,19 @@ function scrape_history($id)
 	while ($row = mysql_fetch_assoc($res)) {
 		$cat = $row['studycat'];
 	}
-
-	if (isset($cat)) {
+	global $logger;
+    if (isset($cat)) {
 
 		echo "<br>Deleting Existing Data<br>";
 		$query = 'delete from data_values where field !=1 and studycat=' . $cat;
 		$res = mysql_query($query) ;
 		
-		if(!$res and ( mysql_errno() <> 1213 and mysql_errno() <> 1205 )  ) // error
-			die('Unable to delete existing values' . mysql_error() . '('. mysql_errno() .')');
+		if(!$res and ( mysql_errno() <> 1213 and mysql_errno() <> 1205 )  ) 
+			{
+				$log='Failed to delete existing values' . mysql_error() . '('. mysql_errno() .'), Query:' . $query;
+				$logger->fatal($log);
+				die($log);
+			}
 		
 		//TKV  
 		//will retry in case of lock wait time timeout  
@@ -96,8 +100,8 @@ function scrape_history($id)
 					$res = mysql_query($query1) or die('Bad SQL query finding ready updates. Query:' . $query1  );
 				}
 				
-				
-				sleep(120); 
+				global $logger;
+				sleep(60); 
 				$res = mysql_query($query) ;
 				if(!$res)
 				{
@@ -109,9 +113,10 @@ function scrape_history($id)
 					else 
 					{
 						$dead_lock = false;
-						die('Unable to delete existing values' . mysql_error() . '('. mysql_errno() .')');
+						$log='Failed to delete existing values' . mysql_error() . '('. mysql_errno() .'), Query:' . $query;
+						$logger->fatal($log);
+						die($log);
 					}
-					
 				}
 				else 
 				{
@@ -122,7 +127,10 @@ function scrape_history($id)
 		}
 		elseif(!$res and mysql_errno() <> 1213 and mysql_errno() <> 1205) 
 		{
-			die('Unable to delete existing values' . mysql_error() . '('. mysql_errno() .')');
+			global $logger;
+			$log='Failed to delete existing values' . mysql_error() . '('. mysql_errno() .'), Query:' . $query;
+			$logger->fatal($log);
+			die($log);
 		}
 		
 		//*************

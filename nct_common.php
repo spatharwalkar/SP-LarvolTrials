@@ -799,10 +799,9 @@ function addval_d($studycat, $category_id, $fieldname, $value, $date) {
 						$query1 = 'UPDATE update_status_fullhistory SET er_message=' . $msg . ' WHERE update_id="' . $res['update_id'] .'"';
 						$res = mysql_query($query1) or die('Bad SQL query finding ready updates. Query:' . $query1  );
 					}
-				
-				
 					sleep(10); 
-					$res = mysql_query($query) ;
+					$res = mysql_query($query);
+					
 					if(!$res)
 					{
 						if (mysql_errno() == 1213 or mysql_errno() == 1205) 
@@ -813,9 +812,11 @@ function addval_d($studycat, $category_id, $fieldname, $value, $date) {
 						else 
 						{
 							$dead_lock = false;
-							die('Unable to delete existing values' . mysql_error() . '('. mysql_errno() .')');
+							global $logger;
+							$log='Failed to delete existing values' . mysql_error() . '('. mysql_errno() .'), Query:' . $query;
+							$logger->fatal($log);
+							die($log);
 						}
-						
 					}
 					else 
 					{

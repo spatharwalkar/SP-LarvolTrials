@@ -310,6 +310,10 @@ function runHeatmap($id, $return = false, $format = "xlsx", $expire = false)
 				mysql_query('ROLLBACK');
 //				sleep(2);
 				mysql_query('DELETE FROM progress WHERE id=' . $pid . ' LIMIT 1');
+				global $logger;
+				$log='Search failed.  So excel is returned with message Search (count failed)';
+				$logger->fatal($log);
+
 				if($return)
 				{
 					return messageInExcel("Search (count) failed." . $SEARCH_ERR);

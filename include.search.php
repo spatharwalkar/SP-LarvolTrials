@@ -234,6 +234,9 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 	
 	}catch(Exception $e){
 		$SEARCH_ERR = $e->getMessage();
+		global $logger;
+		$log='Search failed - ' . $e->getMessage();
+		$logger->fatal($log);
 		return softDie($e->getMessage());
 	}
 	
@@ -298,6 +301,8 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 		if($res === false)
 		{
 			$log = 'Bad SQL query applying search condition: ' . $query;
+			global $logger;
+			$logger->fatal($log);
 			return softDie($log);	
 		}
 		$time_end = microtime(true);
@@ -326,6 +331,8 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 		if($res === false)
 		{
 			$log = 'Bad SQL query applying search condition (global field)'.mysql_error().$query;
+			global $logger;
+			$logger->fatal($log);
 			return softDie($log);
 		}
 	}
@@ -405,12 +412,16 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 			if($res === false)
 			{
 				$log = 'Bad SQL query getting category of field for sorting';
+				global $logger;
+				$logger->fatal($log);
 				return softDie($log);
 			}
 			$res = mysql_fetch_assoc($res);
 			if($res === false)
 			{
 				$log = 'Sort field not found.';
+				global $logger;
+				$logger->fatal($log);
 				return softDie($log);
 			}
 			$sort->type = $res['type'];
@@ -483,6 +494,8 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 		if($res === false)
 		{
 			$log = 'Bad SQL query on count search: ' . $bigquery . "<br />\n" . mysql_error();
+			global $logger;
+			$logger->fatal($log);
 			return softDie($log);
 		}
 		$row = mysql_fetch_assoc($res);
@@ -544,6 +557,8 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 	if($res === false)
 	{
 		$log = 'Bad SQL query on search: ' . $bigquery . "<br />\n" . mysql_error();
+		global $logger;
+		$logger->fatal($log);
 		return softDie($log);
 	}
 	$resid_set = array();
@@ -800,6 +815,8 @@ function search_single_trial($params=array(),$time=NULL,$studyCat=NULL,$list=arr
 		if($res === false)
 		{
 			$log = 'Bad SQL query applying search condition: ' . $query;
+			global $logger;
+			$logger->fatal($log);
 			return softDie($log);	
 		}
 		$time_end = microtime(true);
@@ -828,6 +845,8 @@ function search_single_trial($params=array(),$time=NULL,$studyCat=NULL,$list=arr
 		if($res === false)
 		{
 			$log = 'Bad SQL query applying search condition (global field)'.mysql_error().$query;
+			global $logger;
+			$logger->fatal($log);
 			return softDie($log);
 		}
 	}
@@ -849,6 +868,8 @@ function search_single_trial($params=array(),$time=NULL,$studyCat=NULL,$list=arr
 		if($seq === false)
 		{
 			$log = 'Bad SQL query applying strong exclusions';
+			global $logger;
+			$logger->fatal($log);
 			return softDie($log);
 		}
 		$time_end = microtime(true);
@@ -910,12 +931,16 @@ function search_single_trial($params=array(),$time=NULL,$studyCat=NULL,$list=arr
 			if($res === false)
 			{
 				$log = 'Bad SQL query getting category of field for sorting';
+				global $logger;
+				$logger->fatal($log);
 				return softDie($log);
 			}
 			$res = mysql_fetch_assoc($res);
 			if($res === false)
 			{
 				$log = 'Sort field not found.';
+				global $logger;
+				$logger->fatal($log);
 				return softDie($log);
 			}
 			$sort->type = $res['type'];
@@ -1017,7 +1042,9 @@ function search_single_trial($params=array(),$time=NULL,$studyCat=NULL,$list=arr
 	
 	if($res === false)
 	{
-		$log = 'Bad SQL query on search:2 ' . $bigquery . "<br />\n" . mysql_error();
+		$log = 'Bad SQL query on search : ' . $bigquery . "<br />\n" . mysql_error();
+		global $logger;
+		$logger->fatal($log);
 		return softDie($log);
 	}
 	$resid_set = array();
@@ -1121,6 +1148,8 @@ function getActiveCount($all_ids, $time)
 	if($res === false)
 	{
 		$log = 'Bad SQL query on active status : ' . $query . "<br />\n" . mysql_error();
+		global $logger;
+		$logger->fatal($log);
 		return softDie($log);
 	}
 	while($row = mysql_fetch_array($res)) $id_set[] = $row['id'];
@@ -1255,6 +1284,8 @@ function getRecords($ids,$fields,$time)
 	if($res === false)
 	{
 		$log = 'Bad SQL query getting global fields for result list<br />'.$query;
+		global $logger;
+		$logger->fatal($log);
 		return softDie($log);
 	}
 	while($row = mysql_fetch_assoc($res))
@@ -1303,6 +1334,8 @@ function getRecords($ids,$fields,$time)
 		if($res === false)
 		{
 			$log = 'Bad SQL query getting data for result set<br />'.$query.'<br />'.mysql_error();
+			global $logger;
+			$logger->fatal($log);
 			return softDie($log);
 		}
 
@@ -1377,12 +1410,16 @@ function getEnumvalId($fieldId,$value)
 	if($res === false)
 	{
 		$log = 'Bad SQL query getting ID of enumval ' . $value . ' in field ' . $fieldId;
+		global $logger;
+		$logger->fatal($log);
 		return softDie($log);
 	}
 	$res = mysql_fetch_assoc($res);
 	if($res === false)
 	{
 		$log = 'Enumval ' . $value . ' invalid for field ' . $fieldId . '!';
+		global $logger;
+		$logger->fatal($log);
 		return softDie($log);
 	}
 	return $res['id'];
@@ -1664,6 +1701,8 @@ function validateMaskPCRE($s)
 	if($res === false)
 	{
 		$log = 'Bad SQL query on search: ' . $query . "<br />\n" . mysql_error();
+		global $logger;
+		$logger->fatal($log);
 		return softDie($log);
 	}
 
