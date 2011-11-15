@@ -1891,9 +1891,15 @@ if($stacked)
 			$pdf_output.='<td align="center" valign="middle" bgcolor="'.$bgcol.'">'.$value["NCT/intervention_name"].'</td>';
 			
 			
+			if($value["NCT/start_date"] == '' || $value["NCT/start_date"] == NULL || $value["NCT/start_date"] == '0000-00-00')
+			$start_date='';
+			else
 			$start_date=date('m/y',strtotime($value["NCT/start_date"]));
-			$pdf_output.='<td align="center" valign="middle" bgcolor="'.$bgcol.'">'.$start_date.'</td>';
+			$pdf_output.='<td align="center" valign="middle" bgcolor="'.$bgcol.'">'.$value["NCT/start_date"].'</td>';
 			
+			if($value["NCT/primary_completion_date"] == '' || $value["NCT/primary_completion_date"] == NULL || $value["NCT/primary_completion_date"] == '0000-00-00')
+			$primary_completion_date='';
+			else
 			$primary_completion_date=date('m/y',strtotime($value["NCT/primary_completion_date"]));
 			$pdf_output.='<td align="center" valign="middle" bgcolor="'.$bgcol.'">'.$primary_completion_date.'</td>';
 			
@@ -1980,9 +1986,15 @@ else
 		$value["NCT.intervention_name"]=fix_special_chars($value["NCT.intervention_name"]);
 		$pdf_output.='<td align="center" valign="middle" bgcolor="'.$bgcol.'">'.$value["NCT.intervention_name"].'</td>';
 		
+		if($value["NCT.start_date"] == '' || $value["NCT.start_date"] == NULL || $value["NCT.start_date"] == '0000-00-00')
+		$start_date='';
+		else
 		$start_date=date('m/y',strtotime($value["NCT.start_date"]));
 		$pdf_output.='<td align="center" valign="middle" bgcolor="'.$bgcol.'">'.$start_date.'</td>';
 		
+		if($value["NCT.primary_completion_date"] == '' || $value["NCT.primary_completion_date"] == NULL || $value["NCT.primary_completion_date"] == '0000-00-00')
+		$primary_completion_date='';
+		else
 		$primary_completion_date=date('m/y',strtotime($value["NCT.primary_completion_date"]));
 		$pdf_output.='<td align="center" valign="middle" bgcolor="'.$bgcol.'">'.$primary_completion_date.'</td>';
 		
