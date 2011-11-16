@@ -369,7 +369,7 @@ class ContentManager
 			. '&nbsp;<div class="drop"><div class="text">Show Only</div>'
 			. '<span id="filteropt">' . (isset($_GET["list"]) ? $this->{$_GET["list"].'status'} : $this->activestatus) 
 			. '</span></div>'
-			. '&nbsp;&nbsp;<div class="drop"><div class="text">Show Only</div>');
+			. '&nbsp;&nbsp;<div class="drop"style="margin-left:215px;"><div class="text">Show Only</div>');
 			
 		foreach($enumvals as $k => $v){ 
 			echo '<input type="checkbox" id="' . $v . '" name="institution[]" value="' . $v . '" '
@@ -1798,9 +1798,8 @@ class ContentManager
 			 . '<th style="width:22px;">'
 			 . '<a target="_self" href="javascript:void(0);" onclick="javascript:doSorting(\'ph\');">Ph</a></th>'
 			 . '<th rowspan="2" style="width:12px;padding:4px;"><div class="box_rotate">result</div></th>'
-			 . '<th colspan="36" style="width:72px;">'
-			 . '<div>&nbsp;</div></th>'
-			 . '<th colspan="3" style="width:10px;padding:0px;" class="rightborder noborder"></th></tr>'
+			 . '<th colspan="39" style="width:82px;"><div>&nbsp;</div></th>'
+			 . '<th colspan="3" style="width:10px;padding:0px;border-left:0px;" class="rightborder"></th></tr>'
 			 . '<tr class="secondrow"><th>');
 		
 		if(array_key_exists('en', $this->sortimg)) {
@@ -2315,7 +2314,7 @@ function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last,
 					}
 					
 					if($ph != '' && $ph !== NULL) {
-						$phase = (trim($type_arr[$i][$v]) == 'N/A') ? $ph : ('P' . $ph);
+						$phase = $ph;
 						$ph_color = $phase_arr[$ph];
 					} else {
 						$phase = 'N/A';

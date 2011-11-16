@@ -29,7 +29,6 @@ a, a:hover{
 	height:4.4em;
 	margin: 0 0 0 4px;
 	display:inline-block;
-	/*float:left;*/
 	vertical-align:top;
 	text-align:left;
 	background-color:#ffffff;
@@ -37,8 +36,7 @@ a, a:hover{
 	filter:alpha(opacity=92);
 	overflow:hidden;
 	padding:0 2px 0 2px;
-	position:relative;
-	/*z-index:99;*/
+	position:absolute;
 	width:200px;
 	border: 1px solid black;
 }
@@ -190,7 +188,7 @@ a, a:hover{
 }
 
 .noborder {
-	border:hidden!important;
+	/*border:hidden!important;*/
 	border-right: 1px solid blue!important;
 	border-top: 1px solid blue!important;
 	border-bottom: 1px solid blue!important;
