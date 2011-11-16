@@ -1798,8 +1798,8 @@ class ContentManager
 			 . '<th style="width:22px;">'
 			 . '<a target="_self" href="javascript:void(0);" onclick="javascript:doSorting(\'ph\');">Ph</a></th>'
 			 . '<th rowspan="2" style="width:12px;padding:4px;"><div class="box_rotate">result</div></th>'
-			 . '<th colspan="39" style="width:82px;"><div>&nbsp;</div></th>'
-			 . '<th colspan="3" style="width:10px;padding:0px;border-left:0px;" class="rightborder"></th></tr>'
+			 . '<th colspan="36" style="width:72px;"><div>&nbsp;</div></th>'
+			 . '<th colspan="3" style="width:10px;padding:0px;border-left:0px;" class="rightborder"><div>&nbsp;</div></th></tr>'
 			 . '<tr class="secondrow"><th>');
 		
 		if(array_key_exists('en', $this->sortimg)) {
