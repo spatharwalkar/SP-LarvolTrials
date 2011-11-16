@@ -18,6 +18,7 @@ $mapping = array(
     'is_section_801' => 'is_section_801', //new
     'delayed_posting' => 'delayed_posting', //new
     'brief_title-textblock' => 'brief_title',
+	'acronym' => 'acronym',
     'official_title-textblock' => 'official_title',
     'study_sponsor-sponsor-agency' => 'collaborator',  //added collaborator
     'study_sponsor-lead_sponsor-agency' => 'lead_sponsor',
@@ -55,7 +56,9 @@ $mapping = array(
 	'eligibility-expected_enrollment' => 'enrollment', //dupe for old field that was renamed to "enrollment"
     'condition' => 'condition',
     'arm_group-arm_group_label' => 'arm_group_label',
+	'intervention-arm_group_label' => 'arm_group_label',
     'arm_group-other_name' => 'arm_group_other_name', //new
+	'intervention-other_name' => 'arm_group_other_name', 
     'arm_group-arm_type' => 'arm_group_type',
     'arm_group-description-textblock' => 'arm_group_description',
     'intervention-intervent_type' => 'intervention_type',
@@ -96,6 +99,7 @@ $mapping = array(
     'email' => 'contact_email',
     'description-textblock' => 'intervention_description',
     'study_id-secondary_id' => 'secondary_id',
+	'study_id-secondary_id-id' => 'id',
 );
 
 $level = array();
@@ -1007,7 +1011,7 @@ function ProcessDiffChanges($id, $date) {
                     // Change
                     $action = "change";
                     prepXMP($tr, $action, $studycat, $nct_cat, $date);
-                } else if ($attr->name == 'class' && $attr->value == "sdiff-del") {
+				} else if ($attr->name == 'class' && $attr->value == "sdiff-del") {
                     //Delete
                     $action = "delete";
                     prepXMP($tr, $action, $studycat, $nct_cat, $date);
@@ -1019,7 +1023,12 @@ function ProcessDiffChanges($id, $date) {
                 // Else Dont Care
             } else {
                 // Get Structure
-                ParseStructure($tr);
+                $xy=ParseStructure($tr);
+				if($xy and $xy=='SKIP') 
+				{
+					echo '<br>clinical result values skipped...<br>';
+					return 'SKIP';
+				}
             }
         }
         unset($tr);
@@ -1050,7 +1059,8 @@ function ParseStructure($data) {
 			{
 				echo '<br> Values of clinical_result being skipped (non essential).................' . $tag .  str_repeat("   ", 500). '<br>';
 				unset($divs);
-				return ;
+				unset($div);
+				return 'SKIP';
 			}
         foreach ($div->attributes as $attr) {
             // Just look for start tag
@@ -1058,6 +1068,7 @@ function ParseStructure($data) {
 								
             if ($attr->name == 'class' && ( (strpos($attr->value, "sds") !== false)  or  (strpos($attr->value, "sda") !== false) ) ) {
 				pop_structure($attr->value, $div->nodeValue);
+
             }
         }
         unset($div);
@@ -1133,7 +1144,8 @@ function prepXMP($data, $action, $studycat, $nct_cat, $date) {
 			{
 				echo '<br> Values of clinical_result being skipped (non essential).................' . $tag .  str_repeat("   ", 500). '<br>';
 				unset($divs);
-				return ;
+				return 'SKIP';
+				
 			}
 			
 			foreach ($div->attributes as $attr) {
@@ -1179,14 +1191,15 @@ function prepXMP($data, $action, $studycat, $nct_cat, $date) {
 			{
 				echo '<br> Values of clinical_result being skipped (non essential).................' . $tag .  str_repeat("   ", 500). '<br>';
 				unset($divs);
-				return;
+				return 'SKIP';
+				
 			}
 	
         foreach ($div->attributes as $attr) {
 			
             if ($attr->name == 'class' && (strpos($attr->value, "sds") !== false)) {
                 pop_structure($attr->value, $div->nodeValue);
-     } else if ($attr->name == 'class' && (strpos($attr->value, "sdz") !== false)) {
+			} else if ($attr->name == 'class' && (strpos($attr->value, "sdz") !== false)) {
                 // Do Nothing
                 // Just End Tag
             } else if ($attr->name == 'class' && (strpos($attr->value, "sda") !== false)) {
@@ -1205,12 +1218,14 @@ function prepXMP($data, $action, $studycat, $nct_cat, $date) {
 					if(isset($tt) and !empty($tt))
 					{
 						echo '<br> Values of clinical_result being skipped ........' . $tag .  str_repeat("       ", 100). '<br>';
-						return ;
+						return 'SKIP';
 					}
 					else
 					{
 					$i++;
                     $return = process_change($tag, $tag, $value, $nct_cat, $studycat, $date, $action,$value1[$i]);
+					
+					
 					}
                 } else if ( $value != ">" and $value != "&gt;"   ) {
 					
@@ -1219,12 +1234,14 @@ function prepXMP($data, $action, $studycat, $nct_cat, $date) {
 					if(isset($tt) and !empty($tt))
 					{
 						echo '<br> Values of clinical_result being skipped ......' . $tag .  str_repeat("      ", 100). '<br>';
-						return ;
+						return 'SKIP';
 					}
 					else
 					{
 						$i++;
 						$return = process_change($tag, $tag, $value, $nct_cat, $studycat, $date, $action,$value1[$i]);
+						
+						//if($return and $return=='SKIP')	return 'SKIP';
 					}
                 }
             }
@@ -1252,7 +1269,8 @@ function getFieldName($value)
 	global $ignore_fields;
     $fieldname = $mapping[$value];
 	$ignore=isset($ignore_fields[$value]) and !empty($ignore_fields[$value]) ;
-    if (($fieldname === NULL or !isset($fieldname) or empty($fieldname))  and !$ignore  ) 
+	
+    if (($fieldname === NULL or !isset($fieldname) or empty($fieldname))  and !$ignore and !strpos('a'.$value, "location-") and !strpos('a'.$value, "contact-")  ) 
 	{
 		$log="WARNING: Unable to find fieldname: " . $value . ", match in mapping.";
 		$logger->warn($log);
@@ -1269,7 +1287,7 @@ function commit_diff($studycat, $category_id, $fieldname, $value, $date, $operat
 			if(isset($tt) and !empty($tt))
 			{
 				echo '<br> Values of clinical_result being skipped (non essential).................' . $tag .  str_repeat("   ", 500). '<br>';
-				return ;
+				return 'SKIP';
 			}
 
     // Use Date Passed in or of the record updated instead of actual date
@@ -1372,10 +1390,10 @@ function process_change($begin_tag, $end_tag, $value, $nct_cat, $studycat, $date
     if ($fieldname !== NULL)
 	{
         // Call to REPLACE
-
+		
         if (!commit_diff($studycat, $nct_cat, $fieldname, $value, $date, $action,$value1))
             return softDie('Data error in ' . $studycat . '.');
-        else {
+		else {
             echo "DB Commit: " . $begin_tag . " -> " . $value . "</br>";
         }
 
@@ -1407,8 +1425,15 @@ function pop_structure($attr_value, $node_value) {
 			if(isset($tt) and !empty($tt))
 			{
 				echo '<br> Values of clinical_result being skipped (non essential).................' . $tag .  str_repeat("   ", 500). '<br>';
-				return ;
+				return 'SKIP';
 			}
+			
+	$tt= ( ( strpos('a'.$node_value, "medline_ui") and !strpos('a'.$node_value, "results-reference-medline_ui") ) )  ;
+			if(isset($tt) and !empty($tt))
+			{
+				return 'SKIP';
+			}
+			
 	if(empty($node_value)) return;
     global $level;
     // Get Level
@@ -1539,7 +1564,7 @@ function ProcessNonEssentials($id, $date) {
 						{
 							echo '<br> Values of clinical_result being skipped (non essential).................' . $tag .  str_repeat("   ", 500). '<br>';
 							unset($divs);
-							return;
+							return 'SKIP';
 						}
 						
                     foreach ($div->attributes as $attr) {
@@ -1547,13 +1572,15 @@ function ProcessNonEssentials($id, $date) {
 						
 					
                         if ($attr->name == 'class' && (strpos($attr->value, "sds") !== false)) {
-						pop_structure($attr->value, $div->nodeValue);
+							pop_structure($attr->value, $div->nodeValue);
+													
                         } else if ($attr->name == 'class' && (strpos($attr->value, "sdz") !== false))  {
                             // Do Nothing
                             // Just End Tag
                         } else if ($attr->name == 'class' && (strpos($attr->value, "sda") !== false)) {
                             // Its a Tag Type
 							pop_structure($attr->value, $div->nodeValue);
+
                             
                         } else {
                             $value = trim($div->nodeValue);
@@ -1565,7 +1592,7 @@ function ProcessNonEssentials($id, $date) {
 								if(isset($tt) and !empty($tt))
 								{
 									echo '<br> Values of clinical_result being skipped (non essential).................' . $tag .  str_repeat("   ", 500). '<br>';
-									return ;
+								//	return 'SKIP';
 								}
 								// In this case only interest if tage has location- or contact- in the structure.
                                 elseif((strpos($tag, "location-") !== false) || 
@@ -1573,6 +1600,7 @@ function ProcessNonEssentials($id, $date) {
                                     (strpos($tag, "contact-") !== false))
                                 {
                                     $return = process_change($tag, $tag, $value, $nct_cat, $studycat, $date, "add");
+									
                                 }
                            }
                         }
