@@ -94,7 +94,7 @@ elseif($table=='upm')
 	$query = "select upm.id,upm.event_type,upm.event_description,upm.event_link,upm.result_link,p.name as product,upm.corresponding_trial,upm.start_date,upm.start_date_type,upm.end_date,upm.end_date_type,upm.last_update from upm left join products p on upm.product=p.id $where limit $start , $limit";
 }
 
-$res = mysql_query($query) or die('Cannot get '.$table.' data.'.$query);
+$res = mysql_query($query) or softDieSession('Cannot get '.$table.' data.'.$query);
 $i=0;
 $skip=0;
 
@@ -343,7 +343,7 @@ function getTotalCount($table)
 function deleteData($id,$table)
 {
 	$query = "delete from $table where id=$id";
-	mysql_query($query) or softdie('Cannot delete '.$table.'. '.$query);
+	mysql_query($query) or softDieSession('Cannot delete '.$table.'. '.$query);
 	echo 'Successfully deleted '.$table.'.';
 	
 }
@@ -488,7 +488,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 		}
 		else
 		{
-			softdie('Cannot import row data at line '.$line.'<br/>');
+			softDieSession('Cannot import row data at line '.$line.'<br/>');
 			return false;
 		}
 		
@@ -539,7 +539,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			$id = mysql_real_escape_string($id);
 			if(!is_numeric($id)) continue;
 			if($db->user->userlevel != 'user')
-				mysql_query("UPDATE $table SET searchdata='' WHERE id=$id LIMIT 1") or die('Bad SQL query deleting searchdata');
+				mysql_query("UPDATE $table SET searchdata='' WHERE id=$id LIMIT 1") or softDieSession('Bad SQL query deleting searchdata');
 		}
 		unset($post['delsearch']);
 	}
@@ -565,7 +565,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 		}
 		else
 		{
-			softdie('Cannot insert '.$table.' entry');
+			softDieSession('Cannot insert '.$table.' entry');
 			return 0;
 		}
 	}
@@ -575,7 +575,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 		{
 			
 			$query = "select * from $table where id=$id";
-			$res = mysql_query($query)or softdie('Updating invalid row');
+			$res = mysql_query($query)or softDieSession('Updating invalid row');
 			while($row = mysql_fetch_assoc($res))
 			{
 				$historyArr = $row;
@@ -589,7 +589,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			$historyArrKeys = array_keys($historyArr);		
 			$historyArr = array_map(am,array_keys($historyArr),$historyArr);
 			$query = "insert into upm_history (".implode(',',$historyArrKeys).") values (".implode(',',$historyArr).")";
-			mysql_query($query)or softdie('Cannot update history for upm id '.$historyArr['id']);
+			mysql_query($query)or softdieSession('Cannot update history for upm id '.$historyArr['id']);
 			//remove post action name from insert query.
 			array_pop($post);	
 			$post['last_update'] = date('Y-m-d',$now);
@@ -602,7 +602,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			$post = array_map(am1,array_keys($post),array_values($post));
 		}
 		$query = "update $table set ".implode(',',$post)." where id=".$id;
-		mysql_query($query)or softdie('Cannot update '.$table.' entry');		
+		mysql_query($query)or softDieSession('Cannot update '.$table.' entry');		
 	}
 }
 
@@ -650,7 +650,21 @@ function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),
 		if($options['import'])
 		echo '<input type="submit" value="Import" name="import">';
 		echo '</fieldset>';
-			
+	//$_SESSION['page_errors'] = array('Sql error','What is this error.');
+	if(is_array($_SESSION['page_errors']) && count($_SESSION['page_errors'])>0)
+	{
+		echo '<fieldset class="floatl">';
+		echo '<legend> Errors: </legend>';
+		echo '<ul>';
+		foreach($_SESSION['page_errors'] as $err)
+		{
+			echo '<li class="error">'.$err.'</li>';
+		}
+		echo '</ul>';
+		unset($_SESSION['page_errors']);
+		echo '</fieldset>';
+	}
+	echo '<br/>';			
 	echo  '<fieldset class="">'
 			. '<legend> Search: </legend>';
 
@@ -887,4 +901,19 @@ function getProductUpmAssociation($id)
 	{
 		return $row['cnt'];
 	}
+	
 }
+
+/**
+ * @name softDieSession
+ * @tutorial Logs die messages into session log for future usage.
+ * @param $out error output.
+ * @author Jithu Thomas
+ */	
+function softDieSession($out,$raw=0)
+{
+	$_SESSION['page_errors'][] = $out;
+	if($raw==1)
+	echo $out.'<br/>';
+	return false;
+}	

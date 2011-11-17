@@ -61,7 +61,7 @@ if($_GET['save']=='Save')
 	$saveStatus = saveData($_GET,$table);
 	if(!$pid) 
 	{
-		echo '<br/>Wrong product name selected.';
+		softDieSession('Wrong product name selected.');
 	}
 }
 //delete controller
