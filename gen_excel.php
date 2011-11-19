@@ -842,7 +842,7 @@ class ContentManager
 							unset($vvalue['edited']);
 							unset($vvalue['new']);
 							unset($vvalue['larvol_id']);
-							unset($vvalue['inactive_date']);
+	//						unset($vvalue['inactive_date']);
 	//						unset($vvalue['region']);
 						foreach($vvalue as $k => $v) {
 							if(strpos($k, 'NCT/') !== FALSE) {
@@ -863,7 +863,7 @@ class ContentManager
 						unset($vvalue['edited']);
 						unset($vvalue['new']);
 						unset($vvalue['larvol_id']);
-						unset($vvalue['inactive_date']);
+//						unset($vvalue['inactive_date']);
 //						unset($vvalue['region']);
 						foreach($vvalue as $k => $v) {
 							if(strpos($k, 'NCT/') !== FALSE) {
@@ -885,7 +885,7 @@ class ContentManager
 						unset($value['edited']);
 						unset($value['new']);
 						unset($value['larvol_id']);
-						unset($value['larvol_id']);
+	//					unset($value['inactive_date']);
 	//					unset($value['region']);
 						
 						foreach($value as $k => $v) {
@@ -1265,7 +1265,7 @@ class ContentManager
 					unset($value['edited']);
 					unset($value['new']);
 					unset($value['larvol_id']);
-					unset($value['inactive_date']);
+//					unset($value['inactive_date']);
 //					unset($value['region']);
 					
 					foreach($value as $k => $v) {
@@ -1282,7 +1282,7 @@ class ContentManager
 					unset($value['edited']);
 					unset($value['new']);
 					unset($value['larvol_id']);
-					unset($value['inactive_date']);
+//					unset($value['inactive_date']);
 //					unset($value['region']);
 					
 					foreach($value as $k => $v) {
@@ -1730,6 +1730,7 @@ function getLinkDetails($tablename, $fieldname, $parameters, $param_value) {
 /********************export begins/*/
 function create_excel($process_params,$upm_string,$tm,$ed)
 {
+ob_start();
 //$upm_string=array_unique($upm_string);
 if(isset($upm_string) and is_array($upm_string)) 
 {
@@ -1905,7 +1906,8 @@ if($stacked)
 			}
 			
 			if(isset($value["NCT/start_date"])) 				$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, $value["NCT/start_date"]);
-			if(isset($value["NCT/primary_completion_date"])) 	$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, $value["NCT/primary_completion_date"]);
+			//if(isset($value["NCT/primary_completion_date"])) 	$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, $value["NCT/primary_completion_date"]);
+			if(isset($value["inactive_date"])) 	$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, $value["inactive_date"]);
 			if(isset($value["NCT/phase"])) 						$objPHPExcel->getActiveSheet()->setCellValue('K' . $i, $value["NCT/phase"]);
 			if($bgcol=="D5D3E6") $bgcol="EDEAFF"; 	else $bgcol="D5D3E6";
 			
@@ -2162,7 +2164,8 @@ else
 			$objPHPExcel->getActiveSheet()->setCellValue('H' . $i, $value["NCT.intervention_name"]);
 		}
 		if(isset($value["NCT.start_date"])) 				$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, $value["NCT.start_date"]);
-		if(isset($value["NCT.primary_completion_date"])) 	$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, $value["NCT.primary_completion_date"]);
+		//if(isset($value["NCT.primary_completion_date"])) 	$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, $value["NCT.primary_completion_date"]);
+		if(isset($value["inactive_date"])) 	$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, $value["inactive_date"]);
 		if(isset($value["NCT.phase"])) 						$objPHPExcel->getActiveSheet()->setCellValue('K' . $i, $value["NCT.phase"]);
 		if($bgcol=="D5D3E6") $bgcol="EDEAFF"; 	else $bgcol="D5D3E6";
 		
