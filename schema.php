@@ -1,6 +1,7 @@
 <?php
 require_once('settings.php');
 require_once('class.dbsync.php');
+require_once 'include.util.php';
 ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -62,10 +63,8 @@ foreach($dataScript as $data)
 	}
 }
 mysql_close();
-echo '<pre>';
 $dbsync->syncDataTables('set',array('data_categories','data_enumvals','data_fields','user_permissions'));
 $dbsync->syncData();
-
 ?>
 </fieldset>
 <br />Done. <ul><li>Re-run the script again to make sure no more related data are needed to be inserted or not.</li></ul>

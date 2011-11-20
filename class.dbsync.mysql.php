@@ -287,6 +287,8 @@
 	        	//special case detected for mul keys
 	        	$special_mul_key = null;
 	        	$indexKey = null;
+	        	//pr($new_field);
+	        	//pr($old_field);
 	        	if($new_field['key']=='MUL' && $old_field['key']=='' && $new_field['Sub_part']!=$old_field['Sub_part'])
 	        	{
 	        		$special_mul_key = ', ADD KEY `'.$field.'` (`'.$field.'`('.$new_field['Sub_part'].'))';
@@ -295,9 +297,17 @@
 	        	{
 	        		$indexKey = ', ADD INDEX (`'.$field.'`) ';
 	        	}
+	        	if($new_field['key']=='UNI' && $new_field['type']=='blob' && $old_field['type']!='blob')
+	        	{
+	        		//need to remove old index before adding blob and also suggest blob index if any present
+	        		if($old_field['indexFlag']==1)
+	        		$sql =  "ALTER table `{$table}` DROP INDEX {$old_field['key_primary']}";
+	        		echo $sql.';<br />';
+	        		$special_uni_key = ', ADD UNIQUE `'.$field.'` (`'.$field.'`('.$new_field['Sub_part'].'))';
+	        	}
 	        	if($old_field['key']=='PRI' && $new_field['key']=='PRI')
 	        	$no_primary_def_needed = 1;
-				$sql = "ALTER TABLE `{$table}` CHANGE `{$field}` `{$new_field['name']}` {$new_field['type']} " . ($new_field['null']=='YES' ? '' : 'NOT') . ' NULL' . (strlen($new_field['default']) > 0 ? " default '{$new_field['default']}'" : '') . ($new_field['extra'] == 'auto_increment' ? ' auto_increment' : '') . ($new_field['key'] == 'PRI' && $no_primary_def_needed!=1  ? ", ADD PRIMARY KEY (`{$new_field['name']}`)" : '') . ($special_mul_key?$special_mul_key:''). ($indexKey?$indexKey:'');
+				$sql = "ALTER TABLE `{$table}` CHANGE `{$field}` `{$new_field['name']}` {$new_field['type']} " . ($new_field['null']=='YES' ? '' : 'NOT') . ' NULL' . (strlen($new_field['default']) > 0 ? " default '{$new_field['default']}'" : '') . ($new_field['extra'] == 'auto_increment' ? ' auto_increment' : '') . ($new_field['key'] == 'PRI' && $no_primary_def_needed!=1  ? ", ADD PRIMARY KEY (`{$new_field['name']}`)" : '') . ($special_mul_key?$special_mul_key:''). ($indexKey?$indexKey:''). ($special_uni_key?$special_uni_key:'');
 				echo($sql.';<br />');
 				return true;
 				break;	
