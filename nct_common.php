@@ -99,7 +99,7 @@ $mapping = array(
     'email' => 'contact_email',
     'description-textblock' => 'intervention_description',
     'study_id-secondary_id' => 'secondary_id',
-	'study_id-secondary_id-id' => 'id',
+	'study_id-secondary_id-id' => 'secondary_id',
 );
 
 $level = array();
@@ -1270,7 +1270,7 @@ function getFieldName($value)
     $fieldname = $mapping[$value];
 	$ignore=isset($ignore_fields[$value]) and !empty($ignore_fields[$value]) ;
 	
-    if (($fieldname === NULL or !isset($fieldname) or empty($fieldname))  and !$ignore and !strpos('a'.$value, "location-") and !strpos('a'.$value, "contact-")  ) 
+    if ( ($fieldname === NULL or !isset($fieldname) or empty($fieldname))  and !$ignore and !strpos('a'.$value, "location-") and !strpos('a'.$value, "contact-")  ) 
 	{
 		$log="WARNING: Unable to find fieldname: " . $value . ", match in mapping.";
 		$logger->warn($log);
@@ -1403,7 +1403,8 @@ function process_change($begin_tag, $end_tag, $value, $nct_cat, $studycat, $date
 	
 		global $ignore_fields;
 		$ignore=isset($ignore_fields[$begin_tag]) and !empty($ignore_fields[$begin_tag]) ;
-		if (!$ignore  ) 
+		
+		if (!$ignore and !strpos('a'.$begin_tag, "location-") and !strpos('a'.$begin_tag, "contact-")  ) 
 		{
 			$log = "WARNING: Unable to find fieldname: " . $begin_tag . ", match in mapping. Value:" . $value . "<br>";
 			echo $log;
