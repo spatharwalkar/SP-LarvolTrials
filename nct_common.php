@@ -1,4 +1,5 @@
 <?php
+require_once 'include.derived.php';
 error_reporting(E_ERROR);
 $tab = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
 $parse_retry=0;
@@ -103,6 +104,10 @@ $mapping = array(
 );
 
 $level = array();
+//prefetch recurring derived fields' calculation data.
+$fieldIDArr = calculateDateFieldIds();
+$fieldITArr = calculateInstitutionTypeFieldIds();
+$fieldRArr = calculateRegionFieldIds();
 
 //returned array maps the IDs to lastchanged dates
 function getIDs($type) {
@@ -423,28 +428,6 @@ function addNCT_history($rec, $id, $date) {
         }
     }
 
-    //Determine institution type
-    $institution_type = 'other';
-    $all_sponsors = array();
-
-    if ($rec->study_sponsors->lead_sponsor != null) {
-        foreach ($rec->study_sponsors->lead_sponsor as $cola) {
-            $all_sponsors[] = "" . $cola->agency;
-        }
-    }
-
-    $all_sponsors[] = "" . $rec->study_sponsors->lead_sponsor->agency;
-    foreach ($all_sponsors as $a_sponsor) {
-        if (strlen($a_sponsor) && isset($instMap[$a_sponsor])) {
-            $institution_type = $instMap[$a_sponsor];
-            if ($institution_type == 'industry')
-                break;
-        }
-    }
-    $query = 'UPDATE clinical_study SET institution_type="' . $institution_type . '" WHERE larvol_id=' . $larvol_id . ' LIMIT 1';
-    if (mysql_query($query) === false)
-        return softDie('Bad SQL query recording institution type');
-	
     //Go through the parsed XML structure and pick out the data
     $record_data = array('brief_title' => $rec->brief_title->textblock,
         'official_title' => $rec->official_title->textblock,
@@ -698,8 +681,13 @@ if(count($matches[0]) >0 )
             return softDie('Data error in ' . $nct_id . '.');
 		}
     mysql_query('COMMIT') or die("Couldn't commit SQL transaction to create records from XML");
-	global $fieldArr;
-	refreshInactiveDates($larvol_id, 'search',$fieldArr);		
+	global $fieldIDArr,$fieldITArr,$fieldRArr;
+	//Calculate Inactive Dates
+	refreshInactiveDates($larvol_id, 'search',$fieldIDArr);		
+    //Determine institution type
+	refreshInstitutionType($larvol_id,'search',$fieldITArr);	
+	//Calculate regions
+	refreshRegions($larvol_id,'search',$fieldRArr);
     return true;
 }
 
