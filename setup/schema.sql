@@ -395,6 +395,27 @@ CREATE TABLE IF NOT EXISTS `areas` (
   UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS `rpt_masterhm` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(127) COLLATE utf8_unicode_ci NOT NULL,
+  `user` int(10) unsigned DEFAULT NULL,
+  `footnotes` text COLLATE utf8_unicode_ci,
+  `description` text COLLATE utf8_unicode_ci,
+  `category` varchar(128) COLLATE utf8_unicode_ci DEFAULT NULL,
+  CONSTRAINT `rpt_masterhm_pk` PRIMARY KEY (`id`),
+  CONSTRAINT `rpt_masterhm_fk_1` FOREIGN KEY (`user`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `rpt_masterhm_headers` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `report` int(10) unsigned NOT NULL,
+  `num` tinyint(3) unsigned NOT NULL,
+  `type` enum('product','area') COLLATE utf8_unicode_ci NOT NULL,
+  `type_id` int(10) unsigned NULL COMMENT 'matches the id from the products/areas table',
+  CONSTRAINT `rpt_masterhm_headers_pk` PRIMARY KEY (`id`),
+  CONSTRAINT `rpt_masterhm_headers_fk_1` FOREIGN KEY (`report`) REFERENCES `rpt_masterhm` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
 ALTER TABLE `data_cats_in_study`
   ADD CONSTRAINT `data_cats_in_study_ibfk_1` FOREIGN KEY (`larvol_id`) REFERENCES `clinical_study` (`larvol_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `data_cats_in_study_ibfk_2` FOREIGN KEY (`category`) REFERENCES `data_categories` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
