@@ -236,15 +236,19 @@ function validateEnums($val)
 	$enum1 = array('Phase 1'=>"i", 'Phase 2'=>"ii", 'Phase 3'=>"iii", 'Phase 4'=>"iv", 'N/A'=>"not applicable",'Procedure'=>'procedure/surgery');
 	$enum2 = array('Phase 1'=>"1", 'Phase 2'=>"2", 'Phase 3'=>"3", 'Phase 4'=>"4", 'Phase 2/Phase 3'=>"phase 2-3", 'N/A'=>"none",'Phase 0'=>'0','Phase 1/Phase 2'=>"1/2");
 	$enum3 = array('Phase 1'=>"phase i", 'Phase 2'=>"phase ii", 'Phase 3'=>"phase iii", 'Phase 4'=>"phase iv", 'Phase 1/Phase 2'=>"i-ii",'Phase 1a/1b'=>"phase 1a/b");
+	$enum4 = array('Phase 2'=>"phaseii");
 	$ev1=array_search($eval1,$enum1,false);
 	$ev2=array_search($eval1,$enum2,false);
 	$ev3=array_search($eval1,$enum3,false);
+	$ev4=array_search($eval1,$enum4,false);
 	if ( isset($ev1) and $ev1  )
 		return $ev1;
 	elseif (isset($ev2) and $ev2  )
 		return $ev2;
-	else
+	elseif (isset($ev3) and $ev3  )
 		return $ev3;
+	else
+		return $ev4;
 }
 
 function ProcessChanges($id, $date, $column, $initial_date=NULL) {
@@ -427,12 +431,22 @@ function addNCT_history($rec, $id, $date) {
             return softDie('Bad SQL query adding nct_id');
         }
     }
+//echo '<pre>'; print_r($rec); echo '</pre>';
+//exit;
+
+if(isset($rec->status_block->brief_summary->textblock) and !empty($rec->status_block->brief_summary->textblock)) $bsummary=$rec->status_block->brief_summary->textblock;
+else $bsummary=$rec->brief_summary->textblock;
+if(isset($rec->status_block->detailed_descr->textblock) and !empty($rec->status_block->detailed_descr->textblock)) $ddesc=$rec->status_block->detailed_descr->textblock;
+elseif(isset($rec->detailed_description->textblock) and !empty($rec->detailed_description->textblock)) $ddesc=$rec->detailed_description->textblock;
+else $ddesc=$rec->detailed_descr->textblock;
 
     //Go through the parsed XML structure and pick out the data
     $record_data = array('brief_title' => $rec->brief_title->textblock,
         'official_title' => $rec->official_title->textblock,
-        'brief_summary' => $rec->status_block->brief_summary->textblock,
-        'detailed_description' => $rec->status_block->detailed_descr->textblock,
+//        'brief_summary' => $rec->status_block->brief_summary->textblock,
+         'brief_summary' => $bsummary,
+//        'detailed_description' => $rec->status_block->detailed_descr->textblock,
+          'detailed_description' => $ddesc,
         'why_stopped' => $rec->why_stopped,
 //        'study_design' => $rec->study_design,
 		'study_design' => $rec->design,
@@ -630,17 +644,23 @@ function addNCT_history($rec, $id, $date) {
     }
 /***** TKV
 ****** Detect and pick all irregular phases that exist in one or several of the various title or description fields */
-$phases_regex='/phase 2a\/2b|phase 1b\/2a|phase 1a\/1b|Phase 1a\/b|phase 3b\/4|Phase2b\/3|phase 1b\/2|phase 2a\/b|phase 1a|phase 1b|Phase 1C|phase 2a|phase 2b|phase 3a|phase 3b/i';
+$phases_regex='/phase 2a\/2b|phase 1b\/2a|phase 1a\/1b|Phase 1a\/b|phase 3b\/4|Phase2b\/3|phase 1b\/2|phase 2a\/b|phase 1a|phase 1b|Phase 1C|phase II|phase 2a|PHASEII|phase 2b|phase 3a|phase 3b/i';
 preg_match_all($phases_regex, $record_data['brief_title'], $matches);
 
 if(!count($matches[0]) >0 )
 {
 preg_match_all($phases_regex, $record_data['official_title'], $matches);
 }
+
+if(!count($matches[0]) >0 )
+{
+preg_match_all($phases_regex, $record_data['brief_summary'], $matches);
+}
 if(count($matches[0]) >0 )
 {
 
 	$cnt=count($matches[0]);
+
 	$record_data['phase']=ucwords($matches[0][0]);
 	
 	switch ($record_data['phase']) 
@@ -654,10 +674,12 @@ if(count($matches[0]) >0 )
 	case 'Phase 1C':
         $record_data['phase']='Phase 1c';
         break;
+	
     }
 	
 	
 }
+
 //****
 //     //import everything
 	$pid = getmypid();
