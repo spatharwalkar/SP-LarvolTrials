@@ -344,6 +344,7 @@ class ContentManager
 
 
 
+
 					$excel_params = array($sp);
 
 				} else {	
@@ -1595,23 +1596,29 @@ class ContentManager
 		return $upm_string;
 	}
 	
-	function getNonAssocUpmRecords($non_assoc_upm_params) {
-			
-	$where = '';$upms = array();
-	if ( isset($non_assoc_upm_params) and is_array($non_assoc_upm_params) )
-	foreach($non_assoc_upm_params as $key => $val){
-		$where .= textEqual('product',$val) . ' OR ';
-	}
-	$sql = "SELECT `id`, `corresponding_trial`, `product`,`event_description`, `event_link`, `result_link`, `event_type`, `start_date`, `start_date_type`, `end_date`, `end_date_type` "
-	. "FROM `upm` WHERE (`corresponding_trial` IS NULL) AND ( " . substr($where,0,-4) . " ) ORDER BY `end_date` ASC ";
-	 
-	$res = mysql_query($sql)  or tex('Bad SQL query getting unmatched upms ' . $sql);
+//get records for non associated upms
+function getNonAssocUpmRecords($non_assoc_upm_params) {
 	
-	$i = 0;
-	if(mysql_num_rows($res) > 0){
-		while($row = mysql_fetch_assoc($res)) { 
+	$where = '';$upms = array();$i = 0;
+	foreach($non_assoc_upm_params as $key => $val){
+		$where .= textEqual('`search_name`',$val) . ' OR ';
+	}
+	
+	$result = mysql_query("SELECT `id` FROM `products` WHERE ( " . substr($where,0,-4) . " ) ");
+	if(mysql_num_rows($result) > 0) {
+	
+		while($rows = mysql_fetch_assoc($result)) {
+	
+		$sql = "SELECT `id`, `corresponding_trial`, `product`,`event_description`, `event_link`, `result_link`, `event_type`, `start_date`, `start_date_type`, `end_date`, `end_date_type`  FROM `upm` WHERE `corresponding_trial` IS NULL AND `product` = '" . $rows['id'] 
+				. "' ORDER BY `end_date` ASC ";
+				
+		$res = mysql_query($sql)  or tex('Bad SQL query getting unmatched upms ' . $sql);
 		
-			$upms[$i]['id'] = $row['id'];
+		if(mysql_num_rows($res) > 0) {
+		
+			while($row = mysql_fetch_assoc($res)) { 
+			
+				$upms[$i]['id'] = $row['id'];
 			$upms[$i]['corresponding_trial'] = $row['corresponding_trial'];
 			$upms[$i]['product'] = $row['product'];
 			$upms[$i]['event_description'] = htmlspecialchars($row['event_description']);
@@ -1622,10 +1629,14 @@ class ContentManager
 			$upms[$i]['start_date_type'] = $row['start_date_type'];
 			$upms[$i]['end_date'] 	= $row['end_date'];
 			$upms[$i]['end_date_type'] = $row['end_date_type'];
-			
-			$i++;
+				
+				$i++;
+			}
 		}
+		
 	}
+	}
+	
 	return $upms;
 }
 
@@ -2580,10 +2591,11 @@ if($stacked)
 		$end_month = date('m',strtotime($value['inactive_date']));
 		$end_year = date('Y',strtotime($value['inactive_date']));
 		
+		if($value['section'] > $ii)
+		$ii=$value['section'];
 		
 		
-		
-			if( isset($process_params['ltype'][$ii]) and isset($value['section']) and $value['section']==$ii and isset($value["NCT/brief_title"]) )  
+			if( isset($process_params['ltype'][$ii]) and isset($value['section']) and $value['section']==$ii and isset($value["NCT/brief_title"]) )
 		{
 			
 			$pdf_output.='<tr><td align="left" colspan="50" valign="middle" bgcolor="#A2FF97" >'.$process_params['ltype'][$ii].'</td></tr>';
@@ -2622,7 +2634,7 @@ if($stacked)
 			$start_date='';
 			else
 			$start_date=date('m/y',strtotime($value["NCT/start_date"]));
-			$pdf_output.='<td align="center" valign="middle" bgcolor="'.$bgcol.'">'.$value["NCT/start_date"].'</td>';
+			$pdf_output.='<td align="center" valign="middle" bgcolor="'.$bgcol.'">'.$start_date.'</td>';
 			
 			//if($value["NCT/primary_completion_date"] == '' || $value["NCT/primary_completion_date"] == NULL || $value["NCT/primary_completion_date"] == '0000-00-00')
 			//$primary_completion_date='';
@@ -2803,8 +2815,15 @@ else
 }	
 
 $bgcol="#f0f0f0";
-$pdf_output.='</table>
-			<br>
+$pdf_output.='</table>';
+
+$i=2;
+if(isset($newupmarray) and is_array($newupmarray))
+	{
+	
+	
+	
+	$pdf_output.='<br>
 			<div align="center">
 			<img src="images/Larvol-Trial-Logo-notag.png" align="center" alt="Main" width="327" height="47" id="header" /><br>
 			<font style="font-weight:100;">UPMs</font>
@@ -2822,11 +2841,8 @@ $pdf_output.='</table>
 			 <th align="center" valign="middle" bgcolor="'.$bgcol.'"  class="borderOk" >Start</th>
 			 <th align="center" valign="middle" bgcolor="'.$bgcol.'" class="borderOk">End</th>
 			 <th align="center" valign="middle" bgcolor="'.$bgcol.'" class="borderOk">Result link</th>
-			 <tr></thead>';
-
-$i=2;
-if(isset($newupmarray) and is_array($newupmarray))
-	{
+			 </tr></thead>';
+			 
 	foreach ($newupmarray as $ke=>$valu)
 	{	$phase_color="#C5E5FA";
 	if(isset($valu) and is_array($valu)) {
@@ -2834,20 +2850,20 @@ if(isset($newupmarray) and is_array($newupmarray))
 	{		
 		$pdf_output.='<tr><td align="center" valign="middle" bgcolor="'.$phase_color.'">'.$value["corresponding_trial"].'</td>';	
 		$pdf_output.='<td align="center" valign="middle" bgcolor="'.$phase_color.'">'.$value["product"].'</td>';
+		$pdf_output.='<td align="center" valign="middle" bgcolor="'.$phase_color.'">'.$value["event_description"].'</td>';
 		$pdf_output.='<td align="center" valign="middle" bgcolor="'.$phase_color.'">'.$value["status"].'</td>';
 		$pdf_output.='<td align="center" valign="middle" bgcolor="'.$phase_color.'">'.$$value["condition"].'</td>';
 		$pdf_output.='<td align="center" valign="middle" bgcolor="'.$phase_color.'">'.$value["start_date"].'</td>';
 		$pdf_output.='<td align="center" valign="middle" bgcolor="'.$phase_color.'">'.$value["end_date"].'</td>';
-		//$pdf_output.='<td align="center" valign="middle" bgcolor="'.$phase_color.'">Link</td>';
 		
 		
 		if( (!isset($value["result_link"]) or empty($value["result_link"])) )
 		{
-			$pdf_output.='<td align="center" valign="middle" bgcolor="'.$phase_color.'">&nbsp;</td></tr>'; 
+			$pdf_output.='<td align="center" valign="middle" bgcolor="'.$phase_color.'">&nbsp;</td>'; 
 		}
 		else
 		{
-			$pdf_output.='<td align="center" valign="middle" bgcolor="'.$phase_color.'"><a style="text-decoration:none;  color:#000000";" href="'.$value["result_link"].'" title="'.$value["result_link"].'" target="_blank">&nbsp;</a></td></tr>'; 
+			$pdf_output.='<td align="center" valign="middle" bgcolor="'.$phase_color.'"><a style="text-decoration:none;  color:#000000";" href="'.$value["result_link"].'" title="'.$value["result_link"].'" target="_blank">Link</a></td>'; 
 		}
 		
 		
