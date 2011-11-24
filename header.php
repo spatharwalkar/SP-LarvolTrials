@@ -50,6 +50,7 @@ if($db->loggedIn())
 			. '</div>');
 	}
 	echo('::<div class="drop">Reports<br />'
+		. '<a href="master_heatmap.php">Master HM</a><br />'
 		. '<a href="report_heatmap.php">Heatmap</a><br />'
 		. '<a href="report_update.php">Update Scan</a><br />'
 		. '<a href="report_trial_tracker.php">Trial Tracker</a>'

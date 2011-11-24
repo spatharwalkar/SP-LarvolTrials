@@ -316,4 +316,8 @@ iframe{
 .expiry label {
 	background-color:#fff;
 }
-	
+
+.ottlink {
+	color:#000000!important;
+	text-decoration:none;
+}
