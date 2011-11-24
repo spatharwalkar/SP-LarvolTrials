@@ -1844,6 +1844,10 @@ if($stacked)
 {
 	foreach ($excelarray as $key=>$value)
 	{
+	
+	if($value['section'] > $ii)
+		$ii=$value['section'];
+		
 		if( isset($process_params['ltype'][$ii]) and isset($value['section']) and $value['section']==$ii and isset($value["NCT/brief_title"]) )  
 		{
 			$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $process_params['ltype'][$ii]);
