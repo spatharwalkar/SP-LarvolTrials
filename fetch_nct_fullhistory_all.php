@@ -39,7 +39,20 @@ global $maxid;
 
 ini_set('max_execution_time', '9000000'); //250 hours
 ignore_user_abort(true);
-if($_POST['mode']=='web') $nct_ids=get_nctids_from_web();
+if($_POST['mode']=='web') 
+
+$query="SELECT * FROM nctids limit 1";
+$res=@mysql_query($sql);
+if(!$res) $nct_ids=get_nctids_from_web();
+else
+{
+	$nct_ids=array();
+	query='select nctid from nctids where id>0';
+	$res = mysql_query($query);
+	if($res === false) die('Bad SQL query getting nctids from local table');
+	while($row = mysql_fetch_assoc($res)) $nct_ids[$row['nctid']] = 1;
+}
+
 if(!isset($nct_ids))
 {
 	$query = 'SELECT * FROM update_status_fullhistory where status="1" and trial_type="NCT" order by update_id desc limit 1' ;
@@ -230,6 +243,7 @@ function get_nctids_from_web()
 		$nl = '<br>';
 		$now = strtotime('now');
 		echo($nl . 'Current time ' . date('Y-m-d H:i:s', strtotime('now')) . $nl);		
+
 	}
 	return $ids;
 

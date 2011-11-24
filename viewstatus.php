@@ -304,30 +304,69 @@ function runscraper()
 	ignore_user_abort(true);
 	if(!isset($nct_ids))
 	{
-		$query = 'SELECT * FROM update_status_fullhistory where status="1" and trial_type="NCT" order by update_id desc limit 1' ;
-		$res = mysql_query($query) or die('Bad SQL query finding ready updates ');
-		$res = mysql_fetch_array($res) ;
+		$query="SELECT * FROM nctids limit 1";
+		$res=@mysql_query($query);
+		if($res)  // temporaray table
+		{
+			$nct_ids=array();
+			$query='select nctid from nctids where id>0';
+			$res = mysql_query($query);
+			if($res === false) die('Bad SQL query getting nctids from local table');
+			echo '<br> Picking up nctids from local table "nctids" <br>';
+			while($row = mysql_fetch_assoc($res)) $nct_ids[$row['nctid']] = 1;
+			unset($res);unset($row);
+			
+			
+			$query = 'SELECT * FROM update_status_fullhistory where status="1" and trial_type="NCT" order by update_id desc limit 1' ;
+			$res = mysql_query($query) or die('Bad SQL query finding ready updates ');
+			$res = mysql_fetch_array($res) ;
+			if ( isset($res['process_id']) )
+			{
+				$pr_id=$res['process_id'];
+				$pid = getmypid();
+				$up_id= ((int)$res['update_id']);
+				$up_it_pr=((int)$res['update_items_progress']);
+				$cid = ((int)$res['current_nctid']); 
+				$maxid = ((int)$res['max_nctid']); 
+				$query = 'UPDATE  update_status_fullhistory SET status= "2",er_message="",process_id="' . $pid . '"   WHERE status="1" and process_id = "' . $pr_id .'" ;' ;
+				$res = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory. Query:' . $query );
+				$pr_id=$pid ;
+				unset($res);
+			}
+			
+		}
+
+		else 
+		{
+			
+			$query = 'SELECT * FROM update_status_fullhistory where status="1" and trial_type="NCT" order by update_id desc limit 1' ;
+			$res = mysql_query($query) or die('Bad SQL query finding ready updates ');
+			$res = mysql_fetch_array($res) ;
+		}
 	}	
-	if ( isset($res['process_id']) )
+	if ( isset($res['process_id']) ) // nctids to be picked up from data_values
 	{
-		
+		$pr_id=$res['process_id'];
 		$pid = getmypid();
 		$up_id= ((int)$res['update_id']);
 		$cid = ((int)$res['current_nctid']); 
 		$maxid = ((int)$res['max_nctid']); 
-		$query = 'UPDATE  update_status_fullhistory SET status= "2",er_message=""  WHERE process_id = "' . $pr_id .'" ;' ;
+		$up_it_pr=((int)$res['update_items_progress']);
+		$query = 'UPDATE  update_status_fullhistory SET status= "2",er_message="",process_id="' . $pid . '"  WHERE process_id = "' . $pr_id .'" ;' ;
 		$res = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory. Query:' . $query );
+		$pr_id=$pid ;
 		fetch_records($pid,$cid,$maxid,$up_id);
 		exit;
 	}
 
-	else
-	{
-		$query = 'SELECT MAX(update_id) AS maxid FROM update_status_fullhistory' ;
+	else  // nctids to be picked up from array
+	{ 
+/*		$query = 'SELECT MAX(update_id) AS maxid FROM update_status_fullhistory' ;
 		$res = mysql_query($query) or die('Bad SQL query finding highest update id');
 		$res = mysql_fetch_array($res) ;
 		$up_id = (isset($res['maxid'])) ? ((int)$res['maxid'])+1 : 1;
 		$fid = getFieldId('NCT','nct_id');
+		
 		if(!isset($nct_ids))
 		{
 			$query = 'SELECT MAX(val_int) AS maxid FROM data_values WHERE `field`=' . $fid;
@@ -338,47 +377,27 @@ function runscraper()
 		}
 		else
 		{
-			reset($nct_ids); $val=key($nct_ids); $cid = unpadnct($val);
-			end($nct_ids); $val=key($nct_ids); $maxid = unpadnct($val);
-		}
+*/		
+		ksort($nct_ids); reset($nct_ids); $val=key($nct_ids);
+		if(!isset($cid)) $cid = unpadnct($val);
+		end($nct_ids);$val=key($nct_ids); $maxid = unpadnct($val);
+//		}
 
-		/***************************************************/
-		//$maxid = $cid+40;  
-		/***************************************************/
 
-		$cid_=$cid;
-		if(!isset($nct_ids))
-		{
-			for($totalncts=0; $cid_ <= $maxid; $cid_=$cid_+1)
-			{
-				$vl = validate_nctid($cid_,$maxid);
-				if( isset($vl[1] )) 
-				{
-					$cid_=$vl[1];
-					++$totalncts;
-				}
-				else
-				break;
-			}
-		}
-		else
-		{
-			$totalncts = count($nct_ids);
-		}
+		
+	
+		$totalncts = count($nct_ids);
+	
 		$pid = getmypid();
 
-		if ($totalncts > 0)
-		{
-		$query = 'INSERT into update_status_fullhistory (update_id,process_id,status,update_items_total,start_time,max_nctid,trial_type) 
-				  VALUES ("'.$up_id.'","'. $pid .'","'. 2 .'",
-				  "' . $totalncts . '","'. date("Y-m-d H:i:s", strtotime('now')) .'", "'. $maxid .'", "NCT"  ) ;';
-		$res = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory. Query:' . $query);
-		}
-		else die("No valid nctids found.");
+		if (!$totalncts > 0) die("No valid nctids found.");
 
 		//go
 		echo('Refreshing from: ' . $cid . ' to: ' . $maxid . '<br />'); @flush();
-		fetch_records($pid,$cid,$maxid,$up_id);
+		
+		if(!isset($nct_ids)) fetch_records($pid,$cid,$maxid,$up_id,$up_it_pr);
+		else fetch_records_2($nct_ids,$pid,$up_id,$maxid,$cid,$up_it_pr);
+		
 	}
 
 	
@@ -400,6 +419,34 @@ function runscraper()
 			return array(false,0);
 	}
 	
+	function fetch_records_2($nct_ids,$pr_id,$up_id,$maxid,$cid,$up_it_pr)
+	{ 	
+		
+		$tot_items=count($nct_ids);
+		$v1=array();
+		$current_id=$cid;
+		
+		foreach($nct_ids as $key => $val)
+		{
+			$cid=unpadnct($key);
+			if( intval($cid) >= intval($current_id) ) // do not re-import previous ones
+			{
+				scrape_history($cid);
+				$query = ' UPDATE  update_status_fullhistory SET process_id = "'. $pr_id  .'" , update_items_progress= "' . ( ($tot_items >= $up_it_pr) ? ($up_it_pr) : $tot_items  ) . '" , status="2", current_nctid="'. $cid .'", updated_time="' . date("Y-m-d H:i:s", strtotime('now'))  . '" WHERE update_id="' . $up_id .'" and trial_type="NCT"  ;' ;
+				$res = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory. Query:' . $query);
+				$up_it_pr++;
+				@flush();
+			}
+			
+		}
+
+
+	$query = 'UPDATE  update_status_fullhistory SET status=0, process_id = "'. $pr_id  .'" , end_time="' . date("Y-m-d H:i:s", strtotime('now')) . '" WHERE update_id="' . $up_id .'" ;' ;
+	$res = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory. Query:' . $query );
+	echo('<br>Done with all IDs.');
+
+	}
+	
 	function fetch_records($pr_id,$cid,$maxid,$up_id)
 	{ 	
 		$query = 'SELECT update_items_progress,update_items_total FROM update_status_fullhistory WHERE update_id="' . $up_id .'" and trial_type="NCT" limit 1 ;' ;
@@ -411,8 +458,7 @@ function runscraper()
 		$v1=array();
 		for($i=1; $cid <= $maxid; $cid=$cid+1)
 		{
-			if(!isset($nct_ids)) $vl = validate_nctid($cid,$maxid);
-			else $v1[1]=isset($nct_ids[padnct($cid)]) ? $cid : NULL ;
+			$vl = validate_nctid($cid,$maxid);
 			if( isset($vl[1] )) 
 			{
 			$cid=$vl[1];
