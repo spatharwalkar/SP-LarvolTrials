@@ -1588,23 +1588,28 @@ class ContentManager
 		return $upm_string;
 	}
 	
-	function getNonAssocUpmRecords($non_assoc_upm_params) {
-			
-	$where = '';$upms = array();
-	if ( isset($non_assoc_upm_params) and is_array($non_assoc_upm_params) )
-	foreach($non_assoc_upm_params as $key => $val){
-		$where .= textEqual('product',$val) . ' OR ';
-	}
-	$sql = "SELECT `id`, `corresponding_trial`, `product`,`event_description`, `event_link`, `result_link`, `event_type`, `start_date`, `start_date_type`, `end_date`, `end_date_type` "
-	. "FROM `upm` WHERE (`corresponding_trial` IS NULL) AND ( " . substr($where,0,-4) . " ) ORDER BY `end_date` ASC ";
-	 
-	$res = mysql_query($sql)  or tex('Bad SQL query getting unmatched upms ' . $sql);
+function getNonAssocUpmRecords($non_assoc_upm_params) {
 	
-	$i = 0;
-	if(mysql_num_rows($res) > 0){
-		while($row = mysql_fetch_assoc($res)) { 
+	$where = '';$upms = array();$i = 0;
+	foreach($non_assoc_upm_params as $key => $val){
+		$where .= textEqual('`search_name`',$val) . ' OR ';
+	}
+	
+	$result = mysql_query("SELECT `id` FROM `products` WHERE ( " . substr($where,0,-4) . " ) ");
+	if(mysql_num_rows($result) > 0) {
+	
+		while($rows = mysql_fetch_assoc($result)) {
+	
+		$sql = "SELECT `id`, `corresponding_trial`, `product`,`event_description`, `event_link`, `result_link`, `event_type`, `start_date`, `start_date_type`, `end_date`, `end_date_type`  FROM `upm` WHERE `corresponding_trial` IS NULL AND `product` = '" . $rows['id'] 
+				. "' ORDER BY `end_date` ASC ";
+				
+		$res = mysql_query($sql)  or tex('Bad SQL query getting unmatched upms ' . $sql);
 		
-			$upms[$i]['id'] = $row['id'];
+		if(mysql_num_rows($res) > 0) {
+		
+			while($row = mysql_fetch_assoc($res)) { 
+			
+				$upms[$i]['id'] = $row['id'];
 			$upms[$i]['corresponding_trial'] = $row['corresponding_trial'];
 			$upms[$i]['product'] = $row['product'];
 			$upms[$i]['event_description'] = htmlspecialchars($row['event_description']);
@@ -1615,10 +1620,14 @@ class ContentManager
 			$upms[$i]['start_date_type'] = $row['start_date_type'];
 			$upms[$i]['end_date'] 	= $row['end_date'];
 			$upms[$i]['end_date_type'] = $row['end_date_type'];
-			
-			$i++;
+				
+				$i++;
+			}
 		}
+		
 	}
+	}
+	
 	return $upms;
 }
 	
@@ -1905,9 +1914,9 @@ if($stacked)
 			$objPHPExcel->getActiveSheet()->setCellValue('H' . $i, $value["NCT/intervention_name"]);
 			}
 			
-			if(isset($value["NCT/start_date"])) 				$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, $value["NCT/start_date"]);
+			if(isset($value["NCT/start_date"])) 				$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, date('m/y',strtotime($value["NCT/start_date"])));
 			//if(isset($value["NCT/primary_completion_date"])) 	$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, $value["NCT/primary_completion_date"]);
-			if(isset($value["inactive_date"])) 	$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, $value["inactive_date"]);
+			if(isset($value["inactive_date"])) 	$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, date('m/y',strtotime($value["inactive_date"])));
 			if(isset($value["NCT/phase"])) 						$objPHPExcel->getActiveSheet()->setCellValue('K' . $i, $value["NCT/phase"]);
 			if($bgcol=="D5D3E6") $bgcol="EDEAFF"; 	else $bgcol="D5D3E6";
 			
@@ -2163,9 +2172,9 @@ else
 			$value["NCT.intervention_name"]=fix_special_chars($value["NCT.intervention_name"]);
 			$objPHPExcel->getActiveSheet()->setCellValue('H' . $i, $value["NCT.intervention_name"]);
 		}
-		if(isset($value["NCT.start_date"])) 				$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, $value["NCT.start_date"]);
+		if(isset($value["NCT.start_date"])) 				$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, date('m/y',strtotime($value["NCT.start_date"])));
 		//if(isset($value["NCT.primary_completion_date"])) 	$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, $value["NCT.primary_completion_date"]);
-		if(isset($value["inactive_date"])) 	$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, $value["inactive_date"]);
+		if(isset($value["inactive_date"])) 	$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, date('m/y',strtotime($value["inactive_date"])));
 		if(isset($value["NCT.phase"])) 						$objPHPExcel->getActiveSheet()->setCellValue('K' . $i, $value["NCT.phase"]);
 		if($bgcol=="D5D3E6") $bgcol="EDEAFF"; 	else $bgcol="D5D3E6";
 		
@@ -2559,4 +2568,4 @@ $objWriter->save('php://output');
 
 exit;
 }
-?> 
+?>
