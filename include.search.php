@@ -300,7 +300,7 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 		$res = mysql_query($query);
 		if($res === false)
 		{
-			$log = 'Bad SQL query applying search condition: ' . $query;
+			$log = 'Bad SQL query applying search condition: mysql_error=' . mysql_error() . ' query=' . $query;
 			global $logger;
 			$logger->fatal($log);
 			return softDie($log);	
@@ -411,7 +411,7 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 			$res = mysql_query($query);
 			if($res === false)
 			{
-				$log = 'Bad SQL query getting category of field for sorting';
+				$log = 'Bad SQL query getting category of field for sorting: mysql_error=' . mysql_error() . ' query=' . $query;
 				global $logger;
 				$logger->fatal($log);
 				return softDie($log);
@@ -814,7 +814,7 @@ function search_single_trial($params=array(),$time=NULL,$studyCat=NULL,$list=arr
 		$res = mysql_query($query);
 		if($res === false)
 		{
-			$log = 'Bad SQL query applying search condition: ' . $query;
+			$log = 'Bad SQL query applying search condition: mysql_error=' . mysql_error() . ' query=' . $query;
 			global $logger;
 			$logger->fatal($log);
 			return softDie($log);	
@@ -867,7 +867,7 @@ function search_single_trial($params=array(),$time=NULL,$studyCat=NULL,$list=arr
 		$seq = mysql_query($seq);
 		if($seq === false)
 		{
-			$log = 'Bad SQL query applying strong exclusions';
+			$log = 'Bad SQL query applying strong exclusions : mysql_error=' . mysql_error() ;
 			global $logger;
 			$logger->fatal($log);
 			return softDie($log);
@@ -930,7 +930,7 @@ function search_single_trial($params=array(),$time=NULL,$studyCat=NULL,$list=arr
 			$res = mysql_query($query);
 			if($res === false)
 			{
-				$log = 'Bad SQL query getting category of field for sorting';
+				$log = 'Bad SQL query getting category of field for sorting: mysql_error=' . mysql_error() . ' query=' . $query;
 				global $logger;
 				$logger->fatal($log);
 				return softDie($log);
@@ -1283,7 +1283,7 @@ function getRecords($ids,$fields,$time)
 		
 	if($res === false)
 	{
-		$log = 'Bad SQL query getting global fields for result list<br />'.$query;
+		$log = 'Bad SQL query getting global fields for result list:  mysql_error=' . mysql_error() . ' query=' . $query;
 		global $logger;
 		$logger->fatal($log);
 		return softDie($log);
@@ -1409,7 +1409,7 @@ function getEnumvalId($fieldId,$value)
 		
 	if($res === false)
 	{
-		$log = 'Bad SQL query getting ID of enumval ' . $value . ' in field ' . $fieldId;
+		$log = 'Bad SQL query getting ID of enumval ' . $value . ' in field ' . $fieldId . '  Mysql_error=' . mysql_error() . ' query=' . $query; 
 		global $logger;
 		$logger->fatal($log);
 		return softDie($log);
@@ -1749,7 +1749,7 @@ function validateInputPCRE($post)
 				$res = mysql_query($query);
 				if($res === false)
 				{
-					$log = 'Bad SQL query getting field name for '.$CFid;
+					$log = 'Bad SQL query getting field name for '.$CFid . '  Mysql_error=' . mysql_error() . ' query=' . $query;
 					$logger->fatal($log);
 					die($log);
 					unset($log);
@@ -1772,7 +1772,7 @@ function validateInputPCRE($post)
 				$res = mysql_query($query);
 				if($res === false)
 				{
-					$log = 'Bad SQL query getting field name for '.$CFid;
+					$log = 'Bad SQL query getting field name for '.$CFid . '  Mysql_error=' . mysql_error() . ' query=' . $query;
 					$logger->fatal($log);
 					die($log);
 					unset($log);
