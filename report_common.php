@@ -53,8 +53,8 @@ function reportListCommon($reportTable,$disperr=null)
 			}
 			$out .= '</ul>';
 			$out .='<div class="tar"><input type="submit" value="Delete" title="Delete"/></div></fieldset></form></div>';
-			
 			break;
+			
 		case 'rpt_trial_tracker':
 			
 			$out = '<div style="display:block;float:left;"><form method="post" action="report_trial_tracker.php" class="lisep">'
@@ -78,8 +78,8 @@ function reportListCommon($reportTable,$disperr=null)
 			}
 			$out .= '</ul>';
 			$out .='<div class="tar"><input type="submit" value="Delete" title="Delete"/></div></fieldset></form></div>';
-			
 			break;
+			
 		case 'rpt_update':
 			
 			global $activeUpdated;
@@ -110,9 +110,49 @@ function reportListCommon($reportTable,$disperr=null)
 			if(strlen($disperr)) $out .= '<br clear="all"/><span class="error">' . $disperr . '</span>';
 			if(strlen($activeUpdated)) $out .= '<br clear="all"/><span class="info">Selections updated!</span>';
 			$out .= '</fieldset></form></div>';
-			
 			break;
-		
+			
+		case 'rpt_master_heatmap':
+			$out = '<div style="display:block;float:left;"><form method="post" action="master_heatmap.php" class="lisep">'
+					. '<input type="submit" name="makenew" value="Create new" style="float:none;" /></form><br clear="all"/>'
+					. '<form name="reportlist" method="post" action="master_heatmap.php" class="lisep" onsubmit="return chkbox(this);">'
+					. '<fieldset><legend>Select Report</legend>';
+			$out .= '<div class="tar">Del</div><ul>';
+			$query = 'SELECT id,name,user,category FROM `rpt_masterhm` WHERE user IS NULL OR user=' . $db->user->id . ' ORDER BY user';
+			$res = mysql_query($query) or die('Bad SQL query retrieving master heatmap report names');
+			$categoryArr  = array('');
+			$outArr = array();
+			while($row = mysql_fetch_array($res))
+			{
+				if($row['category'])
+				$categoryArr[$row['category']] = $row['category'];
+				$outArr[] = $row;
+			}
+			sort($categoryArr);
+			
+			foreach($categoryArr as $category)
+			{
+				$out .= '<li>'.$category.'<ul>';
+				foreach($outArr as $row)
+				{
+					$ru = $row['user'];
+					if($row['category']== $category)
+					{
+						$out .= '<li' . ($ru === NULL ? ' class="global"' : '') . '><a href="master_heatmap.php?id=' . $row['id'] . '">'
+								. htmlspecialchars(strlen($row['name'])>0?$row['name']:('(report '.$row['id'].')')) . '</a>';
+						if($ru == $db->user->id || ($ru === NULL && $db->user->userlevel != 'user'))
+						{
+							$out .= ' &nbsp; &nbsp; &nbsp; <label class="lbldel"><input type="checkbox" class="delrep" name="delrep[' 
+							. $row['id']. ']" title="Delete"/></label>';
+						}
+						$out .= '</li>';				
+					}
+				}
+				$out .='</ul></li>';
+			}
+			$out .= '</ul>';
+			$out .='<div class="tar"><input type="submit" value="Delete" title="Delete"/></div></fieldset></form></div>';
+			break;
 	}
 	return $out;
 }
