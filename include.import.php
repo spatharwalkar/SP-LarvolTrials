@@ -87,12 +87,21 @@ function addNCT($rec)
 		if(mysql_query($query) === false) return softDie('Bad SQL query adding nct_id');
 	}
 	
+	//echo '<pre>'; print_r($rec); echo '</pre>';
+	
+	if(isset($rec->status_block->brief_summary->textblock) and !empty($rec->status_block->brief_summary->textblock)) $bsummary=$rec->status_block->brief_summary->textblock;
+else $bsummary=$rec->brief_summary->textblock;
+if(isset($rec->status_block->detailed_descr->textblock) and !empty($rec->status_block->detailed_descr->textblock)) $ddesc=$rec->status_block->detailed_descr->textblock;
+elseif(isset($rec->detailed_description->textblock) and !empty($rec->detailed_description->textblock)) $ddesc=$rec->detailed_description->textblock;
+else $ddesc=$rec->detailed_descr->textblock;
 	
 	//Go through the parsed XML structure and pick out the data
 	$record_data =array('brief_title' => $rec->brief_title,
 						'official_title' => $rec->official_title,
-						'brief_summary' => $rec->brief_summary->textblock,
-						'detailed_description' => $rec->detailed_description->textblock,
+						//'brief_summary' => $rec->brief_summary->textblock,
+						 'brief_summary' => $bsummary,
+						//'detailed_description' => $rec->detailed_description->textblock,
+						  'detailed_description' => $ddesc,
 						'why_stopped' => $rec->why_stopped,
 						'study_design' => $rec->study_design,
 						'biospec_descr' => $rec->biospec_descr->textblock,
@@ -165,12 +174,18 @@ function addNCT($rec)
 	$record_data['secondary_outcome_measure'] = array();
 	$record_data['secondary_outcome_timeframe'] = array();
 	$record_data['secondary_outcome_safety_issue'] = array();
-	foreach($rec->secondary_outcome as $out)
-	{
-		$record_data['secondary_outcome_measure'][] = $out->measure;
+
+	foreach ($rec->secondary_outcome as $out) {
+	
+		if(isset($out->measure))    
+		{
+			$record_data['secondary_outcome_measure'][] = $out->measure;
+		}
+        else $record_data['secondary_outcome_measure'][] = $out;
 		$record_data['secondary_outcome_timeframe'][] = $out->time_frame;
 		$record_data['secondary_outcome_safety_issue'][] = ynbool($out->safety_issue);
-	}
+    }
+	
 	$record_data['condition'] = array();
 	foreach($rec->condition as $con) $record_data['condition'][] = $con;	
 	$record_data['arm_group_label'] = array();

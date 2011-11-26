@@ -46,6 +46,7 @@ $mapping = array(
 	'measure' => 'primary_outcome_measure',
     'primary_outcome-time_frame' => 'primary_outcome_timeframe',
     'primary_outcome-safety_issue' => 'primary_outcome_safety_issue',
+	'secondary_outcome' => 'secondary_outcome_measure', //duplicate for when secondary_outcome_measure is shown as just "secondary_outcome"
     'secondary_outcome-measure' => 'secondary_outcome_measure',
     'secondary_outcome-time_frame' => 'secondary_outcome_timeframe',
     'secondary_outcome-safety_issue' => 'secondary_outcome_safety_issue',
@@ -536,9 +537,16 @@ else $ddesc=$rec->detailed_descr->textblock;
     $record_data['secondary_outcome_timeframe'] = array();
     $record_data['secondary_outcome_safety_issue'] = array();
     foreach ($rec->secondary_outcome as $out) {
-        $record_data['secondary_outcome_measure'][] = $out->measure;
-        $record_data['secondary_outcome_timeframe'][] = $out->time_frame;
-        $record_data['secondary_outcome_safety_issue'][] = ynbool($out->safety_issue);
+	
+		if(isset($out->measure))    
+		{
+			$record_data['secondary_outcome_measure'][] = $out->measure;
+		}
+        else $record_data['secondary_outcome_measure'][] = $out;
+		$record_data['secondary_outcome_timeframe'][] = $out->time_frame;
+		$record_data['secondary_outcome_safety_issue'][] = ynbool($out->safety_issue);
+
+
     }
     $record_data['condition'] = array();
     foreach ($rec->condition as $con)
@@ -792,7 +800,6 @@ function addval_d($studycat, $category_id, $fieldname, $value, $date) {
         if (count($oldids)) 
 		{
             $query = 'UPDATE data_values SET superceded="' . $DTnow . '" WHERE id IN(' . implode(',', $oldids) . ')';
-			
             $res1=mysql_query($query);
 			if( !$res1  and ( mysql_errno() <> 1213 and mysql_errno() <> 1205 )  ) // error
 				return softDie('Bad SQL query marking old values' . mysql_error() . '<br />' . $query);
@@ -1328,7 +1335,7 @@ function commit_diff($studycat, $category_id, $fieldname, $value, $date, $operat
 			else $value2 = $value1;
 			
 			$query = 'UPDATE data_values SET superceded="' . $DTnow . '" WHERE studycat=' . $studycat . ' AND superceded is NULL  and added < "' . $DTnow . '" and ' ;
-			$query .=  'val_' . $type . '= "' . $value2 . '" and field=' . $field . '  ';
+			$query .=  'val_' . $type . '= "' . $value2 . '" and field=' . $field . ' limit 1  ';
 			}
 		else
 		{
@@ -1339,8 +1346,7 @@ function commit_diff($studycat, $category_id, $fieldname, $value, $date, $operat
 
 			$query = 'UPDATE data_values SET superceded="' . $DTnow . '" WHERE studycat=' . $studycat . ' AND superceded is NULL  and added < "' . $DTnow . '"  and ' ;
 			$query .= $type=="date" ? ('"' . $value2 . '"'   ) : ('val_' . $type);
-			$query .= '= "' . $value2 . '" and field=' . $field . '  ';
-
+			$query .= '= "' . $value2 . '" and field=' . $field . ' limit 1  ';
 //			$query = 'UPDATE data_values SET superceded="' . $DTnow . '" WHERE studycat=' . $studycat . ' AND superceded is NULL  and added < "' . $DTnow . '"  and field=' . $field . '  ';
 		}
 		if (mysql_query($query) === false)
