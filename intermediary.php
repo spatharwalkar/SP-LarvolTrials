@@ -369,7 +369,7 @@ class ContentManager
 			. '&nbsp;<div class="drop"><div class="text">Show Only</div>'
 			. '<span id="filteropt">' . (isset($_GET["list"]) ? $this->{$_GET["list"].'status'} : $this->activestatus) 
 			. '</span></div>'
-			. '&nbsp;&nbsp;<div class="drop"style="margin-left:215px;"><div class="text">Show Only</div>');
+			. '&nbsp;&nbsp;<div class="drop" style="margin-left:215px;"><div class="text">Show Only</div>');
 			
 		foreach($enumvals as $k => $v){ 
 			echo '<input type="checkbox" id="' . $v . '" name="institution[]" value="' . $v . '" '
@@ -787,12 +787,21 @@ class ContentManager
 			//Added to consolidate the data returned in an mutidimensional array format as opposed to earlier 
 			//when it was not returned in an mutidimensional array format.
 			$indx = 0;
-			foreach($arrr as $k => $v) { 
-				foreach($v as $kk => $vv) { 
-					if($kk != 'NCT/condition' && $kk != 'NCT/intervention_name' && 'NCT/lead_sponsor')
-						$arr[$indx][$kk] = (is_array($vv)) ? implode(' ', $vv) : $vv;
+			foreach($arrr as $k => $v) 
+			{ 
+				foreach($v as $kk => $vv) 
+				{ 
+					if($kk != 'NCT/condition' && $kk != 'NCT/intervention_name' && $kk != 'NCT/lead_sponsor')
+					{
+						if($kk == 'NCT/start_date' || $kk == 'inactive_date')
+							$arr[$indx][$kk] = (is_array($vv)) ? $vv[0] : $vv;
+						else
+							$arr[$indx][$kk] = (is_array($vv)) ? implode(' ', $vv) : $vv;
+					}
 					else
+					{
 						$arr[$indx][$kk] = (is_array($vv)) ? implode(', ', $vv) : $vv;
+					}
 				}
 				++$indx;
 			}
@@ -1462,12 +1471,21 @@ class ContentManager
 			$all_ids = array();
 			
 			$arrr = search($params,$this->fid,NULL,$this->time_machine);
-			foreach($arrr as $k => $v) {
-				foreach($v as $kk => $vv) {
-					if($kk != 'NCT/condition' && $kk != 'NCT/intervention_name' && 'NCT/lead_sponsor')
-						$arr[$v['NCT/nct_id']][$kk] = (is_array($vv)) ? implode(' ', $vv) : $vv;
+			foreach($arrr as $k => $v) 
+			{
+				foreach($v as $kk => $vv) 
+				{
+					if($kk != 'NCT/condition' && $kk != 'NCT/intervention_name' && $kk != 'NCT/lead_sponsor')
+					{
+						if($kk == 'NCT/start_date' || $kk == 'inactive_date')
+							$arr[$indx][$kk] = (is_array($vv)) ? $vv[0] : $vv;
+						else
+							$arr[$indx][$kk] = (is_array($vv)) ? implode(' ', $vv) : $vv;
+					}
 					else
+					{
 						$arr[$v['NCT/nct_id']][$kk] = (is_array($vv)) ? implode(', ', $vv) : $vv;
+					}
 				}
 			}
 			
@@ -2247,7 +2265,7 @@ function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last,
 					}
 					
 					echo '<td rowspan="' . $rowspan . '" class="' . $row_type_one . $attr . '" ><div class="rowcollapse">'; 
-					if($type_arr[$i]["NCT/start_date"] != '' || $type_arr[$i]["NCT/start_date"] != NULL) {
+					if($type_arr[$i]["NCT/start_date"] != '' && $type_arr[$i]["NCT/start_date"] != NULL && $type_arr[$i]["NCT/start_date"] != '0000-00-00') {
 						echo date('m/y',strtotime($type_arr[$i]["NCT/start_date"]));
 					} else {
 						echo '&nbsp;';
@@ -2260,7 +2278,7 @@ function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last,
 						$attr = ' title="New record" ';
 						
 					echo '<td rowspan="' . $rowspan . '" class="' . $row_type_one . '" ' . $attr . '><div class="rowcollapse">';
-					if($type_arr[$i]["inactive_date"] != '' || $type_arr[$i]["inactive_date"] != NULL) {
+					if($type_arr[$i]["inactive_date"] != '' && $type_arr[$i]["inactive_date"] != NULL && $type_arr[$i]["inactive_date"] != '0000-00-00') {
 						echo date('m/y',strtotime($type_arr[$i]["inactive_date"]));
 					} else {
 						echo '&nbsp;';
