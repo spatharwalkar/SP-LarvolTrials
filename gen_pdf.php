@@ -2476,21 +2476,12 @@ if(isset($upm_string) and is_array($upm_string))
 //$upm_string=array_unique($upm_string);
 }
 										 
-										 
-
-	
-		
+									 		
 $current_yr	= date('Y');
 $second_yr	= date('Y')+1;
 $third_yr	= date('Y')+2;		
 	 
 			 
-		 
-
-	
-	
-
-
 
 $bgcol="#D5D3E6";
 
@@ -2544,6 +2535,22 @@ foreach ($upm_string as $ke=>$valu)
 	}
 }
 
+
+
+
+///Part added to set start date as only one if there are multiple dates exists in start date field
+$start_setter=count($excelarray);
+if($start_setter>0)
+{
+	for ($dump=0; $dump<$start_setter; $dump++)
+	{
+	if($excelarray[$dump]['NCT/start_date'] != '' && $excelarray[$dump]['NCT/start_date'] != NULL && $excelarray[$dump]['NCT/start_date'] != '0000-00-00')
+	$excelarray[$dump]['NCT/start_date']=substr($excelarray[$dump]['NCT/start_date'],0,10);
+	if($excelarray[$dump]['NCT.start_date'] != '' && $excelarray[$dump]['NCT.start_date'] != NULL && $excelarray[$dump]['NCT.start_date'] != '0000-00-00')
+	$excelarray[$dump]['NCT.start_date']=substr($excelarray[$dump]['NCT.start_date'],0,10);
+	}
+}				
+///part end -date setter
 
 $pdf_output.='<html>
 <style type="text/css">
@@ -2608,7 +2615,7 @@ if($stacked)
 			if( (isset($value['section']) or $_POST['list']== 'all') and ( isset($value["NCT/brief_title"]) and !empty($value["NCT/brief_title"]) ) )
 			{
 				
-			$pdf_output.='<tr><td align="center" valign="middle" bgcolor="'.$bgcol.'" >'.$value["NCT/nct_id"].'</td>';
+			$pdf_output.='<tr><td align="center" valign="middle" bgcolor="'.$bgcol.'" >NCT'.$value["NCT/nct_id"].'</td>';
 			
  			$value["NCT/brief_title"]=fix_special_chars($value["NCT/brief_title"]);
 			$pdf_output.='<td align="center" valign="middle"  bgcolor="'.$bgcol.'"><a style="text-decoration:none;  color:#000000";" href="http://clinicaltrials.gov/ct2/show/NCT'.$value["NCT/nct_id"].'" title="Source - ClinicalTrials.gov" target="_blank"> '.$value["NCT/brief_title"].'</td>';
@@ -2716,7 +2723,7 @@ else
 	
 	if( isset($value['section']) or $_POST['list']== 'all' )
 		{
-		$pdf_output.='<tr><td align="center" valign="middle" bgcolor="'.$bgcol.'" >'.$value["NCT.nct_id"].'</td>';
+		$pdf_output.='<tr><td align="center" valign="middle" bgcolor="'.$bgcol.'" >NCT'.$value["NCT.nct_id"].'</td>';
 	
 		$value["NCT.brief_title"]=fix_special_chars($value["NCT.brief_title"]);
 		$pdf_output.='<td align="center" valign="middle"  bgcolor="'.$bgcol.'"><a style="text-decoration:none;  color:#000000";" href="http://clinicaltrials.gov/ct2/show/NCT'.$value["NCT.nct_id"].'" title="Source - ClinicalTrials.gov" target="_blank"> '.$value["NCT.brief_title"].'</td>';
@@ -2818,6 +2825,7 @@ $bgcol="#f0f0f0";
 $pdf_output.='</table>';
 
 $i=2;
+
 if(isset($newupmarray) and is_array($newupmarray))
 	{
 	
@@ -2852,7 +2860,7 @@ if(isset($newupmarray) and is_array($newupmarray))
 		$pdf_output.='<td align="center" valign="middle" bgcolor="'.$phase_color.'">'.$value["product"].'</td>';
 		$pdf_output.='<td align="center" valign="middle" bgcolor="'.$phase_color.'">'.$value["event_description"].'</td>';
 		$pdf_output.='<td align="center" valign="middle" bgcolor="'.$phase_color.'">'.$value["status"].'</td>';
-		$pdf_output.='<td align="center" valign="middle" bgcolor="'.$phase_color.'">'.$$value["condition"].'</td>';
+		$pdf_output.='<td align="center" valign="middle" bgcolor="'.$phase_color.'">'.$value["condition"].'</td>';
 		$pdf_output.='<td align="center" valign="middle" bgcolor="'.$phase_color.'">'.$value["start_date"].'</td>';
 		$pdf_output.='<td align="center" valign="middle" bgcolor="'.$phase_color.'">'.$value["end_date"].'</td>';
 		
@@ -2894,7 +2902,7 @@ $dompdf->stream("Larvol PDF_". date('Y-m-d_H.i.s') .".pdf");
 
 
 
-	//echo $pdf_output;
+	echo $pdf_output;
 exit;
 }
 ?>
