@@ -1840,6 +1840,22 @@ foreach ($upm_string as $ke=>$valu)
 	}
 }
 
+
+///Part added to set start date as only one if there are multiple dates exists in start date field
+$start_setter=count($excelarray);
+if($start_setter>0)
+{
+	for ($dump=0; $dump<$start_setter; $dump++)
+	{
+	if($excelarray[$dump]['NCT/start_date'] != '' && $excelarray[$dump]['NCT/start_date'] != NULL && $excelarray[$dump]['NCT/start_date'] != '0000-00-00')
+	$excelarray[$dump]['NCT/start_date']=substr($excelarray[$dump]['NCT/start_date'],0,10);
+	if($excelarray[$dump]['NCT.start_date'] != '' && $excelarray[$dump]['NCT.start_date'] != NULL && $excelarray[$dump]['NCT.start_date'] != '0000-00-00')
+	$excelarray[$dump]['NCT.start_date']=substr($excelarray[$dump]['NCT.start_date'],0,10);
+	}
+}				
+///part end -date setter
+
+
 if($stacked)
 {
 	foreach ($excelarray as $key=>$value)
