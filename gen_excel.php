@@ -1934,9 +1934,13 @@ if($stacked)
 			$objPHPExcel->getActiveSheet()->setCellValue('H' . $i, $value["NCT/intervention_name"]);
 			}
 			
-			if(isset($value["NCT/start_date"])) 				$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, date('m/y',strtotime($value["NCT/start_date"])));
+			if(isset($value["NCT/start_date"]) && $value["NCT/start_date"] != '' && $value["NCT/start_date"] != NULL && $value["NCT/start_date"] != '0000-00-00') 				
+			$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, date('m/y',strtotime($value["NCT/start_date"])));
 			//if(isset($value["NCT/primary_completion_date"])) 	$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, $value["NCT/primary_completion_date"]);
-			if(isset($value["inactive_date"])) 	$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, date('m/y',strtotime($value["inactive_date"])));
+			
+			if(isset($value["inactive_date"]) && $value["inactive_date"] != '' && $value["inactive_date"] != NULL && $value["inactive_date"] != '0000-00-00') 
+			$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, date('m/y',strtotime($value["inactive_date"])));
+			
 			if(isset($value["NCT/phase"])) 						$objPHPExcel->getActiveSheet()->setCellValue('K' . $i, $value["NCT/phase"]);
 			if($bgcol=="D5D3E6") $bgcol="EDEAFF"; 	else $bgcol="D5D3E6";
 			
@@ -2192,9 +2196,13 @@ else
 			$value["NCT.intervention_name"]=fix_special_chars($value["NCT.intervention_name"]);
 			$objPHPExcel->getActiveSheet()->setCellValue('H' . $i, $value["NCT.intervention_name"]);
 		}
-		if(isset($value["NCT.start_date"])) 				$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, date('m/y',strtotime($value["NCT.start_date"])));
+		if(isset($value["NCT.start_date"]) && $value["NCT.start_date"] != '' && $value["NCT.start_date"] != NULL && $value["NCT.start_date"] != '0000-00-00')
+		$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, date('m/y',strtotime($value["NCT.start_date"])));
 		//if(isset($value["NCT.primary_completion_date"])) 	$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, $value["NCT.primary_completion_date"]);
-		if(isset($value["inactive_date"])) 	$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, date('m/y',strtotime($value["inactive_date"])));
+		
+		if(isset($value["inactive_date"]) && $value["inactive_date"] != '' && $value["inactive_date"] != NULL && $value["inactive_date"] != '0000-00-00') 					
+		$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, date('m/y',strtotime($value["inactive_date"])));
+		
 		if(isset($value["NCT.phase"])) 						$objPHPExcel->getActiveSheet()->setCellValue('K' . $i, $value["NCT.phase"]);
 		if($bgcol=="D5D3E6") $bgcol="EDEAFF"; 	else $bgcol="D5D3E6";
 		
