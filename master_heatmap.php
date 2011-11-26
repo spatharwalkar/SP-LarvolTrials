@@ -11,24 +11,31 @@ require('header.php');
 ?>
 <script type="text/javascript">
 function autoComplete(fieldID)
-{
-	var options1, options2, a, b;
-	var fieldID = fieldID;
+{	
 	$(function()
 	{
-		options1 = {
-			serviceUrl:'autosuggest.php',
-			params:{table:'upm', field:'product'},
-			minChars:3 
-		};
-		options2 = {
-			serviceUrl:'autosuggest.php',
-			params:{table:'areas', field:'name'},
-			minChars:3 
-		};
-		if($('#'+fieldID).length>0)
-		a = $('#'+fieldID).autocomplete(options1);
-		b = $('#'+fieldID).autocomplete(options2);
+		if($('#'+fieldID).length > 0)
+		{	
+			var pattern1 =/products/g;
+			var pattern2 =/areas/g;
+			
+			if(pattern1.test(fieldID))
+			{	
+				var a = $('#'+fieldID).autocomplete({
+							serviceUrl:'autosuggest.php',
+							params:{table:'products', field:'name'},
+							minChars:3 
+				});
+			}
+			else if(pattern2.test(fieldID))
+			{
+				var a = $('#'+fieldID).autocomplete({
+							serviceUrl:'autosuggest.php',
+							params:{table:'areas', field:'name'},
+							minChars:3 
+				});
+			}
+		}
 	});
 }
 </script>
@@ -65,31 +72,31 @@ function editor()
 	$productIds = array();
 	while($header = mysql_fetch_array($res))
 	{
-		if($header['type'] == 'product')
+		if($header['type'] == 'area')
 		{
 			if($header['type_id'] != NULL)
 			{
-				$result =  mysql_fetch_assoc(mysql_query("SELECT id, name FROM `products` WHERE id = '" . $header['type_id'] . "' "));
+				$result =  mysql_fetch_assoc(mysql_query("SELECT id, name FROM `areas` WHERE id = '" . $header['type_id'] . "' "));
 				$columns[$header['num']] = $result['name'];
 			}
 			else
 			{
 				$columns[$header['num']] = $header['type_id'];
 			}
-			$productIds[$header['num']] = $header['type_id'];
+			$areaIds[$header['num']] = $header['type_id'];
 		}
 		else
 		{
 			if($header['type_id'] != NULL)
 			{
-				$result =  mysql_fetch_assoc(mysql_query("SELECT id, name FROM `areas` WHERE id = '" . $header['type_id'] . "' "));
+				$result =  mysql_fetch_assoc(mysql_query("SELECT id, name FROM `products` WHERE id = '" . $header['type_id'] . "' "));
 				$rows[$header['num']] = $result['name'];
 			}
 			else
 			{
 				$rows[$header['num']] = $header['type_id'];
 			}
-			$areaIds[$header['num']] = $header['type_id'];
+			$productIds[$header['num']] = $header['type_id'];
 		}
 	}
 	// SELECT MAX ROW AND MAX COL
@@ -104,8 +111,7 @@ function editor()
 	$out .= '<br clear="both" />'
 		. '<form action="master_heatmap.php" onsubmit="return chkbox(0,\'delrepe\');" method="post"><fieldset><legend>Edit report ' . $id . '</legend>'
 		. '<input type="hidden" name="id" value="' . $id . '" />'
-		. '<label>Name: <input type="text" name="reportname" value="' . htmlspecialchars($name)
-		. '"/></label>'
+		. '<label>Name: <input type="text" name="reportname" value="' . htmlspecialchars($name) . '"/></label>'
 		. '<label>Category: <input type="text" name="reportcategory" value="' . htmlspecialchars($category)
 		. '"/></label>';		
 	if($db->user->userlevel != 'user')
@@ -128,16 +134,16 @@ function editor()
 	if($db->user->userlevel != 'user' || $rptu !== NULL)
 	{
 		$out .= '<input type="submit" name="reportsave" value="Save edits" /> | '
-				. '<input type="submit" name="addarea" value="More rows" /> | '
-				. '<input type="submit" name="addproduct" value="More columns" /> | ';
+				. '<input type="submit" name="addproduct" value="More rows" /> | '
+				. '<input type="submit" name="addarea" value="More columns" /> | ';
 	}
 	$out .= '<input type="submit" name="reportcopy" value="Copy into new" />'
 			. '<br /><table class="reportcell"><tr><th></th>';
 			
 	foreach($columns as $col => $val)
 	{
-		$out .= '<th><input type="text" id="products' . $col . '" name="products[' . $col . ']" value="' . $val . '" autocomplete="off" '
-				. ' onkeyup="javascript:autoComplete(\'products'.$col.'\')" /><br />';
+		$out .= '<th><input type="text" id="areas' . $col . '" name="areas[' . $col . ']" value="' . $val . '" autocomplete="off" '
+				. ' onkeyup="javascript:autoComplete(\'areas'.$col.'\')" /><br />';
 				
 		$out .= 'Column : '.$col.' ';
 		
@@ -149,9 +155,9 @@ function editor()
 		$out .='&nbsp;&nbsp;';	
 		$out .= '<label class="lbldeln"><input class="delrepe" type="checkbox" name="deletecol[' . $col . ']" title="Delete Column '.$col.'"/></label>';
 		$out .='<br/>';
-		if(isset($productIds[$col]) && $productIds[$col] != NULL && !empty($areaIds))
+		if(isset($areaIds[$row]) && $areaIds[$row] != NULL && !empty($productIds))
 		{
-			$out .= '<a href="intermediary.php?p=' . $productIds[$col] . '&a=' . implode(',', $areaIds) . '" target="_blank" class="ottlink">Click</a>';
+			$out .= '<a href="intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$row] . '" target="_blank" class="ottlink">Click</a>';
 		}
 		$out .='<br/>';
 		$out .= '</th>';
@@ -162,6 +168,8 @@ function editor()
 		$out .= '<th width="150px">';
 		if(!empty($productIds) && !empty($areaIds))
 		{
+			$productIds = array_filter($productIds);
+			$areaIds = array_filter($areaIds);
 			$out .= '<a href="intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds) . '" target="_blank" class="ottlink">Click</a>';
 		}
 		$out .= '</th>';
@@ -169,8 +177,8 @@ function editor()
 	$out .= '</tr>';
 	foreach($rows as $row => $rval)
 	{
-		$out .= '<tr><th><input type="text" id="areas' . $row . '"  name="areas[' . $row . ']" value="' . $rval . '" autocomplete="off" '
-				. ' onkeyup="javascript:autoComplete(\'areas'.$row.'\')" /><br />';
+		$out .= '<tr><th><input type="text" id="products' . $row . '"  name="products[' . $row . ']" value="' . $rval . '" autocomplete="off" '
+				. ' onkeyup="javascript:autoComplete(\'products'.$row.'\')" /><br />';
 		
 		$out .= 'Row : '.$row.' ';
 		// UP ARROW?
@@ -179,10 +187,11 @@ function editor()
 		if($row < $max_row['num']) $out .= ' <input type="image" name="move_row_down[' . $row . ']" src="images/des.png" title="Down"/>';
 		
 		$out .='&nbsp;&nbsp;';	
+		$out .= '<label class="lbldeln"><input class="delrepe" type="checkbox" name="deleterow[' . $row . ']" title="Delete Column '.$row.'"/></label>';
 		$out .='<br/>';
-		if(isset($areaIds[$row]) && $areaIds[$row] != NULL && !empty($productIds))
+		if(isset($productIds[$col]) && $productIds[$col] != NULL && !empty($areaIds))
 		{
-			$out .= '<a href="intermediary.php?p=' . $areaIds[$row] . '&a=' . implode(',', $productIds) . '" target="_blank" class="ottlink">Click</a>';
+			$out .= '<a href="intermediary.php?p=' . $productIds[$col] . '&a=' . implode(',', $areaIds) . '" target="_blank" class="ottlink">Click</a>';
 		}
 		$out .='<br/>';
 		$out .= '</th>';
@@ -190,7 +199,7 @@ function editor()
 		foreach($columns as $col => $cval)
 		{
 			$out .= '<td style="text-align:center;">';
-			if(isset($productIds[$col]) && $productIds[$col] != NULL && isset($areaIds[$row]) && $areaIds[$row] != NULL)
+			if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($areaIds[$row]) && $areaIds[$row] != NULL)
 			{
 				$out .= '<a href="intermediary.php?p=' . $productIds[$col] . '&a=' . $areaIds[$row] . '" target="_blank" class="ottlink">Click</a>';
 			}else{
@@ -249,8 +258,7 @@ function postEd()
 		$description = mysql_real_escape_string($res['description']);
 		$category = mysql_real_escape_string($res['category']);
 		$query = 'INSERT INTO rpt_masterhm SET name="Copy of ' . (strlen($oldname) ? $oldname : ('report '.$id)) . '",user='
-				. $db->user->id . ',footnotes="' . $footnotes . '",description="' . $description . '"'
-				. ',category="'.$category.'"';
+				. $db->user->id . ',footnotes="' . $footnotes . '",description="' . $description . '"' . ',category="'.$category.'"';
 				
 		mysql_query($query) or die('Bad SQL Query saving name');
 		$newid = mysql_insert_id();
@@ -349,13 +357,13 @@ function postEd()
 		$next_row=$_POST['move_row_down']+1;
 		
 		// UPDATE ROW HEADERS
-		$sql = "SELECT id FROM `rpt_masterhm_headers` WHERE num = $current_row AND type = 'area' AND report = '$id'";
+		$sql = "SELECT id FROM `rpt_masterhm_headers` WHERE num = $current_row AND type = 'product' AND report = '$id'";
 		$query = mysql_query($sql);
 		$res=mysql_fetch_row($query);
 		$current_row_id=$res[0];
-		$sql = "UPDATE `rpt_masterhm_headers` SET num = '$next_row' WHERE id = '$current_row_id' AND type = 'area' AND report = '$id'";
+		$sql = "UPDATE `rpt_masterhm_headers` SET num = '$next_row' WHERE id = '$current_row_id' AND type = 'product' AND report = '$id'";
 		$query = mysql_query($sql);
-		$sql = "UPDATE `rpt_masterhm_headers` SET num = '$current_row' WHERE num = '$next_row' AND type = 'area' AND id <> '$current_row_id' AND report = '$id'";
+		$sql = "UPDATE `rpt_masterhm_headers` SET num = '$current_row' WHERE num = '$next_row' AND type = 'product' AND id <> '$current_row_id' AND report = '$id'";
 		$query = mysql_query($sql);
 	}
 	
@@ -369,13 +377,13 @@ function postEd()
 		$next_row=$_POST['move_row_up']-1;
 		
 		// UPDATE ROW HEADERS
-		$sql = "SELECT id FROM `rpt_masterhm_headers` WHERE num = $current_row AND type = 'area' AND report = '$id'";
+		$sql = "SELECT id FROM `rpt_masterhm_headers` WHERE num = $current_row AND type = 'product' AND report = '$id'";
 		$query = mysql_query($sql);
 		$res=mysql_fetch_row($query);
 		$current_row_id=$res[0];
-		$sql = "UPDATE `rpt_masterhm_headers` SET num = '$next_row' WHERE id = '$current_row_id' AND type = 'area' AND report = '$id'";
+		$sql = "UPDATE `rpt_masterhm_headers` SET num = '$next_row' WHERE id = '$current_row_id' AND type = 'product' AND report = '$id'";
 		$query = mysql_query($sql);
-		$sql = "UPDATE `rpt_masterhm_headers` SET num = '$current_row' WHERE num = '$next_row' AND type = 'area' AND id <> '$current_row_id' AND report = '$id'";
+		$sql = "UPDATE `rpt_masterhm_headers` SET num = '$current_row' WHERE num = '$next_row' AND type = 'product' AND id <> '$current_row_id' AND report = '$id'";
 		$query = mysql_query($sql);
 	}
 
@@ -389,14 +397,14 @@ function postEd()
 		$next_column=$_POST['move_col_left']-1;
 		
 		// UPDATE ROW HEADERS
-		$sql = "SELECT id FROM `rpt_masterhm_headers` WHERE num = $current_column AND type = 'product' AND report = '$id'";
+		$sql = "SELECT id FROM `rpt_masterhm_headers` WHERE num = $current_column AND type = 'area' AND report = '$id'";
 		$query = mysql_query($sql);
 		$res=mysql_fetch_row($query);
 		$current_column_id=$res[0];
-		$sql = "UPDATE `rpt_masterhm_headers` SET num = '$next_column' WHERE id = '$current_column_id' AND type = 'product' AND report = '$id'";
+		$sql = "UPDATE `rpt_masterhm_headers` SET num = '$next_column' WHERE id = '$current_column_id' AND type = 'area' AND report = '$id'";
 		$query = mysql_query($sql);
 		$sql 
-		= "UPDATE `rpt_masterhm_headers` SET num = '$current_column' WHERE num = '$next_column' AND type = 'product' AND id <> '$current_column_id' AND report = '$id'";
+		= "UPDATE `rpt_masterhm_headers` SET num = '$current_column' WHERE num = '$next_column' AND type = 'area' AND id <> '$current_column_id' AND report = '$id'";
 		$query = mysql_query($sql);
 	}
 	
@@ -410,14 +418,14 @@ function postEd()
 		$next_column=$_POST['move_col_right']+1;
 		
 		// UPDATE ROW HEADERS
-		$sql = "SELECT id FROM `rpt_masterhm_headers` WHERE num = $current_column AND type = 'product' AND report = '$id'";
+		$sql = "SELECT id FROM `rpt_masterhm_headers` WHERE num = $current_column AND type = 'area' AND report = '$id'";
 		$query = mysql_query($sql);
 		$res=mysql_fetch_row($query);
 		$current_column_id=$res[0];
-		$sql = "UPDATE `rpt_masterhm_headers` SET num = '$next_column' WHERE id = '$current_column_id' AND type = 'product' AND report = '$id'";
+		$sql = "UPDATE `rpt_masterhm_headers` SET num = '$next_column' WHERE id = '$current_column_id' AND type = 'area' AND report = '$id'";
 		$query = mysql_query($sql);
 		$sql 
-		= "UPDATE `rpt_masterhm_headers` SET num = '$current_column' WHERE num = '$next_column' AND type = 'product' AND id <> '$current_column_id' AND report = '$id'";
+		= "UPDATE `rpt_masterhm_headers` SET num = '$current_column' WHERE num = '$next_column' AND type = 'area' AND id <> '$current_column_id' AND report = '$id'";
 		$query = mysql_query($sql);
 	}
 	
@@ -429,12 +437,12 @@ function postEd()
 			foreach($_POST['deleterow'] as $delRow=>$stat)
 			{
 				//delete the row
-				$query = "DELETE FROM `rpt_masterhm_headers` WHERE report= $id AND `num` = $delRow AND `type` = 'area' ";
+				$query = "DELETE FROM `rpt_masterhm_headers` WHERE report= $id AND `num` = $delRow AND `type` = 'product' ";
 				mysql_query($query) or die ('Bad SQL Query removing column.');
 				
 			}
 			//after all delete rows reorder rows
-			$query = "SELECT num FROM `rpt_masterhm_headers` WHERE `report` = $id AND `type` = 'area' ORDER BY `num` ASC ";
+			$query = "SELECT num FROM `rpt_masterhm_headers` WHERE `report` = $id AND `type` = 'product' ORDER BY `num` ASC ";
 			$result = mysql_query($query);
 			$cnt = mysql_num_rows($result);
 			if($cnt>0)
@@ -442,7 +450,7 @@ function postEd()
 				$i=1;
 				while($row = mysql_fetch_assoc($result))
 				{
-					$query = "UPDATE `rpt_masterhm_headers` set `num` = $i WHERE `report` = $id and `type` = 'area' AND `num` = ".$row['num'];
+					$query = "UPDATE `rpt_masterhm_headers` set `num` = $i WHERE `report` = $id and `type` = 'product' AND `num` = ".$row['num'];
 					mysql_query($query) or die ('Bad SQL Query updating rows with new values after delete row/s operation.<br/>'.$query);
 					
 					$i++;
@@ -455,11 +463,11 @@ function postEd()
 			foreach($_POST['deletecol'] as $delCol=>$stat)
 			{
 				//delete the column
-				$query = "DELETE FROM `rpt_masterhm_headers` WHERE `report`= $id AND `num` = $delCol AND `type` = 'product' ";
+				$query = "DELETE FROM `rpt_masterhm_headers` WHERE `report`= $id AND `num` = $delCol AND `type` = 'area' ";
 				mysql_query($query) or die ('Bad SQL Query removing column.');
 			}	
 			//after all delete columns reorder columns
-			$query = "SELECT num FROM `rpt_masterhm_headers` WHERE `report` = $id AND `type` = 'product' ORDER BY `num` ASC";
+			$query = "SELECT num FROM `rpt_masterhm_headers` WHERE `report` = $id AND `type` = 'area' ORDER BY `num` ASC";
 			$result = mysql_query($query);
 			$cnt = 0;
 			$cnt = mysql_num_rows($result);
@@ -468,7 +476,7 @@ function postEd()
 				$i=1;
 				while($row = mysql_fetch_assoc($result))
 				{
-					$query = "UPDATE `rpt_masterhm_headers` set `num` = $i WHERE `report` = $id and `type` = 'column' AND `num` = ".$row['num'];
+					$query = "UPDATE `rpt_masterhm_headers` set `num` = $i WHERE `report` = $id and `type` = 'area' AND `num` = ".$row['num'];
 					mysql_query($query) or die ('Bad SQL Query updating columns with new values after delete row/s operation.<br/>'.$query);
 
 					$i++;
