@@ -2902,7 +2902,7 @@ $dompdf->stream("Larvol PDF_". date('Y-m-d_H.i.s') .".pdf");
 
 
 
-	echo $pdf_output;
+	//echo $pdf_output;
 exit;
 }
 ?>
