@@ -345,6 +345,8 @@ class ContentManager
 
 
 
+
+
 					$excel_params = array($sp);
 
 				} else {	
@@ -439,6 +441,7 @@ class ContentManager
 							++$showRecords_inactivearray_Cnt;
 						}
 				}
+
 			} else /*if(in_array($val['NCT/overall_status'], $this->actfilterarr) )*/ {
 				
 					$totactivecount++;
@@ -732,7 +735,14 @@ class ContentManager
 						}
 					}
 					
-					
+				/*  Separate Remaining UPM's - This part is added cause for some of the links the upms displayed at starting are not getting exported in PDF as well as
+				Excel - so this part gets these remainging upms separately - reference for this part has been taken from intermediary.php file 
+				[You can get that part by searcing below id line in intermediary.php file] [i think prevous code has missed tht part of code from intermediary.php 			
+				file] */
+				if(isset($row_upm_arr) && !empty($row_upm_arr)) { 
+				$firstpartof_unmatched_upm_details = getNonAssocUpm($row_upm_arr, 'rowupm',$this->time_machine,$this->edited);
+			}	
+				/* End of Separate UPM's */	
 							
 				$index++;
 				
@@ -942,9 +952,10 @@ class ContentManager
 //			$unmatched_upm_details[$ky] = getNonAssocUpm($non_assoc_upm_params, $ky,$this->time_machine,$this->edited);
 //			$ky++;
 			
-			create_pdf($process_params,$unmatched_upm_details,$this->time_machine,$this->edited);		
+			create_pdf($process_params,$unmatched_upm_details,$firstpartof_unmatched_upm_details,$this->time_machine,$this->edited);		
 			
 			
+
 		} else {
 			global $non_assoc_upm_params;
 			$page = 1;
@@ -2466,7 +2477,7 @@ function getLinkDetails($tablename, $fieldname, $parameters, $param_value) {
 	return $res;
 }
 /********************export begins/*/
-function create_pdf($process_params,$upm_string,$tm,$ed)
+function create_pdf($process_params,$upm_string,$firstpartof_upm_string,$tm,$ed)
 {
 
 ob_start();
@@ -2535,6 +2546,12 @@ foreach ($upm_string as $ke=>$valu)
 	}
 }
 
+/*  Separate Remaining UPM's */
+$first_part_newupmarray=array();
+foreach ($firstpartof_upm_string as $key => $value)
+$first_part_newupmarray[$value['id']][$key]=$value;
+$first_part_newupmarray=array_diff ($first_part_newupmarray, $newupmarray);
+/*Part End - Separate Remaining UPM's */
 
 
 
@@ -2839,6 +2856,7 @@ if(isset($newupmarray) and is_array($newupmarray))
 			<br><br><br>
 			<table width="100%" border="0" cellpadding="0" cellspacing="0">
 			 <thead><tr >
+			 <th align="center" valign="middle" bgcolor="'.$bgcol.'" class="borderOk">ID</th>
 			 <th align="center" valign="middle" bgcolor="'.$bgcol.'" class="borderOk">Corresponding Trial</th>
 			 <th align="center" valign="middle" bgcolor="'.$bgcol.'" class="borderOk">Product</th>
 			 <th align="center" valign="middle" bgcolor="'.$bgcol.'" class="borderOk" >
@@ -2850,13 +2868,49 @@ if(isset($newupmarray) and is_array($newupmarray))
 			 <th align="center" valign="middle" bgcolor="'.$bgcol.'" class="borderOk">End</th>
 			 <th align="center" valign="middle" bgcolor="'.$bgcol.'" class="borderOk">Result link</th>
 			 </tr></thead>';
+	
+	
+	/* Display - Separate Remaining UPM's */
+	foreach ($first_part_newupmarray as $ke=>$valu)
+	{	$phase_color="#C5E5FA";
+	if(isset($valu) and is_array($valu)) {
+	foreach ($valu as $key => $value)
+	{		
+		$pdf_output.='<tr><td align="center" valign="middle" bgcolor="'.$phase_color.'">'.$value["id"].'</td>';
+		$pdf_output.='<td align="center" valign="middle" bgcolor="'.$phase_color.'">'.$value["corresponding_trial"].'</td>';	
+		$pdf_output.='<td align="center" valign="middle" bgcolor="'.$phase_color.'">'.$value["product"].'</td>';
+		$pdf_output.='<td align="center" valign="middle" bgcolor="'.$phase_color.'">'.$value["event_description"].'</td>';
+		$pdf_output.='<td align="center" valign="middle" bgcolor="'.$phase_color.'">'.$value["status"].'</td>';
+		$pdf_output.='<td align="center" valign="middle" bgcolor="'.$phase_color.'">'.$value["condition"].'</td>';
+		$pdf_output.='<td align="center" valign="middle" bgcolor="'.$phase_color.'">'.$value["start_date"].'</td>';
+		$pdf_output.='<td align="center" valign="middle" bgcolor="'.$phase_color.'">'.$value["end_date"].'</td>';
+		
+		
+		if( (!isset($value["result_link"]) or empty($value["result_link"])) )
+		{
+			$pdf_output.='<td align="center" valign="middle" bgcolor="'.$phase_color.'">&nbsp;</td>'; 
+		}
+		else
+		{
+			$pdf_output.='<td align="center" valign="middle" bgcolor="'.$phase_color.'"><a style="text-decoration:none;  color:#000000";" href="'.$value["result_link"].'" title="'.$value["result_link"].'" target="_blank">Link</a></td>'; 
+		}
+		
+		
+		$i++;
+	}
+	}
+	}
+	
+	/* Display Part End - Separate Remaining UPM's */
+
 			 
 	foreach ($newupmarray as $ke=>$valu)
 	{	$phase_color="#C5E5FA";
 	if(isset($valu) and is_array($valu)) {
 	foreach ($valu as $key => $value)
 	{		
-		$pdf_output.='<tr><td align="center" valign="middle" bgcolor="'.$phase_color.'">'.$value["corresponding_trial"].'</td>';	
+		$pdf_output.='<tr><td align="center" valign="middle" bgcolor="'.$phase_color.'">'.$value["id"].'</td>';
+		$pdf_output.='<td align="center" valign="middle" bgcolor="'.$phase_color.'">'.$value["corresponding_trial"].'</td>';	
 		$pdf_output.='<td align="center" valign="middle" bgcolor="'.$phase_color.'">'.$value["product"].'</td>';
 		$pdf_output.='<td align="center" valign="middle" bgcolor="'.$phase_color.'">'.$value["event_description"].'</td>';
 		$pdf_output.='<td align="center" valign="middle" bgcolor="'.$phase_color.'">'.$value["status"].'</td>';
