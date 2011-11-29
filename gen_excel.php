@@ -724,7 +724,16 @@ class ContentManager
 							}
 						}
 					}
-					
+				
+				
+				/*  Separate Remaining UPM's - This part is added cause for some of the links the upms displayed at starting are not getting exported in PDF as well as
+				Excel - so this part gets these remainging upms separately - reference for this part has been taken from intermediary.php file 
+				[You can get that part by searcing below id line in intermediary.php file] [i think prevous code has missed tht part of code from intermediary.php 			
+				file] */
+				if(isset($row_upm_arr) && !empty($row_upm_arr)) { 
+				$firstpartof_unmatched_upm_details = getNonAssocUpm($row_upm_arr, 'rowupm',$this->time_machine,$this->edited);
+			}	
+				/* End of Separate UPM's */		
 					
 							
 				$index++;
@@ -935,7 +944,7 @@ class ContentManager
 //			$unmatched_upm_details[$ky] = getNonAssocUpm($non_assoc_upm_params, $ky,$this->time_machine,$this->edited);
 //			$ky++;
 			
-			create_excel($process_params,$unmatched_upm_details,$this->time_machine,$this->edited);		
+			create_excel($process_params,$unmatched_upm_details,$firstpartof_unmatched_upm_details,$this->time_machine,$this->edited);
 			
 			
 		} else {
@@ -1737,7 +1746,7 @@ function getLinkDetails($tablename, $fieldname, $parameters, $param_value) {
 	return $res;
 }
 /********************export begins/*/
-function create_excel($process_params,$upm_string,$tm,$ed)
+function create_excel($process_params,$upm_string,$firstpartof_upm_string,$tm,$ed)
 {
 ob_start();
 //$upm_string=array_unique($upm_string);
@@ -1839,6 +1848,14 @@ foreach ($upm_string as $ke=>$valu)
 	$newupmarray[$value['id']][$key]=$value;
 	}
 }
+
+
+/*  Separate Remaining UPM's */
+$first_part_newupmarray=array();
+foreach ($firstpartof_upm_string as $key => $value)
+$first_part_newupmarray[$value['id']][$key]=$value;
+$first_part_newupmarray=array_diff ($first_part_newupmarray, $newupmarray);
+/*Part End - Separate Remaining UPM's */
 
 
 ///Part added to set start date as only one if there are multiple dates exists in start date field
@@ -2437,14 +2454,15 @@ $objPHPExcel->setActiveSheetIndex(1);
 $objPHPExcel->getActiveSheet()->setTitle('UPMs');
 
 $objPHPExcel->getActiveSheet()->getStyle('B1:F200')->getAlignment()->setWrapText(true);
-$objPHPExcel->getActiveSheet()->setCellValue('A1' , 'Corresponding Trial');
-$objPHPExcel->getActiveSheet()->setCellValue('B1' , 'Product');
-$objPHPExcel->getActiveSheet()->setCellValue('C1' , 'Event Description');
-$objPHPExcel->getActiveSheet()->setCellValue('D1' , 'Status');
-$objPHPExcel->getActiveSheet()->setCellValue('E1' , 'Conditions');
-$objPHPExcel->getActiveSheet()->setCellValue('F1' , 'Start');
-$objPHPExcel->getActiveSheet()->setCellValue('G1' , 'End');
-$objPHPExcel->getActiveSheet()->setCellValue('H1' , 'Result link');
+$objPHPExcel->getActiveSheet()->setCellValue('A1' , 'ID');
+$objPHPExcel->getActiveSheet()->setCellValue('B1' , 'Corresponding Trial');
+$objPHPExcel->getActiveSheet()->setCellValue('C1' , 'Product');
+$objPHPExcel->getActiveSheet()->setCellValue('D1' , 'Event Description');
+$objPHPExcel->getActiveSheet()->setCellValue('E1' , 'Status');
+$objPHPExcel->getActiveSheet()->setCellValue('F1' , 'Conditions');
+$objPHPExcel->getActiveSheet()->setCellValue('G1' , 'Start');
+$objPHPExcel->getActiveSheet()->setCellValue('H1' , 'End');
+$objPHPExcel->getActiveSheet()->setCellValue('I1' , 'Result link');
 
 $styleThinBlueBorderOutline = array(
 	'borders' => array(
@@ -2459,39 +2477,44 @@ $styleThinBlueBorderOutline = array(
 	),
 );
 
-$objPHPExcel->getActiveSheet()->getStyle('A1:H1')->applyFromArray($styleThinBlueBorderOutline);
+$objPHPExcel->getActiveSheet()->getStyle('A1:I1')->applyFromArray($styleThinBlueBorderOutline);
 
 $i=2;
-if(isset($newupmarray) and is_array($newupmarray))
+
+
+
+/* Display - Separate Remaining UPM's */
+if(isset($first_part_newupmarray) and is_array($first_part_newupmarray))
 	{
-	foreach ($newupmarray as $ke=>$valu)
+	foreach ($first_part_newupmarray as $ke=>$valu)
 	{
 	if(isset($valu) and is_array($valu)) {
 	foreach ($valu as $key => $value)
 	{
-		$objPHPExcel->getActiveSheet()->getStyle('"A' . $i . ':H' . $i . '"')->applyFromArray($styleThinBlueBorderOutline);
-		$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $value["corresponding_trial"] );
-		$objPHPExcel->getActiveSheet()->setCellValue('B' . $i, $value["product"] );
-		$objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $value["event_description"] );
-		$objPHPExcel->getActiveSheet()->setCellValue('D' . $i, $value["status"]);
-		$objPHPExcel->getActiveSheet()->setCellValue('E' . $i, $value["condition"]);
-		$objPHPExcel->getActiveSheet()->setCellValue('F' . $i, $value["start_date"]);
-		$objPHPExcel->getActiveSheet()->setCellValue('G' . $i, $value["end_date"]);
-		$objPHPExcel->getActiveSheet()->setCellValue('H' . $i, "Link");
+		$objPHPExcel->getActiveSheet()->getStyle('"A' . $i . ':I' . $i . '"')->applyFromArray($styleThinBlueBorderOutline);
+		$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $value["id"] );
+		$objPHPExcel->getActiveSheet()->setCellValue('B' . $i, $value["corresponding_trial"] );
+		$objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $value["product"] );
+		$objPHPExcel->getActiveSheet()->setCellValue('D' . $i, $value["event_description"] );
+		$objPHPExcel->getActiveSheet()->setCellValue('E' . $i, $value["status"]);
+		$objPHPExcel->getActiveSheet()->setCellValue('F' . $i, $value["condition"]);
+		$objPHPExcel->getActiveSheet()->setCellValue('G' . $i, $value["start_date"]);
+		$objPHPExcel->getActiveSheet()->setCellValue('H' . $i, $value["end_date"]);
+		$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, "Link");
 		
 		if( (!isset($value["result_link"]) or empty($value["result_link"])) )
 		{
-			$objPHPExcel->getActiveSheet()->setCellValue('H' . $i, '');
+			$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, '');
 		}
 		else
 		{
-			$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($value["result_link"]);
-			$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip('Result Link');
-			$objPHPExcel->getActiveSheet()->getStyle('H' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+			$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($value["result_link"]);
+			$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('Result Link');
+			$objPHPExcel->getActiveSheet()->getStyle('I' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
 		}
 		
 		
-		$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':H' . $i )->applyFromArray
+		$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':I' . $i )->applyFromArray
 			(
 				array
 				(
@@ -2519,7 +2542,70 @@ if(isset($newupmarray) and is_array($newupmarray))
 	}
 	}
 	}
-$objPHPExcel->getActiveSheet()->getStyle('A1:H1')->applyFromArray
+
+/* Display Part End - Separate Remaining UPM's */
+
+
+
+if(isset($newupmarray) and is_array($newupmarray))
+	{
+	foreach ($newupmarray as $ke=>$valu)
+	{
+	if(isset($valu) and is_array($valu)) {
+	foreach ($valu as $key => $value)
+	{
+		$objPHPExcel->getActiveSheet()->getStyle('"A' . $i . ':I' . $i . '"')->applyFromArray($styleThinBlueBorderOutline);
+		$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $value["id"] );
+		$objPHPExcel->getActiveSheet()->setCellValue('B' . $i, $value["corresponding_trial"] );
+		$objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $value["product"] );
+		$objPHPExcel->getActiveSheet()->setCellValue('D' . $i, $value["event_description"] );
+		$objPHPExcel->getActiveSheet()->setCellValue('E' . $i, $value["status"]);
+		$objPHPExcel->getActiveSheet()->setCellValue('F' . $i, $value["condition"]);
+		$objPHPExcel->getActiveSheet()->setCellValue('G' . $i, $value["start_date"]);
+		$objPHPExcel->getActiveSheet()->setCellValue('H' . $i, $value["end_date"]);
+		$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, "Link");
+		
+		if( (!isset($value["result_link"]) or empty($value["result_link"])) )
+		{
+			$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, '');
+		}
+		else
+		{
+			$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($value["result_link"]);
+			$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('Result Link');
+			$objPHPExcel->getActiveSheet()->getStyle('I' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+		}
+		
+		
+		$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':I' . $i )->applyFromArray
+			(
+				array
+				(
+					'fill' => array
+					(
+						'type'       => PHPExcel_Style_Fill::FILL_SOLID,
+						'rotation'   => 0,
+						'startcolor' => array
+						(
+							'rgb' => 'C5E5FA'
+						),
+						'endcolor'   => array
+						(
+							'rgb' => 'C5E5FA'
+						)
+					)
+				)
+			);		
+		
+		
+		
+		
+		$i++;
+	}
+	}
+	}
+	}
+$objPHPExcel->getActiveSheet()->getStyle('A1:I1')->applyFromArray
 			(
 				array
 				(
@@ -2553,14 +2639,15 @@ $objPHPExcel->getActiveSheet()->getStyle('A1:H1')->applyFromArray
 					)
 				)
 			);
-$objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(25);
+$objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(13);			
+$objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(25);
 $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(40);			
-$objPHPExcel->getActiveSheet()->getColumnDimension('C')->setWidth(40);
-$objPHPExcel->getActiveSheet()->getColumnDimension('D')->setWidth(20);
-$objPHPExcel->getActiveSheet()->getColumnDimension('E')->setWidth(26);
-$objPHPExcel->getActiveSheet()->getColumnDimension('F')->setWidth(10);
+$objPHPExcel->getActiveSheet()->getColumnDimension('D')->setWidth(40);
+$objPHPExcel->getActiveSheet()->getColumnDimension('E')->setWidth(20);
+$objPHPExcel->getActiveSheet()->getColumnDimension('F')->setWidth(26);
 $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setWidth(10);
-$objPHPExcel->getActiveSheet()->getColumnDimension('H')->setWidth(12);		
+$objPHPExcel->getActiveSheet()->getColumnDimension('H')->setWidth(10);
+$objPHPExcel->getActiveSheet()->getColumnDimension('I')->setWidth(12);		
 
 
 
