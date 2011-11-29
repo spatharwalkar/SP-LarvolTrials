@@ -20,7 +20,7 @@ $query = 'SELECT studycat from data_values where val_int = "' . $nctid . '" and 
 	return $resu['studycat'];
 }
 
-function tindex($id,$cat)
+function tindex($id,$cat,$productz=NULL)
 {
 	if($cat=='products') $catid='8'; else $catid='9'; 
 	global $logger;
@@ -28,18 +28,22 @@ function tindex($id,$cat)
 	global $db;
 	$DTnow = date('Y-m-d H:i:s',$now);
 	
-	$productz=array();
-	if(!is_numeric($id)) return false;
-	$query = 'SELECT id,name,searchdata from '. $cat .' where searchdata IS NOT NULL ';
-	if(!$resu = mysql_query($query))
+	if(is_null($productz))
 	{
-		$log='Bad SQL query getting  details from '. $cat .' table.<br>Query=' . $query;
-		$logger->fatal($log);
-		echo $log;
-		exit;
+		
+		$productz=array();
+		if(!is_numeric($id)) return false;
+		$query = 'SELECT id,name,searchdata from '. $cat .' where searchdata IS NOT NULL ';
+		if(!$resu = mysql_query($query))
+		{
+			$log='Bad SQL query getting  details from '. $cat .' table.<br>Query=' . $query;
+			$logger->fatal($log);
+			echo $log;
+			exit;
+		}
+	//	$productz = mysql_fetch_assoc($resu);
+		while($productz[]=mysql_fetch_array($resu));
 	}
-//	$productz = mysql_fetch_assoc($resu);
-	while($productz[]=mysql_fetch_array($resu));
 	
 	if(count($productz)>0)
 	{
@@ -58,40 +62,87 @@ function tindex($id,$cat)
 			$xy = prepareParams($xy);
 	
 			$pid=$value['id'];
-		
-			$srch= search_single_trial($xy,NULL,$id);
 			
-			if($srch)
+			if(!is_null($productz) and is_null($id))	
 			{
-				$pfid=get_product_field($pid,$catid);
-//				if($pfid and $pfid=='YES') $pfid=get_product_field($pid,$catid);
-		
-				if(trial_indexed($id,$pfid))
-				{
-					$query='update data_values set field="' . $pfid . '", `added`="' . $DTnow . '", val_bool="1" where studycat=' . $id . ' and field="' . $catid .'" limit 1 ';
-					$res = mysql_query($query);
-					if($res === false)
-					{
-						$log = 'Bad SQL query pre-indexing trial. Query:' . $query;
-						$logger->fatal($log);
-						die($log);
-						unset($log);
-					}
+				$srch= search_all_trials($xy,NULL,$id);
 				
-				}
+				if($srch)
+				{
+					foreach($srch as $scat => $tmp)
+					{
+					
+					 	$pfid=get_product_field($pid,$catid);
+		//				if($pfid and $pfid=='YES') $pfid=get_product_field($pid,$catid);
+//						echo 'studyid='.$scat . 'product field id=' . $pfid .  '<br>';
+						if(trial_indexed($scat,$pfid))
+						{
+							$query='update data_values set field="' . $pfid . '", `added`="' . $DTnow . '", val_bool="1" where studycat=' . $scat . ' and field="' . $pfid .'" limit 1 ';
+							$res = mysql_query($query);
+							if($res === false)
+							{
+								$log = 'Bad SQL query pre-indexing trial. Query:1' . $query;
+								$logger->fatal($log);
+								die($log);
+								unset($log);
+							}
 						
-				else
-				{
-					$query='INSERT INTO `data_values` (`field`, `studycat`, `val_bool`, `added`) VALUES ("' . $pfid . '", "' . $id .'", "1", "' . $DTnow . '") ';
-					$res = mysql_query($query);
-					if($res === false)
-					{
-						$log = 'Bad SQL query pre-indexing trial. Query:' . $query;
-						$logger->fatal($log);
-						die($log);
-						unset($log);
+						}
+								
+						else
+						{
+							$query='INSERT INTO `data_values` (`field`, `studycat`, `val_bool`, `added`) VALUES ("' . $pfid . '", "' . $scat .'", "1", "' . $DTnow . '") ';
+							$res = mysql_query($query);
+							if($res === false)
+							{
+								$log = 'Bad SQL query pre-indexing trial. Query:2' . $query;
+								$logger->fatal($log);
+								die($log);
+								unset($log);
+							}
+						
+						}
 					}
+				}
 				
+				
+			}
+			else	
+			{
+				$srch= search_single_trial($xy,NULL,$id);
+//			return;
+				if($srch)
+				{
+					$pfid=get_product_field($pid,$catid);
+	//				if($pfid and $pfid=='YES') $pfid=get_product_field($pid,$catid);
+			
+					if(trial_indexed($id,$pfid))
+					{
+						$query='update data_values set field="' . $pfid . '", `added`="' . $DTnow . '", val_bool="1" where studycat=' . $id . ' and field="' . $pfid .'" limit 1 ';
+						$res = mysql_query($query);
+						if($res === false)
+						{
+							$log = 'Bad SQL query pre-indexing trial. Query:' . $query;
+							$logger->fatal($log);
+							die($log);
+							unset($log);
+						}
+					
+					}
+							
+					else
+					{
+						$query='INSERT INTO `data_values` (`field`, `studycat`, `val_bool`, `added`) VALUES ("' . $pfid . '", "' . $id .'", "1", "' . $DTnow . '") ';
+						$res = mysql_query($query);
+						if($res === false)
+						{
+							$log = 'Bad SQL query pre-indexing trial. Query:3' . $query;
+							$logger->fatal($log);
+							die($log);
+							unset($log);
+						}
+					
+					}
 				}
 			}
 		}
@@ -102,6 +153,7 @@ function trial_indexed($id,$pfid)
 {
 	global $logger;
 	$query = 'SELECT studycat FROM data_values where studycat=' . $id . ' and field=' . $pfid . ' LIMIT 1';
+	//echo '<br> Query=' . $query . '<br>';
 	$resu 		= mysql_query($query) ;
 	if($resu===false)
 	{
