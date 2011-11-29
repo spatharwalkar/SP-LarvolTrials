@@ -178,7 +178,14 @@ while ($row = mysql_fetch_assoc($res))
 				echo '<td>';
 				echo input_tag(array('Field'=>'searchdata'),$v,array('table'=>$table,'id'=>$upmId,'callFrom'=>'contentListingProducts'));
 				echo '</td>';				
-			}			
+			}	
+			else
+			if($columnName == 'searchdata' && $table=='areas')
+			{
+				echo '<td>';
+				echo input_tag(array('Field'=>'searchdata'),$v,array('table'=>$table,'id'=>$upmId,'callFrom'=>'contentListingAreas'));
+				echo '</td>';
+			}					
 			else
 			if($columnName == 'searchdata')
 			{
@@ -223,7 +230,14 @@ while ($row = mysql_fetch_assoc($res))
 				echo '<td>';
 				echo input_tag(array('Field'=>'searchdata'),$v,array('table'=>$table,'id'=>$upmId,'callFrom'=>'contentListingProducts'));
 				echo '</td>';				
-			}			
+			}	
+			else
+			if($columnName == 'searchdata' && $table=='areas')
+			{
+				echo '<td>';
+				echo input_tag(array('Field'=>'searchdata'),$v,array('table'=>$table,'id'=>$upmId,'callFrom'=>'contentListingAreas'));
+				echo '</td>';
+			}					
 			else
 			if($columnName == 'searchdata')
 			{
@@ -416,7 +430,7 @@ function input_tag($row,$dbVal=null,$options=array())
 		case 'searchdata':
 			$id = $options['id']?$options['id']:null;
 			$table = $options['table'];
-			if($searchData!='' && $options['callFrom']!='contentListingProducts')
+			if($searchData!='' && ($options['callFrom']!='contentListingProducts' && $options['callFrom']!='contentListingAreas'))
 			{
 				$img = 'edit.png';
 				$modifier = '[Modified]';
@@ -439,7 +453,7 @@ function input_tag($row,$dbVal=null,$options=array())
 			{
 				$modifier = $modifier;
 			}
-			elseif(isset($options['callFrom']) && $options['callFrom']=='contentListingProducts')
+			elseif(isset($options['callFrom']) && ($options['callFrom']=='contentListingProducts' || $options['callFrom']=='contentListingAreas'))
 			{
 				return $modifier;
 			}
@@ -797,12 +811,25 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		if($script=='products')
 		{
 			$upmReferenceCount = getProductUpmAssociation($id);
-			$disabled = $upmReferenceCount>0?true:false;
-			$altTitle = $disabled?'Cannot delete product as it is linked to other upms. See References.':$altTitle;
+			$MHMReferenceCount = getMHMAssociation($id,'product');
+			$disabled = ($upmReferenceCount>0 || $MHMReferenceCount>0)?true:false;
+			$altTitle = $disabled?'Cannot delete product as it is linked to other upms/MHM\'s. See References.':$altTitle;
 			echo '<tr>';
 			echo '<td>References : </td><td>'.$upmReferenceCount.' UPM</td>';
-			echo '</tr>';			
+			echo '</tr>';	
+			echo '<tr>';
+			echo '<td>References : </td><td>'.$MHMReferenceCount.' MHM</td>';
+			echo '</tr>';
 		}
+		if($script=='areas')
+		{
+			$MHMReferenceCount = getMHMAssociation($id,'product');
+			$disabled = ($MHMReferenceCount>0)?true:false;
+			$altTitle = $disabled?'Cannot delete area as it is linked to other MHM\'s. See References.':$altTitle;
+			echo '<tr>';
+			echo '<td>References : </td><td>'.$MHMReferenceCount.' MHM</td>';
+			echo '</tr>';
+		}		
 		echo '<tr>';
 		echo '<td>Delete : </td><td>'.input_tag(null,null,array('deletebox'=>true,'id'=>$id,'disabled'=>$disabled,'alttitle'=>$altTitle)).'</td>';
 		echo '</tr>';
@@ -902,6 +929,24 @@ function getProductUpmAssociation($id)
 		return $row['cnt'];
 	}
 	
+}
+
+/**
+* @name getMHMAssociation
+* @tutorial Provides count of mhm's linked to areas/products
+* @param int $id areas/products id.
+* @param string $type[areas/products]
+* @author Jithu Thomas
+*/
+function getMHMAssociation($id,$type)
+{
+	$query = "select count(h.type_id) as cnt from rpt_masterhm_headers h where h.type='$type' and h.type_id='$id'";
+	$result = mysql_query($query);
+	while($row = mysql_fetch_assoc($result))
+	{
+		return $row['cnt'];
+	}
+
 }
 
 /**

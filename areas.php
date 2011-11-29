@@ -115,7 +115,7 @@ if($_REQUEST['add_new_record']=='Add New Record' || $_REQUEST['id'] && !$_GET['s
 {
 	$id = ($_REQUEST['id'])?$_REQUEST['id']:null;
 	echo '<div>';
-	addEditUpm($id,$table,$script,array("formOnSubmit"=>"onsubmit=\"return chkbox(this,'delsearch','searchdata');\""));
+	addEditUpm($id,$table,$script,array("formOnSubmit"=>"onsubmit=\"return chkbox(this,'delsearch','searchdata');\"",'deletebox'=>true));
 	echo '</div>';
 	echo '<br/>';
 }
@@ -123,6 +123,6 @@ if($_REQUEST['add_new_record']=='Add New Record' || $_REQUEST['id'] && !$_GET['s
 
 //normal upm listing
 $start = $page*$limit;
-contentListing($start,$limit,$table,$script,array());
+contentListing($start,$limit,$table,$script,array(),array(),array('delete'=>false));
 echo '</div>';
 echo '</html>';
