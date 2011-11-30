@@ -2059,7 +2059,7 @@ if($stacked)
 			
 			}
 
-			if(isset($value["NCT/phase"]) and ( $value["NCT/phase"]=="Phase 1"  or $value["NCT/phase"]=="Phase 0/Phase 1"))
+			if(isset($value["NCT/phase"]) and ( $value["NCT/phase"]=="Phase 1"  or $value["NCT/phase"]=="Phase 0/Phase 1"  or $value["NCT/phase"]=="Phase 0/1"  or $value["NCT/phase"]=="Phase 1a"  or $value["NCT/phase"]=="Phase 1b"  or $value["NCT/phase"]=="Phase 1a/1b"  or $value["NCT/phase"]=="Phase 1c"))
 			{
 			
 				$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray
@@ -2084,7 +2084,7 @@ if($stacked)
 			
 			
 			}
-			if(isset($value["NCT/phase"]) and ( $value["NCT/phase"]=="Phase 2" or $value["NCT/phase"]=="Phase 1/Phase 2"))
+			if(isset($value["NCT/phase"]) and ( $value["NCT/phase"]=="Phase 2" or $value["NCT/phase"]=="Phase 1/Phase 2" or $value["NCT/phase"]=="Phase 1/2" or $value["NCT/phase"]=="Phase 1b/2" or $value["NCT/phase"]=="Phase 1b/2a" or $value["NCT/phase"]=="Phase 2a" or $value["NCT/phase"]=="Phase 2a/2b" or $value["NCT/phase"]=="Phase 2a/b" or $value["NCT/phase"]=="Phase 2b"))
 			{
 			
 				$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray
@@ -2110,7 +2110,7 @@ if($stacked)
 			
 			}
 			
-			if(isset($value["NCT/phase"]) and ($value["NCT/phase"]=="Phase 3" or  $value["NCT/phase"]=="Phase 2/Phase 3"))
+			if(isset($value["NCT/phase"]) and ($value["NCT/phase"]=="Phase 3" or  $value["NCT/phase"]=="Phase 2/Phase 3" or $value["NCT/phase"]=="Phase 2/3" or $value["NCT/phase"]=="Phase 2b/3" or $value["NCT/phase"]=="Phase 3a" or $value["NCT/phase"]=="Phase 3b"))
 			{
 			
 				$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray
@@ -2136,7 +2136,7 @@ if($stacked)
 			
 			}
 
-			if(isset($value["NCT/phase"]) and ( $value["NCT/phase"]=="Phase 4" or $value["NCT/phase"]=="Phase 3/Phase 4"))
+			if(isset($value["NCT/phase"]) and ( $value["NCT/phase"]=="Phase 4" or $value["NCT/phase"]=="Phase 3/Phase 4" or $value["NCT/phase"]=="Phase 3/4" or $value["NCT/phase"]=="Phase 3b/4"))
 			{
 			
 				$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray
@@ -2321,7 +2321,7 @@ else
 		
 		}
 
-		if(isset($value["NCT.phase"]) and ( $value["NCT.phase"]=="Phase 1"  or $value["NCT.phase"]=="Phase 0/Phase 1"))
+		if(isset($value["NCT.phase"]) and ( $value["NCT.phase"]=="Phase 1"  or $value["NCT.phase"]=="Phase 0/Phase 1"  or $value["NCT.phase"]=="Phase 0/1"  or $value["NCT.phase"]=="Phase 1a"  or $value["NCT.phase"]=="Phase 1b"  or $value["NCT.phase"]=="Phase 1a/1b"  or $value["NCT.phase"]=="Phase 1c"))
 		{
 		
 			$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray
@@ -2346,7 +2346,7 @@ else
 		
 		
 		}
-		if(isset($value["NCT.phase"]) and ( $value["NCT.phase"]=="Phase 2" or $value["NCT.phase"]=="Phase 1/Phase 2"))
+		if(isset($value["NCT.phase"]) and ( $value["NCT.phase"]=="Phase 2" or $value["NCT.phase"]=="Phase 1/Phase 2" or $value["NCT.phase"]=="Phase 1/2" or $value["NCT.phase"]=="Phase 1b/2" or $value["NCT.phase"]=="Phase 1b/2a" or $value["NCT.phase"]=="Phase 2a" or $value["NCT.phase"]=="Phase 2a/2b" or $value["NCT.phase"]=="Phase 2a/b" or $value["NCT.phase"]=="Phase 2b"))
 		{
 		
 			$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray
@@ -2372,7 +2372,7 @@ else
 		
 		}
 		
-		if(isset($value["NCT.phase"]) and ($value["NCT.phase"]=="Phase 3" or  $value["NCT.phase"]=="Phase 2/Phase 3"))
+		if(isset($value["NCT.phase"]) and ($value["NCT.phase"]=="Phase 3" or  $value["NCT.phase"]=="Phase 2/Phase 3" or $value["NCT.phase"]=="Phase 2/3" or $value["NCT.phase"]=="Phase 2b/3" or $value["NCT.phase"]=="Phase 3a" or $value["NCT.phase"]=="Phase 3b"))
 		{
 		
 			$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray
@@ -2398,7 +2398,7 @@ else
 		
 		}
 
-		if(isset($value["NCT.phase"]) and ( $value["NCT.phase"]=="Phase 4" or $value["NCT.phase"]=="Phase 3/Phase 4"))
+		if(isset($value["NCT.phase"]) and ( $value["NCT.phase"]=="Phase 4" or $value["NCT.phase"]=="Phase 3/Phase 4" or $value["NCT.phase"]=="Phase 3/4" or $value["NCT.phase"]=="Phase 3b/4"))
 		{
 		
 			$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray

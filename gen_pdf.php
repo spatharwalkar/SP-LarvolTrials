@@ -2702,28 +2702,28 @@ if($stacked)
 			$phase_color="#00CCFF";
 			}
 
-			elseif(isset($value["NCT/phase"]) and ( $value["NCT/phase"]=="Phase 1"  or $value["NCT/phase"]=="Phase 0/Phase 1"))
+			elseif(isset($value["NCT/phase"]) and ( $value["NCT/phase"]=="Phase 1"  or $value["NCT/phase"]=="Phase 0/Phase 1"  or $value["NCT/phase"]=="Phase 0/1"  or $value["NCT/phase"]=="Phase 1a"  or $value["NCT/phase"]=="Phase 1b"  or $value["NCT/phase"]=="Phase 1a/1b"  or $value["NCT/phase"]=="Phase 1c"))
 			{
 			$phase_color="#99CC00";
 			}
-			elseif(isset($value["NCT/phase"]) and ( $value["NCT/phase"]=="Phase 2" or $value["NCT/phase"]=="Phase 1/Phase 2"))
+			elseif(isset($value["NCT/phase"]) and ( $value["NCT/phase"]=="Phase 2" or $value["NCT/phase"]=="Phase 1/Phase 2" or $value["NCT/phase"]=="Phase 1/2" or $value["NCT/phase"]=="Phase 1b/2" or $value["NCT/phase"]=="Phase 1b/2a" or $value["NCT/phase"]=="Phase 2a" or $value["NCT/phase"]=="Phase 2a/2b" or $value["NCT/phase"]=="Phase 2a/b" or $value["NCT/phase"]=="Phase 2b"))
 			{
 			$phase_color="#FFFF00";
 			}
 			
-			elseif(isset($value["NCT/phase"]) and ($value["NCT/phase"]=="Phase 3" or  $value["NCT/phase"]=="Phase 2/Phase 3"))
+			elseif(isset($value["NCT/phase"]) and ($value["NCT/phase"]=="Phase 3" or  $value["NCT/phase"]=="Phase 2/Phase 3" or $value["NCT/phase"]=="Phase 2/3" or $value["NCT/phase"]=="Phase 2b/3" or $value["NCT/phase"]=="Phase 3a" or $value["NCT/phase"]=="Phase 3b"))
 
 			{
 			$phase_color="#FF9900";
 			}
 
-			elseif(isset($value["NCT/phase"]) and ( $value["NCT/phase"]=="Phase 4" or $value["NCT/phase"]=="Phase 3/Phase 4"))
+			elseif(isset($value["NCT/phase"]) and ( $value["NCT/phase"]=="Phase 4" or $value["NCT/phase"]=="Phase 3/Phase 4" or $value["NCT/phase"]=="Phase 3/4" or $value["NCT/phase"]=="Phase 3b/4"))
 			{
 			$phase_color="#FF0000";
 			}
 			else
 			{
-			$phase_color="#f0f0f0";
+			$phase_color="#BFBFBF";
 			}
 			
 			
@@ -2849,33 +2849,33 @@ else
 			
 		
 		if(isset($value["NCT.phase"]) and $value["NCT.phase"]=="Phase 0")
-		{
-		$phase_color="#00CCFF";
-		}
+			{
+			$phase_color="#00CCFF";
+			}
 
-		elseif(isset($value["NCT.phase"]) and ( $value["NCT.phase"]=="Phase 1"  or $value["NCT.phase"]=="Phase 0/Phase 1"))
-		{
-		$phase_color="#99CC00";
-		}
-		
-		elseif(isset($value["NCT.phase"]) and ( $value["NCT.phase"]=="Phase 2" or $value["NCT.phase"]=="Phase 1/Phase 2"))
-		{
-		$phase_color="#FFFF00";
-		}
-		
-		elseif(isset($value["NCT.phase"]) and ($value["NCT.phase"]=="Phase 3" or  $value["NCT.phase"]=="Phase 2/Phase 3"))
-		{
-		$phase_color="#FF9900";
-		}
+			elseif(isset($value["NCT.phase"]) and ( $value["NCT.phase"]=="Phase 1"  or $value["NCT.phase"]=="Phase 0/Phase 1"  or $value["NCT.phase"]=="Phase 0/1"  or $value["NCT.phase"]=="Phase 1a"  or $value["NCT.phase"]=="Phase 1b"  or $value["NCT.phase"]=="Phase 1a/1b"  or $value["NCT.phase"]=="Phase 1c"))
+			{
+			$phase_color="#99CC00";
+			}
+			elseif(isset($value["NCT.phase"]) and ( $value["NCT.phase"]=="Phase 2" or $value["NCT.phase"]=="Phase 1/Phase 2" or $value["NCT.phase"]=="Phase 1/2" or $value["NCT.phase"]=="Phase 1b/2" or $value["NCT.phase"]=="Phase 1b/2a" or $value["NCT.phase"]=="Phase 2a" or $value["NCT.phase"]=="Phase 2a/2b" or $value["NCT.phase"]=="Phase 2a/b" or $value["NCT.phase"]=="Phase 2b"))
+			{
+			$phase_color="#FFFF00";
+			}
+			
+			elseif(isset($value["NCT.phase"]) and ($value["NCT.phase"]=="Phase 3" or  $value["NCT.phase"]=="Phase 2/Phase 3" or $value["NCT.phase"]=="Phase 2/3" or $value["NCT.phase"]=="Phase 2b/3" or $value["NCT.phase"]=="Phase 3a" or $value["NCT.phase"]=="Phase 3b"))
 
-		elseif(isset($value["NCT.phase"]) and ( $value["NCT.phase"]=="Phase 4" or $value["NCT.phase"]=="Phase 3/Phase 4"))
-		{
-		$phase_color="#FF0000";
-		}
-		else
-		{
-		$phase_color="#f0f0f0";
-		}
+			{
+			$phase_color="#FF9900";
+			}
+
+			elseif(isset($value["NCT.phase"]) and ( $value["NCT.phase"]=="Phase 4" or $value["NCT.phase"]=="Phase 3/Phase 4" or $value["NCT.phase"]=="Phase 3/4" or $value["NCT.phase"]=="Phase 3b/4"))
+			{
+			$phase_color="#FF0000";
+			}
+			else
+			{
+			$phase_color="#BFBFBF";
+			}
 		
 		
 		
