@@ -346,7 +346,6 @@ class ContentManager
 
 
 
-
 					$excel_params = array($sp);
 
 				} else {	
@@ -397,14 +396,14 @@ class ContentManager
 					}
 					foreach($allUpmDetails[$val['NCT/nct_id']] as $kk => $vv) {
 						if(isset($vv['edited']) && !empty($vv['edited'])) {
-							$return_param['upmDetails'][$pk][$val['NCT/nct_id']][] = $vv;
+							$return_param['upmDetails'][$val['NCT/nct_id']][] = $vv;
 						}
 					}
 
 				} else {
 					$return_param['fin_arr'][$pk][$val['NCT/nct_id']] = array_merge($nct[$val['NCT/nct_id']], $val);
 					$return_param['all_records'][$val['NCT/nct_id']] = array_merge($nct[$val['NCT/nct_id']], $val);
-					$return_param['upmDetails'][$pk][$val['NCT/nct_id']] = $allUpmDetails[$val['NCT/nct_id']];
+					$return_param['upmDetails'][$val['NCT/nct_id']] = $allUpmDetails[$val['NCT/nct_id']];
 				}
 				
 				
@@ -742,7 +741,7 @@ class ContentManager
 				if(isset($row_upm_arr) && !empty($row_upm_arr)) { 
 				$firstpartof_unmatched_upm_details = getNonAssocUpm($row_upm_arr, 'rowupm',$this->time_machine,$this->edited);
 			}	
-				/* End of Separate UPM's */	
+				/* End of Separate UPM's */
 							
 				$index++;
 				
@@ -952,10 +951,9 @@ class ContentManager
 //			$unmatched_upm_details[$ky] = getNonAssocUpm($non_assoc_upm_params, $ky,$this->time_machine,$this->edited);
 //			$ky++;
 			
-			create_pdf($process_params,$unmatched_upm_details,$firstpartof_unmatched_upm_details,$this->time_machine,$this->edited);		
+			create_pdf($process_params,$unmatched_upm_details,$firstpartof_unmatched_upm_details, $process_params['upmDetails'], $this->time_machine,$this->edited);		
 			
 			
-
 		} else {
 			global $non_assoc_upm_params;
 			$page = 1;
@@ -1314,7 +1312,7 @@ class ContentManager
 					}
 				}
 				global $unmatched_upm_details;	
-				create_pdf($shownArr,$unmatched_upm_details,$this->time_machine,$this->edited);
+				create_pdf($shownArr,$unmatched_upm_details,$upmDetails, $this->time_machine,$this->edited);
 				
 			}
 			
@@ -1597,6 +1595,13 @@ class ContentManager
 				date('m',strtotime($val['end_date'])), date('Y',strtotime($val['end_date'])), $this->current_yr, $this->second_yr, $this->third_yr, 
 				$val['start_date'], $val['end_date'], $val['event_link'], $upm_title);
 */			
+				$current_yr	= date('Y');
+				$second_yr	= date('Y')+1;
+				$third_yr	= date('Y')+2;
+				
+				$upm_string[$i]['chart']= getUPMChart(date('m',strtotime($val['start_date'])), date('Y',strtotime($val['start_date'])), 
+				date('m',strtotime($val['end_date'])), date('Y',strtotime($val['end_date'])), $current_yr, $second_yr, $third_yr, 
+				$val['start_date'], $val['end_date'], $val['event_link'], $upm_title);
 		
 				$i++;
 				
@@ -2469,6 +2474,13 @@ function getUnmatchedUpmChanges($record_arr, $time, $edited) {
 	return $record_arr;
 }
 
+//Get html content by passing through htmlspecialchars
+function htmlformat($str)
+{
+	$str=fix_special_chars($str);
+	return htmlspecialchars($str);
+}
+
 function getLinkDetails($tablename, $fieldname, $parameters, $param_value) {
 
 	$query = "SELECT `" . $fieldname . "`, `expiry` FROM " . $tablename . " WHERE " . $parameters . " = '" . mysql_real_escape_string($param_value) . "' ";
@@ -2477,7 +2489,7 @@ function getLinkDetails($tablename, $fieldname, $parameters, $param_value) {
 	return $res;
 }
 /********************export begins/*/
-function create_pdf($process_params,$upm_string,$firstpartof_upm_string,$tm,$ed)
+function create_pdf($process_params,$upm_string,$firstpartof_upm_string,$upmDetails,$tm,$ed)
 {
 
 ob_start();
@@ -2491,8 +2503,6 @@ if(isset($upm_string) and is_array($upm_string))
 $current_yr	= date('Y');
 $second_yr	= date('Y')+1;
 $third_yr	= date('Y')+2;		
-	 
-			 
 
 $bgcol="#D5D3E6";
 
@@ -2552,8 +2562,6 @@ foreach ($firstpartof_upm_string as $key => $value)
 $first_part_newupmarray[$value['id']][$key]=$value;
 $first_part_newupmarray=array_diff ($first_part_newupmarray, $newupmarray);
 /*Part End - Separate Remaining UPM's */
-
-
 
 ///Part added to set start date as only one if there are multiple dates exists in start date field
 $start_setter=count($excelarray);
@@ -2619,6 +2627,7 @@ if($stacked)
 		$ii=$value['section'];
 		
 		
+		
 			if( isset($process_params['ltype'][$ii]) and isset($value['section']) and $value['section']==$ii and isset($value["NCT/brief_title"]) )
 		{
 			
@@ -2631,34 +2640,44 @@ if($stacked)
 			
 			if( (isset($value['section']) or $_POST['list']== 'all') and ( isset($value["NCT/brief_title"]) and !empty($value["NCT/brief_title"]) ) )
 			{
+			
+			
+			$rowspan = 1;
+			$nctid=$value["NCT/nct_id"];
+		
+			if(isset($upmDetails[$nctid])) {
 				
-			$pdf_output.='<tr><td align="center" valign="middle" bgcolor="'.$bgcol.'" >NCT'.$value["NCT/nct_id"].'</td>';
+				$rowspan = count($upmDetails[$nctid])+1;
+			}
+		
+				
+			$pdf_output.='<tr><td rowspan="' . $rowspan . '" align="center" valign="middle" bgcolor="'.$bgcol.'" >NCT'.$value["NCT/nct_id"].'</td>';
 			
  			$value["NCT/brief_title"]=fix_special_chars($value["NCT/brief_title"]);
-			$pdf_output.='<td align="center" valign="middle"  bgcolor="'.$bgcol.'"><a style="text-decoration:none;  color:#000000";" href="http://clinicaltrials.gov/ct2/show/NCT'.$value["NCT/nct_id"].'" title="Source - ClinicalTrials.gov" target="_blank"> '.$value["NCT/brief_title"].'</td>';
+			$pdf_output.='<td rowspan="' . $rowspan . '" align="center" valign="middle"  bgcolor="'.$bgcol.'"><a style="text-decoration:none;  color:#000000";" href="http://clinicaltrials.gov/ct2/show/NCT'.$value["NCT/nct_id"].'" title="Source - ClinicalTrials.gov" target="_blank"> '.$value["NCT/brief_title"].'</td>';
 			
-			$pdf_output.='<td align="center" valign="middle"  bgcolor="'.$bgcol.'">'.$value["NCT/enrollment"].'</td>';				
+			$pdf_output.='<td rowspan="' . $rowspan . '" align="center" valign="middle"  bgcolor="'.$bgcol.'">'.$value["NCT/enrollment"].'</td>';				
 			
 			$value["region"]=fix_special_chars($value["region"]);
-			$pdf_output.='<td align="center" valign="middle" bgcolor="'.$bgcol.'">'.$value["region"].'</td>';
+			$pdf_output.='<td rowspan="' . $rowspan . '" align="center" valign="middle" bgcolor="'.$bgcol.'">'.$value["region"].'</td>';
 			
-			$pdf_output.='<td align="center" valign="middle" bgcolor="'.$bgcol.'">'.$value["NCT/overall_status"].'</td>';
+			$pdf_output.='<td rowspan="' . $rowspan . '" align="center" valign="middle" bgcolor="'.$bgcol.'">'.$value["NCT/overall_status"].'</td>';
 			
 			$value["NCT/lead_sponsor"]=fix_special_chars($value["NCT/lead_sponsor"]);
-			$pdf_output.='<td align="center" valign="middle" bgcolor="'.$bgcol.'">'.$value["NCT/lead_sponsor"].'</td>';
+			$pdf_output.='<td rowspan="' . $rowspan . '" align="center" valign="middle" bgcolor="'.$bgcol.'">'.$value["NCT/lead_sponsor"].'</td>';
 			
 			$value["NCT/condition"]=fix_special_chars($value["NCT/condition"]);
-			$pdf_output.='<td align="center" valign="middle" align="center" valign="middle" bgcolor="'.$bgcol.'">'.$value["NCT/condition"].'</td>';
+			$pdf_output.='<td rowspan="' . $rowspan . '" align="center" valign="middle" align="center" valign="middle" bgcolor="'.$bgcol.'">'.$value["NCT/condition"].'</td>';
 			
 			$value["NCT/intervention_name"]=fix_special_chars($value["NCT/intervention_name"]);
-			$pdf_output.='<td align="center" valign="middle" bgcolor="'.$bgcol.'">'.$value["NCT/intervention_name"].'</td>';
+			$pdf_output.='<td rowspan="' . $rowspan . '" align="center" valign="middle" bgcolor="'.$bgcol.'">'.$value["NCT/intervention_name"].'</td>';
 			
 			
 			if($value["NCT/start_date"] == '' || $value["NCT/start_date"] == NULL || $value["NCT/start_date"] == '0000-00-00')
 			$start_date='';
 			else
 			$start_date=date('m/y',strtotime($value["NCT/start_date"]));
-			$pdf_output.='<td align="center" valign="middle" bgcolor="'.$bgcol.'">'.$start_date.'</td>';
+			$pdf_output.='<td rowspan="' . $rowspan . '" align="center" valign="middle" bgcolor="'.$bgcol.'">'.$start_date.'</td>';
 			
 			//if($value["NCT/primary_completion_date"] == '' || $value["NCT/primary_completion_date"] == NULL || $value["NCT/primary_completion_date"] == '0000-00-00')
 			//$primary_completion_date='';
@@ -2670,7 +2689,7 @@ if($stacked)
 			$inactive_date='';
 			else
 			$inactive_date=date('m/y',strtotime($value["inactive_date"]));
-			$pdf_output.='<td align="center" valign="middle" bgcolor="'.$bgcol.'">'.$inactive_date.'</td>';
+			$pdf_output.='<td rowspan="' . $rowspan . '" align="center" valign="middle" bgcolor="'.$bgcol.'">'.$inactive_date.'</td>';
 			
 			
 			
@@ -2693,6 +2712,7 @@ if($stacked)
 			}
 			
 			elseif(isset($value["NCT/phase"]) and ($value["NCT/phase"]=="Phase 3" or  $value["NCT/phase"]=="Phase 2/Phase 3"))
+
 			{
 			$phase_color="#FF9900";
 			}
@@ -2707,7 +2727,7 @@ if($stacked)
 			}
 			
 			
-			$pdf_output.='<td align="center" valign="middle" bgcolor="'.$phase_color.'">'.$value["NCT/phase"].'</td>';	
+			$pdf_output.='<td rowspan="' . $rowspan . '" align="center" valign="middle" bgcolor="'.$phase_color.'">'.$value["NCT/phase"].'</td>';	
 			
 			if($bgcol=="#D5D3E6") $bgcol="#EDEAFF"; 	else $bgcol="#D5D3E6";
 			
@@ -2715,6 +2735,36 @@ if($stacked)
 			$phase_color, $value['NCT/start_date'], $value["inactive_date"]);
 			
 			$pdf_output.=$str.'</tr>';
+			
+			///part added for getting purple bar chart
+			
+			if(isset($upmDetails[$nctid]) && !empty($upmDetails[$nctid])) {
+				
+				foreach($upmDetails[$nctid] as $k => $v) { 
+				
+					$str = '';$diamond = '';$result_image = '';
+	
+					$st_month = date('m',strtotime($v[5]));
+					$st_year = date('Y',strtotime($v[5]));
+					$ed_month = date('m',strtotime($v[6]));
+					$ed_year = date('Y',strtotime($v[6]));
+					$upm_link = $v[4];
+					$upm_result_link = $v[7];
+					$upm_title = 'title="' . htmlformat($v[0]) . '"';
+					
+					$pdf_output.='<tr>';
+					
+					//rendering upm (upcoming project completion) chart
+					 $str = getUPMChart($st_month, $st_year, $ed_month, $ed_year, $current_yr, $second_yr, $third_yr, $v[5], 
+					$v[6], $upm_link, $upm_title);
+					$pdf_output.= $str.'</tr>';
+				}
+			}		
+			
+			/////purple bar chart ends
+			
+			
+			
 			$i++;
 		}
 		
@@ -2740,6 +2790,16 @@ else
 	
 	if( isset($value['section']) or $_POST['list']== 'all' )
 		{
+		
+		$rowspan = 1;
+		$nctid=$value["NCT.nct_id"];
+		
+		if(isset($upmDetails[$nctid])) {
+				
+			$rowspan = count($upmDetails[$nctid])+1;
+		}
+		
+		
 		$pdf_output.='<tr><td align="center" valign="middle" bgcolor="'.$bgcol.'" >NCT'.$value["NCT.nct_id"].'</td>';
 	
 		$value["NCT.brief_title"]=fix_special_chars($value["NCT.brief_title"]);
@@ -2828,6 +2888,33 @@ else
 			
 		$pdf_output.=$str.'</tr>';
 			
+			///part added for getting purple bar chart
+			
+			if(isset($upmDetails[$nctid]) && !empty($upmDetails[$nctid])) {
+				
+				foreach($upmDetails[$nctid] as $k => $v) { 
+				
+					$str = '';$diamond = '';$result_image = '';
+	
+					$st_month = date('m',strtotime($v[5]));
+					$st_year = date('Y',strtotime($v[5]));
+					$ed_month = date('m',strtotime($v[6]));
+					$ed_year = date('Y',strtotime($v[6]));
+					$upm_link = $v[4];
+					$upm_result_link = $v[7];
+					$upm_title = 'title="' . htmlformat($v[0]) . '"';
+					
+					$pdf_output.='<tr>';
+					
+					//rendering upm (upcoming project completion) chart
+					 $str = getUPMChart($st_month, $st_year, $ed_month, $ed_year, $current_yr, $second_yr, $third_yr, $v[5], 
+					$v[6], $upm_link, $upm_title);
+					$pdf_output.= $value["chart"].'</tr>';
+				}
+			}		
+			
+			/////purple bar chart ends
+			
 		
 		
 		
@@ -2845,7 +2932,6 @@ $i=2;
 
 if(isset($newupmarray) and is_array($newupmarray))
 	{
-	
 	
 	
 	$pdf_output.='<br>
@@ -2867,7 +2953,10 @@ if(isset($newupmarray) and is_array($newupmarray))
 			 <th align="center" valign="middle" bgcolor="'.$bgcol.'"  class="borderOk" >Start</th>
 			 <th align="center" valign="middle" bgcolor="'.$bgcol.'" class="borderOk">End</th>
 			 <th align="center" valign="middle" bgcolor="'.$bgcol.'" class="borderOk">Result link</th>
-			 </tr></thead>';
+			 <th colspan="12" bgcolor="#f0f0f0" style="width:24px;">'.$current_yr.'</th>
+			 <th colspan="12" bgcolor="#f0f0f0" style="width:24px;">'.$second_yr.'</th>
+			 <th colspan="12" bgcolor="#f0f0f0" style="width:24px;">'.$third_yr.'</th>
+			 <th colspan="3" bgcolor="#f0f0f0" style="width:10px;" class="rightborder">+</th></tr></thead>';
 	
 	
 	/* Display - Separate Remaining UPM's */
@@ -2894,7 +2983,7 @@ if(isset($newupmarray) and is_array($newupmarray))
 		{
 			$pdf_output.='<td align="center" valign="middle" bgcolor="'.$phase_color.'"><a style="text-decoration:none;  color:#000000";" href="'.$value["result_link"].'" title="'.$value["result_link"].'" target="_blank">Link</a></td>'; 
 		}
-		
+		$pdf_output.=$value["chart"].'</tr>';
 		
 		$i++;
 	}
@@ -2927,7 +3016,7 @@ if(isset($newupmarray) and is_array($newupmarray))
 		{
 			$pdf_output.='<td align="center" valign="middle" bgcolor="'.$phase_color.'"><a style="text-decoration:none;  color:#000000";" href="'.$value["result_link"].'" title="'.$value["result_link"].'" target="_blank">Link</a></td>'; 
 		}
-		
+		$pdf_output.=$value["chart"].'</tr>';
 		
 		$i++;
 	}
@@ -2941,7 +3030,7 @@ if(isset($newupmarray) and is_array($newupmarray))
 
 
 	
-$pdf_output.='</tr></table></body></html>';
+$pdf_output.='</table></body></html>';
 
 
 require_once("dompdf/dompdf_config.inc.php");
