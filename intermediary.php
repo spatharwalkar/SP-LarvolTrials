@@ -1478,9 +1478,9 @@ class ContentManager
 					if($kk != 'NCT/condition' && $kk != 'NCT/intervention_name' && $kk != 'NCT/lead_sponsor')
 					{
 						if($kk == 'NCT/start_date' || $kk == 'inactive_date')
-							$arr[$indx][$kk] = (is_array($vv)) ? $vv[0] : $vv;
+							$arr[$v['NCT/nct_id']][$kk] = (is_array($vv)) ? $vv[0] : $vv;
 						else
-							$arr[$indx][$kk] = (is_array($vv)) ? implode(' ', $vv) : $vv;
+							$arr[$v['NCT/nct_id']][$kk] = (is_array($vv)) ? implode(' ', $vv) : $vv;
 					}
 					else
 					{
