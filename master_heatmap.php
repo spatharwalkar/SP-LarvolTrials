@@ -199,9 +199,9 @@ function editor()
 		foreach($columns as $col => $cval)
 		{
 			$out .= '<td style="text-align:center;">';
-			if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($areaIds[$row]) && $areaIds[$row] != NULL)
+			if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL)
 			{
-				$out .= '<a href="intermediary.php?p=' . $productIds[$col] . '&a=' . $areaIds[$row] . '" target="_blank" class="ottlink">Click</a>';
+				$out .= '<a href="intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col] . '" target="_blank" class="ottlink">Click</a>';
 			}else{
 				$out .= '';
 			}
