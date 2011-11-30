@@ -155,9 +155,9 @@ function editor()
 		$out .='&nbsp;&nbsp;';	
 		$out .= '<label class="lbldeln"><input class="delrepe" type="checkbox" name="deletecol[' . $col . ']" title="Delete Column '.$col.'"/></label>';
 		$out .='<br/>';
-		if(isset($areaIds[$row]) && $areaIds[$row] != NULL && !empty($productIds))
+		if(isset($areaIds[$col]) && $areaIds[$col] != NULL && !empty($productIds))
 		{
-			$out .= '<a href="intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$row] . '" target="_blank" class="ottlink">Click</a>';
+			$out .= '<a href="intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col] . '" target="_blank" class="ottlink">Click</a>';
 		}
 		$out .='<br/>';
 		$out .= '</th>';
@@ -189,9 +189,9 @@ function editor()
 		$out .='&nbsp;&nbsp;';	
 		$out .= '<label class="lbldeln"><input class="delrepe" type="checkbox" name="deleterow[' . $row . ']" title="Delete Column '.$row.'"/></label>';
 		$out .='<br/>';
-		if(isset($productIds[$col]) && $productIds[$col] != NULL && !empty($areaIds))
+		if(isset($productIds[$row]) && $productIds[$row] != NULL && !empty($areaIds))
 		{
-			$out .= '<a href="intermediary.php?p=' . $productIds[$col] . '&a=' . implode(',', $areaIds) . '" target="_blank" class="ottlink">Click</a>';
+			$out .= '<a href="intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds) . '" target="_blank" class="ottlink">Click</a>';
 		}
 		$out .='<br/>';
 		$out .= '</th>';
