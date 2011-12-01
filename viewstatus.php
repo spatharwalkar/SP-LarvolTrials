@@ -45,7 +45,19 @@ if(isset($_POST['pid']))
 				$query = 'UPDATE update_status_fullhistory SET status="'.READY.'" WHERE update_id="' . $_POST['upid'].'"';
 				
 				$res = mysql_query($query) or die('Bad SQL Query setting update ready status');
-				runscraper();
+				if($_POST['ttype']=="trial") runscraper();
+				elseif( $_POST['ttype']=="area" )
+				{
+					$_GET['productid']=0;
+					require('preindex_trials_all.php');
+				}
+				elseif( $_POST['ttype']=="product" )
+				{
+					$_GET['areaid']=0;
+					require('preindex_trials_all.php');
+				}
+
+				
 			}
 			else if($_POST['action']==2)
 			{
@@ -146,15 +158,28 @@ function showprogress()
 			$err[$i]='no';
 		}
 	}
-
+	$running_pids2=array();
 	$cmd = "ps aux|grep viewstatus";
 	exec($cmd, $output, $result);
 	for($i=0;$i < count($output); $i++)
 	{
 		$output[$i] = preg_replace("/ {2,}/", ' ',$output[$i]);
 		$exp_out=explode(" ",$output[$i]);
-		$running_pids[$i]=$exp_out[1];
+		$running_pids2[$i]=$exp_out[1];
 	}
+	$cmd = "ps aux|grep preindex_trials";
+	exec($cmd, $output, $result);
+	$j=$i+1;
+	for($i=0;$i < count($output); $i++)
+	{
+		$output[$i] = preg_replace("/ {2,}/", ' ',$output[$i]);
+		$exp_out=explode(" ",$output[$i]);
+		$running_pids2[$j]=$exp_out[1];
+		$j++;
+	}
+	
+	
+	$running_pids = array_merge($running_pids, $running_pids2);
 
 	for($i=0;$i < $count_upids; $i++)
 	{
@@ -166,17 +191,32 @@ function showprogress()
 			
 	}
 	
-
-
-	
+/********STATUS OF FULL HISTORY SCRAPER ********************************************/
 	//Get entry corresponding to nct in 'update_status_fullhistory'
 	$query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 						`update_items_total`,`update_items_progress`,`er_message`,TIMEDIFF(updated_time, start_time) AS timediff,
-						`update_items_complete_time` FROM update_status_fullhistory ';
+						`update_items_complete_time` FROM update_status_fullhistory where trial_type="NCT"';
 	$res = mysql_query($query) or die('Bad SQL Query getting update_status_fullhistory');
 	$nct_status = array();
 	while($row = mysql_fetch_assoc($res))
 	$nct_status = $row;
+	
+	$query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
+						`update_items_total`,`update_items_progress`,`er_message`,TIMEDIFF(updated_time, start_time) AS timediff,
+						`update_items_complete_time` FROM update_status_fullhistory where trial_type="PRODUCT"';
+	$res = mysql_query($query) or die('Bad SQL Query getting update_status_fullhistory');
+	$product_status = array();
+	while($row = mysql_fetch_assoc($res))
+	$product_status = $row;
+	
+	$query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
+						`update_items_total`,`update_items_progress`,`er_message`,TIMEDIFF(updated_time, start_time) AS timediff,
+						`update_items_complete_time` FROM update_status_fullhistory where trial_type="AREA"';
+	$res = mysql_query($query) or die('Bad SQL Query getting update_status_fullhistory');
+	$area_status = array();
+	while($row = mysql_fetch_assoc($res))
+	$area_status = $row;
+
 
 
 
@@ -188,6 +228,16 @@ function showprogress()
 	{
 		echo "$(\"#nct_new\").progressBar();";
 		echo "$(\"#nct_update\").progressBar({ barImage: 'images/progressbg_orange.gif'} );";
+	}
+	if(count($product_status)!=0)
+	{
+		echo "$(\"#product_status\").progressBar();";
+		echo "$(\"#product_update\").progressBar({ barImage: 'images/progressbg_orange.gif'} );";
+	}
+	if(count($area_status)!=0)
+	{
+		echo "$(\"#area_status\").progressBar();";
+		echo "$(\"#area_update\").progressBar({ barImage: 'images/progressbg_orange.gif'} );";
 	}
 	
 	echo "});";
@@ -269,6 +319,7 @@ function showprogress()
 						echo '<input type="hidden" name="action" value="1">';
 						echo '<input type="hidden" name="upid" value="'.$nct_status['update_id'].'">';
 						echo '<input type="hidden" name="pid" value="'.$nct_status['process_id'].'">';
+						echo '<input type="hidden" name="ttype" value="trial">';
 						echo '<input type="image" src="images/check.png" title="Add" style="border=0px;">';
 						echo '</form>';
 						echo '<form method="post" action="viewstatus.php">';
@@ -280,7 +331,191 @@ function showprogress()
 						echo "</td>";
 					}
 				echo "</tr>";
+			echo "</table></div>";
+		}
+/********STATUS OF PRODUCT PREINDEXING ********************************************/
+
+	echo "<div class=\"container\">";
+		echo "<table width=\"100%\" class=\"event\">";
+			echo "<tr>";
+				echo "<th width=\"100%\" align=\"center\" class=\"head1\" >Preindexing status - Products</th>";
+			echo "</tr>";
+		echo "</table>";
+		if(count($product_status)!=0)
+		{
+			echo "<table width=\"100%\" class=\"event\">";
 			echo "</table>";
+			echo "<table width=\"100%\" class=\"event\">";
+				echo "<tr>";
+					echo "<td width=\"10%\" align=\"left\" class=\"head\">Status</td>";
+					echo "<td width=\"15%\" align=\"left\" class=\"head\">Start Time</td>";
+					echo "<td width=\"15%\" align=\"left\" class=\"head\">Excution run time</td>";
+					echo "<td width=\"15%\" align=\"left\" class=\"head\">Last update time</td>";
+					echo "<td width=\"15%\" align=\"left\" class=\"head\">Progress</td>";
+					echo "<td width=\"25%\" align=\"left\" class=\"head\">Message</td>";
+					echo "<td width=\"5%\" align=\"center\" class=\"head\">Action</td>";
+				echo "</tr>";
+				echo "<tr>";
+					echo "<td align=\"left\" class=\"norm\">".$status[$product_status['status']]."</td>";
+					echo "<td align=\"left\" class=\"norm\">".$product_status['start_time']."</td>";
+					echo "<td align=\"left\" class=\"norm\">".$product_status['timediff']."</td>";
+					echo "<td align=\"left\" class=\"norm\">".$product_status['updated_time']."</td>";
+						
+					if($product_status['start_time']!="0000-00-00 00:00:00"&&$product_status['end_time']!="0000-00-00 00:00:00"&&$product_status['status']==COMPLETED)
+						$product_update_progress=100;
+					else
+						$product_update_progress=number_format(($product_status['update_items_total']==0?0:(($product_status['update_items_progress'])*100/$product_status['update_items_total'])),2);
+
+					echo "<td align=\"left\" class=\"norm\">";
+						echo "<span class=\"progressBar\" id=\"product_update\">".$product_update_progress."</span>";
+					echo "</td>";
+					echo "<td align=\"left\" class=\"norm\">".$product_status['er_message']."</td>";
+					if($product_status['status']==READY)
+					{
+						echo "<td align=\"center\" class=\"norm\">";
+						echo '<form method="post" action="viewstatus.php">';
+						echo '<input type="hidden" name="action" value="4">';
+						echo '<input type="hidden" name="upid" value="'.$product_status['update_id'].'">';
+						//echo '<input type="image" src="images/not.png" title="Cancel" style="border=0px;">';
+						echo '</form>';
+						echo "</td>";
+					}
+					elseif($product_status['status']==RUNNING)
+					{
+						echo "<td align=\"center\" class=\"norm\">";
+						echo '<form method="post" action="viewstatus.php">';
+						echo '<input type="hidden" name="action" value="2">';
+						echo '<input type="hidden" name="upid" value="'.$product_status['update_id'].'">';
+						echo '<input type="hidden" name="pid" value="'.$product_status['process_id'].'">';
+						echo '<input type="image" src="images/not.png" title="Cancel" style="border=0px;">';
+						echo '</form>';
+						echo "</td>";
+					}
+					elseif($product_status['status']==COMPLETED)
+					{
+
+					echo "<td align=\"center\" class=\"norm\">";
+						echo '<form method="post" action="viewstatus.php">';
+						echo '<input type="hidden" name="action" value="3">';
+						echo '<input type="hidden" name="upid" value="'.$product_status['update_id'].'">';
+						echo '<input type="hidden" name="pid" value="'.$product_status['process_id'].'">';
+						echo '<input type="image" src="images/not.png" title="Delete" style="border=0px;">';
+						echo '</form>';
+						echo "</td>";
+					}
+					else if($product_status['status']==ERROR||$product_status['status']==CANCELLED)
+					{
+						echo "<td align=\"center\" class=\"norm\">";
+						echo '<form method="post" action="viewstatus.php">';
+						echo '<input type="hidden" name="action" value="1">';
+						echo '<input type="hidden" name="upid" value="'.$product_status['update_id'].'">';
+						echo '<input type="hidden" name="pid" value="'.$product_status['process_id'].'">';
+						echo '<input type="hidden" name="ttype" value="product">';
+						echo '<input type="hidden" name="mode" value="start">';
+						echo '<input type="image" src="images/check.png" title="Add" style="border=0px;">';
+						echo '</form>';
+						echo '<form method="post" action="viewstatus.php">';
+						echo '<input type="hidden" name="action" value="3">';
+						echo '<input type="hidden" name="upid" value="'.$product_status['update_id'].'">';
+						echo '<input type="hidden" name="pid" value="'.$product_status['process_id'].'">';
+						echo '<input type="image" src="images/not.png" title="Delete" style="border=0px;">';
+						echo '</form>';
+						echo "</td>";
+					}
+				echo "</tr>";
+			echo "</table></div>";
+		}
+/********STATUS OF AREA PREINDEXING ********************************************/
+
+	echo "<div class=\"container\">";
+		echo "<table width=\"100%\" class=\"event\">";
+			echo "<tr>";
+				echo "<th width=\"100%\" align=\"center\" class=\"head1\" >Preindexing status - Area</th>";
+			echo "</tr>";
+		echo "</table>";
+		if(count($area_status)!=0)
+		{
+			echo "<table width=\"100%\" class=\"event\">";
+			echo "</table>";
+			echo "<table width=\"100%\" class=\"event\">";
+				echo "<tr>";
+					echo "<td width=\"10%\" align=\"left\" class=\"head\">Status</td>";
+					echo "<td width=\"15%\" align=\"left\" class=\"head\">Start Time</td>";
+					echo "<td width=\"15%\" align=\"left\" class=\"head\">Excution run time</td>";
+					echo "<td width=\"15%\" align=\"left\" class=\"head\">Last update time</td>";
+					echo "<td width=\"15%\" align=\"left\" class=\"head\">Progress</td>";
+					echo "<td width=\"25%\" align=\"left\" class=\"head\">Message</td>";
+					echo "<td width=\"5%\" align=\"center\" class=\"head\">Action</td>";
+				echo "</tr>";
+				echo "<tr>";
+					echo "<td align=\"left\" class=\"norm\">".$status[$area_status['status']]."</td>";
+					echo "<td align=\"left\" class=\"norm\">".$area_status['start_time']."</td>";
+					echo "<td align=\"left\" class=\"norm\">".$area_status['timediff']."</td>";
+					echo "<td align=\"left\" class=\"norm\">".$area_status['updated_time']."</td>";
+						
+					if($area_status['start_time']!="0000-00-00 00:00:00"&&$area_status['end_time']!="0000-00-00 00:00:00"&&$area_status['status']==COMPLETED)
+						$area_update_progress=100;
+					else
+						$area_update_progress=number_format(($area_status['update_items_total']==0?0:(($area_status['update_items_progress'])*100/$area_status['update_items_total'])),2);
+
+					echo "<td align=\"left\" class=\"norm\">";
+						echo "<span class=\"progressBar\" id=\"area_update\">".$area_update_progress."</span>";
+					echo "</td>";
+					echo "<td align=\"left\" class=\"norm\">".$area_status['er_message']."</td>";
+					if($area_status['status']==READY)
+					{
+						echo "<td align=\"center\" class=\"norm\">";
+						echo '<form method="post" action="viewstatus.php">';
+						echo '<input type="hidden" name="action" value="4">';
+						echo '<input type="hidden" name="upid" value="'.$area_status['update_id'].'">';
+						//echo '<input type="image" src="images/not.png" title="Cancel" style="border=0px;">';
+						echo '</form>';
+						echo "</td>";
+					}
+					elseif($area_status['status']==RUNNING)
+					{
+						echo "<td align=\"center\" class=\"norm\">";
+						echo '<form method="post" action="viewstatus.php">';
+						echo '<input type="hidden" name="action" value="2">';
+						echo '<input type="hidden" name="upid" value="'.$area_status['update_id'].'">';
+						echo '<input type="hidden" name="pid" value="'.$area_status['process_id'].'">';
+						echo '<input type="image" src="images/not.png" title="Cancel" style="border=0px;">';
+						echo '</form>';
+						echo "</td>";
+					}
+					elseif($area_status['status']==COMPLETED)
+					{
+
+					echo "<td align=\"center\" class=\"norm\">";
+						echo '<form method="post" action="viewstatus.php">';
+						echo '<input type="hidden" name="action" value="3">';
+						echo '<input type="hidden" name="upid" value="'.$area_status['update_id'].'">';
+						echo '<input type="hidden" name="pid" value="'.$area_status['process_id'].'">';
+						echo '<input type="image" src="images/not.png" title="Delete" style="border=0px;">';
+						echo '</form>';
+						echo "</td>";
+					}
+					else if($area_status['status']==ERROR||$area_status['status']==CANCELLED)
+					{
+						echo "<td align=\"center\" class=\"norm\">";
+						echo '<form method="post" action="viewstatus.php">';
+						echo '<input type="hidden" name="action" value="1">';
+						echo '<input type="hidden" name="upid" value="'.$area_status['update_id'].'">';
+						echo '<input type="hidden" name="pid" value="'.$area_status['process_id'].'">';
+						echo '<input type="hidden" name="ttype" value="area">';
+						echo '<input type="hidden" name="mode" value="start">';
+						echo '<input type="image" src="images/check.png" title="Add" style="border=0px;">';
+						echo '</form>';
+						echo '<form method="post" action="viewstatus.php">';
+						echo '<input type="hidden" name="action" value="3">';
+						echo '<input type="hidden" name="upid" value="'.$area_status['update_id'].'">';
+						echo '<input type="hidden" name="pid" value="'.$area_status['process_id'].'">';
+						echo '<input type="image" src="images/not.png" title="Delete" style="border=0px;">';
+						echo '</form>';
+						echo "</td>";
+					}
+				echo "</tr>";
+			echo "</table></div>";
 		}
 
 }
@@ -317,7 +552,7 @@ function runscraper()
 			unset($res);unset($row);
 			
 			
-			$query = 'SELECT * FROM update_status_fullhistory where status="1" and trial_type="NCT" order by update_id desc limit 1' ;
+			$query = 'SELECT * FROM update_status_fullhistory where status="1" and trial_type="AREA" order by update_id desc limit 1' ;
 			$res = mysql_query($query) or die('Bad SQL query finding ready updates ');
 			$res = mysql_fetch_array($res) ;
 			if ( isset($res['process_id']) )
@@ -339,7 +574,7 @@ function runscraper()
 		else 
 		{
 			
-			$query = 'SELECT * FROM update_status_fullhistory where status="1" and trial_type="NCT" order by update_id desc limit 1' ;
+			$query = 'SELECT * FROM update_status_fullhistory where status="1" and trial_type="AREA" order by update_id desc limit 1' ;
 			$res = mysql_query($query) or die('Bad SQL query finding ready updates ');
 			$res = mysql_fetch_array($res) ;
 		}

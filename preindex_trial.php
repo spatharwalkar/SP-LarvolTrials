@@ -20,14 +20,15 @@ $query = 'SELECT studycat from data_values where val_int = "' . $nctid . '" and 
 	return $resu['studycat'];
 }
 
-function tindex($id,$cat,$productz=NULL)
+function tindex($id,$cat,$productz=NULL,$up_id=NULL,$cid=NULL)
 {
 	if($cat=='products') $catid='8'; else $catid='9'; 
+	
 	global $logger;
 	global $now;
 	global $db;
 	$DTnow = date('Y-m-d H:i:s',$now);
-	
+	if(!isset($i)) $i=0;
 	if(is_null($productz))
 	{
 		
@@ -45,26 +46,26 @@ function tindex($id,$cat,$productz=NULL)
 		while($productz[]=mysql_fetch_array($resu));
 	}
 	
+	
+	if(!is_null($cid) and !empty($cid) and $cid>0) $startid=$cid; 
+	else $startid=0;
 	if(count($productz)>0)
 	{
 		foreach ($productz as $key=>$value)
 		{
-			
 			if(!isset($value['id']) or empty($value['id'])) break;
+			$cid=$value['id'];
 			$xy = (removeNullSearchdata(unserialize(base64_decode($value['searchdata']))));
 			$xy = array('action' => $xy['action'], 'searchval' => $xy['searchval'], 
 									'negate' => $xy['negate'],
 									'multifields' => $xy['multifields'], 
 									'multivalue' => $xy['multivalue'], 'weak' => $xy['weak']);
-									
-	
-
 			$xy = prepareParams($xy);
 	
 			$pid=$value['id'];
-			
-			if(!is_null($productz) and is_null($id))	
+			if(!is_null($productz) and is_null($id) and $pid>=$startid)	
 			{
+				$cid=$value['id'];
 				$srch= search_all_trials($xy,NULL,$id);
 				
 				if($srch)
@@ -81,7 +82,7 @@ function tindex($id,$cat,$productz=NULL)
 							$res = mysql_query($query);
 							if($res === false)
 							{
-								$log = 'Bad SQL query pre-indexing trial. Query:1' . $query;
+								$log = 'Bad SQL query pre-indexing trial. Query:' . $query;
 								$logger->fatal($log);
 								die($log);
 								unset($log);
@@ -95,7 +96,7 @@ function tindex($id,$cat,$productz=NULL)
 							$res = mysql_query($query);
 							if($res === false)
 							{
-								$log = 'Bad SQL query pre-indexing trial. Query:2' . $query;
+								$log = 'Bad SQL query pre-indexing trial. Query : ' . $query;
 								$logger->fatal($log);
 								die($log);
 								unset($log);
@@ -105,9 +106,22 @@ function tindex($id,$cat,$productz=NULL)
 					}
 				}
 				
+				$proc_id = getmypid();
+				$i++;
+				$ttype=$cat=='products' ? 'PRODUCT' : 'AREA';
+				$query = 'SELECT update_items_progress,update_items_total FROM update_status_fullhistory WHERE update_id="' . $up_id .'" and trial_type="' . $ttype . '" limit 1 ' ;
+				$res = mysql_query($query) or die('Bad SQL query selecting row from update_status_fullhistory. Query='.$query);
+				$res = mysql_fetch_array($res) ;
+				if ( isset($res['update_items_progress'] ) and $res['update_items_progress'] > 0 ) $updtd_items=((int)$res['update_items_progress']); else $updtd_items=0;
+				if ( isset($res['update_items_total'] ) and $res['update_items_total'] > 0 ) $tot_items=((int)$res['update_items_total']); else $tot_items=0;
+		
+				$query = ' UPDATE  update_status_fullhistory SET process_id = "'. $proc_id  .'" , update_items_progress= "' . ( ($tot_items >= $updtd_items+$i) ? ($updtd_items+$i) : $tot_items  ) . '" , status="2", current_nctid="'. $cid .'", updated_time="' . date("Y-m-d H:i:s", strtotime('now'))  . '" WHERE update_id="' . $up_id .'" and trial_type= "' . $ttype . '"  ';
+				$res = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory1. Query:' . $query);
+				@flush();
+				
 				
 			}
-			else	
+			elseif(!is_null($id))	
 			{
 				$srch= search_single_trial($xy,NULL,$id);
 //			return;
@@ -122,7 +136,7 @@ function tindex($id,$cat,$productz=NULL)
 						$res = mysql_query($query);
 						if($res === false)
 						{
-							$log = 'Bad SQL query pre-indexing trial. Query:' . $query;
+							$log = 'Bad SQL query pre-indexing trial. Query  :' . $query;
 							$logger->fatal($log);
 							die($log);
 							unset($log);
@@ -136,7 +150,7 @@ function tindex($id,$cat,$productz=NULL)
 						$res = mysql_query($query);
 						if($res === false)
 						{
-							$log = 'Bad SQL query pre-indexing trial. Query:3' . $query;
+							$log = 'Bad SQL query pre-indexing trial. Query   :' . $query;
 							$logger->fatal($log);
 							die($log);
 							unset($log);
@@ -144,7 +158,27 @@ function tindex($id,$cat,$productz=NULL)
 					
 					}
 				}
+				
+				$proc_id = getmypid();
+				$i++;
+				$ttype=$cat=='products' ? 'PRODUCT' : 'AREA';
+				$query = 'SELECT update_items_progress,update_items_total FROM update_status_fullhistory WHERE update_id="' . $up_id .'" and trial_type="' . $ttype . '" limit 1 ' ;
+				$res = mysql_query($query) or die('Bad SQL query selecting row from update_status_fullhistory. Query='.$query);
+				$res = mysql_fetch_array($res) ;
+				if ( isset($res['update_items_progress'] ) and $res['update_items_progress'] > 0 ) $updtd_items=((int)$res['update_items_progress']); else $updtd_items=0;
+				if ( isset($res['update_items_total'] ) and $res['update_items_total'] > 0 ) $tot_items=((int)$res['update_items_total']); else $tot_items=0;
+		
+				$query = ' UPDATE  update_status_fullhistory SET process_id = "'. $proc_id  .'" , update_items_progress= "' . ( ($tot_items >= $updtd_items+$i) ? ($updtd_items+$i) : $tot_items  ) . '" , status="2", current_nctid="'. $cid .'", updated_time="' . date("Y-m-d H:i:s", strtotime('now'))  . '" WHERE update_id="' . $up_id .'" and trial_type= "' . $ttype . '"  ';
+				echo '<br>' . $query . '<br>';
+				$res = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory1. Query:' . $query);
+				@flush();
+			
 			}
+			
+			
+
+			
+			
 		}
 	}
 }
