@@ -1991,13 +1991,13 @@ cellspacing="0" rowspan="2">Title</th>'
 					if($val['result_link'] != '' && $val['result_link'] != NULL) {
 						$result_image = (($val['event_type'] == 'Clinical Data') ? 'diamond' : 'checkmark' );
 						$upm_string .= '<span ' . $upm_title . '><a href="' . $val['result_link'] . '" style="color:#000;">'
-						. '<img src="images/red-' . $result_image . '.gif" alt="' . $result_image . '" style="padding-top: 0px; width: 8px; height: 8px;" border="0" /></a></span>';
+						. '<img src="images/red-' . $result_image . '.gif" alt="' . $result_image . '" style="padding-top: 3px; width: 8px; height: 8px;" border="0" /></a></span>';
 					}
 				} else {
 					if($val['result_link'] != '' && $val['result_link'] != NULL) {
 						$result_image = (($val['event_type'] == 'Clinical Data') ? 'diamond' : 'checkmark' );
 						$upm_string .= '<span ' . $upm_title . '><a href="' . $val['result_link'] . '" style="color:#000;">'
-						. '<img src="images/black-' . $result_image . '.gif" alt="' . $result_image . '" style="padding-top: 0px; width: 8px; height: 8px;" border="0" /></a></span>';
+						. '<img src="images/black-' . $result_image . '.gif" alt="' . $result_image . '" style="padding-top: 3px; width: 8px; height: 8px;" border="0" /></a></span>';
 					}
 				}
 				
