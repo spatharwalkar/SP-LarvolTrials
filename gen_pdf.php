@@ -923,7 +923,8 @@ tr.upms td a{
 	text-decoration:none;
 }
 </style>
-<body>';
+<body><br><div align="center"><img src="images/Larvol-Trial-Logo-notag.png" align="center" alt="Main" width="500" height="100" id="header" /></div>
+<br><br><br>';
 		
 		
 		
@@ -1720,7 +1721,7 @@ $dompdf->stream("Larvol PDF_". date('Y-m-d_H.i.s') .".pdf");
 			 . (($this->loggedIn) ? '<th rowspan="2" >ID</th>' : '' )
 			 . '<th cellpadding="0"
 cellspacing="0" rowspan="2">Title</th>'
-			 . '<th rowspan="2" title="Black: Actual&nbsp;&nbsp;Gray: Anticipated&nbsp;&nbsp;Red: Change greater than 20%">'
+			 . '<th title="Black: Actual&nbsp;&nbsp;Gray: Anticipated&nbsp;&nbsp;Red: Change greater than 20%">'
 			 . '<a target="_self" href="javascript:void(0);" onclick="javascript:doSorting(\'en\');">N</a></th>'
 			 . '<th rowspan="2" title="&quot;EU&quot; = European Union&nbsp;&quot;ROW&quot; = Rest of World">Region</th>'
 			 . '<th rowspan="2">Interventions</th>'
@@ -1745,7 +1746,7 @@ cellspacing="0" rowspan="2">Title</th>'
 			$img_style = array_search('en-' . $img, $this->sortorder);
 			$pdf_content.="<img src='images/".$img.".png' ".$this->imgscale[$img_style]." border='0' alt='Sort' />";
 		}
-		$pdf_content.='</th><th>';
+		$pdf_content.='</th><th></th><th></th><th></th><th>';
 		
 		if(array_key_exists('os', $this->sortimg)) {
 		
@@ -1753,7 +1754,7 @@ cellspacing="0" rowspan="2">Title</th>'
 			$img_style = array_search('os-' . $img, $this->sortorder);
 			$pdf_content.="<img src='images/".$img.".png' ".$this->imgscale[$img_style]." border='0' alt='Sort' />";
 		}
-		$pdf_content.='</th><th>';
+		$pdf_content.='</th><th></th><th>';
 		
 		if(array_key_exists('sd', $this->sortimg)) {
 		
@@ -1778,7 +1779,7 @@ cellspacing="0" rowspan="2">Title</th>'
 			$pdf_content.="<img src='images/".$img.".png' ".$this->imgscale[$img_style]." border='0' alt='Sort' />";
 		}
 		
-		$pdf_content.='</th><th>&nbsp;</th><th colspan="12" style="width:24px;">' . $this->current_yr . '</th>'
+		$pdf_content.='</th><th></th><th colspan="12" style="width:24px;">' . $this->current_yr . '</th>'
 			 . '<th colspan="12" style="width:24px;">' . $this->second_yr . '</th>'
 			 . '<th colspan="12" style="width:24px;">' . $this->third_yr . '</th>'
 			 . '<th colspan="3" class="rightborder">+</th></tr></thead>';
@@ -1990,19 +1991,19 @@ cellspacing="0" rowspan="2">Title</th>'
 					if($val['result_link'] != '' && $val['result_link'] != NULL) {
 						$result_image = (($val['event_type'] == 'Clinical Data') ? 'diamond' : 'checkmark' );
 						$upm_string .= '<span ' . $upm_title . '><a href="' . $val['result_link'] . '" style="color:#000;">'
-						. '<img src="images/red-' . $result_image . '.png" alt="' . $result_image . '" style="padding-top: 0px;" border="0" /></a></span>';
+						. '<img src="images/red-' . $result_image . '.gif" alt="' . $result_image . '" style="padding-top: 0px; width: 8px; height: 8px;" border="0" /></a></span>';
 					}
 				} else {
 					if($val['result_link'] != '' && $val['result_link'] != NULL) {
 						$result_image = (($val['event_type'] == 'Clinical Data') ? 'diamond' : 'checkmark' );
 						$upm_string .= '<span ' . $upm_title . '><a href="' . $val['result_link'] . '" style="color:#000;">'
-						. '<img src="images/black-' . $result_image . '.png" alt="' . $result_image . '" style="padding-top: 0px;" border="0" /></a></span>';
+						. '<img src="images/black-' . $result_image . '.gif" alt="' . $result_image . '" style="padding-top: 0px; width: 8px; height: 8px;" border="0" /></a></span>';
 					}
 				}
 				
 				if(($val['end_date'] != '' && $val['end_date'] != NULL && $val['end_date'] != '0000-00-00') && 
 				($val['end_date'] < date('Y-m-d', $now)) && ($val['result_link'] == NULL || $val['result_link'] == '')){
-						$upm_string .= '<span ' . $upm_title . '><img src="images/hourglass.png" alt="hourglass" border="0" /></span>';
+						$upm_string .= '<span ' . $upm_title . '><img src="images/hourglass.gif" style="padding-top: 3px; width: 8px; height: 8px;" alt="hourglass" border="0" /></span>';
 				}
 				$upm_string .= '</span></td>';
 				
@@ -2300,7 +2301,7 @@ function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last,
 					$pdf_content.='<tr>';
 					
 					//rendering diamonds in case of end date is prior to the current year
-					$pdf_content.='<td style="text-align:center;' . (($k < count($upmDetails[$nctid])-1) ? 'border-bottom:0;' : '' ) . '">';
+					$pdf_content.='<td valign="middle" style="text-align:center;' . (($k < count($upmDetails[$nctid])-1) ? 'border-bottom:0;' : '' ) . '">';
 					
 					if(!empty($upmDetails[$nctid][$k]['edited']) && ($v[4] != $upmDetails[$nctid][$k]['edited'][3])) {
 					
@@ -2308,7 +2309,7 @@ function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last,
 						
 							$result_image = (($v[5] == 'Clinical Data') ? 'diamond' : 'checkmark' );
 							$pdf_content.='<span ' . $upm_title . '><a href="' . $upm_result_link . '" style="color:#000;">'
-							. '<img src="images/red-' . $result_image . '.png" alt="' . $result_image . '" style="padding-top: 3px;" border="0" /></a></span>';
+							. '<img src="images/red-' . $result_image . '.gif" alt="' . $result_image . '" style="width: 8px; height: 8px; padding-top: 3px;" border="0" /></a></span>';
 						}
 					} else if($upmDetails[$nctid][$k]['new'] == 'y') {
 					
@@ -2317,10 +2318,10 @@ function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last,
 						if(upm_result_link != '' && $upm_result_link != NULL) {
 						
 							$pdf_content.='<a href="' . $upm_result_link . '" style="color:#000;"><img src="images/red-' . $result_image . '.png" alt="' 
-							. $result_image . '" style="padding-top: 3px;" border="0" /></a>';
+							. $result_image . '" style="padding-top: 3px; width: 8px; height: 8px;" border="0" /></a>';
 							
 						} else {
-							$pdf_content.='<img src="images/red-' . $result_image . '.png" alt="' . $result_image . '" style="padding-top: 3px;" border="0" />';
+							$pdf_content.='<img src="images/red-' . $result_image . '.gif" alt="' . $result_image . '" style="padding-top: 3px; width: 8px; height: 8px;" border="0" />';
 						}
 						$pdf_content.='</span>';
 							
@@ -2330,12 +2331,12 @@ function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last,
 						
 							$result_image = (($v[5] == 'Clinical Data') ? 'diamond' : 'checkmark' );
 							$pdf_content.='<span ' . $upm_title . '><a href="' . $upm_result_link . '" style="color:#000;">'
-							. '<img src="images/black-' . $result_image . '.png" alt="' . $result_image . '" style="padding-top: 3px;" border="0" /></a></span>';
+							. '<img src="images/black-' . $result_image . '.gif"  style="padding-top: 3px; width: 8px; height: 8px;" alt="' . $result_image . '" border="0" /></a></span>';
 						}
 					}
 					
 					if(($v[3] != '' && $v[3] != NULL && $v[3] != '0000-00-00') && ($v[3] < date('Y-m-d')) && ($upm_result_link == NULL || $upm_result_link == '')){
-						$pdf_content.='<span ' . $upm_title . '><img src="images/hourglass.png" alt="hourglass" border="0" /></span>';
+						$pdf_content.='<span ' . $upm_title . '><img src="images/hourglass.gif" style="padding-top: 3px; width: 8px; height: 8px;" alt="hourglass" border="0" /></span>';
 					}
 					$pdf_content.='</td>';
 					
@@ -3287,23 +3288,3 @@ function getDifference($value_one, $value_two) {
 ?> 
 </body>
 </html>
-<?php
-
-print $pdf_output;
-
-/*
-$pdf_output=ob_get_contents();
-
-
-ob_end_clean();
-require_once("dompdf/dompdf_config.inc.php");
-spl_autoload_register('DOMPDF_autoload');  
-$dompdf = new DOMPDF();
-$dompdf->set_paper( 'letter', 'portrait' ); 
-$dompdf->load_html($pdf_output);
-$dompdf->render();
-
-
-$dompdf->stream("Larvol PDF_". date('Y-m-d_H.i.s') .".pdf");
-*/
-?>
