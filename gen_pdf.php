@@ -922,8 +922,15 @@ tr.upms td a{
 	color:#0000FF;
 	text-decoration:none;
 }
+
+a {
+text-decoration:none;
+width:100%;
+height:100%;
+
+}
 </style>
-<body><br><div align="center"><img src="images/Larvol-Trial-Logo-notag.png" align="center" alt="Main" width="500" height="100" id="header" /></div>
+<body><div align="center"><img src="images/Larvol-Trial-Logo-notag.png" align="center" alt="Main" width="250" height="38" id="header" /></div>
 <br><br><br>';
 		
 		
@@ -1115,7 +1122,7 @@ tr.upms td a{
 				if($upm_string != '') {
 					$pdf_content.='<tr class="trialtitles">'
 					. '<td colspan="' . getColspanforNAUpm($this->loggedIn) . '" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
-				. 'style="border-bottom:1px solid blue;background-image: url(\'images/down.png\');background-repeat: no-repeat;background-position:left center;"'
+				. 'style="border-bottom:1px solid blue;background-position:left center;"'
 					. ' onclick="sh(this,\'rowupm\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . '</td></tr>' . $upm_string;
 				} else {
 					$pdf_content.='<tr><td colspan="' . getColspanforNAUpm($this->loggedIn) 
@@ -1141,8 +1148,7 @@ tr.upms td a{
 						
 						$pdf_content.='<tr class="trialtitles">'
 						. '<td colspan="' . getColspanforNAUpm($this->loggedIn) . '" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
-						. 'style="border-bottom:1px solid blue;background-image: url(\'images/' . $image 
-						. '.png\');background-repeat: no-repeat;background-position:left center;"'
+						. 'style="border-bottom:1px solid blue;background-position:left center;"'
 						. ' onclick="sh(this,\'' . $k . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . trim($header_details[$k]) 
 						. '</td></tr>' . $unmatched_upm_details[$k];
 						
@@ -1703,10 +1709,10 @@ tr.upms td a{
 		}
 	//print $pdf_content;
 	
-	require_once("dompdf/dompdf_config.inc.php");
+	require_once("dompdf_new/dompdf_config.inc.php");
 spl_autoload_register('DOMPDF_autoload');  
 $dompdf = new DOMPDF();
-$dompdf->set_paper( 'letter', 'portrait' ); 
+$dompdf->set_paper( 'letter', 'letter' ); 
 $dompdf->load_html($pdf_content);
 $dompdf->render();
 ob_end_clean();
@@ -1722,19 +1728,19 @@ $dompdf->stream("Larvol PDF_". date('Y-m-d_H.i.s') .".pdf");
 			 . '<th cellpadding="0"
 cellspacing="0" rowspan="2">Title</th>'
 			 . '<th title="Black: Actual&nbsp;&nbsp;Gray: Anticipated&nbsp;&nbsp;Red: Change greater than 20%">'
-			 . '<a target="_self" href="javascript:void(0);" onclick="javascript:doSorting(\'en\');">N</a></th>'
+			 . '<a>N</a></th>'
 			 . '<th rowspan="2" title="&quot;EU&quot; = European Union&nbsp;&quot;ROW&quot; = Rest of World">Region</th>'
 			 . '<th rowspan="2">Interventions</th>'
 			  . '<th rowspan="2" >Sponsor</th>'
 			 . '<th>'
-			 . '<a target="_self" href="javascript:void(0);" onclick="javascript:doSorting(\'os\');">Status</a></th>'
+			 . '<a target="_self" >Status</a></th>'
 			 . '<th rowspan="2">Conditions</th>'
 			 . '<th title="MM/YY">'
-			 . '<a target="_self" href="javascript:void(0);" onclick="javascript:doSorting(\'sd\');">Start</a></th>'
+			 . '<a target="_self" >Start</a></th>'
 			 . '<th title="MM/YY">'
-			 . '<a target="_self" href="javascript:void(0);" onclick="javascript:doSorting(\'ed\');">End</a></th>'
+			 . '<a target="_self">End</a></th>'
 			 . '<th>'
-			 . '<a target="_self" href="javascript:void(0);" onclick="javascript:doSorting(\'ph\');">Ph</a></th>'
+			 . '<a target="_self">Ph</a></th>'
 			 . '<th rowspan="2">result</th>'
 			 . '<th colspan="36" style="width:72px;"><span>&nbsp;</span></th>'
 			 . '<th colspan="3" style="padding:0px; border-left:0px;" class="rightborder">&nbsp;</th></tr>'
@@ -1746,7 +1752,7 @@ cellspacing="0" rowspan="2">Title</th>'
 			$img_style = array_search('en-' . $img, $this->sortorder);
 			$pdf_content.="<img src='images/".$img.".png' ".$this->imgscale[$img_style]." border='0' alt='Sort' />";
 		}
-		$pdf_content.='</th><th></th><th></th><th></th><th>';
+		$pdf_content.='</th><th>';
 		
 		if(array_key_exists('os', $this->sortimg)) {
 		
@@ -1754,7 +1760,7 @@ cellspacing="0" rowspan="2">Title</th>'
 			$img_style = array_search('os-' . $img, $this->sortorder);
 			$pdf_content.="<img src='images/".$img.".png' ".$this->imgscale[$img_style]." border='0' alt='Sort' />";
 		}
-		$pdf_content.='</th><th></th><th>';
+		$pdf_content.='</th><th>';
 		
 		if(array_key_exists('sd', $this->sortimg)) {
 		
@@ -1779,7 +1785,7 @@ cellspacing="0" rowspan="2">Title</th>'
 			$pdf_content.="<img src='images/".$img.".png' ".$this->imgscale[$img_style]." border='0' alt='Sort' />";
 		}
 		
-		$pdf_content.='</th><th></th><th colspan="12" style="width:24px;">' . $this->current_yr . '</th>'
+		$pdf_content.='</th><th colspan="12" style="width:24px;">' . $this->current_yr . '</th>'
 			 . '<th colspan="12" style="width:24px;">' . $this->second_yr . '</th>'
 			 . '<th colspan="12" style="width:24px;">' . $this->third_yr . '</th>'
 			 . '<th colspan="3" class="rightborder">+</th></tr></thead>';
@@ -1866,15 +1872,15 @@ cellspacing="0" rowspan="2">Title</th>'
 					$title = ' title = "New record" ';
 				}
 				
-				$upm_string .= '<td colspan="5" class="' . $row_type_one .  $attr . ' titleupm titleupmodd txtleft" ' . $title . '><span class="rowcollapse">';
+				$upm_string .= '<td colspan="5" class="' . $row_type_one .  $attr . ' titleupm titleupmodd txtleft" ' . $title . '>';
 				if($val['event_link'] != NULL && $val['event_link'] != '') {
 					$upm_string .= '<a style="' . $title_link_color . '" href="' . $val['event_link'] . '">' . $val['event_description'] . '</a>';
 				} else {
 					$upm_string .= $val['event_description'];
 				}
-				$upm_string .= '</span></td>';
+				$upm_string .= '</td>';
 				
-				$upm_string .= '<td class="' . $row_type_two . ' titleupmodd"><span class="rowcollapse">';
+				$upm_string .= '<td class="' . $row_type_two . ' titleupmodd">';
 				
 				if($val['result_link'] != NULL && $val['result_link'] != '') {
 					$upm_string .= 'Occurred';
@@ -1890,7 +1896,7 @@ cellspacing="0" rowspan="2">Title</th>'
 					
 				}
 				
-				$upm_string .= '</span></td>';
+				$upm_string .= '</td>';
 				
 				$title = '';$attr = '';	
 				if(!empty($val['edited']) && $val['edited']['event_type'] != $val['event_type']) {
@@ -1905,7 +1911,7 @@ cellspacing="0" rowspan="2">Title</th>'
 					$title = ' title = "New record" ';
 				}
 				$upm_string .= '<td class="' . $row_type_two . $attr . ' titleupmodd" ' . $title 
-								. '><span class="rowcollapse">' . $val['event_type'] . ' Milestone</span></td>';
+								. '>' . $val['event_type'] . ' Milestone</td>';
 				
 				$title = '';$attr = '';	
 				if(!empty($val['edited']) && $val['edited']['start_date'] != $val['start_date']){
@@ -1935,7 +1941,7 @@ cellspacing="0" rowspan="2">Title</th>'
 					$date_style = 'color:#973535;'; 
 				}
 								
-				$upm_string .= '<td  class="' . $row_type_two . $attr . ' titleupmodd txtleft" ' . $title . '><span class="rowcollapse">';
+				$upm_string .= '<td  class="' . $row_type_two . $attr . ' titleupmodd txtleft" ' . $title . '>';
 				if($val['start_date_type'] == 'anticipated') {
 				$upm_string .= '<span style="font-weight:bold;' . $date_style . '">' 
 				. (($val['start_date'] != '' && $val['start_date'] != NULL && $val['start_date'] != '0000-00-00') ? date('m/y',strtotime($val['start_date'])) : '' )   
@@ -1945,7 +1951,7 @@ cellspacing="0" rowspan="2">Title</th>'
 					(($val['start_date'] != '' && $val['start_date'] != NULL && $val['start_date'] != '0000-00-00') ? date('m/y',strtotime($val['start_date'])) : '' );
 				}
 				
-				$upm_string .= '</span></td>';
+				$upm_string .= '</td>';
 				
 				$title = '';$attr = '';	
 				if(!empty($val['edited']) && $val['edited']['end_date'] != $val['end_date']){
@@ -1974,7 +1980,7 @@ cellspacing="0" rowspan="2">Title</th>'
 					$date_style = 'color:#973535;'; 
 				}
 				
-				$upm_string .= '<td class="' . $row_type_two . $attr . ' titleupmodd txtleft" ' . $title . '><span class="rowcollapse">';
+				$upm_string .= '<td class="' . $row_type_two . $attr . ' titleupmodd txtleft" ' . $title . '>';
 				if($val['end_date_type'] == 'anticipated') {
 					$upm_string .= '<span style="font-weight:bold;' . $date_style . '">' 
 					. (($val['end_date'] != '' && $val['end_date'] != NULL && $val['end_date'] != '0000-00-00') ? date('m/y',strtotime($val['end_date'])) : '' ) 
@@ -1984,7 +1990,7 @@ cellspacing="0" rowspan="2">Title</th>'
 					(($val['end_date'] != '' && $val['end_date'] != NULL && $val['end_date'] != '0000-00-00') ? date('m/y',strtotime($val['end_date'])) : '');
 				}	
 				
-				$upm_string .= '</span></td><td class="titleupmodd"><span class="rowcollapse"></span></td>';
+				$upm_string .= '</td><td class="titleupmodd"><span class="rowcollapse"></span></td>';
 				$upm_string .= '<td class="titleupmodd"><span class="rowcollapse">';
 				
 				if(!empty($val['edited']) && ($val['result_link'] != $val['edited']['result_link'])) {
@@ -2055,8 +2061,7 @@ function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last,
 				
 				$pdf_content.='<tr class="trialtitles">'
 				. '<td colspan="' . getColspanforNAUpm($db->loggedIn()) . '" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
-				. 'style="border-bottom:1px solid blue;background-image: url(\'images/' . $image 
-				. '.png\');background-repeat: no-repeat;background-position:left center;"'
+				. 'style="border-bottom:1px solid blue;background-position:left center;"'
 				. ' onclick="sh(this,\'' . $type_arr[$i]['section'] . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . trim($header_details[$type_arr[$i]['section']]) 
 				. '</td></tr>' . $unmatched_upm_details[$type_arr[$i]['section']];
 				
@@ -2358,8 +2363,7 @@ function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last,
 				
 				$pdf_content.='<tr class="trialtitles">'
 				. '<td colspan="' . getColspanforNAUpm($db->loggedIn()) . '" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
-				. 'style="border-bottom:1px solid blue;background-image: url(\'images/' . $image 
-				. '.png\');background-repeat: no-repeat;background-position:left center;"'
+				. 'style="border-bottom:1px solid blue;background-position:left center;"'
 				. ' onclick="sh(this,\'' . $type_arr[$i]['section'] . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . trim($header_details[$type_arr[$i]['section']]) 
 				. '</td></tr>' . $unmatched_upm_details[$type_arr[$i]['section']];
 				
@@ -3069,7 +3073,7 @@ function getUPMChart($start_month, $start_year, $end_month, $end_year, $current_
 				. (($st != 0) ? '<td colspan="' . $st . '"><span ' . $upm_title . '>'
 				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '')
 				. '<td colspan="' . (15 - $st) . '" style="' . $background_color . '" ' . $attr_two . '><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';;
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';
 		
 		}
 			
