@@ -104,6 +104,8 @@ $mapping = array(
     'description-textblock' => 'intervention_description',
     'study_id-secondary_id' => 'secondary_id',
 	'study_id-secondary_id-id' => 'secondary_id',
+	'why_stopped' => 'why_stopped',
+	'status_block-why_stopped-textblock' => 'why_stopped'
 );
 
 $level = array();
