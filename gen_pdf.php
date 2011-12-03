@@ -707,7 +707,7 @@ td,th {
 	padding:0 0px 0 0px;
 	position:absolute;
 	
-	border: 1px solid black;
+	border: 0.5px solid black;
 }
 
 .title {
@@ -733,8 +733,8 @@ td,th {
 }
 
 .manage td{
-	border-left:1px solid blue;
-	border-bottom:1px solid blue;
+	border-left:0.5px solid blue;
+	border-bottom:0.5px solid blue;
 	margin:0;
 	padding:0;
 	
@@ -742,9 +742,9 @@ td,th {
 
 .manage th {
 
-	border-top:1px solid blue;
-	border-bottom:1px solid blue;
-	border-left:1px solid blue;
+	border-top:0.5px solid blue;
+	border-bottom:0.5px solid blue;
+	border-left:0.5px solid blue;
 	color:#0000FF;
 	text-decoration:none;
 	white-space:nowrap;
@@ -791,11 +791,11 @@ td,th {
 }
 
 .rightborder {
-	border-right: 1px solid blue;
+	border-right: 0.5px solid blue;
 }
 .norecord {
-	border-bottom: 1px solid blue; 
-	border-right: 1px solid blue;
+	border-bottom: 0.5px solid blue; 
+	border-right: 0.5px solid blue;
 	border-top:0;
 	padding:0px;
 	height:auto;
@@ -836,14 +836,14 @@ td,th {
 
 .noborder {
 	
-	border-right: 1px solid blue;
-	border-top: 1px solid blue;
-	border-bottom: 1px solid blue;
+	border-right: 0.5px solid blue;
+	border-top: 0.5px solid blue;
+	border-bottom: 0.5px solid blue;
 }
 .new {
 	height:1.2em;
 	
-	border:1px solid black;
+	border:0.5px solid black;
 }
 
 .new ul{
@@ -861,11 +861,11 @@ td,th {
 	border-top:none;
 }
 .borderbottom{
-	border-bottom: 1px solid blue;
+	border-bottom: 0.5px solid blue;
 }
 .leftrightborderblue{
-	border-right: 1px solid blue;
-	border-left: 1px solid blue;	
+	border-right: 0.5px solid blue;
+	border-left: 0.5px solid blue;	
 }
 .sectiontitles{
     font-family: Arial;
@@ -929,6 +929,10 @@ width:100%;
 height:100%;
 
 }
+@page {
+margin-top: 0.5em;
+margin-bottom: 1.5em;
+}	
 </style>
 <body><div align="center"><img src="images/Larvol-Trial-Logo-notag.png" align="center" alt="Main" width="250" height="38" id="header" /></div>
 <br><br><br>';
@@ -1122,7 +1126,7 @@ height:100%;
 				if($upm_string != '') {
 					$pdf_content.='<tr class="trialtitles">'
 					. '<td colspan="' . getColspanforNAUpm($this->loggedIn) . '" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
-				. 'style="border-bottom:1px solid blue;background-position:left center;"'
+				. 'style="border-bottom:0.5px solid blue;background-position:left center;"'
 					. ' onclick="sh(this,\'rowupm\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . '</td></tr>' . $upm_string;
 				} else {
 					$pdf_content.='<tr><td colspan="' . getColspanforNAUpm($this->loggedIn) 
@@ -1148,7 +1152,7 @@ height:100%;
 						
 						$pdf_content.='<tr class="trialtitles">'
 						. '<td colspan="' . getColspanforNAUpm($this->loggedIn) . '" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
-						. 'style="border-bottom:1px solid blue;background-position:left center;"'
+						. 'style="border-bottom:0.5px solid blue;background-position:left center;"'
 						. ' onclick="sh(this,\'' . $k . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . trim($header_details[$k]) 
 						. '</td></tr>' . $unmatched_upm_details[$k];
 						
@@ -1613,7 +1617,7 @@ height:100%;
 				
 					$pdf_content.='<tr class="trialtitles">'
 					. '<td colspan="' . getColspanforNAUpm($this->loggedIn) . '" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
-					. 'style="border-bottom:1px solid blue;background-image: url(\'images/down.png\');background-repeat: no-repeat;background-position:left center;"'
+					. 'style="border-bottom:0.5px solid blue;background-image: url(\'images/down.png\');background-repeat: no-repeat;background-position:left center;"'
 					. ' onclick="sh(this,\'0\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . trim($header_details[0]) . '</td></tr>' . $unmatched_upm_details[0];
 					
 				} else {
@@ -1722,30 +1726,31 @@ $dompdf->stream("Larvol PDF_". date('Y-m-d_H.i.s') .".pdf");
 	
 	function displayHeader() {
 	
-		$pdf_content.='<table style="page-break-after:always; border-collapse:collapse;" width="100%" cellpadding="0" cellspacing="0" class="manage">'
+		$pdf_content.='<table style="border-collapse:collapse;" width="100%" cellpadding="0" cellspacing="0" class="manage">'
 			 . '<thead><tr>'
 			 . (($this->loggedIn) ? '<th rowspan="2" >ID</th>' : '' )
 			 . '<th cellpadding="0"
 cellspacing="0" rowspan="2">Title</th>'
-			 . '<th title="Black: Actual&nbsp;&nbsp;Gray: Anticipated&nbsp;&nbsp;Red: Change greater than 20%">'
+			 . '<th rowspan="2" title="Black: Actual&nbsp;&nbsp;Gray: Anticipated&nbsp;&nbsp;Red: Change greater than 20%">'
 			 . '<a>N</a></th>'
 			 . '<th rowspan="2" title="&quot;EU&quot; = European Union&nbsp;&quot;ROW&quot; = Rest of World">Region</th>'
 			 . '<th rowspan="2">Interventions</th>'
 			  . '<th rowspan="2" >Sponsor</th>'
-			 . '<th>'
+			 . '<th rowspan="2">'
 			 . '<a target="_self" >Status</a></th>'
 			 . '<th rowspan="2">Conditions</th>'
-			 . '<th title="MM/YY">'
+			 . '<th rowspan="2" title="MM/YY">'
 			 . '<a target="_self" >Start</a></th>'
-			 . '<th title="MM/YY">'
+			 . '<th rowspan="2" title="MM/YY">'
 			 . '<a target="_self">End</a></th>'
-			 . '<th>'
+			 . '<th rowspan="2">'
 			 . '<a target="_self">Ph</a></th>'
 			 . '<th rowspan="2">result</th>'
 			 . '<th colspan="36" style="width:72px;"><span>&nbsp;</span></th>'
 			 . '<th colspan="3" style="padding:0px; border-left:0px;" class="rightborder">&nbsp;</th></tr>'
-			 . '<tr><th>';
+			 . '<tr>';
 		
+		/*$pdf_content.='<th>';
 		if(array_key_exists('en', $this->sortimg)) {
 		
 			$img = $this->sortimg['en'];
@@ -1784,8 +1789,8 @@ cellspacing="0" rowspan="2">Title</th>'
 			$img_style = array_search('ph-' . $img, $this->sortorder);
 			$pdf_content.="<img src='images/".$img.".png' ".$this->imgscale[$img_style]." border='0' alt='Sort' />";
 		}
-		
-		$pdf_content.='</th><th colspan="12" style="width:24px;">' . $this->current_yr . '</th>'
+		$pdf_content.='</th>';*/
+		$pdf_content.='<th colspan="12" style="width:24px;">' . $this->current_yr . '</th>'
 			 . '<th colspan="12" style="width:24px;">' . $this->second_yr . '</th>'
 			 . '<th colspan="12" style="width:24px;">' . $this->third_yr . '</th>'
 			 . '<th colspan="3" class="rightborder">+</th></tr></thead>';
@@ -1997,19 +2002,19 @@ cellspacing="0" rowspan="2">Title</th>'
 					if($val['result_link'] != '' && $val['result_link'] != NULL) {
 						$result_image = (($val['event_type'] == 'Clinical Data') ? 'diamond' : 'checkmark' );
 						$upm_string .= '<span ' . $upm_title . '><a href="' . $val['result_link'] . '" style="color:#000;">'
-						. '<img src="images/red-' . $result_image . '.gif" alt="' . $result_image . '" style="padding-top: 3px; width: 8px; height: 8px;" border="0" /></a></span>';
+						. '<img src="images/red-' . $result_image . '.png" alt="' . $result_image . '" style="padding-top: 3px; width: 8px; height: 8px;" border="0" /></a></span>';
 					}
 				} else {
 					if($val['result_link'] != '' && $val['result_link'] != NULL) {
 						$result_image = (($val['event_type'] == 'Clinical Data') ? 'diamond' : 'checkmark' );
 						$upm_string .= '<span ' . $upm_title . '><a href="' . $val['result_link'] . '" style="color:#000;">'
-						. '<img src="images/black-' . $result_image . '.gif" alt="' . $result_image . '" style="padding-top: 3px; width: 8px; height: 8px;" border="0" /></a></span>';
+						. '<img src="images/black-' . $result_image . '.png" alt="' . $result_image . '" style="padding-top: 3px; width: 8px; height: 8px;" border="0" /></a></span>';
 					}
 				}
 				
 				if(($val['end_date'] != '' && $val['end_date'] != NULL && $val['end_date'] != '0000-00-00') && 
 				($val['end_date'] < date('Y-m-d', $now)) && ($val['result_link'] == NULL || $val['result_link'] == '')){
-						$upm_string .= '<span ' . $upm_title . '><img src="images/hourglass.gif" style="padding-top: 3px; width: 8px; height: 8px;" alt="hourglass" border="0" /></span>';
+						$upm_string .= '<span ' . $upm_title . '><img src="images/hourglass.png" style="padding-top: 3px; width: 8px; height: 8px;" alt="hourglass" border="0" /></span>';
 				}
 				$upm_string .= '</span></td>';
 				
@@ -2061,7 +2066,7 @@ function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last,
 				
 				$pdf_content.='<tr class="trialtitles">'
 				. '<td colspan="' . getColspanforNAUpm($db->loggedIn()) . '" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
-				. 'style="border-bottom:1px solid blue;background-position:left center;"'
+				. 'style="border-bottom:0.5px solid blue;background-position:left center;"'
 				. ' onclick="sh(this,\'' . $type_arr[$i]['section'] . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . trim($header_details[$type_arr[$i]['section']]) 
 				. '</td></tr>' . $unmatched_upm_details[$type_arr[$i]['section']];
 				
@@ -2214,7 +2219,7 @@ function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last,
 					}
 					
 					$pdf_content.='<td rowspan="' . $rowspan . '" class="' . $row_type_one . $attr . '">'
-						. '' . $val . '</td>';
+						. '' . implode(", ",array_unique(explode(",", str_replace(", ",",",$val)))) . '</td>';
 						
 				
 				} else if($v == "NCT/intervention_name") {
@@ -2226,7 +2231,7 @@ function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last,
 					}
 					
 					$pdf_content.='<td rowspan="' . $rowspan . '" class="' . $row_type_one . $attr . '">'
-						. '' . $val . '</td>';
+						. '' . implode(", ",array_unique(explode(",", str_replace(", ",",",$val)))) . '</td>';
 					
 				
 				} else if($v == "NCT/phase") {
@@ -2314,7 +2319,7 @@ function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last,
 						
 							$result_image = (($v[5] == 'Clinical Data') ? 'diamond' : 'checkmark' );
 							$pdf_content.='<span ' . $upm_title . '><a href="' . $upm_result_link . '" style="color:#000;">'
-							. '<img src="images/red-' . $result_image . '.gif" alt="' . $result_image . '" style="width: 8px; height: 8px; padding-top: 3px;" border="0" /></a></span>';
+							. '<img src="images/red-' . $result_image . '.png" alt="' . $result_image . '" style="width: 8px; height: 8px; padding-top: 3px;" border="0" /></a></span>';
 						}
 					} else if($upmDetails[$nctid][$k]['new'] == 'y') {
 					
@@ -2326,7 +2331,7 @@ function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last,
 							. $result_image . '" style="padding-top: 3px; width: 8px; height: 8px;" border="0" /></a>';
 							
 						} else {
-							$pdf_content.='<img src="images/red-' . $result_image . '.gif" alt="' . $result_image . '" style="padding-top: 3px; width: 8px; height: 8px;" border="0" />';
+							$pdf_content.='<img src="images/red-' . $result_image . '.png" alt="' . $result_image . '" style="padding-top: 3px; width: 8px; height: 8px;" border="0" />';
 						}
 						$pdf_content.='</span>';
 							
@@ -2336,12 +2341,12 @@ function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last,
 						
 							$result_image = (($v[5] == 'Clinical Data') ? 'diamond' : 'checkmark' );
 							$pdf_content.='<span ' . $upm_title . '><a href="' . $upm_result_link . '" style="color:#000;">'
-							. '<img src="images/black-' . $result_image . '.gif"  style="padding-top: 3px; width: 8px; height: 8px;" alt="' . $result_image . '" border="0" /></a></span>';
+							. '<img src="images/black-' . $result_image . '.png"  style="padding-top: 3px; width: 8px; height: 8px;" alt="' . $result_image . '" border="0" /></a></span>';
 						}
 					}
 					
 					if(($v[3] != '' && $v[3] != NULL && $v[3] != '0000-00-00') && ($v[3] < date('Y-m-d')) && ($upm_result_link == NULL || $upm_result_link == '')){
-						$pdf_content.='<span ' . $upm_title . '><img src="images/hourglass.gif" style="padding-top: 3px; width: 8px; height: 8px;" alt="hourglass" border="0" /></span>';
+						$pdf_content.='<span ' . $upm_title . '><img src="images/hourglass.png" style="padding-top: 3px; width: 8px; height: 8px;" alt="hourglass" border="0" /></span>';
 					}
 					$pdf_content.='</td>';
 					
@@ -2363,7 +2368,7 @@ function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last,
 				
 				$pdf_content.='<tr class="trialtitles">'
 				. '<td colspan="' . getColspanforNAUpm($db->loggedIn()) . '" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
-				. 'style="border-bottom:1px solid blue;background-position:left center;"'
+				. 'style="border-bottom:0.5px solid blue;background-position:left center;"'
 				. ' onclick="sh(this,\'' . $type_arr[$i]['section'] . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . trim($header_details[$type_arr[$i]['section']]) 
 				. '</td></tr>' . $unmatched_upm_details[$type_arr[$i]['section']];
 				
