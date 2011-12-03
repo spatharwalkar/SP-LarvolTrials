@@ -683,7 +683,12 @@ class ContentManager
 		$unmatched_upm_details = array();
 		$header_details = array();
 		$unmatched_upms_default_style = 'collapse';
-		$pdf_content='<html>
+		$pdf_content='<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Larvol PDF Export</title>
+</head>
 <style type="text/css">
 
 body {
@@ -930,8 +935,8 @@ height:100%;
 
 }
 @page {
-margin-top: 0.5em;
-margin-bottom: 1.5em;
+margin-top: 1em;
+margin-bottom: 2em;
 }	
 </style>
 <body><div align="center"><img src="images/Larvol-Trial-Logo-notag.png" align="center" alt="Main" width="250" height="38" id="header" /></div>
