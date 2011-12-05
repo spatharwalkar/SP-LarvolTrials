@@ -241,7 +241,7 @@ function validateEnums($val)
 	$enum1 = array('Phase 1'=>"i", 'Phase 2'=>"ii", 'Phase 3'=>"iii", 'Phase 4'=>"iv", 'N/A'=>"not applicable",'Procedure'=>'procedure/surgery');
 	$enum2 = array('Phase 1'=>"1", 'Phase 2'=>"2", 'Phase 3'=>"3", 'Phase 4'=>"4", 'Phase 2/Phase 3'=>"phase 2-3", 'N/A'=>"none",'Phase 0'=>'0','Phase 1/Phase 2'=>"1/2");
 	$enum3 = array('Phase 1'=>"phase i", 'Phase 2'=>"phase ii", 'Phase 3'=>"phase iii", 'Phase 4'=>"phase iv", 'Phase 1/Phase 2'=>"i-ii",'Phase 1a/1b'=>"phase 1a/b");
-	$enum4 = array('Phase 2'=>"phaseii");
+	$enum4 = array('Phase 2'=>"phaseii",'Phase 2b'=>"phase iib",'Phase 2a'=>"phase iia");
 	$ev1=array_search($eval1,$enum1,false);
 	$ev2=array_search($eval1,$enum2,false);
 	$ev3=array_search($eval1,$enum3,false);
@@ -656,7 +656,7 @@ else $ddesc=$rec->detailed_descr->textblock;
     }
 /***** TKV
 ****** Detect and pick all irregular phases that exist in one or several of the various title or description fields */
-$phases_regex='/phase 2a\/2b|phase 1b\/2a|phase 1a\/1b|Phase 1a\/b|phase 3b\/4|Phase2b\/3|phase 1b\/2|phase 2a\/b|phase 1a|phase 1b|Phase 1C|phase II(?!i)|phase 2a|PHASEII|phase 2b|phase 3a|phase 3b/i';
+$phases_regex='/phase 2a\/2b|phase 1b\/2a|phase 1a\/1b|Phase 1a\/b|phase 3b\/4|Phase2b\/3|phase 1b\/2|phase 2a\/b|phase 1a|phase 1b|Phase 1C|phase II(?![a-z.-\\/])|phase 2a|PHASEII|PHASE iii|phase 2b|phase iib|phase iia|phase 3a|phase 3b/i';
 preg_match_all($phases_regex, $record_data['brief_title'], $matches);
 
 if(!count($matches[0]) >0 )
@@ -664,10 +664,14 @@ if(!count($matches[0]) >0 )
 preg_match_all($phases_regex, $record_data['official_title'], $matches);
 }
 
+//pr($record_data['official_title']);
+//pr($matches);
+
 if(!count($matches[0]) >0 )
 {
 preg_match_all($phases_regex, $record_data['brief_summary'], $matches);
 }
+
 if(count($matches[0]) >0 )
 {
 
