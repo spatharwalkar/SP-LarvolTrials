@@ -103,22 +103,9 @@ if(isset($_FILES['uploadedfile']) && $_FILES['uploadedfile']['size']>1)
 	echo 'Imported '.$success.' records, Failed entries '.$fail;
 }
 
-//End controller area
 
 
-//set docs per list
-$limit = 50;
-$totalCount = getTotalCount($table);
-$maxPage = $totalCount%$limit;
-if(!isset($_GET['oldval']))
-$page=0;
-
-//pagination
-pagePagination($limit,$totalCount,$table,$script,array(),array("import"=>false,"formOnSubmit"=>"onsubmit=\"return validatesearch();\""));
-//pagination controller
-
-
-//search controller should come after pagination call since search is embedded in it.
+//run search controller part1 for upm.product/products.id conversion used for pagination counts then the normal GET values are replaced for prefilling searchform data.
 if(isset($_GET['search']))
 {
 	//$_GET['search_product'] = $_GET['search_product_id'];
@@ -132,15 +119,48 @@ if(isset($_GET['search']))
 	}
 	if($pid)
 	{
+		$search_product_tmp_name = $_GET['search_product'];
 		$_GET['search_product'] = $pid;
 	}
-	else 
+	else
 	{
 		//echo 'Select a proper product name.';
-	}	
+	}
 
 }
+
+//set docs per list
+$limit = 50;
+$totalCount = getTotalCount($table);
+$maxPage = $totalCount%$limit;
+if(!isset($_GET['oldval']))
+$page=0;
+
+//search controller part2 should come before pagination call since search is embedded in it needs prefilled values.
+if(isset($_GET['search']))
+{
+	if($pid)
+	{
+		$_GET['search_product'] = $search_product_tmp_name;
+	}
+}
+
+
+//pagination
+pagePagination($limit,$totalCount,$table,$script,array(),array("import"=>false,"formOnSubmit"=>"onsubmit=\"return validatesearch();\""));
+//pagination controller
+
+
+//search controller part3 should come before pagination call since search is embedded in it needs prefilled values.
+if(isset($_GET['search']))
+{
+	if($pid)
+	{
+		$_GET['search_product'] = $pid;
+	}
+}
 //end search controller
+
 
 echo '<br/>';
 echo '<div class="clr">';
