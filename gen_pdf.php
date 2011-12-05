@@ -698,6 +698,7 @@ font-color:black;
 }
 td,th {
 	vertical-align:top;
+	
 }
 .drop {
 	height:4.4em;
@@ -2084,6 +2085,9 @@ function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last,
 			$rowspan = 1;
 			$nctid =  $type_arr[$i]['NCT/nct_id'];
 			
+			///Below line is added just to display border at the footer of PDF table
+			$pdf_content.= '<tr><td colspan="' . getColspanforNAUpm($db->loggedIn()) . '"></td></tr>';
+						
 			$ph = str_replace('Phase ', '', trim($type_arr[$i]['NCT/phase']));
 			
 			$start_month = date('m',strtotime($type_arr[$i]['NCT/start_date']));
@@ -2316,7 +2320,7 @@ function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last,
 					$pdf_content.='<tr>';
 					
 					//rendering diamonds in case of end date is prior to the current year
-					$pdf_content.='<td valign="middle" style="text-align:center;' . (($k < count($upmDetails[$nctid])-1) ? 'border-bottom:0;' : '' ) . '">';
+					$pdf_content.='<td valign="middle" style="text-align:center;' . (($k < count($upmDetails[$nctid])-1) ? 'border-bottom:0;' : '' ) . '"><div  align="center" valign="middle" style="page-break-before: avoid;">';
 					
 					if(!empty($upmDetails[$nctid][$k]['edited']) && ($v[4] != $upmDetails[$nctid][$k]['edited'][3])) {
 					
@@ -2353,7 +2357,7 @@ function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last,
 					if(($v[3] != '' && $v[3] != NULL && $v[3] != '0000-00-00') && ($v[3] < date('Y-m-d')) && ($upm_result_link == NULL || $upm_result_link == '')){
 						$pdf_content.='<span ' . $upm_title . '><img src="images/hourglass.png" style="padding-top: 3px; width: 8px; height: 8px;" alt="hourglass" border="0" /></span>';
 					}
-					$pdf_content.='</td>';
+					$pdf_content.='</div></td>';
 					
 					//rendering upm (upcoming project completion) chart
 					$pdf_content.= getUPMChart($st_month, $st_year, $ed_month, $ed_year, $current_yr, $second_yr, $third_yr, $v[2], 
@@ -3215,6 +3219,7 @@ function getNonAssocUpmRecords($non_assoc_upm_params) {
 	
 		while($rows = mysql_fetch_assoc($result)) {
 	
+
 		$sql = "SELECT `id`, `event_description`, `event_link`, `result_link`, `event_type`, `start_date`,
 				`start_date_type`, `end_date`, `end_date_type` FROM `upm` WHERE `corresponding_trial` IS NULL AND `product` = '" . $rows['id'] 
 				. "' ORDER BY `end_date` ASC ";
