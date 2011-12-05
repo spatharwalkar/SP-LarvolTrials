@@ -740,6 +740,8 @@ echo '<br/>';
 function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 {
 	global $searchData;
+	global $db;
+	$searchType = calculateSearchType($db->sources,unserialize(base64_decode($searchData)));
 	$insertEdit = 'Insert';
 	$formOnSubmit = isset($options['formOnSubmit'])?$options['formOnSubmit']:null;
 	$formStyle = isset($options['formStyle'])?$options['formStyle']:null;
@@ -794,6 +796,10 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		
 		if($row['Field'] == 'searchdata')
 		{
+			if($searchType ===false && ($script=='areas' || $script=='products'))
+			{
+				$searchType = calculateSearchType($db->sources,unserialize(base64_decode($dbVal)));
+			}			
 			echo '<tr><td>'.ucwords(implode(' ',explode('_',$row['Field']))).' : </td>';
 			echo '<td>';
 			echo input_tag($row,$dbVal,array('table'=>$table,'id'=>$id,'callFrom'=>'addedit'));
@@ -804,6 +810,12 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		echo '<tr>';
 		echo '<td>'.ucwords(implode(' ',explode('_',$row['Field']))).' : </td><td>'.input_tag($row,$dbVal,array('style'=>$addEditGlobalInputStyle)).'</td>';
 		echo '</tr>';
+	}
+	if(($script == 'products' || $script == 'areas') && $searchType!==false)
+	{
+		echo '<tr>';
+		echo '<td>Type : </td><td>'.($searchType==1?'Auto':'SemiAuto').'</td>';
+		echo '</tr>';		
 	}
 	if($options['deletebox']===true && $id)
 	{
@@ -947,6 +959,36 @@ function getMHMAssociation($id,$type)
 		return $row['cnt'];
 	}
 
+}
+
+/**
+* @name calculateSearchType
+* @tutorial Returns the search type based on search data array.
+* The type is either Auto or Semi Auto.Semi Auto is when the only
+* fields being searched on are source ID fields (such as NCT/nct_id).
+* This function returs 1 for Auto and 0 for SemiAuto & false for invalid/null searchdata;
+* @param Array $sourceArr We can get from the global variable $db->sources.
+* @param Array $searchArr is normally the $_POST array of the search form submission after input filtering.
+* @author Jithu Thomas
+*/
+function calculateSearchType($sourceArr,$searchArr)
+{
+	if(isset($searchArr['searchval']) && is_array($searchArr['searchval']) && count($searchArr)>0)
+	{
+		$searchSourceIdArr = array_map(function($id){ $tmp = explode('_',$id);return $tmp[1];},array_keys($searchArr['searchval']));
+		$sourceIdArr = array_map(function($id){return $id->fieldId;},$sourceArr);
+		foreach($searchSourceIdArr as $id)
+		{
+			if(!in_array($id,$sourceIdArr))
+			return 1;
+		}
+		return 0;
+	}
+	else
+	{
+		//softDieSession('Invalid search data used for auto/semi auto calculation.');
+		return false;
+	}
 }
 
 /**
