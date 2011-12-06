@@ -522,9 +522,21 @@ else $ddesc=$rec->detailed_descr->textblock;
     foreach ($rec->id_info->nct_alias as $nal)
         $record_data['nct_alias'][] = $nal;
     $record_data['collaborator'] = array();
-    foreach ($rec->sponsors->collaborator as $cola)
-        $record_data['collaborator'][] = $cola->agency;
-    $record_data['oversight_authority'] = array();
+	if(isset($rec->sponsors->collaborator))
+	{
+		foreach ($rec->sponsors->collaborator as $cola)
+		{
+			$record_data['collaborator'][] = $cola->agency;
+		}
+	}
+    else
+	{
+		foreach ($rec->study_sponsor->sponsor as $cola)
+		{
+			$record_data['collaborator'][] = $cola->agency;
+		}
+	}
+	$record_data['oversight_authority'] = array();
     foreach ($rec->oversight_info->regulatory_authority as $auth)
         $record_data['oversight_authority'][] = $auth;
     $record_data['primary_outcome_measure'] = array();
