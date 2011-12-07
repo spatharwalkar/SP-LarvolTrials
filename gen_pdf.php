@@ -117,6 +117,12 @@ class ContentManager
 		$this->activecount = 0;
 		$this->allcount = 0;
 		$this->inactivecount = 0;
+		
+		
+		if((isset($_POST["dOption"])) and $_POST["dOption"]=='all')
+			{
+				$_POST['list'] = 'all';
+			}
 
 		$this->type = (isset($_POST["list"])) ? ($_POST["list"].'array') : 'activearray' ;
 		if(isset($_POST['list']) && $_POST['list'] == 'inactive') { 
