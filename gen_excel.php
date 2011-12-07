@@ -1304,7 +1304,7 @@ class ContentManager
 					}
 				}
 				global $unmatched_upm_details;	
-				create_excel($shownArr,$unmatched_upm_details,$this->time_machine,$this->edited);
+				create_excel($shownArr,$unmatched_upm_details,$firstpartof_unmatched_upm_details,$this->time_machine,$this->edited);
 				
 			}
 			
