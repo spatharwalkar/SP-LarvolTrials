@@ -1725,7 +1725,7 @@ margin-bottom: 2em;
 		}
 	//print $pdf_content;
 	
-	require_once("dompdf_new/dompdf_config.inc.php");
+	require_once("dompdf/dompdf_config.inc.php");
 spl_autoload_register('DOMPDF_autoload');  
 $dompdf = new DOMPDF();
 $dompdf->set_paper( 'letter', 'letter' ); 
