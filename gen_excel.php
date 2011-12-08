@@ -944,7 +944,7 @@ class ContentManager
 //			$unmatched_upm_details[$ky] = getNonAssocUpm($non_assoc_upm_params, $ky,$this->time_machine,$this->edited);
 //			$ky++;
 			
-			create_excel($process_params,$unmatched_upm_details,$firstpartof_unmatched_upm_details,$this->time_machine,$this->edited);
+			create_excel($process_params,$unmatched_upm_details,$firstpartof_unmatched_upm_details,$this->time_machine,$this->edited,$process_params['upmDetails'], $header_details);
 			
 			
 		} else {
@@ -1304,7 +1304,7 @@ class ContentManager
 					}
 				}
 				global $unmatched_upm_details;	
-				create_excel($shownArr,$unmatched_upm_details,$firstpartof_unmatched_upm_details,$this->time_machine,$this->edited);
+				create_excel($shownArr,$unmatched_upm_details,$firstpartof_unmatched_upm_details,$this->time_machine,$this->edited, $upmDetails, $header_details);
 				
 			}
 			
@@ -1745,15 +1745,1499 @@ function getLinkDetails($tablename, $fieldname, $parameters, $param_value) {
 	
 	return $res;
 }
-/********************export begins/*/
-function create_excel($process_params,$upm_string,$firstpartof_upm_string,$tm,$ed)
+
+
+
+//get difference between two dates in months
+function getColspan($start_dt, $end_dt) {
+	
+	$diff = round((strtotime($end_dt)-strtotime($start_dt))/2628000);
+	return $diff;
+
+}
+
+function cell_hr_inc($cell, $inc)
 {
+for($in=1; $in < $inc; $in++)
+$cell++;
+return $cell;
+}
+
+function color_chooser($bg_color)
+{
+if($bg_color == '00CCFF')
+ {
+ $color=(
+		array
+				(
+					'fill' => array
+					(
+						'type'       => PHPExcel_Style_Fill::FILL_SOLID,
+						'rotation'   => 0,
+						'startcolor' => array
+						(
+							'rgb' => '00CCFF'
+						),
+						'endcolor'   => array
+						(
+							'rgb' => '00CCFF'
+						)
+					)
+				)
+		);
+ }elseif($bg_color == '99CC00')
+ {
+ $color=(
+		array
+				(
+					'fill' => array
+					(
+						'type'       => PHPExcel_Style_Fill::FILL_SOLID,
+						'rotation'   => 0,
+						'startcolor' => array
+						(
+							'rgb' => '99CC00'
+						),
+						'endcolor'   => array
+						(
+							'rgb' => '99CC00'
+						)
+					)
+				)
+		);
+ 
+ }elseif($bg_color == 'FFFF00')
+ {
+ $color=(
+		array
+				(
+					'fill' => array
+					(
+						'type'       => PHPExcel_Style_Fill::FILL_SOLID,
+						'rotation'   => 0,
+						'startcolor' => array
+						(
+							'rgb' => 'FFFF00'
+						),
+						'endcolor'   => array
+						(
+							'rgb' => 'FFFF00'
+						)
+					)
+				)
+		);
+ 
+ }elseif($bg_color == 'FF9900')
+ {
+ $color=(
+		array
+				(
+					'fill' => array
+					(
+						'type'       => PHPExcel_Style_Fill::FILL_SOLID,
+						'rotation'   => 0,
+						'startcolor' => array
+						(
+							'rgb' => 'FF9900'
+						),
+						'endcolor'   => array
+						(
+							'rgb' => 'FF9900'
+						)
+					)
+				)
+		);
+ 
+ }elseif($bg_color == 'FF0000')
+ {
+ $color=(
+		array
+				(
+					'fill' => array
+					(
+						'type'       => PHPExcel_Style_Fill::FILL_SOLID,
+						'rotation'   => 0,
+						'startcolor' => array
+						(
+							'rgb' => 'FF0000'
+						),
+						'endcolor'   => array
+						(
+							'rgb' => 'FF0000'
+						)
+					)
+				)
+		);
+ 
+ }
+
+return $color;
+}
+
+//calculating the project completion chart in which the year ranges from the current year and next-to-next year
+function getCompletionChart($start_month, $start_year, $end_month, $end_year, $current_yr, $second_yr, $third_yr, $bg_color, $start_date, $end_date, &$objPHPExcel, $i){
+
+	$attr_two = 'class="rightborder"';
+	$color=color_chooser($bg_color);
+	
+	if(($start_date == '' || $start_date == NULL || $start_date == '0000-00-00') && ($end_date == '' || $end_date == NULL || $end_date == '0000-00-00')) {
+	
+		$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':X'. $i);
+		$objPHPExcel->getActiveSheet()->mergeCells('Y' . $i . ':AJ'. $i);
+		$objPHPExcel->getActiveSheet()->mergeCells('AK' . $i . ':AV'. $i);
+		$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+	
+
+	} else if($start_date == '' || $start_date == NULL || $start_date == '0000-00-00') {
+	
+		$st = $end_month-1;
+		if($end_year < $current_yr) {
+		
+			$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':X'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('Y' . $i . ':AJ'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AK' . $i . ':AV'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+		
+				
+						
+		} else if($end_year == $current_yr) {
+			
+		
+			$from='M';
+			if($st != 0)
+			{
+			$inc=$st;
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			$from=$to;
+			$from++;
+			}
+			
+			$objPHPExcel->getActiveSheet()->getStyle($from . $i )->applyFromArray
+			(
+				$color
+			);
+			
+			$from++;
+			
+			
+			if((12 - ($st+1)) != 0)
+			{
+			$inc=(12 - ($st+1));
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			$from=$to;
+			$from++;
+			}
+			
+			$objPHPExcel->getActiveSheet()->mergeCells('Y' . $i . ':AJ'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AK' . $i . ':AV'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+			
+			
+					
+		} else if($end_year == $second_yr) {
+		
+			$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':X'. $i);
+			
+			$from='Y';
+			if($st != 0)
+			{
+			$inc=$st;
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			$from=$to;
+			$from++;
+			}
+			
+			$objPHPExcel->getActiveSheet()->getStyle($from . $i )->applyFromArray
+			(
+				$color
+			);
+			
+			$from++;
+			
+			
+			if((12 - ($st+1)) != 0)
+			{
+			$inc=(12 - ($st+1));
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			$from=$to;
+			$from++;
+			}
+			
+			$objPHPExcel->getActiveSheet()->mergeCells('AK' . $i . ':AV'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+			
+					
+		} else if($end_year == $third_yr) {
+		
+			
+			$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':X'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('Y' . $i . ':AJ'. $i);
+			
+			$from='AK';
+			if($st != 0)
+			{
+			$inc=$st;
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			$from=$to;
+			$from++;
+			}
+			
+			$objPHPExcel->getActiveSheet()->getStyle($from . $i )->applyFromArray
+			(
+				$color
+			);
+			
+			$from++;
+			
+			
+			if((12 - ($st+1)) != 0)
+			{
+			$inc=(12 - ($st+1));
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			$from=$to;
+			$from++;
+			}
+			
+			$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+		
+			
+				
+		} else if($end_year > $third_yr){
+		
+			$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':X'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('Y' . $i . ':AJ'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AK' . $i . ':AV'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+			
+			$objPHPExcel->getActiveSheet()->getStyle('AW' . $i . ':AY' . $i )->applyFromArray
+			(
+				$color
+			);
+			
+			
+		}
+	} else if($end_date == '' || $end_date == NULL || $end_date == '0000-00-00') {
+	
+		$st = $start_month-1;
+		if($start_year < $current_yr) {
+		
+			$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':X'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('Y' . $i . ':AJ'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AK' . $i . ':AV'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+			
+						
+		} else if($start_year == $current_yr) { 
+			
+			
+			$from='M';
+			if($st != 0)
+			{
+			$inc=$st;
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			$from=$to;
+			$from++;
+			}
+			
+			$objPHPExcel->getActiveSheet()->getStyle($from . $i )->applyFromArray
+			(
+				$color
+			);
+			
+			$from++;
+			
+			
+			if((12 - ($st+1)) != 0)
+			{
+			$inc=(12 - ($st+1));
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			$from=$to;
+			$from++;
+			}
+			
+			$objPHPExcel->getActiveSheet()->mergeCells('Y' . $i . ':AJ'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AK' . $i . ':AV'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+					
+
+		} else if($start_year == $second_yr) {
+		
+			
+			$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':X'. $i);
+			
+			$from='Y';
+			if($st != 0)
+			{
+			$inc=$st;
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			$from=$to;
+			$from++;
+			}
+			
+			$objPHPExcel->getActiveSheet()->getStyle($from . $i )->applyFromArray
+			(
+				$color
+			);
+			
+			$from++;
+			
+			
+			if((12 - ($st+1)) != 0)
+			{
+			$inc=(12 - ($st+1));
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			$from=$to;
+			$from++;
+			}
+			
+			$objPHPExcel->getActiveSheet()->mergeCells('AK' . $i . ':AV'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+			
+			
+					
+		} else if($start_year == $third_yr) {
+		
+			
+			$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':X'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('Y' . $i . ':AJ'. $i);
+			
+			$from='AK';
+			if($st != 0)
+			{
+			$inc=$st;
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			$from=$to;
+			$from++;
+			}
+			
+			$objPHPExcel->getActiveSheet()->getStyle($from . $i )->applyFromArray
+			(
+				$color
+			);
+			
+			$from++;
+			
+			
+			if((12 - ($st+1)) != 0)
+			{
+			$inc=(12 - ($st+1));
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			$from=$to;
+			$from++;
+			}
+			
+			$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+			
+				
+		} else if($start_year > $third_yr){
+		
+			
+			$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':X'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('Y' . $i . ':AJ'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AK' . $i . ':AV'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+			
+			$objPHPExcel->getActiveSheet()->getStyle('AW' . $i . ':AY' . $i )->applyFromArray
+			(
+				$color
+			);
+			
+		}
+			
+	} else if($end_date < $start_date) {
+	
+		$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':X'. $i);
+		$objPHPExcel->getActiveSheet()->mergeCells('Y' . $i . ':AJ'. $i);
+		$objPHPExcel->getActiveSheet()->mergeCells('AK' . $i . ':AV'. $i);
+		$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+		
+					
+	} else if($start_year < $current_yr) {
+		
+		if($end_year < $current_yr) {
+			
+			$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':X'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('Y' . $i . ':AJ'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AK' . $i . ':AV'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+			
+		  
+		} else if($end_year == $current_yr) {
+		 
+			if($end_month == 12) {
+				
+				$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':X'. $i);
+				$objPHPExcel->getActiveSheet()->mergeCells('Y' . $i . ':AJ'. $i);
+				$objPHPExcel->getActiveSheet()->mergeCells('AK' . $i . ':AV'. $i);
+				$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+				
+				$objPHPExcel->getActiveSheet()->getStyle('M' . $i . ':X' . $i )->applyFromArray
+				(
+					$color
+				);
+				
+			
+			} else { 
+				
+				$from='M';
+				
+				$inc=$end_month;
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+				$objPHPExcel->getActiveSheet()->getStyle($from . $i)->applyFromArray
+				(
+					$color
+				);
+				
+				$from=$to;
+				$from++;
+				
+				
+				$inc=(12-$end_month);
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+				$from=$to;
+				$from++;
+				
+				
+				$objPHPExcel->getActiveSheet()->mergeCells('Y' . $i . ':AJ'. $i);
+				$objPHPExcel->getActiveSheet()->mergeCells('AK' . $i . ':AV'. $i);
+				$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+				
+				
+				
+			}
+		} else if($end_year == $second_yr) { 
+		 
+			if($end_month == 12) {
+				
+				$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':AJ'. $i);
+				$objPHPExcel->getActiveSheet()->getStyle('M' . $i . ':AJ' . $i )->applyFromArray
+				(
+					$color
+				);
+				$objPHPExcel->getActiveSheet()->mergeCells('AK' . $i . ':AV'. $i);
+				$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+				
+			} else {
+				
+				$from='M';
+				
+				$inc=(12+$end_month);
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+				$objPHPExcel->getActiveSheet()->getStyle($from . $i)->applyFromArray
+				(
+					$color
+				);
+				
+				$from=$to;
+				$from++;
+				
+				
+				$inc=(12-$end_month);
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+				$from=$to;
+				$from++;
+				
+				
+				$objPHPExcel->getActiveSheet()->mergeCells('AK' . $i . ':AV'. $i);
+				$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+				
+			}
+	
+		} else if($end_year == $third_yr) { 
+		
+			if($end_month == 12) {
+				
+				
+				$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':AV'. $i);
+				$objPHPExcel->getActiveSheet()->getStyle('M' . $i . ':AV' . $i )->applyFromArray
+				(
+					$color
+				);
+				$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+				
+				
+			} else {
+				
+				
+				$from='M';
+				
+				$inc=(24+$end_month);
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+				$objPHPExcel->getActiveSheet()->getStyle($from . $i)->applyFromArray
+				(
+					$color
+				);
+				
+				$from=$to;
+				$from++;
+				
+				
+				$inc=(12-$end_month);
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+				$from=$to;
+				$from++;
+				
+				$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+				
+				
+
+			}
+		 
+		} else if($end_year > $third_yr) { 
+			
+			$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':AY'. $i);
+				$objPHPExcel->getActiveSheet()->getStyle('M' . $i . ':AY' . $i )->applyFromArray
+				(
+					$color
+				);
+			
+		}	
+	
+	} else if($start_year == $current_yr) {
+	
+		$val = getColspan($start_date, $end_date);
+		$st = $start_month-1;
+		if($end_year == $current_yr) {
+			
+			$from='M';
+			if($st != 0)
+			{
+			$inc=$st;
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			$from=$to;
+			$from++;
+			}
+			
+			if($val != 0) {
+				$inc=$val;
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+					$objPHPExcel->getActiveSheet()->getStyle($from . $i .':'.$to .$i )->applyFromArray
+				(
+					$color
+				);
+				$from=$to;
+				$from++;
+				
+				if((12 - ($st+$val)) != 0)
+				{
+				$inc=(12 - ($st+$val));
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+				$from=$to;
+				$from++;
+				}
+			} else {
+					
+					$objPHPExcel->getActiveSheet()->getStyle($from . $i )->applyFromArray
+				(
+					$color
+				);
+				
+				$from++;
+				
+				if((12 - ($st+1)) != 0)
+				{
+				$inc=(12 - ($st+1));
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+				$from=$to;
+				$from++;
+				}
+			
+			
+			}
+			
+			$objPHPExcel->getActiveSheet()->mergeCells('Y' . $i . ':AJ'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AK' . $i . ':AV'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+			
+		
+		} else if($end_year == $second_yr) { 
+		 
+			$from='M';
+			if($st != 0)
+			{
+			$inc=$st;
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			$from=$to;
+			$from++;
+			}
+			
+			if($val != 0) {
+				$inc=$val;
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+					$objPHPExcel->getActiveSheet()->getStyle($from . $i .':'.$to .$i )->applyFromArray
+				(
+					$color
+				);
+				$from=$to;
+				$from++;
+				
+				if((24 - ($val+$st)) != 0)
+				{
+				$inc=(24 - ($val+$st));
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+				$from=$to;
+				$from++;
+				}
+			} else {
+					
+					$objPHPExcel->getActiveSheet()->getStyle($from . $i )->applyFromArray
+				(
+					$color
+				);
+				
+				$from++;
+				
+				if((24 - (1+$st)) != 0)
+				{
+				$inc=(24 - (1+$st));
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+				$from=$to;
+				$from++;
+				}
+			
+			
+			}
+			
+			$objPHPExcel->getActiveSheet()->mergeCells('AK' . $i . ':AV'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+			
+			
+	
+		} else if($end_year == $third_yr) {
+		
+		
+			$from='M';
+			if($st != 0)
+			{
+			$inc=$st;
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			$from=$to;
+			$from++;
+			}
+			
+			
+			if($val != 0) {
+				$inc=$val;
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+					$objPHPExcel->getActiveSheet()->getStyle($from . $i .':'.$to .$i )->applyFromArray
+				(
+					$color
+				);
+				$from=$to;
+				$from++;
+				
+				if((36 - ($val+$st)) != 0)
+				{
+				$inc=(36 - ($val+$st));
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+				$from=$to;
+				$from++;
+				}
+			} else {
+					
+					$objPHPExcel->getActiveSheet()->getStyle($from . $i )->applyFromArray
+				(
+					$color
+				);
+				
+				$from++;
+				
+				if((36 - (1+$st)) != 0)
+				{
+				$inc=(36 - (1+$st));
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+				$from=$to;
+				$from++;
+				}
+			
+			
+			}
+			
+			$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+			
+			
+	
+		} else if($end_year > $third_yr){
+		
+			$from='M';
+			if($st != 0)
+			{
+			$inc=$st;
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			$from=$to;
+			$from++;
+			}
+			
+			$inc=(39 - $st);
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			$objPHPExcel->getActiveSheet()->getStyle($from . $i .':'.$to .$i )->applyFromArray
+				(
+					$color
+				);
+			$from=$to;
+			$from++;
+			
+					
+		}
+		
+	} else if($start_year == $second_yr) {
+	
+		$val = getColspan($start_date, $end_date);
+		$st = $start_month-1;
+		if($end_year == $second_yr) {
+		
+			
+			$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':X'. $i);
+			$from='Y';
+			if($st != 0)
+			{
+			$inc=$st;
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			$from=$to;
+			$from++;
+			}
+			
+			if($val != 0) {
+				$inc=$val;
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+					$objPHPExcel->getActiveSheet()->getStyle($from . $i .':'.$to .$i )->applyFromArray
+				(
+					$color
+				);
+				$from=$to;
+				$from++;
+				
+				if((12 - ($val+$st)) != 0)
+				{
+				$inc=(12 - ($val+$st));
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+				$from=$to;
+				$from++;
+				}
+			} else {
+					
+					$objPHPExcel->getActiveSheet()->getStyle($from . $i )->applyFromArray
+				(
+					$color
+				);
+				
+				$from++;
+				
+				if((12 - (1+$st)) != 0)
+				{
+				$inc=(12 - (1+$st));
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+				$from=$to;
+				$from++;
+				}
+			
+			
+			}
+			
+			$objPHPExcel->getActiveSheet()->mergeCells('AK' . $i . ':AV'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+			
+			
+		
+		} else if($end_year == $third_yr) {
+		
+			
+			$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':X'. $i);
+			$from='Y';
+			if($st != 0)
+			{
+			$inc=$st;
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			$from=$to;
+			$from++;
+			}
+			
+			if($val != 0) {
+				$inc=$val;
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+					$objPHPExcel->getActiveSheet()->getStyle($from . $i .':'.$to .$i )->applyFromArray
+				(
+					$color
+				);
+				$from=$to;
+				$from++;
+				
+				if((24 - ($val+$st)) != 0)
+				{
+				$inc=(24 - ($val+$st));
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+				$from=$to;
+				$from++;
+				}
+			} else {
+					
+					$objPHPExcel->getActiveSheet()->getStyle($from . $i )->applyFromArray
+				(
+					$color
+				);
+				
+				$from++;
+				
+				if((24 - (1+$st)) != 0)
+				{
+				$inc=(24 - (1+$st));
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+				$from=$to;
+				$from++;
+				}
+			
+			
+			}
+			
+			$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+			
+
+		} else if($end_year > $third_yr) {
+		
+			$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':X'. $i);
+			$from='Y';
+			if($st != 0)
+			{
+			$inc=$st;
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			$from=$to;
+			$from++;
+			}
+			
+			$inc=(27 - $st);
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			$objPHPExcel->getActiveSheet()->getStyle($from . $i .':'.$to .$i )->applyFromArray
+				(
+					$color
+				);
+			$from=$to;
+			$from++;
+				
+		}
+		
+	} else if($start_year == $third_yr) {
+	
+		$val = getColspan($start_date, $end_date);
+		$st = $start_month-1;	
+		if($end_year == $third_yr) {
+		
+			
+			$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':X'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('Y' . $i . ':AJ'. $i);
+			$from='AK';
+			if($st != 0)
+			{
+			$inc=$st;
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			$from=$to;
+			$from++;
+			}
+			
+			if($val != 0) {
+				$inc=$val;
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+					$objPHPExcel->getActiveSheet()->getStyle($from . $i .':'.$to .$i )->applyFromArray
+				(
+					$color
+				);
+				$from=$to;
+				$from++;
+				
+				if((12 - ($val+$st)) != 0)
+				{
+				$inc=(12 - ($val+$st));
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+				$from=$to;
+				$from++;
+				}
+			} else {
+					
+					$objPHPExcel->getActiveSheet()->getStyle($from . $i )->applyFromArray
+				(
+					$color
+				);
+				
+				$from++;
+				
+				if((12 - (1+$st)) != 0)
+				{
+				$inc=(12 - (1+$st));
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+				$from=$to;
+				$from++;
+				}
+			
+			
+			}
+			
+			$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+			
+		
+		} else if($end_year > $third_yr) {
+		
+			
+			$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':X'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('Y' . $i . ':AJ'. $i);
+			$from='AK';
+			if($st != 0)
+			{
+			$inc=$st;
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			$from=$to;
+			$from++;
+			}
+			
+			$inc=(15 - $st);
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			$objPHPExcel->getActiveSheet()->getStyle($from . $i .':'.$to .$i )->applyFromArray
+				(
+					$color
+				);
+			$from=$to;
+			$from++;
+				
+						
+		}
+			
+	} else if($start_year > $third_yr) {
+	
+			$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':X'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('Y' . $i . ':AJ'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AK' . $i . ':AV'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+			
+			$objPHPExcel->getActiveSheet()->getStyle('AW' . $i . ':AY' . $i )->applyFromArray
+			(
+				$color
+			);
+	
+			
+	} 
+	return $value;
+}
+
+function getUPMChart($start_month, $start_year, $end_month, $end_year, $current_yr, $second_yr, $third_yr, $start_date, $end_date, $upm_link, $upm_title)
+{
+	
+	$attr_two = 'class="rightborder"';
+	$background_color = 'background-color:#9966FF;';
+	
+	
+	if(($start_date == '' || $start_date == NULL || $start_date == '0000-00-00') && ($end_date == '' || $end_date == NULL || $end_date == '0000-00-00')) {
+	
+		$value = '<td colspan="12"><span ' . $upm_title . '>' 
+			.(( $upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+			. '<td colspan="12"><span ' . $upm_title . '>'
+			. (( $upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+			. '<td colspan="12"><span ' . $upm_title . '>' . (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;')  
+			. '</span></td>'
+			. '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>' 
+			. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';	
+
+	} else if($start_date == '' || $start_date == NULL || $start_date == '0000-00-00') {
+	
+		$st = $end_month-1;
+		if($end_year < $current_yr) {
+		
+			$value = '<td colspan="12"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. '<td colspan="12"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. '<td colspan="12"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';	
+						
+		} else if($end_year == $current_yr) {
+			
+			$value = (($st != 0) ? '<td colspan="' . $st . '"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '')
+				. '<td style="' . $background_color . '"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. (((12 - ($st+1)) != 0) ? '<td colspan="' .(12 - ($st+1)) . '"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '')
+				. '<td colspan="12"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. '<td colspan="12"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';	
+					
+		} else if($end_year == $second_yr) {
+		
+			$value = '<td colspan="12"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. (($st != 0) ? '<td colspan="' . $st . '"><span ' . $upm_title . '>' 
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '')
+				. '<td style="' . $background_color . '"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. (((12 - ($st+1)) != 0) ? '<td colspan="' .(12 - ($st+1)) . '"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '')
+				. '<td colspan="12">&nbsp;</td><td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';
+					
+		} else if($end_year == $third_yr) {
+		
+			$value = '<td colspan="12"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. '<td colspan="12"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. (($st != 0) ? '<td colspan="' . $st . '"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '')
+				. '<td style="' . $background_color . '"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. (((12 - ($st+1)) != 0) ? '<td colspan="' .(12 - ($st+1)) . '"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '')
+				. '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';	
+				
+		} else if($end_year > $third_yr){
+		
+			$value = '<td colspan="12"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. '<td colspan="12"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. '<td colspan="12"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. '<td colspan="3" style="' . $background_color . '" ' . $attr_two . '><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';
+		}
+	} else if($end_date == '' || $end_date == NULL || $end_date == '0000-00-00') {
+	
+		$st = $start_month-1;
+		if($start_year < $current_yr) {
+		
+			$value = '<td colspan="12"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. '<td colspan="12"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. '<td colspan="12"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';	
+						
+		} else if($start_year == $current_yr) { 
+			
+			$value = (($st != 0) ? '<td colspan="' . $st . '"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '')
+				. '<td style="' . $background_color . '"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. (((12 - ($st+1)) != 0) ? '<td colspan="' .(12 - ($st+1)) . '"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '')
+				. '<td colspan="12"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. '<td colspan="12"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';	
+					
+		} else if($start_year == $second_yr) {
+		
+			$value = '<td colspan="12"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. (($st != 0) ? '<td colspan="' . $st . '"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '')
+				. '<td style="' . $background_color . '"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. (((12 - ($st+1)) != 0) ? '<td colspan="' .(12 - ($st+1)) . '"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '')
+				. '<td colspan="12"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';
+					
+		} else if($start_year == $third_yr) {
+		
+			$value = '<td colspan="12"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+			 	. '<td colspan="12"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. (($st != 0) ? '<td colspan="' . $st . '"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '')
+				. '<td style="' . $background_color . '"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. (((12 - ($st+1)) != 0) ? '<td colspan="' .(12 - ($st+1)) . '"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '')
+				. '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';	
+				
+		} else if($start_year > $third_yr){
+		
+			$value = '<td colspan="12"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. '<td colspan="12"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. '<td colspan="12"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. '<td colspan="3" style="' . $background_color . '" ' . $attr_two . '><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';
+		}
+			
+	} else if($end_date < $start_date) {
+	
+		$value = '<td colspan="12">&nbsp;</td><td colspan="12">&nbsp;</td>'
+					. '<td colspan="12">&nbsp;</td><td colspan="3" ' . $attr_two . '>&nbsp;</td>';
+					
+	} else if($start_year < $current_yr) {
+
+		$val = getColspan($start_date, $end_date);
+		$st = $start_month-1;
+
+		if($end_year < $current_yr) {
+		
+			$value = '<td colspan="12"><span ' . $upm_title . '>'
+			. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+			. '<td colspan="12"><span ' . $upm_title . '>'
+			. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+			. '<td colspan="12"><span ' . $upm_title . '>'
+			. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+			. '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
+			. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';
+		  
+		} else if($end_year == $current_yr) { 
+		
+			if($end_month == 12) {
+			
+				$value = '<td style="' . $background_color . '" colspan="' . $end_month . '">' 
+				. '<span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. '<td colspan="12"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. '<td colspan="12"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';
+				
+			} else { 
+			
+				$value = '<td style="' . $background_color . '" colspan="' . $end_month . '">' . '<span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. '<td colspan="' . (12-$end_month) . '"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. '<td colspan="12"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. '<td colspan="12"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';
+				
+			}
+		} else if($end_year == $second_yr) { 
+		 
+			if($end_month == 12) {
+			
+				$value = '<td style="' . $background_color . '" colspan="24">' . '<span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. '<td colspan="12"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';
+				
+			} else {
+			
+				$value = '<td style="' . $background_color . '" colspan="' . (12+$end_month) . '">' . '<span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. '<td colspan="' . (12-$end_month) . '"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. '<td colspan="12"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;'). '</span></td>';
+				
+			}
+	
+		} else if($end_year == $third_yr) { 
+			
+			if($end_month == 12) {
+			
+				$value = '<td style="' . $background_color . '" colspan="36">' . '<span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';
+				
+			} else {
+			
+				$value = '<td style="' . $background_color . '" colspan="' . (24+$end_month) . '" ' . $class . '>' 
+				. '<span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. '<td colspan="' . (12-$end_month) . '"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
+
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';
+			}
+		 
+		} else if($end_year > $third_yr) {
+		
+			$value = '<td colspan="39" style="' . $background_color . '" ' . $attr_two . '><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';		
+		}	
+	
+	} else if($start_year == $current_yr) {
+	
+		$val = getColspan($start_date, $end_date);
+		$st = $start_month-1;
+		if($end_year == $current_yr) {
+			
+			$value = (($st != 0) ? '<td colspan="' . $st . '" ><span ' . $upm_title . '>'
+			. (( $upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '');
+			
+			if($val != 0) {
+				$value .= '<td style="' . $background_color . '" colspan="' . $val . '">'
+						. '<span ' . $upm_title . '>'
+						. (( $upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+						. (((12 - ($st+$val)) != 0) ? '<td colspan="' .(12 - ($st+$val)) . '"  style="' . $lineheight . '"><span ' . $upm_title . '>'
+						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '');
+			} else {
+				$value .= '<td style="' . $background_color . '">'
+						. '<span ' . $upm_title . '>'
+						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+						. (((12 - ($st+1)) != 0) ? '<td colspan="' .(12 - ($st+1)) . '"  style="' . $lineheight . '"><span ' . $upm_title . '>'
+						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '');			
+			}
+			
+			$value .= '<td colspan="12"><span ' . $upm_title . '>'
+					. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+					. '<td colspan="12"><span ' . $upm_title . '>'
+					. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+					. '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
+					. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';
+		
+		} else if($end_year == $second_yr) { 
+		 
+			$value = (($st != 0) ? '<td colspan="' . $st . '"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '');
+			
+			if($val != 0) {
+				$value .= '<td style="' . $background_color . '" colspan="' . $val . '">'
+						. '<span ' . $upm_title .' >'
+						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+						. (((24 - ($val+$st)) != 0) ? '<td colspan="' .(24 - ($val+$st)) . '"><span ' . $upm_title . '>'
+						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '');
+			} else {
+				$value .= '<td style="' . $background_color . '">' . '<span ' . $upm_title .' >'
+						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+						. (((24 - (1+$st)) != 0) ? '<td colspan="' .(24 - (1+$st)) . '"><span ' . $upm_title . '>'
+						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '');			
+			}
+			
+			$value .= '<td colspan="12"><span ' . $upm_title . '>'
+					. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+					. '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
+					. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';
+	
+		} else if($end_year == $third_yr) {
+				
+			$value = (($st != 0) ? '<td colspan="' . $st . '"><span ' . $upm_title . '>'
+					. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '');
+				
+			if($val != 0) {
+				$value .= '<td style="' . $background_color . '" colspan="' . $val . '">' . '<span ' . $upm_title .'>'
+						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+						. (((36 - ($val+$st)) != 0) ? '<td colspan="' .(36 - ($val+$st)) . '"><span ' . $upm_title . '>'
+						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '') ;
+			} else {
+				$value .= '<td style="' . $background_color . '">'
+						. '<span ' . $upm_title .'>'
+						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+						. (((36 - (1+$st)) != 0) ? '<td colspan="' .(36 - (1+$st)) . '"><span ' . $upm_title . '>'
+						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '') ;			
+			}
+			
+			$value .= '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
+						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';
+	
+		} else if($end_year > $third_yr){
+		
+			$value = (($st != 0) ? '<td colspan="' . $st . '">&nbsp;</td>' : '');
+			$value .= '<td colspan="' .(39 - $st) . '" style="' . $background_color . '" ' . $attr_two . '><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';		
+		}
+		
+	} else if($start_year == $second_yr) {
+	
+		$val = getColspan($start_date, $end_date);
+		$st = $start_month-1;
+		if($end_year == $second_yr) {
+		
+			$value = '<td colspan="12"><span ' . $upm_title . '>' 
+					. (( $upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+					. (($st != 0) ? '<td colspan="' . $st . '"><span ' . $upm_title . '>'
+					. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '');
+					
+			if($val != 0) {
+				$value .= '<td style="' . $background_color . '" colspan="' . $val . '">' . '<span ' . $upm_title . '>'
+						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+						. (((12 - ($val+$st)) != 0) ? '<td colspan="' .(12 - ($val+$st)) . '"><span ' . $upm_title . '>'
+						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '');
+			} else {
+				$value .= '<td style="' . $background_color . '">' . '<span ' . $upm_title . '>'
+						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+						. (((12 - (1+$st)) != 0) ? '<td colspan="' .(12 - (1+$st)) . '"><span ' . $upm_title . '>'
+						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '');
+			}
+			
+			$value .= '<td colspan="12"><span ' . $upm_title . '>'
+					. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+					. '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
+					. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';		
+		
+		} else if($end_year == $third_yr) {
+		
+			$value = '<td colspan="12"><span ' . $upm_title . '>'
+					. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+					. (($st != 0) ? '<td colspan="' . $st . '"><span ' . $upm_title . '>'
+					. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '');
+					
+			if($val != 0) {
+				$value .= '<td style="' . $background_color . '" colspan="' . $val . '">' . '<span ' . $upm_title .'>'
+						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+						. (((24 - ($val+$st)) != 0) ? '<td colspan="' .(24 - ($val+$st)) . '"><span ' . $upm_title . '>'
+						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '');
+			} else {
+				$value .= '<td style="' . $background_color . '">' . '<span ' . $upm_title .'>'
+						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+						. (((24 - (1+$st)) != 0) ? '<td colspan="' .(24 - (1+$st)) . '"><span ' . $upm_title . '>'
+						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '');			
+			}
+			$value .= '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
+						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';
+
+		} else if($end_year > $third_yr) {
+		
+			$value = '<td colspan="12">&nbsp;</td>' . (($st != 0) ? '<td colspan="' . $st . '">&nbsp;</td>' : '');
+			$value .= '<td colspan="' .(27 - $st) . '" style="' . $background_color . '" ' . $attr_two . '><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';		
+		}
+		
+	} else if($start_year == $third_yr) {
+	
+		$val = getColspan($start_date, $end_date);
+		$st = $start_month-1;	
+		if($end_year == $third_yr) {
+		
+			$value = '<td colspan="12"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. '<td colspan="12"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. (($st != 0) ? '<td colspan="' . $st . '"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '');
+				
+			if($val != 0) {
+				$value .= '<td style="' . $background_color . '" colspan="' . $val . '">' . '<span ' . $upm_title .'>'
+						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+						. (((12 - ($val+$st)) != 0) ? '<td colspan="' .(12 - ($val+$st)) . '"><span ' . $upm_title . '>'
+						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '');
+			} else {
+				$value .= '<td style="' . $background_color . '">' . '<span ' . $upm_title .'>' 
+						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+						. (((12 - (1+$st)) != 0) ? '<td colspan="' .(12 - (1+$st)) . '"><span ' . $upm_title . '>'
+						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '');			
+			}
+			
+			$value .= '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
+						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';
+		
+		} else if($end_year > $third_yr) {
+		
+			$value = '<td colspan="12"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. '<td colspan="12"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' 
+				. (($st != 0) ? '<td colspan="' . $st . '"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '')
+				. '<td colspan="' . (15 - $st) . '" style="' . $background_color . '" ' . $attr_two . '><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';
+		
+		}
+			
+	} else if($start_year > $third_yr) {
+	
+			$value = '<td colspan="12"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. '<td colspan="12"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. '<td colspan="12"><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
+				. '<td colspan="3" style="' . $background_color . '" ' . $attr_two . '><span ' . $upm_title . '>'
+				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';	
+				
+	}
+	return $value;	
+}
+
+
+//Get html content by passing through htmlspecialchars
+function htmlformat($str)
+{
+	$str=fix_special_chars($str);
+	return htmlspecialchars($str);
+}
+
+
+
+/********************export begins/*/
+function create_excel($process_params,$upm_string,$firstpartof_upm_string,$tm,$ed, $upmDetails, $header_details)
+{
+
 ob_start();
 //$upm_string=array_unique($upm_string);
 if(isset($upm_string) and is_array($upm_string)) 
 {
 //$upm_string=array_unique($upm_string);
 }
+
+$current_yr	= date('Y');
+$second_yr	= date('Y')+1;
+$third_yr	= date('Y')+2;	
 
 $objPHPExcel = new PHPExcel();
 $objPHPExcel->setActiveSheetIndex(0);
@@ -1770,6 +3254,21 @@ $objPHPExcel->getActiveSheet()->setCellValue('I1' , 'Start');
 $objPHPExcel->getActiveSheet()->setCellValue('J1' , 'End');
 $objPHPExcel->getActiveSheet()->setCellValue('K1' , 'Ph');
 
+$objPHPExcel->getActiveSheet()->setCellValue('L1' , 'Result Link');
+
+$objPHPExcel->getActiveSheet()->setCellValue('M1' , $current_yr);
+$objPHPExcel->getActiveSheet()->mergeCells('M1:X1');
+
+$objPHPExcel->getActiveSheet()->setCellValue('Y1' , $second_yr);
+$objPHPExcel->getActiveSheet()->mergeCells('Y1:AJ1');
+
+$objPHPExcel->getActiveSheet()->setCellValue('AK1' , $third_yr);
+$objPHPExcel->getActiveSheet()->mergeCells('AK1:AV1');
+
+$objPHPExcel->getActiveSheet()->setCellValue('AW1' , '+');
+$objPHPExcel->getActiveSheet()->mergeCells('AW1:AY1');
+
+
 $styleThinBlueBorderOutline = array(
 	'borders' => array(
 		'inside' => array(
@@ -1783,7 +3282,7 @@ $styleThinBlueBorderOutline = array(
 	),
 );
 
-$objPHPExcel->getActiveSheet()->getStyle('A1:K1')->applyFromArray($styleThinBlueBorderOutline);
+$objPHPExcel->getActiveSheet()->getStyle('A1:AY1')->applyFromArray($styleThinBlueBorderOutline);
 			
 
 $objPHPExcel->getProperties()->setCreator("The Larvol Group")
@@ -1850,12 +3349,12 @@ foreach ($upm_string as $ke=>$valu)
 }
 
 
-/*  Separate Remaining UPM's */
+/* getting Separate Remaining UPM's */
 $first_part_newupmarray=array();
 foreach ($firstpartof_upm_string as $key => $value)
 $first_part_newupmarray[$value['id']][$key]=$value;
 $first_part_newupmarray=array_diff ($first_part_newupmarray, $newupmarray);
-/*Part End - Separate Remaining UPM's */
+/*Part End - getting Separate Remaining UPM's */
 
 
 ///Part added to set start date as only one if there are multiple dates exists in start date field
@@ -1878,44 +3377,49 @@ if($stacked)
 	foreach ($excelarray as $key=>$value)
 	{
 	
-	if($value['section'] > $ii)
+		$start_month = date('m',strtotime($value['NCT/start_date']));
+		$start_year = date('Y',strtotime($value['NCT/start_date']));
+		$end_month = date('m',strtotime($value['inactive_date']));
+		$end_year = date('Y',strtotime($value['inactive_date']));
+		
+		if($value['section'] > $ii)
 		$ii=$value['section'];
 		
 		if( isset($process_params['ltype'][$ii]) and isset($value['section']) and $value['section']==$ii and isset($value["NCT/brief_title"]) )  
 		{
-			$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $process_params['ltype'][$ii]);
-			$objPHPExcel->getActiveSheet()->mergeCells('A' . $i . ':K'. $i);
-			$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':K'. $i )->applyFromArray
+		$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $process_params['ltype'][$ii]);
+		$objPHPExcel->getActiveSheet()->mergeCells('A' . $i . ':AY'. $i);
+		$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':AY'. $i )->applyFromArray
+			(
+				array
 				(
-					array
+					'fill' => array
 					(
-						'fill' => array
+						'type'       => PHPExcel_Style_Fill::FILL_SOLID,
+						'rotation'   => 0,
+						'startcolor' => array
 						(
-							'type'       => PHPExcel_Style_Fill::FILL_SOLID,
-							'rotation'   => 0,
-							'startcolor' => array
-							(
-								'rgb' => 'A2FF97'
-							),
-							'endcolor'   => array
-							(
-								'rgb' => 'A2FF97'
-							)
+							'rgb' => 'A2FF97'
+						),
+						'endcolor'   => array
+						(
+							'rgb' => 'A2FF97'
 						)
 					)
-				);
+				)
+			);
 				
-				
-			$i++;
-			$ii++;
+		$i++;
+		$ii++;
 		}	
-		//$value=$val1;
+		 	//$value=$val1;
+			
 		
-			if( (isset($value['section']) or $_POST['list']== 'all') and ( isset($value["NCT/brief_title"]) and !empty($value["NCT/brief_title"]) ) )
-			{
+		if( (isset($value['section']) or $_POST['list']== 'all') and ( isset($value["NCT/brief_title"]) and !empty($value["NCT/brief_title"]) ) )
+		{
 				
-			$objPHPExcel->getActiveSheet()->getStyle('"A' . $i . ':K' . $i.'"')->applyFromArray($styleThinBlueBorderOutline);
-			$objPHPExcel->getActiveSheet()->getStyle('A1:K1')->applyFromArray($styleThinBlueBorderOutline);
+			$objPHPExcel->getActiveSheet()->getStyle('"A' . $i . ':AY' . $i.'"')->applyFromArray($styleThinBlueBorderOutline);
+			$objPHPExcel->getActiveSheet()->getStyle('A1:AY1')->applyFromArray($styleThinBlueBorderOutline);
 			if($value["NCT/nct_id"]>0)
 			$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, 'NCT' . sprintf("%08s",$value["NCT/nct_id"]));
 			
@@ -1942,12 +3446,14 @@ if($stacked)
 			if(isset($value["NCT/condition"])) 					
 			{
 			$value["NCT/condition"]=fix_special_chars($value["NCT/condition"]);
+			$value["NCT/condition"]=implode(", ",array_unique(explode(",", str_replace(", ",",",$value["NCT/condition"]))));
 			$objPHPExcel->getActiveSheet()->setCellValue('G' . $i, $value["NCT/condition"]);
 			}
 			
 			if(isset($value["NCT/intervention_name"])) 			
 			{
 			$value["NCT/intervention_name"]=fix_special_chars($value["NCT/intervention_name"]);
+			$value["NCT/intervention_name"]=implode(", ",array_unique(explode(",", str_replace(", ",",",$value["NCT/intervention_name"]))));
 			$objPHPExcel->getActiveSheet()->setCellValue('H' . $i, $value["NCT/intervention_name"]);
 			}
 			
@@ -1959,6 +3465,7 @@ if($stacked)
 			$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, date('m/y',strtotime($value["inactive_date"])));
 			
 			if(isset($value["NCT/phase"])) 						$objPHPExcel->getActiveSheet()->setCellValue('K' . $i, $value["NCT/phase"]);
+			
 			if($bgcol=="D5D3E6") $bgcol="EDEAFF"; 	else $bgcol="D5D3E6";
 			
 			$objPHPExcel->getActiveSheet()->getStyle('A' . $i .':J' .$i )->applyFromArray
@@ -1982,7 +3489,7 @@ if($stacked)
 				);
 				
 			
-			$objPHPExcel->getActiveSheet()->getStyle('A1:K1')->applyFromArray
+			$objPHPExcel->getActiveSheet()->getStyle('A1:AY1')->applyFromArray
 			(
 				array
 				(
@@ -2033,9 +3540,40 @@ if($stacked)
 			)	$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':K' . $i)->getFont()->getColor()->setARGB(PHPExcel_Style_Color::COLOR_RED);
 			*/
 			
+			if(isset($value["NCT/phase"]) and $value["NCT/phase"]=="N/A")
+			{
+			
+				$phase_color="BFBFBF";
+				
+				$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray
+				(
+					array
+					(
+						'fill' => array
+						(
+							'type'       => PHPExcel_Style_Fill::FILL_SOLID,
+							'rotation'   => 0,
+							'startcolor' => array
+							(
+								'rgb' => 'BFBFBF'
+							),
+							'endcolor'   => array
+							(
+								'rgb' => 'BFBFBF'
+							)
+						)
+					)
+				);
+			
+			
+			}
+			
+			
 			if(isset($value["NCT/phase"]) and $value["NCT/phase"]=="Phase 0")
 			{
 			
+				$phase_color="00CCFF";
+				
 				$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray
 				(
 					array
@@ -2062,6 +3600,8 @@ if($stacked)
 			if(isset($value["NCT/phase"]) and ( $value["NCT/phase"]=="Phase 1"  or $value["NCT/phase"]=="Phase 0/Phase 1"  or $value["NCT/phase"]=="Phase 0/1"  or $value["NCT/phase"]=="Phase 1a"  or $value["NCT/phase"]=="Phase 1b"  or $value["NCT/phase"]=="Phase 1a/1b"  or $value["NCT/phase"]=="Phase 1c"))
 			{
 			
+				$phase_color="99CC00";
+				
 				$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray
 				(
 					array
@@ -2084,9 +3624,13 @@ if($stacked)
 			
 			
 			}
+			
+			
 			if(isset($value["NCT/phase"]) and ( $value["NCT/phase"]=="Phase 2" or $value["NCT/phase"]=="Phase 1/Phase 2" or $value["NCT/phase"]=="Phase 1/2" or $value["NCT/phase"]=="Phase 1b/2" or $value["NCT/phase"]=="Phase 1b/2a" or $value["NCT/phase"]=="Phase 2a" or $value["NCT/phase"]=="Phase 2a/2b" or $value["NCT/phase"]=="Phase 2a/b" or $value["NCT/phase"]=="Phase 2b"))
 			{
 			
+				$phase_color="FFFF00";
+				
 				$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray
 				(
 					array
@@ -2113,6 +3657,8 @@ if($stacked)
 			if(isset($value["NCT/phase"]) and ($value["NCT/phase"]=="Phase 3" or  $value["NCT/phase"]=="Phase 2/Phase 3" or $value["NCT/phase"]=="Phase 2/3" or $value["NCT/phase"]=="Phase 2b/3" or $value["NCT/phase"]=="Phase 3a" or $value["NCT/phase"]=="Phase 3b"))
 			{
 			
+				$phase_color="FF9900";
+				
 				$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray
 				(
 					array
@@ -2136,9 +3682,12 @@ if($stacked)
 			
 			}
 
+			
 			if(isset($value["NCT/phase"]) and ( $value["NCT/phase"]=="Phase 4" or $value["NCT/phase"]=="Phase 3/Phase 4" or $value["NCT/phase"]=="Phase 3/4" or $value["NCT/phase"]=="Phase 3b/4"))
 			{
 			
+				$phase_color="FF0000";
+				
 				$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray
 				(
 					array
@@ -2158,276 +3707,346 @@ if($stacked)
 						)
 					)
 				);
+				
 			}
-			$i++;
-		}
+			
+			
 		
-	}
-}
+		
+		//rendering project completion chart
+		$pdf_content.= getCompletionChart($start_month, $start_year, $end_month, $end_year, $current_yr, $second_yr, $third_yr, $phase_color, $value["NCT/start_date"], $value['inactive_date'], $objPHPExcel, $i);
+			
+		$i++;
+			
+		} //end of if
+	   	
+	} //end of foreach
+	
+} ///end of main if
 //UNSTACKED
 else
 {
 	foreach ($excelarray as $key=>$value)
 	{
-	if( isset($value['section']) or $_POST['list']== 'all' )
-		{
-		
-		$objPHPExcel->getProperties()->setCreator("The Larvol Group")
-									 ->setLastModifiedBy("TLG")
-									 ->setTitle("Larvol Trials")
-									 ->setSubject("Larvol Trials")
-									 ->setDescription("Excel file generated by Larvol Trials")
-									 ->setKeywords("Larvol Trials")
-									 ->setCategory("Clinical Trials");
-		$objPHPExcel->getActiveSheet()->getStyle('"A' . $i . ':K' . $i . '"')->applyFromArray($styleThinBlueBorderOutline);
-		
-		$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, 'NCT' . sprintf("%08s",$value["NCT.nct_id"]));
-		
-		$value["NCT.brief_title"]=fix_special_chars($value["NCT.brief_title"]);
-		$objPHPExcel->getActiveSheet()->setCellValue('B' . $i, $value["NCT.brief_title"]);
-		
-		$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/'. $objPHPExcel->getActiveSheet()->getCell('A' . $i)->getValue() );
-		$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('Source - ClinicalTrials.gov');
-		$objPHPExcel->getActiveSheet()->getStyle('B' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
-		if(isset($value["NCT.enrollment"])) 				$objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $value["NCT.enrollment"]);
-		
-		$value["region"]=fix_special_chars($value["region"]);
-		$objPHPExcel->getActiveSheet()->setCellValue('D' . $i, $value["region"]);
-		
-		if(isset($value["NCT.overall_status"])) 			$objPHPExcel->getActiveSheet()->setCellValue('E' . $i, $value["NCT.overall_status"]);
-		
-		if(isset($value["NCT.lead_sponsor"]))
-		{
-			$value["NCT.lead_sponsor"]=fix_special_chars($value["NCT.lead_sponsor"]);
-			$objPHPExcel->getActiveSheet()->setCellValue('F' . $i, $value["NCT.lead_sponsor"]);
-		}
-		
-		if(isset($value["NCT.condition"])) 					
-		{
-			$value["NCT.condition"]=fix_special_chars($value["NCT.condition"]);
-			$objPHPExcel->getActiveSheet()->setCellValue('G' . $i, $value["NCT.condition"]);
-		}
-		
-		if(isset($value["NCT.intervention_name"])) 			
-		{
-			$value["NCT.intervention_name"]=fix_special_chars($value["NCT.intervention_name"]);
-			$objPHPExcel->getActiveSheet()->setCellValue('H' . $i, $value["NCT.intervention_name"]);
-		}
-		if(isset($value["NCT.start_date"]) && $value["NCT.start_date"] != '' && $value["NCT.start_date"] != NULL && $value["NCT.start_date"] != '0000-00-00')
-		$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, date('m/y',strtotime($value["NCT.start_date"])));
-		//if(isset($value["NCT.primary_completion_date"])) 	$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, $value["NCT.primary_completion_date"]);
-		
-		if(isset($value["inactive_date"]) && $value["inactive_date"] != '' && $value["inactive_date"] != NULL && $value["inactive_date"] != '0000-00-00') 					
-		$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, date('m/y',strtotime($value["inactive_date"])));
-		
-		if(isset($value["NCT.phase"])) 						$objPHPExcel->getActiveSheet()->setCellValue('K' . $i, $value["NCT.phase"]);
-		if($bgcol=="D5D3E6") $bgcol="EDEAFF"; 	else $bgcol="D5D3E6";
-		
-		$objPHPExcel->getActiveSheet()->getStyle('A' . $i .':J' .$i )->applyFromArray
+		if( isset($value['section']) or $_POST['list']== 'all' )
+			{
+			
+			
+			$start_month = date('m',strtotime($value['NCT.start_date']));
+			$start_year = date('Y',strtotime($value['NCT.start_date']));
+			$end_month = date('m',strtotime($value['inactive_date']));
+			$end_year = date('Y',strtotime($value['inactive_date']));
+			
+			
+			$objPHPExcel->getProperties()->setCreator("The Larvol Group")
+										 ->setLastModifiedBy("TLG")
+										 ->setTitle("Larvol Trials")
+										 ->setSubject("Larvol Trials")
+										 ->setDescription("Excel file generated by Larvol Trials")
+										 ->setKeywords("Larvol Trials")
+										 ->setCategory("Clinical Trials");
+			$objPHPExcel->getActiveSheet()->getStyle('"A' . $i . ':AY' . $i . '"')->applyFromArray($styleThinBlueBorderOutline);
+			
+			$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, 'NCT' . sprintf("%08s",$value["NCT.nct_id"]));
+			
+			$value["NCT.brief_title"]=fix_special_chars($value["NCT.brief_title"]);
+			$objPHPExcel->getActiveSheet()->setCellValue('B' . $i, $value["NCT.brief_title"]);
+			
+			$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/'. $objPHPExcel->getActiveSheet()->getCell('A' . $i)->getValue() );
+			$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('Source - ClinicalTrials.gov');
+			$objPHPExcel->getActiveSheet()->getStyle('B' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+			
+			if(isset($value["NCT.enrollment"])) 				$objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $value["NCT.enrollment"]);
+			
+			$value["region"]=fix_special_chars($value["region"]);
+			$objPHPExcel->getActiveSheet()->setCellValue('D' . $i, $value["region"]);
+			
+			if(isset($value["NCT.overall_status"])) 			$objPHPExcel->getActiveSheet()->setCellValue('E' . $i, $value["NCT.overall_status"]);
+			
+			if(isset($value["NCT.lead_sponsor"]))
+			{
+				$value["NCT.lead_sponsor"]=fix_special_chars($value["NCT.lead_sponsor"]);
+				$objPHPExcel->getActiveSheet()->setCellValue('F' . $i, $value["NCT.lead_sponsor"]);
+			}
+			
+			if(isset($value["NCT.condition"])) 					
+			{
+				$value["NCT.condition"]=fix_special_chars($value["NCT.condition"]);
+				$value["NCT.condition"]=implode(", ",array_unique(explode(",", str_replace(", ",",",$value["NCT.condition"]))));
+				$objPHPExcel->getActiveSheet()->setCellValue('G' . $i, $value["NCT.condition"]);
+			}
+			
+			if(isset($value["NCT.intervention_name"])) 			
+			{
+				$value["NCT.intervention_name"]=fix_special_chars($value["NCT.intervention_name"]);
+				$value["NCT.intervention_name"]=implode(", ",array_unique(explode(",", str_replace(", ",",",$value["NCT.intervention_name"]))));
+				$objPHPExcel->getActiveSheet()->setCellValue('H' . $i, $value["NCT.intervention_name"]);
+			}
+			if(isset($value["NCT.start_date"]) && $value["NCT.start_date"] != '' && $value["NCT.start_date"] != NULL && $value["NCT.start_date"] != '0000-00-00')
+			$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, date('m/y',strtotime($value["NCT.start_date"])));
+			//if(isset($value["NCT.primary_completion_date"])) 	$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, $value["NCT.primary_completion_date"]);
+			
+			if(isset($value["inactive_date"]) && $value["inactive_date"] != '' && $value["inactive_date"] != NULL && $value["inactive_date"] != '0000-00-00') 					
+			$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, date('m/y',strtotime($value["inactive_date"])));
+			
+			if(isset($value["NCT.phase"])) 						$objPHPExcel->getActiveSheet()->setCellValue('K' . $i, $value["NCT.phase"]);
+			if($bgcol=="D5D3E6") $bgcol="EDEAFF"; 	else $bgcol="D5D3E6";
+			
+			$objPHPExcel->getActiveSheet()->getStyle('A' . $i .':J' .$i )->applyFromArray
+				(
+					array
+					(
+						'fill' => array
+						(
+							'type'       => PHPExcel_Style_Fill::FILL_SOLID,
+							'rotation'   => 0,
+							'startcolor' => array
+							(
+								'rgb' => $bgcol
+							),
+							'endcolor'   => array
+							(
+								'rgb' => $bgcol
+							)
+						)
+					)
+				);
+				
+			
+			$objPHPExcel->getActiveSheet()->getStyle('A1:AY1')->applyFromArray
 			(
 				array
 				(
+					'font'    => array
+					(
+						'bold'      => true
+					),
+					'alignment' => array
+					(
+						'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_LEFT,
+					),
+					'borders' => array
+					(
+						'top'     => array
+						(
+							'style' => PHPExcel_Style_Border::BORDER_THIN
+						)
+					),
 					'fill' => array
 					(
-						'type'       => PHPExcel_Style_Fill::FILL_SOLID,
-						'rotation'   => 0,
+						'type'       => PHPExcel_Style_Fill::FILL_GRADIENT_LINEAR,
+						'rotation'   => 90,
 						'startcolor' => array
 						(
-							'rgb' => $bgcol
+							'argb' => 'FFA0A0A0'
 						),
 						'endcolor'   => array
 						(
-							'rgb' => $bgcol
+							'argb' => 'FFFFFFFF'
 						)
 					)
 				)
 			);
+	
+			/*
+			if(
+				isset($value["NCT.overall_status"]) and 
+				(
+					$value["NCT.overall_status"]=="Completed" or 
+					$value["NCT.overall_status"]=="Approved for marketing" or 
+					$value["NCT.overall_status"]=="Temporarily not available" or 
+					$value["NCT.overall_status"]=="No Longer Available" or 
+					$value["NCT.overall_status"]=="Withdrawn" or 
+					$value["NCT.overall_status"]=="Terminated" or 
+					$value["NCT.overall_status"]=="Suspended" or 
+					$value["NCT.overall_status"]=="Completed"
+				)
+			)	$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':K' . $i)->getFont()->getColor()->setARGB(PHPExcel_Style_Color::COLOR_RED);
+			*/
+			
+			if(isset($value["NCT.phase"]) and $value["NCT.phase"]=="N/A")
+				{
+				
+					$phase_color="BFBFBF";
+					
+					$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray
+					(
+						array
+						(
+							'fill' => array
+							(
+								'type'       => PHPExcel_Style_Fill::FILL_SOLID,
+								'rotation'   => 0,
+								'startcolor' => array
+								(
+									'rgb' => 'BFBFBF'
+								),
+								'endcolor'   => array
+								(
+									'rgb' => 'BFBFBF'
+								)
+							)
+						)
+					);
+				
+				
+				}
 			
 		
-		$objPHPExcel->getActiveSheet()->getStyle('A1:K1')->applyFromArray
-		(
-			array
-			(
-				'font'    => array
+			if(isset($value["NCT.phase"]) and $value["NCT.phase"]=="Phase 0")
+			{
+			
+				$phase_color="00CCFF";
+				
+				$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray
 				(
-					'bold'      => true
-				),
-				'alignment' => array
-				(
-					'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_LEFT,
-				),
-				'borders' => array
-				(
-					'top'     => array
+					array
 					(
-						'style' => PHPExcel_Style_Border::BORDER_THIN
+						'fill' => array
+						(
+							'type'       => PHPExcel_Style_Fill::FILL_SOLID,
+							'rotation'   => 0,
+							'startcolor' => array
+							(
+								'rgb' => '00CCFF'
+							),
+							'endcolor'   => array
+							(
+								'rgb' => '00CCFF'
+							)
+						)
 					)
-				),
-				'fill' => array
-				(
-					'type'       => PHPExcel_Style_Fill::FILL_GRADIENT_LINEAR,
-					'rotation'   => 90,
-					'startcolor' => array
-					(
-						'argb' => 'FFA0A0A0'
-					),
-					'endcolor'   => array
-					(
-						'argb' => 'FFFFFFFF'
-					)
-				)
-			)
-		);
+				);
+			
+		
+			}
 
-		/*
-		if(
-			isset($value["NCT.overall_status"]) and 
-			(
-				$value["NCT.overall_status"]=="Completed" or 
-				$value["NCT.overall_status"]=="Approved for marketing" or 
-				$value["NCT.overall_status"]=="Temporarily not available" or 
-				$value["NCT.overall_status"]=="No Longer Available" or 
-				$value["NCT.overall_status"]=="Withdrawn" or 
-				$value["NCT.overall_status"]=="Terminated" or 
-				$value["NCT.overall_status"]=="Suspended" or 
-				$value["NCT.overall_status"]=="Completed"
-			)
-		)	$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':K' . $i)->getFont()->getColor()->setARGB(PHPExcel_Style_Color::COLOR_RED);
-		*/
-		
-		if(isset($value["NCT.phase"]) and $value["NCT.phase"]=="Phase 0")
-		{
-		
-			$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray
-			(
-				array
+			if(isset($value["NCT.phase"]) and ( $value["NCT.phase"]=="Phase 1"  or $value["NCT.phase"]=="Phase 0/Phase 1"  or $value["NCT.phase"]=="Phase 0/1"  or $value["NCT.phase"]=="Phase 1a"  or $value["NCT.phase"]=="Phase 1b"  or $value["NCT.phase"]=="Phase 1a/1b"  or $value["NCT.phase"]=="Phase 1c"))
+			{
+			
+				$phase_color="99CC00";
+				
+				$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray
 				(
-					'fill' => array
+					array
 					(
-						'type'       => PHPExcel_Style_Fill::FILL_SOLID,
-						'rotation'   => 0,
-						'startcolor' => array
+						'fill' => array
 						(
-							'rgb' => '00CCFF'
-						),
-						'endcolor'   => array
-						(
-							'rgb' => '00CCFF'
+							'type'       => PHPExcel_Style_Fill::FILL_SOLID,
+							'rotation'   => 0,
+							'startcolor' => array
+							(
+								'rgb' => '99CC00'
+							),
+							'endcolor'   => array
+							(
+								'rgb' => '99CC00'
+							)
 						)
 					)
-				)
-			);
+				);
 		
 		
-		}
+			}
+		
+		
+			if(isset($value["NCT.phase"]) and ( $value["NCT.phase"]=="Phase 2" or $value["NCT.phase"]=="Phase 1/Phase 2" or $value["NCT.phase"]=="Phase 1/2" or $value["NCT.phase"]=="Phase 1b/2" or $value["NCT.phase"]=="Phase 1b/2a" or $value["NCT.phase"]=="Phase 2a" or $value["NCT.phase"]=="Phase 2a/2b" or $value["NCT.phase"]=="Phase 2a/b" or $value["NCT.phase"]=="Phase 2b"))
+			{
+			
+				$phase_color="FFFF00";
+				
+				$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray
+				(
+					array
+					(
+						'fill' => array
+						(
+							'type'       => PHPExcel_Style_Fill::FILL_SOLID,
+							'rotation'   => 0,
+							'startcolor' => array
+							(
+								'rgb' => 'FFFF00'
+							),
+							'endcolor'   => array
+							(
+								'rgb' => 'FFFF00'
+							)
+						)
+					)
+				);
+			
+			
+			}
+		
+		
+		
+			if(isset($value["NCT.phase"]) and ($value["NCT.phase"]=="Phase 3" or  $value["NCT.phase"]=="Phase 2/Phase 3" or $value["NCT.phase"]=="Phase 2/3" or $value["NCT.phase"]=="Phase 2b/3" or $value["NCT.phase"]=="Phase 3a" or $value["NCT.phase"]=="Phase 3b"))
+			{
+			
+				$phase_color="FF9900";
+				
+				$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray
+				(
+					array
+					(
+						'fill' => array
+						(
+							'type'       => PHPExcel_Style_Fill::FILL_SOLID,
+							'rotation'   => 0,
+							'startcolor' => array
+							(
+								'rgb' => 'FF9900'
+							),
+							'endcolor'   => array
+							(
+								'rgb' => 'FF9900'
+							)
+						)
+						)
+				);
+		
+		
+			}
+			
+			
 
-		if(isset($value["NCT.phase"]) and ( $value["NCT.phase"]=="Phase 1"  or $value["NCT.phase"]=="Phase 0/Phase 1"  or $value["NCT.phase"]=="Phase 0/1"  or $value["NCT.phase"]=="Phase 1a"  or $value["NCT.phase"]=="Phase 1b"  or $value["NCT.phase"]=="Phase 1a/1b"  or $value["NCT.phase"]=="Phase 1c"))
-		{
-		
-			$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray
-			(
-				array
+			if(isset($value["NCT.phase"]) and ( $value["NCT.phase"]=="Phase 4" or $value["NCT.phase"]=="Phase 3/Phase 4" or $value["NCT.phase"]=="Phase 3/4" or $value["NCT.phase"]=="Phase 3b/4"))
+			{
+			
+				$phase_color="FF0000";
+				
+				$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray
 				(
-					'fill' => array
+					array
 					(
-						'type'       => PHPExcel_Style_Fill::FILL_SOLID,
-						'rotation'   => 0,
-						'startcolor' => array
+						'fill' => array
 						(
-							'rgb' => '99CC00'
-						),
-						'endcolor'   => array
-						(
-							'rgb' => '99CC00'
+							'type'       => PHPExcel_Style_Fill::FILL_SOLID,
+							'rotation'   => 0,
+							'startcolor' => array
+							(
+								'rgb' => 'FF0000'
+							),
+							'endcolor'   => array
+							(
+								'rgb' => 'FF0000'
+							)
 						)
 					)
-				)
-			);
+				);
 		
 		
-		}
-		if(isset($value["NCT.phase"]) and ( $value["NCT.phase"]=="Phase 2" or $value["NCT.phase"]=="Phase 1/Phase 2" or $value["NCT.phase"]=="Phase 1/2" or $value["NCT.phase"]=="Phase 1b/2" or $value["NCT.phase"]=="Phase 1b/2a" or $value["NCT.phase"]=="Phase 2a" or $value["NCT.phase"]=="Phase 2a/2b" or $value["NCT.phase"]=="Phase 2a/b" or $value["NCT.phase"]=="Phase 2b"))
-		{
+			}
 		
-			$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray
-			(
-				array
-				(
-					'fill' => array
-					(
-						'type'       => PHPExcel_Style_Fill::FILL_SOLID,
-						'rotation'   => 0,
-						'startcolor' => array
-						(
-							'rgb' => 'FFFF00'
-						),
-						'endcolor'   => array
-						(
-							'rgb' => 'FFFF00'
-						)
-					)
-				)
-			);
+		//rendering project completion chart
+		$pdf_content.= getCompletionChart($start_month, $start_year, $end_month, $end_year, $current_yr, $second_yr, $third_yr, $phase_color, $value["NCT.start_date"], $value['inactive_date'], $objPHPExcel, $i);
 		
-		
-		}
-		
-		if(isset($value["NCT.phase"]) and ($value["NCT.phase"]=="Phase 3" or  $value["NCT.phase"]=="Phase 2/Phase 3" or $value["NCT.phase"]=="Phase 2/3" or $value["NCT.phase"]=="Phase 2b/3" or $value["NCT.phase"]=="Phase 3a" or $value["NCT.phase"]=="Phase 3b"))
-		{
-		
-			$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray
-			(
-				array
-				(
-					'fill' => array
-					(
-						'type'       => PHPExcel_Style_Fill::FILL_SOLID,
-						'rotation'   => 0,
-						'startcolor' => array
-						(
-							'rgb' => 'FF9900'
-						),
-						'endcolor'   => array
-						(
-							'rgb' => 'FF9900'
-						)
-					)
-				)
-			);
-		
-		
-		}
-
-		if(isset($value["NCT.phase"]) and ( $value["NCT.phase"]=="Phase 4" or $value["NCT.phase"]=="Phase 3/Phase 4" or $value["NCT.phase"]=="Phase 3/4" or $value["NCT.phase"]=="Phase 3b/4"))
-		{
-		
-			$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray
-			(
-				array
-				(
-					'fill' => array
-					(
-						'type'       => PHPExcel_Style_Fill::FILL_SOLID,
-						'rotation'   => 0,
-						'startcolor' => array
-						(
-							'rgb' => 'FF0000'
-						),
-						'endcolor'   => array
-						(
-							'rgb' => 'FF0000'
-						)
-					)
-				)
-			);
-		
-		
-		}
 		$i++;
-	}
-	}
+		} //end of if
+		
+	} //end forach array
 	
-}
+} //end main else
 
 $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(13);
 $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(35);
@@ -2440,6 +4059,57 @@ $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setWidth(35);
 $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setWidth(12);
 $objPHPExcel->getActiveSheet()->getColumnDimension('J')->setWidth(12);
 $objPHPExcel->getActiveSheet()->getColumnDimension('K')->setWidth(9);
+
+$objPHPExcel->getActiveSheet()->getColumnDimension('L')->setWidth(12);
+
+///current year
+$objPHPExcel->getActiveSheet()->getColumnDimension('M')->setWidth(2);
+$objPHPExcel->getActiveSheet()->getColumnDimension('N')->setWidth(2);
+$objPHPExcel->getActiveSheet()->getColumnDimension('O')->setWidth(2);
+$objPHPExcel->getActiveSheet()->getColumnDimension('P')->setWidth(2);
+$objPHPExcel->getActiveSheet()->getColumnDimension('Q')->setWidth(2);
+$objPHPExcel->getActiveSheet()->getColumnDimension('R')->setWidth(2);
+$objPHPExcel->getActiveSheet()->getColumnDimension('S')->setWidth(2);
+$objPHPExcel->getActiveSheet()->getColumnDimension('T')->setWidth(2);
+$objPHPExcel->getActiveSheet()->getColumnDimension('U')->setWidth(2);
+$objPHPExcel->getActiveSheet()->getColumnDimension('V')->setWidth(2);
+$objPHPExcel->getActiveSheet()->getColumnDimension('W')->setWidth(2);
+$objPHPExcel->getActiveSheet()->getColumnDimension('X')->setWidth(2);
+
+//second year
+$objPHPExcel->getActiveSheet()->getColumnDimension('Y')->setWidth(2);
+$objPHPExcel->getActiveSheet()->getColumnDimension('Z')->setWidth(2);
+$objPHPExcel->getActiveSheet()->getColumnDimension('AA')->setWidth(2);
+$objPHPExcel->getActiveSheet()->getColumnDimension('AB')->setWidth(2);
+$objPHPExcel->getActiveSheet()->getColumnDimension('AC')->setWidth(2);
+$objPHPExcel->getActiveSheet()->getColumnDimension('AD')->setWidth(2);
+$objPHPExcel->getActiveSheet()->getColumnDimension('AE')->setWidth(2);
+$objPHPExcel->getActiveSheet()->getColumnDimension('AF')->setWidth(2);
+$objPHPExcel->getActiveSheet()->getColumnDimension('AG')->setWidth(2);
+$objPHPExcel->getActiveSheet()->getColumnDimension('AH')->setWidth(2);
+$objPHPExcel->getActiveSheet()->getColumnDimension('AI')->setWidth(2);
+$objPHPExcel->getActiveSheet()->getColumnDimension('AJ')->setWidth(2);
+
+///third year
+$objPHPExcel->getActiveSheet()->getColumnDimension('AK')->setWidth(2);
+$objPHPExcel->getActiveSheet()->getColumnDimension('AL')->setWidth(2);
+$objPHPExcel->getActiveSheet()->getColumnDimension('AM')->setWidth(2);
+$objPHPExcel->getActiveSheet()->getColumnDimension('AN')->setWidth(2);
+$objPHPExcel->getActiveSheet()->getColumnDimension('AO')->setWidth(2);
+$objPHPExcel->getActiveSheet()->getColumnDimension('AP')->setWidth(2);
+$objPHPExcel->getActiveSheet()->getColumnDimension('AQ')->setWidth(2);
+$objPHPExcel->getActiveSheet()->getColumnDimension('AR')->setWidth(2);
+$objPHPExcel->getActiveSheet()->getColumnDimension('AS')->setWidth(2);
+$objPHPExcel->getActiveSheet()->getColumnDimension('AT')->setWidth(2);
+$objPHPExcel->getActiveSheet()->getColumnDimension('AU')->setWidth(2);
+$objPHPExcel->getActiveSheet()->getColumnDimension('AV')->setWidth(2);
+
+
+/// + sign
+$objPHPExcel->getActiveSheet()->getColumnDimension('AW')->setWidth(2);
+$objPHPExcel->getActiveSheet()->getColumnDimension('AX')->setWidth(2);
+$objPHPExcel->getActiveSheet()->getColumnDimension('AY')->setWidth(2);
+
 $objPHPExcel->getActiveSheet()->getStyle('B1:K900')->getAlignment()->setWrapText(true);
 $objPHPExcel->getActiveSheet()->getStyle('A1:K200')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_TOP);
 $objPHPExcel->getActiveSheet()->setCellValue('A1' , 'NCT ID');
@@ -2485,132 +4155,135 @@ $i=2;
 
 /* Display - Separate Remaining UPM's */
 if(isset($first_part_newupmarray) and is_array($first_part_newupmarray))
-	{
+{
 	foreach ($first_part_newupmarray as $ke=>$valu)
 	{
-	if(isset($valu) and is_array($valu)) {
-	foreach ($valu as $key => $value)
-	{
-		$objPHPExcel->getActiveSheet()->getStyle('"A' . $i . ':I' . $i . '"')->applyFromArray($styleThinBlueBorderOutline);
-		$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $value["id"] );
-		$objPHPExcel->getActiveSheet()->setCellValue('B' . $i, $value["corresponding_trial"] );
-		$objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $value["product"] );
-		$objPHPExcel->getActiveSheet()->setCellValue('D' . $i, $value["event_description"] );
-		$objPHPExcel->getActiveSheet()->setCellValue('E' . $i, $value["status"]);
-		$objPHPExcel->getActiveSheet()->setCellValue('F' . $i, $value["condition"]);
-		$objPHPExcel->getActiveSheet()->setCellValue('G' . $i, $value["start_date"]);
-		$objPHPExcel->getActiveSheet()->setCellValue('H' . $i, $value["end_date"]);
-		$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, "Link");
-		
-		if( (!isset($value["result_link"]) or empty($value["result_link"])) )
+		if(isset($valu) and is_array($valu)) 
 		{
-			$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, '');
-		}
-		else
-		{
-			$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($value["result_link"]);
-			$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('Result Link');
-			$objPHPExcel->getActiveSheet()->getStyle('I' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
-		}
+			foreach ($valu as $key => $value)
+			{
+			$objPHPExcel->getActiveSheet()->getStyle('"A' . $i . ':I' . $i . '"')->applyFromArray($styleThinBlueBorderOutline);
+			$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $value["id"] );
+			$objPHPExcel->getActiveSheet()->setCellValue('B' . $i, $value["corresponding_trial"] );
+			$objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $value["product"] );
+			$objPHPExcel->getActiveSheet()->setCellValue('D' . $i, $value["event_description"] );
+			$objPHPExcel->getActiveSheet()->setCellValue('E' . $i, $value["status"]);
+			$objPHPExcel->getActiveSheet()->setCellValue('F' . $i, $value["condition"]);
+			$objPHPExcel->getActiveSheet()->setCellValue('G' . $i, $value["start_date"]);
+			$objPHPExcel->getActiveSheet()->setCellValue('H' . $i, $value["end_date"]);
+			$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, "Link");
+		
+			if( (!isset($value["result_link"]) or empty($value["result_link"])) )
+			{
+				$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, '');
+			}
+			else
+			{
+				$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($value["result_link"]);
+				$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('Result Link');
+				$objPHPExcel->getActiveSheet()->getStyle('I' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+			}
 		
 		
-		$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':I' . $i )->applyFromArray
-			(
-				array
+			$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':I' . $i )->applyFromArray
 				(
-					'fill' => array
+					array
 					(
-						'type'       => PHPExcel_Style_Fill::FILL_SOLID,
-						'rotation'   => 0,
-						'startcolor' => array
+						'fill' => array
 						(
-							'rgb' => 'C5E5FA'
-						),
-						'endcolor'   => array
-						(
-							'rgb' => 'C5E5FA'
+							'type'       => PHPExcel_Style_Fill::FILL_SOLID,
+							'rotation'   => 0,
+							'startcolor' => array
+							(
+								'rgb' => 'C5E5FA'
+							),
+							'endcolor'   => array
+							(
+								'rgb' => 'C5E5FA'
+							)
 						)
 					)
-				)
-			);		
+				);		
 		
-		
-		
-		
-		$i++;
-	}
-	}
-	}
-	}
+			$i++;
+			}//end foreach
+		}//end if
+	}//end foreach
+}//end if
 
 /* Display Part End - Separate Remaining UPM's */
 
 
 
 if(isset($newupmarray) and is_array($newupmarray))
-	{
+{
 	foreach ($newupmarray as $ke=>$valu)
 	{
-	if(isset($valu) and is_array($valu)) {
-	foreach ($valu as $key => $value)
-	{
-		$objPHPExcel->getActiveSheet()->getStyle('"A' . $i . ':I' . $i . '"')->applyFromArray($styleThinBlueBorderOutline);
-		$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $value["id"] );
-		$objPHPExcel->getActiveSheet()->setCellValue('B' . $i, $value["corresponding_trial"] );
-		$objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $value["product"] );
-		$objPHPExcel->getActiveSheet()->setCellValue('D' . $i, $value["event_description"] );
-		$objPHPExcel->getActiveSheet()->setCellValue('E' . $i, $value["status"]);
-		$objPHPExcel->getActiveSheet()->setCellValue('F' . $i, $value["condition"]);
-		$objPHPExcel->getActiveSheet()->setCellValue('G' . $i, $value["start_date"]);
-		$objPHPExcel->getActiveSheet()->setCellValue('H' . $i, $value["end_date"]);
-		$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, "Link");
-		
-		if( (!isset($value["result_link"]) or empty($value["result_link"])) )
+		if(isset($valu) and is_array($valu)) 
 		{
-			$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, '');
-		}
-		else
-		{
-			$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($value["result_link"]);
-			$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('Result Link');
-			$objPHPExcel->getActiveSheet()->getStyle('I' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
-		}
+			foreach ($valu as $key => $value)
+			{
+			$objPHPExcel->getActiveSheet()->getStyle('"A' . $i . ':I' . $i . '"')->applyFromArray($styleThinBlueBorderOutline);
+			$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $value["id"] );
+			$objPHPExcel->getActiveSheet()->setCellValue('B' . $i, $value["corresponding_trial"] );
+			$objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $value["product"] );
+			$objPHPExcel->getActiveSheet()->setCellValue('D' . $i, $value["event_description"] );
+			$objPHPExcel->getActiveSheet()->setCellValue('E' . $i, $value["status"]);
+			$objPHPExcel->getActiveSheet()->setCellValue('F' . $i, $value["condition"]);
+			$objPHPExcel->getActiveSheet()->setCellValue('G' . $i, $value["start_date"]);
+			$objPHPExcel->getActiveSheet()->setCellValue('H' . $i, $value["end_date"]);
+			$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, "Link");
+		
+			if( (!isset($value["result_link"]) or empty($value["result_link"])) )
+			{
+				$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, '');
+			}
+			else
+			{
+				$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($value["result_link"]);
+				$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('Result Link');
+				$objPHPExcel->getActiveSheet()->getStyle('I' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+			}
 		
 		
-		$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':I' . $i )->applyFromArray
-			(
-				array
+			$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':I' . $i )->applyFromArray
 				(
-					'fill' => array
+					array
 					(
-						'type'       => PHPExcel_Style_Fill::FILL_SOLID,
-						'rotation'   => 0,
-						'startcolor' => array
+						'fill' => array
 						(
-							'rgb' => 'C5E5FA'
-						),
-						'endcolor'   => array
-						(
-							'rgb' => 'C5E5FA'
+							'type'       => PHPExcel_Style_Fill::FILL_SOLID,
+							'rotation'   => 0,
+							'startcolor' => array
+							(
+								'rgb' => 'C5E5FA'
+							),
+							'endcolor'   => array
+							(
+								'rgb' => 'C5E5FA'
+							)
 						)
 					)
-				)
-			);		
+				);			
 		
 		
 		
 		
-		$i++;
-	}
-	}
-	}
-	}
+			$i++;
+			}//end foreach
+		}//end if
+	}//end foreach
+}//end if
+
+
+
 $objPHPExcel->getActiveSheet()->getStyle('A1:I1')->applyFromArray
 			(
 				array
 				(
 					'font'    => array
 					(
+
 						'bold'      => true
 					),
 					'alignment' => array
@@ -2682,5 +4355,5 @@ $objWriter->save('php://output');
 @flush();
 
 exit;
-}
+}//end of excel export
 ?>
