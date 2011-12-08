@@ -1869,6 +1869,48 @@ if($bg_color == '00CCFF')
 				)
 		);
  
+ }elseif($bg_color == 'BFBFBF')
+ {
+ $color=(
+		array
+				(
+					'fill' => array
+					(
+						'type'       => PHPExcel_Style_Fill::FILL_SOLID,
+						'rotation'   => 0,
+						'startcolor' => array
+						(
+							'rgb' => 'BFBFBF'
+						),
+						'endcolor'   => array
+						(
+							'rgb' => 'BFBFBF'
+						)
+					)
+				)
+		);
+ 
+ }else
+ {
+ 
+ $color=(
+		array
+				(
+					'fill' => array
+					(
+						'type'       => PHPExcel_Style_Fill::FILL_SOLID,
+						'rotation'   => 0,
+						'startcolor' => array
+						(
+							'rgb' => 'BFBFBF'
+						),
+						'endcolor'   => array
+						(
+							'rgb' => 'BFBFBF'
+						)
+					)
+				)
+		);
  }
 
 return $color;
@@ -3464,7 +3506,9 @@ if($stacked)
 			if(isset($value["inactive_date"]) && $value["inactive_date"] != '' && $value["inactive_date"] != NULL && $value["inactive_date"] != '0000-00-00') 
 			$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, date('m/y',strtotime($value["inactive_date"])));
 			
-			if(isset($value["NCT/phase"])) 						$objPHPExcel->getActiveSheet()->setCellValue('K' . $i, $value["NCT/phase"]);
+			if((!isset($value["NCT/phase"])) || $value["NCT/phase"] == NULL || $value["NCT/phase"] == '')
+			$value["NCT/phase"] = 'N/A';
+			$objPHPExcel->getActiveSheet()->setCellValue('K' . $i, $value["NCT/phase"]);
 			
 			if($bgcol=="D5D3E6") $bgcol="EDEAFF"; 	else $bgcol="D5D3E6";
 			
@@ -3789,7 +3833,10 @@ else
 			if(isset($value["inactive_date"]) && $value["inactive_date"] != '' && $value["inactive_date"] != NULL && $value["inactive_date"] != '0000-00-00') 					
 			$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, date('m/y',strtotime($value["inactive_date"])));
 			
-			if(isset($value["NCT.phase"])) 						$objPHPExcel->getActiveSheet()->setCellValue('K' . $i, $value["NCT.phase"]);
+			if((!isset($value["NCT.phase"])) || $value["NCT.phase"] == NULL || $value["NCT.phase"] == '')
+			$value["NCT.phase"] = 'N/A';
+			$objPHPExcel->getActiveSheet()->setCellValue('K' . $i, $value["NCT.phase"]);
+			
 			if($bgcol=="D5D3E6") $bgcol="EDEAFF"; 	else $bgcol="D5D3E6";
 			
 			$objPHPExcel->getActiveSheet()->getStyle('A' . $i .':J' .$i )->applyFromArray
