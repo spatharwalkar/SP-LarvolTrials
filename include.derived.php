@@ -1,6 +1,7 @@
 <?php
 require_once('db.php');
 require_once('include.search.php');
+require_once('include.util.php');
 
 
 /**
@@ -103,57 +104,40 @@ function applyInactiveDate($arr=array())
 		$completionDate = $res['NCT/completion_date'];
 		$primaryCompletionDate = $res['NCT/primary_completion_date'];
 		$larvolId = $res['larvol_id'];
+
+		$studyCatId = getStudyCat($larvolId);
+		$activeStatus = array(
+										'Not yet recruiting',
+										'Recruiting',
+										'Enrolling by invitation',
+										'Active, not recruiting',
+										'Available'
+		);
 		
 		if($completionDate)
 		{
+			$addedDate = getAddedDate('completion_date', $studyCatId);
 			$inactiveDate = $completionDate;
 		}
 		elseif($primaryCompletionDate) 
 		{
+			$addedDate = getAddedDate('primary_completion_date', $studyCatId);
 			$inactiveDate = $primaryCompletionDate;
 		}
 		elseif($overallStatus)
 		{
-			
-			$activeStatus = array(
-								'Not yet recruiting',
-								'Recruiting',
-								'Enrolling by invitation',
-								'Active, not recruiting',
-								'Available'
-								);
-			$inactiveStatus = array(
-								'Withheld',
-								'Approved for marketing',
-								'Temporarily not available',
-								'No Longer Available',
-								'Withdrawn',
-								'Terminated',
-								'Suspended',
-								'Completed'
-								);								
-			$query = "select id from data_cats_in_study where larvol_id=$larvolId";
-			$res = mysql_query($query);
-			$studyCatId = mysql_fetch_row($res);
-			$studyCatId = $studyCatId[0];
-			$query = "SELECT dv.added FROM data_values dv LEFT JOIN data_fields df ON df.id=dv.field 
-					LEFT JOIN data_enumvals de ON de.field=df.id WHERE dv.studycat=$studyCatId 
-					AND df.name='overall_status' AND de.value in ('".implode(',',$inactiveStatus)."') ORDER BY dv.added ASC";
-			
-			$res = mysql_query($query);
-			$addedDate = mysql_fetch_row($res);
-			$addedDate = $addedDate[0];
-			
+			$addedDate = getAddedDate('overall_status', $studyCatId);
 			$inactiveDate = $addedDate;
-
-			
 		}
 		
-		if($inactiveDate =='0000-00-00' || $inactiveDate=='')
-		$query  = "update clinical_study set inactive_date=null where larvol_id=$larvolId";
-		else
-		$query  = "update clinical_study set inactive_date='".$inactiveDate."' where larvol_id=$larvolId";
 		
+		//fetch and calculate inactive_date_lastchanged and inactive_date_prev
+		//get cache ready
+		$inactiveDateCache = calculateInactiveDatesFromCacheData($larvolId,$inactiveDate,$addedDate);
+		$inactiveDateCache = array_map(function($k,$v){
+			return "$k=$v";
+		},array_keys($inactiveDateCache),array_values($inactiveDateCache));
+		$query  = "update clinical_study set ".implode(',',$inactiveDateCache)." where larvol_id=$larvolId";
 		if(mysql_query($query))
 		{
 			$flag=1;
@@ -172,9 +156,78 @@ function applyInactiveDate($arr=array())
 	
 }
 
-
+function calculateInactiveDatesFromCacheData($larvolId,$inactiveDate,$addedDate)
+{
+	global $db;
+	$query = "select last_change,inactive_date,inactive_date_lastchanged,inactive_date_prev from clinical_study where larvol_id=$larvolId";
+	$res = mysql_query($query);
+	while($row = mysql_fetch_assoc($res)){}
+	$last_change = $row['last_change'];
+	$inactive_date_old = sqlExplicitNullifier($row['inactive_date'],'date');
+	
+	//previous memory
+	$inactiveDateLastchanged = $row['inactive_date_lastchanged'];
+	$inactiveDatePrev = $row['inactive_date_prev'];
+	
+	if($inactive_date_old=='null')
+	{
+		$inactive_date_lastchanged = $addedDate;
+		$inactive_date_prev = '';
+	}
+	elseif($inactive_date_old == $inactiveDate)
+	{
+		$inactive_date_lastchanged = $inactiveDateLastchanged;
+		$inactive_date_prev = $inactiveDatePrev;
+	}
+	else
+	{
+		$inactive_date_lastchanged = $last_change;
+		$inactive_date_prev = $inactive_date_old;
+	}
+	$inactive_date_lastchanged = sqlExplicitNullifier($last_change,'date');
+	$inactive_date_prev = sqlExplicitNullifier($inactive_date_prev,'date');
+	
+	//convert/check for explicit null case
+	$inactiveDate = sqlExplicitNullifier($inactiveDate,'date');
+	return array('inactive_date'=>$inactiveDate,'inactive_date_lastchanged'=>$inactive_date_lastchanged,'inactive_date_prev'=>$inactive_date_prev);
+	
+}
 //end inactive date functions
 
+
+function getStudyCat($larvolId)
+{
+	global $db;
+	$query = "select id from data_cats_in_study where larvol_id=$larvolId";
+	$res = mysql_query($query);
+	$studyCatId = mysql_fetch_row($res);
+	$studyCatId = $studyCatId[0];
+	return $studyCatId;
+}
+
+function getAddedDate($fieldName,$studyCatId)
+{
+	global $db;
+	$inactiveStatus = array(
+											'Withheld',
+											'Approved for marketing',
+											'Temporarily not available',
+											'No Longer Available',
+											'Withdrawn',
+											'Terminated',
+											'Suspended',
+											'Completed'
+	);
+	
+	$query = "SELECT dv.added FROM data_values dv LEFT JOIN data_fields df ON df.id=dv.field
+						LEFT JOIN data_enumvals de ON de.field=df.id WHERE dv.studycat=$studyCatId 
+						AND df.name='$fieldName' AND de.value in ('".implode(',',$inactiveStatus)."') ORDER BY dv.added ASC";
+				
+	$res = mysql_query($query);
+	$addedDate = mysql_fetch_row($res);
+	$addedDate = $addedDate[0];
+	return $addedDate;
+}
 
 //start region functions
 /**

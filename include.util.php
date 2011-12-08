@@ -406,4 +406,22 @@ function getFieldId($category,$name)
 	return $res['id'];
 }
 
+//sql explicit nullifer
+function sqlExplicitNullifier($val,$type=null)
+{
+	switch($type)
+	{
+		case 'date':
+			if($val=='' || $val=='0000-00-00')
+			return 'null';
+			else
+			return "'".$val."'";
+			break;
+		default:
+			if($val=='')
+			return 'null';
+	}
+	return "'".$val."'";
+}
+
 ?>

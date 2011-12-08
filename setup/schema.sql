@@ -5,6 +5,8 @@ CREATE TABLE IF NOT EXISTS `clinical_study` (
   `last_change` datetime NOT NULL,
   `region` varchar(63) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
   `inactive_date` date DEFAULT NULL,
+  `inactive_date_lastchanged` DATE NULL DEFAULT NULL,
+  `inactive_date_prev` DATE NULL DEFAULT NULL,
   PRIMARY KEY (`larvol_id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
