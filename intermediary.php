@@ -6,16 +6,18 @@ require_once('db.php');
 require_once('include.search.php');
 require_once('special_chars.php');
 error_reporting(E_ALL ^ E_NOTICE);
-if(!isset($_GET['cparams']) && !isset($_GET['params']) && !isset($_GET['results'])) die('cell not set');
-if(isset($_POST['btnDownload'])) {
-	
-	if(isset($_POST['wFormat']) && $_POST['wFormat'] == 'xml') {
-	
+if(!isset($_GET['cparams']) && !isset($_GET['params']) && !isset($_GET['results']) && (!isset($_GET['a']) && !isset($_GET['p']))) die('cell not set');
+if(isset($_POST['btnDownload'])) 
+{
+	if(isset($_POST['wFormat']) && $_POST['wFormat'] == 'xml') 
+	{
 		// Build XML
 		$xml = '<?xml version="1.0" encoding="UTF-8" ?>' . "\n" . '<results>' . "\n";
-		if($_POST['dOption'] == 'shown') {
+		if($_POST['dOption'] == 'shown') 
+		{
 			$xml .= toXML(unserialize($_POST['xmlShownContent']));
-		} else if($_POST['dOption'] == 'all') {
+		} else if($_POST['dOption'] == 'all') 
+		{
 			$xml .= toXML(unserialize($_POST['xmlFullContent']));
 		}
 		$xml .= "\n" . '</results>';
@@ -42,6 +44,17 @@ if(isset($_POST['btnDownload'])) {
 <script src="scripts/func.js" type="text/javascript"></script>
 <script type="text/javascript">
 $("html").css("overflow-x", "hidden"); //for hiding help tab
+function checkformat()
+{
+	if(document.getElementById("wFormat").value=="excel")
+	{
+		document.forms["frmDOptions"].action="gen_excel.php";
+	}
+	if(document.getElementById("wFormat").value=="pdf")
+	{
+		document.forms["frmDOptions"].action="gen_pdf.php";
+	}
+} 
 </script>	
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -53,21 +66,7 @@ $("html").css("overflow-x", "hidden"); //for hiding help tab
     ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
   })();
-  
- function checkformat()
-{
-	if(document.getElementById("wFormat").value=="excel")
-	{
-	document.forms["frmDOptions"].action="gen_excel.php";
-	}
-	
-	if(document.getElementById("wFormat").value=="pdf")
-	{
-	document.forms["frmDOptions"].action="gen_pdf.php";
-	}
-} 
-  
-</script>
+</script>	 
 <script type="text/javascript" language="javascript"> 
 //<![CDATA[
 function applyfilter(value) {
@@ -175,7 +174,7 @@ class ContentManager
 								'style="width:6px;height:6px;"');
 								
 	private $actfilterarr 	= array('nyr'=>'Not yet recruiting', 'r'=>'Recruiting', 'ebi'=>'Enrolling by invitation', 
-								'anr'=>'Active, not recruiting', 'a'=>'Available', 'nlr' =>'No longer recruiting');
+								'anr'=>'Active, not recruiting', 'av'=>'Available', 'nlr' =>'No longer recruiting');
 								
 	private $inactfilterarr = array('wh'=>'Withheld', 'afm'=>'Approved for marketing',
 								'tna'=>'Temporarily not available', 'nla'=>'No Longer Available', 'wd'=>'Withdrawn', 
@@ -212,6 +211,10 @@ class ContentManager
 	private $time_machine;
 	private $loggedIn;
 	
+	private $inactivearray = array();
+	private $activearray = array();
+	private $allarray = array();
+			
 	public function __construct() {
 	
 		$db = new DatabaseManager();
@@ -226,8 +229,8 @@ class ContentManager
 			.(isset($_GET['ebi']) ? ' checked="checked"' : ''). ' />Enrolling by invitation<br/>'
 			.'<input type="checkbox" name="anr" value="1"' 
 			.(isset($_GET['anr']) ? ' checked="checked"' : ''). '  />Active, not recruiting<br/>'
-			.'<input type="checkbox" name="a" value="1" ' 
-			.(isset($_GET['a']) ? ' checked="checked"' : ''). ' />Available<br/>'
+			.'<input type="checkbox" name="av" value="1" ' 
+			.(isset($_GET['av']) ? ' checked="checked"' : ''). ' />Available<br/>'
 			.'<input type="checkbox" name="nlr" value="1" ' 
 			.(isset($_GET['nlr']) ? ' checked="checked"' : ''). ' />No longer recruiting<br/>';
 							
@@ -263,7 +266,6 @@ class ContentManager
 		$this->fid['enrollment'] 				= '_' . getFieldId('NCT', 'enrollment');
 		$this->fid['enrollment_type'] 			= '_' . getFieldId('NCT', 'enrollment_type');
 		$this->fid['start_date'] 				= '_' . getFieldId('NCT', 'start_date');
-		$this->fid['primary_completion_date'] 	= '_' . getFieldId('NCT', 'primary_completion_date');
 		$this->fid['completion_date'] 			= '_' . getFieldId('NCT', 'completion_date');
 		$this->fid['acronym'] 					= '_' . getFieldId('NCT', 'acronym');
 		$this->fid['inactive_date']				= 'inactive_date';
@@ -277,7 +279,7 @@ class ContentManager
 		$this->allcount = 0;
 		$this->inactivecount = 0;
 
-		$this->type = (isset($_GET["list"])) ? ($_GET["list"].'array') : 'activearray' ;
+		$this->type = (isset($_GET["list"])) ? ($_GET["list"].'Trials') : 'activeTrials' ;
 		if(isset($_GET['list']) && $_GET['list'] == 'inactive') { 
 			$this->inactflag = 1; 		// checking if any of the inactive filters are set
 			
@@ -382,7 +384,7 @@ class ContentManager
 	
 	}
 	
-	function pagination($page, $count, $params, $leading, $tt_type, $stacktype) {
+	function pagination($page, $start, $end, $last, $count, $params, $leading, $tt_type, $stacktype) {
 		
 		$pager = '';
 		$sort = '';
@@ -391,7 +393,8 @@ class ContentManager
 		if(isset($_GET['sortorder']) && $_GET['sortorder'] != '') $sort .= '&amp;sortorder=' . rawurlencode($_GET['sortorder']);
 		if(isset($_GET['instparams']) && $_GET['instparams'] != '') $sort .= '&amp;instparams=' 
 		. rawurlencode($_GET['instparams']);
-		if(isset($_GET['institution']) && $_GET['institution'] != '') { 
+		if(isset($_GET['institution']) && $_GET['institution'] != '') 
+		{ 
 			foreach($_GET['institution'] as $k => $v)
 			$sort .= '&amp;institution[]=' . $v;
 		}
@@ -410,12 +413,14 @@ class ContentManager
 		foreach($this->inactfilterarr as $k=>$v) { if(isset($_GET[$k])) $sort .= '&amp;'.$k.'=1'; }
 		foreach($this->allfilterarr as $k=>$v) { if(isset($_GET[$k])) $sort .= '&amp;'.$k.'=1'; }
 		
-		if($tt_type == 'stack') {
-			
+		if($tt_type == 'stack') 
+		{
 			$stack_url = '';
 				
-			if(isset($_GET['cparams'])) {
-				foreach($_GET['params'] as $k => $v) {
+			if(isset($_GET['cparams'])) 
+			{
+				foreach($_GET['params'] as $k => $v) 
+				{
 					$stack_url .= '&amp;leading['.$k.']=' . rawurlencode($_GET['leading'][$k]) . '&amp;params['.$k.']=' . rawurlencode($_GET['params'][$k]);
 					
 					if($stacktype == 'row') 
@@ -428,94 +433,121 @@ class ContentManager
 				}
 			}
 			
-			if($this->pstart > 1)
+			if($start > 1)
 			{
-				if(isset($_GET['results'])) {
-				
+				if(isset($_GET['results'])) 
+				{
 					$pager .= '<a target="_self" href="intermediary.php?results=' . rawurlencode($_GET['results']) . '&amp;type=' . rawurlencode($_GET['type']) 
 					. '&amp;time=' . rawurlencode($_GET['time']) . '&amp;pg=' . ($page-1);
 					if(isset($_GET['format']) && $_GET['format'] == 'new') 
 						$pager .= '&amp;format=' . $_GET['format'];
 						
-				} else if(isset($_GET['cparams'])) {
+				} 
+				else if(isset($_GET['cparams'])) 
+				{
 					$pager .= '<a target="_self" href="intermediary.php?cparams=' . rawurlencode($_GET['cparams']) . $stack_url . '&amp;pg=' . ($page-1);
 				}
-				$pager .= $sort . '" style="float:left;">&lt;&lt; Previous Page (' . ($this->pstart - $this->results_per_page) . '-' . ($this->pstart-1) 
+				$pager .= $sort . '" style="float:left;">&lt;&lt; Previous Page (' . ($start - $this->results_per_page) . '-' . ($start-1) 
 				. ')</a>&nbsp;&nbsp;&nbsp;';
 			}
-			$pager .= '<div style="float:left;margin:0px 10px;">Studies Shown (' . $this->pstart . '-' . $this->last . ')&nbsp;&nbsp;&nbsp;</div>';
-			if($this->pend < $count)
+			$pager .= '<div style="float:left;margin:0px 10px;">Studies Shown (' . $start . '-' . $last . ')&nbsp;&nbsp;&nbsp;</div>';
+			if($end < $count)
 			{
-				
-				$nextlast = ($this->last+$this->results_per_page);
-				
+				$nextlast = ($last+$this->results_per_page);
 				if($nextlast > $count) $nextlast = $count;
-				if(isset($_GET['results'])) {
-				
+				if(isset($_GET['results'])) 
+				{
 					$pager .= '<a target="_self" href="intermediary.php?results=' . rawurlencode($_GET['results']) . '&amp;type=' . rawurlencode($_GET['type']) 
 						. '&amp;time=' . rawurlencode($_GET['time']) . '&amp;pg=' . ($page+1);
 						
 					if(isset($_GET['format']) && $_GET['format'] == 'new') 
 					$pager .= '&amp;format=' . $_GET['format'];	
 					
-				} else if(isset($_GET['cparams'])) {
+				} 
+				else if(isset($_GET['cparams'])) 
+				{
 					$pager .= '<a target="_self" href="intermediary.php?cparams=' . rawurlencode($_GET['cparams']) . $stack_url . '&amp;pg=' . ($page+1);
 				}
-				$pager .= $sort . '" style="float:left;">Next Page (' . ($this->pstart+$this->results_per_page) . '-' . $nextlast . ') &gt;&gt;</a>';
+				$pager .= $sort . '" style="float:left;">Next Page (' . ($start+$this->results_per_page) . '-' . $nextlast . ') &gt;&gt;</a>';
 			}
-		} else {
-		
-			if($this->pstart > 1)
+		} 
+		else if($tt_type == 'indexed')
+		{
+			if($start > 1)
 			{
-				if(isset($_GET['results'])) {
-					$pager .= '<a target="_self" href="intermediary.php?results=' . rawurlencode($params) . '&amp;page=' . ($page-1) . '&amp;time=' . rawurlencode($leading);
-				} else {
-					$pager .= '<a target="_self" href="intermediary.php?params=' . rawurlencode($params) . '&amp;page=' . ($page-1) . '&amp;leading=' . rawurlencode($leading);
-				}
-				$pager .= $sort . '" style="float:left;">&lt;&lt; Previous Page (' . ($this->pstart - $this->results_per_page) . '-' . ($this->pstart-1) 
+				$pager .= '<a target="_self" href="intermediary.php?p=' . rawurlencode($_GET['p']) . '&amp;a=' . rawurlencode($_GET['a']) . '&amp;page=' . ($page-1);
+				$pager .= $sort . '" style="float:left;">&lt;&lt; Previous Page (' . ($start - $this->results_per_page) . '-' . ($start-1) 
 				. ')</a>&nbsp;&nbsp;&nbsp;';
 			}
-			$pager .= '<div style="float:left;margin:0px 10px;">Studies Shown (' . $this->pstart . '-' . $this->last . ')</div>';
-
-			if($this->pend < $count)
+			$pager .= '<div style="float:left;margin:0px 10px;">Studies Shown (' . $start . '-' . $last . ')</div>';
+			if($end < $count)
 			{
-				$nextlast = ($this->last+$this->results_per_page);
+				$nextlast = ($last+$this->results_per_page);
 				if($nextlast > $count) $nextlast = $count;
-				if(isset($_GET['results'])) {
+				
+				$pager .= '<a target="_self" href="intermediary.php?p=' . rawurlencode($_GET['p']) . '&amp;a=' . rawurlencode($_GET['a']) . '&amp;page=' . ($page+1);
+				$pager .= $sort . '" style="float:left;">Next Page (' . ($start+$this->results_per_page) . '-' . $nextlast . ') &gt;&gt;</a>';
+			}
+		}
+		else 
+		{
+			if($start > 1)
+			{
+				if(isset($_GET['results'])) 
+				{
+					$pager .= '<a target="_self" href="intermediary.php?results=' . rawurlencode($params) . '&amp;page=' . ($page-1) . '&amp;time=' 
+					. rawurlencode($leading);
+				} 
+				else 
+				{
+					$pager .= '<a target="_self" href="intermediary.php?params=' . rawurlencode($params) . '&amp;page=' . ($page-1) . '&amp;leading=' 
+					. rawurlencode($leading);
+				}
+				$pager .= $sort . '" style="float:left;">&lt;&lt; Previous Page (' . ($start - $this->results_per_page) . '-' . ($start-1) 
+				. ')</a>&nbsp;&nbsp;&nbsp;';
+			}
+			$pager .= '<div style="float:left;margin:0px 10px;">Studies Shown (' . $start . '-' . $last . ')</div>';
+
+			if($end < $count)
+			{
+				$nextlast = ($last+$this->results_per_page);
+				if($nextlast > $count) $nextlast = $count;
+				if(isset($_GET['results'])) 
+				{
 					$pager .= '<a target="_self" href="intermediary.php?results=' . rawurlencode($params) . '&amp;page=' . ($page+1) . '&amp;time=' 
 					. rawurlencode($leading);
-				} else {
+				} 
+				else 
+				{
 					$pager .= '<a target="_self" href="intermediary.php?params=' . rawurlencode($params) . '&amp;page=' . ($page+1) . '&amp;leading=' 
 					. rawurlencode($leading);
 				}
-				$pager .= $sort . '" style="float:left;">Next Page (' . ($this->pstart+$this->results_per_page) . '-' . $nextlast . ') &gt;&gt;</a>';
+				$pager .= $sort . '" style="float:left;">Next Page (' . ($start+$this->results_per_page) . '-' . $nextlast . ') &gt;&gt;</a>';
 			}
 		}
 		echo $pager;
 
 	}
 	
-	function processParams() {
-		
+	function processParams() 
+	{
 		global $logger;
 		$return_param	= array();
-		$return_param['fin_arr'] = array();
-		$return_param['all_records'] = array();
-		$return_param['upmDetails'] = array();
+		$return_param['inactiveTrials'] = array();
+		$return_param['activeTrials'] = array();
+		$return_param['allTrials'] = array();
+
+		$return_param['inactiveCount'] = 0;
+		$return_param['activeCount'] = 0;
+		$return_param['allCount'] = 0;
+		
+		$return_param['naUpmRegex'] = array();
+		
 		$ins_params		= array();
 		$return_param['showRecordsCnt'] = 0;
-		$showRecords_inactivearray_Cnt = 0;
-		$showRecords_activearray_Cnt = 0;
-		$showRecords_allarray_Cnt = 0;
-		$return_param['stack_inactive_count'] = 0;
-		$return_param['stack_active_count'] = 0;
-		$return_param['stack_total_count'] = 0;
-		$return_param['inactivearray'] = array();
-		$return_param['activearray'] = array();
-		$return_param['allarray'] = array();
 		
-		if(isset($_GET['results']) && isset($_GET['type'])) {
-			
+		if(isset($_GET['results']) && isset($_GET['type'])) 
+		{
 			$this->time_machine = $_GET['time'];
 			echo ('<input type="hidden" name="results" value="' . $_GET['results'] . '" />'
 					. '<input type="hidden" name="type" value="' . $_GET['type'] . '" />'
@@ -524,8 +556,8 @@ class ContentManager
 			if(isset($_GET['v']))
 				echo ('<input type="hidden" name="v" value="' . $_GET['v'] . '" />');
 				
-			if(isset($_GET['format']) && $_GET['format'] == 'new') {
-			
+			if(isset($_GET['format']) && $_GET['format'] == 'new') 
+			{
 				echo ('<input type="hidden" name="format" value="' . $_GET['format'] . '" />');
 				//pack encoding method used to encode data in the url
 				$results = unpack("l*", gzinflate(base64_decode(rawurldecode($_GET['results']))));
@@ -543,53 +575,70 @@ class ContentManager
 					$three++;
 					if($three == $lengthcounter)
 					{
-						$output[] = substr($string, 0, -1);
+						$resultIds[] = substr($string, 0, -1);
 						$three = 0;
 						$lengthcounter = 0;
 						$string = '';
 					}
 				}
-				$return_param['c_params'] = $output;
-			} else { 
+				$ids = explode('.', $resultIds[0]);
+				foreach($resultIds as $k => &$v)
+				{	
+					if($k != 0)
+					{
+						$out = array();
+						$out = explode('.', $v);
+						array_splice($out,1,0,$ids[1]);
+						$v = implode('.', $out);
+					}	
+				}
+				$return_param['params_arr'] = $resultIds;
+			} 
+			else 
+			{ 
 				//no specific encoding method i.e. only implode used to encode data in the url
-				$return_param['c_params'] = explode(',', gzinflate(base64_decode($_GET['results'])));
-				
+				$return_param['params_arr'] = explode(',', gzinflate(base64_decode($_GET['results'])));
 			}
 			
-			$vv = explode('.', $return_param['c_params'][0]);
-			if($_GET['type'] == 'col') {
-				
-				$res = getLinkDetails('rpt_ott_header', 'header', 'id', $vv[1]);
+			if($_GET['type'] == 'col') 
+			{
+				$res = getLinkDetails('rpt_ott_header', 'header', 'id', $ids[1]);
 				$t = 'Area: ' . $res['header'];
 				$link_expiry_date = $res['expiry'];
-				
-			} else if($_GET['type'] == 'row') {
-			
-				$res = getLinkDetails('rpt_ott_header', 'header', 'id', $vv[0]);
+			} 
+			else if($_GET['type'] == 'row') 
+			{
+				$res = getLinkDetails('rpt_ott_header', 'header', 'id', $ids[0]);
 				$t = 'Product: ' . $res['header'];
 				$link_expiry_date = $res['expiry'];
 			}
-			$return_param['params_arr'] = $return_param['c_params'];
-				
-		} else {
-		
+		} 
+		else 
+		{
 			$return_param['c_params'] 	= unserialize(gzinflate(base64_decode($_GET['cparams'])));
 			$stack_type = ($return_param['c_params']['type'] == 'col') ? 'rowlabel' : 'columnlabel';
-			if($return_param['c_params']['type'] == 'col') {
+			if($return_param['c_params']['type'] == 'col') 
+			{
 				$t = 'Area: ' . $return_param['c_params']['columnlabel'];
-			} else {
+			} 
+			else 
+			{
 				$t = 'Product: ' . $return_param['c_params']['rowlabel'];
 			}
 				
 			echo ('<input type="hidden" name="cparams" value="' . $_GET['cparams'] . '"/>'
 					. '<input type="hidden" name="trunc" value="' . $_GET['trunc'] . '"/>');
 					
-			foreach($_GET['params'] as $key => $value) {
+			foreach($_GET['params'] as $key => $value) 
+			{
 				echo ('<input type="hidden" name="params['.$key.']" value="' . $_GET['params'][$key] . '"/>'
 						. '<input type="hidden" name="leading['.$key.']" value="' . $_GET['leading'][$key] . '"/>');
-				if($return_param['c_params']['type'] == 'row') {
+				if($return_param['c_params']['type'] == 'row') 
+				{
 					echo ('<input type="hidden" name="rowupm['.$key.']" value="' . $_GET['rowupm'][$key] . '"/>');
-				} else if($return_param['c_params']['type'] == 'col'){
+				} 
+				else if($return_param['c_params']['type'] == 'col')
+				{
 					echo ('<input type="hidden" name="colupm['.$key.']" value="' . $_GET['colupm'][$key] . '"/>');
 				}		
 			}
@@ -597,8 +646,8 @@ class ContentManager
 			$return_param['params_arr'] = $_GET['params'];
 		}
 		
-		if(isset($_GET['institution']) && $_GET['institution'] != '') {
-				
+		if(isset($_GET['institution']) && $_GET['institution'] != '') 
+		{
 			array_push($this->fid, 'institution_type');
 			$sp = new SearchParam();
 			$sp->field 	= 'institution_type';
@@ -609,8 +658,8 @@ class ContentManager
 		
 		echo ('</td><td class="result">' . htmlformat($t) . '</td>' . '</tr></table>');
 		echo ('<br clear="all"/>');
-		foreach($return_param['params_arr'] as $pk => $pv) {
-		
+		foreach($return_param['params_arr'] as $pk => $pv) 
+		{
 			$excel_params 	= array();
 			$params = array();
 			$arr 	= array();
@@ -620,103 +669,53 @@ class ContentManager
 			$totinactivecount = 0; 
 			$totactivecount	 = 0; 
 			$totalcount	= 0;
-			$all_ids = array();			
-			
+			$larvolIds = array();			
+			$dataset['unmatchedupms'] = array();
 			//New Link Method
-			if(isset($_GET['results'])) {
-			
-				$e 	= explode(".", $pv);$identifier_for_result_set = '';
-				
+			if(isset($_GET['results'])) 
+			{
+				$ids = explode(".", $pv);
+				//echo 'ids<pre>';print_r($ids);
 				if($link_expiry_date != NULL && $link_expiry_date != '')
+				{
 					$return_param['link_expiry_date'][$pk][] = $link_expiry_date;
+				}	
 				//Retrieving headers
-				if($_GET['type'] == 'row') {
-				
-					if($pk != 0) {
-						$res = getLinkDetails('rpt_ott_header', 'header', 'id', $e[0]);
-						$return_param['ltype'][$pk] = htmlentities($res['header']);
-						if($res['expiry'] != NULL && $res['expiry'] != '')
-							$return_param['link_expiry_date'][$pk][] = $res['expiry'];
-							
-						//$tt = $e[1];
-						//result set separator as a separate parameter and maintaining backward compatibility
-						if($e[1] == '-1' || $e[1] == '-2') {
-							$tt = $e[2];
-							$identifier_for_result_set = $e[1];
-						} else {
-							$tt = $e[1];
-						}
-					} else {
-						$res = getLinkDetails('rpt_ott_header', 'header', 'id', $e[1]);
-						$return_param['ltype'][$pk] = htmlentities($res['header']);
-						if($res['expiry'] != NULL && $res['expiry'] != '')
-							$return_param['link_expiry_date'][$pk][] = $res['expiry'];
-							
-						//$tt = $e[2];
-						//result set separator as a separate parameter and maintaining backward compatibility
-						if($e[2] == '-1' || $e[2] == '-2') {
-							$tt = $e[3];
-							$identifier_for_result_set = $e[2];
-						} else {
-							$tt = $e[2];
-						}
-					}	
-					
-				} else if($_GET['type'] == 'col') {
-				
-					if($pk != 0) {
-					
-						$res = getLinkDetails('rpt_ott_header', 'header', 'id', $e[0]);
-						$return_param['ltype'][$pk] = htmlentities($res['header']);
-						if($res['expiry'] != NULL && $res['expiry'] != '')
-							$return_param['link_expiry_date'][$pk][] = $res['expiry'];
-						//$tt = $e[1];
-						//result set separator as a separate parameter and maintaining backward compatibility
-						if($e[1] == '-1' || $e[1] == '-2') {
-							$tt = $e[2];
-							$identifier_for_result_set = $e[1];
-						} else {
-							$tt = $e[1];
-						}
-					} else {
-					
-						$res = getLinkDetails('rpt_ott_header', 'header', 'id', $e[0]);
-						$return_param['ltype'][$pk] = htmlentities($res['header']);
-						if($res['expiry'] != NULL && $res['expiry'] != '')
-							$return_param['link_expiry_date'][$pk][] = $res['expiry'];
-						//$tt = $e[2];
-						//result set separator as a separate parameter and maintaining backward compatibility
-						if($e[2] == '-1' || $e[2] == '-2') {
-							$tt = $e[3];
-							$identifier_for_result_set = $e[2];
-						} else {
-							$tt = $e[2];
-						}
-					}	
+				if($_GET['type'] == 'row') 
+				{
+					$res = getLinkDetails('rpt_ott_header', 'header', 'id', $ids[1]);
+				} 
+				else if($_GET['type'] == 'col') 
+				{
+					$res = getLinkDetails('rpt_ott_header', 'header', 'id', $ids[0]);
 				}
 				
-				//Retrieving params
-				//result set separator as a separate parameter and maintaining backward compatibility
-				if($identifier_for_result_set == '-1' || $identifier_for_result_set == '-2'){
-				
-					if($identifier_for_result_set == '-2') {
-					
-						$res = getLinkDetails('rpt_ott_searchdata', 'result_set', 'id', $tt);
-						
+				$sectionHeader = htmlentities($res['header']);
+				if($res['expiry'] != NULL && $res['expiry'] != '')
+				{
+					$return_param['link_expiry_date'][$pk][] = $res['expiry'];
+				}	
+				if($ids[2] == '-1' || $ids[2] == '-2') 
+				{
+					if($ids[2] == '-2') 
+					{
+						$res = getLinkDetails('rpt_ott_searchdata', 'result_set', 'id', $ds[3]);
 						if($res['expiry'] != NULL && $res['expiry'] != '')
+						{
 							$return_param['link_expiry_date'][$pk][] = $res['expiry'];
-							
+						}	
 						$search_data_content = $res['result_set'];
 						$excel_params = unserialize(stripslashes(gzinflate(base64_decode($search_data_content))));
-						
-					} else if($identifier_for_result_set == '-1') {
-					
-						$res = getLinkDetails('rpt_ott_trials', 'result_set', 'id', $tt);
-						
+					}
+					else if($ids[2] == '-1') 
+					{
+						$res = getLinkDetails('rpt_ott_trials', 'result_set', 'id', $ids[3]);
 						if($res['expiry'] != NULL && $res['expiry'] != '')
+						{
 							$return_param['link_expiry_date'][$pk][] = $res['expiry'];
-							
-						if($res['result_set'] != '') {
+						}	
+						if($res['result_set'] != '') 
+						{
 							$sp = new SearchParam();
 							$sp->field = 'larvol_id';
 							$sp->action = 'search';
@@ -724,38 +723,85 @@ class ContentManager
 							$excel_params = array($sp);
 						}
 					}
-					
-				} else {
-				
-					$searchdata = substr($tt,0,3);
-					if(dechex($searchdata) == '73' && chr($searchdata) == 's') {
-					
-						$res = getLinkDetails('rpt_ott_searchdata', 'result_set', 'id', substr($tt,3));
+					if(isset($ids[4]))
+					{	
+						if($_GET['type'] == 'col') 
+						{ 
+							$val = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $ids[4]);
+							if(isset($_GET['v']) && $_GET['v'] == 1)
+								$val['intervention_name'] = explode('\n',$val['intervention_name']);
+							else
+								$val['intervention_name'] = explode(',',$val['intervention_name']);
+							
+							$dataset['unmatchedupms'] = $this->getNonAssocUpm($val['intervention_name'], $sectionHeader);	
+						}
+						else if($_GET['type'] == 'row') 
+						{ 	
+							$val = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $ids[4]);
+							if(isset($_GET['v']) && $_GET['v'] == 1)
+								$return_param['naUpmRegex'] = array_merge($return_param['naUpmRegex'], explode('\n',$val['intervention_name']));
+							else
+								$return_param['naUpmRegex'] = array_merge($return_param['naUpmRegex'], explode(',',$val['intervention_name']));
+						}
+					}
+				} 
+				else 
+				{
+					$searchdata = substr($ids[2],0,3);
+					if(dechex($searchdata) == '73' && chr($searchdata) == 's') 
+					{
+						$res = getLinkDetails('rpt_ott_searchdata', 'result_set', 'id', substr($ids[2],3));
 						$search_data_content = $res['result_set'];
 						if($res['expiry'] != NULL && $res['expiry'] != '')
+						{
 							$return_param['link_expiry_date'][$pk][] = $res['expiry'];
-							
+						}	
 						$excel_params = unserialize(stripslashes(gzinflate(base64_decode($search_data_content))));
-						
-					} else {
-						
-						$res = getLinkDetails('rpt_ott_trials', 'result_set', 'id', $tt);
-						
+					} 
+					else 
+					{
+						$res = getLinkDetails('rpt_ott_trials', 'result_set', 'id', $ids[2]);
 						if($res['expiry'] != NULL && $res['expiry'] != '')
+						{
 							$return_param['link_expiry_date'][$pk][] = $res['expiry'];
+						}
+						if($res['result_set'] != '') 
+						{	
+							$sp = new SearchParam();
+							$sp->field = 'larvol_id';
+							$sp->action = 'search';
+							$sp->value = str_replace(',', ' OR ', $res['result_set']);
+							$excel_params = array($sp);
+						}
+					}
+					if(isset($ids[3])) 
+					{ 
+						if($_GET['type'] == 'col') 
+						{ 
+							$val = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $ids[2]);
+							if(isset($_GET['v']) && $_GET['v'] == 1)
+								$val['intervention_name'] = explode('\n',$val['intervention_name']);
+							else
+								$val['intervention_name'] = explode(',',$val['intervention_name']);
 							
-						$sp = new SearchParam();
-						$sp->field = 'larvol_id';
-						$sp->action = 'search';
-						$sp->value = str_replace(',', ' OR ', $res['result_set']);
-						$excel_params = array($sp);
+							$dataset['unmatchedupms'] = $this->getNonAssocUpm($val['intervention_name'], $sectionHeader);
+						} 
+						else if($_GET['type'] == 'row') 
+						{ 
+							$val = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $ids[3]); 
+							if(isset($_GET['v']) && $_GET['v'] == 1)
+								$return_param['naUpmRegex'] = array_merge($return_param['naUpmRegex'], explode('\n', $val['intervention_name']));
+							else
+								$return_param['naUpmRegex'] = array_merge($return_param['naUpmRegex'], explode(',', $val['intervention_name']));
+						}
 					}
 				}
+				
 			} else {
 			
 				$excel_params = unserialize(gzinflate(base64_decode($pv)));
-				$this->time_machine 	= $excel_params['time'];
-				$return_param['ltype'][$pk]	= htmlentities($excel_params[$stack_type]);
+				$this->time_machine = $excel_params['time'];
+				$sectionHeader = htmlentities($excel_params[$stack_type]);
 			
 				if($excel_params['params'] === NULL)
 				{ 	
@@ -775,230 +821,232 @@ class ContentManager
 			}
 			
 			$params = array_merge($this->params, $excel_params, $ins_params);
-			if(!empty($excel_params)) {
+			if(!empty($excel_params)) 
+			{
 				$arrr = search($params,$this->fid,NULL,$this->time_machine);
-				
-			} else {
-				$return_param['activearray'][] = array('section' => $pk);
-				$return_param['inactivearray'][] = array('section' => $pk);
-				$return_param['allarray'][] = array('section' => $pk);
-			}
+			} 
 			
 			//Added to consolidate the data returned in an mutidimensional array format as opposed to earlier 
 			//when it was not returned in an mutidimensional array format.
 			$indx = 0;
-			foreach($arrr as $k => $v) 
-			{ 
-				foreach($v as $kk => $vv) 
-				{ 
-					if($kk != 'NCT/condition' && $kk != 'NCT/intervention_name' && $kk != 'NCT/lead_sponsor')
+			foreach($arrr as $key2 => $value2) 
+			{
+				foreach($value2 as $key3 => $value3) 
+				{
+					if(is_array($value3))
 					{
-						if($kk == 'NCT/start_date' || $kk == 'inactive_date')
-							$arr[$indx][$kk] = (is_array($vv)) ? $vv[0] : $vv;
+						if($key3 == 'NCT/condition' || $key3 == 'NCT/intervention_name' || $key3 == 'NCT/lead_sponsor')
+						{
+							$arr[$indx][$key3] = implode(', ', $value3);
+						}
+						elseif($key3 == 'NCT/start_date' || $key3 == 'inactive_date')
+						{
+							$arr[$indx][$key3] = $vv[0];
+						}
 						else
-							$arr[$indx][$kk] = (is_array($vv)) ? implode(' ', $vv) : $vv;
+						{
+							$arr[$indx][$key3] = implode(' ', $value3);
+						}
 					}
 					else
 					{
-						$arr[$indx][$kk] = (is_array($vv)) ? implode(', ', $vv) : $vv;
+						$arr[$indx][$key3] = $value3;
 					}
 				}
 				++$indx;
 			}
 			
 			//Process to check for changes/updates in trials, matched & unmatched upms.
-			foreach($arr as $key => $val) { 
-				
-				$nct = array();
-				$allUpmDetails = array();
+			foreach($arr as $key => $value) 
+			{ 
+				$nctId = $value['NCT/nct_id'];
+				$dataset['trials'] = array();
+				$dataset['matchedupms'] = array();
 				
 				//checking for updated and new trials
-				$nct[$val['NCT/nct_id']] = getNCT($val['NCT/nct_id'], $val['larvol_id'], $this->time_machine, $this->edited);
-				 
+				$dataset['trials'] = getTrialUpdates($nctId, $value['larvol_id'], $this->time_machine, $this->edited);
+				$dataset['trials'] = array_merge($dataset['trials'], array('sectionHeader' => $sectionHeader));
+				if(isset($_GET['type']) && $_GET['type'] == 'col')
+				{
+					$dataset['trials'] = array_merge($dataset['trials'], array('unmatchedupms' => $dataset['unmatchedupms']));
+				}
 				//checking for updated and new unmatched upms.
-				$allUpmDetails[$val['NCT/nct_id']] = getCorrespondingUPM($val['NCT/nct_id'], $this->time_machine, $this->edited);
+				$dataset['matchedupms'] = getCorrespondingUPM($nctId, $this->time_machine, $this->edited);
 
-				if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) {
-			
+				if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) 
+				{
 					//unsetting value for field acroynm if it has a previous value and no current value
-					if(isset($nct[$val['NCT/nct_id']]['edited']['NCT/acronym']) && !isset($nct[$val['NCT/acronym']])) {
-						unset($nct[$val['NCT/nct_id']]['edited']['NCT/acronym']);
-						$acroynm_field_index = array_search('NCT/acronym', $nct[$val['NCT/nct_id']]['edited']);
-						unset($nct[$val['NCT/nct_id']]['edited'][$acroynm_field_index]);
+					if(isset($dataset['trials']['edited']['NCT/acronym']) && !isset($dataset['trials']['NCT/acronym'])) 
+					{
+						unset($dataset['trials']['edited']['NCT/acronym']);
 					}
 					
-					$prev_value = '';
 					//unsetting value for field enrollment if the change is less than 20 percent
-					if(isset($nct[$val['NCT/nct_id']]['edited']['NCT/enrollment'])) {
-						$prev_value = substr($nct[$val['NCT/nct_id']]['edited']['NCT/enrollment'],16);
+					if(isset($dataset['trials']['edited']['NCT/enrollment']))
+					{
+						$prevValue = substr($dataset['trials']['edited']['NCT/enrollment'],16);
 						
-						if(!getDifference($prev_value, $nct[$val['NCT/enrollment']])) {
-							unset($nct[$val['NCT/nct_id']]['edited']['NCT/enrollment']);
-							$enroll_field_index = array_search('NCT/enrollment', $nct[$val['NCT/nct_id']]['edited']);
-							unset($nct[$val['NCT/nct_id']]['edited'][$enroll_field_index]);
+						if(!getDifference($prevValue, $value['NCT/enrollment'])) 
+						{
+							unset($dataset['trials']['edited']['NCT/enrollment']);
 						}
 					}
-					
-					if(!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y') {
-						$return_param['fin_arr'][$pk][$val['NCT/nct_id']] = array_merge($nct[$val['NCT/nct_id']], $val);
-						$return_param['all_records'][$val['NCT/nct_id']] = array_merge($nct[$val['NCT/nct_id']], $val);
-					}
-					foreach($allUpmDetails[$val['NCT/nct_id']] as $kk => $vv) {
-						if(isset($vv['edited']) && !empty($vv['edited'])) {
-							$return_param['upmDetails'][$val['NCT/nct_id']][] = $vv;
+					//merge only if updates are found
+					foreach($dataset['matchedupms'] as $k => $v) 
+					{
+						if(empty($v['edited']) || $v['new'] != 'y') 
+						{
+							unset($dataset['matchedupms'][$k]);
 						}
 					}
-					
-				} else {
-					$return_param['fin_arr'][$pk][$val['NCT/nct_id']] = array_merge($nct[$val['NCT/nct_id']], $val);
-					$return_param['all_records'][$val['NCT/nct_id']] = array_merge($nct[$val['NCT/nct_id']], $val);
-					$return_param['upmDetails'][$val['NCT/nct_id']] = $allUpmDetails[$val['NCT/nct_id']];
-				}
-				
-				if(in_array($val['NCT/overall_status'], $this->inactfilterarr)) {
-				
-					$totinactivecount++;
-					if(isset($_GET['wh']) || isset($_GET['afm']) || isset($_GET['tna']) || isset($_GET['nla']) 
-					|| isset($_GET['wd']) || isset($_GET['t']) || isset($_GET['s']) || isset($_GET['c'])) {
-							
-						$vall = implode(",",array_keys($this->inactfilterarr, $val['NCT/overall_status']));
-						if(array_key_exists($vall, $_GET)) {
-						
-							if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) {
-							
-								if(!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y') {
-									$return_param['inactivearray'][] = array_merge($nct[$val['NCT/nct_id']], $val, array('section' => $pk));
-									++$showRecords_inactivearray_Cnt;
+					//merge only if updates are found
+					if(!empty($dataset['trials']['edited']) || $dataset['trials']['new'] == 'y')
+					{	
+						if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) 
+						|| isset($_GET['av']) || isset($_GET['wh']) || isset($_GET['afm']) || isset($_GET['tna']) 
+						|| isset($_GET['nla']) || isset($_GET['wd']) || isset($_GET['t']) || isset($_GET['s']) 
+						|| isset($_GET['c']) || isset($_GET['nlr'])) 
+						{	
+							$statusValues = implode(",", array_keys($this->allfilterarr, $value['NCT/overall_status']));	
+							if(array_key_exists($statusValues, $_GET)) 
+							{
+								$return_param['allTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+							}
+						}
+						else
+						{
+							$return_param['allTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+						}
+						if(in_array($value['NCT/overall_status'], $this->inactfilterarr)) 
+						{
+							if(isset($_GET['wh']) || isset($_GET['afm']) || isset($_GET['tna']) || isset($_GET['nla']) 
+							|| isset($_GET['wd']) || isset($_GET['t']) || isset($_GET['s']) || isset($_GET['c'])) 
+							{
+								$statusValues = implode(",", array_keys($this->inactfilterarr, $value['NCT/overall_status']));
+								if(array_key_exists($statusValues, $_GET)) 
+								{
+									$return_param['inactiveTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
 								}
-							} else {
-								$return_param['inactivearray'][] = array_merge($val, array('section' => $pk));
-								++$showRecords_inactivearray_Cnt;
 							}
-							
-						} 
-					} else {
-						if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) {
-						
-							if(!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y') {
-								$return_param['inactivearray'][] = array_merge($nct[$val['NCT/nct_id']], $val, array('section' => $pk));
-								++$showRecords_inactivearray_Cnt;
+							else
+							{
+								$return_param['inactiveTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
 							}
-						} else {
-							$return_param['inactivearray'][] = array_merge($val, array('section' => $pk));
-							++$showRecords_inactivearray_Cnt;
+						}
+						else
+						{
+							if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) 
+							|| isset($_GET['av']) || isset($_GET['nlr'])) 
+							{	
+								$statusValues = implode(",", array_keys($this->actfilterarr, $value['NCT/overall_status']));
+								if(array_key_exists($statusValues, $_GET)) 
+								{
+									$return_param['activeTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+								}
+							}
+							else
+							{
+								$return_param['activeTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+							}
 						}
 					}
-					
-				} else {
-				
-					$totactivecount++;
+				} 
+				else 
+				{
 					if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) 
-						|| isset($_GET['a']) || isset($_GET['nlr'])) {	
-					
-						$vall = implode(",",array_keys($this->actfilterarr, $val['NCT/overall_status']));
-						if(array_key_exists($vall, $_GET)) {
-						
-							if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) {
-							
-								if(!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y') {
-									$return_param['activearray'][] = array_merge($nct[$val['NCT/nct_id']], $val, array('section' => $pk));
-									++$showRecords_activearray_Cnt;
-								}
-							} else {
-								$return_param['activearray'][] = array_merge($nct[$val['NCT/nct_id']], $val, array('section' => $pk));
-								++$showRecords_activearray_Cnt;
-							}
-						} 
-					} else {
-					
-						if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) {
-						
-							if(!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y') {
-								$return_param['activearray'][] = array_merge($nct[$val['NCT/nct_id']], $val, array('section' => $pk));
-								++$showRecords_activearray_Cnt;
-							}
-						} else { 
-							$return_param['activearray'][] = array_merge($nct[$val['NCT/nct_id']], $val, array('section' => $pk));
-							++$showRecords_activearray_Cnt;
-						}
-					}
-				}
-				
-				if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) 
-					|| isset($_GET['a']) || isset($_GET['wh']) || isset($_GET['afm']) || isset($_GET['tna']) 
+					|| isset($_GET['av']) || isset($_GET['wh']) || isset($_GET['afm']) || isset($_GET['tna']) 
 					|| isset($_GET['nla']) || isset($_GET['wd']) || isset($_GET['t']) || isset($_GET['s']) 
-					|| isset($_GET['c']) || isset($_GET['nlr'])) {
-							
-					$vall = implode(",",array_keys($this->allfilterarr, $val['NCT/overall_status']));
-					if(array_key_exists($vall, $_GET)) {
-						if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) {
-							if(!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y') {
-								$return_param['allarray'][] = array_merge($nct[$val['NCT/nct_id']], $val, array('section' => $pk));
-								++$showRecords_allarray_Cnt;
+					|| isset($_GET['c']) || isset($_GET['nlr'])) 
+					{	
+						$statusValues = implode(",", array_keys($this->allfilterarr, $value['NCT/overall_status']));	
+						if(array_key_exists($statusValues, $_GET)) 
+						{
+							$return_param['allTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+						}
+					}
+					else
+					{
+						$return_param['allTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+					}
+					if(in_array($value['NCT/overall_status'], $this->inactfilterarr)) 
+					{ 
+						if(isset($_GET['wh']) || isset($_GET['afm']) || isset($_GET['tna']) || isset($_GET['nla']) 
+						|| isset($_GET['wd']) || isset($_GET['t']) || isset($_GET['s']) || isset($_GET['c'])) 
+						{	
+							$statusValues = implode(",", array_keys($this->inactfilterarr, $value['NCT/overall_status']));
+							if(array_key_exists($statusValues, $_GET)) 
+							{	
+								$return_param['inactiveTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
 							}
-						} else {
-							$return_param['allarray'][] = array_merge($val, array('section' => $pk));
-							++$showRecords_allarray_Cnt;
 						}
-					} 
-				} else {
-					if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) {
-						if(!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y') {
-							$return_param['allarray'][] = array_merge($nct[$val['NCT/nct_id']], $val, array('section' => $pk));
-							++$showRecords_allarray_Cnt;
+						else
+						{
+							$return_param['inactiveTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
 						}
-					} else {
-						$return_param['allarray'][] = array_merge($val, array('section' => $pk));
-						++$showRecords_allarray_Cnt;
+					}
+					else
+					{
+						if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) 
+						|| isset($_GET['av']) || isset($_GET['nlr'])) 
+						{	
+							$statusValues = implode(",", array_keys($this->actfilterarr, $value['NCT/overall_status']));
+							if(array_key_exists($statusValues, $_GET)) 
+							{
+								$return_param['activeTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+							}
+						}
+						else
+						{
+							$return_param['activeTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+						}
 					}
 				}
 				
-				if(!in_array($val['NCT/overall_status'],$this->actfilterarr) && !in_array($val['NCT/overall_status'],$this->inactfilterarr) && 
-				!in_array($val['NCT/overall_status'],$this->allfilterarr)) { 
+				if(!in_array($value['NCT/overall_status'],$this->actfilterarr) && !in_array($value['NCT/overall_status'],$this->inactfilterarr)) 
+				{ 
 					$log 	= 'WARN: A new value "' . $val['NCT/overall_status'] . '" (not listed in the existing rule), was encountered for field overall_status.';
 					$logger->warn($log);
 					unset($log);
 				}
 				
 				//getting count of active trials from a common function used in run_heatmap.php and here
-				$all_ids[] = $val['larvol_id'];
-				sort($all_ids); 
-				$totalcount = count($all_ids);
-				$totactivecount = getActiveCount($all_ids, $this->time_machine);
+				$larvolIds[] = $value['larvol_id'];
+				sort($larvolIds); 
+				$totalcount = count($larvolIds);
+				$totactivecount = getActiveCount($larvolIds, $this->time_machine);
 				$totinactivecount = $totalcount - $totactivecount; 
-
 			}
-			
-			$return_param['showRecordsCnt'] = (isset($_GET["list"])) ? (${'showRecords_'.$_GET["list"].'array_Cnt'}) : ($showRecords_activearray_Cnt);
-			$return_param['stack_inactive_count'] 	= $return_param['stack_inactive_count'] + $totinactivecount;
-			$return_param['stack_active_count']		= $return_param['stack_active_count'] + $totactivecount;
-			$return_param['stack_total_count']		= $return_param['stack_total_count'] + $totalcount;
-			
+			$return_param['inactiveCount'] 	= $return_param['inactiveCount'] + $totinactivecount;
+			$return_param['activeCount']	= $return_param['activeCount'] + $totactivecount;
+			$return_param['allCount']		= $return_param['allCount'] + $totalcount;
 		}
 		
 		/*--------------------------------------------------------
 		|Variables set for count when filtered by institution_type
 		---------------------------------------------------------*/
-		if(isset($_GET['instparams']) && $_GET['instparams'] != '') {
-			$return_param['insparams'] = $_GET['instparams'];
-		} else {
+		if(isset($_GET['instparams']) && $_GET['instparams'] != '') 
+		{
+			$return_param['instparams'] = $_GET['instparams'];
+		} 
 		
-			$return_param['insparams']  = rawurlencode(base64_encode(gzdeflate(serialize(array('actcnt' => $return_param['stack_active_count'],
-												'inactcnt' => $return_param['stack_inactive_count'])))));
-		}
+		//echo '<pre>';print_r($return_param);
 		return $return_param;
 	}
 	
-	function chkType() {
-	
+	function chkType() 
+	{
 		global $now;
 		global $logger;
 		
+		$Trials = array();
+		$Trials['allTrials'] = array();
+		$Trials['inactiveTrials'] = array();
+		$Trials['activeTrials'] = array();
+		
 		$process_params = array();
 		$process_params['link_expiry_date'] = array();
-		$unmatched_upm_details = array();
-		$header_details = array();
-		$unmatched_upms_default_style = 'collapse';
+		$naUpms = array();
+		$naUpmsDisplayStyle = 'collapse';
 		
 		echo('<form id="frmOtt" name="frmOtt" method="get" target="_self" action="intermediary.php">');
 		echo ('<table width="100%"><tr><td><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" />'
@@ -1009,309 +1057,171 @@ class ContentManager
 				. 'larvoltrials@larvol.com</a></span>');
 		
 		//Stacked Ott.	
-		if(isset($_GET['cparams']) || (isset($_GET['results']) && isset($_GET['type']))) {
-		
+		if(isset($_GET['cparams']) || (isset($_GET['results']) && isset($_GET['type']))) 
+		{	
 			//Process the get parameters and extract the information
 			$process_params = $this->processParams();
+			$count = count($process_params[$this->type]);
 			
-			if(isset($_GET['institution']) && $_GET['institution'] != '') {
-			
-				$ins = unserialize(gzinflate(base64_decode(rawurldecode($process_params['insparams']))));
-				$this->commonControls($process_params['showRecordsCnt'], $ins['actcnt'], $ins['inactcnt'], ($ins['actcnt'] + $ins['inactcnt']));
+			if(isset($_GET['institution']) && $_GET['institution'] != '') 
+			{
+				$ins = unserialize(gzinflate(base64_decode(rawurldecode($process_params['instparams']))));
 				$foundcount = ($ins['actcnt'] + $ins['inactcnt']);
-			} else {
-			
-				$this->commonControls($process_params['showRecordsCnt'], $process_params['stack_active_count'], $process_params['stack_inactive_count'], 
-				$process_params['stack_total_count']);
-				$foundcount = $process_params['stack_total_count'];
+				
+				$this->commonControls($count, $ins['actcnt'], $ins['inactcnt'], ($ins['actcnt'] + $ins['inactcnt']));
+			} 
+			else 
+			{
+				$process_params['instparams']  = rawurlencode(base64_encode(gzdeflate(serialize(array('actcnt' => $process_params['activeCount'],
+													'inactcnt' => $process_params['inactiveCount'])))));
+				$foundcount = $process_params['allCount'];
+				
+				$this->commonControls($count, $process_params['activeCount'], $process_params['inactiveCount'], $process_params['allCount']);
 			}
-			echo('<br clear="all"/><br/>');
-			echo ('<input type="hidden" name="instparams" value="' . $process_params['insparams']. '" />');	
+			echo ('<br clear="all"/><br/>');
+			echo ('<input type="hidden" name="instparams" value="' . $process_params['instparams']. '" />');	
 
 			//Pagination
 			$page = 1;
-			$this->pstart 	= '';$this->last = '';$this->pend = '';$this->pages = '';
+			$start 	= '';$last = '';$end = '';$pages = '';
 			if(isset($_GET['pg'])) $page = mysql_real_escape_string($_GET['pg']); 
 			if(!is_numeric($page)) die('non-numeric page');
 			
-			if($_GET['type'] == 'col')
-				$count = count($process_params[$this->type]);
-			else
-				$count = $process_params['showRecordsCnt'];
+			$start 	= ($page-1) * $this->results_per_page + 1;
+			$end 	= $start + $this->results_per_page - 1;
+			$pages 	= ceil($count / $this->results_per_page);
+			$last 	= ($page * $this->results_per_page > $count) ? $count : $end;
 			
-			$this->pstart 	= ($page-1) * $this->results_per_page + 1;
-			$this->pend 	= $this->pstart + $this->results_per_page - 1;
-			$this->pages 	= ceil($count / $this->results_per_page);
-			$this->last 	= ($page * $this->results_per_page > $count) ? $count : $this->pend;
-			
-			if($count > $this->results_per_page) {
-				if(isset($_GET['results']) && isset($_GET['type'])) {
-					$this->pagination($page, $count, NULL, NULL, 'stack', $_GET['type']);
-				} else {
-					$this->pagination($page, $count, NULL, NULL, 'stack', $process_params['c_params']['type']);
+			if($count > $this->results_per_page) 
+			{
+				if(isset($_GET['results']) && isset($_GET['type'])) 
+				{
+					$this->pagination($page,  $start, $end, $last, $count, NULL, NULL, 'stack', $_GET['type']);
+				} 
+				else 
+				{
+					$this->pagination($page,  $start, $end, $last, $count, NULL, NULL, 'stack', $process_params['c_params']['type']);
 				}
 			}
 			
 			$this->displayHeader();
 			
-			$first_ids[] = explode('.',$process_params['c_params'][0]);
-			
-			foreach($process_params['params_arr'] as $k => $v) {
-			
-				$row_upm_arr = array();
-				$header_details[$k] = trim($process_params['ltype'][$k]);
-				$vv = explode('.', $v);
-				
-				if($k != 0) {
-				
-					//result set separator as a separate parameter and maintaining backward compatibility
-					if($vv[1] == '-1' || $vv[1] == '-2') {
-					
-						if(isset($vv[3])) { 
-						
-							if(isset($_GET['results']) && $_GET['type'] == 'col') { 
+			/*foreach($process_params['params_arr'] as $key => $value) 
+			{
+				$value2 = explode('.', $value);
+				//result set separator as a separate parameter and maintaining backward compatibility
+				if($value2[2] == '-1' || $value2[2] == '-2') 
+				{
+					if(isset($value2[4])) 
+					{ 
+						if(isset($_GET['results']) && $_GET['type'] == 'col') 
+						{ 
+							$val = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $value2[4]);
+							if(isset($_GET['v']) && $_GET['v'] == 1)
+								$val['intervention_name'] = explode('\n', $val['intervention_name']);
+							else
+								$val['intervention_name'] = explode(',', $val['intervention_name']);
 							
-								$val = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[3]);
-								if(isset($_GET['v']) && $_GET['v'] == 1)
-									$val['intervention_name'] = explode('\n',$val['intervention_name']);
-								else
-									$val['intervention_name'] = explode(',',$val['intervention_name']);
-								
-								$unmatched_upm_details[$k] = $this->getNonAssocUpm($val['intervention_name'], $k);
-								
-							} else if(isset($_GET['results']) && $_GET['type'] == 'row') { 
-								
-								$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[3]); 
-								if(isset($_GET['v']) && $_GET['v'] == 1)
-									$row_upm_arr = array_merge($row_upm_arr,explode('\n',$res['intervention_name']));
-								else
-									$row_upm_arr = array_merge($row_upm_arr,explode(',',$res['intervention_name']));
-							}
-						}
-						
-					} else {
-					
-						if(isset($vv[2])) { 
-						
-							if(isset($_GET['results']) && $_GET['type'] == 'col') { 
-								
-								$val = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[2]);
-								if(isset($_GET['v']) && $_GET['v'] == 1)
-									$val['intervention_name'] = explode('\n',$val['intervention_name']);
-								else
-									$val['intervention_name'] = explode(',',$val['intervention_name']);
-								
-								$unmatched_upm_details[$k] = $this->getNonAssocUpm($val['intervention_name'], $k);
-								
-							} else if(isset($_GET['results']) && $_GET['type'] == 'row') { 
-								
-								$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[2]); 
-								if(isset($_GET['v']) && $_GET['v'] == 1)
-									$row_upm_arr = array_merge($row_upm_arr,explode('\n',$res['intervention_name']));
-								else
-									$row_upm_arr = array_merge($row_upm_arr,explode(',',$res['intervention_name']));
-							}
+							$naUpms[$key] = $this->getNonAssocUpm($val['intervention_name'], $key);
+							
+						} 
+						else
+						{ 
+							$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $value2[4]); 
+							if(isset($_GET['v']) && $_GET['v'] == 1)
+								$naUpms = array_merge($naUpms,explode('\n',$res['intervention_name']));
+							else
+								$naUpms = array_merge($naUpms,explode(',',$res['intervention_name']));
 						}
 					}
-						
-				} else {
-				
-					//result set separator as a separate parameter and maintaining backward compatibility
-					if($vv[2] == '-1' || $vv[2] == '-2') {
-					
-						if(isset($vv[4])) { 
-						
-							if(isset($_GET['results']) && $_GET['type'] == 'col') { 
+				}
+				else 
+				{
+					if(isset($value2[3])) 
+					{ 	
+						if(isset($_GET['results']) && $_GET['type'] == 'col') 
+						{ 
+							$val = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $value2[4]);
+							if(isset($_GET['v']) && $_GET['v'] == 1)
+								$val['intervention_name'] = explode('\n',$val['intervention_name']);
+							else
+								$val['intervention_name'] = explode(',',$val['intervention_name']);
 							
-								$val = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[4]);
-								if(isset($_GET['v']) && $_GET['v'] == 1)
-									$val['intervention_name'] = explode('\n',$val['intervention_name']);
-								else
-									$val['intervention_name'] = explode(',',$val['intervention_name']);
+							$naUpms[$key] = $this->getNonAssocUpm($val['intervention_name'], $key);
 								
-								$unmatched_upm_details[$k] = $this->getNonAssocUpm($val['intervention_name'], $k);
-								
-							} else if(isset($_GET['results']) && $_GET['type'] == 'row') { 
-								
-								$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[4]); 
-								if(isset($_GET['v']) && $_GET['v'] == 1)
-									$row_upm_arr = array_merge($row_upm_arr,explode('\n',$res['intervention_name']));
-								else
-									$row_upm_arr = array_merge($row_upm_arr,explode(',',$res['intervention_name']));
-							}
-						}
+						} 
+						else
+						{ 
 						
-					} else {
-					
-						if(isset($vv[3])) { 	
-						
-							if(isset($_GET['results']) && $_GET['type'] == 'col') { 
-						
-								$val = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[4]);
-								if(isset($_GET['v']) && $_GET['v'] == 1)
-									$val['intervention_name'] = explode('\n',$val['intervention_name']);
-								else
-									$val['intervention_name'] = explode(',',$val['intervention_name']);
-								
-								$unmatched_upm_details[$k] = $this->getNonAssocUpm($val['intervention_name'], $k);
-									
-							} else if(isset($_GET['results']) && $_GET['type'] == 'row') { 
-							
-								$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[3]); 
-								//$process_params['link_expiry_date'][$pk][] = $res['expiry'];
-								if(isset($_GET['v']) && $_GET['v'] == 1)
-									$row_upm_arr = array_merge($row_upm_arr,explode('\n',$res['intervention_name']));
-								else
-									$row_upm_arr = array_merge($row_upm_arr,explode(',',$res['intervention_name']));
-							}
+							$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $vv[3]); 
+							//$process_params['link_expiry_date'][$pk][] = $res['expiry'];
+							if(isset($_GET['v']) && $_GET['v'] == 1)
+								$naUpms = array_merge($naUpms,explode('\n',$res['intervention_name']));
+							else
+								$naUpms = array_merge($naUpms,explode(',',$res['intervention_name']));
 						}
 					}
 				} 
 				
-				if(isset($_GET['cparams'])) { 
-					
-					if(isset($_GET['rowupm']) && $process_params['c_params']['type'] == 'row') {
-					
-						foreach($_GET['rowupm'] as $key => $value) {
-							$val = unserialize(gzinflate(base64_decode($value)));
-							if(isset($val) && $val != '' && !empty($val)) {
-								foreach($val as $valu) { $row_upm_arr[$k] = $valu; }
+				if(isset($_GET['cparams']))
+				{ 
+					if(isset($_GET['rowupm']) && $process_params['c_params']['type'] == 'row') 
+					{
+						foreach($_GET['rowupm'] as $key2 => $value2) 
+						{
+							$val = unserialize(gzinflate(base64_decode($value2)));
+							if(isset($val) && $val != '' && !empty($val)) 
+							{
+								foreach($val as $valu) { $naUpms[$k] = $valu; }
 							}
 						}
-					} else if($process_params['c_params']['type'] == 'col') {
-					
+					} 
+					else if($process_params['c_params']['type'] == 'col') 
+					{
 						$val = unserialize(gzinflate(base64_decode($_GET['colupm'][$k])));
 						if(isset($val) && $val != '' && !empty($val)) {
-							$unmatched_upm_details[$k] = $this->getNonAssocUpm($val, $k);
+							$naUpms[$k] = $this->getNonAssocUpm($val, $k);
 						}
 					}
 				}
 				
-			}
+			}*/
 			
-			if(isset($row_upm_arr) && !empty($row_upm_arr)) { 
-				$unmatched_upms_default_style = 'expand';
-				$upm_string = $this->getNonAssocUpm($row_upm_arr, 'rowupm');
-				if($upm_string != '') {
-					echo ('<tr class="trialtitles">'
-					. '<td colspan="' . getColspanforNAUpm($this->loggedIn) . '" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
-				. 'style="border-bottom:1px solid blue;background-image: url(\'images/down.png\');background-repeat: no-repeat;background-position:left center;"'
-					. ' onclick="sh(this,\'rowupm\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . '</td></tr>' . $upm_string);
-				} else {
-					echo '<tr><td colspan="' . getColspanforNAUpm($this->loggedIn) 
-					. '" class="notopbottomborder leftrightborderblue sectiontitles">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>';
-				}
-			} 
-			
-			if($count > 0) {
-				
-				displayContent($this->displist, $process_params[$this->type], $this->edited, $this->time_machine, $this->pstart, $this->last, 
-				$this->phase_arr, $process_params['all_records'], $this->actfilterarr, $this->current_yr, $this->second_yr, $this->third_yr,
-				$process_params['upmDetails'], $header_details, $unmatched_upm_details, $unmatched_upms_default_style);
-				
-			} else {
-			
-				foreach($process_params['params_arr'] as $k => $v) {
-					if($unmatched_upm_details[$k] != '') {
-					
-						if($unmatched_upms_default_style == 'expand')
-							$image = 'down';
-						else
-							$image = 'up';
-						
-						echo ('<tr class="trialtitles">'
-						. '<td colspan="' . getColspanforNAUpm($this->loggedIn) . '" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
-						. 'style="border-bottom:1px solid blue;background-image: url(\'images/' . $image 
-						. '.png\');background-repeat: no-repeat;background-position:left center;"'
-						. ' onclick="sh(this,\'' . $k . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . trim($header_details[$k]) 
-						. '</td></tr>' . $unmatched_upm_details[$k]);
-						
-						if(!isset($_GET['chkOnlyUpdated']))
-							echo ('<tr><td colspan="' . getColspanforNAUpm($this->loggedIn) . '" class="norecord" align="left">No trials found.</td></tr>'); 
+			if($_GET['type'] == 'row') 
+			{
+				if(isset($process_params['naUpmRegex']) && !empty($process_params['naUpmRegex'])) 
+				{
+					$naUpmsDisplayStyle = 'expand';
+					$dataset['unmatchedupms'] = $this->getNonAssocUpm($process_params['naUpmRegex'], $rowlabel);
+					foreach($process_params[$this->type] as $key => &$value)
+					{
+						$process_params[$this->type][$key]['unmatchedupms'] = $dataset['unmatchedupms']; 
 					}
-					
 				}
-				
-				if($unmatched_upms_default_style == 'expand' && !isset($_GET['chkOnlyUpdated']))
-					echo ('<tr><td colspan="' . getColspanforNAUpm($this->loggedIn) . '" class="norecord" align="left">No trials found.</td></tr>'); 
-					
 			}
 			
-			if(isset($_GET['trunc'])) {
+			if($count > 0) 
+			{
+				displayContent($process_params[$this->type], $this->edited, $this->time_machine, $start, $last, 
+				$this->current_yr, $this->second_yr, $this->third_yr, $naUpmsDisplayStyle);
+			}
+			else 
+			{
+				echo ('<tr><td colspan="' . getColspanforNAUpm($this->loggedIn) . '" class="norecord" align="left">No trials found.</td></tr>');
+			}
+			
+			if(isset($_GET['trunc'])) 
+			{
 				$t = unserialize(gzinflate(base64_decode($_GET['trunc'])));
 				if($t == 'y') echo ('<span style="font-size:10px;color:red;">Note: all data could not be shown</span>');
 			}
 			echo('</table><br/>');
-			echo ('<input type="hidden" id="upmstyle" name="upmstyle" value="'.$unmatched_upms_default_style.'" />');
+			echo ('<input type="hidden" id="upmstyle" name="upmstyle" value="'.$naUpmsDisplayStyle.'" />');
 			echo ('</form>');
 			
-			$shownArr = array();$foundArr = array();
-			if($process_params['showRecordsCnt'] > 0) {
-			
-				$current_type = $this->type;
-				$shownArr = array();
-				$foundArr = array();
-				
-				foreach($process_params[$current_type] as $key => $vvalue) { 
-			
-					//foreach($value as $kkey => $vvalue){ echo '<pre>';print_r($vvalue);
-						unset($vvalue['edited']);
-						unset($vvalue['new']);
-						unset($vvalue['larvol_id']);
-						unset($vvalue['inactive_date']);
-//						unset($vvalue['region']);
-						foreach($vvalue as $k => $v) {
-							if(strpos($k, 'NCT/') !== FALSE) {
-							
-								$newkey = str_replace('NCT/','NCT.',$k);
-								$vvalue[$newkey] = $v;
-								unset($vvalue[$k]);
-							}
-						}
-						
-						$shownArr[$process_params[$current_type][$key][$kkey]['NCT/nct_id']] = $vvalue;
-					//}
-				}
-				foreach($process_params['fin_arr'] as $key => $value) {
-					foreach($value as $kkey => $vvalue){
-						unset($vvalue['edited']);
-						unset($vvalue['new']);
-						unset($vvalue['larvol_id']);
-						unset($vvalue['inactive_date']);
-						unset($vvalue['region']);
-						foreach($vvalue as $k => $v) {
-							if(strpos($k, 'NCT/') !== FALSE) {
-							
-								$newkey = str_replace('NCT/','NCT.',$k);
-								$vvalue[$newkey] = $v;
-								unset($vvalue[$k]);
-							}
-						}
-						$foundArr[$kkey] = $vvalue;
-					}
-					
-				}
-				
-
-				foreach($shownArr as $key => &$value) {
-				
-					unset($value['edited']);
-					unset($value['new']);
-					unset($value['larvol_id']);
-					unset($value['inactive_date']);
-//					unset($value['region']);
-					
-					foreach($value as $k => $v) {
-						if(strpos($k, 'NCT/') !== FALSE) {
-						
-							$newkey = str_replace('NCT/','NCT.',$k);
-							$value[$newkey] = $v;
-							unset($value[$k]);
-						}
-					}
-				}
-				
-				$this->downloadOptions($process_params['showRecordsCnt'], $foundcount, $shownArr, $foundArr);
+			if($foundcount > 0) 
+			{
+				$this->downloadOptions($count, $foundcount, $process_params['allTrials']);
 				echo ('<br/>');
 			}
 			
@@ -1324,9 +1234,1158 @@ class ContentManager
 			if(!empty($link_expiry_date) && ($this->loggedIn)) {
 				echo '<span style="font-size:10px;color:red;">Expires on: ' . $link_expiry_date[0]  . '</span>';
 			}
+		} 
+		else if(isset($_GET['p']) && isset($_GET['a'])) 
+		{
+			$_GET['p'] = mysql_real_escape_string($_GET['p']);
+			$_GET['a'] = mysql_real_escape_string($_GET['a']);
 			
-		} else {
+			$productIds = array();
+			$areaIds = array();
 			
+			$products = array();
+			$areas = array();
+			
+			$fieldIds = array();
+			
+			$totinactivecount = 0;
+			$totactivecount = 0;
+			$totalcount = 0;
+			$count = 0;
+			
+			$productIds = explode(',',$_GET['p']);
+			$areaIds = explode(',',$_GET['a']);
+			
+			//total column
+			$productCnt = count($productIds);
+			$areaCnt = count($areaIds);
+			
+			if($productCnt > 1 && $areaCnt > 1)
+			{
+				$page = 1;
+				if(isset($_GET['page'])) $page = mysql_real_escape_string($_GET['page']); 
+				if(!is_numeric($page)) die('non-numeric page');
+				
+				$query = "SELECT df.`id`, pr.`name` AS productname, df.`name` FROM `data_fields` df LEFT JOIN `products` pr ON df.`name` = pr.`id` "
+				. " WHERE df.`category` = (SELECT `id` FROM `data_categories` WHERE `name` = 'Products') AND df.`name` IN ('" . implode("','", $productIds)
+				. "') ";
+				$res = mysql_query($query);
+				if(mysql_num_rows($res) > 0)
+				{
+					$key = 0;
+					while($row = mysql_fetch_array($res))
+					{
+						$productName[] = $row['productname'];
+						$fieldIds[$key][0] = $row['id'];
+						$key++;
+					}
+				}
+				
+				$query = "SELECT df.`id`, ar.`name` AS areaname, df.`name` FROM `data_fields` df LEFT JOIN `areas` ar ON df.`name` = ar.`id` "
+				. " WHERE df.`category` = (SELECT `id` FROM `data_categories` WHERE `name` = 'Areas') AND df.`name` IN ('" . implode("','", $areaIds) . "') ";
+				$res = mysql_query($query);
+				if(mysql_num_rows($res) > 0)
+				{	
+					$key = 0;
+					while($row = mysql_fetch_array($res))
+					{
+						$areaName[] = $row['areaname'];
+						$fieldIds[$key][1] = $row['id'];
+						$key++;
+					}
+				}
+				
+				echo ('</td><td class="result">Area: Total</td>' . '</tr></table>');
+				echo('<br clear="all"/><br/>');
+				
+				$fields = array_map('highPass', $this->fid);
+				
+				$Trials = array();
+				$Trials['inactiveTrials'] = array();
+				$Trials['activeTrials'] = array();
+				$Trials['allTrials'] = array();
+				
+				foreach($fieldIds as $key1 => $value1)
+				{	
+					$inactiveCount = 0;
+					$activeCount = 0;
+					
+					$result = array();
+					$larvolIds = array();
+					
+					$res = mysql_query("SELECT dc.larvol_id FROM `data_values` `dv` LEFT JOIN `data_cats_in_study` `dc` ON (`dc`.`id`=`dv`.`studycat`)"
+					. " WHERE `dv`.`field` IN ('" . implode("','", $value1) . "') AND `dv`.`val_bool`= '1' AND dv.superceded IS NULL ");
+					while($row = mysql_fetch_assoc($res))
+					{
+						$larvolIds[] = $row['larvol_id'];
+					}
+					//echo "<br/>-->".
+					$query = 'SELECT dv.val_int AS "int",dv.val_bool AS "bool",dv.val_varchar AS "varchar",dv.val_date AS "date",de.`value` AS "enum", '
+					. ' dv.val_text AS "text",dcs.larvol_id AS "larvol_id",df.`type` AS "type",df.`name` AS "name",dc.`name` AS "category" '
+					. ' FROM data_values dv '
+					. ' LEFT JOIN data_cats_in_study dcs ON dv.studycat = dcs.id '
+					. ' LEFT JOIN data_fields df ON dv.`field`= df.id '
+					. ' LEFT JOIN data_enumvals de ON dv.val_enum = de.id '
+					. ' LEFT JOIN data_categories dc ON df.category = dc.id '
+					. ' WHERE dv.superceded IS NULL AND dv.`field` IN("' . implode('","', $fields) . '") AND larvol_id IN("' . implode('","', $larvolIds) . '" )'
+					/*. ' ORDER BY '*/;
+					
+					$res = mysql_query($query);
+					while($row = mysql_fetch_assoc($res))
+					{
+						$id = $row['larvol_id'];
+						$place = $row['category'] . '/' . $row['name']; //fully qualified field name
+						$val = $row[$row['type']];
+						//check if we already have a value for this field and ID
+						if(isset($result[$id][$place]))
+						{
+							//now we know the value will have to be an array
+							//check if there are already multiple values here
+							if($result[$id][$place] == 'NCT/start_date' || $result[$id][$place] == 'inactive_date')
+							{
+								$result[$id][$place] = $result[$id][$place];
+							}
+							else if($result[$id][$place] == 'NCT/condition' || $result[$id][$place] == 'NCT/intervention_name' 
+							|| $result[$id][$place] == 'NCT/lead_sponsor')
+							{
+								$result[$id][$place] = $result[$id][$place] . ' ' . $val;
+							}
+							else
+							{
+									$result[$id][$place] = $result[$id][$place] . ', ' . $val;
+							}
+						}
+						else
+						{
+							//No previous value, so this value goes in the slot by itself.
+							$result[$id][$place] = $val;
+						}
+					}
+						
+					//echo '<pre>';print_r($result);
+					foreach($result as $key => $value) 
+					{ 
+						$nctId = $value['NCT/nct_id'];
+						$dataset['trials'] = array();
+						$dataset['matchedupms'] = array();
+						
+						//checking for updated and new trials
+						$dataset['trials'] = getTrialUpdates($nctId, $value['larvol_id'], NULL, '-1 week');
+						$dataset['trials'] = array_merge($dataset['trials'], array('sectionHeader' => $areaName[$key1]));
+						
+						if(in_array($value['NCT/overall_status'],$this->inactfilterarr)) 
+						{
+							$inactiveCount++;
+						}
+						else
+						{
+							$activeCount++;
+						}
+					
+						if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) 
+						{
+							//unsetting value for field acroynm if it has a previous value and no current value
+							if(isset($dataset['trials']['edited']['NCT/acronym']) && !isset($value['NCT/acronym'])) 
+							{
+								unset($dataset['trials']['edited']['NCT/acronym']);
+							}
+							//unsetting value for field enrollment if the change is less than 20 percent
+							if(isset($dataset['trials']['edited']['NCT/enrollment'])) 
+							{ 
+								$prevValue = substr($dataset['trials']['edited']['NCT/enrollment'],16);
+								if(!getDifference($prevValue, $value['NCT/enrollment'])) 
+								{
+									unset($dataset['trials']['edited']['NCT/enrollment']);
+								}
+							}
+							//merge only if updates are found
+							foreach($dataset['matchedupms'] as $k => $v) 
+							{
+								if(empty($v['edited']) || $v['new'] != 'y') 
+								{
+									unset($dataset['matchedupms'][$k]);
+								}
+							}
+							if(!empty($dataset['trials']['edited']) || $dataset['trials']['new'] == 'y')
+							{
+								if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) 
+								|| isset($_GET['av']) || isset($_GET['wh']) || isset($_GET['afm']) || isset($_GET['tna']) 
+								|| isset($_GET['nla']) || isset($_GET['wd']) || isset($_GET['t']) || isset($_GET['s']) 
+								|| isset($_GET['c']) || isset($_GET['nlr'])) 
+								{	
+									$statusValues = implode(",", array_keys($this->allfilterarr, $value['NCT/overall_status']));	
+									if(array_key_exists($statusValues, $_GET)) 
+									{
+										$Trials['allTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+									}
+								}
+								else
+								{
+									$Trials['allTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+								}
+								if(in_array($value['NCT/overall_status'], $this->inactfilterarr)) 
+								{
+									if(isset($_GET['wh']) || isset($_GET['afm']) || isset($_GET['tna']) || isset($_GET['nla']) 
+									|| isset($_GET['wd']) || isset($_GET['t']) || isset($_GET['s']) || isset($_GET['c'])) 
+									{
+										$statusValues = implode(",", array_keys($this->actfilterarr, $value['NCT/overall_status']));
+										if(array_key_exists($statusValues, $_GET)) 
+										{
+											$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+										}
+									}
+									else
+									{
+										$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+									}
+								}
+								else
+								{
+									if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) 
+									|| isset($_GET['av']) || isset($_GET['nlr'])) 
+									{	
+										$statusValues = implode(",", array_keys($this->inactfilterarr, $value['NCT/overall_status']));
+										if(array_key_exists($statusValues, $_GET)) 
+										{
+											$Trials['activeTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+										}
+									}
+									else
+									{
+										$Trials['activeTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+									}
+								}
+							}
+						} 
+						else 
+						{	
+							if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) 
+							|| isset($_GET['av']) || isset($_GET['wh']) || isset($_GET['afm']) || isset($_GET['tna']) 
+							|| isset($_GET['nla']) || isset($_GET['wd']) || isset($_GET['t']) || isset($_GET['s']) 
+							|| isset($_GET['c']) || isset($_GET['nlr'])) 
+							{	
+								$statusValues = implode(",", array_keys($this->allfilterarr, $value['NCT/overall_status']));	
+								if(array_key_exists($statusValues, $_GET)) 
+								{
+									$Trials['allTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+								}
+							}
+							else
+							{	
+								$Trials['allTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+							}
+							if(in_array($value['NCT/overall_status'], $this->inactfilterarr)) 
+							{
+								if(isset($_GET['wh']) || isset($_GET['afm']) || isset($_GET['tna']) || isset($_GET['nla']) 
+								|| isset($_GET['wd']) || isset($_GET['t']) || isset($_GET['s']) || isset($_GET['c'])) 
+								{ 	
+									$statusValues = implode(",", array_keys($this->inactfilterarr, $value['NCT/overall_status']));
+									if(array_key_exists($statusValues, $_GET)) 
+									{
+										$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+									}
+								}
+								else
+								{
+									$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+								}
+							}
+							else
+							{	
+								if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) 
+								|| isset($_GET['av']) || isset($_GET['nlr'])) 
+								{
+									$statusValues = implode(",", array_keys($this->actfilterarr, $value['NCT/overall_status']));
+									if(array_key_exists($statusValues, $_GET)) 
+									{
+										$Trials['activeTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+									}
+								}
+								else
+								{	
+									$Trials['activeTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+								}
+							}
+						}	
+					
+						if(!in_array($value['NCT/overall_status'],$this->actfilterarr) && !in_array($value['NCT/overall_status'],$this->inactfilterarr)) 
+						{ 
+							$log 	= 'WARN: A new value "' . $value['NCT/overall_status'] 
+							. '" (not listed in the existing rule), was encountered for field overall_status.';
+							$logger->warn($log);
+							unset($log);
+						}
+					}
+					
+					$totinactivecount  = $inactiveCount + $totinactivecount;
+					$totactivecount		= $activeCount + $totactivecount;
+					$totalcount		= $totalcount + $inactiveCount + $activeCount; 
+				}
+				
+				$count = count($Trials[$this->type]);
+				$this->commonControls($count, $totactivecount, $totinactivecount, $totalcount);
+				echo '<br/><br clear="all" />';
+				echo '<input type="hidden" name="p" value="' . $_GET['p'] . '"/><input type="hidden" name="a" value="' . $_GET['a'] . '"/>';
+				
+				$start 	= '';$last = '';$end = '';$pages = '';
+		
+				$start 	= ($page-1) * $this->results_per_page + 1;
+				$end 	= $start + $this->results_per_page - 1;
+				$pages 	= ceil($count / $this->results_per_page);
+				$last 	= ($page * $this->results_per_page > $count) ? $count : $end;
+				
+				if($count > $this->results_per_page) 
+				{
+					$this->pagination($page, $start, $end, $last, $count, $_GET['p'], $_GET['v'], 'indexed', NULL);
+				}
+		
+				$this->displayHeader();
+				if($count > 0) 
+				{
+					displayContent($Trials[$this->type], $this->edited, NULL, $start, $last, $this->current_yr, $this->second_yr, $this->third_yr, 'collapse');
+				}
+				else
+				{
+					echo ('<tr><td colspan="' . getColspanforNAUpm($this->loggedIn) . '" class="norecord" align="left">No trials found.</td></tr>');
+				}
+				echo('</table><br/>');
+				echo ('</form>');
+			}
+			else if($productCnt > 1 || $areaCnt > 1)
+			{
+				$page = 1;
+				if(isset($_GET['page'])) $page = mysql_real_escape_string($_GET['page']); 
+				if(!is_numeric($page)) die('non-numeric page');
+				
+				if($productCnt > 1)
+				{	
+					$query = "SELECT df.`id`, pr.`name` AS productname, df.`name` FROM `data_fields` df LEFT JOIN `products` pr ON df.`name` = pr.`id` "
+					. " WHERE df.`category` = (SELECT `id` FROM `data_categories` WHERE `name` = 'Products') AND df.`name` IN ('" . implode("','", $productIds) 
+					. "') ";
+					$res = mysql_query($query);
+					if(mysql_num_rows($res) > 0)
+					{
+						while($row = mysql_fetch_array($res))
+						{
+							$productName[] = $row['productname'];
+							$fieldIds[][0] = $row['id'];
+						}
+					}
+					
+					$query = "SELECT df.`id`, ar.`name` AS areaname, df.`name` FROM `data_fields` df LEFT JOIN `areas` ar ON df.`name` = ar.`id` "
+					. " WHERE df.`category` = (SELECT `id` FROM `data_categories` WHERE `name` = 'Areas') AND df.`name` IN ('" . implode("','", $areaIds) . "') ";
+					$row = mysql_fetch_array(mysql_query($query));
+					$areaName = $row['areaname'];
+					foreach($fieldIds as $key => $value)
+					{
+						$fieldIds[$key][1] = $row['id'];
+					}
+					//echo '<pre>';print_r($fieldIds);
+					
+					echo ('</td><td class="result">Area: ' . htmlformat($areaName) . '</td>' . '</tr></table>');
+					echo('<br clear="all"/><br/>');
+					
+					$fields = array_map('highPass', $this->fid);
+					
+					$Trials = array();
+					$Trials['inactiveTrials'] = array();
+					$Trials['activeTrials'] = array();
+					$Trials['allTrials'] = array();
+					
+					foreach($fieldIds as $key1 => $value1)
+					{
+						$inactiveCount = 0;
+						$activeCount = 0;
+						
+						$result = array();
+						$larvolIds = array();
+						
+						$res = mysql_query("SELECT dc.larvol_id FROM `data_values` `dv` LEFT JOIN `data_cats_in_study` `dc` ON (`dc`.`id`=`dv`.`studycat`)"
+						. " WHERE `dv`.`field` IN ('" . implode("','", $value1) . "') AND `dv`.`val_bool`= '1' AND dv.superceded IS NULL ");
+						while($row = mysql_fetch_assoc($res))
+						{
+							$larvolIds[] = $row['larvol_id'];
+						}
+						
+						//echo "<br/>-->".
+						$query = 'SELECT dv.val_int AS "int",dv.val_bool AS "bool",dv.val_varchar AS "varchar",dv.val_date AS "date",de.`value` AS "enum", '
+						. ' dv.val_text AS "text",dcs.larvol_id AS "larvol_id",df.`type` AS "type",df.`name` AS "name",dc.`name` AS "category" '
+						. ' FROM data_values dv '
+						. ' LEFT JOIN data_cats_in_study dcs ON dv.studycat = dcs.id '
+						. ' LEFT JOIN data_fields df ON dv.`field`= df.id '
+						. ' LEFT JOIN data_enumvals de ON dv.val_enum = de.id '
+						. ' LEFT JOIN data_categories dc ON df.category = dc.id '
+						. ' WHERE dv.superceded IS NULL AND dv.`field` IN("' . implode('","', $fields) . '") AND larvol_id IN("' . implode('","', $larvolIds) . '" )';
+						
+						$res = mysql_query($query);
+						while($row = mysql_fetch_assoc($res))
+						{
+							$id = $row['larvol_id'];
+							$place = $row['category'] . '/' . $row['name']; //fully qualified field name
+							$val = $row[$row['type']];
+							//check if we already have a value for this field and ID
+							if(isset($result[$id][$place]))
+							{
+								//now we know the value will have to be an array
+								//check if there are already multiple values here
+								if($result[$id][$place] == 'NCT/start_date' || $result[$id][$place] == 'inactive_date')
+								{
+									$result[$id][$place] = $result[$id][$place];
+								}
+								else if($result[$id][$place] == 'NCT/condition' || $result[$id][$place] == 'NCT/intervention_name' 
+								|| $result[$id][$place] == 'NCT/lead_sponsor')
+								{
+									$result[$id][$place] = $result[$id][$place] . ' ' . $val;
+								}
+								else
+								{
+										$result[$id][$place] = $result[$id][$place] . ', ' . $val;
+								}
+							}
+							else
+							{
+								//No previous value, so this value goes in the slot by itself.
+								$result[$id][$place] = $val;
+							}
+						}
+						
+						//echo '<pre>';print_r($result);
+						foreach($result as $key => $value) 
+						{ 
+							$nctId = $value['NCT/nct_id'];
+							$dataset['trials'] = array();
+							$dataset['matchedupms'] = array();
+							
+							//checking for updated and new trials
+							$dataset['trials'] = getTrialUpdates($nctId, $value['larvol_id'], NULL, '-1 week');
+							$dataset['trials'] = array_merge($dataset['trials'], array('sectionHeader' => $productName[$key1]));
+							
+							if(in_array($value['NCT/overall_status'],$this->inactfilterarr)) 
+							{
+								$inactiveCount++;
+							}
+							else
+							{
+								$activeCount++;
+							}
+						
+							if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) 
+							{
+								//unsetting value for field acroynm if it has a previous value and no current value
+								if(isset($dataset['trials']['edited']['NCT/acronym']) && !isset($value['NCT/acronym'])) 
+								{
+									unset($dataset['trials']['edited']['NCT/acronym']);
+								}
+								//unsetting value for field enrollment if the change is less than 20 percent
+								if(isset($dataset['trials']['edited']['NCT/enrollment'])) 
+								{ 
+									$prevValue = substr($dataset['trials']['edited']['NCT/enrollment'],16);
+									if(!getDifference($prevValue, $value['NCT/enrollment'])) 
+									{
+										unset($dataset['trials']['edited']['NCT/enrollment']);
+									}
+								}
+								//merge only if updates are found
+								foreach($dataset['matchedupms'] as $k => $v) 
+								{
+									if(empty($v['edited']) || $v['new'] != 'y') 
+									{
+										unset($dataset['matchedupms'][$k]);
+									}
+								}
+								if(!empty($dataset['trials']['edited']) || $dataset['trials']['new'] == 'y')
+								{
+									if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) 
+									|| isset($_GET['av']) || isset($_GET['wh']) || isset($_GET['afm']) || isset($_GET['tna']) 
+									|| isset($_GET['nla']) || isset($_GET['wd']) || isset($_GET['t']) || isset($_GET['s']) 
+									|| isset($_GET['c']) || isset($_GET['nlr'])) 
+									{	
+										$statusValues = implode(",", array_keys($this->allfilterarr, $value['NCT/overall_status']));	
+										if(array_key_exists($statusValues, $_GET)) 
+										{
+											$Trials['allTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+										}
+									}
+									else
+									{
+										$Trials['allTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+									}
+									if(in_array($value['NCT/overall_status'], $this->inactfilterarr)) 
+									{
+										if(isset($_GET['wh']) || isset($_GET['afm']) || isset($_GET['tna']) || isset($_GET['nla']) 
+										|| isset($_GET['wd']) || isset($_GET['t']) || isset($_GET['s']) || isset($_GET['c'])) 
+										{
+											$statusValues = implode(",", array_keys($this->actfilterarr, $value['NCT/overall_status']));
+											if(array_key_exists($statusValues, $_GET)) 
+											{
+												$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+											}
+										}
+										else
+										{
+											$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+										}
+									}
+									else
+									{
+										if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) 
+										|| isset($_GET['av']) || isset($_GET['nlr'])) 
+										{	
+											$statusValues = implode(",", array_keys($this->inactfilterarr, $value['NCT/overall_status']));
+											if(array_key_exists($statusValues, $_GET)) 
+											{
+												$Trials['activeTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+											}
+										}
+										else
+										{
+											$Trials['activeTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+										}
+									}
+								}
+							} 
+							else 
+							{	
+								if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) 
+								|| isset($_GET['av']) || isset($_GET['wh']) || isset($_GET['afm']) || isset($_GET['tna']) 
+								|| isset($_GET['nla']) || isset($_GET['wd']) || isset($_GET['t']) || isset($_GET['s']) 
+								|| isset($_GET['c']) || isset($_GET['nlr'])) 
+								{	
+									$statusValues = implode(",", array_keys($this->allfilterarr, $value['NCT/overall_status']));	
+									if(array_key_exists($statusValues, $_GET)) 
+									{
+										$Trials['allTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+									}
+								}
+								else
+								{	
+									$Trials['allTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+								}
+								if(in_array($value['NCT/overall_status'], $this->inactfilterarr)) 
+								{
+									if(isset($_GET['wh']) || isset($_GET['afm']) || isset($_GET['tna']) || isset($_GET['nla']) 
+									|| isset($_GET['wd']) || isset($_GET['t']) || isset($_GET['s']) || isset($_GET['c'])) 
+									{ 	
+										$statusValues = implode(",", array_keys($this->inactfilterarr, $value['NCT/overall_status']));
+										if(array_key_exists($statusValues, $_GET)) 
+										{
+											$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+										}
+									}
+									else
+									{
+										$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+									}
+								}
+								else
+								{	
+									if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) 
+									|| isset($_GET['av']) || isset($_GET['nlr'])) 
+									{
+										$statusValues = implode(",", array_keys($this->actfilterarr, $value['NCT/overall_status']));
+										if(array_key_exists($statusValues, $_GET)) 
+										{
+											$Trials['activeTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+										}
+									}
+									else
+									{	
+										$Trials['activeTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+									}
+								}
+							}	
+						
+							if(!in_array($value['NCT/overall_status'],$this->actfilterarr) && !in_array($value['NCT/overall_status'],$this->inactfilterarr)) 
+							{ 
+								$log 	= 'WARN: A new value "' . $value['NCT/overall_status'] 
+								. '" (not listed in the existing rule), was encountered for field overall_status.';
+								$logger->warn($log);
+								unset($log);
+							}
+						}
+						
+						$totinactivecount  = $inactiveCount + $totinactivecount;
+						$totactivecount		= $activeCount + $totactivecount;
+						$totalcount		= $totalcount + $inactiveCount + $activeCount; 
+					}
+				}
+				else
+				{
+					$query = "SELECT df.`id`, ar.`name` AS areaname, df.`name` FROM `data_fields` df LEFT JOIN `areas` ar ON df.`name` = ar.`id` "
+					. " WHERE df.`category` = (SELECT `id` FROM `data_categories` WHERE `name` = 'Areas') AND df.`name` IN ('" . implode("','", $areaIds) . "') ";
+					$res = mysql_query($query);
+					if(mysql_num_rows($res) > 0)
+					{
+						while($row = mysql_fetch_array($res))
+						{
+							$areaName[] = $row['areaname'];
+							$fieldIds[][0] = $row['id'];
+						}
+					}
+					
+					$query = "SELECT df.`id`, pr.`name` AS productname, df.`name` FROM `data_fields` df LEFT JOIN `products` pr ON df.`name` = pr.`id` "
+					. " WHERE df.`category` = (SELECT `id` FROM `data_categories` WHERE `name` = 'Products') AND df.`name` IN ('" . implode("','", $productIds)
+					. "') ";
+					$row = mysql_fetch_array(mysql_query($query));
+					$productName = $row['productname'];
+					foreach($fieldIds as $key => $value)
+					{
+						$fieldIds[$key][1] = $row['id'];
+					}
+					
+					echo ('</td><td class="result">Product: ' . htmlformat($productName) . '</td>' . '</tr></table>');
+					echo('<br clear="all"/><br/>');
+					
+					$fields = array_map('highPass', $this->fid);
+					//echo '<pre>';print_r($areaName);//exit;
+					
+					$Trials = array();
+					$Trials['inactiveTrials'] = array();
+					$Trials['activeTrials'] = array();
+					$Trials['allTrials'] = array();
+					
+					foreach($fieldIds as $key1 => $value1)
+					{	
+						$inactiveCount = 0;
+						$activeCount = 0;
+						
+						$result = array();
+						$larvolIds = array();
+						
+						$res = mysql_query("SELECT dc.larvol_id FROM `data_values` `dv` LEFT JOIN `data_cats_in_study` `dc` ON (`dc`.`id`=`dv`.`studycat`)"
+						. " WHERE `dv`.`field` IN ('" . implode("','", $value1) . "') AND `dv`.`val_bool`= '1' AND dv.superceded IS NULL ");
+						while($row = mysql_fetch_assoc($res))
+						{
+							$larvolIds[] = $row['larvol_id'];
+						}
+						//echo "<br/>-->".
+						$query = 'SELECT dv.val_int AS "int",dv.val_bool AS "bool",dv.val_varchar AS "varchar",dv.val_date AS "date",de.`value` AS "enum", '
+						. ' dv.val_text AS "text",dcs.larvol_id AS "larvol_id",df.`type` AS "type",df.`name` AS "name",dc.`name` AS "category" '
+						. ' FROM data_values dv '
+						. ' LEFT JOIN data_cats_in_study dcs ON dv.studycat = dcs.id '
+						. ' LEFT JOIN data_fields df ON dv.`field`= df.id '
+						. ' LEFT JOIN data_enumvals de ON dv.val_enum = de.id '
+						. ' LEFT JOIN data_categories dc ON df.category = dc.id '
+						. ' WHERE dv.superceded IS NULL AND dv.`field` IN("' . implode('","', $fields) . '") AND larvol_id IN("' . implode('","', $larvolIds) . '" )'
+						/*. ' ORDER BY '*/;
+						
+						$res = mysql_query($query);
+						while($row = mysql_fetch_assoc($res))
+						{
+							$id = $row['larvol_id'];
+							$place = $row['category'] . '/' . $row['name']; //fully qualified field name
+							$val = $row[$row['type']];
+							//check if we already have a value for this field and ID
+							if(isset($result[$id][$place]))
+							{
+								//now we know the value will have to be an array
+								//check if there are already multiple values here
+								if($result[$id][$place] == 'NCT/start_date' || $result[$id][$place] == 'inactive_date')
+								{
+									$result[$id][$place] = $result[$id][$place];
+								}
+								else if($result[$id][$place] == 'NCT/condition' || $result[$id][$place] == 'NCT/intervention_name' 
+								|| $result[$id][$place] == 'NCT/lead_sponsor')
+								{
+									$result[$id][$place] = $result[$id][$place] . ' ' . $val;
+								}
+								else
+								{
+										$result[$id][$place] = $result[$id][$place] . ', ' . $val;
+								}
+							}
+							else
+							{
+								//No previous value, so this value goes in the slot by itself.
+								$result[$id][$place] = $val;
+							}
+						}
+						
+						//echo '<pre>';print_r($result);
+						foreach($result as $key => $value) 
+						{ 
+							$nctId = $value['NCT/nct_id'];
+							$dataset['trials'] = array();
+							$dataset['matchedupms'] = array();
+							
+							//checking for updated and new trials
+							$dataset['trials'] = getTrialUpdates($nctId, $value['larvol_id'], NULL, '-1 week');
+							$dataset['trials'] = array_merge($dataset['trials'], array('sectionHeader' => $areaName[$key1]));
+							
+							if(in_array($value['NCT/overall_status'],$this->inactfilterarr)) 
+							{
+								$inactiveCount++;
+							}
+							else
+							{
+								$activeCount++;
+							}
+						
+							if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) 
+							{
+								//unsetting value for field acroynm if it has a previous value and no current value
+								if(isset($dataset['trials']['edited']['NCT/acronym']) && !isset($value['NCT/acronym'])) 
+								{
+									unset($dataset['trials']['edited']['NCT/acronym']);
+								}
+								//unsetting value for field enrollment if the change is less than 20 percent
+								if(isset($dataset['trials']['edited']['NCT/enrollment'])) 
+								{ 
+									$prevValue = substr($dataset['trials']['edited']['NCT/enrollment'],16);
+									if(!getDifference($prevValue, $value['NCT/enrollment'])) 
+									{
+										unset($dataset['trials']['edited']['NCT/enrollment']);
+									}
+								}
+								//merge only if updates are found
+								foreach($dataset['matchedupms'] as $k => $v) 
+								{
+									if(empty($v['edited']) || $v['new'] != 'y') 
+									{
+										unset($dataset['matchedupms'][$k]);
+									}
+								}
+								if(!empty($dataset['trials']['edited']) || $dataset['trials']['new'] == 'y')
+								{
+									if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) 
+									|| isset($_GET['av']) || isset($_GET['wh']) || isset($_GET['afm']) || isset($_GET['tna']) 
+									|| isset($_GET['nla']) || isset($_GET['wd']) || isset($_GET['t']) || isset($_GET['s']) 
+									|| isset($_GET['c']) || isset($_GET['nlr'])) 
+									{	
+										$statusValues = implode(",", array_keys($this->allfilterarr, $value['NCT/overall_status']));	
+										if(array_key_exists($statusValues, $_GET)) 
+										{
+											$Trials['allTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+										}
+									}
+									else
+									{
+										$Trials['allTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+									}
+									if(in_array($value['NCT/overall_status'], $this->inactfilterarr)) 
+									{
+										if(isset($_GET['wh']) || isset($_GET['afm']) || isset($_GET['tna']) || isset($_GET['nla']) 
+										|| isset($_GET['wd']) || isset($_GET['t']) || isset($_GET['s']) || isset($_GET['c'])) 
+										{
+											$statusValues = implode(",", array_keys($this->actfilterarr, $value['NCT/overall_status']));
+											if(array_key_exists($statusValues, $_GET)) 
+											{
+												$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+											}
+										}
+										else
+										{
+											$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+										}
+									}
+									else
+									{
+										if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) 
+										|| isset($_GET['av']) || isset($_GET['nlr'])) 
+										{	
+											$statusValues = implode(",", array_keys($this->inactfilterarr, $value['NCT/overall_status']));
+											if(array_key_exists($statusValues, $_GET)) 
+											{
+												$Trials['activeTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+											}
+										}
+										else
+										{
+											$Trials['activeTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+										}
+									}
+								}
+							} 
+							else 
+							{	
+								if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) 
+								|| isset($_GET['av']) || isset($_GET['wh']) || isset($_GET['afm']) || isset($_GET['tna']) 
+								|| isset($_GET['nla']) || isset($_GET['wd']) || isset($_GET['t']) || isset($_GET['s']) 
+								|| isset($_GET['c']) || isset($_GET['nlr'])) 
+								{	
+									$statusValues = implode(",", array_keys($this->allfilterarr, $value['NCT/overall_status']));	
+									if(array_key_exists($statusValues, $_GET)) 
+									{
+										$Trials['allTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+									}
+								}
+								else
+								{	
+									$Trials['allTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+								}
+								if(in_array($value['NCT/overall_status'], $this->inactfilterarr)) 
+								{
+									if(isset($_GET['wh']) || isset($_GET['afm']) || isset($_GET['tna']) || isset($_GET['nla']) 
+									|| isset($_GET['wd']) || isset($_GET['t']) || isset($_GET['s']) || isset($_GET['c'])) 
+									{ 	
+										$statusValues = implode(",", array_keys($this->inactfilterarr, $value['NCT/overall_status']));
+										if(array_key_exists($statusValues, $_GET)) 
+										{
+											$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+										}
+									}
+									else
+									{
+										$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+									}
+								}
+								else
+								{	
+									if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) 
+									|| isset($_GET['av']) || isset($_GET['nlr'])) 
+									{
+										$statusValues = implode(",", array_keys($this->actfilterarr, $value['NCT/overall_status']));
+										if(array_key_exists($statusValues, $_GET)) 
+										{
+											$Trials['activeTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+										}
+									}
+									else
+									{	
+										$Trials['activeTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+									}
+								}
+							}	
+						
+							if(!in_array($value['NCT/overall_status'],$this->actfilterarr) && !in_array($value['NCT/overall_status'],$this->inactfilterarr)) 
+							{ 
+								$log 	= 'WARN: A new value "' . $value['NCT/overall_status'] 
+								. '" (not listed in the existing rule), was encountered for field overall_status.';
+								$logger->warn($log);
+								unset($log);
+							}
+						}
+						
+						$totinactivecount  = $inactiveCount + $totinactivecount;
+						$totactivecount		= $activeCount + $totactivecount;
+						$totalcount		= $totalcount + $inactiveCount + $activeCount; 
+					}
+				}
+				
+				$count = count($Trials[$this->type]);
+				$this->commonControls($count, $totactivecount, $totinactivecount, $totalcount);
+				echo '<br/><br clear="all" />';
+				echo '<input type="hidden" name="p" value="' . $_GET['p'] . '"/><input type="hidden" name="a" value="' . $_GET['a'] . '"/>';
+				
+				$start 	= '';$last = '';$end = '';$pages = '';
+		
+				$start 	= ($page-1) * $this->results_per_page + 1;
+				$end 	= $start + $this->results_per_page - 1;
+				$pages 	= ceil($count / $this->results_per_page);
+				$last 	= ($page * $this->results_per_page > $count) ? $count : $end;
+				
+				if($count > $this->results_per_page) 
+				{
+					$this->pagination($page, $start, $end, $last, $count, $_GET['p'], $_GET['v'], 'indexed', NULL);
+				}
+		
+				$this->displayHeader();
+				if($count > 0) 
+				{
+					displayContent($Trials[$this->type], $this->edited, NULL, $start, $last, $this->current_yr, $this->second_yr, $this->third_yr, 'collapse');
+				}
+				else
+				{
+					echo ('<tr><td colspan="' . getColspanforNAUpm($this->loggedIn) . '" class="norecord" align="left">No trials found.</td></tr>');
+				}
+				echo('</table><br/>');
+				echo ('</form>');
+			}
+			else
+			{
+				$page = 1;
+				if(isset($_GET['page'])) $page = mysql_real_escape_string($_GET['page']);
+				if(!is_numeric($page)) die('non-numeric page');
+				
+				$larvolIds = array();
+				$Trials = array();
+				$result = array();
+				$Trials['inactiveTrials'] = array();
+				$Trials['activeTrials'] = array();
+				$Trials['allTrials'] = array();
+				
+				$query = "SELECT df.`id`, pr.`name` AS productname, df.`name` FROM `data_fields` df LEFT JOIN `products` pr ON df.`name` = pr.`id` "
+				. " WHERE df.`category` = (SELECT `id` FROM `data_categories` WHERE `name` = 'Products') AND df.`name` IN ('" . implode("','", $productIds) . "') ";
+				$row = mysql_fetch_array(mysql_query($query));
+				$productName = $row['productname'];
+				$fieldIds[] = $row['id'];
+				
+				$query = "SELECT df.`id`, ar.`name` AS areaname, df.`name` FROM `data_fields` df LEFT JOIN `areas` ar ON df.`name` = ar.`id` "
+				. " WHERE df.`category` = (SELECT `id` FROM `data_categories` WHERE `name` = 'Areas') AND df.`name` IN ('" . implode("','", $areaIds) . "') ";
+				$row = mysql_fetch_array(mysql_query($query));
+				$areaName = $row['areaname'];
+				$fieldIds[] = $row['id'];
+				
+				echo ('</td><td class="result">Area: ' . htmlformat($areaName) . '</td>' . '</tr></table>');
+				echo('<br clear="all"/><br/>');
+
+				$res = mysql_query("SELECT dc.larvol_id FROM `data_values` `dv` LEFT JOIN `data_cats_in_study` `dc` ON (`dc`.`id` = `dv`.`studycat`)"
+				. " WHERE `dv`.`field` IN ('" . implode("','", $fieldIds) . "') AND `dv`.`val_bool`= '1' ");
+				while($row = mysql_fetch_assoc($res))
+				{
+					$larvolIds[] = $row['larvol_id'];
+				}
+				
+				/*$query = 'SELECT DISTINCT i.larvol_id AS "larvol_id" '
+						. ' FROM (data_values AS dv '
+						. ' LEFT JOIN data_cats_in_study AS i ON dv.studycat=i.id '
+						. ' LEFT JOIN clinical_study ON i.larvol_id=clinical_study.larvol_id) ' 
+						. ' LEFT JOIN data_cats_in_study as i_s1 ON i_s1.larvol_id=i.larvol_id AND i_s1.category=1 '
+						. ' LEFT JOIN data_values as dv_s56 ON i_s1.id=dv_s56.studycat AND dv_s56.`field`=56 AND dv_s56.superceded IS NULL '
+						. ' LEFT JOIN data_enumvals AS dv_s56_e ON dv_s56_e.id=dv_s56.val_enum '
+						. ' LEFT JOIN data_values as dv_s15 ON i_s1.id=dv_s15.studycat AND dv_s15.`field`=15 AND dv_s15.superceded IS NULL '
+						. ' LEFT JOIN data_values as dv_s13 ON i_s1.id=dv_s13.studycat AND dv_s13.`field`=13 AND dv_s13.superceded IS NULL '
+						. ' LEFT JOIN data_enumvals AS dv_s13_e ON dv_s13_e.id=dv_s13.val_enum '
+						. ' LEFT JOIN data_values as dv_s25 ON i_s1.id=dv_s25.studycat AND dv_s25.`field`=25 AND dv_s25.superceded IS NULL' 
+						. ' WHERE (`clinical_study`.`larvol_id` IN ("' . implode('","', $larvolIds) . '")) '
+						. ' ORDER BY dv_s56_e.`value` DESC,`inactive_date`,dv_s13_e.`value`,dv_s25.val_int ';
+				$res = mysql_query($query);
+				$larvolIds = array();
+				while($row = mysql_fetch_assoc($res))
+				{
+					$larvolIds[] = $row['larvol_id'];
+				}*/
+				
+				$fields = array_map('highPass', $this->fid);
+				//echo "<br/>-->".
+				$query = 'SELECT dv.val_int AS "int",dv.val_bool AS "bool",dv.val_varchar AS "varchar",dv.val_date AS "date",de.`value` AS "enum", '
+				. ' dv.val_text AS "text",dcs.larvol_id AS "larvol_id",df.`type` AS "type",df.`name` AS "name",dc.`name` AS "category" '
+				. ' FROM data_values dv '
+				. ' LEFT JOIN data_cats_in_study dcs ON dv.studycat = dcs.id '
+				. ' LEFT JOIN data_fields df ON dv.`field`= df.id '
+				. ' LEFT JOIN data_enumvals de ON dv.val_enum = de.id '
+				. ' LEFT JOIN data_categories dc ON df.category = dc.id '
+				. ' WHERE dv.superceded IS NULL AND dv.`field` IN("' . implode('","', $fields) . '") AND '
+				. ' larvol_id IN("' . implode('","', $larvolIds) . '" )';
+				
+				$res = mysql_query($query);
+				while($row = mysql_fetch_assoc($res))
+				{
+					$id = $row['larvol_id'];
+					$place = $row['category'] . '/' . $row['name']; //fully qualified field name
+					$val = $row[$row['type']];
+					//check if we already have a value for this field and ID
+					if(isset($result[$id][$place]))
+					{
+						//now we know the value will have to be an array
+						//check if there are already multiple values here
+						if($result[$id][$place] == 'NCT/start_date' || $result[$id][$place] == 'inactive_date')
+						{
+							$result[$id][$place] = $result[$id][$place];
+						}
+						else if($result[$id][$place] == 'NCT/condition' || $result[$id][$place] == 'NCT/intervention_name' 
+						|| $result[$id][$place] == 'NCT/lead_sponsor')
+						{
+							$result[$id][$place] = $result[$id][$place] . ' ' . $val;
+						}
+						else
+						{
+								$result[$id][$place] = $result[$id][$place] . ', ' . $val;
+						}
+					}
+					else
+					{
+						//No previous value, so this value goes in the slot by itself.
+						$result[$id][$place] = $val;
+					}
+				}
+				
+				foreach($result as $key => $value) 
+				{ 
+					$nctId = $value['NCT/nct_id'];
+					$dataset['trials'] = array();
+					$dataset['matchedupms'] = array();
+					//checking for updated and new trials
+					$dataset['trials'] = getTrialUpdates($nctId, $value['larvol_id'], NULL, '-1 week');
+					$dataset['trials'] = array_merge($dataset['trials'], array('sectionHeader' => $productName));
+					
+					if(in_array($value['NCT/overall_status'],$this->inactfilterarr)) 
+					{
+						$totinactivecount++;
+					}
+					else
+					{
+						$totactivecount++;
+					}
+					
+					if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) 
+					{
+						//unsetting value for field acroynm if it has a previous value and no current value
+						if(isset($dataset['trials']['edited']['NCT/acronym']) && !isset($nct[$value['NCT/acronym']])) 
+						{
+							unset($dataset['trials']['edited']['NCT/acronym']);
+						}
+						
+						//unsetting value for field enrollment if the change is less than 20 percent
+						if(isset($trialUpdates[$nctId]['edited']['NCT/enrollment'])) 
+						{ 
+							$prevValue = substr($trialUpdates[$nctId]['edited']['NCT/enrollment'],16);
+							
+							if(!getDifference($prev_value, $nct[$val['NCT/enrollment']])) 
+							{
+								unset($trialUpdates[$nctId]['edited']['NCT/enrollment']);
+								$enroll_field_index = array_search('NCT/enrollment', $trialUpdates[$nctId]['edited']);
+								unset($trialUpdates[$nctId]['edited'][$enroll_field_index]);
+							}
+						}
+						
+						//merge only if updates are found
+						foreach($dataset['matchedupms'] as $k => $v) 
+						{
+							if(empty($v['edited']) || $v['new'] != 'y') 
+							{
+								unset($dataset['matchedupms'][$k]);
+							}
+						}
+						if(!empty($dataset['trials']['edited']) || $dataset['trials']['new'] == 'y')
+						{
+							if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) 
+							|| isset($_GET['av']) || isset($_GET['wh']) || isset($_GET['afm']) || isset($_GET['tna']) 
+							|| isset($_GET['nla']) || isset($_GET['wd']) || isset($_GET['t']) || isset($_GET['s']) 
+							|| isset($_GET['c']) || isset($_GET['nlr'])) 
+							{	
+								$statusValues = implode(",", array_keys($this->allfilterarr, $value['NCT/overall_status']));	
+								if(array_key_exists($statusValues, $_GET)) 
+								{
+									$Trials['allTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+								}
+							}
+							else
+							{
+								$Trials['allTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+							}
+							if(in_array($value['NCT/overall_status'], $this->inactfilterarr)) 
+							{
+								if(isset($_GET['wh']) || isset($_GET['afm']) || isset($_GET['tna']) || isset($_GET['nla']) 
+								|| isset($_GET['wd']) || isset($_GET['t']) || isset($_GET['s']) || isset($_GET['c'])) 
+								{
+									$statusValues = implode(",", array_keys($this->actfilterarr, $value['NCT/overall_status']));
+									if(array_key_exists($statusValues, $_GET)) 
+									{
+										$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+									}
+								}
+								else
+								{
+									$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+								}
+							}
+							else
+							{
+								if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) 
+								|| isset($_GET['av']) || isset($_GET['nlr'])) 
+								{	
+									$statusValues = implode(",", array_keys($this->inactfilterarr, $value['NCT/overall_status']));
+									if(array_key_exists($statusValues, $_GET)) 
+									{
+										$Trials['activeTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+									}
+								}
+								else
+								{
+									$Trials['activeTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+								}
+							}
+						}
+					} 
+					else 
+					{	
+						if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) 
+						|| isset($_GET['av']) || isset($_GET['wh']) || isset($_GET['afm']) || isset($_GET['tna']) 
+						|| isset($_GET['nla']) || isset($_GET['wd']) || isset($_GET['t']) || isset($_GET['s']) 
+						|| isset($_GET['c']) || isset($_GET['nlr'])) 
+						{	
+							$statusValues = implode(",", array_keys($this->allfilterarr, $value['NCT/overall_status']));	
+							if(array_key_exists($statusValues, $_GET)) 
+							{
+								$Trials['allTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+							}
+						}
+						else
+						{	
+							$Trials['allTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+						}
+						if(in_array($value['NCT/overall_status'], $this->inactfilterarr)) 
+						{
+							if(isset($_GET['wh']) || isset($_GET['afm']) || isset($_GET['tna']) || isset($_GET['nla']) 
+							|| isset($_GET['wd']) || isset($_GET['t']) || isset($_GET['s']) || isset($_GET['c'])) 
+							{ 	
+								$statusValues = implode(",", array_keys($this->inactfilterarr, $value['NCT/overall_status']));
+								if(array_key_exists($statusValues, $_GET)) 
+								{
+									$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+								}
+							}
+							else
+							{
+								$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+							}
+						}
+						else
+						{	
+							if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) 
+							|| isset($_GET['av']) || isset($_GET['nlr'])) 
+							{
+								$statusValues = implode(",", array_keys($this->actfilterarr, $value['NCT/overall_status']));
+								if(array_key_exists($statusValues, $_GET)) 
+								{
+									$Trials['activeTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+								}
+							}
+							else
+							{	
+								$Trials['activeTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+							}
+						}
+					}	
+					
+					if(!in_array($value['NCT/overall_status'],$this->actfilterarr) && !in_array($value['NCT/overall_status'],$this->inactfilterarr)) 
+					{ 
+						$log 	= 'WARN: A new value "' . $value['NCT/overall_status'] 
+						. '" (not listed in the existing rule), was encountered for field overall_status.';
+						$logger->warn($log);
+						unset($log);
+					}
+				}
+				
+				$totalcount = $totinactivecount + $totactivecount; 
+				$count = count($Trials[$this->type]);
+				
+				$this->commonControls($count, $totactivecount, $totinactivecount, $totalcount);
+				
+				echo '<br/><br clear="all" />';
+				echo '<input type="hidden" name="p" value="' . $_GET['p'] . '"/><input type="hidden" name="a" value="' . $_GET['a'] . '"/>';
+				
+				$start 	= '';$last = '';$end = '';$pages = '';
+				
+				$start 	= ($page-1) * $this->results_per_page + 1;
+				$end 	= $start + $this->results_per_page - 1;
+				$pages 	= ceil($count / $this->results_per_page);
+				$last 	= ($page * $this->results_per_page > $count) ? $count : $end;
+				
+				if($count > $this->results_per_page) 
+				{
+					$this->pagination($page, $start, $end, $last, $count, $_GET['p'], $_GET['v'], 'indexed', NULL);
+				}
+				
+				$this->displayHeader();
+				if($count > 0) 
+				{
+					displayContent($Trials[$this->type], $this->edited, NULL, $start, $last, $this->current_yr, $this->second_yr, $this->third_yr, 'collapse');
+				}
+				else
+				{
+					echo '<tr>' . '<td colspan="' . getColspanforNAUpm($this->loggedIn)  . '" class="notopbottomborder leftrightborderblue sectiontitles">'
+					. $productName . '</td></tr>';
+					echo ('<tr><td colspan="' . getColspanforNAUpm($this->loggedIn) . '" class="norecord" align="left">No trials found.</td></tr>');
+				}
+				echo('</table><br/>');
+				echo ('</form>');
+			}
+			
+			} 
+		else 
+		{
 			$page = 1;
 			if(isset($_GET['page'])) $page = mysql_real_escape_string($_GET['page']);
 			if(!is_numeric($page)) die('non-numeric page');
@@ -1337,16 +2396,12 @@ class ContentManager
 			$excel_params 	= array();
 			$results_params = array();
 			$ins_params 	= array();
-			$fin_arr 		= array();
 			$link_expiry_date	= array();
-			$non_assoc_upm_params = array();
-			$this->inactivearray = array();
-			$this->activearray = array();
-			$this->allarray = array();
+			$naUpms = array();
 			
-			if(isset($_GET['results'])) {
-			
-				$results_params 	= explode(".", $_GET['results']);
+			if(isset($_GET['results'])) 
+			{
+				$results_params = explode(".", $_GET['results']);
 				
 				$res = getLinkDetails('rpt_ott_header', 'header', 'id', $results_params[0]);
 				$rowlabel = trim($res['header']);
@@ -1356,73 +2411,76 @@ class ContentManager
 				$columnlabel = trim($res['header']);
 				$link_expiry_date[] = $res['expiry'];
 				
-				if($results_params[2] == '-1' || $results_params[2] == '-2') { 
-					if($results_params[2] == '-2') {
-					
+				if($results_params[2] == '-1' || $results_params[2] == '-2') 
+				{ 
+					if($results_params[2] == '-2') 
+					{
 						$res = getLinkDetails('rpt_ott_searchdata', 'result_set', 'id', $results_params[3]);
 						$excel_params = unserialize(stripslashes(gzinflate(base64_decode($res['result_set']))));
 						$link_expiry_date[] = $res['expiry'];
-						
-					} else if($results_params[2] == '-1') { 
-						
+					} 
+					else if($results_params[2] == '-1') 
+					{ 
 						$res = getLinkDetails('rpt_ott_trials', 'result_set', 'id', $results_params[3]);
 						$link_expiry_date[] = $res['expiry'];
+						
 						$sp = new SearchParam();
 						$sp->field = 'larvol_id';
 						$sp->action = 'search';
 						$sp->value = str_replace(',', ' OR ', $res['result_set']);
 						$excel_params = array($sp);
-						
 					}
-					if(isset($results_params[4])) {
-					
+					if(isset($results_params[4])) 
+					{
 						$link_expiry_date[]	  = $res['expiry'];
 						$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $results_params[4]);
 						if(isset($_GET['v']) && $_GET['v'] == 1)
-							$non_assoc_upm_params = explode('\n',$res['intervention_name']);
+							$naUpms = explode('\n',$res['intervention_name']);
 						else
-							$non_assoc_upm_params = explode(',',$res['intervention_name']);
-						
+							$naUpms = explode(',',$res['intervention_name']);
 					}
-				} else {
-					if(strpos($results_params[2],'s') !== FALSE) {
-					
+				} 
+				else 
+				{
+					if(strpos($results_params[2],'s') !== FALSE) 
+					{
 						$res = getLinkDetails('rpt_ott_searchdata', 'result_set', 'id', substr($results_params[2],1));
 						$excel_params = unserialize(stripslashes(gzinflate(base64_decode($res['result_set']))));
 						$link_expiry_date[] = $res['expiry'];
-						
-					} else {
-					
+					} 
+					else 
+					{
 						$res = getLinkDetails('rpt_ott_trials', 'result_set', 'id', $results_params[2]);
 						$link_expiry_date[] = $res['expiry'];
+						
 						$sp = new SearchParam();
 						$sp->field = 'larvol_id';
 						$sp->action = 'search';
 						$sp->value = str_replace(',', ' OR ', $res['result_set']);
 						$excel_params = array($sp);
 					}
-					if(isset($results_params[3])) {
-					
+					if(isset($results_params[3])) 
+					{
 						$link_expiry_date[]	  = $res['expiry'];
 						$res = getLinkDetails('rpt_ott_upm', 'intervention_name', 'id', $results_params[3]);
 						if(isset($_GET['v']) && $_GET['v'] == 1)
-							$non_assoc_upm_params = explode('\n',$res['intervention_name']);
+							$naUpms = explode('\n',$res['intervention_name']);
 						else
-							$non_assoc_upm_params = explode(',',$res['intervention_name']);
-						
+							$naUpms = explode(',',$res['intervention_name']);
 					}
 				}
 				$bomb = (isset($_GET['bomb'])) ? $_GET['bomb'] : '';
 				$this->time_machine = $_GET['time'];
-				
-			} else {
+			} 
+			else 
+			{
 				$excel_params 	= unserialize(gzinflate(base64_decode($_GET['params'])));
 				
 				$rowlabel 		= $excel_params['rowlabel'];
 				$columnlabel 	= $excel_params['columnlabel'];
 				$bomb			= $excel_params['bomb'];  //added for bomb indication
 				$this->time_machine = $excel_params['time'];
-				$non_assoc_upm_params	= $excel_params['upm'];
+				$naUpms	= $excel_params['upm'];
 				
 				if($excel_params['params'] === NULL)
 				{ 	
@@ -1446,7 +2504,9 @@ class ContentManager
 				}
 				
 			}
-			if(isset($_GET['institution']) && $_GET['institution'] != '') {
+			
+			if(isset($_GET['institution']) && $_GET['institution'] != '') 
+			{
 				array_push($this->fid, 'institution_type');
 
 				$sp = new SearchParam();
@@ -1456,7 +2516,8 @@ class ContentManager
 				$ins_params = array($sp);
 			}
 			$params = array_merge($this->params, $excel_params, $ins_params);
-			if($bomb != '') {
+			if($bomb != '') 
+			{
 				echo ('<span><img src="./images/' . $this->bomb_img_arr[$bomb] . '" alt="Bomb"  /></span>'
 				. '&nbsp;This cell has a ' . $this->bomb_type_arr[$bomb] . ' <a href="./help/bomb.html">bomb</a>');
 			}
@@ -1464,310 +2525,297 @@ class ContentManager
 			echo('<br clear="all"/><br/>');		
 			
 			$arr = array();
-			$nct = array();
+			$larvolIds = array();
+			$dataset['unmatchedupms'] = array();
 			
-			$allUpmDetails	= array();
-			$upmDetails	 	= array();
-			$all_ids = array();
-			
+			//echo 'naUpms<pre>';print_r($naUpms);
 			$arrr = search($params,$this->fid,NULL,$this->time_machine);
 			foreach($arrr as $k => $v) 
 			{
+				$nctId = $v['NCT/nct_id'];
 				foreach($v as $kk => $vv) 
 				{
-					if($kk != 'NCT/condition' && $kk != 'NCT/intervention_name' && $kk != 'NCT/lead_sponsor')
+					if(is_array($vv))
 					{
-						if($kk == 'NCT/start_date' || $kk == 'inactive_date')
-							$arr[$v['NCT/nct_id']][$kk] = (is_array($vv)) ? $vv[0] : $vv;
+						if($kk == 'NCT/condition' || $kk == 'NCT/intervention_name' || $kk == 'NCT/lead_sponsor')
+						{
+							$arr[$nctId][$kk] = implode(', ', $vv);
+						}
+						elseif($kk == 'NCT/start_date' || $kk == 'inactive_date')
+						{
+							$arr[$nctId][$kk] = $vv[0];
+						}
 						else
-							$arr[$v['NCT/nct_id']][$kk] = (is_array($vv)) ? implode(' ', $vv) : $vv;
+						{
+							$arr[$nctId][$kk] = implode(' ', $vv);
+						}
 					}
 					else
 					{
-						$arr[$v['NCT/nct_id']][$kk] = (is_array($vv)) ? implode(', ', $vv) : $vv;
+						$arr[$nctId][$kk] = $vv;
 					}
 				}
 			}
 			
-			foreach($arr as $key => $val) { 
-			
-				//checking for updated and new trials
-				$nct[$val['NCT/nct_id']] = getNCT($val['NCT/nct_id'], $val['larvol_id'], $this->time_machine, $this->edited);
-				
-				if (!is_array($nct[$val['NCT/nct_id']])) { 
-					$nct=array();
-					$val['NCT/intervention_name'] = '(study not in database)';
-				}
+			if(isset($naUpms) && !empty($naUpms)) 
+			{
+				$naUpmsDisplayStyle = 'expand';
+			}
+			foreach($arr as $key => $value) 
+			{ 
+				$nctId = $value['NCT/nct_id'];
+				$dataset['trials'] = array();
+				$dataset['matchedupms'] = array();
 				
 				//checking for updated and new unmatched upms.
-				$allUpmDetails[$val['NCT/nct_id']] = getCorrespondingUPM($val['NCT/nct_id'], $this->time_machine, $this->edited);
-				if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) {
+				$dataset['matchedupms'] = getCorrespondingUPM($nctId, $this->time_machine, $this->edited);
 				
+				if(isset($naUpms) && !empty($naUpms)) 
+					$dataset['unmatchedupms'] = $this->getNonAssocUpm($naUpms, $rowlabel);
+				//checking for updated and new trials
+				$dataset['trials'] = getTrialUpdates($nctId, $value['larvol_id'], $this->time_machine, $this->edited);
+				$dataset['trials'] = array_merge($dataset['trials'], array('sectionHeader' => $rowlabel), array('unmatchedupms' => $dataset['unmatchedupms']));
+				
+				
+				if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) 
+				{
 					//unsetting value for field acroynm if it has a previous value and no current value
-					if(isset($nct[$val['NCT/nct_id']]['edited']['NCT/acronym']) && !isset($nct[$val['NCT/acronym']])) {
-						unset($nct[$val['NCT/nct_id']]['edited']['NCT/acronym']);
-						$acroynm_field_index = array_search('NCT/acronym', $nct[$val['NCT/nct_id']]['edited']);
-						unset($nct[$val['NCT/nct_id']]['edited'][$acroynm_field_index]);
+					if(isset($dataset['trials']['edited']['NCT/acronym']) && !isset($dataset['trials']['NCT/acronym'])) 
+					{
+						unset($dataset['trials']['edited']['NCT/acronym']);
 					}
-					
-					$prev_value = '';
 					//unsetting value for field enrollment if the change is less than 20 percent
-					if(isset($nct[$val['NCT/nct_id']]['edited']['NCT/enrollment'])) { 
-						$prev_value = substr($nct[$val['NCT/nct_id']]['edited']['NCT/enrollment'],16);
-						
-						if(!getDifference($prev_value, $nct[$val['NCT/enrollment']])) {
-							unset($nct[$val['NCT/nct_id']]['edited']['NCT/enrollment']);
-							$enroll_field_index = array_search('NCT/enrollment', $nct[$val['NCT/nct_id']]['edited']);
-							unset($nct[$val['NCT/nct_id']]['edited'][$enroll_field_index]);
+					if(isset($dataset['trials']['edited']['NCT/enrollment']))
+					{ 
+						$prevValue = substr($dataset['trials']['edited']['NCT/enrollment'],16);
+						if(!getDifference($prevValue, $value['NCT/enrollment'])) 
+						{
+							unset($dataset['trials']['NCT/enrollment']);
 						}
 					}
-					
-					if(!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y')
-						$fin_arr[$val['NCT/nct_id']] = array_merge($nct[$val['NCT/nct_id']], $val);
-						
-					foreach($allUpmDetails[$val['NCT/nct_id']] as $kk => $vv) {
-						if(isset($vv['edited']) && !empty($vv['edited'])) {
-							$upmDetails[$val['NCT/nct_id']][] = $vv;
+					//merge only if updates are found
+					foreach($dataset['matchedupms'] as $k => $v) 
+					{
+						if(empty($v['edited']) || $v['new'] != 'y') 
+						{
+							unset($dataset['matchedupms'][$k]);
 						}
-					}	
-				} else {
-					$fin_arr[$val['NCT/nct_id']] = array_merge($nct[$val['NCT/nct_id']], $val);
-					$upmDetails[$val['NCT/nct_id']] = $allUpmDetails[$val['NCT/nct_id']];
-				}	
-				
-				if(in_array($val['NCT/overall_status'],$this->inactfilterarr)) {
-				
-					//$totinactivecount++;
-					if(isset($_GET['wh']) || isset($_GET['afm']) || isset($_GET['tna']) || isset($_GET['nla']) 
-						|| isset($_GET['wd']) || isset($_GET['t']) || isset($_GET['s']) || isset($_GET['c'])) {
-							
-						$vall = implode(",",array_keys($this->inactfilterarr, $val['NCT/overall_status']));
-						if(array_key_exists($vall, $_GET)) {
-						
-							if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) {
-								if(!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y')
-									$this->inactivearray[] = array_merge($nct[$val['NCT/nct_id']], $val, array('section' => '0'));
-							} else {
-								$this->inactivearray[] = array_merge($val, array('section' => '0'));
+					}
+					//merge only if updates are found
+					if(!empty($dataset['trials']['edited']) || $dataset['trials']['new'] == 'y')
+					{	
+						if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) 
+						|| isset($_GET['av']) || isset($_GET['wh']) || isset($_GET['afm']) || isset($_GET['tna']) 
+						|| isset($_GET['nla']) || isset($_GET['wd']) || isset($_GET['t']) || isset($_GET['s']) 
+						|| isset($_GET['c']) || isset($_GET['nlr'])) 
+						{	
+							$statusValues = implode(",", array_keys($this->allfilterarr, $value['NCT/overall_status']));	
+							if(array_key_exists($statusValues, $_GET)) 
+							{
+								$Trials['allTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
 							}
-						} 
-					} else {
-						if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) {
-							if(!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y')
-								$this->inactivearray[] = array_merge($nct[$val['NCT/nct_id']], $val, array('section' => '0'));
-						} else {
-							$this->inactivearray[] = array_merge($val, array('section' => '0'));
+						}
+						else
+						{
+							$Trials['allTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+						}
+						if(in_array($value['NCT/overall_status'], $this->inactfilterarr)) 
+						{
+							if(isset($_GET['wh']) || isset($_GET['afm']) || isset($_GET['tna']) || isset($_GET['nla']) 
+							|| isset($_GET['wd']) || isset($_GET['t']) || isset($_GET['s']) || isset($_GET['c'])) 
+							{
+								$statusValues = implode(",", array_keys($this->inactfilterarr, $value['NCT/overall_status']));
+								if(array_key_exists($statusValues, $_GET)) 
+								{
+									$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+								}
+							}
+							else
+							{
+								$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+							}
+						}
+						else
+						{
+							if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) 
+							|| isset($_GET['av']) || isset($_GET['nlr'])) 
+							{	
+								$statusValues = implode(",", array_keys($this->actfilterarr, $value['NCT/overall_status']));
+								if(array_key_exists($statusValues, $_GET)) 
+								{
+									$Trials['activeTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+								}
+							}
+							else
+							{
+								$Trials['activeTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+							}
 						}
 					}
-					
-				} else {
-				
-					//$totactivecount++;
+				} 
+				else 
+				{
 					if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) 
-						|| isset($_GET['a']) || isset($_GET['nlr'])) {	
-					
-						$vall = implode(",",array_keys($this->actfilterarr, $val['NCT/overall_status']));
-						if(array_key_exists($vall, $_GET)) {
-							if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) {
-								if(!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y')
-									$this->activearray[] = array_merge($nct[$val['NCT/nct_id']], $val, array('section' => '0'));
-							} else {
-								$this->activearray[] = array_merge($val, array('section' => '0'));
-							}
-						} 
-					} else {
-						if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) {
-							if(!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y')
-								$this->activearray[] = array_merge($nct[$val['NCT/nct_id']], $val, array('section' => '0'));
-						} else {
-							$this->activearray[] = array_merge($val, array('section' => '0'));
-						}
-					}
-					
-				}
-				
-				if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) 
-					|| isset($_GET['a']) || isset($_GET['wh']) || isset($_GET['afm']) || isset($_GET['tna']) 
+					|| isset($_GET['av']) || isset($_GET['wh']) || isset($_GET['afm']) || isset($_GET['tna']) 
 					|| isset($_GET['nla']) || isset($_GET['wd']) || isset($_GET['t']) || isset($_GET['s']) 
-					|| isset($_GET['c']) || isset($_GET['nlr'])) {	
-							
-					$vall = implode(",",array_keys($this->allfilterarr, $val['NCT/overall_status']));
-					if(array_key_exists($vall, $_GET)) {
-					
-						if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) {
-							if(!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y')
-								$this->allarray[] = array_merge($nct[$val['NCT/nct_id']], $val, array('section' => '0'));
-						} else {
-							$this->allarray[] = array_merge($val, array('section' => '0'));
+					|| isset($_GET['c']) || isset($_GET['nlr'])) 
+					{	
+						$statusValues = implode(",", array_keys($this->allfilterarr, $value['NCT/overall_status']));	
+						if(array_key_exists($statusValues, $_GET)) 
+						{
+							$Trials['allTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
 						}
-					} 
-				} else {
-					if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) {
-						if(!empty($nct[$val['NCT/nct_id']]['edited']) || $nct[$val['NCT/nct_id']]['new'] == 'y')
-								$this->allarray[] = array_merge($nct[$val['NCT/nct_id']], $val, array('section' => '0'));
-					} else {
-						$this->allarray[] = array_merge($val, array('section' => '0'));
+					}
+					else
+					{
+						$Trials['allTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+					}
+					if(in_array($value['NCT/overall_status'], $this->inactfilterarr)) 
+					{ 
+						if(isset($_GET['wh']) || isset($_GET['afm']) || isset($_GET['tna']) || isset($_GET['nla']) 
+						|| isset($_GET['wd']) || isset($_GET['t']) || isset($_GET['s']) || isset($_GET['c'])) 
+						{	
+							$statusValues = implode(",", array_keys($this->inactfilterarr, $value['NCT/overall_status']));
+							if(array_key_exists($statusValues, $_GET)) 
+							{	
+								$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+							}
+						}
+						else
+						{
+							$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+						}
+					}
+					else
+					{
+						if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) 
+						|| isset($_GET['av']) || isset($_GET['nlr'])) 
+						{	
+							$statusValues = implode(",", array_keys($this->actfilterarr, $value['NCT/overall_status']));
+							if(array_key_exists($statusValues, $_GET)) 
+							{
+								$Trials['activeTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+							}
+						}
+						else
+						{
+							$Trials['activeTrials'][] = array_merge($dataset['trials'], $value, $dataset['matchedupms']);
+						}
 					}
 				}
 				
-				if(!in_array($val['NCT/overall_status'],$this->actfilterarr) && !in_array($val['NCT/overall_status'],$this->inactfilterarr) && 
-				!in_array($val['NCT/overall_status'],$this->allfilterarr)) { 
-					$log 	= 'WARN: A new value "' . $val['NCT/overall_status'] . '" (not listed in the existing rule), was encountered for field overall_status.';
+				if(!in_array($value['NCT/overall_status'],$this->actfilterarr) && !in_array($value['NCT/overall_status'],$this->inactfilterarr)) 
+				{ 
+					$log 	= 'WARN: A new value "' . $value['NCT/overall_status'] . '" (not listed in the existing rule), was encountered for field overall_status.';
 					$logger->warn($log);
 					unset($log);
 				}
-				
-				$all_ids[] = $val['larvol_id'];
+				$larvolIds[] = $value['larvol_id'];
 			}
+			//echo 'Trials<pre>';print_r($Trials);
+			$count = count($Trials[$this->type]);
+			
+			if(isset($_GET['institution']) && $_GET['institution'] != '') 
+			{
+				$ins = unserialize(gzinflate(base64_decode(rawurldecode($_GET['instparams']))));
+				$foundcount = ($ins['actcnt'] + $ins['inactcnt']);
+				$this->commonControls($count, $ins['actcnt'], $ins['inactcnt'], ($ins['actcnt'] + $ins['inactcnt']));
+			} 
+			else 
+			{	
+				sort($larvolIds); 
+				$totalcount = count($larvolIds);
+				
+				//getting count of active trials from a common function used in run_heatmap.php and here
+				$totactivecount = getActiveCount($larvolIds, $this->time_machine);
+				$totinactivecount = $totalcount - $totactivecount; 
+				
+				$foundcount = $totalcount;
+				$instparams = rawurlencode(base64_encode(gzdeflate(serialize(array('actcnt' => $totactivecount,'inactcnt' => $totinactivecount)))));
+				
+				$this->commonControls($count, $totactivecount, $totinactivecount, ($totactivecount + $totinactivecount));
+			}
+			echo ('<br/><br clear="all" />');
 			
 			/*--------------------------------------------------------
 			|Variables set for count when filtered by institution_type
 			---------------------------------------------------------*/
-			if(isset($_GET['instparams']) && $_GET['instparams'] != '') {
+			if(isset($_GET['instparams']) && $_GET['instparams'] != '') 
+			{
+				$instparams = $_GET['instparams'];
+			} 
 			
-				$insparams = $_GET['instparams'];
-			
-			} else {
-			
-				$insparams = rawurlencode(base64_encode(gzdeflate(serialize(array('actcnt' => $totactivecount,'inactcnt' => $totinactivecount)))));
-															
-			}
-			
-			sort($all_ids); 
-			$totalcount = count($all_ids);
-			
-			//getting count of active trials from a common function used in run_heatmap.php and here
-			$totactivecount = getActiveCount($all_ids, $this->time_machine);
-			$totinactivecount = $totalcount - $totactivecount; 
-			$count = count($this->{$this->type});
-			
-			if(isset($_GET['institution']) && $_GET['institution'] != '') {
-				$ins = unserialize(gzinflate(base64_decode(rawurldecode($insparams))));
-				$foundcount = ($ins['actcnt'] + $ins['inactcnt']);
-				$this->commonControls($count, $ins['actcnt'], $ins['inactcnt'], $totalcount);
-			} else {
-				$foundcount = ($totactivecount + $totinactivecount);
-				$this->commonControls($count, $totactivecount, $totinactivecount, ($totactivecount + $totinactivecount));
-			}
-			
-			echo ('<br/><br clear="all" />');
-			
-			if(isset($_GET['results'])) {
-				echo ('<input type="hidden" name="results" value="' . $_GET['results'] . '"/>'
-						. '<input type="hidden" name="time" value="' . $_GET['time'] . '"/>');
+			if(isset($_GET['results'])) 
+			{
+				echo '<input type="hidden" name="results" value="' . $_GET['results'] . '"/><input type="hidden" name="time" value="' . $_GET['time'] . '"/>';
 				if(isset($_GET['bomb']))
+				{
 					echo ('<input type="hidden" name="bomb" value="' . $_GET['bomb'] . '" />');
-			} else {
+				}
+			}
+			else 
+			{
 				echo ('<input type="hidden" name="params" value="' . $_GET['params'] . '"/>'
 						. '<input type="hidden" name="leading" value="' . $_GET['leading'] . '"/>');
 			}
-			echo ('<input type="hidden" name="instparams" value="' . $insparams . '" />');
+			echo ('<input type="hidden" name="instparams" value="' . $instparams . '" />');
 			
 			if(isset($_GET['v']))
+			{
 				echo ('<input type="hidden" name="v" value="' . $_GET['v'] . '" />');
+			}
 				
-			$this->pstart 	= '';$this->last = '';$this->pend = '';$this->pages = '';
+			$start 	= '';$last = '';$end = '';$pages = '';
 			
-			$this->pstart 	= ($page-1) * $this->results_per_page + 1;
-			$this->pend 	= $this->pstart + $this->results_per_page - 1;
-			$this->pages 	= ceil($count / $this->results_per_page);
-			$this->last 	= ($page * $this->results_per_page > $count) ? $count : $this->pend;
+			$start 	= ($page-1) * $this->results_per_page + 1;
+			$end 	= $start + $this->results_per_page - 1;
+			$pages 	= ceil($count / $this->results_per_page);
+			$last 	= ($page * $this->results_per_page > $count) ? $count : $end;
 
-			if($count > $this->results_per_page) {
+			if($count > $this->results_per_page) 
+			{
 				if(isset($_GET['results']))
-					$this->pagination($page, $count, $_GET['results'], $_GET['time'], 'normal', NULL);
+					$this->pagination($page,  $start, $end, $last, $count, $_GET['results'], $_GET['time'], 'normal', NULL);
 				else 
-					$this->pagination($page, $count, $_GET['params'], $_GET['leading'], 'normal', NULL);
+					$this->pagination($page,  $start, $end, $last, $count, $_GET['params'], $_GET['leading'], 'normal', NULL);
 			}
 			$this->displayHeader();
-			$header_details[] = $rowlabel;
 			 
-			if(isset($non_assoc_upm_params) && !empty($non_assoc_upm_params)) {
-				$unmatched_upms_default_style = 'expand';
-				$unmatched_upm_details[0] = $this->getNonAssocUpm($non_assoc_upm_params, '0');
+			if($count > 0) 
+			{
+				displayContent($Trials[$this->type], $this->edited, $this->time_machine, $start, $last, $this->current_yr, $this->second_yr, 
+				$this->third_yr, $naUpmsDisplayStyle);
 			} 
-			
-			if($count > 0) {
-				
-				displayContent($this->displist, $this->{$this->type}, $this->edited, $this->time_machine, $this->pstart, $this->last, $this->phase_arr, 
-				$fin_arr, $this->actfilterarr, $this->current_yr, $this->second_yr, $this->third_yr, $upmDetails, $header_details, $unmatched_upm_details, 
-				$unmatched_upms_default_style);
-				
-			} else {
-			
-				if($unmatched_upm_details[0] != '') {
-				
-					echo ('<tr class="trialtitles">'
-					. '<td colspan="' . getColspanforNAUpm($this->loggedIn) . '" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
-					. 'style="border-bottom:1px solid blue;background-image: url(\'images/down.png\');background-repeat: no-repeat;background-position:left center;"'
-					. ' onclick="sh(this,\'0\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . trim($header_details[0]) . '</td></tr>' . $unmatched_upm_details[0]);
-					
-				} else {
-					echo '<tr><td colspan="' . getColspanforNAUpm($this->loggedIn) . '" class="notopbottomborder leftrightborderblue sectiontitles">' 
-					. trim($header_details[0]) . '</td></tr>';
-				}
+			else 
+			{
+				echo '<tr>' . '<td colspan="' . getColspanforNAUpm($this->loggedIn)  . '" class="notopbottomborder leftrightborderblue sectiontitles">'
+				. $rowlabel . '</td></tr>';
 				echo ('<tr><td colspan="' . getColspanforNAUpm($this->loggedIn) . '" class="norecord" align="left">No trials found.</td></tr>');
 			}
 			echo('</table><br/>');
-			echo ('<input type="hidden" id="upmstyle" name="upmstyle" value="'.$unmatched_upms_default_style.'" />');
+			echo ('<input type="hidden" id="upmstyle" name="upmstyle" value="'.$naUpmsDisplayStyle.'" />');
 			echo ('</form>');
 			
-			$shownArr = array();
-			if($count > 0) {
-			
-				$shownArr = $this->{$this->type};
-				foreach($fin_arr as $key => &$value) {
-				
-					unset($value['edited']);
-					unset($value['new']);
-					unset($value['larvol_id']);
-					unset($value['inactive_date']);
-					unset($value['region']);
-					
-					foreach($value as $k => $v) {
-						if(strpos($k, 'NCT/') !== FALSE) {
-						
-							$newkey = str_replace('NCT/','NCT.',$k);
-							$value[$newkey] = $v;
-							unset($value[$k]);
-						}
-					}
-				}
-				foreach($shownArr as $key => &$value) {
-				
-					unset($value['edited']);
-					unset($value['new']);
-					unset($value['larvol_id']);
-					unset($value['inactive_date']);
-					unset($value['region']);
-					
-					foreach($value as $k => $v) {
-						if(strpos($k, 'NCT/') !== FALSE) {
-						
-							$newkey = str_replace('NCT/','NCT.',$k);
-							$value[$newkey] = $v;
-							unset($value[$k]);
-
-						}
-					}
-				}
-				
-				$this->downloadOptions($count, $foundcount, $shownArr, $fin_arr);
+			if($foundcount > 0) 
+			{
+				$this->downloadOptions($count, $foundcount, $Trials);
 				echo ('<br/>');
 			}
 			
 			//Expiry feature for new link method
-			if(!empty($link_expiry_date)) {
+			if(!empty($link_expiry_date)) 
+			{
 				$link_expiry_date = array_unique(array_filter($link_expiry_date));
 				usort($link_expiry_date, "cmpdate");
-				if(!empty($link_expiry_date)) {
-				
-					if($this->loggedIn) {
+				if(!empty($link_expiry_date)) 
+				{
+					if($this->loggedIn) 
+					{
 						echo '<span style="font-size:10px;color:red;">Expires on: ' . $link_expiry_date[0]  . '</span>';
 					}
-					
 					$ids = explode(".", $_GET['results']);
-					if(($link_expiry_date[0] < date('Y-m-d', $now)) || ($link_expiry_date[0] < date('Y-m-d',strtotime('+1 week',$now)))) {
+					if(($link_expiry_date[0] < date('Y-m-d', $now)) || ($link_expiry_date[0] < date('Y-m-d',strtotime('+1 week',$now)))) 
+					{
 					
 						$query = "UPDATE `rpt_ott_header` SET `expiry` = '" . date('Y-m-d',strtotime('+1 week',$now)) . "' WHERE id = '" . $ids[0] . "' ";
 						$res = mysql_query($query) or tex('Bad SQL Query setting expiry date for row header' . "\n" . $query);
@@ -1775,7 +2823,8 @@ class ContentManager
 						$query = "UPDATE `rpt_ott_header` SET `expiry` = '" . date('Y-m-d',strtotime('+1 week',$now)) . "' WHERE id = '" . $ids[1] . "' ";
 						$res = mysql_query($query) or tex('Bad SQL Query setting expiry date for col header' . "\n" . $query);
 						
-						if(strpos($ids[2],'s') !== FALSE) {
+						if(strpos($ids[2],'s') !== FALSE) 
+						{
 							$query = "UPDATE `rpt_ott_searchdata` SET `expiry` = '" . date('Y-m-d',strtotime('+1 week',$now)) . "' WHERE id = '" 
 							. $ids[2] . "' ";
 						} else {
@@ -1795,8 +2844,8 @@ class ContentManager
 		}
 	}
 	
-	function displayHeader() {
-	
+	function displayHeader() 
+	{
 		echo ('<table width="100%" border="0" cellpadding="4" cellspacing="0" class="manage">'
 			 . '<tr>'
 			 . (($this->loggedIn) ? '<th rowspan="2" style="width:50px;">ID</th>' : '' )
@@ -1866,247 +2915,43 @@ class ContentManager
 
 	}
 	
-	function getNonAssocUpm($non_assoc_upm_params, $trialheader) {
-		
+	function getNonAssocUpm($naUpms, $trialheader) 
+	{
 		global $now;
 
-		$upm_arr = array();$record_arr = array();$unmatched_upm_arr = array();$upm_string = '';
-		$upm_arr = getNonAssocUpmRecords($non_assoc_upm_params);
-		$record_arr = getUnmatchedUpmChanges($upm_arr, $this->time_machine, $this->edited);
+		$upm_arr = array();$record_arr = array();$unmatched_upm_arr = array();
+		$record_arr = getNonAssocUpmRecords($naUpms, $this->time_machine, $this->edited);
+		//$record_arr = getUnmatchedUpmChanges($upm_arr, $this->time_machine, $this->edited);
 		
-		foreach($record_arr as $key => $val) {
-			
-			if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) {
-			
-			 	if(!empty($val['edited']) && $val['new'] == 'n') {
+		foreach($record_arr as $key => $val) 
+		{
+			if(isset($_GET['chkOnlyUpdated']) && $_GET['chkOnlyUpdated'] == 1) 
+			{
+			 	if(!empty($val['edited']) && $val['new'] == 'n') 
+				{
 					if( ($val['event_description'] == $val['edited']['event_description']) && ($val['event_link'] == $val['edited']['event_link']) && 
 					($val['event_type'] == $val['edited']['event_type']) && ($val['start_date'] == $val['edited']['start_date']) && 
 					($val['start_date_type'] == $val['edited']['start_date_type']) && ($val['end_date'] == $val['edited']['end_date']) && 
-					($val['end_date_type'] == $val['edited']['end_date_type']) ){ 
+					($val['end_date_type'] == $val['edited']['end_date_type']) )
+					{ 
 						unset($record_arr[$key]);
 					} 
-				} else if(empty($val['edited']) && $val['new'] == 'n') {
+				}
+				else if(empty($val['edited']) && $val['new'] == 'n') 
+				{
 					unset($record_arr[$key]);
 				}
 			} 		
 		}
 		
-		if(!empty($record_arr)) {
-		
-			$cntr = 0;
-						
-			foreach($record_arr as $key => $val) {
-			
-				$title = '';$attr = '';$result_image = '';
-				$class = 'class = "upms ' . $trialheader . '" ';
-				$title_link_color = 'color:#000;';
-				$date_style = 'color:gray;';
-				$upm_title = 'title="' . htmlformat($val['event_description']) . '"';
-				
-				if($cntr%2 == 1) {
-		
-					$row_type_one = 'alttitle';
-					$row_type_two = 'altrow';
-					
-				} else {
-				
-					$row_type_one = 'title';
-					$row_type_two = 'row';
-				}	
-				
-				//Highlighting the whole row in case of new trials
-				if($val['new'] == 'y') {
-					$class = 'class="upms newtrial ' . $trialheader . '" ';
-				}
-				
-				$upm_string .= '<tr ' . $class . ' style="background-color:#000;">';
-				
-				if($this->loggedIn) {
-				
-					if($val['new'] == 'y') {
-						$title_link_color = 'color:#FF0000;';
-						$title = ' title = "New record" ';
-					}
-					$upm_string .= '<td style="text-align:left;" ' . $title .
-					 '><a style="' . $title_link_color . '" href="upm.php?search_id=' . $val['id'] . '">' . $val['id'] . '</a></td>';
-				}
-				
-				if(!empty($val['edited']) && $val['edited']['event_description'] != $val['event_description']) {
-				
-					$title_link_color = 'color:#FF0000;';$attr = ' highlight'; 
-					if($val['edited']['event_description'] != '' || $val['edited']['event_description'] != NULL)
-						$title = ' title="Previous value: '. $val['edited']['event_description'] . '" '; 
-					else
-						$title = ' title="No Previous value" ';
-						
-				} else if($val['new'] == 'y') {
-					$title_link_color = 'color:#FF0000;';
-					$title = ' title = "New record" ';
-				}
-				
-				$upm_string .= '<td colspan="5" class="' . $row_type_one .  $attr . ' titleupm titleupmodd txtleft" ' . $title . '><div class="rowcollapse">';
-				if($val['event_link'] != NULL && $val['event_link'] != '') {
-					$upm_string .= '<a style="' . $title_link_color . '" href="' . $val['event_link'] . '">' . $val['event_description'] . '</a>';
-				} else {
-					$upm_string .= $val['event_description'];
-				}
-				$upm_string .= '</div></td>';
-				
-				$upm_string .= '<td class="' . $row_type_two . ' titleupmodd"><div class="rowcollapse">';
-				
-				if($val['result_link'] != NULL && $val['result_link'] != '') {
-					$upm_string .= 'Occurred';
-				} else {
-				
-					if($val['end_date'] == NULL || $val['end_date'] == '' || $val['end_date'] == '0000-00-00') {
-						$upm_string .= 'Cancelled';
-					} else if($val['end_date'] < date('Y-m-d', $now)) {
-						$upm_string .= 'Pending';
-					} else if($val['end_date'] > date('Y-m-d', $now)) {
-						$upm_string .= 'Upcoming';
-					}
-					
-				}
-				
-				$upm_string .= '</div></td>';
-				
-				$title = '';$attr = '';	
-				if(!empty($val['edited']) && $val['edited']['event_type'] != $val['event_type']) {
-				
-					$attr = ' highlight'; 
-					if($val['edited']['event_type'] != '' && $val['edited']['event_type'] != NULL)
-						$title = ' title="Previous value: '. $val['edited']['event_type'] . '" '; 
-					else
-						$title = ' title="No Previous value" ';
-						
-				} else if($val['new'] == 'y') {
-					$title = ' title = "New record" ';
-				}
-				$upm_string .= '<td class="' . $row_type_two . $attr . ' titleupmodd" ' . $title 
-								. '><div class="rowcollapse">' . $val['event_type'] . ' Milestone</div></td>';
-				
-				$title = '';$attr = '';	
-				if(!empty($val['edited']) && $val['edited']['start_date'] != $val['start_date']){
-				
-					$attr = ' highlight';$date_style = 'color:#973535;'; 
-					if($val['edited']['start_date'] != '' && $val['edited']['start_date'] != NULL)
-						$title = ' title="Previous value: '. $val['edited']['start_date'] . '" '; 
-					else 
-						$title = ' title="No Previous value" ';
-						
-				} else if($val['new'] == 'y') {
-					$title = ' title = "New record" ';
-					$date_style = 'color:#973535;'; 
-				}
-				if(!empty($val['edited']) && $val['edited']['start_date_type'] != $val['start_date_type']){
-				
-					$attr = ' highlight';$date_style = 'color:#973535;';
-					if($val['edited']['start_date_type'] != '' && $val['edited']['start_date_type'] != NULL) {
-						$title = ' title="Previous value: ' . 
-						(($val['edited']['start_date'] != $val['start_date']) ? $val['edited']['start_date'] : '' ) 
-						. ' ' .$val['edited']['start_date_type'] . '" '; 
-					} else {
-						$title = ' title="No Previous value" ';
-					}
-				} else if($val['new'] == 'y') {
-					$title = ' title = "New record" ';
-					$date_style = 'color:#973535;'; 
-				}
-								
-				$upm_string .= '<td  class="' . $row_type_two . $attr . ' titleupmodd txtleft" ' . $title . '><div class="rowcollapse">';
-				if($val['start_date_type'] == 'anticipated') {
-				$upm_string .= '<span style="font-weight:bold;' . $date_style . '">' 
-				. (($val['start_date'] != '' && $val['start_date'] != NULL && $val['start_date'] != '0000-00-00') ? date('m/y',strtotime($val['start_date'])) : '' )   
-				. '</span>';
-				} else {
-					$upm_string .= 
-					(($val['start_date'] != '' && $val['start_date'] != NULL && $val['start_date'] != '0000-00-00') ? date('m/y',strtotime($val['start_date'])) : '' );
-				}
-				
-				$upm_string .= '</div></td>';
-				
-				$title = '';$attr = '';	
-				if(!empty($val['edited']) && $val['edited']['end_date'] != $val['end_date']){
-				
-					$attr = ' highlight';$date_style = 'color:#973535;';
-					if($val['edited']['end_date'] != '' && $val['edited']['end_date'] != NULL)
-						$title = ' title="Previous value: '. $val['edited']['end_date'] . '" '; 
-					else 
-						$title = ' title="No Previous value" ';
-				} else if($val['new'] == 'y') {
-					$title = ' title = "New record" ';
-					$date_style = 'color:#973535;'; 
-				}
-				if(!empty($val['edited']) && $val['edited']['end_date_type'] != $val['end_date_type']){
-				
-					$attr = ' highlight';$date_style = 'color:#973535;'; 
-					if($val['edited']['end_date_type'] != '' && $val['edited']['end_date_type'] != NULL) {
-						$title = ' title="Previous value: ' . 
-						(($val['edited']['end_date'] != $val['end_date']) ? $val['edited']['end_date'] : '' ) 
-						. ' ' . $val['edited']['end_date_type'] . '" '; 
-					} else {
-						$title = ' title="No Previous value" ';
-					}
-				} else if($val['new'] == 'y') {
-					$title = ' title = "New record" ';
-					$date_style = 'color:#973535;'; 
-				}
-				
-				$upm_string .= '<td class="' . $row_type_two . $attr . ' titleupmodd txtleft" ' . $title . '><div class="rowcollapse">';
-				if($val['end_date_type'] == 'anticipated') {
-					$upm_string .= '<span style="font-weight:bold;' . $date_style . '">' 
-					. (($val['end_date'] != '' && $val['end_date'] != NULL && $val['end_date'] != '0000-00-00') ? date('m/y',strtotime($val['end_date'])) : '' ) 
-					. '</span>';
-				} else {
-					$upm_string .=  
-					(($val['end_date'] != '' && $val['end_date'] != NULL && $val['end_date'] != '0000-00-00') ? date('m/y',strtotime($val['end_date'])) : '');
-				}	
-				
-				$upm_string .= '</div></td><td class="titleupmodd"><div class="rowcollapse"></div></td>';
-				$upm_string .= '<td class="titleupmodd"><div class="rowcollapse">';
-				
-				if(!empty($val['edited']) && ($val['result_link'] != $val['edited']['result_link'])) {
-					if($val['result_link'] != '' && $val['result_link'] != NULL) {
-						$result_image = (($val['event_type'] == 'Clinical Data') ? 'diamond' : 'checkmark' );
-						$upm_string .= '<div ' . $upm_title . '><a href="' . $val['result_link'] . '" style="color:#000;">'
-						. '<img src="images/red-' . $result_image . '.png" alt="' . $result_image . '" style="padding-top: 3px;" border="0" /></a></div>';
-					}
-				} else {
-					if($val['result_link'] != '' && $val['result_link'] != NULL) {
-						$result_image = (($val['event_type'] == 'Clinical Data') ? 'diamond' : 'checkmark' );
-						$upm_string .= '<div ' . $upm_title . '><a href="' . $val['result_link'] . '" style="color:#000;">'
-						. '<img src="images/black-' . $result_image . '.png" alt="' . $result_image . '" style="padding-top: 3px;" border="0" /></a></div>';
-					}
-				}
-				
-				if(($val['end_date'] != '' && $val['end_date'] != NULL && $val['end_date'] != '0000-00-00') && 
-				($val['end_date'] < date('Y-m-d', $now)) && ($val['result_link'] == NULL || $val['result_link'] == '')){
-						$upm_string .= '<div ' . $upm_title . '><img src="images/hourglass.png" alt="hourglass" border="0" /></div>';
-				}
-				$upm_string .= '</div></td>';
-				
-				$upm_string .= getUPMChart(date('m',strtotime($val['start_date'])), date('Y',strtotime($val['start_date'])), 
-				date('m',strtotime($val['end_date'])), date('Y',strtotime($val['end_date'])), $this->current_yr, $this->second_yr, $this->third_yr, 
-				$val['start_date'], $val['end_date'], $val['event_link'], $upm_title);
-		
-		
-				$upm_string .= '</tr>';
-				
-				$cntr++;
-			}
-		} 
-		
-		return $upm_string;
+		return $record_arr;
 	}
 	
-	function downloadOptions($showncount, $foundcount, $shownlist, $foundlist) {
-
+	function downloadOptions($showncount, $foundcount, $Trials/*, $foundlist*/) 
+	{
 		echo ('<div style="height:100px;"><div class="drop new" style="margin:0px"><div class="newtext">Download Options</div>'
 			. '<form  id="frmDOptions" name="frmDOptions" method="post" target="_self" action="">'
-//			. '<input type="hidden" name="xmlShownContent" value="' . htmlspecialchars(serialize($shownlist)) . '" />'
-//			. '<input type="hidden" name="xmlFullContent" value="' . htmlspecialchars(serialize($foundlist)) . '" />'
 			. '<input type="hidden" name="excelInput" id="excelInput" value="" />'
-//			. '<input type=hidden name="shownarr" value="' . htmlspecialchars(serialize($shownlist)).'" />'
 			. '<ul><li><label>Number of Studies: </label></li>'
 			. '<li><select id="dOption" name="dOption">'
 			. '<option value="shown" selected="selected">' . $showncount . ' Shown Studies</option>'
@@ -2118,361 +2963,641 @@ class ContentManager
 			. '<option value="excel" selected="selected">Excel</option><option value="xml">XML</option><option value="pdf">PDF</option></select></li></ul>'
 			. '<input type="submit" id="btnDownload" name="btnDownload" onclick="javascript:checkformat()" value="Download File" style="margin-left:8px;"  />');
 		
-		foreach($_GET as $ke => $va)
+			foreach($_GET as $ke => $va)
 			{
 				echo '<input type="hidden" name="' . $ke . '" value="' . $va . '" />';
 			}
 			echo ( '</form></div></div>');
 	}
-	
 }
 
-function getColspanforNAUpm($loggedIn) {
+function getColspanforNAUpm($loggedIn) 
+{
 	return $colspan = (($loggedIn) ? 51 : 50 );
-	
 }
 
-function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last, $phase_arr, $fin_arr, $actfilterarr, $current_yr, $second_yr, $third_yr, $upmDetails, $header_details, $unmatched_upm_details, $unmatched_upms_default_style) 
-{	
+function displayNAUpms($record_arr = array(), $sectionHeader, $currentYear, $secondYear, $thirdYear)
+{
 	$db = new DatabaseManager();
-	$previous_section = '';
-	$start = $start -1;
-	for($i=$start;$i<$last;$i++) 
+	$upm_string = '';
+	if(!empty($record_arr)) 
 	{
-			
-		if(isset($type_arr[$i]['NCT/nct_id'])) {
+		$cntr = 0;
+		foreach($record_arr as $key => $val) 
+		{
 		
-			//displaying section headers
-			if($type_arr[$i]['section'] !== $previous_section) {
-				
-				if($unmatched_upm_details[$type_arr[$i]['section']] != '') {
-				
-					if($unmatched_upms_default_style == 'expand')
-						$image = 'down';
-					else
-						$image = 'up';
-				
-				echo ('<tr class="trialtitles">'
-				. '<td colspan="' . getColspanforNAUpm($db->loggedIn()) . '" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
-				. 'style="border-bottom:1px solid blue;background-image: url(\'images/' . $image 
-				. '.png\');background-repeat: no-repeat;background-position:left center;"'
-				. ' onclick="sh(this,\'' . $type_arr[$i]['section'] . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . trim($header_details[$type_arr[$i]['section']]) 
-				. '</td></tr>' . $unmatched_upm_details[$type_arr[$i]['section']]);
-				
-				} else {
-					echo '<tr><td colspan="' . getColspanforNAUpm($db->loggedIn()) . '" class="notopbottomborder leftrightborderblue sectiontitles">' 
-						. trim($header_details[$type_arr[$i]['section']]) . '</td></tr>';
+			$title = '';$attr = '';$result_image = '';
+			$class = 'class = "upms ' . $sectionHeader . '" ';
+			$title_link_color = 'color:#000;';
+			$date_style = 'color:gray;';
+			$upm_title = 'title="' . htmlformat($val['event_description']) . '"';
+			
+			if($cntr%2 == 1) 
+			{
+				$row_type_one = 'alttitle';
+				$row_type_two = 'altrow';
+			} 
+			else 
+			{
+				$row_type_one = 'title';
+				$row_type_two = 'row';
+			}	
+			
+			//Highlighting the whole row in case of new trials
+			if($val['new'] == 'y')
+			{
+				$class = 'class="upms newtrial ' . $sectionHeader . '" ';
+			}
+			
+			$upm_string .= '<tr ' . $class . ' style="background-color:#000;">';
+			
+			if($db->loggedIn())
+			{
+				if($val['new'] == 'y') 
+				{
+					$title_link_color = 'color:#FF0000;';
+					$title = ' title = "New record" ';
+				}
+				$upm_string .= '<td style="text-align:left;" ' . $title .
+				 '><a style="' . $title_link_color . '" href="upm.php?search_id=' . $val['id'] . '">' . $val['id'] . '</a></td>';
+			}
+			
+			if(!empty($val['edited']) && $val['edited']['event_description'] != $val['event_description']) 
+			{
+				$title_link_color = 'color:#FF0000;';$attr = ' highlight'; 
+				if($val['edited']['event_description'] != '' || $val['edited']['event_description'] != NULL)
+					$title = ' title="Previous value: '. $val['edited']['event_description'] . '" '; 
+				else
+					$title = ' title="No Previous value" ';
+					
+			} 
+			else if($val['new'] == 'y') 
+			{
+				$title_link_color = 'color:#FF0000;';
+				$title = ' title = "New record" ';
+			}
+			
+			$upm_string .= '<td colspan="5" class="' . $row_type_one .  $attr . ' titleupm titleupmodd txtleft" ' . $title . '><div class="rowcollapse">';
+			if($val['event_link'] != NULL && $val['event_link'] != '') 
+			{
+				$upm_string .= '<a style="' . $title_link_color . '" href="' . $val['event_link'] . '">' . $val['event_description'] . '</a>';
+			} 
+			else 
+			{
+				$upm_string .= $val['event_description'];
+			}
+			$upm_string .= '</div></td>';
+			
+			$upm_string .= '<td class="' . $row_type_two . ' titleupmodd"><div class="rowcollapse">';
+			
+			if($val['result_link'] != NULL && $val['result_link'] != '') 
+			{
+				$upm_string .= 'Occurred';
+			} 
+			else 
+			{
+				if($val['end_date'] == NULL || $val['end_date'] == '' || $val['end_date'] == '0000-00-00') 
+				{
+					$upm_string .= 'Cancelled';
+				} 
+				else if($val['end_date'] < date('Y-m-d', $now)) 
+				{
+					$upm_string .= 'Pending';
+				} 
+				else if($val['end_date'] > date('Y-m-d', $now)) 
+				{
+					$upm_string .= 'Upcoming';
 				}
 			}
-		
-			$rowspan = 1;
-			$nctid =  $type_arr[$i]['NCT/nct_id'];
 			
-			$ph = str_replace('Phase ', '', trim($type_arr[$i]['NCT/phase']));
+			$upm_string .= '</div></td>';
 			
-			$start_month = date('m',strtotime($type_arr[$i]['NCT/start_date']));
-			$start_year = date('Y',strtotime($type_arr[$i]['NCT/start_date']));
-			$end_month = date('m',strtotime($type_arr[$i]["inactive_date"]));
-			$end_year = date('Y',strtotime($type_arr[$i]["inactive_date"]));
-		
-			$enroll_style = 'color:gray;';
-			$title_link_color = '#000000;';
-			
-			$attr = ' ';
-			if(isset($fin_arr[$nctid]['edited']) && in_array('NCT/brief_title',$fin_arr[$nctid]['edited'])) {
-				$attr = ' highlight" title="' . $fin_arr[$nctid]['edited']['NCT/brief_title'];
-				$title_link_color = '#FF0000;';
-			} else if($fin_arr[$nctid]['new'] == 'y') {
-				$attr = '" title="New record';
-				$title_link_color = '#FF0000;';
+			$title = '';$attr = '';	
+			if(!empty($val['edited']) && $val['edited']['event_type'] != $val['event_type'])
+			{
+				$attr = ' highlight'; 
+				if($val['edited']['event_type'] != '' && $val['edited']['event_type'] != NULL)
+					$title = ' title="Previous value: '. $val['edited']['event_type'] . '" '; 
+				else
+					$title = ' title="No Previous value" ';
+					
+			} 
+			else if($val['new'] == 'y') 
+			{
+				$title = ' title = "New record" ';
 			}
+			$upm_string .= '<td class="' . $row_type_two . $attr . ' titleupmodd" ' . $title 
+							. '><div class="rowcollapse">' . $val['event_type'] . ' Milestone</div></td>';
 			
-			if(isset($upmDetails[$nctid])) {
-				
-				$rowspan = count($upmDetails[$nctid])+1;
+			$title = '';$attr = '';	
+			if(!empty($val['edited']) && $val['edited']['start_date'] != $val['start_date'])
+			{
+				$attr = ' highlight';$date_style = 'color:#973535;'; 
+				if($val['edited']['start_date'] != '' && $val['edited']['start_date'] != NULL)
+					$title = ' title="Previous value: '. $val['edited']['start_date'] . '" '; 
+				else 
+					$title = ' title="No Previous value" ';
+					
+			} 
+			else if($val['new'] == 'y')
+			{
+				$title = ' title = "New record" ';
+				$date_style = 'color:#973535;'; 
 			}
-		
-			if($i%2 == 1) {
-				$row_type_one = 'alttitle';
-			} else {
-				$row_type_one = 'title';
-			}
-		
-			echo '<tr ' . (($fin_arr[$nctid]['new'] == 'y') ? 'class="newtrial" ' : ''). ' >';
-			
-			//dispalying NCT Id for logged in users
-			if($db->loggedIn()) {
-				echo '<td class="' . $row_type_one . '" rowspan="' . $rowspan . '" ' . (($fin_arr[$nctid]['new'] == 'y') ? 'title="New record"' : '') 
-				. ' ><a style="color:' . $title_link_color . '" href="http://clinicaltrials.gov/ct2/show/' . padnct($nctid) . '">' 
-				. $type_arr[$i]['NCT/nct_id'] . '</a></td>';
-			}
-				
-			echo '<td rowspan="' . $rowspan . '" class="' . $row_type_one . ' ' . $attr . '">' 
-				. '<div class="rowcollapse"><a style="color:' . $title_link_color 
-				. '" href="http://clinicaltrials.gov/ct2/show/' . padnct($nctid) . '">';
-		
-			if(isset($type_arr[$i]['NCT/acronym']) && $type_arr[$i]['NCT/acronym'] != '') {
-				echo '<b>' . htmlformat($type_arr[$i]['NCT/acronym']) . '</b>&nbsp;' . htmlformat($type_arr[$i]['NCT/brief_title']);
-						
-			} else {
-				echo htmlformat($type_arr[$i]['NCT/brief_title']);
-			}
-					
-			echo ('</a></div></td>');
-			
-			foreach($fieldlist as $k => $v) {
-			
-				$attr = ' ';
-				$val = htmlformat($type_arr[$i][$v]);
-				if($v == "NCT/enrollment"){
-				
-					if(isset($fin_arr[$nctid]['edited']) && in_array($v,$fin_arr[$nctid]['edited']) 
-					&& (getDifference(substr($fin_arr[$nctid]['edited']['NCT/enrollment'],16), $val))) {
-					
-						$attr = ' highlight" title="' . $fin_arr[$nctid]['edited'][$v];
-						$enroll_style = 'color:#973535;';
-						
-					}	else if($fin_arr[$nctid]['new'] == 'y') {
-					
-						$attr = '" title="New record';
-						$enroll_style = 'color:#973535;';
-					}
-					echo '<td nowrap="nowrap" rowspan="' . $rowspan . '" class="' . $row_type_one 
-					. $attr . '"><div class="rowcollapse">';
-					
-						if($type_arr[$i]["NCT/enrollment_type"] != '') {
-						
-							if($type_arr[$i]["NCT/enrollment_type"] == 'Anticipated') { 
-								echo '<span style="font-weight:bold;' . $enroll_style . '">' . $val . '</span>';
-								
-							} else if($type_arr[$i]["NCT/enrollment_type"] == 'Actual') {
-								echo $val;
-								
-							} else { 
-								echo $val . ' (' . $type_arr[$i]["NCT/enrollment_type"] . ')';
-							}
-						} else {
-							echo $val;
-						}
-					echo '</div></td>';  
-					
-				} else if($v == "NCT/start_date") {
-				
-					if(isset($fin_arr[$nctid]['edited']) && in_array($v, $fin_arr[$nctid]['edited'])) {
-						$attr = ' highlight" title="' . $fin_arr[$nctid]['edited'][$v] ;
-					} else if($fin_arr[$nctid]['new'] == 'y') {
-						$attr = '" title="New record';
-					}
-					
-					echo '<td rowspan="' . $rowspan . '" class="' . $row_type_one . $attr . '" ><div class="rowcollapse">'; 
-					if($type_arr[$i]["NCT/start_date"] != '' && $type_arr[$i]["NCT/start_date"] != NULL && $type_arr[$i]["NCT/start_date"] != '0000-00-00') {
-						echo date('m/y',strtotime($type_arr[$i]["NCT/start_date"]));
-					} else {
-						echo '&nbsp;';
-					}
-					  
-					echo '</div></td>';
-					
-					$attr = '';
-					if($fin_arr[$nctid]['new'] == 'y') 
-						$attr = ' title="New record" ';
-						
-					echo '<td rowspan="' . $rowspan . '" class="' . $row_type_one . '" ' . $attr . '><div class="rowcollapse">';
-					if($type_arr[$i]["inactive_date"] != '' && $type_arr[$i]["inactive_date"] != NULL && $type_arr[$i]["inactive_date"] != '0000-00-00') {
-						echo date('m/y',strtotime($type_arr[$i]["inactive_date"]));
-					} else {
-						echo '&nbsp;';
-					}
-					echo '</div></td>';
-					
-				} else if($v == "NCT/overall_status") {
-			
-					if(isset($fin_arr[$nctid]['edited']) && in_array($v, $fin_arr[$nctid]['edited'])) {
-						$attr = 'class="highlight ' . $row_type_one . ' " title="' . $fin_arr[$nctid]['edited'][$v] . '" ';
-					} else if($fin_arr[$nctid]['new'] == 'y') {
-						$attr = 'title="New record" class="' . $row_type_one . '"' ;
-					} else {
-						$attr = 'class="' . $row_type_one . '"';
-					}
-						
-					echo '<td ' . $attr . ' rowspan="' . $rowspan . '">'  
-						.'<div class="rowcollapse">' . $val . '</div></td>';
-				
-				
-				} else if($v == "NCT/condition") {
-				
-					if(isset($fin_arr[$nctid]['edited']) && in_array($v, $fin_arr[$nctid]['edited'])) {
-						$attr = ' highlight" title="' . $fin_arr[$nctid]['edited'][$v];
-					} else if($fin_arr[$nctid]['new'] == 'y') {
-						$attr = '" title="New record';
-					}
-					
-					echo '<td rowspan="' . $rowspan . '" class="' . $row_type_one . $attr . '">'
-						. '<div class="rowcollapse">' . $val . '</div></td>';
-						
-				
-				} else if($v == "NCT/intervention_name") {
-				
-					if(isset($fin_arr[$nctid]['edited']) && in_array($v, $fin_arr[$nctid]['edited'])){
-						$attr = ' highlight" title="' . $fin_arr[$nctid]['edited'][$v];
-					} else if($fin_arr[$nctid]['new'] == 'y') {
-						$attr = '" title="New record';
-					}
-					
-					echo '<td rowspan="' . $rowspan . '" class="' . $row_type_one . $attr . '">'
-						. '<div class="rowcollapse">' . $val . '</div></td>';
-					
-				
-				} else if($v == "NCT/phase") {
-				
-					if(isset($fin_arr[$nctid]['edited']) && in_array($v, $fin_arr[$nctid]['edited'])) {
-						$attr = 'class="highlight" title="' . $fin_arr[$nctid]['edited'][$v] . '" ';
-					} else if($fin_arr[$nctid]['new'] == 'y') {
-						$attr = 'title="New record"';
-					}
-					
-					if($ph != '' && $ph !== NULL) {
-						$phase = $ph;
-						$ph_color = $phase_arr[$ph];
-					} else {
-						$phase = 'N/A';
-						$ph_color = $phase_arr['N/A'];
-					}
-					echo '<td rowspan="' . $rowspan . '" style="background-color:' . $ph_color . ';" ' . $attr . '>'
-						. '<div class="rowcollapse">' . $phase . '</div></td>';
-				
-				
-				} else if($v == "NCT/lead_sponsor") { 
-				
-				
-					if(isset($fin_arr[$nctid]['edited']) && (in_array($v, $fin_arr[$nctid]['edited']) 
-						|| in_array('NCT/collaborator', $fin_arr[$nctid]['edited']))) {
-						
-						$attr = ' highlight" title="';
-						if(in_array($v, $fin_arr[$nctid]['edited']))
-							$attr .= $fin_arr[$nctid]['edited'][$v] . ' ';
-						
-						if(in_array('NCT/collaborator', $fin_arr[$nctid]['edited'])) {
-							$attr .= $fin_arr[$nctid]['edited']['NCT/collaborator'];
-							$enroll_style = 'color:#973535;';
-						}
-						$attr .= '';
-					} else if($fin_arr[$nctid]['new'] == 'y') {
-						$attr = '" title="New record';
-	
-					}
-					echo '<td rowspan="' . $rowspan . '" class="' . $row_type_one . $attr . '">'
-						. '<div class="rowcollapse">' . $val . ' <span style="' . $enroll_style . '"> ' 
-						. $type_arr[$i]["NCT/collaborator"] . ' </span></div></td>';
-					
-				} else if($v == 'region') {
-				
-					if($fin_arr[$nctid]['new'] == 'y') 
-						$attr = 'title="New record"';
-					
-					echo '<td class="' . $row_type_one . '" rowspan="' . $rowspan . '" ' . $attr . '>'
-					. '<div class="rowcollapse">' . $val . '</div></td>';
+			if(!empty($val['edited']) && $val['edited']['start_date_type'] != $val['start_date_type'])
+			{
+				$attr = ' highlight';$date_style = 'color:#973535;';
+				if($val['edited']['start_date_type'] != '' && $val['edited']['start_date_type'] != NULL) 
+				{
+					$title = ' title="Previous value: ' . 
+					(($val['edited']['start_date'] != $val['start_date']) ? $val['edited']['start_date'] : '' ) 
+					. ' ' .$val['edited']['start_date_type'] . '" '; 
 				} 
+				else 
+				{
+					$title = ' title="No Previous value" ';
+				}
+			} 
+			else if($val['new'] == 'y') 
+			{
+				$title = ' title = "New record" ';
+				$date_style = 'color:#973535;'; 
+			}
+							
+			$upm_string .= '<td  class="' . $row_type_two . $attr . ' titleupmodd txtleft" ' . $title . '><div class="rowcollapse">';
+			if($val['start_date_type'] == 'anticipated') 
+			{
+			$upm_string .= '<span style="font-weight:bold;' . $date_style . '">' 
+			. (($val['start_date'] != '' && $val['start_date'] != NULL && $val['start_date'] != '0000-00-00') ? date('m/y',strtotime($val['start_date'])) : '' )   
+			. '</span>';
+			} 
+			else 
+			{
+				$upm_string .= 
+				(($val['start_date'] != '' && $val['start_date'] != NULL && $val['start_date'] != '0000-00-00') ? date('m/y',strtotime($val['start_date'])) : '' );
+			}
+			$upm_string .= '</div></td>';
+			
+			$title = '';$attr = '';	
+			if(!empty($val['edited']) && $val['edited']['end_date'] != $val['end_date'])
+			{
+				$attr = ' highlight';$date_style = 'color:#973535;';
+				if($val['edited']['end_date'] != '' && $val['edited']['end_date'] != NULL)
+					$title = ' title="Previous value: '. $val['edited']['end_date'] . '" '; 
+				else 
+					$title = ' title="No Previous value" ';
+			} 
+			else if($val['new'] == 'y') 
+			{
+				$title = ' title = "New record" ';
+				$date_style = 'color:#973535;'; 
+			}
+			if(!empty($val['edited']) && $val['edited']['end_date_type'] != $val['end_date_type'])
+			{
+				$attr = ' highlight';$date_style = 'color:#973535;'; 
+				if($val['edited']['end_date_type'] != '' && $val['edited']['end_date_type'] != NULL) 
+				{
+					$title = ' title="Previous value: ' . 
+					(($val['edited']['end_date'] != $val['end_date']) ? $val['edited']['end_date'] : '' ) 
+					. ' ' . $val['edited']['end_date_type'] . '" '; 
+				} 
+				else 
+				{
+					$title = ' title="No Previous value" ';
+				}
+			} 
+			else if($val['new'] == 'y') 
+			{
+				$title = ' title = "New record" ';
+				$date_style = 'color:#973535;'; 
 			}
 			
-			echo ('<td>&nbsp;</td>');
+			$upm_string .= '<td class="' . $row_type_two . $attr . ' titleupmodd txtleft" ' . $title . '><div class="rowcollapse">';
+			if($val['end_date_type'] == 'anticipated') 
+			{
+				$upm_string .= '<span style="font-weight:bold;' . $date_style . '">' 
+				. (($val['end_date'] != '' && $val['end_date'] != NULL && $val['end_date'] != '0000-00-00') ? date('m/y',strtotime($val['end_date'])) : '' ) 
+				. '</span>';
+			} 
+			else 
+			{
+				$upm_string .=  
+				(($val['end_date'] != '' && $val['end_date'] != NULL && $val['end_date'] != '0000-00-00') ? date('m/y',strtotime($val['end_date'])) : '');
+			}	
 			
-			//rendering project completion chart
-			echo $str = getCompletionChart($start_month, $start_year, $end_month, $end_year, $current_yr, $second_yr, $third_yr, 
-			$ph_color, $type_arr[$i]['NCT/start_date'], $type_arr[$i]['inactive_date']);
+			$upm_string .= '</div></td><td class="titleupmodd"><div class="rowcollapse"></div></td>';
+			$upm_string .= '<td class="titleupmodd"><div class="rowcollapse">';
+			
+			if(!empty($val['edited']) && ($val['result_link'] != $val['edited']['result_link'])) 
+			{
+				if($val['result_link'] != '' && $val['result_link'] != NULL) 
+				{
+					$result_image = (($val['event_type'] == 'Clinical Data') ? 'diamond' : 'checkmark' );
+					$upm_string .= '<div ' . $upm_title . '><a href="' . $val['result_link'] . '" style="color:#000;">'
+					. '<img src="images/red-' . $result_image . '.png" alt="' . $result_image . '" style="padding-top: 3px;" border="0" /></a></div>';
+				}
+			} 
+			else 
+			{
+				if($val['result_link'] != '' && $val['result_link'] != NULL) 
+				{
+					$result_image = (($val['event_type'] == 'Clinical Data') ? 'diamond' : 'checkmark' );
+					$upm_string .= '<div ' . $upm_title . '><a href="' . $val['result_link'] . '" style="color:#000;">'
+					. '<img src="images/black-' . $result_image . '.png" alt="' . $result_image . '" style="padding-top: 3px;" border="0" /></a></div>';
+				}
+			}
+			
+			if(($val['end_date'] != '' && $val['end_date'] != NULL && $val['end_date'] != '0000-00-00') && 
+			($val['end_date'] < date('Y-m-d', $now)) && ($val['result_link'] == NULL || $val['result_link'] == ''))
+			{
+				$upm_string .= '<div ' . $upm_title . '><img src="images/hourglass.png" alt="hourglass" border="0" /></div>';
+			}
+			$upm_string .= '</div></td>';
+			
+			$upm_string .= getUPMChart(date('m',strtotime($val['start_date'])), date('Y',strtotime($val['start_date'])), 
+			date('m',strtotime($val['end_date'])), date('Y',strtotime($val['end_date'])), $currentYear, $secondYear, $thirdYear, 
+			$val['start_date'], $val['end_date'], $val['event_link'], $upm_title);
+	
+	
+			$upm_string .= '</tr>';
+			
+			$cntr++;
+		}
+	} 
+	
+	return $upm_string;
+}
+	
+function displayContent($trials, $edited, $gentime, $start, $end, $currentYear, $secondYear, $thirdYear, $naUpmsDisplayStyle) 
+{	
+	//echo '<pre>';print_r($trials);
+	$db = new DatabaseManager();
+	$fieldList 	= array('Enrollment' => 'NCT/enrollment', 'Region' => 'region', 'Interventions' => 'NCT/intervention_name', 
+						'Sponsor' => 'NCT/lead_sponsor', 'Status' => 'NCT/overall_status', 'Conditions' => 'NCT/condition', 
+						'Study Dates' => 'NCT/start_date', 'Phase' => 'NCT/phase');
+	$phaseValues = array('N/A'=>'#BFBFBF', '0'=>'#00CCFF', '0/1'=>'#99CC00', '1'=>'#99CC00', '1a'=>'#99CC00', '1b'=>'#99CC00', '1a/1b'=>'#99CC00', 
+						'1c'=>'#99CC00', '1/2'=>'#FFFF00', '1b/2'=>'#FFFF00', '1b/2a'=>'#FFFF00', '2'=>'#FFFF00', '2a'=>'#FFFF00', '2a/2b'=>'#FFFF00', 
+						'2a/b'=>'#FFFF00', '2b'=>'#FFFF00', '2/3'=>'#FF9900', '2b/3'=>'#FF9900','3'=>'#FF9900', '3a'=>'#FF9900', '3b'=>'#FF9900', 
+						'3/4'=>'#FF0000', '3b/4'=>'#FF0000', '4'=>'#FF0000');	
+	
+	$start = $start - 1;
+	$sectionHeader = '';
+	for($i=$start; $i<$end; $i++) 
+	{ 
+		if($i%2 == 1)  
+			$rowOneType = 'alttitle';
+		else
+			$rowOneType = 'title';
+		
+		$rowspan = 1;
+		$enrollStyle = 'color:gray;';
+		$titleLinkColor = '#000000;';
+	
+		if(isset($trials[$i]['matchedupms']))  
+			$rowspan = count($trials[$i]['matchedupms'])+1; 
+		
+		if($sectionHeader != $trials[$i]['sectionHeader'])
+		{
+			//rendering unmatchedpms alongwith section title
+			if(isset($trials[$i]['unmatchedupms']) && !empty($trials[$i]['unmatchedupms'])) 
+			{
+				if($naUpmsDisplayStyle == 'expand')
+					$image = 'down';
+				else
+					$image = 'up';
+					
+				$naUpmIndex = preg_replace('/\s|,|\/|[0-9]/', '', $trials[$i]['sectionHeader']);
+				$naUpmIndex = substr($naUpmIndex, 0, 7);
+				if(isset($_GET['type']) && $_GET['type'] == 'row')
+				{
+					echo '<tr class="trialtitles">'
+						. '<td colspan="' . getColspanforNAUpm($db->loggedIn()) . '" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
+						. 'style="border-bottom:1px solid blue;background-image: url(\'images/' . $image 
+						. '.png\');background-repeat: no-repeat;background-position:left center;"'
+						. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;</td></tr>'
+						. displayNAUpms($trials[$i]['unmatchedupms'], $naUpmIndex , $currentYear, $secondYear, $thirdYear);
+						
+					echo '<tr><td colspan="' . getColspanforNAUpm($db->loggedIn())  . '" class="notopbottomborder leftrightborderblue sectiontitles">'
+						. $trials[$i]['sectionHeader'] . '</td></tr>';
+				}
+				else
+				{
+					echo '<tr class="trialtitles">'
+						. '<td colspan="' . getColspanforNAUpm($db->loggedIn()) . '" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
+						. 'style="border-bottom:1px solid blue;background-image: url(\'images/' . $image 
+						. '.png\');background-repeat: no-repeat;background-position:left center;"'
+						. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+						. $trials[$i]['sectionHeader'] . '</td></tr>'
+						. displayNAUpms($trials[$i]['unmatchedupms'], $naUpmIndex , $currentYear, $secondYear, $thirdYear);
+				}
+			}
+			else
+			{
+				echo '<tr><td colspan="' . getColspanforNAUpm($db->loggedIn())  . '" class="notopbottomborder leftrightborderblue sectiontitles">'
+						. $trials[$i]['sectionHeader'] . '</td></tr>';
+			}
+		}
+		
+		//row starts  
+		echo '<tr ' . (($trials[$i]['new'] == 'y') ? 'class="newtrial" ' : ''). '>';  
+		
+			//field nctid 
+			if($db->loggedIn()) 
+			{ 
+				echo '<td class="' . $rowOneType . '" rowspan="' . $rowspan . '" ' . (($trials[$i]['new'] == 'y') ? 'title="New record"' : '') 
+				. ' ><a style="color:' . $titleLinkColor . '" href="http://clinicaltrials.gov/ct2/show/' 
+				. padnct($trials[$i]['NCT/nct_id']) . '">' . $trials[$i]['NCT/nct_id'] . '</a></td>';
+			}
+
+			//field acroynm and title 
+			$attr = ' ';
+			if(isset($trials[$i]['edited']) && array_key_exists('NCT/brief_title', $trials[$i]['edited'])) 
+			{
+				$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/brief_title'];
+				$titleLinkColor = '#FF0000;';
+			} 
+			else if($trials[$i]['new'] == 'y') 
+			{
+				$attr = '" title="New record';
+				$titleLinkColor = '#FF0000;';
+			}				
+			echo '<td rowspan="' . $rowspan . '" class="' . $rowOneType . ' ' . $attr . '"><div class="rowcollapse">'
+					. '<a style="color:' . $titleLinkColor . '" href="http://clinicaltrials.gov/ct2/show/' . padnct($trials[$i]['NCT/nct_id']) . '">'; 
+			if(isset($trials[$i]['NCT/acronym']) && $trials[$i]['NCT/acronym'] != '') 
+			{
+				echo '<b>' . htmlformat($trials[$i]['NCT/acronym']) . '</b>&nbsp;' . htmlformat($trials[$i]['NCT/brief_title']);
+			} 
+			else 
+			{
+				echo htmlformat($trials[$i]['NCT/brief_title']);
+			}
+			echo '</a></div></td>';
+			
+			//field enrollment
+			$attr = ' ';
+			if(isset($trials[$i]['edited']) && array_key_exists('NCT/enrollment',$trials[$i]['edited']) 
+				&& (getDifference(substr($trials[$i]['edited']['NCT/enrollment'],16), $trials[$i]['NCT/enrollment']))) 
+			{
+				$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/enrollment'];
+				$enrollStyle = 'color:#973535;';
+			}
+			else if($trials[$i]['new'] == 'y') 
+			{
+				$attr = '" title="New record';
+				$enrollStyle = 'color:#973535;';
+			}
+			echo '<td nowrap="nowrap" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">';
+			if($trials[$i]["NCT/enrollment_type"] != '') 
+			{
+			
+				if($trials[$i]["NCT/enrollment_type"] == 'Anticipated') 
+				{ 
+					echo '<span style="font-weight:bold;' . $enrollStyle . '">' . $trials[$i]["NCT/enrollment"] . '</span>';
+					
+				}
+				else if($trials[$i]["NCT/enrollment_type"] == 'Actual') 
+				{
+					echo $trials[$i]["NCT/enrollment"];
+				} 
+				else 
+				{ 
+					echo $trials[$i]["NCT/enrollment"] . ' (' . $trials[$i]["NCT/enrollment_type"] . ')';
+				}
+			} 
+			else 
+			{
+				echo $trials[$i]["NCT/enrollment"];
+			}
+			echo '</div></td>';				
+
+
+			//field region
+			$attr = ' ';
+			if($trials[$i]['new'] == 'y') 
+				$attr = 'title="New record"';
+			
+			echo '<td class="' . $rowOneType . '" rowspan="' . $rowspan . '" ' . $attr . '>'
+			. '<div class="rowcollapse">' . $trials[$i]['region'] . '</div></td>';
+
+			
+			//field intervention name
+			if(isset($trials[$i]['edited']) && array_key_exists('NCT/intervention_name', $trials[$i]['edited']))
+			{
+				$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/intervention_name'];
+			} 
+			else if($trials[$i]['new'] == 'y')
+			{
+				$attr = '" title="New record';
+			}
+			echo '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
+				. '<div class="rowcollapse">' . $trials[$i]['NCT/intervention_name'] . '</div></td>';
+
+
+			//field collaborator and sponsor
+			$attr = ' ';
+			if(isset($trials[$i]['edited']) && (array_key_exists('NCT/collaborator', $trials[$i]['edited']) 
+			|| array_key_exists('NCT/lead_sponsor', $trials[$i]['edited']))) 
+			{
+
+					
+				$attr = ' highlight" title="';
+				if(array_key_exists('NCT/lead_sponsor', $trials[$i]['edited']))
+				{
+					$attr .= $trials[$i]['edited']['NCT/lead_sponsor'] . ' ';
+				}
+				if(array_key_exists('NCT/collaborator', $trials[$i]['edited'])) 
+				{
+					$attr .= $trials[$i]['edited']['NCT/collaborator'];
+					$enrollStyle = 'color:#973535;';
+				}
+				$attr .= '';
+			} 
+			else if($trials[$i]['new'] == 'y') 
+			{
+				$attr = '" title="New record';
+			}
+			echo '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
+				. '<div class="rowcollapse">' . $trials[$i]['NCT/lead_sponsor'] . ' <span style="' . $enrollStyle . '"> ' 
+				. $trials[$i]["NCT/collaborator"] . ' </span></div></td>';
+
+
+			//field overall status
+			$attr = ' ';
+			if(isset($trials[$i]['edited']) && array_key_exists('NCT/overall_status', $trials[$i]['edited'])) 
+			{
+				$attr = 'class="highlight ' . $rowOneType . ' " title="' . $trials[$i]['edited']['NCT/overall_status'] . '" ';
+			} 
+			else if($trials[$i]['new'] == 'y') 
+			{
+				$attr = 'title="New record" class="' . $rowOneType . '"' ;
+			} 
+			else 
+			{
+				$attr = 'class="' . $rowOneType . '"';
+			}
+			echo '<td ' . $attr . ' rowspan="' . $rowspan . '">'  
+				.'<div class="rowcollapse">' . $trials[$i]['NCT/overall_status'] . '</div></td>';
+			
+			
+			//field condition
+			$attr = ' ';
+			if(isset($trials[$i]['edited']) && array_key_exists('NCT/condition', $trials[$i]['edited'])) 
+			{
+				$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/condition'];
+			} 
+			else if($trials[$i]['new'] == 'y') 
+			{
+				$attr = '" title="New record';
+			}
+			echo '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
+				. '<div class="rowcollapse">' . $trials[$i]['NCT/condition'] . '</div></td>';
+				
+			
+			//field start date
+			$attr = ' ';
+			if(isset($trials[$i]['edited']) && array_key_exists('NCT/start_date', $trials[$i]['edited'])) 
+			{
+				$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/start_date'] ;
+			} 
+			else if($trials[$i]['new'] == 'y') 
+			{
+				$attr = '" title="New record';
+			}
+			echo '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '" ><div class="rowcollapse">'; 
+			if($trials[$i]["NCT/start_date"] != '' || $trials[$i]["NCT/start_date"] != NULL) 
+			{
+				echo date('m/y',strtotime($trials[$i]["NCT/start_date"]));
+			} 
+			else 
+			{
+				echo '&nbsp;';
+			}
+			echo '</div></td>';
+			
+			
+			//field end date
+			$attr = '';
+			if($trials[$i]['new'] == 'y') 
+			{
+				$attr = ' title="New record" ';
+			}	
+			echo '<td rowspan="' . $rowspan . '" class="' . $rowOneType . '" ' . $attr . '><div class="rowcollapse">'; 
+			if($trials[$i]["inactive_date"] != '' && $trials[$i]["inactive_date"] != NULL && $trials[$i]["inactive_date"] != '0000-00-00') 
+			{
+				echo date('m/y',strtotime($trials[$i]["inactive_date"]));
+			} 
+			else 
+			{
+				echo '&nbsp;';
+			}
+			echo '</div></td>';
+				
+										
+			//field phase
+			if(isset($trials[$i]['edited']) && array_key_exists('NCT/phase', $trials[$i]['edited'])) 
+			{
+				$attr = 'class="highlight" title="' . $trials[$i]['edited']['NCT/phase'] . '" ';
+			} 
+			else if($trials[$i]['new'] == 'y') 
+			{
+				$attr = 'title="New record"';
+			}
+			if($trials[$i]['NCT/phase'] == 'N/A')
+			{
+				$phase = 'N/A';
+				$phaseColor = $phaseValues['N/A'];
+			}
+			else
+			{
+				$phase = str_replace('Phase ', '', trim($trials[$i]['NCT/phase']));
+				$phaseColor = $phaseValues[$phase];
+			}
+			echo '<td rowspan="' . $rowspan . '" style="background-color:' . $phaseColor . ';" ' . $attr . '>' 
+				. '<div class="rowcollapse">' . $phase . '</div></td>';				
+			
+			echo '<td>&nbsp;</td>';
+			
+			$startMonth = date('m',strtotime($trials[$i]['NCT/start_date']));
+			$startYear = date('Y',strtotime($trials[$i]['NCT/start_date']));
+			$endMonth = date('m',strtotime($trials[$i]['inactive_date']));
+			$endYear = date('Y',strtotime($trials[$i]['inactive_date']));
+
+			//rendering project completion gnatt chart
+			echo $str = getCompletionChart($startMonth, $startYear, $endMonth, $endYear, $currentYear, $secondYear, $thirdYear, $trials[$i]['NCT/start_date'],
+			 $trials[$i]['inactive_date'], $phaseColor);
 			
 			echo '</tr>';
-		
-			if(isset($upmDetails[$nctid]) && !empty($upmDetails[$nctid])) {
-				
-				foreach($upmDetails[$nctid] as $k => $v) { 
-				
-					$str = '';$diamond = '';$result_image = '';
+			//rendering matched upms
+			if(isset($trials[$i]['matchedupms']) && !empty($trials[$i]['matchedupms'])) 
+			{
+				foreach($trials[$i]['matchedupms'] as $k => $v) 
+				{ 
+					$str = '';
+					$diamond = '';
+					$resultImage = '';
 	
-					$st_month = date('m',strtotime($v[2]));
-					$st_year = date('Y',strtotime($v[2]));
-					$ed_month = date('m',strtotime($v[3]));
-					$ed_year = date('Y',strtotime($v[3]));
-					$upm_link = $v[1];
-					$upm_result_link = $v[4];
-					$upm_title = 'title="' . htmlformat($v[0]) . '"';
+					$stMonth = date('m',strtotime($v['start_date']));
+					$stYear = date('Y',strtotime($v['start_date']));
+					$edMonth = date('m',strtotime($v['end_date']));
+					$edYear = date('Y',strtotime($v['end_date']));
+					$upmTitle = 'title="' . htmlformat($v['event_description']) . '"';
 					
-					echo ('<tr>');
+					echo '<tr>';
 					
 					//rendering diamonds in case of end date is prior to the current year
-					echo ('<td style="text-align:center;' . (($k < count($upmDetails[$nctid])-1) ? 'border-bottom:0;' : '' ) . '">');
+					echo '<td style="text-align:center;' . (($k < count($trials[$i]['matchedupms'])-1) ? 'border-bottom:0;' : '' ) . '">';
 					
-					if(!empty($upmDetails[$nctid][$k]['edited']) && ($v[4] != $upmDetails[$nctid][$k]['edited'][3])) {
-					
-						if($upm_result_link != '' && $upm_result_link != NULL) {
-						
-							$result_image = (($v[5] == 'Clinical Data') ? 'diamond' : 'checkmark' );
-							echo ('<div ' . $upm_title . '><a href="' . $upm_result_link . '" style="color:#000;">'
-							. '<img src="images/red-' . $result_image . '.png" alt="' . $result_image . '" style="padding-top: 3px;" border="0" /></a></div>');
+					if(!empty($trials[$i]['matchedupms'][$k]['edited']) && ($v['result_link'] != $trials[$i]['matchedupms'][$k]['edited']['result_link'])) 
+					{
+						if($v['result_link'] != '' && $v['result_link'] != NULL) 
+						{
+							$resultImage = (($v['event_type'] == 'Clinical Data') ? 'diamond' : 'checkmark' );
+							echo '<div ' . $upmTitle . '><a href="' . $v['result_link'] . '" style="color:#000;">'
+							. '<img src="images/red-' . $resultImage . '.png" alt="' . $resultImage . '" style="padding-top: 3px;" border="0" /></a></div>';
 						}
-					} else if($upmDetails[$nctid][$k]['new'] == 'y') {
-					
-						$result_image = (($v[5] == 'Clinical Data') ? 'diamond' : 'checkmark' );
-						echo ('<div ' . $upm_title . '>');
-						if(upm_result_link != '' && $upm_result_link != NULL) {
-						
-							echo ('<a href="' . $upm_result_link . '" style="color:#000;"><img src="images/red-' . $result_image . '.png" alt="' 
-							. $result_image . '" style="padding-top: 3px;" border="0" /></a>');
-							
-						} else {
-							echo ('<img src="images/red-' . $result_image . '.png" alt="' . $result_image . '" style="padding-top: 3px;" border="0" />');
+					} 
+					else if($upmDetails[$nctid][$k]['new'] == 'y') 
+					{
+						$resultImage = (($v['event_type'] == 'Clinical Data') ? 'diamond' : 'checkmark' );
+						echo '<div ' . $upmTitle . '>';
+						if($v['result_link'] != '' && $v['result_link'] != NULL) 
+						{
+							echo '<a href="' . $v['result_link'] . '" style="color:#000;">'
+							. '<img src="images/red-' . $resultImage . '.png" alt="' . $resultImage . '" style="padding-top: 3px;" border="0" /></a>';
+						} 
+						else 
+						{
+							echo '<img src="images/red-' . $resultImage . '.png" alt="' . $resultImage . '" style="padding-top: 3px;" border="0" />';
 						}
-						echo ('</div>');
-							
-					} else {
-					
-						if($upm_result_link != '' && $upm_result_link != NULL) {
-						
-							$result_image = (($v[5] == 'Clinical Data') ? 'diamond' : 'checkmark' );
-							echo ('<div ' . $upm_title . '><a href="' . $upm_result_link . '" style="color:#000;">'
-							. '<img src="images/black-' . $result_image . '.png" alt="' . $result_image . '" style="padding-top: 3px;" border="0" /></a></div>');
+						echo '</div>';
+					}
+					else 
+					{
+						if($v['result_link'] != '' && $v['result_link'] != NULL) 
+						{
+							$resultImage = (($v['event_type'] == 'Clinical Data') ? 'diamond' : 'checkmark' );
+							echo '<div ' . $upmTitle . '><a href="' . $v['result_link'] . '" style="color:#000;">'
+							. '<img src="images/black-' . $resultImage . '.png" alt="' . $resultImage . '" style="padding-top: 3px;" border="0" /></a></div>';
 						}
 					}
 					
-					if(($v[3] != '' && $v[3] != NULL && $v[3] != '0000-00-00') && ($v[3] < date('Y-m-d')) && ($upm_result_link == NULL || $upm_result_link == '')){
-						echo ('<div ' . $upm_title . '><img src="images/hourglass.png" alt="hourglass" border="0" /></div>');
+					if(($v['end_date'] != '' && $v['end_date'] != NULL && $v['end_date'] != '0000-00-00') && 
+					($v['end_date'] < date('Y-m-d')) && ($v['result_link'] == NULL || $v['result_link'] == ''))
+					{
+						echo '<div ' . $upmTitle . '><img src="images/hourglass.png" alt="hourglass" border="0" /></div>';
 					}
-					echo ('</td>');
+					echo '</td>';
 					
 					//rendering upm (upcoming project completion) chart
-					echo $str = getUPMChart($st_month, $st_year, $ed_month, $ed_year, $current_yr, $second_yr, $third_yr, $v[2], 
-					$v[3], $upm_link, $upm_title);
+					echo $str = getUPMChart($stMonth, $stYear, $edMonth, $edYear, $currentYear, $secondYear, $thirdYear, $v['start_date'],
+					$v['end_date'], $v['event_link'], $upmTitle);
 					echo '</tr>';
 				}
 			}
-		
-		} else {
+			echo '</tr>';
 			
-			if($unmatched_upm_details[$type_arr[$i]['section']] != '') {
-				
-					if($unmatched_upms_default_style == 'expand')
-						$image = 'down';
-					else
-						$image = 'up';
-				
-				echo ('<tr class="trialtitles">'
-				. '<td colspan="' . getColspanforNAUpm($db->loggedIn()) . '" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
-				. 'style="border-bottom:1px solid blue;background-image: url(\'images/' . $image 
-				. '.png\');background-repeat: no-repeat;background-position:left center;"'
-				. ' onclick="sh(this,\'' . $type_arr[$i]['section'] . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . trim($header_details[$type_arr[$i]['section']]) 
-				. '</td></tr>' . $unmatched_upm_details[$type_arr[$i]['section']]);
-				
-				if(!isset($_GET['chkOnlyUpdated']))
-				echo ('<tr><td colspan="' . getColspanforNAUpm($db->loggedIn()) . '" class="norecord" align="left">No trials found.</td></tr>'); 
-				
-			} /*else {
-				echo '<tr><td colspan="50" class="notopbottomborder leftrightborderblue sectiontitles">' 
-					. trim($header_details[$type_arr[$i]['section']]) . '</td></tr>';
-			}*/
-		
-			
-		}
-		$previous_section = $type_arr[$i]['section'];
+			//section title
+			$sectionHeader = $trials[$i]['sectionHeader'];
 	}
 }
 
@@ -2485,8 +3610,8 @@ function getColspan($start_dt, $end_dt) {
 }
 
 //calculating the project completion chart in which the year ranges from the current year and next-to-next year
-function getCompletionChart($start_month, $start_year, $end_month, $end_year, $current_yr, $second_yr, $third_yr, $bg_color, $start_date, $end_date){
-
+function getCompletionChart($start_month, $start_year, $end_month, $end_year, $current_yr, $second_yr, $third_yr, $start_date, $end_date, $bg_color)
+{
 	$attr_two = 'class="rightborder"';
 	if(($start_date == '' || $start_date == NULL || $start_date == '0000-00-00') && ($end_date == '' || $end_date == NULL || $end_date == '0000-00-00')) {
 	
@@ -3187,28 +4312,28 @@ function getUPMChart($start_month, $start_year, $end_month, $end_year, $current_
 }
 
 //return NCT fields given an NCTID
-function getNCT($nct_id,$larvol_id,$time,$edited)
+function getTrialUpdates($nctId, $larvolId, $time, $edited)
 {	
-						
-	$study = array('edited' => array(), 'new' => 'n');
+	global $now;
+	if($time === NULL) $time = $now;
+
+	$updates = array('edited' => array(), 'new' => 'n');
 	
 	$fieldnames = array('nct_id', 'brief_title', 'enrollment', 'enrollment_type', 'acronym', 'start_date', 'overall_status',
 	'condition', 'intervention_name', 'phase', 'lead_sponsor', 'collaborator');
 
 	$studycatData = mysql_fetch_assoc(mysql_query("SELECT `dv`.`studycat` FROM `data_values` `dv` LEFT JOIN `data_cats_in_study` `dc` ON "
-	. "(`dc`.`id`=`dv`.`studycat`) WHERE `dv`.`field`='1' AND `dv`.`val_int`='" . $nct_id . "' AND `dc`.`larvol_id`='" .$larvol_id . "'"));
+	. "(`dc`.`id`=`dv`.`studycat`) WHERE `dv`.`field`='1' AND `dv`.`val_int`='" . $nctId . "' AND `dc`.`larvol_id`='" .$larvolId . "'"));
+	
 
 	$res = mysql_query("SELECT DISTINCT `df`.`name` AS `fieldname`, `df`.`id` AS `fieldid`, `df`.`type` AS `fieldtype`, `dv`.`studycat` "
 		. "FROM `data_values` `dv` LEFT JOIN `data_fields` `df` ON (`df`.`id`=`dv`.`field`) WHERE `df`.`name` IN ('" 
 		. join("','",$fieldnames) . "') AND `studycat` = '" . $studycatData['studycat'] 
 		. "' AND (`dv`.`superceded`<'" . date('Y-m-d',$time) . "' AND `dv`.`superceded`>= '" . date('Y-m-d',strtotime($edited,$time)) . "') ");
 
-	while ($row = mysql_fetch_assoc($res)) {
-	 	
-		$study['edited'][] = 'NCT/'.$row['fieldname'];
-		
+	while ($row = mysql_fetch_assoc($res)) 
+	{
 		//getting previous value for updated trials
-		$val = '';
 		$result = mysql_fetch_assoc(mysql_query("SELECT `" . 'val_'.$row['fieldtype'] ."` AS value FROM `data_values` WHERE `studycat` = '" 
 		. $studycatData['studycat'] . "' AND `field` =  '" . $row['fieldid'] . "' AND (`superceded`<'" . date('Y-m-d',$time) 
 		. "' AND `superceded`>= '" . date('Y-m-d',strtotime($edited,$time)) . "') "));
@@ -3216,28 +4341,28 @@ function getNCT($nct_id,$larvol_id,$time,$edited)
 		$val = $result['value'];
 		
 		//special case for enum fields
-		if($row['fieldtype'] == 'enum') {
+		if($row['fieldtype'] == 'enum') 
+		{
 			$result = mysql_fetch_assoc(mysql_query("SELECT `value` FROM `data_enumvals` WHERE `field` = '" . $row['fieldid'] . "' AND `id` = '" . $val . "' "));
 			$val 	= $result['value'];
 		}
 			
 		if(isset($val) && $val != '')
-			$study['edited']['NCT/'.$row['fieldname']] = 'Previous value: ' . $val;
+			$updates['edited']['NCT/'.$row['fieldname']] = 'Previous value: ' . $val;
 		else 
-			$study['edited']['NCT/'.$row['fieldname']] = 'No previous value';
+			$updates['edited']['NCT/'.$row['fieldname']] = 'No previous value';
 	}
 	
 	$sql = "SELECT `clinical_study`.`larvol_id` FROM `clinical_study` WHERE `clinical_study`.`import_time` <= '" 
-		. date('Y-m-d',$time) . "' AND `clinical_study`.`larvol_id` = '" .  $larvol_id
-		. "' AND `clinical_study`.`import_time` >= '" . date('Y-m-d',strtotime($edited,$time)) . "' ";
+		. date('Y-m-d',$time) . "' AND `clinical_study`.`larvol_id` = '" .  $larvolId . "' AND `clinical_study`.`import_time` >= '" 
+		. date('Y-m-d',strtotime($edited,$time)) . "' ";
 		
 	$result = mysql_query($sql);		
 
-	if(mysql_num_rows($result) >= 1) {
-		$study['new'] = 'y';
-	} 
+	if(mysql_num_rows($result) > 0) 
+		$updates['new'] = 'y';
 	
-	return $study;
+	return $updates;
 }
 
 //Get html content by passing through htmlspecialchars
@@ -3248,18 +4373,20 @@ function htmlformat($str)
 }
 
 //getting corresponding UPM details for each of the trials
-function getCorrespondingUPM($trial_id, $time, $edited) {
-	
-	$upm = array();
+function getCorrespondingUPM($trial_id, $time, $edited) 
+{
+	$upm['matchedupms'] = array();
 	$values = array();
 					
 	$result = mysql_query("SELECT id, event_type, corresponding_trial, event_description, event_link, result_link, start_date, end_date 
 					FROM upm WHERE corresponding_trial = '" . $trial_id . "' ");
 	
 	$i = 0;			
-	while($row = mysql_fetch_assoc($result)) {
-	
-		$upm[$i] = array($row['event_description'], $row['event_link'], $row['start_date'], $row['end_date'], $row['result_link'],$row['event_type'],);
+	while($row = mysql_fetch_assoc($result)) 
+	{
+		$upm['matchedupms'][$i] = array('event_description' => $row['event_description'], 'event_link' => $row['event_link'], 
+								'start_date' => $row['start_date'], 'end_date' => $row['end_date'], 
+								'result_link' => $row['result_link'],'event_type' => $row['event_type'],);
 		
 		//Query for checking updates for upms.
 		$sql = "SELECT `id`, `event_type`, `event_description`, `event_link`, `result_link`, `start_date`, `start_date_type`, `end_date`, `end_date_type` "
@@ -3267,11 +4394,14 @@ function getCorrespondingUPM($trial_id, $time, $edited) {
 				. date('Y-m-d',strtotime($edited,$time)) . "') ORDER BY `superceded` DESC LIMIT 0,1 ";
 		$res = mysql_query($sql);
 		
-		$upm[$i]['edited'] = array();
-		$upm[$i]['new'] = 'n';
-		while($arr = mysql_fetch_assoc($res)) {
-			$upm[$i]['edited'] = array($arr['event_type'], $arr['event_description'], $arr['event_link'], $arr['result_link'], 
-									$arr['start_date'], $arr['start_date_type'], $arr['end_date'], $arr['end_date_type'],);
+		$upm['matchedupms'][$i]['edited'] = array();
+		$upm['matchedupms'][$i]['new'] = 'n';
+		while($arr = mysql_fetch_assoc($res)) 
+		{
+			$upm['matchedupms'][$i]['edited'] = array('event_description' => $arr['event_description'], 'event_link' =>$arr['event_link'], 
+											'start_date' => $arr['start_date'], 'end_date' => $arr['end_date'],
+											'result_link' => $arr['result_link'], 'event_type' => $arr['event_type'], 
+											'start_date_type' => $arr['start_date_type'], 'end_date_type' => $arr['end_date_type'],);
 		}
 		
 		$query = " SELECT u.id FROM `upm` u LEFT JOIN `upm_history` uh ON u.`id` = uh.`id` WHERE u.`id` = '" . $row['id'] . "' AND u.`last_update` < '" 
@@ -3279,7 +4409,7 @@ function getCorrespondingUPM($trial_id, $time, $edited) {
 		
 		$ress = mysql_query($query);
 		if(mysql_num_rows($ress) != 0)
-			$upm[$i]['new'] = 'y';
+			$upm['matchedupms'][$i]['new'] = 'y';
 			
 		$i++;
 	}
@@ -3287,95 +4417,86 @@ function getCorrespondingUPM($trial_id, $time, $edited) {
 }
 
 //get records for non associated upms
-function getNonAssocUpmRecords($non_assoc_upm_params) {
-	
+function getNonAssocUpmRecords($naUpmsRegex, $timeMachine, $timeInterval) 
+{
 	$where = '';$upms = array();$i = 0;
-	foreach($non_assoc_upm_params as $key => $val){
+	foreach($naUpmsRegex as $key => $val)
+	{
 		$where .= textEqual('`search_name`',$val) . ' OR ';
 	}
 	
 	$result = mysql_query("SELECT `id` FROM `products` WHERE ( " . substr($where,0,-4) . " ) ");
-	if(mysql_num_rows($result) > 0) {
-	
-		while($rows = mysql_fetch_assoc($result)) {
-	
-		$sql = "SELECT `id`, `event_description`, `event_link`, `result_link`, `event_type`, `start_date`,
-				`start_date_type`, `end_date`, `end_date_type` FROM `upm` WHERE `corresponding_trial` IS NULL AND `product` = '" . $rows['id'] 
-				. "' ORDER BY `end_date` ASC ";
-		$res = mysql_query($sql)  or tex('Bad SQL query getting unmatched upms ' . $sql);
+	if(mysql_num_rows($result) > 0) 
+	{
+		while($rows = mysql_fetch_assoc($result)) 
+		{
+			$sql = "SELECT `id`, `event_description`, `event_link`, `result_link`, `event_type`, `start_date`,
+					`start_date_type`, `end_date`, `end_date_type` FROM `upm` WHERE `corresponding_trial` IS NULL AND `product` = '" . $rows['id'] 
+					. "' ORDER BY `end_date` ASC ";
+			$res = mysql_query($sql)  or tex('Bad SQL query getting unmatched upms ' . $sql);
 		
-		if(mysql_num_rows($res) > 0) {
-		
-			while($row = mysql_fetch_assoc($res)) { 
-			
-				$upms[$i]['id'] = $row['id'];
-				$upms[$i]['event_description'] = htmlspecialchars($row['event_description']);
-				$upms[$i]['event_link'] = $row['event_link'];
-				$upms[$i]['result_link'] = $row['result_link'];
-				$upms[$i]['event_type'] = $row['event_type'];
-				$upms[$i]['start_date'] = $row['start_date'];
-				$upms[$i]['start_date_type'] = $row['start_date_type'];
-				$upms[$i]['end_date'] 	= $row['end_date'];
-				$upms[$i]['end_date_type'] = $row['end_date_type'];
-				
-				$i++;
+			if(mysql_num_rows($res) > 0) 
+			{
+				while($row = mysql_fetch_assoc($res)) 
+				{ 
+					$upms[$i]['id'] = $row['id'];
+					$upms[$i]['event_description'] = htmlspecialchars($row['event_description']);
+					$upms[$i]['event_link'] = $row['event_link'];
+					$upms[$i]['result_link'] = $row['result_link'];
+					$upms[$i]['event_type'] = $row['event_type'];
+					$upms[$i]['start_date'] = $row['start_date'];
+					$upms[$i]['start_date_type'] = $row['start_date_type'];
+					$upms[$i]['end_date'] 	= $row['end_date'];
+					$upms[$i]['end_date_type'] = $row['end_date_type'];
+					$upms[$i]['new'] = 'n';
+					$upms[$i]['edited'] = array();
+					
+					$sql = "SELECT `id`, `event_type`, `event_description`, `event_link`, `result_link`, `start_date`, "
+						. " `start_date_type`, `end_date`, `end_date_type` "
+						. " FROM `upm_history` WHERE `id` = '" . $row['id'] . "' AND (`superceded` < '" . date('Y-m-d',$timeMachine) 
+						. "' AND `superceded` >= '" . date('Y-m-d',strtotime($timeInterval,$timeMachine)) . "') ORDER BY `superceded` DESC LIMIT 0,1 ";
+					$ress = mysql_query($sql);
+					if(mysql_num_rows($ress) > 0) 
+					{
+						while($roww = mysql_fetch_assoc($ress)) 
+						{
+							$upms[$i]['edited']['id'] = $roww['id'];
+							$upms[$i]['edited']['event_description'] = htmlspecialchars($roww['event_description']);
+							$upms[$i]['edited']['event_link'] = $roww['event_link'];
+							$upms[$i]['edited']['result_link'] = $roww['result_link'];
+							$upms[$i]['edited']['event_type'] = $roww['event_type'];
+							$upms[$i]['edited']['start_date'] = $roww['start_date'];
+							$upms[$i]['edited']['start_date_type'] = $roww['start_date_type'];
+							$upms[$i]['edited']['end_date'] 	= $roww['end_date'];
+							$upms[$i]['edited']['end_date_type'] = $roww['end_date_type'];
+						}
+					}
+						
+					$sql = " SELECT u.id FROM `upm` u LEFT JOIN `upm_history` uh ON u.`id` = uh.`id` WHERE u.`id` = '" . $value['id'] 
+							. "' AND u.`last_update` < '" . date('Y-m-d',$timeMachine) . "' AND u.`last_update` >=  '" 
+							. date('Y-m-d',strtotime($timeInterval,$timeMachine)) . "' AND uh.`id` IS NULL ";
+					$reslt = mysql_query($sql);
+					if(mysql_num_rows($reslt) > 0)
+						$upms[$i]['new'] = 'y';	
+					
+					$i++;
+				}
 			}
 		}
-		
 	}
-	}
-	
 	return $upms;
 }
 
-function getUnmatchedUpmChanges($record_arr, $time, $edited) {
-
-	foreach($record_arr as $key => $value) {
-	
-		$sql = "SELECT `id`, `event_type`, `event_description`, `event_link`, `result_link`, `start_date`, `start_date_type`, `end_date`, `end_date_type` "
-				. " FROM `upm_history` WHERE `id` = '" . $value['id'] . "' AND (`superceded` < '" . date('Y-m-d',$time) . "' AND `superceded` >= '" 
-				. date('Y-m-d',strtotime($edited,$time)) . "') ORDER BY `superceded` DESC LIMIT 0,1 ";
-		$res = mysql_query($sql);
-		
-		$record_arr[$key]['edited'] = array();
-		$record_arr[$key]['new'] = 'n';
-		
-		if(mysql_num_rows($res) > 0) {
-			while($row = mysql_fetch_assoc($res)) {
-			
-				$record_arr[$key]['edited']['id'] = $row['id'];
-				$record_arr[$key]['edited']['event_description'] = htmlspecialchars($row['event_description']);
-				$record_arr[$key]['edited']['event_link'] = $row['event_link'];
-				$record_arr[$key]['edited']['result_link'] = $row['result_link'];
-				$record_arr[$key]['edited']['event_type'] = $row['event_type'];
-				$record_arr[$key]['edited']['start_date'] = $row['start_date'];
-				$record_arr[$key]['edited']['start_date_type'] = $row['start_date_type'];
-				$record_arr[$key]['edited']['end_date'] 	= $row['end_date'];
-				$record_arr[$key]['edited']['end_date_type'] = $row['end_date_type'];
-				
-			}
-		}
-		
-		$sql = " SELECT u.id FROM `upm` u LEFT JOIN `upm_history` uh ON u.`id` = uh.`id` WHERE u.`id` = '" . $value['id'] . "' AND u.`last_update` < '" 
-				. date('Y-m-d',$time) . "' AND u.`last_update` >=  '" . date('Y-m-d',strtotime($edited,$time)) . "' AND uh.`id` IS NULL ";
-		
-		$result = mysql_query($sql);
-		if(mysql_num_rows($result) != 0)
-			$record_arr[$key]['new'] = 'y';
-	}
-	
-	return $record_arr;
-}
-
-function getLinkDetails($tablename, $fieldname, $parameters, $param_value) {
+function getLinkDetails($tablename, $fieldname, $parameters, $param_value) 
+{
 	$query = "SELECT `" . $fieldname . "`, `expiry` FROM " . $tablename . " WHERE " . $parameters . " = '" . mysql_real_escape_string($param_value) . "' ";
 	$res = mysql_fetch_assoc(mysql_query($query));
 	
 	return $res;
 }
 
-function getDifference($value_one, $value_two) {
-
+function getDifference($value_one, $value_two) 
+{
 	$diff = abs(($value_one - $value_two) / $value_one * 100);
 	$diff = round($diff);
 	if($diff > 20)
