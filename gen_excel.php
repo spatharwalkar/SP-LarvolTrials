@@ -1526,9 +1526,9 @@ class ContentManager
 				} 
 								
 				if($val['start_date_type'] == 'anticipated') {
-				$upm_string[$i]['start_date'] =  (($val['start_date'] != '' && $val['start_date'] != NULL && $val['start_date'] != '0000-00-00') ? date('m/y',strtotime($val['start_date'])) : '' )  ;
+				$upm_string[$i]['start_date'] =  (($val['start_date'] != '' && $val['start_date'] != NULL && $val['start_date'] != '0000-00-00') ? $val['start_date'] : '' )  ;
 				} else {
-					$upm_string[$i]['start_date'] =  (($val['start_date'] != '' && $val['start_date'] != NULL && $val['start_date'] != '0000-00-00') ? date('m/y',strtotime($val['start_date'])) : '' );
+					$upm_string[$i]['start_date'] =  (($val['start_date'] != '' && $val['start_date'] != NULL && $val['start_date'] != '0000-00-00') ? $val['start_date'] : '' );
 				}
 				
 				if(!empty($val['edited']) && $val['edited']['end_date'] != $val['end_date']){
@@ -1559,10 +1559,10 @@ class ContentManager
 			
 				if($val['end_date_type'] == 'anticipated') {
 					
-					$upm_string[$i]['end_date'] =  (($val['end_date'] != '' && $val['end_date'] != NULL && $val['end_date'] != '0000-00-00') ? date('m/y',strtotime($val['end_date'])) : '' ) ;
+					$upm_string[$i]['end_date'] =  (($val['end_date'] != '' && $val['end_date'] != NULL && $val['end_date'] != '0000-00-00') ? $val['end_date'] : '' ) ;
 				} else {
 					
-					$upm_string[$i]['end_date'] =  (($val['end_date'] != '' && $val['end_date'] != NULL && $val['end_date'] != '0000-00-00') ? date('m/y',strtotime($val['end_date'])) : '');
+					$upm_string[$i]['end_date'] =  (($val['end_date'] != '' && $val['end_date'] != NULL && $val['end_date'] != '0000-00-00') ? $val['end_date'] : '');
 				}	
 				
 				
@@ -1803,6 +1803,7 @@ if($bg_color == '00CCFF')
 							'rgb' => '99CC00'
 						)
 					)
+
 				)
 		);
  
@@ -2806,167 +2807,513 @@ function getCompletionChart($start_month, $start_year, $end_month, $end_year, $c
 	return $value;
 }
 
-function getUPMChart($start_month, $start_year, $end_month, $end_year, $current_yr, $second_yr, $third_yr, $start_date, $end_date, $upm_link, $upm_title)
+function getUPMChart($start_month, $start_year, $end_month, $end_year, $current_yr, $second_yr, $third_yr, $start_date, $end_date, $upm_link, $upm_title, &$objPHPExcel, $i)
 {
 	
 	$attr_two = 'class="rightborder"';
 	$background_color = 'background-color:#9966FF;';
+	$color=(
+		array
+				(
+					'fill' => array
+					(
+						'type'       => PHPExcel_Style_Fill::FILL_SOLID,
+						'rotation'   => 0,
+						'startcolor' => array
+						(
+							'rgb' => '9966FF'
+						),
+						'endcolor'   => array
+						(
+							'rgb' => '9966FF'
+						)
+					)
+				)
+		);
 	
 	
 	if(($start_date == '' || $start_date == NULL || $start_date == '0000-00-00') && ($end_date == '' || $end_date == NULL || $end_date == '0000-00-00')) {
 	
-		$value = '<td colspan="12"><span ' . $upm_title . '>' 
-			.(( $upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-			. '<td colspan="12"><span ' . $upm_title . '>'
-			. (( $upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-			. '<td colspan="12"><span ' . $upm_title . '>' . (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;')  
-			. '</span></td>'
-			. '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>' 
-			. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';	
+		$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':U'. $i);
+		$objPHPExcel->getActiveSheet()->mergeCells('V' . $i . ':AG'. $i);
+		$objPHPExcel->getActiveSheet()->mergeCells('AH' . $i . ':AS'. $i);
+		$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV'. $i);
+		if( $upm_link != '' &&  $upm_link != NULL)
+		{
+		$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($upm_link);
+		$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($upm_title);
+		$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setUrl($upm_link);
+		$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setTooltip($upm_title);
+		$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setUrl($upm_link);
+		$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setTooltip($upm_title);
+		$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upm_link);
+		$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upm_title);
+		}
+		
 
 	} else if($start_date == '' || $start_date == NULL || $start_date == '0000-00-00') {
 	
 		$st = $end_month-1;
 		if($end_year < $current_yr) {
 		
-			$value = '<td colspan="12"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. '<td colspan="12"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. '<td colspan="12"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';	
+			$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':U'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('V' . $i . ':AG'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AH' . $i . ':AS'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV'. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($upm_title);
+			$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setTooltip($upm_title);
+			$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setTooltip($upm_title);
+			$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upm_title);
+			}
 						
 		} else if($end_year == $current_yr) {
 			
-			$value = (($st != 0) ? '<td colspan="' . $st . '"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '')
-				. '<td style="' . $background_color . '"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. (((12 - ($st+1)) != 0) ? '<td colspan="' .(12 - ($st+1)) . '"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '')
-				. '<td colspan="12"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. '<td colspan="12"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';	
+			
+			$from='J';
+			if($st != 0)
+			{
+			$inc=$st;
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			$from=$to;
+			$from++;
+			}
+			
+			$objPHPExcel->getActiveSheet()->getStyle($from . $i )->applyFromArray
+			(
+				$color
+			);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			
+			$from++;
+			
+			
+			if((12 - ($st+1)) != 0)
+			{
+			$inc=(12 - ($st+1));
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			$from=$to;
+			$from++;
+			}
+			
+			$objPHPExcel->getActiveSheet()->mergeCells('V' . $i . ':AG'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AH' . $i . ':AS'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV'. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setTooltip($upm_title);
+			$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setTooltip($upm_title);
+			$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			
+			
 					
 		} else if($end_year == $second_yr) {
 		
-			$value = '<td colspan="12"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. (($st != 0) ? '<td colspan="' . $st . '"><span ' . $upm_title . '>' 
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '')
-				. '<td style="' . $background_color . '"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. (((12 - ($st+1)) != 0) ? '<td colspan="' .(12 - ($st+1)) . '"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '')
-				. '<td colspan="12">&nbsp;</td><td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';
+			
+			$from='V';
+			if($st != 0)
+			{
+			$inc=$st;
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			$from=$to;
+			$from++;
+			}
+			
+			$objPHPExcel->getActiveSheet()->getStyle($from . $i )->applyFromArray
+			(
+				$color
+			);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			
+			$from++;
+			
+			
+			if((12 - ($st+1)) != 0)
+			{
+			$inc=(12 - ($st+1));
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			$from=$to;
+			$from++;
+			}
+			
+			$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':U'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AH' . $i . ':AS'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV'. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($upm_title);
+			$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setTooltip($upm_title);
+			$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			
+			
 					
 		} else if($end_year == $third_yr) {
 		
-			$value = '<td colspan="12"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. '<td colspan="12"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. (($st != 0) ? '<td colspan="' . $st . '"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '')
-				. '<td style="' . $background_color . '"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. (((12 - ($st+1)) != 0) ? '<td colspan="' .(12 - ($st+1)) . '"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '')
-				. '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';	
+			
+			$from='AH';
+			if($st != 0)
+			{
+			$inc=$st;
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			$from=$to;
+			$from++;
+			}
+			
+			$objPHPExcel->getActiveSheet()->getStyle($from . $i )->applyFromArray
+			(
+				$color
+			);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			
+			$from++;
+			
+			
+			if((12 - ($st+1)) != 0)
+			{
+			$inc=(12 - ($st+1));
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			$from=$to;
+			$from++;
+			}
+			
+			$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':U'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('V' . $i . ':AG'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV'. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($upm_title);
+			$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setTooltip($upm_title);
+			$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			
+			
 				
 		} else if($end_year > $third_yr){
 		
-			$value = '<td colspan="12"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. '<td colspan="12"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. '<td colspan="12"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. '<td colspan="3" style="' . $background_color . '" ' . $attr_two . '><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';
+			
+			$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':U'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('V' . $i . ':AG'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AH' . $i . ':AS'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV'. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($upm_title);
+			$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setTooltip($upm_title);
+			$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setTooltip($upm_title);
+			$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			$objPHPExcel->getActiveSheet()->getStyle('AT' . $i )->applyFromArray
+				(
+					$color
+				);
+			
+			
 		}
 	} else if($end_date == '' || $end_date == NULL || $end_date == '0000-00-00') {
 	
 		$st = $start_month-1;
 		if($start_year < $current_yr) {
 		
-			$value = '<td colspan="12"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. '<td colspan="12"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. '<td colspan="12"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';	
+			
+			$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':U'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('V' . $i . ':AG'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AH' . $i . ':AS'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV'. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($upm_title);
+			$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setTooltip($upm_title);
+			$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setTooltip($upm_title);
+			$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			
+			
 						
 		} else if($start_year == $current_yr) { 
 			
-			$value = (($st != 0) ? '<td colspan="' . $st . '"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '')
-				. '<td style="' . $background_color . '"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. (((12 - ($st+1)) != 0) ? '<td colspan="' .(12 - ($st+1)) . '"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '')
-				. '<td colspan="12"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. '<td colspan="12"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';	
+			
+			$from='J';
+			if($st != 0)
+			{
+			$inc=$st;
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			$from=$to;
+			$from++;
+			}
+			
+			$objPHPExcel->getActiveSheet()->getStyle($from . $i )->applyFromArray
+			(
+				$color
+			);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			
+			$from++;
+			
+			
+			if((12 - ($st+1)) != 0)
+			{
+			$inc=(12 - ($st+1));
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			$from=$to;
+			$from++;
+			}
+			
+			$objPHPExcel->getActiveSheet()->mergeCells('V' . $i . ':AG'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AH' . $i . ':AS'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV'. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setTooltip($upm_title);
+			$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setTooltip($upm_title);
+			$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			
+			
 					
 		} else if($start_year == $second_yr) {
 		
-			$value = '<td colspan="12"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. (($st != 0) ? '<td colspan="' . $st . '"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '')
-				. '<td style="' . $background_color . '"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. (((12 - ($st+1)) != 0) ? '<td colspan="' .(12 - ($st+1)) . '"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '')
-				. '<td colspan="12"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';
+			
+			$from='V';
+			if($st != 0)
+			{
+			$inc=$st;
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			$from=$to;
+			$from++;
+			}
+			
+			$objPHPExcel->getActiveSheet()->getStyle($from . $i )->applyFromArray
+			(
+				$color
+			);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			
+			$from++;
+			
+			
+			if((12 - ($st+1)) != 0)
+			{
+			$inc=(12 - ($st+1));
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			$from=$to;
+			$from++;
+			}
+			
+			$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':U'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AH' . $i . ':AS'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV'. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($upm_title);
+			$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setTooltip($upm_title);
+			$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			
+			
 					
 		} else if($start_year == $third_yr) {
 		
-			$value = '<td colspan="12"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-			 	. '<td colspan="12"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. (($st != 0) ? '<td colspan="' . $st . '"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '')
-				. '<td style="' . $background_color . '"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. (((12 - ($st+1)) != 0) ? '<td colspan="' .(12 - ($st+1)) . '"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '')
-				. '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';	
+			$from='AH';
+			if($st != 0)
+			{
+			$inc=$st;
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			$from=$to;
+			$from++;
+			}
+			
+			$objPHPExcel->getActiveSheet()->getStyle($from . $i )->applyFromArray
+			(
+				$color
+			);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			
+			$from++;
+			
+			
+			if((12 - ($st+1)) != 0)
+			{
+			$inc=(12 - ($st+1));
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			$from=$to;
+			$from++;
+			}
+			
+			$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':U'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('V' . $i . ':AG'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV'. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($upm_title);
+			$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setTooltip($upm_title);
+			$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			
+			
 				
 		} else if($start_year > $third_yr){
 		
-			$value = '<td colspan="12"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. '<td colspan="12"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. '<td colspan="12"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. '<td colspan="3" style="' . $background_color . '" ' . $attr_two . '><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';
+			
+			$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':U'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('V' . $i . ':AG'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AH' . $i . ':AS'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV'. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($upm_title);
+			$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setTooltip($upm_title);
+			$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setTooltip($upm_title);
+			$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			
+			$objPHPExcel->getActiveSheet()->getStyle('AT' . $i )->applyFromArray
+			(
+				$color
+			);
+			
+			
 		}
 			
 	} else if($end_date < $start_date) {
 	
-		$value = '<td colspan="12">&nbsp;</td><td colspan="12">&nbsp;</td>'
-					. '<td colspan="12">&nbsp;</td><td colspan="3" ' . $attr_two . '>&nbsp;</td>';
+			$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':U'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('V' . $i . ':AG'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AH' . $i . ':AS'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV'. $i);
+			
 					
 	} else if($start_year < $current_yr) {
 
@@ -2975,64 +3322,167 @@ function getUPMChart($start_month, $start_year, $end_month, $end_year, $current_
 
 		if($end_year < $current_yr) {
 		
-			$value = '<td colspan="12"><span ' . $upm_title . '>'
-			. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-			. '<td colspan="12"><span ' . $upm_title . '>'
-			. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-			. '<td colspan="12"><span ' . $upm_title . '>'
-			. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-			. '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
-			. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';
-		  
+			$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':U'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('V' . $i . ':AG'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AH' . $i . ':AS'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV'. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($upm_title);
+			$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setTooltip($upm_title);
+			$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setTooltip($upm_title);
+			$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			
+			
 		} else if($end_year == $current_yr) { 
 		
 			if($end_month == 12) {
 			
-				$value = '<td style="' . $background_color . '" colspan="' . $end_month . '">' 
-				. '<span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. '<td colspan="12"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. '<td colspan="12"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';
+				$from='J';
+				$inc=$end_month;
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+				if( $upm_link != '' &&  $upm_link != NULL)
+				{
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+				}
+				$objPHPExcel->getActiveSheet()->getStyle($from . $i )->applyFromArray
+				(
+					$color
+				);
+				$from=$to;
+				$from++;
+				
+				$objPHPExcel->getActiveSheet()->mergeCells('V' . $i . ':AG'. $i);
+				$objPHPExcel->getActiveSheet()->mergeCells('AH' . $i . ':AS'. $i);
+				$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV'. $i);
+				if( $upm_link != '' &&  $upm_link != NULL)
+				{
+				$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setTooltip($upm_title);
+				$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setTooltip($upm_title);
+				$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upm_title);
+				}
+				
+				
 				
 			} else { 
 			
-				$value = '<td style="' . $background_color . '" colspan="' . $end_month . '">' . '<span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. '<td colspan="' . (12-$end_month) . '"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. '<td colspan="12"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. '<td colspan="12"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';
+				$from='J';
+				$inc=$end_month;
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+				if( $upm_link != '' &&  $upm_link != NULL)
+				{
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+				}
+				$objPHPExcel->getActiveSheet()->getStyle($from . $i )->applyFromArray
+				(
+					$color
+				);
+				$from=$to;
+				$from++;
+				
+				$inc=(12-$end_month);
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+				if( $upm_link != '' &&  $upm_link != NULL)
+				{
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+				}
+				$from=$to;
+				$from++;
+				
+				$objPHPExcel->getActiveSheet()->mergeCells('V' . $i . ':AG'. $i);
+				$objPHPExcel->getActiveSheet()->mergeCells('AH' . $i . ':AS'. $i);
+				$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV'. $i);
+				if( $upm_link != '' &&  $upm_link != NULL)
+				{
+				$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setTooltip($upm_title);
+				$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setTooltip($upm_title);
+				$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upm_title);
+				}
+				
 				
 			}
 		} else if($end_year == $second_yr) { 
 		 
 			if($end_month == 12) {
 			
-				$value = '<td style="' . $background_color . '" colspan="24">' . '<span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. '<td colspan="12"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';
+				
+				$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':AG'. $i);
+				$objPHPExcel->getActiveSheet()->getStyle('J' . $i )->applyFromArray
+				(
+					$color
+				);
+				$objPHPExcel->getActiveSheet()->mergeCells('AH' . $i . ':AS'. $i);
+				$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV'. $i);
+				if( $upm_link != '' &&  $upm_link != NULL)
+				{
+				$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($upm_title);
+				$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setTooltip($upm_title);
+				$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upm_title);
+				}
+				
+				
 				
 			} else {
 			
-				$value = '<td style="' . $background_color . '" colspan="' . (12+$end_month) . '">' . '<span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. '<td colspan="' . (12-$end_month) . '"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. '<td colspan="12"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;'). '</span></td>';
+				
+				
+				$from='J';
+				$inc=(12+$end_month);
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+				if( $upm_link != '' &&  $upm_link != NULL)
+				{
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+				}
+				$objPHPExcel->getActiveSheet()->getStyle($from . $i )->applyFromArray
+				(
+					$color
+				);
+				$from=$to;
+				$from++;
+				
+				$inc=(12-$end_month);
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+				if( $upm_link != '' &&  $upm_link != NULL)
+				{
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+				}
+				$from=$to;
+				$from++;
+				
+				
+				$objPHPExcel->getActiveSheet()->mergeCells('AH' . $i . ':AS'. $i);
+				$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV'. $i);
+				if( $upm_link != '' &&  $upm_link != NULL)
+				{
+				$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setTooltip($upm_title);
+				$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upm_title);
+				}
 				
 			}
 	
@@ -3040,27 +3490,76 @@ function getUPMChart($start_month, $start_year, $end_month, $end_year, $current_
 			
 			if($end_month == 12) {
 			
-				$value = '<td style="' . $background_color . '" colspan="36">' . '<span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';
+				$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':AS'. $i);
+				$objPHPExcel->getActiveSheet()->getStyle('J' . $i )->applyFromArray
+				(
+					$color
+				);
+				$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV'. $i);
+				if( $upm_link != '' &&  $upm_link != NULL)
+				{
+				$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($upm_title);
+				$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upm_title);
+				}
+				
+				
 				
 			} else {
 			
-				$value = '<td style="' . $background_color . '" colspan="' . (24+$end_month) . '" ' . $class . '>' 
-				. '<span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. '<td colspan="' . (12-$end_month) . '"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
-
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';
+				$from='J';
+				$inc=(24+$end_month);
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+				if( $upm_link != '' &&  $upm_link != NULL)
+				{
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+				}
+				$objPHPExcel->getActiveSheet()->getStyle($from . $i )->applyFromArray
+				(
+					$color
+				);
+				$from=$to;
+				$from++;
+				
+				$inc=(12-$end_month);
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+				if( $upm_link != '' &&  $upm_link != NULL)
+				{
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+				}
+				$from=$to;
+				$from++;
+				
+				
+				$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV'. $i);
+				if( $upm_link != '' &&  $upm_link != NULL)
+				{
+				$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upm_title);
+				}
+				
+				
 			}
 		 
 		} else if($end_year > $third_yr) {
 		
-			$value = '<td colspan="39" style="' . $background_color . '" ' . $attr_two . '><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';		
+				$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':AV'. $i);
+				$objPHPExcel->getActiveSheet()->getStyle('J' . $i )->applyFromArray
+				(
+					$color
+				);
+				if( $upm_link != '' &&  $upm_link != NULL)
+				{
+				$objPHPExcel->getActiveSheet()->getCell('j' . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($upm_title);
+				}
+			
+				
 		}	
 	
 	} else if($start_year == $current_yr) {
@@ -3069,79 +3568,302 @@ function getUPMChart($start_month, $start_year, $end_month, $end_year, $current_
 		$st = $start_month-1;
 		if($end_year == $current_yr) {
 			
-			$value = (($st != 0) ? '<td colspan="' . $st . '" ><span ' . $upm_title . '>'
-			. (( $upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '');
 			
-			if($val != 0) {
-				$value .= '<td style="' . $background_color . '" colspan="' . $val . '">'
-						. '<span ' . $upm_title . '>'
-						. (( $upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-						. (((12 - ($st+$val)) != 0) ? '<td colspan="' .(12 - ($st+$val)) . '"  style="' . $lineheight . '"><span ' . $upm_title . '>'
-						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '');
-			} else {
-				$value .= '<td style="' . $background_color . '">'
-						. '<span ' . $upm_title . '>'
-						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-						. (((12 - ($st+1)) != 0) ? '<td colspan="' .(12 - ($st+1)) . '"  style="' . $lineheight . '"><span ' . $upm_title . '>'
-						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '');			
+			$from='J';
+			if($st != 0)
+			{
+			$inc=$st;
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			$from=$to;
+			$from++;
 			}
 			
-			$value .= '<td colspan="12"><span ' . $upm_title . '>'
-					. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-					. '<td colspan="12"><span ' . $upm_title . '>'
-					. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-					. '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
-					. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';
+			if($val != 0) {
+				$inc=$val;
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+					$objPHPExcel->getActiveSheet()->getStyle($from . $i .':'.$to .$i )->applyFromArray
+				(
+					$color
+				);
+				if( $upm_link != '' &&  $upm_link != NULL)
+				{
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+				}
+				$from=$to;
+				$from++;
+				
+				if((12 - ($st+$val)) != 0)
+				{
+				$inc=(12 - ($st+$val));
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+				if( $upm_link != '' &&  $upm_link != NULL)
+				{
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+				}
+				$from=$to;
+				$from++;
+				}
+			} else {
+			
+				$objPHPExcel->getActiveSheet()->getStyle($from . $i )->applyFromArray
+				(
+					$color
+				);
+				if( $upm_link != '' &&  $upm_link != NULL)
+				{
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+				}
+				$from++;
+				
+				if((12 - ($st+1)) != 0)
+				{
+				$inc=(12 - ($st+1));
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+				if( $upm_link != '' &&  $upm_link != NULL)
+				{
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+				}
+				$from=$to;
+				$from++;
+				}
+			
+			
+			}
+			
+			
+			
+			$objPHPExcel->getActiveSheet()->mergeCells('V' . $i . ':AG'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AH' . $i . ':AS'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV'. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setTooltip($upm_title);
+			$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setTooltip($upm_title);
+			$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			
+				
 		
 		} else if($end_year == $second_yr) { 
 		 
-			$value = (($st != 0) ? '<td colspan="' . $st . '"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '');
 			
-			if($val != 0) {
-				$value .= '<td style="' . $background_color . '" colspan="' . $val . '">'
-						. '<span ' . $upm_title .' >'
-						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-						. (((24 - ($val+$st)) != 0) ? '<td colspan="' .(24 - ($val+$st)) . '"><span ' . $upm_title . '>'
-						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '');
-			} else {
-				$value .= '<td style="' . $background_color . '">' . '<span ' . $upm_title .' >'
-						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-						. (((24 - (1+$st)) != 0) ? '<td colspan="' .(24 - (1+$st)) . '"><span ' . $upm_title . '>'
-						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '');			
+			$from='J';
+			if($st != 0)
+			{
+			$inc=$st;
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			$from=$to;
+			$from++;
 			}
 			
-			$value .= '<td colspan="12"><span ' . $upm_title . '>'
-					. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-					. '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
-					. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';
+			if($val != 0) {
+				$inc=$val;
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+					$objPHPExcel->getActiveSheet()->getStyle($from . $i .':'.$to .$i )->applyFromArray
+				(
+					$color
+				);
+				if( $upm_link != '' &&  $upm_link != NULL)
+				{
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+				}
+				$from=$to;
+				$from++;
+				
+				if((24 - ($st+$val)) != 0)
+				{
+				$inc=(24 - ($st+$val));
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+				if( $upm_link != '' &&  $upm_link != NULL)
+				{
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+				}
+				$from=$to;
+				$from++;
+				}
+			} else {
+			
+				$objPHPExcel->getActiveSheet()->getStyle($from . $i )->applyFromArray
+				(
+					$color
+				);
+				if( $upm_link != '' &&  $upm_link != NULL)
+				{
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+				}
+				$from++;
+				
+				if((24 - ($st+1)) != 0)
+				{
+				$inc=(24 - ($st+1));
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+				if( $upm_link != '' &&  $upm_link != NULL)
+				{
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+				}
+				$from=$to;
+				$from++;
+				}
+			
+			
+			}
+			
+			
+			$objPHPExcel->getActiveSheet()->mergeCells('AH' . $i . ':AS'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV'. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setTooltip($upm_title);
+			$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			
+			
 	
 		} else if($end_year == $third_yr) {
 				
-			$value = (($st != 0) ? '<td colspan="' . $st . '"><span ' . $upm_title . '>'
-					. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '');
-				
-			if($val != 0) {
-				$value .= '<td style="' . $background_color . '" colspan="' . $val . '">' . '<span ' . $upm_title .'>'
-						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-						. (((36 - ($val+$st)) != 0) ? '<td colspan="' .(36 - ($val+$st)) . '"><span ' . $upm_title . '>'
-						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '') ;
-			} else {
-				$value .= '<td style="' . $background_color . '">'
-						. '<span ' . $upm_title .'>'
-						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-						. (((36 - (1+$st)) != 0) ? '<td colspan="' .(36 - (1+$st)) . '"><span ' . $upm_title . '>'
-						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '') ;			
+			
+			
+			$from='J';
+			if($st != 0)
+			{
+			$inc=$st;
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			$from=$to;
+			$from++;
 			}
 			
-			$value .= '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
-						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';
+			if($val != 0) {
+				$inc=$val;
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+					$objPHPExcel->getActiveSheet()->getStyle($from . $i .':'.$to .$i )->applyFromArray
+				(
+					$color
+				);
+				if( $upm_link != '' &&  $upm_link != NULL)
+				{
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+				}
+				$from=$to;
+				$from++;
+				
+				if((36 - ($st+$val)) != 0)
+				{
+				$inc=(36 - ($st+$val));
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+				if( $upm_link != '' &&  $upm_link != NULL)
+				{
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+				}
+				$from=$to;
+				$from++;
+				}
+			} else {
+			
+				$objPHPExcel->getActiveSheet()->getStyle($from . $i )->applyFromArray
+				(
+					$color
+				);
+				if( $upm_link != '' &&  $upm_link != NULL)
+				{
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+				}
+				$from++;
+				
+				if((36 - ($st+1)) != 0)
+				{
+				$inc=(36 - ($st+1));
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+				if( $upm_link != '' &&  $upm_link != NULL)
+				{
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+				}
+				$from=$to;
+				$from++;
+				}
+			
+			
+			}
+			
+			$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV'. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			
+			
 	
 		} else if($end_year > $third_yr){
 		
-			$value = (($st != 0) ? '<td colspan="' . $st . '">&nbsp;</td>' : '');
-			$value .= '<td colspan="' .(39 - $st) . '" style="' . $background_color . '" ' . $attr_two . '><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';		
+			$from='J';
+			if($st != 0)
+			{
+			$inc=$st;
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			$from=$to;
+			$from++;
+			}
+			
+			$inc=(39 - $st);
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			$objPHPExcel->getActiveSheet()->getStyle($from . $i )->applyFromArray
+				(
+					$color
+				);
+			$from=$to;
+			$from++;
+				
 		}
 		
 	} else if($start_year == $second_yr) {
@@ -3150,54 +3872,221 @@ function getUPMChart($start_month, $start_year, $end_month, $end_year, $current_
 		$st = $start_month-1;
 		if($end_year == $second_yr) {
 		
-			$value = '<td colspan="12"><span ' . $upm_title . '>' 
-					. (( $upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-					. (($st != 0) ? '<td colspan="' . $st . '"><span ' . $upm_title . '>'
-					. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '');
-					
-			if($val != 0) {
-				$value .= '<td style="' . $background_color . '" colspan="' . $val . '">' . '<span ' . $upm_title . '>'
-						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-						. (((12 - ($val+$st)) != 0) ? '<td colspan="' .(12 - ($val+$st)) . '"><span ' . $upm_title . '>'
-						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '');
-			} else {
-				$value .= '<td style="' . $background_color . '">' . '<span ' . $upm_title . '>'
-						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-						. (((12 - (1+$st)) != 0) ? '<td colspan="' .(12 - (1+$st)) . '"><span ' . $upm_title . '>'
-						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '');
+			
+			
+			$from='V';
+			if($st != 0)
+			{
+			$inc=$st;
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			$from=$to;
+			$from++;
 			}
 			
-			$value .= '<td colspan="12"><span ' . $upm_title . '>'
-					. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-					. '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
-					. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';		
+			if($val != 0) {
+				$inc=$val;
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+					$objPHPExcel->getActiveSheet()->getStyle($from . $i .':'.$to .$i )->applyFromArray
+				(
+					$color
+				);
+				if( $upm_link != '' &&  $upm_link != NULL)
+				{
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+				}
+				$from=$to;
+				$from++;
+				
+				if((12 - ($st+$val)) != 0)
+				{
+				$inc=(12 - ($st+$val));
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+				if( $upm_link != '' &&  $upm_link != NULL)
+				{
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+				}
+				$from=$to;
+				$from++;
+				}
+			} else {
+			
+				$objPHPExcel->getActiveSheet()->getStyle($from . $i )->applyFromArray
+				(
+					$color
+				);
+				if( $upm_link != '' &&  $upm_link != NULL)
+				{
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+				}
+				$from++;
+				
+				if((12 - ($st+1)) != 0)
+				{
+				$inc=(12 - ($st+1));
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+				if( $upm_link != '' &&  $upm_link != NULL)
+				{
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+				}
+				$from=$to;
+				$from++;
+				}
+			
+			
+			}
+			
+			$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':U'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AH' . $i . ':AS'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV'. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($upm_title);
+			$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setTooltip($upm_title);
+			$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			
+				
 		
 		} else if($end_year == $third_yr) {
 		
-			$value = '<td colspan="12"><span ' . $upm_title . '>'
-					. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-					. (($st != 0) ? '<td colspan="' . $st . '"><span ' . $upm_title . '>'
-					. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '');
-					
-			if($val != 0) {
-				$value .= '<td style="' . $background_color . '" colspan="' . $val . '">' . '<span ' . $upm_title .'>'
-						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-						. (((24 - ($val+$st)) != 0) ? '<td colspan="' .(24 - ($val+$st)) . '"><span ' . $upm_title . '>'
-						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '');
-			} else {
-				$value .= '<td style="' . $background_color . '">' . '<span ' . $upm_title .'>'
-						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-						. (((24 - (1+$st)) != 0) ? '<td colspan="' .(24 - (1+$st)) . '"><span ' . $upm_title . '>'
-						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '');			
+			
+			$from='V';
+			if($st != 0)
+			{
+			$inc=$st;
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
 			}
-			$value .= '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
-						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';
+			$from=$to;
+			$from++;
+			}
+			
+			if($val != 0) {
+				$inc=$val;
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+					$objPHPExcel->getActiveSheet()->getStyle($from . $i .':'.$to .$i )->applyFromArray
+				(
+					$color
+				);
+				if( $upm_link != '' &&  $upm_link != NULL)
+				{
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+				}
+				$from=$to;
+				$from++;
+				
+				if((24 - ($st+$val)) != 0)
+				{
+				$inc=(24 - ($st+$val));
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+				if( $upm_link != '' &&  $upm_link != NULL)
+				{
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+				}
+				$from=$to;
+				$from++;
+				}
+			} else {
+			
+				$objPHPExcel->getActiveSheet()->getStyle($from . $i )->applyFromArray
+				(
+					$color
+				);
+				if( $upm_link != '' &&  $upm_link != NULL)
+				{
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+				}
+				$from++;
+				
+				if((24 - ($st+1)) != 0)
+				{
+				$inc=(24 - ($st+1));
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+				if( $upm_link != '' &&  $upm_link != NULL)
+				{
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+				}
+				$from=$to;
+				$from++;
+				}
+			
+			
+			}
+			
+			$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':U'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV'. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($upm_title);
+			$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			
+			
 
 		} else if($end_year > $third_yr) {
 		
-			$value = '<td colspan="12">&nbsp;</td>' . (($st != 0) ? '<td colspan="' . $st . '">&nbsp;</td>' : '');
-			$value .= '<td colspan="' .(27 - $st) . '" style="' . $background_color . '" ' . $attr_two . '><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';		
+			$from='V';
+			if($st != 0)
+			{
+			$inc=$st;
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			$from=$to;
+			$from++;
+			}
+			
+			$inc=(27 - $st);
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			$objPHPExcel->getActiveSheet()->getStyle($from . $i )->applyFromArray
+				(
+					$color
+				);
+			$from=$to;
+			$from++;
+			
+			$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':U'. $i);
+			
+				
 		}
 		
 	} else if($start_year == $third_yr) {
@@ -3206,51 +4095,166 @@ function getUPMChart($start_month, $start_year, $end_month, $end_year, $current_
 		$st = $start_month-1;	
 		if($end_year == $third_yr) {
 		
-			$value = '<td colspan="12"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. '<td colspan="12"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. (($st != 0) ? '<td colspan="' . $st . '"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '');
-				
-			if($val != 0) {
-				$value .= '<td style="' . $background_color . '" colspan="' . $val . '">' . '<span ' . $upm_title .'>'
-						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-						. (((12 - ($val+$st)) != 0) ? '<td colspan="' .(12 - ($val+$st)) . '"><span ' . $upm_title . '>'
-						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '');
-			} else {
-				$value .= '<td style="' . $background_color . '">' . '<span ' . $upm_title .'>' 
-						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-						. (((12 - (1+$st)) != 0) ? '<td colspan="' .(12 - (1+$st)) . '"><span ' . $upm_title . '>'
-						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '');			
+			
+			$from='AH';
+			if($st != 0)
+			{
+			$inc=$st;
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			$from=$to;
+			$from++;
 			}
 			
-			$value .= '<td colspan="3" ' . $attr_two . '><span ' . $upm_title . '>'
-						. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';
+			if($val != 0) {
+				$inc=$val;
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+					$objPHPExcel->getActiveSheet()->getStyle($from . $i .':'.$to .$i )->applyFromArray
+				(
+					$color
+				);
+				if( $upm_link != '' &&  $upm_link != NULL)
+				{
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+				}
+				$from=$to;
+				$from++;
+				
+				if((12 - ($st+$val)) != 0)
+				{
+				$inc=(12 - ($st+$val));
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+				if( $upm_link != '' &&  $upm_link != NULL)
+				{
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+				}
+				$from=$to;
+				$from++;
+				}
+			} else {
+			
+				$objPHPExcel->getActiveSheet()->getStyle($from . $i )->applyFromArray
+				(
+					$color
+				);
+				if( $upm_link != '' &&  $upm_link != NULL)
+				{
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+				}
+				$from++;
+				
+				if((12 - ($st+1)) != 0)
+				{
+				$inc=(12 - ($st+1));
+				$to=cell_hr_inc($from, $inc);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+				if( $upm_link != '' &&  $upm_link != NULL)
+				{
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+				}
+				$from=$to;
+				$from++;
+				}
+			
+			
+			}
+			
+			$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':U'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('V' . $i . ':AG'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV'. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($upm_title);
+			$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setTooltip($upm_title);
+			$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			
+			
 		
 		} else if($end_year > $third_yr) {
 		
-			$value = '<td colspan="12"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. '<td colspan="12"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' 
-				. (($st != 0) ? '<td colspan="' . $st . '"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>' : '')
-				. '<td colspan="' . (15 - $st) . '" style="' . $background_color . '" ' . $attr_two . '><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';
+			
+			$from='AH';
+			if($st != 0)
+			{
+			$inc=$st;
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			$from=$to;
+			$from++;
+			}
+			
+			$inc=(15 - $st);
+			$to=cell_hr_inc($from, $inc);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':'.$to. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			$objPHPExcel->getActiveSheet()->getStyle($from . $i )->applyFromArray
+				(
+					$color
+				);
+			$from=$to;
+			$from++;
+			
+			
+			$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':U'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('V' . $i . ':AG'. $i);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($upm_title);
+			$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setTooltip($upm_title);
+			}
+			
+			
 		
 		}
 			
 	} else if($start_year > $third_yr) {
 	
-			$value = '<td colspan="12"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. '<td colspan="12"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. '<td colspan="12"><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>'
-				. '<td colspan="3" style="' . $background_color . '" ' . $attr_two . '><span ' . $upm_title . '>'
-				. (($upm_link != '' &&  $upm_link != NULL) ? '<a href="' . $upm_link . '">&nbsp;</a>' : '&nbsp;') . '</span></td>';	
+			$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':U'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('V' . $i . ':AG'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AH' . $i . ':AS'. $i);
+			$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV'. $i);
+			
+			$objPHPExcel->getActiveSheet()->getStyle('AT' . $i )->applyFromArray
+				(
+					$color
+				);
+			if( $upm_link != '' &&  $upm_link != NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($upm_title);
+			$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setTooltip($upm_title);
+			$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setTooltip($upm_title);
+			$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upm_link);
+			$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upm_title);
+			}	
 				
 	}
 	return $value;	
@@ -4181,6 +5185,18 @@ $objPHPExcel->getActiveSheet()->setCellValue('G1' , 'Start');
 $objPHPExcel->getActiveSheet()->setCellValue('H1' , 'End');
 $objPHPExcel->getActiveSheet()->setCellValue('I1' , 'Result link');
 
+$objPHPExcel->getActiveSheet()->setCellValue('J1' , $current_yr);
+$objPHPExcel->getActiveSheet()->mergeCells('J1:U1');
+
+$objPHPExcel->getActiveSheet()->setCellValue('V1' , $second_yr);
+$objPHPExcel->getActiveSheet()->mergeCells('V1:AG1');
+
+$objPHPExcel->getActiveSheet()->setCellValue('AH1' , $third_yr);
+$objPHPExcel->getActiveSheet()->mergeCells('AH1:AS1');
+
+$objPHPExcel->getActiveSheet()->setCellValue('AT1' , '+');
+$objPHPExcel->getActiveSheet()->mergeCells('AT1:AV1');
+
 $styleThinBlueBorderOutline = array(
 	'borders' => array(
 		'inside' => array(
@@ -4194,7 +5210,7 @@ $styleThinBlueBorderOutline = array(
 	),
 );
 
-$objPHPExcel->getActiveSheet()->getStyle('A1:I1')->applyFromArray($styleThinBlueBorderOutline);
+$objPHPExcel->getActiveSheet()->getStyle('A1:AV1')->applyFromArray($styleThinBlueBorderOutline);
 
 $i=2;
 
@@ -4209,7 +5225,7 @@ if(isset($first_part_newupmarray) and is_array($first_part_newupmarray))
 		{
 			foreach ($valu as $key => $value)
 			{
-			$objPHPExcel->getActiveSheet()->getStyle('"A' . $i . ':I' . $i . '"')->applyFromArray($styleThinBlueBorderOutline);
+			$objPHPExcel->getActiveSheet()->getStyle('"A' . $i . ':AV' . $i . '"')->applyFromArray($styleThinBlueBorderOutline);
 			$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $value["id"] );
 			$objPHPExcel->getActiveSheet()->setCellValue('B' . $i, $value["corresponding_trial"] );
 			$objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $value["product"] );
@@ -4230,6 +5246,10 @@ if(isset($first_part_newupmarray) and is_array($first_part_newupmarray))
 				$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('Result Link');
 				$objPHPExcel->getActiveSheet()->getStyle('I' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
 			}
+			
+			$upm_string .= getUPMChart(date('m',strtotime($value['start_date'])), date('Y',strtotime($value['start_date'])), 
+				date('m',strtotime($value['end_date'])), date('Y',strtotime($value['end_date'])), $current_yr, $second_yr, $third_yr, 
+				$value['start_date'], $value['end_date'], $value['event_link'], $value["event_description"], $objPHPExcel, $i);
 		
 		
 			$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':I' . $i )->applyFromArray
@@ -4270,7 +5290,7 @@ if(isset($newupmarray) and is_array($newupmarray))
 		{
 			foreach ($valu as $key => $value)
 			{
-			$objPHPExcel->getActiveSheet()->getStyle('"A' . $i . ':I' . $i . '"')->applyFromArray($styleThinBlueBorderOutline);
+			$objPHPExcel->getActiveSheet()->getStyle('"A' . $i . ':AV' . $i . '"')->applyFromArray($styleThinBlueBorderOutline);
 			$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $value["id"] );
 			$objPHPExcel->getActiveSheet()->setCellValue('B' . $i, $value["corresponding_trial"] );
 			$objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $value["product"] );
@@ -4291,6 +5311,10 @@ if(isset($newupmarray) and is_array($newupmarray))
 				$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('Result Link');
 				$objPHPExcel->getActiveSheet()->getStyle('I' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
 			}
+			
+			$upm_string .= getUPMChart(date('m',strtotime($value['start_date'])), date('Y',strtotime($value['start_date'])), 
+				date('m',strtotime($value['end_date'])), date('Y',strtotime($value['end_date'])), $current_yr, $second_yr, $third_yr, 
+				$value['start_date'], $value['end_date'], $value['event_link'], $value["event_description"], $objPHPExcel, $i);
 		
 		
 			$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':I' . $i )->applyFromArray
@@ -4324,7 +5348,7 @@ if(isset($newupmarray) and is_array($newupmarray))
 
 
 
-$objPHPExcel->getActiveSheet()->getStyle('A1:I1')->applyFromArray
+$objPHPExcel->getActiveSheet()->getStyle('A1:AV1')->applyFromArray
 			(
 				array
 				(
@@ -4369,8 +5393,12 @@ $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setWidth(10);
 $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setWidth(10);
 $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setWidth(12);		
 
-
-
+$chr='J';
+for($c=1; $c <40; $c++)
+{
+$objPHPExcel->getActiveSheet()->getColumnDimension($chr)->setWidth(2);
+$chr++;
+}
 
 /********/
 
