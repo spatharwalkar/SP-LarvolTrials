@@ -1976,11 +1976,11 @@ function removeNullSearchdata($data)
 	$searchval = $data['searchval'];
 	$negate = is_array($data['negate']) ? $data['negate'] : array();
 	$page = $data['page'];
-	$multifields = isset($data['multifields']) and is_array($data['multifields']) ? $data['multifields'] : array();
-	if(isset($data['multivalue'])) $multivalue = $data['multivalue'];
-	if(isset($data['time_machine'])) $time_machine = $data['time_machine'];
-	if(isset($data['override'])) $override = $data['override'];
-	if(isset($data['weak'])) $weak = $data['weak'];
+	$multifields = is_array($data['multifields']) ? $data['multifields'] : array();
+	$multivalue = $data['multivalue'];
+	$time_machine = $data['time_machine'];
+	$override = $data['override'];
+	$weak = $data['weak'];
 	
 	if(is_array($action) && !empty($action))
 	{
