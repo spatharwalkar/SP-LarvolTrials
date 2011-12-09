@@ -1,4 +1,5 @@
 <?php
+require_once('include.util.php');
 	/**
      * Class DBSync_mysql
      * Used by class DBSync to sync a MySQL database
@@ -132,6 +133,15 @@
 						$foreign_key = $referenced_table_name = $referenced_column_name = $update_rule = $delete_rule = null;
 					}
 				}
+				
+				//get table detail engine status like engine collation etc.
+				$query = "show table status where Name='$table'";
+				$result = mysql_query($query, $this->dbp);
+				while($rw = mysql_fetch_assoc($result))
+				{
+					$engine = $rw['Engine'];
+					$collate = $rw['Collation'];
+				}
 				$fields[] = array(
                 	'name'	  => $row[0],
                     'type'    => $row[1],
@@ -150,10 +160,11 @@
 					'referenced_column_name' => $referenced_column_name,
 					'update_rule' => $update_rule,
 					'delete_rule' => $delete_rule,
-					'constraint_name' => $constraint_name
+					'constraint_name' => $constraint_name,
+					'Engine' => $engine,
+					'Collation' => $collate
                 );
             }
-			
             return $fields;
         }
         
@@ -178,7 +189,11 @@
 						kcu.referenced_table_name  = rc.referenced_table_name AND
 						rc.table_name = '$table' AND
 						rc.constraint_schema = '$schema';";
-        	$associations = array();
+        /* 	if($schema=='clinicaltrials' && $table=='rpt_masterhm')
+        	{
+        		//debugecho $query;
+        	}
+ */        	$associations = array();
         	$res = mysql_query($query);
         	while($row = mysql_fetch_assoc($res))
         	{
@@ -214,7 +229,7 @@
                 	{
                 		$index_keys[] = $fields[$i]['name'];
                 	}
-                    if($fields[$i]['Non_unique']==1 &&  $fields[$i]['key']=='MUL')
+                    if($fields[$i]['Non_unique']==1 &&  $fields[$i]['key']=='MUL' && $fields[$i]['Sub_part']!='')
                 	{
                 		$special_mul_key = ', KEY `'.$fields[$i]['name'].'` (`'.$fields[$i]['name'].'`('.$fields[$i]['Sub_part'].'))';
                 	}                	
@@ -226,7 +241,7 @@
                 $sql_f[] = "`{$fields[$i]['name']}` {$fields[$i]['type']} " . ($fields[$i]['null'] =='YES'?'' : 'NOT') . ' NULL' . (strlen($fields[$i]['default']) > 0 ? " default '{$fields[$i]['default']}'" : '') . ($fields[$i]['extra'] == 'auto_increment' ? ' auto_increment' : '');
             }
 
-            $sql = "CREATE TABLE `{$name}` (" . implode(', ', $sql_f) . (count($primary_keys) > 0 ? ", PRIMARY KEY (`" . implode('`, `', $primary_keys) . "`)" : '') . (count($index_keys) > 0 ? ", INDEX (`" . implode('`, `', $index_keys) . "`)" : '') . (count($unique_keys) > 0 ? ", UNIQUE (`" . implode('`, `', $unique_keys) . "`)" : '') .  ($special_mul_key?$special_mul_key:'') . ')';
+            $sql = "CREATE TABLE `{$name}` (" . implode(', ', $sql_f) . (count($primary_keys) > 0 ? ", PRIMARY KEY (`" . implode('`, `', $primary_keys) . "`)" : '') . (count($index_keys) > 0 ? ", INDEX (`" . implode('`, `', $index_keys) . "`)" : '') . (count($unique_keys) > 0 ? ", UNIQUE (`" . implode('`, `', $unique_keys) . "`)" : '') .  ($special_mul_key?$special_mul_key:'') . ') ENGINE='.$fields[0]['Engine'].' COLLATE='.$fields[0]['Collation'];
 			echo($sql.';<br />');
             return true;
         }
