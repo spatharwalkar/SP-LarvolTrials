@@ -4352,10 +4352,21 @@ function getTrialUpdates($nctId, $larvolId, $time, $edited)
 		else 
 			$updates['edited']['NCT/'.$row['fieldname']] = 'No previous value';
 	}
-	
+	/*
 	$sql = "SELECT `clinical_study`.`larvol_id` FROM `clinical_study` WHERE `clinical_study`.`import_time` <= '" 
 		. date('Y-m-d',$time) . "' AND `clinical_study`.`larvol_id` = '" .  $larvolId . "' AND `clinical_study`.`import_time` >= '" 
 		. date('Y-m-d',strtotime($edited,$time)) . "' ";
+	*/
+
+		$frd=getFieldId('NCT', 'firstreceived_date');
+	
+		$sql = "SELECT cs.larvol_id,dv.val_date 
+		FROM clinical_study cs 
+		LEFT JOIN data_cats_in_study dcis ON cs.larvol_id = dcis.larvol_id 
+		LEFT JOIN data_values dv ON dcis.id = dv.studycat 
+		WHERE dv.field='" . $frd . "' and dv.val_date <= '". date('Y-m-d',$time) . "' 
+		AND cs.larvol_id = '" .  $larvolId . "' 
+		AND dv.val_date >= '" . date('Y-m-d',strtotime($edited,$time)) . "' ";
 		
 	$result = mysql_query($sql);		
 
