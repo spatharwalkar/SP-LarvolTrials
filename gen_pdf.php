@@ -1264,7 +1264,7 @@ margin-bottom: 2em;
 				
 			//Expiry feature for new link method
 			if(!empty($link_expiry_date) && ($this->loggedIn)) {
-				$pdf_content.='<span style="font-size:8pt;color:red;">Expires on: ' . $link_expiry_date[0]  . '</span>';
+				//$pdf_content.='<span style="font-size:8pt;color:red;">Expires on: ' . $link_expiry_date[0]  . '</span>';
 			}
 			
 		} else {
@@ -1693,7 +1693,7 @@ margin-bottom: 2em;
 				if(!empty($link_expiry_date)) {
 				
 					if($this->loggedIn) {
-						$pdf_content.='<span style="font-size:8pt;color:red;">Expires on: ' . $link_expiry_date[0]  . '</span>';
+						//$pdf_content.='<span style="font-size:8pt;color:red;">Expires on: ' . $link_expiry_date[0]  . '</span>';
 					}
 					
 					$ids = explode(".", $_POST['results']);
