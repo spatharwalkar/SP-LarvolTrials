@@ -2,8 +2,8 @@
 require_once('db.php');
 require_once('include.search.php');
 require_once('include.util.php');
-/*
-function getStudyCat($nctid)
+
+function getStudyCatId($nctid)
 {
 global $logger;
 if(!isset($nctid) or empty($nctid)) return false;
@@ -19,7 +19,7 @@ $query = 'SELECT studycat from data_values where val_int = "' . $nctid . '" and 
 	$resu=mysql_fetch_array($resu);
 	return $resu['studycat'];
 }
-*/
+
 function tindex($id,$cat,$productz=NULL,$up_id=NULL,$cid=NULL)
 {
 	if($cat=='products') $catid='8'; else $catid='9'; 

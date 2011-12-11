@@ -198,7 +198,7 @@ function scrape_history($id)
 	echo('<hr><br>Parse Current Study for all information and non essentials<br>');
 
 	ProcessNonEssentials($id, $lastdate);
-	$studyCat=getStudyCat($unid);
+	$studyCat=getStudyCatId($unid);
 	echo('<br>Pre-indexing product related trials for id: ' . $id . '..........<br><br>');
 	tindex($studyCat,'products');
 	echo('<br>Pre-indexing area related trials for id: ' . $id . '.........<br><br>');

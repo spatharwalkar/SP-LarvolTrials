@@ -229,7 +229,7 @@ if (count($ids) == 0) {
 		
 		/*** Preindex the trial */
 		echo '<br>Starting preindexing of '. $id . 'Time: '. date("Y-m-d H:i:s", strtotime('now')) . str_repeat (" .....",1);
-		$studyCat=getStudyCat($unid);
+		$studyCat=getStudyCatId($unid);
 		tindex($studyCat,'products');
 		tindex($studyCat,'areas');
 		echo '<br><br>Completed preindexing of '. $id . 'Time: '. date("Y-m-d H:i:s", strtotime('now')) . str_repeat (" ......",1);
