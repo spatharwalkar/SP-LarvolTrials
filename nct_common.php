@@ -1357,9 +1357,16 @@ function commit_diff($studycat, $category_id, $fieldname, $value, $date, $operat
 			if($type=='enum') 	$value2=getEnumvalId($field, $value1);
 			else $value2 = $value1;
 			
-			$query = 'UPDATE data_values SET superceded="' . $DTnow . '" WHERE studycat=' . $studycat . ' AND superceded is NULL  and added < "' . $DTnow . '" and ' ;
-			$query .=  'val_' . $type . '= "' . $value2 . '" and field=' . $field . ' limit 1  ';
+			if($fieldname=='phase')
+			{
+				$query = 'UPDATE data_values SET superceded="' . $DTnow . '" WHERE studycat=' . $studycat . ' AND superceded is NULL  and added < "' . $DTnow . '" and field=' . $field . ' ';
 			}
+			else
+			{
+				$query = 'UPDATE data_values SET superceded="' . $DTnow . '" WHERE studycat=' . $studycat . ' AND superceded is NULL  and added < "' . $DTnow . '" and ' ;
+				$query .=  'val_' . $type . '= "' . $value2 . '" and field=' . $field . ' limit 1  ';
+			}
+		}
 		else
 		{
 			
@@ -1367,10 +1374,17 @@ function commit_diff($studycat, $category_id, $fieldname, $value, $date, $operat
 			else $value2=$value1;
 			if($type=='date') 	$value2='val_date';
 
-			$query = 'UPDATE data_values SET superceded="' . $DTnow . '" WHERE studycat=' . $studycat . ' AND superceded is NULL  and added < "' . $DTnow . '"  and ' ;
-			$query .= $type=="date" ? ('"' . $value2 . '"'   ) : ('val_' . $type);
-			$query .= '= "' . $value2 . '" and field=' . $field . ' limit 1  ';
-//			$query = 'UPDATE data_values SET superceded="' . $DTnow . '" WHERE studycat=' . $studycat . ' AND superceded is NULL  and added < "' . $DTnow . '"  and field=' . $field . '  ';
+			if($fieldname=='phase')
+			{
+				$query = 'UPDATE data_values SET superceded="' . $DTnow . '" WHERE studycat=' . $studycat . ' AND superceded is NULL  and added < "' . $DTnow . '"  and field=' . $field . '  ';			
+			}
+			else
+			{
+				$query = 'UPDATE data_values SET superceded="' . $DTnow . '" WHERE studycat=' . $studycat . ' AND superceded is NULL  and added < "' . $DTnow . '"  and ' ;
+				$query .= $type=="date" ? ('"' . $value2 . '"'   ) : ('val_' . $type);
+				$query .= '= "' . $value2 . '" and field=' . $field . ' limit 1  ';
+//				$query = 'UPDATE data_values SET superceded="' . $DTnow . '" WHERE studycat=' . $studycat . ' AND superceded is NULL  and added < "' . $DTnow . '"  and field=' . $field . '  ';
+			}
 		}
 		if (mysql_query($query) === false)
             return softDie('Bad SQL query marking old values' . mysql_error() . '<br />' . $query);
