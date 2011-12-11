@@ -348,6 +348,7 @@ function ProcessChanges($id, $date, $column, $initial_date=NULL) {
     }
 	$parse_retry=0;
     unset($innerHTML);
+//	echo '<br>*************<br>XXML='; pr($xml);
     if (isset($initial_date) and !empty($initial_date)) {
 		addNCT_history($xml, $id, $initial_date);
       } else {
@@ -436,7 +437,7 @@ function addNCT_history($rec, $id, $date) {
             return softDie('Bad SQL query adding nct_id');
         }
     }
-//echo '<pre>'; print_r($rec); echo '</pre>';
+    //echo '<pre>'; print_r($rec); echo '</pre>';
 //exit;
 
 if(isset($rec->status_block->brief_summary->textblock) and !empty($rec->status_block->brief_summary->textblock)) $bsummary=$rec->status_block->brief_summary->textblock;
@@ -545,6 +546,8 @@ else $ddesc=$rec->detailed_descr->textblock;
     foreach ($rec->primary_outcome as $out) {
 		if(!isset($out->measure) or empty($out->measure))
 			$record_data['primary_outcome_measure'][]=$out;
+		if(isset($out->description->textblock) and !empty($out->description->textblock))
+			$record_data['primary_outcome_measure'][]=$out->description->textblock;
         $record_data['primary_outcome_measure'][] = $out->measure;
         $record_data['primary_outcome_timeframe'][] = $out->time_frame;
         $record_data['primary_outcome_safety_issue'][] = ynbool($out->safety_issue);
@@ -676,7 +679,7 @@ if(!count($matches[0]) >0 )
 preg_match_all($phases_regex, $record_data['official_title'], $matches);
 }
 
-//pr($record_data['official_title']);
+     // pr($record_data['primary_outcome_measure']);
 //pr($matches);
 
 if(!count($matches[0]) >0 )
