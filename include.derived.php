@@ -101,8 +101,18 @@ function applyInactiveDate($arr=array())
 	foreach($arr as $res)
 	{
 		$overallStatus = $res['NCT/overall_status'];
-		$completionDate = $res['NCT/completion_date'];
-		$primaryCompletionDate = $res['NCT/primary_completion_date'];
+		if(is_array($res['NCT/completion_date']))
+		{
+			$cn=count($res['NCT/completion_date']);
+			$completionDate = $res['NCT/completion_date'][$cn-1];
+		}
+		else $completionDate = $res['NCT/completion_date'];
+		if(is_array($res['NCT/primary_completion_date']))
+		{
+			$cn=count($res['NCT/primary_completion_date']);
+			$primaryCompletionDate = $res['NCT/primary_completion_date'][$cn-1];
+		}
+		else $primaryCompletionDate = $res['NCT/primary_completion_date'];
 		$larvolId = $res['larvol_id'];
 
 		$studyCatId = getStudyCat($larvolId);
