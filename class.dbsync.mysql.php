@@ -135,9 +135,9 @@ require_once('include.util.php');
 				}
 				
 				//get table detail engine status like engine collation etc.
-				$query = "show table status where Name='$table'";
-				$result = mysql_query($query, $this->dbp);
-				while($rw = mysql_fetch_assoc($result))
+				$query_engine = "show table status where Name='$table'";
+				$result_engine = mysql_query($query_engine, $this->dbp);
+				while($rw = mysql_fetch_assoc($result_engine))
 				{
 					$engine = $rw['Engine'];
 					$collate = $rw['Collation'];

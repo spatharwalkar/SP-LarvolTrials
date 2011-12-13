@@ -132,8 +132,10 @@
 
                     $diferent_fields = 0;
 
-                    for ($j = 0; $j < count($fields_home); $j++) {
-                    	if (!in_array($fields_home[$j]['name'], $fieldnames_sync)) {
+                    for ($j = 0; $j < count($fields_home); $j++)
+                    {
+                    	if (!in_array($fields_home[$j]['name'], $fieldnames_sync))
+                    	{
                             if (!isset($fields_home[$j - 1])) {
                             	$success = $db_sync->AddTableField($tables_home[$i], $fields_home[$j], 0);
                             } else {
@@ -143,7 +145,8 @@
 								$this->RaiseError("Could not add field <strong>{$fields_home[$j]['name']}</strong> to table <strong>{$tables_home[$i]}</strong> on database <strong>{$db_sync->database}</strong> at {$db_sync->user}@{$db_sync->host}: " . $db_sync->LastError());
                             }
                             $diferent_fields++;
-                        } else
+                        }
+                        else
                         {
 	                        	$k = $this->GetFieldIndex($fields_sync, $fields_home[$j]['name']);
 	                            if (
