@@ -5962,7 +5962,7 @@ if($stacked)
 			$objPHPExcel->getActiveSheet()->getStyle('K' . $i . ':K'. $cell_span)->applyFromArray($styleThinBlueBorderOutline);
 			
 			//set default height which contains upm's as these rows does not support auto height cause Merged cells + wrap text + autofit row height = not working
-			$objPHPExcel->getActiveSheet()->getRowDimension($i)->setRowHeight(50);
+			$objPHPExcel->getActiveSheet()->getRowDimension($i)->setRowHeight(36);
 			}
 			/////END PART - MERGE CELLS AND APPLY BORDER AS - FOR LOOP WAS NOT WORKING SET INDIVIDUALLY
 			
@@ -6303,6 +6303,7 @@ if($stacked)
 					//rendering upm (upcoming project completion) chart
 					$str = get_matched_UPMChart($st_month, $st_year, $ed_month, $ed_year, $current_yr, $second_yr, $third_yr, $v[5], 
 					$v[6], $upm_link, $upm_title, $objPHPExcel, $i);
+					$objPHPExcel->getActiveSheet()->getRowDimension($i)->setRowHeight(36);
 				$i++;	
 				}
 			}
@@ -6366,7 +6367,7 @@ else
 			$objPHPExcel->getActiveSheet()->getStyle('K' . $i . ':K'. $cell_span)->applyFromArray($styleThinBlueBorderOutline);
 			
 			//set default height which contains upm's as these rows does not support auto height cause Merged cells + wrap text + autofit row height = not working
-			$objPHPExcel->getActiveSheet()->getRowDimension($i)->setRowHeight(50);
+			$objPHPExcel->getActiveSheet()->getRowDimension($i)->setRowHeight(36);
 			}
 			/////END PART - MERGE CELLS AND APPLY BORDER AS - FOR LOOP WAS NOT WORKING SET INDIVIDUALLY
 			
@@ -6720,6 +6721,8 @@ else
 					//rendering upm (upcoming project completion) chart
 					$str = get_matched_UPMChart($st_month, $st_year, $ed_month, $ed_year, $current_yr, $second_yr, $third_yr, $v[5], 
 					$v[6], $upm_link, $upm_title, $objPHPExcel, $i);
+					
+					$objPHPExcel->getActiveSheet()->getRowDimension($i)->setRowHeight(36);
 				$i++;	
 				}
 			}
