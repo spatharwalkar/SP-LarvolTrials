@@ -444,6 +444,8 @@
         
         public function createUniqueValArray($dataArr,$fields=array(),$action='implode',$glue='_::_')
         {
+        	if(!isset($dataArr) || !is_array($dataArr) || !count($dataArr)>0)
+        	return array();
         	$returnArr = array();
         	foreach($dataArr as $arr)
         	{
