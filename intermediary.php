@@ -5,6 +5,10 @@ require_once('krumo/class.krumo.php');
 require_once('db.php');
 require_once('include.search.php');
 require_once('special_chars.php');
+
+/*********TKV - time machine being disabled in the new database as it created problems   3.30 */
+unset($_GET['time']);
+
 error_reporting(E_ALL ^ E_NOTICE);
 if(!isset($_GET['cparams']) && !isset($_GET['params']) && !isset($_GET['results']) && (!isset($_GET['a']) && !isset($_GET['p']))) die('cell not set');
 if(isset($_POST['btnDownload'])) 
