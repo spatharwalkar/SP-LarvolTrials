@@ -539,6 +539,8 @@ require_once('include.util.php');
 					return $arr[$name];
 				},$insertArr,array_fill(0,count($insertArr),$name));
 				$categoryIds = array_unique($categoryIds);
+				//without this the str_replace used below will not work properly in certain conditions. 
+				usort($categoryIds,function ($a,$b){return strlen($b)-strlen($a);});
         	}
 			foreach ($categoryIds as $oldCat)
 			{
@@ -568,13 +570,14 @@ require_once('include.util.php');
 			foreach($insertArr as $ky=>$arr)
 			{
 					$arr[$newName] = str_replace($categoryIds,$map,$arr[$name]);
-					unset($arr[$name]);
 					if($arr[$newName]=='')
 					continue;
+					unset($arr[$name]);
 					$tmp[$ky] = $arr;
 					
 			}
 			return $tmp;
-        }         
+        }
+        
     }
 ?>
