@@ -2985,6 +2985,8 @@ function displayNAUpms($record_arr = array(), $sectionHeader, $currentYear, $sec
 	$upm_string = '';
 	if(!empty($record_arr)) 
 	{
+
+
 		$cntr = 0;
 		foreach($record_arr as $key => $val) 
 		{
@@ -3243,7 +3245,6 @@ function displayNAUpms($record_arr = array(), $sectionHeader, $currentYear, $sec
 function displayContent($trials, $edited, $gentime, $start, $end, $currentYear, $secondYear, $thirdYear, $naUpmsDisplayStyle, $trialsInfo = array(), 
 $sections = array()) 
 {	
-	//echo '<pre>';print_r($sections);//exit;
 	$db = new DatabaseManager();
 	$fieldList 	= array('Enrollment' => 'NCT/enrollment', 'Region' => 'region', 'Interventions' => 'NCT/intervention_name', 
 						'Sponsor' => 'NCT/lead_sponsor', 'Status' => 'NCT/overall_status', 'Conditions' => 'NCT/condition', 
@@ -3305,7 +3306,7 @@ $sections = array())
 					}
 				}
 			}
-			else if($section !== $sectionKey && $tkey < $sectionKey)
+			else if($section !== $sectionKey && $tkey < $sectionKey && $tkey > $section)
 			{
 				if($section !== $sectionKey)
 				{
