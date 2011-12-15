@@ -2774,7 +2774,7 @@ class ContentManager
 				if(isset($TrialsInfo[0]['naUpms']) && !empty($TrialsInfo[0]['naUpms']))
 				{
 					$naUpmsDisplayStyle = 'expand';
-					$naUpmIndex = preg_replace('/\s|,|\/|[0-9]/', '', $TrialsInfo[0]['sectionHeader']);
+					$naUpmIndex = preg_replace('/[^a-z]/i', '', $TrialsInfo[0]['sectionHeader']);
 					$naUpmIndex = substr($naUpmIndex, 0, 7);
 					
 					echo '<tr class="trialtitles">'
@@ -3302,7 +3302,7 @@ $sections = array())
 						else
 							$image = 'up';
 						
-						$naUpmIndex = preg_replace('/\s|,|\/|[0-9]/', '', $tvalue['sectionHeader']);
+						$naUpmIndex = preg_replace('/[^a-z]/i', '', $tvalue['sectionHeader']);
 						$naUpmIndex = substr($naUpmIndex, 0, 7);
 						echo '<tr class="trialtitles">'
 							. '<td colspan="' . getColspanforNAUpm($db->loggedIn()) . '" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
@@ -3312,7 +3312,6 @@ $sections = array())
 							. $tvalue['sectionHeader'] . '</td></tr>'
 							. displayNAUpms($tvalue['naUpms'], $naUpmIndex , $currentYear, $secondYear, $thirdYear);
 					}
-
 					else
 					{
 						echo '<tr><td colspan="' . getColspanforNAUpm($db->loggedIn())  . '" class="notopbottomborder leftrightborderblue sectiontitles">'
@@ -3335,7 +3334,7 @@ $sections = array())
 						else
 							$image = 'up';
 						
-						$naUpmIndex = preg_replace('/\s|,|\/|[0-9]/', '', $tvalue['sectionHeader']);
+						$naUpmIndex = preg_replace('/[^a-z]/i', '', $tvalue['sectionHeader']);
 						$naUpmIndex = substr($naUpmIndex, 0, 7);
 						echo '<tr class="trialtitles">'
 							. '<td colspan="' . getColspanforNAUpm($db->loggedIn()) . '" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
@@ -3904,7 +3903,6 @@ function getCompletionChart($start_month, $start_year, $end_month, $end_year, $c
 			$value .= '<td colspan="3" ' . $attr_two . '>&nbsp;</td>';
 		
 		} else if($end_year > $third_yr) {
-
 		
 			$value = '<td colspan="12">&nbsp;</td><td colspan="12">&nbsp;</td>' . (($st != 0) ? '<td colspan="' . $st . '">&nbsp;</td>' : '');
 			$value .= '<td colspan="' .(15 - $st) . '" style="background-color:' . $bg_color . ';" ' . $attr_two . '>&nbsp;</td>';		
