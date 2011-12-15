@@ -1613,7 +1613,7 @@ function getActiveCount($all_ids, $time)
 	{
 		$timecond = 'dv.superceded IS NULL ';
 	}else{
-		$timecond = 'dv.added<' . date('Y-m-d H:i:s',$time) . ' AND (dv.superceded>' . date('Y-m-d H:i:s',$time) . ' OR dv.superceded IS NULL) ';
+		$timecond = 'dv.added < "' . date('Y-m-d H:i:s',$time) . '" AND (dv.superceded > "' . date('Y-m-d H:i:s',$time) . '" OR dv.superceded IS NULL) ';
 	}
 	
 	if(!is_array($all_ids) || empty($all_ids)) return 0;
