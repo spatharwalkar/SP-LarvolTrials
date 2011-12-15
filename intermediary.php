@@ -839,13 +839,6 @@ class ContentManager
 			if(!empty($excel_params)) 
 			{
 				$arrr = search($params,$this->fid,NULL,$this->time_machine);
-
-
-
-
-
-
-
 			} 
 			
 			//Added to consolidate the data returned in an mutidimensional array format as opposed to earlier 
@@ -863,7 +856,11 @@ class ContentManager
 						}
 						elseif($key3 == 'NCT/start_date' || $key3 == 'inactive_date')
 						{
-							$arr[$indx][$key3] = $vv[0];
+							$arr[$indx][$key3] = $value3[0];
+						}
+						elseif($key3 == 'NCT/phase')
+						{
+							$arr[$indx][$key3] = end($value3);
 						}
 						else
 						{
@@ -1308,6 +1305,10 @@ class ContentManager
 							{
 								$result[$id][$place] = $result[$id][$place] . ' ' . $val;
 							}
+							else if($result[$id][$place] == 'NCT/phase')
+							{
+								$result[$id][$place] = $val;
+							}
 							else
 							{
 									$result[$id][$place] = $result[$id][$place] . ', ' . $val;
@@ -1320,7 +1321,6 @@ class ContentManager
 						}
 					}
 						
-					//echo '<pre>';print_r($result);
 					foreach($result as $rkey => $rvalue) 
 					{ 
 						$nctId = $rvalue['NCT/nct_id'];
@@ -1608,6 +1608,10 @@ class ContentManager
 								{
 									$result[$id][$place] = $result[$id][$place] . ' ' . $val;
 								}
+								else if($result[$id][$place] == 'NCT/phase')
+								{
+									$result[$id][$place] = $val;
+								}
 								else
 								{
 										$result[$id][$place] = $result[$id][$place] . ', ' . $val;
@@ -1620,7 +1624,6 @@ class ContentManager
 							}
 						}
 						
-						//echo '<pre>';print_r($result);
 						foreach($result as $rkey => $rvalue) 
 						{ 
 							$nctId = $rvalue['NCT/nct_id'];
@@ -1868,6 +1871,10 @@ class ContentManager
 								{
 									$result[$id][$place] = $result[$id][$place] . ' ' . $val;
 								}
+								else if($result[$id][$place] == 'NCT/phase')
+								{
+									$result[$id][$place] = $val;
+								}
 								else
 								{
 										$result[$id][$place] = $result[$id][$place] . ', ' . $val;
@@ -2066,7 +2073,6 @@ class ContentManager
 				if($count > 0) 
 				{
 					displayContent($Trials[$this->type], $this->edited, NULL, $start, $last, $this->current_yr, $this->second_yr, $this->third_yr, 'collapse',
-
 					 $TrialsInfo, $sections);
 				}
 				else
@@ -2149,6 +2155,10 @@ class ContentManager
 						|| $result[$id][$place] == 'NCT/lead_sponsor')
 						{
 							$result[$id][$place] = $result[$id][$place] . ' ' . $val;
+						}
+						else if($result[$id][$place] == 'NCT/phase')
+						{
+							$result[$id][$place] = $val;
 						}
 						else
 						{
@@ -2521,6 +2531,10 @@ class ContentManager
 						elseif($kk == 'NCT/start_date' || $kk == 'inactive_date')
 						{
 							$arr[$nctId][$kk] = $vv[0];
+						}
+						elseif($kk == 'NCT/phase')
+						{
+							$arr[$nctId][$kk] = end($vv);
 						}
 						else
 						{
@@ -2986,7 +3000,6 @@ function displayNAUpms($record_arr = array(), $sectionHeader, $currentYear, $sec
 	if(!empty($record_arr)) 
 	{
 
-
 		$cntr = 0;
 		foreach($record_arr as $key => $val) 
 		{
@@ -3299,6 +3312,7 @@ $sections = array())
 							. $tvalue['sectionHeader'] . '</td></tr>'
 							. displayNAUpms($tvalue['naUpms'], $naUpmIndex , $currentYear, $secondYear, $thirdYear);
 					}
+
 					else
 					{
 						echo '<tr><td colspan="' . getColspanforNAUpm($db->loggedIn())  . '" class="notopbottomborder leftrightborderblue sectiontitles">'
@@ -3890,6 +3904,7 @@ function getCompletionChart($start_month, $start_year, $end_month, $end_year, $c
 			$value .= '<td colspan="3" ' . $attr_two . '>&nbsp;</td>';
 		
 		} else if($end_year > $third_yr) {
+
 		
 			$value = '<td colspan="12">&nbsp;</td><td colspan="12">&nbsp;</td>' . (($st != 0) ? '<td colspan="' . $st . '">&nbsp;</td>' : '');
 			$value .= '<td colspan="' .(15 - $st) . '" style="background-color:' . $bg_color . ';" ' . $attr_two . '>&nbsp;</td>';		
