@@ -3533,11 +3533,15 @@ $sections = array())
 			
 			//end date column
 			$attr = '';
-			if($trials[$i]['new'] == 'y') 
+			if(isset($trials[$i]['edited']) && array_key_exists('inactive_date', $trials[$i]['edited'])) 
 			{
-				$attr = ' title="New record" ';
+				$attr = ' highlight" title="' . $trials[$i]['edited']['inactive_date'] ;
+			} 
+			else if($trials[$i]['new'] == 'y') 
+			{
+				$attr = '" title="New record" ';
 			}	
-			echo '<td rowspan="' . $rowspan . '" class="' . $rowOneType . '" ' . $attr . '><div class="rowcollapse">'; 
+			echo '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">'; 
 			if($trials[$i]["inactive_date"] != '' && $trials[$i]["inactive_date"] != NULL && $trials[$i]["inactive_date"] != '0000-00-00') 
 			{
 				echo date('m/y',strtotime($trials[$i]["inactive_date"]));
@@ -4411,21 +4415,40 @@ function getTrialUpdates($nctId, $larvolId, $time, $edited)
 		else 
 			$updates['edited']['NCT/'.$row['fieldname']] = 'No previous value';
 	}
+
+	
+	
+	$query = "SELECT inactive_date_prev FROM `clinical_study` WHERE larvol_id = '" . $larvolId . "' AND (inactive_date_lastchanged <'" . date('Y-m-d',$time) 
+				. "' AND inactive_date_lastchanged >= '" . date('Y-m-d',strtotime($edited,$time)) . "')";
+	$res = mysql_query($query);
+	if(mysql_num_rows($res) > 0)
+	{	
+		$row = mysql_fetch_assoc($res);
+		if($row['inactive_date_prev'] !== NULL)
+		{
+			$updates['edited']['inactive_date'] = 'Previous value: ' . $row['inactive_date_prev'];
+		}
+		else
+		{
+			$updates['edited']['inactive_date'] = 'No previous value';
+		}
+	}
+	
 	/*
 	$sql = "SELECT `clinical_study`.`larvol_id` FROM `clinical_study` WHERE `clinical_study`.`import_time` <= '" 
 		. date('Y-m-d',$time) . "' AND `clinical_study`.`larvol_id` = '" .  $larvolId . "' AND `clinical_study`.`import_time` >= '" 
 		. date('Y-m-d',strtotime($edited,$time)) . "' ";
 	*/
 
-		$frd=getFieldId('NCT', 'firstreceived_date');
-	
-		$sql = "SELECT cs.larvol_id,dv.val_date 
-		FROM clinical_study cs 
-		LEFT JOIN data_cats_in_study dcis ON cs.larvol_id = dcis.larvol_id 
-		LEFT JOIN data_values dv ON dcis.id = dv.studycat 
-		WHERE dv.field='" . $frd . "' and dv.val_date <= '". date('Y-m-d',$time) . "' 
-		AND cs.larvol_id = '" .  $larvolId . "' 
-		AND dv.val_date >= '" . date('Y-m-d',strtotime($edited,$time)) . "' ";
+	$frd=getFieldId('NCT', 'firstreceived_date');
+
+	$sql = "SELECT cs.larvol_id,dv.val_date 
+	FROM clinical_study cs 
+	LEFT JOIN data_cats_in_study dcis ON cs.larvol_id = dcis.larvol_id 
+	LEFT JOIN data_values dv ON dcis.id = dv.studycat 
+	WHERE dv.field='" . $frd . "' and dv.val_date <= '". date('Y-m-d',$time) . "' 
+	AND cs.larvol_id = '" .  $larvolId . "' 
+	AND dv.val_date >= '" . date('Y-m-d',strtotime($edited,$time)) . "' ";
 		
 	$result = mysql_query($sql);		
 
