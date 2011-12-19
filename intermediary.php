@@ -599,6 +599,10 @@ class ContentManager
 						else
 						{
 							array_splice($out,0,0,$ids[0]);
+							if(isset($out[4])) 
+							{
+								array_pop($out);
+							}
 						}
 						$resv = implode('.', $out);
 					}	
@@ -685,6 +689,7 @@ class ContentManager
 			$totactivecount	 = 0; 
 			$totalcount	= 0;
 			$larvolIds = array();			
+			$return_param['trialsInfo'][$pk]['naUpms'] = array();
 			
 			//New Link Method
 			if(isset($_GET['results'])) 
