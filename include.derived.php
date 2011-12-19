@@ -655,3 +655,486 @@ function applyInstitutionType($arr)
 	if(mysql_query($query) === false) return softDie('Bad SQL query recording institution type<br/>'.$query);
 	
 }
+
+//start Criteria functions
+/**
+ * @name refreshCriteriaLarvolIds
+ * @tutorial Calling this function all the available larvol_id's
+ * are retrieved and Inclusion Criteria, Exclusion Criteria, Not Specified are updated.
+ * @author Sachin Fasale
+ */
+function refreshCriteriaLarvolIds()
+{
+	global $db;
+	
+	//calculate field Ids and store in an array since it requires db call
+	$fieldArr = calculateCriteriaFieldIds();
+
+	$query = "select larvol_id from clinical_study";
+	$res = mysql_query($query);
+	while($row = mysql_fetch_array($res))
+	{
+		$larvolId = $row['larvol_id'];
+		echo 'Larvol Id :'.$larvolId.'<br/>';
+		refreshCriteria($larvolId, 'search',$fieldArr);
+	}
+}
+
+/**
+ * @name calculateCriteriaFieldIds
+ * @tutorial Calculate the field id's of fields required
+ * for calculating Criteria
+ * @author Sachin Fasale
+ */
+function calculateCriteriaFieldIds()
+{
+	$fieldnames = array('criteria');
+	$fieldArr = array();
+	foreach($fieldnames as $name)
+	{
+		$fieldArr[$name] = getFieldId('NCT',$name);
+	}
+	return $fieldArr;
+}
+
+/**
+ * 
+ * @name refreshCriteria
+ * @tutorial Search function used to get the Criteria.
+ * If larvolId is present function searches for the specific larvolId and updates Criteria.
+ * If no larvolId is present all available larvolId's are listed and updates Criteria
+ * @param int $larvolId 
+ * @param var $action It is either empty string or search. Search is used for individual larvolIds
+ * @param array $fieldArr field arrays are calculated seperately to avoid unnecessary db calls for repeated calls to this function.
+ * @author Sachin Fasale
+ * 
+ */
+function refreshCriteria($larvolId,$action,$fieldArr)
+{
+	$param = new SearchParam();
+	$param->field = 'larvol_id';
+	$param->action = $action;
+	$param->value = $larvolId;
+	$param->strong = 1;
+	
+	$prm = array($param);
+	
+	$fieldnames = array('criteria');
+	foreach($fieldnames as $name)
+	{ 
+		
+		$param = new SearchParam();
+		$param->field = '_'.$fieldArr[$name];
+		$param->action ='';
+		$param->value = '';
+		$param->strong = 1;
+		$prm[] = $param;
+		$list[] = $param->field;
+	
+	}	
+
+	
+	$res = search($prm,$list,NULL,NULL);
+	if(count($res)>0)
+	{
+		applyCriteria($res);
+	}
+	else
+	{
+		mysql_query('BEGIN') or softdie('Cannot begin transaction');
+		$query  = "update clinical_study set inclusion_criteria=null, exclusion_criteria=null where larvol_id=$larvolId";	
+		if(mysql_query($query))
+		{
+			mysql_query('COMMIT') or softdie('Cannot commit transaction');
+			echo ' Criteria updated for Larvol Id: '.$larvolId.'.<br/>';	
+		}
+		else
+		{
+			softdie('Cannot update Criteria. '.$query);
+		}			
+	}
+	
+	
+}	
+/**
+ * @name apply Criteria
+ * @tutorial Function applies derived field Inclusion Criteria, Exclusion Criteria, Not Specified Criteria for each search result array passed.
+ * @param array $arr is an array of search result from the search() function.
+ * @author Sachin Fasale
+ */
+function applyCriteria($arr)
+{
+	global $db;
+	if(count($arr)>0)
+	{
+		mysql_query('BEGIN') or die('Cannot begin transaction');
+	}
+/*	else 
+	{
+		softdie('No records to update.<br/>');
+	}*/	
+	
+	$flag = 0;
+	$flag1 = 0;
+	$flag2 = 0;
+	//$regionArr = regionMapping();
+	foreach($arr as $res)
+	{	
+		$larvolId = $res['larvol_id'];
+		$criteria = $res['NCT/criteria'];
+		if(is_array($criteria))
+		{
+			$criteriaArr = array();
+			foreach($criteria as $criteria1)
+			{
+				$criteriaArr[] = $criteria1;
+			}
+			$criteriaArr = array_unique($criteriaArr);
+			$criteria = $criteriaArr;
+		}
+		$criteriaArr = array();
+		$total_data=criteria_process($criteria);
+		
+		if($total_data['inclusion'] != '' || $total_data['inclusion'] != NULL)
+		$incl_data=mysql_real_escape_string($total_data['inclusion']);
+		else
+		$incl_data=null;
+		
+		if($total_data['exclusion'] != '' || $total_data['exclusion'] != NULL)
+		$excl_data=mysql_real_escape_string($total_data['exclusion']);
+		else
+		$excl_data=null;
+		
+		if($total_data['ntspecified'] != '' || $total_data['ntspecified'] != NULL)
+		$ntspec_data=mysql_real_escape_string($total_data['ntspecified']);
+		else
+		$ntspec_data=null;
+		
+		$query  = "update clinical_study set inclusion_criteria='".$incl_data."', exclusion_criteria='".$excl_data."' where larvol_id=$larvolId";
+		if(mysql_query($query))
+		{
+			$flag=1;
+		}
+		else
+		{
+			softdie('Cannot update Criteria. '.$query.mysql_error());
+		}		
+	}
+	if($flag == 1)
+	{
+		mysql_query('COMMIT') or softdie('Cannot commit transaction');
+		echo 'Criteria updated for Larvol Id: '.$larvolId.'.<br/>';	
+	}	
+}
+
+/**
+ * @name All Functions for getting Inclusion Criteria, Exclusion Criteria, Not Specified Criteria from Criteria value
+ * get_header- gives headers in particular line
+ * check_exclusion - checks line is in Inclusion, Exclusion or Not Specified Criteria
+ * process_criteria - Processess all things
+ * @author Sachin Fasale
+ */
+function get_header($header_text)
+{
+	$header=array();
+	$i=0;
+	preg_match('/(.*:)(.*)/',$header_text, $hd);
+	
+	while($hd[1]) //Extract all Headers
+	{
+		if(preg_match('/(.*:)(.*)/',$header_text, $hd)) //Check if Header is Present
+		{
+			preg_match('/(.*:)(.*)/',$header_text, $hd);
+			$header[$i]['val']=$hd[1];		//Assign value
+			$header[$i]['incl']='New';		//Assign its New value for inclusion criteria
+			$header[$i]['excl']='New';		//Assign its New value for exclusion criteria
+			$header[$i]['ntspec']='New';	//Assign its New value for Not Specified criteria
+			$header[$i]['spcl']='No';		//Assign is it a Special Header i.e which contains subheaders
+			
+			//$header_text = preg_replace('/('.$hd[1].')/','',$header_text); 
+			$header_text=str_replace($hd[1],'',$header_text);	//Replace Encountered Header part with blank
+			
+			preg_match('/(.*:)(.*)/',$header_text, $hd); // Check if more header present
+			//if($hd[1])
+			//$header[$i]['spcl']='Yes';
+			
+			$i++;
+		}
+	//var_dump($header);		
+	}
+	//var_dump($header_text);
+	$return[0]=$header;
+	//var_dump($header);
+	$return[1]=$header_text;
+	return 	$return;	
+}
+
+function check_exclusion($line) //Check line is in Exclusion Criteria
+{
+	if(preg_match('/(.*)No (.*)/',$line, $out))
+	{
+		return 1;
+	}
+	elseif(preg_match('/(.*)ineligible (.*)/',$line, $out))
+	{
+		return 1;
+	}
+	elseif(preg_match('/(.*)Not specified(.*)/',$line, $out) || preg_match('/(.*)Not Specified(.*)/',$line, $out) || preg_match('/(.*)not specified(.*)/',$line, $out))
+	{
+		return 2;
+	}
+	elseif(preg_match('/(.*)Not (.*)/',$line, $out))
+	{
+		return 1;
+	}elseif(preg_match('/(.*)not (.*)/',$line, $out))
+	{
+		return 1;
+	}else
+	{
+		return 0;
+	}
+}
+
+function criteria_process($text)
+{
+	
+	$text=str_replace("/","qqqqqqqq",$text); //Replace / with qqqqqqqq(uncommon string) as it causes problems in some string functions
+
+	//used for replacing . in numbers with * b4 exploding by full stop
+	//$text=preg_replace('/(\d)(\.+)(\d)/','$1*$3',$text); 
+	
+	//used for replacing . in numbers with * b4 replacing . by \n
+	//$text=preg_replace('/(\d)(\.+)(\d)/','$1*$3',$text);
+	
+	//This adds \n before heading as in many cases where text is contneous and we are unable to detect end of line
+	$text=preg_replace('/([A-Z]{1}[a-z]+){0,1}(\s){0,1}[A-Z]{1}[a-z\s]+[a-z]+:{1}/','\n $0',$text); 
+	
+	//add \n at sentence end
+	$re = '/# Split sentences on whitespace between them.
+    (?<=                # Begin positive lookbehind.
+      [.!?]             # Either an end of sentence punct,
+    | [.!?][\'"]        # or end of sentence punct and quote.
+    )                   # End positive lookbehind.
+    (?<!                # Begin negative lookbehind.
+      Mr\.              # Skip either "Mr."
+    | Mrs\.             # or "Mrs.",
+    | Ms\.              # or "Ms.",
+    | Jr\.              # or "Jr.",
+    | Dr\.              # or "Dr.",
+    | Prof\.            # or "Prof.",
+    | Sr\.              # or "Sr.",
+	| i\.e\.            # or "i.e.",
+                        # or... (you get the idea).
+    )                   # End negative lookbehind.
+    \s+                 # Split on whitespace between sentences.
+    /ix';
+
+	$text=preg_replace($re,'$0 \n $1',$text); 
+	
+	//var_dump($text);
+	//$text=str_replace(".","\n",$text); //Replace . with \n as it causes problems in some string functions
+	
+	$data=explode('\n', $text);
+	
+	/*
+	//replace * with . after successful explode using full stop
+	for($i=0;$i< count($data); $i++)
+	{
+		if($data[$i] != '' || $data[$i] != '')
+		{
+		$data[$i]=preg_replace('/(\d)(\*+)(\d)/','$1.$3',$data[$i]); 
+		$data[$i]=$data[$i];
+		}
+	}*/
+	/*
+	//replace * with . after successful explode using \n
+	for($i=0;$i< count($data); $i++)
+
+	{
+		if($data[$i] != '' || $data[$i] != '')
+		{
+		$data[$i]=preg_replace('/(\d)(\*+)(\d)/','$1.$3',$data[$i]); 
+		$data[$i]=$data[$i];
+		}
+	}*/
+	//var_dump($data);
+	
+	$incl_print_data='';
+	$excl_print_data='';
+	
+	$incl_header=0;
+	$excl_header=0;
+	
+	$diff_criteria_present_flag=0;
+	$header=array();
+	
+	for($m=0;$m< count($data); $m++)
+	{
+		//print $data[$i].'<br>';
+			
+		if(trim($data[$m]) != '' && $data[$m] != NULL && trim($data[$m]) != " ") //check if data presents
+		{
+			$line=trim($data[$m]);
+			
+			if(!$incl_header)
+			{
+				if(strpos($line,'Inclusion') || preg_match('/(.*)Inclusion(.*)/',$line, $out11))
+				$incl_header=1;
+			}
+			
+			if(!$excl_header)
+			{
+				if(strpos($line,'Exclusion') || preg_match('/(.*)Exclusion(.*)/',$line, $out11))
+				$excl_header=1;
+			}
+		
+			preg_match('/(.*:)(.*)/',$line, $hd1);  //Check if Line contains Header is Present
+			
+			if($hd1[1]) //If header present Execute this part
+			{
+				if($prev=='header')
+				$header[count($header)-1]['spcl']='Yes';
+				$prev='header';
+				$return=get_header($line);
+				//var_dump($hd1[1]);
+				$line=trim($return[1]);
+				
+				
+				$new_header=$return[0];
+				
+				$j=count($header);
+				for($i=count($new_header)-1;$i>=0; $i--)
+				{
+					$header[$j]['val']=$new_header[$i]['val'];    ///fill new headers in our headers list
+					$header[$j]['incl']=$new_header[$i]['incl'];
+					$header[$j]['excl']=$new_header[$i]['excl'];
+					$header[$j]['ntspec']=$new_header[$i]['ntspec'];
+					$header[$j]['spcl']=$new_header[$i]['spcl'];
+					
+					$j++;
+				}
+				
+			}///header present if ends
+			else
+			{
+				$prev='line';
+			}
+			//var_dump($header);
+			
+			$checker=check_exclusion($line);
+			
+			if($excl_header == 1 && $checker !=2)
+			$checker=1;
+			
+			if(!$checker) //Check line is in inclusion or exclsion criteria
+			{	
+				$i=0;
+				
+				if($line != '' && $line != NULL)
+				{
+				$prev='line';
+				while($i < count($header))
+				{
+					if(($i<(count($header)-count($new_header))) && $header[$i]['spcl'] != 'Yes')
+					$header[$i]['incl']='Old';
+					
+					if($header[$i]['incl'] == 'New')
+					{
+						//if(!strpos($header[$i]['val'],'Inclusion') && !preg_match('/(.*)Inclusion(.*)/',$header[$i]['val'], $out22) && !preg_match('/(.*)Exclusion(.*)/',$header[$i]['val'], $out22))
+						$incl_print_data.="\n".trim($header[$i]['val'])."\n";
+						$header[$i]['incl']='Old';			//make headers status old if we displayed it for inclusion
+					}
+					$i++;
+				}
+				
+					$incl_print_data.=trim($line)."\n";
+				}
+				
+			} elseif($checker == 2) {
+			
+				$i=0;
+				if($line != '' && $line != NULL)
+				{
+					$prev='line';
+					while($i < count($header))
+					{
+						if(($i<(count($header)-count($new_header))) && $header[$i]['spcl'] != 'Yes')
+						$header[$i]['ntspec']='Old';
+						
+						if($header[$i]['ntspec'] == 'New')
+						{
+							$ntspec_print_data.="\n".trim($header[$i]['val'])."\n";
+							$header[$i]['ntspec']='Old';			//make headers status old if we displayed it for exclusion
+						}
+						$i++;
+					}
+					$ntspec_print_data.=trim($line)."\n";
+				}
+				
+			} else {
+			
+				$i=0;
+				if($line != '' && $line != NULL)
+				{
+				$prev='line';
+				while($i < count($header))
+				{
+					if(($i<(count($header)-count($new_header))) && $header[$i]['spcl'] != 'Yes')
+					$header[$i]['excl']='Old';
+					
+					if($header[$i]['excl'] == 'New')
+					{
+						//if(!strpos($header[$i]['val'],'Exclusion') && !preg_match('/(.*)Exclusion(.*)/',$header[$i]['val'], $out22) && !preg_match('/(.*)Inclusion(.*)/',$header[$i]['val'], $out22))
+						$excl_print_data.="\n".trim($header[$i]['val'])."\n";
+						$header[$i]['excl']='Old';			//make headers status old if we displayed it for exclusion
+					}
+					$i++;
+				}
+				$diff_criteria_present_flag=1; //make flag one if we get any line belongs to exclusion criteria
+				
+					$excl_print_data.=trim($line)."\n";
+				}
+				
+			}
+			
+			
+		
+	
+		}//data present if ends
+		
+	}///for loop ends of data counter
+	
+	/*if($diff_criteria_present_flag)
+	{
+		$ntspec_print_data="Not Specified:\n".$ntspec_print_data."\n\n";
+		$incl_print_data="Inclusion Criteria:\n".$incl_print_data."\n\n";
+		$excl_print_data="Exclusion Criteria:\n".$excl_print_data."\n\n";
+		$total_data=$incl_print_data.$excl_print_data.$ntspec_print_data;
+	}
+	else
+	{
+		$ntspec_print_data="Not Specified:\n".$ntspec_print_data."\n\n";
+		$incl_print_data="All Criteria:\n".$incl_print_data."\n\n";
+		$total_data=$incl_print_data.$ntspec_print_data;
+	}
+	
+	$total_data=str_replace("qqqqqqqq","/",$total_data); //Replace qqqqqqqq with / as it causes problems in some string functions
+			
+	//print '<br><br><br><br><b><font size="+3">Processed Data:</font></b> <br><br><pre>'.$total_data.'<pre>';
+	$total_data="\n\nProcessed Output Data:\n\n".$total_data;*/
+
+	$incl_print_data=str_replace("qqqqqqqq","/",$incl_print_data);
+	$excl_print_data=str_replace("qqqqqqqq","/",$excl_print_data);
+	$ntspec_print_data=str_replace("qqqqqqqq","/",$ntspec_print_data);
+	
+	$total_data=array();
+	$total_data['inclusion']=$incl_print_data;
+	$total_data['exclusion']=$excl_print_data;
+	$total_data['ntspecified']=$ntspec_print_data;
+  
+	return $total_data;
+
+	
+} //end of process function
+
+/***** All functions ends belonging to calculating Separated Criteria *****/

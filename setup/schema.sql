@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS `clinical_study` (
   `inactive_date` date DEFAULT NULL,
   `inactive_date_lastchanged` DATE NULL DEFAULT NULL,
   `inactive_date_prev` DATE NULL DEFAULT NULL,
+  `inclusion_criteria` TEXT NULL DEFAULT NULL ,
+  `exclusion_criteria` TEXT NULL DEFAULT NULL ,
   PRIMARY KEY (`larvol_id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
