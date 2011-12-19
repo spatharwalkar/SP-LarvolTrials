@@ -1362,6 +1362,8 @@ function commit_diff($studycat, $category_id, $fieldname, $value, $date, $operat
 			if($type=='enum') 	$value2=getEnumvalId($field, $value1);
 			else $value2 = $value1;
 			
+			if($type=='date' and strlen($value2)<8) $value2=$value2 . '-01';
+			
 			if($fieldname=='phase')
 			{
 				$query = 'UPDATE data_values SET superceded="' . $DTnow . '" WHERE studycat=' . $studycat . ' AND superceded is NULL  and added < "' . $DTnow . '" and field=' . $field . ' ';
@@ -1391,6 +1393,7 @@ function commit_diff($studycat, $category_id, $fieldname, $value, $date, $operat
 //				$query = 'UPDATE data_values SET superceded="' . $DTnow . '" WHERE studycat=' . $studycat . ' AND superceded is NULL  and added < "' . $DTnow . '"  and field=' . $field . '  ';
 			}
 		}
+		
 		if (mysql_query($query) === false)
             return softDie('Bad SQL query marking old values' . mysql_error() . '<br />' . $query);
     }
