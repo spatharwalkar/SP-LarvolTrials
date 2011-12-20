@@ -907,7 +907,11 @@ function criteria_process($text)
 	//$text=preg_replace('/(\d)(\.+)(\d)/','$1*$3',$text);
 	
 	//This adds \n before heading as in many cases where text is contneous and we are unable to detect end of line
-	$text=preg_replace('/([A-Z]{1}[a-z]+){0,1}(\s){0,1}[A-Z]{1}[a-z\s]+[a-z]+:{1}/','\n $0',$text); 
+	$text=preg_replace('/([A-Z]{1}[a-z]+){0,1}(\s){0,1}[A-Z]{1}[a-z\s]+[a-z]+:{1}/','\n $0 \n',$text);
+	
+	$text=preg_replace('/([A-Z]{1}[A-Z]+){0,1}(\s){0,1}[A-Z]{1}[A-Z\s]+[A-Z]+:{1}/','\n $0 \n',$text); 
+	
+	//var_dump($text); 
 	
 	//add \n at sentence end
 	$re = '/# Split sentences on whitespace between them.
@@ -978,13 +982,13 @@ function criteria_process($text)
 			
 			if(!$incl_header)
 			{
-				if(strpos($line,'Inclusion') || preg_match('/(.*)Inclusion(.*)/',$line, $out11))
+				if(strpos($line,'Inclusion') || preg_match('/(.*)Inclusion(.*)/',$line, $out11) || preg_match('/(.*)INCLUSION(.*)/',$line, $out11) || preg_match('/(.*)inclusion(.*)/',$line, $out11))
 				$incl_header=1;
 			}
 			
 			if(!$excl_header)
 			{
-				if(strpos($line,'Exclusion') || preg_match('/(.*)Exclusion(.*)/',$line, $out11))
+				if(strpos($line,'Exclusion') || preg_match('/(.*)Exclusion(.*)/',$line, $out11) || preg_match('/(.*)EXCLUSION(.*)/',$line, $out11) || preg_match('/(.*)exclusion(.*)/',$line, $out11))
 				$excl_header=1;
 			}
 		
@@ -1040,7 +1044,7 @@ function criteria_process($text)
 					
 					if($header[$i]['incl'] == 'New')
 					{
-						//if(!strpos($header[$i]['val'],'Inclusion') && !preg_match('/(.*)Inclusion(.*)/',$header[$i]['val'], $out22) && !preg_match('/(.*)Exclusion(.*)/',$header[$i]['val'], $out22))
+						if(!strpos($header[$i]['val'],'Inclusion') && !preg_match('/(.*)Inclusion(.*)/',$header[$i]['val'], $out22) && !preg_match('/(.*)INCLUSION(.*)/',$header[$i]['val'], $out22) && !preg_match('/(.*)EXCLUSION(.*)/',$header[$i]['val'], $out22) && !preg_match('/(.*)Exclusion(.*)/',$header[$i]['val'], $out22))
 						$incl_print_data.="\n".trim($header[$i]['val'])."\n";
 						$header[$i]['incl']='Old';			//make headers status old if we displayed it for inclusion
 					}
@@ -1084,7 +1088,7 @@ function criteria_process($text)
 					
 					if($header[$i]['excl'] == 'New')
 					{
-						//if(!strpos($header[$i]['val'],'Exclusion') && !preg_match('/(.*)Exclusion(.*)/',$header[$i]['val'], $out22) && !preg_match('/(.*)Inclusion(.*)/',$header[$i]['val'], $out22))
+						if(!strpos($header[$i]['val'],'Exclusion') && !preg_match('/(.*)Inclusion(.*)/',$header[$i]['val'], $out22) && !preg_match('/(.*)INCLUSION(.*)/',$header[$i]['val'], $out22) && !preg_match('/(.*)EXCLUSION(.*)/',$header[$i]['val'], $out22) && !preg_match('/(.*)Exclusion(.*)/',$header[$i]['val'], $out22))
 						$excl_print_data.="\n".trim($header[$i]['val'])."\n";
 						$header[$i]['excl']='Old';			//make headers status old if we displayed it for exclusion
 					}
