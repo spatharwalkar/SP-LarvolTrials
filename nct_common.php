@@ -113,6 +113,7 @@ $level = array();
 $fieldIDArr = calculateDateFieldIds();
 $fieldITArr = calculateInstitutionTypeFieldIds();
 $fieldRArr = calculateRegionFieldIds();
+$fieldCRITArr = calculateCriteriaFieldIds();
 
 //returned array maps the IDs to lastchanged dates
 function getIDs($type) {
@@ -746,6 +747,8 @@ if(count($matches[0]) >0 )
 	refreshInstitutionType($larvol_id,'search',$fieldITArr);	
 	//Calculate regions
 	refreshRegions($larvol_id,'search',$fieldRArr);
+	//Calculate inclusion and exclusion criteria
+	refreshCriteria($larvol_id,'search',$fieldCRITArr);
     return true;
 }
 

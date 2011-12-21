@@ -9,6 +9,7 @@ $instMap = institutionMapping();
 $fieldIDArr = calculateDateFieldIds();
 $fieldITArr = calculateInstitutionTypeFieldIds();
 $fieldRArr = calculateRegionFieldIds();
+$fieldCRITArr = calculateCriteriaFieldIds();
 
 //Adds a new record of any recognized type from a simpleXML object.
 //Autodetects the type if none is specified.
@@ -304,6 +305,8 @@ else $ddesc=$rec->detailed_descr->textblock;
 	refreshInstitutionType($larvol_id,'search',$fieldITArr);	
 	//Calculate regions
 	refreshRegions($larvol_id,'search',$fieldRArr);
+	//Calculate inclusion and exclusion criteria
+	refreshCriteria($larvol_id,'search',$fieldCRITArr);
 	
 	return true;
 }

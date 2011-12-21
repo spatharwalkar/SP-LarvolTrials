@@ -777,22 +777,24 @@ function applyCriteria($arr)
 	$flag = 0;
 	$flag1 = 0;
 	$flag2 = 0;
-	//$regionArr = regionMapping();
+	
 	foreach($arr as $res)
 	{	
 		$larvolId = $res['larvol_id'];
 		$criteria = $res['NCT/criteria'];
 		if(is_array($criteria))
 		{
-			$criteriaArr = array();
+			$criteria=array_unique($criteria);
+			$criteriaArr = '';
 			foreach($criteria as $criteria1)
 			{
-				$criteriaArr[] = $criteria1;
+				$criteriaArr.= $criteria1."\n";
 			}
-			$criteriaArr = array_unique($criteriaArr);
+			//$criteriaArr = array_unique($criteriaArr);
 			$criteria = $criteriaArr;
 		}
 		$criteriaArr = array();
+		//var_dump($criteria);
 		$total_data=criteria_process($criteria);
 		
 		if($total_data['inclusion'] != '' || $total_data['inclusion'] != NULL)
@@ -810,6 +812,9 @@ function applyCriteria($arr)
 		else
 		$ntspec_data=null;
 		
+		//print '<br><br><br><br>Inclusion Criteria'; print $incl_data; print '<br><br><br><br> '.$larvolId.'Exclusion Criteria';
+		//print $excl_data;
+		
 		$query  = "update clinical_study set inclusion_criteria='".$incl_data."', exclusion_criteria='".$excl_data."' where larvol_id=$larvolId";
 		if(mysql_query($query))
 		{
@@ -817,7 +822,7 @@ function applyCriteria($arr)
 		}
 		else
 		{
-			softdie('Cannot update Criteria. '.$query.mysql_error());
+			softdie('Cannot update Criteria. '.$query);
 		}		
 	}
 	if($flag == 1)
@@ -875,6 +880,10 @@ function check_exclusion($line) //Check line is in Exclusion Criteria
 	{
 		return 1;
 	}
+	if(preg_match('/(.*) no (.*)/',$line, $out))
+	{
+		return 1;
+	}
 	elseif(preg_match('/(.*)ineligible (.*)/',$line, $out))
 	{
 		return 1;
@@ -899,6 +908,29 @@ function criteria_process($text)
 {
 	
 	$text=str_replace("/","qqqqqqqq",$text); //Replace / with qqqqqqqq(uncommon string) as it causes problems in some string functions
+	
+	$text=str_replace("Inclusion Criteria:","Inclusion Criteria",$text);
+	$text=str_replace("Exclusion Criteria:","Exclusion Criteria",$text);
+	$text=str_replace("Inclusion Criteria","Inclusion Criteria",$text);
+	$text=str_replace("Exclusion Criteria","Exclusion Criteria",$text);
+	
+	$text=str_replace("inclusion criteria:","Inclusion Criteria",$text);
+	$text=str_replace("exclusion criteria:","Exclusion Criteria",$text);
+	$text=str_replace("inclusion criteria","Inclusion Criteria",$text);
+	$text=str_replace("exclusion criteria","Exclusion Criteria",$text);
+	
+	$text=str_replace("Inclusion criteria:","Inclusion Criteria",$text);
+	$text=str_replace("Exclusion criteria:","Exclusion Criteria",$text);
+	$text=str_replace("Inclusion criteria","Inclusion Criteria",$text);
+	$text=str_replace("Exclusion criteria","Exclusion Criteria",$text);
+	
+	$text=str_replace("INCLUSION CRITERIA:","Inclusion Criteria",$text);
+	$text=str_replace("EXCLUSION CRITERIA:","Exclusion Criteria",$text);
+	$text=str_replace("INCLUSION CRITERIA","Inclusion Criteria",$text);
+	$text=str_replace("EXCLUSION CRITERIA","Exclusion Criteria",$text);
+	
+	$text=str_replace('Inclusion Criteria','Inclusion Criteria: \n',$text); //Replace all Inclusion Criteria with Inclusion Criteria: to make it like header
+	$text=str_replace('Exclusion Criteria','Exclusion Criteria: \n',$text); //Replace all Exclusion Criteria with Exclusion Criteria: to make it like header
 
 	//used for replacing . in numbers with * b4 exploding by full stop
 	//$text=preg_replace('/(\d)(\.+)(\d)/','$1*$3',$text); 
@@ -910,6 +942,9 @@ function criteria_process($text)
 	$text=preg_replace('/([A-Z]{1}[a-z]+){0,1}(\s){0,1}[A-Z]{1}[a-z\s]+[a-z]+:{1}/','\n $0 \n',$text);
 	
 	$text=preg_replace('/([A-Z]{1}[A-Z]+){0,1}(\s){0,1}[A-Z]{1}[A-Z\s]+[A-Z]+:{1}/','\n $0 \n',$text); 
+	
+	$text=str_replace(' - ',' \n - ',$text);
+	$text=preg_replace('/(--){1}([A-Z-a-z\s]+)(--){1}/','\n $2: \n',$text);
 	
 	//var_dump($text); 
 	
@@ -972,6 +1007,21 @@ function criteria_process($text)
 	$diff_criteria_present_flag=0;
 	$header=array();
 	
+	/* This part added for compressing data by removing redundant data but no idea till now */
+	$compress='';
+	for($m=0;$m< count($data); $m++)
+	{
+		if(trim($data[$m]) != '' && $data[$m] != NULL && trim($data[$m]) != " ") //check if data presents
+		{
+		$data[$m]=trim($data[$m]);
+		$compress.=$data[$m].' \n';
+		}
+	}
+	$compress=str_replace("/","qqqqqqqq",$compress);
+	/* End part- This part added for compressing data by removing redundant data but no idea till now */
+	
+	$data=explode('\n', $compress);
+	
 	for($m=0;$m< count($data); $m++)
 	{
 		//print $data[$i].'<br>';
@@ -983,13 +1033,19 @@ function criteria_process($text)
 			if(!$incl_header)
 			{
 				if(strpos($line,'Inclusion') || preg_match('/(.*)Inclusion(.*)/',$line, $out11) || preg_match('/(.*)INCLUSION(.*)/',$line, $out11) || preg_match('/(.*)inclusion(.*)/',$line, $out11))
+				{
 				$incl_header=1;
+				$excl_header=0;
+				}
 			}
 			
 			if(!$excl_header)
 			{
 				if(strpos($line,'Exclusion') || preg_match('/(.*)Exclusion(.*)/',$line, $out11) || preg_match('/(.*)EXCLUSION(.*)/',$line, $out11) || preg_match('/(.*)exclusion(.*)/',$line, $out11))
+				{
 				$excl_header=1;
+				$incl_header=0;
+				}
 			}
 		
 			preg_match('/(.*:)(.*)/',$line, $hd1);  //Check if Line contains Header is Present

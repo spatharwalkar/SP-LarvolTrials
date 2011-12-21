@@ -1773,6 +1773,19 @@ function getRecords($ids,$fields,$time)
 		$global[] = 'region';
 		unset($fields[$k]);
 	}
+	
+	if(($k = array_search('inclusion_criteria',$fields)) !== false)
+	{
+		$global[] = 'inclusion_criteria';
+		unset($fields[$k]);
+	}
+	
+	if(($k = array_search('exclusion_criteria',$fields)) !== false)
+	{
+		$global[] = 'exclusion_criteria';
+		unset($fields[$k]);
+	}
+	
 	$fields = array_map('highPass', $fields);
 	$query = 'SELECT ' . implode(',', $global) . ' FROM clinical_study WHERE larvol_id IN(' . implode(',', $ids) . ')';
 	
