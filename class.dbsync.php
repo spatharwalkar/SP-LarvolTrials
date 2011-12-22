@@ -127,6 +127,7 @@
                     }
                 } else {
 					$fields_home = $db_home->ListTableFields($tables_home[$i]);
+					$fields_home_tmp = $fields_home;
                     $fields_sync = $db_sync->ListTableFields($tables_home[$i]);
                     $fieldnames_sync = $this->GetFieldNames($fields_sync);
 
@@ -148,6 +149,7 @@
                         }
                         else
                         {
+                        		$keys_home = $this->GetPrimaryKeys($fields_home_tmp);
 	                        	$k = $this->GetFieldIndex($fields_sync, $fields_home[$j]['name']);
 	                            if (
 		                            	$fields_sync[$k]['type'] != $fields_home[$j]['type'] ||
@@ -157,7 +159,7 @@
 		                                $fields_sync[$k]['extra'] != $fields_home[$j]['extra'] 
 	                                )
 	                            {
-		                            if (!$db_sync->ChangeTableField($tables_home[$i], $fields_home[$j]['name'], $fields_home[$j],$fields_sync[$k])) {
+		                            if (!$db_sync->ChangeTableField($tables_home[$i], $fields_home[$j]['name'], $fields_home[$j],$fields_sync[$k],0,$keys_home)) {
 			                            $this->RaiseError("Could not change field <strong>{$fields_home[$j]['name']}</strong> on table <strong>{$tables_home[$i]}</strong> on database <strong>{$db_sync->database}</strong> at {$db_sync->user}@{$db_sync->host}: " . $db_sync->LastError());
 		                        }
 	                                $diferent_fields++;
@@ -171,7 +173,7 @@
 	                            
 	                            )
 	                            {
-		                            if (!$db_sync->ChangeTableField($tables_home[$i], $fields_home[$j]['name'], $fields_home[$j],$fields_sync[$k],1)) {
+		                            if (!$db_sync->ChangeTableField($tables_home[$i], $fields_home[$j]['name'], $fields_home[$j],$fields_sync[$k],1,$keys_home)) {
 			                            $this->RaiseError("Could not change field <strong>{$fields_home[$j]['name']}</strong> on table <strong>{$tables_home[$i]}</strong> on database <strong>{$db_sync->database}</strong> at {$db_sync->user}@{$db_sync->host}: " . $db_sync->LastError());
 		                            }
 		                            $diferent_fields++;

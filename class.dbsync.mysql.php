@@ -294,7 +294,7 @@ require_once('include.util.php');
          * @access	public
          * @return 	boolean	Success
          **/
-        function ChangeTableField($table, $field, $new_field,$old_field=array(),$foreignKeyCheck=0) {
+        function ChangeTableField($table, $field, $new_field,$old_field=array(),$foreignKeyCheck=0,$keys_home=array()) {
         	
         	switch($foreignKeyCheck)
         	{
@@ -321,9 +321,14 @@ require_once('include.util.php');
 	        		echo $sql.';<br />';
 	        		$special_uni_key = ', ADD UNIQUE `'.$field.'` (`'.$field.'`('.$new_field['Sub_part'].'))';
 	        	}
-	        	if($old_field['key']=='PRI' && $new_field['key']=='PRI')
+	        	//check primary key defintion needed or not
+	        	if($old_field['key']=='PRI' && $new_field['key']=='PRI' || count($keys_home)>1)
 	        	$no_primary_def_needed = 1;
-				$sql = "ALTER TABLE `{$table}` CHANGE `{$field}` `{$new_field['name']}` {$new_field['type']} " . ($new_field['null']=='YES' ? '' : 'NOT') . ' NULL' . (strlen($new_field['default']) > 0 ? " default '{$new_field['default']}'" : '') . ($new_field['extra'] == 'auto_increment' ? ' auto_increment' : '') . ($new_field['key'] == 'PRI' && $no_primary_def_needed!=1  ? ", ADD PRIMARY KEY (`{$new_field['name']}`)" : '') . ($special_mul_key?$special_mul_key:''). ($indexKey?$indexKey:''). ($special_uni_key?$special_uni_key:'');
+	        	
+	        	//
+	        	
+	        	//echo ($new_field['key'] == 'PRI' && $no_primary_def_needed!=1 ? "ALTER TABLE `{$table}` DROP PRIMARY KEY;<br/>":"");
+				$sql = "ALTER TABLE `{$table}`  CHANGE `{$field}` `{$new_field['name']}` {$new_field['type']} " . ($new_field['null']=='YES' ? '' : 'NOT') . ' NULL' . (strlen($new_field['default']) > 0 ? " default '{$new_field['default']}'" : '') . ($new_field['extra'] == 'auto_increment' ? ' auto_increment' : '') . ($new_field['key'] == 'PRI' && $no_primary_def_needed!=1  ? ", ADD PRIMARY KEY (`{$new_field['name']}`)" : '') . ($special_mul_key?$special_mul_key:''). ($indexKey?$indexKey:''). ($special_uni_key?$special_uni_key:'');
 				echo($sql.';<br />');
 				return true;
 				break;	
