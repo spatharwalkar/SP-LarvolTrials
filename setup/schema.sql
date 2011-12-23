@@ -752,7 +752,7 @@ CREATE TABLE IF NOT EXISTS `data_nct` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `data_trials` (
-  `larvol_id` int(10) unsigned NOT NULL,
+  `larvol_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `source_id` varchar(63) COLLATE utf8_unicode_ci DEFAULT NULL,
   `brief_title` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `acronym` varchar(15) COLLATE utf8_unicode_ci DEFAULT NULL,
