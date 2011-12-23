@@ -2779,7 +2779,7 @@ class ContentManager
 				if(isset($TrialsInfo[0]['naUpms']) && !empty($TrialsInfo[0]['naUpms']))
 				{
 					$naUpmsDisplayStyle = 'expand';
-					$naUpmIndex = preg_replace('/[^a-z]/i', '', $TrialsInfo[0]['sectionHeader']);
+					$naUpmIndex = preg_replace('/[^a-zA-Z0-9]/i', '', $TrialsInfo[0]['sectionHeader']);
 					$naUpmIndex = substr($naUpmIndex, 0, 7);
 					
 					echo '<tr class="trialtitles">'
@@ -3307,7 +3307,7 @@ $sections = array())
 						else
 							$image = 'up';
 						
-						$naUpmIndex = preg_replace('/[^a-z]/i', '', $tvalue['sectionHeader']);
+						$naUpmIndex = preg_replace('/[^a-zA-Z0-9]/i', '', $tvalue['sectionHeader']);
 						$naUpmIndex = substr($naUpmIndex, 0, 7);
 						echo '<tr class="trialtitles">'
 							. '<td colspan="' . getColspanforNAUpm($db->loggedIn()) . '" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
@@ -3339,7 +3339,7 @@ $sections = array())
 						else
 							$image = 'up';
 						
-						$naUpmIndex = preg_replace('/[^a-z]/i', '', $tvalue['sectionHeader']);
+						$naUpmIndex = preg_replace('/[^a-zA-Z0-9]/i', '', $tvalue['sectionHeader']);
 						$naUpmIndex = substr($naUpmIndex, 0, 7);
 						echo '<tr class="trialtitles">'
 							. '<td colspan="' . getColspanforNAUpm($db->loggedIn()) . '" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
