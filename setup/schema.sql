@@ -257,9 +257,52 @@ CREATE TABLE IF NOT EXISTS `upm` (
   `end_date_type` enum('anticipated','actual') COLLATE utf8_unicode_ci NOT NULL,
   `last_update` date NOT NULL,
   `product` int(10) unsigned DEFAULT NULL,
+  `status` enum('Upcoming','Occurred','Pending','Cancelled') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'Upcoming',
   PRIMARY KEY (`id`),
   KEY `product` (`product`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+DELIMITER $$
+CREATE TRIGGER upm_status BEFORE UPDATE ON upm FOR EACH ROW
+BEGIN
+  IF NEW.result_link IS NOT NULL THEN
+    IF NEW.end_date IS NULL THEN
+      SET NEW.`status`='Cancelled';
+    ELSE
+      SET NEW.`status`='Occurred';
+    END IF;
+  ELSE
+    IF NEW.end_date IS NULL THEN
+      SET NEW.`status`='Cancelled';
+    ELSEIF end_date<NOW() THEN
+      SET NEW.`status`='Pending';
+    ELSE
+      SET NEW.`status`='Upcoming';
+    END IF;
+  END IF;
+END;$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE TRIGGER upm_status2 BEFORE INSERT ON upm FOR EACH ROW
+BEGIN
+  IF NEW.result_link IS NOT NULL THEN
+    IF NEW.end_date IS NULL THEN
+      SET NEW.`status`='Cancelled';
+    ELSE
+      SET NEW.`status`='Occurred';
+    END IF;
+  ELSE
+    IF NEW.end_date IS NULL THEN
+      SET NEW.`status`='Cancelled';
+    ELSEIF end_date<NOW() THEN
+      SET NEW.`status`='Pending';
+    ELSE
+      SET NEW.`status`='Upcoming';
+    END IF;
+  END IF;
+END;$$
+DELIMITER ;
 
 CREATE TABLE IF NOT EXISTS `upm_history` (
   `id` int(10) unsigned NOT NULL,
