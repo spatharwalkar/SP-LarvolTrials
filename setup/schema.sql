@@ -306,20 +306,13 @@ DELIMITER ;
 
 CREATE TABLE IF NOT EXISTS `upm_history` (
   `id` int(10) unsigned NOT NULL,
-  `event_type` enum('Clinical','Clinical Data','Regulatory','Commercial','Pricing/Reimbursement','Other') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'Other',
-  `event_description` text COLLATE utf8_unicode_ci NOT NULL,
-  `event_link` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `result_link` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `corresponding_trial` int(10) unsigned DEFAULT NULL,
-  `start_date` date DEFAULT NULL,
-  `start_date_type` enum('anticipated','actual') COLLATE utf8_unicode_ci NOT NULL,
-  `end_date` date DEFAULT NULL,
-  `end_date_type` enum('anticipated','actual') COLLATE utf8_unicode_ci NOT NULL,
-  `added` date NOT NULL,
-  `superceded` date NOT NULL,
-  `product` int(10) unsigned DEFAULT NULL,
-  KEY `id` (`id`),
-  KEY `product` (`product`)
+  `change_date` datetime NOT NULL,
+  `field` enum('event_type','event_description','event_link','result_link','corresponding_trial','start_date','start_date_type','end_date','end_date_type','last_update','product','status') COLLATE utf8_unicode_ci NOT NULL,
+  `old_value` text COLLATE utf8_unicode_ci,
+  `new_value` text COLLATE utf8_unicode_ci,
+  `user` int(10) unsigned DEFAULT NULL,
+  UNIQUE KEY `user` (`user`),
+  KEY `id` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `users` (
@@ -933,7 +926,7 @@ ALTER TABLE `schedule_updatescans`
   ADD CONSTRAINT `schedule_updatescans_ibfk_2` FOREIGN KEY (`updatescan`) REFERENCES `rpt_update` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `upm_history`
-  ADD CONSTRAINT `FKproduct` FOREIGN KEY (`product`) REFERENCES `products` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `upm_history_ibfk_2` FOREIGN KEY (`user`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `upm_history_ibfk_1` FOREIGN KEY (`id`) REFERENCES `upm` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `user_grants`
