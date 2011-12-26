@@ -2264,7 +2264,7 @@ function displayContent($fieldlist, $type_arr, $edited, $gentime, $start, $last,
 						$phase = 'N/A';
 						$ph_color = $phase_arr['N/A'];
 					}
-					$pdf_content.='<td rowspan="' . $rowspan . '" style="background-color:' . $ph_color . ';" ' . $attr . '>'
+					$pdf_content.='<td align="center" rowspan="' . $rowspan . '" style="background-color:' . $ph_color . ';" ' . $attr . '>'
 						. '' . $phase . '</td>';
 				
 				

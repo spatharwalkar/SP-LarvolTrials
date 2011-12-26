@@ -6432,7 +6432,7 @@ else
 			
 			if((!isset($value["NCT.phase"])) || $value["NCT.phase"] == NULL || $value["NCT.phase"] == '')
 			$value["NCT.phase"] = 'N/A';
-			$objPHPExcel->getActiveSheet()->setCellValue('K' . $i, $value["NCT.phase"]);
+			$objPHPExcel->getActiveSheet()->setCellValue('K' . $i, trim(str_replace('Phase','',$value["NCT.phase"])));
 			
 			if($bgcol=="D5D3E6") $bgcol="EDEAFF"; 	else $bgcol="D5D3E6";
 			
@@ -6517,6 +6517,10 @@ else
 					(
 						array
 						(
+							'alignment' => array
+							(
+								'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+							),
 							'fill' => array
 							(
 								'type'       => PHPExcel_Style_Fill::FILL_SOLID,
@@ -6546,6 +6550,10 @@ else
 				(
 					array
 					(
+						'alignment' => array
+						(
+							'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+						),
 						'fill' => array
 						(
 							'type'       => PHPExcel_Style_Fill::FILL_SOLID,
@@ -6574,6 +6582,10 @@ else
 				(
 					array
 					(
+						'alignment' => array
+						(
+							'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+						),
 						'fill' => array
 						(
 							'type'       => PHPExcel_Style_Fill::FILL_SOLID,
@@ -6603,6 +6615,10 @@ else
 				(
 					array
 					(
+						'alignment' => array
+						(
+							'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+						),
 						'fill' => array
 						(
 							'type'       => PHPExcel_Style_Fill::FILL_SOLID,
@@ -6633,6 +6649,10 @@ else
 				(
 					array
 					(
+						'alignment' => array
+						(
+							'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+						),
 						'fill' => array
 						(
 							'type'       => PHPExcel_Style_Fill::FILL_SOLID,
@@ -6663,6 +6683,10 @@ else
 				(
 					array
 					(
+						'alignment' => array
+						(
+							'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+						),
 						'fill' => array
 						(
 							'type'       => PHPExcel_Style_Fill::FILL_SOLID,
@@ -6813,7 +6837,7 @@ $objPHPExcel->getActiveSheet()->setTitle('UPMs');
 
 $objPHPExcel->getActiveSheet()->getStyle('B1:F200')->getAlignment()->setWrapText(true);
 $objPHPExcel->getActiveSheet()->setCellValue('A1' , 'ID');
-$objPHPExcel->getActiveSheet()->setCellValue('B1' , 'Corresponding Trial');
+//$objPHPExcel->getActiveSheet()->setCellValue('B1' , 'Corresponding Trial');
 $objPHPExcel->getActiveSheet()->setCellValue('C1' , 'Product');
 $objPHPExcel->getActiveSheet()->setCellValue('D1' , 'Event Description');
 $objPHPExcel->getActiveSheet()->setCellValue('E1' , 'Status');
@@ -6864,7 +6888,7 @@ if(isset($first_part_newupmarray) and is_array($first_part_newupmarray))
 			{
 			$objPHPExcel->getActiveSheet()->getStyle('"A' . $i . ':AV' . $i . '"')->applyFromArray($styleThinBlueBorderOutline);
 			$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $value["id"] );
-			$objPHPExcel->getActiveSheet()->setCellValue('B' . $i, $value["corresponding_trial"] );
+			//$objPHPExcel->getActiveSheet()->setCellValue('B' . $i, $value["corresponding_trial"] );
 			$objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $value["product"] );
 			$objPHPExcel->getActiveSheet()->setCellValue('D' . $i, $value["event_description"] );
 			$objPHPExcel->getActiveSheet()->setCellValue('E' . $i, $value["status"]);
@@ -6929,7 +6953,7 @@ if(isset($newupmarray) and is_array($newupmarray))
 			{
 			$objPHPExcel->getActiveSheet()->getStyle('"A' . $i . ':AV' . $i . '"')->applyFromArray($styleThinBlueBorderOutline);
 			$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $value["id"] );
-			$objPHPExcel->getActiveSheet()->setCellValue('B' . $i, $value["corresponding_trial"] );
+			//$objPHPExcel->getActiveSheet()->setCellValue('B' . $i, $value["corresponding_trial"] );
 			$objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $value["product"] );
 			$objPHPExcel->getActiveSheet()->setCellValue('D' . $i, $value["event_description"] );
 			$objPHPExcel->getActiveSheet()->setCellValue('E' . $i, $value["status"]);
@@ -7021,8 +7045,7 @@ $objPHPExcel->getActiveSheet()->getStyle('A1:AV1')->applyFromArray
 				)
 			);
 $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(13);			
-$objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(25);
-$objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(40);			
+$objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(0);			
 $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setWidth(40);
 $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setWidth(20);
 $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setWidth(26);
