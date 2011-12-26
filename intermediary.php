@@ -46,8 +46,8 @@ if(isset($_POST['btnDownload']))
 <script src="scripts/jquery.js" type="text/javascript"></script>	
 <script src="scripts/slideout.js" type="text/javascript"></script>	
 <script src="scripts/func.js" type="text/javascript"></script>
+<script type="text/javascript" src="scripts/jquery-ui-1.8.16.custom.min.js"></script>
 <script type="text/javascript">
-$("html").css("overflow-x", "hidden"); //for hiding help tab
 function checkformat()
 {
 	if(document.getElementById("wFormat").value=="excel")
@@ -121,40 +121,132 @@ function applyfilter(value) {
   }
 //]]>
 
-//<![CDATA[
-function doSorting(type) {
+
+</script>
+
+<script type="text/javascript" language="javascript">
+$("html").css("overflow-x", "hidden"); //for hiding help tab
+
+//code for drag drop tab
+$(function() {
+		$( "#sortable" ).sortable({
+			revert: true
+		});
+		$( "#draggable" ).draggable({
+			connectToSortable: "#sortable",
+			helper: "clone",
+			revert: "invalid"
+		});
+		$( "ul, li" ).disableSelection();
+		$( "#sortable" ).disableSelection();
+	});
+	
+function change_image(list_id)
+ {
+ var image = document.getElementById (list_id+"_img");
+ var list = document.getElementById (list_id);
+ 	
+
+	if(list.value == '1')
+ 	{
+ 		image.src = 'images/des.png';
+		image.alt = 'Des Sort';
+		list.value='2';
+ 	}
+ 	else 
+ 	{
+ 		
+ 		image.src = 'images/asc.png';
+		image.alt = 'Asc Sort';
+		list.value='1';
+	
+ 	}
+//alert(image);
+ }
+ 
+ function makeurl_sortorder()
+ {
+ 	var count =0;
+	var sortorder_url='';
+	
+	while(count < 5)
+	{
+		if(count == $('#drag_en').index())
+		{
+		var list_id = document.getElementById ("drag_en");
+		var val=list_id.value;
 		
-		var sOrder = document.getElementById('sortorder').value;
-		
-		if(sOrder.indexOf(type) != -1) {
-		
-			var i = sOrder.indexOf(type);
-			var vtext = sOrder.slice(i, i+6);
-			var sType = vtext.split('-');
-			
-			if(sType[1] == 'des') { 
-			
-				var nText = sOrder.replace(sType[0]+'-des',sType[0]+'-asc');
-				document.getElementById('sortorder').value = nText;
+		if(val==1)
+		sortorder_url=sortorder_url+'en-asc##';
+		else if (val==2)
+				sortorder_url=sortorder_url+'en-des##';
 				
-			} else if(sType[1] == 'asc') { 
-			
-				var nText = sOrder.replace(vtext+'##','');
-				document.getElementById('sortorder').value = nText;
-			}
-			
-		} else {
-		
-			var nText = type+'-des##';
-			document.getElementById('sortorder').value = document.getElementById('sortorder').value + nText;
+		count++;
 		}
 		
-		document.getElementById('frmOtt').submit();	
+		if(count == $('#drag_os').index())
+		{
+		var list_id = document.getElementById ("drag_os");
+		var val=list_id.value;
+		
+		if(val==1)
+		sortorder_url=sortorder_url+'os-asc##';
+		else if (val==2)
+				sortorder_url=sortorder_url+'os-des##';
+		
+		count++;
+		}
+		
+		if(count == $('#drag_sd').index())
+		{
+		var list_id = document.getElementById ("drag_sd");
+		var val=list_id.value;
+		
+		if(val==1)
+		sortorder_url=sortorder_url+'sd-asc##';
+		else if (val==2)
+				sortorder_url=sortorder_url+'sd-des##';
+
+		count++;
+		}
+		
+		if(count == $('#drag_ed').index())
+		{
+		var list_id = document.getElementById ("drag_ed");
+		var val=list_id.value;
+		
+		if(val==1)
+		sortorder_url=sortorder_url+'ed-asc##';
+		else if (val==2)
+				sortorder_url=sortorder_url+'ed-des##';
+
+		count++;
+		}
+		
+		if(count == $('#drag_ph').index())
+		{
+		var list_id = document.getElementById ("drag_ph");
+		var val=list_id.value;
+		
+		if(val==1)
+		sortorder_url=sortorder_url+'ph-asc##';
+		else if (val==2)
+				sortorder_url=sortorder_url+'ph-des##';
+
+		count++;
+		}
+		
+	
 	}
-//]]>
+	//alert(sortorder_url);
+	document.getElementById('sortorder').value  = sortorder_url;
+ }
 </script>
 </head>
 <body>
+
+
+
 <?php 
 $content = new ContentManager();
 $content->setSortParams();
@@ -715,6 +807,8 @@ class ContentManager
 				
 				if($res['expiry'] != NULL && $res['expiry'] != '')
 				{
+
+
 					$return_param['link_expiry_date'][$pk][] = $res['expiry'];
 				}	
 				if($ids[2] == '-1' || $ids[2] == '-2') 
@@ -1075,7 +1169,7 @@ class ContentManager
 		$naUpms = array();
 		$naUpmsDisplayStyle = 'collapse';
 		
-		echo('<form id="frmOtt" name="frmOtt" method="get" target="_self" action="intermediary.php">');
+		echo('<form onsubmit="makeurl_sortorder();" id="frmOtt" name="frmOtt" method="get" target="_self" action="intermediary.php">');
 		echo ('<table width="100%"><tr><td><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" />'
 				. '</td><td nowrap="nowrap">'
 				. '<span style="color:#ff0000;font-weight:normal;margin-left:40px;">Interface Work In Progress</span>'
@@ -1572,6 +1666,7 @@ class ContentManager
 						$query = "SELECT dcs.larvol_id FROM `data_values` `dv` "
 								. " LEFT JOIN `data_cats_in_study` `dcs` ON (`dcs`.`id` = `dv`.`studycat`) "
 								. " LEFT JOIN `data_fields` `df` ON (`df`.`id` = `dv`.`field`) "
+
 								. " LEFT JOIN `data_categories` `dc` ON (`dc`.`id` = `df`.`category`) "
 								. " WHERE `dc`.`name` IN ('Products', 'Areas') "
 								. " AND df.`name` IN ('" . implode("','", $ivalue) . "') "
@@ -1762,6 +1857,7 @@ class ContentManager
 									}
 								}
 								else
+
 								{	
 									if(isset($_GET['nyr']) || isset($_GET['r']) || isset($_GET['ebi']) || isset($_GET['anr']) 
 									|| isset($_GET['av']) || isset($_GET['nlr'])) 
@@ -2866,70 +2962,167 @@ class ContentManager
 	
 	function displayHeader() 
 	{
+		
+		/* code start for display sort tab*/
+		
+		print '<div style="z-index:+1" class="slide-out-div1">'
+			.'<table cellpadding="0" cellspacing="0">'
+				.'<tr>'
+    				.'<td align="center" valign="baseline"><a class="handle_drag" href="#help">Content</a></td>'
+       				.' <td><table bgcolor="#FFFFFF" cellpadding="0" cellspacing="0" class="table-slide">'
+        					.'<tr>'
+                				.'<td>'
+                    				.'<ul value="1" id="sortable" class="demo" style="list-style-type: none; margin: 0; padding: 0; margin-bottom: 10px;">';
+		
+		
+		if(!isset($_GET['sortorder'])) { 
+			$sort_params = "ph-des##ed-asc##sd-asc##os-asc##en-asc##";
+		} else {	
+			$sort_params = $_GET['sortorder'];
+		}
+		
+		$sortorder = array_filter(explode("##", $sort_params));
+		foreach($sortorder as $k => $v)
+		{
+		  
+			if(substr($v,0,2)=='en')
+			{
+				if(array_key_exists('en', $this->sortimg)) {
+				
+					$img = $this->sortimg['en'];
+					$en_print=1; //this is sort attribute printed
+					if($img == 'asc')
+					$value=1;
+					else
+					$value=2;
+					$img_style = array_search('en-' . $img, $this->sortorder);
+					$en_tabimg="<img onclick=\"change_image('drag_en');\" id=\"drag_en_img\" src='images/".$img.".png' ".$this->imgscale[$img_style]." border='0' 
+					alt='Asc Sort' />"; //Added for drag n drop
+					
+					print '<li value="'.$value.'" id="drag_en" class="ui-state-default"><a>N 
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.$en_tabimg.'</a></li>';
+				}
+				
+			}	
+			
+			if(substr($v,0,2)=='os')
+			{
+				
+				if(array_key_exists('os', $this->sortimg)) {
+				
+					$img = $this->sortimg['os'];
+					$os_print=1; //this is sort attribute printed
+					if($img == 'asc')
+					$value=1;
+					else
+					$value=2;
+					$img_style = array_search('os-' . $img, $this->sortorder);
+					$os_tabimg="<img onclick=\"change_image('drag_os');\" id=\"drag_os_img\" src='images/".$img.".png' ".$this->imgscale[$img_style]." border='0' 
+					alt='Asc Sort' />"; //Added for drag n drop
+					
+					print '<li value="'.$value.'" id="drag_os" class="ui-state-default"><a>Status 
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.$os_tabimg.'</a></li>';
+				}
+			}	
+			
+			if(substr($v,0,2)=='sd')
+			{
+				if(array_key_exists('sd', $this->sortimg)) {
+				
+					$img = $this->sortimg['sd'];
+					$sd_print=1; //this is sort attribute printed
+					if($img == 'asc')
+					$value=1;
+					else
+					$value=2;
+					$img_style = array_search('sd-' . $img, $this->sortorder);
+					$sd_tabimg="<img onclick=\"change_image('drag_sd');\" id=\"drag_sd_img\" src='images/".$img.".png' ".$this->imgscale[$img_style]." border='0' 
+					alt='Asc Sort' />"; //Added for drag n drop
+					
+					print '<li value="'.$value.'" id="drag_sd" class="ui-state-default"><a>Start Date &nbsp;&nbsp;&nbsp;'.$sd_tabimg.'
+					</a></li>';
+				}
+			}	
+			
+			if(substr($v,0,2)=='ed')
+			{
+				if(array_key_exists('ed', $this->sortimg)) {
+				
+					$img = $this->sortimg['ed'];
+					$ed_print=1; //this is sort attribute printed
+					if($img == 'asc')
+					$value=1;
+					else
+					$value=2;
+					$img_style = array_search('ed-' . $img, $this->sortorder);
+					$ed_tabimg="<img onclick=\"change_image('drag_ed');\" id=\"drag_ed_img\" src='images/".$img.".png' ".$this->imgscale[$img_style]." border='0' 
+					alt='Asc Sort' />"; //Added for drag n drop
+					
+					print '<li value="'.$value.'" id="drag_ed" class="ui-state-default"><a>End Date &nbsp;&nbsp;&nbsp;&nbsp;'.$ed_tabimg
+					.'</a></li>';
+				}
+			}	
+			
+			if(substr($v,0,2)=='ph')
+			{
+				if(array_key_exists('ph', $this->sortimg)) {
+				
+					$img = $this->sortimg['ph'];
+					$ph_print=1; //this is sort attribute printed
+					if($img == 'asc')
+					$value=1;
+					else
+					$value=2;
+					$img_style = array_search('ph-' . $img, $this->sortorder);
+					$ph_tabimg="<img onclick=\"change_image('drag_ph');\" id=\"drag_ph_img\" src='images/".$img.".png' ".$this->imgscale[$img_style]." border='0' 
+					alt='Des Sort' />"; //Added for drag n drop
+					
+					print '<li value="'.$value.'" id="drag_ph" class="ui-state-default"><a>Phase 
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.$ph_tabimg.'</a></li>';
+				}
+			}
+			
+		  
+		}	
+		
+		
+		print '</ul>'
+                    .'</td>'
+                		.' </tr>'
+							.'</table></td>'
+				.'</tr>'
+				.'</table>'
+				.'</div>';
+		
+		/*Display sort tab code ends here*/
+		
+		
+		
 		echo ('<table width="100%" border="0" cellpadding="4" cellspacing="0" class="manage">'
 			 . '<tr>'
 			 . (($this->loggedIn) ? '<th rowspan="2" style="width:50px;">ID</th>' : '' )
 			 . '<th rowspan="2" style="width:230px;">Title</th>'
-			 . '<th style="width:28px;" title="Black: Actual&nbsp;&nbsp;Gray: Anticipated&nbsp;&nbsp;Red: Change greater than 20%">'
-			 . '<a target="_self" href="javascript:void(0);" onclick="javascript:doSorting(\'en\');">N</a></th>'
+			 . '<th rowspan="2" style="width:28px;" title="Black: Actual&nbsp;&nbsp;Gray: Anticipated&nbsp;&nbsp;Red: Change greater than 20%">'
+			 . '<a target="_self" href="javascript:void(0);">N</a></th>'
 			 . '<th rowspan="2" style="width:32px;" title="&quot;EU&quot; = European Union&nbsp;&quot;ROW&quot; = Rest of World">Region</th>'
 			 . '<th rowspan="2" style="width:110px;">Interventions</th>'
 			  . '<th rowspan="2" style="width:70px;">Sponsor</th>'
-			 . '<th style="width:105px;">'
-			 . '<a target="_self" href="javascript:void(0);" onclick="javascript:doSorting(\'os\');">Status</a></th>'
+			 . '<th rowspan="2" style="width:105px;">'
+			 . '<a target="_self" href="javascript:void(0);">Status</a></th>'
 			 . '<th rowspan="2" style="width:110px;">Conditions</th>'
-			 . '<th style="width:25px;" title="MM/YY">'
-			 . '<a target="_self" href="javascript:void(0);" onclick="javascript:doSorting(\'sd\');">Start</a></th>'
-			 . '<th style="width:25px;" title="MM/YY">'
-			 . '<a target="_self" href="javascript:void(0);" onclick="javascript:doSorting(\'ed\');">End</a></th>'
-			 . '<th style="width:22px;">'
-			 . '<a target="_self" href="javascript:void(0);" onclick="javascript:doSorting(\'ph\');">Ph</a></th>'
+			 . '<th rowspan="2" style="width:25px;" title="MM/YY">'
+			 . '<a target="_self" href="javascript:void(0);">Start</a></th>'
+			 . '<th rowspan="2" style="width:25px;" title="MM/YY">'
+			 . '<a target="_self" href="javascript:void(0);">End</a></th>'
+			 . '<th rowspan="2" style="width:22px;">'
+			 . '<a target="_self" href="javascript:void(0);">Ph</a></th>'
 			 . '<th rowspan="2" style="width:12px;padding:4px;"><div class="box_rotate">result</div></th>'
 			 . '<th colspan="36" style="width:72px;"><div>&nbsp;</div></th>'
 			 . '<th colspan="3" style="width:10px;padding:0px;border-left:0px;" class="rightborder"><div>&nbsp;</div></th></tr>'
-			 . '<tr class="secondrow"><th>');
+			 . '<tr class="secondrow">');
 		
-		if(array_key_exists('en', $this->sortimg)) {
 		
-			$img = $this->sortimg['en'];
-			$img_style = array_search('en-' . $img, $this->sortorder);
-			echo "<img src='images/".$img.".png' ".$this->imgscale[$img_style]." border='0' alt='Sort' />";
-		}
-		echo '</th><th>';
-		
-		if(array_key_exists('os', $this->sortimg)) {
-		
-			$img = $this->sortimg['os'];
-			$img_style = array_search('os-' . $img, $this->sortorder);
-			echo "<img src='images/".$img.".png' ".$this->imgscale[$img_style]." border='0' alt='Sort' />";
-		}
-		echo '</th><th>';
-		
-		if(array_key_exists('sd', $this->sortimg)) {
-		
-			$img = $this->sortimg['sd'];
-			$img_style = array_search('sd-' . $img, $this->sortorder);
-			echo "<img src='images/".$img.".png' ".$this->imgscale[$img_style]." border='0' alt='Sort' />";
-		}
-		echo '</th><th>';
-		
-		if(array_key_exists('ed', $this->sortimg)) {
-		
-			$img = $this->sortimg['ed'];
-			$img_style = array_search('ed-' . $img, $this->sortorder);
-			echo "<img src='images/".$img.".png' ".$this->imgscale[$img_style]." border='0' alt='Sort' />";
-		}
-		echo '</th><th>';
-		
-		if(array_key_exists('ph', $this->sortimg)) {
-		
-
-			$img = $this->sortimg['ph'];
-			$img_style = array_search('ph-' . $img, $this->sortorder);
-			echo "<img src='images/".$img.".png' ".$this->imgscale[$img_style]." border='0' alt='Sort' />";
-		}
-		
-		echo ('</th><th colspan="12" style="width:24px;">' . $this->current_yr . '</th>'
+		echo ('<th colspan="12" style="width:24px;">' . $this->current_yr . '</th>'
 			 . '<th colspan="12" style="width:24px;">' . $this->second_yr . '</th>'
 			 . '<th colspan="12" style="width:24px;">' . $this->third_yr . '</th>'
 			 . '<th colspan="3" style="width:10px;" class="rightborder">+</th></tr>');
@@ -3089,6 +3282,7 @@ function displayNAUpms($record_arr = array(), $sectionHeader, $currentYear, $sec
 					$upm_string .= 'Pending';
 				} 
 				else if($val['end_date'] > date('Y-m-d', $now)) 
+
 				{
 					$upm_string .= 'Upcoming';
 				}
@@ -3342,6 +3536,7 @@ $sections = array())
 						$naUpmIndex = preg_replace('/[^a-zA-Z0-9]/i', '', $tvalue['sectionHeader']);
 						$naUpmIndex = substr($naUpmIndex, 0, 7);
 						echo '<tr class="trialtitles">'
+
 							. '<td colspan="' . getColspanforNAUpm($db->loggedIn()) . '" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
 							. 'style="border-bottom:1px solid blue;background-image: url(\'images/' . $image 
 							. '.png\');background-repeat: no-repeat;background-position:left center;"'
@@ -3510,6 +3705,7 @@ $sections = array())
 				$attr = '" title="New record';
 			}
 			echo '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
+
 				. '<div class="rowcollapse">' . $trials[$i]['NCT/condition'] . '</div></td>';
 				
 			
@@ -4442,6 +4638,7 @@ function getTrialUpdates($nctId, $larvolId, $time, $edited)
 	/*
 	$sql = "SELECT `clinical_study`.`larvol_id` FROM `clinical_study` WHERE `clinical_study`.`import_time` <= '" 
 		. date('Y-m-d',$time) . "' AND `clinical_study`.`larvol_id` = '" .  $larvolId . "' AND `clinical_study`.`import_time` >= '" 
+
 		. date('Y-m-d',strtotime($edited,$time)) . "' ";
 	*/
 

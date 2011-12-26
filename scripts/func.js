@@ -40,6 +40,15 @@ $(document).ready(function(){
 
     });	
 	
+	
+	//drag n drop tab
+	//var drag_drop = '';	
+	//$('body').append(drag_drop);	
+    $(function(){
+        $('.slide-out-div1').drag_drop_tabSlideOut();
+
+    });	
+	
 });
 
 function sh(obj,key,all)
