@@ -6014,7 +6014,7 @@ if($stacked)
 			
 			if((!isset($value["NCT/phase"])) || $value["NCT/phase"] == NULL || $value["NCT/phase"] == '')
 			$value["NCT/phase"] = 'N/A';
-			$objPHPExcel->getActiveSheet()->setCellValue('K' . $i, $value["NCT/phase"]);
+			$objPHPExcel->getActiveSheet()->setCellValue('K' . $i, trim(str_replace('Phase','',$value["NCT/phase"])));
 			
 			if($bgcol=="D5D3E6") $bgcol="EDEAFF"; 	else $bgcol="D5D3E6";
 			
