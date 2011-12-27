@@ -1367,10 +1367,17 @@ class ContentManager
 		$res = mysql_query($sql);
 		
 		$upm[$i]['edited'] = array();
+		$upm[$i]['new'] = 'n';
 		while($arr = mysql_fetch_assoc($res)) {
 			$upm[$i]['edited'] = array($arr['event_type'], $arr['event_description'], $arr['event_link'], $arr['result_link'], 
 									$arr['start_date'], $arr['start_date_type'], $arr['end_date'], $arr['end_date_type'],);
 		}
+		$query = " SELECT u.id FROM `upm` u LEFT JOIN `upm_history` uh ON u.`id` = uh.`id` WHERE u.`id` = '" . $row['id'] . "' AND u.`last_update` < '" 
+				. date('Y-m-d',$time) . "' AND u.`last_update` >=  '" . date('Y-m-d',strtotime($edited,$time)) . "' AND uh.`id` IS NULL ";
+		
+		$ress = mysql_query($query);
+		if(mysql_num_rows($ress) != 0)
+			$upm[$i]['new'] = 'y';
 		$i++;
 	}
 	return $upm;
@@ -1569,18 +1576,26 @@ class ContentManager
 				if(!empty($val['edited']) && ($val['result_link'] != $val['edited']['result_link'])) {
 					if($val['result_link'] != '' && $val['result_link'] != NULL) {
 						$result_image = (($val['event_type'] == 'Clinical Data') ? 'diamond' : 'checkmark' );
-
+						$upm_string[$i]['result_image_src']='images/red-' . $result_image . '.png';
 					}
 				} else {
 					if($val['result_link'] != '' && $val['result_link'] != NULL) {
 						$result_image = (($val['event_type'] == 'Clinical Data') ? 'diamond' : 'checkmark' );
-						
+						$upm_string[$i]['result_image_src']='images/black-' . $result_image . '.png';
 					}
 				}
 				
 				if(($val['end_date'] != '' && $val['end_date'] != NULL && $val['end_date'] != '0000-00-00') && 
 				($val['end_date'] < date('Y-m-d', $now)) && ($val['result_link'] == NULL || $val['result_link'] == '')){
 						$upm_string[$i]['upm_title'] =  $upm_title ;
+						$upm_string[$i]['result_image_src']='images/hourglass.png';
+						
+				}
+				
+				if(!is_null($val['product_name']) and !empty($val['product_name'])) {
+					$upm_string[$i]['product_name'] =  $val['product_name'] ;
+				} else {
+					$upm_string[$i]['product_name'] =  "";
 				}
 /*				
 				$upm_string .= getUPMChart(date('m',strtotime($val['start_date'])), date('Y',strtotime($val['start_date'])), 
@@ -1629,6 +1644,11 @@ function getNonAssocUpmRecords($non_assoc_upm_params) {
 			$upms[$i]['start_date_type'] = $row['start_date_type'];
 			$upms[$i]['end_date'] 	= $row['end_date'];
 			$upms[$i]['end_date_type'] = $row['end_date_type'];
+			
+			
+				$sql_getproduct_name = mysql_query("SELECT `name` from products where `id` ='" . $row['product'] . "'");
+				while($sql_getproduct_name_row = mysql_fetch_assoc($sql_getproduct_name))
+				$upms[$i]['product_name']=$sql_getproduct_name_row['name'];
 				
 				$i++;
 			}
@@ -1723,6 +1743,7 @@ function getUnmatchedUpmChanges($record_arr, $time, $edited) {
 				$record_arr[$key]['edited']['start_date_type'] = $row['start_date_type'];
 				$record_arr[$key]['edited']['end_date'] 	= $row['end_date'];
 				$record_arr[$key]['edited']['end_date_type'] = $row['end_date_type'];
+				
 				
 			}
 		}
@@ -5742,6 +5763,10 @@ $third_yr	= date('Y')+2;
 
 $objPHPExcel = new PHPExcel();
 $objPHPExcel->setActiveSheetIndex(0);
+
+///Theis lines are used for creating object that can add images in excel
+
+
 $objPHPExcel->getActiveSheet()->getStyle('B1:K2000')->getAlignment()->setWrapText(true);
 $objPHPExcel->getActiveSheet()->setCellValue('A1' , 'NCT ID');
 $objPHPExcel->getActiveSheet()->setCellValue('B1' , 'Title');
@@ -5768,7 +5793,6 @@ $objPHPExcel->getActiveSheet()->mergeCells('AK1:AV1');
 
 $objPHPExcel->getActiveSheet()->setCellValue('AW1' , '+');
 $objPHPExcel->getActiveSheet()->mergeCells('AW1:AY1');
-
 
 $styleThinBlueBorderOutline = array(
 	'borders' => array(
@@ -6099,6 +6123,10 @@ if($stacked)
 				(
 					array
 					(
+						'alignment' => array
+						(
+							'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+						),
 						'fill' => array
 						(
 							'type'       => PHPExcel_Style_Fill::FILL_SOLID,
@@ -6128,6 +6156,10 @@ if($stacked)
 				(
 					array
 					(
+						'alignment' => array
+						(
+							'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+						),
 						'fill' => array
 						(
 							'type'       => PHPExcel_Style_Fill::FILL_SOLID,
@@ -6156,6 +6188,10 @@ if($stacked)
 				(
 					array
 					(
+						'alignment' => array
+						(
+							'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+						),
 						'fill' => array
 						(
 							'type'       => PHPExcel_Style_Fill::FILL_SOLID,
@@ -6185,6 +6221,10 @@ if($stacked)
 				(
 					array
 					(
+						'alignment' => array
+						(
+							'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+						),
 						'fill' => array
 						(
 							'type'       => PHPExcel_Style_Fill::FILL_SOLID,
@@ -6213,6 +6253,10 @@ if($stacked)
 				(
 					array
 					(
+						'alignment' => array
+						(
+							'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+						),
 						'fill' => array
 						(
 							'type'       => PHPExcel_Style_Fill::FILL_SOLID,
@@ -6242,6 +6286,10 @@ if($stacked)
 				(
 					array
 					(
+						'alignment' => array
+						(
+							'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+						),
 						'fill' => array
 						(
 							'type'       => PHPExcel_Style_Fill::FILL_SOLID,
@@ -6284,18 +6332,80 @@ if($stacked)
 					$upm_title = $v[0];
 					
 					
+				
 					
-					//rendering diamonds in case of end date is prior to the current year
-					$objPHPExcel->getActiveSheet()->getStyle('"L' . $i . ':AY' . $i.'"')->applyFromArray($styleThinBlueBorderOutline);
-					
-					if($upm_result_link != '' && $upm_result_link != NULL) {
-					
-							$objPHPExcel->getActiveSheet()->setCellValue('L' . $i, 'Link');
-							$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl($upm_result_link);
-							$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setTooltip($upm_title);
-							$objPHPExcel->getActiveSheet()->getStyle('L' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+						if(!empty($upmDetails[$nctid][$k]['edited']) && ($v[7] != $upmDetails[$nctid][$k]['edited'][3])) {
+						
+							if($upm_result_link != '' && $upm_result_link != NULL) {
 							
+								$result_image = (($v[8] == 'Clinical Data') ? 'diamond' : 'checkmark' );
+								
+								$objDrawing = new PHPExcel_Worksheet_Drawing();
+								$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
+								$objDrawing->setOffsetX(40);
+								$objDrawing->setOffsetY(10);
+								$objDrawing->setPath('images/red-' . $result_image. '.png');
+								$objDrawing->setCoordinates('L' . $i);
+								$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setTooltip($upm_title);
+								$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl($upm_result_link);
+							}
+						} else if($upmDetails[$nctid][$k]['new'] == 'y') {
+						
+							$result_image = (($v[8] == 'Clinical Data') ? 'diamond' : 'checkmark' );
+							
+							if(upm_result_link != '' && $upm_result_link != NULL) {
+						
+								$objDrawing = new PHPExcel_Worksheet_Drawing();
+								$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
+								$objDrawing->setOffsetX(40);
+								$objDrawing->setOffsetY(10);
+								$objDrawing->setPath('images/red-' . $result_image. '.png');
+								$objDrawing->setCoordinates('L' . $i);
+								$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setTooltip($upm_title);
+								$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl($upm_result_link);
+								
+							} else {
+								$objDrawing = new PHPExcel_Worksheet_Drawing();
+								$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
+								$objDrawing->setOffsetX(40);
+								$objDrawing->setOffsetY(10);
+								$objDrawing->setPath('images/red-' . $result_image. '.png');
+								$objDrawing->setCoordinates('L' . $i);
+								$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setTooltip($upm_title);
+								$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl($upm_result_link);
+							}
+								
+						} else {
+						
+							if($upm_result_link != '' && $upm_result_link != NULL) {
+							
+								$result_image = (($v[8] == 'Clinical Data') ? 'diamond' : 'checkmark' );
+								$objDrawing = new PHPExcel_Worksheet_Drawing();
+								$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
+								$objDrawing->setOffsetX(40);
+								$objDrawing->setOffsetY(10);
+								$objDrawing->setPath('images/black-' . $result_image. '.png');
+								$objDrawing->setCoordinates('L' . $i);
+								$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setTooltip($upm_title);
+								$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl($upm_result_link);
+							}
 						}
+						
+						if(($v[6] != '' && $v[6] != NULL && $v[6] != '0000-00-00') && ($v[6] < date('Y-m-d')) && ($upm_result_link == NULL || $upm_result_link == '')){
+							$objDrawing = new PHPExcel_Worksheet_Drawing();
+							$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
+							$objDrawing->setOffsetX(40);
+							$objDrawing->setOffsetY(10);
+							$objDrawing->setPath('images/hourglass.png');
+							$objDrawing->setCoordinates('L' . $i);
+							$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setTooltip($upm_title);
+							$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl($upm_result_link);
+						}
+					
+					
+					$objPHPExcel->getActiveSheet()->getStyle('L' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+					
+					$objPHPExcel->getActiveSheet()->getStyle('"L' . $i . ':AY' . $i.'"')->applyFromArray($styleThinBlueBorderOutline);
 					
 					
 					
@@ -6709,6 +6819,8 @@ else
 		//rendering project completion chart
 		$pdf_content.= getCompletionChart($start_month, $start_year, $end_month, $end_year, $current_yr, $second_yr, $third_yr, $phase_color, $value["NCT.start_date"], $value['inactive_date'], $objPHPExcel, $i);
 		
+					
+					$objPHPExcel->getActiveSheet()->getStyle('"L' . $i . ':AY' . $i.'"')->applyFromArray($styleThinBlueBorderOutline);
 
 		$i++;
 		////// UPM chart for matched UPM's
@@ -6725,21 +6837,84 @@ else
 					$ed_year = date('Y',strtotime($v[6]));
 					$upm_link = $v[4];
 					$upm_result_link = $v[7];
-					$upm_title =$v[0];
+					$upm_title =htmlformat($v[0]);
 					
 					
+				
 					
-					//rendering diamonds in case of end date is prior to the current year
-					$objPHPExcel->getActiveSheet()->getStyle('"L' . $i . ':AY' . $i.'"')->applyFromArray($styleThinBlueBorderOutline);
 					
-					if($upm_result_link != '' && $upm_result_link != NULL) {
-					
-							$objPHPExcel->getActiveSheet()->setCellValue('L' . $i, 'Link');
-							$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl($upm_result_link);
-							$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setTooltip($upm_title);
-							$objPHPExcel->getActiveSheet()->getStyle('L' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+						if(!empty($upmDetails[$nctid][$k]['edited']) && ($v[7] != $upmDetails[$nctid][$k]['edited'][3])) {
+						
+							if($upm_result_link != '' && $upm_result_link != NULL) {
 							
+								$result_image = (($v[8] == 'Clinical Data') ? 'diamond' : 'checkmark' );
+								
+								$objDrawing = new PHPExcel_Worksheet_Drawing();
+								$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
+								$objDrawing->setOffsetX(40);
+								$objDrawing->setOffsetY(10);
+								$objDrawing->setPath('images/red-' . $result_image. '.png');
+								$objDrawing->setCoordinates('L' . $i);
+								$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setTooltip($upm_title);
+								$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl($upm_result_link);
+							}
+						} else if($upmDetails[$nctid][$k]['new'] == 'y') {
+						
+							$result_image = (($v[8] == 'Clinical Data') ? 'diamond' : 'checkmark' );
+							
+							if(upm_result_link != '' && $upm_result_link != NULL) {
+						
+								$objDrawing = new PHPExcel_Worksheet_Drawing();
+								$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
+								$objDrawing->setOffsetX(40);
+								$objDrawing->setOffsetY(10);
+								$objDrawing->setPath('images/red-' . $result_image. '.png');
+								$objDrawing->setCoordinates('L' . $i);
+								$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setTooltip($upm_title);
+								$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl($upm_result_link);
+								
+							} else {
+								$objDrawing = new PHPExcel_Worksheet_Drawing();
+								$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
+								$objDrawing->setOffsetX(40);
+								$objDrawing->setOffsetY(10);
+								$objDrawing->setPath('images/red-' . $result_image. '.png');
+								$objDrawing->setCoordinates('L' . $i);
+								$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setTooltip($upm_title);
+								$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl($upm_result_link);
+							}
+								
+						} else {
+						
+							if($upm_result_link != '' && $upm_result_link != NULL) {
+							
+								$result_image = (($v[8] == 'Clinical Data') ? 'diamond' : 'checkmark' );
+								$objDrawing = new PHPExcel_Worksheet_Drawing();
+								$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
+								$objDrawing->setOffsetX(40);
+								$objDrawing->setOffsetY(10);
+								$objDrawing->setPath('images/black-' . $result_image. '.png');
+								$objDrawing->setCoordinates('L' . $i);
+								$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setTooltip($upm_title);
+								$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl($upm_result_link);
+							}
 						}
+						
+						if(($v[6] != '' && $v[6] != NULL && $v[6] != '0000-00-00') && ($v[6] < date('Y-m-d')) && ($upm_result_link == NULL || $upm_result_link == '')){
+							$objDrawing = new PHPExcel_Worksheet_Drawing();
+							$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
+							$objDrawing->setOffsetX(40);
+							$objDrawing->setOffsetY(10);
+							$objDrawing->setPath('images/hourglass.png');
+							$objDrawing->setCoordinates('L' . $i);
+							$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setTooltip($upm_title);
+							$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl($upm_result_link);
+						}
+					
+					
+					$objPHPExcel->getActiveSheet()->getStyle('L' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+					
+					$objPHPExcel->getActiveSheet()->getStyle('"L' . $i . ':AY' . $i.'"')->applyFromArray($styleThinBlueBorderOutline);
 					
 					
 					//rendering upm (upcoming project completion) chart
@@ -6889,31 +7064,35 @@ if(isset($first_part_newupmarray) and is_array($first_part_newupmarray))
 			$objPHPExcel->getActiveSheet()->getStyle('"A' . $i . ':AV' . $i . '"')->applyFromArray($styleThinBlueBorderOutline);
 			$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $value["id"] );
 			//$objPHPExcel->getActiveSheet()->setCellValue('B' . $i, $value["corresponding_trial"] );
-			$objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $value["product"] );
+			$objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $value["product_name"] );
 			$objPHPExcel->getActiveSheet()->setCellValue('D' . $i, $value["event_description"] );
 			$objPHPExcel->getActiveSheet()->setCellValue('E' . $i, $value["status"]);
 			$objPHPExcel->getActiveSheet()->setCellValue('F' . $i, $value["condition"]);
 			$objPHPExcel->getActiveSheet()->setCellValue('G' . $i, date('m/y',strtotime($value["start_date"])));
 			$objPHPExcel->getActiveSheet()->setCellValue('H' . $i, date('m/y',strtotime($value["end_date"])));
-			$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, "Link");
+			
 		
-			if( (!isset($value["result_link"]) or empty($value["result_link"])) )
-			{
-				$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, '');
-			}
-			else
-			{
-				$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($value["result_link"]);
-				$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('Result Link');
-				$objPHPExcel->getActiveSheet()->getStyle('I' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
-			}
+			if($value['result_image_src'] != '' && $value['result_image_src'] != NULL) {
+						$objDrawing = new PHPExcel_Worksheet_Drawing();
+						$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
+						$objDrawing->setOffsetX(40);
+						$objDrawing->setOffsetY(4);
+						$objDrawing->setPath($value['result_image_src']);
+						$objDrawing->setCoordinates('I' . $i);
+						
+						if($value['result_link'] !='' && $value['result_link'] != NULL)
+						{
+						$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($value['result_link']);
+						$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip($value["event_description"]);
+						}
+					}		
 			
 			$upm_string .= getUPMChart(date('m',strtotime($value['start_date'])), date('Y',strtotime($value['start_date'])), 
 				date('m',strtotime($value['end_date'])), date('Y',strtotime($value['end_date'])), $current_yr, $second_yr, $third_yr, 
 				$value['start_date'], $value['end_date'], $value['event_link'], $value["event_description"], $objPHPExcel, $i);
 		
 		
-			$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':I' . $i )->applyFromArray
+			$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':H' . $i )->applyFromArray
 				(
 					array
 					(
@@ -6954,31 +7133,41 @@ if(isset($newupmarray) and is_array($newupmarray))
 			$objPHPExcel->getActiveSheet()->getStyle('"A' . $i . ':AV' . $i . '"')->applyFromArray($styleThinBlueBorderOutline);
 			$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $value["id"] );
 			//$objPHPExcel->getActiveSheet()->setCellValue('B' . $i, $value["corresponding_trial"] );
-			$objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $value["product"] );
+			$objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $value["product_name"] );
 			$objPHPExcel->getActiveSheet()->setCellValue('D' . $i, $value["event_description"] );
 			$objPHPExcel->getActiveSheet()->setCellValue('E' . $i, $value["status"]);
 			$objPHPExcel->getActiveSheet()->setCellValue('F' . $i, $value["condition"]);
 			$objPHPExcel->getActiveSheet()->setCellValue('G' . $i, date('m/y',strtotime($value["start_date"])));
 			$objPHPExcel->getActiveSheet()->setCellValue('H' . $i, date('m/y',strtotime($value["end_date"])));
-			$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, "Link");
+			
 		
-			if( (!isset($value["result_link"]) or empty($value["result_link"])) )
-			{
-				$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, '');
-			}
-			else
-			{
-				$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($value["result_link"]);
-				$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('Result Link');
-				$objPHPExcel->getActiveSheet()->getStyle('I' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
-			}
+			
+			
+					if($value['result_image_src'] != '' && $value['result_image_src'] != NULL) {
+						$objDrawing = new PHPExcel_Worksheet_Drawing();
+						$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
+						$objDrawing->setOffsetX(40);
+						$objDrawing->setOffsetY(4);
+						$objDrawing->setPath($value['result_image_src']);
+						$objDrawing->setCoordinates('I' . $i);
+						
+						if($value['result_link'] !='' && $value['result_link'] != NULL)
+						{
+						$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($value['result_link']);
+						$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip($value["event_description"]);
+						}
+					}	
+						
+				
+			
+			
 			
 			$upm_string .= getUPMChart(date('m',strtotime($value['start_date'])), date('Y',strtotime($value['start_date'])), 
 				date('m',strtotime($value['end_date'])), date('Y',strtotime($value['end_date'])), $current_yr, $second_yr, $third_yr, 
 				$value['start_date'], $value['end_date'], $value['event_link'], $value["event_description"], $objPHPExcel, $i);
 		
 		
-			$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':I' . $i )->applyFromArray
+			$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':H' . $i )->applyFromArray
 				(
 					array
 					(
@@ -7045,7 +7234,8 @@ $objPHPExcel->getActiveSheet()->getStyle('A1:AV1')->applyFromArray
 				)
 			);
 $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(13);			
-$objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(0);			
+$objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(0);
+$objPHPExcel->getActiveSheet()->getColumnDimension('C')->setWidth(40);				
 $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setWidth(40);
 $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setWidth(20);
 $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setWidth(26);
