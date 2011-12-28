@@ -91,6 +91,7 @@ function userControl()
 							. $id . $no_root . ' LIMIT 1';
 				mysql_query('BEGIN') or die("Couldn't begin transaction");
 				mysql_query($query) or die('Bad SQL query for saving edits to user');
+				
 				mysql_query('DELETE FROM user_grants WHERE `user`=' . $db->user->id) or die('Bad SQL query editing permissions');
 				$query = array();
 				foreach($_POST['grant'][$id] as $pname => $plid)
@@ -101,8 +102,15 @@ function userControl()
 					$query = 'INSERT INTO user_grants (`user`,`permission`) VALUES ' . implode(',',$query);
 					mysql_query($query) or die('Bad SQL query saving permissions'.$query);
 				}
+				
 				mysql_query('COMMIT') or die("Couldn't commit transaction");
 			}
+			
+			if(isset($_POST['userpasswd_reset'][$id]))
+			{
+				$passwd_reset = $db->resetPassword($_POST['pwreset_username'][$id],$email);
+			}
+			
 			if(isset($_POST['useredit_del'][$id]))
 			{
 				$no_root = ' AND userlevel!="root"';
@@ -131,7 +139,7 @@ function userControl()
 		
 		$typeColors = array('readonly'=>'1C00EE', 'contained'=>'009FB4', 'editing'=>'00D60A', 'admin'=>'E67300', 'core'=>'FF0000');
 		$out .= '<table><tr><th>id</th><th>Username</th><th>email</th><th>userlevel</th><th>permissions</th>'
-				. '<th>Delete</th><th>Save</th></tr>';
+				. '<th>PW Reset</th><th>Delete</th><th>Save</th></tr>';
 		while($row = mysql_fetch_assoc($res))
 		{
 			$query3 = 'SELECT user_permissions.`name` AS "name",MAX(`level`) AS "level" '
@@ -165,6 +173,7 @@ function userControl()
 			}
 			$out .= '</td>'
 					//. '<td>' . ($isRoot?'&nbsp;':'<input type="submit" name="useredit_del['.$row['id'].']" value="X" />') . '</td>'
+					. '<td>'.($isRoot?'&nbsp;':'<input type="checkbox" name="userpasswd_reset['.$row['id'].']" /><input type="hidden" name="pwreset_username['.$row['id'].']" value="'.$row['username'].'" />').'</td>'
 					. '<td>'.($isRoot?'&nbsp;':'<input type="checkbox" name="useredit_del['.$row['id'].']" />').'</td>'
 					. '<td><input type="submit" name="useredit_save[' . $row['id'] . ']" value="Save" /></td>'
 					. '</tr>';
