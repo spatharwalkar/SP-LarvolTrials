@@ -2,7 +2,7 @@
 
 html
 {
-	overflow-x:auto!important;
+	overflow-x:hidden;
 }
 
 html,body {
