@@ -13,6 +13,7 @@ ini_set('max_execution_time','300');	//5 minutes
 if(!isset($_POST['cparams']) && !isset($_POST['params']) && !isset($_POST['results'])) return (false);
 $content = new ContentManager();
 $content->setSortParams();
+$content->getChangeRange();
 $content->chkType();
 $non_assoc_upm_params=array();
 $unmatched_upm_details = array();
@@ -115,6 +116,19 @@ class ContentManager
 		
 	}
 	
+	
+	function getChangeRange() {
+	
+		//added for highlighting changes
+		if(isset($_POST['edited']) && $_POST['edited'] == 'oneweek') {
+			$this->edited = ' -1 week ';
+		} else if(isset($_POST['edited']) && $_POST['edited'] == 'onemonth') {
+			$this->edited = ' -1 month ';
+		} else {
+			$this->edited = ' -1 week ';
+		}
+
+	}
 
 	
 	function commonControls($count, $act, $inact, $all) {
@@ -944,7 +958,7 @@ class ContentManager
 //			$unmatched_upm_details[$ky] = getNonAssocUpm($non_assoc_upm_params, $ky,$this->time_machine,$this->edited);
 //			$ky++;
 			
-			create_excel($process_params,$unmatched_upm_details,$firstpartof_unmatched_upm_details,$this->time_machine,$this->edited,$process_params['upmDetails'], $header_details);
+			create_excel($process_params,$unmatched_upm_details,$firstpartof_unmatched_upm_details,$this->time_machine,$this->edited,$process_params['upmDetails'], $header_details, $process_params['all_records']);
 			
 			
 		} else {
@@ -1271,9 +1285,9 @@ class ContentManager
 				$shownArr = $this->{$this->type};
 				foreach($fin_arr as $key => &$value) {
 				
-					unset($value['edited']);
-					unset($value['new']);
-					unset($value['larvol_id']);
+//					unset($value['edited']);
+//					unset($value['new']);
+//					unset($value['larvol_id']);
 //					unset($value['inactive_date']);
 //					unset($value['region']);
 					
@@ -1288,9 +1302,9 @@ class ContentManager
 				}
 				foreach($shownArr as $key => &$value) {
 				
-					unset($value['edited']);
-					unset($value['new']);
-					unset($value['larvol_id']);
+//					unset($value['edited']);
+//					unset($value['new']);
+//					unset($value['larvol_id']);
 //					unset($value['inactive_date']);
 //					unset($value['region']);
 					
@@ -1304,7 +1318,7 @@ class ContentManager
 					}
 				}
 				global $unmatched_upm_details;	
-				create_excel($shownArr,$unmatched_upm_details,$firstpartof_unmatched_upm_details,$this->time_machine,$this->edited, $upmDetails, $header_details);
+				create_excel($shownArr,$unmatched_upm_details,$firstpartof_unmatched_upm_details,$this->time_machine,$this->edited, $upmDetails, $header_details, $fin_arr);
 				
 			}
 			
@@ -1451,15 +1465,23 @@ class ContentManager
 						
 				if(!empty($val['edited']) && $val['edited']['event_description'] != $val['event_description']) {
 				
-					$title_link_color = 'color:#FF0000;';$attr = ' highlight'; 
+					$title_link_color = 'color:#FF0000;';$attr = ' highlight'; $upm_string[$i]['event_description_highlight']= 'y'; 
 					if($val['edited']['event_description'] != '' || $val['edited']['event_description'] != NULL)
-						$title = ' title="Previous value: '. $val['edited']['event_description'] . '" '; 
+						{
+						$title = ' title="Previous value: '. $val['edited']['event_description'] . '" ';
+						$upm_string[$i]['prev_event_description']='Previous value: '. $val['edited']['event_description'];
+						}
 					else
+						{
 						$title = ' title="No Previous value" ';
+						$upm_string[$i]['prev_event_description']='No Previous value';
+						}
 						
 				} else if($val['new'] == 'y') {
 					$title_link_color = 'color:#FF0000;';
 					$title = ' title = "New record" ';
+					$upm_string[$i]['prev_event_description']= 'New record';
+					$upm_string[$i]['event_description_highlight']= 'y';
 				}
 				if( isset($upm_string) and is_array($upm_string) )
 					echo "";
@@ -1479,6 +1501,9 @@ class ContentManager
 				}
 				
 				$upm_string[$i]['id'] =  $val['id'] ;
+				if($val['new'] == 'y') {
+						$upm_string[$i]['prev_id'] = 'New record';
+					}
 				
 				if($val['event_link'] != NULL && $val['event_link'] != '') {
 					$upm_string[$i]['event_link'] =  $val['event_link'] ;
@@ -1512,6 +1537,27 @@ class ContentManager
 					
 				}
 				
+				$title = '';$attr = '';	
+				if(!empty($val['edited']) && $val['edited']['event_type'] != $val['event_type']) {
+				
+					$attr = ' highlight'; $upm_string[$i]['event_type_highlight']= 'y'; 
+					if($val['edited']['event_type'] != '' && $val['edited']['event_type'] != NULL)
+						{
+						$title = ' title="Previous value: '. $val['edited']['event_type'] . '" '; 
+						$upm_string[$i]['prev_event_type']='Previous value: '. $val['edited']['event_type'];
+						}
+					else
+						{
+						$title = ' title="No Previous value" ';
+						$upm_string[$i]['prev_event_type']='No Previous value';
+						}
+						
+				} else if($val['new'] == 'y') {
+					$title = ' title = "New record" ';
+					$upm_string[$i]['prev_event_type']='New record';
+				}
+				
+				$title = '';$attr = '';	
 				if(!empty($val['edited']) && $val['edited']['event_type'] != $val['event_type']) {
 			
 					if($val['edited']['event_type'] != '' && $val['edited']['event_type'] != NULL)
@@ -1522,50 +1568,95 @@ class ContentManager
 				$upm_string[$i]['condition'] =   $val['event_type'] . ' Milestone';
 				
 				if(!empty($val['edited']) && $val['edited']['start_date'] != $val['start_date']){
+				$upm_string[$i]['start_date_highlight']= 'y'; 
+				$upm_string[$i]['start_date_highlight_other']= 'y';
 					if($val['edited']['start_date'] != '' && $val['edited']['start_date'] != NULL)
+					{
 						$upm_string[$i]['old_start_date'] = $val['edited']['start_date']; 
+						$upm_string[$i]['prev_start_date']=$val['edited']['start_date']; 
+					}
+					else
+					{
+					$upm_string[$i]['prev_start_date']='No Previous value';
+					}	
 						
-				} 
+				}  else if($val['new'] == 'y') {
+					$upm_string[$i]['prev_start_date']='New record';
+					$upm_string[$i]['start_date_highlight_other']= 'y';
+					$upm_string[$i]['start_date_highlight']= 'y'; 
+				}
+				
+				
 				if(!empty($val['edited']) && $val['edited']['start_date_type'] != $val['start_date_type']){
+				$upm_string[$i]['end_date_highlight']= 'y';
+				$upm_string[$i]['start_date_highlight_other']= 'y';
 					if($val['edited']['start_date_type'] != '' && $val['edited']['start_date_type'] != NULL) {
 						$upm_string[$i]['old_start_date_type'] = $val['edited']['start_date_type']; 
+						if($val['edited']['start_date'] != $val['start_date'])
+						$upm_string[$i]['prev_start_date']=$val['edited']['start_date']. ' ' .$val['edited']['start_date_type'] ; 
 					} 
-				} 
+					else
+					{
+					$upm_string[$i]['prev_start_date']='No Previous value';
+					}
+				}   else if($val['new'] == 'y') {
+					$upm_string[$i]['prev_start_date']='New record';
+					$upm_string[$i]['start_date_highlight_other']= 'y'; 
+					$upm_string[$i]['start_date_highlight']= 'y'; 
+				}
 								
 				if($val['start_date_type'] == 'anticipated') {
+				$upm_string[$i]['start_date_type']='anticipated';
 				$upm_string[$i]['start_date'] =  (($val['start_date'] != '' && $val['start_date'] != NULL && $val['start_date'] != '0000-00-00') ? $val['start_date'] : '' )  ;
 				} else {
 					$upm_string[$i]['start_date'] =  (($val['start_date'] != '' && $val['start_date'] != NULL && $val['start_date'] != '0000-00-00') ? $val['start_date'] : '' );
 				}
 				
 				if(!empty($val['edited']) && $val['edited']['end_date'] != $val['end_date']){
-				
+				$upm_string[$i]['end_date_highlight']= 'y'; 
+				$upm_string[$i]['end_date_highlight_other']= 'y'; 
 					if($val['edited']['end_date'] != '' && $val['edited']['end_date'] != NULL)
+						{
 						$title = ' title="Previous value: '. $val['edited']['end_date'] . '" '; 
+						$upm_string[$i]['prev_end_date']=$val['edited']['start_date'];
+						}
 					else 
+						{
 						$title = ' title="No Previous value" ';
+						$upm_string[$i]['prev_end_date']='No Previous value';
+						}
 				} else if($val['new'] == 'y') {
 					$title = ' title = "New record" ';
 					$date_style = 'color:#973535;'; 
+					$upm_string[$i]['end_start_date']='New record';
+					$upm_string[$i]['end_date_highlight_other']= 'y'; 
+					$upm_string[$i]['end_date_highlight']= 'y'; 
 				}
 				if(!empty($val['edited']) && $val['edited']['end_date_type'] != $val['end_date_type']){
 				
-					
+					$upm_string[$i]['end_date_highlight']= 'y';
+					$upm_string[$i]['end_date_highlight_other']= 'y'; 
 					if($val['edited']['end_date_type'] != '' && $val['edited']['end_date_type'] != NULL) {
 						$title = ' title="Previous value: ' . 
 						(($val['edited']['end_date'] != $val['end_date']) ? $val['edited']['end_date'] : '' ) 
 						. ' ' . $val['edited']['end_date_type'] . '" '; 
+						if($val['edited']['end_date'] != $val['end_date'])
+						$upm_string[$i]['prev_end_date']=$val['edited']['end_date']. ' ' .$val['edited']['end_date_type'] ; 
 					} else {
 						$title = ' title="No Previous value" ';
+						$upm_string[$i]['prev_end_date']='No Previous value';
 					}
 				} else if($val['new'] == 'y') {
 					$title = ' title = "New record" ';
 					$date_style = 'color:#973535;'; 
+					$upm_string[$i]['end_start_date']='New record';
+					$upm_string[$i]['end_date_highlight_other']= 'y'; 
+					$upm_string[$i]['end_date_highlight']= 'y'; 
 				}
 				
 			
 				if($val['end_date_type'] == 'anticipated') {
-					
+					$upm_string[$i]['end_date_type']= 'anticipated';
 					$upm_string[$i]['end_date'] =  (($val['end_date'] != '' && $val['end_date'] != NULL && $val['end_date'] != '0000-00-00') ? $val['end_date'] : '' ) ;
 				} else {
 					
@@ -5744,10 +5835,19 @@ function htmlformat($str)
 	return htmlspecialchars($str);
 }
 
+function getDifference($value_one, $value_two) {
+
+	$diff = abs(($value_one - $value_two) / $value_one * 100);
+	$diff = round($diff);
+	if($diff > 20)
+		return true;
+	else
+		return false;
+}
 
 
 /********************export begins/*/
-function create_excel($process_params,$upm_string,$firstpartof_upm_string,$tm,$ed, $upmDetails, $header_details)
+function create_excel($process_params,$upm_string,$firstpartof_upm_string,$tm,$ed, $upmDetails, $header_details, $fin_arr)
 {
 
 ob_start();
@@ -5896,6 +5996,17 @@ if($start_setter>0)
 }				
 ///part end -date setter
 
+$highlight_color=(
+		array
+				(
+					'font'    => array
+					(
+						'color'     => array(
+   							'rgb' => 'FF0000'
+    						)
+					)
+				)
+		);
 
 if($stacked)
 {
@@ -5992,27 +6103,151 @@ if($stacked)
 			
 			$objPHPExcel->getActiveSheet()->getStyle('"A' . $i . ':AY' . $i.'"')->applyFromArray($styleThinBlueBorderOutline);
 			$objPHPExcel->getActiveSheet()->getStyle('A1:AY1')->applyFromArray($styleThinBlueBorderOutline);
-			if($value["NCT/nct_id"]>0)
-			$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, 'NCT' . sprintf("%08s",$value["NCT/nct_id"]));
 			
+			if($value["NCT/nct_id"]>0)
+			{
+			$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, 'NCT' . sprintf("%08s",$value["NCT/nct_id"]));
+			$objPHPExcel->getActiveSheet()->getCell('A' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/NCT'. $value["NCT/nct_id"] );
+			$objPHPExcel->getActiveSheet()->getCell('A' . $i)->getHyperlink()->setTooltip('New Record');
+			}
  			$value["NCT/brief_title"]=fix_special_chars($value["NCT/brief_title"]);
 			$objPHPExcel->getActiveSheet()->setCellValue('B' . $i, $value["NCT/brief_title"]);
 			
-			$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/'. $objPHPExcel->getActiveSheet()->getCell('A' . $i)->getValue() );
-			$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('Source - ClinicalTrials.gov');
-			$objPHPExcel->getActiveSheet()->getStyle('B' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
-			if(isset($value["NCT/enrollment"])) 				$objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $value["NCT/enrollment"]);
+			$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/NCT'. $value["NCT/nct_id"] );
 			
+				
+			if(isset($fin_arr[$nctid]['edited']) && in_array('NCT/brief_title',$fin_arr[$nctid]['edited'])) {
+				$objPHPExcel->getActiveSheet()->getStyle('B' . $i)->applyFromArray
+				(
+					$highlight_color
+				);
+				$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip($fin_arr[$nctid]['edited']['NCT/brief_title']);
+					
+			} else if($fin_arr[$nctid]['new'] == 'y') {
+				$objPHPExcel->getActiveSheet()->getStyle('B' . $i)->applyFromArray
+				(
+					$highlight_color
+				);
+				$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('New record');
+			}
+			else
+			{
+				$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('Source - ClinicalTrials.gov');
+			}
+				
+			
+			$objPHPExcel->getActiveSheet()->getStyle('B' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+			
+			if(isset($value["NCT/enrollment"])) 				
+			{
+			$objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $value["NCT/enrollment"]);
+			
+			if(isset($fin_arr[$nctid]['edited']) && in_array('NCT/enrollment',$fin_arr[$nctid]['edited']) && (getDifference(substr($fin_arr[$nctid]['edited'][
+			'NCT/enrollment'],16), htmlformat($value["NCT/enrollment"])))) {
+					$objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray
+					(
+						$highlight_color
+					);
+					$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/NCT'. $value["NCT/nct_id"] );
+					$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip($fin_arr[$nctid]['edited']['NCT/enrollment']);
+					if($value["NCT/enrollment_type"] == 'Anticipated') { 
+						$objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray
+						(
+							array
+							(
+								'font'    => array
+								(
+									'color'     => array(
+   										'rgb' => '973535'
+    									)
+								)
+							)
+						);
+					}	
+				}	else if($fin_arr[$nctid]['new'] == 'y') {
+				
+					$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/NCT'. $value["NCT/nct_id"] );
+					$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip('New record');
+					if($value["NCT/enrollment_type"] == 'Anticipated') { 
+						$objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray
+						(
+							array
+							(
+								'font'    => array
+								(
+									'color'     => array(
+   										'rgb' => '973535'
+    									)
+								)
+							)
+						);
+					}	
+				}
+			}
+			
+			if(isset($value["region"])) 
+			{
 			$value["region"]=fix_special_chars($value["region"]);
 			$objPHPExcel->getActiveSheet()->setCellValue('D' . $i, $value["region"]);
+			if($fin_arr[$nctid]['new'] == 'y') 
+				{
+				$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/NCT'. $value["NCT/nct_id"] );
+				$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setTooltip('New record');
+				}
+			}
 			
-			if(isset($value["NCT/overall_status"])) 			$objPHPExcel->getActiveSheet()->setCellValue('E' . $i, $value["NCT/overall_status"]);
-			
+			if(isset($value["NCT/overall_status"])) 			
+			{
+				$objPHPExcel->getActiveSheet()->setCellValue('E' . $i, $value["NCT/overall_status"]);
+				if(isset($fin_arr[$nctid]['edited']) && in_array('NCT/overall_status', $fin_arr[$nctid]['edited'])) {
+					$objPHPExcel->getActiveSheet()->getStyle('E' . $i)->applyFromArray
+					(
+						$highlight_color
+					);
+					$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/NCT'. $value["NCT/nct_id"] );
+					$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip($fin_arr[$nctid]['edited']['NCT/overall_status']);
+				} else if($fin_arr[$nctid]['new'] == 'y') {
+					$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/NCT'. $value["NCT/nct_id"] );
+					$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip('New Record');
+				} 
+			}
 			
 			if(isset($value["NCT/lead_sponsor"])) 				
 			{
 			$value["NCT/lead_sponsor"]=fix_special_chars($value["NCT/lead_sponsor"]);
 			$objPHPExcel->getActiveSheet()->setCellValue('F' . $i, $value["NCT/lead_sponsor"]);
+			
+				if(isset($fin_arr[$nctid]['edited']) && (in_array('NCT/lead_sponsor', $fin_arr[$nctid]['edited']) 
+						|| in_array('NCT/collaborator', $fin_arr[$nctid]['edited']))) {
+						
+							$objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray
+						(
+							$highlight_color
+						);
+						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/NCT'. $value["NCT/nct_id"] );
+						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip($fin_arr[$nctid]['edited']['NCT/lead_sponsor']);
+						
+						if(in_array('NCT/collaborator', $fin_arr[$nctid]['edited'])) {
+							$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/NCT'. $value["NCT/nct_id"] );
+							$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip($fin_arr[$nctid]['edited']['NCT/collaborator']);
+							$objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray
+							(
+								array
+								(
+									'font'    => array
+									(
+										'color'     => array(
+   											'rgb' => '973535'
+    										)
+									)
+								)
+							);
+						}
+						
+					} else if($fin_arr[$nctid]['new'] == 'y') {
+						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/NCT'. $value["NCT/nct_id"] );
+						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('New record');
+					}
 			}
 			
 			if(isset($value["NCT/condition"])) 					
@@ -6020,6 +6255,17 @@ if($stacked)
 			$value["NCT/condition"]=implode(", ",array_unique(explode(",", str_replace(", ",",",$value["NCT/condition"]))));
 			$value["NCT/condition"]=fix_special_chars($value["NCT/condition"]);
 			$objPHPExcel->getActiveSheet()->setCellValue('G' . $i, $value["NCT/condition"]);
+			if(isset($fin_arr[$nctid]['edited']) && in_array('NCT/condition', $fin_arr[$nctid]['edited'])) {
+					$objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray
+					(
+						$highlight_color
+					);
+					$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/NCT'. $value["NCT/nct_id"] );
+					$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip($fin_arr[$nctid]['edited']['NCT/condition']);
+				} else if($fin_arr[$nctid]['new'] == 'y') {
+					$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/NCT'. $value["NCT/nct_id"] );
+					$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip('New Record');
+				} 
 			}
 			
 			if(isset($value["NCT/intervention_name"])) 			
@@ -6027,14 +6273,47 @@ if($stacked)
 			$value["NCT/intervention_name"]=implode(", ",array_unique(explode(",", str_replace(", ",",",$value["NCT/intervention_name"]))));
 			$value["NCT/intervention_name"]=fix_special_chars($value["NCT/intervention_name"]);
 			$objPHPExcel->getActiveSheet()->setCellValue('H' . $i, $value["NCT/intervention_name"]);
+			
+			if(isset($fin_arr[$nctid]['edited']) && in_array('NCT/intervention_name', $fin_arr[$nctid]['edited'])) {
+					$objPHPExcel->getActiveSheet()->getStyle('H' . $i)->applyFromArray
+					(
+						$highlight_color
+					);
+					$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/NCT'. $value["NCT/nct_id"] );
+					$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip($fin_arr[$nctid]['edited']['NCT/intervention_name']);
+				} else if($fin_arr[$nctid]['new'] == 'y') {
+					$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/NCT'. $value["NCT/nct_id"] );
+					$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip('New Record');
+				} 
 			}
 			
 			if(isset($value["NCT/start_date"]) && $value["NCT/start_date"] != '' && $value["NCT/start_date"] != NULL && $value["NCT/start_date"] != '0000-00-00') 				
-			$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, date('m/y',strtotime($value["NCT/start_date"])));
+			{
+				$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, date('m/y',strtotime($value["NCT/start_date"])));
+			
+				if(isset($fin_arr[$nctid]['edited']) && in_array('NCT/start_date', $fin_arr[$nctid]['edited'])) {
+					$objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray
+					(
+						$highlight_color
+					);
+					$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/NCT'. $value["NCT/nct_id"] );
+					$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip($fin_arr[$nctid]['edited']['NCT/start_date']);
+					} else if($fin_arr[$nctid]['new'] == 'y') {
+						$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/NCT'. $value["NCT/nct_id"] );
+						$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('New record');
+					}
+			}		
 			//if(isset($value["NCT/primary_completion_date"])) 	$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, $value["NCT/primary_completion_date"]);
 			
 			if(isset($value["inactive_date"]) && $value["inactive_date"] != '' && $value["inactive_date"] != NULL && $value["inactive_date"] != '0000-00-00') 
+			{
 			$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, date('m/y',strtotime($value["inactive_date"])));
+				if($fin_arr[$nctid]['new'] == 'y') 
+				{
+				$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/NCT'. $value["NCT/nct_id"] );
+				$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip('New record');
+				}
+			}
 			
 			if((!isset($value["NCT/phase"])) || $value["NCT/phase"] == NULL || $value["NCT/phase"] == '')
 			$value["NCT/phase"] = 'N/A';
@@ -6496,49 +6775,225 @@ else
 										 ->setDescription("Excel file generated by Larvol Trials")
 										 ->setKeywords("Larvol Trials")
 										 ->setCategory("Clinical Trials");
-			$objPHPExcel->getActiveSheet()->getStyle('"A' . $i . ':AY' . $i . '"')->applyFromArray($styleThinBlueBorderOutline);
+										 
+										 
+			$objPHPExcel->getActiveSheet()->getStyle('"A' . $i . ':AY' . $i.'"')->applyFromArray($styleThinBlueBorderOutline);
+			$objPHPExcel->getActiveSheet()->getStyle('A1:AY1')->applyFromArray($styleThinBlueBorderOutline);
 			
+			if($value["NCT.nct_id"]>0)
+			{
 			$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, 'NCT' . sprintf("%08s",$value["NCT.nct_id"]));
 			
-			$value["NCT.brief_title"]=fix_special_chars($value["NCT.brief_title"]);
+			$objPHPExcel->getActiveSheet()->getCell('A' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/NCT'. $value["NCT.nct_id"] );
+			$objPHPExcel->getActiveSheet()->getCell('A' . $i)->getHyperlink()->setTooltip('New Record');
+			}
+			
+ 			$value["NCT/brief_title"]=fix_special_chars($value["NCT.brief_title"]);
 			$objPHPExcel->getActiveSheet()->setCellValue('B' . $i, $value["NCT.brief_title"]);
 			
-			$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/'. $objPHPExcel->getActiveSheet()->getCell('A' . $i)->getValue() );
-			$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('Source - ClinicalTrials.gov');
+			$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/NCT'. $value["NCT.nct_id"] );
+			
+				
+			if(isset($fin_arr[$nctid]['edited']) && in_array('NCT/brief_title',$fin_arr[$nctid]['edited'])) {
+				$objPHPExcel->getActiveSheet()->getStyle('B' . $i)->applyFromArray
+				(
+					$highlight_color
+				);
+				$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip($fin_arr[$nctid]['edited']['NCT/brief_title']);
+					
+			} else if($fin_arr[$nctid]['new'] == 'y') {
+				$objPHPExcel->getActiveSheet()->getStyle('B' . $i)->applyFromArray
+				(
+					$highlight_color
+				);
+				$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('New record');
+			}
+			else
+			{
+				$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('Source - ClinicalTrials.gov');
+			}
+				
+			
 			$objPHPExcel->getActiveSheet()->getStyle('B' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
 			
-			if(isset($value["NCT.enrollment"])) 				$objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $value["NCT.enrollment"]);
+			if(isset($value["NCT.enrollment"])) 				
+			{
+			$objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $value["NCT.enrollment"]);
 			
+			if(isset($fin_arr[$nctid]['edited']) && in_array('NCT/enrollment',$fin_arr[$nctid]['edited']) && (getDifference(substr($fin_arr[$nctid]['edited'][
+			'NCT/enrollment'],16), htmlformat($value["NCT.enrollment"])))) {
+					$objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray
+					(
+						$highlight_color
+					);
+					$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/NCT'. $value["NCT.nct_id"] );
+					$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip($fin_arr[$nctid]['edited']['NCT/enrollment']);
+					if($value["NCT/enrollment_type"] == 'Anticipated') { 
+						$objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray
+						(
+							array
+							(
+								'font'    => array
+								(
+									'color'     => array(
+   										'rgb' => '973535'
+    									)
+								)
+							)
+						);
+					}	
+				}	else if($fin_arr[$nctid]['new'] == 'y') {
+				
+					$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/NCT'. $value["NCT.nct_id"] );
+					$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip('New record');
+					if($value["NCT/enrollment_type"] == 'Anticipated') { 
+						$objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray
+						(
+							array
+							(
+								'font'    => array
+								(
+									'color'     => array(
+   										'rgb' => '973535'
+    									)
+								)
+							)
+						);
+					}	
+				}
+					
+			}
+			
+			if(isset($value["region"])) 
+			{
 			$value["region"]=fix_special_chars($value["region"]);
 			$objPHPExcel->getActiveSheet()->setCellValue('D' . $i, $value["region"]);
+			if($fin_arr[$nctid]['new'] == 'y') 
+				{
+				$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/NCT'. $value["NCT.nct_id"] );
+				$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setTooltip('New record');
+				}
+			}
 			
-			if(isset($value["NCT.overall_status"])) 			$objPHPExcel->getActiveSheet()->setCellValue('E' . $i, $value["NCT.overall_status"]);
-			
-			if(isset($value["NCT.lead_sponsor"]))
+			if(isset($value["NCT.overall_status"])) 			
 			{
-				$value["NCT.lead_sponsor"]=fix_special_chars($value["NCT.lead_sponsor"]);
-				$objPHPExcel->getActiveSheet()->setCellValue('F' . $i, $value["NCT.lead_sponsor"]);
+				$objPHPExcel->getActiveSheet()->setCellValue('E' . $i, $value["NCT.overall_status"]);
+				if(isset($fin_arr[$nctid]['edited']) && in_array('NCT/overall_status', $fin_arr[$nctid]['edited'])) {
+					$objPHPExcel->getActiveSheet()->getStyle('E' . $i)->applyFromArray
+					(
+						$highlight_color
+					);
+					$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/NCT'. $value["NCT.nct_id"] );
+					$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip($fin_arr[$nctid]['edited']['NCT/overall_status']);
+				} else if($fin_arr[$nctid]['new'] == 'y') {
+					$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/NCT'. $value["NCT.nct_id"] );
+					$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip('New Record');
+				} 
+			}
+			
+			if(isset($value["NCT.lead_sponsor"])) 				
+			{
+			$value["NCT.lead_sponsor"]=fix_special_chars($value["NCT.lead_sponsor"]);
+			$objPHPExcel->getActiveSheet()->setCellValue('F' . $i, $value["NCT.lead_sponsor"]);
+			
+				if(isset($fin_arr[$nctid]['edited']) && (in_array('NCT/lead_sponsor', $fin_arr[$nctid]['edited']) 
+						|| in_array('NCT/collaborator', $fin_arr[$nctid]['edited']))) {
+						
+							$objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray
+						(
+							$highlight_color
+						);
+						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/NCT'. $value["NCT.nct_id"] );
+						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip($fin_arr[$nctid]['edited']['NCT/lead_sponsor']);
+						
+						if(in_array('NCT/collaborator', $fin_arr[$nctid]['edited'])) {
+							$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/NCT'. $value["NCT.nct_id"] );
+							$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip($fin_arr[$nctid]['edited']['NCT/collaborator']);
+							$objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray
+							(
+								array
+								(
+									'font'    => array
+									(
+										'color'     => array(
+   											'rgb' => '973535'
+    										)
+									)
+								)
+							);
+						}
+						
+					} else if($fin_arr[$nctid]['new'] == 'y') {
+						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/NCT'. $value["NCT.nct_id"] );
+						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('New record');
+					}
 			}
 			
 			if(isset($value["NCT.condition"])) 					
 			{
-				$value["NCT.condition"]=implode(", ",array_unique(explode(",", str_replace(", ",",",$value["NCT.condition"]))));
-				$value["NCT.condition"]=fix_special_chars($value["NCT.condition"]);
-				$objPHPExcel->getActiveSheet()->setCellValue('G' . $i, $value["NCT.condition"]);
+			$value["NCT.condition"]=implode(", ",array_unique(explode(",", str_replace(", ",",",$value["NCT.condition"]))));
+			$value["NCT.condition"]=fix_special_chars($value["NCT.condition"]);
+			$objPHPExcel->getActiveSheet()->setCellValue('G' . $i, $value["NCT.condition"]);
+			
+			if(isset($fin_arr[$nctid]['edited']) && in_array('NCT/condition', $fin_arr[$nctid]['edited'])) {
+					$objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray
+					(
+						$highlight_color
+					);
+					$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/NCT'. $value["NCT.nct_id"] );
+					$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip($fin_arr[$nctid]['edited']['NCT/condition']);
+				} else if($fin_arr[$nctid]['new'] == 'y') {
+					$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/NCT'. $value["NCT.nct_id"] );
+					$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip('New Record');
+				} 
 			}
 			
 			if(isset($value["NCT.intervention_name"])) 			
 			{
-				$value["NCT.intervention_name"]=implode(", ",array_unique(explode(",", str_replace(", ",",",$value["NCT.intervention_name"]))));
-				$value["NCT.intervention_name"]=fix_special_chars($value["NCT.intervention_name"]);
-				$objPHPExcel->getActiveSheet()->setCellValue('H' . $i, $value["NCT.intervention_name"]);
-			}
-			if(isset($value["NCT.start_date"]) && $value["NCT.start_date"] != '' && $value["NCT.start_date"] != NULL && $value["NCT.start_date"] != '0000-00-00')
-			$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, date('m/y',strtotime($value["NCT.start_date"])));
-			//if(isset($value["NCT.primary_completion_date"])) 	$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, $value["NCT.primary_completion_date"]);
+			$value["NCT.intervention_name"]=implode(", ",array_unique(explode(",", str_replace(", ",",",$value["NCT.intervention_name"]))));
+			$value["NCT.intervention_name"]=fix_special_chars($value["NCT.intervention_name"]);
+			$objPHPExcel->getActiveSheet()->setCellValue('H' . $i, $value["NCT.intervention_name"]);
 			
-			if(isset($value["inactive_date"]) && $value["inactive_date"] != '' && $value["inactive_date"] != NULL && $value["inactive_date"] != '0000-00-00') 					
+			if(isset($fin_arr[$nctid]['edited']) && in_array('NCT/intervention_name', $fin_arr[$nctid]['edited'])) {
+					$objPHPExcel->getActiveSheet()->getStyle('H' . $i)->applyFromArray
+					(
+						$highlight_color
+					);
+					$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/NCT'. $value["NCT.nct_id"] );
+					$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip($fin_arr[$nctid]['edited']['NCT/intervention_name']);
+				} else if($fin_arr[$nctid]['new'] == 'y') {
+					$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/NCT'. $value["NCT.nct_id"] );
+					$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip('New Record');
+				} 
+			}
+			
+			if(isset($value["NCT.start_date"]) && $value["NCT.start_date"] != '' && $value["NCT.start_date"] != NULL && $value["NCT.start_date"] != '0000-00-00') 				
+			{
+				$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, date('m/y',strtotime($value["NCT.start_date"])));
+			
+				if(isset($fin_arr[$nctid]['edited']) && in_array('NCT/start_date', $fin_arr[$nctid]['edited'])) {
+					$objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray
+					(
+						$highlight_color
+					);
+					$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/NCT'. $value["NCT.nct_id"] );
+					$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip($fin_arr[$nctid]['edited']['NCT/start_date']);
+					} else if($fin_arr[$nctid]['new'] == 'y') {
+						$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/NCT'. $value["NCT.nct_id"] );
+						$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('New record');
+					}
+			}		
+			//if(isset($value["NCT/primary_completion_date"])) 	$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, $value["NCT/primary_completion_date"]);
+			
+			if(isset($value["inactive_date"]) && $value["inactive_date"] != '' && $value["inactive_date"] != NULL && $value["inactive_date"] != '0000-00-00') 
+			{
 			$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, date('m/y',strtotime($value["inactive_date"])));
+				if($fin_arr[$nctid]['new'] == 'y') 
+				{
+				$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl('http://clinicaltrials.gov/ct2/show/NCT'. $value["NCT.nct_id"] );
+				$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip('New record');
+				}
+			}
 			
 			if((!isset($value["NCT.phase"])) || $value["NCT.phase"] == NULL || $value["NCT.phase"] == '')
 			$value["NCT.phase"] = 'N/A';
@@ -7071,6 +7526,79 @@ if(isset($first_part_newupmarray) and is_array($first_part_newupmarray))
 			$objPHPExcel->getActiveSheet()->setCellValue('G' . $i, date('m/y',strtotime($value["start_date"])));
 			$objPHPExcel->getActiveSheet()->setCellValue('H' . $i, date('m/y',strtotime($value["end_date"])));
 			
+			if($value['event_link'] !='' && $value['event_link'] != NULL)
+			{
+				$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setUrl($value['event_link']);
+				
+				if($value["prev_event_description"] != '' && $value["event_description_highlight"] == 'y')
+				{
+				$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setUrl($value['event_link']);
+				$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setTooltip($value["prev_event_description"]);
+				$objPHPExcel->getActiveSheet()->getStyle('D' . $i)->applyFromArray
+					(
+						$highlight_color
+					);
+				}
+				else
+				{
+				$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setTooltip('Event Link');
+				}
+				
+				if($value["prev_start_date"] != '' && $value["start_date_highlight"] == 'y')
+				{
+				$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($value['event_link']);
+				$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip($value["prev_start_date"]);
+				$objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray
+					(
+						$highlight_color
+					);
+				}
+				
+				if($value["prev_end_date"] != '' && $value["end_date_highlight"] == 'y')
+				{
+				$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($value['event_link']);
+				$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip($value["prev_end_date"]);
+				$objPHPExcel->getActiveSheet()->getStyle('H' . $i)->applyFromArray
+					(
+						$highlight_color
+					);
+				}
+				
+			}
+			
+			if($value["start_date_highlight_other"] == 'y' && $value["start_date_type"] == 'anticipated')	
+				{
+					$objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray
+							(
+								array
+								(
+									'font'    => array
+									(
+										'color'     => array(
+   											'rgb' => '973535'
+    										)
+									)
+								)
+							);
+				}
+				
+			
+			if($value["end_date_highlight_other"] == 'y' && $value["end_date_type"] == 'anticipated')	
+				{
+					$objPHPExcel->getActiveSheet()->getStyle('H' . $i)->applyFromArray
+							(
+								array
+								(
+									'font'    => array
+									(
+										'color'     => array(
+   											'rgb' => '973535'
+    										)
+									)
+								)
+							);
+				}	
+			
 		
 			if($value['result_image_src'] != '' && $value['result_image_src'] != NULL) {
 						$objDrawing = new PHPExcel_Worksheet_Drawing();
@@ -7140,7 +7668,79 @@ if(isset($newupmarray) and is_array($newupmarray))
 			$objPHPExcel->getActiveSheet()->setCellValue('G' . $i, date('m/y',strtotime($value["start_date"])));
 			$objPHPExcel->getActiveSheet()->setCellValue('H' . $i, date('m/y',strtotime($value["end_date"])));
 			
+			if($value['event_link'] !='' && $value['event_link'] != NULL)
+			{
+				$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setUrl($value['event_link']);
+				
+				if($value["prev_event_description"] != '' && $value["event_description_highlight"] == 'y')
+				{
+				$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setUrl($value['event_link']);
+				$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setTooltip($value["prev_event_description"]);
+				$objPHPExcel->getActiveSheet()->getStyle('D' . $i)->applyFromArray
+					(
+						$highlight_color
+					);
+				}
+				else
+				{
+				$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setTooltip('Event Link');
+				}
+				
+				if($value["prev_start_date"] != '' && $value["start_date_highlight"] == 'y')
+				{
+				$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($value['event_link']);
+				$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip($value["prev_start_date"]);
+				$objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray
+					(
+						$highlight_color
+					);
+				}
+				
+				if($value["prev_end_date"] != '' && $value["end_date_highlight"] == 'y')
+				{
+				$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($value['event_link']);
+				$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip($value["prev_end_date"]);
+				$objPHPExcel->getActiveSheet()->getStyle('H' . $i)->applyFromArray
+					(
+						$highlight_color
+					);
+				}
+				
+			}
 		
+			if($value["start_date_highlight_other"] == 'y' && $value["start_date_type"] == 'anticipated')	
+				{
+					$objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray
+							(
+								array
+								(
+									'font'    => array
+									(
+										'color'     => array(
+   											'rgb' => '973535'
+    										)
+									)
+								)
+							);
+				}
+				
+			
+			if($value["end_date_highlight_other"] == 'y' && $value["end_date_type"] == 'anticipated')	
+				{
+					$objPHPExcel->getActiveSheet()->getStyle('H' . $i)->applyFromArray
+							(
+								array
+								(
+									'font'    => array
+									(
+										'color'     => array(
+   											'rgb' => '973535'
+    										)
+									)
+								)
+							);
+				}	
+			
 			
 			
 					if($value['result_image_src'] != '' && $value['result_image_src'] != NULL) {
