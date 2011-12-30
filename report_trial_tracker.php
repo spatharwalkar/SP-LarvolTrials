@@ -24,15 +24,13 @@ function editor()
 	if(!isset($_GET['id'])) return;
 	$id = mysql_real_escape_string(htmlspecialchars($_GET['id']));
 	if(!is_numeric($id)) return;
-	$query = 'SELECT name,user,output_template,time,edited FROM rpt_trial_tracker WHERE id=' . $id . ' LIMIT 1';
+	$query = 'SELECT name,user,time FROM rpt_trial_tracker WHERE id=' . $id . ' LIMIT 1';
 	$res = mysql_query($query) or die('Bad SQL query getting report');
 	$res = mysql_fetch_array($res) or die('Report not found.');
 	$rptu = $res['user'];
 	if($rptu !== NULL && $rptu != $db->user->id) return;	//prevent anyone from viewing others' private reports
 	$name = $res['name'];
 	$reportTime=$res['time'];
-	$reportEdited=$res['edited'];
-	$output_template = $res['output_template'];
 	$query = 'SELECT * FROM rpt_trial_tracker_trials WHERE report=' . $id;
 	$res = mysql_query($query) or die('Bad SQL query getting report trials');
 	$trials = array();
@@ -40,17 +38,16 @@ function editor()
 	{
 		$trials[$trial['num']] = $trial;
 	}
-	echo('<form name="getwordform" method="get" target="_blank" action="run_trial_tracker.php" class="onebutton" style="height:50px;">'
+	echo('<form name="getwordform" method="get" target="_blank" action="intermediary.php" class="onebutton" style="height:50px;">'
 			. '<input type="hidden" name="id" value="' . $id . '" />'
-			. '<input type="image" name="getword" src="images/word.png" title="Run"/></form>'
+			. '<input type="image" name="getword" src="images/word.png" title="Run"/>'
+			. '<input type="image" name="getwebpage" src="images/weblink.png" title="Run" style="margin:8px;" /></form>'
 			. '<br style="margin-top:55px;" clear="all"/>');
 	$out = '<form action="report_trial_tracker.php" method="post"><fieldset><legend>Edit report ' . $id . '</legend>'
 			. '<input type="hidden" name="id" value="' . $id . '" />'
 			. '<label>Name: <input type="text" name="reportname" value="' . htmlspecialchars($name)
 			. '"/></label>'
 			. '<label>Report Time: <input type="text" name="reporttime" value="' . htmlspecialchars($reportTime)
-			. '"/></label>'
-			. '<label>Edited From: <input type="text" name="reportchangedfrom" value="' . htmlspecialchars($reportEdited)
 			. '"/></label>';
 	if($db->user->userlevel != 'user')
 	{
@@ -71,8 +68,7 @@ function editor()
 			. '<input type="submit" name="addtrial" value="More trials" /> | '
 			. '<input type="submit" name="deltrial" value="Less trials" /> | ';
 	}
-	$out .= '<input type="submit" name="reportcopy" value="Copy into new" /><br />'
-		. 'Output Template: ' . makeDropdown('output_template',getEnumValues('rpt_trial_tracker','output_template'),false,$output_template,false) . '<br />'
+	$out .= '<input type="submit" name="reportcopy" value="Copy into new" /><br /><br />'
 		. '<table><tr><th>NCTID</th>'
 		. '<th>Tumor Type</th>'
 		. '<th>Patient Populaton</th>'
@@ -83,7 +79,8 @@ function editor()
 	foreach($trials as $num => $trial)
 	{
 		$out .= '<tr><td><input type="text" name="trials[' . $num . '][nctid]" value="' . padnct($trial['nctid']) . '" /></td>'
-			. '<td>' . makeDropdown('trials[' . $num . '][tumor_type]',getEnumValues('rpt_trial_tracker_trials','tumor_type'),false,$trial['tumor_type'],false) . '</td>'
+			. '<td>' . makeDropdown('trials[' . $num . '][tumor_type]',getEnumValues('rpt_trial_tracker_trials','tumor_type'),false,$trial['tumor_type'],false) 
+			. '</td>'
 			. '<td><input type="text" name="trials[' . $num . '][patient_population]" value="' . $trial['patient_population'] . '" /></td>'
 			. '<td><input type="text" name="trials[' . $num . '][trials_details]" value="' . $trial['trials_details'] . '" /></td>'
 			. '<td><input type="text" name="trials[' . $num . '][randomized_controlled_trial]" value="' . $trial['randomized_controlled_trial'] . '" /></td>'
@@ -211,5 +208,16 @@ function postRL()
 				mysql_query('DELETE FROM rpt_trial_tracker WHERE id=' . $id . ' LIMIT 1') or die('Bad SQL query deleting report');
 		}
 	}
+	/*if(isset($_POST['getwebpage_x']))
+	{
+		$url = 'location:intermediary.php?id=' . $_POST['id'] . 'target="_blank"';
+		header($url);
+		exit;
+	}
+	if(isset($_POST['getword_x']))
+	{
+		echo '<pre>';print_r($_POST);
+		exit;
+	}*/
 }
 ?>
