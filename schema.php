@@ -20,6 +20,15 @@ mysql_query('DROP DATABASE IF EXISTS ' . DB_TEMP) or die("Couldn't drop database
 mysql_query('CREATE DATABASE ' . DB_TEMP) or die("Couldn't create database: " . mysql_error());
 mysql_select_db(DB_TEMP) or die("Could not find database on server!");
 $setupscript = file_get_contents('setup/schema.sql');
+//detect delimiter 
+$pattern = '/DELIMITER \$\$(.*?)DELIMITER.?\;/s';
+if (preg_match_all($pattern,$setupscript,$triggers))
+{
+	if(isset($triggers[0]) && count($triggers[0])>0)
+	{
+		$setupscript = preg_replace($pattern, '', $setupscript);
+	}
+}
 $setupscript = explode(';',$setupscript);
 foreach($setupscript as $stat)
 {
@@ -33,6 +42,13 @@ foreach($setupscript as $stat)
 		echo("\n<br />");
 	}
 }
+//run caught triggers
+foreach($triggers as $trigger)
+{
+	//$res = mysql_query($trigger);
+	
+}
+
 mysql_close();
 echo('Done.<br />Changes needed to make the DB in use the same as the recorded schema for the revision of your working copy:<br /><br /><fieldset class="code"><legend>SQL</legend>');
 $dbsync = new DBSync();
