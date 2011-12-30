@@ -58,9 +58,19 @@ $dbsync->Sync();
 echo('</fieldset><br />Done. <ul><li>If these differences were caused by an update, compare the above changes to what is called for by recent code commits, and if correct, execute them.</li><li>If these differences are due to your own schema changes, update the setup script (setup/schema.sql) to include them, then re-run this page to ensure there are no differences before you commit your code.</li></ul>');
 ?>
 <br/>
+<fieldset class="code"><legend>TRIGGERS</legend>
+<?php 
+if(isset($triggers[0]) && count($triggers[0])>0)
+{
+	$dbsync->syncTriggers();
+}
+?>
+</fieldset>
+Done.
+<br/>
 Data changes based on data.sql
 <br/>
-<fieldset class="code"><legend>SQL</legend>
+<fieldset class="code"><legend>DATA</legend>
 <?php 
 //data.sql import
 mysql_connect(DB_SERVER,DB_USER,DB_PASS) or die("Error connecting to database server!");
@@ -83,7 +93,11 @@ $dbsync->syncDataTables('set',array('data_categories','data_enumvals','data_fiel
 $dbsync->syncData();
 ?>
 </fieldset>
-<br />Done. <ul><li>Re-run the script again to make sure no more related data are needed to be inserted or not.</li></ul>
+<br />Done.
+	<ul>
+		<li>Re-run the script again to make sure no more related data are
+			needed to be inserted or not.</li>
+	</ul>
 
 </body>
 </html>

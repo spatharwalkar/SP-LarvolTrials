@@ -584,5 +584,48 @@ require_once('include.util.php');
 			return $tmp;
         }
         
+        /**
+        * DBSync_mysql::getTriggerList()
+        * @tutorial get triggers installed in database.
+        * @access public
+        * @return array trigger list
+        * @author Jithu Thomas
+        **/
+        function getTriggerList()
+        {
+        	$query = "select trigger_name,event_object_table from information_schema.triggers where trigger_schema='".$this->database."' ";
+        	$result = mysql_query($query,$this->dbp);
+        	if(mysql_num_rows($result)>0)
+        	{
+        		while($row = mysql_fetch_assoc($result))
+        		{
+        			$triggers[] = $row;
+        		}
+        		return $triggers;
+        	}
+        	else
+        	{
+        		return array();
+        	}
+        }
+        
+        /**
+         * DBSync_mysql::removeAllTriggers()
+         * @tutorial generate sql to remove all triggers in a database.
+         * @access public
+         * @return string
+         * @author Jithu Thomas
+         **/
+        function removeAllTriggers()
+        {
+        	$triggers = $this->getTriggerList();
+        	foreach($triggers as $trigger)
+        	{
+        		$sql = "DROP TRIGGER `{$this->database}`.`{$trigger['trigger_name']}`;";
+        		echo $sql."<br/>";
+        	}
+        }      
+          
+    //end class    
     }
 ?>

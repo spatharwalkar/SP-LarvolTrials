@@ -474,5 +474,48 @@
         	}
         	return $returnArr;
         }
+
+        /**
+        * DBSync::syncTriggers()
+        * @tutorial Sync databases triggers with the home database
+        * Databases home and sync are already assigned before running
+        * the function
+        * @access	public
+        * @return 	boolean		Success
+        * @author Jithu Thomas
+        **/
+        public function syncTriggers()
+        {
+        	//echo '<pre>';
+        	if(!$this->home->ok && count($this->sync) && !$this->sync[0]->ok)
+        	{
+        		$this->RaiseError('Home or Sync Database not set properly.');
+        	}
+        	
+        	for ($i = 0; $i < count($this->sync); $i++)
+        	{
+        		$this->syncTriggersIndividual($this->home, $this->sync[$i]);
+        	}        	
+        }    
+
+        /**
+        * DBSync::syncTriggersIndividual()
+        * @tutorial Sync individual sync databases triggers with the home database
+        * Databases home and sync are already assigned before running
+        * the function
+        * @access	private
+        * @return 	boolean		Success
+        * @author Jithu Thomas
+        **/
+        private function syncTriggersIndividual(&$dbHome,&$dbSync)
+        {
+        	//echo '<pre>';
+        	if(!$this->home->ok && count($this->sync) && !$this->sync[0]->ok)
+        	{
+        		$this->RaiseError('Home or Sync Database not set properly.');
+        	}
+
+			$dbSync->removeAllTriggers();
+        }        
     }
 ?>
