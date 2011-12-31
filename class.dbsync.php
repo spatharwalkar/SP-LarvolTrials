@@ -200,6 +200,14 @@
                     }
 
         		    foreach ($fieldnames_sync as $field) {
+        		    	foreach($fields_sync as $fld)
+        		    	{
+        		    		if($fld['name']==$field && $fld['constraint_name']!='')
+        		    		{
+        		    			$sql = "ALTER TABLE `{$tables_home[$i]}` DROP FOREIGN KEY `{$fld['constraint_name']}` ;";
+        		    			echo $sql.'<br/>';
+        		    		}
+        		    	}
                     	if (!$db_sync->RemoveTableField($tables_home[$i], $field)) {
 	                        $this->RaiseError("Could not change field <strong>{$field}</strong> on table <strong>{$tables_home[$i]}</strong> on database <strong>{$db_sync->database}</strong> at {$db_sync->user}@{$db_sync->host}: " . $db_sync->LastError());
                         }

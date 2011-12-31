@@ -42,12 +42,7 @@ foreach($setupscript as $stat)
 		echo("\n<br />");
 	}
 }
-//run caught triggers
-foreach($triggers as $trigger)
-{
-	//$res = mysql_query($trigger);
-	
-}
+
 
 mysql_close();
 echo('Done.<br />Changes needed to make the DB in use the same as the recorded schema for the revision of your working copy:<br /><br /><fieldset class="code"><legend>SQL</legend>');
@@ -63,6 +58,10 @@ echo('</fieldset><br />Done. <ul><li>If these differences were caused by an upda
 if(isset($triggers[0]) && count($triggers[0])>0)
 {
 	$dbsync->syncTriggers();
+	foreach($triggers[0] as $trigger)
+	{
+		echo str_replace("\n","<br/>",htmlspecialchars($trigger))."<br/>";
+	}
 }
 ?>
 </fieldset>
