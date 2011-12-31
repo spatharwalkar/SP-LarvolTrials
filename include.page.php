@@ -594,18 +594,27 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			{
 				$historyArr = $row;
 			}
-			//copy new index added from last_update for the upm_history table
-			$historyArr['added'] = $historyArr['last_update'];
 			//last update not needed for upm_history
 			unset($historyArr['last_update']);
-			//superceded is the current date 
-			$historyArr['superceded']=date('Y-m-d',$now);
-			$historyArrKeys = array_keys($historyArr);		
-			$historyArr = array_map(am,array_keys($historyArr),$historyArr);
-			$query = "insert into upm_history (".implode(',',$historyArrKeys).") values (".implode(',',$historyArr).")";
-			mysql_query($query)or softdieSession('Cannot update history for upm id '.$historyArr['id']);
 			//remove post action name from insert query.
-			array_pop($post);	
+			unset($post['save']);
+			global $post_tmp;
+			$post_tmp = $post;
+			$historyArr = array_diff_assoc($historyArr,$post);
+			$historyArr = array_map(function($a,$b){
+				global $post_tmp;
+				global $now;
+				global $db;
+				$change_date = date('Y-m-d H:i:s',$now);
+				return array('id'=>$post_tmp['id'],'change_date'=>"'".$change_date."'",'field'=>"'".$a."'",'old_value'=>"'".mysql_real_escape_string($b)."'",'new_value'=>"'".mysql_real_escape_string($post_tmp[$a])."'",'user'=>$db->user->id);
+				},array_keys($historyArr),$historyArr);
+			unset($post_tmp);	
+			foreach($historyArr as $history)
+			{
+				$query = "insert into upm_history (".implode(',',array_keys($history)).") values (".implode(',',$history).")";
+				mysql_query($query)or softdieSession('Cannot update history for upm id '.$historyArr['id']);
+			}
+			//changed nowarray_pop($post);	
 			$post['last_update'] = date('Y-m-d',$now);
 			$post = array_map(am1,array_keys($post),array_values($post));
 		}
