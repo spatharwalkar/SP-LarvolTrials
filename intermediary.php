@@ -19,9 +19,14 @@ if(isset($_POST['btnDownload']))
 	$timeMachine = $_POST['timeMachine'];
 	$globalOptions = $_POST['globalOptions'];
 	
+	
 	if($_POST['dOption'] == 'all')
 	{
-		$globalOptions['type'] = 'allTrials';
+		$globalOptions['download'] = 'allTrials';
+	}
+	else
+	{
+		$globalOptions['download'] = $globalOptions['type'];
 	}
 	
 	switch($_POST['wFormat'])

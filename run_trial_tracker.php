@@ -145,6 +145,21 @@ class TrialTracker
 			}
 			$Values = $this->processOTTData($ottType, $resultIds, $timeMachine, $linkExpiryDt = array(), $globalOptions);
 		}
+		
+		if($globalOptions['download'] == 'allTrials')
+		{
+			$Trials = $Values['allTrials'];
+			$count = count($Values['allTrials']);
+		}
+		else
+		{
+			$Trials = $Values['Trials'];
+			$count = count($Values['Trials']);
+		}
+		
+		unset($Values['Trials']);
+		unset($Values['allTrials']);	
+		
 		$unMatchedUpms = array();
 		foreach($Values['TrialsInfo'] as $tkey => $tvalue)
 		{
@@ -154,7 +169,7 @@ class TrialTracker
 		$i = 2;
 		$section = '';
 		
-		foreach ($Values['Trials'] as $tkey => $tvalue)
+		foreach ($Trials as $tkey => $tvalue)
 		{
 			$startMonth = date('m',strtotime($tvalue['NCT/start_date']));
 			$startYear = date('Y',strtotime($tvalue['NCT/start_date']));
@@ -2631,10 +2646,23 @@ class TrialTracker
 			{
 				$resultIds = array($resultIds);
 			}
-			$Values = $this->processOTTData($ottType, $resultIds, $timeMachine, $globalOptions);
+			$Values = $this->processOTTData($ottType, $resultIds, $timeMachine, $linkExpiryDt = array(), $globalOptions);
 		}
 		
-		$count = count($Values['Trials']);
+		if($globalOptions['download'] == 'allTrials')
+		{
+			$Trials = $Values['allTrials'];
+			$count = count($Values['allTrials']);
+		}
+		else
+		{
+			$Trials = $Values['Trials'];
+			$count = count($Values['Trials']);
+		}
+		
+		unset($Values['Trials']);
+		unset($Values['allTrials']);
+		
 		$start 	= '';
 		$last = '';
 		$totalPages = '';
@@ -2648,7 +2676,7 @@ class TrialTracker
 		
 		$pdfContent .= preg_replace('/(rowspan)="[0-9]+"\s*(style)="[^"]+"\s*/', 'rowspan="2"', $pdfContent_1);
 		
-		$pdfContent_2 = $this->displayTrials($globalOptions, $loggedIn, $start, $last, $Values['Trials'], $Values['TrialsInfo'], $ottType);
+		$pdfContent_2 = $this->displayTrials($globalOptions, $loggedIn, $start, $last, $Trials, $Values['TrialsInfo'], $ottType);
 		$pdfContent .= preg_replace('/div/', 'span', $pdfContent_2);
 		
 		$pdfContent .= '</table></body></html>';
@@ -2683,17 +2711,31 @@ class TrialTracker
 				$resultIds = array($resultIds);
 			}
 			
-			$Values = $this->processOTTData($ottType, $resultIds, $timeMachine, $globalOptions);
+			$Values = $this->processOTTData($ottType, $resultIds, $timeMachine, $linkExpiryDt = array(), $globalOptions);
 		}
 		
-		//thses values are not needed at present
+		//these values are not needed at present
 		unset($Values['resultIds']);
 		unset($Values['totactivecount']);
 		unset($Values['totinactivecount']);
 		unset($Values['totalcount']);
 		unset($Values['TrialsInfo']);
 		
-		foreach($Values['Trials'] as $key => &$value)
+		if($globalOptions['download'] == 'allTrials')
+		{
+			$Trials = $Values['allTrials'];
+			
+		}
+		else
+		{
+			$Trials = $Values['Trials'];
+			
+		}
+		
+		unset($Values['Trials']);
+		unset($Values['allTrials']);
+		
+		foreach($Trials as $key => &$value)
 		{
 			unset($value['larvol_id']);
 			unset($value['section']);
@@ -2714,7 +2756,7 @@ class TrialTracker
 		
 		// Build XML
 		$xml = '<?xml version="1.0" encoding="UTF-8" ?>' . "\n" . '<results>' . "\n";
-		$xml .= toXML($Values['Trials']);
+		$xml .= toXML($Trials);
 		$xml .= "\n" . '</results>';
 		
 		//Send download
@@ -2971,11 +3013,17 @@ class TrialTracker
 				echo '<td class="result">Product: ' . $cparams['rowlabel'] . '</td></tr></table>';
 				
 			}
-			
+		
 			echo '<br clear="all"/><br/>'
-				. '<input type="hidden" name="leading" value="' . $resultIds['leading'] . '"/>'
-				. '<input type="hidden" name="params" value="' . $resultIds['params'] . '"/>'
 				. '<input type="hidden" name="cparams" value="' . $resultIds['cparams'] . '"/>';
+			foreach($resultIds['leading'] as $lkey => $lvalue)
+			{
+				echo '<input type="hidden" name="leading[' . $lkey . ']" value="' . $lvalue . '"/>';
+			}
+			foreach($resultIds['params'] as $pkey => $pvalue)
+			{
+				echo '<input type="hidden" name="params[' . $pkey . ']" value="' . $pvalue . '"/>';
+			}
 				
 			if($cparams['type'] != 'col')
 			{
@@ -3003,6 +3051,7 @@ class TrialTracker
 		$Trials['inactiveTrials'] = array();
 		$Trials['activeTrials'] = array();
 		$Trials['allTrials'] = array();
+		$Trials['allTrialsforDownload'] = array();
 		
 		$totinactivecount = 0;
 		$totactivecount = 0;
@@ -3258,7 +3307,7 @@ class TrialTracker
 					$logger->warn($log);
 					unset($log);
 				}
-				
+				$Trials['allTrialsforDownload'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
 				//getting count of active trials from a common function used in run_heatmap.php and here
 				$larvolIds[] = $rvalue['larvol_id'];
 				sort($larvolIds); 
@@ -3278,6 +3327,7 @@ class TrialTracker
 		$Values['totalcount'] = $totalcount;
 		$Values['Trials'] = $Trials[$globalOptions['type']];
 		$Values['TrialsInfo'] = $TrialsInfo;
+		$Values['allTrials'] = $Trials['allTrialsforDownload'];
 		
 		return  $Values;
 	}
@@ -3293,6 +3343,7 @@ class TrialTracker
 		$Trials['inactiveTrials'] = array();
 		$Trials['activeTrials'] = array();
 		$Trials['allTrials'] = array();
+		$Trials['allTrialsforDownload'] = array();
 		
 		$totinactivecount = 0;
 		$totactivecount = 0;
@@ -3507,7 +3558,7 @@ class TrialTracker
 						}
 					}
 				}
-				
+				$Trials['allTrialsforDownload'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
 				if(!in_array($rvalue['NCT/overall_status'],$this->activeStatusValues) && !in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues)) 
 				{ 
 					$log 	= 'WARN: A new value "' . $rvalue['NCT/overall_status'] 
@@ -3536,6 +3587,7 @@ class TrialTracker
 		$Values['totalcount'] = $totalcount;
 		$Values['Trials'] = $Trials[$globalOptions['type']];
 		$Values['TrialsInfo'] = $TrialsInfo;
+		$Values['allTrials'] = $Trials['allTrialsforDownload'];
 		
 		return  $Values;
 	}
@@ -3548,6 +3600,7 @@ class TrialTracker
 		$Trials['inactiveTrials'] = array();
 		$Trials['activeTrials'] = array();
 		$Trials['allTrials'] = array();
+		$Trials['allTrialsforDownload'] = array();
 		
 		$totinactivecount = 0;
 		$totactivecount = 0;
@@ -3768,7 +3821,7 @@ class TrialTracker
 						}
 					}
 				}
-				
+				$Trials['allTrialsforDownload'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
 				if(!in_array($rvalue['NCT/overall_status'],$this->activeStatusValues) && !in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues)) 
 				{ 
 					$log 	= 'WARN: A new value "' . $rvalue['NCT/overall_status'] 
@@ -3777,8 +3830,7 @@ class TrialTracker
 					unset($log);
 				}
 			}
-			//echo '<pre>';print_r($globalOptions);
-			//echo '<pre>';print_r($Trials);
+			
 			$totinactivecount  = $inactiveCount + $totinactivecount;
 			$totactivecount	= $activeCount + $totactivecount;
 			$totalcount		= $totalcount + $inactiveCount + $activeCount; 
@@ -3790,6 +3842,7 @@ class TrialTracker
 		$Values['totalcount'] = $totalcount;
 		$Values['Trials'] = $Trials[$globalOptions['type']];
 		$Values['TrialsInfo'] = $TrialsInfo;
+		$Values['allTrials'] = $Trials['allTrialsforDownload'];
 		
 		return  $Values;
 	}
@@ -3811,6 +3864,7 @@ class TrialTracker
 		$Trials['inactiveTrials'] = array();
 		$Trials['activeTrials'] = array();
 		$Trials['allTrials'] = array();
+		$Trials['allTrialsforDownload'] = array();
 		
 		$totinactivecount = 0;
 		$totactivecount = 0;
@@ -4134,7 +4188,7 @@ class TrialTracker
 						}
 					}
 				}
-				
+				$Trials['allTrialsforDownload'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
 				if(!in_array($rvalue['NCT/overall_status'],$this->activeStatusValues) && !in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues)) 
 				{ 
 					$log 	= 'WARN: A new value "' . $rvalue['NCT/overall_status'] 
@@ -4238,6 +4292,7 @@ class TrialTracker
 		$Values['totalcount'] = $totalcount;
 		$Values['Trials'] = $Trials[$globalOptions['type']];
 		$Values['TrialsInfo'] = $TrialsInfo;
+		$Values['allTrials'] = $Trials['allTrialsforDownload'];
 		
 		return  $Values;
 	}
