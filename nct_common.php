@@ -483,6 +483,7 @@ else $ddesc=$rec->detailed_descr->textblock;
         'number_of_groups' => $rec->number_of_groups,
         'enrollment' => $rec->enrollment,
         'gender' => strtolower($rec->eligibility->gender),
+		'enrollment' => $rec->eligibility->expected_enrollment,
         'minimum_age' => $rec->eligibility->minimum_age,
         'maximum_age' => $rec->eligibility->maximum_age,
         'healthy_volunteers' => ynbool($rec->eligibility->healthy_volunteers),

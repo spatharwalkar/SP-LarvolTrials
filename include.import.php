@@ -132,6 +132,7 @@ else $ddesc=$rec->detailed_descr->textblock;
 						'number_of_groups' => $rec->number_of_groups,
 						'enrollment' => $rec->enrollment,
 						'gender' => strtolower($rec->eligibility->gender),
+						'enrollment' => $rec->eligibility->expected_enrollment,
 						'minimum_age' => strtoyears($rec->eligibility->minimum_age),
 						'maximum_age' => strtoyears($rec->eligibility->maximum_age),
 						'healthy_volunteers' => ynbool($rec->eligibility->healthy_volunteers),
@@ -153,7 +154,8 @@ else $ddesc=$rec->detailed_descr->textblock;
 						'lastchanged_date' => $rec->lastchanged_date,
 						'firstreceived_date' => $rec->firstreceived_date,
 						'responsible_party_name_title' => $rec->responsible_party->name_title,
-						'responsible_party_organization' => $rec->responsible_party->party_organization);
+						'responsible_party_organization' => $rec->responsible_party->party_organization,
+						'enrollment' => $rec->eligibility-expected_enrollment);
 
 	$record_data['secondary_id'] = array();
 	foreach($rec->id_info->secondary_id as $sid) $record_data['secondary_id'][] = $sid;
