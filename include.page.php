@@ -864,6 +864,11 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 	echo '<tr>&nbsp;<td></td><td><input name ="save" type="submit" value="Save"/></td>';
 	echo '</table>';
 	echo '</form>';
+	//upm history 
+	if($table=='upm'  && $insertEdit=='Edit')
+	{
+		echo upmChangeLog($id);
+	}
 	echo '</fieldset>';
 	echo '</div>';
 }
@@ -1000,6 +1005,72 @@ function calculateSearchType($sourceArr,$searchArr)
 	}
 }
 
+/**
+* @name getUpmHistory
+* @tutorial returns an array of upm change history for a specific upm.
+* @param $id upm id.
+* @param $limit max number of changes to be shown.
+* @return array of upm changes or false if no upm changes are present.
+* @author Jithu Thomas
+*/
+function getUpmHistory($id,$limit=null)
+{
+	$query = "SELECT * FROM upm_history WHERE id=$id ORDER BY change_date DESC";
+	if(is_numeric($limit) && $limit>0)
+	{
+		$query .= " LIMIT $limit";
+	}
+	$result  = mysql_query($query);
+	if(mysql_num_rows($result) <=0)
+	return false;
+	
+	while($row = mysql_fetch_assoc($result))
+	{
+		$out[] = $row;
+	}
+	return $out;
+}
+
+/**
+* @name upmChangeLog
+* @tutorial generates upm change logs.
+* @param $id upm id.
+* @return html table of upm change logs.
+* @author Jithu Thomas
+*/
+function upmChangeLog($id)
+{
+	$historyArr = getUpmHistory($id);
+	$out = '<table>';
+	$out .= '<tr><td colspan="4">Change History</td></tr>';
+	if(!is_array($historyArr) || count($historyArr)<=0)
+	{
+		$out .= '<tr><td>No Change History</td></tr></table>';
+		return $out;
+	}
+	
+	// if history present.
+	$out .= '<tr><td>Change Date</td><td>Field</td><td>Old Value</td><td>New Value</td>';
+	foreach($historyArr as $history)
+	{
+		$out .= '<tr>';
+		$out .= '<td>';
+		$out .= $history['change_date'];
+		$out .= '</td>';
+		$out .= '<td style="background-color:#99CC00;">';
+		$out .= $history['field'];
+		$out .= '</td>';
+		$out .= '<td style="background-color:#FF0000;">';
+		$out .= $history['old_value'];
+		$out .= '</td>';
+		$out .= '<td style="background-color:#FFFF00;">';
+		$out .= $history['new_value'];
+		$out .= '</td>';
+		$out .= '</tr>';
+	}
+	$out .= '</table>';
+	return $out;
+}
 /**
  * @name softDieSession
  * @tutorial Logs die messages into session log for future usage.
