@@ -135,7 +135,59 @@ class TrialTracker
 		$bgColor = "D5D3E6";
 		if($ottType == 'indexed')
 		{	
-			$Values = $this->processIndexedOTTData($ottType, $resultIds, $globalOptions, $TrialsInfo);
+			$Ids = array();
+			$TrialsInfo = array();
+			
+			if(count($resultIds['product']) > 1 && count($resultIds['area']) > 1)
+			{
+				foreach($resultIds['product'] as $pkey => $pvalue)
+				{
+					$res = mysql_fetch_assoc(mysql_query("SELECT `name`, `id` FROM `products` WHERE id = '" . $pvalue . "' "));
+					$TrialsInfo[$pkey]['sectionHeader'] = $res['name'];
+					
+					$Ids[$pkey][] = $pvalue;
+					foreach($resultIds['area'] as $akey => $avalue)
+					{
+						$Ids[$pkey][] = $avalue;
+					}
+				}
+			}
+			else if(count($resultIds['product']) > 1 || count($resultIds['area']) > 1)
+			{
+				if(count($resultIds['area']) > 1)
+				{
+					foreach($resultIds['area'] as $akey => $avalue)
+					{
+						$res = mysql_fetch_assoc(mysql_query("SELECT `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' "));
+						$TrialsInfo[$akey]['sectionHeader'] = $res['name'];
+						$Ids[$akey][0] = $resultIds['product'][0];
+						$Ids[$akey][1] = $res['id'];
+					}
+				}
+				else
+				{
+					foreach($resultIds['product'] as $pkey => $pvalue)
+					{
+						$res = mysql_fetch_assoc(mysql_query("SELECT `name`, `id` FROM `products` WHERE id = '" . $pvalue . "' "));
+						$TrialsInfo['sectionHeader'] = $res['name'];
+						$Ids[$pkey][0] = $resultIds['area'][0];
+						$Ids[$pkey][1] = $res['id'];
+					}
+				}
+			}
+			else
+			{
+				$res = mysql_fetch_assoc(mysql_query("SELECT `id` FROM `areas` WHERE id = '" . implode(',', $resultIds['area']) . "' "));
+				$Ids[] = $res['id'];
+				
+				$res = mysql_fetch_assoc(mysql_query("SELECT `name`, `id` FROM `products` WHERE id = '" . implode(',', $resultIds['product']) . "' "));
+				$Ids[] = $res['id'];
+				$TrialsInfo[0]['sectionHeader'] = $res['name'];
+			}
+			
+			$Values = $this->processIndexedOTTData($ottType, $Ids, $globalOptions);
+			$Values = array_merge($Values, array('TrialsInfo' => $TrialsInfo));
+		
 		}
 		else
 		{	
@@ -169,16 +221,17 @@ class TrialTracker
 		$i = 2;
 		$section = '';
 		
-		foreach ($Trials as $tkey => $tvalue)
+		foreach($Trials as $tkey => $tvalue)
 		{
 			$startMonth = date('m',strtotime($tvalue['NCT/start_date']));
 			$startYear = date('Y',strtotime($tvalue['NCT/start_date']));
 			$endMonth = date('m',strtotime($tvalue['inactive_date']));
 			$endYear = date('Y',strtotime($tvalue['inactive_date']));
 			
-			if($section != $tvalue['section'])  
+			if($section !== $tvalue['section'])  
 			{
-				$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $Values['TrialsInfo'][$sectionKey]['sectionHeader']);
+				$sectionHeader = $Values['TrialsInfo'][$tvalue['section']]['sectionHeader'];
+				$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $sectionHeader);
 				$objPHPExcel->getActiveSheet()->mergeCells('A' . $i . ':AY'. $i);
 				$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':AY'. $i )->applyFromArray(
 							array('fill' => array(
@@ -401,7 +454,7 @@ class TrialTracker
 			}
 			
 			$this->trialGnattChartforExcel($startMonth, $startYear, $endMonth, $endYear, $currentYear, $secondYear, $thirdYear, $phaseColor, 
-			$tvalue["NCT/start_date"], $tvalue['inactive_date'], $objPHPExcel, $i);
+			$tvalue["NCT/start_date"], $tvalue['inactive_date'], $objPHPExcel, $i, 'M');
 			
 			$i++;
 				
@@ -426,7 +479,7 @@ class TrialTracker
 						$objPHPExcel->getActiveSheet()->getStyle('L' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
 					}
 					$this->upmGnattChartforExcel($stMonth, $stYear, $edMonth, $edYear, $currentYear, $secondYear, $thirdYear, $mvalue['start_date'], 
-					$mvalue['end_date'], $mvalue['event_link'], $upmTitle, $objPHPExcel, $i);
+					$mvalue['end_date'], $mvalue['event_link'], $upmTitle, $objPHPExcel, $i, 'M');
 					
 					$objPHPExcel->getActiveSheet()->getRowDimension($i)->setRowHeight(36);
 					$i++;	
@@ -435,7 +488,7 @@ class TrialTracker
 			
 			$section = $tvalue['section'];
 		}
-			
+		
 		$objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(13);
 		$objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(35);
 		$objPHPExcel->getActiveSheet()->getColumnDimension('C')->setWidth(5);
@@ -519,7 +572,7 @@ class TrialTracker
 			$edYear = date('Y', strtotime($uvalue['end_date']));
 					
 			$this->upmGnattChartforExcel($stMonth, $stYear, $edMonth, $edYear, $currentYear, $secondYear, $thirdYear, $uvalue['start_date'], 
-			$uvalue['end_date'], $uvalue['event_link'], $uvalue["event_description"], $objPHPExcel, $i);
+			$uvalue['end_date'], $uvalue['event_link'], $uvalue["event_description"], $objPHPExcel, $i, 'M');
 				
 			$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':I' . $i )->applyFromArray(
 					array('fill' => array(
@@ -580,7 +633,7 @@ class TrialTracker
 	}
 	
 	function trialGnattChartforExcel($startMonth, $startYear, $endMonth, $endYear, $currentYear, $secondYear, $thirdYear, $bgColor, $startDate, 
-	$endDate, &$objPHPExcel, $i)
+	$endDate, &$objPHPExcel, $i, $from)
 	{
 		if($bgColor == '00CCFF')
 		{
@@ -641,24 +694,53 @@ class TrialTracker
 		
 		if(($startDate == '' || $startDate === NULL || $startDate == '0000-00-00') && ($endDate == '' || $endDate == NULL || $endDate == '0000-00-00')) 
 		{
-			$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':X'. $i);
-			$objPHPExcel->getActiveSheet()->mergeCells('Y' . $i . ':AJ'. $i);
-			$objPHPExcel->getActiveSheet()->mergeCells('AK' . $i . ':AV'. $i);
-			$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+			$to = getColspanforExcelExport($from, 12);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+			$from = $to;
+			$from++;
+			
+			$to = getColspanforExcelExport($from, 12);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+			$from = $to;
+			$from++;
+			
+			$to = getColspanforExcelExport($from, 12);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+			$from = $to;
+			$from++;
+			
+			$to = getColspanforExcelExport($from, 3);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+			$from = $to;
+			$from++;
 		} 
 		else if($startDate == '' || $startDate === NULL || $startDate == '0000-00-00') 
 		{
 			$st = $endMonth-1;
 			if($endYear < $currentYear) 
 			{
-				$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':X'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('Y' . $i . ':AJ'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AK' . $i . ':AV'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 3);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
 			} 
 			else if($endYear == $currentYear)
 			{
-				$from = 'M';
 				if($st != 0)
 				{
 					$inc = $st;
@@ -679,14 +761,28 @@ class TrialTracker
 					$from++;
 				}
 				
-				$objPHPExcel->getActiveSheet()->mergeCells('Y' . $i . ':AJ'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AK' . $i . ':AV'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 3);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
 			} 
 			else if($endYear == $secondYear) 
 			{
-				$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':X'. $i);
-				$from = 'Y';
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
+				
 				if($st != 0)
 				{
 					$inc = $st;
@@ -708,15 +804,28 @@ class TrialTracker
 					$from++;
 				}
 				
-				$objPHPExcel->getActiveSheet()->mergeCells('AK' . $i . ':AV'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 3);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
 			} 
 			else if($endYear == $thirdYear) 
 			{
-				$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':X'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('Y' . $i . ':AJ'. $i);
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
 				
-				$from = 'AK';
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
+				
 				if($st != 0)
 				{
 					$inc = $st;
@@ -737,15 +846,34 @@ class TrialTracker
 					$from = $to;
 					$from++;
 				}
-				$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+				
+				$to = getColspanforExcelExport($from, 3);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
 			}
 			else if($endYear > $thirdYear)
 			{
-				$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':X'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('Y' . $i . ':AJ'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AK' . $i . ':AV'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
-				$objPHPExcel->getActiveSheet()->getStyle('AW' . $i . ':AY' . $i)->applyFromArray($bgColor);
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 3);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$objPHPExcel->getActiveSheet()->getStyle($from . $i )->applyFromArray($bgColor);
+				$from = $to;
+				$from++;
 			}
 		} 
 		else if($endDate == '' || $endDate === NULL || $endDate == '0000-00-00') 
@@ -753,14 +881,28 @@ class TrialTracker
 			$st = $startMonth-1;
 			if($startYear < $currentYear) 
 			{
-				$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':X'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('Y' . $i . ':AJ'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AK' . $i . ':AV'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 3);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
 			}
 			else if($startYear == $currentYear) 
 			{ 
-				$from = 'M';
 				if($st != 0)
 				{
 					$inc = $st;
@@ -781,15 +923,28 @@ class TrialTracker
 					$from++;
 				}
 			
-				$objPHPExcel->getActiveSheet()->mergeCells('Y' . $i . ':AJ'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AK' . $i . ':AV'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 3);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
 			} 
 			else if($startYear == $secondYear) 
 			{
-				$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':X'. $i);
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
 			
-				$from = 'Y';
 				if($st != 0)
 				{
 					$inc = $st;
@@ -810,15 +965,24 @@ class TrialTracker
 					$from++;
 				}
 				
-				$objPHPExcel->getActiveSheet()->mergeCells('AK' . $i . ':AV'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 3);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
 			} 
 			else if($startYear == $thirdYear)
 			{
-				$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':X'. $i);
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
 				$objPHPExcel->getActiveSheet()->mergeCells('Y' . $i . ':AJ'. $i);
 				
-				$from = 'AK';
 				if($st != 0)
 				{
 					$inc = $st;
@@ -839,49 +1003,111 @@ class TrialTracker
 					$from = $to;
 					$from++;
 				}
-				$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+				
+				$to = getColspanforExcelExport($from, 3);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
 			} 
 			else if($startYear > $thirdYear)
 			{
-				$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':X'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('Y' . $i . ':AJ'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AK' . $i . ':AV'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
 				
-				$objPHPExcel->getActiveSheet()->getStyle('AW' . $i . ':AY' . $i)->applyFromArray($bgColor);
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 3);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$objPHPExcel->getActiveSheet()->getStyle($from . $i)->applyFromArray($bgColor);
+				$from = $to;
+				$from++;
 			}
 		} 
 		else if($endDate < $startDate) 
 		{
-			$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':X'. $i);
-			$objPHPExcel->getActiveSheet()->mergeCells('Y' . $i . ':AJ'. $i);
-			$objPHPExcel->getActiveSheet()->mergeCells('AK' . $i . ':AV'. $i);
-			$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+			$to = getColspanforExcelExport($from, 12);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+			$from = $to;
+			$from++;
+			
+			$to = getColspanforExcelExport($from, 12);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+			$from = $to;
+			$from++;
+			
+			$to = getColspanforExcelExport($from, 12);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+			$from = $to;
+			$from++;
+			
+			$to = getColspanforExcelExport($from, 3);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+			$from = $to;
+			$from++;
 		} 
 		else if($startYear < $currentYear) 
 		{
 			if($endYear < $currentYear) 
 			{
-				$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':X'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('Y' . $i . ':AJ'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AK' . $i . ':AV'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 3);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
 			}
 			else if($endYear == $currentYear) 
 			{
 				if($endMonth == 12) 
 				{
-					$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':X'. $i);
-					$objPHPExcel->getActiveSheet()->mergeCells('Y' . $i . ':AJ'. $i);
-					$objPHPExcel->getActiveSheet()->mergeCells('AK' . $i . ':AV'. $i);
-					$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+					$to = getColspanforExcelExport($from, 12);
+					$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+					$objPHPExcel->getActiveSheet()->getStyle($from . $i)->applyFromArray($bgColor);
+					$from = $to;
+					$from++;
 					
-					$objPHPExcel->getActiveSheet()->getStyle('M' . $i . ':X' . $i)->applyFromArray($bgColor);
+					$to = getColspanforExcelExport($from, 12);
+					$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+					$from = $to;
+					$from++;
+					
+					$to = getColspanforExcelExport($from, 12);
+					$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+					$from = $to;
+					$from++;
+					
+					$to = getColspanforExcelExport($from, 3);
+					$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+					$from = $to;
+					$from++;
+					
+					
 				} 
 				else 
 				{ 
-					$from = 'M';
-					
 					$inc = $endMonth;
 					$to = getColspanforExcelExport($from, $inc);
 					$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
@@ -895,23 +1121,45 @@ class TrialTracker
 					$from = $to;
 					$from++;
 				
-					$objPHPExcel->getActiveSheet()->mergeCells('Y' . $i . ':AJ'. $i);
-					$objPHPExcel->getActiveSheet()->mergeCells('AK' . $i . ':AV'. $i);
-					$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+					$to = getColspanforExcelExport($from, 12);
+					$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+					$from = $to;
+					$from++;
+					
+					$to = getColspanforExcelExport($from, 12);
+					$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+					$from = $to;
+					$from++;
+					
+					$to = getColspanforExcelExport($from, 3);
+					$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+					$from = $to;
+					$from++;
 				}
 			} 
 			else if($endYear == $secondYear)
 			{ 
 				if($endMonth == 12) 
 				{
-					$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':AJ'. $i);
-					$objPHPExcel->getActiveSheet()->getStyle('M' . $i . ':AJ' . $i)->applyFromArray($bgColor);
-					$objPHPExcel->getActiveSheet()->mergeCells('AK' . $i . ':AV'. $i);
-					$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+					$to = getColspanforExcelExport($from, 24);
+					$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+					$objPHPExcel->getActiveSheet()->getStyle($from . $i)->applyFromArray($bgColor);
+					$from = $to;
+					$from++;
+					
+					
+					$to = getColspanforExcelExport($from, 12);
+					$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+					$from = $to;
+					$from++;
+					
+					$to = getColspanforExcelExport($from, 3);
+					$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+					$from = $to;
+					$from++;
 				}
 				else 
 				{
-					$from = 'M';
 					$inc = (12+$endMonth);
 					$to = getColspanforExcelExport($from, $inc);
 					$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
@@ -925,21 +1173,35 @@ class TrialTracker
 					$from = $to;
 					$from++;
 					
-					$objPHPExcel->getActiveSheet()->mergeCells('AK' . $i . ':AV'. $i);
-					$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+					$to = getColspanforExcelExport($from, 12);
+					$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+					$from = $to;
+					$from++;
+					
+					$to = getColspanforExcelExport($from, 3);
+					$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+					$from = $to;
+					$from++;
 				}
 			} 
 			else if($endYear == $thirdYear) 
 			{ 
 				if($endMonth == 12) 
 				{
-					$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':AV'. $i);
-					$objPHPExcel->getActiveSheet()->getStyle('M' . $i . ':AV' . $i)->applyFromArray($bgColor);
-					$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+					$to = getColspanforExcelExport($from, 36);
+					$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+					$objPHPExcel->getActiveSheet()->getStyle($from . $i)->applyFromArray($bgColor);
+					$from = $to;
+					$from++;
+					
+					
+					$to = getColspanforExcelExport($from, 3);
+					$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+					$from = $to;
+					$from++;
 				} 
 				else 
 				{
-					$from='M';
 					$inc=(24+$endMonth);
 					$to=getColspanforExcelExport($from, $inc);
 					$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
@@ -953,13 +1215,19 @@ class TrialTracker
 					$from = $to;
 					$from++;
 					
-					$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+					$to = getColspanforExcelExport($from, 3);
+					$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+					$from = $to;
+					$from++;
 				}
 			} 
 			else if($endYear > $thirdYear) 
 			{ 
-				$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':AY'. $i);
-				$objPHPExcel->getActiveSheet()->getStyle('M' . $i . ':AY' . $i )->applyFromArray($bgColor);
+				$to = getColspanforExcelExport($from, 39);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$objPHPExcel->getActiveSheet()->getStyle($from . $i)->applyFromArray($bgColor);
+				$from = $to;
+				$from++;
 			}	
 		} 
 		else if($startYear == $currentYear) 
@@ -968,7 +1236,6 @@ class TrialTracker
 			$st = $startMonth-1;
 			if($endYear == $currentYear) 
 			{
-				$from = 'M';
 				if($st != 0)
 				{
 					$inc = $st;
@@ -1009,13 +1276,23 @@ class TrialTracker
 						$from++;
 					}
 				}
-				$objPHPExcel->getActiveSheet()->mergeCells('Y' . $i . ':AJ'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AK' . $i . ':AV'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
+					
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 3);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
 			} 
 			else if($endYear == $secondYear) 
 			{ 
-				$from = 'M';
 				if($st != 0)
 				{
 					$inc = $st;
@@ -1054,12 +1331,18 @@ class TrialTracker
 						$from++;
 					}
 				}
-				$objPHPExcel->getActiveSheet()->mergeCells('AK' . $i . ':AV'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 3);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
 			} 
 			else if($endYear == $thirdYear) 
 			{
-				$from = 'M';
 				if($st != 0)
 				{
 					$inc = $st;
@@ -1100,11 +1383,14 @@ class TrialTracker
 						$from++;
 					}
 				}
-				$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+				
+				$to = getColspanforExcelExport($from, 3);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
 			}
 			else if($endYear > $thirdYear)
 			{
-				$from = 'M';
 				if($st != 0)
 				{
 					$inc = $st;
@@ -1128,8 +1414,11 @@ class TrialTracker
 			$st = $startMonth-1;
 			if($endYear == $secondYear) 
 			{
-				$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':X'. $i);
-				$from = 'Y';
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
+				
 				if($st != 0)
 				{
 					$inc=$st;
@@ -1170,13 +1459,24 @@ class TrialTracker
 						$from++;
 					}
 				}
-				$objPHPExcel->getActiveSheet()->mergeCells('AK' . $i . ':AV'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+				
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 3);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
 			} 
 			else if($endYear == $thirdYear) 
 			{
-				$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':X'. $i);
-				$from = 'Y';
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
+				
 				if($st != 0)
 				{
 					$inc = $st;
@@ -1218,12 +1518,19 @@ class TrialTracker
 						$from++;
 					}
 				}
-				$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+				
+				$to = getColspanforExcelExport($from, 3);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
 			} 
 			else if($endYear > $thirdYear) 
 			{
-				$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':X'. $i);
-				$from='Y';
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
+				
 				if($st != 0)
 				{
 					$inc = $st;
@@ -1247,9 +1554,16 @@ class TrialTracker
 			$st = $startMonth-1;	
 			if($endYear == $thirdYear) 
 			{
-				$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':X'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('Y' . $i . ':AJ'. $i);
-				$from='AK';
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
+				
 				if($st != 0)
 				{
 					$inc = $st;
@@ -1289,13 +1603,24 @@ class TrialTracker
 						$from++;
 					}
 				}
-				$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
+				
+				$to = getColspanforExcelExport($from, 3);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
 			}
 			else if($endYear > $thirdYear) 
 			{
-				$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':X'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('Y' . $i . ':AJ'. $i);
-				$from = 'AK';
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
+				$from++;
+				
 				if($st != 0)
 				{
 					$inc = $st;
@@ -1315,16 +1640,32 @@ class TrialTracker
 		}
 		else if($startYear > $thirdYear) 
 		{
-			$objPHPExcel->getActiveSheet()->mergeCells('M' . $i . ':X'. $i);
-			$objPHPExcel->getActiveSheet()->mergeCells('Y' . $i . ':AJ'. $i);
-			$objPHPExcel->getActiveSheet()->mergeCells('AK' . $i . ':AV'. $i);
-			$objPHPExcel->getActiveSheet()->mergeCells('AW' . $i . ':AY'. $i);
-			$objPHPExcel->getActiveSheet()->getStyle('AW' . $i . ':AY' . $i )->applyFromArray($bgColor);
+			$to = getColspanforExcelExport($from, 12);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+			$from = $to;
+			$from++;
+				
+			$to = getColspanforExcelExport($from, 12);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+			$from = $to;
+			$from++;
+			
+			$to = getColspanforExcelExport($from, 12);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+			$from = $to;
+			$from++;
+			
+			$to = getColspanforExcelExport($from, 3);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+			$objPHPExcel->getActiveSheet()->getStyle($from . $i )->applyFromArray($bgColor);
+			$from = $to;
+			$from++;
+			
 		} 
 	}
 	
 	function upmGnattChartforExcel($startMonth, $startYear, $endMonth, $endYear, $currentYear, $secondYear, $thirdYear, $startDate, $endDate, 
-	$upmLink, $upmTitle, &$objPHPExcel, $i)
+	$upmLink, $upmTitle, &$objPHPExcel, $i, $from)
 	{
 		$upmLink = urlencode($upmLink);
 		$bgColor = (array('fill' => array('type'       => PHPExcel_Style_Fill::FILL_SOLID,
@@ -1335,47 +1676,94 @@ class TrialTracker
 		
 		if(($startDate == '' || $startDate === NULL || $startDate == '0000-00-00') && ($endDate == '' || $endDate === NULL || $endDate == '0000-00-00')) 
 		{
-			$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':U' . $i);
-			$objPHPExcel->getActiveSheet()->mergeCells('V' . $i . ':AG' . $i);
-			$objPHPExcel->getActiveSheet()->mergeCells('AH' . $i . ':AS' . $i);
-			$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV' . $i);
-			
-			if($upmLink != '' && $upmLink !== NULL)
+			$to = getColspanforExcelExport($from, 12);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+			if( $upmLink != '' && $upmLink !== NULL)
 			{
-				$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($upmLink);
-				$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($upmTitle);
-				$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setUrl($upmLink);
-				$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setTooltip($upmTitle);
-				$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setUrl($upmLink);
-				$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setTooltip($upmTitle);
-				$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upmLink);
-				$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upmTitle);
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
 			}
+			$from = $to;
+			$from++;
+			
+			$to = getColspanforExcelExport($from, 12);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+			if( $upmLink != '' && $upmLink !== NULL)
+			{
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+			}
+			$from = $to;
+			$from++;
+			
+			$to = getColspanforExcelExport($from, 12);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+			if( $upmLink != '' && $upmLink !== NULL)
+			{
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+			}
+			$from = $to;
+			$from++;
+			
+			$to = getColspanforExcelExport($from, 3);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+			if( $upmLink != '' && $upmLink !== NULL)
+			{
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+			}
+			$from = $to;
+			$from++;
+			
 		} 
 		else if($startDate == '' || $startDate === NULL || $startDate == '0000-00-00') 
 		{
 			$st = $endMonth-1;
 			if($endYear < $currentYear) 
 			{
-				$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':U' . $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('V' . $i . ':AG' . $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AH' . $i . ':AS' . $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV' . $i);
-				if($upmLink != '' &&  $upmLink !== NULL)
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
 				{
-					$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($upmTitle);
-					$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setTooltip($upmTitle);
-					$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setTooltip($upmTitle);
-					$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upmTitle);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
 				}
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+				}
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+				}
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 3);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+				}
+				$from = $to;
+				$from++;	
 			} 
 			else if($endYear == $currentYear) 
 			{
-				$from = 'J';
 				if($st != 0)
 				{
 					$inc = $st;
@@ -1411,22 +1799,49 @@ class TrialTracker
 					$from++;
 				}
 				
-				$objPHPExcel->getActiveSheet()->mergeCells('V' . $i . ':AG' . $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AH' . $i . ':AS' . $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV' . $i);
-				if($upmLink != '' &&  $upmLink !== NULL)
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
 				{
-					$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setTooltip($upmTitle);
-					$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setTooltip($upmTitle);
-					$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upmTitle);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
 				}
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+				}
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 3);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+				}
+				$from = $to;
+				$from++;
+				
 			} 
 			else if($endYear == $secondYear) 
 			{
-				$from = 'V';
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+				}
+				$from = $to;
+				$from++;
+				
 				if($st != 0)
 				{
 					$inc = $st;
@@ -1462,22 +1877,49 @@ class TrialTracker
 					$from++;
 				}
 				
-				$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':U'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AH' . $i . ':AS'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV'. $i);
-				if($upmLink != '' && $upmLink !== NULL)
+				
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
 				{
-					$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($upmTitle);
-					$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setTooltip($upmTitle);
-					$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upmTitle);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
 				}
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 3);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+				}
+				$from = $to;
+				$from++;
 			} 
 			else if($endYear == $thirdYear) 
 			{
-				$from = 'AH';
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+				}
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+				}
+				$from = $to;
+				$from++;
+				
 				if($st != 0)
 				{
 					$inc = $st;
@@ -1513,37 +1955,59 @@ class TrialTracker
 					$from++;
 				}
 				
-				$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':U' . $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('V' . $i . ':AG' . $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV' . $i);
+				$to = getColspanforExcelExport($from, 3);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
 				if( $upmLink != '' && $upmLink !== NULL)
 				{
-					$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($upmTitle);
-					$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setTooltip($upmTitle);
-					$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upmTitle);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
 				}
+				$from = $to;
+				$from++;
 			} 
 			else if($endYear > $thirdYear)
 			{
-				$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':U' . $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('V' . $i . ':AG' . $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AH' . $i . ':AS' . $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV' . $i);
-				if( $upmLink != '' &&  $upmLink !== NULL)
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
 				{
-					$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($upmTitle);
-					$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setTooltip($upmTitle);
-					$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setTooltip($upmTitle);
-					$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upmTitle);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
 				}
-				$objPHPExcel->getActiveSheet()->getStyle('AT' . $i)->applyFromArray($bgColor);
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+
+				if( $upmLink != '' && $upmLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+				}
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+				}
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 3);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+				}
+				$objPHPExcel->getActiveSheet()->getStyle($from . $i)->applyFromArray($bgColor);
+				$from = $to;
+				$from++;
 			}
 		}
 		else if($endDate == '' || $endDate === NULL || $endDate == '0000-00-00') 
@@ -1551,25 +2015,48 @@ class TrialTracker
 			$st = $startMonth-1;
 			if($startYear < $currentYear) 
 			{
-				$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':U'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('V' . $i . ':AG'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AH' . $i . ':AS'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV'. $i);
-				if( $upmLink != '' &&  $upmLink !== NULL)
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
 				{
-					$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($upmTitle);
-					$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setTooltip($upmTitle);
-					$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setTooltip($upmTitle);
-					$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upmTitle);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
 				}
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+				}
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+				}
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 3);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+				}
+				$from = $to;
+				$from++;
 			} 
 			else if($startYear == $currentYear) 
 			{ 
-				$from='J';
 				if($st != 0)
 				{
 					$inc = $st;
@@ -1608,23 +2095,48 @@ class TrialTracker
 					$from++;
 				}
 				
-				$objPHPExcel->getActiveSheet()->mergeCells('V' . $i . ':AG' . $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AH' . $i . ':AS' . $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV' . $i);
-				
-				if($upmLink != '' && $upmLink !== NULL)
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
 				{
-					$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setTooltip($upmTitle);
-					$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setTooltip($upmTitle);
-					$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upmTitle);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
 				}
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+				}
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 3);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+				}
+				$from = $to;
+				$from++;
 			} 
 			else if($startYear == $secondYear) 
 			{
-				$from = 'V';
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+				}
+				$from = $to;
+				$from++;
+				
 				if($st != 0)
 				{
 					$inc = $st;
@@ -1662,22 +2174,48 @@ class TrialTracker
 					$from++;
 				}
 				
-				$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':U'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AH' . $i . ':AS'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV'. $i);
-				if( $upmLink != '' &&  $upmLink !== NULL)
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
 				{
-					$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($upmTitle);
-					$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setTooltip($upmTitle);
-					$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upmTitle);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
 				}
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 3);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+				}
+				$from = $to;
+				$from++;
 			} 
 			else if($startYear == $thirdYear) 
 			{
-				$from = 'AH';
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+				}
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+				}
+				$from = $to;
+				$from++;
+				
 				if($st != 0)
 				{
 					$inc = $st;
@@ -1715,46 +2253,78 @@ class TrialTracker
 					$from++;
 				}
 				
-				$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':U'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('V' . $i . ':AG'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV'. $i);
-				if($upmLink != '' &&  $upmLink !== NULL)
+				$to = getColspanforExcelExport($from, 3);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
 				{
-					$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($upmTitle);
-					$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setTooltip($upmTitle);
-					$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upmTitle);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
 				}
+				$from = $to;
+				$from++;
 			} 
 			else if($startYear > $thirdYear)
 			{
-				$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':U'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('V' . $i . ':AG'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AH' . $i . ':AS'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV'. $i);
-				if( $upmLink != '' &&  $upmLink !== NULL)
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
 				{
-					$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($upmTitle);
-					$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setTooltip($upmTitle);
-					$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setTooltip($upmTitle);
-					$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upmTitle);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
 				}
+				$from = $to;
+				$from++;
 				
-				$objPHPExcel->getActiveSheet()->getStyle('AT' . $i )->applyFromArray($bgColor);
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+				}
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+				}
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 3);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+				}
+				$objPHPExcel->getActiveSheet()->getStyle($from . $i )->applyFromArray($bgColor);
+				$from = $to;
+				$from++;
 			}
 		} 
 		else if($endDate < $startDate) 
 		{
-			$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':U'. $i);
-			$objPHPExcel->getActiveSheet()->mergeCells('V' . $i . ':AG'. $i);
-			$objPHPExcel->getActiveSheet()->mergeCells('AH' . $i . ':AS'. $i);
-			$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV'. $i);
+			$to = getColspanforExcelExport($from, 12);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+			$from = $to;
+			$from++;
+			$to = getColspanforExcelExport($from, 12);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+			$from = $to;
+			$from++;
+			$to = getColspanforExcelExport($from, 12);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+			$from = $to;
+			$from++;
+			$to = getColspanforExcelExport($from, 3);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+			$from = $to;
+			$from++;
 		} 
 		else if($startYear < $currentYear) 
 		{
@@ -1763,27 +2333,50 @@ class TrialTracker
 	
 			if($endYear < $currentYear) 
 			{
-				$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':U'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('V' . $i . ':AG'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AH' . $i . ':AS'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV'. $i);
-				if($upmLink != '' && $upmLink !== NULL)
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
 				{
-					$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($upmTitle);
-					$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setTooltip($upmTitle);
-					$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setTooltip($upmTitle);
-					$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upmTitle);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
 				}
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+				}
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+				}
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 3);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+				}
+				$from = $to;
+				$from++;
 			} 
 			else if($endYear == $currentYear) 
 			{ 
 				if($endMonth == 12)
 				{
-					$from = 'J';
 					$inc = $endMonth;
 					$to = getColspanforExcelExport($from, $inc);
 					$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
@@ -1796,22 +2389,38 @@ class TrialTracker
 					$from = $to;
 					$from++;
 					
-					$objPHPExcel->getActiveSheet()->mergeCells('V' . $i . ':AG' . $i);
-					$objPHPExcel->getActiveSheet()->mergeCells('AH' . $i . ':AS' . $i);
-					$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV' . $i);
-					if($upmLink != '' && $upmLink !== NULL)
+					$to = getColspanforExcelExport($from, 12);
+					$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+					if( $upmLink != '' && $upmLink !== NULL)
 					{
-						$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setUrl($upmLink);
-						$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setTooltip($upmTitle);
-						$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setUrl($upmLink);
-						$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setTooltip($upmTitle);
-						$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upmLink);
-						$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upmTitle);
+						$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+						$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
 					}
+					$from = $to;
+					$from++;
+					
+					$to = getColspanforExcelExport($from, 12);
+					$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+					if( $upmLink != '' && $upmLink !== NULL)
+					{
+						$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+						$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+					}
+					$from = $to;
+					$from++;
+					
+					$to = getColspanforExcelExport($from, 3);
+					$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+					if( $upmLink != '' && $upmLink !== NULL)
+					{
+						$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+						$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+					}
+					$from = $to;
+					$from++;
 				} 
 				else 
 				{ 
-					$from = 'J';
 					$inc = $endMonth;
 					$to = getColspanforExcelExport($from, $inc);
 					$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
@@ -1835,41 +2444,75 @@ class TrialTracker
 					$from = $to;
 					$from++;
 					
-					$objPHPExcel->getActiveSheet()->mergeCells('V' . $i . ':AG' . $i);
-					$objPHPExcel->getActiveSheet()->mergeCells('AH' . $i . ':AS '. $i);
-					$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV' . $i);
-					if($upmLink != '' && $upmLink !== NULL)
+					$to = getColspanforExcelExport($from, 12);
+					$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+					if( $upmLink != '' && $upmLink !== NULL)
 					{
-						$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setUrl($upmLink);
-						$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setTooltip($upmTitle);
-						$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setUrl($upmLink);
-						$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setTooltip($upmTitle);
-						$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upmLink);
-						$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upmTitle);
+						$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+						$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
 					}
+					$from = $to;
+					$from++;
+					
+					$to = getColspanforExcelExport($from, 12);
+					$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+					if( $upmLink != '' && $upmLink !== NULL)
+					{
+						$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+						$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+					}
+					$from = $to;
+					$from++;
+					
+					$to = getColspanforExcelExport($from, 3);
+					$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+					if( $upmLink != '' && $upmLink !== NULL)
+					{
+						$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+						$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+					}
+					$from = $to;
+					$from++;
 				}
 			}
 			else if($endYear == $secondYear) 
 			{ 
 				if($endMonth == 12) 
 				{
-					$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':AG' . $i);
-					$objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($bgColor);
-					$objPHPExcel->getActiveSheet()->mergeCells('AH' . $i . ':AS' . $i);
-					$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV' . $i);
-					if($upmLink != '' &&  $upmLink !== NULL)
+					$to = getColspanforExcelExport($from, 24);
+					$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+					if( $upmLink != '' && $upmLink !== NULL)
 					{
-						$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($upmLink);
-						$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($upmTitle);
-						$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setUrl($upmLink);
-						$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setTooltip($upmTitle);
-						$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upmLink);
-						$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upmTitle);
+						$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+						$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
 					}
+					$objPHPExcel->getActiveSheet()->getStyle($from . $i)->applyFromArray($bgColor);
+					$from = $to;
+					$from++;
+					
+					$to = getColspanforExcelExport($from, 12);
+					$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+					if( $upmLink != '' && $upmLink !== NULL)
+					{
+						$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+						$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+					}
+					$from = $to;
+					$from++;
+					
+					$to = getColspanforExcelExport($from, 3);
+					$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+					if( $upmLink != '' && $upmLink !== NULL)
+					{
+						$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+						$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+					}
+					$from = $to;
+					$from++;
+					
 				} 
 				else 
 				{
-					$from = 'J';
 					$inc = (12+$endMonth);
 					$to = getColspanforExcelExport($from, $inc);
 					$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
@@ -1893,35 +2536,55 @@ class TrialTracker
 					$from = $to;
 					$from++;
 					
-					$objPHPExcel->getActiveSheet()->mergeCells('AH' . $i . ':AS' . $i);
-					$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV' . $i);
-					if($upmLink != '' && $upmLink !== NULL)
+					$to = getColspanforExcelExport($from, 12);
+					$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+					if( $upmLink != '' && $upmLink !== NULL)
 					{
-						$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setUrl($upmLink);
-						$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setTooltip($upmTitle);
-						$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upmLink);
-						$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upmTitle);
+						$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+						$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
 					}
+					$from = $to;
+					$from++;
+					
+					$to = getColspanforExcelExport($from, 3);
+					$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+					if( $upmLink != '' && $upmLink !== NULL)
+					{
+						$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+						$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+					}
+					$from = $to;
+					$from++;
+					
 				}
 			}
 			else if($endYear == $thirdYear) 
 			{ 
 				if($endMonth == 12) 
 				{
-					$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':AS' . $i);
-					$objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($bgColor);
-					$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV' . $i);
-					if($upmLink != '' && $upmLink !== NULL)
+					$to = getColspanforExcelExport($from, 36);
+					$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+					if( $upmLink != '' && $upmLink !== NULL)
 					{
-						$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($upmLink);
-						$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($upmTitle);
-						$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upmLink);
-						$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upmTitle);
+						$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+						$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
 					}
+					$objPHPExcel->getActiveSheet()->getStyle($from . $i)->applyFromArray($bgColor);
+					$from = $to;
+					$from++;
+					
+					$to = getColspanforExcelExport($from, 3);
+					$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+					if( $upmLink != '' && $upmLink !== NULL)
+					{
+						$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+						$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+					}
+					$from = $to;
+					$from++;
 				} 
 				else 
 				{
-					$from = 'J';
 					$inc = (24+$endMonth);
 					$to = getColspanforExcelExport($from, $inc);
 					$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
@@ -1945,23 +2608,29 @@ class TrialTracker
 					$from = $to;
 					$from++;
 					
-					$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV' . $i);
-					if($upmLink != '' && $upmLink !== NULL)
+					$to = getColspanforExcelExport($from, 3);
+					$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+					if( $upmLink != '' && $upmLink !== NULL)
 					{
-						$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upmLink);
-						$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upmTitle);
+						$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+						$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
 					}
+					$from = $to;
+					$from++;
 				}
 			} 
 			else if($endYear > $thirdYear) 
 			{
-				$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':AV' . $i);
-				$objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($bgColor);
-				if($upmLink != '' && $upmLink !== NULL)
+				$to = getColspanforExcelExport($from, 39);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
 				{
-					$objPHPExcel->getActiveSheet()->getCell('j' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($upmTitle);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
 				}
+				$objPHPExcel->getActiveSheet()->getStyle($from . $i)->applyFromArray($bgColor);
+				$from = $to;
+				$from++;
 			}	
 		} 
 		else if($startYear == $currentYear) 
@@ -1970,7 +2639,6 @@ class TrialTracker
 			$st = $startMonth-1;
 			if($endYear == $currentYear) 
 			{
-				$from = 'J';
 				if($st != 0)
 				{
 					$inc = $st;
@@ -2037,22 +2705,39 @@ class TrialTracker
 						$from++;
 					}
 				}
-				$objPHPExcel->getActiveSheet()->mergeCells('V' . $i . ':AG'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AH' . $i . ':AS'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV'. $i);
-				if($upmLink != '' &&  $upmLink !== NULL)
+				
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
 				{
-					$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setTooltip($upmTitle);
-					$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setTooltip($upmTitle);
-					$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upmTitle);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
 				}
+				$from = $to;
+				$from++;
+					
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+				}
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 3);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+				}
+				$from = $to;
+				$from++;
 			} 
 			else if($endYear == $secondYear) 
 			{ 
-				$from = 'J';
 				if($st != 0)
 				{
 					$inc = $st;
@@ -2119,19 +2804,29 @@ class TrialTracker
 						$from++;
 					}
 				}
-				$objPHPExcel->getActiveSheet()->mergeCells('AH' . $i . ':AS' . $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV' . $i);
-				if($upmLink != '' &&  $upmLink !== NULL)
+				
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
 				{
-					$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setTooltip($upmTitle);
-					$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upmTitle);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
 				}
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 3);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+				}
+				$from = $to;
+				$from++;
 			} 
 			else if($endYear == $thirdYear) 
 			{
-				$from = 'J';
 				if($st != 0)
 				{
 					$inc = $st;
@@ -2199,16 +2894,18 @@ class TrialTracker
 					}
 				}
 				
-				$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV' . $i);
-				if($upmLink != '' && $upmLink !== NULL)
+				$to = getColspanforExcelExport($from, 3);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
 				{
-					$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upmTitle);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
 				}
+				$from = $to;
+				$from++;
 			} 
 			else if($endYear > $thirdYear)
 			{
-				$from = 'J';
 				if($st != 0)
 				{
 					$inc = $st;
@@ -2237,7 +2934,16 @@ class TrialTracker
 			$st = $startMonth-1;
 			if($endYear == $secondYear) 
 			{
-				$from = 'V';
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+				}
+				$from = $to;
+				$from++;
+				
 				if($st != 0)
 				{
 					$inc = $st;
@@ -2305,22 +3011,38 @@ class TrialTracker
 					}
 				}
 				
-				$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':U' . $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AH' . $i . ':AS '. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV' . $i);
-				if($upmLink != '' && $upmLink !== NULL)
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
 				{
-					$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($upmTitle);
-					$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setTooltip($upmTitle);
-					$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upmTitle);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
 				}
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 3);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+				}
+				$from = $to;
+				$from++;
 			} 
 			else if($endYear == $thirdYear) 
 			{
-				$from = 'V';
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+				}
+				$from = $to;
+				$from++;
+				
 				if($st != 0)
 				{
 					$inc = $st;
@@ -2388,19 +3110,22 @@ class TrialTracker
 					}
 				}
 				
-				$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':U'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV'. $i);
-				if( $upmLink != '' &&  $upmLink !== NULL)
+				$to = getColspanforExcelExport($from, 3);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
 				{
-					$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($upmTitle);
-					$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upmTitle);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
 				}
+				$from = $to;
+				$from++;
 			} 
 			else if($endYear > $thirdYear) 
 			{
-				$from = 'V';
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from++;
+				
 				if($st != 0)
 				{
 					$inc = $st;
@@ -2426,17 +3151,34 @@ class TrialTracker
 				$objPHPExcel->getActiveSheet()->getStyle($from . $i )->applyFromArray($bgColor);
 				$from = $to;
 				$from++;
-				
-				$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':U' . $i);
 			}
 		} 
 		else if($startYear == $thirdYear) 
 		{
 			$val = getColspan($startDate, $endDate);
-			$st = $startMonth-1;	
+			$st = $startMonth-1;
 			if($endYear == $thirdYear) 
 			{
-				$from = 'AH';
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+				}
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+				}
+				$from = $to;
+				$from++;
+				
 				if($st != 0)
 				{
 					$inc = $st;
@@ -2504,22 +3246,38 @@ class TrialTracker
 					}
 				}
 				
-				$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':U'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('V' . $i . ':AG'. $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV'. $i);
-				if($upmLink != '' &&  $upmLink !== NULL)
+				$to = getColspanforExcelExport($from, 3);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
 				{
-					$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($upmTitle);
-					$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setTooltip($upmTitle);
-					$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upmTitle);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
 				}
+				$from = $to;
+				$from++;
 			} 
 			else if($endYear > $thirdYear) 
 			{
-				$from = 'AH';
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+				}
+				$from = $to;
+				$from++;
+				
+				$to = getColspanforExcelExport($from, 12);
+				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				if( $upmLink != '' && $upmLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+				}
+				$from = $to;
+				$from++;
+				
 				if($st != 0)
 				{
 					$inc = $st;
@@ -2546,36 +3304,50 @@ class TrialTracker
 				$from = $to;
 				$from++;
 				
-				$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':U' . $i);
-				$objPHPExcel->getActiveSheet()->mergeCells('V' . $i . ':AG' . $i);
-				if($upmLink != '' &&  $upmLink !== NULL)
-				{
-					$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($upmTitle);
-					$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setUrl($upmLink);
-					$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setTooltip($upmTitle);
 				}
-			}
 		} 
 		else if($startYear > $thirdYear) 
 		{
-			$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':U' . $i);
-			$objPHPExcel->getActiveSheet()->mergeCells('V' . $i . ':AG' . $i);
-			$objPHPExcel->getActiveSheet()->mergeCells('AH' . $i . ':AS' . $i);
-			$objPHPExcel->getActiveSheet()->mergeCells('AT' . $i . ':AV' . $i);
-			
-			$objPHPExcel->getActiveSheet()->getStyle('AT' . $i )->applyFromArray($bgColor);
-			if($upmLink != '' && $upmLink !== NULL)
+			$to = getColspanforExcelExport($from, 12);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+			if( $upmLink != '' && $upmLink !== NULL)
 			{
-				$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($upmLink);
-				$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($upmTitle);
-				$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setUrl($upmLink);
-				$objPHPExcel->getActiveSheet()->getCell('V' . $i)->getHyperlink()->setTooltip($upmTitle);
-				$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setUrl($upmLink);
-				$objPHPExcel->getActiveSheet()->getCell('AH' . $i)->getHyperlink()->setTooltip($upmTitle);
-				$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setUrl($upmLink);
-				$objPHPExcel->getActiveSheet()->getCell('AT' . $i)->getHyperlink()->setTooltip($upmTitle);
-			}	
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+			}
+			$from = $to;
+			$from++;
+				
+			$to = getColspanforExcelExport($from, 12);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+			if( $upmLink != '' && $upmLink !== NULL)
+			{
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+			}
+			$from = $to;
+			$from++;
+			
+			$to = getColspanforExcelExport($from, 12);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+			if( $upmLink != '' && $upmLink !== NULL)
+			{
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+			}
+			$from = $to;
+			$from++;
+			
+			$to = getColspanforExcelExport($from, 3);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+			if( $upmLink != '' && $upmLink !== NULL)
+			{
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+				$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+			}
+			$objPHPExcel->getActiveSheet()->getStyle($from . $i )->applyFromArray($bgColor);
+			$from = $to;
+			$from++;
 		}
 	}
 	
@@ -2632,9 +3404,62 @@ class TrialTracker
 						. '<div align="center"><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" height="38" id="header" /></div>';
 		
 		$Values = array();
+		
 		if($ottType == 'indexed')
-		{
-			$Values = $this->processIndexedOTTData($ottType, $resultIds, $globalOptions, $TrialsInfo);
+		{	
+			$Ids = array();
+			$TrialsInfo = array();
+			
+			if(count($resultIds['product']) > 1 && count($resultIds['area']) > 1)
+			{
+				foreach($resultIds['product'] as $pkey => $pvalue)
+				{
+					$res = mysql_fetch_assoc(mysql_query("SELECT `name`, `id` FROM `products` WHERE id = '" . $pvalue . "' "));
+					$TrialsInfo[$pkey]['sectionHeader'] = $res['name'];
+					
+					$Ids[$pkey][] = $pvalue;
+					foreach($resultIds['area'] as $akey => $avalue)
+					{
+						$Ids[$pkey][] = $avalue;
+					}
+				}
+			}
+			else if(count($resultIds['product']) > 1 || count($resultIds['area']) > 1)
+			{
+				if(count($resultIds['area']) > 1)
+				{
+					foreach($resultIds['area'] as $akey => $avalue)
+					{
+						$res = mysql_fetch_assoc(mysql_query("SELECT `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' "));
+						$TrialsInfo[$akey]['sectionHeader'] = $res['name'];
+						$Ids[$akey][0] = $resultIds['product'][0];
+						$Ids[$akey][1] = $res['id'];
+					}
+				}
+				else
+				{
+					foreach($resultIds['product'] as $pkey => $pvalue)
+					{
+						$res = mysql_fetch_assoc(mysql_query("SELECT `name`, `id` FROM `products` WHERE id = '" . $pvalue . "' "));
+						$TrialsInfo['sectionHeader'] = $res['name'];
+						$Ids[$pkey][0] = $resultIds['area'][0];
+						$Ids[$pkey][1] = $res['id'];
+					}
+				}
+			}
+			else
+			{
+				$res = mysql_fetch_assoc(mysql_query("SELECT `id` FROM `areas` WHERE id = '" . implode(',', $resultIds['area']) . "' "));
+				$Ids[] = $res['id'];
+				
+				$res = mysql_fetch_assoc(mysql_query("SELECT `name`, `id` FROM `products` WHERE id = '" . implode(',', $resultIds['product']) . "' "));
+				$Ids[] = $res['id'];
+				$TrialsInfo[0]['sectionHeader'] = $res['name'];
+			}
+			
+			$Values = $this->processIndexedOTTData($ottType, $Ids, $globalOptions);
+			$Values = array_merge($Values, array('TrialsInfo' => $TrialsInfo));
+			
 		}
 		else if($ottType == 'standalone')
 		{	
@@ -2672,7 +3497,7 @@ class TrialTracker
 		$totalPages = ceil($count / $this->resultsPerPage);
 		
 		$pdfContent_1 = $this->displayTrialTableHeader($loggedIn, $globalOptions);
-		$pdfContent_1 = preg_replace('/(width)="[0-9]+\%"(.*)(cellpadding)="[0-9]+"(.*)(cellspacing)="[0-9]+"/', '', $pdfContent_1);
+		$pdfContent_1 = preg_replace('/(width)="[0-9]+\%"(.*)(cellpadding)="[0-9]+"(.*)(cellspacing)="[0-9]+"/', ' style="border-collapse:collapse;"', $pdfContent_1);
 		
 		$pdfContent .= preg_replace('/(rowspan)="[0-9]+"\s*(style)="[^"]+"\s*/', 'rowspan="2"', $pdfContent_1);
 		
@@ -2698,7 +3523,52 @@ class TrialTracker
 		$Values = array();
 		if($ottType == 'indexed')
 		{
-			$Values = $this->processIndexedOTTData($ottType, $resultIds, $globalOptions, $TrialsInfo);
+			$Ids = array();
+			
+			if(count($resultIds['product']) > 1 && count($resultIds['area']) > 1)
+			{
+				foreach($resultIds['product'] as $pkey => $pvalue)
+				{
+					$res = mysql_fetch_assoc(mysql_query("SELECT `name`, `id` FROM `products` WHERE id = '" . $pvalue . "' "));
+					
+					$Ids[$pkey][] = $pvalue;
+					foreach($resultIds['area'] as $akey => $avalue)
+					{
+						$Ids[$pkey][] = $avalue;
+					}
+				}
+			}
+			else if(count($resultIds['product']) > 1 || count($resultIds['area']) > 1)
+			{
+				if(count($resultIds['area']) > 1)
+				{
+					foreach($resultIds['area'] as $akey => $avalue)
+					{
+						$res = mysql_fetch_assoc(mysql_query("SELECT `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' "));
+						$Ids[$akey][0] = $resultIds['product'][0];
+						$Ids[$akey][1] = $res['id'];
+					}
+				}
+				else
+				{
+					foreach($resultIds['product'] as $pkey => $pvalue)
+					{
+						$res = mysql_fetch_assoc(mysql_query("SELECT `name`, `id` FROM `products` WHERE id = '" . $pvalue . "' "));
+						$Ids[$pkey][0] = $resultIds['area'][0];
+						$Ids[$pkey][1] = $res['id'];
+					}
+				}
+			}
+			else
+			{
+				$res = mysql_fetch_assoc(mysql_query("SELECT `id` FROM `areas` WHERE id = '" . implode(',', $resultIds['area']) . "' "));
+				$Ids[] = $res['id'];
+				
+				$res = mysql_fetch_assoc(mysql_query("SELECT `name`, `id` FROM `products` WHERE id = '" . implode(',', $resultIds['product']) . "' "));
+				$Ids[] = $res['id'];
+			}
+			
+			$Values = $this->processIndexedOTTData($ottType, $Ids, $globalOptions);
 		}
 		else if($ottType == 'standalone')
 		{	
@@ -2846,7 +3716,7 @@ class TrialTracker
 			echo $this->displayWebPage($ottType, $Values['resultIds'], $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], 
 			$globalOptions, $timeMachine, $Values['Trials'], $Values['TrialsInfo'], $Values['linkExpiry']);
 		}
-		else if($ottType == 'indexed')
+		else if($ottType == 'indexed') 
 		{
 			$TrialsInfo = array();
 			$Ids = array();
@@ -2870,12 +3740,12 @@ class TrialTracker
 						}
 					}
 				}
-				
 				foreach($resultIds['product'] as $pkey => $pvalue)
 				{
+					$Ids[$pkey][] = $pvalue;
 					foreach($resultIds['area'] as $akey => $avalue)
 					{
-						$Ids[$pkey][$akey] = $pvalue . "', '" . $avalue;
+						$Ids[$pkey][] = $avalue;
 					}
 				}
 			}
@@ -2942,7 +3812,7 @@ class TrialTracker
 			echo '<input type="hidden" name="p" value="' . $_GET['p'] . '"/><input type="hidden" name="a" value="' . $_GET['a'] . '"/>';
 			$Values = $this->processIndexedOTTData($ottType, $Ids, $globalOptions);
 			
-			echo $this->displayWebPage($ottType, $Values['Ids'], $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], 
+			echo $this->displayWebPage($ottType, $resultIds, $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], 
 			$globalOptions, $timeMachine, $Values['Trials'], $TrialsInfo);
 		}
 		else if($ottType == 'standalone')
@@ -3145,7 +4015,7 @@ class TrialTracker
 						{
 							$Array2[$indx][$key] = $value[0];
 						}
-						elseif($key == 'NCT/phase')
+						elseif($key == 'NCT/phase' || $key == 'NCT/overall_status' || $key == 'NCT/enrollment')
 						{
 							$Array2[$indx][$key] = end($value);
 						}
@@ -3404,7 +4274,7 @@ class TrialTracker
 						{
 							$Array2[$indx][$key] = $value[0];
 						}
-						elseif($key == 'NCT/phase')
+						elseif($key == 'NCT/phase' || $key == 'NCT/overall_status' || $key == 'NCT/enrollment')
 						{
 							$Array2[$indx][$key] = end($value);
 						}
@@ -3612,7 +4482,7 @@ class TrialTracker
 		$timeInterval = $this->getDecodedValue($globalOptions['findChangesFrom']);
 		
 		foreach($Ids as $ikey => $ivalue)
-		{	
+		{		
 			$inactiveCount = 0;
 			$activeCount = 0;
 			
@@ -3632,7 +4502,6 @@ class TrialTracker
 				$larvolIds[] = $row['larvol_id'];
 			}
 			
-			//echo '<br/>-->'.
 			$query = 'SELECT dv.val_int AS "int",dv.val_bool AS "bool",dv.val_varchar AS "varchar",dv.val_date AS "date",de.`value` AS "enum", '
 			. ' dv.val_text AS "text",dcs.larvol_id AS "larvol_id",df.`type` AS "type",df.`name` AS "name",dc.`name` AS "category" '
 			. ' FROM data_values dv '
@@ -3644,7 +4513,7 @@ class TrialTracker
 			. implode('","', $fields) . '") AND larvol_id IN("' 
 			. implode('","', $larvolIds) . '")'
 			/*. ' ORDER BY '*/;
-						
+					
 			$res = mysql_query($query);
 			while($row = mysql_fetch_assoc($res))
 			{
@@ -3665,7 +4534,7 @@ class TrialTracker
 					{
 						$result[$id][$place] = $result[$id][$place] . ' ' . $val;
 					}
-					else if($result[$id][$place] == 'NCT/phase')
+					else if($result[$id][$place] == 'NCT/phase' || $result[$id][$place] == 'NCT/overall_status' || $result[$id][$place] == 'NCT/enrollment')
 					{
 						$result[$id][$place] = $val;
 					}
@@ -3680,9 +4549,9 @@ class TrialTracker
 					$result[$id][$place] = $val;
 				}
 			}
-						
+				
 			foreach($result as $rkey => $rvalue) 
-			{ 
+			{ 	
 				$nctId = $rvalue['NCT/nct_id'];
 				
 				$dataset['trials'] = array();
@@ -3691,7 +4560,7 @@ class TrialTracker
 				//checking for updated and new trials
 				$dataset['trials'] = $this->getTrialUpdates($nctId, $rvalue['larvol_id'], NULL, $timeInterval);
 				$dataset['trials'] = array_merge($dataset['trials'], array('section' => $ikey));
-				//echo 'gdf<pre>';print_r($dataset);
+				
 				if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues)) 
 				{
 					$inactiveCount++;
@@ -3841,7 +4710,6 @@ class TrialTracker
 		$Values['totinactivecount'] = $totinactivecount;
 		$Values['totalcount'] = $totalcount;
 		$Values['Trials'] = $Trials[$globalOptions['type']];
-		$Values['TrialsInfo'] = $TrialsInfo;
 		$Values['allTrials'] = $Trials['allTrialsforDownload'];
 		
 		return  $Values;
@@ -3901,7 +4769,7 @@ class TrialTracker
 			
 			if($res['expiry'] != '' &&  $res['expiry'] !== NULL)
 			{
-				$linkExpiry[$ikey] = array_merge($linkExpiryDt, $res['expiry']);
+				$linkExpiry[$ikey] = array_merge($linkExpiryDt, array($res['expiry']));
 			}
 			
 			$sectionHeader = htmlentities($res['header']);
@@ -3926,9 +4794,9 @@ class TrialTracker
 					}
 				}
 				
-				if($res['expiry'] != '' &&  $res['expiry'] !== NULL)
-				{
-					$linkExpiry[$ikey] = array_merge($linkExpiryDt, $res['expiry']);
+				if($res['expiry'] != '' && $res['expiry'] !== NULL)
+				{	
+					$linkExpiry[$ikey] = array_merge($linkExpiryDt, array($res['expiry']));
 				}
 				
 				if(isset($Ids[4]))
@@ -3945,7 +4813,7 @@ class TrialTracker
 					
 					if($res['expiry'] != '' &&  $res['expiry'] !== NULL)
 					{
-						$linkExpiry[$ikey] = array_merge($linkExpiryDt, $res['expiry']);
+						$linkExpiry[$ikey] = array_merge($linkExpiryDt, array($res['expiry']));
 					}
 					
 					$TrialsInfo[$ikey]['naUpms'] = $this->getUnMatchedUPMs($res['intervention_name'], $timeMachine, $timeInterval, $globalOptions['onlyUpdates']);	
@@ -3974,7 +4842,7 @@ class TrialTracker
 				
 				if($res['expiry'] != '' &&  $res['expiry'] !== NULL)
 				{
-					$linkExpiry[$ikey] = array_merge($linkExpiryDt, $res['expiry']);
+					$linkExpiry[$ikey] = array_merge($linkExpiryDt, array($res['expiry']));
 				}
 				
 				if(isset($Ids[3])) 
@@ -3991,7 +4859,7 @@ class TrialTracker
 					
 					if($res['expiry'] != '' &&  $res['expiry'] !== NULL)
 					{
-						$linkExpiry[$ikey] = array_merge($linkExpiryDt, $res['expiry']);
+						$linkExpiry[$ikey] = array_merge($linkExpiryDt, array($res['expiry']));
 					}
 					
 					$TrialsInfo[$ikey]['naUpms'] = $this->getUnMatchedUPMs($res['intervention_name'], $timeMachine, $timeInterval, $globalOptions['onlyUpdates']);	
@@ -4034,7 +4902,7 @@ class TrialTracker
 						{
 							$Array2[$indx][$key] = $value[0];
 						}
-						elseif($key == 'NCT/phase')
+						elseif($key == 'NCT/phase' || $key == 'NCT/overall_status' || $key == 'NCT/enrollment')
 						{
 							$Array2[$indx][$key] = end($value);
 						}
@@ -4321,7 +5189,7 @@ class TrialTracker
 		$this->displayFilterControls($count, $totactivecount, $totinactivecount, $totalcount, $globalOptions);
 		if($totalPages > 1)
 		{
-			$this->pagination($globalOptions, $totalPages, $resultIds, $timeMachine, $ottType);
+			$this->pagination($globalOptions, $totalPages, $timeMachine, $ottType);
 		}
 		echo $this->displayTrialTableHeader($loggedIn, $globalOptions);
 		echo $this->displayTrials($globalOptions, $loggedIn, $start, $last, $Trials, $TrialsInfo, $ottType);
@@ -4394,7 +5262,7 @@ class TrialTracker
 	
 	function displayTrialTableHeader($loggedIn, $globalOptions = array()) 
 	{
-		$outputStr = '<table width="100%" style="border-collapse:collapse;" cellpadding="4" cellspacing="0" class="manage">'
+		$outputStr = '<table width="100%" cellpadding="4" cellspacing="0" class="manage">'
 			 . '<tr>' . (($loggedIn) ? '<th rowspan="2" style="width:50px;">ID</th>' : '' )
 			 . '<th rowspan="2" style="width:230px;">Title</th>'
 			 . '<th rowspan="2" style="width:28px;" title="Black: Actual&nbsp;&nbsp;Gray: Anticipated&nbsp;&nbsp;Red: Change greater than 20%">'
@@ -4597,13 +5465,9 @@ class TrialTracker
 		echo '<br/><br clear="all" />';
 	}	
 	
-	function pagination($globalOptions = array(), $totalPages, $resultIds, $timeMachine = NULL, $ottType)
+	function pagination($globalOptions = array(), $totalPages, $timeMachine = NULL, $ottType)
 	{ 	
-		//echo '<pre>';print_r($resultIds);
 		//echo '<pre>';print_r($globalOptions);
-		//exit;
-		//echo $currentPage . $totalPages;
-		
 		$url = 'intermediary.php?';
 		
 		if($ottType == 'unstacked')
@@ -4612,37 +5476,7 @@ class TrialTracker
 		}
 		else if($ottType == 'rowstacked' || $ottType == 'colstacked')
 		{	
-			/*$ids = array();
-			foreach($resultIds as $rkey => &$rvalue)
-			{
-				$id = explode('.', $rvalue);
-				if($rkey != 0)
-				{
-					if($ottType == 'rowstacked')
-					{
-						unset($id[0]);
-					}
-					else
-					{
-						unset($id[1]);
-					}
-				}
-				array_unshift($id, count($id));
-				$ids = array_merge($ids, $id);
-			}
-			
-			if($globalOptions['encodeFormat'] == 'new') 
-			{
-				$evcode = '$packedIDs = pack("l*",' . implode(',', $ids) . ');';
-				eval($evcode);
-				$url .= '?results=' . rawurlencode(base64_encode(gzdeflate($packedIDs))) . '&amp;format=new';
-			}
-			else
-			{
-				$url .= '?results=' . rawurlencode(base64_encode(gzdeflate(implode(',', $ids))));
-			}
-			$url .= '&amp;type=' . substr($ottType, 0, 3);*/
-			$url .= 'results=' . $globalOptions['url'];
+			$url .= 'results=' .  $globalOptions['url'];
 		}
 		else if($ottType == 'indexed')
 		{
@@ -4652,7 +5486,7 @@ class TrialTracker
 		{
 			$url .= 'id=' . $globalOptions['url'];
 		}
-		//echo '<br/>-->'.$url;
+		
 		if($timeMachine !== NULL)
 		{
 			$url .= '&amp;time=' . $timeMachine;
@@ -4660,6 +5494,47 @@ class TrialTracker
 		if($globalOptions['version'] != 0)
 		{
 			$url .= '&amp;v=' . $globalOptions['version'];
+		}
+		if(isset($globalOptions['type']) && $globalOptions['type'] != 'activeTrials')
+		{	
+			if($globalOptions['type'] == 'inactiveTrials')
+			{	
+				$url .= "&amp;list=" . rawurlencode(base64_encode(gzdeflate('in'))) . "";
+			}
+			else
+			{	
+				$url .= '&amp;list=' . rawurlencode(base64_encode(gzdeflate('al')));
+			}
+		}
+		if(isset($globalOptions['findChangesFrom']))
+		{
+			$url .= '&amp;fcf=' . $globalOptions['findChangesFrom'];
+		}
+		if(isset($globalOptions['onlyUpdates']) && $globalOptions['onlyUpdates'] != 'no')
+		{
+			$url .= '&amp;osu=' . $globalOptions['onlyUpdates'];
+		}
+		if(isset($globalOptions['filtersOne']) && !empty($globalOptions['filtersOne']))
+		{
+			foreach($globalOptions['filtersOne'] as $key => $value)
+			{
+				$url .= '&amp;so1[' . $key . ']=' . $value;
+			}
+		}
+		if(isset($globalOptions['filtersTwo']) && !empty($globalOptions['filtersTwo']))
+		{
+			foreach($globalOptions['filtersTwo'] as $key => $value)
+			{
+				$url .= '&amp;so2[' . $key . ']=' . $value;
+			}
+		}
+		if(isset($globalOptions['countDetails']) && !empty($globalOptions['countDetails']))
+		{
+			$url .= '&amp;cd=' . rawurlencode(base64_encode(gzdeflate(serialize($globalOptions['countDetails']))));
+		}
+		if(isset($globalOptions['encodeFormat']) && $globalOptions['encodeFormat'] != 'old')
+		{
+			$url .= '&amp;format=' . $globalOptions['encodeFormat'];
 		}
 		
 		$paginateStr = '<div style="background-color:red;width:100%;">';
@@ -4720,17 +5595,17 @@ class TrialTracker
 			if(isset($trials[$i]['matchedupms']))  
 				$rowspan = count($trials[$i]['matchedupms'])+1; 
 			 
-			foreach($trialsInfo as $tkey => $tvalue)
+			foreach($trialsInfo as $tkey => &$tvalue)
 			{	
 				$flag = false;
 				$trflag = false;
+				//$pageflag = false;
 				
 				if($section !== $sectionKey && $tkey <= $sectionKey && $flag === false)
-				{
+				{	
 					$flag = true;
 					if(!empty($tvalue['naUpms']))
 					{
-						
 						if($ottType == 'rowstacked')
 						{
 							$outputStr .= '<tr class="trialtitles">'
@@ -5013,7 +5888,7 @@ class TrialTracker
 			//phase column
 			if(isset($trials[$i]['edited']) && array_key_exists('NCT/phase', $trials[$i]['edited'])) 
 			{
-				$attr = 'class="highlight" title="' . $trials[$i]['edited'][$v] . '" ';
+				$attr = 'class="highlight" title="' . $trials[$i]['edited']['NCT/phase'] . '" ';
 			} 
 			else if($trials[$i]['new'] == 'y') 
 			{
@@ -5396,7 +6271,8 @@ class TrialTracker
 	}
 	
 	function upmGnattChart($startMonth, $startYear, $endMonth, $endYear, $currentYear, $secondYear, $thirdYear, $startDate, $endDate, $upmLink, $upmTitle)
-	{
+	{	
+		
 		$outputStr = '';
 		$attr_two = 'class="rightborder"';
 		$bgColor = 'background-color:#9966FF;';
@@ -5518,15 +6394,15 @@ class TrialTracker
 			{ 
 				if($endMonth == 12) 
 				{
-					$outputStr .= '<td style="' . $bgColor . '" colspan="' . $edMonth . '">' . '<div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+					$outputStr .= '<td style="' . $bgColor . '" colspan="' . $endMonth . '">' . '<div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
 								. '<td colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
 								. '<td colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
 								. '<td colspan="3" ' . $attr_two . '><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
 				} 
 				else 
 				{ 
-					$outputStr .= '<td style="' . $bgColor . '" colspan="' . $edMonth . '">' . '<div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
-								. '<td style="width:'.(12-$edMonth).'px;" colspan="' . (12-$edMonth) . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+					$outputStr .= '<td style="' . $bgColor . '" colspan="' . $endMonth . '">' . '<div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+								. '<td style="width:'.(12-$endMonth).'px;" colspan="' . (12-$endMonth) . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
 								. '<td colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
 								. '<td colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
 								. '<td colspan="3" ' . $attr_two . '><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
@@ -5542,8 +6418,8 @@ class TrialTracker
 				} 
 				else 
 				{
-					$outputStr .= '<td style="' . $bgColor . '" colspan="' . (12+$edMonth) . '">' . '<div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
-								. '<td colspan="' . (12-$edMonth) . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+					$outputStr .= '<td style="' . $bgColor . '" colspan="' . (12+$endMonth) . '">' . '<div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+								. '<td colspan="' . (12-$endMonth) . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
 								. '<td colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
 								. '<td colspan="3" ' . $attr_two . '><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
 				}
@@ -5559,7 +6435,7 @@ class TrialTracker
 				{
 					$outputStr .= '<td style="' . $bgColor . '" colspan="' . (24+$end_month) . '" ' . $class . '>' 
 								. '<div ' . $upm_title . '>' . $anchorTag . '</div></td>'
-								. '<td colspan="' . (12-$edMonth) . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+								. '<td colspan="' . (12-$endMonth) . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
 								. '<td colspan="3" ' . $attr_two . '><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
 				}
 			} 
@@ -5738,7 +6614,7 @@ class TrialTracker
 				. join("','", $fieldnames) . "') AND `studycat` = '" . $studycatData['studycat'] 
 				. "' AND (`dv`.`superceded`<'" . date('Y-m-d', $timeMachine) . "' AND `dv`.`superceded`>= '" 
 				. date('Y-m-d', strtotime($timeInterval, $timeMachine)) . "') ");
-
+		
 		while ($row = mysql_fetch_assoc($res)) 
 		{
 			//getting previous value for updated trials

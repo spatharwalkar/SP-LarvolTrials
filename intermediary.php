@@ -1,14 +1,14 @@
 <?php 
 header('P3P: CP="CAO PSA OUR"');
 session_start();
-//phpinfo();
+
 require_once('krumo/class.krumo.php');
 require_once('db.php');
 require_once('include.search.php');
 require_once('special_chars.php');
 require_once('run_trial_tracker.php');
 
-error_reporting(E_ALL ^ E_NOTICE);
+$_GET['time'] = NULL;
 
 $tt = new TrialTracker;
 if(isset($_POST['btnDownload'])) 
@@ -16,9 +16,8 @@ if(isset($_POST['btnDownload']))
 	$shownCnt = mysql_real_escape_string($_POST['shownCnt']);
 	$ottType = $_POST['ottType'];
 	$resultIds = $_POST['resultIds'];
-	$timeMachine = $_POST['timeMachine'];
+	$timeMachine = (isset($_POST['timeMachine']) && $_POST['timeMachine'] != '') ? mysql_real_escape_string($_POST['timeMachine']) : NULL;
 	$globalOptions = $_POST['globalOptions'];
-	
 	
 	if($_POST['dOption'] == 'all')
 	{
@@ -179,14 +178,14 @@ if(isset($_GET['fcf']))
 {
 	$globalOptions['findChangesFrom'] = $_GET['fcf'];
 }
-	
+
 if(isset($_GET['list']))
 {
-	if($_GET['list'] == rawurlencode(base64_encode(gzdeflate('in'))))
+	if(gzinflate(base64_decode(rawurldecode($_GET['list']))) == 'in')
 	{
 		$globalOptions['type'] = 'inactiveTrials';
 	}
-	elseif($_GET['list'] == rawurlencode(base64_encode(gzdeflate('al'))))
+	elseif(gzinflate(base64_decode(rawurldecode($_GET['list']))) == 'al')
 	{
 		$globalOptions['type'] = 'allTrials';
 	}
@@ -239,7 +238,7 @@ if(isset($_GET['id']))
 else if(isset($_GET['results']) && isset($_GET['type']))
 {
 	$tt_type = $_GET['type'] . 'stacked';
-	$globalOptions['url'] = $_GET['results'];	
+	$globalOptions['url'] = rawurlencode($_GET['results']).'&amp;type='.$_GET['type'];	
 	$tt->generateTrialTracker('webpage', $_GET['results'], $_GET['time'], $tt_type, $globalOptions);
 }
 else if(isset($_GET['results']))
