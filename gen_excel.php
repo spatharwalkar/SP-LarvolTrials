@@ -6677,8 +6677,6 @@ if($stacked)
 							$objDrawing->setOffsetY(10);
 							$objDrawing->setPath('images/hourglass.png');
 							$objDrawing->setCoordinates('L' . $i);
-							$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setTooltip($upm_title);
-							$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl($upm_result_link);
 						}
 					
 					
@@ -7290,7 +7288,7 @@ else
 					$st_year = date('Y',strtotime($v[5]));
 					$ed_month = date('m',strtotime($v[6]));
 					$ed_year = date('Y',strtotime($v[6]));
-					$upm_link = $v[4];
+					$upm_link = urlencode($v[4]);
 					$upm_result_link = $v[7];
 					$upm_title =htmlformat($v[0]);
 					
@@ -7362,8 +7360,6 @@ else
 							$objDrawing->setOffsetY(10);
 							$objDrawing->setPath('images/hourglass.png');
 							$objDrawing->setCoordinates('L' . $i);
-							$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setTooltip($upm_title);
-							$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl($upm_result_link);
 						}
 					
 					
