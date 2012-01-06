@@ -47,6 +47,54 @@ if(isset($_POST['btnDownload']))
 		exit;
 	}
 }
+
+if(isset($_GET['sort']))
+{
+	$sortOptions = explode(',', mysql_real_escape_string($_GET['sort']));
+	foreach($sortOptions as $skey => $svalue)
+    {
+        $value = substr($svalue, 0, 1);
+        switch($value)
+        {
+            case 'p':
+                $key = 'phase';
+                break;
+            case 'o':
+                $key = 'overall_status';
+                break;
+            case 's':
+                $key = 'start_date';
+                break;
+            case 'i':
+                $key = 'inactive_date';
+                break;
+            case 'e':
+                $key = 'enrollment';
+                break;
+        }
+        $sortFields[$key] = $svalue;
+    }
+}
+else
+{
+	$sortFields = array('phase' => 'pD', 'inactive_date' => 'iA', 'start_date' => 'sA', 'overall_status' => 'oA', 'enrollment' => 'eA');
+}
+
+$sortFieldName = array('phase' => 'Phase', 'inactive_date' => 'End Date', 'start_date' => 'Start Date', 'overall_status' => 'Status', 'enrollment' => 'N');
+
+$sortTab = '';
+foreach($sortFields as $skey => $svalue)
+{
+	$sortImg = '';
+	$sortType = substr($svalue, 1, 1);
+	
+	$sortImg = ($sortType == 'A') ? 'asc' : 'des';
+	
+	$sortTab .= "<li title='" . $svalue . "' class='ui-state-default' name='" . $svalue . "' id='" . $skey . "'>"
+		. "<a href='javascript:void(0)'>" . $sortFieldName[$skey] 
+		. "<img src='images/" . $sortImg . ".png' id='" . substr($svalue, 0, 1) . "'  alt='" . $svalue 
+		. "' border='0' style='margin:0px 5px;' onclick='javascript:fnSort(this)' /></a></li>";
+}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -56,118 +104,162 @@ if(isset($_POST['btnDownload']))
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>Online Trial Tracker</title>
     <link href="css/intermediary.css" rel="stylesheet" type="text/css" media="all" />
-    <script src="scripts/jquery.js" type="text/javascript"></script>	
+    <script src="scripts/jquery.js" type="text/javascript"></script>
+    <script type="text/javascript">
+		//sort tab
+		var sorttab = "<div class='slide-out-sortdiv'>"+
+						"<table cellpadding='0' cellspacing='0'>"+
+						"<tr><td align='center' valign='baseline'><a class='sorthandle' href='#sort'>Content</a></td>"+
+						"<td style='border: 1px solid #000;background-color:#fff;'>"+
+						"<ul id='sortable' class='demo ui-sortable'>"+<?php echo json_encode($sortTab); ?>+"</ul></td></tr></table></div>";
+    </script>	
     <script src="scripts/slideout.js" type="text/javascript"></script>	
     <script src="scripts/func.js" type="text/javascript"></script>	
+    <script src="scripts/jquery-ui-1.8.16.custom.min.js" type="text/javascript"></script>
     <script type="text/javascript">
-      var _gaq = _gaq || [];
-      _gaq.push(['_setAccount', 'UA-18240582-3']);
-      _gaq.push(['_trackPageview']);
-    
-      (function() {
-        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-      })();
-      
-     function checkformat()
-    {
-        if(document.getElementById("wFormat").value=="excel")
-        {
-        document.forms["frmDOptions"].action="gen_excel.php";
-        }
-    } 
-      
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-18240582-3']);
+		_gaq.push(['_trackPageview']);
+		
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      	})();
     </script>
-    <script type="text/javascript" language="javascript"> 
+    <script type="text/javascript"> 
     //<![CDATA[
-    function showValues(value) {
-        
-          if(value == 'inactive') {
-          
-          document.getElementById('so1').innerHTML = 
-             "<input type='checkbox' name='wh' value='1' />Withheld<br/>"+
-             "<input type='checkbox' name='afm' value='1' />Approved for marketing<br/>" +
-             "<input type='checkbox' name='tna' value='1' />Temporarily not available<br/>" + 
-             "<input type='checkbox' name='nla' value='1' />No Longer Available<br/>" + 
-             "<input type='checkbox' name='wd' value='1' />Withdrawn<br/>" + 
-             "<input type='checkbox' name='t' value='1' />Terminated<br/>" +
-             "<input type='checkbox' name='s' value='1' />Suspended<br/>" +
-             "<input type='checkbox' name='c' value='1' />Completed<br/>";
-          
-          
-          
-          } else if(value == 'active') {
-          
-          document.getElementById('so1').innerHTML = 
-            '<input type="checkbox" name="nyr" value="1" />Not yet recruiting<br/>' +
-            '<input type="checkbox" name="r" value="1" />Recruiting<br/>' + 
-            '<input type="checkbox" name="ebi" value="1" />Enrolling by invitation<br/>' + 
-            '<input type="checkbox" name="anr" value="1" />Active, not recruiting<br/>' + 
-            '<input type="checkbox" name="a" value="1" />Available<br/>' +
-            '<input type="checkbox" name="nlr" value="1" />No longer recruiting<br/>';
-          
-          } else {
-          
-          document.getElementById('so1').innerHTML = 
-              '<input type="checkbox" name="wh" value="1" />Withheld<br/>'+
-              '<input type="checkbox" name="afm" value="1" />Approved for marketing<br/>' +
-              '<input type="checkbox" name="tna" value="1" />Temporarily not available<br/>' + 
-              '<input type="checkbox" name="nla" value="1" />No Longer Available<br/>' + 
-              '<input type="checkbox" name="wd" value="1" />Withdrawn<br/>' + 
-              '<input type="checkbox" name="t" value="1" />Terminated<br/>' +
-              '<input type="checkbox" name="s" value="1" />Suspended<br/>' +
-              '<input type="checkbox" name="c" value="1" />Completed<br/>' +
-              '<input type="checkbox" name="nyr" value="1" />Not yet recruiting<br/>' +
-              '<input type="checkbox" name="r" value="1" />Recruiting<br/>' + 
-              '<input type="checkbox" name="ebi" value="1" />Enrolling by invitation<br/>' + 
-              '<input type="checkbox" name="anr" value="1" />Active, not recruiting<br/>' + 
-              '<input type="checkbox" name="a" value="1" />Available<br/>' +
-              '<input type="checkbox" name="nlr" value="1" />No longer recruiting<br/>';
-    
+    function showValues(value) 
+	{
+          if(value == 'inactive') 
+		  {
+          	document.getElementById('so1').innerHTML = 
+				 "<input type='checkbox' name='wh' value='1' />Withheld<br/>"+
+				 "<input type='checkbox' name='afm' value='1' />Approved for marketing<br/>" +
+				 "<input type='checkbox' name='tna' value='1' />Temporarily not available<br/>" + 
+				 "<input type='checkbox' name='nla' value='1' />No Longer Available<br/>" + 
+				 "<input type='checkbox' name='wd' value='1' />Withdrawn<br/>" + 
+				 "<input type='checkbox' name='t' value='1' />Terminated<br/>" +
+				 "<input type='checkbox' name='s' value='1' />Suspended<br/>" +
+				 "<input type='checkbox' name='c' value='1' />Completed<br/>";
+          } 
+		  else if(value == 'active') 
+		  {
+			document.getElementById('so1').innerHTML = 
+				'<input type="checkbox" name="nyr" value="1" />Not yet recruiting<br/>' +
+				'<input type="checkbox" name="r" value="1" />Recruiting<br/>' + 
+				'<input type="checkbox" name="ebi" value="1" />Enrolling by invitation<br/>' + 
+				'<input type="checkbox" name="anr" value="1" />Active, not recruiting<br/>' + 
+				'<input type="checkbox" name="av" value="1" />Available<br/>' +
+				'<input type="checkbox" name="nlr" value="1" />No longer recruiting<br/>';
+          } 
+		  else 
+		  {
+			document.getElementById('so1').innerHTML = 
+				'<input type="checkbox" name="wh" value="1" />Withheld<br/>'+
+				'<input type="checkbox" name="afm" value="1" />Approved for marketing<br/>' +
+				'<input type="checkbox" name="tna" value="1" />Temporarily not available<br/>' + 
+				'<input type="checkbox" name="nla" value="1" />No Longer Available<br/>' + 
+				'<input type="checkbox" name="wd" value="1" />Withdrawn<br/>' + 
+				'<input type="checkbox" name="t" value="1" />Terminated<br/>' +
+				'<input type="checkbox" name="s" value="1" />Suspended<br/>' +
+				'<input type="checkbox" name="c" value="1" />Completed<br/>' +
+				'<input type="checkbox" name="nyr" value="1" />Not yet recruiting<br/>' +
+				'<input type="checkbox" name="r" value="1" />Recruiting<br/>' + 
+				'<input type="checkbox" name="ebi" value="1" />Enrolling by invitation<br/>' + 
+				'<input type="checkbox" name="anr" value="1" />Active, not recruiting<br/>' + 
+				'<input type="checkbox" name="av" value="1" />Available<br/>' +
+				'<input type="checkbox" name="nlr" value="1" />No longer recruiting<br/>';
           }
       }
     //]]>
-    
-    //<![CDATA[
-    function doSorting(type) {
-            
-            var sOrder = document.getElementById('sortorder').value;
-            
-            if(sOrder.indexOf(type) != -1) {
-            
-                var i = sOrder.indexOf(type);
-                var vtext = sOrder.slice(i, i+6);
-                var sType = vtext.split('-');
-                
-                if(sType[1] == 'des') { 
-                
-                    var nText = sOrder.replace(sType[0]+'-des',sType[0]+'-asc');
-                    document.getElementById('sortorder').value = nText;
-                    
-                } else if(sType[1] == 'asc') { 
-                
-                    var nText = sOrder.replace(vtext+'##','');
-                    document.getElementById('sortorder').value = nText;
-                }
-                
-            } else {
-            
-                var nText = type+'-des##';
-                document.getElementById('sortorder').value = document.getElementById('sortorder').value + nText;
-            }
-            
-            document.getElementById('frmOtt').submit();	
-        }
-    //]]>
+	//code for drag drop tab
+	$(document).ready(function()
+	{
+		$("#sortable").sortable({revert: true});
+		$("#draggable").draggable({connectToSortable: "#sortable", helper: "clone", revert: "invalid"});
+		$("ul, li").disableSelection();
+		
+		var sortInput = jQuery('#sort');
+		var list = jQuery('#sortable');
+		
+		var fnSubmit = function() 
+		{
+			var sortOrder = [];
+			list.children('li').each(function()
+			{
+				sortOrder.push($(this).data('id'));
+			});
+			sortInput.val(sortOrder.join(','));
+		};
+		
+		list.children('li').each(function() 
+		{
+			var li = $(this);
+			li.data('id',li.attr('title')).attr('title','');
+		});
+		
+		/* sortables */
+		list.sortable({
+			opacity: 0.7,
+			update: function() {
+				fnSubmit();
+			}
+		});
+		list.disableSelection();
+	});
+	
+	function fnSort(th) 
+	{	
+		var src = $(th).attr('src');
+		var imgId = $(th).attr('id');
+		var newSrc = 'images/';
+		var newOrder;
+		
+		if(src == 'images/des.png')
+		{
+			newSrc += 'blank.png';
+			newOrder = '';
+		}
+		else if(src == 'images/asc.png')
+		{
+			newSrc += 'des.png';
+			newOrder = 'D';
+		}
+		else
+		{
+			newSrc += 'asc.png';
+			newOrder = 'A';
+		}
+		$(th).attr('src',newSrc);
+		
+		var fld;
+		var sortInput = $('#sort').val();
+		var sortOrder = sortInput.split(',');
+		
+		for(var i=0; i<sortOrder.length; i++)
+		{
+			fld = sortOrder[i].substring(0, 1);
+			if(fld == imgId)
+			{
+				sortOrder[i] = fld+newOrder;
+			}
+			else
+			{
+				sortOrder[i] = sortOrder[i];
+			}
+		}
+		$('#sort').val(sortOrder.join(','));
+	};
     </script>
     </head>
 <body>
 <?php
+$globalOptions['sortOrder'] = $sortFields;
 $globalOptions['type'] = 'activeTrials';
 $globalOptions['findChangesFrom'] = rawurlencode(base64_encode(gzdeflate('week')));
 $globalOptions['version'] = rawurlencode(base64_encode('0'));
-//$globalOptions['sortOrder'] = 'ph-des##ed-asc##sd-asc##os-asc##en-asc##';
+
 $globalOptions['page'] = 1;
 $globalOptions['onlyUpdates'] = "no";
 $globalOptions['encodeFormat'] = "old";

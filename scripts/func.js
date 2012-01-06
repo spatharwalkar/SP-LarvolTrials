@@ -1,10 +1,13 @@
-$(document).ready(function(){
-						   
+$(document).ready(function()
+{
 	$('#addtoright').after('&nbsp;&nbsp;&nbsp;<span id="addedtoright" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;All Milestones</span>');
 	var image;
-	if($('#upmstyle').val() == 'expand') {
+	if($('#upmstyle').val() == 'expand') 
+	{
 		image = 'down.png';
-	} else {
+	}
+	else 
+	{
 		$('.upms').hide();
 		image = 'up.png';
 	}
@@ -23,45 +26,44 @@ $(document).ready(function(){
 	else
 	{
 		$('#addedtoright').css('background-color','#DDDDDD').css('cursor','default').css('color','#777777');
-	}	
+	}
+	
 	//help tab
-	var slideout = '<div class="slide-out-div"><table cellpadding="0" cellspacing="0"><tr><td align="center" valign="baseline"><a class="handle" href="#help">Content</a></td><td><table bgcolor="#FFFFFF" cellpadding="0" cellspacing="0" class="table-slide">'+ 
-					'<tr><td><img src="images/black-diamond.png"/></td><td>Click for data release</td></tr>'+
+	var helptab = '<div class="slide-out-div">'+
+					'<table cellpadding="0" cellspacing="0"><tr>'+
+					'<td align="center" valign="baseline"><a class="handle" href="#help">Content</a></td>'+
+					'<td><table bgcolor="#FFFFFF" cellpadding="0" cellspacing="0" class="table-slide">'+ 
+					'<tr><td width="15%"><img src="images/black-diamond.png"/></td><td>Click for data release</td></tr>'+
 					'<tr><td><img src="images/red-diamond.png"/></td><td>Click for data release (new)</td></tr>'+
 					'<tr><td><img src="images/hourglass.png"/></td><td>Results pending</td></tr>'+
 					'<tr><td><img src="images/black-checkmark.png"/></td><td>Click for milestone result</td></tr>'+
 					'<tr><td><img src="images/red-checkmark.png"/></td><td>Click for milestone result (new)</td></tr>'+
 					'<tr><td><img src="images/purple-bar.png"/></td><td>Click for milestone details</td></tr>'+
 					'<tr><td><img src="images/down.png"/></td><td>Display milestones</td></tr>'+
-					'</table></td></tr></table></div>';	
-	$('body').append(slideout);	
-    $(function(){
+					'</table></td>'+
+					'</tr></table></div>';	
+					
+	$('body').append(helptab);	
+	$('body').append(sorttab);
+	
+    $(function()
+	{
         $('.slide-out-div').tabSlideOut();
-
-    });	
-	
-	
-	//drag n drop tab
-	//var drag_drop = '';	
-	//$('body').append(drag_drop);	
-    $(function(){
-        $('.slide-out-div1').drag_drop_tabSlideOut();
-
-    });	
-	
+		$('.slide-out-sortdiv').sorttabSlideOut();
+    });
 });
 
 function sh(obj,key,all)
 {
 	var updown = $(obj).css('background-image').toString().search(/up.png/i);
 	if(updown>0)
-		{
-			dir = 'url(\'./images/down.png\')';
-		}
+	{
+		dir = 'url(\'./images/down.png\')';
+	}
 	else
-		{
-			dir = 'url(\'./images/up.png\')';
-		}
+	{
+		dir = 'url(\'./images/up.png\')';
+	}
 	if(all==undefined)
 	{	
 		$(obj).css('background-image',dir);
@@ -80,9 +82,13 @@ function sh(obj,key,all)
 		$('.upmpointer').css('background-image',dir);
 		$('#addedtoright').css('background-image',scansh());
 		if(updown>0)
-		$('.upms').show();
+		{
+			$('.upms').show();
+		}
 		else
-		$('.upms').hide();
+		{
+			$('.upms').hide();
+		}
 	}
 }
 function scansh()
@@ -92,25 +98,24 @@ function scansh()
 	$('.upmpointer').each(function(){
 		var dir = $(this).css('background-image').toString().search(/up.png/i);
 		if(dir>0)
-			{
-				upflag=1;
-				dir = 'url(\'./images/down.png\')';
-			}
+		{
+			upflag=1;
+			dir = 'url(\'./images/down.png\')';
+		}
 		else
-			{
-				downflag=1;
-				dir = 'url(\'./images/up.png\')';
-			}
+		{
+			downflag=1;
+			dir = 'url(\'./images/up.png\')';
+		}
 	});
 	if(downflag==1)
-		{
-			dir = 'url(\'./images/down.png\')';
-			return dir;
-		}
+	{
+		dir = 'url(\'./images/down.png\')';
+		return dir;
+	}
 	if(upflag==1)
 	{
 		dir = 'url(\'./images/up.png\')';
 		return dir;
 	}	
-
 }

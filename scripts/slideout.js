@@ -193,9 +193,9 @@
         
     };
 	
-	$.fn.drag_drop_tabSlideOut = function(callerSettings) {
+	$.fn.sorttabSlideOut = function(callerSettings) {
         var settings = $.extend({
-            tabHandle: '.handle_drag',
+            tabHandle: '.sorthandle',
             speed: 100, 
             action: 'hover',
             tabLocation: 'right',
@@ -221,8 +221,6 @@
         if (document.all && !window.opera && !window.XMLHttpRequest) {
             settings.positioning = 'absolute';
         }
-        
-
         
         //set initial tabHandle css
         

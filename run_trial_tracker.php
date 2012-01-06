@@ -4251,6 +4251,17 @@ class TrialTracker
 				$params3 = array($sp);
 			}
 			
+			if(!empty($globalOptions['sortOrder'])) 
+			{
+				foreach($globalOptions['sortOrder'] as $skey => $svalue)
+				{
+					$sp = new SearchParam();
+					$sp->field = ($skey != 'inactive_date') ? '_' . getFieldId('NCT', $skey) : $skey;
+					$sp->action = (substr($svalue, 1, 1) == 'A') ? 'ascending' : ((substr($svalue, 1, 1) == 'D') ? 'descending' : '');
+					$params1[] = $sp;
+				}
+			}
+			
 			$Params = array_merge($params1, $params2, $params3);
 			if(!empty($params2)) 
 			{
@@ -4879,6 +4890,17 @@ class TrialTracker
 				$params3 = array($sp);
 			}
 			
+			if(!empty($globalOptions['sortOrder'])) 
+			{
+				foreach($globalOptions['sortOrder'] as $skey => $svalue)
+				{
+					$sp = new SearchParam();
+					$sp->field = ($skey != 'inactive_date') ? '_' . getFieldId('NCT', $skey) : $skey;
+					$sp->action = (substr($svalue, 1, 1) == 'A') ? 'ascending' : ((substr($svalue, 1, 1) == 'D') ? 'descending' : '');
+					$params1[] = $sp;
+				}
+			}
+			
 			$Params = array_merge($params1, $params2, $params3);
 			if(!empty($params2)) 
 			{
@@ -5293,7 +5315,7 @@ class TrialTracker
 	}
 	
 	function getResultSet($resultIds, $stackType)
-	{	//echo 'resultIds<pre>';print_r($resultIds);
+	{	
 		$three = 0;
 		$lengthcounter = 0; 
 		$string = '';
@@ -5381,74 +5403,73 @@ class TrialTracker
 				. '<br/><input type="checkbox" id="osu" name="osu" value="' . rawurlencode(base64_encode(gzdeflate('on'))) . '" '
 				. (($globalOptions['onlyUpdates'] == "yes") ? 'checked = "checked"' : '' ) . ' />'
 				. '<label for="osu">Only Show Updated</label></div>'
-				/*. '<input type="hidden" id="sortorder" name="sortorder" value="' . $globalOptions['sortOrder'] . '" />'*/
 				. '&nbsp;<div class="drop"><div class="text">Show Only</div>'
 				. '<span id="so1">';
 			
 		if($globalOptions['type'] == "inactiveTrials")
 		{
-			echo ('<input type="checkbox" name="so1[]" value="wh" ' 
-				. (in_array('wh', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '' ) . ' />Withheld<br/>'
+			echo '<input type="checkbox" name="so1[]" value="wh" ' 
+				. (in_array('wh', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '') . ' />Withheld<br/>'
 				. '<input type="checkbox" name="so1[]" value="afm" '
-				. (in_array('afm', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '' ) . '/>Approved for marketing<br/>'
+				. (in_array('afm', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '') . '/>Approved for marketing<br/>'
 				. '<input type="checkbox" name="so1[]" value="tna" '
-				. (in_array('tna', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '' ) . '/>Temporarily not available<br/>'
+				. (in_array('tna', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '') . '/>Temporarily not available<br/>'
 				. '<input type="checkbox" name="so1[]" value="nla" '
-				. (in_array('nla', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '' ) . '/>No Longer Available<br/>'
+				. (in_array('nla', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '') . '/>No Longer Available<br/>'
 				. '<input type="checkbox" name="so1[]" value="wd" '
-				. (in_array('wd', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '' ) . '/>Withdrawn<br/>'
+				. (in_array('wd', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '') . '/>Withdrawn<br/>'
 				. '<input type="checkbox" name="so1[]" value="t" '
-				. (in_array('t', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '' ) . '/>Terminated<br/>'
+				. (in_array('t', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '') . '/>Terminated<br/>'
 				. '<input type="checkbox" name="so1[]" value="s" '
-				. (in_array('s', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '' ) . '/>Suspended<br/>'
+				. (in_array('s', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '') . '/>Suspended<br/>'
 				. '<input type="checkbox" name="so1[]" value="c" '
-				. (in_array('c', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '' ) . '/>Completed<br/>');
+				. (in_array('c', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '') . '/>Completed<br/>';
 		}
 		elseif($globalOptions['type'] == "allTrials")
 		{
-			echo ('<input type="checkbox" name="so1[]" value="wh" ' 
-				.  (in_array('wh', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '' ) . '/>Withheld<br/>'
+			echo '<input type="checkbox" name="so1[]" value="wh" ' 
+				 . (in_array('wh', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '') . '/>Withheld<br/>'
 				 . '<input type="checkbox" name="so1[]" value="afm" ' 
-				 . (in_array('afm', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '' ) . '/>Approved for marketing<br/>'
+				 . (in_array('afm', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '') . '/>Approved for marketing<br/>'
 				 . '<input type="checkbox" name="so1[]" value="tna" ' 
-				 . (in_array('tna', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '' ) . '/>Temporarily not available<br/>'
+				 . (in_array('tna', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '') . '/>Temporarily not available<br/>'
 				 . '<input type="checkbox" name="so1[]" value="nla" ' 
-				 . (in_array('nla', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '' ) . '/>No Longer Available<br/>'
+				 . (in_array('nla', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '') . '/>No Longer Available<br/>'
 				 . '<input type="checkbox" name="so1[]" value="wd" ' 
-				 . (in_array('wd', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '' ) . '/>Withdrawn<br/>'
+				 . (in_array('wd', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '') . '/>Withdrawn<br/>'
 				 . '<input type="checkbox" name="so1[]" value="t" ' 
-				 . (in_array('t', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '' ) . '/>Terminated<br/>'
+				 . (in_array('t', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '') . '/>Terminated<br/>'
 				 . '<input type="checkbox" name="so1[]" value="s" ' 
-				 . (in_array('s', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '' ) . '/>Suspended<br/>'
+				 . (in_array('s', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '') . '/>Suspended<br/>'
 				 . '<input type="checkbox" name="so1[]" value="c" ' 
-				 . (in_array('c', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '' ) . '/>Completed<br/>'
+				 . (in_array('c', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '') . '/>Completed<br/>'
 				 . '<input type="checkbox" name="so1[]" value="nyr" ' 
-				 . (in_array('nyr', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '' ) . '/>Not yet recruiting<br/>'
+				 . (in_array('nyr', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '') . '/>Not yet recruiting<br/>'
 				 . '<input type="checkbox" name="so1[]" value="r" ' 
-				 . (in_array('r', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '' ) . '/>Recruiting<br/>'
+				 . (in_array('r', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '') . '/>Recruiting<br/>'
 				 . '<input type="checkbox" name="so1[]" value="ebi" ' 
-				 . (in_array('ebi', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '' ) . '/>Enrolling by invitation<br/>'
+				 . (in_array('ebi', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '') . '/>Enrolling by invitation<br/>'
 				 . '<input type="checkbox" name="so1[]" value="anr" ' 
-				 . (in_array('anr', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '' ) . '/>Active, not recruiting<br/>'
-				 . '<input type="checkbox" name="so1[]" value="a" ' 
-				 . (in_array('av', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '' ) . '/>Available<br/>'
+				 . (in_array('anr', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '') . '/>Active, not recruiting<br/>'
+				 . '<input type="checkbox" name="so1[]" value="av" ' 
+				 . (in_array('av', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '') . '/>Available<br/>'
 				 . '<input type="checkbox" name="so1[]" value="nlr" ' 
-				 . (in_array('nlr', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '' ) . '/>No longer recruiting<br/>');
+				 . (in_array('nlr', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '') . '/>No longer recruiting<br/>';
 		}
 		else
 		{
-			echo ('<input type="checkbox" name="so1[]" value="nyr" '
-				. (in_array('nyr', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '' ) . '/>Not yet recruiting<br/>'
+			echo '<input type="checkbox" name="so1[]" value="nyr" '
+				. (in_array('nyr', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '') . '/>Not yet recruiting<br/>'
 				. '<input type="checkbox" name="so1[]" value="r" '
-				. (in_array('r', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '' ) . '/>Recruiting<br/>'
+				. (in_array('r', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '') . '/>Recruiting<br/>'
 				. '<input type="checkbox" name="so1[]" value="ebi" '
-				. (in_array('ebi', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '' ) . '/>Enrolling by invitation<br/>'
+				. (in_array('ebi', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '') . '/>Enrolling by invitation<br/>'
 				. '<input type="checkbox" name="so1[]" value="anr" '
-				. (in_array('anr', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '' ) . '/>Active, not recruiting<br/>'
-				. '<input type="checkbox" name="so1[]" value="a" '
-				. (in_array('a', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '' ) . '/>Available<br/>'
+				. (in_array('anr', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '') . '/>Active, not recruiting<br/>'
+				. '<input type="checkbox" name="so1[]" value="av" '
+				. (in_array('av', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '') . '/>Available<br/>'
 				. '<input type="checkbox" name="so1[]" value="nlr" '
-				. (in_array('nlr', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '' ) . '/>No longer recruiting<br/>');
+				. (in_array('nlr', $globalOptions['filtersOne']) ? 'checked = "checked" ' : '') . '/>No longer recruiting<br/>';
 		}
 			
 		echo '</span></div>&nbsp;&nbsp;<div class="drop" style="margin-left:215px;"><div class="text">Show Only</div>';
@@ -5462,12 +5483,12 @@ class TrialTracker
 		}
 		
 		echo '</div></div><br/><input type="submit" value="Show"/>&nbsp;' . $shownCount . '&nbsp;Records<span id="addtoright"></span>';	
+		echo '<input type="hidden" name="sort" id="sort" value="' . implode(',', $globalOptions['sortOrder']) . '" />';
 		echo '<br/><br clear="all" />';
 	}	
 	
 	function pagination($globalOptions = array(), $totalPages, $timeMachine = NULL, $ottType)
 	{ 	
-		//echo '<pre>';print_r($globalOptions);
 		$url = 'intermediary.php?';
 		
 		if($ottType == 'unstacked')
