@@ -93,6 +93,7 @@ form div{
 
 td,th,label,form dd{
 	background-color:#DDF;
+	/*background-color:#FFF;*/
 }
 
 div.error,.error{
@@ -320,4 +321,8 @@ iframe{
 .ottlink {
 	color:#000000!important;
 	text-decoration:none;
+}
+
+.graybk {
+	background-color:#CCC;
 }
