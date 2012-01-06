@@ -4894,10 +4894,14 @@ class TrialTracker
 			{
 				foreach($globalOptions['sortOrder'] as $skey => $svalue)
 				{
-					$sp = new SearchParam();
-					$sp->field = ($skey != 'inactive_date') ? '_' . getFieldId('NCT', $skey) : $skey;
-					$sp->action = (substr($svalue, 1, 1) == 'A') ? 'ascending' : ((substr($svalue, 1, 1) == 'D') ? 'descending' : '');
-					$params1[] = $sp;
+					$sortType = substr($svalue, 1, 1);
+					if($sortType == 'A' || $sortType == 'D')
+					{
+						$sp = new SearchParam();
+						$sp->field = ($skey != 'inactive_date') ? '_' . getFieldId('NCT', $skey) : $skey;
+						$sp->action = ($sortType == 'A') ? 'ascending' : (($sortType == 'D') ? 'descending' : '');
+						$params1[] = $sp;
+					}
 				}
 			}
 			

@@ -88,7 +88,7 @@ foreach($sortFields as $skey => $svalue)
 	$sortImg = '';
 	$sortType = substr($svalue, 1, 1);
 	
-	$sortImg = ($sortType == 'A') ? 'asc' : 'des';
+	$sortImg = ($sortType == 'A') ? 'asc' : (($sortType == 'D') ? 'des' : 'blank');
 	
 	$sortTab .= "<li title='" . $svalue . "' class='ui-state-default' name='" . $svalue . "' id='" . $skey . "'>"
 		. "<a href='javascript:void(0)'>" . $sortFieldName[$skey] 
