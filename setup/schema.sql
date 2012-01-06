@@ -274,7 +274,7 @@ BEGIN
   ELSE
     IF NEW.end_date IS NULL THEN
       SET NEW.`status`='Cancelled';
-    ELSEIF end_date<NOW() THEN
+    ELSEIF NEW.end_date<NOW() THEN
       SET NEW.`status`='Pending';
     ELSE
       SET NEW.`status`='Upcoming';
@@ -295,7 +295,7 @@ BEGIN
   ELSE
     IF NEW.end_date IS NULL THEN
       SET NEW.`status`='Cancelled';
-    ELSEIF end_date<NOW() THEN
+    ELSEIF NEW.end_date<NOW() THEN
       SET NEW.`status`='Pending';
     ELSE
       SET NEW.`status`='Upcoming';
