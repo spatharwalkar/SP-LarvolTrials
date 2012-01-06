@@ -187,15 +187,25 @@ function nrescnq($val)
 //turns a numeric NCTID into the full form including the string "NCT" and the leading zeroes
 function padnct($id)
 {
-	if(isset($val) && substr($val,0,3) == 'NCT') return ($id);
+	if(isset($id) && substr($id,0,3) == 'NCT') return ($id);
 	return 'NCT' . sprintf("%08s",$id);
 }
 
 function unpadnct($val)
 {
-	if(substr($val,0,3) == 'NCT') return (int)substr($val,3);
+	if(substr($val,0,3) == 'NCT') 
+	{
+		return ((int)right($val,8));
+	}
 	return $val;
 }
+
+function right($string,$chars)
+{
+    $vright = substr($string, strlen($string)-$chars,$chars);
+    return $vright;
+   
+} 
 
 function base64Decode($encoded)
 {
