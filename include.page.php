@@ -596,6 +596,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			}
 			//last update not needed for upm_history
 			unset($historyArr['last_update']);
+			unset($historyArr['status']);
 			//remove post action name from insert query.
 			unset($post['save']);
 			global $post_tmp;
@@ -609,11 +610,6 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 				return array('id'=>$post_tmp['id'],'change_date'=>"'".$change_date."'",'field'=>"'".$a."'",'old_value'=>"'".mysql_real_escape_string($b)."'",'new_value'=>"'".mysql_real_escape_string($post_tmp[$a])."'",'user'=>$db->user->id);
 				},array_keys($historyArr),$historyArr);
 			unset($post_tmp);	
-			foreach($historyArr as $history)
-			{
-				$query = "insert into upm_history (".implode(',',array_keys($history)).") values (".implode(',',$history).")";
-				mysql_query($query)or softdieSession('Cannot update history for upm id '.$historyArr['id']);
-			}
 			//changed nowarray_pop($post);	
 			$post['last_update'] = date('Y-m-d',$now);
 			$post = array_map(am1,array_keys($post),array_values($post));
@@ -625,7 +621,23 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			$post = array_map(am1,array_keys($post),array_values($post));
 		}
 		$query = "update $table set ".implode(',',$post)." where id=".$id;
-		mysql_query($query)or softDieSession('Cannot update '.$table.' entry');		
+		if(mysql_query($query))
+		{
+			//fire success actions upon successful save.
+			if($table=='upm')
+			{
+				foreach($historyArr as $history)
+				{
+					$query = "insert into upm_history (".implode(',',array_keys($history)).") values (".implode(',',$history).")";
+					mysql_query($query)or softdieSession('Cannot update history for upm id '.$historyArr['id']);
+				}				
+			}
+		}
+		else
+		{
+			softDieSession('Cannot update '.$table.' entry');		
+		}
+		
 	}
 }
 
@@ -889,7 +901,7 @@ function am($k,$v)
 }
 function am1($k,$v)
 {
-	$explicitNullFields = array('corresponding_trial','event_link','result_link','start_date','end_date','oldproduct');
+	$explicitNullFields = array('corresponding_trial','event_link','result_link','start_date','end_date','oldproduct','product');
 	if($k=='corresponding_trial')
 	{
 		$v = unpadnct($v);
@@ -1015,7 +1027,7 @@ function calculateSearchType($sourceArr,$searchArr)
 */
 function getUpmHistory($id,$limit=null)
 {
-	$query = "SELECT * FROM upm_history WHERE id=$id ORDER BY change_date DESC";
+	$query = "SELECT uh.*,u.username as username FROM upm_history uh left join users u on uh.user=u.id WHERE uh.id=$id ORDER BY change_date DESC";
 	if(is_numeric($limit) && $limit>0)
 	{
 		$query .= " LIMIT $limit";
@@ -1042,7 +1054,7 @@ function upmChangeLog($id)
 {
 	$historyArr = getUpmHistory($id);
 	$out = '<table>';
-	$out .= '<tr><td colspan="4">Change History</td></tr>';
+	$out .= '<tr><th colspan="5">Change History</th></tr>';
 	if(!is_array($historyArr) || count($historyArr)<=0)
 	{
 		$out .= '<tr><td>No Change History</td></tr></table>';
@@ -1050,21 +1062,24 @@ function upmChangeLog($id)
 	}
 	
 	// if history present.
-	$out .= '<tr><td>Change Date</td><td>Field</td><td>Old Value</td><td>New Value</td>';
+	$out .= '<tr><td>Change Date</td><td>Field</td><td>Old Value</td><td>New Value</td><td>User</td>';
 	foreach($historyArr as $history)
 	{
 		$out .= '<tr>';
 		$out .= '<td>';
 		$out .= $history['change_date'];
 		$out .= '</td>';
-		$out .= '<td style="background-color:#99CC00;">';
+		$out .= '<td>';
 		$out .= $history['field'];
 		$out .= '</td>';
-		$out .= '<td style="background-color:#FF0000;">';
+		$out .= '<td>';
 		$out .= $history['old_value'];
 		$out .= '</td>';
-		$out .= '<td style="background-color:#FFFF00;">';
+		$out .= '<td>';
 		$out .= $history['new_value'];
+		$out .= '</td>';
+		$out .= '<td>';
+		$out .= $history['username'];
 		$out .= '</td>';
 		$out .= '</tr>';
 	}

@@ -61,7 +61,7 @@ if($_GET['save']=='Save')
 	$saveStatus = saveData($_GET,$table);
 	if(!$pid) 
 	{
-		softDieSession('Wrong product name selected.');
+		softDieSession('Wrong/no product name selected.');
 	}
 }
 //delete controller
@@ -171,7 +171,7 @@ if($_GET['add_new_record']=='Add New Record' || $_GET['id'] || $saveStatus===0)
 	$addEditGlobalInputStyle = 'style="width:97%;min-width:200px;"';
 	$id = ($_GET['id'])?$_GET['id']:null;
 	echo '<div>';
-	addEditUpm($id,$table,$script,array("formOnSubmit"=>"onsubmit=\"return validateedit();\"",'deletebox'=>false,'saveStatus'=>$saveStatus,'formStyle'=>$addEditFormStyle,'mainTableStyle'=>$mainTableStyle,'addEditGlobalInputStyle'=>$addEditGlobalInputStyle),array('last_update'));
+	addEditUpm($id,$table,$script,array("formOnSubmit"=>"onsubmit=\"return validateedit();\"",'deletebox'=>false,'saveStatus'=>$saveStatus,'formStyle'=>$addEditFormStyle,'mainTableStyle'=>$mainTableStyle,'addEditGlobalInputStyle'=>$addEditGlobalInputStyle),array('last_update','status'));
 	echo '</div>';
 }
 
