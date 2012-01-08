@@ -5622,9 +5622,13 @@ class TrialTracker
 			 
 			foreach($trialsInfo as $tkey => &$tvalue)
 			{	
+				if($tkey < $sectionKey)
+				{
+					continue;
+				}
+				
 				$flag = false;
 				$trflag = false;
-				//$pageflag = false;
 				
 				if($section !== $sectionKey && $tkey <= $sectionKey && $flag === false)
 				{	
@@ -5965,7 +5969,7 @@ class TrialTracker
 					//rendering diamonds in case of end date is prior to the current year
 					$outputStr .= '<td style="text-align:center;' . (($mkey < count($trials[$i]['matchedupms'])-1) ? 'border-bottom:0;' : '' ) . '">';
 					
-					if(!empty($trials[$i]['matchedupms']['edited']) && ($mvalue['result_link'] != $trials[$i]['matchedupms']['edited']['result_link'])) 
+					if(!empty($trials[$i]['matchedupms']['edited']) && isset($trials[$i]['matchedupms']['edited']['result_link'])) 
 					{
 						if($mvalue['result_link'] != '' && $mvalue['result_link'] !== NULL) 
 						{
@@ -6697,30 +6701,33 @@ class TrialTracker
 		{
 			$updates['new'] = 'y';
 		}
-		//echo 'updates<pre>'.$nctId;print_r($updates);
 		return $updates;
 	}
 	
 	function getMatchedUPMs($trialId, $timeMachine = NULL, $timeInterval) 
 	{
+		global $now;
 		$upm['matchedupms'] = array();
 		$values = array();
-				
-		$result = mysql_query("SELECT id, event_type, corresponding_trial, event_description, event_link, result_link, start_date, end_date "
+		
+		if($timeMachine === NULL) $timeMachine = $now;
+		$timeInterval = '-1 ' . $timeInterval;
+		
+		$result = mysql_query("SELECT id, event_type, corresponding_trial, event_description, event_link, result_link, start_date, end_date, status "
 								. "FROM upm WHERE corresponding_trial = '" . $trialId . "' ");
 		
 		$i = 0;			
 		while($row = mysql_fetch_assoc($result)) 
 		{
 		
-			$upm['matchedupms'][$i] = array('event_description' => $row['event_description'], 'event_link' => $row['event_link'], 
+			$upm['matchedupms'][$i] = array('id' => $row['id'], 'event_description' => $row['event_description'], 'event_link' => $row['event_link'], 
 											'start_date' => $row['start_date'], 'end_date' => $row['end_date'], 
 											'result_link' => $row['result_link'],'event_type' => $row['event_type'],);
 			
 			//Query for checking updates for upms.
-			$sql = "SELECT `id`, `event_type`, `event_description`, `event_link`, `result_link`, `start_date`, `start_date_type`, `end_date`, `end_date_type` "
-					. " FROM `upm_history` WHERE `id` = '" . $row['id'] . "' AND (`superceded` < '" . date('Y-m-d', $timeMachine) . "' AND `superceded` >= '" 
-					. date('Y-m-d', strtotime($timeInterval ,$timeMachine)) . "') ORDER BY `superceded` DESC LIMIT 0,1 ";
+			$sql = "SELECT `id`, `field`, `old_value` FROM `upm_history` "
+					. " WHERE `id` = '" . $row['id'] . "' AND (`change_date` < '" . date('Y-m-d', $timeMachine) . "' AND `change_date` >= '" 
+					. date('Y-m-d', strtotime($timeInterval ,$timeMachine)) . "') ORDER BY `change_date` DESC LIMIT 0,1 ";
 			$res = mysql_query($sql);
 			
 			$upm['matchedupms'][$i]['edited'] = array();
@@ -6728,10 +6735,7 @@ class TrialTracker
 			
 			while($arr = mysql_fetch_assoc($res)) 
 			{
-				$upm['matchedupms'][$i]['edited'] = array('event_description' => $arr['event_description'], 'event_link' =>$arr['event_link'], 
-															'start_date' => $arr['start_date'], 'end_date' => $arr['end_date'],
-															'result_link' => $arr['result_link'], 'event_type' => $arr['event_type'], 
-															'start_date_type' => $arr['start_date_type'], 'end_date_type' => $arr['end_date_type'],);
+				$upm['matchedupms'][$i]['edited'] = array('id' => $arr['id'], $arr['field'] => $arr['old_value'],);
 			}
 			
 			$query = " SELECT u.id FROM `upm` u LEFT JOIN `upm_history` uh ON u.`id` = uh.`id` WHERE u.`id` = '" . $row['id'] . "' AND u.`last_update` < '" 
@@ -6749,10 +6753,15 @@ class TrialTracker
 
 	function getUnMatchedUPMs($naUpmsRegex, $timeMachine = NULL, $timeInterval = NULL, $onlyUpdates)
 	{	
-		$timeInterval = '-1 ' . $timeInterval;
+		global $now;
+		
 		$where = array();
 		$naUpms = array();
 		$i = 0;
+		
+		if($timeMachine === NULL) $timeMachine = $now;
+		$timeInterval = '-1 ' . $timeInterval;
+		
 		foreach($naUpmsRegex as $ukey => $uvalue)
 		{
 			$where[] = textEqual('`search_name`', $uvalue);
@@ -6765,7 +6774,7 @@ class TrialTracker
 			{
 				while($rows = mysql_fetch_assoc($result)) 
 				{
-					$query = "SELECT `id`, `event_description`, `event_link`, `result_link`, `event_type`, `start_date`,
+					$query = "SELECT `id`, `event_description`, `event_link`, `result_link`, `event_type`, `start_date`, `status`, 
 							`start_date_type`, `end_date`, `end_date_type` FROM `upm` WHERE `corresponding_trial` IS NULL AND `product` = '" . $rows['id'] 
 							. "' ORDER BY `end_date` ASC ";
 					$res = mysql_query($query)  or tex('Bad SQL query getting unmatched upms ' . $sql);
@@ -6775,6 +6784,7 @@ class TrialTracker
 						{ 
 							$naUpms[$i]['id'] = $row['id'];
 							$naUpms[$i]['event_description'] = htmlspecialchars($row['event_description']);
+							$naUpms[$i]['status'] = $row['status'];
 							$naUpms[$i]['event_link'] = $row['event_link'];
 							$naUpms[$i]['result_link'] = $row['result_link'];
 							$naUpms[$i]['event_type'] = $row['event_type'];
@@ -6785,10 +6795,9 @@ class TrialTracker
 							$naUpms[$i]['new'] = 'n';
 							$naUpms[$i]['edited'] = array();
 							
-							$sql = "SELECT `id`, `event_type`, `event_description`, `event_link`, `result_link`, `start_date`, "
-									. " `start_date_type`, `end_date`, `end_date_type` "
-									. " FROM `upm_history` WHERE `id` = '" . $row['id'] . "' AND (`superceded` < '" . date('Y-m-d',$timeMachine) 
-									. "' AND `superceded` >= '" . date('Y-m-d',strtotime($timeInterval,$timeMachine)) . "') ORDER BY `superceded` DESC LIMIT 0,1 ";
+							$sql = "SELECT `id`, `field`, `old_value` FROM `upm_history` "
+									. " WHERE `id` = '" . $row['id'] . "' AND (`change_date` < '" . date('Y-m-d', $timeMachine) 
+									. "' AND `change_date` >= '" . date('Y-m-d',strtotime($timeInterval, $timeMachine)) . "') ORDER BY `change_date` DESC LIMIT 0,1 ";
 							$ress = mysql_query($sql);
 							
 							if(mysql_num_rows($ress) > 0) 
@@ -6796,14 +6805,8 @@ class TrialTracker
 								while($roww = mysql_fetch_assoc($ress)) 
 								{
 									$naUpms[$i]['edited']['id'] = $roww['id'];
-									$naUpms[$i]['edited']['event_description'] = htmlspecialchars($roww['event_description']);
-									$naUpms[$i]['edited']['event_link'] = $roww['event_link'];
-									$naUpms[$i]['edited']['result_link'] = $roww['result_link'];
-									$naUpms[$i]['edited']['event_type'] = $roww['event_type'];
-									$naUpms[$i]['edited']['start_date'] = $roww['start_date'];
-									$naUpms[$i]['edited']['start_date_type'] = $roww['start_date_type'];
-									$naUpms[$i]['edited']['end_date'] 	= $roww['end_date'];
-									$naUpms[$i]['edited']['end_date_type'] = $roww['end_date_type'];
+									$naUpms[$i]['edited']['field'] = $roww['field'];
+									$naUpms[$i]['edited'][$roww['field']] = $roww['old_value'];
 								}
 							}
 							
@@ -6820,13 +6823,8 @@ class TrialTracker
 							{
 								if(!empty($naUpms[$i]['edited']) && $naUpms[$i]['new'] == 'n') 
 								{
-									if( ($naUpms[$i]['event_description'] == $naUpms[$i]['edited']['event_description']) 
-									&& ($naUpms[$i]['event_link'] == $naUpms[$i]['edited']['event_link']) 
-									&& ($naUpms[$i]['event_type'] == $naUpms[$i]['edited']['event_type']) 
-									&& ($naUpms[$i]['start_date'] == $naUpms[$i]['edited']['start_date']) 
-									&& ($naUpms[$i]['start_date_type'] == $naUpms[$i]['edited']['start_date_type']) 
-									&& ($naUpms[$i]['end_date'] == $naUpms[$i]['edited']['end_date']) 
-									&& ($naUpms[$i]['end_date_type'] == $naUpms[$i]['edited']['end_date_type']))
+									$fldName = $naUpms[$i]['edited']['field'];
+									if($naUpms[$i][$fldName] == $naUpms[$i]['edited'][$fldName]) 
 									{ 
 										unset($naUpms[$i]);
 									} 
@@ -6899,7 +6897,7 @@ class TrialTracker
 				
 				
 				//field upm event description
-				if(!empty($value['edited']) && $value['edited']['event_description'] != $value['event_description']) 
+				if(!empty($value['edited']) && isset($value['edited']['event_description'])) 
 				{
 					$titleLinkColor = 'color:#FF0000;';
 					$attr = ' highlight'; 
@@ -6931,33 +6929,13 @@ class TrialTracker
 				
 				
 				//field upm status
-				$outputStr .= '<td class="' . $rowTwoType . ' titleupmodd"><div class="rowcollapse">';
-				if($value['result_link'] !== NULL && $value['result_link'] != '') 
-				{
-					$outputStr .= 'Occurred';
-				} 
-				else 
-				{
-					if($value['end_date'] === NULL || $value['end_date'] == '' || $value['end_date'] == '0000-00-00') 
-					{
-						$outputStr .= 'Cancelled';
-					} 
-					else if($value['end_date'] < date('Y-m-d', $now)) 
-					{
-						$outputStr .= 'Pending';
-					} 
-					else if($value['end_date'] > date('Y-m-d', $now)) 
-					{
-						$outputStr .= 'Upcoming';
-					}
-				}
-				$outputStr .= '</div></td>';
+				$outputStr .= '<td class="' . $rowTwoType . ' titleupmodd"><div class="rowcollapse">' . $value['status'] . '</div></td>';
 
 			
 				//field upm event type
 				$title = '';
 				$attr = '';	
-				if(!empty($value['edited']) && $value['edited']['event_type'] != $value['event_type']) 
+				if(!empty($value['edited']) && isset($value['edited']['event_type'])) 
 				{
 					$attr = ' highlight'; 
 					if($value['edited']['event_type'] != '' && $value['edited']['event_type'] !== NULL)
@@ -6980,33 +6958,26 @@ class TrialTracker
 				//field upm start date
 				$title = '';
 				$attr = '';	
-				if(!empty($value['edited']) && $value['edited']['start_date'] != $value['start_date'])
+				if(!empty($value['edited']) && isset($value['edited']['start_date']))
 				{
 					$attr = ' highlight';
 					$dateStyle = 'color:#973535;'; 
 					if($value['edited']['start_date'] != '' && $value['edited']['start_date'] !== NULL)
 					{
-						$title = ' title="Previous value: '. $value['edited']['start_date'] . '" '; 
+						$title = ' title="Previous value: ' . $value['edited']['start_date'] . '" '; 
 					} 
 					else 
 					{
 						$title = ' title="No Previous value" ';
 					}	
 				} 
-				else if($value['new'] == 'y') 
-				{
-					$title = ' title = "New record" ';
-					$dateStyle = 'color:#973535;'; 
-				}
-				if(!empty($value['edited']) && $value['edited']['start_date_type'] != $value['start_date_type'])
+				else if(!empty($value['edited']) && isset($value['edited']['start_date_type']))
 				{
 					$attr = ' highlight';
 					$dateStyle = 'color:#973535;';
 					if($value['edited']['start_date_type'] != '' && $value['edited']['start_date_type'] !== NULL) 
 					{
-						$title = ' title="Previous value: ' . 
-						(($value['edited']['start_date'] != $value['start_date']) ? $value['edited']['start_date'] : '' ) 
-						. ' ' .$value['edited']['start_date_type'] . '" '; 
+						$title = ' title="Previous value: ' . $value['edited']['start_date_type'] . '" '; 
 					} 
 					else 
 					{
@@ -7036,32 +7007,26 @@ class TrialTracker
 				//field upm end date
 				$title = '';
 				$attr = '';	
-				if(!empty($value['edited']) && $value['edited']['end_date'] != $value['end_date'])
+				if(!empty($value['edited']) && isset($value['edited']['end_date']))
 				{
 					$attr = ' highlight';
 					$dateStyle = 'color:#973535;';
 					if($value['edited']['end_date'] != '' && $value['edited']['end_date'] !== NULL)
 					{
-						$title = ' title="Previous value: '. $value['edited']['end_date'] . '" '; 
+						$title = ' title="Previous value: ' . $value['edited']['end_date'] . '" '; 
 					}
 					else 
 					{
 						$title = ' title="No Previous value" ';
 					}
 				} 
-				else if($value['new'] == 'y') 
-				{
-					$title = ' title = "New record" ';
-					$dateStyle = 'color:#973535;'; 
-				}
-				if(!empty($value['edited']) && $value['edited']['end_date_type'] != $value['end_date_type'])
+				else if(!empty($value['edited']) && isset($value['edited']['end_date_type']))
 				{
 					$attr = ' highlight';
 					$dateStyle = 'color:#973535;'; 
 					if($value['edited']['end_date_type'] != '' && $value['edited']['end_date_type'] !== NULL) 
 					{
-						$title = ' title="Previous value: ' . (($value['edited']['end_date'] != $value['end_date']) ? 
-						$value['edited']['end_date'] : '' ) . ' ' . $value['edited']['end_date_type'] . '" '; 
+						$title = ' title="Previous value: ' .  $value['edited']['end_date_type'] . '" ';
 					} 
 					else 
 					{
@@ -7090,31 +7055,27 @@ class TrialTracker
 				
 				//field upm result 
 				$outputStr .= '<td class="titleupmodd"><div class="rowcollapse">';
-				if(!empty($value['edited']) && ($value['result_link'] != $value['edited']['result_link'])) 
+				if(!empty($value['edited']) && isset($value['edited']['result_link'])) 
 				{
-					if($value['result_link'] != '' && $value['result_link'] !== NULL) 
-					{
-						$resultImage = (($value['event_type'] == 'Clinical Data') ? 'diamond' : 'checkmark' );
-						$outputStr .= '<div ' . $upmTitle . '><a href="' . $value['result_link'] . '" style="color:#000;">'
-									. '<img src="images/red-' . $resultImage . '.png" alt="' . $resultImage 
-									. '" style="margin:4px;" border="0" /></a></div>';
-					}
+					$imgColor = 'red';
 				} 
 				else 
 				{
-					if($value['result_link'] != '' && $value['result_link'] !== NULL) 
-					{
-						$resultImage = (($value['event_type'] == 'Clinical Data') ? 'diamond' : 'checkmark' );
-						$outputStr .= '<div ' . $upmTitle . '><a href="' . $value['result_link'] . '" style="color:#000;">'
-									. '<img src="images/black-' . $resultImage . '.png" alt="' . $resultImage 
-									. '" style="margin:4px;" border="0" /></a></div>';
-					}
+					$imgColor = 'black';
 				}
+				if($value['result_link'] != '' && $value['result_link'] !== NULL) 
+				{
+					$resultImage = (($value['event_type'] == 'Clinical Data') ? 'diamond' : 'checkmark' );
+					$outputStr .= '<div ' . $upmTitle . '><a href="' . $value['result_link'] . '" style="color:#000;">'
+								. '<img src="images/' . $imgColor . '-' . $resultImage . '.png" alt="' . $resultImage 
+								. '" style="margin:4px;" border="0" /></a></div>';
+				}
+				
 				if(($value['end_date'] != '' && $value['end_date'] !== NULL 
 				&& $value['end_date'] != '0000-00-00') && ($value['end_date'] < date('Y-m-d', $now)) 
 				&& ($value['result_link'] === NULL || $value['result_link'] == ''))
 				{
-						$outputStr .= '<div ' . $upmTitle . '><img src="images/hourglass.png" alt="hourglass" style="margin:3px;" border="0" /></div>';
+					$outputStr .= '<div ' . $upmTitle . '><img src="images/hourglass.png" alt="hourglass" style="margin:3px;" border="0" /></div>';
 				}
 				$outputStr .= '</div></td>';		
 				
