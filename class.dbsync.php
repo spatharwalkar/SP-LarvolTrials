@@ -492,7 +492,7 @@
         * @return 	boolean		Success
         * @author Jithu Thomas
         **/
-        public function syncTriggers()
+        public function syncTriggers($triggers)
         {
         	//echo '<pre>';
         	if(!$this->home->ok && count($this->sync) && !$this->sync[0]->ok)
@@ -502,7 +502,7 @@
         	
         	for ($i = 0; $i < count($this->sync); $i++)
         	{
-        		$this->syncTriggersIndividual($this->home, $this->sync[$i]);
+        		$this->syncTriggersIndividual($this->home, $this->sync[$i],$triggers);
         	}        	
         }    
 
@@ -515,15 +515,30 @@
         * @return 	boolean		Success
         * @author Jithu Thomas
         **/
-        private function syncTriggersIndividual(&$dbHome,&$dbSync)
+        private function syncTriggersIndividual(&$dbHome,&$dbSync,$homeTriggerArr)
         {
         	//echo '<pre>';
         	if(!$this->home->ok && count($this->sync) && !$this->sync[0]->ok)
         	{
         		$this->RaiseError('Home or Sync Database not set properly.');
         	}
-
-			$dbSync->removeAllTriggers();
+        	
+			$syncTriggerArr = $dbSync->getTriggerList();
+			//pr($homeTriggerArr);die;
+			//pr($syncTriggerArr);die;
+			$homeDiffSync = array_diff($homeTriggerArr[2], $syncTriggerArr[0]);
+			$syncDiffHome = array_diff($syncTriggerArr[0],$homeTriggerArr[2]);
+			$homeInterSync = array_intersect($homeTriggerArr[2], $syncTriggerArr[0]);
+			
+			//remove all sync diff home
+			if(count($syncDiffHome)>0)
+			$dbSync->removeAllTriggers($syncDiffHome);
+			//add all home diff sync
+			if(count($homeDiffSync)>0)
+			$dbSync->addAllTriggers($homeDiffSync,$homeTriggerArr);
+			
+			//compare all home intersection sync using stripped uncased trigger definition and decide
+			$dbSync->compareCommonTriggers($homeInterSync,$homeTriggerArr,$syncTriggerArr);
         }        
     }
 ?>

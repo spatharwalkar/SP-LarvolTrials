@@ -593,13 +593,14 @@ require_once('include.util.php');
         **/
         function getTriggerList()
         {
-        	$query = "select trigger_name,event_object_table from information_schema.triggers where trigger_schema='".$this->database."' ";
+        	$query = "select * from information_schema.triggers where trigger_schema='".$this->database."' ";
         	$result = mysql_query($query,$this->dbp);
         	if(mysql_num_rows($result)>0)
         	{
         		while($row = mysql_fetch_assoc($result))
         		{
-        			$triggers[] = $row;
+        			$triggers[0][] = $row['TRIGGER_NAME'];
+        			$triggers[1][] = $row;
         		}
         		return $triggers;
         	}
@@ -612,20 +613,92 @@ require_once('include.util.php');
         /**
          * DBSync_mysql::removeAllTriggers()
          * @tutorial generate sql to remove all triggers in a database.
+         * @param array $triggers just trigger names' array
          * @access public
          * @return string
          * @author Jithu Thomas
          **/
-        function removeAllTriggers()
+        function removeAllTriggers($triggers)
         {
-        	$triggers = $this->getTriggerList();
+        	//$triggers = $this->getTriggerList();
         	foreach($triggers as $trigger)
         	{
-        		$sql = "DROP TRIGGER `{$this->database}`.`{$trigger['trigger_name']}`;";
+        		$sql = "DROP TRIGGER `{$this->database}`.`{$trigger}`;";
         		echo $sql."<br/>";
         	}
         }      
-          
+
+        /**
+        * DBSync_mysql::addAllTriggers()
+        * @tutorial generate sql to add all triggers in a database.
+        * @param array $homeDiffSync,$homeTriggerArr
+        * @access public
+        * @return string
+        * @author Jithu Thomas
+        **/
+        function addAllTriggers($homeDiffSync,$homeTriggerArr)
+        {
+        	//$triggers = $this->getTriggerList();
+        	foreach($homeDiffSync as $triggerToAdd)
+        	{
+        		foreach($homeTriggerArr[0] as $ky=>$triggerDef)
+        		{
+        			if($triggerToAdd==$homeTriggerArr[2][$ky])
+        			{
+        				$sql = str_replace("\n","<br/>",htmlspecialchars($triggerDef));
+        				echo $sql."<br/>";
+        			}
+        		}
+        	}
+        }
+        
+        /**
+        * DBSync_mysql::compareCommonTriggers()
+        * @tutorial generate sql to compare & add/drop all triggers in a database.
+        * @param array $homeInterSync,$homeTriggerArr
+        * @access public
+        * @return string
+        * @author Jithu Thomas
+        **/
+        function compareCommonTriggers($homeInterSync,$homeTriggerArr,$syncTriggerArr)
+        {
+        	//pr($homeTriggerArr);pr($syncTriggerArr);die;
+        	foreach($homeInterSync as $triggerToAdd)
+        	{
+        		foreach($homeTriggerArr[0] as $ky=>$triggerDef)
+        		{
+        			foreach($syncTriggerArr[1] as $syncKy=>$syncTriggerDef)
+        			{
+        				//pr($syncTriggerDef);
+	        			if($triggerToAdd==$homeTriggerArr[2][$ky] && $triggerToAdd==$syncTriggerDef['TRIGGER_NAME'])
+	        			{
+	        				$syncTriggerDefStrip = 'DELIMITER$$CREATETRIGGER'.$syncTriggerDef['TRIGGER_NAME'].$syncTriggerDef['ACTION_TIMING'].$syncTriggerDef['EVENT_MANIPULATION'].'ON'.$syncTriggerDef['EVENT_OBJECT_TABLE'].'FOREACHROW'.$syncTriggerDef['ACTION_STATEMENT'].';$$DELIMITER;';
+	        				$syncTriggerDefStrip = strtolower(preg_replace('!\s+!', '',trim($syncTriggerDefStrip)));
+	        				$homeTriggerDefStrip = strtolower(preg_replace('!\s+!', '',trim($homeTriggerArr[0][$ky])));
+	        				if($homeTriggerDefStrip != $syncTriggerDefStrip)
+	        				{
+	        					//add to array for remove sync def & add home def
+	        					$triggersForUpdate[] = $triggerToAdd;
+	        				}
+	        				else
+	        				{
+	        					//match so we don't need further changes
+	        					continue;
+	        				}
+	        			}
+        			}
+        		}
+        		
+        	}
+			//decision ready now executing..
+			if(count($triggersForUpdate)>0)
+			{
+				//remove all diff sync
+				$this->removeAllTriggers($triggersForUpdate);
+				//add all home diff sync
+				$this->addAllTriggers($triggersForUpdate,$homeTriggerArr);
+			}
+        }
     //end class    
     }
 ?>

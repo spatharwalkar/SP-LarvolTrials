@@ -20,12 +20,19 @@ mysql_query('DROP DATABASE IF EXISTS ' . DB_TEMP) or die("Couldn't drop database
 mysql_query('CREATE DATABASE ' . DB_TEMP) or die("Couldn't create database: " . mysql_error());
 mysql_select_db(DB_TEMP) or die("Could not find database on server!");
 $setupscript = file_get_contents('setup/schema.sql');
-//detect delimiter 
+//detect delimiter and filter from rest of sql
 $pattern = '/DELIMITER \$\$(.*?)DELIMITER.?\;/s';
 if (preg_match_all($pattern,$setupscript,$triggers))
 {
+	
 	if(isset($triggers[0]) && count($triggers[0])>0)
 	{
+		foreach($triggers[1] as $ky=>$triggerStmt)
+		{
+			$triggerStmt = preg_replace('!\s+!', ' ',trim($triggerStmt));
+			$triggerStmt = explode(" ",$triggerStmt);
+			$triggers[2][$ky] = $triggerStmt[2];
+		}
 		$setupscript = preg_replace($pattern, '', $setupscript);
 	}
 }
@@ -57,10 +64,10 @@ echo('</fieldset><br />Done. <ul><li>If these differences were caused by an upda
 <?php 
 if(isset($triggers[0]) && count($triggers[0])>0)
 {
-	$dbsync->syncTriggers();
+	$dbsync->syncTriggers($triggers);
 	foreach($triggers[0] as $trigger)
 	{
-		echo str_replace("\n","<br/>",htmlspecialchars($trigger))."<br/>";
+		//echo str_replace("\n","<br/>",htmlspecialchars($trigger))."<br/>";
 	}
 }
 ?>
