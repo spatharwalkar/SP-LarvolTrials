@@ -47,7 +47,7 @@ function addNCT($rec)
 	if($res === false) return softDie('Bad SQL query determining existence of record');
 	$res = mysql_fetch_assoc($res);
 	$exists = $res !== false;
-	$newtrial=$exists;
+	$oldtrial=$exists;
 	$larvol_id = NULL;
 	if($exists)
 	{
@@ -108,7 +108,6 @@ else $ddesc=$rec->detailed_descr->textblock;
 						'number_of_groups' => $rec->number_of_groups,
 						'enrollment' => $rec->enrollment,
 						'gender' => strtolower($rec->eligibility->gender),
-						'enrollment' => $rec->eligibility->expected_enrollment,
 						'minimum_age' => strtoyears($rec->eligibility->minimum_age),
 						'maximum_age' => strtoyears($rec->eligibility->maximum_age),
 						'healthy_volunteers' => ynbool($rec->eligibility->healthy_volunteers),
@@ -130,8 +129,10 @@ else $ddesc=$rec->detailed_descr->textblock;
 						'lastchanged_date' => $rec->lastchanged_date,
 						'firstreceived_date' => $rec->firstreceived_date,
 						'responsible_party_name_title' => $rec->responsible_party->name_title,
-						'responsible_party_organization' => $rec->responsible_party->party_organization,
-						'enrollment' => $rec->eligibility-expected_enrollment);
+						'responsible_party_organization' => $rec->responsible_party->party_organization);
+						
+						if( ( !isset($record_data['enrollment']) or is_null($record_data['enrollment']) or empty($record_data['enrollment']) ) )
+							$record_data['enrollment'] = $rec->eligibility->expected_enrollment;
 
 	$record_data['secondary_id'] = array();
 	foreach($rec->id_info->secondary_id as $sid) $record_data['secondary_id'][] = $sid;
@@ -272,7 +273,7 @@ else $ddesc=$rec->detailed_descr->textblock;
 	//import everything
 
 	foreach($record_data as $fieldname => $value)
-		if(!addval($larvol_id, $fieldname, $value,$record_data['lastchanged_date']))
+		if(!addval($larvol_id, $fieldname, $value,$record_data['lastchanged_date'],$oldtrial))
 			logDataErr('<br>Could not save the value of <b>' . $fieldname . '</b>, Value: ' . $value );//Log in errorlog
 
 /*	
@@ -289,7 +290,7 @@ else $ddesc=$rec->detailed_descr->textblock;
 	return true;
 }
 
-function addval($larvol_id, $fieldname, $value,$lastchanged_date)
+function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial)
 {
 	
 	$lastchanged_date = normal('date',$lastchanged_date);
@@ -443,7 +444,7 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date)
 				$res = mysql_query($query);
 				if($res === false) return softDie('Bad SQL query getting value');
 				$row = mysql_fetch_assoc($res);
-				$olddate=$row['lastedited_date'];
+				$olddate=$row['lastchanged_date'];
 				$oldval=$row[$fieldname];
 				$value=mysql_real_escape_string($value);
 				$query = 'update data_nct set `' . $fieldname . '` = "' . $raw_value .'", lastchanged_date = "' .$lastchanged_date.'" where larvol_id="' .$larvol_id . '"' ;
@@ -467,19 +468,26 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date)
 					$res = mysql_fetch_assoc($res);
 					$exists = $res !== false;
 					$oldval=mysql_real_escape_string($oldval);
-					if($exists and $value<>$oldval)
+					
+					$val1=str_replace("\\", "", $oldval);
+					$val2=str_replace("\\", "", $value);
+							
+					if($exists and trim($val1)<>trim($val2) )
 					{
-					$query = 'update data_history set `' . $fieldname . '_prev` = "' . $oldval .'", `' . $fieldname . '_lastchanged` = "' . $olddate .'" where larvol_id="' .$larvol_id . '" limit 1' ;
-					
-					if(mysql_query($query) === false) return softDie('Bad SQL query saving value in data_history. query:'.$query.'<br>');
-					
+						$query = 'update data_history set `' . $fieldname . '_prev` = "' . $oldval .'", `' . $fieldname . '_lastchanged` = "' . $olddate .'" where larvol_id="' .$larvol_id . '" limit 1' ;
+						if(mysql_query($query) === false) return softDie('Bad SQL query saving value in data_history. query:'.$query.'<br>');
 					}
 					else
 					{
-						if(!$newtrial and  $value<>$oldval)
+						if(  $oldtrial )
 						{
-							$query = 'insert into data_history set `' . $fieldname . '_prev` = "' . mysql_real_escape_string($oldval) .'", `' . $fieldname . '_lastchanged` = "' . $olddate .'" , larvol_id="' .$larvol_id . '" ' ;
-							if(mysql_query($query) === false) return softDie('Bad SQL query saving value');
+							$val1=str_replace("\\", "", $oldval);
+							$val2=str_replace("\\", "", $value);
+							if(trim($val1)<>trim($val2))
+							{
+								$query = 'insert into data_history set `' . $fieldname . '_prev` = "' . mysql_real_escape_string($oldval) .'", `' . $fieldname . '_lastchanged` = "' . $olddate .'" , larvol_id="' .$larvol_id . '" ' ;
+								if(mysql_query($query) === false) return softDie('Bad SQL query saving value  Query='.$query);
+							}
 						}
 					}
 				

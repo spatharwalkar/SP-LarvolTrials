@@ -88,7 +88,7 @@ function addNCT($rec)
 		if(mysql_query($query) === false) return softDie('Bad SQL query adding nct_id');
 	}
 	
-	//echo '<pre>'; print_r($rec); echo '</pre>';
+//	echo '<pre>'; print_r($rec); echo '</pre>';
 	
 	if(isset($rec->status_block->brief_summary->textblock) and !empty($rec->status_block->brief_summary->textblock)) $bsummary=$rec->status_block->brief_summary->textblock;
 else $bsummary=$rec->brief_summary->textblock;
@@ -132,7 +132,6 @@ else $ddesc=$rec->detailed_descr->textblock;
 						'number_of_groups' => $rec->number_of_groups,
 						'enrollment' => $rec->enrollment,
 						'gender' => strtolower($rec->eligibility->gender),
-						'enrollment' => $rec->eligibility->expected_enrollment,
 						'minimum_age' => strtoyears($rec->eligibility->minimum_age),
 						'maximum_age' => strtoyears($rec->eligibility->maximum_age),
 						'healthy_volunteers' => ynbool($rec->eligibility->healthy_volunteers),
@@ -154,9 +153,13 @@ else $ddesc=$rec->detailed_descr->textblock;
 						'lastchanged_date' => $rec->lastchanged_date,
 						'firstreceived_date' => $rec->firstreceived_date,
 						'responsible_party_name_title' => $rec->responsible_party->name_title,
-						'responsible_party_organization' => $rec->responsible_party->party_organization,
-						'enrollment' => $rec->eligibility-expected_enrollment);
+						'responsible_party_organization' => $rec->responsible_party->party_organization
+						);
 
+						if( ( !isset($record_data['enrollment']) or is_null($record_data['enrollment']) or empty($record_data['enrollment']) ) )
+							$record_data['enrollment'] = $rec->eligibility->expected_enrollment;
+							
+							
 	$record_data['secondary_id'] = array();
 	foreach($rec->id_info->secondary_id as $sid) $record_data['secondary_id'][] = $sid;
 	$record_data['nct_alias'] = array();
@@ -294,7 +297,7 @@ else $ddesc=$rec->detailed_descr->textblock;
 	}
 
 	//import everything
-
+//echo '<pre>'; print_r($record_data); echo '</pre>'; 
 	foreach($record_data as $fieldname => $value)
 		if(!addval($studycat, $nct_cat, $fieldname, $value))
 			logDataErr('Data error - NCTID:' . padnct($nct_id) . ', Field Name:' . $fieldname . ', Value: ' . $value);//Log in errorlog
@@ -563,7 +566,7 @@ function addval($studycat, $category_id, $fieldname, $value)
 			$val=normalize($type, $val);
 			$query = 'INSERT INTO data_values SET `added`="' . $DTnow . '",'
 					. '`field`=' . $field . ',studycat=' . $studycat . ',val_' . $type . '=' . esc($type, $val);
-			if(mysql_query($query) === false) return softDie('Bad SQL query saving value');
+			if(mysql_query($query) === false) return softDie('Bad SQL query saving value. Query='.$query);
 		}
 		$query = 'UPDATE clinical_study SET last_change="' . $DTnow . '" '
 			. 'WHERE larvol_id=(SELECT larvol_id FROM data_cats_in_study WHERE id=' . $studycat . ') LIMIT 1';
