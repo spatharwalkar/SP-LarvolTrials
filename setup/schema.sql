@@ -403,7 +403,7 @@ CREATE TABLE IF NOT EXISTS `update_status_fullhistory` (  `update_id` int( 10  )
 CREATE TABLE IF NOT EXISTS `products` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `LI_id` varchar(63) COLLATE utf8_unicode_ci NULL,
-  `name` varchar(127) COLLATE utf8_unicode_ci NOT NULL COMMENT 'matches the fieldname in the quickfind schema',
+  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL COMMENT 'matches the fieldname in the quickfind schema',
   `comments` TEXT,
   `product_type` VARCHAR( 255 ) DEFAULT NULL,
   `licensing_mode` VARCHAR( 255 ) DEFAULT NULL,
