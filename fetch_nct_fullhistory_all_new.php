@@ -239,12 +239,13 @@ function get_nctids_from_web()
 			echo('Last page reached.' . "\n<br />");
 			break;
 		}
-		
+		/* for testing
 		if($page >= 7)
 		{
 			echo('Last page reached.' . "\n<br />");
 			break;
 		}
+		*/
 		unset($tables);
 		//Now that we found the table, go through its TDs to find the ones with NCTIDs
 		$tds = $datatable->getElementsByTagName('td');
