@@ -311,7 +311,7 @@ CREATE TABLE IF NOT EXISTS `upm_history` (
   `old_value` text COLLATE utf8_unicode_ci,
   `new_value` text COLLATE utf8_unicode_ci,
   `user` int(10) unsigned DEFAULT NULL,
-  UNIQUE KEY `user` (`user`),
+  KEY `user` (`user`),
   KEY `id` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
