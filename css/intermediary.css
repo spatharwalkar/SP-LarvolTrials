@@ -1,6 +1,6 @@
 @charset "utf-8";
 
-html {overflow-x:auto!important;}
+html {overflow-x:hidden;} /* Overflow-x auto causes issue in ie6 for help tab */
 
 html,body {height: 100%;margin-bottom:1px;}
 
@@ -342,5 +342,5 @@ tr.upms td a{
 .ui-widget :active { outline: none; }
 
 #sortable  { list-style-type: none; margin: 0; padding: 0; margin-bottom: 10px; }
-.demo li { margin: 5px; padding: 5px; height:20px; width: 200px; cursor:move; z-index:+1; }
+.demo li { margin: 5px; padding: 5px; height:20px; width: 200px; cursor:default; z-index:+1; }
 /* css for drag drop tab end */

@@ -88,12 +88,12 @@ foreach($sortFields as $skey => $svalue)
 	$sortImg = '';
 	$sortType = substr($svalue, 1, 1);
 	
-	$sortImg = ($sortType == 'A') ? 'asc' : (($sortType == 'D') ? 'des' : 'blank');
+	$sortImg = ($sortType == 'A') ? 'asc' : 'des';
 	
 	$sortTab .= "<li title='" . $svalue . "' class='ui-state-default' name='" . $svalue . "' id='" . $skey . "'>"
-		. "<a href='javascript:void(0)'>" . $sortFieldName[$skey] 
+		. "<div align=\"left\" style=\"vertical-align:middle;\">" . $sortFieldName[$skey] 
 		. "<img src='images/" . $sortImg . ".png' id='" . substr($svalue, 0, 1) . "'  alt='" . $svalue 
-		. "' border='0' style='margin:0px 5px;' onclick='javascript:fnSort(this)' /></a></li>";
+		. "' border='0' align='right' style='margin:0px 5px; width:14px; height:14px; padding-right:100px;' onclick='javascript:fnSort(this)' /></div></li>";
 }
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -218,18 +218,13 @@ foreach($sortFields as $skey => $svalue)
 		
 		if(src == 'images/des.png')
 		{
-			newSrc += 'blank.png';
-			newOrder = '';
-		}
-		else if(src == 'images/asc.png')
-		{
-			newSrc += 'des.png';
-			newOrder = 'D';
+			newSrc += 'asc.png';
+			newOrder = 'A';
 		}
 		else
 		{
-			newSrc += 'asc.png';
-			newOrder = 'A';
+			newSrc += 'des.png';
+			newOrder = 'D';
 		}
 		$(th).attr('src',newSrc);
 		
