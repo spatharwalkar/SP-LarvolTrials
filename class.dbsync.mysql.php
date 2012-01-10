@@ -606,7 +606,7 @@ require_once('include.util.php');
         	}
         	else
         	{
-        		return array();
+        		return array(0=>array(),1=>array());
         	}
         }
         
