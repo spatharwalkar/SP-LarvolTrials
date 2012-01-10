@@ -90,6 +90,7 @@ class TrialTracker
 		$secondYear	= date('Y')+1;
 		$thirdYear	= date('Y')+2;	
 
+
 		ob_start();
 		$objPHPExcel = new PHPExcel();
 		$objPHPExcel->setActiveSheetIndex(0);
@@ -363,6 +364,7 @@ class TrialTracker
 				
 			$objPHPExcel->getActiveSheet()->getStyle('A' . $i .':J' .$i )->applyFromArray(
 					array(
+						'alignment' => array('horizontal'	=> PHPExcel_Style_Alignment::HORIZONTAL_LEFT,),
 						'fill' => array('type'       => PHPExcel_Style_Fill::FILL_SOLID,
 										'rotation'   => 0,
 										'startcolor' => array('rgb' => $bgColor),
@@ -384,6 +386,7 @@ class TrialTracker
 	
 			if($tvalue['NCT/phase'] == 'N/A' || $tvalue['NCT/phase'] == '' || $tvalue['NCT/phase'] === NULL)
 			{
+				$phaseColor='BFBFBF';
 				$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray(
 						array('alignment' => array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,),
 								'fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,
@@ -395,6 +398,7 @@ class TrialTracker
 			}
 			else if($tvalue['NCT/phase'] == 'Phase 0')
 			{
+				$phaseColor='00CCFF';
 				$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray(
 						array('alignment' => array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,),
 								'fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,
@@ -408,6 +412,7 @@ class TrialTracker
 			|| $tvalue['NCT/phase'] == 'Phase 1a' || $tvalue['NCT/phase'] == 'Phase 1b' || $tvalue['NCT/phase'] == 'Phase 1a/1b'  
 			|| $tvalue['NCT/phase'] == 'Phase 1c')
 			{
+				$phaseColor='99CC00';
 				$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray(
 						array('alignment' => array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,),
 								'fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,
@@ -421,6 +426,7 @@ class TrialTracker
 			|| $tvalue['NCT/phase'] == 'Phase 1b/2' || $tvalue['NCT/phase'] == 'Phase 1b/2a' || $tvalue['NCT/phase'] == 'Phase 2a'  
 			|| $tvalue['NCT/phase'] == 'Phase 2a/2b' || $tvalue['NCT/phase'] == 'Phase 2a/b' || $tvalue['NCT/phase'] == 'Phase 2b')
 			{
+				$phaseColor='FFFF00';
 				$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray(
 						array('alignment' => array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,),
 								'fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,
@@ -433,6 +439,7 @@ class TrialTracker
 			else if($tvalue['NCT/phase'] == 'Phase 3' || $tvalue['NCT/phase'] == 'Phase 2/Phase 3' || $tvalue['NCT/phase'] == 'Phase 2/3' 
 			|| $tvalue['NCT/phase'] == 'Phase 2b/3' || $tvalue['NCT/phase'] == 'Phase 3a' || $tvalue['NCT/phase'] == 'Phase 3b')
 			{
+				$phaseColor='FF9900';
 				$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray(
 						array('alignment' => array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,),
 								'fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,
@@ -445,6 +452,7 @@ class TrialTracker
 			else if($tvalue['NCT/phase'] == 'Phase 4' || $tvalue['NCT/phase'] == 'Phase 3/Phase 4' || $tvalue['NCT/phase'] == 'Phase 3/4' 
 			|| $tvalue['NCT/phase'] == 'Phase 3b/4')
 			{
+				$phaseColor='FF0000';
 				$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray(
 						array('alignment' => array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,),
 								'fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,
@@ -473,13 +481,76 @@ class TrialTracker
 					//rendering diamonds in case of end date is prior to the current year
 					$objPHPExcel->getActiveSheet()->getStyle('"L' . $i . ':AY' . $i . '"')->applyFromArray($styleThinBlueBorderOutline);
 					
-					if($mvalue['result_link'] != '' && $mvalue['result_link'] !== NULL) 
+					if(!empty($tvalue['matchedupms']['edited']) && ($mvalue['result_link'] != $tvalue['matchedupms']['edited']['result_link'])) 
 					{
-						$objPHPExcel->getActiveSheet()->setCellValue('L' . $i, 'Link');
-						$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl($mvalue['result_link']);
-						$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setTooltip($upmTitle);
-						$objPHPExcel->getActiveSheet()->getStyle('L' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+						if($mvalue['result_link'] != '' && $mvalue['result_link'] !== NULL) 
+						{
+							
+							$resultImage = (($mvalue['event_type'] == 'Clinical Data') ? 'diamond' : 'checkmark' );
+								
+							$objDrawing = new PHPExcel_Worksheet_Drawing();
+							$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
+							$objDrawing->setOffsetX(40);
+							$objDrawing->setOffsetY(10);
+							$objDrawing->setPath('images/red-' . $resultImage. '.png');
+							$objDrawing->setCoordinates('L' . $i);
+							$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setTooltip($upmTitle);
+							$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl(urlencode($mvalue['result_link']));
+						
+						}
+					} 
+					else if($tvalue['matchedupms']['new'] == 'y') 
+					{
+						$resultImage = (($mvalue['event_type'] == 'Clinical Data') ? 'diamond' : 'checkmark' );
+						if($mvalue['result_link'] != '' && $mvalue['result_link'] !== NULL) 
+						{
+							$objDrawing = new PHPExcel_Worksheet_Drawing();
+							$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
+							$objDrawing->setOffsetX(40);
+							$objDrawing->setOffsetY(10);
+							$objDrawing->setPath('images/red-' . $resultImage. '.png');
+							$objDrawing->setCoordinates('L' . $i);
+							$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setTooltip($upmTitle);
+							$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl(urlencode($mvalue['result_link']));
+						} 
+						else 
+						{
+							$objDrawing = new PHPExcel_Worksheet_Drawing();
+							$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
+							$objDrawing->setOffsetX(40);
+							$objDrawing->setOffsetY(10);
+							$objDrawing->setPath('images/red-' . $resultImage. '.png');
+							$objDrawing->setCoordinates('L' . $i);
+						}
 					}
+					else 
+					{
+						if($mvalue['result_link'] != '' && $mvalue['result_link'] != NULL) 
+						{
+							$resultImage = (($mvalue['event_type'] == 'Clinical Data') ? 'diamond' : 'checkmark' );
+							
+							$objDrawing = new PHPExcel_Worksheet_Drawing();
+							$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
+							$objDrawing->setOffsetX(40);
+							$objDrawing->setOffsetY(10);
+							$objDrawing->setPath('images/black-' . $resultImage. '.png');
+							$objDrawing->setCoordinates('L' . $i);
+							$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setTooltip($upmTitle);
+							$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl(urlencode($mvalue['result_link']));
+						}
+					}
+					
+					if(($mvalue['end_date'] != '' && $mvalue['end_date'] !== NULL && $mvalue['end_date'] != '0000-00-00') 
+						&& ($mvalue['end_date'] < date('Y-m-d')) && ($mvalue['result_link'] === NULL || $mvalue['result_link'] == ''))
+					{
+						$objDrawing = new PHPExcel_Worksheet_Drawing();
+						$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
+						$objDrawing->setOffsetX(40);
+						$objDrawing->setOffsetY(10);
+						$objDrawing->setPath('images/hourglass.png');
+						$objDrawing->setCoordinates('L' . $i);
+					}
+					
 					$this->upmGnattChartforExcel($stMonth, $stYear, $edMonth, $edYear, $currentYear, $secondYear, $thirdYear, $mvalue['start_date'], 
 					$mvalue['end_date'], $mvalue['event_link'], $upmTitle, $objPHPExcel, $i, 'M');
 					
@@ -494,8 +565,8 @@ class TrialTracker
 		$objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(13);
 		$objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(50);
 		$objPHPExcel->getActiveSheet()->getColumnDimension('C')->setWidth(10);
-		$objPHPExcel->getActiveSheet()->getColumnDimension('D')->setWidth(10);
-		$objPHPExcel->getActiveSheet()->getColumnDimension('E')->setWidth(12);
+		$objPHPExcel->getActiveSheet()->getColumnDimension('D')->setWidth(15);
+		$objPHPExcel->getActiveSheet()->getColumnDimension('E')->setWidth(15);
 		$objPHPExcel->getActiveSheet()->getColumnDimension('F')->setWidth(15);
 		$objPHPExcel->getActiveSheet()->getColumnDimension('G')->setWidth(15);
 		$objPHPExcel->getActiveSheet()->getColumnDimension('H')->setWidth(15);
@@ -554,17 +625,44 @@ class TrialTracker
 			$objPHPExcel->getActiveSheet()->setCellValue('E' . $i, $uvalue["event_type"] . 'Milestone');
 			$objPHPExcel->getActiveSheet()->setCellValue('F' . $i, date('m/y',strtotime($uvalue["start_date"])));
 			$objPHPExcel->getActiveSheet()->setCellValue('G' . $i, date('m/y',strtotime($uvalue["end_date"])));
-			$objPHPExcel->getActiveSheet()->setCellValue('H' . $i, "Link");
-	
-			if($uvalue["result_link"] == '' || $uvalue["result_link"]=== NULL)
-			{
-				$objPHPExcel->getActiveSheet()->setCellValue('H' . $i, '');
+			
+			if(!empty($uvalue['edited']) && ($uvalue['result_link'] != $uvalue['edited']['result_link'])) {
+				if($uvalue['result_link'] != '' && $uvalue['result_link'] != NULL) {
+					$resultImage = (($uvalue['event_type'] == 'Clinical Data') ? 'diamond' : 'checkmark' );
+					
+					$objDrawing = new PHPExcel_Worksheet_Drawing();
+					$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
+					$objDrawing->setOffsetX(40);
+					$objDrawing->setOffsetY(4);
+					$objDrawing->setPath('images/red-' . $resultImage. '.png');
+					$objDrawing->setCoordinates('H' . $i);
+					$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip($uvalue['event_description']);
+					$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl(urlencode($uvalue['result_link']));
+				}
+			} else {
+				if($uvalue['result_link'] != '' && $uvalue['result_link'] != NULL) {
+					$resultImage = (($uvalue['event_type'] == 'Clinical Data') ? 'diamond' : 'checkmark' );
+					
+					$objDrawing = new PHPExcel_Worksheet_Drawing();
+					$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
+					$objDrawing->setOffsetX(40);
+					$objDrawing->setOffsetY(4);
+					$objDrawing->setPath('images/black-' . $resultImage. '.png');
+					$objDrawing->setCoordinates('H' . $i);
+					$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip($uvalue['event_description']);
+					$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl(urlencode($uvalue['result_link']));
+				}
 			}
-			else
-			{
-				$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($uvalue["result_link"]);
-				$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip('Result Link');
-				$objPHPExcel->getActiveSheet()->getStyle('H' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+			
+			if(($uvalue['end_date'] != '' && $uvalue['end_date'] != NULL && $uvalue['end_date'] != '0000-00-00') && 
+			($uvalue['end_date'] < date('Y-m-d')) && ($uvalue['result_link'] == NULL || $uvalue['result_link'] == '')){
+					$objDrawing = new PHPExcel_Worksheet_Drawing();
+					$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
+					$objDrawing->setOffsetX(40);
+					$objDrawing->setOffsetY(4);
+					$objDrawing->setPath('images/hourglass.png');
+					$objDrawing->setCoordinates('H' . $i);
+					
 			}
 			
 			$stMonth = date('m', strtotime($uvalue['start_date']));
@@ -575,7 +673,7 @@ class TrialTracker
 			$this->upmGnattChartforExcel($stMonth, $stYear, $edMonth, $edYear, $currentYear, $secondYear, $thirdYear, $uvalue['start_date'], 
 			$uvalue['end_date'], $uvalue['event_link'], $uvalue["event_description"], $objPHPExcel, $i, 'I');
 				
-			$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':H' . $i)->applyFromArray(
+			$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':G' . $i)->applyFromArray(
 					array('fill' => array(
 							'type'       => PHPExcel_Style_Fill::FILL_SOLID,
 							'rotation'   => 0,
@@ -597,13 +695,13 @@ class TrialTracker
 									'endcolor'   => array('argb' => 'FFDBFCFF'))));
 									
 		$objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(13);			
-		$objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(27);
-		$objPHPExcel->getActiveSheet()->getColumnDimension('C')->setWidth(50);			
-		$objPHPExcel->getActiveSheet()->getColumnDimension('D')->setWidth(40);
-		$objPHPExcel->getActiveSheet()->getColumnDimension('E')->setWidth(20);
-		$objPHPExcel->getActiveSheet()->getColumnDimension('F')->setWidth(26);
+		$objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(40);
+		$objPHPExcel->getActiveSheet()->getColumnDimension('C')->setWidth(40);			
+		$objPHPExcel->getActiveSheet()->getColumnDimension('D')->setWidth(20);
+		$objPHPExcel->getActiveSheet()->getColumnDimension('E')->setWidth(26);
+		$objPHPExcel->getActiveSheet()->getColumnDimension('F')->setWidth(10);
 		$objPHPExcel->getActiveSheet()->getColumnDimension('G')->setWidth(10);
-		$objPHPExcel->getActiveSheet()->getColumnDimension('H')->setWidth(10);
+		$objPHPExcel->getActiveSheet()->getColumnDimension('H')->setWidth(12);
 		
 		$chr = 'I';
 		for($c=1; $c<40; $c++)
@@ -2177,6 +2275,7 @@ class TrialTracker
 				}
 				$from = $to;
 				$from++;
+
 				
 				$to = getColspanforExcelExport($from, 3);
 				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
@@ -3246,6 +3345,7 @@ class TrialTracker
 					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
 					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
 				}
+
 				$from = $to;
 				$from++;
 			} 
@@ -3352,45 +3452,58 @@ class TrialTracker
 						. '<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" />'
 						. '<title>Larvol PDF Export</title>'
 						. '<style type="text/css">'
-						. 'body {font-family:Arial;font-size:8pt;font-color:black;}'
-						. 'td,th {vertical-align:top;}'
-						. '.title {background-color:#EDEAFF;}'
-						. '.alttitle {background-color:#D5D3E6;}'
-						. '.highlight {color:#FF0000;}'
-						. '.manage {font-weight:normal;table-layout:fixed;}'
-						. '.manage td{border-left:0.5px solid blue;border-bottom:0.5px solid blue;margin:0;padding:0;}'
-						. '.manage th {border-top:0.5px solid blue;border-bottom:0.5px solid blue;border-left:0.5px solid blue;'
-						. 'color:#0000FF;text-decoration:none;white-space:nowrap;}'
-						. '.manage th a{color:#0000FF;text-decoration:none;}'
-						. '.newtrial td, .newtrial td a{color:#FF0000;}'
-						. '.secondrow th{padding-left:0;padding-right:0;border-top:0;}'
-						. '.rightborder {border-right: 0.5px solid blue;}'
-						. '.norecord {border-bottom: 0.5px solid blue; border-right: 0.5px solid blue;border-top:0;padding:0px;height:auto;'
-						. 'line-height:normal;font-weight:normal;background-color: #EDEAFF;color:#000000;}'
-						. '.row {background-color:#D8D3E0;text-align:center;}'
-						. '.altrow {background-color:#C2BECA;text-align:center;}'
-						. '.region {background-color:#FFFFFF;}'
-						. '.altregion {background-color:#F2F2F2;}'
-						. '.box_rotate {-moz-transform: rotate(90deg);-o-transform: rotate(90deg);-webkit-transform: rotate(90deg);writing-mode: tb-rl;margin:2px;}'
-						. '.noborder {border-right: 0.5px solid blue;border-top: 0.5px solid blue;border-bottom: 0.5px solid blue;}'
-						. '.new {height:1.2em;border:0.5px solid black;}'
-						. '.new ul {list-style:none;margin:5px;padding:0px;}'
-						. '.new ul li {float:left;margin:2px;}'
-						. '.notopbottomborder {border-top:none;}'
-						. '.borderbottom {border-bottom: 0.5px solid blue;}'
-						. '.leftrightborderblue {border-right: 0.5px solid blue;border-left: 0.5px solid blue;}'
-						. '.sectiontitles {font-family: Arial;font-size: 8pt;font-weight: bold;background-color: #A2FF97;}'
-						. '.zeroborder {border-bottom:none;border-top:none;border-left:none;border-right:none;}'
-						. '.norightborder {border-right:none;}'
-						. '.upmheader {color:#0000FF;font-weight:bold;}'
-						. '.titleupmodd {background-color:#C5E5FA;}'
-						. '.titleupmeven {background-color:#95C7E8;}'
-						. 'tr.upms td, tr.upms th {text-decoration:none;text-align: center;background-color:#C5E5FA;}'
-						. 'tr.upms th {color:#0000FF;font-weight:normal;border-top:none;}'
-						. 'tr.upms td.txtleft {text-align: left;}'
-						. 'tr.upms td a {color:#0000FF;text-decoration:none;}'
-						. 'a {text-decoration:none;width:100%;height:100%;}'
-						. '@page {margin-top: 1em;margin-bottom: 2em;}'
+						.'body { font-family:Arial; font-size:8pt; font-color:black;}'
+						.'td,th {vertical-align:top; border-right: 0.5px solid blue; border-left: 0.5px solid blue; border-top: 0.5px solid blue;	border-bottom: 
+						0.5px solid blue;}'
+						.'tr {border-right: 0.5px solid blue; border-left: 0.5px solid blue; border-top: 0.5px solid blue; border-bottom: 0.5px solid blue;}'
+						.'.drop { height:4.4em; margin: 0 0 0 4px; display:inline-block; vertical-align:top; text-align:left; background-color:#ffffff; opacity:0.92; 
+						filter:alpha(opacity=92); overflow:hidden; padding:0 0px 0 0px; position:absolute; border: 0.5px solid black; }'
+						.'.title { background-color:#EDEAFF;}'
+						.'.alttitle { background-color:#D5D3E6;}'
+						.'.highlight {color:#FF0000;}'
+						.'.manage {	font-weight:normal;	table-layout:fixed;}'
+						.'.manage {	font-weight:normal;	table-layout:fixed;}'
+						.'.manage td{ border-left:0.5px solid blue;	border-bottom:0.5px solid blue;	margin:0; padding:0;}'
+						.'.manage th { border-top:0.5px solid blue;	border-bottom:0.5px solid blue;	border-left:0.5px solid blue; color:#0000FF; text-decoration:none; 
+						white-space:nowrap;}'
+						.'.manage th a{	color:#0000FF; text-decoration:none;}'
+						.'.newtrial td,  .newtrial td a{ color:#FF0000;}'
+						.'.rowcollapse { vertical-align:top; padding-top:0;	margin:0;}'
+						.'.rowcollapse:hover { max-height:none;}'
+						.'.bomb { font-size:8pt; float:left; margin-top:20px; text-align:center;}'
+						.'.result {	font-weight:bold; font-size:8pt;}'
+						.'.secondrow th{ padding-left:0; padding-right:0; border-top:0;}'
+						.'.rightborder { border-right: 0.5px solid blue;}'
+						.'.norecord { border-bottom: 0.5px solid blue; border-right: 0.5px solid blue; border-top:0; padding:0px; height:auto; line-height:normal; 
+						font-weight:normal;	background-color: #EDEAFF; color:#000000;}'
+						.'.rowcollapse:hover .upmcollapse { display: block; }'
+						.'.row { background-color:#D8D3E0; text-align:center;}'
+						.'.altrow {	background-color:#C2BECA; text-align:center;}'
+						.'.region {	background-color:#FFFFFF;}'
+						.'.altregion { background-color:#F2F2F2;}'
+						.'.box_rotate { -moz-transform: rotate(90deg); -o-transform: rotate(90deg);	-webkit-transform: rotate(90deg); writing-mode: tb-rl; margin:2px;}
+						'
+						.'.noborder { border-right: 0.5px solid blue; border-top: 0.5px solid blue;	border-bottom: 0.5px solid blue;}'
+						.'.new { height:1.2em; border:0.5px solid black;}'
+						.'.new ul{ list-style:none;	margin:5px;	padding:0px;}'
+						.'.new ul li{ float:left; margin:2px;}'
+						.'.borderbottom{ border-bottom: 0.5px solid blue;}'
+						.'.leftrightborderblue{	border-right: 0.5px solid blue;	border-left: 0.5px solid blue;}'
+						.'.sectiontitles{ font-family: Arial; font-size: 8pt; font-weight: bold; background-color: #A2FF97;}'
+						.'.zeroborder{ border-bottom:none; border-top:none;	border-left:none; border-right:none;}'
+						.'.norightborder{ border-right:none;}'
+						.'.upmheader{ color:#0000FF; font-weight:bold;}'
+						.'.rowcollapseupm {	vertical-align:top;	max-height:1.3em; overflow:visible;	padding-top:0; margin:0;}'
+						.'.rowcollapseupm:hover { max-height:none;}'
+						.'.titleupmodd{	background-color:#C5E5FA;}'	
+						.'.titleupmeven{ background-color:#95C7E8;}'
+						.'tr.upms td, tr.upms th{ text-decoration:none;	text-align: center;	background-color:#C5E5FA;}'
+						.'tr.upms th{ color:#0000FF; font-weight:normal; border-top:none;}'
+						.'tr.upms td.txtleft{ text-align: left;}'
+						.'tr.upms td a{	color:#0000FF; text-decoration:none;}'
+						.'a {text-decoration:none; width:100%; height:100%; display:block;}'
+						.'@page {margin-top: 1em; margin-bottom: 2em;}'
+						.'.nobr {white-space: nowrap}'
 						. '</style></head>'
 						. '<body>'
 						. '<div align="center"><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" height="38" id="header" /></div>';
@@ -3488,26 +3601,38 @@ class TrialTracker
 		$last 	= ($globalOptions['page'] * $this->resultsPerPage > $count) ? $count : ($start + $this->resultsPerPage - 1);
 		$totalPages = ceil($count / $this->resultsPerPage);
 		
-		$pdfContent_1 = $this->displayTrialTableHeader($loggedIn, $globalOptions);
-		$pdfContent_1 = preg_replace('/(width)="[0-9]+\%"(.*)(cellpadding)="[0-9]+"(.*)(cellspacing)="[0-9]+"/', ' style="border-collapse:collapse;"', $pdfContent_1);
+		$pdfContent .= $this->displayTrialTableHeader_TCPDF($loggedIn, $globalOptions);
 		
-		$pdfContent .= preg_replace('/(rowspan)="[0-9]+"\s*(style)="[^"]+"\s*/', 'rowspan="2"', $pdfContent_1);
-		
-		$pdfContent_2 = $this->displayTrials($globalOptions, $loggedIn, $start, $last, $Trials, $Values['TrialsInfo'], $ottType);
+		$pdfContent_2 = $this->displayTrials_TCPDF($globalOptions, $loggedIn, $start, $last, $Trials, $Values['TrialsInfo'], $ottType);
 		$pdfContent .= preg_replace('/div/', 'span', $pdfContent_2);
 		
 		$pdfContent .= '</table></body></html>';
 		$pdfContent = preg_replace('/(background-image|background-position|background-repeat):(\w)*\s/', '', $pdfContent);
 		
-		require_once("dompdf/dompdf_config.inc.php");
-		spl_autoload_register('DOMPDF_autoload');  
-		$domPdf = new DOMPDF();
-		$domPdf->set_paper('letter', 'letter'); 
-		$domPdf->load_html($pdfContent);
-		$domPdf->render();
-		ob_end_clean();
+		require_once('tcpdf/config/lang/eng.php');
+		require_once('tcpdf/tcpdf.php');  
+		$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+		$pdf->SetFont('times', '', 6);
+		$pdf->setFontSubsetting(false);
+		//set margins
+		$pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
+		$pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
+		$pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
+		// set default monospaced font
+		$pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+		//set some language-dependent strings
+		$pdf->setLanguageArray($l);
+		//set auto page breaks
+		$pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+		$pdf->AddPage();
 		
-		$domPdf->stream("Larvol PDF_". date('Y-m-d_H.i.s') .".pdf");
+		ini_set('pcre.backtrack_limit',strlen($pdfContent));
+		// output the HTML content
+		$pdf->writeHTML($pdfContent, true, false, true, false, '');
+		ob_end_clean();
+		//Close and output PDF document
+		$pdf->Output('Larvol PDF_'. date("Y-m-d_H.i.s") .'.pdf', 'I');
+		
 	}
 	
 	function generateXmlFile($resultIds, $timeMachine = NULL, $ottType, $globalOptions)
@@ -5310,6 +5435,49 @@ class TrialTracker
 
 	}
 	
+	function displayTrialTableHeader_TCPDF($loggedIn, $globalOptions = array()) 
+	{
+		$outputStr ='<table style="border-collapse:collapse;" width="100%" cellpadding="0" cellspacing="0" class="manage">'
+			 . '<thead><tr>'. (($loggedIn) ? '<th rowspan="2" style="width:30px;" >ID</th>' : '' )
+			 . '<th rowspan="2" style="width:93px;">Title</th>'
+			 . '<th rowspan="2" style="width:15px;" title="Black: Actual&nbsp;&nbsp;Gray: Anticipated&nbsp;&nbsp;Red: Change greater than 20%">N</th>'
+			 . '<th rowspan="2" style="width:45px;" title="&quot;EU&quot; = European Union&nbsp;&quot;ROW&quot; = Rest of World">Region</th>'
+			 . '<th rowspan="2" style="width:60px;">Interventions</th>'
+			 . '<th rowspan="2" style="width:45px;">Sponsor</th>'
+			 . '<th rowspan="2" style="width:45px;">Status</th>'
+			 . '<th rowspan="2" style="width:60px;">Conditions</th>'
+			 . '<th rowspan="2" title="MM/YY" style="width:20px;">Start</th>'
+			 . '<th rowspan="2" title="MM/YY" style="width:20px;">End</th>'
+			 . '<th rowspan="2" style="width:20px;">Ph</th>'
+			 . '<th rowspan="2" style="width:22px;">Result</th>'
+			 . '<th colspan="36" style="width:60px;"><span>&nbsp;</span></th>'
+			 . '<th colspan="3" style="width:5px;" class="rightborder">&nbsp;</th></tr>'
+			 . '<tr>'
+			 . '<th colspan="12" style="width:20px;">' . (date('Y')) . '</th>'
+			 . '<th colspan="12" style="width:20px;">' . (date('Y')+1) . '</th>'
+			 . '<th colspan="12" style="width:20px;">' . (date('Y')+2) . '</th>'
+			 . '<th colspan="3" style="width:5px;" class="rightborder">+</th></tr></thead>';
+		
+		$outputStr.= '<tr style="border:none;">'
+			 . (($loggedIn) ? '<td style="width:30px; height:0px; border:none;" ></td>' : '' )
+			 . '<td style="width:93px; height:0px; border:none;"></td>'
+			 . '<td style="width:15px; height:0px; border:none;"></td>'
+			 . '<td style="width:45px; height:0px; border:none;"></td>'
+			 . '<td style="width:60px; height:0px; border:none;"></td>'
+			 . '<td style="width:45px; height:0px; border:none;"></td>'
+			 . '<td style="width:45px; height:0px; border:none;"></td>'
+			 . '<td style="width:60px; height:0px; border:none;"></td>'
+			 . '<td style="width:20px; height:0px; border:none;"></td>'
+			 . '<td style="width:20px; height:0px; border:none;"></td>'
+			 . '<td style="width:20px; height:0px; border:none;"></td>'
+			 . '<td style="width:22px; height:0px; border:none;"></td>'
+			 . '<td colspan="36" style="width:60px; height:0px; border:none;"></td>'
+			 . '<td colspan="3" style="width:5px; height:0px; border:none;" class="rightborder"></td></tr>';
+			 
+		return $outputStr;
+
+	}
+	
 	function getResultSet($resultIds, $stackType)
 	{	
 		$three = 0;
@@ -6007,6 +6175,468 @@ class TrialTracker
 					//rendering upm (upcoming project completion) chart
 					$outputStr .= $this->upmGnattChart($stMonth, $stYear, $edMonth, $edYear, $currentYear, $secondYear, $thirdYear, $mvalue['start_date'],
 					$mvalue['end_date'], $mvalue['event_link'], $upmTitle);
+					$outputStr .= '</tr>';
+				}
+			}
+			
+			//section title
+			$section = $trials[$i]['section'];
+		}
+		
+		return $outputStr;
+	}
+	
+	function displayTrials_TCPDF($globalOptions = array(), $loggedIn, $start, $end, $trials, $trialsInfo, $ottType)
+	{	
+		$fieldList 	= array('Enrollment' => 'NCT/enrollment', 'Region' => 'region', 'Interventions' => 'NCT/intervention_name', 
+							'Sponsor' => 'NCT/lead_sponsor', 'Status' => 'NCT/overall_status', 'Conditions' => 'NCT/condition', 
+							'Study Dates' => 'NCT/start_date', 'Phase' => 'NCT/phase');
+		$phaseValues = array('N/A'=>'#BFBFBF', '0'=>'#00CCFF', '0/1'=>'#99CC00', '1'=>'#99CC00', '1a'=>'#99CC00', '1b'=>'#99CC00', '1a/1b'=>'#99CC00', 
+							'1c'=>'#99CC00', '1/2'=>'#FFFF00', '1b/2'=>'#FFFF00', '1b/2a'=>'#FFFF00', '2'=>'#FFFF00', '2a'=>'#FFFF00', '2a/2b'=>'#FFFF00', 
+							'2a/b'=>'#FFFF00', '2b'=>'#FFFF00', '2/3'=>'#FF9900', '2b/3'=>'#FF9900','3'=>'#FF9900', '3a'=>'#FF9900', '3b'=>'#FF9900', 
+							'3/4'=>'#FF0000', '3b/4'=>'#FF0000', '4'=>'#FF0000');	
+		
+		$currentYear = date('Y');
+		$secondYear = (date('Y')+1);
+		$thirdYear = (date('Y')+2);
+		
+		$section = '';$outputStr = '';
+		$start = $start - 1;
+		
+		$max = array_reduce($trials, function($a, $b) { 
+		  return $a > $b['section'] ? $a : $b['section']; 
+		});
+		
+		$sections = array_map(function($a) { 
+		  return $a['section']; 
+		},  $trials);
+		$sections = array_unique($sections);
+		
+		$endT = end($trialsInfo);
+		
+		for($i=$start; $i<=$end; $i++) 
+		{ 	
+			if($i%2 == 1) 
+			{ 
+				$rowOneType = 'alttitle';
+				$rowOneBGType = 'background-color:#D5D3E6;';
+			}	
+			else
+			{
+				$rowOneType = 'title';
+				$rowOneBGType = 'background-color:#EDEAFF;';
+			}
+			
+			$rowspan = 1;
+			$enrollStyle = 'color:gray;';
+			$titleLinkColor = '#000000;';
+			$sectionKey = $trials[$i]['section'];
+			
+			if(isset($trials[$i]['matchedupms']))  
+				$rowspan = count($trials[$i]['matchedupms'])+1; 
+			 
+			foreach($trialsInfo as $tkey => &$tvalue)
+			{	
+				if($tkey < $sectionKey)
+				{
+					continue;
+				}
+				
+				$flag = false;
+				$trflag = false;
+				
+				if($section !== $sectionKey && $tkey <= $sectionKey && $flag === false)
+				{	
+					$flag = true;
+					if(!empty($tvalue['naUpms']))
+					{
+						if($ottType == 'rowstacked')
+						{
+							$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true" class="trialtitles">'
+									. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer notopbottomborder leftrightborderblue sectiontitles"'
+									. 'style="border-bottom:1px solid blue;background-image: url(\'images/down.png\');'
+									. 'background-repeat: no-repeat;background-position:left center;"'
+									. ' onclick="sh(this,\'rowstacked\');">&nbsp;</td></tr>'
+									. $this->displayUnMatchedUpms_TCPDF($loggedIn, 'rowstacked', $tvalue['naUpms'])
+									. '<tr style="page-break-inside:avoid;" nobr="true" class="trialtitles">'
+									. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="notopbottomborder leftrightborderblue sectiontitles"'
+									. ' >' . $tvalue['sectionHeader'] . '</td></tr>';
+						}
+						else
+						{
+							if($ottType != 'colstacked')
+								$image = 'down';
+							else
+								$image = 'up';
+							
+							$naUpmIndex = preg_replace('/[^a-zA_Z0-9]/i', '', $tvalue['sectionHeader']);
+							$naUpmIndex = substr($naUpmIndex, 0, 7);
+							
+							$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true" class="trialtitles">'
+									. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer notopbottomborder leftrightborderblue sectiontitles"'
+									. ' style="border-bottom:1px solid blue;background-image: url(\'images/' . $image 
+									. '.png\');background-repeat: no-repeat;background-position:left center;"'
+									. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . $tvalue['sectionHeader'] . '</td></tr>';
+							$outputStr .= $this->displayUnMatchedUpms_TCPDF($loggedIn, $naUpmIndex, $tvalue['naUpms']);
+						}
+					}
+					else
+					{	
+						$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true"><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="notopbottomborder leftrightborderblue sectiontitles">'
+									. $tvalue['sectionHeader'] . '</td></tr>';
+					}
+					unset($trialsInfo[$tkey]);
+					if(!in_array($tkey, $sections) && $globalOptions['onlyUpdates'] == "no")
+					{
+						$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true"><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord" align="left">No trials found</td></tr>';
+					}
+				}
+				else if($tkey > $max && $i == $end)
+				{	
+					if(!empty($tvalue['naUpms']))
+					{
+						if($ottType != 'colstacked')
+							$image = 'down';
+						else
+							$image = 'up';
+						
+						$naUpmIndex = preg_replace('/[^a-za-zA_Z0-9]/i', '', $tvalue['sectionHeader']);
+						$naUpmIndex = substr($naUpmIndex, 0, 7);
+						
+						$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true" class="trialtitles">'
+									. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
+									. 'style="border-bottom:1px solid blue;background-image: url(\'images/' . $image 
+									. '.png\');background-repeat: no-repeat;background-position:left center;"'
+									. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . $tvalue['sectionHeader'] . '</td></tr>';
+						$outputStr .= $this->displayUnMatchedUpms_TCPDF($loggedIn, $naUpmIndex, $tvalue['naUpms']);
+					}
+					else
+					{
+						$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true"><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="notopbottomborder leftrightborderblue sectiontitles">'
+									. $tvalue['sectionHeader'] . '</td></tr>';
+					}
+					unset($trialsInfo[$tkey]);
+					if($globalOptions['onlyUpdates'] == "no")
+					{
+						$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true"><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord" align="left">No trials found</td></tr>';
+					}
+					if($tvalue['sectionHeader'] == $endT['sectionHeader'])
+					{	
+						$trflag = true;
+					}
+				}
+			}
+			if($trflag == true || $i == $end)
+			{
+				continue;
+			}
+			
+			//row starts  
+			$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true" ' . (($trials[$i]['new'] == 'y') ? 'class="newtrial" ' : ''). '>';  
+			
+			//nctid column
+			if($loggedIn) 
+			{ 
+				$outputStr .= '<td style="'.$rowOneBGType.'" class="' . $rowOneType . '" rowspan="' . $rowspan . '" ' . (($trials[$i]['new'] == 'y') ? 'title="New record"' : '') 
+							. ' ><a style="color:' . $titleLinkColor . '" href="http://clinicaltrials.gov/ct2/show/' 
+							. padnct($trials[$i]['NCT/nct_id']) . '" target="_blank">' . $trials[$i]['NCT/nct_id'] . '</a></td>';
+			}
+
+			//acroynm and title column
+			$attr = ' ';
+			if(isset($trials[$i]['edited']) && array_key_exists('NCT/brief_title', $trials[$i]['edited'])) 
+			{
+				$attr = ' highlight" title="' . $trials[$nctid]['edited']['NCT/brief_title'];
+				$titleLinkColor = '#FF0000;';
+			} 
+			else if($trials[$i]['new'] == 'y') 
+			{
+				$attr = '" title="New record';
+				$titleLinkColor = '#FF0000;';
+			}				
+			$outputStr .= '<td style="'.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . ' ' . $attr . '"><div class="rowcollapse">'
+						. '<a style="color:' . $titleLinkColor . '" href="http://clinicaltrials.gov/ct2/show/' . padnct($trials[$i]['NCT/nct_id']) . '" '
+						. 'target="_blank">'; 
+			if(isset($trials[$i]['NCT/acronym']) && $trials[$i]['NCT/acronym'] != '') 
+			{
+				$outputStr .= '<b>' . htmlformat($trials[$i]['NCT/acronym']) . '</b>&nbsp;' . htmlformat($trials[$i]['NCT/brief_title']);
+			} 
+			else 
+			{
+				$outputStr .= htmlformat($trials[$i]['NCT/brief_title']);
+			}
+			$outputStr .= '</a></div></td>';
+			
+				
+			//enrollment column
+			$attr = ' ';
+			if(isset($trials[$i]['edited']) && array_key_exists('NCT/enrollment',$trials[$i]['edited']) 
+				&& (getDifference(substr($trials[$i]['edited']['NCT/enrollment'],16), $trials[$i]['NCT/enrollment']))) 
+			{
+				$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/enrollment'];
+				$enrollStyle = 'color:#973535;';
+			}
+			else if($trials[$i]['new'] == 'y') 
+			{
+				$attr = '" title="New record';
+				$enrollStyle = 'color:#973535;';
+			}
+			$outputStr .= '<td style="'.$rowOneBGType.'" nowrap="nowrap" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">';
+			if($trials[$i]["NCT/enrollment_type"] != '') 
+			{
+				if($trials[$i]["NCT/enrollment_type"] == 'Anticipated') 
+				{ 
+					$outputStr .= '<span style="font-weight:bold;' . $enrollStyle . '">' . $trials[$i]["NCT/enrollment"] . '</span>';
+				}
+				else if($trials[$i]["NCT/enrollment_type"] == 'Actual') 
+				{
+					$outputStr .= $trials[$i]["NCT/enrollment"];
+				} 
+				else 
+				{ 
+					$outputStr .= $trials[$i]["NCT/enrollment"] . ' (' . $trials[$i]["NCT/enrollment_type"] . ')';
+				}
+			} 
+			else 
+			{
+				$outputStr .= $trials[$i]["NCT/enrollment"];
+			}
+			$outputStr .= '</div></td>';				
+
+
+			//region column
+			$attr = ' ';
+			if($trials[$i]['new'] == 'y')
+			{ 
+				$attr = 'title="New record"';
+			}
+			$outputStr .= '<td style="'.$rowOneBGType.'" class="' . $rowOneType . '" rowspan="' . $rowspan . '" ' . $attr . '>'
+						. '<div class="rowcollapse">' . $trials[$i]['region'] . '</div></td>';
+
+				
+			//intervention name column
+			if(isset($trials[$i]['edited']) && array_key_exists('NCT/intervention_name', $trials[$i]['edited']))
+			{
+				$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/intervention_name'];
+			} 
+			else if($trials[$i]['new'] == 'y')
+			{
+				$attr = '" title="New record';
+			}
+			$outputStr .= '<td style="'.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
+						. '<div class="rowcollapse">' . implode(", ",array_unique(explode(",", str_replace(", ",",",$trials[$i]['NCT/intervention_name'])))) . '</div></td>';
+
+
+			//collaborator and sponsor column
+			$attr = ' ';
+			if(isset($trials[$i]['edited']) && (array_key_exists('NCT/collaborator', $trials[$i]['edited']) 
+			|| array_key_exists('NCT/lead_sponsor', $trials[$i]['edited']))) 
+			{
+					
+				$attr = ' highlight" title="';
+				if(array_key_exists('NCT/lead_sponsor', $trials[$i]['edited']))
+				{
+					$attr .= $trials[$i]['edited']['NCT/lead_sponsor'] . ' ';
+				}
+				if(array_key_exists('NCT/collaborator', $trials[$i]['edited'])) 
+				{
+					$attr .= $trials[$i]['edited']['NCT/collaborator'];
+					$enrollStyle = 'color:#973535;';
+				}
+				$attr .= '';
+			} 
+			else if($trials[$i]['new'] == 'y') 
+			{
+				$attr = '" title="New record';
+			}
+			$outputStr .= '<td style="'.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
+						. '<div class="rowcollapse">' . $trials[$i]['NCT/lead_sponsor'] . ' <span style="' . $enrollStyle . '"> ' 
+						. $trials[$i]["NCT/collaborator"] . ' </span></div></td>';
+
+
+			//overall status column
+			if(isset($trials[$i]['edited']) && array_key_exists('NCT/overall_status', $trials[$i]['edited'])) 
+			{
+				$attr = 'class="highlight ' . $rowOneType . ' " title="' . $trials[$i]['edited']['NCT/overall_status'] . '" ';
+			} 
+			else if($trials[$i]['new'] == 'y') 
+			{
+				$attr = 'title="New record" class="' . $rowOneType . '"' ;
+			} 
+			else 
+			{
+				$attr = 'class="' . $rowOneType . '"';
+			}
+			$outputStr .= '<td style="'.$rowOneBGType.'" ' . $attr . ' rowspan="' . $rowspan . '">'  
+						. '<div class="rowcollapse">' . $trials[$i]['NCT/overall_status'] . '</div></td>';
+				
+				
+			//condition column
+			$attr = ' ';
+			if(isset($trials[$i]['edited']) && array_key_exists('NCT/condition', $trials[$i]['edited'])) 
+			{
+				$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/condition'];
+			} 
+			else if($trials[$i]['new'] == 'y') 
+			{
+				$attr = '" title="New record';
+			}
+			$outputStr .= '<td style="'.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
+						. '<div class="rowcollapse">' . implode(", ",array_unique(explode(",", str_replace(", ",",",$trials[$i]['NCT/condition'])))) . '</div></td>';
+					
+				
+			//start date column
+			$attr = ' ';
+			if(isset($trials[$i]['edited']) && array_key_exists('NCT/start_date', $trials[$i]['edited'])) 
+			{
+				$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/start_date'] ;
+			} 
+			else if($trials[$i]['new'] == 'y') 
+			{
+				$attr = '" title="New record';
+			}
+			$outputStr .= '<td style="'.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '" ><div class="rowcollapse">'; 
+			if($trials[$i]["NCT/start_date"] != '' && $trials[$i]["NCT/start_date"] != NULL && $trials[$i]["NCT/start_date"] != '0000-00-00') 
+			{
+				$outputStr .= date('m/y',strtotime($trials[$i]["NCT/start_date"]));
+			} 
+			else 
+			{
+				$outputStr .= '&nbsp;';
+			}
+			$outputStr .= '</div></td>';
+				
+				
+			//end date column
+			$attr = '';
+			if(isset($trials[$i]['edited']) && array_key_exists('inactive_date', $trials[$i]['edited'])) 
+			{
+				$attr = ' highlight" title="' . $trials[$i]['edited']['inactive_date'] ;
+			} 
+			else if($trials[$i]['new'] == 'y') 
+			{
+				$attr = '" title="New record" ';
+			}	
+			$outputStr .= '<td style="'.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . '" ' . $attr . '><div class="rowcollapse">'; 
+			if($trials[$i]["inactive_date"] != '' && $trials[$i]["inactive_date"] != NULL && $trials[$i]["inactive_date"] != '0000-00-00') 
+			{
+				$outputStr .= date('m/y',strtotime($trials[$i]["inactive_date"]));
+			} 
+			else 
+			{
+				$outputStr .= '&nbsp;';
+			}
+			$outputStr .= '</div></td>';
+					
+											
+			//phase column
+			if(isset($trials[$i]['edited']) && array_key_exists('NCT/phase', $trials[$i]['edited'])) 
+			{
+				$attr = 'class="highlight" title="' . $trials[$i]['edited']['NCT/phase'] . '" ';
+			} 
+			else if($trials[$i]['new'] == 'y') 
+			{
+				$attr = 'title="New record"';
+			}
+			if($trials[$i]['NCT/phase'] == 'N/A' || $trials[$i]['NCT/phase'] == '' || $trials[$i]['NCT/phase'] === NULL)
+			{
+				$phase = 'N/A';
+				$phaseColor = $phaseValues['N/A'];
+			}
+			else
+			{
+				$phase = str_replace('Phase ', '', trim($trials[$i]['NCT/phase']));
+				$phaseColor = $phaseValues[$phase];
+			}
+			$outputStr .= '<td align="center" rowspan="' . $rowspan . '" style="background-color:' . $phaseColor . ';" ' . $attr . '>' 
+						. '<div class="rowcollapse">' . $phase . '</div></td>';				
+			
+			$outputStr .= '<td>&nbsp;</td>';
+				
+			$startMonth = date('m',strtotime($trials[$i]['NCT/start_date']));
+			$startYear = date('Y',strtotime($trials[$i]['NCT/start_date']));
+			$endMonth = date('m',strtotime($trials[$i]['inactive_date']));
+			$endYear = date('Y',strtotime($trials[$i]['inactive_date']));
+
+			//rendering project completion gnatt chart
+			$trialGnattChart = $this->trialGnattChart($startMonth, $startYear, $endMonth, $endYear, $currentYear, $secondYear, $thirdYear, 
+				$trials[$i]['NCT/start_date'], $trials[$i]['inactive_date'], $phaseColor);
+			
+			$trialGnattChart = preg_replace('/&nbsp;/', '<img src="images/trans_big.gif" />', $trialGnattChart);	
+			$outputStr .= preg_replace('/width:([0-9]*)px;/', '', $trialGnattChart);	
+				
+			$outputStr .= '</tr>';
+			
+			//rendering matched upms
+			if(isset($trials[$i]['matchedupms']) && !empty($trials[$i]['matchedupms'])) 
+			{
+				foreach($trials[$i]['matchedupms'] as $mkey => $mvalue) 
+				{ 
+					$str = '';
+					$diamond = '';
+					$resultImage = '';
+	
+					$stMonth = date('m', strtotime($mvalue['start_date']));
+					$stYear = date('Y', strtotime($mvalue['start_date']));
+					$edMonth = date('m', strtotime($mvalue['end_date']));
+					$edYear = date('Y', strtotime($mvalue['end_date']));
+					$upmTitle = 'title="' . htmlformat($mvalue['event_description']) . '"';
+					
+					$outputStr .= '<tr style="page-break-inside:avoid; width:65px;" nobr="true">';
+					
+					//rendering diamonds in case of end date is prior to the current year
+					$outputStr .= '<td style="width:22px; text-align:center;">';
+					
+					if(!empty($trials[$i]['matchedupms']['edited']) && isset($trials[$i]['matchedupms']['edited']['result_link'])) 
+					{
+						if($mvalue['result_link'] != '' && $mvalue['result_link'] !== NULL) 
+						{
+							$resultImage = (($mvalue['event_type'] == 'Clinical Data') ? 'diamond' : 'checkmark' );
+							$outputStr .= '<div ' . $upmTitle . '><a href="' . $mvalue['result_link'] . '" style="color:#000;" target="_blank">'
+										. '<img src="images/red-' . $resultImage . '.png" alt="' 
+										. $resultImage . '" style="margin:4px;" border="0" /></a></div>';
+						}
+					} 
+					else if($upmDetails[$nctid]['new'] == 'y') 
+					{
+						$resultImage = (($mvalue['event_type'] == 'Clinical Data') ? 'diamond' : 'checkmark' );
+						$outputStr .= '<div ' . $upmTitle . '>';
+						if($mvalue['result_link'] != '' && $mvalue['result_link'] !== NULL) 
+						{
+							$outputStr .= '<a href="' . $mvalue['result_link'] . '" style="color:#000;" target="_blank">'
+										. '<img src="images/red-' . $resultImage . '.png" alt="' . $resultImage . '" style="margin:4px;" border="0" /></a>';
+						} 
+						else 
+						{
+							$outputStr .= '<img src="images/red-' . $resultImage . '.png" alt="' . $resultImage . '" style="margin:4px;" border="0" />';
+						}
+						$outputStr .= '</div>';
+					}
+					else 
+					{
+						if($mvalue['result_link'] != '' && $mvalue['result_link'] != NULL) 
+						{
+							$resultImage = (($mvalue['event_type'] == 'Clinical Data') ? 'diamond' : 'checkmark' );
+							$outputStr .= '<div ' . $upmTitle . '><a href="' . $mvalue['result_link'] . '" style="color:#000;" target="_blank">'
+										. '<img src="images/black-' . $resultImage . '.png" alt="' . $resultImage 
+										. '" style="margin:4px;" border="0" /></a></div>';
+						}
+					}
+					
+					if(($mvalue['end_date'] != '' && $mvalue['end_date'] !== NULL && $mvalue['end_date'] != '0000-00-00') 
+						&& ($mvalue['end_date'] < date('Y-m-d')) && ($mvalue['result_link'] === NULL || $mvalue['result_link'] == ''))
+					{
+						$outputStr .= '<div ' . $upmTitle . '><img src="images/hourglass.png" alt="hourglass" style="margin:4px;" border="0" /></div>';
+					}
+					$outputStr .= '</td>';
+					
+					//rendering upm (upcoming project completion) chart
+					$upmGnattChart = $this->upmGnattChart($stMonth, $stYear, $edMonth, $edYear, $currentYear, $secondYear, $thirdYear, $mvalue['start_date'],
+					$mvalue['end_date'], $mvalue['event_link'], $upmTitle);
+					
+					$upmGnattChart = preg_replace('/&nbsp;/', '<img src="images/trans_big.gif" />', $upmGnattChart);
+					$outputStr .= preg_replace('/width:([0-9]*)px;/', '', $upmGnattChart);
+					
 					$outputStr .= '</tr>';
 				}
 			}
@@ -7081,6 +7711,257 @@ class TrialTracker
 		}
 		return $outputStr;
 	}
+	
+	
+	function displayUnMatchedUpms_TCPDF($loggedIn, $naUpmIndex, $naUpms)
+	{
+		global $now;
+		$outputStr = '';
+		if(!empty($naUpms))
+		{
+			$currentYear = date('Y');
+			$secondYear = (date('Y')+1);
+			$thirdYear = (date('Y')+2);
+			
+			$cntr = 0;
+			foreach($naUpms as $key => $value)
+			{
+				$attr = '';
+				$resultImage = '';
+				$class = 'class = "upms ' . $naUpmIndex . '" ';
+				$titleLinkColor = 'color:#000;';
+				$dateStyle = 'color:gray;';
+				$upmTitle = 'title="' . htmlformat($value['event_description']) . '"';
+				
+				if($cntr%2 == 1) 
+				{
+					$rowOneType = 'alttitle';
+					$rowTwoType = 'altrow';
+				} 
+				else 
+				{
+					$rowOneType = 'title';
+					$rowTwoType = 'row';
+				}
+				
+				//Highlighting the whole row in case of new trials
+				if($value['new'] == 'y') 
+				{
+					$class = 'class="upms newtrial ' . $upmHeader . '" ';
+				}
+				
+				//rendering unmatched upms
+				$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true" ' . $class . ' style="background-color:#000;">';
+				
+				//field upm-id
+				if($loggedIn)
+				{
+					if($value['new'] == 'y')
+					{
+						$titleLinkColor = 'color:#FF0000;';
+						$title = ' title = "New record" ';
+					}
+					$outputStr .= '<td ' . $title . '>'
+								. '<a style="' . $titleLinkColor . '" href="upm.php?search_id=' . $value['id'] . '" target="_blank">' . $value['id'] . '</a></td>';
+				}
+				
+				
+				//field upm event description
+				if(!empty($value['edited']) && isset($value['edited']['event_description'])) 
+				{
+					$titleLinkColor = 'color:#FF0000;';
+					$attr = ' highlight'; 
+					
+					if($value['edited']['event_description'] != '' && $value['edited']['event_description'] !== NULL)
+					{
+						$title = ' title="Previous value: '. $value['edited']['event_description'] . '" '; 
+					}
+					else
+					{
+						$title = ' title="No Previous value" ';
+					}
+				} 
+				else if($val['new'] == 'y') 
+				{
+					$titleLinkColor = 'color:#FF0000;';
+					$title = ' title = "New record" ';
+				}
+				$outputStr .= '<td colspan="5" class="' . $rowOneType .  $attr . ' titleupm titleupmodd txtleft" ' . $title . '><div class="rowcollapse">';
+				if($value['event_link'] !== NULL && $value['event_link'] != '') 
+				{
+					$outputStr .= '<a style="' . $titleLinkColor . '" href="' . $value['event_link'] . '" target="_blank">' . $value['event_description'] . '</a>';
+				} 
+				else 
+				{
+					$outputStr .= $value['event_description'];
+				}
+				$outputStr .= '</div></td>';
+				
+				
+				//field upm status
+				$outputStr .= '<td class="' . $rowTwoType . ' titleupmodd"><div class="rowcollapse">' . $value['status'] . '</div></td>';
+
+			
+				//field upm event type
+				$title = '';
+				$attr = '';	
+				if(!empty($value['edited']) && isset($value['edited']['event_type'])) 
+				{
+					$attr = ' highlight'; 
+					if($value['edited']['event_type'] != '' && $value['edited']['event_type'] !== NULL)
+					{
+						$title = ' title="Previous value: '. $value['edited']['event_type'] . '" '; 
+					}
+					else
+					{
+						$title = ' title="No Previous value" ';
+					}	
+				} 
+				else if($value['new'] == 'y') 
+				{
+					$title = ' title = "New record" ';
+				}
+				$outputStr .= '<td class="' . $rowTwoType . $attr . ' titleupmodd" ' . $title . '>'
+							. '<div class="rowcollapse">' . $value['event_type'] . ' Milestone</div></td>';
+				
+				
+				//field upm start date
+				$title = '';
+				$attr = '';	
+				if(!empty($value['edited']) && isset($value['edited']['start_date']))
+				{
+					$attr = ' highlight';
+					$dateStyle = 'color:#973535;'; 
+					if($value['edited']['start_date'] != '' && $value['edited']['start_date'] !== NULL)
+					{
+						$title = ' title="Previous value: ' . $value['edited']['start_date'] . '" '; 
+					} 
+					else 
+					{
+						$title = ' title="No Previous value" ';
+					}	
+				} 
+				else if(!empty($value['edited']) && isset($value['edited']['start_date_type']))
+				{
+					$attr = ' highlight';
+					$dateStyle = 'color:#973535;';
+					if($value['edited']['start_date_type'] != '' && $value['edited']['start_date_type'] !== NULL) 
+					{
+						$title = ' title="Previous value: ' . $value['edited']['start_date_type'] . '" '; 
+					} 
+					else 
+					{
+						$title = ' title="No Previous value" ';
+					}
+				} 
+				else if($value['new'] == 'y')
+				{
+					$title = ' title = "New record" ';
+					$dateStyle = 'color:#973535;'; 
+				}
+				$outputStr .= '<td class="' . $rowTwoType . $attr . ' titleupmodd txtleft" ' . $title . '><div class="rowcollapse">';
+				if($value['start_date_type'] == 'anticipated') 
+				{
+					$outputStr .= '<span style="font-weight:bold;' . $dateStyle . '">'
+					 			. (($value['start_date'] != '' && $value['start_date'] !== NULL && $value['start_date'] != '0000-00-00') ? 
+								date('m/y',strtotime($value['start_date'])) : '' )  . '</span>';
+				} 
+				else 
+				{
+					$outputStr .= (($value['start_date'] != '' && $value['start_date'] !== NULL && $value['start_date'] != '0000-00-00') ? 
+									date('m/y',strtotime($value['start_date'])) : '' );
+				}
+				$outputStr .= '</div></td>';		
+				
+				
+				//field upm end date
+				$title = '';
+				$attr = '';	
+				if(!empty($value['edited']) && isset($value['edited']['end_date']))
+				{
+					$attr = ' highlight';
+					$dateStyle = 'color:#973535;';
+					if($value['edited']['end_date'] != '' && $value['edited']['end_date'] !== NULL)
+					{
+						$title = ' title="Previous value: ' . $value['edited']['end_date'] . '" '; 
+					}
+					else 
+					{
+						$title = ' title="No Previous value" ';
+					}
+				} 
+				else if(!empty($value['edited']) && isset($value['edited']['end_date_type']))
+				{
+					$attr = ' highlight';
+					$dateStyle = 'color:#973535;'; 
+					if($value['edited']['end_date_type'] != '' && $value['edited']['end_date_type'] !== NULL) 
+					{
+						$title = ' title="Previous value: ' .  $value['edited']['end_date_type'] . '" ';
+					} 
+					else 
+					{
+						$title = ' title="No Previous value" ';
+					}
+				} 
+				else if($value['new'] == 'y') 
+				{
+					$title = ' title = "New record" ';
+					$dateStyle = 'color:#973535;'; 
+				}
+				$outputStr .= '<td class="' . $rowTwoType . $attr . ' titleupmodd txtleft" ' . $title . '><div class="rowcollapse">';
+				if($value['end_date_type'] == 'anticipated') 
+				{
+					$outputStr .= '<span style="font-weight:bold;' . $dateStyle . '">' 
+								. (($value['end_date'] != '' && $value['end_date'] !== NULL && $value['end_date'] != '0000-00-00') ? 
+									date('m/y',strtotime($value['end_date'])) : '' ) . '</span>';
+				} 
+				else 
+				{
+					$outputStr .= (($value['end_date'] != '' && $value['end_date'] !== NULL && $value['end_date'] != '0000-00-00') ? 
+									date('m/y',strtotime($value['end_date'])) : '');
+				}	
+				$outputStr .= '</div></td><td class="titleupmodd"><div class="rowcollapse"></div></td>';
+				
+				
+				//field upm result 
+				$outputStr .= '<td class="titleupmodd"><div class="rowcollapse">';
+				if(!empty($value['edited']) && isset($value['edited']['result_link'])) 
+				{
+					$imgColor = 'red';
+				} 
+				else 
+				{
+					$imgColor = 'black';
+				}
+				if($value['result_link'] != '' && $value['result_link'] !== NULL) 
+				{
+					$resultImage = (($value['event_type'] == 'Clinical Data') ? 'diamond' : 'checkmark' );
+					$outputStr .= '<div ' . $upmTitle . '><a href="' . $value['result_link'] . '" style="color:#000;">'
+								. '<img src="images/' . $imgColor . '-' . $resultImage . '.png" alt="' . $resultImage 
+								. '" style="margin:4px;" border="0" /></a></div>';
+				}
+				
+				if(($value['end_date'] != '' && $value['end_date'] !== NULL 
+				&& $value['end_date'] != '0000-00-00') && ($value['end_date'] < date('Y-m-d', $now)) 
+				&& ($value['result_link'] === NULL || $value['result_link'] == ''))
+				{
+					$outputStr .= '<div ' . $upmTitle . '><img src="images/hourglass.png" alt="hourglass" style="margin:3px;" border="0" /></div>';
+				}
+				$outputStr .= '</div></td>';		
+				
+				//upm gnatt chart
+				$upmGnattChart = $this->upmGnattChart(date('m',strtotime($value['start_date'])), date('Y',strtotime($value['start_date'])), 
+								date('m',strtotime($value['end_date'])), date('Y',strtotime($value['end_date'])), $currentYear, $secondYear, $thirdYear, 
+								$value['start_date'], $value['end_date'], $value['event_link'], $upmTitle);
+				$upmGnattChart = preg_replace('/&nbsp;/', '<img src="images/trans_big.gif" />', $upmGnattChart);
+				$outputStr .= preg_replace('/width:([0-9]*)px;/', '', $upmGnattChart);
+				
+				$outputStr .= '</tr>';
+			}
+		}
+		return $outputStr;
+	}
+	
 	
 	function getInfo($tablename, $fieldnames, $id, $value)
 	{
