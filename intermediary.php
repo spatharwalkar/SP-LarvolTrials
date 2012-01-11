@@ -93,7 +93,7 @@ foreach($sortFields as $skey => $svalue)
 	$sortTab .= "<li title='" . $svalue . "' class='ui-state-default' name='" . $svalue . "' id='" . $skey . "'>"
 		. "<div align=\"left\" style=\"vertical-align:middle;\">" . $sortFieldName[$skey] 
 		. "<img src='images/" . $sortImg . ".png' id='" . substr($svalue, 0, 1) . "'  alt='" . $svalue 
-		. "' border='0' align='right' style='margin:0px 5px; width:14px; height:14px; padding-right:100px;' onclick='javascript:fnSort(this)' /></div></li>";
+		. "' border='0' align='right' style='margin:0px 5px; width:14px; height:14px; padding-right:70px; cursor:pointer;' onclick='javascript:fnSort(this)' /></div></li>";
 }
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">

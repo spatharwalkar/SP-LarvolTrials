@@ -189,6 +189,12 @@ a, a:hover{
 	border:1px solid black;
 }
 
+.downld_box {
+	height:auto;
+	width:310px;
+	border:1px solid black;
+}
+
 .new ul{
 	list-style:none;
 	margin:5px;
@@ -307,7 +313,7 @@ tr.upms td a{
 .ui-widget :active { outline: none; }
 
 #sortable  { list-style-type: none; margin: 0; padding: 0; margin-bottom: 10px; }
-.demo li { margin: 5px; padding: 5px; height:20px; width: 200px; cursor:default; z-index:+1; }
+.demo li { margin: 5px; padding: 5px; height:20px; width: 200px; cursor:move; z-index:+1; }
 /* css for drag drop tab end */
 
 #loading  {
