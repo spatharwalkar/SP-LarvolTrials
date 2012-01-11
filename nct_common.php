@@ -438,7 +438,7 @@ function addNCT_history($rec, $id, $date) {
             return softDie('Bad SQL query adding nct_id');
         }
     }
-    //echo '<pre>'; print_r($rec); echo '</pre>';
+//    echo '<pre>'; print_r($rec); echo '</pre>';
 //exit;
 
 if(isset($rec->status_block->brief_summary->textblock) and !empty($rec->status_block->brief_summary->textblock)) $bsummary=$rec->status_block->brief_summary->textblock;
@@ -483,7 +483,6 @@ else $ddesc=$rec->detailed_descr->textblock;
         'number_of_groups' => $rec->number_of_groups,
         'enrollment' => $rec->enrollment,
         'gender' => strtolower($rec->eligibility->gender),
-		'enrollment' => $rec->eligibility->expected_enrollment,
         'minimum_age' => $rec->eligibility->minimum_age,
         'maximum_age' => $rec->eligibility->maximum_age,
         'healthy_volunteers' => ynbool($rec->eligibility->healthy_volunteers),
@@ -671,6 +670,8 @@ else $ddesc=$rec->detailed_descr->textblock;
         $record_data['results_reference_citation'][] = $ref->reference->citation;
         $record_data['results_reference_PMID'][] = $ref->reference->PMID;
     }
+	if( ( !isset($record_data['enrollment']) or is_null($record_data['enrollment']) or empty($record_data['enrollment']) ) )
+							$record_data['enrollment'] = $rec->eligibility->expected_enrollment;
 /***** TKV
 ****** Detect and pick all irregular phases that exist in one or several of the various title or description fields */
 $phases_regex='/phase4|phase2\/3|phase 2a\/2b|phase 1\/2|Phase l\/Phase ll|phase 1b\/2a|phase 1a\/1b|Phase 1a\/b|phase 3b\/4|Phase I\/II|Phase2b\/3|phase 1b\/2|phase 2a\/b|phase 1a|phase 1b|Phase 1C|Phase III(?![a-z.-\\/])|phase II(?![a-z.-\\/])|Phase I(?![a-z.-\\/])|phase 2a|PHASEII|PHASE iii|phase 2b|phase iib|phase iia|phase 3a|phase 3b/i';
@@ -681,7 +682,7 @@ if(!count($matches[0]) >0 )
 preg_match_all($phases_regex, $record_data['official_title'], $matches);
 }
 
-     // pr($record_data['primary_outcome_measure']);
+     // pr($record_data);
 //pr($matches);
 
 if(!count($matches[0]) >0 )
