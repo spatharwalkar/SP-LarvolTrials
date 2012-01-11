@@ -441,7 +441,7 @@ function regionMapping()
 	    {
 	        if (substr($file,-4)=='.txt')
 	        {
-	            $regionEntry = strtoupper(str_replace('_','/',substr($file,0,strpos($file,'.txt'))));
+	            $regionEntry = str_replace('_','/',substr($file,0,strpos($file,'.txt')));
 	            $regionFile = file('derived/region/'.$file,FILE_IGNORE_NEW_LINES|FILE_SKIP_EMPTY_LINES);
 	        	foreach($regionFile as $countryList)
 				{
