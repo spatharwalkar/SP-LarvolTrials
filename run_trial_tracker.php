@@ -748,11 +748,9 @@ class TrialTracker
 			$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':AU' . $i . '')->applyFromArray($styleThinBlueBorderOutline);
 			
 			$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $uvalue["id"]);
-			$objPHPExcel->getActiveSheet()->getCell('A' . $i)->getHyperlink()->setUrl('upm.php?search_id=' . $value["id"]);
 			if($uvalue['new'] == 'y')
 			{
 				$objPHPExcel->getActiveSheet()->getStyle('A' . $i)->applyFromArray($highlight_color);
-				$objPHPExcel->getActiveSheet()->getCell('A' . $i)->getHyperlink()->setTooltip('New record');
 			}
 				
 			$objPHPExcel->getActiveSheet()->setCellValue('B' . $i, $uvalue["product_name"]);
