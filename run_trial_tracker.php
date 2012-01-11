@@ -3512,6 +3512,7 @@ class TrialTracker
 			{
 				$to = getColspanforExcelExport($from, 12);
 				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
 				$from++;
 				
 				if($st != 0)
