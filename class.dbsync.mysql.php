@@ -309,6 +309,10 @@ require_once('include.util.php');
 	        	{
 	        		$special_mul_key = ', ADD KEY `'.$field.'` (`'.$field.'`('.$new_field['Sub_part'].'))';
 	        	}
+	        	if($new_field['key']=='MUL' && $old_field['key']=='UNI' && $new_field['indexFlag']==1 && $old_field['indexFlag']==1)
+	        	{
+	        		$special_mul_key = ', DROP INDEX `'.$old_field['name'].'` , ADD INDEX `'.$old_field['name'].'` ( `'.$old_field['name'].'` )';
+	        	}
 	        	if($new_field['key']=='MUL' && $old_field['key']=='' && $new_field['indexFlag']==1 && $old_field['indexFlag']=='')
 	        	{
 	        		$indexKey = ', ADD INDEX (`'.$field.'`) ';

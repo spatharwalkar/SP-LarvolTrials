@@ -130,7 +130,6 @@
 					$fields_home_tmp = $fields_home;
                     $fields_sync = $db_sync->ListTableFields($tables_home[$i]);
                     $fieldnames_sync = $this->GetFieldNames($fields_sync);
-
                     $diferent_fields = 0;
 
                     for ($j = 0; $j < count($fields_home); $j++)
@@ -154,7 +153,7 @@
 	                            if (
 		                            	$fields_sync[$k]['type'] != $fields_home[$j]['type'] ||
 		                                $fields_sync[$k]['null'] != $fields_home[$j]['null'] ||
-		                                ($fields_sync[$k]['key'] != $fields_home[$j]['key'] && ($fields_home[$j]['key']!='UNI'&&$fields_sync[$k]['key'] !='UNI')) ||
+		                                ($fields_sync[$k]['key'] != $fields_home[$j]['key'] && (($fields_home[$j]['key']!='UNI'&&$fields_sync[$k]['key'] !='UNI')|| ($fields_home[$j]['key']=='MUL'&&$fields_sync[$k]['key'] =='UNI'))) ||
 		                                $fields_sync[$k]['default'] != $fields_home[$j]['default'] ||
 		                                $fields_sync[$k]['extra'] != $fields_home[$j]['extra'] 
 	                                )
