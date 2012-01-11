@@ -249,6 +249,9 @@ foreach($sortFields as $skey => $svalue)
     </script>
     </head>
 <body>
+<div id="loading">
+  <img id="loading-image" src="images/loading.gif" alt="Loading..." />
+</div>
 <?php
 $globalOptions['sortOrder'] = $sortFields;
 $globalOptions['type'] = 'activeTrials';
@@ -367,6 +370,12 @@ else
 {
 	die('cell not set');
 }
-?> 
+?>
+<script type="text/javascript">
+	$(window).load(function() 
+	{
+		$('#loading').hide();
+	});
+</script>
 </body>
 </html>

@@ -202,45 +202,10 @@ a, a:hover{
 }
 
 /*changes*/
-.w740p{
-	width:750px;
-}
 tr.btopblue td{
 	border-top:1px solid blue;
 }
-.w250p{
-	width:250px;
-}
-.w28p{
-	width:28px;
-}
-.w45p{
-	width:45px;
-}
-.w55p{
-	width:55px;
-}
-.w110p{
-	width:110px;
-}
-.w25p{
-	width:25px;
-}
-.w22p{
-	width:22px;
-}
-.w24p{
-	width:24px;
-}
-.w12p{
-	width:12px;
-}
-.w0p{
-	width:0px;
-}
-.p4{
-	padding:4px;
-}
+
 .notopbottomborder{
 	border-top:none!important;
 }
@@ -344,3 +309,23 @@ tr.upms td a{
 #sortable  { list-style-type: none; margin: 0; padding: 0; margin-bottom: 10px; }
 .demo li { margin: 5px; padding: 5px; height:20px; width: 200px; cursor:default; z-index:+1; }
 /* css for drag drop tab end */
+
+#loading  {
+	width: 100%;
+	height: 100%;
+	top: 0px;
+	left: 0px;
+	position: fixed;
+	display: block;
+	opacity: 0.7;
+	background-color: #fff;
+	z-index: 99;
+	text-align: center;
+}
+
+#loading-image {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	z-index: 100;
+}
