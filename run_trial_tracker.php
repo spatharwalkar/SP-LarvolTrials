@@ -319,7 +319,7 @@ class TrialTracker
 			$objPHPExcel->getActiveSheet()->setCellValue('B' . $i, $tvalue["NCT/brief_title"]);
 			$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setUrl($ctLink);
 			
-			if(isset($tvalue['edited']) && array_key_exists('NCT/brief_title', $tvalue['edited']))
+			if(!empty($tvalue['edited']) && array_key_exists('NCT/brief_title', $tvalue['edited']))
 			{
 				 $objPHPExcel->getActiveSheet()->getStyle('B' . $i)->applyFromArray($highlightChange);
 				 $objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip($tvalue['edited']['NCT/brief_title']); 
@@ -337,7 +337,7 @@ class TrialTracker
 			
 				
 			//enrollment
-			if(isset($tvalue['edited']) && array_key_exists('NCT/enrollment', $tvalue['edited']) 
+			if(!empty($tvalue['edited']) && array_key_exists('NCT/enrollment', $tvalue['edited']) 
 			&& (getDifference(substr($tvalue['edited']['NCT/enrollment'],16), $tvalue['NCT/enrollment'])))
 			{
 				 if($tvalue["NCT/enrollment_type"] != '' && $tvalue["NCT/enrollment_type"] == 'Anticipated') 
@@ -390,7 +390,7 @@ class TrialTracker
 			
 			
 			//region	
-			$tvalue["region"] = fix_special_chars($value["region"]);
+			$tvalue["region"] = fix_special_chars($tvalue["region"]);
 			$objPHPExcel->getActiveSheet()->setCellValue('D' . $i, $tvalue["region"]);
 			if($tvalue['new'] == 'y')
 			{
@@ -402,7 +402,7 @@ class TrialTracker
 				
 			//status
 			$objPHPExcel->getActiveSheet()->setCellValue('E' . $i, $tvalue["NCT/overall_status"]);
-			if(isset($tvalue['edited']) && array_key_exists('NCT/overall_status', $tvalue['edited']))
+			if(!empty($tvalue['edited']) && array_key_exists('NCT/overall_status', $tvalue['edited']))
 			{
 				 $objPHPExcel->getActiveSheet()->getStyle('E' . $i)->applyFromArray($highlightChange);
 				 $objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setUrl($ctLink);
@@ -422,7 +422,7 @@ class TrialTracker
 			
 			$objPHPExcel->getActiveSheet()->setCellValue('F' . $i, $tvalue["NCT/lead_sponsor"] . $tvalue["NCT/collaborator"]);
 			
-			if(isset($tvalue['edited']) && (array_key_exists('NCT/lead_sponsor', $tvalue['edited']) || array_key_exists('NCT/collaborator', $tvalue['edited'])))
+			if(!empty($tvalue['edited']) && (array_key_exists('NCT/lead_sponsor', $tvalue['edited']) || array_key_exists('NCT/collaborator', $tvalue['edited'])))
 			{
 				$value = '';
 				if(array_key_exists('NCT/lead_sponsor', $tvalue['edited']))
@@ -448,10 +448,9 @@ class TrialTracker
 			
 			
 			//condition
-			$tvalue["NCT/condition"] = implode(", ",array_unique(explode(",", str_replace(", ",",",$tvalue["NCT/condition"]))));
 			$tvalue["NCT/condition"] = fix_special_chars($tvalue["NCT/condition"]);
 			$objPHPExcel->getActiveSheet()->setCellValue('G' . $i, $tvalue["NCT/condition"]);
-			if(isset($tvalue['edited']) && array_key_exists('NCT/condition', $tvalue['edited']))
+			if(!empty($tvalue['edited']) && array_key_exists('NCT/condition', $tvalue['edited']))
 			{
 				 $objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($highlightChange);
 				 $objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($ctLink);
@@ -466,10 +465,9 @@ class TrialTracker
 			
 			
 			//intervention
-			$tvalue["NCT/intervention_name"] = implode(", ",array_unique(explode(",", str_replace(", ",",",$tvalue["NCT/intervention_name"]))));
-			$tvalue["NCT/intervention_name"] = fix_special_chars($value["NCT/intervention_name"]);
+			$tvalue["NCT/intervention_name"] = fix_special_chars($tvalue["NCT/intervention_name"]);
 			$objPHPExcel->getActiveSheet()->setCellValue('H' . $i, $tvalue["NCT/intervention_name"]);
-			if(isset($tvalue['edited']) && array_key_exists('NCT/intervention_name', $tvalue['edited']))
+			if(!empty($tvalue['edited']) && array_key_exists('NCT/intervention_name', $tvalue['edited']))
 			{
 				 $objPHPExcel->getActiveSheet()->getStyle('H' . $i)->applyFromArray($highlightChange);
 				 $objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($ctLink);
@@ -491,7 +489,7 @@ class TrialTracker
 			{ 				
 				$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, date('m/y',strtotime($tvalue["NCT/start_date"])));
 			}
-			if(isset($tvalue['edited']) && array_key_exists('NCT/start_date', $tvalue['edited']))
+			if(!empty($tvalue['edited']) && array_key_exists('NCT/start_date', $tvalue['edited']))
 			{
 				 $objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray($highlightChange);
 				 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($ctLink);
@@ -513,7 +511,7 @@ class TrialTracker
 			{
 				$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, date('m/y',strtotime($tvalue["inactive_date"])));
 			}
-			if(isset($tvalue['edited']) && array_key_exists('NCT/inactive_date', $tvalue['edited']))
+			if(!empty($tvalue['edited']) && array_key_exists('NCT/inactive_date', $tvalue['edited']))
 			{
 				 $objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($highlightChange);
 				 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink);
@@ -540,7 +538,7 @@ class TrialTracker
 			}
 			
 			$objPHPExcel->getActiveSheet()->setCellValue('K' . $i, $phase);
-			if(isset($tvalue['edited']) && array_key_exists('NCT/phase', $tvalue['edited']))
+			if(!empty($tvalue['edited']) && array_key_exists('NCT/phase', $tvalue['edited']))
 			{
 				 $objPHPExcel->getActiveSheet()->getStyle('K' . $i)->applyFromArray($highlightChange);
 				 $objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setUrl($ctLink);
@@ -6268,9 +6266,9 @@ class TrialTracker
 
 			//acroynm and title column
 			$attr = ' ';
-			if(isset($trials[$i]['edited']) && array_key_exists('NCT/brief_title', $trials[$i]['edited'])) 
+			if(!empty($trials[$i]['edited']) && array_key_exists('NCT/brief_title', $trials[$i]['edited'])) 
 			{
-				$attr = ' highlight" title="' . $trials[$nctid]['edited']['NCT/brief_title'];
+				$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/brief_title'];
 				$titleLinkColor = '#FF0000;';
 			} 
 			else if($trials[$i]['new'] == 'y') 
@@ -6294,7 +6292,7 @@ class TrialTracker
 				
 			//enrollment column
 			$attr = ' ';
-			if(isset($trials[$i]['edited']) && array_key_exists('NCT/enrollment',$trials[$i]['edited']) 
+			if(!empty($trials[$i]['edited']) && array_key_exists('NCT/enrollment',$trials[$i]['edited']) 
 				&& (getDifference(substr($trials[$i]['edited']['NCT/enrollment'],16), $trials[$i]['NCT/enrollment']))) 
 			{
 				$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/enrollment'];
@@ -6339,7 +6337,7 @@ class TrialTracker
 
 				
 			//intervention name column
-			if(isset($trials[$i]['edited']) && array_key_exists('NCT/intervention_name', $trials[$i]['edited']))
+			if(!empty($trials[$i]['edited']) && array_key_exists('NCT/intervention_name', $trials[$i]['edited']))
 			{
 				$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/intervention_name'];
 			} 
@@ -6353,7 +6351,7 @@ class TrialTracker
 
 			//collaborator and sponsor column
 			$attr = ' ';
-			if(isset($trials[$i]['edited']) && (array_key_exists('NCT/collaborator', $trials[$i]['edited']) 
+			if(!empty($trials[$i]['edited']) && (array_key_exists('NCT/collaborator', $trials[$i]['edited']) 
 			|| array_key_exists('NCT/lead_sponsor', $trials[$i]['edited']))) 
 			{
 					
@@ -6379,7 +6377,7 @@ class TrialTracker
 
 
 			//overall status column
-			if(isset($trials[$i]['edited']) && array_key_exists('NCT/overall_status', $trials[$i]['edited'])) 
+			if(!empty($trials[$i]['edited']) && array_key_exists('NCT/overall_status', $trials[$i]['edited'])) 
 			{
 				$attr = 'class="highlight ' . $rowOneType . ' " title="' . $trials[$i]['edited']['NCT/overall_status'] . '" ';
 			} 
@@ -6397,7 +6395,7 @@ class TrialTracker
 				
 			//condition column
 			$attr = ' ';
-			if(isset($trials[$i]['edited']) && array_key_exists('NCT/condition', $trials[$i]['edited'])) 
+			if(!empty($trials[$i]['edited']) && array_key_exists('NCT/condition', $trials[$i]['edited'])) 
 			{
 				$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/condition'];
 			} 
@@ -6411,7 +6409,7 @@ class TrialTracker
 				
 			//start date column
 			$attr = ' ';
-			if(isset($trials[$i]['edited']) && array_key_exists('NCT/start_date', $trials[$i]['edited'])) 
+			if(!empty($trials[$i]['edited']) && array_key_exists('NCT/start_date', $trials[$i]['edited'])) 
 			{
 				$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/start_date'] ;
 			} 
@@ -6433,7 +6431,7 @@ class TrialTracker
 				
 			//end date column
 			$attr = '';
-			if(isset($trials[$i]['edited']) && array_key_exists('inactive_date', $trials[$i]['edited'])) 
+			if(!empty($trials[$i]['edited']) && array_key_exists('inactive_date', $trials[$i]['edited'])) 
 			{
 				$attr = ' highlight" title="' . $trials[$i]['edited']['inactive_date'] ;
 			} 
@@ -6454,7 +6452,7 @@ class TrialTracker
 					
 											
 			//phase column
-			if(isset($trials[$i]['edited']) && array_key_exists('NCT/phase', $trials[$i]['edited'])) 
+			if(!empty($trials[$i]['edited']) && array_key_exists('NCT/phase', $trials[$i]['edited'])) 
 			{
 				$attr = 'class="highlight" title="' . $trials[$i]['edited']['NCT/phase'] . '" ';
 			} 
