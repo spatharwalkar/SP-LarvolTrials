@@ -92,6 +92,7 @@ class TrialTracker
 
 
 
+
 		ob_start();
 		$objPHPExcel = new PHPExcel();
 		$objPHPExcel->setActiveSheetIndex(0);
@@ -813,12 +814,12 @@ class TrialTracker
 			
 			//upm description
 			$objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $uvalue["event_description"]);
+			$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl($eventLink);
 			if(!empty($uvalue['edited']) && ($uvalue['edited']['field'] == 'event_description'))
 			{
 				$objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($highlightChange);
 				if($eventLink != '' && $eventLink !== NULL)
 				{
-					$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl($eventLink);
 					if($uvalue['edited']['event_description'] != '' && $uvalue['edited']['event_description'] !== NULL)
 					{
 						$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip('Previous value: ' . $uvalue['edited']['event_description']); 
@@ -2790,7 +2791,7 @@ class TrialTracker
 		} 
 		else if($startYear < $currentYear) 
 		{
-			$val = getColspan($startDate, $startDate);
+			$val = getColspan($startDate, $endDate);
 			$st = $startMonth-1;
 	
 			if($endYear < $currentYear) 
@@ -3063,6 +3064,7 @@ class TrialTracker
 					if($upmLink != '' && $upmLink !== NULL)
 					{
 						$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+
 						$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
 					}
 					$from = $to;
@@ -3095,7 +3097,7 @@ class TrialTracker
 		} 
 		else if($startYear == $currentYear) 
 		{
-			$val = getColspan($startDate, $startDate);
+			$val = getColspan($startDate, $endDate);
 			$st = $startMonth-1;
 			if($endYear == $currentYear) 
 			{
@@ -3585,6 +3587,7 @@ class TrialTracker
 			{
 				$to = getColspanforExcelExport($from, 12);
 				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+				$from = $to;
 				$from++;
 				
 				if($st != 0)
@@ -3821,8 +3824,8 @@ class TrialTracker
 						. '<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" />'
 						. '<title>Larvol PDF Export</title>'
 						. '<style type="text/css">'
-						.'body { font-family:Arial; font-size:8pt; font-color:black;}'
-						.'td,th {vertical-align:top; border-right: 0.5px solid blue; border-left: 0.5px solid blue; border-top: 0.5px solid blue;	border-bottom: 
+						.'body { font-family:Arial; font-color:black;}'
+						.'td {vertical-align:top; border-right: 0.5px solid blue; border-left: 0.5px solid blue; border-top: 0.5px solid blue;	border-bottom: 
 						0.5px solid blue;}'
 						.'tr {border-right: 0.5px solid blue; border-left: 0.5px solid blue; border-top: 0.5px solid blue; border-bottom: 0.5px solid blue;}'
 						.'.drop { height:4.4em; margin: 0 0 0 4px; display:inline-block; vertical-align:top; text-align:left; background-color:#ffffff; opacity:0.92; 
@@ -3833,14 +3836,14 @@ class TrialTracker
 						.'.manage {	font-weight:normal;	table-layout:fixed;}'
 						.'.manage {	font-weight:normal;	table-layout:fixed;}'
 						.'.manage td{ border-left:0.5px solid blue;	border-bottom:0.5px solid blue;	margin:0; padding:0;}'
-						.'.manage th { border-top:0.5px solid blue;	border-bottom:0.5px solid blue;	border-left:0.5px solid blue; color:#0000FF; text-decoration:none; 
+						.'.manage th { border-top:0.5px solid blue;	border-left:0.5px solid blue; color:#0000FF; text-decoration:none; 
 						white-space:nowrap;}'
 						.'.manage th a{	color:#0000FF; text-decoration:none;}'
 						.'.newtrial td,  .newtrial td a{ color:#FF0000;}'
 						.'.rowcollapse { vertical-align:top; padding-top:0;	margin:0;}'
 						.'.rowcollapse:hover { max-height:none;}'
-						.'.bomb { font-size:8pt; float:left; margin-top:20px; text-align:center;}'
-						.'.result {	font-weight:bold; font-size:8pt;}'
+						.'.bomb { float:left; margin-top:20px; text-align:center;}'
+						.'.result {	font-weight:bold;}'
 						.'.secondrow th{ padding-left:0; padding-right:0; border-top:0;}'
 						.'.rightborder { border-right: 0.5px solid blue;}'
 						.'.norecord { border-bottom: 0.5px solid blue; border-right: 0.5px solid blue; border-top:0; padding:0px; height:auto; line-height:normal; 
@@ -3858,7 +3861,7 @@ class TrialTracker
 						.'.new ul li{ float:left; margin:2px;}'
 						.'.borderbottom{ border-bottom: 0.5px solid blue;}'
 						.'.leftrightborderblue{	border-right: 0.5px solid blue;	border-left: 0.5px solid blue;}'
-						.'.sectiontitles{ font-family: Arial; font-size: 8pt; font-weight: bold; background-color: #A2FF97;}'
+						.'.sectiontitles{ font-family: Arial; font-weight: bold; background-color: #A2FF97;}'
 						.'.zeroborder{ border-bottom:none; border-top:none;	border-left:none; border-right:none;}'
 						.'.norightborder{ border-right:none;}'
 						.'.upmheader{ color:#0000FF; font-weight:bold;}'
@@ -3989,7 +3992,7 @@ class TrialTracker
 		$pdf->SetSubject('Larvol Trials');
 		$pdf->SetKeywords('Larvol Trials, Larvol Trials PDF Export');
 		
-		$pdf->SetFont('times', '', 6);
+		$pdf->SetFont('verdana', '', 6);
 		$pdf->setFontSubsetting(false);
 		//set margins
 		$pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_RIGHT);
@@ -4013,6 +4016,752 @@ class TrialTracker
 		$pdf->Output('Larvol PDF_'. date("Y-m-d_H.i.s") .'.pdf', 'I');
 		
 	}
+	
+	/***** Functions ONLY FOR TCPDF *****************************/
+	function displayTrialTableHeader_TCPDF($loggedIn, $globalOptions = array()) 
+	{
+		$outputStr ='<table style="border-collapse:collapse;" width="100%" cellpadding="0" cellspacing="0" class="manage">'
+			 . '<thead><tr>'. (($loggedIn) ? '<th valign="bottom" align="center" style="width:30px; vertical-align:bottom;" >ID</th>' : '' )
+			 . '<th valign="bottom" height="11px" align="center" style="width:93px; vertical-align:bottom;">Title</th>'
+			 . '<th valign="bottom" align="center" style="width:15px; vertical-align:bottom;" title="Black: Actual&nbsp;&nbsp;Gray: Anticipated&nbsp;&nbsp;Red: Change greater than 20%">N</th>'
+			 . '<th valign="bottom" align="center" style="width:45px; vertical-align:bottom;" title="&quot;EU&quot; = European Union&nbsp;&quot;ROW&quot; = Rest of World">Region</th>'
+			 . '<th valign="bottom" align="center" style="width:60px; vertical-align:bottom;">Interventions</th>'
+			 . '<th valign="bottom" align="center" style="width:45px; vertical-align:bottom;">Sponsor</th>'
+			 . '<th valign="bottom" align="center" style="width:45px; vertical-align:bottom;">Status</th>'
+			 . '<th valign="bottom" align="center" style="width:60px; vertical-align:bottom;">Conditions</th>'
+			 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;" title="MM/YY">Start</th>'
+			 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;" title="MM/YY">End</th>'
+			 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;">Ph</th>'
+			 . '<th valign="bottom" align="center" style="width:22px; vertical-align:bottom;">Result</th>'
+			 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;" colspan="12">' . (date('Y')) . '</th>'
+			 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;" colspan="12">' . (date('Y')+1) . '</th>'
+			 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;" colspan="12">' . (date('Y')+2) . '</th>'
+			 . '<th valign="bottom" align="center" style="width:5px; vertical-align:bottom;" colspan="3" class="rightborder">+</th></tr></thead>';
+		
+		$outputStr.= '<tr style="border:none; border-top:none;">' //Extra row used for Alignment[IMP]
+			 . (($loggedIn) ? '<td border="0" style="width:30px; height:0px; border-top:none; border:none;" ></td>' : '' )
+			 . '<td border="0" height="0px" style="width:93px; height:0px; border-top:none; border:none;"></td>'
+			 . '<td border="0" style="width:15px; height:0px; border-top:none; border:none;"></td>'
+			 . '<td border="0" style="width:45px; height:0px; border-top:none; border:none;"></td>'
+			 . '<td border="0" style="width:60px; height:0px; border-top:none; border:none;"></td>'
+			 . '<td border="0" style="width:45px; height:0px; border-top:none; border:none;"></td>'
+			 . '<td border="0" style="width:45px; height:0px; border-top:none; border:none;"></td>'
+			 . '<td border="0" style="width:60px; height:0px; border-top:none; border:none;"></td>'
+			 . '<td border="0" style="width:20px; height:0px; border-top:none; border:none;"></td>'
+			 . '<td border="0" style="width:20px; height:0px; border-top:none; border:none;"></td>'
+			 . '<td border="0" style="width:20px; height:0px; border-top:none; border:none;"></td>'
+			 . '<td border="0" style="width:22px; height:0px; border-top:none; border:none;"></td>'
+			 . '<td border="0" style="width:20px; height:0px; border-top:none; border:none;" colspan="12"></td>'
+			 . '<td border="0" style="width:20px; height:0px; border-top:none; border:none;" colspan="12"></td>'
+			 . '<td border="0" style="width:20px; height:0px; border-top:none; border:none;" colspan="12"></td>'
+			 . '<td border="0" style="width:5px; height:0px; border-top:none; border:none;" colspan="3" class="rightborder"></td></tr>';
+			 
+		return $outputStr;
+
+	}
+
+	function displayTrials_TCPDF($globalOptions = array(), $loggedIn, $start, $end, $trials, $trialsInfo, $ottType)
+	{	
+		$fieldList 	= array('Enrollment' => 'NCT/enrollment', 'Region' => 'region', 'Interventions' => 'NCT/intervention_name', 
+							'Sponsor' => 'NCT/lead_sponsor', 'Status' => 'NCT/overall_status', 'Conditions' => 'NCT/condition', 
+							'Study Dates' => 'NCT/start_date', 'Phase' => 'NCT/phase');
+		$phaseValues = array('N/A'=>'#BFBFBF', '0'=>'#00CCFF', '0/1'=>'#99CC00', '1'=>'#99CC00', '1a'=>'#99CC00', '1b'=>'#99CC00', '1a/1b'=>'#99CC00', 
+							'1c'=>'#99CC00', '1/2'=>'#FFFF00', '1b/2'=>'#FFFF00', '1b/2a'=>'#FFFF00', '2'=>'#FFFF00', '2a'=>'#FFFF00', '2a/2b'=>'#FFFF00', 
+							'2a/b'=>'#FFFF00', '2b'=>'#FFFF00', '2/3'=>'#FF9900', '2b/3'=>'#FF9900','3'=>'#FF9900', '3a'=>'#FF9900', '3b'=>'#FF9900', 
+							'3/4'=>'#FF0000', '3b/4'=>'#FF0000', '4'=>'#FF0000');	
+		
+		$currentYear = date('Y');
+		$secondYear = (date('Y')+1);
+		$thirdYear = (date('Y')+2);
+		
+		$section = '';$outputStr = '';
+		$start = $start - 1;
+		
+		$max = array_reduce($trials, function($a, $b) { 
+		  return $a > $b['section'] ? $a : $b['section']; 
+		});
+		
+		$sections = array_map(function($a) { 
+		  return $a['section']; 
+		},  $trials);
+		$sections = array_unique($sections);
+		
+		$endT = end($trialsInfo);
+		
+		for($i=$start; $i<=$end; $i++) 
+		{ 	
+			if($i%2 == 1) 
+			{ 
+				$rowOneType = 'alttitle';
+				$rowOneBGType = 'background-color:#D5D3E6;';
+			}	
+			else
+			{
+				$rowOneType = 'title';
+				$rowOneBGType = 'background-color:#EDEAFF;';
+			}	
+			
+			$rowspan = 1;
+			$enrollStyle = 'color:gray;';
+			$titleLinkColor = '#000000;';
+			$sectionKey = $trials[$i]['section'];
+			
+			if(isset($trials[$i]['matchedupms']))  
+				$rowspan = count($trials[$i]['matchedupms'])+1; 
+			 
+			foreach($trialsInfo as $tkey => &$tvalue)
+			{	
+				if($tkey < $sectionKey)
+				{
+					continue;
+				}
+				
+				$flag = false;
+				$trflag = false;
+				
+				if($section !== $sectionKey && $tkey <= $sectionKey && $flag === false)
+				{	
+					$flag = true;
+					if(!empty($tvalue['naUpms']))
+					{
+						if($ottType == 'rowstacked')
+						{
+							$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true" class="trialtitles">'
+									. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer notopbottomborder leftrightborderblue sectiontitles"'
+									. ' onclick="sh(this,\'rowstacked\');">&nbsp;</td></tr>'
+									. $this->displayUnMatchedUpms_TCPDF($loggedIn, 'rowstacked', $tvalue['naUpms'])
+									. '<tr style="page-break-inside:avoid;" nobr="true" class="trialtitles">'
+									. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="notopbottomborder leftrightborderblue sectiontitles"'
+									. ' >' . $tvalue['sectionHeader'] . '</td></tr>';
+						}
+						else
+						{
+							if($ottType != 'colstacked')
+								$image = 'down';
+							else
+								$image = 'up';
+							
+							$naUpmIndex = preg_replace('/[^a-zA_Z0-9]/i', '', $tvalue['sectionHeader']);
+							$naUpmIndex = substr($naUpmIndex, 0, 7);
+							
+							$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true" class="trialtitles">'
+									. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer notopbottomborder leftrightborderblue sectiontitles"'
+									. ' onclick="sh(this,\'' . $naUpmIndex . '\');">' . $tvalue['sectionHeader'] . '</td></tr>';
+							$outputStr .= $this->displayUnMatchedUpms_TCPDF($loggedIn, $naUpmIndex, $tvalue['naUpms']);
+						}
+					}
+					else
+					{	
+						$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true"><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="notopbottomborder leftrightborderblue sectiontitles">'
+									. $tvalue['sectionHeader'] . '</td></tr>';
+					}
+					unset($trialsInfo[$tkey]);
+					if(!in_array($tkey, $sections) && $globalOptions['onlyUpdates'] == "no")
+					{
+						$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true"><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord" align="left">No trials found</td></tr>';
+					}
+				}
+				else if($tkey > $max && $i == $end)
+				{	
+					if(!empty($tvalue['naUpms']))
+					{
+						if($ottType != 'colstacked')
+							$image = 'down';
+						else
+							$image = 'up';
+						
+						$naUpmIndex = preg_replace('/[^a-za-zA_Z0-9]/i', '', $tvalue['sectionHeader']);
+						$naUpmIndex = substr($naUpmIndex, 0, 7);
+						
+						$outputStr .= '<tr class="trialtitles">'
+									. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
+									. ' onclick="sh(this,\'' . $naUpmIndex . '\');">' . $tvalue['sectionHeader'] . '</td></tr>';
+						$outputStr .= $this->displayUnMatchedUpms_TCPDF($loggedIn, $naUpmIndex, $tvalue['naUpms']);
+					}
+					else
+					{
+						$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="notopbottomborder leftrightborderblue sectiontitles">'
+									. $tvalue['sectionHeader'] . '</td></tr>';
+					}
+					unset($trialsInfo[$tkey]);
+					if($globalOptions['onlyUpdates'] == "no")
+					{
+						$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord" align="left">No trials found</td></tr>';
+					}
+					if($tvalue['sectionHeader'] == $endT['sectionHeader'])
+					{	
+						$trflag = true;
+					}
+				}
+			}
+			if($trflag == true || $i == $end)
+			{
+				continue;
+			}
+			
+			//row starts  
+			$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true" ' . (($trials[$i]['new'] == 'y') ? 'class="newtrial" ' : ''). '>';  
+			
+			//nctid column
+			if($loggedIn) 
+			{ 
+				$outputStr .= '<td style="'.$rowOneBGType.'" class="' . $rowOneType . '" rowspan="' . $rowspan . '" ' . (($trials[$i]['new'] == 'y') ? 'title="New record"' : '') 
+							. ' ><a style="color:' . $titleLinkColor . '" href="http://clinicaltrials.gov/ct2/show/' 
+							. padnct($trials[$i]['NCT/nct_id']) . '" target="_blank">' . $trials[$i]['NCT/nct_id'] . '</a></td>';
+			}
+
+			//acroynm and title column
+			$attr = ' ';
+			if(isset($trials[$i]['edited']) && array_key_exists('NCT/brief_title', $trials[$i]['edited'])) 
+			{
+				$attr = ' highlight" title="' . $trials[$nctid]['edited']['NCT/brief_title'];
+				$titleLinkColor = '#FF0000;';
+			} 
+			else if($trials[$i]['new'] == 'y') 
+			{
+				$attr = '" title="New record';
+				$titleLinkColor = '#FF0000;';
+			}				
+			$outputStr .= '<td style="'.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . ' ' . $attr . '"><div class="rowcollapse">'
+						. '<a style="color:' . $titleLinkColor . '" href="http://clinicaltrials.gov/ct2/show/' . padnct($trials[$i]['NCT/nct_id']) . '" '
+						. 'target="_blank">'; 
+			if(isset($trials[$i]['NCT/acronym']) && $trials[$i]['NCT/acronym'] != '') 
+			{
+				$outputStr .= '<b>' . htmlformat($trials[$i]['NCT/acronym']) . '</b>&nbsp;' . htmlformat($trials[$i]['NCT/brief_title']);
+			} 
+			else 
+			{
+				$outputStr .= htmlformat($trials[$i]['NCT/brief_title']);
+			}
+			$outputStr .= '</a></div></td>';
+			
+				
+			//enrollment column
+			$attr = ' ';
+			if(isset($trials[$i]['edited']) && array_key_exists('NCT/enrollment',$trials[$i]['edited']) 
+				&& (getDifference(substr($trials[$i]['edited']['NCT/enrollment'],16), $trials[$i]['NCT/enrollment']))) 
+			{
+				$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/enrollment'];
+				$enrollStyle = 'color:#973535;';
+			}
+			else if($trials[$i]['new'] == 'y') 
+			{
+				$attr = '" title="New record';
+				$enrollStyle = 'color:#973535;';
+			}
+			$outputStr .= '<td style="'.$rowOneBGType.'" nowrap="nowrap" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">';
+			if($trials[$i]["NCT/enrollment_type"] != '') 
+			{
+				if($trials[$i]["NCT/enrollment_type"] == 'Anticipated') 
+				{ 
+					$outputStr .= '<span style="font-weight:bold;' . $enrollStyle . '">' . $trials[$i]["NCT/enrollment"] . '</span>';
+				}
+				else if($trials[$i]["NCT/enrollment_type"] == 'Actual') 
+				{
+					$outputStr .= $trials[$i]["NCT/enrollment"];
+				} 
+				else 
+				{ 
+					$outputStr .= $trials[$i]["NCT/enrollment"] . ' (' . $trials[$i]["NCT/enrollment_type"] . ')';
+				}
+			} 
+			else 
+			{
+				$outputStr .= $trials[$i]["NCT/enrollment"];
+			}
+			$outputStr .= '</div></td>';				
+
+
+			//region column
+			$attr = ' ';
+			if($trials[$i]['new'] == 'y')
+			{ 
+				$attr = 'title="New record"';
+			}
+			$outputStr .= '<td style="'.$rowOneBGType.'" class="' . $rowOneType . '" rowspan="' . $rowspan . '" ' . $attr . '>'
+						. '<div class="rowcollapse">' . $trials[$i]['region'] . '</div></td>';
+
+				
+			//intervention name column
+			if(isset($trials[$i]['edited']) && array_key_exists('NCT/intervention_name', $trials[$i]['edited']))
+			{
+				$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/intervention_name'];
+			} 
+			else if($trials[$i]['new'] == 'y')
+			{
+				$attr = '" title="New record';
+			}
+			$outputStr .= '<td style="'.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
+						. '<div class="rowcollapse">' . implode(", ",array_unique(explode(",", str_replace(", ",",",$trials[$i]['NCT/intervention_name'])))) . '</div></td>';
+
+
+			//collaborator and sponsor column
+			$attr = ' ';
+			if(isset($trials[$i]['edited']) && (array_key_exists('NCT/collaborator', $trials[$i]['edited']) 
+			|| array_key_exists('NCT/lead_sponsor', $trials[$i]['edited']))) 
+			{
+					
+				$attr = ' highlight" title="';
+				if(array_key_exists('NCT/lead_sponsor', $trials[$i]['edited']))
+				{
+					$attr .= $trials[$i]['edited']['NCT/lead_sponsor'] . ' ';
+				}
+				if(array_key_exists('NCT/collaborator', $trials[$i]['edited'])) 
+				{
+					$attr .= $trials[$i]['edited']['NCT/collaborator'];
+					$enrollStyle = 'color:#973535;';
+				}
+				$attr .= '';
+			} 
+			else if($trials[$i]['new'] == 'y') 
+			{
+				$attr = '" title="New record';
+			}
+			$outputStr .= '<td style="'.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
+						. '<div class="rowcollapse">' . $trials[$i]['NCT/lead_sponsor'] . ' <span style="' . $enrollStyle . '"> ' 
+						. $trials[$i]["NCT/collaborator"] . ' </span></div></td>';
+
+
+			//overall status column
+			if(isset($trials[$i]['edited']) && array_key_exists('NCT/overall_status', $trials[$i]['edited'])) 
+			{
+				$attr = 'class="highlight ' . $rowOneType . ' " title="' . $trials[$i]['edited']['NCT/overall_status'] . '" ';
+			} 
+			else if($trials[$i]['new'] == 'y') 
+			{
+				$attr = 'title="New record" class="' . $rowOneType . '"' ;
+			} 
+			else 
+			{
+				$attr = 'class="' . $rowOneType . '"';
+			}
+			$outputStr .= '<td style="'.$rowOneBGType.'" ' . $attr . ' rowspan="' . $rowspan . '">'  
+						. '<div class="rowcollapse">' . $trials[$i]['NCT/overall_status'] . '</div></td>';
+				
+				
+			//condition column
+			$attr = ' ';
+			if(isset($trials[$i]['edited']) && array_key_exists('NCT/condition', $trials[$i]['edited'])) 
+			{
+				$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/condition'];
+			} 
+			else if($trials[$i]['new'] == 'y') 
+			{
+				$attr = '" title="New record';
+			}
+			$outputStr .= '<td style="'.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
+						. '<div class="rowcollapse">' . implode(", ",array_unique(explode(",", str_replace(", ",",",$trials[$i]['NCT/condition'])))) . '</div></td>';
+					
+				
+			//start date column
+			$attr = ' ';
+			if(isset($trials[$i]['edited']) && array_key_exists('NCT/start_date', $trials[$i]['edited'])) 
+			{
+				$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/start_date'] ;
+			} 
+			else if($trials[$i]['new'] == 'y') 
+			{
+				$attr = '" title="New record';
+			}
+			$outputStr .= '<td style="'.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '" ><div class="rowcollapse">'; 
+			if($trials[$i]["NCT/start_date"] != '' && $trials[$i]["NCT/start_date"] != NULL && $trials[$i]["NCT/start_date"] != '0000-00-00') 
+			{
+				$outputStr .= date('m/y',strtotime($trials[$i]["NCT/start_date"]));
+			} 
+			else 
+			{
+				$outputStr .= '&nbsp;';
+			}
+			$outputStr .= '</div></td>';
+				
+				
+			//end date column
+			$attr = '';
+			if(isset($trials[$i]['edited']) && array_key_exists('inactive_date', $trials[$i]['edited'])) 
+			{
+				$attr = ' highlight" title="' . $trials[$i]['edited']['inactive_date'] ;
+			} 
+			else if($trials[$i]['new'] == 'y') 
+			{
+				$attr = '" title="New record" ';
+			}	
+			$outputStr .= '<td style="'.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . '" ' . $attr . '><div class="rowcollapse">'; 
+			if($trials[$i]["inactive_date"] != '' && $trials[$i]["inactive_date"] != NULL && $trials[$i]["inactive_date"] != '0000-00-00') 
+			{
+				$outputStr .= date('m/y',strtotime($trials[$i]["inactive_date"]));
+			} 
+			else 
+			{
+				$outputStr .= '&nbsp;';
+			}
+			$outputStr .= '</div></td>';
+					
+											
+			//phase column
+			if(isset($trials[$i]['edited']) && array_key_exists('NCT/phase', $trials[$i]['edited'])) 
+			{
+				$attr = 'class="highlight" title="' . $trials[$i]['edited']['NCT/phase'] . '" ';
+			} 
+			else if($trials[$i]['new'] == 'y') 
+			{
+				$attr = 'title="New record"';
+			}
+			if($trials[$i]['NCT/phase'] == 'N/A' || $trials[$i]['NCT/phase'] == '' || $trials[$i]['NCT/phase'] === NULL)
+			{
+				$phase = 'N/A';
+				$phaseColor = $phaseValues['N/A'];
+			}
+			else
+			{
+				$phase = str_replace('Phase ', '', trim($trials[$i]['NCT/phase']));
+				$phaseColor = $phaseValues[$phase];
+			}
+			$outputStr .= '<td align="center" rowspan="' . $rowspan . '" style="background-color:' . $phaseColor . ';" ' . $attr . '>' 
+						. '<div class="rowcollapse">' . $phase . '</div></td>';				
+			
+			$outputStr .= '<td>&nbsp;</td>';
+				
+			$startMonth = date('m',strtotime($trials[$i]['NCT/start_date']));
+			$startYear = date('Y',strtotime($trials[$i]['NCT/start_date']));
+			$endMonth = date('m',strtotime($trials[$i]['inactive_date']));
+			$endYear = date('Y',strtotime($trials[$i]['inactive_date']));
+
+			//rendering project completion gnatt chart
+			$trialGnattChart = $this->trialGnattChart($startMonth, $startYear, $endMonth, $endYear, $currentYear, $secondYear, $thirdYear, 
+				$trials[$i]['NCT/start_date'], $trials[$i]['inactive_date'], $phaseColor);
+				
+			$trialGnattChart = preg_replace('/&nbsp;/', '<img src="images/trans_big.gif" />', $trialGnattChart);	
+			$outputStr .= preg_replace('/width:([0-9]*)px;/', '', $trialGnattChart);	
+				
+			$outputStr .= '</tr>';
+			
+			//rendering matched upms
+			if(isset($trials[$i]['matchedupms']) && !empty($trials[$i]['matchedupms'])) 
+			{
+				foreach($trials[$i]['matchedupms'] as $mkey => $mvalue) 
+				{ 
+					$str = '';
+					$diamond = '';
+					$resultImage = '';
+	
+					$stMonth = date('m', strtotime($mvalue['start_date']));
+					$stYear = date('Y', strtotime($mvalue['start_date']));
+					$edMonth = date('m', strtotime($mvalue['end_date']));
+					$edYear = date('Y', strtotime($mvalue['end_date']));
+					$upmTitle = 'title="' . htmlformat($mvalue['event_description']) . '"';
+					
+					$outputStr .= '<tr style="page-break-inside:avoid; width:65px;" nobr="true">';
+					
+					
+					$outputStr .= '<td style="width:22px;  text-align:center;">';
+					
+					$outputStr .= '<div ' . $upmTitle . '>';
+					if($mvalue['result_link'] != '' && $mvalue['result_link'] !== NULL)
+					{
+						if((!empty($mvalue['edited']) && $mvalue['edited']['field'] == 'result_link') || ($mvalue['new'] == 'y')) 
+							$imgColor = 'red';
+						else 
+							$imgColor = 'black'; 
+							
+						$outputStr .= '<a href="' . $value['result_link'] . '" style="color:#000;">';
+						if($mvalue['event_type'] == 'Clinical Data')
+						{
+							$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond" height="6px" width="6px" style="margin:4px;" border="0" />';
+						}
+						else if($mvalue['status'] == 'Cancelled')
+						{
+							$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel" height="6px" width="6px" style="margin:4px;" border="0" />';
+						}
+						else
+						{
+							$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark" height="6px" width="6px" style="margin:4px;" border="0" />';
+						}
+						$outputStr .= '</a>';
+					}
+					else if($mvalue['status'] == 'Pending')
+					{
+						$outputStr .= '<img src="images/hourglass.png" alt="Hourglass" height="8px" width="8px" style="margin:3px;" border="0" />';
+					}
+					$outputStr .= '</div></td>';
+					
+					//rendering upm (upcoming project completion) chart
+					$upmGnattChart = $this->upmGnattChart($stMonth, $stYear, $edMonth, $edYear, $currentYear, $secondYear, $thirdYear, $mvalue['start_date'],
+					$mvalue['end_date'], $mvalue['event_link'], $upmTitle);
+					$upmGnattChart = preg_replace('/&nbsp;/', '<img src="images/trans_big.gif" />', $upmGnattChart);
+					$outputStr .= preg_replace('/width:([0-9]*)px;/', '', $upmGnattChart);
+					$outputStr .= '</tr>';
+				}
+			}
+			
+			//section title
+			$section = $trials[$i]['section'];
+		}
+		
+		return $outputStr;
+	}
+	
+
+	function displayUnMatchedUpms_TCPDF($loggedIn, $naUpmIndex, $naUpms)
+	{
+		global $now;
+		$outputStr = '';
+		if(!empty($naUpms))
+		{
+			$currentYear = date('Y');
+			$secondYear = (date('Y')+1);
+			$thirdYear = (date('Y')+2);
+			
+			$cntr = 0;
+			foreach($naUpms as $key => $value)
+			{
+				$attr = '';
+				$resultImage = '';
+				$class = 'class = "upms ' . $naUpmIndex . '" ';
+				$titleLinkColor = 'color:#000;';
+				$dateStyle = 'color:gray;';
+				$upmTitle = 'title="' . htmlformat($value['event_description']) . '"';
+				
+				if($cntr%2 == 1) 
+				{
+					$rowOneType = 'alttitle';
+					$rowTwoType = 'altrow';
+				} 
+				else 
+				{
+					$rowOneType = 'title';
+					$rowTwoType = 'row';
+				}
+				
+				//Highlighting the whole row in case of new trials
+				if($value['new'] == 'y') 
+				{
+					$class = 'class="upms newtrial ' . $upmHeader . '" ';
+				}
+				
+				//rendering unmatched upms
+				$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true" ' . $class . ' style="background-color:#000;">';
+				
+				//field upm-id
+				if($loggedIn)
+				{
+					if($value['new'] == 'y')
+					{
+						$titleLinkColor = 'color:#FF0000;';
+						$title = ' title = "New record" ';
+					}
+					$outputStr .= '<td ' . $title . '><a style="' . $titleLinkColor 
+							. '" href="' . urlPath() . 'upm.php?search_id=' . $value['id'] . '" target="_blank">' . $value['id'] . '</a></td>';
+				}
+				
+				
+				//field upm event description
+				if(!empty($value['edited']) && ($value['edited']['field'] == 'event_description')) 
+				{
+					$titleLinkColor = 'color:#FF0000;';
+					$attr = ' highlight'; 
+					
+					if($value['edited']['event_description'] != '' && $value['edited']['event_description'] !== NULL)
+					{
+						$title = ' title="Previous value: '. $value['edited']['event_description'] . '" '; 
+					}
+					else
+					{
+						$title = ' title="No Previous value" ';
+					}
+				} 
+				else if($value['new'] == 'y') 
+				{
+					$titleLinkColor = 'color:#FF0000;';
+					$title = ' title = "New record" ';
+				}
+				$outputStr .= '<td colspan="5" class="' . $rowOneType .  $attr . ' titleupm titleupmodd txtleft" ' . $title . '><div class="rowcollapse">';
+				if($value['event_link'] !== NULL && $value['event_link'] != '') 
+				{
+					$outputStr .= '<a style="' . $titleLinkColor . '" href="' . $value['event_link'] . '" target="_blank">' . $value['event_description'] . '</a>';
+				} 
+				else 
+				{
+					$outputStr .= $value['event_description'];
+				}
+				$outputStr .= '</div></td>';
+				
+				
+				//field upm status
+				$title = '';
+				if($value['new'] == 'y')
+				{
+					$title = ' title = "New record" ';
+				}
+				$outputStr .= '<td class="' . $rowTwoType . ' titleupmodd" ' . $title . '><div class="rowcollapse">' . $value['status'] . '</div></td>';
+
+			
+				//field upm event type
+				$title = '';
+				$attr = '';	
+				if(!empty($value['edited']) && ($value['edited']['field'] == 'event_type')) 
+				{
+					$attr = ' highlight'; 
+					if($value['edited']['event_type'] != '' && $value['edited']['event_type'] !== NULL)
+					{
+						$title = ' title="Previous value: '. $value['edited']['event_type'] . '" '; 
+					}
+					else
+					{
+						$title = ' title="No Previous value" ';
+					}	
+				} 
+				else if($value['new'] == 'y') 
+				{
+					$title = ' title = "New record" ';
+				}
+				$outputStr .= '<td class="' . $rowTwoType . $attr . ' titleupmodd" ' . $title . '>'
+							. '<div class="rowcollapse">' . $value['event_type'] . ' Milestone</div></td>';
+				
+				
+				//field upm start date
+				$title = '';
+				$attr = '';	
+				if(!empty($value['edited']) && ($value['edited']['field'] == 'start_date'))
+				{
+					$attr = ' highlight';
+					$dateStyle = 'color:#973535;'; 
+					if($value['edited']['start_date'] != '' && $value['edited']['start_date'] !== NULL)
+					{
+						$title = ' title="Previous value: ' . $value['edited']['start_date'] . '" '; 
+					} 
+					else 
+					{
+						$title = ' title="No Previous value" ';
+					}	
+				} 
+				else if(!empty($value['edited']) && ($value['edited']['field'] == 'start_date_type'))
+				{
+					$attr = ' highlight';
+					$dateStyle = 'color:#973535;';
+					if($value['edited']['start_date_type'] != '' && $value['edited']['start_date_type'] !== NULL) 
+					{
+						$title = ' title="Previous value: ' . $value['edited']['start_date_type'] . '" '; 
+					} 
+					else 
+					{
+						$title = ' title="No Previous value" ';
+					}
+				} 
+				else if($value['new'] == 'y')
+				{
+					$title = ' title = "New record" ';
+					$dateStyle = 'color:#973535;'; 
+				}
+				$outputStr .= '<td class="' . $rowTwoType . $attr . ' titleupmodd txtleft" ' . $title . '><div class="rowcollapse">';
+				if($value['start_date_type'] == 'anticipated') 
+				{
+					$outputStr .= '<span style="font-weight:bold;' . $dateStyle . '">'
+					 			. (($value['start_date'] != '' && $value['start_date'] !== NULL && $value['start_date'] != '0000-00-00') ? 
+								date('m/y',strtotime($value['start_date'])) : '' )  . '</span>';
+				} 
+				else 
+				{
+					$outputStr .= (($value['start_date'] != '' && $value['start_date'] !== NULL && $value['start_date'] != '0000-00-00') ? 
+									date('m/y',strtotime($value['start_date'])) : '' );
+				}
+				$outputStr .= '</div></td>';		
+				
+				
+				//field upm end date
+				$title = '';
+				$attr = '';	
+				if(!empty($value['edited']) && ($value['edited']['field'] == 'end_date'))
+				{
+					$attr = ' highlight';
+					$dateStyle = 'color:#973535;';
+					if($value['edited']['end_date'] != '' && $value['edited']['end_date'] !== NULL)
+					{
+						$title = ' title="Previous value: ' . $value['edited']['end_date'] . '" '; 
+					}
+					else 
+					{
+						$title = ' title="No Previous value" ';
+					}
+				} 
+				else if(!empty($value['edited']) && ($value['edited']['field'] == 'end_date_type'))
+				{
+					$attr = ' highlight';
+					$dateStyle = 'color:#973535;'; 
+					if($value['edited']['end_date_type'] != '' && $value['edited']['end_date_type'] !== NULL) 
+					{
+						$title = ' title="Previous value: ' .  $value['edited']['end_date_type'] . '" ';
+					} 
+					else 
+					{
+						$title = ' title="No Previous value" ';
+					}
+				} 
+				else if($value['new'] == 'y') 
+				{
+					$title = ' title = "New record" ';
+					$dateStyle = 'color:#973535;'; 
+				}
+				$outputStr .= '<td class="' . $rowTwoType . $attr . ' titleupmodd txtleft" ' . $title . '><div class="rowcollapse">';
+				if($value['end_date_type'] == 'anticipated') 
+				{
+					$outputStr .= '<span style="font-weight:bold;' . $dateStyle . '">' 
+								. (($value['end_date'] != '' && $value['end_date'] !== NULL && $value['end_date'] != '0000-00-00') ? 
+									date('m/y',strtotime($value['end_date'])) : '' ) . '</span>';
+				} 
+				else 
+				{
+					$outputStr .= (($value['end_date'] != '' && $value['end_date'] !== NULL && $value['end_date'] != '0000-00-00') ? 
+									date('m/y',strtotime($value['end_date'])) : '');
+				}	
+				$outputStr .= '</div></td><td class="titleupmodd"><div class="rowcollapse"></div></td>';
+				
+				
+				//field upm result 
+				$outputStr .= '<td class="titleupmodd"><div class="rowcollapse">';
+				if($value['result_link'] != '' && $value['result_link'] !== NULL)
+				{
+					if((!empty($value['edited']) && $value['edited']['field'] == 'result_link') || ($value['new'] == 'y')) 
+							$imgColor = 'red';
+					else 
+						$imgColor = 'black'; 
+						
+					$outputStr .= '<div ' . $upmTitle . '><a href="' . $value['result_link'] . '" style="color:#000;">';
+					if($value['event_type'] == 'Clinical Data')
+					{
+						$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond" height="6px" width="6px" style="margin:4px;" border="0" />';
+					}
+					else if($value['status'] == 'Cancelled')
+					{
+						$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel" height="6px" width="6px" style="margin:4px;" border="0" />';
+					}
+					else
+					{
+						$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark" height="6px" width="6px" style="margin:4px;" border="0" />';
+					}
+					$outputStr .= '</a></div>';
+				}
+				else if($value['status'] == 'Pending')
+				{
+					$outputStr .= '<div ' . $upmTitle . '><img src="images/hourglass.png" alt="Hourglass" height="8px" width="8px" style="margin:3px;" border="0" /></div>';
+				}
+				$outputStr .= '</div></td>';		
+				
+				
+				//upm gnatt chart
+				$upmGnattChart = $this->upmGnattChart(date('m',strtotime($value['start_date'])), date('Y',strtotime($value['start_date'])), 
+								date('m',strtotime($value['end_date'])), date('Y',strtotime($value['end_date'])), $currentYear, $secondYear, $thirdYear, 
+								$value['start_date'], $value['end_date'], $value['event_link'], $upmTitle);
+				$upmGnattChart = preg_replace('/&nbsp;/', '<img src="images/trans_big.gif" />', $upmGnattChart);
+				$outputStr .= preg_replace('/width:([0-9]*)px;/', '', $upmGnattChart);				
+				
+				$outputStr .= '</tr>';
+			}
+		}
+		return $outputStr;
+	}
+
+	
+	/*****END OF Functions ONLY FOR TCPDF *****************************/
 	
 	function generateXmlFile($resultIds, $timeMachine = NULL, $ottType, $globalOptions)
 	{
@@ -5814,47 +6563,7 @@ class TrialTracker
 		return $outputStr;
 
 	}
-	
-	function displayTrialTableHeader_TCPDF($loggedIn, $globalOptions = array()) 
-	{
-		$outputStr ='<table style="border-collapse:collapse;" width="100%" cellpadding="0" cellspacing="0" class="manage">'
-			 . '<thead><tr>'. (($loggedIn) ? '<th align="center" style="width:30px;" >ID</th>' : '' )
-			 . '<th align="center" style="width:93px;">Title</th>'
-			 . '<th align="center" style="width:15px;" title="Black: Actual&nbsp;&nbsp;Gray: Anticipated&nbsp;&nbsp;Red: Change greater than 20%">N</th>'
-			 . '<th align="center" style="width:45px;" title="&quot;EU&quot; = European Union&nbsp;&quot;ROW&quot; = Rest of World">Region</th>'
-			 . '<th align="center" style="width:60px;">Interventions</th>'
-			 . '<th align="center" style="width:45px;">Sponsor</th>'
-			 . '<th align="center" style="width:45px;">Status</th>'
-			 . '<th align="center" style="width:60px;">Conditions</th>'
-			 . '<th align="center" title="MM/YY" style="width:20px;">Start</th>'
-			 . '<th align="center" title="MM/YY" style="width:20px;">End</th>'
-			 . '<th align="center" style="width:20px;">Ph</th>'
-			 . '<th align="center" style="width:22px;">Result</th>'
-			 . '<th align="center" colspan="12" style="width:20px;">' . (date('Y')) . '</th>'
-			 . '<th align="center" colspan="12" style="width:20px;">' . (date('Y')+1) . '</th>'
-			 . '<th align="center" colspan="12" style="width:20px;">' . (date('Y')+2) . '</th>'
-			 . '<th align="center" colspan="3" style="width:5px;" class="rightborder">+</th></tr></thead>';
 		
-		$outputStr.= '<tr style="border:none;">' //Extra row used for Alignment
-			 . (($loggedIn) ? '<td style="width:30px; height:0px; border:none;" ></td>' : '' )
-			 . '<td style="width:93px; height:0px; border:none;"></td>'
-			 . '<td style="width:15px; height:0px; border:none;"></td>'
-			 . '<td style="width:45px; height:0px; border:none;"></td>'
-			 . '<td style="width:60px; height:0px; border:none;"></td>'
-			 . '<td style="width:45px; height:0px; border:none;"></td>'
-			 . '<td style="width:45px; height:0px; border:none;"></td>'
-			 . '<td style="width:60px; height:0px; border:none;"></td>'
-			 . '<td style="width:20px; height:0px; border:none;"></td>'
-			 . '<td style="width:20px; height:0px; border:none;"></td>'
-			 . '<td style="width:20px; height:0px; border:none;"></td>'
-			 . '<td style="width:22px; height:0px; border:none;"></td>'
-			 . '<td colspan="36" style="width:60px; height:0px; border:none;"></td>'
-			 . '<td colspan="3" style="width:5px; height:0px; border:none;" class="rightborder"></td></tr>';
-			 
-		return $outputStr;
-
-	}
-	
 	function getResultSet($resultIds, $stackType)
 	{	
 		$three = 0;
@@ -6548,469 +7257,7 @@ class TrialTracker
 		
 		return $outputStr;
 	}
-	
-	function displayTrials_TCPDF($globalOptions = array(), $loggedIn, $start, $end, $trials, $trialsInfo, $ottType)
-	{	
-		$fieldList 	= array('Enrollment' => 'NCT/enrollment', 'Region' => 'region', 'Interventions' => 'NCT/intervention_name', 
-							'Sponsor' => 'NCT/lead_sponsor', 'Status' => 'NCT/overall_status', 'Conditions' => 'NCT/condition', 
-							'Study Dates' => 'NCT/start_date', 'Phase' => 'NCT/phase');
-		$phaseValues = array('N/A'=>'#BFBFBF', '0'=>'#00CCFF', '0/1'=>'#99CC00', '1'=>'#99CC00', '1a'=>'#99CC00', '1b'=>'#99CC00', '1a/1b'=>'#99CC00', 
-							'1c'=>'#99CC00', '1/2'=>'#FFFF00', '1b/2'=>'#FFFF00', '1b/2a'=>'#FFFF00', '2'=>'#FFFF00', '2a'=>'#FFFF00', '2a/2b'=>'#FFFF00', 
-							'2a/b'=>'#FFFF00', '2b'=>'#FFFF00', '2/3'=>'#FF9900', '2b/3'=>'#FF9900','3'=>'#FF9900', '3a'=>'#FF9900', '3b'=>'#FF9900', 
-							'3/4'=>'#FF0000', '3b/4'=>'#FF0000', '4'=>'#FF0000');	
 		
-		$currentYear = date('Y');
-		$secondYear = (date('Y')+1);
-		$thirdYear = (date('Y')+2);
-		
-		$section = '';$outputStr = '';
-		$start = $start - 1;
-		
-		$max = array_reduce($trials, function($a, $b) { 
-		  return $a > $b['section'] ? $a : $b['section']; 
-		});
-		
-		$sections = array_map(function($a) { 
-		  return $a['section']; 
-		},  $trials);
-		$sections = array_unique($sections);
-		
-		$endT = end($trialsInfo);
-		
-		for($i=$start; $i<=$end; $i++) 
-		{ 	
-			if($i%2 == 1) 
-			{ 
-				$rowOneType = 'alttitle';
-				$rowOneBGType = 'background-color:#D5D3E6;';
-			}	
-			else
-			{
-				$rowOneType = 'title';
-				$rowOneBGType = 'background-color:#EDEAFF;';
-			}
-			
-			$rowspan = 1;
-			$enrollStyle = 'color:gray;';
-			$titleLinkColor = '#000000;';
-			$sectionKey = $trials[$i]['section'];
-			
-			if(isset($trials[$i]['matchedupms']))  
-				$rowspan = count($trials[$i]['matchedupms'])+1; 
-			 
-			foreach($trialsInfo as $tkey => &$tvalue)
-			{	
-				if($tkey < $sectionKey)
-				{
-					continue;
-				}
-				
-				$flag = false;
-				$trflag = false;
-				
-				if($section !== $sectionKey && $tkey <= $sectionKey && $flag === false)
-				{	
-					$flag = true;
-					if(!empty($tvalue['naUpms']))
-					{
-						if($ottType == 'rowstacked')
-						{
-							$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true" class="trialtitles">'
-									. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer notopbottomborder leftrightborderblue sectiontitles"'
-									. 'style="border-bottom:1px solid blue;background-image: url(\'images/down.png\');'
-									. 'background-repeat: no-repeat;background-position:left center;"'
-									. ' onclick="sh(this,\'rowstacked\');">&nbsp;</td></tr>'
-									. $this->displayUnMatchedUpms_TCPDF($loggedIn, 'rowstacked', $tvalue['naUpms'])
-									. '<tr style="page-break-inside:avoid;" nobr="true" class="trialtitles">'
-									. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="notopbottomborder leftrightborderblue sectiontitles"'
-									. ' >' . $tvalue['sectionHeader'] . '</td></tr>';
-						}
-						else
-						{
-							if($ottType != 'colstacked')
-								$image = 'down';
-							else
-								$image = 'up';
-							
-							$naUpmIndex = preg_replace('/[^a-zA_Z0-9]/i', '', $tvalue['sectionHeader']);
-							$naUpmIndex = substr($naUpmIndex, 0, 7);
-							
-							$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true" class="trialtitles">'
-									. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer notopbottomborder leftrightborderblue sectiontitles"'
-									. ' style="border-bottom:1px solid blue;background-image: url(\'images/' . $image 
-									. '.png\');background-repeat: no-repeat;background-position:left center;"'
-									. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . $tvalue['sectionHeader'] . '</td></tr>';
-							$outputStr .= $this->displayUnMatchedUpms_TCPDF($loggedIn, $naUpmIndex, $tvalue['naUpms']);
-						}
-					}
-					else
-					{	
-						$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true"><td colspan="' . getColspanBasedOnLogin($loggedIn)  
-						. '" class="notopbottomborder leftrightborderblue sectiontitles">' . $tvalue['sectionHeader'] . '</td></tr>';
-					}
-					unset($trialsInfo[$tkey]);
-					if(!in_array($tkey, $sections) && $globalOptions['onlyUpdates'] == "no")
-					{
-						$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true"><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord" align="left">No trials found</td></tr>';
-					}
-				}
-				else if($tkey > $max && $i == $end)
-				{	
-					if(!empty($tvalue['naUpms']))
-					{
-						if($ottType != 'colstacked')
-							$image = 'down';
-						else
-							$image = 'up';
-						
-						$naUpmIndex = preg_replace('/[^a-za-zA_Z0-9]/i', '', $tvalue['sectionHeader']);
-						$naUpmIndex = substr($naUpmIndex, 0, 7);
-						
-						$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true" class="trialtitles">'
-									. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer notopbottomborder leftrightborderblue sectiontitles" '
-									. 'style="border-bottom:1px solid blue;background-image: url(\'images/' . $image 
-									. '.png\');background-repeat: no-repeat;background-position:left center;"'
-									. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . $tvalue['sectionHeader'] . '</td></tr>';
-						$outputStr .= $this->displayUnMatchedUpms_TCPDF($loggedIn, $naUpmIndex, $tvalue['naUpms']);
-					}
-					else
-					{
-						$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true"><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="notopbottomborder leftrightborderblue sectiontitles">'
-									. $tvalue['sectionHeader'] . '</td></tr>';
-					}
-					unset($trialsInfo[$tkey]);
-					if($globalOptions['onlyUpdates'] == "no")
-					{
-						$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true"><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord" align="left">No trials found</td></tr>';
-					}
-					if($tvalue['sectionHeader'] == $endT['sectionHeader'])
-					{	
-						$trflag = true;
-					}
-				}
-			}
-			if($trflag == true || $i == $end)
-			{
-				continue;
-			}
-			
-			//row starts  
-			$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true" ' . (($trials[$i]['new'] == 'y') ? 'class="newtrial" ' : ''). '>';  
-			
-			//nctid column
-			if($loggedIn) 
-			{ 
-				$outputStr .= '<td style="'.$rowOneBGType.'" class="' . $rowOneType . '" rowspan="' . $rowspan . '" ' . (($trials[$i]['new'] == 'y') ? 'title="New record"' : '') 
-							. ' ><a style="color:' . $titleLinkColor . '" href="http://clinicaltrials.gov/ct2/show/' 
-							. padnct($trials[$i]['NCT/nct_id']) . '" target="_blank">' . $trials[$i]['NCT/nct_id'] . '</a></td>';
-			}
-
-			//acroynm and title column
-			$attr = ' ';
-			if(isset($trials[$i]['edited']) && array_key_exists('NCT/brief_title', $trials[$i]['edited'])) 
-			{
-				$attr = ' highlight" title="' . $trials[$nctid]['edited']['NCT/brief_title'];
-				$titleLinkColor = '#FF0000;';
-			} 
-			else if($trials[$i]['new'] == 'y') 
-			{
-				$attr = '" title="New record';
-				$titleLinkColor = '#FF0000;';
-			}				
-			$outputStr .= '<td style="'.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . ' ' . $attr . '"><div class="rowcollapse">'
-						. '<a style="color:' . $titleLinkColor . '" href="http://clinicaltrials.gov/ct2/show/' . padnct($trials[$i]['NCT/nct_id']) . '" '
-						. 'target="_blank">'; 
-			if(isset($trials[$i]['NCT/acronym']) && $trials[$i]['NCT/acronym'] != '') 
-			{
-				$outputStr .= '<b>' . htmlformat($trials[$i]['NCT/acronym']) . '</b>&nbsp;' . htmlformat($trials[$i]['NCT/brief_title']);
-			} 
-			else 
-			{
-				$outputStr .= htmlformat($trials[$i]['NCT/brief_title']);
-			}
-			$outputStr .= '</a></div></td>';
-			
-				
-			//enrollment column
-			$attr = ' ';
-			if(isset($trials[$i]['edited']) && array_key_exists('NCT/enrollment',$trials[$i]['edited']) 
-				&& (getDifference(substr($trials[$i]['edited']['NCT/enrollment'],16), $trials[$i]['NCT/enrollment']))) 
-			{
-				$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/enrollment'];
-				$enrollStyle = 'color:#973535;';
-			}
-			else if($trials[$i]['new'] == 'y') 
-			{
-				$attr = '" title="New record';
-				$enrollStyle = 'color:#973535;';
-			}
-			$outputStr .= '<td style="'.$rowOneBGType.'" nowrap="nowrap" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">';
-			if($trials[$i]["NCT/enrollment_type"] != '') 
-			{
-				if($trials[$i]["NCT/enrollment_type"] == 'Anticipated') 
-				{ 
-					$outputStr .= '<span style="font-weight:bold;' . $enrollStyle . '">' . $trials[$i]["NCT/enrollment"] . '</span>';
-				}
-				else if($trials[$i]["NCT/enrollment_type"] == 'Actual') 
-				{
-					$outputStr .= $trials[$i]["NCT/enrollment"];
-				} 
-				else 
-				{ 
-					$outputStr .= $trials[$i]["NCT/enrollment"] . ' (' . $trials[$i]["NCT/enrollment_type"] . ')';
-				}
-			} 
-			else 
-			{
-				$outputStr .= $trials[$i]["NCT/enrollment"];
-			}
-			$outputStr .= '</div></td>';				
-
-
-			//region column
-			$attr = ' ';
-			if($trials[$i]['new'] == 'y')
-			{ 
-				$attr = 'title="New record"';
-			}
-			$outputStr .= '<td style="'.$rowOneBGType.'" class="' . $rowOneType . '" rowspan="' . $rowspan . '" ' . $attr . '>'
-						. '<div class="rowcollapse">' . $trials[$i]['region'] . '</div></td>';
-
-				
-			//intervention name column
-			if(isset($trials[$i]['edited']) && array_key_exists('NCT/intervention_name', $trials[$i]['edited']))
-			{
-				$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/intervention_name'];
-			} 
-			else if($trials[$i]['new'] == 'y')
-			{
-				$attr = '" title="New record';
-			}
-			$outputStr .= '<td style="'.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
-						. '<div class="rowcollapse">' . implode(", ",array_unique(explode(",", str_replace(", ",",",$trials[$i]['NCT/intervention_name'])))) . '</div></td>';
-
-
-			//collaborator and sponsor column
-			$attr = ' ';
-			if(isset($trials[$i]['edited']) && (array_key_exists('NCT/collaborator', $trials[$i]['edited']) 
-			|| array_key_exists('NCT/lead_sponsor', $trials[$i]['edited']))) 
-			{
-					
-				$attr = ' highlight" title="';
-				if(array_key_exists('NCT/lead_sponsor', $trials[$i]['edited']))
-				{
-					$attr .= $trials[$i]['edited']['NCT/lead_sponsor'] . ' ';
-				}
-				if(array_key_exists('NCT/collaborator', $trials[$i]['edited'])) 
-				{
-					$attr .= $trials[$i]['edited']['NCT/collaborator'];
-					$enrollStyle = 'color:#973535;';
-				}
-				$attr .= '';
-			} 
-			else if($trials[$i]['new'] == 'y') 
-			{
-				$attr = '" title="New record';
-			}
-			$outputStr .= '<td style="'.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
-						. '<div class="rowcollapse">' . $trials[$i]['NCT/lead_sponsor'] . ' <span style="' . $enrollStyle . '"> ' 
-						. $trials[$i]["NCT/collaborator"] . ' </span></div></td>';
-
-
-			//overall status column
-			if(isset($trials[$i]['edited']) && array_key_exists('NCT/overall_status', $trials[$i]['edited'])) 
-			{
-				$attr = 'class="highlight ' . $rowOneType . ' " title="' . $trials[$i]['edited']['NCT/overall_status'] . '" ';
-			} 
-			else if($trials[$i]['new'] == 'y') 
-			{
-				$attr = 'title="New record" class="' . $rowOneType . '"' ;
-			} 
-			else 
-			{
-				$attr = 'class="' . $rowOneType . '"';
-			}
-			$outputStr .= '<td style="'.$rowOneBGType.'" ' . $attr . ' rowspan="' . $rowspan . '">'  
-						. '<div class="rowcollapse">' . $trials[$i]['NCT/overall_status'] . '</div></td>';
-				
-				
-			//condition column
-			$attr = ' ';
-			if(isset($trials[$i]['edited']) && array_key_exists('NCT/condition', $trials[$i]['edited'])) 
-			{
-				$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/condition'];
-			} 
-			else if($trials[$i]['new'] == 'y') 
-			{
-				$attr = '" title="New record';
-			}
-			$outputStr .= '<td style="'.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
-						. '<div class="rowcollapse">' . implode(", ",array_unique(explode(",", str_replace(", ",",",$trials[$i]['NCT/condition'])))) . '</div></td>';
-					
-				
-			//start date column
-			$attr = ' ';
-			if(isset($trials[$i]['edited']) && array_key_exists('NCT/start_date', $trials[$i]['edited'])) 
-			{
-				$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/start_date'] ;
-			} 
-			else if($trials[$i]['new'] == 'y') 
-			{
-				$attr = '" title="New record';
-			}
-			$outputStr .= '<td style="'.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '" ><div class="rowcollapse">'; 
-			if($trials[$i]["NCT/start_date"] != '' && $trials[$i]["NCT/start_date"] != NULL && $trials[$i]["NCT/start_date"] != '0000-00-00') 
-			{
-				$outputStr .= date('m/y',strtotime($trials[$i]["NCT/start_date"]));
-			} 
-			else 
-			{
-				$outputStr .= '&nbsp;';
-			}
-			$outputStr .= '</div></td>';
-				
-				
-			//end date column
-			$attr = '';
-			if(isset($trials[$i]['edited']) && array_key_exists('inactive_date', $trials[$i]['edited'])) 
-			{
-				$attr = ' highlight" title="' . $trials[$i]['edited']['inactive_date'] ;
-			} 
-			else if($trials[$i]['new'] == 'y') 
-			{
-				$attr = '" title="New record" ';
-			}	
-			$outputStr .= '<td style="'.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . '" ' . $attr . '><div class="rowcollapse">'; 
-			if($trials[$i]["inactive_date"] != '' && $trials[$i]["inactive_date"] != NULL && $trials[$i]["inactive_date"] != '0000-00-00') 
-			{
-				$outputStr .= date('m/y',strtotime($trials[$i]["inactive_date"]));
-			} 
-			else 
-			{
-				$outputStr .= '&nbsp;';
-			}
-			$outputStr .= '</div></td>';
-					
-											
-			//phase column
-			if(isset($trials[$i]['edited']) && array_key_exists('NCT/phase', $trials[$i]['edited'])) 
-			{
-				$attr = 'class="highlight" title="' . $trials[$i]['edited']['NCT/phase'] . '" ';
-			} 
-			else if($trials[$i]['new'] == 'y') 
-			{
-				$attr = 'title="New record"';
-			}
-			if($trials[$i]['NCT/phase'] == 'N/A' || $trials[$i]['NCT/phase'] == '' || $trials[$i]['NCT/phase'] === NULL)
-			{
-				$phase = 'N/A';
-				$phaseColor = $phaseValues['N/A'];
-			}
-			else
-			{
-				$phase = str_replace('Phase ', '', trim($trials[$i]['NCT/phase']));
-				$phaseColor = $phaseValues[$phase];
-			}
-			$outputStr .= '<td align="center" rowspan="' . $rowspan . '" style="background-color:' . $phaseColor . ';" ' . $attr . '>' 
-						. '<div class="rowcollapse">' . $phase . '</div></td>';				
-			
-			$outputStr .= '<td>&nbsp;</td>';
-				
-			$startMonth = date('m',strtotime($trials[$i]['NCT/start_date']));
-			$startYear = date('Y',strtotime($trials[$i]['NCT/start_date']));
-			$endMonth = date('m',strtotime($trials[$i]['inactive_date']));
-			$endYear = date('Y',strtotime($trials[$i]['inactive_date']));
-
-			//rendering project completion gnatt chart
-			$trialGnattChart = $this->trialGnattChart($startMonth, $startYear, $endMonth, $endYear, $currentYear, $secondYear, $thirdYear, 
-				$trials[$i]['NCT/start_date'], $trials[$i]['inactive_date'], $phaseColor);
-			
-			$trialGnattChart = preg_replace('/&nbsp;/', '<img src="images/trans_big.gif" />', $trialGnattChart);	
-			$outputStr .= preg_replace('/width:([0-9]*)px;/', '', $trialGnattChart);	
-				
-			$outputStr .= '</tr>';
-			
-			//rendering matched upms
-			if(isset($trials[$i]['matchedupms']) && !empty($trials[$i]['matchedupms'])) 
-			{
-				foreach($trials[$i]['matchedupms'] as $mkey => $mvalue) 
-				{ 
-					$str = '';
-					$diamond = '';
-					$resultImage = '';
-	
-					$stMonth = date('m', strtotime($mvalue['start_date']));
-					$stYear = date('Y', strtotime($mvalue['start_date']));
-					$edMonth = date('m', strtotime($mvalue['end_date']));
-					$edYear = date('Y', strtotime($mvalue['end_date']));
-					$upmTitle = 'title="' . htmlformat($mvalue['event_description']) . '"';
-					
-					$outputStr .= '<tr style="page-break-inside:avoid; width:65px;" nobr="true">';
-					
-					//rendering diamonds in case of end date is prior to the current year
-					$outputStr .= '<td style="width:22px; text-align:center;">';
-					
-					if(!empty($trials[$i]['matchedupms']['edited']) && isset($trials[$i]['matchedupms']['edited']['result_link'])) 
-					{
-						if($mvalue['result_link'] != '' && $mvalue['result_link'] !== NULL) 
-						{
-							$resultImage = (($mvalue['event_type'] == 'Clinical Data') ? 'diamond' : 'checkmark' );
-							$outputStr .= '<div ' . $upmTitle . '><a href="' . $mvalue['result_link'] . '" style="color:#000;" target="_blank">'
-										. '<img src="images/red-' . $resultImage . '.png" alt="' 
-										. $resultImage . '" style="margin:4px;" border="0" /></a></div>';
-						}
-					} 
-					else if($upmDetails[$nctid]['new'] == 'y') 
-					{
-						$resultImage = (($mvalue['event_type'] == 'Clinical Data') ? 'diamond' : 'checkmark' );
-						$outputStr .= '<div ' . $upmTitle . '>';
-						if($mvalue['result_link'] != '' && $mvalue['result_link'] !== NULL) 
-						{
-							$outputStr .= '<a href="' . $mvalue['result_link'] . '" style="color:#000;" target="_blank">'
-										. '<img src="images/red-' . $resultImage . '.png" alt="' . $resultImage . '" style="margin:4px;" border="0" /></a>';
-						} 
-						else 
-						{
-							$outputStr .= '<img src="images/red-' . $resultImage . '.png" alt="' . $resultImage . '" style="margin:4px;" border="0" />';
-						}
-						$outputStr .= '</div>';
-					}
-					else 
-					{
-						if($mvalue['result_link'] != '' && $mvalue['result_link'] != NULL) 
-						{
-							$resultImage = (($mvalue['event_type'] == 'Clinical Data') ? 'diamond' : 'checkmark' );
-							$outputStr .= '<div ' . $upmTitle . '><a href="' . $mvalue['result_link'] . '" style="color:#000;" target="_blank">'
-										. '<img src="images/black-' . $resultImage . '.png" alt="' . $resultImage 
-										. '" style="margin:4px;" border="0" /></a></div>';
-						}
-					}
-					
-					if(($mvalue['end_date'] != '' && $mvalue['end_date'] !== NULL && $mvalue['end_date'] != '0000-00-00') 
-						&& ($mvalue['end_date'] < date('Y-m-d')) && ($mvalue['result_link'] === NULL || $mvalue['result_link'] == ''))
-					{
-						$outputStr .= '<div ' . $upmTitle . '><img src="images/hourglass.png" alt="hourglass" style="margin:4px;" border="0" /></div>';
-					}
-					$outputStr .= '</td>';
-					
-					//rendering upm (upcoming project completion) chart
-					$upmGnattChart = $this->upmGnattChart($stMonth, $stYear, $edMonth, $edYear, $currentYear, $secondYear, $thirdYear, $mvalue['start_date'],
-					$mvalue['end_date'], $mvalue['event_link'], $upmTitle);
-					
-					$upmGnattChart = preg_replace('/&nbsp;/', '<img src="images/trans_big.gif" />', $upmGnattChart);
-					$outputStr .= preg_replace('/width:([0-9]*)px;/', '', $upmGnattChart);
-					
-					$outputStr .= '</tr>';
-				}
-			}
-			
-			//section title
-			$section = $trials[$i]['section'];
-		}
-		
-		return $outputStr;
-	}
-	
 	function trialGnattChart($startMonth, $startYear, $endMonth, $endYear, $currentYear, $secondYear, $thirdYear, $startDate, $endDate, $bgColor)
 	{
 		$outputStr = '';
@@ -8083,256 +8330,6 @@ class TrialTracker
 				$outputStr .= $this->upmGnattChart(date('m',strtotime($value['start_date'])), date('Y',strtotime($value['start_date'])), 
 								date('m',strtotime($value['end_date'])), date('Y',strtotime($value['end_date'])), $currentYear, $secondYear, $thirdYear, 
 								$value['start_date'], $value['end_date'], $value['event_link'], $upmTitle);
-				
-				$outputStr .= '</tr>';
-			}
-		}
-		return $outputStr;
-	}
-	
-	
-	function displayUnMatchedUpms_TCPDF($loggedIn, $naUpmIndex, $naUpms)
-	{
-		global $now;
-		$outputStr = '';
-		if(!empty($naUpms))
-		{
-			$currentYear = date('Y');
-			$secondYear = (date('Y')+1);
-			$thirdYear = (date('Y')+2);
-			
-			$cntr = 0;
-			foreach($naUpms as $key => $value)
-			{
-				$attr = '';
-				$resultImage = '';
-				$class = 'class = "upms ' . $naUpmIndex . '" ';
-				$titleLinkColor = 'color:#000;';
-				$dateStyle = 'color:gray;';
-				$upmTitle = 'title="' . htmlformat($value['event_description']) . '"';
-				
-				if($cntr%2 == 1) 
-				{
-					$rowOneType = 'alttitle';
-					$rowTwoType = 'altrow';
-				} 
-				else 
-				{
-					$rowOneType = 'title';
-					$rowTwoType = 'row';
-				}
-				
-				//Highlighting the whole row in case of new trials
-				if($value['new'] == 'y') 
-				{
-					$class = 'class="upms newtrial ' . $upmHeader . '" ';
-				}
-				
-				//rendering unmatched upms
-				$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true" ' . $class . ' style="background-color:#000;">';
-				
-				//field upm-id
-				if($loggedIn)
-				{
-					if($value['new'] == 'y')
-					{
-						$titleLinkColor = 'color:#FF0000;';
-						$title = ' title = "New record" ';
-					}
-					$outputStr .= '<td ' . $title . '>'
-								. '<a style="' . $titleLinkColor . '" href="upm.php?search_id=' . $value['id'] . '" target="_blank">' . $value['id'] . '</a></td>';
-				}
-				
-				
-				//field upm event description
-				if(!empty($value['edited']) && isset($value['edited']['event_description'])) 
-				{
-					$titleLinkColor = 'color:#FF0000;';
-					$attr = ' highlight'; 
-					
-					if($value['edited']['event_description'] != '' && $value['edited']['event_description'] !== NULL)
-					{
-						$title = ' title="Previous value: '. $value['edited']['event_description'] . '" '; 
-					}
-					else
-					{
-						$title = ' title="No Previous value" ';
-					}
-				} 
-				else if($val['new'] == 'y') 
-				{
-					$titleLinkColor = 'color:#FF0000;';
-					$title = ' title = "New record" ';
-				}
-				$outputStr .= '<td colspan="5" class="' . $rowOneType .  $attr . ' titleupm titleupmodd txtleft" ' . $title . '><div class="rowcollapse">';
-				if($value['event_link'] !== NULL && $value['event_link'] != '') 
-				{
-					$outputStr .= '<a style="' . $titleLinkColor . '" href="' . $value['event_link'] . '" target="_blank">' . $value['event_description'] . '</a>';
-				} 
-				else 
-				{
-					$outputStr .= $value['event_description'];
-				}
-				$outputStr .= '</div></td>';
-				
-				
-				//field upm status
-				$outputStr .= '<td class="' . $rowTwoType . ' titleupmodd"><div class="rowcollapse">' . $value['status'] . '</div></td>';
-
-			
-				//field upm event type
-				$title = '';
-				$attr = '';	
-				if(!empty($value['edited']) && isset($value['edited']['event_type'])) 
-				{
-					$attr = ' highlight'; 
-					if($value['edited']['event_type'] != '' && $value['edited']['event_type'] !== NULL)
-					{
-						$title = ' title="Previous value: '. $value['edited']['event_type'] . '" '; 
-					}
-					else
-					{
-						$title = ' title="No Previous value" ';
-					}	
-				} 
-				else if($value['new'] == 'y') 
-				{
-					$title = ' title = "New record" ';
-				}
-				$outputStr .= '<td class="' . $rowTwoType . $attr . ' titleupmodd" ' . $title . '>'
-							. '<div class="rowcollapse">' . $value['event_type'] . ' Milestone</div></td>';
-				
-				
-				//field upm start date
-				$title = '';
-				$attr = '';	
-				if(!empty($value['edited']) && isset($value['edited']['start_date']))
-				{
-					$attr = ' highlight';
-					$dateStyle = 'color:#973535;'; 
-					if($value['edited']['start_date'] != '' && $value['edited']['start_date'] !== NULL)
-					{
-						$title = ' title="Previous value: ' . $value['edited']['start_date'] . '" '; 
-					} 
-					else 
-					{
-						$title = ' title="No Previous value" ';
-					}	
-				} 
-				else if(!empty($value['edited']) && isset($value['edited']['start_date_type']))
-				{
-					$attr = ' highlight';
-					$dateStyle = 'color:#973535;';
-					if($value['edited']['start_date_type'] != '' && $value['edited']['start_date_type'] !== NULL) 
-					{
-						$title = ' title="Previous value: ' . $value['edited']['start_date_type'] . '" '; 
-					} 
-					else 
-					{
-						$title = ' title="No Previous value" ';
-					}
-				} 
-				else if($value['new'] == 'y')
-				{
-					$title = ' title = "New record" ';
-					$dateStyle = 'color:#973535;'; 
-				}
-				$outputStr .= '<td class="' . $rowTwoType . $attr . ' titleupmodd txtleft" ' . $title . '><div class="rowcollapse">';
-				if($value['start_date_type'] == 'anticipated') 
-				{
-					$outputStr .= '<span style="font-weight:bold;' . $dateStyle . '">'
-					 			. (($value['start_date'] != '' && $value['start_date'] !== NULL && $value['start_date'] != '0000-00-00') ? 
-								date('m/y',strtotime($value['start_date'])) : '' )  . '</span>';
-				} 
-				else 
-				{
-					$outputStr .= (($value['start_date'] != '' && $value['start_date'] !== NULL && $value['start_date'] != '0000-00-00') ? 
-									date('m/y',strtotime($value['start_date'])) : '' );
-				}
-				$outputStr .= '</div></td>';		
-				
-				
-				//field upm end date
-				$title = '';
-				$attr = '';	
-				if(!empty($value['edited']) && isset($value['edited']['end_date']))
-				{
-					$attr = ' highlight';
-					$dateStyle = 'color:#973535;';
-					if($value['edited']['end_date'] != '' && $value['edited']['end_date'] !== NULL)
-					{
-						$title = ' title="Previous value: ' . $value['edited']['end_date'] . '" '; 
-					}
-					else 
-					{
-						$title = ' title="No Previous value" ';
-					}
-				} 
-				else if(!empty($value['edited']) && isset($value['edited']['end_date_type']))
-				{
-					$attr = ' highlight';
-					$dateStyle = 'color:#973535;'; 
-					if($value['edited']['end_date_type'] != '' && $value['edited']['end_date_type'] !== NULL) 
-					{
-						$title = ' title="Previous value: ' .  $value['edited']['end_date_type'] . '" ';
-					} 
-					else 
-					{
-						$title = ' title="No Previous value" ';
-					}
-				} 
-				else if($value['new'] == 'y') 
-				{
-					$title = ' title = "New record" ';
-					$dateStyle = 'color:#973535;'; 
-				}
-				$outputStr .= '<td class="' . $rowTwoType . $attr . ' titleupmodd txtleft" ' . $title . '><div class="rowcollapse">';
-				if($value['end_date_type'] == 'anticipated') 
-				{
-					$outputStr .= '<span style="font-weight:bold;' . $dateStyle . '">' 
-								. (($value['end_date'] != '' && $value['end_date'] !== NULL && $value['end_date'] != '0000-00-00') ? 
-									date('m/y',strtotime($value['end_date'])) : '' ) . '</span>';
-				} 
-				else 
-				{
-					$outputStr .= (($value['end_date'] != '' && $value['end_date'] !== NULL && $value['end_date'] != '0000-00-00') ? 
-									date('m/y',strtotime($value['end_date'])) : '');
-				}	
-				$outputStr .= '</div></td><td class="titleupmodd"><div class="rowcollapse"></div></td>';
-				
-				
-				//field upm result 
-				$outputStr .= '<td class="titleupmodd"><div class="rowcollapse">';
-				if(!empty($value['edited']) && isset($value['edited']['result_link'])) 
-				{
-					$imgColor = 'red';
-				} 
-				else 
-				{
-					$imgColor = 'black';
-				}
-				if($value['result_link'] != '' && $value['result_link'] !== NULL) 
-				{
-					$resultImage = (($value['event_type'] == 'Clinical Data') ? 'diamond' : 'checkmark' );
-					$outputStr .= '<div ' . $upmTitle . '><a href="' . $value['result_link'] . '" style="color:#000;">'
-								. '<img src="images/' . $imgColor . '-' . $resultImage . '.png" alt="' . $resultImage 
-								. '" style="margin:4px;" border="0" /></a></div>';
-				}
-				
-				if(($value['end_date'] != '' && $value['end_date'] !== NULL 
-				&& $value['end_date'] != '0000-00-00') && ($value['end_date'] < date('Y-m-d', $now)) 
-				&& ($value['result_link'] === NULL || $value['result_link'] == ''))
-				{
-					$outputStr .= '<div ' . $upmTitle . '><img src="images/hourglass.png" alt="hourglass" style="margin:3px;" border="0" /></div>';
-				}
-				$outputStr .= '</div></td>';		
-				
-				//upm gnatt chart
-				$upmGnattChart = $this->upmGnattChart(date('m',strtotime($value['start_date'])), date('Y',strtotime($value['start_date'])), 
-								date('m',strtotime($value['end_date'])), date('Y',strtotime($value['end_date'])), $currentYear, $secondYear, $thirdYear, 
-								$value['start_date'], $value['end_date'], $value['event_link'], $upmTitle);
-				$upmGnattChart = preg_replace('/&nbsp;/', '<img src="images/trans_big.gif" />', $upmGnattChart);
-				$outputStr .= preg_replace('/width:([0-9]*)px;/', '', $upmGnattChart);
 				
 				$outputStr .= '</tr>';
 			}
