@@ -1,10 +1,20 @@
 @charset "utf-8";
 
-html {overflow-x:hidden;} /* Overflow-x auto causes issue in ie6 for help tab */
+html
+{
+	overflow-x:auto!important;
+}
 
-html,body {height: 100%;margin-bottom:1px;}
+html,body {
+	height: 100%;
+	margin-bottom:1px;
+}
 
-body {font-family:Arial, Helvetica, sans-serif;font-size:13px;font-weight:bold;}
+body {
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:13px;
+	font-weight:bold;
+}
 
 td,th {
 	vertical-align:top;
@@ -189,12 +199,6 @@ a, a:hover{
 	border:1px solid black;
 }
 
-.downld_box {
-	height:auto;
-	width:310px;
-	border:1px solid black;
-}
-
 .new ul{
 	list-style:none;
 	margin:5px;
@@ -208,10 +212,45 @@ a, a:hover{
 }
 
 /*changes*/
+.w740p{
+	width:750px;
+}
 tr.btopblue td{
 	border-top:1px solid blue;
 }
-
+.w250p{
+	width:250px;
+}
+.w28p{
+	width:28px;
+}
+.w45p{
+	width:45px;
+}
+.w55p{
+	width:55px;
+}
+.w110p{
+	width:110px;
+}
+.w25p{
+	width:25px;
+}
+.w22p{
+	width:22px;
+}
+.w24p{
+	width:24px;
+}
+.w12p{
+	width:12px;
+}
+.w0p{
+	width:0px;
+}
+.p4{
+	padding:4px;
+}
 .notopbottomborder{
 	border-top:none!important;
 }
@@ -234,7 +273,6 @@ tr.btopblue td{
 	border-left:none!important;
 	border-right:none!important;
 }
-
 .norightborder{
 	border-right:none!important;
 }
@@ -285,7 +323,8 @@ tr.upms td a{
 	text-decoration:none;
 }
 .slide-out-div {
-  width: 280px;
+  width: 250px;
+  /*background: #fff;*/
   opacity:.9;
   filter:alpha(opacity=90);
 }
@@ -295,43 +334,5 @@ tr.upms td a{
 .table-slide td{
 	border-right:1px solid #000;
 	padding:8px;
-	padding-right:20px;
 	border-bottom:1px solid #000;
-}
-
-/* css for drag drop tab start */
-
-.slide-out-sortdiv {width: 200px;opacity:.9;filter:alpha(opacity=90);}
-/* Interaction states
-----------------------------------*/
-.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default { border: 1px solid #c5dbec; background: #dfeffc url(images/ui-bg_glass_85_dfeffc_1x400.png) 50% 50% repeat-x; font-weight: bold; color: #2e6e9e;}
-.ui-state-default a, .ui-state-default a:link, .ui-state-default a:visited { color: #2e6e9e; text-decoration: none; }
-.ui-state-hover, .ui-widget-content .ui-state-hover, .ui-widget-header .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus, .ui-widget-header .ui-state-focus { border: 1px solid #79b7e7; background: #d0e5f5 url(images/ui-bg_glass_75_d0e5f5_1x400.png) 50% 50% repeat-x; font-weight: bold; color: #1d5987; }
-.ui-state-hover a, .ui-state-hover a:hover { color: #1d5987; text-decoration: none; }
-.ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active { border: 1px solid #79b7e7; background: #f5f8f9 url(images/ui-bg_inset-hard_100_f5f8f9_1x100.png) 50% 50% repeat-x; font-weight: bold; color: #e17009; }
-.ui-state-active a, .ui-state-active a:link, .ui-state-active a:visited { color: #e17009; text-decoration: none; }
-.ui-widget :active { outline: none; }
-
-#sortable  { list-style-type: none; margin: 0; padding: 0; margin-bottom: 10px; }
-.demo li { margin: 5px; padding: 5px; height:20px; width: 200px; cursor:move; z-index:+1; }
-/* css for drag drop tab end */
-
-#loading  {
-	width: 100%;
-	height: 100%;
-	top: 0px;
-	left: 0px;
-	position: fixed;
-	display: block;
-	opacity: 0.7;
-	background-color: #fff;
-	z-index: 99;
-	text-align: center;
-}
-
-#loading-image {
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	z-index: 100;
 }

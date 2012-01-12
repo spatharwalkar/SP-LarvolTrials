@@ -121,9 +121,10 @@
             //	$('.sqlgroup').remove();
             $('.sqlsort').remove();
 
+            $('#override').val('');
             var j = eval('(' + jsonstr + ')');
-            
             $('#override').val(j.override);
+           
 
             var coldiv = $(".addnewsqlcolumn");
             var sortdiv = $('.addnewsqlsort');
@@ -207,7 +208,8 @@
             onselectclose: null,
             onselectablelist: null,
             oncheck: null,
-            fields: []
+            fields: [],
+            exclusion:[]
         };
         $('input:text:first').focus();
         var opts = $.extend({}, $.fn.sqlsimplemenu.defaults, options);
@@ -215,14 +217,33 @@
         function buildsimplemenu() {
             /*console.log("buildsimplemenu: %o", this);*/
             //alert(opts);
+        	var exclHash = new Array();
+        	 if (opts.exclusion.length > 0) {
+                 for (var j = 0; j < opts.exclusion.length; j++) 
+                 {
+                	 var name = opts.exclusion[j].name;
+                	 exclHash[name]=name;
+                 }
+             }
+        	
             var mmenu = '';
             if (opts.fields.length > 0) {
                 for (var i = 0; i < opts.fields.length; i++) {
+                	var dispName = opts.fields[i].name;
+                	if(exclHash[dispName])
+                	{
+                		continue;
+                	}
+                	
+                	if(opts.fields[i].displayname)
+                	{
+                		dispName = opts.fields[i].displayname;
+                	}
                     if (opts.fields[i].ftype == '{')
-                        mmenu = mmenu + '<li><a href="#' + i + '">' + opts.fields[i].name + '</a><ul>';
+                        mmenu = mmenu + '<li><a href="#' + i + '">' + dispName + '</a><ul>';
                     else if (opts.fields[i].ftype == '}')
                         mmenu = mmenu + '</ul></li>';
-                    else mmenu = mmenu + '<li><a href="#' + i + '">' + opts.fields[i].name + '</a></li>';
+                    else mmenu = mmenu + '<li><a href="#' + i + '">' + dispName + '</a></li>';
                 }
             }
             if (opts.menu == 'sqlmenulist') {
@@ -625,7 +646,7 @@
             wheretitle: 'Select records where all of the following apply',
            addnewwhere:'<img src="images/add.gif" style="border:none;">'+'Add Condition',
 		showwhere:true,
-		sorttitle:'Sort columns by..',
+		sorttitle:'Sort By',
 		addnewsort:'<img src="images/add.gif" style="border:none;">'+'Add Sort Column',
 		showsort:true,
 		grouptitle:'Group columns by..',
@@ -639,24 +660,24 @@
             joinrules: [],
             extrawhere: '',
             operators: [
-		 { name: 'EqualTo', op: "%f='%s'", multipleval: false },
-		 { name: 'NotEqualTo', op: "%f!='%s'", multipleval: false },
-		 { name: 'StartsWith', op: "%f like '%s%'", multipleval: false },
-		 { name: 'NotStartsWith', op: "not(%f like '%s%')", multipleval: false },
-		 { name: 'Contains', op: "%f like '%%s%'", multipleval: false },
-		 { name: 'NotContains', op: "not(%f like '%%s%')", multipleval: false },
-		 { name: 'BiggerThan', op: "%f>'%s'", multipleval: false },
-		 { name: 'BiggerOrEqualTo', op: "%f>='%s'", multipleval: false },
-		 { name: 'SmallerThan', op: "%f<'%s'", multipleval: false },
-		 { name: 'SmallerOrEqualTo', op: "%f<='%s'", multipleval: false },
-		 { name: 'InBetween', op: "%f between '%s1' and '%s2'", multipleval: true, info: '' },
-		 { name: 'NotInBetween', op: "not(%f between '%s1' and '%s2')", multipleval: true, info: '' },
-		 { name: 'IsIn', op: "%f in (%s)", multipleval: false, selectablelist: true, info: '' },
-		 { name: 'IsNotIn', op: "not(%f in (%s))", multipleval: false, selectablelist: true, info: '' },
-		 { name: 'IsNull', op: " %f is null", multipleval: false },
-		 { name: 'NotNull', op: " %f not null", multipleval: false },
-		 { name: 'Regex', op: " %f ='%s'", multipleval: false },
-		 { name: 'NotRegex', op: " %f !='%s'", multipleval: false }
+		 { name: 'EqualTo', displayname: '=', op: "%f='%s'", multipleval: false },
+		 { name: 'NotEqualTo',displayname: '!=', op: "%f!='%s'", multipleval: false },
+		 { name: 'StartsWith',displayname: 'StartsWith', op: "%f like '%s%'", multipleval: false },
+		 { name: 'NotStartsWith',displayname: 'NotStartsWith', op: "not(%f like '%s%')", multipleval: false },
+		 { name: 'Contains', displayname: 'Contains', op: "%f like '%%s%'", multipleval: false },
+		 { name: 'NotContains',displayname: 'NotContains', op: "not(%f like '%%s%')", multipleval: false },
+		 { name: 'BiggerThan',displayname: '>', op: "%f>'%s'", multipleval: false },
+		 { name: 'BiggerOrEqualTo',displayname: '>=', op: "%f>='%s'", multipleval: false },
+		 { name: 'SmallerThan', displayname: '<',op: "%f<'%s'", multipleval: false },
+		 { name: 'SmallerOrEqualTo',displayname: '<=', op: "%f<='%s'", multipleval: false },
+		 { name: 'InBetween', displayname: 'InBetween',op: "%f between '%s1' and '%s2'", multipleval: true, info: '' },
+		 { name: 'NotInBetween',displayname: 'EqualTo', op: "not(%f between '%s1' and '%s2')", multipleval: true, info: '' },
+		 { name: 'IsIn', displayname: 'IsIn', op: "%f in (%s)", multipleval: false, selectablelist: true, info: '' },
+		 { name: 'IsNotIn',displayname: 'IsNotIn', op: "not(%f in (%s))", multipleval: false, selectablelist: true, info: '' },
+		 { name: 'IsNull', displayname: 'IsNull', op: " %f is null", multipleval: false },
+		 { name: 'NotNull', displayname: 'NotNull', op: " %f not null", multipleval: false },
+		 { name: 'Regex', displayname: 'Regex', op: " %f ='%s'", multipleval: false },
+		 { name: 'NotRegex', displayname: 'NotRegex', op: " %f !='%s'", multipleval: false }
 		],
             chain: [
 		 { name: 'AND', op: 'AND' },
@@ -689,11 +710,15 @@
 
         function addnewsqlcolumn() {
 
-            var sql_text = "<br/>" + opts.columntitle + "<br/><br/>";
+            //var sql_text = "<br/>" + opts.columntitle + "<br/><br/>";
             //add predefined columns here too...
             //...
 
-            return sql_text;
+            if(opts.showcolumn)
+            {
+                      return opts.columntitle ;
+            }
+            return "";
         }
 
 
@@ -710,11 +735,14 @@
 
         function addnewsqlsort() {
 
-            var sql_text = "<br/>" + opts.sorttitle + "<br/><br/>";
+            //var sql_text = "<br/>" + opts.sorttitle + "<br/><br/>";
             //add predefined sort here too...
             //...
-
-            return sql_text;
+            if(opts.showsort)
+            {
+                      return opts.sorttitle;
+            }
+            return "";
         }
 
 
@@ -775,31 +803,35 @@
                 data = data.replace(/,$/, '');
                 data = data + '],'; //close group data   
 
-                //vijay
+                
                 data = data + '"wheredata":[';
                 $('span.sqlwhere').each(function () {
                     //debugger;
 
                     var col_slot = $(this).find('a.addnewsqlwhere').attr('href');
+                    var index = $(this).find('a.addnewsqlwhere').attr('id');
                     var col_name = $(this).find('a.addnewsqlwhere').text();
                     col_slot = col_slot.split('#')[1];
                     //alert(col_slot);
                     var op_slot = $(this).find('a.addnewsqlwhereoperator').attr('href');
                     op_slot = op_slot.split('#')[1];
-                    var op_name = $(this).find('a.addnewsqlwhereoperator').text();
+                    //var op_name = $(this).find('a.addnewsqlwhereoperator').text();
+                    var op_name = opts.operators[op_slot].name;
                     var chain_slot = $(this).find('a.addnewsqlwherechain').attr('href');
                     chain_slot = chain_slot.split('#')[1];
                     var chain_name = $(this).find('a.addnewsqlwherechain').text();
                     var col_value = '';
                     if(opts.operators[op_slot].multipleval){
                        	if ($(this)[0].innerHTML.toLowerCase().indexOf('input') != -1) {
-                    		var col_value1 = $(this).find('input.addnewsqlwherevalue[id=1]').val();
-                    		var col_value2 = $(this).find('input.addnewsqlwherevalue[id=2]').val();
+                    		var col_value1 = $(this).find('input.addnewsqlwherevalue[id=' + index + '_1]').val();
+                    		var col_value2 = $(this).find('input.addnewsqlwherevalue[id=' + index + '_2]').val();
                     		col_value = col_value1 + 'and;endl' + col_value2;
                     	}
                     	else if ($(this)[0].innerHTML.toLowerCase().indexOf('select') != -1) {
                     		//TODO if necessary
-                    		col_value = $(this).find(":selected").text();
+                      		var col_value1 = $(this).find('select.addnewsqlwherevalue[id=' + index + '_1] option:selected').val();
+                    		var col_value2 = $(this).find('select.addnewsqlwherevalue[id=' + index + '_2] option:selected').val();
+                    		col_value = col_value1 + 'and;endl' + col_value2;
                     	}
                     }
                     else
@@ -1066,10 +1098,10 @@
                     '<font size="4" face="Bold" color="Grey">Conditions</font>' +
                     '<p class=sqlbuilderwhere>' + '<br/>' + '<a class="addnewsqlwhere" id=9999 href="#">' + '<br/>' + opts.addnewwhere + '</a>' + '<br/><br/><br/>' + '</p>' +
                     '<br/><br/>' +
-                    '<font size="4" face="Bold" color="Grey">Result Columns</font>' +
+                    '<font size="4" face="Bold" color="Grey">' + addnewsqlcolumn()  + '</font>' +
                     '<p class=sqlbuildercolumn>' + '<br/><br/>' + '<a class="addnewsqlcolumn" id=9999 href="#">' + opts.addnewcolumn + '</a>' + '<br/><br/><br/>' + '</p>' +
                     '<br/>' +
-                    '<font size="4" face="Bold" color="Grey">Sort By</font>' +
+                    '<font size="4" face="Bold" color="Grey">' + addnewsqlsort() + '</font>' +
                     '<p class=sqlbuildersort>' + '<br/>' + '<a class="addnewsqlsort" id=9999 href="#">' + '<br/>' + opts.addnewsort + '</a>' + '<br/><br/><br/>' + '</p>' +
                     '<br/><br/>' +
                    
@@ -1264,10 +1296,349 @@
 
             }); //end of column handling....
 
+ 
+           //Creates TextBox or Selectboxes as needed based on the field type and column type
+           function getSQLWhereValueHtml(col_slot, op_slot, column_value, counter_id)
+           {
+        	   if(opts.operators[op_slot].name == 'IsNull' || opts.operators[op_slot].name == 'NotNull')
+               {
+        		   return '';
+               }
+        	   
+               var valstr='';
+               var vals;
+               var col_val='';
+               
+               if(opts.operators[op_slot].multipleval)
+               {
+            	column_value =( column_value == '' ? 'and;endl': column_value);  
+               	vals=column_value.split('and;endl');
+               	col_val=vals[0];
+               }
+               else
+               {
+               	col_val=column_value;
+               }
+               if (opts.fields[col_slot].type == 'enum') {
+               	
+               	valstr = '<select class="addnewsqlwherevalue" id="' + counter_id + '_1">' + col_val + '>';
+                   
+                   var options = opts.fields[col_slot].values.replace('enum(', '');
+                   options = options.replace(')', '');
+                   var myOptions = options.split(',');
+                   //var myOptions = opts.fields[action].values.split(',');
+
+                   //alert(myOptions.length);
+
+                   for (value = 0; value < myOptions.length; value++) {
+                   	var myVal = myOptions[value];
+                   	myVal = myVal.slice(1);
+                   	myVal= myVal.substring(0, myVal.length - 1);
+                       if (col_val == myVal) {
+                       	valstr += '<option value="' + value + '" selected="true">' + myVal + '</option>';
+                       }
+                       else {
+                       	valstr += '<option value="' + value + '">' + myVal + '</option>';
+                       }
+
+                   };
+
+                   valstr += '</select>&nbsp;'
+                   if(opts.operators[op_slot].multipleval)
+                   {
+                   	col_val=vals[1];
+                      	valstr += ' and <select class="addnewsqlwherevalue" id="' + counter_id + '_2">' + col_val + '>';
+                       for (value = 0; value < myOptions.length; value++) {
+                       	var myVal = myOptions[value];
+                       	myVal = myVal.slice(1);
+                       	myVal= myVal.substring(0, myVal.length - 1);
+                           if (col_val == myVal) {
+                           	valstr += '<option value="' + value + '" selected="true">' + myVal + '</option>';
+                           }
+                           else {
+                           	valstr += '<option value="' + value + '">' + myVal + '</option>';
+                           }
+
+                       };
+                       valstr += '</select>&nbsp;'
+                   }
+                   
+                   
+
+               }
+//               else if (opts.fields[action].type == 'date') {
+//               	valstr = '<input type="text" class="addnewsqlwherevalue" id="' + counter_id + '_1"/>&nbsp;';
+//               	 if(opts.operators[(defval ? defval.opslot : 0)].multipleval)
+//                    {
+//                    	col_val=vals[1];
+//                    	valstr += ' and <input type="text" class="addnewsqlwherevalue" id="' + counter_id + '_2" value="' + col_val + '" />&nbsp;';
+//                    }
+//               }
+               else {
+                   valstr = '<input type="text" class="addnewsqlwherevalue" id="' + counter_id + '_1" value="' + col_val + '" />&nbsp;';
+                   if(opts.operators[op_slot].multipleval)
+                   {
+                   	col_val=vals[1];
+                   	valstr += ' and <input type="text" class="addnewsqlwherevalue" id="' + counter_id + '_2" value="' + col_val + '" />&nbsp;';
+                   }
+               }
+//             if (opts.fields[action].type == 'date') {
+//             $('#' + counter_id + '_1').jdPicker();
+//             if(opts.operators[(defval ? defval.opslot : 0)].multipleval)
+//             {
+//             	$('#' + counter_id + '_2').jdPicker();
+//             }
+//             }
+    
+               
+               return valstr;
+
+           }
+           
+           
+             function indent() {
+        	   var padleft = 0;
+        	   var inc = 30;
+               $('span.sqlwhere').each(function () {
+            	   var chainTag = $(this).find('a.addnewsqlwherechain').text();
+            	   var index = $(this).find('a.addnewsqlwhere').attr('id');
+
+                   
+                   var span1Tag = $(this).find('span.sqlwhere1');
+                   span1Tag.css("padding-left", (parseInt(padleft)));
+                   var span2Tag = $(this).find('span.sqlwhere2');
+                   span2Tag.css("padding-left", (parseInt(padleft)));
+                   if (chainTag.indexOf(')') != -1) {
+                	   span2Tag.css("padding-left", (parseInt(padleft) - inc));
+                   }
+                   
+            	   if (chainTag.indexOf('(') != -1) {
+                       padleft+=inc;
+                   }
+                   if (chainTag.indexOf(')') != -1) {
+                       padleft-=inc;
+                   }
+                 
+               });
+               
+             
+           }
+
+           
+           function createSQLWhereValueChangeEvents(i)
+           {
+        	   var counter_id = i;
+               $("input[class=addnewsqlwherevalue][id='" + counter_id + "_1']").click(
+		               function (e) {
+		                   $('.addnewsqlwherevalue').blur(function () {
+		                       $('.sqlsyntaxhelp').remove();
+		                       onchangeevent('change');
 
 
 
+		                   });
 
+		               });
+            $("input[class=addnewsqlwherevalue][id='" + counter_id + "_2']").click(
+		               function (e) {
+		                   $('.addnewsqlwherevalue').blur(function () {
+		                       $('.sqlsyntaxhelp').remove();
+		                       onchangeevent('change');
+
+
+
+		                   });
+
+		               });
+
+            $("select[class=addnewsqlwherevalue][id='" + counter_id + "_1']").change(
+		               function (e) {
+		            	   
+		                   $('.addnewsqlwherevalue').blur(function () {
+		                       $('.sqlsyntaxhelp').remove();
+		                       onchangeevent('change');
+
+
+
+		                   });
+
+		               });
+            
+
+            $("select[class=addnewsqlwherevalue][id='" + counter_id + "_2']").change(
+		               function (e) {
+		            	   
+		                   $('.addnewsqlwherevalue').blur(function () {
+		                       $('.sqlsyntaxhelp').remove();
+		                       onchangeevent('change');
+
+
+
+		                   });
+
+		               });
+
+
+           }
+
+           
+           function createSQLWhereDeleteEvent(counter_id)
+           {
+               //on click delete remove p for the condition...
+               $("[class=addnewsqlwheredelete][id='" + counter_id + "']").click(
+			               function () {
+			                   var item = $('span[class=sqlwhere][id=' + $(this).attr('id') + ']');
+			                   if (opts.animate) $(item).animate({ opacity: "hide", height: "hide" }, 150, "swing", function () { $(this).hide().remove(); onchangeevent('change'); });
+			                   else { $(item).hide().remove(); onchangeevent('change'); }
+
+			               });
+           }
+           
+           function createSQLWhereColumnEvent(counter_id)
+           {
+               //add a menu to newly added operator
+               $("[class=addnewsqlwhere][id='" + counter_id + "']").sqlsimplemenu({
+                   menu: 'sqlmenulist',
+                   fields: opts.fields,
+                   onselect: function (action, el, defval) {
+
+                       $("[class=addnewsqlwhere][id=" + $(el).attr('id') + "]")
+			            .html(opts.fields[action].name)
+			            .attr('href', "#" + action);
+                        var op_slot1 = $("[class=addnewsqlwhereoperator][id=" + $(el).attr('id') + "]")
+			            .attr('href').substr(1);
+                        var col_slot1 = action;
+                        var counter_id1 = $(el).attr('id');
+                        var valstr = getSQLWhereValueHtml(col_slot1, op_slot1, "", counter_id1);
+                        $("[class=divnewsqlwherevalue][id=" + $(el).attr('id') + "]").html(valstr);
+                        createSQLWhereValueChangeEvents(counter_id1);
+                        onchangeevent('change');
+
+                   }
+               });
+           }
+           
+           //We can exclude operators with this function based on column type
+           function getOperatorsExclusion(column_type)
+           {
+        	   var exclusion = [];
+        	   if(column_type == 'int')
+        		{
+        		   exclusion = [
+        			 { name: 'Regex'},
+        			 { name: 'NotRegex'},
+        			 ];
+        		}
+        	   else if(column_type == 'enum')
+        	   {
+        		   exclusion = [
+        	        			 { name: 'Regex'},
+        	        			 { name: 'NotRegex'},
+        	        			 ];
+        	   }
+        	   return exclusion;
+           }
+           
+           function createSQLWhereOperatorEvent(counter_id, column_type)
+           {
+        	   var exclusion = getOperatorsExclusion(column_type);
+        	   
+               $("[class=addnewsqlwhereoperator][id='" + counter_id + "']").sqlsimplemenu({
+                   menu: 'operatorlist',
+                   fields: opts.operators,
+                   exclusion: exclusion,
+                   onselect: function (action, el) {
+                 $("[class=addnewsqlwhereoperator][id=" + $(el).attr('id') + "]")
+		            .html(opts.operators[action].displayname)
+		            .attr('href', "#" + action);
+                  var col_slot1 = $("[class=addnewsqlwhere][id=" + $(el).attr('id') + "]")
+		            .attr('href').substr(1);
+                  var op_slot1 = action;
+                  var counter_id1 = $(el).attr('id');
+                  var valstr = getSQLWhereValueHtml(col_slot1, op_slot1, "", counter_id1);
+                 $("[class=divnewsqlwherevalue][id=" + $(el).attr('id') + "]").html(valstr);
+                 createSQLWhereValueChangeEvents(counter_id1);
+                 onchangeevent('change');
+
+
+               }
+                });
+           }
+           
+           function createSQLWhereChainEvent(counter_id)
+           {
+               //add a menu to newly added chain
+               $("[class=addnewsqlwherechain][id='" + counter_id + "']").sqlsimplemenu({
+                   menu: 'chainlist',
+                   fields: opts.chain,
+                   onselect: function (action, el) {
+                       $("[class=addnewsqlwherechain][id=" + $(el).attr('id') + "]")
+			            .html(opts.chain[action].name)
+			            .attr('href', "#" + action);
+                       onchangeevent('change');
+                       indent();
+                   }
+               });
+
+           }
+
+           function getSQLWhereLine(col_slot, op_slot, chain_slot, column_value, counter_id)
+           {
+          	    var valstr = getSQLWhereValueHtml(col_slot, op_slot, column_value, counter_id);
+        	    var sqlwherevalue = '<div class="divnewsqlwherevalue" id="' + counter_id + '">' + valstr + '</div>&nbsp;';
+        	    var sqlline =
+			                 '<span class="sqlwhere" id=' + counter_id + '>' +
+                             '<span class="sqlwhere1" id=' + counter_id + '>' +
+                             '<a class="addnewsqlwhereadd" id=' + counter_id + ' href="#' + col_slot + '">' + '<img src="images/add.gif" style="border:none;">' + '</a>&nbsp;' +
+			                 '<a class="addnewsqlwheredelete" id=' + counter_id + ' href="#' + col_slot + '">' + opts.deletetext + '</a>&nbsp;' +
+			                 '<div class="divnewsqlwhere" id=' + counter_id + '>' +
+			                '<a class="addnewsqlwhere" id=' + counter_id + ' href="#' + col_slot + '">' + opts.fields[col_slot].name + '</a></div>&nbsp;' +
+			                '<div class="divnewsqlwhereoperator" id=' + counter_id + '>' +
+			                 '<a class="addnewsqlwhereoperator" id=' + counter_id + ' href="#' + op_slot + '">' + opts.operators[op_slot].displayname + '</a></div>&nbsp;' +
+			                 sqlwherevalue +
+                             '</span><br />' +
+                             '<span class="sqlwhere2" id=' + counter_id + '>' +
+			                 '<a class="addnewsqlwherechain" id=' + counter_id + ' href="#' + chain_slot + '">' + opts.chain[chain_slot].name + '</a>&nbsp;' +
+                              '</span>' +
+			                 '</span>';
+                return sqlline;
+           }
+           
+           function createAddSQLWhereAddEvent(parent_counter_id)
+           {
+               $("[class=addnewsqlwhereadd][id='" + parent_counter_id + "']").sqlsimplemenu({
+                   menu: 'sqlmenulist',
+                   fields: opts.fields,
+                   onselect: function (action, el, defval) {
+                       //                    debugger;
+               	    var counter_id = opts.counters[3];
+               	    var col_slot = action;
+               	    var op_slot = (defval ? defval.opslot : 0);
+               	    var column_value = (defval ? defval.columnvalue : opts.fields[action].defaultval);
+               	     var col_type = opts.fields[col_slot].type;
+                       var chain_slot = (defval ? defval.chainslot : '0') ;
+                       var sqlline = getSQLWhereLine(col_slot, op_slot, chain_slot, column_value, counter_id);
+                       var item = $(sqlline).hide();
+                       $("[class=sqlwhere][id='" + parent_counter_id + "']").after(item);
+                       if (opts.animate) $(item).animate({ opacity: "show", height: "show" }, 150, "swing", function () { $(item).animate({ height: "+=3px" }, 75, "swing", function () { $(item).animate({ height: "-=3px" }, 50, "swing", function () { onchangeevent('new'); }); }); });
+                       else { $(item).show(); onchangeevent('new'); }
+
+                      
+                       createSQLWhereValueChangeEvents(counter_id);
+                       createSQLWhereDeleteEvent(counter_id);
+                       createSQLWhereColumnEvent(counter_id);
+                       createSQLWhereOperatorEvent(counter_id, col_type);
+                       createSQLWhereChainEvent(counter_id);
+                       createAddSQLWhereAddEvent(counter_id);
+                       indent();
+                       opts.counters[3]++; //where counters...
+
+
+                   }
+
+               }); /*end of where handling....*/
+        	   
+           }
 
 
             /*************************************************************************************************************/
@@ -1276,332 +1647,28 @@
                 menu: 'sqlmenulist',
                 fields: opts.fields,
                 onselect: function (action, el, defval) {
-                    var sqlwherevalue = '';
-                    var valstr='';
-                    var vals;
-                    var col_val='';
-                    if(opts.operators[(defval ? defval.opslot : 0)].multipleval)
-                    {
-                    	vals=defval.columnvalue.split('and;endl');
-                    	col_val=vals[0];
-                    }
-                    else
-                    {
-                    	col_val=(defval ? defval.columnvalue : opts.fields[action].defaultval);
-                    	//(defval ? defval.columnvalue : opts.fields[action].defaultval)
-                    }
-                    if (opts.fields[action].type == 'enum') {
-                    	
-                    	valstr = '<select class="addnewsqlwherevalue" id=1>' + (defval ? defval.columnvalue : opts.fields[action].defaultval) + '>';
-                        
-                        var options = opts.fields[action].values.replace('enum(', '');
-                        options = options.replace(')', '');
-                        var myOptions = options.split(',');
-                        //var myOptions = opts.fields[action].values.split(',');
-
-                        //alert(myOptions.length);
-
-                        for (value = 0; value < myOptions.length; value++) {
-                        	var myVal = myOptions[value];
-                        	myVal = myVal.slice(1);
-                        	myVal= myVal.substring(0, myVal.length - 1);
-                            if (defval && col_val == myVal) {
-                            	valstr += '<option value="' + value + '" selected="true">' + myVal + '</option>';
-                            }
-                            else {
-                            	valstr += '<option value="' + value + '">' + myVal + '</option>';
-                            }
-
-                        };
-
-                        valstr += '</select>&nbsp;'
-                        if(opts.operators[(defval ? defval.opslot : 0)].multipleval)
-                        {
-                        	col_val=vals[1];
-                           	valstr += ' and <select class="addnewsqlwherevalue" id=2>' + (defval ? defval.columnvalue : opts.fields[action].defaultval) + '>';
-                            for (value = 0; value < myOptions.length; value++) {
-                            	var myVal = myOptions[value];
-                            	myVal = myVal.slice(1);
-                            	myVal= myVal.substring(0, myVal.length - 1);
-                                if (defval && col_val == myVal) {
-                                	valstr += '<option value="' + value + '" selected="true">' + myVal + '</option>';
-                                }
-                                else {
-                                	valstr += '<option value="' + value + '">' + myVal + '</option>';
-                                }
-
-                            };
-                            valstr += '</select>&nbsp;'
-                        }
-                        
-                        
-
-                    }
-//                    else if (opts.fields[action].type == 'date') {
-//                    	sqlwherevalue = '<div class="divnewsqlwherevalue" id="' + opts.counters[3] + '"><input type="text" name="your_input" class="jdpicker" id="' + opts.counters[3] + '/></div>&nbsp;';
-//                    }
-                    else {
-                        valstr = '<input type="text" class="addnewsqlwherevalue" id="1" value="' + col_val + '" />&nbsp;';
-                        if(opts.operators[(defval ? defval.opslot : 0)].multipleval)
-                        {
-                        	col_val=vals[1];
-                        	valstr += ' and <input type="text" class="addnewsqlwherevalue" id="2" value="' + col_val + '" />&nbsp;';
-                        }
-                    }
-                    
-                    sqlwherevalue = '<div class="divnewsqlwherevalue" id="' + opts.counters[3] + '">' + valstr + '</div>&nbsp;';
                     //                    debugger;
-                    var pad = myfunc1();
-                    var sqlline =
-				                 '<span class="sqlwhere" id=' + opts.counters[3] + '>' +
-                                 '<span class="sqlwhere1" style="padding-left:' + pad * 30 + 'px" id=' + opts.counters[3] + '>' +
-				                 '<a class="addnewsqlwheredelete" id=' + opts.counters[3] + ' href="#' + action + '">' + opts.deletetext + '</a>&nbsp;' +
-				                 '<div class="divnewsqlwhere" id=' + opts.counters[3] + '>' +
-				                '<a class="addnewsqlwhere" id=' + opts.counters[3] + ' href="#' + action + '">' + opts.fields[action].name + '</a></div>&nbsp;' +
-				                '<div class="divnewsqlwhereoperator" id=' + opts.counters[3] + '>' +
-				                 '<a class="addnewsqlwhereoperator" id=' + opts.counters[3] + ' href="#' + (defval ? defval.opslot : '0') + '">' + opts.operators[(defval ? defval.opslot : 0)].name + '</a></div>&nbsp;' +
-				                 sqlwherevalue +
-                                 '</span><br />' +
-                                 '<span class="sqlwhere2" style="padding-left:' + pad * 30 + 'px" id=' + opts.counters[3] + '>' +
-				                 '<a class="addnewsqlwherechain" id=' + opts.counters[3] + ' href="#' + (defval ? defval.chainslot : '0') + '">' + opts.chain[(defval ? defval.chainslot : 0)].name + '</a>&nbsp;' +
-                                  '</span>' +
-				                 '</span>';
-
+            	    var counter_id = opts.counters[3];
+            	    var col_slot = action;
+            	    var op_slot = (defval ? defval.opslot : 0);
+            	    var column_value = (defval ? defval.columnvalue : opts.fields[action].defaultval);
+            	    var col_type = opts.fields[col_slot].type;
+                    var chain_slot = (defval ? defval.chainslot : '0') ;
+                    var sqlline = getSQLWhereLine(col_slot, op_slot, chain_slot, column_value, counter_id, counter_id);
                     var item = $(sqlline).hide();
                     $('[class=addnewsqlwhere][id=9999]').before(item);
-                    //                    debugger;
-                    if (defval != null) {
-                        myfunc2();
-                    }
+                    
                     if (opts.animate) $(item).animate({ opacity: "show", height: "show" }, 150, "swing", function () { $(item).animate({ height: "+=3px" }, 75, "swing", function () { $(item).animate({ height: "-=3px" }, 50, "swing", function () { onchangeevent('new'); }); }); });
                     else { $(item).show(); onchangeevent('new'); }
 
-  
-                    function myfunc1() {
-                        var padleft = 0;
-                        for (i = 0; i <= opts.counters[3]; i++) {
-                            var spanTag = $("span[class=sqlwhere][id='" + i + "']");
-                            var chainTag = $("a[class=addnewsqlwherechain][id='" + i + "']");
-                            if (chainTag.text().indexOf('(') != -1) {
-                                padleft++;
-                            }
-
-                            if (chainTag.text().indexOf(')') != -1) {
-                                padleft--;
-                            }
-                        }
-
-                        return padleft;
-                    }
-
-                    function myfunc2() {
-                        var spanTag = $("span[class=sqlwhere2][id='" + opts.counters[3] + "']");
-                        var chainTag = $("a[class=addnewsqlwherechain][id='" + opts.counters[3] + "']");
-                        if (chainTag.text().indexOf(')') != -1) {
-                            var padleft = spanTag.css("padding-left").substring(0, (spanTag.css("padding-left").length - 2));
-                            spanTag.css("padding-left", (parseInt(padleft) - 30));
-                        }
-                    }
-
-                    
-
-                    $("input[class=addnewsqlwherevalue][id='1']").click(
-				               function (e) {
-				                   $('.addnewsqlwherevalue').blur(function () {
-				                       $('.sqlsyntaxhelp').remove();
-				                       onchangeevent('change');
-
-
-
-				                   });
-
-				               });
-                    $("input[class=addnewsqlwherevalue][id='2']").click(
-				               function (e) {
-				                   $('.addnewsqlwherevalue').blur(function () {
-				                       $('.sqlsyntaxhelp').remove();
-				                       onchangeevent('change');
-
-
-
-				                   });
-
-				               });
-
-                    $("select[class=addnewsqlwherevalue][id='1']").change(
-				               function (e) {
-				            	   
-				                   $('.addnewsqlwherevalue').blur(function () {
-				                       $('.sqlsyntaxhelp').remove();
-				                       onchangeevent('change');
-
-
-
-				                   });
-
-				               });
-                    
-
-                    $("select[class=addnewsqlwherevalue][id='2']").change(
-				               function (e) {
-				            	   
-				                   $('.addnewsqlwherevalue').blur(function () {
-				                       $('.sqlsyntaxhelp').remove();
-				                       onchangeevent('change');
-
-
-
-				                   });
-
-				               });
-
-
-
-
-                    //on click delete remove p for the condition...
-                    $("[class=addnewsqlwheredelete][id='" + opts.counters[3] + "']").click(
-				               function () {
-				                   var item = $('span[class=sqlwhere][id=' + $(this).attr('id') + ']');
-				                   if (opts.animate) $(item).animate({ opacity: "hide", height: "hide" }, 150, "swing", function () { $(this).hide().remove(); onchangeevent('change'); });
-				                   else { $(item).hide().remove(); onchangeevent('change'); }
-
-				               });
-
-
-
-                    //add a menu to newly added operator
-                    $("[class=addnewsqlwhere][id='" + opts.counters[3] + "']").sqlsimplemenu({
-                        menu: 'sqlmenulist',
-                        fields: opts.fields,
-                        onselect: function (action, el) {
-
-                            $("[class=addnewsqlwhere][id=" + $(el).attr('id') + "]")
-				            .html(opts.fields[action].name)
-				            .attr('href', "#" + action);
-                            onchangeevent('change');
-
-
-                        }
-                    });
-
-
-
-
-                    //add a menu to newly added operator
-                    //vijay add code here to do inbetween error
-                    $("[class=addnewsqlwhereoperator][id='" + opts.counters[3] + "']").sqlsimplemenu({
-                        menu: 'operatorlist',
-                        fields: opts.operators,
-                        onselect: function (action, el) {
-
-                            $("[class=addnewsqlwhereoperator][id=" + $(el).attr('id') + "]")
-				            .html(opts.operators[action].name)
-				            .attr('href', "#" + action);
-                            //if the operator is in between        
-                            if (opts.operators[action].multipleval) {
-                                var val = $("[class=divnewsqlwherevalue][id=" + $(el).attr('id') + "]").html();
-                                if (val.indexOf('and') == -1) {
-                                var val1=val.replace(/id="1"/g, 'id="2"');
-                                $("[class=divnewsqlwherevalue][id=" + $(el).attr('id') + "]")
-				                 .html(val + ' and ' + val1);
-                                }
-                            } else {
-                                var val = $("[class=divnewsqlwherevalue][id=" + $(el).attr('id') + "]").html();
-                                //if there is any and in it..
-                                if (val.indexOf('and') != -1) {
-                                    var vals = $("[class=divnewsqlwherevalue][id=" + $(el).attr('id') + "]").html().split('and');
-                                    $("[class=divnewsqlwherevalue][id=" + $(el).attr('id') + "]").html(vals[0]);
-                                }
-
-
-                            }
-                            
-                            $("input[class=addnewsqlwherevalue][id='1']").click(
-     				               function (e) {
-     				                   $('.addnewsqlwherevalue').blur(function () {
-     				                       $('.sqlsyntaxhelp').remove();
-     				                       onchangeevent('change');
-
-
-
-     				                   });
-
-     				               });
-                         $("input[class=addnewsqlwherevalue][id='2']").click(
-     				               function (e) {
-     				                   $('.addnewsqlwherevalue').blur(function () {
-     				                       $('.sqlsyntaxhelp').remove();
-     				                       onchangeevent('change');
-
-
-
-     				                   });
-
-     				               });
-
-                         $("select[class=addnewsqlwherevalue][id='1']").change(
-     				               function (e) {
-     				            	   
-     				                   $('.addnewsqlwherevalue').blur(function () {
-     				                       $('.sqlsyntaxhelp').remove();
-     				                       onchangeevent('change');
-
-
-
-     				                   });
-
-     				               });
-                         
-
-                         $("select[class=addnewsqlwherevalue][id='2']").change(
-     				               function (e) {
-     				            	   
-     				                   $('.addnewsqlwherevalue').blur(function () {
-     				                       $('.sqlsyntaxhelp').remove();
-     				                       onchangeevent('change');
-
-
-
-     				                   });
-
-     				               });
-                            onchangeevent('change');
-
-
-
-                        }
-                    });
-
-
-                    //add a menu to newly added chain
-                    $("[class=addnewsqlwherechain][id='" + opts.counters[3] + "']").sqlsimplemenu({
-                        menu: 'chainlist',
-                        fields: opts.chain,
-                        onselect: function (action, el) {
-                            $("[class=addnewsqlwherechain][id=" + $(el).attr('id') + "]")
-				            .html(opts.chain[action].name)
-				            .attr('href', "#" + action);
-                            onchangeevent('change');
-                            var spanTag = $("span[class=sqlwhere2][id='" + $(el).attr('id') + "']");
-                            var chainTag = $("a[class=addnewsqlwherechain][id='" + $(el).attr('id') + "']");
-
-                            if (chainTag.text().indexOf(')') != -1) {
-
-                                if (spanTag.css("padding-left") != undefined) {
-                                    var padleft = spanTag.css("padding-left").substring(0, (spanTag.css("padding-left").length - 2));
-                                    if (padleft != 0) {
-                                        spanTag.css("padding-left", (parseInt(padleft) - 30));
-                                    }
-                                }
-                            }
-
-                            //                            for (i = len; i <= opts.counters[3]; i++) {
-
-                        }
-                    });
-
-
-
+                   
+                    createSQLWhereValueChangeEvents(counter_id);
+                    createSQLWhereDeleteEvent(counter_id);
+                    createSQLWhereColumnEvent(counter_id);
+                    createSQLWhereOperatorEvent(counter_id, col_type);
+                    createSQLWhereChainEvent(counter_id);
+                    createAddSQLWhereAddEvent(counter_id);
+                    indent();
                     opts.counters[3]++; //where counters...
 
 

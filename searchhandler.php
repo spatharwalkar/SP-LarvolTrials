@@ -10,17 +10,15 @@ switch($_REQUEST['op']){
 		echo($dataS);
 		//echo("hello world");
 		break;
-
+	case 'getsearchdata':
+		getSearchData();
+        break;
 	case 'saveexists':
 		updateSearch();
 		echo $_REQUEST['reportname']." saved....";
 		break;
 	case 'savenew':
 		echo(insertSearch());
-		break;
-
-	case 'New':
-		echo "<script language=javascript>location.reload(true);</script>";
 		break;
 	case 'list':
 		echo(listSearchForm());
@@ -110,6 +108,28 @@ function updateSearch()
 
 }
 
+function getSearchData()
+{
+    if(!isset($_REQUEST['id']) || !is_numeric($_REQUEST['id']))	return;
+//load search from Saved Search
+
+	$ssid = mysql_real_escape_string($_REQUEST['id']);
+	//$query = 'SELECT * FROM saved_searches WHERE id=' . $ssid . ' AND (user=' . $db->user->id . ' or user IS NULL)' . ' LIMIT 1';
+	$query = 'SELECT * FROM saved_searches WHERE id=' . $ssid . ' LIMIT 1';
+	$res = mysql_query($query) or die('Bad SQL query getting searchdata');
+	$row = mysql_fetch_array($res);
+	//if($row === false) return;	//In this case, either the ID is invalid or it doesn't belong to the current user.
+    		
+    		   //$show_value = 'showSearchData("' . $_GET['id'] . '");';
+    		   //echo($show_value);
+    $data = unserialize(base64_decode($row['searchdata']));
+    $res_ret->searchdata=$data;
+    $res_ret->name= $row['name'];
+    $res_ret->id= $row['id'];
+    echo json_encode($res_ret);
+
+
+}
 
 //returns HTML for saved searches controller
 //not using any more since we have a search grid separately
@@ -154,7 +174,15 @@ function listSearchProc()
 function testQuery()
 {
 	$jsonData=$_REQUEST['data'];
+	$actual_query= "";
+	try {
 	$actual_query= buildQuery($jsonData, false);
+	}
+	catch(Exception $e)
+	{
+		return $e->getMessage();
+	}
+	
 	$result = mysql_query($actual_query);
 	if (mysql_errno()) {
     $error = "MySQL error ".mysql_errno().": ".mysql_error()."\n<br>When executing:<br>\n$actual_query\n<br>";
@@ -171,10 +199,7 @@ function runQuery()
 {
 	$jsonData=$_REQUEST['data'];
 	$actual_query= buildQuery($jsonData, false);
-
 	$count_query =  buildQuery($jsonData, true);
-
-
 	$page = $_GET['page']; // get the requested page
 	$limit = $_GET['rows']; // get how many rows we want to have into the grid
 	$sidx = $_GET['sidx']; // get index row - i.e. user click to sort
@@ -211,6 +236,8 @@ function runQuery()
 
 function buildQuery($data, $isCount=false)
 {
+	$actual_query = "";
+	try {
 	$jsonData=$data;
 	$filterData = json_decode($jsonData, true, 10);
 
@@ -225,7 +252,7 @@ function buildQuery($data, $isCount=false)
 	$select_str = getSelectString($select_columns, $alias);
 	$where_str = getWhereString($where_datas, $alias);
 	$sort_str = getSortString($sort_datas, $alias);
-	$actual_query = "";
+	
 
 	if($isOverride)
 	{
@@ -276,6 +303,11 @@ function buildQuery($data, $isCount=false)
 	      $actual_query .= ") UNION (" . $override_str . ")";
 	    }
 
+	}
+	}
+	catch(Exception $e)
+	{
+		throw $e;
 	}
 
 	return $actual_query;
@@ -335,7 +367,7 @@ function getWhereString($data, $alias)
 	$wheres = array();
     $wcount = 0;
 	$prevchain = ' ';
-	
+	try {
     foreach($wheredatas as $where_data)
 	{
 		$op_name = $where_data["opname"];
@@ -370,6 +402,11 @@ function getWhereString($data, $alias)
 			    }
 //                if($pos == true)
 //                    $wherestr .= $prevchain;
+	}
+	catch(Exception $e)
+	{
+		throw $e;
+	}
            return $wherestr;
 
 
@@ -378,6 +415,7 @@ function getWhereString($data, $alias)
 function getOperator($opname, $column_name, $column_value)
 {
 	$val = '';
+try {
 	switch($opname){
 	case 'EqualTo':
 		$val = "%f='%s'";
@@ -436,6 +474,11 @@ function getOperator($opname, $column_name, $column_value)
 		break;
 
 	}
+}
+	catch(Exception $e)
+	{
+		throw $e;
+	}
 	return $val;
 }
 
@@ -443,19 +486,20 @@ function getOperator($opname, $column_name, $column_value)
 //Outputs SQL expression to match text -- auto-detects use of regex and selects comparison method automatically
 function textEqual($field,$value)
 {
-	$pcre = strlen($value) > 1
-	&& $value[0] == '/'
-	&& ($value[strlen($value)-1] == '/' || ($value[strlen($value)-2] == '/' && strlen($value) > 2));
-	if($pcre)
+//	$pcre = strlen($value) > 1
+//	&& $value[0] == '/'
+//	&& ($value[strlen($value)-1] == '/' || ($value[strlen($value)-2] == '/' && strlen($value) > 2));
+//	if($pcre)
 	{
 		//alexvp added exception
-		$result=validateMaskPCRE($value);
+		$result=validateMaskPCRE('/' . $value . '/');
 		if(!$result)
 		throw new Exception("Bad regex: $field = $value", 6);
 		return 'PREG_RLIKE("' . '%s' . '",' . '%f' . ')';
-	}else{
-		return '%f' . '="' . '%s' . '"';
 	}
+//	else{
+//		return '%f' . '="' . '%s' . '"';
+//	}
 }
 
 

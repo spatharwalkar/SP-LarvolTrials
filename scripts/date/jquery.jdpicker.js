@@ -182,7 +182,7 @@ jdPicker.prototype = {
 	
     tableShell += "</tr></thead><tbody></tbody></table>";
 
-    var style = (this.input.context.type=="hidden")?' style="display:block; position:static; margin:0 auto"':'';    
+    var style = (this.input.context.type=="hidden")?' style="display:inline; position:static; margin:0 auto"':'';    
 
     this.dateSelector = this.rootLayers = $('<div class="date_selector" '+style+'></div>').append(nav, tableShell).insertAfter(this.input);
     

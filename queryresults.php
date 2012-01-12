@@ -90,12 +90,23 @@ html,body {
 	   
 });
 
+   function goBack()
+   {
+	   var url = "newsearch.php?data=" + <?php echo("'" . $jsonData) . "'"; ?>;
+	   window.location.href= url;
+   }
+
 </script>
 </head>
 <body>
 <table>
+<tr>
+				<td style="background-color:#fff;padding-left: 50px;padding-top: 50px"><input type="submit"
+					style="width: 100px" onclick="goBack();return false;"
+					value="Back" id="btnGoBack" /></td>
+			</tr>
 	<tr>
-		<td style="background-color:#fff;padding-left: 50px; padding-top: 50px">
+		<td style="background-color:#fff;padding-left: 50px; ">
 		<table id="list2"></table>
 		<div id="pager2"></div>
 
