@@ -2,6 +2,7 @@
 require_once('settings.php');
 require_once('class.dbsync.php');
 require_once 'include.util.php';
+ini_set('max_execution_time','360000');	//100 hours
 ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -107,7 +108,7 @@ $dbsync->syncData();
 
 </body>
 </html>
-<?php 
+<?php
 //delete temp db created.
 mysql_connect(DB_SERVER,DB_USER,DB_PASS) or die("Error connecting to database server!");
 mysql_query('DROP DATABASE ' . DB_TEMP) or die("Couldn't drop database: " . mysql_error());

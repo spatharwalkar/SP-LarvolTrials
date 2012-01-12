@@ -130,7 +130,7 @@ require_once('include.util.php');
 					}
 					else 
 					{
-						$foreign_key = $referenced_table_name = $referenced_column_name = $update_rule = $delete_rule = null;
+						$foreign_key = $referenced_table_name = $referenced_column_name = $update_rule = $delete_rule = $constraint_name = null;
 					}
 				}
 				
