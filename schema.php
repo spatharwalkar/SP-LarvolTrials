@@ -96,7 +96,7 @@ foreach($dataScript as $data)
 	}
 }
 mysql_close();
-$dbsync->syncDataTables('set',array('data_categories','data_enumvals','data_fields','user_permissions'));
+$dbsync->syncDataTables('set',array('user_permissions'));
 $dbsync->syncData();
 ?>
 </fieldset>
