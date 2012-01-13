@@ -37,27 +37,43 @@ echo '<br>';
 global $pr_id;
 global $cid;
 global $maxid;
-
 ini_set('max_execution_time', '9000000'); //250 hours
 ignore_user_abort(true);
-if($_POST['mode']=='web') 
 
-$query="SELECT * FROM nctids limit 1";
-$res=@mysql_query($sql);
-if(!$res) 
+$query="SHOW TABLES FROM " .DB_NAME. " like 'nctids'";
+$res=mysql_query($query);
+$row = mysql_fetch_assoc($res);
+if($row) 
 {
-	$nct_ids=get_nctids_from_web();
-	
+	$query="SELECT * FROM nctids limit 1";
+	$res=@mysql_query($sql);
+	if(!$res) 
+	{
+		$nct_ids=get_nctids_from_web();
+		foreach($nct_ids as $nct_id=>$key)
+		{
+			$query='insert into `nctids` set nctid="'. padnct($nct_id) .'"';
+			$res = mysql_query($query);
+			if($res === false) die('Bad SQL query adding nctid into local table.Query='.$query);
+		}
+		
+	}
+	else
+	{
+		$nct_ids=array();
+		$query='select nctid from nctids where id>0';
+		$res = mysql_query($query);
+		if($res === false) die('Bad SQL query getting nctids from local table');
+		while($row = mysql_fetch_assoc($res)) 
+		{
+			if(isset($requeued) and isset($current_nctid))
+				if(unpadnct($row['nctid'])>=$current_nctid)
+					$nct_ids[$row['nctid']] = 1;
+			else
+				$nct_ids[$row['nctid']] = 1;
+		}
+	}
 }
-else
-{
-	$nct_ids=array();
-	$query='select nctid from nctids where id>0';
-	$res = mysql_query($query);
-	if($res === false) die('Bad SQL query getting nctids from local table');
-	while($row = mysql_fetch_assoc($res)) $nct_ids[$row['nctid']] = 1;
-}
-
 if(!isset($nct_ids))
 {
 	$query = 'SELECT * FROM update_status_fullhistory where status="1" and trial_type="NCT" order by update_id desc limit 1' ;
@@ -79,6 +95,7 @@ if ( isset($res['process_id']) )
 
 else
 {
+
 	$query = 'SELECT MAX(update_id) AS maxid FROM update_status_fullhistory' ;
 	$res = mysql_query($query) or die('Bad SQL query finding highest update id');
 	$res = mysql_fetch_array($res) ;
@@ -94,7 +111,8 @@ else
 	}
 	else
 	{
-		reset($nct_ids); $val=key($nct_ids); $cid = unpadnct($val);
+		
+		ksort($nct_ids); reset($nct_ids); $val=key($nct_ids); $cid = unpadnct($val);
 		end($nct_ids); $val=key($nct_ids); $maxid = unpadnct($val);
 	}
 
@@ -125,6 +143,7 @@ else
 
 	if ($totalncts > 0)
 	{
+	
 	$query = 'INSERT into update_status_fullhistory (update_id,process_id,status,update_items_total,start_time,max_nctid,trial_type) 
 			  VALUES ("'.$up_id.'","'. $pid .'","'. 2 .'",
 			  "' . $totalncts . '","'. date("Y-m-d H:i:s", strtotime('now')) .'", "'. $maxid .'", "NCT"  ) ;';
@@ -136,12 +155,24 @@ else
 	echo('Refreshing from: ' . $cid . ' to: ' . $maxid . '<br />'); @flush();
 	echo('<br>Current time ' . date('Y-m-d H:i:s', strtotime('now')) . '<br>');
 	echo str_repeat ("  ", 4000);
+	$i=1;
 	foreach($nct_ids as $nct_id=>$key)
 	{
+	
+	$query = 'SELECT update_items_progress,update_items_total FROM update_status_fullhistory WHERE update_id="' . $up_id .'" and trial_type="NCT" limit 1 ;' ;
+	$res = mysql_query($query) or die('Bad SQL query selecting row from update_status_fullhistory ');
+	$res = mysql_fetch_array($res) ;
+	if ( isset($res['update_items_progress'] ) and $res['update_items_progress'] > 0 ) $updtd_items=((int)$res['update_items_progress']); else $updtd_items=0;
+	if ( isset($res['update_items_total'] ) and $res['update_items_total'] > 0 ) $tot_items=((int)$res['update_items_total']); else $tot_items=0;
+//	++$i;
+	$cid = unpadnct($nct_id);
 	$nct_id = padnct($nct_id);
 	ProcessNew($nct_id);
 	echo('<br>Current time ' . date('Y-m-d H:i:s', strtotime('now')) . '<br>');
 	echo str_repeat (" ", 4000);
+	$query = ' UPDATE  update_status_fullhistory SET process_id = "'. $pid  .'" , update_items_progress= "' . ( ($tot_items >= $updtd_items+$i) ? ($updtd_items+$i) : $tot_items  ) . '" , status="2", current_nctid="'. $cid .'", updated_time="' . date("Y-m-d H:i:s", strtotime('now'))  . '" WHERE update_id="' . $up_id .'" and trial_type="NCT"  ;' ;
+	$res = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory. Query:' . $query);
+	@flush();
 	}
 	
 	
@@ -151,7 +182,7 @@ else
 function fetch_records($pr_id,$cid,$maxid,$up_id)
 { 	
 	global $nct_ids;
-	pr($nct_ids);
+//	pr($nct_ids);
 	$query = 'SELECT update_items_progress,update_items_total FROM update_status_fullhistory WHERE update_id="' . $up_id .'" and trial_type="NCT" limit 1 ;' ;
 	$res = mysql_query($query) or die('Bad SQL query selecting row from update_status_fullhistory ');
 	$res = mysql_fetch_array($res) ;
@@ -239,13 +270,13 @@ function get_nctids_from_web()
 			echo('Last page reached.' . "\n<br />");
 			break;
 		}
-		/* for testing
-		if($page >= 7)
+/*		
+		if($page >= 5)
 		{
 			echo('Last page reached.' . "\n<br />");
 			break;
 		}
-		*/
+*/		
 		unset($tables);
 		//Now that we found the table, go through its TDs to find the ones with NCTIDs
 		$tds = $datatable->getElementsByTagName('td');
