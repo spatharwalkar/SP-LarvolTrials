@@ -83,7 +83,19 @@ html,body {
 		    	  records: "records",
 		    	  repeatitems: false,
 		    	  id: "0"
-		    	}
+		    	},
+		        loadComplete: function () {
+		            //alert("OK");
+		        },
+		        loadError: function (jqXHR, textStatus, errorThrown) {
+//		            alert('HTTP status code: ' + jqXHR.status + '\n' +
+//		                  'textStatus: ' + textStatus + '\n' +
+//		                  'errorThrown: ' + errorThrown);
+//		            alert('HTTP message body (jqXHR.responseText): ' + '\n' + jqXHR.responseText);
+
+   					$("#3009").html(jqXHR.responseText);
+		            $("#3009").show();
+		        }		    
 		});
 		jQuery("#list2").jqGrid('navGrid','#pager2',{edit:false,add:false,del:false});
 		//jQuery("#list2").jqGrid('filterToolbar',{stringResult: true,searchOnEnter : false});
@@ -100,12 +112,18 @@ html,body {
 </head>
 <body>
 <table>
-<tr>
-				<td style="background-color:#fff;padding-left: 50px;padding-top: 50px"><input type="submit"
+
+            <tr>
+			<td style="background-color:#fff;padding-left: 50px;padding-top: 50px"><input type="submit"
 					style="width: 100px" onclick="goBack();return false;"
 					value="Back" id="btnGoBack" /></td>
 			</tr>
-	<tr>
+			<tr >
+				<td style="background-color:#fff;padding-left: 50px;">
+				<p id="3009" style="color:red" visible="false"></p>
+				</td>
+			</tr>
+	    <tr>
 		<td style="background-color:#fff;padding-left: 50px; ">
 		<table id="list2"></table>
 		<div id="pager2"></div>

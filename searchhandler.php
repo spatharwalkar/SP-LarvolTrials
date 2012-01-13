@@ -464,7 +464,7 @@ try {
 		$val ="%f IS NULL";
 		break;
 	case 'NotNull':
-		$val ="%f NOT NULL";
+		$val ="%f IS NOT NULL";
 		break;
 	case 'Regex':
 		$val = textEqual($column_name, $column_value);
@@ -492,7 +492,7 @@ function textEqual($field,$value)
 //	if($pcre)
 	{
 		//alexvp added exception
-		$result=validateMaskPCRE('/' . $value . '/');
+		$result=validateMaskPCRE($value);
 		if(!$result)
 		throw new Exception("Bad regex: $field = $value", 6);
 		return 'PREG_RLIKE("' . '%s' . '",' . '%f' . ')';

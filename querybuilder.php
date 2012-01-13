@@ -273,11 +273,7 @@ $show_sort_res = false;
 					style="width: 100px" onclick="saveSearch();return false" value="Save"
 					id="btnsave" /></td>
 			</tr>
-			<tr>
-				<td style="padding-left: 30px;"><input type="submit"
-					style="width: 100px" onclick="submitSearch();return false" value="Submit"
-					id="btnsubmit" /></td>
-			 </tr>
+
 	         <tr>
 
 						<td valign="top" style="border: 1px solid #ccc; width: 200px;">

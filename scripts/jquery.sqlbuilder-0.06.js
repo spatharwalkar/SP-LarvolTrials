@@ -246,8 +246,12 @@
                     else mmenu = mmenu + '<li><a href="#' + i + '">' + dispName + '</a></li>';
                 }
             }
+            //remove any visible menus
+            $("#sqlmenulist").remove();
+            $("#operatorlist").remove();
+            $("#chainlist").remove();
             if (opts.menu == 'sqlmenulist') {
-                $("#sqlmenulist").remove();
+                
                 return '<div id="' + opts.menu + '" class="sqlsimplemenu" style="height:450px; width:550px;padding-bottom:10px;overflow:scroll;padding-left:5px;padding-top:10px;">' +
         		'<input class="txtsearch" id="txtsearch" name="txtsearch" size="20" type="text" style="width:250px;"/>' +
                 //        		'<input type="submit" id="btnsearch" class="btnsearch" value="Search" size="10" style="height:25px; width:60px;padding-bottom:10px;" />'+
@@ -258,14 +262,7 @@
                 '</div>';
             }
             else {
-                if (opts.menu == 'operatorlist') {
-                    $("#operatorlist").remove();
-                }
-                if (opts.menu == 'chainlist') {
-                    $("#chainlist").remove();
-                }
-
-                return '<div id="' + opts.menu + '" class="sqlsimplemenu">' +
+                 return '<div id="' + opts.menu + '" class="sqlsimplemenu">' +
 		        		'<input type="image" id="imgcancel" class="imgcancel" src="images/cancel.gif" name="image" style="height:25px;width:20px;padding-bottom:10px;float:right;right:50px;">' +
 		                  '<ul class="clicklist">' +
 		                    mmenu +
@@ -1324,16 +1321,16 @@
                	valstr = '<select class="addnewsqlwherevalue" id="' + counter_id + '_1">' + col_val + '>';
                    
                    var options = opts.fields[col_slot].values.replace('enum(', '');
-                   options = options.replace(')', '');
-                   var myOptions = options.split(',');
-                   //var myOptions = opts.fields[action].values.split(',');
+                   options = options.replace( /s*$/, "" );//right trim
+                   options = options.substring(0, options.length - 1);//remove last )
+                   
+                  
+                   var myOptions = eval("[" + options + "]");
 
                    //alert(myOptions.length);
 
                    for (value = 0; value < myOptions.length; value++) {
                    	var myVal = myOptions[value];
-                   	myVal = myVal.slice(1);
-                   	myVal= myVal.substring(0, myVal.length - 1);
                        if (col_val == myVal) {
                        	valstr += '<option value="' + value + '" selected="true">' + myVal + '</option>';
                        }
@@ -1522,19 +1519,36 @@
            function getOperatorsExclusion(column_type)
            {
         	   var exclusion = [];
-        	   if(column_type == 'int')
-        		{
-        		   exclusion = [
-        			 { name: 'Regex'},
-        			 { name: 'NotRegex'},
-        			 ];
-        		}
-        	   else if(column_type == 'enum')
+        	   switch(column_type)
         	   {
+        	   case 'int':
+        	   case 'tinyint':
+        	   case 'enum':
+        	   case 'datetime':
+        	   case 'date':
         		   exclusion = [
+        	        			 { name: 'Contains'},
+        	        			 { name: 'NotContains'},
+        	        			 { name: 'IsIn'},
+        	        			 { name: 'IsNotIn'},
         	        			 { name: 'Regex'},
-        	        			 { name: 'NotRegex'},
+        	        			 { name: 'NotRegex'}
         	        			 ];
+        		   break;
+        	   case 'char':
+        	   case 'varchar':
+        	   case 'text':
+        		   exclusion = [
+       	        			 { name: 'BiggerThan'},
+       	        			 { name: 'BiggerOrEqualTo'},
+       	        			 { name: 'SmallerThan'},
+       	        			 { name: 'SmallerOrEqualTo'},
+       	        			 { name: 'InBetween'},
+       	        			 { name: 'NotInBetween'}
+       	        			 ];
+        	    break;
+        	   default:
+        		break;
         	   }
         	   return exclusion;
            }
