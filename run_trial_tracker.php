@@ -814,7 +814,10 @@ class TrialTracker
 			
 			//upm description
 			$objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $uvalue["event_description"]);
-			$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl($eventLink);
+			if($eventLink != '' && $eventLink !== NULL)
+			{
+			$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl(urlencode($eventLink));
+			}
 			if(!empty($uvalue['edited']) && ($uvalue['edited']['field'] == 'event_description'))
 			{
 				$objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($highlightChange);
@@ -4742,7 +4745,7 @@ class TrialTracker
 				}
 				else if($value['status'] == 'Pending')
 				{
-					$outputStr .= '<div ' . $upmTitle . '><img src="images/hourglass.png" alt="Hourglass" height="8px" width="8px" style="margin:3px;" border="0" /></div>';
+					$outputStr .= '<div ' . $upmTitle . '><img src="images/hourglass.png" alt="Hourglass" height="8px" width="8px" style="margin:3px; padding:10px;" border="0" /></div>';
 				}
 				$outputStr .= '</div></td>';		
 				
@@ -4760,7 +4763,6 @@ class TrialTracker
 		return $outputStr;
 	}
 
-	
 	/*****END OF Functions ONLY FOR TCPDF *****************************/
 	
 	function generateXmlFile($resultIds, $timeMachine = NULL, $ottType, $globalOptions)
