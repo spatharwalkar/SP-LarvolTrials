@@ -440,7 +440,7 @@ function addNCT_history($rec, $id, $date) {
     }
 //    echo '<pre>'; print_r($rec); echo '</pre>';
 //exit;
-
+	mysql_query('COMMIT') or die("Couldn't commit SQL transaction. Query:".$query);
 if(isset($rec->status_block->brief_summary->textblock) and !empty($rec->status_block->brief_summary->textblock)) $bsummary=$rec->status_block->brief_summary->textblock;
 else $bsummary=$rec->brief_summary->textblock;
 if(isset($rec->status_block->detailed_descr->textblock) and !empty($rec->status_block->detailed_descr->textblock)) $ddesc=$rec->status_block->detailed_descr->textblock;
