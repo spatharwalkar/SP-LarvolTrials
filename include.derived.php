@@ -932,16 +932,10 @@ function criteria_process($text)
 	$text=str_replace('Inclusion Criteria','Inclusion Criteria: \n',$text); //Replace all Inclusion Criteria with Inclusion Criteria: to make it like header
 	$text=str_replace('Exclusion Criteria','Exclusion Criteria: \n',$text); //Replace all Exclusion Criteria with Exclusion Criteria: to make it like header
 
-	//used for replacing . in numbers with * b4 exploding by full stop
-	//$text=preg_replace('/(\d)(\.+)(\d)/','$1*$3',$text); 
-	
-	//used for replacing . in numbers with * b4 replacing . by \n
-	//$text=preg_replace('/(\d)(\.+)(\d)/','$1*$3',$text);
-	
 	//This adds \n before heading as in many cases where text is contneous and we are unable to detect end of line
-	$text=preg_replace('/([A-Z]{1}[a-z]+){0,1}(\s){0,1}[A-Z]{1}[a-z\s]+[a-z]+:{1}/','\n $0 \n',$text);
+	$text=preg_replace('/([A-Z]{1}[a-z]+){0,1}(\s){0,1}[A-Z]{1,}[a-z\s\/]+[a-z]+:{1}/','\n $0 \n',$text);
 	
-	$text=preg_replace('/([A-Z]{1}[A-Z]+){0,1}(\s){0,1}[A-Z]{1}[A-Z\s]+[A-Z]+:{1}/','\n $0 \n',$text); 
+	$text=preg_replace('/([A-Z]{1}[A-Z]+){0,1}(\s){0,1}[A-Z]{1,}[A-Z\s\/]+[A-Z]+:{1}/','\n $0 \n',$text); 
 	
 	$text=str_replace(' - ',' \n - ',$text);
 	$text=preg_replace('/(--){1}([A-Z-a-z\s]+)(--){1}/','\n $2: \n',$text);
@@ -975,27 +969,6 @@ function criteria_process($text)
 	
 	$data=explode('\n', $text);
 	
-	/*
-	//replace * with . after successful explode using full stop
-	for($i=0;$i< count($data); $i++)
-	{
-		if($data[$i] != '' || $data[$i] != '')
-		{
-		$data[$i]=preg_replace('/(\d)(\*+)(\d)/','$1.$3',$data[$i]); 
-		$data[$i]=$data[$i];
-		}
-	}*/
-	/*
-	//replace * with . after successful explode using \n
-	for($i=0;$i< count($data); $i++)
-
-	{
-		if($data[$i] != '' || $data[$i] != '')
-		{
-		$data[$i]=preg_replace('/(\d)(\*+)(\d)/','$1.$3',$data[$i]); 
-		$data[$i]=$data[$i];
-		}
-	}*/
 	//var_dump($data);
 	
 	$incl_print_data='';
@@ -1164,25 +1137,7 @@ function criteria_process($text)
 		
 	}///for loop ends of data counter
 	
-	/*if($diff_criteria_present_flag)
-	{
-		$ntspec_print_data="Not Specified:\n".$ntspec_print_data."\n\n";
-		$incl_print_data="Inclusion Criteria:\n".$incl_print_data."\n\n";
-		$excl_print_data="Exclusion Criteria:\n".$excl_print_data."\n\n";
-		$total_data=$incl_print_data.$excl_print_data.$ntspec_print_data;
-	}
-	else
-	{
-		$ntspec_print_data="Not Specified:\n".$ntspec_print_data."\n\n";
-		$incl_print_data="All Criteria:\n".$incl_print_data."\n\n";
-		$total_data=$incl_print_data.$ntspec_print_data;
-	}
 	
-	$total_data=str_replace("qqqqqqqq","/",$total_data); //Replace qqqqqqqq with / as it causes problems in some string functions
-			
-	//print '<br><br><br><br><b><font size="+3">Processed Data:</font></b> <br><br><pre>'.$total_data.'<pre>';
-	$total_data="\n\nProcessed Output Data:\n\n".$total_data;*/
-
 	$incl_print_data=str_replace("qqqqqqqq","/",$incl_print_data);
 	$excl_print_data=str_replace("qqqqqqqq","/",$excl_print_data);
 	$ntspec_print_data=str_replace("qqqqqqqq","/",$ntspec_print_data);
