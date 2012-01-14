@@ -311,6 +311,9 @@ if($current_tasks_count==0)
 						case 2:
 						$updtname='isrctn';
 						break;
+						case 3:
+						$updtname='nct_new';
+						break;
 						default:
 						$updtname='nct';
 					}
@@ -418,6 +421,9 @@ if($current_tasks_count==0)
 						break;
 						case 'isrctn':
 						$updtid=2;
+						break;
+						case 3:
+						$updtname='nct_new';
 						break;
 						default:
 						$updtid=0;
@@ -663,6 +669,9 @@ if($current_tasks_count==0)
 						break;
 						case 2:
 						$updtname='isrctn';
+						break;
+						case 3:
+						$updtname='nct_new';
 						break;
 						default:
 						$updtname='nct';
@@ -940,6 +949,9 @@ elseif($current_tasks_count==1)
 						case 2:
 						$updtname='isrctn';
 						break;
+						case 3:
+						$updtname='nct_new';
+						break;
 						default:
 						$updtname='nct';
 					}
@@ -1046,6 +1058,9 @@ elseif($current_tasks_count==1)
 						break;
 						case 'isrctn':
 						$updtid=2;
+						break;
+						case 3:
+						$updtname='nct_new';
 						break;
 						default:
 						$updtid=0;
@@ -1291,6 +1306,9 @@ elseif($current_tasks_count==1)
 						break;
 						case 2:
 						$updtname='isrctn';
+						break;
+						case 3:
+						$updtname='nct_new';
 						break;
 						default:
 						$updtname='nct';
@@ -1573,6 +1591,9 @@ elseif($current_tasks_count>1)
 									case 2:
 									$updtname='isrctn';
 									break;
+									case 3:
+									$updtname='nct_new';
+									break;
 									default:
 									$updtname='nct';
 								}
@@ -1928,6 +1949,9 @@ elseif($current_tasks_count>1)
 									case 2:
 									$updtname='isrctn';
 									break;
+									case 3:
+									$updtname='nct_new';
+									break;
 									default:
 									$updtname='nct';
 								}
@@ -2199,6 +2223,9 @@ elseif($current_tasks_count>1)
 									case 2:
 									$updtname='isrctn';
 									break;
+									case 3:
+									$updtname='nct_new';
+									break;
 									default:
 									$updtname='nct';
 								}
@@ -2307,6 +2334,9 @@ elseif($current_tasks_count>1)
 									break;
 									case 'isrctn':
 									$updtid=2;
+									break;
+									case 3:
+									$updtname='nct_new';
 									break;
 									default:
 									$updtid=0;
@@ -2552,6 +2582,9 @@ elseif($current_tasks_count>1)
 									break;
 									case 2:
 									$updtname='isrctn';
+									break;
+									case 3:
+									$updtname='nct_new';
 									break;
 									default:
 									$updtname='nct';
@@ -2826,6 +2859,9 @@ elseif($current_tasks_count>1)
 								case 2:
 								$updtname='isrctn';
 								break;
+								case 3:
+								$updtname='nct_new';
+								break;
 								default:
 								$updtname='nct';
 							}
@@ -2934,6 +2970,9 @@ elseif($current_tasks_count>1)
 								break;
 								case 'isrctn':
 								$updtid=2;
+								break;
+								case 3:
+								$updtname='nct_new';
 								break;
 								default:
 								$updtid=0;
@@ -3180,6 +3219,9 @@ elseif($current_tasks_count>1)
 								break;
 								case 2:
 								$updtname='isrctn';
+								break;
+								case 3:
+								$updtname='nct_new';
 								break;
 								default:
 								$updtname='nct';
@@ -3454,6 +3496,9 @@ elseif($current_tasks_count>1)
 							case 2:
 							$updtname='isrctn';
 							break;
+							case 3:
+							$updtname='nct_new';
+							break;
 							default:
 							$updtname='nct';
 						}
@@ -3562,6 +3607,9 @@ elseif($current_tasks_count>1)
 							break;
 							case 'isrctn':
 							$updtid=2;
+							break;
+							case 3:
+							$updtname='nct_new';
 							break;
 							default:
 							$updtid=0;
@@ -3805,6 +3853,9 @@ elseif($current_tasks_count>1)
 							break;
 							case 2:
 							$updtname='isrctn';
+							break;
+							case 3:
+							$updtname='nct_new';
 							break;
 							default:
 							$updtname='nct';
