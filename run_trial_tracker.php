@@ -4458,7 +4458,7 @@ class TrialTracker
 					
 					$outputStr .= '<td style="width:22px;  text-align:center;">';
 					
-					$outputStr .= '<div ' . $upmTitle . '>';
+					$outputStr .= '<div ' . $upmTitle . '><br />';
 					if($mvalue['result_link'] != '' && $mvalue['result_link'] !== NULL)
 					{
 						if((!empty($mvalue['edited']) && $mvalue['edited']['field'] == 'result_link') || ($mvalue['new'] == 'y')) 
@@ -4720,7 +4720,7 @@ class TrialTracker
 				
 				
 				//field upm result 
-				$outputStr .= '<td class="titleupmodd"><div class="rowcollapse">';
+				$outputStr .= '<td class="titleupmodd"><div class="rowcollapse"><br />';
 				if($value['result_link'] != '' && $value['result_link'] !== NULL)
 				{
 					if((!empty($value['edited']) && $value['edited']['field'] == 'result_link') || ($value['new'] == 'y')) 
