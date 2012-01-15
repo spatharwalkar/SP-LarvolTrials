@@ -884,7 +884,7 @@ function check_exclusion($line) //Check line is in Exclusion Criteria
 	{
 		return 1;
 	}
-	elseif(preg_match('/(.*)ineligible (.*)/',$line, $out))
+	elseif(preg_match('/(.*)ineligible (.*)/',$line, $out) || preg_match('/(.*)Ineligible (.*)/',$line, $out))
 	{
 		return 1;
 	}
@@ -907,7 +907,7 @@ function check_exclusion($line) //Check line is in Exclusion Criteria
 function criteria_process($text)
 {
 	
-	$text=str_replace("/","qqqqqqqq",$text); //Replace / with qqqqqqqq(uncommon string) as it causes problems in some string functions
+	$text=str_replace("/","########",$text); //Replace / with ########(uncommon string) as it causes problems in some string functions
 	
 	$text=str_replace("Inclusion Criteria:","Inclusion Criteria",$text);
 	$text=str_replace("Exclusion Criteria:","Exclusion Criteria",$text);
@@ -966,7 +966,7 @@ function criteria_process($text)
 	
 	//var_dump($text);
 	//$text=str_replace(".","\n",$text); //Replace . with \n as it causes problems in some string functions
-	
+	$text=preg_replace("/\n/",'\n',$text);
 	$data=explode('\n', $text);
 	
 	//var_dump($data);
@@ -990,7 +990,7 @@ function criteria_process($text)
 		$compress.=$data[$m].' \n';
 		}
 	}
-	$compress=str_replace("/","qqqqqqqq",$compress);
+	$compress=str_replace("/","########",$compress);
 	/* End part- This part added for compressing data by removing redundant data but no idea till now */
 	
 	$data=explode('\n', $compress);
@@ -1138,9 +1138,9 @@ function criteria_process($text)
 	}///for loop ends of data counter
 	
 	
-	$incl_print_data=str_replace("qqqqqqqq","/",$incl_print_data);
-	$excl_print_data=str_replace("qqqqqqqq","/",$excl_print_data);
-	$ntspec_print_data=str_replace("qqqqqqqq","/",$ntspec_print_data);
+	$incl_print_data=str_replace("########","/",$incl_print_data);
+	$excl_print_data=str_replace("########","/",$excl_print_data);
+	$ntspec_print_data=str_replace("########","/",$ntspec_print_data);
 	
 	$total_data=array();
 	$total_data['inclusion']=$incl_print_data;
