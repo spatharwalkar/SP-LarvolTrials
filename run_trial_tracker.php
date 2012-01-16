@@ -6869,7 +6869,12 @@ class TrialTracker
 				$rowspan = count($trials[$i]['matchedupms'])+1; 
 			 
 			foreach($trialsInfo as $tkey => &$tvalue)
-			{	
+			{
+				if($trflag == true || $i == $end)
+				{
+					continue 2;
+				}
+					
 				if($tkey < $sectionKey)
 				{
 					continue;
@@ -6959,10 +6964,7 @@ class TrialTracker
 					}
 				}
 			}
-			if($trflag == true || $i == $end)
-			{
-				continue;
-			}
+			
 			
 			//row starts  
 			$outputStr .= '<tr ' . (($trials[$i]['new'] == 'y') ? 'class="newtrial" ' : ''). '>';  
