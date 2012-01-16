@@ -6964,7 +6964,10 @@ class TrialTracker
 					}
 				}
 			}
-			
+			if($trflag == true || $i == $end)
+			{
+				continue;
+			}
 			
 			//row starts  
 			$outputStr .= '<tr ' . (($trials[$i]['new'] == 'y') ? 'class="newtrial" ' : ''). '>';  
