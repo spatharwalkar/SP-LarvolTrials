@@ -4466,7 +4466,7 @@ class TrialTracker
 						else 
 							$imgColor = 'black'; 
 							
-						$outputStr .= '<a href="' . $value['result_link'] . '" style="color:#000;">';
+						$outputStr .= '<a href="' . $mvalue['result_link'] . '" style="color:#000;">';
 						if($mvalue['event_type'] == 'Clinical Data')
 						{
 							$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond" height="6px" width="6px" style="margin:4px;" border="0" />';
@@ -7225,7 +7225,7 @@ class TrialTracker
 						else 
 							$imgColor = 'black'; 
 							
-						$outputStr .= '<a href="' . $value['result_link'] . '" style="color:#000;">';
+						$outputStr .= '<a href="' . $mvalue['result_link'] . '" style="color:#000;">';
 						if($mvalue['event_type'] == 'Clinical Data')
 						{
 							$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond" style="margin:4px;" border="0" />';
