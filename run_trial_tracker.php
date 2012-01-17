@@ -17,7 +17,7 @@ class TrialTracker
 	private $activeStatusValues = array();
 	private $allStatusValues = array();
 	private $resultsPerPage = 100;
-	
+	private $enumVals = array();
 	function TrialTracker()
 	{
 		$this->fid['nct_id'] 					= '_' . getFieldId('NCT', 'nct_id');
@@ -43,6 +43,8 @@ class TrialTracker
 		$this->activeStatusValues = array('nyr'=>'Not yet recruiting', 'r'=>'Recruiting', 'ebi'=>'Enrolling by invitation', 
 								'anr'=>'Active, not recruiting', 'av'=>'Available', 'nlr' =>'No longer recruiting');
 		$this->allStatusValues = array_merge($this->inactiveStatusValues, $this->activeStatusValues);
+		
+		$this->enumVals = getEnumValues('clinical_study', 'institution_type');
 	}
 	
 	function generateTrialTracker($format, $resultIds, $timeMachine = NULL, $ottType, $globalOptions = array())
@@ -89,6 +91,7 @@ class TrialTracker
 		$currentYear = date('Y');
 		$secondYear	= date('Y')+1;
 		$thirdYear	= date('Y')+2;	
+
 
 
 
@@ -4170,6 +4173,7 @@ class TrialTracker
 					{
 						if($ottType != 'colstacked')
 							$image = 'down';
+
 						else
 							$image = 'up';
 						
@@ -4832,6 +4836,7 @@ class TrialTracker
 		}
 		
 		//these values are not needed at present
+
 		unset($Values['resultIds']);
 		unset($Values['totactivecount']);
 		unset($Values['totinactivecount']);
@@ -5163,7 +5168,6 @@ class TrialTracker
 		
 		$Trials = array();
 		$TrialsInfo = array();
-		$params3 = array();
 		
 		$Trials['inactiveTrials'] = array();
 		$Trials['activeTrials'] = array();
@@ -5189,6 +5193,7 @@ class TrialTracker
 			$Params = array();
 			$params1 = array();
 			$params2 = array();
+			$params3 = array();
 			
 			$pval = unserialize(gzinflate(base64_decode($pvalue)));
 			$timeMachine = $pval['time'];
@@ -5230,13 +5235,16 @@ class TrialTracker
 			
 			if(isset($globalOptions['filtersTwo']) && !empty($globalOptions['filtersTwo'])) 
 			{
-				array_push($this->fid, 'institution_type');
-
-				$sp = new SearchParam();
-				$sp->field 	= 'institution_type';
-				$sp->action = 'search';
-				$sp->value 	= $globalOptions['filtersTwo'];
-				$params3 = array($sp);
+				$this->fid['institution_type'] = 'institution_type';
+				
+				foreach($globalOptions['filtersTwo'] as $fkey => $fvalue)
+				{
+					$sp = new SearchParam();
+					$sp->field 	= 'institution_type';
+					$sp->action = 'search';
+					$sp->value 	= $this->enumVals[$fvalue];
+					$params3[] = $sp;
+				}
 			}
 			
 			$Params = array_merge($params1, $params2, $params3);
@@ -5262,7 +5270,7 @@ class TrialTracker
 						{
 							$Array2[$indx][$key] = $value[0];
 						}
-						elseif($key == 'NCT/phase' || $key == 'NCT/overall_status' || $key == 'NCT/enrollment')
+						elseif($key == 'NCT/phase' || $key == 'NCT/overall_status' || $key == 'NCT/enrollment' || $key == 'NCT/brief_title')
 						{
 							$Array2[$indx][$key] = end($value);
 						}
@@ -5455,7 +5463,6 @@ class TrialTracker
 		$Values = array();
 		$Trials = array();
 		$TrialsInfo = array();
-		$params3 = array();
 		
 		$Trials['inactiveTrials'] = array();
 		$Trials['activeTrials'] = array();
@@ -5478,6 +5485,7 @@ class TrialTracker
 			$Params = array();
 			$params1 = array();
 			$params2 = array();
+			$params3 = array();
 			
 			$TrialsInfo[$ikey]['sectionHeader'] = $globalOptions['sectionHeader'];
 			
@@ -5489,13 +5497,16 @@ class TrialTracker
 			
 			if(isset($globalOptions['filtersTwo']) && !empty($globalOptions['filtersTwo'])) 
 			{
-				array_push($this->fid, 'institution_type');
-
-				$sp = new SearchParam();
-				$sp->field 	= 'institution_type';
-				$sp->action = 'search';
-				$sp->value 	= $globalOptions['filtersTwo'];
-				$params3 = array($sp);
+				$this->fid['institution_type'] = 'institution_type';
+				
+				foreach($globalOptions['filtersTwo'] as $fkey => $fvalue)
+				{
+					$sp = new SearchParam();
+					$sp->field 	= 'institution_type';
+					$sp->action = 'search';
+					$sp->value 	= $this->enumVals[$fvalue];
+					$params3[] = $sp;
+				}
 			}
 			
 			if(!empty($globalOptions['sortOrder'])) 
@@ -5532,7 +5543,7 @@ class TrialTracker
 						{
 							$Array2[$indx][$key] = $value[0];
 						}
-						elseif($key == 'NCT/phase' || $key == 'NCT/overall_status' || $key == 'NCT/enrollment')
+						elseif($key == 'NCT/phase' || $key == 'NCT/overall_status' || $key == 'NCT/enrollment' || $key == 'NCT/brief_title')
 						{
 							$Array2[$indx][$key] = end($value);
 						}
@@ -5985,7 +5996,6 @@ class TrialTracker
 		$Values = array();
 		$Trials = array();
 		$TrialsInfo = array();
-		$params3 = array();
 		$linkExpiry = array();
 		
 		$Trials['inactiveTrials'] = array();
@@ -6013,6 +6023,7 @@ class TrialTracker
 			$Params = array();
 			$params1 = array();
 			$params2 = array();
+			$params3 = array();
 			
 			$Ids = explode('.', $ivalue);
 			
@@ -6129,13 +6140,16 @@ class TrialTracker
 			
 			if(isset($globalOptions['filtersTwo']) && !empty($globalOptions['filtersTwo'])) 
 			{
-				array_push($this->fid, 'institution_type');
-
-				$sp = new SearchParam();
-				$sp->field 	= 'institution_type';
-				$sp->action = 'search';
-				$sp->value 	= $globalOptions['filtersTwo'];
-				$params3 = array($sp);
+				$this->fid['institution_type'] = 'institution_type';
+				
+				foreach($globalOptions['filtersTwo'] as $fkey => $fvalue)
+				{
+					$sp = new SearchParam();
+					$sp->field 	= 'institution_type';
+					$sp->action = 'search';
+					$sp->value 	= $this->enumVals[$fvalue];
+					$params3[] = $sp;
+				}
 			}
 			
 			if(!empty($globalOptions['sortOrder'])) 
@@ -6176,7 +6190,7 @@ class TrialTracker
 						{
 							$Array2[$indx][$key] = $value[0];
 						}
-						elseif($key == 'NCT/phase' || $key == 'NCT/overall_status' || $key == 'NCT/enrollment')
+						elseif($key == 'NCT/phase' || $key == 'NCT/overall_status' || $key == 'NCT/enrollment' || $key == 'NCT/brief_title')
 						{
 							$Array2[$indx][$key] = end($value);
 						}
@@ -6473,7 +6487,11 @@ class TrialTracker
 		echo '<input type="hidden" name="cd" value="' 
 		. rawurlencode(base64_encode(gzdeflate(serialize(array('a'=>$totactivecount, 'in'=>$totinactivecount))))). '" />';	
 		
-		echo '</form>';
+		if($totalPages > 1)
+		{
+			$this->pagination($globalOptions, $totalPages, $timeMachine, $ottType);
+		}
+		echo '</form><br/>';
 		
 		if($totalcount > 0 && ($ottType != 'unstackedoldlink' && $ottType != 'stackedoldlink')) 
 		{
@@ -6726,12 +6744,11 @@ class TrialTracker
 			
 		echo '</span></div>&nbsp;&nbsp;<div class="drop" style="margin-left:215px;"><div class="text">Show Only</div>';
 		
-		$enumvals = getEnumValues('clinical_study', 'institution_type');
-		foreach($enumvals as $key => $value)
+		foreach($this->enumVals as $ekey => $evalue)
 		{ 
-			echo '<input type="checkbox" id="' . $value . '" name="so2[]" value="' . rawurlencode(base64_encode(gzdeflate($key))) 
-				. '" ' . (in_array($key, $globalOptions['filtersTwo']) ? 'checked="checked"' : '') . ' />&nbsp;' 
-				. '<label for="'.$value.'">' .$value . '</label><br/>';
+			echo '<input type="checkbox" id="' . $evalue . '" name="so2[]" value="' . rawurlencode(base64_encode(gzdeflate($ekey))) 
+				. '" ' . (in_array($ekey, $globalOptions['filtersTwo']) ? 'checked="checked"' : '') . ' />&nbsp;' 
+				. '<label for="'.$evalue.'">' .$evalue . '</label><br/>';
 		}
 		
 		echo '</div></div><br/><input type="submit" value="Show"/>&nbsp;' . $shownCount . '&nbsp;Records<span id="addtoright"></span>';	
@@ -6810,15 +6827,97 @@ class TrialTracker
 			$url .= '&amp;format=' . $globalOptions['encodeFormat'];
 		}
 		
-		$paginateStr = '<div style="background-color:red;width:100%;">';
-		if($globalOptions['page'] > 1)
+		$stages = 3;
+		
+		$paginateStr = '<div class="pagination">';
+		if($globalOptions['page'] == 1)
 		{
-			$paginateStr .= '<a href="' . $url . '&page=' . ($globalOptions['page']-1) . '" style="float:left;">&lt;&lt;Prev</a>';
+			$paginateStr .= '<span>&laquo; Prev</span>';
 		}
-		$paginateStr .= '<label style="float:left;">&nbsp;&nbsp;&nbsp;(Page ' . $globalOptions['page'] . ' of ' . $totalPages . ')&nbsp;&nbsp;&nbsp;</label>';
-		if($globalOptions['page'] < $totalPages)
+		else
 		{
-			$paginateStr .= '<a href="' . $url . '&page=' . ($globalOptions['page']+1) . '" style="float:left;">Next&gt;&gt;</a>';
+			$paginateStr .= '<a href="' . $url . '&page=' . ($globalOptions['page']-1) . '">&laquo; Prev</a>';
+		}
+		
+		if($totalPages < 7 + ($stages * 2))
+		{	
+			for($counter = 1; $counter <= $totalPages; $counter++)
+			{
+				if ($counter == $globalOptions['page'])
+				{
+					$paginateStr .= '<span>' . $counter . '</span>';
+				}
+				else
+				{
+					$paginateStr .= '<a href="' . $url . '&page=' . $counter . '">' . $counter . '</a>';
+				}
+			}
+		}
+		elseif($totalPages > 5 + ($stages * 2))
+		{
+			if($globalOptions['page'] < 1 + ($stages * 2))
+			{
+				for($counter = 1; $counter < 4 + ($stages * 2); $counter++)
+				{
+					if ($counter == $globalOptions['page'])
+					{
+						$paginateStr .= '<span>' . $counter . '</span>';
+					}
+					else
+					{
+						$paginateStr .='<a href="' . $url . '&page=' . $counter . '">' . $counter . '</a>';
+					}
+				}
+				$paginateStr.= '<span>...</span>';
+				$paginateStr.= '<a href="' . $url . '&page=' . ($totalPages-1) . '">' .  ($totalPages-1) . '</a>';
+				$paginateStr.= '<a href="' . $url . '&page=' . $totalPages . '">' . $totalPages . '</a>';
+			}
+			elseif($totalPages - ($stages * 2) > $globalOptions['page'] && $globalOptions['page'] > ($stages * 2))
+			{
+				$paginateStr.= '<a href="' . $url . '&page=1">1</a>';
+				$paginateStr.= '<a href="' . $url . '&page=2">2</a>';
+				$paginateStr.= '<span>...</span>';
+				for($counter = $globalOptions['page'] - $stages; $counter <= $globalOptions['page'] + $stages; $counter++)
+				{
+					if ($counter == $globalOptions['page'])
+					{
+						$paginateStr.= '<span>' . $counter . '</span>';
+					}
+					else
+					{
+						$paginateStr.= '<a href="' . $url . '&page=' . $counter . '">' . $counter . '</a>';
+					}
+				}
+				$paginateStr.= '<span>...</span>';
+				$paginateStr.= '<a href="' . $url . '&page=' . ($totalPages-1) . '">' . ($totalPages-1) . '</a>';
+				$paginateStr.= '<a href="' . $url . '&page=' . $totalPages . '">' . $totalPages . '</a>';
+			}
+			else
+			{
+				$paginateStr .= '<a href="' . $url . '&page=1">1</a>';
+				$paginateStr .= '<a href="' . $url . '&page=2">2</a>';
+				$paginateStr .= "<span>...</span>";
+				for($counter = $totalPages - (2 + ($stages * 2)); $counter <= $totalPages; $counter++)
+				{
+					if ($counter == $globalOptions['page'])
+					{
+						$paginateStr .= '<span>' . $counter . '</span>';
+					}
+					else
+					{
+						$paginateStr .= '<a href="' . $url . '&page=' . $counter . '">' . $counter . '</a>';
+					}
+				}
+			}
+		}
+		
+		if($globalOptions['page'] == $totalPages)
+		{
+			$paginateStr .= '<span>Next &raquo;</span>';
+		}
+		else
+		{
+			$paginateStr .= '<a href="' . $url . '&page=' . ($globalOptions['page']+1) . '">Next &raquo;</a>';
 		}
 		$paginateStr .= '</div>';
 		
