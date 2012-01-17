@@ -171,12 +171,24 @@ else $ddesc=$rec->detailed_descr->textblock;
 	$record_data['primary_outcome_measure'] = array();
 	$record_data['primary_outcome_timeframe'] = array();
 	$record_data['primary_outcome_safety_issue'] = array();
+	foreach ($rec->primary_outcome as $out) 
+	{
+		if(!isset($out->measure) or empty($out->measure))
+			$record_data['primary_outcome_measure'][]=$out;
+		if(isset($out->description->textblock) and !empty($out->description->textblock))
+			$record_data['primary_outcome_measure'][]=$out->description->textblock;
+        $record_data['primary_outcome_measure'][] = $out->measure;
+        $record_data['primary_outcome_timeframe'][] = $out->time_frame;
+        $record_data['primary_outcome_safety_issue'][] = ynbool($out->safety_issue);
+    }
+	/*
 	foreach($rec->primary_outcome as $out)
 	{
 		$record_data['primary_outcome_measure'][] = $out->measure;
 		$record_data['primary_outcome_timeframe'][] = $out->time_frame;
 		$record_data['primary_outcome_safety_issue'][] = ynbool($out->safety_issue);
 	}
+	*/
 	$record_data['secondary_outcome_measure'] = array();
 	$record_data['secondary_outcome_timeframe'] = array();
 	$record_data['secondary_outcome_safety_issue'] = array();
