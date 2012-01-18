@@ -28,7 +28,7 @@ echo('<a href="index.php" style="text-align:center;display:block;width:100%;">'
 	 . '</a><div id="bar"><div id="nav">');
 if($db->loggedIn())
 {
-	echo('Search (<a href="search.php">Main</a>,<a href="search_simple.php">Simple</a>) :: <a href="inspect.php">ID Lookup</a>');
+	echo('Search (<a href="search.php">Main</a>,<a href="search_simple.php">Simple</a>,<a href="newsearch.php">New</a>) :: <a href="inspect.php">ID Lookup</a>');
 	echo(' :: ');
 	echo('<div class="drop">Import<br/>'
 	.'<a href="import.php">XML Import</a><br/>'
