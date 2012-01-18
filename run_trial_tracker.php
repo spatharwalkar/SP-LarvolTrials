@@ -7969,7 +7969,7 @@ class TrialTracker
 		
 		$updates = array('edited' => array(), 'new' => 'n');
 		
-		$fieldnames = array('nct_id', 'brief_title', 'enrollment', 'enrollment_type', 'acronym', 'start_date',
+		$fieldnames = array('nct_id', 'brief_title', 'enrollment', 'acronym', 'start_date',
 							'overall_status','condition', 'intervention_name', 'phase', 'lead_sponsor', 'collaborator');
 
 		$studycatData = mysql_fetch_assoc(mysql_query("SELECT `dv`.`studycat` FROM `data_values` `dv` LEFT JOIN `data_cats_in_study` `dc` ON "
