@@ -20,6 +20,8 @@ $colModel .= "{name:'larvol_id',jsonmap:'larvol_id',width:90},";
 $colNames .= "'source_id',";
 $colModel .= "{name:'source_id',jsonmap:'source_id',width:90},";
 
+if(!empty($select_columns))
+{
 foreach($select_columns as $selectcolumn)
 {
 	$colName = $selectcolumn["columnname"];
@@ -30,7 +32,8 @@ foreach($select_columns as $selectcolumn)
 	}
 	$colNames .= "'" . $colName . "',";
 	$colModel .= "{name:'" . $colName . "',jsonmap:'" . $colName . "',width:90},";
-	
+
+}
 }
 $colNames = substr($colNames, 0, -1); //strip last comma
 $colModel = substr($colModel, 0, -1); //strip last comma
@@ -95,11 +98,11 @@ html,body {
 
    					$("#3009").html(jqXHR.responseText);
 		            $("#3009").show();
-		        }		    
+		        }
 		});
 		jQuery("#list2").jqGrid('navGrid','#pager2',{edit:false,add:false,del:false});
 		//jQuery("#list2").jqGrid('filterToolbar',{stringResult: true,searchOnEnter : false});
-	   
+
 });
 
    function goBack()

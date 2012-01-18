@@ -122,6 +122,11 @@
             $('.sqlsort').remove();
 
             $('#override').val('');
+            
+            if(jsonstr.length == 0)
+            {
+               return;
+            }
             var j = eval('(' + jsonstr + ')');
             $('#override').val(j.override);
            
@@ -1347,9 +1352,7 @@
                       	valstr += ' and <select class="addnewsqlwherevalue" id="' + counter_id + '_2">' + col_val + '>';
                        for (value = 0; value < myOptions.length; value++) {
                        	var myVal = myOptions[value];
-                       	myVal = myVal.slice(1);
-                       	myVal= myVal.substring(0, myVal.length - 1);
-                           if (col_val == myVal) {
+                       	   if (col_val == myVal) {
                            	valstr += '<option value="' + value + '" selected="true">' + myVal + '</option>';
                            }
                            else {
@@ -1502,10 +1505,16 @@
                        $("[class=addnewsqlwhere][id=" + $(el).attr('id') + "]")
 			            .html(opts.fields[action].name)
 			            .attr('href', "#" + action);
-                        var op_slot1 = $("[class=addnewsqlwhereoperator][id=" + $(el).attr('id') + "]")
-			            .attr('href').substr(1);
+                        //var op_slot1 = $("[class=addnewsqlwhereoperator][id=" + $(el).attr('id') + "]")
+			//            .attr('href').substr(1);
+		       $("[class=addnewsqlwhereoperator][id=" + $(el).attr('id') + "]")
+					            .html(opts.operators[0].displayname)
+		            .attr('href', "#" + "0");
+			var op_slot1 = "0";
                         var col_slot1 = action;
                         var counter_id1 = $(el).attr('id');
+                        var col_type = opts.fields[col_slot1].type;
+                        createSQLWhereOperatorEvent(counter_id, col_type);
                         var valstr = getSQLWhereValueHtml(col_slot1, op_slot1, "", counter_id1);
                         $("[class=divnewsqlwherevalue][id=" + $(el).attr('id') + "]").html(valstr);
                         createSQLWhereValueChangeEvents(counter_id1);
@@ -1532,7 +1541,9 @@
         	        			 { name: 'IsIn'},
         	        			 { name: 'IsNotIn'},
         	        			 { name: 'Regex'},
-        	        			 { name: 'NotRegex'}
+        	        			 { name: 'NotRegex'},
+        	        			 { name: 'StartsWith'},
+        	        			 { name: 'NotStartsWith'}
         	        			 ];
         		   break;
         	   case 'char':

@@ -46,10 +46,10 @@ $show_sort_res = false;
   <script type="text/javascript">
    $(document).ready(function () {
 
-   $('.sqlbuild').sqlquerybuilder({  
-	fields: [ 
+   $('.sqlbuild').sqlquerybuilder({
+	fields: [
    <?php
-   
+
     $my_table = 'data_trials';
     $query = "select * from information_schema.columns where table_name='data_trials';";
     $res = mysql_query($query) or die('Bad SQL query getting searchdata');
@@ -64,13 +64,13 @@ $show_sort_res = false;
 	    {
 	    	$column_type = "enum('0','1')";
 	    	$data_type = "enum";
-	    	
+
 	    }
 	    //printf ("Name: %s", $name_val);
 	    $field_str .="{ field: '$name_val', name: '$name_val', id: 2, ftype: 'string', defaultval: '$default_value', type: '$data_type' , values:\"$column_type\"},";
      }
      $field_str = substr($field_str, 0, -1); //strip last comma
-     //$field_str .= "],"; 
+     //$field_str .= "],";
      echo($field_str);
     ?>
     ],
@@ -142,9 +142,9 @@ $show_sort_res = false;
     var name = $("#txtSearchName").val();
     var searchId = $("label[for=" + "lblId" + "]").text();
     $("#3009").attr("style", "visibility:show");
-    
+
     if (jQuery.trim(searchId) == "") {//new search
-        if (!name) 
+        if (!name)
         {
             $($tt.opts.statusmsgdiv).html("Can't save the search. Please enter search name");
             $("#3009").attr("style", "visibility:show");
@@ -156,16 +156,16 @@ $show_sort_res = false;
             async: false,
             url: $tt.opts.reporthandler + '?op=savenew&reportid=' + $tt.opts.reportid + '&reportname=' + name,
             data: 'querytosave=' + $('.sqldata', $('.sqlbuild')).html(),
-            error: function () { 
-            if ($tt.opts.statusmsgdiv) 
-                $($tt.opts.statusmsgdiv).html("Can't save the report sql"); 
+            error: function () {
+            if ($tt.opts.statusmsgdiv)
+                $($tt.opts.statusmsgdiv).html("Can't save the report sql");
                 return false;
             },
-            success: function (data) { 
-            	if ($tt.opts.statusmsgdiv) $($tt.opts.statusmsgdiv).html( name + " saved...."); 
+            success: function (data) {
+            	if ($tt.opts.statusmsgdiv) $($tt.opts.statusmsgdiv).html( name + " saved....");
             	$("#txtSearchName").val(name);
             	var newItem='<li class="item"> <a onclick="showSearchData(\''
-                    + data + ');return false;" href="#">' + name + '</a> </li>';
+                    + data + '\');return false;" href="#">' + name + '</a> </li>';
             	$('ul.treeview li.list').addClass('expanded').find('>ul').append(newItem);
                 $('#3009').show();
             	}
@@ -183,13 +183,13 @@ $show_sort_res = false;
             async: false,
             url: $tt.opts.reporthandler + '?op=saveexists&searchId=' + searchId + '&reportname=' + name,
             data: 'querytosave=' + queryData,
-            error: function () { 
-            if ($tt.opts.statusmsgdiv) 
-                $($tt.opts.statusmsgdiv).html("Can't save the search sql"); 
+            error: function () {
+            if ($tt.opts.statusmsgdiv)
+                $($tt.opts.statusmsgdiv).html("Can't save the search sql");
                 return false;
             },
-            success: function (data) 
-            { 
+            success: function (data)
+            {
             	if ($tt.opts.statusmsgdiv) $($tt.opts.statusmsgdiv).html(data);
                 $("#txtSearchName").val(name);
                 $("#lblId").text(searchId);
@@ -206,12 +206,13 @@ $show_sort_res = false;
 	   //window.location.href="newsearch.php";
 	   $('#txtSearchName').val('');
 	   $('#lblId').text('');
-	   loadQueryData(' ');
-	   
+	   loadQueryData('');
+
    }
 
    function showSearchData(id)
     {
+       $('#3009').hide();
 	   var $tt= $('.sqlbuild')[0];
 	    //window.location.href="newsearch.php?id=" + id;
        $.ajax({
@@ -219,23 +220,23 @@ $show_sort_res = false;
            async: false,
            url: $tt.opts.reporthandler + '?op=getsearchdata&id=' + id,
            data: 'querytosave=',
-           error: function () { 
-           if ($tt.opts.statusmsgdiv) 
-               $($tt.opts.statusmsgdiv).html("Can't get the search data"); 
+           error: function () {
+           if ($tt.opts.statusmsgdiv)
+               $($tt.opts.statusmsgdiv).html("Can't get the search data");
                return false;
            },
-           success: function (data) 
-           { 
+           success: function (data)
+           {
         	   var searchData = eval('(' + data + ')');
                loadQueryData(searchData.searchdata);
                $("#txtSearchName").val(searchData.name);
                $("#lblId").text(searchData.id);
-          
+
            }
        });
        return false;
     }
-   
+
     function getQueryData()
     {
        return $('.sqldata', $('.sqlbuild')).html();
@@ -247,7 +248,7 @@ $show_sort_res = false;
         $("#lblId").text('');
     	$('.sqlbuild').loadSQB(data);
     }
-    
+
   </script>
 <body>
 <div class="builder">
@@ -278,7 +279,7 @@ $show_sort_res = false;
 
 						<td valign="top" style="border: 1px solid #ccc; width: 200px;">
 						<p id="6000">
-<?php 
+<?php
 	global $db;
 
 	$out = "<ul class='treeview' id='treeview_9000'>";
@@ -299,7 +300,7 @@ $show_sort_res = false;
 	$out .= "</li>";
 	//$out .= "</ul>";
 	echo($out);
-?>						
+?>
 						</p>
 						</td>
                   </tr>

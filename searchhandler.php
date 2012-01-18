@@ -12,7 +12,7 @@ switch($_REQUEST['op']){
 		break;
 	case 'getsearchdata':
 		getSearchData();
-        break;
+		break;
 	case 'saveexists':
 		updateSearch();
 		echo $_REQUEST['reportname']." saved....";
@@ -110,8 +110,8 @@ function updateSearch()
 
 function getSearchData()
 {
-    if(!isset($_REQUEST['id']) || !is_numeric($_REQUEST['id']))	return;
-//load search from Saved Search
+	if(!isset($_REQUEST['id']) || !is_numeric($_REQUEST['id']))	return;
+	//load search from Saved Search
 
 	$ssid = mysql_real_escape_string($_REQUEST['id']);
 	//$query = 'SELECT * FROM saved_searches WHERE id=' . $ssid . ' AND (user=' . $db->user->id . ' or user IS NULL)' . ' LIMIT 1';
@@ -119,14 +119,14 @@ function getSearchData()
 	$res = mysql_query($query) or die('Bad SQL query getting searchdata');
 	$row = mysql_fetch_array($res);
 	//if($row === false) return;	//In this case, either the ID is invalid or it doesn't belong to the current user.
-    		
-    		   //$show_value = 'showSearchData("' . $_GET['id'] . '");';
-    		   //echo($show_value);
-    $data = unserialize(base64_decode($row['searchdata']));
-    $res_ret->searchdata=$data;
-    $res_ret->name= $row['name'];
-    $res_ret->id= $row['id'];
-    echo json_encode($res_ret);
+
+	//$show_value = 'showSearchData("' . $_GET['id'] . '");';
+	//echo($show_value);
+	$data = unserialize(base64_decode($row['searchdata']));
+	$res_ret->searchdata=$data;
+	$res_ret->name= $row['name'];
+	$res_ret->id= $row['id'];
+	echo json_encode($res_ret);
 
 
 }
@@ -161,14 +161,14 @@ function listSearchProc()
 {
 	global $db;
 
-		$ssid = mysql_real_escape_string($_REQUEST['searchId']);
-		$query = 'SELECT searchdata FROM saved_searches WHERE id=' . $ssid . ' AND (user=' . $db->user->id . ' or user IS NULL)'
-		. ' LIMIT 1';
-		$res = mysql_query($query) or die('Bad SQL query getting searchdata');
-		$row = mysql_fetch_array($res);
-		if($row === false) return;	//In this case, either the ID is invalid or it doesn't belong to the current user.
-		unserialize(base64_decode($row['searchdata']));
-		return $row;
+	$ssid = mysql_real_escape_string($_REQUEST['searchId']);
+	$query = 'SELECT searchdata FROM saved_searches WHERE id=' . $ssid . ' AND (user=' . $db->user->id . ' or user IS NULL)'
+	. ' LIMIT 1';
+	$res = mysql_query($query) or die('Bad SQL query getting searchdata');
+	$row = mysql_fetch_array($res);
+	if($row === false) return;	//In this case, either the ID is invalid or it doesn't belong to the current user.
+	unserialize(base64_decode($row['searchdata']));
+	return $row;
 }
 
 function testQuery()
@@ -176,22 +176,22 @@ function testQuery()
 	$jsonData=$_REQUEST['data'];
 	$actual_query= "";
 	try {
-	$actual_query= buildQuery($jsonData, false);
+		$actual_query= buildQuery($jsonData, false);
 	}
 	catch(Exception $e)
 	{
 		return $e->getMessage();
 	}
-	
+
 	$result = mysql_query($actual_query);
 	if (mysql_errno()) {
-    $error = "MySQL error ".mysql_errno().": ".mysql_error()."\n<br>When executing:<br>\n$actual_query\n<br>";
-    return $error;
-    }
-    else
-    {
-    	return "Great! SQL Query has no syntax issues" ."\n<br>When executing:<br>\n$actual_query\n<br>";
-    }
+		$error = "MySQL error ".mysql_errno().": ".mysql_error()."\n<br>When executing:<br>\n$actual_query\n<br>";
+		return $error;
+	}
+	else
+	{
+		return "Great! SQL Query has no syntax issues" ."\n<br>When executing:<br>\n$actual_query\n<br>";
+	}
 
 }
 
@@ -207,29 +207,29 @@ function runQuery()
 	if(!$sidx) $sidx =1;
 
 	$result = mysql_query($count_query);
-    $row = mysql_fetch_array($result,MYSQL_ASSOC);
-    $count = $row['count'];
-    if( $count >0 ) {
-        $total_pages = ceil($count/$limit);
+	$row = mysql_fetch_array($result,MYSQL_ASSOC);
+	$count = $row['count'];
+	if( $count >0 ) {
+		$total_pages = ceil($count/$limit);
 	} else {
 		$total_pages = 0;
 	}
-    if ($page > $total_pages) $page=$total_pages;
+	if ($page > $total_pages) $page=$total_pages;
 	$start = $limit*$page - $limit; // do not put $limit*($page - 1)
-    if ($start<0) $start = 0;
-    //$SQL = "$actual_query ORDER BY $sidx $sord LIMIT $start , $limit";
-    $SQL = "$actual_query LIMIT $start , $limit";
-    $result = mysql_query( $SQL ) or die("Couldn't execute query.".mysql_error());
-    $responce->page = $page;
-    $responce->total = $total_pages;
-    $responce->records = $count;
-    $i=0;
-    while($row = mysql_fetch_array($result,MYSQL_ASSOC)) {
-        $responce->rows[$i]=$row;
-        $i++;
+	if ($start<0) $start = 0;
+	//$SQL = "$actual_query ORDER BY $sidx $sord LIMIT $start , $limit";
+	$SQL = "$actual_query LIMIT $start , $limit";
+	$result = mysql_query( $SQL ) or die("Couldn't execute query.".mysql_error());
+	$responce->page = $page;
+	$responce->total = $total_pages;
+	$responce->records = $count;
+	$i=0;
+	while($row = mysql_fetch_array($result,MYSQL_ASSOC)) {
+		$responce->rows[$i]=$row;
+		$i++;
 	}
-    $ret_val = json_encode($responce);
-    echo($ret_val);
+	$ret_val = json_encode($responce);
+	echo($ret_val);
 
 
 }
@@ -238,72 +238,72 @@ function buildQuery($data, $isCount=false)
 {
 	$actual_query = "";
 	try {
-	$jsonData=$data;
-	$filterData = json_decode($jsonData, true, 10);
+		$jsonData=$data;
+		$filterData = json_decode($jsonData, true, 10);
 
-	$alias= " dt"; //data_trial table alias
+		$alias= " dt"; //data_trial table alias
 
-	$where_datas = $filterData["wheredata"];
-	$select_columns=$filterData["columndata"];
-	$override_vals = trim($filterData["override"]);
-	$sort_datas = $filterData["sortdata"];
-	$isOverride = !empty($override_vals);
+		$where_datas = $filterData["wheredata"];
+		$select_columns=$filterData["columndata"];
+		$override_vals = trim($filterData["override"]);
+		$sort_datas = $filterData["sortdata"];
+		$isOverride = !empty($override_vals);
 
-	$select_str = getSelectString($select_columns, $alias);
-	$where_str = getWhereString($where_datas, $alias);
-	$sort_str = getSortString($sort_datas, $alias);
-	
+		$select_str = getSelectString($select_columns, $alias);
+		$where_str = getWhereString($where_datas, $alias);
+		$sort_str = getSortString($sort_datas, $alias);
 
-	if($isOverride)
-	{
+
+		if($isOverride)
+		{
+			if($isCount)
+			{
+		  $actual_query .= "SELECT((";
+			}
+			else
+			{
+		  $actual_query .= "(";
+			}
+		}
+
+		$actual_query .= "SELECT ";
+
 		if($isCount)
 		{
-		  $actual_query .= "SELECT((";
+	  $actual_query .= 	"COUNT(*) AS count";
 		}
 		else
 		{
-		  $actual_query .= "(";
+			$actual_query .= 	$select_str;
 		}
-	}
 
-	$actual_query .= "SELECT ";
+		$actual_query .= " FROM data_trials " . $alias;
 
-	if($isCount)
-	{
-	  $actual_query .= 	"COUNT(*) AS count";
-	}
-	else
-	{
-		$actual_query .= 	$select_str;
-	}
+		if(strlen(trim($where_str)) != 0)
+		{
+			$actual_query .= " WHERE " .$where_str;
+		}
 
-	$actual_query .= " FROM data_trials " . $alias;
+		if((!$isCount) && (strlen(trim($sort_str)) != 0))//Sort
+		{
+			$actual_query .= " ORDER BY " . $sort_str;
+		}
 
-	if(strlen(trim($where_str)) != 0)
-	{
-		$actual_query .= " WHERE " .$where_str;
-	}
-
-	if((!$isCount) && (strlen(trim($sort_str)) != 0))//Sort
-	{
-		$actual_query .= " ORDER BY " . $sort_str;
-	}
-
-	if($isOverride)//override string present
-	{
+		if($isOverride)//override string present
+		{
 
 	  $override_str = getNCTOverrideString($override_vals, $alias, $select_str, $isCount);
 
-	    if($isCount)
-	    {
-		 $actual_query .=  ") + (" . $override_str . ")) AS count";
-	    }
-	    else
-	    {
-	      $actual_query .= ") UNION (" . $override_str . ")";
-	    }
+	  if($isCount)
+	  {
+	  	$actual_query .=  ") + (" . $override_str . ")) AS count";
+	  }
+	  else
+	  {
+	  	$actual_query .= ") UNION (" . $override_str . ")";
+	  }
 
-	}
+		}
 	}
 	catch(Exception $e)
 	{
@@ -317,16 +317,16 @@ function getNCTOverrideString($data, $alias, $select_str, $isCount)
 {
 	$override_str = $data;
 	$return = " SELECT ";
-    if($isCount)
-    {
-      $return .= "COUNT(*) AS count ";
-    }
-    else
-    {
-      $return .= $select_str;
-    }
+	if($isCount)
+	{
+		$return .= "COUNT(*) AS count ";
+	}
+	else
+	{
+		$return .= $select_str;
+	}
 	$return .=  " FROM data_trials " . $alias . " WHERE "
-	           . $alias . ".larvol_id IN (" .  $override_str . ")";
+	. $alias . ".larvol_id IN (" .  $override_str . ")";
 	return $return;
 
 
@@ -336,9 +336,12 @@ function getSelectString($data, $alias)
 {
 	$query = $alias . "." . "larvol_id, " . $alias . "." . "source_id, ";
 	$select_columns = $data;
-	foreach($select_columns as $selectcolumn)
+	if(!empty($select_columns))
 	{
-		$query .= $alias . "." . $selectcolumn["columnname"] . " AS " . $selectcolumn["columnas"] . ", ";
+		foreach($select_columns as $selectcolumn)
+		{
+			$query .= $alias . "." . $selectcolumn["columnname"] . " AS " . $selectcolumn["columnas"] . ", ";
+		}
 	}
 	$query = substr($query, 0, -2); //strip last comma
 	return $query;
@@ -349,6 +352,10 @@ function getSortString($data, $alias)
 {
 	$query = '';
 	$sort_columns = $data;
+	if(empty($sort_columns))
+	{
+		return $query;
+	}
 	foreach($sort_columns as $sort_column)
 	{
 		$sort_as = $sort_column["columnas"];
@@ -364,50 +371,55 @@ function getSortString($data, $alias)
 function getWhereString($data, $alias)
 {
 	$wheredatas = $data;
+    if(empty($wheredatas))
+	{
+	   return '';
+	}
 	$wheres = array();
-    $wcount = 0;
+	$wcount = 0;
 	$prevchain = ' ';
 	try {
-    foreach($wheredatas as $where_data)
-	{
-		$op_name = $where_data["opname"];
-		$column_name = $where_data["columnname"];
-		$column_value = $where_data["columnvalue"];
-		$chain_name = $where_data["chainname"];
-		$op_string = getOperator($op_name, $column_name, $column_value);
-		$wstr = " " . $prevchain . " " . $op_string;
-		$wstr = str_replace('%f', $alias . "." . $column_name,$wstr);
-		$pos = strpos($op_string,'%s1');
 
-		if($pos === false) {
-			$wstr = str_replace('%s', $column_value, $wstr);
+		foreach($wheredatas as $where_data)
+		{
+			$op_name = $where_data["opname"];
+			$column_name = $where_data["columnname"];
+			$column_value = $where_data["columnvalue"];
+			$chain_name = $where_data["chainname"];
+			$op_string = getOperator($op_name, $column_name, $column_value);
+			$wstr = " " . $prevchain . " " . $op_string;
+			$wstr = str_replace('%f', $alias . "." . $column_name,$wstr);
+			$pos = strpos($op_string,'%s1');
+
+			if($pos === false) {
+				$wstr = str_replace('%s', $column_value, $wstr);
+			}
+			else {
+				$xx = split('and;endl', $column_value);//and;endl
+				$wstr = str_replace('%s1', $xx[0],$wstr);
+				$wstr = str_replace('%s2', $xx[1],$wstr);
+			}
+			$prevchain = $chain_name;
+			$wheres[$wcount++] = $wstr;
 		}
-		else {
-			$xx = split('and;endl', $column_value);//and;endl
-			$wstr = str_replace('%s1', $xx[0],$wstr);
-			$wstr = str_replace('%s2', $xx[1],$wstr);
+		$wherestr = implode(' ', $wheres);
+		$pos = strpos($prevchain,'.');
+		if($pos === false)
+		{
+			//do nothing
 		}
-     		$prevchain = $chain_name;
-		    $wheres[$wcount++] = $wstr;
-	}
-			    $wherestr = implode(' ', $wheres);
-			    $pos = strpos($prevchain,'.');
-			    if($pos === false)
-			    {
-			    	//do nothing
-			    }
-			    else 
-			    {
-			    	$wherestr .= str_replace('.', '', $prevchain);//if . is present remove it and empty
-			    }
-//                if($pos == true)
-//                    $wherestr .= $prevchain;
+		else
+		{
+			$wherestr .= str_replace('.', '', $prevchain);//if . is present remove it and empty
+		}
+		//                if($pos == true)
+		//                    $wherestr .= $prevchain;
 	}
 	catch(Exception $e)
 	{
 		throw $e;
 	}
-           return $wherestr;
+	return $wherestr;
 
 
 }
@@ -415,66 +427,66 @@ function getWhereString($data, $alias)
 function getOperator($opname, $column_name, $column_value)
 {
 	$val = '';
-try {
-	switch($opname){
-	case 'EqualTo':
-		$val = "%f='%s'";
-		break;
-	case 'NotEqualTo':
-		$val= "%f!='%s'";
-		break;
-	case 'StartsWith':
-		$val ="%f LIKE '%s%";
-		break;
-	case 'NotStartsWith':
-		$val ="NOT(%f LIKE '%s%";
-		break;
-	case 'Contains':
-		$val ="%f LIKE '%%s%'";
-		break;
-	case 'NotContains':
-		$val ="NOT(%f LIKE '%%s%";
-		break;
-	case 'BiggerThan':
-		$val ="%f>'%s'";
-		break;
-	case 'BiggerOrEqualTo':
-		$val ="%f>='%s'";
-		break;
-	case 'SmallerThan':
-		$val ="%f<'%s'";
-		break;
-	case 'SmallerOrEqualTo':
-		$val ="%f<='%s'";
-		break;
-	case 'InBetween':
-		$val ="%f BETWEEN '%s1' AND '%s2'";
-		break;
-	case 'NotInBetween':
-		$val ="not(%f BETWEEN '%s1' AND '%s2')";
-		break;
+	try {
+		switch($opname){
+			case 'EqualTo':
+				$val = "%f='%s'";
+				break;
+			case 'NotEqualTo':
+				$val= "%f!='%s'";
+				break;
+			case 'StartsWith':
+				$val ="%f LIKE '%s%'";
+				break;
+			case 'NotStartsWith':
+				$val ="NOT(%f LIKE '%s%')";
+				break;
+			case 'Contains':
+				$val ="%f LIKE '%%s%'";
+				break;
+			case 'NotContains':
+				$val ="NOT(%f LIKE '%%s%')";
+				break;
+			case 'BiggerThan':
+				$val ="%f>'%s'";
+				break;
+			case 'BiggerOrEqualTo':
+				$val ="%f>='%s'";
+				break;
+			case 'SmallerThan':
+				$val ="%f<'%s'";
+				break;
+			case 'SmallerOrEqualTo':
+				$val ="%f<='%s'";
+				break;
+			case 'InBetween':
+				$val ="%f BETWEEN '%s1' AND '%s2'";
+				break;
+			case 'NotInBetween':
+				$val ="not(%f BETWEEN '%s1' AND '%s2')";
+				break;
 
-	case 'IsIn':
-		$val ="%f IN (%s)";
-		break;
-	case 'IsNotIn':
-		$val ="NOT(%f IN (%s))";
-		break;
-	case 'IsNull':
-		$val ="%f IS NULL";
-		break;
-	case 'NotNull':
-		$val ="%f IS NOT NULL";
-		break;
-	case 'Regex':
-		$val = textEqual($column_name, $column_value);
-		break;
-	case 'NotRegex':
-		$val = 'NOT (' . textEqual($column_name, $column_value) . ')';
-		break;
+			case 'IsIn':
+				$val ="%f IN (%s)";
+				break;
+			case 'IsNotIn':
+				$val ="NOT(%f IN (%s))";
+				break;
+			case 'IsNull':
+				$val ="%f IS NULL";
+				break;
+			case 'NotNull':
+				$val ="%f IS NOT NULL";
+				break;
+			case 'Regex':
+				$val = textEqual($column_name, $column_value);
+				break;
+			case 'NotRegex':
+				$val = 'NOT (' . textEqual($column_name, $column_value) . ')';
+				break;
 
+		}
 	}
-}
 	catch(Exception $e)
 	{
 		throw $e;
@@ -486,10 +498,10 @@ try {
 //Outputs SQL expression to match text -- auto-detects use of regex and selects comparison method automatically
 function textEqual($field,$value)
 {
-//	$pcre = strlen($value) > 1
-//	&& $value[0] == '/'
-//	&& ($value[strlen($value)-1] == '/' || ($value[strlen($value)-2] == '/' && strlen($value) > 2));
-//	if($pcre)
+	//	$pcre = strlen($value) > 1
+	//	&& $value[0] == '/'
+	//	&& ($value[strlen($value)-1] == '/' || ($value[strlen($value)-2] == '/' && strlen($value) > 2));
+	//	if($pcre)
 	{
 		//alexvp added exception
 		$result=validateMaskPCRE($value);
@@ -497,9 +509,9 @@ function textEqual($field,$value)
 		throw new Exception("Bad regex: $field = $value", 6);
 		return 'PREG_RLIKE("' . '%s' . '",' . '%f' . ')';
 	}
-//	else{
-//		return '%f' . '="' . '%s' . '"';
-//	}
+	//	else{
+	//		return '%f' . '="' . '%s' . '"';
+	//	}
 }
 
 
