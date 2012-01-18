@@ -255,7 +255,7 @@ class TrialTracker
 			}	
 			
 			$nctId = $tvalue["NCT/nct_id"];
-			$ctLink = 'http://clinicaltrials.gov/ct2/show/' . $nctId; 
+			$ctLink = 'http://clinicaltrials.gov/ct2/show/' . padnct($nctId);
 				
 			$cellSpan = $i;
 			$rowspanLimit = 0;
