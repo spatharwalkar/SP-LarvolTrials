@@ -7329,7 +7329,7 @@ class TrialTracker
 						else 
 							$imgColor = 'black'; 
 							
-						$outputStr .= '<a href="' . $mvalue['result_link'] . '" style="color:#000;">';
+						$outputStr .= '<a href="' . $mvalue['result_link'] . '" style="color:#000;" target="_blank">';
 						if($mvalue['event_type'] == 'Clinical Data')
 						{
 							$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond" style="padding-top: 3px;" border="0" />';
@@ -7642,7 +7642,7 @@ class TrialTracker
 		$outputStr = '';
 		$attr_two = 'class="rightborder"';
 		$bgColor = 'background-color:#9966FF;';
-		$anchorTag = ($upmLink != '' &&  $upmLink !== NULL) ? '<a href="' . $upmLink . '">&nbsp;</a>' : '&nbsp;' ;
+		$anchorTag = ($upmLink != '' &&  $upmLink !== NULL) ? '<a href="' . $upmLink . '" target="_blank">&nbsp;</a>' : '&nbsp;' ;
 		
 		if(($startDate == '' || $startDate === NULL || $startDate == '0000-00-00') && ($endDate == '' || $endDate === NULL || $endDate == '0000-00-00'))
 		{
@@ -8410,7 +8410,7 @@ class TrialTracker
 					else 
 						$imgColor = 'black'; 
 						
-					$outputStr .= '<div ' . $upmTitle . '><a href="' . $value['result_link'] . '" style="color:#000;">';
+					$outputStr .= '<div ' . $upmTitle . '><a href="' . $value['result_link'] . '" style="color:#000;" target="_blank">';
 					if($value['event_type'] == 'Clinical Data')
 					{
 						$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond" style="padding-top: 3px;" border="0" />';
