@@ -255,7 +255,7 @@ class TrialTracker
 			}	
 			
 			$nctId = $tvalue["NCT/nct_id"];
-			$ctLink = 'http://clinicaltrials.gov/ct2/show/' . padnct($nctId);
+			$ctLink = urlencode('http://clinicaltrials.gov/ct2/show/' . padnct($nctId));
 				
 			$cellSpan = $i;
 			$rowspanLimit = 0;
@@ -714,8 +714,11 @@ class TrialTracker
 						$objDrawing->setOffsetY(10);
 						$objDrawing->setPath('images/hourglass.png');
 						$objDrawing->setCoordinates('L' . $i);
-						$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl(urlencode($mvalue['event_link']));
-						$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setTooltip($upmTitle);
+						if($mvalue['event_link'] != '' && $mvalue['event_link'] !== NULL)
+						{
+							$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl(urlencode($mvalue['event_link']));
+							$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setTooltip($upmTitle);
+						}
 					}
 					
 					
@@ -1033,8 +1036,11 @@ class TrialTracker
 				$objDrawing->setOffsetY(4);
 				$objDrawing->setPath('images/hourglass.png');
 				$objDrawing->setCoordinates('H' . $i);
-				$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($eventLink);
-				$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip($uvalue['event_description']);
+				if($eventLink != '' && $eventLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($eventLink);
+					$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip($uvalue['event_description']);
+				}
 			}
 			
 
@@ -3852,7 +3858,7 @@ class TrialTracker
 						.'.result {	font-weight:bold;}'
 						.'.secondrow th{ padding-left:0; padding-right:0; border-top:0;}'
 						.'.rightborder { border-right: 0.5px solid blue;}'
-						.'.norecord { border-bottom: 0.5px solid blue; border-right: 0.5px solid blue; border-top:0; padding:0px; height:auto; line-height:normal; 
+						.'.norecord { padding:0px; height:auto; line-height:normal; 
 						font-weight:normal;	background-color: #EDEAFF; color:#000000;}'
 						.'.rowcollapse:hover .upmcollapse { display: block; }'
 						.'.row { background-color:#D8D3E0; text-align:center;}'
@@ -3861,12 +3867,9 @@ class TrialTracker
 						.'.altregion { background-color:#F2F2F2;}'
 						.'.box_rotate { -moz-transform: rotate(90deg); -o-transform: rotate(90deg);	-webkit-transform: rotate(90deg); writing-mode: tb-rl; margin:2px;}
 						'
-						.'.noborder { border-right: 0.5px solid blue; border-top: 0.5px solid blue;	border-bottom: 0.5px solid blue;}'
 						.'.new { height:1.2em; border:0.5px solid black;}'
 						.'.new ul{ list-style:none;	margin:5px;	padding:0px;}'
 						.'.new ul li{ float:left; margin:2px;}'
-						.'.borderbottom{ border-bottom: 0.5px solid blue;}'
-						.'.leftrightborderblue{	border-right: 0.5px solid blue;	border-left: 0.5px solid blue;}'
 						.'.sectiontitles{ font-family: Arial; font-weight: bold; background-color: #A2FF97;}'
 						.'.zeroborder{ border-bottom:none; border-top:none;	border-left:none; border-right:none;}'
 						.'.norightborder{ border-right:none;}'
@@ -4001,7 +4004,15 @@ class TrialTracker
 		$pdf->SetFont('verdana', '', 6);
 		$pdf->setFontSubsetting(false);
 		//set margins
-		$pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_RIGHT);
+		if($loggedIn)
+		{
+			$pdf->SetMargins(9.5, 15, 9.5);
+		}
+		else
+		{
+			$pdf->SetMargins(14.7, 15, 14.7);
+		}
+		
 		$pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
 		$pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
 		
@@ -4019,7 +4030,7 @@ class TrialTracker
 		$pdf->writeHTML($pdfContent, true, false, true, false, '');
 		ob_end_clean();
 		//Close and output PDF document
-		$pdf->Output('Larvol PDF_'. date("Y-m-d_H.i.s") .'.pdf', 'I');
+		$pdf->Output('Larvol PDF_'. date("Y-m-d_H.i.s") .'.pdf', 'D');
 		
 	}
 	
@@ -4029,7 +4040,7 @@ class TrialTracker
 		$outputStr ='<table style="border-collapse:collapse;" width="100%" cellpadding="0" cellspacing="0" class="manage">'
 			 . '<thead><tr>'. (($loggedIn) ? '<th valign="bottom" align="center" style="width:30px; vertical-align:bottom;" >ID</th>' : '' )
 			 . '<th valign="bottom" height="11px" align="center" style="width:93px; vertical-align:bottom;">Title</th>'
-			 . '<th valign="bottom" align="center" style="width:15px; vertical-align:bottom;" title="Black: Actual&nbsp;&nbsp;Gray: Anticipated&nbsp;&nbsp;Red: Change greater than 20%">N</th>'
+			 . '<th valign="bottom" align="center" style="width:18px; vertical-align:bottom;" title="Black: Actual&nbsp;&nbsp;Gray: Anticipated&nbsp;&nbsp;Red: Change greater than 20%">N</th>'
 			 . '<th valign="bottom" align="center" style="width:45px; vertical-align:bottom;" title="&quot;EU&quot; = European Union&nbsp;&quot;ROW&quot; = Rest of World">Region</th>'
 			 . '<th valign="bottom" align="center" style="width:60px; vertical-align:bottom;">Interventions</th>'
 			 . '<th valign="bottom" align="center" style="width:45px; vertical-align:bottom;">Sponsor</th>'
@@ -4047,7 +4058,7 @@ class TrialTracker
 		$outputStr.= '<tr style="border:none; border-top:none;">' //Extra row used for Alignment[IMP]
 			 . (($loggedIn) ? '<td border="0" style="width:30px; height:0px; border-top:none; border:none;" ></td>' : '' )
 			 . '<td border="0" height="0px" style="width:93px; height:0px; border-top:none; border:none;"></td>'
-			 . '<td border="0" style="width:15px; height:0px; border-top:none; border:none;"></td>'
+			 . '<td border="0" style="width:18px; height:0px; border-top:none; border:none;"></td>'
 			 . '<td border="0" style="width:45px; height:0px; border-top:none; border:none;"></td>'
 			 . '<td border="0" style="width:60px; height:0px; border-top:none; border:none;"></td>'
 			 . '<td border="0" style="width:45px; height:0px; border-top:none; border:none;"></td>'
@@ -4256,7 +4267,7 @@ class TrialTracker
 				$attr = '" title="New record';
 				$enrollStyle = 'color:#973535;';
 			}
-			$outputStr .= '<td style="'.$rowOneBGType.'" nowrap="nowrap" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">';
+			$outputStr .= '<td style="'.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">';
 			if($trials[$i]["NCT/enrollment_type"] != '') 
 			{
 				if($trials[$i]["NCT/enrollment_type"] == 'Anticipated') 
