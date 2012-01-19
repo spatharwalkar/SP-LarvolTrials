@@ -7332,21 +7332,21 @@ class TrialTracker
 						$outputStr .= '<a href="' . $mvalue['result_link'] . '" style="color:#000;">';
 						if($mvalue['event_type'] == 'Clinical Data')
 						{
-							$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond" style="margin:4px;" border="0" />';
+							$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond" style="padding-top: 3px;" border="0" />';
 						}
 						else if($mvalue['status'] == 'Cancelled')
 						{
-							$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel" style="margin:4px;" border="0" />';
+							$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel" style="padding-top: 3px;" border="0" />';
 						}
 						else
 						{
-							$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark" style="margin:4px;" border="0" />';
+							$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark" style="padding-top: 3px;" border="0" />';
 						}
 						$outputStr .= '</a>';
 					}
 					else if($mvalue['status'] == 'Pending')
 					{
-						$outputStr .= '<img src="images/hourglass.png" alt="Hourglass" style="margin:3px;" border="0" />';
+						$outputStr .= '<img src="images/hourglass.png" alt="Hourglass" border="0" />';
 					}
 					$outputStr .= '</div></td>';
 					
@@ -8413,21 +8413,21 @@ class TrialTracker
 					$outputStr .= '<div ' . $upmTitle . '><a href="' . $value['result_link'] . '" style="color:#000;">';
 					if($value['event_type'] == 'Clinical Data')
 					{
-						$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond" style="margin:4px;" border="0" />';
+						$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond" style="padding-top: 3px;" border="0" />';
 					}
 					else if($value['status'] == 'Cancelled')
 					{
-						$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel" style="margin:4px;" border="0" />';
+						$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel" style="padding-top: 3px;" border="0" />';
 					}
 					else
 					{
-						$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark" style="margin:4px;" border="0" />';
+						$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark" style="padding-top: 3px;" border="0" />';
 					}
 					$outputStr .= '</a></div>';
 				}
 				else if($value['status'] == 'Pending')
 				{
-					$outputStr .= '<div ' . $upmTitle . '><img src="images/hourglass.png" alt="Hourglass" style="margin:3px;" border="0" /></div>';
+					$outputStr .= '<div ' . $upmTitle . '><img src="images/hourglass.png" alt="Hourglass"  border="0" /></div>';
 				}
 				$outputStr .= '</div></td>';		
 				
