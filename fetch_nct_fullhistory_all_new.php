@@ -174,7 +174,8 @@ else
 	//	++$i;
 		$cid = unpadnct($nct_id);
 		$nct_id = padnct($nct_id);
-		ProcessNew($nct_id);
+	//	ProcessNew($nct_id);
+		scrape_history($cid);
 		echo('<br>Current time ' . date('Y-m-d H:i:s', strtotime('now')) . '<br>');
 		echo str_repeat (" ", 4000);
 		$query = ' UPDATE  update_status_fullhistory SET process_id = "'. $pid  .'" , update_items_progress= "' . ( ($tot_items >= $updtd_items+$i) ? ($updtd_items+$i) : $tot_items  ) . '" , status="2", current_nctid="'. $cid .'", updated_time="' . date("Y-m-d H:i:s", strtotime('now'))  . '" WHERE update_id="' . $up_id .'" and trial_type="NCT"  ;' ;
