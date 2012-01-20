@@ -22,8 +22,8 @@ require_once('db.php');
 require_once('include.search.php');
 require_once('include.util.php');
 require_once('nct_common.php');
-require_once('include.import.php');
-require_once('include.import.history.php');
+require_once('include.import_new.php');
+require_once('include.import.history_new.php');
 	
 	define('READY', 1);
 	define('RUNNING', 2);
@@ -648,7 +648,7 @@ function runnewscraper($requeued,$current_nctid)
 {
 
 
-
+	echo('<br>RESUMING SCRAPER..........<br>');
 	echo('<br>Current time ' . date('Y-m-d H:i:s', strtotime('now')) . '<br>');
 	echo str_repeat ("  ", 1500);
 	global $pr_id;
@@ -780,21 +780,25 @@ function runnewscraper($requeued,$current_nctid)
 	$i=1;
 	foreach($nct_ids as $nct_id=>$key)
 	{
-	$query = 'SELECT update_items_progress,update_items_total FROM update_status_fullhistory WHERE update_id="' . $up_id .'" and trial_type="NCT" limit 1 ;' ;
-	$res = mysql_query($query) or die('Bad SQL query selecting row from update_status_fullhistory ');
-	$res = mysql_fetch_array($res) ;
-	if ( isset($res['update_items_progress'] ) and $res['update_items_progress'] > 0 ) $updtd_items=((int)$res['update_items_progress']); else $updtd_items=0;
-	if ( isset($res['update_items_total'] ) and $res['update_items_total'] > 0 ) $tot_items=((int)$res['update_items_total']); else $tot_items=0;
-//	++$i;
-	$cid = unpadnct($nct_id);
-	$nct_id = padnct($nct_id);
-	ProcessNew($nct_id);
-	echo('<br>Current time ' . date('Y-m-d H:i:s', strtotime('now')) . '<br>');
-	echo str_repeat (" ", 4000);
-	$query = ' UPDATE  update_status_fullhistory SET process_id = "'. $pid  .'" , update_items_progress= "' . ( ($tot_items >= $updtd_items+$i) ? ($updtd_items+$i) : $tot_items  ) . '" , status="2", current_nctid="'. $cid .'", updated_time="' . date("Y-m-d H:i:s", strtotime('now'))  . '" WHERE update_id="' . $up_id .'" and trial_type="NCT"  ;' ;
-	$res = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory. Query:' . $query);
-	@flush();
+	
+		$query = 'SELECT update_items_progress,update_items_total FROM update_status_fullhistory WHERE update_id="' . $up_id .'" and trial_type="NCT" limit 1 ;' ;
+		$res = mysql_query($query) or die('Bad SQL query selecting row from update_status_fullhistory ');
+		$res = mysql_fetch_array($res) ;
+		if ( isset($res['update_items_progress'] ) and $res['update_items_progress'] > 0 ) $updtd_items=((int)$res['update_items_progress']); else $updtd_items=0;
+		if ( isset($res['update_items_total'] ) and $res['update_items_total'] > 0 ) $tot_items=((int)$res['update_items_total']); else $tot_items=0;
+	//	++$i;
+		$cid = unpadnct($nct_id);
+		$nct_id = padnct($nct_id);
+		ProcessNew($nct_id);
+		echo('<br>Current time ' . date('Y-m-d H:i:s', strtotime('now')) . '<br>');
+		echo str_repeat (" ", 4000);
+		$query = ' UPDATE  update_status_fullhistory SET process_id = "'. $pid  .'" , update_items_progress= "' . ( ($tot_items >= $updtd_items+$i) ? ($updtd_items+$i) : $tot_items  ) . '" , status="2", current_nctid="'. $cid .'", updated_time="' . date("Y-m-d H:i:s", strtotime('now'))  . '" WHERE update_id="' . $up_id .'" and trial_type="NCT"  ;' ;
+		$res = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory. Query:' . $query);
+		@flush();
 	}
+	$query = 'UPDATE  update_status_fullhistory SET status=0, process_id = "'. $pid  .'" , end_time="' . date("Y-m-d H:i:s", strtotime('now')) . '" WHERE update_id="' . $up_id .'" ;' ;
+	$res = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory. Query:' . $query );
+	echo('<br>Done with all IDs.');
 	
 }
 function fetch_records($pr_id,$cid,$maxid,$up_id)
