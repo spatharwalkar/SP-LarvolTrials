@@ -425,6 +425,61 @@ function applyRegions($arr)
 	}	
 }
 
+function getRegions($locationCountry)
+{
+	global $db;
+	
+	$flag = 0;
+	$flag1 = 0;
+	$flag2 = 0;
+	$regionArr = regionMapping();
+
+		if(is_array($locationCountry))
+		{
+			$countryArr = array();
+			foreach($locationCountry as $country)
+			{
+				$countryArr[] = $country;
+			}
+			$countryArr = array_unique($countryArr);
+			$locationCountry = $countryArr;
+		}
+		$codeArr = array();
+		foreach($regionArr as $countryName=>$code)
+		{
+			if(is_array($locationCountry))
+			{
+				foreach($locationCountry as $tmp)
+				{
+					if($countryName == $tmp)
+					{
+						$flag1=1;
+						$flag2=1;
+						$codeArr[] = $code;
+						
+					}
+				}
+				
+			}
+			else
+			{
+				if($countryName == $locationCountry)
+				{
+					$flag1 = 1;
+					break;
+				}
+			}
+		}
+		if($flag2 ==1)
+		$code = implode(', ',array_unique($codeArr));
+		if($flag1 != 1)
+		$code = 'other';
+		
+		$flag1 = 0;
+		
+		return $code;
+}
+
 /**
  * @name regionMapping
  * @tutorial Returns an array of all regions mapped with with countries and corresponding 
@@ -655,6 +710,80 @@ function applyInstitutionType($arr)
 	if(mysql_query($query) === false) return softDie('Bad SQL query recording institution type<br/>'.$query);
 	
 }
+
+
+function getInstitutionType($collaborator,$lead_sponsor,$larvol_id)
+{
+	global $db;
+	$institution_type = 'other';
+	$lead_sponsors = array();
+	$collaborators = array();
+	$instMap = institutionMapping();
+//	pr($instMap);	
+	//create the generic array for institution_type decision making.
+	if(isset($collaborator))
+	{
+		if(is_array($collaborator))
+		{
+			foreach($collaborator as $sponsor)
+			{
+				$collaborators[] = $sponsor;
+			}
+		}
+		else
+		{
+			$collaborators[] = $collaborator;
+		}
+		
+	}
+	if(isset($lead_sponsor))
+	{
+		if(is_array($lead_sponsor))
+		{
+			foreach($lead_sponsor as $sponsor)
+			{
+				$lead_sponsors[] = $lead_sponsor;
+			}
+		}
+		else
+		{
+			$lead_sponsors[] = $lead_sponsor;
+		}
+		
+	}
+	foreach($lead_sponsors as $a_sponsor)
+	{
+		$a_sponsor=trim($a_sponsor);
+		if( strlen($a_sponsor) && isset($instMap[$a_sponsor]) )
+		{
+			$institution_type = $instMap[$a_sponsor];
+			if($institution_type == 'industry')
+			{
+				$institution_type = 'industry_lead_sponsor';
+				break;
+			} 
+		}
+	}
+	if($institution_type != 'industry_lead_sponsor')
+	{
+		foreach($collaborators as $a_sponsor)
+		{
+			$a_sponsor=trim($a_sponsor);
+			if(strlen($a_sponsor) && strlen($instMap[$a_sponsor]))
+			{
+				$institution_type = $instMap[$a_sponsor];
+				if($institution_type == 'industry')
+				{
+					$institution_type = 'industry_collaborator';
+					break;
+				} 
+			}
+		}		
+	}
+	return $institution_type ;
+	
+}
+
 
 //start Criteria functions
 /**

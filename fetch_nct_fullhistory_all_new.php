@@ -45,9 +45,14 @@ $res=mysql_query($query);
 $row = mysql_fetch_assoc($res);
 if($row) 
 {
-	$query="SELECT * FROM nctids limit 1";
-	$res=@mysql_query($sql);
-	if(!$res) 
+	$query="SELECT * FROM nctids limit 2";
+	$res=mysql_query($query);
+	if($res === false) die('Bad SQL query getting nctids from local table');
+	
+	$tmp2=array();
+	while($row = mysql_fetch_assoc($res)) $tmp2[]=$row['nctid'];
+//	pr($tmp2);
+	if(count($tmp2)<2)
 	{
 		$nct_ids=get_nctids_from_web();
 		foreach($nct_ids as $nct_id=>$key)
@@ -67,8 +72,10 @@ if($row)
 		while($row = mysql_fetch_assoc($res)) 
 		{
 			if(isset($requeued) and isset($current_nctid))
+			{
 				if(unpadnct($row['nctid'])>=$current_nctid)
 					$nct_ids[$row['nctid']] = 1;
+			}
 			else
 				$nct_ids[$row['nctid']] = 1;
 		}
@@ -273,13 +280,13 @@ function get_nctids_from_web()
 			echo('Last page reached.' . "\n<br />");
 			break;
 		}
-/*		
-		if($page >= 5)
+	/*
+		if($page >= 2)
 		{
 			echo('Last page reached.' . "\n<br />");
 			break;
 		}
-*/		
+*/
 		unset($tables);
 		//Now that we found the table, go through its TDs to find the ones with NCTIDs
 		$tds = $datatable->getElementsByTagName('td');

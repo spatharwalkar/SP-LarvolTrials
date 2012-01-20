@@ -275,11 +275,45 @@ else $ddesc=$rec->detailed_descr->textblock;
 		$record_data['results_reference_PMID'][] = $ref->PMID;
 	}
 
-	//import everything
+	
 
 	foreach($record_data as $fieldname => $value)
 		if(!addval($larvol_id, $fieldname, $value,$record_data['lastchanged_date'],$oldtrial))
 			logDataErr('<br>Could not save the value of <b>' . $fieldname . '</b>, Value: ' . $value );//Log in errorlog
+			
+			
+	//calculate institution type
+	$ins_type=getInstitutionType($record_data['collaborator'],$record_data['lead_sponsor'],$larvol_id);
+	
+	//calculate region
+	$region=getRegions($record_data['location_country']);
+	
+	//calculate active or inactive
+	$inactiveStatus = 
+		array(
+			'test string',
+			'Withheld',
+			'Approved for marketing',
+			'Temporarily not available',
+			'No Longer Available',
+			'Withdrawn',
+			'Terminated',
+			'Suspended',
+			'Completed'	
+			);
+	
+	$inactive=1;
+	if(isset($record_data['overall_status']))
+	{
+		$x=array_search($record_data['overall_status'],$inactiveStatus);
+		if($x) $inactive=0; else $inactive=1;
+	}
+			
+	
+	
+	
+	$query = 'update data_trials set institution_type="' .$ins_type. '",region="'.$region.'", is_active='.$inactive.'  where larvol_id="' .$larvol_id . '" limit 1' ;	
+	if(mysql_query($query) === false) return softDie('Bad SQL query saving institution type in data_trials. query:'.$query.'<br>');
 
 /*	
 	global $fieldIDArr,$fieldITArr,$fieldRArr;
@@ -295,7 +329,7 @@ else $ddesc=$rec->detailed_descr->textblock;
 	return true;
 }
 
-function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial)
+function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_type)
 {
 	
 	$lastchanged_date = normal('date',$lastchanged_date);
@@ -461,6 +495,7 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial)
 				'dummy', 'larvol_id', 'source_id', 'brief_title', 'acronym', 'official_title', 'lead_sponsor', 'collaborator', 'institution_type', 'source', 'has_dmc', 'brief_summary', 'detailed_description', 'overall_status', 'is_active', 'why_stopped', 'start_date', 'end_date', 'study_type', 'study_design', 'number_of_arms', 'number_of_groups', 'enrollment', 'enrollment_type', 'biospec_retention', 'biospec_descr', 'study_pop', 'sampling_method', 'criteria', 'gender', 'minimum_age', 'maximum_age', 'healthy_volunteers', 'verification_date', 'lastchanged_date', 'firstreceived_date', 'responsible_party_name_title', 'responsible_party_organization', 'org_study_id', 'phase', 'condition', 'secondary_id', 'oversight_authority', 'arm_group_label', 'arm_group_type', 'arm_group_description', 'intervention_type', 'intervention_name', 'intervention_other_name', 'intervention_description', 'primary_outcome_measure', 'primary_outcome_timeframe', 'primary_outcome_safety_issue', 'secondary_outcome_measure', 'secondary_outcome_timeframe', 'secondary_outcome_safety_issue', 'location_name', 'location_city', 'location_state', 'location_zip', 'location_country', 'region', 'location_status', 'investigator_name', 'investigator_role', 'overall_official_name', 'overall_official_role', 'overall_official_affiliation', 'keyword', 'is_fda_regulated', 'is_section_801'
 				);
 				$as=array_search($fieldname,$dt_array);
+				
 				if ( isset($as) and $as)
 				{
 					$query = 'update data_trials set `' . $fieldname . '` = "' . $value .'", lastchanged_date = "' .$lastchanged_date.'" where larvol_id="' .$larvol_id . '"  limit 1' ;
@@ -505,6 +540,7 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial)
 		}
 		mysql_query('COMMIT') or die("Couldn't COMMIT SQL transaction to update record from XML");
 		
+		
 		$query = 'select completion_date,primary_completion_date,criteria from data_nct where larvol_id="' . $larvol_id . '"  LIMIT 1';
 		$res = mysql_query($query);
 		if($res === false) return softDie('Bad SQL query determining existence of record in data nct');
@@ -544,7 +580,7 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial)
 			$res = mysql_fetch_assoc($res);
 			$cdate=$res['lastchanged_date'];
 			$is_active=$res['is_active'];
-
+			global $ins_type;
 			if( !is_null($cdate) and  $cdate <>'0000-00-00' and !is_null($is_active) and $is_active<>1) // last changed date
 			{
 				$cdate=normalize('date',$cdate);
