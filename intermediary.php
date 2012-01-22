@@ -21,7 +21,7 @@ if(isset($_POST['btnDownload']))
 	
 	if($_POST['dOption'] == 'all')
 	{
-		$globalOptions['download'] = 'allTrials';
+		$globalOptions['download'] = 'allTrialsforDownload';
 	}
 	else
 	{
