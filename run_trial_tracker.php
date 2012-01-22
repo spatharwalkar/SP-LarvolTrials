@@ -4220,23 +4220,21 @@ class TrialTracker
 								$naUpmIndex = preg_replace('/[^a-zA_Z0-9]/i', '', $trialsInfo[$j]['sectionHeader']);
 								$naUpmIndex = substr($naUpmIndex, 0, 7);
 								
-								$outputStr .= '<tr class="trialtitles">'
+								$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true" class="trialtitles">'
 										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) 
 										. '" class="upmpointer notopbottomborder leftrightborderblue sectiontitles"'
-										. ' style="border-bottom:1px solid blue;background-image: url(\'images/up'
-										. '.png\');background-repeat: no-repeat;background-position:left center;"'
 										. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
 										. $trialsInfo[$j]['sectionHeader'] . '</td></tr>';
-								$outputStr .= $this->displayUnMatchedUpms($loggedIn, $naUpmIndex, $trialsInfo[$j]['naUpms']);
+								$outputStr .= $this->displayUnMatchedUpms_TCPDF($loggedIn, $naUpmIndex, $trialsInfo[$j]['naUpms']);
 							}
 							else
 							{	
-								$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="notopbottomborder leftrightborderblue sectiontitles">'
+								$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true"><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="notopbottomborder leftrightborderblue sectiontitles">'
 											. $trialsInfo[$j]['sectionHeader'] . '</td></tr>';
 							}
 							if($globalOptions['onlyUpdates'] == "no")
 							{
-								$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord" align="left">No trials found</td></tr>';
+								$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true"><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord" align="left">No trials found</td></tr>';
 							}
 						}
 					}
@@ -4245,13 +4243,11 @@ class TrialTracker
 				{
 					if($ottType == 'rowstacked')
 					{
-						$outputStr .= '<tr class="trialtitles">'
+						$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true" class="trialtitles">'
 								. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer notopbottomborder leftrightborderblue sectiontitles"'
-								. 'style="border-bottom:1px solid blue;background-image: url(\'images/down.png\');'
-								. 'background-repeat: no-repeat;background-position:left center;"'
 								. ' onclick="sh(this,\'rowstacked\');">&nbsp;</td></tr>'
-								. $this->displayUnMatchedUpms($loggedIn, 'rowstacked', $trialsInfo[$sectionKey]['naUpms'])
-								. '<tr class="trialtitles">'
+								. $this->displayUnMatchedUpms_TCPDF($loggedIn, 'rowstacked', $trialsInfo[$sectionKey]['naUpms'])
+								. '<tr style="page-break-inside:avoid;" nobr="true" class="trialtitles">'
 								. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="notopbottomborder leftrightborderblue sectiontitles"'
 								. ' >' . $trialsInfo[$sectionKey]['sectionHeader'] . '</td></tr>';
 					}
@@ -4265,18 +4261,16 @@ class TrialTracker
 						$naUpmIndex = preg_replace('/[^a-zA_Z0-9]/i', '', $trialsInfo[$sectionKey]['sectionHeader']);
 						$naUpmIndex = substr($naUpmIndex, 0, 7);
 						
-						$outputStr .= '<tr class="trialtitles">'
+						$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true" class="trialtitles">'
 								. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer notopbottomborder leftrightborderblue sectiontitles"'
-								. ' style="border-bottom:1px solid blue;background-image: url(\'images/' . $image 
-								. '.png\');background-repeat: no-repeat;background-position:left center;"'
 								. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
 								. $trialsInfo[$sectionKey]['sectionHeader'] . '</td></tr>';
-						$outputStr .= $this->displayUnMatchedUpms($loggedIn, $naUpmIndex, $trialsInfo[$sectionKey]['naUpms']);
+						$outputStr .= $this->displayUnMatchedUpms_TCPDF($loggedIn, $naUpmIndex, $trialsInfo[$sectionKey]['naUpms']);
 					}
 				}
 				else
 				{	
-					$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="notopbottomborder leftrightborderblue sectiontitles">'
+					$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true"><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="notopbottomborder leftrightborderblue sectiontitles">'
 								. $trialsInfo[$sectionKey]['sectionHeader'] . '</td></tr>';
 				}
 			}
@@ -4591,23 +4585,21 @@ class TrialTracker
 					$naUpmIndex = preg_replace('/[^a-zA_Z0-9]/i', '', $trialsInfo[$cntr]['sectionHeader']);
 					$naUpmIndex = substr($naUpmIndex, 0, 7);
 					
-					$outputStr .= '<tr class="trialtitles">'
+					$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true" class="trialtitles">'
 							. '<td colspan="' . getColspanBasedOnLogin($loggedIn) 
 							. '" class="upmpointer notopbottomborder leftrightborderblue sectiontitles"'
-							. ' style="border-bottom:1px solid blue;background-image: url(\'images/up'
-							. '.png\');background-repeat: no-repeat;background-position:left center;"'
 							. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
 							. $trialsInfo[$cntr]['sectionHeader'] . '</td></tr>';
-					$outputStr .= $this->displayUnMatchedUpms($loggedIn, $naUpmIndex, $trialsInfo[$cntr]['naUpms']);
+					$outputStr .= $this->displayUnMatchedUpms_TCPDF($loggedIn, $naUpmIndex, $trialsInfo[$cntr]['naUpms']);
 				}
 				else
 				{	
-					$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="notopbottomborder leftrightborderblue sectiontitles">'
+					$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true"><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="notopbottomborder leftrightborderblue sectiontitles">'
 								. $trialsInfo[$cntr]['sectionHeader'] . '</td></tr>';
 				}
 				if($globalOptions['onlyUpdates'] == "no")
 				{
-					$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord" align="left">No trials found</td></tr>';
+					$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true"><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord" align="left">No trials found</td></tr>';
 				}
 			}
 		}
