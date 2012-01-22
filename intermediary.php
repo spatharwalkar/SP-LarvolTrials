@@ -9,7 +9,7 @@ require_once('special_chars.php');
 require_once('run_trial_tracker.php');
 
 /********* If Report generation time is less than 1 Jan 2012, time machine is disabled **********/
-if((date('Y-m-d H:i:s', $_GET['time'])) < date('Y-m-d H:i:s',strtotime('2012-01-01 00:01:02')))
+if((date('Y-m-d H:i:s', $_GET['time'])) < date('Y-m-d H:i:s',strtotime('2012-01-01 00:00:00')))
 $_GET['time'] = NULL;
 
 
