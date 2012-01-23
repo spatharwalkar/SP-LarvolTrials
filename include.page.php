@@ -463,7 +463,9 @@ function input_tag($row,$dbVal=null,$options=array())
 				$delete = '';
 			}
 			$task = ($dbVal=='')?'Add':'Edit';
-			return '<a href="search.php?'.$table.'='.$id.'"><img src="images/'.$img.'" title="'.$task.' Search Data" alt="'.$task.' Search Data"/></a>&nbsp;'.$modifier.$delete;
+			//echo $dbVal;die;
+			$hiddenSearchData = '<input type="hidden" name="searchdata" id="searchdata" value=\''.($dbVal).'\'/>';
+			return $hiddenSearchData.'<a class="ajax cboxElement" href="#inline_content"><img id="add_edit_searchdata_img" src="images/'.$img.'" title="'.$task.' Search Data" alt="'.$task.' Search Data"/></a>&nbsp;<span id="search_modifier">'.$modifier.'</span>'.$delete;
 			break;
 			
 		case 'deletebox':
@@ -491,6 +493,7 @@ function input_tag($row,$dbVal=null,$options=array())
 function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),$line=null)
 {
 	global $now;
+	global $db;
 	//import save
 	if($import ==1 && $table=='upm')
 	{
@@ -553,7 +556,11 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			$id = mysql_real_escape_string($id);
 			if(!is_numeric($id)) continue;
 			if($db->user->userlevel != 'user')
-				mysql_query("UPDATE $table SET searchdata='' WHERE id=$id LIMIT 1") or softDieSession('Bad SQL query deleting searchdata');
+			{
+				$post['searchdata'] = '';
+				$q = "UPDATE $table SET searchdata=null WHERE id=$id LIMIT 1";
+				mysql_query($q) or softDieSession('Bad SQL query deleting searchdata');
+			}
 		}
 		unset($post['delsearch']);
 	}
@@ -565,7 +572,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 	$id = ($post['id'])?$post['id']:null;	
 	if(!$id)//insert
 	{
-		array_pop($post);
+		unset($post['save']);
 		if($table=='upm')
 		{	
 			$post['last_update'] = 	date('Y-m-d',$now);		
@@ -617,8 +624,9 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 		else
 		{
 			//remove post action name from insert query.
-			array_pop($post);
+			unset($post['save']);
 			$post = array_map(am1,array_keys($post),array_values($post));
+			//pr($post);//die;
 		}
 		$query = "update $table set ".implode(',',$post)." where id=".$id;
 		if(mysql_query($query))
@@ -635,7 +643,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 		}
 		else
 		{
-			softDieSession('Cannot update '.$table.' entry');		
+			softDieSession('Cannot update '.$table.mysql_error().' entry');		
 		}
 		
 	}
@@ -794,7 +802,7 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 	echo '<div class="clr">';
 	echo '<fieldset>';
 	echo '<legend> '.$insertEdit.': </legend>';
-	echo '<form '.$formStyle.' name="umpInput" '.$formOnSubmit.' method="get" action="'.$script.'.php">';
+	echo '<form '.$formStyle.' id="umpInput" name="umpInput" '.$formOnSubmit.' method="get" action="'.$script.'.php">';
 	echo '<table '.$mainTableStyle.'>';
 	while($row = mysql_fetch_assoc($res))
 	{
@@ -901,7 +909,7 @@ function am($k,$v)
 }
 function am1($k,$v)
 {
-	$explicitNullFields = array('corresponding_trial','event_link','result_link','start_date','end_date','oldproduct','product');
+	$explicitNullFields = array('corresponding_trial','event_link','result_link','start_date','end_date','oldproduct','product','searchdata');
 	if($k=='corresponding_trial')
 	{
 		$v = unpadnct($v);
@@ -1098,4 +1106,24 @@ function softDieSession($out,$raw=0)
 	if($raw==1)
 	echo $out.'<br/>';
 	return false;
-}	
+}
+
+/**
+* @name getSearchData
+* @tutorial returns the search data string for a table
+* @param $table,$searchdata,$id
+* @author Jithu Thomas
+*/
+function getSearchData($table,$searchdata,$id)
+{
+	global $db;
+	$query = "select $searchdata from $table where id=$id";
+	$result = mysql_query($query);
+	$out = null;
+	while($row = mysql_fetch_assoc($result))
+	{
+		$out = $row[$searchdata];
+		break;
+	}
+	return $out;
+}

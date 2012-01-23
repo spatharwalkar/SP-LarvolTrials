@@ -11,12 +11,48 @@
 <link href="date/date_input.css" rel="stylesheet" type="text/css" media="all" />
 <link href="scripts/date/jdpicker.css" rel="stylesheet" type="text/css" media="screen" /> 
 <link href="krumo/skin.css" rel="stylesheet" type="text/css" media="all" />
+<link href="css/colorbox.css" rel="stylesheet" type="text/css" media="all" />
 <script type="text/javascript" src="date/jquery.js"></script>
 <script type="text/javascript" src="date/jquery.date_input.js"></script>
 <script type="text/javascript" src="scripts/date/jquery.jdpicker.js"></script>
 <script type="text/javascript" src="date/init.js"></script>
 <script type="text/javascript" src="krumo/krumo.js"></script>
 <script type="text/javascript" src="scripts/autosuggest/jquery.autocomplete-min.js"></script>
+<script type="text/javascript" src="scripts/colorbox/jquery.colorbox-min.js"></script>
+<script type="text/javascript" src="scripts/jquery.sqlbuilder-0.06.js"></script>
+
+<link rel="stylesheet" type="text/css" href="css/jquery.sqlbuilder.css" />
+<style type="text/css">
+#sqlreport
+{
+	/* border: 1px solid #ccc;*/
+	position: relative;
+	width: 1200px;
+	height: 600px;
+	margin: 5px;
+	padding: 5px;
+	font-family: "Verdana" , "Tahoma" , Arial;
+	font-size: 12px;
+	overflow: auto;
+}
+.sqlbuild
+{
+	/*       border: 1px solid #ccc; /*	float:left;*/
+	position: relative;
+	width: 800px;
+	margin: 5px;
+	padding: 5px;
+	font-family: "Verdana" , "Tahoma" , Arial;
+	font-size: 12px;
+	overflow: auto;
+}
+.sqlsyntaxhelp
+{
+	font-family: "Verdana" , "Tahoma" , Arial;
+	font-size: 10px;
+	color: #FF0000;
+}
+</style>
 <?php if($_GET && isset($_GET['header'])) { echo($_GET['header']); } ?>
 </head>
 <body>

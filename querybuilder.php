@@ -6,42 +6,6 @@ $show_sort_res = false;
  	$show_sort_res = $show_sort_res_bool;
  }
 ?>
-      <head>
-      <script type="text/javascript" src="scripts/jquery.sqlbuilder-0.06.js"></script>
-
-      <link rel="stylesheet" type="text/css" href="css/jquery.sqlbuilder.css" />
-      <style type="text/css">
-        #sqlreport
-        {
-        /* border: 1px solid #ccc;*/
-        position: relative;
-        width: 1200px;
-        height: 600px;
-        margin: 5px;
-        padding: 5px;
-        font-family: "Verdana" , "Tahoma" , Arial;
-        font-size: 12px;
-        overflow: auto;
-        }
-        .sqlbuild
-        {
-        /*       border: 1px solid #ccc; /*	float:left;*/
-        position: relative;
-        width: 800px;
-        margin: 5px;
-        padding: 5px;
-        font-family: "Verdana" , "Tahoma" , Arial;
-        font-size: 12px;
-        overflow: auto;
-        }
-        .sqlsyntaxhelp
-        {
-        font-family: "Verdana" , "Tahoma" , Arial;
-        font-size: 10px;
-        color: #FF0000;
-        }
-      </style>
-    </head>
 
   <script type="text/javascript">
    $(document).ready(function () {
@@ -250,7 +214,6 @@ $show_sort_res = false;
     }
 
   </script>
-<body>
 <div class="builder">
 <table>
 	<tr>
@@ -355,5 +318,3 @@ $show_sort_res = false;
 	</tr>
 </table>
 </div>
-</body>
-

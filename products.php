@@ -65,6 +65,18 @@ require('header.php');
 echo('<script type="text/javascript" src="delsure.js"></script>');
 ?>
 <script type="text/javascript">
+<?php
+		if(isset($_REQUEST['id']))	//load search from Saved Search
+		{
+			$id = ($_REQUEST['id'])?$_REQUEST['id']:null;
+			$searchDbData = getSearchData($table, 'searchdata', $id);
+			//$show_value = 'loadQueryData("' . $data . '");';
+			//$show_value = "loadQueryData('" . $searchDbData . "');";
+			$show_value = "searchDbData = '" . $searchDbData . "';";
+			echo($show_value);
+
+		}
+		?>
 function upmdelsure(){ return confirm("Are you sure you want to delete this product?"); }
 $(document).ready(function(){
 	var options, a,b;
@@ -74,10 +86,18 @@ $(document).ready(function(){
 	  a = $('#name').autocomplete(options);
 	  b = $('#search_name').autocomplete(options);
 	});
+	$(".ajax").colorbox({
+		onComplete:function(){ loadQueryData($('#searchdata').val());},
+		onClosed:function(){ newSearch(); },
+		inline:true, 
+		width:"100%",
+		height:"100%"
+			});
+	$("#inline_outer").hide();
 });
 </script>
-<div class="error">Under Development</div>
 
+<div class="error">Under Development</div>
 <?php 
 //Start controller area
 //delete controller should come above save controller if delete box is added in the add edit form
@@ -225,4 +245,102 @@ if($_GET['import']=='Import' || $_GET['uploadedfile'])
 $start = $page*$limit;
 contentListing($start,$limit,$table,$script,$skipArr,$includeArr,array('delete'=>false));
 echo '</div>';
+/* echo '<div class="querybuilder" id="inline_content">
+</div></div>'; */
+?>
+<div id="inline_outer" >
+<div id="inline_content">
+<table>
+
+<tr>
+
+<td>
+<div class="querybuilder" ></div>
+</td>
+
+<td valign="top" style="padding-top: 15px">
+<table width="200px">
+<tr>
+<td class="graybk" style="text-align: center; font-weight: bold">
+Actions</td>
+</tr>
+<tr>
+<td style="padding-left: 30px;"><input type="submit"
+style="width: 100px" onclick="testSQL();return false;"
+value="Test Query" id="btnTest" /></td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+	<td style="padding-left: 30px;"><input type="submit"
+	style="width: 100px" onclick="submitSearch();return false;"
+	value="Submit" id="btnSubmit" /></td>
+</tr>
+</table>
+</div>
+</div>
+<?php 
+require_once 'querybuilder.php';
+?>
+<script type="text/javascript">
+$(document).ready(function () {
+
+});
+
+    function testSQL()
+    {
+        var jsonData = getQueryData();   
+          $.ajax({
+					type: 'GET',
+					url:  'searchhandler.php' + '?op=testQuery',
+					data: 'data=' + jsonData,
+					success: function (data) {
+        					//alert(data);
+        					$("#3009").html(data);
+        		            $("#3009").attr("style", "visibility:show");
+        		        	
+					}
+        	});
+        return;
+    		
+  }
+    
+    function runSQL()
+    {
+        var jsonData = getQueryData();   
+        var url = 'queryresults.php' + '?op=runQuery&data=' + jsonData;
+        window.location.href=url;
+        return;
+    }
+
+    function submitSearch()
+    {
+    	//function to get the JSON data of the search
+    	var jsonData = getQueryData(); 
+    	$('#searchdata').val(jsonData);
+    	if($('#searchdata').val() != searchDbData)
+    	$('#search_modifier').html('[Modified]');
+    	if(jsonData=='')
+    	{
+        	$('#add_edit_searchdata_img').attr('src','images/add.png');
+    	}
+    	else
+    	{
+        	$('#add_edit_searchdata_img').attr('src','images/edit.png');
+        }
+    	
+    	$('.ajax').colorbox.close();
+    	$(".ajax").colorbox({
+    		onComplete:function(){ loadQueryData($('#searchdata').val());},
+    		onClosed:function(){ newSearch(); },
+    		inline:true, 
+    		width:"100%",
+    		height:"100%"
+    			});    	
+    	return false;
+
+    }
+  </script>
+<?php 
 echo '</html>';
