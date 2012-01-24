@@ -1608,14 +1608,6 @@ function getActiveCount($all_ids, $time)
 	//logger variable in db.php
 	global $logger;	
 		
-	//$time = '"' . date('Y-m-d H:i:s',$time) . '"';
-	if($time === NULL)
-	{
-		$timecond = 'dv.superceded IS NULL ';
-	}else{
-		$timecond = 'dv.added < "' . date('Y-m-d H:i:s',$time) . '" AND (dv.superceded > "' . date('Y-m-d H:i:s',$time) . '" OR dv.superceded IS NULL) ';
-	}
-	
 	if(!is_array($all_ids) || empty($all_ids)) return 0;
 	$ids = implode(', ',$all_ids);
 	$overallStatusId = getFieldId("NCT", "overall_status");
@@ -1629,6 +1621,15 @@ function getActiveCount($all_ids, $time)
 	getEnumvalId($overallStatusId, "Suspended") .",".
 	getEnumvalId($overallStatusId, "Completed");
 	
+	
+	//$time = '"' . date('Y-m-d H:i:s',$time) . '"';
+	if($time === NULL)
+	{
+		$timecond = 'dv.superceded IS NULL and dv.added = (select max(data_values.added) as dd from data_values where data_values.studycat=i.id and data_values.field="'.$overallStatusId.'")';
+	}else{
+		$timecond = 'dv.added < "' . date('Y-m-d H:i:s',$time) . '" AND (dv.superceded > "' . date('Y-m-d H:i:s',$time) . '" OR (dv.superceded IS NULL and dv.added = (select max(data_values.added) as dd from data_values where data_values.studycat=i.id and data_values.field="'.$overallStatusId.'")))';
+	}
+	
 	/*$query = "SELECT DISTINCT i.larvol_id AS id FROM data_cats_in_study i
 					INNER JOIN data_values AS dv ON i.id = dv.studycat
 					WHERE i.larvol_id IN (".$ids.") AND dv.field = ".$overallStatusId." AND
@@ -1639,6 +1640,7 @@ function getActiveCount($all_ids, $time)
 					INNER JOIN data_values AS dv ON i.id = dv.studycat
 					WHERE i.larvol_id IN (".$ids.") AND dv.field = ".$overallStatusId." AND
 					dv.val_enum NOT IN (".$inactiveStatuses.") AND " . $timecond;
+					
 	$time_start = microtime(true);					
 	$res = mysql_query($query);
 	$time_end = microtime(true);
