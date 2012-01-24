@@ -21,7 +21,7 @@ $query = 'SELECT studycat from data_values where val_int = "' . $nctid . '" and 
 }
 
 
-function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL)
+function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=NULL)
 {
 	
 	if($cat=='products') 
@@ -42,7 +42,8 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL)
 	if(is_null($productz))
 	{
 		$productz=array();
-		$query = 'SELECT id,name,searchdata from '. $cat .' where searchdata IS NOT NULL and  searchdata <>"" ';
+		if(is_null($productID))	$query = 'SELECT id,name,searchdata from '. $cat .' where searchdata IS NOT NULL and  searchdata <>"" ';
+		else $query = 'SELECT id,name,searchdata from '. $cat .' where searchdata IS NOT NULL and  searchdata <>"" and id="' . $productID .'"' ;
 		if(!$resu = mysql_query($query))
 		{
 			$log='Bad SQL query getting  details from '. $cat .' table.<br>Query=' . $query;
@@ -107,10 +108,11 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL)
 					
 						if(trial_indexed($larvol_id,$cat,$cid))
 						{
-							echo '<br>'.$sourceid . ' is already indexed. <br>';
+							echo '<br>Larvol ID:'.$larvol_id . ' is already indexed. <br>';
 						}
 						else
 						{
+							echo '<br>Indexing Larvol ID:'.$larvol_id . '<br>';
 							$query='INSERT INTO `'. $table .'` (`'. $field .'`, `trial`) VALUES ("' . $cid . '", "' . $larvol_id .'") ';
 							$res = mysql_query($query);
 							if($res === false)
