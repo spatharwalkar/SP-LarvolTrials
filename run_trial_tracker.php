@@ -7552,6 +7552,7 @@ class TrialTracker
 			$section = $trials[$i]['section'];
 		}
 		
+		if(count($sections) > 0)
 		$maxSection = max($sections);
 		$maxTrialsInfo = max(array_keys($trialsInfo));
 		if($sectionKey == $maxSection && $maxTrialsInfo > $maxSection)
