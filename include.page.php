@@ -587,6 +587,20 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 		$query = "insert into $table (".implode(',',$postKeys).") values(".implode(',',$post).")";
 		if(mysql_query($query))
 		{
+			if($table=='products')
+			{
+				ob_start();
+				$_GET['id'] = mysql_insert_id();
+				require 'index_product.php';
+				ob_end_clean();
+			}
+			if($table=='areas')
+			{
+				ob_start();
+				$_GET['id'] = mysql_insert_id();
+				require 'index_area.php';
+				ob_end_clean();				
+			}
 			return 1;
 		}
 		else
@@ -650,6 +664,19 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 					mysql_query($query)or softdieSession('Cannot update history for upm id '.$historyArr['id']);
 				}				
 			}
+			
+			if($table=='products')
+			{
+				ob_start();
+				require 'index_product.php';
+				ob_end_clean();
+			}
+			if($table=='areas')
+			{
+				ob_start();
+				require 'index_area.php';
+				ob_end_clean();
+			}			
 		}
 		else
 		{
