@@ -14,7 +14,10 @@ if($_GET['time'] != NULL && $_GET['time'] != '')
 if((date('Y-m-d H:i:s', $_GET['time'])) < date('Y-m-d H:i:s',strtotime('2012-01-01 00:00:00')))
 $_GET['time'] = NULL;
 }
-
+else
+{
+$_GET['time'] = NULL;
+}
 
 $tt = new TrialTracker;
 if(isset($_POST['btnDownload'])) 
