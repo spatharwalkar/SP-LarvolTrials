@@ -75,6 +75,7 @@ else $ddesc=$rec->detailed_descr->textblock;
 	//Go through the parsed XML structure and pick out the data
 	$record_data =array('brief_title' => $rec->brief_title,
 						'official_title' => $rec->official_title,
+						'keyword' => $rec->keyword,
 						//'brief_summary' => $rec->brief_summary->textblock,
 						 'brief_summary' => $bsummary,
 						//'detailed_description' => $rec->detailed_description->textblock,
@@ -134,6 +135,11 @@ else $ddesc=$rec->detailed_descr->textblock;
 						if( ( !isset($record_data['enrollment']) or is_null($record_data['enrollment']) or empty($record_data['enrollment']) ) )
 							$record_data['enrollment'] = $rec->eligibility->expected_enrollment;
 
+	if(!is_array($rec->keyword)) 
+	{
+		$record_data['keyword'] = array();
+		foreach($rec->keyword as $kw) $record_data['keyword'][] = $kw;
+	}
 	$record_data['secondary_id'] = array();
 	foreach($rec->id_info->secondary_id as $sid) $record_data['secondary_id'][] = $sid;
 	$record_data['nct_alias'] = array();
@@ -486,6 +492,25 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 				$olddate=$row['lastchanged_date'];
 				$oldval=$row[$fieldname];
 				$value=mysql_real_escape_string($value);
+				
+				//check if the data is manually overridden
+				$dn_array1=array
+				(
+					'dummy', 'larvol_id', 'brief_title', 'acronym', 'official_title', 'lead_sponsor', 'collaborator', 'institution_type', 'source', 'has_dmc', 'brief_summary', 'detailed_description', 'overall_status', 'is_active', 'why_stopped', 'start_date', 'end_date', 'study_type', 'study_design', 'number_of_arms', 'number_of_groups', 'enrollment', 'enrollment_type', 'biospec_retention', 'biospec_descr', 'study_pop', 'sampling_method', 'criteria', 'gender', 'minimum_age', 'maximum_age', 'healthy_volunteers', 'verification_date', 'lastchanged_date', 'firstreceived_date', 'responsible_party_name_title', 'responsible_party_organization', 'org_study_id', 'phase', 'condition', 'secondary_id', 'oversight_authority', 'arm_group_label', 'arm_group_type', 'arm_group_description', 'intervention_type', 'intervention_name', 'intervention_other_name', 'intervention_description', 'primary_outcome_measure', 'primary_outcome_timeframe', 'primary_outcome_safety_issue', 'secondary_outcome_measure', 'secondary_outcome_timeframe', 'secondary_outcome_safety_issue', 'location_name', 'location_city', 'location_state', 'location_zip', 'location_country', 'region', 'location_status', 'investigator_name', 'investigator_role', 'overall_official_name', 'overall_official_role', 'overall_official_affiliation', 'keyword', 'is_fda_regulated', 'is_section_801'
+				);
+				$as1=array_search($fieldname,$dn_array1);
+				if ( isset($as1) and $as1)
+				{
+					$query = 'SELECT `' .$fieldname. '` FROM data_manual WHERE larvol_id="'. $larvol_id . '" and `' .$fieldname. '` is not null limit 1';
+					$res = mysql_query($query);
+					if($res === false) return softDie('Bad SQL query checking data in data_manual. Query:'.$query);
+					$row = mysql_fetch_assoc($res);
+					$overridden = $row !== false;
+					if($overridden and !empty($row[$fieldname]))
+						$value=mysql_real_escape_string($row[$fieldname]);
+				}				
+				//
+				
 				$query = 'update data_nct set `' . $fieldname . '` = "' . $raw_value .'", lastchanged_date = "' .$lastchanged_date.'" where larvol_id="' .$larvol_id . '"  limit 1'  ;
 				
 				if(mysql_query($query) === false) return softDie('Bad SQL query saving value in datanct. query:'.$query.'<br>');
