@@ -577,6 +577,11 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 		{	
 			$post['last_update'] = 	date('Y-m-d',$now);		
 		}
+		if($table=='products' && $post['name']=='')
+		{
+			softDieSession('Cannot insert '.$table.' entry. Product name cannot empty.');
+			return 0;
+		}		
 		$postKeys = array_keys($post);
 		$post = array_map(am,$postKeys,array_values($post));
 		$query = "insert into $table (".implode(',',$postKeys).") values(".implode(',',$post).")";
@@ -625,6 +630,11 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 		{
 			//remove post action name from insert query.
 			unset($post['save']);
+			if($table=='products' && $post['name']=='')
+			{
+				softDieSession('Cannot update '.$table.' entry. Product name cannot empty.');
+				return 0;
+			}			
 			$post = array_map(am1,array_keys($post),array_values($post));
 			//pr($post);//die;
 		}

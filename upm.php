@@ -110,7 +110,7 @@ if(isset($_GET['search']))
 {
 	//$_GET['search_product'] = $_GET['search_product_id'];
 	//unset($_GET['search_product_id']);
-	$query = "select id from products where name='{$_GET['search_product']}'";
+	$query = "select id from products where name='{$_GET['search_product']}' and name !=''";
 	$res = mysql_query($query);
 	$pid = null;
 	while($row = mysql_fetch_assoc($res))
