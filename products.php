@@ -111,7 +111,7 @@ if(isset($_GET['deleteId']) && is_numeric($_GET['deleteId']) && $deleteFlag)
 //save operation controller
 if($_GET['save']=='Save')
 {
-	saveData($_GET,$table);
+	$saveStatus = saveData($_GET,$table);
 }
 
 //import controller
@@ -224,13 +224,13 @@ $skipArr = array('comments','product_type','licensing_mode','administration_mode
 echo '<br/>';
 echo '<div class="clr">';
 //add edit form.
-if($_REQUEST['add_new_record']=='Add New Record' || $_REQUEST['id'] && !$_GET['save'])
+if($_REQUEST['add_new_record']=='Add New Record' || $_REQUEST['id'] && !$_GET['save'] || $saveStatus===0)
 {
 	$addEditFormStyle = $mainTableStyle = 'style="width:100%"';
 	$addEditGlobalInputStyle = 'style="width:99%;min-width:200px;"';
 	$id = ($_REQUEST['id'])?$_REQUEST['id']:null;
 	echo '<div>';
-	addEditUpm($id,$table,$script,array("formOnSubmit"=>"onsubmit=\"return chkbox(this,'delsearch','searchdata');\"",'deletebox'=>true,'formStyle'=>$addEditFormStyle,'mainTableStyle'=>$mainTableStyle,'addEditGlobalInputStyle'=>$addEditGlobalInputStyle),$skipArr);
+	addEditUpm($id,$table,$script,array("formOnSubmit"=>"onsubmit=\"return chkbox(this,'delsearch','searchdata');\"",'deletebox'=>true,'formStyle'=>$addEditFormStyle,'mainTableStyle'=>$mainTableStyle,'addEditGlobalInputStyle'=>$addEditGlobalInputStyle,'saveStatus'=>$saveStatus),$skipArr);
 	echo '</div>';
 	echo '<br/>';
 }
