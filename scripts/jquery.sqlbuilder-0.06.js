@@ -339,7 +339,7 @@
                 if (!e.pageX) { e.pageX = mouseX; e.pageY = mouseY; }
                 $('div#' + opts.menu).css({ top: e.pageY + 5, left: e.pageX + 5, position: 'absolute' }).slideToggle(200);
 
-                $(document).unbind('click').click(function (e) {
+                $(document).click(function (e) {
                     if (opts.fields.name != undefined) {
                         /*console.log("sqlsimplemenu:this.each:click:unbind:"+'div#'+opts.menu+": %o",this);*/
                         $('div#' + opts.menu).slideUp(200, function () {
