@@ -1627,7 +1627,7 @@ function getActiveCount($all_ids, $time)
 	{
 		$timecond = 'dv.superceded IS NULL and dv.added = (select max(data_values.added) as dd from data_values where data_values.studycat=i.id and data_values.field="'.$overallStatusId.'")';
 	}else{
-		$timecond = 'dv.added < "' . date('Y-m-d H:i:s',$time) . '" AND (dv.superceded > "' . date('Y-m-d H:i:s',$time) . '" OR (dv.superceded IS NULL and dv.added = (select max(data_values.added) as dd from data_values where data_values.studycat=i.id and data_values.field="'.$overallStatusId.'")))';
+		$timecond = 'dv.added < "' . date('Y-m-d H:i:s',$time) . '" AND ((dv.superceded > "' . date('Y-m-d H:i:s',$time) . '" and dv.added = (select max(data_values.added) as dd from data_values where data_values.studycat=i.id and data_values.field="'.$overallStatusId.'" and data_values.added < "' . date('Y-m-d H:i:s',$time) . '")) OR (dv.superceded IS NULL and dv.added = (select max(data_values.added) as dd from data_values where data_values.studycat=i.id and data_values.field="'.$overallStatusId.'" and data_values.added < "' . date('Y-m-d H:i:s',$time) . '")))';
 	}
 	
 	/*$query = "SELECT DISTINCT i.larvol_id AS id FROM data_cats_in_study i
