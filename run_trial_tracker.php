@@ -4912,7 +4912,7 @@ class TrialTracker
 						{
 							$idColor = 'gray';
 						}
-						$outputStr .= '<td class="' . $rowOneType . '"><a style="color:' . $idColor 
+						$outputStr .= '<td style="border-top:none;" class="' . $rowOneType . '"><a style="color:' . $idColor 
 						. '" href="' . urlPath() . 'upm.php?search_id=' . $mvalue['id'] . '" target="_blank">' . $mvalue['id'] . '</a></td>';
 					}
 					

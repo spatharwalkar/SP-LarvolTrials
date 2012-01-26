@@ -44,7 +44,7 @@ $(document).ready(function()
 					'</tr></table></div>';	
 					
 	$('body').append(helptab);	
-	$('body').append(sorttab);
+	//$('body').append(sorttab); //comment out as we are going to use it in future
 	
     $(function()
 	{
