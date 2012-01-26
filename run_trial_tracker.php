@@ -6389,13 +6389,13 @@ class TrialTracker
 				$result[$index]['NCT/brief_title'] = $row['brief_title'];
 				$result[$index]['NCT/enrollment_type'] = $row['enrollment_type'];
 				$result[$index]['NCT/acronym'] = $row['acronym'];
-				$result[$index]['NCT/lead_sponsor'] = $row['lead_sponsor'];
+				$result[$index]['NCT/lead_sponsor'] = str_replace('`', ',', $row['lead_sponsor']);
 				$result[$index]['NCT/start_date'] = $row['start_date'];
 				$result[$index]['NCT/phase'] = $row['phase'];
 				$result[$index]['NCT/enrollment'] = $row['enrollment'];
-				$result[$index]['NCT/collaborator'] = $row['collaborator'];
-				$result[$index]['NCT/condition'] = $row['condition'];
-				$result[$index]['NCT/intervention_name'] = $row['intervention_name'];
+				$result[$index]['NCT/collaborator'] = str_replace('`', ',', $row['collaborator']);
+				$result[$index]['NCT/condition'] = str_replace('`', ',', $row['condition']);
+				$result[$index]['NCT/intervention_name'] = str_replace('`', ',', $row['intervention_name']);
 				$result[$index]['NCT/overall_status'] = $row['overall_status'];
 				$result[$index]['NCT/is_active'] = $row['is_active'];
 				$result[$index]['section'] = $ikey;
@@ -6432,7 +6432,7 @@ class TrialTracker
 							$result[$index]['edited']['NCT/acronym'] = $arr['acronym'];
 
 						if($arr['lead_sponsor'] != '' && $arr['lead_sponsor'] !== NULL)
-							$result[$index]['edited']['NCT/lead_sponsor'] = $arr['lead_sponsor_prev'];
+							$result[$index]['edited']['NCT/lead_sponsor'] = str_replace('`', ',', $arr['lead_sponsor_prev']);
 							
 						if($arr['start_date'] != '' && $arr['start_date'] !== NULL)
 							$result[$index]['edited']['NCT/start_date'] = $arr['start_date_prev'];
@@ -6444,13 +6444,13 @@ class TrialTracker
 							$result[$index]['edited']['NCT/enrollment'] = $arr['enrollment_prev'];
 
 						if($arr['collaborator'] != '' && $arr['collaborator'] !== NULL)
-							$result[$index]['edited']['NCT/collaborator'] = $arr['collaborator_prev'];
+							$result[$index]['edited']['NCT/collaborator'] = str_replace('`', ',', $arr['collaborator_prev']);
 
 						if($arr['condition'] != '' && $arr['condition'] !== NULL)
-							$result[$index]['edited']['NCT/condition'] = $arr['condition_prev'];
+							$result[$index]['edited']['NCT/condition'] = str_replace('`', ',', $arr['condition_prev']);
 
 						if($arr['intervention_name'] != '' && $arr['intervention_name'] !== NULL)
-							$result[$index]['edited']['NCT/intervention_name'] = $arr['intervention_name_prev'];
+							$result[$index]['edited']['NCT/intervention_name'] = str_replace('`', ',', $arr['intervention_name_prev']);
 
 						if($arr['overall_status'] != '' && $arr['overall_status'] !== NULL)
 							$result[$index]['edited']['NCT/overall_status'] = $arr['overall_status_prev'];
