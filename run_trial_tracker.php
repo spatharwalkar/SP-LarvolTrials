@@ -1129,7 +1129,7 @@ class TrialTracker
 		$objPHPExcel->getActiveSheet()->getColumnDimension('H')->setWidth(12);
 		
 		$chr = 'I';
-		for($c=1; $c<40; $c++)
+		for($c=1; $c<43; $c++)
 		{
 			$objPHPExcel->getActiveSheet()->getColumnDimension($chr)->setWidth(2);
 			$chr++;
@@ -4281,15 +4281,15 @@ class TrialTracker
 						. '<style type="text/css">'
 						.'body { font-family:Arial; font-color:black;}'
 						. 'a, a:hover{color:#000000;text-decoration:none;display:block;width:100%; height:100%;}'
-						.'td {vertical-align:top;border-right: 0.5px solid blue;border-left:0.5px solid blue;border-top: 0.5px solid blue;border-bottom: 
+						.'td {vertical-align:top; border-right: 0.5px solid blue; border-left:0.5px solid blue; border-top: 0.5px solid blue; border-bottom: 
 						0.5px solid blue;}'
 						.'tr {border-right: 0.5px solid blue; border-left: 0.5px solid blue; border-top: 0.5px solid blue; border-bottom: 0.5px solid blue;}'
 						.'.title { background-color:#EDEAFF;}'
 						.'.alttitle { background-color:#D5D3E6;}'
 						.'.highlight {color:#FF0000;}'
 						.'.manage {table-layout:fixed;border-top:0.5px solid blue;border-left:0.5px solid blue;border-bottom:0.5px solid blue;}'
-						.'.manage td{ border-top:0.5px solid blue;border-right:0.5px solid blue;margin:0; padding:0;}'
-						.'.manage th { border-right:0.5px solid blue;color:#0000FF;white-space:nowrap;}'
+						.'.manage td{ margin:0; padding:0;}'
+						.'.manage th { border-top:0.5px solid blue;	border-left:0.5px solid blue; border-right:0.5px solid blue;color:#0000FF;white-space:nowrap;}'
 						.'.newtrial td, .newtrial td a{ color:#FF0000;}'
 						.'.bomb { float:left; margin-top:20px; text-align:center;}'
 						.'.result {	font-weight:bold;font-size:18px;}'
@@ -4637,7 +4637,7 @@ class TrialTracker
 						
 						$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true" class="trialtitles">'
 								. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
-								. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+								. ' onclick="sh(this,\'' . $naUpmIndex . '\');">' 
 								. $trialsInfo[$sectionKey]['sectionHeader'] . '</td></tr>';
 						$outputStr .= $this->displayUnMatchedUpms_TCPDF($loggedIn, $naUpmIndex, $trialsInfo[$sectionKey]['naUpms']);
 					}
@@ -4912,7 +4912,7 @@ class TrialTracker
 						{
 							$idColor = 'gray';
 						}
-						$outputStr .= '<td style="border-top:none;" class="' . $rowOneType . '"><a style="color:' . $idColor 
+						$outputStr .= '<td class="' . $rowOneType . '"><a style="color:' . $idColor 
 						. '" href="' . urlPath() . 'upm.php?search_id=' . $mvalue['id'] . '" target="_blank">' . $mvalue['id'] . '</a></td>';
 					}
 					
@@ -4985,7 +4985,7 @@ class TrialTracker
 					$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true" class="trialtitles">'
 							. '<td colspan="' . getColspanBasedOnLogin($loggedIn) 
 							. '" class="upmpointer sectiontitles"'
-							. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+							. ' onclick="sh(this,\'' . $naUpmIndex . '\');">' 
 							. $trialsInfo[$cntr]['sectionHeader'] . '</td></tr>';
 					$outputStr .= $this->displayUnMatchedUpms_TCPDF($loggedIn, $naUpmIndex, $trialsInfo[$cntr]['naUpms']);
 				}
