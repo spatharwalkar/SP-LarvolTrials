@@ -4469,11 +4469,11 @@ class TrialTracker
 		//set margins
 		if($loggedIn)
 		{
-			$pdf->SetMargins(9.5, 15, 9.5);
+			$pdf->SetMargins(8.6, 15, 8.6);
 		}
 		else
 		{
-			$pdf->SetMargins(14.7, 15, 14.7);
+			$pdf->SetMargins(13.6, 15, 13.6);
 		}
 		
 		$pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
