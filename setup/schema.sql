@@ -884,6 +884,26 @@ CREATE TABLE IF NOT EXISTS `product_trials` (
   KEY `trial` (`trial`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+CREATE TABLE IF NOT EXISTS `rpt_masterhm_cells` (
+  `product` int(10) unsigned NOT NULL COMMENT 'Foreign key to product table ID',
+  `area` int(10) unsigned NOT NULL COMMENT 'Foreign key to area table ID',
+  `count_total` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Total trials with this product and area',
+  `count_active` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Count of only active trials',
+  `bomb` enum('none','small','large') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'none' COMMENT 'Analysts'' indication of bomb',
+  `bomb_auto` enum('none','small','large') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'none' COMMENT 'Indication that LT suggests a bomb for this cell',
+  `bomb_explain` text COLLATE utf8_unicode_ci COMMENT 'Analysts'' explanation of bomb',
+  `highest_phase` enum('N/A','0','0/1','1','1a','1b','1a/1b','1c','1/2','1b/2','1b/2a','2','2a','2a/2b','2b','2/3','2b/3','3','3a','3b','3/4','3b/4','4') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'N/A',
+  `filing` text COLLATE utf8_unicode_ci,
+  `last_update` datetime NOT NULL,
+  PRIMARY KEY (`product`,`area`),
+  KEY `area` (`area`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+ALTER TABLE `rpt_masterhm_cells`
+  ADD CONSTRAINT `rpt_masterhm_cells_ibfk_2` FOREIGN KEY (`area`) REFERENCES `areas` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `rpt_masterhm_cells_ibfk_1` FOREIGN KEY (`product`) REFERENCES `products` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+
 ALTER TABLE `data_cats_in_study`
   ADD CONSTRAINT `data_cats_in_study_ibfk_1` FOREIGN KEY (`larvol_id`) REFERENCES `clinical_study` (`larvol_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `data_cats_in_study_ibfk_2` FOREIGN KEY (`category`) REFERENCES `data_categories` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
