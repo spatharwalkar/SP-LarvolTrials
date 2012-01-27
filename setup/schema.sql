@@ -944,7 +944,7 @@ ALTER TABLE `upm`
 
 ALTER TABLE `area_trials`
   ADD CONSTRAINT `area_trials_ibfk_1` FOREIGN KEY (`area`) REFERENCES `areas` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `area_trials_ibfk_2` FOREIGN KEY (`trial`) REFERENCES `clinical_study` (`larvol_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `area_trials_ibfk_2` FOREIGN KEY (`trial`) REFERENCES `data_trials` (`larvol_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `data_history`
   ADD CONSTRAINT `data_history_ibfk_1` FOREIGN KEY (`larvol_id`) REFERENCES `data_trials` (`larvol_id`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -957,4 +957,4 @@ ALTER TABLE `data_nct`
 
 ALTER TABLE `product_trials`
   ADD CONSTRAINT `product_trials_ibfk_1` FOREIGN KEY (`product`) REFERENCES `products` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `product_trials_ibfk_2` FOREIGN KEY (`trial`) REFERENCES `clinical_study` (`larvol_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `product_trials_ibfk_2` FOREIGN KEY (`trial`) REFERENCES `data_trials` (`larvol_id`) ON DELETE CASCADE ON UPDATE CASCADE;
