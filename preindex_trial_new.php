@@ -117,7 +117,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 							$res = mysql_query($query);
 							if($res === false)
 							{
-								$log = 'Bad SQL query pre-indexing trial***. Query : ' . $query;
+								$log = 'Bad SQL query pre-indexing trial***. Query : ' . $query . '<br> MySql Error:'.mysql_error();
 								$logger->fatal($log);
 								die($log);
 								unset($log);
