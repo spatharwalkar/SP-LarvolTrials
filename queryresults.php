@@ -16,10 +16,13 @@ $colNames='';
 $colModel='';
 
 $colNames .= "'larvol_id',";
-$colModel .= "{name:'larvol_id',jsonmap:'larvol_id',width:90},";
+$colModel .= "{name:'larvol_id',jsonmap:'larvol_id',width:50},";
 $colNames .= "'source_id',";
-$colModel .= "{name:'source_id',jsonmap:'source_id',width:90},";
-
+$colModel .= "{name:'source_id',jsonmap:'source_id',width:50},";
+$colNames .= "'view',";
+$colModel .= "{name:'view',jsonmap:'view',width:10},";
+$colNames .= "'edit',";
+$colModel .= "{name:'edit',jsonmap:'edit',width:10},";
 if(!empty($select_columns))
 {
 foreach($select_columns as $selectcolumn)
@@ -37,8 +40,6 @@ foreach($select_columns as $selectcolumn)
 }
 $colNames = substr($colNames, 0, -1); //strip last comma
 $colModel = substr($colModel, 0, -1); //strip last comma
-
-
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">

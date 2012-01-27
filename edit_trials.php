@@ -17,6 +17,13 @@ if(isset($_GET['larvol_id']))
 {
 $_GET['PME_sys_operation']='PME_op_View';
 $_GET['PME_sys_rec']=$_GET['larvol_id'];
+
+	if(isset($_GET['mode']) and $_GET['mode']=='edit' )
+	{
+		$_GET['PME_sys_operation']='PME_op_Change';
+		$_GET['PME_sys_rec']=$_GET['larvol_id'];
+	}
+
 }
 
 global $db;
@@ -35,7 +42,7 @@ $opts['display'] = array(
 	'query' => false,
 	'sort'  => false,
 	'time'  => false,
-	'tabs'  => false
+	'tabs'  => true
 );
 
 $opts['js']['prefix']               = 'PME_js_';
@@ -45,26 +52,33 @@ $opts['cgi']['prefix']['sys']       = 'PME_sys_';
 $opts['cgi']['prefix']['data']      = 'PME_data_';
 $opts['language'] = $_SERVER['HTTP_ACCEPT_LANGUAGE'] . '-UTF8';
 
-$opts['fdd']['larvol_id'] = array(
-  'name'     => 'Larvol ID',
-  'select'   => 'T',
-  'options'  => 'LAVCPDR', // auto increment
-  'maxlen'   => 10,
-  'default'  => '0',
-  'sort'     => false
+
+$opts['fdd']['larvol_id'] 
+= array(
+  'name'    => 'Larvol ID',
+  'select'  => 'T',
+  'options' => 'LAVCPDR',
+  'maxlen'  => 10,
+  'default' => '0',
+  'sort'    => true
 );
-$opts['fdd']['source_id'] = array(
-  'name'     => 'Source ID',
-  'options'  => 'LAVPD', 
-  'select'   => 'T',
-  'maxlen'   => 63,
-  'sort'     => false
+
+$opts['fdd']['source_id']=
+array
+(
+  'name'   => 'Source ID',
+  'options'=> 'LAVPD', 
+  'select' => 'T',
+  'maxlen' => 63,
+  'sort'   => true
 );
+
+
 $opts['fdd']['brief_title'] = array(
   'name'     => 'Brief title',
   'select'   => 'T',
   'maxlen'   => 255,
-  'sort'     => false
+  'sort'     => true
 );
 $opts['fdd']['acronym'] = array(
   'name'     => 'Acronym',
@@ -585,26 +599,32 @@ $opts['fdd']['region'] = array(
   'default'  => 'RestOfWorld',
   'options'  => 'AVCPD', 'sort'     => false
 );
-$opts['fdd']['location_status'] = array(
-  'name'     => 'Location status',
-  'select'   => 'T',
-  'maxlen'   => 25,
-  'values'   => array(
-                  "Not yet recruiting",
-                  "Recruiting",
-                  "Enrolling by invitation",
-                  "Active, not recruiting",
-                  "Completed",
-                  "Suspended",
-                  "Terminated",
-                  "Withdrawn",
-                  "Available",
-                  "No Longer Available",
-                  "Approved for marketing",
-                  "No longer recruiting",
-                  "Withheld",
-                  "Temporarily Not Available"),
-  'options'  => 'AVCPD', 'sort'     => false
+$opts['fdd']['location_status']=
+array
+(
+'name'     => 'Location status',
+'select'   => 'T',
+'maxlen'   => 25,
+'values'   => 
+	array
+	(
+		"Not yet recruiting",
+        "Recruiting",
+        "Enrolling by invitation",
+        "Active, not recruiting",
+        "Completed",
+        "Suspended",
+        "Terminated",
+        "Withdrawn",
+        "Available",
+        "No Longer Available",
+        "Approved for marketing",
+        "No longer recruiting",
+        "Withheld",
+        "Temporarily Not Available"
+	),
+'options'  => 'AVCPD', 
+'sort'     => false
 );
 $opts['fdd']['investigator_name'] = array(
   'name'     => 'Investigator name',
@@ -635,17 +655,23 @@ $opts['fdd']['overall_official_name'] = array(
     'cols' => 50),
   'options'  => 'AVCPD', 'sort'     => false
 );
-$opts['fdd']['overall_official_role'] = array(
-  'name'     => 'Overall official role',
-  'select'   => 'T',
-  'maxlen'   => 22,
-  'values'   => array(
-                  "Principal Investigator",
-                  "Sub-Investigator",
-                  "Study Chair",
-                  "Study Director"),
-  'options'  => 'AVCPD', 'sort'     => false
+$opts['fdd']['overall_official_role']=
+array
+(
+'name'     => 'Overall official role',
+'select'   => 'T',
+'maxlen'   => 22,
+'values'   => 
+	array(
+         "Principal Investigator",
+         "Sub-Investigator",
+         "Study Chair",
+         "Study Director"
+		 ),
+'options'  => 'AVCPD', 
+'sort'     => false
 );
+
 $opts['fdd']['overall_official_affiliation'] = array(
   'name'     => 'Overall official affiliation',
   'select'   => 'T',

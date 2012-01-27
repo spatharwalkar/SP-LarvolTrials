@@ -207,6 +207,9 @@ function runQuery()
 	if(!$sidx) $sidx =1;
 
 	$result = mysql_query($count_query);
+	
+	//	pr($result);
+	
 	$row = mysql_fetch_array($result,MYSQL_ASSOC);
 	$count = $row['count'];
 	if( $count >0 ) {
@@ -220,6 +223,8 @@ function runQuery()
 	//$SQL = "$actual_query ORDER BY $sidx $sord LIMIT $start , $limit";
 	$SQL = "$actual_query LIMIT $start , $limit";
 	$result = mysql_query( $SQL ) or die("Couldn't execute query.".mysql_error());
+	if(!isset($responce)) $responce = new stdClass();
+
 	$responce->page = $page;
 	$responce->total = $total_pages;
 	$responce->records = $count;
@@ -228,6 +233,29 @@ function runQuery()
 		$responce->rows[$i]=$row;
 		$i++;
 	}
+	
+//	pr($responce->rows);
+	
+	foreach ($responce->rows as $fieldname => $value)
+	{
+		$x=0;
+		foreach ($value  as $field => $val)
+		{
+
+			if($x==0)
+			{
+				$x=1;
+				
+				$responce->rows[$fieldname]['view'][] = '<a href="edit_trials.php?larvol_id='.$responce->rows[$fieldname]['larvol_id'].'"><img src="images/view.png" border="0"></a>';
+				$responce->rows[$fieldname]['edit'][] = '<a href="edit_trials.php?larvol_id='.$responce->rows[$fieldname]['larvol_id'].'&mode=edit"><img src="images/jedit.png" border="0"></a>';				
+				
+			}
+		}
+		//	
+	}
+	
+//	pr($responce->rows);
+
 	$ret_val = json_encode($responce);
 	echo($ret_val);
 
