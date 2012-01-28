@@ -8735,7 +8735,7 @@ class TrialTracker
 			$res = mysql_query($sql);
 			
 			$upm['matchedupms'][$i]['edited'] = array();
-			$upm['matchedupms'][$i]['new'] = 'y';
+			$upm['matchedupms'][$i]['new'] = 'n';
 			
 			while($arr = mysql_fetch_assoc($res)) 
 			{
