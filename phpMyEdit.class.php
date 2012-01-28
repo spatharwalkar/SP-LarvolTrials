@@ -130,7 +130,8 @@ class phpMyEdit
 			'A' => array('save','more','cancel'),
 			'C' => array('save','more','cancel'),
 			'P' => array('save', 'cancel'),
-			'V' => array('change','cancel')
+			//'V' => array('change','cancel')
+			'V' => array('cancel')
 			);
 
 	function col_has_sql($k)    { return isset($this->fdd[$k]['sql']); }
