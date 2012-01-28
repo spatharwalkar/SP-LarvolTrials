@@ -5533,7 +5533,7 @@ class TrialTracker
 					$row = mysql_fetch_assoc($res);
 					$productName = $row['name'];
 					$productId = $row['id'];
-					$ottType = 'rowstacked';
+					$ottType = 'rowstackedindexed';
 					
 					echo '<td class="result">Product: ' . htmlformat($productName) . '</td></tr></table>';
 					echo '<br clear="all"/><br/>';
@@ -6389,13 +6389,13 @@ class TrialTracker
 				$result[$index]['NCT/brief_title'] = $row['brief_title'];
 				$result[$index]['NCT/enrollment_type'] = $row['enrollment_type'];
 				$result[$index]['NCT/acronym'] = $row['acronym'];
-				$result[$index]['NCT/lead_sponsor'] = str_replace('`', ',', $row['lead_sponsor']);
+				$result[$index]['NCT/lead_sponsor'] = str_replace('`', ', ', $row['lead_sponsor']);
 				$result[$index]['NCT/start_date'] = $row['start_date'];
 				$result[$index]['NCT/phase'] = $row['phase'];
 				$result[$index]['NCT/enrollment'] = $row['enrollment'];
-				$result[$index]['NCT/collaborator'] = str_replace('`', ',', $row['collaborator']);
-				$result[$index]['NCT/condition'] = str_replace('`', ',', $row['condition']);
-				$result[$index]['NCT/intervention_name'] = str_replace('`', ',', $row['intervention_name']);
+				$result[$index]['NCT/collaborator'] = str_replace('`', ', ', $row['collaborator']);
+				$result[$index]['NCT/condition'] = str_replace('`', ', ', $row['condition']);
+				$result[$index]['NCT/intervention_name'] = str_replace('`', ', ', $row['intervention_name']);
 				$result[$index]['NCT/overall_status'] = $row['overall_status'];
 				$result[$index]['NCT/is_active'] = $row['is_active'];
 				$result[$index]['section'] = $ikey;
@@ -6432,7 +6432,7 @@ class TrialTracker
 							$result[$index]['edited']['NCT/acronym'] = $arr['acronym'];
 
 						if($arr['lead_sponsor'] != '' && $arr['lead_sponsor'] !== NULL)
-							$result[$index]['edited']['NCT/lead_sponsor'] = str_replace('`', ',', $arr['lead_sponsor_prev']);
+							$result[$index]['edited']['NCT/lead_sponsor'] = str_replace('`', ', ', $arr['lead_sponsor_prev']);
 							
 						if($arr['start_date'] != '' && $arr['start_date'] !== NULL)
 							$result[$index]['edited']['NCT/start_date'] = $arr['start_date_prev'];
@@ -6444,13 +6444,13 @@ class TrialTracker
 							$result[$index]['edited']['NCT/enrollment'] = $arr['enrollment_prev'];
 
 						if($arr['collaborator'] != '' && $arr['collaborator'] !== NULL)
-							$result[$index]['edited']['NCT/collaborator'] = str_replace('`', ',', $arr['collaborator_prev']);
+							$result[$index]['edited']['NCT/collaborator'] = str_replace('`', ', ', $arr['collaborator_prev']);
 
 						if($arr['condition'] != '' && $arr['condition'] !== NULL)
-							$result[$index]['edited']['NCT/condition'] = str_replace('`', ',', $arr['condition_prev']);
+							$result[$index]['edited']['NCT/condition'] = str_replace('`', ', ', $arr['condition_prev']);
 
 						if($arr['intervention_name'] != '' && $arr['intervention_name'] !== NULL)
-							$result[$index]['edited']['NCT/intervention_name'] = str_replace('`', ',', $arr['intervention_name_prev']);
+							$result[$index]['edited']['NCT/intervention_name'] = str_replace('`', ', ', $arr['intervention_name_prev']);
 
 						if($arr['overall_status'] != '' && $arr['overall_status'] !== NULL)
 							$result[$index]['edited']['NCT/overall_status'] = $arr['overall_status_prev'];
@@ -7372,10 +7372,11 @@ class TrialTracker
 			$url .= 'results=' . $globalOptions['url'];
 		}
 		else if($ottType == 'rowstacked' || $ottType == 'colstacked')
+
 		{	
 			$url .= 'results=' .  $globalOptions['url'];
 		}
-		else if($ottType == 'indexed')
+		else if($ottType == 'indexed' || $ottType == 'rowstackedindexed')
 		{
 			$url .= $globalOptions['url'];
 		}
@@ -7591,11 +7592,11 @@ class TrialTracker
 				}
 				if(!empty($trialsInfo[$sectionKey]['naUpms']))
 				{
-					if($ottType == 'rowstacked')
+					if($ottType == 'rowstacked' || $ottType == 'rowstackedindexed')
 					{
 						$outputStr .= '<tr class="trialtitles">'
 									. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
-									. 'style="background-image: url(\'images/down.png\') no-repeat left center;"'
+									. 'style="background: url(\'images/down.png\') no-repeat left center;"'
 									. ' onclick="sh(this,\'rowstacked\');">&nbsp;</td></tr>'
 									. $this->displayUnMatchedUpms($loggedIn, 'rowstacked', $trialsInfo[$sectionKey]['naUpms'])
 									. '<tr class="trialtitles">'
@@ -7962,7 +7963,7 @@ class TrialTracker
 					
 					$outputStr .= '<tr class="trialtitles">'
 								. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
-								. ' style="background-image: url(\'images/up.png\') no-repeat left center;"'
+								. ' style="background: url(\'images/up.png\') no-repeat left center;"'
 								. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
 								. $trialsInfo[$cntr]['sectionHeader'] . '</td></tr>';
 					$outputStr .= $this->displayUnMatchedUpms($loggedIn, $naUpmIndex, $trialsInfo[$cntr]['naUpms']);
@@ -8440,6 +8441,7 @@ class TrialTracker
 				{
 					$outputStr .= '<td style="' . $bgColor . '" colspan="' . (15+$endMonth) . '">' . '<div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
 								. '<td colspan="' . (12-$endMonth) . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+
 								. '<td colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
 								. '<td colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
 				}
