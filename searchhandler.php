@@ -197,6 +197,7 @@ function testQuery()
 
 function runQuery()
 {
+	global $db;
 	$jsonData=$_REQUEST['data'];
 	$actual_query= buildQuery($jsonData, false);
 	$count_query =  buildQuery($jsonData, true);
@@ -247,8 +248,10 @@ function runQuery()
 				$x=1;
 				
 				$responce->rows[$fieldname]['view'][] = '<a href="edit_trials.php?larvol_id='.$responce->rows[$fieldname]['larvol_id'].'"><img src="images/view.png" border="0"></a>';
-				$responce->rows[$fieldname]['edit'][] = '<a href="edit_trials.php?larvol_id='.$responce->rows[$fieldname]['larvol_id'].'&mode=edit"><img src="images/jedit.png" border="0"></a>';				
-				
+				if($db->loggedIn() and ($db->user->userlevel=='admin'||$db->user->userlevel=='root'))
+					{
+						$responce->rows[$fieldname]['edit'][] = '<a href="edit_trials.php?larvol_id='.$responce->rows[$fieldname]['larvol_id'].'&mode=edit"><img src="images/jedit.png" border="0"></a>';				
+					}
 			}
 		}
 		//	

@@ -21,8 +21,12 @@ $colNames .= "'source_id',";
 $colModel .= "{name:'source_id',jsonmap:'source_id',width:50},";
 $colNames .= "'view',";
 $colModel .= "{name:'view',jsonmap:'view',width:10},";
-$colNames .= "'edit',";
-$colModel .= "{name:'edit',jsonmap:'edit',width:10},";
+global $db;
+if($db->loggedIn() and ($db->user->userlevel=='admin'||$db->user->userlevel=='root'))
+	{
+		$colNames .= "'edit',";
+		$colModel .= "{name:'edit',jsonmap:'edit',width:10},";
+	}
 if(!empty($select_columns))
 {
 foreach($select_columns as $selectcolumn)

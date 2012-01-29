@@ -13,20 +13,43 @@
 </style><?php
 
 require_once('db.php');
+global $db;
+//pr($_POST);
 if(isset($_GET['larvol_id']))
 {
 $_GET['PME_sys_operation']='PME_op_View';
 $_GET['PME_sys_rec']=$_GET['larvol_id'];
 
-	if(isset($_GET['mode']) and $_GET['mode']=='edit' )
+}
+
+if(isset($_GET['mode']) and $_GET['mode']=='edit' )
+{
+	if($db->loggedIn() and ($db->user->userlevel=='admin'||$db->user->userlevel=='root'))
 	{
 		$_GET['PME_sys_operation']='PME_op_Change';
 		$_GET['PME_sys_rec']=$_GET['larvol_id'];
 	}
-
+	else
+	{
+		$_GET['PME_sys_operation']='PME_op_View';
+		$_GET['PME_sys_rec']=$_GET['larvol_id'];
+	}
 }
 
-global $db;
+$adm=$db->loggedIn() and ($db->user->userlevel=='admin'||$db->user->userlevel=='root');
+
+if(!$adm and isset($_POST['PME_sys_operation']) and ($_POST['PME_sys_operation']=='PME_op_Change' or $_POST['PME_sys_operation']=='Change'))
+{
+	$_POST['PME_sys_operation']='PME_op_View';
+}
+if(!$adm and isset($_GET['PME_sys_operation']) and ($_GET['PME_sys_operation']=='PME_op_Change' or $_GET['PME_sys_operation']=='Change'))
+{
+	$_GET['PME_sys_operation']='PME_op_View';
+}
+
+
+
+
 
 $opts['dbh'] = $db->db_link;
 $opts['tb'] = 'data_trials';
