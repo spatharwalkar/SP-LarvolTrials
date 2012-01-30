@@ -434,4 +434,13 @@ function sqlExplicitNullifier($val,$type=null)
 	return "'".$val."'";
 }
 
+//back ticks every string passed into it
+function backTicker($in)
+{
+	if($in)
+	return '`'.$in.'`';
+	else
+	return null;
+}
+
 ?>
