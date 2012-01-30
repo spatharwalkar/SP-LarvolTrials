@@ -6320,7 +6320,7 @@ class TrialTracker
 		$totactivecount = 0;
 		$totalcount = 0;
 		$where = '';
-		$orderBy = " dt.phase DESC, dt.end_date ASC, dt.start_date ASC, dt.overall_status ASC, dt.enrollment ASC ";
+		$orderBy = " dt.`phase` DESC, dt.`end_date` ASC, dt.`start_date` ASC, dt.`overall_status` ASC, dt.`enrollment` ASC ";
 		
 		if($timeMachine === NULL) $timeMachine = $now;
 		
@@ -6336,7 +6336,7 @@ class TrialTracker
 			{
 				$fvalue	= $this->enumVals[$fvalue];
 			}
-			$where = " AND dt.institution_type IN ('"  . implode("','", $globalOptions['filtersTwo']) . "') ";
+			$where = " AND dt.`institution_type` IN ('"  . implode("','", $globalOptions['filtersTwo']) . "') ";
 		}
 		
 		if(!empty($globalOptions['sortOrder'])) 
@@ -6363,10 +6363,10 @@ class TrialTracker
 			$dataset['matchedupms'] = array();
 			
 			//echo '<br/>query-->'.
-			$query = "SELECT dt.larvol_id, dt.source_id, dt.brief_title, dt.acronym, dt.lead_sponsor, dt.collaborator,"
-					. " dt.overall_status, dt.is_active, dt.start_date, dt.end_date, dt.enrollment, dt.enrollment_type, dt.intervention_name,"
-					. " dt.region, dt.lastchanged_date, dt.phase, dt.overall_status, dt.lastchanged_date, dt.firstreceived_date "
-					. " FROM `data_trials` dt WHERE dt.larvol_id IN ('" . implode("','", $ivalue) . "') " . $where 
+			$query = "SELECT dt.`larvol_id`, dt.`source_id`, dt.`brief_title`, dt.`acronym`, dt.`lead_sponsor`, dt.`collaborator`, dt.`condition`,"
+					. " dt.`overall_status`, dt.`is_active`, dt.`start_date`, dt.`end_date`, dt.`enrollment`, dt.`enrollment_type`, dt.`intervention_name`,"
+					. " dt.`region`, dt.`lastchanged_date`, dt.`phase`, dt.`overall_status`, dt.`lastchanged_date`, dt.`firstreceived_date` "
+					. " FROM `data_trials` dt WHERE dt.`larvol_id` IN ('" . implode("','", $ivalue) . "') " . $where 
 					. " ORDER BY " . $orderBy;
 			$res = mysql_query($query);
 			while($row = mysql_fetch_assoc($res))
@@ -6411,11 +6411,11 @@ class TrialTracker
 				if($row['lastchanged_date'] <= date('Y-m-d', $timeMachine) && $row['lastchanged_date'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
 				{
 					//echo '<br/>query-->'.
-					$uquery = "SELECT end_date_prev, region_prev, brief_title_prev, acronym_prev, lead_sponsor_prev,"
-					. " start_date_prev, phase_prev, enrollment_prev, collaborator_prev, condition_prev, intervention_name_prev,  "
-					. " FROM `data_history` WHERE larvol_id = '" . $row['larvol_id'] . "' AND (" 
+					$uquery = "SELECT `end_date_prev`, `region_prev`, `brief_title_prev`, `acronym_prev`, `lead_sponsor_prev`,"
+					. " `start_date_prev`, `phase_prev`, `enrollment_prev`, `collaborator_prev`, `condition_prev`, `intervention_name_prev` "
+					. " FROM `data_history` WHERE `larvol_id` = '" . $row['larvol_id'] . "' AND ((" 
 					. implode(' BETWEEN "' . date('Y-m-d', $timeMachine) . '" AND "' . date('Y-m-d', strtotime($timeInterval, $timeMachine)) . '") OR (', $fieldNames) 
-					. " BETWEEN '" . date('Y-m-d', $timeMachine) . "' AND '" . date('Y-m-d', strtotime($timeInterval, $timeMachine)) . "' ) ";
+					. " BETWEEN '" . date('Y-m-d', $timeMachine) . "' AND '" . date('Y-m-d', strtotime($timeInterval, $timeMachine)) . "' )) ";
 					$ures = mysql_query($uquery);
 					while($arr = mysql_fetch_assoc($ures))
 					{
@@ -8003,7 +8003,7 @@ class TrialTracker
 			else if($endYear == $currentYear) 
 			{
 				$outputStr .= '<td colspan="3">&nbsp;</td>';
-				$outputStr 	.= (($st != 0) ? '<td colspan="' . $st . '">&nbsp;</td>' : '')
+				$outputStr .= (($st != 0) ? '<td colspan="' . $st . '">&nbsp;</td>' : '')
 							. '<td style="background-color:' . $bgColor . ';">&nbsp;</td>'
 							. (((12 - ($st+1)) != 0) ? '<td colspan="' .(12 - ($st+1)) . '">&nbsp;</td>' : '')
 							. '<td colspan="12">&nbsp;</td><td colspan="12">&nbsp;</td><td colspan="3">&nbsp;</td>';	
@@ -8046,7 +8046,7 @@ class TrialTracker
 			else if($startYear == $currentYear) 
 			{ 
 				$outputStr .= '<td colspan="3">&nbsp;</td>';
-				$outputStr 	. (($st != 0) ? '<td colspan="' . $st . '">&nbsp;</td>' : '')
+				$outputStr .= (($st != 0) ? '<td colspan="' . $st . '">&nbsp;</td>' : '')
 							. '<td style="background-color:' . $bgColor . ';width:2px;">&nbsp;</td>'
 							. (((12 - ($st+1)) != 0) ? '<td colspan="' .(12 - ($st+1)) . '">&nbsp;</td>' : '')
 							. '<td colspan="12">&nbsp;</td><td colspan="12">&nbsp;</td><td colspan="3">&nbsp;</td>';	
@@ -8441,7 +8441,6 @@ class TrialTracker
 				{
 					$outputStr .= '<td style="' . $bgColor . '" colspan="' . (15+$endMonth) . '">' . '<div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
 								. '<td colspan="' . (12-$endMonth) . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
-
 								. '<td colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
 								. '<td colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
 				}
