@@ -1,11 +1,15 @@
 <?php
-
+require_once 'db.php';
 function buildQuery($data, $isCount=false)
 {
 	$actual_query = "";
 	try {
 		$jsonData=$data;
 		$filterData = json_decode($jsonData, true, 10);
+		if(is_array($filterData))
+		array_walk_recursive($filterData, 'searchHandlerBackTicker','columnname');
+		if(is_array($filterData))
+		array_walk_recursive($filterData['columndata'], 'searchHandlerBackTicker','columnas');
 		if(json_last_error()<>0)	return 'Invalid Json';
 		$alias= " dt"; //data_trial table alias
 

@@ -271,7 +271,9 @@ function buildQuery($data, $isCount=false)
 	try {
 		$jsonData=$data;
 		$filterData = json_decode($jsonData, true, 10);
+		if(is_array($filterData))
 		array_walk_recursive($filterData, 'searchHandlerBackTicker','columnname');
+		if(is_array($filterData))
 		array_walk_recursive($filterData['columndata'], 'searchHandlerBackTicker','columnas');
 		$alias= " dt"; //data_trial table alias
 
@@ -572,14 +574,6 @@ function validateMaskPCRE($s)
 
 	list($check)=mysql_fetch_row($res);
 	return ($check==1); // pcre ok?
-}
-
-function searchHandlerBackTicker(&$item,$key,$userKey)
-{
-	if($key == $userKey)
-	{
-		$item = backTicker($item);
-	}
 }
 
 ?>

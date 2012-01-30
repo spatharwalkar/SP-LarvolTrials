@@ -443,4 +443,11 @@ function backTicker($in)
 	return null;
 }
 
+function searchHandlerBackTicker(&$item,$key,$userKey)
+{
+	if($key == $userKey)
+	{
+		$item = backTicker($item);
+	}
+}
 ?>
