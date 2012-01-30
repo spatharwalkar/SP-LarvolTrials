@@ -944,7 +944,7 @@ function applyCriteria($arr)
 		//print '<br><br><br><br>Inclusion Criteria'; print $incl_data; print '<br><br><br><br> '.$larvolId.'Exclusion Criteria';
 		//print $excl_data;
 		
-		$query  = "update clinical_study set inclusion_criteria='".$incl_data."', exclusion_criteria='".$excl_data."' where larvol_id=$larvolId";
+		$query  = "update clinical_study set `inclusion_criteria`='".$incl_data."', `exclusion_criteria`='".$excl_data."' where `larvol_id`=$larvolId";
 		if(mysql_query($query))
 		{
 			$flag=1;

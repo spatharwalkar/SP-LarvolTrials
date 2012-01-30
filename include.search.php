@@ -1625,9 +1625,9 @@ function getActiveCount($all_ids, $time)
 	//$time = '"' . date('Y-m-d H:i:s',$time) . '"';
 	if($time === NULL)
 	{
-		$timecond = 'dv.superceded IS NULL and dv.added = (select max(data_values.added) as dd from data_values where data_values.studycat=i.id and data_values.field="'.$overallStatusId.'")';
+		$timecond = 'dv.`superceded` IS NULL and dv.`added` = (select max(data_values.`added`) as dd from data_values where data_values.`studycat`=i.`id` and data_values.`field`="'.$overallStatusId.'")';
 	}else{
-		$timecond = 'dv.added < "' . date('Y-m-d H:i:s',$time) . '" AND ((dv.superceded > "' . date('Y-m-d H:i:s',$time) . '" and dv.added = (select max(data_values.added) as dd from data_values where data_values.studycat=i.id and data_values.field="'.$overallStatusId.'" and data_values.added < "' . date('Y-m-d H:i:s',$time) . '")) OR (dv.superceded IS NULL and dv.added = (select max(data_values.added) as dd from data_values where data_values.studycat=i.id and data_values.field="'.$overallStatusId.'" and data_values.added < "' . date('Y-m-d H:i:s',$time) . '")))';
+		$timecond = 'dv.`added` < "' . date('Y-m-d H:i:s',$time) . '" AND ((dv.`superceded` > "' . date('Y-m-d H:i:s',$time) . '" and dv.`added` = (select max(data_values.`added`) as dd from data_values where data_values.`studycat`=i.`id` and data_values.`field`="'.$overallStatusId.'" and data_values.`added` < "' . date('Y-m-d H:i:s',$time) . '")) OR (dv.`superceded` IS NULL and dv.`added` = (select max(data_values.`added`) as dd from data_values where data_values.`studycat`=i.`id` and data_values.`field`="'.$overallStatusId.'" and data_values.`added` < "' . date('Y-m-d H:i:s',$time) . '")))';
 	}
 	
 	/*$query = "SELECT DISTINCT i.larvol_id AS id FROM data_cats_in_study i
@@ -1636,10 +1636,10 @@ function getActiveCount($all_ids, $time)
 					dv.val_enum NOT IN (".$inactiveStatuses.") AND dv.added < " . $time 
 					. " AND ( dv.superceded>" . $time . " OR dv.superceded IS NULL) ";*/	
 	
-	$query = "SELECT DISTINCT i.larvol_id AS id FROM data_cats_in_study i
-					INNER JOIN data_values AS dv ON i.id = dv.studycat
-					WHERE i.larvol_id IN (".$ids.") AND dv.field = ".$overallStatusId." AND
-					dv.val_enum NOT IN (".$inactiveStatuses.") AND " . $timecond;
+	$query = "SELECT DISTINCT i.`larvol_id` AS id FROM data_cats_in_study i
+					INNER JOIN data_values AS dv ON i.`id` = dv.`studycat`
+					WHERE i.`larvol_id` IN (".$ids.") AND dv.`field` = ".$overallStatusId." AND
+					dv.`val_enum` NOT IN (".$inactiveStatuses.") AND " . $timecond;
 					
 	$time_start = microtime(true);					
 	$res = mysql_query($query);
