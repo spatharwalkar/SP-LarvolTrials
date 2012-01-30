@@ -42,8 +42,8 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 	if(is_null($productz))
 	{
 		$productz=array();
-		if(is_null($productID))	$query = 'SELECT id,name,searchdata from '. $cat .' where searchdata IS NOT NULL and  searchdata <>"" ';
-		else $query = 'SELECT id,name,searchdata from '. $cat .' where searchdata IS NOT NULL and  searchdata <>"" and id="' . $productID .'"' ;
+		if(is_null($productID))	$query = 'SELECT `id`,`name`,`searchdata` from '. $cat .' where searchdata IS NOT NULL and  `searchdata` <>"" ';
+		else $query = 'SELECT `id`,`name`,`searchdata` from '. $cat .' where `searchdata` IS NOT NULL and  `searchdata` <>"" and `id`="' . $productID .'"' ;
 		if(!$resu = mysql_query($query))
 		{
 			$log='Bad SQL query getting  details from '. $cat .' table.<br>Query=' . $query;
@@ -156,7 +156,7 @@ function trial_indexed($larvol_id,$cat,$cid)
 //	$nctid=padnct($nctid);
 	global $logger;
 //	$query = 'SELECT trial from  ' . $indextable . ' where trial="' . $nctid . '" LIMIT 1';
-	$query = 'SELECT trial from  ' . $indextable . ' where trial="' . $larvol_id . '" and `'. $columnname .'`= "' . $cid . '" ';
+	$query = 'SELECT `trial` from  `' . $indextable . '` where `trial`="' . $larvol_id . '" and `'. $columnname .'`= "' . $cid . '" ';
 	$res1 		= mysql_query($query) ;
 	if($res1===false)
 	{

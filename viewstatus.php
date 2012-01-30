@@ -42,9 +42,9 @@ if(isset($_POST['pid']))
 		{
 			if($_POST['action']==1)
 			{
-				$query = 'UPDATE update_status_fullhistory SET status="'.READY.'" WHERE update_id="' . $_POST['upid'].'"';
+				$query = 'UPDATE update_status_fullhistory SET `status`="'.READY.'" WHERE `update_id`="' . $_POST['upid'].'"';
 				$res = mysql_query($query) or die('Bad SQL Query setting update ready status');
-				$query = 'select current_nctid from  update_status_fullhistory WHERE update_id="' . $_POST['upid'].'" limit 1';
+				$query = 'select `current_nctid` from  update_status_fullhistory WHERE `update_id`="' . $_POST['upid'].'" limit 1';
 				$res = mysql_query($query) or die('Bad SQL Query setting update ready status');
 				$row = mysql_fetch_assoc($res); $current_nctid=$row['current_nctid'];
 				if($_POST['ttype']=="trial") runnewscraper(true,$current_nctid);
@@ -66,12 +66,12 @@ if(isset($_POST['pid']))
 				$cmd = "kill ".$_POST['pid'];
 				exec($cmd, $output, $result);
 				
-				$query = 'UPDATE update_status_fullhistory SET status="'.CANCELLED.'" WHERE update_id="' . $_POST['upid'].'"';
+				$query = 'UPDATE update_status_fullhistory SET `status`="'.CANCELLED.'" WHERE `update_id`="' . $_POST['upid'].'"';
 				$res = mysql_query($query) or die('Bad SQL Query setting update cancelled status');
 			}
 			else if($_POST['action']==3)
 			{
-				$query = 'DELETE FROM update_status_fullhistory WHERE update_id="' . $_POST['upid'].'"';
+				$query = 'DELETE FROM update_status_fullhistory WHERE `update_id`="' . $_POST['upid'].'"';
 				$res = mysql_query($query) or die('Bad SQL Query deleting update status');
 			}		
 		}
@@ -83,7 +83,7 @@ if(isset($_POST['pid']))
 		{
 			if($_POST['action']==4)
 			{			
-				$query = 'UPDATE update_status_fullhistory SET status="'.CANCELLED.'" WHERE update_id="' . $_POST['upid'].'"';
+				$query = 'UPDATE update_status_fullhistory SET `status`="'.CANCELLED.'" WHERE `update_id`="' . $_POST['upid'].'"';
 				$res = mysql_query($query) or die('Bad SQL Query setting update cancelled status');
 			}
 		}
@@ -91,7 +91,7 @@ if(isset($_POST['pid']))
 		{
 			if($_POST['action']==4)
 			{
-				$query = 'UPDATE reports_status SET status="'.CANCELLED.'" WHERE run_id="' . $_POST['runid'].'" AND report_type="' . $_POST['rpttyp'].'" AND type_id="' . $_POST['typeid'].'"';
+				$query = 'UPDATE reports_status SET `status`="'.CANCELLED.'" WHERE `run_id`="' . $_POST['runid'].'" AND report_type="' . $_POST['rpttyp'].'" AND `type_id`="' . $_POST['typeid'].'"';
 				$res = mysql_query($query) or die('Bad SQL Query setting report cancelled status');
 			}
 		}
@@ -187,7 +187,7 @@ function showprogress()
 	{
 			if( !in_array($update_pids[$i],$running_pids) and $err[$i]=='yes')
 		{
-			$query = 'UPDATE update_status_fullhistory SET status="'.ERROR.'",process_id="0" WHERE update_id="' . $update_ids[$i].'"';
+			$query = 'UPDATE update_status_fullhistory SET `status`="'.ERROR.'",`process_id`="0" WHERE `update_id`="' . $update_ids[$i].'"';
 			$res = mysql_query($query) or die('Bad SQL Query setting update error status');
 		}
 			

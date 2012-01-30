@@ -42,7 +42,7 @@ function addNCT($rec)
 
 	
 	
-	$query = 'SELECT larvol_id FROM data_trials where source_id="' . $rec->id_info->nct_id . '"  LIMIT 1';
+	$query = 'SELECT `larvol_id` FROM data_trials where `source_id`="' . $rec->id_info->nct_id . '"  LIMIT 1';
 	$res = mysql_query($query);
 	if($res === false) return softDie('Bad SQL query determining existence of record');
 	$res = mysql_fetch_assoc($res);
@@ -56,10 +56,10 @@ function addNCT($rec)
 	else
 	{
 		mysql_query('BEGIN') or die("Couldn't begin SQL transaction to create record from XML");
-		$query = 'INSERT INTO data_trials SET source_id="' . $rec->id_info->nct_id . '"' ;
+		$query = 'INSERT INTO data_trials SET `source_id`="' . $rec->id_info->nct_id . '"' ;
 		if(mysql_query($query) === false) return softDie('Bad SQL query adding new record');
 		$larvol_id = mysql_insert_id();
-		$query = 'INSERT INTO data_nct SET larvol_id=' . $larvol_id . ',nct_id="' . $nct_id .'"';
+		$query = 'INSERT INTO data_nct SET `larvol_id`=' . $larvol_id . ',nct_id="' . $nct_id .'"';
 		if(mysql_query($query) === false) return softDie('Bad SQL query adding nct_id');
 		mysql_query('COMMIT') or die("Couldn't commit SQL transaction to create record from XML");
 	}
@@ -318,7 +318,7 @@ else $ddesc=$rec->detailed_descr->textblock;
 	
 	
 	
-	$query = 'update data_trials set institution_type="' .$ins_type. '",region="'.$region.'", is_active='.$inactive.'  where larvol_id="' .$larvol_id . '" limit 1' ;	
+	$query = 'update data_trials set `institution_type`="' .$ins_type. '",`region`="'.$region.'", `is_active`='.$inactive.'  where `larvol_id`="' .$larvol_id . '" limit 1' ;	
 	if(mysql_query($query) === false) return softDie('Bad SQL query saving institution type in data_trials. query:'.$query.'<br>');
 
 /*	
@@ -466,7 +466,7 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 	if ( isset($as) and $as)
 	{
 	
-		$query = 'SELECT `' .$fieldname. '`  FROM data_nct WHERE larvol_id="'. $larvol_id . '" limit 1';
+		$query = 'SELECT `' .$fieldname. '`  FROM data_nct WHERE `larvol_id`="'. $larvol_id . '" limit 1';
 		$res = mysql_query($query);
 		
 		if($res === false) return softDie('Bad SQL query getting value');
@@ -485,7 +485,7 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 			
 			if ( isset($as) and $as)
 			{
-				$query = 'SELECT `' .$fieldname. '`, lastchanged_date  FROM data_nct WHERE larvol_id="'. $larvol_id . '" limit 1';
+				$query = 'SELECT `' .$fieldname. '`, `lastchanged_date`  FROM data_nct WHERE `larvol_id`="'. $larvol_id . '" limit 1';
 				$res = mysql_query($query);
 				if($res === false) return softDie('Bad SQL query getting value');
 				$row = mysql_fetch_assoc($res);
@@ -501,7 +501,7 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 				$as1=array_search($fieldname,$dn_array1);
 				if ( isset($as1) and $as1)
 				{
-					$query = 'SELECT `' .$fieldname. '` FROM data_manual WHERE larvol_id="'. $larvol_id . '" and `' .$fieldname. '` is not null limit 1';
+					$query = 'SELECT `' .$fieldname. '` FROM data_manual WHERE `larvol_id`="'. $larvol_id . '" and `' .$fieldname. '` is not null limit 1';
 					$res = mysql_query($query);
 					if($res === false) return softDie('Bad SQL query checking data in data_manual. Query:'.$query);
 					$row = mysql_fetch_assoc($res);
@@ -511,7 +511,7 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 				}				
 				//
 				
-				$query = 'update data_nct set `' . $fieldname . '` = "' . $raw_value .'", lastchanged_date = "' .$lastchanged_date.'" where larvol_id="' .$larvol_id . '"  limit 1'  ;
+				$query = 'update `data_nct` set `' . $fieldname . '` = "' . $raw_value .'", `lastchanged_date` = "' .$lastchanged_date.'" where `larvol_id`="' .$larvol_id . '"  limit 1'  ;
 				
 				if(mysql_query($query) === false) return softDie('Bad SQL query saving value in datanct. query:'.$query.'<br>');
 				
@@ -527,7 +527,7 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 					
 					if(mysql_query($query) === false) return softDie('Bad SQL query saving value in data_trials. query:'.$query.'<br>');
 
-					$query = 'SELECT larvol_id FROM data_history where larvol_id="' . $larvol_id . '"  LIMIT 1';
+					$query = 'SELECT `larvol_id` FROM data_history where `larvol_id`="' . $larvol_id . '"  LIMIT 1';
 					$res = mysql_query($query);
 					if($res === false) return softDie('Bad SQL query determining existence of record in data history');
 					$res = mysql_fetch_assoc($res);
@@ -539,7 +539,7 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 							
 					if($exists and trim($val1)<>trim($val2) )
 					{
-						$query = 'update data_history set `' . $fieldname . '_prev` = "' . $oldval .'", `' . $fieldname . '_lastchanged` = "' . $olddate .'" where larvol_id="' .$larvol_id . '" limit 1' ;
+						$query = 'update data_history set `' . $fieldname . '_prev` = "' . $oldval .'", `' . $fieldname . '_lastchanged` = "' . $olddate .'" where `larvol_id`="' .$larvol_id . '" limit 1' ;
 						if(mysql_query($query) === false) return softDie('Bad SQL query saving value in data_history. query:'.$query.'<br>');
 					}
 					else
@@ -550,7 +550,7 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 							$val2=str_replace("\\", "", $value);
 							if(trim($val1)<>trim($val2))
 							{
-								$query = 'insert into data_history set `' . $fieldname . '_prev` = "' . mysql_real_escape_string($oldval) .'", `' . $fieldname . '_lastchanged` = "' . $olddate .'" , larvol_id="' .$larvol_id . '" ' ;
+								$query = 'insert into `data_history` set `' . $fieldname . '_prev` = "' . mysql_real_escape_string($oldval) .'", `' . $fieldname . '_lastchanged` = "' . $olddate .'" , `larvol_id`="' .$larvol_id . '" ' ;
 								if(mysql_query($query) === false) return softDie('Bad SQL query saving value  Query='.$query);
 							}
 						}
@@ -566,7 +566,7 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 		mysql_query('COMMIT') or die("Couldn't COMMIT SQL transaction to update record from XML");
 		
 		
-		$query = 'select completion_date,primary_completion_date,criteria from data_nct where larvol_id="' . $larvol_id . '"  LIMIT 1';
+		$query = 'select `completion_date`,`primary_completion_date`,`criteria` from `data_nct` where `larvol_id`="' . $larvol_id . '"  LIMIT 1';
 		$res = mysql_query($query);
 		if($res === false) return softDie('Bad SQL query determining existence of record in data nct');
 		$res = mysql_fetch_assoc($res);
@@ -582,14 +582,14 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 		if( !is_null($cdate) and  $cdate <>'0000-00-00')	// completion date
 		{
 			$cdate=normalize('date',$cdate);
-			$query = 'update data_trials set end_date = "' . $cdate . '", inclusion_criteria = "'. $str['inclusion'] . '", exclusion_criteria = "'. $str['exclusion'] .'" where larvol_id="' .$larvol_id . '" limit 1' ;
+			$query = 'update `data_trials` set `end_date` = "' . $cdate . '", `inclusion_criteria` = "'. $str['inclusion'] . '", `exclusion_criteria` = "'. $str['exclusion'] .'" where `larvol_id`="' .$larvol_id . '" limit 1' ;
 //			$query = 'update data_trials set end_date = "' . $cdate . '" where larvol_id="' .$larvol_id . '"  limit 1' ;
 			if(mysql_query($query) === false) return softDie('Bad SQL query updating end date  in data_trials. query:'.$query.'<br>');
 		}
 		elseif( !is_null($pcdate) and  $pcdate <>'0000-00-00') 	// primary completion date
 		{
 			$pcdate=normalize('date',$pcdate);
-			$query = 'update data_trials set end_date = "' . $pcdate . '", inclusion_criteria = "'. $str['inclusion'] . '", exclusion_criteria = "'. $str['exclusion'] .'" where larvol_id="' .$larvol_id . '" limit 1' ;
+			$query = 'update `data_trials` set `end_date` = "' . $pcdate . '", `inclusion_criteria` = "'. $str['inclusion'] . '", `exclusion_criteria` = "'. $str['exclusion'] .'" where `larvol_id`="' .$larvol_id . '" limit 1' ;
 //			$query = 'update data_trials set end_date = "' . $pcdate . '" where larvol_id="' .$larvol_id . '"  limit 1' ;
 			if(mysql_query($query) === false) return softDie('Bad SQL query updating end date  in data_trials. query:'.$query.'<br>');
 		}
@@ -598,7 +598,7 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 		else	
 		{
 		
-			$query = 'select is_active, lastchanged_date from data_trials where larvol_id="' . $larvol_id . '"  LIMIT 1';
+			$query = 'select `is_active`, `lastchanged_date` from `data_trials` where `larvol_id`="' . $larvol_id . '"  LIMIT 1';
 			$res = mysql_query($query);
 
 			if($res === false) return softDie('Bad SQL query determining existence of record in data trials');
@@ -609,13 +609,13 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 			if( !is_null($cdate) and  $cdate <>'0000-00-00' and !is_null($is_active) and $is_active<>1) // last changed date
 			{
 				$cdate=normalize('date',$cdate);
-				$query = 'update data_trials set end_date = "' . $cdate . '", inclusion_criteria = "'. $str['inclusion'] . '", exclusion_criteria = "'. $str['exclusion'] .'" where larvol_id="' .$larvol_id . '" limit 1' ;
+				$query = 'update `data_trials` set `end_date` = "' . $cdate . '", `inclusion_criteria` = "'. $str['inclusion'] . '", `exclusion_criteria` = "'. $str['exclusion'] .'" where `larvol_id`="' .$larvol_id . '" limit 1' ;
 //				$query = 'update data_trials set end_date = "' . $cdate . '" where larvol_id="' .$larvol_id . '"  limit 1' ;
 				if(mysql_query($query) === false) return softDie('Bad SQL query updating end date  in data_trials. query:'.$query.'<br>');
 			}
 			else	// replace with null
 			{
-				$query = 'update data_trials set end_date = null, inclusion_criteria = "'. $str['inclusion'] . '", exclusion_criteria = "'. $str['exclusion'] .'" where larvol_id="' .$larvol_id . '" limit 1' ;
+				$query = 'update `data_trials` set `end_date` = null, `inclusion_criteria` = "'. $str['inclusion'] . '", `exclusion_criteria` = "'. $str['exclusion'] .'" where `larvol_id`="' .$larvol_id . '" limit 1' ;
 //				$query = 'update data_trials set end_date = null where larvol_id="' .$larvol_id . '"  limit 1' ;
 				if(mysql_query($query) === false) return softDie('Bad SQL query updating end date  in data_trials. query:'.$query.'<br>');
 			}

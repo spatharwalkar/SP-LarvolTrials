@@ -27,7 +27,7 @@ function scrape_history($id)
 	
 	echo('<br>Finished Parsing Current Study with this ID.<br />');
 
-	$query = 'UPDATE update_status SET end_time="' . date("Y-m-d H:i:s", strtotime('now')) . '" WHERE update_id="' . $update_id . '"';
+	$query = 'UPDATE update_status SET `end_time`="' . date("Y-m-d H:i:s", strtotime('now')) . '" WHERE `update_id`="' . $update_id . '"';
 	$res = mysql_query($query) or die('Unable to update running' . mysql_error());
 
 	echo('<br>Completely Finished with this ID.<br />');
