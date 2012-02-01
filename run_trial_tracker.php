@@ -152,21 +152,8 @@ class TrialTracker
 					$row = mysql_fetch_assoc($res);
 					
 					$TrialsInfo[$pkey]['sectionHeader'] = $row['name'];
-					$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
-					
-					$res = mysql_query("SELECT `trial` FROM `product_trials` WHERE `product` = '" . $pvalue . "' ");
-					while($row = mysql_fetch_assoc($res))
-					{
-						$Ids[$pkey][] = $row['trial'];
-					}
-					foreach($resultIds['area'] as $akey => $avalue)
-					{
-						$res = mysql_query("SELECT `trial` FROM `area_trials` WHERE `area` = '" . $avalue . "' ");
-						while($row = mysql_fetch_assoc($res))
-						{
-							$Ids[$pkey][] = $row['trial'];
-						}
-					}
+					$Ids[$pkey]['product'] = $row['id'];
+					$Ids[$pkey]['area'] = implode("', '", $resultIds['area']);
 				}
 			}
 			else if(count($resultIds['product']) > 1 || count($resultIds['area']) > 1)
@@ -179,19 +166,8 @@ class TrialTracker
 						$row = mysql_fetch_assoc($res);
 						
 						$TrialsInfo[$akey]['sectionHeader'] = $row['name'];
-						$TrialsInfo[$akey]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
-						
-						$result = mysql_query("SELECT `trial` FROM `product_trials` WHERE `product` IN '" . implode("','", $resultIds['product']) . "' ");
-						while($trial = mysql_fetch_assoc($result))
-						{
-							$Ids[$akey][] = $trial['trial'];
-						}
-						
-						$result = mysql_query("SELECT `trial` FROM `area_trials` WHERE `area` = '" . $avalue . "' ");
-						while($arr = mysql_fetch_assoc($result))
-						{
-							$Ids[$akey][] = $arr['trial'];
-						}
+						$Ids[$akey]['product'] = implode("', '", $resultIds['product']);
+						$Ids[$akey]['area'] = $row['id'];
 					}
 				}
 				else
@@ -202,19 +178,8 @@ class TrialTracker
 						$row = mysql_fetch_assoc($res);
 						
 						$TrialsInfo[$pkey]['sectionHeader'] = $row['name'];
-						$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
-						
-						$result = mysql_query("SELECT `trial` FROM `product_trials` WHERE `product` = '" . $pvalue . "' ");
-						while($trial = mysql_fetch_assoc($result))
-						{
-							$Ids[$pkey][] = $trial['trial'];
-						}
-						
-						$res = mysql_query("SELECT `trial` FROM `area_trials` WHERE `area` IN ('" . implode("','", $resultIds['area']) . "') ");
-						while($arr = mysql_fetch_assoc($res))
-						{
-							$Ids[$pkey][] = $arr['trial'];
-						}
+						$Ids[$pkey]['product'] = $row['id'];
+						$Ids[$pkey]['area'] = implode("', '", $resultIds['area']);
 					}
 				}
 			}
@@ -222,24 +187,15 @@ class TrialTracker
 			{
 				$res = mysql_query("SELECT `name`, `id` FROM `products` WHERE id IN ('" . implode(',', $resultIds['product']) . "') ");
 				$row = mysql_fetch_assoc($res);
-				$TrialsInfo[0]['sectionHeader'] = $row['name'];
-				$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
+
 				
-				$result = mysql_query("SELECT `trial` FROM `area_trials` WHERE `area` IN ('" . implode(',', $resultIds['area']) . "') ");
-				while($arr = mysql_fetch_assoc($result))
-				{
-					$Ids[0][] = $arr['trial'];
-				}
-								
-				$result = mysql_query("SELECT `trial` FROM `product_trials` WHERE `product` IN ('" . implode(',', $resultIds['product']) . "') ");
-				while($trial = mysql_fetch_assoc($result))
-				{
-					$Ids[0][] = $trial['trial'];
-				}
+				$TrialsInfo[0]['sectionHeader'] = $row['name'];
+				$Ids[0]['product'] = $row['id'];
+				$Ids[0]['area'] = implode("', '", $resultIds['area']);
 			}
 			
-			$Values = $this->processIndexedOTTData($ottType, $Ids, $globalOptions);
-			$Values = array_merge($Values, array('TrialsInfo' => $TrialsInfo));
+			$Values = $this->processIndexedOTTData($TrialsInfo, $ottType, $Ids, $globalOptions);
+			//$Values = array_merge($Values, array('TrialsInfo' => $TrialsInfo));
 			
 		}
 		else
@@ -670,6 +626,7 @@ class TrialTracker
 			|| $tvalue['NCT/phase'] == '1b/2a' || $tvalue['NCT/phase'] == '2a' || $tvalue['NCT/phase'] == '2a/2b' 
 			|| $tvalue['NCT/phase'] == '2a/b' || $tvalue['NCT/phase'] == '2b')
 			{
+
 				$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray(
 						array('alignment' => array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,),
 								'fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,
@@ -839,6 +796,7 @@ class TrialTracker
 			
 			//upm id
 			$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $uvalue["id"]);
+
 			if($uvalue['new'] == 'y')
 			{
 				$objPHPExcel->getActiveSheet()->getStyle('A' . $i)->applyFromArray($highlightChange);
@@ -1033,6 +991,7 @@ class TrialTracker
 			}
 			else if($uvalue["new"] == 'y')
 			{
+
 				$objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($highlightChange);
 				if($eventLink != '' && $eventLink !== NULL)
 				{
@@ -1242,6 +1201,7 @@ class TrialTracker
 			$from = $to;
 			$from++;
 		} 
+
 		else if($startDate == '' || $startDate === NULL || $startDate == '0000-00-00') 
 		{
 			$st = $endMonth-1;
@@ -1376,6 +1336,7 @@ class TrialTracker
 				$from++;
 				
 				if($st != 0)
+
 				{
 					$inc = $st;
 					$to = getColspanforExcelExport($from, $inc);
@@ -4320,21 +4281,8 @@ class TrialTracker
 					$row = mysql_fetch_assoc($res);
 					
 					$TrialsInfo[$pkey]['sectionHeader'] = $row['name'];
-					$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
-					
-					$res = mysql_query("SELECT `trial` FROM `product_trials` WHERE `product` = '" . $pvalue . "' ");
-					while($row = mysql_fetch_assoc($res))
-					{
-						$Ids[$pkey][] = $row['trial'];
-					}
-					foreach($resultIds['area'] as $akey => $avalue)
-					{
-						$res = mysql_query("SELECT `trial` FROM `area_trials` WHERE `area` = '" . $avalue . "' ");
-						while($row = mysql_fetch_assoc($res))
-						{
-							$Ids[$pkey][] = $row['trial'];
-						}
-					}
+					$Ids[$pkey]['product'] = $row['id'];
+					$Ids[$pkey]['area'] = implode("', '", $resultIds['area']);
 				}
 			}
 			else if(count($resultIds['product']) > 1 || count($resultIds['area']) > 1)
@@ -4347,19 +4295,8 @@ class TrialTracker
 						$row = mysql_fetch_assoc($res);
 						
 						$TrialsInfo[$akey]['sectionHeader'] = $row['name'];
-						$TrialsInfo[$akey]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
-						
-						$result = mysql_query("SELECT `trial` FROM `product_trials` WHERE `product` IN '" . implode("','", $resultIds['product']) . "' ");
-						while($trial = mysql_fetch_assoc($result))
-						{
-							$Ids[$akey][] = $trial['trial'];
-						}
-						
-						$result = mysql_query("SELECT `trial` FROM `area_trials` WHERE `area` = '" . $avalue . "' ");
-						while($arr = mysql_fetch_assoc($result))
-						{
-							$Ids[$akey][] = $arr['trial'];
-						}
+						$Ids[$akey]['product'] = implode("', '", $resultIds['product']);
+						$Ids[$akey]['area'] = $row['id'];
 					}
 				}
 				else
@@ -4370,19 +4307,8 @@ class TrialTracker
 						$row = mysql_fetch_assoc($res);
 						
 						$TrialsInfo[$pkey]['sectionHeader'] = $row['name'];
-						$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
-						
-						$result = mysql_query("SELECT `trial` FROM `product_trials` WHERE `product` = '" . $pvalue . "' ");
-						while($trial = mysql_fetch_assoc($result))
-						{
-							$Ids[$pkey][] = $trial['trial'];
-						}
-						
-						$res = mysql_query("SELECT `trial` FROM `area_trials` WHERE `area` IN ('" . implode("','", $resultIds['area']) . "') ");
-						while($arr = mysql_fetch_assoc($res))
-						{
-							$Ids[$pkey][] = $arr['trial'];
-						}
+						$Ids[$pkey]['product'] = $row['id'];
+						$Ids[$pkey]['area'] = implode("', '", $resultIds['area']);
 					}
 				}
 			}
@@ -4392,24 +4318,12 @@ class TrialTracker
 				$row = mysql_fetch_assoc($res);
 				
 				$TrialsInfo[0]['sectionHeader'] = $row['name'];
-				$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
-						
-				$result = mysql_query("SELECT `trial` FROM `area_trials` WHERE `area` IN ('" . implode(',', $resultIds['area']) . "') ");
-				while($arr = mysql_fetch_assoc($result))
-				{
-					$Ids[0][] = $arr['trial'];
-				}
-								
-				$result = mysql_query("SELECT `trial` FROM `product_trials` WHERE `product` IN ('" . implode(',', $resultIds['product']) . "') ");
-				while($trial = mysql_fetch_assoc($result))
-				{
-					$Ids[0][] = $trial['trial'];
-				}
+				$Ids[0]['product'] = $row['id'];
+				$Ids[0]['area'] = implode("', '", $resultIds['area']);
 			}
-			
-			$Values = $this->processIndexedOTTData($ottType, $Ids, $globalOptions);
-			$Values = array_merge($Values, array('TrialsInfo' => $TrialsInfo));
-			
+		
+			$Values = $this->processIndexedOTTData($TrialsInfo, $ottType, $Ids, $globalOptions);
+			//$Values = array_merge($Values, array('TrialsInfo' => $TrialsInfo));
 		}
 		else if($ottType == 'standalone')
 		{	
@@ -5268,19 +5182,8 @@ class TrialTracker
 			{
 				foreach($resultIds['product'] as $pkey => $pvalue)
 				{
-					$res = mysql_query("SELECT `trial` FROM `product_trials` WHERE `product` = '" . $pvalue . "' ");
-					while($row = mysql_fetch_assoc($res))
-					{
-						$Ids[$pkey][] = $row['trial'];
-					}
-					foreach($resultIds['area'] as $akey => $avalue)
-					{
-						$res = mysql_query("SELECT `trial` FROM `area_trials` WHERE `area` = '" . $avalue . "' ");
-						while($row = mysql_fetch_assoc($res))
-						{
-							$Ids[$pkey][] = $row['trial'];
-						}
-					}
+					$Ids[$pkey]['product'] = $pvalue;
+					$Ids[$pkey]['area'] = implode("', '", $resultIds['area']);
 				}
 			}
 			else if(count($resultIds['product']) > 1 || count($resultIds['area']) > 1)
@@ -5289,53 +5192,26 @@ class TrialTracker
 				{
 					foreach($resultIds['area'] as $akey => $avalue)
 					{
-						$result = mysql_query("SELECT `trial` FROM `product_trials` WHERE `product` IN '" . implode("','", $resultIds['product']) . "' ");
-						while($trial = mysql_fetch_assoc($result))
-						{
-							$Ids[$akey][] = $trial['trial'];
-						}
-						
-						$result = mysql_query("SELECT `trial` FROM `area_trials` WHERE `area` = '" . $avalue . "' ");
-						while($arr = mysql_fetch_assoc($result))
-						{
-							$Ids[$akey][] = $arr['trial'];
-						}
+						$Ids[$akey]['product'] = implode("', '", $resultIds['product']);
+						$Ids[$akey]['area'] = $avalue;
 					}
 				}
 				else
 				{
 					foreach($resultIds['product'] as $pkey => $pvalue)
 					{
-						$result = mysql_query("SELECT `trial` FROM `product_trials` WHERE `product` = '" . $pvalue . "' ");
-						while($trial = mysql_fetch_assoc($result))
-						{
-							$Ids[$pkey][] = $trial['trial'];
-						}
-						
-						$res = mysql_query("SELECT `trial` FROM `area_trials` WHERE `area` IN ('" . implode("','", $resultIds['area']) . "') ");
-						while($arr = mysql_fetch_assoc($res))
-						{
-							$Ids[$pkey][] = $arr['trial'];
-						}
+						$Ids[$pkey]['product'] = $pvalue;
+						$Ids[$pkey]['area'] = implode("', '", $resultIds['area']);
 					}
 				}
 			}
 			else
 			{
-				$result = mysql_query("SELECT `trial` FROM `area_trials` WHERE `area` IN ('" . implode(',', $resultIds['area']) . "') ");
-				while($arr = mysql_fetch_assoc($result))
-				{
-					$Ids[0][] = $arr['trial'];
-				}
-								
-				$result = mysql_query("SELECT `trial` FROM `product_trials` WHERE `product` IN ('" . implode(',', $resultIds['product']) . "') ");
-				while($trial = mysql_fetch_assoc($result))
-				{
-					$Ids[0][] = $trial['trial'];
-				}
+				$Ids[0]['product'] = implode("', '", $resultIds['product']);
+				$Ids[0]['area'] = implode("', '", $resultIds['area']);
 			}
 			
-			$Values = $this->processIndexedOTTData($ottType, $Ids, $globalOptions);
+			$Values = $this->processIndexedOTTData($TrialsInfo, $ottType, $Ids, $globalOptions);
 		}
 		else if($ottType == 'standalone')
 		{	
@@ -5482,7 +5358,7 @@ class TrialTracker
 			$globalOptions, $timeMachine, $Values['Trials'], $Values['TrialsInfo'], $Values['linkExpiry']);
 		}
 		else if($ottType == 'indexed') 
-		{
+		{	
 			$TrialsInfo = array();
 			$Ids = array();
 			
@@ -5492,7 +5368,7 @@ class TrialTracker
 			$resultIds['area'] = explode(',', $resultIds['area']);
 			
 			if(count($resultIds['product']) > 1 && count($resultIds['area']) > 1)
-			{
+			{	
 				echo '<td class="result">Area: Total</td>' . '</tr></table>';
 				echo '<br clear="all"/><br/>';
 				
@@ -5504,23 +5380,8 @@ class TrialTracker
 						while($row = mysql_fetch_assoc($res))
 						{
 							$TrialsInfo[$pkey]['sectionHeader'] = $row['name'];
-							$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
-						}
-					}
-				}
-				foreach($resultIds['product'] as $pkey => $pvalue)
-				{
-					$res = mysql_query("SELECT `trial` FROM `product_trials` WHERE `product` = '" . $pvalue . "' ");
-					while($row = mysql_fetch_assoc($res))
-					{
-						$Ids[$pkey][] = $row['trial'];
-					}
-					foreach($resultIds['area'] as $akey => $avalue)
-					{
-						$res = mysql_query("SELECT `trial` FROM `area_trials` WHERE `area` = '" . $avalue . "' ");
-						while($row = mysql_fetch_assoc($res))
-						{
-							$Ids[$pkey][] = $row['trial'];
+							$Ids[$pkey]['product'] = $row['id'];
+							$Ids[$pkey]['area'] = implode("', '", $resultIds['area']);
 						}
 					}
 				}
@@ -5533,6 +5394,7 @@ class TrialTracker
 					$row = mysql_fetch_assoc($res);
 					$productName = $row['name'];
 					$productId = $row['id'];
+					
 					$ottType = 'rowstackedindexed';
 					
 					echo '<td class="result">Product: ' . htmlformat($productName) . '</td></tr></table>';
@@ -5540,34 +5402,16 @@ class TrialTracker
 					
 					foreach($resultIds['area'] as $akey => $avalue)
 					{
-						$result = mysql_query("SELECT `trial` FROM `product_trials` WHERE `product` = '" . $productId . "' ");
-						while($trial = mysql_fetch_assoc($result))
-						{
-							$Ids[$akey][] = $trial['trial'];
-						}
-						
 						$res = mysql_query("SELECT `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
 						if(mysql_num_rows($res) > 0)
 						{
 							while($row = mysql_fetch_assoc($res))
 							{
 								$TrialsInfo[$akey]['sectionHeader'] = $row['name'];
-								if($akey == 0)
-								{
-									$TrialsInfo[$akey]['naUpms'] = 
-									$this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $productId);
-								}
-								$result = mysql_query("SELECT `trial` FROM `area_trials` WHERE `area` = '" . $row['id'] . "' ");
-								while($arr = mysql_fetch_assoc($result))
-								{
-									$Ids[$akey][] = $arr['trial'];
-								}
+								$Ids[$akey]['product'] = $productId;
+								$Ids[$akey]['area'] = $row['id'];
 							}
 						}
-					}
-					if(!empty($TrialsInfo[0]['naUpms']))
-					{
-						echo '<input type="hidden" id="upmstyle" value="expand"/>';
 					}
 				}
 				else
@@ -5588,19 +5432,10 @@ class TrialTracker
 							while($row = mysql_fetch_assoc($res))
 							{
 								$TrialsInfo[$pkey]['sectionHeader'] = $row['name'];
-							$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
-								$result = mysql_query("SELECT `trial` FROM `product_trials` WHERE `product` = '" . $row['id'] . "' ");
-								while($trial = mysql_fetch_assoc($result))
-								{
-									$Ids[$pkey][] = $trial['trial'];
-								}
+								$Ids[$pkey]['product'] = $row['id'];
+								$Ids[$pkey]['area'] = $areaId;
+
 							}
-						}
-						
-						$res = mysql_query("SELECT `trial` FROM `area_trials` WHERE `area` = '" . $areaId . "' ");
-						while($arr = mysql_fetch_assoc($res))
-						{
-							$Ids[$pkey][] = $arr['trial'];
 						}
 					}
 				}
@@ -5609,37 +5444,22 @@ class TrialTracker
 			{	
 				$res = mysql_query("SELECT `name`, `id` FROM `areas` WHERE id IN ('" . implode(',', $resultIds['area']) . "') ");
 				$row = mysql_fetch_assoc($res);
+				$Ids[0]['area'] = $row['id'];
 				
-				$result = mysql_query("SELECT `trial` FROM `area_trials` WHERE `area` = '" . $row['id'] . "' ");
-				while($arr = mysql_fetch_assoc($result))
-				{
-					$Ids[0][] = $arr['trial'];
-				}
-								
 				echo '<td class="result">Area: ' . htmlformat($row['name']) . '</td></tr></table>';
 				echo '<br clear="all"/><br/>';
 				
 				$res = mysql_query("SELECT `name`, `id` FROM `products` WHERE id IN ('" . implode(',', $resultIds['product']) . "') ");
 				$row = mysql_fetch_assoc($res);
 				$TrialsInfo[0]['sectionHeader'] = $row['name'];
-				$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
-				
-				$result = mysql_query("SELECT `trial` FROM `product_trials` WHERE `product` = '" . $row['id'] . "' ");
-				while($trial = mysql_fetch_assoc($result))
-				{
-					$Ids[0][] = $trial['trial'];
-				}
-				if(!empty($TrialsInfo[0]['naUpms']))
-				{
-					echo '<input type="hidden" id="upmstyle" value="expand"/>';
-				}
+				$Ids[0]['product'] = $row['id'];
 			}
 			
 			echo '<input type="hidden" name="p" value="' . $_GET['p'] . '"/><input type="hidden" name="a" value="' . $_GET['a'] . '"/>';
-			$Values = $this->processIndexedOTTData($ottType, $Ids, $globalOptions);
+			$Values = $this->processIndexedOTTData($TrialsInfo, $ottType, $Ids, $globalOptions);
 			
 			echo $this->displayWebPage($ottType, $resultIds, $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], 
-			$globalOptions, $timeMachine, $Values['Trials'], $TrialsInfo);
+			$globalOptions, $timeMachine, $Values['Trials'], $Values['TrialsInfo']);
 		}
 		else if($ottType == 'standalone')
 		{
@@ -6306,7 +6126,7 @@ class TrialTracker
 		return  $Values;
 	}
 	
-	function processIndexedOTTData($ottType, $Ids = array(), $globalOptions = array())
+	function processIndexedOTTData($TrialsInfo = array(), $ottType, $Ids = array(), $globalOptions = array())
 	{	
 		global $logger, $now, $sortFieldName;
 		
@@ -6366,8 +6186,11 @@ class TrialTracker
 			$query = "SELECT dt.`larvol_id`, dt.`source_id`, dt.`brief_title`, dt.`acronym`, dt.`lead_sponsor`, dt.`collaborator`, dt.`condition`,"
 					. " dt.`overall_status`, dt.`is_active`, dt.`start_date`, dt.`end_date`, dt.`enrollment`, dt.`enrollment_type`, dt.`intervention_name`,"
 					. " dt.`region`, dt.`lastchanged_date`, dt.`phase`, dt.`overall_status`, dt.`lastchanged_date`, dt.`firstreceived_date` "
-					. " FROM `data_trials` dt WHERE dt.`larvol_id` IN ('" . implode("','", $ivalue) . "') " . $where 
-					. " ORDER BY " . $orderBy;
+					. " FROM `data_trials` dt "
+					. " JOIN `product_trials` pt ON dt.`larvol_id` = pt.`trial` "
+					. " JOIN `area_trials` at ON dt.`larvol_id` = at.`trial` "
+					. " WHERE pt.`product` IN ('" . $ivalue['product'] . "') AND at.`area` IN ('" . $ivalue['area'] . "') " 
+					. $where . " ORDER BY " . $orderBy;
 			$res = mysql_query($query);
 			while($row = mysql_fetch_assoc($res))
 			{
@@ -6381,6 +6204,7 @@ class TrialTracker
 				}
 				
 				$nctId = unpadnct($row['source_id']);
+				$TrialsInfo[$ikey]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['larvol_id']);
 				
 				$result[$index]['larvol_id'] = $row['larvol_id'];
 				$result[$index]['inactive_date'] = $row['end_date'];
@@ -6596,6 +6420,7 @@ class TrialTracker
 		$Values['totinactivecount'] = $totinactivecount;
 		$Values['totalcount'] = $totalcount;
 		$Values['Trials'] = $Trials[$globalOptions['type']];
+		$Values['TrialsInfo'] = $TrialsInfo;
 		$Values['allTrialsforDownload'] = $Trials['allTrialsforDownload'];
 		
 		return  $Values;
@@ -7911,6 +7736,7 @@ class TrialTracker
 						else if($mvalue['status'] == 'Cancelled')
 						{
 							$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel" style="padding-top: 3px;" border="0" />';
+
 						}
 						else
 						{
@@ -8858,6 +8684,7 @@ class TrialTracker
 			if(mysql_num_rows($res) > 0) 
 			{
 				while($row = mysql_fetch_assoc($res)) 
+
 				{ 
 					$naUpms[$i]['id'] = $row['id'];
 					$naUpms[$i]['product_name'] = $productName['name'];
@@ -9227,4 +9054,3 @@ function getColspanBasedOnLogin($loggedIn)
 {
 	return $colspan = (($loggedIn) ? 54 : 53 );
 }
-
