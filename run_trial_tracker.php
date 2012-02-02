@@ -139,7 +139,7 @@ class TrialTracker
 										 ->setCategory("Clinical Trials");
 
 		$bgColor = "D5D3E6";
-		if($ottType == 'indexed')
+		if($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed')
 		{	
 			$Ids = array();
 			$TrialsInfo = array();
@@ -152,6 +152,8 @@ class TrialTracker
 					$row = mysql_fetch_assoc($res);
 					
 					$TrialsInfo[$pkey]['sectionHeader'] = $row['name'];
+					$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
+							
 					$Ids[$pkey]['product'] = $row['id'];
 					$Ids[$pkey]['area'] = implode("', '", $resultIds['area']);
 				}
@@ -160,6 +162,8 @@ class TrialTracker
 			{
 				if(count($resultIds['area']) > 1)
 				{
+					$TrialsInfo[0]['naUpms'] = 
+					$this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], implode("', '", $resultIds['product']));
 					foreach($resultIds['area'] as $akey => $avalue)
 					{
 						$res = mysql_query("SELECT `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
@@ -178,6 +182,8 @@ class TrialTracker
 						$row = mysql_fetch_assoc($res);
 						
 						$TrialsInfo[$pkey]['sectionHeader'] = $row['name'];
+						$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
+								
 						$Ids[$pkey]['product'] = $row['id'];
 						$Ids[$pkey]['area'] = implode("', '", $resultIds['area']);
 					}
@@ -187,16 +193,17 @@ class TrialTracker
 			{
 				$res = mysql_query("SELECT `name`, `id` FROM `products` WHERE id IN ('" . implode(',', $resultIds['product']) . "') ");
 				$row = mysql_fetch_assoc($res);
-
 				
 				$TrialsInfo[0]['sectionHeader'] = $row['name'];
+				$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
+				
 				$Ids[0]['product'] = $row['id'];
 				$Ids[0]['area'] = implode("', '", $resultIds['area']);
 			}
 			
-			$Values = $this->processIndexedOTTData($TrialsInfo, $ottType, $Ids, $globalOptions);
-			//$Values = array_merge($Values, array('TrialsInfo' => $TrialsInfo));
-			
+			$Values = $this->processIndexedOTTData($ottType, $Ids, $globalOptions);
+			$Values = array_merge($Values, array('TrialsInfo' => $TrialsInfo));
+			//echo '<pre>';print_r($Values);
 		}
 		else
 		{	
@@ -224,7 +231,10 @@ class TrialTracker
 		$unMatchedUpms = array();
 		foreach($Values['TrialsInfo'] as $tkey => $tvalue)
 		{
-			$unMatchedUpms = array_merge($unMatchedUpms, $tvalue['naUpms']);
+			if(isset($tvalue['naUpms']))
+			{
+				$unMatchedUpms = array_merge($unMatchedUpms, $tvalue['naUpms']);
+			}
 		}
 		
 		$i = 2;
@@ -626,7 +636,6 @@ class TrialTracker
 			|| $tvalue['NCT/phase'] == '1b/2a' || $tvalue['NCT/phase'] == '2a' || $tvalue['NCT/phase'] == '2a/2b' 
 			|| $tvalue['NCT/phase'] == '2a/b' || $tvalue['NCT/phase'] == '2b')
 			{
-
 				$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray(
 						array('alignment' => array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,),
 								'fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,
@@ -796,7 +805,6 @@ class TrialTracker
 			
 			//upm id
 			$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $uvalue["id"]);
-
 			if($uvalue['new'] == 'y')
 			{
 				$objPHPExcel->getActiveSheet()->getStyle('A' . $i)->applyFromArray($highlightChange);
@@ -1201,7 +1209,6 @@ class TrialTracker
 			$from = $to;
 			$from++;
 		} 
-
 		else if($startDate == '' || $startDate === NULL || $startDate == '0000-00-00') 
 		{
 			$st = $endMonth-1;
@@ -2765,6 +2772,7 @@ class TrialTracker
 					if( $upmLink != '' &&  $upmLink !== NULL)
 					{
 						$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
+
 						$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
 					}
 					$from = $to;
@@ -4268,7 +4276,7 @@ class TrialTracker
 		
 		$Values = array();
 		
-		if($ottType == 'indexed')
+		if($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed')
 		{	
 			$Ids = array();
 			$TrialsInfo = array();
@@ -4281,6 +4289,8 @@ class TrialTracker
 					$row = mysql_fetch_assoc($res);
 					
 					$TrialsInfo[$pkey]['sectionHeader'] = $row['name'];
+					$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
+							
 					$Ids[$pkey]['product'] = $row['id'];
 					$Ids[$pkey]['area'] = implode("', '", $resultIds['area']);
 				}
@@ -4289,6 +4299,9 @@ class TrialTracker
 			{
 				if(count($resultIds['area']) > 1)
 				{
+					$TrialsInfo[0]['naUpms'] = 
+					$this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], implode("', '", $resultIds['product']));
+					
 					foreach($resultIds['area'] as $akey => $avalue)
 					{
 						$res = mysql_query("SELECT `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
@@ -4307,6 +4320,8 @@ class TrialTracker
 						$row = mysql_fetch_assoc($res);
 						
 						$TrialsInfo[$pkey]['sectionHeader'] = $row['name'];
+						$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
+						
 						$Ids[$pkey]['product'] = $row['id'];
 						$Ids[$pkey]['area'] = implode("', '", $resultIds['area']);
 					}
@@ -4318,12 +4333,13 @@ class TrialTracker
 				$row = mysql_fetch_assoc($res);
 				
 				$TrialsInfo[0]['sectionHeader'] = $row['name'];
+				$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
 				$Ids[0]['product'] = $row['id'];
 				$Ids[0]['area'] = implode("', '", $resultIds['area']);
 			}
 		
-			$Values = $this->processIndexedOTTData($TrialsInfo, $ottType, $Ids, $globalOptions);
-			//$Values = array_merge($Values, array('TrialsInfo' => $TrialsInfo));
+			$Values = $this->processIndexedOTTData($ottType, $Ids, $globalOptions);
+			$Values = array_merge($Values, array('TrialsInfo' => $TrialsInfo));
 		}
 		else if($ottType == 'standalone')
 		{	
@@ -5174,7 +5190,7 @@ class TrialTracker
 	function generateXmlFile($resultIds, $timeMachine = NULL, $ottType, $globalOptions)
 	{
 		$Values = array();
-		if($ottType == 'indexed')
+		if($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed')
 		{
 			$Ids = array();
 			
@@ -5211,7 +5227,7 @@ class TrialTracker
 				$Ids[0]['area'] = implode("', '", $resultIds['area']);
 			}
 			
-			$Values = $this->processIndexedOTTData($TrialsInfo, $ottType, $Ids, $globalOptions);
+			$Values = $this->processIndexedOTTData($ottType, $Ids, $globalOptions);
 		}
 		else if($ottType == 'standalone')
 		{	
@@ -5372,6 +5388,8 @@ class TrialTracker
 				echo '<td class="result">Area: Total</td>' . '</tr></table>';
 				echo '<br clear="all"/><br/>';
 				
+				$ottType = 'colstackedindexed';
+				
 				foreach($resultIds['product'] as $pkey => $pvalue)
 				{
 					$res = mysql_query("SELECT `name`, `id` FROM `products` WHERE id = '" . $pvalue . "' ");
@@ -5380,6 +5398,9 @@ class TrialTracker
 						while($row = mysql_fetch_assoc($res))
 						{
 							$TrialsInfo[$pkey]['sectionHeader'] = $row['name'];
+							$TrialsInfo[$pkey]['naUpms'] = 
+							$this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
+							
 							$Ids[$pkey]['product'] = $row['id'];
 							$Ids[$pkey]['area'] = implode("', '", $resultIds['area']);
 						}
@@ -5392,9 +5413,11 @@ class TrialTracker
 				{
 					$res = mysql_query("SELECT `name`, `id` FROM `products` WHERE id IN ('" . implode("','", $resultIds['product']) . "') ");
 					$row = mysql_fetch_assoc($res);
+					
 					$productName = $row['name'];
 					$productId = $row['id'];
 					
+					$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $productId);
 					$ottType = 'rowstackedindexed';
 					
 					echo '<td class="result">Product: ' . htmlformat($productName) . '</td></tr></table>';
@@ -5408,10 +5431,15 @@ class TrialTracker
 							while($row = mysql_fetch_assoc($res))
 							{
 								$TrialsInfo[$akey]['sectionHeader'] = $row['name'];
+								
 								$Ids[$akey]['product'] = $productId;
 								$Ids[$akey]['area'] = $row['id'];
 							}
 						}
+					}
+					if(!empty($TrialsInfo[0]['naUpms']))
+					{
+						echo '<input type="hidden" id="upmstyle" value="expand"/>';
 					}
 				}
 				else
@@ -5420,6 +5448,8 @@ class TrialTracker
 					$row = mysql_fetch_assoc($res);
 					$areaName = $row['name'];
 					$areaId = $row['id'];
+					
+					$ottType = 'colstackedindexed';
 					
 					echo '<td class="result">Area: ' . htmlformat($areaName) . '</td></tr></table>';
 					echo '<br clear="all"/><br/>';
@@ -5432,9 +5462,11 @@ class TrialTracker
 							while($row = mysql_fetch_assoc($res))
 							{
 								$TrialsInfo[$pkey]['sectionHeader'] = $row['name'];
+								$TrialsInfo[$pkey]['naUpms'] = 
+								$this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
+								
 								$Ids[$pkey]['product'] = $row['id'];
 								$Ids[$pkey]['area'] = $areaId;
-
 							}
 						}
 					}
@@ -5451,15 +5483,22 @@ class TrialTracker
 				
 				$res = mysql_query("SELECT `name`, `id` FROM `products` WHERE id IN ('" . implode(',', $resultIds['product']) . "') ");
 				$row = mysql_fetch_assoc($res);
-				$TrialsInfo[0]['sectionHeader'] = $row['name'];
+				
 				$Ids[0]['product'] = $row['id'];
+				
+				$TrialsInfo[0]['sectionHeader'] = $row['name'];
+				$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
+				if(!empty($TrialsInfo[0]['naUpms']))
+				{
+					echo '<input type="hidden" id="upmstyle" value="expand"/>';
+				}
 			}
 			
 			echo '<input type="hidden" name="p" value="' . $_GET['p'] . '"/><input type="hidden" name="a" value="' . $_GET['a'] . '"/>';
-			$Values = $this->processIndexedOTTData($TrialsInfo, $ottType, $Ids, $globalOptions);
+			$Values = $this->processIndexedOTTData($ottType, $Ids, $globalOptions);
 			
 			echo $this->displayWebPage($ottType, $resultIds, $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], 
-			$globalOptions, $timeMachine, $Values['Trials'], $Values['TrialsInfo']);
+			$globalOptions, $timeMachine, $Values['Trials'], $TrialsInfo);
 		}
 		else if($ottType == 'standalone')
 		{
@@ -6126,7 +6165,7 @@ class TrialTracker
 		return  $Values;
 	}
 	
-	function processIndexedOTTData($TrialsInfo = array(), $ottType, $Ids = array(), $globalOptions = array())
+	function processIndexedOTTData($ottType, $Ids = array(), $globalOptions = array())
 	{	
 		global $logger, $now, $sortFieldName;
 		
@@ -6204,7 +6243,6 @@ class TrialTracker
 				}
 				
 				$nctId = unpadnct($row['source_id']);
-				$TrialsInfo[$ikey]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['larvol_id']);
 				
 				$result[$index]['larvol_id'] = $row['larvol_id'];
 				$result[$index]['inactive_date'] = $row['end_date'];
@@ -6415,12 +6453,11 @@ class TrialTracker
 			$totactivecount	= $activeCount + $totactivecount;
 			$totalcount		= $totalcount + $inactiveCount + $activeCount; 
 		}
-		
+		//echo '<br/>ValuesTrialsInfo--><pre>';print_r($TrialsInfo);
 		$Values['totactivecount'] = $totactivecount;
 		$Values['totinactivecount'] = $totinactivecount;
 		$Values['totalcount'] = $totalcount;
 		$Values['Trials'] = $Trials[$globalOptions['type']];
-		$Values['TrialsInfo'] = $TrialsInfo;
 		$Values['allTrialsforDownload'] = $Trials['allTrialsforDownload'];
 		
 		return  $Values;
@@ -7201,7 +7238,7 @@ class TrialTracker
 		{	
 			$url .= 'results=' .  $globalOptions['url'];
 		}
-		else if($ottType == 'indexed' || $ottType == 'rowstackedindexed')
+		else if($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed')
 		{
 			$url .= $globalOptions['url'];
 		}
@@ -7430,10 +7467,10 @@ class TrialTracker
 					}
 					else
 					{
-						if($ottType != 'colstacked')
-							$image = 'down';
-						else
+						if($ottType == 'colstacked' || $ottType == 'colstackedindexed')
 							$image = 'up';
+						else
+							$image = 'down';
 						
 						$naUpmIndex = preg_replace('/[^a-zA_Z0-9]/i', '', $trialsInfo[$sectionKey]['sectionHeader']);
 						$naUpmIndex = substr($naUpmIndex, 0, 7);
@@ -7717,8 +7754,7 @@ class TrialTracker
 						$outputStr .= '<td style="border-top:0px;" class="' . $rowOneType . '"><a style="color:' . $idColor 
 						. '" href="' . urlPath() . 'upm.php?search_id=' . $mvalue['id'] . '" target="_blank">' . $mvalue['id'] . '</a></td>';
 					}
-					$outputStr .= '<td style="text-align:center;vertical-align:middle;' 
-								. (($mkey < count($trials[$i]['matchedupms'])-1) ? 'border-bottom:0;' : '' ) . '">';
+					$outputStr .= '<td style="text-align:center;vertical-align:middle;' . (($mkey != 0) ? 'border-top:0px;' : '') . '">';
 					
 					$outputStr .= '<div ' . $upmTitle . '>';
 					if($mvalue['result_link'] != '' && $mvalue['result_link'] !== NULL)
@@ -7736,7 +7772,6 @@ class TrialTracker
 						else if($mvalue['status'] == 'Cancelled')
 						{
 							$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel" style="padding-top: 3px;" border="0" />';
-
 						}
 						else
 						{
@@ -8684,7 +8719,6 @@ class TrialTracker
 			if(mysql_num_rows($res) > 0) 
 			{
 				while($row = mysql_fetch_assoc($res)) 
-
 				{ 
 					$naUpms[$i]['id'] = $row['id'];
 					$naUpms[$i]['product_name'] = $productName['name'];
@@ -9054,3 +9088,4 @@ function getColspanBasedOnLogin($loggedIn)
 {
 	return $colspan = (($loggedIn) ? 54 : 53 );
 }
+
