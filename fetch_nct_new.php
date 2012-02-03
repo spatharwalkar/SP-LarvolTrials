@@ -35,7 +35,6 @@ if($cron_run)
 	$res = mysql_query($query) or die('Unable to update running. Query='.$query.' Error:' . mysql_error());
 }
 
-
 echo("\n<br />" . 'Begin updating. Going back ' . $days . ' days.' . "\n<br />" . "\n<br />");
 
 $methode = "update";
@@ -60,11 +59,15 @@ if (count($ids) == 0) {
     $progress_count = 0;
     foreach ($ids as $id => $one) {
 		scrape_history(unpadnct($id));
+		if($cron_run)
+		{
+			$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s", strtotime('now')) . '",update_items_progress = update_items_progress+1 WHERE update_id="' . $update_id . '"';
+			$res = mysql_query($query) or die('Unable to update running. Query='.$query.' Error:' . mysql_error());
+		}
     }
 	if($cron_run)
 	{
     	$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s", strtotime('now')) . '",update_items_complete_time ="' . date("Y-m-d H:i:s", strtotime('now')) . '" WHERE update_id="' . $update_id . '"';
-		//echo $query;
 	    $res = mysql_query($query) or die('Unable to update running. Query='.$query.' Error:' . mysql_error());
 	}
 

@@ -314,8 +314,9 @@ if($current_tasks_count==0)
 						case 3:
 						$updtname='nct_new';
 						break;
-						default:
-						$updtname='nct';
+						case 4:
+						$updtname='calc_hm_cells'; 
+						break;
 					}
 					//Update status set to 'error'
 					echo($updtname  .' database updation error. Requeueing it.' . $nl);
@@ -422,11 +423,12 @@ if($current_tasks_count==0)
 						case 'isrctn':
 						$updtid=2;
 						break;
-						case 3:
-						$updtname='nct_new';
+						case 'nct_new':
+						$updtid=3;
 						break;
-						default:
-						$updtid=0;
+						case 'calc_hm_cells':
+						$updtid=4;
+						break;
 					}
 					if($update_status[$count]==COMPLETED)
 					{
@@ -438,7 +440,7 @@ if($current_tasks_count==0)
 						
 						//Add new entry with status ready
 						echo('Adding entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
-						$query = 'INSERT INTO update_status SET update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
+						$query = 'INSERT INTO update_status SET update_items_progress=0,  update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
 						$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
 					}
 					else if ($update_status[$count]==READY)
@@ -457,7 +459,7 @@ if($current_tasks_count==0)
 					{
 						//Since entry with 'error' status already exists, leave as is and inform user
 						echo('Update of  '.$s.' database encountered error during previous execution.' . $nl);
-						echo ('Please add the report manaully from Status page to ensure it runs '. $nl);
+						echo ('Please add the report manaully from Status page to ensure it runs. '. $nl);
 					}
 					else if ($update_status[$count]==RUNNING)
 					{
@@ -468,7 +470,8 @@ if($current_tasks_count==0)
 					{
 						//Add new entry with status ready
 						echo('Adding entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
-						$query = 'INSERT INTO update_status SET update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
+						$query = 'INSERT INTO update_status SET update_items_progress=0, update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
+						
 						$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
 					}
 					$count++;
@@ -536,7 +539,7 @@ if($current_tasks_count==0)
 								echo('Deleted previous entry to generate report - heatmap ' . $row['heatmap'] . $nl);
 							
 							//Add new entry with status ready
-							$query = 'INSERT INTO reports_status SET run_id="' . $item['id']	. '",type_id="' . $row['heatmap']	. '",report_type="0",status="'.READY.'"';
+							$query = 'INSERT INTO reports_status SET  run_id="' . $item['id']	. '",type_id="' . $row['heatmap']	. '",report_type="0",status="'.READY.'"';
 							$res4 = mysql_query($query) or die('Bad SQL query updating report_status. Error: '.mysql_error());
 							echo('Adding entry to generate report - heatmap ' . $row['heatmap'] . $nl);
 							
@@ -589,7 +592,7 @@ if($current_tasks_count==0)
 								echo('Deleted previous entry to generate report - updatescan ' . $row['updatescan'] . $nl);
 							
 							//Add new entry with status ready
-							$query = 'INSERT INTO reports_status SET run_id="' . $item['id']	.'",type_id="' . $row['updatescan']. '",report_type="2",status="'.READY.'"';
+							$query = 'INSERT INTO reports_status SET  run_id="' . $item['id']	.'",type_id="' . $row['updatescan']. '",report_type="2",status="'.READY.'"';
 							$res4 = mysql_query($query) or die('Bad SQL query updating report_status. Error: '.mysql_error());
 							echo('Adding entry to generate report - updatescan ' . $row['updatescan'] . $nl);
 						
@@ -673,21 +676,29 @@ if($current_tasks_count==0)
 						case 3:
 						$updtname='nct_new';
 						break;
-						default:
-						$updtname='nct';
+						case 4:
+						$updtname='calc_hm_cells'; 
+						break;
 					}
+					if($updtname=='calc_hm_cells')
+					{
+						require_once('calculate_hm_cells.php');
+						calc_cells(NULL,$run_updates[$i]['update_id']);
+					}
+					else
+					{
+						//Start the update execution
+						$filename = 'fetch_' . $updtname . '.php';
+						echo('Invoking: ' . $filename . '...</pre>' . $nl);
+						$days_to_fetch=$run_updates[$i]['updated_days'];
+						$update_id=$run_updates[$i]['update_id'];
+						require_once($filename);
+						echo($nl . '<pre>Done with ' . $filename . '.' . $nl);
+					}	
+						//Set status to 'complete' in 'update_status'
+						$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s",strtotime('now')).'",end_time="' . date("Y-m-d H:i:s",strtotime('now')).'",status="'.COMPLETED.'" WHERE update_id="' .$run_updates[$i]['update_id'] .'"';
+						$res2 = mysql_query($query) or die('Bad SQL Query setting update status to complete');
 					
-					//Start the update execution
-					$filename = 'fetch_' . $updtname . '.php';
-					echo('Invoking ' . $filename . '...</pre>' . $nl);
-					$days_to_fetch=$run_updates[$i]['updated_days'];
-					$update_id=$run_updates[$i]['update_id'];
-					require_once($filename);
-					echo($nl . '<pre>Done with ' . $filename . '.' . $nl);
-					
-					//Set status to 'complete' in 'update_status'
-					$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s",strtotime('now')).'",end_time="' . date("Y-m-d H:i:s",strtotime('now')).'",status="'.COMPLETED.'" WHERE update_id="' .$run_updates[$i]['update_id'] .'"';
-					$res2 = mysql_query($query) or die('Bad SQL Query setting update status to complete');
 				}
 			}
 			
@@ -952,8 +963,9 @@ elseif($current_tasks_count==1)
 						case 3:
 						$updtname='nct_new';
 						break;
-						default:
-						$updtname='nct';
+						case 4:
+						$updtname='calc_hm_cells'; 
+						break;
 					}
 					echo($updtname.' database updation error. Requeueing it.' . $nl);
 					$query = 'UPDATE update_status SET status="'.ERROR.'",process_id="0" WHERE update_id="' . $update_ids[$i].'"';
@@ -1046,6 +1058,7 @@ elseif($current_tasks_count==1)
 			{
 				$fetchers = $fetch;
 				$count=0;
+				
 				foreach($fetchers as $s => $lastrun)
 				{
 					switch($s)
@@ -1059,11 +1072,12 @@ elseif($current_tasks_count==1)
 						case 'isrctn':
 						$updtid=2;
 						break;
-						case 3:
-						$updtname='nct_new';
+						case 'nct_new':
+						$updtid=3;
 						break;
-						default:
-						$updtid=0;
+						case 'calc_hm_cells':
+						$updtid=4;
+						break;
 						
 					}
 					if($update_status[$count]==COMPLETED)
@@ -1076,7 +1090,9 @@ elseif($current_tasks_count==1)
 						
 						//Add new entry with status ready
 						echo('Adding entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
-						$query = 'INSERT INTO update_status SET update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
+						$query = 'INSERT INTO update_status SET  update_items_progress="0", update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
+						
+						
 						$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
 					}
 					else if ($update_status[$count]==READY)
@@ -1094,7 +1110,7 @@ elseif($current_tasks_count==1)
 					else if ($update_status[$count]==ERROR)
 					{
 						//Since entry with 'error' status already exists, leave as is and inform user
-						echo('Update of  '.$s.' database encountered error during previous execution.' . $nl);
+						echo('Update of  '.$s.' database encountered error during previous execution..' . $nl);
 						echo ('Please add the report manaully from Status page to ensure it runs '. $nl);
 					}
 					else if ($update_status[$count]==RUNNING)
@@ -1106,7 +1122,9 @@ elseif($current_tasks_count==1)
 					{
 						//Add new entry with status ready
 						echo('Adding entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
-						$query = 'INSERT INTO update_status SET update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
+						$query = 'INSERT INTO update_status SET  update_items_progress="0", update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
+						
+						
 						$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
 					}
 					$count++;
@@ -1227,7 +1245,7 @@ elseif($current_tasks_count==1)
 								echo('Deleted previous entry to generate report - updatescan ' . $row['updatescan'] . $nl);
 							
 							//Add new entry with status ready
-							$query = 'INSERT INTO reports_status SET run_id="' . $item['id']	.'",type_id="' . $row['updatescan']. '",report_type="2",status="'.READY.'"';
+							$query = 'INSERT INTO reports_status SET  run_id="' . $item['id']	.'",type_id="' . $row['updatescan']. '",report_type="2",status="'.READY.'"';
 							$res4 = mysql_query($query) or die('Bad SQL query updating report_status. Error: '.mysql_error());
 							echo('Adding entry to generate report - updatescan ' . $row['updatescan'] . $nl);
 						
@@ -1310,9 +1328,17 @@ elseif($current_tasks_count==1)
 						case 3:
 						$updtname='nct_new';
 						break;
-						default:
-						$updtname='nct';
+						case 4:
+						$updtname='calc_hm_cells'; 
+						break;
 					}
+					if($updtname=='calc_hm_cells')
+					{
+						require_once('calculate_hm_cells.php');
+						calc_cells(NULL,$run_updates[$i]['update_id']);
+					}
+					else
+					{
 					//Start the update execution
 					$filename = 'fetch_' . $updtname . '.php';
 					echo('Invoking ' . $filename . '...</pre>' . $nl);
@@ -1320,10 +1346,11 @@ elseif($current_tasks_count==1)
 					$update_id=$run_updates[$i]['update_id'];
 					require_once($filename);
 					echo($nl . '<pre>Done with ' . $filename . '.' . $nl);
-					
+					}
 					//Set status to 'complete' in 'update_status'
 					$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s",strtotime('now')).'",end_time="' . date("Y-m-d H:i:s",strtotime('now')).'",status="'.COMPLETED.'" WHERE update_id="' .$run_updates[$i]['update_id'] .'"';
 					$res2 = mysql_query($query) or die('Bad SQL Query setting update status to complete');
+					
 				}
 			}
 			
@@ -1594,8 +1621,10 @@ elseif($current_tasks_count>1)
 									case 3:
 									$updtname='nct_new';
 									break;
-									default:
-									$updtname='nct';
+									case 4:
+									$updtname='calc_hm_cells';
+									break;
+									
 								}
 								//Update status set to 'error'
 								echo($updtname.' database updation error. Requeueing it.' . $nl);
@@ -1703,8 +1732,13 @@ elseif($current_tasks_count>1)
 									case 'isrctn':
 									$updtid=2;
 									break;
-									default:
-									$updtid=0;
+									case 'nct_new':
+									$updtid=3;
+									break;
+									case 'calc_hm_cells':
+									$updtid=4;
+									break;
+									
 								}
 								if($update_status[$count]==COMPLETED)
 								{
@@ -1716,7 +1750,8 @@ elseif($current_tasks_count>1)
 									
 									//Add new entry with status ready
 									echo('Adding entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
-									$query = 'INSERT INTO update_status SET update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
+									$query = 'INSERT INTO update_status SET  update_items_progress="0", update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
+									
 									$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
 								}
 								else if ($update_status[$count]==READY)
@@ -1734,8 +1769,8 @@ elseif($current_tasks_count>1)
 								else if ($update_status[$count]==ERROR)
 								{
 									//Since entry with 'error' status already exists, leave as is and inform user
-									echo('Update of  '.$s.' database encountered error during previous execution.' . $nl);
-									echo ('Please add the report manaully from Status page to ensure it runs '. $nl);
+									echo('Update of  '.$s.' database encountered error during previous execution...' . $nl);
+									echo ('Please add the report manaully from Status page to ensure it runs ...'. $nl);
 								}
 								else if ($update_status[$count]==RUNNING)
 								{
@@ -1746,7 +1781,9 @@ elseif($current_tasks_count>1)
 								{
 									//Add new entry with status ready
 									echo('Adding entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
-									$query = 'INSERT INTO update_status SET update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
+									$query = 'INSERT INTO update_status SET  update_items_progress="0", update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
+									
+									
 									$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
 								}
 								$count++;
@@ -1814,7 +1851,7 @@ elseif($current_tasks_count>1)
 											echo('Deleted previous entry to generate report - heatmap ' . $row['heatmap'] . $nl);
 										
 										//Add new entry with status ready
-										$query = 'INSERT INTO reports_status SET run_id="' . $item['id']	. '",type_id="' . $row['heatmap']	. '",report_type="0",status="'.READY.'"';
+										$query = 'INSERT INTO reports_status SET  run_id="' . $item['id']	. '",type_id="' . $row['heatmap']	. '",report_type="0",status="'.READY.'"';
 										$res4 = mysql_query($query) or die('Bad SQL query updating report_status. Error: '.mysql_error());
 										echo('Adding entry to generate report - heatmap ' . $row['heatmap'] . $nl);
 										
@@ -1952,19 +1989,29 @@ elseif($current_tasks_count>1)
 									case 3:
 									$updtname='nct_new';
 									break;
-									default:
-									$updtname='nct';
+									case 4:
+									$updtname='calc_hm_cells'; 
+									break;
+									
 								}
+								if($updtname=='calc_hm_cells')
+								{
+									require_once('calculate_hm_cells.php');
+									calc_cells(NULL,$run_updates[$i]['update_id']);
+								}
+								else
+								{
 								$filename = 'fetch_' . $updtname . '.php';
-								echo('Invoking ' . $filename . '...</pre>' . $nl);
+								echo('Invoking:- ' . $filename . '...</pre>' . $nl);
 								$days_to_fetch=$run_updates[$i]['updated_days'];
 								$update_id=$run_updates[$i]['update_id'];
 								require_once($filename);
 								echo($nl . '<pre>Done with ' . $filename . '.' . $nl);
-								
+								}
 								//Set status to 'complete' in 'update_status'
 								$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s",strtotime('now')).'",end_time="' . date("Y-m-d H:i:s",strtotime('now')).'",status="'.COMPLETED.'" WHERE update_id="' .$run_updates[$i]['update_id'] .'"';
 								$res2 = mysql_query($query) or die('Bad SQL Query setting update status to complete');
+								
 							}
 						}
 						
@@ -2226,8 +2273,10 @@ elseif($current_tasks_count>1)
 									case 3:
 									$updtname='nct_new';
 									break;
-									default:
-									$updtname='nct';
+									case 4:
+									$updtname='calc_hm_cells'; 
+									break;
+									
 								}
 								//Update status set to 'error'
 								echo($updtname.' database updation error. Requeueing it.' . $nl);
@@ -2335,11 +2384,13 @@ elseif($current_tasks_count>1)
 									case 'isrctn':
 									$updtid=2;
 									break;
-									case 3:
-									$updtname='nct_new';
+									case 'nct_new':
+									$updtid=3;
 									break;
-									default:
-									$updtid=0;
+									case 'calc_hm_cells':
+									$updtid=4;
+									break;
+									
 								}
 								if($update_status[$count]==COMPLETED)
 								{
@@ -2351,7 +2402,9 @@ elseif($current_tasks_count>1)
 									
 									//Add new entry with status ready
 									echo('Adding entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
-									$query = 'INSERT INTO update_status SET update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
+									$query = 'INSERT INTO update_status  SET update_items_progress="0",  update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
+									
+									
 									$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
 								}
 								else if ($update_status[$count]==READY)
@@ -2369,8 +2422,8 @@ elseif($current_tasks_count>1)
 								else if ($update_status[$count]==ERROR)
 								{
 									//Since entry with 'error' status already exists, leave as is and inform user
-									echo('Update of  '.$s.' database encountered error during previous execution.' . $nl);
-									echo ('Please add the report manaully from Status page to ensure it runs '. $nl);
+									echo('Update of  '.$s.' database encountered error during previous execution....' . $nl);
+									echo ('Please add the report manaully from Status page to ensure it runs-- '. $nl);
 								}
 								else if ($update_status[$count]==RUNNING)
 								{
@@ -2381,7 +2434,9 @@ elseif($current_tasks_count>1)
 								{
 									//Add new entry with status ready
 									echo('Adding entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
-									$query = 'INSERT INTO update_status SET update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
+									$query = 'INSERT INTO update_status SET  update_items_progress="0", update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
+									
+									
 									$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
 								}
 								$count++;
@@ -2586,20 +2641,30 @@ elseif($current_tasks_count>1)
 									case 3:
 									$updtname='nct_new';
 									break;
-									default:
-									$updtname='nct';
+									case 4:
+									$updtname='calc_hm_cells'; 
+									break;
+									
 								}
-								//Start the update execution
-								$filename = 'fetch_' . $updtname . '.php';
-								echo('Invoking ' . $filename . '...</pre>' . $nl);
-								$days_to_fetch=$run_updates[$i]['updated_days'];
-								$update_id=$run_updates[$i]['update_id'];
-								echo '<br>'.($filename). '<br>';
-								echo($nl . '<pre>Done with ' . $filename . '.' . $nl);
+								if($updtname=='calc_hm_cells')
+								{
+									require_once('calculate_hm_cells.php');
+									calc_cells(NULL,$run_updates[$i]['update_id']);
+								}
+								else
+								{
+									//Start the update execution
+									$filename = 'fetch_' . $updtname . '.php';
+									echo('Invoking.- ' . $filename . '...</pre>' . $nl);
+									$days_to_fetch=$run_updates[$i]['updated_days'];
+									$update_id=$run_updates[$i]['update_id'];
+									echo '<br>'.($filename). '<br>';
+									echo($nl . '<pre>Done with ' . $filename . '.' . $nl);
+								}	
+									//Set status to 'complete' in 'update_status'
+									$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s",strtotime('now')).'",end_time="' . date("Y-m-d H:i:s",strtotime('now')).'",status="'.COMPLETED.'" WHERE update_id="' .$run_updates[$i]['update_id'] .'"';
+									$res2 = mysql_query($query) or die('Bad SQL Query setting update status to complete');
 								
-								//Set status to 'complete' in 'update_status'
-								$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s",strtotime('now')).'",end_time="' . date("Y-m-d H:i:s",strtotime('now')).'",status="'.COMPLETED.'" WHERE update_id="' .$run_updates[$i]['update_id'] .'"';
-								$res2 = mysql_query($query) or die('Bad SQL Query setting update status to complete');
 							}
 						}
 						
@@ -2862,8 +2927,10 @@ elseif($current_tasks_count>1)
 								case 3:
 								$updtname='nct_new';
 								break;
-								default:
-								$updtname='nct';
+								case 4:
+								$updtname='calc_hm_cells'; 
+								break;
+								
 							}
 							//Update status set to 'error'
 							echo($updtname.' database updation error. Requeueing it.' . $nl);
@@ -2971,11 +3038,13 @@ elseif($current_tasks_count>1)
 								case 'isrctn':
 								$updtid=2;
 								break;
-								case 3:
-								$updtname='nct_new';
+								case 'nct_new':
+								$updtid=3;
 								break;
-								default:
-								$updtid=0;
+								case 'calc_hm_cells':
+								$updtid=4;
+								break;
+							
 							}
 							if($update_status[$count]==COMPLETED)
 							{
@@ -2987,7 +3056,9 @@ elseif($current_tasks_count>1)
 								
 								//Add new entry with status ready
 								echo('Adding entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
-								$query = 'INSERT INTO update_status SET update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
+								$query = 'INSERT INTO update_status SET  update_items_progress="0", update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
+								
+								
 							$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
 							}
 							else if ($update_status[$count]==READY)
@@ -3005,8 +3076,8 @@ elseif($current_tasks_count>1)
 							else if ($update_status[$count]==ERROR)
 							{
 								//Since entry with 'error' status already exists, leave as is and inform user
-								echo('Update of  '.$s.' database encountered error during previous execution.' . $nl);
-								echo ('Please add the report manaully from Status page to ensure it runs '. $nl);
+								echo('Update of  '.$s.' database encountered error during previous execution.....' . $nl);
+								echo ('Please add the report manaully from Status page to ensure it runs.  - '. $nl);
 							}
 							else if ($update_status[$count]==RUNNING)
 							{
@@ -3017,7 +3088,9 @@ elseif($current_tasks_count>1)
 							{
 								//Add new entry with status ready
 								echo('Adding entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
-								$query = 'INSERT INTO update_status SET update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
+								$query = 'INSERT INTO update_status SET  update_items_progress="0", update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
+								
+								
 								$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
 							}
 							$count++;
@@ -3223,20 +3296,29 @@ elseif($current_tasks_count>1)
 								case 3:
 								$updtname='nct_new';
 								break;
-								default:
-								$updtname='nct';
+								case 4:
+								$updtname='calc_hm_cells'; 
 								break;
+								
 							}
-							$filename = 'fetch_' . $updtname . '.php';
-							echo('Invoking ' . $filename . '...</pre>' . $nl);
-							$days_to_fetch=$run_updates[$i]['updated_days'];
-							$update_id=$run_updates[$i]['update_id'];
-							echo '<br>'.($filename). '<br>';
-							echo($nl . '<pre>Done with ' . $filename . '.' . $nl);
+							if($updtname=='calc_hm_cells')
+							{
+								require_once('calculate_hm_cells.php');
+								calc_cells(NULL,$run_updates[$i]['update_id']);
+							}
+							else
+							{
+								$filename = 'fetch_' . $updtname . '.php';
+								echo('Invoking-: ' . $filename . '...</pre>' . $nl);
+								$days_to_fetch=$run_updates[$i]['updated_days'];
+								$update_id=$run_updates[$i]['update_id'];
+								echo '<br>'.($filename). '<br>';
+								echo($nl . '<pre>Done with ' . $filename . '.' . $nl);
+							}	
+								//Set status to 'complete' in 'update_status'
+								$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s",strtotime('now')).'",end_time="' . date("Y-m-d H:i:s",strtotime('now')).'",status="'.COMPLETED.'" WHERE update_id="' .$run_updates[$i]['update_id'] .'"';
+								$res2 = mysql_query($query) or die('Bad SQL Query setting update status to complete');
 							
-							//Set status to 'complete' in 'update_status'
-							$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s",strtotime('now')).'",end_time="' . date("Y-m-d H:i:s",strtotime('now')).'",status="'.COMPLETED.'" WHERE update_id="' .$run_updates[$i]['update_id'] .'"';
-							$res2 = mysql_query($query) or die('Bad SQL Query setting update status to complete');
 						}
 					}
 					
@@ -3499,8 +3581,10 @@ elseif($current_tasks_count>1)
 							case 3:
 							$updtname='nct_new';
 							break;
-							default:
-							$updtname='nct';
+							case 4:
+							$updtname='calc_hm_cells'; 
+							break;
+							
 						}
 						//Update status set to 'error'
 						echo($updtname.' database updation error. Requeueing it.' . $nl);
@@ -3608,11 +3692,13 @@ elseif($current_tasks_count>1)
 							case 'isrctn':
 							$updtid=2;
 							break;
-							case 3:
-							$updtname='nct_new';
+							case 'nct_new':
+							$updtid=3;
 							break;
-							default:
-							$updtid=0;
+							case 'calc_hm_cells':
+							$updtid=4;
+							break;
+							
 						}
 						if($update_status[$count]==COMPLETED)
 						{
@@ -3624,7 +3710,9 @@ elseif($current_tasks_count>1)
 							
 							//Add new entry with status ready
 							echo('Adding entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
-							$query = 'INSERT INTO update_status SET update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
+							$query = 'INSERT INTO update_status SET  update_items_progress="0", update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
+							
+							
 						$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
 						}
 						else if ($update_status[$count]==READY)
@@ -3642,8 +3730,8 @@ elseif($current_tasks_count>1)
 						else if ($update_status[$count]==ERROR)
 						{
 							//Since entry with 'error' status already exists, leave as is and inform user
-							echo('Update of  '.$s.' database encountered error during previous execution.' . $nl);
-							echo ('Please add the report manaully from Status page to ensure it runs '. $nl);
+							echo('Update of  '.$s.' database encountered error during previous execution......' . $nl);
+							echo ('Please add the report manaully from Status page to ensure it runs--. '. $nl);
 						}
 						else if ($update_status[$count]==RUNNING)
 						{
@@ -3654,7 +3742,9 @@ elseif($current_tasks_count>1)
 						{
 							//Add new entry with status ready
 							echo('Adding entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
-							$query = 'INSERT INTO update_status SET update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
+							$query = 'INSERT INTO update_status SET  update_items_progress="0", update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
+							
+							
 							$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
 						}
 						$count++;
@@ -3857,20 +3947,30 @@ elseif($current_tasks_count>1)
 							case 3:
 							$updtname='nct_new';
 							break;
-							default:
-							$updtname='nct';
+							case 4:
+							$updtname='calc_hm_cells'; 
+							break;
+							
 						}
-						//Start the update execution
-						$filename = 'fetch_' . $updtname . '.php';
-						echo('Invoking ' . $filename . '...</pre>' . $nl);
-						$days_to_fetch=$run_updates[$i]['updated_days'];
-						$update_id=$run_updates[$i]['update_id'];
-						echo '<br>'.($filename). '<br>';
-						echo($nl . '<pre>Done with ' . $filename . '.' . $nl);
+						if($updtname=='calc_hm_cells')
+						{
+							require_once('calculate_hm_cells.php');
+							calc_cells(NULL,$run_updates[$i]['update_id']);
+						}
+						else
+						{
+							//Start the update execution
+							$filename = 'fetch_' . $updtname . '.php';
+							echo('Invoking:: ' . $filename . '...</pre>' . $nl);
+							$days_to_fetch=$run_updates[$i]['updated_days'];
+							$update_id=$run_updates[$i]['update_id'];
+							echo '<br>'.($filename). '<br>';
+							echo($nl . '<pre>Done with ' . $filename . '.' . $nl);
+						}	
+							//Set status to 'complete' in 'update_status'
+							$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s",strtotime('now')).'",end_time="' . date("Y-m-d H:i:s",strtotime('now')).'",status="'.COMPLETED.'" WHERE update_id="' .$run_updates[$i]['update_id'] .'"';
+							$res2 = mysql_query($query) or die('Bad SQL Query setting update status to complete');
 						
-						//Set status to 'complete' in 'update_status'
-						$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s",strtotime('now')).'",end_time="' . date("Y-m-d H:i:s",strtotime('now')).'",status="'.COMPLETED.'" WHERE update_id="' .$run_updates[$i]['update_id'] .'"';
-						$res2 = mysql_query($query) or die('Bad SQL Query setting update status to complete');
 					}
 				}
 				

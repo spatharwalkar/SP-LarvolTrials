@@ -156,11 +156,20 @@ for($i=0;$i < $count_rpids; $i++)
 //Get entry corresponding to nct in 'update_status'
 $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,`add_items_total`,`add_items_progress`,
 					`update_items_total`,`update_items_progress`,TIMEDIFF(updated_time, start_time) AS timediff,
-					`add_items_complete_time`, `update_items_complete_time` FROM update_status WHERE update_id="0"';
+					`add_items_complete_time`, `update_items_complete_time` FROM update_status WHERE (update_id="0" or update_id="3")';
 $res = mysql_query($query) or die('Bad SQL Query getting update_status');
 $nct_status = array();
 while($row = mysql_fetch_assoc($res))
 	$nct_status = $row;
+	
+$query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,`add_items_total`,`add_items_progress`,
+					`update_items_total`,`update_items_progress`,TIMEDIFF(updated_time, start_time) AS timediff,
+					`add_items_complete_time`, `update_items_complete_time` FROM update_status WHERE update_id="4"';
+$res = mysql_query($query) or die('Bad SQL Query getting update_status');
+$calc_status = array();
+while($row = mysql_fetch_assoc($res))
+	$calc_status = $row;
+	
 	
 
 //Get entry corresponding to eudract in 'update_status'
@@ -236,6 +245,11 @@ if(count($isrctn_status)!=0)
 {
 	echo "$(\"#isrctn_new\").progressBar();";
 	echo "$(\"#isrctn_update\").progressBar({ barImage: 'images/progressbg_orange.gif'} );";
+}
+if(count($calc_status)!=0)
+{
+	echo "$(\"#calc_new\").progressBar();";
+	echo "$(\"#calc_update\").progressBar({ barImage: 'images/progressbg_orange.gif'} );";
 }
 for($i=0;$i < count($heatmap_status);$i++)
 {
@@ -353,6 +367,101 @@ echo "<div class=\"container\">";
 			echo "</tr>";
 		echo "</table>";
 	}
+	
+	if(count($calc_status)!=0)
+	{
+		echo "<table width=\"100%\" class=\"event\">";
+			echo "<tr>";
+				echo "<th width=\"100%\" align=\"center\" class=\"head2\">Calculate HM cells</th>";
+			echo "</tr>";
+		echo "</table>";
+		echo "<table width=\"100%\" class=\"event\">";
+			echo "<tr>";
+				echo "<td width=\"20%\" align=\"left\" class=\"head\">Status</td>";
+				echo "<td width=\"20%\" align=\"left\" class=\"head\">Start Time</td>";
+				echo "<td width=\"19%\" align=\"left\" class=\"head\">Excution run time</td>";
+				echo "<td width=\"19%\" align=\"left\" class=\"head\">Last update time</td>";
+//				echo "<td width=\"19%\" align=\"left\" class=\"head\">New Records</td>";
+				echo "<td width=\"17%\" align=\"left\" class=\"head\">Progress</td>";
+				echo "<td width=\"5%\" align=\"center\" class=\"head\">Action</td>";
+			echo "</tr>";
+			echo "<tr>";
+				echo "<td align=\"left\" class=\"norm\">".$status[$calc_status['status']]."</td>";
+				echo "<td align=\"left\" class=\"norm\">".$calc_status['start_time']."</td>";
+				echo "<td align=\"left\" class=\"norm\">".$calc_status['timediff']."</td>";
+				echo "<td align=\"left\" class=\"norm\">".$calc_status['updated_time']."</td>";
+				if($calc_status['add_items_start_time']!="0000-00-00 00:00:00"&&$calc_status['add_items_complete_time']!="0000-00-00 00:00:00"&&$calc_status['status']==COMPLETED)
+					$calc_add_progress=100;
+				else
+					$calc_add_progress=number_format(($calc_status['add_items_total']==0?0:(($calc_status['add_items_progress'])*100/$calc_status['add_items_total'])),2);
+					
+				if($calc_status['update_items_start_time']!="0000-00-00 00:00:00"&&$calc_status['update_items_complete_time']!="0000-00-00 00:00:00"&&$calc_status['status']==COMPLETED)
+					$calc_update_progress=100;
+				else
+					$calc_update_progress=number_format(($calc_status['update_items_total']==0?0:(($calc_status['update_items_progress'])*100/$calc_status['update_items_total'])),2);
+				
+				//echo $calc_status['update_items_complete_time'];
+				
+//				echo "<td align=\"left\" class=\"norm\">";
+//					echo "<span class=\"progressBar\" id=\"nct_new\">".$nct_add_progress."%</span>";
+//				echo "</td>";
+				echo "<td align=\"left\" class=\"norm\">";
+					echo "<span class=\"progressBar\" id=\"calc_update\">".$calc_update_progress."</span>";
+				echo "</td>";
+				if($calc_status['status']==READY)
+				{
+					echo "<td align=\"center\" class=\"norm\">";
+					echo '<form method="post" action="status.php">';
+					echo '<input type="hidden" name="action" value="4">';
+					echo '<input type="hidden" name="upid" value="'.$calc_status['update_id'].'">';
+					echo '<input type="image" src="images/not.png" title="Cancel" style="border=0px;">';
+					echo '</form>';
+					echo "</td>";
+				}
+				elseif($calc_status['status']==RUNNING)
+				{
+					echo "<td align=\"center\" class=\"norm\">";
+					echo '<form method="post" action="status.php">';
+					echo '<input type="hidden" name="action" value="2">';
+					echo '<input type="hidden" name="upid" value="'.$calc_status['update_id'].'">';
+					echo '<input type="hidden" name="pid" value="'.$calc_status['process_id'].'">';
+					echo '<input type="image" src="images/not.png" title="Cancel" style="border=0px;">';
+					echo '</form>';
+					echo "</td>";
+				}
+				elseif($calc_status['status']==COMPLETED)
+				{
+					echo "<td align=\"center\" class=\"norm\">";
+					echo '<form method="post" action="status.php">';
+					echo '<input type="hidden" name="action" value="3">';
+					echo '<input type="hidden" name="upid" value="'.$calc_status['update_id'].'">';
+					echo '<input type="hidden" name="pid" value="'.$calc_status['process_id'].'">';
+					echo '<input type="image" src="images/not.png" title="Delete" style="border=0px;">';
+					echo '</form>';
+					echo "</td>";
+				}
+				else if($calc_status['status']==ERROR||$calc_status['status']==CANCELLED)
+				{
+					echo "<td align=\"center\" class=\"norm\">";
+					echo '<form method="post" action="status.php">';
+					echo '<input type="hidden" name="action" value="1">';
+					echo '<input type="hidden" name="upid" value="'.$calc_status['update_id'].'">';
+					echo '<input type="hidden" name="pid" value="'.$calc_status['process_id'].'">';
+					echo '<input type="image" src="images/check.png" title="Add" style="border=0px;">';
+					echo '</form>';
+					echo '<form method="post" action="status.php">';
+					echo '<input type="hidden" name="action" value="3">';
+					echo '<input type="hidden" name="upid" value="'.$calc_status['update_id'].'">';
+					echo '<input type="hidden" name="pid" value="'.$calc_status['process_id'].'">';
+					echo '<input type="image" src="images/not.png" title="Delete" style="border=0px;">';
+					echo '</form>';
+					echo "</td>";
+				}
+			echo "</tr>";
+		echo "</table>";
+	}
+	
+	
 	if(count($eudract_status)!=0)
 	{
 		echo "<table width=\"100%\" class=\"event\">";
