@@ -140,7 +140,6 @@ function applyInactiveDate($arr=array())
 			$inactiveDate = $addedDate;
 		}
 		
-		
 		//fetch and calculate inactive_date_lastchanged and inactive_date_prev
 		//get cache ready
 		$inactiveDateCache = calculateInactiveDatesFromCacheData($larvolId,$inactiveDate,$addedDate);
@@ -173,13 +172,18 @@ function calculateInactiveDatesFromCacheData($larvolId,$inactiveDate,$addedDate)
 	$res = mysql_query($query);
 	while($row = mysql_fetch_assoc($res)){}
 	$last_change = $row['last_change'];
-	$inactive_date_old = sqlExplicitNullifier($row['inactive_date'],'date');
+	//works for commented code below$inactive_date_old = sqlExplicitNullifier($row['inactive_date'],'date');
+	$inactive_date_old = $row['inactive_date'];
 	
 	//previous memory
 	$inactiveDateLastchanged = $row['inactive_date_lastchanged'];
 	$inactiveDatePrev = $row['inactive_date_prev'];
+	if($inactiveDate != $inactive_date_old)
+	{
+		
+	}
 	
-	if($inactive_date_old=='null')
+	if($inactive_date_old=='')
 	{
 		$inactive_date_lastchanged = $addedDate;
 		$inactive_date_prev = '';
@@ -194,7 +198,7 @@ function calculateInactiveDatesFromCacheData($larvolId,$inactiveDate,$addedDate)
 		$inactive_date_lastchanged = $last_change;
 		$inactive_date_prev = $inactive_date_old;
 	}
-	$inactive_date_lastchanged = sqlExplicitNullifier($last_change,'date');
+	$inactive_date_lastchanged = sqlExplicitNullifier($inactive_date_lastchanged,'date');
 	$inactive_date_prev = sqlExplicitNullifier($inactive_date_prev,'date');
 	
 	//convert/check for explicit null case
@@ -215,10 +219,20 @@ function getStudyCat($larvolId)
 	return $studyCatId;
 }
 
+function getFieldData($fieldName)
+{
+	global $db;
+	$query = "select * from data_fields where `name` = '$fieldName'";
+	$res = mysql_query($query);
+	$fieldData = mysql_fetch_row($res);
+	$fieldData = $fieldData[0];
+	return $fieldData;	
+}
+
 function getAddedDate($fieldName,$studyCatId)
 {
 	global $db;
-	$inactiveStatus = array(
+/* 	$inactiveStatus = array(
 											'Withheld',
 											'Approved for marketing',
 											'Temporarily not available',
@@ -227,15 +241,21 @@ function getAddedDate($fieldName,$studyCatId)
 											'Terminated',
 											'Suspended',
 											'Completed'
-	);
+	); 
 	
 	$query = "SELECT dv.added FROM data_values dv LEFT JOIN data_fields df ON df.id=dv.field
 						LEFT JOIN data_enumvals de ON de.field=df.id WHERE dv.studycat=$studyCatId 
-						AND df.name='$fieldName' AND de.value in ('".implode(',',$inactiveStatus)."') ORDER BY dv.added ASC";
+						AND df.name='$fieldName' AND de.value in ('".implode(',',$inactiveStatus)."') ORDER BY dv.added ASC";*/
+	$fieldId = getFieldData($fieldName);
+	$fieldId = $fieldId['id'];
+	$query = "select * from data_values where studycat=$studyCatId  and field=$fieldId order by id desc limit 1";
 				
 	$res = mysql_query($query);
-	$addedDate = mysql_fetch_row($res);
-	$addedDate = $addedDate[0];
+	while($row = mysql_fetch_assoc($res))
+	{
+		break;
+	}
+	$addedDate = date('Y-m-d',strtotime($row['added']));
 	return $addedDate;
 }
 
