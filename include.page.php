@@ -510,7 +510,6 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 		}
 		
 	}
-	
 	if($import==1 && $table=='products')
 	{
 		ini_set('max_execution_time','360000');	//100 hours
@@ -534,18 +533,27 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 		}
 		else 
 		{
+			//if insert check the product is_active. We dont need it in an import, skipping...
+			if($importVal['is_active'] == 0)
+			{
+				//skipping.
+				//return false can show as failed attempt on higher level controller.
+				return 3;
+			}
+			
 			$importVal = array_map(function ($v){return "'".mysql_real_escape_string($v)."'";},$importVal);
 			$query = "insert into $table (".implode(',',$importKeys).") values (".implode(',',$importVal).")";
 		}
 		if(mysql_query($query))
 		{
-			return true;
+			return 1;
 		}
 		else
 		{
+			echo 'Product Id : '.$product_id.' Fail !! <br/>'."\n";
 			softdie('Cannot import product id '.$importVal['LI_id'].'<br/>'.$query.'<br/>');
 			//softdie('Cannot import product id '.$importVal['LI_id'].'<br/>');
-			return false;
+			return 2;
 		}
 	}
 	
@@ -581,7 +589,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 		{
 			softDieSession('Cannot insert '.$table.' entry. Product name cannot empty.');
 			return 0;
-		}		
+		}
 		$postKeys = array_keys($post);
 		$post = array_map(am,$postKeys,array_values($post));
 		$query = "insert into $table (".implode(',',$postKeys).") values(".implode(',',$post).")";
@@ -1163,4 +1171,96 @@ function getSearchData($table,$searchdata,$id)
 		break;
 	}
 	return $out;
+}
+
+/**
+* @name parseProductsXmlAndSave
+* @tutorial parse and get ready products xml for saving.
+* @param $table,$searchdata,$id
+* @author Jithu Thomas
+*/
+function parseProductsXmlAndSave($xmlImport,$table)
+{
+	$importKeys = array('LI_id','name','comments','product_type','licensing_mode','administration_mode','discontinuation_status','discontinuation_status_comment','is_key','is_active','created','modified','company','brand_names','generic_names','code_names','approvals','xml');
+	$success = $fail = $skip = 0;
+	foreach($xmlImport->getElementsByTagName('Product') as $product)
+	{
+		$importVal = array();
+		$product_id = $product->getElementsByTagName('product_id')->item(0)->nodeValue;
+		$name = $product->getElementsByTagName('name')->item(0)->nodeValue;
+		$comments = $product->getElementsByTagName('comments')->item(0)->nodeValue;
+		$product_type = $product->getElementsByTagName('product_type')->item(0)->nodeValue;
+		$licensing_mode = $product->getElementsByTagName('licensing_mode')->item(0)->nodeValue;
+		$administration_mode = $product->getElementsByTagName('administration_mode')->item(0)->nodeValue;
+		$discontinuation_status = $product->getElementsByTagName('discontinuation_status')->item(0)->nodeValue;
+		$discontinuation_status_comment = $product->getElementsByTagName('discontinuation_status_comment')->item(0)->nodeValue;
+		$is_key = ($product->getElementsByTagName('is_key')->item(0)->nodeValue == 'True')?1:0;
+		$is_active = ($product->getElementsByTagName('is_active')->item(0)->nodeValue == 'True')?1:0;
+		$created = date('y-m-d H:i:s',time($product->getElementsByTagName('created')->item(0)->nodeValue));
+		$modified = date('y-m-d H:i:s',time($product->getElementsByTagName('modified')->item(0)->nodeValue));
+		
+		foreach($product->getElementsByTagName('Institutions') as $brandNames)
+		{
+			foreach($brandNames->getElementsByTagName('Institution') as $brandName)
+			{
+				$company = $brandName->getElementsByTagName('name')->item(0)->nodeValue;
+			}
+		}		
+		$brand_names = array();
+		foreach($product->getElementsByTagName('ProductBrandNames') as $brandNames)
+		{
+			foreach($brandNames->getElementsByTagName('ProductBrandName') as $brandName)
+			{
+				($brandName->getElementsByTagName('is_active')->item(0)->nodeValue=='True')?$brand_names[] = $brandName->getElementsByTagName('name')->item(0)->nodeValue:null;
+			}
+		}
+		$brand_names = implode(',',$brand_names);
+		
+		$generic_names = array();
+		foreach($product->getElementsByTagName('ProductGenericNames') as $brandNames)
+		{
+			foreach($brandNames->getElementsByTagName('ProductGenericName') as $brandName)
+			{
+				($brandName->getElementsByTagName('is_active')->item(0)->nodeValue=='True')?$generic_names[] = $brandName->getElementsByTagName('name')->item(0)->nodeValue:null;
+			}
+		}
+		$generic_names = implode(',',$generic_names);
+				
+		$code_names = array();
+		foreach($product->getElementsByTagName('ProductCodeNames') as $brandNames)
+		{
+			foreach($brandNames->getElementsByTagName('ProductCodeName') as $brandName)
+			{
+				($brandName->getElementsByTagName('is_active')->item(0)->nodeValue=='True')?$code_names[] = $brandName->getElementsByTagName('name')->item(0)->nodeValue:null;
+			}
+		}
+		$code_names = implode(',',$code_names);
+
+		$approvals = $product->getElementsByTagName('approvals')->item(0)->nodeValue;
+		$xmldump = $xmlImport->saveXML($product);
+		
+		
+		$importVal = array('LI_id'=>$product_id,'name'=>$name,'comments'=>$comments,'product_type'=>$product_type,'licensing_mode'=>$licensing_mode,'administration_mode'=>$administration_mode,'discontinuation_status'=>$discontinuation_status,'discontinuation_status_comment'=>$discontinuation_status_comment,'is_key'=>$is_key,'is_active'=>$is_active,'created'=>$created,'modified'=>$modified,'company'=>$company,'brand_names'=>$brand_names,'generic_names'=>$generic_names,'code_names'=>$code_names,'approvals'=>$approvals,'xml'=>$xmldump);
+		//ob_start();
+		$out = saveData(null,$table,1,$importKeys,$importVal,$k);
+		if($out ==1)
+		{
+			$success ++;
+			ob_start();
+			echo 'Product Id : '.$product_id.' Done .. <br/>'."\n";
+			ob_end_flush();
+		}
+		elseif($out==2) 
+		{
+			echo 'Product Id : '.$product_id.' Fail !! <br/>'."\n";
+			$fail ++;
+		}
+		elseif($out==3)
+		{
+			echo 'Product Id : '.$product_id.' Skipped !! <br/>'."\n";
+			$skip ++;
+		}		
+		//ob_end_clean();
+	}
+	return array('success'=>$success,'fail'=>$fail,'skip'=>$skip);
 }

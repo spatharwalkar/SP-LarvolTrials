@@ -130,78 +130,8 @@ if(isset($_FILES['uploadedfile']) && $_FILES['uploadedfile']['size']>1)
 	$xmlImport->load($xml);
 	//$xmlImport->saveXML()
 	//set import keys
-	$importKeys = array('LI_id','name','comments','product_type','licensing_mode','administration_mode','discontinuation_status','discontinuation_status_comment','is_key','is_active','created','modified','company','brand_names','generic_names','code_names','approvals','xml');
-	
-	foreach($xmlImport->getElementsByTagName('Product') as $product)
-	{
-		$importVal = array();
-		$product_id = $product->getElementsByTagName('product_id')->item(0)->nodeValue;
-		$name = $product->getElementsByTagName('name')->item(0)->nodeValue;
-		$comments = $product->getElementsByTagName('comments')->item(0)->nodeValue;
-		$product_type = $product->getElementsByTagName('product_type')->item(0)->nodeValue;
-		$licensing_mode = $product->getElementsByTagName('licensing_mode')->item(0)->nodeValue;
-		$administration_mode = $product->getElementsByTagName('administration_mode')->item(0)->nodeValue;
-		$discontinuation_status = $product->getElementsByTagName('discontinuation_status')->item(0)->nodeValue;
-		$discontinuation_status_comment = $product->getElementsByTagName('discontinuation_status_comment')->item(0)->nodeValue;
-		$is_key = ($product->getElementsByTagName('is_key')->item(0)->nodeValue == 'True')?1:0;
-		$is_active = ($product->getElementsByTagName('is_active')->item(0)->nodeValue == 'True')?1:0;
-		$created = date('y-m-d H:i:s',time($product->getElementsByTagName('created')->item(0)->nodeValue));
-		$modified = date('y-m-d H:i:s',time($product->getElementsByTagName('modified')->item(0)->nodeValue));
-		
-		foreach($product->getElementsByTagName('Institutions') as $brandNames)
-		{
-			foreach($brandNames->getElementsByTagName('Institution') as $brandName)
-			{
-				$company = $brandName->getElementsByTagName('name')->item(0)->nodeValue;
-			}
-		}		
-		$brand_names = array();
-		foreach($product->getElementsByTagName('ProductBrandNames') as $brandNames)
-		{
-			foreach($brandNames->getElementsByTagName('ProductBrandName') as $brandName)
-			{
-				($brandName->getElementsByTagName('is_active')->item(0)->nodeValue=='True')?$brand_names[] = $brandName->getElementsByTagName('name')->item(0)->nodeValue:null;
-			}
-		}
-		$brand_names = implode(',',$brand_names);
-		
-		$generic_names = array();
-		foreach($product->getElementsByTagName('ProductGenericNames') as $brandNames)
-		{
-			foreach($brandNames->getElementsByTagName('ProductGenericName') as $brandName)
-			{
-				($brandName->getElementsByTagName('is_active')->item(0)->nodeValue=='True')?$generic_names[] = $brandName->getElementsByTagName('name')->item(0)->nodeValue:null;
-			}
-		}
-		$generic_names = implode(',',$generic_names);
-				
-		$code_names = array();
-		foreach($product->getElementsByTagName('ProductCodeNames') as $brandNames)
-		{
-			foreach($brandNames->getElementsByTagName('ProductCodeName') as $brandName)
-			{
-				($brandName->getElementsByTagName('is_active')->item(0)->nodeValue=='True')?$code_names[] = $brandName->getElementsByTagName('name')->item(0)->nodeValue:null;
-			}
-		}
-		$code_names = implode(',',$code_names);
-
-		$approvals = $product->getElementsByTagName('approvals')->item(0)->nodeValue;
-		$xmldump = $xmlImport->saveXML($product);
-		
-		
-		$importVal = array('LI_id'=>$product_id,'name'=>$name,'comments'=>$comments,'product_type'=>$product_type,'licensing_mode'=>$licensing_mode,'administration_mode'=>$administration_mode,'discontinuation_status'=>$discontinuation_status,'discontinuation_status_comment'=>$discontinuation_status_comment,'is_key'=>$is_key,'is_active'=>$is_active,'created'=>$created,'modified'=>$modified,'company'=>$company,'brand_names'=>$brand_names,'generic_names'=>$generic_names,'code_names'=>$code_names,'approvals'=>$approvals,'xml'=>$xmldump);
-		//ob_start();
-		if(saveData(null,$table,1,$importKeys,$importVal,$k))
-		{
-			$success ++;
-		}
-		else 
-		{			
-			$fail ++;
-		}
-		//ob_end_clean();
-	}
-	echo 'Imported '.$success.' records, Failed entries '.$fail;
+	$out = parseProductsXmlAndSave($xmlImport,$table);
+	echo 'Imported '.$out['success'].' records, Failed entries '.$out['fail'].', Skipped entries'.$out['skip'];
 
 }
 //end controller area
