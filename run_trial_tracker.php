@@ -6210,7 +6210,10 @@ class TrialTracker
 			}
 			$orderBy = implode(', ', $orderBy);
 		}
-			
+		
+		$previousValue = 'Previous value: ';	
+		$noPreviousValue = 'No previous value';	
+		
 		foreach($Ids as $ikey => $ivalue)
 		{		
 			$inactiveCount = 0;
@@ -6256,7 +6259,7 @@ class TrialTracker
 				$result[$index]['NCT/phase'] = $row['phase'];
 				$result[$index]['NCT/enrollment'] = $row['enrollment'];
 				$result[$index]['NCT/collaborator'] = str_replace('`', ', ', $row['collaborator']);
-				$result[$index]['NCT/condition'] = str_replace('`', ', ', $row['condition']);
+				$result[$index]['NCT/condition'] = str_replace('`', ', ', stripslashes($row['condition']));
 				$result[$index]['NCT/intervention_name'] = str_replace('`', ', ', $row['intervention_name']);
 				$result[$index]['NCT/overall_status'] = $row['overall_status'];
 				$result[$index]['NCT/is_active'] = $row['is_active'];
@@ -6272,50 +6275,161 @@ class TrialTracker
 				}
 				if($row['lastchanged_date'] <= date('Y-m-d', $timeMachine) && $row['lastchanged_date'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
 				{
-					//echo '<br/>query-->'.
-					$uquery = "SELECT `end_date_prev`, `region_prev`, `brief_title_prev`, `acronym_prev`, `lead_sponsor_prev`,"
-					. " `start_date_prev`, `phase_prev`, `enrollment_prev`, `collaborator_prev`, `condition_prev`, `intervention_name_prev` "
-					. " FROM `data_history` WHERE `larvol_id` = '" . $row['larvol_id'] . "' AND ((" 
-					. implode(' BETWEEN "' . date('Y-m-d', $timeMachine) . '" AND "' . date('Y-m-d', strtotime($timeInterval, $timeMachine)) . '") OR (', $fieldNames) 
-					. " BETWEEN '" . date('Y-m-d', $timeMachine) . "' AND '" . date('Y-m-d', strtotime($timeInterval, $timeMachine)) . "' )) ";
+					$subquery = '';
+					foreach($fieldNames as $fkey => $fvalue)
+					{
+						$subquery .= 'CASE WHEN (' . $fvalue . ' BETWEEN "' . date('Y-m-d', strtotime($timeInterval, $timeMachine)) . '" AND "'
+									 . date('Y-m-d', $timeMachine) . '") THEN ' . str_replace('_lastchanged', '_prev', $fvalue) 
+									 . ' END AS ' . str_replace('_lastchanged', '_prev', $fvalue) . ', ';
+					}
+					
+					$uquery = 'SELECT ' . substr($subquery, 0, -2) . ' FROM `data_history` WHERE `larvol_id` = "' . $row['larvol_id'] . '" ' ;
 					$ures = mysql_query($uquery);
 					while($arr = mysql_fetch_assoc($ures))
 					{
-						if($arr['end_date_prev'] != '' && $arr['end_date_prev'] !== NULL)
-							$result[$index]['edited']['inactive_date'] = $arr['end_date_prev'];
+						if(isset($arr['end_date_prev']))
+						{
+							if($arr['end_date_prev'] != '' && $arr['end_date_prev'] !== NULL)
+							{
+								$result[$index]['edited']['inactive_date'] = $previousValue . $arr['end_date_prev'];
+							}
+							else
+							{
+								$result[$index]['edited']['inactive_date'] = $noPreviousValue;
+							}
+						}
 						
-						if($arr['region'] != '' && $arr['region'] !== NULL)
-							$result[$index]['edited']['region'] = $arr['region'];
+						if(isset($arr['region']))
+						{
+							if($arr['region'] != '' && $arr['region'] !== NULL)
+							{
+								$result[$index]['edited']['region'] = $previousValue . $arr['region'];
+							}
+							else
+							{
+								$result[$index]['edited']['region'] = $noPreviousValue;
+							}
+						}
+						
+						if(isset($arr['brief_title']))
+						{
+							if($arr['brief_title'] != '' && $arr['brief_title'] !== NULL)
+							{
+								$result[$index]['edited']['NCT/brief_title'] = $previousValue . $arr['brief_title_prev'];
+							}
+							else
+							{
+								$result[$index]['edited']['NCT/brief_title'] = $noPreviousValue;
+							}
+						}
+						
+						if(isset($arr['acronym']))
+						{
+							if($arr['acronym'] != '' && $arr['acronym'] !== NULL)
+							{
+								$result[$index]['edited']['NCT/acronym'] = $previousValue . $arr['acronym'];
+							}
+							else
+							{
+								$result[$index]['edited']['NCT/acronym'] = $noPreviousValue;
+							}
+						}
+						
+						if(isset($arr['lead_sponsor']))
+						{
+							if($arr['lead_sponsor'] != '' && $arr['lead_sponsor'] !== NULL)
+							{
+								$result[$index]['edited']['NCT/lead_sponsor'] = $previousValue . str_replace('`', ', ', $arr['lead_sponsor_prev']);;
+							}
+							else
+							{
+								$result[$index]['edited']['NCT/lead_sponsor'] = $noPreviousValue;
+							}
+						}
+						
+						if(isset($arr['start_date']))
+						{
+							if($arr['start_date'] != '' && $arr['start_date'] !== NULL)
+							{
+								$result[$index]['edited']['NCT/start_date'] = $previousValue . $arr['start_date_prev'];
+							}
+							else
+							{
+								$result[$index]['edited']['NCT/start_date'] = $noPreviousValue;
+							}
+						}
+						
+						if(isset($arr['phase']))
+						{
+							if($arr['phase'] != '' && $arr['phase'] !== NULL)
+							{
+								$result[$index]['edited']['NCT/phase'] = $previousValue . $arr['phase_prev'];
+							}
+							else
+							{
+								$result[$index]['edited']['NCT/phase'] = $noPreviousValue;
+							}
+						}
 
-						if($arr['brief_title'] != '' && $arr['brief_title'] !== NULL)
-							$result[$index]['edited']['NCT/brief_title'] = $arr['brief_title_prev'];
-
-						if($arr['acronym'] != '' && $arr['acronym'] !== NULL)
-							$result[$index]['edited']['NCT/acronym'] = $arr['acronym'];
-
-						if($arr['lead_sponsor'] != '' && $arr['lead_sponsor'] !== NULL)
-							$result[$index]['edited']['NCT/lead_sponsor'] = str_replace('`', ', ', $arr['lead_sponsor_prev']);
+						if(isset($arr['enrollment']))
+						{
+							if($arr['enrollment'] != '' && $arr['enrollment'] !== NULL)
+							{
+								$result[$index]['edited']['NCT/enrollment'] = $previousValue . $arr['enrollment_prev'];
+							}
+							else
+							{
+								$result[$index]['edited']['NCT/enrollment'] = $noPreviousValue;
+							}
+						}
 							
-						if($arr['start_date'] != '' && $arr['start_date'] !== NULL)
-							$result[$index]['edited']['NCT/start_date'] = $arr['start_date_prev'];
+						if(isset($arr['collaborator']))
+						{
+							if($arr['collaborator'] != '' && $arr['collaborator'] !== NULL)
+							{
+								$result[$index]['edited']['NCT/collaborator'] = $previousValue . str_replace('`', ', ', $arr['collaborator_prev']);;
+							}
+							else
+							{
+								$result[$index]['edited']['NCT/collaborator'] = $noPreviousValue;
+							}
+						}
 
-						if($arr['phase'] != '' && $arr['phase'] !== NULL)
-							$result[$index]['edited']['NCT/phase'] = $arr['phase_prev'];
-							
-						if($arr['enrollment'] != '' && $arr['enrollment'] !== NULL)
-							$result[$index]['edited']['NCT/enrollment'] = $arr['enrollment_prev'];
+						if(isset($arr['condition']))
+						{
+							if($arr['condition'] != '' && $arr['condition'] !== NULL)
+							{
+								$result[$index]['edited']['NCT/condition'] = $previousValue . str_replace('`', ', ', stripslashes($arr['condition_prev']));
+							}
+							else
+							{
+								$result[$index]['edited']['NCT/condition'] = $noPreviousValue;
+							}
+						}
 
-						if($arr['collaborator'] != '' && $arr['collaborator'] !== NULL)
-							$result[$index]['edited']['NCT/collaborator'] = str_replace('`', ', ', $arr['collaborator_prev']);
+						if(isset($arr['intervention_name']))
+						{
+							if($arr['intervention_name'] != '' && $arr['intervention_name'] !== NULL)
+							{
+								$result[$index]['edited']['NCT/intervention_name'] = $previousValue . str_replace('`', ', ', $arr['intervention_name_prev']);;
+							}
+							else
+							{
+								$result[$index]['edited']['NCT/intervention_name'] = $noPreviousValue;
+							}
+						}
 
-						if($arr['condition'] != '' && $arr['condition'] !== NULL)
-							$result[$index]['edited']['NCT/condition'] = str_replace('`', ', ', $arr['condition_prev']);
-
-						if($arr['intervention_name'] != '' && $arr['intervention_name'] !== NULL)
-							$result[$index]['edited']['NCT/intervention_name'] = str_replace('`', ', ', $arr['intervention_name_prev']);
-
-						if($arr['overall_status'] != '' && $arr['overall_status'] !== NULL)
-							$result[$index]['edited']['NCT/overall_status'] = $arr['overall_status_prev'];
+						if(isset($arr['overall_status']))
+						{
+							if($arr['overall_status'] != '' && $arr['overall_status'] !== NULL)
+							{
+								$result[$index]['edited']['NCT/overall_status'] = $previousValue . str_replace('`', ', ', $arr['overall_status_prev']);;
+							}
+							else
+							{
+								$result[$index]['edited']['NCT/overall_status'] = $noPreviousValue;
+							}
+						}
 					}
 				}
 				else
@@ -7513,7 +7627,7 @@ class TrialTracker
 				$attr = '" title="New record';
 				$titleLinkColor = '#FF0000;';
 			}				
-			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . ' ' . $attr . '"><div class="rowcollapse">'
+			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">'
 						. '<a style="color:' . $titleLinkColor . '" href="http://clinicaltrials.gov/ct2/show/' . padnct($trials[$i]['NCT/nct_id']) . '" '
 						. 'target="_blank">'; 
 			if(isset($trials[$i]['NCT/acronym']) && $trials[$i]['NCT/acronym'] != '') 
@@ -7574,6 +7688,7 @@ class TrialTracker
 
 				
 			//intervention name column
+			$attr = ' ';
 			if(!empty($trials[$i]['edited']) && array_key_exists('NCT/intervention_name', $trials[$i]['edited']))
 			{
 				$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/intervention_name'];
@@ -7614,19 +7729,16 @@ class TrialTracker
 
 
 			//overall status column
+			$attr = ' ';
 			if(!empty($trials[$i]['edited']) && array_key_exists('NCT/overall_status', $trials[$i]['edited'])) 
 			{
-				$attr = 'class="highlight ' . $rowOneType . ' " title="' . $trials[$i]['edited']['NCT/overall_status'] . '" ';
+				$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/overall_status'];
 			} 
 			else if($trials[$i]['new'] == 'y') 
 			{
-				$attr = 'title="New record" class="' . $rowOneType . '"' ;
+				$attr = '" title="New record' ;
 			} 
-			else 
-			{
-				$attr = 'class="' . $rowOneType . '"';
-			}
-			$outputStr .= '<td ' . $attr . ' rowspan="' . $rowspan . '">' . '<div class="rowcollapse">' 
+			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">' . '<div class="rowcollapse">' 
 							. (($trials[$i]['NCT/overall_status'] != '' && $trials[$i]['NCT/overall_status'] !== NULL) ? $trials[$i]['NCT/overall_status'] : '&nbsp;')
 							. '</div></td>';
 				
@@ -7655,7 +7767,7 @@ class TrialTracker
 			{
 				$attr = '" title="New record';
 			}
-			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '" ><div class="rowcollapse">'; 
+			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">'; 
 			if($trials[$i]["NCT/start_date"] != '' && $trials[$i]["NCT/start_date"] != NULL && $trials[$i]["NCT/start_date"] != '0000-00-00') 
 			{
 				$outputStr .= date('m/y',strtotime($trials[$i]["NCT/start_date"]));
@@ -7668,16 +7780,16 @@ class TrialTracker
 				
 				
 			//end date column
-			$attr = '';
+			$attr = ' ';
 			if(!empty($trials[$i]['edited']) && array_key_exists('inactive_date', $trials[$i]['edited'])) 
 			{
-				$attr = ' highlight" title="' . $trials[$i]['edited']['inactive_date'] ;
+				$attr = ' highlight" title="' . $trials[$i]['edited']['inactive_date'];
 			} 
 			else if($trials[$i]['new'] == 'y') 
 			{
-				$attr = '" title="New record" ';
+				$attr = '" title="New record';
 			}	
-			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . '" ' . $attr . '><div class="rowcollapse">'; 
+			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">'; 
 			if($trials[$i]["inactive_date"] != '' && $trials[$i]["inactive_date"] != NULL && $trials[$i]["inactive_date"] != '0000-00-00') 
 			{
 				$outputStr .= date('m/y',strtotime($trials[$i]["inactive_date"]));
@@ -7690,6 +7802,7 @@ class TrialTracker
 					
 											
 			//phase column
+			$attr = ' ';
 			if(!empty($trials[$i]['edited']) && array_key_exists('NCT/phase', $trials[$i]['edited'])) 
 			{
 				$attr = 'class="highlight" title="' . $trials[$i]['edited']['NCT/phase'] . '" ';
