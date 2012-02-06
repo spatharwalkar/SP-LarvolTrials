@@ -76,6 +76,11 @@ echo('<script type="text/javascript" src="delsure.js"></script>');
 			echo($show_value);
 
 		}
+		else
+		{
+			$show_value = "searchDbData = '';";
+			echo($show_value);
+		}		
 		?>
 function upmdelsure(){ return confirm("Are you sure you want to delete this product?"); }
 $(document).ready(function(){
