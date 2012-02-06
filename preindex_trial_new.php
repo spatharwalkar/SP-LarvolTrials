@@ -23,7 +23,6 @@ $query = 'SELECT studycat from data_values where val_int = "' . $nctid . '" and 
 
 function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=NULL)
 {
-	
 	if($cat=='products') 
 	{
 		$table='product_trials'; 
@@ -44,6 +43,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 		$productz=array();
 		if(is_null($productID))	$query = 'SELECT `id`,`name`,`searchdata` from '. $cat .' where searchdata IS NOT NULL and  `searchdata` <>"" ';
 		else $query = 'SELECT `id`,`name`,`searchdata` from '. $cat .' where `searchdata` IS NOT NULL and  `searchdata` <>"" and `id`="' . $productID .'"' ;
+		
 		if(!$resu = mysql_query($query))
 		{
 			$log='Bad SQL query getting  details from '. $cat .' table.<br>Query=' . $query;
@@ -52,6 +52,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 			exit;
 		}
 	//	$productz = mysql_fetch_assoc($resu);
+	
 		while($productz[]=mysql_fetch_array($resu));
 	}
 	if(!is_null($cid) and !empty($cid) and $cid>0) $startid=$cid; 
@@ -69,7 +70,46 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 			if(!is_null($productz) and $pid>=$startid)	
 			{
 				$cid=$value['id'];
+				
 				$query=buildQuery($searchdata);
+//				pr($query);
+				
+				
+				
+				$mystring=$query;
+
+				$findme   = 'UNION';
+				$pos = stripos($mystring, $findme);
+				if ($pos === false) 
+				{
+					echo '' ;
+				} 
+				else 
+				{
+					
+					$mystring = substr($mystring,0,$pos);
+				}
+				
+			//	if( substr($mystring,0,1)=="(" and substr($mystring,-1,1) == ")" ) $mystring=substr($mystring,1,$strlen-2);
+				
+				/********** add larvolid to condition   *************/
+				$findme   = 'where';
+				$pos = stripos($mystring, $findme);
+				if ($pos === false) 
+				{
+					echo 'Error in MySql Query :' . $query;
+					exit;
+				} else 
+				{
+					$ln=strlen('  `source_id` = "'. $sourceid . '"  and  ');
+					$query = substr($mystring,0,$pos+6). ' ( `source_id` = "'. $sourceid . '" )  and  ( ' . substr($mystring,$pos+6) . ' ) ';
+				}
+				
+				/*******/
+				
+//				$query.= ' and (  `source_id` = "'. $sourceid . '" )';
+//				pr($query);
+				
 				if($query=='Invalid Json') 
 				{
 					echo '<br> Invalid JSON in table <b>'. $cat .'</b> and id=<b>'.$cid.'</b> : <br>';
@@ -85,6 +125,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					echo $log;
 					exit;
 				}
+				
 				$nctidz=array();
 				while($nctidz[]=mysql_fetch_array($resu));
 				
@@ -124,6 +165,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 							}
 						
 						}
+						
 					}
 				
 				}
