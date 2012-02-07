@@ -1,0 +1,84 @@
+div.popup_form 
+{ 
+	z-index: 1; 
+	-moz-box-shadow: 0px 0px 10px #cbcbcb;
+	-webkit-box-shadow: 0px 0px 10px #cbcbcb; 
+	border: solid 1px #cbcbcb;
+	background: #fff;
+}
+
+div.popup_form div.menu_form_header
+{
+  border-bottom: none;
+  width: 200px;
+  height: 20px;
+  line-height: 19px;
+  vertical-align: middle;
+  text-decoration: none;
+  font-family: Times New Roman, Serif;
+  font-weight: 900;
+  font-size:  13px;
+  color:   #206040;
+  cursor:move;
+}
+
+div.popup_form div.menu_form_body
+{
+  background: #fff;
+}
+
+div.popup_form img.menu_form_exit
+{
+  float:  right;
+  margin: 0px 0px 0px 0px;
+  cursor: pointer;
+}
+
+div.popup_form table
+{
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+div.popup_form th
+{
+  width: 1%;
+  padding: 0px 5px 1px 0px;
+
+  text-align: left;
+
+  font-family: Times New Roman, Serif;
+  font-weight: 900;
+  font-size:  13px;
+  color:   #004060;
+}
+
+div.popup_form td
+{
+  width: 99%;
+  padding: 0px 0px 1px 0px;
+}
+
+div.popup_form form
+{
+  margin:  0px;
+  padding: 8px 10px 10px 10px;
+}
+
+div.popup_form input.field
+{
+  width: 95%;
+  font-family: Verdana, Sans-Serif;
+  font-size: 12px;
+}
+
+div.popup_form input.btn
+{
+  margin-top: 2px;
+  background-color:#FFF;
+  -moz-box-shadow: 0px 0px 10px #cbcbcb;
+  -webkit-box-shadow: 0px 0px 10px #cbcbcb; 
+  font-family: Verdana, Sans-Serif;
+  font-size: 11px;
+}
