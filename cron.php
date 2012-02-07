@@ -98,7 +98,7 @@ sleep(1);	//ensure that we always check and run things after (and not during) th
 
 
 echo($nl);
-echo ('<pre>Checking schedule for updates and reports...' . $nl);
+echo ('<pre>Checking schedule for updates and reports....' . $nl);
 //Fetch schedule data 
 $schedule = array();
 $fetch = array();
@@ -149,6 +149,7 @@ foreach($tasks as $row)
 		{
 			//Max number of previous days to check for new records for 
 			// nct and pubmed database separately
+			if($row['fetch'] == 'nct_new') $scrapercode=3; else $scrapercode=0;
 			if(!isset($fetch[$row['fetch']]) || $fetch[$row['fetch']] < $lastrun)
 				$fetch[$row['fetch']] = $lastrun;
 		}
@@ -342,7 +343,7 @@ if($current_tasks_count==0)
 			
 			/************************************ Step 2 ****************************************/
 			echo($nl);
-			echo ('Checking schedule for updates and reports...' . $nl);
+			echo ('Checking schedule for updates and reports..' . $nl);
 			//Fetch schedule data 
 			$schedule = array();
 			$fetch = array();
@@ -392,6 +393,7 @@ if($current_tasks_count==0)
 					{
 						//Max number of previous days to check for new records for 
 						// nct and pubmed database separately
+						if($row['fetch'] == 'nct_new') $scrapercode=3; else $scrapercode=0;
 						if(!isset($fetch[$row['fetch']]) || $fetch[$row['fetch']] < $lastrun)
 							$fetch[$row['fetch']] = $lastrun;
 					}
@@ -403,7 +405,10 @@ if($current_tasks_count==0)
 			$update_status = array();
 			$count=0;
 			while($row = mysql_fetch_assoc($res))
+			{
+				$update_status['id'.$count] = $row['update_id'];
 				$update_status[$count++] = $row['status'];
+			}
 			
 			//Check if any updates(nct/pubmed) have been newly scheduled and add to update_status
 			if(count($fetch))
@@ -430,7 +435,7 @@ if($current_tasks_count==0)
 						$updtid=4;
 						break;
 					}
-					if($update_status[$count]==COMPLETED)
+					if($update_status[$count]==COMPLETED and $scrapercode==$updtid )
 					{
 						//Remove previous entry corresponding to completed update
 						$query = 'DELETE FROM update_status WHERE update_id="' . $updtid .'"';
@@ -441,27 +446,27 @@ if($current_tasks_count==0)
 						//Add new entry with status ready
 						echo('Adding entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
 						$query = 'INSERT INTO update_status SET update_items_progress=0,  update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
-						$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
+						$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error() . 'Query:' . $query);
 					}
-					else if ($update_status[$count]==READY)
+					else if ($update_status[$count]==READY and $scrapercode==$updtid )
 					{
 						//Since entry with 'ready' status already exists, update it retaining the state
 					echo('Refreshing entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
 						$query = 'UPDATE update_status SET updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'" WHERE update_id="' . $updtid .'"';
-						$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
+						$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error() . 'Query:' . $query);
 					}
-					else if ($update_status[$count]==CANCELLED)
+					else if ($update_status[$count]==CANCELLED and $scrapercode==$updtid )
 					{
 						echo('Update of  '.$s.' database already was cancelled during previous execution.' . $nl);
 						echo ('Please add the update manaully from Status page to ensure it runs '. $nl);
 					}
-					else if ($update_status[$count]==ERROR)
+					else if ($update_status[$count]==ERROR and $scrapercode==$updtid )
 					{
 						//Since entry with 'error' status already exists, leave as is and inform user
 						echo('Update of  '.$s.' database encountered error during previous execution.' . $nl);
 						echo ('Please add the report manaully from Status page to ensure it runs. '. $nl);
 					}
-					else if ($update_status[$count]==RUNNING)
+					else if ($update_status[$count]==RUNNING and $scrapercode==$updtid )
 					{
 						//No action if update is already running
 						echo('Update of  '.$s.' database already running currently.' . $nl);
@@ -472,7 +477,7 @@ if($current_tasks_count==0)
 						echo('Adding entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
 						$query = 'INSERT INTO update_status SET update_items_progress=0, update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
 						
-						$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
+						$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error() . 'Query:' . $query);
 					}
 					$count++;
 				}
@@ -616,7 +621,11 @@ if($current_tasks_count==0)
 			$all_updates_complete=1;
 			while($row = mysql_fetch_assoc($res))
 			{
+			
+				$update_status['id'.$count] = $row['update_id'];
 				$update_status[$count++] = $row['status'];
+				
+			
 				//Update flag which checks if all updates are complete
 				if($row['status']!=COMPLETED)
 					$all_updates_complete=0;
@@ -713,9 +722,12 @@ if($current_tasks_count==0)
 			$res = mysql_query($query) or die('Bad SQL Query getting update_status');
 			$update_status = array();
 			$count=0;
-			while($row = mysql_fetch_assoc($res))
-				$update_status[$count++] = $row['status'];
 			
+			while($row = mysql_fetch_assoc($res))
+			{
+				$update_status['id'.$count] = $row['update_id'];
+				$update_status[$count++] = $row['status'];
+			}
 			
 			//Get list of all reports(running and ready to run)
 			$query = 'SELECT `run_id`,`type_id`,`report_type`,`status` FROM reports_status WHERE run_id='.$selected_schedule_item;
@@ -990,7 +1002,7 @@ elseif($current_tasks_count==1)
 			
 			/************************************ Step 2 ****************************************/
 			echo($nl);
-			echo ('Checking schedule for updates and reports...' . $nl);
+			echo ('Checking schedule for updates and reports...=' . $nl);
 			//Fetch schedule data 
 			$schedule = array();
 			$fetch = array();
@@ -1040,6 +1052,7 @@ elseif($current_tasks_count==1)
 					{
 						//Max number of previous days to check for new records for 
 						// nct and pubmed database separately
+						if($row['fetch'] == 'nct_new') $scrapercode=3; else $scrapercode=0;
 						if(!isset($fetch[$row['fetch']]) || $fetch[$row['fetch']] < $lastrun)
 							$fetch[$row['fetch']] = $lastrun;
 					}
@@ -1050,8 +1063,12 @@ elseif($current_tasks_count==1)
 			$res = mysql_query($query) or die('Bad SQL Query getting update_status');
 			$update_status = array();
 			$count=0;
+			
 			while($row = mysql_fetch_assoc($res))
+			{
+				$update_status['id'.$count] = $row['update_id'];
 				$update_status[$count++] = $row['status'];
+			}
 			
 			//Check if any updates(nct/pubmed) have been newly scheduled and add to update_status
 			if(count($fetch))
@@ -1080,7 +1097,8 @@ elseif($current_tasks_count==1)
 						break;
 						
 					}
-					if($update_status[$count]==COMPLETED)
+					
+					if($update_status[$count]==COMPLETED and $scrapercode==$updtid )
 					{
 						//Remove previous entry corresponding to completed update
 						$query = 'DELETE FROM update_status WHERE update_id="' . $updtid .'"';
@@ -1093,27 +1111,27 @@ elseif($current_tasks_count==1)
 						$query = 'INSERT INTO update_status SET  update_items_progress="0", update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
 						
 						
-						$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
+						$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error() . 'Query:' . $query);
 					}
-					else if ($update_status[$count]==READY)
+					else if ($update_status[$count]==READY and $scrapercode==$updtid )
 					{
 						//Since entry with 'ready' status already exists, update it retaining the state
 					echo('Refreshing entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
 						$query = 'UPDATE update_status SET updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'" WHERE update_id="' . $updtid .'"';
-						$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
+						$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error() . 'Query:' . $query);
 					}
-					else if ($update_status[$count]==CANCELLED)
+					else if ($update_status[$count]==CANCELLED and $scrapercode==$updtid )
 					{
 						echo('Update of  '.$s.' database already was cancelled during previous execution.' . $nl);
 						echo ('Please add the update manaully from Status page to ensure it runs '. $nl);
 					}
-					else if ($update_status[$count]==ERROR)
+					else if ($update_status[$count]==ERROR and $scrapercode==$updtid )
 					{
 						//Since entry with 'error' status already exists, leave as is and inform user
 						echo('Update of  '.$s.' database encountered error during previous execution..' . $nl);
 						echo ('Please add the report manaully from Status page to ensure it runs '. $nl);
 					}
-					else if ($update_status[$count]==RUNNING)
+					else if ($update_status[$count]==RUNNING and $scrapercode==$updtid )
 					{
 						//No action if update is already running
 						echo('Update of  '.$s.' database already running currently.' . $nl);
@@ -1125,7 +1143,7 @@ elseif($current_tasks_count==1)
 						$query = 'INSERT INTO update_status SET  update_items_progress="0", update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
 						
 						
-						$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
+						$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error() . 'Query:' . $query);
 					}
 					$count++;
 				}
@@ -1269,7 +1287,9 @@ elseif($current_tasks_count==1)
 			$all_updates_complete=1;
 			while($row = mysql_fetch_assoc($res))
 			{
+				$update_status['id'.$count] = $row['update_id'];
 				$update_status[$count++] = $row['status'];
+			
 				//Update flag which checks if all updates are complete
 				if($row['status']!=COMPLETED)
 					$all_updates_complete=0;
@@ -1366,8 +1386,10 @@ elseif($current_tasks_count==1)
 			$update_status = array();
 			$count=0;
 			while($row = mysql_fetch_assoc($res))
+			{
+				$update_status['id'.$count] = $row['update_id'];
 				$update_status[$count++] = $row['status'];
-			
+			}			
 			
 			//Get list of all reports(running and ready to run)
 			$query = 'SELECT `run_id`,`type_id`,`report_type`,`status` FROM reports_status WHERE run_id='.$selected_schedule_item;
@@ -1651,7 +1673,7 @@ elseif($current_tasks_count>1)
 						
 						/************************************ Step 2 ****************************************/
 						echo($nl);
-						echo ('Checking schedule for updates and reports...' . $nl);
+						echo ('Checking schedule for updates and reports..=.' . $nl);
 						//Fetch schedule data 
 						$schedule = array();
 						$fetch = array();
@@ -1699,6 +1721,7 @@ elseif($current_tasks_count>1)
 								$schedule[] = $row;
 								if($row['fetch'] != 'none')
 								{
+								if($row['fetch'] == 'nct_new') $scrapercode=3; else $scrapercode=0;
 									//Max number of previous days to check for new records for 
 									// nct and pubmed database separately
 									if(!isset($fetch[$row['fetch']]) || $fetch[$row['fetch']] < $lastrun)
@@ -1712,7 +1735,10 @@ elseif($current_tasks_count>1)
 						$update_status = array();
 						$count=0;
 						while($row = mysql_fetch_assoc($res))
+						{
+							$update_status['id'.$count] = $row['update_id'];
 							$update_status[$count++] = $row['status'];
+						}
 						
 						//Check if any updates(nct/pubmed) have been newly scheduled and add to update_status
 						if(count($fetch))
@@ -1740,7 +1766,7 @@ elseif($current_tasks_count>1)
 									break;
 									
 								}
-								if($update_status[$count]==COMPLETED)
+								if($update_status[$count]==COMPLETED and $scrapercode==$update_status['id'.$count] )
 								{
 									//Remove previous entry corresponding to completed update
 									$query = 'DELETE FROM update_status WHERE update_id="' . $updtid .'"';
@@ -1752,27 +1778,27 @@ elseif($current_tasks_count>1)
 									echo('Adding entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
 									$query = 'INSERT INTO update_status SET  update_items_progress="0", update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
 									
-									$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
+									$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error() . 'Query:' . $query);
 								}
-								else if ($update_status[$count]==READY)
+								else if ($update_status[$count]==READY and $scrapercode==$update_status['id'.$count] )
 								{
 									//Since entry with 'ready' status already exists, update it retaining the state
 								echo('Refreshing entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
 									$query = 'UPDATE update_status SET updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'" WHERE update_id="' . $updtid .'"';
-									$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
+									$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error() . 'Query:' . $query);
 								}
-								else if ($update_status[$count]==CANCELLED)
+								else if ($update_status[$count]==CANCELLED and $scrapercode==$update_status['id'.$count] )
 								{
 									echo('Update of  '.$s.' database already was cancelled during previous execution.' . $nl);
 									echo ('Please add the update manaully from Status page to ensure it runs '. $nl);
 								}
-								else if ($update_status[$count]==ERROR)
+								else if ($update_status[$count]==ERROR and $scrapercode==$update_status['id'.$count] )
 								{
 									//Since entry with 'error' status already exists, leave as is and inform user
 									echo('Update of  '.$s.' database encountered error during previous execution...' . $nl);
 									echo ('Please add the report manaully from Status page to ensure it runs ...'. $nl);
 								}
-								else if ($update_status[$count]==RUNNING)
+								else if ($update_status[$count]==RUNNING and $scrapercode==$update_status['id'.$count] )
 								{
 									//No action if update is already running
 									echo('Update of  '.$s.' database already running currently.' . $nl);
@@ -1784,7 +1810,7 @@ elseif($current_tasks_count>1)
 									$query = 'INSERT INTO update_status SET  update_items_progress="0", update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
 									
 									
-									$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
+									$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error() . 'Query:' . $query);
 								}
 								$count++;
 							}
@@ -1928,7 +1954,10 @@ elseif($current_tasks_count>1)
 						$all_updates_complete=1;
 						while($row = mysql_fetch_assoc($res))
 						{
+							
+							$update_status['id'.$count] = $row['update_id'];
 							$update_status[$count++] = $row['status'];
+			
 							//Update flag which checks if all updates are complete
 							if($row['status']!=COMPLETED)
 								$all_updates_complete=0;
@@ -2026,9 +2055,12 @@ elseif($current_tasks_count>1)
 						$res = mysql_query($query) or die('Bad SQL Query getting update_status');
 						$update_status = array();
 						$count=0;
+
 						while($row = mysql_fetch_assoc($res))
+						{
+							$update_status['id'.$count] = $row['update_id'];
 							$update_status[$count++] = $row['status'];
-						
+						}
 						
 						//Get list of all reports(running and ready to run)
 						$query = 'SELECT `run_id`,`type_id`,`report_type`,`status` FROM reports_status WHERE run_id='.$selected_schedule_item;
@@ -2303,7 +2335,7 @@ elseif($current_tasks_count>1)
 						
 						/************************************ Step 2 ****************************************/
 						echo($nl);
-						echo ('Checking schedule for updates and reports...' . $nl);
+						echo ('Checking schedule for updates and reports...*' . $nl);
 						//Fetch schedule data 
 						$schedule = array();
 						$fetch = array();
@@ -2351,6 +2383,7 @@ elseif($current_tasks_count>1)
 								$schedule[] = $row;
 								if($row['fetch'] != 'none')
 								{
+								if($row['fetch'] == 'nct_new') $scrapercode=3; else $scrapercode=0;
 									//Max number of previous days to check for new records for 
 									// nct and pubmed database separately
 									if(!isset($fetch[$row['fetch']]) || $fetch[$row['fetch']] < $lastrun)
@@ -2364,7 +2397,10 @@ elseif($current_tasks_count>1)
 						$update_status = array();
 						$count=0;
 						while($row = mysql_fetch_assoc($res))
+						{
+							$update_status['id'.$count] = $row['update_id'];
 							$update_status[$count++] = $row['status'];
+						}
 						
 						//Check if any updates(nct/pubmed) have been newly scheduled and add to update_status
 						if(count($fetch))
@@ -2392,7 +2428,7 @@ elseif($current_tasks_count>1)
 									break;
 									
 								}
-								if($update_status[$count]==COMPLETED)
+								if($update_status[$count]==COMPLETED and $scrapercode==$update_status['id'.$count] )
 								{
 									//Remove previous entry corresponding to completed update
 									$query = 'DELETE FROM update_status WHERE update_id="' . $updtid .'"';
@@ -2405,27 +2441,27 @@ elseif($current_tasks_count>1)
 									$query = 'INSERT INTO update_status  SET update_items_progress="0",  update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
 									
 									
-									$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
+									$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error() . 'Query:' . $query);
 								}
-								else if ($update_status[$count]==READY)
+								else if ($update_status[$count]==READY and $scrapercode==$update_status['id'.$count] )
 								{
 									//Since entry with 'ready' status already exists, update it retaining the state
 								echo('Refreshing entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
 									$query = 'UPDATE update_status SET updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'" WHERE update_id="' . $updtid .'"';
-									$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
+									$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error() . 'Query:' . $query);
 								}
-								else if ($update_status[$count]==CANCELLED)
+								else if ($update_status[$count]==CANCELLED and $scrapercode==$update_status['id'.$count] )
 								{
 									echo('Update of  '.$s.' database already was cancelled during previous execution.' . $nl);
 									echo ('Please add the update manaully from Status page to ensure it runs '. $nl);
 								}
-								else if ($update_status[$count]==ERROR)
+								else if ($update_status[$count]==ERROR and $scrapercode==$update_status['id'.$count] )
 								{
 									//Since entry with 'error' status already exists, leave as is and inform user
 									echo('Update of  '.$s.' database encountered error during previous execution....' . $nl);
 									echo ('Please add the report manaully from Status page to ensure it runs-- '. $nl);
 								}
-								else if ($update_status[$count]==RUNNING)
+								else if ($update_status[$count]==RUNNING and $scrapercode==$update_status['id'.$count] )
 								{
 									//No action if update is already running
 									echo('Update of  '.$s.' database already running currently.' . $nl);
@@ -2437,7 +2473,7 @@ elseif($current_tasks_count>1)
 									$query = 'INSERT INTO update_status SET  update_items_progress="0", update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
 									
 									
-									$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
+									$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error() . 'Query:' . $query);
 								}
 								$count++;
 							}
@@ -2581,7 +2617,9 @@ elseif($current_tasks_count>1)
 						$all_updates_complete=1;
 						while($row = mysql_fetch_assoc($res))
 						{
+							$update_status['id'.$count] = $row['update_id'];
 							$update_status[$count++] = $row['status'];
+			
 							//Update flag which checks if all updates are complete
 							if($row['status']!=COMPLETED)
 								$all_updates_complete=0;
@@ -2658,7 +2696,7 @@ elseif($current_tasks_count>1)
 									echo('Invoking.- ' . $filename . '...</pre>' . $nl);
 									$days_to_fetch=$run_updates[$i]['updated_days'];
 									$update_id=$run_updates[$i]['update_id'];
-									echo '<br>'.($filename). '<br>';
+									require_once($filename);
 									echo($nl . '<pre>Done with ' . $filename . '.' . $nl);
 								}	
 									//Set status to 'complete' in 'update_status'
@@ -2680,8 +2718,10 @@ elseif($current_tasks_count>1)
 						$update_status = array();
 						$count=0;
 						while($row = mysql_fetch_assoc($res))
+						{
+							$update_status['id'.$count] = $row['update_id'];
 							$update_status[$count++] = $row['status'];
-						
+						}						
 						
 						//Get list of all reports(running and ready to run)
 						$query = 'SELECT `run_id`,`type_id`,`report_type`,`status` FROM reports_status WHERE run_id='.$selected_schedule_item;
@@ -2957,7 +2997,7 @@ elseif($current_tasks_count>1)
 					
 					/************************************ Step 2 ****************************************/
 					echo($nl);
-					echo ('Checking schedule for updates and reports...' . $nl);
+					echo ('Checking schedule for updates and reports/...' . $nl);
 					//Fetch schedule data 
 					$schedule = array();
 					$fetch = array();
@@ -3005,6 +3045,7 @@ elseif($current_tasks_count>1)
 							$schedule[] = $row;
 							if($row['fetch'] != 'none')
 							{
+							if($row['fetch'] == 'nct_new') $scrapercode=3; else $scrapercode=0;
 								//Max number of previous days to check for new records for 
 								// nct and pubmed database separately
 								if(!isset($fetch[$row['fetch']]) || $fetch[$row['fetch']] < $lastrun)
@@ -3018,7 +3059,10 @@ elseif($current_tasks_count>1)
 					$update_status = array();
 					$count=0;
 					while($row = mysql_fetch_assoc($res))
+					{
+						$update_status['id'.$count] = $row['update_id'];
 						$update_status[$count++] = $row['status'];
+					}
 					
 					//Check if any updates(nct/pubmed) have been newly scheduled and add to update_status
 					if(count($fetch))
@@ -3046,7 +3090,7 @@ elseif($current_tasks_count>1)
 								break;
 							
 							}
-							if($update_status[$count]==COMPLETED)
+							if($update_status[$count]==COMPLETED and $scrapercode==$update_status['id'.$count] )
 							{
 								//Remove previous entry corresponding to completed update
 								$query = 'DELETE FROM update_status WHERE update_id="' . $updtid .'"';
@@ -3059,27 +3103,27 @@ elseif($current_tasks_count>1)
 								$query = 'INSERT INTO update_status SET  update_items_progress="0", update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
 								
 								
-							$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
+							$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error() . 'Query:' . $query);
 							}
-							else if ($update_status[$count]==READY)
+							else if ($update_status[$count]==READY and $scrapercode==$update_status['id'.$count] )
 							{
 								//Since entry with 'ready' status already exists, update it retaining the state
 							echo('Refreshing entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
 								$query = 'UPDATE update_status SET updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'" WHERE update_id="' . $updtid.'"';
-							$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
+							$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error() . 'Query:' . $query);
 							}
-							else if ($update_status[$count]==CANCELLED)
+							else if ($update_status[$count]==CANCELLED and $scrapercode==$update_status['id'.$count] )
 							{
 								echo('Update of  '.$s.' database already was cancelled during previous execution.' . $nl);
 								echo ('Please add the update manaully from Status page to ensure it runs '. $nl);
 							}
-							else if ($update_status[$count]==ERROR)
+							else if ($update_status[$count]==ERROR and $scrapercode==$update_status['id'.$count] )
 							{
 								//Since entry with 'error' status already exists, leave as is and inform user
 								echo('Update of  '.$s.' database encountered error during previous execution.....' . $nl);
 								echo ('Please add the report manaully from Status page to ensure it runs.  - '. $nl);
 							}
-							else if ($update_status[$count]==RUNNING)
+							else if ($update_status[$count]==RUNNING and $scrapercode==$update_status['id'.$count] )
 							{
 								//No action if update is already running
 								echo('Update of  '.$s.' database already running currently.' . $nl);
@@ -3091,7 +3135,7 @@ elseif($current_tasks_count>1)
 								$query = 'INSERT INTO update_status SET  update_items_progress="0", update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
 								
 								
-								$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
+								$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error() . 'Query:' . $query);
 							}
 							$count++;
 						}
@@ -3235,12 +3279,14 @@ elseif($current_tasks_count>1)
 					$all_updates_complete=1;
 					while($row = mysql_fetch_assoc($res))
 					{
+						$update_status['id'.$count] = $row['update_id'];
 						$update_status[$count++] = $row['status'];
+					
 						//Update flag which checks if all updates are complete
 						if($row['status']!=COMPLETED)
 							$all_updates_complete=0;
 					}
-						
+					
 					//Get all data from 'reports_status'
 					$query = 'SELECT `run_id`,`type_id`,`report_type`,`status` FROM reports_status';
 					$res = mysql_query($query) or die('Bad SQL Query getting reports_status');
@@ -3312,7 +3358,7 @@ elseif($current_tasks_count>1)
 								echo('Invoking-: ' . $filename . '...</pre>' . $nl);
 								$days_to_fetch=$run_updates[$i]['updated_days'];
 								$update_id=$run_updates[$i]['update_id'];
-								echo '<br>'.($filename). '<br>';
+								require_once($filename);
 								echo($nl . '<pre>Done with ' . $filename . '.' . $nl);
 							}	
 								//Set status to 'complete' in 'update_status'
@@ -3334,7 +3380,10 @@ elseif($current_tasks_count>1)
 					$update_status = array();
 					$count=0;
 					while($row = mysql_fetch_assoc($res))
+					{
+						$update_status['id'.$count] = $row['update_id'];
 						$update_status[$count++] = $row['status'];
+					}
 					
 					
 					//Get list of all reports(running and ready to run)
@@ -3611,14 +3660,14 @@ elseif($current_tasks_count>1)
 				
 				/************************************ Step 2 ****************************************/
 				echo($nl);
-				echo ('Checking schedule for updates and reports...' . $nl);
+				echo ('Checking schedule for updates and reports...7' . $nl);
 				//Fetch schedule data 
 				$schedule = array();
 				$fetch = array();
 				$query = 'SELECT `id`,`name`,`fetch`,`runtimes`,`lastrun`,`emails` FROM schedule WHERE runtimes!=0';
 				$res = mysql_query($query) or die('Bad SQL Query getting schedule');
 				$tasks = array(); while($row = mysql_fetch_assoc($res)) $tasks[] = $row;
-				
+				$scrapercode=array();
 				foreach($tasks as $row)
 				{
 					//Get time when scheduler item was last checked, in Unix time
@@ -3653,12 +3702,15 @@ elseif($current_tasks_count>1)
 							}
 						}
 					}
+					
 					if($due)
 					{
 						//Get data of current item(which must be checked for updates/reports)
 						$schedule[] = $row;
 						if($row['fetch'] != 'none')
 						{
+						
+						if($row['fetch'] == 'nct_new') $scrapercode[]=3; else $scrapercode[]=0;
 							//Max number of previous days to check for new records for 
 							// nct and pubmed database separately
 							if(!isset($fetch[$row['fetch']]) || $fetch[$row['fetch']] < $lastrun)
@@ -3672,7 +3724,10 @@ elseif($current_tasks_count>1)
 				$update_status = array();
 				$count=0;
 				while($row = mysql_fetch_assoc($res))
+				{
+					$update_status['id'.$count] = $row['update_id'];
 					$update_status[$count++] = $row['status'];
+				}
 				
 				//Check if any updates(nct/pubmed) have been newly scheduled and add to update_status
 				if(count($fetch))
@@ -3700,7 +3755,9 @@ elseif($current_tasks_count>1)
 							break;
 							
 						}
-						if($update_status[$count]==COMPLETED)
+					//	echo '<br>scf code=' . $scrapercode .  'updtid' . $updtid . 'updt st id' . $update_status['id'.$count] .'<br>';
+						pr($scrapercode);
+						if($update_status[$count]==COMPLETED and $scrapercode[$count]==$updtid )
 						{
 							//Remove previous entry corresponding to completed update
 							$query = 'DELETE FROM update_status WHERE update_id="' . $updtid.'"';
@@ -3713,39 +3770,40 @@ elseif($current_tasks_count>1)
 							$query = 'INSERT INTO update_status SET  update_items_progress="0", update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
 							
 							
-						$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
+						$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error() . 'Query:' . $query);
 						}
-						else if ($update_status[$count]==READY)
+						else if ($update_status[$count]==READY and $scrapercode[$count]==$updtid )
 						{
 							//Since entry with 'ready' status already exists, update it retaining the state
 						echo('Refreshing entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
 							$query = 'UPDATE update_status SET updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'" WHERE update_id="' . $updtid.'"';
-						$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
+						$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error() . 'Query:' . $query);
 						}
-						else if ($update_status[$count]==CANCELLED)
+						else if ($update_status[$count]==CANCELLED and $scrapercode[$count]==$updtid )
 						{
 							echo('Update of  '.$s.' database already was cancelled during previous execution.' . $nl);
 							echo ('Please add the update manaully from Status page to ensure it runs '. $nl);
 						}
-						else if ($update_status[$count]==ERROR)
+						else if ($update_status[$count]==ERROR and $scrapercode[$count]==$updtid )
 						{
 							//Since entry with 'error' status already exists, leave as is and inform user
 							echo('Update of  '.$s.' database encountered error during previous execution......' . $nl);
 							echo ('Please add the report manaully from Status page to ensure it runs--. '. $nl);
 						}
-						else if ($update_status[$count]==RUNNING)
+						else if ($update_status[$count]==RUNNING and $scrapercode[$count]==$updtid )
 						{
 							//No action if update is already running
 							echo('Update of  '.$s.' database already running currently.' . $nl);
 						}
 						else
 						{
+							
 							//Add new entry with status ready
 							echo('Adding entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
 							$query = 'INSERT INTO update_status SET  update_items_progress="0", update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
 							
 							
-							$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error());
+							$res = mysql_query($query) or die('Bad SQL query updating update_status. Error: '.mysql_error() . 'Query:' . $query);
 						}
 						$count++;
 					}
@@ -3888,7 +3946,9 @@ elseif($current_tasks_count>1)
 				$all_updates_complete=1;
 				while($row = mysql_fetch_assoc($res))
 				{
+					$update_status['id'.$count] = $row['update_id'];
 					$update_status[$count++] = $row['status'];
+				
 					//Update flag which checks if all updates are complete
 					if($row['status']!=COMPLETED)
 						$all_updates_complete=0;
@@ -3964,7 +4024,7 @@ elseif($current_tasks_count>1)
 							echo('Invoking:: ' . $filename . '...</pre>' . $nl);
 							$days_to_fetch=$run_updates[$i]['updated_days'];
 							$update_id=$run_updates[$i]['update_id'];
-							echo '<br>'.($filename). '<br>';
+							require_once($filename);
 							echo($nl . '<pre>Done with ' . $filename . '.' . $nl);
 						}	
 							//Set status to 'complete' in 'update_status'
@@ -3987,7 +4047,10 @@ elseif($current_tasks_count>1)
 				$update_status = array();
 				$count=0;
 				while($row = mysql_fetch_assoc($res))
+				{
+					$update_status['id'.$count] = $row['update_id'];
 					$update_status[$count++] = $row['status'];
+				}
 				
 				
 				//Get list of all reports(running and ready to run)

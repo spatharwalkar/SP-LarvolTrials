@@ -156,11 +156,19 @@ for($i=0;$i < $count_rpids; $i++)
 //Get entry corresponding to nct in 'update_status'
 $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,`add_items_total`,`add_items_progress`,
 					`update_items_total`,`update_items_progress`,TIMEDIFF(updated_time, start_time) AS timediff,
-					`add_items_complete_time`, `update_items_complete_time` FROM update_status WHERE (update_id="0" or update_id="3")';
+					`add_items_complete_time`, `update_items_complete_time` FROM update_status WHERE (update_id="0")';
 $res = mysql_query($query) or die('Bad SQL Query getting update_status');
 $nct_status = array();
 while($row = mysql_fetch_assoc($res))
 	$nct_status = $row;
+	
+	$query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,`add_items_total`,`add_items_progress`,
+					`update_items_total`,`update_items_progress`,TIMEDIFF(updated_time, start_time) AS timediff,
+					`add_items_complete_time`, `update_items_complete_time` FROM update_status WHERE (update_id="3")';
+$res = mysql_query($query) or die('Bad SQL Query getting update_status');
+$nct_newstatus = array();
+while($row = mysql_fetch_assoc($res))
+	$nct_newstatus = $row;
 	
 $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,`add_items_total`,`add_items_progress`,
 					`update_items_total`,`update_items_progress`,TIMEDIFF(updated_time, start_time) AS timediff,
@@ -236,6 +244,12 @@ if(count($nct_status)!=0)
 	echo "$(\"#nct_new\").progressBar();";
 	echo "$(\"#nct_update\").progressBar({ barImage: 'images/progressbg_orange.gif'} );";
 }
+if(count($nct_newstatus)!=0)
+{
+	echo "$(\"#nct_new2\").progressBar();";
+	echo "$(\"#nct_update2\").progressBar({ barImage: 'images/progressbg_orange.gif'} );";
+}
+
 if(count($eudract_status)!=0)
 {
 	echo "$(\"#eudract_new\").progressBar();";
@@ -360,6 +374,99 @@ echo "<div class=\"container\">";
 					echo '<input type="hidden" name="action" value="3">';
 					echo '<input type="hidden" name="upid" value="'.$nct_status['update_id'].'">';
 					echo '<input type="hidden" name="pid" value="'.$nct_status['process_id'].'">';
+					echo '<input type="image" src="images/not.png" title="Delete" style="border=0px;">';
+					echo '</form>';
+					echo "</td>";
+				}
+			echo "</tr>";
+		echo "</table>";
+	}
+	
+	if(count($nct_newstatus)!=0)
+	{
+		echo "<table width=\"100%\" class=\"event\">";
+			echo "<tr>";
+				echo "<th width=\"100%\" align=\"center\" class=\"head2\">nct database (new)</th>";
+			echo "</tr>";
+		echo "</table>";
+		echo "<table width=\"100%\" class=\"event\">";
+			echo "<tr>";
+				echo "<td width=\"20%\" align=\"left\" class=\"head\">Status</td>";
+				echo "<td width=\"20%\" align=\"left\" class=\"head\">Start Time</td>";
+				echo "<td width=\"19%\" align=\"left\" class=\"head\">Excution run time</td>";
+				echo "<td width=\"19%\" align=\"left\" class=\"head\">Last update time</td>";
+//				echo "<td width=\"19%\" align=\"left\" class=\"head\">New Records</td>";
+				echo "<td width=\"17%\" align=\"left\" class=\"head\">Progress</td>";
+				echo "<td width=\"5%\" align=\"center\" class=\"head\">Action</td>";
+			echo "</tr>";
+			echo "<tr>";
+				echo "<td align=\"left\" class=\"norm\">".$status[$nct_newstatus['status']]."</td>";
+				echo "<td align=\"left\" class=\"norm\">".$nct_newstatus['start_time']."</td>";
+				echo "<td align=\"left\" class=\"norm\">".$nct_newstatus['timediff']."</td>";
+				echo "<td align=\"left\" class=\"norm\">".$nct_newstatus['updated_time']."</td>";
+				if($nct_newstatus['add_items_start_time']!="0000-00-00 00:00:00"&&$nct_newstatus['add_items_complete_time']!="0000-00-00 00:00:00"&&$nct_newstatus['status']==COMPLETED)
+					$nct_newadd_progress=100;
+				else
+					$nct_newadd_progress=number_format(($nct_newstatus['add_items_total']==0?0:(($nct_newstatus['add_items_progress'])*100/$nct_newstatus['add_items_total'])),2);
+					
+				if($nct_newstatus['update_items_start_time']!="0000-00-00 00:00:00"&&$nct_newstatus['update_items_complete_time']!="0000-00-00 00:00:00"&&$nct_newstatus['status']==COMPLETED)
+					$nct_newupdate_progress=100;
+				else
+					$nct_newupdate_progress=number_format(($nct_newstatus['update_items_total']==0?0:(($nct_newstatus['update_items_progress'])*100/$nct_newstatus['update_items_total'])),2);
+				
+				//echo $nct_status['update_items_complete_time'];
+				
+//				echo "<td align=\"left\" class=\"norm\">";
+//					echo "<span class=\"progressBar\" id=\"nct_new\">".$nct_add_progress."%</span>";
+//				echo "</td>";
+				echo "<td align=\"left\" class=\"norm\">";
+					echo "<span class=\"progressBar\" id=\"nct_update2\">".$nct_newupdate_progress."</span>";
+				echo "</td>";
+				if($nct_newstatus['status']==READY)
+				{
+					echo "<td align=\"center\" class=\"norm\">";
+					echo '<form method="post" action="status.php">';
+					echo '<input type="hidden" name="action" value="4">';
+					echo '<input type="hidden" name="upid" value="'.$nct_newstatus['update_id'].'">';
+					echo '<input type="image" src="images/not.png" title="Cancel" style="border=0px;">';
+					echo '</form>';
+					echo "</td>";
+				}
+				elseif($nct_newstatus['status']==RUNNING)
+				{
+					echo "<td align=\"center\" class=\"norm\">";
+					echo '<form method="post" action="status.php">';
+					echo '<input type="hidden" name="action" value="2">';
+					echo '<input type="hidden" name="upid" value="'.$nct_newstatus['update_id'].'">';
+					echo '<input type="hidden" name="pid" value="'.$nct_newstatus['process_id'].'">';
+					echo '<input type="image" src="images/not.png" title="Cancel" style="border=0px;">';
+					echo '</form>';
+					echo "</td>";
+				}
+				elseif($nct_newstatus['status']==COMPLETED)
+				{
+					echo "<td align=\"center\" class=\"norm\">";
+					echo '<form method="post" action="status.php">';
+					echo '<input type="hidden" name="action" value="3">';
+					echo '<input type="hidden" name="upid" value="'.$nct_newstatus['update_id'].'">';
+					echo '<input type="hidden" name="pid" value="'.$nct_newstatus['process_id'].'">';
+					echo '<input type="image" src="images/not.png" title="Delete" style="border=0px;">';
+					echo '</form>';
+					echo "</td>";
+				}
+				else if($nct_newstatus['status']==ERROR||$nct_newstatus['status']==CANCELLED)
+				{
+					echo "<td align=\"center\" class=\"norm\">";
+					echo '<form method="post" action="status.php">';
+					echo '<input type="hidden" name="action" value="1">';
+					echo '<input type="hidden" name="upid" value="'.$nct_newstatus['update_id'].'">';
+					echo '<input type="hidden" name="pid" value="'.$nct_newstatus['process_id'].'">';
+					echo '<input type="image" src="images/check.png" title="Add" style="border=0px;">';
+					echo '</form>';
+					echo '<form method="post" action="status.php">';
+					echo '<input type="hidden" name="action" value="3">';
+					echo '<input type="hidden" name="upid" value="'.$nct_newstatus['update_id'].'">';
+					echo '<input type="hidden" name="pid" value="'.$nct_newstatus['process_id'].'">';
 					echo '<input type="image" src="images/not.png" title="Delete" style="border=0px;">';
 					echo '</form>';
 					echo "</td>";

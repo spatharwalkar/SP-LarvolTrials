@@ -73,7 +73,14 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 				
 				$query=buildQuery($searchdata);
 //				pr($query);
-				
+				if($query=='Invalid Json') 
+				{
+					echo '<br> Invalid JSON in table <b>'. $cat .'</b> and id=<b>'.$cid.'</b> : <br>';
+					echo $searchdata;
+					echo '<br>';
+					
+					continue;
+				}
 				
 				
 				$mystring=$query;
