@@ -546,6 +546,17 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 		}
 		if(mysql_query($query))
 		{
+			if($id)
+			{
+				$_GET['id'] = $id;
+			}
+			else 
+			{
+				$_GET['id'] = mysql_insert_id();
+			}
+			ob_start();
+			require 'index_product.php';
+			ob_end_clean();			
 			return 1;
 		}
 		else
