@@ -1152,7 +1152,7 @@ function Download_reports()
 				$tooltip='Active Records, Total Records';
 			}
 					
-			$cell = num2char(count($col)+2).'1';
+			$cell = num2char(count($columns)+1).'1';
 			$objPHPExcel->getActiveSheet()->setCellValue($cell, $count_val);
 			$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlencode(urlPath() . 'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds)));
 			$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip($tooltip);
