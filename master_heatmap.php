@@ -15,7 +15,7 @@ if(!$db->loggedIn())
 	header('Location: ' . urlPath() . 'index.php');
 	exit;
 }
-if($_POST['htmldown'] || $_POST['pdfdown'] || $_POST['exceldown'])
+if($_POST['dwformat'])
 Download_reports();
 else {
 require('header.php');
@@ -197,7 +197,7 @@ function editor()
 				else
 				{
 					$data_matrix[$row][$col]['bomb']['value']=$cell_data['bomb'];
-					$data_matrix[$row][$col]['bomb']['src']='trans.gif';
+					$data_matrix[$row][$col]['bomb']['src']='square.png';
 					$data_matrix[$row][$col]['bomb']['alt']='None';
 					$data_matrix[$row][$col]['bomb']['style']='width:18px; height:20px;';
 					$data_matrix[$row][$col]['bomb']['title']='Edit Bomb';
@@ -253,15 +253,22 @@ function editor()
 
 
 	$out = '<script type="text/javascript" src="progress/progress.js"></script>'
-		. '<br><div id="runbuttons" style="width:300px;"><form action="master_heatmap.php" method="post">'
+		. '<br><form action="master_heatmap.php" method="post"><fieldset><legend>Download Option</legend>'
 		. '<input type="hidden" name="id" value="' . $id . '" />';
 	if(isset($_POST['total']) && $_POST['total'] == "on")
 	{
 		$out .='<input type="hidden" name="total_col" value="on" />';
 	}
-	$out .='<input type="image" name="htmldown[]" src="images/html.png" title="HTML Download" />&nbsp;&nbsp;'
+	$out .='<b>Which Format: </b><select id="dwformat" name="dwformat"><option value="htmldown" selected="selected">HTML</option>'
+		. '<option value="pdfdown">PDF</option>'
+		. '<option value="exceldown">Excel</option></select><br/><br/>';
+	$out .='<b>Counts Display: </b><select id="dwcount" name="dwcount"><option value="both" selected="selected">Active & Total Count</option>'
+		. '<option value="active">Only Active Count</option>'
+		. '<option value="total">Only Total Count</option></select><br/><br/><input type="submit" name="download" value="Download" title="Download" /></fieldset></form>';	
+		
+	/*$out .='<input type="image" name="htmldown[]" src="images/html.png" title="HTML Download" />&nbsp;&nbsp;'
 		. '<input type="image" name="pdfdown[]" src="images/pdf.png" title="PDF Download" />&nbsp;&nbsp;'
-		. '<input type="image" name="exceldown[]" src="images/excel_new.png" title="Excel Download" /></div></form>';		
+		. '<input type="image" name="exceldown[]" src="images/excel_new.png" title="Excel Download" /></div></form>';		*/
 	
 	$out .= '<br clear="both" />'
 		. '<form action="master_heatmap.php" onsubmit="return chkbox(0,\'delrepe\');" method="post"><fieldset><legend>Edit report ' . $id . '</legend>'
@@ -312,7 +319,7 @@ function editor()
 		$out .='<br/>';
 		if(isset($areaIds[$col]) && $areaIds[$col] != NULL && !empty($productIds))
 		{
-			$out .= '<a href="intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col] . '" target="_blank" class="ottlink" title="Total Records"><b title="Active Records">'.$col_active_total[$col].', </b>'.$col_count_total[$col].'</a>';
+			$out .= '<a href="intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col] . '" target="_blank" class="ottlink" title="Active Records, Total Records"><b>'.$col_active_total[$col].', </b>'.$col_count_total[$col].'</a>';
 		}
 		$out .='<br/>';
 		$out .= '</th>';
@@ -325,7 +332,7 @@ function editor()
 		{
 			$productIds = array_filter($productIds);
 			$areaIds = array_filter($areaIds);
-			$out .= '<a href="intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds) . '" target="_blank" class="ottlink" title="Total Records"><b title="Active Records">'.$active_total.', </b>'.$count_total.'</a>';
+			$out .= '<a href="intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds) . '" target="_blank" class="ottlink" title="Active Records, Total Records"><b>'.$active_total.', </b>'.$count_total.'</a>';
 		}
 		$out .= '</th>';
 	}
@@ -346,7 +353,7 @@ function editor()
 		$out .='<br/>';
 		if(isset($productIds[$row]) && $productIds[$row] != NULL && !empty($areaIds))
 		{
-			$out .= '<a href="intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds) . '" target="_blank" class="ottlink" title="Total Records"><b title="Active Records">'.$row_active_total[$row].', </b>'.$row_count_total[$row].'</a>';
+			$out .= '<a href="intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds) . '" target="_blank" class="ottlink" title="Active Records, Total Records"><b>'.$row_active_total[$row].', </b>'.$row_count_total[$row].'</a>';
 		}
 		$out .='<br/>';
 		$out .= '</th>';
@@ -360,7 +367,7 @@ function editor()
 				if($data_matrix[$row][$col]['bomb_auto']['src'] != '' && $data_matrix[$row][$col]['bomb_auto']['src'] != NULL)
 				$out .= '<img align="left" title="'.$data_matrix[$row][$col]['bomb_auto']['title'].'" src="images/'.$data_matrix[$row][$col]['bomb_auto']['src'].'" style="'.$data_matrix[$row][$col]['bomb_auto']['style'].' padding-left:10px; cursor:pointer;" alt="'.$data_matrix[$row][$col]['bomb_auto']['alt'].'"  />';
 				
-				$out .= '<a href="intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col] . '" target="_blank" class="ottlink" title="Total Records"><b title="Active Records">'.$data_matrix[$row][$col]['active'].', </b>'.$data_matrix[$row][$col]['total'].'</a>';
+				$out .= '<a href="intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col] . '" target="_blank" class="ottlink" title="Active Records, Total Records"><b>'.$data_matrix[$row][$col]['active'].', </b>'.$data_matrix[$row][$col]['total'].'</a>';
 				
 				$out .= '<img align="right" title="'.$data_matrix[$row][$col]['bomb']['title'].'" src="images/'.$data_matrix[$row][$col]['bomb']['src'].'" style="'.$data_matrix[$row][$col]['bomb']['style'].' vertical-align:middle; padding-right:10px; cursor:pointer;" alt="'.$data_matrix[$row][$col]['bomb']['alt'].'"'
 			.'onclick="popup_show(\'bombpopup_'.$row.'_'.$col.'\', \'bombpopup_drag_'.$row.'_'.$col.'\', \'bombpopup_exit_'.$row.'_'.$col.'\', \'mouse\', -10, -10);" /><br><br>';
@@ -393,7 +400,6 @@ function editor()
 						.'<td align="center" style="background-color:#fff;">'
 						.'<input type="hidden" name="cell_prod['.$row.']['.$col.']" value="'. $productIds[$row] .'" />'
 						.'<input type="hidden" name="cell_area['.$row.']['.$col.']" value="' . $areaIds[$col] . '" />'
-						.'<input name="bomb_popup['.$row.']['.$col.']" class="btn" type="submit" value="Update" />'	
 						.'</td>'
 						.'</tr>'
 						.'</table>'
@@ -414,11 +420,6 @@ function editor()
 						.'<textarea name="filing['.$row.']['.$col.']" id="filing" style="overflow:scroll;" rows="5" cols="20">'. $data_matrix[$row][$col]['filing'] .'</textarea>'
 						.'</td></tr>'
 						.'<tr><th style="background-color:#fff;">&nbsp;</th></tr>'
-						.'<tr>'
-						.'<td align="center" style="background-color:#fff;">'
-						.'<input name="filing_popup['.$row.']['.$col.']" class="btn" type="submit" value="Update" />'	
-						.'</td>'
-						.'</tr>'
 						.'</table>'
 						.'</div>'
 						.'</div>';
@@ -587,7 +588,7 @@ function Download_reports()
 				else
 				{
 					$data_matrix[$row][$col]['bomb']['value']=$cell_data['bomb'];
-					$data_matrix[$row][$col]['bomb']['src']='trans.gif';
+					$data_matrix[$row][$col]['bomb']['src']='square.png';
 					$data_matrix[$row][$col]['bomb']['alt']='None';
 					$data_matrix[$row][$col]['bomb']['style']='width:18px; height:20px;';
 					$data_matrix[$row][$col]['bomb']['title']='Bomb Details';
@@ -647,8 +648,9 @@ function Download_reports()
 			}
 		}
 	}
-		
-	if($_POST['pdfdown'] || $_POST['htmldown'])
+	
+	$count_fillbomb=0;	
+	if($_POST['dwformat']=='pdfdown' || $_POST['dwformat']=='htmldown')
 	{
 	
 		$pdfContent .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'
@@ -659,7 +661,7 @@ function Download_reports()
 						. 'body { font-family:Verdana; font-color:black; font-size: 16px;}'
 						. 'a, a:hover{color:#000000;text-decoration:none; height:100%;}';
 						
-						if($_POST['pdfdown']) //0.5px border value does not work for Chrome and IE and 1px border looks dark in PDF
+						if($_POST['dwformat']=='pdfdown') //0.5px border value does not work for Chrome and IE and 1px border looks dark in PDF
 						{
 							$pdfContent .= 'td, th {vertical-align:top; padding-top:10px; border-right: 0.5px solid blue; border-left:0.5px solid blue; border-top: 0.5px solid blue; border-bottom:0.5px solid blue;}';
 							$pdfContent .= 'tr {border-right: 0.5px solid blue; border-left: 0.5px solid blue; border-top: 0.5px solid blue; border-bottom: 0.5px solid blue;}';
@@ -680,14 +682,14 @@ function Download_reports()
 
 		$pdfContent .= '<div align="center">'
 						. '<table align="center" style="border-collapse:collapse; padding:10px; background-color:#DDF;">'
-						. '<tr><td width="300px" align="left"><b>Name: </b>'. htmlspecialchars($name) .'</td>'
+						. '<tr style="page-break-inside:avoid;" nobr="true"><td width="300px" align="left"><b>Name: </b>'. htmlspecialchars($name) .'</td>'
 						. '<td width="300px" align="left"><b>Category: </b>'. htmlspecialchars($category) .'</td></tr>'
 						. '</table>'
 						. '</div><br /><br/>';
 						
 		$pdfContent .= '<div align="center">'
-						. '<table style="border-collapse:collapse; background-color:#DDF;">'
-						. '<tr><th>&nbsp;</th>';
+						. '<table style="border-collapse:collapse; background-color:#DDF; padding-top:5px;">'
+						. '<thead><tr style="page-break-inside:avoid;" nobr="true"><th>&nbsp;</th>';
 				
 		foreach($columns as $col => $val)
 		{
@@ -695,7 +697,22 @@ function Download_reports()
 					
 			if(isset($areaIds[$col]) && $areaIds[$col] != NULL && !empty($productIds))
 			{
-				$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. '" target="_blank" title="Total Records"><b title="Active Records">'.$col_active_total[$col].', </b>'.$col_count_total[$col].'</a>';
+				if($_POST['dwcount']=='active')
+				{
+					$count_val=$col_active_total[$col];
+					$title="Active Records";
+				}
+				elseif($_POST['dwcount']=='total')
+				{
+					$count_val=$col_count_total[$col];
+					$title="Total Records";
+				}
+				else
+				{
+					$count_val='<b>'.$col_active_total[$col].', </b>'.$col_count_total[$col];
+					$title="Active Records, Total Records";
+				}
+				$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. '" target="_blank" title="'. $title .'">'.$count_val.'</a>';
 			}
 			$pdfContent .='</div></th>';
 		}
@@ -705,13 +722,38 @@ function Download_reports()
 			$pdfContent .= '<th width="150px"><div align="center">';
 			if(!empty($productIds) && !empty($areaIds))
 			{
+				if($_POST['dwcount']=='active')
+				{
+					$count_val=$active_total;
+					$title="Active Records";
+				}
+				elseif($_POST['dwcount']=='total')
+				{
+					$count_val=$count_total;
+					$title="Total Records";
+				}
+				else
+				{
+					$count_val='<b>'.$active_total.', </b>'.$count_total;
+					$title="Active Records, Total Records";
+				}
 				$productIds = array_filter($productIds);
 				$areaIds = array_filter($areaIds);
-				$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds). '" target="_blank" title="Total Records"><b title="Active Records">'.$active_total.', </b>'.$count_total.'</a>';
+				$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds). '" target="_blank" title="'. $title .'">'.$count_val.'</a>';
 			}
 			$pdfContent .= '</div></th>';
 		}
-		$pdfContent .= '</tr>';
+		$pdfContent .= '</tr></thead>';
+		
+		if($_POST['dwformat']=='pdfdown')//Extra row for alignment in PDF
+		{
+			$pdfContent .= '<tr style="page-break-inside:avoid;" nobr="true"><th height="0px" style="height:0px; border-top:none; border:none;">&nbsp;</th>';
+			foreach($columns as $col => $val)
+				$pdfContent .= '<th height="0px" style="height:0px; border-top:none; border:none;">&nbsp;</th>';
+			if(isset($_POST['total_col']) && $_POST['total_col'] == "on")
+				$pdfContent .= '<th height="0px" style="height:0px; border-top:none; border:none;">&nbsp;</th>';
+			$pdfContent .= '</tr>';		
+		}
 		
 		foreach($rows as $row => $rval)
 		{
@@ -719,26 +761,77 @@ function Download_reports()
 					
 			if(isset($productIds[$row]) && $productIds[$row] != NULL && !empty($areaIds))
 			{
-				$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). '" target="_blank" class="ottlink" title="Total Records"><b title="Active Records">'.$row_active_total[$row].', </b>'.$row_count_total[$row].'</a>';
+				if($_POST['dwcount']=='active')
+				{
+					$count_val=$row_active_total[$row];
+					$title="Active Records";
+				}
+				elseif($_POST['dwcount']=='total')
+				{
+					$count_val=$row_count_total[$row];
+					$title="Total Records";
+				}
+				else
+				{
+					$count_val='<b>'.$row_active_total[$row].', </b>'.$row_count_total[$row];
+					$title="Active Records, Total Records";
+				}
+				$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). '" target="_blank" class="ottlink" title="'. $title .'">'.$count_val.'</a>';
 			}
 			$pdfContent .= '</div></th>';
 			
 			foreach($columns as $col => $cval)
 			{
-				$pdfContent .= '<td width="150px" style="text-align:center; '.$data_matrix[$row][$col]['color'].'" align="center">';
+				$pdfContent .= '<td width="150px" style="text-align:center; '.$data_matrix[$row][$col]['color'].'" align="center">&nbsp;&nbsp;&nbsp;&nbsp;';
 				
 				if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL)
 				{
-					if($data_matrix[$row][$col]['bomb_auto']['src'] != '' && $data_matrix[$row][$col]['bomb_auto']['src'] != NULL)
-					$pdfContent .= '<img align="left" title="'.$data_matrix[$row][$col]['bomb_auto']['title'].'" src="'. urlPath() .'images/'.$data_matrix[$row][$col]['bomb_auto']['src'].'" style="'.$data_matrix[$row][$col]['bomb_auto']['style'].' padding-left:10px; cursor:pointer;" alt="'.$data_matrix[$row][$col]['bomb_auto']['alt'].'"  />';
-				
-					$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '" target="_blank" title="Total Records"><b title="Active Records">'.$data_matrix[$row][$col]['active'].', </b>'.$data_matrix[$row][$col]['total'].'</a>';
-				
-					$pdfContent .= '<img align="right" title="'.$data_matrix[$row][$col]['bomb']['title'].'" src="'. urlPath() .'images/'.$data_matrix[$row][$col]['bomb']['src'].'" style="'.$data_matrix[$row][$col]['bomb']['style'].' vertical-align:middle; padding-right:10px; cursor:pointer;" alt="'.$data_matrix[$row][$col]['bomb']['alt'].'"'
-			.'onclick="popup_show(\'bombpopup_'.$row.'_'.$col.'\', \'bombpopup_drag_'.$row.'_'.$col.'\', \'bombpopup_exit_'.$row.'_'.$col.'\', \'mouse\', -10, -10);" />';
-					if($_POST['htmldown']) //As there is no need for following code to be executed for PDF
+					
+					if($_POST['dwcount']=='active')
 					{
-						$pdfContent .= '<br/><br/><img align="right" title="Filing Details" src="'. urlPath() .'images/'. (($data_matrix[$row][$col]['filing'] == NULL && $data_matrix[$row][$col]['filing'] == '') ? 'edit.png' : 'file.png' ) .'" style="width:14px; height:16px; vertical-align:top; cursor:pointer;'.(($data_matrix[$row][$col]['filing'] == NULL && $data_matrix[$row][$col]['filing'] == '') ? ' background-color:#CCCCCC;' : '' ).'" alt="Filing Details" onclick="popup_show(\'filingpopup_'.$row.'_'.$col.'\', \'filingpopup_drag_'.$row.'_'.$col.'\', \'filingpopup_exit_'.$row.'_'.$col.'\', \'mouse\', -10, -10);" />';
+						$count_val=$data_matrix[$row][$col]['active'];
+						$title="Active Records";
+					}
+					elseif($_POST['dwcount']=='total')
+					{
+						$count_val=$data_matrix[$row][$col]['total'];
+						$title="Total Records";
+					}
+					else
+					{
+						$count_val='<b>'.$data_matrix[$row][$col]['active'].', </b>'.$data_matrix[$row][$col]['total'];
+						$title="Active Records, Total Records";
+					}
+				
+					$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '" target="_blank" title="'. $title .'">'. (($_POST['dwformat']=='pdfdown' || $data_matrix[$row][$col]['bomb']['src'] != 'square.png') ? '' : '&nbsp;&nbsp;&nbsp;&nbsp;').$count_val.'</a>';
+					
+					if($_POST['dwformat']=='htmldown') //When bomb has square dont include it in pdf as size is big and no use
+					{	$pdfContent .= '<img align="right" title="'.$data_matrix[$row][$col]['bomb']['title'].'" src="'. urlPath() .'images/'.$data_matrix[$row][$col]['bomb']['src'].'" style="'.$data_matrix[$row][$col]['bomb']['style'].' vertical-align:middle; padding-right:10px; cursor:pointer;" alt="'.$data_matrix[$row][$col]['bomb']['alt'].'"'
+			.'onclick="popup_show(\'bombpopup_'.$row.'_'.$col.'\', \'bombpopup_drag_'.$row.'_'.$col.'\', \'bombpopup_exit_'.$row.'_'.$col.'\', \'mouse\', -10, -10);" />';				}
+			
+			
+					if($_POST['dwformat']=='pdfdown') //As in PDF alignment not works space added to align it properly	
+					{
+						$pdfContent .= '&nbsp;&nbsp;<img align="right" title="'.$data_matrix[$row][$col]['bomb']['title'].'" src="'. urlPath() .'images/'.$data_matrix[$row][$col]['bomb']['src'].'" style="'.(($data_matrix[$row][$col]['bomb']['src'] == 'square.png') ? 'width:10px; height:10px;' : $data_matrix[$row][$col]['bomb']['style'] ).' vertical-align:middle; padding-right:10px; cursor:pointer;" alt="'.$data_matrix[$row][$col]['bomb']['alt'].'" />';
+						
+						if($data_matrix[$row][$col]['bomb_explain'] != NULL && $data_matrix[$row][$col]['bomb_explain'] != '')
+						{
+							$count_fillbomb++;
+							$pdfContent .= '&nbsp;('.$count_fillbomb.')';
+						}
+						
+						$pdfContent .= '<br/><br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img align="right" title="Filing Details" src="'. urlPath() .'images/'. (($data_matrix[$row][$col]['filing'] == NULL && $data_matrix[$row][$col]['filing'] == '') ? 'edit.png' : 'file.png' ) .'" style="width:10px; height:12px; vertical-align:top; cursor:pointer;'.(($data_matrix[$row][$col]['filing'] == NULL && $data_matrix[$row][$col]['filing'] == '') ? ' background-color:#CCCCCC;' : '' ).'" alt="Filing" />';
+						
+						if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
+						{
+							$count_fillbomb++;
+							$pdfContent .= '&nbsp;('.$count_fillbomb.')';
+						}
+					}	
+
+					if($_POST['dwformat']=='htmldown') //As there is no need for following code to be executed for PDF
+					{
+						$pdfContent .= '<br/><br/><img align="right" title="Filing Details" src="'. urlPath() .'images/'. (($data_matrix[$row][$col]['filing'] == NULL && $data_matrix[$row][$col]['filing'] == '') ? 'edit.png' : 'file.png' ) .'" style="width:14px; height:16px; vertical-align:top; cursor:pointer;'.(($data_matrix[$row][$col]['filing'] == NULL && $data_matrix[$row][$col]['filing'] == '') ? ' background-color:#CCCCCC;' : '' ).'" alt="Filing" onclick="popup_show(\'filingpopup_'.$row.'_'.$col.'\', \'filingpopup_drag_'.$row.'_'.$col.'\', \'filingpopup_exit_'.$row.'_'.$col.'\', \'mouse\', -10, -10);" />';
 
 					
 						$pdfContent .= '<div class="popup_form" id="bombpopup_'.$row.'_'.$col.'" style="display: none;">'	//Pop-Up Form for Bomb Editing Starts Here
@@ -796,14 +889,49 @@ function Download_reports()
 		}
 		$pdfContent .= '</table></div><br /><br/>'
 						. '<div align="center"><table align="center" style="border-collapse:collapse; vertical-align:middle; padding:10px; background-color:#DDF;">'
-						. '<tr><td width="300px" align="left"><b>Footnotes: </b><br/><div style="padding-left:10px;">'. $footnotes .'</div></td>'
+						. '<tr style="page-break-inside:avoid;" nobr="true"><td width="300px" align="left"><b>Footnotes: </b><br/><div style="padding-left:10px;">'. $footnotes .'</div></td>'
 						. '<td width="300px" align="left"><b>Description: </b><br/><div style="padding-left:10px;">'. $description .'</div></td></tr>'
-						. '</table></div>'
-						. '</body>'
+						. '</table></div>';
+						
+		if($_POST['dwformat']=='pdfdown' && $count_fillbomb > 0)
+		{
+			$pdfContent .= '<br style="page-break-before:always;" /><br/>'
+							. '<div align="center"><table align="center" width="100%" style="border-collapse:collapse; vertical-align:middle; background-color:#DDF;">'
+							. '<thead><tr style="border-bottom:none;"><th height="11px" style="width:30px; border-bottom:none;" align="left">No.</th><th style="width:70px; border-bottom:none;" align="left">Image</th><th style="width:675px; border-bottom:none;" align="left">Details</th></tr></thead>'
+							. '<tr height="1px" style="border:none; border-top:none;"><td style="width:30px; height:0px; border-top:none; border:none;"></td><td style="width:70px; height:0px; border-top:none; border:none;"></td><td style="width:675px; height:0px; border-top:none; border:none;"></td></tr>';
+								
+			$count_fillbomb_again=0;
+			foreach($rows as $row => $rval)
+			foreach($columns as $col => $cval)
+			{
+				if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL)
+				{
+					if($data_matrix[$row][$col]['bomb_explain'] != NULL && $data_matrix[$row][$col]['bomb_explain'] != '')
+					{
+						$count_fillbomb_again++;
+						$pdfContent .=  '<tr style="page-break-inside:avoid;" nobr="true"><td align="left"><div style="padding-left:10px;">'. $count_fillbomb_again .'</div></td>'
+							. '<td align="left" width="30px"><div style="padding-left:10px;"><img align="right" title="'.$data_matrix[$row][$col]['bomb']['title'].'" src="'. urlPath() .'images/'.$data_matrix[$row][$col]['bomb']['src'].'" style="'.(($data_matrix[$row][$col]['bomb']['src'] == 'square.png') ? 'width:10px; height:10px;' : $data_matrix[$row][$col]['bomb']['style'] ).' vertical-align:middle; padding-right:10px; cursor:pointer;" alt="'.$data_matrix[$row][$col]['bomb']['alt'].'" /></div></td>'
+							. '<td align="left"><div style="padding-left:10px;">'. $data_matrix[$row][$col]['bomb_explain'] .'</div></td></tr>';
+					}
+						
+					if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
+					{
+						$count_fillbomb_again++;
+						$pdfContent .=  '<tr style="page-break-inside:avoid;" nobr="true"><td align="left" width="30px"><div style="padding-left:10px;">'. $count_fillbomb_again .'</div></td>'
+							. '<td align="left" width="30px"><div style="padding-left:10px;"><img align="right" title="Filing Details" src="'. urlPath() .'images/'. (($data_matrix[$row][$col]['filing'] == NULL && $data_matrix[$row][$col]['filing'] == '') ? 'edit.png' : 'file.png' ) .'" style="width:10px; height:12px; vertical-align:top; cursor:pointer;'.(($data_matrix[$row][$col]['filing'] == NULL && $data_matrix[$row][$col]['filing'] == '') ? ' background-color:#CCCCCC;' : '' ).'" alt="Filing" /></div></td>'
+							. '<td align="left"><div style="padding-left:10px;">'. $data_matrix[$row][$col]['filing'] .'</div></td></tr>';
+					}
+				}				
+			}
+			
+			$pdfContent .= '</table></div>';			
+		}
+						
+		$pdfContent .=  '</body>'
 						. '</html>';
-
+						
 		//echo $pdfContent;
-		if($_POST['pdfdown'])
+		if($_POST['dwformat']=='pdfdown')
 		{
 			require_once('tcpdf/config/lang/eng.php');
 			require_once('tcpdf/tcpdf.php');  
@@ -813,11 +941,13 @@ function Download_reports()
 			$pdf->SetAuthor('Larvol Trials');
 			$pdf->SetTitle('Larvol Trials');
 			$pdf->SetSubject('Larvol Trials');
-			$pdf->SetKeywords('Larvol Trials, Larvol Trials PDF Export');
+			$pdf->SetKeywords('Larvol Trials Master Heatmap, Larvol Trials Master Heatmap PDF Export');
 			$pdf->SetFont('verdana', '', 8);
 			$pdf->setFontSubsetting(false);
 			$pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
 			$pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
+			
+			$pdf->setPageOrientation('l');
 			
 			// remove default header/footer
 			$pdf->setPrintHeader(false);
@@ -838,7 +968,7 @@ function Download_reports()
 		}//PDF Function Ends
 		//var_dump(urlPath());
 		//echo htmlspecialchars($pdfContent);
-		if($_POST['htmldown'])
+		if($_POST['dwformat']=='htmldown')
 		{	
 			$filename = 'Larvol_'. substr($name,0,20) .'_HTML_Report_'. date("Y-m-d_H.i.s").'.html';
 			//!$handle = fopen($filename, 'w');
@@ -859,7 +989,7 @@ function Download_reports()
 		
 	}//Pdf & HTML Function Ends
 	
-	if($_POST['exceldown'])
+	if($_POST['dwformat']=='exceldown')
 	{
 	  	
 		// Create excel file object
@@ -883,10 +1013,26 @@ function Download_reports()
 		{
 			if(isset($areaIds[$col]) && $areaIds[$col] != NULL && !empty($productIds))
 			{
+				if($_POST['dwcount']=='active')
+				{
+					$count_val=' ('. $col_active_total[$col] .')';
+					$tooltip='Active Records';
+				}
+				elseif($_POST['dwcount']=='total')
+				{
+					$count_val=' ('. $col_count_total[$col] .')';
+					$tooltip='Total Records';
+				}
+				else
+				{
+					$count_val=' ('.$col_active_total[$col].', '.$col_count_total[$col].')';
+					$tooltip='Active Records, Total Records';
+				}
+				
 				$cell= num2char($col).'1';
-				$objPHPExcel->getActiveSheet()->setCellValue($cell, $val.' ('.$col_active_total[$col].', '.$col_count_total[$col].')');
+				$objPHPExcel->getActiveSheet()->setCellValue($cell, $val.$count_val);
 				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlencode(urlPath() . 'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col])); 
- 			    $objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip('Active record, Total Records');
+ 			    $objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip($tooltip);
 				$objPHPExcel->getActiveSheet()->getColumnDimension(num2char($col))->setWidth(18);
 				
 				$objPHPExcel->getActiveSheet()->getStyle($cell)->getAlignment()->applyFromArray(
@@ -911,10 +1057,27 @@ function Download_reports()
 		{
 			if(isset($productIds[$row]) && $productIds[$row] != NULL && !empty($areaIds))
 			{
+				
+				if($_POST['dwcount']=='active')
+				{
+					$count_val=' ('. $row_active_total[$row] .')';
+					$tooltip='Active Records';
+				}
+				elseif($_POST['dwcount']=='total')
+				{
+					$count_val=' ('. $row_count_total[$row] .')';
+					$tooltip='Total Records';
+				}
+				else
+				{
+					$count_val=' ('.$row_active_total[$row].', '.$row_count_total[$row].')';
+					$tooltip='Active Records, Total Records';
+				}
+				
 				$cell='A'.($row+1);
-				$objPHPExcel->getActiveSheet()->setCellValue($cell, $rval.' ('.$row_active_total[$row].', '.$row_count_total[$row].')');
+				$objPHPExcel->getActiveSheet()->setCellValue($cell, $rval.$count_val);
 				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlencode(urlPath() . 'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds))); 
- 			    $objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip('Active record, Total Records');
+ 			    $objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip($tooltip);
 				
 				/*$objPHPExcel->getActiveSheet()->getStyle($cell)->getAlignment()->applyFromArray(
       									array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_LEFT,
@@ -928,27 +1091,32 @@ function Download_reports()
 				$cell = num2char($col) . ($row + 1);
 				if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL)
 				{
-					if($data_matrix[$row][$col]['bomb_auto']['src'] != '' && $data_matrix[$row][$col]['bomb_auto']['src'] != NULL && $data_matrix[$row][$col]['bomb']['src'] != 'trans.gif')
+					if($_POST['dwcount']=='active')
 					{
-						$objDrawing = new PHPExcel_Worksheet_Drawing();
-						$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
-						$objDrawing->setOffsetX(10);
-						$objDrawing->setOffsetY(3);
-						$objDrawing->setPath('images/'.$data_matrix[$row][$col]['bomb_auto']['src']);
-						$objDrawing->setDescription($data_matrix[$row][$col]['bomb_auto']['title']);
-						$objDrawing->setCoordinates($cell);
+						$count_val=$data_matrix[$row][$col]['active'];
+						$tooltip="Active Records";
+					}
+					elseif($_POST['dwcount']=='total')
+					{
+						$count_val=$data_matrix[$row][$col]['total'];
+						$tooltip="Total Records";
+					}
+					else
+					{
+						$count_val=' ('.$data_matrix[$row][$col]['active'].', '.$data_matrix[$row][$col]['total'].')';
+						$tooltip="Active Records, Total Records";
 					}
 					
 					
-					$objPHPExcel->getActiveSheet()->setCellValue($cell, ' ('.$data_matrix[$row][$col]['active'].', '.$data_matrix[$row][$col]['total'].')');
+					$objPHPExcel->getActiveSheet()->setCellValue($cell, $count_val);
 					$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlencode(urlPath() . 'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col])); 
- 			    	$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip('Filing:- '. $data_matrix[$row][$col]['filing']);
+ 			    	$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip($tooltip."\nFiling:- ". $data_matrix[$row][$col]['filing'] ."\nBomb Details:- ". $data_matrix[$row][$col]['bomb_explain']);
 					
-					if($data_matrix[$row][$col]['bomb']['src'] != '' && $data_matrix[$row][$col]['bomb']['src'] != NULL && $data_matrix[$row][$col]['bomb']['src'] !='trans.gif')
+					if($data_matrix[$row][$col]['bomb']['src'] != '' && $data_matrix[$row][$col]['bomb']['src'] != NULL && $data_matrix[$row][$col]['bomb']['src'] !='square.png')
 					{
 						$objDrawing = new PHPExcel_Worksheet_Drawing();
 						$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
-						$objDrawing->setOffsetX(110);
+						$objDrawing->setOffsetX(100);
 						$objDrawing->setOffsetY(3);
 						$objDrawing->setPath('images/'.$data_matrix[$row][$col]['bomb']['src']);
 						$objDrawing->setDescription($data_matrix[$row][$col]['bomb']['title']);
@@ -968,9 +1136,26 @@ function Download_reports()
 		
 		if(isset($_POST['total_col']) && $_POST['total_col'] == "on")
 		{
+			if($_POST['dwcount']=='active')
+			{
+				$count_val=' ('. $active_total .')';
+				$tooltip='Active Records';
+			}
+			elseif($_POST['dwcount']=='total')
+			{
+				$count_val=' ('. $count_total .')';
+				$tooltip='Total Records';
+			}
+			else
+			{
+				$count_val='Total ('.$active_total.', '.$count_total.')';
+				$tooltip='Active Records, Total Records';
+			}
+					
 			$cell = num2char(count($col)+2).'1';
-			$objPHPExcel->getActiveSheet()->setCellValue($cell, 'Total ('.$active_total.', '.$count_total.')');
+			$objPHPExcel->getActiveSheet()->setCellValue($cell, $count_val);
 			$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlencode(urlPath() . 'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds)));
+			$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip($tooltip);
 		}
 		
 		$row = count($rows) + 1;
@@ -1171,6 +1356,18 @@ function postEd()
 				}
 			}
 		}//exit;
+		
+		foreach($_POST['cell_prod'] as $row => $data)
+		foreach($data as $col => $value)
+		{
+			$prod=$_POST['cell_prod'][$row][$col];
+			$area=$_POST['cell_area'][$row][$col];
+			$filing=mysql_real_escape_string($_POST['filing'][$row][$col]);
+			$bomb=$_POST['bomb'][$row][$col];
+			$bomb_explain=mysql_real_escape_string($_POST['bomb_explain'][$row][$col]);
+			$query = "UPDATE `rpt_masterhm_cells` set `bomb` = '$bomb', `bomb_explain` = '$bomb_explain', `filing` = '$filing' WHERE `product` = $prod AND `area` = $area";
+			mysql_query($query) or die ('Bad SQL Query updating Bomb and Filing Information.<br/>'.$query);
+		}
 	}
 
 	if(isset($_POST['move_row_down']))
@@ -1313,33 +1510,6 @@ function postEd()
 		mysql_query('COMMIT');
 	}
 	
-	if(isset($_POST['bomb_popup']))
-	{
-	foreach($_POST['bomb_popup'] as $row => $cols)
-	foreach($cols as $col => $data);
-	
-	$bomb=$_POST['bomb'][$row][$col];
-	$bomb_explain=mysql_real_escape_string($_POST['bomb_explain'][$row][$col]);
-	$id=$_POST['id'];
-	$prod=$_POST['cell_prod'][$row][$col];
-	$area=$_POST['cell_area'][$row][$col];
-	$query = "UPDATE `rpt_masterhm_cells` set `bomb` = '$bomb', `bomb_explain` = '$bomb_explain' WHERE `product` = $prod AND `area` = $area";
-	mysql_query($query) or die ('Bad SQL Query updating Bomb Information.<br/>'.$query);
-	}
-	
-	if(isset($_POST['filing_popup']))
-	{
-	foreach($_POST['filing_popup'] as $row => $cols)
-	foreach($cols as $col => $data);
-	
-	$filing=mysql_real_escape_string($_POST['filing'][$row][$col]);
-	$id=$_POST['id'];
-	$prod=$_POST['cell_prod'][$row][$col];
-	$area=$_POST['cell_area'][$row][$col];
-	$query = "UPDATE `rpt_masterhm_cells` set `filing` = '$filing' WHERE `product` = $prod AND `area` = $area";
-	mysql_query($query) or die ('Bad SQL Query updating Bomb Information.<br/>'.$query);
-	}
-
 }
 
 //processes POST for report list
