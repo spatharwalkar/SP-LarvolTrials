@@ -108,8 +108,16 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					exit;
 				} else 
 				{
-					$ln=strlen('  `source_id` = "'. $sourceid . '"  and  ');
-					$query = substr($mystring,0,$pos+6). ' ( `source_id` = "'. $sourceid . '" )  and  ( ' . substr($mystring,$pos+6) . ' ) ';
+				
+					if( isset($sourceid) and !is_null($sourceid) and !empty($sourceid) )
+					{
+//						$ln=strlen('  `source_id` = "'. $sourceid . '"  and  ');
+						$query = substr($mystring,0,$pos+6). ' ( `source_id` = "'. $sourceid . '" )  and  ( ' . substr($mystring,$pos+6) . ' ) ';
+					}
+					else
+					{
+						$query = substr($mystring,0,$pos+6). '  ( ' . substr($mystring,$pos+6) . ' ) ';
+					}
 				}
 				
 				/*******/
