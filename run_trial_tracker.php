@@ -19,6 +19,7 @@ class TrialTracker
 	private $resultsPerPage = 100;
 	private $enumVals = array();
 	private $phaseValues = array();
+	private $referrerFlag = FALSE;
 	
 	function TrialTracker()
 	{
@@ -49,6 +50,11 @@ class TrialTracker
 							'1c'=>'#99CC00', '1/2'=>'#FFFF00', '1b/2'=>'#FFFF00', '1b/2a'=>'#FFFF00', '2'=>'#FFFF00', '2a'=>'#FFFF00', '2a/2b'=>'#FFFF00', 
 							'2a/b'=>'#FFFF00', '2b'=>'#FFFF00', '2/3'=>'#FF9900', '2b/3'=>'#FF9900','3'=>'#FF9900', '3a'=>'#FF9900', '3b'=>'#FF9900', 
 							'3/4'=>'#FF0000', '3b/4'=>'#FF0000', '4'=>'#FF0000');
+		
+		if(isset($_SERVER['HTTP_REFERER']) && $_SERVER['HTTP_REFERER'] != '' && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') !== FALSE)
+		{
+			$this->referrerFlag = TRUE;
+		}
 	}
 	
 	function generateTrialTracker($format, $resultIds, $timeMachine = NULL, $ottType, $globalOptions = array())
@@ -5299,7 +5305,10 @@ class TrialTracker
 		$Values = array();
 		$linkExpiry = array();
 			
-		$this->displayHeader();
+		if($this->referrerFlag === FALSE)
+		{
+			$this->displayHeader();
+		}
 		if($ottType == 'unstacked')
 		{
 			$Id = explode(".", $resultIds);
@@ -5309,10 +5318,11 @@ class TrialTracker
 			{
 				$linkExpiry[] = $res['expiry'];
 			}
-			
-			echo '<td class="result">Area: ' . htmlformat(trim($res['header'])) . '</td></tr></table>';
-			echo '<br clear="all"/><br/>';
-			
+			if($this->referrerFlag === FALSE)
+			{
+				echo '<td class="result">Area: ' . htmlformat(trim($res['header'])) . '</td></tr></table>';
+				echo '<br clear="all"/><br/>';
+			}
 			echo '<input type="hidden" name="results" value="' . $resultIds . '"/>'
 					. '<input type="hidden" name="time" value="' . $timeMachine . '"/>'
 					. '<input type="hidden" name="v" value="' . $globalOptions['version'] . '"/>';
@@ -5354,10 +5364,11 @@ class TrialTracker
 			{
 				$linkExpiry[] = $res['expiry'];
 			}
-			
-			echo '<td class="result">' . $t . '</td></tr></table>';
-			echo '<br clear="all"/><br/>';
-			
+			if($this->referrerFlag === FALSE)
+			{
+				echo '<td class="result">' . $t . '</td></tr></table>';
+				echo '<br clear="all"/><br/>';
+			}
 			echo '<input type="hidden" name="results" value="' . $resultIds . '"/>'
 					. '<input type="hidden" name="type" value="' . substr($ottType, 0, 3) . '"/>'
 					. '<input type="hidden" name="time" value="' . $timeMachine . '"/>'
@@ -5385,9 +5396,11 @@ class TrialTracker
 			
 			if(count($resultIds['product']) > 1 && count($resultIds['area']) > 1)
 			{	
-				echo '<td class="result">Area: Total</td>' . '</tr></table>';
-				echo '<br clear="all"/><br/>';
-				
+				if($this->referrerFlag === FALSE)
+				{
+					echo '<td class="result">Area: Total</td>' . '</tr></table>';
+					echo '<br clear="all"/><br/>';
+				}
 				$ottType = 'colstackedindexed';
 				
 				foreach($resultIds['product'] as $pkey => $pvalue)
@@ -5420,9 +5433,11 @@ class TrialTracker
 					$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $productId);
 					$ottType = 'rowstackedindexed';
 					
-					echo '<td class="result">Product: ' . htmlformat($productName) . '</td></tr></table>';
-					echo '<br clear="all"/><br/>';
-					
+					if($this->referrerFlag === FALSE)
+					{
+						echo '<td class="result">Product: ' . htmlformat($productName) . '</td></tr></table>';
+						echo '<br clear="all"/><br/>';
+					}
 					foreach($resultIds['area'] as $akey => $avalue)
 					{
 						$res = mysql_query("SELECT `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
@@ -5450,10 +5465,11 @@ class TrialTracker
 					$areaId = $row['id'];
 					
 					$ottType = 'colstackedindexed';
-					
-					echo '<td class="result">Area: ' . htmlformat($areaName) . '</td></tr></table>';
-					echo '<br clear="all"/><br/>';
-					
+					if($this->referrerFlag === FALSE)
+					{
+						echo '<td class="result">Area: ' . htmlformat($areaName) . '</td></tr></table>';
+						echo '<br clear="all"/><br/>';
+					}
 					foreach($resultIds['product'] as $pkey => $pvalue)
 					{
 						$res = mysql_query("SELECT `name`, `id` FROM `products` WHERE id = '" . $pvalue . "' ");
@@ -5477,10 +5493,11 @@ class TrialTracker
 				$res = mysql_query("SELECT `name`, `id` FROM `areas` WHERE id IN ('" . implode(',', $resultIds['area']) . "') ");
 				$row = mysql_fetch_assoc($res);
 				$Ids[0]['area'] = $row['id'];
-				
-				echo '<td class="result">Area: ' . htmlformat($row['name']) . '</td></tr></table>';
-				echo '<br clear="all"/><br/>';
-				
+				if($this->referrerFlag === FALSE)
+				{
+					echo '<td class="result">Area: ' . htmlformat($row['name']) . '</td></tr></table>';
+					echo '<br clear="all"/><br/>';
+				}
 				$res = mysql_query("SELECT `name`, `id` FROM `products` WHERE id IN ('" . implode(',', $resultIds['product']) . "') ");
 				$row = mysql_fetch_assoc($res);
 				
@@ -5520,9 +5537,11 @@ class TrialTracker
 					$nctIds[0][] = $arow['nctid'];
 				}
 			}
-			
-			echo '<td class="result">&nbsp;</td></tr></table>';
-			echo '<br clear="all"/><br/>';
+			if($this->referrerFlag === FALSE)
+			{
+				echo '<td class="result">&nbsp;</td></tr></table>';
+				echo '<br clear="all"/><br/>';
+			}
 			echo '<input type="hidden" name="id" value="' . $Id . '"/>';
 			
 			$timeMachine = strtotime($row['time']);
@@ -5542,10 +5561,11 @@ class TrialTracker
 		else if($ottType == 'unstackedoldlink')
 		{
 			$params 	= unserialize(gzinflate(base64_decode($resultIds['params'])));
-			
-			echo '<td class="result">Area: ' . $params['columnlabel'] . '</td></tr></table>';
-			echo '<br clear="all"/><br/>';
-			
+			if($this->referrerFlag === FALSE)
+			{
+				echo '<td class="result">Area: ' . $params['columnlabel'] . '</td></tr></table>';
+				echo '<br clear="all"/><br/>';
+			}
 			echo '<input type="hidden" name="leading" value="' . $resultIds['leading'] . '"/>'
 					. '<input type="hidden" name="params" value="' . $resultIds['params'] . '"/>'
 					.'<input type="hidden" id="upmstyle" value="expand"/>';
@@ -5559,18 +5579,21 @@ class TrialTracker
 		{
 			$cparams 	= unserialize(gzinflate(base64_decode($resultIds['cparams'])));
 			
-			if($cparams['type'] == 'col')
+			if($this->referrerFlag === FALSE)
 			{
-				echo '<td class="result">Area: ' . $cparams['columnlabel'] . '</td></tr></table>';
+				if($cparams['type'] == 'col')
+				{
+					echo '<td class="result">Area: ' . $cparams['columnlabel'] . '</td></tr></table>';
+				}
+				else
+				{
+					echo '<td class="result">Product: ' . $cparams['rowlabel'] . '</td></tr></table>';
+					
+				}
+				echo '<br clear="all"/><br/>';
 			}
-			else
-			{
-				echo '<td class="result">Product: ' . $cparams['rowlabel'] . '</td></tr></table>';
-				
-			}
-		
-			echo '<br clear="all"/><br/>'
-				. '<input type="hidden" name="cparams" value="' . $resultIds['cparams'] . '"/>';
+			
+			echo '<input type="hidden" name="cparams" value="' . $resultIds['cparams'] . '"/>';
 			foreach($resultIds['leading'] as $lkey => $lvalue)
 			{
 				echo '<input type="hidden" name="leading[' . $lkey . ']" value="' . $lvalue . '"/>';
