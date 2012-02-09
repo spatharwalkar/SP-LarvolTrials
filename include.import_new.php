@@ -280,6 +280,70 @@ else $ddesc=$rec->detailed_descr->textblock;
 		$record_data['results_reference_citation'][] = $ref->citation;
 		$record_data['results_reference_PMID'][] = $ref->PMID;
 	}
+	
+	/***** TKV
+	****** Detect and pick all irregular phases that exist in one or several of the various title or description fields */
+	$phases_regex='/phase4|phase2\/3|phase 2a\/2b|phase 1\/2|Phase l\/Phase ll|phase 1b\/2a|phase 1a\/1b|Phase 1a\/b|phase 3b\/4|Phase I\/II|Phase2b\/3|phase 1b\/2|phase 2a\/b|phase 1a|phase 1b|Phase 1C|Phase III(?![a-z.-\\/])|phase II(?![a-z.-\\/])|Phase I(?![a-z.-\\/])|phase 2a|PHASEII|PHASE iii|phase 2b|phase iib|phase iia|phase 3a|phase 3b/i';
+	preg_match_all($phases_regex, $record_data['brief_title'], $matches);
+
+	if(!count($matches[0]) >0 )
+	{
+	preg_match_all($phases_regex, $record_data['official_title'], $matches);
+	}
+
+		 // pr($record_data);
+	//pr($matches);
+
+	if(!count($matches[0]) >0 )
+	{
+	preg_match_all($phases_regex, $record_data['brief_summary'], $matches);
+	}
+
+	if(count($matches[0]) >0 )
+	{
+
+		$cnt=count($matches[0]);
+
+		$record_data['phase']=ucwords($matches[0][0]);
+		
+		switch ($record_data['phase']) 
+		{
+		case 'Phase 1a/b':
+			$record_data['phase']='Phase 1a/b';
+			break;
+		case 'Phase2b/3':
+			$record_data['phase']='Phase 2b/3';
+			break;
+		case 'Phase 1C':
+			$record_data['phase']='Phase 1c';
+			break;
+		case 'Phase I/II':
+			$record_data['phase']='Phase 1/Phase 2';
+			break;
+		case 'Phase l/Phase ll':
+			$record_data['phase']='Phase 1/Phase 2';
+			break;
+		case 'phase 1/2':
+			$record_data['phase']='Phase 1/Phase 2';
+			break;
+		case 'phase 2/3':
+			$record_data['phase']='Phase 2/Phase 3';
+			break;
+		case 'phase2/3':
+			$record_data['phase']='Phase 2/Phase 3';
+			break;
+		case 'phase 3/4':
+			$record_data['phase']='Phase 3/Phase 4';
+			break;
+		case 'phase4':
+			$record_data['phase']='Phase 4';
+			break;
+		}
+		
+		
+	}
+
+	//****
 
 	
 
