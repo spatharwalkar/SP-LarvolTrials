@@ -4519,6 +4519,8 @@ class TrialTracker
 				if($section != '-1')
 				{
 					$diff = $sectionKey - $section;
+
+
 					if(($diff >= 2) && $section != -1)
 					{	
 						$counter = $section+1;
@@ -5631,6 +5633,7 @@ class TrialTracker
 		$Trials['allTrialsforDownload'] = array();
 		
 		$totinactivecount = 0;
+
 		$totactivecount = 0;
 		$totalcount = 0;
 		
@@ -6287,56 +6290,56 @@ class TrialTracker
 				$result[$index]['NCT/overall_status'] = $row['overall_status'];
 				$result[$index]['NCT/is_active'] = $row['is_active'];
 				$result[$index]['section'] = $ikey;
+				$result[$index]['new'] = 'n';
+				$result[$index]['edited'] = array();
 				
 				if($row['firstreceived_date'] <= date('Y-m-d', $timeMachine) && $row['firstreceived_date'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
 				{
 					$result[$index]['new'] = 'y';
 				}
-				else
-				{
-					$result[$index]['new'] = 'n';
-				}
+				
 				if($row['lastchanged_date'] <= date('Y-m-d', $timeMachine) && $row['lastchanged_date'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
 				{
-					$subquery = '';
-					foreach($fieldNames as $fkey => $fvalue)
-					{
-						$subquery .= 'CASE WHEN (' . $fvalue . ' BETWEEN "' . date('Y-m-d', strtotime($timeInterval, $timeMachine)) . '" AND "'
-									 . date('Y-m-d', $timeMachine) . '") THEN ' . str_replace('_lastchanged', '_prev', $fvalue) 
-									 . ' END AS ' . str_replace('_lastchanged', '_prev', $fvalue) . ', ';
-					}
-					
-					$uquery = 'SELECT ' . substr($subquery, 0, -2) . ' FROM `data_history` WHERE `larvol_id` = "' . $row['larvol_id'] . '" ' ;
+					//echo '<br/>query-->'.
+					$uquery = "SELECT `end_date_prev`, `region_prev`, `brief_title_prev`, `acronym_prev`, `lead_sponsor_prev`,"
+							. " `start_date_prev`, `phase_prev`, `enrollment_prev`, `collaborator_prev`, `condition_prev`, `intervention_name_prev`, `"
+							. implode("`, `", $fieldNames) . "` FROM `data_history` WHERE `larvol_id` = '" . $row['larvol_id'] . "' AND ( (`" 
+							. implode('` BETWEEN "' . date('Y-m-d', strtotime($timeInterval, $timeMachine)) . '" AND "' . date('Y-m-d', $timeMachine) 
+							. '") OR (`', $fieldNames) . "` BETWEEN '" . date('Y-m-d', strtotime($timeInterval, $timeMachine)) . "' AND '" 
+							. date('Y-m-d', $timeMachine) . "') ) ";
 					$ures = mysql_query($uquery);
 					while($arr = mysql_fetch_assoc($ures))
 					{
-						if(isset($arr['end_date_prev']))
+						if($arr['end_date_lastchanged'] < date('Y-m-d', $timeMachine) 
+						&& $arr['end_date_lastchanged'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
 						{
 							if($arr['end_date_prev'] != '' && $arr['end_date_prev'] !== NULL)
 							{
-								$result[$index]['edited']['inactive_date'] = $previousValue . $arr['end_date_prev'];
+								$result[$index]['edited']['NCT/inactive_date'] = $previousValue . $arr['end_date_prev'];
 							}
 							else
 							{
-								$result[$index]['edited']['inactive_date'] = $noPreviousValue;
+								$result[$index]['edited']['NCT/inactive_date'] = $noPreviousValue;
 							}
 						}
 						
-						if(isset($arr['region']))
+						if($arr['region_lastchanged'] < date('Y-m-d', $timeMachine) 
+						&& $arr['region_lastchanged'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
 						{
-							if($arr['region'] != '' && $arr['region'] !== NULL)
+							if($arr['region_prev'] != '' && $arr['region_prev'] !== NULL)
 							{
-								$result[$index]['edited']['region'] = $previousValue . $arr['region'];
+								$result[$index]['edited']['NCT/region'] = $previousValue . $arr['region_prev'];
 							}
 							else
 							{
-								$result[$index]['edited']['region'] = $noPreviousValue;
+								$result[$index]['edited']['NCT/region'] = $noPreviousValue;
 							}
 						}
 						
-						if(isset($arr['brief_title']))
+						if($arr['brief_title_lastchanged'] < date('Y-m-d', $timeMachine) 
+						&& $arr['brief_title_lastchanged'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
 						{
-							if($arr['brief_title'] != '' && $arr['brief_title'] !== NULL)
+							if($arr['brief_title_prev'] != '' && $arr['brief_title_prev'] !== NULL)
 							{
 								$result[$index]['edited']['NCT/brief_title'] = $previousValue . $arr['brief_title_prev'];
 							}
@@ -6346,11 +6349,12 @@ class TrialTracker
 							}
 						}
 						
-						if(isset($arr['acronym']))
+						if($arr['acronym_lastchanged'] < date('Y-m-d', $timeMachine) 
+						&& $arr['acronym_lastchanged'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
 						{
-							if($arr['acronym'] != '' && $arr['acronym'] !== NULL)
+							if($arr['acronym_prev'] != '' && $arr['acronym_prev'] !== NULL)
 							{
-								$result[$index]['edited']['NCT/acronym'] = $previousValue . $arr['acronym'];
+								$result[$index]['edited']['NCT/acronym'] = $previousValue . $arr['acronym_prev'];
 							}
 							else
 							{
@@ -6358,21 +6362,23 @@ class TrialTracker
 							}
 						}
 						
-						if(isset($arr['lead_sponsor']))
+						if($arr['lead_sponsor_lastchanged'] < date('Y-m-d', $timeMachine) 
+						&& $arr['lead_sponsor_lastchanged'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
 						{
-							if($arr['lead_sponsor'] != '' && $arr['lead_sponsor'] !== NULL)
+							if($arr['lead_sponsor_prev'] != '' && $arr['lead_sponsor_prev'] !== NULL)
 							{
-								$result[$index]['edited']['NCT/lead_sponsor'] = $previousValue . str_replace('`', ', ', $arr['lead_sponsor_prev']);;
+								$result[$index]['edited']['NCT/lead_sponsor'] = $previousValue . str_replace('`', ', ', $arr['lead_sponsor_prev']);
 							}
 							else
 							{
 								$result[$index]['edited']['NCT/lead_sponsor'] = $noPreviousValue;
 							}
 						}
-						
-						if(isset($arr['start_date']))
+
+						if($arr['start_date_lastchanged'] < date('Y-m-d', $timeMachine) 
+						&& $arr['start_date_lastchanged'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
 						{
-							if($arr['start_date'] != '' && $arr['start_date'] !== NULL)
+							if($arr['start_date_prev'] != '' && $arr['start_date_prev'] !== NULL)
 							{
 								$result[$index]['edited']['NCT/start_date'] = $previousValue . $arr['start_date_prev'];
 							}
@@ -6381,10 +6387,11 @@ class TrialTracker
 								$result[$index]['edited']['NCT/start_date'] = $noPreviousValue;
 							}
 						}
-						
-						if(isset($arr['phase']))
+
+						if($arr['phase_lastchanged'] < date('Y-m-d', $timeMachine) 
+						&& $arr['phase_lastchanged'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
 						{
-							if($arr['phase'] != '' && $arr['phase'] !== NULL)
+							if($arr['phase_prev'] != '' && $arr['phase_prev'] !== NULL)
 							{
 								$result[$index]['edited']['NCT/phase'] = $previousValue . $arr['phase_prev'];
 							}
@@ -6393,10 +6400,11 @@ class TrialTracker
 								$result[$index]['edited']['NCT/phase'] = $noPreviousValue;
 							}
 						}
-
-						if(isset($arr['enrollment']))
+							
+						if($arr['enrollment_lastchanged'] < date('Y-m-d', $timeMachine) 
+						&& $arr['enrollment_lastchanged'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
 						{
-							if($arr['enrollment'] != '' && $arr['enrollment'] !== NULL)
+							if($arr['enrollment_prev'] != '' && $arr['enrollment_prev'] !== NULL)
 							{
 								$result[$index]['edited']['NCT/enrollment'] = $previousValue . $arr['enrollment_prev'];
 							}
@@ -6405,12 +6413,13 @@ class TrialTracker
 								$result[$index]['edited']['NCT/enrollment'] = $noPreviousValue;
 							}
 						}
-							
-						if(isset($arr['collaborator']))
+
+						if($arr['collaborator_lastchanged'] < date('Y-m-d', $timeMachine) 
+						&& $arr['collaborator_lastchanged'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
 						{
-							if($arr['collaborator'] != '' && $arr['collaborator'] !== NULL)
+							if($arr['collaborator_prev'] != '' && $arr['collaborator_prev'] !== NULL)
 							{
-								$result[$index]['edited']['NCT/collaborator'] = $previousValue . str_replace('`', ', ', $arr['collaborator_prev']);;
+								$result[$index]['edited']['NCT/collaborator'] = $previousValue . str_replace('`', ', ', $arr['collaborator_prev']);
 							}
 							else
 							{
@@ -6418,9 +6427,10 @@ class TrialTracker
 							}
 						}
 
-						if(isset($arr['condition']))
+						if($arr['condition_lastchanged'] < date('Y-m-d', $timeMachine) 
+						&& $arr['condition_lastchanged'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
 						{
-							if($arr['condition'] != '' && $arr['condition'] !== NULL)
+							if($arr['condition_prev'] != '' && $arr['condition_prev'] !== NULL)
 							{
 								$result[$index]['edited']['NCT/condition'] = $previousValue . str_replace('`', ', ', stripslashes($arr['condition_prev']));
 							}
@@ -6430,11 +6440,12 @@ class TrialTracker
 							}
 						}
 
-						if(isset($arr['intervention_name']))
+						if($arr['intervention_name_lastchanged'] < date('Y-m-d', $timeMachine) 
+						&& $arr['intervention_name_lastchanged'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
 						{
-							if($arr['intervention_name'] != '' && $arr['intervention_name'] !== NULL)
+							if($arr['intervention_name_prev'] != '' && $arr['intervention_name_prev'] !== NULL)
 							{
-								$result[$index]['edited']['NCT/intervention_name'] = $previousValue . str_replace('`', ', ', $arr['intervention_name_prev']);;
+								$result[$index]['edited']['NCT/intervention_name'] = $previousValue . str_replace('`', ', ', $arr['intervention_name_prev']);
 							}
 							else
 							{
@@ -6442,11 +6453,12 @@ class TrialTracker
 							}
 						}
 
-						if(isset($arr['overall_status']))
+						if($arr['overall_status_lastchanged'] < date('Y-m-d', $timeMachine) 
+						&& $arr['overall_status_lastchanged'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
 						{
-							if($arr['overall_status'] != '' && $arr['overall_status'] !== NULL)
+							if($arr['overall_status_prev'] != '' && $arr['overall_status_prev'] !== NULL)
 							{
-								$result[$index]['edited']['NCT/overall_status'] = $previousValue . str_replace('`', ', ', $arr['overall_status_prev']);;
+								$result[$index]['edited']['NCT/overall_status'] = $previousValue . str_replace('`', ', ', $arr['overall_status_prev']);
 							}
 							else
 							{
@@ -6454,10 +6466,6 @@ class TrialTracker
 							}
 						}
 					}
-				}
-				else
-				{
-					$result[$index]['edited'] = array();
 				}
 				
 				$dataset['matchedupms'] = $this->getMatchedUPMs($nctId, $timeMachine, $timeInterval);
@@ -6590,7 +6598,7 @@ class TrialTracker
 			$totactivecount	= $activeCount + $totactivecount;
 			$totalcount		= $totalcount + $inactiveCount + $activeCount; 
 		}
-		//echo '<br/>ValuesTrialsInfo--><pre>';print_r($TrialsInfo);
+		//echo '<br/>Trials--><pre>';print_r($Trials[$globalOptions['type']]);
 		$Values['totactivecount'] = $totactivecount;
 		$Values['totinactivecount'] = $totinactivecount;
 		$Values['totalcount'] = $totalcount;
@@ -9224,4 +9232,3 @@ function getColspanBasedOnLogin($loggedIn)
 {
 	return $colspan = (($loggedIn) ? 54 : 53 );
 }
-
