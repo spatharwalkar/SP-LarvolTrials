@@ -601,7 +601,7 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 					$val1=str_replace("\\", "", $oldval);
 					$val2=str_replace("\\", "", $value);
 							
-					if($exists and trim($val1)<>trim($val2) )
+					if($exists and trim($val1)<>trim($val2) and $oldval<>'0000-00-00' and !empty($oldval) )
 					{
 						$query = 'update data_history set `' . $fieldname . '_prev` = "' . $oldval .'", `' . $fieldname . '_lastchanged` = "' . $olddate .'" where `larvol_id`="' .$larvol_id . '" limit 1' ;
 						if(mysql_query($query) === false) return softDie('Bad SQL query saving value in data_history. query:'.$query.'<br>');
@@ -612,7 +612,7 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 						{
 							$val1=str_replace("\\", "", $oldval);
 							$val2=str_replace("\\", "", $value);
-							if(trim($val1)<>trim($val2))
+							if( trim($val1)<>trim($val2) and $oldval<>'0000-00-00' and !empty($oldval) )
 							{
 								$query = 'insert into `data_history` set `' . $fieldname . '_prev` = "' . mysql_real_escape_string($oldval) .'", `' . $fieldname . '_lastchanged` = "' . $olddate .'" , `larvol_id`="' .$larvol_id . '" ' ;
 								if(mysql_query($query) === false) return softDie('Bad SQL query saving value  Query='.$query);
