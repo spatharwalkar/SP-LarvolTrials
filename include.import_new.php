@@ -599,10 +599,6 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 					$exists = $res !== false;
 					$oldval=mysql_real_escape_string($oldval);
 					
-					$val1=str_replace("\\", "", $oldval);
-					$val2=str_replace("\\", "", $value);
-					$cond1=( $exists and trim($val1)<>trim($val2) and $oldval<>'0000-00-00' and !empty($oldval) );
-					
 					global $array1,$array2;
 
 					if (trim($fieldname)=='phase')
@@ -613,6 +609,12 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 							$oldval=$array2[$v];
 						}
 					}
+					
+					$val1=str_replace("\\", "", $oldval);
+					$val2=str_replace("\\", "", $value);
+					$cond1=( $exists and trim($val1)<>trim($val2) and $oldval<>'0000-00-00' and !empty($oldval) );
+					
+					
 					if ($fieldname=='phase' and ( is_null($oldval) or strlen(trim($oldval)) ==0 or empty($oldval)) )
 						$cond2=false; else $cond2=true;
 			
