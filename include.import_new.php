@@ -2,6 +2,61 @@
 require_once('db.php');
 require_once ('include.derived.php');
 
+$array1=array
+	(
+	'N/A',
+	'Phase 0',
+	'Phase 0/Phase 1',
+	'Phase 1',
+	'Phase 1/Phase 2',
+	'Phase 2',
+	'Phase 2/Phase 3',
+	'Phase 3',
+	'Phase 3/Phase 4',
+	'Phase 4',
+	'Phase 1a',
+	'Phase 1a/1b',
+	'Phase 1b',
+	'Phase 1b/2',
+	'Phase 1b/2a',
+	'Phase 1c',
+	'Phase 2a',
+	'Phase 2a/2b',
+	'Phase 2a/b',
+	'Phase 2b',
+	'Phase 2b/3',
+	'Phase 3a',
+	'Phase 3b',
+	'Phase 3b/4'
+	);
+	
+	$array2=array
+	(
+	'N/A',
+	'0',
+	'0/1',
+	'1',
+	'1/2',
+	'2',
+	'2/3',
+	'3',
+	'3/4',
+	'4',
+	'1a',
+	'1a/1b',
+	'1b',
+	'1b/2',
+	'1b/2a',
+	'1c',
+	'2a',
+	'2a/2b',
+	'2a/b',
+	'2b',
+	'2b/3',
+	'3a',
+	'3b',
+	'3b/4'
+	);
 
 //calculate field Ids and store in an array since it requires db call
 //prefetch recurring derived fields' calculation data.
@@ -451,62 +506,8 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 		$value=$newval;
 	}
 	
-	$array1=array
-	(
-	'N/A',
-	'Phase 0',
-	'Phase 0/Phase 1',
-	'Phase 1',
-	'Phase 1/Phase 2',
-	'Phase 2',
-	'Phase 2/Phase 3',
-	'Phase 3',
-	'Phase 3/Phase 4',
-	'Phase 4',
-	'Phase 1a',
-	'Phase 1a/1b',
-	'Phase 1b',
-	'Phase 1b/2',
-	'Phase 1b/2a',
-	'Phase 1c',
-	'Phase 2a',
-	'Phase 2a/2b',
-	'Phase 2a/b',
-	'Phase 2b',
-	'Phase 2b/3',
-	'Phase 3a',
-	'Phase 3b',
-	'Phase 3b/4'
-	);
+	global $array1,$array2;
 	
-	$array2=array
-	(
-	'N/A',
-	'0',
-	'0/1',
-	'1',
-	'1/2',
-	'2',
-	'2/3',
-	'3',
-	'3/4',
-	'4',
-	'1a',
-	'1a/1b',
-	'1b',
-	'1b/2',
-	'1b/2a',
-	'1c',
-	'2a',
-	'2a/2b',
-	'2a/b',
-	'2b',
-	'2b/3',
-	'3a',
-	'3b',
-	'3b/4'
-	);
-
 	if($fieldname=="phase") 
 	{
 		$v=array_search($value,$array1,false);
@@ -600,8 +601,23 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 					
 					$val1=str_replace("\\", "", $oldval);
 					$val2=str_replace("\\", "", $value);
-							
-					if($exists and trim($val1)<>trim($val2) and $oldval<>'0000-00-00' and !empty($oldval) )
+					$cond1=( $exists and trim($val1)<>trim($val2) and $oldval<>'0000-00-00' and !empty($oldval) );
+					
+					global $array1,$array2;
+
+					if (trim($fieldname)=='phase')
+					{
+						$v=array_search($oldval,$array1,false);
+						if($v!==false)
+						{
+							$oldval=$array2[$v];
+						}
+					}
+					if ($fieldname=='phase' and ( is_null($oldval) or strlen(trim($oldval)) ==0 or empty($oldval)) )
+						$cond2=false; else $cond2=true;
+			
+		
+					if($cond1 and $cond2)
 					{
 						$query = 'update data_history set `' . $fieldname . '_prev` = "' . $oldval .'", `' . $fieldname . '_lastchanged` = "' . $olddate .'" where `larvol_id`="' .$larvol_id . '" limit 1' ;
 						if(mysql_query($query) === false) return softDie('Bad SQL query saving value in data_history. query:'.$query.'<br>');
@@ -612,7 +628,10 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 						{
 							$val1=str_replace("\\", "", $oldval);
 							$val2=str_replace("\\", "", $value);
-							if( trim($val1)<>trim($val2) and $oldval<>'0000-00-00' and !empty($oldval) )
+							$cond1=( trim($val1)<>trim($val2) and $oldval<>'0000-00-00' and !empty($oldval) );
+							if ($fieldname=='phase' and ( is_null($oldval) or strlen(trim($oldval)) ==0 or empty($oldval)) )
+								$cond2=false; else $cond2=true;
+							if($cond1 and $cond2)
 							{
 								$query = 'insert into `data_history` set `' . $fieldname . '_prev` = "' . mysql_real_escape_string($oldval) .'", `' . $fieldname . '_lastchanged` = "' . $olddate .'" , `larvol_id`="' .$larvol_id . '" ' ;
 								if(mysql_query($query) === false) return softDie('Bad SQL query saving value  Query='.$query);
