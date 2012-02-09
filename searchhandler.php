@@ -182,8 +182,7 @@ function testQuery()
 	{
 		return $e->getMessage();
 	}
-
-	$result = mysql_query($actual_query);
+	$result = mysql_query($actual_query." LIMIT 0");
 	if (mysql_errno()) {
 		$error = "MySQL error ".mysql_errno().": ".mysql_error()."\n<br>When executing:<br>\n$actual_query\n<br>";
 		return $error;
@@ -327,7 +326,6 @@ function buildQuery($data, $isCount=false)
 		{
 
 	  $override_str = getNCTOverrideString($override_vals, $alias, $select_str, $isCount);
-
 	  if($isCount)
 	  {
 	  	$actual_query .=  ") + (" . $override_str . ")) AS count";
@@ -343,7 +341,6 @@ function buildQuery($data, $isCount=false)
 	{
 		throw $e;
 	}
-
 	return $actual_query;
 }
 
@@ -359,8 +356,13 @@ function getNCTOverrideString($data, $alias, $select_str, $isCount)
 	{
 		$return .= $select_str;
 	}
-	$return .=  " FROM data_trials " . $alias . " WHERE "
-	. $alias . ".larvol_id IN (" .  $override_str . ")";
+	$override_str_arr = explode(',',$override_str);
+	$override_str_arr = array_map(function($v){
+		$v = trim($v);
+		return "'".padnct($v)."' ";
+	},$override_str_arr);
+	$return .=  " FROM `data_trials` " . $alias . " WHERE "
+	.$alias . ".`source_id` IN (".implode(',',$override_str_arr).")";
 	return $return;
 
 
