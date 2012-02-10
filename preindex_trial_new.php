@@ -3,6 +3,7 @@ require_once('db.php');
 require_once('include.search.php');
 require_once('include.util.php');
 require_once('searchhandler_new.php');
+
 function getStudyCatId($nctid)
 {
 global $logger;
@@ -15,7 +16,6 @@ $query = 'SELECT studycat from data_values where val_int = "' . $nctid . '" and 
 		echo $log;
 		exit;
 	}
-//	$productz = mysql_fetch_assoc($resu);
 	$resu=mysql_fetch_array($resu);
 	return $resu['studycat'];
 }
@@ -102,6 +102,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 				/********** add larvolid to condition   *************/
 				$findme   = 'where';
 				$pos = stripos($mystring, $findme);
+				mysql_query('BEGIN') or die("Couldn't begin SQL transaction");
 				if ($pos === false) 
 				{
 					echo 'Error in MySql Query :' . $query;
@@ -116,6 +117,9 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					}
 					else
 					{
+						//delete existing product/area indexes
+						$qry='DELETE from '. $table .' where `'. $field . '` = "'. $productID . '"';
+						mysql_query($qry) or die("Couldn't delete existing product indexes.");
 						$query = substr($mystring,0,$pos+6). '  ( ' . substr($mystring,$pos+6) . ' ) ';
 					}
 				}
@@ -184,7 +188,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					}
 				
 				}
-				
+				mysql_query('COMMIT') or die("Couldn't commit SQL transaction.");
 				$proc_id = getmypid();
 				$i++;
 				$ttype=$cat=='products' ? 'PRODUCT' : 'AREA';
