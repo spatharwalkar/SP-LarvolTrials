@@ -4440,41 +4440,42 @@ class TrialTracker
 			 . '<thead><tr>'. (($loggedIn) ? '<th valign="bottom" align="center" style="width:30px; vertical-align:bottom;" >ID</th>' : '' )
 			 . '<th valign="bottom" height="11px" align="center" style="width:93px; vertical-align:bottom;">Title</th>'
 			 . '<th valign="bottom" align="center" style="width:18px; vertical-align:bottom;" title="Black: Actual&nbsp;&nbsp;Gray: Anticipated&nbsp;&nbsp;Red: Change greater than 20%">N</th>'
-			 . '<th valign="bottom" align="center" style="width:45px; vertical-align:bottom;" title="&quot;EU&quot; = European Union&nbsp;&quot;ROW&quot; = Rest of World">Region</th>'
+			 . '<th valign="bottom" align="center" style="width:41px; vertical-align:bottom;" title="&quot;EU&quot; = European Union&nbsp;&quot;ROW&quot; = Rest of World">Region</th>'
 			 . '<th valign="bottom" align="center" style="width:60px; vertical-align:bottom;">Interventions</th>'
-			 . '<th valign="bottom" align="center" style="width:45px; vertical-align:bottom;">Sponsor</th>'
-			 . '<th valign="bottom" align="center" style="width:45px; vertical-align:bottom;">Status</th>'
+			 . '<th valign="bottom" align="center" style="width:41px; vertical-align:bottom;">Sponsor</th>'
+			 . '<th valign="bottom" align="center" style="width:41px; vertical-align:bottom;">Status</th>'
 			 . '<th valign="bottom" align="center" style="width:60px; vertical-align:bottom;">Conditions</th>'
 			 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;" title="MM/YY">Start</th>'
 			 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;" title="MM/YY">End</th>'
 			 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;">Ph</th>'
-			 . '<th valign="bottom" align="center" style="width:22px; vertical-align:bottom;">Result</th>'
-			  . '<th valign="bottom" align="center" style="width:5px; vertical-align:bottom;" colspan="3">-</th>'
-			 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;" colspan="12">' . (date('Y')) . '</th>'
-			 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;" colspan="12">' . (date('Y')+1) . '</th>'
-			 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;" colspan="12">' . (date('Y')+2) . '</th>'
-			 . '<th valign="bottom" align="center" style="width:5px; vertical-align:bottom;" colspan="3">+</th></tr></thead>';
+			 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;">Result</th>'
+			  . '<th valign="bottom" align="center" style="width:6px; vertical-align:bottom;" colspan="3">-</th>'
+			 . '<th valign="bottom" align="center" style="width:24px; vertical-align:bottom;" colspan="12">' . (date('Y')) . '</th>'
+			 . '<th valign="bottom" align="center" style="width:24px; vertical-align:bottom;" colspan="12">' . (date('Y')+1) . '</th>'
+			 . '<th valign="bottom" align="center" style="width:24px; vertical-align:bottom;" colspan="12">' . (date('Y')+2) . '</th>'
+			 . '<th valign="bottom" align="center" style="width:6px; vertical-align:bottom;" colspan="3">+</th></tr></thead>';
 		
 		$outputStr.= '<tr style="border:none; border-top:none;">' //Extra row used for Alignment[IMP]
 			 . (($loggedIn) ? '<td border="0" style="width:30px; height:0px; border-top:none; border:none;" ></td>' : '' )
 			 . '<td border="0" height="0px" style="width:93px; height:0px; border-top:none; border:none;"></td>'
 			 . '<td border="0" style="width:18px; height:0px; border-top:none; border:none;"></td>'
-			 . '<td border="0" style="width:45px; height:0px; border-top:none; border:none;"></td>'
+			 . '<td border="0" style="width:41px; height:0px; border-top:none; border:none;"></td>'
 			 . '<td border="0" style="width:60px; height:0px; border-top:none; border:none;"></td>'
-			 . '<td border="0" style="width:45px; height:0px; border-top:none; border:none;"></td>'
-			 . '<td border="0" style="width:45px; height:0px; border-top:none; border:none;"></td>'
+			 . '<td border="0" style="width:41px; height:0px; border-top:none; border:none;"></td>'
+			 . '<td border="0" style="width:41px; height:0px; border-top:none; border:none;"></td>'
 			 . '<td border="0" style="width:60px; height:0px; border-top:none; border:none;"></td>'
 			 . '<td border="0" style="width:20px; height:0px; border-top:none; border:none;"></td>'
 			 . '<td border="0" style="width:20px; height:0px; border-top:none; border:none;"></td>'
 			 . '<td border="0" style="width:20px; height:0px; border-top:none; border:none;"></td>'
-			 . '<td border="0" style="width:22px; height:0px; border-top:none; border:none;"></td>'
-			 . '<td border="0" style="width:5px; height:0px; border-top:none; border:none;" colspan="3"></td>'
-			 . '<td border="0" style="width:20px; height:0px; border-top:none; border:none;" colspan="12"></td>'
-			 . '<td border="0" style="width:20px; height:0px; border-top:none; border:none;" colspan="12"></td>'
-			 . '<td border="0" style="width:20px; height:0px; border-top:none; border:none;" colspan="12"></td>'
-			 . '<td border="0" style="width:5px; height:0px; border-top:none; border:none;" colspan="3"></td></tr>';
+			 . '<td border="0" style="width:20px; height:0px; border-top:none; border:none;"></td>'
+			 . '<td border="0" style="width:6px; height:0px; border-top:none; border:none;" colspan="3"></td>'
+			 . '<td border="0" style="width:24px; height:0px; border-top:none; border:none;" colspan="12"></td>'
+			 . '<td border="0" style="width:24px; height:0px; border-top:none; border:none;" colspan="12"></td>'
+			 . '<td border="0" style="width:24px; height:0px; border-top:none; border:none;" colspan="12"></td>'
+			 . '<td border="0" style="width:6px; height:0px; border-top:none; border:none;" colspan="3"></td></tr>';
 			 
 		return $outputStr;
+
 
 	}
 
@@ -4492,6 +4493,11 @@ class TrialTracker
 		  return $a['section']; 
 		},  $trials);
 		$sections = array_unique($sections);
+		
+		if($loggedIn)
+		$col_width=548;
+		else
+		$col_width=518;
 		
 		for($i=$start; $i<$end; $i++) 
 		{ 	
@@ -4520,7 +4526,6 @@ class TrialTracker
 				{
 					$diff = $sectionKey - $section;
 
-
 					if(($diff >= 2) && $section != -1)
 					{	
 						$counter = $section+1;
@@ -4531,8 +4536,8 @@ class TrialTracker
 								$naUpmIndex = preg_replace('/[^a-zA_Z0-9]/i', '', $trialsInfo[$j]['sectionHeader']);
 								$naUpmIndex = substr($naUpmIndex, 0, 7);
 								
-								$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true" class="trialtitles">'
-										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) 
+								$outputStr .= '<tr style="page-break-inside:avoid; width:'.$col_width.'px;" nobr="true" class="trialtitles">'
+										. '<td style="width:'.$col_width.'px;" colspan="' . getColspanBasedOnLogin($loggedIn) 
 										. '" class="upmpointer sectiontitles"'
 										. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
 										. $trialsInfo[$j]['sectionHeader'] . '</td></tr>';
@@ -4540,12 +4545,12 @@ class TrialTracker
 							}
 							else
 							{	
-								$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true"><td colspan="' . getColspanBasedOnLogin($loggedIn)  
+								$outputStr .= '<tr style=" width:'.$col_width.'px; page-break-inside:avoid;" nobr="true"><td style="width:'.$col_width.'px;" colspan="' . getColspanBasedOnLogin($loggedIn)  
 								. '" class="sectiontitles">' . $trialsInfo[$j]['sectionHeader'] . '</td></tr>';
 							}
 							if($globalOptions['onlyUpdates'] == "no")
 							{
-								$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true"><td colspan="' . getColspanBasedOnLogin($loggedIn) 
+								$outputStr .= '<tr style=" width:'.$col_width.'px; page-break-inside:avoid;" nobr="true"><td style="width:'.$col_width.'px;" colspan="' . getColspanBasedOnLogin($loggedIn) 
 								. '" class="norecord" align="left">No trials found</td></tr>';
 							}
 						}
@@ -4555,12 +4560,12 @@ class TrialTracker
 				{
 					if($ottType == 'rowstacked')
 					{
-						$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true" class="trialtitles">'
-								. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
+						$outputStr .= '<tr style=" width:'.$col_width.'px; page-break-inside:avoid;" nobr="true" class="trialtitles">'
+								. '<td style="width:'.$col_width.'px;" colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
 								. ' onclick="sh(this,\'rowstacked\');">&nbsp;</td></tr>'
 								. $this->displayUnMatchedUpms_TCPDF($loggedIn, 'rowstacked', $trialsInfo[$sectionKey]['naUpms'])
-								. '<tr style="page-break-inside:avoid;" nobr="true" class="trialtitles">'
-								. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles"'
+								. '<tr style="width:'.$col_width.'px; page-break-inside:avoid;" nobr="true" class="trialtitles">'
+								. '<td style="width:'.$col_width.'px;" colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles"'
 								. ' >' . $trialsInfo[$sectionKey]['sectionHeader'] . '</td></tr>';
 					}
 					else
@@ -4573,8 +4578,8 @@ class TrialTracker
 						$naUpmIndex = preg_replace('/[^a-zA_Z0-9]/i', '', $trialsInfo[$sectionKey]['sectionHeader']);
 						$naUpmIndex = substr($naUpmIndex, 0, 7);
 						
-						$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true" class="trialtitles">'
-								. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
+						$outputStr .= '<tr style="width:'.$col_width.'px; page-break-inside:avoid;" nobr="true" class="trialtitles">'
+								. '<td style="width:'.$col_width.'px;" colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
 								. ' onclick="sh(this,\'' . $naUpmIndex . '\');">' 
 								. $trialsInfo[$sectionKey]['sectionHeader'] . '</td></tr>';
 						$outputStr .= $this->displayUnMatchedUpms_TCPDF($loggedIn, $naUpmIndex, $trialsInfo[$sectionKey]['naUpms']);
@@ -4582,18 +4587,18 @@ class TrialTracker
 				}
 				else
 				{	
-					$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true"><td colspan="' . getColspanBasedOnLogin($loggedIn)  
+					$outputStr .= '<tr style="page-break-inside:avoid; width:'.$col_width.'px;" nobr="true"><td style="width:'.$col_width.'px;" colspan="' . getColspanBasedOnLogin($loggedIn)  
 								. '" class="sectiontitles">' . $trialsInfo[$sectionKey]['sectionHeader'] . '</td></tr>';
 				}
 			}
 			
 			//row starts  
-			$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true" ' . (($trials[$i]['new'] == 'y') ? 'class="newtrial" ' : ''). '>';  
+			$outputStr .= '<tr style="width:'.$col_width.'px; height:'.(24).'px; page-break-inside:avoid;" nobr="true" ' . (($trials[$i]['new'] == 'y') ? 'class="newtrial" ' : ''). '>';  
 			
 			//nctid column
 			if($loggedIn) 
 			{ 
-				$outputStr .= '<td style="'.$rowOneBGType.'" class="' . $rowOneType . '" ' . (($trials[$i]['new'] == 'y') ? 'title="New record"' : '') 
+				$outputStr .= '<td style="width:30px; '.$rowOneBGType.'" class="' . $rowOneType . '" ' . (($trials[$i]['new'] == 'y') ? 'title="New record"' : '') 
 				. ' ><a style="color:' . $titleLinkColor . '" href="http://clinicaltrials.gov/ct2/show/' 
 				. padnct($trials[$i]['NCT/nct_id']) . '" target="_blank">' . $trials[$i]['NCT/nct_id'] . '</a></td>';
 			}
@@ -4610,7 +4615,7 @@ class TrialTracker
 				$attr = '" title="New record';
 				$titleLinkColor = '#FF0000;';
 			}				
-			$outputStr .= '<td style="'.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . ' ' . $attr . '"><span>'
+			$outputStr .= '<td style="width:93px; '.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . ' ' . $attr . '"><span>'
 						. '<a style="color:' . $titleLinkColor . '" href="http://clinicaltrials.gov/ct2/show/' . padnct($trials[$i]['NCT/nct_id']) . '" '
 						. 'target="_blank">'; 
 			if(isset($trials[$i]['NCT/acronym']) && $trials[$i]['NCT/acronym'] != '') 
@@ -4637,7 +4642,7 @@ class TrialTracker
 				$attr = '" title="New record';
 				$enrollStyle = 'color:#973535;';
 			}
-			$outputStr .= '<td style="'.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><span>';
+			$outputStr .= '<td style="width:18px; '.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><span>';
 			if($trials[$i]["NCT/enrollment_type"] != '') 
 			{
 				if($trials[$i]["NCT/enrollment_type"] == 'Anticipated') 
@@ -4666,7 +4671,7 @@ class TrialTracker
 			{ 
 				$attr = 'title="New record"';
 			}
-			$outputStr .= '<td style="'.$rowOneBGType.'" class="' . $rowOneType . '" rowspan="' . $rowspan . '" ' . $attr . '>'
+			$outputStr .= '<td style="width:41px; '.$rowOneBGType.'" class="' . $rowOneType . '" rowspan="' . $rowspan . '" ' . $attr . '>'
 						. '<span>' . $trials[$i]['region'] . '</span></td>';
 
 				
@@ -4679,7 +4684,7 @@ class TrialTracker
 			{
 				$attr = '" title="New record';
 			}
-			$outputStr .= '<td style="'.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
+			$outputStr .= '<td style="width:60px; '.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
 						. '<span>' . $trials[$i]['NCT/intervention_name'] . '</span></td>';
 
 
@@ -4705,7 +4710,7 @@ class TrialTracker
 			{
 				$attr = '" title="New record';
 			}
-			$outputStr .= '<td style="'.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
+			$outputStr .= '<td style="width:41px; '.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
 						. '<span>' . $trials[$i]['NCT/lead_sponsor'] . ' <span style="' . $enrollStyle . '"> ' 
 						. $trials[$i]["NCT/collaborator"] . ' </span></span></td>';
 
@@ -4723,7 +4728,7 @@ class TrialTracker
 			{
 				$attr = 'class="' . $rowOneType . '"';
 			}
-			$outputStr .= '<td style="'.$rowOneBGType.'" ' . $attr . ' rowspan="' . $rowspan . '">'  
+			$outputStr .= '<td style="width:41px; '.$rowOneBGType.'" ' . $attr . ' rowspan="' . $rowspan . '">'  
 						. '<span>' . $trials[$i]['NCT/overall_status'] . '</span></td>';
 				
 				
@@ -4737,7 +4742,7 @@ class TrialTracker
 			{
 				$attr = '" title="New record';
 			}
-			$outputStr .= '<td style="'.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
+			$outputStr .= '<td style="width:60px; '.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
 						. '<span>' . $trials[$i]['NCT/condition'] . '</span></td>';
 					
 				
@@ -4751,7 +4756,7 @@ class TrialTracker
 			{
 				$attr = '" title="New record';
 			}
-			$outputStr .= '<td style="'.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '" ><span>'; 
+			$outputStr .= '<td style="width:20px; '.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '" ><span>'; 
 			if($trials[$i]["NCT/start_date"] != '' && $trials[$i]["NCT/start_date"] != NULL && $trials[$i]["NCT/start_date"] != '0000-00-00') 
 			{
 				$outputStr .= date('m/y',strtotime($trials[$i]["NCT/start_date"]));
@@ -4764,16 +4769,16 @@ class TrialTracker
 				
 				
 			//end date column
-			$attr = '';
+			$attr = ' ';
 			if(isset($trials[$i]['edited']) && array_key_exists('inactive_date', $trials[$i]['edited'])) 
 			{
 				$attr = ' highlight" title="' . $trials[$i]['edited']['inactive_date'] ;
 			} 
 			else if($trials[$i]['new'] == 'y') 
 			{
-				$attr = '" title="New record" ';
+				$attr = '" title="New record';
 			}	
-			$outputStr .= '<td style="'.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . '" ' . $attr . '><span>'; 
+			$outputStr .= '<td style="width:20px; '.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType  . $attr . '"><span>'; 
 			if($trials[$i]["inactive_date"] != '' && $trials[$i]["inactive_date"] != NULL && $trials[$i]["inactive_date"] != '0000-00-00') 
 			{
 				$outputStr .= date('m/y',strtotime($trials[$i]["inactive_date"]));
@@ -4804,10 +4809,10 @@ class TrialTracker
 				$phase = str_replace('Phase ', '', trim($trials[$i]['NCT/phase']));
 				$phaseColor = $this->phaseValues[$phase];
 			}
-			$outputStr .= '<td align="center" rowspan="' . $rowspan . '" style="background-color:' . $phaseColor . ';" ' . $attr . '>' 
+			$outputStr .= '<td align="center" rowspan="' . $rowspan . '" style="width:20px; background-color:' . $phaseColor . ';" ' . $attr . '>' 
 						. '<span>' . $phase . '</span></td>';				
 			
-			$outputStr .= '<td>&nbsp;</td>';
+			$outputStr .= '<td style="width:20px;">&nbsp;</td>';
 				
 			$startMonth = date('m',strtotime($trials[$i]['NCT/start_date']));
 			$startYear = date('Y',strtotime($trials[$i]['NCT/start_date']));
@@ -4815,11 +4820,12 @@ class TrialTracker
 			$endYear = date('Y',strtotime($trials[$i]['inactive_date']));
 
 			//rendering project completion gnatt chart
-			$trialGnattChart = $this->trialGnattChart($startMonth, $startYear, $endMonth, $endYear, $currentYear, $secondYear, $thirdYear, 
+			$trialGnattChart = $this->trialGnattChart_TCPDF($startMonth, $startYear, $endMonth, $endYear, $currentYear, $secondYear, $thirdYear, 
 				$trials[$i]['NCT/start_date'], $trials[$i]['inactive_date'], $phaseColor);
 				
 			$trialGnattChart = preg_replace('/&nbsp;/', '<img src="images/trans_big.gif" />', $trialGnattChart);	
-			$outputStr .= preg_replace('/width:([0-9]*)px;/', '', $trialGnattChart);	
+			//$outputStr .= preg_replace('/width:([0-9]*)px;/', '', $trialGnattChart);
+			$outputStr .= $trialGnattChart;	
 				
 			$outputStr .= '</tr>';
 			
@@ -4838,7 +4844,7 @@ class TrialTracker
 					$edYear = date('Y', strtotime($mvalue['end_date']));
 					$upmTitle = 'title="' . htmlformat($mvalue['event_description']) . '"';
 					
-					$outputStr .= '<tr style="page-break-inside:avoid; width:65px;" nobr="true">';
+					$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true">';
 					
 					if($loggedIn) 
 					{
@@ -4850,13 +4856,13 @@ class TrialTracker
 						{
 							$idColor = 'gray';
 						}
-						$outputStr .= '<td style="border-top:none;" class="' . $rowOneType . '"><a style="color:' . $idColor 
+						$outputStr .= '<td style="width:30px; border-top:none;" class="' . $rowOneType . '"><a style="color:' . $idColor 
 						. '" href="' . urlPath() . 'upm.php?search_id=' . $mvalue['id'] . '" target="_blank">' . $mvalue['id'] . '</a></td>';
 					}
 					
-					$outputStr .= '<td style="width:22px;  text-align:center;">';
+					$outputStr .= '<td style="width:20px; text-align:center;"><br />';
 					
-					$outputStr .= '<span ' . $upmTitle . '><br />';
+					
 					if($mvalue['result_link'] != '' && $mvalue['result_link'] !== NULL)
 					{
 						if((!empty($mvalue['edited']) && $mvalue['edited']['field'] == 'result_link') || ($mvalue['new'] == 'y')) 
@@ -4891,13 +4897,14 @@ class TrialTracker
 							$outputStr .= '<img src="images/hourglass.png" alt="Hourglass" height="8px" width="8px" style="margin:3px;" border="0" />';
 						}
 					}
-					$outputStr .= '</span></td>';
+					$outputStr .= '</td>';
 					
 					//rendering upm (upcoming project completion) chart
-					$upmGnattChart = $this->upmGnattChart($stMonth, $stYear, $edMonth, $edYear, $currentYear, $secondYear, $thirdYear, $mvalue['start_date'],
+					$upmGnattChart = $this->upmGnattChart_TCPDF($stMonth, $stYear, $edMonth, $edYear, $currentYear, $secondYear, $thirdYear, $mvalue['start_date'],
 					$mvalue['end_date'], $mvalue['event_link'], $upmTitle);
 					$upmGnattChart = preg_replace('/&nbsp;/', '<img src="images/trans_big.gif" />', $upmGnattChart);
-					$outputStr .= preg_replace('/width:([0-9]*)px;/', '', $upmGnattChart);
+					//$outputStr .= preg_replace('/width:([0-9]*)px;/', '', $upmGnattChart);
+					$outputStr .= $upmGnattChart;
 					$outputStr .= '</tr>';
 				}
 			}
@@ -4920,8 +4927,8 @@ class TrialTracker
 					$naUpmIndex = preg_replace('/[^a-zA_Z0-9]/i', '', $trialsInfo[$cntr]['sectionHeader']);
 					$naUpmIndex = substr($naUpmIndex, 0, 7);
 					
-					$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true" class="trialtitles">'
-							. '<td colspan="' . getColspanBasedOnLogin($loggedIn) 
+					$outputStr .= '<tr style=" width:'.$col_width.'px; page-break-inside:avoid;" nobr="true" class="trialtitles">'
+							. '<td style="width:'.$col_width.'px;" colspan="' . getColspanBasedOnLogin($loggedIn) 
 							. '" class="upmpointer sectiontitles"'
 							. ' onclick="sh(this,\'' . $naUpmIndex . '\');">' 
 							. $trialsInfo[$cntr]['sectionHeader'] . '</td></tr>';
@@ -4929,12 +4936,12 @@ class TrialTracker
 				}
 				else
 				{	
-					$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true"><td colspan="' . getColspanBasedOnLogin($loggedIn)  
+					$outputStr .= '<tr style=" width:'.$col_width.'px; page-break-inside:avoid;" nobr="true"><td style="width:'.$col_width.'px;" colspan="' . getColspanBasedOnLogin($loggedIn)  
 								. '" class="sectiontitles">' . $trialsInfo[$cntr]['sectionHeader'] . '</td></tr>';
 				}
 				if($globalOptions['onlyUpdates'] == "no")
 				{
-					$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true"><td colspan="' . getColspanBasedOnLogin($loggedIn) 
+					$outputStr .= '<tr style=" width:'.$col_width.'px; page-break-inside:avoid;" nobr="true"><td style="width:'.$col_width.'px;" colspan="' . getColspanBasedOnLogin($loggedIn) 
 								. '" class="norecord" align="left">No trials found</td></tr>';
 				}
 			}
@@ -4948,6 +4955,11 @@ class TrialTracker
 	{
 		global $now;
 		$outputStr = '';
+		if($loggedIn)
+		$col_width=548;
+		else
+		$col_width=518;
+		
 		if(!empty($naUpms))
 		{
 			$currentYear = date('Y');
@@ -4971,7 +4983,7 @@ class TrialTracker
 				}
 				
 				//rendering unmatched upms
-				$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true" ' . $class . ' style="background-color:#000;">';
+				$outputStr .= '<tr style="width:'.$col_width.'px; page-break-inside:avoid; background-color:#000;" nobr="true" ' . $class . '>';
 				
 				//field upm-id
 				if($loggedIn)
@@ -5006,7 +5018,7 @@ class TrialTracker
 					$titleLinkColor = 'color:#FF0000;';
 					$title = ' title = "New record" ';
 				}
-				$outputStr .= '<td colspan="5" class="' . $rowOneType .  $attr . '" ' . $title . '><span>';
+				$outputStr .= '<td style="width:253px;" colspan="5" class="' . $rowOneType .  $attr . '" ' . $title . '><span>';
 				if($value['event_link'] !== NULL && $value['event_link'] != '') 
 				{
 					$outputStr .= '<a style="' . $titleLinkColor . '" href="' . $value['event_link'] . '" target="_blank">' . $value['event_description'] . '</a>';
@@ -5024,7 +5036,7 @@ class TrialTracker
 				{
 					$title = ' title = "New record" ';
 				}
-				$outputStr .= '<td class="' . $rowTwoType . '" ' . $title . '><span>' . $value['status'] . '</span></td>';
+				$outputStr .= '<td style="width:41px;"class="' . $rowTwoType . '" ' . $title . '><span>' . $value['status'] . '</span></td>';
 
 			
 				//field upm event type
@@ -5047,7 +5059,7 @@ class TrialTracker
 				{
 					$title = ' title = "New record" ';
 				}
-				$outputStr .= '<td class="' . $rowTwoType . $attr . '" ' . $title . '><span>' . $value['event_type'] . ' Milestone</span></td>';
+				$outputStr .= '<td style="width:60px;" class="' . $rowTwoType . $attr . '" ' . $title . '><span>' . $value['event_type'] . ' Milestone</span></td>';
 				
 				
 				//field upm start date
@@ -5084,7 +5096,7 @@ class TrialTracker
 					$title = ' title = "New record" ';
 					$dateStyle = 'color:#973535;'; 
 				}
-				$outputStr .= '<td class="' . $rowTwoType . $attr . '" ' . $title . '><span>';
+				$outputStr .= '<td style="width:20px;" class="' . $rowTwoType . $attr . '" ' . $title . '><span>';
 				if($value['start_date_type'] == 'anticipated') 
 				{
 					$outputStr .= '<span style="font-weight:bold;' . $dateStyle . '">'
@@ -5133,7 +5145,7 @@ class TrialTracker
 					$title = ' title = "New record" ';
 					$dateStyle = 'color:#973535;'; 
 				}
-				$outputStr .= '<td class="' . $rowTwoType . $attr . '" ' . $title . '><span>';
+				$outputStr .= '<td style="width:20px;" class="' . $rowTwoType . $attr . '" ' . $title . '><span>';
 				if($value['end_date_type'] == 'anticipated') 
 				{
 					$outputStr .= '<span style="font-weight:bold;' . $dateStyle . '">' 
@@ -5145,11 +5157,11 @@ class TrialTracker
 					$outputStr .= (($value['end_date'] != '' && $value['end_date'] !== NULL && $value['end_date'] != '0000-00-00') ? 
 									date('m/y',strtotime($value['end_date'])) : '');
 				}	
-				$outputStr .= '</span></td><td><span></span></td>';
+				$outputStr .= '</span></td><td style="width:20px;"><span></span></td>';
 				
 				
 				//field upm result 
-				$outputStr .= '<td style="text-align:center;"><span><br />';
+				$outputStr .= '<td style="width:20px; text-align:center;"><span><br />';
 				if($value['result_link'] != '' && $value['result_link'] !== NULL)
 				{
 					if((!empty($value['edited']) && $value['edited']['field'] == 'result_link') || ($value['new'] == 'y')) 
@@ -5181,17 +5193,657 @@ class TrialTracker
 				
 				
 				//upm gnatt chart
-				$upmGnattChart = $this->upmGnattChart(date('m',strtotime($value['start_date'])), date('Y',strtotime($value['start_date'])), 
+				$upmGnattChart = $this->upmGnattChart_TCPDF(date('m',strtotime($value['start_date'])), date('Y',strtotime($value['start_date'])), 
 								date('m',strtotime($value['end_date'])), date('Y',strtotime($value['end_date'])), $currentYear, $secondYear, $thirdYear, 
 								$value['start_date'], $value['end_date'], $value['event_link'], $upmTitle);
 				$upmGnattChart = preg_replace('/&nbsp;/', '<img src="images/trans_big.gif" />', $upmGnattChart);
-				$outputStr .= preg_replace('/width:([0-9]*)px;/', '', $upmGnattChart);				
+				//$outputStr .= preg_replace('/width:([0-9]*)px;/', '', $upmGnattChart);
+				$outputStr .= $upmGnattChart;				
 				
 				$outputStr .= '</tr>';
 			}
 		}
 		return $outputStr;
 	}
+	
+	function trialGnattChart_TCPDF($startMonth, $startYear, $endMonth, $endYear, $currentYear, $secondYear, $thirdYear, $startDate, $endDate, $bgColor)
+	{
+		$outputStr = '';
+		if(($startDate == '' || $startDate === NULL || $startDate == '0000-00-00') && ($endDate == '' || $endDate === NULL || $endDate == '0000-00-00')) 
+		{
+			$outputStr .= '<td style="width:6px;" colspan="3">&nbsp;</td>';
+			$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td><td style="width:24px;" colspan="12">&nbsp;</td>'
+						. '<td style="width:24px;" colspan="12">&nbsp;</td><td style="width:6px;" colspan="3">&nbsp;</td>';	
+		} 
+		else if($startDate == '' || $startDate === NULL || $startDate == '0000-00-00') 
+		{
+			$st = $endMonth-1;
+			if($endYear < $currentYear) 
+			{
+				$outputStr .= '<td colspan="3" style="width:6px; background-color:' . $bgColor . ';">&nbsp;</td>';
+				$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td><td  style="width:24px;" colspan="12">&nbsp;</td>'
+							. '<td style="width:24px;" colspan="12">&nbsp;</td><td style="width:6px;" colspan="3">&nbsp;</td>';	
+			} 
+			else if($endYear == $currentYear) 
+			{
+				$outputStr .= '<td style="width:6px;" colspan="3">&nbsp;</td>';
+				$outputStr .= (($st != 0) ? '<td style="width:'. ($st*2) .'px;" colspan="' . $st . '">&nbsp;</td>' : '')
+							. '<td style="width:2px; background-color:' . $bgColor . ';">&nbsp;</td>'
+							. (((12 - ($st+1)) != 0) ? '<td style="width:'.((12-($st+1))*2).'px;" colspan="' .(12 - ($st+1)) . '">&nbsp;</td>' : '')
+							. '<td style="width:24px;" colspan="12">&nbsp;</td><td  style="width:24px;" colspan="12">&nbsp;</td><td style="width:6px;" colspan="3">&nbsp;</td>';	
+			}
+			else if($endYear == $secondYear)
+			{
+				$outputStr .= '<td style="width:6px;" colspan="3">&nbsp;</td>';
+				$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td>' 
+							. (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '">&nbsp;</td>' : '')
+							. '<td style="background-color:' . $bgColor . '; width:2px;">&nbsp;</td>'
+							. (((12 - ($st+1)) != 0) ? '<td style="width:'.((12-($st+1))*2).'px;" colspan="' .(12 - ($st+1)) . '">&nbsp;</td>' : '')
+							. '<td style="width:24px;" colspan="12">&nbsp;</td><td style="width:6px;" colspan="3">&nbsp;</td>';
+			} 
+			else if($endYear == $thirdYear) 
+			{
+				$outputStr .= '<td style="width:6px;" colspan="3">&nbsp;</td>';
+				$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td><td style="width:24px;" colspan="12">&nbsp;</td>' 
+							. (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '">&nbsp;</td>' : '')
+							. '<td style="background-color:' . $bgColor . '; width:2px;">&nbsp;</td>'
+							. (((12 - ($st+1)) != 0) ? '<td style="width:'.((12-($st+1))*2).'px;" colspan="' .(12 - ($st+1)) . '">&nbsp;</td>' : '')
+							. '<td style="width:6px;" colspan="3">&nbsp;</td>';	
+			} 
+			else if($endYear > $thirdYear)
+			{
+				$outputStr .= '<td style="width:6px;" colspan="3">&nbsp;</td>';
+				$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td>'
+							. '<td style="width:24px;" colspan="12">&nbsp;</td><td style="width:24px;" colspan="12">&nbsp;</td>'
+							. '<td colspan="3" style="background-color:' . $bgColor . '; width:6px;">&nbsp;</td>';
+			}
+		}
+		else if($endDate == '' || $endDate === NULL || $endDate == '0000-00-00')
+		{
+			$st = $startMonth-1;
+			if($startYear < $currentYear)
+			{
+				$outputStr .= '<td colspan="3" style="width:6px; background-color:' . $bgColor . ';">&nbsp;</td>';
+				$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td><td style="width:24px;" colspan="12">&nbsp;</td>'
+							. '<td style="width:24px;" colspan="12">&nbsp;</td><td style="width:6px;" colspan="3">&nbsp;</td>';	
+			}
+			else if($startYear == $currentYear) 
+			{ 
+				$outputStr .= '<td style="width:6px;" colspan="3">&nbsp;</td>';
+				$outputStr .= (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '">&nbsp;</td>' : '')
+							. '<td style="background-color:' . $bgColor . '; width:2px;">&nbsp;</td>'
+							. (((12 - ($st+1)) != 0) ? '<td style="width:'.((12-($st+1))*2).'px;" colspan="' .(12 - ($st+1)) . '">&nbsp;</td>' : '')
+							. '<td style="width:24px;" colspan="12">&nbsp;</td><td style="width:24px;" colspan="12">&nbsp;</td><td style="width:6px;" colspan="3">&nbsp;</td>';	
+			} 
+			else if($startYear == $secondYear) 
+			{
+				$outputStr .= '<td style="width:6px;" colspan="3">&nbsp;</td>';
+				$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td>'
+							. (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '">&nbsp;</td>' : '')
+							. '<td style="background-color:' . $bgColor . ';width:2px;">&nbsp;</td>'
+							. (((12 - ($st+1)) != 0) ? '<td style="width:'.((12-($st+1))*2).'px;" colspan="' .(12 - ($st+1)) . '">&nbsp;</td>' : '')
+							. '<td style="width:24px;" colspan="12">&nbsp;</td><td style="width:6px;" colspan="3">&nbsp;</td>';
+			}
+			else if($startYear == $thirdYear) 
+			{
+				$outputStr .= '<td style="width:6px;" colspan="3">&nbsp;</td>';
+				$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td><td style="width:24px;" colspan="12">&nbsp;</td>'
+							. (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '">&nbsp;</td>' : '')
+							. '<td style="background-color:' . $bgColor . '; width:2px;">&nbsp;</td>'
+							. (((12 - ($st+1)) != 0) ? '<td style="width:'.((12-($st+1))*2).'px;" colspan="' .(12 - ($st+1)) . '">&nbsp;</td>' : '')
+							. '<td style="width:6px;" colspan="3">&nbsp;</td>';	
+			} 
+			else if($startYear > $thirdYear)
+			{
+				$outputStr .= '<td style="width:6px;" colspan="3">&nbsp;</td>';
+				$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td>'
+							. '<td style="width:24px;" colspan="12">&nbsp;</td><td style="width:24px;" colspan="12">&nbsp;</td>'
+							. '<td colspan="3" style="width:6px; background-color:' . $bgColor . ';">&nbsp;</td>';
+			}
+		} 
+		else if($endDate < $startDate) 
+		{
+			$outputStr .= '<td style="width:6px;" colspan="3">&nbsp;</td>';
+			$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td>'
+						. '<td style="width:24px;" colspan="12">&nbsp;</td>'
+						. '<td style="width:24px;" colspan="12">&nbsp;</td><td style="width:6px;" colspan="3">&nbsp;</td>';
+		} 
+		else if($startYear < $currentYear) 
+		{
+			if($endYear < $currentYear) 
+			{
+				$outputStr .= '<td colspan="3" style="width:6px; background-color:' . $bgColor . ';">&nbsp;</td>';
+				$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td><td style="width:24px;" colspan="12">&nbsp;</td>'
+							. '<td style="width:24px;" colspan="12">&nbsp;</td><td style="width:6px;" colspan="3">&nbsp;</td>';
+			} 
+			else if($endYear == $currentYear) 
+			{
+				if($endMonth == 12) 
+				{
+					$outputStr .= '<td style="width:30px; background-color:' . $bgColor . ';" colspan="15">&nbsp;</td>' 
+								. '<td style="width:24px;" colspan="12">&nbsp;</td><td style="width:24px;" colspan="12">&nbsp;</td>'
+								. '<td style="width:6px;" colspan="3">&nbsp;</td>';
+				} 
+				else 
+				{ 
+					$outputStr .= '<td style="width:'.(($endMonth+3)*2).'px; background-color:' . $bgColor . ';" colspan="' . ($endMonth+3) . '">&nbsp;</td>'
+								. '<td style="width:'.((12-$endMonth)*2).'px;" colspan="' . (12-$endMonth) . '">&nbsp;</td>'
+								. '<td style="width:24px;" colspan="12">&nbsp;</td><td style="width:24px;" colspan="12">&nbsp;</td>'
+								. '<td style="width:6px;" colspan="3">&nbsp;</td>';
+				}
+			}
+			else if($endYear == $secondYear) 
+			{ 
+				if($endMonth == 12) 
+				{
+					$outputStr .= '<td style="width:'.(27*2).'px; background-color:' . $bgColor . ';" colspan="27">&nbsp;</td>'
+								. '<td  style="width:24px;" colspan="12">&nbsp;</td><td style="width:6px;" colspan="3">&nbsp;</td>';
+				} 
+				else 
+				{
+					$outputStr .= '<td style="width:'.((15+$endMonth)*2).'px; background-color:' . $bgColor . ';" colspan="' . (15+$endMonth) . '">&nbsp;</td>'
+								. '<td style="width:' . ((12-$endMonth)*2) . 'px;" colspan="' . (12-$endMonth) . '">&nbsp;</td><td style="width:24px;" colspan="12">&nbsp;</td>'
+								. '<td style="width:6px;" colspan="3">&nbsp;</td>';
+				}
+			} 
+			else if($endYear == $thirdYear) 
+			{ 
+				if($endMonth == 12) 
+				{
+					$outputStr .= '<td style="width:'.(39*2).'px; background-color:' . $bgColor . ';" colspan="39">&nbsp;</td>'
+								. '<td style="width:6px;" colspan="3">&nbsp;</td>';
+				} 
+				else 
+				{
+					$outputStr .= '<td style="width:'.((27+$endMonth)*2).'px; background-color:' . $bgColor . ';" colspan="' . (27+$endMonth) . '">&nbsp;</td>'
+								. '<td style="width:'.((12-$endMonth)*2).'px;" colspan="' . (12-$endMonth) . '">&nbsp;</td>'
+								. '<td style="width:6px;" colspan="3">&nbsp;</td>';
+				}
+			} 
+			else if($endYear > $thirdYear)
+			{ 
+				$outputStr .= '<td colspan="42" style="width:'.(42*2).'px; background-color:' . $bgColor . ';">&nbsp;</td>';		
+			}	
+		} 
+		else if($startYear == $currentYear) 
+		{
+			$val = getColspan($startDate, $endDate);
+			$st = $startMonth-1;
+			if($endYear == $currentYear) 
+			{
+				$outputStr .= '<td style="width:6px;" colspan="3">&nbsp;</td>';
+				$outputStr .= (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '">&nbsp;</td>' : '');
+				if($val != 0) 
+				{
+					$outputStr .= '<td style="width:'.($val*2).'px; background-color:' . $bgColor . ';" colspan="' . $val . '">&nbsp;</td>'
+								. (((12 - ($st+$val)) != 0) ? '<td style="width:' . ((12 - ($st+$val))*2) . 'px;" colspan="' .(12 - ($st+$val)) . '">&nbsp;</td>' : '');
+				} 
+				else 
+				{
+					$outputStr .= '<td style="width:2px; background-color:' . $bgColor . ';">&nbsp;</td>'
+								. (((12 - ($st+1)) != 0) ? '<td style="width:'.((12-($st+1))*2).'px;" colspan="' .(12 - ($st+1)) . '">&nbsp;</td>' : '');
+				}
+				$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td><td style="width:24px;" colspan="12">&nbsp;</td><td style="width:6px;" colspan="3">&nbsp;</td>';
+			} 
+			else if($endYear == $secondYear)
+			{ 
+				$outputStr .= '<td style="width:6px;" colspan="3">&nbsp;</td>';
+				$outputStr .= (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '">&nbsp;</td>' : '');
+				if($val != 0)
+				{
+					$outputStr .= '<td style="width:'.($val*2).'px; background-color:' . $bgColor . ';" colspan="' . $val . '">&nbsp;</td>'
+								. (((24 - ($val+$st)) != 0) ? '<td style="width:'.((24-($val+$st))*2).'px;" colspan="' .(24 - ($val+$st)) . '">&nbsp;</td>' : '');
+				} 
+				else 
+				{
+					$outputStr .= '<td style="width:2px; background-color:' . $bgColor . ';">&nbsp;</td>'
+								. (((24 - (1+$st)) != 0) ? '<td style="width:'.((24-(1+$st))*2).'px;" colspan="' .(24 - (1+$st)) . '">&nbsp;</td>' : '');			
+				}
+				$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td><td style="width:6px;" colspan="3">&nbsp;</td>';
+			} 
+			else if($endYear == $thirdYear) 
+			{
+				$outputStr .= '<td  style="width:6px;" colspan="3">&nbsp;</td>';
+				$outputStr .= (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '">&nbsp;</td>' : '');
+				if($val != 0) 
+				{
+					$outputStr .= '<td style="width:'.($val*2).'px; background-color:' . $bgColor . ';" colspan="' . $val . '">&nbsp;</td>'
+								. (((36 - ($val+$st)) != 0) ? '<td style="width:'.((36-($val+$st))*2).'px;" colspan="' .(36 - ($val+$st)) . '">&nbsp;</td>' : '');
+				} 
+				else 
+				{
+					$outputStr .= '<td style="width:2px; background-color:' . $bgColor . ';">&nbsp;</td>'
+								. (((36 - (1+$st)) != 0) ? '<td style="width:'.((36-(1+$st))*2).'px;" colspan="' .(36 - (1+$st)) . '">&nbsp;</td>' : '');
+				}
+				$outputStr .= '<td style="width:6px;" colspan="3">&nbsp;</td>';
+			} 
+			else if($endYear > $thirdYear)
+			{
+				$outputStr .= '<td style="width:6px;" colspan="3">&nbsp;</td>';
+				$outputStr .= (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '">&nbsp;</td>' : '');
+				$outputStr .= '<td colspan="' .(39 - $st) . '" style="width:'.((39-$st)*2).'px; background-color:' . $bgColor . ';">&nbsp;</td>';		
+			}
+		}
+		else if($startYear == $secondYear) 
+		{
+			$val = getColspan($startDate, $endDate);
+			$st = $startMonth-1;
+			if($endYear == $secondYear) 
+			{
+				$outputStr .= '<td style="width:6px;" colspan="3">&nbsp;</td>';
+				$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td>' . (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '">' . '&nbsp;</td>' : '');
+				if($val != 0) 
+				{ 
+					$outputStr .= '<td style="width:'.($val*2).'px; background-color:' . $bgColor . ';" colspan="' . $val . '">&nbsp;</td>'
+								. (((12 - ($val+$st)) != 0) ? '<td style="width:'.((12-($val+$st))*2).'px;" colspan="' .(12 - ($val+$st)) . '">&nbsp;</td>' : '');
+				} 
+				else 
+				{ 
+					$outputStr .= '<td style="background-color:' . $bgColor . ';width:2px;"></td>'
+								. (((12 - (1+$st)) != 0) ? '<td style="width:'.((12-(1+$st))*2).'px;" colspan="' .(12 - (1+$st)) . '">&nbsp;</td>' : '');
+				}
+				$outputStr .= '<td colspan="12" style="width:24px;">&nbsp;</td><td colspan="3" style="width:6px;">&nbsp;</td>';		
+			} 
+			else if($endYear == $thirdYear) 
+			{
+				$outputStr .= '<td colspan="3" style="width:6px;">&nbsp;</td>';
+				$outputStr .= '<td colspan="12" style="width:24px;">&nbsp;</td>' . (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '">&nbsp;</td>' : '');
+				if($val != 0) 
+				{
+					$outputStr .= '<td style="width:'.($val*2).'px; background-color:' . $bgColor . ';" colspan="' . $val . '">&nbsp;</td>'
+								. (((24 - ($val+$st)) != 0) ? '<td style="width:'.((24-($val+$st))*2).'px;" colspan="' .(24 - ($val+$st)) . '">&nbsp;</td>' : '');
+				} 
+				else 
+				{
+					$outputStr .= '<td style="width:2px; background-color:' . $bgColor . ';">&nbsp;</td>'
+								. (((24 - (1+$st)) != 0) ? '<td style="width:'.((24-(1+$st))*2).'px;" colspan="' .(24 - (1+$st)) . '">&nbsp;</td>' : '');
+				}
+				$outputStr .= '<td style="width:6px;" colspan="3">&nbsp;</td>';
+			} 
+			else if($endYear > $thirdYear) 
+			{
+				$outputStr .= '<td style="width:6px;" colspan="3">&nbsp;</td>';
+				$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td>' . (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '">&nbsp;</td>' : '');
+				$outputStr .= '<td colspan="' .(27 - $st) . '" style="background-color:' . $bgColor . '; width:'.((27-$st)*2).'px; ">&nbsp;</td>';		
+			}
+		} 
+		else if($startYear == $thirdYear) 
+		{
+			$val = getColspan($startDate, $endDate);
+			$st = $startMonth-1;	
+			if($endYear == $thirdYear) 
+			{
+				$outputStr .= '<td style="width:6px;" colspan="3">&nbsp;</td>';
+				$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td><td style="width:24px;" colspan="12">&nbsp;</td>'
+							. (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '">&nbsp;</td>' : '');
+				if($val != 0) 
+				{
+					$outputStr .= '<td style="width:'.($val*2).'px; background-color:' . $bgColor . ';" colspan="' . $val . '">&nbsp;</td>'
+								. (((12 - ($val+$st)) != 0) ? '<td style="width:'.((12-($val+$st))*2).'px;" colspan="' .(12 - ($val+$st)) . '">&nbsp;</td>' : '');
+				} 
+				else 
+				{
+					$outputStr .= '<td style="background-color:' . $bgColor . '; width:2px;">&nbsp;</td>'
+								. (((12 - (1+$st)) != 0) ? '<td style="width:'.((12-(1+$st))*2).'px;" colspan="' .(12 - (1+$st)) . '">&nbsp;</td>' : '');
+				}
+				$outputStr .= '<td colspan="3" style="width:6px;">&nbsp;</td>';
+			} 
+			else if($endYear > $thirdYear)
+			{
+				$outputStr .= '<td style="width:6px;" colspan="3">&nbsp;</td>';
+				$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td><td style="width:24px;" colspan="12">&nbsp;</td>' . (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '">&nbsp;</td>' : '');
+				$outputStr .= '<td colspan="' .(15 - $st) . '" style="width:'.((15-$st)*2).'px; background-color:' . $bgColor . ';">&nbsp;</td>';		
+			}
+		} 
+		else if($startYear > $thirdYear) 
+		{
+			$outputStr .= '<td style="width:6px;" colspan="3">&nbsp;</td>';
+			$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td><td style="width:24px;" colspan="12">&nbsp;</td><td style="width:24px;" colspan="12">&nbsp;</td>'
+						. '<td colspan="3" style="width:6px; background-color:' . $bgColor . ';">&nbsp;</td>';	
+		} 
+		return $outputStr;
+	}
+	
+	function upmGnattChart_TCPDF($startMonth, $startYear, $endMonth, $endYear, $currentYear, $secondYear, $thirdYear, $startDate, $endDate, $upmLink, $upmTitle)
+	{	
+		$outputStr = '';
+		$bgColor = 'background-color:#9966FF;';
+		$anchorTag = ($upmLink != '' &&  $upmLink !== NULL) ? '<a href="' . $upmLink . '" target="_blank">&nbsp;</a>' : '&nbsp;' ;
+		
+		if(($startDate == '' || $startDate === NULL || $startDate == '0000-00-00') && ($endDate == '' || $endDate === NULL || $endDate == '0000-00-00'))
+		{
+			$outputStr .= '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
+			$outputStr .= '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+						. '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>'. $anchorTag . '</div></td>'
+						. '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+						. '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';	
+		} 
+		else if($startDate == '' || $startDate === NULL || $startDate == '0000-00-00') 
+		{
+			$st = $endMonth-1;
+			if($endYear < $currentYear) 
+			{
+				$outputStr .= '<td colspan="3" style="width:6px; ' . $bgColor . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
+				$outputStr .= '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+							. '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+							. '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+							. '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';	
+			} 
+			else if($endYear == $currentYear) 
+			{
+				$outputStr .= '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
+				$outputStr .= (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>' : '')
+							. '<td style="width:2px; ' . $bgColor . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+							. (((12 - ($st+1)) != 0) ? '<td style="width:'.((12-($st+1))*2).'px;" colspan="' .(12 - ($st+1)) . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>' : '')
+							. '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+							. '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+							. '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';	
+			}
+			else if($endYear == $secondYear) 
+			{
+				$outputStr .= '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
+				$outputStr .= '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+							. (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>' : '')
+							. '<td style="width:2px; ' . $bgColor . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+							. (((12 - ($st+1)) != 0) ? '<td style="width:'.((12-($st+1))*2).'px;" colspan="' .(12 - ($st+1)) . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>' : '')
+							. '<td style="width:24px;" colspan="12">&nbsp;</td><td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
+			} 
+			else if($endYear == $thirdYear) 
+			{
+				$outputStr .= '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
+				$outputStr .= '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+							. '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+							. (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>' : '')
+							. '<td style="width:2px; ' . $bgColor . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+							. (((12 - ($st+1)) != 0) ? '<td style="width:'.((12-($st+1))*2).'px;" colspan="' .(12 - ($st+1)) . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>' : '')
+							. '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';	
+			} 
+			else if($endYear > $thirdYear)
+			{
+				$outputStr .= '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
+				$outputStr .= '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+							. '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+							. '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+							. '<td colspan="3" style="width:6px; ' . $bgColor . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
+			}
+		} 
+		else if($endDate == '' || $endDate === NULL || $endDate == '0000-00-00') 
+		{
+			$st = $startMonth-1;
+			if($startYear < $currentYear) 
+			{
+				$outputStr .= '<td colspan="3" style="width:6px; ' . $bgColor . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
+				$outputStr .= '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+							. '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+							. '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+							. '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';	
+			} 
+			else if($startYear == $currentYear) 
+			{ 
+				$outputStr .= '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
+				$outputStr .= (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>' : '')
+							. '<td style="width:2px; ' . $bgColor . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+							. (((12 - ($st+1)) != 0) ? '<td style="width:'.((12-($st+1))*2).'px;" colspan="' .(12 - ($st+1)) . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>' : '')
+							. '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+							. '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+							. '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';	
+			} 
+			else if($startYear == $secondYear)
+			{
+				$outputStr .= '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
+				$outputStr .= '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+							. (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>' : '')
+							. '<td style="width:2px; ' . $bgColor . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+							. (((12 - ($st+1)) != 0) ? '<td style="width:'.((12-($st+1))*2).'px;" colspan="' .(12 - ($st+1)) . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>' : '')
+							. '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+							. '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
+			} 
+			else if($startYear == $thirdYear) 
+			{
+				$outputStr .= '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
+				$outputStr .= '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+							. '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+							. (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>' : '')
+							. '<td style="width:2px; ' . $bgColor . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+							. (((12 - ($st+1)) != 0) ? '<td style="width:'.((12-($st+1))*2).'px;" colspan="' .(12 - ($st+1)) . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>' : '')
+							. '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';	
+			} 
+			else if($startYear > $thirdYear)
+			{
+				$outputStr .= '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
+				$outputStr .= '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+							. '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+							. '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+							. '<td colspan="3" style="width:6px; ' . $bgColor . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
+			}
+		} 
+		else if($endDate < $startDate) 
+		{
+			$outputStr .= '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
+			$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td><td style="width:24px;" colspan="12">&nbsp;</td>'
+						. '<td style="width:24px;" colspan="12">&nbsp;</td><td style="width:6px;" colspan="3">&nbsp;</td>';
+		} 
+		else if($startYear < $currentYear) 
+		{
+			$val = getColspan($startDate, $endDate);
+			$st = $startMonth-1;
+			if($endYear < $currentYear) 
+			{
+				$outputStr .= '<td colspan="3" style="width:6px; ' . $bgColor . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
+				$outputStr .= '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+							. '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+							. '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+							. '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
+			}
+			else if($endYear == $currentYear) 
+			{ 
+				if($endMonth == 12) 
+				{
+					$outputStr .= '<td style="width:'.(($endMonth+3)*2).'px; ' . $bgColor . '" colspan="' . ($endMonth+3) . '">' . '<div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+								. '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+								. '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+								. '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
+				} 
+				else 
+				{ 
+					$outputStr .= '<td style="width:'.(($endMonth+3)*2).'px; ' . $bgColor . '" colspan="' . ($endMonth+3) . '">' . '<div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+								. '<td style="width:'.((12-$endMonth)*2).'px;" colspan="' . (12-$endMonth) . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+								. '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+								. '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+								. '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
+				}
+			} 
+			else if($endYear == $secondYear) 
+			{ 
+				if($endMonth == 12) 
+				{
+					$outputStr .= '<td style="width:'.(27*2).'px; ' . $bgColor . '" colspan="27">' . '<div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+								. '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+								. '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
+				} 
+				else 
+				{
+					$outputStr .= '<td style="width:'.(($endMonth+15)*2).'px; ' . $bgColor . '" colspan="' . (15+$endMonth) . '">' . '<div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+								. '<td style="width:'.((12-$endMonth)*2).'px;" colspan="' . (12-$endMonth) . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+								. '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+								. '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
+				}
+			} 
+			else if($endYear == $thirdYear)
+			{ 
+				if($endMonth == 12)
+				{
+					$outputStr .= '<td style="width:'.(39*2).'px; ' . $bgColor . '" colspan="39">' . '<div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+								. '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
+				}
+				else 
+				{
+					$outputStr .= '<td style="width:'.((27+$endMonth)*2).'px; ' . $bgColor . '" colspan="' . (27+$end_month) . '" ' . $class . '>' 
+								. '<div ' . $upm_title . '>' . $anchorTag . '</div></td>'
+								. '<td style="width:'.((12-$endMonth)*2).'px;" colspan="' . (12-$endMonth) . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+								. '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
+				}
+			} 
+			else if($endYear > $thirdYear) 
+			{
+				$outputStr .= '<td colspan="42" style="width:'.(42*2).'px; ' . $bgColor . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';		
+			}	
+		} 
+		else if($startYear == $currentYear) 
+		{
+			$val = getColspan($startDate, $endDate);
+			$st = $startMonth-1;
+			if($endYear == $currentYear) 
+			{
+				$outputStr .= '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
+				$outputStr .= (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '" ><div ' . $upm_title . '>' . $anchorTag . '</div></td>' : '');
+				if($val != 0)
+				{
+					$outputStr .= '<td style="width:'.($val*2).'px; ' . $bgColor . '" colspan="' . $val . '">'. '<div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+								. (((12 - ($st+$val)) != 0) ? '<td style="width:'.((12-($st+$val))*2).'px;" colspan="' .(12 - ($st+$val)) . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>' : '');
+				} 
+				else 
+				{
+					$outputStr .= '<td style="width:2px; ' . $bgColor . '">' . '<div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+								. (((12 - ($st+1)) != 0) ? '<td style="width:'.((12-($st+1))*2).'px;" colspan="' .(12 - ($st+1)) . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>' : '');			
+				}
+				$outputStr .= '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+							. '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+							. '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
+			}
+			else if($endYear == $secondYear) 
+			{ 
+				$outputStr .= '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
+				$outputStr .= (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>' : '');
+				if($val != 0) 
+				{
+					$outputStr .= '<td style="width:'.($val*2).'px; ' . $bgColor . '" colspan="' . $val . '">' . '<div ' . $upmTitle .' >' . $anchorTag . '</div></td>'
+								. (((24 - ($val+$st)) != 0) ? '<td style="width:'.((24-($val+$st))*2).'px;" colspan="' .(24 - ($val+$st)) . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>' : '');
+				} 
+				else 
+				{
+					$outputStr .= '<td style="width:2px; ' . $bgColor . '">' . '<div ' . $upmTitle .' >' . $anchorTag . '</div></td>'
+								. (((24 - (1+$st)) != 0) ? '<td style="width:'.((24-(1+$st))*2).'px;" colspan="' .(24 - (1+$st)) . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>' : '');			
+				}
+				$outputStr .= '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+							. '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
+			} 
+			else if($endYear == $thirdYear) 
+			{
+				$outputStr .= '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
+				$outputStr .= (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>' : '');
+				if($val != 0) 
+				{
+					$outputStr .= '<td style="width:'.($val*2).'px; ' . $bgColor . '" colspan="' . $val . '">' . '<div ' . $upmTitle .'>'. $anchorTag . '</div></td>'
+								. (((36 - ($val+$st)) != 0) ? '<td style="width:'.((36-($val+$st))*2).'px;" colspan="' .(36 - ($val+$st)) . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>' : '') ;
+				} 
+				else 
+				{
+					$outputStr .= '<td style="width:2px; ' . $bgColor . '">' . '<div ' . $upmTitle .'>' . $anchorTag . '</div></td>'
+								. (((36 - (1+$st)) != 0) ? '<td style="width:'.((36-(1+$st))*2).'px;" colspan="' .(36 - (1+$st)) . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>' : '') ;			
+				}
+				$outputStr .= '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
+			} 
+			else if($endYear > $thirdYear)
+			{
+				$outputStr .= '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
+				$outputStr .= (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '">&nbsp;</td>' : '');
+				$outputStr .= '<td colspan="' .(39 - $st) . '" style="width:'.((39-$st)*2).'px; ' . $bgColor . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';		
+			}
+		} 
+		else if($startYear == $secondYear) 
+		{
+			$val = getColspan($startDate, $endDate);
+			$st = $startMonth-1;
+			if($endYear == $secondYear) 
+			{
+				$outputStr .= '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
+				$outputStr .= '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+							. (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>' : '');
+							
+				if($val != 0) 
+				{
+					$outputStr .= '<td style="width:'.($val*2).'px; ' . $bgColor . '" colspan="' . $val . '">' . '<div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+								. (((12 - ($val+$st)) != 0) ? '<td style="width:'.((12-($val+$st))*2).'px;" colspan="' .(12 - ($val+$st)) . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>' : '');
+				} 
+				else 
+				{
+					$outputStr .= '<td style="width:2px; ' . $bgColor . '">' . '<div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+								. (((12 - (1+$st)) != 0) ? '<td style="width:'.((12-(1+$st))*2).'px;" colspan="' .(12 - (1+$st)) . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>' : '');
+				}
+				$outputStr .= '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+							. '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';		
+			} 
+			else if($endYear == $thirdYear) 
+			{
+				$outputStr .= '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
+				$outputStr .= '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+							. (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>' : '');
+							
+				if($val != 0) 
+				{
+					$outputStr .= '<td style="width:'.($val*2).'px; ' . $bgColor . '" colspan="' . $val . '">' . '<div ' . $upmTitle .'>' . $anchorTag . '</div></td>'
+								. (((24 - ($val+$st)) != 0) ? '<td style="width:'.((24-($val+$st))*2).'px;" colspan="' .(24 - ($val+$st)) . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>' : '');
+				} 
+				else 
+				{
+					$outputStr .=  '<td style="width:2px; ' . $bgColor . '">' . '<div ' . $upmTitle .'>' . $anchorTag . '</div></td>'
+								. (((24 - (1+$st)) != 0) ? '<td style="width:'.((24-(1+$st))*2).'px;" colspan="' .(24 - (1+$st)) . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>' : '');			
+				}
+				$outputStr .= '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
+	
+			}
+			else if($endYear > $thirdYear)
+			{
+				$outputStr .= '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
+				$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td>' . (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '">&nbsp;</td>' : '');
+				$outputStr .= '<td colspan="' .(27 - $st) . '" style="width:'.((27-$st)*2).'px; ' . $bgColor . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';		
+			}
+		} 
+		else if($startYear == $thirdYear) 
+		{
+			$val = getColspan($startDate, $endDate);
+			$st = $startMonth-1;	
+			if($endYear == $thirdYear) 
+			{
+				$outputStr .= '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
+				$outputStr .= '<td style="width:24px;" colspan="12"><div ' . $upm_title . '>' . $anchorTag . '</div></td>'
+							. '<td style="width:24px;" colspan="12"><div ' . $upm_title . '>' . $anchorTag . '</div></td>'
+							. (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>' : '');
+							
+				if($val != 0) 
+				{
+					$outputStr .= '<td style="width:'.($val*2).'px; ' . $bgColor . '" colspan="' . $val . '">' . '<div ' . $upmTitle .'>' . $anchorTag . '</div></td>'
+								. (((12 - ($val+$st)) != 0) ? '<td style="width:'.((12-($val+$st))*2).'px;" colspan="' .(12 - ($val+$st)) . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>' : '');
+				} 
+				else 
+				{
+					$outputStr .= '<td style="width:2px; ' . $bgColor . '">' . '<div ' . $upmTitle .'>' . $anchorTag . '</div></td>'
+								. (((12 - (1+$st)) != 0) ? '<td style="width:'.((12-(1+$st))*2).'px;" colspan="' .(12 - (1+$st)) . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>' : '');			
+				}
+				$outputStr .= '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
+			} 
+			else if($endYear > $thirdYear) 
+			{
+				$outputStr .= '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
+				$outputStr .= '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>'. $anchorTag . '</div></td>'
+							. '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>' 
+							. (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>' : '')
+							. '<td colspan="' . (15 - $st) . '" style="width:'.((15-$st)*2).'px; ' . $bgColor . '"><div ' . $upmTitle . '>'. $anchorTag . '</div></td>';
+			}
+		} 
+		else if($startYear > $thirdYear) 
+		{
+			$outputStr .= '<td style="width:6px;" colspan="3"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
+			$outputStr .= '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+						. '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+						. '<td style="width:24px;" colspan="12"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
+						. '<td colspan="3" style="width:6px; ' . $bgColor . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';	
+		}
+		
+		return $outputStr;	
+	}
+
 
 	/*****END OF Functions ONLY FOR TCPDF *****************************/
 	
@@ -6133,6 +6785,7 @@ class TrialTracker
 							$svalue = array_search($rvalue['NCT/overall_status'], $this->inactiveStatusValues);
 							if(in_array($svalue, $globalOptions['filtersOne']))
 							{	
+
 								$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
 							}
 						}
