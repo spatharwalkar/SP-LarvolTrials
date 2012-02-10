@@ -5299,6 +5299,7 @@ class TrialTracker
 				$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td>'
 							. '<td style="width:24px;" colspan="12">&nbsp;</td><td style="width:24px;" colspan="12">&nbsp;</td>'
 							. '<td colspan="3" style="width:6px; background-color:' . $bgColor . ';">&nbsp;</td>';
+
 			}
 		} 
 		else if($endDate < $startDate) 
@@ -5459,6 +5460,7 @@ class TrialTracker
 								. (((24 - (1+$st)) != 0) ? '<td style="width:'.((24-(1+$st))*2).'px;" colspan="' .(24 - (1+$st)) . '">&nbsp;</td>' : '');
 				}
 				$outputStr .= '<td style="width:6px;" colspan="3">&nbsp;</td>';
+
 			} 
 			else if($endYear > $thirdYear) 
 			{
@@ -6173,6 +6175,7 @@ class TrialTracker
 		}
 		else if($ottType == 'standalone')
 		{
+
 			$nctIds = array();
 			$Id = mysql_real_escape_string($resultIds);
 			if(!is_numeric($Id))
@@ -6866,7 +6869,8 @@ class TrialTracker
 		$timeInterval = '-1 ' . $timeInterval;
 		
 		$fieldNames = array('end_date_lastchanged', 'region_lastchanged', 'brief_title_lastchanged', 'acronym_lastchanged', 'lead_sponsor_lastchanged',
-		'start_date_lastchanged', 'phase_lastchanged', 'enrollment_lastchanged', 'collaborator_lastchanged', 'condition_lastchanged', 'intervention_name_lastchanged');
+		'overall_status_lastchanged', 'start_date_lastchanged', 'phase_lastchanged', 'enrollment_lastchanged', 
+		'collaborator_lastchanged', 'condition_lastchanged', 'intervention_name_lastchanged');
 		
 		if(isset($globalOptions['filtersTwo']) && !empty($globalOptions['filtersTwo'])) 
 		{
@@ -6954,8 +6958,9 @@ class TrialTracker
 				if($row['lastchanged_date'] <= date('Y-m-d', $timeMachine) && $row['lastchanged_date'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
 				{
 					//echo '<br/>query-->'.
-					$uquery = "SELECT `end_date_prev`, `region_prev`, `brief_title_prev`, `acronym_prev`, `lead_sponsor_prev`,"
-							. " `start_date_prev`, `phase_prev`, `enrollment_prev`, `collaborator_prev`, `condition_prev`, `intervention_name_prev`, `"
+					$uquery = "SELECT `end_date_prev`, `region_prev`, `brief_title_prev`, `acronym_prev`, `lead_sponsor_prev`, `overall_status_prev`, "
+							. "`overall_status_lastchanged`, `start_date_prev`, `phase_prev`, `enrollment_prev`, `collaborator_prev`, `condition_prev`, "
+							. " `intervention_name_prev`, `"
 							. implode("`, `", $fieldNames) . "` FROM `data_history` WHERE `larvol_id` = '" . $row['larvol_id'] . "' AND ( (`" 
 							. implode('` BETWEEN "' . date('Y-m-d', strtotime($timeInterval, $timeMachine)) . '" AND "' . date('Y-m-d', $timeMachine) 
 							. '") OR (`', $fieldNames) . "` BETWEEN '" . date('Y-m-d', strtotime($timeInterval, $timeMachine)) . "' AND '" 
@@ -8488,6 +8493,7 @@ class TrialTracker
 			//phase column
 			$attr = ' ';
 			if(!empty($trials[$i]['edited']) && array_key_exists('NCT/phase', $trials[$i]['edited'])) 
+
 			{
 				$attr = 'class="highlight" title="' . $trials[$i]['edited']['NCT/phase'] . '" ';
 			} 
