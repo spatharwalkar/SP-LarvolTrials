@@ -1347,7 +1347,7 @@ function postEd()
 			{
 				if($header != "") 
 				{
-					$query = "select id from " . $t . "s where name='" . $header . "' ";
+					$query = "select id from " . $t . "s where name='" . mysql_real_escape_string($header) . "' ";
 					$row = mysql_fetch_assoc(mysql_query($query)) or die('Bad SQL Query getting ' . $t . ' names ');
 					
 					$query = 'UPDATE rpt_masterhm_headers SET type_id="' . mysql_real_escape_string($row['id']) 
