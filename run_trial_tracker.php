@@ -4280,6 +4280,7 @@ class TrialTracker
 						.'<body>'
 						.'<div align="center"><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="200" height="25" id="header" /></div><br/>';
 		
+		$timeInterval = $this->getDecodedValue($globalOptions['findChangesFrom']);
 		$Values = array();
 		
 		if($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed')
