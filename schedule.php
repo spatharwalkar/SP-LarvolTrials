@@ -64,7 +64,12 @@ function editor()
 	{
 		$reports['u' . $row['id']] = 'Update Scan ' . $row['id'] . ': ' . $row['name'];
 	}
-
+	
+	//put product/areas schedule list prodcuts=1 areas=2 using bitmask.
+	$reports['LI_sync1'] = 'LI Product Sync';
+	$reports['LI_sync2'] = 'LI Areas Sync';
+	//end
+	
 	$selectedreports = array();
 	$query = 'SELECT heatmap FROM schedule_heatmaps WHERE schedule=' . $id;
 	$res = mysql_query($query) or die('Bad SQL query getting associated heatmaps');
@@ -78,6 +83,27 @@ function editor()
 	{
 		$selectedreports[] = 'u' . $row['updatescan'];
 	}
+	
+	//li sync preselection
+	$query = "select `LI_sync` from `schedule` where id=$id";
+	$res = mysql_query($query) or die('Bad SQL query getting LI sync data.');
+	while($row = mysql_fetch_assoc($res))
+	{
+		switch($row['LI_sync'])
+		{
+			case '1':
+				$selectedreports[] = 'LI_sync' . $row['LI_sync'];
+				break;
+			case '2':
+				$selectedreports[] = 'LI_sync' . $row['LI_sync'];
+				break;
+			case '3':
+				$selectedreports[] = 'LI_sync1';
+				$selectedreports[] = 'LI_sync2';
+				break;
+		}
+	}
+	//end
 	$out .= '<label>Run these reports: ' . makeDropdown('reports',$reports,10,$selectedreports,true) . '</label><br clear="all"/>'
 			. '<label>Send output to these emails (comma-delimited): <input type="text" name="emails" value="'
 			. htmlspecialchars($rpt['emails']) . '"/></label><br clear="all"/>';
@@ -151,11 +177,28 @@ function postEd()
 					$continueFlag=1;
 					break;
 				}
+				$LI_sync_type = explode('LI_sync',$rep);
+				if(is_array($LI_sync_type) && count($LI_sync_type)==2)
+				{
+					$LI_sync_array[] = $LI_sync_type[1];
+					$continueFlag = 1;
+				}
 				if($continueFlag == 1)
 				continue;
 				$query .= ',schedule=' . $id;
 				mysql_query($query) or die('Bad SQL query saving report associations'.mysql_error().'<br />'.$query);
 			}
+		}
+		//save li sync variables
+		if(is_array($LI_sync_array) && count($LI_sync_array)>0)
+		{
+			$query = "UPDATE `schedule` SET `LI_sync`=".implode('|',$LI_sync_array)." where id=".$id;
+			mysql_query($query) or die('Bad SQL query saving product/areas sync data'.mysql_error().'<br />'.$query);
+		}
+		else
+		{
+			$query = "UPDATE `schedule` SET `LI_sync`=null where id=".$id;;
+			mysql_query($query) or die('Bad SQL query saving product/areas sync data'.mysql_error().'<br />'.$query);
 		}
 	}
 }

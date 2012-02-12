@@ -73,6 +73,7 @@ require_once('PHPExcel.php');
 require_once('PHPExcel/Writer/Excel2007.php');
 require_once('include.excel.php');
 require_once('class.phpmailer.php');
+require_once 'fetch_li_products.php';
 
 //variables used for running report
 global $run_id;
@@ -102,7 +103,7 @@ echo ('<pre>Checking schedule for updates and reports....' . $nl);
 //Fetch schedule data 
 $schedule = array();
 $fetch = array();
-$query = 'SELECT `id`,`name`,`fetch`,`runtimes`,`lastrun`,`emails` FROM schedule WHERE runtimes!=0';
+$query = 'SELECT `id`,`name`,`fetch`,`runtimes`,`lastrun`,`emails`,`LI_sync` FROM schedule WHERE runtimes!=0';
 $res = mysql_query($query) or die('Bad SQL Query getting schedule');
 $tasks = array(); while($row = mysql_fetch_assoc($res)) $tasks[] = $row;
 
@@ -142,6 +143,12 @@ foreach($tasks as $row)
 	}
 	if($due)
 	{
+		//check for li syncable rows
+		if($row['LI_sync'] && is_numeric($row['LI_sync']))
+		{
+			$LISyncTasks[] = $row;
+			continue;
+		}		
 		//Get data of current item(which must be checked for updates/reports)
 		$schedule[] = $row;
 		$schedule_tasks[]=$row['id'];
@@ -153,14 +160,48 @@ foreach($tasks as $row)
 			if(!isset($fetch[$row['fetch']]) || $fetch[$row['fetch']] < $lastrun)
 				$fetch[$row['fetch']] = $lastrun;
 		}
+		
 	}
 }
 
 $currently_scheduled_tasks=$schedule_tasks;
 
 $current_tasks_count=count($currently_scheduled_tasks);
-
 echo ($current_tasks_count." new tasks found.".$nl);
+
+//no threading needed for LI sync so doing it now....
+//start LI sync
+echo count($LISyncTasks)." new LI sync tasks found.".$nl;
+foreach($LISyncTasks as $syncTask)
+{
+	$query = 'UPDATE schedule SET lastrun="' . date("Y-m-d H:i:s",strtotime('now')) . '" WHERE id=' . $syncTask['id'] . ' LIMIT 1';
+	if(mysql_query($query))
+	{
+		echo 'LI sync schedule lastrun updated.'.$nl;
+	}
+	else
+	{
+		die('Bad SQL query setting LI sync lastrun in schedule. Error: '.mysql_error());
+	}
+	echo 'LI Sync in process...'.$nl;
+	switch($syncTask['LI_sync'])
+	{
+		case 1:
+			//product sync
+			fetch_li_products(strtotime($syncTask['lastrun']));
+			break;
+		case 2:
+			//area sync
+			break;
+		case 3:
+			//areas and product sync
+			fetch_li_products(strtotime($syncTask['lastrun']));
+			break;
+	}
+	//echo date('Y-m-d H:i:s',$now);die;
+}
+
+//end LI sync
 
 mysql_close($db->db_link) or die("Error disconnecting from database server!");
 /************************************ Step A ****************************************/
