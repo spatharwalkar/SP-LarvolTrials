@@ -393,6 +393,9 @@ else $ddesc=$rec->detailed_descr->textblock;
 		case 'phase4':
 			$record_data['phase']='Phase 4';
 			break;
+		case 'Phase iib' or 'Phase iib':
+			$record_data['phase']='Phase 2b';
+			break;
 		}
 		
 		
