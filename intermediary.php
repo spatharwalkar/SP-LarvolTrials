@@ -300,7 +300,7 @@ if(isset($_GET['v']))
 	$globalOptions['version'] = mysql_real_escape_string($_GET['v']);
 }
 
-if(isset($_GET['osu']) && $_GET['osu'] == rawurlencode(base64_encode(gzdeflate('on'))))
+if(isset($_GET['osu']) && gzinflate(base64_decode($_GET['osu'])) == 'on')
 {
 	$globalOptions['onlyUpdates'] = "yes";
 }

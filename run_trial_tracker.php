@@ -7138,7 +7138,7 @@ class TrialTracker
 					}
 					
 					//unsetting value for field enrollment if the change is less than 20 percent
-					if(isset($result[$ikey]['edited']['NCT/enrollment'])) 
+					if(isset($result[$index]['edited']['NCT/enrollment'])) 
 					{ 
 						$prevValue = substr($result[$index]['edited']['NCT/enrollment'],16);
 						if(!getDifference($prevValue, $result[$index]['NCT/enrollment'])) 
@@ -8074,9 +8074,9 @@ class TrialTracker
 		{
 			$url .= '&amp;fcf=' . $globalOptions['findChangesFrom'];
 		}
-		if(isset($globalOptions['onlyUpdates']) && $globalOptions['onlyUpdates'] != 'no')
+		if(isset($globalOptions['onlyUpdates']) && $globalOptions['onlyUpdates'] == 'yes')
 		{
-			$url .= '&amp;osu=' . $globalOptions['onlyUpdates'];
+			$url .= '&amp;osu=' . rawurlencode(base64_encode(gzdeflate('on')));
 		}
 		if(isset($globalOptions['filtersOne']) && !empty($globalOptions['filtersOne']))
 		{
