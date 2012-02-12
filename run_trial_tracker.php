@@ -9863,12 +9863,30 @@ function htmlformat($str)
 
 function getDifference($valueOne, $valueTwo) 
 {
-	$diff = abs(($valueOne - $valueTwo) / $valueOne * 100);
-	$diff = round($diff);
-	if($diff > 20)
-		return true;
+	if($valueOne == 0)
+	{
+		if($valueTwo > 20)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
 	else
-		return false;
+	{
+		$diff = abs(($valueOne - $valueTwo) / $valueOne * 100);
+		$diff = round($diff);
+		if($diff > 20)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
 }
 
 //get difference between two dates in months
