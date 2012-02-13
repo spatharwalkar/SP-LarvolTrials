@@ -424,9 +424,7 @@ function editor()
 						.'<tr><th style="background-color:#fff;">Bomb:</th></tr>'
 						.'<tr><td style="background-color:#fff;">'
 						.'<select id="bombselect_'.$row.'_'.$col.'" onchange="bicon_change(bombselect_'.$row.'_'.$col.', bombimg_'.$row.'_'.$col.')" class="field" name="bomb['.$row.']['.$col.']">';
-					
-				$out .= '<option value="" '.(($data_matrix[$row][$col]['bomb']['value'] == '' || $data_matrix[$row][$col]['bomb']['value'] == NULL) ? ' selected="selected"' : '') .'></option>';
-			    $out .= '<option value="none" '.(($data_matrix[$row][$col]['bomb']['value'] == 'none') ? ' selected="selected"' : '') .'>None</option>';
+				$out .= '<option value="none" '.(($data_matrix[$row][$col]['bomb']['value'] == 'none' || $data_matrix[$row][$col]['bomb']['value'] == '' || $data_matrix[$row][$col]['bomb']['value'] == NULL) ? ' selected="selected"' : '') .'>None</option>';
 				$out .= '<option value="small" '.(($data_matrix[$row][$col]['bomb']['value'] == 'small') ? ' selected="selected"' : '') .'>Small Bomb</option>';
 				$out .= '<option value="large" '.(($data_matrix[$row][$col]['bomb']['value'] == 'large') ? ' selected="selected"' : '') .'>Large Bomb</option>';
 						
