@@ -908,31 +908,31 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		echo '<td>Type : </td><td>'.($searchType==1?'Auto':'SemiAuto').'</td>';
 		echo '</tr>';		
 	}
+	$altTitle='Delete';
+	if($script=='products')
+	{
+		$upmReferenceCount = getProductUpmAssociation($id);
+		$MHMReferenceCount = getMHMAssociation($id,'product');
+		$disabled = ($upmReferenceCount>0 || $MHMReferenceCount>0)?true:false;
+		$altTitle = $disabled?'Cannot delete product as it is linked to other upms/MHM\'s. See References.':$altTitle;
+		echo '<tr>';
+		echo '<td>References : </td><td>'.$upmReferenceCount.' UPM</td>';
+		echo '</tr>';
+		echo '<tr>';
+		echo '<td>References : </td><td>'.$MHMReferenceCount.' MHM</td>';
+		echo '</tr>';
+	}
+	if($script=='areas')
+	{
+		$MHMReferenceCount = getMHMAssociation($id,'product');
+		$disabled = ($MHMReferenceCount>0)?true:false;
+		$altTitle = $disabled?'Cannot delete area as it is linked to other MHM\'s. See References.':$altTitle;
+		echo '<tr>';
+		echo '<td>References : </td><td>'.$MHMReferenceCount.' MHM</td>';
+		echo '</tr>';
+	}	
 	if($options['deletebox']===true && $id)
 	{
-		$altTitle='Delete';
-		if($script=='products')
-		{
-			$upmReferenceCount = getProductUpmAssociation($id);
-			$MHMReferenceCount = getMHMAssociation($id,'product');
-			$disabled = ($upmReferenceCount>0 || $MHMReferenceCount>0)?true:false;
-			$altTitle = $disabled?'Cannot delete product as it is linked to other upms/MHM\'s. See References.':$altTitle;
-			echo '<tr>';
-			echo '<td>References : </td><td>'.$upmReferenceCount.' UPM</td>';
-			echo '</tr>';	
-			echo '<tr>';
-			echo '<td>References : </td><td>'.$MHMReferenceCount.' MHM</td>';
-			echo '</tr>';
-		}
-		if($script=='areas')
-		{
-			$MHMReferenceCount = getMHMAssociation($id,'product');
-			$disabled = ($MHMReferenceCount>0)?true:false;
-			$altTitle = $disabled?'Cannot delete area as it is linked to other MHM\'s. See References.':$altTitle;
-			echo '<tr>';
-			echo '<td>References : </td><td>'.$MHMReferenceCount.' MHM</td>';
-			echo '</tr>';
-		}		
 		echo '<tr>';
 		echo '<td>Delete : </td><td>'.input_tag(null,null,array('deletebox'=>true,'id'=>$id,'disabled'=>$disabled,'alttitle'=>$altTitle)).'</td>';
 		echo '</tr>';
