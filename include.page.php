@@ -931,6 +931,9 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		$disabled = ($upmReferenceCount>0 || $MHMReferenceCount>0)?true:false;
 		$altTitle = $disabled?'Cannot delete product as it is linked to other upms/MHM\'s. See References.':$altTitle;
 		echo '<tr>';
+		echo '<td>Active : </td><td>'.(($upmDetails['is_active']==='0')?'False':'True').'</td>';
+		echo '</tr>';
+		echo '<tr>';
 		echo '<td>References : </td><td>'.$upmReferenceCount.' UPM</td>';
 		echo '</tr>';
 		echo '<tr>';
