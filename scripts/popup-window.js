@@ -123,8 +123,43 @@ function popup_exit(e)
 
 // ***** popup_show ************************************************************
 
-function popup_show(id, drag_id, exit_id, position, x, y, position_id)
+function popup_show(type, rows, cols, id, drag_id, exit_id, position, x, y, position_id)
 {
+	///////Added new part to clode other popup windows other than current/////////
+	if(type=='bomb')
+	{
+		for(pt1=1; pt1<=rows; pt1++)
+		{
+			for(pt2=1; pt2<=cols; pt2++)
+			{
+				if(id !='bombpopup_'+pt1+'_'+pt2)
+				{
+					var element = document.getElementById('bombpopup_'+pt1+'_'+pt2);
+					element.style.display='none';
+				}
+				var element = document.getElementById('filingpopup_'+pt1+'_'+pt2);	///in case of bomb close all filing windows
+				element.style.display='none';
+			}
+		}
+	}
+	else
+	{
+		for(pt1=1; pt1<=rows; pt1++)
+		{
+			for(pt2=1; pt2<=cols; pt2++)
+			{
+				if(id !='filingpopup_'+pt1+'_'+pt2)
+				{
+					var element = document.getElementById('filingpopup_'+pt1+'_'+pt2);
+					element.style.display='none';
+				}
+				var element = document.getElementById('bombpopup_'+pt1+'_'+pt2);	////in case of filing close all bomb windows 
+				element.style.display='none';
+			}
+		}
+	}
+	
+	
   var element      = document.getElementById(id);
   var drag_element = document.getElementById(drag_id);
   var exit_element = document.getElementById(exit_id);

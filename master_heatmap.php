@@ -50,6 +50,47 @@ function autoComplete(fieldID)
 	});
 }
 </script>
+<script type="text/javascript">
+function bicon_change(option, bomb_id)
+{
+	var bomb = document.getElementById('bomb_id');
+
+	if(option.value == 'small')
+	{
+		bomb_id.src='images/sbomb.png';
+		bomb_id.style.height='11px';
+		bomb_id.style.width='10px';
+	}
+	else if(option.value == 'large')
+	{
+		bomb_id.src='images/lbomb.png';
+		bomb_id.style.height='20px';
+		bomb_id.style.width='18px';
+	}
+	else
+	{
+		bomb_id.src='images/square.png';
+		bomb_id.style.height='20px';
+		bomb_id.style.width='18px';
+	}	
+
+}
+function ficon_change(filing_id, filingicon_id)
+{
+	var bomb = document.getElementById('filing_id');
+
+	if(filing_id.value != '' && filing_id.value != null)
+	{
+		filingicon_id.src='images/file.png';
+	}
+	else
+	{
+		filingicon_id.src='images/edit.png';
+	}	
+
+}
+
+</script>
 <link href="css/popup_form.css" rel="stylesheet" type="text/css" media="all" />
 <script type="text/javascript" src="scripts/popup-window.js"></script>
 <?php
@@ -369,9 +410,9 @@ function editor()
 				
 				$out .= '<a href="intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col] . '" target="_blank" class="ottlink" title="Active Records, Total Records"><b>'.$data_matrix[$row][$col]['active'].', </b>'.$data_matrix[$row][$col]['total'].'</a>';
 				
-				$out .= '<img align="right" title="'.$data_matrix[$row][$col]['bomb']['title'].'" src="images/'.$data_matrix[$row][$col]['bomb']['src'].'" style="'.$data_matrix[$row][$col]['bomb']['style'].' vertical-align:middle; padding-right:10px; cursor:pointer;" alt="'.$data_matrix[$row][$col]['bomb']['alt'].'"'
-			.'onclick="popup_show(\'bombpopup_'.$row.'_'.$col.'\', \'bombpopup_drag_'.$row.'_'.$col.'\', \'bombpopup_exit_'.$row.'_'.$col.'\', \'mouse\', -10, -10);" /><br><br>';
-				$out .= '<img align="right" title="Edit Filing" src="images/'. (($data_matrix[$row][$col]['filing'] == NULL && $data_matrix[$row][$col]['filing'] == '') ? 'edit.png' : 'file.png' ) .'" style="width:14px; height:16px; vertical-align:top; cursor:pointer;'.(($data_matrix[$row][$col]['filing'] == NULL && $data_matrix[$row][$col]['filing'] == '') ? ' background-color:#CCCCCC;' : '' ).'" alt="Edit Filing" onclick="popup_show(\'filingpopup_'.$row.'_'.$col.'\', \'filingpopup_drag_'.$row.'_'.$col.'\', \'filingpopup_exit_'.$row.'_'.$col.'\', \'mouse\', -10, -10);" />';
+				$out .= '<img align="right" id="bombimg_'.$row.'_'.$col.'" title="'.$data_matrix[$row][$col]['bomb']['title'].'" src="images/'.$data_matrix[$row][$col]['bomb']['src'].'" style="'.$data_matrix[$row][$col]['bomb']['style'].' vertical-align:middle; padding-right:10px; cursor:pointer;" alt="'.$data_matrix[$row][$col]['bomb']['alt'].'"'
+			.'onclick="popup_show(\'bomb\', '.count($rows).','.count($columns).',\'bombpopup_'.$row.'_'.$col.'\', \'bombpopup_drag_'.$row.'_'.$col.'\', \'bombpopup_exit_'.$row.'_'.$col.'\', \'mouse\', -10, -10);" /><br><br>';
+				$out .= '<img align="right" id="filingimg_'.$row.'_'.$col.'" title="Edit Filing" src="images/'. (($data_matrix[$row][$col]['filing'] == NULL && $data_matrix[$row][$col]['filing'] == '') ? 'edit.png' : 'file.png' ) .'" style="width:14px; height:16px; vertical-align:top; cursor:pointer; background-color:#CCCCCC;" alt="Edit Filing" onclick="popup_show(\'filing\', '.count($rows).','.count($columns).',\'filingpopup_'.$row.'_'.$col.'\', \'filingpopup_drag_'.$row.'_'.$col.'\', \'filingpopup_exit_'.$row.'_'.$col.'\', \'mouse\', -10, -10);" />';
 
 				$out .= '<div class="popup_form" id="bombpopup_'.$row.'_'.$col.'" style="display: none;">'	//Pop-Up Form for Bomb Editing Starts Here
 						.'<div class="menu_form_header" id="bombpopup_drag_'.$row.'_'.$col.'">'
@@ -382,7 +423,7 @@ function editor()
 						.'<table style="background-color:#fff;">'
 						.'<tr><th style="background-color:#fff;">Bomb:</th></tr>'
 						.'<tr><td style="background-color:#fff;">'
-						.'<select class="field" name="bomb['.$row.']['.$col.']">';
+						.'<select id="bombselect_'.$row.'_'.$col.'" onchange="bicon_change(bombselect_'.$row.'_'.$col.', bombimg_'.$row.'_'.$col.')" class="field" name="bomb['.$row.']['.$col.']">';
 					
 				$out .= '<option value="" '.(($data_matrix[$row][$col]['bomb']['value'] == '' || $data_matrix[$row][$col]['bomb']['value'] == NULL) ? ' selected="selected"' : '') .'></option>';
 			    $out .= '<option value="none" '.(($data_matrix[$row][$col]['bomb']['value'] == 'none') ? ' selected="selected"' : '') .'>None</option>';
@@ -417,7 +458,7 @@ function editor()
 						
 						$out .= '<tr><th style="background-color:#fff;">Filing:</th></tr>'
 						.'<tr><td style="background-color:#fff;">'
-						.'<textarea name="filing['.$row.']['.$col.']" id="filing" style="overflow:scroll;" rows="5" cols="20">'. $data_matrix[$row][$col]['filing'] .'</textarea>'
+						.'<textarea id="filing_'.$row.'_'.$col.'" onkeyup="ficon_change(filing_'.$row.'_'.$col.', filingimg_'.$row.'_'.$col.')" onkeypress="ficon_change(filing_'.$row.'_'.$col.', filingimg_'.$row.'_'.$col.')" name="filing['.$row.']['.$col.']" style="overflow:scroll;" rows="5" cols="20">'. $data_matrix[$row][$col]['filing'] .'</textarea>'
 						.'</td></tr>'
 						.'<tr><th style="background-color:#fff;">&nbsp;</th></tr>'
 						.'</table>'
@@ -805,25 +846,25 @@ function Download_reports()
 				
 					$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '" target="_blank" title="'. $title .'">'. (($_POST['dwformat']=='pdfdown' || $data_matrix[$row][$col]['bomb']['src'] != 'square.png') ? '' : '&nbsp;&nbsp;&nbsp;&nbsp;').$count_val.'</a>';
 					
-					if($_POST['dwformat']=='htmldown') //When bomb has square dont include it in pdf as size is big and no use
+					if($_POST['dwformat']=='htmldown' && $data_matrix[$row][$col]['bomb']['src'] != 'square.png') //When bomb has square dont include it in pdf as size is big and no use
 					{	$pdfContent .= '<img align="right" title="'.$data_matrix[$row][$col]['bomb']['title'].'" src="'. urlPath() .'images/'.$data_matrix[$row][$col]['bomb']['src'].'" style="'.$data_matrix[$row][$col]['bomb']['style'].' vertical-align:middle; padding-right:10px; cursor:pointer;" alt="'.$data_matrix[$row][$col]['bomb']['alt'].'"'
 			.'onclick="popup_show(\'bombpopup_'.$row.'_'.$col.'\', \'bombpopup_drag_'.$row.'_'.$col.'\', \'bombpopup_exit_'.$row.'_'.$col.'\', \'mouse\', -10, -10);" />';				}
 			
 			
 					if($_POST['dwformat']=='pdfdown') //As in PDF alignment not works space added to align it properly	
 					{
-						$pdfContent .= '&nbsp;&nbsp;<img align="right" title="'.$data_matrix[$row][$col]['bomb']['title'].'" src="'. urlPath() .'images/'.$data_matrix[$row][$col]['bomb']['src'].'" style="'.(($data_matrix[$row][$col]['bomb']['src'] == 'square.png') ? 'width:10px; height:10px;' : $data_matrix[$row][$col]['bomb']['style'] ).' vertical-align:middle; padding-right:10px; cursor:pointer;" alt="'.$data_matrix[$row][$col]['bomb']['alt'].'" />';
-						
-						if($data_matrix[$row][$col]['bomb_explain'] != NULL && $data_matrix[$row][$col]['bomb_explain'] != '')
+						if($data_matrix[$row][$col]['bomb']['src'] != 'square.png')
 						{
+							$pdfContent .= '&nbsp;&nbsp;<img align="right" title="'.$data_matrix[$row][$col]['bomb']['title'].'" src="'. urlPath() .'images/'.$data_matrix[$row][$col]['bomb']['src'].'" style="'.(($data_matrix[$row][$col]['bomb']['src'] == 'square.png') ? 'width:10px; height:10px;' : $data_matrix[$row][$col]['bomb']['style'] ).' vertical-align:middle; padding-right:10px; cursor:pointer;" alt="'.$data_matrix[$row][$col]['bomb']['alt'].'" />';
+						
 							$count_fillbomb++;
 							$pdfContent .= '&nbsp;('.$count_fillbomb.')';
 						}
 						
-						$pdfContent .= '<br/><br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img align="right" title="Filing Details" src="'. urlPath() .'images/'. (($data_matrix[$row][$col]['filing'] == NULL && $data_matrix[$row][$col]['filing'] == '') ? 'edit.png' : 'file.png' ) .'" style="width:10px; height:12px; vertical-align:top; cursor:pointer;'.(($data_matrix[$row][$col]['filing'] == NULL && $data_matrix[$row][$col]['filing'] == '') ? ' background-color:#CCCCCC;' : '' ).'" alt="Filing" />';
-						
 						if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
 						{
+							$pdfContent .= '<br/><br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img align="right" title="Filing Details" src="'. urlPath() .'images/'. (($data_matrix[$row][$col]['filing'] == NULL && $data_matrix[$row][$col]['filing'] == '') ? 'edit.png' : 'file.png' ) .'" style="width:10px; height:12px; vertical-align:top; cursor:pointer;'.(($data_matrix[$row][$col]['filing'] == NULL && $data_matrix[$row][$col]['filing'] == '') ? ' background-color:#CCCCCC;' : '' ).'" alt="Filing" />';
+						
 							$count_fillbomb++;
 							$pdfContent .= '&nbsp;('.$count_fillbomb.')';
 						}
@@ -831,7 +872,8 @@ function Download_reports()
 
 					if($_POST['dwformat']=='htmldown') //As there is no need for following code to be executed for PDF
 					{
-						$pdfContent .= '<br/><br/><img align="right" title="Filing Details" src="'. urlPath() .'images/'. (($data_matrix[$row][$col]['filing'] == NULL && $data_matrix[$row][$col]['filing'] == '') ? 'edit.png' : 'file.png' ) .'" style="width:14px; height:16px; vertical-align:top; cursor:pointer;'.(($data_matrix[$row][$col]['filing'] == NULL && $data_matrix[$row][$col]['filing'] == '') ? ' background-color:#CCCCCC;' : '' ).'" alt="Filing" onclick="popup_show(\'filingpopup_'.$row.'_'.$col.'\', \'filingpopup_drag_'.$row.'_'.$col.'\', \'filingpopup_exit_'.$row.'_'.$col.'\', \'mouse\', -10, -10);" />';
+						if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
+						$pdfContent .= '<br/><br/><img align="right" title="Filing Details" src="'. urlPath() .'images/file.png" style="width:14px; height:16px; vertical-align:top; cursor:pointer; background-color:#CCCCCC;" alt="Filing" onclick="popup_show(\'filingpopup_'.$row.'_'.$col.'\', \'filingpopup_drag_'.$row.'_'.$col.'\', \'filingpopup_exit_'.$row.'_'.$col.'\', \'mouse\', -10, -10);" />';
 
 					
 						$pdfContent .= '<div class="popup_form" id="bombpopup_'.$row.'_'.$col.'" style="display: none;">'	//Pop-Up Form for Bomb Editing Starts Here
@@ -906,7 +948,7 @@ function Download_reports()
 			{
 				if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL)
 				{
-					if($data_matrix[$row][$col]['bomb_explain'] != NULL && $data_matrix[$row][$col]['bomb_explain'] != '')
+					if($data_matrix[$row][$col]['bomb_explain'] != NULL && $data_matrix[$row][$col]['bomb_explain'] != '' && $data_matrix[$row][$col]['bomb']['src'] != 'square.png')
 					{
 						$count_fillbomb_again++;
 						$pdfContent .=  '<tr style="page-break-inside:avoid;" nobr="true"><td align="left"><div style="padding-left:10px;">'. $count_fillbomb_again .'</div></td>'
