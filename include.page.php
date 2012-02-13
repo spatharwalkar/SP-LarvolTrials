@@ -873,6 +873,12 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 			continue;
 		}
 		$dbVal = isset($upmDetails[$row['Field']])?$upmDetails[$row['Field']]:null;
+		
+		//check products table for LI_id
+		if($script=='products' && $row['Field']=='LI_id' && trim($dbVal)!='')
+		{
+			$options['deletebox'] = false;
+		}
 		if(isset($options['saveStatus'])&& $options['saveStatus']===0)
 		{
 			$dbVal = (isset($_GET[$row['Field']]) && $_GET[$row['Field']]!='')?$_GET[$row['Field']]:$dbVal;
