@@ -150,7 +150,7 @@ $page=0;
 
 //pagination
 $ignoreFields = array('searchdata');
-pagePagination($limit,$totalCount,$table,$script,$ignoreFields,array('import'=>true));
+pagePagination($limit,$totalCount,$table,$script,$ignoreFields,array('import'=>true,'searchDataCheck'=>true));
 //pagination controller
 
 //define skip array table fields

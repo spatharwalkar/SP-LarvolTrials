@@ -319,6 +319,11 @@ function calculateWhere($table)
 						);
 		
 	}
+	//searching for explicity searchDataCheck case.
+	if(isset($_GET['searchDataCheck']) && $_GET['searchDataCheck'] == 'on')
+	{
+		$whereArr[] = $table.".searchdata !='' AND ";
+	}	
 	if(count($whereArr)>0)
 	{
 		$where = ' WHERE ';
@@ -472,7 +477,10 @@ function input_tag($row,$dbVal=null,$options=array())
 			$id = $options['id'];
 			return '&nbsp;<label class="lbldel" style="float:none;" title="'.$altTitle.'" alt="'.$altTitle.'"><input '.$disabled.' type="checkbox" title="'.$altTitle.'" alt="'.$altTitle.'" name="deleteId" value="'.$id.'" class="delsearch"></label>';
 			break;
-			
+		case 'checkbox':
+			$checkedStat = ($dbVal=='on')?'checked="checked"':null;
+			return '<input type="checkbox" name="'.$row['Field'].'" id="'.$row['Field'].'" title="'.$altTitle.'" alt="'.$altTitle.'" '.$checkedStat.'/>';
+			break;	
 		default:
 			$dateinput = (strpos($row['Field'], 'date') !== false) ? ' class="jdpicker"' : '';
 			return '<input '.$style.' type="text" value="'.$dbVal.'" name="'.$nameIndex.$row['Field'].'" id="'.$nameIndex.$row['Field'].'"' . $dateinput . '/>';
@@ -711,7 +719,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
  * @param int $limit The total limit of records defined in the controller.
  * @author Jithu Thomas
  */
-function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),$options=array('import'=>true))
+function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),$options=array('import'=>true,'searchDataCheck'=>false))
 {
 	global $page;	
 	$formOnSubmit = isset($options['formOnSubmit'])?$options['formOnSubmit']:null;
@@ -770,6 +778,13 @@ function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),
 	$query = "SHOW COLUMNS FROM $table";
 	$res = mysql_query($query);
 	echo '<table>';
+	if($options['searchDataCheck'])
+	{
+		$searchDataCheckStatus = (isset($_GET['searchDataCheck']))?$_GET['searchDataCheck']:null;
+		echo '<tr>';
+		echo '<td>Search Data : </td><td>'.input_tag(array('Type'=>'checkbox','Field'=>'searchDataCheck'),$searchDataCheckStatus,array('alttitle'=>'Search for records having search data.')).'</td>';
+		echo '</tr>';
+	}
 	while($row = mysql_fetch_assoc($res))
 	{
 		if(!in_array($row['Field'],$ignoreFields))
