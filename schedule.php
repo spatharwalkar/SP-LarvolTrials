@@ -29,8 +29,9 @@ function editor()
 	$rpt = mysql_fetch_assoc($res) or die('Item not found.');
 	$out = '<form action="schedule.php" method="post"><fieldset class="schedule"><legend>Edit schedule item ' . $id . '</legend>'
 			. '<input type="hidden" name="id" value="' . $id . '" />'
-			. '<input type="submit" name="reportsave" value="Save edits" /><br clear="all"/><br />'
-			. '<label>Name: <input type="text" name="name" value="' . htmlspecialchars($rpt['name']) . '"/></label>'
+			. '<input type="submit" name="reportsave" value="Save edits" /><br clear="all"/>'
+			. '<label>Name: <input type="text" name="name" value="' . htmlspecialchars($rpt['name']) . '"/></label><br />'
+			. '<label>Calculate Master HM cells?: <input type="checkbox" name="mhm" value="calc" /></label><br />'  // checkbox for calulating Master HM cells
 			. '<label>Update database (fetch)?: '
 			//. '<input type="checkbox" name="fetch"'	. ($rpt['fetch'] ? 'checked="checked"' : '') . '/>'
 			. makeDropdown('fetch',getEnumValues('schedule','fetch'),false,$rpt['fetch'])
@@ -141,7 +142,6 @@ function postEd()
 	if(!is_numeric($id)) return;
 	
 	$_GET['id'] = $id;	//This is so the editor will load the item we are about to (maybe?) save
-	
 	if(isset($_POST['reportsave']))
 	{
 		$runtimes = 0;
@@ -200,6 +200,28 @@ function postEd()
 			$query = "UPDATE `schedule` SET `LI_sync`=null where id=".$id;;
 			mysql_query($query) or die('Bad SQL query saving product/areas sync data'.mysql_error().'<br />'.$query);
 		}
+
+		// save changes of master HM calculation 
+		global $logger;
+		//	echo '<pre>'; print_r($_GET);  print_r($_POST); echo '</pre>';
+
+		if( isset($_POST['mhm']) and $_POST['mhm']=='calc' )  
+		{
+			$query = 'UPDATE `schedule` SET `calc_HM`="1" where `id`="'.$id . '" limit 1';
+		}
+		else
+		{
+			$query = 'UPDATE `schedule` SET `calc_HM`= NULL where `id`="'.$id . '" limit 1';		
+		}
+			
+		if(!mysql_query($query))
+		{
+			$log='Error saving changes to schedule: ' . mysql_error() . '('. mysql_errno() .'), Query:' . $query;
+			$logger->fatal($log);
+			die($log);
+		}
+		
+		
 	}
 }
 

@@ -103,7 +103,7 @@ echo ('<pre>Checking schedule for updates and reports....' . $nl);
 //Fetch schedule data 
 $schedule = array();
 $fetch = array();
-$query = 'SELECT `id`,`name`,`fetch`,`runtimes`,`lastrun`,`emails`,`LI_sync` FROM schedule WHERE runtimes!=0';
+$query = 'SELECT `id`,`name`,`fetch`,`runtimes`,`lastrun`,`emails`,`LI_sync`,`calc_HM` FROM schedule WHERE runtimes!=0';
 $res = mysql_query($query) or die('Bad SQL Query getting schedule');
 $tasks = array(); while($row = mysql_fetch_assoc($res)) $tasks[] = $row;
 
@@ -149,6 +149,26 @@ foreach($tasks as $row)
 			$LISyncTasks[] = $row;
 			continue;
 		}		
+		
+		//Calculate Master HM cells if scheduled
+		if( !is_null($row['calc_HM']) and $row['calc_HM']==1 )
+		{
+			echo '<br>Calculating Master HM cells...<br>';
+			$query = 'UPDATE schedule SET lastrun="' . date("Y-m-d H:i:s",strtotime('now')) . '" WHERE id=' . $row['id'] . ' LIMIT 1';
+		
+			global $logger;
+			if(!mysql_query($query))
+			{
+				$log='Error saving changes to schedule: ' . mysql_error() . '('. mysql_errno() .'), Query:' . $query;
+				$logger->fatal($log);
+				die($log);
+			}
+			require_once('calculate_hm_cells.php');
+			calc_cells(NULL,4);
+			continue;
+		}
+		
+		
 		//Get data of current item(which must be checked for updates/reports)
 		$schedule[] = $row;
 		$schedule_tasks[]=$row['id'];
@@ -356,9 +376,6 @@ if($current_tasks_count==0)
 						case 3:
 						$updtname='nct_new';
 						break;
-						case 4:
-						$updtname='calc_hm_cells'; 
-						break;
 					}
 					//Update status set to 'error'
 					echo($updtname  .' database updation error. Requeueing it.' . $nl);
@@ -471,9 +488,6 @@ if($current_tasks_count==0)
 						break;
 						case 'nct_new':
 						$updtid=3;
-						break;
-						case 'calc_hm_cells':
-						$updtid=4;
 						break;
 					}
 					if($update_status[$count]==COMPLETED and $scrapercode==$updtid )
@@ -726,17 +740,8 @@ if($current_tasks_count==0)
 						case 3:
 						$updtname='nct_new';
 						break;
-						case 4:
-						$updtname='calc_hm_cells'; 
-						break;
 					}
-					if($updtname=='calc_hm_cells')
-					{
-						require_once('calculate_hm_cells.php');
-						calc_cells(NULL,$run_updates[$i]['update_id']);
-					}
-					else
-					{
+
 						//Start the update execution
 						$filename = 'fetch_' . $updtname . '.php';
 						echo('Invoking: ' . $filename . '...</pre>' . $nl);
@@ -744,7 +749,7 @@ if($current_tasks_count==0)
 						$update_id=$run_updates[$i]['update_id'];
 						require_once($filename);
 						echo($nl . '<pre>Done with ' . $filename . '.' . $nl);
-					}	
+
 						//Set status to 'complete' in 'update_status'
 						$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s",strtotime('now')).'",end_time="' . date("Y-m-d H:i:s",strtotime('now')).'",status="'.COMPLETED.'" WHERE update_id="' .$run_updates[$i]['update_id'] .'"';
 						$res2 = mysql_query($query) or die('Bad SQL Query setting update status to complete');
@@ -1016,9 +1021,6 @@ elseif($current_tasks_count==1)
 						case 3:
 						$updtname='nct_new';
 						break;
-						case 4:
-						$updtname='calc_hm_cells'; 
-						break;
 					}
 					echo($updtname.' database updation error. Requeueing it.' . $nl);
 					$query = 'UPDATE update_status SET status="'.ERROR.'",process_id="0" WHERE update_id="' . $update_ids[$i].'"';
@@ -1133,10 +1135,7 @@ elseif($current_tasks_count==1)
 						case 'nct_new':
 						$updtid=3;
 						break;
-						case 'calc_hm_cells':
-						$updtid=4;
-						break;
-						
+					
 					}
 					
 					if($update_status[$count]==COMPLETED and $scrapercode==$updtid )
@@ -1389,17 +1388,8 @@ elseif($current_tasks_count==1)
 						case 3:
 						$updtname='nct_new';
 						break;
-						case 4:
-						$updtname='calc_hm_cells'; 
-						break;
 					}
-					if($updtname=='calc_hm_cells')
-					{
-						require_once('calculate_hm_cells.php');
-						calc_cells(NULL,$run_updates[$i]['update_id']);
-					}
-					else
-					{
+
 					//Start the update execution
 					$filename = 'fetch_' . $updtname . '.php';
 					echo('Invoking ' . $filename . '...</pre>' . $nl);
@@ -1407,7 +1397,7 @@ elseif($current_tasks_count==1)
 					$update_id=$run_updates[$i]['update_id'];
 					require_once($filename);
 					echo($nl . '<pre>Done with ' . $filename . '.' . $nl);
-					}
+
 					//Set status to 'complete' in 'update_status'
 					$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s",strtotime('now')).'",end_time="' . date("Y-m-d H:i:s",strtotime('now')).'",status="'.COMPLETED.'" WHERE update_id="' .$run_updates[$i]['update_id'] .'"';
 					$res2 = mysql_query($query) or die('Bad SQL Query setting update status to complete');
@@ -1684,10 +1674,7 @@ elseif($current_tasks_count>1)
 									case 3:
 									$updtname='nct_new';
 									break;
-									case 4:
-									$updtname='calc_hm_cells';
-									break;
-									
+								
 								}
 								//Update status set to 'error'
 								echo($updtname.' database updation error. Requeueing it.' . $nl);
@@ -1802,10 +1789,7 @@ elseif($current_tasks_count>1)
 									case 'nct_new':
 									$updtid=3;
 									break;
-									case 'calc_hm_cells':
-									$updtid=4;
-									break;
-									
+								
 								}
 								if($update_status[$count]==COMPLETED and $scrapercode==$update_status['id'.$count] )
 								{
@@ -2059,25 +2043,16 @@ elseif($current_tasks_count>1)
 									case 3:
 									$updtname='nct_new';
 									break;
-									case 4:
-									$updtname='calc_hm_cells'; 
-									break;
-									
+								
 								}
-								if($updtname=='calc_hm_cells')
-								{
-									require_once('calculate_hm_cells.php');
-									calc_cells(NULL,$run_updates[$i]['update_id']);
-								}
-								else
-								{
+
 								$filename = 'fetch_' . $updtname . '.php';
 								echo('Invoking:- ' . $filename . '...</pre>' . $nl);
 								$days_to_fetch=$run_updates[$i]['updated_days'];
 								$update_id=$run_updates[$i]['update_id'];
 								require_once($filename);
 								echo($nl . '<pre>Done with ' . $filename . '.' . $nl);
-								}
+								
 								//Set status to 'complete' in 'update_status'
 								$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s",strtotime('now')).'",end_time="' . date("Y-m-d H:i:s",strtotime('now')).'",status="'.COMPLETED.'" WHERE update_id="' .$run_updates[$i]['update_id'] .'"';
 								$res2 = mysql_query($query) or die('Bad SQL Query setting update status to complete');
@@ -2346,9 +2321,6 @@ elseif($current_tasks_count>1)
 									case 3:
 									$updtname='nct_new';
 									break;
-									case 4:
-									$updtname='calc_hm_cells'; 
-									break;
 									
 								}
 								//Update status set to 'error'
@@ -2463,9 +2435,6 @@ elseif($current_tasks_count>1)
 									break;
 									case 'nct_new':
 									$updtid=3;
-									break;
-									case 'calc_hm_cells':
-									$updtid=4;
 									break;
 									
 								}
@@ -2720,18 +2689,9 @@ elseif($current_tasks_count>1)
 									case 3:
 									$updtname='nct_new';
 									break;
-									case 4:
-									$updtname='calc_hm_cells'; 
-									break;
-									
+								
 								}
-								if($updtname=='calc_hm_cells')
-								{
-									require_once('calculate_hm_cells.php');
-									calc_cells(NULL,$run_updates[$i]['update_id']);
-								}
-								else
-								{
+
 									//Start the update execution
 									$filename = 'fetch_' . $updtname . '.php';
 									echo('Invoking.- ' . $filename . '...</pre>' . $nl);
@@ -2739,7 +2699,7 @@ elseif($current_tasks_count>1)
 									$update_id=$run_updates[$i]['update_id'];
 									require_once($filename);
 									echo($nl . '<pre>Done with ' . $filename . '.' . $nl);
-								}	
+
 									//Set status to 'complete' in 'update_status'
 									$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s",strtotime('now')).'",end_time="' . date("Y-m-d H:i:s",strtotime('now')).'",status="'.COMPLETED.'" WHERE update_id="' .$run_updates[$i]['update_id'] .'"';
 									$res2 = mysql_query($query) or die('Bad SQL Query setting update status to complete');
@@ -3008,9 +2968,6 @@ elseif($current_tasks_count>1)
 								case 3:
 								$updtname='nct_new';
 								break;
-								case 4:
-								$updtname='calc_hm_cells'; 
-								break;
 								
 							}
 							//Update status set to 'error'
@@ -3126,10 +3083,6 @@ elseif($current_tasks_count>1)
 								case 'nct_new':
 								$updtid=3;
 								break;
-								case 'calc_hm_cells':
-								$updtid=4;
-								break;
-							
 							}
 							if($update_status[$count]==COMPLETED and $scrapercode==$update_status['id'.$count] )
 							{
@@ -3383,28 +3336,18 @@ elseif($current_tasks_count>1)
 								case 3:
 								$updtname='nct_new';
 								break;
-								case 4:
-								$updtname='calc_hm_cells'; 
-								break;
 								
 							}
-							if($updtname=='calc_hm_cells')
-							{
-								require_once('calculate_hm_cells.php');
-								calc_cells(NULL,$run_updates[$i]['update_id']);
-							}
-							else
-							{
-								$filename = 'fetch_' . $updtname . '.php';
-								echo('Invoking-: ' . $filename . '...</pre>' . $nl);
-								$days_to_fetch=$run_updates[$i]['updated_days'];
-								$update_id=$run_updates[$i]['update_id'];
-								require_once($filename);
-								echo($nl . '<pre>Done with ' . $filename . '.' . $nl);
-							}	
-								//Set status to 'complete' in 'update_status'
-								$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s",strtotime('now')).'",end_time="' . date("Y-m-d H:i:s",strtotime('now')).'",status="'.COMPLETED.'" WHERE update_id="' .$run_updates[$i]['update_id'] .'"';
-								$res2 = mysql_query($query) or die('Bad SQL Query setting update status to complete');
+							$filename = 'fetch_' . $updtname . '.php';
+							echo('Invoking-: ' . $filename . '...</pre>' . $nl);
+							$days_to_fetch=$run_updates[$i]['updated_days'];
+							$update_id=$run_updates[$i]['update_id'];
+							require_once($filename);
+							echo($nl . '<pre>Done with ' . $filename . '.' . $nl);
+
+							//Set status to 'complete' in 'update_status'
+							$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s",strtotime('now')).'",end_time="' . date("Y-m-d H:i:s",strtotime('now')).'",status="'.COMPLETED.'" WHERE update_id="' .$run_updates[$i]['update_id'] .'"';
+							$res2 = mysql_query($query) or die('Bad SQL Query setting update status to complete');
 							
 						}
 					}
@@ -3671,10 +3614,6 @@ elseif($current_tasks_count>1)
 							case 3:
 							$updtname='nct_new';
 							break;
-							case 4:
-							$updtname='calc_hm_cells'; 
-							break;
-							
 						}
 						//Update status set to 'error'
 						echo($updtname.' database updation error. Requeueing it.' . $nl);
@@ -3790,9 +3729,6 @@ elseif($current_tasks_count>1)
 							break;
 							case 'nct_new':
 							$updtid=3;
-							break;
-							case 'calc_hm_cells':
-							$updtid=4;
 							break;
 							
 						}
@@ -4048,18 +3984,9 @@ elseif($current_tasks_count>1)
 							case 3:
 							$updtname='nct_new';
 							break;
-							case 4:
-							$updtname='calc_hm_cells'; 
-							break;
 							
 						}
-						if($updtname=='calc_hm_cells')
-						{
-							require_once('calculate_hm_cells.php');
-							calc_cells(NULL,$run_updates[$i]['update_id']);
-						}
-						else
-						{
+
 							//Start the update execution
 							$filename = 'fetch_' . $updtname . '.php';
 							echo('Invoking:: ' . $filename . '...</pre>' . $nl);
@@ -4067,7 +3994,7 @@ elseif($current_tasks_count>1)
 							$update_id=$run_updates[$i]['update_id'];
 							require_once($filename);
 							echo($nl . '<pre>Done with ' . $filename . '.' . $nl);
-						}	
+
 							//Set status to 'complete' in 'update_status'
 							$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s",strtotime('now')).'",end_time="' . date("Y-m-d H:i:s",strtotime('now')).'",status="'.COMPLETED.'" WHERE update_id="' .$run_updates[$i]['update_id'] .'"';
 							$res2 = mysql_query($query) or die('Bad SQL Query setting update status to complete');
