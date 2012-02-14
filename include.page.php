@@ -505,6 +505,7 @@ function input_tag($row,$dbVal=null,$options=array())
 /**
  * @name saveData
  * @tutorial Saves the table entry/edit forms and inputs from the tab seperated file inputs.
+ * @tutorial For products import subroutine return codes are as follow 1=>success, 2=>fail, 3=>skippped, 4=>deleted
  * @param array $post Post array.
  * @param int $import =0 for normal form save and = 1 for tab seperated input.
  * @param array $importKeys Keys for import relates to the fields in the upm table.
@@ -538,7 +539,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 		//check for insert update case
 		$esclid = mysql_real_escape_string($importVal['LI_id']);
 		$escname = mysql_real_escape_string($importVal['name']);
-		$query = "select id from products where LI_id='{$esclid}' OR name='{$escname}' limit 1";
+		$query = "select id,searchdata from products where LI_id='{$esclid}' OR name='{$escname}' limit 1";
 		$result = mysql_query($query);
 		$update = false;
 		ob_start();
@@ -546,10 +547,23 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 		{
 			$update = true;
 			$id = $row['id'];
+			$searchData = $row['searchdata'];
 		}
 		ob_end_clean();
 		if($update)
 		{
+			if($importVal['is_active'] == 0)
+			{
+				//check if database has NULL searchdata and no UPM/MHM references.. in case of no linkages we can delete the product.
+				//return false can show as failed attempt on higher level controller so return 4 code is meant as delete.
+				$upmReferenceCount = count(getProductUpmAssociation($id));
+				$MHMReferenceCount = getMHMAssociation($id, 'products');
+				if($upmReferenceCount==0 && $MHMReferenceCount==0 && $searchData=='')
+				{
+					deleteData($id, $table);
+					return 4;
+				}
+			}			
 			$importVal = array_map(am1,$importKeys,array_values($importVal));
 			$query = "update $table set ".implode(',',$importVal)." where id=".$id;
 		}
@@ -1233,7 +1247,7 @@ function getSearchData($table,$searchdata,$id)
 function parseProductsXmlAndSave($xmlImport,$table)
 {
 	$importKeys = array('LI_id','name','comments','product_type','licensing_mode','administration_mode','discontinuation_status','discontinuation_status_comment','is_key','is_active','created','modified','company','brand_names','generic_names','code_names','approvals','xml');
-	$success = $fail = $skip = 0;
+	$success = $fail = $skip = $delete = 0;
 	foreach($xmlImport->getElementsByTagName('Product') as $product)
 	{
 		$importVal = array();
@@ -1310,8 +1324,13 @@ function parseProductsXmlAndSave($xmlImport,$table)
 		{
 			echo 'Product Id : '.$product_id.' Skipped !! <br/>'."\n";
 			$skip ++;
-		}		
+		}	
+		elseif($out==4)
+		{
+			echo 'Product Id : '.$product_id.' Deleted !! <br/>'."\n";
+			$delete ++;
+		}			
 		//ob_end_clean();
 	}
-	return array('success'=>$success,'fail'=>$fail,'skip'=>$skip);
+	return array('success'=>$success,'fail'=>$fail,'skip'=>$skip,'delete'=>$delete);
 }

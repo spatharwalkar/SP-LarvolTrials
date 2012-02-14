@@ -136,7 +136,7 @@ if(isset($_FILES['uploadedfile']) && $_FILES['uploadedfile']['size']>1)
 	//$xmlImport->saveXML()
 	//set import keys
 	$out = parseProductsXmlAndSave($xmlImport,$table);
-	echo 'Imported '.$out['success'].' records, Failed entries '.$out['fail'].', Skipped entries'.$out['skip'];
+	echo 'Imported '.$out['success'].' records, Failed entries '.$out['fail'].', Skipped entries'.$out['skip'].', Deleted entries'.$out['delete'];
 
 }
 //end controller area
