@@ -846,7 +846,7 @@ function Download_reports()
 					
 					if($_POST['dwformat']=='htmldown' && $data_matrix[$row][$col]['bomb']['src'] != 'square.png') //When bomb has square dont include it in pdf as size is big and no use
 					{	$pdfContent .= '<img align="right" title="'.$data_matrix[$row][$col]['bomb']['title'].'" src="'. urlPath() .'images/'.$data_matrix[$row][$col]['bomb']['src'].'" style="'.$data_matrix[$row][$col]['bomb']['style'].' vertical-align:middle; padding-right:10px; cursor:pointer;" alt="'.$data_matrix[$row][$col]['bomb']['alt'].'"'
-			.'onclick="popup_show(\'bombpopup_'.$row.'_'.$col.'\', \'bombpopup_drag_'.$row.'_'.$col.'\', \'bombpopup_exit_'.$row.'_'.$col.'\', \'mouse\', -10, -10);" />';				}
+			.'onclick="popup_show(\'bomb\', '.count($rows).','.count($columns).',\'bombpopup_'.$row.'_'.$col.'\', \'bombpopup_drag_'.$row.'_'.$col.'\', \'bombpopup_exit_'.$row.'_'.$col.'\', \'mouse\', -10, -10);" />';				}
 			
 			
 					if($_POST['dwformat']=='pdfdown') //As in PDF alignment not works space added to align it properly	
@@ -871,7 +871,7 @@ function Download_reports()
 					if($_POST['dwformat']=='htmldown') //As there is no need for following code to be executed for PDF
 					{
 						if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
-						$pdfContent .= '<br/><br/><img align="right" title="Filing Details" src="'. urlPath() .'images/file.png" style="width:14px; height:16px; vertical-align:top; cursor:pointer; background-color:#CCCCCC;" alt="Filing" onclick="popup_show(\'filingpopup_'.$row.'_'.$col.'\', \'filingpopup_drag_'.$row.'_'.$col.'\', \'filingpopup_exit_'.$row.'_'.$col.'\', \'mouse\', -10, -10);" />';
+						$pdfContent .= '<br/><br/><img align="right" title="Filing Details" src="'. urlPath() .'images/file.png" style="width:14px; height:16px; vertical-align:top; cursor:pointer; background-color:#CCCCCC;" alt="Filing" onclick="popup_show(\'filing\', '.count($rows).','.count($columns).',\'filingpopup_'.$row.'_'.$col.'\', \'filingpopup_drag_'.$row.'_'.$col.'\', \'filingpopup_exit_'.$row.'_'.$col.'\', \'mouse\', -10, -10);" />';
 
 					
 						$pdfContent .= '<div class="popup_form" id="bombpopup_'.$row.'_'.$col.'" style="display: none;">'	//Pop-Up Form for Bomb Editing Starts Here
