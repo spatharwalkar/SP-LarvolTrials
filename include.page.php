@@ -311,6 +311,16 @@ function calculateWhere($table)
 								if($whereKeys=='upm.event_description' || $whereKeys=='products.name')
 								{
 									return ' '.$whereKeys.' LIKE '. '\'%'.$whereValues.'%\' AND ';
+								}
+								if($whereKeys == 'upm.id' || $whereKeys == 'products.id' || $whereKeys == 'areas.id')
+								{
+									if(strpos($whereValues,','))
+									{
+										$whereValues = explode(',',$whereValues);
+										$whereValues = array_filter($whereValues);	
+										$whereValues = implode(',',$whereValues);
+										return ' '.$whereKeys.' IN( '.$whereValues.') AND ';
+									}
 								}								
 								return ' '.$whereKeys.' = '. '\''.$whereValues.'\' AND ';
 							},
@@ -480,6 +490,10 @@ function input_tag($row,$dbVal=null,$options=array())
 		case 'checkbox':
 			$checkedStat = ($dbVal=='on')?'checked="checked"':null;
 			return '<input type="checkbox" name="'.$row['Field'].'" id="'.$row['Field'].'" title="'.$altTitle.'" alt="'.$altTitle.'" '.$checkedStat.'/>';
+			break;
+		case 'link':
+			$linkTarget = (isset($options['linkTarget']) && $options['linkTarget']=='_blank')?' target="_blank" ':'';
+			return '<a href="'.$row['Field'].'" title="'.$altTitle.'" alt="'.$altTitle.'" '.$linkTarget.'>'.$dbVal.'</a>';
 			break;	
 		default:
 			$dateinput = (strpos($row['Field'], 'date') !== false) ? ' class="jdpicker"' : '';
@@ -855,7 +869,7 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		$query = "SELECT u.id,u.event_type,u.event_description,u.event_link,u.result_link,p.name AS product,u.corresponding_trial,u.start_date,u.start_date_type,u.end_date,u.end_date_type,u.last_update,p.id as product_id FROM upm u LEFT JOIN products p ON u.product=p.id WHERE u.id=$id";
 		else
 		$query = "SELECT * FROM $table WHERE id=$id";
-		$res = mysql_query($query) or die('Cannot update this '.$table.' id');
+		$res = mysql_query($query) or die('Cannot get details for this '.$table.' id');
 		while($row = mysql_fetch_assoc($res))
 		{
 			$upmDetails = $row;
@@ -926,7 +940,8 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 	$altTitle='Delete';
 	if($script=='products')
 	{
-		$upmReferenceCount = getProductUpmAssociation($id);
+		$upmReference = getProductUpmAssociation($id);
+		$upmReferenceCount = count($upmReference);
 		$MHMReferenceCount = getMHMAssociation($id,'product');
 		$disabled = ($upmReferenceCount>0 || $MHMReferenceCount>0)?true:false;
 		$altTitle = $disabled?'Cannot delete product as it is linked to other upms/MHM\'s. See References.':$altTitle;
@@ -934,7 +949,7 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		echo '<td>Active : </td><td>'.(($upmDetails['is_active']==='0')?'False':'True').'</td>';
 		echo '</tr>';
 		echo '<tr>';
-		echo '<td>References : </td><td>'.$upmReferenceCount.' UPM</td>';
+		echo '<td>References : </td><td>'.(($upmReferenceCount>0)?input_tag(array('Type'=>'link','Field'=>'upm.php?search_id='.implode(',',$upmReference)),$upmReferenceCount,array('alttitle'=>'Click here to see the UPM references.','linkTarget'=>'_blank')):$upmReferenceCount).' UPM</td>';
 		echo '</tr>';
 		echo '<tr>';
 		echo '<td>References : </td><td>'.$MHMReferenceCount.' MHM</td>';
@@ -1048,13 +1063,14 @@ function unzipForXmlImport($file)
  */
 function getProductUpmAssociation($id)
 {
-	$query = "select count(u.id) as cnt from upm u left join products p on u.product=p.id where p.id=$id";
+	$query = "select u.id from upm u left join products p on u.product=p.id where p.id=$id";
 	$result = mysql_query($query);
+	$out = array();
 	while($row = mysql_fetch_assoc($result))
 	{
-		return $row['cnt'];
+		$out[] = $row['id'];
 	}
-	
+	return $out;	
 }
 
 /**
