@@ -4,23 +4,18 @@ require_once('include.search.php');
 require_once('include.util.php');
 require_once('searchhandler_new.php');
 
-function getStudyCatId($nctid)
-{
-global $logger;
-if(!isset($nctid) or empty($nctid)) return false;
-$query = 'SELECT studycat from data_values where val_int = "' . $nctid . '" and field = "1" limit 1 ';
-	if(!$resu = mysql_query($query))
-	{
-		$log='Bad SQL query getting  studycat .<br>Query=' . $query;
-		$logger->fatal($log);
-		echo $log;
-		exit;
-	}
-	$resu=mysql_fetch_array($resu);
-	return $resu['studycat'];
-}
 
+/*	
+function tindex() - to preindex a combination of one trial+one product, or  one trial+one area.  
+parameters : 
+		1.	NCTID (required only a single trial is to be indexed)
+		2.	either "products" or "areas" as appropriate.
+		3.	Array of product ids or array of area ids as appropriate.
+		4.	update id - supplied by viewstatus.php when a task is resumed / requed etc.
+		5.	current product id - supplied by viewstatus.php when a task is resumed / requed etc.
+		6.	product id / area id when a single product or area is to beindexed.
 
+*/
 function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=NULL)
 {
 	if($cat=='products') 
@@ -38,7 +33,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 	global $db;
 	$DTnow = date('Y-m-d H:i:s',$now);
 	if(!isset($i)) $i=0;
-	if(is_null($productz))
+	if(is_null($productz))	// array of product ids
 	{
 		$productz=array();
 		if(is_null($productID))	$query = 'SELECT `id`,`name`,`searchdata` from '. $cat .' where searchdata IS NOT NULL and  `searchdata` <>"" ';
@@ -71,9 +66,10 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 			{
 				$cid=$value['id'];
 				
-				$query=buildQuery($searchdata);
-//				pr($query);
-				if($query=='Invalid Json') 
+				// get the actual mysql query  
+				$query=buildQuery($searchdata);	
+
+				if($query=='Invalid Json') // if searchdata contains invalid JSON
 				{
 					echo '<br> Invalid JSON in table <b>'. $cat .'</b> and id=<b>'.$cid.'</b> : <br>';
 					echo $searchdata;
@@ -82,7 +78,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					continue;
 				}
 				
-				
+				/* get rid of any "UNION" keywords in the mysql query */
 				$mystring=$query;
 
 				$findme   = 'UNION';
@@ -93,23 +89,26 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 				} 
 				else 
 				{
-					
 					$mystring = substr($mystring,0,$pos);
 				}
+				/****/
 				
-			//	if( substr($mystring,0,1)=="(" and substr($mystring,-1,1) == ")" ) $mystring=substr($mystring,1,$strlen-2);
+
 				
-				/********** add larvolid to condition   *************/
+				
 				$findme   = 'where';
 				$pos = stripos($mystring, $findme);
 				mysql_query('BEGIN') or die("Couldn't begin SQL transaction");
 				if ($pos === false) 
 				{
-					echo 'Error in MySql Query :' . $query;
+					$log='Error in MySql Query :' . $query;
+					$logger->fatal($log);
+					echo $log;
 					exit;
-				} else 
+				} 
+				else 
 				{
-				
+					/********** add source id to condition for quick indexing   *************/
 					if( isset($sourceid) and !is_null($sourceid) and !empty($sourceid) )
 					{
 //						$ln=strlen('  `source_id` = "'. $sourceid . '"  and  ');
@@ -145,7 +144,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					exit;
 				}
 				
-				$nctidz=array();
+				$nctidz=array(); // search result
 				while($nctidz[]=mysql_fetch_array($resu));
 				
 
@@ -166,7 +165,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					else
 					{
 					
-						if(trial_indexed($larvol_id,$cat,$cid))
+						if(trial_indexed($larvol_id,$cat,$cid)) // check if the trial+product/trial+area index already exists
 						{
 							echo '<br>Larvol ID:'.$larvol_id . ' is already indexed. <br>';
 						}
@@ -192,6 +191,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 				$proc_id = getmypid();
 				$i++;
 				$ttype=$cat=='products' ? 'PRODUCT' : 'AREA';
+				//update status
 				$query = 'SELECT update_items_progress,update_items_total FROM update_status_fullhistory WHERE update_id="' . $up_id .'" and trial_type="' . $ttype . '" limit 1 ' ;
 				$res = mysql_query($query) or die('Bad SQL query selecting row from update_status_fullhistory. Query='.$query);
 				$res = mysql_fetch_array($res) ;
@@ -210,6 +210,13 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 	}
 }
 
+/*
+Function trial_indexed() - to check if a combination of trial+product / trial+area is alrady indexed.
+Parameters :
+	1.	larvol id
+	2.	"products" or "areas" as appropriate
+	3.	product id or area id
+*/
 function trial_indexed($larvol_id,$cat,$cid)
 {
 	$indextable=$cat=='products' ? 'product_trials' : 'area_trials';
@@ -243,48 +250,6 @@ function trial_indexed($larvol_id,$cat,$cid)
 		return false;
 	}
 
-}
-
-function get_product_field($pid,$catid)
-{
-	global $logger;
-
-	$query = 'SELECT id,name FROM data_fields where name ="' . $pid . '" and category="' . $catid .'" LIMIT 1';
-	$resu 		= mysql_query($query) ;
-	if($resu===false)
-	{
-	$log = 'Bad SQL query getting product field id. Query=' . $query;
-	$logger->fatal($log);
-	die($log);
-
-	}
-	
-	$res1 = array(); while($res2 = mysql_fetch_array($resu)) $res1[] = $res2; 
-	if (count($res1)== 0) 
-	{
-		$y=add_field($pid,$catid);
-		return $y; 
-	}
-	else return($res1[0]['id']);
-
-}
-function add_field($pid,$catid)
-{
-	return true;
-	global $logger;
-	$query = 'INSERT into `data_fields` (`name`, `type`, `category`) VALUES ("' . $pid . '", "bool", "' . $catid .'") ';
-	$resu 		= mysql_query($query) ;
-	if($resu===false)
-	{
-		$log = 'Bad SQL query adding field to data_fieds. Query=' . $query;
-		$logger->fatal($log);
-		die($log);
-
-	}
-	else $insid=mysql_insert_id();
-	
-	return $insid;
-	
 }
 
 ?>
