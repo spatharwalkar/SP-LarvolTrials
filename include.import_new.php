@@ -415,7 +415,7 @@ else $ddesc=$rec->detailed_descr->textblock;
 	
 	//calculate region
 	$region=getRegions($record_data['location_country']);
-	
+	if($region=='other') $region='RoW';
 	//calculate active or inactive
 	$inactiveStatus = 
 		array(
