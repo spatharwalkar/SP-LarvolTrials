@@ -1171,7 +1171,7 @@ function getUpmHistory($id,$limit=null)
 function upmChangeLog($id)
 {
 	$historyArr = getUpmHistory($id);
-	$out = '<table>';
+	$out = '<br/><table>';
 	$out .= '<tr><th colspan="5">Change History</th></tr>';
 	if(!is_array($historyArr) || count($historyArr)<=0)
 	{
