@@ -340,7 +340,8 @@ function editor()
 				. '<input type="submit" name="addproduct" value="More rows" /> | '
 				. '<input type="submit" name="addarea" value="More columns" /> | ';
 	}
-	$out .= '<input type="submit" name="reportcopy" value="Copy into new" />'
+	$out .= '<input type="submit" name="reportcopy" value="Copy into new" /> | '
+			. '<a href="masterhm_report_inputcheck.php?id=' . $id . '">Input check</a>'
 			. '<br /><table class="reportcell"><tr><th></th>';
 			
 	foreach($columns as $col => $val)
@@ -1251,7 +1252,7 @@ function Download_reports()
 			
 		if(/*connection_aborted()*/true)	//connection_aborted doesn't work due to PHP bug 
 		{
-			/*ob_start();
+			ob_start();
 			$tempfile = tempnam(sys_get_temp_dir(), 'exc');
 			if($tempfile === false) exit;//tex('Unable to create temp file');
 			$objWriter->save($tempfile);
@@ -1261,7 +1262,7 @@ function Download_reports()
 			$from = 'no-reply@' . $_SERVER['SERVER_NAME'];
 			if(strlen($_SERVER['SERVER_NAME'])) $mail->SetFrom($from);
 			$mail->AddAddress($db->user->email);
-			$mail->Subject = SITE_NAME . ' manual report ' . date("Y-m-d H.i.s", $now) . ' - ' . substr($name,0,20);
+			$mail->Subject = SITE_NAME . ' Master Heatmap Manual Excel Report ' . date("Y-m-d H.i.s", $now) . ' - ' . substr($name,0,20);
 			$mail->Body = 'Attached is the report you generated earlier.';
 			$current_filename=substr($name,0,20).'_'.date('Y-m-d_H.i.s', $now);
 			$mail->AddStringAttachment($content,
@@ -1270,7 +1271,7 @@ function Download_reports()
 									   'Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','','manual report');		
 			
 			@$mail->Send();
-			ob_end_clean();*/
+			ob_end_clean();
 		}
 		
 	} //Excel Function Ends
