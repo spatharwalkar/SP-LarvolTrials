@@ -855,17 +855,19 @@ function Download_reports()
 						if($data_matrix[$row][$col]['bomb']['src'] != 'square.png')
 						{
 							$pdfContent .= '&nbsp;&nbsp;<img align="right" title="'.$data_matrix[$row][$col]['bomb']['title'].'" src="'. urlPath() .'images/'.$data_matrix[$row][$col]['bomb']['src'].'" style="'.(($data_matrix[$row][$col]['bomb']['src'] == 'square.png') ? 'width:10px; height:10px;' : $data_matrix[$row][$col]['bomb']['style'] ).' vertical-align:middle; padding-right:10px; cursor:pointer;" alt="'.$data_matrix[$row][$col]['bomb']['alt'].'" />';
-						
-							$count_fillbomb++;
-							$pdfContent .= '&nbsp;('.$count_fillbomb.')';
+							if($data_matrix[$row][$col]['bomb_explain'] != NULL && $data_matrix[$row][$col]['bomb_explain'] != '' && $data_matrix[$row][$col]['bomb']['src'] != 'square.png')
+							{
+								$count_fillbomb++;
+								$pdfContent .= '&nbsp;('.$count_fillbomb.')';
+							}
 						}
 						
 						if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
 						{
 							$pdfContent .= '<br/><br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img align="right" title="Filing Details" src="'. urlPath() .'images/'. (($data_matrix[$row][$col]['filing'] == NULL && $data_matrix[$row][$col]['filing'] == '') ? 'edit.png' : 'file.png' ) .'" style="width:10px; height:12px; vertical-align:top; cursor:pointer;'.(($data_matrix[$row][$col]['filing'] == NULL && $data_matrix[$row][$col]['filing'] == '') ? ' background-color:#CCCCCC;' : '' ).'" alt="Filing" />';
-						
-							$count_fillbomb++;
-							$pdfContent .= '&nbsp;('.$count_fillbomb.')';
+							
+								$count_fillbomb++;
+								$pdfContent .= '&nbsp;('.$count_fillbomb.')';
 						}
 					}	
 
