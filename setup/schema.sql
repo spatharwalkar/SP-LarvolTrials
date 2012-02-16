@@ -856,7 +856,7 @@ CREATE TABLE IF NOT EXISTS `data_trials` (
   `location_state` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `location_zip` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `location_country` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `region` varchar(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'RestOfWorld',
+  `region` varchar(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'RoW',
   `location_status` enum('Not yet recruiting','Recruiting','Enrolling by invitation','Active, not recruiting','Completed','Suspended','Terminated','Withdrawn','Available','No Longer Available','Approved for marketing','No longer recruiting','Withheld','Temporarily Not Available') COLLATE utf8_unicode_ci DEFAULT NULL,
   `investigator_name` text COLLATE utf8_unicode_ci,
   `investigator_role` enum('Principal Investigator','Sub-Investigator','Study Chair','Study Director') COLLATE utf8_unicode_ci DEFAULT NULL,
