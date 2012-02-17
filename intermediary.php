@@ -272,6 +272,7 @@ $globalOptions['onlyUpdates'] = "no";
 $globalOptions['encodeFormat'] = "old";
 $globalOptions['filtersOne'] = array();
 $globalOptions['filtersTwo'] = array();
+$globalOptions['LI'] = "0";
 
 if(isset($_GET['fcf']))
 {
@@ -327,6 +328,12 @@ if(isset($_GET['cd']))
 if(isset($_GET['format']) && $_GET['format'] == "new")
 {
 	$globalOptions['encodeFormat'] = "new";
+}
+
+if((isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') !== FALSE)
+|| (isset($_GET['LI']) && $_GET['LI'] == 1))
+{
+	$globalOptions['LI'] = "1";
 }
 
 if(isset($_GET['id']))

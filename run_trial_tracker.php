@@ -16,10 +16,9 @@ class TrialTracker
 	private $inactiveStatusValues = array();
 	private $activeStatusValues = array();
 	private $allStatusValues = array();
-	private $resultsPerPage = 100;
+	private $resultsPerPage = 5;//100;
 	private $enumVals = array();
 	private $phaseValues = array();
-	private $referrerFlag = FALSE;
 	
 	function TrialTracker()
 	{
@@ -51,10 +50,6 @@ class TrialTracker
 							'2a/b'=>'#FFFF00', '2b'=>'#FFFF00', '2/3'=>'#FF9900', '2b/3'=>'#FF9900','3'=>'#FF9900', '3a'=>'#FF9900', '3b'=>'#FF9900', 
 							'3/4'=>'#FF0000', '3b/4'=>'#FF0000', '4'=>'#FF0000');
 		
-		if(isset($_SERVER['HTTP_REFERER']) && $_SERVER['HTTP_REFERER'] != '' && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') !== FALSE)
-		{
-			$this->referrerFlag = TRUE;
-		}
 	}
 	
 	function generateTrialTracker($format, $resultIds, $timeMachine = NULL, $ottType, $globalOptions = array())
@@ -5962,10 +5957,6 @@ class TrialTracker
 		$Values = array();
 		$linkExpiry = array();
 			
-		if($this->referrerFlag === FALSE)
-		{
-			$this->displayHeader();
-		}
 		if($ottType == 'unstacked')
 		{
 			$Id = explode(".", $resultIds);
@@ -5975,11 +5966,10 @@ class TrialTracker
 			{
 				$linkExpiry[] = $res['expiry'];
 			}
-			if($this->referrerFlag === FALSE)
-			{
-				echo '<td class="result">Area: ' . htmlformat(trim($res['header'])) . '</td></tr></table>';
-				echo '<br clear="all"/><br/>';
-			}
+			
+			$t = 'Area: ' . htmlformat(trim($res['header']));
+			$this->displayHeader($t);
+			
 			echo '<input type="hidden" name="results" value="' . $resultIds . '"/>'
 					. '<input type="hidden" name="time" value="' . $timeMachine . '"/>'
 					. '<input type="hidden" name="v" value="' . $globalOptions['version'] . '"/>';
@@ -6021,11 +6011,9 @@ class TrialTracker
 			{
 				$linkExpiry[] = $res['expiry'];
 			}
-			if($this->referrerFlag === FALSE)
-			{
-				echo '<td class="result">' . $t . '</td></tr></table>';
-				echo '<br clear="all"/><br/>';
-			}
+			
+			$this->displayHeader($t);
+			
 			echo '<input type="hidden" name="results" value="' . $resultIds . '"/>'
 					. '<input type="hidden" name="type" value="' . substr($ottType, 0, 3) . '"/>'
 					. '<input type="hidden" name="time" value="' . $timeMachine . '"/>'
@@ -6053,11 +6041,9 @@ class TrialTracker
 			
 			if(count($resultIds['product']) > 1 && count($resultIds['area']) > 1)
 			{	
-				if($this->referrerFlag === FALSE)
-				{
-					echo '<td class="result">Area: Total</td>' . '</tr></table>';
-					echo '<br clear="all"/><br/>';
-				}
+				$t = 'Area: Total';
+				$this->displayHeader($t);
+				
 				$ottType = 'colstackedindexed';
 				
 				foreach($resultIds['product'] as $pkey => $pvalue)
@@ -6090,11 +6076,9 @@ class TrialTracker
 					$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $productId);
 					$ottType = 'rowstackedindexed';
 					
-					if($this->referrerFlag === FALSE)
-					{
-						echo '<td class="result">Product: ' . htmlformat($productName) . '</td></tr></table>';
-						echo '<br clear="all"/><br/>';
-					}
+					$t = 'Product: ' . htmlformat($productName);
+					$this->displayHeader($t);
+					
 					foreach($resultIds['area'] as $akey => $avalue)
 					{
 						$res = mysql_query("SELECT `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
@@ -6122,11 +6106,10 @@ class TrialTracker
 					$areaId = $row['id'];
 					
 					$ottType = 'colstackedindexed';
-					if($this->referrerFlag === FALSE)
-					{
-						echo '<td class="result">Area: ' . htmlformat($areaName) . '</td></tr></table>';
-						echo '<br clear="all"/><br/>';
-					}
+					
+					$t = 'Area: ' . htmlformat($areaName);
+					$this->displayHeader($t);
+					
 					foreach($resultIds['product'] as $pkey => $pvalue)
 					{
 						$res = mysql_query("SELECT `name`, `id` FROM `products` WHERE id = '" . $pvalue . "' ");
@@ -6150,11 +6133,10 @@ class TrialTracker
 				$res = mysql_query("SELECT `name`, `id` FROM `areas` WHERE id IN ('" . implode(',', $resultIds['area']) . "') ");
 				$row = mysql_fetch_assoc($res);
 				$Ids[0]['area'] = $row['id'];
-				if($this->referrerFlag === FALSE)
-				{
-					echo '<td class="result">Area: ' . htmlformat($row['name']) . '</td></tr></table>';
-					echo '<br clear="all"/><br/>';
-				}
+				
+				$t = 'Area: ' . htmlformat($row['name']);
+				$this->displayHeader($t);
+				
 				$res = mysql_query("SELECT `name`, `id` FROM `products` WHERE id IN ('" . implode(',', $resultIds['product']) . "') ");
 				$row = mysql_fetch_assoc($res);
 				
@@ -6195,11 +6177,10 @@ class TrialTracker
 					$nctIds[0][] = $arow['nctid'];
 				}
 			}
-			if($this->referrerFlag === FALSE)
-			{
-				echo '<td class="result">&nbsp;</td></tr></table>';
-				echo '<br clear="all"/><br/>';
-			}
+			
+			$t = '&nbsp;';
+			$this->displayHeader($t);
+			
 			echo '<input type="hidden" name="id" value="' . $Id . '"/>';
 			
 			$timeMachine = strtotime($row['time']);
@@ -6219,11 +6200,10 @@ class TrialTracker
 		else if($ottType == 'unstackedoldlink')
 		{
 			$params 	= unserialize(gzinflate(base64_decode($resultIds['params'])));
-			if($this->referrerFlag === FALSE)
-			{
-				echo '<td class="result">Area: ' . $params['columnlabel'] . '</td></tr></table>';
-				echo '<br clear="all"/><br/>';
-			}
+			
+			$t = 'Area: ' . $params['columnlabel'];
+			$this->displayHeader($t);
+			
 			echo '<input type="hidden" name="leading" value="' . $resultIds['leading'] . '"/>'
 					. '<input type="hidden" name="params" value="' . $resultIds['params'] . '"/>'
 					.'<input type="hidden" id="upmstyle" value="expand"/>';
@@ -6237,20 +6217,19 @@ class TrialTracker
 		{
 			$cparams 	= unserialize(gzinflate(base64_decode($resultIds['cparams'])));
 			
-			if($this->referrerFlag === FALSE)
+			if($cparams['type'] == 'col')
 			{
-				if($cparams['type'] == 'col')
-				{
-					echo '<td class="result">Area: ' . $cparams['columnlabel'] . '</td></tr></table>';
-				}
-				else
-				{
-					echo '<td class="result">Product: ' . $cparams['rowlabel'] . '</td></tr></table>';
-					
-				}
-				echo '<br clear="all"/><br/>';
+				$t = 'Area: ' . $cparams['columnlabel'];
+				echo '<td class="result">Area: ' . $cparams['columnlabel'] . '</td></tr></table>';
+			}
+			else
+			{
+				$t = 'Product: ' . $cparams['rowlabel'];
+				echo '<td class="result">Product: ' . $cparams['rowlabel'] . '</td></tr></table>';	
 			}
 			
+			$this->displayHeader($t);
+						
 			echo '<input type="hidden" name="cparams" value="' . $resultIds['cparams'] . '"/>';
 			foreach($resultIds['leading'] as $lkey => $lvalue)
 			{
@@ -7907,15 +7886,27 @@ class TrialTracker
 		return $output;
 	}
 	
-	function displayHeader()
+	function displayHeader($productAreaInfo)
 	{
-		echo('<form id="frmOtt" name="frmOtt" method="get" target="_self" action="intermediary.php">'
-			. '<table width="100%">'
-			. '<tr><td><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" /></td>'
-			. '<td nowrap="nowrap"><span style="color:#ff0000;font-weight:normal;margin-left:40px;">Interface Work In Progress</span>'
-			. '<br/><span style="font-weight:normal;">Send feedback to '
-			. '<a style="display:inline;color:#0000FF;" target="_self" href="mailto:larvoltrials@larvol.com">'
-			. 'larvoltrials@larvol.com</a></span></td>');
+	
+		echo '<form id="frmOtt" name="frmOtt" method="get" target="_self" action="intermediary.php">';
+		
+		if((isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') !== FALSE) 
+		|| (isset($_GET['LI']) && $_GET['LI'] == 1))
+		{
+			echo '<input type="hidden" name="LI" value="1" />';
+		}
+		else
+		{
+			echo '<table width="100%">'
+					. '<tr><td><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" /></td>'
+					. '<td nowrap="nowrap"><span style="color:#ff0000;font-weight:normal;margin-left:40px;">Interface Work In Progress</span>'
+					. '<br/><span style="font-weight:normal;">Send feedback to '
+					. '<a style="display:inline;color:#0000FF;" target="_self" href="mailto:larvoltrials@larvol.com">'
+					. 'larvoltrials@larvol.com</a></span></td>'
+					. '<td class="result">' . $productAreaInfo . '</td></tr></table>'
+					. '<br clear="all"/><br/>';
+		}
 	}
 	
 	function displayFilterControls($shownCount, $activeCount, $inactiveCount, $totalCount, $globalOptions = array()) 
@@ -8099,6 +8090,11 @@ class TrialTracker
 		if(isset($globalOptions['encodeFormat']) && $globalOptions['encodeFormat'] != 'old')
 		{
 			$url .= '&amp;format=' . $globalOptions['encodeFormat'];
+		}
+		
+		if(isset($globalOptions['LI']) && $globalOptions['LI'] == '1')
+		{
+			$url .= '&amp;LI=1';
 		}
 		
 		$stages = 3;
