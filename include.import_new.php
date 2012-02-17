@@ -90,6 +90,7 @@ function addNCT($rec)
 	global $db;
 	global $instMap;
 	global $now;
+	global $logger;
 	if($rec === false) return false;
 	
 	$DTnow = date('Y-m-d H:i:s',$now);
@@ -98,8 +99,14 @@ function addNCT($rec)
 	
 	
 	$query = 'SELECT `larvol_id` FROM data_trials where `source_id`="' . $rec->id_info->nct_id . '"  LIMIT 1';
-	$res = mysql_query($query);
-	if($res === false) return softDie('Bad SQL query determining existence of record');
+	
+	if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
 	$res = mysql_fetch_assoc($res);
 	$exists = $res !== false;
 	$oldtrial=$exists;
@@ -110,13 +117,42 @@ function addNCT($rec)
 	}
 	else
 	{
-		mysql_query('BEGIN') or die("Couldn't begin SQL transaction to create record from XML");
+
+		if(!mysql_query('BEGIN'))
+		{
+			$log='There seems to be a problem with beginning the transaction.   SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->fatal($log);
+			echo $log;
+			exit;
+		}
 		$query = 'INSERT INTO data_trials SET `source_id`="' . $rec->id_info->nct_id . '"' ;
-		if(mysql_query($query) === false) return softDie('Bad SQL query adding new record');
+		if(!mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL  Query:'.$query.' Error:' . mysql_error();
+			$logger->fatal($log);
+			mysql_query('ROLLBACK');
+			echo $log;
+			exit;
+		}
 		$larvol_id = mysql_insert_id();
 		$query = 'INSERT INTO data_nct SET `larvol_id`=' . $larvol_id . ',nct_id="' . $nct_id .'"';
-		if(mysql_query($query) === false) return softDie('Bad SQL query adding nct_id');
-		mysql_query('COMMIT') or die("Couldn't commit SQL transaction to create record from XML");
+		if(!mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			mysql_query('ROLLBACK');
+			echo $log;
+			exit;
+		}
+		if(!mysql_query('COMMIT'))
+		{
+			$log='There seems to be a problem while committing the transaction  Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			mysql_query('ROLLBACK');
+			echo $log;
+			return false;
+		}
+		
 	}
 	
 	//echo '<pre>'; print_r($rec); echo '</pre>';
@@ -338,6 +374,7 @@ else $ddesc=$rec->detailed_descr->textblock;
 	
 	/***** TKV
 	****** Detect and pick all irregular phases that exist in one or several of the various title or description fields */
+	global $array1,$array2;
 	$phases_regex='/phase4|phase2\/3|phase 2a\/2b|phase 1\/2|Phase l\/Phase ll|phase 1b\/2a|phase 1a\/1b|Phase 1a\/b|phase 3b\/4|Phase I\/II|Phase2b\/3|phase 1b\/2|phase 2a\/b|phase 1a|phase 1b|Phase 1C|Phase III(?![a-z.-\\/])|phase II(?![a-z.-\\/])|Phase I(?![a-z.-\\/])|phase 2a|PHASEII|PHASE iii|phase 2b|phase iib|phase iia|phase 3a|phase 3b/i';
 	preg_match_all($phases_regex, $record_data['brief_title'], $matches);
 
@@ -347,63 +384,126 @@ else $ddesc=$rec->detailed_descr->textblock;
 	}
 
 		 // pr($record_data);
-	//pr($matches);
+	//	pr($matches);
 
 	if(!count($matches[0]) >0 )
 	{
 	preg_match_all($phases_regex, $record_data['brief_summary'], $matches);
 	}
-
+	
 	if(count($matches[0]) >0 )
 	{
 
-		$cnt=count($matches[0]);
-
-		$record_data['phase']=ucwords($matches[0][0]);
+		$v=array_search(ucwords($matches[0][0]),$array1,false);
 		
-		switch ($record_data['phase']) 
+		if($v!==false)
 		{
-		case 'Phase 1a/b':
-			$record_data['phase']='Phase 1a/b';
-			break;
-		case 'Phase2b/3':
-			$record_data['phase']='Phase 2b/3';
-			break;
-		case 'Phase 1C':
-			$record_data['phase']='Phase 1c';
-			break;
-		case 'Phase I/II':
-			$record_data['phase']='Phase 1/Phase 2';
-			break;
-		case 'Phase l/Phase ll':
-			$record_data['phase']='Phase 1/Phase 2';
-			break;
-		case 'phase 1/2':
-			$record_data['phase']='Phase 1/Phase 2';
-			break;
-		case 'phase 2/3':
-			$record_data['phase']='Phase 2/Phase 3';
-			break;
-		case 'phase2/3':
-			$record_data['phase']='Phase 2/Phase 3';
-			break;
-		case 'phase 3/4':
-			$record_data['phase']='Phase 3/Phase 4';
-			break;
-		case 'phase4':
-			$record_data['phase']='Phase 4';
-			break;
-		case 'Phase iib' or 'Phase iib':
-			$record_data['phase']='Phase 2b';
-			break;
+			$record_data['phase']=$array2[$v];
 		}
-		
-		
+		else
+		{
+			$cnt=count($matches[0]);
+
+			$record_data['phase']=strtolower($matches[0][0]);
+			
+			$phval='P'.substr($record_data['phase'],1);
+			
+			switch ($phval) 
+			{
+			case 'Phase 1a/b':
+				$record_data['phase']='Phase 1a/b';
+				break;
+			case 'Phase2b/3':
+				$record_data['phase']='Phase 2b/3';
+				break;
+			case 'Phase 1c':
+				$record_data['phase']='Phase 1c';
+				break;
+			case 'Phase i/ii':
+				$record_data['phase']='Phase 1/Phase 2';
+				break;
+			case 'Phase i/phase ii':
+				$record_data['phase']='Phase 1/Phase 2';
+				break;
+			case 'Phase 1/2':
+				$record_data['phase']='Phase 1/Phase 2';
+				break;
+			case 'Phase 2/3':
+				$record_data['phase']='Phase 2/Phase 3';
+				break;
+			case 'Phase2/3':
+				$record_data['phase']='Phase 2/Phase 3';
+				break;
+			case 'Phase 3/4':
+				$record_data['phase']='Phase 3/Phase 4';
+				break;
+			case 'Phase4':
+				$record_data['phase']='Phase 4';
+				break;
+			case 'Phase iib':
+				$record_data['phase']='Phase 2b';
+				break;
+			case 'Phase 2a/2b':
+				$record_data['phase']='Phase 2a/2b';
+				break;
+			case 'Phase 1b/2a':
+				$record_data['phase']='Phase 1b/2a';
+				break;
+			case 'Phase 1a/1b':
+				$record_data['phase']='Phase 1a/1b';
+				break;
+			case 'Phase 3b/4':
+				$record_data['phase']='Phase 3b/4';
+				break;
+			case 'Phase 1b/2':
+				$record_data['phase']='Phase 1b/2';
+				break;
+			case 'Phase 2a/b':
+				$record_data['phase']='Phase 2a/b';
+				break;
+			case 'Phase 1a':
+				$record_data['phase']='Phase 1a';
+				break;
+			case 'Phase 1b':
+				$record_data['phase']='Phase 1b';
+				break;
+			case 'Phase iii':
+				$record_data['phase']='Phase 3';
+				break;
+			case 'Phase ii':
+				$record_data['phase']='Phase 2';
+				break;
+			case 'Phase i':
+				$record_data['phase']='Phase 1';
+				break;
+			case 'Phase 2a':
+				$record_data['phase']='Phase 2a';
+				break;
+			case 'Phase 3a':
+				$record_data['phase']='Phase 3a';
+				break;
+			case 'Phase iia':
+				$record_data['phase']='Phase 2a';
+				break;
+			case 'Phase 2b':
+				$record_data['phase']='Phase 2b';
+				break;
+			case 'Phase 3b':
+				$record_data['phase']='Phase 3b';
+				break;
+			case 'Phase iib':
+				$record_data['phase']='Phase 2b';
+				break;
+			case 'Phaseii':
+				$record_data['phase']='Phase 2';
+				break;
+			}
+		}
 	}
 
 	//****
 
-	
+
 
 	foreach($record_data as $fieldname => $value)
 		if(!addval($larvol_id, $fieldname, $value,$record_data['lastchanged_date'],$oldtrial))
@@ -441,8 +541,13 @@ else $ddesc=$rec->detailed_descr->textblock;
 	
 	
 	$query = 'update data_trials set `institution_type`="' .$ins_type. '",`region`="'.$region.'", `is_active`='.$inactive.'  where `larvol_id`="' .$larvol_id . '" limit 1' ;	
-	if(mysql_query($query) === false) return softDie('Bad SQL query saving institution type in data_trials. query:'.$query.'<br>');
-
+	if(!mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
 /*	
 	global $fieldIDArr,$fieldITArr,$fieldRArr;
 	//Calculate Inactive Dates
@@ -462,6 +567,7 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 	
 	$lastchanged_date = normal('date',$lastchanged_date);
 	global $now;
+	global $logger;
 	$DTnow = date('Y-m-d H:i:s',$now);
 
 	//normalize the input
@@ -535,13 +641,24 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 	{
 	
 		$query = 'SELECT `' .$fieldname. '`  FROM data_nct WHERE `larvol_id`="'. $larvol_id . '" limit 1';
-		$res = mysql_query($query);
-		
-		if($res === false) return softDie('Bad SQL query getting value');
+		if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
 		$row = mysql_fetch_assoc($res);
 		
 		$change = ($row[$fieldname]===null and $value !== null) or ($value != $row[$fieldname]);
-		mysql_query('BEGIN') or die("Couldn't begin SQL transaction to update record from XML");
+		
+		if(!mysql_query('BEGIN'))
+		{
+			$log='Could not begin transaction.   SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
 		if(1)
 		{
 				
@@ -554,8 +671,14 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 			if ( isset($as) and $as)
 			{
 				$query = 'SELECT `' .$fieldname. '`, `lastchanged_date`  FROM data_nct WHERE `larvol_id`="'. $larvol_id . '" limit 1';
-				$res = mysql_query($query);
-				if($res === false) return softDie('Bad SQL query getting value');
+				if(!$res = mysql_query($query))
+				{
+					$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+					$logger->error($log);
+					mysql_query('ROLLBACK');
+					echo $log;
+					return false;
+				}
 				$row = mysql_fetch_assoc($res);
 				$olddate=$row['lastchanged_date'];
 				$oldval=$row[$fieldname];
@@ -570,8 +693,15 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 				if ( isset($as1) and $as1)
 				{
 					$query = 'SELECT `' .$fieldname. '` FROM data_manual WHERE `larvol_id`="'. $larvol_id . '" and `' .$fieldname. '` is not null limit 1';
-					$res = mysql_query($query);
-					if($res === false) return softDie('Bad SQL query checking data in data_manual. Query:'.$query);
+					if(!$res = mysql_query($query))
+					{
+						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+						$logger->error($log);
+						mysql_query('ROLLBACK');
+						echo $log;
+						return false;
+					}
+
 					$row = mysql_fetch_assoc($res);
 					$overridden = $row !== false;
 					if($overridden and !empty($row[$fieldname]))
@@ -581,8 +711,15 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 				
 				$query = 'update `data_nct` set `' . $fieldname . '` = "' . $raw_value .'", `lastchanged_date` = "' .$lastchanged_date.'" where `larvol_id`="' .$larvol_id . '"  limit 1'  ;
 				
-				if(mysql_query($query) === false) return softDie('Bad SQL query saving value in datanct. query:'.$query.'<br>');
-				
+				if(!mysql_query($query))
+				{
+					$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+					$logger->error($log);
+					mysql_query('ROLLBACK');
+					echo $log;
+					return false;
+				}
+			
 				$dt_array=array
 				(
 				'dummy', 'larvol_id', 'source_id', 'brief_title', 'acronym', 'official_title', 'lead_sponsor', 'collaborator', 'institution_type', 'source', 'has_dmc', 'brief_summary', 'detailed_description', 'overall_status', 'is_active', 'why_stopped', 'start_date', 'end_date', 'study_type', 'study_design', 'number_of_arms', 'number_of_groups', 'enrollment', 'enrollment_type', 'biospec_retention', 'biospec_descr', 'study_pop', 'sampling_method', 'criteria', 'gender', 'minimum_age', 'maximum_age', 'healthy_volunteers', 'verification_date', 'lastchanged_date', 'firstreceived_date', 'responsible_party_name_title', 'responsible_party_organization', 'org_study_id', 'phase', 'condition', 'secondary_id', 'oversight_authority', 'arm_group_label', 'arm_group_type', 'arm_group_description', 'intervention_type', 'intervention_name', 'intervention_other_name', 'intervention_description', 'primary_outcome_measure', 'primary_outcome_timeframe', 'primary_outcome_safety_issue', 'secondary_outcome_measure', 'secondary_outcome_timeframe', 'secondary_outcome_safety_issue', 'location_name', 'location_city', 'location_state', 'location_zip', 'location_country', 'region', 'location_status', 'investigator_name', 'investigator_role', 'overall_official_name', 'overall_official_role', 'overall_official_affiliation', 'keyword', 'is_fda_regulated', 'is_section_801'
@@ -592,12 +729,24 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 				if ( isset($as) and $as)
 				{
 					$query = 'update data_trials set `' . $fieldname . '` = "' . $value .'", lastchanged_date = "' .$lastchanged_date.'" where larvol_id="' .$larvol_id . '"  limit 1' ;
-					
-					if(mysql_query($query) === false) return softDie('Bad SQL query saving value in data_trials. query:'.$query.'<br>');
+					if(!mysql_query($query))
+					{
+						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+						$logger->error($log);
+						mysql_query('ROLLBACK');
+						echo $log;
+						return false;
+					}
 
 					$query = 'SELECT `larvol_id` FROM data_history where `larvol_id`="' . $larvol_id . '"  LIMIT 1';
-					$res = mysql_query($query);
-					if($res === false) return softDie('Bad SQL query determining existence of record in data history');
+					if(!$res = mysql_query($query))
+					{
+						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+						$logger->error($log);
+						mysql_query('ROLLBACK');
+						echo $log;
+						return false;
+					}
 					$res = mysql_fetch_assoc($res);
 					$exists = $res !== false;
 					$oldval=mysql_real_escape_string($oldval);
@@ -625,7 +774,15 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 					if($cond1 and $cond2)
 					{
 						$query = 'update data_history set `' . $fieldname . '_prev` = "' . $oldval .'", `' . $fieldname . '_lastchanged` = "' . $olddate .'" where `larvol_id`="' .$larvol_id . '" limit 1' ;
-						if(mysql_query($query) === false) return softDie('Bad SQL query saving value in data_history. query:'.$query.'<br>');
+						if(!mysql_query($query))
+						{
+							$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+							$logger->error($log);
+							mysql_query('ROLLBACK');
+							echo $log;
+							return false;
+						}
+						
 					}
 					else
 					{
@@ -639,7 +796,14 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 							if($cond1 and $cond2)
 							{
 								$query = 'insert into `data_history` set `' . $fieldname . '_prev` = "' . mysql_real_escape_string($oldval) .'", `' . $fieldname . '_lastchanged` = "' . $olddate .'" , `larvol_id`="' .$larvol_id . '" ' ;
-								if(mysql_query($query) === false) return softDie('Bad SQL query saving value  Query='.$query);
+								if(!mysql_query($query))
+								{
+									$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+									$logger->error($log);
+									mysql_query('ROLLBACK');
+									echo $log;
+									return false;
+								}
 							}
 						}
 					}
@@ -651,12 +815,23 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 			
 			
 		}
-		mysql_query('COMMIT') or die("Couldn't COMMIT SQL transaction to update record from XML");
-		
+		if(!mysql_query('COMMIT'))
+					{
+						$log='Could not commit transaction. Rolling back transaction...   SQL Query:'.$query.' Error:' . mysql_error();
+						$logger->error($log);
+						mysql_query('ROLLBACK');
+						echo $log;
+						return false;
+					}
 		
 		$query = 'select `completion_date`,`primary_completion_date`,`criteria` from `data_nct` where `larvol_id`="' . $larvol_id . '"  LIMIT 1';
-		$res = mysql_query($query);
-		if($res === false) return softDie('Bad SQL query determining existence of record in data nct');
+		if(!$res = mysql_query($query))
+			{
+				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				$logger->error($log);
+				echo $log;
+				return false;
+			}
 		$res = mysql_fetch_assoc($res);
 		$exists = $res !== false;
 				
@@ -672,14 +847,26 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 			$cdate=normalize('date',$cdate);
 			$query = 'update `data_trials` set `end_date` = "' . $cdate . '", `inclusion_criteria` = "'. $str['inclusion'] . '", `exclusion_criteria` = "'. $str['exclusion'] .'" where `larvol_id`="' .$larvol_id . '" limit 1' ;
 //			$query = 'update data_trials set end_date = "' . $cdate . '" where larvol_id="' .$larvol_id . '"  limit 1' ;
-			if(mysql_query($query) === false) return softDie('Bad SQL query updating end date  in data_trials. query:'.$query.'<br>');
+			if(!mysql_query($query))
+					{
+						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+						$logger->error($log);
+						echo $log;
+						return false;
+					}
 		}
 		elseif( !is_null($pcdate) and  $pcdate <>'0000-00-00') 	// primary completion date
 		{
 			$pcdate=normalize('date',$pcdate);
 			$query = 'update `data_trials` set `end_date` = "' . $pcdate . '", `inclusion_criteria` = "'. $str['inclusion'] . '", `exclusion_criteria` = "'. $str['exclusion'] .'" where `larvol_id`="' .$larvol_id . '" limit 1' ;
 //			$query = 'update data_trials set end_date = "' . $pcdate . '" where larvol_id="' .$larvol_id . '"  limit 1' ;
-			if(mysql_query($query) === false) return softDie('Bad SQL query updating end date  in data_trials. query:'.$query.'<br>');
+			if(!mysql_query($query))
+					{
+						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+						$logger->error($log);
+						echo $log;
+						return false;
+					}
 		}
 		
 		
@@ -687,9 +874,15 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 		{
 		
 			$query = 'select `is_active`, `lastchanged_date` from `data_trials` where `larvol_id`="' . $larvol_id . '"  LIMIT 1';
-			$res = mysql_query($query);
+			if(!$res=mysql_query($query))
+					{
+						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+						$logger->error($log);
+						echo $log;
+						return false;
+					}
 
-			if($res === false) return softDie('Bad SQL query determining existence of record in data trials');
+			
 			$res = mysql_fetch_assoc($res);
 			$cdate=$res['lastchanged_date'];
 			$is_active=$res['is_active'];
@@ -699,13 +892,25 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 				$cdate=normalize('date',$cdate);
 				$query = 'update `data_trials` set `end_date` = "' . $cdate . '", `inclusion_criteria` = "'. $str['inclusion'] . '", `exclusion_criteria` = "'. $str['exclusion'] .'" where `larvol_id`="' .$larvol_id . '" limit 1' ;
 //				$query = 'update data_trials set end_date = "' . $cdate . '" where larvol_id="' .$larvol_id . '"  limit 1' ;
-				if(mysql_query($query) === false) return softDie('Bad SQL query updating end date  in data_trials. query:'.$query.'<br>');
+				if(!mysql_query($query))
+					{
+						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+						$logger->error($log);
+						echo $log;
+						return false;
+					}
 			}
 			else	// replace with null
 			{
 				$query = 'update `data_trials` set `end_date` = null, `inclusion_criteria` = "'. $str['inclusion'] . '", `exclusion_criteria` = "'. $str['exclusion'] .'" where `larvol_id`="' .$larvol_id . '" limit 1' ;
 //				$query = 'update data_trials set end_date = null where larvol_id="' .$larvol_id . '"  limit 1' ;
-				if(mysql_query($query) === false) return softDie('Bad SQL query updating end date  in data_trials. query:'.$query.'<br>');
+				if(!mysql_query($query))
+					{
+						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+						$logger->error($log);
+						echo $log;
+						return false;
+					}
 			}
 			
 		}

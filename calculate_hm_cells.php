@@ -6,12 +6,12 @@ ini_set('max_execution_time', '360000'); //100 hours
 if(isset($_GET['area']) or isset($_GET['product']))
 {
 	$parameters=$_GET;
-	calc_cells($parameters);
+	if(!calc_cells($parameters))	echo '<br><b>Could complete calculating cells, there was an error.<br></b>';
 }
 elseif( isset($_GET['calc']) and ($_GET['calc']=="all") )
 {
 	$parameters=NULL;
-	calc_cells($parameters);
+	if(!calc_cells($parameters))	echo '<br><b>Could complete calculating cells, there was an error.<br></b>';
 }
 
 function calc_cells($parameters,$update_id=NULL)
@@ -22,7 +22,13 @@ function calc_cells($parameters,$update_id=NULL)
 	if($cron_run)
 	{
 		$query = 'UPDATE update_status SET start_time="' . date("Y-m-d H:i:s", strtotime('now')) . '", updated_days="0" WHERE update_id="' . $update_id . '"';
-		$res = mysql_query($query) or die('Unable to update running' . mysql_error());
+		if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
 	}
 
 	//get area ids
@@ -40,7 +46,8 @@ function calc_cells($parameters,$update_id=NULL)
 		$log = 'Bad SQL query getting `id` from areas mysql_error=' . mysql_error() . ' query=' . $query;
 		global $logger;
 		$logger->fatal($log);
-		die($log);
+		echo($log);
+		return false;
 	}
 	$areaids=array();
 	while($areaids[]=mysql_fetch_assoc($res));
@@ -60,7 +67,8 @@ function calc_cells($parameters,$update_id=NULL)
 		$log = 'Bad SQL query getting id from products mysql_error=' . mysql_error() . ' query=' . $query;
 		global $logger;
 		$logger->fatal($log);
-		die($log);
+		echo ($log);
+		return false;
 	}
 	$productids=array();
 	while($productids[]=mysql_fetch_assoc($res));
@@ -70,7 +78,13 @@ function calc_cells($parameters,$update_id=NULL)
 	if($cron_run)
 	{
 	    $query = 'UPDATE update_status SET update_items_total="' . $totalcount . '",update_items_start_time="' . date("Y-m-d H:i:s", strtotime('now')) . '" WHERE update_id="' . $update_id . '"';
-    	$res = mysql_query($query) or die('Unable to update running' . mysql_error());
+		if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
 	}
 	//pr($areaids);pr($productids);
 	$counter=0;
@@ -99,14 +113,13 @@ function calc_cells($parameters,$update_id=NULL)
 					ON a.trial=p.trial
 					where a.area="'.$av['id'].'" and p.product="'.$pv['id'].'"';
 			
-			$res = mysql_query($query);
-			if($res === false)
-			{
-				$log = 'Bad SQL query getting data . mysql_error=' . mysql_error() . ' query=' . $query;
-				global $logger;
-				$logger->fatal($log);
-				die($log);
-			}
+			if(!$res = mysql_query($query))
+					{
+						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+						$logger->error($log);
+						echo $log;
+						return false;
+					}
 			$data=array();
 			while ($row = mysql_fetch_assoc($res))
 			{	
@@ -127,7 +140,13 @@ function calc_cells($parameters,$update_id=NULL)
 				if($cron_run)
 				{
 					$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s", strtotime('now')) . '",update_items_progress="' . $progress_count . '" WHERE update_id="' . $update_id . '"';
-					$res = mysql_query($query) or die('Unable to update running');
+					if(!$res = mysql_query($query))
+					{
+						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+						$logger->error($log);
+						echo $log;
+						return false;
+					}
 				}
 				
 				$counter++;
@@ -141,15 +160,13 @@ function calc_cells($parameters,$update_id=NULL)
 					JOIN data_trials d ON p.`trial`=d.`larvol_id`
 					where a.`area`="'.$av['id'].'" and p.`product`="'.$pv['id'].'" and d.`is_active`="1"	';
 
-			$res = mysql_query($query);
-			
-			if($res === false)
-			{
-				$log = 'Bad SQL query getting data. mysql_error=' . mysql_error() . ' query=' . $query;
-				global $logger;
-				$logger->fatal($log);
-				die($log);
-			}
+			if(!$res = mysql_query($query))
+					{
+						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+						$logger->error($log);
+						echo $log;
+						return false;
+					}
 			$data1=array();
 			while ($row = mysql_fetch_assoc($res))
 			{	
@@ -171,14 +188,12 @@ function calc_cells($parameters,$update_id=NULL)
 			$query='SELECT max(`phase`) as max_phase from data_trials 
 					where `phase`<>"N/A" and `larvol_id` IN (' . $ids . ')' ;
 			//pr($query);
-			$res = mysql_query($query);
-			
-			if($res === false)
+			if(!$res = mysql_query($query))
 			{
-				$log = 'Bad SQL query getting max phase. mysql_error=' . mysql_error() . ' query=' . $query;
-				global $logger;
-				$logger->fatal($log);
-				die($log);
+				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				$logger->error($log);
+				echo $log;
+				return false;
 			}
 			$row = mysql_fetch_assoc($res);
 			$max_phase = $row["max_phase"];
@@ -194,7 +209,13 @@ function calc_cells($parameters,$update_id=NULL)
 			if($cron_run)
 			{
 				$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s", strtotime('now')) . '",update_items_progress="' . $progress_count . '" WHERE update_id="' . $update_id . '"';
-				$res = mysql_query($query) or die('Unable to update running');
+				if(!$res = mysql_query($query))
+				{
+					$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+					$logger->error($log);
+					echo $log;
+					return false;
+				}
 			}
 		}
 
@@ -202,7 +223,13 @@ function calc_cells($parameters,$update_id=NULL)
 	if($cron_run)
 	{
 		$query = 'UPDATE update_status SET end_time="' . date("Y-m-d H:i:s", strtotime('now')) . '" WHERE update_id="' . $update_id . '"';
-		$res = mysql_query($query) or die('Unable to update running' . mysql_error());
+		if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
 	}
 	echo '<br>All Done.';
 }			
@@ -214,15 +241,15 @@ function add_data($arid,$prid,$cnt_total,$cnt_active,$bomb,$max_phase)
 			from rpt_masterhm_cells
 			where `area`="'.$arid.'" and `product`="'.$prid.'" limit 1';
 
-	$res = mysql_query($query);
+
 	$curtime = date('Y-m-d H:i:s');
-	if($res === false)
-	{
-		$log = 'Bad SQL query getting data from rpt_masterhm_cells. mysql_error=' . mysql_error() . ' query=' . $query;
-		global $logger;
-		$logger->fatal($log);
-		die($log);
-	}
+	if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
 	$row = mysql_fetch_assoc($res);
 //			pr($row);
 	if($row["area"])
@@ -235,13 +262,12 @@ function add_data($arid,$prid,$cnt_total,$cnt_active,$bomb,$max_phase)
 				`last_update` = "'. $curtime .'"
 
 				';
-		$res = mysql_query($query);
-		if($res === false)
+		if(!$res = mysql_query($query))
 		{
-			$log = 'Bad SQL query saving data in rpt_masterhm_cells. Mysql_error=' . mysql_error() . '.  Mysql Query=' . $query;
-			global $logger;
-			$logger->fatal($log);
-			die($log);
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
 		}
 	}
 	else
@@ -256,13 +282,12 @@ function add_data($arid,$prid,$cnt_total,$cnt_active,$bomb,$max_phase)
 				`last_update` = "'. $curtime .'"
 
 				';
-		$res = mysql_query($query);
-		if($res === false)
+		if(!$res = mysql_query($query))
 		{
-			$log = 'Bad SQL query saving data in rpt_masterhm_cells.  Mysql_error=' . mysql_error() . '.  Mysql Query=' . $query;
-			global $logger;
-			$logger->fatal($log);
-			die($log);
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
 		}
 	
 	
@@ -294,9 +319,15 @@ function getBombdtl($ids)
 			larvol_id IN (".$ids.") and
 			lastchanged_date < ".$past ;
 	
-			
-	if(!$rs = mysql_query($get_bomb_query1)) die('error in getting larvol id from larvol_trials. Query='.$get_bomb_query1) ;
-	
+
+	if(!$rs = mysql_query($get_bomb_query1))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$get_bomb_query1.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}		
+		
 	$trials = array();
 	while ($row = mysql_fetch_assoc($rs))
 		$trials[] = $row["larvol_id"];
@@ -305,16 +336,30 @@ function getBombdtl($ids)
 	$trials = implode(",", $trials);
 	$get_bomb_query2 = "SELECT MAX(phase) AS phase FROM data_trials where
 			larvol_id IN (".$ids.") AND larvol_id NOT IN (".$trials.")";
-	if(!$rs = mysql_query($get_bomb_query2)) die('error in getting max(phase) from larvol_trials. Query='.$get_bomb_query2) ;
-
+	if(!$rs = mysql_query($get_bomb_query2))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$get_bomb_query2.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
+		
 	$row = mysql_fetch_assoc($rs);
 	$phase = $row["phase"];
 	$get_bomb_query3 = "SELECT larvol_id FROM data_trials where
 			`phase` = '".$phase."' AND larvol_id IN (".$ids.") AND
 			larvol_id NOT IN (".$trials.") AND
 			overall_status IN (".$bombStatuses.")";
-	if(!$rs = mysql_query($get_bomb_query3)) die('error in getting larvol_id from larvol_trials. Query='.$get_bomb_query3) ;
-	
+
+	if(!$rs = mysql_query($get_bomb_query3))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$get_bomb_query3.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
+		
+
 	if (mysql_fetch_assoc($rs))
 		return "small";
 	return "large";

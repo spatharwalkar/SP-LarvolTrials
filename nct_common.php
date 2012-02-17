@@ -379,9 +379,13 @@ function addNCT_history($rec, $id, $date) {
         $query = 'SELECT data_fields.id AS "nct_id",data_categories.id AS "nct_cat" FROM '
                 . 'data_fields LEFT JOIN data_categories ON data_fields.category=data_categories.id '
                 . 'WHERE data_fields.name="nct_id" AND data_categories.name="NCT" LIMIT 1';
-        $res = mysql_query($query);
-        if ($res === false)
-            return softDie('Bad SQL query getting field ID of nct_id');
+       if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
         $res = mysql_fetch_assoc($res);
         if ($res === false)
             return softDie('NCT schema not found!');
@@ -398,7 +402,13 @@ function addNCT_history($rec, $id, $date) {
         mysql_close();
         $db = new DatabaseManager();
         // Start Trans again
-        mysql_query('BEGIN') or die("Couldn't begin SQL transaction to create record from XML after reconnect:" . mysql_error());
+        if(!mysql_query('BEGIN'))
+		{
+			$log='Could not begin transaction.   SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
     }
 
     //Detect if this record already exists (if not, add it, and associate it with the category NCT)
@@ -406,9 +416,13 @@ function addNCT_history($rec, $id, $date) {
     $query = 'SELECT studycat,larvol_id FROM '
             . 'data_values LEFT JOIN data_cats_in_study ON data_values.studycat=data_cats_in_study.id '
             . 'WHERE field=' . $id_field . ' AND val_int=' . $nct_id . ' LIMIT 1';
-    $res = mysql_query($query);
-    if ($res === false)
-        return softDie('Bad SQL query determining existence of record');
+    if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
     $res = mysql_fetch_assoc($res);
     $exists = $res !== false;
     $studycat = NULL;
@@ -418,12 +432,22 @@ function addNCT_history($rec, $id, $date) {
         $larvol_id = $res['larvol_id'];
     } else {
         $query = 'INSERT INTO clinical_study SET import_time="' . date('Y-m-d H:i:s', $now) . '"';
-        if (mysql_query($query) === false)
-            return softDie('Bad SQL query adding new record');
+        if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
         $larvol_id = mysql_insert_id();
         $query = 'INSERT INTO data_cats_in_study SET larvol_id=' . $larvol_id . ',category=' . $nct_cat;
-        if (mysql_query($query) === false)
-            return softDie('Bad SQL query adding new record to category');
+        if(!mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
         $studycat = mysql_insert_id();
         
         $no_dat=false;
@@ -434,13 +458,25 @@ function addNCT_history($rec, $id, $date) {
         {
             $query = 'INSERT INTO data_values SET field=' . $id_field . ',`added`="' . $DTnow . '",studycat=' . $studycat
                 . ',val_int=' . $nct_id;
-            if (mysql_query($query) === false)
-            return softDie('Bad SQL query adding nct_id');
+            if(!mysql_query($query))
+			{
+				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				$logger->error($log);
+				echo $log;
+				return false;
+			}
         }
     }
 //    echo '<pre>'; print_r($rec); echo '</pre>';
 //exit;
-	mysql_query('COMMIT') or die("Couldn't commit SQL transaction. Query:".$query);
+	if(!mysql_query('COMMIT'))
+		{
+			$log='Commit failed. rolling back transaction:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			mysql_query('ROLLBACK');
+			echo $log;
+			return false;
+		}
 if(isset($rec->status_block->brief_summary->textblock) and !empty($rec->status_block->brief_summary->textblock)) $bsummary=$rec->status_block->brief_summary->textblock;
 else $bsummary=$rec->brief_summary->textblock;
 if(isset($rec->status_block->detailed_descr->textblock) and !empty($rec->status_block->detailed_descr->textblock)) $ddesc=$rec->status_block->detailed_descr->textblock;
@@ -743,20 +779,46 @@ if(count($matches[0]) >0 )
 		
 			$pid = getmypid();
 			$query = 'SELECT update_id,process_id FROM update_status_fullhistory where status="2" order by update_id desc limit 1' ;
-			$res = mysql_query($query) or die('Bad SQL query finding ready updates. Query:' . $query  );
+			if(!$res = mysql_query($query))
+			{
+				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				$logger->error($log);
+				echo $log;
+				return false;
+			}
 			$res = mysql_fetch_array($res) ;
 			if ( isset($res['update_id']) and $res['process_id'] == $pid  )
 			{
 				$msg='Data error in ' . $nct_id . '.';
 				$query = 'UPDATE update_status_fullhistory SET status="3", er_message=' . $msg .' WHERE update_id="' . $res['update_id'] .'"';
-				$res = mysql_query($query) or die('Bad SQL query finding ready updates. Query:' . $query  );
-				mysql_query('COMMIT') or die("Couldn't commit SQL transaction. Query:".$query);
-				exit;
+				if(!$res = mysql_query($query))
+				{
+					$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+					$logger->error($log);
+					echo $log;
+					return false;
+				}
+				if(!mysql_query('COMMIT'))
+				{
+					$log='There seems to be a problem while committing the transaction. SQL Query:'.$query.' Error:' . mysql_error();
+					$logger->error($log);
+					mysql_query('ROLLBACK');
+					echo $log;
+					return false;
+				}
+				return false;
 			}
 			else
             return softDie('Data error in ' . $nct_id . '.');
 		}
-    mysql_query('COMMIT') or die("Couldn't commit SQL transaction to create records from XML");
+		if(!mysql_query('COMMIT'))
+				{
+					$log='There seems to be a problem while committing the transaction. SQL Query:'.$query.' Error:' . mysql_error();
+					$logger->error($log);
+					mysql_query('ROLLBACK');
+					echo $log;
+					return false;
+				}
 	global $fieldIDArr,$fieldITArr,$fieldRArr;
 	//Calculate Inactive Dates
 	refreshInactiveDates($larvol_id, 'search',$fieldIDArr);		
@@ -778,9 +840,13 @@ function addval_d($studycat, $category_id, $fieldname, $value, $date) {
 
     //Find the field id (and get it's type) using the name
     $query = 'SELECT id,type FROM data_fields WHERE name="' . $fieldname . '" AND category=' . $category_id . ' LIMIT 1';
-    $res = mysql_query($query);
-    if ($res === false)
-        return softDie('Bad SQL query getting field');
+	if(!$res = mysql_query($query))
+				{
+					$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+					$logger->error($log);
+					echo $log;
+					return false;
+				}
     $res = mysql_fetch_assoc($res);
     if ($res === false)
         return softDie('Field not found.' . $query);
@@ -800,9 +866,13 @@ function addval_d($studycat, $category_id, $fieldname, $value, $date) {
     $query = 'SELECT id,val_' . $type . ' AS "val" FROM data_values WHERE '
 			. 'val_' . $type . ' != \'\' AND val_' . $type . ' IS NOT NULL AND '
             . 'studycat=' . $studycat . ' AND field=' . $field . ' AND superceded IS NULL';
-    $res = mysql_query($query);
-    if ($res === false)
-        return softDie('Bad SQL query getting value');
+    if(!$res = mysql_query($query))
+				{
+					$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+					$logger->error($log);
+					echo $log;
+					return false;
+				}
     $oldids = array();
     $oldvals = array();
 	$t_value=array_flip($value);
@@ -810,9 +880,13 @@ function addval_d($studycat, $category_id, $fieldname, $value, $date) {
         
         if ($type == 'enum' && $row['val'] !== NULL) {
             $query2 = 'SELECT `value` FROM data_enumvals WHERE id=' . $row['val'] . ' LIMIT 1';
-            $res2 = mysql_query($query2);
-            if ($res2 === false)
-                return softDie('Bad SQL query getting enumval');
+            if(!$res3 = mysql_query($query3))
+				{
+					$log='There seems to be a problem with the SQL Query:'.$query3.' Error:' . mysql_error();
+					$logger->error($log);
+					echo $log;
+					return false;
+				}
             $res2 = mysql_fetch_assoc($res2);
             if ($res2 === false)
                 return softDie('enumval not found');
@@ -848,9 +922,13 @@ function addval_d($studycat, $category_id, $fieldname, $value, $date) {
         if (count($oldids)) 
 		{
             $query = 'UPDATE data_values SET superceded="' . $DTnow . '" WHERE id IN(' . implode(',', $oldids) . ')';
-            $res1=mysql_query($query);
-			if( !$res1  and ( mysql_errno() <> 1213 and mysql_errno() <> 1205 )  ) // error
-				return softDie('Bad SQL query marking old values' . mysql_error() . '<br />' . $query);
+			if(!$res1 = mysql_query($query))
+				{
+					$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+					$logger->error($log);
+					echo $log;
+					return false;
+				}
 	
 			//TKV  
 			//will retry in case of lock wait time timeout  
@@ -860,13 +938,25 @@ function addval_d($studycat, $category_id, $fieldname, $value, $date) {
 				{
 					$pid = getmypid();
 					$query1 = 'SELECT update_id,process_id FROM update_status_fullhistory where status="2" order by update_id desc limit 1' ;
-					$res = mysql_query($query1) or die('Bad SQL query finding ready updates. Query:' . $query1  );
+					if(!$res = mysql_query($query1))
+					{
+						$log='There seems to be a problem with the SQL Query:'.$query1.' Error:' . mysql_error();
+						$logger->error($log);
+						echo $log;
+						return false;
+					}
 					$res = mysql_fetch_array($res) ;
 					if ( isset($res['update_id']) and $res['process_id'] == $pid  )
 					{
 						$msg='Lock wait timed out. Re-trying to get lock...';
 						$query1 = 'UPDATE update_status_fullhistory SET er_message=' . $msg . ' WHERE update_id="' . $res['update_id'] .'"';
-						$res = mysql_query($query1) or die('Bad SQL query finding ready updates. Query:' . $query1  );
+						if(!$res = mysql_query($query1))
+						{
+							$log='There seems to be a problem with the SQL Query:'.$query1.' Error:' . mysql_error();
+							$logger->error($log);
+							echo $log;
+							return false;
+						}
 					}
 					sleep(10); 
 					$res = mysql_query($query);
@@ -915,15 +1005,25 @@ function addval_d($studycat, $category_id, $fieldname, $value, $date) {
 					}
                     $query = 'SELECT id FROM data_enumvals WHERE `field`=' . $field . ' AND `value`="' . mysql_real_escape_string($val)
                             . '" LIMIT 1';
-                    $res = mysql_query($query);
-                    if ($res === false)
-                        return softDie('Bad SQL query getting enumval id');
+                    if(!$res = mysql_query($query))
+						{
+							$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+							$logger->error($log);
+							echo $log;
+							return false;
+						}
                     $res = mysql_fetch_array($res);
                     if ($res === false)
 					{
 						$pid = getmypid();
 						$query = 'SELECT update_id,process_id FROM update_status_fullhistory where status="2" order by update_id desc limit 1' ;
-						$res = mysql_query($query) or die('Bad SQL query finding ready updates. Query:' . $query  );
+						if(!$res = mysql_query($query))
+						{
+							$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+							$logger->error($log);
+							echo $log;
+							return false;
+						}
 						$res = mysql_fetch_array($res) ;
 
 						if ( isset($res['update_id']) and $res['process_id'] == $pid  )
@@ -931,9 +1031,22 @@ function addval_d($studycat, $category_id, $fieldname, $value, $date) {
 							$upid=$res['update_id'];
 							$msg='Error:Invalid enumval <b>' . $val . '</b> for field <b>' . $fieldname . '</b> (studycat='. $studycat .')' ;
 							$query = 'UPDATE update_status_fullhistory SET status="3", er_message="' . $msg . '" WHERE update_id= "' . $upid .'" ';
-							$res = mysql_query($query) or die('Bad SQL query finding ready updates. Query:' . $query  );
-							mysql_query('COMMIT') or die("Couldn't commit SQL transaction. Query:".$query);
-							exit;
+							if(!$res = mysql_query($query))
+							{
+								$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+								$logger->error($log);
+								echo $log;
+								return false;
+							}
+							if(!$res = mysql_query('COMMIT'))
+							{
+								$log='There seems to be a problem while committing.   SQL Query:'.$query.' Error:' . mysql_error();
+								$logger->error($log);
+								mysql_query('ROLLBACK');
+								echo $log;
+								return false;
+							}
+							return false;
 						}
 						else
                         return softDie('Invalid enumval "' . $val . '" for field "' . $fieldname . '"');
@@ -958,15 +1071,25 @@ function addval_d($studycat, $category_id, $fieldname, $value, $date) {
 					$val=normalize($type, $val);
 					$query = 'INSERT INTO data_values SET `added`="' . $DTnow . '",'
 							. '`field`=' . $field . ',studycat=' . $studycat . ',val_' . $type . '=' . esc($type, $val);
-					if (mysql_query($query) === false)
-						return softDie('Bad SQL query saving value');
+					if(!$res = mysql_query($query))
+				{
+					$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+					$logger->error($log);
+					echo $log;
+					return false;
+				}
 			}
 						
         }
         $query = 'UPDATE clinical_study SET last_change="' . $DTnow . '" '
                 . 'WHERE larvol_id=(SELECT larvol_id FROM data_cats_in_study WHERE id=' . $studycat . ') LIMIT 1';
-        if (mysql_query($query) === false)
-            return softDie('Bad SQL query recording changetime');
+		if(!$res = mysql_query($query))
+				{
+					$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+					$logger->error($log);
+					echo $log;
+					return false;
+				}
     }
     return true;
 }
@@ -992,9 +1115,13 @@ function ProcessDiffChanges($id, $date) {
         $query = 'SELECT data_fields.id AS "nct_id",data_categories.id AS "nct_cat" FROM '
                 . 'data_fields LEFT JOIN data_categories ON data_fields.category=data_categories.id '
                 . 'WHERE data_fields.name="nct_id" AND data_categories.name="NCT" LIMIT 1';
-        $res = mysql_query($query);
-        if ($res === false)
-            return softDie('Bad SQL query getting field ID of nct_id');
+        if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
         $res = mysql_fetch_assoc($res);
         if ($res === false)
             return softDie('NCT schema not found!');
@@ -1007,9 +1134,13 @@ function ProcessDiffChanges($id, $date) {
     $query = 'SELECT studycat FROM '
             . 'data_values LEFT JOIN data_cats_in_study ON data_values.studycat=data_cats_in_study.id '
             . 'WHERE field=' . $id_field . ' AND val_int=' . $nct_id . ' LIMIT 1';
-    $res = mysql_query($query);
-    if ($res === false)
-        return softDie('Bad SQL query determining existence of record');
+    if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
     $res = mysql_fetch_assoc($res);
     $exists = $res !== false;
     $studycat = NULL;
@@ -1414,8 +1545,13 @@ function commit_diff($studycat, $category_id, $fieldname, $value, $date, $operat
 			}
 		}
 		
-		if (mysql_query($query) === false)
-            return softDie('Bad SQL query marking old values' . mysql_error() . '<br />' . $query);
+		 if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
     }
 
     if ($operation == "add" || $operation == "change") {
@@ -1426,9 +1562,13 @@ function commit_diff($studycat, $category_id, $fieldname, $value, $date, $operat
                 } else {
                     $query = 'SELECT id FROM data_enumvals WHERE `field`=' . $field . ' AND `value`="' . mysql_real_escape_string($val)
                             . '" LIMIT 1';
-                    $res = mysql_query($query);
-                    if ($res === false)
-                        return softDie('Bad SQL query getting enumval id');
+                     if(!$res = mysql_query($query))
+					{
+						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+						$logger->error($log);
+						echo $log;
+						return false;
+					}
                     $res = mysql_fetch_array($res);
                     if ($res === false)
                         return softDie('Invalid enumval "' . $val . '" for field "' . $fieldname . '"');
@@ -1439,15 +1579,24 @@ function commit_diff($studycat, $category_id, $fieldname, $value, $date, $operat
             $query = 'INSERT INTO data_values SET `added`="' . $DTnow . '",'
                     . '`field`=' . $field . ',studycat=' . $studycat . ',val_' . $type . '=' . esc($type, $val);
 
-            if (mysql_query($query) === false)
-                return softDie('Bad SQL query saving value');
+            if(!$res = mysql_query($query))
+			{
+				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				$logger->error($log);
+				echo $log;
+				return false;
+			}
         }
     }
 	
     $query = 'SELECT larvol_id FROM data_cats_in_study WHERE id=' . $studycat . ' LIMIT 1';
-    $res = mysql_query($query);
-    if ($res === false)
-        return softDie('Bad SQL query getting larvol id');
+     if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
     $res = mysql_fetch_assoc($res);
     if ($res === false)
         return softDie('Field not found.' . $query);
@@ -1455,8 +1604,13 @@ function commit_diff($studycat, $category_id, $fieldname, $value, $date, $operat
     
 	
     $query = 'UPDATE clinical_study SET last_change="' . $DTnow . '"  WHERE larvol_id= "' . $larvol_id . '" LIMIT 1';
-    if (mysql_query($query) === false)
-        return softDie('Bad SQL query recording changetime');
+     if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
 	global $fieldArr;
 	refreshInactiveDates($larvol_id, 'search',$fieldArr);		
     return true;
@@ -1555,9 +1709,13 @@ function ProcessNonEssentials($id, $date) {
         $query = 'SELECT data_fields.id AS "nct_id",data_categories.id AS "nct_cat" FROM '
                 . 'data_fields LEFT JOIN data_categories ON data_fields.category=data_categories.id '
                 . 'WHERE data_fields.name="nct_id" AND data_categories.name="NCT" LIMIT 1';
-        $res = mysql_query($query);
-        if ($res === false)
-            return softDie('Bad SQL query getting field ID of nct_id');
+         if(!$res = mysql_query($query))
+			{
+				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				$logger->error($log);
+				echo $log;
+				return false;
+			}
         $res = mysql_fetch_assoc($res);
         if ($res === false)
             return softDie('NCT schema not found!');
@@ -1570,9 +1728,13 @@ function ProcessNonEssentials($id, $date) {
     $query = 'SELECT studycat FROM '
             . 'data_values LEFT JOIN data_cats_in_study ON data_values.studycat=data_cats_in_study.id '
             . 'WHERE field=' . $id_field . ' AND val_int=' . $nct_id . ' LIMIT 1';
-    $res = mysql_query($query);
-    if ($res === false)
-        return softDie('Bad SQL query determining existence of record');
+    if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
     $res = mysql_fetch_assoc($res);
     $exists = $res !== false;
     $studycat = NULL;

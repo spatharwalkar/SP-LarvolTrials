@@ -12,24 +12,29 @@ function scrape_history($id)
 {
 	if (!isset($id) or empty($id)  ) 
 	{
-		die('No ID passed');
+		return 'No NCTID passed';
 	} 
-
+	
 	$id = padnct($id);
 	$unid = unpadnct($id);
-	
+	echo('<br><b>' . date('Y-m-d H:i:s') .'</b> - Refreshing trial : ' . $id .   str_repeat("     ",300) . '<br>');
+		
 	ProcessNew($id);
-
-	echo('<br>Pre-indexing (PRODUCT) - id: ' . $id . '..........<br><br>');
-	tindex(padnct($id),'products');
-	echo('<br>Pre-indexing (AREA)    - id: ' . $id . '.........<br><br>');
-	tindex(padnct($id),'areas');
 	
-	echo('<br>Finished Parsing Current Study with this ID.<br />');
+	echo('<br><b>' . date('Y-m-d H:i:s') .'</b> - Preindexing trial : ' . $id .   str_repeat("     ",300) );
+	tindex(padnct($id),'products');
+	
+	tindex(padnct($id),'areas');
 
 	$query = 'UPDATE update_status SET `end_time`="' . date("Y-m-d H:i:s", strtotime('now')) . '" WHERE `update_id`="' . $update_id . '"';
-	$res = mysql_query($query) or die('Unable to update running' . mysql_error());
-
-	echo('<br>Completely Finished with this ID.<br />');
+	if(!$res = mysql_query($query))
+		{
+			$log='Unable to update update_status. There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
+	echo('<br><b>' . date('Y-m-d H:i:s') .'</b> - Completely Finished with  ID : ' . $id .    str_repeat("     ",300) . '<br>');
+	
 }
 ?>  

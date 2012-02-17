@@ -98,7 +98,15 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 				
 				$findme   = 'where';
 				$pos = stripos($mystring, $findme);
-				mysql_query('BEGIN') or die("Couldn't begin SQL transaction");
+				
+				if(!mysql_query('BEGIN'))
+				{
+					$log='Unable to begin transaction. Query='.$query.' Error:' . mysql_error();
+					$logger->fatal($log);
+					echo $log;
+					exit;
+				}
+				
 				if ($pos === false) 
 				{
 					$log='Error in MySql Query :' . $query;
@@ -118,7 +126,14 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					{
 						//delete existing product/area indexes
 						$qry='DELETE from '. $table .' where `'. $field . '` = "'. $productID . '"';
-						mysql_query($qry) or die("Couldn't delete existing product indexes.");
+						if(!mysql_query($qry))
+						{
+							$log='Could not delete existing product indexes. Query='.$qry.' Error:' . mysql_error();
+							$logger->fatal($log);
+							mysql_query('ROLLBACK');
+							echo $log;
+							exit;
+						}
 						$query = substr($mystring,0,$pos+6). '  ( ' . substr($mystring,$pos+6) . ' ) ';
 					}
 				}
@@ -140,6 +155,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 				{
 					$log='Bad SQL query getting larvol_id from data_trials table.<br>Query=' . $query;
 					$logger->fatal($log);
+					mysql_query('ROLLBACK');
 					echo $log;
 					exit;
 				}
@@ -177,9 +193,9 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 							if($res === false)
 							{
 								$log = 'Bad SQL query pre-indexing trial***. Query : ' . $query . '<br> MySql Error:'.mysql_error();
+								mysql_query('ROLLBACK');
 								$logger->fatal($log);
 								die($log);
-								unset($log);
 							}
 						
 						}
@@ -187,19 +203,42 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					}
 				
 				}
-				mysql_query('COMMIT') or die("Couldn't commit SQL transaction.");
+				
+				if(!mysql_query('COMMIT'))
+				{
+					$log='Error - could not commit transaction. Query='.$query.' Error:' . mysql_error();
+					$logger->fatal($log);
+					mysql_query('ROLLBACK');
+					echo $log;
+					exit;
+				}
 				$proc_id = getmypid();
 				$i++;
 				$ttype=$cat=='products' ? 'PRODUCT' : 'AREA';
 				//update status
 				$query = 'SELECT update_items_progress,update_items_total FROM update_status_fullhistory WHERE update_id="' . $up_id .'" and trial_type="' . $ttype . '" limit 1 ' ;
-				$res = mysql_query($query) or die('Bad SQL query selecting row from update_status_fullhistory. Query='.$query);
+				if(!$res = mysql_query($query))
+				{
+					$log='Bad SQL query selecting rows from update_status_fullhistory. Query='.$query.' Error:' . mysql_error();
+					$logger->fatal($log);
+					echo $log;
+					
+					exit;
+				}
+				
 				$res = mysql_fetch_array($res) ;
 				if ( isset($res['update_items_progress'] ) and $res['update_items_progress'] > 0 ) $updtd_items=((int)$res['update_items_progress']); else $updtd_items=0;
 				if ( isset($res['update_items_total'] ) and $res['update_items_total'] > 0 ) $tot_items=((int)$res['update_items_total']); else $tot_items=0;
 		
 				$query = ' UPDATE  update_status_fullhistory SET process_id = "'. $proc_id  .'" , update_items_progress= "' . ( ($tot_items >= $updtd_items+$i) ? ($updtd_items+$i) : $tot_items  ) . '" , status="2", current_nctid="'. $cid .'", updated_time="' . date("Y-m-d H:i:s", strtotime('now'))  . '" WHERE update_id="' . $up_id .'" and trial_type= "' . $ttype . '"  ';
-				$res = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory1. Query:' . $query);
+				
+				if(!$res = mysql_query($query))
+				{
+					$log='Unable to update update_status_fullhistory. Query='.$query.' Error:' . mysql_error();
+					$logger->fatal($log);
+					echo $log;
+					return false;
+				}
 				@flush();
 				
 				
@@ -228,11 +267,10 @@ function trial_indexed($larvol_id,$cat,$cid)
 	$res1 		= mysql_query($query) ;
 	if($res1===false)
 	{
-	
-	$log = 'Bad SQL query checking trial index status. Query=' . $query;
-	$logger->fatal($log);
-	die($log);
-
+		$log = 'Bad SQL query checking trial index status. Query=' . $query;
+		$logger->fatal($log);
+		echo $log;
+		die($log);
 	}
 	$resu=array();
 	while($resu[]=mysql_fetch_array($res1));

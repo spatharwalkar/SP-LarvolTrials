@@ -43,9 +43,21 @@ if(isset($_POST['pid']))
 			if($_POST['action']==1)
 			{
 				$query = 'UPDATE update_status_fullhistory SET `status`="'.READY.'" WHERE `update_id`="' . $_POST['upid'].'"';
-				$res = mysql_query($query) or die('Bad SQL Query setting update ready status');
+				if(!$res = mysql_query($query))
+				{
+					$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+					$logger->error($log);
+					echo $log;
+					return false;
+				}
 				$query = 'select `current_nctid` from  update_status_fullhistory WHERE `update_id`="' . $_POST['upid'].'" limit 1';
-				$res = mysql_query($query) or die('Bad SQL Query setting update ready status');
+				if(!$res = mysql_query($query))
+				{
+					$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+					$logger->error($log);
+					echo $log;
+					return false;
+				}
 				$row = mysql_fetch_assoc($res); $current_nctid=$row['current_nctid'];
 				if($_POST['ttype']=="trial") runnewscraper(true,$current_nctid);
 				elseif( $_POST['ttype']=="area" )
@@ -67,12 +79,24 @@ if(isset($_POST['pid']))
 				exec($cmd, $output, $result);
 				
 				$query = 'UPDATE update_status_fullhistory SET `status`="'.CANCELLED.'" WHERE `update_id`="' . $_POST['upid'].'"';
-				$res = mysql_query($query) or die('Bad SQL Query setting update cancelled status');
+				if(!$res = mysql_query($query))
+				{
+					$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+					$logger->error($log);
+					echo $log;
+					return false;
+				}
 			}
 			else if($_POST['action']==3)
 			{
 				$query = 'DELETE FROM update_status_fullhistory WHERE `update_id`="' . $_POST['upid'].'"';
-				$res = mysql_query($query) or die('Bad SQL Query deleting update status');
+				if(!$res = mysql_query($query))
+				{
+					$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+					$logger->error($log);
+					echo $log;
+					return false;
+				}
 			}		
 		}
 		
@@ -84,7 +108,13 @@ if(isset($_POST['pid']))
 			if($_POST['action']==4)
 			{			
 				$query = 'UPDATE update_status_fullhistory SET `status`="'.CANCELLED.'" WHERE `update_id`="' . $_POST['upid'].'"';
-				$res = mysql_query($query) or die('Bad SQL Query setting update cancelled status');
+				if(!$res = mysql_query($query))
+				{
+					$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+					$logger->error($log);
+					echo $log;
+					return false;
+				}
 			}
 		}
 		elseif(isset($_POST['runid']))
@@ -92,14 +122,26 @@ if(isset($_POST['pid']))
 			if($_POST['action']==4)
 			{
 				$query = 'UPDATE reports_status SET `status`="'.CANCELLED.'" WHERE `run_id`="' . $_POST['runid'].'" AND report_type="' . $_POST['rpttyp'].'" AND `type_id`="' . $_POST['typeid'].'"';
-				$res = mysql_query($query) or die('Bad SQL Query setting report cancelled status');
+				if(!$res = mysql_query($query))
+				{
+					$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+					$logger->error($log);
+					echo $log;
+					return false;
+				}
 			}
 		}
 	}
 
 
 $query = 'SELECT update_items_total,update_items_progress,current_nctid FROM update_status_fullhistory  ' ;
-$res = mysql_query($query) or die('Bad SQL query checking update status');
+if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
 
 $res = mysql_fetch_array($res) ;
 //if(isset($res['update_items_total'])) $cid = ((int)$res['current_nctid']);
@@ -127,7 +169,13 @@ function showprogress()
 
 	//Get Process IDs of all currently running updates to check crashes
 	$query = 'SELECT `update_id`,`process_id` FROM update_status_fullhistory WHERE `status`='.RUNNING;
-	$res = mysql_query($query) or die('Bad SQL Query getting process IDs of updates. Query: '. $query .'Error: '.mysql_error());
+	if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
 	$count_upids=0;
 	
 	while($row = mysql_fetch_assoc($res))
@@ -188,7 +236,13 @@ function showprogress()
 			if( !in_array($update_pids[$i],$running_pids) and $err[$i]=='yes')
 		{
 			$query = 'UPDATE update_status_fullhistory SET `status`="'.ERROR.'",`process_id`="0" WHERE `update_id`="' . $update_ids[$i].'"';
-			$res = mysql_query($query) or die('Bad SQL Query setting update error status');
+			if(!$res = mysql_query($query))
+			{
+				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				$logger->error($log);
+				echo $log;
+				return false;
+			}
 		}
 			
 	}
@@ -198,7 +252,13 @@ function showprogress()
 	$query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 						`update_items_total`,`update_items_progress`,`er_message`,TIMEDIFF(updated_time, start_time) AS timediff,
 						`update_items_complete_time` FROM update_status_fullhistory where trial_type="NCT"';
-	$res = mysql_query($query) or die('Bad SQL Query getting update_status_fullhistory');
+	if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
 	$nct_status = array();
 	while($row = mysql_fetch_assoc($res))
 	$nct_status = $row;
@@ -206,7 +266,13 @@ function showprogress()
 	$query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 						`update_items_total`,`update_items_progress`,`er_message`,TIMEDIFF(updated_time, start_time) AS timediff,
 						`update_items_complete_time` FROM update_status_fullhistory where trial_type="PRODUCT"';
-	$res = mysql_query($query) or die('Bad SQL Query getting update_status_fullhistory');
+	if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
 	$product_status = array();
 	while($row = mysql_fetch_assoc($res))
 	$product_status = $row;
@@ -214,7 +280,13 @@ function showprogress()
 	$query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 						`update_items_total`,`update_items_progress`,`er_message`,TIMEDIFF(updated_time, start_time) AS timediff,
 						`update_items_complete_time` FROM update_status_fullhistory where trial_type="AREA"';
-	$res = mysql_query($query) or die('Bad SQL Query getting update_status_fullhistory');
+	if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
 	$area_status = array();
 	while($row = mysql_fetch_assoc($res))
 	$area_status = $row;
@@ -547,15 +619,26 @@ function runscraper()
 		{
 			$nct_ids=array();
 			$query='select nctid from nctids where id>0';
-			$res = mysql_query($query);
-			if($res === false) die('Bad SQL query getting nctids from local table');
+			if(!$res = mysql_query($query))
+			{
+				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				$logger->error($log);
+				echo $log;
+				return false;
+			}
 			echo '<br> Picking up nctids from local table "nctids" <br>';
 			while($row = mysql_fetch_assoc($res)) $nct_ids[$row['nctid']] = 1;
 			unset($res);unset($row);
 			
 			
 			$query = 'SELECT * FROM update_status_fullhistory where status="1" and trial_type="AREA" order by update_id desc limit 1' ;
-			$res = mysql_query($query) or die('Bad SQL query finding ready updates ');
+			if(!$res = mysql_query($query))
+			{
+				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				$logger->error($log);
+				echo $log;
+				return false;
+			}
 			$res = mysql_fetch_array($res) ;
 			if ( isset($res['process_id']) )
 			{
@@ -566,7 +649,13 @@ function runscraper()
 				$cid = ((int)$res['current_nctid']); 
 				$maxid = ((int)$res['max_nctid']); 
 				$query = 'UPDATE  update_status_fullhistory SET status= "2",er_message="",process_id="' . $pid . '"   WHERE status="1" and process_id = "' . $pr_id .'" ;' ;
-				$res = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory. Query:' . $query );
+				if(!$res = mysql_query($query))
+				{
+					$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+					$logger->error($log);
+					echo $log;
+					return false;
+				}
 				$pr_id=$pid ;
 				unset($res);
 			}
@@ -577,7 +666,13 @@ function runscraper()
 		{
 			
 			$query = 'SELECT * FROM update_status_fullhistory where status="1" and trial_type="AREA" order by update_id desc limit 1' ;
-			$res = mysql_query($query) or die('Bad SQL query finding ready updates ');
+			if(!$res = mysql_query($query))
+			{
+				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				$logger->error($log);
+				echo $log;
+				return false;
+			}
 			$res = mysql_fetch_array($res) ;
 		}
 	}	
@@ -590,7 +685,13 @@ function runscraper()
 		$maxid = ((int)$res['max_nctid']); 
 		$up_it_pr=((int)$res['update_items_progress']);
 		$query = 'UPDATE  update_status_fullhistory SET status= "2",er_message="",process_id="' . $pid . '"  WHERE process_id = "' . $pr_id .'" ;' ;
-		$res = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory. Query:' . $query );
+		if(!$res = mysql_query($query))
+			{
+				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				$logger->error($log);
+				echo $log;
+				return false;
+			}
 		$pr_id=$pid ;
 		fetch_records($pid,$cid,$maxid,$up_id);
 		exit;
@@ -670,8 +771,13 @@ function runnewscraper($requeued,$current_nctid)
 			foreach($nct_ids as $nct_id=>$key)
 			{
 				$query='insert into `nctids` set nctid="'. padnct($nct_id) .'"';
-				$res = mysql_query($query);
-				if($res === false) die('Bad SQL query adding nctid into local table.Query='.$query);
+				if(!$res = mysql_query($query))
+						{
+							$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+							$logger->error($log);
+							echo $log;
+							return false;
+						}			
 			}
 			
 		}
@@ -679,8 +785,13 @@ function runnewscraper($requeued,$current_nctid)
 		{
 			$nct_idz=array();
 			$query='select nctid from nctids where id>0';
-			$res = mysql_query($query);
-			if($res === false) die('Bad SQL query getting nctids from local table');
+			if(!$res = mysql_query($query))
+			{
+				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				$logger->error($log);
+				echo $log;
+				return false;
+			}
 			while($row = mysql_fetch_assoc($res)) 
 			{
 				if(isset($current_nctid) and $current_nctid>0)
@@ -697,7 +808,13 @@ function runnewscraper($requeued,$current_nctid)
 	{
 		$nct_ids=$nct_idz;
 		$query = 'SELECT * FROM update_status_fullhistory where status="1" and trial_type="NCT" order by update_id desc limit 1' ;
-		$res = mysql_query($query) or die('Bad SQL query finding ready updates ');
+		if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
 		$row = mysql_fetch_assoc($res) ;
 //		pr($row);
 	}	
@@ -709,7 +826,13 @@ function runnewscraper($requeued,$current_nctid)
 		$cid = ((int)$row['current_nctid']); 
 		$maxid = ((int)$row['max_nctid']); 
 		$query = 'UPDATE  update_status_fullhistory SET status= "2",er_message=""  WHERE process_id = "' . $pr_id .'" ;' ;
-		$row = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory. Query:' . $query );
+		if(!$row = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
 	//	fetch_records($pid,$cid,$maxid,$up_id);
 //		exit;
 	}
@@ -718,14 +841,26 @@ function runnewscraper($requeued,$current_nctid)
 	{
 
 		$query = 'SELECT MAX(update_id) AS maxid FROM update_status_fullhistory' ;
-		$res = mysql_query($query) or die('Bad SQL query finding highest update id');
+		if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
 		$res = mysql_fetch_array($res) ;
 		$up_id = (isset($res['maxid'])) ? ((int)$res['maxid'])+1 : 1;
 		$fid = getFieldId('NCT','nct_id');
 		if(!isset($nct_ids))
 		{
 			$query = 'SELECT MAX(nct_id) AS maxid FROM data_nct';
-			$res = mysql_query($query) or die('Bad SQL query finding highest nct_id');
+			if(!$res = mysql_query($query))
+			{
+				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				$logger->error($log);
+				echo $log;
+				return false;
+			}
 			$res = mysql_fetch_array($res) or die('No nct_id found!');
 			$maxid = $res['maxid'];
 			$cid = (isset($_GET['start']) && is_numeric($_GET['start'])) ? ((int)$_GET['start']) : 102;  // 102 is the starting NCTID in ct.gov
@@ -769,7 +904,13 @@ function runnewscraper($requeued,$current_nctid)
 			$query = 'INSERT into update_status_fullhistory (update_id,process_id,status,update_items_total,start_time,max_nctid,trial_type) 
 					  VALUES ("'.$up_id.'","'. $pid .'","'. 2 .'",
 					  "' . $totalncts . '","'. date("Y-m-d H:i:s", strtotime('now')) .'", "'. $maxid .'", "NCT"  ) ;';
-			$res = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory. Query:' . $query);
+			if(!$res = mysql_query($query))
+			{
+				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				$logger->error($log);
+				echo $log;
+				return false;
+			}
 		}
 		else die("No valid nctids found.");
 	}
@@ -782,7 +923,13 @@ function runnewscraper($requeued,$current_nctid)
 	{
 	
 		$query = 'SELECT update_items_progress,update_items_total FROM update_status_fullhistory WHERE update_id="' . $up_id .'" and trial_type="NCT" limit 1 ;' ;
-		$res = mysql_query($query) or die('Bad SQL query selecting row from update_status_fullhistory ');
+		if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
 		$res = mysql_fetch_array($res) ;
 		if ( isset($res['update_items_progress'] ) and $res['update_items_progress'] > 0 ) $updtd_items=((int)$res['update_items_progress']); else $updtd_items=0;
 		if ( isset($res['update_items_total'] ) and $res['update_items_total'] > 0 ) $tot_items=((int)$res['update_items_total']); else $tot_items=0;
@@ -793,11 +940,23 @@ function runnewscraper($requeued,$current_nctid)
 		echo('<br>Current time ' . date('Y-m-d H:i:s', strtotime('now')) . '<br>');
 		echo str_repeat (" ", 4000);
 		$query = ' UPDATE  update_status_fullhistory SET process_id = "'. $pid  .'" , update_items_progress= "' . ( ($tot_items >= $updtd_items+$i) ? ($updtd_items+$i) : $tot_items  ) . '" , status="2", current_nctid="'. $cid .'", updated_time="' . date("Y-m-d H:i:s", strtotime('now'))  . '" WHERE update_id="' . $up_id .'" and trial_type="NCT"  ;' ;
-		$res = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory. Query:' . $query);
+		if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
 		@flush();
 	}
 	$query = 'UPDATE  update_status_fullhistory SET status=0, process_id = "'. $pid  .'" , end_time="' . date("Y-m-d H:i:s", strtotime('now')) . '" WHERE update_id="' . $up_id .'" ;' ;
-	$res = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory. Query:' . $query );
+	if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
 	echo('<br>Done with all IDs.');
 	
 }
@@ -806,7 +965,13 @@ function fetch_records($pr_id,$cid,$maxid,$up_id)
 	global $nct_ids;
 //	pr($nct_ids);
 	$query = 'SELECT update_items_progress,update_items_total FROM update_status_fullhistory WHERE update_id="' . $up_id .'" and trial_type="NCT" limit 1 ;' ;
-	$res = mysql_query($query) or die('Bad SQL query selecting row from update_status_fullhistory ');
+	if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
 	$res = mysql_fetch_array($res) ;
 	if ( isset($res['update_items_progress'] ) and $res['update_items_progress'] > 0 ) $updtd_items=((int)$res['update_items_progress']); else $updtd_items=0;
 	if ( isset($res['update_items_total'] ) and $res['update_items_total'] > 0 ) $tot_items=((int)$res['update_items_total']); else $tot_items=0;
@@ -822,20 +987,32 @@ function fetch_records($pr_id,$cid,$maxid,$up_id)
 		else $v1[1]=isset($nct_ids[padnct($cid)]) ? $cid : NULL ;
 		if( isset($vl[1] )) 
 		{
-		$cid=$vl[1];
-		scrape_history($cid);
-		++$i;
-		$query = ' UPDATE  update_status_fullhistory SET process_id = "'. $pr_id  .'" , update_items_progress= "' . ( ($tot_items >= $updtd_items+$i) ? ($updtd_items+$i) : $tot_items  ) . '" , status="2", current_nctid="'. $cid .'", updated_time="' . date("Y-m-d H:i:s", strtotime('now'))  . '" WHERE update_id="' . $up_id .'" and trial_type="NCT"  ;' ;
-		$res = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory. Query:' . $query);
-		@flush();
+			$cid=$vl[1];
+			scrape_history($cid);
+			++$i;
+			$query = ' UPDATE  update_status_fullhistory SET process_id = "'. $pr_id  .'" , update_items_progress= "' . ( ($tot_items >= $updtd_items+$i) ? ($updtd_items+$i) : $tot_items  ) . '" , status="2", current_nctid="'. $cid .'", updated_time="' . date("Y-m-d H:i:s", strtotime('now'))  . '" WHERE update_id="' . $up_id .'" and trial_type="NCT"  ;' ;
+			if(!$res = mysql_query($query))
+			{
+				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				$logger->error($log);
+				echo $log;
+				return false;
+			}
+			@flush();
 		}
 		else
-		break;
+			break;
 	}
 
 
 $query = 'UPDATE  update_status_fullhistory SET status=0, process_id = "'. $pr_id  .'" , end_time="' . date("Y-m-d H:i:s", strtotime('now')) . '" WHERE update_id="' . $up_id .'" ;' ;
-$res = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory. Query:' . $query );
+if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
 echo('<br>Done with all IDs.');
 
 }
@@ -844,7 +1021,13 @@ function validate_nctid($ncid,$mxid)
 	
 	$query = 'select nct_id from data_nct where nct_id>="'.$ncid.'" and nct_id<="'.$mxid.'" order by nct_id limit 1 ;'; 
 	//echo('<br>query=' .$query. '<br>' );
-	$res = mysql_query($query) or die('checking of NCTID  Failed. Query:' . $query );
+	if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
 	$res = mysql_fetch_assoc($res);
 	if (isset($res['nct_id']))
 		return array(true,$res['nct_id']);
@@ -949,7 +1132,13 @@ function get_nctids_from_web()
 			{
 				scrape_history($cid);
 				$query = ' UPDATE  update_status_fullhistory SET process_id = "'. $pr_id  .'" , update_items_progress= "' . ( ($tot_items >= $up_it_pr) ? ($up_it_pr) : $tot_items  ) . '" , status="2", current_nctid="'. $cid .'", updated_time="' . date("Y-m-d H:i:s", strtotime('now'))  . '" WHERE update_id="' . $up_id .'" and trial_type="NCT"  ;' ;
-				$res = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory. Query:' . $query);
+				if(!$res = mysql_query($query))
+				{
+					$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+					$logger->error($log);
+					echo $log;
+					return false;
+				}
 				$up_it_pr++;
 				@flush();
 			}
@@ -958,7 +1147,13 @@ function get_nctids_from_web()
 
 
 	$query = 'UPDATE  update_status_fullhistory SET status=0, process_id = "'. $pr_id  .'" , end_time="' . date("Y-m-d H:i:s", strtotime('now')) . '" WHERE update_id="' . $up_id .'" ;' ;
-	$res = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory. Query:' . $query );
+	if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
 	echo('<br>Done with all IDs.');
 
 	}
