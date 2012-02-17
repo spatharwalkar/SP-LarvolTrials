@@ -1007,7 +1007,7 @@ function Download_reports()
 			ob_end_clean();
 			//Close and output PDF document
 			$pdf->Output('Larvol_'. substr($name,0,20) .'_PDF_Report_'. date("Y-m-d_H.i.s") .'.pdf', 'D');
-	
+		
 		}//PDF Function Ends
 		//var_dump(urlPath());
 		//echo htmlspecialchars($pdfContent);
@@ -1026,8 +1026,6 @@ function Download_reports()
 			//header("Content-Transfer-Encoding: binary");
 			echo $pdfContent;
 			//readfile($filename);
-			
-			
 		}//HTML Function Ends
 		
 	}//Pdf & HTML Function Ends
@@ -1250,32 +1248,6 @@ function Download_reports()
 		header("Content-Transfer-Encoding: binary ");
 		$objWriter->save('php://output');
 		@flush();
-	
-			
-		if(/*connection_aborted()*/true)	//connection_aborted doesn't work due to PHP bug 
-		{
-			ob_start();
-			$tempfile = tempnam(sys_get_temp_dir(), 'exc');
-			if($tempfile === false) exit;//tex('Unable to create temp file');
-			$objWriter->save($tempfile);
-			$content = file_get_contents($tempfile);
-			unlink($tempfile);
-			$mail = new PHPMailer();
-			$from = 'no-reply@' . $_SERVER['SERVER_NAME'];
-			if(strlen($_SERVER['SERVER_NAME'])) $mail->SetFrom($from);
-			$mail->AddAddress($db->user->email);
-			$mail->Subject = SITE_NAME . ' Master Heatmap Manual Excel Report ' . date("Y-m-d H.i.s", $now) . ' - ' . substr($name,0,20);
-			$mail->Body = 'Attached is the report you generated earlier.';
-			$current_filename=substr($name,0,20).'_'.date('Y-m-d_H.i.s', $now);
-			$mail->AddStringAttachment($content,
-									   $current_filename.'.xlsx',
-									   'base64',
-									   'Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','','manual report');		
-			
-			@$mail->Send();
-			ob_end_clean();
-		}
-		
 	} //Excel Function Ends
 }
 
