@@ -16,7 +16,7 @@ class TrialTracker
 	private $inactiveStatusValues = array();
 	private $activeStatusValues = array();
 	private $allStatusValues = array();
-	private $resultsPerPage = 5;//100;
+	private $resultsPerPage = 100;
 	private $enumVals = array();
 	private $phaseValues = array();
 	
