@@ -277,10 +277,6 @@ function editor()
 			}
 			else
 			{
-				$col_active_total[$col]=$col_total[$col];
-				$row_active_total[$row]=$row_total[$row];
-				$col_count_total[$col]=$col_total[$col];
-				$row_count_total[$row]=$row_total[$row];
 				$data_matrix[$row][$col]['active']=0;
 				$data_matrix[$row][$col]['total']=0;
 				$data_matrix[$row][$col]['bomb_auto']['src']='';
@@ -673,10 +669,6 @@ function Download_reports()
 			}
 			else
 			{
-				$col_active_total[$col]=$col_total[$col];
-				$row_active_total[$row]=$row_total[$row];
-				$col_count_total[$col]=$col_total[$col];
-				$row_count_total[$row]=$row_total[$row];
 				$data_matrix[$row][$col]['active']=0;
 				$data_matrix[$row][$col]['total']=0;
 				$data_matrix[$row][$col]['bomb_auto']['src']='';
@@ -734,7 +726,7 @@ function Download_reports()
 		foreach($columns as $col => $val)
 		{
 			$pdfContent .= '<th width="150px"><div align="center">'. $val .'<br />';
-					
+			
 			if(isset($areaIds[$col]) && $areaIds[$col] != NULL && !empty($productIds))
 			{
 				if($_POST['dwcount']=='active')
@@ -843,7 +835,7 @@ function Download_reports()
 						$title="Active Records, Total Records";
 					}
 				
-					$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '" target="_blank" title="'. $title .'">'. (($_POST['dwformat']=='pdfdown' || $data_matrix[$row][$col]['bomb']['src'] != 'square.png') ? '' : '&nbsp;&nbsp;&nbsp;&nbsp;').$count_val.'</a>';
+					$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '" target="_blank" title="'. $title .'">'. (($_POST['dwformat']=='pdfdown' && $data_matrix[$row][$col]['bomb']['src'] != 'square.png') ? '&nbsp;&nbsp;&nbsp;&nbsp;' : '').$count_val.'</a>';
 					
 					if($_POST['dwformat']=='htmldown' && $data_matrix[$row][$col]['bomb']['src'] != 'square.png') //When bomb has square dont include it in pdf as size is big and no use
 					{	$pdfContent .= '<img align="right" title="'.$data_matrix[$row][$col]['bomb']['title'].'" src="'. urlPath() .'images/'.$data_matrix[$row][$col]['bomb']['src'].'" style="'.$data_matrix[$row][$col]['bomb']['style'].' vertical-align:middle; padding-right:10px; cursor:pointer;" alt="'.$data_matrix[$row][$col]['bomb']['alt'].'"'

@@ -30,14 +30,14 @@ while($row = mysql_fetch_array($res))
 	if($row['type'] == 'product')
 	{
 		$data_query = 'SELECT `searchdata`, `name` FROM `products` WHERE `id` =' . $row['type_id'];
-		$data_res = mysql_query($data_query) or die('Bad SQL query getting master heatmap report');
+		$data_res = mysql_query($data_query) or die('Bad SQL query getting product in master heatmap report');
 		$data_res = mysql_fetch_array($data_res) or die('Report not found.');
 		$type='Row'.$data_res['num'];
 	}
 	else
 	{	
 		$data_query = 'SELECT `searchdata`, `name` FROM `areas` WHERE `id` = ' . $row['type_id'];
-		$data_res = mysql_query($data_query) or die('Bad SQL query getting master heatmap report');
+		$data_res = mysql_query($data_query) or die('Bad SQL query getting area in master heatmap report');
 		$data_res = mysql_fetch_array($data_res) or die('Report not found.');
 		$type='Column'.$data_res['num'];
 	}
@@ -217,7 +217,7 @@ header("Cache-Control: no-cache, must-revalidate, post-check=0, pre-check=0");
 header("Content-Type: application/force-download");
 header("Content-Type: application/download");
 header("Content-Type: application/msword");
-header("Content-Disposition: attachment;filename=inputcheck-" . substr($name,0,20) . ".doc");
+header("Content-Disposition: attachment;filename=MasterHM_inputcheck-" . substr($name,0,20) . ".doc");
 header("Content-Transfer-Encoding: binary ");
 echo($doc);
 @flush();
