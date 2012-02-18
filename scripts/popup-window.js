@@ -135,9 +135,11 @@ function popup_show(type, rows, cols, id, drag_id, exit_id, position, x, y, posi
 				if(id !='bombpopup_'+pt1+'_'+pt2)
 				{
 					var element = document.getElementById('bombpopup_'+pt1+'_'+pt2);
+					if(element != null && element !='')
 					element.style.display='none';
 				}
 				var element = document.getElementById('filingpopup_'+pt1+'_'+pt2);	///in case of bomb close all filing windows
+				if(element != null && element !='')
 				element.style.display='none';
 			}
 		}
@@ -151,9 +153,11 @@ function popup_show(type, rows, cols, id, drag_id, exit_id, position, x, y, posi
 				if(id !='filingpopup_'+pt1+'_'+pt2)
 				{
 					var element = document.getElementById('filingpopup_'+pt1+'_'+pt2);
+					if(element != null && element !='')
 					element.style.display='none';
 				}
-				var element = document.getElementById('bombpopup_'+pt1+'_'+pt2);	////in case of filing close all bomb windows 
+				var element = document.getElementById('bombpopup_'+pt1+'_'+pt2);	////in case of filing close all bomb windows
+				if(element != null && element !='')
 				element.style.display='none';
 			}
 		}
