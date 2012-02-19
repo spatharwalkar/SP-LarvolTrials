@@ -114,15 +114,6 @@ foreach($sortFields as $skey => $svalue)
     <title>Online Trial Tracker</title>
     <link href="css/intermediary.css" rel="stylesheet" type="text/css" media="all" />
     <script src="scripts/jquery.js" type="text/javascript"></script>
-    <script type="text/javascript">
-		//sort tab
-		var sorttab = "<div class='slide-out-sortdiv'>"+
-						"<table cellpadding='0' cellspacing='0'>"+
-						"<tr><td align='center' valign='baseline'><a class='sorthandle' href='#sort'>Content</a></td>"+
-						"<td style='border: 1px solid #000;background-color:#fff;'>"+
-						"<ul id='sortable' class='demo ui-sortable'>"+<?php echo json_encode($sortTab); ?>+"</ul></td></tr></table></div>";
-    </script>	
-    <script src="scripts/slideout.js" type="text/javascript"></script>	
     <script src="scripts/func.js" type="text/javascript"></script>	
     <script src="scripts/jquery-ui-1.8.16.custom.min.js" type="text/javascript"></script>
     <script type="text/javascript">
@@ -387,6 +378,20 @@ else
 	die('cell not set');
 }
 ?>
+<div id="slideout">
+    <img src="images/help.png" alt="Help" />
+    <div class="slideout_inner">
+        <table bgcolor="#FFFFFF" cellpadding="0" cellspacing="0" class="table-slide">
+        <tr><td width="15%"><img src="images/black-diamond.png"/></td><td>Click for data release</td></tr>
+        <tr><td><img src="images/red-diamond.png"/></td><td>Click for data release (new)</td></tr>
+        <tr><td><img src="images/hourglass.png"/></td><td>Results pending</td></tr>
+        <tr><td><img src="images/black-checkmark.png"/></td><td>Click for milestone result</td></tr>
+        <tr><td><img src="images/red-checkmark.png"/></td><td>Click for milestone result (new)</td></tr>
+        <tr><td><img src="images/purple-bar.png"/></td><td>Click for milestone details</td></tr>
+        <tr><td><img src="images/down.png"/></td><td>Display milestones</td></tr>
+        </table>
+    </div>
+</div>
 <script type="text/javascript">
 	$(window).load(function() 
 	{

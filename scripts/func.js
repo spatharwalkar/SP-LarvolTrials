@@ -27,30 +27,7 @@ $(document).ready(function()
 	{
 		$('#addedtoright').css('background-color','#DDDDDD').css('cursor','default').css('color','#777777');
 	}
-	
-	//help tab
-	var helptab = '<div class="slide-out-div">'+
-					'<table cellpadding="0" cellspacing="0"><tr>'+
-					'<td align="center" valign="baseline"><a class="handle" href="#help">Content</a></td>'+
-					'<td><table bgcolor="#FFFFFF" cellpadding="0" cellspacing="0" class="table-slide">'+ 
-					'<tr><td width="15%"><img src="images/black-diamond.png"/></td><td>Click for data release</td></tr>'+
-					'<tr><td><img src="images/red-diamond.png"/></td><td>Click for data release (new)</td></tr>'+
-					'<tr><td><img src="images/hourglass.png"/></td><td>Results pending</td></tr>'+
-					'<tr><td><img src="images/black-checkmark.png"/></td><td>Click for milestone result</td></tr>'+
-					'<tr><td><img src="images/red-checkmark.png"/></td><td>Click for milestone result (new)</td></tr>'+
-					'<tr><td><img src="images/purple-bar.png"/></td><td>Click for milestone details</td></tr>'+
-					'<tr><td><img src="images/down.png"/></td><td>Display milestones</td></tr>'+
-					'</table></td>'+
-					'</tr></table></div>';	
-					
-	$('body').append(helptab);	
-	//$('body').append(sorttab); //comment out as we are going to use it in future
-	
-    $(function()
-	{
-        $('.slide-out-div').tabSlideOut();
-		$('.slide-out-sortdiv').sorttabSlideOut();
-    });
+
 });
 
 function sh(obj,key,all)
