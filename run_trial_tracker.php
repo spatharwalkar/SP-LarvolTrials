@@ -8016,7 +8016,6 @@ class TrialTracker
 		}
 		
 		echo '</div></div><br/><input type="submit" value="Show"/>&nbsp;<b>' . $shownCount . '&nbsp;Records</b><span id="addtoright"></span>';	
-		echo '<input type="hidden" name="sort" id="sort" value="' . implode(',', $globalOptions['sortOrder']) . '" />';
 		echo '<br/><br clear="all" />';
 	}	
 	

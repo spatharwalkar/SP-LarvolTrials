@@ -57,37 +57,8 @@ if(isset($_POST['btnDownload']))
 	}
 }
 
-if(isset($_GET['sort']))
-{
-	$sortOptions = explode(',', mysql_real_escape_string($_GET['sort']));
-	foreach($sortOptions as $skey => $svalue)
-    {
-        $value = substr($svalue, 0, 1);
-        switch($value)
-        {
-            case 'p':
-                $key = 'phase';
-                break;
-            case 'o':
-                $key = 'overall_status';
-                break;
-            case 's':
-                $key = 'start_date';
-                break;
-            case 'i':
-                $key = 'inactive_date';
-                break;
-            case 'e':
-                $key = 'enrollment';
-                break;
-        }
-        $sortFields[$key] = $svalue;
-    }
-}
-else
-{
-	$sortFields = array('phase' => 'pD', 'inactive_date' => 'iA', 'start_date' => 'sA', 'overall_status' => 'oA', 'enrollment' => 'eA');
-}
+$sortFields = array('phase' => 'pD', 'inactive_date' => 'iA', 'start_date' => 'sA', 'overall_status' => 'oA', 'enrollment' => 'eA');
+
 
 $sortFieldName = array('phase' => 'Phase', 'inactive_date' => 'End Date', 'start_date' => 'Start Date', 'overall_status' => 'Status', 'enrollment' => 'N');
 
