@@ -313,6 +313,35 @@ else $ddesc=$rec->detailed_descr->textblock;
 $phases_regex='/phase4|phase2\/3|phase 2a\/2b|phase 1\/2|Phase l\/Phase ll|phase 1b\/2a|phase 1a\/1b|Phase 1a\/b|phase 3b\/4|Phase I\/II|Phase2b\/3|phase 1b\/2|phase 2a\/b|phase 1a|phase 1b|Phase 1C|Phase III(?![a-z.-\\/])|phase II(?![a-z.-\\/])|Phase I(?![a-z.-\\/])|phase 2a|PHASEII|PHASE iii|phase 2b|phase iib|phase iia|phase 3a|phase 3b/i';
 preg_match_all($phases_regex, $record_data['brief_title'], $matches);
 
+$array1=array
+	(
+	'N/A',
+	'Phase 0',
+	'Phase 0/Phase 1',
+	'Phase 1',
+	'Phase 1/Phase 2',
+	'Phase 2',
+	'Phase 2/Phase 3',
+	'Phase 3',
+	'Phase 3/Phase 4',
+	'Phase 4',
+	'Phase 1a',
+	'Phase 1a/1b',
+	'Phase 1b',
+	'Phase 1b/2',
+	'Phase 1b/2a',
+	'Phase 1c',
+	'Phase 2a',
+	'Phase 2a/2b',
+	'Phase 2a/b',
+	'Phase 2b',
+	'Phase 2b/3',
+	'Phase 3a',
+	'Phase 3b',
+	'Phase 3b/4'
+	);
+	
+
 if(!count($matches[0]) >0 )
 {
 preg_match_all($phases_regex, $record_data['official_title'], $matches);
@@ -329,46 +358,113 @@ preg_match_all($phases_regex, $record_data['brief_summary'], $matches);
 if(count($matches[0]) >0 )
 {
 
-	$cnt=count($matches[0]);
 
-	$record_data['phase']=ucwords($matches[0][0]);
+	$v=array_search(ucwords($matches[0][0]),$array1,false);
+		
+		if($v!==false)
+		{
+			$record_data['phase']=$array1[$v];
+		}
+		else
+		{
+
+			$record_data['phase']=strtolower($matches[0][0]);
+			
+			$phval='P'.substr($record_data['phase'],1);
+			
+			switch ($phval) 
+			{
+			case 'Phase 1a/b':
+				$record_data['phase']='Phase 1a/b';
+				break;
+			case 'Phase2b/3':
+				$record_data['phase']='Phase 2b/3';
+				break;
+			case 'Phase 1c':
+				$record_data['phase']='Phase 1c';
+				break;
+			case 'Phase i/ii':
+				$record_data['phase']='Phase 1/Phase 2';
+				break;
+			case 'Phase i/phase ii':
+				$record_data['phase']='Phase 1/Phase 2';
+				break;
+			case 'Phase 1/2':
+				$record_data['phase']='Phase 1/Phase 2';
+				break;
+			case 'Phase 2/3':
+				$record_data['phase']='Phase 2/Phase 3';
+				break;
+			case 'Phase2/3':
+				$record_data['phase']='Phase 2/Phase 3';
+				break;
+			case 'Phase 3/4':
+				$record_data['phase']='Phase 3/Phase 4';
+				break;
+			case 'Phase4':
+				$record_data['phase']='Phase 4';
+				break;
+			case 'Phase iib':
+				$record_data['phase']='Phase 2b';
+				break;
+			case 'Phase 2a/2b':
+				$record_data['phase']='Phase 2a/2b';
+				break;
+			case 'Phase 1b/2a':
+				$record_data['phase']='Phase 1b/2a';
+				break;
+			case 'Phase 1a/1b':
+				$record_data['phase']='Phase 1a/1b';
+				break;
+			case 'Phase 3b/4':
+				$record_data['phase']='Phase 3b/4';
+				break;
+			case 'Phase 1b/2':
+				$record_data['phase']='Phase 1b/2';
+				break;
+			case 'Phase 2a/b':
+				$record_data['phase']='Phase 2a/b';
+				break;
+			case 'Phase 1a':
+				$record_data['phase']='Phase 1a';
+				break;
+			case 'Phase 1b':
+				$record_data['phase']='Phase 1b';
+				break;
+			case 'Phase iii':
+				$record_data['phase']='Phase 3';
+				break;
+			case 'Phase ii':
+				$record_data['phase']='Phase 2';
+				break;
+			case 'Phase i':
+				$record_data['phase']='Phase 1';
+				break;
+			case 'Phase 2a':
+				$record_data['phase']='Phase 2a';
+				break;
+			case 'Phase 3a':
+				$record_data['phase']='Phase 3a';
+				break;
+			case 'Phase iia':
+				$record_data['phase']='Phase 2a';
+				break;
+			case 'Phase 2b':
+				$record_data['phase']='Phase 2b';
+				break;
+			case 'Phase 3b':
+				$record_data['phase']='Phase 3b';
+				break;
+			case 'Phase iib':
+				$record_data['phase']='Phase 2b';
+				break;
+			case 'Phaseii':
+				$record_data['phase']='Phase 2';
+				break;
+			}
+		}
 	
-	switch ($record_data['phase']) 
-	{
-    case 'Phase 1a/b':
-        $record_data['phase']='Phase 1a/b';
-        break;
-	case 'Phase2b/3':
-        $record_data['phase']='Phase 2b/3';
-        break;
-	case 'Phase 1C':
-        $record_data['phase']='Phase 1c';
-        break;
-	case 'Phase I/II':
-        $record_data['phase']='Phase 1/Phase 2';
-        break;
-	case 'Phase l/Phase ll':
-        $record_data['phase']='Phase 1/Phase 2';
-        break;
-	case 'phase 1/2':
-        $record_data['phase']='Phase 1/Phase 2';
-        break;
-	case 'phase 2/3':
-        $record_data['phase']='Phase 2/Phase 3';
-        break;
-	case 'phase2/3':
-        $record_data['phase']='Phase 2/Phase 3';
-        break;
-	case 'phase 3/4':
-        $record_data['phase']='Phase 3/Phase 4';
-        break;
-	case 'phase4':
-        $record_data['phase']='Phase 4';
-        break;
-    }
-	
-	
-	
+
 }
 
 //****
