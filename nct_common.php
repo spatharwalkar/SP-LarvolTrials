@@ -365,6 +365,7 @@ function addNCT_history($rec, $id, $date) {
     global $db;
     global $instMap;
     global $now;
+	global $logger;
     if ($rec === false)
         return false;
 
@@ -832,7 +833,7 @@ if(count($matches[0]) >0 )
 }
 
 function addval_d($studycat, $category_id, $fieldname, $value, $date) {
-
+	global $logger;
     // Use Date Passed in or of the record updated instead of actual date
     // so data matches up per Anthony.
 
@@ -1097,6 +1098,7 @@ function addval_d($studycat, $category_id, $fieldname, $value, $date) {
 function ProcessDiffChanges($id, $date) {
 
     global $level;
+	global $logger;
     // Now Go To changes Site and parse differences
     $url = "http://clinicaltrials.gov/archive/" . $id . "/" . $date . "/changes";
 
@@ -1242,7 +1244,7 @@ function ProcessDiffChanges($id, $date) {
 
 function ParseStructure($data) {
     global $level;
-
+	global $logger;
     $divs = $data->getElementsByTagName('div');
     $end_tag = null;
     $last = false;
@@ -1278,7 +1280,8 @@ function ParseStructure($data) {
 function prepXMP($data, $action, $studycat, $nct_cat, $date) {
 
     global $level;
-    // Logic for which column see if needs to be different.
+	global $logger;  
+  // Logic for which column see if needs to be different.
     if ($action == "change") {
         $column = "sdiff-b";
     } else if ($action == "add") {
@@ -1477,7 +1480,7 @@ function getFieldName($value)
 }
 
 function commit_diff($studycat, $category_id, $fieldname, $value, $date, $operation,$value1) {
-
+	global $logger;
 
 		$tt=strpos('a'.$fieldname, "clinical_result")  ;
 			if(isset($tt) and !empty($tt))
@@ -1691,6 +1694,7 @@ function pop_structure($attr_value, $node_value) {
 function ProcessNonEssentials($id, $date) {
 
     global $level;
+	global $logger;
     // Now Go To changes Site and parse differences
     $url = "http://clinicaltrials.gov/archive/" . $id . "/" . $date . "/changes";
 
