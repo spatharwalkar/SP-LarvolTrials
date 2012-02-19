@@ -7764,6 +7764,7 @@ class TrialTracker
 		{
 			echo '<span style="font-size:10px;color:red;">Expires on: ' . $linkExpiry  . '</span>';
 		}
+		echo '<div style="height:50px;"></div>';	//50Pixels extra space
 	}
 	
 	function downloadOptions($shownCnt, $foundCnt, $ottType, $result, $timeMachine = NULL, $globalOptions) 
