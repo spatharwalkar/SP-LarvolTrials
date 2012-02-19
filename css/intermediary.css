@@ -163,6 +163,10 @@ a, a:hover{
     background-color: #A2FF97!important;
 }
 
+.upmpointer{
+    cursor:pointer;
+}
+
 .rowcollapseupm {
 	vertical-align:top;
 	max-height:1.3em;

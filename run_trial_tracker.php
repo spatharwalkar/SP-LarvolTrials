@@ -149,10 +149,11 @@ class TrialTracker
 			{
 				foreach($resultIds['product'] as $pkey => $pvalue)
 				{
-					$res = mysql_query("SELECT `name`, `id` FROM `products` WHERE id = '" . $pvalue . "' ");
+					$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id = '" . $pvalue . "' ");
 					$row = mysql_fetch_assoc($res);
 					
-					$TrialsInfo[$pkey]['sectionHeader'] = $row['name'];
+					$TrialsInfo[$pkey]['sectionHeader'] = $row['name']
+					. (($row['company'] !== NULL && $row['company'] != '') ? ", " . $row['company'] . "" : '');
 					$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
 							
 					$Ids[$pkey]['product'] = $row['id'];
@@ -179,10 +180,11 @@ class TrialTracker
 				{
 					foreach($resultIds['product'] as $pkey => $pvalue)
 					{
-						$res = mysql_query("SELECT `name`, `id` FROM `products` WHERE id = '" . $pvalue . "' ");
+						$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id = '" . $pvalue . "' ");
 						$row = mysql_fetch_assoc($res);
 						
-						$TrialsInfo[$pkey]['sectionHeader'] = $row['name'];
+						$TrialsInfo[$pkey]['sectionHeader'] = $row['name']
+						. (($row['company'] !== NULL && $row['company'] != '') ? ", " . $row['company'] . "" : '');
 						$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
 								
 						$Ids[$pkey]['product'] = $row['id'];
@@ -577,7 +579,7 @@ class TrialTracker
 				$bgColor = "D5D3E6";
 			}
 				
-			$objPHPExcel->getActiveSheet()->getStyle('A' . $i .':J' .$i)->applyFromArray(
+			$objPHPExcel->getActiveSheet()->getStyle('A' . $i .':K' .$i)->applyFromArray(
 					array(
 						'alignment' => array('horizontal'	=> PHPExcel_Style_Alignment::HORIZONTAL_LEFT,),
 						'fill' => array('type'       => PHPExcel_Style_Fill::FILL_SOLID,
@@ -599,76 +601,6 @@ class TrialTracker
 					)
 				);
 	
-			if($tvalue['NCT/phase'] == 'N/A' || $tvalue['NCT/phase'] == '' || $tvalue['NCT/phase'] === NULL)
-			{
-				$objPHPExcel->getActiveSheet()->getStyle('K' . $i)->applyFromArray(
-						array('alignment' => array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,),
-								'fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,
-												'rotation'   => 0,
-												'startcolor' => array('rgb' => 'BFBFBF'),
-												'endcolor'   => array('rgb' => 'BFBFBF'))
-						)
-				);
-			}
-			else if($tvalue['NCT/phase'] == '0')
-			{
-				$objPHPExcel->getActiveSheet()->getStyle('K' . $i)->applyFromArray(
-						array('alignment' => array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,),
-								'fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,
-												'rotation'   => 0,
-												'startcolor' => array('rgb' => '00CCFF'),
-												'endcolor'   => array('rgb' => '00CCFF'))
-						)
-				);
-			}
-			else if($tvalue['NCT/phase'] == '1' || $tvalue['NCT/phase'] == '0/1' || $tvalue['NCT/phase'] == '1a' 
-			|| $tvalue['NCT/phase'] == '1b' || $tvalue['NCT/phase'] == '1a/1b' || $tvalue['NCT/phase'] == '1c')
-			{
-				$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray(
-						array('alignment' => array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,),
-								'fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,
-												'rotation'   => 0,
-												'startcolor' => array('rgb' => '99CC00'),
-												'endcolor'   => array('rgb' => '99CC00'))
-						)
-				);
-			}
-			else if($tvalue['NCT/phase'] == '2' || $tvalue['NCT/phase'] == '1/2' || $tvalue['NCT/phase'] == '1b/2' 
-			|| $tvalue['NCT/phase'] == '1b/2a' || $tvalue['NCT/phase'] == '2a' || $tvalue['NCT/phase'] == '2a/2b' 
-			|| $tvalue['NCT/phase'] == '2a/b' || $tvalue['NCT/phase'] == '2b')
-			{
-				$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray(
-						array('alignment' => array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,),
-								'fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,
-												'rotation'   => 0,
-												'startcolor' => array('rgb' => 'FFFF00'),
-												'endcolor'   => array('rgb' => 'FFFF00'))
-						)
-				);
-			}
-			else if($tvalue['NCT/phase'] == '3' || $tvalue['NCT/phase'] == '2/3' || $tvalue['NCT/phase'] == '2b/3' 
-			|| $tvalue['NCT/phase'] == '3a' || $tvalue['NCT/phase'] == '3b')
-			{
-				$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray(
-						array('alignment' => array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,),
-								'fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,
-												'rotation'   => 0,
-												'startcolor' => array('rgb' => 'FF9900'),
-												'endcolor'   => array('rgb' => 'FF9900'))
-						)
-				);
-			}
-			else if($tvalue['NCT/phase'] == '4' || $tvalue['NCT/phase'] == '3/4' || $tvalue['NCT/phase'] == '3b/4')
-			{
-				$objPHPExcel->getActiveSheet()->getStyle('K' . $i )->applyFromArray(
-						array('alignment' => array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,),
-								'fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,
-												'rotation'   => 0,
-												'startcolor' => array('rgb' => 'FF0000'),
-												'endcolor'   => array('rgb' => 'FF0000'))
-						)
-				);
-			}
 			
 			$this->trialGnattChartforExcel($startMonth, $startYear, $endMonth, $endYear, $currentYear, $secondYear, $thirdYear, $phaseColor, 
 			$tvalue["NCT/start_date"], $tvalue['inactive_date'], $objPHPExcel, $i, 'M');
@@ -4287,10 +4219,11 @@ class TrialTracker
 			{
 				foreach($resultIds['product'] as $pkey => $pvalue)
 				{
-					$res = mysql_query("SELECT `name`, `id` FROM `products` WHERE id = '" . $pvalue . "' ");
+					$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id = '" . $pvalue . "' ");
 					$row = mysql_fetch_assoc($res);
 					
-					$TrialsInfo[$pkey]['sectionHeader'] = $row['name'];
+					$TrialsInfo[$pkey]['sectionHeader'] = $row['name']
+					. (($row['company'] !== NULL && $row['company'] != '') ? ", <i>" . $row['company'] . "</i>" : '');
 					$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
 							
 					$Ids[$pkey]['product'] = $row['id'];
@@ -4318,10 +4251,11 @@ class TrialTracker
 				{
 					foreach($resultIds['product'] as $pkey => $pvalue)
 					{
-						$res = mysql_query("SELECT `name`, `id` FROM `products` WHERE id = '" . $pvalue . "' ");
+						$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id = '" . $pvalue . "' ");
 						$row = mysql_fetch_assoc($res);
 						
-						$TrialsInfo[$pkey]['sectionHeader'] = $row['name'];
+						$TrialsInfo[$pkey]['sectionHeader'] = $row['name']
+						. (($row['company'] !== NULL && $row['company'] != '') ? ", <i>" . $row['company'] . "</i>" : '');
 						$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
 						
 						$Ids[$pkey]['product'] = $row['id'];
@@ -4436,7 +4370,7 @@ class TrialTracker
 			 . '<thead><tr>'. (($loggedIn) ? '<th valign="bottom" align="center" style="width:30px; vertical-align:bottom;" >ID</th>' : '' )
 			 . '<th valign="bottom" height="11px" align="center" style="width:93px; vertical-align:bottom;">Title</th>'
 			 . '<th valign="bottom" align="center" style="width:18px; vertical-align:bottom;" title="Black: Actual&nbsp;&nbsp;Gray: Anticipated&nbsp;&nbsp;Red: Change greater than 20%">N</th>'
-			 . '<th valign="bottom" align="center" style="width:41px; vertical-align:bottom;" title="&quot;EU&quot; = European Union&nbsp;&quot;ROW&quot; = Rest of World">Region</th>'
+			 . '<th valign="bottom" align="center" style="width:41px; vertical-align:bottom;" title="&quot;ROW&quot; = Rest of World">Region</th>'
 			 . '<th valign="bottom" align="center" style="width:60px; vertical-align:bottom;">Interventions</th>'
 			 . '<th valign="bottom" align="center" style="width:41px; vertical-align:bottom;">Sponsor</th>'
 			 . '<th valign="bottom" align="center" style="width:41px; vertical-align:bottom;">Status</th>'
@@ -4789,11 +4723,11 @@ class TrialTracker
 			//phase column
 			if(isset($trials[$i]['edited']) && array_key_exists('NCT/phase', $trials[$i]['edited'])) 
 			{
-				$attr = 'class="highlight" title="' . $trials[$i]['edited']['NCT/phase'] . '" ';
+				$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/phase'];
 			} 
 			else if($trials[$i]['new'] == 'y') 
 			{
-				$attr = 'title="New record"';
+				$attr = '" title="New record';
 			}
 			if($trials[$i]['NCT/phase'] == 'N/A' || $trials[$i]['NCT/phase'] == '' || $trials[$i]['NCT/phase'] === NULL)
 			{
@@ -4805,7 +4739,7 @@ class TrialTracker
 				$phase = str_replace('Phase ', '', trim($trials[$i]['NCT/phase']));
 				$phaseColor = $this->phaseValues[$phase];
 			}
-			$outputStr .= '<td align="center" rowspan="' . $rowspan . '" style="width:20px; background-color:' . $phaseColor . ';" ' . $attr . '>' 
+			$outputStr .= '<td align="center" style="width:20px; '.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">' 
 						. '<span>' . $phase . '</span></td>';				
 			
 			$outputStr .= '<td style="width:20px;">&nbsp;</td>';
@@ -6048,12 +5982,13 @@ class TrialTracker
 				
 				foreach($resultIds['product'] as $pkey => $pvalue)
 				{
-					$res = mysql_query("SELECT `name`, `id` FROM `products` WHERE id = '" . $pvalue . "' ");
+					$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id = '" . $pvalue . "' ");
 					if(mysql_num_rows($res) > 0)
 					{
 						while($row = mysql_fetch_assoc($res))
 						{
-							$TrialsInfo[$pkey]['sectionHeader'] = $row['name'];
+							$TrialsInfo[$pkey]['sectionHeader'] = $row['name'] 
+							. (($row['company'] !== NULL && $row['company'] != '') ? ", <i>" . $row['company'] . "</i>" : '');
 							$TrialsInfo[$pkey]['naUpms'] = 
 							$this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
 							
@@ -6112,12 +6047,13 @@ class TrialTracker
 					
 					foreach($resultIds['product'] as $pkey => $pvalue)
 					{
-						$res = mysql_query("SELECT `name`, `id` FROM `products` WHERE id = '" . $pvalue . "' ");
+						$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id = '" . $pvalue . "' ");
 						if(mysql_num_rows($res) > 0)
 						{
 							while($row = mysql_fetch_assoc($res))
 							{
-								$TrialsInfo[$pkey]['sectionHeader'] = $row['name'];
+								$TrialsInfo[$pkey]['sectionHeader'] = $row['name']
+								. (($row['company'] !== NULL && $row['company'] != '') ? ", <i>" . $row['company'] . "</i>" : '');
 								$TrialsInfo[$pkey]['naUpms'] = 
 								$this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
 								
@@ -6137,7 +6073,7 @@ class TrialTracker
 				$t = 'Area: ' . htmlformat($row['name']);
 				$this->displayHeader($t);
 				
-				$res = mysql_query("SELECT `name`, `id` FROM `products` WHERE id IN ('" . implode(',', $resultIds['product']) . "') ");
+				$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id IN ('" . implode(',', $resultIds['product']) . "') ");
 				$row = mysql_fetch_assoc($res);
 				
 				$Ids[0]['product'] = $row['id'];
@@ -6914,7 +6850,7 @@ class TrialTracker
 				$result[$index]['inactive_date'] = $row['end_date'];
 				$result[$index]['region'] = $row['region'];
 				$result[$index]['NCT/nct_id'] = $nctId;
-				$result[$index]['NCT/brief_title'] = $row['brief_title'];
+				$result[$index]['NCT/brief_title'] = stripslashes($row['brief_title']);
 				$result[$index]['NCT/enrollment_type'] = $row['enrollment_type'];
 				$result[$index]['NCT/acronym'] = $row['acronym'];
 				$result[$index]['NCT/lead_sponsor'] = str_replace('`', ', ', $row['lead_sponsor']);
@@ -6979,7 +6915,7 @@ class TrialTracker
 						{
 							if($arr['brief_title_prev'] != '' && $arr['brief_title_prev'] !== NULL)
 							{
-								$result[$index]['edited']['NCT/brief_title'] = $previousValue . $arr['brief_title_prev'];
+								$result[$index]['edited']['NCT/brief_title'] = $previousValue . stripslashes($arr['brief_title_prev']);
 							}
 							else
 							{
@@ -7818,7 +7754,7 @@ class TrialTracker
 			 . '<tr>' . (($loggedIn) ? '<th width="38px">ID</th>' : '' )
 			 . '<th width="250px">Title</th>'
 			 . '<th width="30px" title="Black: Actual&nbsp;&nbsp;Gray: Anticipated&nbsp;&nbsp;Red: Change greater than 20%">N</th>'
-			 . '<th width="60px" title="&quot;EU&quot; = European Union&nbsp;&quot;ROW&quot; = Rest of World">Region</th>'
+			 . '<th width="60px" title="&quot;ROW&quot; = Rest of World">Region</th>'
 			 . '<th width="115px">Interventions</th>'
 			 . '<th width="90px">Sponsor</th>'
 			 . '<th width="105px">Status</th>'
@@ -8297,10 +8233,10 @@ class TrialTracker
 			if($loggedIn) 
 			{ 
 				$outputStr .= '<td class="' . $rowOneType . '" ' . (($trials[$i]['new'] == 'y') ? 'title="New record"' : '')
-							. ' ><a style="color:' . $titleLinkColor . '" href="http://clinicaltrials.gov/ct2/show/' 
-							. padnct($trials[$i]['NCT/nct_id']) . '" target="_blank">' . $trials[$i]['NCT/nct_id'] . '</a></td>';
+							. ' ><a style="color:' . $titleLinkColor 
+							. '" href="' . urlPath() . 'edit_trials.php?larvol_id=' . $trials[$i]['larvol_id'] . '" target="_blank">' . $trials[$i]['NCT/nct_id'] . '</a></td>';
 			}
-
+			
 			//acroynm and title column
 			$attr = ' ';
 			if(!empty($trials[$i]['edited']) && array_key_exists('NCT/brief_title', $trials[$i]['edited'])) 
@@ -8492,11 +8428,11 @@ class TrialTracker
 			if(!empty($trials[$i]['edited']) && array_key_exists('NCT/phase', $trials[$i]['edited'])) 
 
 			{
-				$attr = 'class="highlight" title="' . $trials[$i]['edited']['NCT/phase'] . '" ';
+				$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/phase'];
 			} 
 			else if($trials[$i]['new'] == 'y') 
 			{
-				$attr = 'title="New record"';
+				$attr = '" title="New record';
 			}
 			if($trials[$i]['NCT/phase'] == 'N/A' || $trials[$i]['NCT/phase'] == '' || $trials[$i]['NCT/phase'] === NULL)
 			{
@@ -8508,7 +8444,7 @@ class TrialTracker
 				$phase = str_replace('Phase ', '', trim($trials[$i]['NCT/phase']));
 				$phaseColor = $this->phaseValues[$phase];
 			}
-			$outputStr .= '<td rowspan="' . $rowspan . '" style="background-color:' . $phaseColor . ';" ' . $attr . '>' 
+			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">' 
 						. '<div class="rowcollapse">' . $phase . '</div></td>';				
 			
 			$outputStr .= '<td>&nbsp;</td>';
