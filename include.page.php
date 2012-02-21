@@ -880,7 +880,7 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		$insertEdit = 'Edit';
 		
 		if($table=='upm')
-		$query = "SELECT u.id,u.event_type,u.event_description,u.event_link,u.result_link,p.name AS product,u.corresponding_trial,u.start_date,u.start_date_type,u.end_date,u.end_date_type,u.last_update,p.id as product_id FROM upm u LEFT JOIN products p ON u.product=p.id WHERE u.id=$id";
+		$query = "SELECT u.id,u.event_type,u.event_description,u.event_link,u.result_link,p.name AS product,u.status,u.corresponding_trial,u.start_date,u.start_date_type,u.end_date,u.end_date_type,u.last_update,p.id as product_id FROM upm u LEFT JOIN products p ON u.product=p.id WHERE u.id=$id";
 		else
 		$query = "SELECT * FROM $table WHERE id=$id";
 		$res = mysql_query($query) or die('Cannot get details for this '.$table.' id');
@@ -940,6 +940,14 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 			echo '</td></tr>';	
 			$i++;
 			continue;			
+		}
+		if($row['Field']=='status' && $script=='upm')
+		{
+			echo '<tr>';
+			echo '<td>'.ucwords(implode(' ',explode('_',$row['Field']))).' : </td><td>'.$dbVal.'</td>';
+			echo '</tr>';		
+			$i++;	
+			continue;
 		}			
 		echo '<tr>';
 		echo '<td>'.ucwords(implode(' ',explode('_',$row['Field']))).' : </td><td>'.input_tag($row,$dbVal,array('style'=>$addEditGlobalInputStyle)).'</td>';
