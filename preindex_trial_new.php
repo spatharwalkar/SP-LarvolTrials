@@ -84,9 +84,21 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 			if(!is_null($productz) and $pid>=$startid)	
 			{
 				$cid=$value['id'];
-				
 				// get the actual mysql query  
-				$query=buildQuery($searchdata);	
+				
+				try	
+					{
+						$query=buildQuery($searchdata);
+					}
+				catch(Exception $e)
+					{
+						echo '<br>Bad Regex in product id ' . $pid .', skipping the product.  Mysql error:' . $e->getMessage().'<br>';
+						$log='Bad Regex in product id ' . $pid .'  Error:' . $e->getMessage();
+						$logger->error($log);
+						continue;
+					}
+				
+					
 				if($query=='Invalid Json') // if searchdata contains invalid JSON
 				{
 					echo '<br> Invalid JSON in table <b>'. $cat .'</b> and id=<b>'.$cid.'</b> : <br>';
