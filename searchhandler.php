@@ -11,7 +11,7 @@ switch($_REQUEST['op']){
 		//echo("hello world");
 		break;
 	case 'getsearchdata':
-		getSearchData();
+		get_SearchData();
 		break;
 	case 'saveexists':
 		updateSearch();
@@ -108,7 +108,7 @@ function updateSearch()
 
 }
 
-function getSearchData()
+function get_SearchData()
 {
 	if(!isset($_REQUEST['id']) || !is_numeric($_REQUEST['id']))	return;
 	//load search from Saved Search
