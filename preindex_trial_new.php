@@ -84,7 +84,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 			if(!is_null($productz) and $pid>=$startid)	
 			{
 				$cid=$value['id'];
-				pr($pid);
+				
 				// get the actual mysql query  
 				$query=buildQuery($searchdata);	
 				if($query=='Invalid Json') // if searchdata contains invalid JSON
