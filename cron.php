@@ -73,7 +73,7 @@ require_once('PHPExcel.php');
 require_once('PHPExcel/Writer/Excel2007.php');
 require_once('include.excel.php');
 require_once('class.phpmailer.php');
-require_once 'fetch_li_products.php';
+
 
 //variables used for running report
 global $run_id;
@@ -208,6 +208,7 @@ foreach($LISyncTasks as $syncTask)
 	{
 		case 1:
 			//product sync
+			require_once 'fetch_li_products.php';
 			fetch_li_products(strtotime($syncTask['lastrun']));
 			break;
 		case 2:
@@ -215,6 +216,7 @@ foreach($LISyncTasks as $syncTask)
 			break;
 		case 3:
 			//areas and product sync
+			require_once 'fetch_li_products.php';
 			fetch_li_products(strtotime($syncTask['lastrun']));
 			break;
 	}

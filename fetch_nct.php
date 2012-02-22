@@ -228,11 +228,13 @@ if (count($ids) == 0) {
         unset($doc);
 		
 		/*** Preindex the trial */
+		/*
 		echo '<br>Starting preindexing of '. $id . 'Time: '. date("Y-m-d H:i:s", strtotime('now')) . str_repeat (" .....",1);
 		$studyCat=getStudyCatId($unid);
 		tindex($studyCat,'products');
 		tindex($studyCat,'areas');
 		echo '<br><br>Completed preindexing of '. $id . 'Time: '. date("Y-m-d H:i:s", strtotime('now')) . str_repeat (" ......",1);
+		*/
         echo('End Parsing Archive Page for ' . $id);
 
         $progress_count++;

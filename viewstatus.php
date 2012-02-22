@@ -265,7 +265,7 @@ function showprogress()
 	
 	$query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 						`update_items_total`,`update_items_progress`,`er_message`,TIMEDIFF(updated_time, start_time) AS timediff,
-						`update_items_complete_time` FROM update_status_fullhistory where trial_type="PRODUCT"';
+						`update_items_complete_time` FROM update_status_fullhistory where trial_type="PRODUCT1"';
 	if(!$res = mysql_query($query))
 		{
 			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -279,7 +279,7 @@ function showprogress()
 	
 	$query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 						`update_items_total`,`update_items_progress`,`er_message`,TIMEDIFF(updated_time, start_time) AS timediff,
-						`update_items_complete_time` FROM update_status_fullhistory where trial_type="AREA"';
+						`update_items_complete_time` FROM update_status_fullhistory where trial_type="AREA1"';
 	if(!$res = mysql_query($query))
 		{
 			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();

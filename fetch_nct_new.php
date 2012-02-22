@@ -22,7 +22,7 @@ if(isset($_GET['days']))
 }
 if(isset($days_to_fetch))	//$days_to_fetch comes from cron.php normally
 {
-	$days = 30+(int)$days_to_fetch;
+	$days = 1+(int)$days_to_fetch;
 }
 else
 {

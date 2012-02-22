@@ -2,13 +2,13 @@
 require_once('db.php');
 require_once('include.search.php');
 require_once('include.util.php');
-require_once('searchhandler_new.php');
+require_once('searchhandler.php');
 
 
 /*	
 function tindex() - to preindex a combination of one trial+one product, or  one trial+one area.  
 parameters : 
-		1.	NCTID (required only a single trial is to be indexed)
+		1.	NCTID (if a single trial is to be indexed)
 		2.	either "products" or "areas" as appropriate.
 		3.	Array of product ids or array of area ids as appropriate.
 		4.	update id - supplied by viewstatus.php when a task is resumed / requed etc.
@@ -28,16 +28,26 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 		$table='area_trials'; 
 		$field='area';
 	}
+
 	global $logger;
 	global $now;
 	global $db;
+	$scraper_run=( isset($sourceid) and !is_null($sourceid) and !empty($sourceid) );
 	$DTnow = date('Y-m-d H:i:s',$now);
 	if(!isset($i)) $i=0;
 	if(is_null($productz))	// array of product ids
 	{
 		$productz=array();
-		if(is_null($productID))	$query = 'SELECT `id`,`name`,`searchdata` from '. $cat .' where searchdata IS NOT NULL and  `searchdata` <>"" ';
-		else $query = 'SELECT `id`,`name`,`searchdata` from '. $cat .' where `searchdata` IS NOT NULL and  `searchdata` <>"" and `id`="' . $productID .'"' ;
+		if(is_null($productID))
+		{
+			$query = 'SELECT `id`,`name`,`searchdata` from '. $cat .' where searchdata IS NOT NULL and  `searchdata` <>"" ';
+			$ttype=$cat=='products' ? 'PRODUCT1' : 'AREA1';
+		}
+		else 
+		{
+			$query = 'SELECT `id`,`name`,`searchdata` from '. $cat .' where `searchdata` IS NOT NULL and  `searchdata` <>"" and `id`="' . $productID .'"' ;
+			$ttype=$cat=='products' ? 'PRODUCT2' : 'AREA2';
+		}
 		
 		if(!$resu = mysql_query($query))
 		{
@@ -50,10 +60,18 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 	
 		while($productz[]=mysql_fetch_array($resu));
 	}
+	// remove blanks
+	foreach ($productz as $key => $product)
+		if( is_null($product) or empty($product) ) unset($productz[$key]);
+	
 	if(!is_null($cid) and !empty($cid) and $cid>0) $startid=$cid; 
 	else $startid=0;
+	$total=count($productz);
+	$current = 0;
+	$progress=0;	
 	if(count($productz)>0)
 	{
+	
 		foreach ($productz as $key=>$value)
 		{
 			
@@ -62,34 +80,48 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 			$searchdata = $value['searchdata'];
 			
 			$pid=$value['id'];
+			$prid=getmypid();
 			if(!is_null($productz) and $pid>=$startid)	
 			{
 				$cid=$value['id'];
-				
+				pr($pid);
 				// get the actual mysql query  
 				$query=buildQuery($searchdata);	
-
 				if($query=='Invalid Json') // if searchdata contains invalid JSON
 				{
 					echo '<br> Invalid JSON in table <b>'. $cat .'</b> and id=<b>'.$cid.'</b> : <br>';
 					echo $searchdata;
 					echo '<br>';
+					--$total;
+					if($up_id and !$scraper_run) 
+					{
+						$query = 'update update_status_fullhistory set process_id="'. $prid . '",status="2",update_items_total = "' . $total . '",trial_type="' . $ttype . '" where update_id= "'. $up_id .'" limit 1' ; 
+						if(!$res = mysql_query($query))
+						{
+							$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+							$logger->error($log);
+							echo $log;
+							return false;
+						}
+					}
 					
 					continue;
 				}
 				
-				/* get rid of any "UNION" keywords in the mysql query */
+				/* remove overridden trials in case we are indexing a single trial */
 				$mystring=$query;
-
-				$findme   = 'UNION';
-				$pos = stripos($mystring, $findme);
-				if ($pos === false) 
+				if( isset($sourceid) and !is_null($sourceid) and !empty($sourceid) )
 				{
-					echo '' ;
-				} 
-				else 
-				{
-					$mystring = substr($mystring,0,$pos);
+					$findme   = 'UNION';
+					$pos = stripos($mystring, $findme);
+					if ($pos === false) 
+					{
+						echo '' ;
+					} 
+					else 
+					{
+						$mystring = substr($mystring,0,$pos);
+					}
 				}
 				/****/
 				
@@ -134,7 +166,8 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 							echo $log;
 							exit;
 						}
-						$query = substr($mystring,0,$pos+6). '  ( ' . substr($mystring,$pos+6) . ' ) ';
+//						$query = substr($mystring,0,$pos+6). '  ( ' . substr($mystring,$pos+6) . ' ) ';
+						$query = $mystring ;
 					}
 				}
 				
@@ -148,7 +181,19 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					echo '<br> Invalid JSON in table <b>'. $cat .'</b> and id=<b>'.$cid.'</b> : <br>';
 					echo $searchdata;
 					echo '<br>';
-					
+					--$total;
+					if($up_id and !$scraper_run)
+					{
+						$query = 'update update_status_fullhistory set process_id="'. $prid . '",status="2",update_items_total = "' . $total . '",trial_type="' . $ttype . '" where update_id= "'. $up_id .'" limit 1' ; 
+						
+						if(!$res = mysql_query($query))
+						{
+							$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+							$logger->error($log);
+							echo $log;
+							return false;
+						}
+					}
 					continue;
 				}
 				if(!$resu = mysql_query($query))
@@ -163,7 +208,52 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 				$nctidz=array(); // search result
 				while($nctidz[]=mysql_fetch_array($resu));
 				
-
+				//in case of a single product, the total column of status should show the total number of trials.
+				if( !is_null($productID) )
+					$total=count($nctidz);
+				
+				if( $up_id and !$scraper_run) // task already exists, just update it.
+				{	
+					if($current==0)
+					{
+						++$current;
+						$query = 'update update_status_fullhistory set process_id="'. $prid . '",status="'. 2 . '",update_items_total = "' . $total . '",start_time = "'. date("Y-m-d H:i:s", strtotime('now')) . '",trial_type="' . $ttype . '" where update_id= "'. $up_id .'" limit 1' ; 
+					}
+					else
+					{
+						++$current;
+						$query = 'update update_status_fullhistory set process_id="'. $prid . '",status="'. 2 . '",update_items_total = "' . $total . '",trial_type="' . $ttype . '" where update_id= "'. $up_id .'" limit 1' ; 
+					}
+				}
+				elseif(!$scraper_run)  // insert new status row
+				{
+					$query = 'SELECT MAX(update_id) AS maxid FROM update_status_fullhistory' ;
+					if(!$res = mysql_query($query))
+					{
+						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+						$logger->error($log);
+						echo $log;
+						return false;
+					}
+					$res = mysql_fetch_array($res) ;
+					$up_id = (isset($res['maxid'])) ? ((int)$res['maxid'])+1 : 1;
+					$prid = getmypid();
+				
+					$query = 'INSERT into update_status_fullhistory (update_id,process_id,status,update_items_total,start_time,trial_type) 
+						  VALUES ("'.$up_id.'","'. $prid .'","'. 2 .'",
+						  "' . $total . '","'. date("Y-m-d H:i:s", strtotime('now')) .'", "' . $ttype . '"  ) ;';
+				
+				}
+				
+				if(!$res = mysql_query($query))
+					{
+						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+						$logger->error($log);
+						echo $log;
+						return false;
+					}
+				
+				
 				foreach($nctidz as $key => $value)
 				{
 					if( isset($sourceid) and !is_null($sourceid) and !empty($sourceid) )
@@ -199,8 +289,30 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 							}
 						
 						}
+						if( !is_null($productID) and !$scraper_run )	
+						{
+						
+							$query = 'update update_status_fullhistory set process_id="'. $prid . '",status="'. 2 . '",
+										  trial_type="' . $ttype . '", update_items_total=' . $total . ',update_items_progress=' . ++$progress . ', updated_time="' . date("Y-m-d H:i:s", strtotime('now')) . '"  where update_id= "'. $up_id .'" limit 1'  ; 
+							if(!$res = mysql_query($query))
+							{
+								$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+								$logger->error($log);
+								echo $log;
+								return false;
+							}
+							if(!mysql_query('COMMIT'))
+							{
+								$log='Error - could not commit transaction. Query='.$query.' Error:' . mysql_error();
+								$logger->fatal($log);
+								mysql_query('ROLLBACK');
+								echo $log;
+								exit;
+							}
+						}
 						
 					}
+					
 				
 				}
 				
@@ -214,8 +326,21 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 				}
 				$proc_id = getmypid();
 				$i++;
-				$ttype=$cat=='products' ? 'PRODUCT' : 'AREA';
+			//	$ttype=$cat=='products' ? 'PRODUCT' : 'AREA';
 				//update status
+				if( is_null($productID) and !$scraper_run )	
+					{
+						$query = 'update update_status_fullhistory set process_id="'. $prid . '",status="'. 2 . '",
+										  trial_type="' . $ttype . '", update_items_total=' . $total . ',update_items_progress=' . ++$progress . ', updated_time="' . date("Y-m-d H:i:s", strtotime('now')) . '"  where update_id= "'. $up_id .'" limit 1'  ; 
+						if(!$res = mysql_query($query))
+						{
+							$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+							$logger->error($log);
+							echo $log;
+							return false;
+						}
+					}
+				/***************** 
 				$query = 'SELECT update_items_progress,update_items_total FROM update_status_fullhistory WHERE update_id="' . $up_id .'" and trial_type="' . $ttype . '" limit 1 ' ;
 				if(!$res = mysql_query($query))
 				{
@@ -239,12 +364,26 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					echo $log;
 					return false;
 				}
+				
+				****************/
+				
 				@flush();
 				
 				
 			}
 	
 			
+		}
+		if(!$scraper_run)
+		{
+			$query = 'update update_status_fullhistory set status="'. 0 . '", update_items_progress=update_items_total  where update_id= "'. $up_id .'" limit 1'  ; 
+			if(!$res = mysql_query($query))
+			{
+				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				$logger->error($log);
+				echo $log;
+				return false;
+			}
 		}
 	}
 }

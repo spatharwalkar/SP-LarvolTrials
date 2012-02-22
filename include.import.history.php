@@ -199,11 +199,12 @@ function scrape_history($id)
 
 	ProcessNonEssentials($id, $lastdate);
 	$studyCat=getStudyCatId($unid);
+	/*  disabled preindexing
 	echo('<br>Pre-indexing product related trials for id: ' . $id . '..........<br><br>');
 	tindex($studyCat,'products');
 	echo('<br>Pre-indexing area related trials for id: ' . $id . '.........<br><br>');
 	tindex($studyCat,'areas');
-		
+	*/	
 		
 	echo('<br>Finished Parsing Current Study with this ID.<br />');
 

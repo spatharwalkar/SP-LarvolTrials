@@ -515,10 +515,10 @@ function getOperator($opname, $column_name, $column_value)
 				$val ="%f IS NOT NULL";
 				break;
 			case 'Regex':
-				$val = textEqual($column_name, $column_value);
+				$val = text_equal($column_name, $column_value);
 				break;
 			case 'NotRegex':
-				$val = 'NOT (' . textEqual($column_name, $column_value) . ')';
+				$val = 'NOT (' . text_equal($column_name, $column_value) . ')';
 				break;
 
 		}
@@ -532,7 +532,7 @@ function getOperator($opname, $column_name, $column_value)
 
 
 //Outputs SQL expression to match text -- auto-detects use of regex and selects comparison method automatically
-function textEqual($field,$value)
+function text_equal($field,$value)
 {
 	//	$pcre = strlen($value) > 1
 	//	&& $value[0] == '/'
@@ -540,7 +540,7 @@ function textEqual($field,$value)
 	//	if($pcre)
 	{
 		//alexvp added exception
-		$result=validateMaskPCRE($value);
+		$result=validateMask_PCRE($value);
 		if(!$result)
 		throw new Exception("Bad regex: $field = $value", 6);
 		return 'PREG_RLIKE("' . '%s' . '",' . '%f' . ')';
@@ -551,7 +551,7 @@ function textEqual($field,$value)
 }
 
 
-function validateMaskPCRE($s)
+function validateMask_PCRE($s)
 {
 	//logger variable in db.php
 	global $logger;
@@ -563,7 +563,7 @@ function validateMaskPCRE($s)
 	$res = mysql_query($query);
 	$time_end = microtime(true);
 	$time_taken = $time_end-$time_start;
-	$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments:validateMaskPCRE';
+	$log = 'Time_Taken:'.$time_taken.'#Query_Details:'.$query.'#Comments:validateMask_PCRE';
 	$logger->info($log);
 	unset($log);
 	if($res === false)

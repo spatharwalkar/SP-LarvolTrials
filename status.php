@@ -106,6 +106,15 @@ while($row = mysql_fetch_assoc($res))
 	$update_pids[$count_upids++] = $row['process_id'];
 }
 
+$query = 'SELECT `update_id`,`process_id` FROM update_status_fullhistory WHERE `status`='. RUNNING . ' and (trial_type="AREA1" or trial_type="PRODUCT1")';
+$res = mysql_query($query) or die('Bad SQL Query getting process IDs of updates. Error: '.mysql_error());
+while($row = mysql_fetch_assoc($res))
+{
+	$update_ids[$count_upids] = $row['update_id'];
+	$update_pids[$count_upids++] = $row['process_id'];
+}
+
+
 //Get Process IDs of all currently running reports
 $query = 'SELECT `run_id`,`type_id`,`report_type`,`process_id` FROM reports_status WHERE `status`='.RUNNING;
 $res = mysql_query($query) or die('Bad SQL Query getting process IDs of updates. Error: '.mysql_error());
@@ -178,6 +187,39 @@ $calc_status = array();
 while($row = mysql_fetch_assoc($res))
 	$calc_status = $row;
 	
+/*************/
+$query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
+						`update_items_total`,`update_items_progress`,`er_message`,TIMEDIFF(updated_time, start_time) AS timediff,
+						`update_items_complete_time` FROM update_status_fullhistory where trial_type="PRODUCT2"';
+	if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
+	$product_status = array();
+	while($row = mysql_fetch_assoc($res))
+	$product_status = $row;
+	
+	$query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
+						`update_items_total`,`update_items_progress`,`er_message`,TIMEDIFF(updated_time, start_time) AS timediff,
+						`update_items_complete_time` FROM update_status_fullhistory where trial_type="AREA2"';
+	if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
+	$area_status = array();
+	while($row = mysql_fetch_assoc($res))
+	$area_status = $row;
+
+
+
+/******************/
+	
 	
 
 //Get entry corresponding to eudract in 'update_status'
@@ -248,6 +290,18 @@ if(count($nct_newstatus)!=0)
 {
 	echo "$(\"#nct_new2\").progressBar();";
 	echo "$(\"#nct_update2\").progressBar({ barImage: 'images/progressbg_orange.gif'} );";
+}
+
+if(count($product_status)!=0)
+{
+	echo "$(\"#product_new\").progressBar();";
+	echo "$(\"#product_update\").progressBar({ barImage: 'images/progressbg_orange.gif'} );";
+}
+
+if(count($area_status)!=0)
+{
+	echo "$(\"#area_new\").progressBar();";
+	echo "$(\"#area_update\").progressBar({ barImage: 'images/progressbg_orange.gif'} );";
 }
 
 if(count($eudract_status)!=0)
@@ -467,6 +521,192 @@ echo "<div class=\"container\">";
 					echo '<input type="hidden" name="action" value="3">';
 					echo '<input type="hidden" name="upid" value="'.$nct_newstatus['update_id'].'">';
 					echo '<input type="hidden" name="pid" value="'.$nct_newstatus['process_id'].'">';
+					echo '<input type="image" src="images/not.png" title="Delete" style="border=0px;">';
+					echo '</form>';
+					echo "</td>";
+				}
+			echo "</tr>";
+		echo "</table>";
+	}
+	
+	if(count($product_status)!=0)
+	{
+		echo "<table width=\"100%\" class=\"event\">";
+			echo "<tr>";
+				echo "<th width=\"100%\" align=\"center\" class=\"head2\">Preindexing - Products</th>";
+			echo "</tr>";
+		echo "</table>";
+		echo "<table width=\"100%\" class=\"event\">";
+			echo "<tr>";
+				echo "<td width=\"20%\" align=\"left\" class=\"head\">Status</td>";
+				echo "<td width=\"20%\" align=\"left\" class=\"head\">Start Time</td>";
+				echo "<td width=\"19%\" align=\"left\" class=\"head\">Excution run time</td>";
+				echo "<td width=\"19%\" align=\"left\" class=\"head\">Last update time</td>";
+//				echo "<td width=\"19%\" align=\"left\" class=\"head\">New Records</td>";
+				echo "<td width=\"17%\" align=\"left\" class=\"head\">Progress</td>";
+				echo "<td width=\"5%\" align=\"center\" class=\"head\">Action</td>";
+			echo "</tr>";
+			echo "<tr>";
+				echo "<td align=\"left\" class=\"norm\">".$status[$product_status['status']]."</td>";
+				echo "<td align=\"left\" class=\"norm\">".$product_status['start_time']."</td>";
+				echo "<td align=\"left\" class=\"norm\">".$product_status['timediff']."</td>";
+				echo "<td align=\"left\" class=\"norm\">".$product_status['updated_time']."</td>";
+				if($product_status['add_items_start_time']!="0000-00-00 00:00:00"&&$product_status['add_items_complete_time']!="0000-00-00 00:00:00"&&$product_status['status']==COMPLETED)
+					$product_add_progress=100;
+				else
+					$product_add_progress=number_format(($product_status['add_items_total']==0?0:(($product_status['add_items_progress'])*100/$product_status['add_items_total'])),2);
+					
+				if($product_status['update_items_start_time']!="0000-00-00 00:00:00"&&$product_status['update_items_complete_time']!="0000-00-00 00:00:00"&&$product_status['status']==COMPLETED)
+					$product_update_progress=100;
+				else
+					$product_update_progress=number_format(($product_status['update_items_total']==0?0:(($product_status['update_items_progress'])*100/$product_status['update_items_total'])),2);
+				
+				//echo $nct_status['update_items_complete_time'];
+				
+//				echo "<td align=\"left\" class=\"norm\">";
+//					echo "<span class=\"progressBar\" id=\"nct_new\">".$nct_add_progress."%</span>";
+//				echo "</td>";
+				echo "<td align=\"left\" class=\"norm\">";
+					echo "<span class=\"progressBar\" id=\"product_update\">".$product_update_progress."</span>";
+				echo "</td>";
+				if($product_status['status']==READY)
+				{
+					echo "<td align=\"center\" class=\"norm\">";
+					echo '<form method="post" action="status.php">';
+					echo '<input type="hidden" name="action" value="4">';
+					echo '<input type="hidden" name="upid" value="'.$product_status['update_id'].'">';
+					echo '<input type="image" src="images/not.png" title="Cancel" style="border=0px;">';
+					echo '</form>';
+					echo "</td>";
+				}
+				elseif($product_status['status']==RUNNING)
+				{
+					echo "<td align=\"center\" class=\"norm\">";
+					echo '<form method="post" action="status.php">';
+					echo '<input type="hidden" name="action" value="2">';
+					echo '<input type="hidden" name="upid" value="'.$product_status['update_id'].'">';
+					echo '<input type="hidden" name="pid" value="'.$product_status['process_id'].'">';
+					echo '<input type="image" src="images/not.png" title="Cancel" style="border=0px;">';
+					echo '</form>';
+					echo "</td>";
+				}
+				elseif($product_status['status']==COMPLETED)
+				{
+					echo "<td align=\"center\" class=\"norm\">";
+					echo '<form method="post" action="status.php">';
+					echo '<input type="hidden" name="action" value="3">';
+					echo '<input type="hidden" name="upid" value="'.$product_status['update_id'].'">';
+					echo '<input type="hidden" name="pid" value="'.$product_status['process_id'].'">';
+					echo '<input type="image" src="images/not.png" title="Delete" style="border=0px;">';
+					echo '</form>';
+					echo "</td>";
+				}
+				else if($product_status['status']==ERROR||$product_status['status']==CANCELLED)
+				{
+					echo "<td align=\"center\" class=\"norm\">";
+					echo '<form method="post" action="status.php">';
+					echo '<input type="hidden" name="action" value="1">';
+					echo '<input type="hidden" name="upid" value="'.$product_status['update_id'].'">';
+					echo '<input type="hidden" name="pid" value="'.$product_status['process_id'].'">';
+					echo '<input type="image" src="images/check.png" title="Add" style="border=0px;">';
+					echo '</form>';
+					echo '<form method="post" action="status.php">';
+					echo '<input type="hidden" name="action" value="3">';
+					echo '<input type="hidden" name="upid" value="'.$product_status['update_id'].'">';
+					echo '<input type="hidden" name="pid" value="'.$product_status['process_id'].'">';
+					echo '<input type="image" src="images/not.png" title="Delete" style="border=0px;">';
+					echo '</form>';
+					echo "</td>";
+				}
+			echo "</tr>";
+		echo "</table>";
+	}
+	
+	if(count($area_status)!=0)
+	{
+		echo "<table width=\"100%\" class=\"event\">";
+			echo "<tr>";
+				echo "<th width=\"100%\" align=\"center\" class=\"head2\">Preindexing - Areas</th>";
+			echo "</tr>";
+		echo "</table>";
+		echo "<table width=\"100%\" class=\"event\">";
+			echo "<tr>";
+				echo "<td width=\"20%\" align=\"left\" class=\"head\">Status</td>";
+				echo "<td width=\"20%\" align=\"left\" class=\"head\">Start Time</td>";
+				echo "<td width=\"19%\" align=\"left\" class=\"head\">Excution run time</td>";
+				echo "<td width=\"19%\" align=\"left\" class=\"head\">Last update time</td>";
+//				echo "<td width=\"19%\" align=\"left\" class=\"head\">New Records</td>";
+				echo "<td width=\"17%\" align=\"left\" class=\"head\">Progress</td>";
+				echo "<td width=\"5%\" align=\"center\" class=\"head\">Action</td>";
+			echo "</tr>";
+			echo "<tr>";
+				echo "<td align=\"left\" class=\"norm\">".$status[$area_status['status']]."</td>";
+				echo "<td align=\"left\" class=\"norm\">".$area_status['start_time']."</td>";
+				echo "<td align=\"left\" class=\"norm\">".$area_status['timediff']."</td>";
+				echo "<td align=\"left\" class=\"norm\">".$area_status['updated_time']."</td>";
+				if($area_status['add_items_start_time']!="0000-00-00 00:00:00"&&$area_status['add_items_complete_time']!="0000-00-00 00:00:00"&&$area_status['status']==COMPLETED)
+					$area_add_progress=100;
+				else
+					$area_add_progress=number_format(($area_status['add_items_total']==0?0:(($area_status['add_items_progress'])*100/$area_status['add_items_total'])),2);
+					
+				if($area_status['update_items_start_time']!="0000-00-00 00:00:00"&&$area_status['update_items_complete_time']!="0000-00-00 00:00:00"&&$area_status['status']==COMPLETED)
+					$area_update_progress=100;
+				else
+					$area_update_progress=number_format(($area_status['update_items_total']==0?0:(($area_status['update_items_progress'])*100/$area_status['update_items_total'])),2);
+				
+				//echo $nct_status['update_items_complete_time'];
+				
+//				echo "<td align=\"left\" class=\"norm\">";
+//					echo "<span class=\"progressBar\" id=\"nct_new\">".$nct_add_progress."%</span>";
+//				echo "</td>";
+				echo "<td align=\"left\" class=\"norm\">";
+					echo "<span class=\"progressBar\" id=\"area_update\">".$area_update_progress."</span>";
+				echo "</td>";
+				if($area_status['status']==READY)
+				{
+					echo "<td align=\"center\" class=\"norm\">";
+					echo '<form method="post" action="status.php">';
+					echo '<input type="hidden" name="action" value="4">';
+					echo '<input type="hidden" name="upid" value="'.$area_status['update_id'].'">';
+					echo '<input type="image" src="images/not.png" title="Cancel" style="border=0px;">';
+					echo '</form>';
+					echo "</td>";
+				}
+				elseif($area_status['status']==RUNNING)
+				{
+					echo "<td align=\"center\" class=\"norm\">";
+					echo '<form method="post" action="status.php">';
+					echo '<input type="hidden" name="action" value="2">';
+					echo '<input type="hidden" name="upid" value="'.$area_status['update_id'].'">';
+					echo '<input type="hidden" name="pid" value="'.$area_status['process_id'].'">';
+					echo '<input type="image" src="images/not.png" title="Cancel" style="border=0px;">';
+					echo '</form>';
+					echo "</td>";
+				}
+				elseif($area_status['status']==COMPLETED)
+				{
+					echo "<td align=\"center\" class=\"norm\">";
+					echo '<form method="post" action="status.php">';
+					echo '<input type="hidden" name="action" value="3">';
+					echo '<input type="hidden" name="upid" value="'.$area_status['update_id'].'">';
+					echo '<input type="hidden" name="pid" value="'.$area_status['process_id'].'">';
+					echo '<input type="image" src="images/not.png" title="Delete" style="border=0px;">';
+					echo '</form>';
+					echo "</td>";
+				}
+				else if($area_status['status']==ERROR||$area_status['status']==CANCELLED)
+				{
+					echo "<td align=\"center\" class=\"norm\">";
+					echo '<form method="post" action="status.php">';
+					echo '<input type="hidden" name="action" value="1">';
+					echo '<input type="hidden" name="upid" value="'.$area_status['update_id'].'">';
+					echo '<input type="hidden" name="pid" value="'.$area_status['process_id'].'">';
+					echo '<input type="image" src="images/check.png" title="Add" style="border=0px;">';
+					echo '</form>';
+					echo '<form method="post" action="status.php">';
+					echo '<input type="hidden" name="action" value="3">';
+					echo '<input type="hidden" name="upid" value="'.$area_status['update_id'].'">';
+					echo '<input type="hidden" name="pid" value="'.$area_status['process_id'].'">';
 					echo '<input type="image" src="images/not.png" title="Delete" style="border=0px;">';
 					echo '</form>';
 					echo "</td>";
