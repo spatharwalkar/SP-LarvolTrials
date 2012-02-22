@@ -74,8 +74,8 @@ function editor()
 	}
 	
 	//put product/areas schedule list prodcuts=1 areas=2 using bitmask.
-	$reports['LI_sync1'] = 'LI Product Sync';
-	$reports['LI_sync2'] = 'LI Areas Sync';
+	$LISync['LI_sync1'] = 'LI Product Sync';
+	$LISync['LI_sync2'] = 'LI Areas Sync';
 	//end
 	
 	$selectedreports = array();
@@ -100,19 +100,20 @@ function editor()
 		switch($row['LI_sync'])
 		{
 			case '1':
-				$selectedreports[] = 'LI_sync' . $row['LI_sync'];
+				$selectedLISync[] = 'LI_sync' . $row['LI_sync'];
 				break;
 			case '2':
-				$selectedreports[] = 'LI_sync' . $row['LI_sync'];
+				$selectedLISync[] = 'LI_sync' . $row['LI_sync'];
 				break;
 			case '3':
-				$selectedreports[] = 'LI_sync1';
-				$selectedreports[] = 'LI_sync2';
+				$selectedLISync[] = 'LI_sync1';
+				$selectedLISync[] = 'LI_sync2';
 				break;
 		}
 	}
 	//end
 	$out .= '<label>Run these reports: ' . makeDropdown('reports',$reports,10,$selectedreports,true) . '</label><br clear="all"/>'
+			.'<label>Run these LI sync: ' . makeDropdown('li_sync',$LISync,7,$selectedLISync,true) . '</label><br clear="all"/>'
 			. '<label>Send output to these emails (comma-delimited): <input type="text" name="emails" value="'
 			. htmlspecialchars($rpt['emails']) . '"/></label><br clear="all"/>';
 	$out .= '<label>Format: '.makeDropdown('format', getEnumValues('schedule', 'format'), false, $rpt['format']).'</label><br clear="all"/>';
@@ -184,17 +185,25 @@ function postEd()
 					$continueFlag=1;
 					break;
 				}
-				$LI_sync_type = explode('LI_sync',$rep);
-				if(is_array($LI_sync_type) && count($LI_sync_type)==2)
-				{
-					$LI_sync_array[] = $LI_sync_type[1];
-					$continueFlag = 1;
-				}
+
 				if($continueFlag == 1)
 				continue;
 				$query .= ',schedule=' . $id;
 				mysql_query($query) or die('Bad SQL query saving report associations'.mysql_error().'<br />'.$query);
 			}
+		}
+		if(is_array($_POST['li_sync']))
+		{
+			foreach($_POST['li_sync'] as $rep)
+			{
+				$LI_sync_type = explode('LI_sync',$rep);
+				if(is_array($LI_sync_type) && count($LI_sync_type)==2)
+				{
+					$LI_sync_array[] = $LI_sync_type[1];
+				}				
+				
+			}	
+
 		}
 		//save li sync variables
 		if(is_array($LI_sync_array) && count($LI_sync_array)>0)
