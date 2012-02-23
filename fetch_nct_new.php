@@ -22,7 +22,7 @@ if(isset($_GET['days']))
 }
 if(isset($days_to_fetch))	//$days_to_fetch comes from cron.php normally
 {
-	$days = 1+(int)$days_to_fetch;
+	$days = 30+(int)$days_to_fetch;
 }
 else
 {
@@ -52,12 +52,29 @@ $url = "results?flds";
 
 echo('Searching for updated records...' . "\n<br />");
 $ids = getIDs('update');
-
-if (count($ids) == 0) {
+if (count($ids) == 0) 
+{
     echo('There are none!' . "\n<br />");
+	return false;
 } 
+/***** get only new updates  */
+$query = 'SELECT UNIX_TIMESTAMP(lastchanged_date) AS "lastchanged_date",source_id FROM data_trials WHERE 
+			source_id IN("' . implode('","', array_keys($ids)) . '")';
+$res = mysql_query($query);
+if ($res === false) return softDie('Bad SQL query getting lastchanged dates for existing nct_ids');
+$totcnt=count($ids);
+while ($row = mysql_fetch_assoc($res)) 
+{
+	if($row['lastchanged_date'] >= $ids[$row['source_id']])
+	{
+//		pr($row['source_id']);
+		unset($ids[$row['source_id']]);
+	}
+				
+}
+/*********/
 
-    echo("<br /><br /> " . count($ids) . ' new updates out of ' . $reportednew . '.' . "\n<br />");
+echo("<br /><br /> " . count($ids) . ' new updates out of ' . $totcnt . '.' . "\n<br />");
 	if($cron_run)
 	{
 	    $query = 'UPDATE update_status SET update_items_total="' . count($ids) . '",update_items_start_time="' . date("Y-m-d H:i:s", strtotime('now')) . '" WHERE update_id="' . $update_id . '"';
