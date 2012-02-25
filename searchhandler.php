@@ -27,6 +27,9 @@ switch($_REQUEST['op']){
 		runQuery();
 		break;
 	case 'testQuery':
+		if(isset($_REQUEST['jsonOp']) && $_REQUEST['jsonOp']==1)
+		echo(testQuery($_REQUEST['jsonOp']));
+		else
 		echo(testQuery());
 		break;
 	case 'gridList':
@@ -171,25 +174,51 @@ function listSearchProc()
 	return $row;
 }
 
-function testQuery()
+function testQuery($jsonOp=0,$scriptCall=0,$data=null)
 {
 	$jsonData=$_REQUEST['data'];
+	if($scriptCall==1)
+	{
+		$jsonData = $data;
+	}
 	$actual_query= "";
 	try {
 		$actual_query= buildQuery($jsonData, false);
 	}
 	catch(Exception $e)
 	{
+		if($jsonOp==1)
+		{
+			return json_encode(array('status'=>0,'message'=>$e->getMessage()));
+		}
+		else
+		{
 		return $e->getMessage();
+		}
 	}
 	$result = mysql_query($actual_query." LIMIT 0");
 	if (mysql_errno()) {
 		$error = "MySQL error ".mysql_errno().": ".mysql_error()."\n<br>When executing:<br>\n$actual_query\n<br>";
+		if($jsonOp==1)
+		{
+			return json_encode(array('status'=>0,'message'=>$error));
+		}
+		else
+		{
 		return $error;
+		}
 	}
 	else
 	{
-		return "Great! SQL Query has no syntax issues" ."\n<br>When executing:<br>\n$actual_query\n<br>";
+		$msg =  "Great! SQL Query has no syntax issues" ."\n<br>When executing:<br>\n$actual_query\n<br>";
+		if($jsonOp==1)
+		{
+			return json_encode(array('status'=>1,'message'=>$msg));
+		}
+		else
+		{
+			return $msg;
+		}		
 	}
 
 }

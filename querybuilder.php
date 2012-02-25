@@ -317,4 +317,6 @@ $show_sort_res = false;
 
 	</tr>
 </table>
+<!-- pre cache loader -->
+<img style="display:none" src="images/loading.gif" alt="loading" title="loading"/>
 </div>

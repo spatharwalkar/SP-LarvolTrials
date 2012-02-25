@@ -109,7 +109,7 @@ $(document).ready(function(){
 //save operation controller
 if($_GET['save']=='Save')
 {
-	saveData($_GET,$table);
+	$saveStatus = saveData($_GET,$table);
 }
 
 //delete controller
@@ -136,11 +136,11 @@ pagePagination($limit,$totalCount,$table,$script,$ignoreFields,array('import'=>f
 echo '<br/>';
 echo '<div class="clr">';
 //add edit form.
-if($_REQUEST['add_new_record']=='Add New Record' || $_REQUEST['id'] && !$_GET['save'])
+if($_REQUEST['add_new_record']=='Add New Record' || $_REQUEST['id'] && !$_GET['save'] || $saveStatus===0)
 {
 	$id = ($_REQUEST['id'])?$_REQUEST['id']:null;
 	echo '<div>';
-	addEditUpm($id,$table,$script,array("formOnSubmit"=>"onsubmit=\"return chkbox(this,'delsearch','searchdata');\"",'deletebox'=>true));
+	addEditUpm($id,$table,$script,array("formOnSubmit"=>"onsubmit=\"return chkbox(this,'delsearch','searchdata');\"",'deletebox'=>true,'saveStatus'=>$saveStatus));
 	echo '</div>';
 	echo '<br/>';
 }
@@ -198,10 +198,14 @@ $(document).ready(function () {
 					type: 'GET',
 					url:  'searchhandler.php' + '?op=testQuery',
 					data: 'data=' + jsonData,
+					beforeSend:function (){
+						$("#3009").show();
+						$("#3009").html('<div style="height:50px;text-align: center;z-index: 99;"><img width="100" height="100" src="images/loading.gif" alt="loading..." title="loading..."/></div>');
+						},
 					success: function (data) {
-        					//alert(data);
+							$("#3009").show();
         					$("#3009").html(data);
-        		            $("#3009").attr("style", "visibility:show");
+        		            //$("#3009").attr("style", "visibility:show");
         		        	
 					}
         	});
@@ -232,7 +236,7 @@ $(document).ready(function () {
     	{
         	$('#add_edit_searchdata_img').attr('src','images/edit.png');
         }
-    	
+    	$("#3009").hide();
     	$('.ajax').colorbox.close();
     	$(".ajax").colorbox({
     		onComplete:function(){ loadQueryData($('#searchdata').val());},

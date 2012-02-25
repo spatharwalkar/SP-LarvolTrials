@@ -467,6 +467,8 @@ function input_tag($row,$dbVal=null,$options=array())
 			if(isset($options['callFrom']) && $options['callFrom']=='addedit')
 			{
 				$modifier = $modifier;
+				if(isset($options['saveStatusForInputTag']) && $options['saveStatusForInputTag'] == 0 && $dbVal!='')
+				$modifier = '[Modified]';
 			}
 			elseif(isset($options['callFrom']) && ($options['callFrom']=='contentListingProducts' || $options['callFrom']=='contentListingAreas'))
 			{
@@ -625,6 +627,21 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 	}
 	
 	$id = ($post['id'])?$post['id']:null;	
+	//precheck before attepting to insert/update
+	if($table=='products' || $table=='areas')
+	{
+		if(isset($post['searchdata']) && $post['searchdata']!='')
+		{
+			require_once 'searchhandler.php';
+			$stat = json_decode(testQuery(1,1,$post['searchdata']));
+			if($stat->status==0)
+			{
+				softDieSession('Cannot insert '.$table.' entry. Search data corrupt!<br/>'.$stat->message);
+				return 0;
+			}
+		}
+	}
+	//end precheck
 	if(!$id)//insert
 	{
 		unset($post['save']);
@@ -925,7 +942,12 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		if(isset($options['saveStatus'])&& $options['saveStatus']===0)
 		{
 			$dbVal = (isset($_GET[$row['Field']]) && $_GET[$row['Field']]!='')?$_GET[$row['Field']]:$dbVal;
+			$saveStatusForInputTag=0;
 			
+		}
+		else 
+		{
+			$saveStatusForInputTag = 1;
 		}
 		
 		if($row['Field'] == 'searchdata')
@@ -936,7 +958,7 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 			}			
 			echo '<tr><td>'.ucwords(implode(' ',explode('_',$row['Field']))).' : </td>';
 			echo '<td>';
-			echo input_tag($row,$dbVal,array('table'=>$table,'id'=>$id,'callFrom'=>'addedit'));
+			echo input_tag($row,$dbVal,array('table'=>$table,'id'=>$id,'callFrom'=>'addedit','saveStatusForInputTag'=>$saveStatusForInputTag));
 			echo '</td></tr>';	
 			$i++;
 			continue;			
