@@ -165,6 +165,8 @@ function editor()
 	$row_total=array();
 	$col_total=array();
 	$data_matrix=array();
+	$active_total=0;
+	$count_total=0;
 	foreach($rows as $row => $rval)
 	{
 		foreach($columns as $col => $cval)
@@ -279,6 +281,10 @@ function editor()
 			{
 				$data_matrix[$row][$col]['active']=0;
 				$data_matrix[$row][$col]['total']=0;
+				$col_active_total[$col]=0+$col_active_total[$col];
+				$row_active_total[$row]=0+$row_active_total[$row];
+				$col_count_total[$col]=0+$col_count_total[$col];
+				$row_count_total[$row]=0+$row_count_total[$row];
 				$data_matrix[$row][$col]['bomb_auto']['src']='';
 				$data_matrix[$row][$col]['bomb']['src']='';
 				$data_matrix[$row][$col]['bomb_explain']='';
@@ -550,6 +556,8 @@ function Download_reports()
 	
 	$row_total=array();
 	$col_total=array();
+	$active_total=0;
+	$count_total=0;
 	$data_matrix=array();
 	foreach($rows as $row => $rval)
 	{
@@ -671,6 +679,10 @@ function Download_reports()
 			{
 				$data_matrix[$row][$col]['active']=0;
 				$data_matrix[$row][$col]['total']=0;
+				$col_active_total[$col]=0+$col_active_total[$col];
+				$row_active_total[$row]=0+$row_active_total[$row];
+				$col_count_total[$col]=0+$col_count_total[$col];
+				$row_count_total[$row]=0+$row_count_total[$row];
 				$data_matrix[$row][$col]['bomb_auto']['src']='';
 				$data_matrix[$row][$col]['bomb']['src']='';
 				$data_matrix[$row][$col]['bomb_explain']='';
@@ -1364,16 +1376,19 @@ function postEd()
 			}
 		}//exit;
 		
-		foreach($_POST['cell_prod'] as $row => $data)
-		foreach($data as $col => $value)
+		if(isset($_POST['cell_prod']) && !empty($_POST['cell_prod']))
 		{
-			$prod=$_POST['cell_prod'][$row][$col];
-			$area=$_POST['cell_area'][$row][$col];
-			$filing=mysql_real_escape_string($_POST['filing'][$row][$col]);
-			$bomb=$_POST['bomb'][$row][$col];
-			$bomb_explain=mysql_real_escape_string($_POST['bomb_explain'][$row][$col]);
-			$query = "UPDATE `rpt_masterhm_cells` set `bomb` = '$bomb', `bomb_explain` = '$bomb_explain', `filing` = '$filing' WHERE `product` = $prod AND `area` = $area";
-			mysql_query($query) or die ('Bad SQL Query updating Bomb and Filing Information.<br/>'.$query);
+			foreach($_POST['cell_prod'] as $row => $data)
+			foreach($data as $col => $value)
+			{
+				$prod=$_POST['cell_prod'][$row][$col];
+				$area=$_POST['cell_area'][$row][$col];
+				$filing=mysql_real_escape_string($_POST['filing'][$row][$col]);
+				$bomb=$_POST['bomb'][$row][$col];
+				$bomb_explain=mysql_real_escape_string($_POST['bomb_explain'][$row][$col]);
+				$query = "UPDATE `rpt_masterhm_cells` set `bomb` = '$bomb', `bomb_explain` = '$bomb_explain', `filing` = '$filing' WHERE `product` = $prod AND `area` = $area";
+				mysql_query($query) or die ('Bad SQL Query updating Bomb and Filing Information.<br/>'.$query);
+			}
 		}
 	}
 
