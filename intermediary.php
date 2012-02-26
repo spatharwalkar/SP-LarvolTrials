@@ -58,32 +58,18 @@ if(isset($_POST['btnDownload']))
 }
 
 $sortFields = array('phase' => 'pD', 'inactive_date' => 'iA', 'start_date' => 'sA', 'overall_status' => 'oA', 'enrollment' => 'eA');
-
-
 $sortFieldName = array('phase' => 'Phase', 'inactive_date' => 'End Date', 'start_date' => 'Start Date', 'overall_status' => 'Status', 'enrollment' => 'N');
 
-$sortTab = '';
-foreach($sortFields as $skey => $svalue)
-{
-	$sortImg = '';
-	$sortType = substr($svalue, 1, 1);
-	
-	$sortImg = ($sortType == 'A') ? 'asc' : 'des';
-	
-	$sortTab .= "<li title='" . $svalue . "' class='ui-state-default' name='" . $svalue . "' id='" . $skey . "'>"
-		. "<div align=\"left\" style=\"vertical-align:middle;\">" . $sortFieldName[$skey] 
-		. "<img src='images/" . $sortImg . ".png' id='" . substr($svalue, 0, 1) . "'  alt='" . $svalue 
-		. "' border='0' align='right' style='margin:0px 5px; width:14px; height:14px; padding-right:70px; cursor:pointer;' onclick='javascript:fnSort(this)' /></div></li>";
+$lastChangedTime = filectime("css/intermediary.css");
 }
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-   <!-- <base target='_blank' />-->
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>Online Trial Tracker</title>
-    <link href="css/intermediary.css" rel="stylesheet" type="text/css" media="all" />
+    <link href="css/intermediary.css?t=<?php echo $lastChangedTime;?>" rel="stylesheet" type="text/css" media="all" />
     <script src="scripts/jquery.js" type="text/javascript"></script>
     <script src="scripts/func.js" type="text/javascript"></script>	
     <script src="scripts/jquery-ui-1.8.16.custom.min.js" type="text/javascript"></script>
