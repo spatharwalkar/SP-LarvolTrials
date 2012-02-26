@@ -1608,27 +1608,26 @@ function getActiveCount($all_ids, $time)
 	//logger variable in db.php
 	global $logger;	
 		
+	//$time = '"' . date('Y-m-d H:i:s',$time) . '"';
+	if($time === NULL)
+	{
+		$timecond = 'dv.superceded IS NULL ';
+	}else{
+		$timecond = 'dv.added < "' . date('Y-m-d H:i:s',$time) . '" AND (dv.superceded > "' . date('Y-m-d H:i:s',$time) . '" OR dv.superceded IS NULL) ';
+	}
+	
 	if(!is_array($all_ids) || empty($all_ids)) return 0;
 	$ids = implode(', ',$all_ids);
 	$overallStatusId = getFieldId("NCT", "overall_status");
 	
-	$inactiveStatuses = getEnumvalId($overallStatusId, "Withheld") .", ".
-	getEnumvalId($overallStatusId, "Approved for marketing") .", ".
-	getEnumvalId($overallStatusId, "Temporarily not available") .", ".
+	$inactiveStatuses = getEnumvalId($overallStatusId, "Withheld") .",".
+	getEnumvalId($overallStatusId, "Approved for marketing") .",".
+	getEnumvalId($overallStatusId, "Temporarily not available") .",".
 	getEnumvalId($overallStatusId, "No Longer Available") .",".
 	getEnumvalId($overallStatusId, "Withdrawn") .",".
 	getEnumvalId($overallStatusId, "Terminated") .",".
 	getEnumvalId($overallStatusId, "Suspended") .",".
 	getEnumvalId($overallStatusId, "Completed");
-	
-	
-	//$time = '"' . date('Y-m-d H:i:s',$time) . '"';
-	if($time === NULL)
-	{
-		$timecond = 'dv.`id` = (select max(data_values.`id`) as dd from data_values where data_values.`studycat`=i.`id` and data_values.`field`="'.$overallStatusId.'")';
-	}else{
-		$timecond = 'dv.`added` < "' . date('Y-m-d H:i:s',$time) . '" AND (dv.`id` = (select max(data_values.`id`) as dd from data_values where data_values.`studycat`=i.`id` and data_values.`field`="'.$overallStatusId.'" and data_values.`added` < "' . date('Y-m-d H:i:s',$time) . '"))';
-	}
 	
 	/*$query = "SELECT DISTINCT i.larvol_id AS id FROM data_cats_in_study i
 					INNER JOIN data_values AS dv ON i.id = dv.studycat
@@ -1636,11 +1635,9 @@ function getActiveCount($all_ids, $time)
 					dv.val_enum NOT IN (".$inactiveStatuses.") AND dv.added < " . $time 
 					. " AND ( dv.superceded>" . $time . " OR dv.superceded IS NULL) ";*/	
 	
-	$query = "SELECT DISTINCT i.`larvol_id` AS id FROM data_cats_in_study i
-					INNER JOIN data_values AS dv ON i.`id` = dv.`studycat`
-					WHERE i.`larvol_id` IN (".$ids.") AND dv.`field` = ".$overallStatusId." AND
-					dv.`val_enum` NOT IN (".$inactiveStatuses.") AND " . $timecond;
-					
+	$query = "SELECT DISTINCT i.larvol_id AS id, dv.val_enum as status FROM data_cats_in_study i
+					INNER JOIN data_values AS dv ON i.id = dv.studycat
+					WHERE i.larvol_id IN (".$ids.") AND dv.field = ".$overallStatusId." AND " . $timecond;
 	$time_start = microtime(true);					
 	$res = mysql_query($query);
 	$time_end = microtime(true);
@@ -1657,7 +1654,15 @@ function getActiveCount($all_ids, $time)
 		$logger->fatal($log);
 		return softDie($log);
 	}
-	while($row = mysql_fetch_array($res)) $id_set[] = $row['id'];
+	
+	$inact_status = explode(',',$inactiveStatuses);
+	while($row = mysql_fetch_array($res)) 
+	{
+		if(!in_array($row['id'],$id_set) && !in_array($row['status'],$inact_status))
+			$id_set[] = $row['id'];
+		elseif(in_array($row['id'],$id_set) && in_array($row['status'],$inact_status))
+			$id_set = array_diff($id_set,array($row['id']));
+	}
 	
 	return count($id_set);
 }
