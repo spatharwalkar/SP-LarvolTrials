@@ -263,8 +263,12 @@ function runQuery()
 		$i++;
 	}
 	
-//	pr($responce->rows);
-	
+	if($count==0)
+	{
+	$ret_val = json_encode($responce);
+	echo($ret_val);
+	return;
+	}
 	foreach ($responce->rows as $fieldname => $value)
 	{
 		$x=0;
