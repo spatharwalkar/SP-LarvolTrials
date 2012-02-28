@@ -12,7 +12,8 @@ $db = new DatabaseManager();
 $db->loggedIn();	//check login status and load userinfo
 $now = strtotime('now');
 
-
+//Session function added here as its Common file for all (Added for viewcount in OTT)
+session_start();
 
 /* Abstracts mundane database access and manages login. 
 	You shouldn't instantiate this class on your own -- an instance is made when it is included.

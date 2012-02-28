@@ -866,6 +866,7 @@ CREATE TABLE IF NOT EXISTS `data_trials` (
   `keyword` varchar(127) COLLATE utf8_unicode_ci DEFAULT NULL,
   `is_fda_regulated` tinyint(1) DEFAULT NULL,
   `is_section_801` tinyint(1) DEFAULT NULL,
+  `viewcount` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`larvol_id`),
   UNIQUE KEY `source_id` (`source_id`),
   KEY `overall_status` (`overall_status`),

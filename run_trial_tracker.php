@@ -6826,7 +6826,7 @@ class TrialTracker
 			//echo '<br/>query-->'.
 			$query = "SELECT dt.`larvol_id`, dt.`source_id`, dt.`brief_title`, dt.`acronym`, dt.`lead_sponsor`, dt.`collaborator`, dt.`condition`,"
 					. " dt.`overall_status`, dt.`is_active`, dt.`start_date`, dt.`end_date`, dt.`enrollment`, dt.`enrollment_type`, dt.`intervention_name`,"
-					. " dt.`region`, dt.`lastchanged_date`, dt.`phase`, dt.`overall_status`, dt.`lastchanged_date`, dt.`firstreceived_date` "
+					. " dt.`region`, dt.`lastchanged_date`, dt.`phase`, dt.`overall_status`, dt.`lastchanged_date`, dt.`firstreceived_date`, dt.`viewcount` "
 					. " FROM `data_trials` dt "
 					. " JOIN `product_trials` pt ON dt.`larvol_id` = pt.`trial` "
 					. " JOIN `area_trials` at ON dt.`larvol_id` = at.`trial` "
@@ -6865,6 +6865,7 @@ class TrialTracker
 				$result[$index]['section'] = $ikey;
 				$result[$index]['new'] = 'n';
 				$result[$index]['edited'] = array();
+				$result[$index]['viewcount'] = $row['viewcount'];
 				
 				if($row['firstreceived_date'] <= date('Y-m-d', $timeMachine) && $row['firstreceived_date'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
 				{
@@ -8249,9 +8250,19 @@ class TrialTracker
 				$attr = '" title="New record';
 				$titleLinkColor = '#FF0000;';
 			}				
-			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">'
-						. '<a style="color:' . $titleLinkColor . '" href="http://clinicaltrials.gov/ct2/show/' . padnct($trials[$i]['NCT/nct_id']) . '" '
-						. 'target="_blank">'; 
+			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse"><a style="color:' . $titleLinkColor . '"  href="http://clinicaltrials.gov/ct2/show/' . padnct($trials[$i]['NCT/nct_id']) . '" target="_blank" ';
+			
+			if(($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed'))
+			{
+				$outputStr .= ' onclick="INC_ViewCount('.$trials[$i]['larvol_id'].')">'
+							.'<font id="ViewCount_'.$trials[$i]['larvol_id'].'">';
+				if($trials[$i]['viewcount'] != '' && $trials[$i]['viewcount'] != NULL && $trials[$i]['viewcount'] > 0)
+					$outputStr .= '<font size="1px" style="background-color:#CCCCCC">'.$trials[$i]['viewcount'].'&nbsp;</font>'; 
+				$outputStr .= '</font>'; 
+			}
+			else
+				$outputStr .= '>'; 
+						
 			if(isset($trials[$i]['NCT/acronym']) && $trials[$i]['NCT/acronym'] != '') 
 			{
 				$outputStr .= '<b>' . htmlformat($trials[$i]['NCT/acronym']) . '</b>&nbsp;' . htmlformat($trials[$i]['NCT/brief_title']);

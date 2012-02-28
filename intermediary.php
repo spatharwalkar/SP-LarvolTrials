@@ -203,6 +203,22 @@ $lastChangedTime = filectime("css/intermediary.css");
 		$('#sort').val(sortOrder.join(','));
 	};
     </script>
+    
+    <script type="text/javascript">
+	//Count the Number of View of Records
+	function INC_ViewCount(larvol_id)
+	{
+		 $.ajax({
+						type: 'GET',
+						url:  'viewcount.php' + '?op=Inc_ViewCount&larvol_id=' + larvol_id,
+						success: function (data) {
+	        					//alert(data);
+	        					$("#ViewCount_"+larvol_id).html(data);
+	        		   }
+				});
+	        return;
+	}
+	</script>
     </head>
 <body>
 <div id="loading">
