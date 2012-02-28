@@ -55,10 +55,20 @@ function listSearchesInGrid()
 	} else {
 		$total_pages = 0;
 	}
+	global $logger;
+	
 	if ($page > $total_pages) $page=$total_pages;
 	$start = $limit*$page - $limit; // do not put $limit*($page - 1)
 	$SQL = "SELECT a.id, a.name, 'description' as description FROM saved_searches a ORDER BY $sidx $sord LIMIT $start , $limit";
-	$result = mysql_query( $SQL ) or die("Couldn t execute query.".mysql_error());
+	if(!$result = mysql_query($SQL))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
+	
+//	$result = mysql_query( $SQL ) or die("Couldn t execute query.".mysql_error());
 
 	$responce->page = $page;
 	$responce->total = $total_pages;
@@ -85,9 +95,23 @@ function insertSearch()
 	$uclause = ($db->user->userlevel != 'user' && $user === NULL) ? 'NULL' : $user;
 	$query = 'INSERT INTO saved_searches SET user=' . $uclause . ',name="' . $name . '",searchdata="'
 	. base64_encode(serialize($searchdata)) . '"';
+	global $logger;
+	if(!mysql_query($query))
+		{
+			$log='Bad SQL query adding saved search:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
 	mysql_query($query) or die('Bad SQL query adding saved search');
 	$miid = mysql_insert_id();
-	mysql_query('COMMIT') or die("Couldn't commit SQL query");
+	if(!mysql_query('COMMIT'))
+		{
+			$log='Couldn\'t commit SQL query: "COMMIT", Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
 	return $miid;
 }
 
@@ -105,9 +129,25 @@ function updateSearch()
 	$uclause = ($db->user->userlevel != 'user' && $user === NULL) ? 'NULL' : $user;
 	$query = 'UPDATE saved_searches SET user=' . $uclause . ',name="' . $name . '",searchdata="'
 	. base64_encode(serialize($searchdata)) . '" where id=' . $searchId;
-	mysql_query($query) or die('Bad SQL query adding saved search');
+	global $logger;
+	if(!mysql_query($query))
+		{
+			$log='Bad SQL query adding saved search:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
+//	mysql_query($query) or die('Bad SQL query adding saved search');
 	//$miid = mysql_insert_id();
-	mysql_query('COMMIT') or die("Couldn't commit SQL query");
+	
+	global $logger;
+	if(!mysql_query('COMMIT'))
+		{
+			$log='Could not commit sql query Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
 
 }
 
@@ -119,7 +159,16 @@ function get_SearchData()
 	$ssid = mysql_real_escape_string($_REQUEST['id']);
 	//$query = 'SELECT * FROM saved_searches WHERE id=' . $ssid . ' AND (user=' . $db->user->id . ' or user IS NULL)' . ' LIMIT 1';
 	$query = 'SELECT * FROM saved_searches WHERE id=' . $ssid . ' LIMIT 1';
-	$res = mysql_query($query) or die('Bad SQL query getting searchdata');
+	
+	global $logger;
+	if(!$res=mysql_query($query))
+		{
+			$log='Bad SQL query getting searchdata :'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
+	
 	$row = mysql_fetch_array($res);
 	//if($row === false) return;	//In this case, either the ID is invalid or it doesn't belong to the current user.
 
@@ -145,7 +194,15 @@ function listSearchForm()
 	//$out .= "</li>";
 	$out .= '<ul style="display:block;">';
 	$query = 'SELECT id,name,user FROM saved_searches WHERE user=' . $db->user->id . ' OR user IS NULL ORDER BY user';
-	$res = mysql_query($query) or die('Bad SQL query getting saved search list');
+	global $logger;
+	if(!$res=mysql_query($query))
+		{
+			$log='Bad SQL query adding saved search list:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
+
 	while($ss = mysql_fetch_assoc($res))
 	{
 		$out .= "<li class='item'> <a href='#' onclick='showSearchData(\"" . $ss['id'] . "\",\"" . htmlspecialchars($ss['name']) . "\");return false;'>" . htmlspecialchars($ss['name']) . "</a></li>";
@@ -167,7 +224,15 @@ function listSearchProc()
 	$ssid = mysql_real_escape_string($_REQUEST['searchId']);
 	$query = 'SELECT searchdata FROM saved_searches WHERE id=' . $ssid . ' AND (user=' . $db->user->id . ' or user IS NULL)'
 	. ' LIMIT 1';
-	$res = mysql_query($query) or die('Bad SQL query getting searchdata');
+	global $logger;
+	if(!$res=mysql_query($query))
+		{
+			$log='Bad SQL query getting searchdata:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
+		
 	$row = mysql_fetch_array($res);
 	if($row === false) return;	//In this case, either the ID is invalid or it doesn't belong to the current user.
 	unserialize(base64_decode($row['searchdata']));
@@ -251,7 +316,14 @@ function runQuery()
 	if ($start<0) $start = 0;
 	//$SQL = "$actual_query ORDER BY $sidx $sord LIMIT $start , $limit";
 	$SQL = "$actual_query LIMIT $start , $limit";
-	$result = mysql_query( $SQL ) or die("Couldn't execute query.".mysql_error());
+	global $logger;
+	if(!$result=mysql_query($SQL))
+		{
+			$log='Bad SQL query :'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
 	if(!isset($responce)) $responce = new stdClass();
 
 	$responce->page = $page;
