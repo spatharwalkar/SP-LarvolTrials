@@ -4,7 +4,7 @@ require_once('db.php');
 require_once('include.import.php');
 require_once('nct_common.php');
 require_once('include.search.php');
-require_once('preindex_trial.php');
+//require_once('preindex_trial.php');
 
 ini_set('max_execution_time', '36000'); //10 hours
 

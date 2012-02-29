@@ -4,22 +4,6 @@ require_once('include.search.php');
 require_once('include.util.php');
 require_once('searchhandler.php');
 
-function getStudyCatId($nctid)
-{
-global $logger;
-if(!isset($nctid) or empty($nctid)) return false;
-$query = 'SELECT studycat from data_values where val_int = "' . $nctid . '" and field = "1" limit 1 ';
-	if(!$resu = mysql_query($query))
-	{
-		$log='Bad SQL query getting  studycat .<br>Query=' . $query;
-		$logger->fatal($log);
-		echo $log;
-		exit;
-	}
-//	$productz = mysql_fetch_assoc($resu);
-	$resu=mysql_fetch_array($resu);
-	return $resu['studycat'];
-}
 
 /*	
 function tindex() - to preindex a combination of one trial+one product, or  one trial+one area.  
