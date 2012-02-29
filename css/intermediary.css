@@ -244,7 +244,7 @@ tr.upms td {
 	position: fixed;
 	top: 40px;
 	right: 0;
-	padding: 12px 0 0 0;
+	margin: 12px 0 0 0;
 }
 
 .slideout_inner {
@@ -257,7 +257,52 @@ tr.upms td {
 #slideout:hover .slideout_inner{
 	display : block;
 	position:absolute;
-	top: 14px;
+	top: 2px;
 	right: 0px;
 	width: 280px;
+	z-index:10;
+}
+
+.controls {
+	border: none !important;
+	font-family: Verdana,Geneva,sans-serif;
+   /* font-size: smaller;*/
+}
+
+.controls td{
+	border-bottom:1px solid #44F;
+	border-right:1px solid #44F;
+	padding-left: 5px;
+    vertical-align: top;
+}
+
+.right{
+	border-right:0px !important;
+}
+
+.bottom{
+	border-bottom:0px !important;
+}
+
+#demo-frame > div.demo { padding: 10px !important; };
+
+.demo div{
+	margin:0 10px 0 10px;
+}
+
+.checkscroll{
+	float:left;
+	margin-top:1em;
+	height:10em;
+	width:15em;
+	overflow:auto;
+}
+
+.checkscroll input{
+	margin:0;
+	padding:0;
+}
+
+.ui-slider-horizontal .ui-slider-handle {
+	margin-left:0 !important;
 }

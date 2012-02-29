@@ -8,6 +8,7 @@ require_once('include.search.php');
 require_once('special_chars.php');
 require_once('run_trial_tracker.php');
 
+
 /********* If Report generation time is less than 1 Jan 2012, time machine is disabled **********/
 if($_GET['time'] != NULL && $_GET['time'] != '')
 {
@@ -56,9 +57,7 @@ if(isset($_POST['btnDownload']))
 		exit;
 	}
 }
-
 $sortFields = array('phase' => 'pD', 'inactive_date' => 'iA', 'start_date' => 'sA', 'overall_status' => 'oA', 'enrollment' => 'eA');
-$sortFieldName = array('phase' => 'Phase', 'inactive_date' => 'End Date', 'start_date' => 'Start Date', 'overall_status' => 'Status', 'enrollment' => 'N');
 
 $lastChangedTime = filectime("css/intermediary.css");
 ?>
@@ -69,9 +68,11 @@ $lastChangedTime = filectime("css/intermediary.css");
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>Online Trial Tracker</title>
     <link href="css/intermediary.css?t=<?php echo $lastChangedTime;?>" rel="stylesheet" type="text/css" media="all" />
+    <link href="css/themes/cupertino/jquery-ui-1.8.17.custom.css" rel="stylesheet" type="text/css" media="all" />
     <script src="scripts/jquery.js" type="text/javascript"></script>
     <script src="scripts/func.js" type="text/javascript"></script>	
-    <script src="scripts/jquery-ui-1.8.16.custom.min.js" type="text/javascript"></script>
+    <script src="scripts/jquery-1.7.1.min.js"></script>
+	<script src="scripts/jquery-ui-1.8.17.custom.min.js"></script>
     <script type="text/javascript">
 		var _gaq = _gaq || [];
 		_gaq.push(['_setAccount', 'UA-18240582-3']);
@@ -86,49 +87,128 @@ $lastChangedTime = filectime("css/intermediary.css");
     <script type="text/javascript"> 
     //<![CDATA[
     function showValues(value) 
-	{
+	{	
           if(value == 'inactive') 
-		  {
-          	document.getElementById('so1').innerHTML = 
-				 "<input type='checkbox' name='wh' value='1' />Withheld<br/>"+
-				 "<input type='checkbox' name='afm' value='1' />Approved for marketing<br/>" +
-				 "<input type='checkbox' name='tna' value='1' />Temporarily not available<br/>" + 
-				 "<input type='checkbox' name='nla' value='1' />No Longer Available<br/>" + 
-				 "<input type='checkbox' name='wd' value='1' />Withdrawn<br/>" + 
-				 "<input type='checkbox' name='t' value='1' />Terminated<br/>" +
-				 "<input type='checkbox' name='s' value='1' />Suspended<br/>" +
-				 "<input type='checkbox' name='c' value='1' />Completed<br/>";
+		  {	
+          	document.getElementById('statuscontainer').innerHTML = 
+				 "<input type='checkbox' class='status' value='6' />Withheld<br/>"+
+				 "<input type='checkbox' class='status' value='7' />Approved for marketing<br/>" +
+				 "<input type='checkbox' class='status' value='8' />Temporarily not available<br/>" + 
+				 "<input type='checkbox' class='status' value='9' />No Longer Available<br/>" + 
+				 "<input type='checkbox' class='status' value='10' />Withdrawn<br/>" + 
+				 "<input type='checkbox' class='status' value='11' />Terminated<br/>" +
+				 "<input type='checkbox' class='status' value='12' />Suspended<br/>" +
+				 "<input type='checkbox' class='status' value='13' />Completed<br/>";
           } 
 		  else if(value == 'active') 
-		  {
-			document.getElementById('so1').innerHTML = 
-				'<input type="checkbox" name="nyr" value="1" />Not yet recruiting<br/>' +
-				'<input type="checkbox" name="r" value="1" />Recruiting<br/>' + 
-				'<input type="checkbox" name="ebi" value="1" />Enrolling by invitation<br/>' + 
-				'<input type="checkbox" name="anr" value="1" />Active, not recruiting<br/>' + 
-				'<input type="checkbox" name="av" value="1" />Available<br/>' +
-				'<input type="checkbox" name="nlr" value="1" />No longer recruiting<br/>';
+		  {	
+			document.getElementById('statuscontainer').innerHTML = 
+				'<input type="checkbox" class="status" value="0" />Not yet recruiting<br/>' +
+				'<input type="checkbox" class="status" value="1" />Recruiting<br/>' + 
+				'<input type="checkbox" class="status" value="2" />Enrolling by invitation<br/>' + 
+				'<input type="checkbox" class="status" value="3" />Active, not recruiting<br/>' + 
+				'<input type="checkbox" class="status" value="4" />Available<br/>' +
+				'<input type="checkbox" class="status" value="5" />No longer recruiting<br/>';
           } 
 		  else 
-		  {
-			document.getElementById('so1').innerHTML = 
-				'<input type="checkbox" name="wh" value="1" />Withheld<br/>'+
-				'<input type="checkbox" name="afm" value="1" />Approved for marketing<br/>' +
-				'<input type="checkbox" name="tna" value="1" />Temporarily not available<br/>' + 
-				'<input type="checkbox" name="nla" value="1" />No Longer Available<br/>' + 
-				'<input type="checkbox" name="wd" value="1" />Withdrawn<br/>' + 
-				'<input type="checkbox" name="t" value="1" />Terminated<br/>' +
-				'<input type="checkbox" name="s" value="1" />Suspended<br/>' +
-				'<input type="checkbox" name="c" value="1" />Completed<br/>' +
-				'<input type="checkbox" name="nyr" value="1" />Not yet recruiting<br/>' +
-				'<input type="checkbox" name="r" value="1" />Recruiting<br/>' + 
-				'<input type="checkbox" name="ebi" value="1" />Enrolling by invitation<br/>' + 
-				'<input type="checkbox" name="anr" value="1" />Active, not recruiting<br/>' + 
-				'<input type="checkbox" name="av" value="1" />Available<br/>' +
-				'<input type="checkbox" name="nlr" value="1" />No longer recruiting<br/>';
+		  { 
+			document.getElementById('statuscontainer').innerHTML = 
+				'<input type="checkbox" class="status" value="0" />Not yet recruiting<br/>' +
+				'<input type="checkbox" class="status" value="1" />Recruiting<br/>' + 
+				'<input type="checkbox" class="status" value="2" />Enrolling by invitation<br/>' + 
+				'<input type="checkbox" class="status" value="3" />Active, not recruiting<br/>' + 
+				'<input type="checkbox" class="status" value="4" />Available<br/>' +
+				'<input type="checkbox" class="status" value="5" />No longer recruiting<br/>' +
+				'<input type="checkbox" class="status" value="6" />Withheld<br/>'+
+				'<input type="checkbox" class="status" value="7" />Approved for marketing<br/>' +
+				'<input type="checkbox" class="status" value="8" />Temporarily not available<br/>' + 
+				'<input type="checkbox" class="status" value="9" />No Longer Available<br/>' + 
+				'<input type="checkbox" class="status" value="10" />Withdrawn<br/>' + 
+				'<input type="checkbox" class="status" value="11" />Terminated<br/>' +
+				'<input type="checkbox" class="status" value="12" />Suspended<br/>' +
+				'<input type="checkbox" class="status" value="13" />Completed<br/>';
           }
       }
     //]]>
+	
+	function timeEnum($timerange)
+	{
+		switch($timerange)
+		{
+			case 1: $timerange = "1 week"; break;
+			case 2: $timerange = "2 weeks"; break;
+			case 3: $timerange = "1 month"; break;
+			case 4: $timerange = "1 quarter"; break;
+			case 5: $timerange = "1 year"; break;
+		}
+		return $timerange;
+	}
+	
+	$(function() 
+	{
+		$("#slider-range").slider({
+			range: true,
+			min: 0,
+			max: 300,
+			values: [ 0, 300 ],
+			slide: function( event, ui ) {
+				$("#amount").val(ui.values[ 0 ] + " - " + ui.values[ 1 ] );
+			}
+		});
+		$("#amount").val( $("#slider-range").slider("values", 0 ) +
+			" - " + $("#slider-range").slider("values", 1 ) );
+		
+		$("#slider-range-min").slider({
+			range: "min",
+			value: 3,
+			min: 1,
+			max: 5,
+			step:1,
+			slide: function( event, ui ) {
+				$("#amount3").val(timeEnum(ui.value));
+			}
+		});
+		//$timerange = timeEnum($("#slider-range-min").slider("value"));
+		//$("#amount3").val($timerange);
+		
+		$("#frmOtt").submit(function() {	
+			
+			//set phase filters
+			var phase = new Array();
+			$('input.phase:checked').each(function(index) 
+			{	
+				phase.push($(this).val());
+			});
+			$("#phase").val(phase);
+			
+			//set region filters
+			var region = new Array();
+			$('input.region:checked').each(function(index) 
+			{	
+				region.push($(this).val());
+			});
+			$("#region").val(region);
+			
+			//set institution type filters
+			var institution = new Array();
+			$('input.institution:checked').each(function(index) 
+			{	
+				institution.push($(this).val());
+			});
+			$("#itype").val(institution);
+			
+			//set status filters
+			var status = new Array();
+			$('input.status:checked').each(function(index) 
+			{	
+				status.push($(this).val());
+			});
+			$("#status").val(status);
+			
+			$("#change").val($("#amount3").val());
+			
+		});
+	});
     </script>
     
     <script type="text/javascript">
@@ -153,29 +233,60 @@ $lastChangedTime = filectime("css/intermediary.css");
 </div>
 <?php
 $globalOptions['sortOrder'] = $sortFields;
+
 $globalOptions['type'] = 'activeTrials';
-$globalOptions['findChangesFrom'] = rawurlencode(base64_encode(gzdeflate('week')));
+$globalOptions['enroll'] = '';
+$globalOptions['status'] = array();
+$globalOptions['itype'] = array();
+$globalOptions['region'] = array();
+$globalOptions['phase'] = array();
+
+$globalOptions['change'] = '1 month';
 $globalOptions['version'] = rawurlencode(base64_encode('0'));
 
 $globalOptions['page'] = 1;
 $globalOptions['onlyUpdates'] = "no";
 $globalOptions['encodeFormat'] = "old";
-$globalOptions['filtersOne'] = array();
-$globalOptions['filtersTwo'] = array();
 $globalOptions['LI'] = "0";
 
-if(isset($_GET['fcf']))
+if(isset($_GET['region']) && $_GET['region'] != '')
 {
-	$globalOptions['findChangesFrom'] = $_GET['fcf'];
+	$globalOptions['region'] = explode(',', $_GET['region']);
 }
+
+if(isset($_GET['phase']) && $_GET['phase'] != '')
+{
+	$globalOptions['phase'] = explode(',', $_GET['phase']);
+}
+
+if(isset($_GET['itype']) && $_GET['itype'] != '')
+{
+	$globalOptions['itype'] = explode(',', $_GET['itype']);
+}
+
+if(isset($_GET['status']) && $_GET['status'] != '')
+{
+	$globalOptions['status'] = explode(',', $_GET['status']);
+}
+
+if(isset($_GET['enroll']) && $_GET['enroll'] != '0 - 300')
+{	
+	$globalOptions['enroll'] = $_GET['enroll'];
+}
+
+if(isset($_GET['change']))
+{
+	$globalOptions['change'] = ($_GET['change'] == '1 quarter') ? '3 months' : $_GET['change'];
+}
+
 
 if(isset($_GET['list']))
 {
-	if(gzinflate(base64_decode(rawurldecode($_GET['list']))) == 'in')
+	if($_GET['list'] == 0)
 	{
 		$globalOptions['type'] = 'inactiveTrials';
 	}
-	elseif(gzinflate(base64_decode(rawurldecode($_GET['list']))) == 'al')
+	elseif($_GET['list'] == 2)
 	{
 		$globalOptions['type'] = 'allTrials';
 	}
@@ -191,22 +302,9 @@ if(isset($_GET['v']))
 	$globalOptions['version'] = mysql_real_escape_string($_GET['v']);
 }
 
-if(isset($_GET['osu']) && gzinflate(base64_decode($_GET['osu'])) == 'on')
+if(isset($_GET['osu']) && $_GET['osu'] == 'on')
 {
 	$globalOptions['onlyUpdates'] = "yes";
-}
-
-if(isset($_GET['so1']))
-{
-	$globalOptions['filtersOne'] = $_GET['so1'];
-}
-
-if(isset($_GET['so2']))
-{
-	foreach($_GET['so2'] as $key => $value)
-	{
-		$globalOptions['filtersTwo'][] = gzinflate(base64_decode(rawurldecode($value)));
-	}
 }
 
 if(isset($_GET['cd']))
