@@ -16,7 +16,7 @@ class TrialTracker
 	private $inactiveStatusValues = array();
 	private $activeStatusValues = array();
 	private $allStatusValues = array();
-	private $resultsPerPage = 10;//0;
+	private $resultsPerPage = 100;
 	private $enumVals = array();
 	private $phaseValues = array();
 	
@@ -7891,7 +7891,7 @@ class TrialTracker
 						$pkeys = array_search($this->phaseFilters, $rvalue['phase']);
 						if(in_array($pkeys, $globalOptions['phase']))
 						{
-							$Trials['allTrials'][$rkey] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+							$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
 							if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
 							{
 								$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
@@ -8220,7 +8220,7 @@ class TrialTracker
 	}
 	
 	function displayFilterControls($shownCount, $activeCount, $inactiveCount, $totalCount, $globalOptions = array())
-	{	//echo 'globalOptions<pre>';print_r($globalOptions);
+	{	
 		echo '<table width="75%" border="0" cellspacing="0" class="controls">'
 				. '<tr><td>Active</td><td>Status</td><td>Institution Type</td>'
 				. '<td>Region</td><td>Phase</td><td class="right">Ranges</td></tr>'
@@ -8675,7 +8675,8 @@ class TrialTracker
 				$attr = '" title="New record';
 				$titleLinkColor = '#FF0000;';
 			}				
-			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse"><a style="color:' . $titleLinkColor . '"  href="http://clinicaltrials.gov/ct2/show/' . padnct($trials[$i]['NCT/nct_id']) . '" target="_blank" ';
+			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse"><a style="color:' 
+						. $titleLinkColor . '"  href="http://clinicaltrials.gov/ct2/show/' . padnct($trials[$i]['NCT/nct_id']) . '" target="_blank" ';
 			
 			if(($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed'))
 			{
