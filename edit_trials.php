@@ -1,3 +1,53 @@
+<?php
+require_once('krumo/class.krumo.php');
+require_once('db.php');
+require_once('include.search.php');
+require_once('include.util.php');
+require_once 'include.page.php';
+$table = 'products';
+$script = 'edit_trials';
+require('header.php');	
+global $db;
+?>
+<script type="text/javascript">
+<?
+if(isset($_REQUEST['id']))	//load search from Saved Search
+{
+	$id = ($_REQUEST['id'])?$_REQUEST['id']:null;
+	$searchDbData = getSearchData($table, 'searchdata', $id);
+	//$show_value = 'loadQueryData("' . $data . '");';
+	//$show_value = "loadQueryData('" . $searchDbData . "');";
+	$show_value = "searchDbData = '" . $searchDbData . "';";
+	echo($show_value);
+
+}
+else
+{
+	$show_value = "searchDbData = '';";
+	echo($show_value);
+}		
+
+?>
+function upmdelsure(){ return confirm("Are you sure you want to delete this product?"); }
+$(document).ready(function(){
+	var options, a,b;
+	
+	jQuery(function(){
+	  options = { serviceUrl:'autosuggest.php',params:{table:<?php echo "'$table'"?>,field:'name'} };
+	  if($('#PME_data_intervention_name').length>0)
+	  a = $('#PME_data_intervention_name').autocomplete(options);
+	  b = $('#name').autocomplete(options);
+	});
+	$(".ajax").colorbox({
+		onComplete:function(){ loadQueryData($('#searchdata').val());},
+		onClosed:function(){ newSearch(); },
+		inline:true, 
+		width:"100%",
+		height:"100%"
+			});
+	$("#inline_outer").hide();
+});
+</script>
 <style type="text/css">
 	hr.pme-hr		     { border: 0px solid; padding: 0px; margin: 0px; border-top-width: 1px; height: 1px; }
 	table.pme-main 	     { border: #004d9c 1px solid; border-collapse: collapse; border-spacing: 0px; width: 100%; }
@@ -10,7 +60,13 @@
 	td.pme-buttons { text-align: left;   }
 	td.pme-message { text-align: center; }
 	td.pme-stats   { text-align: right;  }
-</style><?php
+	td,th,label,form dd{
+	width:500px;
+	/*background-color:#DDF;*/
+	background-color:#FFF;
+}
+</style>
+<?php
 
 require_once('db.php');
 global $db;
