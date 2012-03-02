@@ -127,8 +127,10 @@ function calc_cells($parameters,$update_id=NULL)
 					$data[] = $row["trial"];
 			}
 			$cnt_total=count($data);
+			
 			if(!$cnt_total or $cnt_total<1) 
 			{
+				
 				if($counter>=1000)
 				{
 					$counter=0;
@@ -159,7 +161,7 @@ function calc_cells($parameters,$update_id=NULL)
 					JOIN product_trials p ON a.`trial`=p.`trial`
 					JOIN data_trials d ON p.`trial`=d.`larvol_id`
 					where a.`area`="'.$av['id'].'" and p.`product`="'.$pv['id'].'" and d.`is_active`="1"	';
-
+			
 			if(!$res = mysql_query($query))
 					{
 						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -196,7 +198,9 @@ function calc_cells($parameters,$update_id=NULL)
 				return false;
 			}
 			$row = mysql_fetch_assoc($res);
+			
 			$max_phase = $row["max_phase"];
+			
 			$bomb=getBombdtl($data);
 			if($counter>=1000)
 			{
@@ -204,6 +208,7 @@ function calc_cells($parameters,$update_id=NULL)
 				echo '<br>1000 records added, sleeping 2 seconds....'.str_repeat("  ",800);
 				sleep(2);
 			}
+			
 			add_data($av['id'],$pv['id'],$cnt_total,$cnt_active,$bomb,$max_phase);
 			$progress_count ++;
 			if($cron_run)
@@ -232,6 +237,7 @@ function calc_cells($parameters,$update_id=NULL)
 		}
 	}
 	echo '<br>All Done.';
+	return true;
 }			
 function add_data($arid,$prid,$cnt_total,$cnt_active,$bomb,$max_phase)
 {
@@ -251,7 +257,7 @@ function add_data($arid,$prid,$cnt_total,$cnt_active,$bomb,$max_phase)
 			return false;
 		}
 	$row = mysql_fetch_assoc($res);
-//			pr($row);
+	
 	if($row["area"])
 	{
 		$query='UPDATE rpt_masterhm_cells SET 
@@ -259,8 +265,8 @@ function add_data($arid,$prid,$cnt_total,$cnt_active,$bomb,$max_phase)
 				`count_active` ="'. $cnt_active.'",
 				`bomb_auto` = "'. $bomb .'",
 				`highest_phase` = "'. $max_phase .'",
-				`last_update` = "'. $curtime .'"
-
+				`last_update` = "'. $curtime .'" where
+				`area`="'.$arid.'" and `product`="'.$prid.'" 
 				';
 		if(!$res = mysql_query($query))
 		{
@@ -269,6 +275,7 @@ function add_data($arid,$prid,$cnt_total,$cnt_active,$bomb,$max_phase)
 			echo $log;
 			return false;
 		}
+		
 	}
 	else
 	{
