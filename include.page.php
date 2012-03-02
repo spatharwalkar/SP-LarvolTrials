@@ -1020,6 +1020,14 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 	{
 		//echo '<input type="hidden" id="product_id" name="product_id" value="'.$upm_product_id.'">';
 	}
+	if($table=='products' || $table=='areas' && isset($options['preindexProgress']) && isset($options['preindexStatus']) && $id)
+	{
+		$status = array('Completed','Ready','Running','Error','Cancelled');
+		echo "<tr><td>Preindex Status:</td><td align=\"left\" class=\"norm\">";
+		echo "<span class=\"progressBar\" id=\"product_update\">{$options['preindexProgress']}</span>";
+		echo "&nbsp;<span>{$status[$options['preindexStatus']['status']]}.</span>";
+		echo "</td></tr>";	
+	}
 	echo '<tr>&nbsp;<td></td><td><input name ="save" type="submit" value="Save"/></td>';
 	echo '</table>';
 	echo '</form>';
@@ -1236,11 +1244,14 @@ function upmChangeLog($id)
 }
 /**
  * @name softDieSession
- * @tutorial Logs die messages into session log for future usage.
+ * @tutorial Logs die messages into session log for future usage & also logs into the logger.
  * @param $out error output.
+ * @param $raw 1=outputs message to screen 0 = no output displayed
+ * @param $log 1 = logs to logger
+ * @param $level if $log = 1 takes the logging level threshold.
  * @author Jithu Thomas
  */	
-function softDieSession($out,$raw=0)
+function softDieSession($out,$raw=0,$log=0,$level='')
 {
 	$_SESSION['page_errors'][] = $out;
 	if($raw==1)
@@ -1363,4 +1374,31 @@ function parseProductsXmlAndSave($xmlImport,$table)
 		//ob_end_clean();
 	}
 	return array('success'=>$success,'fail'=>$fail,'skip'=>$skip,'delete'=>$delete);
+}
+
+/**
+* @name getPreindexProgress
+* @tutorial Get preindexing progress data,
+* Currently it supports products/areas page after save operation preindex progress data.
+* @param $type type of preindex data. Eg: PRODUCT2,AREA2
+* @author Jithu Thomas
+*/
+function getPreindexProgress($type)
+{
+	global $db;
+	$query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
+							`update_items_total`,`update_items_progress`,`er_message`,TIMEDIFF(updated_time, start_time) AS timediff,
+							`update_items_complete_time` FROM update_status_fullhistory where trial_type="'.$type.'"';
+	if(!$res = mysql_query($query))
+	{
+		$msg = 'There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+		softDieSession($msg,$raw=0,1);
+		return false;
+	}	
+	
+	$status = array();
+	while($row = mysql_fetch_assoc($res))
+	$status = $row;	
+	
+	return $status;
 }
