@@ -68,7 +68,7 @@ if($db->loggedIn())
 	echo(' :: ');
 	echo('<div class="drop">Import<br/>'
 	.'<a href="import.php">XML Import</a><br/>'
-	.'<a href="entry.php">Trial Entry</a>'
+	.'<a href="edit_trials.php">Trial Entry</a>'
 	.'<a href="upm.php">UPM</a>'
 	.'<a href="areas.php">Areas</a>'
 	.'<a href="products.php">Products</a>'
