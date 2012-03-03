@@ -1,5 +1,6 @@
 <?php
 //Count the Nummber of View of Records diplayes in OTT
+session_start();
 require_once('db.php');
 global $db;
 $loggedIn	= $db->loggedIn();
