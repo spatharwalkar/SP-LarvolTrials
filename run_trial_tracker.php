@@ -6013,7 +6013,7 @@ class TrialTracker
 						while($row = mysql_fetch_assoc($res))
 						{
 							$TrialsInfo[$pkey]['sectionHeader'] = $row['name'] 
-							. (($row['company'] !== NULL && $row['company'] != '') ? " / " . $row['company'] . "" : '');
+							. (($row['company'] !== NULL && $row['company'] != '') ? " / <i>" . $row['company'] . "</i>" : '');
 							$TrialsInfo[$pkey]['naUpms'] = 
 							$this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
 							
@@ -6078,7 +6078,7 @@ class TrialTracker
 							while($row = mysql_fetch_assoc($res))
 							{
 								$TrialsInfo[$pkey]['sectionHeader'] = $row['name']
-								. (($row['company'] !== NULL && $row['company'] != '') ? " / " . $row['company'] . "" : '');
+								. (($row['company'] !== NULL && $row['company'] != '') ? " / <i>" . $row['company'] . "</i>" : '');
 								$TrialsInfo[$pkey]['naUpms'] = 
 								$this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
 								
@@ -6104,7 +6104,7 @@ class TrialTracker
 				$Ids[0]['product'] = $row['id'];
 				
 				$TrialsInfo[0]['sectionHeader'] = $row['name']
-				. (($row['company'] !== NULL && $row['company'] != '') ? " / " . $row['company'] . "" : '');
+				. (($row['company'] !== NULL && $row['company'] != '') ? " / <i>" . $row['company'] . "</i>" : '');
 				$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
 				if(!empty($TrialsInfo[0]['naUpms']))
 				{
