@@ -4230,7 +4230,7 @@ class TrialTracker
 						.'<body>'
 						.'<div align="center"><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="200" height="25" id="header" /></div><br/>';
 		
-		$timeInterval = $this->getDecodedValue($globalOptions['findChangesFrom']);
+		$timeInterval = '-' . $globalOptions['change'];
 		$Values = array();
 		
 		if($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed')
@@ -5993,7 +5993,7 @@ class TrialTracker
 			$TrialsInfo = array();
 			$Ids = array();
 			
-			$timeInterval = $this->getDecodedValue($globalOptions['findChangesFrom']);
+			$timeInterval = '-' . $globalOptions['change'];
 			
 			$resultIds['product'] = explode(',', $resultIds['product']);
 			$resultIds['area'] = explode(',', $resultIds['area']);
@@ -7156,7 +7156,7 @@ class TrialTracker
 					$ures = mysql_query($uquery);
 					while($arr = mysql_fetch_assoc($ures))
 					{
-						if($arr['end_date_lastchanged'] < date('Y-m-d', $timeMachine) 
+						if($arr['end_date_lastchanged'] <= date('Y-m-d', $timeMachine) 
 						&& $arr['end_date_lastchanged'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
 						{
 							if($arr['end_date_prev'] != '' && $arr['end_date_prev'] !== NULL)
@@ -7169,7 +7169,7 @@ class TrialTracker
 							}
 						}
 						
-						if($arr['region_lastchanged'] < date('Y-m-d', $timeMachine) 
+						if($arr['region_lastchanged'] <= date('Y-m-d', $timeMachine) 
 						&& $arr['region_lastchanged'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
 						{
 							if($arr['region_prev'] != '' && $arr['region_prev'] !== NULL)
@@ -7182,7 +7182,7 @@ class TrialTracker
 							}
 						}
 						
-						if($arr['brief_title_lastchanged'] < date('Y-m-d', $timeMachine) 
+						if($arr['brief_title_lastchanged'] <= date('Y-m-d', $timeMachine) 
 						&& $arr['brief_title_lastchanged'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
 						{
 							if($arr['brief_title_prev'] != '' && $arr['brief_title_prev'] !== NULL)
@@ -7195,7 +7195,7 @@ class TrialTracker
 							}
 						}
 						
-						if($arr['acronym_lastchanged'] < date('Y-m-d', $timeMachine) 
+						if($arr['acronym_lastchanged'] <= date('Y-m-d', $timeMachine) 
 						&& $arr['acronym_lastchanged'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
 						{
 							if($arr['acronym_prev'] != '' && $arr['acronym_prev'] !== NULL)
@@ -7208,7 +7208,7 @@ class TrialTracker
 							}
 						}
 						
-						if($arr['lead_sponsor_lastchanged'] < date('Y-m-d', $timeMachine) 
+						if($arr['lead_sponsor_lastchanged'] <= date('Y-m-d', $timeMachine) 
 						&& $arr['lead_sponsor_lastchanged'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
 						{
 							if($arr['lead_sponsor_prev'] != '' && $arr['lead_sponsor_prev'] !== NULL)
@@ -7221,7 +7221,7 @@ class TrialTracker
 							}
 						}
 
-						if($arr['start_date_lastchanged'] < date('Y-m-d', $timeMachine) 
+						if($arr['start_date_lastchanged'] <= date('Y-m-d', $timeMachine) 
 						&& $arr['start_date_lastchanged'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
 						{
 							if($arr['start_date_prev'] != '' && $arr['start_date_prev'] !== NULL)
@@ -7234,7 +7234,7 @@ class TrialTracker
 							}
 						}
 
-						if($arr['phase_lastchanged'] < date('Y-m-d', $timeMachine) 
+						if($arr['phase_lastchanged'] <= date('Y-m-d', $timeMachine) 
 						&& $arr['phase_lastchanged'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
 						{
 							if($arr['phase_prev'] != '' && $arr['phase_prev'] !== NULL)
@@ -7247,7 +7247,7 @@ class TrialTracker
 							}
 						}
 							
-						if($arr['enrollment_lastchanged'] < date('Y-m-d', $timeMachine) 
+						if($arr['enrollment_lastchanged'] <= date('Y-m-d', $timeMachine) 
 						&& $arr['enrollment_lastchanged'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
 						{
 							if($arr['enrollment_prev'] != '' && $arr['enrollment_prev'] !== NULL)
@@ -7260,7 +7260,7 @@ class TrialTracker
 							}
 						}
 
-						if($arr['collaborator_lastchanged'] < date('Y-m-d', $timeMachine) 
+						if($arr['collaborator_lastchanged'] <= date('Y-m-d', $timeMachine) 
 						&& $arr['collaborator_lastchanged'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
 						{
 							if($arr['collaborator_prev'] != '' && $arr['collaborator_prev'] !== NULL)
@@ -7273,7 +7273,7 @@ class TrialTracker
 							}
 						}
 
-						if($arr['condition_lastchanged'] < date('Y-m-d', $timeMachine) 
+						if($arr['condition_lastchanged'] <= date('Y-m-d', $timeMachine) 
 						&& $arr['condition_lastchanged'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
 						{
 							if($arr['condition_prev'] != '' && $arr['condition_prev'] !== NULL)
@@ -7286,7 +7286,7 @@ class TrialTracker
 							}
 						}
 
-						if($arr['intervention_name_lastchanged'] < date('Y-m-d', $timeMachine) 
+						if($arr['intervention_name_lastchanged'] <= date('Y-m-d', $timeMachine) 
 						&& $arr['intervention_name_lastchanged'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
 						{
 							if($arr['intervention_name_prev'] != '' && $arr['intervention_name_prev'] !== NULL)
@@ -7299,7 +7299,7 @@ class TrialTracker
 							}
 						}
 
-						if($arr['overall_status_lastchanged'] < date('Y-m-d', $timeMachine) 
+						if($arr['overall_status_lastchanged'] <= date('Y-m-d', $timeMachine) 
 						&& $arr['overall_status_lastchanged'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
 						{
 							if($arr['overall_status_prev'] != '' && $arr['overall_status_prev'] !== NULL)
@@ -9687,17 +9687,11 @@ class TrialTracker
 		return $outputStr;	
 	}
 	
-	function getDecodedValue($encodedValue)
-	{
-		return gzinflate(base64_decode($encodedValue));
-	}
-	
 	function getTrialUpdates($nctId, $larvolId, $timeMachine = NULL, $timeInterval)
 	{	
 		global $now;
 		
 		if($timeMachine === NULL) $timeMachine = $now;
-		$timeInterval = '-1 ' . $timeInterval;
 		
 		$updates = array('edited' => array(), 'new' => 'n');
 		
@@ -9710,15 +9704,15 @@ class TrialTracker
 		$res = mysql_query("SELECT DISTINCT `df`.`name` AS `fieldname`, `df`.`id` AS `fieldid`, `df`.`type` AS `fieldtype`, `dv`.`studycat` "
 				. "FROM `data_values` `dv` LEFT JOIN `data_fields` `df` ON (`df`.`id`=`dv`.`field`) WHERE `df`.`name` IN ('" 
 				. join("','", $fieldnames) . "') AND `studycat` = '" . $studycatData['studycat'] 
-				. "' AND (`dv`.`superceded`<'" . date('Y-m-d', $timeMachine) . "' AND `dv`.`superceded`>= '" 
+				. "' AND (`dv`.`superceded`<= '" . date('Y-m-d', $timeMachine) . "' AND `dv`.`superceded`>= '" 
 				. date('Y-m-d', strtotime($timeInterval, $timeMachine)) . "') ");
 		
 		while ($row = mysql_fetch_assoc($res)) 
 		{
 			//getting previous value for updated trials
 			$result = mysql_fetch_assoc(mysql_query("SELECT `" . 'val_'.$row['fieldtype'] . "` AS value FROM `data_values` WHERE `studycat` = '" 
-				. $studycatData['studycat'] . "' AND `field` =  '" . $row['fieldid'] . "' AND (`superceded`<'" . date('Y-m-d', $timeMachine) 
-				. "' AND `superceded`>= '" . date('Y-m-d', strtotime($timeInterval, $timeMachine)) . "') "));
+				. $studycatData['studycat'] . "' AND `field` =  '" . $row['fieldid'] . "' AND (`superceded` <= '" . date('Y-m-d', $timeMachine) 
+				. "' AND `superceded` >= '" . date('Y-m-d', strtotime($timeInterval, $timeMachine)) . "') "));
 		
 			$val = $result['value'];
 			
@@ -9735,7 +9729,7 @@ class TrialTracker
 				$updates['edited']['NCT/'.$row['fieldname']] = 'No previous value';
 		}
 		
-		$query = "SELECT inactive_date_prev FROM `clinical_study` WHERE larvol_id = '" . $larvolId . "' AND (inactive_date_lastchanged <'" 
+		$query = "SELECT inactive_date_prev FROM `clinical_study` WHERE larvol_id = '" . $larvolId . "' AND (inactive_date_lastchanged <= '" 
 			. date('Y-m-d',$timeMachine) . "' AND inactive_date_lastchanged >= '" . date('Y-m-d',strtotime($timeInterval,$timeMachine)) . "')";
 		$res = mysql_query($query);
 		
@@ -9777,7 +9771,6 @@ class TrialTracker
 		$values = array();
 		
 		if($timeMachine === NULL) $timeMachine = $now;
-		$timeInterval = '-1 ' . $timeInterval;
 		
 		$result = mysql_query("SELECT id, event_type, corresponding_trial, event_description, event_link, result_link, start_date, end_date, status "
 								. "FROM upm WHERE corresponding_trial = '" . $trialId . "' ");
@@ -9798,7 +9791,7 @@ class TrialTracker
 				
 			//Query for checking updates for upms.
 			$sql = "SELECT `id`, `field`, `old_value` FROM `upm_history` "
-					. " WHERE `id` = '" . $row['id'] . "' AND (`change_date` < '" . date('Y-m-d', $timeMachine) . "' AND `change_date` >= '" 
+					. " WHERE `id` = '" . $row['id'] . "' AND (`change_date` <= '" . date('Y-m-d', $timeMachine) . "' AND `change_date` >= '" 
 					. date('Y-m-d', strtotime($timeInterval ,$timeMachine)) . "') ORDER BY `change_date` DESC LIMIT 0,1 ";
 			$res = mysql_query($sql);
 			
@@ -9812,7 +9805,7 @@ class TrialTracker
 				$upm['matchedupms'][$i]['edited'][$arr['field']] = $arr['old_value'];
 			}
 			
-			$query = " SELECT u.id FROM `upm` u LEFT JOIN `upm_history` uh ON u.`id` = uh.`id` WHERE u.`id` = '" . $row['id'] . "' AND u.`last_update` < '" 
+			$query = " SELECT u.id FROM `upm` u LEFT JOIN `upm_history` uh ON u.`id` = uh.`id` WHERE u.`id` = '" . $row['id'] . "' AND u.`last_update` <= '" 
 				. date('Y-m-d', $timeMachine) . "' AND u.`last_update` >=  '" . date('Y-m-d', strtotime($timeInterval, $timeMachine)) . "' AND uh.`id` IS NULL ";
 		
 			$ress = mysql_query($query);
@@ -9834,7 +9827,6 @@ class TrialTracker
 		$i = 0;
 		
 		if($timeMachine === NULL) $timeMachine = $now;
-		$timeInterval = '-1 ' . $timeInterval;
 		
 		foreach($naUpmsRegex as $ukey => $uvalue)
 		{
@@ -9871,7 +9863,7 @@ class TrialTracker
 							$naUpms[$i]['edited'] = array();
 							
 							$sql = "SELECT `id`, `field`, `old_value` FROM `upm_history` "
-									. " WHERE `id` = '" . $row['id'] . "' AND (`change_date` < '" . date('Y-m-d', $timeMachine) 
+									. " WHERE `id` = '" . $row['id'] . "' AND (`change_date` <= '" . date('Y-m-d', $timeMachine) 
 									. "' AND `change_date` >= '" . date('Y-m-d',strtotime($timeInterval, $timeMachine)) . "') ORDER BY `change_date` DESC LIMIT 0,1 ";
 							$ress = mysql_query($sql);
 							
@@ -9886,7 +9878,7 @@ class TrialTracker
 							}
 							
 							$sql = " SELECT u.id FROM `upm` u LEFT JOIN `upm_history` uh ON u.`id` = uh.`id` WHERE u.`id` = '" . $value['id'] 
-									. "' AND u.`last_update` < '" . date('Y-m-d', $timeMachine) . "' AND u.`last_update` >=  '" 
+									. "' AND u.`last_update` <= '" . date('Y-m-d', $timeMachine) . "' AND u.`last_update` >=  '" 
 									. date('Y-m-d', strtotime($timeInterval, $timeMachine)) . "' AND uh.`id` IS NULL ";
 							$reslt = mysql_query($sql);
 							if(mysql_num_rows($reslt) > 0)
@@ -9941,7 +9933,7 @@ class TrialTracker
 					$naUpms[$i]['edited'] = array();
 					
 					$sql = "SELECT `id`, `field`, `old_value` FROM `upm_history` "
-							. " WHERE `id` = '" . $row['id'] . "' AND (`change_date` < '" . date('Y-m-d', $timeMachine) 
+							. " WHERE `id` = '" . $row['id'] . "' AND (`change_date` <= '" . date('Y-m-d', $timeMachine) 
 							. "' AND `change_date` >= '" . date('Y-m-d',strtotime($timeInterval, $timeMachine)) . "') ORDER BY `change_date` DESC LIMIT 0,1 ";
 					$ress = mysql_query($sql);
 					
@@ -9956,7 +9948,7 @@ class TrialTracker
 					}
 					
 					$sql = " SELECT u.id FROM `upm` u LEFT JOIN `upm_history` uh ON u.`id` = uh.`id` WHERE u.`id` = '" . $value['id'] 
-							. "' AND u.`last_update` < '" . date('Y-m-d', $timeMachine) . "' AND u.`last_update` >=  '" 
+							. "' AND u.`last_update` <= '" . date('Y-m-d', $timeMachine) . "' AND u.`last_update` >=  '" 
 							. date('Y-m-d', strtotime($timeInterval, $timeMachine)) . "' AND uh.`id` IS NULL ";
 					$reslt = mysql_query($sql);
 					if(mysql_num_rows($reslt) > 0)
