@@ -497,6 +497,9 @@ function input_tag($row,$dbVal=null,$options=array())
 			$linkTarget = (isset($options['linkTarget']) && $options['linkTarget']=='_blank')?' target="_blank" ':'';
 			return '<a href="'.$row['Field'].'" title="'.$altTitle.'" alt="'.$altTitle.'" '.$linkTarget.'>'.$dbVal.'</a>';
 			break;	
+		case 'iframe':
+			return '<iframe src="'.$row['Field'].'" style="'.(isset($options['style'])?$options['style']:'').'" class="'.(isset($options['class'])?$options['class']:'').'"></iframe>';
+			break;
 		default:
 			$dateinput = (strpos($row['Field'], 'date') !== false) ? ' class="jdpicker"' : '';
 			return '<input '.$style.' type="text" value="'.$dbVal.'" name="'.$nameIndex.$row['Field'].'" id="'.$nameIndex.$row['Field'].'"' . $dateinput . '/>';
@@ -661,17 +664,11 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 		{
 			if($table=='products')
 			{
-				ob_start();
 				$_GET['id'] = mysql_insert_id();
-				require 'index_product.php';
-				ob_end_clean();
 			}
 			if($table=='areas')
 			{
-				ob_start();
 				$_GET['id'] = mysql_insert_id();
-				require 'index_area.php';
-				ob_end_clean();				
 			}
 			return 1;
 		}
@@ -737,22 +734,12 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 				}				
 			}
 			
-			if($table=='products')
-			{
-				ob_start();
-				require 'index_product.php';
-				ob_end_clean();
-			}
-			if($table=='areas')
-			{
-				ob_start();
-				require 'index_area.php';
-				ob_end_clean();
-			}			
+			return 1;			
 		}
 		else
 		{
-			softDieSession('Cannot update '.$table.mysql_error().' entry');		
+			softDieSession('Cannot update '.$table.mysql_error().' entry');	
+			return 0;	
 		}
 		
 	}

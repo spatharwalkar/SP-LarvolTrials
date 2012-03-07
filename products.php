@@ -146,6 +146,7 @@ if(isset($_GET['deleteId']) && is_numeric($_GET['deleteId']) && $deleteFlag)
 //save operation controller
 if($_GET['save']=='Save')
 {
+	$searchDataOld = $_GET['id']?getSearchData('products', 'searchdata', $_GET['id']):null;	
 	$saveStatus = saveData($_GET,$table);
 }
 
@@ -314,5 +315,8 @@ $(document).ready(function () {
   </script>
   
 <?php 
-
+if($saveStatus == 1 && $searchDataOld != $_GET['searchdata'])
+{
+	echo input_tag(array('Type'=>'iframe','Field'=>urlPath().'index_product.php?id='.$_GET['id']),null,array('style'=>"display:none"));die;
+}
 echo '</html>';

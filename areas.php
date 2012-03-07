@@ -58,13 +58,44 @@ $deleteFlag = 1;
 else
 $deleteFlag = null;
 
+//Header controller
+$_GET['header']='<script type="text/javascript" src="progressbar/jquery.progressbar.js"></script>
+<link href="css/status.css" rel="stylesheet" type="text/css" media="all" />'."\n";
+//get product status & progress bar controller
+$areaStatus = getPreindexProgress('AREA2');
+if($areaStatus['update_items_start_time']!="0000-00-00 00:00:00"&&$areaStatus['update_items_complete_time']!="0000-00-00 00:00:00"&&$areaStatus['status']==COMPLETED)
+$areaPreindexProgress=100;
+else
+$areaPreindexProgress=number_format(($areaStatus['update_items_total']==0?0:(($areaStatus['update_items_progress'])*100/$areaStatus['update_items_total'])),2);
+
+/* if(count($areaStatus)!=0 || 1)
+ {
+$_GET['header'] .= '<script type="text/javascript">'."\n";
+//$_GET['header'] .=  "$('#product_new').progressBar();"."\n";
+$_GET['header'] .=  "$('#product_update').progressBar({ barImage: 'images/progressbg_orange.gif'} );"."\n";
+$_GET['header'] .= '</script>'."\n";
+} */
+
+//end Header controller
+
 //reset controller
 if($_GET['reset'])
 header('Location: ' . urlPath() . $script.'.php');
 require('header.php');
+//reset header controller
+unset($_GET['header']);
+//
 echo('<script type="text/javascript" src="delsure.js"></script>');
 ?>
 <script type="text/javascript">
+$('#product_update').progressBar({ 	
+    barImage : {
+		0:  'images/progressbg_red.gif',
+		30: 'images/progressbg_orange.gif',
+		70: 'images/progressbg_green.gif'
+	},
+} );
+
 <?php
 		if(isset($_REQUEST['id']))	//load search from Saved Search
 		{
@@ -109,6 +140,7 @@ $(document).ready(function(){
 //save operation controller
 if($_GET['save']=='Save')
 {
+	$searchDataOld = $_GET['id']?getSearchData('areas', 'searchdata', $_GET['id']):null;
 	$saveStatus = saveData($_GET,$table);
 }
 
@@ -140,7 +172,7 @@ if($_REQUEST['add_new_record']=='Add New Record' || $_REQUEST['id'] && !$_GET['s
 {
 	$id = ($_REQUEST['id'])?$_REQUEST['id']:null;
 	echo '<div>';
-	addEditUpm($id,$table,$script,array("formOnSubmit"=>"onsubmit=\"return chkbox(this,'delsearch','searchdata');\"",'deletebox'=>true,'saveStatus'=>$saveStatus));
+	addEditUpm($id,$table,$script,array("formOnSubmit"=>"onsubmit=\"return chkbox(this,'delsearch','searchdata');\"",'deletebox'=>true,'saveStatus'=>$saveStatus,'preindexProgress'=>$areaPreindexProgress,'preindexStatus'=>$areaStatus));
 	echo '</div>';
 	echo '<br/>';
 }
@@ -248,6 +280,11 @@ $(document).ready(function () {
     	return false;
 
     }
+    $('#product_update').progressBar();
   </script>
 <?php 
+if($saveStatus == 1 && $searchDataOld != $_GET['searchdata'])
+{
+	echo input_tag(array('Type'=>'iframe','Field'=>urlPath().'index_area.php?id='.$_GET['id']),null,array('style'=>"display:none"));die;
+}
 echo '</html>';
