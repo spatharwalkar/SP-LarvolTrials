@@ -59,6 +59,37 @@ if(isset($_POST['btnDownload']))
 }
 $sortFields = array('phase' => 'pD', 'inactive_date' => 'iA', 'start_date' => 'sA', 'overall_status' => 'oA', 'enrollment' => 'eA');
 
+$globalOptions['sortOrder'] = $sortFields;
+
+$globalOptions['type'] = 'activeTrials';
+$globalOptions['enroll'] = '';
+$globalOptions['status'] = array();
+$globalOptions['itype'] = array();
+$globalOptions['region'] = array();
+$globalOptions['phase'] = array();
+
+$globalOptions['change'] = '1 month';
+$globalOptions['version'] = rawurlencode(base64_encode('0'));
+
+$globalOptions['page'] = 1;
+$globalOptions['onlyUpdates'] = "no";
+$globalOptions['encodeFormat'] = "old";
+$globalOptions['LI'] = "0";
+
+if(isset($_GET['change']))
+{
+	$globalOptions['change'] = $_GET['change'];
+}
+
+switch($globalOptions['change'])
+{
+	case "1 week": $change_value = 1; break;
+	case "2 weeks": $change_value = 2; break;
+	case "1 month": $change_value = 3; break;
+	case "1 quarter": $change_value = 4; break;
+	case "1 year": $change_value = 5; break;
+}
+	
 $lastChangedTime = filectime("css/intermediary.css");
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -160,7 +191,7 @@ $lastChangedTime = filectime("css/intermediary.css");
 		
 		$("#slider-range-min").slider({
 			range: "min",
-			value: 3,
+			value: <?php echo $change_value;?>,
 			min: 1,
 			max: 5,
 			step:1,
@@ -168,8 +199,8 @@ $lastChangedTime = filectime("css/intermediary.css");
 				$("#amount3").val(timeEnum(ui.value));
 			}
 		});
-		//$timerange = timeEnum($("#slider-range-min").slider("value"));
-		//$("#amount3").val($timerange);
+		$timerange = '<?php echo $globalOptions['change'];?>';
+		$("#amount3").val($timerange);
 		
 		$("#frmOtt").submit(function() {	
 			
@@ -232,23 +263,6 @@ $lastChangedTime = filectime("css/intermediary.css");
   <img id="loading-image" src="images/loading.gif" alt="Loading..." />
 </div>
 <?php
-$globalOptions['sortOrder'] = $sortFields;
-
-$globalOptions['type'] = 'activeTrials';
-$globalOptions['enroll'] = '';
-$globalOptions['status'] = array();
-$globalOptions['itype'] = array();
-$globalOptions['region'] = array();
-$globalOptions['phase'] = array();
-
-$globalOptions['change'] = '1 month';
-$globalOptions['version'] = rawurlencode(base64_encode('0'));
-
-$globalOptions['page'] = 1;
-$globalOptions['onlyUpdates'] = "no";
-$globalOptions['encodeFormat'] = "old";
-$globalOptions['LI'] = "0";
-
 if(isset($_GET['region']) && $_GET['region'] != '')
 {
 	$globalOptions['region'] = explode(',', $_GET['region']);
@@ -273,12 +287,6 @@ if(isset($_GET['enroll']) && $_GET['enroll'] != '0 - 300')
 {	
 	$globalOptions['enroll'] = $_GET['enroll'];
 }
-
-if(isset($_GET['change']))
-{
-	$globalOptions['change'] = ($_GET['change'] == '1 quarter') ? '3 months' : $_GET['change'];
-}
-
 
 if(isset($_GET['list']))
 {

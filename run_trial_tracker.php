@@ -103,7 +103,7 @@ class TrialTracker
 	{	
 		$Values = array();
 		
-		$timeInterval = '-' . $globalOptions['change'];
+		$timeInterval = '-' . (($globalOptions['change'] == '1 quarter') ? '3 months' : $globalOptions['change']);
 							
 		$currentYear = date('Y');
 		$secondYear	= date('Y')+1;
@@ -4230,7 +4230,7 @@ class TrialTracker
 						.'<body>'
 						.'<div align="center"><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="200" height="25" id="header" /></div><br/>';
 		
-		$timeInterval = '-' . $globalOptions['change'];
+		$timeInterval = '-' . (($globalOptions['change'] == '1 quarter') ? '3 months' : $globalOptions['change']);
 		$Values = array();
 		
 		if($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed')
@@ -5993,7 +5993,7 @@ class TrialTracker
 			$TrialsInfo = array();
 			$Ids = array();
 			
-			$timeInterval = '-' . $globalOptions['change'];
+			$timeInterval = '-' . (($globalOptions['change'] == '1 quarter') ? '3 months' : $globalOptions['change']);
 			
 			$resultIds['product'] = explode(',', $resultIds['product']);
 			$resultIds['area'] = explode(',', $resultIds['area']);
@@ -6219,7 +6219,7 @@ class TrialTracker
 		global $logger;
 		global $now;
 		
-		$timeInterval = '-' . $globalOptions['change'];
+		$timeInterval = '-' . (($globalOptions['change'] == '1 quarter') ? '3 months' : $globalOptions['change']);
 		
 		$Trials = array();
 		$TrialsInfo = array();
@@ -7020,7 +7020,7 @@ class TrialTracker
 		
 		if($timeMachine === NULL) $timeMachine = $now;
 		
-		$timeInterval = '-' . $globalOptions['change'];
+		$timeInterval = '-' . (($globalOptions['change'] == '1 quarter') ? '3 months' : $globalOptions['change']);
 		
 		$fieldNames = array('end_date_lastchanged', 'region_lastchanged', 'brief_title_lastchanged', 'acronym_lastchanged', 'lead_sponsor_lastchanged',
 		'overall_status_lastchanged', 'start_date_lastchanged', 'phase_lastchanged', 'enrollment_lastchanged', 
@@ -8253,7 +8253,7 @@ class TrialTracker
 	
 	function displayFilterControls($shownCount, $activeCount, $inactiveCount, $totalCount, $globalOptions = array())
 	{	
-		echo '<table width="75%" border="0" cellspacing="0" class="controls">'
+		echo '<table width="75%" border="0" cellspacing="0" class="controls" align="center">'
 				. '<tr><td>Active</td><td>Status</td><td>Institution Type</td>'
 				. '<td>Region</td><td>Phase</td><td class="right">Ranges</td></tr>'
 				. '<tr><td class="bottom">'
