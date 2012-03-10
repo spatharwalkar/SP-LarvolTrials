@@ -647,6 +647,7 @@ CREATE TABLE IF NOT EXISTS `data_manual` (
   `keyword` text COLLATE utf8_unicode_ci DEFAULT NULL,
   `is_fda_regulated` tinyint(1) DEFAULT NULL,
   `is_section_801` tinyint(1) DEFAULT NULL,
+   `is_sourceless` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`larvol_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
