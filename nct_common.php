@@ -23,9 +23,9 @@ $mapping = array(
     'official_title-textblock' => 'official_title',
     'study_sponsor-sponsor-agency' => 'collaborator',  //added collaborator
     'study_sponsor-lead_sponsor-agency' => 'lead_sponsor',
-    'resp_party-name_title' => 'responsible_party_name_title',
-    'resp_party-organization' => 'responsible_party_organization',
-    'oversight_info-regulatory_authority' => 'oversight_authority',
+//    'resp_party-name_title' => 'responsible_party_name_title',
+//    'resp_party-organization' => 'responsible_party_organization',
+//    'oversight_info-regulatory_authority' => 'oversight_authority',
     'oversight_info-has_dmc' => 'has_dmc',
     'brief_summary-textblock' => 'brief_summary',
     'detailed_descr-textblock' => 'detailed_description',
@@ -73,8 +73,8 @@ $mapping = array(
     'eligibility-gender' => 'gender',
     'eligibility-minimum_age' => 'minimum_age',
     'eligibility-maximum_age' => 'maximum_age',
-    'investigator-role' => 'investigator_role',
-    'investigator-name' => 'investigator_name',
+//    'investigator-role' => 'investigator_role',
+//    'investigator-name' => 'investigator_name',
     'investigator-affiliation-agency' => 'investigator_degrees',  //chg  
     'contact-name' => 'contact_name',
     'contact-phone' => 'contact_phone',
@@ -85,7 +85,7 @@ $mapping = array(
     'location-facility-address-state' => 'location_state',
     'location-facility-address-zip' => 'location_zip',
     'location-facility-address-country' => 'location_country',
-    'location-status' => 'location_status',
+//    'location-status' => 'location_status',
     'location-contact-name' => 'location_contact_name',
     'location-contact-phone' => 'location_contact_phone',    
     'location-contact-email' => 'location_contact_email',
@@ -494,10 +494,10 @@ else $ddesc=$rec->detailed_descr->textblock;
         'why_stopped' => $rec->why_stopped,
 //        'study_design' => $rec->study_design,
 		'study_design' => $rec->design,
-        'biospec_descr' => $rec->biospec_descr->textblock,
+//        'biospec_descr' => $rec->biospec_descr->textblock,
         'study_pop' => $rec->eligibility->study_pop->textblock,
         'criteria' => $rec->eligibility->criteria->textblock,
-        'biospec_retention' => $rec->biospec_retention,
+//        'biospec_retention' => $rec->biospec_retention,
         'completion_date_type' => $rec->completion_date['type'],
         'primary_completion_date_type' => $rec->primary_compl_date['type'],
         'enrollment_type' => $rec->enrollment['type'],
@@ -535,10 +535,9 @@ else $ddesc=$rec->detailed_descr->textblock;
         'backup_email' => $rec->contact_backup->email,
         'verification_date' => $rec->status_block->date,
         'lastchanged_date' => $rec->last_release_date,
-        'firstreceived_date' => $rec->initial_release_date,
-        'responsible_party_name_title' => $rec->resp_party->name_title,
-        'responsible_party_organization' => $rec->resp_party->organization);
-
+        'firstreceived_date' => $rec->initial_release_date);
+//        'responsible_party_name_title' => $rec->resp_party->name_title,
+//        'responsible_party_organization' => $rec->resp_party->organization);
     // It appears can be more then one contact now
     $record_data['contact_name'] = array();
     $record_data['contact_degrees'] = array();
@@ -575,9 +574,11 @@ else $ddesc=$rec->detailed_descr->textblock;
 			$record_data['collaborator'][] = $cola->agency;
 		}
 	}
+/*
 	$record_data['oversight_authority'] = array();
     foreach ($rec->oversight_info->regulatory_authority as $auth)
         $record_data['oversight_authority'][] = $auth;
+*/		
     $record_data['primary_outcome_measure'] = array();
     $record_data['primary_outcome_timeframe'] = array();
     $record_data['primary_outcome_safety_issue'] = array();
@@ -631,22 +632,22 @@ else $ddesc=$rec->detailed_descr->textblock;
         foreach ($inter->other_name as $oname)
             $record_data['intervention_other_name'][] = $oname;
     }
-    $record_data['overall_official_name'] = array();
+//    $record_data['overall_official_name'] = array();
     $record_data['overall_official_degrees'] = array();
-    $record_data['overall_official_role'] = array();
-    $record_data['overall_official_affiliation'] = array();
+    //$record_data['overall_official_role'] = array();
+    //$record_data['overall_official_affiliation'] = array();
     foreach ($rec->investigator as $oa) {
-        $record_data['overall_official_name'][] = $oa->name;
+        //$record_data['overall_official_name'][] = $oa->name;
         $record_data['overall_official_degrees'][] = $oa->degrees;
-        $record_data['overall_official_affiliation'][] = $oa->affiliation->agency;
-        $record_data['overall_official_role'][] = $oa->role;
+        //$record_data['overall_official_affiliation'][] = $oa->affiliation->agency;
+        //$record_data['overall_official_role'][] = $oa->role;
     }
     $record_data['location_name'] = array();
     $record_data['location_city'] = array();
     $record_data['location_state'] = array();
     $record_data['location_zip'] = array();
     $record_data['location_country'] = array();
-    $record_data['location_status'] = array();
+//    $record_data['location_status'] = array();
     $record_data['location_contact_name'] = array();
     $record_data['location_contact_degrees'] = array();
     $record_data['location_contact_phone'] = array();
@@ -657,9 +658,9 @@ else $ddesc=$rec->detailed_descr->textblock;
     $record_data['location_backup_phone'] = array();
     $record_data['location_backup_phone_ext'] = array();
     $record_data['location_backup_email'] = array();
-    $record_data['investigator_name'] = array();
+//    $record_data['investigator_name'] = array();
     $record_data['investigator_degrees'] = array();
-    $record_data['investigator_role'] = array();
+//    $record_data['investigator_role'] = array();
 
     foreach ($rec->location as $loc) {
         $record_data['location_name'][] = $loc->facility->name;
@@ -667,7 +668,7 @@ else $ddesc=$rec->detailed_descr->textblock;
         $record_data['location_state'][] = $loc->facility->address->state;
         $record_data['location_zip'][] = $loc->facility->address->zip;
         $record_data['location_country'][] = $loc->facility->address->country;
-        $record_data['location_status'][] = $loc->status;
+//        $record_data['location_status'][] = $loc->status;
         $record_data['location_contact_name'][] = assemble(' ', array($loc->contact->first_name,
             $loc->contact->middle_name,
             $loc->contact->last_name));
@@ -684,9 +685,9 @@ else $ddesc=$rec->detailed_descr->textblock;
         $record_data['location_backup_email'][] = $loc->contact_backup->email;
         
         foreach ($loc->investigator as $inv) {
-            $record_data['investigator_name'][] = assemble(' ', array($inv->first_name, $inv->middle_name, $inv->last_name));
+//            $record_data['investigator_name'][] = assemble(' ', array($inv->first_name, $inv->middle_name, $inv->last_name));
             $record_data['investigator_degrees'][] = $inv->degrees;
-            $record_data['investigator_role'][] = $inv->role;
+//            $record_data['investigator_role'][] = $inv->role;
         }
     }
     $record_data['link_url'] = array();

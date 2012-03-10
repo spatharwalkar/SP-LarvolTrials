@@ -321,7 +321,7 @@ class phpMyEdit
 			$ret = @mysql_query($qry, $this->dbh);
 		}
 		if (! $ret) {
-			echo '<h4>MySQL error ',mysql_errno($this->dbh),'</h4>';
+			echo '<h4>MySQL error ',mysql_errno($this->dbh),' Query:',$qry,'</h4>';
 			echo htmlspecialchars(mysql_error($this->dbh)),'<hr size="1" />',"\n";
 		}
 		return $ret;
@@ -505,6 +505,7 @@ class phpMyEdit
 
 	function get_SQL_main_list_query($qparts) /* {{{ */
 	{
+
  		return $this->get_SQL_query($qparts);
  	} /* }}} */
  
@@ -1039,7 +1040,7 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 				echo '<input class="',$css_class_name,'" ';
 				echo ($this->password($k) ? 'type="password"' : 'type="text"');
 				echo ($this->readonly($k) ? ' disabled' : '');
-				echo ' name="',$this->cgi['prefix']['data'].$this->fds[$k],'"';
+				echo ' name="',$this->cgi['prefix']['data'].$this->fds[$k], '" id="',$this->cgi['prefix']['data'].$this->fds[$k],'"';
 				echo $len_props,' value="';
 				if($escape) echo htmlspecialchars($this->fdd[$k]['default']);
 			    else echo $this->fdd[$k]['default'];
@@ -1064,7 +1065,7 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 		$qparts['from']   = $this->get_SQL_join_clause();
 		$qparts['where']  = '('.$this->fqn($this->key).'='
 			.$this->key_delim.$this->rec.$this->key_delim.')';
-
+		
 		$res = $this->myquery($this->get_SQL_query($qparts),__LINE__);
 		if (! ($row = $this->sql_fetch($res))) {
 			return false;
@@ -1178,9 +1179,9 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 			if ($maxlen > 0) {
 				$len_props .= ' maxlength="'.$maxlen.'"';
 			}
-			echo '<input class="',$css_class_name,'" type="text"';
+			echo '<input type="text"';
 			echo ($this->readonly($k) ? ' disabled' : '');
-			echo ' name="',$this->cgi['prefix']['data'].$this->fds[$k],'" value="';
+			echo ' name="',$this->cgi['prefix']['data'].$this->fds[$k],'" id="',$this->cgi['prefix']['data'].$this->fds[$k],'" value="';
 			if($escape) echo htmlspecialchars($row["qf$k"]);
 			else echo $row["qf$k"];
 			echo '"',$len_props,' />',"\n";
@@ -1775,11 +1776,16 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 		if($this->display['num_pages'] || $this->display['num_records'])
 			echo '<td class="',$this->getCSSclass('stats', $position),'">',"\n";
 		if($this->display['num_pages']) {
-			if ($listall) {
+			if ($listall) 
+			{
+				if($_POST['sourceless_only'] and $_POST['sourceless_only'] == 'YES') $checked=' checked="checked" '; else $checked='';
+				echo '<b>Show sourceless trials only?&nbsp;<input type="checkbox" name="sourceless_only" value="YES"' . $checked . ' onclick="this.form.submit();"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b>';
 				echo $this->labels['Page'],':&nbsp;1&nbsp;',$this->labels['of'],'&nbsp;1';
 			} else {
 				$current_page = intval($this->fm / $this->inc) + 1;
 				$total_pages  = max(1, ceil($this->total_recs / abs($this->inc)));
+				if($_POST['sourceless_only'] and $_POST['sourceless_only'] == 'YES') $checked=' checked="checked" '; else $checked='';
+				echo '<b>Show sourceless trials only?&nbsp;<input type="checkbox" name="sourceless_only" value="YES"' . $checked . ' onclick="this.form.submit();"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b>';
 				echo $this->labels['Page'],':&nbsp;',$current_page;
 				echo '&nbsp;',$this->labels['of'],'&nbsp;',$total_pages;
 			}
@@ -1932,6 +1938,7 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 				'select' => 'count(*)',
 				'from'   => $this->get_SQL_join_clause(),
 				'where'  => $this->get_SQL_where_from_query_opts());
+		
 		$res = $this->myquery($this->get_SQL_main_list_query($count_parts), __LINE__);
 		$row = $this->sql_fetch($res, 'n');
 		$this->total_recs = $row[0];
@@ -2057,6 +2064,13 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 		}
 		$qparts['from']  = $this->get_SQL_join_clause();
 		$qparts['where'] = $this->get_SQL_where_from_query_opts();
+		//show sourceless records only.
+		if($_POST['sourceless_only'] and $_POST['sourceless_only'] == 'YES') 
+		{
+			if( strlen(trim( $qparts['where']))>1 ) $and=' and '; else $and='';
+			$qparts['where']= substr( $qparts['where'],0,-1) . '( ' . $and .' PMEtable0.larvol_id in ( select `larvol_id` from data_manual where `is_sourceless`="1" ) )'. substr( $qparts['where'],-1)  ;
+		}
+		
 		// build up the ORDER BY clause
 		if (isset($this->sfn)) {
 			$sort_fields   = array();
@@ -2086,8 +2100,6 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 			}
 		}
 		$qparts['limit'] = $listall ? '' : $this->sql_limit($this->fm,$this->inc);
-
-
 		$query = $this->get_SQL_main_list_query($qparts);
 		$res   = $this->myquery($query, __LINE__);
 		if ($res == false) {
@@ -2103,6 +2115,7 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 			$filter_row = $row;
 			if (! is_array($filter_row)) {
 				unset($qparts['where']);
+				
 				$query = $this->get_SQL_query($qparts);
 				$res   = $this->myquery($query, __LINE__);
 				if ($res == false) {
@@ -2256,6 +2269,7 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 				$viewQuery   = $qpviewStr   . $queryAppend;
 				$copyQuery   = $qpcopyStr   . $queryAppend;
 				$changeQuery = $qpchangeStr . $queryAppend;
+				$linkQuery = "";
 				$deleteQuery = $qpdeleteStr . $queryAppend;
 				$viewTitle   = htmlspecialchars($this->labels['View']);
 				$changeTitle = htmlspecialchars($this->labels['Change']);
@@ -2282,6 +2296,7 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 							echo $css_class_name,'" src="',$this->url['images'];
 							echo 'jedit.png"  border="0" ';
 							echo 'alt="',$changeTitle,'" title="',$changeTitle,'" /></a>';
+	
 						}
 						if ($this->copy_enabled()) {
 							$printed_out && print('&nbsp;');
@@ -2373,6 +2388,7 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 				$qp['select'] = $aggr_from_clause;
 				$qp['from']   = $this->get_SQL_join_clause();
 				$qp['where']  = $this->get_SQL_where_from_query_opts();
+				
 				$tot_query    = $this->get_SQL_query($qp);
 				$totals_result = $this->myquery($tot_query,__LINE__);
 				$tot_row       = $this->sql_fetch($totals_result);
@@ -2473,7 +2489,8 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 	function do_add_record() /* {{{ */
 	{
 		// Preparing query
-		$query       = '';
+		$query		= 	'';
+		$query_m	=	'';
 		$key_col_val = '';
 		$newvals     = array();
 		for ($k = 0; $k < $this->num_fds; $k++) {
@@ -2499,7 +2516,8 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 		// Real query (no additional query in this method)
 		foreach ($newvals as $fd => $val) {
 			if ($fd == '') continue;
-			if ($this->col_has_sqlw($this->fdn[$fd])) {
+			if ($this->col_has_sqlw($this->fdn[$fd])) 
+			{
 				$val_as  = addslashes($val);
 				$val_qas = '"'.addslashes($val).'"';
 				$value = $this->substituteVars(
@@ -2508,26 +2526,55 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 							'val_as'  => $val_as,
 							'val'     => $val
 							));
-			} else {
+			} 
+			else 
+			{
 				$value = "'".addslashes($val)."'";
 			}
-			if ($query == '') {
+			if ($query == '') 
+			{
 				$query = 'INSERT INTO '.$this->sd.$this->tb.$this->ed.' ('.$this->sd.$fd.$this->ed.''; // )
 				$query2 = ') VALUES ('.$value.'';
-			} else {
+			} 
+			else 
+			{
 				$query  .= ', '.$this->sd.$fd.$this->ed.'';
 				$query2 .= ', '.$value.'';
 			}
+			if ($query_m == '' and $fd<>'source_id' and $fd<>'inclusion_criteria' and $fd<>'exclusion_criteria') 
+			{
+			//	$query_m = 'INSERT INTO `data_manual` ('.$this->sd.$fd.$this->ed.''; // )
+				$query_m  .= ', '.'`is_sourceless`';
+			//	$query_m2 = ') VALUES ('.$value.'';
+				$query_m2 .= ', "1"';
+			}
+			elseif($fd<>'source_id' and $fd<>'inclusion_criteria' and $fd<>'exclusion_criteria') 
+			{
+				$query_m  .= ', '.$this->sd.$fd.$this->ed.'';
+				$query_m2 .= ', '.$value.'';
+			}
 		}
 		$query .= $query2.')';
+	
 		$res    = $this->myquery($query, __LINE__);
+		if (! $res) 
+		{
+			return false;
+		}
+		$lid=mysql_insert_id();
+		$query_m = 'INSERT INTO `data_manual` (`larvol_id` ' . $query_m; 
+		$query_m2 = ') VALUES ('.$lid.''.$query_m2;
+		$query_m .= $query_m2.')';
+		$res    = $this->myquery($query_m, __LINE__);
 		$this->message = $this->sql_affected_rows($this->dbh).' '.$this->labels['record added'];
-		if (! $res) {
+		if (! $res) 
+		{
 			return false;
 		}
 		$this->rec = $this->sql_insert_id();
 		// Notify list
-		if (@$this->notify['insert'] || @$this->notify['all']) {
+		if (@$this->notify['insert'] || @$this->notify['all']) 
+		{
 			$this->email_notify(false, $newvals);
 		}
 		// Note change in log table
