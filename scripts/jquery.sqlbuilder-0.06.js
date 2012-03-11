@@ -187,8 +187,7 @@
             	var chain_name = j.wheredata[i].chainname;
                 var chain_slot = chainHash[chain_name];
                 if(chain_slot == null)continue;
-
-                
+				
                 wherediv[0].opts.onselect(col_slot, wherediv, { columnslot: col_slot, opslot: op_slot, chainslot: chain_slot, columnvalue: j.wheredata[i].columnvalue });
 
             }
@@ -1088,7 +1087,7 @@
             $(this).html(
             		'<fieldset style="float:left;width:35em;"><legend>NCTid Override</legend>'
             				+ 'Enter a comma-delimited list of NCTids of records that must be returned by this search regardless of criteria<br />'
-            				+ '<input type="text" id="override" name="override" value="" /></fieldset>' 
+            				+ '<input type="text" id="override" name="override" value="" /> &nbsp; <input type="button" class="addnewsqlwherevalue" value="Pad NCTids" id="PadNCT_JSFn_override" onclick="javascript:PadNCT_JSFn(\'override\')" /></fieldset>' 
             				+ '<br clear="all"/>' +
 
                     '<p class=sqldata></p>' +
@@ -1374,13 +1373,21 @@
 //                    	valstr += ' and <input type="text" class="addnewsqlwherevalue" id="' + counter_id + '_2" value="' + col_val + '" />&nbsp;';
 //                    }
 //               }
-               else {
+                else if (opts.fields[col_slot].type == 'product') {
+                   valstr = '<input type="text" class="addnewsqlwherevalue" id="' + counter_id + '_1" value="' + col_val + '" autocomplete="off" onkeyup="javascript:autoComplete(\'products\',\''+ counter_id +'_1\')" />';
+               }
+			   else if (opts.fields[col_slot].type == 'area') {
+                   valstr = '<input type="text" class="addnewsqlwherevalue" id="' + counter_id + '_1" value="' + col_val + '" autocomplete="off" onkeyup="javascript:autoComplete(\'areas\',\''+ counter_id +'_1\')" />';
+               }
+			   else {
                    valstr = '<input type="text" class="addnewsqlwherevalue" id="' + counter_id + '_1" value="' + col_val + '" />&nbsp;';
                    if(opts.operators[op_slot].multipleval)
                    {
                    	col_val=vals[1];
                    	valstr += ' and <input type="text" class="addnewsqlwherevalue" id="' + counter_id + '_2" value="' + col_val + '" />&nbsp;';
                    }
+				   if (opts.fields[col_slot].name == 'source_id')
+				   valstr += ' <input type="button" class="addnewsqlwherevalue" value="Pad NCTids" id="PadNCT_JSFn_' + counter_id + '" onclick="javascript:PadNCT_JSFn(\''+ counter_id +'_1\')" />&nbsp;';
                }
 //             if (opts.fields[action].type == 'date') {
 //             $('#' + counter_id + '_1').jdPicker();
@@ -1432,7 +1439,8 @@
 		               function (e) {
 		                   $('.addnewsqlwherevalue').blur(function () {
 		                       $('.sqlsyntaxhelp').remove();
-		                       onchangeevent('change');
+							   onchangeevent('change');
+		                       $('.autocomplete').click(function () { onchangeevent('change'); });
 
 
 
@@ -1456,7 +1464,8 @@
 		            	   
 		                   $('.addnewsqlwherevalue').blur(function () {
 		                       $('.sqlsyntaxhelp').remove();
-		                       onchangeevent('change');
+							   onchangeevent('change');
+		                        $('.autocomplete').click(function () { onchangeevent('change'); });
 
 
 
@@ -1558,7 +1567,29 @@
        	        			 { name: 'NotInBetween'}
        	        			 ];
         	    break;
-        	   default:
+				 case 'product':
+				 case 'area':
+        		   exclusion = [
+       	        			 { name: 'NotEqualTo'},
+							 { name: 'StartsWith'},
+							 { name: 'NotStartsWith'},
+							 { name: 'Contains'},
+							 { name: 'NotContains'},
+							 { name: 'BiggerThan'},
+							 { name: 'BiggerOrEqualTo'},
+							 { name: 'SmallerThan'},
+							 { name: 'SmallerOrEqualTo'},
+							 { name: 'InBetween'},
+							 { name: 'NotInBetween'},
+							 { name: 'IsIn'},
+							 { name: 'IsNotIn'},
+							 { name: 'IsNull'},
+							 { name: 'NotNull'},
+							 { name: 'Regex'},
+							 { name: 'NotRegex'}
+       	        			 ];
+        	    break;
+				default:
         		break;
         	   }
         	   return exclusion;

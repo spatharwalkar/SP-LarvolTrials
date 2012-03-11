@@ -43,14 +43,8 @@ $(document).ready(function () {
 
     function testSQL()
     {
-//         var isSaved =  saveSearch();
-//         if(!isSaved)
-//         {
-//             return;
-//         }
-        var jsonData = getQueryData();   
-        //alert(jsonData);
-          $.ajax({
+		 var jsonData = getQueryData();   
+         $.ajax({
 					type: 'GET',
 					url:  'searchhandler.php' + '?op=testQuery',
 					data: 'data=' + jsonData,
@@ -62,8 +56,7 @@ $(document).ready(function () {
 					}
         	});
         return;
-    		
-  }
+    }
     
     function runSQL()
     {
@@ -73,8 +66,9 @@ $(document).ready(function () {
 //             return;
 //         }
         var jsonData = getQueryData();   
-        var url = 'queryresults.php' + '?op=runQuery&data=' + jsonData;
-        window.location.href=url;
+        var url = 'searchhandler.php' + '?op=runQuery&data=' + jsonData;
+        //window.location.href=url;
+		window.open(url,'_blank')
         return;
     }
 
@@ -102,12 +96,12 @@ $(document).ready(function () {
 			</tr>
 			<tr>
 				<td style="padding-left: 30px;"><input type="submit"
-					style="width: 100px" onclick="testSQL();return false;"
+					style="width: 100px" onClick="testSQL();return false;"
 					value="Test Query" id="btnTest" /></td>
 			</tr>
 			<tr>
 				<td style="padding-left: 30px;"><input type="submit"
-					style="width: 100px" onclick="runSQL();return false"
+					style="width: 100px" onClick="runSQL();return false"
 					value="Run Query" id="btnRun" /></td>
 			</tr>
 

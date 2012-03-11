@@ -24,7 +24,7 @@ switch($_REQUEST['op']){
 		echo(listSearchForm());
 		break;
 	case 'runQuery':
-		runQuery();
+		runQuery($_REQUEST['data']);
 		break;
 	case 'testQuery':
 		if(isset($_REQUEST['jsonOp']) && $_REQUEST['jsonOp']==1)
@@ -35,7 +35,6 @@ switch($_REQUEST['op']){
 	case 'gridList':
 		echo(listSearchesInGrid());
 		break;
-
 }
 
 function listSearchesInGrid()
@@ -88,6 +87,26 @@ function insertSearch()
 {
 	$querytosave=stripslashes($_REQUEST['querytosave']);
 	global $db;
+	
+	/***Part to Replace product/Area name by product/Area id when storing******/
+	$jsonData=$querytosave; 
+	$filterData = json_decode($jsonData, true, 10);
+	if(is_array($filterData["wheredata"]) && !empty($filterData["wheredata"]))
+	{
+		foreach($filterData["wheredata"] as $key=>$where_data)
+		{
+			if($where_data["columnname"] == 'product' || $where_data["columnname"] == 'area')
+			{
+				$ProdORAreaID=get_ProdORAreaID($where_data["columnvalue"], $where_data["columnname"]);
+				if($ProdORAreaID)
+				$where_data["columnvalue"]=$ProdORAreaID;
+				$filterData["wheredata"][$key]=$where_data;
+			}
+		}
+	}
+	$querytosave=json_encode($filterData);
+	/***End Part to Replace product/Area name by product/Area id when storing******/
+	
 	if(!isset($_REQUEST['reportname']) || !strlen($_REQUEST['reportname'])) return;
 	$name = mysql_real_escape_string($_REQUEST['reportname']);
 	$user = $db->user->id;
@@ -120,6 +139,26 @@ function updateSearch()
 {
 	$querytosave=stripslashes($_REQUEST['querytosave']);
 	global $db;
+	
+	/***Part to Replace product/Area name by product/Area id when storing******/
+	$jsonData=$querytosave; 
+	$filterData = json_decode($jsonData, true, 10);
+	if(is_array($filterData["wheredata"]) && !empty($filterData["wheredata"]))
+	{
+		foreach($filterData["wheredata"] as $key=>$where_data)
+		{
+			if($where_data["columnname"] == 'product' || $where_data["columnname"] == 'area')
+			{
+				$ProdORAreaID=get_ProdORAreaID($where_data["columnvalue"], $where_data["columnname"]);
+				if($ProdORAreaID)
+				$where_data["columnvalue"]=$ProdORAreaID;
+				$filterData["wheredata"][$key]=$where_data;
+			}
+		}
+	}
+	$querytosave=json_encode($filterData);
+	/***End Part to Replace product/Area name by product/Area id when storing******/
+	
 	if(!isset($_REQUEST['reportname']) || !strlen($_REQUEST['reportname'])) return;
 	$name = mysql_real_escape_string($_REQUEST['reportname']);
 	$searchId = mysql_real_escape_string($_REQUEST['searchId']);
@@ -175,6 +214,26 @@ function get_SearchData()
 	//$show_value = 'showSearchData("' . $_GET['id'] . '");';
 	//echo($show_value);
 	$data = unserialize(base64_decode($row['searchdata']));
+	
+	/***Part to Replace product/Area ID by product/Area Name when Displaying******/
+	$jsonData=$data; 
+	$filterData = json_decode($jsonData, true, 10);
+	if(is_array($filterData["wheredata"]) && !empty($filterData["wheredata"]))
+	{
+		foreach($filterData["wheredata"] as $key=>$where_data)
+		{
+			if($where_data["columnname"] == 'product' || $where_data["columnname"] == 'area')
+			{
+				$ProdORAreaName=get_ProdORAreaName($where_data["columnvalue"], $where_data["columnname"]);
+				if($ProdORAreaName)
+				$where_data["columnvalue"]=$ProdORAreaName;
+				$filterData["wheredata"][$key]=$where_data;
+			}
+		}
+	}
+	$data=json_encode($filterData);
+	/***End Part to Replace product/Area ID by product/Area Name when Displaying******/
+	
 	$res_ret->searchdata=$data;
 	$res_ret->name= $row['name'];
 	$res_ret->id= $row['id'];
@@ -288,85 +347,89 @@ function testQuery($jsonOp=0,$scriptCall=0,$data=null)
 
 }
 
-function runQuery()
+function runQuery($jsonData)
 {
 	global $db;
-	$jsonData=$_REQUEST['data'];
-	$actual_query= buildQuery($jsonData, false);
-	$count_query =  buildQuery($jsonData, true);
-	$page = $_GET['page']; // get the requested page
-	$limit = $_GET['rows']; // get how many rows we want to have into the grid
-	$sidx = $_GET['sidx']; // get index row - i.e. user click to sort
-	$sord = $_GET['sord']; // get the direction
-	if(!$sidx) $sidx =1;
-
-	$result = mysql_query($count_query);
+	//$jsonData=$_REQUEST['data'];
+	$filterData = json_decode($jsonData, true, 10);
 	
-	//	pr($result);
-	
-	$row = mysql_fetch_array($result,MYSQL_ASSOC);
-	$count = $row['count'];
-	if( $count >0 ) {
-		$total_pages = ceil($count/$limit);
-	} else {
-		$total_pages = 0;
-	}
-	if ($page > $total_pages) $page=$total_pages;
-	$start = $limit*$page - $limit; // do not put $limit*($page - 1)
-	if ($start<0) $start = 0;
-	//$SQL = "$actual_query ORDER BY $sidx $sord LIMIT $start , $limit";
-	$SQL = "$actual_query LIMIT $start , $limit";
-	global $logger;
-	if(!$result=mysql_query($SQL))
-		{
-			$log='Bad SQL query :'.$query.' Error:' . mysql_error();
-			$logger->error($log);
-			echo $log;
-			return false;
-		}
-	if(!isset($responce)) $responce = new stdClass();
-
-	$responce->page = $page;
-	$responce->total = $total_pages;
-	$responce->records = $count;
-	$i=0;
-	while($row = mysql_fetch_array($result,MYSQL_ASSOC)) {
-		$responce->rows[$i]=$row;
-		$i++;
-	}
-	
-	if($count==0)
+	///// Part To replace Product/Area name by id as its faster to search
+	if(is_array($filterData["wheredata"]) && !empty($filterData["wheredata"]))
 	{
-	$ret_val = json_encode($responce);
-	echo($ret_val);
-	return;
-	}
-	foreach ($responce->rows as $fieldname => $value)
-	{
-		$x=0;
-		foreach ($value  as $field => $val)
+		foreach($filterData["wheredata"] as $key=>$where_data)
 		{
-
-			if($x==0)
+			if($where_data["columnname"] == 'product' || $where_data["columnname"] == 'area')
 			{
-				$x=1;
-				
-				$responce->rows[$fieldname]['view'][] = '<a href="edit_trials.php?larvol_id='.$responce->rows[$fieldname]['larvol_id'].'"><img src="images/view.png" border="0"></a>';
-				if($db->loggedIn() and ($db->user->userlevel=='admin'||$db->user->userlevel=='root'))
-					{
-						$responce->rows[$fieldname]['edit'][] = '<a href="edit_trials.php?larvol_id='.$responce->rows[$fieldname]['larvol_id'].'&mode=edit"><img src="images/jedit.png" border="0"></a>';				
-					}
+				$ProdORAreaID=get_ProdORAreaID($where_data["columnvalue"], $where_data["columnname"]);
+				if($ProdORAreaID)
+				$where_data["columnvalue"]=$ProdORAreaID;
+				$filterData["wheredata"][$key]=$where_data;
 			}
 		}
-		//	
+	}
+	$jsonData=json_encode($filterData); ///Again Encode data which include ID instead of Names
+	
+	///// End of Part To replace Product/Area name by id as its faster to search
+	
+	$where_datas = $filterData["wheredata"];
+	$select_columns=$filterData["columndata"];
+	$override_vals = trim($filterData["override"]);
+	$sort_datas = $filterData["sortdata"];
+	$isOverride = !empty($override_vals);
+	
+	$prod='p= '; $area='&a= '; $prod_flag=0; $area_flag=0; $OT_Exist_Flg=0; $OT_Flg=0; $link=''; $Prod_Flg=0; $Area_Flg=0;
+	if(is_array($where_datas) && !empty($where_datas))
+	{
+		foreach($where_datas as $where_data)
+		{
+			if($where_data["columnname"] == 'product')
+			{
+				$prod.=$where_data["columnvalue"] .',';
+			}
+			elseif($where_data["columnname"] == 'area')
+			{
+				$area.=$where_data["columnvalue"] .',';
+			}
+			elseif($where_data["columnname"] != '' && $where_data["columnname"] != NULL)
+			{
+				$OT_Exist_Flg=1;
+			}
+		}
+	}
+	$prod = substr($prod, 0, -1); //strip last comma
+	
+	$area = substr($area, 0, -1); //strip last comma
+	
+	if(is_array($select_columns) && !empty($select_columns))
+	{
+		foreach($select_columns as $selectcolumn)
+		{
+			//if($selectcolumn["columnname"] != '' && $selectcolumn["columnname"] != NULL)
+			//$OT_Exist_Flg=1;	//Currently we Dont need select columns so flag is commented
+		}
 	}
 	
-//	pr($responce->rows);
+	if(is_array($sort_datas) && !empty($sort_datas) && (!$prod_flag || !$area_flag))
+	{
+		foreach($sort_datas as $sort_column)
+		{
+			if($sort_column["columnas"] != '' && $sort_column["columnas"] != NULL)
+			$OT_Exist_Flg=1;
+		}
+	}
+	
+	if($isOverride) 
+	{
+		$OT_Exist_Flg=1;
+	}
+	
+	$link=urlPath().'intermediary.php?'.$prod.$area;
+	if($OT_Exist_Flg)	//if OTT exists just send data as it is we will process it in run_trial_tracket
+	{
+		$link.='&JSON_search='.$jsonData;
+	}
 
-	$ret_val = json_encode($responce);
-	echo($ret_val);
-
-
+	header("Location: ".$link); 
 }
 
 function buildQuery($data, $isCount=false)
@@ -380,27 +443,69 @@ function buildQuery($data, $isCount=false)
 		if(is_array($filterData))
 		array_walk_recursive($filterData['columndata'], 'searchHandlerBackTicker','columnas');
 		$alias= " dt"; //data_trial table alias
-
+		$pd_alias= " pd"; //Products table alias
+		$ar_alias= " ar"; //Areas table alias
+		
 		$where_datas = $filterData["wheredata"];
 		$select_columns=$filterData["columndata"];
 		$override_vals = trim($filterData["override"]);
 		$sort_datas = $filterData["sortdata"];
 		$isOverride = !empty($override_vals);
-
-		$select_str = getSelectString($select_columns, $alias);
-		$where_str = getWhereString($where_datas, $alias);
-		$sort_str = getSortString($sort_datas, $alias);
+		
+		$prod_flag=0; $area_flag=0; $prod_col=0; $area_col=0;
+		if(is_array($where_datas) && !empty($where_datas))
+		{
+			foreach($where_datas as $where_data)
+			{
+				if($where_data["columnname"] == '`product`')
+				$prod_flag=1;
+				if($where_data["columnname"] == '`area`')
+				$area_flag=1;
+			}
+		}
+		
+		if(is_array($select_columns) && !empty($select_columns))
+		{
+			foreach($select_columns as $selectcolumn)
+			{
+				if($selectcolumn["columnname"] == '`product`')
+				{
+					$prod_flag=1;
+					$prod_col=1;	//This will need in overrriding Query
+				}
+				if($selectcolumn["columnname"] == '`area`')
+				{
+					$area_flag=1;
+					$area_col=1;	//This will need in overrriding Query
+				}
+			}
+		}
+		
+		if(is_array($sort_datas) && !empty($sort_datas) && (!$prod_flag || !$area_flag))
+		{
+			foreach($sort_datas as $sort_column)
+			{
+				if($sort_column["columnas"] == '`product`')
+				$prod_flag=1;
+				if($sort_column["columnas"] == '`area`')
+				$area_flag=1;
+			}
+		}
+		
+		$select_str = getSelectString($select_columns, $alias, $pd_alias, $ar_alias);
+		$where_str = getWhereString($where_datas, $alias, $pd_alias, $ar_alias);
+		$sort_str = getSortString($sort_datas, $alias, $pd_alias, $ar_alias);
 
 
 		if($isOverride)
 		{
 			if($isCount)
 			{
-		  $actual_query .= "SELECT((";
+				 $actual_query .= "SELECT((";
 			}
 			else
 			{
-		  $actual_query .= "(";
+		  		$actual_query .= "(";
 			}
 		}
 
@@ -408,7 +513,7 @@ function buildQuery($data, $isCount=false)
 
 		if($isCount)
 		{
-	  $actual_query .= 	"COUNT(*) AS count";
+	 		 $actual_query .= 	"COUNT(*) AS count";
 		}
 		else
 		{
@@ -416,6 +521,12 @@ function buildQuery($data, $isCount=false)
 		}
 
 		$actual_query .= " FROM data_trials " . $alias;
+		
+		if($prod_flag)
+		$actual_query .= " JOIN product_trials pt ON (pt.`trial`=".$alias.".`larvol_id`) JOIN products ". $pd_alias ." ON (". $pd_alias .".`id`=pt.`product`)";
+		
+		if($area_flag)
+		$actual_query .= " JOIN area_trials at ON (at.`trial`=".$alias.".`larvol_id`) JOIN areas ". $ar_alias ." ON (". $ar_alias .".`id`=at.`area`)";
 
 		if(strlen(trim($where_str)) != 0)
 		{
@@ -430,16 +541,15 @@ function buildQuery($data, $isCount=false)
 		if($isOverride)//override string present
 		{
 
-	  $override_str = getNCTOverrideString($override_vals, $alias, $select_str, $isCount);
-	  if($isCount)
-	  {
-	  	$actual_query .=  ") + (" . $override_str . ")) AS count";
-	  }
-	  else
-	  {
-	  	$actual_query .= ") UNION (" . $override_str . ")";
-	  }
-
+	 		$override_str = getNCTOverrideString($override_vals, $alias, $pd_alias, $ar_alias, $select_str, $isCount, $prod_col, $area_col);
+	  		if($isCount)
+	  		{
+	  			$actual_query .=  ") + (" . $override_str . ")) AS count";
+	  		}
+	  		else
+	  		{
+	  			$actual_query .= ") UNION (" . $override_str . ")";
+	  		}
 		}
 	}
 	catch(Exception $e)
@@ -449,7 +559,7 @@ function buildQuery($data, $isCount=false)
 	return $actual_query;
 }
 
-function getNCTOverrideString($data, $alias, $select_str, $isCount)
+function getNCTOverrideString($data, $alias, $pd_alias, $ar_alias, $select_str, $isCount, $prod_col, $area_col)
 {
 	$override_str = $data;
 	$return = " SELECT ";
@@ -466,14 +576,23 @@ function getNCTOverrideString($data, $alias, $select_str, $isCount)
 		$v = trim($v);
 		return "'".padnct($v)."' ";
 	},$override_str_arr);
-	$return .=  " FROM `data_trials` " . $alias . " WHERE "
+	$return .=  " FROM `data_trials` " . $alias . " ";
+	
+	if($prod_col)
+	$return .= " JOIN product_trials pt ON (pt.`trial`=".$alias.".`larvol_id`) JOIN products " . $pd_alias . " ON (" . $pd_alias . ".`id`=pt.`product`)";
+	
+	if($area_col)
+	$return .= " JOIN area_trials at ON (at.`trial`=".$alias.".`larvol_id`) JOIN areas " . $ar_alias . " ON (" . $ar_alias . ".`id`=at.`area`)";
+	
+	$return .=  " WHERE "
+		
 	.$alias . ".`source_id` IN (".implode(',',$override_str_arr).")";
 	return $return;
 
 
 }
 
-function getSelectString($data, $alias)
+function getSelectString($data, $alias, $pd_alias, $ar_alias)
 {
 	$query = $alias . "." . "larvol_id, " . $alias . "." . "source_id, ";
 	$select_columns = $data;
@@ -481,7 +600,12 @@ function getSelectString($data, $alias)
 	{
 		foreach($select_columns as $selectcolumn)
 		{
-			$query .= $alias . "." . $selectcolumn["columnname"] . " AS " . $selectcolumn["columnas"] . ", ";
+			if($selectcolumn["columnname"] == '`product`')
+				$query .="" . $pd_alias . ".`name` AS " . $selectcolumn["columnas"] . ", ";
+			elseif($selectcolumn["columnname"] == '`area`')
+				$query .= "" . $ar_alias . ".`name` AS " . $selectcolumn["columnas"] . ", ";
+			else
+				$query .= $alias . "." . $selectcolumn["columnname"] . " AS " . $selectcolumn["columnas"] . ", ";
 		}
 	}
 	$query = substr($query, 0, -2); //strip last comma
@@ -489,7 +613,7 @@ function getSelectString($data, $alias)
 
 }
 
-function getSortString($data, $alias)
+function getSortString($data, $alias, $pd_alias, $ar_alias)
 {
 	$query = '';
 	$sort_columns = $data;
@@ -501,7 +625,13 @@ function getSortString($data, $alias)
 	{
 		$sort_as = $sort_column["columnas"];
 		$sorttype = $sort_as=="Ascending"? "asc" : "desc";
-		$query .= $alias . "." . $sort_column["columnname"] . " "  . $sorttype . ", ";
+		
+		if($sort_column["columnname"] == '`product`')
+			$query .= $pd_alias.".`name` "  . $sorttype . ", ";
+		elseif($sort_column["columnname"] == '`area`')
+			$query .= $ar_alias.".`name` "  . $sorttype . ", ";
+		else
+			$query .= $alias . "." . $sort_column["columnname"] . " "  . $sorttype . ", ";
 	}
 	$query = substr($query, 0, -2); //strip last comma
 	return $query;
@@ -509,7 +639,7 @@ function getSortString($data, $alias)
 }
 
 
-function getWhereString($data, $alias)
+function getWhereString($data, $alias, $pd_alias, $ar_alias)
 {
 	$wheredatas = $data;
     if(empty($wheredatas))
@@ -527,9 +657,20 @@ function getWhereString($data, $alias)
 			$column_name = $where_data["columnname"];
 			$column_value = $where_data["columnvalue"];
 			$chain_name = $where_data["chainname"];
+			
+			if($column_name == '`product`' || $column_name == '`area`')
+				$column_name='`name`';
+				
 			$op_string = getOperator($op_name, $column_name, $column_value);
 			$wstr = " " . $prevchain . " " . $op_string;
-			$wstr = str_replace('%f', $alias . "." . $column_name,$wstr);
+			
+			if($where_data["columnname"] == '`product`')
+				$wstr = str_replace('%f', $pd_alias . "." . $column_name,$wstr);
+			elseif($where_data["columnname"] == '`area`')
+				$wstr = str_replace('%f', $ar_alias . "." . $column_name,$wstr);
+			else
+				$wstr = str_replace('%f', $alias . "." . $column_name,$wstr);
+			
 			$pos = strpos($op_string,'%s1');
 
 			if($pos === false) {
@@ -681,6 +822,22 @@ function validateMask_PCRE($s)
 
 	list($check)=mysql_fetch_row($res);
 	return ($check==1); // pcre ok?
+}
+
+function get_ProdORAreaID($column_value, $column_type)
+{
+	$query = "select id from " . $column_type . "s where name='" . mysql_real_escape_string($column_value) . "' ";
+	$row = mysql_fetch_assoc(mysql_query($query)) or die('Bad SQL Query getting '. $column_type .' ID instead of names ');
+	
+	return $row['id'];
+}
+
+function get_ProdORAreaName($column_value, $column_type)
+{
+	$query = "select name from " . $column_type . "s where id='" . mysql_real_escape_string($column_value) . "' ";
+	$row = mysql_fetch_assoc(mysql_query($query)) or die('Bad SQL Query getting '. $column_type .' Name instead of names ');
+	
+	return $row['name'];
 }
 
 ?>

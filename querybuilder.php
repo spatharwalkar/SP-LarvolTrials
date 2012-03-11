@@ -33,6 +33,11 @@ $show_sort_res = false;
 	    //printf ("Name: %s", $name_val);
 	    $field_str .="{ field: '$name_val', name: '$name_val', id: 2, ftype: 'string', defaultval: '$default_value', type: '$data_type' , values:\"$column_type\"},";
      }
+	 if($show_sort_res)
+	 {
+	 	$field_str .="{ field: 'product', name: 'product', id: 2, ftype: 'string', defaultval: '', type: 'product' , values:\"varchar(255)\"},";
+	 	$field_str .="{ field: 'area', name: 'area', id: 2, ftype: 'string', defaultval: '', type: 'area' , values:\"varchar(255)\"},";
+	}
      $field_str = substr($field_str, 0, -1); //strip last comma
      //$field_str .= "],";
      echo($field_str);
@@ -212,6 +217,58 @@ $show_sort_res = false;
         $("#lblId").text('');
     	$('.sqlbuild').loadSQB(data);
     }
+	
+	function autoComplete(type, fieldID)
+	{	
+		$(function()
+		{
+			if($('#'+fieldID).length > 0)
+			{	
+				var pattern1 =/products/g;
+				var pattern2 =/areas/g;
+				
+				if(type=='products')
+				{	
+					var a = $('#'+fieldID).autocomplete({
+								serviceUrl:'autosuggest.php',
+								params:{table:'products', field:'name'},
+								minChars:3 
+					});
+				}
+				else if(type=='areas')
+				{
+					var a = $('#'+fieldID).autocomplete({
+								serviceUrl:'autosuggest.php',
+								params:{table:'areas', field:'name'},
+								minChars:3 
+					}); 
+				}
+			}
+		});
+	}
+	
+	function PadNCT_JSFn(fieldID)
+	{	
+		var Field_value = $('#'+fieldID).val();
+		
+		if(Field_value != '' && Field_value != null)
+		{	
+			var Field_value = Field_value.replace(/\s+/g, '') ;
+			
+			var Field_value_Arr = Field_value.split(',');
+			
+			for(var i=0; i<Field_value_Arr.length; i++)
+			{
+				fld = Field_value_Arr[i];
+				if(fld.substring(0, 3) != 'NCT')
+				{
+					fld=("00000000" + fld).slice(-8);
+					Field_value_Arr[i] = 'NCT'+fld;
+				}
+			}
+			$('#'+fieldID).val(Field_value_Arr.join(', '));
+		}
+	}
 
   </script>
 <div class="builder">
@@ -237,6 +294,7 @@ $show_sort_res = false;
 					style="width: 100px" onclick="saveSearch();return false" value="Save"
 					id="btnsave" /></td>
 			</tr>
+
 
 	         <tr>
 
