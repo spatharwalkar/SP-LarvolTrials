@@ -204,9 +204,10 @@ tr.upms td {
 }
 
 .pagination {
-	margin: 5px 0;
-	line-height: 2em;
-	width:100%;
+	line-height: 1.6em;
+	width:auto;
+	float:left;
+	margin-right:20px;
 }
 
 .pagination a:hover {
@@ -272,8 +273,14 @@ tr.upms td {
 .controls td{
 	border-bottom:1px solid #44F;
 	border-right:1px solid #44F;
-	padding-left: 5px;
+	padding: 10px 0 0 3px;
     vertical-align: top;
+}
+
+.controls th{
+	font-weight:normal;
+	border-bottom: 1px solid #4444FF;
+    border-right: 1px solid #4444FF;
 }
 
 .right{
@@ -292,17 +299,20 @@ tr.upms td {
 
 .checkscroll{
 	float:left;
-	margin-top:1em;
 	height:10em;
 	width:15em;
 	overflow:auto;
 }
 
-.checkscroll input{
-	margin:0;
-	padding:0;
+.controls input{
+	margin:0.1em;
 }
 
 .ui-slider-horizontal .ui-slider-handle {
 	margin-left:0 !important;
+}
+
+.controls p{
+	margin-bottom:0;
+	margin-top: 0;
 }

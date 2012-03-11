@@ -9,6 +9,7 @@ require_once('special_chars.php');
 require_once('run_trial_tracker.php');
 require('searchhandler.php');
 
+
 /********* If Report generation time is less than 1 Jan 2012, time machine is disabled **********/
 if($_GET['time'] != NULL && $_GET['time'] != '')
 {
@@ -62,7 +63,7 @@ $sortFields = array('phase' => 'pD', 'inactive_date' => 'iA', 'start_date' => 's
 $globalOptions['sortOrder'] = $sortFields;
 
 $globalOptions['type'] = 'activeTrials';
-$globalOptions['enroll'] = '';
+$globalOptions['enroll'] = '0';
 $globalOptions['status'] = array();
 $globalOptions['itype'] = array();
 $globalOptions['region'] = array();
@@ -75,10 +76,23 @@ $globalOptions['page'] = 1;
 $globalOptions['onlyUpdates'] = "no";
 $globalOptions['encodeFormat'] = "old";
 $globalOptions['LI'] = "0";
+$globalOptions['minEnroll'] = "0";
+$globalOptions['maxEnroll'] = "0";
 
 if(isset($_GET['change']))
 {
 	$globalOptions['change'] = $_GET['change'];
+}
+
+if(isset($_GET['minenroll']) && isset($_GET['maxenroll']))
+{
+	$globalOptions['minEnroll'] = $_GET['minenroll'];
+	$globalOptions['maxEnroll'] = $_GET['maxenroll'];
+}
+
+if(isset($_GET['enroll']) && $_GET['enroll'] != '')
+{	
+	$globalOptions['enroll'] = $_GET['enroll'];
 }
 
 switch($globalOptions['change'])
@@ -177,18 +191,6 @@ $lastChangedTime = filectime("css/intermediary.css");
 	
 	$(function() 
 	{
-		$("#slider-range").slider({
-			range: true,
-			min: 0,
-			max: 300,
-			values: [ 0, 300 ],
-			slide: function( event, ui ) {
-				$("#amount").val(ui.values[ 0 ] + " - " + ui.values[ 1 ] );
-			}
-		});
-		$("#amount").val( $("#slider-range").slider("values", 0 ) +
-			" - " + $("#slider-range").slider("values", 1 ) );
-		
 		$("#slider-range-min").slider({
 			range: "min",
 			value: <?php echo $change_value;?>,
@@ -202,8 +204,8 @@ $lastChangedTime = filectime("css/intermediary.css");
 		$timerange = '<?php echo $globalOptions['change'];?>';
 		$("#amount3").val($timerange);
 		
-		$("#frmOtt").submit(function() {	
-			
+		$("#frmOtt").submit(function() 
+		{	
 			//set phase filters
 			var phase = new Array();
 			$('input.phase:checked').each(function(index) 
@@ -281,11 +283,6 @@ if(isset($_GET['itype']) && $_GET['itype'] != '')
 if(isset($_GET['status']) && $_GET['status'] != '')
 {
 	$globalOptions['status'] = explode(',', $_GET['status']);
-}
-
-if(isset($_GET['enroll']) && $_GET['enroll'] != '0 - 300')
-{	
-	$globalOptions['enroll'] = $_GET['enroll'];
 }
 
 if(isset($_GET['list']))
@@ -420,6 +417,35 @@ else
     </div>
 </div>
 <script type="text/javascript">
+	$(function() 
+	{
+		$enrollValues = '<?php echo $globalOptions['enroll'];?>';
+		if($enrollValues == '0')
+		{	
+			$minEnroll = $("#minenroll").val();
+			$maxEnroll = $("#maxenroll").val();
+		}
+		else
+		{
+			$enrollValues = $enrollValues.split(' - ');
+			$minEnroll = $enrollValues[0];
+			$maxEnroll = $enrollValues[1];
+		}
+		
+		$("#slider-range").slider({
+			range: true,
+			min: $("#minenroll").val(),
+			max: $("#maxenroll").val(),
+			values: [ $minEnroll, $maxEnroll ],
+			slide: function( event, ui ) {
+				$("#amount").val(ui.values[ 0 ] + " - " + ui.values[ 1 ] );
+			}
+		});
+		$("#amount").val( $("#slider-range").slider("values", 0 ) +
+			" - " + $("#slider-range").slider("values", 1 ) );
+		
+	});
+	
 	$(window).load(function() 
 	{
 		$('#loading').hide();

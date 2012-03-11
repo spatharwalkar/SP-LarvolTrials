@@ -225,7 +225,7 @@ class TrialTracker
 				$Ids[0]['area'] = implode("', '", $resultIds['area']);
 			}
 			
-			$Values = $this->processIndexedOTTData($ottType, $Ids, $globalOptions);
+			$Values = $this->processIndexedOTTData($ottType, $Ids, $timeMachine, $globalOptions);
 			$Values = array_merge($Values, array('TrialsInfo' => $TrialsInfo));
 		}
 		else if($ottType == 'indexed_search')
@@ -4309,7 +4309,7 @@ class TrialTracker
 				$Ids[0]['area'] = implode("', '", $resultIds['area']);
 			}
 		
-			$Values = $this->processIndexedOTTData($ottType, $Ids, $globalOptions);
+			$Values = $this->processIndexedOTTData($ottType, $Ids, $timeMachine, $globalOptions);
 			$Values = array_merge($Values, array('TrialsInfo' => $TrialsInfo));
 		}
 		else if($ottType == 'indexed_search')
@@ -5863,7 +5863,7 @@ class TrialTracker
 				$Ids[0]['area'] = implode("', '", $resultIds['area']);
 			}
 			
-			$Values = $this->processIndexedOTTData($ottType, $Ids, $globalOptions);
+			$Values = $this->processIndexedOTTData($ottType, $Ids, $timeMachine, $globalOptions);
 		}
 		else if($ottType == 'indexed_search')
 		{	
@@ -6136,7 +6136,7 @@ class TrialTracker
 			}
 			
 			echo '<input type="hidden" name="p" value="' . $_GET['p'] . '"/><input type="hidden" name="a" value="' . $_GET['a'] . '"/>';
-			$Values = $this->processIndexedOTTData($ottType, $Ids, $globalOptions);
+			$Values = $this->processIndexedOTTData($ottType, $Ids, $timeMachine, $globalOptions);
 			
 			echo $this->displayWebPage($ottType, $resultIds, $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], 
 			$globalOptions, $timeMachine, $Values['Trials'], $TrialsInfo);
@@ -7082,7 +7082,7 @@ class TrialTracker
 		return $row['id'];
 	}
 	
-	function processIndexedOTTData($ottType, $Ids = array(), $globalOptions = array())
+	function processIndexedOTTData($ottType, $Ids = array(), $timeMachine = NULL, $globalOptions = array())
 	{	
 		global $logger, $now;
 		
@@ -7159,7 +7159,7 @@ class TrialTracker
 			unset($phase);
 		}
 		
-		if(isset($globalOptions['enroll']) && $globalOptions['enroll'] != '') 
+		if(isset($globalOptions['enroll']) && $globalOptions['enroll'] != '0') 
 		{
 			$enroll = array();
 			$enroll = explode(' - ', $globalOptions['enroll']);
@@ -8643,6 +8643,20 @@ class TrialTracker
 		$last 	= ($globalOptions['page'] * $this->resultsPerPage > $count) ? $count : ($start + $this->resultsPerPage - 1);
 		$totalPages = ceil($count / $this->resultsPerPage);
 		
+		if(!empty($Trials) && $globalOptions['minEnroll'] == 0 && $globalOptions['maxEnroll'] == 0)
+		{
+			$enrollments = array_map(function($a) { 
+			  return $a['NCT/enrollment']; 
+			},  $Trials);
+			$globalOptions['minEnroll'] = min($enrollments);
+			$globalOptions['maxEnroll'] = max($enrollments);
+		}
+		else
+		{
+			$globalOptions['minEnroll'] = $globalOptions['minEnroll'];
+			$globalOptions['maxEnroll'] = $globalOptions['maxEnroll'];		
+		}
+		
 		if(isset($globalOptions['countDetails']) && !empty($globalOptions['countDetails'])) 
 		{
 			$totactivecount = $globalOptions['countDetails']['a'];
@@ -8654,16 +8668,21 @@ class TrialTracker
 		{
 			$this->pagination($globalOptions, $totalPages, $timeMachine, $ottType);
 		}
+		
+		echo '<span id="addtoright"></span><br/><br/>';
 		echo $this->displayTrialTableHeader($loggedIn, $globalOptions);
 		echo $this->displayTrials($globalOptions, $loggedIn, $start, $last, $Trials, $TrialsInfo, $ottType);
 		
 		echo '</table>';
 		
 		echo '<input type="hidden" name="cd" value="' 
-		. rawurlencode(base64_encode(gzdeflate(serialize(array('a'=>$totactivecount, 'in'=>$totinactivecount))))). '" />';	
+			. rawurlencode(base64_encode(gzdeflate(serialize(array('a'=>$totactivecount, 'in'=>$totinactivecount))))) . '" />';
+		echo '<input type="hidden" name="minenroll" id="minenroll" value="' . $globalOptions['minEnroll'] 
+			. '" /><input type="hidden" name="maxenroll" id="maxenroll" value="' . $globalOptions['maxEnroll'] . '" />';	
 		
 		if($totalPages > 1)
 		{
+			echo '<div style="height:10px;">&nbsp;</div>';
 			$this->pagination($globalOptions, $totalPages, $timeMachine, $ottType);
 		}
 		echo '</form><br/>';
@@ -8826,8 +8845,8 @@ class TrialTracker
 	function displayFilterControls($shownCount, $activeCount, $inactiveCount, $totalCount, $globalOptions = array())
 	{	
 		echo '<table width="75%" border="0" cellspacing="0" class="controls" align="center">'
-				. '<tr><td>Active</td><td>Status</td><td>Institution Type</td>'
-				. '<td>Region</td><td>Phase</td><td class="right">Ranges</td></tr>'
+				. '<tr><th>Active</th><th>Status</th><th>Institution Type</th>'
+				. '<th>Region</th><th>Phase</th><th class="right">Ranges</th></tr>'
 				. '<tr><td class="bottom">'
       			. '<input type="radio" name="list" value="1"  id="active_1" '
 				. (($globalOptions['type'] == 'activeTrials') ? ' checked="checked" ' : '')
@@ -8955,10 +8974,10 @@ class TrialTracker
 				. '</td><td class="right bottom">'
 				. '<div class="demo"><p>'
 				. '<label for="amount">Enrollment:</label>'
-				. '<input type="text" name="enroll" id="amount" readonly="readonly" style="border:0; color:#f6931f; font-weight:bold;" '
-				. ' value="' . ((isset($globalOptions['enroll'])) ? $globalOptions['enroll'] : '' ) . '" />'
+				. '<input type="text" name="enroll" id="amount" style="border:0; color:#f6931f; font-weight:bold;" '
+				. ' value="' . ((isset($globalOptions['enroll'])) ? $globalOptions['enroll'] : '' ) . '" autocomplete="off" />'
 				. '<div id="slider-range"></div>'
-				. '</p></div><div class="demo"><p>'
+				. '</p></div><div class="demo"><p style="margin-top:10px;">'
 				. '<label for="amount3">Highlight changes:</label>'
 				. '<input type="text" id="amount3" value="' . (($globalOptions['change'] == '3 months') ? '1 quarter' : $globalOptions['change']) 
 				. '" readonly="readonly" style="border:0; color:#f6931f; font-weight:bold;" />'
@@ -8973,8 +8992,7 @@ class TrialTracker
 				. '<input type="hidden" name="phase" id="phase" value="' . implode(',', $globalOptions['phase']) . '" />'
 				. '<input type="hidden" id="change" name="change" value="' . $globalOptions['change'] . '" />';
 				
-		echo '<input type="submit" id="Show" value="Show"/>&nbsp;<b>' . $shownCount . '&nbsp;Records</b><span id="addtoright"></span>';	
-		echo '<br/><br clear="all" />';
+		echo '<div style="float:left;margin-right:25px;"><input type="submit" id="Show" value="Show"/>&nbsp;<b>' . $shownCount . '&nbsp;Records</b></div>';	
 	}
 	
 	function pagination($globalOptions = array(), $totalPages, $timeMachine = NULL, $ottType)
