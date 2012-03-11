@@ -233,7 +233,7 @@ class TrialTracker
 			$Ids = array();
 			$TrialsInfo = array();
 			
-			$Values = $this->processIndexed_SRCH_OTTData($ottType, $Ids, $globalOptions);
+			$Values = $this->processIndexed_SRCH_OTTData($ottType, $Ids, $timeMachine, $globalOptions);
 			$Values = array_merge($Values, array('TrialsInfo' => $TrialsInfo)); 
 		}
 		else if($ottType == 'standalone')
@@ -4317,7 +4317,7 @@ class TrialTracker
 			$Ids = array();
 			$TrialsInfo = array();
 			
-			$Values = $this->processIndexed_SRCH_OTTData($ottType, $Ids, $globalOptions);
+			$Values = $this->processIndexed_SRCH_OTTData($ottType, $Ids, $timeMachine, $globalOptions);
 			$Values = array_merge($Values, array('TrialsInfo' => $TrialsInfo));
 		}
 		else if($ottType == 'standalone')
@@ -5867,7 +5867,7 @@ class TrialTracker
 		}
 		else if($ottType == 'indexed_search')
 		{	
-			$Values = $this->processIndexed_SRCH_OTTData($ottType, $Ids, $globalOptions);
+			$Values = $this->processIndexed_SRCH_OTTData($ottType, $Ids, $timeMachine, $globalOptions);
 		}
 		else if($ottType == 'standalone')
 		{	
@@ -6198,7 +6198,7 @@ class TrialTracker
 			
 			echo '<input type="hidden" name="p" value="' . $_GET['p'] . '"/><input type="hidden" name="a" value="' . $_GET['a'] . '"/>'
 				.'<input type="hidden" name="JSON_search" value=\'' . $_GET['JSON_search'] . '\'/>';
-			$Values = $this->processIndexed_SRCH_OTTData($ottType, $Ids, $globalOptions);
+			$Values = $this->processIndexed_SRCH_OTTData($ottType, $Ids, $timeMachine, $globalOptions);
 			
 			echo $this->displayWebPage($ottType, $resultIds, $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], 
 			$globalOptions, $timeMachine, $Values['Trials'], $TrialsInfo);
@@ -7573,7 +7573,7 @@ class TrialTracker
 		return  $Values;
 	}
 	
-	function processIndexed_SRCH_OTTData($ottType, $Ids = array(), $globalOptions = array())
+	function processIndexed_SRCH_OTTData($ottType, $Ids = array(), $timeMachine, $globalOptions = array())
 	{	
 		global $logger, $now;
 		
@@ -7650,7 +7650,7 @@ class TrialTracker
 			unset($phase);
 		}
 		
-		if(isset($globalOptions['enroll']) && $globalOptions['enroll'] != '') 
+		if(isset($globalOptions['enroll']) && $globalOptions['enroll'] != '0') 
 		{
 			$enroll = array();
 			$enroll = explode(' - ', $globalOptions['enroll']);
