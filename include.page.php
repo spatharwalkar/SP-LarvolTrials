@@ -1292,13 +1292,16 @@ function parseProductsXmlAndSave($xmlImport,$table)
 		$created = date('y-m-d H:i:s',time($product->getElementsByTagName('created')->item(0)->nodeValue));
 		$modified = date('y-m-d H:i:s',time($product->getElementsByTagName('modified')->item(0)->nodeValue));
 		
+		$company = array();
 		foreach($product->getElementsByTagName('Institutions') as $brandNames)
 		{
 			foreach($brandNames->getElementsByTagName('Institution') as $brandName)
 			{
-				$company = $brandName->getElementsByTagName('name')->item(0)->nodeValue;
+				$company[] = $brandName->getElementsByTagName('name')->item(0)->nodeValue;
 			}
-		}		
+		}	
+		$company = implode(',',$company);
+		
 		$brand_names = array();
 		foreach($product->getElementsByTagName('ProductBrandNames') as $brandNames)
 		{
