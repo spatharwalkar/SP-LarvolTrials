@@ -5482,7 +5482,7 @@ class TrialTracker
 			$Values = $this->processIndexedOTTData($ottType, $Ids, $timeMachine, $globalOptions);
 			
 			echo $this->displayWebPage($ottType, $resultIds, $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], 
-			$globalOptions, $timeMachine, $Values['Trials'], $TrialsInfo, $Values['allTrialsforDownload'], );
+			$globalOptions, $timeMachine, $Values['Trials'], $TrialsInfo, $Values['allTrialsforDownload']);
 		}
 		else if($ottType == 'standalone')
 		{
