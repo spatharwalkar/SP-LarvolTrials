@@ -345,27 +345,6 @@ else if(isset($_GET['results']))
 	$globalOptions['url'] = $_GET['results'];	
 	$tt->generateTrialTracker('webpage', $_GET['results'], $_GET['time'], 'unstacked', $globalOptions);
 }
-else if(isset($_GET['JSON_search']))
-{
-	if(count($_GET['p']) > 1 && count($_GET['a']) > 1)
-	{
-		$tt_type = 'totalindexed';
-	}
-	else if(count($_GET['p']) > 1 || count($_GET['a']) > 1)
-	{
-		$tt_type = 'stackedindexed';
-	}
-	else 
-	{
-		$tt_type = 'singleindexed';
-	}
-	$globalOptions['url'] = 'p=' . $_GET['p'] . '&a=' . $_GET['a'] . '&JSON_search=' . $_GET['JSON_search'];	
-	
-	if(isset($_GET['JSON_search']) && $_GET['JSON_search'] != '' && $_GET['JSON_search'] != NULL)
-	$globalOptions['JSON_search'] = $_GET['JSON_search'];
-	
-	$tt->generateTrialTracker('indexed_search', array('product' => $_GET['p'], 'area' => $_GET['a']), $_GET['time'], 'indexed_search', $globalOptions);
-}
 else if(isset($_GET['p']) && isset($_GET['a']))
 {
 	if(count($_GET['p']) > 1 && count($_GET['a']) > 1)
@@ -381,6 +360,12 @@ else if(isset($_GET['p']) && isset($_GET['a']))
 		$tt_type = 'singleindexed';
 	}
 	$globalOptions['url'] = 'p=' . $_GET['p'] . '&a=' . $_GET['a'];	
+	
+	if(isset($_GET['JSON_search']))
+	{
+		$globalOptions['url'] = 'p=' . $_GET['p'] . '&a=' . $_GET['a'] . '&JSON_search=' . $_GET['JSON_search'];
+		$globalOptions['JSON_search'] = $_GET['JSON_search'];
+	}
 	
 	$tt->generateTrialTracker('indexed', array('product' => $_GET['p'], 'area' => $_GET['a']), $_GET['time'], 'indexed', $globalOptions);
 }
