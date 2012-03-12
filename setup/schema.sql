@@ -586,7 +586,7 @@ CREATE TABLE IF NOT EXISTS `data_history` (
   `is_section_801_prev` tinyint(1) DEFAULT NULL,
   `is_section_801_lastchanged` datetime DEFAULT NULL,
   PRIMARY KEY (`larvol_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=DYNAMIC;
 
 CREATE TABLE IF NOT EXISTS `data_manual` (
   `larvol_id` int(10) unsigned NOT NULL,
@@ -649,7 +649,7 @@ CREATE TABLE IF NOT EXISTS `data_manual` (
   `is_section_801` tinyint(1) DEFAULT NULL,
    `is_sourceless` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`larvol_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=DYNAMIC;
 
 CREATE TABLE IF NOT EXISTS `data_nct` (
   `larvol_id` int(10) unsigned NOT NULL,
@@ -759,7 +759,7 @@ CREATE TABLE IF NOT EXISTS `data_nct` (
   KEY `phase` (`phase`(2)),
   KEY `condition` (`condition`(31)),
   KEY `intervention_name` (`intervention_name`(31))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=DYNAMIC;
 
 CREATE TABLE IF NOT EXISTS `data_trials` (
   `larvol_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -835,7 +835,7 @@ CREATE TABLE IF NOT EXISTS `data_trials` (
   KEY `intervention_name` (`intervention_name`(31)),
   KEY `institution_type` (`institution_type`),
   KEY `is_active` (`is_active`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=DYNAMIC;
 
 CREATE TABLE IF NOT EXISTS `product_trials` (
   `product` int(10) unsigned NOT NULL,
