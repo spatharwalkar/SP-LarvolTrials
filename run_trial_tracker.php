@@ -7454,6 +7454,8 @@ class TrialTracker
 			$enrollments = array_map(function($a) { 
 			  return $a['NCT/enrollment']; 
 			},  $Trials);
+			$enrollments = array_unique(array_filter($enrollments));
+			
 			$globalOptions['minEnroll'] = min($enrollments);
 			$globalOptions['maxEnroll'] = max($enrollments);
 		}
