@@ -1297,7 +1297,7 @@ function parseProductsXmlAndSave($xmlImport,$table)
 		{
 			foreach($brandNames->getElementsByTagName('Institution') as $brandName)
 			{
-				$company[] = $brandName->getElementsByTagName('name')->item(0)->nodeValue;
+				($brandName->getElementsByTagName('is_active')->item(0)->nodeValue=='True')?$company[] = $brandName->getElementsByTagName('name')->item(0)->nodeValue:null;
 			}
 		}	
 		$company = implode(',',$company);
