@@ -7892,7 +7892,8 @@ class TrialTracker
 		$stages = 3;
 		
 		$paginateStr = '<div class="pagination">';
-		///ALL Apostrophe SIGN REPLACED BY Quotation Marks, CAUSE JASON DATA URL GET PROBLEM WITH IT
+		///ALL Quotation Marks SIGN REPLACED BY Apostrophe, CAUSE JSON DATA URL GET PROBLEM WITH double quote.
+		// globalOptions Should always have Apostrophe instead of quote sign or data will not be passed
 		if($globalOptions['page'] != 1)
 		{
 			$paginateStr .= '<a href=\'' . $url . '&page=' . ($globalOptions['page']-1) . '\'>&laquo; Prev</a>';
