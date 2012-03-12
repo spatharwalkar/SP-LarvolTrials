@@ -5726,7 +5726,7 @@ class TrialTracker
 				unset($phase);
 			}
 			
-			if(isset($globalOptions['enroll']) && $globalOptions['enroll'] != '') 
+			if(isset($globalOptions['enroll']) && $globalOptions['enroll'] != '0') 
 			{
 				$sp = new SearchParam();
 				$sp->field = '_' . getFieldId('NCT', 'enrollment');
@@ -6089,7 +6089,7 @@ class TrialTracker
 				unset($phase);
 			}
 			
-			if(isset($globalOptions['enroll']) && $globalOptions['enroll'] != '') 
+			if(isset($globalOptions['enroll']) && $globalOptions['enroll'] != '0') 
 			{
 				$sp = new SearchParam();
 				$sp->field = '_' . getFieldId('NCT', 'enrollment');
@@ -7089,7 +7089,7 @@ class TrialTracker
 				unset($phase);
 			}
 		
-			 if(isset($globalOptions['enroll']) && $globalOptions['enroll'] != '') 
+			 if(isset($globalOptions['enroll']) && $globalOptions['enroll'] != '0') 
 			{
 				$sp = new SearchParam();
 				$sp->field = '_' . getFieldId('NCT', 'enrollment');
@@ -7868,7 +7868,7 @@ class TrialTracker
 		{
 			$url .= '&amp;phase=' . implode(',',$globalOptions['phase']);
 		}
-		if(isset($globalOptions['enroll']) && $globalOptions['enroll'] != '') 
+		if(isset($globalOptions['enroll']) && $globalOptions['enroll'] != '0') 
 		{
 			$url .= '&amp;enroll=' . $globalOptions['enroll'];
 		}

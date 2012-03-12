@@ -90,7 +90,7 @@ if(isset($_GET['minenroll']) && isset($_GET['maxenroll']))
 	$globalOptions['maxEnroll'] = $_GET['maxenroll'];
 }
 
-if(isset($_GET['enroll']) && $_GET['enroll'] != '')
+if(isset($_GET['enroll']) && $_GET['enroll'] != '0')
 {	
 	$globalOptions['enroll'] = $_GET['enroll'];
 }
@@ -419,9 +419,9 @@ else
 		
 		$("#slider-range").slider({
 			range: true,
-			min: $("#minenroll").val(),
-			max: $("#maxenroll").val(),
-			values: [ $minEnroll, $maxEnroll ],
+			min: parseInt($("#minenroll").val()),
+			max: parseInt($("#maxenroll").val()),
+			values: [ parseInt($minEnroll), parseInt($maxEnroll) ],
 			slide: function( event, ui ) {
 				$("#amount").val(ui.values[ 0 ] + " - " + ui.values[ 1 ] );
 			}
