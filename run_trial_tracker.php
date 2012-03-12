@@ -5302,7 +5302,7 @@ class TrialTracker
 				echo '<input type="hidden" id="upmstyle" value="expand"/>';
 			}
 			echo $this->displayWebPage($ottType, $Values['resultIds'], $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], 
-			$globalOptions, $timeMachine, $Values['Trials'], $Values['TrialsInfo'], $Values['linkExpiry']);
+			$globalOptions, $timeMachine, $Values['Trials'], $Values['TrialsInfo'], $Values['allTrialsforDownload'], $Values['linkExpiry']);
 		}
 		else if($ottType == 'rowstacked' || $ottType == 'colstacked')
 		{
@@ -5348,7 +5348,7 @@ class TrialTracker
 			$Values = $this->processOTTData($ottType, $result, $timeMachine, $linkExpiry, $globalOptions);
 			
 			echo $this->displayWebPage($ottType, $Values['resultIds'], $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], 
-			$globalOptions, $timeMachine, $Values['Trials'], $Values['TrialsInfo'], $Values['linkExpiry']);
+			$globalOptions, $timeMachine, $Values['Trials'], $Values['TrialsInfo'], $Values['allTrialsforDownload'], $Values['linkExpiry']);
 		}
 		else if($ottType == 'indexed') 
 		{	
@@ -5482,7 +5482,7 @@ class TrialTracker
 			$Values = $this->processIndexedOTTData($ottType, $Ids, $timeMachine, $globalOptions);
 			
 			echo $this->displayWebPage($ottType, $resultIds, $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], 
-			$globalOptions, $timeMachine, $Values['Trials'], $TrialsInfo);
+			$globalOptions, $timeMachine, $Values['Trials'], $TrialsInfo, $Values['allTrialsforDownload'], );
 		}
 		else if($ottType == 'standalone')
 		{
@@ -5523,7 +5523,7 @@ class TrialTracker
 			unset($globalOptions['sectionHeader']);
 			
 			echo $this->displayWebPage($ottType, $nctIds, $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], 
-			$globalOptions, $timeMachine, $Values['Trials'], $Values['TrialsInfo']);
+			$globalOptions, $timeMachine, $Values['Trials'], $Values['TrialsInfo'], $Values['allTrialsforDownload']);
 		}
 		else if($ottType == 'unstackedoldlink')
 		{
@@ -5539,7 +5539,7 @@ class TrialTracker
 			$Values = $this->processOldLinkMethod($ottType, array($resultIds['params']), array($resultIds['leading']), $globalOptions);
 			
 			echo $this->displayWebPage($ottType, $Values['resultIds'], $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], 
-			$globalOptions, $timeMachine, $Values['Trials'], $Values['TrialsInfo']);
+			$globalOptions, $timeMachine, $Values['Trials'], $Values['TrialsInfo'], $Values['allTrialsforDownload']);
 		}
 		else if($ottType == 'stackedoldlink')
 		{
@@ -5576,7 +5576,7 @@ class TrialTracker
 			$Values = $this->processOldLinkMethod($ottType, $resultIds['params'], $resultIds['leading'], $globalOptions, $cparams);
 			
 			echo $this->displayWebPage($ottType, $Values['resultIds'], $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], 
-			$globalOptions, $timeMachine, $Values['Trials'], $Values['TrialsInfo']);
+			$globalOptions, $timeMachine, $Values['Trials'], $Values['TrialsInfo'], $Values['allTrialsforDownload']);
 		}
 	}
 	
@@ -7435,7 +7435,7 @@ class TrialTracker
 	}
 	
 	function displayWebPage($ottType, $resultIds, $totactivecount, $totinactivecount, $totalcount, $globalOptions, $timeMachine = NULL, $Trials, $TrialsInfo, 
-	$linkExpiry = NULL)
+	$allTrials, $linkExpiry = NULL)
 	{	
 		global $db;
 		$loggedIn	= $db->loggedIn();
@@ -7449,14 +7449,14 @@ class TrialTracker
 		$last 	= ($globalOptions['page'] * $this->resultsPerPage > $count) ? $count : ($start + $this->resultsPerPage - 1);
 		$totalPages = ceil($count / $this->resultsPerPage);
 		
-		if(!empty($Trials) && $globalOptions['minEnroll'] == 0 && $globalOptions['maxEnroll'] == 0)
+		if(!empty($allTrials) && $globalOptions['minEnroll'] == 0 && $globalOptions['maxEnroll'] == 0)
 		{
 			$enrollments = array_map(function($a) { 
 			  return $a['NCT/enrollment']; 
-			},  $Trials);
+			},  $allTrials);
 			$enrollments = array_unique(array_filter($enrollments));
 			
-			$globalOptions['minEnroll'] = min($enrollments);
+			$globalOptions['minEnroll'] = 0;
 			$globalOptions['maxEnroll'] = max($enrollments);
 		}
 		else
