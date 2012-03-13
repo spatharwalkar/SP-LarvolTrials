@@ -285,6 +285,6 @@ $(document).ready(function () {
 <?php 
 if($saveStatus == 1 && $searchDataOld != $_GET['searchdata'])
 {
-	echo input_tag(array('Type'=>'iframe','Field'=>urlPath().'index_area.php?id='.$_GET['id']),null,array('style'=>"display:none"));die;
+	echo input_tag(array('Type'=>'iframe','Field'=>urlPath().'index_area.php?id='.$_GET['id'].'&connection_close=1'),null,array('style'=>"display:none"));die;
 }
 echo '</html>';
