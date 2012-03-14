@@ -4,15 +4,19 @@ require_once 'db.php';
 $search = mysql_real_escape_string($_GET['query']);
 $table = mysql_real_escape_string($_GET['table']);
 $field = mysql_real_escape_string($_GET['field']);
+$hint = mysql_real_escape_string($_GET['hint']);
 
 //filter input
-$autoSuggestTables = array('areas','upm','products');
+$autoSuggestTables = array('areas','upm','products','data_trials');
 if(!in_array($table,$autoSuggestTables))die;
 
 if($table=='upm' && $field=='product')
 $query = "select p.id,p.name from products p where p.name like '%$search%' and (p.is_active=1 or p.is_active is null) order by name asc";
 else
 $query = "select distinct $field from $table where $field like '%$search%' order by $field asc";
+if( isset($hint) and !is_null($hint) and strlen($hint)>1 )
+$query = "select distinct $field from $table  where $field like '%$hint%' order by $field asc limit 50";
+
 $result =  mysql_query($query);
 $data = array();
 $json = array();

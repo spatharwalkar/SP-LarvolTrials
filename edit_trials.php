@@ -1,8 +1,10 @@
 <?php
 require_once('db.php');
 require_once('include.util.php');
+//pr($_POST);pr($_GET);
 //ini_set('error_reporting', E_ALL ^ E_NOTICE);
 global $logger;
+if(isset($_GET['sourceless_only'])) $_POST['sourceless_only']=$_GET['sourceless_only'];
 /*
 if(!isset($_POST['PME_sys_operation']) and !isset($_GET['larvol_id'])) 
 {
@@ -48,8 +50,6 @@ if(!isset($_POST['PME_sys_operation']) and !isset($_GET['larvol_id']))
 }
 */
 ?>
-
-
 <?
 require_once('krumo/class.krumo.php');
 require_once('db.php');
@@ -58,13 +58,40 @@ require_once('include.util.php');
 require_once 'include.page.php';
 global $logger;
 $table = 'products';
+$table1 = 'data_trials';
 $script = 'edit_trials';
 		
-require('header.php');	
+require_once('header.php');	
 global $db;
-?>
-<script type="text/javascript">
-<?
+if(isset($_GET['larvol_id']))
+{
+$_GET['PME_sys_operation']='PME_op_View';
+$_GET['PME_sys_rec']=$_GET['larvol_id'];
+}
+if(isset($_GET['mode']) and $_GET['mode']=='edit' )
+{
+	if($db->loggedIn() and ($db->user->userlevel=='admin'||$db->user->userlevel=='root'))
+	{
+		$_GET['PME_sys_operation']='PME_op_Change';
+		$_GET['PME_sys_rec']=$_GET['larvol_id'];
+	}
+	else
+	{
+		$_GET['PME_sys_operation']='PME_op_View';
+		$_GET['PME_sys_rec']=$_GET['larvol_id'];
+	}
+}
+$adm=$db->loggedIn() and ($db->user->userlevel=='admin'||$db->user->userlevel=='root');
+
+if(!$adm and isset($_POST['PME_sys_operation']) and ($_POST['PME_sys_operation']=='PME_op_Change' or $_POST['PME_sys_operation']=='Change'))
+{
+	$_POST['PME_sys_operation']='PME_op_View';
+}
+if(!$adm and isset($_GET['PME_sys_operation']) and ($_GET['PME_sys_operation']=='PME_op_Change' or $_GET['PME_sys_operation']=='Change'))
+{
+	$_GET['PME_sys_operation']='PME_op_View';
+}
+
 if(isset($_REQUEST['id']))	//load search from Saved Search
 {
 	$id = ($_REQUEST['id'])?$_REQUEST['id']:null;
@@ -72,25 +99,69 @@ if(isset($_REQUEST['id']))	//load search from Saved Search
 	//$show_value = 'loadQueryData("' . $data . '");';
 	//$show_value = "loadQueryData('" . $searchDbData . "');";
 	$show_value = "searchDbData = '" . $searchDbData . "';";
-	echo($show_value);
+//	echo($show_value);
 
 }
 else
 {
 	$show_value = "searchDbData = '';";
-	echo($show_value);
+//	echo($show_value);
 }		
+$change='No' ;
+if(isset($_GET['PME_sys_operation'])) $change=$_GET['PME_sys_operation'];
+if(isset($_POST['PME_sys_operation'])) $change=$_POST['PME_sys_operation'];
+
+
+if( $db->loggedIn() and ( $db->user->userlevel=='admin' || $db->user->userlevel=='root' ) and ( $change=='Change' or $change=='PME_op_Change' ) )
+{
+	
+
+	if(isset($_GET['PME_sys_rec'])) $lid=$_GET['PME_sys_rec']; 
+	if(isset($_POST['PME_sys_rec'])) $lid=$_POST['PME_sys_rec']; 
+	
+	
+	$query = "
+			SELECT `source`,`is_sourceless` 
+			FROM `data_manual` 
+			WHERE `larvol_id` = $lid limit 1
+			";
+	$res1 		= mysql_query($query) ;
+	
+	
+	if($res1===false)
+	{
+		$log = 'Bad SQL query. Query=' . $query;
+		$logger->fatal($log);
+		echo $log;
+		die($log);
+	}
+	
+	$hint=mysql_fetch_assoc($res1);
+	if(isset($hint['source']) and trim($hint['source'])<>'') $hnt=",hint:'".$hint['source']."'";
+	else $hnt='';
+	
+}
+
 
 ?>
+<script type="text/javascript">
+
+
 function upmdelsure(){ return confirm("Are you sure you want to delete this product?"); }
 $(document).ready(function(){
-	var options, a,b;
+	var options,options1,a,b,c,d;
 
 	jQuery(function(){
 	  options = { serviceUrl:'autosuggest.php',params:{table:<?php echo "'$table'"?>,field:'name'} };
+	  options1 = { serviceUrl:'autosuggest.php',params:{table:'data_trials',field:'source_id'<?php echo $hnt;?>} };
+	  
 	  if($('#PME_data_intervention_name').length>=0)
 	  a = $('#PME_data_intervention_name').autocomplete(options);
 	  b = $('#name').autocomplete(options);
+	  
+	  if($('#PME_data_condition').length>=0)
+	  c = $('#PME_data_condition').autocomplete(options1);
+	  d = $('#name').autocomplete(options1);
 	});
 	$(".ajax").colorbox({
 		onComplete:function(){ loadQueryData($('#searchdata').val());},
@@ -103,7 +174,7 @@ $(document).ready(function(){
 });
 </script>
 <style type="text/css">
-	hr.pme-hr		     { border: 0px solid; padding: 0px; margin: 0px; border-top-width: 1px; height: 1px; }
+	hr.pme-hr		     { border: 0px solid; padding: 0px; margin: 0px; border-top-width: 1px; height: 5px; }
 	table.pme-main 	     { border: #004d9c 1px solid; border-collapse: collapse; border-spacing: 0px; width: 100%; }
 	table.pme-navigation { border: #004d9c 0px solid; border-collapse: collapse; border-spacing: 0px; width: 100%; }
 	td.pme-navigation-0, td.pme-navigation-1 { white-space: nowrap; }
@@ -138,54 +209,13 @@ $(document).ready(function(){
 }
 </style>
 </head>
-<?php
-
-require_once('db.php');
-global $db;
-//pr($_POST);
-//pr($_GET);
-if(isset($_GET['larvol_id']))
-{
-$_GET['PME_sys_operation']='PME_op_View';
-$_GET['PME_sys_rec']=$_GET['larvol_id'];
-
-}
-
-if(isset($_GET['mode']) and $_GET['mode']=='edit' )
-{
-	if($db->loggedIn() and ($db->user->userlevel=='admin'||$db->user->userlevel=='root'))
-	{
-		$_GET['PME_sys_operation']='PME_op_Change';
-		$_GET['PME_sys_rec']=$_GET['larvol_id'];
-	}
-	else
-	{
-		$_GET['PME_sys_operation']='PME_op_View';
-		$_GET['PME_sys_rec']=$_GET['larvol_id'];
-	}
-}
-
-$adm=$db->loggedIn() and ($db->user->userlevel=='admin'||$db->user->userlevel=='root');
-
-if(!$adm and isset($_POST['PME_sys_operation']) and ($_POST['PME_sys_operation']=='PME_op_Change' or $_POST['PME_sys_operation']=='Change'))
-{
-	$_POST['PME_sys_operation']='PME_op_View';
-}
-if(!$adm and isset($_GET['PME_sys_operation']) and ($_GET['PME_sys_operation']=='PME_op_Change' or $_GET['PME_sys_operation']=='Change'))
-{
-	$_GET['PME_sys_operation']='PME_op_View';
-}
-
-
-
-
-
+<?
 $opts['dbh'] = $db->db_link;
 $opts['tb'] = 'data_trials';
 $opts['key'] = 'larvol_id';
 $opts['key_type'] = 'int';
 $opts['sort_field'] = array('larvol_id');
-$opts['inc'] = 20;
+$opts['inc'] = 15;
 $opts['options'] = 'ACVFI';
 $opts['multiple'] = '4';
 $opts['navigation'] = 'G';
@@ -267,7 +297,7 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['official_title'
   'select'   => 'T',
   'width'   => '10%',
   'maxlen'   => 65535,
-//  'options'  => 'AVCPD',
+  'options'  => 'AVCPD',
   'textarea' => array(
     'rows' => 5,
     'cols' => 50),

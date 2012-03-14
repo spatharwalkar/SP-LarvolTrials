@@ -1779,13 +1779,13 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 			if ($listall) 
 			{
 				if($_POST['sourceless_only'] and $_POST['sourceless_only'] == 'YES') $checked=' checked="checked" '; else $checked='';
-				echo '<b>Show sourceless trials only?&nbsp;<input type="checkbox" name="sourceless_only" value="YES"' . $checked . ' onclick="this.form.submit();"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b>';
+				echo '<b><span style="color:red">Show sourceless trials only?</span>&nbsp;<input type="checkbox" name="sourceless_only" value="YES"' . $checked . ' onclick="this.form.submit();"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b>';
 				echo $this->labels['Page'],':&nbsp;1&nbsp;',$this->labels['of'],'&nbsp;1';
 			} else {
 				$current_page = intval($this->fm / $this->inc) + 1;
 				$total_pages  = max(1, ceil($this->total_recs / abs($this->inc)));
 				if($_POST['sourceless_only'] and $_POST['sourceless_only'] == 'YES') $checked=' checked="checked" '; else $checked='';
-				echo '<b>Show sourceless trials only?&nbsp;<input type="checkbox" name="sourceless_only" value="YES"' . $checked . ' onclick="this.form.submit();"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b>';
+				echo '<b><span style="color:red">Show sourceless trials only?</span>&nbsp;<input type="checkbox" name="sourceless_only" value="YES"' . $checked . ' onclick="this.form.submit();"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b>';
 				echo $this->labels['Page'],':&nbsp;',$current_page;
 				echo '&nbsp;',$this->labels['of'],'&nbsp;',$total_pages;
 			}
@@ -2282,7 +2282,11 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 					}
 					if ($this->nav_graphic_links()) {
 						$printed_out = false;
-						if ($this->view_enabled()) {
+						if ($this->view_enabled()) 
+						{
+							if( $this->change_enabled() and $_POST['sourceless_only'] and $_POST['sourceless_only'] == 'YES')
+								echo '</form><form method="post" action="link_trials.php" name="link_form">';
+							
 							$printed_out = true;
 							echo '&nbsp;&nbsp;<a class="',$css_class_name,'" href="',$viewQuery,'"><img class="';
 							echo $css_class_name,'" src="',$this->url['images'];
@@ -2296,6 +2300,16 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 							echo $css_class_name,'" src="',$this->url['images'];
 							echo 'jedit.png"  border="0" ';
 							echo 'alt="',$changeTitle,'" title="',$changeTitle,'" /></a>';
+							
+							if( $this->change_enabled() and $_POST['sourceless_only'] and $_POST['sourceless_only'] == 'YES')
+							{
+							echo'
+					
+							<input type="hidden" name="lid" value="'.$key_rec.'" />
+							<input type="image" src="images/link.jpg">
+							</form>
+							';
+							}
 	
 						}
 						if ($this->copy_enabled()) {

@@ -2,7 +2,7 @@
 require_once('db.php');
 require_once('include.util.php');
 ini_set('max_execution_time', '360000'); //100 hours
-
+ignore_user_abort(true);
 if(isset($_GET['area']) or isset($_GET['product']))
 {
 	$parameters=$_GET;
