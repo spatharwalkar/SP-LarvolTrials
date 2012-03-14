@@ -590,6 +590,7 @@ CREATE TABLE IF NOT EXISTS `data_history` (
 
 CREATE TABLE IF NOT EXISTS `data_manual` (
   `larvol_id` int(10) unsigned NOT NULL,
+  `source_id` VARCHAR(20) COLLATE utf8_unicode_ci DEFAULT NULL,
   `brief_title` text COLLATE utf8_unicode_ci DEFAULT NULL,
   `acronym` text COLLATE utf8_unicode_ci DEFAULT NULL,
   `official_title` text COLLATE utf8_unicode_ci,
