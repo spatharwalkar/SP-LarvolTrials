@@ -54,7 +54,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 			$log='Bad SQL query getting  details from '. $cat .' table.<br>Query=' . $query;
 			$logger->fatal($log);
 			echo $log;
-			exit;
+			return false;
 		}
 	//	$productz = mysql_fetch_assoc($resu);
 	
@@ -148,7 +148,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					$log='Unable to begin transaction. Query='.$query.' Error:' . mysql_error();
 					$logger->fatal($log);
 					echo $log;
-					exit;
+					return false;
 				}
 				
 				if ($pos === false) 
@@ -156,6 +156,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					$log='Error in MySql Query (no "where" clause is used in the query)  :' . $query;
 					$logger->fatal($log);
 					echo $log;
+					return false;
 				//	exit;
 				} 
 				else 
@@ -176,7 +177,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 							$logger->fatal($log);
 							mysql_query('ROLLBACK');
 							echo $log;
-							exit;
+							return false;
 						}
 //						$query = substr($mystring,0,$pos+6). '  ( ' . substr($mystring,$pos+6) . ' ) ';
 						$query = $mystring ;
@@ -214,7 +215,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					$logger->fatal($log);
 					mysql_query('ROLLBACK');
 					echo $log;
-					exit;
+					return false;
 				}
 				
 				$nctidz=array(); // search result
@@ -297,7 +298,8 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 								$log = 'Bad SQL query pre-indexing trial***. Query : ' . $query . '<br> MySql Error:'.mysql_error();
 								mysql_query('ROLLBACK');
 								$logger->fatal($log);
-								die($log);
+								echo $log;
+								return false;
 							}
 						
 						}
@@ -319,7 +321,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 								$logger->fatal($log);
 								mysql_query('ROLLBACK');
 								echo $log;
-								exit;
+								return false;
 							}
 						}
 						
@@ -334,7 +336,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					$logger->fatal($log);
 					mysql_query('ROLLBACK');
 					echo $log;
-					exit;
+					return false;
 				}
 				$proc_id = getmypid();
 				$i++;
@@ -421,7 +423,7 @@ function trial_indexed($larvol_id,$cat,$cid)
 		$log = 'Bad SQL query checking trial index status. Query=' . $query;
 		$logger->fatal($log);
 		echo $log;
-		die($log);
+		return false;
 	}
 	$resu=array();
 	while($resu[]=mysql_fetch_array($res1));
