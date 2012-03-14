@@ -180,46 +180,6 @@ class TrialTracker
 					$Ids[$pkey]['area'] = implode("', '", $resultIds['area']);
 				}
 			}
-			else if((count($resultIds['product']) >= 1 && count($resultIds['area']) == 1 && ($resultIds['area'][0] == NULL || trim($resultIds['area'][0]) == "")) || (count($resultIds['area']) >= 1 && count($resultIds['product']) == 1 && ($resultIds['product'][0] == NULL || trim($resultIds['product'][0]) == ""))) //Condition For Only Product OR When Only Area is Given
-			{
-				if(count($resultIds['product']) >= 1 && count($resultIds['area']) == 1 && ($resultIds['area'][0] == NULL || $resultIds['area'] == ''))
-				{
-					foreach($resultIds['product'] as $pkey => $pvalue)
-					{
-						$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id = '" . $pvalue . "' ");
-						if(mysql_num_rows($res) > 0)
-						{
-							while($row = mysql_fetch_assoc($res))
-							{
-								$TrialsInfo[$pkey]['sectionHeader'] = $row['name']
-								. (($row['company'] !== NULL && $row['company'] != '') ? " / <i>" . $row['company'] . "</i>" : '');
-								$TrialsInfo[$pkey]['naUpms'] = 
-								$this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
-								
-								$Ids[$pkey]['product'] = $row['id'];
-								$Ids[$pkey]['area'] = '';
-							}
-						}
-					}
-				}
-				else
-				{
-					foreach($resultIds['area'] as $akey => $avalue)
-					{
-						$res = mysql_query("SELECT `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
-						if(mysql_num_rows($res) > 0)
-						{
-							while($row = mysql_fetch_assoc($res))
-							{
-								$TrialsInfo[$akey]['sectionHeader'] = $row['name'];
-								
-								$Ids[$akey]['product'] = '';
-								$Ids[$akey]['area'] = $row['id'];
-							}
-						}
-					}
-				}
-			}
 			else if(count($resultIds['product']) > 1 || count($resultIds['area']) > 1)
 			{
 				if(count($resultIds['area']) > 1)
@@ -4298,46 +4258,6 @@ class TrialTracker
 					$Ids[$pkey]['area'] = implode("', '", $resultIds['area']);
 				}
 			}
-			else if((count($resultIds['product']) >= 1 && count($resultIds['area']) == 1 && ($resultIds['area'][0] == NULL || trim($resultIds['area'][0]) == "")) || (count($resultIds['area']) >= 1 && count($resultIds['product']) == 1 && ($resultIds['product'][0] == NULL || trim($resultIds['product'][0]) == ""))) //Condition For Only Product OR When Only Area is Given
-			{
-				if(count($resultIds['product']) >= 1 && count($resultIds['area']) == 1 && ($resultIds['area'][0] == NULL || $resultIds['area'] == ''))
-				{
-					foreach($resultIds['product'] as $pkey => $pvalue)
-					{
-						$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id = '" . $pvalue . "' ");
-						if(mysql_num_rows($res) > 0)
-						{
-							while($row = mysql_fetch_assoc($res))
-							{
-								$TrialsInfo[$pkey]['sectionHeader'] = $row['name']
-								. (($row['company'] !== NULL && $row['company'] != '') ? " / <i>" . $row['company'] . "</i>" : '');
-								$TrialsInfo[$pkey]['naUpms'] = 
-								$this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
-								
-								$Ids[$pkey]['product'] = $row['id'];
-								$Ids[$pkey]['area'] = '';
-							}
-						}
-					}
-				}
-				else
-				{
-					foreach($resultIds['area'] as $akey => $avalue)
-					{
-						$res = mysql_query("SELECT `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
-						if(mysql_num_rows($res) > 0)
-						{
-							while($row = mysql_fetch_assoc($res))
-							{
-								$TrialsInfo[$akey]['sectionHeader'] = $row['name'];
-								
-								$Ids[$akey]['product'] = '';
-								$Ids[$akey]['area'] = $row['id'];
-							}
-						}
-					}
-				}
-			}
 			else if(count($resultIds['product']) > 1 || count($resultIds['area']) > 1)
 			{
 				if(count($resultIds['area']) > 1)
@@ -5263,39 +5183,6 @@ class TrialTracker
 					$Ids[$pkey]['area'] = implode("', '", $resultIds['area']);
 				}
 			}
-			else if((count($resultIds['product']) >= 1 && count($resultIds['area']) == 1 && ($resultIds['area'][0] == NULL || trim($resultIds['area'][0]) == "")) || (count($resultIds['area']) >= 1 && count($resultIds['product']) == 1 && ($resultIds['product'][0] == NULL || trim($resultIds['product'][0]) == ""))) //Condition For Only Product OR When Only Area is Given
-			{
-				if(count($resultIds['product']) >= 1 && count($resultIds['area']) == 1 && ($resultIds['area'][0] == NULL || $resultIds['area'] == ''))
-				{
-					foreach($resultIds['product'] as $pkey => $pvalue)
-					{
-						$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id = '" . $pvalue . "' ");
-						if(mysql_num_rows($res) > 0)
-						{
-							while($row = mysql_fetch_assoc($res))
-							{
-								$Ids[$pkey]['product'] = $row['id'];
-								$Ids[$pkey]['area'] = '';
-							}
-						}
-					}
-				}
-				else
-				{
-					foreach($resultIds['area'] as $akey => $avalue)
-					{
-						$res = mysql_query("SELECT `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
-						if(mysql_num_rows($res) > 0)
-						{
-							while($row = mysql_fetch_assoc($res))
-							{
-								$Ids[$akey]['product'] = '';
-								$Ids[$akey]['area'] = $row['id'];
-							}
-						}
-					}
-				}
-			}
 			else if(count($resultIds['product']) > 1 || count($resultIds['area']) > 1)
 			{
 				if(count($resultIds['area']) > 1)
@@ -5498,56 +5385,6 @@ class TrialTracker
 							$Ids[$pkey]['area'] = implode("', '", $resultIds['area']);
 						}
 					}
-				}
-			}
-			else if((count($resultIds['product']) >= 1 && count($resultIds['area']) == 1 && ($resultIds['area'][0] == NULL || trim($resultIds['area'][0]) == "")) || (count($resultIds['area']) >= 1 && count($resultIds['product']) == 1 && ($resultIds['product'][0] == NULL || trim($resultIds['product'][0]) == ""))) //Condition For Only Product OR When Only Area is Given
-			{
-				if(count($resultIds['product']) >= 1 && count($resultIds['area']) == 1 && ($resultIds['area'][0] == NULL || $resultIds['area'] == ''))
-				{
-					$t = 'Area: No Area';
-					$this->displayHeader($t);
-					
-					foreach($resultIds['product'] as $pkey => $pvalue)
-					{
-						$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id = '" . $pvalue . "' ");
-						if(mysql_num_rows($res) > 0)
-						{
-							while($row = mysql_fetch_assoc($res))
-							{
-								$TrialsInfo[$pkey]['sectionHeader'] = $row['name']
-								. (($row['company'] !== NULL && $row['company'] != '') ? " / <i>" . $row['company'] . "</i>" : '');
-								$TrialsInfo[$pkey]['naUpms'] = 
-								$this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
-								
-								$Ids[$pkey]['product'] = $row['id'];
-								$Ids[$pkey]['area'] = '';
-							}
-						}
-					}
-				}
-				else
-				{
-					$t = 'Product: No Product';
-					$this->displayHeader($t);
-					
-					foreach($resultIds['area'] as $akey => $avalue)
-					{
-						$res = mysql_query("SELECT `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
-						if(mysql_num_rows($res) > 0)
-						{
-							while($row = mysql_fetch_assoc($res))
-							{
-								$TrialsInfo[$akey]['sectionHeader'] = $row['name'];
-								
-								$Ids[$akey]['product'] = '';
-								$Ids[$akey]['area'] = $row['id'];
-							}
-						}
-					}
-				}
-				if(!empty($TrialsInfo[0]['naUpms']))
-				{
-					echo '<input type="hidden" id="upmstyle" value="expand"/>';
 				}
 			}
 			else if(count($resultIds['product']) > 1 || count($resultIds['area']) > 1)
@@ -6173,10 +6010,6 @@ class TrialTracker
 			$params1 = array();
 			$params2 = array();
 			$params3 = array();
-			$params4 = array();
-			$params5 = array();
-			$params6 = array();
-			$params7 = array();
 			
 			$TrialsInfo[$ikey]['sectionHeader'] = $globalOptions['sectionHeader'];
 			
@@ -6186,24 +6019,6 @@ class TrialTracker
 			$sp->value = implode(' OR ', $ivalue);
 			$params2 = array($sp);
 			
-			if(isset($globalOptions['status']) && !empty($globalOptions['status'])) 
-			{
-				$status = array();
-				foreach($globalOptions['status'] as $skey => $svalue)
-				{
-					$svalue =  $this->statusFilters[$svalue];
-					$status[] = $this->getEnumIds(getFieldId('NCT', 'overall_status'), $svalue);
-				}
-				
-				$sp = new SearchParam();
-				$sp->field = '_' . getFieldId('NCT', 'overall_status');
-				$sp->action = 'search';
-				$sp->value = $status;
-				$params3[] = $sp;
-				
-				unset($status);
-			}
-		
 			if(isset($globalOptions['itype']) && !empty($globalOptions['itype'])) 
 			{
 				foreach($globalOptions['itype'] as $ikey => $ivalue)
@@ -6214,52 +6029,7 @@ class TrialTracker
 					$sp->value 	= $this->institutionFilters[$ivalue];
 					$params[] = $sp;
 				}
-				$params4 = $params;
-			}
-			
-			if(isset($globalOptions['region']) && !empty($globalOptions['region'])) 
-			{
-				foreach($globalOptions['region'] as $rkey => $rvalue)
-				{
-					$sp = new SearchParam();
-					$sp->field 	= 'region';
-					$sp->action = 'search';
-					$sp->value 	= $this->regionFilters[$rvalue];
-					$params[] = $sp;
-				}
-				$params5 = $params;
-				
-			}
-			
-			if(isset($globalOptions['phase']) && !empty($globalOptions['phase'])) 
-			{
-				$phase = array();
-				foreach($globalOptions['phase'] as $pkey => $pvalue)
-				{	
-					$pvalue = array_keys($this->phaseFilters, $pvalue);
-					foreach($pvalue as $key => &$value)
-					{	
-						$value = $this->getEnumIds(getFieldId('NCT', 'phase'), $value);
-					}
-					$phase = array_merge($pvalue, $phase);
-				}
-				
-				$sp = new SearchParam();
-				$sp->field = '_' . getFieldId('NCT', 'phase');
-				$sp->action = 'search';
-				$sp->value 	= $phase;
-				$params6[] = $sp;
-				
-				unset($phase);
-			}
-			
-			if(isset($globalOptions['enroll']) && $globalOptions['enroll'] != '0') 
-			{
-				$sp = new SearchParam();
-				$sp->field = '_' . getFieldId('NCT', 'enrollment');
-				$sp->action = 'search';
-				$sp->value 	= str_replace('-', 'TO', $globalOptions['enroll']);
-				$params7[] = $sp;
+				$params2 = $params;
 			}
 			
 			if(!empty($globalOptions['sortOrder'])) 
@@ -6273,7 +6043,7 @@ class TrialTracker
 				}
 			}
 			
-			$Params = array_merge($params1, $params2, $params3, $params4, $params5, $params6,  $params7);
+			$Params = array_merge($params1, $params2, $params3);
 			
 			if(!empty($params2)) 
 			{
@@ -6328,7 +6098,8 @@ class TrialTracker
 				
 				//checking for updated and new unmatched upms.
 				$dataset['matchedupms'] = $this->getMatchedUPMs($nctId, $timeMachine, $timeInterval);
-
+				$Trials['allTrialsforDownload'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+				
 				if($globalOptions['onlyUpdates'] == "yes")
 				{
 					//unsetting value for field acroynm if it has a previous value and no current value
@@ -6360,122 +6131,471 @@ class TrialTracker
 					//merge only if updates are found
 					if(!empty($dataset['trials']['edited']) || $dataset['trials']['new'] == 'y')
 					{	
-						if(!empty($globalOptions['status']))
-						{	
-							$skeys = array_search($rvalue['NCT/overall_status'], $this->statusFilters);
-							if(in_array($skeys, $globalOptions['status']))
-							{
-								$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
-								{
-									$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								}
-								else
-								{
-									$Trials['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								}
-							}
-						}
-						if(!empty($globalOptions['region']))
-						{	
-							$rkeys = array_search($rvalue['region'], $this->regionFilters);
-							if(in_array($rkeys, $globalOptions['region']))
-							{
-								$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
-								{
-									$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								}
-								else
-								{
-									$Trials['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								}
-							}
-						}
-						if(!empty($globalOptions['phase']))
-						{	
-							$pkeys = array_search($rvalue['phase'], $this->phaseFilters);
-							if(in_array($pkeys, $globalOptions['phase']))
-							{
-								$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
-								{
-									$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								}
-								else
-								{
-									$Trials['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								}
-							}
-						}
-						if(empty($globalOptions['status']) && empty($globalOptions['region']) && empty($globalOptions['phase']))
+						if(!empty($globalOptions['status']) && !empty($globalOptions['phase']) && !empty($globalOptions['region']))
 						{
+							$status = array();
+							foreach($globalOptions['status'] as $skey => $svalue)
+							{
+								$status[] = $this->statusFilters[$svalue];
+							}
+							
+							$phase = array();
+							foreach($globalOptions['phase'] as $pkey => $pvalue)
+							{	
+								$ph = array_keys($this->phaseFilters, $pvalue);
+								$phase = array_merge($phase, $ph);
+							}
+							
+							$region = array();
+							foreach($globalOptions['region'] as $rkey => $rgvalue)
+							{
+								$region[] = $this->regionFilters[$rgvalue];
+							}
+							
+							if(in_array($rvalue['NCT/overall_status'], $status) 
+							&& in_array($rvalue['NCT/phase'], $phase) 
+							&& in_array($rvalue['region'], $region))
+							{
+								$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+								if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
+								{
+									$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+								}
+								else
+								{
+									$Trials['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+								}
+							}
+							
+							unset($status);
+							unset($phase);
+							unset($region);
+						}
+						else if(!empty($globalOptions['status']) && !empty($globalOptions['phase'])) 
+						{
+							$status = array();
+							foreach($globalOptions['status'] as $skey => $svalue)
+							{
+								$status[] = $this->statusFilters[$svalue];
+							}
+							
+							$phase = array();
+							foreach($globalOptions['phase'] as $pkey => $pvalue)
+							{	
+								$ph = array_keys($this->phaseFilters, $pvalue);
+								$phase = array_merge($phase, $ph);
+							}
+							
+							if(in_array($rvalue['NCT/overall_status'], $status) 
+							&& in_array($rvalue['NCT/phase'], $phase))
+							{
+								$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+								if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
+								{
+									$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+								}
+								else
+								{
+									$Trials['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+								}
+							}
+							
+							unset($status);
+							unset($phase);
+						}
+						else if(!empty($globalOptions['phase']) && !empty($globalOptions['region']))
+						{
+							$phase = array();
+							foreach($globalOptions['phase'] as $pkey => $pvalue)
+							{	
+								$ph = array_keys($this->phaseFilters, $pvalue);
+								$phase = array_merge($phase, $ph);
+							}
+							
+							$region = array();
+							foreach($globalOptions['region'] as $rkey => $rgvalue)
+							{
+								$region[] = $this->regionFilters[$rgvalue];
+							}
+							
+							if(in_array($rvalue['NCT/phase'], $phase) 
+							&& in_array($rvalue['region'], $region))
+							{
+								$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+								if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
+								{
+									$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+								}
+								else
+								{
+									$Trials['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+								}
+							}
+							
+							unset($phase);
+							unset($region);
+						}
+						else if(!empty($globalOptions['status']) && !empty($globalOptions['region']))
+						{
+							$status = array();
+							foreach($globalOptions['status'] as $skey => $svalue)
+							{
+								$status[] = $this->statusFilters[$svalue];
+							}
+							
+							$region = array();
+							foreach($globalOptions['region'] as $rkey => $rgvalue)
+							{
+								$region[] = $this->regionFilters[$rgvalue];
+							}
+							
+							if(in_array($rvalue['NCT/overall_status'], $status) 
+							&& in_array($rvalue['region'], $region))
+							{
+								$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+								if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
+								{
+									$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+								}
+								else
+								{
+									$Trials['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+								}
+							}
+							
+							unset($status);
+							unset($region);
+						}
+						else if(!empty($globalOptions['status']))
+						{
+							$status = array();
+							foreach($globalOptions['status'] as $skey => $svalue)
+							{
+								$status[] = $this->statusFilters[$svalue];
+							}
+							
+							if(in_array($rvalue['NCT/overall_status'], $status))
+							{
+								$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+								if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
+								{
+									$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+								}
+								else
+								{
+									$Trials['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+								}
+							}
+							
+							unset($status);
+						}
+						else if(!empty($globalOptions['phase']))
+						{
+							$phase = array();
+							foreach($globalOptions['phase'] as $pkey => $pvalue)
+							{	
+								$ph = array_keys($this->phaseFilters, $pvalue);
+								$phase = array_merge($phase, $ph);
+							}
+							
+							if(in_array($rvalue['NCT/phase'], $phase))
+							{
+								$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+								if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
+								{
+									$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+								}
+								else
+								{
+									$Trials['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+								}
+							}
+							
+							unset($phase);
+						}
+						else if(!empty($globalOptions['region']))
+						{
+							$region = array();
+							foreach($globalOptions['region'] as $rkey => $rgvalue)
+							{
+								$region[] = $this->regionFilters[$rgvalue];
+							}
+							
+							if(in_array($rvalue['region'], $region))
+							{
+								$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+								if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
+								{
+									$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+								}
+								else
+								{
+									$Trials['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+								}
+							}
+							
+							unset($region);
+						}
+						else
+						{	
 							$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
+							if(in_array($rvalue['NCT/overall_status'], $this->inactiveStatusValues))
 							{
 								$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
 							}
 							else
 							{
 								$Trials['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+							}
+						}
+						
+						if($globalOptions['enroll'] != '0')
+						{
+							$enroll = explode(' - ', $globalOptions['enroll']);
+							
+							if($rvalue['NCT/enrollment'] < $enroll[0] || $rvalue['NCT/enrollment'] > $enroll[1])
+							{	
+								foreach($Trials['allTrials'] as $k => $v)
+								{
+									if($v['NCT/nct_id'] == $nctId)
+									{
+										unset($Trials['allTrials'][$k]);
+										$Trials['allTrials'] = array_values($Trials['allTrials']);
+									}
+								}
+								
+								foreach($Trials['inactiveTrials'] as $k => $v)
+								{
+									if($v['NCT/nct_id'] == $nctId)
+									{
+										unset($Trials['inactiveTrials'][$k]);
+										$Trials['inactiveTrials'] = array_values($Trials['inactiveTrials']);
+									}
+								}
+								
+								foreach($Trials['activeTrials'] as $k => $v)
+								{
+									if($v['NCT/nct_id'] == $nctId)
+									{
+										unset($Trials['activeTrials'][$k]);
+										$Trials['activeTrials'] = array_values($Trials['activeTrials']);
+									}
+								}
 							}
 						}
 					}
 				} 
 				else 
 				{	
-					if(!empty($globalOptions['status']))
-					{	
-						$skeys = array_search($rvalue['NCT/overall_status'], $this->statusFilters);
-						if(in_array($skeys, $globalOptions['status']))
-						{
-							$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
-							{
-								$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							}
-							else
-							{
-								$Trials['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							}
-						}
-					}
-					if(!empty($globalOptions['region']))
-					{	
-						$rkeys = array_search($rvalue['region'], $this->regionFilters);
-						if(in_array($rkeys, $globalOptions['region']))
-						{
-							$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
-							{
-								$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							}
-							else
-							{
-								$Trials['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							}
-						}
-					}
-					if(!empty($globalOptions['phase']))
-					{	
-						$pkeys = array_search($rvalue['phase'], $this->phaseFilters);
-						if(in_array($pkeys, $globalOptions['phase']))
-						{
-							$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
-							{
-								$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							}
-							else
-							{
-								$Trials['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							}
-						}
-					}
-					if(empty($globalOptions['status']) && empty($globalOptions['region']) && empty($globalOptions['phase']))
+					if(!empty($globalOptions['status']) && !empty($globalOptions['phase']) && !empty($globalOptions['region']))
 					{
+						$status = array();
+						foreach($globalOptions['status'] as $skey => $svalue)
+						{
+							$status[] = $this->statusFilters[$svalue];
+						}
+						
+						$phase = array();
+						foreach($globalOptions['phase'] as $pkey => $pvalue)
+						{	
+							$ph = array_keys($this->phaseFilters, $pvalue);
+							$phase = array_merge($phase, $ph);
+						}
+						
+						$region = array();
+						foreach($globalOptions['region'] as $rkey => $rgvalue)
+						{
+							$region[] = $this->regionFilters[$rgvalue];
+						}
+						
+						if(in_array($rvalue['NCT/overall_status'], $status) 
+						&& in_array($rvalue['NCT/phase'], $phase) 
+						&& in_array($rvalue['region'], $region))
+						{
+							$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+							if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
+							{
+								$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+							}
+							else
+							{
+								$Trials['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+							}
+						}
+						
+						unset($status);
+						unset($phase);
+						unset($region);
+					}
+					else if(!empty($globalOptions['status']) && !empty($globalOptions['phase'])) 
+					{
+						$status = array();
+						foreach($globalOptions['status'] as $skey => $svalue)
+						{
+							$status[] = $this->statusFilters[$svalue];
+						}
+						
+						$phase = array();
+						foreach($globalOptions['phase'] as $pkey => $pvalue)
+						{	
+							$ph = array_keys($this->phaseFilters, $pvalue);
+							$phase = array_merge($phase, $ph);
+						}
+						
+						if(in_array($rvalue['NCT/overall_status'], $status) 
+						&& in_array($rvalue['NCT/phase'], $phase))
+						{
+							$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+							if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
+							{
+								$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+							}
+							else
+							{
+								$Trials['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+							}
+						}
+						
+						unset($status);
+						unset($phase);
+					}
+					else if(!empty($globalOptions['phase']) && !empty($globalOptions['region']))
+					{
+						$phase = array();
+						foreach($globalOptions['phase'] as $pkey => $pvalue)
+						{	
+							$ph = array_keys($this->phaseFilters, $pvalue);
+							$phase = array_merge($phase, $ph);
+						}
+						
+						$region = array();
+						foreach($globalOptions['region'] as $rkey => $rgvalue)
+						{
+							$region[] = $this->regionFilters[$rgvalue];
+						}
+						
+						if(in_array($rvalue['NCT/phase'], $phase) 
+						&& in_array($rvalue['region'], $region))
+						{
+							$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+							if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
+							{
+								$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+							}
+							else
+							{
+								$Trials['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+							}
+						}
+						
+						unset($phase);
+						unset($region);
+					}
+					else if(!empty($globalOptions['status']) && !empty($globalOptions['region']))
+					{
+						$status = array();
+						foreach($globalOptions['status'] as $skey => $svalue)
+						{
+							$status[] = $this->statusFilters[$svalue];
+						}
+						
+						$region = array();
+						foreach($globalOptions['region'] as $rkey => $rgvalue)
+						{
+							$region[] = $this->regionFilters[$rgvalue];
+						}
+						
+						if(in_array($rvalue['NCT/overall_status'], $status) 
+						&& in_array($rvalue['region'], $region))
+						{
+							$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+							if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
+							{
+								$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+							}
+							else
+							{
+								$Trials['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+							}
+						}
+						
+						unset($status);
+						unset($region);
+					}
+					else if(!empty($globalOptions['status']))
+					{
+						$status = array();
+						foreach($globalOptions['status'] as $skey => $svalue)
+						{
+							$status[] = $this->statusFilters[$svalue];
+						}
+						
+						if(in_array($rvalue['NCT/overall_status'], $status))
+						{
+							$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+							if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
+							{
+								$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+							}
+							else
+							{
+								$Trials['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+							}
+						}
+						
+						unset($status);
+					}
+					else if(!empty($globalOptions['phase']))
+					{
+						$phase = array();
+						foreach($globalOptions['phase'] as $pkey => $pvalue)
+						{	
+							$ph = array_keys($this->phaseFilters, $pvalue);
+							$phase = array_merge($phase, $ph);
+						}
+						
+						if(in_array($rvalue['NCT/phase'], $phase))
+						{
+							$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+							if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
+							{
+								$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+							}
+							else
+							{
+								$Trials['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+							}
+						}
+						
+						unset($phase);
+					}
+					else if(!empty($globalOptions['region']))
+					{
+						$region = array();
+						foreach($globalOptions['region'] as $rkey => $rgvalue)
+						{
+							$region[] = $this->regionFilters[$rgvalue];
+						}
+						
+						if(in_array($rvalue['region'], $region))
+						{
+							$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+							if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
+							{
+								$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+							}
+							else
+							{
+								$Trials['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+							}
+						}
+						
+						unset($region);
+					}
+					else
+					{	
 						$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-						if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
+						if(in_array($rvalue['NCT/overall_status'], $this->inactiveStatusValues))
 						{
 							$Trials['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
 						}
@@ -6484,8 +6604,43 @@ class TrialTracker
 							$Trials['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
 						}
 					}
+					
+					if($globalOptions['enroll'] != '0')
+					{
+						$enroll = explode(' - ', $globalOptions['enroll']);
+						
+						if($rvalue['NCT/enrollment'] < $enroll[0] || $rvalue['NCT/enrollment'] > $enroll[1])
+						{	
+							foreach($Trials['allTrials'] as $k => $v)
+							{
+								if($v['NCT/nct_id'] == $nctId)
+								{
+									unset($Trials['allTrials'][$k]);
+									$Trials['allTrials'] = array_values($Trials['allTrials']);
+								}
+							}
+							
+							foreach($Trials['inactiveTrials'] as $k => $v)
+							{
+								if($v['NCT/nct_id'] == $nctId)
+								{
+									unset($Trials['inactiveTrials'][$k]);
+									$Trials['inactiveTrials'] = array_values($Trials['inactiveTrials']);
+								}
+							}
+							
+							foreach($Trials['activeTrials'] as $k => $v)
+							{
+								if($v['NCT/nct_id'] == $nctId)
+								{
+									unset($Trials['activeTrials'][$k]);
+									$Trials['activeTrials'] = array_values($Trials['activeTrials']);
+								}
+							}
+						}
+					}
 				}
-				$Trials['allTrialsforDownload'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
+				
 				if(!in_array($rvalue['NCT/overall_status'],$this->activeStatusValues) && !in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues)) 
 				{ 
 					$log 	= 'WARN: A new value "' . $rvalue['NCT/overall_status'] 
@@ -6597,15 +6752,8 @@ class TrialTracker
 						. " FROM `data_trials` dt "
 						. " JOIN `product_trials` pt ON dt.`larvol_id` = pt.`trial` "
 						. " JOIN `area_trials` at ON dt.`larvol_id` = at.`trial` "
-						. " WHERE ";
-						
-						if($ivalue['product'] != '')
-						$query .= "pt.`product` IN ('" . $ivalue['product'] . "') ";
-						if($ivalue['product'] != '' && $ivalue['area']  != '')
-						$query .= "AND " ;
-						if($ivalue['area'] !='' )
-						$query .= "at.`area` IN ('" . $ivalue['area'] . "') " ;
-						$query .= $where . " ORDER BY " . $orderBy;
+						. " WHERE pt.`product` IN ('" . $ivalue['product'] . "') AND at.`area` IN ('" . $ivalue['area'] . "') " 
+						. $where . " ORDER BY " . $orderBy;
 			}
 			$res = mysql_query($query);
 			while($row = mysql_fetch_assoc($res))
