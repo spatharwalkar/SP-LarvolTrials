@@ -121,7 +121,7 @@ if( $db->loggedIn() and ( $db->user->userlevel=='admin' || $db->user->userlevel=
 	
 	
 	$query = "
-			SELECT `source`,`is_sourceless` 
+			SELECT `source_id`,`is_sourceless` 
 			FROM `data_manual` 
 			WHERE `larvol_id` = $lid limit 1
 			";
@@ -137,7 +137,7 @@ if( $db->loggedIn() and ( $db->user->userlevel=='admin' || $db->user->userlevel=
 	}
 	
 	$hint=mysql_fetch_assoc($res1);
-	if(isset($hint['source']) and trim($hint['source'])<>'') $hnt=",hint:'".$hint['source']."'";
+	if(isset($hint['source_id']) and trim($hint['source_id'])<>'') $hnt=",hint:'".$hint['source_id']."'";
 	else $hnt='';
 	
 }
@@ -269,7 +269,6 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['source_id']=
 array
 (
   'name'   => 'Source ID',
-  'options'=> 'LAVPD', 
   'select' => 'T',
   'maxlen' => 63,
   'sort'   => true

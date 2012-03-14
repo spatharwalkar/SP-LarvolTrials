@@ -15,7 +15,7 @@ $query = "select p.id,p.name from products p where p.name like '%$search%' and (
 else
 $query = "select distinct $field from $table where $field like '%$search%' order by $field asc";
 if( isset($hint) and !is_null($hint) and strlen($hint)>1 )
-$query = "select distinct $field from $table  where $field like '%$hint%' order by $field asc limit 50";
+$query = "select distinct $field from $table  where ( $field like '%$hint%' ) and ( $field <> '$hint' ) order by $field asc limit 50";
 
 $result =  mysql_query($query);
 $data = array();

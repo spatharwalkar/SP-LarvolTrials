@@ -19,7 +19,7 @@ global $db;
 
 // get trial details 
 $query = 	"
-			SELECT `source`,`is_sourceless` , `larvol_id`, `brief_title`
+			SELECT `source_id`,`is_sourceless` , `larvol_id`, `brief_title`
 			FROM `data_manual` 
 			WHERE `larvol_id` = $lid limit 1
 			";
@@ -32,7 +32,7 @@ $query = 	"
 		die($log);
 	}
 	$sourceless=mysql_fetch_assoc($res1);
-	if(isset($sourceless['source']) and trim($sourceless['source'])<>'') $hnt=",hint:'".$sourceless['source']."'";
+	if(isset($sourceless['source_id']) and trim($sourceless['source_id'])<>'') $hnt=",hint:'".$sourceless['source_id']."'";
 	else $hnt='';
 
 //auto suggest
@@ -88,10 +88,10 @@ $(document).ready(function(){
 	</tr>
 	<tr>
 		<td>
-			Source
+			Source Id:
 		</td>
 		<td>
-			<input type="text" name="source" value="<? echo $sourceless['source'] ?>"  size="150" readonly="readonly">
+			<input type="text" name="source" value="<? echo $sourceless['source_id'] ?>"  size="150" readonly="readonly">
 		</td>
 	</tr>
 	<tr>
@@ -115,42 +115,23 @@ $(document).ready(function(){
 </table>
 </div>
 <?
+// function to link sourceless trial to sourced trial.
+
 function link_trial()
 {
 global $logger;
 $lid=$_POST['lid'];
 $sid=$_POST['linked_trial'];
-//******* link 
-	$query = "
-			SELECT `source`,`is_sourceless`,`brief_summary` 
-			FROM `data_manual` 
-			WHERE `larvol_id` = '$lid' limit 1
-			";
-	$res1 		= mysql_query($query) ;
-	
-	
-	if($res1===false)
-	{
-		$log = 'Bad SQL query. Query=' . $query;
-		$logger->fatal($log);
-		echo $log;
-		return $log;
-	}
-	
-	$hint=mysql_fetch_assoc($res1);
-//	pr($hint);
 
-	
-	
-	
-	
+//******* pick the larvol id to be linked to 
+
 	$query = "
 			SELECT `source_id`,`larvol_id`,`brief_title` 
 			FROM `data_trials` 
 			WHERE `source_id` = '$sid' limit 1
 			";
-	$res1 		= mysql_query($query) ;
-	
+
+	$res1 	= mysql_query($query) ;
 	
 	if($res1===false)
 	{
@@ -161,14 +142,35 @@ $sid=$_POST['linked_trial'];
 	}
 	
 	$hint=mysql_fetch_assoc($res1);
-	//pr($hint);
 
+// update sourceless data (change larvol id)
 	$query = '
 			UPDATE data_manual 
 			set larvol_id="'  . $hint['larvol_id'] . '", is_sourceless=NULL 
 			WHERE `larvol_id` ="' .  $lid .'" limit 1
 			';
 	$res1 		= mysql_query($query) ;
+	if($res1===false)
+	{
+		$log = 'Bad SQL query. Query=' . $query;
+		$logger->fatal($log);
+		echo $log;
+		return $log;
+	}
+//delete the sourceless trial from data trial as it is no longer needed
+
+	$query = '
+			DELETE FROM `data_trials` 
+			where larvol_id="' .  $lid .'" limit 1
+			';
+	$res1 		= mysql_query($query) ;
+	if($res1===false)
+	{
+		$log = 'Bad SQL query. Query=' . $query;
+		$logger->fatal($log);
+		echo $log;
+		return $log;
+	}
 	
 
 $_POST['sourceless_only']='YES';

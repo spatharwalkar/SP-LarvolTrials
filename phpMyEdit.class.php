@@ -133,7 +133,7 @@ class phpMyEdit
 			'V' => array('change','cancel')
 //			'V' => array('cancel')
 			);
-
+	
 	function col_has_sql($k)    { return isset($this->fdd[$k]['sql']); }
 	function col_has_sqlw($k)   { return isset($this->fdd[$k]['sqlw']) && !$this->virtual($k); }
 	function col_has_values($k) { return isset($this->fdd[$k]['values']) || isset($this->fdd[$k]['values2']); }
@@ -170,7 +170,7 @@ class phpMyEdit
 	function virtual($k)      { return stristr($this->fdd[$k]['input'],'V') && $this->col_has_sql($k); }
 
 	function add_operation()    { return $this->operation == $this->labels['Add']    && $this->add_enabled();    }
-	function change_operation() { return $this->operation == $this->labels['Change'] && $this->change_enabled(); }
+	function change_operation() { global $db; return $this->operation == $this->labels['Change'] && $this->change_enabled() && $db->loggedIn() && ($db->user->userlevel=='admin'||$db->user->userlevel=='root') ;}
 	function copy_operation()   { return $this->operation == $this->labels['Copy']   && $this->copy_enabled();   }
 	function delete_operation() { return $this->operation == $this->labels['Delete'] && $this->delete_enabled(); }
 	function view_operation()   { return $this->operation == $this->labels['View']   && $this->view_enabled();   }
@@ -1949,6 +1949,7 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 	 */
 	function list_table() /* {{{ */
 	{
+		global $db;
 		if ($this->fm == '') {
 			$this->fm = 0;
 		}
@@ -2293,7 +2294,7 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 							echo 'view.png" border="0" ';
 							echo 'alt="',$viewTitle,'" title="',$viewTitle,'" /></a>&nbsp;&nbsp;';
 						}
-						if ($this->change_enabled()) {
+						if ($this->change_enabled() and $db->loggedIn() and ($db->user->userlevel=='admin'||$db->user->userlevel=='root') ) {
 							$printed_out && print('&nbsp;');
 							$printed_out = true;
 							echo '<a class="',$css_class_name,'" href="',$changeQuery,'"><img class="';
@@ -2301,7 +2302,7 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 							echo 'jedit.png"  border="0" ';
 							echo 'alt="',$changeTitle,'" title="',$changeTitle,'" /></a>';
 							
-							if( $this->change_enabled() and $_POST['sourceless_only'] and $_POST['sourceless_only'] == 'YES')
+							if( $this->change_enabled()  and $db->loggedIn() and ($db->user->userlevel=='admin'||$db->user->userlevel=='root') and $_POST['sourceless_only'] and $_POST['sourceless_only'] == 'YES')
 							{
 							echo'
 					
@@ -2555,14 +2556,14 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 				$query  .= ', '.$this->sd.$fd.$this->ed.'';
 				$query2 .= ', '.$value.'';
 			}
-			if ($query_m == '' and $fd<>'source_id' and $fd<>'inclusion_criteria' and $fd<>'exclusion_criteria') 
+			if ($query_m == '' and $fd<>'inclusion_criteria' and $fd<>'exclusion_criteria') 
 			{
 			//	$query_m = 'INSERT INTO `data_manual` ('.$this->sd.$fd.$this->ed.''; // )
 				$query_m  .= ', '.'`is_sourceless`';
 			//	$query_m2 = ') VALUES ('.$value.'';
 				$query_m2 .= ', "1"';
 			}
-			elseif($fd<>'source_id' and $fd<>'inclusion_criteria' and $fd<>'exclusion_criteria') 
+			elseif($fd<>'inclusion_criteria' and $fd<>'exclusion_criteria') 
 			{
 				$query_m  .= ', '.$this->sd.$fd.$this->ed.'';
 				$query_m2 .= ', '.$value.'';
