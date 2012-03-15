@@ -180,6 +180,46 @@ class TrialTracker
 					$Ids[$pkey]['area'] = implode("', '", $resultIds['area']);
 				}
 			}
+			else if((count($resultIds['product']) >= 1 && count($resultIds['area']) == 1 && ($resultIds['area'][0] == NULL || trim($resultIds['area'][0]) == "")) || (count($resultIds['area']) >= 1 && count($resultIds['product']) == 1 && ($resultIds['product'][0] == NULL || trim($resultIds['product'][0]) == ""))) //Condition For Only Product OR When Only Area is Given
+			{
+				if(count($resultIds['product']) >= 1 && count($resultIds['area']) == 1 && ($resultIds['area'][0] == NULL || $resultIds['area'] == ''))
+				{
+					foreach($resultIds['product'] as $pkey => $pvalue)
+					{
+						$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id = '" . $pvalue . "' ");
+						if(mysql_num_rows($res) > 0)
+						{
+							while($row = mysql_fetch_assoc($res))
+							{
+								$TrialsInfo[$pkey]['sectionHeader'] = $row['name']
+								. (($row['company'] !== NULL && $row['company'] != '') ? " / <i>" . $row['company'] . "</i>" : '');
+								$TrialsInfo[$pkey]['naUpms'] = 
+								$this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
+								
+								$Ids[$pkey]['product'] = $row['id'];
+								$Ids[$pkey]['area'] = '';
+							}
+						}
+					}
+				}
+				else
+				{
+					foreach($resultIds['area'] as $akey => $avalue)
+					{
+						$res = mysql_query("SELECT `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
+						if(mysql_num_rows($res) > 0)
+						{
+							while($row = mysql_fetch_assoc($res))
+							{
+								$TrialsInfo[$akey]['sectionHeader'] = $row['name'];
+								
+								$Ids[$akey]['product'] = '';
+								$Ids[$akey]['area'] = $row['id'];
+							}
+						}
+					}
+				}
+			}
 			else if(count($resultIds['product']) > 1 || count($resultIds['area']) > 1)
 			{
 				if(count($resultIds['area']) > 1)
@@ -4258,6 +4298,46 @@ class TrialTracker
 					$Ids[$pkey]['area'] = implode("', '", $resultIds['area']);
 				}
 			}
+			else if((count($resultIds['product']) >= 1 && count($resultIds['area']) == 1 && ($resultIds['area'][0] == NULL || trim($resultIds['area'][0]) == "")) || (count($resultIds['area']) >= 1 && count($resultIds['product']) == 1 && ($resultIds['product'][0] == NULL || trim($resultIds['product'][0]) == ""))) //Condition For Only Product OR When Only Area is Given
+			{
+				if(count($resultIds['product']) >= 1 && count($resultIds['area']) == 1 && ($resultIds['area'][0] == NULL || $resultIds['area'] == ''))
+				{
+					foreach($resultIds['product'] as $pkey => $pvalue)
+					{
+						$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id = '" . $pvalue . "' ");
+						if(mysql_num_rows($res) > 0)
+						{
+							while($row = mysql_fetch_assoc($res))
+							{
+								$TrialsInfo[$pkey]['sectionHeader'] = $row['name']
+								. (($row['company'] !== NULL && $row['company'] != '') ? " / <i>" . $row['company'] . "</i>" : '');
+								$TrialsInfo[$pkey]['naUpms'] = 
+								$this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
+								
+								$Ids[$pkey]['product'] = $row['id'];
+								$Ids[$pkey]['area'] = '';
+							}
+						}
+					}
+				}
+				else
+				{
+					foreach($resultIds['area'] as $akey => $avalue)
+					{
+						$res = mysql_query("SELECT `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
+						if(mysql_num_rows($res) > 0)
+						{
+							while($row = mysql_fetch_assoc($res))
+							{
+								$TrialsInfo[$akey]['sectionHeader'] = $row['name'];
+								
+								$Ids[$akey]['product'] = '';
+								$Ids[$akey]['area'] = $row['id'];
+							}
+						}
+					}
+				}
+			}
 			else if(count($resultIds['product']) > 1 || count($resultIds['area']) > 1)
 			{
 				if(count($resultIds['area']) > 1)
@@ -5183,6 +5263,39 @@ class TrialTracker
 					$Ids[$pkey]['area'] = implode("', '", $resultIds['area']);
 				}
 			}
+			else if((count($resultIds['product']) >= 1 && count($resultIds['area']) == 1 && ($resultIds['area'][0] == NULL || trim($resultIds['area'][0]) == "")) || (count($resultIds['area']) >= 1 && count($resultIds['product']) == 1 && ($resultIds['product'][0] == NULL || trim($resultIds['product'][0]) == ""))) //Condition For Only Product OR When Only Area is Given
+			{
+				if(count($resultIds['product']) >= 1 && count($resultIds['area']) == 1 && ($resultIds['area'][0] == NULL || $resultIds['area'] == ''))
+				{
+					foreach($resultIds['product'] as $pkey => $pvalue)
+					{
+						$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id = '" . $pvalue . "' ");
+						if(mysql_num_rows($res) > 0)
+						{
+							while($row = mysql_fetch_assoc($res))
+							{
+								$Ids[$pkey]['product'] = $row['id'];
+								$Ids[$pkey]['area'] = '';
+							}
+						}
+					}
+				}
+				else
+				{
+					foreach($resultIds['area'] as $akey => $avalue)
+					{
+						$res = mysql_query("SELECT `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
+						if(mysql_num_rows($res) > 0)
+						{
+							while($row = mysql_fetch_assoc($res))
+							{
+								$Ids[$akey]['product'] = '';
+								$Ids[$akey]['area'] = $row['id'];
+							}
+						}
+					}
+				}
+			}
 			else if(count($resultIds['product']) > 1 || count($resultIds['area']) > 1)
 			{
 				if(count($resultIds['area']) > 1)
@@ -5385,6 +5498,56 @@ class TrialTracker
 							$Ids[$pkey]['area'] = implode("', '", $resultIds['area']);
 						}
 					}
+				}
+			}
+			else if((count($resultIds['product']) >= 1 && count($resultIds['area']) == 1 && ($resultIds['area'][0] == NULL || trim($resultIds['area'][0]) == "")) || (count($resultIds['area']) >= 1 && count($resultIds['product']) == 1 && ($resultIds['product'][0] == NULL || trim($resultIds['product'][0]) == ""))) //Condition For Only Product OR When Only Area is Given
+			{
+				if(count($resultIds['product']) >= 1 && count($resultIds['area']) == 1 && ($resultIds['area'][0] == NULL || $resultIds['area'] == ''))
+				{
+					$t = 'Area: No Area';
+					$this->displayHeader($t);
+					
+					foreach($resultIds['product'] as $pkey => $pvalue)
+					{
+						$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id = '" . $pvalue . "' ");
+						if(mysql_num_rows($res) > 0)
+						{
+							while($row = mysql_fetch_assoc($res))
+							{
+								$TrialsInfo[$pkey]['sectionHeader'] = $row['name']
+								. (($row['company'] !== NULL && $row['company'] != '') ? " / <i>" . $row['company'] . "</i>" : '');
+								$TrialsInfo[$pkey]['naUpms'] = 
+								$this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
+								
+								$Ids[$pkey]['product'] = $row['id'];
+								$Ids[$pkey]['area'] = '';
+							}
+						}
+					}
+				}
+				else
+				{
+					$t = 'Product: No Product';
+					$this->displayHeader($t);
+					
+					foreach($resultIds['area'] as $akey => $avalue)
+					{
+						$res = mysql_query("SELECT `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
+						if(mysql_num_rows($res) > 0)
+						{
+							while($row = mysql_fetch_assoc($res))
+							{
+								$TrialsInfo[$akey]['sectionHeader'] = $row['name'];
+								
+								$Ids[$akey]['product'] = '';
+								$Ids[$akey]['area'] = $row['id'];
+							}
+						}
+					}
+				}
+				if(!empty($TrialsInfo[0]['naUpms']))
+				{
+					echo '<input type="hidden" id="upmstyle" value="expand"/>';
 				}
 			}
 			else if(count($resultIds['product']) > 1 || count($resultIds['area']) > 1)
@@ -6752,8 +6915,15 @@ class TrialTracker
 						. " FROM `data_trials` dt "
 						. " JOIN `product_trials` pt ON dt.`larvol_id` = pt.`trial` "
 						. " JOIN `area_trials` at ON dt.`larvol_id` = at.`trial` "
-						. " WHERE pt.`product` IN ('" . $ivalue['product'] . "') AND at.`area` IN ('" . $ivalue['area'] . "') " 
-						. $where . " ORDER BY " . $orderBy;
+						. " WHERE ";
+						
+				if($ivalue['product'] != '')	//When Product is blank do not process Product in Query
+				$query .= "pt.`product` IN ('" . $ivalue['product'] . "') ";
+				if($ivalue['product'] != '' && $ivalue['area']  != '')
+				$query .= "AND " ;
+				if($ivalue['area'] !='' )	//When Area is blank do not process Area in Query
+				$query .= "at.`area` IN ('" . $ivalue['area'] . "') " ;
+				$query .= $where . " ORDER BY " . $orderBy;
 			}
 			$res = mysql_query($query);
 			while($row = mysql_fetch_assoc($res))
