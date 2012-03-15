@@ -377,7 +377,7 @@ function runQuery($jsonData)
 	$sort_datas = $filterData["sortdata"];
 	$isOverride = !empty($override_vals);
 	
-	$prod='p= '; $area='&a= '; $prod_flag=0; $area_flag=0; $OT_Exist_Flg=0; $OT_Flg=0; $link=''; $Prod_Flg=0; $Area_Flg=0;
+	$prod=''; $area=''; $prod_flag=0; $area_flag=0; $OT_Exist_Flg=0; $OT_Flg=0; $link=''; $Prod_Flg=0; $Area_Flg=0;
 	if(is_array($where_datas) && !empty($where_datas))
 	{
 		foreach($where_datas as $where_data)
@@ -423,11 +423,13 @@ function runQuery($jsonData)
 		$OT_Exist_Flg=1;
 	}
 	
-	$link=urlPath().'intermediary.php?'.$prod.$area;
+	$link=urlPath().'intermediary.php?p= '.$prod.'&a= '.$area;
 	if($OT_Exist_Flg)	//if OTT exists just send data as it is we will process it in run_trial_tracket
 	{
 		$link.='&JSON_search='.$jsonData;
 	}
+	else if($prod=='' && $area=='')
+	$link.='&JSON_search='.$jsonData;
 
 	header("Location: ".$link); 
 }
