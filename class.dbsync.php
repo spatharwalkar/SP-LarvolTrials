@@ -119,29 +119,47 @@
         	$tables_home = $db_home->ListTables();
             $tables_sync = $db_sync->ListTables();
 
-            for ($i = 0; $i < count($tables_home); $i++) {
-            	if (!in_array($tables_home[$i], $tables_sync)) {
+            for ($i = 0; $i < count($tables_home); $i++)
+            {
+            	if (!in_array($tables_home[$i], $tables_sync))
+            	{
                 	$fields = $db_home->ListTableFields($tables_home[$i]);
-					if (!$db_sync->CreateTable($tables_home[$i], $fields)) {
+					if (!$db_sync->CreateTable($tables_home[$i], $fields))
+					{
                     	$this->RaiseError("Could not create table <strong>{$tables_home[$i]}</strong> on database <strong>{$db_sync->database}</strong> at {$db_sync->user}@{$db_sync->host}: " . $db_sync->LastError());
                     }
-                } else {
+                }
+                else
+                {
 					$fields_home = $db_home->ListTableFields($tables_home[$i]);
 					$fields_home_tmp = $fields_home;
                     $fields_sync = $db_sync->ListTableFields($tables_home[$i]);
                     $fieldnames_sync = $this->GetFieldNames($fields_sync);
+                    $fieldnames_home = $this->GetFieldNames($fields_home);
+                    //get copy of fiendnames for ordering.
+                    $fieldNamesOrderHome = $fieldnames_home;
+                    $fieldNamesOrderSync = $fieldnames_sync;
+                    //
                     $diferent_fields = 0;
-
+                    //TODO:remove after further testing.
+/*                     if($tables_home[$i] =='user_permissions')
+                    {
+					pr($fieldnames_home);pr($fieldnames_sync);//die;
+                    } */
                     for ($j = 0; $j < count($fields_home); $j++)
                     {
                     	if (!in_array($fields_home[$j]['name'], $fieldnames_sync))
                     	{
-                            if (!isset($fields_home[$j - 1])) {
+                            if (!isset($fields_home[$j - 1]))
+                            {
                             	$success = $db_sync->AddTableField($tables_home[$i], $fields_home[$j], 0);
-                            } else {
+                            }
+                            else
+                            {
 	                        	$success = $db_sync->AddTableField($tables_home[$i], $fields_home[$j], $fields_home[$j - 1]['name']);
                             }
-                            if (!$success) {
+                            if (!$success)
+                            {
 								$this->RaiseError("Could not add field <strong>{$fields_home[$j]['name']}</strong> to table <strong>{$tables_home[$i]}</strong> on database <strong>{$db_sync->database}</strong> at {$db_sync->user}@{$db_sync->host}: " . $db_sync->LastError());
                             }
                             $diferent_fields++;
@@ -150,17 +168,26 @@
                         {
                         		$keys_home = $this->GetPrimaryKeys($fields_home_tmp);
 	                        	$k = $this->GetFieldIndex($fields_sync, $fields_home[$j]['name']);
+	                        	
+	                        	//decision parameters for ordering
+	                        	$newFieldHomeKey = $newFieldSyncKey = null;
+	                        	$newFieldHomeKey = array_search( $fields_home[$j]['name'],$fieldNamesOrderHome);
+	                        	$newFieldSyncKey = array_search($fields_sync[$k]['name'],$fieldNamesOrderSync);
+	                        	//
+	                        	
 	                            if (
 		                            	$fields_sync[$k]['type'] != $fields_home[$j]['type'] ||
 		                                $fields_sync[$k]['null'] != $fields_home[$j]['null'] ||
 		                                ($fields_sync[$k]['key'] != $fields_home[$j]['key'] && (($fields_home[$j]['key']!='UNI'&&$fields_sync[$k]['key'] !='UNI')|| ($fields_home[$j]['key']=='MUL'&&$fields_sync[$k]['key'] =='UNI'))) ||
 		                                $fields_sync[$k]['default'] != $fields_home[$j]['default'] ||
-		                                $fields_sync[$k]['extra'] != $fields_home[$j]['extra'] 
+		                                $fields_sync[$k]['extra'] != $fields_home[$j]['extra'] ||
+	                            		$newFieldHomeKey != $newFieldSyncKey
 	                                )
 	                            {
-		                            if (!$db_sync->ChangeTableField($tables_home[$i], $fields_home[$j]['name'], $fields_home[$j],$fields_sync[$k],0,$keys_home)) {
+		                            if (!$db_sync->ChangeTableField($tables_home[$i], $fields_home[$j]['name'], $fields_home[$j],$fields_sync[$k],0,$keys_home,$fieldNamesOrderHome,$fieldNamesOrderSync))
+		                            {
 			                            $this->RaiseError("Could not change field <strong>{$fields_home[$j]['name']}</strong> on table <strong>{$tables_home[$i]}</strong> on database <strong>{$db_sync->database}</strong> at {$db_sync->user}@{$db_sync->host}: " . $db_sync->LastError());
-		                        }
+		                        	}
 	                                $diferent_fields++;
 	                            }
 	                            if (
@@ -172,7 +199,8 @@
 	                            
 	                            )
 	                            {
-		                            if (!$db_sync->ChangeTableField($tables_home[$i], $fields_home[$j]['name'], $fields_home[$j],$fields_sync[$k],1,$keys_home)) {
+		                            if (!$db_sync->ChangeTableField($tables_home[$i], $fields_home[$j]['name'], $fields_home[$j],$fields_sync[$k],1,$keys_home))
+		                            {
 			                            $this->RaiseError("Could not change field <strong>{$fields_home[$j]['name']}</strong> on table <strong>{$tables_home[$i]}</strong> on database <strong>{$db_sync->database}</strong> at {$db_sync->user}@{$db_sync->host}: " . $db_sync->LastError());
 		                            }
 		                            $diferent_fields++;
@@ -182,6 +210,8 @@
 
 		                unset($fieldnames_sync[array_shift(array_keys($fieldnames_sync, $fields_home[$j]['name']))]);
                     }
+                    
+                    //set table field orders
 
                     if ($diferent_fields > 0) {
                     	/**

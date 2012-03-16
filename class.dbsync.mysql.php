@@ -294,7 +294,7 @@ require_once('include.util.php');
          * @access	public
          * @return 	boolean	Success
          **/
-        function ChangeTableField($table, $field, $new_field,$old_field=array(),$foreignKeyCheck=0,$keys_home=array()) {
+        function ChangeTableField($table, $field, $new_field,$old_field=array(),$foreignKeyCheck=0,$keys_home=array(),$fieldNamesOrderHome=array(),$fieldNamesOrderSync=array()) {
         	
         	switch($foreignKeyCheck)
         	{
@@ -329,11 +329,51 @@ require_once('include.util.php');
 	        	if($old_field['key']=='PRI' && $new_field['key']=='PRI' || count($keys_home)>1)
 	        	$no_primary_def_needed = 1;
 	        	
-	        	//
+	        	//decide change/modify
+	        	//TODO:remove all test comments
+	        	/*
+	        	 * Array Home $fieldNamesOrderHome
+					(
+					    [0] => id
+					    [1] => name
+					    [2] => type
+					    [3] => level
+					)
+						
+					Array Sync $fieldNamesOrderSync
+					(
+					    [0] => id
+					    [1] => level
+					    [2] => type
+					    [3] => name
+					)
+
+	        	 * */
+	        	//by default $change ='CHANGE'
+	        	$change = 'CHANGE';
+	        	$after = null;
+	        	$newFieldHomeKey = array_search($new_field['name'],$fieldNamesOrderHome);
+	        	$newFieldSyncKey = array_search($new_field['name'],$fieldNamesOrderSync);
+	        	if($newFieldHomeKey != $newFieldSyncKey)
+	        	{
+	        		//required for reordering alter query
+	        		$change = 'MODIFY';
+	        		//$after is to be defined if $change ='MODIFIED' or else query totaly fails.
+	        		$after = $fieldNamesOrderHome[$newFieldHomeKey-1];
+	        	}
 	        	
 	        	//echo ($new_field['key'] == 'PRI' && $no_primary_def_needed!=1 ? "ALTER TABLE `{$table}` DROP PRIMARY KEY;<br/>":"");
-				$sql = "ALTER TABLE `{$table}`  CHANGE `{$field}` `{$new_field['name']}` {$new_field['type']} " . ($new_field['null']=='YES' ? '' : 'NOT') . ' NULL' . (strlen($new_field['default']) > 0 ? " default '{$new_field['default']}'" : '') . ($new_field['extra'] == 'auto_increment' ? ' auto_increment' : '') . ($new_field['key'] == 'PRI' && $no_primary_def_needed!=1  ? ", ADD PRIMARY KEY (`{$new_field['name']}`)" : '') . ($special_mul_key?$special_mul_key:''). ($indexKey?$indexKey:''). ($special_uni_key?$special_uni_key:'');
+				//$sql1 = "ALTER TABLE `{$table}`  CHANGE `{$field}` `{$new_field['name']}` {$new_field['type']} " . ($new_field['null']=='YES' ? '' : 'NOT') . ' NULL' . (strlen($new_field['default']) > 0 ? " default '{$new_field['default']}'" : '') . ($new_field['extra'] == 'auto_increment' ? ' auto_increment' : '') . ($new_field['key'] == 'PRI' && $no_primary_def_needed!=1  ? ", ADD PRIMARY KEY (`{$new_field['name']}`)" : '') . ($special_mul_key?$special_mul_key:''). ($indexKey?$indexKey:''). ($special_uni_key?$special_uni_key:'');
+				$sql = $this->ChangeTableFieldQuery($table, $change, $field, $new_field, $no_primary_def_needed, $special_mul_key, $indexKey, $special_uni_key,$after);
 				echo($sql.';<br />');
+				
+/* 				// TODO:remove this later after user testing.
+				if($sql!=$sql1)
+				{
+					echo '<br/>ChangeTableFieldQuery Function fail!!!!!!!!!!!!!!!!<br/>Please report to concerned developer ';die;
+				}
+				// TODO:end */
+				
 				return true;
 				break;	
 				
@@ -370,6 +410,19 @@ require_once('include.util.php');
 	            return true;
 	            break;
         	}
+        }
+
+        /**
+        * DBSync_mysql::ChangeTableFieldQuery()
+        * @tutorial Returns the query for changeTableField function
+        * @access	public
+        * @return 	mysql result
+        * @author Jithu Thomas
+        **/        
+        function ChangeTableFieldQuery($table,$changeOrModify,$field,$new_field,$no_primary_def_needed,$special_mul_key,$indexKey,$special_uni_key,$after=null)
+        {
+        	$sql = "ALTER TABLE `{$table}`  $changeOrModify ".($changeOrModify=='CHANGE'?"`{$field}`":null)." `{$new_field['name']}` {$new_field['type']} " . ($new_field['null']=='YES' ? '' : 'NOT') . ' NULL' . (strlen($new_field['default']) > 0 ? " default '{$new_field['default']}'" : '') . ($new_field['extra'] == 'auto_increment' ? ' auto_increment' : '') . ($new_field['key'] == 'PRI' && $no_primary_def_needed!=1  ? ", ADD PRIMARY KEY (`{$new_field['name']}`)" : '') . ($special_mul_key?$special_mul_key:''). ($indexKey?$indexKey:''). ($special_uni_key?$special_uni_key:''). ($after?' AFTER `'.$after.'`':'');
+        	return $sql;
         }
 
         /**
