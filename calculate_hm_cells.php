@@ -19,6 +19,7 @@ function calc_cells($parameters,$update_id=NULL)
 
 	$cron_run = isset($update_id); 	// check if being run by cron.php
 	
+	
 	if($cron_run)
 	{
 		$query = 'UPDATE update_status SET start_time="' . date("Y-m-d H:i:s", strtotime('now')) . '", updated_days="0" WHERE update_id="' . $update_id . '"';
@@ -36,7 +37,8 @@ function calc_cells($parameters,$update_id=NULL)
 	{
 		$query='select `id` from areas where `id`="'.$parameters['area'].'"';
 	}
-	else
+	
+	else // no area given, select all .
 	{
 		$query='select `id` from areas order by `id`';
 	}
@@ -57,7 +59,7 @@ function calc_cells($parameters,$update_id=NULL)
 	{
 		$query='select `id` from products where `id`="'.$parameters['product'].'"';
 	}
-	else
+	else // no product given, select all products.
 	{
 		$query='select id from products order by `id` ';
 	}
@@ -86,7 +88,8 @@ function calc_cells($parameters,$update_id=NULL)
 			return false;
 		}
 	}
-	//pr($areaids);pr($productids);
+	//pr($areaids);
+	//pr($productids);
 	$counter=0;
 	$progress_count = 0;
 	foreach ($areaids as $ak=>$av)
@@ -126,16 +129,17 @@ function calc_cells($parameters,$update_id=NULL)
 				if($row["trial"])
 					$data[] = $row["trial"];
 			}
+			// $cnt_tl=count($data);
 			$cnt_total=count($data);
-			
+			//echo $cnt_total;
 			if(!$cnt_total or $cnt_total<1) 
 			{
 				
-				if($counter>=1000)
+				if($counter>=5000)
 				{
 					$counter=0;
-					echo '<br>1000 records added, sleeping 2 seconds....'.str_repeat("  ",800);
-					sleep(2);
+					echo '<br>5000 records added, sleeping 1 second....'.str_repeat("  ",800);
+					sleep(1);
 				}
 				add_data($av['id'],$pv['id'],0,0,'none','N/A');
 				$progress_count ++;
@@ -156,11 +160,11 @@ function calc_cells($parameters,$update_id=NULL)
 			}
 
 	//		pr($data);
-			$query='SELECT a.trial
+			$query='SELECT a.trial,d.is_active 
 					from area_trials a 
 					JOIN product_trials p ON a.`trial`=p.`trial`
 					JOIN data_trials d ON p.`trial`=d.`larvol_id`
-					where a.`area`="'.$av['id'].'" and p.`product`="'.$pv['id'].'" and d.`is_active`="1"	';
+					where a.`area`="'.$av['id'].'" and p.`product`="'.$pv['id'].'" ';
 			
 			if(!$res = mysql_query($query))
 					{
@@ -170,12 +174,15 @@ function calc_cells($parameters,$update_id=NULL)
 						return false;
 					}
 			$data1=array();
+			
+			$temp_total=0;
 			while ($row = mysql_fetch_assoc($res))
 			{	
-				if($row["trial"])
+				if( $row["trial"] && ($row["is_active"]=="1" or $row["is_active"]==1)  )
 					$data1[] = $row["trial"];
-			}
-			$cnt_total=count($data1);
+				$temp_total++;
+			} 
+			$cnt_total=$temp_total;
 
 			if($data1[0])
 			{
@@ -197,16 +204,17 @@ function calc_cells($parameters,$update_id=NULL)
 				echo $log;
 				return false;
 			}
+			
 			$row = mysql_fetch_assoc($res);
 			
 			$max_phase = $row["max_phase"];
 			
 			$bomb=getBombdtl($data);
-			if($counter>=1000)
+			if($counter>=5000)
 			{
 				$counter=0;
-				echo '<br>1000 records added, sleeping 2 seconds....'.str_repeat("  ",800);
-				sleep(2);
+				echo '<br>5000 records added, sleeping 1 second ....'.str_repeat("  ",800);
+				sleep(1);
 			}
 			
 			add_data($av['id'],$pv['id'],$cnt_total,$cnt_active,$bomb,$max_phase);
@@ -239,6 +247,7 @@ function calc_cells($parameters,$update_id=NULL)
 	echo '<br>All Done.';
 	return true;
 }			
+
 function add_data($arid,$prid,$cnt_total,$cnt_active,$bomb,$max_phase)
 {
 /*********/
@@ -260,14 +269,16 @@ function add_data($arid,$prid,$cnt_total,$cnt_active,$bomb,$max_phase)
 	
 	if($row["area"])
 	{
-		$query='UPDATE rpt_masterhm_cells SET 
-				`count_total` = "'. $cnt_total .'",
+		$query='UPDATE rpt_masterhm_cells 
+				SET 
 				`count_active` ="'. $cnt_active.'",
 				`bomb_auto` = "'. $bomb .'",
 				`highest_phase` = "'. $max_phase .'",
+				`count_total` = "'. $cnt_total .'",
 				`last_update` = "'. $curtime .'" where
 				`area`="'.$arid.'" and `product`="'.$prid.'" 
 				';
+				
 		if(!$res = mysql_query($query))
 		{
 			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -279,13 +290,14 @@ function add_data($arid,$prid,$cnt_total,$cnt_active,$bomb,$max_phase)
 	}
 	else
 	{
-		$query='INSERT INTO rpt_masterhm_cells SET 
+		$query='INSERT INTO rpt_masterhm_cells 
+				SET 
 				`product` = "'. $prid .'",
 				`area` = "'. $arid .'",
-				`count_total` = "'. $cnt_total .'",
 				`count_active` ="'. $cnt_active.'",
 				`bomb_auto` = "'. $bomb .'",
 				`highest_phase` = "'. $max_phase .'",
+				`count_total` = "'. $cnt_total .'",
 				`last_update` = "'. $curtime .'"
 
 				';
