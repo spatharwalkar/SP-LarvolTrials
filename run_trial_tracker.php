@@ -17,7 +17,6 @@ class TrialTracker
 	private $activeStatusValues = array();
 	private $allStatusValues = array();
 	private $resultsPerPage = 100;
-	private $enumVals = array();
 	private $phaseValues = array();
 	
 	private $statusFilters = array();
@@ -50,7 +49,6 @@ class TrialTracker
 								'Active, not recruiting', 'Available', 'No longer recruiting');
 		$this->allStatusValues = array_merge($this->inactiveStatusValues, $this->activeStatusValues);
 		
-		$this->enumVals = getEnumValues('clinical_study', 'institution_type');
 		$this->phaseValues = array('N/A'=>'#BFBFBF', '0'=>'#00CCFF', '0/1'=>'#99CC00', '1'=>'#99CC00', '1a'=>'#99CC00', '1b'=>'#99CC00', '1a/1b'=>'#99CC00', 
 							'1c'=>'#99CC00', '1/2'=>'#FFFF00', '1b/2'=>'#FFFF00', '1b/2a'=>'#FFFF00', '2'=>'#FFFF00', '2a'=>'#FFFF00', '2a/2b'=>'#FFFF00', 
 							'2a/b'=>'#FFFF00', '2b'=>'#FFFF00', '2/3'=>'#FF9900', '2b/3'=>'#FF9900','3'=>'#FF9900', '3a'=>'#FF9900', '3b'=>'#FF9900', 
@@ -63,9 +61,10 @@ class TrialTracker
 									'Phase 1a/1b'=>'1', 'Phase 1c'=>'1', 'Phase 1/Phase 2'=>'2', 'Phase 1b/2'=>'2', 'Phase 1b/2a'=>'2', 'Phase 2'=>'2', 
 									'Phase 2a'=>'2', 'Phase 2a/2b'=>'2', 'Phase 2a/b'=>'2', 'Phase 2b'=>'2', 'Phase 2/Phase 3'=>'3', 'Phase 2b/3'=>'3',
 									'Phase 3'=>'3', 'Phase 3a'=>'3', 'Phase 3b'=>'3', 'Phase 3/Phase 4'=>'4', 'Phase 3b/4'=>'4', 'Phase 4'=>'4');
-		$this->institutionFilters = array('Industry lead sponsor','Industry collaborator','Co-op','Other');
+		
 		$this->regionFilters = array('US','Canada','Japan','Europe','RestOfWorld');
 		
+		$this->institutionFilters = getEnumValues('clinical_study', 'institution_type');
 	}
 	
 	function generateTrialTracker($format, $resultIds, $timeMachine = NULL, $ottType, $globalOptions = array())
@@ -5702,7 +5701,7 @@ class TrialTracker
 					
 			$Values = $this->processOldLinkMethod($ottType, array($resultIds['params']), array($resultIds['leading']), $globalOptions);
 			
-			echo $this->displayWebPage($ottType, $Values['resultIds'], $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], 
+			echo $this->displayWebPage($ottType, array(), $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], 
 			$globalOptions, $timeMachine, $Values['Trials'], $Values['TrialsInfo'], $Values['allTrialsforDownload']);
 		}
 		else if($ottType == 'stackedoldlink')
@@ -5739,7 +5738,7 @@ class TrialTracker
 				
 			$Values = $this->processOldLinkMethod($ottType, $resultIds['params'], $resultIds['leading'], $globalOptions, $cparams);
 			
-			echo $this->displayWebPage($ottType, $Values['resultIds'], $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], 
+			echo $this->displayWebPage($ottType, array(), $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], 
 			$globalOptions, $timeMachine, $Values['Trials'], $Values['TrialsInfo'], $Values['allTrialsforDownload']);
 		}
 	}
@@ -5834,9 +5833,9 @@ class TrialTracker
 					$sp->field 	= 'institution_type';
 					$sp->action = 'search';
 					$sp->value 	= $this->institutionFilters[$ivalue];
-					$params[] = $sp;
+					$params3[] = $sp;
 				}
-				$params3 = $params;
+				$params3 = $params3;
 			}
 			
 			$Params = array_merge($params1, $params2, $params3);
@@ -8172,12 +8171,12 @@ class TrialTracker
 			
 			if(isset($globalOptions['itype']) && !empty($globalOptions['itype'])) 
 			{
-				foreach($globalOptions['itype'] as $ikey => $ivalue)
+				foreach($globalOptions['itype'] as $iskey => $isvalue)
 				{
 					$sp = new SearchParam();
 					$sp->field 	= 'institution_type';
 					$sp->action = 'search';
-					$sp->value 	= $this->institutionFilters[$ivalue];
+					$sp->value 	= $this->institutionFilters[$isvalue];
 					$params[] = $sp;
 				}
 				$params3 = $params;
@@ -9206,21 +9205,21 @@ class TrialTracker
 				. '<input type="checkbox" class="status" value="5" '
 				. (in_array('5', $globalOptions['status']) ? 'checked = "checked" ' : '') . '/>No longer recruiting<br/>';
 		}
-		echo  '</div></td><td class="bottom">'
-				. '<input type="checkbox" value="0" id="institution_type_0" class="institution" '
-				. (in_array(0, $globalOptions['itype']) ? ' checked="checked" ' : '') . '/>'
-				. '<label for="institution_type_0">Industry lead sponsor</label><br />'
-				. '<input type="checkbox" value="1" id="institution_type_1" class="institution" '
-				. (in_array(1, $globalOptions['itype']) ? ' checked="checked" ' : '') . '/>'
-      			. '<label for="institution_type_1">Industry collaborator</label><br />'
-				. '<input type="checkbox" value="2" id="institution_type_2" class="institution" '
-				. (in_array(2, $globalOptions['itype']) ? ' checked="checked" ' : '') . '/>'
-      			. '<label for="institution_type_2">Co-op</label><br />'
-				. '<input type="checkbox" value="3" id="institution_type_3" class="institution" '
-				. (in_array(3, $globalOptions['itype']) ? ' checked="checked" ' : '') . '/>'
-      			. '<label for="institution_type_3">Other</label>'
-				. '</td><td class="bottom">'
-				. '<input type="checkbox" value="0" id="region_0" class="region" '
+		echo  '</div></td>';
+		
+		if(!empty($this->institutionFilters))
+		{
+			echo '<td class="bottom">';
+			foreach($this->institutionFilters as $ikey => $ivalue)
+			{
+				echo '<input type="checkbox" value="' . $ikey . '" id="institution_type_' . $ikey . '" class="institution" '
+						. (in_array($ikey, $globalOptions['itype']) ? ' checked="checked" ' : '') . '/>'
+						. '<label for="institution_type_' . $ikey . '">' . str_replace('_', ' ', ucfirst($ivalue)) . '</label><br />';
+			}
+			echo '</td>';
+		}
+		
+		echo '<td class="bottom"><input type="checkbox" value="0" id="region_0" class="region" '
 				. (in_array(0, $globalOptions['region']) ? ' checked="checked" ' : '') . '/>'
 				. '<label for="region_0">US</label><br />'
 				. '<input type="checkbox" value="1" id="region_1" class="region" '
