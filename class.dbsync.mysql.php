@@ -88,6 +88,14 @@ require_once('include.util.php');
         		$indexArr[] = $row;
         	}
         	
+        	//get row format
+        	$queryRowFormat = 'SELECT row_format FROM information_schema.tables WHERE table_schema="'.$this->database.'" AND table_name="'.$table.'" LIMIT 1';
+        	$resultRowFormat = mysql_query($queryRowFormat,$this->dbp);
+        	while($rw = mysql_fetch_assoc($resultRowFormat))
+        	{
+        		$rowFormat = $rw['row_format'];
+        	}        	
+        	
         	//get foreign key associations if present for all fields in the table
         	$foreignKeyAssoc = null;
         	$foreignKeyAssoc = $this->listForeignKeyAssociations($this->database,$table);
@@ -142,6 +150,8 @@ require_once('include.util.php');
 					$engine = $rw['Engine'];
 					$collate = $rw['Collation'];
 				}
+				
+				
 				$fields[] = array(
                 	'name'	  => $row[0],
                     'type'    => $row[1],
@@ -162,7 +172,8 @@ require_once('include.util.php');
 					'delete_rule' => $delete_rule,
 					'constraint_name' => $constraint_name,
 					'Engine' => $engine,
-					'Collation' => $collate
+					'Collation' => $collate,
+					'row_format' => $rowFormat
                 );
             }
             return $fields;
@@ -241,7 +252,7 @@ require_once('include.util.php');
                 $sql_f[] = "`{$fields[$i]['name']}` {$fields[$i]['type']} " . ($fields[$i]['null'] =='YES'?'' : 'NOT') . ' NULL' . (strlen($fields[$i]['default']) > 0 ? " default '{$fields[$i]['default']}'" : '') . ($fields[$i]['extra'] == 'auto_increment' ? ' auto_increment' : '');
             }
 
-            $sql = "CREATE TABLE `{$name}` (" . implode(', ', $sql_f) . (count($primary_keys) > 0 ? ", PRIMARY KEY (`" . implode('`, `', $primary_keys) . "`)" : '') . (count($index_keys) > 0 ? ", INDEX (`" . implode('`, `', $index_keys) . "`)" : '') . (count($unique_keys) > 0 ? ", UNIQUE (`" . implode('`, `', $unique_keys) . "`)" : '') .  ($special_mul_key?$special_mul_key:'') . ') ENGINE='.$fields[0]['Engine'].' COLLATE='.$fields[0]['Collation'];
+            $sql = "CREATE TABLE `{$name}` (" . implode(', ', $sql_f) . (count($primary_keys) > 0 ? ", PRIMARY KEY (`" . implode('`, `', $primary_keys) . "`)" : '') . (count($index_keys) > 0 ? ", INDEX (`" . implode('`, `', $index_keys) . "`)" : '') . (count($unique_keys) > 0 ? ", UNIQUE (`" . implode('`, `', $unique_keys) . "`)" : '') .  ($special_mul_key?$special_mul_key:'') . ') ENGINE='.$fields[0]['Engine'].' COLLATE='.$fields[0]['Collation'].' ROW_FORMAT='.$fields[0]['row_format'];
 			echo($sql.';<br />');
             return true;
         }
@@ -328,6 +339,8 @@ require_once('include.util.php');
 	        	//check primary key defintion needed or not
 	        	if($old_field['key']=='PRI' && $new_field['key']=='PRI' || count($keys_home)>1)
 	        	$no_primary_def_needed = 1;
+	        	
+	        	
 	        	
 	        	//decide change/modify
 	        	//TODO:remove all test comments
@@ -424,6 +437,23 @@ require_once('include.util.php');
         	$sql = "ALTER TABLE `{$table}`  $changeOrModify ".($changeOrModify=='CHANGE'?"`{$field}`":null)." `{$new_field['name']}` {$new_field['type']} " . ($new_field['null']=='YES' ? '' : 'NOT') . ' NULL' . (strlen($new_field['default']) > 0 ? " default '{$new_field['default']}'" : '') . ($new_field['extra'] == 'auto_increment' ? ' auto_increment' : '') . ($new_field['key'] == 'PRI' && $no_primary_def_needed!=1  ? ", ADD PRIMARY KEY (`{$new_field['name']}`)" : '') . ($special_mul_key?$special_mul_key:''). ($indexKey?$indexKey:''). ($special_uni_key?$special_uni_key:''). ($after?' AFTER `'.$after.'`':'');
         	return $sql;
         }
+        
+        /**
+        * DBSync_mysql::ChangeTableFieldQuery()
+        * @tutorial Returns the query for changeTableField function
+        * @access	public
+        * @return 	mysql result
+        * @author Jithu Thomas
+        **/
+        function ChangeTableRowFormat($table,$new_field,$old_field)
+        {
+            //check row_format
+	        if($old_field['row_format'] != $new_field['row_format'])
+	        {
+	        	$sql = "ALTER TABLE `$table` ROW_FORMAT={$new_field['row_format']}";
+	        	echo $sql.';<br />';
+	        }
+        }        
 
         /**
          * DBSync_mysql::RemoveTableField()

@@ -146,6 +146,13 @@
                     {
 					pr($fieldnames_home);pr($fieldnames_sync);//die;
                     } */
+                    
+                    //check for table_format changes
+                    if($fields_sync[0]['row_format'] != $fields_home[0]['row_format'])
+                    {
+                    	$db_sync->ChangeTableRowFormat($tables_home[$i],$fields_home[0],$fields_sync[0]);
+                    }                    
+                    
                     for ($j = 0; $j < count($fields_home); $j++)
                     {
                     	if (!in_array($fields_home[$j]['name'], $fieldnames_sync))
@@ -205,6 +212,7 @@
 		                            }
 		                            $diferent_fields++;
 	                            }
+	                            
 	                            
                         }
 
