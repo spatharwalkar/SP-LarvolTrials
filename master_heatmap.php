@@ -293,6 +293,22 @@ function editor()
 			}
 		}
 	}
+	
+	if($_GET['view_type']=='total')
+	{
+		$title="Total Count";
+		$view_tp='total';
+	}
+	else if($_GET['view_type']=='both')
+	{
+		$title="Active Count, Total Count";
+		$view_tp='both';
+	}
+	else
+	{
+		$title="Active Count";
+		$view_tp='active';
+	}
 
 
 	$out = '<script type="text/javascript" src="progress/progress.js"></script>'
@@ -303,11 +319,14 @@ function editor()
 		$out .='<input type="hidden" name="total_col" value="on" />';
 	}
 	$out .='<b>Which Format: </b><select id="dwformat" name="dwformat"><option value="htmldown" selected="selected">HTML</option>'
+		. '<option value="exceldown">Excel</option>'
 		. '<option value="pdfdown">PDF</option>'
-		. '<option value="exceldown">Excel</option></select><br/><br/>';
-	$out .='<b>Counts Display: </b><select id="dwcount" name="dwcount"><option value="both" selected="selected">Active & Total Count</option>'
-		. '<option value="active">Only Active Count</option>'
-		. '<option value="total">Only Total Count</option></select><br/><br/><input type="submit" name="download" value="Download" title="Download" /></fieldset></form>';	
+		. '</select><br/><br/>';
+	$out .='<b>Counts Display: </b><select id="dwcount" name="dwcount">'
+		. '<option value="active" '.(($view_tp=='active')? "selected=\"selected\"":"").'>Only Active Count</option>'
+		. '<option value="total" '.(($view_tp=='total')? "selected=\"selected\"":"").'>Only Total Count</option>'
+		. '<option value="both" '.(($view_tp=='both')? "selected=\"selected\"":"").'>Active & Total Count</option></select><br/><br/><input type="submit" name="download" value="Download" title="Download" />'
+		. '</fieldset></form>';	
 		
 	/*$out .='<input type="image" name="htmldown[]" src="images/html.png" title="HTML Download" />&nbsp;&nbsp;'
 		. '<input type="image" name="pdfdown[]" src="images/pdf.png" title="PDF Download" />&nbsp;&nbsp;'
@@ -363,7 +382,20 @@ function editor()
 		$out .='<br/>';
 		if(isset($areaIds[$col]) && $areaIds[$col] != NULL && !empty($productIds))
 		{
-			$out .= '<a href="intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col] . '" target="_blank" class="ottlink" title="Active Records, Total Records"><b>'.$col_active_total[$col].', </b>'.$col_count_total[$col].'</a>';
+			if($view_tp=='active')
+			{
+				$count_val='<b>'.$col_active_total[$col].'</b>';
+			}
+			else if($view_tp=='total')
+			{
+				$count_val=$col_count_total[$col];
+			}
+			else if($view_tp =='both')
+			{
+				$count_val='<b>'.$col_active_total[$col].', </b>'.$col_count_total[$col];
+			}
+				
+			$out .= '<a href="intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col] . '" target="_blank" class="ottlink" title="'.$title.'">'.$count_val.'</a>';
 		}
 		$out .='<br/>';
 		$out .= '</th>';
@@ -374,9 +406,22 @@ function editor()
 		$out .= '<th width="150px">';
 		if(!empty($productIds) && !empty($areaIds))
 		{
+			if($view_tp=='active')
+			{
+				$count_val='<b>'.$active_total.'</b>';
+			}
+			else if($view_tp=='total')
+			{
+				$count_val=$count_total;
+			}
+			else if($view_tp == 'both')
+			{
+				$count_val='<b>'.$active_total.', </b>'.$count_total;
+			}
+				
 			$productIds = array_filter($productIds);
 			$areaIds = array_filter($areaIds);
-			$out .= '<a href="intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds) . '" target="_blank" class="ottlink" title="Active Records, Total Records"><b>'.$active_total.', </b>'.$count_total.'</a>';
+			$out .= '<a href="intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds) . '" target="_blank" class="ottlink" title="'.$title.'">'.$count_val.'</a>';
 		}
 		$out .= '</th>';
 	}
@@ -397,7 +442,20 @@ function editor()
 		$out .='<br/>';
 		if(isset($productIds[$row]) && $productIds[$row] != NULL && !empty($areaIds))
 		{
-			$out .= '<a href="intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds) . '" target="_blank" class="ottlink" title="Active Records, Total Records"><b>'.$row_active_total[$row].', </b>'.$row_count_total[$row].'</a>';
+			if($view_tp=='active')
+			{
+				$count_val='<b>'.$row_active_total[$row].'</b>';
+			}
+			else if($view_tp=='total')
+			{
+				$count_val=$row_count_total[$row];
+			}
+			else if($view_tp == 'both')
+			{
+				$count_val='<b>'.$row_active_total[$row].', </b>'.$row_count_total[$row];
+			}
+				
+			$out .= '<a href="intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds) . '" target="_blank" class="ottlink" title="'.$title.'">'.$count_val.'</a>';
 		}
 		$out .='<br/>';
 		$out .= '</th>';
@@ -411,7 +469,20 @@ function editor()
 				if($data_matrix[$row][$col]['bomb_auto']['src'] != '' && $data_matrix[$row][$col]['bomb_auto']['src'] != NULL)
 				$out .= '<img align="left" title="'.$data_matrix[$row][$col]['bomb_auto']['title'].'" src="images/'.$data_matrix[$row][$col]['bomb_auto']['src'].'" style="'.$data_matrix[$row][$col]['bomb_auto']['style'].' padding-left:10px; cursor:pointer;" alt="'.$data_matrix[$row][$col]['bomb_auto']['alt'].'"  />';
 				
-				$out .= '<a href="intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col] . '" target="_blank" class="ottlink" title="Active Records, Total Records"><b>'.$data_matrix[$row][$col]['active'].', </b>'.$data_matrix[$row][$col]['total'].'</a>';
+				if($view_tp=='active')
+				{
+					$count_val='<b>'.$data_matrix[$row][$col]['active'].'</b>';
+				}
+				else if($view_tp=='total')
+				{
+					$count_val=$data_matrix[$row][$col]['total'];
+				}
+				else if($view_tp == 'both')
+				{
+					$count_val='<b>'.$data_matrix[$row][$col]['active'].', </b>'.$data_matrix[$row][$col]['total'];
+				}
+					
+				$out .= '<a href="intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col] . '" target="_blank" class="ottlink" title="'.$title.'">'.$count_val.'</a>';
 				
 				$out .= '<img align="right" id="bombimg_'.$row.'_'.$col.'" title="'.$data_matrix[$row][$col]['bomb']['title'].'" src="images/'.$data_matrix[$row][$col]['bomb']['src'].'" style="'.$data_matrix[$row][$col]['bomb']['style'].' vertical-align:middle; padding-right:10px; cursor:pointer;" alt="'.$data_matrix[$row][$col]['bomb']['alt'].'"'
 			.'onclick="popup_show(\'bomb\', '.count($rows).','.count($columns).',\'bombpopup_'.$row.'_'.$col.'\', \'bombpopup_drag_'.$row.'_'.$col.'\', \'bombpopup_exit_'.$row.'_'.$col.'\', \'mouse\', -10, -10);" /><br><br>';
@@ -694,6 +765,19 @@ function Download_reports()
 	}
 	
 	$count_fillbomb=0;	
+	if($_POST['dwcount']=='active')
+	{
+		$tooltip=$title="Active Count";
+	}
+	elseif($_POST['dwcount']=='total')
+	{
+		$tooltip=$title="Total Count";
+	}
+	else
+	{
+		$tooltip=$title="Active Count, Total Count";
+	}
+		
 	if($_POST['dwformat']=='pdfdown' || $_POST['dwformat']=='htmldown')
 	{
 	
@@ -722,11 +806,12 @@ function Download_reports()
 						. '<style type="text/css">'.file_get_contents('css/popup_form.css').'</style>'
 						. '</head>'
 						. '<body bgcolor="#FFFFFF">'
-						. '<div align="center"><img src="'.  urlPath() .'images/Larvol-Trial-Logo-notag.png" alt="Main" width="200" height="25" id="header" /></div><br/>';
+						. '<div align="center"><img src="'.  urlPath() .'images/Larvol-Trial-Logo-notag.png" alt="Main" width="200" height="25" id="header" /></div><br/>'
+						. '<div align="center"><b>Report Name: '.$name .'</b></div><br/>';
 
 		$pdfContent .= '<div align="center">'
 						. '<table align="center" style="border-collapse:collapse; padding:10px; background-color:#DDF;">'
-						. '<tr style="page-break-inside:avoid;" nobr="true"><td width="300px" align="left"><b>Name: </b>'. htmlspecialchars($name) .'</td>'
+						. '<tr style="page-break-inside:avoid;" nobr="true"><td width="300px" align="left"><b>Name: </b>'. htmlspecialchars($name) .'&nbsp; ('. $title .')</td>'
 						. '<td width="300px" align="left"><b>Category: </b>'. htmlspecialchars($category) .'</td></tr>'
 						. '</table>'
 						. '</div><br /><br/>';
@@ -744,17 +829,14 @@ function Download_reports()
 				if($_POST['dwcount']=='active')
 				{
 					$count_val=$col_active_total[$col];
-					$title="Active Records";
 				}
 				elseif($_POST['dwcount']=='total')
 				{
 					$count_val=$col_count_total[$col];
-					$title="Total Records";
 				}
 				else
 				{
 					$count_val='<b>'.$col_active_total[$col].', </b>'.$col_count_total[$col];
-					$title="Active Records, Total Records";
 				}
 				$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. '" target="_blank" title="'. $title .'">'.$count_val.'</a>';
 			}
@@ -769,17 +851,14 @@ function Download_reports()
 				if($_POST['dwcount']=='active')
 				{
 					$count_val=$active_total;
-					$title="Active Records";
 				}
 				elseif($_POST['dwcount']=='total')
 				{
 					$count_val=$count_total;
-					$title="Total Records";
 				}
 				else
 				{
 					$count_val='<b>'.$active_total.', </b>'.$count_total;
-					$title="Active Records, Total Records";
 				}
 				$productIds = array_filter($productIds);
 				$areaIds = array_filter($areaIds);
@@ -808,17 +887,14 @@ function Download_reports()
 				if($_POST['dwcount']=='active')
 				{
 					$count_val=$row_active_total[$row];
-					$title="Active Records";
 				}
 				elseif($_POST['dwcount']=='total')
 				{
 					$count_val=$row_count_total[$row];
-					$title="Total Records";
 				}
 				else
 				{
 					$count_val='<b>'.$row_active_total[$row].', </b>'.$row_count_total[$row];
-					$title="Active Records, Total Records";
 				}
 				$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). '" target="_blank" class="ottlink" title="'. $title .'">'.$count_val.'</a>';
 			}
@@ -834,17 +910,14 @@ function Download_reports()
 					if($_POST['dwcount']=='active')
 					{
 						$count_val=$data_matrix[$row][$col]['active'];
-						$title="Active Records";
 					}
 					elseif($_POST['dwcount']=='total')
 					{
 						$count_val=$data_matrix[$row][$col]['total'];
-						$title="Total Records";
 					}
 					else
 					{
 						$count_val='<b>'.$data_matrix[$row][$col]['active'].', </b>'.$data_matrix[$row][$col]['total'];
-						$title="Active Records, Total Records";
 					}
 				
 					$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '" target="_blank" title="'. $title .'">'. (($_POST['dwformat']=='pdfdown' && $data_matrix[$row][$col]['bomb']['src'] != 'square.png') ? '&nbsp;&nbsp;&nbsp;&nbsp;' : '').$count_val.'</a>';
@@ -1061,17 +1134,14 @@ function Download_reports()
 				if($_POST['dwcount']=='active')
 				{
 					$count_val=' ('. $col_active_total[$col] .')';
-					$tooltip='Active Records';
 				}
 				elseif($_POST['dwcount']=='total')
 				{
 					$count_val=' ('. $col_count_total[$col] .')';
-					$tooltip='Total Records';
 				}
 				else
 				{
 					$count_val=' ('.$col_active_total[$col].', '.$col_count_total[$col].')';
-					$tooltip='Active Records, Total Records';
 				}
 				
 				$cell= num2char($col).'1';
@@ -1106,17 +1176,14 @@ function Download_reports()
 				if($_POST['dwcount']=='active')
 				{
 					$count_val=' ('. $row_active_total[$row] .')';
-					$tooltip='Active Records';
 				}
 				elseif($_POST['dwcount']=='total')
 				{
 					$count_val=' ('. $row_count_total[$row] .')';
-					$tooltip='Total Records';
 				}
 				else
 				{
 					$count_val=' ('.$row_active_total[$row].', '.$row_count_total[$row].')';
-					$tooltip='Active Records, Total Records';
 				}
 				
 				$cell='A'.($row+1);
@@ -1139,17 +1206,14 @@ function Download_reports()
 					if($_POST['dwcount']=='active')
 					{
 						$count_val=$data_matrix[$row][$col]['active'];
-						$tooltip="Active Records";
 					}
 					elseif($_POST['dwcount']=='total')
 					{
 						$count_val=$data_matrix[$row][$col]['total'];
-						$tooltip="Total Records";
 					}
 					else
 					{
 						$count_val=' ('.$data_matrix[$row][$col]['active'].', '.$data_matrix[$row][$col]['total'].')';
-						$tooltip="Active Records, Total Records";
 					}
 					
 					
@@ -1184,17 +1248,14 @@ function Download_reports()
 			if($_POST['dwcount']=='active')
 			{
 				$count_val=' ('. $active_total .')';
-				$tooltip='Active Records';
 			}
 			elseif($_POST['dwcount']=='total')
 			{
 				$count_val=' ('. $count_total .')';
-				$tooltip='Total Records';
 			}
 			else
 			{
 				$count_val='Total ('.$active_total.', '.$count_total.')';
-				$tooltip='Active Records, Total Records';
 			}
 					
 			$cell = num2char(count($columns)+1).'1';
@@ -1207,6 +1268,8 @@ function Download_reports()
 		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$row, '');
 		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$row, 'Report name:');
 		$objPHPExcel->getActiveSheet()->SetCellValue('B' . $row, substr($name,0,250));
+		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$row, 'View Type:');
+		$objPHPExcel->getActiveSheet()->SetCellValue('B' . $row, $tooltip);
 		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$row, 'Footnotes:');
 		$objPHPExcel->getActiveSheet()->SetCellValue('B' . $row, $footnotes);
 		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$row, 'Description:');

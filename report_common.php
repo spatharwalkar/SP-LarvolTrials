@@ -114,7 +114,12 @@ function reportListCommon($reportTable,$disperr=null)
 			
 		case 'rpt_master_heatmap':
 			$out = '<div style="display:block;float:left;"><form method="post" action="master_heatmap.php" class="lisep">'
-					. '<input type="submit" name="makenew" value="Create new" style="float:none;" /></form><br clear="all"/>'
+					. '<input type="submit" name="makenew" value="Create new" style="float:none;" />'
+					. '&nbsp;&nbsp;<b>View Type: </b> <select id="view_type" name="view_type" onchange="window.location.href=\'master_heatmap.php?id='.$_GET['id'].'&view_type=\'+this.value+\'\'">'
+					. '<option value="active" '.(($_GET['view_type']!='total' && $_GET['view_type']!='both')? "selected=\"selected\"":"").'>Only Active Count</option>'
+					. '<option value="total" '.(($_GET['view_type']=='total')? "selected=\"selected\"":"").'>Only Total Count</option>'
+					. '<option value="both"'.(($_GET['view_type']=='both')? "selected=\"selected\"":"").'>Active & Total Count</option></select>'
+					. '</form><br clear="all"/>'
 					. '<form name="reportlist" method="post" action="master_heatmap.php" class="lisep" onsubmit="return chkbox(this);">'
 					. '<fieldset><legend>Select Report</legend>';
 			$out .= '<div class="tar">Del</div><ul>';
