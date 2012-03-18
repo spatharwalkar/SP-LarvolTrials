@@ -501,10 +501,22 @@ else $ddesc=$rec->detailed_descr->textblock;
 	}
 
 	//****
+foreach($record_data as $fieldname => $value)
+{
+		if($fieldname=='completion_date') 
+		{
+			$c_date = normal('date',(string)$value);
+		}
+		if($fieldname=='primary_completion_date') 
+		{
+			$pc_date = normal('date',(string)$value);
 
-
+		}
+}
+if(isset($c_date) and !is_null($c_date)) $end_date=$c_date;
+else $end_date=$pc_date;
 	foreach($record_data as $fieldname => $value)
-		if(!addval($larvol_id, $fieldname, $value,$record_data['lastchanged_date'],$oldtrial))
+		if(!addval($larvol_id, $fieldname, $value,$record_data['lastchanged_date'],$oldtrial,NULL,$end_date))
 			logDataErr('<br>Could not save the value of <b>' . $fieldname . '</b>, Value: ' . $value );//Log in errorlog
 			
 			
@@ -560,9 +572,8 @@ else $ddesc=$rec->detailed_descr->textblock;
 	return true;
 }
 
-function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_type)
+function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_type,$end_date)
 {
-	
 	$lastchanged_date = normal('date',$lastchanged_date);
 	global $now;
 	global $logger;
@@ -742,7 +753,6 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 						echo $log;
 						return false;
 					}
-
 					$query = 'SELECT `larvol_id` FROM data_history where `larvol_id`="' . $larvol_id . '"  LIMIT 1';
 					if(!$res = mysql_query($query))
 					{
@@ -767,6 +777,11 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 						}
 					}
 					
+					if($fieldname=='end_date') 
+					{
+						$value=$end_date;
+					}
+					
 					$val1=str_replace("\\", "", $oldval);
 					$val2=str_replace("\\", "", $value);
 					$cond1=( $exists and trim($val1)<>trim($val2) and $oldval<>'0000-00-00' and !empty($oldval) );
@@ -774,7 +789,7 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 					
 					if ($fieldname=='phase' and ( is_null($oldval) or strlen(trim($oldval)) ==0 or empty($oldval)) )
 						$cond2=false; else $cond2=true;
-			
+					
 		
 					if($cond1 and $cond2)
 					{
