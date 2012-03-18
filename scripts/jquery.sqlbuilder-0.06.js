@@ -1611,7 +1611,21 @@
 		            .attr('href').substr(1);
                   var op_slot1 = action;
                   var counter_id1 = $(el).attr('id');
-                  var valstr = getSQLWhereValueHtml(col_slot1, op_slot1, "", counter_id1);
+				  
+				  ////Keep Same value Even After Operator Changes
+				  var col_val1 = $('#'+counter_id1+'_1').attr('value'); //Retrives old Values
+				  var col_val2 = $('#'+counter_id1+'_2').attr('value');
+				  col_val="";											//Initialse Value
+				  if(col_val1 != 'undefined' && col_val1 != null)	//Check First column value exist
+				  col_val=col_val1;
+				  if(opts.operators[op_slot1].multipleval)			//Check operator Multivalue
+				  {
+					  col_val=col_val+"and;endl";
+					   if(col_val2 != 'undefined' && col_val2 != null)	//Dont Add value if second value undefined
+					   col_val=col_val+col_val2;
+				  }
+				  
+				 var valstr = getSQLWhereValueHtml(col_slot1, op_slot1, col_val, counter_id1);
                  $("[class=divnewsqlwherevalue][id=" + $(el).attr('id') + "]").html(valstr);
                  createSQLWhereValueChangeEvents(counter_id1);
                  onchangeevent('change');
