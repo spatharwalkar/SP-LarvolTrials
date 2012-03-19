@@ -1779,13 +1779,13 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 			if ($listall) 
 			{
 				if($_POST['sourceless_only'] and $_POST['sourceless_only'] == 'YES') $checked=' checked="checked" '; else $checked='';
-				echo '<b><span style="color:red">Show sourceless trials only?</span>&nbsp;<input type="checkbox" name="sourceless_only" value="YES"' . $checked . ' onclick="this.form.submit();"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b>';
+				echo '<b><span style="color:red">Show only sourceless trials / trials with manual data</span>&nbsp;<input type="checkbox" name="sourceless_only" value="YES"' . $checked . ' onclick="this.form.submit();"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b>';
 				echo $this->labels['Page'],':&nbsp;1&nbsp;',$this->labels['of'],'&nbsp;1';
 			} else {
 				$current_page = intval($this->fm / $this->inc) + 1;
 				$total_pages  = max(1, ceil($this->total_recs / abs($this->inc)));
 				if($_POST['sourceless_only'] and $_POST['sourceless_only'] == 'YES') $checked=' checked="checked" '; else $checked='';
-				echo '<b><span style="color:red">Show sourceless trials only?</span>&nbsp;<input type="checkbox" name="sourceless_only" value="YES"' . $checked . ' onclick="this.form.submit();"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b>';
+				echo '<b><span style="color:red">Show only sourceless trials / trials with manual data</span>&nbsp;<input type="checkbox" name="sourceless_only" value="YES"' . $checked . ' onclick="this.form.submit();"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b>';
 				echo $this->labels['Page'],':&nbsp;',$current_page;
 				echo '&nbsp;',$this->labels['of'],'&nbsp;',$total_pages;
 			}
@@ -2069,7 +2069,15 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 		if($_POST['sourceless_only'] and $_POST['sourceless_only'] == 'YES') 
 		{
 			if( strlen(trim( $qparts['where']))>1 ) $and=' and '; else $and='';
-			$qparts['where']= substr( $qparts['where'],0,-1) . '( ' . $and .' PMEtable0.larvol_id in ( select `larvol_id` from data_manual where `is_sourceless`="1" ) )'. substr( $qparts['where'],-1)  ;
+			/*
+			$qparts['where']= substr( $qparts['where'],0,-1) . 
+							'( ' . $and .' PMEtable0.larvol_id in 
+							( select `larvol_id` from data_manual where `is_sourceless`="1" ) )'. 
+							substr( $qparts['where'],-1)  ;
+			*/
+			$qparts['where']= substr( $qparts['where'],0,-1) . 
+							  '( ' . $and .' PMEtable0.larvol_id in ( select `larvol_id` from data_manual ) )'. 
+							  substr( $qparts['where'],-1)  ;
 		}
 		
 		// build up the ORDER BY clause

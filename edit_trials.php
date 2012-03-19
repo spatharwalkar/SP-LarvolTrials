@@ -149,19 +149,15 @@ if( $db->loggedIn() and ( $db->user->userlevel=='admin' || $db->user->userlevel=
 
 function upmdelsure(){ return confirm("Are you sure you want to delete this product?"); }
 $(document).ready(function(){
-	var options,options1,a,b,c,d;
+	var options,a,b;
 
 	jQuery(function(){
 	  options = { serviceUrl:'autosuggest.php',params:{table:<?php echo "'$table'"?>,field:'name'} };
-	  options1 = { serviceUrl:'autosuggest.php',params:{table:'data_trials',field:'source_id'<?php echo $hnt;?>} };
-	  
+	  	  
 	  if($('#PME_data_intervention_name').length>=0)
 	  a = $('#PME_data_intervention_name').autocomplete(options);
 	  b = $('#name').autocomplete(options);
 	  
-	  if($('#PME_data_condition').length>=0)
-	  c = $('#PME_data_condition').autocomplete(options1);
-	  d = $('#name').autocomplete(options1);
 	});
 	$(".ajax").colorbox({
 		onComplete:function(){ loadQueryData($('#searchdata').val());},
