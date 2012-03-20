@@ -89,7 +89,6 @@ if($db->loggedIn())
 		. '<a href="master_heatmap.php">Master HM</a><br />'
 		. '<a href="report_heatmap.php">Heatmap</a><br />'
 		. '<a href="report_update.php">Update Scan</a><br />'
-		. '<a href="report_trial_tracker.php">Trial Tracker</a>'
 		. '</div>');
 	echo('</div>Welcome, <a href="profile.php">'
 		. htmlspecialchars($db->user->username) . '</a> :: <a href="index.php?logout">Logout</a> &nbsp; </div>');
