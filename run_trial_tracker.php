@@ -8924,7 +8924,7 @@ class TrialTracker
 			$enrollments = array_map(function($a) { 
 			  return $a['NCT/enrollment']; 
 			},  $allTrials);
-			$enrollments = array_unique(array_filter($enrollments));
+			//$enrollments = array_unique(array_filter($enrollments));
 			
 			$globalOptions['minEnroll'] = 0;
 			$globalOptions['maxEnroll'] = max($enrollments);
@@ -11012,6 +11012,7 @@ class TrialTracker
 				//field upm end date
 				$title = '';
 				$attr = '';	
+				$dateStyle = '';
 				if(!empty($value['edited']) && ($value['edited']['field'] == 'end_date'))
 				{
 					$attr = ' highlight';
