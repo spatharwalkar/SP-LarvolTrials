@@ -311,22 +311,32 @@ require_once('include.util.php');
         	{
 	        	case 0:
 	        		
+				$skipModify = null;	        		
 	        	//special case detected for mul keys
 	        	$special_mul_key = null;
 	        	$indexKey = null;
 	        	//pr($new_field);
 	        	//pr($old_field);
+	        	//die;
 	        	if($new_field['key']=='MUL' && $old_field['key']=='' && $new_field['Sub_part']!=$old_field['Sub_part'])
 	        	{
 	        		$special_mul_key = ', ADD KEY `'.$field.'` (`'.$field.'`('.$new_field['Sub_part'].'))';
+	        		$skipModify = 1;
 	        	}
+	        	if($new_field['key']=='MUL' && $old_field['key']=='MUL' && $new_field['Sub_part']!=$old_field['Sub_part'])
+	        	{
+	        		$special_mul_key = ', DROP INDEX `'.$old_field['name'].'`, ADD KEY `'.$field.'` (`'.$field.'`('.$new_field['Sub_part'].'))';
+	        		$skipModify = 1;
+	        	}	        	
 	        	if($new_field['key']=='MUL' && $old_field['key']=='UNI' && $new_field['indexFlag']==1 && $old_field['indexFlag']==1)
 	        	{
 	        		$special_mul_key = ', DROP INDEX `'.$old_field['name'].'` , ADD INDEX `'.$old_field['name'].'` ( `'.$old_field['name'].'` )';
+	        		$skipModify = 1;
 	        	}
 	        	if($new_field['key']=='MUL' && $old_field['key']=='' && $new_field['indexFlag']==1 && $old_field['indexFlag']=='')
 	        	{
 	        		$indexKey = ', ADD INDEX (`'.$field.'`) ';
+	        		$skipModify = 1;
 	        	}
 	        	if($new_field['key']=='UNI' && $new_field['type']=='blob' && $old_field['type']!='blob')
 	        	{
@@ -335,6 +345,7 @@ require_once('include.util.php');
 	        		$sql =  "ALTER table `{$table}` DROP INDEX {$old_field['key_primary']}";
 	        		echo $sql.';<br />';
 	        		$special_uni_key = ', ADD UNIQUE `'.$field.'` (`'.$field.'`('.$new_field['Sub_part'].'))';
+	        		$skipModify = 1;
 	        	}
 	        	//check primary key defintion needed or not
 	        	if($old_field['key']=='PRI' && $new_field['key']=='PRI' || count($keys_home)>1)
@@ -367,7 +378,7 @@ require_once('include.util.php');
 	        	$after = null;
 	        	$newFieldHomeKey = array_search($new_field['name'],$fieldNamesOrderHome);
 	        	$newFieldSyncKey = array_search($new_field['name'],$fieldNamesOrderSync);
-	        	if($newFieldHomeKey != $newFieldSyncKey)
+	        	if($newFieldHomeKey != $newFieldSyncKey && $skipModify == null)
 	        	{
 	        		//required for reordering alter query
 	        		$change = 'MODIFY';
