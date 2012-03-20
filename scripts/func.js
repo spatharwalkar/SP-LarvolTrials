@@ -17,7 +17,6 @@ $(document).ready(function()
 	.css('background-position','left center')
 	.css('border','1px solid')
 	.css('padding','2px')
-	/*.css('margin-left','200px');*/
 	
 	if($('.trialtitles').length>0)
 	{

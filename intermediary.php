@@ -78,6 +78,7 @@ $globalOptions['encodeFormat'] = "old";
 $globalOptions['LI'] = "0";
 $globalOptions['minEnroll'] = "0";
 $globalOptions['maxEnroll'] = "0";
+$globalOptions['product'] = "";
 
 if(isset($_GET['change']))
 {
@@ -241,7 +242,21 @@ $lastChangedTime = filectime("css/intermediary.css");
 			$("#change").val($("#amount3").val());
 			
 		});
+		
+		$('#nav li').hover(
+			function () {
+				//show its submenu
+				$('ul', this).slideDown(100);
+	
+			}, 
+			function () {
+				//hide its submenu
+				$('ul', this).slideUp(100);			
+			}
+		);
+		
 	});
+	
     </script>
     
     <script type="text/javascript">
@@ -327,6 +342,11 @@ if((isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvoli
 || (isset($_GET['LI']) && $_GET['LI'] == 1))
 {
 	$globalOptions['LI'] = "1";
+}
+
+if(isset($_GET['pr']))
+{	
+	$globalOptions['product'] = $_GET['pr'];
 }
 
 if(isset($_GET['id']))

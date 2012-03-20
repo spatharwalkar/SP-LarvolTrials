@@ -8794,6 +8794,7 @@ class TrialTracker
 							}
 						}
 					}
+					
 				}
 				
 				if(!in_array($rvalue['NCT/overall_status'],$this->activeStatusValues) && !in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues)) 
@@ -8910,6 +8911,28 @@ class TrialTracker
 		global $db;
 		$loggedIn	= $db->loggedIn();
 		
+		$TrialsInfoList = $TrialsInfo;
+		
+		if(isset($globalOptions['product']) && $globalOptions['product'] != '')
+		{	
+			echo '<input type="hidden" name="pr" value="' . $globalOptions['product'] . '" />';
+			
+			foreach($TrialsInfo as $k => $v)
+			{
+				if($k != $globalOptions['product'])
+				{
+					unset($TrialsInfo[$k]);
+				}
+			}
+			foreach($Trials as $k => $v)
+			{
+				if($v['section'] != $globalOptions['product'])
+				{
+					unset($Trials[$k]);
+				}
+			}
+			$Trials = array_values($Trials);
+		}
 		$count = count($Trials);
 		$start 	= '';
 		$last = '';
@@ -8918,6 +8941,7 @@ class TrialTracker
 		$start 	= ($globalOptions['page']-1) * $this->resultsPerPage + 1;
 		$last 	= ($globalOptions['page'] * $this->resultsPerPage > $count) ? $count : ($start + $this->resultsPerPage - 1);
 		$totalPages = ceil($count / $this->resultsPerPage);
+		$paginate = $this->pagination($globalOptions, $totalPages, $timeMachine, $ottType);
 		
 		if(!empty($allTrials) && $globalOptions['minEnroll'] == 0 && $globalOptions['maxEnroll'] == 0)
 		{
@@ -8944,10 +8968,28 @@ class TrialTracker
 		$this->displayFilterControls($count, $totactivecount, $totinactivecount, $totalcount, $globalOptions);
 		if($totalPages > 1)
 		{
-			$this->pagination($globalOptions, $totalPages, $timeMachine, $ottType);
+			echo $paginate['paginate'];
 		}
 		
-		echo '<span id="addtoright"></span><br/><br/>';
+		echo '<div style="float: left;margin-right: 25px;"><span id="addtoright"></span></div>';
+		
+		if(!empty($TrialsInfoList)
+		&& ($ottType != 'unstacked' && $ottType != 'indexed' && $ottType != 'standalone' && $ottType != 'unstackedoldlink'))
+		{
+			$paginate['url'] = preg_replace("/\&amp;page=[0-9].*?(\&amp;|$)/", '',   $paginate['url']);
+			$allproductsurl = preg_replace("/\&amp;pr=[0-9].*?(\&amp;|$)/", '',   $paginate['url']);
+			
+			echo '<ul id="nav"><li class="first" style="text-align:center"><a href="javascript: void(0);">Product Dropdown</a><ul>'
+					. '<li style="width:200px;"><a href="' . $allproductsurl . '">All Products</a></li>';
+			foreach($TrialsInfoList as $infkey => $infvalue)
+			{
+				echo '<li style="width:200px;"><a href="' . $paginate['url'] . '&amp;pr=' . $infkey .  '">' . $infvalue['sectionHeader'] . '</a></li>';
+			}
+			echo '</ul></ul>';
+		}
+		
+		echo '<br/><br/>';
+		
 		echo $this->displayTrialTableHeader($loggedIn, $globalOptions);
 		echo $this->displayTrials($globalOptions, $loggedIn, $start, $last, $Trials, $TrialsInfo, $ottType);
 		
@@ -8961,7 +9003,7 @@ class TrialTracker
 		if($totalPages > 1)
 		{
 			echo '<div style="height:10px;">&nbsp;</div>';
-			$this->pagination($globalOptions, $totalPages, $timeMachine, $ottType);
+			echo $paginate['paginate'];
 		}
 		echo '</form><br/>';
 		
@@ -9296,7 +9338,6 @@ class TrialTracker
 			$url .= 'id=' . $globalOptions['url'];
 		}
 		
-		
 		if($timeMachine !== NULL)
 		{
 			$url .= '&amp;time=' . $timeMachine;
@@ -9318,7 +9359,7 @@ class TrialTracker
 		}
 		if(isset($globalOptions['change']))
 		{
-			$url .= '&amp;change=' . $globalOptions['change'];
+			$url .= '&amp;change=' . str_replace(' ', '+', $globalOptions['change']);
 		}
 		if(isset($globalOptions['onlyUpdates']) && $globalOptions['onlyUpdates'] == 'yes')
 		{
@@ -9358,6 +9399,11 @@ class TrialTracker
 		if(isset($globalOptions['LI']) && $globalOptions['LI'] == '1')
 		{
 			$url .= '&amp;LI=1';
+		}
+		
+		if(isset($globalOptions['product']) && $globalOptions['product'] != '')
+		{
+			$url .= '&amp;pr=' . $globalOptions['product'];
 		}
 		
 		$stages = 3;
@@ -9448,7 +9494,7 @@ class TrialTracker
 		}
 		$paginateStr .= '</div>';
 		
-		echo $paginateStr;
+		return array('paginate' => $paginateStr, 'url' => $url);
 	}
 	
 	function displayTrials($globalOptions = array(), $loggedIn, $start, $end, $trials, $trialsInfo, $ottType)
