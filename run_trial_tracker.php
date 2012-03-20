@@ -10752,7 +10752,7 @@ class TrialTracker
 								}
 							}
 							
-							$sql = " SELECT u.id FROM `upm` u LEFT JOIN `upm_history` uh ON u.`id` = uh.`id` WHERE u.`id` = '" . $value['id'] 
+							$sql = " SELECT u.id FROM `upm` u LEFT JOIN `upm_history` uh ON u.`id` = uh.`id` WHERE u.`id` = '" . $row['id'] 
 									. "' AND u.`last_update` <= '" . date('Y-m-d', $timeMachine) . "' AND u.`last_update` >=  '" 
 									. date('Y-m-d', strtotime($timeInterval, $timeMachine)) . "' AND uh.`id` IS NULL ";
 							$reslt = mysql_query($sql);
@@ -10822,7 +10822,7 @@ class TrialTracker
 						}
 					}
 					
-					$sql = " SELECT u.id FROM `upm` u LEFT JOIN `upm_history` uh ON u.`id` = uh.`id` WHERE u.`id` = '" . $value['id'] 
+					$sql = " SELECT u.id FROM `upm` u LEFT JOIN `upm_history` uh ON u.`id` = uh.`id` WHERE u.`id` = '" . $row['id'] 
 							. "' AND u.`last_update` <= '" . date('Y-m-d', $timeMachine) . "' AND u.`last_update` >=  '" 
 							. date('Y-m-d', strtotime($timeInterval, $timeMachine)) . "' AND uh.`id` IS NULL ";
 					$reslt = mysql_query($sql);
