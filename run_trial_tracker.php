@@ -9305,7 +9305,7 @@ class TrialTracker
 				. '<div id="slider-range-min"></div></p></div>'
 				. '<input type="checkbox" id="showonlyupdated" name="osu" ' 
 				. ($globalOptions['onlyUpdates'] == 'yes' ? ' checked="checked" ' : '' ) . ' style="margin-left:20px;" />'
-				. '<label for="showonlyupdated" style="font-size:x-small;">Show only updated</label>'
+				. '<label for="showonlyupdated" style="font-size:x-small;">Show only updated trials</label>'
 				. '</tr></table><br/><br/>';
 		echo '<input type="hidden" name="status" id="status" value="' . implode(',', $globalOptions['status']) . '" />'
 				. '<input type="hidden" name="itype" id="itype" value="' . implode(',', $globalOptions['itype']) . '" />'
@@ -9606,10 +9606,17 @@ class TrialTracker
 			//nctid column
 			if($loggedIn) 
 			{ 
-				$outputStr .= '<td class="' . $rowOneType . '" ' . (($trials[$i]['new'] == 'y') ? 'title="New record"' : '')
-							. ' ><a style="color:' . $titleLinkColor 
-							. '" href="' . urlPath() . 'edit_trials.php?larvol_id=' . $trials[$i]['larvol_id'] . '" target="_blank">' 
-							. $trials[$i]['NCT/nct_id'] . '</a></td>';
+				$outputStr .= '<td class="' . $rowOneType . '" ' . (($trials[$i]['new'] == 'y') ? 'title="New record"' : ''). ' >';
+					if($ottType == 'indexed' || $ottType == 'colstackedindexed' || $ottType == 'rowstackedindexed')
+					{
+						$outputStr .= '<a style="color:' . $titleLinkColor . '" href="' . urlPath() . 'edit_trials.php?larvol_id=' . $trials[$i]['larvol_id'] 
+									. '" target="_blank">' . $trials[$i]['NCT/nct_id'] . '</a>';
+					}
+					else
+					{
+						$outputStr .= $trials[$i]['NCT/nct_id'] . '</a>';
+					}
+				$outputStr .= '</td>';
 			}
 			
 			//acroynm and title column
@@ -10694,7 +10701,7 @@ class TrialTracker
 		if($timeMachine === NULL) $timeMachine = $now;
 		
 		$result = mysql_query("SELECT id, event_type, corresponding_trial, event_description, event_link, result_link, start_date, end_date, status "
-								. "FROM upm WHERE corresponding_trial = '" . $trialId . "' ");
+								. "FROM upm WHERE corresponding_trial = '" . $trialId . "' ORDER BY `end_date` ASC, `start_date` ASC ");
 		
 		$i = 0;			
 		while($row = mysql_fetch_assoc($result)) 
@@ -10763,7 +10770,7 @@ class TrialTracker
 				{
 					$query = "SELECT `id`, `event_description`, `event_link`, `result_link`, `event_type`, `start_date`, `status`, " 
 							. " `start_date_type`, `end_date`, `end_date_type` FROM `upm` WHERE `corresponding_trial` IS NULL AND `product` = '" . $rows['id'] 
-							. "' ORDER BY `end_date` ASC ";
+							. "' ORDER BY `end_date` ASC, `start_date` ASC ";
 					$res = mysql_query($query)  or tex('Bad SQL query getting unmatched upms ' . $sql);
 					if(mysql_num_rows($res) > 0) 
 					{
