@@ -10,9 +10,9 @@ ignore_user_abort(true);
 global $db;
 global $logger;
 
-if(isset($_GET['nct_id'])) // A single trial
+if(isset($_GET['trial'])) // A single trial
 {
-	$trial=padnct($_GET['nct_id']);
+	$trial=padnct($_GET['trial']);
 	$query = 'SELECT `larvol_id` FROM data_trials where `source_id`="' . $trial . '"  LIMIT 1';
 
 	if(!$res = mysql_query($query))
@@ -170,7 +170,7 @@ else return false;
 		
 		
 		
-		echo('Remapping from: ' . $cid . ' to: ' . $maxid . '<br />'); @flush();
+//		echo('Remapping from: ' . $cid . ' to: ' . $maxid . '<br />'); @flush();
 		echo('<br>Current time ' . date('Y-m-d H:i:s', strtotime('now')) . '<br>');
 		echo str_repeat ("  ", 4000);
 		$i=1;
