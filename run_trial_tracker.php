@@ -5600,6 +5600,7 @@ class TrialTracker
 					{
 						$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id = '" . $pvalue . "' ");
 						if(mysql_num_rows($res) > 0)
+
 						{
 							while($row = mysql_fetch_assoc($res))
 							{
@@ -5875,6 +5876,8 @@ class TrialTracker
 						$Array2[$indx][$key] = $value;
 					}
 				}
+				$Array2[$indx]['source'] = NULL;
+				$Array2[$indx]['manual_larvol_id'] = NULL;
 				++$indx;
 			}
 			
@@ -5946,9 +5949,13 @@ class TrialTracker
 								$region[] = $this->regionFilters[$rgvalue];
 							}
 							
+							$trialRegion = array();
+							$trialRegion = explode(',', $result[$index]['region']);
+							$matchedRegion = array_intersect($region, $trialRegion);
+							
 							if(in_array($rvalue['NCT/overall_status'], $status) 
 							&& in_array($rvalue['NCT/phase'], $phase) 
-							&& in_array($rvalue['region'], $region))
+							&& !empty($matchedRegion))
 							{
 								$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
 								if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
@@ -5964,6 +5971,8 @@ class TrialTracker
 							unset($status);
 							unset($phase);
 							unset($region);
+							unset($trialRegion);
+							unset($matchedRegion);
 						}
 						else if(!empty($globalOptions['status']) && !empty($globalOptions['phase'])) 
 						{
@@ -6012,8 +6021,12 @@ class TrialTracker
 								$region[] = $this->regionFilters[$rgvalue];
 							}
 							
+							$trialRegion = array();
+							$trialRegion = explode(',', $result[$index]['region']);
+							$matchedRegion = array_intersect($region, $trialRegion);
+							
 							if(in_array($rvalue['NCT/phase'], $phase) 
-							&& in_array($rvalue['region'], $region))
+							&& !empty($matchedRegion))
 							{
 								$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
 								if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
@@ -6028,6 +6041,8 @@ class TrialTracker
 							
 							unset($phase);
 							unset($region);
+							unset($trialRegion);
+							unset($matchedRegion);
 						}
 						else if(!empty($globalOptions['status']) && !empty($globalOptions['region']))
 						{
@@ -6043,8 +6058,12 @@ class TrialTracker
 								$region[] = $this->regionFilters[$rgvalue];
 							}
 							
+							$trialRegion = array();
+							$trialRegion = explode(',', $result[$index]['region']);
+							$matchedRegion = array_intersect($region, $trialRegion);
+							
 							if(in_array($rvalue['NCT/overall_status'], $status) 
-							&& in_array($rvalue['region'], $region))
+							&& !empty($matchedRegion))
 							{
 								$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
 								if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
@@ -6059,6 +6078,8 @@ class TrialTracker
 							
 							unset($status);
 							unset($region);
+							unset($trialRegion);
+							unset($matchedRegion);
 						}
 						else if(!empty($globalOptions['status']))
 						{
@@ -6115,7 +6136,11 @@ class TrialTracker
 								$region[] = $this->regionFilters[$rgvalue];
 							}
 							
-							if(in_array($rvalue['region'], $region))
+							$trialRegion = array();
+							$trialRegion = explode(',', $result[$index]['region']);
+							$matchedRegion = array_intersect($region, $trialRegion);
+							
+							if(!empty($matchedRegion))
 							{
 								$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
 								if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
@@ -6129,6 +6154,8 @@ class TrialTracker
 							}
 							
 							unset($region);
+							unset($trialRegion);
+							unset($matchedRegion);
 						}
 						else
 						{	
@@ -6202,9 +6229,13 @@ class TrialTracker
 							$region[] = $this->regionFilters[$rgvalue];
 						}
 						
+						$trialRegion = array();
+						$trialRegion = explode(',', $result[$index]['region']);
+						$matchedRegion = array_intersect($region, $trialRegion);
+						
 						if(in_array($rvalue['NCT/overall_status'], $status) 
 						&& in_array($rvalue['NCT/phase'], $phase) 
-						&& in_array($rvalue['region'], $region))
+						&& !empty($matchedRegion))
 						{
 							$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
 							if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
@@ -6220,6 +6251,8 @@ class TrialTracker
 						unset($status);
 						unset($phase);
 						unset($region);
+						unset($trialRegion);
+						unset($matchedRegion);
 					}
 					else if(!empty($globalOptions['status']) && !empty($globalOptions['phase'])) 
 					{
@@ -6268,8 +6301,12 @@ class TrialTracker
 							$region[] = $this->regionFilters[$rgvalue];
 						}
 						
+						$trialRegion = array();
+						$trialRegion = explode(',', $result[$index]['region']);
+						$matchedRegion = array_intersect($region, $trialRegion);
+						
 						if(in_array($rvalue['NCT/phase'], $phase) 
-						&& in_array($rvalue['region'], $region))
+						&& !empty($matchedRegion))
 						{
 							$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
 							if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
@@ -6284,6 +6321,8 @@ class TrialTracker
 						
 						unset($phase);
 						unset($region);
+						unset($trialRegion);
+						unset($matchedRegion);
 					}
 					else if(!empty($globalOptions['status']) && !empty($globalOptions['region']))
 					{
@@ -6299,8 +6338,12 @@ class TrialTracker
 							$region[] = $this->regionFilters[$rgvalue];
 						}
 						
+						$trialRegion = array();
+						$trialRegion = explode(',', $result[$index]['region']);
+						$matchedRegion = array_intersect($region, $trialRegion);
+						
 						if(in_array($rvalue['NCT/overall_status'], $status) 
-						&& in_array($rvalue['region'], $region))
+						&& !empty($matchedRegion))
 						{
 							$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
 							if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
@@ -6315,6 +6358,8 @@ class TrialTracker
 						
 						unset($status);
 						unset($region);
+						unset($trialRegion);
+						unset($matchedRegion);
 					}
 					else if(!empty($globalOptions['status']))
 					{
@@ -6371,7 +6416,11 @@ class TrialTracker
 							$region[] = $this->regionFilters[$rgvalue];
 						}
 						
-						if(in_array($rvalue['region'], $region))
+						$trialRegion = array();
+						$trialRegion = explode(',', $result[$index]['region']);
+						$matchedRegion = array_intersect($region, $trialRegion);
+						
+						if(!empty($matchedRegion))
 						{
 							$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
 							if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
@@ -6385,6 +6434,8 @@ class TrialTracker
 						}
 						
 						unset($region);
+						unset($trialRegion);
+						unset($matchedRegion);
 					}
 					else
 					{	
@@ -6567,6 +6618,8 @@ class TrialTracker
 						$Array2[$indx][$key] = $value;
 					}
 				}
+				$Array2[$indx]['source'] = NULL;
+				$Array2[$indx]['manual_larvol_id'] = NULL;
 				++$indx;
 			}
 			
@@ -6638,9 +6691,13 @@ class TrialTracker
 								$region[] = $this->regionFilters[$rgvalue];
 							}
 							
+							$trialRegion = array();
+							$trialRegion = explode(',', $result[$index]['region']);
+							$matchedRegion = array_intersect($region, $trialRegion);
+							
 							if(in_array($rvalue['NCT/overall_status'], $status) 
 							&& in_array($rvalue['NCT/phase'], $phase) 
-							&& in_array($rvalue['region'], $region))
+							&& !empty($matchedRegion))
 							{
 								$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
 								if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
@@ -6656,6 +6713,8 @@ class TrialTracker
 							unset($status);
 							unset($phase);
 							unset($region);
+							unset($trialRegion);
+							unset($matchedRegion);
 						}
 						else if(!empty($globalOptions['status']) && !empty($globalOptions['phase'])) 
 						{
@@ -6704,8 +6763,12 @@ class TrialTracker
 								$region[] = $this->regionFilters[$rgvalue];
 							}
 							
+							$trialRegion = array();
+							$trialRegion = explode(',', $result[$index]['region']);
+							$matchedRegion = array_intersect($region, $trialRegion);
+							
 							if(in_array($rvalue['NCT/phase'], $phase) 
-							&& in_array($rvalue['region'], $region))
+							&& !empty($matchedRegion))
 							{
 								$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
 								if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
@@ -6720,6 +6783,8 @@ class TrialTracker
 							
 							unset($phase);
 							unset($region);
+							unset($trialRegion);
+							unset($matchedRegion);
 						}
 						else if(!empty($globalOptions['status']) && !empty($globalOptions['region']))
 						{
@@ -6735,8 +6800,12 @@ class TrialTracker
 								$region[] = $this->regionFilters[$rgvalue];
 							}
 							
+							$trialRegion = array();
+							$trialRegion = explode(',', $result[$index]['region']);
+							$matchedRegion = array_intersect($region, $trialRegion);
+							
 							if(in_array($rvalue['NCT/overall_status'], $status) 
-							&& in_array($rvalue['region'], $region))
+							&& !empty($matchedRegion))
 							{
 								$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
 								if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
@@ -6751,6 +6820,8 @@ class TrialTracker
 							
 							unset($status);
 							unset($region);
+							unset($trialRegion);
+							unset($matchedRegion);
 						}
 						else if(!empty($globalOptions['status']))
 						{
@@ -6807,7 +6878,11 @@ class TrialTracker
 								$region[] = $this->regionFilters[$rgvalue];
 							}
 							
-							if(in_array($rvalue['region'], $region))
+							$trialRegion = array();
+							$trialRegion = explode(',', $result[$index]['region']);
+							$matchedRegion = array_intersect($region, $trialRegion);
+							
+							if(!empty($matchedRegion))
 							{
 								$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
 								if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
@@ -6821,6 +6896,8 @@ class TrialTracker
 							}
 							
 							unset($region);
+							unset($trialRegion);
+							unset($matchedRegion);
 						}
 						else
 						{	
@@ -6894,9 +6971,13 @@ class TrialTracker
 							$region[] = $this->regionFilters[$rgvalue];
 						}
 						
+						$trialRegion = array();
+						$trialRegion = explode(',', $result[$index]['region']);
+						$matchedRegion = array_intersect($region, $trialRegion);
+						
 						if(in_array($rvalue['NCT/overall_status'], $status) 
 						&& in_array($rvalue['NCT/phase'], $phase) 
-						&& in_array($rvalue['region'], $region))
+						&& !empty($matchedRegion))
 						{
 							$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
 							if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
@@ -6912,6 +6993,8 @@ class TrialTracker
 						unset($status);
 						unset($phase);
 						unset($region);
+						unset($trialRegion);
+						unset($matchedRegion);
 					}
 					else if(!empty($globalOptions['status']) && !empty($globalOptions['phase'])) 
 					{
@@ -6960,8 +7043,12 @@ class TrialTracker
 							$region[] = $this->regionFilters[$rgvalue];
 						}
 						
+						$trialRegion = array();
+						$trialRegion = explode(',', $result[$index]['region']);
+						$matchedRegion = array_intersect($region, $trialRegion);
+						
 						if(in_array($rvalue['NCT/phase'], $phase) 
-						&& in_array($rvalue['region'], $region))
+						&& !empty($matchedRegion))
 						{
 							$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
 							if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
@@ -6976,6 +7063,8 @@ class TrialTracker
 						
 						unset($phase);
 						unset($region);
+						unset($trialRegion);
+						unset($matchedRegion);
 					}
 					else if(!empty($globalOptions['status']) && !empty($globalOptions['region']))
 					{
@@ -6991,8 +7080,12 @@ class TrialTracker
 							$region[] = $this->regionFilters[$rgvalue];
 						}
 						
+						$trialRegion = array();
+						$trialRegion = explode(',', $result[$index]['region']);
+						$matchedRegion = array_intersect($region, $trialRegion);
+						
 						if(in_array($rvalue['NCT/overall_status'], $status) 
-						&& in_array($rvalue['region'], $region))
+						&& !empty($matchedRegion))
 						{
 							$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
 							if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
@@ -7007,6 +7100,8 @@ class TrialTracker
 						
 						unset($status);
 						unset($region);
+						unset($trialRegion);
+						unset($matchedRegion);
 					}
 					else if(!empty($globalOptions['status']))
 					{
@@ -7063,7 +7158,11 @@ class TrialTracker
 							$region[] = $this->regionFilters[$rgvalue];
 						}
 						
-						if(in_array($rvalue['region'], $region))
+						$trialRegion = array();
+						$trialRegion = explode(',', $result[$index]['region']);
+						$matchedRegion = array_intersect($region, $trialRegion);
+						
+						if(!empty($matchedRegion))
 						{
 							$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
 							if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
@@ -7077,6 +7176,8 @@ class TrialTracker
 						}
 						
 						unset($region);
+						unset($trialRegion);
+						unset($matchedRegion);
 					}
 					else
 					{	
@@ -7234,10 +7335,12 @@ class TrialTracker
 			{
 				$query = "SELECT dt.`larvol_id`, dt.`source_id`, dt.`brief_title`, dt.`acronym`, dt.`lead_sponsor`, dt.`collaborator`, dt.`condition`,"
 						. " dt.`overall_status`, dt.`is_active`, dt.`start_date`, dt.`end_date`, dt.`enrollment`, dt.`enrollment_type`, dt.`intervention_name`,"
-						. " dt.`region`, dt.`lastchanged_date`, dt.`phase`, dt.`overall_status`, dt.`lastchanged_date`, dt.`firstreceived_date`, dt.`viewcount` "
+						. " dt.`region`, dt.`lastchanged_date`, dt.`phase`, dt.`overall_status`, dt.`lastchanged_date`, dt.`firstreceived_date`, dt.`viewcount`, "
+						. " dm.`larvol_id` AS manual_larvol_id, dt.`source` "
 						. " FROM `data_trials` dt "
 						. " JOIN `product_trials` pt ON dt.`larvol_id` = pt.`trial` "
 						. " JOIN `area_trials` at ON dt.`larvol_id` = at.`trial` "
+						. " LEFT JOIN `data_manual` dm ON dt.`larvol_id` = dm.`larvol_id` "
 						. " WHERE ";
 						
 				if($ivalue['product'] != '')	//When Product is blank do not process Product in Query
@@ -7282,6 +7385,8 @@ class TrialTracker
 				$result[$index]['new'] = 'n';
 				$result[$index]['edited'] = array();
 				$result[$index]['viewcount'] = $row['viewcount']; 
+				$result[$index]['source'] = $row['source']; 
+				$result[$index]['manual_larvol_id'] = $row['manual_larvol_id']; 
 				
 				if($row['firstreceived_date'] <= date('Y-m-d', $timeMachine) && $row['firstreceived_date'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
 				{
@@ -7511,9 +7616,13 @@ class TrialTracker
 								$region[] = $this->regionFilters[$rvalue];
 							}
 							
+							$trialRegion = array();
+							$trialRegion = explode(',', $result[$index]['region']);
+							$matchedRegion = array_intersect($region, $trialRegion);
+							
 							if(in_array($result[$index]['NCT/overall_status'], $status) 
 							&& in_array($result[$index]['NCT/phase'], $phase) 
-							&& in_array($result[$index]['region'], $region))
+							&& !empty($matchedRegion))
 							{
 								$Trials['allTrials'][] = array_merge($dataset['matchedupms'], $result[$index]);
 								if($result[$index]['NCT/is_active'] != 1)
@@ -7529,6 +7638,8 @@ class TrialTracker
 							unset($status);
 							unset($phase);
 							unset($region);
+							unset($trialRegion);
+							unset($matchedRegion);
 						}
 						else if(!empty($globalOptions['status']) && !empty($globalOptions['phase'])) 
 						{
@@ -7577,8 +7688,12 @@ class TrialTracker
 								$region[] = $this->regionFilters[$rvalue];
 							}
 							
+							$trialRegion = array();
+							$trialRegion = explode(',', $result[$index]['region']);
+							$matchedRegion = array_intersect($region, $trialRegion);
+							
 							if(in_array($result[$index]['NCT/phase'], $phase) 
-							&& in_array($result[$index]['region'], $region))
+							&& !empty($matchedRegion))
 							{
 								$Trials['allTrials'][] = array_merge($dataset['matchedupms'], $result[$index]);
 								if($result[$index]['NCT/is_active'] != 1)
@@ -7593,6 +7708,8 @@ class TrialTracker
 							
 							unset($phase);
 							unset($region);
+							unset($trialRegion);
+							unset($matchedRegion);
 						}
 						else if(!empty($globalOptions['status']) && !empty($globalOptions['region']))
 						{
@@ -7608,8 +7725,12 @@ class TrialTracker
 								$region[] = $this->regionFilters[$rvalue];
 							}
 							
+							$trialRegion = array();
+							$trialRegion = explode(',', $result[$index]['region']);
+							$matchedRegion = array_intersect($region, $trialRegion);
+						
 							if(in_array($result[$index]['NCT/overall_status'], $status) 
-							&& in_array($result[$index]['region'], $region))
+							&& !empty($matchedRegion))
 							{
 								$Trials['allTrials'][] = array_merge($dataset['matchedupms'], $result[$index]);
 								if($result[$index]['NCT/is_active'] != 1)
@@ -7624,6 +7745,8 @@ class TrialTracker
 							
 							unset($status);
 							unset($region);
+							unset($trialRegion);
+							unset($matchedRegion);
 						}
 						else if(!empty($globalOptions['status']))
 						{
@@ -7680,7 +7803,11 @@ class TrialTracker
 								$region[] = $this->regionFilters[$rvalue];
 							}
 							
-							if(in_array($result[$index]['region'], $region))
+							$trialRegion = array();
+							$trialRegion = explode(',', $result[$index]['region']);
+							$matchedRegion = array_intersect($region, $trialRegion);
+						
+							if(!empty($matchedRegion))
 							{
 								$Trials['allTrials'][] = array_merge($dataset['matchedupms'], $result[$index]);
 								if($result[$index]['NCT/is_active'] != 1)
@@ -7694,6 +7821,8 @@ class TrialTracker
 							}
 							
 							unset($region);
+							unset($trialRegion);
+							unset($matchedRegion);
 						}
 						else
 						{
@@ -7767,9 +7896,13 @@ class TrialTracker
 							$region[] = $this->regionFilters[$rvalue];
 						}
 						
+						$trialRegion = array();
+						$trialRegion = explode(',', $result[$index]['region']);
+						$matchedRegion = array_intersect($region, $trialRegion);
+						
 						if(in_array($result[$index]['NCT/overall_status'], $status) 
 						&& in_array($result[$index]['NCT/phase'], $phase) 
-						&& in_array($result[$index]['region'], $region))
+						&& !empty($matchedRegion))
 						{
 							$Trials['allTrials'][] = array_merge($dataset['matchedupms'], $result[$index]);
 							if($result[$index]['NCT/is_active'] != 1)
@@ -7785,6 +7918,8 @@ class TrialTracker
 						unset($status);
 						unset($phase);
 						unset($region);
+						unset($trialRegion);
+						unset($matchedRegion);
 					}
 					else if(!empty($globalOptions['status']) && !empty($globalOptions['phase'])) 
 					{
@@ -7833,8 +7968,12 @@ class TrialTracker
 							$region[] = $this->regionFilters[$rvalue];
 						}
 						
+						$trialRegion = array();
+						$trialRegion = explode(',', $result[$index]['region']);
+						$matchedRegion = array_intersect($region, $trialRegion);
+						
 						if(in_array($result[$index]['NCT/phase'], $phase) 
-						&& in_array($result[$index]['region'], $region))
+						&& !empty($matchedRegion))
 						{
 							$Trials['allTrials'][] = array_merge($dataset['matchedupms'], $result[$index]);
 							if($result[$index]['NCT/is_active'] != 1)
@@ -7849,6 +7988,8 @@ class TrialTracker
 						
 						unset($phase);
 						unset($region);
+						unset($trialRegion);
+						unset($matchedRegion);
 					}
 					else if(!empty($globalOptions['status']) && !empty($globalOptions['region']))
 					{
@@ -7864,8 +8005,12 @@ class TrialTracker
 							$region[] = $this->regionFilters[$rvalue];
 						}
 						
+						$trialRegion = array();
+						$trialRegion = explode(',', $result[$index]['region']);
+						$matchedRegion = array_intersect($region, $trialRegion);
+						
 						if(in_array($result[$index]['NCT/overall_status'], $status) 
-						&& in_array($result[$index]['region'], $region))
+						&& !empty($matchedRegion))
 						{
 							$Trials['allTrials'][] = array_merge($dataset['matchedupms'], $result[$index]);
 							if($result[$index]['NCT/is_active'] != 1)
@@ -7880,6 +8025,8 @@ class TrialTracker
 						
 						unset($status);
 						unset($region);
+						unset($trialRegion);
+						unset($matchedRegion);
 					}
 					else if(!empty($globalOptions['status']))
 					{
@@ -7936,7 +8083,11 @@ class TrialTracker
 							$region[] = $this->regionFilters[$rvalue];
 						}
 						
-						if(in_array($result[$index]['region'], $region))
+						$trialRegion = array();
+						$trialRegion = explode(',', $result[$index]['region']);
+						$matchedRegion = array_intersect($region, $trialRegion);
+						
+						if(!empty($matchedRegion))
 						{
 							$Trials['allTrials'][] = array_merge($dataset['matchedupms'], $result[$index]);
 							if($result[$index]['NCT/is_active'] != 1)
@@ -7950,6 +8101,8 @@ class TrialTracker
 						}
 						
 						unset($region);
+						unset($trialRegion);
+						unset($matchedRegion);
 					}
 					else
 					{
@@ -8235,6 +8388,8 @@ class TrialTracker
 						$Array2[$indx][$key] = $value;
 					}
 				}
+				$Array2[$indx]['source'] = NULL;
+				$Array2[$indx]['manual_larvol_id'] = NULL;
 				++$indx;
 			}
 			
@@ -8306,9 +8461,13 @@ class TrialTracker
 								$region[] = $this->regionFilters[$rgvalue];
 							}
 							
+							$trialRegion = array();
+							$trialRegion = explode(',', $result[$index]['region']);
+							$matchedRegion = array_intersect($region, $trialRegion);
+							
 							if(in_array($rvalue['NCT/overall_status'], $status) 
 							&& in_array($rvalue['NCT/phase'], $phase) 
-							&& in_array($rvalue['region'], $region))
+							&& !empty($matchedRegion))
 							{
 								$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
 								if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
@@ -8324,6 +8483,8 @@ class TrialTracker
 							unset($status);
 							unset($phase);
 							unset($region);
+							unset($trialRegion);
+							unset($matchedRegion);
 						}
 						else if(!empty($globalOptions['status']) && !empty($globalOptions['phase'])) 
 						{
@@ -8373,8 +8534,12 @@ class TrialTracker
 								$region[] = $this->regionFilters[$rgvalue];
 							}
 							
+							$trialRegion = array();
+							$trialRegion = explode(',', $result[$index]['region']);
+							$matchedRegion = array_intersect($region, $trialRegion);
+							
 							if(in_array($rvalue['NCT/phase'], $phase) 
-							&& in_array($rvalue['region'], $region))
+							&& !empty($matchedRegion))
 							{
 								$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
 								if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
@@ -8389,6 +8554,8 @@ class TrialTracker
 							
 							unset($phase);
 							unset($region);
+							unset($trialRegion);
+							unset($matchedRegion);
 						}
 						else if(!empty($globalOptions['status']) && !empty($globalOptions['region']))
 						{
@@ -8404,8 +8571,12 @@ class TrialTracker
 								$region[] = $this->regionFilters[$rgvalue];
 							}
 							
+							$trialRegion = array();
+							$trialRegion = explode(',', $result[$index]['region']);
+							$matchedRegion = array_intersect($region, $trialRegion);
+							
 							if(in_array($rvalue['NCT/overall_status'], $status) 
-							&& in_array($rvalue['region'], $region))
+							&& !empty($matchedRegion))
 							{
 								$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
 								if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
@@ -8420,6 +8591,8 @@ class TrialTracker
 							
 							unset($status);
 							unset($region);
+							unset($trialRegion);
+							unset($matchedRegion);
 						}
 						else if(!empty($globalOptions['status']))
 						{
@@ -8476,7 +8649,11 @@ class TrialTracker
 								$region[] = $this->regionFilters[$rgvalue];
 							}
 							
-							if(in_array($rvalue['region'], $region))
+							$trialRegion = array();
+							$trialRegion = explode(',', $result[$index]['region']);
+							$matchedRegion = array_intersect($region, $trialRegion);
+							
+							if(!empty($matchedRegion))
 							{
 								$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
 								if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
@@ -8490,6 +8667,8 @@ class TrialTracker
 							}
 							
 							unset($region);
+							unset($trialRegion);
+							unset($matchedRegion);
 						}
 						else
 						{	
@@ -8563,9 +8742,13 @@ class TrialTracker
 							$region[] = $this->regionFilters[$rgvalue];
 						}
 						
+						$trialRegion = array();
+						$trialRegion = explode(',', $result[$index]['region']);
+						$matchedRegion = array_intersect($region, $trialRegion);
+							
 						if(in_array($rvalue['NCT/overall_status'], $status) 
 						&& in_array($rvalue['NCT/phase'], $phase) 
-						&& in_array($rvalue['region'], $region))
+						&& !empty($matchedRegion))
 						{
 							$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
 							if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
@@ -8581,6 +8764,8 @@ class TrialTracker
 						unset($status);
 						unset($phase);
 						unset($region);
+						unset($trialRegion);
+						unset($matchedRegion);
 					}
 					else if(!empty($globalOptions['status']) && !empty($globalOptions['phase'])) 
 					{
@@ -8629,8 +8814,12 @@ class TrialTracker
 							$region[] = $this->regionFilters[$rgvalue];
 						}
 						
+						$trialRegion = array();
+						$trialRegion = explode(',', $result[$index]['region']);
+						$matchedRegion = array_intersect($region, $trialRegion);
+						
 						if(in_array($rvalue['NCT/phase'], $phase) 
-						&& in_array($rvalue['region'], $region))
+						&& !empty($matchedRegion))
 						{
 							$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
 							if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
@@ -8645,6 +8834,8 @@ class TrialTracker
 						
 						unset($phase);
 						unset($region);
+						unset($trialRegion);
+						unset($matchedRegion);
 					}
 					else if(!empty($globalOptions['status']) && !empty($globalOptions['region']))
 					{
@@ -8660,8 +8851,12 @@ class TrialTracker
 							$region[] = $this->regionFilters[$rgvalue];
 						}
 						
+						$trialRegion = array();
+						$trialRegion = explode(',', $result[$index]['region']);
+						$matchedRegion = array_intersect($region, $trialRegion);
+						
 						if(in_array($rvalue['NCT/overall_status'], $status) 
-						&& in_array($rvalue['region'], $region))
+						&& !empty($matchedRegion))
 						{
 							$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
 							if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
@@ -8676,6 +8871,8 @@ class TrialTracker
 						
 						unset($status);
 						unset($region);
+						unset($trialRegion);
+						unset($matchedRegion);
 					}
 					else if(!empty($globalOptions['status']))
 					{
@@ -8732,7 +8929,11 @@ class TrialTracker
 							$region[] = $this->regionFilters[$rgvalue];
 						}
 						
-						if(in_array($rvalue['region'], $region))
+						$trialRegion = array();
+						$trialRegion = explode(',', $result[$index]['region']);
+						$matchedRegion = array_intersect($region, $trialRegion);
+							
+						if(!empty($matchedRegion))
 						{
 							$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
 							if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
@@ -8746,6 +8947,8 @@ class TrialTracker
 						}
 						
 						unset($region);
+						unset($trialRegion);
+						unset($matchedRegion);
 					}
 					else
 					{	
@@ -8979,7 +9182,7 @@ class TrialTracker
 			$paginate['url'] = preg_replace("/\&amp;page=[0-9].*?(\&amp;|$)/", '',   $paginate['url']);
 			$allproductsurl = preg_replace("/\&amp;pr=[0-9].*?(\&amp;|$)/", '',   $paginate['url']);
 			
-			echo '<ul id="nav"><li class="first" style="text-align:center"><a href="javascript: void(0);">Product Dropdown</a><ul>'
+			echo '<ul id="nav"><li class="first" style="text-align:center"><a href="javascript: void(0);">Select Product</a><ul>'
 					. '<li style="width:200px;"><a href="' . $allproductsurl . '">All Products</a></li>';
 			foreach($TrialsInfoList as $infkey => $infvalue)
 			{
@@ -9299,7 +9502,7 @@ class TrialTracker
 				. ' value="' . ((isset($globalOptions['enroll'])) ? $globalOptions['enroll'] : '' ) . '" autocomplete="off" />'
 				. '<div id="slider-range"></div>'
 				. '</p></div><div class="demo"><p style="margin-top:10px;">'
-				. '<label for="amount3">Highlight changes:</label>'
+				. '<label for="amount3">Highlight updates:</label>'
 				. '<input type="text" id="amount3" value="' . (($globalOptions['change'] == '3 months') ? '1 quarter' : $globalOptions['change']) 
 				. '" readonly="readonly" style="border:0; color:#f6931f; font-weight:bold;" />'
 				. '<div id="slider-range-min"></div></p></div>'
@@ -9630,9 +9833,26 @@ class TrialTracker
 			{
 				$attr = '" title="New record';
 				$titleLinkColor = '#FF0000;';
-			}				
-			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse"><a style="color:' 
-						. $titleLinkColor . '"  href="http://clinicaltrials.gov/ct2/show/' . padnct($trials[$i]['NCT/nct_id']) . '" target="_blank" ';
+			}
+			/*elseif($trials[$i]['manual_larvol_id'] !== NULL)
+			{
+				$titleLinkColor = '#FFA500';
+			}*/
+							
+			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse"><a style="color:' . $titleLinkColor . '"  ';
+			if($trials[$i]['NCT/nct_id'] !== '' && $trials[$i]['NCT/nct_id'] !== NULL)
+			{
+				$outputStr .= ' href="http://clinicaltrials.gov/ct2/show/' . padnct($trials[$i]['NCT/nct_id']) . '" ';
+			}
+			else if($trials[$i]['source'] !== '' && $trials[$i]['source'] !== NULL)
+			{
+				$outputStr .= ' href="' . $trials[$i]['source'] . '" ';
+			}
+			else
+			{
+				$outputStr .= ' href="javascript:void(0);" ';
+			}
+			$outputStr .= ' target="_blank" ';
 			
 			if(($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed'))
 			{
