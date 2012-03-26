@@ -9835,21 +9835,21 @@ class TrialTracker
 				$attr = '" title="New record';
 				$titleLinkColor = '#FF0000;';
 			}
-			/*elseif($trials[$i]['manual_larvol_id'] !== NULL)
+			elseif($trials[$i]['manual_larvol_id'] !== NULL)
 			{
-				$titleLinkColor = '#FFA500';
-			}*/
+				$titleLinkColor = '#FF7700';
+			}
 							
 			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse"><a style="color:' . $titleLinkColor . '"  ';
 			if($trials[$i]['NCT/nct_id'] !== '' && $trials[$i]['NCT/nct_id'] !== NULL)
-			{
+			{ 
 				$outputStr .= ' href="http://clinicaltrials.gov/ct2/show/' . padnct($trials[$i]['NCT/nct_id']) . '" ';
 			}
 			else if($trials[$i]['source'] !== '' && $trials[$i]['source'] !== NULL)
 			{
 				$outputStr .= ' href="' . $trials[$i]['source'] . '" ';
 			}
-			else
+			else 
 			{
 				$outputStr .= ' href="javascript:void(0);" ';
 			}
@@ -9889,6 +9889,10 @@ class TrialTracker
 			{
 				$attr = '" title="New record';
 				$enrollStyle = 'color:#973535;';
+			}
+			elseif($trials[$i]['manual_larvol_id'] !== NULL)
+			{
+				$attr = ' manual';
 			}
 			$outputStr .= '<td nowrap="nowrap" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">';
 			if($trials[$i]["NCT/enrollment_type"] != '') 
@@ -9933,6 +9937,10 @@ class TrialTracker
 			{
 				$attr = '" title="New record';
 			}
+			elseif($trials[$i]['manual_larvol_id'] !== NULL)
+			{
+				$attr = ' manual';
+			}
 			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
 						. '<div class="rowcollapse">' . $trials[$i]['NCT/intervention_name'] . '</div></td>';
 
@@ -9959,6 +9967,10 @@ class TrialTracker
 			{
 				$attr = '" title="New record';
 			}
+			elseif($trials[$i]['manual_larvol_id'] !== NULL)
+			{
+				$attr = ' manual';
+			}
 			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
 						. '<div class="rowcollapse">' . $trials[$i]['NCT/lead_sponsor'] . ' <span style="' . $enrollStyle . '"> ' 
 						. $trials[$i]["NCT/collaborator"] . ' </span></div></td>';
@@ -9974,6 +9986,10 @@ class TrialTracker
 			{
 				$attr = '" title="New record' ;
 			} 
+			elseif($trials[$i]['manual_larvol_id'] !== NULL)
+			{
+				$attr = ' manual';
+			}
 			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">' . '<div class="rowcollapse">' 
 							. (($trials[$i]['NCT/overall_status'] != '' && $trials[$i]['NCT/overall_status'] !== NULL) ? $trials[$i]['NCT/overall_status'] : '&nbsp;')
 							. '</div></td>';
@@ -9989,6 +10005,10 @@ class TrialTracker
 			{
 				$attr = '" title="New record';
 			}
+			elseif($trials[$i]['manual_larvol_id'] !== NULL)
+			{
+				$attr = ' manual';
+			}
 			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
 						. '<div class="rowcollapse">' . $trials[$i]['NCT/condition'] . '</div></td>';
 					
@@ -10002,6 +10022,10 @@ class TrialTracker
 			else if($trials[$i]['new'] == 'y') 
 			{
 				$attr = '" title="New record';
+			}
+			elseif($trials[$i]['manual_larvol_id'] !== NULL)
+			{
+				$attr = ' manual';
 			}
 			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">'; 
 			if($trials[$i]["NCT/start_date"] != '' && $trials[$i]["NCT/start_date"] != NULL && $trials[$i]["NCT/start_date"] != '0000-00-00') 
@@ -10025,6 +10049,10 @@ class TrialTracker
 			{
 				$attr = '" title="New record';
 			}	
+			elseif($trials[$i]['manual_larvol_id'] !== NULL)
+			{
+				$attr = ' manual';
+			}
 			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">'; 
 			if($trials[$i]["inactive_date"] != '' && $trials[$i]["inactive_date"] != NULL && $trials[$i]["inactive_date"] != '0000-00-00') 
 			{
@@ -10047,6 +10075,10 @@ class TrialTracker
 			else if($trials[$i]['new'] == 'y') 
 			{
 				$attr = '" title="New record';
+			}
+			elseif($trials[$i]['manual_larvol_id'] !== NULL)
+			{
+				$attr = ' manual';
 			}
 			if($trials[$i]['NCT/phase'] == 'N/A' || $trials[$i]['NCT/phase'] == '' || $trials[$i]['NCT/phase'] === NULL)
 			{
