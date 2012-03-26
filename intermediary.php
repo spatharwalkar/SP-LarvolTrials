@@ -1,7 +1,7 @@
 <?php 
 header('P3P: CP="CAO PSA OUR"');
 session_start();
-
+error_reporting(E_ALL ^ E_NOTICE);
 require_once('krumo/class.krumo.php');
 require_once('db.php');
 require_once('include.search.php');
@@ -243,18 +243,21 @@ $lastChangedTime = filectime("css/intermediary.css");
 			
 		});
 		
-		$('#nav li').hover(
-			function () {
-				//show its submenu
-				$('ul', this).slideDown(100);
-	
-			}, 
-			function () {
-				//hide its submenu
-				$('ul', this).slideUp(100);			
-			}
-		);
+		var $menu = $('.dropdown').hide();
+
+		var _expand = function(event){
+			$menu.stop(true);
+			$menu.fadeIn();
+		};
 		
+		var _collapse = function(event){
+			   $menu.stop(true, true);
+			   $menu.fadeOut();
+		};
+		
+		$menu.hover(_expand, _collapse);
+		
+		$('#menu a').hover(_expand, _collapse);
 	});
 	
     </script>

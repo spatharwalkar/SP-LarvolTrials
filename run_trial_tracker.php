@@ -5601,6 +5601,7 @@ class TrialTracker
 						$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id = '" . $pvalue . "' ");
 						if(mysql_num_rows($res) > 0)
 
+
 						{
 							while($row = mysql_fetch_assoc($res))
 							{
@@ -9182,16 +9183,16 @@ class TrialTracker
 			$paginate['url'] = preg_replace("/\&amp;page=[0-9].*?(\&amp;|$)/", '',   $paginate['url']);
 			$allproductsurl = preg_replace("/\&amp;pr=[0-9].*?(\&amp;|$)/", '',   $paginate['url']);
 			
-			echo '<ul id="nav"><li class="first" style="text-align:center"><a href="javascript: void(0);">Select Product</a><ul>'
-					. '<li style="width:200px;"><a href="' . $allproductsurl . '">All Products</a></li>';
+			echo '<div id="menu"><a href="javascript: void(0);">Select Product</a></div><br/><br/>'
+					. '<div class="dropdown"><a href="' . $allproductsurl . '">All Products</a>';
 			foreach($TrialsInfoList as $infkey => $infvalue)
 			{
-				echo '<li style="width:200px;"><a href="' . $paginate['url'] . '&amp;pr=' . $infkey .  '">' . $infvalue['sectionHeader'] . '</a></li>';
+				echo '<a href="' . $paginate['url'] . '&amp;pr=' . $infkey .  '">' . $infvalue['sectionHeader'] . '</a>';
 			}
-			echo '</ul></ul>';
+			echo '</div>';
 		}
 		
-		echo '<br/><br/>';
+		//echo '<br/>';
 		
 		echo $this->displayTrialTableHeader($loggedIn, $globalOptions);
 		echo $this->displayTrials($globalOptions, $loggedIn, $start, $last, $Trials, $TrialsInfo, $ottType);

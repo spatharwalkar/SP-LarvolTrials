@@ -318,62 +318,32 @@ tr.upms td {
 	margin-top: 0;
 }
 
-#nav {
-	margin:0;
-	padding:0;
-	list-style:none;
+#menu {
+	float: left;
+	background-color: #A2FF97;
+	width: 130px;
+	border-radius: 25px;
+	-moz-border-radius: 25px;
+	padding: 2px 10px;
+	text-align: center;
 }
 
-#nav li {
+.dropdown {
 	float:left;
-	display:block;
-	width:130px;
-	background-color:#A2FF97;
-	position:relative;
-	z-index:500;
-	padding: 0px 10px;
-	text-align:left;
+	background-color: #A2FF97;
+   	position: absolute;
+	top: 305px;
+	left: 310px;
+    width: 260px;
+	max-height:300px;
+    overflow-y:auto!important;
 }
 
-.first{
-	border-radius:25px;
-	-moz-border-radius:25px; /* Firefox 3.6 and earlier */
-}
-
-#nav li a {
+.dropdown a{
+	/*width: 200px;*/
 	display:block;
-	margin: 2px;
 	text-decoration:none;
-	color:#fff;
-	/*text-align:center;*/
-	color:#333;
-}
-
-#nav li a:hover {
 	color:#000;
-}
-
-#nav ul {
-	width: 100%;
-	position:absolute;
-	left:0;
-	display:none;
-	/*margin:0 0 0 -1px;*/
-	padding:0;
-	list-style:none;
-}
-#nav ul li {
-	float:left;
-	border-top:1px solid #FFF;
-}
-#nav ul a {
-	display:block;
-	margin: 2px;
-	color:#000;
-}
-#nav ul a:hover {
-	text-decoration:none;
-}
-*html #nav ul {
-	margin:0 0 0 -2px;
+	border-bottom: 1px solid #FFF;
+	padding:2px 0px 2px 8px;
 }
