@@ -13,6 +13,7 @@
 	}
 	sort($categoryArr);
 	
+	$Uncategorized_Flg=0;
 	$Json_Tree=" {\"text\":\".\",\"children\": [ ";
 	foreach($categoryArr as $category)
 	{
@@ -27,6 +28,8 @@
 		$expand='false';
 		else
 		$expand='true';
+		
+		$Prev_Tree=$Json_Tree;
 		
 		$Json_Tree.=" { mhmcategory:'<a ondblclick=\"tree_grid_cookie(\'".trim($category_name)."\');\">".$category_name."</a>',
         owner:'',
@@ -62,6 +65,7 @@
 			
 			if($row['category']== $category)
 			{
+				$Uncategorized_Flg=1;
 				$report_name = '<a style="text-decoration:none;color:#000000;" href="master_heatmap.php?id=' . $row['id'] . '">'.htmlspecialchars(strlen($row['name'])>0?$row['name']:('(report '.$row['id'].')')) . '</a>';
 				$Json_Tree.="{
                 mhmcategory:'". addslashes($report_name) ."',
@@ -75,6 +79,9 @@
 		}
 		$Json_Tree = substr($Json_Tree, 0, -1); //strip last comma
 		$Json_Tree .=' ]}, ';
+		
+		if(!$Uncategorized_Flg && $category_name = 'Uncategorized')//If Uncategorized is empty
+		$Json_Tree=$Prev_Tree;
 	}
 	$Json_Tree = substr($Json_Tree, 0, -1); //strip last comma
 	$Json_Tree .=' ]} ';
