@@ -113,50 +113,15 @@ function reportListCommon($reportTable,$disperr=null)
 			break;
 			
 		case 'rpt_master_heatmap':
-			$out = '<div style="display:block;float:left;"><form method="post" action="master_heatmap.php" class="lisep">'
-					. '<input type="submit" name="makenew" value="Create new" style="float:none;" />'
-					. '&nbsp;&nbsp;<b>View Type: </b> <select id="view_type" name="view_type" onchange="window.location.href=\'master_heatmap.php?id='.$_GET['id'].'&view_type=\'+this.value+\'\'">'
-					. '<option value="active" '.(($_GET['view_type']!='total' && $_GET['view_type']!='both')? "selected=\"selected\"":"").'>Only Active Count</option>'
-					. '<option value="total" '.(($_GET['view_type']=='total')? "selected=\"selected\"":"").'>Only Total Count</option>'
-					. '<option value="both"'.(($_GET['view_type']=='both')? "selected=\"selected\"":"").'>Active & Total Count</option></select>'
-					. '</form><br clear="all"/>'
-					. '<form name="reportlist" method="post" action="master_heatmap.php" class="lisep" onsubmit="return chkbox(this);">'
-					. '<fieldset><legend>Select Report</legend>';
-			$out .= '<div class="tar">Del</div><ul>';
-			$query = 'SELECT id,name,user,category FROM `rpt_masterhm` WHERE user IS NULL OR user=' . $db->user->id . ' ORDER BY user';
-			$res = mysql_query($query) or die('Bad SQL query retrieving master heatmap report names');
-			$categoryArr  = array('');
-			$outArr = array();
-			while($row = mysql_fetch_array($res))
-			{
-				if($row['category'])
-				$categoryArr[$row['category']] = $row['category'];
-				$outArr[] = $row;
-			}
-			sort($categoryArr);
+			$out = '<script type="text/javascript" src="scripts/tree_grid/bootstrap.js"></script>'
+        			. '<script type="text/javascript" src="scripts/tree_grid/treegrid.js"></script>'
+					. '<link rel="stylesheet" type="text/css" href="css/ext-all.css">'
+        			. '<style type="text/css">'
+            		. '.task {background-image: url(images/tree_grid/tree/leaf.gif) !important; height:16px;}'
+            		. '.task-folder {background-image: url(images/folder_go.gif) !important; height:16px;}'
+        			. '</style>'
+					. '<div id="HMReports_Tree" style="float:left;padding:2px;margin:1em;"></div>';
 			
-			foreach($categoryArr as $category)
-			{
-				$out .= '<li>'.$category.'<ul>';
-				foreach($outArr as $row)
-				{
-					$ru = $row['user'];
-					if($row['category']== $category)
-					{
-						$out .= '<li' . ($ru === NULL ? ' class="global"' : '') . '><a href="master_heatmap.php?id=' . $row['id'] . '">'
-								. htmlspecialchars(strlen($row['name'])>0?$row['name']:('(report '.$row['id'].')')) . '</a>';
-						if($ru == $db->user->id || ($ru === NULL && $db->user->userlevel != 'user'))
-						{
-							$out .= ' &nbsp; &nbsp; &nbsp; <label class="lbldel"><input type="checkbox" class="delrep" name="delrep[' 
-							. $row['id']. ']" title="Delete"/></label>';
-						}
-						$out .= '</li>';				
-					}
-				}
-				$out .='</ul></li>';
-			}
-			$out .= '</ul>';
-			$out .='<div class="tar"><input type="submit" value="Delete" title="Delete"/></div></fieldset></form></div>';
 			break;
 	}
 	return $out;

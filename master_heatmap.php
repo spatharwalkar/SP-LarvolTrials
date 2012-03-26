@@ -90,6 +90,57 @@ function ficon_change(filing_id, filingicon_id)
 
 }
 
+function getCookie_value(name) 
+{
+	var nameEQ = name + "=";
+	var ca = document.cookie.split( ';');
+	for( var i=0;i < ca.length;i++) 
+	{
+	var c = ca[i];
+	while ( c.charAt( 0)==' ') c = c.substring( 1,c.length);
+	if ( c.indexOf( nameEQ) == 0) return c.substring( nameEQ.length,c.length);
+	}
+	return null;
+}
+
+function tree_grid_cookie(category_name)	///Categories listed in cookies will only be collapsed
+{
+	var present_flg=0; var New_cookie='';
+	var Cookie_value=getCookie_value('tree_grid_cookie');
+	if(Cookie_value != null && Cookie_value != "")
+	{
+		var Cookie_value_Arr = Cookie_value.split('****');
+			
+		for(var i=0; i<Cookie_value_Arr.length; i++)
+		{
+			if(Cookie_value_Arr[i] != '' && Cookie_value_Arr[i] != null)
+			{
+				if(Cookie_value_Arr[i] == escape(category_name))	///Check if category already present in our cookie, if present escape it.
+					present_flg=1;
+				else
+				{
+					if(New_cookie=='')
+					New_cookie = Cookie_value_Arr[i];
+					else
+					New_cookie = New_cookie+'****'+Cookie_value_Arr[i];
+				}
+			}
+			
+		}
+		if(!present_flg) New_cookie = New_cookie+'****'+escape(category_name);	//If cookie doesn't have category add it
+		Cookie_value=New_cookie;
+	}
+	else
+	{
+		Cookie_value=escape(category_name);
+	}
+			
+	var today = new Date();
+ 	var expire = new Date();//Cookie_value="";
+ 	expire.setTime(today.getTime() + 60*60*24*365*1000);
+ 	document.cookie ="tree_grid_cookie="+Cookie_value+ ";expires="+expire.toGMTString();
+}
+
 </script>
 <link href="css/popup_form.css" rel="stylesheet" type="text/css" media="all" />
 <script type="text/javascript" src="scripts/popup-window.js"></script>
@@ -98,6 +149,7 @@ echo('<script type="text/javascript" src="delsure.js"></script>');
 postRL();
 postEd();
 echo(reportListCommon('rpt_master_heatmap'));
+if(!isset($_POST['delrep']) && !is_array($_POST['delrep'])) ///Below Function Should be skipped after delete Otherwise we will get report not found error after delete
 echo(editor());
 echo('</body></html>');
 }
@@ -242,7 +294,7 @@ function editor()
 					$data_matrix[$row][$col]['bomb']['value']=$cell_data['bomb'];
 					$data_matrix[$row][$col]['bomb']['src']='square.png';
 					$data_matrix[$row][$col]['bomb']['alt']='None';
-					$data_matrix[$row][$col]['bomb']['style']='width:18px; height:20px;';
+					$data_matrix[$row][$col]['bomb']['style']='width:30px; height:20px;';
 					$data_matrix[$row][$col]['bomb']['title']='Edit Bomb';
 				}
 				
@@ -311,9 +363,13 @@ function editor()
 	}
 
 
-	$out = '<script type="text/javascript" src="progress/progress.js"></script>'
-		. '<br><form action="master_heatmap.php" method="post"><fieldset><legend>Download Option</legend>'
-		. '<input type="hidden" name="id" value="' . $id . '" />';
+	$out = '<br/>&nbsp;&nbsp;<b>View Type: </b> <select id="view_type" name="view_type" onchange="window.location.href=\'master_heatmap.php?id='.$_GET['id'].'&view_type=\'+this.value+\'\'">'
+			. '<option value="active" '.(($_GET['view_type']!='total' && $_GET['view_type']!='both')? "selected=\"selected\"":"").'>Only Active Count</option>'
+			. '<option value="total" '.(($_GET['view_type']=='total')? "selected=\"selected\"":"").'>Only Total Count</option>'
+			. '<option value="both"'.(($_GET['view_type']=='both')? "selected=\"selected\"":"").'>Active & Total Count</option></select><br/>'
+			. '<form action="master_heatmap.php" method="post">'
+			. '<fieldset><legend>Download Option</legend>'
+			. '<input type="hidden" name="id" value="' . $id . '" />';
 	if(isset($_POST['total']) && $_POST['total'] == "on")
 	{
 		$out .='<input type="hidden" name="total_col" value="on" />';
@@ -378,7 +434,7 @@ function editor()
 		if($col < $max_column['num']) $out .= ' <input type="image" name="move_col_right[' . $col . ']" src="images/right.png" title="Right"/>';
 			
 		$out .='&nbsp;&nbsp;';	
-		$out .= '<label class="lbldeln"><input class="delrepe" type="checkbox" name="deletecol[' . $col . ']" title="Delete Column '.$col.'"/></label>';
+		$out .= '<label class="lbldeln"><input type="checkbox" name="deletecol[' . $col . ']" title="Delete Column '.$col.'"/></label>';
 		$out .='<br/>';
 		if(isset($areaIds[$col]) && $areaIds[$col] != NULL && !empty($productIds))
 		{
@@ -438,7 +494,7 @@ function editor()
 		if($row < $max_row['num']) $out .= ' <input type="image" name="move_row_down[' . $row . ']" src="images/des.png" title="Down"/>';
 		
 		$out .='&nbsp;&nbsp;';	
-		$out .= '<label class="lbldeln"><input class="delrepe" type="checkbox" name="deleterow[' . $row . ']" title="Delete Column '.$row.'"/></label>';
+		$out .= '<label class="lbldeln"><input type="checkbox" name="deleterow[' . $row . ']" title="Delete Column '.$row.'"/></label>';
 		$out .='<br/>';
 		if(isset($productIds[$row]) && $productIds[$row] != NULL && !empty($areaIds))
 		{
@@ -557,7 +613,10 @@ function editor()
 			. '<fieldset><legend>Footnotes</legend><textarea name="footnotes" cols="45" rows="5">' 
 			. $footnotes . '</textarea></fieldset>'
 			. '<fieldset><legend>Description</legend><textarea name="description" cols="45" rows="5">' . $description
-			. '</textarea></fieldset>';
+			. '</textarea></fieldset>'
+			. '<br/><fieldset style="margin-top:50px; padding:8px;"><legend>Advanced</legend>'
+			. '<label class="lbldeln"><input class="delrepe" type="checkbox" name="delrep['.$id.']" title="Delete" /></label>' 
+			. '&nbsp;&nbsp;&nbsp;&nbsp;Delete This Master Heatmap Report</fieldset>';
 	$out .= '</form>';
 
 	return $out;
@@ -1332,7 +1391,7 @@ function postEd()
 	$query = 'SELECT user FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
 	$res = mysql_query($query) or die('Bad SQL query getting user for master heatmap report id');
 	$res = mysql_fetch_assoc($res);
-	if($res === false) continue;
+	if($res === false) return;	///Replaced "Continue" by "Return" cause continue was giving "Cannot break/continue 1 level" error when report deleted and continue should only be used to escape through loop not function
 	if(count($res)==0){ die('Not found.'); }
 	$rptu = $res['user'];
 	if($rptu !== NULL && $rptu != $db->user->id) return;

@@ -155,6 +155,7 @@ class DatabaseManager
 		$query = 'UPDATE users SET fingerprint=NULL WHERE id=' . $this->user->id . ' LIMIT 1';
 		mysql_query($query);
 		setcookie('qw_login', '', time()-60*60*24);
+		setcookie('tree_grid_cookie', '', time()-60*60*24);
 		$this->user = false;
 	}
 	
