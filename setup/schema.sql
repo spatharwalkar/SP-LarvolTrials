@@ -591,6 +591,8 @@ CREATE TABLE IF NOT EXISTS `data_history` (
   `is_fda_regulated_lastchanged` datetime DEFAULT NULL,
   `is_section_801_prev` tinyint(1) DEFAULT NULL,
   `is_section_801_lastchanged` datetime DEFAULT NULL,
+  `ages_prev` text COLLATE utf8_unicode_ci DEFAULT NULL,
+  `ages_lastchanged` datetime DEFAULT NULL,
   PRIMARY KEY (`larvol_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=DYNAMIC;
 
@@ -655,6 +657,7 @@ CREATE TABLE IF NOT EXISTS `data_manual` (
   `is_fda_regulated` tinyint(1) DEFAULT NULL,
   `is_section_801` tinyint(1) DEFAULT NULL,
    `is_sourceless` tinyint(1) DEFAULT NULL,
+   `ages` text COLLATE utf8_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`larvol_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=DYNAMIC;
 
@@ -831,6 +834,7 @@ CREATE TABLE IF NOT EXISTS `data_trials` (
   `is_fda_regulated` tinyint(1) DEFAULT NULL,
   `is_section_801` tinyint(1) DEFAULT NULL,
   `viewcount` int(10) unsigned NOT NULL DEFAULT '0',
+  `ages` text COLLATE utf8_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`larvol_id`),
   UNIQUE KEY `source_id` (`source_id`),
   KEY `overall_status` (`overall_status`),
