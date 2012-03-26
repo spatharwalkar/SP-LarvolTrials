@@ -5471,8 +5471,11 @@ class TrialTracker
 			
 			$timeInterval = '-' . (($globalOptions['change'] == '1 quarter') ? '3 months' : $globalOptions['change']);
 			
-			$resultIds['product'] = explode(',', $resultIds['product']);
-			$resultIds['area'] = explode(',', $resultIds['area']);
+			//$resultIds['product'] = explode(',', $resultIds['product']);
+			//$resultIds['area'] = explode(',', $resultIds['area']);
+			
+			$resultIds['product'] = preg_split("/[,-]+/", $resultIds['product']);
+			$resultIds['area'] = preg_split("/[,-]+/", $resultIds['area']);
 			
 			if(count($resultIds['product']) > 1 && count($resultIds['area']) > 1)
 			{	
@@ -5597,10 +5600,10 @@ class TrialTracker
 					$this->displayHeader($t);
 					
 					foreach($resultIds['product'] as $pkey => $pvalue)
+
 					{
 						$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id = '" . $pvalue . "' ");
 						if(mysql_num_rows($res) > 0)
-
 
 						{
 							while($row = mysql_fetch_assoc($res))
