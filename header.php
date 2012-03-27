@@ -35,6 +35,15 @@
 	font-size: 12px;
 	overflow: auto;
 }
+.sameLine 
+{
+  text-align: left;
+  vertical-align:middle;
+  display: table-cell;
+  /*min-width: 2px;
+  padding-right: 2px;*/
+}
+
 .sqlbuild
 {
 	/*       border: 1px solid #ccc; /*	float:left;*/

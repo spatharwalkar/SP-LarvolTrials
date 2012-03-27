@@ -321,7 +321,8 @@ class phpMyEdit
 			$ret = @mysql_query($qry, $this->dbh);
 		}
 		if (! $ret) {
-			echo '<h4>MySQL error ',mysql_errno($this->dbh),' Query:',$qry,'</h4>';
+			
+			echo '<h4>MySQL error ',mysql_errno($this->dbh),'<br> Line:',$line,'<br> Query:',$qry,'</h4>';
 			echo htmlspecialchars(mysql_error($this->dbh)),'<hr size="1" />',"\n";
 		}
 		return $ret;
@@ -1257,8 +1258,8 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 			$colattrs .= ' ';
 			$colattrs .= trim($this->fdd[$k]['colattrs']);
 		}
-		if (isset($this->fdd[$k]['nowrap'])) {
-			$colattrs .= ' nowrap';
+		if (isset($this->fdd[$k]['wrap'])) {
+			$colattrs .= ' wrap';
 		}
 		return $colattrs;
 	} /* }}} */
@@ -1779,13 +1780,13 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 			if ($listall) 
 			{
 				if($_POST['sourceless_only'] and $_POST['sourceless_only'] == 'YES') $checked=' checked="checked" '; else $checked='';
-				echo '<b><span style="color:red">Show only sourceless trials / trials with manual data</span>&nbsp;<input type="checkbox" name="sourceless_only" value="YES"' . $checked . ' onclick="this.form.submit();"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b>';
+				echo '<b><span style="color:red">Show only sourceless trials / trials with manual data</span>&nbsp;<input type="checkbox" name="sourceless_only" value="YES"' . $checked . ' onclick="this.form.submit();">' . str_repeat("&nbsp;",25) . '</b>';
 				echo $this->labels['Page'],':&nbsp;1&nbsp;',$this->labels['of'],'&nbsp;1';
 			} else {
 				$current_page = intval($this->fm / $this->inc) + 1;
 				$total_pages  = max(1, ceil($this->total_recs / abs($this->inc)));
 				if($_POST['sourceless_only'] and $_POST['sourceless_only'] == 'YES') $checked=' checked="checked" '; else $checked='';
-				echo '<b><span style="color:red">Show only sourceless trials / trials with manual data</span>&nbsp;<input type="checkbox" name="sourceless_only" value="YES"' . $checked . ' onclick="this.form.submit();"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b>';
+				echo '<b><span style="color:red">Show only sourceless trials / trials with manual data</span>&nbsp;<input type="checkbox" name="sourceless_only" value="YES"' . $checked . ' onclick="this.form.submit();">' . str_repeat("&nbsp;",25) . '</b>';
 				echo $this->labels['Page'],':&nbsp;',$current_page;
 				echo '&nbsp;',$this->labels['of'],'&nbsp;',$total_pages;
 			}
@@ -2075,9 +2076,9 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 							( select `larvol_id` from data_manual where `is_sourceless`="1" ) )'. 
 							substr( $qparts['where'],-1)  ;
 			*/
-			$qparts['where']= substr( $qparts['where'],0,-1) . 
-							  '( ' . $and .' PMEtable0.larvol_id in ( select `larvol_id` from data_manual ) )'. 
-							  substr( $qparts['where'],-1)  ;
+			$qparts['where']= substr( $qparts['where'],0) . 
+							   $and . '( ' . 'PMEtable0.larvol_id in ( select `larvol_id` from data_manual ) )';
+			//				  . substr( $qparts['where'],-1)  ;
 		}
 		
 		// build up the ORDER BY clause
@@ -2224,7 +2225,6 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 			echo '<td class="',$css_class_name,'" colspan="',$this->num_fields_displayed,'">';
 			echo $this->labels['Sorted By'],': ',join(', ', $sort_fields_w),'</td></tr>',"\n";
 		}
-
 		/*
 		 * Display the current query
 		 */
@@ -2294,7 +2294,7 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 						if ($this->view_enabled()) 
 						{
 							if( $this->change_enabled() and $_POST['sourceless_only'] and $_POST['sourceless_only'] == 'YES')
-								echo '</form><form method="post" action="link_trials.php" name="link_form">';
+								echo '</form><span class="sameLine"><form method="post" action="link_trials.php" name="link_form">';
 							
 							$printed_out = true;
 							echo '&nbsp;&nbsp;<a class="',$css_class_name,'" href="',$viewQuery,'"><img class="';
@@ -2312,12 +2312,35 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 							
 							if( $this->change_enabled()  and $db->loggedIn() and ($db->user->userlevel=='admin'||$db->user->userlevel=='root') and $_POST['sourceless_only'] and $_POST['sourceless_only'] == 'YES')
 							{
-							echo'
-					
-							<input type="hidden" name="lid" value="'.$key_rec.'" />
-							<input type="image" src="images/link.jpg">
-							</form>
-							';
+								echo'
+								
+								<script type="text/javascript">
+								<!--
+								function delsure(lid3)
+								{ 
+									if(confirm("Deleting a trial : Are you sure you want to do this ?"))
+									{
+										 document.forms["link_form2"].delsure.value = "Yes";
+										 document.forms["link_form2"].lid2.value = lid3;
+										 return true;
+									}
+								}
+								-->
+								</script>
+
+								<input type="hidden" name="lid" value="'.$key_rec.'" />
+								&nbsp;&nbsp;<input type="image" src="images/link.jpg" alt="Link" title="Link" />
+								</form></span><span class="sameLine">
+								<form method="post" action="link_trials.php" name="link_form2">
+								<input type="hidden" name="delsure" value="No" />
+								<input type="hidden" name="lid2" id="lid2" value="'.$key_rec.'" />
+								<a href="#" onClick= "delsure('.$key_rec.');document.forms[\'link_form2\'].submit(); " alt="Delete"  ><img src="images/cancel.gif" border="0"/></a>
+								</form></span>
+								';
+							}
+							else
+							{
+							//echo '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
 							}
 	
 						}
@@ -2511,6 +2534,7 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 
 	function do_add_record() /* {{{ */
 	{
+		$ignore_fields=array('dummy','responsible_party_name_title','responsible_party_organization','oversight_authority','investigator_name','overall_official_name','overall_official_role','overall_official_affiliation','investigator_role','biospec_retention','location_status','inclusion_criteria','exclusion_criteria','biospec_descr','responsible_party_name_title');
 		// Preparing query
 		$query		= 	'';
 		$query_m	=	'';
@@ -2564,17 +2588,25 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 				$query  .= ', '.$this->sd.$fd.$this->ed.'';
 				$query2 .= ', '.$value.'';
 			}
-			if ($query_m == '' and $fd<>'inclusion_criteria' and $fd<>'exclusion_criteria') 
+			$ignore = array_search(trim($fd),$ignore_fields) ;
+			if ( isset($ignore) and $ignore > 0  ) 
 			{
-			//	$query_m = 'INSERT INTO `data_manual` ('.$this->sd.$fd.$this->ed.''; // )
-				$query_m  .= ', '.'`is_sourceless`';
-			//	$query_m2 = ') VALUES ('.$value.'';
-				$query_m2 .= ', "1"';
+				
 			}
-			elseif($fd<>'inclusion_criteria' and $fd<>'exclusion_criteria') 
+			else
 			{
-				$query_m  .= ', '.$this->sd.$fd.$this->ed.'';
-				$query_m2 .= ', '.$value.'';
+				if ($query_m == '' and $fd<>'inclusion_criteria' and $fd<>'exclusion_criteria') 
+				{
+				//	$query_m = 'INSERT INTO `data_manual` ('.$this->sd.$fd.$this->ed.''; // )
+					$query_m  .= ', '.'`is_sourceless`';
+				//	$query_m2 = ') VALUES ('.$value.'';
+					$query_m2 .= ', "1"';
+				}
+				elseif($fd<>'inclusion_criteria' and $fd<>'exclusion_criteria') 
+				{
+					$query_m  .= ', '.$this->sd.$fd.$this->ed.'';
+					$query_m2 .= ', '.$value.'';
+				}
 			}
 		}
 		$query .= $query2.')';
@@ -2620,6 +2652,9 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 	function do_change_record() /* {{{ */
 	{
 		// Preparing queries
+		
+		//ignore following fields from data_manual
+		$ignore_fields=array('dummy','responsible_party_name_title','responsible_party_organization','oversight_authority','investigator_name','overall_official_name','overall_official_role','overall_official_affiliation','investigator_role','biospec_retention','location_status','inclusion_criteria','exclusion_criteria','biospec_descr','responsible_party_name_title');
 		$query_real   = '';
 		$query_oldrec = '';
 		$newvals      = array();
@@ -2639,6 +2674,16 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 			}
 		}
 		$where_part = " WHERE (".$this->sd.$this->key.$this->ed.'='.$this->key_delim.$this->rec.$this->key_delim.')';
+		
+		$ignore = array_search(trim($fd),$ignore_fields) ;
+		if ( isset($ignore) and $ignore > 0  ) 
+		{
+			$where_part_manual = '';
+		}
+		else
+		{
+			$where_part_manual = " WHERE (".$this->sd.$this->key.$this->ed.'='.$this->key_delim.$this->rec.$this->key_delim.')';
+		}
 		$query_newrec  = $query_oldrec.' FROM ' . $this->tb;
 		$query_oldrec .= ' FROM ' . $this->sd.$this->tb.$this->ed . $where_part;
 		// Additional query (must go before real query)
@@ -2676,7 +2721,8 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 			} else {
 				$value = "'".addslashes($val)."'";
 			}
-			if ($query_real == '') {
+			if ($query_real == '') 
+			{
 //tkv
 //				$query_real   = 'UPDATE '.$this->sd.$this->tb.$this->ed.' SET '.$this->sd.$fd.$this->ed.'='.$value;
 				if(!isset($exists))
@@ -2687,9 +2733,9 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 					$res = mysql_fetch_assoc($res);
 					$exists = $res !== false;
 				}
-				if(!$exists)
+				if(!$exists and strlen($where_part_manual)>2)
 				{
-					$ins_condition=str_replace("WHERE", "SET", $where_part);
+					$ins_condition=str_replace("WHERE", "SET", $where_part_manual);
 					$ins_condition=str_replace("(", "", $ins_condition);
 					$ins_condition=str_replace(")", "", $ins_condition);
 					$query_tmp = 	'INSERT INTO data_manual ' . $ins_condition;
@@ -2697,27 +2743,55 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 					if ($res === false) return softDie('Bad SQL query inserting data in data_manual');
 				
 				}
-
-				$query_real   = 'UPDATE '.$this->sd."data_manual".$this->ed.' SET '.$this->sd.$fd.$this->ed.'='.$value;
+				$ignore = array_search(trim($fd),$ignore_fields) ;
+				if ( isset($ignore) and $ignore > 0  ) 
+				{
+					$query_real=' ';
+				}
+				else
+				{
+					$query_real   = 'UPDATE '.$this->sd."data_manual".$this->ed.' SET '.$this->sd.$fd.$this->ed.'='.$value;
+				}
 				$query_real1   = 'UPDATE '.$this->sd."data_trials".$this->ed.' SET '.$this->sd.$fd.$this->ed.'='.$value;
-			} else {
-				$query_real   .= ','.$this->sd.$fd.$this->ed.'='.$value;
-				$query_real1   .= ','.$this->sd.$fd.$this->ed.'='.$value;
+				
+				
+				
+			} 
+			else 
+			{
+				$ignore = array_search(trim($fd),$ignore_fields) ;
+				if ( isset($ignore) and $ignore > 0  ) 
+				{
+				}
+				elseif(strlen($query_real)>2)
+				{
+					
+					$query_real   .= ','.$this->sd.$fd.$this->ed.'='.$value;
+				}
+					$query_real1   .= ','.$this->sd.$fd.$this->ed.'='.$value;
+				
 			}
 		}
-		$query_real .= $where_part;
+		if(strlen($query_real)>2) $query_real .= $where_part;
 		$query_real1 .= $where_part;
 		// Real query
-		$res = $this->myquery($query_real, __LINE__);
-		$this->message = $this->sql_affected_rows($this->dbh).' '.$this->labels['record changed'];
-		if (! $res) {
-			return false;
+		
+		if(strlen($query_real)>2)
+		{
+			$res = $this->myquery($query_real, __LINE__);
+			$this->message = $this->sql_affected_rows($this->dbh).' '.$this->labels['record changed'];
+			
+			if (! $res) {
+				return false;
+			}
 		}
+		
 		$res = $this->myquery($query_real1, __LINE__);
 		$this->message = $this->sql_affected_rows($this->dbh).' '.$this->labels['record changed'];
 		if (! $res) {
 			return false;
 		}
+		
 
 		if (in_array($this->key, $changed)) {
 			$this->rec = $newvals[$this->key]; // key has changed

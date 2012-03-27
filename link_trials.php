@@ -2,6 +2,11 @@
 require_once('db.php');
 require_once('include.util.php');
 //ini_set('error_reporting', E_ALL ^ E_NOTICE);
+if(isset($_POST['delsure']) and $_POST['delsure']=='Yes')	
+{
+	delete_trial();
+	return ;
+}
 global $logger;
 require_once('krumo/class.krumo.php');
 require_once('db.php');
@@ -29,7 +34,7 @@ $query = 	"
 		$log = 'Bad SQL query. Query=' . $query;
 		$logger->fatal($log);
 		echo $log;
-		die($log);
+		return($log);
 	}
 	$sourceless=mysql_fetch_assoc($res1);
 	if(isset($sourceless['source_id']) and trim($sourceless['source_id'])<>'') $hnt=",hint:'".$sourceless['source_id']."'";
@@ -46,6 +51,11 @@ function confirmlinking()
 	}
 }
 $(document).ready(function(){
+
+		
+
+
+
 	var options1,c,d;
 
 	jQuery(function(){
@@ -179,5 +189,70 @@ pr('<br><b><span style="color:green">Trial linked to SOURCE ID:'.$sid.', larvol 
 //require_once('edit_trials.php');
 exit;
 }	
+
+function delete_trial()
+{
+global $logger;
+/**/
+$larvol_id=$_POST['lid2'];
+	$query = 'SELECT `larvol_id`,is_sourceless FROM data_manual where `larvol_id`="' . $larvol_id . '"  LIMIT 1';
+
+	if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
+	$res = mysql_fetch_assoc($res);
+	$exists = $res !== false;
+	if($exists)
+	{
+		$is_sourceless = $res['is_sourceless'];
+	}
+	
+	if(isset($is_sourceless) and !is_null($is_sourceless) and $is_sourceless=="1") // sourceless, so delete the trial.
+	{
+	
+		$query ='delete from data_manual where `larvol_id`="' . $larvol_id . '"  LIMIT 1'; 
+		$res1 		= mysql_query($query) ;
+		$ok=false;
+		if($res1===false)
+		{
+			$log = 'Bad SQL query, could not delete trial from data manual. Query=' . $query;
+			$logger->fatal($log);
+			echo $log;
+			return false;
+		}
+		else $ok=true;
+		
+		$query ='delete from data_trials where `larvol_id`="' . $larvol_id . '"  LIMIT 1'; 
+		$res1 		= mysql_query($query) ;
+		
+		if($res1===false)
+		{
+			$log = 'Bad SQL query, could not delete trial from data trials. Query=' . $query.' Error:' . mysql_error();
+			$logger->fatal($log);
+			echo $log;
+			return false;
+		}
+		else
+		{
+			if($ok===true)
+			echo '<br><b><span style="color:red;font-size=+4;">Deleted the trial</span><b/>';
+		}
+		
+		
+	}
+	else  // not sourceless, so dont delete.
+	{
+		echo '<br><br><span style="color:red;font-size=+4;">Only sourceless trials can be deleted</span>';
+		return false;
+	}
+		
+/**/
+
+
+}
 ?>
 
