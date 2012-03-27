@@ -374,7 +374,7 @@ else $ddesc=$rec->detailed_descr->textblock;
 	/***** TKV
 	****** Detect and pick all irregular phases that exist in one or several of the various title or description fields */
 	global $array1,$array2;
-	$phases_regex='/phase4|phase2\/3|phase 2a\/2b|phase 1\/2|Phase l\/Phase ll|phase 1b\/2a|phase 1a\/1b|Phase 1a\/b|phase 3b\/4|Phase I\/II|Phase2b\/3|phase 1b\/2|phase 2a\/b|phase 1a|phase 1b|Phase 1C|Phase III(?![a-z.-\\/])|phase II(?![a-z.-\\/])|Phase I(?![a-z.-\\/])|phase 2a|PHASEII|PHASE iii|phase 2b|phase iib|phase iia|phase 3a|phase 3b/i';
+	$phases_regex='/phase4|phase2\/3|phase 2a\/2b|phase 1\/2|Phase l\/Phase ll|phase 1b\/2a|phase 1a\/1b|Phase 1a\/b|phase 3b\/4|Phase I\/II|Phase2b\/3|phase 1b\/2|phase 2a\/b|phase 1a|phase 1b|Phase 1C|Phase III(?![a-z.-\\/])|phase II(?![a-z.-\\/])|Phase I(?![a-z.-\\/])|phase 2a|PHASEII|PHASE iii|phase 2b|phase iib|phase iia|phase 3a|phase 3b|Phase I-II/i';
 	preg_match_all($phases_regex, $record_data['brief_title'], $matches);
 
 	if(!count($matches[0]) >0 )
@@ -496,6 +496,11 @@ else $ddesc=$rec->detailed_descr->textblock;
 			case 'Phaseii':
 				$record_data['phase']='Phase 2';
 				break;
+			case 'Phase i-ii':
+				$record_data['phase']='Phase 1/Phase 2';
+				break;
+				
+				
 			}
 		}
 	}
