@@ -382,7 +382,7 @@ else $ddesc=$rec->detailed_descr->textblock;
 	preg_match_all($phases_regex, $record_data['official_title'], $matches);
 	}
 
-		 // pr($record_data);
+	//	  pr($record_data);
 	//	pr($matches);
 
 	if(!count($matches[0]) >0 )
@@ -574,6 +574,14 @@ else $end_date=$pc_date;
 
 function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_type,$end_date)
 {
+	$nullvalue='NO';
+	if(	$fieldname=='enrollment' and(is_null($value) or empty($value) or $value=='') )	
+	{
+		$value = null;
+		$nullvalue='YES';
+//		return true;
+	}
+
 	$lastchanged_date = normal('date',$lastchanged_date);
 	global $now;
 	global $logger;
@@ -724,7 +732,11 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 						$value=mysql_real_escape_string($row[$fieldname]);
 				}				
 				//
-				
+				if($nullvalue=='YES')
+				{
+					$raw_value=null;
+					$value=null;
+				}
 				$query = 'update `data_nct` set `' . $fieldname . '` = "' . $raw_value .'", `lastchanged_date` = "' .$lastchanged_date.'" where `larvol_id`="' .$larvol_id . '"  limit 1'  ;
 				
 				if(!mysql_query($query))
@@ -735,7 +747,7 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 					echo $log;
 					return false;
 				}
-			
+
 				$dt_array=array
 				(
 				'dummy', 'larvol_id', 'source_id', 'brief_title', 'acronym', 'official_title', 'lead_sponsor', 'collaborator', 'institution_type', 'source', 'has_dmc', 'brief_summary', 'detailed_description', 'overall_status', 'is_active', 'why_stopped', 'start_date', 'end_date', 'study_type', 'study_design', 'number_of_arms', 'number_of_groups', 'enrollment', 'enrollment_type',  'study_pop', 'sampling_method', 'criteria', 'gender', 'minimum_age', 'maximum_age', 'healthy_volunteers', 'verification_date', 'lastchanged_date', 'firstreceived_date', 'org_study_id', 'phase', 'condition', 'secondary_id', 'arm_group_label', 'arm_group_type', 'arm_group_description', 'intervention_type', 'intervention_name', 'intervention_other_name', 'intervention_description', 'primary_outcome_measure', 'primary_outcome_timeframe', 'primary_outcome_safety_issue', 'secondary_outcome_measure', 'secondary_outcome_timeframe', 'secondary_outcome_safety_issue', 'location_name', 'location_city', 'location_state', 'location_zip', 'location_country', 'region', 'keyword', 'is_fda_regulated', 'is_section_801'
@@ -744,7 +756,9 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 				
 				if ( isset($as) and $as)
 				{
-					$query = 'update data_trials set `' . $fieldname . '` = "' . $value .'", lastchanged_date = "' .$lastchanged_date.'" where larvol_id="' .$larvol_id . '"  limit 1' ;
+					if(is_null($value)) $query = 'update data_trials set `' . $fieldname . '` = null , lastchanged_date = "' .$lastchanged_date.'" where larvol_id="' .$larvol_id . '"  limit 1' ;
+					else $query = 'update data_trials set `' . $fieldname . '` = "' . $value .'", lastchanged_date = "' .$lastchanged_date.'" where larvol_id="' .$larvol_id . '"  limit 1' ;
+					
 					if(!mysql_query($query))
 					{
 						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -791,7 +805,7 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 						$cond2=false; else $cond2=true;
 					
 		
-					if($cond1 and $cond2)
+					if($cond1 and $cond2 and $nullvalue=='NO')
 					{
 						$query = 'update data_history set `' . $fieldname . '_prev` = "' . $oldval .'", `' . $fieldname . '_lastchanged` = "' . $olddate .'" where `larvol_id`="' .$larvol_id . '" limit 1' ;
 						if(!mysql_query($query))
@@ -806,7 +820,7 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 					}
 					else
 					{
-						if(  $oldtrial )
+						if(  $oldtrial  and $nullvalue=='NO' )
 						{
 							$val1=str_replace("\\", "", $oldval);
 							$val2=str_replace("\\", "", $value);
