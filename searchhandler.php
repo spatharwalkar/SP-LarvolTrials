@@ -111,19 +111,26 @@ function insertSearch()
 	$name = mysql_real_escape_string($_REQUEST['reportname']);
 	$user = $db->user->id;
 	$searchdata = $querytosave;
+	
+	if($_REQUEST['search_type'] == 'shared')
+	$uclause = 'NULL';
+	else
 	$uclause = ($db->user->userlevel != 'user' && $user === NULL) ? 'NULL' : $user;
+	
 	$query = 'INSERT INTO saved_searches SET user=' . $uclause . ',name="' . $name . '",searchdata="'
 	. base64_encode(serialize($searchdata)) . '"';
+	
+	$insert_res=mysql_query($query) or die('Bad SQL query adding saved search');
+	$miid = mysql_insert_id();
 	global $logger;
-	if(!mysql_query($query))
+	if(!$insert_res)
 		{
 			$log='Bad SQL query adding saved search:'.$query.' Error:' . mysql_error();
 			$logger->error($log);
 			echo $log;
 			return false;
 		}
-	mysql_query($query) or die('Bad SQL query adding saved search');
-	$miid = mysql_insert_id();
+	
 	if(!mysql_query('COMMIT'))
 		{
 			$log='Couldn\'t commit SQL query: "COMMIT", Error:' . mysql_error();
@@ -165,7 +172,12 @@ function updateSearch()
 	//$user = isset($_POST['saveglobal']) ? NULL : $db->user->id;
 	$user = $db->user->id;
 	$searchdata = $querytosave;
+	
+	if($_REQUEST['search_type'] == 'shared')
+	$uclause = 'NULL';
+	else
 	$uclause = ($db->user->userlevel != 'user' && $user === NULL) ? 'NULL' : $user;
+	
 	$query = 'UPDATE saved_searches SET user=' . $uclause . ',name="' . $name . '",searchdata="'
 	. base64_encode(serialize($searchdata)) . '" where id=' . $searchId;
 	global $logger;
@@ -237,6 +249,7 @@ function get_SearchData()
 	$res_ret->searchdata=$data;
 	$res_ret->name= $row['name'];
 	$res_ret->id= $row['id'];
+	$res_ret->search_type= trim($row['user']);
 	echo json_encode($res_ret);
 
 

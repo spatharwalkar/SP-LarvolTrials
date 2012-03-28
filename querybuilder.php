@@ -111,6 +111,11 @@ $show_sort_res = false;
     var name = $("#txtSearchName").val();
     var searchId = $("label[for=" + "lblId" + "]").text();
     $("#3009").attr("style", "visibility:show");
+	
+	if(document.getElementById('mine_search').checked)
+	var search_type='private';
+	else
+	var search_type='shared';
 
     if (jQuery.trim(searchId) == "") {//new search
         if (!name)
@@ -123,7 +128,7 @@ $show_sort_res = false;
         $.ajax({
             type: 'POST',
             async: false,
-            url: $tt.opts.reporthandler + '?op=savenew&reportid=' + $tt.opts.reportid + '&reportname=' + name,
+            url: $tt.opts.reporthandler + '?op=savenew&reportid=' + $tt.opts.reportid + '&reportname=' + name + '&search_type=' + search_type,
             data: 'querytosave=' + $('.sqldata', $('.sqlbuild')).html(),
             error: function () {
             if ($tt.opts.statusmsgdiv)
@@ -150,7 +155,7 @@ $show_sort_res = false;
         $.ajax({
             type: 'POST',
             async: false,
-            url: $tt.opts.reporthandler + '?op=saveexists&searchId=' + searchId + '&reportname=' + name,
+            url: $tt.opts.reporthandler + '?op=saveexists&searchId=' + searchId + '&reportname=' + name + '&search_type=' + search_type,
             data: 'querytosave=' + queryData,
             error: function () {
             if ($tt.opts.statusmsgdiv)
@@ -161,6 +166,11 @@ $show_sort_res = false;
             {
             	if ($tt.opts.statusmsgdiv) $($tt.opts.statusmsgdiv).html(data);
                 $("#txtSearchName").val(name);
+				if(search_type == null && search_type == '')
+				document.getElementById('shared_search').checked = true;
+				else
+				document.getElementById('mine_search').checked = true;
+				
                 $("#lblId").text(searchId);
                 $('#3009').show();
 
@@ -200,6 +210,11 @@ $show_sort_res = false;
                loadQueryData(searchData.searchdata);
                $("#txtSearchName").val(searchData.name);
                $("#lblId").text(searchData.id);
+			   
+			   if(searchData.search_type != '' && searchData.search_type != null)
+				document.getElementById('mine_search').checked = true;
+				else
+				document.getElementById('shared_search').checked = true;
 
            }
        });
@@ -216,6 +231,7 @@ $show_sort_res = false;
     	$("#txtSearchName").val('');
         $("#lblId").text('');
     	$('.sqlbuild').loadSQB(data);
+		document.getElementById('mine_search').checked = true;
     }
 	
 	function autoComplete(type, fieldID)
@@ -335,7 +351,9 @@ $show_sort_res = false;
 								<td style="padding-left: 20px;"><label id="lblSearch"
 									style="font-weight: bold; color: Gray">Name </label> <input
 									id="txtSearchName" name="txtSearchName" type="text" value="" />
-								<label id="lblId" for="lblId" style="visibility: hidden;"> </label>
+                                    <label id="lblId" for="lblId" style="visibility: hidden;"> </label>
+                                    <label style="font-weight: bold; color: Gray">Ownership: </label><label><input type="radio" name="own" id="shared_search" value="global" checked="" />Shared</label>
+                                    <label><input type="radio" name="own" id="mine_search" value="mine" checked="checked" />Private</label>
 								</td>
 							</tr>
 
