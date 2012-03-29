@@ -243,6 +243,43 @@ $lastChangedTime = filectime("css/intermediary.css");
 			
 		});
 		
+		//reset functionality
+		$("#reset").click(function() 
+		{	
+			$("#status").val("");
+			$('input.status').each(function(index) 
+			{	
+				 $(this).attr("checked", false);
+			});
+			
+			$("#itype").val("");
+			$('input.institution').each(function(index) 
+			{	
+				 $(this).attr("checked", false);
+			});
+			
+			$("#region").val("");
+			$('input.region').each(function(index) 
+			{	
+				 $(this).attr("checked", false);
+			});
+			
+			$("#phase").val("");
+			$('input.phase').each(function(index) 
+			{	
+				 $(this).attr("checked", false);
+			});
+			
+			$("#amount").val("0 - <?php echo $globalOptions['maxEnroll'];?>");
+			$( "#slider-range").slider( "option", "value", parseInt(<?php echo $globalOptions['maxEnroll'];?>));
+			
+			$("#amount3").val("1 month");
+			$( "#slider-range-min").slider({ step: 2});
+			
+			$("#frmOtt").submit();
+		});
+		
+		//product dropdown
 		var $menu = $('.dropdown').hide();
 
 		var _expand = function(event){

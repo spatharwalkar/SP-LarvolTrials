@@ -5601,6 +5601,7 @@ class TrialTracker
 					
 					foreach($resultIds['product'] as $pkey => $pvalue)
 
+
 					{
 						$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id = '" . $pvalue . "' ");
 						if(mysql_num_rows($res) > 0)
@@ -9173,6 +9174,7 @@ class TrialTracker
 			$totalcount = $totactivecount + $totinactivecount;
 		}
 		$this->displayFilterControls($count, $totactivecount, $totinactivecount, $totalcount, $globalOptions);
+
 		if($totalPages > 1)
 		{
 			echo $paginate['paginate'];
@@ -9482,7 +9484,7 @@ class TrialTracker
 				. '<label for="region_3">Europe</label><br />'
 				. '<input type="checkbox" value="4" id="region_4" class="region" '
 				. (in_array(4, $globalOptions['region']) ? ' checked="checked" ' : '') . '/>'
-				. '<label for="region_4">RestOfWorld</label>'
+				. '<label for="region_4">RoW</label>'
 				. '</td><td class="bottom">'
 				. '<input type="checkbox" value="0" id="phase_0" class="phase" '
 				. (in_array(0, $globalOptions['phase']) ? ' checked="checked" ' : '') . '/>'
@@ -9520,7 +9522,9 @@ class TrialTracker
 				. '<input type="hidden" name="phase" id="phase" value="' . implode(',', $globalOptions['phase']) . '" />'
 				. '<input type="hidden" id="change" name="change" value="' . $globalOptions['change'] . '" />';
 				
-		echo '<div style="float:left;margin-right:25px;"><input type="submit" id="Show" value="Show"/>&nbsp;<b>' . $shownCount . '&nbsp;Records</b></div>';	
+		echo '<div style="float:left;margin-right:25px;">'
+				. '<input type="submit" id="Show" value="Show"/>&nbsp;<input type="button" value="Reset" id="reset" />'
+				. '&nbsp;&nbsp;&nbsp;<b>' . $shownCount . '&nbsp;Records</b></div>';
 	}
 	
 	function pagination($globalOptions = array(), $totalPages, $timeMachine = NULL, $ottType)
@@ -9746,6 +9750,7 @@ class TrialTracker
 						for($j = $counter; $j < $sectionKey; $j++)
 						{	
 							if(!empty($trialsInfo[$j]['naUpms']))
+
 							{
 								$naUpmIndex = preg_replace('/[^a-zA_Z0-9]/i', '', $trialsInfo[$j]['sectionHeader']);
 								$naUpmIndex = substr($naUpmIndex, 0, 7);
@@ -11284,6 +11289,7 @@ class TrialTracker
 					{
 						$title = ' title="No Previous value" ';
 					}	
+
 				} 
 				else if(!empty($value['edited']) && ($value['edited']['field'] == 'start_date_type'))
 				{
