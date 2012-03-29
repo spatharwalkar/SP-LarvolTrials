@@ -646,14 +646,19 @@ function Download_reports()
 	$columns = array();
 	$areaIds = array();
 	$productIds = array();
+	$columnsDisplayName = array();
+	$rowsDisplayName = array();
+	
 	while($header = mysql_fetch_array($res))
 	{
 		if($header['type'] == 'area')
 		{
 			if($header['type_id'] != NULL)
 			{
-				$result =  mysql_fetch_assoc(mysql_query("SELECT id, name FROM `areas` WHERE id = '" . $header['type_id'] . "' "));
+				$result =  mysql_fetch_assoc(mysql_query("SELECT id, name, display_name, description FROM `areas` WHERE id = '" . $header['type_id'] . "' "));
 				$columns[$header['num']] = $result['name'];
+				$columnsDisplayName[$header['num']] = $result['display_name'];
+				$columnsDescription[$header['num']] = $result['description'];
 			}
 			else
 			{
@@ -665,8 +670,10 @@ function Download_reports()
 		{
 			if($header['type_id'] != NULL)
 			{
-				$result =  mysql_fetch_assoc(mysql_query("SELECT id, name FROM `products` WHERE id = '" . $header['type_id'] . "' "));
+				$result =  mysql_fetch_assoc(mysql_query("SELECT id, name, display_name, description FROM `products` WHERE id = '" . $header['type_id'] . "' "));
 				$rows[$header['num']] = $result['name'];
+				$rowsDisplayName[$header['num']] = $result['display_name'];
+				$rowsDescription[$header['num']] = $result['description'];
 			}
 			else
 			{
@@ -675,6 +682,13 @@ function Download_reports()
 			$productIds[$header['num']] = $header['type_id'];
 		}
 	}
+/* 	echo '<pre>';
+	print_r($rows);
+	print_r($columnsDisplayName);
+	print_r($columnsDescription);
+	print_r($rowsDisplayName);
+	print_r($rowsDescription);
+	die; */
 	// SELECT MAX ROW AND MAX COL
 	$query = 'SELECT MAX(`num`) AS `num` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' AND type = \'product\'';
 	$res = mysql_query($query) or die(mysql_error());
@@ -881,7 +895,11 @@ function Download_reports()
 				
 		foreach($columns as $col => $val)
 		{
-			$pdfContent .= '<th width="150px"><div align="center">'. $val .'<br />';
+			$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col]:$val;
+			$cdesc = (isset($columnsDescription[$col]) && $columnsDescription[$col] != '')?$columnsDescription[$col]:null;
+			$caltTitle = (isset($cdesc) && $cdesc != '')?' alt="'.$cdesc.'" title="'.$cdesc.'" ':null;
+				
+			$pdfContent .= '<th width="150px" '.$caltTitle.'><div align="center">'. $val .'<br />';
 			
 			if(isset($areaIds[$col]) && $areaIds[$col] != NULL && !empty($productIds))
 			{
@@ -939,7 +957,10 @@ function Download_reports()
 		
 		foreach($rows as $row => $rval)
 		{
-			$pdfContent .= '<tr  style="page-break-inside:avoid;" nobr="true"><th width="150px"><div align="center">' . $rval . '<br />';
+			$rval = (isset($rowsDisplayName[$row]) && $rowsDisplayName[$row] != '')?$rowsDisplayName[$row]:$rval;
+			$rdesc = (isset($rowsDescription[$row]) && $rowsDescription[$row] != '')?$rowsDescription[$row]:null;
+			$raltTitle = (isset($rdesc) && $rdesc != '')?' alt="'.$rdesc.'" title="'.$rdesc.'" ':null;
+			$pdfContent .= '<tr  style="page-break-inside:avoid;" nobr="true"><th width="150px" '.$raltTitle.'><div align="center">' . $rval . '<br />';
 					
 			if(isset($productIds[$row]) && $productIds[$row] != NULL && !empty($areaIds))
 			{
@@ -1204,6 +1225,11 @@ function Download_reports()
 				}
 				
 				$cell= num2char($col).'1';
+				
+				$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col]:$val;
+				$cdesc = (isset($columnsDescription[$col]) && $columnsDescription[$col] != '')?$columnsDescription[$col]:null;
+				$caltTitle = (isset($cdesc) && $cdesc != '')?' alt="'.$cdesc.'" title="'.$cdesc.'" ':null;
+								
 				$objPHPExcel->getActiveSheet()->setCellValue($cell, $val.$count_val);
 				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlencode(urlPath() . 'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col])); 
  			    $objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip($tooltip);
@@ -1246,6 +1272,11 @@ function Download_reports()
 				}
 				
 				$cell='A'.($row+1);
+				
+				$rval = (isset($rowsDisplayName[$row]) && $rowsDisplayName[$row] != '')?$rowsDisplayName[$row]:$rval;
+				$rdesc = (isset($rowsDescription[$row]) && $rowsDescription[$row] != '')?$rowsDescription[$row]:null;
+				$raltTitle = (isset($rdesc) && $rdesc != '')?' alt="'.$rdesc.'" title="'.$rdesc.'" ':null;
+				
 				$objPHPExcel->getActiveSheet()->setCellValue($cell, $rval.$count_val);
 				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlencode(urlPath() . 'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds))); 
  			    $objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip($tooltip);
