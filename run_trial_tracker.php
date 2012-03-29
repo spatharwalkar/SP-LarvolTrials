@@ -9819,15 +9819,15 @@ class TrialTracker
 			if($loggedIn) 
 			{ 
 				$outputStr .= '<td class="' . $rowOneType . '" ' . (($trials[$i]['new'] == 'y') ? 'title="New record"' : ''). ' >';
-					if($ottType == 'indexed' || $ottType == 'colstackedindexed' || $ottType == 'rowstackedindexed')
-					{
-						$outputStr .= '<a style="color:' . $titleLinkColor . '" href="' . urlPath() . 'edit_trials.php?larvol_id=' . $trials[$i]['larvol_id'] 
-									. '" target="_blank">' . $trials[$i]['NCT/nct_id'] . '</a>';
-					}
-					else
-					{
-						$outputStr .= $trials[$i]['NCT/nct_id'] . '</a>';
-					}
+				if($ottType == 'indexed' || $ottType == 'colstackedindexed' || $ottType == 'rowstackedindexed')
+				{
+					$outputStr .= '<a style="color:' . $titleLinkColor . '" href="' . urlPath() . 'edit_trials.php?larvol_id=' . $trials[$i]['larvol_id'] 
+								. '" target="_blank">' . $trials[$i]['NCT/nct_id'] . '</a>';
+				}
+				else
+				{
+					$outputStr .= $trials[$i]['NCT/nct_id'] . '</a>';
+				}
 				$outputStr .= '</td>';
 			}
 			
@@ -9845,6 +9845,7 @@ class TrialTracker
 			}
 			elseif($trials[$i]['manual_larvol_id'] !== NULL)
 			{
+				$attr = '" title="Manual curation';
 				$titleLinkColor = '#FF7700';
 			}
 							
@@ -9900,7 +9901,7 @@ class TrialTracker
 			}
 			elseif($trials[$i]['manual_larvol_id'] !== NULL)
 			{
-				$attr = ' manual';
+				$attr = ' manual" title="Manual curation';
 			}
 			$outputStr .= '<td nowrap="nowrap" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">';
 			if($trials[$i]["NCT/enrollment_type"] != '') 
@@ -9947,7 +9948,7 @@ class TrialTracker
 			}
 			elseif($trials[$i]['manual_larvol_id'] !== NULL)
 			{
-				$attr = ' manual';
+				$attr = ' manual" title="Manual curation';
 			}
 			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
 						. '<div class="rowcollapse">' . $trials[$i]['NCT/intervention_name'] . '</div></td>';
@@ -9977,7 +9978,7 @@ class TrialTracker
 			}
 			elseif($trials[$i]['manual_larvol_id'] !== NULL)
 			{
-				$attr = ' manual';
+				$attr = ' manual" title="Manual curation';
 			}
 			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
 						. '<div class="rowcollapse">' . $trials[$i]['NCT/lead_sponsor'] . ' <span style="' . $enrollStyle . '"> ' 
@@ -9996,7 +9997,7 @@ class TrialTracker
 			} 
 			elseif($trials[$i]['manual_larvol_id'] !== NULL)
 			{
-				$attr = ' manual';
+				$attr = ' manual" title="Manual curation';
 			}
 			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">' . '<div class="rowcollapse">' 
 							. (($trials[$i]['NCT/overall_status'] != '' && $trials[$i]['NCT/overall_status'] !== NULL) ? $trials[$i]['NCT/overall_status'] : '&nbsp;')
@@ -10015,7 +10016,7 @@ class TrialTracker
 			}
 			elseif($trials[$i]['manual_larvol_id'] !== NULL)
 			{
-				$attr = ' manual';
+				$attr = ' manual" title="Manual curation';
 			}
 			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
 						. '<div class="rowcollapse">' . $trials[$i]['NCT/condition'] . '</div></td>';
@@ -10033,7 +10034,7 @@ class TrialTracker
 			}
 			elseif($trials[$i]['manual_larvol_id'] !== NULL)
 			{
-				$attr = ' manual';
+				$attr = ' manual" title="Manual curation';
 			}
 			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">'; 
 			if($trials[$i]["NCT/start_date"] != '' && $trials[$i]["NCT/start_date"] != NULL && $trials[$i]["NCT/start_date"] != '0000-00-00') 
@@ -10059,7 +10060,7 @@ class TrialTracker
 			}	
 			elseif($trials[$i]['manual_larvol_id'] !== NULL)
 			{
-				$attr = ' manual';
+				$attr = ' manual" title="Manual curation';
 			}
 			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">'; 
 			if($trials[$i]["inactive_date"] != '' && $trials[$i]["inactive_date"] != NULL && $trials[$i]["inactive_date"] != '0000-00-00') 
@@ -10086,7 +10087,7 @@ class TrialTracker
 			}
 			elseif($trials[$i]['manual_larvol_id'] !== NULL)
 			{
-				$attr = ' manual';
+				$attr = ' manual" title="Manual curation';
 			}
 			if($trials[$i]['NCT/phase'] == 'N/A' || $trials[$i]['NCT/phase'] == '' || $trials[$i]['NCT/phase'] === NULL)
 			{
