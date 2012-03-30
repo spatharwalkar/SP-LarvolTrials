@@ -1,7 +1,7 @@
 <?php
 	require_once("db.php");
 	global $db;
-	$query = 'SELECT id,name,user,category FROM `rpt_masterhm` WHERE user IS NULL OR user=' . $db->user->id . ' ORDER BY user';
+	$query = 'SELECT id,name,user,category FROM `rpt_masterhm` WHERE user IS NULL OR user=' . $db->user->id . ' OR shared=1 ORDER BY user';
 	$res = mysql_query($query) or die('Bad SQL query retrieving master heatmap report names');
 	$categoryArr  = array('');
 	$outArr = array();

@@ -666,7 +666,7 @@ function listSearchForm()
 	
 	$out = '<form method="post" action="search.php" class="lisep" style="float:right;z-index:100">'
 			. '<fieldset><legend>Load saved search</legend><ul>';
-	$query = 'SELECT id,name,user FROM saved_searches WHERE user=' . $db->user->id . ' OR user IS NULL ORDER BY user';
+	$query = 'SELECT id,name,user FROM saved_searches WHERE user=' . $db->user->id . ' OR user IS NULL OR shared=1 ORDER BY user';
 	$res = mysql_query($query) or die('Bad SQL query getting saved search list');
 	while($ss = mysql_fetch_assoc($res))
 	{
@@ -674,11 +674,11 @@ function listSearchForm()
 		$adm = $db->user->userlevel != 'user';
 		$out .= '<li' . ($global ? ' class="global"' : '') . '><a href="search.php?load='
 				. $ss['id'] . $repq . '">' . htmlspecialchars($ss['name'])
-				. ( (!$global || ($global && $adm))
+				. ( ((!$global && $ss['user']==$db->user->id) || ($global && $adm))
 								 ? ' <img src="images/edit.png" width="14" height="14" border="0" alt="edit"/>'
 								 : '')
 				. ' </a> &nbsp; '
-				. ( (!$global || ($global && $adm))
+				. ( ((!$global && $ss['user']==$db->user->id) || ($global && $adm))
 						? '<input type="image" src="images/not.png" name="delsch[' . $ss['id'] . ']" alt="delete" title="delete"/>'
 						: '')
 				. '</li>';

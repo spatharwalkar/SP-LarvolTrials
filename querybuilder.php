@@ -112,10 +112,15 @@ $show_sort_res = false;
     var searchId = $("label[for=" + "lblId" + "]").text();
     $("#3009").attr("style", "visibility:show");
 	
-	if(document.getElementById('mine_search').checked)
-	var search_type='private';
+	if(document.getElementById('mine_search'))
+	{
+		if(document.getElementById('global_search').checked)
+			var search_type='global';
+		else if(document.getElementById('shared_search').checked)
+			var search_type='shared';
+	}
 	else
-	var search_type='shared';
+		var search_type='mine';
 
     if (jQuery.trim(searchId) == "") {//new search
         if (!name)
@@ -166,10 +171,29 @@ $show_sort_res = false;
             {
             	if ($tt.opts.statusmsgdiv) $($tt.opts.statusmsgdiv).html(data);
                 $("#txtSearchName").val(name);
-				if(search_type == null && search_type == '')
-				document.getElementById('shared_search').checked = true;
+				
+				if(searchData.user_level == 'user')
+				{
+					$("#ownership").html('Mine');
+				}
 				else
-				document.getElementById('mine_search').checked = true;
+				{
+					$("#ownership").html('<label><input type="radio" name="own" id="shared_search" value="shared" checked="" />Shared</label>'
+                                    +'<label><input type="radio" name="own" id="global_search" value="global" checked="" />Global</label>'
+                                    +'<label><input type="radio" name="own" id="mine_search" value="mine" checked="checked" />Mine</label>');
+					
+					if(searchData.search_type == 'mine')
+					document.getElementById('mine_search').checked = true;
+					else if(searchData.search_type == 'shared')
+					document.getElementById('shared_search').checked = true;
+					else
+					document.getElementById('global_search').checked = true;
+				}
+				
+				if(searchData.search_type == 'mine' || (searchData.search_type == 'global' && searchData.user_level != 'user') || (searchData.search_type == 'shared' && searchData.current_user == searchData.search_user))
+				$("#save_bttn").html('<input type="submit" style="width: 100px" onclick="saveSearch();return false" value="Save" id="btnsave" />');
+				else
+				$("#save_bttn").html('');
 				
                 $("#lblId").text(searchId);
                 $('#3009').show();
@@ -211,10 +235,28 @@ $show_sort_res = false;
                $("#txtSearchName").val(searchData.name);
                $("#lblId").text(searchData.id);
 			   
-			   if(searchData.search_type != '' && searchData.search_type != null)
-				document.getElementById('mine_search').checked = true;
+			   if(searchData.user_level == 'user')
+				{
+					$("#ownership").html('Mine');
+				}
 				else
-				document.getElementById('shared_search').checked = true;
+				{
+					$("#ownership").html('<label><input type="radio" name="own" id="shared_search" value="shared" checked="" />Shared</label>'
+                                    +'<label><input type="radio" name="own" id="global_search" value="global" checked="" />Global</label>'
+                                   +'<label><input type="radio" name="own" id="mine_search" value="mine" checked="checked" />Mine</label>');
+					
+					if(searchData.search_type == 'mine')
+					document.getElementById('mine_search').checked = true;
+					else if(searchData.search_type == 'shared')
+					document.getElementById('shared_search').checked = true;
+					else
+					document.getElementById('global_search').checked = true;
+				}
+				
+				if(searchData.search_type == 'mine' || (searchData.search_type == 'global' && searchData.user_level != 'user') || (searchData.search_type == 'shared' && searchData.current_user == searchData.search_user))
+				$("#save_bttn").html('<input type="submit" style="width: 100px" onclick="saveSearch();return false" value="Save" id="btnsave" />');
+				else
+				$("#save_bttn").html('');
 
            }
        });
@@ -231,7 +273,14 @@ $show_sort_res = false;
     	$("#txtSearchName").val('');
         $("#lblId").text('');
     	$('.sqlbuild').loadSQB(data);
-		document.getElementById('mine_search').checked = true;
+		
+		<?php
+			global $db;
+			if($db->user->userlevel == 'user')
+			print '$("#ownership").html(\'Mine\');';
+			else
+			print 'document.getElementById(\'mine_search\').checked = true;'
+		?>
     }
 	
 	function autoComplete(type, fieldID)
@@ -306,7 +355,7 @@ $show_sort_res = false;
 					onclick="newSearch();" style="width: 100px" value="New" id="btnNew" /></td>
 			</tr>
 			<tr>
-				<td style="padding-left: 30px;"><input type="submit"
+				<td id="save_bttn" style="padding-left: 30px;"><input type="submit"
 					style="width: 100px" onclick="saveSearch();return false" value="Save"
 					id="btnsave" /></td>
 			</tr>
@@ -323,7 +372,7 @@ $show_sort_res = false;
 	$out .= "<li class='list'>" . "Load saved search";
 	//$out .= "</li>";
 	$out .= '<ul style="display:block;">';
-	$query = 'SELECT id,name,user FROM saved_searches WHERE user=' . $db->user->id . ' OR user IS NULL ORDER BY user';
+	$query = 'SELECT id,name,user FROM saved_searches WHERE user=' . $db->user->id . ' OR user IS NULL OR shared=1 ORDER BY user';
 	$res = mysql_query($query) or die('Bad SQL query getting saved search list');
 	while($ss = mysql_fetch_assoc($res))
 	{
@@ -352,8 +401,10 @@ $show_sort_res = false;
 									style="font-weight: bold; color: Gray">Name </label> <input
 									id="txtSearchName" name="txtSearchName" type="text" value="" />
                                     <label id="lblId" for="lblId" style="visibility: hidden;"> </label>
-                                    <label style="font-weight: bold; color: Gray">Ownership: </label><label><input type="radio" name="own" id="shared_search" value="global" checked="" />Shared</label>
-                                    <label><input type="radio" name="own" id="mine_search" value="mine" checked="checked" />Private</label>
+                                    <label style="font-weight: bold; color: Gray">Ownership: </label>
+                                    <font id="ownership" style="color:#333333;"><?php print (($db->user->userlevel == 'user') ? 'Mine' : '<label><input type="radio" name="own" id="shared_search" value="shared" checked="" />Shared</label>
+                                    <label><input type="radio" name="own" id="global_search" value="global" checked="" />Global</label>
+                                    <label><input type="radio" name="own" id="mine_search" value="mine" checked="checked" />Mine</label>') ?></font>
 								</td>
 							</tr>
 

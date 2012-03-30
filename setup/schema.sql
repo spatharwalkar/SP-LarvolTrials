@@ -181,6 +181,7 @@ CREATE TABLE IF NOT EXISTS `saved_searches` (
   `user` int(10) unsigned DEFAULT NULL,
   `searchdata` text COLLATE utf8_unicode_ci NOT NULL COMMENT 'serialized then base64_encoded POST data from the search page',
   `name` varchar(127) COLLATE utf8_unicode_ci NOT NULL,
+  `shared` int(10) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_names` (`user`,`name`),
   KEY `FK_user` (`user`)
@@ -450,6 +451,7 @@ CREATE TABLE IF NOT EXISTS `rpt_masterhm` (
   `footnotes` text COLLATE utf8_unicode_ci,
   `description` text COLLATE utf8_unicode_ci,
   `category` varchar(128) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `shared` int(10) NOT NULL DEFAULT '0',
   CONSTRAINT `rpt_masterhm_pk` PRIMARY KEY (`id`),
   CONSTRAINT `rpt_masterhm_fk_1` FOREIGN KEY (`user`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

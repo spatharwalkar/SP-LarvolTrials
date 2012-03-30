@@ -112,12 +112,20 @@ function insertSearch()
 	$user = $db->user->id;
 	$searchdata = $querytosave;
 	
-	if($_REQUEST['search_type'] == 'shared')
-	$uclause = 'NULL';
-	else
-	$uclause = ($db->user->userlevel != 'user' && $user === NULL) ? 'NULL' : $user;
+	if($_REQUEST['search_type'] == 'global')
+	{
+		$uclause = 'NULL'; $shared=0;
+	}
+	else if($_REQUEST['search_type'] == 'mine')
+	{
+		$uclause = $user; $shared=0;
+	}
+	else if($_REQUEST['search_type'] == 'shared')
+	{
+		$uclause = $user; $shared=1;
+	}
 	
-	$query = 'INSERT INTO saved_searches SET user=' . $uclause . ',name="' . $name . '",searchdata="'
+	$query = 'INSERT INTO saved_searches SET user=' . $uclause . ',name="' . $name . '",shared="' . $shared . '",searchdata="'
 	. base64_encode(serialize($searchdata)) . '"';
 	
 	$insert_res=mysql_query($query) or die('Bad SQL query adding saved search');
@@ -173,12 +181,20 @@ function updateSearch()
 	$user = $db->user->id;
 	$searchdata = $querytosave;
 	
-	if($_REQUEST['search_type'] == 'shared')
-	$uclause = 'NULL';
-	else
-	$uclause = ($db->user->userlevel != 'user' && $user === NULL) ? 'NULL' : $user;
+	if($_REQUEST['search_type'] == 'global')
+	{
+		$uclause = 'NULL'; $shared=0;
+	}
+	else if($_REQUEST['search_type'] == 'mine')
+	{
+		$uclause = $user; $shared=0;
+	}
+	else if($_REQUEST['search_type'] == 'shared')
+	{
+		$uclause = $user; $shared=1;
+	}
 	
-	$query = 'UPDATE saved_searches SET user=' . $uclause . ',name="' . $name . '",searchdata="'
+	$query = 'UPDATE saved_searches SET user=' . $uclause . ',name="' . $name . '",shared="' . $shared . '",searchdata="'
 	. base64_encode(serialize($searchdata)) . '" where id=' . $searchId;
 	global $logger;
 	if(!mysql_query($query))
@@ -204,6 +220,8 @@ function updateSearch()
 
 function get_SearchData()
 {
+	global $db;
+	
 	if(!isset($_REQUEST['id']) || !is_numeric($_REQUEST['id']))	return;
 	//load search from Saved Search
 
@@ -246,10 +264,21 @@ function get_SearchData()
 	$data=json_encode($filterData);
 	/***End Part to Replace product/Area ID by product/Area Name when Displaying******/
 	
+	$shared=$row['shared'];
+	if($shared)
+	$owner_type="shared";
+	else if($row['user'] !== NULL)
+	$owner_type="mine";
+	else if($row['user'] === NULL)
+	$owner_type="global";
+	
 	$res_ret->searchdata=$data;
 	$res_ret->name= $row['name'];
 	$res_ret->id= $row['id'];
-	$res_ret->search_type= trim($row['user']);
+	$res_ret->search_type= trim($owner_type);
+	$res_ret->search_user= $row['user'];
+	$res_ret->current_user= $db->user->id;
+	$res_ret->user_level= $db->user->userlevel;
 	echo json_encode($res_ret);
 
 
@@ -265,7 +294,7 @@ function listSearchForm()
 	$out .= "<li class='list'>" . "Load saved search";
 	//$out .= "</li>";
 	$out .= '<ul style="display:block;">';
-	$query = 'SELECT id,name,user FROM saved_searches WHERE user=' . $db->user->id . ' OR user IS NULL ORDER BY user';
+	$query = 'SELECT id,name,user FROM saved_searches WHERE user=' . $db->user->id . ' OR user IS NULL OR shared=1 ORDER BY user';
 	global $logger;
 	if(!$res=mysql_query($query))
 		{
@@ -294,7 +323,7 @@ function listSearchProc()
 	global $db;
 
 	$ssid = mysql_real_escape_string($_REQUEST['searchId']);
-	$query = 'SELECT searchdata FROM saved_searches WHERE id=' . $ssid . ' AND (user=' . $db->user->id . ' or user IS NULL)'
+	$query = 'SELECT searchdata FROM saved_searches WHERE id=' . $ssid . ' AND (user=' . $db->user->id . ' or user IS NULL OR shared=1)'
 	. ' LIMIT 1';
 	global $logger;
 	if(!$res=mysql_query($query))
