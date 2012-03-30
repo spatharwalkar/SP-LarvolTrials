@@ -1786,7 +1786,7 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 				$current_page = intval($this->fm / $this->inc) + 1;
 				$total_pages  = max(1, ceil($this->total_recs / abs($this->inc)));
 				if($_POST['sourceless_only'] and $_POST['sourceless_only'] == 'YES') $checked=' checked="checked" '; else $checked='';
-				echo '<b><span style="color:red">Show only sourceless trials / trials with manual data</span>&nbsp;<input type="checkbox" name="sourceless_only" value="YES"' . $checked . ' onclick="this.form.submit();">' . str_repeat("&nbsp;",25) . '</b>';
+				echo '<b><span style="color:darkred">Show only sourceless trials / trials with manual data</span>&nbsp;<input type="checkbox" name="sourceless_only" value="YES"' . $checked . ' onclick="this.form.submit();">' . str_repeat("&nbsp;",25) . '</b>';
 				echo $this->labels['Page'],':&nbsp;',$current_page;
 				echo '&nbsp;',$this->labels['of'],'&nbsp;',$total_pages;
 			}
@@ -1794,6 +1794,17 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 		if($this->display['num_records'])
 			echo '&nbsp; ',$this->labels['Records'],':&nbsp;',$this->total_recs;
 		if($this->display['num_pages'] || $this->display['num_records']) echo '</td>';
+		if	(isset($_GET['sourceless_only']) and $_GET['sourceless_only'] == 'YES' and isset($_GET['deleted_trial']) )
+		{
+			echo '</tr><tr><td colspan="2" ><b> <span style="color:red">Deleted the trial (larvol_id:'. $_GET['deleted_trial'] . ')</span></b></div></td>'; 
+			unset($_GET['sourceless_only']);
+			unset($_GET['deleted_trial']);
+		}
+		elseif	(isset($_GET['sourceless_only']) and $_GET['sourceless_only'] == 'YES' and isset($_GET['err_message']) )
+		{
+			echo '</tr><tr><td colspan="2" ><b> <span style="color:red">'. $_GET['err_message'] . '</span></b></div></td>'; 
+		}
+		
 		echo '</tr></table>',"\n";
 		if($position == 'up') echo '<hr size="1" class="'.$this->getCSSclass('hr', 'up').'" />'."\n";
 	} /* }}} */

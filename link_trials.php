@@ -239,15 +239,22 @@ $larvol_id=$_POST['lid2'];
 		else
 		{
 			if($ok===true)
-			echo '<br><b><span style="color:red;font-size=+4;">Deleted the trial</span><b/>';
+			{
+			//echo '<br><b><span style="color:red;font-size=+4;">Deleted the trial</span><b/>';
+				header("Location: edit_trials.php?sourceless_only=YES&deleted_trial=". $larvol_id);
+				exit;
+			
+			}
 		}
 		
 		
 	}
 	else  // not sourceless, so dont delete.
 	{
-		echo '<br><br><span style="color:red;font-size=+4;">Only sourceless trials can be deleted</span>';
-		return false;
+		
+		header("Location: edit_trials.php?sourceless_only=YES&err_message=WARNING : " . $larvol_id  . " is a sourced trial, and it cannot be deleted.");
+		exit;
+		
 	}
 		
 /**/
