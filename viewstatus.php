@@ -1,3 +1,22 @@
+<?php
+require_once('db.php');
+require_once('include.search.php');
+require_once('include.util.php');
+require_once('nct_common.php');
+require_once('include.import_new.php');
+require_once('include.import.history_new.php');
+	
+	define('READY', 1);
+	define('RUNNING', 2);
+	define('ERROR', 3);
+	define('CANCELLED', 4);
+	define('COMPLETED', 0);
+
+/*	
+if(isset($_POST['runscrapper']))
+	require_once('fetch_nct_fullhistory_all.php');
+*/
+?>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -18,24 +37,6 @@
 </head>
 <body>
 <?php
-require_once('db.php');
-require_once('include.search.php');
-require_once('include.util.php');
-require_once('nct_common.php');
-require_once('include.import_new.php');
-require_once('include.import.history_new.php');
-	
-	define('READY', 1);
-	define('RUNNING', 2);
-	define('ERROR', 3);
-	define('CANCELLED', 4);
-	define('COMPLETED', 0);
-
-/*	
-if(isset($_POST['runscrapper']))
-	require_once('fetch_nct_fullhistory_all.php');
-*/
-	
 if(isset($_POST['pid']))
 	{
 		if(isset($_POST['upid']))
