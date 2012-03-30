@@ -691,18 +691,18 @@ function showprogress()
 	echo "$(document).ready(function() {";
 	if(count($nct_history_status)!=0)
 	{
-		echo "$(\"#nct_new\").progressBar();";
-		echo "$(\"#nct_update\").progressBar({ barImage: 'images/progressbg_orange.gif'} );";
+		echo "$(\"#nct_old\").progressBar();";
+		echo "$(\"#nct_old_update\").progressBar({ barImage: 'images/progressbg_orange.gif'} );";
 	}
 	if(count($product_status)!=0)
 	{
-		echo "$(\"#product_status\").progressBar();";
-		echo "$(\"#product_update\").progressBar({ barImage: 'images/progressbg_orange.gif'} );";
+		echo "$(\"#product_full_status\").progressBar();";
+		echo "$(\"#product_full_update\").progressBar({ barImage: 'images/progressbg_orange.gif'} );";
 	}
 	if(count($area_status)!=0)
 	{
-		echo "$(\"#area_status\").progressBar();";
-		echo "$(\"#area_update\").progressBar({ barImage: 'images/progressbg_orange.gif'} );";
+		echo "$(\"#area_full_status\").progressBar();";
+		echo "$(\"#area_full_update\").progressBar({ barImage: 'images/progressbg_orange.gif'} );";
 	}
 	
 	echo "});";
@@ -742,7 +742,7 @@ function showprogress()
 
 					echo "<td align=\"left\" class=\"norm\">".$nct_history_status['er_message']."</td>";
 					echo "<td align=\"left\" class=\"norm\">";
-						echo "<span class=\"progressBar\" id=\"nct_update\">".$nct_update_progress."</span>";
+						echo "<span class=\"progressBar\" id=\"nct_old_update\">".$nct_update_progress."</span>";
 					echo "</td>";
 					if($nct_history_status['status']==READY)
 					{
@@ -1412,9 +1412,9 @@ function get_nctids_from_web()
 					$nct_add_progress=number_format(($nct_status['add_items_total']==0?0:(($nct_status['add_items_progress'])*100/$nct_status['add_items_total'])),2);
 					
 				if($nct_status['update_items_start_time']!="0000-00-00 00:00:00"&&$nct_status['update_items_complete_time']!="0000-00-00 00:00:00"&&$nct_status['status']==COMPLETED)
-					$nct_update_progress=100;
+					$nct_update_progress1=100;
 				else
-					$nct_update_progress=number_format(($nct_status['update_items_total']==0?0:(($nct_status['update_items_progress'])*100/$nct_status['update_items_total'])),2);
+					$nct_update_progress1=number_format(($nct_status['update_items_total']==0?0:(($nct_status['update_items_progress'])*100/$nct_status['update_items_total'])),2);
 				
 				//echo $nct_status['update_items_complete_time'];
 				
@@ -1422,7 +1422,7 @@ function get_nctids_from_web()
 //					echo "<span class=\"progressBar\" id=\"nct_new\">".$nct_add_progress."%</span>";
 //				echo "</td>";
 				echo "<td align=\"left\" class=\"norm\">";
-					echo "<span class=\"progressBar\" id=\"nct_update\">".$nct_update_progress."</span>";
+					echo "<span class=\"progressBar\" id=\"nct_update\">".$nct_update_progress1."</span>";
 				echo "</td>";
 				if($nct_status['status']==READY)
 				{
