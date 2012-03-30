@@ -118,6 +118,8 @@ $show_sort_res = false;
 			var search_type='global';
 		else if(document.getElementById('shared_search').checked)
 			var search_type='shared';
+		else
+			var search_type='mine';
 	}
 	else
 		var search_type='mine';
@@ -174,7 +176,12 @@ $show_sort_res = false;
 				
 				if(searchData.user_level == 'user')
 				{
+					if(searchData.search_type == 'mine')
 					$("#ownership").html('Mine');
+					else if(searchData.search_type == 'shared')
+					$("#ownership").html('Shared');
+					else
+					$("#ownership").html('Global');
 				}
 				else
 				{
@@ -237,7 +244,12 @@ $show_sort_res = false;
 			   
 			   if(searchData.user_level == 'user')
 				{
+					if(searchData.search_type == 'mine')
 					$("#ownership").html('Mine');
+					else if(searchData.search_type == 'shared')
+					$("#ownership").html('Shared');
+					else
+					$("#ownership").html('Global');
 				}
 				else
 				{
