@@ -160,15 +160,23 @@ function editor()
 	if(!isset($_GET['id'])) return;
 	$id = mysql_real_escape_string(htmlspecialchars($_GET['id']));
 	if(!is_numeric($id)) return;
-	$query = 'SELECT name,user,footnotes,description,category FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
+	$query = 'SELECT name,user,footnotes,description,category,shared FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
 	$res = mysql_query($query) or die('Bad SQL query getting master heatmap report');
 	$res = mysql_fetch_array($res) or die('Report not found.');
 	$rptu = $res['user'];
-	if($rptu !== NULL && $rptu != $db->user->id) return;	//prevent anyone from viewing others' private reports
+	$shared = $res['shared'];
+	if($rptu !== NULL && $rptu != $db->user->id && !$shared) return;	//prevent anyone from viewing others' private reports
 	$name = $res['name'];
 	$footnotes = htmlspecialchars($res['footnotes']);
 	$description = htmlspecialchars($res['description']);
 	$category = $res['category'];
+	
+	if($shared)
+	$owner_type="shared";
+	else if($rptu !== NULL)
+	$owner_type="mine";
+	else if($rptu === NULL)
+	$owner_type="global";
 	
 	$query = 'SELECT `num`,`type`,`type_id` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' ORDER BY num ASC';
 	$res = mysql_query($query) or die('Bad SQL query getting master heatmap report headers');
@@ -348,17 +356,17 @@ function editor()
 	
 	if($_GET['view_type']=='total')
 	{
-		$title="Total Count";
+		$title="All Trials (Active+Inactive)";
 		$view_tp='total';
 	}
 	else if($_GET['view_type']=='both')
 	{
-		$title="Active Count, Total Count";
+		$title="Active Trials, Total Trials";
 		$view_tp='both';
 	}
 	else
 	{
-		$title="Active Count";
+		$title="Active Trials";
 		$view_tp='active';
 	}
 
@@ -397,14 +405,20 @@ function editor()
 	if($db->user->userlevel != 'user')
 	{
 		$out .= ' Ownership: '
+			. '<label><input type="radio" name="own" value="shared" '
+			. ($owner_type == 'shared' ? 'checked="checked"' : '')
+			. '/>Shared</label> '
 			. '<label><input type="radio" name="own" value="global" '
-			. ($rptu === NULL ? 'checked="checked"' : '')
+			. ($owner_type == 'global' ? 'checked="checked"' : '')
 			. '/>Global</label> '
 			. '<label><input type="radio" name="own" value="mine" '
-			. ($rptu !== NULL ? 'checked="checked"' : '')
+			. ($owner_type == 'mine' ? 'checked="checked"' : '')
 			. '/>Mine</label>';
 	}else{
-		$out .= ' Ownership: ' . ($rptu === NULL ? 'Global' : 'Mine');
+		$out .= ' Ownership: '
+			. ($owner_type == 'shared' ? 'Shared' : '')
+			. ($owner_type == 'global' ? 'Global' : '')
+			. ($owner_type == 'mine' ? 'Mine' : '');
 	}
 	
 	//total column checkbox
@@ -413,8 +427,9 @@ function editor()
 	$out .= '<br clear="all"/>';
 	if($db->user->userlevel != 'user' || $rptu !== NULL)
 	{
+		if($owner_type == 'mine' || $owner_type == 'global' || ($owner_type == 'shared' && $rptu == $db->user->id))
 		$out .= '<input type="submit" name="reportsave" value="Save edits" /> | '
-				. '<input type="submit" name="addproduct" value="More rows" /> | '
+				.'<input type="submit" name="addproduct" value="More rows" /> | '
 				. '<input type="submit" name="addarea" value="More columns" /> | ';
 	}
 	$out .= '<input type="submit" name="reportcopy" value="Copy into new" /> | '
@@ -840,15 +855,17 @@ function Download_reports()
 	$count_fillbomb=0;	
 	if($_POST['dwcount']=='active')
 	{
-		$tooltip=$title="Active Count";
+		$tooltip=$title="Active Trials";
+		$pdftitle="<b>Active Trials</b>";
 	}
 	elseif($_POST['dwcount']=='total')
 	{
-		$tooltip=$title="Total Count";
+		$pdftitle=$tooltip=$title="All Trials (Active + Inactive)";
 	}
 	else
 	{
-		$tooltip=$title="Active Count, Total Count";
+		$tooltip=$title="Active Trials, Total Trials";
+		$pdftitle="<b>Active Trials,</b> Total Trials";
 	}
 		
 	if($_POST['dwformat']=='pdfdown' || $_POST['dwformat']=='htmldown')
@@ -879,13 +896,13 @@ function Download_reports()
 						. '<style type="text/css">'.file_get_contents('css/popup_form.css').'</style>'
 						. '</head>'
 						. '<body bgcolor="#FFFFFF">'
-						. '<div align="center"><img src="'.  urlPath() .'images/Larvol-Trial-Logo-notag.png" alt="Main" width="200" height="25" id="header" /></div><br/>'
-						. '<div align="center"><b>Report Name: '.$name .'</b></div><br/>';
+						. '<div align="center"><img src="'.  urlPath() .'images/Larvol-Trial-Logo-notag.png" alt="Main" width="200" height="25" id="header" /></div><br/>';
 
 		$pdfContent .= '<div align="center">'
 						. '<table align="center" style="border-collapse:collapse; padding:10px; background-color:#DDF;">'
-						. '<tr style="page-break-inside:avoid;" nobr="true"><td width="300px" align="left"><b>Name: </b>'. htmlspecialchars($name) .'&nbsp; ('. $title .')</td>'
+						. '<tr style="page-break-inside:avoid;" nobr="true"><td width="300px" align="left"><b>Name: </b>'. htmlspecialchars($name) .'</td>'
 						. '<td width="300px" align="left"><b>Category: </b>'. htmlspecialchars($category) .'</td></tr>'
+						. '<tr style="page-break-inside:avoid;" nobr="true"><td width="300px" align="left" colspan="2"><b>Display Mode: </b>'. $pdftitle .'</td></tr>'
 						. '</table>'
 						. '</div><br /><br/>';
 						
@@ -1358,7 +1375,7 @@ function Download_reports()
 		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$row, '');
 		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$row, 'Report name:');
 		$objPHPExcel->getActiveSheet()->SetCellValue('B' . $row, substr($name,0,250));
-		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$row, 'View Type:');
+		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$row, 'Display Mode:');
 		$objPHPExcel->getActiveSheet()->SetCellValue('B' . $row, $tooltip);
 		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$row, 'Footnotes:');
 		$objPHPExcel->getActiveSheet()->SetCellValue('B' . $row, $footnotes);
@@ -1505,12 +1522,23 @@ function postEd()
 	{
 		$footnotes = mysql_real_escape_string($_POST['footnotes']);
 		$description = mysql_real_escape_string($_POST['description']);
-		$owner = (isset($_POST['own']) && $_POST['own'] == 'global' )? 'NULL' : $db->user->id;
+		
+		if(isset($_POST['own']) && $_POST['own'] == 'global')
+		{
+			$owner='NULL'; $shared=0;
+		} else if(isset($_POST['own']) && $_POST['own'] == 'shared')
+		{
+			$owner=$db->user->id; $shared=1;
+		} else
+		{
+			$owner=$db->user->id; $shared=0;
+		}
+		
 		$category = mysql_real_escape_string($_POST['reportcategory']);
 		
 		$query = 'UPDATE rpt_masterhm SET name="' . mysql_real_escape_string($_POST['reportname']) . '",user=' . $owner
 					. ',footnotes="' . $footnotes . '",description="' . $description . '"'
-					. ',category="' . $category . '"' . ' WHERE id=' . $id . ' LIMIT 1';
+					. ',category="' . $category . '",shared="' . $shared . '"' . ' WHERE id=' . $id . ' LIMIT 1';
 		mysql_query($query) or die('Bad SQL Query saving name');
 		
 		foreach($types as $t)
