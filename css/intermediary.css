@@ -104,7 +104,7 @@ a, a:hover{
 }
 
 .rowcollapse:hover {
-	/*max-height:none;*/
+	max-height:none;
 }
 
 .bomb {
