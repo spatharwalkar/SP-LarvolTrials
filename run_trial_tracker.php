@@ -9413,7 +9413,7 @@ class TrialTracker
 		elseif($globalOptions['type'] == "allTrials")
 		{
 			echo '<input type="checkbox" class="status" value="0" ' 
-				 . (in_array('nyr', $globalOptions['status']) ? 'checked = "checked" ' : '') . '/>Not yet recruiting<br/>'
+				 . (in_array('0', $globalOptions['status']) ? 'checked = "checked" ' : '') . '/>Not yet recruiting<br/>'
 				 . '<input type="checkbox" class="status" value="1" ' 
 				 . (in_array('1', $globalOptions['status']) ? 'checked = "checked" ' : '') . '/>Recruiting<br/>'
 				 . '<input type="checkbox" class="status" value="2" ' 
@@ -9444,7 +9444,7 @@ class TrialTracker
 		else
 		{
 			echo '<input type="checkbox" class="status" value="0" '
-				. (in_array('nyr', $globalOptions['status']) ? 'checked = "checked" ' : '') . '/>Not yet recruiting<br/>'
+				. (in_array('0', $globalOptions['status']) ? 'checked = "checked" ' : '') . '/>Not yet recruiting<br/>'
 				. '<input type="checkbox" class="status" value="1" '
 				. (in_array('1', $globalOptions['status']) ? 'checked = "checked" ' : '') . '/>Recruiting<br/>'
 				. '<input type="checkbox" class="status" value="2" '
