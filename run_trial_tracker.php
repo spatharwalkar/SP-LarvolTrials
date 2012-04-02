@@ -9173,7 +9173,7 @@ class TrialTracker
 			$totinactivecount = $globalOptions['countDetails']['in'];
 			$totalcount = $totactivecount + $totinactivecount;
 		}
-		$this->displayFilterControls($count, $totactivecount, $totinactivecount, $totalcount, $globalOptions);
+		$this->displayFilterControls($count, $totactivecount, $totinactivecount, $totalcount, $globalOptions, $ottType);
 
 		if($totalPages > 1)
 		{
@@ -9372,7 +9372,7 @@ class TrialTracker
 		}
 	}
 	
-	function displayFilterControls($shownCount, $activeCount, $inactiveCount, $totalCount, $globalOptions = array())
+	function displayFilterControls($shownCount, $activeCount, $inactiveCount, $totalCount, $globalOptions = array(), $ottType)
 	{	
 		echo '<table width="75%" border="0" cellspacing="0" class="controls" align="center">'
 				. '<tr><th>Active</th><th>Status</th><th>Institution Type</th>'
@@ -9521,9 +9521,47 @@ class TrialTracker
 				. '<input type="hidden" name="region" id="region" value="' . implode(',', $globalOptions['region']) . '" />'
 				. '<input type="hidden" name="phase" id="phase" value="' . implode(',', $globalOptions['phase']) . '" />'
 				. '<input type="hidden" id="change" name="change" value="' . $globalOptions['change'] . '" />';
-				
+		
+		$url = 'intermediary.php?';
+		if($ottType == 'unstacked')
+		{
+			$url .= 'results=' . $globalOptions['url'];
+		}
+		else if($ottType == 'rowstacked' || $ottType == 'colstacked')
+		{	
+			$url .= 'results=' .  $globalOptions['url'];
+		}
+		else if($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed')
+		{
+			$url .= $globalOptions['url'];
+		}
+		else if($ottType == 'standalone')
+		{
+			$url .= 'id=' . $globalOptions['url'];
+		}
+		if($timeMachine !== NULL)
+		{
+			$url .= '&amp;time=' . $timeMachine;
+		}
+		if($globalOptions['version'] != 0)
+		{
+			$url .= '&amp;v=' . $globalOptions['version'];
+		}
+		if(isset($globalOptions['countDetails']) && !empty($globalOptions['countDetails']))
+		{
+			$url .= '&amp;cd=' . rawurlencode(base64_encode(gzdeflate(serialize($globalOptions['countDetails']))));
+		}
+		if(isset($globalOptions['encodeFormat']) && $globalOptions['encodeFormat'] != 'old')
+		{
+			$url .= '&amp;format=' . $globalOptions['encodeFormat'];
+		}
+		if(isset($globalOptions['LI']) && $globalOptions['LI'] == '1')
+		{
+			$url .= '&amp;LI=1';
+		}
 		echo '<div style="float:left;margin-right:25px;">'
-				. '<input type="submit" id="Show" value="Show"/>&nbsp;<input type="button" value="Reset" id="reset" />'
+				. '<input type="submit" id="Show" value="Show" />&nbsp;<a style="display:inline;" href="' . $url
+				. '"><input type="button" value="Reset" id="reset" /></a>'
 				. '&nbsp;&nbsp;&nbsp;<b>' . $shownCount . '&nbsp;Records</b></div>';
 	}
 	

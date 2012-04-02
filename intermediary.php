@@ -269,6 +269,8 @@ $lastChangedTime = filectime("css/intermediary.css");
 			{	
 				 $(this).attr("checked", false);
 			});
+
+			$('#showonlyupdated').attr("checked", false);
 			
 			$("#amount").val("0 - <?php echo $globalOptions['maxEnroll'];?>");
 			$( "#slider-range").slider( "option", "value", parseInt(<?php echo $globalOptions['maxEnroll'];?>));
@@ -276,7 +278,8 @@ $lastChangedTime = filectime("css/intermediary.css");
 			$("#amount3").val("1 month");
 			$( "#slider-range-min").slider({ step: 2});
 			
-			$("#frmOtt").submit();
+			//$("#frmOtt").submit();
+			return true;
 		});
 		
 		//product dropdown
