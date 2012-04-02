@@ -31,7 +31,7 @@
 		
 		$Prev_Tree=$Json_Tree;
 		
-		$Json_Tree.=" { mhmcategory:'<a ondblclick=\"tree_grid_cookie(\'".trim($category_name)."\');\">".$category_name."</a>',
+		$Json_Tree.=" { mhmcategory:'".addslashes($category_name)."',
         owner:'',
 		rows:'',
 		cols:'',

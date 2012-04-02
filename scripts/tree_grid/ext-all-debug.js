@@ -91525,6 +91525,8 @@ Ext.define('Ext.tree.View', {
         if (!me.rendered || !me.animate) {
             return;
         }
+		
+		tree_grid_cookie(parent['raw']['mhmcategory']);	//Remove Category Name From Cookie value When it's Expanded
 
         if (me.getNode(parent)) {
             animWrap = me.getAnimWrap(parent);
@@ -91602,6 +91604,8 @@ Ext.define('Ext.tree.View', {
         if (!me.rendered || !me.animate) {
             return;
         }
+		
+		tree_grid_cookie(parent['raw']['mhmcategory']);	//Add Category Name From Cookie value When it's Collapsed
 
         if (me.getNode(parent)) {
             animWrap = me.getAnimWrap(parent);
