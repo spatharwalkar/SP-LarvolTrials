@@ -11231,7 +11231,7 @@ class TrialTracker
 				//Highlighting the whole row in case of new trials
 				if($value['new'] == 'y') 
 				{
-					$class = 'class="upms newtrial ' . $upmHeader . '" ';
+					$class = 'class="upms newtrial ' . $naUpmIndex . '" ';
 				}
 				
 				//rendering unmatched upms
