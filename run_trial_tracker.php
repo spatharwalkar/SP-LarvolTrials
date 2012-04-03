@@ -6177,6 +6177,10 @@ class TrialTracker
 						{
 							$enroll = explode(' - ', $globalOptions['enroll']);
 							
+							if($result[$index]['NCT/enrollment'] === NULL || $result[$index]['NCT/enrollment'] == '')
+							{
+								$result[$index]['NCT/enrollment'] = 0;
+							}
 							if($rvalue['NCT/enrollment'] < $enroll[0] || $rvalue['NCT/enrollment'] > $enroll[1])
 							{	
 								foreach($Trials['allTrials'] as $k => $v)
@@ -6457,6 +6461,10 @@ class TrialTracker
 					{
 						$enroll = explode(' - ', $globalOptions['enroll']);
 						
+						if($result[$index]['NCT/enrollment'] === NULL || $result[$index]['NCT/enrollment'] == '')
+						{
+							$result[$index]['NCT/enrollment'] = 0;
+						}
 						if($rvalue['NCT/enrollment'] < $enroll[0] || $rvalue['NCT/enrollment'] > $enroll[1])
 						{	
 							foreach($Trials['allTrials'] as $k => $v)
@@ -6916,7 +6924,11 @@ class TrialTracker
 						if($globalOptions['enroll'] != '0')
 						{
 							$enroll = explode(' - ', $globalOptions['enroll']);
-							
+
+							if($result[$index]['NCT/enrollment'] === NULL || $result[$index]['NCT/enrollment'] == '')
+							{
+								$result[$index]['NCT/enrollment'] = 0;
+							}
 							if($rvalue['NCT/enrollment'] < $enroll[0] || $rvalue['NCT/enrollment'] > $enroll[1])
 							{	
 								foreach($Trials['allTrials'] as $k => $v)
@@ -7196,7 +7208,11 @@ class TrialTracker
 					if($globalOptions['enroll'] != '0')
 					{
 						$enroll = explode(' - ', $globalOptions['enroll']);
-						
+
+						if($result[$index]['NCT/enrollment'] === NULL || $result[$index]['NCT/enrollment'] == '')
+						{
+							$result[$index]['NCT/enrollment'] = 0;
+						}
 						if($rvalue['NCT/enrollment'] < $enroll[0] || $rvalue['NCT/enrollment'] > $enroll[1])
 						{	
 							foreach($Trials['allTrials'] as $k => $v)
@@ -7859,7 +7875,11 @@ class TrialTracker
 						if($globalOptions['enroll'] != '0')
 						{
 							$enroll = explode(' - ', $globalOptions['enroll']);
-							
+
+							if($result[$index]['NCT/enrollment'] === NULL || $result[$index]['NCT/enrollment'] == '')
+							{
+								$result[$index]['NCT/enrollment'] = 0;
+							}
 							if($result[$index]['NCT/enrollment'] < $enroll[0] || $result[$index]['NCT/enrollment'] > $enroll[1])
 							{	
 								foreach($Trials['allTrials'] as $k => $v)
@@ -8139,11 +8159,15 @@ class TrialTracker
 					if($globalOptions['enroll'] != '0')
 					{
 						$enroll = explode(' - ', $globalOptions['enroll']);
-						
+					
+						if($result[$index]['NCT/enrollment'] === NULL || $result[$index]['NCT/enrollment'] == '')
+						{
+							$result[$index]['NCT/enrollment'] = 0;
+						}
 						if($result[$index]['NCT/enrollment'] < $enroll[0] || $result[$index]['NCT/enrollment'] > $enroll[1])
-						{	
+						{
 							foreach($Trials['allTrials'] as $k => $v)
-							{
+							{	
 								if($v['NCT/nct_id'] == $nctId)
 								{
 									unset($Trials['allTrials'][$k]);
@@ -8703,7 +8727,11 @@ class TrialTracker
 						if($globalOptions['enroll'] != '0')
 						{
 							$enroll = explode(' - ', $globalOptions['enroll']);
-							
+
+							if($result[$index]['NCT/enrollment'] === NULL || $result[$index]['NCT/enrollment'] == '')
+							{
+								$result[$index]['NCT/enrollment'] = 0;
+							}
 							if($rvalue['NCT/enrollment'] < $enroll[0] || $rvalue['NCT/enrollment'] > $enroll[1])
 							{	
 								foreach($Trials['allTrials'] as $k => $v)
@@ -8983,7 +9011,11 @@ class TrialTracker
 					if($globalOptions['enroll'] != '0')
 					{
 						$enroll = explode(' - ', $globalOptions['enroll']);
-						
+
+						if($result[$index]['NCT/enrollment'] === NULL || $result[$index]['NCT/enrollment'] == '')
+						{
+							$result[$index]['NCT/enrollment'] = 0;
+						}
 						if($rvalue['NCT/enrollment'] < $enroll[0] || $rvalue['NCT/enrollment'] > $enroll[1])
 						{	
 							foreach($Trials['allTrials'] as $k => $v)
