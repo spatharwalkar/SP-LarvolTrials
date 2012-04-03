@@ -645,11 +645,12 @@ function Download_reports()
 	if(!isset($_POST['id'])) return;
 	$id = mysql_real_escape_string(htmlspecialchars($_POST['id']));
 	if(!is_numeric($id)) return;
-	$query = 'SELECT name,user,footnotes,description,category FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
+	$query = 'SELECT name,user,footnotes,description,category,shared FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
 	$res = mysql_query($query) or die('Bad SQL query getting master heatmap report');
 	$res = mysql_fetch_array($res) or die('Report not found.');
 	$rptu = $res['user'];
-	if($rptu !== NULL && $rptu != $db->user->id) return;	//prevent anyone from viewing others' private reports
+	$shared = $res['shared'];
+	if($rptu !== NULL && $rptu != $db->user->id && !$shared) return;	//prevent anyone from viewing others' private reports
 	$name = $res['name'];
 	$footnotes = htmlspecialchars($res['footnotes']);
 	$description = htmlspecialchars($res['description']);
