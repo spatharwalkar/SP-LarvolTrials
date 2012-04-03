@@ -5881,8 +5881,6 @@ class TrialTracker
 						$Array2[$indx][$key] = $value;
 					}
 				}
-				$Array2[$indx]['source'] = NULL;
-				$Array2[$indx]['manual_larvol_id'] = NULL;
 				++$indx;
 			}
 			
@@ -6623,8 +6621,6 @@ class TrialTracker
 						$Array2[$indx][$key] = $value;
 					}
 				}
-				$Array2[$indx]['source'] = NULL;
-				$Array2[$indx]['manual_larvol_id'] = NULL;
 				++$indx;
 			}
 			
@@ -7299,7 +7295,7 @@ class TrialTracker
 		$timeInterval = '-' . (($globalOptions['change'] == '1 quarter') ? '3 months' : $globalOptions['change']);
 		
 		$fieldNames = array('end_date_lastchanged', 'region_lastchanged', 'brief_title_lastchanged', 'acronym_lastchanged', 'lead_sponsor_lastchanged',
-		'overall_status_lastchanged', 'start_date_lastchanged', 'phase_lastchanged', 'enrollment_lastchanged', 
+		'overall_status_lastchanged', 'start_date_lastchanged', 'phase_lastchanged', 'enrollment_lastchanged', 'enrollment_type_lastchanged',
 		'collaborator_lastchanged', 'condition_lastchanged', 'intervention_name_lastchanged');
 		
 		if(isset($globalOptions['itype']) && !empty($globalOptions['itype'])) 
@@ -7340,8 +7336,12 @@ class TrialTracker
 			{
 				$query = "SELECT dt.`larvol_id`, dt.`source_id`, dt.`brief_title`, dt.`acronym`, dt.`lead_sponsor`, dt.`collaborator`, dt.`condition`,"
 						. " dt.`overall_status`, dt.`is_active`, dt.`start_date`, dt.`end_date`, dt.`enrollment`, dt.`enrollment_type`, dt.`intervention_name`,"
-						. " dt.`region`, dt.`lastchanged_date`, dt.`phase`, dt.`overall_status`, dt.`lastchanged_date`, dt.`firstreceived_date`, dt.`viewcount`, "
-						. " dm.`larvol_id` AS manual_larvol_id, dt.`source` "
+						. " dt.`region`, dt.`lastchanged_date`, dt.`phase`, dt.`firstreceived_date`, dt.`viewcount`, dt.`source`,"
+						. " dm.`larvol_id` AS manual_larvol_id, dm.`is_sourceless` AS manual_is_sourceless, dm.`brief_title` AS manual_brief_title,"
+						. " dm.`acronym` AS manual_acronym, dm.`lead_sponsor` AS manual_lead_sponsor, dm.`collaborator` AS manual_collaborator,"
+						. " dm.`condition` AS manual_condition, dm.`overall_status` AS manual_overall_status, dm.`start_date` AS manual_start_date,"
+						. " dm.`end_date` AS manual_end_date, dm.`enrollment` AS manual_enrollment, dm.`enrollment_type` AS manual_enrollment_type,"
+						. " dm.`intervention_name` AS manual_intervention_name, dm.`phase` AS manual_phase "
 						. " FROM `data_trials` dt "
 						. " JOIN `product_trials` pt ON dt.`larvol_id` = pt.`trial` "
 						. " JOIN `area_trials` at ON dt.`larvol_id` = at.`trial` "
@@ -7391,7 +7391,21 @@ class TrialTracker
 				$result[$index]['edited'] = array();
 				$result[$index]['viewcount'] = $row['viewcount']; 
 				$result[$index]['source'] = $row['source']; 
+
 				$result[$index]['manual_larvol_id'] = $row['manual_larvol_id']; 
+				$result[$index]['manual_brief_title'] = $row['manual_brief_title']; 
+				$result[$index]['manual_acronym'] = $row['manual_acronym']; 
+				$result[$index]['manual_lead_sponsor'] = $row['manual_lead_sponsor']; 
+				$result[$index]['manual_collaborator'] = $row['manual_collaborator']; 
+				$result[$index]['manual_condition'] = $row['manual_condition']; 
+				$result[$index]['manual_overall_status'] = $row['manual_overall_status']; 
+				$result[$index]['manual_start_date'] = $row['manual_start_date']; 
+				$result[$index]['manual_end_date'] = $row['manual_end_date']; 
+				$result[$index]['manual_enrollment'] = $row['manual_enrollment']; 
+				$result[$index]['manual_enrollment_type'] = $row['manual_enrollment_type']; 
+				$result[$index]['manual_intervention_name'] = $row['manual_intervention_name']; 
+				$result[$index]['manual_phase'] = $row['manual_phase'];
+				$result[$index]['manual_is_sourceless'] = $row['manual_is_sourceless'];
 				
 				if($row['firstreceived_date'] <= date('Y-m-d', $timeMachine) && $row['firstreceived_date'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
 				{
@@ -7399,10 +7413,10 @@ class TrialTracker
 				}
 							
 				if($row['lastchanged_date'] <= date('Y-m-d', $timeMachine) && $row['lastchanged_date'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
-				{					
+				{			
 					$uquery = "SELECT `end_date_prev`, `region_prev`, `brief_title_prev`, `acronym_prev`, `lead_sponsor_prev`, `overall_status_prev`, "
-							. "`overall_status_lastchanged`, `start_date_prev`, `phase_prev`, `enrollment_prev`, `collaborator_prev`, `condition_prev`, "
-							. " `intervention_name_prev`, `"
+							. "`overall_status_lastchanged`, `start_date_prev`, `phase_prev`, `enrollment_prev`, `enrollment_type_prev`,`collaborator_prev`, "
+							. " `condition_prev`, `intervention_name_prev`, `"
 							. implode("`, `", $fieldNames) . "` FROM `data_history` WHERE `larvol_id` = '" . $row['larvol_id'] . "' AND ( (`" 
 							. implode('` BETWEEN "' . date('Y-m-d', strtotime($timeInterval, $timeMachine)) . '" AND "' . date('Y-m-d', $timeMachine) 
 							. '") OR (`', $fieldNames) . "` BETWEEN '" . date('Y-m-d', strtotime($timeInterval, $timeMachine)) . "' AND '" 
@@ -8393,8 +8407,6 @@ class TrialTracker
 						$Array2[$indx][$key] = $value;
 					}
 				}
-				$Array2[$indx]['source'] = NULL;
-				$Array2[$indx]['manual_larvol_id'] = NULL;
 				++$indx;
 			}
 			
@@ -9453,7 +9465,7 @@ class TrialTracker
 				. (in_array('3', $globalOptions['status']) ? 'checked = "checked" ' : '') . '/>Active, not recruiting<br/>'
 				. '<input type="checkbox" class="status" value="4" '
 				. (in_array('4', $globalOptions['status']) ? 'checked = "checked" ' : '') . '/>Available<br/>'
-				. '<input type="checkbox" class="status" value="5" '
+				. '<input type="checkbox" class="status" value="5" ' 
 				. (in_array('5', $globalOptions['status']) ? 'checked = "checked" ' : '') . '/>No longer recruiting<br/>';
 		}
 		echo  '</div></td>';
@@ -9764,7 +9776,7 @@ class TrialTracker
 		
 		for($i=$start; $i<$end; $i++) 
 		{ 	
-			if($i%2 == 1)  
+			if($i%2 == 1) 
 				$rowOneType = 'alttitle';
 			else
 				$rowOneType = 'title';
@@ -9871,33 +9883,56 @@ class TrialTracker
 			
 			//acroynm and title column
 			$attr = ' ';
-			if(!empty($trials[$i]['edited']) && array_key_exists('NCT/brief_title', $trials[$i]['edited'])) 
-			{
-				$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/brief_title'];
-				$titleLinkColor = '#FF0000;';
-			} 
-			else if($trials[$i]['new'] == 'y') 
-			{
-				$attr = '" title="New record';
-				$titleLinkColor = '#FF0000;';
+			if(isset($trials[$i]['manual_is_sourceless']))
+			{	//echo 'highlight';
+				if(!empty($trials[$i]['edited']) && array_key_exists('NCT/brief_title', $trials[$i]['edited'])) 
+				{
+					$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/brief_title'];
+					$titleLinkColor = '#FF0000;';
+				} 
+				elseif($trials[$i]['new'] == 'y') 
+				{
+					$attr = '" title="New record';
+					$titleLinkColor = '#FF0000;';
+				}
+				elseif((isset($trials[$i]['manual_brief_title']) && $trials[$i]['manual_brief_title'] !== NULL)
+				|| (isset($trials[$i]['manual_acronym']) && $trials[$i]['manual_acronym'] !== NULL))
+				{
+					$attr = '" title="Manual curation';
+					$titleLinkColor = '#FF7700';
+				}
 			}
-			elseif($trials[$i]['manual_larvol_id'] !== NULL)
-			{
-				$attr = '" title="Manual curation';
-				$titleLinkColor = '#FF7700';
+			else
+			{ 	
+				if((isset($trials[$i]['manual_brief_title']) && $trials[$i]['manual_brief_title'] !== NULL)
+				|| (isset($trials[$i]['manual_acronym']) && $trials[$i]['manual_acronym'] !== NULL))
+				{
+					$attr = '" title="Manual curation';
+					$titleLinkColor = '#FF7700';
+				}
+				elseif(!empty($trials[$i]['edited']) && array_key_exists('NCT/brief_title', $trials[$i]['edited'])) 
+				{
+					$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/brief_title'];
+					$titleLinkColor = '#FF0000;';
+				} 
+				elseif($trials[$i]['new'] == 'y') 
+				{
+					$attr = '" title="New record';
+					$titleLinkColor = '#FF0000;';
+				}
 			}
-							
-			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse"><a style="color:' . $titleLinkColor . '"  ';
+			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr 
+						. '"><div class="rowcollapse"><a style="color:' . $titleLinkColor . '"  ';
 			if($trials[$i]['NCT/nct_id'] !== '' && $trials[$i]['NCT/nct_id'] !== NULL)
-			{ 
+			{  
 				$outputStr .= ' href="http://clinicaltrials.gov/ct2/show/' . padnct($trials[$i]['NCT/nct_id']) . '" ';
 			}
-			else if($trials[$i]['source'] !== '' && $trials[$i]['source'] !== NULL)
+			else if(isset($trials[$i]['source']) && $trials[$i]['source'] !== '' && $trials[$i]['source'] !== NULL)
 			{
 				$outputStr .= ' href="' . $trials[$i]['source'] . '" ';
 			}
 			else 
-			{
+			{ 
 				$outputStr .= ' href="javascript:void(0);" ';
 			}
 			$outputStr .= ' target="_blank" ';
@@ -9926,20 +9961,45 @@ class TrialTracker
 				
 			//enrollment column
 			$attr = ' ';
-			if(!empty($trials[$i]['edited']) && array_key_exists('NCT/enrollment',$trials[$i]['edited']) 
+			if(isset($trials[$i]['manual_is_sourceless']))
+			{
+				if(!empty($trials[$i]['edited']) && array_key_exists('NCT/enrollment',$trials[$i]['edited']) 
 				&& (getDifference(substr($trials[$i]['edited']['NCT/enrollment'],16), $trials[$i]['NCT/enrollment']))) 
-			{
-				$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/enrollment'];
-				$enrollStyle = 'color:#973535;';
+				{
+					$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/enrollment'];
+					$enrollStyle = 'color:#973535;';
+				}
+				else if($trials[$i]['new'] == 'y') 
+				{
+					$attr = '" title="New record';
+					$enrollStyle = 'color:#973535;';
+				}
+				elseif((isset($trials[$i]['manual_enrollment']) && $trials[$i]['manual_enrollment'] !== NULL)
+				|| (isset($trials[$i]['manual_enrollment_type']) && $trials[$i]['manual_enrollment_type'] !== NULL))
+				{
+					$attr = ' manual" title="Manual curation';
+					$enrollStyle = 'color:#C7846D;';
+				}
 			}
-			else if($trials[$i]['new'] == 'y') 
+			else
 			{
-				$attr = '" title="New record';
-				$enrollStyle = 'color:#973535;';
-			}
-			elseif($trials[$i]['manual_larvol_id'] !== NULL)
-			{
-				$attr = ' manual" title="Manual curation';
+				if((isset($trials[$i]['manual_enrollment']) && $trials[$i]['manual_enrollment'] !== NULL)
+				|| (isset($trials[$i]['manual_enrollment_type']) && $trials[$i]['manual_enrollment_type'] !== NULL))
+				{
+					$attr = ' manual" title="Manual curation';
+					$enrollStyle = 'color:#C7846D;';
+				}
+				elseif(!empty($trials[$i]['edited']) && array_key_exists('NCT/enrollment',$trials[$i]['edited']) 
+				&& (getDifference(substr($trials[$i]['edited']['NCT/enrollment'],16), $trials[$i]['NCT/enrollment']))) 
+				{
+					$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/enrollment'];
+					$enrollStyle = 'color:#973535;';
+				}
+				else if($trials[$i]['new'] == 'y') 
+				{
+					$attr = '" title="New record';
+					$enrollStyle = 'color:#973535;';
+				}
 			}
 			$outputStr .= '<td nowrap="nowrap" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">';
 			if($trials[$i]["NCT/enrollment_type"] != '') 
@@ -9976,17 +10036,35 @@ class TrialTracker
 				
 			//intervention name column
 			$attr = ' ';
-			if(!empty($trials[$i]['edited']) && array_key_exists('NCT/intervention_name', $trials[$i]['edited']))
+			if(isset($trials[$i]['manual_is_sourceless']))
 			{
-				$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/intervention_name'];
-			} 
-			else if($trials[$i]['new'] == 'y')
-			{
-				$attr = '" title="New record';
+				if(!empty($trials[$i]['edited']) && array_key_exists('NCT/intervention_name', $trials[$i]['edited']))
+				{
+					$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/intervention_name'];
+				} 
+				else if($trials[$i]['new'] == 'y')
+				{
+					$attr = '" title="New record';
+				}
+				elseif(isset($trials[$i]['manual_intervention_name']) && $trials[$i]['manual_intervention_name'] !== NULL)
+				{
+					$attr = ' manual" title="Manual curation';
+				}
 			}
-			elseif($trials[$i]['manual_larvol_id'] !== NULL)
+			else
 			{
-				$attr = ' manual" title="Manual curation';
+				if(isset($trials[$i]['manual_intervention_name']) && $trials[$i]['manual_intervention_name'] !== NULL)
+				{
+					$attr = ' manual" title="Manual curation';
+				}
+				elseif(!empty($trials[$i]['edited']) && array_key_exists('NCT/intervention_name', $trials[$i]['edited']))
+				{
+					$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/intervention_name'];
+				} 
+				else if($trials[$i]['new'] == 'y')
+				{
+					$attr = '" title="New record';
+				}
 			}
 			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
 						. '<div class="rowcollapse">' . $trials[$i]['NCT/intervention_name'] . '</div></td>';
@@ -9994,29 +10072,58 @@ class TrialTracker
 
 			//collaborator and sponsor column
 			$attr = ' ';
-			if(!empty($trials[$i]['edited']) && (array_key_exists('NCT/collaborator', $trials[$i]['edited']) 
-			|| array_key_exists('NCT/lead_sponsor', $trials[$i]['edited']))) 
+			if(isset($trials[$i]['manual_is_sourceless']))
 			{
-					
-				$attr = ' highlight" title="';
-				if(array_key_exists('NCT/lead_sponsor', $trials[$i]['edited']))
+				if(!empty($trials[$i]['edited']) && (array_key_exists('NCT/collaborator', $trials[$i]['edited']) 
+				|| array_key_exists('NCT/lead_sponsor', $trials[$i]['edited']))) 
 				{
-					$attr .= $trials[$i]['edited']['NCT/lead_sponsor'] . ' ';
-				}
-				if(array_key_exists('NCT/collaborator', $trials[$i]['edited'])) 
+					$attr = ' highlight" title="';
+					if(array_key_exists('NCT/lead_sponsor', $trials[$i]['edited']))
+					{
+						$attr .= $trials[$i]['edited']['NCT/lead_sponsor'] . ' ';
+					}
+					if(array_key_exists('NCT/collaborator', $trials[$i]['edited'])) 
+					{
+						$attr .= $trials[$i]['edited']['NCT/collaborator'];
+						$enrollStyle = 'color:#973535;';
+					}
+					$attr .= '';
+				} 
+				else if($trials[$i]['new'] == 'y') 
 				{
-					$attr .= $trials[$i]['edited']['NCT/collaborator'];
-					$enrollStyle = 'color:#973535;';
+					$attr = '" title="New record';
 				}
-				$attr .= '';
-			} 
-			else if($trials[$i]['new'] == 'y') 
-			{
-				$attr = '" title="New record';
+				elseif((isset($trials[$i]['manual_lead_sponsor']) && $trials[$i]['manual_lead_sponsor'] !== NULL)
+				|| (isset($trials[$i]['manual_collaborator']) && $trials[$i]['manual_collaborator'] !== NULL))
+				{
+					$attr = ' manual" title="Manual curation';
+				}
 			}
-			elseif($trials[$i]['manual_larvol_id'] !== NULL)
+			else
 			{
-				$attr = ' manual" title="Manual curation';
+				if((isset($trials[$i]['manual_lead_sponsor']) && $trials[$i]['manual_lead_sponsor'] !== NULL)
+				|| (isset($trials[$i]['manual_collaborator']) && $trials[$i]['manual_collaborator'] !== NULL))
+				{
+					$attr = ' manual" title="Manual curation';
+				}
+				elseif(!empty($trials[$i]['edited']) && (array_key_exists('NCT/collaborator', $trials[$i]['edited']) 
+				|| array_key_exists('NCT/lead_sponsor', $trials[$i]['edited']))) 
+				{
+					$attr = ' highlight" title="';
+					if(array_key_exists('NCT/lead_sponsor', $trials[$i]['edited']))
+					{
+						$attr .= $trials[$i]['edited']['NCT/lead_sponsor'] . ' ';
+					}
+					if(array_key_exists('NCT/collaborator', $trials[$i]['edited'])) 
+					{
+						$attr .= $trials[$i]['edited']['NCT/collaborator'];
+					}
+					$attr .= '';
+				} 
+				else if($trials[$i]['new'] == 'y') 
+				{
+					$attr = '" title="New record';
+				}
 			}
 			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
 						. '<div class="rowcollapse">' . $trials[$i]['NCT/lead_sponsor'] . ' <span style="' . $enrollStyle . '"> ' 
@@ -10025,36 +10132,72 @@ class TrialTracker
 
 			//overall status column
 			$attr = ' ';
-			if(!empty($trials[$i]['edited']) && array_key_exists('NCT/overall_status', $trials[$i]['edited'])) 
+			if(isset($trials[$i]['manual_is_sourceless']))
 			{
-				$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/overall_status'];
-			} 
-			else if($trials[$i]['new'] == 'y') 
+				if(!empty($trials[$i]['edited']) && array_key_exists('NCT/overall_status', $trials[$i]['edited'])) 
+				{
+					$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/overall_status'];
+				} 
+				else if($trials[$i]['new'] == 'y') 
+				{
+					$attr = '" title="New record' ;
+				} 
+				elseif(isset($trials[$i]['manual_overall_status']) && $trials[$i]['manual_overall_status'] !== NULL)
+				{
+					$attr = ' manual" title="Manual curation';
+				}
+			}
+			else
 			{
-				$attr = '" title="New record' ;
-			} 
-			elseif($trials[$i]['manual_larvol_id'] !== NULL)
-			{
-				$attr = ' manual" title="Manual curation';
+				if(isset($trials[$i]['manual_overall_status']) && $trials[$i]['manual_overall_status'] !== NULL)
+				{
+					$attr = ' manual" title="Manual curation';
+				}
+				elseif(!empty($trials[$i]['edited']) && array_key_exists('NCT/overall_status', $trials[$i]['edited'])) 
+				{
+					$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/overall_status'];
+				} 
+				else if($trials[$i]['new'] == 'y') 
+				{
+					$attr = '" title="New record' ;
+				} 
 			}
 			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">' . '<div class="rowcollapse">' 
-							. (($trials[$i]['NCT/overall_status'] != '' && $trials[$i]['NCT/overall_status'] !== NULL) ? $trials[$i]['NCT/overall_status'] : '&nbsp;')
-							. '</div></td>';
+						. (($trials[$i]['NCT/overall_status'] != '' && $trials[$i]['NCT/overall_status'] !== NULL) ? $trials[$i]['NCT/overall_status'] : '&nbsp;')
+						. '</div></td>';
 				
 				
 			//condition column
 			$attr = ' ';
-			if(!empty($trials[$i]['edited']) && array_key_exists('NCT/condition', $trials[$i]['edited'])) 
+			if(isset($trials[$i]['manual_is_sourceless']))
 			{
-				$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/condition'];
-			} 
-			else if($trials[$i]['new'] == 'y') 
-			{
-				$attr = '" title="New record';
+				if(!empty($trials[$i]['edited']) && array_key_exists('NCT/condition', $trials[$i]['edited'])) 
+				{
+					$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/condition'];
+				} 
+				else if($trials[$i]['new'] == 'y') 
+				{
+					$attr = '" title="New record';
+				}
+				if(isset($trials[$i]['manual_condition']) && $trials[$i]['manual_condition'] !== NULL)
+				{
+					$attr = ' manual" title="Manual curation';
+				}
 			}
-			elseif($trials[$i]['manual_larvol_id'] !== NULL)
+			else
 			{
-				$attr = ' manual" title="Manual curation';
+				if(isset($trials[$i]['manual_condition']) && $trials[$i]['manual_condition'] !== NULL)
+				{
+					$attr = ' manual" title="Manual curation';
+				}
+				elseif(!empty($trials[$i]['edited']) && array_key_exists('NCT/condition', $trials[$i]['edited'])) 
+				{
+					$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/condition'];
+				} 
+				else if($trials[$i]['new'] == 'y') 
+				{
+					$attr = '" title="New record';
+				}
 			}
 			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
 						. '<div class="rowcollapse">' . $trials[$i]['NCT/condition'] . '</div></td>';
@@ -10062,17 +10205,35 @@ class TrialTracker
 				
 			//start date column
 			$attr = ' ';
-			if(!empty($trials[$i]['edited']) && array_key_exists('NCT/start_date', $trials[$i]['edited'])) 
+			if(isset($trials[$i]['manual_is_sourceless']))
 			{
-				$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/start_date'] ;
-			} 
-			else if($trials[$i]['new'] == 'y') 
-			{
-				$attr = '" title="New record';
+				if(!empty($trials[$i]['edited']) && array_key_exists('NCT/start_date', $trials[$i]['edited'])) 
+				{
+					$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/start_date'] ;
+				} 
+				else if($trials[$i]['new'] == 'y') 
+				{
+					$attr = '" title="New record';
+				}
+				if(isset($trials[$i]['manual_start_date']) && $trials[$i]['manual_start_date'] !== NULL)
+				{
+					$attr = ' manual" title="Manual curation';
+				}
 			}
-			elseif($trials[$i]['manual_larvol_id'] !== NULL)
+			else
 			{
-				$attr = ' manual" title="Manual curation';
+				if(isset($trials[$i]['manual_start_date']) && $trials[$i]['manual_start_date'] !== NULL)
+				{
+					$attr = ' manual" title="Manual curation';
+				}
+				elseif(!empty($trials[$i]['edited']) && array_key_exists('NCT/start_date', $trials[$i]['edited'])) 
+				{
+					$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/start_date'] ;
+				} 
+				else if($trials[$i]['new'] == 'y') 
+				{
+					$attr = '" title="New record';
+				}
 			}
 			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">'; 
 			if($trials[$i]["NCT/start_date"] != '' && $trials[$i]["NCT/start_date"] != NULL && $trials[$i]["NCT/start_date"] != '0000-00-00') 
@@ -10088,17 +10249,35 @@ class TrialTracker
 				
 			//end date column
 			$attr = ' ';
-			if(!empty($trials[$i]['edited']) && array_key_exists('inactive_date', $trials[$i]['edited'])) 
+			if(isset($trials[$i]['manual_is_sourceless']))
 			{
-				$attr = ' highlight" title="' . $trials[$i]['edited']['inactive_date'];
-			} 
-			else if($trials[$i]['new'] == 'y') 
+				if(!empty($trials[$i]['edited']) && array_key_exists('inactive_date', $trials[$i]['edited'])) 
+				{
+					$attr = ' highlight" title="' . $trials[$i]['edited']['inactive_date'];
+				} 
+				else if($trials[$i]['new'] == 'y') 
+				{
+					$attr = '" title="New record';
+				}	
+				elseif(isset($trials[$i]['manual_end_date']) && $trials[$i]['manual_end_date'] !== NULL)
+				{
+					$attr = ' manual" title="Manual curation';
+				}
+			}
+			else
 			{
-				$attr = '" title="New record';
-			}	
-			elseif($trials[$i]['manual_larvol_id'] !== NULL)
-			{
-				$attr = ' manual" title="Manual curation';
+				if(isset($trials[$i]['manual_end_date']) && $trials[$i]['manual_end_date'] !== NULL)
+				{
+					$attr = ' manual" title="Manual curation';
+				}
+				elseif(!empty($trials[$i]['edited']) && array_key_exists('inactive_date', $trials[$i]['edited'])) 
+				{
+					$attr = ' highlight" title="' . $trials[$i]['edited']['inactive_date'];
+				} 
+				elseif($trials[$i]['new'] == 'y') 
+				{
+					$attr = '" title="New record';
+				}	
 			}
 			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">'; 
 			if($trials[$i]["inactive_date"] != '' && $trials[$i]["inactive_date"] != NULL && $trials[$i]["inactive_date"] != '0000-00-00') 
@@ -10114,18 +10293,35 @@ class TrialTracker
 											
 			//phase column
 			$attr = ' ';
-			if(!empty($trials[$i]['edited']) && array_key_exists('NCT/phase', $trials[$i]['edited'])) 
-
+			if(isset($trials[$i]['manual_is_sourceless']))
 			{
-				$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/phase'];
-			} 
-			else if($trials[$i]['new'] == 'y') 
-			{
-				$attr = '" title="New record';
+				if(!empty($trials[$i]['edited']) && array_key_exists('NCT/phase', $trials[$i]['edited'])) 
+				{
+					$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/phase'];
+				} 
+				elseif($trials[$i]['new'] == 'y') 
+				{
+					$attr = '" title="New record';
+				}
+				elseif(isset($trials[$i]['manual_phase']) && $trials[$i]['manual_phase'] !== NULL)
+				{
+					$attr = ' manual" title="Manual curation';
+				}
 			}
-			elseif($trials[$i]['manual_larvol_id'] !== NULL)
+			else
 			{
-				$attr = ' manual" title="Manual curation';
+				if(isset($trials[$i]['manual_phase']) && $trials[$i]['manual_phase'] !== NULL)
+				{
+					$attr = ' manual" title="Manual curation';
+				}
+				elseif(!empty($trials[$i]['edited']) && array_key_exists('NCT/phase', $trials[$i]['edited'])) 
+				{
+					$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/phase'];
+				} 
+				elseif($trials[$i]['new'] == 'y') 
+				{
+					$attr = '" title="New record';
+				}
 			}
 			if($trials[$i]['NCT/phase'] == 'N/A' || $trials[$i]['NCT/phase'] == '' || $trials[$i]['NCT/phase'] === NULL)
 			{
