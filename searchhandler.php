@@ -721,7 +721,7 @@ function getWhereString($data, $alias, $pd_alias, $ar_alias)
 				$wstr = str_replace('%s', $column_value, $wstr);
 			}
 			else {
-				$xx = split('and;endl', $column_value);//and;endl
+				$xx = explode('and;endl', $column_value);//and;endl
 				$wstr = str_replace('%s1', $xx[0],$wstr);
 				$wstr = str_replace('%s2', $xx[1],$wstr);
 			}
