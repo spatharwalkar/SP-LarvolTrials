@@ -36,8 +36,8 @@ $Flg=0;
 <title>List of Bad Searches from <?php print $table_name ?> Table</title>
 <style type="text/css">
 body { font-family:Verdana; font-color:black; font-size: 14px;}
-td, th {vertical-align:top; padding-top:10px; padding-left:10px; border-right: 0.5px solid; border-left:0.5px solid; border-top: 0.5px solid; border-bottom:0.5px solid;}
-tr {border-right: 0.5px solid; border-left: 0.5px solid; border-top: 0.5px solid; border-bottom: 0.5px solid;}
+td, th {vertical-align:top; padding-top:10px; padding-left:10px; border-right: 1px solid; border-left:1px solid; border-top: 1px solid; border-bottom:1px solid;}
+tr {border-right: 1px solid; border-left: 1px solid; border-top: 1px solid; border-bottom: 1px solid;}
 </style>
 </head>
 
