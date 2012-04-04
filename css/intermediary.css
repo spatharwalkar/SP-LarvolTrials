@@ -349,5 +349,19 @@ tr.upms td {
 }
 
 .manual {
-	color:#FF7700;	
+	color:#FF7700;
+}
+
+.jdpicker_w
+{
+	width:90px;
+	float:left;
+}
+
+.jdpicker
+{
+	border:0;
+	color:#f6931f;
+	font-weight:bold;
+	width:100px;
 }

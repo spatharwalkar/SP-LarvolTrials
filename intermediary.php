@@ -69,7 +69,6 @@ $globalOptions['itype'] = array();
 $globalOptions['region'] = array();
 $globalOptions['phase'] = array();
 
-$globalOptions['change'] = '1 month';
 $globalOptions['version'] = rawurlencode(base64_encode('0'));
 
 $globalOptions['page'] = 1;
@@ -79,6 +78,9 @@ $globalOptions['LI'] = "0";
 $globalOptions['minEnroll'] = "0";
 $globalOptions['maxEnroll'] = "0";
 $globalOptions['product'] = "";
+
+$globalOptions['startrange'] = "now";
+$globalOptions['endrange'] = "1 month ago";
 
 if(isset($_GET['change']))
 {
@@ -96,13 +98,36 @@ if(isset($_GET['enroll']) && $_GET['enroll'] != '0')
 	$globalOptions['enroll'] = $_GET['enroll'];
 }
 
-switch($globalOptions['change'])
+if(isset($_GET['sr']))
+{	
+	$globalOptions['startrange'] = $_GET['sr'];
+}
+
+if(isset($_GET['er']))
+{	
+	$globalOptions['endrange'] = $_GET['er'];
+}
+
+switch($globalOptions['startrange'])
 {
-	case "1 week": $change_value = 1; break;
-	case "2 weeks": $change_value = 2; break;
-	case "1 month": $change_value = 3; break;
-	case "1 quarter": $change_value = 4; break;
-	case "1 year": $change_value = 5; break;
+	case "now": $starttimerange = 0; break;
+	case "1 week ago": $starttimerange = 1; break;
+	case "2 weeks ago": $starttimerange = 2; break;
+	case "1 month ago": $starttimerange = 3; break;
+	case "1 quarter ago": $starttimerange = 4; break;
+	case "1 year ago": $starttimerange = 5; break;
+	default: $starttimerange = 0; break;
+}
+
+switch($globalOptions['endrange'])
+{
+	case "now": $endtimerange = 0; break;
+	case "1 week ago": $endtimerange = 1; break;
+	case "2 weeks ago": $endtimerange = 2; break;
+	case "1 month ago": $endtimerange = 3; break;
+	case "1 quarter ago": $endtimerange = 4; break;
+	case "1 year ago": $endtimerange = 5; break;
+	default: $endtimerange = 3; break;
 }
 	
 $lastChangedTime = filectime("css/intermediary.css");
@@ -115,10 +140,16 @@ $lastChangedTime = filectime("css/intermediary.css");
     <title>Online Trial Tracker</title>
     <link href="css/intermediary.css?t=<?php echo $lastChangedTime;?>" rel="stylesheet" type="text/css" media="all" />
     <link href="css/themes/cupertino/jquery-ui-1.8.17.custom.css" rel="stylesheet" type="text/css" media="all" />
+    <link href="date/date_input.css" rel="stylesheet" type="text/css" media="all" />
+    <link href="scripts/date/jdpicker.css" rel="stylesheet" type="text/css" media="screen" />
     <script src="scripts/jquery.js" type="text/javascript"></script>
     <script src="scripts/func.js" type="text/javascript"></script>	
     <script src="scripts/jquery-1.7.1.min.js"></script>
 	<script src="scripts/jquery-ui-1.8.17.custom.min.js"></script>
+	<!--<script type="text/javascript" src="date/jquery.js"></script>-->
+    <script type="text/javascript" src="date/jquery.date_input.js"></script>
+    <script type="text/javascript" src="scripts/date/jquery.jdpicker.js"></script>
+    <script type="text/javascript" src="date/init.js"></script>
     <script type="text/javascript">
 		var _gaq = _gaq || [];
 		_gaq.push(['_setAccount', 'UA-18240582-3']);
@@ -177,34 +208,8 @@ $lastChangedTime = filectime("css/intermediary.css");
       }
     //]]>
 	
-	function timeEnum($timerange)
-	{
-		switch($timerange)
-		{
-			case 1: $timerange = "1 week"; break;
-			case 2: $timerange = "2 weeks"; break;
-			case 3: $timerange = "1 month"; break;
-			case 4: $timerange = "1 quarter"; break;
-			case 5: $timerange = "1 year"; break;
-		}
-		return $timerange;
-	}
-	
 	$(function() 
 	{
-		$("#slider-range-min").slider({
-			range: "min",
-			value: <?php echo $change_value;?>,
-			min: 1,
-			max: 5,
-			step:1,
-			slide: function( event, ui ) {
-				$("#amount3").val(timeEnum(ui.value));
-			}
-		});
-		$timerange = '<?php echo $globalOptions['change'];?>';
-		$("#amount3").val($timerange);
-		
 		$("#frmOtt").submit(function() 
 		{	
 			//set phase filters
@@ -492,7 +497,36 @@ else
 		$("#amount").val( $("#slider-range").slider("values", 0 ) +
 			" - " + $("#slider-range").slider("values", 1 ) );
 		
+		//highlight changes slider
+		$("#slider-range-min").slider({
+			range: true,
+			min: 0,
+			max: 5,
+			step: 1,
+			values: [ <?php echo $starttimerange;?>, <?php echo $endtimerange;?> ],
+			slide: function(event, ui) {
+				$("#startrange").val(timeEnum(ui.values[0]));
+				$("#endrange").val(timeEnum(ui.values[1]));
+			}
+		});
+		
+		//$("#startrange").val(timeEnum($("#slider-range-min").slider("values", 0)));
+		//$("#endrange").val(timeEnum($("#slider-range-min").slider("values", 1)));
 	});
+
+	function timeEnum($timerange)
+	{
+		switch($timerange)
+		{
+			case 0: $timerange = "now"; break;
+			case 1: $timerange = "1 week ago"; break;
+			case 2: $timerange = "2 weeks ago"; break;
+			case 3: $timerange = "1 month ago"; break;
+			case 4: $timerange = "1 quarter ago"; break;
+			case 5: $timerange = "1 year ago"; break;
+		}
+		return $timerange;
+	}
 	
 	$(window).load(function() 
 	{

@@ -105,8 +105,30 @@ class TrialTracker
 	{	
 		$Values = array();
 		
-		$timeInterval = '-' . (($globalOptions['change'] == '1 quarter') ? '3 months' : $globalOptions['change']);
-							
+		//$timeInterval = '-' . (($globalOptions['change'] == '1 quarter') ? '3 months' : $globalOptions['change']);
+		if(strpos($globalOptions['startrange'], 'ago') !== FALSE)
+		{
+			$timeMachine = str_replace('ago', '', $globalOptions['startrange']);
+			$timeMachine = '-' . (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
+		}
+		else
+		{
+			$timeMachine = $globalOptions['startrange'];
+			$timeMachine = (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
+		}
+		$timeMachine = strtotime($timeMachine);
+
+		if(strpos($globalOptions['endrange'], 'ago') !== FALSE)
+		{
+			$timeInterval = str_replace('ago', '', $globalOptions['endrange']);
+			$timeInterval = '-' . (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
+		}
+		else
+		{
+			$timeInterval = $globalOptions['endrange'];
+			$timeInterval = (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
+		}
+					
 		$currentYear = date('Y');
 		$secondYear	= date('Y')+1;
 		$thirdYear	= date('Y')+2;	
@@ -4274,7 +4296,29 @@ class TrialTracker
 						.'<body>'
 						.'<div align="center"><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="200" height="25" id="header" /></div><br/>';
 		
-		$timeInterval = '-' . (($globalOptions['change'] == '1 quarter') ? '3 months' : $globalOptions['change']);
+		//$timeInterval = '-' . (($globalOptions['change'] == '1 quarter') ? '3 months' : $globalOptions['change']);
+		if(strpos($globalOptions['startrange'], 'ago') !== FALSE)
+		{
+			$timeMachine = str_replace('ago', '', $globalOptions['startrange']);
+			$timeMachine = '-' . (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
+		}
+		else
+		{
+			$timeMachine = $globalOptions['startrange'];
+			$timeMachine = (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
+		}
+		$timeMachine = strtotime($timeMachine);
+
+		if(strpos($globalOptions['endrange'], 'ago') !== FALSE)
+		{
+			$timeInterval = str_replace('ago', '', $globalOptions['endrange']);
+			$timeInterval = '-' . (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
+		}
+		else
+		{
+			$timeInterval = $globalOptions['endrange'];
+			$timeInterval = (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
+		}
 		$Values = array();
 		
 		if($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed')
@@ -5469,8 +5513,30 @@ class TrialTracker
 			$TrialsInfo = array();
 			$Ids = array();
 			
-			$timeInterval = '-' . (($globalOptions['change'] == '1 quarter') ? '3 months' : $globalOptions['change']);
-			
+			//$timeInterval = '-' . (($globalOptions['change'] == '1 quarter') ? '3 months' : $globalOptions['change']);
+			if(strpos($globalOptions['startrange'], 'ago') !== FALSE)
+			{
+				$timeMachine = str_replace('ago', '', $globalOptions['startrange']);
+				$timeMachine = '-' . (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
+			}
+			else
+			{
+				$timeMachine = $globalOptions['startrange'];
+				$timeMachine = (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
+			}
+			$timeMachine = strtotime($timeMachine);
+	
+			if(strpos($globalOptions['endrange'], 'ago') !== FALSE)
+			{
+				$timeInterval = str_replace('ago', '', $globalOptions['endrange']);
+				$timeInterval = '-' . (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
+			}
+			else
+			{
+				$timeInterval = $globalOptions['endrange'];
+				$timeInterval = (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
+			}
+		
 			//$resultIds['product'] = explode(',', $resultIds['product']);
 			//$resultIds['area'] = explode(',', $resultIds['area']);
 			
@@ -5600,8 +5666,6 @@ class TrialTracker
 					$this->displayHeader($t);
 					
 					foreach($resultIds['product'] as $pkey => $pvalue)
-
-
 					{
 						$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id = '" . $pvalue . "' ");
 						if(mysql_num_rows($res) > 0)
@@ -5647,7 +5711,7 @@ class TrialTracker
 			echo '<input type="hidden" name="p" value="' . $_GET['p'] . '"/><input type="hidden" name="a" value="' . $_GET['a'] . '"/>';
 			
 			if(isset($_GET['JSON_search']))
-			echo '<input type="hidden" name="JSON_search" value=\'' . $_GET['JSON_search'] . '\'/>';
+			echo '<input type="hidden"  name="JSON_search" value=\'' . $_GET['JSON_search'] . '\'/>';
 			
 			$Values = $this->processIndexedOTTData($ottType, $Ids, $timeMachine, $globalOptions);
 			
@@ -5680,7 +5744,7 @@ class TrialTracker
 			
 			echo '<input type="hidden" name="id" value="' . $Id . '"/>';
 			
-			$timeMachine = strtotime($row['time']);
+			//$timeMachine = strtotime($row['time']);
 			$globalOptions['sectionHeader'] = htmlspecialchars($row['name']);
 			
 			$Values = $this->processStandaloneOTTData($nctIds, $timeMachine, $globalOptions);
@@ -5752,9 +5816,30 @@ class TrialTracker
 	function processOldLinkMethod($ottType, $params, $leadingIds, $globalOptions = array(), $cparams = array())
 	{
 		global $logger;
-		global $now;
 		
-		$timeInterval = '-' . (($globalOptions['change'] == '1 quarter') ? '3 months' : $globalOptions['change']);
+		//timeInterval = '-' . (($globalOptions['change'] == '1 quarter') ? '3 months' : $globalOptions['change']);
+		if(strpos($globalOptions['startrange'], 'ago') !== FALSE)
+		{
+			$timeMachine = str_replace('ago', '', $globalOptions['startrange']);
+			$timeMachine = '-' . (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
+		}
+		else
+		{
+			$timeMachine = $globalOptions['startrange'];
+			$timeMachine = (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
+		}
+		$timeMachine = strtotime($timeMachine);
+
+		if(strpos($globalOptions['endrange'], 'ago') !== FALSE)
+		{
+			$timeInterval = str_replace('ago', '', $globalOptions['endrange']);
+			$timeInterval = '-' . (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
+		}
+		else
+		{
+			$timeInterval = $globalOptions['endrange'];
+			$timeInterval = (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
+		}
 		
 		$Trials = array();
 		$TrialsInfo = array();
@@ -5790,7 +5875,7 @@ class TrialTracker
 			$params3 = array();
 			
 			$pval = unserialize(gzinflate(base64_decode($pvalue)));
-			$timeMachine = $pval['time'];
+			//$timeMachine = $pval['time'];
 			
 			if(!empty($cparams))
 			{	
@@ -6544,6 +6629,30 @@ class TrialTracker
 		$totinactivecount = 0;
 		$totactivecount = 0;
 		$totalcount = 0;
+
+		if(strpos($globalOptions['startrange'], 'ago') !== FALSE)
+		{
+			$timeMachine = str_replace('ago', '', $globalOptions['startrange']);
+			$timeMachine = '-' . (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
+		}
+		else
+		{
+			$timeMachine = $globalOptions['startrange'];
+			$timeMachine = (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
+		}
+		$timeMachine = strtotime($timeMachine);
+
+		if(strpos($globalOptions['endrange'], 'ago') !== FALSE)
+		{
+			$timeInterval = str_replace('ago', '', $globalOptions['endrange']);
+			$timeInterval = '-' . (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
+		}
+		else
+		{
+			$timeInterval = $globalOptions['endrange'];
+			$timeInterval = (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
+		}
+		
 		foreach($resultIds as $ikey => $ivalue)
 		{
 			$activeCount = 0;
@@ -7288,7 +7397,7 @@ class TrialTracker
 	
 	function processIndexedOTTData($ottType, $Ids = array(), $timeMachine = NULL, $globalOptions = array())
 	{	
-		global $logger, $now;
+		global $logger;
 		
 		$Trials = array();
 		$Trials['inactiveTrials'] = array();
@@ -7306,9 +7415,28 @@ class TrialTracker
 									'1/2'=>'2', '1b/2'=>'2', '1b/2a'=>'2', '2'=>'2', '2a'=>'2', '2a/2b'=>'2', '2a/b'=>'2', '2b'=>'2', 
 									'2/3'=>'3', '2b/3'=>'3','3'=>'3', '3a'=>'3', '3b'=>'3', '3/4'=>'4', '3b/4'=>'4', '4'=>'4');
 		
-		if($timeMachine === NULL) $timeMachine = $now;
-		
-		$timeInterval = '-' . (($globalOptions['change'] == '1 quarter') ? '3 months' : $globalOptions['change']);
+		if(strpos($globalOptions['startrange'], 'ago') !== FALSE)
+		{
+			$timeMachine = str_replace('ago', '', $globalOptions['startrange']);
+			$timeMachine = '-' . (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
+		}
+		else
+		{
+			$timeMachine = $globalOptions['startrange'];
+			$timeMachine = (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
+		}
+		$timeMachine = strtotime($timeMachine);
+
+		if(strpos($globalOptions['endrange'], 'ago') !== FALSE)
+		{
+			$timeInterval = str_replace('ago', '', $globalOptions['endrange']);
+			$timeInterval = '-' . (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
+		}
+		else
+		{
+			$timeInterval = $globalOptions['endrange'];
+			$timeInterval = (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
+		}
 		
 		$fieldNames = array('end_date_lastchanged', 'region_lastchanged', 'brief_title_lastchanged', 'acronym_lastchanged', 'lead_sponsor_lastchanged',
 		'overall_status_lastchanged', 'start_date_lastchanged', 'phase_lastchanged', 'enrollment_lastchanged', 'enrollment_type_lastchanged',
@@ -7422,14 +7550,14 @@ class TrialTracker
 				$result[$index]['manual_intervention_name'] = $row['manual_intervention_name']; 
 				$result[$index]['manual_phase'] = $row['manual_phase'];
 				$result[$index]['manual_is_sourceless'] = $row['manual_is_sourceless'];
-				
+						
 				if($row['firstreceived_date'] <= date('Y-m-d', $timeMachine) && $row['firstreceived_date'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
 				{
 					$result[$index]['new'] = 'y';
 				}
 							
 				if($row['lastchanged_date'] <= date('Y-m-d', $timeMachine) && $row['lastchanged_date'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
-				{			
+				{	
 					$uquery = "SELECT `end_date_prev`, `region_prev`, `brief_title_prev`, `acronym_prev`, `lead_sponsor_prev`, `overall_status_prev`, "
 							. "`overall_status_lastchanged`, `start_date_prev`, `phase_prev`, `enrollment_prev`, `enrollment_type_prev`,`collaborator_prev`, "
 							. " `condition_prev`, `intervention_name_prev`, `"
@@ -8215,9 +8343,8 @@ class TrialTracker
 	function processOTTData($ottType, $resultIds, $timeMachine = NULL, $linkExpiryDt = array(), $globalOptions = array())
 	{	
 		global $logger;
-		global $now;
 		
-		$timeInterval = '-' . $globalOptions['change'];
+		//$timeInterval = '-' . $globalOptions['change'];
 		
 		$Ids = array();
 		$Values = array();
@@ -8233,6 +8360,29 @@ class TrialTracker
 		$totinactivecount = 0;
 		$totactivecount = 0;
 		$totalcount = 0;
+
+		if(strpos($globalOptions['startrange'], 'ago') !== FALSE)
+		{
+			$timeMachine = str_replace('ago', '', $globalOptions['startrange']);
+			$timeMachine = '-' . (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
+		}
+		else
+		{
+			$timeMachine = $globalOptions['startrange'];
+			$timeMachine = (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
+		}
+		$timeMachine = strtotime($timeMachine);
+
+		if(strpos($globalOptions['endrange'], 'ago') !== FALSE)
+		{
+			$timeInterval = str_replace('ago', '', $globalOptions['endrange']);
+			$timeInterval = '-' . (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
+		}
+		else
+		{
+			$timeInterval = $globalOptions['endrange'];
+			$timeInterval = (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
+		}
 		
 		foreach($resultIds as $ikey => $ivalue)
 		{
@@ -9262,7 +9412,7 @@ class TrialTracker
 		
 		if($totalcount > 0 && ($ottType != 'unstackedoldlink' && $ottType != 'stackedoldlink')) 
 		{
-			$this->downloadOptions($count, $totalcount, $ottType, $resultIds, $timeMachine, $globalOptions);
+			$this->downloadOptions($count, $totalcount, $ottType, $resultIds, $globalOptions);
 		}
 		echo '<br/><br/>';
 		if($linkExpiry !== NULL && $loggedIn)
@@ -9272,12 +9422,11 @@ class TrialTracker
 		echo '<div style="height:50px;"></div>';	//50Pixels extra space
 	}
 	
-	function downloadOptions($shownCnt, $foundCnt, $ottType, $result, $timeMachine = NULL, $globalOptions) 
+	function downloadOptions($shownCnt, $foundCnt, $ottType, $result, $globalOptions) 
 	{	
 		echo '<div style="height:100px;margin-top:10px;"><div class="drop downldbox"><div class="newtext">Download Options</div>'
 				. '<form  id="frmDOptions" name="frmDOptions" method="post" target="_self">'
-				. '<input type="hidden" name="ottType" value="' . $ottType . '" />'
-				. '<input type="hidden" name="timeMachine" value="' . $timeMachine . '" />';
+				. '<input type="hidden" name="ottType" value="' . $ottType . '" />';
 				foreach($result as $rkey => $rvalue)
 				{
 					if(is_array($rvalue))
@@ -9552,10 +9701,12 @@ class TrialTracker
 				. ' value="' . ((isset($globalOptions['enroll'])) ? $globalOptions['enroll'] : '' ) . '" autocomplete="off" />'
 				. '<div id="slider-range"></div>'
 				. '</p></div><div class="demo"><p style="margin-top:10px;">'
-				. '<label for="amount3">Highlight updates:</label>'
-				. '<input type="text" id="amount3" value="' . (($globalOptions['change'] == '3 months') ? '1 quarter' : $globalOptions['change']) 
-				. '" readonly="readonly" style="border:0; color:#f6931f; font-weight:bold;" />'
-				. '<div id="slider-range-min"></div></p></div>'
+				. '<label for="startrange" style="float:left;">Highlight updates:</label>'
+				. '<input type="text" id="startrange" name="sr" value="' . $globalOptions['startrange'] . '" class="jdpicker" />'
+				. '<label style="color:#f6931f;float:left;">-</label>'
+				. '<input type="text" id="endrange"  name="er" value="' . $globalOptions['endrange'] 
+				. '" style="width:auto;margin-left:15px;" class="jdpicker" />'
+				. '<br/><div id="slider-range-min" style="margin-top:5px;"></div></p></div>'
 				. '<input type="checkbox" id="showonlyupdated" name="osu" ' 
 				. ($globalOptions['onlyUpdates'] == 'yes' ? ' checked="checked" ' : '' ) . ' style="margin-left:20px;" />'
 				. '<label for="showonlyupdated" style="font-size:x-small;">Show only updated trials</label>'
@@ -9591,10 +9742,6 @@ class TrialTracker
 		{
 			$url .= '&amp;v=' . $globalOptions['version'];
 		}
-		if(isset($globalOptions['countDetails']) && !empty($globalOptions['countDetails']))
-		{
-			$url .= '&amp;cd=' . rawurlencode(base64_encode(gzdeflate(serialize($globalOptions['countDetails']))));
-		}
 		if(isset($globalOptions['encodeFormat']) && $globalOptions['encodeFormat'] != 'old')
 		{
 			$url .= '&amp;format=' . $globalOptions['encodeFormat'];
@@ -9618,7 +9765,6 @@ class TrialTracker
 			$url .= 'results=' . $globalOptions['url'];
 		}
 		else if($ottType == 'rowstacked' || $ottType == 'colstacked')
-
 		{	
 			$url .= 'results=' .  $globalOptions['url'];
 		}
@@ -9631,10 +9777,15 @@ class TrialTracker
 			$url .= 'id=' . $globalOptions['url'];
 		}
 		
-		if($timeMachine !== NULL)
+		if(isset($globalOptions['startrange']))
 		{
-			$url .= '&amp;time=' . $timeMachine;
+			$url .= '&amp;sr=' . $globalOptions['startrange'];
 		}
+		if(isset($globalOptions['endrange']))
+		{
+			$url .= '&amp;er=' . $globalOptions['endrange'];
+		}
+
 		if($globalOptions['version'] != 0)
 		{
 			$url .= '&amp;v=' . $globalOptions['version'];
@@ -9807,7 +9958,7 @@ class TrialTracker
 		$sections = array_unique($sections);
 		
 		for($i=$start; $i<$end; $i++) 
-		{ 	
+		{ 	 
 			if($i%2 == 1) 
 				$rowOneType = 'alttitle';
 			else
