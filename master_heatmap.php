@@ -16,7 +16,12 @@ if(!$db->loggedIn())
 	exit;
 }
 if($_POST['dwformat'])
-Download_reports();
+{
+	if($_POST['dwformat']=='htmldown')
+		header('Location: ' . urlPath() . 'online_heatmap.php?id='.$_POST['id']);
+	else
+		Download_reports();
+}
 else {
 require('header.php');
 ?>
@@ -160,11 +165,12 @@ function editor()
 	if(!isset($_GET['id'])) return;
 	$id = mysql_real_escape_string(htmlspecialchars($_GET['id']));
 	if(!is_numeric($id)) return;
-	$query = 'SELECT name,user,footnotes,description,category,shared FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
+	$query = 'SELECT name,user,footnotes,description,category,shared,total FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
 	$res = mysql_query($query) or die('Bad SQL query getting master heatmap report');
 	$res = mysql_fetch_array($res) or die('Report not found.');
 	$rptu = $res['user'];
 	$shared = $res['shared'];
+	$toal_fld=$res['total'];
 	if($rptu !== NULL && $rptu != $db->user->id && !$shared) return;	//prevent anyone from viewing others' private reports
 	$name = $res['name'];
 	$footnotes = htmlspecialchars($res['footnotes']);
@@ -260,7 +266,7 @@ function editor()
 					$data_matrix[$row][$col]['bomb_auto']['value']=$cell_data['bomb_auto'];
 					$data_matrix[$row][$col]['bomb_auto']['src']='sbomb.png';
 					$data_matrix[$row][$col]['bomb_auto']['alt']='Small Bomb';
-					$data_matrix[$row][$col]['bomb_auto']['style']='width:10px; height:11px;';
+					$data_matrix[$row][$col]['bomb_auto']['style']='width:21px; height:11px;';
 					$data_matrix[$row][$col]['bomb_auto']['title']='Suggested';
 				}
 				elseif($cell_data['bomb_auto'] == 'large')
@@ -268,7 +274,7 @@ function editor()
 					$data_matrix[$row][$col]['bomb_auto']['value']=$cell_data['bomb_auto'];
 					$data_matrix[$row][$col]['bomb_auto']['src']='lbomb.png';
 					$data_matrix[$row][$col]['bomb_auto']['alt']='Large Bomb';
-					$data_matrix[$row][$col]['bomb_auto']['style']='width:18px; height:20px;';
+					$data_matrix[$row][$col]['bomb_auto']['style']='width:30px; height:20px;';
 					$data_matrix[$row][$col]['bomb_auto']['title']='Suggested';
 				}
 				else
@@ -276,7 +282,7 @@ function editor()
 					$data_matrix[$row][$col]['bomb_auto']['value']=$cell_data['bomb_auto'];
 					$data_matrix[$row][$col]['bomb_auto']['src']='trans.gif';
 					$data_matrix[$row][$col]['bomb_auto']['alt']='None';
-					$data_matrix[$row][$col]['bomb_auto']['style']='width:10px; height:11px;';
+					$data_matrix[$row][$col]['bomb_auto']['style']='width:30px; height:11px;';
 					$data_matrix[$row][$col]['bomb_auto']['title']='';
 				}
 				
@@ -286,7 +292,7 @@ function editor()
 					$data_matrix[$row][$col]['bomb']['value']=$cell_data['bomb'];
 					$data_matrix[$row][$col]['bomb']['src']='sbomb.png';
 					$data_matrix[$row][$col]['bomb']['alt']='Small Bomb';
-					$data_matrix[$row][$col]['bomb']['style']='width:10px; height:11px;';
+					$data_matrix[$row][$col]['bomb']['style']='width:21px; height:11px;';
 					$data_matrix[$row][$col]['bomb']['title']='Edit Bomb';
 				}
 				elseif($cell_data['bomb'] == 'large')
@@ -294,7 +300,7 @@ function editor()
 					$data_matrix[$row][$col]['bomb']['value']=$cell_data['bomb'];
 					$data_matrix[$row][$col]['bomb']['src']='lbomb.png';
 					$data_matrix[$row][$col]['bomb']['alt']='Large Bomb';
-					$data_matrix[$row][$col]['bomb']['style']='width:18px; height:20px;';
+					$data_matrix[$row][$col]['bomb']['style']='width:30px; height:20px;';
 					$data_matrix[$row][$col]['bomb']['title']='Edit Bomb';
 				}
 				else
@@ -378,9 +384,9 @@ function editor()
 			. '<form action="master_heatmap.php" method="post">'
 			. '<fieldset><legend>Download Option</legend>'
 			. '<input type="hidden" name="id" value="' . $id . '" />';
-	if(isset($_POST['total']) && $_POST['total'] == "on")
+	if($toal_fld)
 	{
-		$out .='<input type="hidden" name="total_col" value="on" />';
+		$out .='<input type="hidden" name="total_col" value="1" />';
 	}
 	$out .='<b>Which Format: </b><select id="dwformat" name="dwformat"><option value="htmldown" selected="selected">HTML</option>'
 		. '<option value="exceldown">Excel</option>'
@@ -422,7 +428,7 @@ function editor()
 	}
 	
 	//total column checkbox
-	$out .= ' <label><input type="checkbox" name="total" ' . (isset($_POST['total']) && $_POST['total'] == "on" ? 'checked="checked"' : '') . ' />Total</label>';
+	$out .= ' <label><input type="checkbox" name="total"  value="1" ' . (($toal_fld) ? 'checked="checked"' : '') . ' />Total</label>';
 	
 	$out .= '<br clear="all"/>';
 	if($db->user->userlevel != 'user' || $rptu !== NULL)
@@ -472,7 +478,7 @@ function editor()
 		$out .= '</th>';
 	}
 	//if total checkbox is selected
-	if(isset($_POST['total']) && $_POST['total'] == "on")
+	if($toal_fld)
 	{
 		$out .= '<th width="150px">';
 		if(!empty($productIds) && !empty($areaIds))
@@ -617,7 +623,7 @@ function editor()
 					
 		}
 		//if total checkbox is selected
-		if(isset($_POST['total']) && $_POST['total'] == "on")
+		if($toal_fld)
 		{
 			$out .= '<th width="150px">&nbsp;</th>';
 		}
@@ -938,7 +944,7 @@ function Download_reports()
 			$pdfContent .='</div></th>';
 		}
 		//if total checkbox is selected
-		if(isset($_POST['total_col']) && $_POST['total_col'] == "on")
+		if(isset($_POST['total_col']) && $_POST['total_col'] == "1")
 		{
 			$pdfContent .= '<th width="150px"><div align="center">';
 			if(!empty($productIds) && !empty($areaIds))
@@ -968,7 +974,7 @@ function Download_reports()
 			$pdfContent .= '<tr style="page-break-inside:avoid;" nobr="true"><th height="0px" style="height:0px; border-top:none; border:none;">&nbsp;</th>';
 			foreach($columns as $col => $val)
 				$pdfContent .= '<th height="0px" style="height:0px; border-top:none; border:none;">&nbsp;</th>';
-			if(isset($_POST['total_col']) && $_POST['total_col'] == "on")
+			if(isset($_POST['total_col']) && $_POST['total_col'] == "1")
 				$pdfContent .= '<th height="0px" style="height:0px; border-top:none; border:none;">&nbsp;</th>';
 			$pdfContent .= '</tr>';		
 		}
@@ -1098,7 +1104,7 @@ function Download_reports()
 				$pdfContent .= '</td>';
 			}
 			//if total checkbox is selected
-			if(isset($_POST['total_col']) && $_POST['total_col'] == "on")
+			if(isset($_POST['total_col']) && $_POST['total_col'] == "1")
 			{
 				$pdfContent .= '<th>&nbsp;</th>';
 			}
@@ -1261,7 +1267,7 @@ function Download_reports()
 			}
 		}
 		
-		if(isset($_POST['total_col']) && $_POST['total_col'] == "on")
+		if(isset($_POST['total_col']) && $_POST['total_col'] == "1")
 		{
 			$objPHPExcel->getActiveSheet()->getColumnDimension(num2char($col+1))->setWidth(18);
 			$objPHPExcel->getActiveSheet()->getStyle(num2char($col+1))->getAlignment()->applyFromArray(
@@ -1351,7 +1357,7 @@ function Download_reports()
 			}
 		}
 		
-		if(isset($_POST['total_col']) && $_POST['total_col'] == "on")
+		if(isset($_POST['total_col']) && $_POST['total_col'] == "1")
 		{
 			if($_POST['dwcount']=='active')
 			{
@@ -1437,13 +1443,14 @@ function postEd()
 	$_GET['id'] = $id;	//This is so the editor will load the report we are about to (maybe?) save
 	
 	// block any user from modifying other peoples private reports and block non-admins from modifying global reports
-	$query = 'SELECT user FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
+	$query = 'SELECT user,shared FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
 	$res = mysql_query($query) or die('Bad SQL query getting user for master heatmap report id');
 	$res = mysql_fetch_assoc($res);
 	if($res === false) return;	///Replaced "Continue" by "Return" cause continue was giving "Cannot break/continue 1 level" error when report deleted and continue should only be used to escape through loop not function
 	if(count($res)==0){ die('Not found.'); }
 	$rptu = $res['user'];
-	if($rptu !== NULL && $rptu != $db->user->id) return;
+	$shared = $res['shared'];
+	if($rptu !== NULL && $rptu != $db->user->id && !$shared) return;
 
 	// "Copy into new" is the exception for non-admins sending POSTdata about global reports
 	if(isset($_POST['reportcopy']))
@@ -1535,11 +1542,16 @@ function postEd()
 			$owner=$db->user->id; $shared=0;
 		}
 		
+		if(isset($_POST['total']) && $_POST['total']==1)
+		$total_col=1;
+		else
+		$total_col=0;
+		
 		$category = mysql_real_escape_string($_POST['reportcategory']);
 		
 		$query = 'UPDATE rpt_masterhm SET name="' . mysql_real_escape_string($_POST['reportname']) . '",user=' . $owner
 					. ',footnotes="' . $footnotes . '",description="' . $description . '"'
-					. ',category="' . $category . '",shared="' . $shared . '"' . ' WHERE id=' . $id . ' LIMIT 1';
+					. ',category="' . $category . '",shared="' . $shared . '",total="' . $total_col . '"' . ' WHERE id=' . $id . ' LIMIT 1';
 		mysql_query($query) or die('Bad SQL Query saving name');
 		
 		foreach($types as $t)
