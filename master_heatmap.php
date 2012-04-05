@@ -1249,13 +1249,23 @@ function Download_reports()
 				}
 				
 				$cell= num2char($col).'1';
-				
+				//TODO
 				$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col]:$val;
 				$cdesc = (isset($columnsDescription[$col]) && $columnsDescription[$col] != '')?$columnsDescription[$col]:null;
 				$caltTitle = (isset($cdesc) && $cdesc != '')?' alt="'.$cdesc.'" title="'.$cdesc.'" ':null;
 								
 				$objPHPExcel->getActiveSheet()->setCellValue($cell, $val.$count_val);
-				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlencode(urlPath() . 'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col])); 
+				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlencode(urlPath() . 'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]));
+				
+				if($cdesc)
+				{
+					$objPHPExcel->getActiveSheet()->getComment($cell)->setAuthor('Description:');
+					$objCommentRichText = $objPHPExcel->getActiveSheet()->getComment($cell)->getText()->createTextRun('Description:');
+					$objCommentRichText->getFont()->setBold(true);
+					$objPHPExcel->getActiveSheet()->getComment($cell)->getText()->createTextRun("\r\n");
+					$objPHPExcel->getActiveSheet()->getComment($cell)->getText()->createTextRun($cdesc);					
+				}
+				
  			    $objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip($tooltip);
 				$objPHPExcel->getActiveSheet()->getColumnDimension(num2char($col))->setWidth(18);
 				
@@ -1296,7 +1306,7 @@ function Download_reports()
 				}
 				
 				$cell='A'.($row+1);
-				
+				//TODO
 				$rval = (isset($rowsDisplayName[$row]) && $rowsDisplayName[$row] != '')?$rowsDisplayName[$row]:$rval;
 				$rdesc = (isset($rowsDescription[$row]) && $rowsDescription[$row] != '')?$rowsDescription[$row]:null;
 				$raltTitle = (isset($rdesc) && $rdesc != '')?' alt="'.$rdesc.'" title="'.$rdesc.'" ':null;
@@ -1304,6 +1314,15 @@ function Download_reports()
 				$objPHPExcel->getActiveSheet()->setCellValue($cell, $rval.$count_val);
 				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlencode(urlPath() . 'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds))); 
  			    $objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip($tooltip);
+ 			    
+ 			    if($rdesc)
+ 			    {
+ 			    	$objPHPExcel->getActiveSheet()->getComment($cell)->setAuthor('Description:');
+ 			    	$objCommentRichText = $objPHPExcel->getActiveSheet()->getComment($cell)->getText()->createTextRun('Description:');
+ 			    	$objCommentRichText->getFont()->setBold(true);
+ 			    	$objPHPExcel->getActiveSheet()->getComment($cell)->getText()->createTextRun("\r\n");
+ 			    	$objPHPExcel->getActiveSheet()->getComment($cell)->getText()->createTextRun($rdesc);
+ 			    } 			    
 				
 				/*$objPHPExcel->getActiveSheet()->getStyle($cell)->getAlignment()->applyFromArray(
       									array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_LEFT,
