@@ -177,9 +177,9 @@ function editor()
 	$description = htmlspecialchars($res['description']);
 	$category = $res['category'];
 	
-	if($shared)
+	if($shared && $rptu !== NULL)
 	$owner_type="shared";
-	else if($rptu !== NULL)
+	else if($rptu !== NULL && $rptu == $db->user->id)
 	$owner_type="mine";
 	else if($rptu === NULL)
 	$owner_type="global";
@@ -433,7 +433,7 @@ function editor()
 	$out .= '<br clear="all"/>';
 	if($db->user->userlevel != 'user' || $rptu !== NULL)
 	{
-		if($owner_type == 'mine' || $owner_type == 'global' || ($owner_type == 'shared' && $rptu == $db->user->id))
+		if($owner_type == 'mine' || ($owner_type == 'global' && $db->user->userlevel != 'user') || ($owner_type == 'shared' && $rptu == $db->user->id))
 		$out .= '<input type="submit" name="reportsave" value="Save edits" /> | '
 				.'<input type="submit" name="addproduct" value="More rows" /> | '
 				. '<input type="submit" name="addarea" value="More columns" /> | ';
@@ -449,13 +449,16 @@ function editor()
 				
 		$out .= 'Column : '.$col.' ';
 		
-		// LEFT ARROW?
-		if($col > 1) $out .= ' <input type="image" name="move_col_left[' . $col . ']" src="images/left.png" title="Left"/>';
-		// RIGHT ARROW?
-		if($col < $max_column['num']) $out .= ' <input type="image" name="move_col_right[' . $col . ']" src="images/right.png" title="Right"/>';
-			
-		$out .='&nbsp;&nbsp;';	
-		$out .= '<label class="lbldeln"><input type="checkbox" name="deletecol[' . $col . ']" title="Delete Column '.$col.'"/></label>';
+		if($owner_type == 'mine' || ($owner_type == 'global' && $db->user->userlevel != 'user') || ($owner_type == 'shared' && $rptu == $db->user->id))
+		{
+			// LEFT ARROW?
+			if($col > 1) $out .= ' <input type="image" name="move_col_left[' . $col . ']" src="images/left.png" title="Left"/>';
+			// RIGHT ARROW?
+			if($col < $max_column['num']) $out .= ' <input type="image" name="move_col_right[' . $col . ']" src="images/right.png" title="Right"/>';
+				
+			$out .='&nbsp;&nbsp;';	
+			$out .= '<label class="lbldeln"><input type="checkbox" name="deletecol[' . $col . ']" title="Delete Column '.$col.'"/></label>';
+		}
 		$out .='<br/>';
 		if(isset($areaIds[$col]) && $areaIds[$col] != NULL && !empty($productIds))
 		{
@@ -509,13 +512,17 @@ function editor()
 				. ' onkeyup="javascript:autoComplete(\'products'.$row.'\')" /><br />';
 		
 		$out .= 'Row : '.$row.' ';
-		// UP ARROW?
-		if($row > 1) $out .= ' <input type="image" name="move_row_up[' . $row . ']" src="images/asc.png" title="Up"/>';
-		// DOWN ARROW?
-		if($row < $max_row['num']) $out .= ' <input type="image" name="move_row_down[' . $row . ']" src="images/des.png" title="Down"/>';
 		
-		$out .='&nbsp;&nbsp;';	
-		$out .= '<label class="lbldeln"><input type="checkbox" name="deleterow[' . $row . ']" title="Delete Column '.$row.'"/></label>';
+		if($owner_type == 'mine' || ($owner_type == 'global' && $db->user->userlevel != 'user') || ($owner_type == 'shared' && $rptu == $db->user->id))
+		{
+			// UP ARROW?
+			if($row > 1) $out .= ' <input type="image" name="move_row_up[' . $row . ']" src="images/asc.png" title="Up"/>';
+			// DOWN ARROW?
+			if($row < $max_row['num']) $out .= ' <input type="image" name="move_row_down[' . $row . ']" src="images/des.png" title="Down"/>';
+			
+			$out .='&nbsp;&nbsp;';	
+			$out .= '<label class="lbldeln"><input type="checkbox" name="deleterow[' . $row . ']" title="Delete Column '.$row.'"/></label>';
+		}
 		$out .='<br/>';
 		if(isset($productIds[$row]) && $productIds[$row] != NULL && !empty($areaIds))
 		{
@@ -634,10 +641,13 @@ function editor()
 			. '<fieldset><legend>Footnotes</legend><textarea name="footnotes" cols="45" rows="5">' 
 			. $footnotes . '</textarea></fieldset>'
 			. '<fieldset><legend>Description</legend><textarea name="description" cols="45" rows="5">' . $description
-			. '</textarea></fieldset>'
-			. '<br/><fieldset style="margin-top:50px; padding:8px;"><legend>Advanced</legend>'
-			. '<label class="lbldeln"><input class="delrepe" type="checkbox" name="delrep['.$id.']" title="Delete" /></label>' 
-			. '&nbsp;&nbsp;&nbsp;&nbsp;Delete This Master Heatmap Report</fieldset>';
+			. '</textarea></fieldset>';
+	if($owner_type == 'mine' || ($owner_type == 'global' && $db->user->userlevel != 'user') || ($owner_type == 'shared' && $rptu == $db->user->id))
+	{
+		$out .= '<br/><fieldset style="margin-top:50px; padding:8px;"><legend>Advanced</legend>'
+				. '<label class="lbldeln"><input class="delrepe" type="checkbox" name="delrep['.$id.']" title="Delete" /></label>' 
+				. '&nbsp;&nbsp;&nbsp;&nbsp;Delete This Master Heatmap Report</fieldset>';
+	};
 	$out .= '</form>';
 
 	return $out;
@@ -1518,7 +1528,7 @@ function postEd()
 		$_GET['id'] = $newid;
 	}
 	
-	if($rptu === NULL && $db->user->userlevel == 'user') return;
+	if(($rptu === NULL && $db->user->userlevel == 'user') || ($rptu !== NULL && $rptu != $db->user->id)) return;
 
 	$maxrow = 0;
 	$maxcolumn = 0;
