@@ -109,11 +109,12 @@ class TrialTracker
 		if(strpos($globalOptions['startrange'], 'ago') !== FALSE)
 		{
 			$timeMachine = str_replace('ago', '', $globalOptions['startrange']);
+			$timeMachine = trim($timeMachine);
 			$timeMachine = '-' . (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
 		}
 		else
 		{
-			$timeMachine = $globalOptions['startrange'];
+			$timeMachine = trim($globalOptions['startrange']);
 			$timeMachine = (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
 		}
 		$timeMachine = strtotime($timeMachine);
@@ -121,11 +122,12 @@ class TrialTracker
 		if(strpos($globalOptions['endrange'], 'ago') !== FALSE)
 		{
 			$timeInterval = str_replace('ago', '', $globalOptions['endrange']);
+			$timeInterval = trim($timeInterval);
 			$timeInterval = '-' . (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
 		}
 		else
 		{
-			$timeInterval = $globalOptions['endrange'];
+			$timeInterval = trim($globalOptions['endrange']);
 			$timeInterval = (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
 		}
 					
@@ -4300,11 +4302,12 @@ class TrialTracker
 		if(strpos($globalOptions['startrange'], 'ago') !== FALSE)
 		{
 			$timeMachine = str_replace('ago', '', $globalOptions['startrange']);
+			$timeMachine = trim($timeMachine);
 			$timeMachine = '-' . (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
 		}
 		else
 		{
-			$timeMachine = $globalOptions['startrange'];
+			$timeMachine = trim($globalOptions['startrange']);
 			$timeMachine = (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
 		}
 		$timeMachine = strtotime($timeMachine);
@@ -4312,11 +4315,12 @@ class TrialTracker
 		if(strpos($globalOptions['endrange'], 'ago') !== FALSE)
 		{
 			$timeInterval = str_replace('ago', '', $globalOptions['endrange']);
+			$timeInterval = trim($timeInterval);
 			$timeInterval = '-' . (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
 		}
 		else
 		{
-			$timeInterval = $globalOptions['endrange'];
+			$timeInterval = trim($globalOptions['endrange']);
 			$timeInterval = (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
 		}
 		$Values = array();
@@ -5517,11 +5521,12 @@ class TrialTracker
 			if(strpos($globalOptions['startrange'], 'ago') !== FALSE)
 			{
 				$timeMachine = str_replace('ago', '', $globalOptions['startrange']);
+				$timeMachine = trim($timeMachine);
 				$timeMachine = '-' . (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
 			}
 			else
 			{
-				$timeMachine = $globalOptions['startrange'];
+				$timeMachine = trim($globalOptions['startrange']);
 				$timeMachine = (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
 			}
 			$timeMachine = strtotime($timeMachine);
@@ -5529,11 +5534,12 @@ class TrialTracker
 			if(strpos($globalOptions['endrange'], 'ago') !== FALSE)
 			{
 				$timeInterval = str_replace('ago', '', $globalOptions['endrange']);
+				$timeInterval = trim($timeInterval);
 				$timeInterval = '-' . (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
 			}
 			else
 			{
-				$timeInterval = $globalOptions['endrange'];
+				$timeInterval = trim($globalOptions['endrange']);
 				$timeInterval = (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
 			}
 		
@@ -5821,11 +5827,12 @@ class TrialTracker
 		if(strpos($globalOptions['startrange'], 'ago') !== FALSE)
 		{
 			$timeMachine = str_replace('ago', '', $globalOptions['startrange']);
+			$timeMachine = trim($timeMachine);
 			$timeMachine = '-' . (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
 		}
 		else
 		{
-			$timeMachine = $globalOptions['startrange'];
+			$timeMachine = trim($globalOptions['startrange']);
 			$timeMachine = (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
 		}
 		$timeMachine = strtotime($timeMachine);
@@ -5833,11 +5840,12 @@ class TrialTracker
 		if(strpos($globalOptions['endrange'], 'ago') !== FALSE)
 		{
 			$timeInterval = str_replace('ago', '', $globalOptions['endrange']);
+			$timeInterval = trim($timeInterval);
 			$timeInterval = '-' . (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
 		}
 		else
 		{
-			$timeInterval = $globalOptions['endrange'];
+			$timeInterval = trim($globalOptions['endrange']);
 			$timeInterval = (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
 		}
 		
@@ -6633,11 +6641,12 @@ class TrialTracker
 		if(strpos($globalOptions['startrange'], 'ago') !== FALSE)
 		{
 			$timeMachine = str_replace('ago', '', $globalOptions['startrange']);
+			$timeMachine = trim($timeMachine);
 			$timeMachine = '-' . (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
 		}
 		else
 		{
-			$timeMachine = $globalOptions['startrange'];
+			$timeMachine = trim($globalOptions['startrange']);
 			$timeMachine = (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
 		}
 		$timeMachine = strtotime($timeMachine);
@@ -6645,11 +6654,12 @@ class TrialTracker
 		if(strpos($globalOptions['endrange'], 'ago') !== FALSE)
 		{
 			$timeInterval = str_replace('ago', '', $globalOptions['endrange']);
+			$timeInterval = trim($timeInterval);
 			$timeInterval = '-' . (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
 		}
 		else
 		{
-			$timeInterval = $globalOptions['endrange'];
+			$timeInterval = trim($globalOptions['endrange']);
 			$timeInterval = (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
 		}
 		
@@ -7418,11 +7428,12 @@ class TrialTracker
 		if(strpos($globalOptions['startrange'], 'ago') !== FALSE)
 		{
 			$timeMachine = str_replace('ago', '', $globalOptions['startrange']);
+			$timeMachine = trim($timeMachine);
 			$timeMachine = '-' . (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
 		}
 		else
 		{
-			$timeMachine = $globalOptions['startrange'];
+			$timeMachine = trim($globalOptions['startrange']);
 			$timeMachine = (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
 		}
 		$timeMachine = strtotime($timeMachine);
@@ -7430,11 +7441,12 @@ class TrialTracker
 		if(strpos($globalOptions['endrange'], 'ago') !== FALSE)
 		{
 			$timeInterval = str_replace('ago', '', $globalOptions['endrange']);
+			$timeInterval = trim($timeInterval);
 			$timeInterval = '-' . (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
 		}
 		else
 		{
-			$timeInterval = $globalOptions['endrange'];
+			$timeInterval = trim($globalOptions['endrange']);
 			$timeInterval = (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
 		}
 		
@@ -8364,11 +8376,12 @@ class TrialTracker
 		if(strpos($globalOptions['startrange'], 'ago') !== FALSE)
 		{
 			$timeMachine = str_replace('ago', '', $globalOptions['startrange']);
+			$timeMachine = trim($timeMachine);
 			$timeMachine = '-' . (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
 		}
 		else
 		{
-			$timeMachine = $globalOptions['startrange'];
+			$timeMachine = trim($globalOptions['startrange']);
 			$timeMachine = (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
 		}
 		$timeMachine = strtotime($timeMachine);
@@ -8376,11 +8389,12 @@ class TrialTracker
 		if(strpos($globalOptions['endrange'], 'ago') !== FALSE)
 		{
 			$timeInterval = str_replace('ago', '', $globalOptions['endrange']);
+			$timeInterval = trim($timeInterval);
 			$timeInterval = '-' . (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
 		}
 		else
 		{
-			$timeInterval = $globalOptions['endrange'];
+			$timeInterval = trim($globalOptions['endrange']);
 			$timeInterval = (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
 		}
 		
