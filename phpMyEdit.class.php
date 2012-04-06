@@ -1800,7 +1800,7 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 			unset($_GET['sourceless_only']);
 			unset($_GET['deleted_trial']);
 		}
-		elseif	(isset($_GET['sourceless_only']) and $_GET['sourceless_only'] == 'YES' and isset($_GET['err_message']) )
+		elseif ( isset($_GET['err_message']) )
 		{
 			echo '</tr><tr><td colspan="2" ><b> <span style="color:red">'. $_GET['err_message'] . '</span></b></div></td>'; 
 		}
@@ -2026,7 +2026,7 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 		 * if we have filters, Changes or Deletes enabled
 		 */
 		if ($sys_cols) {
-			echo '<th class="',$this->getCSSclass('header'),'" colspan="',$sys_cols,'">';
+			echo '<th class="',$this->getCSSclass('header'),'" style="width:10%" colspan="',$sys_cols,'">';
 			if ($this->filter_enabled()) {
 				if ($this->filter_operation()) {
 					echo $this->htmlSubmit('sw', 'Hide', $this->getCSSclass('hide'), false);
@@ -2053,7 +2053,12 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 				// Clicking on the current sort field reverses the sort order
 				$new_sfn = $this->sfn;
 				array_unshift($new_sfn, in_array("$k", $new_sfn, 1) ? "-$k" : $k);
-				echo '<th class="',$css_class_name,'">';
+				echo '<th class="',$css_class_name,'"';
+				if(trim($fdn)=='Brief title')
+					echo ' style="width:70%"   ';
+				else
+					echo ' style="width:10%"  ';
+				echo '>';
 				echo '<a class="',$css_class_name,'" href="';
 				echo htmlspecialchars($this->page_name.'?'.$this->cgi['prefix']['sys'].'fm'.'=0'
 						.'&'.$this->cgi['prefix']['sys'].'fl'.'='.$this->fl
@@ -2304,7 +2309,7 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 						$printed_out = false;
 						if ($this->view_enabled()) 
 						{
-							if( $this->change_enabled() and $_POST['sourceless_only'] and $_POST['sourceless_only'] == 'YES')
+							if( $this->change_enabled() )
 								echo '</form><span class="sameLine"><form method="post" action="link_trials.php" name="link_form">';
 							
 							$printed_out = true;
@@ -2321,7 +2326,7 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 							echo 'jedit.png"  border="0" ';
 							echo 'alt="',$changeTitle,'" title="',$changeTitle,'" /></a>';
 							
-							if( $this->change_enabled()  and $db->loggedIn() and ($db->user->userlevel=='admin'||$db->user->userlevel=='root') and $_POST['sourceless_only'] and $_POST['sourceless_only'] == 'YES')
+							if( $this->change_enabled()  and $db->loggedIn() and ($db->user->userlevel=='admin'||$db->user->userlevel=='root') )
 							{
 								echo'
 								
@@ -2341,13 +2346,17 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 
 								<input type="hidden" name="lid" value="'.$key_rec.'" />
 								&nbsp;&nbsp;<input type="image" src="images/link.jpg" alt="Link" title="Link" />
-								</form></span><span class="sameLine">
-								<form method="post" action="link_trials.php" name="link_form2">
-								<input type="hidden" name="delsure" value="No" />
-								<input type="hidden" name="lid2" id="lid2" value="'.$key_rec.'" />
-								<a href="#" onClick= "delsure('.$key_rec.');document.forms[\'link_form2\'].submit(); " alt="Delete"  ><img src="images/cancel.gif" border="0"/></a>
-								</form></span>
-								';
+								</form></span>';
+								if(isset($_POST['sourceless_only']) and $_POST['sourceless_only'] == 'YES')
+								{
+									echo '<span class="sameLine">
+									<form method="post" action="link_trials.php" name="link_form2">
+									<input type="hidden" name="delsure" value="No" />
+									<input type="hidden" name="lid2" id="lid2" value="'.$key_rec.'" />
+									<a href="#" onClick= "delsure('.$key_rec.');document.forms[\'link_form2\'].submit(); " alt="Delete"  ><img src="images/cancel.gif" border="0"/></a>
+									</form></span>
+									';
+								}
 							}
 							else
 							{

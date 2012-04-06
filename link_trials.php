@@ -14,6 +14,9 @@ require_once('include.search.php');
 require_once('include.util.php');
 if(isset($_POST['source']) and isset($_POST['lid']))
 {
+//	pr($_POST['source']);
+//	pr($_POST['lid']);
+	
 	link_trial();
 }
 elseif(!isset($_POST['lid'])) die('<br> No larvol id pased.');
@@ -21,14 +24,11 @@ $lid=$_POST['lid'];
 require_once('header.php');	
 global $db;
 
-
-// get trial details 
-$query = 	"
-			SELECT `source_id`,`is_sourceless` , `larvol_id`, `brief_title`
-			FROM `data_manual` 
-			WHERE `larvol_id` = $lid limit 1
-			";
-	$res1 		= mysql_query($query) ;
+$query = "
+		SELECT `larvol_id` FROM `data_nct` 
+		WHERE `larvol_id` = $lid limit 1
+		";
+$res1 	= mysql_query($query) ;
 	if($res1===false)
 	{
 		$log = 'Bad SQL query. Query=' . $query;
@@ -36,44 +36,104 @@ $query = 	"
 		echo $log;
 		return($log);
 	}
-	$sourceless=mysql_fetch_assoc($res1);
-	if(isset($sourceless['source_id']) and trim($sourceless['source_id'])<>'') $hnt=",hint:'".$sourceless['source_id']."'";
-	else $hnt='';
+	$sourced=mysql_fetch_assoc($res1);
+	if(isset($sourced['larvol_id'])) $sourced_trial='YES'; 
+	else $sourced_trial='NO';
 
+
+// get trial details 
+if($sourced_trial=='NO')
+{
+	$query = 	"
+				SELECT `source_id`,`is_sourceless` , `larvol_id`, `brief_title`
+				FROM `data_manual` 
+				WHERE `larvol_id` = $lid limit 1
+				";
+		$res1 		= mysql_query($query) ;
+		if($res1===false)
+		{
+			$log = 'Bad SQL query. Query=' . $query;
+			$logger->fatal($log);
+			echo $log;
+			return($log);
+		}
+		$sourceless=mysql_fetch_assoc($res1);
+		if(isset($sourceless['source_id']) and trim($sourceless['source_id'])<>'') $hnt=$sourceless['source_id'];
+		else $hnt=$sourceless['source_id'];
+	$data = array();
+	if($hnt<>'')
+	{
+	$query = "select distinct source_id from data_trials  where ( source_id like '%$hnt%' ) and ( source_id <> '$hnt' ) order by source_id asc limit 100";
+//	pr($query);
+	$result =  mysql_query($query);
+
+		while($row = mysql_fetch_assoc($result))
+		{
+			$data[] = $row['source_id'];
+		}	
+
+	}
+}
+else
+{
+	if($_POST['sourceless_only'] and $_POST['sourceless_only'] == 'YES')
+	{
+		header("Location: edit_trials.php?sourceless_only=YES&err_message=Cannot proceed: larvol_id " . $lid  . " is a sourced trial, which can only be linked to trials from another source.");
+		exit;
+	}
+	else
+	{
+		header("Location: edit_trials.php?err_message=Cannot proceed: larvol_id " . $lid  . " is a sourced trial, which can only be linked to trials from another source.  Currently the system has trials from only one source.");
+		exit;
+	
+	}
+
+	$query = 	"
+				SELECT `larvol_id`, `brief_title`
+				FROM `data_nct` 
+				WHERE `larvol_id` = $lid limit 1
+				";
+		$res1 		= mysql_query($query) ;
+		if($res1===false)
+		{
+			$log = 'Bad SQL query. Query=' . $query;
+			$logger->fatal($log);
+			echo $log;
+			return($log);
+		}
+		$sourced=mysql_fetch_assoc($res1);
+		if(isset($sourced['source_id']) and trim($sourced['source_id'])<>'') $hnt=$sourced['source_id'];
+		//else $hnt=$sourced['source_id'];
+		else $hnt='';
+	$data = array();
+	if($hnt<>'')
+	{
+	$query = "select distinct source_id from data_trials  where ( source_id like '%$hnt%' ) and ( source_id <> '$hnt' ) order by source_id asc limit 100";
+//	pr($query);
+	$result =  mysql_query($query);
+
+		while($row = mysql_fetch_assoc($result))
+		{
+			$data[] = $row['source_id'];
+		}	
+
+	}
+}
+
+
+$cnt=count($data);	
+	
 //auto suggest
 ?>
 <script type="text/javascript">
 function confirmlinking()
 { 
-	if(confirm("Are you sure you want to link to this trial?"))
+	if(confirm("Are you sure you want to link these trials?"))
 	{
 		document.forms["link"].submit();
 	}
 }
-$(document).ready(function(){
 
-		
-
-
-
-	var options1,c,d;
-
-	jQuery(function(){
-	  options1 = { serviceUrl:'autosuggest.php',params:{table:'data_trials',field:'source_id'<?php echo $hnt;?>} };
-	  
-	  if($('#linked_trial').length>=0)
-	  c = $('#linked_trial').autocomplete(options1);
-	  d = $('#name').autocomplete(options1);
-	});
-	$(".ajax").colorbox({
-		onComplete:function(){ loadQueryData($('#searchdata').val());},
-		onClosed:function(){ newSearch(); },
-		inline:true, 
-		width:"100%",
-		height:"100%"
-			});
-	$("#inline_outer").hide();
-});
 </script>
 <!-- main form -->
 <div style= "padding-top:10px;padding-left:20px;">
@@ -105,19 +165,31 @@ $(document).ready(function(){
 		</td>
 	</tr>
 	<tr>
-	<td style="color:red">
+	<td style="background-color: white;font-size:12px;color:darkred;valign:top">&nbsp;</td>
+	<td style="background-color: white;font-size:12px;color:darkred;valign:top">
 			Link with source trial
-		</td>
-		<td>
-			<input type="text" name="linked_trial" id="linked_trial"  size="150">
+			<BR>
+			<!--<input type="text" name="linked_trial" id="linked_trial"  size="150"> -->
+			<select name="linkedtrial" id="ltrial" size="<?php echo $cnt; ?>" >
+			
+			<?php 
+			foreach($data as $option) 
+			{ ?>
+				<option value="<?php echo $option ?>" >
+					 <?php echo $option ?>
+				</option>
+			<?php 
+			}?>
+			</select>
 		</td>
 	</tr>
 	<tr>
-		<td colspan="2">
+		<td style="background-color: white;font-size:12px;color:darkred;valign:top">&nbsp;</td>
+	<td style="background-color: white;font-size:12px;color:darkred;valign:top">
 			
-		
+		&nbsp;
 			<input type="submit" name="submitit"
-			value="Submit this form"
+			value="Link trial(s)"
 			onclick="confirmlinking();return false;" /> 
 		</td>
 	</tr>
@@ -131,8 +203,10 @@ function link_trial()
 {
 global $logger;
 $lid=$_POST['lid'];
-$sid=$_POST['linked_trial'];
-
+$sid=$_POST['linkedtrial'];
+//pr('posts');
+//pr($_POST);
+//pr('postsend');
 //******* pick the larvol id to be linked to 
 
 	$query = "
@@ -142,7 +216,7 @@ $sid=$_POST['linked_trial'];
 			";
 
 	$res1 	= mysql_query($query) ;
-	
+//	pr($query);
 	if($res1===false)
 	{
 		$log = 'Bad SQL query. Query=' . $query;
@@ -152,7 +226,7 @@ $sid=$_POST['linked_trial'];
 	}
 	
 	$hint=mysql_fetch_assoc($res1);
-
+	
 // update sourceless data (change larvol id)
 	$query = '
 			UPDATE data_manual 
@@ -160,6 +234,8 @@ $sid=$_POST['linked_trial'];
 			WHERE `larvol_id` ="' .  $lid .'" limit 1
 			';
 	$res1 		= mysql_query($query) ;
+//	pr($query);
+
 	if($res1===false)
 	{
 		$log = 'Bad SQL query. Query=' . $query;

@@ -181,7 +181,7 @@ $(document).ready(function(){
 	height:50px;
 	width:50px
 	overflow:hidden;
-	white-space:nowrap;
+	white-space:wrap;
 	padding-top:0;
 	margin:0;
 	}
