@@ -865,6 +865,8 @@ CREATE TABLE IF NOT EXISTS `rpt_masterhm_cells` (
   `count_total_prev` int(10) unsigned NOT NULL DEFAULT '0',
   `count_active` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Count of only active trials',
   `count_active_prev` int(10) unsigned NOT NULL DEFAULT '0',
+  `count_active_indlead` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Count of only active trials with institution type of industry_lead_sponsor',
+  `count_active_indlead_prev` int(10) unsigned NOT NULL DEFAULT '0',
   `count_lastchanged` datetime DEFAULT NULL,
   `bomb` enum('none','small','large') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'none' COMMENT 'Analysts'' indication of bomb',
   `bomb_lastchanged` datetime DEFAULT NULL,
@@ -875,7 +877,7 @@ CREATE TABLE IF NOT EXISTS `rpt_masterhm_cells` (
   `phase_explain` text COLLATE utf8_unicode_ci DEFAULT NULL,
   `filing` text COLLATE utf8_unicode_ci DEFAULT NULL,
   `filing_lastchanged` datetime DEFAULT NULL,
-  `last_update` datetime NOT NULL,
+  `last_update` datetime DEFAULT NULL,
   PRIMARY KEY (`product`,`area`),
   KEY `area` (`area`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
