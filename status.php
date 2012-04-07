@@ -42,7 +42,7 @@ if(isset($_POST['pid']))
 				}
 		//	$res = mysql_query($query) or die('Bad SQL Query setting update ready status');
 			
-			/* * */
+			//run scraper in case user selected resume
 			if($updttable=='update_status_fullhistory')
 			{
 			$query = 'select `current_nctid` from  update_status_fullhistory WHERE `update_id`="' . $_POST['upid'].'" limit 1';
@@ -56,7 +56,7 @@ if(isset($_POST['pid']))
 				$row = mysql_fetch_assoc($res); $current_nctid=$row['current_nctid'];
 				if($_POST['ttype']=="trial") runnewscraper(true,$current_nctid);
 			}
-			/**/
+			
 			
 			//status for preindexing
 				if( $_POST['ttype']=="area" )
@@ -294,11 +294,10 @@ $res = mysql_query($query) or die('Bad SQL Query getting update_status');
 $calc_status = array();
 while($row = mysql_fetch_assoc($res))
 	$calc_status = $row;
-	
-/*************/
-$query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
-						`update_items_total`,`update_items_progress`,`er_message`,TIMEDIFF(updated_time, start_time) AS timediff,
-						`update_items_complete_time` FROM update_status_fullhistory where trial_type="PRODUCT2"';
+///////// Just display the status of the latest backend	action (update_status_fullhistory)
+
+$query = 'SELECT `update_id` FROM update_status_fullhistory 
+		order by update_id desc limit 1';
 	if(!$res = mysql_query($query))
 		{
 			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -306,13 +305,34 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 			echo $log;
 			return false;
 		}
-	$product_status = array();
+	
+	$last_id = mysql_fetch_assoc($res);
+	$last_id = $last_id['update_id'];
+	
+////////////
+	
+	
+/*************/
+
+$query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
+						`update_items_total`,`update_items_progress`,`er_message`,TIMEDIFF(updated_time, start_time) AS timediff,
+						`update_items_complete_time` FROM update_status_fullhistory where trial_type="PRODUCT2" and update_id="'.$last_id.'"  ';
+	if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
+	
+		$product_status = array();
 	while($row = mysql_fetch_assoc($res))
 	$product_status = $row;
 	
 	$query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 						`update_items_total`,`update_items_progress`,`er_message`,TIMEDIFF(updated_time, start_time) AS timediff,
-						`update_items_complete_time` FROM update_status_fullhistory where trial_type="AREA2"';
+						`update_items_complete_time` FROM update_status_fullhistory where trial_type="AREA2" and update_id="'.$last_id.'" ';
+						
 	if(!$res = mysql_query($query))
 		{
 			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -331,7 +351,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 /*************/
 $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 						`update_items_total`,`update_items_progress`,`er_message`,TIMEDIFF(updated_time, start_time) AS timediff,
-						`update_items_complete_time` FROM update_status_fullhistory where trial_type="PRODUCT1"';
+						`update_items_complete_time` FROM update_status_fullhistory where trial_type="PRODUCT1" and update_id="'.$last_id.'" ';
 	if(!$res = mysql_query($query))
 		{
 			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -345,7 +365,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 	
 	$query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 						`update_items_total`,`update_items_progress`,`er_message`,TIMEDIFF(updated_time, start_time) AS timediff,
-						`update_items_complete_time` FROM update_status_fullhistory where trial_type="AREA1"';
+						`update_items_complete_time` FROM update_status_fullhistory where trial_type="AREA1" and update_id="'.$last_id.'" ';
 	if(!$res = mysql_query($query))
 		{
 			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -364,7 +384,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 /*************/
 $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 						`update_items_total`,`update_items_progress`,`er_message`,TIMEDIFF(updated_time, start_time) AS timediff,
-						`update_items_complete_time` FROM update_status_fullhistory where trial_type="REMAP"';
+						`update_items_complete_time` FROM update_status_fullhistory where trial_type="REMAP" and update_id="'.$last_id.'" ';
 	if(!$res = mysql_query($query))
 		{
 			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -402,7 +422,7 @@ while($row = mysql_fetch_assoc($res))
 	
 //Get all heatmap reports from 'report_status'
 $query = 'SELECT `run_id`,`process_id`,`report_type`,`type_id`,`status`,`total`,`progress`,
-					`start_time`,`update_time`,TIMEDIFF(update_time, start_time) AS timediff FROM reports_status WHERE report_type="0"';
+					`start_time`,`update_time`,TIMEDIFF(update_time, start_time) AS timediff FROM reports_status WHERE report_type="0" and status<>"0" ';
 $res = mysql_query($query) or die('Bad SQL Query getting report_status');
 $heatmap_status = array();
 while($row = mysql_fetch_assoc($res))
@@ -525,7 +545,7 @@ echo "<div class=\"container\">";
 	
 	
 	/******************* status moved from viewstatus *******/
-	$query = 'SELECT update_items_total,update_items_progress,current_nctid FROM update_status_fullhistory  ' ;
+	$query = 'SELECT update_items_total,update_items_progress,current_nctid FROM update_status_fullhistory   ' ;
 if(!$res = mysql_query($query))
 		{
 			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -537,7 +557,7 @@ if(!$res = mysql_query($query))
 $res = mysql_fetch_array($res) ;
 //if(isset($res['update_items_total'])) $cid = ((int)$res['current_nctid']);
 
-if(isset($res['update_items_total'])) showprogress();
+if(isset($res['update_items_total'])) showprogress($last_id);
 
 /*echo " <div align=\"center\"  >
 		   <form name='scrapper' method='post' action='status.php'>
@@ -546,7 +566,7 @@ if(isset($res['update_items_total'])) showprogress();
 			</form>
 		</div> ";
 */
-function showprogress()
+function showprogress($last_id)
 {
 
 	$status = array();
@@ -642,7 +662,7 @@ function showprogress()
 	//Get entry corresponding to nct in 'update_status_fullhistory'
 	$query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 						`update_items_total`,`update_items_progress`,`er_message`,TIMEDIFF(updated_time, start_time) AS timediff,
-						`update_items_complete_time` FROM update_status_fullhistory where trial_type="NCT"';
+						`update_items_complete_time` FROM update_status_fullhistory where trial_type="NCT" and update_id="'.$last_id.'" ';
 	if(!$res = mysql_query($query))
 		{
 			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -656,7 +676,7 @@ function showprogress()
 	
 	$query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 						`update_items_total`,`update_items_progress`,`er_message`,TIMEDIFF(updated_time, start_time) AS timediff,
-						`update_items_complete_time` FROM update_status_fullhistory where trial_type="PRODUCT1"';
+						`update_items_complete_time` FROM update_status_fullhistory where trial_type="PRODUCT1" and update_id="'.$last_id.'" ';
 	if(!$res = mysql_query($query))
 		{
 			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -670,7 +690,7 @@ function showprogress()
 	
 	$query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 						`update_items_total`,`update_items_progress`,`er_message`,TIMEDIFF(updated_time, start_time) AS timediff,
-						`update_items_complete_time` FROM update_status_fullhistory where trial_type="AREA1"';
+						`update_items_complete_time` FROM update_status_fullhistory where trial_type="AREA1" and update_id="'.$last_id.'" ';
 	if(!$res = mysql_query($query))
 		{
 			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -710,13 +730,14 @@ function showprogress()
 	echo "</script>";
 		
 	
-		echo "<table width=\"100%\" class=\"event\">";
-			echo "<tr>";
-				echo "<th width=\"100%\" align=\"center\" class=\"head2\" >NCT history update status</th>";
-			echo "</tr>";
-		echo "</table>";
+		
 		if(count($nct_history_status)!=0)
 		{
+			echo "<table width=\"100%\" class=\"event\">";
+				echo "<tr>";
+					echo "<th width=\"100%\" align=\"center\" class=\"head2\" >NCT history update status</th>";
+				echo "</tr>";
+			echo "</table>";
 			echo "<table width=\"100%\" class=\"event\">";
 			echo "</table>";
 			echo "<table width=\"100%\" class=\"event\">";
@@ -843,7 +864,7 @@ function runscraper()
 			unset($res);unset($row);
 			
 			
-			$query = 'SELECT * FROM update_status_fullhistory where status="1" and trial_type="AREA" order by update_id desc limit 1' ;
+			$query = 'SELECT * FROM update_status_fullhistory where status="1" and trial_type="AREA"  and update_id="'.$last_id.'" order by update_id desc limit 1' ;
 			if(!$res = mysql_query($query))
 			{
 				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -877,7 +898,7 @@ function runscraper()
 		else 
 		{
 			
-			$query = 'SELECT * FROM update_status_fullhistory where status="1" and trial_type="AREA" order by update_id desc limit 1' ;
+			$query = 'SELECT * FROM update_status_fullhistory where status="1" and trial_type="AREA"  and update_id="'.$last_id.'"  order by update_id desc limit 1' ;
 			if(!$res = mysql_query($query))
 			{
 				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
