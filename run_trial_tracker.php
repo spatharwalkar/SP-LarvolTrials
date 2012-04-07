@@ -8562,6 +8562,10 @@ class TrialTracker
 			$indx = 0;
 			foreach($Array as $akey => $avalue) 
 			{
+				if(!isset($avalue['NCT/enrollment']))
+				{
+					$avalue['NCT/enrollment'] = 0;
+				}
 				foreach($avalue as $key => $value) 
 				{
 					if(is_array($value))
