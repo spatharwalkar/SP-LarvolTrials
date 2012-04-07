@@ -191,15 +191,13 @@ class TrialTracker
 			{
 				foreach($resultIds['product'] as $pkey => $pvalue)
 				{
-					$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id = '" . $pvalue . "' ");
-					$row = mysql_fetch_assoc($res);
-
+					$prow = $this->getProductId(array($pvalue));
 					
-					$TrialsInfo[$pkey]['sectionHeader'] = $row['name']
-					. (($row['company'] !== NULL && $row['company'] != '') ? " / (" . $row['company'] . ")" : '');
-					$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
+					$TrialsInfo[$pkey]['sectionHeader'] = $prow['name']
+					. (($prow['company'] !== NULL && $prow['company'] != '') ? " / (" . $prow['company'] . ")" : '');
+					$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
 							
-					$Ids[$pkey]['product'] = $row['id'];
+					$Ids[$pkey]['product'] = $prow['id'];
 					$Ids[$pkey]['area'] = implode("', '", $resultIds['area']);
 				}
 			}
@@ -209,20 +207,16 @@ class TrialTracker
 				{
 					foreach($resultIds['product'] as $pkey => $pvalue)
 					{
-						$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id = '" . $pvalue . "' ");
-						if(mysql_num_rows($res) > 0)
-						{
-							while($row = mysql_fetch_assoc($res))
-							{
-								$TrialsInfo[$pkey]['sectionHeader'] = $row['name']
-								. (($row['company'] !== NULL && $row['company'] != '') ? " / <i>" . $row['company'] . "</i>" : '');
-								$TrialsInfo[$pkey]['naUpms'] = 
-								$this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
-								
-								$Ids[$pkey]['product'] = $row['id'];
-								$Ids[$pkey]['area'] = '';
-							}
-						}
+						$prow = $this->getProductId(array($pvalue));
+
+						$TrialsInfo[$pkey]['sectionHeader'] = $prow['name']
+						. (($prow['company'] !== NULL && $prow['company'] != '') ? " / <i>" . $prow['company'] . "</i>" : '');
+						$TrialsInfo[$pkey]['naUpms'] = 
+						$this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
+						
+						$Ids[$pkey]['product'] = $prow['id'];
+						$Ids[$pkey]['area'] = '';
+
 					}
 				}
 				else
@@ -247,44 +241,44 @@ class TrialTracker
 			{
 				if(count($resultIds['area']) > 1)
 				{
+					$prow = $this->getProductId($resultIds['product']);
+
 					$TrialsInfo[0]['naUpms'] = 
-					$this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], implode("', '", $resultIds['product']));
+					$this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
 					foreach($resultIds['area'] as $akey => $avalue)
 					{
 						$res = mysql_query("SELECT `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
 						$row = mysql_fetch_assoc($res);
 						
 						$TrialsInfo[$akey]['sectionHeader'] = $row['name'];
-						$Ids[$akey]['product'] = implode("', '", $resultIds['product']);
 						$Ids[$akey]['area'] = $row['id'];
+						$Ids[$akey]['product'] = $prow['id'];
 					}
 				}
 				else
 				{
 					foreach($resultIds['product'] as $pkey => $pvalue)
 					{
-						$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id = '" . $pvalue . "' ");
-						$row = mysql_fetch_assoc($res);
+						$prow = $this->getProductId(array($pvalue));
 						
-						$TrialsInfo[$pkey]['sectionHeader'] = $row['name']
-						. (($row['company'] !== NULL && $row['company'] != '') ? " / (" . $row['company'] . ")" : '');
-						$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
+						$TrialsInfo[$pkey]['sectionHeader'] = $prow['name']
+						. (($prow['company'] !== NULL && $prow['company'] != '') ? " / (" . $prow['company'] . ")" : '');
+						$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
 								
-						$Ids[$pkey]['product'] = $row['id'];
+						$Ids[$pkey]['product'] = $prow['id'];
 						$Ids[$pkey]['area'] = implode("', '", $resultIds['area']);
 					}
 				}
 			}
 			else
 			{
-				$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id IN ('" . implode(',', $resultIds['product']) . "') ");
-				$row = mysql_fetch_assoc($res);
+				$prow = $this->getProductId($resultIds['product']);
 				
-				$TrialsInfo[0]['sectionHeader'] = $row['name']
-				. (($row['company'] !== NULL && $row['company'] != '') ? " / (" . $row['company'] . ")" : '');
-				$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
+				$TrialsInfo[0]['sectionHeader'] = $prow['name']
+				. (($prow['company'] !== NULL && $prow['company'] != '') ? " / (" . $prow['company'] . ")" : '');
+				$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
 				
-				$Ids[0]['product'] = $row['id'];
+				$Ids[0]['product'] = $prow['id'];
 				$Ids[0]['area'] = implode("', '", $resultIds['area']);
 			}
 			
@@ -4333,15 +4327,14 @@ class TrialTracker
 			if(count($resultIds['product']) > 1 && count($resultIds['area']) > 1)
 			{
 				foreach($resultIds['product'] as $pkey => $pvalue)
-				{
-					$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id = '" . $pvalue . "' ");
-					$row = mysql_fetch_assoc($res);
+				{	
+					$prow = $this->getProductId(array($pvalue));
 					
-					$TrialsInfo[$pkey]['sectionHeader'] = $row['name']
-					. (($row['company'] !== NULL && $row['company'] != '') ? " / (" . $row['company'] . ")" : '');
-					$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
+					$TrialsInfo[$pkey]['sectionHeader'] = $prow['name']
+					. (($prow['company'] !== NULL && $prow['company'] != '') ? " / (" . $prow['company'] . ")" : '');
+					$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
 							
-					$Ids[$pkey]['product'] = $row['id'];
+					$Ids[$pkey]['product'] = $prow['id'];
 					$Ids[$pkey]['area'] = implode("', '", $resultIds['area']);
 				}
 			}
@@ -4351,20 +4344,15 @@ class TrialTracker
 				{
 					foreach($resultIds['product'] as $pkey => $pvalue)
 					{
-						$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id = '" . $pvalue . "' ");
-						if(mysql_num_rows($res) > 0)
-						{
-							while($row = mysql_fetch_assoc($res))
-							{
-								$TrialsInfo[$pkey]['sectionHeader'] = $row['name']
-								. (($row['company'] !== NULL && $row['company'] != '') ? " / <i>" . $row['company'] . "</i>" : '');
-								$TrialsInfo[$pkey]['naUpms'] = 
-								$this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
-								
-								$Ids[$pkey]['product'] = $row['id'];
-								$Ids[$pkey]['area'] = '';
-							}
-						}
+						$prow = $this->getProductId(array($pvalue));
+
+						$TrialsInfo[$pkey]['sectionHeader'] = $prow['name']
+						. (($prow['company'] !== NULL && $prow['company'] != '') ? " / <i>" . $prow['company'] . "</i>" : '');
+						$TrialsInfo[$pkey]['naUpms'] = 
+						$this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
+						
+						$Ids[$pkey]['product'] = $prow['id'];
+						$Ids[$pkey]['area'] = '';
 					}
 				}
 				else
@@ -4389,8 +4377,9 @@ class TrialTracker
 			{
 				if(count($resultIds['area']) > 1)
 				{
+					$prow = $this->getProductId($resultIds['product']);
 					$TrialsInfo[0]['naUpms'] = 
-					$this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], implode("', '", $resultIds['product']));
+					$this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
 					
 					foreach($resultIds['area'] as $akey => $avalue)
 					{
@@ -4398,35 +4387,35 @@ class TrialTracker
 						$row = mysql_fetch_assoc($res);
 						
 						$TrialsInfo[$akey]['sectionHeader'] = $row['name'];
-						$Ids[$akey]['product'] = implode("', '", $resultIds['product']);
 						$Ids[$akey]['area'] = $row['id'];
+
+						$Ids[$akey]['product'] = $prow['id'];
 					}
 				}
 				else
 				{
 					foreach($resultIds['product'] as $pkey => $pvalue)
-					{
-						$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id = '" . $pvalue . "' ");
-						$row = mysql_fetch_assoc($res);
+					{	
+						$prow = $this->getProductId(array($pvalue));
 						
-						$TrialsInfo[$pkey]['sectionHeader'] = $row['name']
-						. (($row['company'] !== NULL && $row['company'] != '') ? " / (" . $row['company'] . ")" : '');
-						$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
+						$TrialsInfo[$pkey]['sectionHeader'] = $prow['name']
+						. (($prow['company'] !== NULL && $prow['company'] != '') ? " / (" . $prow['company'] . ")" : '');
+						$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
 						
-						$Ids[$pkey]['product'] = $row['id'];
+						$Ids[$pkey]['product'] = $prow['id'];
 						$Ids[$pkey]['area'] = implode("', '", $resultIds['area']);
 					}
 				}
 			}
 			else
 			{
-				$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id IN ('" . implode(',', $resultIds['product']) . "') ");
-				$row = mysql_fetch_assoc($res);
-				
-				$TrialsInfo[0]['sectionHeader'] = $row['name']
-				. (($row['company'] !== NULL && $row['company'] != '') ? " / (" . $row['company'] . ")" : '');
-				$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
-				$Ids[0]['product'] = $row['id'];
+				$prow = $this->getProductId($resultIds['product']);
+
+				$TrialsInfo[0]['sectionHeader'] = $prow['name']
+				. (($prow['company'] !== NULL && $prow['company'] != '') ? " / (" . $prow['company'] . ")" : '');
+				$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
+
+				$Ids[0]['product'] = $prow['id'];
 				$Ids[0]['area'] = implode("', '", $resultIds['area']);
 			}
 		
@@ -5292,11 +5281,18 @@ class TrialTracker
 		return $outputStr;
 	}
 
+	function getProductId($productIds = array())
+	{
+		$res = mysql_query("SELECT `id`, `name`, `company` FROM `products` WHERE id IN ('" . implode(',', $productIds) . "') OR LI_id IN ('" . implode(',', $productIds) . "') ");
+		$prow = mysql_fetch_assoc($res);
+		
+		return $prow;
+	}
 
 	/*****END OF Functions ONLY FOR TCPDF *****************************/
 	
 	function generateXmlFile($resultIds, $timeMachine = NULL, $ottType, $globalOptions)
-	{
+	{	
 		$Values = array();
 		if($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed')
 		{
@@ -5306,7 +5302,8 @@ class TrialTracker
 			{
 				foreach($resultIds['product'] as $pkey => $pvalue)
 				{
-					$Ids[$pkey]['product'] = $pvalue;
+					$prow = $this->getProductId(array($pvalue));
+					$Ids[$pkey]['product'] = $prow['id'];
 					$Ids[$pkey]['area'] = implode("', '", $resultIds['area']);
 				}
 			}
@@ -5316,15 +5313,9 @@ class TrialTracker
 				{
 					foreach($resultIds['product'] as $pkey => $pvalue)
 					{
-						$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id = '" . $pvalue . "' ");
-						if(mysql_num_rows($res) > 0)
-						{
-							while($row = mysql_fetch_assoc($res))
-							{
-								$Ids[$pkey]['product'] = $row['id'];
-								$Ids[$pkey]['area'] = '';
-							}
-						}
+						$prow = $this->getProductId(array($pvalue));
+						$Ids[$pkey]['product'] = $prow['id'];
+						$Ids[$pkey]['area'] = '';
 					}
 				}
 				else
@@ -5349,7 +5340,8 @@ class TrialTracker
 				{
 					foreach($resultIds['area'] as $akey => $avalue)
 					{
-						$Ids[$akey]['product'] = implode("', '", $resultIds['product']);
+						$prow = $this->getProductId($resultIds['product']);
+						$Ids[$akey]['product'] = $prow['id'];
 						$Ids[$akey]['area'] = $avalue;
 					}
 				}
@@ -5357,14 +5349,16 @@ class TrialTracker
 				{
 					foreach($resultIds['product'] as $pkey => $pvalue)
 					{
-						$Ids[$pkey]['product'] = $pvalue;
+						$prow = $this->getProductId(array($pvalue));
+						$Ids[$pkey]['product'] = $prow['id'];
 						$Ids[$pkey]['area'] = implode("', '", $resultIds['area']);
 					}
 				}
 			}
 			else
 			{
-				$Ids[0]['product'] = implode("', '", $resultIds['product']);
+				$prow = $this->getProductId($resultIds['product']);
+				$Ids[0]['product'] = $prow['id'];
 				$Ids[0]['area'] = implode("', '", $resultIds['area']);
 			}
 			
@@ -5543,11 +5537,8 @@ class TrialTracker
 				$timeInterval = (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
 			}
 		
-			//$resultIds['product'] = explode(',', $resultIds['product']);
-			//$resultIds['area'] = explode(',', $resultIds['area']);
-			
-			$resultIds['product'] = preg_split("/[,-]+/", $resultIds['product']);
-			$resultIds['area'] = preg_split("/[,-]+/", $resultIds['area']);
+			$resultIds['product'] = explode(',', $resultIds['product']);
+			$resultIds['area'] = explode(',', $resultIds['area']);
 			
 			if(count($resultIds['product']) > 1 && count($resultIds['area']) > 1)
 			{	
@@ -5558,7 +5549,7 @@ class TrialTracker
 				
 				foreach($resultIds['product'] as $pkey => $pvalue)
 				{
-					$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id = '" . $pvalue . "' ");
+					$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id = '" . $pvalue . "' OR LI_id = '" . $pvalue . "' ");
 					if(mysql_num_rows($res) > 0)
 					{
 						while($row = mysql_fetch_assoc($res))
@@ -5583,7 +5574,7 @@ class TrialTracker
 					
 					foreach($resultIds['product'] as $pkey => $pvalue)
 					{
-						$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id = '" . $pvalue . "' ");
+						$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id = '" . $pvalue . "' OR LI_id = '" . $pvalue . "' ");
 						if(mysql_num_rows($res) > 0)
 						{
 							while($row = mysql_fetch_assoc($res))
@@ -5628,7 +5619,8 @@ class TrialTracker
 			{
 				if(count($resultIds['area']) > 1)
 				{
-					$res = mysql_query("SELECT `name`, `id` FROM `products` WHERE id IN ('" . implode("','", $resultIds['product']) . "') ");
+					$res = mysql_query("SELECT `name`, `id` FROM `products` WHERE id IN ('" . implode("','", $resultIds['product']) 
+							. "') OR LI_id IN ('" . implode(',', $resultIds['product']) . "') ");
 					$row = mysql_fetch_assoc($res);
 					
 					$productName = $row['name'];
@@ -5673,7 +5665,7 @@ class TrialTracker
 					
 					foreach($resultIds['product'] as $pkey => $pvalue)
 					{
-						$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id = '" . $pvalue . "' ");
+						$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id = '" . $pvalue . "' OR LI_id = '" . $pvalue . "' ");
 						if(mysql_num_rows($res) > 0)
 
 						{
@@ -5700,7 +5692,8 @@ class TrialTracker
 				$t = 'Area: ' . htmlformat($row['name']);
 				$this->displayHeader($t);
 				
-				$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id IN ('" . implode(',', $resultIds['product']) . "') ");
+				$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id IN ('" . implode(',', $resultIds['product']) 
+						. "') OR LI_id IN ('" . implode(',', $resultIds['product']) . "') ");
 				$row = mysql_fetch_assoc($res);
 				
 				$Ids[0]['product'] = $row['id'];
@@ -5717,7 +5710,7 @@ class TrialTracker
 			echo '<input type="hidden" name="p" value="' . $_GET['p'] . '"/><input type="hidden" name="a" value="' . $_GET['a'] . '"/>';
 			
 			if(isset($_GET['JSON_search']))
-			echo '<input type="hidden"  name="JSON_search" value=\'' . $_GET['JSON_search'] . '\'/>';
+			echo '<input type="hidden" name="JSON_search" value=\'' . $_GET['JSON_search'] . '\'/>';
 			
 			$Values = $this->processIndexedOTTData($ottType, $Ids, $timeMachine, $globalOptions);
 			
