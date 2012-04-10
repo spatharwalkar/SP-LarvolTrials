@@ -369,6 +369,7 @@ CREATE TABLE IF NOT EXISTS `rpt_ott_header` (
 CREATE TABLE IF NOT EXISTS `rpt_ott_upm` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `intervention_name` BLOB NOT NULL,
+  `intervention_name_negate` BLOB DEFAULT NULL,
   `created` datetime NOT NULL,
   `expiry` date DEFAULT NULL,
   `last_referenced` datetime NOT NULL,
