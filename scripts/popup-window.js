@@ -141,10 +141,13 @@ function popup_show(type, rows, cols, id, drag_id, exit_id, position, x, y, posi
 				var element = document.getElementById('filingpopup_'+pt1+'_'+pt2);	///in case of bomb close all filing windows
 				if(element != null && element !='')
 				element.style.display='none';
+				var element = document.getElementById('phaseexppopup_'+pt1+'_'+pt2);	////in case of bomb close all phase windows
+				if(element != null && element !='')
+				element.style.display='none';
 			}
 		}
 	}
-	else
+	else if(type=='filing')
 	{
 		for(pt1=1; pt1<=rows; pt1++)
 		{
@@ -157,6 +160,30 @@ function popup_show(type, rows, cols, id, drag_id, exit_id, position, x, y, posi
 					element.style.display='none';
 				}
 				var element = document.getElementById('bombpopup_'+pt1+'_'+pt2);	////in case of filing close all bomb windows
+				if(element != null && element !='')
+				element.style.display='none';
+				var element = document.getElementById('phaseexppopup_'+pt1+'_'+pt2);	////in case of filing close all phase windows
+				if(element != null && element !='')
+				element.style.display='none';
+			}
+		}
+	} 
+	else
+	{
+		for(pt1=1; pt1<=rows; pt1++)
+		{
+			for(pt2=1; pt2<=cols; pt2++)
+			{
+				if(id !='phasepopup_'+pt1+'_'+pt2)
+				{
+					var element = document.getElementById('phaseexppopup_'+pt1+'_'+pt2);
+					if(element != null && element !='')
+					element.style.display='none';
+				}
+				var element = document.getElementById('bombpopup_'+pt1+'_'+pt2);	////in case of phase close all bomb windows
+				if(element != null && element !='')
+				element.style.display='none';
+				var element = document.getElementById('filingpopup_'+pt1+'_'+pt2);	///in case of phase close all filing windows
 				if(element != null && element !='')
 				element.style.display='none';
 			}

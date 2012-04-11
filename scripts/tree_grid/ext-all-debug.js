@@ -25521,6 +25521,7 @@ Ext.define('Ext.data.reader.Json', {
                 }
             }
             return function(obj) {
+			if(obj != null && obj != '' )
                 return obj[expr];
             };
         };

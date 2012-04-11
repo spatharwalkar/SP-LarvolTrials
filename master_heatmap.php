@@ -56,27 +56,89 @@ function autoComplete(fieldID)
 }
 </script>
 <script type="text/javascript">
+function update_icons(type, row, col, tot_rows, tot_cols, BG_color)
+{
+	if(type=='phase4')
+	{
+	  if(document.getElementById("phase4opt_"+row+"_"+col).checked == true)
+	  {
+	  	document.getElementById("phase4_val_"+row+"_"+col).value='1';
+		document.getElementById("phase4_pos_"+row+"_"+col).innerHTML = '<img align="middle" id="phase4img_'+row+'_'+col+'" title="Phase4_Override" src="images/phase4.png" style="width:20px; height:20px; vertical-align:bottom; cursor:pointer;" alt="Phase4_Override"/>&nbsp;';
+	  }
+	  else
+	  {
+	 	 if(!confirm("Do you really want to unset phase4_override")) {document.getElementById("phase4opt_"+row+"_"+col).checked = true; return true;}
+		 document.getElementById("phase4_val_"+row+"_"+col).value='0';
+		 document.getElementById("phase4_pos_"+row+"_"+col).innerHTML = '';
+	  }
+	}
+	
+	if(type=='bomb')
+	{
+	  if(document.getElementById("bombopt_"+row+"_"+col).checked == true)
+	  {
+	  	document.getElementById("bomb_pos_"+row+"_"+col).innerHTML = '<img align="middle" id="bombimg_'+row+'_'+col+'" title="Edit Large Bomb Details" src="images/new_lbomb.png" style="width:20px; height:20px; vertical-align:bottom; cursor:pointer;" alt="Large Bomb" onclick="popup_show(\'bomb\', '+tot_rows+','+tot_cols+',\'bombpopup_'+row+'_'+col+'\', \'bombpopup_drag_'+row+'_'+col+'\', \'bombpopup_exit_'+row+'_'+col+'\', \'mouse\', -10, -10);" />&nbsp;';
+		document.getElementById("bombselect_"+row+"_"+col).value='large';
+	  }
+	  else
+	  {
+	 	 if(!confirm("Do you really want to remove Bomb & associated Details")) {document.getElementById("bombopt_"+row+"_"+col).checked = true; return true;}
+		 document.getElementById("bomb_pos_"+row+"_"+col).innerHTML = '';
+		 document.getElementById("bombselect_"+row+"_"+col).value='none';
+		 document.getElementById("bomb_explain_"+row+"_"+col).value='';
+	  }
+	}
+	
+	if(type=='filing')
+	{
+	  if(document.getElementById("filingopt_"+row+"_"+col).checked == true)
+	  {
+	  	document.getElementById("filing_pos_"+row+"_"+col).innerHTML = '<img align="middle" id="filingimg_'+row+'_'+col+'" title="Edit Filing" src="images/new_edit.png" style="width:20px; height:20px; vertical-align:bottom; cursor:pointer;" alt="Edit Filing" onclick="popup_show(\'filing\', '+tot_rows+','+tot_cols+',\'filingpopup_'+row+'_'+col+'\', \'filingpopup_drag_'+row+'_'+col+'\', \'filingpopup_exit_'+row+'_'+col+'\', \'mouse\', -10, -10);" />&nbsp;';
+	  }
+	  else
+	  {
+	 	 if(!confirm("Do you really want to remove Filing Details")) {document.getElementById("filingopt_"+row+"_"+col).checked = true; return true;}
+		 document.getElementById("filing_pos_"+row+"_"+col).innerHTML = '';
+	  }
+	}
+	
+	if(type=='phaseexp')
+	{
+	  if(document.getElementById("phaseexpopt_"+row+"_"+col).checked == true)
+	  {
+	  	document.getElementById("phaseexp_pos_"+row+"_"+col).innerHTML = '<img id="Phase_Explain_'+row+'_'+col+'" src="images/phaseexp.png" title="Edit Phase Explain" style="width: 20px; height: 20px; vertical-align: bottom; cursor: pointer; " alt="Phase Explain" onclick="popup_show(\'phaseexp\', '+tot_rows+','+tot_cols+',\'phaseexppopup_'+row+'_'+col+'\', \'phaseexppopup_drag_'+row+'_'+col+'\', \'phaseexppopup_exit_'+row+'_'+col+'\', \'mouse\', -10, -10);" />&nbsp;';
+	  }
+	  else
+	  {
+	 	 if(!confirm("Do you really want to remove Phase Explain")) {document.getElementById("phaseexpopt_"+row+"_"+col).checked = true; return true;}
+		 document.getElementById("phaseexp_pos_"+row+"_"+col).innerHTML = '';
+	  }
+	}
+}
 function bicon_change(option, bomb_id)
 {
 	var bomb = document.getElementById('bomb_id');
 
 	if(option.value == 'small')
 	{
-		bomb_id.src='images/sbomb.png';
-		bomb_id.style.height='11px';
-		bomb_id.style.width='10px';
+		bomb_id.src='images/new_sbomb.png';
+		bomb_id.title='Edit Small Bomb Details';
+		bomb_id.style.height='20px';
+		bomb_id.style.width='20px';
 	}
 	else if(option.value == 'large')
 	{
-		bomb_id.src='images/lbomb.png';
+		bomb_id.src='images/new_lbomb.png';
+		bomb_id.title='Edit Large Bomb Details';
 		bomb_id.style.height='20px';
-		bomb_id.style.width='18px';
+		bomb_id.style.width='20px';
 	}
 	else
 	{
-		bomb_id.src='images/square.png';
+		bomb_id.src='images/new_square.png';
+		bomb_id.title='Edit Bomb Details';
 		bomb_id.style.height='20px';
-		bomb_id.style.width='18px';
+		bomb_id.style.width='20px';
 	}	
 
 }
@@ -86,11 +148,11 @@ function ficon_change(filing_id, filingicon_id)
 
 	if(filing_id.value != '' && filing_id.value != null)
 	{
-		filingicon_id.src='images/file.png';
+		filingicon_id.src='images/new_file.png';
 	}
 	else
 	{
-		filingicon_id.src='images/edit.png';
+		filingicon_id.src='images/new_edit.png';
 	}	
 
 }
@@ -148,7 +210,9 @@ function tree_grid_cookie(category_name)	///Categories listed in cookies will on
 
 </script>
 <link href="css/popup_form.css" rel="stylesheet" type="text/css" media="all" />
+<link rel="stylesheet" type="text/css" href="css/chromestyle2.css" />
 <script type="text/javascript" src="scripts/popup-window.js"></script>
+<script type="text/javascript" src="scripts/chrome.js"></script>
 <?php
 echo('<script type="text/javascript" src="delsure.js"></script>');
 postRL();
@@ -258,15 +322,19 @@ function editor()
 				$data_matrix[$row][$col]['total']=$cell_data['count_total'];
 				else
 				$data_matrix[$row][$col]['total']=0;
+				
+				$data_matrix[$row][$col]['phase_explain']=trim($cell_data['phase_explain']);
 
-				$data_matrix[$row][$col]['bomb_explain']=$cell_data['bomb_explain'];
+				$data_matrix[$row][$col]['bomb_explain']=trim($cell_data['bomb_explain']);
+				
+				$data_matrix[$row][$col]['phase4_override']=$cell_data['phase4_override'];
 				
 				if($cell_data['bomb_auto'] == 'small')
 				{
 					$data_matrix[$row][$col]['bomb_auto']['value']=$cell_data['bomb_auto'];
 					$data_matrix[$row][$col]['bomb_auto']['src']='sbomb.png';
 					$data_matrix[$row][$col]['bomb_auto']['alt']='Small Bomb';
-					$data_matrix[$row][$col]['bomb_auto']['style']='width:21px; height:11px;';
+					$data_matrix[$row][$col]['bomb_auto']['style']='width:9px; height:11px;';
 					$data_matrix[$row][$col]['bomb_auto']['title']='Suggested';
 				}
 				elseif($cell_data['bomb_auto'] == 'large')
@@ -274,7 +342,7 @@ function editor()
 					$data_matrix[$row][$col]['bomb_auto']['value']=$cell_data['bomb_auto'];
 					$data_matrix[$row][$col]['bomb_auto']['src']='lbomb.png';
 					$data_matrix[$row][$col]['bomb_auto']['alt']='Large Bomb';
-					$data_matrix[$row][$col]['bomb_auto']['style']='width:30px; height:20px;';
+					$data_matrix[$row][$col]['bomb_auto']['style']='width:18px; height:20px;';
 					$data_matrix[$row][$col]['bomb_auto']['title']='Suggested';
 				}
 				else
@@ -282,7 +350,7 @@ function editor()
 					$data_matrix[$row][$col]['bomb_auto']['value']=$cell_data['bomb_auto'];
 					$data_matrix[$row][$col]['bomb_auto']['src']='trans.gif';
 					$data_matrix[$row][$col]['bomb_auto']['alt']='None';
-					$data_matrix[$row][$col]['bomb_auto']['style']='width:30px; height:11px;';
+					$data_matrix[$row][$col]['bomb_auto']['style']='width:18px; height:11px;';
 					$data_matrix[$row][$col]['bomb_auto']['title']='';
 				}
 				
@@ -290,57 +358,70 @@ function editor()
 				if($cell_data['bomb'] == 'small')
 				{
 					$data_matrix[$row][$col]['bomb']['value']=$cell_data['bomb'];
-					$data_matrix[$row][$col]['bomb']['src']='sbomb.png';
+					$data_matrix[$row][$col]['bomb']['src']='new_sbomb.png';
 					$data_matrix[$row][$col]['bomb']['alt']='Small Bomb';
-					$data_matrix[$row][$col]['bomb']['style']='width:21px; height:11px;';
-					$data_matrix[$row][$col]['bomb']['title']='Edit Bomb';
+					$data_matrix[$row][$col]['bomb']['style']='width:20px; height:20px;';
+					$data_matrix[$row][$col]['bomb']['title']='Edit Small Bomb Details';
 				}
 				elseif($cell_data['bomb'] == 'large')
 				{
 					$data_matrix[$row][$col]['bomb']['value']=$cell_data['bomb'];
-					$data_matrix[$row][$col]['bomb']['src']='lbomb.png';
+					$data_matrix[$row][$col]['bomb']['src']='new_lbomb.png';
 					$data_matrix[$row][$col]['bomb']['alt']='Large Bomb';
-					$data_matrix[$row][$col]['bomb']['style']='width:30px; height:20px;';
-					$data_matrix[$row][$col]['bomb']['title']='Edit Bomb';
+					$data_matrix[$row][$col]['bomb']['style']='width:20px; height:20px;';
+					$data_matrix[$row][$col]['bomb']['title']='Edit Large Bomb Details';
 				}
 				else
 				{
 					$data_matrix[$row][$col]['bomb']['value']=$cell_data['bomb'];
-					$data_matrix[$row][$col]['bomb']['src']='square.png';
+					$data_matrix[$row][$col]['bomb']['src']='new_square.png';
 					$data_matrix[$row][$col]['bomb']['alt']='None';
-					$data_matrix[$row][$col]['bomb']['style']='width:30px; height:20px;';
+					$data_matrix[$row][$col]['bomb']['style']='width:20px; height:20px;';
 					$data_matrix[$row][$col]['bomb']['title']='Edit Bomb';
 				}
 				
-				$data_matrix[$row][$col]['filing']=$cell_data['filing'];
+				$data_matrix[$row][$col]['filing']=trim($cell_data['filing']);
+				
 				
 				if($cell_data['highest_phase'] == 'N/A' || $cell_data['highest_phase'] == '' || $cell_data['highest_phase'] === NULL)
 				{
 					$data_matrix[$row][$col]['color']='background-color:#BFBFBF;';
+					$data_matrix[$row][$col]['color_code']='BFBFBF';
 				}
 				else if($cell_data['highest_phase'] == '0')
 				{
 					$data_matrix[$row][$col]['color']='background-color:#00CCFF;';
+					$data_matrix[$row][$col]['color_code']='00CCFF';
 				}
 				else if($cell_data['highest_phase'] == '1' || $cell_data['highest_phase'] == '0/1' || $cell_data['highest_phase'] == '1a' 
 				|| $cell_data['highest_phase'] == '1b' || $cell_data['highest_phase'] == '1a/1b' || $cell_data['highest_phase'] == '1c')
 				{
 					$data_matrix[$row][$col]['color']='background-color:#99CC00;';
+					$data_matrix[$row][$col]['color_code']='99CC00';
 				}
 				else if($cell_data['highest_phase'] == '2' || $cell_data['highest_phase'] == '1/2' || $cell_data['highest_phase'] == '1b/2' 
 				|| $cell_data['highest_phase'] == '1b/2a' || $cell_data['highest_phase'] == '2a' || $cell_data['highest_phase'] == '2a/2b' 
 				|| $cell_data['highest_phase'] == '2a/b' || $cell_data['highest_phase'] == '2b')
 				{
 					$data_matrix[$row][$col]['color']='background-color:#FFFF00;';
+					$data_matrix[$row][$col]['color_code']='FFFF00';
 				}
 				else if($cell_data['highest_phase'] == '3' || $cell_data['highest_phase'] == '2/3' || $cell_data['highest_phase'] == '2b/3' 
 				|| $cell_data['highest_phase'] == '3a' || $cell_data['highest_phase'] == '3b')
 				{
 					$data_matrix[$row][$col]['color']='background-color:#FF9900;';
+					$data_matrix[$row][$col]['color_code']='F9900';
 				}
 				else if($cell_data['highest_phase'] == '4' || $cell_data['highest_phase'] == '3/4' || $cell_data['highest_phase'] == '3b/4')
 				{
 					$data_matrix[$row][$col]['color']='background-color:#FF0000;';	
+					$data_matrix[$row][$col]['color_code']='FF0000';
+				}
+				
+				if($cell_data['phase4_override'])
+				{
+					$data_matrix[$row][$col]['color']='background-color:#FF0000;';
+					$data_matrix[$row][$col]['color_code']='FF0000';
 				}
 			}
 			else
@@ -405,20 +486,25 @@ function editor()
 	$out .= '<br clear="both" />'
 		. '<form action="master_heatmap.php" onsubmit="return chkbox(0,\'delrepe\');" method="post"><fieldset><legend>Edit report ' . $id . '</legend>'
 		. '<input type="hidden" name="id" value="' . $id . '" />'
-		. '<label>Name: <input type="text" name="reportname" value="' . htmlspecialchars($name) . '"/></label>'
-		. '<label>Category: <input type="text" name="reportcategory" value="' . htmlspecialchars($category)
+		. '<label>Name: <input type="text" '.(($owner_type == 'shared' && $rptu != $db->user->id) ? ' disabled="disabled" ':'').' '
+		. 'name="reportname" value="' . htmlspecialchars($name) . '"/></label>'
+		. '<label>Category: <input type="text" '.(($owner_type == 'shared' && $rptu != $db->user->id) ? ' disabled="disabled" ':'').' '
+		. 'name="reportcategory" value="' . htmlspecialchars($category)
 		. '"/></label>';		
 	if($db->user->userlevel != 'user')
 	{
 		$out .= ' Ownership: '
 			. '<label><input type="radio" name="own" value="shared" '
 			. ($owner_type == 'shared' ? 'checked="checked"' : '')
+			. (($owner_type == 'shared' && $rptu != $db->user->id) ? ' disabled="disabled" ':'')
 			. '/>Shared</label> '
 			. '<label><input type="radio" name="own" value="global" '
 			. ($owner_type == 'global' ? 'checked="checked"' : '')
+			. (($owner_type == 'shared' && $rptu != $db->user->id) ? ' disabled="disabled" ':'')
 			. '/>Global</label> '
 			. '<label><input type="radio" name="own" value="mine" '
 			. ($owner_type == 'mine' ? 'checked="checked"' : '')
+			. (($owner_type == 'shared' && $rptu != $db->user->id) ? ' disabled="disabled" ':'')
 			. '/>Mine</label>';
 	}else{
 		$out .= ' Ownership: '
@@ -546,12 +632,12 @@ function editor()
 		
 		foreach($columns as $col => $cval)
 		{
-			$out .= '<td valign="middle"; style="text-align:center;'.$data_matrix[$row][$col]['color'].'"><br><br>';
+			$out .= '<td valign="middle" align="center" style="text-align:center;'.$data_matrix[$row][$col]['color'].'"><br>';
 			
 			if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL)
 			{
 				if($data_matrix[$row][$col]['bomb_auto']['src'] != '' && $data_matrix[$row][$col]['bomb_auto']['src'] != NULL)
-				$out .= '<img align="left" title="'.$data_matrix[$row][$col]['bomb_auto']['title'].'" src="images/'.$data_matrix[$row][$col]['bomb_auto']['src'].'" style="'.$data_matrix[$row][$col]['bomb_auto']['style'].' padding-left:10px; cursor:pointer;" alt="'.$data_matrix[$row][$col]['bomb_auto']['alt'].'"  />';
+				$out .= '<img title="'.$data_matrix[$row][$col]['bomb_auto']['title'].'" src="images/'.$data_matrix[$row][$col]['bomb_auto']['src'].'" style="'.$data_matrix[$row][$col]['bomb_auto']['style'].' cursor:pointer;" alt="'.$data_matrix[$row][$col]['bomb_auto']['alt'].'"  />';
 				
 				if($view_tp=='active')
 				{
@@ -568,9 +654,41 @@ function editor()
 					
 				$out .= '<a href="intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col] . '" target="_blank" class="ottlink" title="'.$title.'">'.$count_val.'</a>';
 				
-				$out .= '<img align="right" id="bombimg_'.$row.'_'.$col.'" title="'.$data_matrix[$row][$col]['bomb']['title'].'" src="images/'.$data_matrix[$row][$col]['bomb']['src'].'" style="'.$data_matrix[$row][$col]['bomb']['style'].' vertical-align:middle; padding-right:10px; cursor:pointer;" alt="'.$data_matrix[$row][$col]['bomb']['alt'].'"'
-			.'onclick="popup_show(\'bomb\', '.count($rows).','.count($columns).',\'bombpopup_'.$row.'_'.$col.'\', \'bombpopup_drag_'.$row.'_'.$col.'\', \'bombpopup_exit_'.$row.'_'.$col.'\', \'mouse\', -10, -10);" /><br><br>';
-				$out .= '<img align="right" id="filingimg_'.$row.'_'.$col.'" title="Edit Filing" src="images/'. (($data_matrix[$row][$col]['filing'] == NULL && $data_matrix[$row][$col]['filing'] == '') ? 'edit.png' : 'file.png' ) .'" style="width:14px; height:16px; vertical-align:top; cursor:pointer; background-color:#CCCCCC;" alt="Edit Filing" onclick="popup_show(\'filing\', '.count($rows).','.count($columns).',\'filingpopup_'.$row.'_'.$col.'\', \'filingpopup_drag_'.$row.'_'.$col.'\', \'filingpopup_exit_'.$row.'_'.$col.'\', \'mouse\', -10, -10);" />';
+				$out .= '<input type="hidden" value=" ' . (($data_matrix[$row][$col]['phase4_override']) ? '1':'0') . ' " name="phase4_val['.$row.']['.$col.']" id="phase4_val_'.$row.'_'.$col.'" />';
+				
+				$out .= '<div align="right" style="vertical-align:middle" class="chromestyle" id="chromemenu_'.$row.'_'.$col.'"><ul><li><a rel="dropmenu_'.$row.'_'.$col.'"><b>+<b></a></li></ul></div>';
+				
+				$out .= '<div id="dropmenu_'.$row.'_'.$col.'" class="dropmenudiv" style="width: 180px;">'
+					 .'<a style="vertical-align:bottom;"><input  id="bombopt_'.$row.'_'.$col.'"  name="bombopt_'.$row.'_'.$col.'" type="checkbox" value="1" ' . (($data_matrix[$row][$col]['bomb']['src'] != 'new_square.png') ? 'checked="checked"':'') . ' onchange="update_icons(\'bomb\','.$row.','.$col.', '.count($rows).','.count($columns).',\''.$data_matrix[$row][$col]['color_code'].'\')" />Small/Large Bomb&nbsp;<img align="right" src="images/lbomb.png"  style="vertical-align:bottom; width:11px; height:11px;"/></a>'
+					 .'<a style="vertical-align:bottom;"><input  id="filingopt_'.$row.'_'.$col.'"  name="filingopt_'.$row.'_'.$col.'" type="checkbox" value="1" ' . (($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '') ? 'checked="checked"':'') . '  onchange="update_icons(\'filing\','.$row.','.$col.', '.count($rows).','.count($columns).',\''.$data_matrix[$row][$col]['color_code'].'\')" />Filing&nbsp;<img align="right" src="images/file.png"  style="vertical-align:bottom; width:11px; height:11px;"/></a>'
+					 .'<a style="vertical-align:bottom;"><input  id="phase4opt_'.$row.'_'.$col.'"  name="phase4opt_'.$row.'_'.$col.'" type="checkbox" value="1" ' . (($data_matrix[$row][$col]['phase4_override']) ? 'checked="checked"':'') . '  onchange="update_icons(\'phase4\','.$row.','.$col.', '.count($rows).','.count($columns).',\''.$data_matrix[$row][$col]['color_code'].'\')" />Phase4_Override&nbsp;<img align="right" src="images/phase4.png"  style="vertical-align:bottom; width:11px; height:11px;"/></a>'
+					 .'<a style="vertical-align:bottom;"><input  id="phaseexpopt_'.$row.'_'.$col.'"  name="phaseexpopt_'.$row.'_'.$col.'" type="checkbox" value="1" ' . (($data_matrix[$row][$col]['phase_explain'] != NULL && $data_matrix[$row][$col]['phase_explain'] != '') ? 'checked="checked"':'') . '  onchange="update_icons(\'phaseexp\','.$row.','.$col.', '.count($rows).','.count($columns).',\''.$data_matrix[$row][$col]['color_code'].'\')" />Phase Explain&nbsp;<img align="right" src="images/phaseexp.png"  style="vertical-align:bottom; width:11px; height:11px;"/></a>'
+					 .'</div>';
+					 
+				$out .= '<script type="text/javascript">cssdropdown.startchrome("chromemenu_'.$row.'_'.$col.'");</script>';
+				
+				
+				$out .= '<font id="phase4_pos_'.$row.'_'.$col.'">';
+				if($data_matrix[$row][$col]['phase4_override'])
+				$out .= '<img align="middle" id="phase4img_'.$row.'_'.$col.'" title="Phase4_Override" src="images/phase4.png" style="width:20px; height:20px; vertical-align:bottom; cursor:pointer;" alt="Phase4_Override"/>&nbsp;';
+				$out .= '</font>';
+				
+				$out .= '<font id="bomb_pos_'.$row.'_'.$col.'">';
+				if($data_matrix[$row][$col]['bomb']['src'] != 'new_square.png')
+				$out .= '<img align="middle" id="bombimg_'.$row.'_'.$col.'" title="'.$data_matrix[$row][$col]['bomb']['title'].'" src="images/'.$data_matrix[$row][$col]['bomb']['src'].'" style="'.$data_matrix[$row][$col]['bomb']['style'].' vertical-align:bottom; cursor:pointer;" alt="'.$data_matrix[$row][$col]['bomb']['alt'].'"'
+			.'onclick="popup_show(\'bomb\', '.count($rows).','.count($columns).',\'bombpopup_'.$row.'_'.$col.'\', \'bombpopup_drag_'.$row.'_'.$col.'\', \'bombpopup_exit_'.$row.'_'.$col.'\', \'mouse\', -10, -10);" />&nbsp;';
+				$out .= '</font>';
+			
+				$out .= '<font id="filing_pos_'.$row.'_'.$col.'">';
+				if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
+				$out .= '<img align="middle" id="filingimg_'.$row.'_'.$col.'" title="Edit Filing" src="images/'. (($data_matrix[$row][$col]['filing'] == NULL && $data_matrix[$row][$col]['filing'] == '') ? 'new_edit.png' : 'new_file.png' ) .'" style="width:20px; height:20px; vertical-align:bottom; cursor:pointer;" alt="Edit Filing" onclick="popup_show(\'filing\', '.count($rows).','.count($columns).',\'filingpopup_'.$row.'_'.$col.'\', \'filingpopup_drag_'.$row.'_'.$col.'\', \'filingpopup_exit_'.$row.'_'.$col.'\', \'mouse\', -10, -10);" />&nbsp;';
+				$out .= '</font>';
+				
+				$out .= '<font id="phaseexp_pos_'.$row.'_'.$col.'">';
+				if($data_matrix[$row][$col]['phase_explain'] != NULL && $data_matrix[$row][$col]['phase_explain'] != '')
+				$out .= '<img id="Phase_Explain_'.$row.'_'.$col.'" src="images/phaseexp.png" title="Edit Phase Explain" style="width: 20px; height: 20px; vertical-align: bottom; cursor: pointer;" alt="Phase Explain" onclick="popup_show(\'phaseexp\', '.count($rows).','.count($columns).',\'phaseexppopup_'.$row.'_'.$col.'\', \'phaseexppopup_drag_'.$row.'_'.$col.'\', \'phaseexppopup_exit_'.$row.'_'.$col.'\', \'mouse\', -10, -10);" />&nbsp;';
+				$out .= '</font>';
+				
 
 				$out .= '<div class="popup_form" id="bombpopup_'.$row.'_'.$col.'" style="display: none;">'	//Pop-Up Form for Bomb Editing Starts Here
 						.'<div class="menu_form_header" id="bombpopup_drag_'.$row.'_'.$col.'">'
@@ -590,7 +708,7 @@ function editor()
 						$out .= '</select><br /><br /></td></tr>'
 						.'<tr><th style="background-color:#fff;">Bomb Explanation:</th></tr>'
 						.'<tr><td style="background-color:#fff;">'
-						.'<textarea name="bomb_explain['.$row.']['.$col.']" style="overflow:scroll;" rows="5" cols="20">'. $data_matrix[$row][$col]['bomb_explain'] .'</textarea>'
+						.'<textarea name="bomb_explain['.$row.']['.$col.']" id="bomb_explain_'.$row.'_'.$col.'" style="overflow:scroll;" rows="5" cols="20">'. $data_matrix[$row][$col]['bomb_explain'] .'</textarea>'
 						.'</td></tr>'
 						.'<tr><th style="background-color:#fff;">&nbsp;</th></tr>'
 						.'<tr>'
@@ -619,7 +737,26 @@ function editor()
 						.'<tr><th style="background-color:#fff;">&nbsp;</th></tr>'
 						.'</table>'
 						.'</div>'
-						.'</div>';
+						.'</div>'; ///Pop-up Form for Filing Ends Here	
+						
+						
+						$out .= '<div class="popup_form" id="phaseexppopup_'.$row.'_'.$col.'" style="display: none;">'	//Pop-Up Form for Bomb Editing Starts Here
+							.'<div class="menu_form_header" id="phaseexppopup_drag_'.$row.'_'.$col.'">'
+							.'<img class="menu_form_exit" align="right" id="phaseexppopup_exit_'.$row.'_'.$col.'" src="'. urlPath() .'images/fancy_close.png" style="width:30px; height:30px;" '		
+							.'alt="" />&nbsp;&nbsp;&nbsp;Phase Explain'
+							.'</div>'
+							.'<div class="menu_form_body">'
+							.'<table style="background-color:#fff;">';
+							
+						$out .= '<tr style="background-color:#fff; border:none;"><th style="background-color:#fff; border:none;">Phase Explain:</th></tr>'
+							.'<tr style="background-color:#fff; border:none;"><td style="background-color:#fff; border:none;">'
+							.'<textarea id="phase_explain_'.$row.'_'.$col.'" name="phase_explain['.$row.']['.$col.']" style="overflow:scroll;" rows="5" cols="20">'. $data_matrix[$row][$col]['phase_explain'] .'</textarea>'
+							//.'<div align="left" width="200px" style="overflow:scroll; width:200px; height:150px; padding-left:10px;" id="filing">'. $data_matrix[$row][$col]['phase_explain'] .'</div>'
+							.'</td></tr>'
+							.'<tr style="background-color:#fff; border:none;"><th style="background-color:#fff; border:none;">&nbsp;</th></tr>'
+							.'</table>'
+							.'</div>'
+							.'</div>'; ///Pop-up Form for Phase Explain Ends Here		
 
 
 			}else{
@@ -644,9 +781,9 @@ function editor()
 			. '</textarea></fieldset>';
 	if($owner_type == 'mine' || ($owner_type == 'global' && $db->user->userlevel != 'user') || ($owner_type == 'shared' && $rptu == $db->user->id))
 	{
-		$out .= '<br/><fieldset style="margin-top:50px; padding:8px;"><legend>Advanced</legend>'
+		$out .= '<br/><br/><br/><br/><div align="left"><fieldset style="margin-top:50px; padding:8px;"><legend>Advanced</legend>'
 				. '<label class="lbldeln"><input class="delrepe" type="checkbox" name="delrep['.$id.']" title="Delete" /></label>' 
-				. '&nbsp;&nbsp;&nbsp;&nbsp;Delete This Master Heatmap Report</fieldset>';
+				. '&nbsp;&nbsp;&nbsp;&nbsp;Delete This Master Heatmap Report</fieldset></div>';
 	};
 	$out .= '</form>';
 
@@ -816,7 +953,15 @@ function Download_reports()
 				
 				$data_matrix[$row][$col]['filing']=$cell_data['filing'];
 				
-				if($cell_data['highest_phase'] == 'N/A' || $cell_data['highest_phase'] == '' || $cell_data['highest_phase'] === NULL)
+				$data_matrix[$row][$col]['phase4_override']=$cell_data['phase4_override'];
+				
+				
+				if($cell_data['phase4_override'])
+				{
+					$data_matrix[$row][$col]['color']='background-color:#FF0000;';
+					$data_matrix[$row][$col]['color_code']='FF0000';
+				}
+				else if($cell_data['highest_phase'] == 'N/A' || $cell_data['highest_phase'] == '' || $cell_data['highest_phase'] === NULL)
 				{
 					$data_matrix[$row][$col]['color']='background-color:#BFBFBF;';
 					$data_matrix[$row][$col]['color_code']='BFBFBF';
@@ -1465,6 +1610,7 @@ function Download_reports()
 function postEd()
 {
 	global $db;
+	global $now;
 	if(!isset($_POST['id'])) return;
 	$id = mysql_real_escape_string($_POST['id']);
 	if(!is_numeric($id)) return;
@@ -1609,7 +1755,24 @@ function postEd()
 				$filing=mysql_real_escape_string($_POST['filing'][$row][$col]);
 				$bomb=$_POST['bomb'][$row][$col];
 				$bomb_explain=mysql_real_escape_string($_POST['bomb_explain'][$row][$col]);
-				$query = "UPDATE `rpt_masterhm_cells` set `bomb` = '$bomb', `bomb_explain` = '$bomb_explain', `filing` = '$filing' WHERE `product` = $prod AND `area` = $area";
+				$phase_explain=mysql_real_escape_string($_POST['phase_explain'][$row][$col]);
+				$phase4_val=mysql_real_escape_string($_POST['phase4_val'][$row][$col]);
+				
+				$up_time=date('Y-m-d H:i:s', $now);
+				
+				$originDT_query = "SELECT `bomb`, `bomb_explain`, `filing` FROM `rpt_masterhm_cells` WHERE `product` = $prod AND `area` = $area";
+				$originDT=mysql_query($originDT_query) or die ('Bad SQL Query getting Original Bomb and Filing Information Before Updating.<br/>'.$query);
+				$originDT = mysql_fetch_array($originDT);
+				
+				$query = "UPDATE `rpt_masterhm_cells` set ";
+				
+				if($bomb != $originDT['bomb'] || $_POST['bomb_explain'][$row][$col] != $originDT['bomb_explain'])
+				$query .="`bomb` = '$bomb', `bomb_explain` = '$bomb_explain', `bomb_lastchanged`= '$up_time', ";
+				
+				if($filing != $originDT['filing'])
+				$query .="`filing` = '$filing', `filing_lastchanged`= '$up_time', ";
+				
+				$query .= "`phase4_override`='$phase4_val', `phase_explain`='$phase_explain', `last_update`= '$up_time' WHERE `product` = $prod AND `area` = $area";
 				mysql_query($query) or die ('Bad SQL Query updating Bomb and Filing Information.<br/>'.$query);
 			}
 		}
