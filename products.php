@@ -185,7 +185,7 @@ pagePagination($limit,$totalCount,$table,$script,$ignoreFields,array('import'=>t
 //pagination controller
 
 //define skip array table fields
-$skipArr = array('comments','product_type','licensing_mode','administration_mode','discontinuation_status','discontinuation_status_comment','is_key','is_active','created','modified','company','brand_names','generic_names','code_names','approvals','xml');
+$skipArr = array('comments','product_type','licensing_mode','administration_mode','discontinuation_status','discontinuation_status_comment','is_key','is_active','created','modified','company','brand_names','generic_names','code_names','approvals','xml','display_name');
 
 echo '<br/>';
 echo '<div class="clr">';
