@@ -486,9 +486,9 @@ function editor()
 	$out .= '<br clear="both" />'
 		. '<form action="master_heatmap.php" onsubmit="return chkbox(0,\'delrepe\');" method="post"><fieldset><legend>Edit report ' . $id . '</legend>'
 		. '<input type="hidden" name="id" value="' . $id . '" />'
-		. '<label>Name: <input type="text" '.(($owner_type == 'shared' && $rptu != $db->user->id) ? ' disabled="disabled" ':'').' '
+		. '<label>Name: <input type="text" '.((($owner_type == 'shared' && $rptu != $db->user->id) || ($owner_type == 'global' && $db->user->userlevel == 'user')) ? ' disabled="disabled" ':'').' '
 		. 'name="reportname" value="' . htmlspecialchars($name) . '"/></label>'
-		. '<label>Category: <input type="text" '.(($owner_type == 'shared' && $rptu != $db->user->id) ? ' disabled="disabled" ':'').' '
+		. '<label>Category: <input type="text" '.((($owner_type == 'shared' && $rptu != $db->user->id) || ($owner_type == 'global' && $db->user->userlevel == 'user')) ? ' disabled="disabled" ':'').' '
 		. 'name="reportcategory" value="' . htmlspecialchars($category)
 		. '"/></label>';		
 	if($db->user->userlevel != 'user')
@@ -839,9 +839,9 @@ function Download_reports()
 		{
 			if($header['type_id'] != NULL)
 			{
-				$result =  mysql_fetch_assoc(mysql_query("SELECT id, name, display_name, description FROM `products` WHERE id = '" . $header['type_id'] . "' "));
+				$result =  mysql_fetch_assoc(mysql_query("SELECT id, name, description FROM `products` WHERE id = '" . $header['type_id'] . "' "));
 				$rows[$header['num']] = $result['name'];
-				$rowsDisplayName[$header['num']] = $result['display_name'];
+				$rowsDisplayName[$header['num']] = '';
 				$rowsDescription[$header['num']] = $result['description'];
 			}
 			else
