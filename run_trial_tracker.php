@@ -195,7 +195,7 @@ class TrialTracker
 					
 					$TrialsInfo[$pkey]['sectionHeader'] = $prow['name']
 					. (($prow['company'] !== NULL && $prow['company'] != '') ? " / (" . $prow['company'] . ")" : '');
-					$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
+					$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
 							
 					$Ids[$pkey]['product'] = $prow['id'];
 					$Ids[$pkey]['area'] = implode("', '", $resultIds['area']);
@@ -212,7 +212,7 @@ class TrialTracker
 						$TrialsInfo[$pkey]['sectionHeader'] = $prow['name']
 						. (($prow['company'] !== NULL && $prow['company'] != '') ? " / <i>" . $prow['company'] . "</i>" : '');
 						$TrialsInfo[$pkey]['naUpms'] = 
-						$this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
+						$this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
 						
 						$Ids[$pkey]['product'] = $prow['id'];
 						$Ids[$pkey]['area'] = '';
@@ -244,7 +244,7 @@ class TrialTracker
 					$prow = $this->getProductId($resultIds['product']);
 
 					$TrialsInfo[0]['naUpms'] = 
-					$this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
+					$this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
 					foreach($resultIds['area'] as $akey => $avalue)
 					{
 						$res = mysql_query("SELECT `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
@@ -263,7 +263,7 @@ class TrialTracker
 						
 						$TrialsInfo[$pkey]['sectionHeader'] = $prow['name']
 						. (($prow['company'] !== NULL && $prow['company'] != '') ? " / (" . $prow['company'] . ")" : '');
-						$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
+						$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
 								
 						$Ids[$pkey]['product'] = $prow['id'];
 						$Ids[$pkey]['area'] = implode("', '", $resultIds['area']);
@@ -276,7 +276,7 @@ class TrialTracker
 				
 				$TrialsInfo[0]['sectionHeader'] = $prow['name']
 				. (($prow['company'] !== NULL && $prow['company'] != '') ? " / (" . $prow['company'] . ")" : '');
-				$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
+				$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
 				
 				$Ids[0]['product'] = $prow['id'];
 				$Ids[0]['area'] = implode("', '", $resultIds['area']);
@@ -4332,7 +4332,7 @@ class TrialTracker
 					
 					$TrialsInfo[$pkey]['sectionHeader'] = $prow['name']
 					. (($prow['company'] !== NULL && $prow['company'] != '') ? " / (" . $prow['company'] . ")" : '');
-					$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
+					$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
 							
 					$Ids[$pkey]['product'] = $prow['id'];
 					$Ids[$pkey]['area'] = implode("', '", $resultIds['area']);
@@ -4349,7 +4349,7 @@ class TrialTracker
 						$TrialsInfo[$pkey]['sectionHeader'] = $prow['name']
 						. (($prow['company'] !== NULL && $prow['company'] != '') ? " / <i>" . $prow['company'] . "</i>" : '');
 						$TrialsInfo[$pkey]['naUpms'] = 
-						$this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
+						$this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
 						
 						$Ids[$pkey]['product'] = $prow['id'];
 						$Ids[$pkey]['area'] = '';
@@ -4379,7 +4379,7 @@ class TrialTracker
 				{
 					$prow = $this->getProductId($resultIds['product']);
 					$TrialsInfo[0]['naUpms'] = 
-					$this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
+					$this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
 					
 					foreach($resultIds['area'] as $akey => $avalue)
 					{
@@ -4400,7 +4400,7 @@ class TrialTracker
 						
 						$TrialsInfo[$pkey]['sectionHeader'] = $prow['name']
 						. (($prow['company'] !== NULL && $prow['company'] != '') ? " / (" . $prow['company'] . ")" : '');
-						$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
+						$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
 						
 						$Ids[$pkey]['product'] = $prow['id'];
 						$Ids[$pkey]['area'] = implode("', '", $resultIds['area']);
@@ -4413,7 +4413,7 @@ class TrialTracker
 
 				$TrialsInfo[0]['sectionHeader'] = $prow['name']
 				. (($prow['company'] !== NULL && $prow['company'] != '') ? " / (" . $prow['company'] . ")" : '');
-				$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
+				$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
 
 				$Ids[0]['product'] = $prow['id'];
 				$Ids[0]['area'] = implode("', '", $resultIds['area']);
@@ -5557,7 +5557,7 @@ class TrialTracker
 							$TrialsInfo[$pkey]['sectionHeader'] = $row['name'] 
 							. (($row['company'] !== NULL && $row['company'] != '') ? " / <i>" . $row['company'] . "</i>" : '');
 							$TrialsInfo[$pkey]['naUpms'] = 
-							$this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
+							$this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
 							
 							$Ids[$pkey]['product'] = $row['id'];
 							$Ids[$pkey]['area'] = implode("', '", $resultIds['area']);
@@ -5582,7 +5582,7 @@ class TrialTracker
 								$TrialsInfo[$pkey]['sectionHeader'] = $row['name']
 								. (($row['company'] !== NULL && $row['company'] != '') ? " / <i>" . $row['company'] . "</i>" : '');
 								$TrialsInfo[$pkey]['naUpms'] = 
-								$this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
+								$this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
 								
 								$Ids[$pkey]['product'] = $row['id'];
 								$Ids[$pkey]['area'] = '';
@@ -5626,7 +5626,7 @@ class TrialTracker
 					$productName = $row['name'];
 					$productId = $row['id'];
 					
-					$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $productId);
+					$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $productId);
 					$ottType = 'rowstackedindexed';
 					
 					$t = 'Product: ' . htmlformat($productName);
@@ -5674,7 +5674,7 @@ class TrialTracker
 								$TrialsInfo[$pkey]['sectionHeader'] = $row['name']
 								. (($row['company'] !== NULL && $row['company'] != '') ? " / <i>" . $row['company'] . "</i>" : '');
 								$TrialsInfo[$pkey]['naUpms'] = 
-								$this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
+								$this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
 								
 								$Ids[$pkey]['product'] = $row['id'];
 								$Ids[$pkey]['area'] = $areaId;
@@ -5700,7 +5700,7 @@ class TrialTracker
 				
 				$TrialsInfo[0]['sectionHeader'] = $row['name']
 				. (($row['company'] !== NULL && $row['company'] != '') ? " / <i>" . $row['company'] . "</i>" : '');
-				$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
+				$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
 				if(!empty($TrialsInfo[0]['naUpms']))
 				{
 					echo '<input type="hidden" id="upmstyle" value="expand"/>';
@@ -5884,20 +5884,20 @@ class TrialTracker
 				{
 					$TrialsInfo[$pkey]['sectionHeader'] = $pval['columnlabel'];
 					if($pkey == 0)
-					{
-						$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs($pval['upm'], $timeMachine, $timeInterval, $globalOptions['onlyUpdates']);
+					{	
+						$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs($pval['upm'], array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates']);
 					}
 				}
 				else
 				{
 					$TrialsInfo[$pkey]['sectionHeader'] = $pval['rowlabel'];
-					$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs($pval['upm'], $timeMachine, $timeInterval, $globalOptions['onlyUpdates']);
+					$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs($pval['upm'], array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates']);
 				}
 			}
 			else
 			{
 				$TrialsInfo[$pkey]['sectionHeader'] = $pval['rowlabel'];
-				$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs($pval['upm'], $timeMachine, $timeInterval, $globalOptions['onlyUpdates']);
+				$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs($pval['upm'], array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates']);
 			}
 			
 			if($pval['params'] === NULL)
@@ -6431,6 +6431,7 @@ class TrialTracker
 							$region[] = $this->regionFilters[$rgvalue];
 						}
 						
+
 						$trialRegion = array();
 						$trialRegion = explode(',', $result[$index]['region']);
 						$matchedRegion = array_intersect($region, $trialRegion);
@@ -8455,22 +8456,26 @@ class TrialTracker
 				
 				if(isset($Ids[4]))
 				{	
-					$res = $this->getInfo('rpt_ott_upm', array('intervention_name', 'id', 'expiry'), 'id', $Ids[4]);
+					$res = $this->getInfo('rpt_ott_upm', array('intervention_name', 'intervention_name_negate','id', 'expiry'), 'id', $Ids[4]);
+					
 					if($globalOptions['version'] == 1)
 					{
 						$res['intervention_name'] = explode('\n', $res['intervention_name']);
+						$res['intervention_name_negate'] = explode('\n', $res['intervention_name_negate']);
 					}
 					else
 					{
 						$res['intervention_name'] = explode(',', $res['intervention_name']);
+						$res['intervention_name_negate'] = array();
 					}
+					
 					
 					if($res['expiry'] != '' &&  $res['expiry'] !== NULL)
 					{
 						$linkExpiry[$ikey] = array_merge($linkExpiryDt, array($res['expiry']));
 					}
 					
-					$TrialsInfo[$ikey]['naUpms'] = $this->getUnMatchedUPMs($res['intervention_name'], $timeMachine, $timeInterval, $globalOptions['onlyUpdates']);	
+					$TrialsInfo[$ikey]['naUpms'] = $this->getUnMatchedUPMs($res['intervention_name'], $res['intervention_name_negate'], $timeMachine, $timeInterval, $globalOptions['onlyUpdates']);	
 				}
 			}
 			else
@@ -8516,7 +8521,7 @@ class TrialTracker
 						$linkExpiry[$ikey] = array_merge($linkExpiryDt, array($res['expiry']));
 					}
 					
-					$TrialsInfo[$ikey]['naUpms'] = $this->getUnMatchedUPMs($res['intervention_name'], $timeMachine, $timeInterval, $globalOptions['onlyUpdates']);	
+					$TrialsInfo[$ikey]['naUpms'] = $this->getUnMatchedUPMs($res['intervention_name'],array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates']);	
 				}
 			}
 			
@@ -11436,24 +11441,48 @@ class TrialTracker
 		return $upm;	
 	}
 
-	function getUnMatchedUPMs($naUpmsRegex, $timeMachine = NULL, $timeInterval = NULL, $onlyUpdates, $productId = NULL)
+	function getUnMatchedUPMs($naUpmsRegex, $naUpmsNegateRegex,$timeMachine = NULL, $timeInterval = NULL, $onlyUpdates, $productId = NULL)
 	{	
 		global $now;
 		
-		$where = array();
+		$where = '';
 		$naUpms = array();
 		$i = 0;
 		
 		if($timeMachine === NULL) $timeMachine = $now;
 		
-		foreach($naUpmsRegex as $ukey => $uvalue)
-		{
-			$where[] = textEqual('`search_name`', $uvalue);
+		$naUpmsRegex = array_filter($naUpmsRegex);
+		$naUpmsNegateRegex = array_filter($naUpmsNegateRegex);
+		
+		if(!empty($naUpmsRegex))
+		{	$where = ' ( ';
+			foreach($naUpmsRegex as $ukey => $uvalue)
+			{
+				$where .= textEqual('`search_name`', $uvalue) . ' OR ';
+			}
+			$where = substr($where, 0, -3);
+			$where .= ' ) ';
 		}
 		
-		if(!empty($where))
-		{
-			$result = mysql_query("SELECT `id`, `name` FROM `products` WHERE ( " . implode(' OR ', $where) . " ) ");
+		if(!empty($naUpmsNegateRegex))
+		{	
+			if(!empty($naUpmsRegex))
+			{
+				$where .= ' AND ';
+			}
+			
+			$where .= ' (`id` NOT IN (SELECT `id` FROM `upm` WHERE ( ';
+			foreach($naUpmsNegateRegex as $nkey => $nvalue)
+			{
+				$where .= textEqual('`search_name`', $nvalue) . ' OR ';
+			}
+			$where = substr($where, 0, -3);
+			$where .= ' ) ) )';
+		}
+		
+		if(!empty($where) && $where != "")
+		{	
+			$result = mysql_query("SELECT `id`, `name` FROM `products` WHERE " . $where . " ");
 			if(mysql_num_rows($result) > 0) 
 			{
 				while($rows = mysql_fetch_assoc($result)) 

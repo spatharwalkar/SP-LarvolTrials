@@ -397,10 +397,10 @@ function runHeatmap($id, $return = false, $format = "xlsx", $expire = false)
 			$global_multi_upm_params = array();$col_multi_upm_params = array();$row_multi_upm_params = array();$cell_multi_upm_params = array();
 			$global_searchval_upm_params = array();$col_searchval_upm_params = array();$row_searchval_upm_params = array();$cell_searchval_upm_params = array();*/
 			
-			$global_upm_params = array();
-			$col_upm_params = array();
-			$row_upm_params = array();
-			$cell_upm_params = array();
+			$global_upm_params = array(); $global_negate_upm_params = array();
+			$col_upm_params = array(); $col_negate_upm_params = array();
+			$row_upm_params = array(); $row_negate_upm_params = array();
+			$cell_upm_params = array(); $cell_negate_upm_params = array();
 			
 			if(isset($oversearch['multifields']['varchar+text']) && in_array($intervention_name_field_id,$oversearch['multifields']['varchar+text'])) {
 				$global_upm_params[] = $oversearch['multivalue']['varchar+text'];
@@ -409,7 +409,7 @@ function runHeatmap($id, $return = false, $format = "xlsx", $expire = false)
 				$global_upm_params[] = $oversearch['searchval'][$intervention_name_field_id];
 			}
 			if(isset($oversearch['negate']) && array_key_exists($intervention_name_field_id,$oversearch['negate'])) {
-				$global_upm_params[] = $oversearch['negate'][$intervention_name_field_id];
+				$global_negate_upm_params[] = $oversearch['negate'][$intervention_name_field_id];
 			}
 			
 			if(isset($columnsearch[$column]['multifields']['varchar+text']) && 
@@ -420,7 +420,7 @@ function runHeatmap($id, $return = false, $format = "xlsx", $expire = false)
 				$col_upm_params[] = $columnsearch[$column]['searchval'][$intervention_name_field_id];
 			}
 			if(isset($columnsearch[$column]['negate']) && array_key_exists($intervention_name_field_id,$columnsearch[$column]['negate'])) {
-				$col_upm_params[] = $columnsearch[$column]['negate'][$intervention_name_field_id];
+				$col_negate_upm_params[] = $columnsearch[$column]['negate'][$intervention_name_field_id];
 			}
 			
 			if(isset($rowsearch[$row]['multifields']['varchar+text']) && in_array($intervention_name_field_id,$rowsearch[$row]['multifields']['varchar+text'])) {
@@ -430,7 +430,7 @@ function runHeatmap($id, $return = false, $format = "xlsx", $expire = false)
 				$row_upm_params[] = $rowsearch[$row]['searchval'][$intervention_name_field_id];
 			}
 			if(isset($rowsearch[$row]['negate']) && array_key_exists($intervention_name_field_id,$rowsearch[$row]['negate'])) {
-				$row_upm_params[] = $rowsearch[$row]['negate'][$intervention_name_field_id];
+				$row_negate_upm_params[] = $rowsearch[$row]['negate'][$intervention_name_field_id];
 			}
 			
 			if(isset($cell['multifields']['varchar+text']) && in_array($intervention_name_field_id,$cell['multifields']['varchar+text'])) {
@@ -440,12 +440,14 @@ function runHeatmap($id, $return = false, $format = "xlsx", $expire = false)
 				$cell_upm_params[] = $cell['searchval'][$intervention_name_field_id];
 			}
 			if(isset($cell['negate']) && array_key_exists($intervention_name_field_id,$cell['negate'])) {
-				$cell_upm_params[] = $cell['negate'][$intervention_name_field_id];
+				$cell_negate_upm_params[] = $cell['negate'][$intervention_name_field_id];
 			}
 			
 			$upm_params = $row_upms[$row][$column] = $col_upms[$row][$column] = array_unique(array_filter(array_merge(
 															$global_upm_params, $col_upm_params, $row_upm_params, $cell_upm_params)));
-			
+			$upm_negate_params = array_unique(array_filter(array_merge(
+									$global_negate_upm_params, $col_negate_upm_params, $row_negate_upm_params, $cell_negate_upm_params)));
+															
 			if($link_generation_method == 'db') {
 			
 				//row labels
@@ -520,12 +522,18 @@ function runHeatmap($id, $return = false, $format = "xlsx", $expire = false)
 				}
 								
 				$upm_id = '';
-				if(!empty($upm_params)) {
+				if(!empty($upm_params) || !empty($upm_negate_params)) {
+				
 					natsort($upm_params);
+					natsort($upm_negate_params);
+					
 					//upm values
 					$upm_result_set = implode("\\n",$upm_params);
+					$upm_negate_result_set = implode("\\n", $upm_negate_params);
+					
 					//checking whether the upm id already exists and if not inserting a new record into the rpt_ott_upm table
-					$query 		= "SELECT `id` FROM `rpt_ott_upm` WHERE `intervention_name` = '" . mysql_real_escape_string($upm_result_set) . "' ";
+					$query 		= "SELECT `id` FROM `rpt_ott_upm` WHERE `intervention_name` = '" . mysql_real_escape_string($upm_result_set) 
+								. "' AND `intervention_name_negate` = '" . mysql_real_escape_string($upm_negate_result_set) . "' ";
 					$time_start = microtime(true);
 					$res 	= mysql_query($query) or tex('Bad SQL query getting id for the upm result_set for row ' . $row . ' column ' . $column . "\n" . $query);
 					$time_end	= microtime(true);
@@ -539,11 +547,11 @@ function runHeatmap($id, $return = false, $format = "xlsx", $expire = false)
 						$upm_id = $res['id'];
 					} else {
 						if($expire) {
-							$query 		= "INSERT INTO `rpt_ott_upm`(`intervention_name`, `created`, `expiry`, `last_referenced`) VALUES('" 
-										. mysql_real_escape_string($upm_result_set) . "', NOW(), '" . date('Y-m-d',strtotime('+2 weeks',$now)) . "', NOW()) ";
+							$query 		= "INSERT INTO `rpt_ott_upm`(`intervention_name`, `intervention_name_negate`, `created`, `expiry`, `last_referenced`) VALUES('" 
+										. mysql_real_escape_string($upm_result_set) . "', '" . mysql_real_escape_string($upm_negate_result_set) . "', NOW(), '" . date('Y-m-d',strtotime('+2 weeks',$now)) . "', NOW()) ";
 						} else {
-							$query 		= "INSERT INTO `rpt_ott_upm`(`intervention_name`, `created`, `last_referenced`) VALUES('" 
-										. mysql_real_escape_string($upm_result_set) . "', NOW(), NOW()) ";
+							$query 		= "INSERT INTO `rpt_ott_upm`(`intervention_name`, `intervention_name_negate`, `created`, `last_referenced`) VALUES('" 
+										. mysql_real_escape_string($upm_result_set) . "', '" . mysql_real_escape_string($upm_negate_result_set) . "', NOW(), NOW()) ";
 						}
 						$time_start = microtime(true);
 						$res 		= mysql_query($query) or tex('Bad SQL Query saving upm result_set for row ' . $row . ' column ' . $column . "\n" . $query);
