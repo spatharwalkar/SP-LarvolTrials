@@ -181,7 +181,7 @@ CREATE TABLE IF NOT EXISTS `saved_searches` (
   `user` int(10) unsigned DEFAULT NULL,
   `searchdata` text COLLATE utf8_unicode_ci NOT NULL COMMENT 'serialized then base64_encoded POST data from the search page',
   `name` varchar(127) COLLATE utf8_unicode_ci NOT NULL,
-  `shared` int(10) NOT NULL DEFAULT '0',
+  `shared` int(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_names` (`user`,`name`),
   KEY `FK_user` (`user`)

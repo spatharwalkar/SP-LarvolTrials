@@ -35,6 +35,9 @@ switch($_REQUEST['op']){
 	case 'gridList':
 		echo(listSearchesInGrid());
 		break;
+	case 'copySearch':
+		echo(copySearch_Data());
+		break;
 }
 
 function listSearchesInGrid()
@@ -194,6 +197,16 @@ function updateSearch()
 		$uclause = $user; $shared=1;
 	}
 	
+	//////Only Authorised User can Update Search////////
+	$query = 'SELECT user FROM `saved_searches` WHERE id='.$searchId.' LIMIT 1';
+	$get_search = mysql_query($query) or die('Bad SQL query getting Search for saved search id');
+	$get_search = mysql_fetch_assoc($get_search);
+	if($get_search === false) return;	
+	if(count($get_search)==0){ die('Not found.'); }
+	$rptu = $get_search['user'];
+	if(($rptu === NULL && $db->user->userlevel == 'user') || ($rptu !== NULL && $rptu != $db->user->id)) return;
+	//////Only Authorised User can Update Search////////
+	
 	$query = 'UPDATE saved_searches SET user=' . $uclause . ',name="' . $name . '",shared="' . $shared . '",searchdata="'
 	. base64_encode(serialize($searchdata)) . '" where id=' . $searchId;
 	global $logger;
@@ -263,6 +276,17 @@ function get_SearchData()
 	}
 	$data=json_encode($filterData);
 	/***End Part to Replace product/Area ID by product/Area Name when Displaying******/
+	
+	//////Only Authorised User can View Search////////
+	$query = 'SELECT user,searchdata,name,shared FROM `saved_searches` WHERE id='.$ssid.' LIMIT 1';
+	$get_search = mysql_query($query) or die('Bad SQL query getting Search for saved search id');
+	$get_search = mysql_fetch_assoc($get_search);
+	if($get_search === false) return;	
+	if(count($get_search)==0){ die('Not found.'); }
+	$rptu = $get_search['user'];
+	$shared = $get_search['shared'];
+	if($rptu !== NULL && $rptu != $db->user->id && !$shared) return;
+	//////Only Authorised User can View Search////////
 	
 	$shared=$row['shared'];
 	if($shared)
@@ -882,6 +906,50 @@ function get_ProdORAreaName($column_value, $column_type)
 	$row = mysql_fetch_assoc(mysql_query($query)) or die('Bad SQL Query getting '. $column_type .' Name instead of names ');
 	
 	return $row['name'];
+}
+
+//processes postdata for saving new searches
+function copySearch_Data()
+{
+	$reportid=$_REQUEST['reportid'];
+	global $db;
+	
+	//////Only Authorised User can Copy Search////////
+	$query = 'SELECT user,searchdata,name,shared FROM `saved_searches` WHERE id='.$reportid.' LIMIT 1';
+	$get_search = mysql_query($query) or die('Bad SQL query getting Search for saved search id');
+	$get_search = mysql_fetch_assoc($get_search);
+	if($get_search === false) return;	
+	if(count($get_search)==0){ die('Not found.'); }
+	$rptu = $get_search['user'];
+	$shared = $get_search['shared'];
+	if($rptu !== NULL && $rptu != $db->user->id && !$shared) return;
+	//////Only Authorised User can Copy Search////////
+	
+	$user = $db->user->id;
+	$searchdata = $get_search['searchdata'];
+	$name = mysql_real_escape_string('Copy Of '.$get_search['name']);
+	
+	$query = 'INSERT INTO saved_searches SET user=' . $user . ',name="' . $name . '",searchdata="'. $searchdata . '"';
+	
+	$insert_res=mysql_query($query) or die('Bad SQL query adding copy of search');
+	$miid = mysql_insert_id();
+	global $logger;
+	if(!$insert_res)
+		{
+			$log='Bad SQL query adding copy of search:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
+	
+	if(!mysql_query('COMMIT'))
+		{
+			$log='Couldn\'t commit SQL query: "COMMIT", Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
+	return $miid;
 }
 
 ?>

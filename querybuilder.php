@@ -5,6 +5,16 @@ $show_sort_res = false;
  {
  	$show_sort_res = $show_sort_res_bool;
  }
+ 
+if(isset($_POST['delsch']) && is_array($_POST['delsch']))
+{
+	foreach($_POST['delsch'] as $ssid => $coord)
+	{
+		$query = 'DELETE FROM saved_searches WHERE id=' . mysql_real_escape_string($ssid) . ' AND (user='
+					. $db->user->id . ($db->user->userlevel != 'user' ? ' OR user IS NULL' : '') . ') LIMIT 1';
+		mysql_query($query) or die('Bad SQL query deleting saved search');
+	}
+}
 ?>
 
   <script type="text/javascript">
@@ -112,7 +122,8 @@ $show_sort_res = false;
     var searchId = $("label[for=" + "lblId" + "]").text();
     $("#3009").attr("style", "visibility:show");
 	
-	if(document.getElementById('mine_search'))
+	var mine_present=document.getElementById('mine_search');
+	if(mine_present != null && mine_present != '')
 	{
 		if(document.getElementById('global_search').checked)
 			var search_type='global';
@@ -145,10 +156,11 @@ $show_sort_res = false;
             success: function (data) {
             	if ($tt.opts.statusmsgdiv) $($tt.opts.statusmsgdiv).html( name + " saved....");
             	$("#txtSearchName").val(name);
-            	var newItem='<li class="item"> <a onclick="showSearchData(\''
-                    + data + '\');return false;" href="#">' + name + '</a> </li>';
+            	var newItem='<li class="item"><table style="border:none; border-collapse:collapse;"><tr><td><a onclick="showSearchData(\''
+                    + data + '\');return false;" href="#">' + name + '</a></td><td><input type="image" src="images/not.png" name="delsch[' +data+ ']" alt="delete" title="delete"/></td></tr></table></li>';
             	$('ul.treeview li.list').addClass('expanded').find('>ul').append(newItem);
                 $('#3009').show();
+				$("#copy_bttn").html('<input type="submit" style="width: 100px" onclick="copySearch();return false" value="Copy Search" id="btncopy" />');
             	}
         });
 
@@ -198,9 +210,31 @@ $show_sort_res = false;
 				}
 				
 				if(searchData.search_type == 'mine' || (searchData.search_type == 'global' && searchData.user_level != 'user') || (searchData.search_type == 'shared' && searchData.current_user == searchData.search_user))
-				$("#save_bttn").html('<input type="submit" style="width: 100px" onclick="saveSearch();return false" value="Save" id="btnsave" />');
+				{
+					$("#save_bttn").html('<input type="submit" style="width: 100px" onclick="saveSearch();return false" value="Save" id="btnsave" />');
+					var own_radio = document.getElementById('shared_search');
+					if(own_radio != null && own_radio != '')
+					{
+						document.getElementById('shared_search').disabled = false;
+						document.getElementById('global_search').disabled = false;
+						document.getElementById('mine_search').disabled = false;
+					}
+					document.getElementById('txtSearchName').disabled = false;
+				}
 				else
-				$("#save_bttn").html('');
+				{
+					$("#save_bttn").html('');
+					var own_radio = document.getElementById('shared_search');
+					if(own_radio != null && own_radio != '')
+					{
+						document.getElementById('shared_search').disabled = true;
+						document.getElementById('global_search').disabled = true;
+						document.getElementById('mine_search').disabled = true;
+					}
+					document.getElementById('txtSearchName').disabled = true;
+				}
+				
+				$("#copy_bttn").html('<input type="submit" style="width: 100px" onclick="copySearch();return false" value="Copy Search" id="btncopy" />');
 				
                 $("#lblId").text(searchId);
                 $('#3009').show();
@@ -217,6 +251,16 @@ $show_sort_res = false;
 	   $('#txtSearchName').val('');
 	   $('#lblId').text('');
 	   loadQueryData('');
+	   $("#save_bttn").html('<input type="submit" style="width: 100px" onclick="saveSearch();return false" value="Save" id="btnsave" />');
+	   var own_radio = document.getElementById('shared_search');
+		if(own_radio != null && own_radio != '')
+		{
+			document.getElementById('shared_search').disabled = false;
+			document.getElementById('global_search').disabled = false;
+			document.getElementById('mine_search').disabled = false;
+		}
+		document.getElementById('txtSearchName').disabled = false;
+		$("#copy_bttn").html('');
 
    }
 
@@ -266,11 +310,31 @@ $show_sort_res = false;
 				}
 				
 				if(searchData.search_type == 'mine' || (searchData.search_type == 'global' && searchData.user_level != 'user') || (searchData.search_type == 'shared' && searchData.current_user == searchData.search_user))
-				$("#save_bttn").html('<input type="submit" style="width: 100px" onclick="saveSearch();return false" value="Save" id="btnsave" />');
+				{
+					$("#save_bttn").html('<input type="submit" style="width: 100px" onclick="saveSearch();return false" value="Save" id="btnsave" />');
+					var own_radio = document.getElementById('shared_search');
+					if(own_radio != null && own_radio != '')
+					{
+						document.getElementById('shared_search').disabled = false;
+						document.getElementById('global_search').disabled = false;
+						document.getElementById('mine_search').disabled = false;
+					}
+					document.getElementById('txtSearchName').disabled = false;
+				}
 				else
-				$("#save_bttn").html('');
-
-           }
+				{
+					$("#save_bttn").html('');
+					var own_radio = document.getElementById('shared_search');
+					if(own_radio != null && own_radio != '')
+					{
+						document.getElementById('shared_search').disabled = true;
+						document.getElementById('global_search').disabled = true;
+						document.getElementById('mine_search').disabled = true;
+					}
+					document.getElementById('txtSearchName').disabled = true;
+				}
+				$("#copy_bttn").html('<input type="submit" style="width: 100px" onclick="copySearch();return false" value="Copy Search" id="btncopy" />');
+			}
        });
        return false;
     }
@@ -346,6 +410,35 @@ $show_sort_res = false;
 			$('#'+fieldID).val(Field_value_Arr.join(', '));
 		}
 	}
+	
+	function copySearch()
+	{
+		var $tt= $('.sqlbuild')[0];
+		var name = $("#txtSearchName").val();
+    	var searchId = $("label[for=" + "lblId" + "]").text();
+    	$("#3009").attr("style", "visibility:show");
+		
+		$.ajax({
+            type: 'POST',
+            async: false,
+            url: $tt.opts.reporthandler + '?op=copySearch&reportid=' + searchId,
+            data: '',
+            error: function () {
+            if ($tt.opts.statusmsgdiv)
+                $($tt.opts.statusmsgdiv).html("Can't Copy the report...");
+                return false;
+            },
+            success: function (data) {
+            	if ($tt.opts.statusmsgdiv) $($tt.opts.statusmsgdiv).html( "Search\""+name+"\" Copied Successfully....");
+            	var newItem='<li class="item"> <table style="border:none; border-collapse:collapse;"><tr><td><a onclick="showSearchData(\''
+                    + data + '\');return false;" href="#">Copy Of ' + name + '</a></td><td><input type="image" src="images/not.png" name="delsch[' +data+ ']" alt="delete" title="delete"/></td></tr></table></li>';
+            	$('ul.treeview li.list').addClass('expanded').find('>ul').append(newItem);
+                showSearchData(data);
+				$('#3009').show();
+            	}
+        });
+	}
+	
 
   </script>
 <div class="builder">
@@ -371,11 +464,15 @@ $show_sort_res = false;
 					style="width: 100px" onclick="saveSearch();return false" value="Save"
 					id="btnsave" /></td>
 			</tr>
+            <tr>
+				<td id="copy_bttn" style="padding-left: 30px;"></td>
+			</tr>
 
 
 	         <tr>
 
 						<td valign="top" style="border: 1px solid #ccc; width: 200px;">
+                        <form method="post" action="newsearch.php" class="lisep">
 						<p id="6000">
 <?php
 	global $db;
@@ -388,7 +485,9 @@ $show_sort_res = false;
 	$res = mysql_query($query) or die('Bad SQL query getting saved search list');
 	while($ss = mysql_fetch_assoc($res))
 	{
-		$out .= "<li class='item'> <a href='#' onclick='showSearchData(\"" . $ss['id'] . "\");return false;'>" . htmlspecialchars($ss['name']) . "</a></li>";
+		$out .= "<li class='item'><table style=\"border:none; border-collapse:collapse;\"><tr><td><a href='#' onclick='showSearchData(\"" . $ss['id'] . "\");return false;'>" . htmlspecialchars($ss['name']) . "</a></td><td> ";
+		$out .= ((($ss['user'] === NULL && $db->user->userlevel != 'user') || ($ss['user'] !== NULL && $ss['user'] == $db->user->id)) ? '<input type="image" src="images/not.png" name="delsch[' . $ss['id'] . ']" alt="delete" title="delete"/>':'');
+		$out .= "</td></tr></table></li>";
 		//$out .= "<li class='item'> <a href='javascript:void();return false;'>" . htmlspecialchars($ss['name']) . "</a></li>";
 		//$out .= "<li class='item'>"  . htmlspecialchars($ss['name']) . "</li>";
 		//$out .= "<li>"  . htmlspecialchars($ss['name']) . "</li>";
@@ -400,7 +499,7 @@ $show_sort_res = false;
 	echo($out);
 ?>
 						</p>
-						</td>
+					</form>	</td>
                   </tr>
                   </table>
                   </td>
@@ -414,8 +513,9 @@ $show_sort_res = false;
 									id="txtSearchName" name="txtSearchName" type="text" value="" />
                                     <label id="lblId" for="lblId" style="visibility: hidden;"> </label>
                                     <label style="font-weight: bold; color: Gray">Ownership: </label>
-                                    <font id="ownership" style="color:#333333;"><?php print (($db->user->userlevel == 'user') ? 'Mine' : '<label><input type="radio" name="own" id="shared_search" value="shared" checked="" />Shared</label>
-                                    <label><input type="radio" name="own" id="global_search" value="global" checked="" />Global</label>
+                                    <font id="ownership" style="color:#333333;">
+									<?php print (($db->user->userlevel == 'user') ? 'Mine' : '<label><input type="radio" name="own" id="shared_search" value="shared" />Shared</label>
+                                    <label><input type="radio" name="own" id="global_search" value="global" />Global</label>
                                     <label><input type="radio" name="own" id="mine_search" value="mine" checked="checked" />Mine</label>') ?></font>
 								</td>
 							</tr>
