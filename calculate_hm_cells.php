@@ -135,13 +135,13 @@ function calc_cells($parameters,$update_id=NULL)
 			if(!$cnt_total or $cnt_total<1) 
 			{
 				
-				if($counter>=5000)
+				if($counter>=20000)
 				{
 					$counter=0;
-					echo '<br>5000 records added, sleeping 1 second....'.str_repeat("  ",800);
+					echo '<br>20000 records added, sleeping 1 second....'.str_repeat("  ",800);
 					sleep(1);
 				}
-				add_data($av['id'],$pv['id'],0,0,'none','N/A');
+				add_data($av['id'],$pv['id'],0,0,0,'none','N/A');
 				$progress_count ++;
 				if($cron_run)
 				{
@@ -160,26 +160,33 @@ function calc_cells($parameters,$update_id=NULL)
 			}
 
 	//		pr($data);
-			$query='SELECT a.trial,d.is_active 
+			$query='SELECT a.trial,d.is_active,d.institution_type 
 					from area_trials a 
 					JOIN product_trials p ON a.`trial`=p.`trial`
 					JOIN data_trials d ON p.`trial`=d.`larvol_id`
 					where a.`area`="'.$av['id'].'" and p.`product`="'.$pv['id'].'" ';
 			
 			if(!$res = mysql_query($query))
-					{
-						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-						$logger->error($log);
-						echo $log;
-						return false;
-					}
+			{
+				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				$logger->error($log);
+				echo $log;
+				return false;
+			}
 			$data1=array();
-			
+			$data2=array();
 			$temp_total=0;
 			while ($row = mysql_fetch_assoc($res))
 			{	
 				if( $row["trial"] && ($row["is_active"]=="1" or $row["is_active"]==1)  )
+				{
 					$data1[] = $row["trial"];
+				}
+				if( $row["trial"] && ( $row["is_active"]=="1" or $row["is_active"]==1 ) && $row["institution_type"]=='industry_lead_sponsor'  )
+				{
+					$data2[] = $row["trial"];
+				}
+				
 				$temp_total++;
 			} 
 			$cnt_total=$temp_total;
@@ -191,6 +198,13 @@ function calc_cells($parameters,$update_id=NULL)
 			}
 			else
 				$cnt_active=0;	
+			if($data2[0])
+			{
+			
+				$cnt_active_indlead=count($data2);			
+			}
+			else
+				$cnt_active_indlead=0;	
 				
 			$ids = implode(",", $data);
 			
@@ -217,7 +231,7 @@ function calc_cells($parameters,$update_id=NULL)
 				sleep(1);
 			}
 			
-			add_data($av['id'],$pv['id'],$cnt_total,$cnt_active,$bomb,$max_phase);
+			add_data($av['id'],$pv['id'],$cnt_total,$cnt_active,$cnt_active_indlead,$bomb,$max_phase);
 			$progress_count ++;
 			if($cron_run)
 			{
@@ -248,7 +262,7 @@ function calc_cells($parameters,$update_id=NULL)
 	return true;
 }			
 
-function add_data($arid,$prid,$cnt_total,$cnt_active,$bomb,$max_phase)
+function add_data($arid,$prid,$cnt_total,$cnt_active,$cnt_active_indlead,$bomb,$max_phase)
 {
 /*********/
 
@@ -269,15 +283,62 @@ function add_data($arid,$prid,$cnt_total,$cnt_active,$bomb,$max_phase)
 	
 	if($row["area"])
 	{
+		//get existing counts before updating
+		$query='select 
+				`count_active`,count_active_indlead,
+				`count_total` from rpt_masterhm_cells  where
+				`area`="'.$arid.'" and `product`="'.$prid.'" 
+				';
+				
+		if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
+		
+		$row = mysql_fetch_assoc($res);
+		$count_active_old = $row["count_active"];
+		$cnt_indlead_old = $row["count_active_indlead"];
+		$count_total_old = $row["count_total"];
+		
+		//if there is a difference in counts, then update the _prev fields
+		$aa='';$bb='';$cc='';
+		if($count_active_old<>$cnt_active) $aa='`count_active_prev` = "'. $count_active_old .'",';
+		
+		if($count_total_old<>$cnt_total) $bb='`count_total_prev` = "'. $count_total_old .'",';
+			
+		if($cnt_indlead_old<>$cnt_active_indlead) $cc='`count_active_indlead_prev` = "'. $cnt_indlead_old .'",';
+		if( empty($aa) && empty($bb) && empty($cc) )
+		{
 		$query='UPDATE rpt_masterhm_cells 
 				SET 
 				`count_active` ="'. $cnt_active.'",
+				`count_active_indlead` ="'. $cnt_active_indlead.'",
 				`bomb_auto` = "'. $bomb .'",
 				`highest_phase` = "'. $max_phase .'",
 				`count_total` = "'. $cnt_total .'",
 				`last_update` = "'. $curtime .'" where
 				`area`="'.$arid.'" and `product`="'.$prid.'" 
 				';
+		}
+		else
+		{
+//			pr('AA='.$aa);pr('bb='.$bb);pr('cc='.$cc);
+			$query='UPDATE rpt_masterhm_cells 
+				SET 
+				`count_active` ="'. $cnt_active.'",
+				`count_active_indlead` ="'. $cnt_active_indlead.'",
+				`bomb_auto` = "'. $bomb .'",
+				`highest_phase` = "'. $max_phase .'",
+				`count_total` = "'. $cnt_total .'",'
+				. $aa . $bb . $cc .
+				'`count_lastchanged` = "'. $curtime .'",
+				`last_update` = "'. $curtime .'" where
+				`area`="'.$arid.'" and `product`="'.$prid.'" 
+				';
+		}
 				
 		if(!$res = mysql_query($query))
 		{
@@ -295,6 +356,7 @@ function add_data($arid,$prid,$cnt_total,$cnt_active,$bomb,$max_phase)
 				`product` = "'. $prid .'",
 				`area` = "'. $arid .'",
 				`count_active` ="'. $cnt_active.'",
+				`count_active_indlead` ="'. $cnt_active_indlead.'",
 				`bomb_auto` = "'. $bomb .'",
 				`highest_phase` = "'. $max_phase .'",
 				`count_total` = "'. $cnt_total .'",
