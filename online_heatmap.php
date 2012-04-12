@@ -55,7 +55,7 @@ while($header = mysql_fetch_array($res))
 	{
 		if($header['type_id'] != NULL)
 		{
-			$result =  mysql_fetch_assoc(mysql_query("SELECT id, name, display_name, description, company FROM `products` WHERE id = '" . $header['type_id'] . "' "));
+			$result =  mysql_fetch_assoc(mysql_query("SELECT id, name, description, company FROM `products` WHERE id = '" . $header['type_id'] . "' "));
 			$rows[$header['num']] = $result['name'];
 			if($result['company'] != NULL && trim($result['company']) != '') $rows[$header['num']] = $result['name'].' / '.$result['company'];
 			$rowsDisplayName[$header['num']] = $result['display_name'];
