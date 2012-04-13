@@ -875,6 +875,7 @@ CREATE TABLE IF NOT EXISTS `rpt_masterhm_cells` (
   `highest_phase_prev` enum('N/A','0','0/1','1','1a','1b','1a/1b','1c','1/2','1b/2','1b/2a','2','2a','2a/2b','2b','2/3','2b/3','3','3a','3b','3/4','3b/4','4') COLLATE utf8_unicode_ci DEFAULT NULL,
   `highest_phase_lastchanged` datetime DEFAULT NULL,
   `phase4_override` tinyint(1) NOT NULL DEFAULT '0',
+  `phase4_override_lastchanged` datetime DEFAULT NULL,
   `phase_explain` text COLLATE utf8_unicode_ci DEFAULT NULL,
   `phase_explain_lastchanged` datetime DEFAULT NULL,
   `filing` text COLLATE utf8_unicode_ci DEFAULT NULL,
