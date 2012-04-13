@@ -2026,7 +2026,7 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 		 * if we have filters, Changes or Deletes enabled
 		 */
 		if ($sys_cols) {
-			echo '<th class="',$this->getCSSclass('header'),'" style="width:10%" colspan="',$sys_cols,'">';
+			echo '<th class="',$this->getCSSclass('header'),'" style="width:15%" colspan="',$sys_cols,'">';
 			if ($this->filter_enabled()) {
 				if ($this->filter_operation()) {
 					echo $this->htmlSubmit('sw', 'Hide', $this->getCSSclass('hide'), false);
@@ -2055,7 +2055,7 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 				array_unshift($new_sfn, in_array("$k", $new_sfn, 1) ? "-$k" : $k);
 				echo '<th class="',$css_class_name,'"';
 				if(trim($fdn)=='Brief title')
-					echo ' style="width:70%"   ';
+					echo ' style="width:65%"   ';
 				else
 					echo ' style="width:10%"  ';
 				echo '>';

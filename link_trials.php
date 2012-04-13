@@ -21,7 +21,6 @@ if(isset($_POST['source']) and isset($_POST['lid']))
 }
 elseif(!isset($_POST['lid'])) die('<br> No larvol id pased.');
 $lid=$_POST['lid'];
-require_once('header.php');	
 global $db;
 
 $query = "
@@ -119,7 +118,7 @@ else
 
 	}
 }
-
+require_once('header.php');	
 
 $cnt=count($data);	
 	
