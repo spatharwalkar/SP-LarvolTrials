@@ -223,7 +223,7 @@ class TrialTracker
 				{
 					foreach($resultIds['area'] as $akey => $avalue)
 					{
-						$res = mysql_query("SELECT `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
+						$res = mysql_query("SELECT IFNULL(`display_name`, `name`) AS name, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
 						if(mysql_num_rows($res) > 0)
 						{
 							while($row = mysql_fetch_assoc($res))
@@ -247,7 +247,7 @@ class TrialTracker
 					$this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
 					foreach($resultIds['area'] as $akey => $avalue)
 					{
-						$res = mysql_query("SELECT `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
+						$res = mysql_query("SELECT IFNULL(`display_name`, `name`) AS name, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
 						$row = mysql_fetch_assoc($res);
 						
 						$TrialsInfo[$akey]['sectionHeader'] = $row['name'];
@@ -4359,7 +4359,7 @@ class TrialTracker
 				{
 					foreach($resultIds['area'] as $akey => $avalue)
 					{
-						$res = mysql_query("SELECT `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
+						$res = mysql_query("SELECT IFNULL(`display_name`, `name`) AS name, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
 						if(mysql_num_rows($res) > 0)
 						{
 							while($row = mysql_fetch_assoc($res))
@@ -4383,7 +4383,7 @@ class TrialTracker
 					
 					foreach($resultIds['area'] as $akey => $avalue)
 					{
-						$res = mysql_query("SELECT `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
+						$res = mysql_query("SELECT IFNULL(`display_name`, `name`) AS name, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
 						$row = mysql_fetch_assoc($res);
 						
 						$TrialsInfo[$akey]['sectionHeader'] = $row['name'];
@@ -5322,7 +5322,7 @@ class TrialTracker
 				{
 					foreach($resultIds['area'] as $akey => $avalue)
 					{
-						$res = mysql_query("SELECT `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
+						$res = mysql_query("SELECT IFNULL(`display_name`, `name`) AS name, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
 						if(mysql_num_rows($res) > 0)
 						{
 							while($row = mysql_fetch_assoc($res))
@@ -5597,7 +5597,7 @@ class TrialTracker
 					
 					foreach($resultIds['area'] as $akey => $avalue)
 					{
-						$res = mysql_query("SELECT `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
+						$res = mysql_query("SELECT IFNULL(`display_name`, `name`) AS name, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
 						if(mysql_num_rows($res) > 0)
 						{
 							while($row = mysql_fetch_assoc($res))
@@ -5634,7 +5634,7 @@ class TrialTracker
 					
 					foreach($resultIds['area'] as $akey => $avalue)
 					{
-						$res = mysql_query("SELECT `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
+						$res = mysql_query("SELECT IFNULL(`display_name`, `name`) AS name, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
 						if(mysql_num_rows($res) > 0)
 						{
 							while($row = mysql_fetch_assoc($res))
@@ -5653,7 +5653,7 @@ class TrialTracker
 				}
 				else
 				{
-					$res = mysql_query("SELECT `name`, `id` FROM `areas` WHERE id IN ('" . implode("','", $resultIds['area']) . "') ");
+					$res = mysql_query("SELECT IFNULL(`display_name`, `name`) AS name, `id` FROM `areas` WHERE id IN ('" . implode("','", $resultIds['area']) . "') ");
 					$row = mysql_fetch_assoc($res);
 					$areaName = $row['name'];
 					$areaId = $row['id'];
@@ -5685,7 +5685,7 @@ class TrialTracker
 			}
 			else 
 			{	
-				$res = mysql_query("SELECT `name`, `id` FROM `areas` WHERE id IN ('" . implode(',', $resultIds['area']) . "') ");
+				$res = mysql_query("SELECT IFNULL(`display_name`, `name`) AS name, `id` FROM `areas` WHERE id IN ('" . implode(',', $resultIds['area']) . "') ");
 				$row = mysql_fetch_assoc($res);
 				$Ids[0]['area'] = $row['id'];
 				
@@ -6431,6 +6431,7 @@ class TrialTracker
 							$region[] = $this->regionFilters[$rgvalue];
 						}
 						
+
 
 						$trialRegion = array();
 						$trialRegion = explode(',', $result[$index]['region']);
