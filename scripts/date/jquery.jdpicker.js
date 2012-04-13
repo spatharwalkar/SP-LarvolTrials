@@ -290,6 +290,10 @@ jdPicker.prototype = {
 			this.selectMonth(this.date_max);
 			this.input.val(" ");
 	}
+	///Below Function call is added for Online Heatmap, so it first check function exists or NOT then only call to ensure execution of it in OHM only
+	if(typeof window.change_view == 'function') {
+	// function exists, so we can now call it // 
+	change_view(); }
   },
   
   isNewDateAllowed: function(date){

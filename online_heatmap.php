@@ -364,7 +364,7 @@ width:100px;
 <script language="javascript" type="text/javascript">
 function change_view()
 {
-	
+	///Date format set cause some date format does not work in IE
 	var today = new Date("<?php print date('m/d/Y H:i:s', strtotime('now', $now)); ?>");	// "mm/dd/yyyy hh:mm:ss"  
 	var one_week = new Date("<?php print date('m/d/Y H:i:s', strtotime('-1 Week', $now)); ?>");
 	var two_week = new Date("<?php print date('m/d/Y H:i:s', strtotime('-2 Weeks', $now)); ?>");
@@ -387,6 +387,14 @@ function change_view()
 		case '1 month ago': st_limit = one_month; break;
 		case '1 quarter ago': st_limit = three_month; break;
 		case '1 year ago': st_limit = one_year; break;
+		default: var date_st = new Date(start_range); 	//Set date Format
+				 var m = date_st.getMonth()+1;
+				 var month = (m < 10) ? '0' + m : m;
+				 var d = date_st.getDate();
+				 var date = (d < 10) ? '0' + d : d; 
+				 var st_limit = month + "/" + date + "/" + date_st.getFullYear() + " 23:59:59";
+				 var st_limit = new Date(st_limit);
+				 break;
 	}
 	switch(end_range)
 	{
@@ -396,6 +404,14 @@ function change_view()
 		case '1 month ago': ed_limit = one_month; break;
 		case '1 quarter ago': ed_limit = three_month; break;
 		case '1 year ago': ed_limit = one_year; break;
+		default: var date_st = new Date(end_range); 
+				 var m = date_st.getMonth()+1;
+				 var month = (m < 10) ? '0' + m : m;
+				 var d = date_st.getDate();
+				 var date = (d < 10) ? '0' + d : d; 
+				 var ed_limit = month + "/" + date + "/" + date_st.getFullYear() + " 00:00:01";
+				 var ed_limit = new Date(ed_limit);
+				 break;
 	}
 		
 	var i=1;
