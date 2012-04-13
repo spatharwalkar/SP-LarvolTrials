@@ -183,7 +183,6 @@ CREATE TABLE IF NOT EXISTS `saved_searches` (
   `name` varchar(127) COLLATE utf8_unicode_ci NOT NULL,
   `shared` int(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `unique_names` (`user`,`name`),
   KEY `FK_user` (`user`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
