@@ -58,7 +58,6 @@ while($header = mysql_fetch_array($res))
 			$result =  mysql_fetch_assoc(mysql_query("SELECT id, name, description, company FROM `products` WHERE id = '" . $header['type_id'] . "' "));
 			$rows[$header['num']] = $result['name'];
 			if($result['company'] != NULL && trim($result['company']) != '') $rows[$header['num']] = $result['name'].' / '.$result['company'];
-			$rowsDisplayName[$header['num']] = '';
 			$rowsDescription[$header['num']] = $result['description'];
 		}
 		else
@@ -387,12 +386,9 @@ function change_view()
 		case '1 month ago': st_limit = one_month; break;
 		case '1 quarter ago': st_limit = three_month; break;
 		case '1 year ago': st_limit = one_year; break;
-		default: var date_st = new Date(start_range); 	//Set date Format
-				 var m = date_st.getMonth()+1;
-				 var month = (m < 10) ? '0' + m : m;
-				 var d = date_st.getDate();
-				 var date = (d < 10) ? '0' + d : d; 
-				 var st_limit = month + "/" + date + "/" + date_st.getFullYear() + " 23:59:59";
+		default: start_range = start_range.replace(/\s+/g, '') ;	//Remove space in between
+				 var date_arr = start_range.split('-'); 
+				 var st_limit = date_arr[1] + "/" + date_arr[2] + "/" + date_arr[0] + " 23:59:59";	///As date Picker format is NOT Supported by by Javascript in IE, manual creation in required format
 				 var st_limit = new Date(st_limit);
 				 break;
 	}
@@ -404,12 +400,9 @@ function change_view()
 		case '1 month ago': ed_limit = one_month; break;
 		case '1 quarter ago': ed_limit = three_month; break;
 		case '1 year ago': ed_limit = one_year; break;
-		default: var date_st = new Date(end_range); 
-				 var m = date_st.getMonth()+1;
-				 var month = (m < 10) ? '0' + m : m;
-				 var d = date_st.getDate();
-				 var date = (d < 10) ? '0' + d : d; 
-				 var ed_limit = month + "/" + date + "/" + date_st.getFullYear() + " 00:00:01";
+		default: end_range = end_range.replace(/\s+/g, '') ;
+				 var date_arr = end_range.split('-');
+				 var ed_limit = date_arr[1] + "/" + date_arr[2] + "/" + date_arr[0] + " 00:00:01"; ///As date Picker format is NOT Supported by by Javascript in IE, manual creation in required format
 				 var ed_limit = new Date(ed_limit);
 				 break;
 	}
@@ -424,25 +417,27 @@ function change_view()
 			var cell_val=document.getElementById("Cell_values_"+i).value;
 			var Cell_values_Arr = cell_val.split(',');
 			
+			var cell_link_val=document.getElementById("Link_value_"+i).value;
 			
-			///Change Cell Border Color
-			var record_cdate= new Date(Cell_values_Arr[6]);	//Record Update Date
-			
-			if((record_cdate <= st_limit) && (record_cdate >= ed_limit)) //Compare Count Change Dates
+			if(cell_link_val != '' && cell_link_val != null)
 			{
-				document.getElementById("Cell_ID_"+i).style.border = "#FF0000 solid";
-				document.getElementById("Cell_ID_"+i).title = "Record Updated On: "+ Cell_values_Arr[7];
-			}
-			else
-			{
-				if(Cell_values_Arr[14] != '' && Cell_values_Arr[14] != null && Cell_values_Arr[14] != 'undefined')
+				///Change Cell Border Color
+				var record_cdate= new Date(Cell_values_Arr[6]);	//Record Update Date
+				
+				if((record_cdate <= st_limit) && (record_cdate >= ed_limit)) //Compare record Change Dates
 				{
-					document.getElementById("Cell_ID_"+i).style.border = "#"+Cell_values_Arr[14]+" solid";
-					document.getElementById("Cell_ID_"+i).title = "";
+					document.getElementById("Cell_ID_"+i).style.border = "#FF0000 solid";
+					document.getElementById("Cell_ID_"+i).title = "Record Updated On: "+ Cell_values_Arr[7];
+				}
+				else
+				{
+					if(Cell_values_Arr[14] != '' && Cell_values_Arr[14] != null && Cell_values_Arr[14] != 'undefined')
+					{
+						document.getElementById("Cell_ID_"+i).style.border = "#"+Cell_values_Arr[14]+" solid";
+						document.getElementById("Cell_ID_"+i).title = "";
+					}
 				}
 			}
-			
-			var cell_link_val=document.getElementById("Link_value_"+i).value;
 		
 			/////Change Count
 			var font_element=document.getElementById("Font_ID_"+i);
