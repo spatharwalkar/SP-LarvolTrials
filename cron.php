@@ -1,8 +1,5 @@
 #!/usr/bin/php -q
 <?php
-
-
-
 /*
 * ACTIVITY
 *	Updation of database and generation of reports based on Scheduler settings. Status 
@@ -47,7 +44,6 @@
 *		after the other, status being changed to 'running' and then 'complete'. Mail is
 *		sent to the corresponding ID with the report attached.
 */
-
 
 ini_set('error_reporting', E_ALL ^ E_NOTICE);
 ini_set('display_errors', 1);
@@ -164,8 +160,8 @@ foreach($tasks as $row)
 				die($log);
 			}
 			require_once('calculate_hm_cells.php');
-			calc_cells(NULL,4);
-			continue;
+			if(!calc_cells(NULL,4)) echo '<br><b>Could complete calculating cells, there was an error.<br></b>';
+			else continue;
 		}
 		
 		

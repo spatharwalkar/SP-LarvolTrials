@@ -26,6 +26,7 @@ function calc_cells($parameters,$update_id=NULL)
 		if(!$res = mysql_query($query))
 		{
 			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			global $logger;
 			$logger->error($log);
 			echo $log;
 			return false;
@@ -83,6 +84,7 @@ function calc_cells($parameters,$update_id=NULL)
 		if(!$res = mysql_query($query))
 		{
 			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			global $logger;
 			$logger->error($log);
 			echo $log;
 			return false;
@@ -119,6 +121,7 @@ function calc_cells($parameters,$update_id=NULL)
 			if(!$res = mysql_query($query))
 					{
 						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+						global $logger;
 						$logger->error($log);
 						echo $log;
 						return false;
@@ -149,6 +152,7 @@ function calc_cells($parameters,$update_id=NULL)
 					if(!$res = mysql_query($query))
 					{
 						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+						global $logger;
 						$logger->error($log);
 						echo $log;
 						return false;
@@ -169,6 +173,7 @@ function calc_cells($parameters,$update_id=NULL)
 			if(!$res = mysql_query($query))
 			{
 				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				global $logger;
 				$logger->error($log);
 				echo $log;
 				return false;
@@ -214,6 +219,7 @@ function calc_cells($parameters,$update_id=NULL)
 			if(!$res = mysql_query($query))
 			{
 				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				global $logger;
 				$logger->error($log);
 				echo $log;
 				return false;
@@ -239,6 +245,7 @@ function calc_cells($parameters,$update_id=NULL)
 				if(!$res = mysql_query($query))
 				{
 					$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+					global $logger;
 					$logger->error($log);
 					echo $log;
 					return false;
@@ -253,6 +260,7 @@ function calc_cells($parameters,$update_id=NULL)
 		if(!$res = mysql_query($query))
 		{
 			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			global $logger;
 			$logger->error($log);
 			echo $log;
 			return false;
@@ -275,6 +283,7 @@ function add_data($arid,$prid,$cnt_total,$cnt_active,$cnt_active_indlead,$bomb,$
 	if(!$res = mysql_query($query))
 		{
 			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			global $logger;
 			$logger->error($log);
 			echo $log;
 			return false;
@@ -293,6 +302,7 @@ function add_data($arid,$prid,$cnt_total,$cnt_active,$cnt_active_indlead,$bomb,$
 		if(!$res = mysql_query($query))
 		{
 			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			global $logger;
 			$logger->error($log);
 			echo $log;
 			return false;
@@ -343,6 +353,7 @@ function add_data($arid,$prid,$cnt_total,$cnt_active,$cnt_active_indlead,$bomb,$
 		if(!$res = mysql_query($query))
 		{
 			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			global $logger;
 			$logger->error($log);
 			echo $log;
 			return false;
@@ -366,6 +377,7 @@ function add_data($arid,$prid,$cnt_total,$cnt_active,$cnt_active_indlead,$bomb,$
 		if(!$res = mysql_query($query))
 		{
 			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			global $logger;
 			$logger->error($log);
 			echo $log;
 			return false;
