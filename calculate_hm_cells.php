@@ -16,9 +16,9 @@ elseif( isset($_GET['calc']) and ($_GET['calc']=="all") )
 
 function calc_cells($parameters,$update_id=NULL)
 {
-
 	$cron_run = isset($update_id); 	// check if being run by cron.php
 	
+	$display_status='NO';
 	
 	if($cron_run)
 	{
@@ -90,6 +90,8 @@ function calc_cells($parameters,$update_id=NULL)
 			return false;
 		}
 	}
+	
+	
 	//pr($areaids);
 	//pr($productids);
 	$counter=0;
@@ -158,6 +160,7 @@ function calc_cells($parameters,$update_id=NULL)
 						return false;
 					}
 				}
+				
 				
 				$counter++;
 				continue;
@@ -251,6 +254,7 @@ function calc_cells($parameters,$update_id=NULL)
 					return false;
 				}
 			}
+			
 		}
 
 	}
@@ -266,6 +270,7 @@ function calc_cells($parameters,$update_id=NULL)
 			return false;
 		}
 	}
+	
 	echo '<br>All Done.';
 	return true;
 }			

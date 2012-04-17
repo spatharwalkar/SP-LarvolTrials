@@ -215,18 +215,24 @@ function tree_grid_cookie(category_name)	///Categories listed in cookies will on
 <script type="text/javascript" src="scripts/chrome.js"></script>
 <?php
 echo('<script type="text/javascript" src="delsure.js"></script>');
+
 postRL();
 postEd();
+
 echo(reportListCommon('rpt_master_heatmap'));
+
 if(!isset($_POST['delrep']) && !is_array($_POST['delrep'])) ///Below Function Should be skipped after delete Otherwise we will get report not found error after delete
 echo(editor());
+
 echo('</body></html>');
 }
 //return html for report editor
 function editor()
 {
 	global $db;
+	
 	if(!isset($_GET['id'])) return;
+	
 	$id = mysql_real_escape_string(htmlspecialchars($_GET['id']));
 	if(!is_numeric($id)) return;
 	$query = 'SELECT name,user,footnotes,description,category,shared,total FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
@@ -562,8 +568,13 @@ function editor()
 			{
 				$count_val='<b>'.$col_active_total[$col].', </b>'.$col_count_total[$col];
 			}
-				
 			$out .= '<a href="intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col] . '" target="_blank" class="ottlink" title="'.$title.'">'.$count_val.'</a>';
+		
+			$out .= '<br><a href="calculate_hm_cells.php?area=' . $areaIds[$col] . '" target="_blank"  title="Recalculate values">'. 'Recalculate' .'</a>';
+			
+			
+
+
 		}
 		$out .='<br/>';
 		$out .= '</th>';
