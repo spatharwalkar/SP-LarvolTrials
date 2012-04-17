@@ -9399,16 +9399,26 @@ class TrialTracker
 			$paginate['url'] = preg_replace("/\&amp;page=[0-9].*?(\&amp;|$)/", '',   $paginate['url']);
 			$allproductsurl = preg_replace("/\&amp;pr=[0-9].*?(\&amp;|$)/", '',   $paginate['url']);
 			
-			echo '<div id="menu"><a href="javascript: void(0);">Select Product</a></div><br/><br/>'
-					. '<div class="dropdown"><a href="' . $allproductsurl . '">All Products</a>';
+			echo '<ul id="nav">';
+			if(isset($globalOptions['product']) && $globalOptions['product'] != '')
+			{	
+				unset($TrialsInfoList[$globalOptions['product']]);
+				echo '<li><a href="javascript: void(0);" class="arrow">' . $TrialsInfo[$globalOptions['product']] ['sectionHeader'] . '</a>'
+						. '<ul><li><a href="' . $allproductsurl . '">All Products</a></li>';
+			}
+			else
+			{
+				echo '<li><a href="' . $allproductsurl . '" class="arrow">All Products</a><ul>';
+			}
+			
 			foreach($TrialsInfoList as $infkey => $infvalue)
 			{
-				echo '<a href="' . $paginate['url'] . '&amp;pr=' . $infkey .  '">' . $infvalue['sectionHeader'] . '</a>';
+				echo '<li><a href="' . $paginate['url'] . '&amp;pr=' . $infkey .  '">' . $infvalue['sectionHeader'] . '</a></li>';
 			}
-			echo '</div>';
+			echo '</ul></ul>';
 		}
 		
-		//echo '<br/>';
+		echo '<br/><br/>';
 		
 		echo $this->displayTrialTableHeader($loggedIn, $globalOptions);
 		echo $this->displayTrials($globalOptions, $loggedIn, $start, $last, $Trials, $TrialsInfo, $ottType);

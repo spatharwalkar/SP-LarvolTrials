@@ -23,7 +23,7 @@ $_GET['time'] = NULL;
 
 $tt = new TrialTracker;
 if(isset($_POST['btnDownload'])) 
-{
+{	
 	$shownCnt = mysql_real_escape_string($_POST['shownCnt']);
 	$ottType = $_POST['ottType'];
 	$resultIds = $_POST['resultIds'];
@@ -286,23 +286,6 @@ $lastChangedTime = filectime("css/intermediary.css");
 			//$("#frmOtt").submit();
 			return true;
 		});
-		
-		//product dropdown
-		var $menu = $('.dropdown').hide();
-
-		var _expand = function(event){
-			$menu.stop(true);
-			$menu.fadeIn();
-		};
-		
-		var _collapse = function(event){
-			   $menu.stop(true, true);
-			   $menu.fadeOut();
-		};
-		
-		$menu.hover(_expand, _collapse);
-		
-		$('#menu a').hover(_expand, _collapse);
 	});
 	
     </script>
