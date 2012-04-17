@@ -5941,6 +5941,10 @@ class TrialTracker
 			$indx = 0;
 			foreach($Array as $akey => $avalue) 
 			{
+				if(!isset($avalue['NCT/enrollment']) || $avalue['NCT/enrollment'] > 1000000)
+				{
+					$avalue['NCT/enrollment'] = NULL;
+				}
 				foreach($avalue as $key => $value) 
 				{
 					if(is_array($value))
@@ -6267,7 +6271,7 @@ class TrialTracker
 							{
 								$result[$index]['NCT/enrollment'] = 0;
 							}
-							if($rvalue['NCT/enrollment'] < $enroll[0] || $rvalue['NCT/enrollment'] > $enroll[1])
+							if($result[$index]['NCT/enrollment'] < $enroll[0] || $result[$index]['NCT/enrollment'] > $enroll[1])
 							{	
 								foreach($Trials['allTrials'] as $k => $v)
 								{
@@ -6553,7 +6557,7 @@ class TrialTracker
 						{
 							$result[$index]['NCT/enrollment'] = 0;
 						}
-						if($rvalue['NCT/enrollment'] < $enroll[0] || $rvalue['NCT/enrollment'] > $enroll[1])
+						if($result[$index]['NCT/enrollment'] < $enroll[0] || $result[$index]['NCT/enrollment'] > $enroll[1])
 						{	
 							foreach($Trials['allTrials'] as $k => $v)
 							{
@@ -6717,6 +6721,10 @@ class TrialTracker
 			$indx = 0;
 			foreach($Array as $akey => $avalue) 
 			{
+				if(!isset($avalue['NCT/enrollment']) || $avalue['NCT/enrollment'] > 1000000)
+				{
+					$avalue['NCT/enrollment'] = NULL;
+				}
 				foreach($avalue as $key => $value) 
 				{
 					if(is_array($value))
@@ -7043,7 +7051,7 @@ class TrialTracker
 							{
 								$result[$index]['NCT/enrollment'] = 0;
 							}
-							if($rvalue['NCT/enrollment'] < $enroll[0] || $rvalue['NCT/enrollment'] > $enroll[1])
+							if($result[$index]['NCT/enrollment'] < $enroll[0] || $result[$index]['NCT/enrollment'] > $enroll[1])
 							{	
 								foreach($Trials['allTrials'] as $k => $v)
 								{
@@ -7327,7 +7335,7 @@ class TrialTracker
 						{
 							$result[$index]['NCT/enrollment'] = 0;
 						}
-						if($rvalue['NCT/enrollment'] < $enroll[0] || $rvalue['NCT/enrollment'] > $enroll[1])
+						if($result[$index]['NCT/enrollment'] < $enroll[0] || $result[$index]['NCT/enrollment'] > $enroll[1])
 						{	
 							foreach($Trials['allTrials'] as $k => $v)
 							{
@@ -8568,9 +8576,9 @@ class TrialTracker
 			$indx = 0;
 			foreach($Array as $akey => $avalue) 
 			{
-				if(!isset($avalue['NCT/enrollment']))
+				if(!isset($avalue['NCT/enrollment']) || $avalue['NCT/enrollment'] > 1000000)
 				{
-					$avalue['NCT/enrollment'] = 0;
+					$avalue['NCT/enrollment'] = NULL;
 				}
 				foreach($avalue as $key => $value) 
 				{
@@ -8899,7 +8907,7 @@ class TrialTracker
 							{
 								$result[$index]['NCT/enrollment'] = 0;
 							}
-							if($rvalue['NCT/enrollment'] < $enroll[0] || $rvalue['NCT/enrollment'] > $enroll[1])
+							if($result[$index]['NCT/enrollment'] < $enroll[0] || $result[$index]['NCT/enrollment'] > $enroll[1])
 							{	
 								foreach($Trials['allTrials'] as $k => $v)
 								{
@@ -9183,7 +9191,7 @@ class TrialTracker
 						{
 							$result[$index]['NCT/enrollment'] = 0;
 						}
-						if($rvalue['NCT/enrollment'] < $enroll[0] || $rvalue['NCT/enrollment'] > $enroll[1])
+						if($result[$index]['NCT/enrollment'] < $enroll[0] || $result[$index]['NCT/enrollment'] > $enroll[1])
 						{	
 							foreach($Trials['allTrials'] as $k => $v)
 							{
