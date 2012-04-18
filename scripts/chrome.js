@@ -110,6 +110,13 @@ dropit:function(obj, e, dropmenuID){
 	this.dropmenuobj.style.left=this.dropmenuobj.x-this.clearbrowseredge(obj, "rightedge")+"px"
 	this.dropmenuobj.style.top=this.dropmenuobj.y-this.clearbrowseredge(obj, "bottomedge")+obj.offsetHeight+1+"px"
 	this.positionshim() //call iframe shim function
+	//// To avoid OUTER Onclick function execution
+	if (window.event) {
+	window.event.cancelBubble=true;
+    }
+else {
+	if (e.cancelable ) {e.stopPropagation();}
+	}
 },
 
 positionshim:function(){ //display iframe shim function
@@ -189,9 +196,9 @@ startchrome:function(){
 						var evtobj=window.event || e
 						cssdropdown.dropit(this, evtobj, this.getAttribute("rel"))
 					}
-				}, "mouseover")
+				}, "click")
 				this.addEvent(menuitems[i], function(e){cssdropdown.dynamichide(this, e)}, "mouseout") //hide drop down menu when main menu items are mouse out
-				this.addEvent(menuitems[i], function(){cssdropdown.delayhidemenu()}, "click") //hide drop down menu when main menu items are clicked on
+				//this.addEvent(menuitems[i], function(){cssdropdown.delayhidemenu()}, "click") //hide drop down menu when main menu items are clicked on
 			}
 		} //end inner for
 	} //end outer for

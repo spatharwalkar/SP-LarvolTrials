@@ -1,6 +1,6 @@
 div.popup_form 
 { 
-	z-index: 1; 
+	z-index: 9; 
 	-moz-box-shadow: 0px 0px 10px #cbcbcb;
 	-webkit-box-shadow: 0px 0px 10px #cbcbcb; 
 	border: solid 1px #cbcbcb;
@@ -10,7 +10,7 @@ div.popup_form
 div.popup_form div.menu_form_header
 {
   border-bottom: none;
-  width: 200px;
+  width: 440px;
   height: 20px;
   line-height: 19px;
   vertical-align: middle;
@@ -20,6 +20,7 @@ div.popup_form div.menu_form_header
   font-size:  13px;
   color:   #206040;
   cursor:move;
+  background: #fff;
 }
 
 div.popup_form div.menu_form_body
@@ -58,6 +59,7 @@ div.popup_form td
 {
   width: 99%;
   padding: 0px 0px 1px 0px;
+  background: #fff;
 }
 
 div.popup_form form
