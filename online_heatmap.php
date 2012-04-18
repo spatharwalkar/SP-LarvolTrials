@@ -504,9 +504,11 @@ function change_view()
 			var Cell_values_Arr = cell_val.split(',endl,');
 			
 			/////Change Count
-			var font_element=document.getElementById("Font_ID_"+i);
+			var font_element=document.getElementById("Font_ID_"+i);	//Ceck if cell has font element so we can chnage cont value
 			
-			var cell_link_val=document.getElementById("Link_value_"+i).value;
+			var tot_element=document.getElementById("Tot_ID_"+i); 	// Check if total column exists
+			
+			var cell_link_val=document.getElementById("Link_value_"+i).value;	//Check in cell has link
 			
 			
 			
@@ -517,6 +519,9 @@ function change_view()
 				if(view_type.value == 'active')
 				{
 					document.getElementById("Cell_Link_"+i).href = cell_link_val+'&list=1&sr='+start_range+'&er='+end_range;
+					
+					if(tot_element != null && tot_element != '')
+					document.getElementById("Tot_ID_"+i).innerHTML = Cell_values_Arr[0];
 					
 					if(font_element != null && font_element != '')
 					{
@@ -529,6 +534,9 @@ function change_view()
 				{
 					document.getElementById("Cell_Link_"+i).href = cell_link_val+'&list=2&sr='+start_range+'&er='+end_range;
 					
+					if(tot_element != null && tot_element != '')
+					document.getElementById("Tot_ID_"+i).innerHTML = Cell_values_Arr[1];
+					
 					if(font_element != null && font_element != '')
 					{
 						document.getElementById("Font_ID_"+i).innerHTML = Cell_values_Arr[1];
@@ -539,6 +547,9 @@ function change_view()
 				else if(view_type.value == 'indlead')
 				{
 					document.getElementById("Cell_Link_"+i).href = cell_link_val+'&list=1&itype=0&sr='+start_range+'&er='+end_range;
+					
+					if(tot_element != null && tot_element != '')
+					document.getElementById("Tot_ID_"+i).innerHTML = Cell_values_Arr[0];
 					
 					if(font_element != null && font_element != '')
 					{
@@ -904,12 +915,12 @@ if($toal_fld)
 	$htmlContent .= '<th id="Cell_ID_'.$online_HMCounter.'" width="80px"><div align="center">';
 	if(!empty($productIds) && !empty($areaIds))
 	{
+		$productIds = array_filter($productIds);
+		$areaIds = array_filter($areaIds);
 		$htmlContent .= '<input type="hidden" value="'.$active_total.',endl,'.$count_total.',endl,'.$indlead_total.'" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
 		$htmlContent .= '<input type="hidden" value="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds). '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />';
 		
-		$productIds = array_filter($productIds);
-		$areaIds = array_filter($areaIds);
-		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" title="Active Trials" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds). '&list=1&sr=now&er=1 month ago" target="_blank">'.$active_total.'</a>';
+		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" title="Active Trials" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds). '&list=1&sr=now&er=1 month ago" target="_blank"><font id="Tot_ID_'.$online_HMCounter.'">'.$active_total.'</font></a>';
 	}
 	$htmlContent .= '</div></th>';
 }
