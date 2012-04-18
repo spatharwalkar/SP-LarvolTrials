@@ -790,7 +790,7 @@ function editor()
 						.'<img class="menu_form_exit" align="right" id="bombpopup_exit_'.$row.'_'.$col.'" src="images/fancy_close.png" style="width:30px; height:30px; " '		
 						.'alt="" />&nbsp;&nbsp;&nbsp;'
 						.'</div>'
-						.'<div class="menu_form_body">'
+						.'<div class="menu_form_body" style="width:300px;">'
 						.'<table style="background-color:#fff;">'
 						.'<tr><td style="background-color:#fff;">'
 						.'<font style="color:#206040; font-weight: 900;"><br/>&nbsp;Bomb Value: </font> <font style="color:#000000; font-weight: 900;">';
@@ -814,7 +814,7 @@ function editor()
 						.'<img class="menu_form_exit" align="right" id="filingpopup_exit_'.$row.'_'.$col.'" src="images/fancy_close.png" style="width:30px; height:30px;" '		
 						.'alt="" />&nbsp;&nbsp;&nbsp;'
 						.'</div>'
-						.'<div class="menu_form_body">'
+						.'<div class="menu_form_body" style="width:300px;">'
 						.'<table style="background-color:#fff;">';
 						
 						$out .= '<tr><td style="background-color:#fff;">'
@@ -832,7 +832,7 @@ function editor()
 							.'<img class="menu_form_exit" align="right" id="phaseexppopup_exit_'.$row.'_'.$col.'" src="'. urlPath() .'images/fancy_close.png" style="width:30px; height:30px;" '		
 							.'alt="" />&nbsp;&nbsp;&nbsp;'
 							.'</div>'
-							.'<div class="menu_form_body">'
+							.'<div class="menu_form_body" style="width:300px;">'
 							.'<table style="background-color:#fff;">';
 							
 						$out .= '<tr style="background-color:#fff; border:none;"><td style="background-color:#fff; border:none;">'
