@@ -373,7 +373,7 @@ CREATE TABLE IF NOT EXISTS `rpt_ott_upm` (
   `expiry` date DEFAULT NULL,
   `last_referenced` datetime NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `intervention_name` (`intervention_name`(1000))
+  UNIQUE KEY `intervention_name` (`intervention_name`(500),`intervention_name_negate`(500))
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `rpt_ott_searchdata` (
