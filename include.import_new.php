@@ -154,7 +154,7 @@ function addNCT($rec)
 		
 	}
 	
-	//echo '<pre>'; print_r($rec); echo '</pre>';
+	 // echo '<pre>'; print_r($rec); echo '</pre>';
 	
 	if(isset($rec->status_block->brief_summary->textblock) and !empty($rec->status_block->brief_summary->textblock)) $bsummary=$rec->status_block->brief_summary->textblock;
 else $bsummary=$rec->brief_summary->textblock;
@@ -247,6 +247,8 @@ else $ddesc=$rec->detailed_descr->textblock;
 			$record_data['primary_outcome_measure'][]=$out;
 		if(isset($out->description->textblock) and !empty($out->description->textblock))
 			$record_data['primary_outcome_measure'][]=$out->description->textblock;
+		if(isset($out->description) and !empty($out->description))
+			$record_data['primary_outcome_measure'][]=$out->description;
         $record_data['primary_outcome_measure'][] = $out->measure;
         $record_data['primary_outcome_timeframe'][] = $out->time_frame;
         $record_data['primary_outcome_safety_issue'][] = ynbool($out->safety_issue);
