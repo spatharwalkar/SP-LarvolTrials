@@ -288,6 +288,13 @@ $(document).ready(function () {
     {
     	//function to get the JSON data of the search
     	var jsonData = getQueryData(); 
+
+    	var jsonDataArr = eval('('+jsonData+')');
+    	if(jsonDataArr.wheredata == '' && jsonDataArr.override=='')
+    	{
+			alert('Null search data not allowed. Please delete search data using the delete checkbox');
+			return false;
+    	}
     	$('#searchdata').val(jsonData);
     	if($('#searchdata').val() != searchDbData)
     	$('#search_modifier').html('[Modified]');
