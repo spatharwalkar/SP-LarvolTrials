@@ -402,3 +402,62 @@ tr.upms td {
 	background-color:#D5D3E6;
 }
 
+.gray {
+	background-color:#CCCCCC;
+	width: 35px;
+	height: 18px;
+	float: left;
+	text-align: center;
+	margin-right: 1px;
+	padding-top:3px;
+}
+
+.blue {
+	background-color:#00ccff;
+	width: 35px;
+	height: 18px;
+	float: left;
+	text-align: center;
+	margin-right: 1px;
+	padding-top:3px;
+}
+
+.green {
+	background-color:#99cc00;
+	width: 35px;
+	height: 18px;
+	float: left;
+	text-align: center;
+	margin-right: 1px;
+	padding-top:3px;
+}
+
+.yellow {
+	background-color:#ffff00;
+	width: 35px;
+	height: 18px;
+	float: left;
+	text-align: center;
+	margin-right: 1px;
+	padding-top:3px;
+}
+
+.orange {
+	background-color:#ff9900;
+	width: 35px;
+	height: 18px;
+	float: left;
+	text-align: center;
+	margin-right: 1px;
+	padding-top:3px;
+}
+
+.red {
+	background-color:#ff0000;
+	width: 35px;
+	height: 18px;
+	float: left;
+	text-align: center;
+	margin-right: 1px;
+	padding-top:3px;
+}

@@ -449,6 +449,15 @@ else
         <tr><td><img src="images/red-checkmark.png"/></td><td>Click for milestone result (new)</td></tr>
         <tr><td><img src="images/purple-bar.png"/></td><td>Click for milestone details</td></tr>
         <tr><td><img src="images/down.png"/></td><td>Display milestones</td></tr>
+        <tr><td colspan="2" style="padding-right: 1px;">
+         <div style="float:left;padding-top:3px;">Phase&nbsp;</div>
+         <div class="gray">N/A</div>
+         <div class="blue">0</div>
+         <div class="green">1</div>
+         <div class="yellow">2</div>
+         <div class="orange">3</div>
+         <div class="red">4</div>
+         </td></tr>
         </table>
     </div>
 </div>
