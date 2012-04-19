@@ -2,12 +2,6 @@
 require_once('db.php');
 ini_set('memory_limit','-1');
 ini_set('max_execution_time','36000');	//10 hours
-if(!$db->loggedIn())
-{
-	header('Location: ' . urlPath() . 'index.php');
-	exit;
-}
-
 global $db;
 global $now;
 if(!isset($_GET['id'])) return;
@@ -19,7 +13,6 @@ $res = mysql_fetch_array($res) or die('Report not found.');
 $rptu = $res['user'];
 $shared = $res['shared'];
 $toal_fld=$res['total'];
-if($rptu !== NULL && $rptu != $db->user->id && !$shared) return;	//prevent anyone from viewing others' private reports
 $name = $res['name'];
 $footnotes = htmlspecialchars($res['footnotes']);
 $description = htmlspecialchars($res['description']);
@@ -158,7 +151,7 @@ foreach($rows as $row => $rval)
 				$data_matrix[$row][$col]['bomb']['value']=$cell_data['bomb'];
 				$data_matrix[$row][$col]['bomb']['src']='new_sbomb.png';
 				$data_matrix[$row][$col]['bomb']['alt']='Small Bomb';
-				$data_matrix[$row][$col]['bomb']['style']='width:20px; height:20px;';
+				$data_matrix[$row][$col]['bomb']['style']='width:15px; height:15px;';
 				$data_matrix[$row][$col]['bomb']['title']='Bomb Details';
 			}
 			elseif($cell_data['bomb'] == 'large')
@@ -166,7 +159,7 @@ foreach($rows as $row => $rval)
 				$data_matrix[$row][$col]['bomb']['value']=$cell_data['bomb'];
 				$data_matrix[$row][$col]['bomb']['src']='new_lbomb.png';
 				$data_matrix[$row][$col]['bomb']['alt']='Large Bomb';
-				$data_matrix[$row][$col]['bomb']['style']='width:20px; height:20px;';
+				$data_matrix[$row][$col]['bomb']['style']='width:15px; height:15px;';
 				$data_matrix[$row][$col]['bomb']['title']='Bomb Details';
 			}
 			else
@@ -174,7 +167,7 @@ foreach($rows as $row => $rval)
 				$data_matrix[$row][$col]['bomb']['value']=$cell_data['bomb'];
 				$data_matrix[$row][$col]['bomb']['src']='new_square.png';
 				$data_matrix[$row][$col]['bomb']['alt']='None';
-				$data_matrix[$row][$col]['bomb']['style']='width:20px; height:20px;';
+				$data_matrix[$row][$col]['bomb']['style']='width:15px; height:15px;';
 				$data_matrix[$row][$col]['bomb']['title']='Bomb Details';
 			}
 			
@@ -308,7 +301,7 @@ foreach($rows as $row => $rval)
 			{
 				$data_matrix[$row][$col]['filing_src']='images/newred_file.png';
 				$data_matrix[$row][$col]['filing_start_title'] = 'Filing Details Updated On: '.date('F d, Y', strtotime($data_matrix[$row][$col]['filing_lastchanged']));
-				$data_matrix[$row][$col]['filing_start_style'] = 'width:20px; height:20px; vertical-align:middle; cursor:pointer;';
+				$data_matrix[$row][$col]['filing_start_style'] = 'width:15px; height:15px; vertical-align:middle; cursor:pointer;';
 				
 				if($latest_date < date('m/d/Y H:i:s',strtotime($data_matrix[$row][$col]['filing_lastchanged'])) || $latest_date != '')
 				{
@@ -330,7 +323,7 @@ foreach($rows as $row => $rval)
 			{
 				$data_matrix[$row][$col]['phaseexp_src']='images/phaseexp_red.png';
 				$data_matrix[$row][$col]['phaseexp_start_title'] = 'Filing Details Updated On: '.date('F d, Y', strtotime($data_matrix[$row][$col]['filing_lastchanged']));
-				$data_matrix[$row][$col]['phaseexp_start_style'] = 'width:20px; height:20px; vertical-align:middle; cursor:pointer;';
+				$data_matrix[$row][$col]['phaseexp_start_style'] = 'width:15px; height:15px; vertical-align:middle; cursor:pointer;';
 				
 				if($latest_date < date('m/d/Y H:i:s',strtotime($data_matrix[$row][$col]['phase_explain_lastchanged'])) || $latest_date != '')
 				{
@@ -573,7 +566,7 @@ function change_view()
 				if((record_cdate <= st_limit) && (record_cdate >= ed_limit)) //Compare record Change Dates
 				{
 					document.getElementById("Cell_ID_"+i).style.border = "#FF0000 solid";
-					if(Cell_values_Arr[14]=='FF0000')
+					//if(Cell_values_Arr[14]=='FF0000')
 					document.getElementById("Cell_ID_"+i).style.backgroundColor = "#FFFFFF";
 					document.getElementById("Div_ID_"+i).title = "Record Updated On: "+ Cell_values_Arr[7];
 					document.getElementById("Last_CDate_"+i).style.display = "block";
@@ -590,7 +583,7 @@ function change_view()
 						document.getElementById("Cell_ID_"+i).style.border = "#"+Cell_values_Arr[14]+" solid";
 						document.getElementById("Last_CDate_"+i).style.display = "none";
 						document.getElementById("Div_ID_"+i).title = "";
-						if(Cell_values_Arr[14]=='FF0000')
+						//if(Cell_values_Arr[14]=='FF0000')
 						document.getElementById("Cell_ID_"+i).style.backgroundColor = "#"+Cell_values_Arr[14];
 					}
 				}
@@ -607,7 +600,7 @@ function change_view()
 						document.getElementById("Cell_Link_"+i).title = "Active Industry Lead Count Changed from: "+ Cell_values_Arr[5] +" On: "+ Cell_values_Arr[9];
 						document.getElementById("Cell_Link_"+i).style.color = "#FF0000";
 						document.getElementById("Cell_Link_"+i).style.fontWeight = "bold";
-						if(Cell_values_Arr[14]=='FF0000')
+						//if(Cell_values_Arr[14]=='FF0000')
 						document.getElementById("Cell_Link_"+i).style.backgroundColor = "#FFFFFF";
 						if(latest_date < count_cdate || latest_date == '')
 						{
@@ -620,7 +613,7 @@ function change_view()
 						document.getElementById("Cell_Link_"+i).title = "Total Count Changed from: "+ Cell_values_Arr[4] +" On: "+ Cell_values_Arr[9];
 						document.getElementById("Cell_Link_"+i).style.color = "#FF0000";
 						document.getElementById("Cell_Link_"+i).style.fontWeight = "bold";
-						if(Cell_values_Arr[14]=='FF0000')
+						//if(Cell_values_Arr[14]=='FF0000')
 						document.getElementById("Cell_Link_"+i).style.backgroundColor = "#FFFFFF";
 						if(latest_date < count_cdate || latest_date == '')
 						{
@@ -633,7 +626,7 @@ function change_view()
 						document.getElementById("Cell_Link_"+i).title = "Active Count Changed from: "+ Cell_values_Arr[3] +" On: "+ Cell_values_Arr[9];
 						document.getElementById("Cell_Link_"+i).style.color = "#FF0000";
 						document.getElementById("Cell_Link_"+i).style.fontWeight = "bold";
-						if(Cell_values_Arr[14]=='FF0000')
+						//if(Cell_values_Arr[14]=='FF0000')
 						document.getElementById("Cell_Link_"+i).style.backgroundColor = "#FFFFFF";
 						if(latest_date < count_cdate || latest_date == '')
 						{
@@ -803,7 +796,7 @@ function change_view()
 				if(qualify_title != '')
 				{
 					document.getElementById("Cell_ID_"+i).style.border = "#FF0000 solid";
-					if(Cell_values_Arr[14]=='FF0000')
+					//if(Cell_values_Arr[14]=='FF0000')
 					document.getElementById("Cell_ID_"+i).style.backgroundColor = "#FFFFFF";
 					
 					document.getElementById("Div_ID_"+i).title = qualify_title;
