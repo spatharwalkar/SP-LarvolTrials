@@ -35,7 +35,7 @@ text-decoration: none;
 }
 
 .chromestyle ul li a:hover, .chromestyle ul li a.selected{ /*script dynamically adds a class of "selected" to the current active menu item*/
-background: url(../images/cchromebg2-over.gif) center center repeat-x; /*THEME CHANGE HERE*/
+background: url(../images/chromebg2.gif) center center repeat-x; /*THEME CHANGE HERE*/
 }
 
 
