@@ -18,7 +18,7 @@ $footnotes = htmlspecialchars($res['footnotes']);
 $description = htmlspecialchars($res['description']);
 $category = $res['category'];
 	
-$query = 'SELECT `num`,`type`,`type_id` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' ORDER BY num ASC';
+$query = 'SELECT `num`,`type`,`type_id`, `display_name` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' ORDER BY num ASC';
 $res = mysql_query($query) or die('Bad SQL query getting master heatmap report headers');
 $rows = array();
 $columns = array();
@@ -35,7 +35,8 @@ while($header = mysql_fetch_array($res))
 		{
 			$result =  mysql_fetch_assoc(mysql_query("SELECT id, name, display_name, description FROM `areas` WHERE id = '" . $header['type_id'] . "' "));
 			$columns[$header['num']] = $result['name'];
-			$columnsDisplayName[$header['num']] = $result['display_name'];
+			//$columnsDisplayName[$header['num']] = $result['display_name'];
+			$columnsDisplayName[$header['num']] = $header['display_name'];	///Display name from master hm header table
 			$columnsDescription[$header['num']] = $result['description'];
 		}
 		else

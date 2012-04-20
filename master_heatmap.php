@@ -310,6 +310,7 @@ function refresher(row, col, tot_rows, tot_cols)
 	{
 		for(pt2=1; pt2<=tot_cols; pt2++)
 		{
+
 			var current_product_ele=document.getElementById("cell_prod_"+pt1+"_"+pt2);
 			var current_area_ele=document.getElementById("cell_area_"+pt1+"_"+pt2);
 			
@@ -367,6 +368,7 @@ function refresher(row, col, tot_rows, tot_cols)
 					 }
 					 else
 					 {
+
 					 	document.getElementById("filing_pos_"+pt1+"_"+pt2).innerHTML = '';
 						document.getElementById("filingopt_"+pt1+"_"+pt2).checked = false;
 					 }
@@ -436,7 +438,7 @@ function editor()
 	else if($rptu === NULL)
 	$owner_type="global";
 	
-	$query = 'SELECT `num`,`type`,`type_id` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' ORDER BY num ASC';
+	$query = 'SELECT `num`,`type`,`type_id`, `display_name` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' ORDER BY num ASC';
 	$res = mysql_query($query) or die('Bad SQL query getting master heatmap report headers');
 	$rows = array();
 	$columns = array();
@@ -450,6 +452,7 @@ function editor()
 			{
 				$result =  mysql_fetch_assoc(mysql_query("SELECT id, name FROM `areas` WHERE id = '" . $header['type_id'] . "' "));
 				$columns[$header['num']] = $result['name'];
+				$columnsDisplayName[$header['num']] = $header['display_name']; ///Display name from master hm header table
 			}
 			else
 			{
@@ -736,6 +739,9 @@ function editor()
 	{
 		$out .= '<th><input type="text" id="areas' . $col . '" name="areas[' . $col . ']" value="' . $val . '" autocomplete="off" '
 				. ' onkeyup="javascript:autoComplete(\'areas'.$col.'\')" '.(($disabled) ? ' readonly="readonly" ':'').' /><br />';
+				
+		$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col]:'';
+		$out .= 'Display Name: <br/><input type="text" id="areas_display' . $col . '" name="areas_display[' . $col . ']" value="' . $val . '" '.(($disabled) ? ' readonly="readonly" ':'').' /><br />';
 				
 		$out .= 'Column : '.$col.' ';
 		
@@ -1024,7 +1030,7 @@ function Download_reports()
 	$description = htmlspecialchars($res['description']);
 	$category = $res['category'];
 	
-	$query = 'SELECT `num`,`type`,`type_id` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' ORDER BY num ASC';
+	$query = 'SELECT `num`,`type`,`type_id`, `display_name` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' ORDER BY num ASC';
 	$res = mysql_query($query) or die('Bad SQL query getting master heatmap report headers');
 	$rows = array();
 	$columns = array();
@@ -1041,8 +1047,9 @@ function Download_reports()
 			{
 				$result =  mysql_fetch_assoc(mysql_query("SELECT id, name, display_name, description FROM `areas` WHERE id = '" . $header['type_id'] . "' "));
 				$columns[$header['num']] = $result['name'];
-				$columnsDisplayName[$header['num']] = $result['display_name'];
+				//$columnsDisplayName[$header['num']] = $result['display_name'];
 				$columnsDescription[$header['num']] = $result['description'];
+				$columnsDisplayName[$header['num']] = $header['display_name'];	///Display name from master hm header table
 			}
 			else
 			{
@@ -1990,12 +1997,17 @@ function postEd()
 			{
 				if($header != "") 
 				{
+					if($t == 'area')
+					$display_name=mysql_real_escape_string($_POST['areas_display'][$num]);
+					else
+					$display_name='NULL';
+					
 					$query = "select id from " . $t . "s where name='" . mysql_real_escape_string($header) . "' ";
 					$row = mysql_fetch_assoc(mysql_query($query)) or die('Bad SQL Query getting ' . $t . ' names ');
 					
 					$query = 'UPDATE rpt_masterhm_headers SET type_id="' . mysql_real_escape_string($row['id']) 
-					. '" WHERE report=' . $id . ' AND num=' . $num . ' AND type="' . $t . '" LIMIT 1';
-					mysql_query($query) or die('Bad SQL Query saving ' . $t . ' names ');
+					. '", `display_name` = "' . $display_name . '" WHERE report=' . $id . ' AND num=' . $num . ' AND type="' . $t . '" LIMIT 1';
+					mysql_query($query) or die('Bad SQL Query saving ' . $t . ' names '); 
 				}
 			}
 		}//exit;
