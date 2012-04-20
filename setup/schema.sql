@@ -883,6 +883,7 @@ CREATE TABLE IF NOT EXISTS `rpt_masterhm_cells` (
   `filing_lastchanged` datetime DEFAULT NULL,
   `last_update` datetime DEFAULT NULL,
   `last_calc` datetime DEFAULT NULL,
+  `viewcount` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`product`,`area`),
   KEY `area` (`area`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
