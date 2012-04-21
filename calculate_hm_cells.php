@@ -3,6 +3,10 @@ require_once('db.php');
 require_once('include.util.php');
 ini_set('max_execution_time', '360000'); //100 hours
 ignore_user_abort(true);
+
+$data=array();$isactive=array();$instype=array();$ldate=array();$phases=array();$ostatus=array();$cnt_total=0;
+
+
 if(isset($_GET['area']) or isset($_GET['product']))
 {
 	$parameters=$_GET;
@@ -16,6 +20,8 @@ elseif( isset($_GET['calc']) and ($_GET['calc']=="all") )
 
 function calc_cells($parameters,$update_id=NULL)
 {
+	global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_total;
+	$data=array();$isactive=array();$instype=array();$ldate=array();$phases=array();$ostatus=array();$cnt_total=0;
 	$cron_run = isset($update_id); 	// check if being run by cron.php
 	
 	$display_status='NO';
@@ -32,7 +38,36 @@ function calc_cells($parameters,$update_id=NULL)
 			return false;
 		}
 	}
-
+	elseif(isset($parameters['area']))
+	{
+	
+		$display_status='YES';
+		$query = '	select max(update_id) as maxid from  update_status_fullhistory ';
+		if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			global $logger;
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
+		$row = mysql_fetch_assoc($res);
+		$update_id=$row['maxid']+1;
+		
+		$query = '	INSERT into update_status_fullhistory SET 
+					start_time="' . date("Y-m-d H:i:s", strtotime('now')) . '", 
+					updated_days="0", status="2", trial_type="RECALC,AREA=' . $parameters['area'] . '", update_id="' . $update_id . '"';
+		if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			global $logger;
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
+		
+		 
+	}
 	//get area ids
 	if(isset($parameters['area']))
 	{
@@ -90,7 +125,18 @@ function calc_cells($parameters,$update_id=NULL)
 			return false;
 		}
 	}
-	
+	elseif($display_status=='YES')
+	{
+	    $query = 'UPDATE update_status_fullhistory SET update_items_total="' . $totalcount . '",status="2", update_items_start_time="' . date("Y-m-d H:i:s", strtotime('now')) . '" WHERE update_id="' . $update_id . '"';
+		if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			global $logger;
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
+	}
 	
 	//pr($areaids);
 	//pr($productids);
@@ -108,35 +154,50 @@ function calc_cells($parameters,$update_id=NULL)
 		
 		foreach($productids as $pk=>$pv)
 		{
+			$data=array();$isactive=array();$instype=array();$ldate=array();$phases=array();$ostatus=array();$cnt_total=0;
 		
 			if(!$pv['id'] or is_null($pv['id']) or empty($pv['id']))
 			{
 				echo '<br> ';
 				continue;
 			}
-		
-			$query='SELECT a.trial from area_trials a 
-					JOIN product_trials p
-					ON a.trial=p.trial
-					where a.area="'.$av['id'].'" and p.product="'.$pv['id'].'"';
+			/*
+			$query_m='	SELECT a.trial from area_trials a 
+						JOIN product_trials p
+						ON a.trial=p.trial
+						where a.area="'.$av['id'].'" and p.product="'.$pv['id'].'"';
+			*/
+			$query_m='	SELECT a.trial,d.is_active,d.institution_type,d.lastchanged_date,d.phase,d.overall_status from area_trials a 
+						JOIN product_trials p ON a.`trial`=p.`trial`
+						LEFT JOIN data_trials d ON p.`trial`=d.`larvol_id`
+						where a.`area`="'.$av['id'].'" and p.`product`="'.$pv['id'].'" ';
 			
-			if(!$res = mysql_query($query))
+			if(!$res = mysql_query($query_m))
 					{
-						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+						$log='There seems to be a problem with the SQL Query:'.$query_m.' Error:' . mysql_error();
 						global $logger;
 						$logger->error($log);
 						echo $log;
 						return false;
 					}
-			$data=array();
+			$phasez=array();
 			while ($row = mysql_fetch_assoc($res))
 			{	
 				if($row["trial"])
+				{
 					$data[] = $row["trial"];
+					$isactive[] = $row["is_active"];
+					$instype[] = $row["institution_type"];
+					$ldate[] = $row["lastchanged_date"];
+					$phases[] = $row["phase"];
+					if($row["phase"]<>'N/A') $phasez[] = $row["phase"];
+					$ostatus[] = $row["overall_status"];
+					$cnt_total++;
+				}
 			}
-			// $cnt_tl=count($data);
+			
 			$cnt_total=count($data);
-			//echo $cnt_total;
+			
 			if(!$cnt_total or $cnt_total<1) 
 			{
 				
@@ -150,7 +211,19 @@ function calc_cells($parameters,$update_id=NULL)
 				$progress_count ++;
 				if($cron_run)
 				{
-					$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s", strtotime('now')) . '",update_items_progress="' . $progress_count . '" WHERE update_id="' . $update_id . '"';
+					$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s", strtotime('now')) . '",update_items_progress="' . $progress_count . '", status="2" WHERE update_id="' . $update_id . '"';
+					if(!$res = mysql_query($query))
+					{
+						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+						global $logger;
+						$logger->error($log);
+						echo $log;
+						return false;
+					}
+				}
+				elseif($display_status=='YES')
+				{
+					$query = 'UPDATE update_status_fullhistory SET status="2", updated_time="' . date("Y-m-d H:i:s", strtotime('now')) . '",update_items_progress="' . $progress_count . '" WHERE update_id="' . $update_id . '"';
 					if(!$res = mysql_query($query))
 					{
 						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -161,78 +234,34 @@ function calc_cells($parameters,$update_id=NULL)
 					}
 				}
 				
-				
 				$counter++;
 				continue;
 			}
 
 	//		pr($data);
-			$query='SELECT a.trial,d.is_active,d.institution_type 
-					from area_trials a 
-					JOIN product_trials p ON a.`trial`=p.`trial`
-					JOIN data_trials d ON p.`trial`=d.`larvol_id`
-					where a.`area`="'.$av['id'].'" and p.`product`="'.$pv['id'].'" ';
-			
-			if(!$res = mysql_query($query))
+			$cnt_active=0;
+			foreach($isactive as $act)
 			{
-				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-				global $logger;
-				$logger->error($log);
-				echo $log;
-				return false;
-			}
-			$data1=array();
-			$data2=array();
-			$temp_total=0;
-			while ($row = mysql_fetch_assoc($res))
-			{	
-				if( $row["trial"] && ($row["is_active"]=="1" or $row["is_active"]==1)  )
+				if($act==1 or $act=="1")
 				{
-					$data1[] = $row["trial"];
+					$cnt_active++;
 				}
-				if( $row["trial"] && ( $row["is_active"]=="1" or $row["is_active"]==1 ) && $row["institution_type"]=='industry_lead_sponsor'  )
+			}
+			$cnt_active_indlead=0;
+			foreach($instype as $key=>$act)
+			{
+				if( ($isactive[$key]==1 or $isactive[$key]=="1") and $act=='industry_lead_sponsor' )
 				{
-					$data2[] = $row["trial"];
+					$cnt_active_indlead++;
 				}
-				
-				$temp_total++;
-			} 
-			$cnt_total=$temp_total;
-
-			if($data1[0])
-			{
-			
-				$cnt_active=count($data1);			
 			}
+			
+			if(!empty($phasez))
+				$max_phase = max($phasez);
 			else
-				$cnt_active=0;	
-			if($data2[0])
-			{
+				$max_phase = 'N/A';
 			
-				$cnt_active_indlead=count($data2);			
-			}
-			else
-				$cnt_active_indlead=0;	
-				
-			$ids = implode(",", $data);
-			
-			$query='SELECT max(`phase`) as max_phase from data_trials 
-					where `phase`<>"N/A" and `larvol_id` IN (' . $ids . ')' ;
-			//pr($query);
-			if(!$res = mysql_query($query))
-			{
-				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-				global $logger;
-				$logger->error($log);
-				echo $log;
-				return false;
-			}
-			
-			$row = mysql_fetch_assoc($res);
-			
-			$max_phase = $row["max_phase"];
-			
-			$bomb=getBombdtl($data);
+			$bomb=getBombdtl();
 			if($counter>=5000)
 			{
 				$counter=0;
@@ -244,7 +273,7 @@ function calc_cells($parameters,$update_id=NULL)
 			$progress_count ++;
 			if($cron_run)
 			{
-				$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s", strtotime('now')) . '",update_items_progress="' . $progress_count . '" WHERE update_id="' . $update_id . '"';
+				$query = 'UPDATE update_status SET status="2", updated_time="' . date("Y-m-d H:i:s", strtotime('now')) . '",update_items_progress="' . $progress_count . '" WHERE update_id="' . $update_id . '"';
 				if(!$res = mysql_query($query))
 				{
 					$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -254,13 +283,24 @@ function calc_cells($parameters,$update_id=NULL)
 					return false;
 				}
 			}
-			
+			elseif($display_status=='YES')
+			{
+				$query = 'UPDATE update_status_fullhistory SET status="2", updated_time="' . date("Y-m-d H:i:s", strtotime('now')) . '",update_items_progress="' . $progress_count . '" WHERE update_id="' . $update_id . '"';
+				if(!$res = mysql_query($query))
+				{
+					$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+					global $logger;
+					$logger->error($log);
+					echo $log;
+					return false;
+				}
+			}
 		}
 
 	}
 	if($cron_run)
 	{
-		$query = 'UPDATE update_status SET end_time="' . date("Y-m-d H:i:s", strtotime('now')) . '" WHERE update_id="' . $update_id . '"';
+		$query = 'UPDATE update_status SET status="0", end_time="' . date("Y-m-d H:i:s", strtotime('now')) . '" WHERE update_id="' . $update_id . '"';
 		if(!$res = mysql_query($query))
 		{
 			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -270,7 +310,18 @@ function calc_cells($parameters,$update_id=NULL)
 			return false;
 		}
 	}
-	
+	elseif($display_status=='YES')
+	{
+		$query = 'UPDATE update_status_fullhistory SET status="0",end_time="' . date("Y-m-d H:i:s", strtotime('now')) . '" WHERE update_id="' . $update_id . '"';
+		if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			global $logger;
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
+}
 	echo '<br>All Done.';
 	return true;
 }			
@@ -278,7 +329,7 @@ function calc_cells($parameters,$update_id=NULL)
 function add_data($arid,$prid,$cnt_total,$cnt_active,$cnt_active_indlead,$bomb,$max_phase)
 {
 /*********/
-
+global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_total;
 	$query='SELECT `area`,`product`
 			from rpt_masterhm_cells
 			where `area`="'.$arid.'" and `product`="'.$prid.'" limit 1';
@@ -299,7 +350,7 @@ function add_data($arid,$prid,$cnt_total,$cnt_active,$cnt_active_indlead,$bomb,$
 	{
 		//get existing counts before updating
 		$query='select 
-				`count_active`,count_active_indlead,
+				`count_active`,count_active_indlead,highest_phase,
 				`count_total` from rpt_masterhm_cells  where
 				`area`="'.$arid.'" and `product`="'.$prid.'" 
 				';
@@ -317,15 +368,17 @@ function add_data($arid,$prid,$cnt_total,$cnt_active,$cnt_active_indlead,$bomb,$
 		$count_active_old = $row["count_active"];
 		$cnt_indlead_old = $row["count_active_indlead"];
 		$count_total_old = $row["count_total"];
+		$highest_phase_old = $row["highest_phase"];
 		
 		//if there is a difference in counts, then update the _prev fields
-		$aa='';$bb='';$cc='';
+		$aa='';$bb='';$cc='';$dd='';
 		if($count_active_old<>$cnt_active) $aa='`count_active_prev` = "'. $count_active_old .'",';
-		
 		if($count_total_old<>$cnt_total) $bb='`count_total_prev` = "'. $count_total_old .'",';
-			
 		if($cnt_indlead_old<>$cnt_active_indlead) $cc='`count_active_indlead_prev` = "'. $cnt_indlead_old .'",';
-		if( empty($aa) && empty($bb) && empty($cc) )
+		if($highest_phase_old<>$max_phase) $dd='`highest_phase_prev` = "'. $highest_phase_old .'",';
+		
+		
+		if( empty($aa) && empty($bb) && empty($cc) && empty($dd))
 		{
 		$query='UPDATE rpt_masterhm_cells 
 				SET 
@@ -334,7 +387,7 @@ function add_data($arid,$prid,$cnt_total,$cnt_active,$cnt_active_indlead,$bomb,$
 				`bomb_auto` = "'. $bomb .'",
 				`highest_phase` = "'. $max_phase .'",
 				`count_total` = "'. $cnt_total .'",
-				`last_update` = "'. $curtime .'" where
+				`last_calc` = "'. $curtime .'" where
 				`area`="'.$arid.'" and `product`="'.$prid.'" 
 				';
 		}
@@ -348,8 +401,10 @@ function add_data($arid,$prid,$cnt_total,$cnt_active,$cnt_active_indlead,$bomb,$
 				`bomb_auto` = "'. $bomb .'",
 				`highest_phase` = "'. $max_phase .'",
 				`count_total` = "'. $cnt_total .'",'
-				. $aa . $bb . $cc .
+				. $aa . $bb . $cc . $dd .
 				'`count_lastchanged` = "'. $curtime .'",
+				`highest_phase_lastchanged` = "'. $curtime .'",
+				`last_calc` = "'. $curtime .'",
 				`last_update` = "'. $curtime .'" where
 				`area`="'.$arid.'" and `product`="'.$prid.'" 
 				';
@@ -399,68 +454,44 @@ function add_data($arid,$prid,$cnt_total,$cnt_active,$cnt_active_indlead,$bomb,$
 }
 
 
-function getBombdtl($ids)
+function getBombdtl()
 {
+	global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_total;
 	global $logger;
 		
-	if (count($ids) == 0)
+	if (count($data) == 0)
 		return "";
 	
 	$bombStatuses = '"Active, not recruiting","Not yet recruiting","Recruiting","Enrolling by invitation"';
-	$ids = implode(",", $ids);
-	
-//	pr($ids);
 	$past = "'".date("Y-m-d H:i:s", time() - (int)(540*24*3600))."'";
 	
-	$get_bomb_query1 = "
-			SELECT larvol_id FROM data_trials where 
-			larvol_id IN (".$ids.") and
-			lastchanged_date < ".$past ;
+	$tmpphase=array();
+	foreach($ldate as $key=>$ld)
+	{
+		if($ld < $past)
+			continue;
+		else
+			$tmpphase[]=$data[$key];
+	}
+	$phase = max($tmpphase);
+	$bomb="large";
+	foreach($ostatus as $key=>$ld)
+	{
+		if	(
+				( 
+					($ld =="Active, not recruiting")or($ld =="Not yet recruiting")or( $ld =="Recruiting")or ($ld == "Enrolling by invitation") 
+				)
+				and $phases[$key] == $phase
+				and $ldate[$key] < $past 
+			)
+			$bomb="small";
+		else
+			continue;
+	}
 	
-
-	if(!$rs = mysql_query($get_bomb_query1))
-		{
-			$log='There seems to be a problem with the SQL Query:'.$get_bomb_query1.' Error:' . mysql_error();
-			$logger->error($log);
-			echo $log;
-			return false;
-		}		
-		
-	$trials = array();
-	while ($row = mysql_fetch_assoc($rs))
-		$trials[] = $row["larvol_id"];
-	if (count($trials) == 0)
-		return "";
-	$trials = implode(",", $trials);
-	$get_bomb_query2 = "SELECT MAX(phase) AS phase FROM data_trials where
-			larvol_id IN (".$ids.") AND larvol_id NOT IN (".$trials.")";
-	if(!$rs = mysql_query($get_bomb_query2))
-		{
-			$log='There seems to be a problem with the SQL Query:'.$get_bomb_query2.' Error:' . mysql_error();
-			$logger->error($log);
-			echo $log;
-			return false;
-		}
-		
-	$row = mysql_fetch_assoc($rs);
-	$phase = $row["phase"];
-	$get_bomb_query3 = "SELECT larvol_id FROM data_trials where
-			`phase` = '".$phase."' AND larvol_id IN (".$ids.") AND
-			larvol_id NOT IN (".$trials.") AND
-			overall_status IN (".$bombStatuses.")";
-
-	if(!$rs = mysql_query($get_bomb_query3))
-		{
-			$log='There seems to be a problem with the SQL Query:'.$get_bomb_query3.' Error:' . mysql_error();
-			$logger->error($log);
-			echo $log;
-			return false;
-		}
-		
-
-	if (mysql_fetch_assoc($rs))
-		return "small";
-	return "large";
+	
+	return $bomb;
+	
 }
 
 
