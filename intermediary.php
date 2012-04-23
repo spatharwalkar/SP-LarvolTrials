@@ -502,17 +502,6 @@ else
 			}
 		});
 		
-		//$("#startrange").val(timeEnum($("#slider-range-min").slider("values", 0)));
-		//$("#endrange").val(timeEnum($("#slider-range-min").slider("values", 1)));
-		
-		if($('.arrow').width() > 150)
-		{ 
-			var width = $('.arrow').width();
-			width = width + 15;
-			width = parseInt(width);
-			$('#nav ul').width(width+'px');
-			$('#nav ul li').width(width+'px');
-		}
 	});
 
 	function timeEnum($timerange)

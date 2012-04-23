@@ -336,70 +336,106 @@ tr.upms td {
 	width:100px;
 }
 
-#nav {
-	list-style:none;
-	/*padding: 2px 10px 2px 0px;*/
-	float:left;
-	width:auto;
-	margin:0px
+/* We remove the margin, padding, and list style of UL and LI components */
+#menuwrapper ul, #menuwrapper ul li{
+    margin:0;
+    padding:0;
+    list-style:none;
+	width:400px;
+	float: left;
+	text-align: center;
 }
 
-#nav li {
-	float:left;
-	position:relative;
-	width:auto;
-	text-align:center;
+#menuwrapper ul .arrow{
+	background: url(../images/dropdown.png) no-repeat right center; 
 	background-color:#D5D3E6;
 }
 
-#nav a {
-	display:block;
-	padding: 2px 12px 2px 0px;
-	background-color:#D5D3E6;
-}
-#nav a:hover{
-	color:#000;
-	background-color:#D5D3E6;
+/* We float the li list to the left and apply background color and border right white */
+#menuwrapper ul li{
+    float:left;
+    background-color:#D5D3E6;
+    border-bottom:solid 1px white;
 }
 
-#nav li .arrow {
-	background: url(../images/dropdown.png) no-repeat right center ; 
-	margin: 2px;
+/* We apply the background hover color when user hover the mouse over of the li component */
+#menuwrapper ul li:hover{
+    background-color:#EDEAFF;
+    position:relative;
 }
-/*--- DROPDOWN ---*/
-#nav ul {
-	background:#D5D3E6; /* Adding a background makes the dropdown work properly in IE7+. Make this as close to your page's background as possible (i.e. white page == white background). */
-	background:rgba(255,255,255,0); /* But! Let's make the background fully transparent where we can, we don't actually want to see it if we can help it... */
-	list-style:none;
-	position:absolute;
-	left:-9999px; /* Hide off-screen when not needed (this is more accessible than display:none;) */
-	width:150px;
+
+/* We apply the link style */
+#menuwrapper ul li a{
+    padding:4px 8px;
+    color:#000000;
+    display:inline-block;
+    text-decoration:none;
+}
+
+/**** SECOND LEVEL MENU ****/
+/* We make the position to absolute for flyout menu and hidden the ul until the user hover the parent li item */
+#menuwrapper ul li ul{
+    position:absolute;
+    display:none;
 	max-height: 300px;
-	overflow-y: auto;
+	overflow-y: scroll;
 	overflow-x: hidden;
 }
-#nav ul li{
-	border-top: 1px solid #FFFFFF;
-	float:left;
-	text-align:left;
-	width:150px;
+
+/* When user has hovered the li item, we show the ul list by applying display:block, note: 25px is the menu height.  */
+#menuwrapper ul li:hover ul{
+    left:0;
+    top:25px;
+    display:block;
 }
 
-#nav ul a{
-	margin-left: 5px;
+/* As the parent li has float:left property, we overwrite for the submenu (level 2) to float none (normal position)  */
+#menuwrapper ul li ul li{
+    float:none;
+    width:400px;
+    background-color:#D5D3E6;
+	text-align: left;
 }
-#nav li:hover ul{ /* Display the dropdown on hover */
-	left:-40px;; /* Bring back on-screen when needed */
+
+/* We change the background color for the level 2 submenu when hovering the menu */
+#menuwrapper ul li:hover ul li:hover{
+    background-color:#EDEAFF;
 }
-#nav li:hover a{ /* These create persistent hover states, meaning the top-most link stays 'hovered' even when your cursor has moved down the list. */
-	background-color:#D5D3E6;
-	text-decoration:none;
+
+/* We style the color of level 2 links */
+#menuwrapper ul li ul li a{
+    color:#000000;
+    display:inline-block;
+    width:400px;
 }
-#nav li:hover ul a{ /* The persistent hover state does however create a global style for links even before they're hovered. Here we undo these effects. */
-	text-decoration:none;
+
+/**** THIRD LEVEL MENU ****/
+/* We need to hide the 3rd menu, when hovering the first level menu */
+#menuwrapper ul li:hover ul li ul{
+    position:absolute;
+    display:none;
 }
-#nav li:hover ul li a:hover{ /* Here we define the most explicit hover states--what happens when you hover each individual link. */
-	background-color:#D5D3E6;
+
+/* We show the third level menu only when they hover the second level menu parent */
+#menuwrapper ul li:hover ul li:hover ul{
+    display:block;
+    left:150px;
+    top:0;
+}
+
+/* We change the background color for the level 3 submenu*/
+#menuwrapper ul li:hover ul li:hover ul li{
+    background:#D5D3E6;
+}
+
+/* We change the background color for the level 3 submenu when hovering the menu */
+#menuwrapper ul li:hover ul li:hover ul li:hover{
+    background:#D5D3E6;
+}
+
+/* We change the level 3 link color */
+#menuwrapper ul li:hover ul li:hover ul li a{
+    color:#000000;
 }
 
 .gray {

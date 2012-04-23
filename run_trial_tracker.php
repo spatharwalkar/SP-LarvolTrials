@@ -9339,7 +9339,9 @@ class TrialTracker
 		global $db;
 		$loggedIn	= $db->loggedIn();
 		
-		$TrialsInfoList = $TrialsInfo;
+		$TrialsInfoList = array_map(function($a) { 
+		  return $a['sectionHeader']; 
+		},  $TrialsInfo);
 		
 		if(isset($globalOptions['product']) && $globalOptions['product'] != '')
 		{	
@@ -9402,29 +9404,31 @@ class TrialTracker
 		
 		echo '<div style="float: left;margin-right: 25px;"><span id="addtoright"></span></div>';
 		
+		natcasesort($TrialsInfoList);
+		
 		if(!empty($TrialsInfoList)
 		&& ($ottType != 'unstacked' && $ottType != 'indexed' && $ottType != 'standalone' && $ottType != 'unstackedoldlink'))
 		{
 			$paginate['url'] = preg_replace("/\&amp;page=[0-9].*?(\&amp;|$)/", '',   $paginate['url']);
 			$allproductsurl = preg_replace("/\&amp;pr=[0-9].*?(\&amp;|$)/", '',   $paginate['url']);
 			
-			echo '<ul id="nav">';
+			echo '<div id="menuwrapper"><ul>';
 			if(isset($globalOptions['product']) && $globalOptions['product'] != '')
 			{	
-				unset($TrialsInfoList[$globalOptions['product']]);
-				echo '<li><a href="javascript: void(0);" class="arrow">' . $TrialsInfo[$globalOptions['product']] ['sectionHeader'] . '</a>'
+				echo '<li class="arrow"><a href="javascript: void(0);">' . $TrialsInfoList[$globalOptions['product']] . '</a>'
 						. '<ul><li><a href="' . $allproductsurl . '">All Products</a></li>';
+				unset($TrialsInfoList[$globalOptions['product']]);
 			}
 			else
 			{
-				echo '<li><a href="' . $allproductsurl . '" class="arrow">All Products</a><ul>';
+				echo '<li class="arrow"><a href="' . $allproductsurl . '">All Products</a><ul>';
 			}
 			
 			foreach($TrialsInfoList as $infkey => $infvalue)
 			{
-				echo '<li><a href="' . $paginate['url'] . '&amp;pr=' . $infkey .  '">' . $infvalue['sectionHeader'] . '</a></li>';
+				echo '<li><a href="' . $paginate['url'] . '&amp;pr=' . $infkey .  '">' . $infvalue . '</a></li>';
 			}
-			echo '</ul></ul>';
+			echo '</ul></ul></div>';
 		}
 		
 		echo '<br/><br/>';
@@ -10592,6 +10596,7 @@ class TrialTracker
 							$idColor = '#973535';
 						}
 						else
+
 						{
 							$idColor = 'gray';
 						}
@@ -10916,6 +10921,7 @@ class TrialTracker
 				$outputStr .= '<td style="width:6px;" colspan="3">&nbsp;</td>';
 				$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td>' . (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '">' . '&nbsp;</td>' : '');
 				if($val != 0) 
+
 				{ 
 					$outputStr .= '<td style="width:'.($val*2).'px; background-color:' . $bgColor . ';" colspan="' . $val . '">&nbsp;</td>'
 								. (((12 - ($val+$st)) != 0) ? '<td style="width:'.((12-($val+$st))*2).'px;" colspan="' .(12 - ($val+$st)) . '">&nbsp;</td>' : '');
@@ -11164,7 +11170,6 @@ class TrialTracker
 				}
 				else 
 				{
-
 					$outputStr .= '<td style="width:'.((27+$endMonth)*2).'px; ' . $bgColor . '" colspan="' . (27+$end_month) . '" ' . $class . '>' 
 								. '<div ' . $upm_title . '>' . $anchorTag . '</div></td>'
 								. '<td style="width:'.((12-$endMonth)*2).'px;" colspan="' . (12-$endMonth) . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
