@@ -223,12 +223,12 @@ class TrialTracker
 				{
 					foreach($resultIds['area'] as $akey => $avalue)
 					{
-						$res = mysql_query("SELECT IFNULL(`display_name`, `name`) AS name, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
+						$res = mysql_query("SELECT `display_name`, `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
 						if(mysql_num_rows($res) > 0)
 						{
 							while($row = mysql_fetch_assoc($res))
 							{
-								$TrialsInfo[$akey]['sectionHeader'] = $row['name'];
+								$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : $row['name'];
 								
 								$Ids[$akey]['product'] = '';
 								$Ids[$akey]['area'] = $row['id'];
@@ -247,10 +247,10 @@ class TrialTracker
 					$this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
 					foreach($resultIds['area'] as $akey => $avalue)
 					{
-						$res = mysql_query("SELECT IFNULL(`display_name`, `name`) AS name, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
+						$res = mysql_query("SELECT `display_name`, `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
 						$row = mysql_fetch_assoc($res);
 						
-						$TrialsInfo[$akey]['sectionHeader'] = $row['name'];
+						$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : $row['name'];
 						$Ids[$akey]['area'] = $row['id'];
 						$Ids[$akey]['product'] = $prow['id'];
 					}
@@ -981,6 +981,7 @@ class TrialTracker
 				$objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($highlightChange);
 				if($eventLink != '' && $eventLink !== NULL)
 				{
+
 					$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($eventLink);
 					if($uvalue['edited']['end_date'] != '' && $uvalue['edited']['end_date'] !== NULL)
 					{
@@ -4359,12 +4360,12 @@ class TrialTracker
 				{
 					foreach($resultIds['area'] as $akey => $avalue)
 					{
-						$res = mysql_query("SELECT IFNULL(`display_name`, `name`) AS name, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
+						$res = mysql_query("SELECT `display_name`, `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
 						if(mysql_num_rows($res) > 0)
 						{
 							while($row = mysql_fetch_assoc($res))
 							{
-								$TrialsInfo[$akey]['sectionHeader'] = $row['name'];
+								$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : $row['name'];
 								
 								$Ids[$akey]['product'] = '';
 								$Ids[$akey]['area'] = $row['id'];
@@ -4383,10 +4384,10 @@ class TrialTracker
 					
 					foreach($resultIds['area'] as $akey => $avalue)
 					{
-						$res = mysql_query("SELECT IFNULL(`display_name`, `name`) AS name, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
+						$res = mysql_query("SELECT `display_name`, `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
 						$row = mysql_fetch_assoc($res);
 						
-						$TrialsInfo[$akey]['sectionHeader'] = $row['name'];
+						$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : $row['name'];
 						$Ids[$akey]['area'] = $row['id'];
 
 						$Ids[$akey]['product'] = $prow['id'];
@@ -5322,7 +5323,7 @@ class TrialTracker
 				{
 					foreach($resultIds['area'] as $akey => $avalue)
 					{
-						$res = mysql_query("SELECT IFNULL(`display_name`, `name`) AS name, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
+						$res = mysql_query("SELECT `display_name`, `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
 						if(mysql_num_rows($res) > 0)
 						{
 							while($row = mysql_fetch_assoc($res))
@@ -5597,12 +5598,12 @@ class TrialTracker
 					
 					foreach($resultIds['area'] as $akey => $avalue)
 					{
-						$res = mysql_query("SELECT IFNULL(`display_name`, `name`) AS name, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
+						$res = mysql_query("SELECT `display_name`, `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
 						if(mysql_num_rows($res) > 0)
 						{
 							while($row = mysql_fetch_assoc($res))
 							{
-								$TrialsInfo[$akey]['sectionHeader'] = $row['name'];
+								$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : $row['name'];
 								
 								$Ids[$akey]['product'] = '';
 								$Ids[$akey]['area'] = $row['id'];
@@ -5634,12 +5635,12 @@ class TrialTracker
 					
 					foreach($resultIds['area'] as $akey => $avalue)
 					{
-						$res = mysql_query("SELECT IFNULL(`display_name`, `name`) AS name, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
+						$res = mysql_query("SELECT `display_name`, `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
 						if(mysql_num_rows($res) > 0)
 						{
 							while($row = mysql_fetch_assoc($res))
 							{
-								$TrialsInfo[$akey]['sectionHeader'] = $row['name'];
+								$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : $row['name'];
 								
 								$Ids[$akey]['product'] = $productId;
 								$Ids[$akey]['area'] = $row['id'];
@@ -5653,9 +5654,9 @@ class TrialTracker
 				}
 				else
 				{
-					$res = mysql_query("SELECT IFNULL(`display_name`, `name`) AS name, `id` FROM `areas` WHERE id IN ('" . implode("','", $resultIds['area']) . "') ");
+					$res = mysql_query("SELECT `display_name`, `name`, `id` FROM `areas` WHERE id IN ('" . implode("','", $resultIds['area']) . "') ");
 					$row = mysql_fetch_assoc($res);
-					$areaName = $row['name'];
+					$areaName = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : $row['name'];
 					$areaId = $row['id'];
 					
 					$ottType = 'colstackedindexed';
@@ -5685,10 +5686,10 @@ class TrialTracker
 			}
 			else 
 			{	
-				$res = mysql_query("SELECT IFNULL(`display_name`, `name`) AS name, `id` FROM `areas` WHERE id IN ('" . implode(',', $resultIds['area']) . "') ");
+				$res = mysql_query("SELECT `display_name`, `name`, `id` FROM `areas` WHERE id IN ('" . implode(',', $resultIds['area']) . "') ");
 				$row = mysql_fetch_assoc($res);
 				$Ids[0]['area'] = $row['id'];
-				
+				$row['name'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : $row['name'];
 				$t = 'Area: ' . htmlformat($row['name']);
 				$this->displayHeader($t);
 				
@@ -11051,6 +11052,7 @@ class TrialTracker
 							. '<td colspan="3" style="width:6px; ' . $bgColor . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>';
 			}
 		} 
+
 		else if($endDate == '' || $endDate === NULL || $endDate == '0000-00-00') 
 		{
 			$st = $startMonth-1;
@@ -11162,6 +11164,7 @@ class TrialTracker
 				}
 				else 
 				{
+
 					$outputStr .= '<td style="width:'.((27+$endMonth)*2).'px; ' . $bgColor . '" colspan="' . (27+$end_month) . '" ' . $class . '>' 
 								. '<div ' . $upm_title . '>' . $anchorTag . '</div></td>'
 								. '<td style="width:'.((12-$endMonth)*2).'px;" colspan="' . (12-$endMonth) . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>'
