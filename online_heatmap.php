@@ -228,124 +228,14 @@ foreach($rows as $row => $rval)
 			$data_matrix[$row][$col]['div_start_style'] = $data_matrix[$row][$col]['color'];
 			$data_matrix[$row][$col]['cell_start_title'] = 'Active Trials';
 			
-			/////Calculate Record Update Class
-			 $latest_date='';
-			 $qualify_title='';
-			 
-			if(date('m/d/Y H:i:s',strtotime($data_matrix[$row][$col]['last_update'])) <= date('m/d/Y H:i:s', $now) && date('m/d/Y H:i:s',strtotime($data_matrix[$row][$col]['last_update'])) >= date('m/d/Y H:i:s', strtotime('-1 month', $now)))
-			{
-				if($data_matrix[$row][$col]['color_code']=='FF0000')
-				$data_matrix[$row][$col]['cell_start_style'] = 'background-color:#FFFFFF; border:#FF0000 solid;';
-				else
-				$data_matrix[$row][$col]['cell_start_style'] = $data_matrix[$row][$col]['color'].' border:#FF0000 solid;';
-				$data_matrix[$row][$col]['cell_start_title'] = 'Record Updated On: '.date('F d, Y', strtotime($data_matrix[$row][$col]['last_update']));
-				
-				if($latest_date < date('m/d/Y H:i:s',strtotime($data_matrix[$row][$col]['count_lastchanged'])) || $latest_date != '')
-				{
-					$qualify_title=$data_matrix[$row][$col]['cell_start_title'];
-					$latest_date = date('m/d/Y H:i:s',strtotime($data_matrix[$row][$col]['last_update']));
-				}
-			}
-			else
-			{
-				$data_matrix[$row][$col]['cell_start_style'] = $data_matrix[$row][$col]['color'].' border:#'.$data_matrix[$row][$col]['color_code'].' solid;';
-			} 
-			
-			/////Calculate Count Update Class
 			$data_matrix[$row][$col]['count_lastchanged']=$cell_data['count_lastchanged'];
-			
-			if(date('m/d/Y H:i:s',strtotime($data_matrix[$row][$col]['count_lastchanged'])) <= date('m/d/Y H:i:s', $now) && date('m/d/Y H:i:s',strtotime($data_matrix[$row][$col]['count_lastchanged'])) >= date('m/d/Y H:i:s', strtotime('-1 month', $now)))
-			{
-				$data_matrix[$row][$col]['count_start_title'] = 'Active Count Changed from: '. $cell_data['count_active_prev'] .' On:'. date('F d, Y', strtotime($data_matrix[$row][$col]['count_lastchanged']));
-				$data_matrix[$row][$col]['count_start_style'] = 'color:#FF0000; font-weight:bold;';
-				if($data_matrix[$row][$col]['color_code']=='FF0000')
-				$data_matrix[$row][$col]['count_start_style'] = 'color:#FF0000;  background-color:#FFFFFF; font-weight:bold;';
-				if($latest_date < date('m/d/Y H:i:s',strtotime($data_matrix[$row][$col]['count_lastchanged'])) || $latest_date != '')
-				{
-					$qualify_title=$data_matrix[$row][$col]['count_start_title'];
-					$latest_date = date('m/d/Y H:i:s',strtotime($data_matrix[$row][$col]['count_lastchanged']));
-				}
-			} 
-			
-			
 			$data_matrix[$row][$col]['bomb']['style'] = $data_matrix[$row][$col]['bomb']['style'].' vertical-align:middle; cursor:pointer;';
-				
-			/////Calculate Bomb Update Class
 			$data_matrix[$row][$col]['bomb_lastchanged']=$cell_data['bomb_lastchanged'];
-			
-			if(date('m/d/Y H:i:s',strtotime($data_matrix[$row][$col]['bomb_lastchanged'])) <= date('m/d/Y H:i:s', $now) && date('m/d/Y H:i:s',strtotime($data_matrix[$row][$col]['bomb_lastchanged'])) >= date('m/d/Y H:i:s', strtotime('-1 month', $now)))
-			{
-				$data_matrix[$row][$col]['bomb']['title'] = 'Bomb Updated On: '.date('F d, Y', strtotime($data_matrix[$row][$col]['bomb_lastchanged']));
-				//$data_matrix[$row][$col]['bomb']['style'] = $data_matrix[$row][$col]['bomb']['style'].' border:#FF0000 solid;';
-				
-				if($cell_data['bomb'] == 'small')
-				$data_matrix[$row][$col]['bomb']['src']='newred_sbomb.png';
-				if($cell_data['bomb'] == 'large')
-				$data_matrix[$row][$col]['bomb']['src']='newred_lbomb.png';
-				
-				if($latest_date < date('m/d/Y H:i:s',strtotime($data_matrix[$row][$col]['bomb_lastchanged'])) || $latest_date != '')
-				{
-					$qualify_title=$data_matrix[$row][$col]['bomb']['title'];
-					$latest_date = date('m/d/Y H:i:s',strtotime($data_matrix[$row][$col]['bomb_lastchanged']));
-				}
-			} 
-			
-			/////Calculate Filling Update Class
 			$data_matrix[$row][$col]['filing_lastchanged']=$cell_data['filing_lastchanged'];
-			
-			$data_matrix[$row][$col]['filing_src']='images/new_file.png';
-			
-			$data_matrix[$row][$col]['filing_start_title'] = 'Filing Details';
-			$data_matrix[$row][$col]['filing_start_style'] = 'width:20px; height:20px; vertical-align:top; cursor:pointer;';
-			 
-			if(date('m/d/Y H:i:s',strtotime($data_matrix[$row][$col]['filing_lastchanged'])) <= date('m/d/Y H:i:s', $now) && date('m/d/Y H:i:s',strtotime($data_matrix[$row][$col]['filing_lastchanged'])) >= date('m/d/Y H:i:s', strtotime('-1 month', $now)))
-			{
-				$data_matrix[$row][$col]['filing_src']='images/newred_file.png';
-				$data_matrix[$row][$col]['filing_start_title'] = 'Filing Details Updated On: '.date('F d, Y', strtotime($data_matrix[$row][$col]['filing_lastchanged']));
-				$data_matrix[$row][$col]['filing_start_style'] = 'width:15px; height:15px; vertical-align:middle; cursor:pointer;';
-				
-				if($latest_date < date('m/d/Y H:i:s',strtotime($data_matrix[$row][$col]['filing_lastchanged'])) || $latest_date != '')
-				{
-					$qualify_title=$data_matrix[$row][$col]['filing_start_title'];
-					$latest_date = date('m/d/Y H:i:s',strtotime($data_matrix[$row][$col]['filing_lastchanged']));
-				}
-			} 
-			
-			
-			/////Calculate Phase Explain Update Class
 			$data_matrix[$row][$col]['phase_explain_lastchanged']=$cell_data['phase_explain_lastchanged'];
 			
-			$data_matrix[$row][$col]['phaseexp_src']='images/phaseexp.png';
 			
-			$data_matrix[$row][$col]['phaseexp_start_title'] = 'Phase Explain';
-			$data_matrix[$row][$col]['phaseexp_start_style'] = 'width:20px; height:20px; vertical-align:top; cursor:pointer;';
-			 
-			if(date('m/d/Y H:i:s',strtotime($data_matrix[$row][$col]['phase_explain_lastchanged'])) <= date('m/d/Y H:i:s', $now) && date('m/d/Y H:i:s',strtotime($data_matrix[$row][$col]['phase_explain_lastchanged'])) >= date('m/d/Y H:i:s', strtotime('-1 month', $now)))
-			{
-				$data_matrix[$row][$col]['phaseexp_src']='images/phaseexp_red.png';
-				$data_matrix[$row][$col]['phaseexp_start_title'] = 'Filing Details Updated On: '.date('F d, Y', strtotime($data_matrix[$row][$col]['filing_lastchanged']));
-				$data_matrix[$row][$col]['phaseexp_start_style'] = 'width:15px; height:15px; vertical-align:middle; cursor:pointer;';
-				
-				if($latest_date < date('m/d/Y H:i:s',strtotime($data_matrix[$row][$col]['phase_explain_lastchanged'])) || $latest_date != '')
-				{
-					$qualify_title=$data_matrix[$row][$col]['phaseexp_start_title'];
-					$latest_date = date('m/d/Y H:i:s',strtotime($data_matrix[$row][$col]['phase_explain_lastchanged']));
-				}
-			}
 			
-			 if($qualify_title != '')
-			 {
-			 	if($data_matrix[$row][$col]['color_code']=='FF0000')
-				$data_matrix[$row][$col]['cell_start_style'] = 'background-color:#FFFFFF; border:#FF0000 solid;';
-				else
-				$data_matrix[$row][$col]['cell_start_style'] = $data_matrix[$row][$col]['color'].' border:#FF0000 solid;';
-				
-				$data_matrix[$row][$col]['cell_start_title'] = $qualify_title;
-			 	$data_matrix[$row][$col]['count_start_title'] = $qualify_title;
-			 	$data_matrix[$row][$col]['bomb']['title'] = $qualify_title;
-			 	$data_matrix[$row][$col]['filing_start_title'] = $qualify_title;
-			 	$data_matrix[$row][$col]['phaseexp_start_title'] = $qualify_title;
-			}
 		}
 		else
 		{
@@ -378,9 +268,11 @@ foreach($rows as $row => $rval)
 <script type="text/javascript" src="scripts/popup-window.js"></script>
 <script src="scripts/jquery-1.7.1.min.js"></script>
 <script src="scripts/jquery-ui-1.8.17.custom.min.js"></script>
+<?php if($db->loggedIn()) { //No Date-Picker for NON-LoggedIN Users  ?>	
 <script type="text/javascript" src="date/jquery.date_input.js"></script>
 <script type="text/javascript" src="scripts/date/jquery.jdpicker.js"></script>
 <script type="text/javascript" src="date/init.js"></script>
+<?php } ?>
 <link href="date/date_input.css" rel="stylesheet" type="text/css" media="all" />
 <link href="scripts/date/jdpicker.css" rel="stylesheet" type="text/css" media="screen" />
 <link href="css/popup_form.css" rel="stylesheet" type="text/css" media="all" />
@@ -388,8 +280,7 @@ foreach($rows as $row => $rval)
 <style type="text/css">
 body { font-family:Verdana; font-size: 13px;}
 a, a:hover{color:#000000;text-decoration:none; height:100%;}
-.display td, .display th {font-weight:normal; background-color:#DDF; vertical-align:top; /*border-right: 1px solid blue; border-left:1px solid blue; border-top: 1px solid blue; border-bottom:1px solid blue;*/}
-tr {/*border-right: 1px solid blue; border-left: 1px solid blue; border-top: 1px solid blue; border-bottom: 1px solid blue;*/}
+.display td, .display th {font-weight:normal; background-color:#DDF; vertical-align:top;}
 .active{font-weight:bold;}
 .total{visibility:hidden;}
 .comma_sep{visibility:hidden;}
@@ -437,6 +328,21 @@ width:100px;
 .controls input{
 	margin:0.1em;
 }
+</style>
+<style type="text/css">
+.tooltip {
+	border-bottom: 1px dotted #000000; color: #000000; outline: none;
+	cursor:pointer; text-decoration: none;
+}
+.tooltip span {
+	border-radius: 5px 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px; 
+	box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.1); -webkit-box-shadow: 5px 5px rgba(0, 0, 0, 0.1); -moz-box-shadow: 5px 5px rgba(0, 0, 0, 0.1);
+	font-family:Verdana; font-size: 12px;
+	position: absolute; 
+	margin-left: 0; width: 280px; display: none; z-index: 0;
+}
+.classic { padding: 0.8em 1em; }
+.classic {background: #FFFFAA; border: 1px solid #FFAD33; }
 </style>
 <script language="javascript" type="text/javascript">
 function change_view()
@@ -505,9 +411,6 @@ function change_view()
 			var cell_link_val=document.getElementById("Link_value_"+i).value;	//Check in cell has link
 			
 			
-			
-			
-			
 			if(cell_link_val != '' && cell_link_val != null)
 			{
 				if(view_type.value == 'active')
@@ -570,7 +473,7 @@ function change_view()
 					//if(Cell_values_Arr[14]=='FF0000')
 					document.getElementById("Cell_ID_"+i).style.backgroundColor = "#FFFFFF";
 					document.getElementById("Div_ID_"+i).title = "Record Updated On: "+ Cell_values_Arr[7];
-					document.getElementById("Last_CDate_"+i).style.display = "block";
+					
 					if(latest_date < record_cdate || latest_date == '')
 					{
 						qualify_title = "Last Update On: "+ Cell_values_Arr[7];
@@ -582,7 +485,6 @@ function change_view()
 					if(Cell_values_Arr[14] != '' && Cell_values_Arr[14] != null && Cell_values_Arr[14] != 'undefined')
 					{
 						document.getElementById("Cell_ID_"+i).style.border = "#"+Cell_values_Arr[14]+" solid";
-						document.getElementById("Last_CDate_"+i).style.display = "none";
 						document.getElementById("Div_ID_"+i).title = "";
 						//if(Cell_values_Arr[14]=='FF0000')
 						document.getElementById("Cell_ID_"+i).style.backgroundColor = "#"+Cell_values_Arr[14];
@@ -635,7 +537,7 @@ function change_view()
 							latest_date = count_cdate;
 						}
 					}
-					document.getElementById("Count_CDate_"+i).style.display = "block";
+					document.getElementById("Count_CDate_"+i).style.display = "inline";
 				}
 				else	//Make Count to normal state if there is no change
 				{
@@ -654,7 +556,7 @@ function change_view()
 					document.getElementById("Cell_Link_"+i).style.color = "#000000";
 					document.getElementById("Cell_Link_"+i).style.backgroundColor = "#"+Cell_values_Arr[14];
 					document.getElementById("Cell_Link_"+i).style.fontWeight = "normal";
-					document.getElementById("Count_CDate_"+i).style.display = "none";
+					document.getElementById("Count_CDate_"+i).style.display = "none"
 				}
 					
 				///Change Bomb Color
@@ -666,13 +568,12 @@ function change_view()
 					if((bomb_cdate <= st_limit) && (bomb_cdate >= ed_limit)) //Compare Bomb Change Dates
 					{
 						document.getElementById("Cell_Bomb_"+i).title = "Bomb Data Updated On: "+ Cell_values_Arr[11];
-						//document.getElementById("Cell_Bomb_"+i).style.border = "#FF0000 solid";
 						
 						if(Cell_values_Arr[15] == 'large')
 						document.getElementById("Cell_Bomb_"+i).src = "images/newred_lbomb.png";
 						else if(Cell_values_Arr[15] == 'small')
 						document.getElementById("Cell_Bomb_"+i).src = "images/newred_sbomb.png";
-						document.getElementById("Bomb_CDate_"+i).style.display = "block";
+						document.getElementById("Bomb_CDate_"+i).style.display = "inline";
 						
 						if(latest_date < bomb_cdate || latest_date == '')
 						{
@@ -682,13 +583,18 @@ function change_view()
 					}
 					else
 					{
-						document.getElementById("Cell_Bomb_"+i).title = "Bomb Details";
-						document.getElementById("Bomb_CDate_"+i).style.display = "none";
+						document.getElementById("Bomb_CDate_"+i).style.display = "none"
 						
 						if(Cell_values_Arr[15] == 'large')
-						document.getElementById("Cell_Bomb_"+i).src = "images/new_lbomb.png";
+						{
+							document.getElementById("Cell_Bomb_"+i).src = "images/new_lbomb.png";
+							document.getElementById("Cell_Bomb_"+i).title = "Large Bomb";
+						}
 						else if(Cell_values_Arr[15] == 'small')
-						document.getElementById("Cell_Bomb_"+i).src = "images/new_sbomb.png";
+						{
+							document.getElementById("Cell_Bomb_"+i).src = "images/new_sbomb.png";
+							document.getElementById("Cell_Bomb_"+i).title = "Small Bomb";
+						}
 					}
 				}
 				
@@ -701,9 +607,8 @@ function change_view()
 					if((filing_cdate <= st_limit) && (filing_cdate >= ed_limit)) //Compare Filing Change Dates
 					{
 						document.getElementById("Cell_Filing_"+i).title = "Filing Data Updated On: "+ Cell_values_Arr[13];
-						//document.getElementById("Cell_Filing_"+i).style.border = "#FF0000 solid";
 						document.getElementById("Cell_Filing_"+i).src = "images/newred_file.png";
-						document.getElementById("Filing_CDate_"+i).style.display = "block";
+						document.getElementById("Filing_CDate_"+i).style.display = "inline";
 						if(latest_date < filing_cdate || latest_date == '')
 						{
 							qualify_title = "Filing Data Updated On: "+ Cell_values_Arr[13];
@@ -713,9 +618,8 @@ function change_view()
 					else
 					{
 						document.getElementById("Cell_Filing_"+i).title = "Filing Details";
-						//document.getElementById("Cell_Filing_"+i).style.border = "#"+Cell_values_Arr[14]+" solid";
 						document.getElementById("Cell_Filing_"+i).src = "images/new_file.png";
-						document.getElementById("Filing_CDate_"+i).style.display = "none";
+						document.getElementById("Filing_CDate_"+i).style.display = "none"
 					}
 				}
 				
@@ -728,9 +632,8 @@ function change_view()
 					if((phaseexp_cdate <= st_limit) && (phaseexp_cdate >= ed_limit)) //Compare Filing Change Dates
 					{
 						document.getElementById("Cell_Phase_"+i).title = "Phase Explain Updated On: "+ Cell_values_Arr[17];
-						//document.getElementById("Cell_Filing_"+i).style.border = "#FF0000 solid";
 						document.getElementById("Cell_Phase_"+i).src = "images/phaseexp_red.png";
-						document.getElementById("PhaseExp_CDate_"+i).style.display = "block";
+						document.getElementById("PhaseExp_CDate_"+i).style.display = "inline";
 						if(latest_date < phaseexp_cdate || latest_date == '')
 						{
 							qualify_title = "Phase Explain Updated On: "+ Cell_values_Arr[17];
@@ -740,9 +643,8 @@ function change_view()
 					else
 					{
 						document.getElementById("Cell_Phase_"+i).title = "Phase Explain";
-						//document.getElementById("Cell_Filing_"+i).style.border = "#"+Cell_values_Arr[14]+" solid";
 						document.getElementById("Cell_Phase_"+i).src = "images/phaseexp.png";
-						document.getElementById("PhaseExp_CDate_"+i).style.display = "none";
+						document.getElementById("PhaseExp_CDate_"+i).style.display = "none"
 					}
 				}
 				
@@ -752,10 +654,12 @@ function change_view()
 				
 				if(phase4_ele != null && phase4_ele != '')
 				{
+					var phase4_presence_ele= document.getElementById("Phase4_Presence_"+i);
 					if((phase4_cdate <= st_limit) && (phase4_cdate >= ed_limit)) //Compare Filing Change Dates
 					{
-						document.getElementById("Red_Cell_"+i).style.visibility = "visible";
+						document.getElementById("Red_Cell_"+i).style.display = "inline";
 						document.getElementById("Red_Cell_"+i).title = "Red Cell Override";
+						document.getElementById("Red_Cell_CDate_"+i).style.display = "inline";
 						if(latest_date < phase4_cdate || latest_date == '')
 						{
 							qualify_title = "Red Cell Override On: "+ Cell_values_Arr[19];
@@ -765,8 +669,14 @@ function change_view()
 					else
 					{
 						document.getElementById("Red_Cell_"+i).title = "Red Cell Override";
-						//document.getElementById("Cell_Filing_"+i).style.border = "#"+Cell_values_Arr[14]+" solid";
-						document.getElementById("Red_Cell_"+i).style.visibility = "hidden";
+						document.getElementById("Red_Cell_"+i).style.display = "none";
+						document.getElementById("Red_Cell_CDate_"+i).style.display = "none";
+						if(phase4_presence_ele != null && phase4_presence_ele != '')
+						if(phase4_presence_ele.value == 1)
+						{
+							document.getElementById("Red_Cell_"+i).style.display = "inline";
+							qualify_title = "Red Cell ON";
+						}
 					}
 				}
 				
@@ -778,7 +688,7 @@ function change_view()
 				{
 					if((high_phase_cdate <= st_limit) && (high_phase_cdate >= ed_limit)) //Compare highest phase Change Dates
 					{
-						document.getElementById("Highest_Phase_"+i).style.display = "block";
+						document.getElementById("Highest_Phase_"+i).style.display = "inline";
 						document.getElementById("Highest_Phase_"+i).title = "Highest Phase";
 						if(latest_date < high_phase_cdate || latest_date == '')
 						{
@@ -789,25 +699,49 @@ function change_view()
 					else
 					{
 						document.getElementById("Highest_Phase_"+i).title = "Highest Phase";
-						//document.getElementById("Cell_Filing_"+i).style.border = "#"+Cell_values_Arr[14]+" solid";
-						document.getElementById("Highest_Phase_"+i).style.display = "none";
+						document.getElementById("Highest_Phase_"+i).style.display = "none"
 					}
 				}
 				
 				if(qualify_title != '')
-				{
+				{	
+					document.getElementById("ToolTip_Visible_"+i).value = "1"
+					
 					document.getElementById("Cell_ID_"+i).style.border = "#FF0000 solid";
 					//if(Cell_values_Arr[14]=='FF0000')
 					document.getElementById("Cell_ID_"+i).style.backgroundColor = "#FFFFFF";
 					
-					document.getElementById("Div_ID_"+i).title = qualify_title;
-					document.getElementById("Cell_Link_"+i).title = qualify_title;
+					document.getElementById("Div_ID_"+i).title = '';
+					document.getElementById("Cell_Link_"+i).title = '';
 					if(bomb_ele != null && bomb_ele != '')
-					document.getElementById("Cell_Bomb_"+i).title = qualify_title;
+					document.getElementById("Cell_Bomb_"+i).title = '';
 					if(filing_ele != null && filing_ele != '')
-					document.getElementById("Cell_Filing_"+i).title = qualify_title;
+					document.getElementById("Cell_Filing_"+i).title = '';
 					if(phaseexp_ele != null && phaseexp_ele != '')
-					document.getElementById("Cell_Phase_"+i).title = qualify_title;
+					document.getElementById("Cell_Phase_"+i).title = '';
+				}
+				else
+				{
+					var bomb_presence_ele= document.getElementById("Bomb_Presence_"+i);
+					if((phaseexp_ele != null && phaseexp_ele != '') || (filing_ele != null && filing_ele != '') || (bomb_presence_ele != null && bomb_presence_ele != ''))
+					{
+						document.getElementById("ToolTip_Visible_"+i).value = "1"
+						
+						document.getElementById("Div_ID_"+i).title = '';
+						document.getElementById("Cell_Link_"+i).title = '';
+						if(bomb_ele != null && bomb_ele != '')
+						document.getElementById("Cell_Bomb_"+i).title = '';
+						if(filing_ele != null && filing_ele != '')
+						document.getElementById("Cell_Filing_"+i).title = '';
+						if(phaseexp_ele != null && phaseexp_ele != '')
+						document.getElementById("Cell_Phase_"+i).title = '';
+					}
+					else
+					{
+						document.getElementById("ToolTip_Visible_"+i).value = "0"
+					}
+					document.getElementById("Cell_ID_"+i).style.border = "#"+Cell_values_Arr[14]+" solid";
+					document.getElementById("Cell_ID_"+i).style.backgroundColor = "#"+Cell_values_Arr[14];
 				}
 			
 			}	///Font Element If Ends
@@ -831,8 +765,24 @@ function timeEnum($timerange)
 
 $(function() 
 {
-	//highlight changes slider
-		$("#slider-range-min").slider({
+
+<?php if(!$db->loggedIn()) { ?>		
+		$("#slider-range-min").slider({	//Single Slider - For NOT LoogedIN Users
+		range: "min",
+		value: 3,
+		min: 0,
+		max: 5,
+		step:1,
+		slide: function( event, ui ) {
+			$("#endrange").val(timeEnum(ui.value));
+			change_view();
+		}
+	});
+	$timerange = "1 month";
+	$("#endrange").val($timerange);
+<?php } else { ?>
+//highlight changes slider
+		$("#slider-range-min").slider({	//Double Slider - For LoggedIN Users
 			range: true,
 			min: 0,
 			max: 5,
@@ -844,9 +794,45 @@ $(function()
 				change_view();
 			}
 		});
+<?php } ?>
+
 	
 });
+
+function display_tooltip(type, id)
+{
+	var tooltip_ele = document.getElementById("ToolTip_ID_"+id);
+	var tooltip_val_ele = document.getElementById("ToolTip_Visible_"+id);
+	if((tooltip_ele != null && tooltip_ele != '') && (tooltip_val_ele != null && tooltip_val_ele != ''))
+	{
+		if(type =='on' && tooltip_val_ele.value==1)
+		{
+			tooltip_ele.style.display = "block";
+			tooltip_ele.style.zIndex = "99";
+		}
+		else
+		{
+			tooltip_ele.style.display = "none";
+			tooltip_ele.style.zIndex = "0";
+		}
+	}
+}
 </script>
+<script type="text/javascript">
+	//Count the Number of View of Records
+	function INC_ViewCount(product, area, cell_id)
+	{
+		 $.ajax({
+						type: 'GET',
+						url:  'viewcount.php' + '?op=Inc_OHM_ViewCount&product=' + product +'&area=' + area + '&Cell_ID=' + cell_id,
+						success: function (data) {
+	        					//alert(data);
+	        					//$("#ViewCount_"+cell_id).html(data);
+	        		   }
+				});
+	        return;
+	}
+	</script>
 </head>
 
 <body>
@@ -871,9 +857,9 @@ $htmlContent .= '<table width="100%" style="background-color:#FFFFFF;">'
 				. '<option value="indlead">Active Industry Trials</option></select></p></td>'
 				. '<td style="background-color:#FFFFFF;" class="bottom right"><div class="demo"><p style="margin-top:10px;">'
 				. '<label for="startrange" style="float:left;margin-left:15px;"><b>Highlight updates:</b></label>'
-				. '<input type="text" id="startrange" name="sr" value="now" class="jdpicker" />'
+				. '<input type="text" id="startrange" name="sr" value="now" readonly="readonly" style="border:0; color:#f6931f; font-weight:bold; background-color:#FFFFFF; font-family:Verdana; font-size: 13px;" class="jdpicker" />'
 				. '<label style="color:#f6931f;float:left;">-</label> '
-				. '<input type="text" id="endrange"  name="er" value="1 month ago" style="width:auto;margin-left:15px;" class="jdpicker" />'
+				. '<input type="text" id="endrange"  name="er" value="1 month ago" readonly="readonly" style="border:0; color:#f6931f; font-weight:bold; background-color:#FFFFFF; font-family:Verdana; font-size: 13px;" class="jdpicker" />'
 				. '<br/><div id="slider-range-min" style="width:320px; margin:10px 10px 0 10px;margin-left:40px;" align="left"></div></p></div></td>'
 				. '</tr>'
 				. '</table>'
@@ -927,7 +913,7 @@ foreach($rows as $row => $rval)
 	//$rval = (isset($rowsDisplayName[$row]) && $rowsDisplayName[$row] != '')?$rowsDisplayName[$row]:$rval; //Commente as as planned to ignore display name in Product only
 	$rdesc = (isset($rowsDescription[$row]) && $rowsDescription[$row] != '')?$rowsDescription[$row]:null;
 	$raltTitle = (isset($rdesc) && $rdesc != '')?' alt="'.$rdesc.'" title="'.$rdesc.'" ':null;
-	$htmlContent .= '<tr style="page-break-inside:avoid;"><th style="width:200px; height:100%;" id="Cell_ID_'.$online_HMCounter.'" '.$raltTitle.'><div align="center">';
+	$htmlContent .= '<tr style="page-break-inside:avoid;"><th style="width:200px; padding-left:4px; height:100%;" id="Cell_ID_'.$online_HMCounter.'" '.$raltTitle.'><div align="left">';
 			
 	if(isset($productIds[$row]) && $productIds[$row] != NULL && !empty($areaIds))
 	{
@@ -941,17 +927,18 @@ foreach($rows as $row => $rval)
 	foreach($columns as $col => $cval)
 	{
 		$online_HMCounter++;
-		$htmlContent .= '<td id="Cell_ID_'.$online_HMCounter.'" width="110px" style="'. $data_matrix[$row][$col]['cell_start_style'] .' padding:2px; height:100%;" align="center">';
+		$htmlContent .= '<td class="tooltip" id="Cell_ID_'.$online_HMCounter.'" width="110px" style="'. $data_matrix[$row][$col]['cell_start_style'] .' padding:2px; height:100%;" align="center" onmouseover="display_tooltip(\'on\','.$online_HMCounter.');" onmouseout="display_tooltip(\'off\','.$online_HMCounter.');">';
 	
 		if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL)
 		{
 			
-			$htmlContent .= '<div id="Div_ID_'.$online_HMCounter.'" title="'. $data_matrix[$row][$col]['cell_start_title'] .'" style="'.$data_matrix[$row][$col]['div_start_style'].' width:100%; height:100%; " onclick="popup_show(\'allpopup\', '.count($rows).','.count($columns).',\'allpopup_'.$row.'_'.$col.'\', \'allpopup_drag_'.$row.'_'.$col.'\', \'allpopup_exit_'.$row.'_'.$col.'\', \'mouse\', -10, -10);">';
+			$htmlContent .= '<div id="Div_ID_'.$online_HMCounter.'" style="'.$data_matrix[$row][$col]['div_start_style'].' width:100%; height:100%; " onclick="popup_show(\'allpopup\', '.count($rows).','.count($columns).',\'allpopup_'.$row.'_'.$col.'\', \'allpopup_drag_'.$row.'_'.$col.'\', \'allpopup_exit_'.$row.'_'.$col.'\', \'mouse\', -10, -10);">';
 			
 			$htmlContent .= '<input type="hidden" value="'.$data_matrix[$row][$col]['active'].',endl,'.$data_matrix[$row][$col]['total'].',endl,'.$data_matrix[$row][$col]['indlead'].',endl,'.$data_matrix[$row][$col]['active_prev'].',endl,'.$data_matrix[$row][$col]['total_prev'].',endl,'.$data_matrix[$row][$col]['indlead_prev'].',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['last_update'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['last_update'])).',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['count_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['count_lastchanged'])).',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])).',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['filing_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['filing_lastchanged'])).',endl,'.$data_matrix[$row][$col]['color_code'].',endl,'.$data_matrix[$row][$col]['bomb']['value'].',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['phase_explain_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['phase_explain_lastchanged'])).',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['phase4_override_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['phase4_override_lastchanged'])).',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['highest_phase_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['highest_phase_lastchanged'])).',endl,\''.$data_matrix[$row][$col]['highest_phase_prev'].'\'" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
+			
 			$htmlContent .= '<input type="hidden" value="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />&nbsp;';
 				
-			$htmlContent .= '<a style="'.$data_matrix[$row][$col]['count_start_style'].' height:100%;" id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '&list=1&sr=now&er=1 month ago" target="_blank" title="'. $title .'"><font id="Font_ID_'.$online_HMCounter.'">'. $data_matrix[$row][$col]['active'] .'</font></a>&nbsp;';
+			$htmlContent .= '<a onclick="INC_ViewCount(' . trim($productIds[$row]) . ',' . trim($areaIds[$col]) . ',' . $online_HMCounter .')" style="'.$data_matrix[$row][$col]['count_start_style'].' height:100%;" id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '&list=1&sr=now&er=1 month ago" target="_blank" title="'. $title .'"><font id="Font_ID_'.$online_HMCounter.'">'. $data_matrix[$row][$col]['active'] .'</font></a>&nbsp;';
 					
 			if($data_matrix[$row][$col]['bomb']['src'] != 'new_square.png') //When bomb has square dont include it in pdf as size is big and no use
 			{	$htmlContent .= '<img id="Cell_Bomb_'.$online_HMCounter.'" title="'.$data_matrix[$row][$col]['bomb']['title'].'" src="'. urlPath() .'images/'.$data_matrix[$row][$col]['bomb']['src'].'"  style="'.$data_matrix[$row][$col]['bomb']['style'].'" '
@@ -961,67 +948,44 @@ foreach($rows as $row => $rval)
 			
 			
 				if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
-				$htmlContent .= '<img id="Cell_Filing_'.$online_HMCounter.'" src="'. $data_matrix[$row][$col]['filing_src'] .'" title="'. $data_matrix[$row][$col]['filing_start_title'] .'" style="'. $data_matrix[$row][$col]['filing_start_style'] .'" alt="Filing" onclick="popup_show(\'filing\', '.count($rows).','.count($columns).',\'filingpopup_'.$row.'_'.$col.'\', \'filingpopup_drag_'.$row.'_'.$col.'\', \'filingpopup_exit_'.$row.'_'.$col.'\', \'mouse\', -10, -10);" />&nbsp;';
+				$htmlContent .= '<img id="Cell_Filing_'.$online_HMCounter.'" src="images/new_file.png" title="Filing Details" style="width:15px; height:15px; vertical-align:middle; cursor:pointer;" alt="Filing" onclick="popup_show(\'filing\', '.count($rows).','.count($columns).',\'filingpopup_'.$row.'_'.$col.'\', \'filingpopup_drag_'.$row.'_'.$col.'\', \'filingpopup_exit_'.$row.'_'.$col.'\', \'mouse\', -10, -10);" />&nbsp;';
 				
 				if($data_matrix[$row][$col]['phase_explain'] != NULL && $data_matrix[$row][$col]['phase_explain'] != '')
-				$htmlContent .= '<img id="Cell_Phase_'.$online_HMCounter.'" src="'. $data_matrix[$row][$col]['phaseexp_src'] .'" title="'. $data_matrix[$row][$col]['phaseexp_start_title'] .'" style="'. $data_matrix[$row][$col]['phaseexp_start_style'] .'" alt="Phase Explain" onclick="popup_show(\'phaseexp\', '.count($rows).','.count($columns).',\'phaseexppopup_'.$row.'_'.$col.'\', \'phaseexppopup_drag_'.$row.'_'.$col.'\', \'phaseexppopup_exit_'.$row.'_'.$col.'\', \'mouse\', -10, -10);" />';
+				$htmlContent .= '<img id="Cell_Phase_'.$online_HMCounter.'" src="images/phaseexp.png" title="Phase Explain" style="width:15px; height:15px; vertical-align:middle; cursor:pointer;" alt="Phase Explain" onclick="popup_show(\'phaseexp\', '.count($rows).','.count($columns).',\'phaseexppopup_'.$row.'_'.$col.'\', \'phaseexppopup_drag_'.$row.'_'.$col.'\', \'phaseexppopup_exit_'.$row.'_'.$col.'\', \'mouse\', -10, -10);" />';
 
 				$htmlContent .= '</div>'; ///Div complete to avoid panel problem
 					
-				//All Pop-Up Form for Editing Starts Here
-				$htmlContent .= '<div class="popup_form" id="allpopup_'.$row.'_'.$col.'" style="display: none;  background-color:#fff; width:440px;" >'	
-							.'<div class="menu_form_header" id="allpopup_drag_'.$row.'_'.$col.'" style="width:440px;">'
-							.'<img class="menu_form_exit" align="right" id="allpopup_exit_'.$row.'_'.$col.'" src="'. urlPath() .'images/fancy_close.png" style="width:30px; height:30px;" '			
-							.'alt="" />&nbsp;&nbsp;&nbsp;All Details<br />'
-							.'</div>'
-							.'<div class="menu_form_body" style="width:440px;">'
-							.'<table style="background-color:#fff; border:none;" cellpadding="5" cellspacing="5">'
-							.'<tr style="background-color:#fff; border:none;" id="Last_CDate_'.$online_HMCounter.'">'
-							.'<td align="left" style="background-color:#fff; border:none;">'
-							.''. (($data_matrix[$row][$col]['last_update']!=NULL && $data_matrix[$row][$col]['last_update']!='') ? '<font style="color:#206040; font-weight: 900;"></br>&nbsp;Last Update On: </font><font style="color:#000000; font-weight: 900;">'.date('F d, Y', strtotime($data_matrix[$row][$col]['last_update'])).'</font>':'') .'</br>'
-							.'<td></tr>'
-							.'<tr style="background-color:#fff; border:none;" id="Count_CDate_'.$online_HMCounter.'">'
-							.'<td align="left" style="background-color:#fff; border:none;">'
-							.'<font style="color:#206040; font-weight: 900;">&nbsp;Count Updated From: </font><font id="Popup_Count_ID_'.$online_HMCounter.'" style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['active_prev'] .'</font>'. (($data_matrix[$row][$col]['count_lastchanged'] != NULL && $data_matrix[$row][$col]['count_lastchanged'] != '') ? '<font style="color:#206040; font-weight: 900;"> On </font> <font style="color:#000000; font-weight: 900;">'.date('F d, Y', strtotime($data_matrix[$row][$col]['count_lastchanged'])).'</font>' : '').'<td></tr>';
+				//Tool Tip Starts Here
+				$htmlContent .= '<span id="ToolTip_ID_'.$online_HMCounter.'" class="classic" style="text-align:left;">'
+								.'<input type="hidden" value="0" name="ToolTip_Visible_'.$online_HMCounter.'" id="ToolTip_Visible_'.$online_HMCounter.'" />';	
+				
+				$htmlContent .= '<font id="Count_CDate_'.$online_HMCounter.'" style="'.(($data_matrix[$row][$col]['active_prev'] != NULL && $data_matrix[$row][$col]['active_prev'] != '')? 'display:inline;':'display:none;').'"><font style="color:#206040; font-weight: 900;">Count </font>'. (($data_matrix[$row][$col]['count_lastchanged'] != NULL && $data_matrix[$row][$col]['count_lastchanged'] != '') ? '<font style="color:#206040; font-weight: 900;">(Updated:</font><font style="color:#000000; font-weight: 900;">'.date('Y-m-d', strtotime($data_matrix[$row][$col]['count_lastchanged'])).'</font><font style="color:#206040; font-weight: 900;">) </font>' : '').'<font style="color:#206040; font-weight: 900;">From : </font><font id="Popup_Count_ID_'.$online_HMCounter.'" style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['active_prev'] .'</font><br/></font>';
 							
-						$htmlContent .= '<tr style="background-color:#fff; border:none;'.(($data_matrix[$row][$col]['phase4_override'])? 'display:block;':'display:none;').'">'
-							.'<td align="left" style="background-color:#fff; border:none;">'
-							.'<font style="color:#206040; font-weight: 900;">&nbsp;Red cell override: </font><font style="color:#FF0000; font-weight: 900;">"ON"</font><font id="Red_Cell_'.$online_HMCounter.'">'. (($data_matrix[$row][$col]['phase4_override_lastchanged'] != NULL && $data_matrix[$row][$col]['phase4_override_lastchanged'] != '') ? '<font style="color:#206040; font-weight: 900;">&nbsp;Updated On </font> <font style="color:#000000; font-weight: 900;">'.date('F d, Y', strtotime($data_matrix[$row][$col]['phase4_override_lastchanged'])).'</font>' : '').'</font>'
-							.'<td></tr>';
+						$htmlContent .= '<font id="Red_Cell_'.$online_HMCounter.'"><font style="color:#206040; font-weight: 900;">Red cell override </font>'. (($data_matrix[$row][$col]['phase4_override_lastchanged'] != NULL && $data_matrix[$row][$col]['phase4_override_lastchanged'] != '') ? '<font id="Red_Cell_CDate_'.$online_HMCounter.'"><font style="color:#206040; font-weight: 900;">(Updated:</font><font style="color:#000000; font-weight: 900;">'.date('Y-m-d', strtotime($data_matrix[$row][$col]['phase4_override_lastchanged'])).'</font><font style="color:#206040; font-weight: 900;">) </font></font>' : '').'<font style="color:#FF0000; font-weight: 900;"><font style="color:#206040; font-weight: 900;">: </font>'. (($data_matrix[$row][$col]['phase4_override'])? '"ON"<input type="hidden" value="1" name="Phase4_Presence_'.$online_HMCounter.'" id="Phase4_Presence_'.$online_HMCounter.'" />':'"OFF"<input type="hidden" value="0" name="Phase4_Presence_'.$online_HMCounter.'" id="Phase4_Presence_'.$online_HMCounter.'" />').'</font><br/></font>';
 							
-							$htmlContent .= '<tr id="Highest_Phase_'.$online_HMCounter.'" style="background-color:#fff; border:none;'.(($data_matrix[$row][$col]['highest_phase_prev'] != NULL && $data_matrix[$row][$col]['highest_phase_prev'] != '')? 'display:block;':'display:none;').'">'
-							.'<td align="left" style="background-color:#fff; border:none;">'
-							.'<font style="color:#206040; font-weight: 900;">&nbsp;Highest Phase Updated From: </font> <font style="color:#000000; font-weight: 900;">Phase '.$data_matrix[$row][$col]['highest_phase_prev'].'</font>'. (($data_matrix[$row][$col]['highest_phase_lastchanged'] != NULL && $data_matrix[$row][$col]['highest_phase_lastchanged'] != '') ? '<font style="color:#206040; font-weight: 900;">&nbsp; On </font> <font style="color:#000000; font-weight: 900;">'.date('F d, Y', strtotime($data_matrix[$row][$col]['highest_phase_lastchanged'])).'</font>' : '').'</br>'
-							.'<td></tr>';
+							$htmlContent .= '<font id="Highest_Phase_'.$online_HMCounter.'" style="'.(($data_matrix[$row][$col]['highest_phase_prev'] != NULL && $data_matrix[$row][$col]['highest_phase_prev'] != '')? 'display:inline;':'display:none;').'" ><font style="color:#206040; font-weight: 900;">Highest Phase</font><font style="color:#206040; font-weight: 900;"> (Updated:</font>'. (($data_matrix[$row][$col]['highest_phase_lastchanged'] != NULL && $data_matrix[$row][$col]['highest_phase_lastchanged'] != '') ? ' <font style="color:#000000; font-weight: 900;">'.date('Y-m-d', strtotime($data_matrix[$row][$col]['highest_phase_lastchanged'])).'</font><font style="color:#206040; font-weight: 900;">)</font>' : '').'<font style="color:#206040; font-weight: 900;"> From : </font> <font style="color:#000000; font-weight: 900;">Phase '.$data_matrix[$row][$col]['highest_phase_prev'].'</font></br>'
+							.'</font>';
 							
 							
 							
 						if($data_matrix[$row][$col]['bomb']['src'] != 'new_square.png')
 						{
-							$htmlContent .= '<tr style="background-color:#fff; border:none;">'
-							.'<td align="left" style="background-color:#fff; border:none;">'
-							.'<font id="Bomb_CDate_'.$online_HMCounter.'">'. (($data_matrix[$row][$col]['bomb_lastchanged'] != NULL && $data_matrix[$row][$col]['bomb_lastchanged'] != '') ? '<font style="color:#206040; font-weight: 900;">&nbsp;Bomb Updated On: </font><font style="color:#000000; font-weight: 900;">'.date('F d, Y', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])).'<br/></font>' : '') .'</font><font style="color:#206040; font-weight: 900;">&nbsp;Bomb Value: </font> <font style="color:#000000; font-weight: 900;">'.$data_matrix[$row][$col]['bomb']['alt'].'<br/></font>'.(($data_matrix[$row][$col]['bomb_explain'] != NULL && $data_matrix[$row][$col]['bomb_explain'] != '')? '<font style="color:#206040; font-weight: 900;">&nbsp;Bomb Details: <br/></font><textarea align="left" readonly="readonly"  rows="5" cols="20" style="overflow:scroll; width:400px; height:60px; padding-left:10px; ">'. $data_matrix[$row][$col]['bomb_explain'] .'</textarea>':'' ).'</br></br>'
-							.'<td></tr>';
+							$htmlContent .= '<font style="color:#000000; font-weight: 900;">'.$data_matrix[$row][$col]['bomb']['alt'].' </font><font id="Bomb_CDate_'.$online_HMCounter.'">'. (($data_matrix[$row][$col]['bomb_lastchanged'] != NULL && $data_matrix[$row][$col]['bomb_lastchanged'] != '') ? '<font style="color:#206040; font-weight: 900;">(Updated:</font><font style="color:#000000; font-weight: 900;">'.date('Y-m-d', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])).'</font><font style="color:#206040; font-weight: 900;">) </font>' : '') .'</font> '.(($data_matrix[$row][$col]['bomb_explain'] != NULL && $data_matrix[$row][$col]['bomb_explain'] != '')? '<font style="color:#206040; font-weight: 900;">: </font>'. $data_matrix[$row][$col]['bomb_explain'] .'<input type="hidden" value="1" name="Bomb_Presence_'.$online_HMCounter.'" id="Bomb_Presence_'.$online_HMCounter.'" />':'' ).'</br>'
+							.'';
 						}
 							
 						if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
 						{
-							$htmlContent .= '<tr style="background-color:#fff; border:none;">'
-							.'<td align="left" style="background-color:#fff; border:none;">'
-							.'<font id="Filing_CDate_'.$online_HMCounter.'">'. (($data_matrix[$row][$col]['filing_lastchanged'] != NULL && $data_matrix[$row][$col]['filing_lastchanged'] != '') ? '<font style="color:#206040; font-weight: 900;">&nbsp;Filing Updated On: </font><font style="color:#000000; font-weight: 900;">'.date('F d, Y', strtotime($data_matrix[$row][$col]['filing_lastchanged'])).'<br/></font>' :'') .'</font><font style="color:#206040; font-weight: 900;">&nbsp;Filing Details: <br/></font><textarea align="left" readonly="readonly"  rows="5" cols="20" style="overflow:scroll; width:400px; height:60px; padding-left:10px; ">'. $data_matrix[$row][$col]['filing'] .'</textarea></br></br>'
-							.'<td></tr>';
+							$htmlContent .= '<font style="color:#206040; font-weight: 900;">Filing </font><font id="Filing_CDate_'.$online_HMCounter.'">'. (($data_matrix[$row][$col]['filing_lastchanged'] != NULL && $data_matrix[$row][$col]['filing_lastchanged'] != '') ? '<font style="color:#206040; font-weight: 900;">(Updated:</font><font style="color:#000000; font-weight: 900;">'.date('Y-m-d', strtotime($data_matrix[$row][$col]['filing_lastchanged'])).'</font><font style="color:#206040; font-weight: 900;">) </font>' :'') .'</font><font style="color:#206040; font-weight: 900;">: </font>'. $data_matrix[$row][$col]['filing'] .'</br>'
+							.'';
 						}
 						if($data_matrix[$row][$col]['phase_explain'] != NULL && $data_matrix[$row][$col]['phase_explain'] != '')
 						{
-							$htmlContent .= '<tr style="background-color:#fff; border:none;">'
-							.'<td align="left" style="background-color:#fff; border:none;">'
-							.'<font id="PhaseExp_CDate_'.$online_HMCounter.'">'. (($data_matrix[$row][$col]['phase_explain_lastchanged'] != NULL && $data_matrix[$row][$col]['phase_explain_lastchanged'] != '') ? '<font style="color:#206040; font-weight: 900;">&nbsp;Phase Explain Updated On: </font><font style="color:#000000; font-weight: 900;">'.date('F d, Y', strtotime($data_matrix[$row][$col]['phase_explain_lastchanged'])).'<br/></font>' :'') .'</font><font style="color:#206040; font-weight: 900;">&nbsp;Phase Explain: <br/></font><textarea align="left" readonly="readonly"  rows="5" cols="20" style="overflow:scroll; width:400px; height:60px; padding-left:10px; ">'. $data_matrix[$row][$col]['phase_explain'] .'</textarea></br>'
-							.'<td></tr>';
+							$htmlContent .= '<font style="color:#206040; font-weight: 900;">Phase Explain </font><font id="PhaseExp_CDate_'.$online_HMCounter.'">'. (($data_matrix[$row][$col]['phase_explain_lastchanged'] != NULL && $data_matrix[$row][$col]['phase_explain_lastchanged'] != '') ? '<font style="color:#206040; font-weight: 900;">(Updated:</font><font style="color:#000000; font-weight: 900;">'.date('Y-m-d', strtotime($data_matrix[$row][$col]['phase_explain_lastchanged'])).'</font><font style="color:#206040; font-weight: 900;">) </font>' :'') .'</font><font style="color:#206040; font-weight: 900;">: </font>'. $data_matrix[$row][$col]['phase_explain'] .'</br>'
+							.'';
 						}
 							
-							$htmlContent .='</table>'
-							.'</div>'
-							.'</div>';	//Pop-Up Form for All Editing Ends Here
+							$htmlContent .='</span>';	//Tool Tip Ends Here
 		}
 		else
 		{
@@ -1050,3 +1014,6 @@ print $htmlContent;
 
 </body>
 </html>
+<script language="javascript" type="text/javascript">
+change_view();
+</script>

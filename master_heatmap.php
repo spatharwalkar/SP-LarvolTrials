@@ -2020,7 +2020,7 @@ function postEd()
 				$prod=$_POST['cell_prod'][$row][$col];
 				$area=$_POST['cell_area'][$row][$col];
 				$filing=trim(mysql_real_escape_string($_POST['filing'][$row][$col]));
-				$bomb=$_POST['bomb'][$row][$col];
+				$bomb=trim($_POST['bomb'][$row][$col]);
 				$filing_presence=$_POST['filing_presence'][$row][$col];
 				$phaseexp_presence=$_POST['phaseexp_presence'][$row][$col];
 				$bomb_explain=mysql_real_escape_string($_POST['bomb_explain'][$row][$col]);
@@ -2033,29 +2033,57 @@ function postEd()
 				$originDT=mysql_query($originDT_query) or die ('Bad SQL Query getting Original Bomb and Filing Information Before Updating.<br/>'.$query);
 				$originDT = mysql_fetch_array($originDT);
 				
+				$change_flag=0;
+				
 				$query = "UPDATE `rpt_masterhm_cells` set ";
 				
 				if($bomb != $originDT['bomb'] || $_POST['bomb_explain'][$row][$col] != $originDT['bomb_explain'])
-				$query .="`bomb` = '$bomb', `bomb_explain` = '$bomb_explain', `bomb_lastchanged`= '$up_time', ";
+				{
+					$query .="`bomb` = '$bomb', `bomb_explain` = '$bomb_explain', `bomb_lastchanged`= '$up_time', ";
+					$change_flag=1;
+				}
 				
-				if(trim($filing) != trim($originDT['filing']))
-				$query .="`filing` = '$filing', `filing_lastchanged`= '$up_time', ";
-				else if(trim($filing) =='' && trim($originDT['filing']) == '' && $filing_presence==1)
-				$query .="`filing` = ' ', `filing_lastchanged`= '$up_time', ";
-				else if(trim($filing) =='' && trim($originDT['filing']) == '' && $filing_presence==0)
-				$query .="`filing` = NULL, `filing_lastchanged`= '$up_time', ";
+				if((trim($filing) == '' && $originDT['filing'] == NULL) && $filing_presence == 1)
+				{
+					$query .="`filing` = ' ', `filing_lastchanged`= '$up_time', ";
+					$change_flag=1;
+				}
+				else if((trim($filing) != trim($originDT['filing'])) && $filing_presence == 1)
+				{
+					$query .="`filing` = '$filing', `filing_lastchanged`= '$up_time', ";
+					$change_flag=1;
+				}
+				else if($originDT['filing'] != NULL && $filing_presence == 0)
+				{
+					$query .="`filing` = NULL, `filing_lastchanged`= '$up_time', ";
+					$change_flag=1;
+				}
 				
-				if(trim($phase_explain) != trim($originDT['phase_explain']))
-				$query .="`phase_explain` = '$phase_explain', `phase_explain_lastchanged`= '$up_time', ";
-				else if(trim($phase_explain) =='' && trim($originDT['phase_explain']) == '' && $phaseexp_presence==1)
-				$query .="`phase_explain` = ' ', `phase_explain_lastchanged`= '$up_time', ";
-				else if(trim($phase_explain) =='' && trim($originDT['phase_explain']) == '' && $phaseexp_presence==0)
-				$query .="`phase_explain` = NULL, `phase_explain_lastchanged`= '$up_time', ";
+				if((trim($phase_explain) == '' && $originDT['phase_explain'] == NULL) && $phaseexp_presence == 1)
+				{
+					$query .="`phase_explain` = ' ', `phase_explain_lastchanged`= '$up_time', ";
+					$change_flag=1;
+				}
+				else if((trim($phase_explain) != trim($originDT['phase_explain'])) && $phaseexp_presence == 1)
+				{
+					$query .="`phase_explain` = '$phase_explain', `phase_explain_lastchanged`= '$up_time', ";
+					$change_flag=1;
+				}
+				else if($originDT['phase_explain'] != NULL && $phaseexp_presence == 0)
+				{
+					$query .="`phase_explain` = NULL, `phase_explain_lastchanged`= '$up_time', ";
+					$change_flag=1;
+				}
 				
-				if($phase4_val != $originDT['phase4_override'])
-				$query .="`phase4_override` = '$phase4_val', `phase4_override_lastchanged`= '$up_time', ";
+				if(trim($phase4_val) != trim($originDT['phase4_override']))
+				{
+					$query .="`phase4_override` = '$phase4_val', `phase4_override_lastchanged`= '$up_time', ";
+					$change_flag=1;
+				}
 				
 				$query .= "`last_update`= '$up_time' WHERE `product` = $prod AND `area` = $area";
+				
+				if($change_flag) ///If there is change then only execute query
 				mysql_query($query) or die ('Bad SQL Query updating Bomb and Filing Information.<br/>'.$query);
 			}
 		}
