@@ -256,7 +256,20 @@ $(document).ready(function () {
     function submitSearch()
     {
     	//function to get the JSON data of the search
-    	var jsonData = getQueryData(); 
+    	var jsonData = getQueryData();
+    	if(jsonData !='') 
+    	var jsonDataArr = eval('('+jsonData+')');
+    	if(jsonData =='')
+    	{
+			alert('Null search data not allowed. Please delete search data using the delete checkbox');
+			return false;        	
+    	}
+    	if(jsonDataArr.wheredata == '')
+    	{
+			alert('Null search data not allowed. Please delete search data using the delete checkbox');
+			return false;
+    	}
+    	
     	$('#searchdata').val(jsonData);
     	if($('#searchdata').val() != searchDbData)
     	$('#search_modifier').html('[Modified]');
