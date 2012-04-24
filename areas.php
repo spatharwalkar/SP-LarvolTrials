@@ -257,16 +257,18 @@ $(document).ready(function () {
     {
     	//function to get the JSON data of the search
     	var jsonData = getQueryData();
+    	
+    	var ermsg = 'Null search data not allowed. If search data is already there & you are trying to remove it, please delete search data using the delete checkbox';
     	if(jsonData !='') 
     	var jsonDataArr = eval('('+jsonData+')');
     	if(jsonData =='')
     	{
-			alert('Null search data not allowed. Please delete search data using the delete checkbox');
+			alert(ermsg);
 			return false;        	
     	}
     	if(jsonDataArr.wheredata == '')
     	{
-			alert('Null search data not allowed. Please delete search data using the delete checkbox');
+			alert(ermsg);
 			return false;
     	}
     	
