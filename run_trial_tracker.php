@@ -982,6 +982,7 @@ class TrialTracker
 				if($eventLink != '' && $eventLink !== NULL)
 				{
 
+
 					$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($eventLink);
 					if($uvalue['edited']['end_date'] != '' && $uvalue['edited']['end_date'] !== NULL)
 					{
@@ -3193,6 +3194,7 @@ class TrialTracker
 						$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
 					}
 					$from = $to;
+
 					$from++;
 					
 					$to = getColspanforExcelExport($from, 3);
@@ -7993,6 +7995,7 @@ class TrialTracker
 								{
 									$Trials['inactiveTrials'][] = array_merge($dataset['matchedupms'], $result[$index]);
 								}
+
 								else
 								{
 									$Trials['activeTrials'][] = array_merge($dataset['matchedupms'], $result[$index]);
@@ -9371,7 +9374,7 @@ class TrialTracker
 		$start 	= ($globalOptions['page']-1) * $this->resultsPerPage + 1;
 		$last 	= ($globalOptions['page'] * $this->resultsPerPage > $count) ? $count : ($start + $this->resultsPerPage - 1);
 		$totalPages = ceil($count / $this->resultsPerPage);
-		$paginate = $this->pagination($globalOptions, $totalPages, $timeMachine, $ottType);
+		$paginate = $this->pagination($globalOptions, $totalPages, $timeMachine, $ottType, $loggedIn);
 		
 		if(!empty($allTrials) && $globalOptions['minEnroll'] == 0 && $globalOptions['maxEnroll'] == 0)
 		{
@@ -9395,7 +9398,7 @@ class TrialTracker
 			$totinactivecount = $globalOptions['countDetails']['in'];
 			$totalcount = $totactivecount + $totinactivecount;
 		}
-		$this->displayFilterControls($count, $totactivecount, $totinactivecount, $totalcount, $globalOptions, $ottType);
+		$this->displayFilterControls($count, $totactivecount, $totinactivecount, $totalcount, $globalOptions, $ottType, $loggedIn);
 
 		if($totalPages > 1)
 		{
@@ -9584,7 +9587,6 @@ class TrialTracker
 	
 	function displayHeader($productAreaInfo)
 	{
-	
 		echo '<form id="frmOtt" name="frmOtt" method="get" target="_self" action="intermediary.php">';
 		
 		if((isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') !== FALSE) 
@@ -9605,7 +9607,7 @@ class TrialTracker
 		}
 	}
 	
-	function displayFilterControls($shownCount, $activeCount, $inactiveCount, $totalCount, $globalOptions = array(), $ottType)
+	function displayFilterControls($shownCount, $activeCount, $inactiveCount, $totalCount, $globalOptions = array(), $ottType, $loggedIn)
 	{	
 		echo '<table width="75%" border="0" cellspacing="0" class="controls" align="center">'
 				. '<tr><th>Active</th><th>Status</th><th>Institution Type</th>'
@@ -9735,27 +9737,38 @@ class TrialTracker
 				. (in_array(4, $globalOptions['phase']) ? ' checked="checked" ' : '') . '/>'
 				. '<label for="phase_4">4</label>'
 				. '</td><td class="right bottom">'
-				. '<div class="demo"><p>'
-				. '<label for="amount">Enrollment:</label>'
+				. '<div class="demo"><p><label for="amount">Enrollment:</label>'
 				. '<input type="text" name="enroll" id="amount" style="border:0; color:#f6931f; font-weight:bold;" '
 				. ' value="' . ((isset($globalOptions['enroll'])) ? $globalOptions['enroll'] : '' ) . '" autocomplete="off" />'
 				. '<div id="slider-range"></div>'
-				. '</p></div><div class="demo"><p style="margin-top:10px;">'
-				. '<label for="startrange" style="float:left;">Highlight updates:</label>'
-				. '<input type="text" id="startrange" name="sr" value="' . $globalOptions['startrange'] . '" class="jdpicker" />'
-				. '<label style="color:#f6931f;float:left;">-</label>'
-				. '<input type="text" id="endrange"  name="er" value="' . $globalOptions['endrange'] 
-				. '" style="width:auto;margin-left:15px;" class="jdpicker" />'
-				. '<br/><div id="slider-range-min" style="margin-top:5px;"></div></p></div>'
-				. '<input type="checkbox" id="showonlyupdated" name="osu" ' 
+				. '</p></div><div class="demo"><p style="margin-top:10px;">';
+				
+		if($loggedIn) 
+		{
+			echo '<label for="startrange" style="float:left;">Highlight updates:</label>'
+					. '<input type="text" id="startrange" name="sr" value="' . $globalOptions['startrange'] . '" class="jdpicker" />'
+					. '<label style="color:#f6931f;float:left;">-</label>'
+					. '<input type="text" id="endrange"  name="er" value="' . $globalOptions['endrange'] 
+					. '" style="width:auto;margin-left:15px;" class="jdpicker" />'
+					. '<br/><div id="slider-range-min" style="margin-top:5px;"></div></p></div>';
+		}
+		else
+		{
+			echo '<label for="amount3">Highlight changes:</label>'
+					. '<input type="text" id="amount3" value="' . (($globalOptions['change'] == '3 months') ? '1 quarter' : $globalOptions['change']) 
+					. '" readonly="readonly" style="border:0; color:#f6931f; font-weight:bold;" />'
+					. '<div id="slider-range-min"></div></p></div>'
+					. '<input type="hidden" id="change" name="change" value="' . $globalOptions['change'] . '" />';
+		}
+			
+		echo '<input type="checkbox" id="showonlyupdated" name="osu" ' 
 				. ($globalOptions['onlyUpdates'] == 'yes' ? ' checked="checked" ' : '' ) . ' style="margin-left:20px;" />'
 				. '<label for="showonlyupdated" style="font-size:x-small;">Show only updated trials</label>'
 				. '</tr></table><br/><br/>';
 		echo '<input type="hidden" name="status" id="status" value="' . implode(',', $globalOptions['status']) . '" />'
 				. '<input type="hidden" name="itype" id="itype" value="' . implode(',', $globalOptions['itype']) . '" />'
 				. '<input type="hidden" name="region" id="region" value="' . implode(',', $globalOptions['region']) . '" />'
-				. '<input type="hidden" name="phase" id="phase" value="' . implode(',', $globalOptions['phase']) . '" />'
-				. '<input type="hidden" id="change" name="change" value="' . $globalOptions['change'] . '" />';
+				. '<input type="hidden" name="phase" id="phase" value="' . implode(',', $globalOptions['phase']) . '" />';
 		
 		$url = 'intermediary.php?';
 		if($ottType == 'unstacked')
@@ -9796,7 +9809,7 @@ class TrialTracker
 				. '&nbsp;&nbsp;&nbsp;<b>' . $shownCount . '&nbsp;Records</b></div>';
 	}
 	
-	function pagination($globalOptions = array(), $totalPages, $timeMachine = NULL, $ottType)
+	function pagination($globalOptions = array(), $totalPages, $timeMachine = NULL, $ottType, $loggedIn)
 	{ 	
 		$url = 'intermediary.php?';
 		
@@ -9817,15 +9830,24 @@ class TrialTracker
 			$url .= 'id=' . $globalOptions['url'];
 		}
 		
-		if(isset($globalOptions['startrange']))
+		if($loggedIn)
 		{
-			$url .= '&amp;sr=' . $globalOptions['startrange'];
+			if(isset($globalOptions['startrange']))
+			{
+				$url .= '&amp;sr=' . $globalOptions['startrange'];
+			}
+			if(isset($globalOptions['endrange']))
+			{
+				$url .= '&amp;er=' . $globalOptions['endrange'];
+			}
 		}
-		if(isset($globalOptions['endrange']))
+		else
 		{
-			$url .= '&amp;er=' . $globalOptions['endrange'];
+			if(isset($globalOptions['change']))
+			{
+				$url .= '&amp;change=' . str_replace(' ', '+', $globalOptions['change']);
+			}
 		}
-
 		if($globalOptions['version'] != 0)
 		{
 			$url .= '&amp;v=' . $globalOptions['version'];
@@ -9841,10 +9863,7 @@ class TrialTracker
 				$url .= '&amp;list=2';
 			}
 		}
-		if(isset($globalOptions['change']))
-		{
-			$url .= '&amp;change=' . str_replace(' ', '+', $globalOptions['change']);
-		}
+		
 		if(isset($globalOptions['onlyUpdates']) && $globalOptions['onlyUpdates'] == 'yes')
 		{
 			$url .= '&amp;osu=' . 'on';
@@ -11934,6 +11953,7 @@ function htmlformat($str)
 }
 
 function getDifference($valueOne, $valueTwo) 
+
 {
 	if($valueOne == 0)
 	{

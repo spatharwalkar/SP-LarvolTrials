@@ -79,13 +79,9 @@ $globalOptions['minEnroll'] = "0";
 $globalOptions['maxEnroll'] = "0";
 $globalOptions['product'] = "";
 
+$globalOptions['change'] = '1 month';
 $globalOptions['startrange'] = "now";
 $globalOptions['endrange'] = "1 month ago";
-
-if(isset($_GET['change']))
-{
-	$globalOptions['change'] = $_GET['change'];
-}
 
 if(isset($_GET['minenroll']) && isset($_GET['maxenroll']))
 {
@@ -108,8 +104,9 @@ if(isset($_GET['er']))
 	$globalOptions['endrange'] = $_GET['er'];
 }
 
+
 switch($globalOptions['startrange'])
-{
+{	
 	case "now": $starttimerange = 0; break;
 	case "1 week ago": $starttimerange = 1; break;
 	case "2 weeks ago": $starttimerange = 2; break;
@@ -128,6 +125,22 @@ switch($globalOptions['endrange'])
 	case "1 quarter ago": $endtimerange = 4; break;
 	case "1 year ago": $endtimerange = 5; break;
 	default: $endtimerange = 3; break;
+}
+
+if(isset($_GET['change']) && $_GET['change'] != '')
+{
+	$globalOptions['change'] = $_GET['change'];
+	$globalOptions['startrange'] = 'now';
+	$globalOptions['endrange'] = $globalOptions['change'] . ' ago';
+}
+
+switch($globalOptions['change'])
+{
+	case "1 week": $change_value = 1; break;
+	case "2 weeks": $change_value = 2; break;
+	case "1 month": $change_value = 3; break;
+	case "1 quarter": $change_value = 4; break;
+	case "1 year": $change_value = 5; break;
 }
 	
 $lastChangedTime = filectime("css/intermediary.css");
@@ -280,10 +293,6 @@ $lastChangedTime = filectime("css/intermediary.css");
 			$("#amount").val("0 - <?php echo $globalOptions['maxEnroll'];?>");
 			$( "#slider-range").slider( "option", "value", parseInt(<?php echo $globalOptions['maxEnroll'];?>));
 			
-			$("#amount3").val("1 month");
-			$( "#slider-range-min").slider({ step: 2});
-			
-			//$("#frmOtt").submit();
 			return true;
 		});
 	});
@@ -437,6 +446,8 @@ else
 {
 	die('cell not set');
 }
+
+global $db;
 ?>
 <div id="slideout">
     <img src="images/help.png" alt="Help" />
@@ -489,6 +500,7 @@ else
 		$("#amount").val( $("#slider-range").slider("values", 0 ) +
 			" - " + $("#slider-range").slider("values", 1 ) );
 		
+		<?php if($db->loggedIn()) { ?>
 		//highlight changes slider
 		$("#slider-range-min").slider({
 			range: true,
@@ -501,7 +513,20 @@ else
 				$("#endrange").val(timeEnum(ui.values[1]));
 			}
 		});
-		
+		<?php } else { ?>
+		$("#slider-range-min").slider({
+			range: "min",
+			value: <?php echo $change_value;?>,
+			min: 1,
+			max: 5,
+			step:1,
+			slide: function( event, ui ) {
+				$("#amount3").val(timeEnumforGuests(ui.value));
+			}
+		});
+		$timerange = '<?php echo $globalOptions['change'];?>';
+		$("#amount3").val($timerange);
+		<?php } ?>
 	});
 
 	function timeEnum($timerange)
@@ -514,6 +539,19 @@ else
 			case 3: $timerange = "1 month ago"; break;
 			case 4: $timerange = "1 quarter ago"; break;
 			case 5: $timerange = "1 year ago"; break;
+		}
+		return $timerange;
+	}
+	
+	function timeEnumforGuests($timerange)
+	{
+		switch($timerange)
+		{
+			case 1: $timerange = "1 week"; break;
+			case 2: $timerange = "2 weeks"; break;
+			case 3: $timerange = "1 month"; break;
+			case 4: $timerange = "1 quarter"; break;
+			case 5: $timerange = "1 year"; break;
 		}
 		return $timerange;
 	}
