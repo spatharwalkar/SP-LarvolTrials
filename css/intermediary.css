@@ -497,3 +497,12 @@ tr.upms td {
 	margin-right: 1px;
 	padding-top:3px;
 }
+
+.button{
+      background: url(../images/search.png) no-repeat center;
+      width: 65px;
+      height: 30px;
+	  border-radius: 25px;
+	 -moz-border-radius: 25px;
+      /*color:white;*/
+}

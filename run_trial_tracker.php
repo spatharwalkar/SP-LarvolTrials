@@ -9804,7 +9804,7 @@ class TrialTracker
 			$url .= '&amp;LI=1';
 		}
 		echo '<div style="float:left;margin-right:25px;">'
-				. '<input type="submit" id="Show" value="Show" />&nbsp;<a style="display:inline;" href="' . $url
+				. '<input type="submit" id="Show" value="" class="button" />&nbsp;<a style="display:inline;" href="' . $url
 				. '"><input type="button" value="Reset" id="reset" /></a>'
 				. '&nbsp;&nbsp;&nbsp;<b>' . $shownCount . '&nbsp;Records</b></div>';
 	}
