@@ -438,7 +438,7 @@ function editor()
 	else if($rptu === NULL)
 	$owner_type="global";
 	
-	$query = 'SELECT `num`,`type`,`type_id`, `display_name` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' ORDER BY num ASC';
+	$query = 'SELECT `num`,`type`,`type_id`, `display_name`, `category` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' ORDER BY num ASC';
 	$res = mysql_query($query) or die('Bad SQL query getting master heatmap report headers');
 	$rows = array();
 	$columns = array();
@@ -453,6 +453,7 @@ function editor()
 				$result =  mysql_fetch_assoc(mysql_query("SELECT id, name FROM `areas` WHERE id = '" . $header['type_id'] . "' "));
 				$columns[$header['num']] = $result['name'];
 				$columnsDisplayName[$header['num']] = $header['display_name']; ///Display name from master hm header table
+				$columnsCategoryName[$header['num']] = $header['category'];
 			}
 			else
 			{
@@ -466,6 +467,7 @@ function editor()
 			{
 				$result =  mysql_fetch_assoc(mysql_query("SELECT id, name FROM `products` WHERE id = '" . $header['type_id'] . "' "));
 				$rows[$header['num']] = $result['name'];
+				$rowsCategoryName[$header['num']] = $header['category'];
 			}
 			else
 			{
@@ -741,7 +743,9 @@ function editor()
 				. ' onkeyup="javascript:autoComplete(\'areas'.$col.'\')" '.(($disabled) ? ' readonly="readonly" ':'').' /><br />';
 				
 		$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col]:'';
+		$cat = (isset($columnsCategoryName[$col]) && $columnsCategoryName[$col] != '')?$columnsCategoryName[$col]:'';
 		$out .= 'Display Name: <br/><input type="text" id="areas_display' . $col . '" name="areas_display[' . $col . ']" value="' . $val . '" '.(($disabled) ? ' readonly="readonly" ':'').' /><br />';
+		$out .= 'Category Name: <br/><input type="text" id="category_area' . $col . '" name="category_area[' . $col . ']" value="' . $cat . '" '.(($disabled) ? ' readonly="readonly" ':'').' /><br />';
 				
 		$out .= 'Column : '.$col.' ';
 		
@@ -809,8 +813,11 @@ function editor()
 	$out .= '</tr>';
 	foreach($rows as $row => $rval)
 	{
+		$cat = (isset($rowsCategoryName[$row]) && $rowsCategoryName[$row] != '')?$rowsCategoryName[$row]:'';
 		$out .= '<tr><th><input type="text" id="products' . $row . '"  name="products[' . $row . ']" value="' . $rval . '" autocomplete="off" '
 				. ' onkeyup="javascript:autoComplete(\'products'.$row.'\')" '.(($disabled) ? ' readonly="readonly" ':'').' /><br />';
+				
+		$out .= 'Category Name: <br/><input type="text" id="category_product' . $row . '" name="category_product[' . $row . ']" value="' . $cat . '" '.(($disabled) ? ' readonly="readonly" ':'').' /><br />';
 		
 		$out .= 'Row : '.$row.' ';
 		
@@ -1030,7 +1037,7 @@ function Download_reports()
 	$description = htmlspecialchars($res['description']);
 	$category = $res['category'];
 	
-	$query = 'SELECT `num`,`type`,`type_id`, `display_name` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' ORDER BY num ASC';
+	$query = 'SELECT `num`,`type`,`type_id`, `display_name`, `category` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' ORDER BY num ASC';
 	$res = mysql_query($query) or die('Bad SQL query getting master heatmap report headers');
 	$rows = array();
 	$columns = array();
@@ -1050,6 +1057,7 @@ function Download_reports()
 				//$columnsDisplayName[$header['num']] = $result['display_name'];
 				$columnsDescription[$header['num']] = $result['description'];
 				$columnsDisplayName[$header['num']] = $header['display_name'];	///Display name from master hm header table
+				$columnsCategoryName[$header['num']] = $header['category'];
 			}
 			else
 			{
@@ -1065,6 +1073,7 @@ function Download_reports()
 				$rows[$header['num']] = $result['name'];
 				$rowsDisplayName[$header['num']] = '';
 				$rowsDescription[$header['num']] = $result['description'];
+				$rowsCategoryName[$header['num']] = $header['category'];
 			}
 			else
 			{
@@ -1324,9 +1333,10 @@ function Download_reports()
 		{
 			$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col]:$val;
 			$cdesc = (isset($columnsDescription[$col]) && $columnsDescription[$col] != '')?$columnsDescription[$col]:null;
+			$cat = (isset($columnsCategoryName[$col]) && $columnsCategoryName[$col] != '')? ' ('.$columnsCategoryName[$col].') ':'';
 			$caltTitle = (isset($cdesc) && $cdesc != '')?' alt="'.$cdesc.'" title="'.$cdesc.'" ':null;
 				
-			$pdfContent .= '<th width="150px" '.$caltTitle.'><div align="center">'. $val .'<br />';
+			$pdfContent .= '<th width="150px" '.$caltTitle.'><div align="center">'. $val . $cat .'<br />';
 			
 			if(isset($areaIds[$col]) && $areaIds[$col] != NULL && !empty($productIds))
 			{
@@ -1386,8 +1396,9 @@ function Download_reports()
 		{
 			//$rval = (isset($rowsDisplayName[$row]) && $rowsDisplayName[$row] != '')?$rowsDisplayName[$row]:$rval;
 			$rdesc = (isset($rowsDescription[$row]) && $rowsDescription[$row] != '')?$rowsDescription[$row]:null;
+			$cat = (isset($rowsCategoryName[$row]) && $rowsCategoryName[$row] != '')? ' ('.$rowsCategoryName[$row].') ':'';
 			$raltTitle = (isset($rdesc) && $rdesc != '')?' alt="'.$rdesc.'" title="'.$rdesc.'" ':null;
-			$pdfContent .= '<tr  style="page-break-inside:avoid;" nobr="true"><th width="150px" '.$raltTitle.'><div align="center">' . $rval . '<br />';
+			$pdfContent .= '<tr  style="page-break-inside:avoid;" nobr="true"><th width="150px" '.$raltTitle.'><div align="center">' . $rval . $cat .'<br />';
 					
 			if(isset($productIds[$row]) && $productIds[$row] != NULL && !empty($areaIds))
 			{
@@ -1409,9 +1420,9 @@ function Download_reports()
 			
 			foreach($columns as $col => $cval)
 			{
-				$pdfContent .= '<td width="150px" align="center" style="text-align:center; '.$data_matrix[$row][$col]['color'].'" align="center">&nbsp;&nbsp;&nbsp;&nbsp;';
+				$pdfContent .= '<td width="150px" align="center" style="text-align:center; '.(($data_matrix[$row][$col]['total'] != 0) ? $data_matrix[$row][$col]['color']:'background-color:#BFBFBF;').'" align="center">&nbsp;&nbsp;&nbsp;&nbsp;';
 				
-				if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL)
+				if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL && $data_matrix[$row][$col]['total'] != 0)
 				{
 					
 					if($_POST['dwcount']=='active')
@@ -1539,9 +1550,9 @@ function Download_reports()
 			foreach($rows as $row => $rval)
 			foreach($columns as $col => $cval)
 			{
-				if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL)
+				if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL  && $data_matrix[$row][$col]['total'] != 0)
 				{
-					if($data_matrix[$row][$col]['bomb_explain'] != NULL && $data_matrix[$row][$col]['bomb_explain'] != '' && $data_matrix[$row][$col]['bomb']['src'] != 'square.png')
+					if($data_matrix[$row][$col]['bomb_explain'] != NULL && trim($data_matrix[$row][$col]['bomb_explain']) != '' && $data_matrix[$row][$col]['bomb']['src'] != 'new_square.png')
 					{
 						$count_fillbomb_again++;
 						$pdfContent .=  '<tr style="page-break-inside:avoid;" nobr="true"><td align="left"><div style="padding-left:10px;">'. $count_fillbomb_again .'</div></td>'
@@ -1549,7 +1560,7 @@ function Download_reports()
 							. '<td align="left"><div style="padding-left:10px;">'. $data_matrix[$row][$col]['bomb_explain'] .'</div></td></tr>';
 					}
 						
-					if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
+					if($data_matrix[$row][$col]['filing'] != NULL && trim($data_matrix[$row][$col]['filing']) != '')
 					{
 						$count_fillbomb_again++;
 						$pdfContent .=  '<tr style="page-break-inside:avoid;" nobr="true"><td align="left" width="30px"><div style="padding-left:10px;">'. $count_fillbomb_again .'</div></td>'
@@ -1557,7 +1568,7 @@ function Download_reports()
 							. '<td align="left"><div style="padding-left:10px;">'. $data_matrix[$row][$col]['filing'] .'</div></td></tr>';
 					}
 					
-					if($data_matrix[$row][$col]['phase_explain'] != NULL && $data_matrix[$row][$col]['phase_explain'] != '')
+					if($data_matrix[$row][$col]['phase_explain'] != NULL && trim($data_matrix[$row][$col]['phase_explain']) != '')
 					{
 						$count_fillbomb_again++;
 						$pdfContent .=  '<tr style="page-break-inside:avoid;" nobr="true" ><td align="left" width="30px"><div style="padding-left:10px;">'. $count_fillbomb_again .'</div></td><td align="left" width="30px"><div style="padding-left:10px;"><img align="right" title="Phase Explain" src="images/phaseexp.png" style="width:15px; height:15px; vertical-align:top; cursor:pointer;" alt="Filing" /></div></td><td align="left"><div style="padding-left:10px;">'. $data_matrix[$row][$col]['phase_explain'] .'</div></td></tr>';
@@ -1669,10 +1680,11 @@ function Download_reports()
 				//TODO
 				$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col]:$val;
 				$cdesc = (isset($columnsDescription[$col]) && $columnsDescription[$col] != '')?$columnsDescription[$col]:null;
+				$cat = (isset($columnsCategoryName[$col]) && $columnsCategoryName[$col] != '')? ' ('.$columnsCategoryName[$col].') ':'';
 				$caltTitle = (isset($cdesc) && $cdesc != '')?' alt="'.$cdesc.'" title="'.$cdesc.'" ':null;
 								
-				$objPHPExcel->getActiveSheet()->setCellValue($cell, $val.$count_val);
-				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlencode(urlPath() . 'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]));
+				$objPHPExcel->getActiveSheet()->setCellValue($cell, $val.$cat.$count_val);
+				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]);
 				
 				if($cdesc)
 				{
@@ -1726,10 +1738,11 @@ function Download_reports()
 				//TODO
 				//$rval = (isset($rowsDisplayName[$row]) && $rowsDisplayName[$row] != '')?$rowsDisplayName[$row]:$rval;
 				$rdesc = (isset($rowsDescription[$row]) && $rowsDescription[$row] != '')?$rowsDescription[$row]:null;
+				$cat = (isset($rowsCategoryName[$row]) && $rowsCategoryName[$row] != '')? ' ('.$rowsCategoryName[$row].') ':'';
 				$raltTitle = (isset($rdesc) && $rdesc != '')?' alt="'.$rdesc.'" title="'.$rdesc.'" ':null;
 				
-				$objPHPExcel->getActiveSheet()->setCellValue($cell, $rval.$count_val);
-				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlencode(urlPath() . 'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds))); 
+				$objPHPExcel->getActiveSheet()->setCellValue($cell, $rval.$cat.$count_val);
+				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds)); 
  			    $objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip($tooltip);
  			    
  			    if($rdesc)
@@ -1751,7 +1764,7 @@ function Download_reports()
 			foreach($columns as $col => $cval)
 			{
 				$cell = num2char($col) . ($row + 1);
-				if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL)
+				if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL  && $data_matrix[$row][$col]['total'] != 0)
 				{
 					if($_POST['dwcount']=='active')
 					{
@@ -1768,8 +1781,8 @@ function Download_reports()
 					
 					
 					$objPHPExcel->getActiveSheet()->setCellValue($cell, $count_val);
-					$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlencode(urlPath() . 'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col])); 
- 			    	$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip($tooltip."\nFiling:- ". $data_matrix[$row][$col]['filing'] ."\nBomb Details:- ". $data_matrix[$row][$col]['bomb_explain']."\nPhase Explain:- ". $data_matrix[$row][$col]['phase_explain']);
+					$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]); 
+ 			    	$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip($tooltip.(($data_matrix[$row][$col]['filing'] != NULL && trim($data_matrix[$row][$col]['filing']) != '')? "\nFiling:- ". $data_matrix[$row][$col]['filing'] :'') . (($data_matrix[$row][$col]['bomb_explain'] != NULL && trim($data_matrix[$row][$col]['bomb_explain']) != '') ? "\nBomb Details:- ". $data_matrix[$row][$col]['bomb_explain'] : '') . (($data_matrix[$row][$col]['phase_explain'] != NULL && trim($data_matrix[$row][$col]['phase_explain']) != '') ? "\nPhase Explain:- ". $data_matrix[$row][$col]['phase_explain']:'' ) );
 					
 					if($data_matrix[$row][$col]['exec_bomb']['src'] != '' && $data_matrix[$row][$col]['exec_bomb']['src'] != NULL && $data_matrix[$row][$col]['exec_bomb']['src'] !='new_square.png')
 					{
@@ -1810,7 +1823,7 @@ function Download_reports()
 					
 			$cell = num2char(count($columns)+1).'1';
 			$objPHPExcel->getActiveSheet()->setCellValue($cell, $count_val);
-			$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlencode(urlPath() . 'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds)));
+			$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds));
 			$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip($tooltip);
 		}
 		
@@ -2002,11 +2015,13 @@ function postEd()
 					else
 					$display_name='NULL';
 					
+					$category=mysql_real_escape_string($_POST['category_'.$t][$num]);
+					
 					$query = "select id from " . $t . "s where name='" . mysql_real_escape_string($header) . "' ";
 					$row = mysql_fetch_assoc(mysql_query($query)) or die('Bad SQL Query getting ' . $t . ' names ');
 					
 					$query = 'UPDATE rpt_masterhm_headers SET type_id="' . mysql_real_escape_string($row['id']) 
-					. '", `display_name` = "' . $display_name . '" WHERE report=' . $id . ' AND num=' . $num . ' AND type="' . $t . '" LIMIT 1';
+					. '", `display_name` = "' . $display_name . '", `category` = "' . $category . '" WHERE report=' . $id . ' AND num=' . $num . ' AND type="' . $t . '" LIMIT 1';
 					mysql_query($query) or die('Bad SQL Query saving ' . $t . ' names '); 
 				}
 			}

@@ -18,7 +18,7 @@ $footnotes = htmlspecialchars($res['footnotes']);
 $description = htmlspecialchars($res['description']);
 $category = $res['category'];
 	
-$query = 'SELECT `num`,`type`,`type_id`, `display_name` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' ORDER BY num ASC';
+$query = 'SELECT `num`,`type`,`type_id`, `display_name`, `category` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' ORDER BY num ASC';
 $res = mysql_query($query) or die('Bad SQL query getting master heatmap report headers');
 $rows = array();
 $columns = array();
@@ -38,6 +38,7 @@ while($header = mysql_fetch_array($res))
 			//$columnsDisplayName[$header['num']] = $result['display_name'];
 			$columnsDisplayName[$header['num']] = $header['display_name'];	///Display name from master hm header table
 			$columnsDescription[$header['num']] = $result['description'];
+			$columnsCategoryName[$header['num']] = $header['category'];
 		}
 		else
 		{
@@ -53,6 +54,7 @@ while($header = mysql_fetch_array($res))
 			$rows[$header['num']] = $result['name'];
 			if($result['company'] != NULL && trim($result['company']) != '') $rows[$header['num']] = $result['name'].' / '.$result['company'];
 			$rowsDescription[$header['num']] = $result['description'];
+			$rowsCategoryName[$header['num']] = $header['category'];
 		}
 		else
 		{
@@ -332,7 +334,7 @@ width:100px;
 <style type="text/css">
 .tooltip {
 	border-bottom: 1px dotted #000000; color: #000000; outline: none;
-	cursor:pointer; text-decoration: none;
+	cursor:default; text-decoration: none;
 }
 .tooltip span {
 	border-radius: 5px 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px; 
@@ -684,7 +686,6 @@ function change_view()
 						document.getElementById("Red_Cell_"+i).style.display = "none";
 						document.getElementById("Red_Cell_CDate_"+i).style.display = "none";
 						document.getElementById("Red_Cell_"+i).style.display = "inline";
-						qualify_title = "Red Cell ON";
 					}
 				}
 				
@@ -786,7 +787,7 @@ $(function()
 			change_view();
 		}
 	});
-	$timerange = "1 month";
+	$timerange = "1 month ago";
 	$("#endrange").val($timerange);
 <?php } else { ?>
 //highlight changes slider
@@ -883,6 +884,7 @@ foreach($columns as $col => $val)
 	$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col]:$val;
 	$cdesc = (isset($columnsDescription[$col]) && $columnsDescription[$col] != '')?$columnsDescription[$col]:null;
 	$caltTitle = (isset($cdesc) && $cdesc != '')?' alt="'.$cdesc.'" title="'.$cdesc.'" ':null;
+	$cat = (isset($columnsCategoryName[$col]) && $columnsCategoryName[$col] != '')? ' ('.$columnsCategoryName[$col].') ':'';
 		
 	$htmlContent .= '<th id="Cell_ID_'.$online_HMCounter.'" width="80px" '.$caltTitle.'>';
 	
@@ -891,7 +893,7 @@ foreach($columns as $col => $val)
 		$htmlContent .= '<input type="hidden" value="'.$col_active_total[$col].',endl,'.$col_count_total[$col].',endl,'.$col_indlead_total[$col].'" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
 		$htmlContent .= '<input type="hidden" value="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />';
 		
-		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" title="Active Trials" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. '" target="_blank">'.$val.'</a>';
+		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" title="Active Trials" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. '" target="_blank">'.$val.$cat.'</a>';
 	}
 		$htmlContent .='</div></th>';
 }
@@ -920,6 +922,7 @@ foreach($rows as $row => $rval)
 	$online_HMCounter++;
 	//$rval = (isset($rowsDisplayName[$row]) && $rowsDisplayName[$row] != '')?$rowsDisplayName[$row]:$rval; //Commente as as planned to ignore display name in Product only
 	$rdesc = (isset($rowsDescription[$row]) && $rowsDescription[$row] != '')?$rowsDescription[$row]:null;
+	$cat = (isset($rowsCategoryName[$row]) && $rowsCategoryName[$row] != '')? ' ('.$rowsCategoryName[$row].') ':'';
 	$raltTitle = (isset($rdesc) && $rdesc != '')?' alt="'.$rdesc.'" title="'.$rdesc.'" ':null;
 	$htmlContent .= '<tr style="page-break-inside:avoid;"><th style="width:200px; padding-left:4px; height:100%;" id="Cell_ID_'.$online_HMCounter.'" '.$raltTitle.'><div align="left">';
 			
@@ -928,7 +931,7 @@ foreach($rows as $row => $rval)
 		$htmlContent .= '<input type="hidden" value="'.$row_active_total[$row].',endl,'.$row_count_total[$row].',endl,'.$row_indlead_total[$row].'" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
 		$htmlContent .= '<input type="hidden" value="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />';
 		
-		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" title="Active Trials" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). '&list=1&sr=now&er=1 month ago" target="_blank" class="ottlink">'.$rval.'&nbsp;</a>';
+		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" title="Active Trials" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). '&list=1&sr=now&er=1 month ago" target="_blank" class="ottlink">'.$rval.$cat.'&nbsp;</a>';
 	}
 	$htmlContent .= '</div></th>';
 	
@@ -940,7 +943,7 @@ foreach($rows as $row => $rval)
 		if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL && $data_matrix[$row][$col]['total'] != 0)
 		{
 			
-			$htmlContent .= '<div id="Div_ID_'.$online_HMCounter.'" style="'.$data_matrix[$row][$col]['div_start_style'].' width:100%; height:100%; " onclick="popup_show(\'allpopup\', '.count($rows).','.count($columns).',\'allpopup_'.$row.'_'.$col.'\', \'allpopup_drag_'.$row.'_'.$col.'\', \'allpopup_exit_'.$row.'_'.$col.'\', \'mouse\', -10, -10);">';
+			$htmlContent .= '<div id="Div_ID_'.$online_HMCounter.'" style="'.$data_matrix[$row][$col]['div_start_style'].' width:100%; height:100%; ">';
 			
 			$htmlContent .= '<input type="hidden" value="'.$data_matrix[$row][$col]['active'].',endl,'.$data_matrix[$row][$col]['total'].',endl,'.$data_matrix[$row][$col]['indlead'].',endl,'.$data_matrix[$row][$col]['active_prev'].',endl,'.$data_matrix[$row][$col]['total_prev'].',endl,'.$data_matrix[$row][$col]['indlead_prev'].',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['last_update'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['last_update'])).',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['count_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['count_lastchanged'])).',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])).',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['filing_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['filing_lastchanged'])).',endl,'.$data_matrix[$row][$col]['color_code'].',endl,'.$data_matrix[$row][$col]['bomb']['value'].',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['phase_explain_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['phase_explain_lastchanged'])).',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['phase4_override_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['phase4_override_lastchanged'])).',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['highest_phase_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['highest_phase_lastchanged'])).',endl,\''.$data_matrix[$row][$col]['highest_phase_prev'].'\'" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
 			
@@ -979,7 +982,7 @@ foreach($rows as $row => $rval)
 							
 						if($data_matrix[$row][$col]['bomb']['src'] != 'new_square.png')
 						{
-							$htmlContent .= '<font style="color:#000000; font-weight: 900;" id="Bomb_Img_'.$online_HMCounter.'">'.$data_matrix[$row][$col]['bomb']['alt'].' </font><font id="Bomb_CDate_'.$online_HMCounter.'">'. (($data_matrix[$row][$col]['bomb_lastchanged'] != NULL && $data_matrix[$row][$col]['bomb_lastchanged'] != '') ? '<font style="color:#206040; font-weight: 900;">(Updated:</font><font style="color:#000000; font-weight: normal;">'.date('Y-m-d', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])).'</font><font style="color:#206040; font-weight: 900;">) </font>' : '') .'</font> '.(($data_matrix[$row][$col]['bomb_explain'] != NULL && $data_matrix[$row][$col]['bomb_explain'] != '')? '<font style="color:#206040; font-weight: 900;">: </font>'. $data_matrix[$row][$col]['bomb_explain'] .'<input type="hidden" value="1" name="Bomb_Presence_'.$online_HMCounter.'" id="Bomb_Presence_'.$online_HMCounter.'" />':'' ).'</br>'
+							$htmlContent .= '<font style="color:#000000; font-weight: 900;" id="Bomb_Img_'.$online_HMCounter.'">'.$data_matrix[$row][$col]['bomb']['alt'].' </font><font id="Bomb_CDate_'.$online_HMCounter.'">'. (($data_matrix[$row][$col]['bomb_lastchanged'] != NULL && $data_matrix[$row][$col]['bomb_lastchanged'] != '') ? '<font style="color:#206040; font-weight: 900;">(Updated:</font><font style="color:#000000; font-weight: normal;">'.date('Y-m-d', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])).'</font><font style="color:#206040; font-weight: 900;">) </font>' : '') .'</font>'.(($data_matrix[$row][$col]['bomb_explain'] != NULL && $data_matrix[$row][$col]['bomb_explain'] != '')? '<font style="color:#206040; font-weight: 900;">: </font>'. $data_matrix[$row][$col]['bomb_explain'] .'<input type="hidden" value="1" name="Bomb_Presence_'.$online_HMCounter.'" id="Bomb_Presence_'.$online_HMCounter.'" />':'' ).'</br>'
 							.'';
 						}
 							
