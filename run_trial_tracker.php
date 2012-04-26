@@ -10166,7 +10166,7 @@ class TrialTracker
 			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr 
 						. '"><div class="rowcollapse"><a style="color:' . $titleLinkColor . '"  ';
 			if($trials[$i]['NCT/nct_id'] !== '' && $trials[$i]['NCT/nct_id'] !== NULL)
-			{  
+			{   
 				$outputStr .= ' href="http://clinicaltrials.gov/ct2/show/' . padnct($trials[$i]['NCT/nct_id']) . '" ';
 			}
 			else if(isset($trials[$i]['source']) && $trials[$i]['source'] !== '' && $trials[$i]['source'] !== NULL)
@@ -10184,7 +10184,10 @@ class TrialTracker
 				$outputStr .= ' onclick="INC_ViewCount('.$trials[$i]['larvol_id'].')">'
 							.'<font id="ViewCount_'.$trials[$i]['larvol_id'].'">';
 				if($trials[$i]['viewcount'] != '' && $trials[$i]['viewcount'] != NULL && $trials[$i]['viewcount'] > 0)
-					$outputStr .= '<font size="1px" style="background-color:#CCCCCC">'.$trials[$i]['viewcount'].'&nbsp;</font>'; 
+				{
+					$outputStr .= '<span style="background-color:#BDAEC6">' . $trials[$i]['viewcount'].'&nbsp;</span>'
+								. '<img src="images/statistics-icon.png" border="0" alt="ViewCount" />'; 
+				}
 				$outputStr .= '</font>'; 
 			}
 			else
