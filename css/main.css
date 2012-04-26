@@ -297,7 +297,7 @@ iframe{
 }
 .autocomplete div { 
 	padding:2px 5px; 
-	white-space:nowrap; 
+	white-space:wrap; 
 }
 .autocomplete strong { 
 	font-weight:normal; 

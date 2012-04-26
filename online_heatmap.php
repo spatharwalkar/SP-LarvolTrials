@@ -426,7 +426,6 @@ function change_view()
 					{
 						document.getElementById("Font_ID_"+i).innerHTML = Cell_values_Arr[0];
 						document.getElementById("Popup_Count_ID_"+i).innerHTML = Cell_values_Arr[3];
-						document.getElementById("Cell_Link_"+i).title = "Active Trials";
 					}
 				}
 				else if(view_type.value == 'total')
@@ -440,7 +439,6 @@ function change_view()
 					{
 						document.getElementById("Font_ID_"+i).innerHTML = Cell_values_Arr[1];
 						document.getElementById("Popup_Count_ID_"+i).innerHTML = Cell_values_Arr[4];
-						document.getElementById("Cell_Link_"+i).title = "Total Trials (Active + Inactive)";
 					}
 				}
 				else if(view_type.value == 'indlead')
@@ -454,7 +452,6 @@ function change_view()
 					{
 						document.getElementById("Font_ID_"+i).innerHTML = Cell_values_Arr[2];
 						document.getElementById("Popup_Count_ID_"+i).innerHTML = Cell_values_Arr[5];
-						document.getElementById("Cell_Link_"+i).title = "Active Industry Lead Sponsor Trials";
 					}
 					
 				}	
@@ -505,7 +502,7 @@ function change_view()
 						document.getElementById("Cell_Link_"+i).title = "Active Industry Lead Count Changed from: "+ Cell_values_Arr[5] +" On: "+ Cell_values_Arr[9];
 						document.getElementById("Cell_Link_"+i).style.color = "#FF0000";
 						document.getElementById("Cell_Link_"+i).style.fontWeight = "bold";
-						//if(Cell_values_Arr[14]=='FF0000')
+						if(Cell_values_Arr[14]=='FF0000')
 						document.getElementById("Cell_Link_"+i).style.backgroundColor = "#FFFFFF";
 						if(latest_date < count_cdate || latest_date == '')
 						{
@@ -518,7 +515,7 @@ function change_view()
 						document.getElementById("Cell_Link_"+i).title = "Total Count Changed from: "+ Cell_values_Arr[4] +" On: "+ Cell_values_Arr[9];
 						document.getElementById("Cell_Link_"+i).style.color = "#FF0000";
 						document.getElementById("Cell_Link_"+i).style.fontWeight = "bold";
-						//if(Cell_values_Arr[14]=='FF0000')
+						if(Cell_values_Arr[14]=='FF0000')
 						document.getElementById("Cell_Link_"+i).style.backgroundColor = "#FFFFFF";
 						if(latest_date < count_cdate || latest_date == '')
 						{
@@ -531,7 +528,7 @@ function change_view()
 						document.getElementById("Cell_Link_"+i).title = "Active Count Changed from: "+ Cell_values_Arr[3] +" On: "+ Cell_values_Arr[9];
 						document.getElementById("Cell_Link_"+i).style.color = "#FF0000";
 						document.getElementById("Cell_Link_"+i).style.fontWeight = "bold";
-						//if(Cell_values_Arr[14]=='FF0000')
+						if(Cell_values_Arr[14]=='FF0000')
 						document.getElementById("Cell_Link_"+i).style.backgroundColor = "#FFFFFF";
 						if(latest_date < count_cdate || latest_date == '')
 						{
@@ -735,15 +732,6 @@ function change_view()
 					if((phaseexp_ele != null && phaseexp_ele != '') || (filing_ele != null && filing_ele != '') || (bomb_presence_ele != null && bomb_presence_ele != '') || (phase4_ele != null && phase4_ele != ''))
 					{
 						document.getElementById("ToolTip_Visible_"+i).value = "1"
-						
-						document.getElementById("Div_ID_"+i).title = '';
-						document.getElementById("Cell_Link_"+i).title = '';
-						if(bomb_ele != null && bomb_ele != '')
-						document.getElementById("Cell_Bomb_"+i).title = '';
-						if(filing_ele != null && filing_ele != '')
-						document.getElementById("Cell_Filing_"+i).title = '';
-						if(phaseexp_ele != null && phaseexp_ele != '')
-						document.getElementById("Cell_Phase_"+i).title = '';
 					}
 					else
 					{
@@ -751,6 +739,14 @@ function change_view()
 					}
 					document.getElementById("Cell_ID_"+i).style.border = "#"+Cell_values_Arr[14]+" solid";
 					document.getElementById("Cell_ID_"+i).style.backgroundColor = "#"+Cell_values_Arr[14];
+					document.getElementById("Div_ID_"+i).title = '';
+					document.getElementById("Cell_Link_"+i).title = '';
+					if(bomb_ele != null && bomb_ele != '')
+					document.getElementById("Cell_Bomb_"+i).title = '';
+					if(filing_ele != null && filing_ele != '')
+					document.getElementById("Cell_Filing_"+i).title = '';
+					if(phaseexp_ele != null && phaseexp_ele != '')
+					document.getElementById("Cell_Phase_"+i).title = '';
 				}
 			
 			}	///Font Element If Ends
@@ -861,9 +857,9 @@ $htmlContent .= '<table width="100%" style="background-color:#FFFFFF;">'
 				. '<tr><th>View Mode</th><th class="right">Range</th></tr>'
 				. '<tr>'
 				. '<td class="bottom"><p style="margin-top:10px;margin-right:10px;"><select id="view_type" name="view_type" onchange="change_view()">'
-				. '<option value="active" selected="selected">Active Trials</option>'
-				. '<option value="total">All Trials</option>'
-				. '<option value="indlead">Active Industry Trials</option></select></p></td>'
+				. '<option value="indlead" selected="selected">Active Industry Trials</option>'
+				. '<option value="active">Active Trials</option>'
+				. '<option value="total">All Trials</option></select></p></td>'
 				. '<td style="background-color:#FFFFFF;" class="bottom right"><div class="demo"><p style="margin-top:10px;">'
 				. '<label for="startrange" style="float:left;margin-left:15px;"><b>Highlight updates:</b></label>'
 				. '<input type="text" id="startrange" name="sr" value="now" readonly="readonly" style="border:0; color:#f6931f; font-weight:bold; background-color:#FFFFFF; font-family:Verdana; font-size: 13px;" class="jdpicker" />'
@@ -910,7 +906,7 @@ if($toal_fld)
 		$htmlContent .= '<input type="hidden" value="'.$active_total.',endl,'.$count_total.',endl,'.$indlead_total.'" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
 		$htmlContent .= '<input type="hidden" value="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds). '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />';
 		
-		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" title="Active Trials" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds). '&list=1&sr=now&er=1 month ago" target="_blank"><font id="Tot_ID_'.$online_HMCounter.'">'.$active_total.'</font></a>';
+		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds). '&list=1&sr=now&er=1 month ago" target="_blank"><font id="Tot_ID_'.$online_HMCounter.'">'.$active_total.'</font></a>';
 	}
 	$htmlContent .= '</div></th>';
 }
@@ -931,7 +927,7 @@ foreach($rows as $row => $rval)
 		$htmlContent .= '<input type="hidden" value="'.$row_active_total[$row].',endl,'.$row_count_total[$row].',endl,'.$row_indlead_total[$row].'" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
 		$htmlContent .= '<input type="hidden" value="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />';
 		
-		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" title="Active Trials" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). '&list=1&sr=now&er=1 month ago" target="_blank" class="ottlink">'.$rval.$cat.'&nbsp;</a>';
+		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). '&list=1&sr=now&er=1 month ago" target="_blank" class="ottlink">'.$rval.$cat.'&nbsp;</a>';
 	}
 	$htmlContent .= '</div></th>';
 	
