@@ -1,6 +1,5 @@
 <?php
 require_once('db.php');
-require_once('report_common.php');
 
 require_once('PHPExcel.php');
 require_once('PHPExcel/Writer/Excel2007.php');
@@ -10,11 +9,6 @@ require_once('class.phpmailer.php');
 ini_set('memory_limit','-1');
 ini_set('max_execution_time','36000');	//10 hours
 
-if(!$db->loggedIn())
-{
-	header('Location: ' . urlPath() . 'index.php');
-	exit;
-}
 if($_POST['dwformat'])
 {
 	if($_POST['dwformat']=='htmldown')
@@ -23,6 +17,14 @@ if($_POST['dwformat'])
 		Download_reports();
 }
 else {
+require_once('report_common.php');
+
+if(!$db->loggedIn())
+{
+	header('Location: ' . urlPath() . 'index.php');
+	exit;
+}
+
 require('header.php');
 ?>
 <script type="text/javascript">
@@ -668,8 +670,9 @@ function editor()
 	$out = '<br/>&nbsp;&nbsp;<b>View Type: </b> <select id="view_type" name="view_type" onchange="window.location.href=\'master_heatmap.php?id='.$_GET['id'].'&view_type=\'+this.value+\'\'">'
 			. '<option value="active" '.(($_GET['view_type']!='total' && $_GET['view_type']!='indlead')? "selected=\"selected\"":"").'>Active Trials</option>'
 			. '<option value="total" '.(($_GET['view_type']=='total')? "selected=\"selected\"":"").'>All Trials</option>'
-			. '<option value="indlead"'.(($_GET['view_type']=='indlead')? "selected=\"selected\"":"").'>Active Industry Trials</option></select><br/>'
-			. '<form action="master_heatmap.php" method="post">'
+			. '<option value="indlead"'.(($_GET['view_type']=='indlead')? "selected=\"selected\"":"").'>Active Industry Trials</option></select><br/>';
+			
+	$out .= '<form action="master_heatmap.php" method="post">'
 			. '<fieldset><legend>Download Option</legend>'
 			. '<input type="hidden" name="id" value="' . $id . '" />';
 	if($toal_fld)
@@ -739,7 +742,7 @@ function editor()
 			
 	foreach($columns as $col => $val)
 	{
-		$out .= '<th>Area:<br/><input type="text" id="areas' . $col . '" name="areas[' . $col . ']" value="' . $val . '" autocomplete="off" '
+		$out .= '<th valign="top">Area:<br/><input type="text" id="areas' . $col . '" name="areas[' . $col . ']" value="' . $val . '" autocomplete="off" '
 				. ' onkeyup="javascript:autoComplete(\'areas'.$col.'\')" '.(($disabled) ? ' readonly="readonly" ':'').' /><br />';
 				
 		$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col]:'';

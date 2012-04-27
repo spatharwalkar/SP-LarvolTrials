@@ -18,7 +18,7 @@ $footnotes = htmlspecialchars($res['footnotes']);
 $description = htmlspecialchars($res['description']);
 $category = $res['category'];
 	
-$query = 'SELECT `num`,`type`,`type_id`, `display_name`, `category` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' ORDER BY num ASC';
+$query = 'SELECT `num`,`type`,`type_id`, `display_name`, `category` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' ORDER BY case when `category` is null or `category`=\'\' then 1 else 0 end, `category`, num ASC';
 $res = mysql_query($query) or die('Bad SQL query getting master heatmap report headers');
 $rows = array();
 $columns = array();
@@ -228,7 +228,7 @@ foreach($rows as $row => $rval)
 			$data_matrix[$row][$col]['last_update']=$cell_data['last_update'];
 			
 			$data_matrix[$row][$col]['div_start_style'] = $data_matrix[$row][$col]['color'];
-			$data_matrix[$row][$col]['cell_start_title'] = 'Active Trials';
+			//$data_matrix[$row][$col]['cell_start_title'] = 'Active Trials';
 			
 			$data_matrix[$row][$col]['count_lastchanged']=$cell_data['count_lastchanged'];
 			$data_matrix[$row][$col]['bomb']['style'] = $data_matrix[$row][$col]['bomb']['style'].' vertical-align:middle; cursor:pointer;';
@@ -282,7 +282,7 @@ foreach($rows as $row => $rval)
 <style type="text/css">
 body { font-family:Verdana; font-size: 13px;}
 a, a:hover{color:#000000;text-decoration:none; height:100%;}
-.display td, .display th {font-weight:normal; background-color:#DDF; vertical-align:top;}
+.display td, .display th {font-weight:normal; background-color:#DDF; vertical-align:middle;}
 .active{font-weight:bold;}
 .total{visibility:hidden;}
 .comma_sep{visibility:hidden;}
@@ -345,6 +345,99 @@ width:100px;
 }
 .classic { padding: 0.8em 1em; }
 .classic {background: #FFFFAA; border: 1px solid #FFAD33; }
+
+#slideout {
+	position: fixed;
+	top: 40px;
+	right: 0;
+	margin: 12px 0 0 0;
+}
+
+.slideout_inner {
+	position:absolute;
+	top: 40px;
+	right: -255px;
+	display:none;
+}
+
+#slideout:hover .slideout_inner{
+	display : block;
+	position:absolute;
+	top: 2px;
+	right: 0px;
+	width: 280px;
+	z-index:10;
+}
+
+.table-slide{
+	border:1px solid #000;
+}
+.table-slide td{
+	border-right:1px solid #000;
+	padding:8px;
+	padding-right:20px;
+	border-bottom:1px solid #000;
+}
+
+.gray {
+	background-color:#CCCCCC;
+	width: 35px;
+	height: 18px;
+	float: left;
+	text-align: center;
+	margin-right: 1px;
+	padding-top:3px;
+}
+
+.blue {
+	background-color:#00ccff;
+	width: 35px;
+	height: 18px;
+	float: left;
+	text-align: center;
+	margin-right: 1px;
+	padding-top:3px;
+}
+
+.green {
+	background-color:#99cc00;
+	width: 35px;
+	height: 18px;
+	float: left;
+	text-align: center;
+	margin-right: 1px;
+	padding-top:3px;
+}
+
+.yellow {
+	background-color:#ffff00;
+	width: 35px;
+	height: 18px;
+	float: left;
+	text-align: center;
+	margin-right: 1px;
+	padding-top:3px;
+}
+
+.orange {
+	background-color:#ff9900;
+	width: 35px;
+	height: 18px;
+	float: left;
+	text-align: center;
+	margin-right: 1px;
+	padding-top:3px;
+}
+
+.red {
+	background-color:#ff0000;
+	width: 35px;
+	height: 18px;
+	float: left;
+	text-align: center;
+	margin-right: 1px;
+	padding-top:3px;
+}
 </style>
 <script language="javascript" type="text/javascript">
 function change_view()
@@ -841,6 +934,31 @@ function display_tooltip(type, id)
 </head>
 
 <body>
+<div id="slideout">
+    <img src="images/help.png" alt="Help" />
+    <div class="slideout_inner">
+        <table bgcolor="#FFFFFF" cellpadding="0" cellspacing="0" class="table-slide">
+        <tr><td width="15%"><img title="Large Bomb" src="images/new_lbomb.png"  style="width:15px; height:15px; cursor:pointer;" /></td><td>Large Bomb</td></tr>
+        <tr><td><img title="Large Bomb" src="images/newred_lbomb.png"  style="width:15px; height:15px; cursor:pointer;" /></td><td>Large Bomb (Updated)</td></tr>
+        <tr><td><img title="Small Bomb" src="images/new_sbomb.png"  style="width:15px; height:15px; cursor:pointer;" /></td><td>Small Bomb</td></tr>
+        <tr><td><img title="Large Bomb" src="images/newred_sbomb.png"  style="width:15px; height:15px; cursor:pointer;" /></td><td>Small Bomb (Updated)</td></tr>
+        <tr><td><img title="Filing" src="images/new_file.png"  style="width:15px; height:15px; cursor:pointer;" /></td><td>Filing Details</td></tr>
+        <tr><td><img title="Filing" src="images/newred_file.png"  style="width:15px; height:15px; cursor:pointer;" /></td><td>Filing Details (Updated)</td></tr>
+        <tr><td><img title="Phase Explain" src="images/phaseexp.png"  style="width:15px; height:15px; cursor:pointer;" /></td><td>Phase Explain</td></tr>
+        <tr><td><img title="Phase Explain" src="images/phaseexp_red.png"  style="width:15px; height:15px; cursor:pointer;" /></td><td>Phase Explain (Updated)</td></tr>
+        <tr><td colspan="2" style="padding-right: 1px;">
+         <div style="float:left;padding-top:3px;">Phase&nbsp;</div>
+         <div class="gray">N/A</div>
+         <div class="blue">0</div>
+         <div class="green">1</div>
+         <div class="yellow">2</div>
+         <div class="orange">3</div>
+         <div class="red">4</div>
+         </td></tr>
+        </table>
+    </div>
+</div>
+
 <?php 
 
 $online_HMCounter=0;
@@ -853,25 +971,39 @@ $htmlContent .= '<table width="100%" style="background-color:#FFFFFF;">'
 				. 'larvoltrials@larvol.com</a></span></td>'
 				. '<td style="background-color:#FFFFFF;" class="result">Name: ' . htmlspecialchars($name) . '</td></tr></table><br/>'
 				
-				. '<table width="600px" border="0" cellspacing="0" class="controls" align="center">'
-				. '<tr><th>View Mode</th><th class="right">Range</th></tr>'
+				. '<table width="900px" border="0" cellspacing="0" class="controls" align="center">'
+				. '<tr><th>View Mode</th><th>Range</th><th class="right">Download Option</th></tr>'
 				. '<tr>'
-				. '<td class="bottom"><p style="margin-top:10px;margin-right:10px;"><select id="view_type" name="view_type" onchange="change_view()">'
+				. '<td class="bottom"><p style="margin-top:10px;margin-right:5px;"><select id="view_type" name="view_type" onchange="change_view()">'
 				. '<option value="indlead" selected="selected">Active Industry Trials</option>'
 				. '<option value="active">Active Trials</option>'
 				. '<option value="total">All Trials</option></select></p></td>'
-				. '<td style="background-color:#FFFFFF;" class="bottom right"><div class="demo"><p style="margin-top:10px;">'
+				. '<td style="background-color:#FFFFFF; width:380px;" class="bottom"><div class="demo"><p style="margin-top:10px;">'
 				. '<label for="startrange" style="float:left;margin-left:15px;"><b>Highlight updates:</b></label>'
 				. '<input type="text" id="startrange" name="sr" value="now" readonly="readonly" style="border:0; color:#f6931f; font-weight:bold; background-color:#FFFFFF; font-family:Verdana; font-size: 13px;" class="jdpicker" />'
 				. '<label style="color:#f6931f;float:left;">-</label> '
 				. '<input type="text" id="endrange"  name="er" value="1 month ago" readonly="readonly" style="border:0; color:#f6931f; font-weight:bold; background-color:#FFFFFF; font-family:Verdana; font-size: 13px;" class="jdpicker" />'
-				. '<br/><div id="slider-range-min" style="width:320px; margin:10px 10px 0 10px;margin-left:40px;" align="left"></div></p></div></td>'
+				. '<br/><div id="slider-range-min" style="width:320px; margin:10px 10px 0 10px;margin-left:20px;" align="left"></div></p></div></td>'
+				. '<td style="background-color:#FFFFFF;" class="bottom right"><p style="margin-top:10px;margin-left:5px;">'
+				. '<form action="master_heatmap.php" method="post">'
+				. '<input type="hidden" name="id" value="' . $id . '" />'
+				. '<b style="margin-left:5px;">Which Format: </b><select id="dwformat" name="dwformat">'
+				. '<option value="exceldown" selected="selected">Excel</option>'
+				. '<option value="pdfdown">PDF</option>'
+				. '</select><br/><br/>'
+				. '<b style="margin-left:5px;">Counts Display: </b><select id="dwcount" name="dwcount">'
+				. '<option value="indlead" selected="selected">Active Industry Trials</option>'
+				. '<option value="active">Active Trials</option>'
+				. '<option value="total">All Trials</option>'
+				. '</select><br/><br/><input type="submit" name="download" value="Download" title="Download" style="margin-left:5px;" />'
+				. '</form>'	
+				. '</p></td>'
 				. '</tr>'
 				. '</table>'
 				. '<br clear="all"/><br/>';
 						
 $htmlContent .= '<div align="center">'
-			. '<table style="padding-top:5px; height:100%;" class="display">'
+			. '<table style="padding-top:5px; height:100%; vertical-align:middle;"" class="display">'
 			. '<thead><tr style="page-break-inside:avoid; height:100%;" nobr="true"><th>&nbsp;</th>';
 						
 foreach($columns as $col => $val)
@@ -920,7 +1052,7 @@ foreach($rows as $row => $rval)
 	$rdesc = (isset($rowsDescription[$row]) && $rowsDescription[$row] != '')?$rowsDescription[$row]:null;
 	$cat = (isset($rowsCategoryName[$row]) && $rowsCategoryName[$row] != '')? ' ('.$rowsCategoryName[$row].') ':'';
 	$raltTitle = (isset($rdesc) && $rdesc != '')?' alt="'.$rdesc.'" title="'.$rdesc.'" ':null;
-	$htmlContent .= '<tr style="page-break-inside:avoid;"><th style="width:200px; padding-left:4px; height:100%;" id="Cell_ID_'.$online_HMCounter.'" '.$raltTitle.'><div align="left">';
+	$htmlContent .= '<tr style="page-break-inside:avoid; vertical-align:middle; height:100%;"><th style="width:400px; padding-left:4px; height:100%; vertical-align:middle;" id="Cell_ID_'.$online_HMCounter.'" '.$raltTitle.'><div align="left" style="vertical-align:middle; height:100%;">';
 			
 	if(isset($productIds[$row]) && $productIds[$row] != NULL && !empty($areaIds))
 	{
@@ -934,21 +1066,21 @@ foreach($rows as $row => $rval)
 	foreach($columns as $col => $cval)
 	{
 		$online_HMCounter++;
-		$htmlContent .= '<td class="tooltip" id="Cell_ID_'.$online_HMCounter.'" width="110px" style="'. (($data_matrix[$row][$col]['total'] != 0) ? $data_matrix[$row][$col]['cell_start_style'] : 'background-color:#BFBFBF;') .' padding:2px; height:100%;" align="center" onmouseover="display_tooltip(\'on\','.$online_HMCounter.');" onmouseout="display_tooltip(\'off\','.$online_HMCounter.');">';
+		$htmlContent .= '<td class="tooltip" valign="middle" id="Cell_ID_'.$online_HMCounter.'" width="110px" style="'. (($data_matrix[$row][$col]['total'] != 0) ? $data_matrix[$row][$col]['cell_start_style'] : 'background-color:#BFBFBF; border:#BFBFBF solid;') .' padding:2px; height:100%; vertical-align:middle; text-align:center; " align="center" onmouseover="display_tooltip(\'on\','.$online_HMCounter.');" onmouseout="display_tooltip(\'off\','.$online_HMCounter.');">';
 	
 		if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL && $data_matrix[$row][$col]['total'] != 0)
 		{
 			
-			$htmlContent .= '<div id="Div_ID_'.$online_HMCounter.'" style="'.$data_matrix[$row][$col]['div_start_style'].' width:100%; height:100%; ">';
+			$htmlContent .= '<div id="Div_ID_'.$online_HMCounter.'" style="'.$data_matrix[$row][$col]['div_start_style'].' width:100%; height:100%;  vertical-align:middle; float:none; display:table;">';
 			
 			$htmlContent .= '<input type="hidden" value="'.$data_matrix[$row][$col]['active'].',endl,'.$data_matrix[$row][$col]['total'].',endl,'.$data_matrix[$row][$col]['indlead'].',endl,'.$data_matrix[$row][$col]['active_prev'].',endl,'.$data_matrix[$row][$col]['total_prev'].',endl,'.$data_matrix[$row][$col]['indlead_prev'].',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['last_update'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['last_update'])).',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['count_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['count_lastchanged'])).',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])).',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['filing_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['filing_lastchanged'])).',endl,'.$data_matrix[$row][$col]['color_code'].',endl,'.$data_matrix[$row][$col]['bomb']['value'].',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['phase_explain_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['phase_explain_lastchanged'])).',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['phase4_override_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['phase4_override_lastchanged'])).',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['highest_phase_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['highest_phase_lastchanged'])).',endl,\''.$data_matrix[$row][$col]['highest_phase_prev'].'\'" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
 			
 			$htmlContent .= '<input type="hidden" value="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />&nbsp;';
 				
-			$htmlContent .= '<a onclick="INC_ViewCount(' . trim($productIds[$row]) . ',' . trim($areaIds[$col]) . ',' . $online_HMCounter .')" style="'.$data_matrix[$row][$col]['count_start_style'].' height:100%;" id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '&list=1&sr=now&er=1 month ago" target="_blank" title="'. $title .'"><font id="Font_ID_'.$online_HMCounter.'">'. $data_matrix[$row][$col]['active'] .'</font></a>&nbsp;';
+			$htmlContent .= '<a onclick="INC_ViewCount(' . trim($productIds[$row]) . ',' . trim($areaIds[$col]) . ',' . $online_HMCounter .')" style="'.$data_matrix[$row][$col]['count_start_style'].' height:100%; vertical-align:middle; padding-top:0px; padding-bottom:0px;" id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '&list=1&sr=now&er=1 month ago" target="_blank" title="'. $title .'"><font id="Font_ID_'.$online_HMCounter.'">'. $data_matrix[$row][$col]['active'] .'</font></a>&nbsp;';
 					
 			if($data_matrix[$row][$col]['bomb']['src'] != 'new_square.png') //When bomb has square dont include it in pdf as size is big and no use
-			{	$htmlContent .= '<img id="Cell_Bomb_'.$online_HMCounter.'" title="'.$data_matrix[$row][$col]['bomb']['title'].'" src="'. urlPath() .'images/'.$data_matrix[$row][$col]['bomb']['src'].'"  style="'.$data_matrix[$row][$col]['bomb']['style'].'" />'
+			{	$htmlContent .= '<img id="Cell_Bomb_'.$online_HMCounter.'" title="'.$data_matrix[$row][$col]['bomb']['title'].'" src="'. urlPath() .'images/'.$data_matrix[$row][$col]['bomb']['src'].'"  style="'.$data_matrix[$row][$col]['bomb']['style'].' vertical-align:middle;" />'
 			.'&nbsp;';				
 			}
 			
