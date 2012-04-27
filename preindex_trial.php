@@ -29,9 +29,8 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 		$field='area';
 	}
 
-	global $logger;
-	global $now;
-	global $db;
+	global $logger,$now,$db;
+	
 	$scraper_run=( isset($sourceid) and !is_null($sourceid) and !empty($sourceid) );
 	$DTnow = date('Y-m-d H:i:s',$now);
 	if(!isset($i)) $i=0;
@@ -64,17 +63,22 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 	foreach ($productz as $key => $product)
 		if( is_null($product) or empty($product) ) unset($productz[$key]);
 	
-	if(!is_null($cid) and !empty($cid) and $cid>0) $startid=$cid; 
-	else $startid=0;
-	$total=count($productz);
+	
+	if (!is_null($cid) and !empty($cid) and $cid>0)
+	{
+		$startid=$cid; 
+	}
+	else 
+	{
+		$startid=0;
+	}
+	$total = count($productz);
 	$current = 0;
-	$progress=0;	
+	$progress = 0;	
 	if(count($productz)>0)
 	{
-	
 		foreach ($productz as $key=>$value)
 		{
-			
 			if(!isset($value['id']) or empty($value['id'])) break;
 			$cid=$value['id'];
 			$searchdata = $value['searchdata'];
@@ -85,7 +89,6 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 			{
 				$cid=$value['id'];
 				// get the actual mysql query  
-				
 				try	
 					{
 						$query=buildQuery($searchdata);
@@ -105,6 +108,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					echo $searchdata;
 					echo '<br>';
 					--$total;
+					
 					if($up_id and !$scraper_run) 
 					{
 						$query = 'update update_status_fullhistory set process_id="'. $prid . '",status="2",update_items_total = "' . $total . '",trial_type="' . $ttype . '" where update_id= "'. $up_id .'" limit 1' ; 
@@ -137,13 +141,16 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 				}
 				/****/
 				
-
+				//Start the transaction.
 				
-				
-				$findme   = 'where';
-				$pos = stripos($mystring, $findme);
-				
-				if(!mysql_query('BEGIN'))
+				if(!mysql_query('SET autocommit = 0;'))
+				{
+					$log='Unable to begin transaction. Query='.$query.' Error:' . mysql_error();
+					$logger->fatal($log);
+					echo $log;
+					return false;
+				}
+				if(!mysql_query('START TRANSACTION'))
 				{
 					$log='Unable to begin transaction. Query='.$query.' Error:' . mysql_error();
 					$logger->fatal($log);
@@ -151,10 +158,23 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					return false;
 				}
 				
+				
+				$findme   = 'where';
+				$pos = stripos($mystring, $findme);
+				/*
+				if(!mysql_query('BEGIN'))
+				{
+					$log='Unable to begin transaction. Query='.$query.' Error:' . mysql_error();
+					$logger->fatal($log);
+					echo $log;
+					return false;
+				}
+				*/
 				if ($pos === false) 
 				{
 					$log='Error in MySql Query (no "where" clause is used in the query)  :' . $query;
 					$logger->fatal($log);
+					mysql_query('ROLLBACK');
 					echo $log;
 					return false;
 				//	exit;
@@ -203,6 +223,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 						{
 							$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
 							$logger->error($log);
+							mysql_query('ROLLBACK');
 							echo $log;
 							return false;
 						}
@@ -245,6 +266,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					{
 						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
 						$logger->error($log);
+						mysql_query('ROLLBACK');
 						echo $log;
 						return false;
 					}
@@ -263,6 +285,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
 						$logger->error($log);
 						echo $log;
+						mysql_query('ROLLBACK');
 						return false;
 					}
 				
@@ -290,7 +313,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 						}
 						else
 						{
-							echo '<br>Indexing Larvol ID:'.$larvol_id . '<br>';
+							echo '<br>'. date("Y-m-d H:i:s", strtotime('now')) . ' - Indexing Larvol ID:'.$larvol_id . '<br>';
 							$query='INSERT INTO `'. $table .'` (`'. $field .'`, `trial`) VALUES ("' . $cid . '", "' . $larvol_id .'") ';
 							$res = mysql_query($query);
 							if($res === false)
@@ -312,6 +335,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 							{
 								$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
 								$logger->error($log);
+								mysql_query('ROLLBACK');
 								echo $log;
 								return false;
 							}
@@ -343,17 +367,17 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 			//	$ttype=$cat=='products' ? 'PRODUCT' : 'AREA';
 				//update status
 				if( is_null($productID) and !$scraper_run )	
+				{
+					$query = 'update update_status_fullhistory set process_id="'. $prid . '",status="'. 2 . '",
+									  trial_type="' . $ttype . '", update_items_total=' . $total . ',update_items_progress=' . ++$progress . ', updated_time="' . date("Y-m-d H:i:s", strtotime('now')) . '"  where update_id= "'. $up_id .'" limit 1'  ; 
+					if(!$res = mysql_query($query))
 					{
-						$query = 'update update_status_fullhistory set process_id="'. $prid . '",status="'. 2 . '",
-										  trial_type="' . $ttype . '", update_items_total=' . $total . ',update_items_progress=' . ++$progress . ', updated_time="' . date("Y-m-d H:i:s", strtotime('now')) . '"  where update_id= "'. $up_id .'" limit 1'  ; 
-						if(!$res = mysql_query($query))
-						{
-							$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-							$logger->error($log);
-							echo $log;
-							return false;
-						}
+						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+						$logger->error($log);
+						echo $log;
+						return false;
 					}
+				}
 				/***************** 
 				$query = 'SELECT update_items_progress,update_items_total FROM update_status_fullhistory WHERE update_id="' . $up_id .'" and trial_type="' . $ttype . '" limit 1 ' ;
 				if(!$res = mysql_query($query))
