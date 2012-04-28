@@ -173,6 +173,10 @@
                         }
                         else
                         {
+/*                         	if($tables_home[$i] == 'rpt_ott_upm')
+                        	{
+                        		pr($fields_home[2]);pr($fields_sync[2]);die;
+                        	} */
                         		$keys_home = $this->GetPrimaryKeys($fields_home_tmp);
 	                        	$k = $this->GetFieldIndex($fields_sync, $fields_home[$j]['name']);
 	                        	
@@ -181,16 +185,21 @@
 	                        	$newFieldHomeKey = array_search( $fields_home[$j]['name'],$fieldNamesOrderHome);
 	                        	$newFieldSyncKey = array_search($fields_sync[$k]['name'],$fieldNamesOrderSync);
 	                        	//
-	                        	
+
 	                            if (
 		                            	$fields_sync[$k]['type'] != $fields_home[$j]['type'] ||
 		                                $fields_sync[$k]['null'] != $fields_home[$j]['null'] ||
-		                                ($fields_sync[$k]['key'] != $fields_home[$j]['key'] && (($fields_home[$j]['key']!='UNI'&&$fields_sync[$k]['key'] !='UNI')|| ($fields_home[$j]['key']=='MUL'&&$fields_sync[$k]['key'] =='UNI'))) ||
+		                                ($fields_sync[$k]['key'] != $fields_home[$j]['key'] && (($fields_home[$j]['key']!='UNI'&&$fields_sync[$k]['key'] !='UNI')|| ($fields_home[$j]['Non_unique']=='1'&&$fields_sync[$k]['Non_unique'] =='0'))) ||
 		                                $fields_sync[$k]['default'] != $fields_home[$j]['default'] ||
 		                                $fields_sync[$k]['extra'] != $fields_home[$j]['extra'] ||
-	                            		$newFieldHomeKey != $newFieldSyncKey
+	                            		$newFieldHomeKey != $newFieldSyncKey ||
+	                            		$fields_sync[$k]['Sub_part'] != $fields_home[$j]['Sub_part']
 	                                )
 	                            {
+/* 	                            	if($fields_sync[$k]['name'] == 'intervention_name')
+	                            	{
+	                            		pr($fields_sync[$k]);pr($fields_home[$j]);die;
+	                            	}	 */                            	
 		                            if (!$db_sync->ChangeTableField($tables_home[$i], $fields_home[$j]['name'], $fields_home[$j],$fields_sync[$k],0,$keys_home,$fieldNamesOrderHome,$fieldNamesOrderSync))
 		                            {
 			                            $this->RaiseError("Could not change field <strong>{$fields_home[$j]['name']}</strong> on table <strong>{$tables_home[$i]}</strong> on database <strong>{$db_sync->database}</strong> at {$db_sync->user}@{$db_sync->host}: " . $db_sync->LastError());

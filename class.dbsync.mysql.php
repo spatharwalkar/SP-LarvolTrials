@@ -328,7 +328,7 @@ require_once('include.util.php');
 	        		$special_mul_key = ', DROP INDEX `'.$old_field['name'].'`, ADD KEY `'.$field.'` (`'.$field.'`('.$new_field['Sub_part'].'))';
 	        		$skipModify = 1;
 	        	}	        	
-	        	if($new_field['key']=='MUL' && $old_field['key']=='UNI' && $new_field['indexFlag']==1 && $old_field['indexFlag']==1)
+	        	if($new_field['Non_unique']=='1' && $old_field['Non_unique']=='0' && $new_field['indexFlag']==1 && $old_field['indexFlag']==1)
 	        	{
 	        		$special_mul_key = ', DROP INDEX `'.$old_field['name'].'` , ADD INDEX `'.$old_field['name'].'` ( `'.$old_field['name'].'` )';
 	        		$skipModify = 1;
@@ -338,7 +338,7 @@ require_once('include.util.php');
 	        		$indexKey = ', ADD INDEX (`'.$field.'`) ';
 	        		$skipModify = 1;
 	        	}
-	        	if($new_field['key']=='UNI' && $new_field['type']=='blob' && $old_field['type']!='blob')
+	        	if(($new_field['key']=='UNI' || $new_field['Non_unique'] == 0)  && $new_field['type']=='blob')
 	        	{
 	        		//need to remove old index before adding blob and also suggest blob index if any present
 	        		if($old_field['indexFlag']==1)
@@ -346,13 +346,13 @@ require_once('include.util.php');
 	        		echo $sql.';<br />';
 	        		$special_uni_key = ', ADD UNIQUE `'.$field.'` (`'.$field.'`('.$new_field['Sub_part'].'))';
 	        		$skipModify = 1;
+    		
 	        	}
 	        	//check primary key defintion needed or not
 	        	if($old_field['key']=='PRI' && $new_field['key']=='PRI' || count($keys_home)>1)
 	        	$no_primary_def_needed = 1;
 	        	
-	        	
-	        	
+
 	        	//decide change/modify
 	        	//TODO:remove all test comments
 	        	/*
@@ -386,16 +386,13 @@ require_once('include.util.php');
 	        		$after = $fieldNamesOrderHome[$newFieldHomeKey-1];
 	        	}
 	        	
-	        	//echo ($new_field['key'] == 'PRI' && $no_primary_def_needed!=1 ? "ALTER TABLE `{$table}` DROP PRIMARY KEY;<br/>":"");
-				//$sql1 = "ALTER TABLE `{$table}`  CHANGE `{$field}` `{$new_field['name']}` {$new_field['type']} " . ($new_field['null']=='YES' ? '' : 'NOT') . ' NULL' . (strlen($new_field['default']) > 0 ? " default '{$new_field['default']}'" : '') . ($new_field['extra'] == 'auto_increment' ? ' auto_increment' : '') . ($new_field['key'] == 'PRI' && $no_primary_def_needed!=1  ? ", ADD PRIMARY KEY (`{$new_field['name']}`)" : '') . ($special_mul_key?$special_mul_key:''). ($indexKey?$indexKey:''). ($special_uni_key?$special_uni_key:'');
 				$sql = $this->ChangeTableFieldQuery($table, $change, $field, $new_field, $no_primary_def_needed, $special_mul_key, $indexKey, $special_uni_key,$after);
 				echo($sql.';<br />');
-				
-/* 				// TODO:remove this later after user testing.
-				if($sql!=$sql1)
+/* 				if($table=='rpt_ott_upm' && ($new_field['name'] == 'intervention_name_negate' || $new_field['name'] == 'intervention_name'))
 				{
-					echo '<br/>ChangeTableFieldQuery Function fail!!!!!!!!!!!!!!!!<br/>Please report to concerned developer ';die;
-				}
+					pr($new_field);pr($old_field);
+				} */
+/* 				// TODO:remove this later after user testing.
 				// TODO:end */
 				
 				return true;
@@ -420,7 +417,6 @@ require_once('include.util.php');
 						$referencedColumnName = $new_field['referenced_column_name'];
 						$deleteRule = $new_field['delete_rule'];
 						$updateRule = $new_field['update_rule'];
-						//if($constrain=='' || $referencedTableName=='' || $referencedColumnName=='' || $deleteRule=='' || $updateRule!='')return true;
 					}
 					else 
 					{
