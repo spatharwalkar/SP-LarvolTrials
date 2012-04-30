@@ -518,7 +518,6 @@ else $ddesc=$rec->detailed_descr->textblock;
 			if($fieldname=='primary_completion_date') 
 			{
 				$pc_date = normal('date',(string)$value);
-
 			}
 	}
 	if(isset($c_date) and !is_null($c_date)) $end_date=$c_date;
@@ -767,6 +766,10 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 				{
 					if(is_null($value)) $query = 'update data_trials set `' . $fieldname . '` = null , lastchanged_date = "' .$lastchanged_date.'" where larvol_id="' .$larvol_id . '"  limit 1' ;
 					else $query = 'update data_trials set `' . $fieldname . '` = "' . $value .'", lastchanged_date = "' .$lastchanged_date.'" where larvol_id="' .$larvol_id . '"  limit 1' ;
+					if($fieldname=='end_date')
+					{ 
+						$query = 'update data_trials set `' . $fieldname . '` = "' . $end_date .'", lastchanged_date = "' .$lastchanged_date.'" where larvol_id="' .$larvol_id . '"  limit 1' ;
+					}
 					
 					if(!mysql_query($query))
 					{
@@ -966,7 +969,7 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 		if( !is_null($cdate) and  $cdate <>'0000-00-00' )	// completion date
 		{
 			$cdate=normalize('date',$cdate);
-			$query = 'update `data_trials` set `inclusion_criteria` = "'. $str['inclusion'] . '", `exclusion_criteria` = "'. $str['exclusion'] .'" where `larvol_id`="' .$larvol_id . '" limit 1' ;
+			$query = 'update `data_trials` set `inclusion_criteria` = "'. $str['inclusion'] . '", `exclusion_criteria` = "'. $str['exclusion'] .'", end_date = "' . $cdate . '"  where `larvol_id`="' .$larvol_id . '" limit 1' ;
 			
 			if(!mysql_query($query))
 					{
@@ -979,7 +982,7 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 		elseif( !is_null($pcdate) and  $pcdate <>'0000-00-00') 	// primary completion date
 		{
 			$pcdate=normalize('date',$pcdate);
-			$query = 'update `data_trials` set  `inclusion_criteria` = "'. $str['inclusion'] . '", `exclusion_criteria` = "'. $str['exclusion'] .'" where `larvol_id`="' .$larvol_id . '" limit 1' ;
+			$query = 'update `data_trials` set  `inclusion_criteria` = "'. $str['inclusion'] . '", `exclusion_criteria` = "'. $str['exclusion'] .'" , end_date = "' . $pcdate . '" where `larvol_id`="' .$larvol_id . '" limit 1' ;
 //			$query = 'update data_trials set end_date = "' . $pcdate . '" where larvol_id="' .$larvol_id . '"  limit 1' ;
 			if(!mysql_query($query))
 					{
@@ -1011,7 +1014,7 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 			if( !is_null($cdate) and  $cdate <>'0000-00-00' and !is_null($is_active) and $is_active<>1 ) // last changed date
 			{
 				$cdate=normalize('date',$cdate);
-				$query = 'update `data_trials` set `inclusion_criteria` = "'. $str['inclusion'] . '", `exclusion_criteria` = "'. $str['exclusion'] .'" where `larvol_id`="' .$larvol_id . '" limit 1' ;
+				$query = 'update `data_trials` set `inclusion_criteria` = "'. $str['inclusion'] . '", `exclusion_criteria` = "'. $str['exclusion'] .'", end_date = "' . $cdate . '"  where `larvol_id`="' .$larvol_id . '" limit 1' ;
 //				$query = 'update data_trials set end_date = "' . $cdate . '" where larvol_id="' .$larvol_id . '"  limit 1' ;
 				if(!mysql_query($query))
 					{
@@ -1021,7 +1024,7 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 						return false;
 					}
 			}
-			else	// replace with null
+			else	
 			{
 				$query = 'update `data_trials` set `inclusion_criteria` = "'. $str['inclusion'] . '", `exclusion_criteria` = "'. $str['exclusion'] .'" where `larvol_id`="' .$larvol_id . '" limit 1' ;
 //				$query = 'update data_trials set end_date = null where larvol_id="' .$larvol_id . '"  limit 1' ;
