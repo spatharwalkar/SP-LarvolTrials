@@ -1,6 +1,7 @@
 <?php
 require_once('db.php');
 require_once('include.util.php');
+require_once('preindex_trial.php');
 
 //ini_set('error_reporting', E_ALL ^ E_NOTICE);
 global $logger;

@@ -3,7 +3,7 @@ require_once('db.php');
 require_once('include.search.php');
 require_once('include.util.php');
 require_once('searchhandler.php');
-
+ini_set('error_reporting', E_ALL ^ E_NOTICE);
 
 /*	
 function tindex() - to preindex a combination of one trial+one product, or  one trial+one area.  
@@ -230,6 +230,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					}
 					continue;
 				}
+				//pr($query);
 				if(!$resu = mysql_query($query))
 				{
 					$log='Bad SQL query getting larvol_id from data_trials table.<br>Query=' . $query;
@@ -292,7 +293,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 				
 				foreach($nctidz as $key => $value)
 				{
-					if( isset($sourceid) and !is_null($sourceid) and !empty($sourceid) )
+					if( isset($sourceid) and !is_null($sourceid) and !empty($sourceid) and !empty($value) )
 					{
 						$srch = array_search($sourceid, $value); 
 						if($srch!==false) echo ''; else continue;

@@ -2580,6 +2580,7 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 		if ($this->exec_triggers('insert', 'before', $oldvals, $changed, $newvals) == false) {
 			return false;
 		}
+		$sourzeid="";
 		// Real query (no additional query in this method)
 		foreach ($newvals as $fd => $val) {
 			if ($fd == '') continue;
@@ -2609,6 +2610,14 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 				$query2 .= ', '.$value.'';
 			}
 			$ignore = array_search(trim($fd),$ignore_fields) ;
+			//store source id in a variable for later use in preindexing
+			if($fd=='source_id')
+			{
+				$l=strlen($value);
+				
+				$sourzeid=substr($value,1,$l-2);
+			}
+			
 			if ( isset($ignore) and $ignore > 0  ) 
 			{
 				
@@ -2646,6 +2655,13 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 		{
 			return false;
 		}
+		elseif(!empty($sourzeid))
+		{
+			ob_start();
+			tindex($sourzeid,'products');
+			tindex($sourzeid,'areas');
+			ob_end_clean();
+		}
 		$this->rec = $this->sql_insert_id();
 		// Notify list
 		if (@$this->notify['insert'] || @$this->notify['all']) 
@@ -2672,7 +2688,7 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 	function do_change_record() /* {{{ */
 	{
 		// Preparing queries
-		
+		global $logger;
 		//ignore following fields from data_manual
 		$ignore_fields=array('dummy','responsible_party_name_title','responsible_party_organization','oversight_authority','investigator_name','overall_official_name','overall_official_role','overall_official_affiliation','investigator_role','biospec_retention','location_status','inclusion_criteria','exclusion_criteria','biospec_descr','responsible_party_name_title');
 		$query_real   = '';
@@ -2800,10 +2816,10 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 		{
 			$res = $this->myquery($query_real, __LINE__);
 			$this->message = $this->sql_affected_rows($this->dbh).' '.$this->labels['record changed'];
-			
 			if (! $res) {
 				return false;
 			}
+		
 		}
 		
 		$res = $this->myquery($query_real1, __LINE__);
@@ -2812,6 +2828,27 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 			return false;
 		}
 		
+		$getsourceid='SELECT source_id from data_manual '. $where_part;
+			
+			$res1 	= mysql_query($getsourceid) ;
+				if($res1===false)
+				{
+					$log = 'Bad SQL query . Query=' . $getsourceid;
+					$logger->fatal($log);
+					echo $log;
+					return false;
+				}
+
+			$row = mysql_fetch_assoc($res1);
+			$sourzeid=$row['source_id'];
+			
+			if(!empty($sourzeid))
+			{
+				ob_start();
+				tindex($sourzeid,'products');
+				tindex($sourzeid,'areas');
+				ob_end_clean();
+			}
 
 		if (in_array($this->key, $changed)) {
 			$this->rec = $newvals[$this->key]; // key has changed
