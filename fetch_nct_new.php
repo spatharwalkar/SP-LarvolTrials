@@ -77,8 +77,12 @@ while ($row = mysql_fetch_assoc($res))
 echo("<br /><br /> " . count($ids) . ' new updates out of ' . $totcnt . '.' . "\n<br />");
 	if($cron_run)
 	{
-	    $query = 'UPDATE update_status SET update_items_total="' . count($ids) . '",update_items_start_time="' . date("Y-m-d H:i:s", strtotime('now')) . '" WHERE update_id="' . $update_id . '"';
-    	
+	    
+		$query = 'UPDATE update_status 
+				  SET update_items_total="' . count($ids) . '",
+				  update_items_start_time="' . date("Y-m-d H:i:s", strtotime('now')) . '" 
+				  WHERE update_id="' . $update_id . '"';
+				  
 		if(!$res = mysql_query($query))
 		{
 			$log='Unable to update update_status. Query='.$query.' Error:' . mysql_error();

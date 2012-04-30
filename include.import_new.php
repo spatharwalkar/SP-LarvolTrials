@@ -1,7 +1,7 @@
 <?php
 require_once('db.php');
 require_once ('include.derived.php');
-
+$newtrial='NO';
 $array1=array
 	(
 	'N/A',
@@ -91,6 +91,7 @@ function addNCT($rec)
 	global $instMap;
 	global $now;
 	global $logger;
+	global $newtrial;
 	if($rec === false) return false;
 	
 	$DTnow = date('Y-m-d H:i:s',$now);
@@ -116,7 +117,7 @@ function addNCT($rec)
 	}
 	else
 	{
-
+		$newtrial='YES';
 		if(!mysql_query('BEGIN'))
 		{
 			$log='There seems to be a problem with beginning the transaction.   SQL Query:'.$query.' Error:' . mysql_error();
@@ -508,22 +509,22 @@ else $ddesc=$rec->detailed_descr->textblock;
 	}
 
 	//****
-foreach($record_data as $fieldname => $value)
-{
-		if($fieldname=='completion_date') 
-		{
-			$c_date = normal('date',(string)$value);
-		}
-		if($fieldname=='primary_completion_date') 
-		{
-			$pc_date = normal('date',(string)$value);
-
-		}
-}
-if(isset($c_date) and !is_null($c_date)) $end_date=$c_date;
-else $end_date=$pc_date;
 	foreach($record_data as $fieldname => $value)
-		if(!addval($larvol_id, $fieldname, $value,$record_data['lastchanged_date'],$oldtrial,NULL,$end_date))
+	{
+			if($fieldname=='completion_date') 
+			{
+				$c_date = normal('date',(string)$value);
+			}
+			if($fieldname=='primary_completion_date') 
+			{
+				$pc_date = normal('date',(string)$value);
+
+			}
+	}
+	if(isset($c_date) and !is_null($c_date)) $end_date=$c_date;
+	else $end_date=$pc_date;
+	foreach($record_data as $fieldname => $value)
+		if(!addval($larvol_id, $fieldname, $value,$record_data['lastchanged_date'],$oldtrial,NULL,$end_date,$rec->id_info->nct_id))
 			logDataErr('<br>Could not save the value of <b>' . $fieldname . '</b>, Value: ' . $value );//Log in errorlog
 			
 			
@@ -579,8 +580,9 @@ else $end_date=$pc_date;
 	return true;
 }
 
-function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_type,$end_date)
+function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_type,$end_date,$sourceid=null)
 {
+	global $newtrial;
 	$nullvalue='NO';
 	if(	$fieldname=='enrollment' and(is_null($value) or empty($value) or $value=='') )	
 	{
@@ -774,6 +776,82 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 						echo $log;
 						return false;
 					}
+					// validation of first received date.  
+					// if first recieved date in archived version is older than that of the regular version, 
+					// then store the archived version's date, else store regular version's date.
+					if($fieldname=='firstreceived_date' and !is_null($sourceid) and $newtrial=='YES') 
+					{
+//						$sourceid='NCT01584193';
+						$url = "http://clinicaltrials.gov/archive/" .$sourceid;
+						$doc = new DOMDocument();
+
+						for ($done = false, $tries = 0; $done == false && $tries < 5; $tries++) {
+							$done = $doc->loadHTMLFile($url);
+						}
+
+						$ths = $doc->getElementsByTagName('th');
+					//	$i=0;$j=100;
+						foreach ($ths as $th) {
+						//	pr(++$i);
+							foreach ($th->attributes as $attr) {
+							//	pr(++$j);
+								if ($attr->name == 'scope' && $attr->value == 'row') {
+										$archive_fdate = $th->nodeValue; // date
+										echo "<br/>";
+										break 2;
+								   
+								}
+							}
+						}
+						
+						
+						$archive_fdate=normal('date',str_replace("_","-",$archive_fdate));
+						if($archive_fdate>$value) // if it is older than regular date, then insert in data manual.
+						{
+							$query = 'SELECT `larvol_id` FROM data_manual 
+							WHERE `larvol_id`="'. $larvol_id . '" limit 1';
+							if(!$res = mysql_query($query))
+							{
+								$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+								$logger->error($log);
+								echo $log;
+								return false;
+							}
+
+							$row = mysql_fetch_assoc($res);
+							$overridden = $row !== false;
+							if($overridden)
+							{
+								$query = '	update data_manual 
+											set `firstreceived_date` = "'.$archive_fdate.'"
+											WHERE `larvol_id`="'. $larvol_id . '"  limit 1';
+								if(!$res = mysql_query($query))
+								{
+									$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+									$logger->error($log);
+									echo $log;
+									return false;
+								}
+							}
+							else
+							{
+							$query = '	insert into data_manual 
+											set `firstreceived_date` = "'.$archive_fdate.'",
+											`larvol_id`="'. $larvol_id . '" ';
+								if(!$res = mysql_query($query))
+								{
+									$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+									$logger->error($log);
+									echo $log;
+									return false;
+								}
+							}
+						}
+					
+					
+					}
+					
+					
 					$query = 'SELECT `larvol_id` FROM data_history where `larvol_id`="' . $larvol_id . '"  LIMIT 1';
 					if(!$res = mysql_query($query))
 					{
