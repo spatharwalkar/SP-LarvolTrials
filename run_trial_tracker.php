@@ -10163,15 +10163,14 @@ class TrialTracker
 					$titleLinkColor = '#FF0000;';
 				}
 			}
-			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr 
-						. '"><div class="rowcollapse"><a style="color:' . $titleLinkColor . '"  ';
-			if($trials[$i]['NCT/nct_id'] !== '' && $trials[$i]['NCT/nct_id'] !== NULL)
+			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse"><a style="color:' . $titleLinkColor . '"  ';
+                        if(isset($trials[$i]['manual_is_sourceless']))
+                        {
+                            $outputStr .= ' href="' . $trials[$i]['source'] . '" ';
+                        }
+			else if($trials[$i]['NCT/nct_id'] !== '' && $trials[$i]['NCT/nct_id'] !== NULL)
 			{   
 				$outputStr .= ' href="http://clinicaltrials.gov/ct2/show/' . padnct($trials[$i]['NCT/nct_id']) . '" ';
-			}
-			else if(isset($trials[$i]['source']) && $trials[$i]['source'] !== '' && $trials[$i]['source'] !== NULL)
-			{
-				$outputStr .= ' href="' . $trials[$i]['source'] . '" ';
 			}
 			else 
 			{ 
