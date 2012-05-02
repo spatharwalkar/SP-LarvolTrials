@@ -13,6 +13,9 @@ if(!in_array($table,$autoSuggestTables))die;
 if($table=='upm' && $field=='product')
 $query = "select p.id,p.name from products p where p.name like '%$search%' and (p.is_active=1 or p.is_active is null) order by name asc";
 else
+if($table=='products' || $table=='areas')
+$query = "select distinct $field, description from $table where $field like '%$search%' order by $field asc";
+else
 $query = "select distinct $field from $table where $field like '%$search%' order by $field asc";
 if( isset($hint) and !is_null($hint) and strlen($hint)>1 )
 $query = "select distinct $field from $table  where ( $field like '%$hint%' ) and ( $field <> '$hint' ) order by $field asc limit 50";
@@ -35,6 +38,14 @@ else
 	while($row = mysql_fetch_assoc($result))
 	{
 		$suggestions[] = $row[$field];
+		if($table=='products' || $table=='areas')
+		{
+			if($row['description'] != NULL && $row['description'] != '')
+			$datas[] = $row['description'];	//Display Description on Mouseover
+			else
+			$datas[] = ' ';	//If description is NULL make it blank
+		}
+		else
 		$datas[] = $row[$field];
 	}	
 }

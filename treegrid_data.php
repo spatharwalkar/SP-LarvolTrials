@@ -40,6 +40,7 @@
         children:[ ";
 		foreach($outArr as $row)
 		{
+			$owner='';
 			if($row['user'] != NULL && $row['user'] != '')
 			{
 				$owner_query = 'SELECT username FROM `users` WHERE id=' . $row['user'];

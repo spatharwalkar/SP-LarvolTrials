@@ -27,91 +27,94 @@ $res = mysql_query($query) or die('Bad SQL query getting master heatmap report h
 $line='<div align="center"><b>Master Heatmap Input Check for '.$name.'</b></div><br/><br/>';
 while($row = mysql_fetch_array($res))
 {
-	$out = '';
-	if($row['type'] == 'product')
+	if($row['type_id'] != NULL && $row['type_id'] != '')
 	{
-		$data_query = 'SELECT `searchdata`, `name` FROM `products` WHERE `id` =' . $row['type_id'];
-		$data_res = mysql_query($data_query) or die('Bad SQL query getting product in master heatmap report');
-		$data_res = mysql_fetch_array($data_res) or die('Report not found.');
-		$type='Row'.$data_res['num'];
-	}
-	else
-	{	
-		$data_query = 'SELECT `searchdata`, `name` FROM `areas` WHERE `id` = ' . $row['type_id'];
-		$data_res = mysql_query($data_query) or die('Bad SQL query getting area in master heatmap report');
-		$data_res = mysql_fetch_array($data_res) or die('Report not found.');
-		$type='Column'.$data_res['num'];
-	}
-	
-	$json = $data_res['searchdata'];
-	
-	$searchdata=array();
-	$searchdatas=json_decode($json, true);
-	
-	if($data_res['searchdata'] != NULL && $data_res['searchdata'] != '')
-	{
-		/*Check data
-		$json = '{"reportid":"9000","override":"1, 2, 10, 15","columndata":["1dasd"," 2dasdsa"," 3"],"sortdata":["1dasd"," 2dasdsa"," 3"],"groupdata":["1dasd"," 2dasdsa"," 3"],"wheredata":[{"columnname":"larvol_id","opname":"NotInBetween","chainname":"AND","columnvalue":"1and;endl20"},{"columnname":"institution_type","opname":"EqualTo","chainname":"AND","columnvalue":"industry_collaborator"}]}';
-	
-		$ch=0;
-		if(is_array($searchdatas['columndata']) && !empty($searchdatas['columndata']))
+		$out = '';
+		if($row['type'] == 'product')
 		{
-			$out.= '<tt style="font-weight:bold; color:#000000;">fields</tt> ';
-			foreach($searchdatas['columndata'] as $columndata)
-			{
-				$out.= '<tt style="font-weight:bold; color:#FF0000;">'.$columndata["columnname"].'</tt>';
-				$ch++;
-				$out.=', ';
-			}
-		}	*/
-		$conn='';
-		foreach($searchdatas['wheredata'] as $searchdata)
-		{
-			$out.='<tt style="font-weight:bold; color:#000000;"><u>'.$conn.'</u></tt> ';
-			$out.=CreateLine($searchdata['columnname'], $searchdata['opname'], $searchdata['columnvalue']);
-			$conn=$searchdata['chainname'];
+			$data_query = 'SELECT `searchdata`, `name` FROM `products` WHERE `id` =' . $row['type_id'];
+			$data_res = mysql_query($data_query) or die('Bad SQL query getting product in master heatmap report');
+			$data_res = mysql_fetch_array($data_res) or die('Report not found.');
+			$type='Row'.$data_res['num'];
 		}
-		/// Commented some condition so if we require them to add in future just uncomment it
-		/*$ch=0;
-		if(is_array($searchdatas['sortdata']) && !empty($searchdatas['sortdata']))
-		{
-			$out.= '<tt style="font-weight:bold; color:#000000;">All Sorted using fields</tt> ';
-			foreach($searchdatas['sortdata'] as $sortdata)
-			{
-				$out.= '<tt style="color:#FF0000;">'.$sortdata["columnname"].' '.$sort_column["columnas"].'</tt>';
-				$ch++;
-				if($ch < count($searchdatas['sortdata']))
-					$out.=', ';
-				else 
-					$out.=' ';
-			}
-		}	
+		else
+		{	
+			$data_query = 'SELECT `searchdata`, `name` FROM `areas` WHERE `id` = ' . $row['type_id'];
+			$data_res = mysql_query($data_query) or die('Bad SQL query getting area in master heatmap report');
+			$data_res = mysql_fetch_array($data_res) or die('Report not found.');
+			$type='Column'.$data_res['num'];
+		}
 		
-		$ch=0;
-		if(is_array($searchdatas['groupdata']) && !empty($searchdatas['groupdata']))
-		{
-			$out.= '<tt style="font-weight:bold; color:#000000;">All Grouped using fields</tt> ';
-			foreach($searchdatas['groupdata'] as $groupdata)
-			{
-				$out.= '<tt style="color:#FF0000;">'.$groupdata.'</tt>';
-				$ch++;
-				if($ch < count($searchdatas['groupdata']))
-					$out.=', ';
-				else 
-					$out.=' ';
-			}
-		}*/
+		$json = $data_res['searchdata'];
 		
-		$ch=0;
-		if(!empty($searchdatas['override']))
+		$searchdata=array();
+		$searchdatas=json_decode($json, true);
+		
+		if($data_res['searchdata'] != NULL && $data_res['searchdata'] != '')
 		{
-			$out.= '<tt style="font-weight:bold; color:#000000;">With Overriding search by following NCTid\'s</tt> ';
+			/*Check data
+			$json = '{"reportid":"9000","override":"1, 2, 10, 15","columndata":["1dasd"," 2dasdsa"," 3"],"sortdata":["1dasd"," 2dasdsa"," 3"],"groupdata":["1dasd"," 2dasdsa"," 3"],"wheredata":[{"columnname":"larvol_id","opname":"NotInBetween","chainname":"AND","columnvalue":"1and;endl20"},{"columnname":"institution_type","opname":"EqualTo","chainname":"AND","columnvalue":"industry_collaborator"}]}';
+	
+			$ch=0;
+			if(is_array($searchdatas['columndata']) && !empty($searchdatas['columndata']))
+			{
+				$out.= '<tt style="font-weight:bold; color:#000000;">fields</tt> ';
+				foreach($searchdatas['columndata'] as $columndata)
+				{
+					$out.= '<tt style="font-weight:bold; color:#FF0000;">'.$columndata["columnname"].'</tt>';
+					$ch++;
+					$out.=', ';
+				}
+			}	*/
+			$conn='';
+			foreach($searchdatas['wheredata'] as $searchdata)
+			{
+				$out.='<tt style="font-weight:bold; color:#000000;"><u>'.$conn.'</u></tt> ';
+				$out.=CreateLine($searchdata['columnname'], $searchdata['opname'], $searchdata['columnvalue']);
+				$conn=$searchdata['chainname'];
+			}
+			/// Commented some condition so if we require them to add in future just uncomment it
+			/*$ch=0;
+			if(is_array($searchdatas['sortdata']) && !empty($searchdatas['sortdata']))
+			{
+				$out.= '<tt style="font-weight:bold; color:#000000;">All Sorted using fields</tt> ';
+				foreach($searchdatas['sortdata'] as $sortdata)
+				{
+					$out.= '<tt style="color:#FF0000;">'.$sortdata["columnname"].' '.$sort_column["columnas"].'</tt>';
+					$ch++;
+					if($ch < count($searchdatas['sortdata']))
+						$out.=', ';
+					else 
+						$out.=' ';
+				}
+			}	
 			
-			$out.= '<tt style="color:#FF0000;">'.$searchdatas['override'].'</tt>';
-		}	
-
-	$out= '<br/><b>' . $type . ' ' . $row['num'] . ': ' . $data_res['name'] . '</b><br><tt style="font-weight:bold; color:#000000;">Search For </tt>' . $out.'<br>' ;
-	$line=$line.$out;
+			$ch=0;
+			if(is_array($searchdatas['groupdata']) && !empty($searchdatas['groupdata']))
+			{
+				$out.= '<tt style="font-weight:bold; color:#000000;">All Grouped using fields</tt> ';
+				foreach($searchdatas['groupdata'] as $groupdata)
+				{
+					$out.= '<tt style="color:#FF0000;">'.$groupdata.'</tt>';
+					$ch++;
+					if($ch < count($searchdatas['groupdata']))
+						$out.=', ';
+					else 
+						$out.=' ';
+				}
+			}*/
+			
+			$ch=0;
+			if(!empty($searchdatas['override']))
+			{
+				$out.= '<tt style="font-weight:bold; color:#000000;">With Overriding search by following NCTid\'s</tt> ';
+				
+				$out.= '<tt style="color:#FF0000;">'.$searchdatas['override'].'</tt>';
+			}	
+	
+		$out= '<br/><b>' . $type . ' ' . $row['num'] . ': ' . $data_res['name'] . '</b><br><tt style="font-weight:bold; color:#000000;">Search For </tt>' . $out.'<br>' 	;
+		$line=$line.$out;
+		}
 	}
 }
 

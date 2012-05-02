@@ -277,7 +277,7 @@ function validate(rows, cols)
 			if(filing_flag) { if(ele != '') ele=ele+', '; ele=ele+'Filing'};
 			if(phaseexp_flag) { if(ele != '') ele=ele+', '; ele=ele+'Phase Explain'};
 			if(phase4_flag || bomb_flag || filing_flag || phaseexp_flag)
-			data=data+' '+ele+' of Product '+product +' X '+ 'Area '+ area +'; '
+			data=data+' <font style="color:red">'+ele+'</font> of <font style="color:blue">Product '+product +' X '+ 'Area '+ area +'</font>; '
 			
 			phase4_flag=0; bomb_flag=0; filing_flag=0; phaseexp_flag=0; ele='';
 		}
@@ -286,18 +286,47 @@ function validate(rows, cols)
 	var message='';
 	if(document.getElementById("delrep").checked == true)
 	{
-		if(!confirm('You are going to delete report, Are you sure?')) return false;
+		//if(!confirm('You are going to delete report, Are you sure?')) 
+		message = '<img align="middle" title="Warning" src="images/warning.png" style="width:20px; height:20px; vertical-align:top; cursor:pointer;" alt="Warning"> You are going to delete report, <b><font style="color:red">Are you sure?</font></b>';
+		//return false;
+		document.getElementById("dialog").innerHTML = '<p>'+ message + '</p>';
+		Dialog();
+		return false;
 	}
 	else if(flag)
 	{
-		message='You are going to delete'+data+' From this report, Are you sure?';
-		return confirm(message);
+		message='<img align="middle" title="Warning" src="images/warning.png" style="width:20px; height:20px; vertical-align:top; cursor:pointer;" alt="Warning">You are going to delete</b> '+data+' From this report, <b><font style="color:red">Are you sure?</font></b>';
+		//return confirm(message);
+		document.getElementById("dialog").innerHTML = '<p>'+ message + '</p>';
+		Dialog();
+		return false;
 	}
 	else
-	{
-		return true;
-	}
+	return true;
 	
+}
+
+function Dialog()
+{
+	$(function(){
+		// Dialog
+		$('#dialog').dialog({
+			autoOpen: true,
+			width: 700,
+			buttons: {
+				"Ok": function() {
+					//alert("You click OK");
+					$(this).dialog("close");
+					document.forms["master_heatmap"].submit();
+				},
+				"Cancel": function() {
+					//alert("You click cancel");
+					$(this).dialog("close");
+				}
+			}
+			
+		});	
+	});
 }
 
 ///Function refreshes the report such that if multiple instaces present of same product X area combination then its data made same
@@ -400,6 +429,10 @@ function refresher(row, col, tot_rows, tot_cols)
 <link rel="stylesheet" type="text/css" href="css/chromestyle2.css" />
 <script type="text/javascript" src="scripts/popup-window.js"></script>
 <script type="text/javascript" src="scripts/chrome.js"></script>
+<link type="text/css" href="css/confirm_box.css" rel="stylesheet" />
+<script type="text/javascript" src="scripts/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="scripts/jquery-ui-1.8.20.custom.min.js"></script>
+<script type="text/javascript" src="scripts/autosuggest/jquery.autocomplete-min.js"></script>
 <?php
 
 postRL();
@@ -696,7 +729,7 @@ function editor()
 	if(($owner_type == 'shared' && $rptu != $db->user->id) || ($owner_type == 'global' && $db->user->userlevel == 'user'))
 	$disabled=1;
 	$out .= '<br clear="both" />'
-		. '<form action="master_heatmap.php" onsubmit="return validate('.count($rows).','.count($columns).');" method="post"><fieldset><legend>Edit report ' . $id . '</legend>'
+		. '<form action="master_heatmap.php" name="master_heatmap" onsubmit="return validate('.count($rows).','.count($columns).');" method="post"><fieldset><legend>Edit report ' . $id . '</legend>'
 		. '<input type="hidden" name="id" value="' . $id . '" />'
 		. '<label>Name: <input type="text" '.(($disabled) ? ' readonly="readonly" ':'').' '
 		. 'name="reportname" value="' . htmlspecialchars($name) . '"/></label>'
@@ -915,7 +948,7 @@ function editor()
 				$out .= '</font></div>';
 				
 				
-				$out .= '<div align="right" style="height:25px; vertical-align: bottom;" class="chromestyle" id="chromemenu_'.$row.'_'.$col.'"><ul><li><a rel="dropmenu_'.$row.'_'.$col.'"><b>+<b></a></li></ul></div>';
+				$out .= '<div align="right" style="height:25px; vertical-align: bottom; cursor:pointer;" class="chromestyle" id="chromemenu_'.$row.'_'.$col.'"><ul><li><a rel="dropmenu_'.$row.'_'.$col.'"><b>+<b></a></li></ul></div>';
 				
 				
 				
@@ -1010,6 +1043,7 @@ function editor()
 			. $footnotes . '</textarea></fieldset>'
 			. '<fieldset><legend>Description</legend><textarea '.(($disabled) ? ' readonly="readonly" ':'').' name="description" cols="45" rows="5">' . $description
 			. '</textarea></fieldset>';
+	$out .='<div id="dialog" title="Confirm"></div>';
 	if($owner_type == 'mine' || ($owner_type == 'global' && $db->user->userlevel != 'user') || ($owner_type == 'shared' && $rptu == $db->user->id))
 	{
 		$out .= '<br/><br/><br/><br/><div align="left"><fieldset style="margin-top:50px; padding:8px;"><legend>Advanced</legend>'
@@ -1775,7 +1809,7 @@ function Download_reports()
 					}
 					else
 					{
-						$count_val=' ('.$data_matrix[$row][$col]['indlead'].')';
+						$count_val=$data_matrix[$row][$col]['indlead'];
 					}
 					
 					
@@ -1809,15 +1843,15 @@ function Download_reports()
 		{
 			if($_POST['dwcount']=='active')
 			{
-				$count_val=' ('. $active_total .')';
+				$count_val=$active_total;
 			}
 			elseif($_POST['dwcount']=='total')
 			{
-				$count_val=' ('. $count_total .')';
+				$count_val=$count_total;
 			}
 			else
 			{
-				$count_val='Total ('.$indlead_total.')';
+				$count_val=$indlead_total;
 			}
 					
 			$cell = num2char(count($columns)+1).'1';

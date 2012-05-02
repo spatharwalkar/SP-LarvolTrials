@@ -18,7 +18,7 @@ $footnotes = htmlspecialchars($res['footnotes']);
 $description = htmlspecialchars($res['description']);
 $category = $res['category'];
 	
-$query = 'SELECT `num`,`type`,`type_id`, `display_name`, `category` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' ORDER BY case when `category` is null or `category`=\'\' then 1 else 0 end, `category`, num ASC';
+$query = 'SELECT `num`,`type`,`type_id`, `display_name`, `category` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' ORDER BY num ASC';
 $res = mysql_query($query) or die('Bad SQL query getting master heatmap report headers');
 $rows = array();
 $columns = array();
@@ -27,6 +27,10 @@ $productIds = array();
 $columnsDisplayName = array();
 $rowsDisplayName = array();
 
+$rows_category = array('');
+$columns_category = array('');
+$columns_categorySpan  = array();
+$rows_categorySpan = array();
 while($header = mysql_fetch_array($res))
 {
 	if($header['type'] == 'area')
@@ -38,13 +42,20 @@ while($header = mysql_fetch_array($res))
 			//$columnsDisplayName[$header['num']] = $result['display_name'];
 			$columnsDisplayName[$header['num']] = $header['display_name'];	///Display name from master hm header table
 			$columnsDescription[$header['num']] = $result['description'];
-			$columnsCategoryName[$header['num']] = $header['category'];
+			$header['category']=trim($header['category']);
+			if($header['category'] == NULL || trim($header['category']) == '')
+			$header['category'] = 'Undefined';
 		}
 		else
 		{
 			$columns[$header['num']] = $header['type_id'];
+			
+			$header['category'] = 'Undefined';
 		}
 		$areaIds[$header['num']] = $header['type_id'];
+		$columns_categoryArr[$header['category']] = $header['category'];
+		$columns_categorySpan[$header['category']] = $columns_categorySpan[$header['category']]+1;
+		$columnsCategoryName[$header['num']] = $header['category'];
 	}
 	else
 	{
@@ -54,15 +65,52 @@ while($header = mysql_fetch_array($res))
 			$rows[$header['num']] = $result['name'];
 			if($result['company'] != NULL && trim($result['company']) != '') $rows[$header['num']] = $result['name'].' / '.$result['company'];
 			$rowsDescription[$header['num']] = $result['description'];
-			$rowsCategoryName[$header['num']] = $header['category'];
+			$header['category']=trim($header['category']);
+			if($header['category'] == NULL || trim($header['category']) == '')
+			$header['category'] = 'Undefined';
 		}
 		else
 		{
 			$rows[$header['num']] = $header['type_id'];
+			
+			$header['category'] = 'Undefined';
 		}
 		$productIds[$header['num']] = $header['type_id'];
+		$rows_categoryArr[$header['category']] = $header['category'];
+		$rows_categorySpan[$header['category']] = $rows_categorySpan[$header['category']]+1;
+		$rowsCategoryName[$header['num']] = $header['category'];
+		$rowsCategoryPrintStatus[$header['category']] = 0;
 	}
 }
+
+/////Rearrange Data according to Category //////////
+$new_rows = array();
+$new_columns = array();
+foreach($columns_categoryArr as $columns_category)
+{
+	foreach($columns as $col => $cval)
+	{
+		if($columnsCategoryName[$col] == $columns_category)
+		{
+			$new_columns[$col]=$cval;
+		}
+	}
+}
+
+foreach($rows_categoryArr as $rows_category)
+{
+	foreach($rows as $row => $rval)
+	{
+		if($rowsCategoryName[$row] == $rows_category)
+		{
+			$new_rows[$row]=$rval;
+		}
+	}
+}
+$rows=$new_rows;
+$columns=$new_columns;
+/////Rearrange Completes //////////
+
 	// SELECT MAX ROW AND MAX COL
 $query = 'SELECT MAX(`num`) AS `num` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' AND type = \'product\'';
 $res = mysql_query($query) or die(mysql_error());
@@ -154,7 +202,7 @@ foreach($rows as $row => $rval)
 				$data_matrix[$row][$col]['bomb']['value']=$cell_data['bomb'];
 				$data_matrix[$row][$col]['bomb']['src']='new_sbomb.png';
 				$data_matrix[$row][$col]['bomb']['alt']='Small Bomb';
-				$data_matrix[$row][$col]['bomb']['style']='width:15px; height:15px;';
+				$data_matrix[$row][$col]['bomb']['style']='width:17px; height:17px;';
 				$data_matrix[$row][$col]['bomb']['title']='Bomb Details';
 			}
 			elseif($cell_data['bomb'] == 'large')
@@ -162,7 +210,7 @@ foreach($rows as $row => $rval)
 				$data_matrix[$row][$col]['bomb']['value']=$cell_data['bomb'];
 				$data_matrix[$row][$col]['bomb']['src']='new_lbomb.png';
 				$data_matrix[$row][$col]['bomb']['alt']='Large Bomb';
-				$data_matrix[$row][$col]['bomb']['style']='width:15px; height:15px;';
+				$data_matrix[$row][$col]['bomb']['style']='width:17px; height:17px;';
 				$data_matrix[$row][$col]['bomb']['title']='Bomb Details';
 			}
 			else
@@ -170,7 +218,7 @@ foreach($rows as $row => $rval)
 				$data_matrix[$row][$col]['bomb']['value']=$cell_data['bomb'];
 				$data_matrix[$row][$col]['bomb']['src']='new_square.png';
 				$data_matrix[$row][$col]['bomb']['alt']='None';
-				$data_matrix[$row][$col]['bomb']['style']='width:15px; height:15px;';
+				$data_matrix[$row][$col]['bomb']['style']='width:17px; height:17px;';
 				$data_matrix[$row][$col]['bomb']['title']='Bomb Details';
 			}
 			
@@ -438,6 +486,19 @@ width:100px;
 	margin-right: 1px;
 	padding-top:3px;
 }
+
+.box_rotate {
+	-moz-transform: rotate(270deg); /* For Firefox */
+	-o-transform: rotate(270deg); /* For Opera */
+	-webkit-transform: rotate(270deg); /* For Safari and Chrome */
+	writing-mode: tb-rl; /* For IE */
+	max-width:20px;
+	max-height:400px;
+	margin:2px;
+	height:auto;
+}
+
+
 </style>
 <script language="javascript" type="text/javascript">
 function change_view()
@@ -664,14 +725,14 @@ function change_view()
 						if(Cell_values_Arr[15] == 'large')
 						{
 							document.getElementById("Cell_Bomb_"+i).src = "images/newred_lbomb.png";
-							document.getElementById("Bomb_Img_"+i).innerHTML = '<img title="Large Bomb" src="images/newred_lbomb.png"  style="width:15px; height:15px; vertical-align:middle; cursor:pointer;" />&nbsp;';
+							document.getElementById("Bomb_Img_"+i).innerHTML = '<img title="Large Bomb" src="images/newred_lbomb.png"  style="width:17px; height:17px; vertical-align:middle; cursor:pointer; padding-bottom:2px;" />&nbsp;';
 						}
 						else if(Cell_values_Arr[15] == 'small')
 						{
 							document.getElementById("Cell_Bomb_"+i).src = "images/newred_sbomb.png";
-							document.getElementById("Bomb_Img_"+i).innerHTML = '<img title="Small Bomb" src="images/newred_sbomb.png"  style="width:15px; height:15px; vertical-align:middle; cursor:pointer;" />&nbsp;';
+							document.getElementById("Bomb_Img_"+i).innerHTML = '<img title="Small Bomb" src="images/newred_sbomb.png"  style="width:17px; height:17px; vertical-align:middle; cursor:pointer; padding-bottom:2px;" />&nbsp;';
 						}
-							document.getElementById("Bomb_CDate_"+i).style.display = "inline";
+						//document.getElementById("Bomb_CDate_"+i).style.display = "inline";
 						
 						if(latest_date < bomb_cdate || latest_date == '')
 						{
@@ -681,19 +742,19 @@ function change_view()
 					}
 					else
 					{
-						document.getElementById("Bomb_CDate_"+i).style.display = "none"
+						//document.getElementById("Bomb_CDate_"+i).style.display = "none"
 						
 						if(Cell_values_Arr[15] == 'large')
 						{
 							document.getElementById("Cell_Bomb_"+i).src = "images/new_lbomb.png";
 							document.getElementById("Cell_Bomb_"+i).title = "Large Bomb";
-							document.getElementById("Bomb_Img_"+i).innerHTML = '<img title="Large Bomb" src="images/new_lbomb.png"  style="width:15px; height:15px; vertical-align:middle; cursor:pointer;" />&nbsp;';
+							document.getElementById("Bomb_Img_"+i).innerHTML = '<img title="Large Bomb" src="images/new_lbomb.png"  style="width:17px; height:17px; vertical-align:middle; cursor:pointer; padding-bottom:2px;" />&nbsp;';
 						}
 						else if(Cell_values_Arr[15] == 'small')
 						{
 							document.getElementById("Cell_Bomb_"+i).src = "images/new_sbomb.png";
 							document.getElementById("Cell_Bomb_"+i).title = "Small Bomb";
-							document.getElementById("Bomb_Img_"+i).innerHTML = '<img title="Small Bomb" src="images/new_sbomb.png"  style="width:15px; height:15px; vertical-align:middle; cursor:pointer;" />&nbsp;';
+							document.getElementById("Bomb_Img_"+i).innerHTML = '<img title="Small Bomb" src="images/new_sbomb.png"  style="width:17px; height:17px; vertical-align:middle; cursor:pointer; padding-bottom:2px;" />&nbsp;';
 						}
 					}
 				}
@@ -708,8 +769,8 @@ function change_view()
 					{
 						document.getElementById("Cell_Filing_"+i).title = "Filing Data Updated On: "+ Cell_values_Arr[13];
 						document.getElementById("Cell_Filing_"+i).src = "images/newred_file.png";
-						document.getElementById("Filing_CDate_"+i).style.display = "inline";
-						document.getElementById("Filing_Img_"+i).innerHTML = '<img title="Filing" src="images/newred_file.png"  style="width:15px; height:15px; vertical-align:middle; cursor:pointer;" />&nbsp;';
+						//document.getElementById("Filing_CDate_"+i).style.display = "inline";
+						document.getElementById("Filing_Img_"+i).innerHTML = '<img title="Filing" src="images/newred_file.png"  style="width:17px; height:17px; vertical-align:middle; cursor:pointer; padding-bottom:2px;" />&nbsp;';
 						if(latest_date < filing_cdate || latest_date == '')
 						{
 							qualify_title = "Filing Data Updated On: "+ Cell_values_Arr[13];
@@ -720,8 +781,8 @@ function change_view()
 					{
 						document.getElementById("Cell_Filing_"+i).title = "Filing Details";
 						document.getElementById("Cell_Filing_"+i).src = "images/new_file.png";
-						document.getElementById("Filing_CDate_"+i).style.display = "none"
-						document.getElementById("Filing_Img_"+i).innerHTML = '<img title="Filing" src="images/new_file.png"  style="width:15px; height:15px; vertical-align:middle; cursor:pointer;" />&nbsp;';
+						//document.getElementById("Filing_CDate_"+i).style.display = "none"
+						document.getElementById("Filing_Img_"+i).innerHTML = '<img title="Filing" src="images/new_file.png"  style="width:17px; height:17px; vertical-align:middle; cursor:pointer; padding-bottom:2px;" />&nbsp;';
 					}
 				}
 				
@@ -735,8 +796,8 @@ function change_view()
 					{
 						document.getElementById("Cell_Phase_"+i).title = "Phase Explain Updated On: "+ Cell_values_Arr[17];
 						document.getElementById("Cell_Phase_"+i).src = "images/phaseexp_red.png";
-						document.getElementById("PhaseExp_CDate_"+i).style.display = "inline";
-						document.getElementById("Phaseexp_Img_"+i).innerHTML = '<img title="Phase Explain" src="images/phaseexp_red.png"  style="width:15px; height:15px; vertical-align:middle; cursor:pointer;" />&nbsp;';
+						//document.getElementById("PhaseExp_CDate_"+i).style.display = "inline";
+						document.getElementById("Phaseexp_Img_"+i).innerHTML = '<img title="Phase Explain" src="images/phaseexp_red.png"  style="width:17px; height:17px; vertical-align:middle; cursor:pointer; padding-bottom:2px;" />&nbsp;';
 						if(latest_date < phaseexp_cdate || latest_date == '')
 						{
 							qualify_title = "Phase Explain Updated On: "+ Cell_values_Arr[17];
@@ -747,8 +808,8 @@ function change_view()
 					{
 						document.getElementById("Cell_Phase_"+i).title = "Phase Explain";
 						document.getElementById("Cell_Phase_"+i).src = "images/phaseexp.png";
-						document.getElementById("PhaseExp_CDate_"+i).style.display = "none"
-						document.getElementById("Phaseexp_Img_"+i).innerHTML = '<img title="Phase Explain" src="images/phaseexp.png"  style="width:15px; height:15px; vertical-align:middle; cursor:pointer;" />&nbsp;';
+						//document.getElementById("PhaseExp_CDate_"+i).style.display = "none"
+						document.getElementById("Phaseexp_Img_"+i).innerHTML = '<img title="Phase Explain" src="images/phaseexp.png"  style="width:17px; height:17px; vertical-align:middle; cursor:pointer; padding-bottom:2px;" />&nbsp;';
 					}
 				}
 				
@@ -763,7 +824,7 @@ function change_view()
 					{
 						document.getElementById("Red_Cell_"+i).style.display = "inline";
 						document.getElementById("Red_Cell_"+i).title = "Red Cell Override";
-						document.getElementById("Red_Cell_CDate_"+i).style.display = "inline";
+						//document.getElementById("Red_Cell_CDate_"+i).style.display = "inline";
 						if(latest_date < phase4_cdate || latest_date == '')
 						{
 							qualify_title = "Red Cell Override On: "+ Cell_values_Arr[19];
@@ -774,7 +835,7 @@ function change_view()
 					{
 						document.getElementById("Red_Cell_"+i).title = "Red Cell Override";
 						document.getElementById("Red_Cell_"+i).style.display = "none";
-						document.getElementById("Red_Cell_CDate_"+i).style.display = "none";
+						//document.getElementById("Red_Cell_CDate_"+i).style.display = "none";
 						document.getElementById("Red_Cell_"+i).style.display = "inline";
 					}
 				}
@@ -938,14 +999,15 @@ function display_tooltip(type, id)
     <img src="images/help.png" alt="Help" />
     <div class="slideout_inner">
         <table bgcolor="#FFFFFF" cellpadding="0" cellspacing="0" class="table-slide">
-        <tr><td width="15%"><img title="Large Bomb" src="images/new_lbomb.png"  style="width:15px; height:15px; cursor:pointer;" /></td><td>Large Bomb</td></tr>
-        <tr><td><img title="Large Bomb" src="images/newred_lbomb.png"  style="width:15px; height:15px; cursor:pointer;" /></td><td>Large Bomb (Updated)</td></tr>
-        <tr><td><img title="Small Bomb" src="images/new_sbomb.png"  style="width:15px; height:15px; cursor:pointer;" /></td><td>Small Bomb</td></tr>
-        <tr><td><img title="Large Bomb" src="images/newred_sbomb.png"  style="width:15px; height:15px; cursor:pointer;" /></td><td>Small Bomb (Updated)</td></tr>
-        <tr><td><img title="Filing" src="images/new_file.png"  style="width:15px; height:15px; cursor:pointer;" /></td><td>Filing Details</td></tr>
-        <tr><td><img title="Filing" src="images/newred_file.png"  style="width:15px; height:15px; cursor:pointer;" /></td><td>Filing Details (Updated)</td></tr>
-        <tr><td><img title="Phase Explain" src="images/phaseexp.png"  style="width:15px; height:15px; cursor:pointer;" /></td><td>Phase Explain</td></tr>
-        <tr><td><img title="Phase Explain" src="images/phaseexp_red.png"  style="width:15px; height:15px; cursor:pointer;" /></td><td>Phase Explain (Updated)</td></tr>
+        <tr><td width="15%"><img title="Large Bomb" src="images/new_lbomb.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Large Bomb</td></tr>
+        <tr><td><img title="Large Bomb" src="images/newred_lbomb.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Large Bomb (Updated)</td></tr>
+        <tr><td><img title="Small Bomb" src="images/new_sbomb.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Small Bomb</td></tr>
+        <tr><td><img title="Large Bomb" src="images/newred_sbomb.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Small Bomb (Updated)</td></tr>
+        <tr><td><img title="Filing" src="images/new_file.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Filing Details</td></tr>
+        <tr><td><img title="Filing" src="images/newred_file.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Filing Details (Updated)</td></tr>
+        <tr><td><img title="Phase Explain" src="images/phaseexp.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Phase Explain</td></tr>
+        <tr><td><img title="Phase Explain" src="images/phaseexp_red.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Phase Explain (Updated)</td></tr>
+        <tr><td><img title="Red Border" src="images/outline.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Red Border (Record Updated)</td></tr>
         <tr><td colspan="2" style="padding-right: 1px;">
          <div style="float:left;padding-top:3px;">Phase&nbsp;</div>
          <div class="gray">N/A</div>
@@ -1003,9 +1065,18 @@ $htmlContent .= '<table width="100%" style="background-color:#FFFFFF;">'
 				. '<br clear="all"/><br/>';
 						
 $htmlContent .= '<div align="center">'
-			. '<table style="padding-top:5px; height:100%; vertical-align:middle;"" class="display">'
-			. '<thead><tr style="page-break-inside:avoid; height:100%;" nobr="true"><th>&nbsp;</th>';
+			. '<table style="padding-top:5px; height:100%; vertical-align:middle;" class="display">'
+			. '<thead><tr style="page-break-inside:avoid; height:100%;" nobr="true"><th style="background-color:#FFFFFF;">&nbsp;</th><th style="background-color:#FFFFFF;">&nbsp;</th>';
 						
+foreach($columns_categoryArr as $columns_category)
+{
+	$online_HMCounter++;
+	$htmlContent .= '<th style="background-color:#FFFFFF; '.(($columns_category != 'Undefined') ? 'border-left:#000000 solid 2px; border-top:#000000 solid 2px; border-right:#000000 solid 2px;':'').'" id="Cell_ID_'.$online_HMCounter.'" colspan="'.$columns_categorySpan[$columns_category].'" width="80px" '.$caltTitle.'><b>'.(($columns_category != 'Undefined') ? $columns_category:'').'</b></th>';
+}
+
+$htmlContent .= '</tr><tr style="page-break-inside:avoid; height:100%;" nobr="true"><th style="background-color:#FFFFFF;">&nbsp;</th><th>&nbsp;</th>';
+
+
 foreach($columns as $col => $val)
 {
 	$online_HMCounter++;
@@ -1021,10 +1092,11 @@ foreach($columns as $col => $val)
 		$htmlContent .= '<input type="hidden" value="'.$col_active_total[$col].',endl,'.$col_count_total[$col].',endl,'.$col_indlead_total[$col].'" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
 		$htmlContent .= '<input type="hidden" value="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />';
 		
-		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. '" target="_blank">'.$val.$cat.'</a>';
+		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. '" target="_blank">'.$val.'</a>';
 	}
-		$htmlContent .='</div></th>';
+	$htmlContent .='</div></th>';
 }
+
 		
 //if total checkbox is selected
 if($toal_fld)
@@ -1047,26 +1119,44 @@ $htmlContent .= '</tr></thead>';
 				
 foreach($rows as $row => $rval)
 {
+	
+	$cat = (isset($rowsCategoryName[$row]) && $rowsCategoryName[$row] != '')? $rowsCategoryName[$row]:'Undefined';
+	
+	$height="100%";
+	if($cat != 'Undefined')
+	$height=((strlen($rowsCategoryName[$row])*8)/$rows_categorySpan[$cat]).'px'; //Calculate height
+	$htmlContent .= '<tr height="'.$height.'" style="page-break-inside:avoid; vertical-align:middle; max-height:100%;">';
+	
+	if($rowsCategoryPrintStatus[$cat] == 0)
+	{
+		$online_HMCounter++;
+		$htmlContent .='<th align="left" style="vertical-align:bottom; padding-top:4px; background-color:#FFFFFF; '.(($cat != 'Undefined') ? ' border-left:#000000 solid 2px; border-top:#000000 solid 2px; border-bottom:#000000 solid 2px;' : '' ).'" rowspan="'.$rows_categorySpan[$cat].'" id="Cell_ID_'.$online_HMCounter.'"><div class="box_rotate"><b>'.(($cat != 'Undefined') ? $cat:'').'</b></div></th>';
+		$rowsCategoryPrintStatus[$cat] = 1;
+	}
+	
 	$online_HMCounter++;
 	//$rval = (isset($rowsDisplayName[$row]) && $rowsDisplayName[$row] != '')?$rowsDisplayName[$row]:$rval; //Commente as as planned to ignore display name in Product only
 	$rdesc = (isset($rowsDescription[$row]) && $rowsDescription[$row] != '')?$rowsDescription[$row]:null;
-	$cat = (isset($rowsCategoryName[$row]) && $rowsCategoryName[$row] != '')? ' ('.$rowsCategoryName[$row].') ':'';
 	$raltTitle = (isset($rdesc) && $rdesc != '')?' alt="'.$rdesc.'" title="'.$rdesc.'" ':null;
-	$htmlContent .= '<tr style="page-break-inside:avoid; vertical-align:middle; height:100%;"><th style="width:400px; padding-left:4px; height:100%; vertical-align:middle;" id="Cell_ID_'.$online_HMCounter.'" '.$raltTitle.'><div align="left" style="vertical-align:middle; height:100%;">';
+	
+	
+	
+	
+	$htmlContent .='<th class="product_col" style="padding-left:4px; height:auto; vertical-align:middle;" id="Cell_ID_'.$online_HMCounter.'" '.$raltTitle.'><div align="left" style="vertical-align:middle; height:100%;">';
 			
 	if(isset($productIds[$row]) && $productIds[$row] != NULL && !empty($areaIds))
 	{
 		$htmlContent .= '<input type="hidden" value="'.$row_active_total[$row].',endl,'.$row_count_total[$row].',endl,'.$row_indlead_total[$row].'" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
 		$htmlContent .= '<input type="hidden" value="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />';
 		
-		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). '&list=1&sr=now&er=1 month ago" target="_blank" class="ottlink">'.$rval.$cat.'&nbsp;</a>';
+		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). '&list=1&sr=now&er=1 month ago" target="_blank" class="ottlink">'.$rval.'&nbsp;</a>';
 	}
 	$htmlContent .= '</div></th>';
 	
 	foreach($columns as $col => $cval)
 	{
 		$online_HMCounter++;
-		$htmlContent .= '<td class="tooltip" valign="middle" id="Cell_ID_'.$online_HMCounter.'" width="110px" style="'. (($data_matrix[$row][$col]['total'] != 0) ? $data_matrix[$row][$col]['cell_start_style'] : 'background-color:#BFBFBF; border:#BFBFBF solid;') .' padding:2px; height:100%; vertical-align:middle; text-align:center; " align="center" onmouseover="display_tooltip(\'on\','.$online_HMCounter.');" onmouseout="display_tooltip(\'off\','.$online_HMCounter.');">';
+		$htmlContent .= '<td class="tooltip" valign="middle" id="Cell_ID_'.$online_HMCounter.'" style="'. (($data_matrix[$row][$col]['total'] != 0) ? $data_matrix[$row][$col]['cell_start_style'] : 'background-color:#d9d9d9; border:#d9d9d9 solid;') .' padding:1px; min-width:110px; height:100%; vertical-align:middle; text-align:center; " align="center" onmouseover="display_tooltip(\'on\','.$online_HMCounter.');" onmouseout="display_tooltip(\'off\','.$online_HMCounter.');">';
 	
 		if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL && $data_matrix[$row][$col]['total'] != 0)
 		{
@@ -1077,55 +1167,51 @@ foreach($rows as $row => $rval)
 			
 			$htmlContent .= '<input type="hidden" value="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />&nbsp;';
 				
-			$htmlContent .= '<a onclick="INC_ViewCount(' . trim($productIds[$row]) . ',' . trim($areaIds[$col]) . ',' . $online_HMCounter .')" style="'.$data_matrix[$row][$col]['count_start_style'].' height:100%; vertical-align:middle; padding-top:0px; padding-bottom:0px;" id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '&list=1&sr=now&er=1 month ago" target="_blank" title="'. $title .'"><font id="Font_ID_'.$online_HMCounter.'">'. $data_matrix[$row][$col]['active'] .'</font></a>&nbsp;';
+			$htmlContent .= '<a onclick="INC_ViewCount(' . trim($productIds[$row]) . ',' . trim($areaIds[$col]) . ',' . $online_HMCounter .')" style="'.$data_matrix[$row][$col]['count_start_style'].' height:100%; vertical-align:middle; padding-top:0px; padding-bottom:0px; line-height:13px;" id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '&list=1&sr=now&er=1 month ago" target="_blank" title="'. $title .'"><font id="Font_ID_'.$online_HMCounter.'">'. $data_matrix[$row][$col]['active'] .'</font></a>&nbsp;';
 					
 			if($data_matrix[$row][$col]['bomb']['src'] != 'new_square.png') //When bomb has square dont include it in pdf as size is big and no use
-			{	$htmlContent .= '<img id="Cell_Bomb_'.$online_HMCounter.'" title="'.$data_matrix[$row][$col]['bomb']['title'].'" src="'. urlPath() .'images/'.$data_matrix[$row][$col]['bomb']['src'].'"  style="'.$data_matrix[$row][$col]['bomb']['style'].' vertical-align:middle;" />'
-			.'&nbsp;';				
+			$htmlContent .= '<img id="Cell_Bomb_'.$online_HMCounter.'" title="'.$data_matrix[$row][$col]['bomb']['title'].'" src="'. urlPath() .'images/'.$data_matrix[$row][$col]['bomb']['src'].'"  style="'.$data_matrix[$row][$col]['bomb']['style'].' vertical-align:middle;" />&nbsp;';				
+			
+			
+			
+			if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
+			$htmlContent .= '<img id="Cell_Filing_'.$online_HMCounter.'" src="images/new_file.png" title="Filing Details" style="width:17px; height:17px; vertical-align:middle; cursor:pointer;" alt="Filing" />&nbsp;';
+				
+			if($data_matrix[$row][$col]['phase_explain'] != NULL && $data_matrix[$row][$col]['phase_explain'] != '')
+			$htmlContent .= '<img id="Cell_Phase_'.$online_HMCounter.'" src="images/phaseexp.png" title="Phase Explain" style="width:17px; height:17px; vertical-align:middle; cursor:pointer;" alt="Phase Explain" />&nbsp;';
+
+			$htmlContent .= '</div>'; ///Div complete to avoid panel problem
+					
+			//Tool Tip Starts Here
+			$htmlContent .= '<span id="ToolTip_ID_'.$online_HMCounter.'" class="classic" style="text-align:left;">'
+							.'<input type="hidden" value="0" name="ToolTip_Visible_'.$online_HMCounter.'" id="ToolTip_Visible_'.$online_HMCounter.'" />';	
+				
+			$htmlContent .= '<font id="Count_CDate_'.$online_HMCounter.'" style="'.(($data_matrix[$row][$col]['active_prev'] != NULL && $data_matrix[$row][$col]['active_prev'] != '')? 'display:inline;':'display:none;').'"><font style="color:#206040; font-weight: 900;">Count </font><font style="color:#206040; font-weight: 900;">Updated From : </font><font id="Popup_Count_ID_'.$online_HMCounter.'" style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['active_prev'] .'</font><br/></font>';
+							
+			if($data_matrix[$row][$col]['phase4_override'])	
+			$htmlContent .= '<font id="Red_Cell_'.$online_HMCounter.'"><font style="color:#206040; font-weight: 900;""><img src="images/phase4.png" title="Red Cell Override" style="width:17px; height:17px; vertical-align:middle; cursor:pointer; padding-bottom:2px;" alt="Red Cell Override" />&nbsp;</font></font><font style="color:#FF0000; font-weight: 900;"><font style="color:#206040; font-weight: 900;">: </font>'. (($data_matrix[$row][$col]['phase4_override'])? '"ON"<input type="hidden" value="1" name="Phase4_Presence_'.$online_HMCounter.'" id="Phase4_Presence_'.$online_HMCounter.'" />':'"OFF"<input type="hidden" value="0" name="Phase4_Presence_'.$online_HMCounter.'" id="Phase4_Presence_'.$online_HMCounter.'" />').'</font><br/></font>';
+							
+			if($data_matrix[$row][$col]['highest_phase_prev'] != NULL && $data_matrix[$row][$col]['highest_phase_prev'] != '')
+			$htmlContent .= '<font id="Highest_Phase_'.$online_HMCounter.'"><font style="color:#206040; font-weight: 900;">Highest Phase Updated </font><font style="color:#206040; font-weight: 900;">From : </font> <font style="color:#000000; font-weight: 900;">Phase '.$data_matrix[$row][$col]['highest_phase_prev'].'</font></br></font>';
+							
+							
+							
+			if($data_matrix[$row][$col]['bomb']['src'] != 'new_square.png')
+			{
+				$htmlContent .= '<font style="color:#000000; font-weight: 900;" id="Bomb_Img_'.$online_HMCounter.'">'.$data_matrix[$row][$col]['bomb']['alt'].' </font>'.(($data_matrix[$row][$col]['bomb_explain'] != NULL && $data_matrix[$row][$col]['bomb_explain'] != '')? '<font style="color:#206040; font-weight: 900;">: </font>'. $data_matrix[$row][$col]['bomb_explain'] .'<input type="hidden" value="1" name="Bomb_Presence_'.$online_HMCounter.'" id="Bomb_Presence_'.$online_HMCounter.'" />':'' ).'</br>';
+			}
+							
+			if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
+			{
+				$htmlContent .= '<font style="color:#206040; font-weight: 900;" id="Filing_Img_'.$online_HMCounter.'">Filing </font><font style="color:#206040; font-weight: 900;">: </font>'. $data_matrix[$row][$col]['filing'] .'</br>';
 			}
 			
-			
-				if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
-				$htmlContent .= '<img id="Cell_Filing_'.$online_HMCounter.'" src="images/new_file.png" title="Filing Details" style="width:15px; height:15px; vertical-align:middle; cursor:pointer;" alt="Filing" />&nbsp;';
-				
-				if($data_matrix[$row][$col]['phase_explain'] != NULL && $data_matrix[$row][$col]['phase_explain'] != '')
-				$htmlContent .= '<img id="Cell_Phase_'.$online_HMCounter.'" src="images/phaseexp.png" title="Phase Explain" style="width:15px; height:15px; vertical-align:middle; cursor:pointer;" alt="Phase Explain" />';
-
-				$htmlContent .= '</div>'; ///Div complete to avoid panel problem
-					
-				//Tool Tip Starts Here
-				$htmlContent .= '<span id="ToolTip_ID_'.$online_HMCounter.'" class="classic" style="text-align:left;">'
-								.'<input type="hidden" value="0" name="ToolTip_Visible_'.$online_HMCounter.'" id="ToolTip_Visible_'.$online_HMCounter.'" />';	
-				
-				$htmlContent .= '<font id="Count_CDate_'.$online_HMCounter.'" style="'.(($data_matrix[$row][$col]['active_prev'] != NULL && $data_matrix[$row][$col]['active_prev'] != '')? 'display:inline;':'display:none;').'"><font style="color:#206040; font-weight: 900;">Count </font>'. (($data_matrix[$row][$col]['count_lastchanged'] != NULL && $data_matrix[$row][$col]['count_lastchanged'] != '') ? '<font style="color:#206040; font-weight: 900;">(Updated:</font><font style="color:#000000; font-weight: normal;">'.date('Y-m-d', strtotime($data_matrix[$row][$col]['count_lastchanged'])).'</font><font style="color:#206040; font-weight: 900;">) </font>' : '').'<font style="color:#206040; font-weight: 900;">From : </font><font id="Popup_Count_ID_'.$online_HMCounter.'" style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['active_prev'] .'</font><br/></font>';
+			if($data_matrix[$row][$col]['phase_explain'] != NULL && $data_matrix[$row][$col]['phase_explain'] != '')
+			{
+				$htmlContent .= '<font style="color:#206040; font-weight: 900;" id="Phaseexp_Img_'.$online_HMCounter.'">Phase Explain </font><font style="color:#206040; font-weight: 900;">: </font>'. $data_matrix[$row][$col]['phase_explain'] .'</br>';
+			}
 							
-					if($data_matrix[$row][$col]['phase4_override'])	
-						$htmlContent .= '<font id="Red_Cell_'.$online_HMCounter.'"><font style="color:#206040; font-weight: 900;""><img src="images/phase4.png" title="Red Cell Override" style="width:15px; height:15px; vertical-align:middle; cursor:pointer;" alt="Red Cell Override" />&nbsp;</font><font id="Red_Cell_CDate_'.$online_HMCounter.'"><font style="color:#206040; font-weight: 900;">(Updated:</font><font style="color:#000000; font-weight: normal;">'.date('Y-m-d', strtotime($data_matrix[$row][$col]['phase4_override_lastchanged'])).'</font><font style="color:#206040; font-weight: 900;">) </font></font><font style="color:#FF0000; font-weight: 900;"><font style="color:#206040; font-weight: 900;">: </font>'. (($data_matrix[$row][$col]['phase4_override'])? '"ON"<input type="hidden" value="1" name="Phase4_Presence_'.$online_HMCounter.'" id="Phase4_Presence_'.$online_HMCounter.'" />':'"OFF"<input type="hidden" value="0" name="Phase4_Presence_'.$online_HMCounter.'" id="Phase4_Presence_'.$online_HMCounter.'" />').'</font><br/></font>';
-							
-							if($data_matrix[$row][$col]['highest_phase_prev'] != NULL && $data_matrix[$row][$col]['highest_phase_prev'] != '')
-							$htmlContent .= '<font id="Highest_Phase_'.$online_HMCounter.'"><font style="color:#206040; font-weight: 900;">Highest Phase</font><font style="color:#206040; font-weight: 900;"> (Updated:</font>'. (($data_matrix[$row][$col]['highest_phase_lastchanged'] != NULL && $data_matrix[$row][$col]['highest_phase_lastchanged'] != '') ? ' <font style="color:#000000; font-weight: normal;">'.date('Y-m-d', strtotime($data_matrix[$row][$col]['highest_phase_lastchanged'])).'</font><font style="color:#206040; font-weight: 900;">)</font>' : '').'<font style="color:#206040; font-weight: 900;"> From : </font> <font style="color:#000000; font-weight: 900;">Phase '.$data_matrix[$row][$col]['highest_phase_prev'].'</font></br>'
-							.'</font>';
-							
-							
-							
-						if($data_matrix[$row][$col]['bomb']['src'] != 'new_square.png')
-						{
-							$htmlContent .= '<font style="color:#000000; font-weight: 900;" id="Bomb_Img_'.$online_HMCounter.'">'.$data_matrix[$row][$col]['bomb']['alt'].' </font><font id="Bomb_CDate_'.$online_HMCounter.'">'. (($data_matrix[$row][$col]['bomb_lastchanged'] != NULL && $data_matrix[$row][$col]['bomb_lastchanged'] != '') ? '<font style="color:#206040; font-weight: 900;">(Updated:</font><font style="color:#000000; font-weight: normal;">'.date('Y-m-d', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])).'</font><font style="color:#206040; font-weight: 900;">) </font>' : '') .'</font>'.(($data_matrix[$row][$col]['bomb_explain'] != NULL && $data_matrix[$row][$col]['bomb_explain'] != '')? '<font style="color:#206040; font-weight: 900;">: </font>'. $data_matrix[$row][$col]['bomb_explain'] .'<input type="hidden" value="1" name="Bomb_Presence_'.$online_HMCounter.'" id="Bomb_Presence_'.$online_HMCounter.'" />':'' ).'</br>'
-							.'';
-						}
-							
-						if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
-						{
-							$htmlContent .= '<font style="color:#206040; font-weight: 900;" id="Filing_Img_'.$online_HMCounter.'">Filing </font><font id="Filing_CDate_'.$online_HMCounter.'">'. (($data_matrix[$row][$col]['filing_lastchanged'] != NULL && $data_matrix[$row][$col]['filing_lastchanged'] != '') ? '<font style="color:#206040; font-weight: 900;">(Updated:</font><font style="color:#000000; font-weight: normal;">'.date('Y-m-d', strtotime($data_matrix[$row][$col]['filing_lastchanged'])).'</font><font style="color:#206040; font-weight: 900;">) </font>' :'') .'</font><font style="color:#206040; font-weight: 900;">: </font>'. $data_matrix[$row][$col]['filing'] .'</br>'
-							.'';
-						}
-						if($data_matrix[$row][$col]['phase_explain'] != NULL && $data_matrix[$row][$col]['phase_explain'] != '')
-						{
-							$htmlContent .= '<font style="color:#206040; font-weight: 900;" id="Phaseexp_Img_'.$online_HMCounter.'">Phase Explain </font><font id="PhaseExp_CDate_'.$online_HMCounter.'">'. (($data_matrix[$row][$col]['phase_explain_lastchanged'] != NULL && $data_matrix[$row][$col]['phase_explain_lastchanged'] != '') ? '<font style="color:#206040; font-weight: 900;">(Updated:</font><font style="color:#000000; font-weight: normal;">'.date('Y-m-d', strtotime($data_matrix[$row][$col]['phase_explain_lastchanged'])).'</font><font style="color:#206040; font-weight: 900;">) </font>' :'') .'</font><font style="color:#206040; font-weight: 900;">: </font>'. $data_matrix[$row][$col]['phase_explain'] .'</br>'
-							.'';
-						}
-							
-							$htmlContent .='</span>';	//Tool Tip Ends Here
+			$htmlContent .='</span>';	//Tool Tip Ends Here
 		}
 		else
 		{
@@ -1161,5 +1247,13 @@ print $htmlContent;
 </body>
 </html>
 <script language="javascript" type="text/javascript">
+var winWidth = $(window).width();
+var docWidth = $(document).width();
+//adjust for too small resolutions
+if (docWidth > winWidth)
+{
+//alert("Horizontal Scrollbar Present");
+$('.product_col').css('min-width','400px');
+}
 change_view();
 </script>
