@@ -9397,6 +9397,19 @@ class TrialTracker
 			$totactivecount = $globalOptions['countDetails']['a'];
 			$totinactivecount = $globalOptions['countDetails']['in'];
 			$totalcount = $totactivecount + $totinactivecount;
+                        
+                        if($globalOptions['type'] == 'activeTrials')
+                        {
+                            $count = $totactivecount;
+                        }
+                        else if($globalOptions['type'] == 'inactiveTrials')
+                        {
+                            $count = $totinactivecount;
+                        }
+                        else
+                        {
+                            $count = $totalcount;
+                        }
 		}
 		$this->displayFilterControls($count, $totactivecount, $totinactivecount, $totalcount, $globalOptions, $ottType, $loggedIn);
 
