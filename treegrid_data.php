@@ -45,8 +45,18 @@
 			{
 				$owner_query = 'SELECT username FROM `users` WHERE id=' . $row['user'];
 				$owner_res = mysql_query($owner_query) or die('Bad SQL query retrieving username in master heatmap report list');
-				while($owner_row = mysql_fetch_array($owner_res))
-				$owner=$owner_row['username'];
+				if(mysql_num_rows($owner_res) > 0)
+				{
+					while($owner_row = mysql_fetch_array($owner_res))
+					$owner=$owner_row['username'];
+				}
+				else
+				{
+					$refresh_query = 'UPDATE rpt_masterhm SET user=NULL, shared=0 WHERE id=' . $row['id'];
+					$refresh=mysql_query($refresh_query) or die('Bad SQL Query Updating data for invalid users');
+					if($refresh)
+					$owner='Global';
+				}
 			}
 			else
 			{

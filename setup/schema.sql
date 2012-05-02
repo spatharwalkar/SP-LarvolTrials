@@ -452,6 +452,7 @@ CREATE TABLE IF NOT EXISTS `rpt_masterhm` (
   `category` varchar(128) COLLATE utf8_unicode_ci DEFAULT NULL,
   `shared` tinyint(1) NOT NULL DEFAULT '0',
   `total` tinyint(1) NOT NULL DEFAULT '0',
+  `dtt` tinyint(1) NOT NULL DEFAULT '0',
   CONSTRAINT `rpt_masterhm_pk` PRIMARY KEY (`id`),
   CONSTRAINT `rpt_masterhm_fk_1` FOREIGN KEY (`user`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

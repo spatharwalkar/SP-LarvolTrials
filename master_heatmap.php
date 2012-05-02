@@ -454,12 +454,13 @@ function editor()
 	
 	$id = mysql_real_escape_string(htmlspecialchars($_GET['id']));
 	if(!is_numeric($id)) return;
-	$query = 'SELECT name,user,footnotes,description,category,shared,total FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
+	$query = 'SELECT name,user,footnotes,description,category,shared,total, dtt FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
 	$res = mysql_query($query) or die('Bad SQL query getting master heatmap report');
 	$res = mysql_fetch_array($res) or die('Report not found.');
 	$rptu = $res['user'];
 	$shared = $res['shared'];
 	$toal_fld=$res['total'];
+	$dtt_fld=$res['dtt'];
 	if($rptu !== NULL && $rptu != $db->user->id && !$shared) return;	//prevent anyone from viewing others' private reports
 	$name = $res['name'];
 	$footnotes = htmlspecialchars($res['footnotes']);
@@ -760,6 +761,7 @@ function editor()
 	
 	//total column checkbox
 	$out .= ' <label><input '.(($disabled) ? ' disabled="disabled" ':'').' type="checkbox" name="total"  value="1" ' . (($toal_fld) ? 'checked="checked"' : '') . ' />Total</label>';
+	$out .= ' <label><input '.(($disabled) ? ' disabled="disabled" ':'').' type="checkbox" name="dtt"  value="1" ' . (($dtt_fld) ? 'checked="checked"' : '') . ' />Last column is DTT</label>';
 	
 	$out .= '<br clear="all"/>';
 	if($db->user->userlevel != 'user' || $rptu !== NULL)
@@ -1063,11 +1065,12 @@ function Download_reports()
 	if(!isset($_POST['id'])) return;
 	$id = mysql_real_escape_string(htmlspecialchars($_POST['id']));
 	if(!is_numeric($id)) return;
-	$query = 'SELECT name,user,footnotes,description,category,shared FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
+	$query = 'SELECT name,user,footnotes,description,category,shared,dtt FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
 	$res = mysql_query($query) or die('Bad SQL query getting master heatmap report');
 	$res = mysql_fetch_array($res) or die('Report not found.');
 	$rptu = $res['user'];
 	$shared = $res['shared'];
+	$dtt = $res['dtt'];
 	if($rptu !== NULL && $rptu != $db->user->id && !$shared) return;	//prevent anyone from viewing others' private reports
 	$name = $res['name'];
 	$footnotes = htmlspecialchars($res['footnotes']);
@@ -1101,6 +1104,9 @@ function Download_reports()
 				$columns[$header['num']] = $header['type_id'];
 			}
 			$areaIds[$header['num']] = $header['type_id'];
+			
+			$last_num = $header['num'];
+			$last_area = $header['type_id'];
 		}
 		else
 		{
@@ -1119,6 +1125,20 @@ function Download_reports()
 			$productIds[$header['num']] = $header['type_id'];
 		}
 	}
+	
+	/////Remove last column at start only //////////
+	$new_columns = array();
+	foreach($columns as $col => $cval)
+	{
+		if($dtt && $last_num == $col)
+		array_pop($areaIds); //In case of DTT enable skip last column vaules
+		else
+		$new_columns[$col]=$cval;
+	}
+	
+	$columns=$new_columns;
+	/////Rearrange Completes //////////
+
 /* 	echo '<pre>';
 	print_r($rows);
 	print_r($columnsDisplayName);
@@ -1211,7 +1231,7 @@ function Download_reports()
 					$data_matrix[$row][$col]['bomb']['src']='new_sbomb.png';
 					$data_matrix[$row][$col]['exec_bomb']['src']='sbomb.png'; //Excel bomb image
 					$data_matrix[$row][$col]['bomb']['alt']='Small Bomb';
-					$data_matrix[$row][$col]['bomb']['style']='width:15px; height:15px;';
+					$data_matrix[$row][$col]['bomb']['style']='width:11px; height:11px;';
 					$data_matrix[$row][$col]['bomb']['title']='Bomb Details';
 				}
 				elseif($cell_data['bomb'] == 'large')
@@ -1220,7 +1240,7 @@ function Download_reports()
 					$data_matrix[$row][$col]['bomb']['src']='new_lbomb.png';
 					$data_matrix[$row][$col]['exec_bomb']['src']='lbomb.png';
 					$data_matrix[$row][$col]['bomb']['alt']='Large Bomb';
-					$data_matrix[$row][$col]['bomb']['style']='width:15px; height:15px;';
+					$data_matrix[$row][$col]['bomb']['style']='width:11px; height:11px;';
 					$data_matrix[$row][$col]['bomb']['title']='Bomb Details';
 				}
 				else
@@ -1229,7 +1249,7 @@ function Download_reports()
 					$data_matrix[$row][$col]['bomb']['src']='new_square.png';
 					$data_matrix[$row][$col]['exec_bomb']['src']='new_square.png';
 					$data_matrix[$row][$col]['bomb']['alt']='None';
-					$data_matrix[$row][$col]['bomb']['style']='width:15px; height:15px;';
+					$data_matrix[$row][$col]['bomb']['style']='width:11px; height:11px;';
 					$data_matrix[$row][$col]['bomb']['title']='Bomb Details';
 				}
 				
@@ -1373,7 +1393,7 @@ function Download_reports()
 			$caltTitle = (isset($cdesc) && $cdesc != '')?' alt="'.$cdesc.'" title="'.$cdesc.'" ':null;
 				
 			$pdfContent .= '<th width="150px" '.$caltTitle.'><div align="center">'. $val .'<br />';
-			
+				
 			if(isset($areaIds[$col]) && $areaIds[$col] != NULL && !empty($productIds))
 			{
 				if($_POST['dwcount']=='active')
@@ -1391,6 +1411,7 @@ function Download_reports()
 				$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. '" target="_blank" title="'. $title .'">'.$count_val.'</a>';
 			}
 			$pdfContent .='</div></th>';
+			
 		}
 		//if total checkbox is selected
 		if(isset($_POST['total_col']) && $_POST['total_col'] == "1")
@@ -1494,7 +1515,7 @@ function Download_reports()
 						
 						if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
 						{
-							$pdfContent .= '&nbsp;<img align="right" title="Filing Details" src="'. urlPath() .'images/new_file.png" style="width:15px; height:15px; vertical-align:bottom; cursor:pointer;" alt="Filing" />';
+							$pdfContent .= '&nbsp;<img align="right" title="Filing Details" src="'. urlPath() .'images/new_file.png" style="width:11px; height:11px; vertical-align:bottom; cursor:pointer;" alt="Filing" />';
 							
 								$count_fillbomb++;
 								$pdfContent .= '('.$count_fillbomb.')';
@@ -1502,57 +1523,14 @@ function Download_reports()
 						
 						if($data_matrix[$row][$col]['phase_explain'] != NULL && $data_matrix[$row][$col]['phase_explain'] != '')
 						{
-							$pdfContent .= '&nbsp;<img align="right" title="Phase Explain" src="'. urlPath() .'images/phaseexp.png" style="width:15px; height:15px; vertical-align:bottom; cursor:pointer;" alt="Phase Explain" />';
+							$pdfContent .= '&nbsp;<img align="right" title="Phase Explain" src="'. urlPath() .'images/phaseexp.png" style="width:11px; height:11px; vertical-align:bottom; cursor:pointer;" alt="Phase Explain" />';
 							
 								$count_fillbomb++;
 								$pdfContent .= '('.$count_fillbomb.')';
 						}
 					}	
 
-					if($_POST['dwformat']=='htmldown') //As there is no need for following code to be executed for PDF
-					{
-						if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
-						$pdfContent .= '<br/><br/><img align="right" title="Filing Details" src="'. urlPath() .'images/file.png" style="width:14px; height:16px; vertical-align:top; cursor:pointer; background-color:#CCCCCC;" alt="Filing" onclick="popup_show(\'filing\', '.count($rows).','.count($columns).',\'filingpopup_'.$row.'_'.$col.'\', \'filingpopup_drag_'.$row.'_'.$col.'\', \'filingpopup_exit_'.$row.'_'.$col.'\', \'mouse\', -10, -10);" />';
-
-					
-						$pdfContent .= '<div class="popup_form" id="bombpopup_'.$row.'_'.$col.'" style="display: none;">'	//Pop-Up Form for Bomb Editing Starts Here
-								.'<div class="menu_form_header" id="bombpopup_drag_'.$row.'_'.$col.'">'
-								.'<img class="menu_form_exit" align="right" id="bombpopup_exit_'.$row.'_'.$col.'" src="'. urlPath() .'images/fancy_close.png" style="width:30px; height:30px;" '			
-								.'alt="" />&nbsp;&nbsp;&nbsp;Bomb Details<br />'
-								.'</div>'
-								.'<div class="menu_form_body">'
-								.'<table style="background-color:#fff; border:none;">'
-								.'<tr style="background-color:#fff; border:none;"><th style="background-color:#fff; border:none;">Bomb: '. $data_matrix[$row][$col]['bomb']['alt'] .'<br/><br/></th></tr>';
-								
-							
 						
-						$pdfContent .= '<tr style="background-color:#fff; border:none;"><th style="background-color:#fff; border:none;">Bomb Explanation:</th></tr>'
-							.'<tr style="background-color:#fff; border:none;"><td style="background-color:#fff; border:none;">'
-							.'<div align="left" width="200px" style="overflow:scroll; width:200px; height:150px; padding-left:10px;">'. $data_matrix[$row][$col]['bomb_explain'] .'</div>'
-							.'</td></tr>'
-							.'<tr style="background-color:#fff; border:none;"><th style="background-color:#fff; border:none;">&nbsp;</th></tr>'
-							.'</table>'
-							.'</div>'
-							.'</div>';	//Pop-Up Form for Bomb Editing Ends Here
-			
-						
-						$pdfContent .= '<div class="popup_form" id="filingpopup_'.$row.'_'.$col.'" style="display: none;">'	//Pop-Up Form for Bomb Editing Starts Here
-							.'<div class="menu_form_header" id="filingpopup_drag_'.$row.'_'.$col.'">'
-							.'<img class="menu_form_exit" align="right" id="filingpopup_exit_'.$row.'_'.$col.'" src="'. urlPath() .'images/fancy_close.png" style="width:30px; height:30px;" '		
-							.'alt="" />&nbsp;&nbsp;&nbsp;Filing Details'
-							.'</div>'
-							.'<div class="menu_form_body">'
-							.'<table style="background-color:#fff;">';
-							
-						$pdfContent .= '<tr style="background-color:#fff; border:none;"><th style="background-color:#fff; border:none;">Filing:</th></tr>'
-							.'<tr style="background-color:#fff; border:none;"><td style="background-color:#fff; border:none;">'
-							.'<div align="left" width="200px" style="overflow:scroll; width:200px; height:150px; padding-left:10px;" id="filing">'. $data_matrix[$row][$col]['filing'] .'</div>'
-							.'</td></tr>'
-							.'<tr style="background-color:#fff; border:none;"><th style="background-color:#fff; border:none;">&nbsp;</th></tr>'
-							.'</table>'
-							.'</div>'
-							.'</div>';
-					}	
 
 
 				}else{
@@ -2030,11 +2008,16 @@ function postEd()
 		else
 		$total_col=0;
 		
+		if(isset($_POST['dtt']) && $_POST['dtt']==1)
+		$dtt=1;
+		else
+		$dtt=0;
+		
 		$category = mysql_real_escape_string($_POST['reportcategory']);
 		
 		$query = 'UPDATE rpt_masterhm SET name="' . mysql_real_escape_string($_POST['reportname']) . '",user=' . $owner
 					. ',footnotes="' . $footnotes . '",description="' . $description . '"'
-					. ',category="' . $category . '",shared="' . $shared . '",total="' . $total_col . '"' . ' WHERE id=' . $id . ' LIMIT 1';
+					. ',category="' . $category . '",shared="' . $shared . '",total=' . $total_col . ',dtt=' . $dtt . '' . ' WHERE id=' . $id . ' LIMIT 1';
 		mysql_query($query) or die('Bad SQL Query saving name');
 		
 		foreach($types as $t)

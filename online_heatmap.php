@@ -7,13 +7,14 @@ global $now;
 if(!isset($_GET['id'])) return;
 $id = mysql_real_escape_string(htmlspecialchars($_GET['id']));
 if(!is_numeric($id)) return;
-$query = 'SELECT name,user,footnotes,description,category,shared,total FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
+$query = 'SELECT name,user,footnotes,description,category,shared,total, dtt FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
 $res = mysql_query($query) or die('Bad SQL query getting master heatmap report');
 $res = mysql_fetch_array($res) or die('Report not found.');
 $rptu = $res['user'];
 $shared = $res['shared'];
 $toal_fld=$res['total'];
 $name = $res['name'];
+$dtt = $res['dtt'];
 $footnotes = htmlspecialchars($res['footnotes']);
 $description = htmlspecialchars($res['description']);
 $category = $res['category'];
@@ -31,6 +32,7 @@ $rows_category = array('');
 $columns_category = array('');
 $columns_categorySpan  = array();
 $rows_categorySpan = array();
+$rows_categoryProducts = array();
 while($header = mysql_fetch_array($res))
 {
 	if($header['type'] == 'area')
@@ -56,6 +58,10 @@ while($header = mysql_fetch_array($res))
 		$columns_categoryArr[$header['category']] = $header['category'];
 		$columns_categorySpan[$header['category']] = $columns_categorySpan[$header['category']]+1;
 		$columnsCategoryName[$header['num']] = $header['category'];
+		
+		$last_category = $header['category'];
+		$last_num = $header['num'];
+		$last_area = $header['type_id'];
 	}
 	else
 	{
@@ -80,6 +86,7 @@ while($header = mysql_fetch_array($res))
 		$rows_categorySpan[$header['category']] = $rows_categorySpan[$header['category']]+1;
 		$rowsCategoryName[$header['num']] = $header['category'];
 		$rowsCategoryPrintStatus[$header['category']] = 0;
+		$rows_categoryProducts[$header['category']][] = $header['type_id'];
 	}
 }
 
@@ -92,6 +99,9 @@ foreach($columns_categoryArr as $columns_category)
 	{
 		if($columnsCategoryName[$col] == $columns_category)
 		{
+			if($dtt && $last_num == $col && $columns_category == $last_category)
+			array_pop($areaIds); //In case of DTT enable skip last column vaules
+			else
 			$new_columns[$col]=$cval;
 		}
 	}
@@ -1092,7 +1102,7 @@ foreach($columns as $col => $val)
 		$htmlContent .= '<input type="hidden" value="'.$col_active_total[$col].',endl,'.$col_count_total[$col].',endl,'.$col_indlead_total[$col].'" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
 		$htmlContent .= '<input type="hidden" value="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />';
 		
-		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. '" target="_blank">'.$val.'</a>';
+		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. '&list=1&itype=0&sr=now&er=1 month ago" target="_blank">'.$val.'</a>';
 	}
 	$htmlContent .='</div></th>';
 }
@@ -1110,7 +1120,7 @@ if($toal_fld)
 		$htmlContent .= '<input type="hidden" value="'.$active_total.',endl,'.$count_total.',endl,'.$indlead_total.'" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
 		$htmlContent .= '<input type="hidden" value="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds). '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />';
 		
-		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds). '&list=1&sr=now&er=1 month ago" target="_blank"><font id="Tot_ID_'.$online_HMCounter.'">'.$active_total.'</font></a>';
+		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds). '&list=1&itype=0&sr=now&er=1 month ago" target="_blank"><font id="Tot_ID_'.$online_HMCounter.'">'.$active_total.'</font></a>';
 	}
 	$htmlContent .= '</div></th>';
 }
@@ -1130,7 +1140,17 @@ foreach($rows as $row => $rval)
 	if($rowsCategoryPrintStatus[$cat] == 0)
 	{
 		$online_HMCounter++;
-		$htmlContent .='<th align="left" style="vertical-align:bottom; padding-top:4px; background-color:#FFFFFF; '.(($cat != 'Undefined') ? ' border-left:#000000 solid 2px; border-top:#000000 solid 2px; border-bottom:#000000 solid 2px;' : '' ).'" rowspan="'.$rows_categorySpan[$cat].'" id="Cell_ID_'.$online_HMCounter.'"><div class="box_rotate"><b>'.(($cat != 'Undefined') ? $cat:'').'</b></div></th>';
+		$htmlContent .='<th align="left" style="vertical-align:bottom; padding-top:4px; background-color:#FFFFFF; '.(($cat != 'Undefined') ? ' border-left:#000000 solid 2px; border-top:#000000 solid 2px; border-bottom:#000000 solid 2px;' : '' ).'" rowspan="'.$rows_categorySpan[$cat].'" id="Cell_ID_'.$online_HMCounter.'"><div class="box_rotate">';
+		if($dtt)
+		{
+			$htmlContent .= '<input type="hidden" value="0,endl,0,endl,0" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
+			$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . implode(',', $rows_categoryProducts[$cat]) . '&a=' . $last_area . '&list=1&sr=now&er=1 month ago" target="_blank" class="ottlink">';
+			$htmlContent .= '<input type="hidden" value="'. urlPath() .'intermediary.php?p=' . implode(',', $rows_categoryProducts[$cat]) . '&a=' . $last_area . '&list=1&itype=0&sr=now&er=1 month ago" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />';
+		}
+		$htmlContent .='<b>'.(($cat != 'Undefined') ? $cat:'').'</b>';
+		if($dtt)
+		$htmlContent .= '</a>';
+		$htmlContent .='</div></th>';
 		$rowsCategoryPrintStatus[$cat] = 1;
 	}
 	
@@ -1147,7 +1167,7 @@ foreach($rows as $row => $rval)
 	if(isset($productIds[$row]) && $productIds[$row] != NULL && !empty($areaIds))
 	{
 		$htmlContent .= '<input type="hidden" value="'.$row_active_total[$row].',endl,'.$row_count_total[$row].',endl,'.$row_indlead_total[$row].'" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
-		$htmlContent .= '<input type="hidden" value="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />';
+		$htmlContent .= '<input type="hidden" value="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). '" name="Link_value_'.$online_HMCounter.'&list=1&itype=0&sr=now&er=1 month ago" id="Link_value_'.$online_HMCounter.'" />';
 		
 		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). '&list=1&sr=now&er=1 month ago" target="_blank" class="ottlink">'.$rval.'&nbsp;</a>';
 	}
@@ -1167,7 +1187,7 @@ foreach($rows as $row => $rval)
 			
 			$htmlContent .= '<input type="hidden" value="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />&nbsp;';
 				
-			$htmlContent .= '<a onclick="INC_ViewCount(' . trim($productIds[$row]) . ',' . trim($areaIds[$col]) . ',' . $online_HMCounter .')" style="'.$data_matrix[$row][$col]['count_start_style'].' height:100%; vertical-align:middle; padding-top:0px; padding-bottom:0px; line-height:13px;" id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '&list=1&sr=now&er=1 month ago" target="_blank" title="'. $title .'"><font id="Font_ID_'.$online_HMCounter.'">'. $data_matrix[$row][$col]['active'] .'</font></a>&nbsp;';
+			$htmlContent .= '<a onclick="INC_ViewCount(' . trim($productIds[$row]) . ',' . trim($areaIds[$col]) . ',' . $online_HMCounter .')" style="'.$data_matrix[$row][$col]['count_start_style'].' height:100%; vertical-align:middle; padding-top:0px; padding-bottom:0px; line-height:13px;" id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '&list=1&itype=0&sr=now&er=1 month ago" target="_blank" title="'. $title .'"><font id="Font_ID_'.$online_HMCounter.'">'. $data_matrix[$row][$col]['active'] .'</font></a>&nbsp;';
 					
 			if($data_matrix[$row][$col]['bomb']['src'] != 'new_square.png') //When bomb has square dont include it in pdf as size is big and no use
 			$htmlContent .= '<img id="Cell_Bomb_'.$online_HMCounter.'" title="'.$data_matrix[$row][$col]['bomb']['title'].'" src="'. urlPath() .'images/'.$data_matrix[$row][$col]['bomb']['src'].'"  style="'.$data_matrix[$row][$col]['bomb']['style'].' vertical-align:middle;" />&nbsp;';				
