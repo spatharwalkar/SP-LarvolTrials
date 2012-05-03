@@ -317,10 +317,12 @@ function Dialog()
 				"Ok": function() {
 					//alert("You click OK");
 					$(this).dialog("close");
+					document.getElementById("reportsave_flg").value = 1;
 					document.forms["master_heatmap"].submit();
 				},
 				"Cancel": function() {
 					//alert("You click cancel");
+					document.getElementById("reportsave_flg").value = 0;
 					$(this).dialog("close");
 				}
 			}
@@ -767,7 +769,7 @@ function editor()
 	if($db->user->userlevel != 'user' || $rptu !== NULL)
 	{
 		if($owner_type == 'mine' || ($owner_type == 'global' && $db->user->userlevel != 'user') || ($owner_type == 'shared' && $rptu == $db->user->id))
-		$out .= '<input type="submit" name="reportsave" value="Save edits" /> | '
+		$out .= '<input type="submit" name="reportsave" value="Save edits" /><input type="hidden" id="reportsave_flg" name="reportsave_flg" value="0" /> | '
 				.'<input type="submit" name="addproduct" value="More rows" /> | '
 				. '<input type="submit" name="addarea" value="More columns" /> | ';
 	}
@@ -1987,7 +1989,7 @@ function postEd()
 			mysql_query($query) or die('Bad SQL Query removing ' . $t);
 		}
 	}
-	if(isset($_POST['reportsave']))
+	if(isset($_POST['reportsave']) || $_POST['reportsave_flg']==1)
 	{
 		$footnotes = mysql_real_escape_string($_POST['footnotes']);
 		$description = mysql_real_escape_string($_POST['description']);
