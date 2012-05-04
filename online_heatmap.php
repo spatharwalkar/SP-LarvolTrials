@@ -1,4 +1,6 @@
 <?php
+session_start();
+//unset($_SESSION['OHM_array']);
 require_once('db.php');
 ini_set('memory_limit','-1');
 ini_set('max_execution_time','36000');	//10 hours
@@ -135,6 +137,7 @@ $col_total=array();
 $active_total=0;
 $count_total=0;
 $data_matrix=array();
+$Max_ViewCount = 0;
 foreach($rows as $row => $rval)
 {
 	foreach($columns as $col => $cval)
@@ -180,6 +183,10 @@ foreach($rows as $row => $rval)
 			
 			$data_matrix[$row][$col]['filing']=trim($cell_data['filing']);
 			
+			$data_matrix[$row][$col]['viewcount']=$cell_data['viewcount'];
+			
+			if($cell_data['count_total'] > 0 && $data_matrix[$row][$col]['viewcount'] > $Max_ViewCount)
+			$Max_ViewCount = $data_matrix[$row][$col]['viewcount'];
 				
 			if($cell_data['bomb_auto'] == 'small')
 			{
@@ -873,6 +880,24 @@ function change_view()
 					}
 				}
 				
+				var viewcount_ele = document.getElementById("ViewCount_value_"+i);
+				var maxviewcount_ele = document.getElementById("Max_ViewCount_value");
+				if(maxviewcount_ele != null && maxviewcount_ele != '')
+				{
+					var maxview = maxviewcount_ele.value;
+					if(viewcount_ele != null && viewcount_ele != '')
+					{
+						var view = viewcount_ele.value;
+						var new_value = (17*view)/maxview;
+						//new_value = round(new_value)
+						//alert(new_value);
+						var viewcount_Bar_ele = document.getElementById("ViewCount_Bar_"+i);
+						if(viewcount_Bar_ele != null && viewcount_Bar_ele != '' && (view > 0))
+						document.getElementById("ViewCount_Bar_"+i).innerHTML = '<img src="images/viewcount_bar.png" style="width:1px; height:'+new_value+'px; vertical-align:bottom; cursor:pointer;" alt="View Count Bar" />&nbsp;';
+									
+					}
+				}
+				
 				if(qualify_title != '')
 				{	
 					document.getElementById("ToolTip_Visible_"+i).value = "1"
@@ -892,14 +917,20 @@ function change_view()
 				}
 				else
 				{
-					var bomb_presence_ele= document.getElementById("Bomb_Presence_"+i);
-					if((phaseexp_ele != null && phaseexp_ele != '') || (filing_ele != null && filing_ele != '') || (bomb_presence_ele != null && bomb_presence_ele != '') || (phase4_ele != null && phase4_ele != ''))
+					var bomb_presence_ele = document.getElementById("Bomb_Presence_"+i);
+					
+					var viewcount_ele = document.getElementById("ViewCount_value_"+i);
+					if(viewcount_ele != null && viewcount_ele != '')
+					var view = viewcount_ele.value;
+					else view = 0;
+					
+					if((phaseexp_ele != null && phaseexp_ele != '') || (filing_ele != null && filing_ele != '') || (bomb_presence_ele != null && bomb_presence_ele != '') || (phase4_ele != null && phase4_ele != '') || (view > 0))
 					{
-						document.getElementById("ToolTip_Visible_"+i).value = "1"
+						document.getElementById("ToolTip_Visible_"+i).value = "1";
 					}
 					else
 					{
-						document.getElementById("ToolTip_Visible_"+i).value = "0"
+						document.getElementById("ToolTip_Visible_"+i).value = "0";
 					}
 					document.getElementById("Cell_ID_"+i).style.border = "#"+Cell_values_Arr[14]+" solid";
 					document.getElementById("Cell_ID_"+i).style.backgroundColor = "#"+Cell_values_Arr[14];
@@ -996,8 +1027,21 @@ function display_tooltip(type, id)
 						url:  'viewcount.php' + '?op=Inc_OHM_ViewCount&product=' + product +'&area=' + area + '&Cell_ID=' + cell_id,
 						success: function (data) {
 	        					//alert(data);
-	        					//$("#ViewCount_"+cell_id).html(data);
-	        		   }
+								$("#ViewCount_"+cell_id).html(data);
+								var viewcount_ele = document.getElementById("ViewCount_value_"+cell_id);
+								var maxviewcount_ele = document.getElementById("Max_ViewCount_value");
+								if(maxviewcount_ele != null && maxviewcount_ele != '')
+								{
+									var maxview = maxviewcount_ele.value;
+									if(viewcount_ele != null && viewcount_ele != '')
+									{
+										var view = viewcount_ele.value;
+										if(view > maxview)
+										document.getElementById("Max_ViewCount_value").value = view;
+									}
+								}
+								change_view();
+						 }
 				});
 	        return;
 	}
@@ -1018,6 +1062,7 @@ function display_tooltip(type, id)
         <tr><td><img title="Phase Explain" src="images/phaseexp.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Phase Explain</td></tr>
         <tr><td><img title="Phase Explain" src="images/phaseexp_red.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Phase Explain (Updated)</td></tr>
         <tr><td><img title="Red Border" src="images/outline.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Red Border (Record Updated)</td></tr>
+        <tr><td align="center"><img title="Red Border" src="images/viewcount_bar.png" align="middle"  style="width:1px; height:17px; cursor:pointer;" /></td><td>View Count Bar</td></tr>
         <tr><td colspan="2" style="padding-right: 1px;">
          <div style="float:left;padding-top:3px;">Phase&nbsp;</div>
          <div class="gray">N/A</div>
@@ -1200,6 +1245,11 @@ foreach($rows as $row => $rval)
 			if($data_matrix[$row][$col]['phase_explain'] != NULL && $data_matrix[$row][$col]['phase_explain'] != '')
 			$htmlContent .= '<img id="Cell_Phase_'.$online_HMCounter.'" src="images/phaseexp.png" title="Phase Explain" style="width:17px; height:17px; vertical-align:middle; cursor:pointer;" alt="Phase Explain" />&nbsp;';
 
+			$htmlContent .= '<font id="ViewCount_Bar_'.$online_HMCounter.'">';
+			if($data_matrix[$row][$col]['viewcount'] > 0)
+			$htmlContent .= '<img src="images/viewcount_bar.png" style="width:1px; height:'.((17*$data_matrix[$row][$col]['viewcount'])/$Max_ViewCount).'px; vertical-align:bottom; cursor:pointer;" alt="View Count Bar" />&nbsp;';
+			$htmlContent .= '</font>';
+			
 			$htmlContent .= '</div>'; ///Div complete to avoid panel problem
 					
 			//Tool Tip Starts Here
@@ -1230,6 +1280,8 @@ foreach($rows as $row => $rval)
 			{
 				$htmlContent .= '<font style="color:#206040; font-weight: 900;" id="Phaseexp_Img_'.$online_HMCounter.'">Phase Explain </font><font style="color:#206040; font-weight: 900;">: </font>'. $data_matrix[$row][$col]['phase_explain'] .'</br>';
 			}
+			
+			$htmlContent .= '<font id="ViewCount_'.$online_HMCounter.'">'.(($data_matrix[$row][$col]['viewcount'] > 0) ? '<font style="color:#206040; font-weight: 900;">Number of Views: </font><font style="color:#000000; font-weight: 900;">'.$data_matrix[$row][$col]['viewcount'].'</font><input type="hidden" value="'.$data_matrix[$row][$col]['viewcount'].'" id="ViewCount_value_'.$online_HMCounter.'" />':'' ).'</font>';
 							
 			$htmlContent .='</span>';	//Tool Tip Ends Here
 		}
@@ -1250,7 +1302,7 @@ foreach($rows as $row => $rval)
 	$htmlContent .= '</tr>';
 } //Main Data For loop ends
 		
-$htmlContent .= '<input type="hidden" value="'.$online_HMCounter.'" name="Last_HM" id="Last_HM" /></table></div><br /><br/>';
+$htmlContent .= '</table><input type="hidden" value="'.$online_HMCounter.'" name="Last_HM" id="Last_HM" /><input type="hidden" value="'.$Max_ViewCount.'" id="Max_ViewCount_value" /></div><br /><br/>';
 
 if(($footnotes != NULL && trim($footnotes) != '') && ($description != NULL && trim($description) != ''))
 {

@@ -30,7 +30,7 @@ if(isset($_GET['larvol_id']) && isset($_GET['op']) && $_GET['op'] == 'Inc_ViewCo
 //Count the Number of Views in OHM
 if(!is_array($_SESSION['OHM_array']))
 $_SESSION['OHM_array']=array(); 
-if(isset($_GET['product']) && isset($_GET['area']) && isset($_GET['op']) && $_GET['op'] == 'Inc_OHM_ViewCount')
+if(isset($_GET['product']) && isset($_GET['area']) && isset($_GET['Cell_ID']) && isset($_GET['op']) && $_GET['op'] == 'Inc_OHM_ViewCount')
 {
 	$product = trim($_GET['product']);
 	$area = trim($_GET['area']);
@@ -47,8 +47,8 @@ if(isset($_GET['product']) && isset($_GET['area']) && isset($_GET['op']) && $_GE
 	while($res=mysql_fetch_array($NewOHM_query))
 	$ViewCount=$res['viewcount'];
 	
-	//if($NewOHM_query && $ViewCount > 0)
-	//print '<font size="1px" style="background-color:#CCCCCC">'.$ViewCount.'&nbsp;</font>';	
+	if($NewOHM_query && $ViewCount > 0)
+	print '<font style="color:#206040; font-weight: 900;">Number of Views: </font><font style="color:#000000; font-weight: 900;">'.$ViewCount.'</font><input type="hidden" value="'.$ViewCount.'" id="ViewCount_value_'.trim($_GET['Cell_ID']).'" />';	
 }
 
 ?>
