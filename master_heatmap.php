@@ -1073,7 +1073,6 @@ function Download_reports()
 	$rptu = $res['user'];
 	$shared = $res['shared'];
 	$dtt = $res['dtt'];
-	if($rptu !== NULL && $rptu != $db->user->id && !$shared) return;	//prevent anyone from viewing others' private reports
 	$name = $res['name'];
 	$footnotes = htmlspecialchars($res['footnotes']);
 	$description = htmlspecialchars($res['description']);

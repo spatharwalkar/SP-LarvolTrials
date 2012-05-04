@@ -1062,7 +1062,7 @@ function display_tooltip(type, id)
         <tr><td><img title="Phase Explain" src="images/phaseexp.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Phase Explain</td></tr>
         <tr><td><img title="Phase Explain" src="images/phaseexp_red.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Phase Explain (Updated)</td></tr>
         <tr><td><img title="Red Border" src="images/outline.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Red Border (Record Updated)</td></tr>
-        <tr><td align="center"><img title="Red Border" src="images/viewcount_bar.png" align="middle"  style="width:1px; height:17px; cursor:pointer;" /></td><td>View Count Bar</td></tr>
+        <tr><td align="center"><img title="Red Border" src="images/viewcount_bar.png" align="middle"  style="width:1px; height:17px; cursor:pointer;" /></td><td>Views</td></tr>
         <tr><td colspan="2" style="padding-right: 1px;">
          <div style="float:left;padding-top:3px;">Phase&nbsp;</div>
          <div class="gray">N/A</div>
@@ -1221,7 +1221,7 @@ foreach($rows as $row => $rval)
 	foreach($columns as $col => $cval)
 	{
 		$online_HMCounter++;
-		$htmlContent .= '<td class="tooltip" valign="middle" id="Cell_ID_'.$online_HMCounter.'" style="'. (($data_matrix[$row][$col]['total'] != 0) ? $data_matrix[$row][$col]['cell_start_style'] : 'background-color:#d9d9d9; border:#d9d9d9 solid;') .' padding:1px; min-width:110px; height:100%; vertical-align:middle; text-align:center; " align="center" onmouseover="display_tooltip(\'on\','.$online_HMCounter.');" onmouseout="display_tooltip(\'off\','.$online_HMCounter.');">';
+		$htmlContent .= '<td class="tooltip" valign="middle" id="Cell_ID_'.$online_HMCounter.'" style="'. (($data_matrix[$row][$col]['total'] != 0) ? $data_matrix[$row][$col]['cell_start_style'] : 'background-color:#d9d9d9; border:#d9d9d9 solid;') .' padding:1px; width:110px; height:100%; vertical-align:middle; text-align:center; " align="center" onmouseover="display_tooltip(\'on\','.$online_HMCounter.');" onmouseout="display_tooltip(\'off\','.$online_HMCounter.');">';
 	
 		if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL && $data_matrix[$row][$col]['total'] != 0)
 		{
