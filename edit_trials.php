@@ -249,6 +249,12 @@ $query = 	"
 	$cols=array();
 	$cols[]='dummy';
 	while($x=mysql_fetch_assoc($res1)) $cols[]=$x['COLUMN_NAME'];
+	
+	$viewmode='NO';
+	if(isset($_GET['PME_sys_operation']) and $_GET['PME_sys_operation']=='PME_op_View' ) $viewmode='YES';
+	elseif(isset($_POST['PME_sys_operation']) and $_POST['PME_sys_operation']=='PME_op_View' ) $viewmode='YES';
+	
+	
 /****************/	
 $field_exists = array_search('larvol_id',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['larvol_id'] 
@@ -279,6 +285,25 @@ if ( isset($field_exists) and $field_exists > 0  )  $opts['fdd']['brief_title'] 
   'maxlen'   => 255,
   'sort'     => true
 );
+
+if($viewmode=='YES')
+{
+ $opts['fdd']['brief_title_prev'] = array(
+  'name'     => 'Prev Brief title',
+  'select'   => 'T',
+  'maxlen'   => 255,
+  'sort'     => true
+);
+ $opts['fdd']['brief_title_lastchanged'] = array(
+  'name'     => 'Brief title',
+  'select'   => 'T',
+  'maxlen'   => 255,
+  'sort'     => true
+);
+
+}
+
+
 $field_exists = array_search('acronym',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  )  $opts['fdd']['acronym'] = array(
   'name'     => 'Acronym',
@@ -287,6 +312,26 @@ if ( isset($field_exists) and $field_exists > 0  )  $opts['fdd']['acronym'] = ar
   'options'  => 'AVCPD',
   'sort'     => false
 );
+
+if($viewmode=='YES')
+{
+ $opts['fdd']['acronym_prev'] = array(
+  'name'     => 'Prev Acronym',
+  'select'   => 'T',
+  'maxlen'   => 15,
+  'options'  => 'AVCPD',
+  'sort'     => false
+);
+ $opts['fdd']['acronym_lastchanged'] = array(
+  'name'     => 'Acronym',
+  'select'   => 'T',
+  'maxlen'   => 15,
+  'options'  => 'AVCPD',
+  'sort'     => false
+);
+
+}
+
 $field_exists = array_search('official_title',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['official_title'] = array(
   'name'     => 'Official title',
@@ -299,6 +344,30 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['official_title'
     'cols' => 50),
   'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['official_title_prev'] = array(
+  'name'     => 'Prev Official title',
+  'select'   => 'T',
+  'width'   => '10%',
+  'maxlen'   => 65535,
+  'options'  => 'AVCPD',
+  'textarea' => array(
+    'rows' => 5,
+    'cols' => 50),
+  'sort'     => false
+);
+$opts['fdd']['official_title_lastchanged'] = array(
+  'name'     => 'Official title',
+  'select'   => 'T',
+  'width'   => '10%',
+  'maxlen'   => 65535,
+  'options'  => 'AVCPD',
+  'textarea' => array(
+    'rows' => 5,
+    'cols' => 50),
+  'sort'     => false
+);
+ }
 $field_exists = array_search('lead_sponsor',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['lead_sponsor'] = array(
   'name'     => 'Lead sponsor',
@@ -307,6 +376,26 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['lead_sponsor'] 
   'options'  => 'AVCPD',
   'sort'     => false
 );
+
+if($viewmode=='YES')
+{$opts['fdd']['lead_sponsor_prev'] = array(
+  'name'     => 'Prev Lead sponsor',
+  'select'   => 'T',
+  'maxlen'   => 127,
+  'options'  => 'AVCPD',
+  'sort'     => false
+); 
+
+$opts['fdd']['lead_sponsor_lastchanged'] = array(
+  'name'     => 'Lead sponsor',
+  'select'   => 'T',
+  'maxlen'   => 127,
+  'options'  => 'AVCPD',
+  'sort'     => false
+);
+
+}
+
 $field_exists = array_search('collaborator',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['collaborator'] = array(
   'name'     => 'Collaborator',
@@ -315,6 +404,24 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['collaborator'] 
   'options'  => 'AVCPD',
   'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['collaborator_prev'] = array(
+  'name'     => 'Prev Collaborator',
+  'select'   => 'T',
+  'maxlen'   => 255,
+  'options'  => 'AVCPD',
+  'sort'     => false
+);
+$opts['fdd']['collaborator_lastchanged'] = array(
+  'name'     => 'Collaborator',
+  'select'   => 'T',
+  'maxlen'   => 255,
+  'options'  => 'AVCPD',
+  'sort'     => false
+);
+
+ }
+
 $field_exists = array_search('institution_type',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['institution_type'] = array(
   'name'     => 'Institution type',
@@ -329,6 +436,37 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['institution_typ
   'default'  => 'other',
   'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['institution_type_prev'] = array(
+  'name'     => 'Prev Institution type',
+  'select'   => 'T',
+  'maxlen'   => 21,
+  'options'  => 'AVCPD',
+  'values'   => array(
+                  "industry_lead_sponsor",
+                  "industry_collaborator",
+                  "coop",
+                  "other"),
+  'default'  => 'other',
+  'sort'     => false
+);
+$opts['fdd']['institution_type_lastchanged'] = array(
+  'name'     => 'Institution type',
+  'select'   => 'T',
+  'maxlen'   => 21,
+  'options'  => 'AVCPD',
+  'values'   => array(
+                  "industry_lead_sponsor",
+                  "industry_collaborator",
+                  "coop",
+                  "other"),
+  'default'  => 'other',
+  'sort'     => false
+);
+
+ }
+
+
 $field_exists = array_search('source',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['source'] = array(
   'name'     => 'Source',
@@ -336,6 +474,20 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['source'] = arra
   'maxlen'   => 127,
   'options'  => 'AVCPD', 'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['source_prev'] = array(
+  'name'     => 'Prev Source',
+  'select'   => 'T',
+  'maxlen'   => 127,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+$opts['fdd']['source_lastchanged'] = array(
+  'name'     => 'Source',
+  'select'   => 'T',
+  'maxlen'   => 127,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+ }
 $field_exists = array_search('has_dmc',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['has_dmc'] = array(
   'name'     => 'Has dmc',
@@ -343,6 +495,22 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['has_dmc'] = arr
   'maxlen'   => 1,
   'options'  => 'AVCPD', 'sort'     => false
 );
+
+if($viewmode=='YES')
+{$opts['fdd']['has_dmc_prev'] = array(
+  'name'     => 'Prev Has dmc',
+  'select'   => 'T',
+  'maxlen'   => 1,
+  'options'  => 'AVCPD', 'sort'     => false
+); 
+$opts['fdd']['has_dmc_lastchanged'] = array(
+  'name'     => 'Has dmc',
+  'select'   => 'T',
+  'maxlen'   => 1,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+
+}
 $field_exists = array_search('brief_summary',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['brief_summary'] = array(
   'name'     => 'Brief summary',
@@ -353,6 +521,27 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['brief_summary']
     'cols' => 50),
   'options'  => 'AVCPD', 'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['brief_summary_prev'] = array(
+  'name'     => 'Prev Brief summary',
+  'select'   => 'T',
+  'maxlen'   => 65535,
+  'textarea' => array(
+    'rows' => 5,
+    'cols' => 50),
+  'options'  => 'AVCPD', 'sort'     => false
+);
+$opts['fdd']['brief_summary_lastchanged'] = array(
+  'name'     => 'Brief summary',
+  'select'   => 'T',
+  'maxlen'   => 65535,
+  'textarea' => array(
+    'rows' => 5,
+    'cols' => 50),
+  'options'  => 'AVCPD', 'sort'     => false
+);
+
+ }
 $field_exists = array_search('detailed_description',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['detailed_description'] = array(
   'name'     => 'Detailed description',
@@ -363,6 +552,26 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['detailed_descri
     'cols' => 50),
   'options'  => 'AVCPD', 'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['detailed_description_prev'] = array(
+  'name'     => 'Prev Detailed description',
+  'select'   => 'T',
+  'maxlen'   => 65535,
+  'textarea' => array(
+    'rows' => 5,
+    'cols' => 50),
+  'options'  => 'AVCPD', 'sort'     => false
+);
+$opts['fdd']['detailed_description_lastchanged'] = array(
+  'name'     => 'Detailed description',
+  'select'   => 'T',
+  'maxlen'   => 65535,
+  'textarea' => array(
+    'rows' => 5,
+    'cols' => 50),
+  'options'  => 'AVCPD', 'sort'     => false
+);
+ }
 $field_exists = array_search('overall_status',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['overall_status'] = array(
   'name'     => 'Overall status',
@@ -386,6 +595,36 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['overall_status'
   'default'  => 'Not yet recruiting',
   'options'  => 'AVCPD', 'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['overall_status_prev'] = array(
+  'name'     => 'Prev Overall status',
+  'select'   => 'T',
+  'maxlen'   => 25,
+  'values'   => array(
+                  "Not yet recruiting",
+                  "Recruiting",
+                  "Enrolling by invitation",
+                  "Active, not recruiting",
+                  "Completed",
+                  "Suspended",
+                  "Terminated",
+                  "Withdrawn",
+                  "Available",
+                  "No Longer Available",
+                  "Approved for marketing",
+                  "No longer recruiting",
+                  "Withheld",
+                  "Temporarily Not Available"),
+  'default'  => 'Not yet recruiting',
+  'options'  => 'AVCPD', 'sort'     => false
+); 
+$opts['fdd']['overall_status_lastchanged'] = array(
+  'name'     => 'Overall status',
+  'select'   => 'T',
+  'maxlen'   => 25,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+}
 $field_exists = array_search('is_active',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['is_active'] = array(
   'name'     => 'Is active',
@@ -394,6 +633,22 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['is_active'] = a
   'default'  => '1',
   'options'  => 'AVCPD', 'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['is_active_prev'] = array(
+  'name'     => 'Prev Is active',
+  'select'   => 'T',
+  'maxlen'   => 1,
+  'default'  => '1',
+  'options'  => 'AVCPD', 'sort'     => false
+);
+$opts['fdd']['is_active_lastchanged'] = array(
+  'name'     => 'Is active',
+  'select'   => 'T',
+  'maxlen'   => 1,
+  'default'  => '1',
+  'options'  => 'AVCPD', 'sort'     => false
+);
+ }
 $field_exists = array_search('why_stopped',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['why_stopped'] = array(
   'name'     => 'Why stopped',
@@ -404,6 +659,26 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['why_stopped'] =
     'cols' => 50),
   'options'  => 'AVCPD', 'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['why_stopped_prev'] = array(
+  'name'     => 'Prev Why stopped',
+  'select'   => 'T',
+  'maxlen'   => 65535,
+  'textarea' => array(
+    'rows' => 5,
+    'cols' => 50),
+  'options'  => 'AVCPD', 'sort'     => false
+);
+$opts['fdd']['why_stopped_lastchanged'] = array(
+  'name'     => 'Why stopped',
+  'select'   => 'T',
+  'maxlen'   => 65535,
+  'textarea' => array(
+    'rows' => 5,
+    'cols' => 50),
+  'options'  => 'AVCPD', 'sort'     => false
+);
+ }
 $field_exists = array_search('start_date',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['start_date'] = array(
   'name'     => 'Start date',
@@ -411,6 +686,21 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['start_date'] = 
   'maxlen'   => 10,
   'options'  => 'AVCPD', 'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['start_date_prev'] = array(
+  'name'     => 'Prev Start date',
+  'select'   => 'T',
+  'maxlen'   => 10,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+$opts['fdd']['start_date_lastchanged'] = array(
+  'name'     => 'Start date',
+  'select'   => 'T',
+  'maxlen'   => 10,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+
+ }
 $field_exists = array_search('end_date',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['end_date'] = array(
   'name'     => 'End date',
@@ -418,6 +708,22 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['end_date'] = ar
   'maxlen'   => 10,
   'options'  => 'AVCPD', 'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['end_date_prev'] = array(
+  'name'     => 'Prev End date',
+  'select'   => 'T',
+  'maxlen'   => 10,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+$opts['fdd']['end_date_lastchanged'] = array(
+  'name'     => 'End date',
+  'select'   => 'T',
+  'maxlen'   => 10,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+
+ }
+
 $field_exists = array_search('study_type',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['study_type'] = array(
   'name'     => 'Study type',
@@ -430,6 +736,26 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['study_type'] = 
                   "N/A"),
   'options'  => 'AVCPD', 'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['study_type_prev'] = array(
+  'name'     => 'Prev Study type',
+  'select'   => 'T',
+  'maxlen'   => 15,
+  'options'  => 'AVCPD', 'sort'     => false
+); 
+$opts['fdd']['study_type_lastchanged'] = array(
+  'name'     => 'Study type',
+  'select'   => 'T',
+  'maxlen'   => 15,
+  'values'   => array(
+                  "Interventional",
+                  "Observational",
+                  "Expanded Access",
+                  "N/A"),
+  'options'  => 'AVCPD', 'sort'     => false
+);
+
+}
 $field_exists = array_search('study_design',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['study_design'] = array(
   'name'     => 'Study design',
@@ -440,6 +766,28 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['study_design'] 
     'cols' => 50),
   'options'  => 'AVCPD', 'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['study_design_prev'] = array(
+  'name'     => 'Prev Study design',
+  'select'   => 'T',
+  'maxlen'   => 65535,
+  'textarea' => array(
+    'rows' => 5,
+    'cols' => 50),
+  'options'  => 'AVCPD', 'sort'     => false
+); 
+
+$opts['fdd']['study_design_lastchanged'] = array(
+  'name'     => 'Study design',
+  'select'   => 'T',
+  'maxlen'   => 65535,
+  'textarea' => array(
+    'rows' => 5,
+    'cols' => 50),
+  'options'  => 'AVCPD', 'sort'     => false
+);
+
+}
 $field_exists = array_search('number_of_arms',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['number_of_arms'] = array(
   'name'     => 'Number of arms',
@@ -447,6 +795,20 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['number_of_arms'
   'maxlen'   => 10,
   'options'  => 'AVCPD', 'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['number_of_arms_prev'] = array(
+  'name'     => 'Prev Number of arms',
+  'select'   => 'T',
+  'maxlen'   => 10,
+  'options'  => 'AVCPD', 'sort'     => false
+); 
+$opts['fdd']['number_of_arms_lastchanged'] = array(
+  'name'     => 'Number of arms',
+  'select'   => 'T',
+  'maxlen'   => 10,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+}
 $field_exists = array_search('number_of_groups',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['number_of_groups'] = array(
   'name'     => 'Number of groups',
@@ -454,6 +816,22 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['number_of_group
   'maxlen'   => 10,
   'options'  => 'AVCPD', 'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['number_of_groups_prev'] = array(
+  'name'     => 'Prev Number of groups',
+  'select'   => 'T',
+  'maxlen'   => 10,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+$opts['fdd']['number_of_groups_lastchanged'] = array(
+  'name'     => 'Number of groups',
+  'select'   => 'T',
+  'maxlen'   => 10,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+
+}
+
 $field_exists = array_search('enrollment',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['enrollment'] = array(
   'name'     => 'Enrollment',
@@ -461,6 +839,22 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['enrollment'] = 
   'maxlen'   => 10,
   'options'  => 'AVCPD', 'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['enrollment_prev'] = array(
+  'name'     => 'Prev Enrollment',
+  'select'   => 'T',
+  'maxlen'   => 10,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+
+$opts['fdd']['enrollment_lastchanged'] = array(
+  'name'     => 'Enrollment',
+  'select'   => 'T',
+  'maxlen'   => 10,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+
+ }
 $field_exists = array_search('enrollment_type',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['enrollment_type'] = array(
   'name'     => 'Enrollment type',
@@ -471,6 +865,27 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['enrollment_type
                   "Anticipated"),
   'options'  => 'AVCPD', 'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['enrollment_type_prev'] = array(
+  'name'     => 'Prev Enrollment type',
+  'select'   => 'T',
+  'maxlen'   => 11,
+  'values'   => array(
+                  "Actual",
+                  "Anticipated"),
+  'options'  => 'AVCPD', 'sort'     => false
+); 
+$opts['fdd']['enrollment_type_lastchanged'] = array(
+  'name'     => 'Enrollment type',
+  'select'   => 'T',
+  'maxlen'   => 11,
+  'values'   => array(
+                  "Actual",
+                  "Anticipated"),
+  'options'  => 'AVCPD', 'sort'     => false
+);
+
+}
 $field_exists = array_search('biospec_retention',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['biospec_retention'] = array(
   'name'     => 'Biospec retention',
@@ -492,6 +907,7 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['biospec_descr']
     'cols' => 50),
   'options'  => 'AVCPD', 'sort'     => false
 );
+
 $field_exists = array_search('study_pop',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['study_pop'] = array(
   'name'     => 'Study pop',
@@ -502,6 +918,27 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['study_pop'] = a
     'cols' => 50),
   'options'  => 'AVCPD', 'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['study_pop_prev'] = array(
+  'name'     => 'Prev Study pop',
+  'select'   => 'T',
+  'maxlen'   => 65535,
+  'textarea' => array(
+    'rows' => 5,
+    'cols' => 50),
+  'options'  => 'AVCPD', 'sort'     => false
+); 
+$opts['fdd']['study_pop_lastchanged'] = array(
+  'name'     => 'Study pop',
+  'select'   => 'T',
+  'maxlen'   => 65535,
+  'textarea' => array(
+    'rows' => 5,
+    'cols' => 50),
+  'options'  => 'AVCPD', 'sort'     => false
+);
+
+}
 $field_exists = array_search('sampling_method',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['sampling_method'] = array(
   'name'     => 'Sampling method',
@@ -512,6 +949,28 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['sampling_method
                   "Non-Probability Sample"),
   'options'  => 'AVCPD', 'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['sampling_method_prev'] = array(
+  'name'     => 'Prev Sampling method',
+  'select'   => 'T',
+  'maxlen'   => 22,
+  'values'   => array(
+                  "Probability Sample",
+                  "Non-Probability Sample"),
+  'options'  => 'AVCPD', 'sort'     => false
+); 
+
+$opts['fdd']['sampling_method_lastchanged'] = array(
+  'name'     => 'Sampling method',
+  'select'   => 'T',
+  'maxlen'   => 22,
+  'values'   => array(
+                  "Probability Sample",
+                  "Non-Probability Sample"),
+  'options'  => 'AVCPD', 'sort'     => false
+);
+
+}
 $field_exists = array_search('criteria',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['criteria'] = array(
   'name'     => 'Criteria',
@@ -522,6 +981,28 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['criteria'] = ar
     'cols' => 50),
   'options'  => 'AVCPD', 'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['criteria_prev'] = array(
+  'name'     => 'Prev Criteria',
+  'select'   => 'T',
+  'maxlen'   => 65535,
+  'textarea' => array(
+    'rows' => 5,
+    'cols' => 50),
+  'options'  => 'AVCPD', 'sort'     => false
+);
+$opts['fdd']['criteria_lastchanged'] = array(
+  'name'     => 'Criteria',
+  'select'   => 'T',
+  'maxlen'   => 65535,
+  'textarea' => array(
+    'rows' => 5,
+    'cols' => 50),
+  'options'  => 'AVCPD', 'sort'     => false
+);
+
+ }
+
 $field_exists = array_search('inclusion_criteria',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['inclusion_criteria'] = array(
   'name'     => 'Inclusion criteria',
@@ -533,6 +1014,28 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['inclusion_crite
     'cols' => 50),
 	'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['inclusion_criteria_prev'] = array(
+  'name'     => 'Prev Inclusion criteria',
+  'select'   => 'T',
+  'maxlen'   => 65535,
+  'options'  => 'AVCPDR',
+  'textarea' => array(
+    'rows' => 5,
+    'cols' => 50),
+	'sort'     => false
+); 
+$opts['fdd']['inclusion_criteria_lastchanged'] = array(
+  'name'     => 'Inclusion criteria',
+  'select'   => 'T',
+  'maxlen'   => 65535,
+  'options'  => 'AVCPDR',
+  'textarea' => array(
+    'rows' => 5,
+    'cols' => 50),
+	'sort'     => false
+);
+}
 $field_exists = array_search('exclusion_criteria',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['exclusion_criteria'] = array(
   'name'     => 'Exclusion criteria',
@@ -544,6 +1047,30 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['exclusion_crite
     'cols' => 50),
   'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['exclusion_criteria_prev'] = array(
+  'name'     => 'Prev Exclusion criteria',
+  'select'   => 'T',
+  'maxlen'   => 65535,
+  'options'  => 'AVCPDR',
+  'textarea' => array(
+    'rows' => 5,
+    'cols' => 50),
+  'sort'     => false
+);
+
+$opts['fdd']['exclusion_criteria_lastchanged'] = array(
+  'name'     => 'Exclusion criteria',
+  'select'   => 'T',
+  'maxlen'   => 65535,
+  'options'  => 'AVCPDR',
+  'textarea' => array(
+    'rows' => 5,
+    'cols' => 50),
+  'sort'     => false
+);
+ }
+
 $field_exists = array_search('gender',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['gender'] = array(
   'name'     => 'Gender',
@@ -555,6 +1082,28 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['gender'] = arra
                   "Both"),
   'options'  => 'AVCPD', 'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['gender_prev'] = array(
+  'name'     => 'Prev Gender',
+  'select'   => 'T',
+  'maxlen'   => 6,
+  'values'   => array(
+                  "Male",
+                  "Female",
+                  "Both"),
+  'options'  => 'AVCPD', 'sort'     => false
+); 
+$opts['fdd']['gender_lastchanged'] = array(
+  'name'     => 'Gender',
+  'select'   => 'T',
+  'maxlen'   => 6,
+  'values'   => array(
+                  "Male",
+                  "Female",
+                  "Both"),
+  'options'  => 'AVCPD', 'sort'     => false
+);
+}
 $field_exists = array_search('minimum_age',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['minimum_age'] = array(
   'name'     => 'Minimum age',
@@ -562,6 +1111,20 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['minimum_age'] =
   'maxlen'   => 15,
   'options'  => 'AVCPD', 'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['minimum_age_prev'] = array(
+  'name'     => 'Prev Minimum age',
+  'select'   => 'T',
+  'maxlen'   => 15,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+$opts['fdd']['minimum_age_lastchanged'] = array(
+  'name'     => 'Minimum age',
+  'select'   => 'T',
+  'maxlen'   => 15,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+ }
 $field_exists = array_search('maximum_age',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['maximum_age'] = array(
   'name'     => 'Maximum age',
@@ -569,6 +1132,23 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['maximum_age'] =
   'maxlen'   => 15,
   'options'  => 'AVCPD', 'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['maximum_age_prev'] = array(
+  'name'     => 'Prev Maximum age',
+  'select'   => 'T',
+  'maxlen'   => 15,
+  'options'  => 'AVCPD', 'sort'     => false
+); 
+
+$opts['fdd']['maximum_age_lastchanged'] = array(
+  'name'     => 'Maximum age',
+  'select'   => 'T',
+  'maxlen'   => 15,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+
+}
+
 $field_exists = array_search('healthy_volunteers',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['healthy_volunteers'] = array(
   'name'     => 'Healthy volunteers',
@@ -576,6 +1156,22 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['healthy_volunte
   'maxlen'   => 1,
   'options'  => 'AVCPD', 'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['healthy_volunteers_prev'] = array(
+  'name'     => 'Prev Healthy volunteers',
+  'select'   => 'T',
+  'maxlen'   => 1,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+
+$opts['fdd']['healthy_volunteers_lastchanged'] = array(
+  'name'     => 'Healthy volunteers',
+  'select'   => 'T',
+  'maxlen'   => 1,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+
+}
 $field_exists = array_search('verification_date',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['verification_date'] = array(
   'name'     => 'Verification date',
@@ -583,13 +1179,46 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['verification_da
   'maxlen'   => 10,
   'options'  => 'AVCPD', 'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['verification_date_prev'] = array(
+  'name'     => 'Prev Verification date',
+  'select'   => 'T',
+  'maxlen'   => 10,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+$opts['fdd']['verification_date_lastchanged'] = array(
+  'name'     => 'Verification date',
+  'select'   => 'T',
+  'maxlen'   => 10,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+
+ }
+
 $field_exists = array_search('lastchanged_date',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['lastchanged_date'] = array(
   'name'     => 'Lastchanged date',
   'select'   => 'T',
   'maxlen'   => 10,
   'options'  => 'AVCPD', 'sort'     => false
+)
+
+;
+
+if($viewmode=='YES')
+{$opts['fdd']['lastchanged_date_prev'] = array(
+  'name'     => 'Prev Lastchanged date',
+  'select'   => 'T',
+  'maxlen'   => 10,
+  'options'  => 'AVCPD', 'sort'     => false
+); 
+$opts['fdd']['lastchanged_date_lastchanged'] = array(
+  'name'     => 'Lastchanged date',
+  'select'   => 'T',
+  'maxlen'   => 10,
+  'options'  => 'AVCPD', 'sort'     => false
 );
+}
 $field_exists = array_search('firstreceived_date',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['firstreceived_date'] = array(
   'name'     => 'Firstreceived date',
@@ -597,6 +1226,22 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['firstreceived_d
   'maxlen'   => 10,
   'options'  => 'AVCPD', 'sort'     => false
 );
+
+if($viewmode=='YES')
+{$opts['fdd']['firstreceived_date_prev'] = array(
+  'name'     => 'Prev Firstreceived date',
+  'select'   => 'T',
+  'maxlen'   => 10,
+  'options'  => 'AVCPD', 'sort'     => false
+); 
+
+$opts['fdd']['firstreceived_date_lastchanged'] = array(
+  'name'     => 'Firstreceived date',
+  'select'   => 'T',
+  'maxlen'   => 10,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+}
 $field_exists = array_search('responsible_party_name_title',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['responsible_party_name_title'] = array(
   'name'     => 'Responsible party name title',
@@ -604,6 +1249,8 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['responsible_par
   'maxlen'   => 255,
   'options'  => 'AVCPD', 'sort'     => false
 );
+
+
 $field_exists = array_search('responsible_party_organization',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['responsible_party_organization'] = array(
   'name'     => 'Responsible party organization',
@@ -611,6 +1258,7 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['responsible_par
   'maxlen'   => 255,
   'options'  => 'AVCPD', 'sort'     => false
 );
+
 $field_exists = array_search('org_study_id',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['org_study_id'] = array(
   'name'     => 'Org study ID',
@@ -619,6 +1267,22 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['org_study_id'] 
   'options'  => 'AVCPD', 'sort'     => false
 );
 
+
+if($viewmode=='YES')
+{$opts['fdd']['org_study_id_prev'] = array(
+  'name'     => 'Prev Org study ID',
+  'select'   => 'T',
+  'maxlen'   => 127,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+$opts['fdd']['org_study_id_lastchanged'] = array(
+  'name'     => 'Org study ID',
+  'select'   => 'T',
+  'maxlen'   => 127,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+
+ }
 $field_exists = array_search('phase',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['phase'] = array(
   'name'     => 'Phase',
@@ -651,6 +1315,47 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['phase'] = array
   'default'  => 'N/A',
   'options'  => 'AVCPD', 'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['phase_prev'] = array(
+  'name'     => 'Prev Phase',
+  'select'   => 'T',
+  'maxlen'   => 5,
+  'values'   => array(
+                  "N/A",
+                  "0",
+                  "0/1",
+                  "1",
+                  "1a",
+                  "1b",
+                  "1a/1b",
+                  "1c",
+                  "1/2",
+                  "1b/2",
+                  "1b/2a",
+                  "2",
+                  "2a",
+                  "2a/2b",
+                  "2b",
+                  "2/3",
+                  "2b/3",
+                  "3",
+                  "3a",
+                  "3b",
+                  "3/4",
+                  "3b/4",
+                  "4"),
+  'default'  => 'N/A',
+  'options'  => 'AVCPD', 'sort'     => false
+); 
+$opts['fdd']['phase_lastchanged'] = array(
+  'name'     => 'Phase',
+  'select'   => 'T',
+  'maxlen'   => 5,
+  'default'  => 'N/A',
+  'options'  => 'AVCPD', 'sort'     => false
+);
+}
+
 $field_exists = array_search('condition',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['condition'] = array(
   'name'     => 'Condition',
@@ -658,6 +1363,22 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['condition'] = a
   'maxlen'   => 255,
   'options'  => 'AVCPD', 'sort'     => false
 );
+
+if($viewmode=='YES')
+{$opts['fdd']['condition_prev'] = array(
+  'name'     => 'Prev Condition',
+  'select'   => 'T',
+  'maxlen'   => 255,
+  'options'  => 'AVCPD', 'sort'     => false
+); 
+$opts['fdd']['condition_lastchanged'] = array(
+  'name'     => 'Condition',
+  'select'   => 'T',
+  'maxlen'   => 255,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+}
+
 $field_exists = array_search('secondary_id',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['secondary_id'] = array(
   'name'     => 'Secondary ID',
@@ -665,6 +1386,22 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['secondary_id'] 
   'maxlen'   => 63,
   'options'  => 'AVCPD', 'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['secondary_id_prev'] = array(
+  'name'     => 'Prev Secondary ID',
+  'select'   => 'T',
+  'maxlen'   => 63,
+  'options'  => 'AVCPD', 'sort'     => false
+); 
+
+$opts['fdd']['secondary_id_lastchanged'] = array(
+  'name'     => 'Secondary ID',
+  'select'   => 'T',
+  'maxlen'   => 63,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+}
+
 $field_exists = array_search('oversight_authority',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['oversight_authority'] = array(
   'name'     => 'Oversight authority',
@@ -673,6 +1410,7 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['oversight_autho
   'options'  => 'AVCPD', 'sort'     => false
 );
 
+
 $field_exists = array_search('arm_group_label',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['arm_group_label'] = array(
   'name'     => 'Arm group label',
@@ -680,6 +1418,23 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['arm_group_label
   'maxlen'   => 255,
   'options'  => 'AVCPD', 'sort'     => false
 );
+
+if($viewmode=='YES')
+{$opts['fdd']['arm_group_label_prev'] = array(
+  'name'     => 'Prev Arm group label',
+  'select'   => 'T',
+  'maxlen'   => 255,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+
+$opts['fdd']['arm_group_label_lastchanged'] = array(
+  'name'     => 'Arm group label',
+  'select'   => 'T',
+  'maxlen'   => 255,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+ }
+
 $field_exists = array_search('arm_group_type',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['arm_group_type'] = array(
   'name'     => 'Arm group type',
@@ -698,6 +1453,43 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['arm_group_type'
                   "Exposure Comparison"),
   'options'  => 'AVCPD', 'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['arm_group_type_prev'] = array(
+  'name'     => 'Prev Arm group type',
+  'select'   => 'T',
+  'maxlen'   => 20,
+  'values'   => array(
+                  "Experimental",
+                  "Active Comparator",
+                  "Placebo Comparator",
+                  "Sham Comparator",
+                  "No Intervention",
+                  "Other",
+                  "Case",
+                  "Control",
+                  "Treatment Comparison",
+                  "Exposure Comparison"),
+  'options'  => 'AVCPD', 'sort'     => false
+); 
+$opts['fdd']['arm_group_type_lastchanged'] = array(
+  'name'     => 'Arm group type',
+  'select'   => 'T',
+  'maxlen'   => 20,
+  'values'   => array(
+                  "Experimental",
+                  "Active Comparator",
+                  "Placebo Comparator",
+                  "Sham Comparator",
+                  "No Intervention",
+                  "Other",
+                  "Case",
+                  "Control",
+                  "Treatment Comparison",
+                  "Exposure Comparison"),
+  'options'  => 'AVCPD', 'sort'     => false
+);
+}
+
 $field_exists = array_search('arm_group_description',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['arm_group_description'] = array(
   'name'     => 'Arm group description',
@@ -708,6 +1500,27 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['arm_group_descr
     'cols' => 50),
   'options'  => 'AVCPD', 'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['arm_group_description_prev'] = array(
+  'name'     => 'Prev Arm group description',
+  'select'   => 'T',
+  'maxlen'   => 65535,
+  'textarea' => array(
+    'rows' => 5,
+    'cols' => 50),
+  'options'  => 'AVCPD', 'sort'     => false
+);
+$opts['fdd']['arm_group_description_lastchanged'] = array(
+  'name'     => 'Arm group description',
+  'select'   => 'T',
+  'maxlen'   => 65535,
+  'textarea' => array(
+    'rows' => 5,
+    'cols' => 50),
+  'options'  => 'AVCPD', 'sort'     => false
+);
+ }
+
 $field_exists = array_search('intervention_type',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['intervention_type'] = array(
   'name'     => 'Intervention type',
@@ -731,6 +1544,37 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['intervention_ty
                   "Other"),
   'options'  => 'AVCPD', 'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['intervention_type_prev'] = array(
+  'name'     => 'Prev Intervention type',
+  'select'   => 'T',
+  'maxlen'   => 36,
+  'values'   => array(
+                  "Behavioral",
+                  "Drug",
+                  "Device",
+                  "Biological",
+                  "Biological/Vaccine",
+                  "Vaccine",
+                  "Genetic",
+                  "Radiation",
+                  "Procedure",
+                  "Procedure/Surgery",
+                  "Procedure/Surgery Dietary Supplement",
+                  "Dietary Supplement",
+                  "Gene Transfer",
+                  "Therapy",
+                  "Other"),
+  'options'  => 'AVCPD', 'sort'     => false
+);
+$opts['fdd']['intervention_type_lastchanged'] = array(
+  'name'     => 'Intervention type',
+  'select'   => 'T',
+  'maxlen'   => 36,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+
+ }
 $field_exists = array_search('intervention_name',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['intervention_name'] = array(
   'name'     => 'Intervention name',
@@ -738,13 +1582,44 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['intervention_na
   'maxlen'   => 255,
   'options'  => 'AVCPD', 'sort'     => false
 );
-$field_exists = array_search('intervention_other_name',$cols) ;
+if($viewmode=='YES')
+{$opts['fdd']['intervention_name_prev'] = array(
+  'name'     => 'Prev Intervention name',
+  'select'   => 'T',
+  'maxlen'   => 255,
+  'options'  => 'AVCPD', 'sort'     => false
+); 
+
+$opts['fdd']['intervention_name_lastchanged'] = array(
+  'name'     => 'Intervention name',
+  'select'   => 'T',
+  'maxlen'   => 255,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+
+}
+	$field_exists = array_search('intervention_other_name',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['intervention_other_name'] = array(
   'name'     => 'Intervention other name',
   'select'   => 'T',
   'maxlen'   => 255,
   'options'  => 'AVCPD', 'sort'     => false
 );
+
+if($viewmode=='YES')
+{$opts['fdd']['intervention_other_name_prev'] = array(
+  'name'     => 'Prev Intervention other name',
+  'select'   => 'T',
+  'maxlen'   => 255,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+$opts['fdd']['intervention_other_name_lastchanged'] = array(
+  'name'     => 'Intervention other name',
+  'select'   => 'T',
+  'maxlen'   => 255,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+ }
 $field_exists = array_search('intervention_description',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['intervention_description'] = array(
   'name'     => 'Intervention description',
@@ -755,6 +1630,26 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['intervention_de
     'cols' => 50),
   'options'  => 'AVCPD', 'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['intervention_description_prev'] = array(
+  'name'     => 'Prev Intervention description',
+  'select'   => 'T',
+  'maxlen'   => 65535,
+  'textarea' => array(
+    'rows' => 5,
+    'cols' => 50),
+  'options'  => 'AVCPD', 'sort'     => false
+);
+$opts['fdd']['intervention_description_lastchanged'] = array(
+  'name'     => 'Intervention description',
+  'select'   => 'T',
+  'maxlen'   => 65535,
+  'textarea' => array(
+    'rows' => 5,
+    'cols' => 50),
+  'options'  => 'AVCPD', 'sort'     => false
+);
+ }
 $field_exists = array_search('primary_outcome_measure',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['primary_outcome_measure'] = array(
   'name'     => 'Primary outcome measure',
@@ -765,6 +1660,26 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['primary_outcome
     'cols' => 50),
   'options'  => 'AVCPD', 'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['primary_outcome_measure_prev'] = array(
+  'name'     => 'Prev Primary outcome measure',
+  'select'   => 'T',
+  'maxlen'   => 65535,
+  'textarea' => array(
+    'rows' => 5,
+    'cols' => 50),
+  'options'  => 'AVCPD', 'sort'     => false
+); 
+$opts['fdd']['primary_outcome_measure_lastchanged'] = array(
+  'name'     => 'Primary outcome measure',
+  'select'   => 'T',
+  'maxlen'   => 65535,
+  'textarea' => array(
+    'rows' => 5,
+    'cols' => 50),
+  'options'  => 'AVCPD', 'sort'     => false
+);
+}
 $field_exists = array_search('primary_outcome_timeframe',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['primary_outcome_timeframe'] = array(
   'name'     => 'Primary outcome timeframe',
@@ -775,6 +1690,28 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['primary_outcome
     'cols' => 50),
   'options'  => 'AVCPD', 'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['primary_outcome_timeframe_prev'] = array(
+  'name'     => 'Prev Primary outcome timeframe',
+  'select'   => 'T',
+  'maxlen'   => 65535,
+  'textarea' => array(
+    'rows' => 5,
+    'cols' => 50),
+  'options'  => 'AVCPD', 'sort'     => false
+); 
+
+$opts['fdd']['primary_outcome_timeframe_lastchanged'] = array(
+  'name'     => 'Primary outcome timeframe',
+  'select'   => 'T',
+  'maxlen'   => 65535,
+  'textarea' => array(
+    'rows' => 5,
+    'cols' => 50),
+  'options'  => 'AVCPD', 'sort'     => false
+);
+}
+
 $field_exists = array_search('primary_outcome_safety_issue',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['primary_outcome_safety_issue'] = array(
   'name'     => 'Primary outcome safety issue',
@@ -785,6 +1722,26 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['primary_outcome
     'cols' => 50),
   'options'  => 'AVCPD', 'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['primary_outcome_safety_issue_prev'] = array(
+  'name'     => 'Prev Primary outcome safety issue',
+  'select'   => 'T',
+  'maxlen'   => 65535,
+  'textarea' => array(
+    'rows' => 5,
+    'cols' => 50),
+  'options'  => 'AVCPD', 'sort'     => false
+); 
+$opts['fdd']['primary_outcome_safety_issue_lastchanged'] = array(
+  'name'     => 'Primary outcome safety issue',
+  'select'   => 'T',
+  'maxlen'   => 65535,
+  'textarea' => array(
+    'rows' => 5,
+    'cols' => 50),
+  'options'  => 'AVCPD', 'sort'     => false
+);
+}
 $field_exists = array_search('secondary_outcome_measure',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['secondary_outcome_measure'] = array(
   'name'     => 'Secondary outcome measure',
@@ -795,6 +1752,26 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['secondary_outco
     'cols' => 50),
   'options'  => 'AVCPD', 'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['secondary_outcome_measure_prev'] = array(
+  'name'     => 'Prev Secondary outcome measure',
+  'select'   => 'T',
+  'maxlen'   => 65535,
+  'textarea' => array(
+    'rows' => 5,
+    'cols' => 50),
+  'options'  => 'AVCPD', 'sort'     => false
+);
+$opts['fdd']['secondary_outcome_measure_lastchanged'] = array(
+  'name'     => 'Secondary outcome measure',
+  'select'   => 'T',
+  'maxlen'   => 65535,
+  'textarea' => array(
+    'rows' => 5,
+    'cols' => 50),
+  'options'  => 'AVCPD', 'sort'     => false
+);
+ }
 $field_exists = array_search('secondary_outcome_timeframe',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['secondary_outcome_timeframe'] = array(
   'name'     => 'Secondary outcome timeframe',
@@ -805,6 +1782,26 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['secondary_outco
     'cols' => 50),
   'options'  => 'AVCPD', 'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['secondary_outcome_timeframe_prev'] = array(
+  'name'     => 'Prev Secondary outcome timeframe',
+  'select'   => 'T',
+  'maxlen'   => 65535,
+  'textarea' => array(
+    'rows' => 5,
+    'cols' => 50),
+  'options'  => 'AVCPD', 'sort'     => false
+); 
+$opts['fdd']['secondary_outcome_timeframe_lastchanged'] = array(
+  'name'     => 'Secondary outcome timeframe',
+  'select'   => 'T',
+  'maxlen'   => 65535,
+  'textarea' => array(
+    'rows' => 5,
+    'cols' => 50),
+  'options'  => 'AVCPD', 'sort'     => false
+);
+}
 $field_exists = array_search('secondary_outcome_safety_issue',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['secondary_outcome_safety_issue'] = array(
   'name'     => 'Secondary outcome safety issue',
@@ -815,6 +1812,26 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['secondary_outco
     'cols' => 50),
   'options'  => 'AVCPD', 'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['secondary_outcome_safety_issue_prev'] = array(
+  'name'     => 'Prev Secondary outcome safety issue',
+  'select'   => 'T',
+  'maxlen'   => 65535,
+  'textarea' => array(
+    'rows' => 5,
+    'cols' => 50),
+  'options'  => 'AVCPD', 'sort'     => false
+); 
+$opts['fdd']['secondary_outcome_safety_issue_lastchanged'] = array(
+  'name'     => 'Secondary outcome safety issue',
+  'select'   => 'T',
+  'maxlen'   => 65535,
+  'textarea' => array(
+    'rows' => 5,
+    'cols' => 50),
+  'options'  => 'AVCPD', 'sort'     => false
+);
+}
 $field_exists = array_search('location_name',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['location_name'] = array(
   'name'     => 'Location name',
@@ -825,6 +1842,26 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['location_name']
     'cols' => 50),
   'options'  => 'AVCPD', 'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['location_name_prev'] = array(
+  'name'     => 'Prev Location name',
+  'select'   => 'T',
+  'maxlen'   => 65535,
+  'textarea' => array(
+    'rows' => 5,
+    'cols' => 50),
+  'options'  => 'AVCPD', 'sort'     => false
+);
+$opts['fdd']['location_name_lastchanged'] = array(
+  'name'     => 'Location name',
+  'select'   => 'T',
+  'maxlen'   => 65535,
+  'textarea' => array(
+    'rows' => 5,
+    'cols' => 50),
+  'options'  => 'AVCPD', 'sort'     => false
+);
+ }
 $field_exists = array_search('location_city',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['location_city'] = array(
   'name'     => 'Location city',
@@ -832,6 +1869,20 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['location_city']
   'maxlen'   => 255,
   'options'  => 'AVCPD', 'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['location_city_prev'] = array(
+  'name'     => 'Prev Location city',
+  'select'   => 'T',
+  'maxlen'   => 255,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+$opts['fdd']['location_city_lastchanged'] = array(
+  'name'     => 'Location city',
+  'select'   => 'T',
+  'maxlen'   => 255,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+ }
 $field_exists = array_search('location_state',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['location_state'] = array(
   'name'     => 'Location state',
@@ -839,6 +1890,22 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['location_state'
   'maxlen'   => 255,
   'options'  => 'AVCPD', 'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['location_state_prev'] = array(
+  'name'     => 'Prev Location state',
+  'select'   => 'T',
+  'maxlen'   => 255,
+  'options'  => 'AVCPD', 'sort'     => false
+); 
+
+$opts['fdd']['location_state_lastchanged'] = array(
+  'name'     => 'Location state',
+  'select'   => 'T',
+  'maxlen'   => 255,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+
+}
 $field_exists = array_search('location_zip',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['location_zip'] = array(
   'name'     => 'Location zip',
@@ -846,6 +1913,20 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['location_zip'] 
   'maxlen'   => 255,
   'options'  => 'AVCPD', 'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['location_zip_prev'] = array(
+  'name'     => 'Prev Location zip',
+  'select'   => 'Prev T',
+  'maxlen'   => 255,
+  'options'  => 'AVCPD', 'sort'     => false
+); 
+$opts['fdd']['location_zip_lastchanged'] = array(
+  'name'     => 'Location zip',
+  'select'   => 'T',
+  'maxlen'   => 255,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+}
 $field_exists = array_search('location_country',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['location_country'] = array(
   'name'     => 'Location country',
@@ -854,6 +1935,20 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['location_countr
   'options'  => 'AVCPD', 'sort'     => false
 );
 
+if($viewmode=='YES')
+{$opts['fdd']['location_country_prev'] = array(
+  'name'     => 'Location country',
+  'select'   => 'Prev T',
+  'maxlen'   => 255,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+$opts['fdd']['location_country_lastchanged'] = array(
+  'name'     => 'Location country',
+  'select'   => 'T',
+  'maxlen'   => 255,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+ }
 $field_exists = array_search('region',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['region'] = array(
   'name'     => 'Region',
@@ -862,6 +1957,24 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['region'] = arra
   'default'  => 'RestOfWorld',
   'options'  => 'AVCPD', 'sort'     => false
 );
+
+if($viewmode=='YES')
+{$opts['fdd']['region_prev'] = array(
+  'name'     => 'Region',
+  'select'   => 'Prev T',
+  'maxlen'   => 255,
+  'default'  => 'RestOfWorld',
+  'options'  => 'AVCPD', 'sort'     => false
+); 
+
+$opts['fdd']['region_lastchanged'] = array(
+  'name'     => 'Region',
+  'select'   => 'T',
+  'maxlen'   => 255,
+  'default'  => 'RestOfWorld',
+  'options'  => 'AVCPD', 'sort'     => false
+);
+}
 $field_exists = array_search('location_status',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['location_status']=
 array
@@ -891,6 +2004,7 @@ array
 'sort'     => false
 );
 
+
 $field_exists = array_search('investigator_name',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['investigator_name'] = array(
   'name'     => 'Investigator name',
@@ -901,6 +2015,7 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['investigator_na
     'cols' => 50),
   'options'  => 'AVCPD', 'sort'     => false
 );
+
 $field_exists = array_search('investigator_role',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['investigator_role'] = array(
   'name'     => 'Investigator role',
@@ -923,6 +2038,7 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['overall_officia
     'cols' => 50),
   'options'  => 'AVCPD', 'sort'     => false
 );
+
 $field_exists = array_search('overall_official_role',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['overall_official_role']=
 array
@@ -941,6 +2057,8 @@ array
 'sort'     => false
 );
 
+
+
 $field_exists = array_search('overall_official_affiliation',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['overall_official_affiliation'] = array(
   'name'     => 'Overall official affiliation',
@@ -948,6 +2066,8 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['overall_officia
   'maxlen'   => 255,
   'options'  => 'AVCPD', 'sort'     => false
 );
+
+
 $field_exists = array_search('keyword',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['keyword'] = array(
   'name'     => 'Keyword',
@@ -956,6 +2076,22 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['keyword'] = arr
   'options'  => 'AVCPD', 'sort'     => false
 );
 
+if($viewmode=='YES')
+{$opts['fdd']['keyword_prev'] = array(
+  'name'     => 'Prev Keyword',
+  'select'   => 'T',
+  'maxlen'   => 127,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+$opts['fdd']['keyword_lastchanged'] = array(
+  'name'     => 'Keyword',
+  'select'   => 'T',
+  'maxlen'   => 127,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+
+ }
+
 $field_exists = array_search('is_fda_regulated',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['is_fda_regulated'] = array(
   'name'     => 'Is fda regulated',
@@ -963,6 +2099,21 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['is_fda_regulate
   'maxlen'   => 1,
   'options'  => 'AVCPD', 'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['is_fda_regulated_prev'] = array(
+  'name'     => 'Prev Is fda regulated',
+  'select'   => 'T',
+  'maxlen'   => 1,
+  'options'  => 'AVCPD', 'sort'     => false
+); 
+
+$opts['fdd']['is_fda_regulated_lastchanged'] = array(
+  'name'     => 'Is fda regulated',
+  'select'   => 'T',
+  'maxlen'   => 1,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+}
 $field_exists = array_search('is_section_801',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['is_section_801'] = array(
   'name'     => 'Is section 801',
@@ -970,9 +2121,24 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['is_section_801'
   'maxlen'   => 1,
   'options'  => 'AVCPD', 'sort'     => false
 );
+if($viewmode=='YES')
+{$opts['fdd']['is_section_801_prev'] = array(
+  'name'     => 'Prev Is section 801',
+  'select'   => 'T',
+  'maxlen'   => 1,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+$opts['fdd']['is_section_801_lastchanged'] = array(
+  'name'     => 'Is section 801',
+  'select'   => 'T',
+  'maxlen'   => 1,
+  'options'  => 'AVCPD', 'sort'     => false
+);
+}
+
 require_once 'phpMyEdit.class.php';
 //require_once 'edit_trials_list.php';
 new phpMyEdit($opts);
-
+//pr($opts);
 ?>
 

@@ -76,6 +76,7 @@ class phpMyEdit
 	var $num_fds;	
 	var $options;	
 	var $fdd;		
+	var $fdd1;
 	var $qfn;		
 	var $sfn;		
 	var $cur_tab;	
@@ -558,7 +559,7 @@ class phpMyEdit
 				die('unknown query type');
 				break;
 		}
-		
+//		pr($ret);
 		return $ret;
 	} /* }}} */
 
@@ -569,13 +570,28 @@ class phpMyEdit
 			if (! $this->displayed[$k] && $k != $this->key_num) {
 				continue;
 			}
-			$fields[] = $this->fqn($k).' AS '.$this->sd.'qf'.$k.$this->ed; // no delimiters here, or maybe some yes
-			if ($this->col_has_values($k)) {
-				if($this->col_has_sql($k)) $fields[] = $this->fdd[$k]['sql'].' AS '.$this->sd.'qf'.$k.'_idx'.$this->ed;
-				else $fields[] = $this->fqn($k, true, true).' AS '.$this->sd.'qf'.$k.'_idx'.$this->ed;
+			$sx=$this->fqn($k);
+			$sx=substr($sx,13,-1);
+//			$sx2=str_replace("`PMEtable0`.`","",
+			//pr($sx);
+			$pos = strpos('a'.$sx, '_prev');  $pos1 = strpos('a'.$sx, '_lastchanged'); // check if data to be picked from history table.
+			if ($pos === false and $pos1 === false ) 
+			{
+				$fields[] = $this->fqn($k).' AS   '.$this->sd.'qf'.$k.$this->ed; // no delimiters here, or maybe some yes
+				if ($this->col_has_values($k)) {
+					if($this->col_has_sql($k)) $fields[] = $this->fdd[$k]['sql'].' AS '.$this->sd.'qf'.$k.'_idx'.$this->ed;
+					else $fields[] = $this->fqn($k, true, true).' AS '.$this->sd.'qf'.$k.'_idx'.$this->ed;
+				}
+				if ($this->col_has_datemask($k)) {
+					$fields[] = 'UNIX_TIMESTAMP('.$this->fqn($k).') AS '.$this->sd.'qf'.$k.'_timestamp'.$this->ed;
+				}
 			}
-			if ($this->col_has_datemask($k)) {
-				$fields[] = 'UNIX_TIMESTAMP('.$this->fqn($k).') AS '.$this->sd.'qf'.$k.'_timestamp'.$this->ed;
+//			$sx=$this->fqn($k);
+			else // pick data from history table
+			{
+//				$sx=substr($sx,3);
+				$fields[] = 'qfh.'. $sx.' AS   '.$this->sd.'qfh'.$k.$this->ed;
+//				$fields[] = 'qfh.'. $sx.'_lastchanged AS   '.$this->sd.'qfhd'.$k.$this->ed;
 			}
 		}
 		return join(',', $fields);
@@ -584,7 +600,7 @@ class phpMyEdit
 	function get_SQL_join_clause() /* {{{ */
 	{
 		$main_table  = $this->sd.'PMEtable0'.$this->ed;
-		$join_clause = $this->sd.$this->tb.$this->ed." AS $main_table";
+		$join_clause = $this->sd.$this->tb.$this->ed." AS $main_table left join data_history as qfh on PMEtable0.larvol_id=qfh.larvol_id ";
 		for ($k = 0, $numfds = sizeof($this->fds); $k < $numfds; $k++) {
 			$main_column = $this->fds[$k];
 			if($this->fdd[$main_column]['values']['db']) {
@@ -1071,6 +1087,8 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 		if (! ($row = $this->sql_fetch($res))) {
 			return false;
 		}
+//		pr($row);
+		$column_headers_displayed=false;
 		for ($tab = 0, $k = 0; $k < $this->num_fds; $k++) {
 			if (isset($this->fdd[$k]['tab']) && $this->tabs_enabled() && $k > 0) {
 				$tab++;
@@ -1110,20 +1128,72 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 			} elseif ($this->delete_operation() || $this->view_operation()) {
 				$css_postfix = @$this->fdd[$k]['css']['postfix'];
 				echo '<tr class="',$this->getCSSclass('row', null, 'next', $css_postfix),'">',"\n";
-				echo '<td class="',$this->getCSSclass('key', null, true, $css_postfix),'">';
+				if($column_headers_displayed===false)
+						{
+							$column_headers_displayed=true;
+							echo '<td class="pme-value-0"',$this->getColAttributes($k),">";
+							echo '<font size="+1"><b>Field Name';
+							echo '</font></b></td>';
+							echo '<td class="pme-value-0"',$this->getColAttributes($k),">";
+							echo '<font size="+1"><b>Current Value';
+							echo '</font></b></td>';
+							echo '<td class="pme-value-0"',$this->getColAttributes($k),">";
+							echo '<font size="+1"><b>Previous Value';
+							echo '<td class="pme-value-0"',$this->getColAttributes($k),">";
+							echo '<font size="+1"><b>Last changed on';
+							echo '</font></b></td></tr>';
+							echo '<tr class="',$this->getCSSclass('row', null, 'next', $css_postfix),'">',"\n";
+						}
+				echo '<td class="',$this->getCSSclass('key', null, true, $css_postfix),'" style="vertical-align:top; padding-top:10px; padding-bottom:10px;" >';
 				echo $this->fdd[$k]['name'],'</td>',"\n";
-				if ($this->password($k)) {
+				if ($this->password($k)) 
+				{
 					echo '<td class="',$this->getCSSclass('value', null, true, $css_postfix),'"';
 					echo $this->getColAttributes($k),'>',$this->labels['hidden'],'</td>',"\n";
-				} else {
+				} 
+				else 
+				{
 					$this->display_delete_field($row, $k);
+					$kp=$k+1;
+					
+					if(isset($row['qfh'.$kp])) 
+					{
+						
+						echo '<td class="pme-value-0"',$this->getColAttributes($kp),"style='vertical-align:top; padding-top:10px; padding-bottom:10px;' >";
+						echo ''. $row['qfh'.$kp];echo '</td>';
+						$k=$kp;
+						$kp=$k+1;
+						echo '<td class="pme-value-0"',$this->getColAttributes($kp)," style='vertical-align:top; padding-top:10px; padding-bottom:10px;' >";
+						
+						if( isset($row['qfh'.$kp]) and isset($row['qfh'.$k]) and !empty($row['qfh'.$k]) and $row['qfh'.$kp]<>'0000-00-00 00:00:00' ) 
+						{
+							echo ''. $row['qfh'.$kp];echo '</td>';
+						}
+						else
+							echo ''; echo '</td>';
+						$k=$kp;
+						$kp=$k+1;
+
+//						$this->display_delete_field1($row, $k);						
+					
+//						$this->display_delete_field1($row, $k);						
+					}
+					else
+					{
+						echo '<td class="pme-value-0"',$this->getColAttributes($k),">\n";
+						echo '</td>';
+						echo '<td class="pme-value-0"',$this->getColAttributes($k),">\n";
+						echo '</td>';
+					}
+					echo '</tr>',"\n";
 				}
-				if ($this->guidance) {
+				if ($this->guidance) 
+				{
 					$css_class_name = $this->getCSSclass('help', null, true, $css_postfix);
 					$cell_value     = $this->fdd[$k]['help'] ? $this->fdd[$k]['help'] : '&nbsp;';
 					echo '<td class="',$css_class_name,'">',$cell_value,'</td>',"\n";
 				}
-				echo '</tr>',"\n";
+				
 			}
 		}
 	} /* }}} */
@@ -1215,8 +1285,16 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 	{
 		$css_postfix    = @$this->fdd[$k]['css']['postfix'];
 		$css_class_name = $this->getCSSclass('value', null, true, $css_postfix);
-		echo '<td class="',$css_class_name,'"',$this->getColAttributes($k),">\n";
+		echo '<td class="',$css_class_name,'"',$this->getColAttributes($k)," style='vertical-align:top; padding-top:10px; padding-bottom:10px;' >\n";
 		echo $this->cellDisplay($k, $row, $css_class_name);
+		echo '</td>',"\n";
+	} /* }}} */
+	function display_delete_field1($row, $k) /* {{{ */
+	{
+		$css_postfix    = @$this->fdd[$k]['css']['postfix'];
+		$css_class_name = $this->getCSSclass('value', null, true, $css_postfix);
+		echo '<td class="',$css_class_name,'"',$this->getColAttributes($k),">\n";
+		echo $this->cellDisplay1($k, $row, $css_class_name);
 		echo '</td>',"\n";
 	} /* }}} */
 
@@ -1345,6 +1423,78 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 	{
 		$escape  = isset($this->fdd[$k]['escape']) ? $this->fdd[$k]['escape'] : true;
 		$key_rec = $row['qf'.$this->key_num];
+		if (@$this->fdd[$k]['datemask']) {
+			$value = intval($row["qf$k".'_timestamp']);
+			$value = $value ? @date($this->fdd[$k]['datemask'], $value) : '';
+		} else if (@$this->fdd[$k]['strftimemask']) {
+			$value = intval($row["qf$k".'_timestamp']);
+			$value = $value ? @strftime($this->fdd[$k]['strftimemask'], $value) : '';
+		} else if ($this->is_values2($k, $row["qf$k"])) {
+			$value = $row['qf'.$k.'_idx'];
+			if ($this->fdd[$k]['select'] == 'M') {
+				$value_ar  = explode(',', $value);
+				$value_ar2 = array();
+				foreach ($value_ar as $value_key) {
+					if (isset($this->fdd[$k]['values2'][$value_key])) {
+						$value_ar2[$value_key] = $this->fdd[$k]['values2'][$value_key];
+						$escape = false;
+					}
+				}
+				$value = join(', ', $value_ar2);
+			} else {
+				if (isset($this->fdd[$k]['values2'][$value])) {
+					$value  = $this->fdd[$k]['values2'][$value];
+					$escape = false;
+				}
+			}
+		} elseif (isset($this->fdd[$k]['values2'][$row["qf$k"]])) {
+			$value = $this->fdd[$k]['values2'][$row["qf$k"]];
+		} else {
+			$value = $row["qf$k"];
+		}
+		$original_value = $value;
+		if (@$this->fdd[$k]['strip_tags']) {
+			$value = strip_tags($value);
+		}
+		if ($num_ar = @$this->fdd[$k]['number_format']) {
+			if (! is_array($num_ar)) {
+				$num_ar = array($num_ar);
+			}
+			if (count($num_ar) == 1) {
+				list($nbDec) = $num_ar;
+				$value = number_format($value, $nbDec);
+			} else if (count($num_ar) == 3) {
+				list($nbDec, $decPoint, $thSep) = $num_ar;
+				$value = number_format($value, $nbDec, $decPoint, $thSep);
+			}
+		}
+		if (intval($this->fdd[$k]['trimlen']) > 0 && strlen($value) > $this->fdd[$k]['trimlen']) {
+			$value = ereg_replace("[\r\n\t ]+",' ',$value);
+			$value = substr($value, 0, $this->fdd[$k]['trimlen'] - 3).'...';
+		}
+		if (@$this->fdd[$k]['mask']) {
+			$value = sprintf($this->fdd[$k]['mask'], $value);
+		}
+		if ($this->col_has_php($k)) {
+			return include($this->fdd[$k]['php']);
+		}
+		if ($this->col_has_URL($k)) {
+			return $this->urlDisplay($k, $original_value, $value, $css, $key_rec);
+		}
+		if (strlen($value) <= 0) {
+			return '&nbsp;';
+		}
+		if ($escape) {
+			$value = htmlspecialchars($value);
+		}
+		return nl2br($value);
+	} /* }}} */
+	
+	
+	function cellDisplay1($k, $row, $css) /* {{{ */
+	{
+		$escape  = isset($this->fdd[$k]['escape']) ? $this->fdd[$k]['escape'] : true;
+		$key_rec = $row['qfh'.$this->key_num];
 		if (@$this->fdd[$k]['datemask']) {
 			$value = intval($row["qf$k".'_timestamp']);
 			$value = $value ? @date($this->fdd[$k]['datemask'], $value) : '';
@@ -3323,6 +3473,7 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 		$this->inc       = $opts['inc'];
 		$this->options   = $opts['options'];
 		$this->fdd       = $opts['fdd'];
+		$this->fdd1       = $opts['fdd1'];
 		$this->multiple  = intval($opts['multiple']);
 		$this->multiple <= 0 && $this->multiple = 2;
 		$this->filters   = is_array(@$opts['filters']) ? join(' AND ', $opts['filters']) : @$opts['filters'];
