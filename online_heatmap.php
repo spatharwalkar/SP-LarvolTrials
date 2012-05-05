@@ -32,9 +32,16 @@ $rowsDisplayName = array();
 
 $rows_category = array('');
 $columns_category = array('');
-$columns_categorySpan  = array();
+$columns_Span  = array();
 $rows_categorySpan = array();
 $rows_categoryProducts = array();
+$prev_area_category='';
+$prev_prod_category='';
+$prev_area='';
+$prev_prod='';
+$prev_areaSpan=0;
+$prev_prodSpan=0;
+
 while($header = mysql_fetch_array($res))
 {
 	if($header['type'] == 'area')
@@ -57,11 +64,26 @@ while($header = mysql_fetch_array($res))
 			$header['category'] = 'Undefined';
 		}
 		$areaIds[$header['num']] = $header['type_id'];
-		$columns_categoryArr[$header['category']] = $header['category'];
-		$columns_categorySpan[$header['category']] = $columns_categorySpan[$header['category']]+1;
+		
+		if($prev_area_category == $header['category'])
+		{
+			$columns_Span[$prev_area] = $prev_areaSpan+1;
+			$columns_Span[$header['num']] = 0;
+			$prev_area = $prev_area;
+			$prev_areaSpan = $prev_areaSpan+1;
+		}
+		else
+		{
+			$columns_Span[$header['num']] = 1;
+			$prev_area = $header['num'];
+			$prev_areaSpan = 1;
+		}
+		
+		$prev_area_category = $header['category'];
 		$columnsCategoryName[$header['num']] = $header['category'];
 		
 		$last_category = $header['category'];
+		$second_last_num = $last_num;
 		$last_num = $header['num'];
 		$last_area = $header['type_id'];
 	}
@@ -84,42 +106,44 @@ while($header = mysql_fetch_array($res))
 			$header['category'] = 'Undefined';
 		}
 		$productIds[$header['num']] = $header['type_id'];
-		$rows_categoryArr[$header['category']] = $header['category'];
-		$rows_categorySpan[$header['category']] = $rows_categorySpan[$header['category']]+1;
+		
+		if($prev_prod_category == $header['category'])
+		{
+			$rows_Span[$prev_prod] = $prev_prodSpan+1;
+			$rows_Span[$header['num']] = 0;
+			$prev_prod = $prev_prod;
+			$prev_prodSpan = $prev_prodSpan+1;
+		}
+		else
+		{
+			$rows_Span[$header['num']] = 1;
+			$prev_prod = $header['num'];
+			$prev_prodSpan = 1;
+		}
+		
+		$prev_prod_category = $header['category'];
 		$rowsCategoryName[$header['num']] = $header['category'];
-		$rowsCategoryPrintStatus[$header['category']] = 0;
+		
+		//$rowsCategoryPrintStatus[$header['category']] = 0;
 		$rows_categoryProducts[$header['category']][] = $header['type_id'];
 	}
 }
 
 /////Rearrange Data according to Category //////////
-$new_rows = array();
 $new_columns = array();
-foreach($columns_categoryArr as $columns_category)
+foreach($columns as $col => $cval)
 {
-	foreach($columns as $col => $cval)
+	if($dtt && $last_num == $col)
+		array_pop($areaIds); //In case of DTT enable skip last column vaules
+	else
 	{
-		if($columnsCategoryName[$col] == $columns_category)
-		{
-			if($dtt && $last_num == $col && $columns_category == $last_category)
-			array_pop($areaIds); //In case of DTT enable skip last column vaules
-			else
-			$new_columns[$col]=$cval;
-		}
+		if($dtt && $second_last_num == $col && $rows_Span[$col] == 0)	//In case of DTT skipping last column can cause colspan problem of category
+		$rows_Span[$col] = $rows_Span[$last_num];
+		$new_columns[$col]=$cval;
 	}
+	
 }
 
-foreach($rows_categoryArr as $rows_category)
-{
-	foreach($rows as $row => $rval)
-	{
-		if($rowsCategoryName[$row] == $rows_category)
-		{
-			$new_rows[$row]=$rval;
-		}
-	}
-}
-$rows=$new_rows;
 $columns=$new_columns;
 /////Rearrange Completes //////////
 
@@ -1061,7 +1085,7 @@ function display_tooltip(type, id)
         <tr><td><img title="Filing" src="images/newred_file.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Filing Details (Updated)</td></tr>
         <tr><td><img title="Phase Explain" src="images/phaseexp.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Phase Explain</td></tr>
         <tr><td><img title="Phase Explain" src="images/phaseexp_red.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Phase Explain (Updated)</td></tr>
-        <tr><td><img title="Red Border" src="images/outline.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Red Border (Record Updated)</td></tr>
+        <tr><td><img title="Red Border" src="images/outline.png"  style="width:20px; height:15px; cursor:pointer;" /></td><td>Red Border (Record Updated)</td></tr>
         <tr><td align="center"><img title="Red Border" src="images/viewcount_bar.png" align="middle"  style="width:1px; height:17px; cursor:pointer;" /></td><td>Views</td></tr>
         <tr><td colspan="2" style="padding-right: 1px;">
          <div style="float:left;padding-top:3px;">Phase&nbsp;</div>
@@ -1082,14 +1106,14 @@ $online_HMCounter=0;
 
 $htmlContent .= '<table width="100%" style="background-color:#FFFFFF;">'
 				. '<tr><td style="background-color:#FFFFFF;"><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" /></td>'
-				. '<td style="background-color:#FFFFFF;" nowrap="nowrap"><span style="color:#ff0000;font-weight:normal;margin-left:40px;">Interface Work In Progress</span>'
+				. '<td style="background-color:#FFFFFF;" nowrap="nowrap"><span style="color:#ff0000;font-weight:normal;margin-left:40px;">Interface work in progress</span>'
 				. '<br/><span style="font-weight:normal;">Send feedback to '
 				. '<a style="display:inline;color:#0000FF;" target="_self" href="mailto:larvoltrials@larvol.com">'
 				. 'larvoltrials@larvol.com</a></span></td>'
 				. '<td style="background-color:#FFFFFF;" class="result">Name: ' . htmlspecialchars($name) . '</td></tr></table><br/>'
 				
 				. '<table width="900px" border="0" cellspacing="0" class="controls" align="center">'
-				. '<tr><th>View Mode</th><th>Range</th><th class="right">Download Option</th></tr>'
+				. '<tr><th>View mode</th><th>Range</th><th class="right">Download option</th></tr>'
 				. '<tr>'
 				. '<td class="bottom"><p style="margin-top:10px;margin-right:5px;"><select id="view_type" name="view_type" onchange="change_view()">'
 				. '<option value="indlead" selected="selected">Active Industry Trials</option>'
@@ -1104,11 +1128,11 @@ $htmlContent .= '<table width="100%" style="background-color:#FFFFFF;">'
 				. '<td style="background-color:#FFFFFF;" class="bottom right"><p style="margin-top:10px;margin-left:5px;">'
 				. '<form action="master_heatmap.php" method="post">'
 				. '<input type="hidden" name="id" value="' . $id . '" />'
-				. '<b style="margin-left:5px;">Which Format: </b><select id="dwformat" name="dwformat">'
+				. '<b style="margin-left:5px;">Which format: </b><select id="dwformat" name="dwformat">'
 				. '<option value="exceldown" selected="selected">Excel</option>'
 				. '<option value="pdfdown">PDF</option>'
 				. '</select><br/><br/>'
-				. '<b style="margin-left:5px;">Counts Display: </b><select id="dwcount" name="dwcount">'
+				. '<b style="margin-left:5px;">Counts display: </b><select id="dwcount" name="dwcount">'
 				. '<option value="indlead" selected="selected">Active Industry Trials</option>'
 				. '<option value="active">Active Trials</option>'
 				. '<option value="total">All Trials</option>'
@@ -1123,10 +1147,13 @@ $htmlContent .= '<div align="center">'
 			. '<table style="padding-top:5px; height:100%; vertical-align:middle;" class="display">'
 			. '<thead><tr style="page-break-inside:avoid; height:100%;" nobr="true"><th style="background-color:#FFFFFF;">&nbsp;</th><th style="background-color:#FFFFFF;">&nbsp;</th>';
 						
-foreach($columns_categoryArr as $columns_category)
+foreach($columns as $col => $val)
 {
-	$online_HMCounter++;
-	$htmlContent .= '<th style="background-color:#FFFFFF; '.(($columns_category != 'Undefined') ? 'border-left:#000000 solid 2px; border-top:#000000 solid 2px; border-right:#000000 solid 2px;':'').'" id="Cell_ID_'.$online_HMCounter.'" colspan="'.$columns_categorySpan[$columns_category].'" width="80px" '.$caltTitle.'><b>'.(($columns_category != 'Undefined') ? $columns_category:'').'</b></th>';
+	if($columns_Span[$col] > 0)
+	{
+		$online_HMCounter++;
+		$htmlContent .= '<th style="background-color:#FFFFFF; '.(($columnsCategoryName[$col] != 'Undefined') ? 'border-left:#000000 solid 2px; border-top:#000000 solid 2px; border-right:#000000 solid 2px;':'').'" id="Cell_ID_'.$online_HMCounter.'" colspan="'.$columns_Span[$col].'" width="80px"><b>'.(($columnsCategoryName[$col] != 'Undefined') ? $columnsCategoryName[$col]:'').'</b></th>';
+	}
 }
 
 $htmlContent .= '</tr><tr style="page-break-inside:avoid; height:100%;" nobr="true"><th style="background-color:#FFFFFF;">&nbsp;</th><th>&nbsp;</th>';
@@ -1179,13 +1206,24 @@ foreach($rows as $row => $rval)
 	
 	$height="100%";
 	if($cat != 'Undefined')
-	$height=((strlen($rowsCategoryName[$row])*8)/$rows_categorySpan[$cat]).'px'; //Calculate height
+	{
+		if($rows_Span[$row] > 0)
+		{
+			$height = ((strlen($rowsCategoryName[$row])*8)/$rows_Span[$row]).'px'; //Calculate height
+			$prev_height = $height;
+		}
+		else if($rows_Span[$row] == 0)
+		{
+			$height = $prev_height;
+		}
+		
+	}
 	$htmlContent .= '<tr height="'.$height.'" style="page-break-inside:avoid; vertical-align:middle; max-height:100%;">';
 	
-	if($rowsCategoryPrintStatus[$cat] == 0)
+	if($rows_Span[$row] > 0)
 	{
 		$online_HMCounter++;
-		$htmlContent .='<th align="left" style="vertical-align:bottom; padding-top:4px; background-color:#FFFFFF; '.(($cat != 'Undefined') ? ' border-left:#000000 solid 2px; border-top:#000000 solid 2px; border-bottom:#000000 solid 2px;' : '' ).'" rowspan="'.$rows_categorySpan[$cat].'" id="Cell_ID_'.$online_HMCounter.'"><div class="box_rotate">';
+		$htmlContent .='<th align="left" style="vertical-align:bottom; padding-top:4px; background-color:#FFFFFF; '.(($cat != 'Undefined') ? ' border-left:#000000 solid 2px; border-top:#000000 solid 2px; border-bottom:#000000 solid 2px;' : '' ).'" rowspan="'.$rows_Span[$row].'" id="Cell_ID_'.$online_HMCounter.'"><div class="box_rotate">';
 		if($dtt)
 		{
 			$htmlContent .= '<input type="hidden" value="0,endl,0,endl,0" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
@@ -1196,7 +1234,7 @@ foreach($rows as $row => $rval)
 		if($dtt)
 		$htmlContent .= '</a>';
 		$htmlContent .='</div></th>';
-		$rowsCategoryPrintStatus[$cat] = 1;
+		//$rowsCategoryPrintStatus[$cat] = 1;
 	}
 	
 	$online_HMCounter++;
@@ -1221,7 +1259,7 @@ foreach($rows as $row => $rval)
 	foreach($columns as $col => $cval)
 	{
 		$online_HMCounter++;
-		$htmlContent .= '<td class="tooltip" valign="middle" id="Cell_ID_'.$online_HMCounter.'" style="'. (($data_matrix[$row][$col]['total'] != 0) ? $data_matrix[$row][$col]['cell_start_style'] : 'background-color:#d9d9d9; border:#d9d9d9 solid;') .' padding:1px; width:110px; height:100%; vertical-align:middle; text-align:center; " align="center" onmouseover="display_tooltip(\'on\','.$online_HMCounter.');" onmouseout="display_tooltip(\'off\','.$online_HMCounter.');">';
+		$htmlContent .= '<td class="tooltip" valign="middle" id="Cell_ID_'.$online_HMCounter.'" style="'. (($data_matrix[$row][$col]['total'] != 0) ? $data_matrix[$row][$col]['cell_start_style'] : 'background-color:#efefef; border:#efefef solid;') .' padding:1px; width:110px; height:100%; vertical-align:middle; text-align:center; " align="center" onmouseover="display_tooltip(\'on\','.$online_HMCounter.');" onmouseout="display_tooltip(\'off\','.$online_HMCounter.');">';
 	
 		if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL && $data_matrix[$row][$col]['total'] != 0)
 		{
@@ -1245,7 +1283,7 @@ foreach($rows as $row => $rval)
 			if($data_matrix[$row][$col]['phase_explain'] != NULL && $data_matrix[$row][$col]['phase_explain'] != '')
 			$htmlContent .= '<img id="Cell_Phase_'.$online_HMCounter.'" src="images/phaseexp.png" title="Phase Explain" style="width:17px; height:17px; vertical-align:middle; cursor:pointer;" alt="Phase Explain" />&nbsp;';
 
-			$htmlContent .= '<font id="ViewCount_Bar_'.$online_HMCounter.'">';
+			$htmlContent .= '<font id="ViewCount_Bar_'.$online_HMCounter.'" style="text-align:right; float:right;">';
 			if($data_matrix[$row][$col]['viewcount'] > 0)
 			$htmlContent .= '<img src="images/viewcount_bar.png" style="width:1px; height:'.((17*$data_matrix[$row][$col]['viewcount'])/$Max_ViewCount).'px; vertical-align:bottom; cursor:pointer;" alt="View Count Bar" />&nbsp;';
 			$htmlContent .= '</font>';
@@ -1256,13 +1294,13 @@ foreach($rows as $row => $rval)
 			$htmlContent .= '<span id="ToolTip_ID_'.$online_HMCounter.'" class="classic" style="text-align:left;">'
 							.'<input type="hidden" value="0" name="ToolTip_Visible_'.$online_HMCounter.'" id="ToolTip_Visible_'.$online_HMCounter.'" />';	
 				
-			$htmlContent .= '<font id="Count_CDate_'.$online_HMCounter.'" style="'.(($data_matrix[$row][$col]['active_prev'] != NULL && $data_matrix[$row][$col]['active_prev'] != '')? 'display:inline;':'display:none;').'"><font style="color:#206040; font-weight: 900;">Count </font><font style="color:#206040; font-weight: 900;">Updated From : </font><font id="Popup_Count_ID_'.$online_HMCounter.'" style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['active_prev'] .'</font><br/></font>';
+			$htmlContent .= '<font id="Count_CDate_'.$online_HMCounter.'" style="'.(($data_matrix[$row][$col]['active_prev'] != NULL && $data_matrix[$row][$col]['active_prev'] != '')? 'display:inline;':'display:none;').'"><font style="color:#206040; font-weight: 900;">Count </font><font style="color:#206040; font-weight: 900;">updated from : </font><font id="Popup_Count_ID_'.$online_HMCounter.'" style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['active_prev'] .'</font><br/></font>';
 							
 			if($data_matrix[$row][$col]['phase4_override'])	
 			$htmlContent .= '<font id="Red_Cell_'.$online_HMCounter.'"><font style="color:#206040; font-weight: 900;""><img src="images/phase4.png" title="Red Cell Override" style="width:17px; height:17px; vertical-align:middle; cursor:pointer; padding-bottom:2px;" alt="Red Cell Override" />&nbsp;</font></font><font style="color:#FF0000; font-weight: 900;"><font style="color:#206040; font-weight: 900;">: </font>'. (($data_matrix[$row][$col]['phase4_override'])? '"ON"<input type="hidden" value="1" name="Phase4_Presence_'.$online_HMCounter.'" id="Phase4_Presence_'.$online_HMCounter.'" />':'"OFF"<input type="hidden" value="0" name="Phase4_Presence_'.$online_HMCounter.'" id="Phase4_Presence_'.$online_HMCounter.'" />').'</font><br/></font>';
 							
 			if($data_matrix[$row][$col]['highest_phase_prev'] != NULL && $data_matrix[$row][$col]['highest_phase_prev'] != '')
-			$htmlContent .= '<font id="Highest_Phase_'.$online_HMCounter.'"><font style="color:#206040; font-weight: 900;">Highest Phase Updated </font><font style="color:#206040; font-weight: 900;">From : </font> <font style="color:#000000; font-weight: 900;">Phase '.$data_matrix[$row][$col]['highest_phase_prev'].'</font></br></font>';
+			$htmlContent .= '<font id="Highest_Phase_'.$online_HMCounter.'"><font style="color:#206040; font-weight: 900;">Highest phase updated </font><font style="color:#206040; font-weight: 900;">from : </font> <font style="color:#000000; font-weight: 900;">Phase '.$data_matrix[$row][$col]['highest_phase_prev'].'</font></br></font>';
 							
 							
 							
@@ -1281,7 +1319,7 @@ foreach($rows as $row => $rval)
 				$htmlContent .= '<font style="color:#206040; font-weight: 900;" id="Phaseexp_Img_'.$online_HMCounter.'">Phase Explain </font><font style="color:#206040; font-weight: 900;">: </font>'. $data_matrix[$row][$col]['phase_explain'] .'</br>';
 			}
 			
-			$htmlContent .= '<font id="ViewCount_'.$online_HMCounter.'">'.(($data_matrix[$row][$col]['viewcount'] > 0) ? '<font style="color:#206040; font-weight: 900;">Number of Views: </font><font style="color:#000000; font-weight: 900;">'.$data_matrix[$row][$col]['viewcount'].'</font><input type="hidden" value="'.$data_matrix[$row][$col]['viewcount'].'" id="ViewCount_value_'.$online_HMCounter.'" />':'' ).'</font>';
+			$htmlContent .= '<font id="ViewCount_'.$online_HMCounter.'">'.(($data_matrix[$row][$col]['viewcount'] > 0) ? '<font style="color:#206040; font-weight: 900;">Number of views: </font><font style="color:#000000; font-weight: 900;">'.$data_matrix[$row][$col]['viewcount'].'</font><input type="hidden" value="'.$data_matrix[$row][$col]['viewcount'].'" id="ViewCount_value_'.$online_HMCounter.'" />':'' ).'</font>';
 							
 			$htmlContent .='</span>';	//Tool Tip Ends Here
 		}
