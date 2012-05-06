@@ -295,7 +295,7 @@ if($viewmode=='YES')
   'sort'     => true
 );
  $opts['fdd']['brief_title_lastchanged'] = array(
-  'name'     => 'Brief title',
+  'name'     => 'last_changed Brief title',
   'select'   => 'T',
   'maxlen'   => 255,
   'sort'     => true
@@ -323,7 +323,7 @@ if($viewmode=='YES')
   'sort'     => false
 );
  $opts['fdd']['acronym_lastchanged'] = array(
-  'name'     => 'Acronym',
+  'name'     => 'last_changed Acronym',
   'select'   => 'T',
   'maxlen'   => 15,
   'options'  => 'AVCPD',
@@ -357,7 +357,7 @@ if($viewmode=='YES')
   'sort'     => false
 );
 $opts['fdd']['official_title_lastchanged'] = array(
-  'name'     => 'Official title',
+  'name'     => 'last_changed Official title',
   'select'   => 'T',
   'width'   => '10%',
   'maxlen'   => 65535,
@@ -387,7 +387,7 @@ if($viewmode=='YES')
 ); 
 
 $opts['fdd']['lead_sponsor_lastchanged'] = array(
-  'name'     => 'Lead sponsor',
+  'name'     => 'last_changed Lead sponsor',
   'select'   => 'T',
   'maxlen'   => 127,
   'options'  => 'AVCPD',
@@ -413,7 +413,7 @@ if($viewmode=='YES')
   'sort'     => false
 );
 $opts['fdd']['collaborator_lastchanged'] = array(
-  'name'     => 'Collaborator',
+  'name'     => 'last_changed Collaborator',
   'select'   => 'T',
   'maxlen'   => 255,
   'options'  => 'AVCPD',
@@ -451,7 +451,7 @@ if($viewmode=='YES')
   'sort'     => false
 );
 $opts['fdd']['institution_type_lastchanged'] = array(
-  'name'     => 'Institution type',
+  'name'     => 'last_changed Institution type',
   'select'   => 'T',
   'maxlen'   => 21,
   'options'  => 'AVCPD',
@@ -482,7 +482,7 @@ if($viewmode=='YES')
   'options'  => 'AVCPD', 'sort'     => false
 );
 $opts['fdd']['source_lastchanged'] = array(
-  'name'     => 'Source',
+  'name'     => 'last_changed Source',
   'select'   => 'T',
   'maxlen'   => 127,
   'options'  => 'AVCPD', 'sort'     => false
@@ -504,7 +504,7 @@ if($viewmode=='YES')
   'options'  => 'AVCPD', 'sort'     => false
 ); 
 $opts['fdd']['has_dmc_lastchanged'] = array(
-  'name'     => 'Has dmc',
+  'name'     => 'last_changed Has dmc',
   'select'   => 'T',
   'maxlen'   => 1,
   'options'  => 'AVCPD', 'sort'     => false
@@ -532,7 +532,7 @@ if($viewmode=='YES')
   'options'  => 'AVCPD', 'sort'     => false
 );
 $opts['fdd']['brief_summary_lastchanged'] = array(
-  'name'     => 'Brief summary',
+  'name'     => 'last_changed Brief summary',
   'select'   => 'T',
   'maxlen'   => 65535,
   'textarea' => array(
@@ -563,7 +563,7 @@ if($viewmode=='YES')
   'options'  => 'AVCPD', 'sort'     => false
 );
 $opts['fdd']['detailed_description_lastchanged'] = array(
-  'name'     => 'Detailed description',
+  'name'     => 'last_changed Detailed description',
   'select'   => 'T',
   'maxlen'   => 65535,
   'textarea' => array(
@@ -619,7 +619,7 @@ if($viewmode=='YES')
   'options'  => 'AVCPD', 'sort'     => false
 ); 
 $opts['fdd']['overall_status_lastchanged'] = array(
-  'name'     => 'Overall status',
+  'name'     => 'last_changed Overall status',
   'select'   => 'T',
   'maxlen'   => 25,
   'options'  => 'AVCPD', 'sort'     => false
@@ -642,7 +642,7 @@ if($viewmode=='YES')
   'options'  => 'AVCPD', 'sort'     => false
 );
 $opts['fdd']['is_active_lastchanged'] = array(
-  'name'     => 'Is active',
+  'name'     => 'last_changed Is active',
   'select'   => 'T',
   'maxlen'   => 1,
   'default'  => '1',
@@ -670,7 +670,7 @@ if($viewmode=='YES')
   'options'  => 'AVCPD', 'sort'     => false
 );
 $opts['fdd']['why_stopped_lastchanged'] = array(
-  'name'     => 'Why stopped',
+  'name'     => 'last_changed Why stopped',
   'select'   => 'T',
   'maxlen'   => 65535,
   'textarea' => array(
@@ -694,7 +694,7 @@ if($viewmode=='YES')
   'options'  => 'AVCPD', 'sort'     => false
 );
 $opts['fdd']['start_date_lastchanged'] = array(
-  'name'     => 'Start date',
+  'name'     => 'last_changed Start date',
   'select'   => 'T',
   'maxlen'   => 10,
   'options'  => 'AVCPD', 'sort'     => false
@@ -716,7 +716,7 @@ if($viewmode=='YES')
   'options'  => 'AVCPD', 'sort'     => false
 );
 $opts['fdd']['end_date_lastchanged'] = array(
-  'name'     => 'End date',
+  'name'     => 'last_changed End date',
   'select'   => 'T',
   'maxlen'   => 10,
   'options'  => 'AVCPD', 'sort'     => false
@@ -744,7 +744,7 @@ if($viewmode=='YES')
   'options'  => 'AVCPD', 'sort'     => false
 ); 
 $opts['fdd']['study_type_lastchanged'] = array(
-  'name'     => 'Study type',
+  'name'     => 'last_changed Study type',
   'select'   => 'T',
   'maxlen'   => 15,
   'values'   => array(
@@ -778,7 +778,7 @@ if($viewmode=='YES')
 ); 
 
 $opts['fdd']['study_design_lastchanged'] = array(
-  'name'     => 'Study design',
+  'name'     => 'last_changed Study design',
   'select'   => 'T',
   'maxlen'   => 65535,
   'textarea' => array(
@@ -803,7 +803,7 @@ if($viewmode=='YES')
   'options'  => 'AVCPD', 'sort'     => false
 ); 
 $opts['fdd']['number_of_arms_lastchanged'] = array(
-  'name'     => 'Number of arms',
+  'name'     => 'last_changed Number of arms',
   'select'   => 'T',
   'maxlen'   => 10,
   'options'  => 'AVCPD', 'sort'     => false
@@ -824,7 +824,7 @@ if($viewmode=='YES')
   'options'  => 'AVCPD', 'sort'     => false
 );
 $opts['fdd']['number_of_groups_lastchanged'] = array(
-  'name'     => 'Number of groups',
+  'name'     => 'last_changed Number of groups',
   'select'   => 'T',
   'maxlen'   => 10,
   'options'  => 'AVCPD', 'sort'     => false
@@ -848,7 +848,7 @@ if($viewmode=='YES')
 );
 
 $opts['fdd']['enrollment_lastchanged'] = array(
-  'name'     => 'Enrollment',
+  'name'     => 'last_changed Enrollment',
   'select'   => 'T',
   'maxlen'   => 10,
   'options'  => 'AVCPD', 'sort'     => false
@@ -876,7 +876,7 @@ if($viewmode=='YES')
   'options'  => 'AVCPD', 'sort'     => false
 ); 
 $opts['fdd']['enrollment_type_lastchanged'] = array(
-  'name'     => 'Enrollment type',
+  'name'     => 'last_changed Enrollment type',
   'select'   => 'T',
   'maxlen'   => 11,
   'values'   => array(
@@ -929,7 +929,7 @@ if($viewmode=='YES')
   'options'  => 'AVCPD', 'sort'     => false
 ); 
 $opts['fdd']['study_pop_lastchanged'] = array(
-  'name'     => 'Study pop',
+  'name'     => 'last_changed Study pop',
   'select'   => 'T',
   'maxlen'   => 65535,
   'textarea' => array(
@@ -961,7 +961,7 @@ if($viewmode=='YES')
 ); 
 
 $opts['fdd']['sampling_method_lastchanged'] = array(
-  'name'     => 'Sampling method',
+  'name'     => 'last_changed Sampling method',
   'select'   => 'T',
   'maxlen'   => 22,
   'values'   => array(
@@ -992,7 +992,7 @@ if($viewmode=='YES')
   'options'  => 'AVCPD', 'sort'     => false
 );
 $opts['fdd']['criteria_lastchanged'] = array(
-  'name'     => 'Criteria',
+  'name'     => 'last_changed Criteria',
   'select'   => 'T',
   'maxlen'   => 65535,
   'textarea' => array(
@@ -1026,7 +1026,7 @@ if($viewmode=='YES')
 	'sort'     => false
 ); 
 $opts['fdd']['inclusion_criteria_lastchanged'] = array(
-  'name'     => 'Inclusion criteria',
+  'name'     => 'last_changed Inclusion criteria',
   'select'   => 'T',
   'maxlen'   => 65535,
   'options'  => 'AVCPDR',
@@ -1060,7 +1060,7 @@ if($viewmode=='YES')
 );
 
 $opts['fdd']['exclusion_criteria_lastchanged'] = array(
-  'name'     => 'Exclusion criteria',
+  'name'     => 'last_changed Exclusion criteria',
   'select'   => 'T',
   'maxlen'   => 65535,
   'options'  => 'AVCPDR',
@@ -1094,7 +1094,7 @@ if($viewmode=='YES')
   'options'  => 'AVCPD', 'sort'     => false
 ); 
 $opts['fdd']['gender_lastchanged'] = array(
-  'name'     => 'Gender',
+  'name'     => 'last_changed Gender',
   'select'   => 'T',
   'maxlen'   => 6,
   'values'   => array(
@@ -1119,7 +1119,7 @@ if($viewmode=='YES')
   'options'  => 'AVCPD', 'sort'     => false
 );
 $opts['fdd']['minimum_age_lastchanged'] = array(
-  'name'     => 'Minimum age',
+  'name'     => 'last_changed Minimum age',
   'select'   => 'T',
   'maxlen'   => 15,
   'options'  => 'AVCPD', 'sort'     => false
@@ -1141,7 +1141,7 @@ if($viewmode=='YES')
 ); 
 
 $opts['fdd']['maximum_age_lastchanged'] = array(
-  'name'     => 'Maximum age',
+  'name'     => 'last_changed Maximum age',
   'select'   => 'T',
   'maxlen'   => 15,
   'options'  => 'AVCPD', 'sort'     => false
@@ -1165,7 +1165,7 @@ if($viewmode=='YES')
 );
 
 $opts['fdd']['healthy_volunteers_lastchanged'] = array(
-  'name'     => 'Healthy volunteers',
+  'name'     => 'last_changed Healthy volunteers',
   'select'   => 'T',
   'maxlen'   => 1,
   'options'  => 'AVCPD', 'sort'     => false
@@ -1187,7 +1187,7 @@ if($viewmode=='YES')
   'options'  => 'AVCPD', 'sort'     => false
 );
 $opts['fdd']['verification_date_lastchanged'] = array(
-  'name'     => 'Verification date',
+  'name'     => 'last_changed Verification date',
   'select'   => 'T',
   'maxlen'   => 10,
   'options'  => 'AVCPD', 'sort'     => false
@@ -1213,7 +1213,7 @@ if($viewmode=='YES')
   'options'  => 'AVCPD', 'sort'     => false
 ); 
 $opts['fdd']['lastchanged_date_lastchanged'] = array(
-  'name'     => 'Lastchanged date',
+  'name'     => 'last_changed Lastchanged date',
   'select'   => 'T',
   'maxlen'   => 10,
   'options'  => 'AVCPD', 'sort'     => false
@@ -1236,7 +1236,7 @@ if($viewmode=='YES')
 ); 
 
 $opts['fdd']['firstreceived_date_lastchanged'] = array(
-  'name'     => 'Firstreceived date',
+  'name'     => 'last_changed Firstreceived date',
   'select'   => 'T',
   'maxlen'   => 10,
   'options'  => 'AVCPD', 'sort'     => false
@@ -1276,7 +1276,7 @@ if($viewmode=='YES')
   'options'  => 'AVCPD', 'sort'     => false
 );
 $opts['fdd']['org_study_id_lastchanged'] = array(
-  'name'     => 'Org study ID',
+  'name'     => 'last_changed Org study ID',
   'select'   => 'T',
   'maxlen'   => 127,
   'options'  => 'AVCPD', 'sort'     => false
@@ -1348,7 +1348,7 @@ if($viewmode=='YES')
   'options'  => 'AVCPD', 'sort'     => false
 ); 
 $opts['fdd']['phase_lastchanged'] = array(
-  'name'     => 'Phase',
+  'name'     => 'last_changed Phase',
   'select'   => 'T',
   'maxlen'   => 5,
   'default'  => 'N/A',
@@ -1372,7 +1372,7 @@ if($viewmode=='YES')
   'options'  => 'AVCPD', 'sort'     => false
 ); 
 $opts['fdd']['condition_lastchanged'] = array(
-  'name'     => 'Condition',
+  'name'     => 'last_changed Condition',
   'select'   => 'T',
   'maxlen'   => 255,
   'options'  => 'AVCPD', 'sort'     => false
@@ -1395,7 +1395,7 @@ if($viewmode=='YES')
 ); 
 
 $opts['fdd']['secondary_id_lastchanged'] = array(
-  'name'     => 'Secondary ID',
+  'name'     => 'last_changed Secondary ID',
   'select'   => 'T',
   'maxlen'   => 63,
   'options'  => 'AVCPD', 'sort'     => false
@@ -1428,7 +1428,7 @@ if($viewmode=='YES')
 );
 
 $opts['fdd']['arm_group_label_lastchanged'] = array(
-  'name'     => 'Arm group label',
+  'name'     => 'last_changed Arm group label',
   'select'   => 'T',
   'maxlen'   => 255,
   'options'  => 'AVCPD', 'sort'     => false
@@ -1472,7 +1472,7 @@ if($viewmode=='YES')
   'options'  => 'AVCPD', 'sort'     => false
 ); 
 $opts['fdd']['arm_group_type_lastchanged'] = array(
-  'name'     => 'Arm group type',
+  'name'     => 'last_changed Arm group type',
   'select'   => 'T',
   'maxlen'   => 20,
   'values'   => array(
@@ -1511,7 +1511,7 @@ if($viewmode=='YES')
   'options'  => 'AVCPD', 'sort'     => false
 );
 $opts['fdd']['arm_group_description_lastchanged'] = array(
-  'name'     => 'Arm group description',
+  'name'     => 'last_changed Arm group description',
   'select'   => 'T',
   'maxlen'   => 65535,
   'textarea' => array(
@@ -1568,7 +1568,7 @@ if($viewmode=='YES')
   'options'  => 'AVCPD', 'sort'     => false
 );
 $opts['fdd']['intervention_type_lastchanged'] = array(
-  'name'     => 'Intervention type',
+  'name'     => 'last_changed Intervention type',
   'select'   => 'T',
   'maxlen'   => 36,
   'options'  => 'AVCPD', 'sort'     => false
@@ -1591,7 +1591,7 @@ if($viewmode=='YES')
 ); 
 
 $opts['fdd']['intervention_name_lastchanged'] = array(
-  'name'     => 'Intervention name',
+  'name'     => 'last_changed Intervention name',
   'select'   => 'T',
   'maxlen'   => 255,
   'options'  => 'AVCPD', 'sort'     => false
@@ -1614,7 +1614,7 @@ if($viewmode=='YES')
   'options'  => 'AVCPD', 'sort'     => false
 );
 $opts['fdd']['intervention_other_name_lastchanged'] = array(
-  'name'     => 'Intervention other name',
+  'name'     => 'last_changed Intervention other name',
   'select'   => 'T',
   'maxlen'   => 255,
   'options'  => 'AVCPD', 'sort'     => false
@@ -1641,7 +1641,7 @@ if($viewmode=='YES')
   'options'  => 'AVCPD', 'sort'     => false
 );
 $opts['fdd']['intervention_description_lastchanged'] = array(
-  'name'     => 'Intervention description',
+  'name'     => 'last_changed Intervention description',
   'select'   => 'T',
   'maxlen'   => 65535,
   'textarea' => array(
@@ -1671,7 +1671,7 @@ if($viewmode=='YES')
   'options'  => 'AVCPD', 'sort'     => false
 ); 
 $opts['fdd']['primary_outcome_measure_lastchanged'] = array(
-  'name'     => 'Primary outcome measure',
+  'name'     => 'last_changed Primary outcome measure',
   'select'   => 'T',
   'maxlen'   => 65535,
   'textarea' => array(
@@ -1702,7 +1702,7 @@ if($viewmode=='YES')
 ); 
 
 $opts['fdd']['primary_outcome_timeframe_lastchanged'] = array(
-  'name'     => 'Primary outcome timeframe',
+  'name'     => 'last_changed Primary outcome timeframe',
   'select'   => 'T',
   'maxlen'   => 65535,
   'textarea' => array(
@@ -1733,7 +1733,7 @@ if($viewmode=='YES')
   'options'  => 'AVCPD', 'sort'     => false
 ); 
 $opts['fdd']['primary_outcome_safety_issue_lastchanged'] = array(
-  'name'     => 'Primary outcome safety issue',
+  'name'     => 'last_changed Primary outcome safety issue',
   'select'   => 'T',
   'maxlen'   => 65535,
   'textarea' => array(
@@ -1763,7 +1763,7 @@ if($viewmode=='YES')
   'options'  => 'AVCPD', 'sort'     => false
 );
 $opts['fdd']['secondary_outcome_measure_lastchanged'] = array(
-  'name'     => 'Secondary outcome measure',
+  'name'     => 'last_changed Secondary outcome measure',
   'select'   => 'T',
   'maxlen'   => 65535,
   'textarea' => array(
@@ -1793,7 +1793,7 @@ if($viewmode=='YES')
   'options'  => 'AVCPD', 'sort'     => false
 ); 
 $opts['fdd']['secondary_outcome_timeframe_lastchanged'] = array(
-  'name'     => 'Secondary outcome timeframe',
+  'name'     => 'last_changed Secondary outcome timeframe',
   'select'   => 'T',
   'maxlen'   => 65535,
   'textarea' => array(
@@ -1823,7 +1823,7 @@ if($viewmode=='YES')
   'options'  => 'AVCPD', 'sort'     => false
 ); 
 $opts['fdd']['secondary_outcome_safety_issue_lastchanged'] = array(
-  'name'     => 'Secondary outcome safety issue',
+  'name'     => 'last_changed Secondary outcome safety issue',
   'select'   => 'T',
   'maxlen'   => 65535,
   'textarea' => array(
@@ -1853,7 +1853,7 @@ if($viewmode=='YES')
   'options'  => 'AVCPD', 'sort'     => false
 );
 $opts['fdd']['location_name_lastchanged'] = array(
-  'name'     => 'Location name',
+  'name'     => 'last_changed Location name',
   'select'   => 'T',
   'maxlen'   => 65535,
   'textarea' => array(
@@ -1877,7 +1877,7 @@ if($viewmode=='YES')
   'options'  => 'AVCPD', 'sort'     => false
 );
 $opts['fdd']['location_city_lastchanged'] = array(
-  'name'     => 'Location city',
+  'name'     => 'last_changed Location city',
   'select'   => 'T',
   'maxlen'   => 255,
   'options'  => 'AVCPD', 'sort'     => false
@@ -1899,7 +1899,7 @@ if($viewmode=='YES')
 ); 
 
 $opts['fdd']['location_state_lastchanged'] = array(
-  'name'     => 'Location state',
+  'name'     => 'last_changed Location state',
   'select'   => 'T',
   'maxlen'   => 255,
   'options'  => 'AVCPD', 'sort'     => false
@@ -1916,12 +1916,12 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['location_zip'] 
 if($viewmode=='YES')
 {$opts['fdd']['location_zip_prev'] = array(
   'name'     => 'Prev Location zip',
-  'select'   => 'Prev T',
+  'select'   => 'T',
   'maxlen'   => 255,
   'options'  => 'AVCPD', 'sort'     => false
 ); 
 $opts['fdd']['location_zip_lastchanged'] = array(
-  'name'     => 'Location zip',
+  'name'     => 'last_changed Location zip',
   'select'   => 'T',
   'maxlen'   => 255,
   'options'  => 'AVCPD', 'sort'     => false
@@ -1937,13 +1937,13 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['location_countr
 
 if($viewmode=='YES')
 {$opts['fdd']['location_country_prev'] = array(
-  'name'     => 'Location country',
-  'select'   => 'Prev T',
+  'name'     => 'Prev Location country',
+  'select'   => 'T',
   'maxlen'   => 255,
   'options'  => 'AVCPD', 'sort'     => false
 );
 $opts['fdd']['location_country_lastchanged'] = array(
-  'name'     => 'Location country',
+  'name'     => 'last_changed Location country',
   'select'   => 'T',
   'maxlen'   => 255,
   'options'  => 'AVCPD', 'sort'     => false
@@ -1960,15 +1960,15 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['region'] = arra
 
 if($viewmode=='YES')
 {$opts['fdd']['region_prev'] = array(
-  'name'     => 'Region',
-  'select'   => 'Prev T',
+  'name'     => 'Prev Region',
+  'select'   => 'T',
   'maxlen'   => 255,
   'default'  => 'RestOfWorld',
   'options'  => 'AVCPD', 'sort'     => false
 ); 
 
 $opts['fdd']['region_lastchanged'] = array(
-  'name'     => 'Region',
+  'name'     => 'last_changed Region',
   'select'   => 'T',
   'maxlen'   => 255,
   'default'  => 'RestOfWorld',
@@ -2084,7 +2084,7 @@ if($viewmode=='YES')
   'options'  => 'AVCPD', 'sort'     => false
 );
 $opts['fdd']['keyword_lastchanged'] = array(
-  'name'     => 'Keyword',
+  'name'     => 'last_changed Keyword',
   'select'   => 'T',
   'maxlen'   => 127,
   'options'  => 'AVCPD', 'sort'     => false
@@ -2108,7 +2108,7 @@ if($viewmode=='YES')
 ); 
 
 $opts['fdd']['is_fda_regulated_lastchanged'] = array(
-  'name'     => 'Is fda regulated',
+  'name'     => 'last_changed Is fda regulated',
   'select'   => 'T',
   'maxlen'   => 1,
   'options'  => 'AVCPD', 'sort'     => false
@@ -2129,7 +2129,7 @@ if($viewmode=='YES')
   'options'  => 'AVCPD', 'sort'     => false
 );
 $opts['fdd']['is_section_801_lastchanged'] = array(
-  'name'     => 'Is section 801',
+  'name'     => 'last_changed Is section 801',
   'select'   => 'T',
   'maxlen'   => 1,
   'options'  => 'AVCPD', 'sort'     => false

@@ -1089,6 +1089,7 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 		}
 //		pr($row);
 		$column_headers_displayed=false;
+		$cntr=0;
 		for ($tab = 0, $k = 0; $k < $this->num_fds; $k++) {
 			if (isset($this->fdd[$k]['tab']) && $this->tabs_enabled() && $k > 0) {
 				$tab++;
@@ -1155,7 +1156,12 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 				{
 					$this->display_delete_field($row, $k);
 					$kp=$k+1;
-					
+					if($k>1 and !isset($row['qfh'.$kp]) and $cntr<2) 
+					{
+						$row['qfh'.$kp]='';
+						$cntr++;
+					}
+					if($cntr==2) $cntr=0; 
 					if(isset($row['qfh'.$kp])) 
 					{
 						
