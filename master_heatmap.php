@@ -952,7 +952,7 @@ function editor()
 				$out .= '</font></div>';
 				
 				
-				$out .= '<div align="right" style="height:25px; vertical-align: bottom; cursor:pointer;" class="chromestyle" id="chromemenu_'.$row.'_'.$col.'"><ul><li><a rel="dropmenu_'.$row.'_'.$col.'"><b>+<b></a></li></ul></div>';
+				$out .= '<div align="right" style="height:25px; vertical-align: bottom; cursor:pointer;" class="chromestyle" id="chromemenu_'.$row.'_'.$col.'"><ul><li><a rel="dropmenu_'.$row.'_'.$col.'"><b>+<img src="images/down.gif" border="0" style="width:9px; height:5px;" /><b></a></li></ul></div>';
 				
 				
 				

@@ -9418,7 +9418,7 @@ class TrialTracker
 			echo $paginate['paginate'];
 		}
 		
-		echo '<div style="float: left;margin-right: 25px;"><span id="addtoright"></span></div>';
+		echo '<div style="float: left;margin-right: 25px; vertical-align:bottom;"><span id="addtoright"></span></div>';
 		
 		natcasesort($TrialsInfoList);
 		
@@ -9468,7 +9468,8 @@ class TrialTracker
 		
 		if($totalcount > 0 && ($ottType != 'unstackedoldlink' && $ottType != 'stackedoldlink')) 
 		{
-			$this->downloadOptions($count, $totalcount, $ottType, $resultIds, $globalOptions);
+			echo '<div id="dropmenu" class="dropmenudiv" style="width: 310px;">'.$this->downloadOptions($count, $totalcount, $ottType, $resultIds, $globalOptions).'</div><script type="text/javascript">cssdropdown.startchrome("chromemenu");</script>';
+			
 		}
 		echo '<br/><br/>';
 		if($linkExpiry !== NULL && $loggedIn)
@@ -9480,7 +9481,7 @@ class TrialTracker
 	
 	function downloadOptions($shownCnt, $foundCnt, $ottType, $result, $globalOptions) 
 	{	
-		echo '<div style="height:100px;margin-top:10px;"><div class="drop downldbox"><div class="newtext">Download Options</div>'
+		$downloadOptions = '<div style="height:100px;margin-top:10px; padding:6px;"><div class="downldbox"><div class="newtext">Download Options</div>'
 				. '<form  id="frmDOptions" name="frmDOptions" method="post" target="_self">'
 				. '<input type="hidden" name="ottType" value="' . $ottType . '" />';
 				foreach($result as $rkey => $rvalue)
@@ -9489,12 +9490,12 @@ class TrialTracker
 					{
 						foreach($rvalue as $rk => $rv)
 						{
-							echo '<input type="hidden" name="resultIds[' . $rkey . '][' . $rk . ']" value="' . $rv . '" />';
+							$downloadOptions .= '<input type="hidden" name="resultIds[' . $rkey . '][' . $rk . ']" value="' . $rv . '" />';
 						}
 					}
 					else
 					{
-						echo '<input type="hidden" name="resultIds[' . $rkey . ']" value="' . $rvalue . '" />';
+						$downloadOptions .= '<input type="hidden" name="resultIds[' . $rkey . ']" value="' . $rvalue . '" />';
 					}
 
 				}
@@ -9504,15 +9505,15 @@ class TrialTracker
 					{	
 						foreach($gvalue as $gk => $gv)
 						{	
-							echo '<input type="hidden" name="globalOptions[' . $gkey . '][' . $gk . ']" value=\'' . $gv . '\' />';
+							$downloadOptions .= '<input type="hidden" name="globalOptions[' . $gkey . '][' . $gk . ']" value=\'' . $gv . '\' />';
 						}
 					}
 					else
 					{	
-						echo '<input type="hidden" name="globalOptions[' . $gkey . ']" value=\'' . $gvalue . '\' />';
+						$downloadOptions .= '<input type="hidden" name="globalOptions[' . $gkey . ']" value=\'' . $gvalue . '\' />';
 					}
 				}	
-		echo '<ul><li><label>Number of Studies: </label></li>'
+		$downloadOptions .= '<ul><li><label>Number of Studies: </label></li>'
 				. '<li><select id="dOption" name="dOption">'
 				. '<option value="shown" selected="selected">' . $shownCnt . ' Shown Studies</option>'
 				. '<option value="all">' . $foundCnt . ' Found Studies</option></select></li>'
@@ -9521,6 +9522,7 @@ class TrialTracker
 				. '<input type="hidden" name="shownCnt" value="' . $shownCnt . '" />'
 				. '<input type="submit" id="btnDownload" name="btnDownload" value="Download File" style="margin-left:8px;"  />'
 				. '</form></div></div>';
+				return $downloadOptions;
 	}
 	
 	function displayTrialTableHeader($loggedIn, $globalOptions = array()) 
@@ -9611,7 +9613,7 @@ class TrialTracker
 		{
 			echo '<table width="100%">'
 					. '<tr><td><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" /></td>'
-					. '<td nowrap="nowrap"><span style="color:#ff0000;font-weight:normal;margin-left:40px;">Interface Work In Progress</span>'
+					. '<td nowrap="nowrap"><span style="color:#ff0000;font-weight:normal;margin-left:40px;">Interface work in progress</span>'
 					. '<br/><span style="font-weight:normal;">Send feedback to '
 					. '<a style="display:inline;color:#0000FF;" target="_self" href="mailto:larvoltrials@larvol.com">'
 					. 'larvoltrials@larvol.com</a></span></td>'
@@ -9623,7 +9625,7 @@ class TrialTracker
 	function displayFilterControls($shownCount, $activeCount, $inactiveCount, $totalCount, $globalOptions = array(), $ottType, $loggedIn)
 	{	
 		echo '<table width="75%" border="0" cellspacing="0" class="controls" align="center">'
-				. '<tr><th>Active</th><th>Status</th><th>Institution Type</th>'
+				. '<tr><th>Active</th><th>Status</th><th>Institution type</th>'
 				. '<th>Region</th><th>Phase</th><th class="right">Ranges</th></tr>'
 				. '<tr><td class="bottom">'
       			. '<input type="radio" name="list" value="1"  id="active_1" '
@@ -9750,15 +9752,11 @@ class TrialTracker
 				. (in_array(4, $globalOptions['phase']) ? ' checked="checked" ' : '') . '/>'
 				. '<label for="phase_4">4</label>'
 				. '</td><td class="right bottom">'
-				. '<div class="demo"><p><label for="amount">Enrollment:</label>'
-				. '<input type="text" name="enroll" id="amount" style="border:0; color:#f6931f; font-weight:bold;" '
-				. ' value="' . ((isset($globalOptions['enroll'])) ? $globalOptions['enroll'] : '' ) . '" autocomplete="off" />'
-				. '<div id="slider-range"></div>'
-				. '</p></div><div class="demo"><p style="margin-top:10px;">';
+				. '<div class="demo"><p style="margin-top:10px;">';
 				
 		if($loggedIn) 
 		{
-			echo '<label for="startrange" style="float:left;">Highlight updates:</label>'
+			echo '<label for="startrange" style="float:left;">Highlight changes:</label>'
 					. '<input type="text" id="startrange" name="sr" value="' . $globalOptions['startrange'] . '" class="jdpicker" />'
 					. '<label style="color:#f6931f;float:left;">-</label>'
 					. '<input type="text" id="endrange"  name="er" value="' . $globalOptions['endrange'] 
@@ -9776,7 +9774,13 @@ class TrialTracker
 			
 		echo '<input type="checkbox" id="showonlyupdated" name="osu" ' 
 				. ($globalOptions['onlyUpdates'] == 'yes' ? ' checked="checked" ' : '' ) . ' style="margin-left:20px;" />'
-				. '<label for="showonlyupdated" style="font-size:x-small;">Show only updated trials</label>'
+				. '<label for="showonlyupdated" style="font-size:x-small;">Show only changed items</label>'
+				. '<br/><div class="demo" style="padding-top:4px;"><p><label for="amount">Enrollment:</label>'
+				. '<input type="text" name="enroll" id="amount" style="border:0; color:#f6931f; font-weight:bold;" '
+				. ' value="' . ((isset($globalOptions['enroll'])) ? $globalOptions['enroll'] : '' ) . '" autocomplete="off" />'
+				. '<div id="slider-range"></div>'
+				. '</p></div>'
+				. '<br/><div style="float: left;margin-left: 20px; padding-top:4px; vertical-align:bottom;" id="chromemenu"><a rel="dropmenu"><span style="background-color:#DDDDDD; padding:2px; padding-right:4px; border:1px solid; color:#777777; background-position:left center; background-repeat:no-repeat; background-image:url(\'./images/save.png\'); cursor:pointer; ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Export</b></span></a></div>'
 				. '</tr></table><br/><br/>';
 		echo '<input type="hidden" name="status" id="status" value="' . implode(',', $globalOptions['status']) . '" />'
 				. '<input type="hidden" name="itype" id="itype" value="' . implode(',', $globalOptions['itype']) . '" />'

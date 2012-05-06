@@ -359,6 +359,7 @@ foreach($rows as $row => $rval)
 <script type="text/javascript" src="scripts/popup-window.js"></script>
 <script src="scripts/jquery-1.7.1.min.js"></script>
 <script src="scripts/jquery-ui-1.8.17.custom.min.js"></script>
+<script type="text/javascript" src="scripts/chrome.js"></script>
 <?php if($db->loggedIn()) { //No Date-Picker for NON-LoggedIN Users  ?>	
 <script type="text/javascript" src="date/jquery.date_input.js"></script>
 <script type="text/javascript" src="scripts/date/jquery.jdpicker.js"></script>
@@ -539,7 +540,35 @@ width:100px;
 	height:auto;
 }
 
+.downldbox {
+	height:auto;
+	width:310px;
+	font-weight:bold;
+}
 
+.downldbox ul{
+	list-style:none;
+	margin:5px;
+	padding:0px;
+}
+
+.downldbox ul li{
+	width: 130px;
+	float:left;
+	margin:2px;
+}
+.dropmenudiv{
+position:absolute;
+top: 0;
+border: 1px solid #DDDDDD; /*THEME CHANGE HERE*/
+/*border-bottom-width: 0;*/
+font:normal 12px Verdana;
+line-height:18px;
+z-index:100;
+background-color: white;
+width: 50px;
+visibility: hidden;
+}
 </style>
 <script language="javascript" type="text/javascript">
 function change_view()
@@ -550,6 +579,7 @@ function change_view()
 	var two_week = new Date("<?php print date('m/d/Y H:i:s', strtotime('-2 Weeks', $now)); ?>");
 	var one_month = new Date("<?php print date('m/d/Y H:i:s', strtotime('-1 Month', $now)); ?>");
 	var three_month = new Date("<?php print date('m/d/Y H:i:s', strtotime('-3 Months', $now)); ?>");
+	var six_month = new Date("<?php print date('m/d/Y H:i:s', strtotime('-6 Months', $now)); ?>");
 	var one_year = new Date("<?php print date('m/d/Y H:i:s', strtotime('-1 Year', $now)); ?>");
 	
 	var limit = document.getElementById('Last_HM').value;
@@ -566,6 +596,7 @@ function change_view()
 		case '2 weeks ago': st_limit = two_week; break;
 		case '1 month ago': st_limit = one_month; break;
 		case '1 quarter ago': st_limit = three_month; break;
+		case '6 months ago': st_limit = six_month; break;
 		case '1 year ago': st_limit = one_year; break;
 		default: start_range = start_range.replace(/\s+/g, '') ;	//Remove space in between
 				 var date_arr = start_range.split('-'); 
@@ -580,6 +611,7 @@ function change_view()
 		case '2 weeks ago': ed_limit = two_week; break;
 		case '1 month ago': ed_limit = one_month; break;
 		case '1 quarter ago': ed_limit = three_month; break;
+		case '6 months ago': ed_limit = six_month; break;
 		case '1 year ago': ed_limit = one_year; break;
 		default: end_range = end_range.replace(/\s+/g, '') ;
 				 var date_arr = end_range.split('-');
@@ -982,7 +1014,8 @@ function timeEnum($timerange)
 			case 2: $timerange = "2 weeks ago"; break;
 			case 3: $timerange = "1 month ago"; break;
 			case 4: $timerange = "1 quarter ago"; break;
-			case 5: $timerange = "1 year ago"; break;
+			case 5: $timerange = "6 months ago"; break;
+			case 6: $timerange = "1 year ago"; break;
 		}
 		return $timerange;
 	}
@@ -995,7 +1028,7 @@ $(function()
 		range: "min",
 		value: 3,
 		min: 0,
-		max: 5,
+		max: 6,
 		step:1,
 		slide: function( event, ui ) {
 			$("#endrange").val(timeEnum(ui.value));
@@ -1009,7 +1042,7 @@ $(function()
 		$("#slider-range-min").slider({	//Double Slider - For LoggedIN Users
 			range: true,
 			min: 0,
-			max: 5,
+			max: 6,
 			step: 1,
 			values: [ 0, 3 ],
 			slide: function(event, ui) {
@@ -1112,36 +1145,42 @@ $htmlContent .= '<table width="100%" style="background-color:#FFFFFF;">'
 				. 'larvoltrials@larvol.com</a></span></td>'
 				. '<td style="background-color:#FFFFFF;" class="result">Name: ' . htmlspecialchars($name) . '</td></tr></table><br/>'
 				
-				. '<table width="900px" border="0" cellspacing="0" class="controls" align="center">'
-				. '<tr><th>View mode</th><th>Range</th><th class="right">Download option</th></tr>'
+				. '<table width="550px" border="0" cellspacing="0" class="controls" align="center">'
+				. '<tr><th>View mode</th><th class="right">Range</th></tr>'
 				. '<tr>'
 				. '<td class="bottom"><p style="margin-top:10px;margin-right:5px;"><select id="view_type" name="view_type" onchange="change_view()">'
 				. '<option value="indlead" selected="selected">Active Industry Trials</option>'
 				. '<option value="active">Active Trials</option>'
 				. '<option value="total">All Trials</option></select></p></td>'
-				. '<td style="background-color:#FFFFFF; width:380px;" class="bottom"><div class="demo"><p style="margin-top:10px;">'
+				. '<td style="background-color:#FFFFFF; width:380px;" class="bottom right"><div class="demo"><p style="margin-top:10px;">'
 				. '<label for="startrange" style="float:left;margin-left:15px;"><b>Highlight updates:</b></label>'
 				. '<input type="text" id="startrange" name="sr" value="now" readonly="readonly" style="border:0; color:#f6931f; font-weight:bold; background-color:#FFFFFF; font-family:Verdana; font-size: 13px;" class="jdpicker" />'
 				. '<label style="color:#f6931f;float:left;">-</label> '
 				. '<input type="text" id="endrange"  name="er" value="1 month ago" readonly="readonly" style="border:0; color:#f6931f; font-weight:bold; background-color:#FFFFFF; font-family:Verdana; font-size: 13px;" class="jdpicker" />'
-				. '<br/><div id="slider-range-min" style="width:320px; margin:10px 10px 0 10px;margin-left:20px;" align="left"></div></p></div></td>'
-				. '<td style="background-color:#FFFFFF;" class="bottom right"><p style="margin-top:10px;margin-left:5px;">'
-				. '<form action="master_heatmap.php" method="post">'
-				. '<input type="hidden" name="id" value="' . $id . '" />'
-				. '<b style="margin-left:5px;">Which format: </b><select id="dwformat" name="dwformat">'
-				. '<option value="exceldown" selected="selected">Excel</option>'
-				. '<option value="pdfdown">PDF</option>'
-				. '</select><br/><br/>'
-				. '<b style="margin-left:5px;">Counts display: </b><select id="dwcount" name="dwcount">'
-				. '<option value="indlead" selected="selected">Active Industry Trials</option>'
-				. '<option value="active">Active Trials</option>'
-				. '<option value="total">All Trials</option>'
-				. '</select><br/><br/><input type="submit" name="download" value="Download" title="Download" style="margin-left:5px;" />'
-				. '</form>'	
-				. '</p></td>'
+				. '<br/><div id="slider-range-min" style="width:320px; margin:10px 10px 0 10px;margin-left:20px;" align="left"></div></p></div>'
+				. '<br/><div style="float: right; margin-right: 25px; vertical-align:bottom;" id="chromemenu"><a rel="dropmenu"><span style="background-color:#DDDDDD; padding:2px; padding-right:4px; border:1px solid; color:#777777; background-position:left center; background-repeat:no-repeat; background-image:url(\'./images/save.png\'); cursor:pointer; ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Export</b></span></a></div></td>'
 				. '</tr>'
 				. '</table>'
 				. '<br clear="all"/><br/>';
+				
+$htmlContent  .= '<div id="dropmenu" class="dropmenudiv" style="width: 310px;">'
+				.'<div style="height:100px;margin-top:10px; padding:6px;"><div class="downldbox"><div class="newtext">Download Options</div>'
+				. '<form action="master_heatmap.php" method="post">'
+				. '<input type="hidden" name="id" value="' . $id . '" />'
+				. '<ul><li><label>Which format: </label></li>'
+				. '<li><select id="dwformat" name="dwformat">'
+				. '<option value="exceldown" selected="selected">Excel</option>'
+				. '<option value="pdfdown">PDF</option>'
+				. '</select></li>'
+				. '<li><label>Counts display: </label></li>'
+				. '<li><select id="dwcount" name="dwcount">'
+				. '<option value="indlead" selected="selected">Active Industry Trials</option>'
+				. '<option value="active">Active Trials</option>'
+				. '<option value="total">All Trials</option>'
+				. '</select></li></ul>'
+				. '<input type="submit" name="download" title="Download" value="Download File" style="margin-left:8px;"  />'
+				. '</form></div></div>'
+				.'</div><script type="text/javascript">cssdropdown.startchrome("chromemenu");</script>';
 						
 $htmlContent .= '<div align="center">'
 			. '<table style="padding-top:5px; height:100%; vertical-align:middle;" class="display">'
@@ -1259,7 +1298,7 @@ foreach($rows as $row => $rval)
 	foreach($columns as $col => $cval)
 	{
 		$online_HMCounter++;
-		$htmlContent .= '<td class="tooltip" valign="middle" id="Cell_ID_'.$online_HMCounter.'" style="'. (($data_matrix[$row][$col]['total'] != 0) ? $data_matrix[$row][$col]['cell_start_style'] : 'background-color:#efefef; border:#efefef solid;') .' padding:1px; width:110px; height:100%; vertical-align:middle; text-align:center; " align="center" onmouseover="display_tooltip(\'on\','.$online_HMCounter.');" onmouseout="display_tooltip(\'off\','.$online_HMCounter.');">';
+		$htmlContent .= '<td class="tooltip" valign="middle" id="Cell_ID_'.$online_HMCounter.'" style="'. (($data_matrix[$row][$col]['total'] != 0) ? $data_matrix[$row][$col]['cell_start_style'] : 'background-color:#efefef; border:#efefef solid;') .' padding:1px; min-width:110px;  max-width:110px; height:100%; vertical-align:middle; text-align:center; " align="center" onmouseover="display_tooltip(\'on\','.$online_HMCounter.');" onmouseout="display_tooltip(\'off\','.$online_HMCounter.');">';
 	
 		if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL && $data_matrix[$row][$col]['total'] != 0)
 		{

@@ -19,7 +19,7 @@
 
 var cssdropdown={
 disappeardelay: 250, //set delay in miliseconds before menu disappears onmouseout
-dropdownindicator: '<img src="images/down.gif" border="0" style="width:9px; height:5px;" />', //specify full HTML to add to end of each menu item with a drop down menu
+dropdownindicator: '', //specify full HTML to add to end of each menu item with a drop down menu
 enablereveal: [true, 5], //enable swipe effect? [true/false, steps (Number of animation steps. Integer between 1-20. Smaller=faster)]
 enableiframeshim: 1, //enable "iframe shim" in IE5.5 to IE7? (1=yes, 0=no)
 
@@ -187,7 +187,7 @@ startchrome:function(){
 				var asscdropdownmenu=document.getElementById(relvalue)
 				this.addEvent(asscdropdownmenu, function(){cssdropdown.clearhidemenu()}, "mouseover")
 				this.addEvent(asscdropdownmenu, function(e){cssdropdown.dynamichide(this, e)}, "mouseout")
-				this.addEvent(asscdropdownmenu, function(){cssdropdown.delayhidemenu()}, "click")
+				//this.addEvent(asscdropdownmenu, function(){cssdropdown.delayhidemenu()}, "click")
 				try{
 					menuitems[i].innerHTML=menuitems[i].innerHTML+" "+this.dropdownindicator
 				}catch(e){}

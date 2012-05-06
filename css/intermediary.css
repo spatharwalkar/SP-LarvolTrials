@@ -143,7 +143,6 @@ a, a:hover{
 .downldbox {
 	height:auto;
 	width:310px;
-	border:1px solid black;
 	font-weight:bold;
 }
 
@@ -505,4 +504,17 @@ tr.upms td {
 	  border-radius: 25px;
 	 -moz-border-radius: 25px;
       /*color:white;*/
+}
+
+.dropmenudiv{
+position:absolute;
+top: 0;
+border: 1px solid #DDDDDD; /*THEME CHANGE HERE*/
+/*border-bottom-width: 0;*/
+font:normal 12px Verdana;
+line-height:18px;
+z-index:100;
+background-color: white;
+width: 50px;
+visibility: hidden;
 }

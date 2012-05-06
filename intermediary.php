@@ -112,7 +112,8 @@ switch($globalOptions['startrange'])
 	case "2 weeks ago": $starttimerange = 2; break;
 	case "1 month ago": $starttimerange = 3; break;
 	case "1 quarter ago": $starttimerange = 4; break;
-	case "1 year ago": $starttimerange = 5; break;
+	case "6 months ago": $starttimerange = 5; break;
+	case "1 year ago": $starttimerange = 6; break;
 	default: $starttimerange = 0; break;
 }
 
@@ -123,7 +124,8 @@ switch($globalOptions['endrange'])
 	case "2 weeks ago": $endtimerange = 2; break;
 	case "1 month ago": $endtimerange = 3; break;
 	case "1 quarter ago": $endtimerange = 4; break;
-	case "1 year ago": $endtimerange = 5; break;
+	case "6 months ago": $endtimerange = 5; break;
+	case "1 year ago": $endtimerange = 6; break;
 	default: $endtimerange = 3; break;
 }
 
@@ -140,7 +142,8 @@ switch($globalOptions['change'])
 	case "2 weeks": $change_value = 2; break;
 	case "1 month": $change_value = 3; break;
 	case "1 quarter": $change_value = 4; break;
-	case "1 year": $change_value = 5; break;
+	case "6 months": $change_value = 5; break;
+	case "1 year": $change_value = 6; break;
 }
 	
 $lastChangedTime = filectime("css/intermediary.css");
@@ -163,6 +166,7 @@ $lastChangedTime = filectime("css/intermediary.css");
     <script type="text/javascript" src="date/jquery.date_input.js"></script>
     <script type="text/javascript" src="scripts/date/jquery.jdpicker.js"></script>
     <script type="text/javascript" src="date/init.js"></script>
+    <script type="text/javascript" src="scripts/chrome.js"></script>
     <script type="text/javascript">
 		var _gaq = _gaq || [];
 		_gaq.push(['_setAccount', 'UA-18240582-3']);
@@ -505,7 +509,7 @@ global $db;
 		$("#slider-range-min").slider({
 			range: true,
 			min: 0,
-			max: 5,
+			max: 6,
 			step: 1,
 			values: [ <?php echo $starttimerange;?>, <?php echo $endtimerange;?> ],
 			slide: function(event, ui) {
@@ -518,7 +522,7 @@ global $db;
 			range: "min",
 			value: <?php echo $change_value;?>,
 			min: 1,
-			max: 5,
+			max: 6,
 			step:1,
 			slide: function( event, ui ) {
 				$("#amount3").val(timeEnumforGuests(ui.value));
@@ -538,7 +542,8 @@ global $db;
 			case 2: $timerange = "2 weeks ago"; break;
 			case 3: $timerange = "1 month ago"; break;
 			case 4: $timerange = "1 quarter ago"; break;
-			case 5: $timerange = "1 year ago"; break;
+			case 5: $timerange = "6 months ago"; break;
+			case 6: $timerange = "1 year ago"; break;
 		}
 		return $timerange;
 	}
@@ -551,7 +556,8 @@ global $db;
 			case 2: $timerange = "2 weeks"; break;
 			case 3: $timerange = "1 month"; break;
 			case 4: $timerange = "1 quarter"; break;
-			case 5: $timerange = "1 year"; break;
+			case 5: $timerange = "6 months"; break;
+			case 6: $timerange = "1 year"; break;
 		}
 		return $timerange;
 	}
