@@ -1137,6 +1137,8 @@ function display_tooltip(type, id)
 
 $online_HMCounter=0;
 
+$name = htmlspecialchars(strlen($name)>0?$name:('report '.$id.''));
+
 $htmlContent .= '<table width="100%" style="background-color:#FFFFFF;">'
 				. '<tr><td style="background-color:#FFFFFF;"><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" /></td>'
 				. '<td style="background-color:#FFFFFF;" nowrap="nowrap"><span style="color:#ff0000;font-weight:normal;margin-left:40px;">Interface work in progress</span>'

@@ -1348,6 +1348,8 @@ function Download_reports()
 	if($_POST['dwformat']=='pdfdown' || $_POST['dwformat']=='htmldown')
 	{
 	
+		$name = htmlspecialchars(strlen($name)>0?$name:('report '.$id.''));
+		
 		$pdfContent .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'
 						. '<html xmlns="http://www.w3.org/1999/xhtml">'
 						. '<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" />'
@@ -1655,7 +1657,8 @@ function Download_reports()
 	
 	if($_POST['dwformat']=='exceldown')
 	{
-	  	
+	  	$name = htmlspecialchars(strlen($name)>0?$name:('report '.$id.''));
+		
 		// Create excel file object
 		$objPHPExcel = new PHPExcel();
 	
