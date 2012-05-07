@@ -74,7 +74,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 	}
 	$total = count($productz);
 	$current = 0;
-	$progress = 0;	
+	$progress = 1;	
 	if(count($productz)>0)
 	{
 		foreach ($productz as $key=>$value)
@@ -410,9 +410,25 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 				
 				
 			}
-	
+			
 			
 		}
+		$query = 'update update_status_fullhistory set status="'. 0 . '", update_items_progress=update_items_total  where update_id= "'. $up_id .'" limit 1'  ; 
+			if(!$res = mysql_query($query))
+			{
+				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				$logger->error($log);
+				echo $log;
+				return false;
+			}
+		if(!mysql_query('COMMIT'))
+				{
+					$log='Error - could not commit transaction. Query='.$query.' Error:' . mysql_error();
+					$logger->fatal($log);
+					mysql_query('ROLLBACK');
+					echo $log;
+					return false;
+				}
 		if(!$scraper_run)
 		{
 			$query = 'update update_status_fullhistory set status="'. 0 . '", update_items_progress=update_items_total  where update_id= "'. $up_id .'" limit 1'  ; 
