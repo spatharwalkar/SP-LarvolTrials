@@ -9419,7 +9419,7 @@ class TrialTracker
 		}
 		
 		echo '<div style="float: left;margin-right: 25px; vertical-align:bottom; padding-top:7px;"><span id="addtoright"></span></div>';
-		echo '<div style="float: left;margin-right: 25px; padding-top:7px; vertical-align:bottom;" id="chromemenu"><a rel="dropmenu"><span style="background-color:#DDDDDD; padding:2px; padding-right:4px; border:1px solid; color:#777777; background-position:left center; background-repeat:no-repeat; background-image:url(\'./images/save.png\'); cursor:pointer; ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Export</b></span></a></div>';
+		echo '<div style="float: left;margin-right: 25px; padding-top:7px; vertical-align:bottom;" id="chromemenu"><a rel="dropmenu"><span style="padding:2px; padding-right:4px; border:1px solid; color:#000000; background-position:left center; background-repeat:no-repeat; background-image:url(\'./images/save.png\'); cursor:pointer; ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Export</b></span></a></div>';
 		
 		natcasesort($TrialsInfoList);
 		

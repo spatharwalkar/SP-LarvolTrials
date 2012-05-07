@@ -1158,7 +1158,7 @@ $htmlContent .= '<table width="100%" style="background-color:#FFFFFF;">'
 				. '<label style="color:#f6931f;float:left;">-</label> '
 				. '<input type="text" id="endrange"  name="er" value="1 month ago" readonly="readonly" style="border:0; color:#f6931f; font-weight:bold; background-color:#FFFFFF; font-family:Verdana; font-size: 13px;" class="jdpicker" />'
 				. '<br/><div id="slider-range-min" style="width:320px; margin:10px 10px 0 10px;margin-left:20px;" align="left"></div></p></div>'
-				. '<br/><div style="float: right; margin-right: 25px; vertical-align:bottom;" id="chromemenu"><a rel="dropmenu"><span style="background-color:#DDDDDD; padding:2px; padding-right:4px; border:1px solid; color:#777777; background-position:left center; background-repeat:no-repeat; background-image:url(\'./images/save.png\'); cursor:pointer; ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Export</b></span></a></div></td>'
+				. '<br/><div style="float: right; margin-right: 25px; vertical-align:bottom;" id="chromemenu"><a rel="dropmenu"><span style="padding:2px; padding-right:4px; border:1px solid; color:#000000; background-position:left center; background-repeat:no-repeat; background-image:url(\'./images/save.png\'); cursor:pointer; ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Export</b></span></a></div></td>'
 				. '</tr>'
 				. '</table>'
 				. '<br clear="all"/><br/>';
