@@ -949,7 +949,7 @@ function change_view()
 						//alert(new_value);
 						var viewcount_Bar_ele = document.getElementById("ViewCount_Bar_"+i);
 						if(viewcount_Bar_ele != null && viewcount_Bar_ele != '' && (view > 0))
-						document.getElementById("ViewCount_Bar_"+i).innerHTML = '<img src="images/viewcount_bar.png" style="width:1px; height:'+new_value+'px; vertical-align:bottom; cursor:pointer;" alt="View Count Bar" />&nbsp;';
+						document.getElementById("ViewCount_Bar_"+i).innerHTML = '<img src="images/viewcount_bar.png" style="width:1px; height:'+new_value+'px; vertical-align:bottom; cursor:pointer; padding-top:'+(17-new_value)+'px; padding-right:1px;" align="right" alt="View Count Bar" />&nbsp;';
 									
 					}
 				}
@@ -1110,16 +1110,16 @@ function display_tooltip(type, id)
     <img src="images/help.png" alt="Help" />
     <div class="slideout_inner">
         <table bgcolor="#FFFFFF" cellpadding="0" cellspacing="0" class="table-slide">
-        <tr><td width="15%"><img title="Large Bomb" src="images/new_lbomb.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Large Bomb</td></tr>
-        <tr><td><img title="Large Bomb" src="images/newred_lbomb.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Large Bomb (Updated)</td></tr>
-        <tr><td><img title="Small Bomb" src="images/new_sbomb.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Small Bomb</td></tr>
-        <tr><td><img title="Large Bomb" src="images/newred_sbomb.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Small Bomb (Updated)</td></tr>
-        <tr><td><img title="Filing" src="images/new_file.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Filing Details</td></tr>
-        <tr><td><img title="Filing" src="images/newred_file.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Filing Details (Updated)</td></tr>
-        <tr><td><img title="Phase Explain" src="images/phaseexp.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Phase Explain</td></tr>
-        <tr><td><img title="Phase Explain" src="images/phaseexp_red.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Phase Explain (Updated)</td></tr>
-        <tr><td><img title="Red Border" src="images/outline.png"  style="width:20px; height:15px; cursor:pointer;" /></td><td>Red Border (Record Updated)</td></tr>
-        <tr><td align="center"><img title="Red Border" src="images/viewcount_bar.png" align="middle"  style="width:1px; height:17px; cursor:pointer;" /></td><td>Views</td></tr>
+        <tr><td width="15%"><img title="Large Bomb" src="images/new_lbomb.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Large bomb</td></tr>
+        <tr><td><img title="Large Bomb" src="images/newred_lbomb.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Large bomb (updated)</td></tr>
+        <tr><td><img title="Small Bomb" src="images/new_sbomb.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Small bomb</td></tr>
+        <tr><td><img title="Large Bomb" src="images/newred_sbomb.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Small bomb (updated)</td></tr>
+        <tr><td><img title="Filing" src="images/new_file.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Filing details</td></tr>
+        <tr><td><img title="Filing" src="images/newred_file.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Filing details (updated)</td></tr>
+        <tr><td><img title="Phase Explain" src="images/phaseexp.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Phase explain</td></tr>
+        <tr><td><img title="Phase Explain" src="images/phaseexp_red.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Phase explain (updated)</td></tr>
+        <tr><td><img title="Red Border" src="images/outline.png"  style="width:20px; height:15px; cursor:pointer;" /></td><td>Red border (record updated)</td></tr>
+        <tr><td align="center"><img title="Views" src="images/viewcount_bar.png" align="middle"  style="width:1px; height:17px; cursor:pointer;" /></td><td>Views</td></tr>
         <tr><td colspan="2" style="padding-right: 1px;">
          <div style="float:left;padding-top:3px;">Phase&nbsp;</div>
          <div class="gray">N/A</div>
@@ -1324,7 +1324,7 @@ foreach($rows as $row => $rval)
 
 			$htmlContent .= '<font id="ViewCount_Bar_'.$online_HMCounter.'" style="text-align:right; float:right;">';
 			if($data_matrix[$row][$col]['viewcount'] > 0)
-			$htmlContent .= '<img src="images/viewcount_bar.png" style="width:1px; height:'.((17*$data_matrix[$row][$col]['viewcount'])/$Max_ViewCount).'px; vertical-align:bottom; cursor:pointer;" alt="View Count Bar" />&nbsp;';
+			$htmlContent .= '<img src="images/viewcount_bar.png" style="width:1px; height:'.((17*$data_matrix[$row][$col]['viewcount'])/$Max_ViewCount).'px; vertical-align:bottom; cursor:pointer; padding-top:'.(17-((17*$data_matrix[$row][$col]['viewcount'])/$Max_ViewCount)).'px; padding-right:1px;" alt="View Count Bar" />&nbsp;';
 			$htmlContent .= '</font>';
 			
 			$htmlContent .= '</div>'; ///Div complete to avoid panel problem

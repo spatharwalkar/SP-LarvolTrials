@@ -9418,7 +9418,8 @@ class TrialTracker
 			echo $paginate['paginate'];
 		}
 		
-		echo '<div style="float: left;margin-right: 25px; vertical-align:bottom;"><span id="addtoright"></span></div>';
+		echo '<div style="float: left;margin-right: 25px; vertical-align:bottom; padding-top:7px;"><span id="addtoright"></span></div>';
+		echo '<div style="float: left;margin-right: 25px; padding-top:7px; vertical-align:bottom;" id="chromemenu"><a rel="dropmenu"><span style="background-color:#DDDDDD; padding:2px; padding-right:4px; border:1px solid; color:#777777; background-position:left center; background-repeat:no-repeat; background-image:url(\'./images/save.png\'); cursor:pointer; ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Export</b></span></a></div>';
 		
 		natcasesort($TrialsInfoList);
 		
@@ -9650,7 +9651,7 @@ class TrialTracker
 				. '<input type="checkbox" class="status" value="8" '
 				. (in_array('8', $globalOptions['status']) ? 'checked = "checked" ' : '') . '/>Temporarily not available<br/>'
 				. '<input type="checkbox" class="status" value="9" '
-				. (in_array('9', $globalOptions['status']) ? 'checked = "checked" ' : '') . '/>No Longer Available<br/>'
+				. (in_array('9', $globalOptions['status']) ? 'checked = "checked" ' : '') . '/>No longer available<br/>'
 				. '<input type="checkbox" class="status" value="10" '
 				. (in_array('10', $globalOptions['status']) ? 'checked = "checked" ' : '') . '/>Withdrawn<br/>'
 				. '<input type="checkbox" class="status" value="11" '
@@ -9681,7 +9682,7 @@ class TrialTracker
 				 . '<input type="checkbox" class="status" value="8" ' 
 				 . (in_array('8', $globalOptions['status']) ? 'checked = "checked" ' : '') . '/>Temporarily not available<br/>'
 				 . '<input type="checkbox" class="status" value="9" ' 
-				 . (in_array('9', $globalOptions['status']) ? 'checked = "checked" ' : '') . '/>No Longer Available<br/>'
+				 . (in_array('9', $globalOptions['status']) ? 'checked = "checked" ' : '') . '/>No longer available<br/>'
 				 . '<input type="checkbox" class="status" value="10" ' 
 				 . (in_array('10', $globalOptions['status']) ? 'checked = "checked" ' : '') . '/>Withdrawn<br/>'
 				 . '<input type="checkbox" class="status" value="11" ' 
@@ -9780,7 +9781,6 @@ class TrialTracker
 				. ' value="' . ((isset($globalOptions['enroll'])) ? $globalOptions['enroll'] : '' ) . '" autocomplete="off" />'
 				. '<div id="slider-range"></div>'
 				. '</p></div>'
-				. '<br/><div style="float: left;margin-left: 20px; padding-top:4px; vertical-align:bottom;" id="chromemenu"><a rel="dropmenu"><span style="background-color:#DDDDDD; padding:2px; padding-right:4px; border:1px solid; color:#777777; background-position:left center; background-repeat:no-repeat; background-image:url(\'./images/save.png\'); cursor:pointer; ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Export</b></span></a></div>'
 				. '</tr></table><br/><br/>';
 		echo '<input type="hidden" name="status" id="status" value="' . implode(',', $globalOptions['status']) . '" />'
 				. '<input type="hidden" name="itype" id="itype" value="' . implode(',', $globalOptions['itype']) . '" />'
