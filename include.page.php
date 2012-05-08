@@ -297,7 +297,8 @@ function calculateWhere($table)
 		$whereArr = array_map(
 							function($whereKeys,$whereValues)
 							{
-
+								//real escape search values
+								$whereValues = mysql_real_escape_string($whereValues);
 								//check search keys are regex or not.
 								$pcre = strlen($whereValues) > 1 && $whereValues[0] == '/' && ($whereValues[strlen($whereValues)-1] == '/' || ($whereValues[strlen($whereValues)-2] == '/' && strlen($whereValues) > 2));
 								//if regex pattern then check with a sample query.
