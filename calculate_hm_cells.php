@@ -11,11 +11,13 @@ if(isset($_GET['area']) or isset($_GET['product']))
 {
 	$parameters=$_GET;
 	if(!calc_cells($parameters))	echo '<br><b>Could complete calculating cells, there was an error.<br></b>';
+	echo '<br>All done.<br>';
 }
 elseif( isset($_GET['calc']) and ($_GET['calc']=="all") )
 {
 	$parameters=NULL;
 	if(!calc_cells($parameters))	echo '<br><b>Could complete calculating cells, there was an error.<br></b>';
+	echo '<br>All done.<br>';
 }
 
 function calc_cells($parameters,$update_id=NULL)
@@ -25,7 +27,7 @@ function calc_cells($parameters,$update_id=NULL)
 	$cron_run = isset($update_id); 	// check if being run by cron.php
 	
 	$display_status='NO';
-	
+	$id = mysql_real_escape_string($_GET['id']);
 	if($cron_run)
 	{
 		$query = 'UPDATE update_status SET start_time="' . date("Y-m-d H:i:s", strtotime('now')) . '", updated_days="0" WHERE update_id="' . $update_id . '"';
@@ -54,9 +56,32 @@ function calc_cells($parameters,$update_id=NULL)
 		$row = mysql_fetch_assoc($res);
 		$update_id=$row['maxid']+1;
 		
-		$query = '	INSERT into update_status_fullhistory SET 
-					start_time="' . date("Y-m-d H:i:s", strtotime('now')) . '", 
-					updated_days="0", status="2", trial_type="RECALC,AREA=' . $parameters['area'] . '", update_id="' . $update_id . '"';
+		
+		$query = '	select update_id,trial_type,status from update_status_fullhistory where 
+					trial_type="RECALC=' . $id . '" and status="2" ' ;
+		
+		if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			global $logger;
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
+		$x=mysql_fetch_assoc($res);
+		if(isset($x['update_id']))
+		{
+			$update_id=$x['update_id'];
+
+		}
+		else
+		{			
+			
+			
+			$query = '	INSERT into update_status_fullhistory SET 
+						start_time="' . date("Y-m-d H:i:s", strtotime('now')) . '", 
+						updated_days="0", status="2", trial_type="RECALC=' . $id . '", update_id="' . $update_id . '"';
+		}
 		if(!$res = mysql_query($query))
 		{
 			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -89,7 +114,7 @@ function calc_cells($parameters,$update_id=NULL)
 	}
 	$areaids=array();
 	while($areaids[]=mysql_fetch_assoc($res));
-
+	
 	//get product ids
 	if(isset($parameters['product']))
 	{
@@ -112,7 +137,8 @@ function calc_cells($parameters,$update_id=NULL)
 	while($productids[]=mysql_fetch_assoc($res));
 
 	$x=count($areaids); $y=count($productids);
-	$totalcount=$x*$y;
+	
+	$totalcount=($x*$y)/4;
 	if($cron_run)
 	{
 	    $query = 'UPDATE update_status SET update_items_total="' . $totalcount . '",update_items_start_time="' . date("Y-m-d H:i:s", strtotime('now')) . '" WHERE update_id="' . $update_id . '"';
@@ -127,7 +153,9 @@ function calc_cells($parameters,$update_id=NULL)
 	}
 	elseif($display_status=='YES')
 	{
-	    $query = 'UPDATE update_status_fullhistory SET update_items_total="' . $totalcount . '",status="2", update_items_start_time="' . date("Y-m-d H:i:s", strtotime('now')) . '" WHERE update_id="' . $update_id . '"';
+	    $query = '	UPDATE update_status_fullhistory SET update_items_total=update_items_total+' . $totalcount . ',
+					status="2", update_items_start_time="' . date("Y-m-d H:i:s", strtotime('now')) . '" 
+					WHERE update_id="' . $update_id . '"';
 		if(!$res = mysql_query($query))
 		{
 			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -211,7 +239,9 @@ function calc_cells($parameters,$update_id=NULL)
 				$progress_count ++;
 				if($cron_run)
 				{
-					$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s", strtotime('now')) . '",update_items_progress="' . $progress_count . '", status="2" WHERE update_id="' . $update_id . '"';
+					$query = '	UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s", strtotime('now')) . '",
+								update_items_progress="' . $progress_count . '", status="2" 
+								WHERE update_id="' . $update_id . '"';
 					if(!$res = mysql_query($query))
 					{
 						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -223,7 +253,10 @@ function calc_cells($parameters,$update_id=NULL)
 				}
 				elseif($display_status=='YES')
 				{
-					$query = 'UPDATE update_status_fullhistory SET status="2", updated_time="' . date("Y-m-d H:i:s", strtotime('now')) . '",update_items_progress="' . $progress_count . '" WHERE update_id="' . $update_id . '"';
+					$query = '	UPDATE update_status_fullhistory SET status="2", 
+								updated_time="' . date("Y-m-d H:i:s", strtotime('now')) . '",
+								update_items_progress=update_items_progress+' . $progress_count . ' 
+								WHERE update_id="' . $update_id . '"';
 					if(!$res = mysql_query($query))
 					{
 						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -285,7 +318,7 @@ function calc_cells($parameters,$update_id=NULL)
 			}
 			elseif($display_status=='YES')
 			{
-				$query = 'UPDATE update_status_fullhistory SET status="2", updated_time="' . date("Y-m-d H:i:s", strtotime('now')) . '",update_items_progress="' . $progress_count . '" WHERE update_id="' . $update_id . '"';
+				$query = 'UPDATE update_status_fullhistory SET status="2", updated_time="' . date("Y-m-d H:i:s", strtotime('now')) . '",update_items_progress=update_items_progress+' . $progress_count . ' WHERE update_id="' . $update_id . '"';
 				if(!$res = mysql_query($query))
 				{
 					$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -310,19 +343,7 @@ function calc_cells($parameters,$update_id=NULL)
 			return false;
 		}
 	}
-	elseif($display_status=='YES')
-	{
-		$query = 'UPDATE update_status_fullhistory SET status="0",end_time="' . date("Y-m-d H:i:s", strtotime('now')) . '" WHERE update_id="' . $update_id . '"';
-		if(!$res = mysql_query($query))
-		{
-			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-			global $logger;
-			$logger->error($log);
-			echo $log;
-			return false;
-		}
-}
-	echo '<br>All Done.';
+//	echo '<br>All Done.';
 	return true;
 }			
 

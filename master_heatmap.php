@@ -5,9 +5,149 @@ require_once('PHPExcel.php');
 require_once('PHPExcel/Writer/Excel2007.php');
 require_once('include.excel.php');
 require_once('class.phpmailer.php');
+require_once('krumo/class.krumo.php');
+require_once('calculate_hm_cells.php');
+ini_set('error_reporting', E_ALL ^ E_NOTICE);
+define('READY', 1);
+define('RUNNING', 2);
+define('ERROR', 3);
+define('CANCELLED', 4);
+define('COMPLETED', 0);
+
+global $logger;
+
 
 ini_set('memory_limit','-1');
 ini_set('max_execution_time','36000');	//10 hours
+
+/***Recalculation of cells start*/
+if(isset($_REQUEST['recalc']))
+{
+	$productz=get_products();	// get list of products from master heatmap
+	
+	$areaz=get_areas();	// get list of areas from master heatmap
+	
+//	$searchdata=get_search_data($productz);	// get the searchdata using the list of products 
+	echo 'Recalculating all values of the Master HM<br>';
+	foreach($areaz as $akey => $aval)
+	{
+		foreach($productz as $pkey => $pval)
+		{
+			recalc_values($aval,$pval);	// recalculate values using searchdata.
+		}
+	}
+	$id = mysql_real_escape_string($_GET['id']);
+	$query = '	select update_id,trial_type,status from update_status_fullhistory where 
+					trial_type="RECALC=' . $id . '" and status="2" ' ;
+		if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			global $logger;
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
+		$x=mysql_fetch_assoc($res);
+		if(isset($x['update_id']))
+		{
+			$x=$x['update_id'];
+			$query = 'UPDATE update_status_fullhistory SET status="0",end_time="' . date("Y-m-d H:i:s", strtotime('now')) . '" 
+				  WHERE update_id="' . $x . '"';
+			if(!$res = mysql_query($query))
+			{
+				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				global $logger;
+				$logger->error($log);
+				echo $log;
+				return false;
+			}
+
+		}
+	
+	
+	
+	echo '<br>All done.<br>';
+	return true;
+}
+
+function get_products() // get list of products 
+{
+	global $logger;
+	$productz=array();
+	$id = mysql_real_escape_string($_GET['id']);
+	$query = '	SELECT `num`,`type`,`type_id`, `display_name`, `category` FROM `rpt_masterhm_headers` 
+				WHERE report=' . $id . ' and type="product" ORDER BY num ASC';
+
+	if(!$resu = mysql_query($query))
+	{
+	$log='Bad SQL query getting  details from rpt_masterhm_headers table.<br>Query=' . $query;
+	$logger->fatal($log);
+	echo $log;
+	return false;
+	}
+
+	while($header = mysql_fetch_array($resu))
+	{
+		$productz[] = $header['type_id'];
+	}
+	return $productz;
+}
+function get_areas() // get list of areas 
+{
+	global $logger;
+	$areaz=array();
+	$id = mysql_real_escape_string(htmlspecialchars($_GET['id']));
+	
+	$query = '	SELECT `num`,`type`,`type_id` FROM `rpt_masterhm_headers` 
+				WHERE report=' . $id . ' and type="area" ORDER BY num ASC';
+
+	if(!$resu = mysql_query($query))
+	{
+	$log='Bad SQL query getting  details from rpt_masterhm_headers table.<br>Query=' . $query;
+	$logger->fatal($log);
+	echo $log;
+	return false;
+	}
+
+	while($header = mysql_fetch_array($resu))
+	{
+		$areaz[] = $header['type_id'];
+	}
+	return $areaz;
+}
+
+function get_search_data($idz,$cat) // get the searchdata 
+{
+	global $logger;
+	$idz = implode(",", $idz);
+	$query = 'SELECT `id`,`name`,`searchdata` from '. $cat .' where searchdata IS NOT NULL and  `searchdata` <>""
+	and id in (' . $idz . ')';
+
+	if(!$resu = mysql_query($query))
+	{
+		$log='Bad SQL query getting  details from '. $cat .' table.<br>Query=' . $query;
+		$logger->fatal($log);
+		echo $log;
+		return false;
+	}
+	$searchdata=array();
+	while($searchdata[]=mysql_fetch_array($resu));
+	return $searchdata;
+
+}
+
+function  recalc_values($aval,$pval) // recalculate values
+{
+	global $logger;
+	$parameters=array();
+	$parameters['area']=$aval;
+	$parameters['product']=$pval;
+	calc_cells($parameters);
+	return true;
+}
+
+/***Recalculation of cells end*/
+
 
 if($_POST['dwformat'])
 {
@@ -24,6 +164,10 @@ if(!$db->loggedIn())
 	header('Location: ' . urlPath() . 'index.php');
 	exit;
 }
+
+$_GET['header']='<script type="text/javascript" src="progressbar/jquery.js"></script>
+<script type="text/javascript" src="progressbar/jquery.progressbar.js"></script>
+<link href="css/status.css" rel="stylesheet" type="text/css" media="all" />';
 
 require('header.php');
 ?>
@@ -457,7 +601,102 @@ function editor()
 	$id = mysql_real_escape_string(htmlspecialchars($_GET['id']));
 	if(!is_numeric($id)) return;
 	$query = 'SELECT name,user,footnotes,description,category,shared,total, dtt FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
-	$res = mysql_query($query) or die('Bad SQL query getting master heatmap report');
+	
+	/******** RECALCULATION STATUS  */
+	//Get Process IDs of all currently running updates to check crashes
+	$query = 'SELECT `update_id`,`process_id` FROM update_status_fullhistory WHERE `status`='. RUNNING . ' and left(trial_type,6)="RECALC" ';
+	if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
+	$count_upids=0;
+	
+	while($row = mysql_fetch_assoc($res))
+	{
+		$update_ids[$count_upids] = $row['update_id'];
+		$update_pids[$count_upids++] = $row['process_id'];
+	}
+if($count_upids<>0)
+{
+	$err=array();
+	$cmd = "ps aux|grep calculate";
+	exec($cmd, $output, $result);
+	for($i=0;$i < count($output); $i++)
+	{
+		$output[$i] = preg_replace("/ {2,}/", ' ',$output[$i]);
+		$exp_out=explode(" ",$output[$i]);
+		$running_pids[$i]=$exp_out[1];
+	}
+
+	//Check if any update has terminated abruptly
+	for($i=0;$i < $count_upids; $i++)
+	{
+		
+		if(!in_array($update_pids[$i],$running_pids))
+		{
+			$err[$i]='yes';
+		}
+		else
+		{
+			$err[$i]='no';
+		}
+	}
+	
+	for($i=0;$i < $count_upids; $i++)
+	{
+			if( !in_array($update_pids[$i],$running_pids) and $err[$i]=='yes')
+		{
+	/*		$query = 'UPDATE update_status_fullhistory SET `status`="'.ERROR.'",`process_id`="0" WHERE `update_id`="' . $update_ids[$i].'"';
+			if(!$res = mysql_query($query))
+			{
+				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				$logger->error($log);
+				echo $log;
+				return false;
+			}
+	*/
+		}
+			
+	}
+	
+	/**************************************/
+
+
+
+$query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
+						`update_items_total`,`update_items_progress`,`er_message`,TIMEDIFF(updated_time, start_time) AS timediff,
+						`update_items_complete_time` FROM update_status_fullhistory where left(trial_type,6)="RECALC" order by update_id desc limit 1 ';
+	if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
+	$recalc_status = array();
+	while($row = mysql_fetch_assoc($res))
+	$recalc_status = $row;
+	
+	echo "<script type=\"text/javascript\">";
+
+	echo "$(document).ready(function() {";
+	if(count($recalc_status)!=0)
+	{
+		echo "$(\"#recalc_new\").progressBar();";
+		echo "$(\"#recalc_update\").progressBar({ barImage: 'images/progressbg_orange.gif'} );";
+	}
+	
+	echo "});";
+
+	echo "</script>";
+}	
+/*** RECALCULATION STATUS. ****/
+	
+	$query = 'SELECT name,user,footnotes,description,category,shared,total FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
+	$res = mysql_query($query) or die('Bad SQL query getting master heatmap report'.$query);
 	$res = mysql_fetch_array($res) or die('Report not found.');
 	$rptu = $res['user'];
 	$shared = $res['shared'];
@@ -477,7 +716,7 @@ function editor()
 	$owner_type="global";
 	
 	$query = 'SELECT `num`,`type`,`type_id`, `display_name`, `category` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' ORDER BY num ASC';
-	$res = mysql_query($query) or die('Bad SQL query getting master heatmap report headers');
+	$res = mysql_query($query) or die('Bad SQL query getting master heatmap report headers'.$query);
 	$rows = array();
 	$columns = array();
 	$areaIds = array();
@@ -731,8 +970,59 @@ function editor()
 	$disabled=0;
 	if(($owner_type == 'shared' && $rptu != $db->user->id) || ($owner_type == 'global' && $db->user->userlevel == 'user'))
 	$disabled=1;
-	$out .= '<br clear="both" />'
-		. '<form action="master_heatmap.php" name="master_heatmap" onsubmit="return validate('.count($rows).','.count($columns).');" method="post"><fieldset><legend>Edit report ' . $id . '</legend>'
+	
+	/**Recalculate button***/
+	//check if the  HM is being recalculated
+		$id = mysql_real_escape_string($_GET['id']);	 
+		$query = 'SELECT `update_id`,`process_id`,`start_time`,`end_time`,`updated_time`,`status`,
+						`update_items_total`,`update_items_progress`,`er_message`,TIMEDIFF(updated_time, start_time) AS timediff,
+						`update_items_complete_time` FROM update_status_fullhistory where status="2" 
+						 and trial_type="RECALC='. $id . '"  order by update_id desc limit 1 ';
+				 
+		if(!$res1 = mysql_query($query))
+			{
+				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				$logger->error($log);
+				echo $log;
+				return false;
+			}
+		$row1 = mysql_fetch_assoc($res1);
+	//	$recalc_status = array();
+	//	while($row = mysql_fetch_assoc($res))
+		$recalc_status = $row1;
+								
+		
+		if( isset($row1['update_id']) )
+		{
+		
+					if($recalc_status['status']==COMPLETED)
+						$recalc_update_progress=100;
+					else
+						$recalc_update_progress=number_format(($recalc_status['update_items_total']==0?0:(($recalc_status['update_items_progress'])*100/$recalc_status['update_items_total'])),2);
+
+		
+		
+		
+			$out .=  "<br clear=\"both\" />&nbsp;&nbsp;&nbsp;Recalculation status: <span class=\"progressBar\" id=\"recalc_update\">".$recalc_update_progress."</span>";
+			
+		}
+		else 
+		{
+			$out .= '<br clear="both" />'.
+			'
+			<form action="master_heatmap.php?id=' . $id . '" name="rc" id="rd" method="post" />
+			<input type="submit" name="recalc" id="recalc" value="Recalculate all values" onclick="this.form.target=\'_blank\';return true;">
+			
+			</form>
+			';
+		
+		}
+	
+	
+	/****/
+	
+	
+	$out .= '<br clear="both" /><form action="master_heatmap.php" name="master_heatmap" onsubmit="return validate('.count($rows).','.count($columns).');" method="post"><fieldset><legend>Edit report ' . $id . '</legend>'
 		. '<input type="hidden" name="id" value="' . $id . '" />'
 		. '<label>Name: <input type="text" '.(($disabled) ? ' readonly="readonly" ':'').' '
 		. 'name="reportname" value="' . htmlspecialchars($name) . '"/></label>'
@@ -816,11 +1106,7 @@ function editor()
 			}
 			$out .= '<a href="intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col] . '" target="_blank" class="ottlink" title="'.$title.'">'.$count_val.'</a>';
 		
-			$out .= '<br><a href="calculate_hm_cells.php?area=' . $areaIds[$col] . '" target="_blank"  title="Recalculate values">'. 'Recalculate' .'</a>';
-			
-			
-
-
+		
 		}
 		$out .='<br/>';
 		$out .= '</th>';
@@ -1068,7 +1354,7 @@ function Download_reports()
 	$id = mysql_real_escape_string(htmlspecialchars($_POST['id']));
 	if(!is_numeric($id)) return;
 	$query = 'SELECT name,user,footnotes,description,category,shared,dtt FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
-	$res = mysql_query($query) or die('Bad SQL query getting master heatmap report');
+	$res = mysql_query($query) or die('Bad SQL query getting master heatmap report'.$query);
 	$res = mysql_fetch_array($res) or die('Report not found.');
 	$rptu = $res['user'];
 	$shared = $res['shared'];
@@ -1079,7 +1365,7 @@ function Download_reports()
 	$category = $res['category'];
 	
 	$query = 'SELECT `num`,`type`,`type_id`, `display_name`, `category` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' ORDER BY num ASC';
-	$res = mysql_query($query) or die('Bad SQL query getting master heatmap report headers');
+	$res = mysql_query($query) or die('Bad SQL query getting master heatmap report headers'.$query);
 	$rows = array();
 	$columns = array();
 	$areaIds = array();
