@@ -949,7 +949,10 @@ function change_view()
 						//alert(new_value);
 						var viewcount_Bar_ele = document.getElementById("ViewCount_Bar_"+i);
 						if(viewcount_Bar_ele != null && viewcount_Bar_ele != '' && (view > 0))
-						document.getElementById("ViewCount_Bar_"+i).innerHTML = '<img src="images/viewcount_bar.png" style="width:1px; height:'+new_value+'px; vertical-align:bottom; cursor:pointer; padding-top:'+(17-new_value)+'px; padding-right:1px;" align="right" alt="View Count Bar" />&nbsp;';
+						{
+							document.getElementById("ViewCount_Bar_"+i).innerHTML = '<img src="images/viewcount_bar.png" style="width:1px; height:'+new_value+'px; vertical-align:bottom; cursor:pointer; padding-top:'+(17-new_value)+'px; padding-right:1px;" align="right" alt="View Count Bar" />&nbsp;';
+							document.getElementById("ViewCount_"+i).innerHTML = '<font style="color:#206040; font-weight: 900;">Number of views: </font><font style="color:#000000; font-weight: 900;">'+view+'</font><input type="hidden" value="'+view+'" id="ViewCount_value_'+i+'" />';
+						}
 									
 					}
 				}
@@ -1074,6 +1077,42 @@ function display_tooltip(type, id)
 		}
 	}
 }
+
+function refresh_data(cell_id)
+{
+	var product_ele=document.getElementById("Product_value_"+cell_id);
+	var area_ele=document.getElementById("Area_value_"+cell_id);
+	product=product_ele.value.replace(/\s+/g, '');
+	area=area_ele.value.replace(/\s+/g, '');
+	
+	var limit = document.getElementById('Last_HM').value;
+	var i=1;
+	for(i=1;i<=limit;i++)
+	{
+		var cell_exist=document.getElementById("Cell_values_"+i);
+		if(cell_exist != null && cell_exist != '')
+		{
+			var font_element=document.getElementById("Font_ID_"+i);
+			if(font_element != null && font_element != '')
+			{
+				var current_product_ele=document.getElementById("Product_value_"+i);
+				var current_area_ele=document.getElementById("Area_value_"+i);
+			
+				if((current_product_ele != null && current_product_ele != '') && (current_area_ele != '' && current_area_ele != null) && (i != cell_id))
+				{
+					current_product=current_product_ele.value.replace(/\s+/g, '');
+					current_area=current_area_ele.value.replace(/\s+/g, '');
+				
+					if(current_product == product && current_area == area)
+					{
+						document.getElementById("ViewCount_value_"+i).value=document.getElementById("ViewCount_value_"+cell_id).value;
+						change_view();
+					}
+				}
+			}
+		}
+	}
+}
 </script>
 <script type="text/javascript">
 	//Count the Number of View of Records
@@ -1097,6 +1136,7 @@ function display_tooltip(type, id)
 										document.getElementById("Max_ViewCount_value").value = view;
 									}
 								}
+								refresh_data(cell_id);
 								change_view();
 						 }
 				});
@@ -1310,6 +1350,8 @@ foreach($rows as $row => $rval)
 			$htmlContent .= '<input type="hidden" value="'.$data_matrix[$row][$col]['active'].',endl,'.$data_matrix[$row][$col]['total'].',endl,'.$data_matrix[$row][$col]['indlead'].',endl,'.$data_matrix[$row][$col]['active_prev'].',endl,'.$data_matrix[$row][$col]['total_prev'].',endl,'.$data_matrix[$row][$col]['indlead_prev'].',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['last_update'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['last_update'])).',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['count_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['count_lastchanged'])).',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])).',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['filing_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['filing_lastchanged'])).',endl,'.$data_matrix[$row][$col]['color_code'].',endl,'.$data_matrix[$row][$col]['bomb']['value'].',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['phase_explain_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['phase_explain_lastchanged'])).',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['phase4_override_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['phase4_override_lastchanged'])).',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['highest_phase_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['highest_phase_lastchanged'])).',endl,\''.$data_matrix[$row][$col]['highest_phase_prev'].'\'" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
 			
 			$htmlContent .= '<input type="hidden" value="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />&nbsp;';
+			$htmlContent .= '<input type="hidden" value="' . $productIds[$row] . '" name="Product_value_'.$online_HMCounter.'" id="Product_value_'.$online_HMCounter.'" />&nbsp;';
+			$htmlContent .= '<input type="hidden" value="' . $areaIds[$col]. '" name="Area_value_'.$online_HMCounter.'" id="Area_value_'.$online_HMCounter.'" />&nbsp;';
 				
 			$htmlContent .= '<a onclick="INC_ViewCount(' . trim($productIds[$row]) . ',' . trim($areaIds[$col]) . ',' . $online_HMCounter .')" style="'.$data_matrix[$row][$col]['count_start_style'].' height:100%; vertical-align:middle; padding-top:0px; padding-bottom:0px; line-height:13px;" id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '&list=1&itype=0&sr=now&er=1 month ago" target="_blank" title="'. $title .'"><font id="Font_ID_'.$online_HMCounter.'">'. $data_matrix[$row][$col]['active'] .'</font></a>&nbsp;';
 					
@@ -1360,7 +1402,7 @@ foreach($rows as $row => $rval)
 				$htmlContent .= '<font style="color:#206040; font-weight: 900;" id="Phaseexp_Img_'.$online_HMCounter.'">Phase Explain </font><font style="color:#206040; font-weight: 900;">: </font>'. $data_matrix[$row][$col]['phase_explain'] .'</br>';
 			}
 			
-			$htmlContent .= '<font id="ViewCount_'.$online_HMCounter.'">'.(($data_matrix[$row][$col]['viewcount'] > 0) ? '<font style="color:#206040; font-weight: 900;">Number of views: </font><font style="color:#000000; font-weight: 900;">'.$data_matrix[$row][$col]['viewcount'].'</font><input type="hidden" value="'.$data_matrix[$row][$col]['viewcount'].'" id="ViewCount_value_'.$online_HMCounter.'" />':'' ).'</font>';
+			$htmlContent .= '<font id="ViewCount_'.$online_HMCounter.'">'.(($data_matrix[$row][$col]['viewcount'] > 0) ? '<font style="color:#206040; font-weight: 900;">Number of views: </font><font style="color:#000000; font-weight: 900;">'.$data_matrix[$row][$col]['viewcount'].'</font><input type="hidden" value="'.$data_matrix[$row][$col]['viewcount'].'" id="ViewCount_value_'.$online_HMCounter.'" />':'<input type="hidden" value="'.$data_matrix[$row][$col]['viewcount'].'" id="ViewCount_value_'.$online_HMCounter.'" />' ).'</font>';
 							
 			$htmlContent .='</span>';	//Tool Tip Ends Here
 		}
