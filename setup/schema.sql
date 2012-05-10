@@ -401,6 +401,7 @@ CREATE TABLE IF NOT EXISTS `update_status_fullhistory` (  `update_id` int( 10  )
 `max_nctid` INT( 11 ) NOT NULL DEFAULT '0',
 `er_message` VARCHAR( 255 ) NOT NULL ,
 `trial_type` VARCHAR( 255 ) NULL DEFAULT NULL ,
+`item_id` INT(11) NULL DEFAULT NULL  ,
  PRIMARY  KEY (  `update_id`  )  ) ENGINE  = InnoDB  DEFAULT CHARSET  = utf8 COLLATE  = utf8_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `products` (
