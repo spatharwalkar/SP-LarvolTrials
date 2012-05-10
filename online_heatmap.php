@@ -867,51 +867,25 @@ function change_view()
 				{
 					if((phaseexp_cdate <= st_limit) && (phaseexp_cdate >= ed_limit)) //Compare Filing Change Dates
 					{
-						document.getElementById("Cell_Phase_"+i).title = "Phase Explain Updated On: "+ Cell_values_Arr[17];
+						document.getElementById("Cell_Phase_"+i).title = "Phase explaination Updated On: "+ Cell_values_Arr[17];
 						document.getElementById("Cell_Phase_"+i).src = "images/phaseexp_red.png";
 						//document.getElementById("PhaseExp_CDate_"+i).style.display = "inline";
-						document.getElementById("Phaseexp_Img_"+i).innerHTML = '<img title="Phase Explain" src="images/phaseexp_red.png"  style="width:17px; height:17px; vertical-align:middle; cursor:pointer; padding-bottom:2px;" />&nbsp;';
+						document.getElementById("Phaseexp_Img_"+i).innerHTML = '<img title="Phase explaination" src="images/phaseexp_red.png"  style="width:17px; height:17px; vertical-align:middle; cursor:pointer; padding-bottom:2px;" />&nbsp;';
 						if(latest_date < phaseexp_cdate || latest_date == '')
 						{
-							qualify_title = "Phase Explain Updated On: "+ Cell_values_Arr[17];
+							qualify_title = "Phase explaination Updated On: "+ Cell_values_Arr[17];
 							latest_date = phaseexp_cdate;
 						}
 					}
 					else
 					{
-						document.getElementById("Cell_Phase_"+i).title = "Phase Explain";
+						document.getElementById("Cell_Phase_"+i).title = "Phase explaination";
 						document.getElementById("Cell_Phase_"+i).src = "images/phaseexp.png";
 						//document.getElementById("PhaseExp_CDate_"+i).style.display = "none"
-						document.getElementById("Phaseexp_Img_"+i).innerHTML = '<img title="Phase Explain" src="images/phaseexp.png"  style="width:17px; height:17px; vertical-align:middle; cursor:pointer; padding-bottom:2px;" />&nbsp;';
+						document.getElementById("Phaseexp_Img_"+i).innerHTML = '<img title="Phase explaination" src="images/phaseexp.png"  style="width:17px; height:17px; vertical-align:middle; cursor:pointer; padding-bottom:2px;" />&nbsp;';
 					}
 				}
 				
-				///Change Phase4 Details
-				var phase4_cdate= new Date(Cell_values_Arr[18]);	//Phase4 Chnage Date
-				var phase4_ele= document.getElementById("Red_Cell_"+i);	//Phase4 Element
-				
-				if(phase4_ele != null && phase4_ele != '')
-				{
-					var phase4_presence_ele= document.getElementById("Phase4_Presence_"+i);
-					if((phase4_cdate <= st_limit) && (phase4_cdate >= ed_limit)) //Compare Filing Change Dates
-					{
-						document.getElementById("Red_Cell_"+i).style.display = "inline";
-						document.getElementById("Red_Cell_"+i).title = "Red Cell Override";
-						//document.getElementById("Red_Cell_CDate_"+i).style.display = "inline";
-						if(latest_date < phase4_cdate || latest_date == '')
-						{
-							qualify_title = "Red Cell Override On: "+ Cell_values_Arr[19];
-							latest_date = phase4_cdate;
-						}
-					}
-					else
-					{
-						document.getElementById("Red_Cell_"+i).title = "Red Cell Override";
-						document.getElementById("Red_Cell_"+i).style.display = "none";
-						//document.getElementById("Red_Cell_CDate_"+i).style.display = "none";
-						document.getElementById("Red_Cell_"+i).style.display = "inline";
-					}
-				}
 				
 				///Change Hign Phase Details
 				var high_phase_cdate= new Date(Cell_values_Arr[20]);	//High Phase Chnage Date
@@ -983,7 +957,7 @@ function change_view()
 					var view = viewcount_ele.value;
 					else view = 0;
 					
-					if((phaseexp_ele != null && phaseexp_ele != '') || (filing_ele != null && filing_ele != '') || (bomb_presence_ele != null && bomb_presence_ele != '') || (phase4_ele != null && phase4_ele != '') || (view > 0))
+					if((phaseexp_ele != null && phaseexp_ele != '') || (filing_ele != null && filing_ele != '') || (bomb_presence_ele != null && bomb_presence_ele != '') || (view > 0))
 					{
 						document.getElementById("ToolTip_Visible_"+i).value = "1";
 					}
@@ -1156,8 +1130,8 @@ function refresh_data(cell_id)
         <tr><td><img title="Large Bomb" src="images/newred_sbomb.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Small bomb (updated)</td></tr>
         <tr><td><img title="Filing" src="images/new_file.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Filing details</td></tr>
         <tr><td><img title="Filing" src="images/newred_file.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Filing details (updated)</td></tr>
-        <tr><td><img title="Phase Explain" src="images/phaseexp.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Phase explain</td></tr>
-        <tr><td><img title="Phase Explain" src="images/phaseexp_red.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Phase explain (updated)</td></tr>
+        <tr><td><img title="Phase explaination" src="images/phaseexp.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Phase explaination</td></tr>
+        <tr><td><img title="Phase explaination" src="images/phaseexp_red.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Phase explaination (updated)</td></tr>
         <tr><td><img title="Red Border" src="images/outline.png"  style="width:20px; height:15px; cursor:pointer;" /></td><td>Red border (record updated)</td></tr>
         <tr><td align="center"><img title="Views" src="images/viewcount_bar.png" align="middle"  style="width:1px; height:17px; cursor:pointer;" /></td><td>Views</td></tr>
         <tr><td colspan="2" style="padding-right: 1px;">
@@ -1353,7 +1327,7 @@ foreach($rows as $row => $rval)
 			$htmlContent .= '<input type="hidden" value="' . $productIds[$row] . '" name="Product_value_'.$online_HMCounter.'" id="Product_value_'.$online_HMCounter.'" />&nbsp;';
 			$htmlContent .= '<input type="hidden" value="' . $areaIds[$col]. '" name="Area_value_'.$online_HMCounter.'" id="Area_value_'.$online_HMCounter.'" />&nbsp;';
 				
-			$htmlContent .= '<a onclick="INC_ViewCount(' . trim($productIds[$row]) . ',' . trim($areaIds[$col]) . ',' . $online_HMCounter .')" style="'.$data_matrix[$row][$col]['count_start_style'].' height:100%; vertical-align:middle; padding-top:0px; padding-bottom:0px; line-height:13px;" id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '&list=1&itype=0&sr=now&er=1 month ago" target="_blank" title="'. $title .'"><font id="Font_ID_'.$online_HMCounter.'">'. $data_matrix[$row][$col]['active'] .'</font></a>&nbsp;';
+			$htmlContent .= '<a onclick="INC_ViewCount(' . trim($productIds[$row]) . ',' . trim($areaIds[$col]) . ',' . $online_HMCounter .')" style="'.$data_matrix[$row][$col]['count_start_style'].' height:100%; vertical-align:middle; padding-top:0px; padding-bottom:0px; line-height:13px; text-decoration:underline;" id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '&list=1&itype=0&sr=now&er=1 month ago" target="_blank" title="'. $title .'"><b><font id="Font_ID_'.$online_HMCounter.'">'. $data_matrix[$row][$col]['active'] .'</font></b></a>&nbsp;';
 					
 			if($data_matrix[$row][$col]['bomb']['src'] != 'new_square.png') //When bomb has square dont include it in pdf as size is big and no use
 			$htmlContent .= '<img id="Cell_Bomb_'.$online_HMCounter.'" title="'.$data_matrix[$row][$col]['bomb']['title'].'" src="'. urlPath() .'images/'.$data_matrix[$row][$col]['bomb']['src'].'"  style="'.$data_matrix[$row][$col]['bomb']['style'].' vertical-align:middle;" />&nbsp;';				
@@ -1364,7 +1338,7 @@ foreach($rows as $row => $rval)
 			$htmlContent .= '<img id="Cell_Filing_'.$online_HMCounter.'" src="images/new_file.png" title="Filing Details" style="width:17px; height:17px; vertical-align:middle; cursor:pointer;" alt="Filing" />&nbsp;';
 				
 			if($data_matrix[$row][$col]['phase_explain'] != NULL && $data_matrix[$row][$col]['phase_explain'] != '')
-			$htmlContent .= '<img id="Cell_Phase_'.$online_HMCounter.'" src="images/phaseexp.png" title="Phase Explain" style="width:17px; height:17px; vertical-align:middle; cursor:pointer;" alt="Phase Explain" />&nbsp;';
+			$htmlContent .= '<img id="Cell_Phase_'.$online_HMCounter.'" src="images/phaseexp.png" title="Phase explaination" style="width:17px; height:17px; vertical-align:middle; cursor:pointer;" alt="Phase explaination" />&nbsp;';
 
 			$htmlContent .= '<font id="ViewCount_Bar_'.$online_HMCounter.'" style="text-align:right; float:right;">';
 			if($data_matrix[$row][$col]['viewcount'] > 0)
@@ -1379,9 +1353,7 @@ foreach($rows as $row => $rval)
 				
 			$htmlContent .= '<font id="Count_CDate_'.$online_HMCounter.'" style="'.(($data_matrix[$row][$col]['active_prev'] != NULL && $data_matrix[$row][$col]['active_prev'] != '')? 'display:inline;':'display:none;').'"><font style="color:#206040; font-weight: 900;">Count </font><font style="color:#206040; font-weight: 900;">updated from : </font><font id="Popup_Count_ID_'.$online_HMCounter.'" style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['active_prev'] .'</font><br/></font>';
 							
-			if($data_matrix[$row][$col]['phase4_override'])	
-			$htmlContent .= '<font id="Red_Cell_'.$online_HMCounter.'"><font style="color:#206040; font-weight: 900;""><img src="images/phase4.png" title="Red Cell Override" style="width:17px; height:17px; vertical-align:middle; cursor:pointer; padding-bottom:2px;" alt="Red Cell Override" />&nbsp;</font></font><font style="color:#FF0000; font-weight: 900;"><font style="color:#206040; font-weight: 900;">: </font>'. (($data_matrix[$row][$col]['phase4_override'])? '"ON"<input type="hidden" value="1" name="Phase4_Presence_'.$online_HMCounter.'" id="Phase4_Presence_'.$online_HMCounter.'" />':'"OFF"<input type="hidden" value="0" name="Phase4_Presence_'.$online_HMCounter.'" id="Phase4_Presence_'.$online_HMCounter.'" />').'</font><br/></font>';
-							
+			
 			if($data_matrix[$row][$col]['highest_phase_prev'] != NULL && $data_matrix[$row][$col]['highest_phase_prev'] != '')
 			$htmlContent .= '<font id="Highest_Phase_'.$online_HMCounter.'"><font style="color:#206040; font-weight: 900;">Highest phase updated </font><font style="color:#206040; font-weight: 900;">from : </font> <font style="color:#000000; font-weight: 900;">Phase '.$data_matrix[$row][$col]['highest_phase_prev'].'</font></br></font>';
 							
@@ -1399,7 +1371,7 @@ foreach($rows as $row => $rval)
 			
 			if($data_matrix[$row][$col]['phase_explain'] != NULL && $data_matrix[$row][$col]['phase_explain'] != '')
 			{
-				$htmlContent .= '<font style="color:#206040; font-weight: 900;" id="Phaseexp_Img_'.$online_HMCounter.'">Phase Explain </font><font style="color:#206040; font-weight: 900;">: </font>'. $data_matrix[$row][$col]['phase_explain'] .'</br>';
+				$htmlContent .= '<font style="color:#206040; font-weight: 900;" id="Phaseexp_Img_'.$online_HMCounter.'">Phase explaination </font><font style="color:#206040; font-weight: 900;">: </font>'. $data_matrix[$row][$col]['phase_explain'] .'</br>';
 			}
 			
 			$htmlContent .= '<font id="ViewCount_'.$online_HMCounter.'">'.(($data_matrix[$row][$col]['viewcount'] > 0) ? '<font style="color:#206040; font-weight: 900;">Number of views: </font><font style="color:#000000; font-weight: 900;">'.$data_matrix[$row][$col]['viewcount'].'</font><input type="hidden" value="'.$data_matrix[$row][$col]['viewcount'].'" id="ViewCount_value_'.$online_HMCounter.'" />':'<input type="hidden" value="'.$data_matrix[$row][$col]['viewcount'].'" id="ViewCount_value_'.$online_HMCounter.'" />' ).'</font>';

@@ -9753,7 +9753,7 @@ class TrialTracker
 				. (in_array(4, $globalOptions['phase']) ? ' checked="checked" ' : '') . '/>'
 				. '<label for="phase_4">4</label>'
 				. '</td><td class="right bottom">'
-				. '<div class="demo"><p style="margin-top:10px;">';
+				. '<div class="demo"><p>';
 				
 		if($loggedIn) 
 		{

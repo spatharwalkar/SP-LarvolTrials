@@ -6,7 +6,7 @@ require_once('PHPExcel/Writer/Excel2007.php');
 require_once('include.excel.php');
 require_once('class.phpmailer.php');
 require_once('krumo/class.krumo.php');
-require_once('calculate_hm_cells.php');
+
 ini_set('error_reporting', E_ALL ^ E_NOTICE);
 define('READY', 1);
 define('RUNNING', 2);
@@ -20,9 +20,17 @@ global $logger;
 ini_set('memory_limit','-1');
 ini_set('max_execution_time','36000');	//10 hours
 
+if(!$db->loggedIn())
+{
+	header('Location: ' . urlPath() . 'index.php');
+	exit;
+}
+
 /***Recalculation of cells start*/
 if(isset($_REQUEST['recalc']))
 {
+	require_once('calculate_hm_cells.php');
+	
 	$productz=get_products();	// get list of products from master heatmap
 	
 	$areaz=get_areas();	// get list of areas from master heatmap
@@ -159,11 +167,6 @@ if($_POST['dwformat'])
 else {
 require_once('report_common.php');
 
-if(!$db->loggedIn())
-{
-	header('Location: ' . urlPath() . 'index.php');
-	exit;
-}
 
 $_GET['header']='<script type="text/javascript" src="progressbar/jquery.js"></script>
 <script type="text/javascript" src="progressbar/jquery.progressbar.js"></script>
@@ -1954,6 +1957,9 @@ function Download_reports()
 		$objPHPExcel->getProperties()->setTitle(substr($name,0,20));
 		$objPHPExcel->getProperties()->setSubject(substr($name,0,20));
 		$objPHPExcel->getProperties()->setDescription(substr($name,0,20));
+		
+		$objPHPExcel->getActiveSheet()->getDefaultStyle()->getFont()->setSize(8);
+		$objPHPExcel->getActiveSheet()->getDefaultStyle()->getFont()->setName('Verdana'); 
 	
 		// Build sheet
 		$objPHPExcel->setActiveSheetIndex(0);
