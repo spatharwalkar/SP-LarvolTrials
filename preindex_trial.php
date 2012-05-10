@@ -111,7 +111,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					
 					if($up_id and !$scraper_run) 
 					{
-						$query = 'update update_status_fullhistory set process_id="'. $prid . '",status="2",update_items_total = "' . $total . '",trial_type="' . $ttype . '" where update_id= "'. $up_id .'" limit 1' ; 
+						$query = 'update update_status_fullhistory set process_id="'. $prid . '",er_message="",status="2",update_items_total = "' . $total . '",trial_type="' . $ttype . '" where update_id= "'. $up_id .'" limit 1' ; 
 						if(!$res = mysql_query($query))
 						{
 							$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -147,6 +147,9 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 				{
 					$log='Unable to begin transaction. Query='.$query.' Error:' . mysql_error();
 					$logger->fatal($log);
+					$query = 'update update_status_fullhistory set 
+					er_message="' . $log . '" where update_id= "'. $up_id .'" limit 1' ; 
+					mysql_query($query);
 					echo $log;
 					return false;
 				}
@@ -154,6 +157,9 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 				{
 					$log='Unable to begin transaction. Query='.$query.' Error:' . mysql_error();
 					$logger->fatal($log);
+					$query = 'update update_status_fullhistory set 
+					er_message="' . $log . '" where update_id= "'. $up_id .'" limit 1' ; 
+					mysql_query($query);
 					echo $log;
 					return false;
 				}
@@ -195,6 +201,9 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 						{
 							$log='Could not delete existing product indexes. Query='.$qry.' Error:' . mysql_error();
 							$logger->fatal($log);
+							$query = 'update update_status_fullhistory set 
+							er_message="' . $log . '" where update_id= "'. $up_id .'" limit 1' ; 
+							mysql_query($query);
 							mysql_query('ROLLBACK');
 							echo $log;
 							return false;
@@ -217,7 +226,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					--$total;
 					if($up_id and !$scraper_run)
 					{
-						$query = 'update update_status_fullhistory set process_id="'. $prid . '",status="2",update_items_total = "' . $total . '",trial_type="' . $ttype . '" where update_id= "'. $up_id .'" limit 1' ; 
+						$query = 'update update_status_fullhistory set process_id="'. $prid . '",er_message="",status="2",update_items_total = "' . $total . '",trial_type="' . $ttype . '" where update_id= "'. $up_id .'" limit 1' ; 
 						
 						if(!$res = mysql_query($query))
 						{
@@ -235,6 +244,9 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 				{
 					$log='Bad SQL query getting larvol_id from data_trials table.<br>Query=' . $query;
 					$logger->fatal($log);
+					$query = 'update update_status_fullhistory set 
+					er_message="' . $log . '" where update_id= "'. $up_id .'" limit 1' ; 
+					mysql_query($query);
 					mysql_query('ROLLBACK');
 					echo $log;
 					return false;
@@ -252,12 +264,12 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					if($current==0)
 					{
 						++$current;
-						$query = 'update update_status_fullhistory set process_id="'. $prid . '",status="'. 2 . '",update_items_total = "' . $total . '",start_time = "'. date("Y-m-d H:i:s", strtotime('now')) . '",trial_type="' . $ttype . '" where update_id= "'. $up_id .'" limit 1' ; 
+						$query = 'update update_status_fullhistory set process_id="'. $prid . '",er_message="",status="'. 2 . '",update_items_total = "' . $total . '",start_time = "'. date("Y-m-d H:i:s", strtotime('now')) . '",trial_type="' . $ttype . '" where update_id= "'. $up_id .'" limit 1' ; 
 					}
 					else
 					{
 						++$current;
-						$query = 'update update_status_fullhistory set process_id="'. $prid . '",status="'. 2 . '",update_items_total = "' . $total . '",trial_type="' . $ttype . '" where update_id= "'. $up_id .'" limit 1' ; 
+						$query = 'update update_status_fullhistory set process_id="'. $prid . '",er_message="",status="'. 2 . '",update_items_total = "' . $total . '",trial_type="' . $ttype . '" where update_id= "'. $up_id .'" limit 1' ; 
 					}
 				}
 				elseif(!$scraper_run)  // insert new status row
@@ -275,9 +287,9 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					$up_id = (isset($res['maxid'])) ? ((int)$res['maxid'])+1 : 1;
 					$prid = getmypid();
 				
-					$query = 'INSERT into update_status_fullhistory (update_id,process_id,status,update_items_total,start_time,trial_type) 
+					$query = 'INSERT into update_status_fullhistory (update_id,process_id,status,update_items_total,start_time,trial_type,item_id) 
 						  VALUES ("'.$up_id.'","'. $prid .'","'. 2 .'",
-						  "' . $total . '","'. date("Y-m-d H:i:s", strtotime('now')) .'", "' . $ttype . '"  ) ;';
+						  "' . $total . '","'. date("Y-m-d H:i:s", strtotime('now')) .'", "' . $ttype . '" , "' . $pid . '" ) ;';
 				
 				}
 				
@@ -285,11 +297,14 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					{
 						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
 						$logger->error($log);
+						$query = 'update update_status_fullhistory set 
+						er_message="' . $log . '" where update_id= "'. $up_id .'" limit 1' ; 
+						mysql_query($query);
 						echo $log;
 						mysql_query('ROLLBACK');
 						return false;
 					}
-				
+				 
 				
 				foreach($nctidz as $key => $value)
 				{
@@ -321,6 +336,9 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 							{
 								$log = 'Bad SQL query pre-indexing trial***. Query : ' . $query . '<br> MySql Error:'.mysql_error();
 								mysql_query('ROLLBACK');
+								$query = 'update update_status_fullhistory set 
+								er_message="' . $log . '" where update_id= "'. $up_id .'" limit 1' ; 
+								mysql_query($query);
 								$logger->fatal($log);
 								echo $log;
 								return false;
@@ -330,7 +348,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 						if( !is_null($productID) and !$scraper_run )	
 						{
 						
-							$query = 'update update_status_fullhistory set process_id="'. $prid . '",status="'. 2 . '",
+							$query = 'update update_status_fullhistory set process_id="'. $prid . '",er_message="",status="'. 2 . '",
 										  trial_type="' . $ttype . '", update_items_total=' . $total . ',update_items_progress=' . ++$progress . ', updated_time="' . date("Y-m-d H:i:s", strtotime('now')) . '"  where update_id= "'. $up_id .'" limit 1'  ; 
 							if(!$res = mysql_query($query))
 							{
@@ -345,6 +363,9 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 								$log='Error - could not commit transaction. Query='.$query.' Error:' . mysql_error();
 								$logger->fatal($log);
 								mysql_query('ROLLBACK');
+								$query = 'update update_status_fullhistory set 
+								er_message="' . $log . '" where update_id= "'. $up_id .'" limit 1' ; 
+								mysql_query($query);
 								echo $log;
 								return false;
 							}
@@ -360,6 +381,9 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					$log='Error - could not commit transaction. Query='.$query.' Error:' . mysql_error();
 					$logger->fatal($log);
 					mysql_query('ROLLBACK');
+					$query = 'update update_status_fullhistory set 
+					er_message="' . $log . '" where update_id= "'. $up_id .'" limit 1' ; 
+					mysql_query($query);
 					echo $log;
 					return false;
 				}
@@ -369,7 +393,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 				//update status
 				if( is_null($productID) and !$scraper_run )	
 				{
-					$query = 'update update_status_fullhistory set process_id="'. $prid . '",status="'. 2 . '",
+					$query = 'update update_status_fullhistory set process_id="'. $prid . '",er_message="",status="'. 2 . '",
 									  trial_type="' . $ttype . '", update_items_total=' . $total . ',update_items_progress=' . ++$progress . ', updated_time="' . date("Y-m-d H:i:s", strtotime('now')) . '"  where update_id= "'. $up_id .'" limit 1'  ; 
 					if(!$res = mysql_query($query))
 					{
@@ -413,7 +437,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 			
 			
 		}
-		$query = 'update update_status_fullhistory set status="'. 0 . '", update_items_progress=update_items_total  where update_id= "'. $up_id .'" limit 1'  ; 
+		$query = 'update update_status_fullhistory set status="'. 0 . '", er_message="",update_items_progress=update_items_total  where update_id= "'. $up_id .'" limit 1'  ; 
 			if(!$res = mysql_query($query))
 			{
 				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -426,16 +450,22 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					$log='Error - could not commit transaction. Query='.$query.' Error:' . mysql_error();
 					$logger->fatal($log);
 					mysql_query('ROLLBACK');
+					$query = 'update update_status_fullhistory set 
+					er_message="' . $log . '" where update_id= "'. $up_id .'" limit 1' ; 
+					mysql_query($query);
 					echo $log;
 					return false;
 				}
 		if(!$scraper_run)
 		{
-			$query = 'update update_status_fullhistory set status="'. 0 . '", update_items_progress=update_items_total  where update_id= "'. $up_id .'" limit 1'  ; 
+			$query = 'update update_status_fullhistory set status="'. 0 . '",er_message="", update_items_progress=update_items_total  where update_id= "'. $up_id .'" limit 1'  ; 
 			if(!$res = mysql_query($query))
 			{
 				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
 				$logger->error($log);
+				$query = 'update update_status_fullhistory set 
+					er_message="' . $log . '" where update_id= "'. $up_id .'" limit 1' ; 
+					mysql_query($query);
 				echo $log;
 				return false;
 			}

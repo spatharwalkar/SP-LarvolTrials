@@ -1008,10 +1008,29 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 	{
 		//echo '<input type="hidden" id="product_id" name="product_id" value="'.$upm_product_id.'">';
 	}
+	if($table=='products') 
+	{
+		$lnk='<a href="intermediary.php?p=' . $_GET['id'] . '&a=" target="_blank">';
+	}
+		
+	elseif($table=='areas') 
+	{
+		$lnk='<a href="intermediary.php?p=&a=' . $_GET['id'] . '">';
+	}
+	
+	if(isset($lnk)) 
+	{
+		$lnk2='</a>';
+	}
+	else
+	{
+		$lnk="";$lnk2="";
+	}
+	
 	if($table=='products' || $table=='areas' && isset($options['preindexProgress']) && isset($options['preindexStatus']) && $id)
 	{
 		$status = array('Completed','Ready','Running','Error','Cancelled');
-		echo "<tr><td>Preindex Status:</td><td align=\"left\" class=\"norm\">";
+		echo "<tr><td>".$lnk."Preindex".$lnk2." Status:</td><td align=\"left\" class=\"norm\">";
 		echo "<span class=\"progressBar\" id=\"product_update\">{$options['preindexProgress']}</span>";
 		echo "&nbsp;<span>{$status[$options['preindexStatus']['status']]}.</span>";
 		echo "</td></tr>";	
