@@ -212,7 +212,7 @@ function update_icons(type, row, col, tot_rows, tot_cols, BG_color)
 	  if(document.getElementById("phase4opt_"+row+"_"+col).checked == true)
 	  {
 	  	document.getElementById("phase4_val_"+row+"_"+col).value=1;
-		document.getElementById("phase4_pos_"+row+"_"+col).innerHTML = '<img align="middle" id="phase4img_'+row+'_'+col+'" title="Red cell override" src="images/phase4.png" style="width:20px; height:20px; vertical-align:bottom; cursor:pointer;" alt="Phase4_Override"/>&nbsp;';
+		document.getElementById("phase4_pos_"+row+"_"+col).innerHTML = '<img align="middle" id="phase4img_'+row+'_'+col+'" title="Red cell override" src="images/phase4.png" style="width:20px; height:20px; vertical-align:bottom; cursor:pointer;" alt="Red cell override"/>&nbsp;';
 	  }
 	  else
 	  {
@@ -247,7 +247,7 @@ function update_icons(type, row, col, tot_rows, tot_cols, BG_color)
 			var bomb_src='new_lbomb.png';
 		}
 		
-		document.getElementById("bomb_pos_"+row+"_"+col).innerHTML = '<img align="middle" id="bombimg_'+row+'_'+col+'" title="Edit Large Bomb Details" src="images/'+bomb_src+'" style="width:20px; height:20px; vertical-align:bottom; cursor:pointer;" alt="Large Bomb" onclick="popup_show(\'bomb\', '+tot_rows+','+tot_cols+',\'bombpopup_'+row+'_'+col+'\', \'bombpopup_drag_'+row+'_'+col+'\', \'bombpopup_exit_'+row+'_'+col+'\', \'mouse\', -10, -10);" />&nbsp;';
+		document.getElementById("bomb_pos_"+row+"_"+col).innerHTML = '<img align="middle" id="bombimg_'+row+'_'+col+'" title="Edit bomb details" src="images/'+bomb_src+'" style="width:20px; height:20px; vertical-align:bottom; cursor:pointer;" alt="Bomb" onclick="popup_show(\'bomb\', '+tot_rows+','+tot_cols+',\'bombpopup_'+row+'_'+col+'\', \'bombpopup_drag_'+row+'_'+col+'\', \'bombpopup_exit_'+row+'_'+col+'\', \'mouse\', -10, -10);" />&nbsp;';
 		
 		document.getElementById("bomb_explain_"+row+"_"+col).value = document.getElementById("bk_bomb_explain_"+row+"_"+col).value;
 		}
@@ -264,7 +264,7 @@ function update_icons(type, row, col, tot_rows, tot_cols, BG_color)
 	{
 	  if(document.getElementById("filingopt_"+row+"_"+col).checked == true)
 	  {
-	  	document.getElementById("filing_pos_"+row+"_"+col).innerHTML = '<img align="middle" id="filingimg_'+row+'_'+col+'" title="Edit Filing" src="images/new_file.png" style="width:20px; height:20px; vertical-align:bottom; cursor:pointer;" alt="Edit Filing" onclick="popup_show(\'filing\', '+tot_rows+','+tot_cols+',\'filingpopup_'+row+'_'+col+'\', \'filingpopup_drag_'+row+'_'+col+'\', \'filingpopup_exit_'+row+'_'+col+'\', \'mouse\', -10, -10);" />&nbsp;';
+	  	document.getElementById("filing_pos_"+row+"_"+col).innerHTML = '<img align="middle" id="filingimg_'+row+'_'+col+'" title="Edit filing" src="images/new_file.png" style="width:20px; height:20px; vertical-align:bottom; cursor:pointer;" alt="Edit filing" onclick="popup_show(\'filing\', '+tot_rows+','+tot_cols+',\'filingpopup_'+row+'_'+col+'\', \'filingpopup_drag_'+row+'_'+col+'\', \'filingpopup_exit_'+row+'_'+col+'\', \'mouse\', -10, -10);" />&nbsp;';
 		document.getElementById("filing_"+row+"_"+col).value=document.getElementById("bk_filing_"+row+"_"+col).value;
 		document.getElementById("filing_presence_"+row+"_"+col).value = 1;
 		//document.getElementById("filingpopup_"+row+"_"+col).style.display = 'block';
@@ -282,7 +282,7 @@ function update_icons(type, row, col, tot_rows, tot_cols, BG_color)
 	{
 	  if(document.getElementById("phaseexpopt_"+row+"_"+col).checked == true)
 	  {
-	  	document.getElementById("phaseexp_pos_"+row+"_"+col).innerHTML = '<img id="Phase_Explain_'+row+'_'+col+'" src="images/phaseexp.png" title="Edit Phase Explain" style="width: 20px; height: 20px; vertical-align: bottom; cursor: pointer; " alt="Phase Explain" onclick="popup_show(\'phaseexp\', '+tot_rows+','+tot_cols+',\'phaseexppopup_'+row+'_'+col+'\', \'phaseexppopup_drag_'+row+'_'+col+'\', \'phaseexppopup_exit_'+row+'_'+col+'\', \'mouse\', -10, -10);" />&nbsp;';
+	  	document.getElementById("phaseexp_pos_"+row+"_"+col).innerHTML = '<img id="Phase_Explain_'+row+'_'+col+'" src="images/phaseexp.png" title="Edit phase explain" style="width: 20px; height: 20px; vertical-align: bottom; cursor: pointer; " alt="Phase explain" onclick="popup_show(\'phaseexp\', '+tot_rows+','+tot_cols+',\'phaseexppopup_'+row+'_'+col+'\', \'phaseexppopup_drag_'+row+'_'+col+'\', \'phaseexppopup_exit_'+row+'_'+col+'\', \'mouse\', -10, -10);" />&nbsp;';
 		document.getElementById("phase_explain_"+row+"_"+col).value=document.getElementById("bk_phase_explain_"+row+"_"+col).value;
 		document.getElementById("phaseexp_presence_"+row+"_"+col).value = 1;
 		//document.getElementById("phaseexppopup_"+row+"_"+col).style.display = 'block';
@@ -305,11 +305,11 @@ function bicon_change(option, bomb_id, row, col, tot_rows, tot_cols)
 
 	if(option.value == 'small')
 	{
-		document.getElementById("bomb_pos_"+row+"_"+col).innerHTML = '<img align="middle" id="bombimg_'+row+'_'+col+'" title="Edit Small Bomb Details" src="images/new_sbomb.png" style="width:20px; height:20px; vertical-align:bottom; cursor:pointer;" alt="Large Bomb" onclick="popup_show(\'bomb\', '+tot_rows+','+tot_cols+',\'bombpopup_'+row+'_'+col+'\', \'bombpopup_drag_'+row+'_'+col+'\', \'bombpopup_exit_'+row+'_'+col+'\', \'mouse\', -10, -10);" />&nbsp;';
+		document.getElementById("bomb_pos_"+row+"_"+col).innerHTML = '<img align="middle" id="bombimg_'+row+'_'+col+'" title="Edit bomb details" src="images/new_sbomb.png" style="width:20px; height:20px; vertical-align:bottom; cursor:pointer;" alt="Large Bomb" onclick="popup_show(\'bomb\', '+tot_rows+','+tot_cols+',\'bombpopup_'+row+'_'+col+'\', \'bombpopup_drag_'+row+'_'+col+'\', \'bombpopup_exit_'+row+'_'+col+'\', \'mouse\', -10, -10);" />&nbsp;';
 	}
 	else if(option.value == 'large')
 	{
-		document.getElementById("bomb_pos_"+row+"_"+col).innerHTML = '<img align="middle" id="bombimg_'+row+'_'+col+'" title="Edit Large Bomb Details" src="images/new_lbomb.png" style="width:20px; height:20px; vertical-align:bottom; cursor:pointer;" alt="Large Bomb" onclick="popup_show(\'bomb\', '+tot_rows+','+tot_cols+',\'bombpopup_'+row+'_'+col+'\', \'bombpopup_drag_'+row+'_'+col+'\', \'bombpopup_exit_'+row+'_'+col+'\', \'mouse\', -10, -10);" />&nbsp;';
+		document.getElementById("bomb_pos_"+row+"_"+col).innerHTML = '<img align="middle" id="bombimg_'+row+'_'+col+'" title="Edit bomb details" src="images/new_lbomb.png" style="width:20px; height:20px; vertical-align:bottom; cursor:pointer;" alt="Large Bomb" onclick="popup_show(\'bomb\', '+tot_rows+','+tot_cols+',\'bombpopup_'+row+'_'+col+'\', \'bombpopup_drag_'+row+'_'+col+'\', \'bombpopup_exit_'+row+'_'+col+'\', \'mouse\', -10, -10);" />&nbsp;';
 	}
 	else
 	{
@@ -420,11 +420,11 @@ function validate(rows, cols)
 				flag=1; phaseexp_flag=1;
 			}
 			if(phase4_flag) ele='Red Cell Override';
-			if(bomb_flag) { if(ele != '') ele=ele+', '; ele=ele+'Bomb'};
-			if(filing_flag) { if(ele != '') ele=ele+', '; ele=ele+'Filing'};
-			if(phaseexp_flag) { if(ele != '') ele=ele+', '; ele=ele+'Phase Explain'};
+			if(bomb_flag) { if(ele != '') ele=ele+', '; ele=ele+'bomb'};
+			if(filing_flag) { if(ele != '') ele=ele+', '; ele=ele+'filing'};
+			if(phaseexp_flag) { if(ele != '') ele=ele+', '; ele=ele+'phase explain'};
 			if(phase4_flag || bomb_flag || filing_flag || phaseexp_flag)
-			data=data+' <font style="color:red">'+ele+'</font> of <font style="color:blue">Product '+product +' X '+ 'Area '+ area +'</font>; '
+			data=data+' <font style="color:red">'+ele+'</font> of <font style="color:blue">product '+product +' X '+ 'area '+ area +'</font>; '
 			
 			phase4_flag=0; bomb_flag=0; filing_flag=0; phaseexp_flag=0; ele='';
 		}
@@ -434,7 +434,7 @@ function validate(rows, cols)
 	if(document.getElementById("delrep").checked == true)
 	{
 		//if(!confirm('You are going to delete report, Are you sure?')) 
-		message = '<img align="middle" title="Warning" src="images/warning.png" style="width:20px; height:20px; vertical-align:top; cursor:pointer;" alt="Warning"> You are going to delete report, <b><font style="color:red">Are you sure?</font></b>';
+		message = '<img align="middle" title="Warning" src="images/warning.png" style="width:20px; height:20px; vertical-align:top; cursor:pointer;" alt="Warning"> You are going to delete report, <b><font style="color:red">are you sure?</font></b>';
 		//return false;
 		document.getElementById("dialog").innerHTML = '<p>'+ message + '</p>';
 		Dialog();
@@ -442,7 +442,7 @@ function validate(rows, cols)
 	}
 	else if(flag)
 	{
-		message='<img align="middle" title="Warning" src="images/warning.png" style="width:20px; height:20px; vertical-align:top; cursor:pointer;" alt="Warning">You are going to delete</b> '+data+' From this report, <b><font style="color:red">Are you sure?</font></b>';
+		message='<img align="middle" title="Warning" src="images/warning.png" style="width:20px; height:20px; vertical-align:top; cursor:pointer;" alt="Warning">You are going to delete</b> '+data+' from this report, <b><font style="color:red">are you sure?</font></b>';
 		//return confirm(message);
 		document.getElementById("dialog").innerHTML = '<p>'+ message + '</p>';
 		Dialog();
@@ -521,13 +521,13 @@ function refresher(row, col, tot_rows, tot_cols)
 					 if(or_bomb == 'small')
 					 {
 					 	document.getElementById("bombselect_"+pt1+"_"+pt2).value='small';
-					 	document.getElementById("bomb_pos_"+pt1+"_"+pt2).innerHTML = '<img align="middle" id="bombimg_'+pt1+'_'+pt2+'" title="Edit Large Bomb Details" src="images/new_sbomb.png" style="width:20px; height:20px; vertical-align:bottom; cursor:pointer;" alt="Large Bomb" onclick="popup_show(\'bomb\', '+tot_rows+','+tot_cols+',\'bombpopup_'+pt1+'_'+pt2+'\', \'bombpopup_drag_'+pt1+'_'+pt2+'\', \'bombpopup_exit_'+pt1+'_'+pt2+'\', \'mouse\', -10, -10);" />&nbsp;';
+					 	document.getElementById("bomb_pos_"+pt1+"_"+pt2).innerHTML = '<img align="middle" id="bombimg_'+pt1+'_'+pt2+'" title="Edit Bomb Details" src="images/new_sbomb.png" style="width:20px; height:20px; vertical-align:bottom; cursor:pointer;" alt="Small bomb" onclick="popup_show(\'bomb\', '+tot_rows+','+tot_cols+',\'bombpopup_'+pt1+'_'+pt2+'\', \'bombpopup_drag_'+pt1+'_'+pt2+'\', \'bombpopup_exit_'+pt1+'_'+pt2+'\', \'mouse\', -10, -10);" />&nbsp;';
 						document.getElementById("bombopt_"+pt1+"_"+pt2).checked = true;
 					 }
 					 else if(or_bomb == "large")
 					 {
 					 	document.getElementById("bombselect_"+pt1+"_"+pt2).value='large';
-					 	document.getElementById("bomb_pos_"+pt1+"_"+pt2).innerHTML = '<img align="middle" id="bombimg_'+pt1+'_'+pt2+'" title="Edit Large Bomb Details" src="images/new_lbomb.png" style="width:20px; height:20px; vertical-align:bottom; cursor:pointer;" alt="Large Bomb" onclick="popup_show(\'bomb\', '+tot_rows+','+tot_cols+',\'bombpopup_'+pt1+'_'+pt2+'\', \'bombpopup_drag_'+pt1+'_'+pt2+'\', \'bombpopup_exit_'+pt1+'_'+pt2+'\', \'mouse\', -10, -10);" />&nbsp;';
+					 	document.getElementById("bomb_pos_"+pt1+"_"+pt2).innerHTML = '<img align="middle" id="bombimg_'+pt1+'_'+pt2+'" title="Edit Bomb Details" src="images/new_lbomb.png" style="width:20px; height:20px; vertical-align:bottom; cursor:pointer;" alt="Large bomb" onclick="popup_show(\'bomb\', '+tot_rows+','+tot_cols+',\'bombpopup_'+pt1+'_'+pt2+'\', \'bombpopup_drag_'+pt1+'_'+pt2+'\', \'bombpopup_exit_'+pt1+'_'+pt2+'\', \'mouse\', -10, -10);" />&nbsp;';
 						document.getElementById("bombopt_"+pt1+"_"+pt2).checked = true;
 					 }
 					 else if(or_bomb == 'none')
@@ -543,7 +543,7 @@ function refresher(row, col, tot_rows, tot_cols)
 					 
 					 if(document.getElementById("filing_presence_"+row+"_"+col).value == 1)
 					 {
-					 	document.getElementById("filing_pos_"+pt1+"_"+pt2).innerHTML = '<img align="middle" id="filingimg_'+pt1+'_'+pt2+'" title="Edit Filing" src="images/new_file.png" style="width:20px; height:20px; vertical-align:bottom; cursor:pointer;" alt="Edit Filing" onclick="popup_show(\'filing\', '+tot_rows+','+tot_cols+',\'filingpopup_'+pt1+'_'+pt2+'\', \'filingpopup_drag_'+pt1+'_'+pt2+'\', \'filingpopup_exit_'+pt1+'_'+pt2+'\', \'mouse\', -10, -10);" />&nbsp;';
+					 	document.getElementById("filing_pos_"+pt1+"_"+pt2).innerHTML = '<img align="middle" id="filingimg_'+pt1+'_'+pt2+'" title="Edit filing" src="images/new_file.png" style="width:20px; height:20px; vertical-align:bottom; cursor:pointer;" alt="Edit filing" onclick="popup_show(\'filing\', '+tot_rows+','+tot_cols+',\'filingpopup_'+pt1+'_'+pt2+'\', \'filingpopup_drag_'+pt1+'_'+pt2+'\', \'filingpopup_exit_'+pt1+'_'+pt2+'\', \'mouse\', -10, -10);" />&nbsp;';
 						document.getElementById("filingopt_"+pt1+"_"+pt2).checked = true;
 					 }
 					 else
@@ -559,7 +559,7 @@ function refresher(row, col, tot_rows, tot_cols)
 					 
 					 if(document.getElementById("phaseexp_presence_"+row+"_"+col).value == 1)
 					 {
-					 	document.getElementById("phaseexp_pos_"+pt1+"_"+pt2).innerHTML = '<img id="Phase_Explain_'+pt1+'_'+pt2+'" src="images/phaseexp.png" title="Edit Phase Explain" style="width: 20px; height: 20px; vertical-align: bottom; cursor: pointer; " alt="Phase Explain" onclick="popup_show(\'phaseexp\', '+tot_rows+','+tot_cols+',\'phaseexppopup_'+pt1+'_'+pt2+'\', \'phaseexppopup_drag_'+pt1+'_'+pt2+'\', \'phaseexppopup_exit_'+pt1+'_'+pt2+'\', \'mouse\', -10, -10);" />&nbsp;';
+					 	document.getElementById("phaseexp_pos_"+pt1+"_"+pt2).innerHTML = '<img id="Phase_Explain_'+pt1+'_'+pt2+'" src="images/phaseexp.png" title="Edit phase explain" style="width: 20px; height: 20px; vertical-align: bottom; cursor: pointer; " alt="Phase explain" onclick="popup_show(\'phaseexp\', '+tot_rows+','+tot_cols+',\'phaseexppopup_'+pt1+'_'+pt2+'\', \'phaseexppopup_drag_'+pt1+'_'+pt2+'\', \'phaseexppopup_exit_'+pt1+'_'+pt2+'\', \'mouse\', -10, -10);" />&nbsp;';
 						document.getElementById("phaseexpopt_"+pt1+"_"+pt2).checked = true;
 					 }
 					 else
@@ -930,25 +930,25 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 	
 	if($_GET['view_type']=='total')
 	{
-		$title="All Trials (Active+Inactive)";
+		$title="All trials (Active+Inactive)";
 		$view_tp='total';
 	}
 	else if($_GET['view_type']=='indlead')
 	{
-		$title="Active Industry Lead Sponsor Trials";
+		$title="Active industry lead sponsor trials";
 		$view_tp='indlead';
 	}
 	else
 	{
-		$title="Active Trials";
+		$title="Active trials";
 		$view_tp='active';
 	}
 
 
 	$out = '<br/>&nbsp;&nbsp;<b>View Type: </b> <select id="view_type" name="view_type" onchange="window.location.href=\'master_heatmap.php?id='.$_GET['id'].'&view_type=\'+this.value+\'\'">'
-			. '<option value="active" '.(($_GET['view_type']!='total' && $_GET['view_type']!='indlead')? "selected=\"selected\"":"").'>Active Trials</option>'
-			. '<option value="total" '.(($_GET['view_type']=='total')? "selected=\"selected\"":"").'>All Trials</option>'
-			. '<option value="indlead"'.(($_GET['view_type']=='indlead')? "selected=\"selected\"":"").'>Active Industry Trials</option></select><br/>';
+			. '<option value="active" '.(($_GET['view_type']!='total' && $_GET['view_type']!='indlead')? "selected=\"selected\"":"").'>Active trials</option>'
+			. '<option value="total" '.(($_GET['view_type']=='total')? "selected=\"selected\"":"").'>All trials</option>'
+			. '<option value="indlead"'.(($_GET['view_type']=='indlead')? "selected=\"selected\"":"").'>Active Industry trials</option></select><br/>';
 			
 	$out .= '<form action="master_heatmap.php" method="post">'
 			. '<fieldset><legend>Download Option</legend>'
@@ -962,9 +962,9 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 		. '<option value="pdfdown">PDF</option>'
 		. '</select><br/><br/>';
 	$out .='<b>Counts Display: </b><select id="dwcount" name="dwcount">'
-		. '<option value="active" '.(($view_tp=='active')? "selected=\"selected\"":"").'>Active Trials</option>'
-		. '<option value="total" '.(($view_tp=='total')? "selected=\"selected\"":"").'>All Trials</option>'
-		. '<option value="indlead" '.(($view_tp=='indlead')? "selected=\"selected\"":"").'>Active Industry Trials</option></select><br/><br/><input type="submit" name="download" value="Download" title="Download" />'
+		. '<option value="active" '.(($view_tp=='active')? "selected=\"selected\"":"").'>Active trials</option>'
+		. '<option value="total" '.(($view_tp=='total')? "selected=\"selected\"":"").'>All trials</option>'
+		. '<option value="indlead" '.(($view_tp=='indlead')? "selected=\"selected\"":"").'>Active industry trials</option></select><br/><br/><input type="submit" name="download" value="Download" title="Download" />'
 		. '</fieldset></form>';	
 		
 	/*$out .='<input type="image" name="htmldown[]" src="images/html.png" title="HTML Download" />&nbsp;&nbsp;'
@@ -1232,12 +1232,12 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 			
 				$out .= '<font id="filing_pos_'.$row.'_'.$col.'">';
 				if($data_matrix[$row][$col]['filing'] != NULL)
-				$out .= '<img align="middle" id="filingimg_'.$row.'_'.$col.'" title="Edit Filing" src="images/new_file.png" style="width:20px; height:20px; vertical-align:bottom; cursor:pointer;" alt="Edit Filing" onclick="popup_show(\'filing\', '.count($rows).','.count($columns).',\'filingpopup_'.$row.'_'.$col.'\', \'filingpopup_drag_'.$row.'_'.$col.'\', \'filingpopup_exit_'.$row.'_'.$col.'\', \'mouse\', -10, -10);" />&nbsp;';
+				$out .= '<img align="middle" id="filingimg_'.$row.'_'.$col.'" title="Edit filing" src="images/new_file.png" style="width:20px; height:20px; vertical-align:bottom; cursor:pointer;" alt="Edit Filing" onclick="popup_show(\'filing\', '.count($rows).','.count($columns).',\'filingpopup_'.$row.'_'.$col.'\', \'filingpopup_drag_'.$row.'_'.$col.'\', \'filingpopup_exit_'.$row.'_'.$col.'\', \'mouse\', -10, -10);" />&nbsp;';
 				$out .= '</font>';
 				
 				$out .= '<font id="phaseexp_pos_'.$row.'_'.$col.'">';
 				if($data_matrix[$row][$col]['phase_explain'] != NULL)
-				$out .= '<img align="middle" id="Phase_Explain_'.$row.'_'.$col.'" src="images/phaseexp.png" title="Edit Phase Explain" style="width: 20px; height: 20px; vertical-align: bottom; cursor: pointer;" alt="Phase Explain" onclick="popup_show(\'phaseexp\', '.count($rows).','.count($columns).',\'phaseexppopup_'.$row.'_'.$col.'\', \'phaseexppopup_drag_'.$row.'_'.$col.'\', \'phaseexppopup_exit_'.$row.'_'.$col.'\', \'mouse\', -10, -10);" />&nbsp;';
+				$out .= '<img align="middle" id="Phase_Explain_'.$row.'_'.$col.'" src="images/phaseexp.png" title="Edit phase explain" style="width: 20px; height: 20px; vertical-align: bottom; cursor: pointer;" alt="Phase Explain" onclick="popup_show(\'phaseexp\', '.count($rows).','.count($columns).',\'phaseexppopup_'.$row.'_'.$col.'\', \'phaseexppopup_drag_'.$row.'_'.$col.'\', \'phaseexppopup_exit_'.$row.'_'.$col.'\', \'mouse\', -10, -10);" />&nbsp;';
 				$out .= '</font></div>';
 				
 				
@@ -1246,10 +1246,10 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 				
 				
 				$out .= '<div id="dropmenu_'.$row.'_'.$col.'" class="dropmenudiv" style="width: 180px;">'
-					 .'<a style="vertical-align:bottom;"><input  id="bombopt_'.$row.'_'.$col.'"  name="bombopt_'.$row.'_'.$col.'" type="checkbox" value="1" ' . (($data_matrix[$row][$col]['bomb']['src'] != 'new_square.png') ? 'checked="checked"':'') . ' onchange="update_icons(\'bomb\','.$row.','.$col.', '.count($rows).','.count($columns).',\''.$data_matrix[$row][$col]['color_code'].'\')" '.(($disabled) ? ' disabled="disabled" ':'').' />Small/Large Bomb&nbsp;<img align="right" src="images/lbomb.png"  style="vertical-align:bottom; width:11px; height:11px;"/></a>'
+					 .'<a style="vertical-align:bottom;"><input  id="bombopt_'.$row.'_'.$col.'"  name="bombopt_'.$row.'_'.$col.'" type="checkbox" value="1" ' . (($data_matrix[$row][$col]['bomb']['src'] != 'new_square.png') ? 'checked="checked"':'') . ' onchange="update_icons(\'bomb\','.$row.','.$col.', '.count($rows).','.count($columns).',\''.$data_matrix[$row][$col]['color_code'].'\')" '.(($disabled) ? ' disabled="disabled" ':'').' />Small/Large bomb&nbsp;<img align="right" src="images/lbomb.png"  style="vertical-align:bottom; width:11px; height:11px;"/></a>'
 					 .'<a style="vertical-align:bottom;"><input  id="filingopt_'.$row.'_'.$col.'"  name="filingopt_'.$row.'_'.$col.'" type="checkbox" value="1" ' . (($data_matrix[$row][$col]['filing'] != NULL) ? 'checked="checked"':'') . '  onchange="update_icons(\'filing\','.$row.','.$col.', '.count($rows).','.count($columns).',\''.$data_matrix[$row][$col]['color_code'].'\')" '.(($disabled) ? ' disabled="disabled" ':'').' />Filing&nbsp;<img align="right" src="images/file.png"  style="vertical-align:bottom; width:11px; height:11px;"/></a>'
-					 .'<a style="vertical-align:bottom;"><input  id="phase4opt_'.$row.'_'.$col.'"  name="phase4opt_'.$row.'_'.$col.'" type="checkbox" value="1" ' . (($data_matrix[$row][$col]['phase4_override']) ? 'checked="checked"':'') . '  onchange="update_icons(\'phase4\','.$row.','.$col.', '.count($rows).','.count($columns).',\''.$data_matrix[$row][$col]['color_code'].'\')"  '.(($disabled) ? ' disabled="disabled" ':'').' />Phase4_Override&nbsp;<img align="right" src="images/phase4.png"  style="vertical-align:bottom; width:11px; height:11px;"/></a>'
-					 .'<a style="vertical-align:bottom;"><input  id="phaseexpopt_'.$row.'_'.$col.'"  name="phaseexpopt_'.$row.'_'.$col.'" type="checkbox" value="1" ' . (($data_matrix[$row][$col]['phase_explain'] != NULL) ? 'checked="checked"':'') . '  onchange="update_icons(\'phaseexp\','.$row.','.$col.', '.count($rows).','.count($columns).',\''.$data_matrix[$row][$col]['color_code'].'\')" '.(($disabled) ? ' disabled="disabled" ':'').' />Phase Explain&nbsp;<img align="right" src="images/phaseexp.png"  style="vertical-align:bottom; width:11px; height:11px;"/></a>'
+					 .'<a style="vertical-align:bottom;"><input  id="phase4opt_'.$row.'_'.$col.'"  name="phase4opt_'.$row.'_'.$col.'" type="checkbox" value="1" ' . (($data_matrix[$row][$col]['phase4_override']) ? 'checked="checked"':'') . '  onchange="update_icons(\'phase4\','.$row.','.$col.', '.count($rows).','.count($columns).',\''.$data_matrix[$row][$col]['color_code'].'\')"  '.(($disabled) ? ' disabled="disabled" ':'').' />Red cell override&nbsp;<img align="right" src="images/phase4.png"  style="vertical-align:bottom; width:11px; height:11px;"/></a>'
+					 .'<a style="vertical-align:bottom;"><input  id="phaseexpopt_'.$row.'_'.$col.'"  name="phaseexpopt_'.$row.'_'.$col.'" type="checkbox" value="1" ' . (($data_matrix[$row][$col]['phase_explain'] != NULL) ? 'checked="checked"':'') . '  onchange="update_icons(\'phaseexp\','.$row.','.$col.', '.count($rows).','.count($columns).',\''.$data_matrix[$row][$col]['color_code'].'\')" '.(($disabled) ? ' disabled="disabled" ':'').' />Phase explain&nbsp;<img align="right" src="images/phaseexp.png"  style="vertical-align:bottom; width:11px; height:11px;"/></a>'
 					 .'</div>';
 					 
 				$out .= '<script type="text/javascript">cssdropdown.startchrome("chromemenu_'.$row.'_'.$col.'");</script>';
@@ -1263,13 +1263,13 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 						.'<div class="menu_form_body" style="width:300px;">'
 						.'<table style="background-color:#fff;">'
 						.'<tr><td style="background-color:#fff;">'
-						.'<font style="color:#206040; font-weight: 900;"><br/>&nbsp;Bomb Value: </font> <font style="color:#000000; font-weight: 900;">';
+						.'<font style="color:#206040; font-weight: 900;"><br/>&nbsp;Bomb value: </font> <font style="color:#000000; font-weight: 900;">';
 						
 						$out .='<select '.(($disabled) ? ' disabled="disabled" ':'').' id="bombselect_'.$row.'_'.$col.'" onchange="bicon_change(bombselect_'.$row.'_'.$col.', bombimg_'.$row.'_'.$col.','.$row.','.$col.', '.count($rows).','.count($columns).')" class="field" name="bomb['.$row.']['.$col.']">';
 						$out .= '<option value="none" '.(($data_matrix[$row][$col]['bomb']['value'] == 'none' || $data_matrix[$row][$col]['bomb']['value'] == '' || $data_matrix[$row][$col]['bomb']['value'] == NULL) ? ' selected="selected"' : '') .'>None</option>';
 						$out .= '<option value="small" '.(($data_matrix[$row][$col]['bomb']['value'] == 'small') ? ' selected="selected"' : '') .'>Small Bomb</option>';
 						$out .= '<option value="large" '.(($data_matrix[$row][$col]['bomb']['value'] == 'large') ? ' selected="selected"' : '') .'>Large Bomb</option>';
-						$out .= '</select><br/><br/></font><font style="color:#206040; font-weight: 900;">&nbsp;Bomb Details: <br/></font><textarea onkeyup="refresher('.$row.','.$col.', '.count($rows).','.count($columns).')" onkeypress="refresher('.$row.','.$col.', '.count($rows).','.count($columns).')" onchange="refresher('.$row.','.$col.', '.count($rows).','.count($columns).')" align="left" '.(($disabled) ? ' readonly="readonly" ':'').' name="bomb_explain['.$row.']['.$col.']" id="bomb_explain_'.$row.'_'.$col.'"  rows="5" cols="20" style="overflow:scroll; width:280px; height:80px; padding-left:10px; ">'. $data_matrix[$row][$col]['bomb_explain'] .'</textarea>';
+						$out .= '</select><br/><br/></font><font style="color:#206040; font-weight: 900;">&nbsp;Bomb details: <br/></font><textarea onkeyup="refresher('.$row.','.$col.', '.count($rows).','.count($columns).')" onkeypress="refresher('.$row.','.$col.', '.count($rows).','.count($columns).')" onchange="refresher('.$row.','.$col.', '.count($rows).','.count($columns).')" align="left" '.(($disabled) ? ' readonly="readonly" ':'').' name="bomb_explain['.$row.']['.$col.']" id="bomb_explain_'.$row.'_'.$col.'"  rows="5" cols="20" style="overflow:scroll; width:280px; height:80px; padding-left:10px; ">'. $data_matrix[$row][$col]['bomb_explain'] .'</textarea>';
 						
 						$out .= '<input type="hidden" value=" ' . (($data_matrix[$row][$col]['bomb']['value'] == 'none' || $data_matrix[$row][$col]['bomb']['value'] == '' || $data_matrix[$row][$col]['bomb']['value'] == NULL) ? 'none':$data_matrix[$row][$col]['bomb']['value']) . ' " name="bk_bomb['.$row.']['.$col.']" id="bk_bombselect_'.$row.'_'.$col.'" />'
 						.'<textarea name="bk_bomb_explain['.$row.']['.$col.']" id="bk_bomb_explain_'.$row.'_'.$col.'" style="overflow:scroll; display:none;" rows="5" cols="20">'. $data_matrix[$row][$col]['bomb_explain'] .'</textarea>'
@@ -1288,7 +1288,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 						.'<table style="background-color:#fff;">';
 						
 						$out .= '<tr><td style="background-color:#fff;">'
-						.'<font style="color:#206040; font-weight: 900;">&nbsp;Filing Details: <br/></font><textarea onkeyup="refresher('.$row.','.$col.', '.count($rows).','.count($columns).')" onkeypress="refresher('.$row.','.$col.', '.count($rows).','.count($columns).')" onchange="refresher('.$row.','.$col.', '.count($rows).','.count($columns).')" align="left" '.(($disabled) ? ' readonly="readonly" ':'').' id="filing_'.$row.'_'.$col.'" name="filing['.$row.']['.$col.']"  rows="5" cols="20" style="overflow:scroll; width:280px; height:60px; padding-left:10px; ">'. $data_matrix[$row][$col]['filing'] .'</textarea>'
+						.'<font style="color:#206040; font-weight: 900;">&nbsp;Filing details: <br/></font><textarea onkeyup="refresher('.$row.','.$col.', '.count($rows).','.count($columns).')" onkeypress="refresher('.$row.','.$col.', '.count($rows).','.count($columns).')" onchange="refresher('.$row.','.$col.', '.count($rows).','.count($columns).')" align="left" '.(($disabled) ? ' readonly="readonly" ':'').' id="filing_'.$row.'_'.$col.'" name="filing['.$row.']['.$col.']"  rows="5" cols="20" style="overflow:scroll; width:280px; height:60px; padding-left:10px; ">'. $data_matrix[$row][$col]['filing'] .'</textarea>'
 						.'<textarea id="bk_filing_'.$row.'_'.$col.'" name="bk_filing['.$row.']['.$col.']" style="overflow:scroll; display:none;" rows="5" cols="20">'. $data_matrix[$row][$col]['filing'] .'</textarea>'
 						.'</td></tr>'
 						.'<tr><th style="background-color:#fff;">&nbsp;</th></tr>'
@@ -1306,7 +1306,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 							.'<table style="background-color:#fff;">';
 							
 						$out .= '<tr style="background-color:#fff; border:none;"><td style="background-color:#fff; border:none;">'
-							.'<font style="color:#206040; font-weight: 900;">&nbsp;Phase Explain: <br/></font><textarea onkeyup="refresher('.$row.','.$col.', '.count($rows).','.count($columns).')" onkeypress="refresher('.$row.','.$col.', '.count($rows).','.count($columns).')" onchange="refresher('.$row.','.$col.', '.count($rows).','.count($columns).')" align="left" '.(($disabled) ? ' readonly="readonly" ':'').' id="phase_explain_'.$row.'_'.$col.'" name="phase_explain['.$row.']['.$col.']"  rows="5" cols="20" style="overflow:scroll; width:280px; height:60px; padding-left:10px; ">'. $data_matrix[$row][$col]['phase_explain'] .'</textarea>'
+							.'<font style="color:#206040; font-weight: 900;">&nbsp;Phase explain: <br/></font><textarea onkeyup="refresher('.$row.','.$col.', '.count($rows).','.count($columns).')" onkeypress="refresher('.$row.','.$col.', '.count($rows).','.count($columns).')" onchange="refresher('.$row.','.$col.', '.count($rows).','.count($columns).')" align="left" '.(($disabled) ? ' readonly="readonly" ':'').' id="phase_explain_'.$row.'_'.$col.'" name="phase_explain['.$row.']['.$col.']"  rows="5" cols="20" style="overflow:scroll; width:280px; height:60px; padding-left:10px; ">'. $data_matrix[$row][$col]['phase_explain'] .'</textarea>'
 							.'<textarea id="bk_phase_explain_'.$row.'_'.$col.'" name="bk_phase_explain['.$row.']['.$col.']" style="overflow:scroll; display:none;" rows="5" cols="20">'. $data_matrix[$row][$col]['phase_explain'] .'</textarea>'
 							//.'<div align="left" width="200px" style="overflow:scroll; width:200px; height:150px; padding-left:10px;" id="filing">'. $data_matrix[$row][$col]['phase_explain'] .'</div>'
 							.'</td></tr>'
@@ -1341,7 +1341,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 	{
 		$out .= '<br/><br/><br/><br/><div align="left"><fieldset style="margin-top:50px; padding:8px;"><legend>Advanced</legend>'
 				. '<label class="lbldeln"><input class="delrepe" type="checkbox" id="delrep" name="delrep['.$id.']" title="Delete" /></label>' 
-				. '&nbsp;&nbsp;&nbsp;&nbsp;Delete This Master Heatmap Report</fieldset></div>';
+				. '&nbsp;&nbsp;&nbsp;&nbsp;Delete this master heatmap report</fieldset></div>';
 	};
 	$out .= '</form>';
 
@@ -1493,7 +1493,7 @@ function Download_reports()
 				{
 					$data_matrix[$row][$col]['bomb_auto']['value']=$cell_data['bomb_auto'];
 					$data_matrix[$row][$col]['bomb_auto']['src']='sbomb.png';
-					$data_matrix[$row][$col]['bomb_auto']['alt']='Small Bomb';
+					$data_matrix[$row][$col]['bomb_auto']['alt']='Small bomb';
 					$data_matrix[$row][$col]['bomb_auto']['style']='width:10px; height:11px;';
 					$data_matrix[$row][$col]['bomb_auto']['title']='Suggested';
 				}
@@ -1501,7 +1501,7 @@ function Download_reports()
 				{
 					$data_matrix[$row][$col]['bomb_auto']['value']=$cell_data['bomb_auto'];
 					$data_matrix[$row][$col]['bomb_auto']['src']='lbomb.png';
-					$data_matrix[$row][$col]['bomb_auto']['alt']='Large Bomb';
+					$data_matrix[$row][$col]['bomb_auto']['alt']='Large bomb';
 					$data_matrix[$row][$col]['bomb_auto']['style']='width:18px; height:20px;';
 					$data_matrix[$row][$col]['bomb_auto']['title']='Suggested';
 				}
@@ -1520,7 +1520,7 @@ function Download_reports()
 					$data_matrix[$row][$col]['bomb']['value']=$cell_data['bomb'];
 					$data_matrix[$row][$col]['bomb']['src']='new_sbomb.png';
 					$data_matrix[$row][$col]['exec_bomb']['src']='sbomb.png'; //Excel bomb image
-					$data_matrix[$row][$col]['bomb']['alt']='Small Bomb';
+					$data_matrix[$row][$col]['bomb']['alt']='Small bomb';
 					$data_matrix[$row][$col]['bomb']['style']='width:11px; height:11px;';
 					$data_matrix[$row][$col]['bomb']['title']='Bomb Details';
 				}
@@ -1529,7 +1529,7 @@ function Download_reports()
 					$data_matrix[$row][$col]['bomb']['value']=$cell_data['bomb'];
 					$data_matrix[$row][$col]['bomb']['src']='new_lbomb.png';
 					$data_matrix[$row][$col]['exec_bomb']['src']='lbomb.png';
-					$data_matrix[$row][$col]['bomb']['alt']='Large Bomb';
+					$data_matrix[$row][$col]['bomb']['alt']='Large bomb';
 					$data_matrix[$row][$col]['bomb']['style']='width:11px; height:11px;';
 					$data_matrix[$row][$col]['bomb']['title']='Bomb Details';
 				}
@@ -1540,7 +1540,7 @@ function Download_reports()
 					$data_matrix[$row][$col]['exec_bomb']['src']='new_square.png';
 					$data_matrix[$row][$col]['bomb']['alt']='None';
 					$data_matrix[$row][$col]['bomb']['style']='width:11px; height:11px;';
-					$data_matrix[$row][$col]['bomb']['title']='Bomb Details';
+					$data_matrix[$row][$col]['bomb']['title']='Bomb details';
 				}
 				
 				$data_matrix[$row][$col]['filing']=trim($cell_data['filing']);
@@ -1621,17 +1621,17 @@ function Download_reports()
 	$count_fillbomb=0;	
 	if($_POST['dwcount']=='active')
 	{
-		$tooltip=$title="Active Trials";
-		$pdftitle="<b>Active Trials</b>";
+		$tooltip=$title="Active trials";
+		$pdftitle="<b>Active trials</b>";
 	}
 	elseif($_POST['dwcount']=='total')
 	{
-		$pdftitle=$tooltip=$title="All Trials (Active + Inactive)";
+		$pdftitle=$tooltip=$title="All trials (Active + Inactive)";
 	}
 	else
 	{
-		$tooltip=$title="Active Industry Lead Sponsor Trials";
-		$pdftitle="<b>Active Industry Lead Sponsor Trials</b>";
+		$tooltip=$title="Active industry lead sponsor trials";
+		$pdftitle="<b>Active industry lead sponsor trials</b>";
 	}
 		
 	if($_POST['dwformat']=='pdfdown' || $_POST['dwformat']=='htmldown')
@@ -1807,7 +1807,7 @@ function Download_reports()
 						
 						if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
 						{
-							$pdfContent .= '&nbsp;<img align="right" title="Filing Details" src="'. urlPath() .'images/new_file.png" style="width:11px; height:11px; vertical-align:bottom; cursor:pointer;" alt="Filing" />';
+							$pdfContent .= '&nbsp;<img align="right" title="Filing details" src="'. urlPath() .'images/new_file.png" style="width:11px; height:11px; vertical-align:bottom; cursor:pointer;" alt="Filing" />';
 							
 								$count_fillbomb++;
 								$pdfContent .= '('.$count_fillbomb.')';
@@ -1815,7 +1815,7 @@ function Download_reports()
 						
 						if($data_matrix[$row][$col]['phase_explain'] != NULL && $data_matrix[$row][$col]['phase_explain'] != '')
 						{
-							$pdfContent .= '&nbsp;<img align="right" title="Phase Explain" src="'. urlPath() .'images/phaseexp.png" style="width:11px; height:11px; vertical-align:bottom; cursor:pointer;" alt="Phase Explain" />';
+							$pdfContent .= '&nbsp;<img align="right" title="Phase explain" src="'. urlPath() .'images/phaseexp.png" style="width:11px; height:11px; vertical-align:bottom; cursor:pointer;" alt="Phase explain" />';
 							
 								$count_fillbomb++;
 								$pdfContent .= '('.$count_fillbomb.')';
@@ -1869,14 +1869,14 @@ function Download_reports()
 					{
 						$count_fillbomb_again++;
 						$pdfContent .=  '<tr style="page-break-inside:avoid;" nobr="true"><td align="left" width="30px"><div style="padding-left:10px;">'. $count_fillbomb_again .'</div></td>'
-							. '<td align="left" width="30px"><div style="padding-left:10px;"><img align="right" title="Filing Details" src="'. urlPath() .'images/new_file.png" style="width:15px; height:15px; vertical-align:top; cursor:pointer;" alt="Filing" /></div></td>'
+							. '<td align="left" width="30px"><div style="padding-left:10px;"><img align="right" title="Filing details" src="'. urlPath() .'images/new_file.png" style="width:15px; height:15px; vertical-align:top; cursor:pointer;" alt="Filing" /></div></td>'
 							. '<td align="left"><div style="padding-left:10px;">'. $data_matrix[$row][$col]['filing'] .'</div></td></tr>';
 					}
 					
 					if($data_matrix[$row][$col]['phase_explain'] != NULL && trim($data_matrix[$row][$col]['phase_explain']) != '')
 					{
 						$count_fillbomb_again++;
-						$pdfContent .=  '<tr style="page-break-inside:avoid;" nobr="true" ><td align="left" width="30px"><div style="padding-left:10px;">'. $count_fillbomb_again .'</div></td><td align="left" width="30px"><div style="padding-left:10px;"><img align="right" title="Phase Explain" src="images/phaseexp.png" style="width:15px; height:15px; vertical-align:top; cursor:pointer;" alt="Filing" /></div></td><td align="left"><div style="padding-left:10px;">'. $data_matrix[$row][$col]['phase_explain'] .'</div></td></tr>';
+						$pdfContent .=  '<tr style="page-break-inside:avoid;" nobr="true" ><td align="left" width="30px"><div style="padding-left:10px;">'. $count_fillbomb_again .'</div></td><td align="left" width="30px"><div style="padding-left:10px;"><img align="right" title="Phase explain" src="images/phaseexp.png" style="width:15px; height:15px; vertical-align:top; cursor:pointer;" alt="Filing" /></div></td><td align="left"><div style="padding-left:10px;">'. $data_matrix[$row][$col]['phase_explain'] .'</div></td></tr>';
 					}
 				}				
 			}
@@ -2089,7 +2089,7 @@ function Download_reports()
 					
 					$objPHPExcel->getActiveSheet()->setCellValue($cell, $count_val);
 					$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]); 
- 			    	$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip($tooltip.(($data_matrix[$row][$col]['filing'] != NULL && trim($data_matrix[$row][$col]['filing']) != '')? "\nFiling:- ". $data_matrix[$row][$col]['filing'] :'') . (($data_matrix[$row][$col]['bomb_explain'] != NULL && trim($data_matrix[$row][$col]['bomb_explain']) != '') ? "\nBomb Details:- ". $data_matrix[$row][$col]['bomb_explain'] : '') . (($data_matrix[$row][$col]['phase_explain'] != NULL && trim($data_matrix[$row][$col]['phase_explain']) != '') ? "\nPhase Explain:- ". $data_matrix[$row][$col]['phase_explain']:'' ) );
+ 			    	$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip($tooltip.(($data_matrix[$row][$col]['filing'] != NULL && trim($data_matrix[$row][$col]['filing']) != '')? "\nFiling:- ". $data_matrix[$row][$col]['filing'] :'') . (($data_matrix[$row][$col]['bomb_explain'] != NULL && trim($data_matrix[$row][$col]['bomb_explain']) != '') ? "\nBomb details:- ". $data_matrix[$row][$col]['bomb_explain'] : '') . (($data_matrix[$row][$col]['phase_explain'] != NULL && trim($data_matrix[$row][$col]['phase_explain']) != '') ? "\nPhase explain:- ". $data_matrix[$row][$col]['phase_explain']:'' ) );
 					
 					if($data_matrix[$row][$col]['exec_bomb']['src'] != '' && $data_matrix[$row][$col]['exec_bomb']['src'] != NULL && $data_matrix[$row][$col]['exec_bomb']['src'] !='new_square.png')
 					{

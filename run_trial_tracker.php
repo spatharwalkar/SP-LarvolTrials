@@ -9429,7 +9429,7 @@ class TrialTracker
 			$paginate['url'] = preg_replace("/\&amp;page=[0-9].*?(\&amp;|$)/", '',   $paginate['url']);
 			$allproductsurl = preg_replace("/\&amp;pr=[0-9].*?(\&amp;|$)/", '',   $paginate['url']);
 			
-			echo '<div id="menuwrapper"><ul>';
+			echo '<div id="menuwrapper" style="padding-top:2px; vertical-align:bottom;"><ul>';
 			if(isset($globalOptions['product']) && $globalOptions['product'] != '')
 			{	
 				echo '<li class="arrow"><a href="javascript: void(0);">' . $TrialsInfoList[$globalOptions['product']] . '</a>'
@@ -9530,9 +9530,9 @@ class TrialTracker
 	{
 		$outputStr = '<table width="100%" cellpadding="5" cellspacing="0" class="manage">'
 			 . '<tr>' . (($loggedIn) ? '<th width="38px">ID</th>' : '' )
-			 . '<th width="250px">Title</th>'
+			 . '<th width="245px">Title</th>'
 			 . '<th width="30px" title="Black: Actual&nbsp;&nbsp;Gray: Anticipated&nbsp;&nbsp;Red: Change greater than 20%">N</th>'
-			 . '<th width="60px" title="&quot;ROW&quot; = Rest of World">Region</th>'
+			 . '<th width="65px" title="&quot;ROW&quot; = Rest of World">Region</th>'
 			 . '<th width="115px">Interventions</th>'
 			 . '<th width="90px">Sponsor</th>'
 			 . '<th width="105px">Status</th>'

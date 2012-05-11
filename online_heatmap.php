@@ -244,7 +244,7 @@ foreach($rows as $row => $rval)
 				$data_matrix[$row][$col]['bomb']['src']='new_sbomb.png';
 				$data_matrix[$row][$col]['bomb']['alt']='Small Bomb';
 				$data_matrix[$row][$col]['bomb']['style']='width:17px; height:17px;';
-				$data_matrix[$row][$col]['bomb']['title']='Bomb Details';
+				$data_matrix[$row][$col]['bomb']['title']='Bomb details';
 			}
 			elseif($cell_data['bomb'] == 'large')
 			{
@@ -252,7 +252,7 @@ foreach($rows as $row => $rval)
 				$data_matrix[$row][$col]['bomb']['src']='new_lbomb.png';
 				$data_matrix[$row][$col]['bomb']['alt']='Large Bomb';
 				$data_matrix[$row][$col]['bomb']['style']='width:17px; height:17px;';
-				$data_matrix[$row][$col]['bomb']['title']='Bomb Details';
+				$data_matrix[$row][$col]['bomb']['title']='Bomb details';
 			}
 			else
 			{
@@ -260,7 +260,7 @@ foreach($rows as $row => $rval)
 				$data_matrix[$row][$col]['bomb']['src']='new_square.png';
 				$data_matrix[$row][$col]['bomb']['alt']='None';
 				$data_matrix[$row][$col]['bomb']['style']='width:17px; height:17px;';
-				$data_matrix[$row][$col]['bomb']['title']='Bomb Details';
+				$data_matrix[$row][$col]['bomb']['title']='Bomb details';
 			}
 			
 			
@@ -798,12 +798,12 @@ function change_view()
 						if(Cell_values_Arr[15] == 'large')
 						{
 							document.getElementById("Cell_Bomb_"+i).src = "images/newred_lbomb.png";
-							document.getElementById("Bomb_Img_"+i).innerHTML = '<img title="Large Bomb" src="images/newred_lbomb.png"  style="width:17px; height:17px; vertical-align:middle; cursor:pointer; padding-bottom:2px;" />&nbsp;';
+							document.getElementById("Bomb_Img_"+i).innerHTML = '<img title="Bomb" src="images/newred_lbomb.png"  style="width:17px; height:17px; vertical-align:middle; cursor:pointer; padding-bottom:2px;" />&nbsp;';
 						}
 						else if(Cell_values_Arr[15] == 'small')
 						{
 							document.getElementById("Cell_Bomb_"+i).src = "images/newred_sbomb.png";
-							document.getElementById("Bomb_Img_"+i).innerHTML = '<img title="Small Bomb" src="images/newred_sbomb.png"  style="width:17px; height:17px; vertical-align:middle; cursor:pointer; padding-bottom:2px;" />&nbsp;';
+							document.getElementById("Bomb_Img_"+i).innerHTML = '<img title="Bomb" src="images/newred_sbomb.png"  style="width:17px; height:17px; vertical-align:middle; cursor:pointer; padding-bottom:2px;" />&nbsp;';
 						}
 						//document.getElementById("Bomb_CDate_"+i).style.display = "inline";
 						
@@ -821,13 +821,13 @@ function change_view()
 						{
 							document.getElementById("Cell_Bomb_"+i).src = "images/new_lbomb.png";
 							document.getElementById("Cell_Bomb_"+i).title = "Large Bomb";
-							document.getElementById("Bomb_Img_"+i).innerHTML = '<img title="Large Bomb" src="images/new_lbomb.png"  style="width:17px; height:17px; vertical-align:middle; cursor:pointer; padding-bottom:2px;" />&nbsp;';
+							document.getElementById("Bomb_Img_"+i).innerHTML = '<img title="Bomb" src="images/new_lbomb.png"  style="width:17px; height:17px; vertical-align:middle; cursor:pointer; padding-bottom:2px;" />&nbsp;';
 						}
 						else if(Cell_values_Arr[15] == 'small')
 						{
 							document.getElementById("Cell_Bomb_"+i).src = "images/new_sbomb.png";
 							document.getElementById("Cell_Bomb_"+i).title = "Small Bomb";
-							document.getElementById("Bomb_Img_"+i).innerHTML = '<img title="Small Bomb" src="images/new_sbomb.png"  style="width:17px; height:17px; vertical-align:middle; cursor:pointer; padding-bottom:2px;" />&nbsp;';
+							document.getElementById("Bomb_Img_"+i).innerHTML = '<img title="Bomb" src="images/new_sbomb.png"  style="width:17px; height:17px; vertical-align:middle; cursor:pointer; padding-bottom:2px;" />&nbsp;';
 						}
 					}
 				}
@@ -867,22 +867,22 @@ function change_view()
 				{
 					if((phaseexp_cdate <= st_limit) && (phaseexp_cdate >= ed_limit)) //Compare Filing Change Dates
 					{
-						document.getElementById("Cell_Phase_"+i).title = "Phase explaination Updated On: "+ Cell_values_Arr[17];
+						document.getElementById("Cell_Phase_"+i).title = "Phase explanation Updated On: "+ Cell_values_Arr[17];
 						document.getElementById("Cell_Phase_"+i).src = "images/phaseexp_red.png";
 						//document.getElementById("PhaseExp_CDate_"+i).style.display = "inline";
-						document.getElementById("Phaseexp_Img_"+i).innerHTML = '<img title="Phase explaination" src="images/phaseexp_red.png"  style="width:17px; height:17px; vertical-align:middle; cursor:pointer; padding-bottom:2px;" />&nbsp;';
+						document.getElementById("Phaseexp_Img_"+i).innerHTML = '<img title="Phase explanation" src="images/phaseexp_red.png"  style="width:17px; height:17px; vertical-align:middle; cursor:pointer; padding-bottom:2px;" />&nbsp;';
 						if(latest_date < phaseexp_cdate || latest_date == '')
 						{
-							qualify_title = "Phase explaination Updated On: "+ Cell_values_Arr[17];
+							qualify_title = "Phase explanation Updated On: "+ Cell_values_Arr[17];
 							latest_date = phaseexp_cdate;
 						}
 					}
 					else
 					{
-						document.getElementById("Cell_Phase_"+i).title = "Phase explaination";
+						document.getElementById("Cell_Phase_"+i).title = "Phase explanation";
 						document.getElementById("Cell_Phase_"+i).src = "images/phaseexp.png";
 						//document.getElementById("PhaseExp_CDate_"+i).style.display = "none"
-						document.getElementById("Phaseexp_Img_"+i).innerHTML = '<img title="Phase explaination" src="images/phaseexp.png"  style="width:17px; height:17px; vertical-align:middle; cursor:pointer; padding-bottom:2px;" />&nbsp;';
+						document.getElementById("Phaseexp_Img_"+i).innerHTML = '<img title="Phase explanation" src="images/phaseexp.png"  style="width:17px; height:17px; vertical-align:middle; cursor:pointer; padding-bottom:2px;" />&nbsp;';
 					}
 				}
 				
@@ -1124,14 +1124,12 @@ function refresh_data(cell_id)
     <img src="images/help.png" alt="Help" />
     <div class="slideout_inner">
         <table bgcolor="#FFFFFF" cellpadding="0" cellspacing="0" class="table-slide">
-        <tr><td width="15%"><img title="Large Bomb" src="images/new_lbomb.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Large bomb</td></tr>
-        <tr><td><img title="Large Bomb" src="images/newred_lbomb.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Large bomb (updated)</td></tr>
-        <tr><td><img title="Small Bomb" src="images/new_sbomb.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Small bomb</td></tr>
-        <tr><td><img title="Large Bomb" src="images/newred_sbomb.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Small bomb (updated)</td></tr>
+        <tr><td width="15%"><img title="Bomb" src="images/new_lbomb.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Bomb</td></tr>
+        <tr><td><img title="Bomb" src="images/newred_lbomb.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Bomb (updated)</td></tr>
         <tr><td><img title="Filing" src="images/new_file.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Filing details</td></tr>
         <tr><td><img title="Filing" src="images/newred_file.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Filing details (updated)</td></tr>
-        <tr><td><img title="Phase explaination" src="images/phaseexp.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Phase explaination</td></tr>
-        <tr><td><img title="Phase explaination" src="images/phaseexp_red.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Phase explaination (updated)</td></tr>
+        <tr><td><img title="Phase explanation" src="images/phaseexp.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Phase explanation</td></tr>
+        <tr><td><img title="Phase explanation" src="images/phaseexp_red.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Phase explanation (updated)</td></tr>
         <tr><td><img title="Red Border" src="images/outline.png"  style="width:20px; height:15px; cursor:pointer;" /></td><td>Red border (record updated)</td></tr>
         <tr><td align="center"><img title="Views" src="images/viewcount_bar.png" align="middle"  style="width:1px; height:17px; cursor:pointer;" /></td><td>Views</td></tr>
         <tr><td colspan="2" style="padding-right: 1px;">
@@ -1165,9 +1163,9 @@ $htmlContent .= '<table width="100%" style="background-color:#FFFFFF;">'
 				. '<tr><th>View mode</th><th class="right">Range</th></tr>'
 				. '<tr>'
 				. '<td class="bottom"><p style="margin-top:10px;margin-right:5px;"><select id="view_type" name="view_type" onchange="change_view()">'
-				. '<option value="indlead" selected="selected">Active Industry Trials</option>'
-				. '<option value="active">Active Trials</option>'
-				. '<option value="total">All Trials</option></select></p></td>'
+				. '<option value="indlead" selected="selected">Active industry trials</option>'
+				. '<option value="active">Active trials</option>'
+				. '<option value="total">All trials</option></select></p></td>'
 				. '<td style="background-color:#FFFFFF; width:380px;" class="bottom right"><div class="demo"><p style="margin-top:10px;">'
 				. '<label for="startrange" style="float:left;margin-left:15px;"><b>Highlight updates:</b></label>'
 				. '<input type="text" id="startrange" name="sr" value="now" readonly="readonly" style="border:0; color:#f6931f; font-weight:bold; background-color:#FFFFFF; font-family:Verdana; font-size: 13px;" class="jdpicker" />'
@@ -1190,11 +1188,11 @@ $htmlContent  .= '<div id="dropmenu" class="dropmenudiv" style="width: 310px;">'
 				. '</select></li>'
 				. '<li><label>Counts display: </label></li>'
 				. '<li><select id="dwcount" name="dwcount">'
-				. '<option value="indlead" selected="selected">Active Industry Trials</option>'
-				. '<option value="active">Active Trials</option>'
-				. '<option value="total">All Trials</option>'
+				. '<option value="indlead" selected="selected">Active industry trials</option>'
+				. '<option value="active">Active trials</option>'
+				. '<option value="total">All trials</option>'
 				. '</select></li></ul>'
-				. '<input type="submit" name="download" title="Download" value="Download File" style="margin-left:8px;"  />'
+				. '<input type="submit" name="download" title="Download" value="Download file" style="margin-left:8px;"  />'
 				. '</form></div></div>'
 				.'</div><script type="text/javascript">cssdropdown.startchrome("chromemenu");</script>';
 						
@@ -1231,7 +1229,7 @@ foreach($columns as $col => $val)
 		
 		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. '&list=1&itype=0&sr=now&er=1 month ago" target="_blank">'.$val.'</a>';
 	}
-	$htmlContent .='</div></th>';
+	$htmlContent .='</th>';
 }
 
 		
@@ -1338,7 +1336,7 @@ foreach($rows as $row => $rval)
 			$htmlContent .= '<img id="Cell_Filing_'.$online_HMCounter.'" src="images/new_file.png" title="Filing Details" style="width:17px; height:17px; vertical-align:middle; cursor:pointer;" alt="Filing" />&nbsp;';
 				
 			if($data_matrix[$row][$col]['phase_explain'] != NULL && $data_matrix[$row][$col]['phase_explain'] != '')
-			$htmlContent .= '<img id="Cell_Phase_'.$online_HMCounter.'" src="images/phaseexp.png" title="Phase explaination" style="width:17px; height:17px; vertical-align:middle; cursor:pointer;" alt="Phase explaination" />&nbsp;';
+			$htmlContent .= '<img id="Cell_Phase_'.$online_HMCounter.'" src="images/phaseexp.png" title="Phase explanation" style="width:17px; height:17px; vertical-align:middle; cursor:pointer;" alt="Phase explanation" />&nbsp;';
 
 			$htmlContent .= '<font id="ViewCount_Bar_'.$online_HMCounter.'" style="text-align:right; float:right;">';
 			if($data_matrix[$row][$col]['viewcount'] > 0)
@@ -1371,7 +1369,7 @@ foreach($rows as $row => $rval)
 			
 			if($data_matrix[$row][$col]['phase_explain'] != NULL && $data_matrix[$row][$col]['phase_explain'] != '')
 			{
-				$htmlContent .= '<font style="color:#206040; font-weight: 900;" id="Phaseexp_Img_'.$online_HMCounter.'">Phase explaination </font><font style="color:#206040; font-weight: 900;">: </font>'. $data_matrix[$row][$col]['phase_explain'] .'</br>';
+				$htmlContent .= '<font style="color:#206040; font-weight: 900;" id="Phaseexp_Img_'.$online_HMCounter.'">Phase explanation </font><font style="color:#206040; font-weight: 900;">: </font>'. $data_matrix[$row][$col]['phase_explain'] .'</br>';
 			}
 			
 			$htmlContent .= '<font id="ViewCount_'.$online_HMCounter.'">'.(($data_matrix[$row][$col]['viewcount'] > 0) ? '<font style="color:#206040; font-weight: 900;">Number of views: </font><font style="color:#000000; font-weight: 900;">'.$data_matrix[$row][$col]['viewcount'].'</font><input type="hidden" value="'.$data_matrix[$row][$col]['viewcount'].'" id="ViewCount_value_'.$online_HMCounter.'" />':'<input type="hidden" value="'.$data_matrix[$row][$col]['viewcount'].'" id="ViewCount_value_'.$online_HMCounter.'" />' ).'</font>';
