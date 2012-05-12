@@ -102,6 +102,15 @@ function calc_cells($parameters,$update_id=NULL)
 	else // no area given, select all .
 	{
 		$query='select `id` from areas order by `id`';
+		
+		// update query to fire the trigger (non-change)
+		$activate_trigger=' update upm set event_description=event_description
+							where 
+							(   
+								end_date <= left(now(),10) and 
+								id > 0 and 
+								status="Upcoming" 
+							)';
 	}
 	$res = mysql_query($query);
 	if($res === false)
@@ -333,7 +342,16 @@ function calc_cells($parameters,$update_id=NULL)
 	}
 	if($cron_run)
 	{
-		$query = 'UPDATE update_status SET status="0", end_time="' . date("Y-m-d H:i:s", strtotime('now')) . '" WHERE update_id="' . $update_id . '"';
+		/*
+		$query = 'UPDATE update_status 
+		SET status="0", WHERE update_id="' . $update_id . '"';
+		
+		*/
+		
+		$query = 'UPDATE `update_status` 
+				  SET `status`="0", `end_time`="' . date("Y-m-d H:i:s", strtotime('now')) . '" 
+				  WHERE `update_id`="' . $update_id . '"';
+				  
 		if(!$res = mysql_query($query))
 		{
 			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -344,6 +362,21 @@ function calc_cells($parameters,$update_id=NULL)
 		}
 	}
 //	echo '<br>All Done.';
+
+	//activate the trigger if required.
+	if( isset($activate_trigger) and !empty($activate_trigger) )
+	{
+		echo '<br> Activating trigger to update status...<br>';
+		if(!$res = mysql_query($activate_trigger))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			global $logger;
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
+	}
+
 	return true;
 }			
 
