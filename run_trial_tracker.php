@@ -9498,7 +9498,7 @@ class TrialTracker
                             $count = $totalcount;
                         }
 		}
-		if($new_total > 0)
+		if($new_total > 0 || (isset($globalOptions['product']) && $globalOptions['product'] != ''))
 		{
 			$totactivecount = $new_active;
 			$totinactivecount = $new_inactive;
