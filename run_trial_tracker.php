@@ -10275,7 +10275,7 @@ class TrialTracker
 					$attr = '" title="Manual curation';
 					$titleLinkColor = '#FF7700';
 				}
-				elseif(!empty($trials[$i]['edited']) && array_key_exists('NCT/brief_title', $trials[$i]['edited'])) 
+				elseif(!empty($trials[$i]['edited']) && array_key_exists('NCT/brief_title', $trials[$i]['edited']) &&   str_replace('Previous value: ', '', $trials[$i]['edited']['NCT/brief_title'])<> $trials[$i]['NCT/brief_title']) 
 				{
 					$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/brief_title'];
 					$titleLinkColor = '#FF0000;';
@@ -10424,7 +10424,7 @@ class TrialTracker
 				{
 					$attr = ' manual" title="Manual curation';
 				}
-				elseif(!empty($trials[$i]['edited']) && array_key_exists('NCT/intervention_name', $trials[$i]['edited']))
+				elseif(!empty($trials[$i]['edited']) && array_key_exists('NCT/intervention_name', $trials[$i]['edited']) && str_replace('Previous value: ', '', $trials[$i]['edited']['NCT/intervention_name'])<>$trials[$i]['NCT/intervention_name'])
 				{
 					$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/intervention_name'];
 				} 
@@ -10474,7 +10474,7 @@ class TrialTracker
 					$attr = ' manual" title="Manual curation';
 				}
 				elseif(!empty($trials[$i]['edited']) && (array_key_exists('NCT/collaborator', $trials[$i]['edited']) 
-				|| array_key_exists('NCT/lead_sponsor', $trials[$i]['edited']))) 
+				|| array_key_exists('NCT/lead_sponsor', $trials[$i]['edited'])) && ( str_replace('Previous value: ', '', $trials[$i]['edited']['NCT/lead_sponsor'])<>$trials[$i]['NCT/lead_sponsor'] or str_replace('Previous value: ', '', $trials[$i]['edited']['NCT/collaborator'])<>$trials[$i]['NCT/collaborator'] )) 
 				{
 					$attr = ' highlight" title="';
 					if(array_key_exists('NCT/lead_sponsor', $trials[$i]['edited']))
@@ -10520,7 +10520,7 @@ class TrialTracker
 				{
 					$attr = ' manual" title="Manual curation';
 				}
-				elseif(!empty($trials[$i]['edited']) && array_key_exists('NCT/overall_status', $trials[$i]['edited'])) 
+				elseif(!empty($trials[$i]['edited']) && array_key_exists('NCT/overall_status', $trials[$i]['edited']) && str_replace('Previous value: ', '', $trials[$i]['edited']['NCT/overall_status'])<>$trials[$i]['NCT/overall_status']) 
 				{
 					$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/overall_status'];
 				} 
@@ -10557,7 +10557,7 @@ class TrialTracker
 				{
 					$attr = ' manual" title="Manual curation';
 				}
-				elseif(!empty($trials[$i]['edited']) && array_key_exists('NCT/condition', $trials[$i]['edited'])) 
+				elseif(!empty($trials[$i]['edited']) && array_key_exists('NCT/condition', $trials[$i]['edited']) && str_replace('Previous value: ', '', $trials[$i]['edited']['NCT/condition'])<>$trials[$i]['NCT/condition']) 
 				{
 					$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/condition'];
 				} 
@@ -10593,7 +10593,7 @@ class TrialTracker
 				{
 					$attr = ' manual" title="Manual curation';
 				}
-				elseif(!empty($trials[$i]['edited']) && array_key_exists('NCT/start_date', $trials[$i]['edited'])) 
+				elseif(!empty($trials[$i]['edited']) && array_key_exists('NCT/start_date', $trials[$i]['edited']) &&  str_replace('Previous value: ', '', $trials[$i]['edited']['NCT/start_date'])<>$trials[$i]["NCT/start_date"]) 
 				{
 					$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/start_date'] ;
 				} 
@@ -10637,7 +10637,7 @@ class TrialTracker
 				{
 					$attr = ' manual" title="Manual curation';
 				}
-				elseif(!empty($trials[$i]['edited']) && array_key_exists('inactive_date', $trials[$i]['edited'])) 
+				elseif(!empty($trials[$i]['edited']) && array_key_exists('inactive_date', $trials[$i]['edited']) && str_replace('Previous value: ', '', $trials[$i]['edited']['inactive_date'])<>$trials[$i]["inactive_date"]) 
 				{
 					$attr = ' highlight" title="' . $trials[$i]['edited']['inactive_date'];
 				} 
@@ -10681,7 +10681,7 @@ class TrialTracker
 				{
 					$attr = ' manual" title="Manual curation';
 				}
-				elseif(!empty($trials[$i]['edited']) && array_key_exists('NCT/phase', $trials[$i]['edited'])) 
+				elseif(!empty($trials[$i]['edited']) && array_key_exists('NCT/phase', $trials[$i]['edited']) && ( str_replace('Previous value: ', '', trim($trials[$i]['edited']['NCT/phase'])) <> trim($trials[$i]['NCT/phase'])) ) 
 				{
 					$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/phase'];
 				} 
@@ -10690,6 +10690,7 @@ class TrialTracker
 					$attr = '" title="New record';
 				}
 			}
+			
 			if($trials[$i]['NCT/phase'] == 'N/A' || $trials[$i]['NCT/phase'] == '' || $trials[$i]['NCT/phase'] === NULL)
 			{
 				$phase = 'N/A';
