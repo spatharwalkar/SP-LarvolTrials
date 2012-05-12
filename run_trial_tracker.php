@@ -421,7 +421,7 @@ class TrialTracker
 			if(!empty($tvalue['edited']) && array_key_exists('NCT/brief_title', $tvalue['edited']))
 			{
 				 $objPHPExcel->getActiveSheet()->getStyle('B' . $i)->applyFromArray($highlightChange);
-				 $objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip($tvalue['edited']['NCT/brief_title']); 
+				 $objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip(substr($tvalue['edited']['NCT/brief_title'],0,255));  //We can display only 255 character as tooltip in Excel
 			}
 			else if($tvalue['new'] == 'y')
 			{
@@ -449,7 +449,7 @@ class TrialTracker
 				 	 $objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($highlightChange);
 				 }
 				 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl($ctLink);
-				 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip($tvalue['edited']['NCT/enrollment']); 
+				 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip(substr($tvalue['edited']['NCT/enrollment'],0,255)); 
 			}
 			else if($tvalue['new'] == 'y')
 			{
@@ -505,7 +505,7 @@ class TrialTracker
 			{
 				 $objPHPExcel->getActiveSheet()->getStyle('E' . $i)->applyFromArray($highlightChange);
 				 $objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setUrl($ctLink);
-				 $objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip($tvalue['edited']['NCT/overall_status']); 
+				 $objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip(substr($tvalue['edited']['NCT/overall_status'],0,255)); 
 			}
 			else if($tvalue['new'] == 'y')
 			{
@@ -536,7 +536,7 @@ class TrialTracker
 				
 				 $objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray($highlightChange);
 				 $objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl($ctLink);
-				 $objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip($value); 
+				 $objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip(substr($value,0,255)); 
 			}
 			else if($tvalue['new'] == 'y')
 			{
@@ -553,7 +553,7 @@ class TrialTracker
 			{
 				 $objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($highlightChange);
 				 $objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($ctLink);
-				 $objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip($tvalue['edited']['NCT/condition']); 
+				 $objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip(substr($tvalue['edited']['NCT/condition'],0,255)); 
 			}
 			else if($tvalue['new'] == 'y')
 			{
@@ -570,7 +570,7 @@ class TrialTracker
 			{
 				 $objPHPExcel->getActiveSheet()->getStyle('H' . $i)->applyFromArray($highlightChange);
 				 $objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($ctLink);
-				 $objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip($tvalue['edited']['NCT/intervention_name']); 
+				 $objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip(substr($tvalue['edited']['NCT/intervention_name'],0,255)); 
 			}
 			else if($tvalue['new'] == 'y')
 			{
@@ -592,7 +592,7 @@ class TrialTracker
 			{
 				 $objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray($highlightChange);
 				 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($ctLink);
-				 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip($tvalue['edited']['NCT/start_date']); 
+				 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip(substr($tvalue['edited']['NCT/start_date'],0,255)); 
 			}
 			else if($tvalue['new'] == 'y')
 			{
@@ -614,7 +614,7 @@ class TrialTracker
 			{
 				 $objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($highlightChange);
 				 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink);
-				 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($tvalue['edited']['NCT/inactive_date']); 
+				 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip(substr($tvalue['edited']['NCT/inactive_date'],0,255)); 
 			}
 			else if($tvalue['new'] == 'y')
 			{
@@ -642,7 +642,7 @@ class TrialTracker
 			{
 				 $objPHPExcel->getActiveSheet()->getStyle('K' . $i)->applyFromArray($highlightChange);
 				 $objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setUrl($ctLink);
-				 $objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip($tvalue['edited']['NCT/phase']); 
+				 $objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip(substr($tvalue['edited']['NCT/phase'],0,255)); 
 			}
 			else if($tvalue['new'] == 'y')
 			{
@@ -726,7 +726,7 @@ class TrialTracker
 						}
 						$objDrawing->setCoordinates('L' . $i);
 						$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl(urlencode($mvalue['result_link']));
-						$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setTooltip($upmTitle);
+						$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setTooltip(substr($upmTitle,0,255));
 						
 					}
 					else if($mvalue['status'] == 'Pending')
@@ -740,7 +740,7 @@ class TrialTracker
 						if($mvalue['event_link'] != '' && $mvalue['event_link'] !== NULL)
 						{
 							$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl(urlencode($mvalue['event_link']));
-							$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setTooltip($upmTitle);
+							$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setTooltip(substr($upmTitle,0,255));
 						}
 					}
 					
@@ -857,7 +857,7 @@ class TrialTracker
 				{
 					if($uvalue['edited']['event_description'] != '' && $uvalue['edited']['event_description'] !== NULL)
 					{
-						$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip('Previous value: ' . $uvalue['edited']['event_description']); 
+						$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip(substr('Previous value: ' . $uvalue['edited']['event_description'],0,255)); 
 					}
 					else
 					{
@@ -899,7 +899,7 @@ class TrialTracker
 					$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setUrl($eventLink);
 					if($uvalue['edited']['event_type'] != '' && $uvalue['edited']['event_type'] !== NULL)
 					{
-						$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip('Previous value: '.$uvalue['edited']['event_type']);
+						$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip(substr('Previous value: '.$uvalue['edited']['event_type'],0,255));
 					}
 					else
 					{
@@ -929,7 +929,7 @@ class TrialTracker
 					$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl($eventLink);
 					if($uvalue['edited']['start_date'] != '' && $uvalue['edited']['start_date'] !== NULL)
 					{
-						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('Previous value: ' . $uvalue['edited']['start_date']); 
+						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip(substr('Previous value: ' . $uvalue['edited']['start_date'],0,255)); 
 					}
 					else
 					{
@@ -945,7 +945,7 @@ class TrialTracker
 					$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl($eventLink);
 					if($uvalue['edited']['start_date_type'] != '' && $uvalue['edited']['start_date_type'] !== NULL)
 					{
-						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('Previous value: ' . $uvalue['edited']['start_date_type']); 
+						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip(substr('Previous value: ' . $uvalue['edited']['start_date_type'],0,255)); 
 					}
 					else
 					{
@@ -986,7 +986,7 @@ class TrialTracker
 					$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($eventLink);
 					if($uvalue['edited']['end_date'] != '' && $uvalue['edited']['end_date'] !== NULL)
 					{
-						$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip('Previous value: ' . $uvalue['edited']['end_date']); 
+						$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip(substr('Previous value: ' . $uvalue['edited']['end_date'],0,255)); 
 					}
 					else
 					{
@@ -1002,7 +1002,7 @@ class TrialTracker
 					$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($eventLink);
 					if($uvalue['edited']['end_date_type'] != '' && $uvalue['edited']['end_date_type'] !== NULL)
 					{
-						$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip('Previous value: ' . $uvalue['edited']['end_date_type']); 
+						$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip(substr('Previous value: ' . $uvalue['edited']['end_date_type'],0,255)); 
 					}
 					else
 					{
@@ -1056,7 +1056,7 @@ class TrialTracker
 				}
 				$objDrawing->setCoordinates('H' . $i);
 				$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($resultLink);
-				$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip($uvalue['event_description']);
+				$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip(substr($uvalue['event_description'],0,255));
 			}
 			elseif($uvalue['status'] == 'Pending')
 			{
@@ -1069,7 +1069,7 @@ class TrialTracker
 				if($eventLink != '' && $eventLink !== NULL)
 				{
 					$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($eventLink);
-					$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip($uvalue['event_description']);
+					$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip(substr($uvalue['event_description'],0,255));
 				}
 			}
 			
@@ -2312,6 +2312,7 @@ class TrialTracker
 	$upmLink, $upmTitle, &$objPHPExcel, $i, $from)
 	{
 		$upmLink = urlencode($upmLink);
+		$upmTitle = substr($upmTitle,0,255); //Take 255 characters only to disply as tooltip
 		$bgColor = (array('fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,
 									'rotation'   => 0,
 									'startcolor' => array('rgb' => '9966FF'),

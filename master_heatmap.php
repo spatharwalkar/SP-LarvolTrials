@@ -2089,7 +2089,7 @@ function Download_reports()
 					
 					$objPHPExcel->getActiveSheet()->setCellValue($cell, $count_val);
 					$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]); 
- 			    	$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip($tooltip.(($data_matrix[$row][$col]['filing'] != NULL && trim($data_matrix[$row][$col]['filing']) != '')? "\nFiling:- ". $data_matrix[$row][$col]['filing'] :'') . (($data_matrix[$row][$col]['bomb_explain'] != NULL && trim($data_matrix[$row][$col]['bomb_explain']) != '') ? "\nBomb details:- ". $data_matrix[$row][$col]['bomb_explain'] : '') . (($data_matrix[$row][$col]['phase_explain'] != NULL && trim($data_matrix[$row][$col]['phase_explain']) != '') ? "\nPhase explain:- ". $data_matrix[$row][$col]['phase_explain']:'' ) );
+ 			    	$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip(substr((($data_matrix[$row][$col]['filing'] != NULL && trim($data_matrix[$row][$col]['filing']) != '')? "\nFiling:- ". $data_matrix[$row][$col]['filing'] :'') . (($data_matrix[$row][$col]['bomb_explain'] != NULL && trim($data_matrix[$row][$col]['bomb_explain']) != '') ? "\nBomb details:- ". $data_matrix[$row][$col]['bomb_explain'] : '') . (($data_matrix[$row][$col]['phase_explain'] != NULL && trim($data_matrix[$row][$col]['phase_explain']) != '') ? "\nPhase explain:- ". $data_matrix[$row][$col]['phase_explain']:'' ),0,20) );
 					
 					if($data_matrix[$row][$col]['exec_bomb']['src'] != '' && $data_matrix[$row][$col]['exec_bomb']['src'] != NULL && $data_matrix[$row][$col]['exec_bomb']['src'] !='new_square.png')
 					{
