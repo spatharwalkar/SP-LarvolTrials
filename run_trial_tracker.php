@@ -312,6 +312,26 @@ class TrialTracker
 		unset($Values['Trials']);
 		unset($Values['allTrialsforDownload']);	
 		
+		if(isset($globalOptions['product']) && $globalOptions['product'] != '')
+		{	
+			foreach($Values['TrialsInfo'] as $k => $v)
+			{
+				if($k != $globalOptions['product'])
+				{
+					unset($Values['TrialsInfo'][$k]);
+				}
+			}
+			foreach($Trials as $k => $v)
+			{
+				if($v['section'] != $globalOptions['product'])
+				{
+					unset($Trials[$k]);
+				}
+			}
+			$Trials = array_values($Trials);
+		}
+		
+	
 		$unMatchedUpms = array();
 		foreach($Values['TrialsInfo'] as $tkey => $tvalue)
 		{
@@ -323,6 +343,7 @@ class TrialTracker
 		
 		$i = 2;
 		$section = '';
+		
 		
 		foreach($Trials as $tkey => $tvalue)
 		{
@@ -4453,6 +4474,26 @@ class TrialTracker
 		unset($Values['Trials']);
 		unset($Values['allTrialsforDownload']);
 		
+		if(isset($globalOptions['product']) && $globalOptions['product'] != '')
+		{	
+			foreach($Values['TrialsInfo'] as $k => $v)
+			{
+				if($k != $globalOptions['product'])
+				{
+					unset($Values['TrialsInfo'][$k]);
+				}
+			}
+			foreach($Trials as $k => $v)
+			{
+				if($v['section'] != $globalOptions['product'])
+				{
+					unset($Trials[$k]);
+				}
+			}
+			$Trials = array_values($Trials);
+			$count = count($Trials);
+		}
+		
 		$start 	= '';
 		$last = '';
 		$totalPages = '';
@@ -5396,6 +5437,18 @@ class TrialTracker
 		else
 		{
 			$Trials = $Values['Trials'];
+		}
+		
+		if(isset($globalOptions['product']) && $globalOptions['product'] != '')
+		{	
+			foreach($Trials as $k => $v)
+			{
+				if($v['section'] != $globalOptions['product'])
+				{
+					unset($Trials[$k]);
+				}
+			}
+			$Trials = array_values($Trials);
 		}
 		
 		unset($Values['Trials']);
@@ -9347,6 +9400,9 @@ class TrialTracker
 		  return $a['sectionHeader']; 
 		},  $TrialsInfo);
 		
+		
+		$new_active = 0; $new_inactive = 0; $new_total = 0;
+		
 		if(isset($globalOptions['product']) && $globalOptions['product'] != '')
 		{	
 			echo '<input type="hidden" name="pr" value="' . $globalOptions['product'] . '" />';
@@ -9367,6 +9423,36 @@ class TrialTracker
 			}
 			$Trials = array_values($Trials);
 		}
+		
+		foreach($allTrials as $i => $arr)
+		{
+			if(isset($globalOptions['product']) && $globalOptions['product'] != '') ///When product field is set calculate new counts
+			{
+				if($allTrials[$i]['section'] == $globalOptions['product'])
+				{
+					if($allTrials[$i]['NCT/is_active'] != NULL && trim($allTrials[$i]['NCT/is_active']) != '')
+					{
+						if($allTrials[$i]['NCT/is_active'] == 1)
+						$new_active++;
+						else
+						$new_inactive++;
+					}
+				}
+			}
+			else	//When product is unset count reset again
+			{
+				if($allTrials[$i]['NCT/is_active'] != NULL && trim($allTrials[$i]['NCT/is_active']) != '')
+				{
+					if($allTrials[$i]['NCT/is_active'] == 1)
+					$new_active++;
+					else
+					$new_inactive++;
+				}
+			}
+		}
+			
+		$new_total = $new_active+$new_inactive;
+		
 		$count = count($Trials);
 		$start 	= '';
 		$last = '';
@@ -9412,15 +9498,34 @@ class TrialTracker
                             $count = $totalcount;
                         }
 		}
+		if($new_total > 0)
+		{
+			$totactivecount = $new_active;
+			$totinactivecount = $new_inactive;
+			$totalcount = $new_total;
+			if($globalOptions['type'] == 'activeTrials')
+            {
+                $count = $totactivecount;
+            }
+            else if($globalOptions['type'] == 'inactiveTrials')
+            {
+                $count = $totinactivecount;
+            }
+            else
+            {
+                $count = $totalcount;
+            }
+		}
 		$this->displayFilterControls($count, $totactivecount, $totinactivecount, $totalcount, $globalOptions, $ottType, $loggedIn);
-
+		
+		
 		if($totalPages > 1)
 		{
 			echo $paginate['paginate'];
 		}
 		
-		echo '<div style="float: left;margin-right: 25px; vertical-align:bottom; padding-top:7px;"><span id="addtoright"></span></div>';
-		echo '<div style="float: left;margin-right: 25px; padding-top:7px; vertical-align:bottom;" id="chromemenu"><a rel="dropmenu"><span style="padding:2px; padding-right:4px; border:1px solid; color:#000000; background-position:left center; background-repeat:no-repeat; background-image:url(\'./images/save.png\'); cursor:pointer; ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Export</b></span></a></div>';
+		echo '<div style="float: left;margin-right: 20px; vertical-align:bottom; padding-top:7px;"><span id="addtoright"></span></div>';
+		echo '<div style="float: left;margin-right: 20px; padding-top:7px; vertical-align:bottom;" id="chromemenu"><a rel="dropmenu"><span style="padding:2px; padding-right:4px; border:1px solid; color:#000000; background-position:left center; background-repeat:no-repeat; background-image:url(\'./images/save.png\'); cursor:pointer; ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Export</b></span></a></div>';
 		
 		natcasesort($TrialsInfoList);
 		
@@ -9927,9 +10032,9 @@ class TrialTracker
 			$url .= '&amp;pr=' . $globalOptions['product'];
 		}
 		
-		$stages = 3;
+		$stages = 2;
 		
-		$paginateStr = '<div class="pagination">';
+		$paginateStr = '<div class="pagination" style="float: left; padding-top:5px; vertical-align:bottom;">';
 		///ALL Quotation Marks SIGN REPLACED BY Apostrophe, CAUSE JSON DATA URL GET PROBLEM WITH double quote.
 		// globalOptions Should always have Apostrophe instead of quote sign or data will not be passed
 		if($globalOptions['page'] != 1)
