@@ -673,7 +673,7 @@ function change_view()
 					document.getElementById("Cell_Link_"+i).href = cell_link_val+'&list=1&itype=0&sr='+start_range+'&er='+end_range;
 					
 					if(tot_element != null && tot_element != '')
-					document.getElementById("Tot_ID_"+i).innerHTML = Cell_values_Arr[0];
+					document.getElementById("Tot_ID_"+i).innerHTML = Cell_values_Arr[2];
 					
 					if(font_element != null && font_element != '')
 					{
@@ -924,7 +924,7 @@ function change_view()
 						var viewcount_Bar_ele = document.getElementById("ViewCount_Bar_"+i);
 						if(viewcount_Bar_ele != null && viewcount_Bar_ele != '' && (view > 0))
 						{
-							document.getElementById("ViewCount_Bar_"+i).innerHTML = '<img src="images/viewcount_bar.png" style="width:1px; height:'+new_value+'px; vertical-align:bottom; cursor:pointer; padding-top:'+(17-new_value)+'px; padding-right:1px;" align="right" alt="View Count Bar" />&nbsp;';
+							document.getElementById("ViewCount_Bar_"+i).innerHTML = '<img src="images/viewcount_bar.png" style="width:1px; height:'+new_value+'px; vertical-align:bottom; cursor:pointer; padding-top:'+(17-new_value)+'px;" align="right" alt="View Count Bar" />&nbsp;';
 							document.getElementById("ViewCount_"+i).innerHTML = '<font style="color:#206040; font-weight: 900;">Number of views: </font><font style="color:#000000; font-weight: 900;">'+view+'</font><input type="hidden" value="'+view+'" id="ViewCount_value_'+i+'" />';
 						}
 									
@@ -1178,7 +1178,7 @@ $htmlContent .= '<table width="100%" style="background-color:#FFFFFF;">'
 				. '<br clear="all"/><br/>';
 				
 $htmlContent  .= '<div id="dropmenu" class="dropmenudiv" style="width: 310px;">'
-				.'<div style="height:100px;margin-top:10px; padding:6px;"><div class="downldbox"><div class="newtext">Download Options</div>'
+				.'<div style="height:100px;margin-top:10px; padding:6px;"><div class="downldbox"><div class="newtext">Download options</div>'
 				. '<form action="master_heatmap.php" method="post">'
 				. '<input type="hidden" name="id" value="' . $id . '" />'
 				. '<ul><li><label>Which format: </label></li>'
@@ -1245,7 +1245,7 @@ if($toal_fld)
 		$htmlContent .= '<input type="hidden" value="'.$active_total.',endl,'.$count_total.',endl,'.$indlead_total.'" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
 		$htmlContent .= '<input type="hidden" value="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds). '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />';
 		
-		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds). '&list=1&itype=0&sr=now&er=1 month ago" target="_blank"><font id="Tot_ID_'.$online_HMCounter.'">'.$active_total.'</font></a>';
+		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds). '&list=1&itype=0&sr=now&er=1 month ago" target="_blank"><font id="Tot_ID_'.$online_HMCounter.'">'.$indlead_total.'</font></a>';
 	}
 	$htmlContent .= '</div></th>';
 }
@@ -1338,9 +1338,9 @@ foreach($rows as $row => $rval)
 			if($data_matrix[$row][$col]['phase_explain'] != NULL && $data_matrix[$row][$col]['phase_explain'] != '')
 			$htmlContent .= '<img id="Cell_Phase_'.$online_HMCounter.'" src="images/phaseexp.png" title="Phase explanation" style="width:17px; height:17px; vertical-align:middle; cursor:pointer;" alt="Phase explanation" />&nbsp;';
 
-			$htmlContent .= '<font id="ViewCount_Bar_'.$online_HMCounter.'" style="text-align:right; float:right;">';
+			$htmlContent .= '<font id="ViewCount_Bar_'.$online_HMCounter.'" style="text-align:right; float:right; vertical-align:bottom;">';
 			if($data_matrix[$row][$col]['viewcount'] > 0)
-			$htmlContent .= '<img src="images/viewcount_bar.png" style="width:1px; height:'.((17*$data_matrix[$row][$col]['viewcount'])/$Max_ViewCount).'px; vertical-align:bottom; cursor:pointer; padding-top:'.(17-((17*$data_matrix[$row][$col]['viewcount'])/$Max_ViewCount)).'px; padding-right:1px;" alt="View Count Bar" />&nbsp;';
+			$htmlContent .= '<img src="images/viewcount_bar.png" style="width:1px; height:'.((17*$data_matrix[$row][$col]['viewcount'])/$Max_ViewCount).'px; vertical-align:bottom; cursor:pointer; padding-top:'.(17-((17*$data_matrix[$row][$col]['viewcount'])/$Max_ViewCount)).'px;" alt="View Count Bar" />&nbsp;';
 			$htmlContent .= '</font>';
 			
 			$htmlContent .= '</div>'; ///Div complete to avoid panel problem

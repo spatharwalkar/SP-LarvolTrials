@@ -419,7 +419,7 @@ function validate(rows, cols)
 			{
 				flag=1; phaseexp_flag=1;
 			}
-			if(phase4_flag) ele='Red Cell Override';
+			if(phase4_flag) ele='red cell override';
 			if(bomb_flag) { if(ele != '') ele=ele+', '; ele=ele+'bomb'};
 			if(filing_flag) { if(ele != '') ele=ele+', '; ele=ele+'filing'};
 			if(phaseexp_flag) { if(ele != '') ele=ele+', '; ele=ele+'phase explain'};
@@ -698,7 +698,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 }	
 /*** RECALCULATION STATUS. ****/
 	
-	$query = 'SELECT name,user,footnotes,description,category,shared,total FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
+	$query = 'SELECT name,user,footnotes,description,category,shared,total, dtt FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
 	$res = mysql_query($query) or die('Bad SQL query getting master heatmap report'.$query);
 	$res = mysql_fetch_array($res) or die('Report not found.');
 	$rptu = $res['user'];
@@ -945,10 +945,10 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 	}
 
 
-	$out = '<br/>&nbsp;&nbsp;<b>View Type: </b> <select id="view_type" name="view_type" onchange="window.location.href=\'master_heatmap.php?id='.$_GET['id'].'&view_type=\'+this.value+\'\'">'
-			. '<option value="active" '.(($_GET['view_type']!='total' && $_GET['view_type']!='indlead')? "selected=\"selected\"":"").'>Active trials</option>'
-			. '<option value="total" '.(($_GET['view_type']=='total')? "selected=\"selected\"":"").'>All trials</option>'
-			. '<option value="indlead"'.(($_GET['view_type']=='indlead')? "selected=\"selected\"":"").'>Active Industry trials</option></select><br/>';
+	$out = '<br/>&nbsp;&nbsp;<b>View type: </b> <select id="view_type" name="view_type" onchange="window.location.href=\'master_heatmap.php?id='.$_GET['id'].'&view_type=\'+this.value+\'\'">'
+			. '<option value="active" '.(($view_tp=='active')? "selected=\"selected\"":"").'>Active trials</option>'
+			. '<option value="indlead"'.(($view_tp=='indlead')? "selected=\"selected\"":"").'>Active Industry trials</option>'
+			. '<option value="total" '.(($view_tp=='total')? "selected=\"selected\"":"").'>All trials</option></select><br/>';
 			
 	$out .= '<form action="master_heatmap.php" method="post">'
 			. '<fieldset><legend>Download Option</legend>'
@@ -957,14 +957,14 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 	{
 		$out .='<input type="hidden" name="total_col" value="1" />';
 	}
-	$out .='<b>Which Format: </b><select id="dwformat" name="dwformat"><option value="htmldown" selected="selected">HTML</option>'
+	$out .='<b>Which format: </b><select id="dwformat" name="dwformat"><option value="htmldown" selected="selected">HTML</option>'
 		. '<option value="exceldown">Excel</option>'
 		. '<option value="pdfdown">PDF</option>'
 		. '</select><br/><br/>';
-	$out .='<b>Counts Display: </b><select id="dwcount" name="dwcount">'
+	$out .='<b>Counts display: </b><select id="dwcount" name="dwcount">'
 		. '<option value="active" '.(($view_tp=='active')? "selected=\"selected\"":"").'>Active trials</option>'
-		. '<option value="total" '.(($view_tp=='total')? "selected=\"selected\"":"").'>All trials</option>'
-		. '<option value="indlead" '.(($view_tp=='indlead')? "selected=\"selected\"":"").'>Active industry trials</option></select><br/><br/><input type="submit" name="download" value="Download" title="Download" />'
+		. '<option value="indlead" '.(($view_tp=='indlead')? "selected=\"selected\"":"").'>Active industry trials</option>'
+		. '<option value="total" '.(($view_tp=='total')? "selected=\"selected\"":"").'>All trials</option></select><br/><br/><input type="submit" name="download" value="Download" title="Download" />'
 		. '</fieldset></form>';	
 		
 	/*$out .='<input type="image" name="htmldown[]" src="images/html.png" title="HTML Download" />&nbsp;&nbsp;'
@@ -1059,11 +1059,13 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 	$out .= ' <label><input '.(($disabled) ? ' disabled="disabled" ':'').' type="checkbox" name="dtt"  value="1" ' . (($dtt_fld) ? 'checked="checked"' : '') . ' />Last column is DTT</label>';
 	
 	$out .= '<br clear="all"/>';
+	
+	$out .= '<input type="submit" name="reportsave" value="Save edits" /><input type="hidden" id="reportsave_flg" name="reportsave_flg" value="0" /> | ';
+	
 	if($db->user->userlevel != 'user' || $rptu !== NULL)
 	{
 		if($owner_type == 'mine' || ($owner_type == 'global' && $db->user->userlevel != 'user') || ($owner_type == 'shared' && $rptu == $db->user->id))
-		$out .= '<input type="submit" name="reportsave" value="Save edits" /><input type="hidden" id="reportsave_flg" name="reportsave_flg" value="0" /> | '
-				.'<input type="submit" name="addproduct" value="More rows" /> | '
+		$out .= '<input type="submit" name="addproduct" value="More rows" /> | '
 				. '<input type="submit" name="addarea" value="More columns" /> | ';
 	}
 	$out .= '<input type="submit" name="reportcopy" value="Copy into new" /> | '
@@ -1077,8 +1079,8 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 				
 		$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col]:'';
 		$cat = (isset($columnsCategoryName[$col]) && $columnsCategoryName[$col] != '')?$columnsCategoryName[$col]:'';
-		$out .= 'Display Name: <br/><input type="text" id="areas_display' . $col . '" name="areas_display[' . $col . ']" value="' . $val . '" '.(($disabled) ? ' readonly="readonly" ':'').' /><br />';
-		$out .= 'Category Name: <br/><input type="text" id="category_area' . $col . '" name="category_area[' . $col . ']" value="' . $cat . '" '.(($disabled) ? ' readonly="readonly" ':'').' /><br />';
+		$out .= 'Display name: <br/><input type="text" id="areas_display' . $col . '" name="areas_display[' . $col . ']" value="' . $val . '" '.(($disabled) ? ' readonly="readonly" ':'').' /><br />';
+		$out .= 'Category name: <br/><input type="text" id="category_area' . $col . '" name="category_area[' . $col . ']" value="' . $cat . '" '.(($disabled) ? ' readonly="readonly" ':'').' /><br />';
 				
 		$out .= 'Column : '.$col.' ';
 		
@@ -1146,7 +1148,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 		$out .= '<tr><th>Product:<br/><input type="text" id="products' . $row . '"  name="products[' . $row . ']" value="' . $rval . '" autocomplete="off" '
 				. ' onkeyup="javascript:autoComplete(\'products'.$row.'\')" '.(($disabled) ? ' readonly="readonly" ':'').' /><br />';
 				
-		$out .= 'Category Name: <br/><input type="text" id="category_product' . $row . '" name="category_product[' . $row . ']" value="' . $cat . '" '.(($disabled) ? ' readonly="readonly" ':'').' /><br />';
+		$out .= 'Category name: <br/><input type="text" id="category_product' . $row . '" name="category_product[' . $row . ']" value="' . $cat . '" '.(($disabled) ? ' readonly="readonly" ':'').' /><br />';
 		
 		$out .= 'Row : '.$row.' ';
 		
@@ -1246,10 +1248,10 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 				
 				
 				$out .= '<div id="dropmenu_'.$row.'_'.$col.'" class="dropmenudiv" style="width: 180px;">'
-					 .'<a style="vertical-align:bottom;"><input  id="bombopt_'.$row.'_'.$col.'"  name="bombopt_'.$row.'_'.$col.'" type="checkbox" value="1" ' . (($data_matrix[$row][$col]['bomb']['src'] != 'new_square.png') ? 'checked="checked"':'') . ' onchange="update_icons(\'bomb\','.$row.','.$col.', '.count($rows).','.count($columns).',\''.$data_matrix[$row][$col]['color_code'].'\')" '.(($disabled) ? ' disabled="disabled" ':'').' />Small/Large bomb&nbsp;<img align="right" src="images/lbomb.png"  style="vertical-align:bottom; width:11px; height:11px;"/></a>'
-					 .'<a style="vertical-align:bottom;"><input  id="filingopt_'.$row.'_'.$col.'"  name="filingopt_'.$row.'_'.$col.'" type="checkbox" value="1" ' . (($data_matrix[$row][$col]['filing'] != NULL) ? 'checked="checked"':'') . '  onchange="update_icons(\'filing\','.$row.','.$col.', '.count($rows).','.count($columns).',\''.$data_matrix[$row][$col]['color_code'].'\')" '.(($disabled) ? ' disabled="disabled" ':'').' />Filing&nbsp;<img align="right" src="images/file.png"  style="vertical-align:bottom; width:11px; height:11px;"/></a>'
-					 .'<a style="vertical-align:bottom;"><input  id="phase4opt_'.$row.'_'.$col.'"  name="phase4opt_'.$row.'_'.$col.'" type="checkbox" value="1" ' . (($data_matrix[$row][$col]['phase4_override']) ? 'checked="checked"':'') . '  onchange="update_icons(\'phase4\','.$row.','.$col.', '.count($rows).','.count($columns).',\''.$data_matrix[$row][$col]['color_code'].'\')"  '.(($disabled) ? ' disabled="disabled" ':'').' />Red cell override&nbsp;<img align="right" src="images/phase4.png"  style="vertical-align:bottom; width:11px; height:11px;"/></a>'
-					 .'<a style="vertical-align:bottom;"><input  id="phaseexpopt_'.$row.'_'.$col.'"  name="phaseexpopt_'.$row.'_'.$col.'" type="checkbox" value="1" ' . (($data_matrix[$row][$col]['phase_explain'] != NULL) ? 'checked="checked"':'') . '  onchange="update_icons(\'phaseexp\','.$row.','.$col.', '.count($rows).','.count($columns).',\''.$data_matrix[$row][$col]['color_code'].'\')" '.(($disabled) ? ' disabled="disabled" ':'').' />Phase explain&nbsp;<img align="right" src="images/phaseexp.png"  style="vertical-align:bottom; width:11px; height:11px;"/></a>'
+					 .'<a style="vertical-align:bottom;"><input  id="bombopt_'.$row.'_'.$col.'"  name="bombopt_'.$row.'_'.$col.'" type="checkbox" value="1" ' . (($data_matrix[$row][$col]['bomb']['src'] != 'new_square.png') ? 'checked="checked"':'') . ' onchange="update_icons(\'bomb\','.$row.','.$col.', '.count($rows).','.count($columns).',\''.$data_matrix[$row][$col]['color_code'].'\')" />Small/Large bomb&nbsp;<img align="right" src="images/lbomb.png"  style="vertical-align:bottom; width:11px; height:11px;"/></a>'
+					 .'<a style="vertical-align:bottom;"><input  id="filingopt_'.$row.'_'.$col.'"  name="filingopt_'.$row.'_'.$col.'" type="checkbox" value="1" ' . (($data_matrix[$row][$col]['filing'] != NULL) ? 'checked="checked"':'') . '  onchange="update_icons(\'filing\','.$row.','.$col.', '.count($rows).','.count($columns).',\''.$data_matrix[$row][$col]['color_code'].'\')" />Filing&nbsp;<img align="right" src="images/file.png"  style="vertical-align:bottom; width:11px; height:11px;"/></a>'
+					 .'<a style="vertical-align:bottom;"><input  id="phase4opt_'.$row.'_'.$col.'"  name="phase4opt_'.$row.'_'.$col.'" type="checkbox" value="1" ' . (($data_matrix[$row][$col]['phase4_override']) ? 'checked="checked"':'') . '  onchange="update_icons(\'phase4\','.$row.','.$col.', '.count($rows).','.count($columns).',\''.$data_matrix[$row][$col]['color_code'].'\')" />Red cell override&nbsp;<img align="right" src="images/phase4.png"  style="vertical-align:bottom; width:11px; height:11px;"/></a>'
+					 .'<a style="vertical-align:bottom;"><input  id="phaseexpopt_'.$row.'_'.$col.'"  name="phaseexpopt_'.$row.'_'.$col.'" type="checkbox" value="1" ' . (($data_matrix[$row][$col]['phase_explain'] != NULL) ? 'checked="checked"':'') . '  onchange="update_icons(\'phaseexp\','.$row.','.$col.', '.count($rows).','.count($columns).',\''.$data_matrix[$row][$col]['color_code'].'\')" />Phase explain&nbsp;<img align="right" src="images/phaseexp.png"  style="vertical-align:bottom; width:11px; height:11px;"/></a>'
 					 .'</div>';
 					 
 				$out .= '<script type="text/javascript">cssdropdown.startchrome("chromemenu_'.$row.'_'.$col.'");</script>';
@@ -1265,11 +1267,11 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 						.'<tr><td style="background-color:#fff;">'
 						.'<font style="color:#206040; font-weight: 900;"><br/>&nbsp;Bomb value: </font> <font style="color:#000000; font-weight: 900;">';
 						
-						$out .='<select '.(($disabled) ? ' disabled="disabled" ':'').' id="bombselect_'.$row.'_'.$col.'" onchange="bicon_change(bombselect_'.$row.'_'.$col.', bombimg_'.$row.'_'.$col.','.$row.','.$col.', '.count($rows).','.count($columns).')" class="field" name="bomb['.$row.']['.$col.']">';
+						$out .='<select id="bombselect_'.$row.'_'.$col.'" onchange="bicon_change(bombselect_'.$row.'_'.$col.', bombimg_'.$row.'_'.$col.','.$row.','.$col.', '.count($rows).','.count($columns).')" class="field" name="bomb['.$row.']['.$col.']">';
 						$out .= '<option value="none" '.(($data_matrix[$row][$col]['bomb']['value'] == 'none' || $data_matrix[$row][$col]['bomb']['value'] == '' || $data_matrix[$row][$col]['bomb']['value'] == NULL) ? ' selected="selected"' : '') .'>None</option>';
 						$out .= '<option value="small" '.(($data_matrix[$row][$col]['bomb']['value'] == 'small') ? ' selected="selected"' : '') .'>Small Bomb</option>';
 						$out .= '<option value="large" '.(($data_matrix[$row][$col]['bomb']['value'] == 'large') ? ' selected="selected"' : '') .'>Large Bomb</option>';
-						$out .= '</select><br/><br/></font><font style="color:#206040; font-weight: 900;">&nbsp;Bomb details: <br/></font><textarea onkeyup="refresher('.$row.','.$col.', '.count($rows).','.count($columns).')" onkeypress="refresher('.$row.','.$col.', '.count($rows).','.count($columns).')" onchange="refresher('.$row.','.$col.', '.count($rows).','.count($columns).')" align="left" '.(($disabled) ? ' readonly="readonly" ':'').' name="bomb_explain['.$row.']['.$col.']" id="bomb_explain_'.$row.'_'.$col.'"  rows="5" cols="20" style="overflow:scroll; width:280px; height:80px; padding-left:10px; ">'. $data_matrix[$row][$col]['bomb_explain'] .'</textarea>';
+						$out .= '</select><br/><br/></font><font style="color:#206040; font-weight: 900;">&nbsp;Bomb details: <br/></font><textarea onkeyup="refresher('.$row.','.$col.', '.count($rows).','.count($columns).')" onkeypress="refresher('.$row.','.$col.', '.count($rows).','.count($columns).')" onchange="refresher('.$row.','.$col.', '.count($rows).','.count($columns).')" align="left" name="bomb_explain['.$row.']['.$col.']" id="bomb_explain_'.$row.'_'.$col.'"  rows="5" cols="20" style="overflow:scroll; width:280px; height:80px; padding-left:10px; ">'. $data_matrix[$row][$col]['bomb_explain'] .'</textarea>';
 						
 						$out .= '<input type="hidden" value=" ' . (($data_matrix[$row][$col]['bomb']['value'] == 'none' || $data_matrix[$row][$col]['bomb']['value'] == '' || $data_matrix[$row][$col]['bomb']['value'] == NULL) ? 'none':$data_matrix[$row][$col]['bomb']['value']) . ' " name="bk_bomb['.$row.']['.$col.']" id="bk_bombselect_'.$row.'_'.$col.'" />'
 						.'<textarea name="bk_bomb_explain['.$row.']['.$col.']" id="bk_bomb_explain_'.$row.'_'.$col.'" style="overflow:scroll; display:none;" rows="5" cols="20">'. $data_matrix[$row][$col]['bomb_explain'] .'</textarea>'
@@ -1288,7 +1290,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 						.'<table style="background-color:#fff;">';
 						
 						$out .= '<tr><td style="background-color:#fff;">'
-						.'<font style="color:#206040; font-weight: 900;">&nbsp;Filing details: <br/></font><textarea onkeyup="refresher('.$row.','.$col.', '.count($rows).','.count($columns).')" onkeypress="refresher('.$row.','.$col.', '.count($rows).','.count($columns).')" onchange="refresher('.$row.','.$col.', '.count($rows).','.count($columns).')" align="left" '.(($disabled) ? ' readonly="readonly" ':'').' id="filing_'.$row.'_'.$col.'" name="filing['.$row.']['.$col.']"  rows="5" cols="20" style="overflow:scroll; width:280px; height:60px; padding-left:10px; ">'. $data_matrix[$row][$col]['filing'] .'</textarea>'
+						.'<font style="color:#206040; font-weight: 900;">&nbsp;Filing details: <br/></font><textarea onkeyup="refresher('.$row.','.$col.', '.count($rows).','.count($columns).')" onkeypress="refresher('.$row.','.$col.', '.count($rows).','.count($columns).')" onchange="refresher('.$row.','.$col.', '.count($rows).','.count($columns).')" align="left" id="filing_'.$row.'_'.$col.'" name="filing['.$row.']['.$col.']"  rows="5" cols="20" style="overflow:scroll; width:280px; height:60px; padding-left:10px; ">'. $data_matrix[$row][$col]['filing'] .'</textarea>'
 						.'<textarea id="bk_filing_'.$row.'_'.$col.'" name="bk_filing['.$row.']['.$col.']" style="overflow:scroll; display:none;" rows="5" cols="20">'. $data_matrix[$row][$col]['filing'] .'</textarea>'
 						.'</td></tr>'
 						.'<tr><th style="background-color:#fff;">&nbsp;</th></tr>'
@@ -1306,7 +1308,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 							.'<table style="background-color:#fff;">';
 							
 						$out .= '<tr style="background-color:#fff; border:none;"><td style="background-color:#fff; border:none;">'
-							.'<font style="color:#206040; font-weight: 900;">&nbsp;Phase explain: <br/></font><textarea onkeyup="refresher('.$row.','.$col.', '.count($rows).','.count($columns).')" onkeypress="refresher('.$row.','.$col.', '.count($rows).','.count($columns).')" onchange="refresher('.$row.','.$col.', '.count($rows).','.count($columns).')" align="left" '.(($disabled) ? ' readonly="readonly" ':'').' id="phase_explain_'.$row.'_'.$col.'" name="phase_explain['.$row.']['.$col.']"  rows="5" cols="20" style="overflow:scroll; width:280px; height:60px; padding-left:10px; ">'. $data_matrix[$row][$col]['phase_explain'] .'</textarea>'
+							.'<font style="color:#206040; font-weight: 900;">&nbsp;Phase explain: <br/></font><textarea onkeyup="refresher('.$row.','.$col.', '.count($rows).','.count($columns).')" onkeypress="refresher('.$row.','.$col.', '.count($rows).','.count($columns).')" onchange="refresher('.$row.','.$col.', '.count($rows).','.count($columns).')" align="left" id="phase_explain_'.$row.'_'.$col.'" name="phase_explain['.$row.']['.$col.']"  rows="5" cols="20" style="overflow:scroll; width:280px; height:60px; padding-left:10px; ">'. $data_matrix[$row][$col]['phase_explain'] .'</textarea>'
 							.'<textarea id="bk_phase_explain_'.$row.'_'.$col.'" name="bk_phase_explain['.$row.']['.$col.']" style="overflow:scroll; display:none;" rows="5" cols="20">'. $data_matrix[$row][$col]['phase_explain'] .'</textarea>'
 							//.'<div align="left" width="200px" style="overflow:scroll; width:200px; height:150px; padding-left:10px;" id="filing">'. $data_matrix[$row][$col]['phase_explain'] .'</div>'
 							.'</td></tr>'
@@ -1356,11 +1358,12 @@ function Download_reports()
 	if(!isset($_POST['id'])) return;
 	$id = mysql_real_escape_string(htmlspecialchars($_POST['id']));
 	if(!is_numeric($id)) return;
-	$query = 'SELECT name,user,footnotes,description,category,shared,dtt FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
+	$query = 'SELECT name,user,footnotes,description,category,shared,dtt,total FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
 	$res = mysql_query($query) or die('Bad SQL query getting master heatmap report'.$query);
 	$res = mysql_fetch_array($res) or die('Report not found.');
 	$rptu = $res['user'];
 	$shared = $res['shared'];
+	$toal_fld=$res['total'];
 	$dtt = $res['dtt'];
 	$name = $res['name'];
 	$footnotes = htmlspecialchars($res['footnotes']);
@@ -1644,7 +1647,7 @@ function Download_reports()
 						. '<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" />'
 						. '<title>Larvol Master Heatmap Export</title>'
 						. '<style type="text/css">'
-						. 'body { font-family:Verdana; font-color:black; font-size: 16px;}'
+						. 'body { font-family:Verdana; font-color:black; font-size: 8px;}'
 						. 'a, a:hover{color:#000000;text-decoration:none; height:100%;}';
 						
 						if($_POST['dwformat']=='pdfdown') //0.5px border value does not work for Chrome and IE and 1px border looks dark in PDF
@@ -1706,7 +1709,7 @@ function Download_reports()
 			
 		}
 		//if total checkbox is selected
-		if(isset($_POST['total_col']) && $_POST['total_col'] == "1")
+		if(isset($toal_fld) && $toal_fld == "1")
 		{
 			$pdfContent .= '<th width="150px"><div align="center">';
 			if(!empty($productIds) && !empty($areaIds))
@@ -1736,7 +1739,7 @@ function Download_reports()
 			$pdfContent .= '<tr style="page-break-inside:avoid;" nobr="true"><th height="0px" style="height:0px; border-top:none; border:none;">&nbsp;</th>';
 			foreach($columns as $col => $val)
 				$pdfContent .= '<th height="0px" style="height:0px; border-top:none; border:none;">&nbsp;</th>';
-			if(isset($_POST['total_col']) && $_POST['total_col'] == "1")
+			if(isset($toal_fld) && $toal_fld == "1")
 				$pdfContent .= '<th height="0px" style="height:0px; border-top:none; border:none;">&nbsp;</th>';
 			$pdfContent .= '</tr>';		
 		}
@@ -1831,7 +1834,7 @@ function Download_reports()
 				$pdfContent .= '</td>';
 			}
 			//if total checkbox is selected
-			if(isset($_POST['total_col']) && $_POST['total_col'] == "1")
+			if(isset($toal_fld) && $toal_fld == "1")
 			{
 				$pdfContent .= '<th>&nbsp;</th>';
 			}
@@ -2014,7 +2017,7 @@ function Download_reports()
 			}
 		}
 		
-		if(isset($_POST['total_col']) && $_POST['total_col'] == "1")
+		if(isset($toal_fld) && $toal_fld == "1")
 		{
 			$objPHPExcel->getActiveSheet()->getColumnDimension(num2char($col+1))->setWidth(18);
 			$objPHPExcel->getActiveSheet()->getStyle(num2char($col+1))->getAlignment()->applyFromArray(
@@ -2113,7 +2116,7 @@ function Download_reports()
 			}
 		}
 		
-		if(isset($_POST['total_col']) && $_POST['total_col'] == "1")
+		if(isset($toal_fld) && $toal_fld == "1")
 		{
 			if($_POST['dwcount']=='active')
 			{
@@ -2256,33 +2259,39 @@ function postEd()
 		$_GET['id'] = $newid;
 	}
 	
-	if(($rptu === NULL && $db->user->userlevel == 'user') || ($rptu !== NULL && $rptu != $db->user->id)) return;
-
+	
 	$maxrow = 0;
 	$maxcolumn = 0;
 	$types = array('product','area');
-	foreach($types as $t)
+	
+	if(($rptu === NULL && $db->user->userlevel != 'user') || ($rptu !== NULL && $rptu == $db->user->id)) 	///Restriction on editing
 	{
-		$maxvar = 'max' . $t;
-		if(isset($_POST['add'.$t]) || isset($_POST['del'.$t]))
+		
+		foreach($types as $t)
 		{
-			$query = 'SELECT MAX(num) AS "prevnum" FROM rpt_masterhm_headers WHERE report=' . $id
+			$maxvar = 'max' . $t;
+			if(isset($_POST['add'.$t]) || isset($_POST['del'.$t]))
+			{
+				$query = 'SELECT MAX(num) AS "prevnum" FROM rpt_masterhm_headers WHERE report=' . $id
 						. ' AND type="' . $t . '" GROUP BY report LIMIT 1';
-			$res = mysql_query($query) or die('Bad SQL query getting max ' . $t . ' number');
-			$res = mysql_fetch_array($res);
-			if($res !== false) $$maxvar = $res['prevnum'];
-		}
-		if(isset($_POST['add'.$t]))
-		{
-			$query = 'INSERT INTO rpt_masterhm_headers SET report=' . $id . ',type="' . $t . '",num=' . ($$maxvar + 1);
-			mysql_query($query) or die('Bad SQL Query adding ' . $t);
-		}
-		if(isset($_POST['del'.$t]))
-		{
-			$query = 'DELETE FROM rpt_masterhm_headers WHERE report=' . $id . ' AND num=' . $$maxvar . ' AND type="' . $t . '" LIMIT 1';
-			mysql_query($query) or die('Bad SQL Query removing ' . $t);
+				$res = mysql_query($query) or die('Bad SQL query getting max ' . $t . ' number');
+				$res = mysql_fetch_array($res);
+				if($res !== false) $$maxvar = $res['prevnum'];
+			}
+			if(isset($_POST['add'.$t]))
+			{
+				$query = 'INSERT INTO rpt_masterhm_headers SET report=' . $id . ',type="' . $t . '",num=' . ($$maxvar + 1);
+				mysql_query($query) or die('Bad SQL Query adding ' . $t);
+			}
+			if(isset($_POST['del'.$t]))
+			{
+				$query = 'DELETE FROM rpt_masterhm_headers WHERE report=' . $id . ' AND num=' . $$maxvar . ' AND type="' . $t . '" LIMIT 1';
+				mysql_query($query) or die('Bad SQL Query removing ' . $t);
+				}
 		}
 	}
+	
+	
 	if(isset($_POST['reportsave']) || $_POST['reportsave_flg']==1)
 	{
 		$footnotes = mysql_real_escape_string($_POST['footnotes']);
@@ -2311,33 +2320,124 @@ function postEd()
 		
 		$category = mysql_real_escape_string($_POST['reportcategory']);
 		
-		$query = 'UPDATE rpt_masterhm SET name="' . mysql_real_escape_string($_POST['reportname']) . '",user=' . $owner
-					. ',footnotes="' . $footnotes . '",description="' . $description . '"'
-					. ',category="' . $category . '",shared="' . $shared . '",total=' . $total_col . ',dtt=' . $dtt . '' . ' WHERE id=' . $id . ' LIMIT 1';
-		mysql_query($query) or die('Bad SQL Query saving name');
+		if(($rptu === NULL && $db->user->userlevel != 'user') || ($rptu !== NULL && $rptu == $db->user->id)) 	///Restriction on report saving
+		{
 		
-		foreach($types as $t)
-		{	
-			foreach($_POST[$t."s"] as $num => $header)
+			$originDT_query = 'SELECT `name`, `user`, `footnotes`, `description`, `category`, `shared`, `total`, `dtt` FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
+			$originDT=mysql_query($originDT_query) or die ('Bad SQL Query getting Original Master Header Table Information Before Updating.<br/>'.$query);
+			$originDT = mysql_fetch_array($originDT);
+		
+			$change_flag=0;
+			
+			$query = 'UPDATE rpt_masterhm SET';
+			
+			if(trim($_POST['reportname']) != trim($originDT['name']))
 			{
-				if($header != "") 
-				{
-					if($t == 'area')
-					$display_name=mysql_real_escape_string($_POST['areas_display'][$num]);
-					else
-					$display_name='NULL';
-					
-					$category=mysql_real_escape_string($_POST['category_'.$t][$num]);
-					
-					$query = "select id from " . $t . "s where name='" . mysql_real_escape_string($header) . "' ";
-					$row = mysql_fetch_assoc(mysql_query($query)) or die('Bad SQL Query getting ' . $t . ' names ');
-					
-					$query = 'UPDATE rpt_masterhm_headers SET type_id="' . mysql_real_escape_string($row['id']) 
-					. '", `display_name` = "' . $display_name . '", `category` = "' . $category . '" WHERE report=' . $id . ' AND num=' . $num . ' AND type="' . $t . '" LIMIT 1';
-					mysql_query($query) or die('Bad SQL Query saving ' . $t . ' names '); 
-				}
+				$query .= ' `name`="' . mysql_real_escape_string($_POST['reportname']) . '",';
+				$change_flag=1;
 			}
-		}//exit;
+			
+			if(trim($owner) != trim($originDT['user']))
+			{
+				$query .= ' `user`=' . $owner . ',';
+				$change_flag=1;
+			}
+			
+			if(trim($footnotes) != trim($originDT['footnotes']))
+			{
+				$query .= ' `footnotes`="' . $footnotes . '",';
+				$change_flag=1;
+			}
+			
+			if(trim($description) != trim($originDT['description']))
+			{
+				$query .= ' `description`="' . $description . '",';
+				$change_flag=1;
+			}
+			
+			if(trim($category) != trim($originDT['category']))
+			{
+				$query .= ' `category`="' . $category . '",';
+				$change_flag=1;
+			}
+			
+			if(trim($shared) != trim($originDT['shared']))
+			{
+				$query .= ' `shared`="' . $shared . '",';
+				$change_flag=1;
+			}
+			
+			if(trim($total_col) != trim($originDT['total']))
+			{
+				$query .= ' `total`=' . $total_col . ',';
+				$change_flag=1;
+			}
+			
+			if(trim($dtt) != trim($originDT['dtt']))
+			{
+				$query .= ' `dtt`=' . $dtt . ',';
+				$change_flag=1;
+			}
+			
+			if($change_flag)
+			{
+				$query = substr($query, 0, -1); //strip last comma
+				$query .= ' WHERE id=' . $id . ' LIMIT 1';
+				mysql_query($query) or die('Bad SQL Query saving report');
+			}
+			
+		
+		
+			foreach($types as $t)
+			{	
+				foreach($_POST[$t."s"] as $num => $header)
+				{
+					if($header != "") 
+					{
+						if($t == 'area')
+						$display_name=mysql_real_escape_string($_POST['areas_display'][$num]);
+						else
+						$display_name='NULL';
+							
+						$category=mysql_real_escape_string($_POST['category_'.$t][$num]);
+						
+						$query = "select id from " . $t . "s where name='" . mysql_real_escape_string($header) . "' ";
+						$row = mysql_fetch_assoc(mysql_query($query)) or die('Bad SQL Query getting ' . $t . ' names ');
+					
+						$originDT_query = 'SELECT `type_id`, `display_name`, `category` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' AND num=' . $num . ' AND type="' . $t . '" LIMIT 1';
+						$originDT=mysql_query($originDT_query) or die ('Bad SQL Query getting Original Master Header Table Information Before Updating.<br/>'.$query);
+						$originDT = mysql_fetch_array($originDT);
+						
+						$change_flag=0;
+						$query = 'UPDATE rpt_masterhm_headers SET';
+						
+						if(trim($row['id']) != trim($originDT['type_id']))
+						{
+							$query .= ' type_id="' . mysql_real_escape_string($row['id']) . '",';
+							$change_flag=1;
+						}
+						if(trim($display_name) != trim($originDT['display_name']))
+						{
+							$query .= ' `display_name` = "' . $display_name . '",';
+							$change_flag=1;
+						}
+						
+						if(trim($category) != trim($originDT['category']))
+						{
+							$query .= ' `category` = "' . $category . '",';
+							$change_flag=1;
+						}
+						
+						if($change_flag)
+						{
+							$query = substr($query, 0, -1); //strip last comma
+							$query .= ' WHERE report=' . $id . ' AND num=' . $num . ' AND type="' . $t . '" LIMIT 1';
+							mysql_query($query) or die('Bad SQL Query saving ' . $t . ' names '); 
+						}
+					}
+				}
+			}//exit;
+		}///Restriction on report saving ends
 		
 		if(isset($_POST['cell_prod']) && !empty($_POST['cell_prod']))
 		{
@@ -2415,7 +2515,11 @@ function postEd()
 			}
 		}
 	}
+	
+	
 
+	if(($rptu === NULL && $db->user->userlevel == 'user') || ($rptu !== NULL && $rptu != $db->user->id)) return;	///Restriction on report saving
+	
 	if(isset($_POST['move_row_down']))
 	{
 		//the real value is the first key in the array in this value

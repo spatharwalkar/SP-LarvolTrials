@@ -9401,7 +9401,20 @@ class TrialTracker
 		},  $TrialsInfo);
 		
 		
-		$new_active = 0; $new_inactive = 0; $new_total = 0;
+		$new_active = 0; $new_inactive = 0; $new_total = 0; $larvolIds = array();
+		
+		if(strpos($globalOptions['startrange'], 'ago') !== FALSE)
+		{
+			$timeMachine = str_replace('ago', '', $globalOptions['startrange']);
+			$timeMachine = trim($timeMachine);
+			$timeMachine = '-' . (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
+		}
+		else
+		{
+			$timeMachine = trim($globalOptions['startrange']);
+			$timeMachine = (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
+		}
+		$timeMachine = strtotime($timeMachine);
 		
 		if(isset($globalOptions['product']) && $globalOptions['product'] != '')
 		{	
@@ -9424,13 +9437,14 @@ class TrialTracker
 			$Trials = array_values($Trials);
 		}
 		
+		///Calculate new count values
 		foreach($allTrials as $i => $arr)
 		{
-			if(isset($globalOptions['product']) && $globalOptions['product'] != '') ///When product field is set calculate new counts
+			if(isset($globalOptions['product']) && $globalOptions['product'] != '') ///When product field is set calculate new counts for that product
 			{
-				if($allTrials[$i]['section'] == $globalOptions['product'])
+				if($ottType == 'indexed')
 				{
-					if($allTrials[$i]['NCT/is_active'] != NULL && trim($allTrials[$i]['NCT/is_active']) != '')
+					if($allTrials[$i]['section'] == $globalOptions['product'])
 					{
 						if($allTrials[$i]['NCT/is_active'] == 1)
 						$new_active++;
@@ -9438,20 +9452,40 @@ class TrialTracker
 						$new_inactive++;
 					}
 				}
+				else
+				{
+					if($allTrials[$i]['section'] == $globalOptions['product'])
+					{
+						if(trim($allTrials[$i]['larvol_id']) != '' && $allTrials[$i]['larvol_id'] != NULL)
+						$larvolIds[] = $allTrials[$i]['larvol_id'];
+						$new_total = count($larvolIds);
+						$new_active = getActiveCount($larvolIds, $timeMachine);
+						$new_inactive = $new_total - $new_active; 
+					}
+				}
 			}
 			else	//When product is unset count reset again
 			{
-				if($allTrials[$i]['NCT/is_active'] != NULL && trim($allTrials[$i]['NCT/is_active']) != '')
+				if($ottType == 'indexed')
 				{
 					if($allTrials[$i]['NCT/is_active'] == 1)
 					$new_active++;
 					else
 					$new_inactive++;
 				}
+				else
+				{
+					if(trim($allTrials[$i]['larvol_id']) != '' && $allTrials[$i]['larvol_id'] != NULL)
+					$larvolIds[] = $allTrials[$i]['larvol_id'];
+					$new_total = count($larvolIds);
+					$new_active = getActiveCount($larvolIds, $timeMachine);
+					$new_inactive = $new_total - $new_active; 
+				}
 			}
 		}
-			
+		
 		$new_total = $new_active+$new_inactive;
+		///End - Calculate new count values
 		
 		$count = count($Trials);
 		$start 	= '';
