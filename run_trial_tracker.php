@@ -223,15 +223,39 @@ class TrialTracker
 				{
 					foreach($resultIds['area'] as $akey => $avalue)
 					{
-						$res = mysql_query("SELECT `display_name`, `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
-						if(mysql_num_rows($res) > 0)
+						if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve display name from heatmap report
 						{
-							while($row = mysql_fetch_assoc($res))
+							$res = mysql_query("SELECT `display_name`, `type_id` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $avalue . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'area'");
+							if(mysql_num_rows($res) > 0)
 							{
-								$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : $row['name'];
-								
-								$Ids[$akey]['product'] = '';
-								$Ids[$akey]['area'] = $row['id'];
+								while($row = mysql_fetch_assoc($res))
+								{
+									$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : "Area ".$row['type_id'];	//if area has no display name, just display id
+									
+									$Ids[$akey]['product'] = '';
+									$Ids[$akey]['area'] = $row['type_id'];
+								}
+							}
+							else	//if area not found in report, just display id
+							{
+									$TrialsInfo[$akey]['sectionHeader'] = "Area ".$avalue;
+									
+									$Ids[$akey]['product'] = '';
+									$Ids[$akey]['area'] = $avalue;
+							}
+						}
+						else	//if no hm field
+						{
+							$res = mysql_query("SELECT `display_name`, `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
+							if(mysql_num_rows($res) > 0)
+							{
+								while($row = mysql_fetch_assoc($res))
+								{
+									$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : "Area ".$row['id'];
+									
+									$Ids[$akey]['product'] = '';
+									$Ids[$akey]['area'] = $row['id'];
+								}
 							}
 						}
 					}
@@ -247,12 +271,36 @@ class TrialTracker
 					$this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
 					foreach($resultIds['area'] as $akey => $avalue)
 					{
-						$res = mysql_query("SELECT `display_name`, `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
-						$row = mysql_fetch_assoc($res);
-						
-						$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : $row['name'];
-						$Ids[$akey]['area'] = $row['id'];
-						$Ids[$akey]['product'] = $prow['id'];
+						if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve display name from heatmap report
+						{
+							$res = mysql_query("SELECT `display_name`, `type_id` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $avalue . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'area'");
+							if(mysql_num_rows($res) > 0)
+							{
+								while($row = mysql_fetch_assoc($res))
+								{
+									$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : "Area ".$row['type_id'];	//if area has no display name, just display id
+									
+									$Ids[$akey]['product'] = $prow['id'];
+									$Ids[$akey]['area'] = $row['type_id'];
+								}
+							}
+							else	//if area not found in report, just display id
+							{
+									$TrialsInfo[$akey]['sectionHeader'] = "Area ".$avalue;
+									
+									$Ids[$akey]['product'] = $prow['id'];
+									$Ids[$akey]['area'] = $avalue;
+							}
+						}
+						else	//if no hm field
+						{
+							$res = mysql_query("SELECT `display_name`, `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
+							$row = mysql_fetch_assoc($res);
+							
+							$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : "Area ".$row['id'];
+							$Ids[$akey]['area'] = $row['id'];
+							$Ids[$akey]['product'] = $prow['id'];
+						}
 					}
 				}
 				else
@@ -4384,15 +4432,39 @@ class TrialTracker
 				{
 					foreach($resultIds['area'] as $akey => $avalue)
 					{
-						$res = mysql_query("SELECT `display_name`, `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
-						if(mysql_num_rows($res) > 0)
+						if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve display name from heatmap report
 						{
-							while($row = mysql_fetch_assoc($res))
+							$res = mysql_query("SELECT `display_name`, `type_id` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $avalue . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'area'");
+							if(mysql_num_rows($res) > 0)
 							{
-								$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : $row['name'];
+								while($row = mysql_fetch_assoc($res))
+								{
+									$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : "Area ".$row['type_id'];	//if area has no display name, just display id
+									
+									$Ids[$akey]['product'] = '';
+									$Ids[$akey]['area'] = $row['type_id'];
+								}
+							}
+							else	//if area not found in report, just display id
+							{
+									$TrialsInfo[$akey]['sectionHeader'] = "Area ".$avalue;
+									
+									$Ids[$akey]['product'] = '';
+									$Ids[$akey]['area'] = $avalue;
+							}
+						}
+						else	//if no hm field
+						{
+							$res = mysql_query("SELECT `display_name`, `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
+							if(mysql_num_rows($res) > 0)
+							{
+								while($row = mysql_fetch_assoc($res))
+								{
+									$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : "Area ".$row['id'];
 								
-								$Ids[$akey]['product'] = '';
-								$Ids[$akey]['area'] = $row['id'];
+									$Ids[$akey]['product'] = '';
+									$Ids[$akey]['area'] = $row['id'];
+								}
 							}
 						}
 					}
@@ -4408,13 +4480,37 @@ class TrialTracker
 					
 					foreach($resultIds['area'] as $akey => $avalue)
 					{
-						$res = mysql_query("SELECT `display_name`, `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
-						$row = mysql_fetch_assoc($res);
-						
-						$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : $row['name'];
-						$Ids[$akey]['area'] = $row['id'];
+						if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve display name from heatmap report
+						{
+							$res = mysql_query("SELECT `display_name`, `type_id` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $avalue . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'area'");
+							if(mysql_num_rows($res) > 0)
+							{
+								while($row = mysql_fetch_assoc($res))
+								{
+									$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : "Area ".$row['type_id'];	//if area has no display name, just display id
+									
+									$Ids[$akey]['product'] = $prow['id'];
+									$Ids[$akey]['area'] = $row['type_id'];
+								}
+							}
+							else	//if area not found in report, just display id
+							{
+									$TrialsInfo[$akey]['sectionHeader'] = "Area ".$avalue;
+									
+									$Ids[$akey]['product'] = $prow['id'];
+									$Ids[$akey]['area'] = $avalue;
+							}
+						}
+						else	//if no hm field
+						{
+							$res = mysql_query("SELECT `display_name`, `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
+							$row = mysql_fetch_assoc($res);
+							
+							$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : "Area ".$row['id'];
+							$Ids[$akey]['area'] = $row['id'];
 
-						$Ids[$akey]['product'] = $prow['id'];
+							$Ids[$akey]['product'] = $prow['id'];
+						}
 					}
 				}
 				else
@@ -5367,13 +5463,33 @@ class TrialTracker
 				{
 					foreach($resultIds['area'] as $akey => $avalue)
 					{
-						$res = mysql_query("SELECT `display_name`, `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
-						if(mysql_num_rows($res) > 0)
+						if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve display name from heatmap report
 						{
-							while($row = mysql_fetch_assoc($res))
+							$res = mysql_query("SELECT `display_name`, `type_id` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $avalue . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'area'");
+							if(mysql_num_rows($res) > 0)
 							{
-								$Ids[$akey]['product'] = '';
-								$Ids[$akey]['area'] = $row['id'];
+								while($row = mysql_fetch_assoc($res))
+								{
+									$Ids[$akey]['area'] = $row['type_id'];
+									$Ids[$akey]['product'] = '';
+								}
+							}
+							else	//if area not found in report, just display id
+							{
+									$Ids[$akey]['area'] = $avalue;
+									$Ids[$akey]['product'] = '';
+							}
+						}
+						else	//if no hm field
+						{
+							$res = mysql_query("SELECT `display_name`, `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
+							if(mysql_num_rows($res) > 0)
+							{
+								while($row = mysql_fetch_assoc($res))
+								{
+									$Ids[$akey]['product'] = '';
+									$Ids[$akey]['area'] = $row['id'];
+								}
 							}
 						}
 					}
@@ -5654,15 +5770,39 @@ class TrialTracker
 					
 					foreach($resultIds['area'] as $akey => $avalue)
 					{
-						$res = mysql_query("SELECT `display_name`, `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
-						if(mysql_num_rows($res) > 0)
+						if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve display name from heatmap report
 						{
-							while($row = mysql_fetch_assoc($res))
+							$res = mysql_query("SELECT `display_name`, `type_id` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $avalue . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'area'");
+							if(mysql_num_rows($res) > 0)
 							{
-								$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : $row['name'];
-								
-								$Ids[$akey]['product'] = '';
-								$Ids[$akey]['area'] = $row['id'];
+								while($row = mysql_fetch_assoc($res))
+								{
+									$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : "Area ".$row['type_id'];	//if area has no display name, just display id
+									
+									$Ids[$akey]['product'] = '';
+									$Ids[$akey]['area'] = $row['type_id'];
+								}
+							}
+							else	//if area not found in report, just display id
+							{
+									$TrialsInfo[$akey]['sectionHeader'] = "Area ".$avalue;
+									
+									$Ids[$akey]['product'] = '';
+									$Ids[$akey]['area'] = $avalue;
+							}
+						}
+						else	//if no hm field
+						{
+							$res = mysql_query("SELECT `display_name`, `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
+							if(mysql_num_rows($res) > 0)
+							{
+								while($row = mysql_fetch_assoc($res))
+								{
+									$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : "Area ".$row['id'];
+									
+									$Ids[$akey]['product'] = '';
+									$Ids[$akey]['area'] = $row['id'];
+								}
 							}
 						}
 					}
@@ -5691,15 +5831,40 @@ class TrialTracker
 					
 					foreach($resultIds['area'] as $akey => $avalue)
 					{
-						$res = mysql_query("SELECT `display_name`, `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
-						if(mysql_num_rows($res) > 0)
+						if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve display name from heatmap report
 						{
-							while($row = mysql_fetch_assoc($res))
+							$res = mysql_query("SELECT `display_name`, `type_id` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $avalue . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'area'");
+							
+							if(mysql_num_rows($res) > 0)
 							{
-								$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : $row['name'];
-								
-								$Ids[$akey]['product'] = $productId;
-								$Ids[$akey]['area'] = $row['id'];
+								while($row = mysql_fetch_assoc($res))
+								{
+									$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : "Area ".$row['type_id'];	//if area has no display name, just display id
+									
+									$Ids[$akey]['product'] = $productId;
+									$Ids[$akey]['area'] = $row['type_id'];
+								}
+							}
+							else	//if area not found in report, just display id
+							{
+									$TrialsInfo[$akey]['sectionHeader'] = "Area ".$avalue;
+									
+									$Ids[$akey]['product'] = $productId;
+									$Ids[$akey]['area'] = $avalue;
+							}
+						}
+						else	//if no hm field
+						{
+							$res = mysql_query("SELECT `display_name`, `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
+							if(mysql_num_rows($res) > 0)
+							{
+								while($row = mysql_fetch_assoc($res))
+								{
+									$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : "Area ".$row['id'];
+									
+									$Ids[$akey]['product'] = $productId;
+									$Ids[$akey]['area'] = $row['id'];
+								}
 							}
 						}
 					}
@@ -5710,10 +5875,31 @@ class TrialTracker
 				}
 				else
 				{
-					$res = mysql_query("SELECT `display_name`, `name`, `id` FROM `areas` WHERE id IN ('" . implode("','", $resultIds['area']) . "') ");
-					$row = mysql_fetch_assoc($res);
-					$areaName = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : $row['name'];
-					$areaId = $row['id'];
+					
+					if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve display name from heatmap report
+					{
+						$res = mysql_query("SELECT `display_name`, `type_id` FROM `rpt_masterhm_headers` WHERE `type_id` IN ('" . implode("','", $resultIds['area']) . "') AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'area'");
+						if(mysql_num_rows($res) > 0)
+						{
+							while($row = mysql_fetch_assoc($res))
+							{
+								$areaName = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : "Area ".$row['type_id'];	//if area has no display name, just display id
+								$areaId = $row['type_id'];
+							}
+						}
+						else	//if area not found in report, just display id
+						{
+								$areaName = "Area ".$avalue;
+								$areaId = $avalue;
+						}
+					}
+					else
+					{
+						$res = mysql_query("SELECT `display_name`, `name`, `id` FROM `areas` WHERE id IN ('" . implode("','", $resultIds['area']) . "') ");
+						$row = mysql_fetch_assoc($res);
+						$areaName = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : "Area ".$row['id'];;
+						$areaId = $row['id'];
+					}
 					
 					$ottType = 'colstackedindexed';
 					
@@ -5742,11 +5928,35 @@ class TrialTracker
 			}
 			else 
 			{	
-				$res = mysql_query("SELECT `display_name`, `name`, `id` FROM `areas` WHERE id IN ('" . implode(',', $resultIds['area']) . "') ");
-				$row = mysql_fetch_assoc($res);
-				$Ids[0]['area'] = $row['id'];
-				$row['name'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : $row['name'];
-				$t = 'Area: ' . htmlformat($row['name']);
+				if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve display name from heatmap report
+				{
+					$res = mysql_query("SELECT `display_name`, `type_id` FROM `rpt_masterhm_headers` WHERE `type_id` IN ('" . implode("','", $resultIds['area']) . "') AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'area'");
+					if(mysql_num_rows($res) > 0)
+					{
+						while($row = mysql_fetch_assoc($res))
+						{
+							$Ids[0]['area'] = $row['type_id'];
+							$areaName = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : "Area ".$row['type_id'];	//if area has no display name, just display id
+									
+							$t = 'Area: ' . htmlformat($areaName);
+						}
+					}
+					else	//if area not found in report, just display id
+					{
+							$Ids[0]['area'] = $row['type_id'];
+							$areaName = "Area ".$avalue;
+							
+							$t = 'Area: ' . htmlformat($areaName);
+					}
+				}
+				else
+				{
+					$res = mysql_query("SELECT `display_name`, `name`, `id` FROM `areas` WHERE id IN ('" . implode(',', $resultIds['area']) . "') ");
+					$row = mysql_fetch_assoc($res);
+					$Ids[0]['area'] = $row['id'];
+					$row['name'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : "Area ".$row['id'];
+					$t = 'Area: ' . htmlformat($row['name']);
+				}
 				$this->displayHeader($t);
 				
 				$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id IN ('" . implode(',', $resultIds['product']) 
@@ -5768,6 +5978,9 @@ class TrialTracker
 			
 			if(isset($_GET['JSON_search']))
 			echo '<input type="hidden" name="JSON_search" value=\'' . $_GET['JSON_search'] . '\'/>';
+			
+			if(isset($_GET['hm']) && trim($_GET['hm']) != '' && $_GET['hm'] != NULL)
+			echo '<input type="hidden" name="hm" value="' . $_GET['hm'] . '"/>';
 			
 			$Values = $this->processIndexedOTTData($ottType, $Ids, $timeMachine, $globalOptions);
 			
@@ -9442,7 +9655,7 @@ class TrialTracker
 		{
 			if(isset($globalOptions['product']) && $globalOptions['product'] != '') ///When product field is set calculate new counts for that product
 			{
-				if($ottType == 'indexed')
+				if($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed')
 				{
 					if($allTrials[$i]['section'] == $globalOptions['product'])
 					{
@@ -9466,7 +9679,7 @@ class TrialTracker
 			}
 			else	//When product is unset count reset again
 			{
-				if($ottType == 'indexed')
+				if($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed')
 				{
 					if($allTrials[$i]['NCT/is_active'] == 1)
 					$new_active++;

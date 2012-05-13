@@ -430,6 +430,11 @@ else if(isset($_GET['p']) && isset($_GET['a']))
 		$globalOptions['url'] = 'p=' . $_GET['p'] . '&a=' . $_GET['a'] . '&JSON_search=' . $_GET['JSON_search'];
 		$globalOptions['JSON_search'] = $_GET['JSON_search'];
 	}
+	if(isset($_GET['hm']) && trim($_GET['hm']) != '' && $_GET['hm'] != NULL)
+	{
+		$globalOptions['url'] .= '&hm=' . $_GET['hm'];
+		$globalOptions['hm'] = $_GET['hm'];
+	}
 	
 	$tt->generateTrialTracker('indexed', array('product' => $_GET['p'], 'area' => $_GET['a']), $_GET['time'], 'indexed', $globalOptions);
 }

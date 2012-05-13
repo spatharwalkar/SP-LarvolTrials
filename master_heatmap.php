@@ -1703,7 +1703,7 @@ function Download_reports()
 				{
 					$count_val=$col_indlead_total[$col];
 				}
-				$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. '" target="_blank" title="'. $title .'">'.$count_val.'</a>';
+				$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. '&hm=' . $id . '" target="_blank" title="'. $title .'">'.$count_val.'</a>';
 			}
 			$pdfContent .='</div></th>';
 			
@@ -1728,7 +1728,7 @@ function Download_reports()
 				}
 				$productIds = array_filter($productIds);
 				$areaIds = array_filter($areaIds);
-				$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds). '" target="_blank" title="'. $title .'">'.$count_val.'</a>';
+				$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds). '&hm=' . $id . '" target="_blank" title="'. $title .'">'.$count_val.'</a>';
 			}
 			$pdfContent .= '</div></th>';
 		}
@@ -1765,7 +1765,7 @@ function Download_reports()
 				{
 					$count_val=$row_indlead_total[$row];
 				}
-				$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). '" target="_blank" class="ottlink" title="'. $title .'">'.$count_val.'</a>';
+				$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). '&hm=' . $id . '" target="_blank" class="ottlink" title="'. $title .'">'.$count_val.'</a>';
 			}
 			$pdfContent .= '</div></th>';
 			
@@ -1789,11 +1789,9 @@ function Download_reports()
 						$count_val=$data_matrix[$row][$col]['indlead'];
 					}
 				
-					$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '" target="_blank" title="'. $title .'">'. $count_val.'</a><br/>';
+					$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '&hm=' . $id . '" target="_blank" title="'. $title .'">'. $count_val.'</a><br/>';
 					
-					if($_POST['dwformat']=='htmldown' && $data_matrix[$row][$col]['bomb']['src'] != 'square.png') //When bomb has square dont include it in pdf as size is big and no use
-					{	$pdfContent .= '<img align="right" title="'.$data_matrix[$row][$col]['bomb']['title'].'" src="'. urlPath() .'images/'.$data_matrix[$row][$col]['bomb']['src'].'" style="'.$data_matrix[$row][$col]['bomb']['style'].' vertical-align:middle; padding-right:10px; cursor:pointer;" alt="'.$data_matrix[$row][$col]['bomb']['alt'].'"'
-			.'onclick="popup_show(\'bomb\', '.count($rows).','.count($columns).',\'bombpopup_'.$row.'_'.$col.'\', \'bombpopup_drag_'.$row.'_'.$col.'\', \'bombpopup_exit_'.$row.'_'.$col.'\', \'mouse\', -10, -10);" />';				}
+					
 			
 			
 					if($_POST['dwformat']=='pdfdown') //As in PDF alignment not works space added to align it properly	
@@ -1995,7 +1993,7 @@ function Download_reports()
 				$caltTitle = (isset($cdesc) && $cdesc != '')?' alt="'.$cdesc.'" title="'.$cdesc.'" ':null;
 								
 				$objPHPExcel->getActiveSheet()->setCellValue($cell, $val.$count_val);
-				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]);
+				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col].'&hm=' . $id);
 				
 				if($cdesc)
 				{
@@ -2052,7 +2050,7 @@ function Download_reports()
 				$raltTitle = (isset($rdesc) && $rdesc != '')?' alt="'.$rdesc.'" title="'.$rdesc.'" ':null;
 				
 				$objPHPExcel->getActiveSheet()->setCellValue($cell, $rval.$count_val);
-				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds)); 
+				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds).'&hm=' . $id); 
  			    $objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip($tooltip);
  			    
  			    if($rdesc)
@@ -2091,7 +2089,7 @@ function Download_reports()
 					
 					
 					$objPHPExcel->getActiveSheet()->setCellValue($cell, $count_val);
-					$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]); 
+					$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col].'&hm=' . $id); 
  			    	$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip(substr((($data_matrix[$row][$col]['filing'] != NULL && trim($data_matrix[$row][$col]['filing']) != '')? "\nFiling:- ". $data_matrix[$row][$col]['filing'] :'') . (($data_matrix[$row][$col]['bomb_explain'] != NULL && trim($data_matrix[$row][$col]['bomb_explain']) != '') ? "\nBomb details:- ". $data_matrix[$row][$col]['bomb_explain'] : '') . (($data_matrix[$row][$col]['phase_explain'] != NULL && trim($data_matrix[$row][$col]['phase_explain']) != '') ? "\nPhase explain:- ". $data_matrix[$row][$col]['phase_explain']:'' ),0,20) );
 					
 					if($data_matrix[$row][$col]['exec_bomb']['src'] != '' && $data_matrix[$row][$col]['exec_bomb']['src'] != NULL && $data_matrix[$row][$col]['exec_bomb']['src'] !='new_square.png')
@@ -2133,7 +2131,7 @@ function Download_reports()
 					
 			$cell = num2char(count($columns)+1).'1';
 			$objPHPExcel->getActiveSheet()->setCellValue($cell, $count_val);
-			$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds));
+			$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds).'&hm=' . $id);
 			$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip($tooltip);
 		}
 		
