@@ -9614,7 +9614,8 @@ class TrialTracker
 		},  $TrialsInfo);
 		
 		
-		$new_active = 0; $new_inactive = 0; $new_total = 0; $larvolIds = array();
+		$new_active = 0; $new_inactive = 0; $new_total = 0; $prev_section ='';
+		$totinactivecount = 0; $totactivecount = 0; $totalcount = 0;
 		
 		if(strpos($globalOptions['startrange'], 'ago') !== FALSE)
 		{
@@ -9653,48 +9654,86 @@ class TrialTracker
 		///Calculate new count values
 		foreach($allTrials as $i => $arr)
 		{
-			if(isset($globalOptions['product']) && $globalOptions['product'] != '') ///When product field is set calculate new counts for that product
+			if(isset($globalOptions['product']) && trim($globalOptions['product']) != '') ///When product field is set calculate new counts for that product
 			{
-				if($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed')
+				if($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed')	//Process indexed OTT link
 				{
-					if($allTrials[$i]['section'] == $globalOptions['product'])
+					if(trim($allTrials[$i]['section']) == trim($globalOptions['product']))
 					{
-						if($allTrials[$i]['NCT/is_active'] == 1)
+						if(trim($allTrials[$i]['NCT/is_active']) == 1)
 						$new_active++;
 						else
 						$new_inactive++;
 					}
 				}
-				else
+				else	//Process old type of OTT link [Other than indexed]
 				{
-					if($allTrials[$i]['section'] == $globalOptions['product'])
+					if(trim($allTrials[$i]['section']) == trim($globalOptions['product']))
 					{
 						if(trim($allTrials[$i]['larvol_id']) != '' && $allTrials[$i]['larvol_id'] != NULL)
-						$larvolIds[] = $allTrials[$i]['larvol_id'];
-						$new_total = count($larvolIds);
-						$new_active = getActiveCount($larvolIds, $timeMachine);
-						$new_inactive = $new_total - $new_active; 
+						$larvolIds[] = trim($allTrials[$i]['larvol_id']);
 					}
 				}
 			}
 			else	//When product is unset count reset again
 			{
-				if($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed')
+				if($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed')	//Process indexed OTT link
 				{
-					if($allTrials[$i]['NCT/is_active'] == 1)
+					if(trim($allTrials[$i]['NCT/is_active']) == 1)
 					$new_active++;
 					else
 					$new_inactive++;
 				}
-				else
+				else	//Process old type of OTT link [Other than indexed]
 				{
-					if(trim($allTrials[$i]['larvol_id']) != '' && $allTrials[$i]['larvol_id'] != NULL)
-					$larvolIds[] = $allTrials[$i]['larvol_id'];
-					$new_total = count($larvolIds);
-					$new_active = getActiveCount($larvolIds, $timeMachine);
-					$new_inactive = $new_total - $new_active; 
+					if(trim($prev_section) != trim($allTrials[$i]['section']) && trim($prev_section) != '')	//If encounterd different category calculate total counts
+					{
+						$new_total = count($larvolIds);
+						$new_active = getActiveCount($larvolIds, $timeMachine);
+						$new_inactive = $new_total - $new_active; 
+						
+						$totinactivecount  = $new_inactive + $totinactivecount;
+						$totactivecount	= $new_active + $totactivecount;
+						$totalcount		= $new_total + $totalcount; 
+						$larvolIds = array();	//reset array
+						$new_inactive = 0; $new_active = 0; $new_total = 0;
+						if(trim($allTrials[$i]['larvol_id']) != '' && $allTrials[$i]['larvol_id'] != NULL)	//insert record having new category in array
+						{
+							$larvolIds[] = trim($allTrials[$i]['larvol_id']);
+							$prev_Id = $allTrials[$i]['larvol_id'];
+							$prev_section = trim($allTrials[$i]['section']);	//get its category
+						}
+					}
+					else	//if same category or first pass of loop then just add it to array
+					{
+						if(trim($allTrials[$i]['larvol_id']) != '' && $allTrials[$i]['larvol_id'] != NULL)	//insert record having new/same prev category in array
+						{
+							$larvolIds[] = trim($allTrials[$i]['larvol_id']);
+							$prev_Id = $allTrials[$i]['larvol_id'];
+							$prev_section = trim($allTrials[$i]['section']);	//get its category
+						}
+					}
 				}
 			}
+		}
+		
+		if($ottType != 'indexed' && $ottType != 'rowstackedindexed' && $ottType != 'colstackedindexed')	//For other than indexed OTT
+		{
+			$new_total = count($larvolIds);	//if last category present calculates its count
+			if($new_total > 0)
+			{
+				$new_active = getActiveCount($larvolIds, $timeMachine);
+				$new_inactive = $new_total - $new_active; 
+			
+				$totinactivecount  = $new_inactive + $totinactivecount;
+				$totactivecount	= $new_active + $totactivecount;
+				$totalcount		= $new_total + $totalcount; 	
+				$larvolIds = array();
+			}
+				
+			$new_active = $totactivecount;
+			$new_inactive = $totinactivecount;
+			$new_total = $totalCount; 
 		}
 		
 		$new_total = $new_active+$new_inactive;
