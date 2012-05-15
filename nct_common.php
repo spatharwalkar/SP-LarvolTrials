@@ -630,7 +630,7 @@ else $ddesc=$rec->detailed_descr->textblock;
         foreach ($inter->arm_group_label as $agl)
             $record_data['arm_group_label'][] = $agl;
         foreach ($inter->other_name as $oname)
-            $record_data['intervention_other_name'][] = $oname;
+            $record_data['intervention_name'][] = $oname;
     }
 //    $record_data['overall_official_name'] = array();
     $record_data['overall_official_degrees'] = array();

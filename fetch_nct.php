@@ -8,7 +8,7 @@ require_once('include.search.php');
 
 ini_set('max_execution_time', '36000'); //10 hours
 
-
+ignore_user_abort(true);
 //Globals
 $days = 0;
 $last_id = 0;
@@ -243,8 +243,8 @@ if (count($ids) == 0) {
         	$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s", strtotime('now')) . '",update_items_progress="' . $progress_count . '" WHERE update_id="' . $update_id . '"';
 	        $res = mysql_query($query) or die('Unable to update running');
 		}
-        echo('<br/>Snoring<br/>');
-        sleep(rand(5, 15));
+//		echo('<br/>Snoring<br/>');
+//        sleep(rand(5, 15));
     }
 	if($cron_run)
 	{

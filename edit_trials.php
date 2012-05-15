@@ -1598,28 +1598,7 @@ $opts['fdd']['intervention_name_lastchanged'] = array(
 );
 
 }
-	$field_exists = array_search('intervention_other_name',$cols) ;
-if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['intervention_other_name'] = array(
-  'name'     => 'Intervention other name',
-  'select'   => 'T',
-  'maxlen'   => 255,
-  'options'  => 'AVCPD', 'sort'     => false
-);
 
-if($viewmode=='YES')
-{$opts['fdd']['intervention_other_name_prev'] = array(
-  'name'     => 'Prev Intervention other name',
-  'select'   => 'T',
-  'maxlen'   => 255,
-  'options'  => 'AVCPD', 'sort'     => false
-);
-$opts['fdd']['intervention_other_name_lastchanged'] = array(
-  'name'     => 'last_changed Intervention other name',
-  'select'   => 'T',
-  'maxlen'   => 255,
-  'options'  => 'AVCPD', 'sort'     => false
-);
- }
 $field_exists = array_search('intervention_description',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['intervention_description'] = array(
   'name'     => 'Intervention description',
