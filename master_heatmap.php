@@ -2119,13 +2119,16 @@ function Download_reports()
 					
 					if($data_matrix[$row][$col]['count_lastchanged_value']==1)
 					{
+						if($data_matrix[$row][$col]['color_code'] != 'FF0000')
 						$red_font['font']['color']['rgb'] = 'FF0000';
-						//$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($red_font);
+						else
+						$red_font['font']['color']['rgb'] = 'FFFFFF';
+						$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($red_font);
 					}
 					else
 					{
 						$red_font['font']['color']['rgb'] = '000000';
-						//$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($red_font);
+						$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($red_font);
 					}
 					
 					$objPHPExcel->getActiveSheet()->setCellValue($cell, $count_val);
