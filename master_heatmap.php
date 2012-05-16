@@ -20,12 +20,6 @@ global $logger;
 ini_set('memory_limit','-1');
 ini_set('max_execution_time','36000');	//10 hours
 
-if(!$db->loggedIn())
-{
-	header('Location: ' . urlPath() . 'index.php');
-	exit;
-}
-
 /***Recalculation of cells start*/
 if(isset($_REQUEST['recalc']))
 {
@@ -165,6 +159,12 @@ if($_POST['dwformat'])
 		Download_reports();
 }
 else {
+if(!$db->loggedIn())
+{
+	header('Location: ' . urlPath() . 'index.php');
+	exit;
+}
+
 require_once('report_common.php');
 
 
@@ -1431,6 +1431,29 @@ function Download_reports()
 	
 	$columns=$new_columns;
 	/////Rearrange Completes //////////
+	
+	if(isset($_REQUEST['sr']) && isset($_REQUEST['er']))
+	{
+		$sr = $_REQUEST['sr'];
+		$er = $_REQUEST['er'];
+		$start_range = trim(str_replace('ago', '', $_REQUEST['sr']));
+		if($start_range == 'now')
+			$start_range = 'now';
+		else
+			$start_range = '-' . (($start_range == '1 quarter') ? '3 months' : $start_range);
+		
+		$end_range = trim(str_replace('ago', '', $_REQUEST['er']));
+		if($end_range == 'now')
+			$end_range = 'now';
+		else
+			$end_range = '-' . (($end_range == '1 quarter') ? '3 months' : $end_range);
+	}
+	else
+	{
+		$start_range = 'now';
+		$end_range = 'now';
+		$sr = $er = 'now';
+	}
 
 /* 	echo '<pre>';
 	print_r($rows);
@@ -1518,20 +1541,83 @@ function Download_reports()
 				}
 				
 				
-				if($cell_data['bomb'] == 'small')
+				$data_matrix[$row][$col]['last_update']=$cell_data['last_update'];
+				$data_matrix[$row][$col]['count_lastchanged']=$cell_data['count_lastchanged'];
+				$data_matrix[$row][$col]['bomb_lastchanged']=$cell_data['bomb_lastchanged'];
+				$data_matrix[$row][$col]['filing_lastchanged']=$cell_data['filing_lastchanged'];
+				$data_matrix[$row][$col]['phase_explain_lastchanged']=$cell_data['phase_explain_lastchanged'];
+				$data_matrix[$row][$col]['highest_phase_prev']=$cell_data['highest_phase_prev'];
+				$data_matrix[$row][$col]['highest_phase_lastchanged']=$cell_data['highest_phase_lastchanged'];
+				
+				
+				$data_matrix[$row][$col]['active_prev']=$cell_data['count_active_prev'];
+				$data_matrix[$row][$col]['total_prev']=$cell_data['count_total_prev'];
+				$data_matrix[$row][$col]['indlead_prev']=$cell_data['count_active_indlead_prev'];
+				
+				
+				$data_matrix[$row][$col]['update_flag'] = 0;
+				if(date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['count_lastchanged'])) <= date('Y-m-d H:i:s', strtotime($start_range, $now)) && date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['count_lastchanged'])) >= date('Y-m-d H:i:s', strtotime($end_range, $now)))
 				{
-					$data_matrix[$row][$col]['bomb']['value']=$cell_data['bomb'];
-					$data_matrix[$row][$col]['bomb']['src']='new_sbomb.png';
-					$data_matrix[$row][$col]['exec_bomb']['src']='sbomb.png'; //Excel bomb image
+					$data_matrix[$row][$col]['count_lastchanged_value']=1;
+					$data_matrix[$row][$col]['update_flag'] = 1;
+				}
+				
+				if(date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['filing_lastchanged'])) <= date('Y-m-d H:i:s', strtotime($start_range, $now)) && date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['filing_lastchanged'])) >= date('Y-m-d H:i:s', strtotime($end_range, $now)))
+				{
+					$data_matrix[$row][$col]['filing_image']='images/newred_file.png';
+					$data_matrix[$row][$col]['update_flag'] = 1;
+				}
+				else
+				$data_matrix[$row][$col]['filing_image']='images/new_file.png';
+				
+				if(date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['phase_explain_lastchanged'])) <= date('Y-m-d H:i:s', strtotime($start_range, $now)) && date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['phase_explain_lastchanged'])) >= date('Y-m-d H:i:s', strtotime($end_range, $now)))
+				{
+					$data_matrix[$row][$col]['phase_explain_image']='images/phaseexp_red.png';
+					$data_matrix[$row][$col]['update_flag'] = 1;
+				}
+				else
+				$data_matrix[$row][$col]['phase_explain_image']='images/phaseexp.png';
+				
+				if((date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['highest_phase_lastchanged'])) <= date('Y-m-d H:i:s', strtotime($start_range, $now))) && (date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['highest_phase_lastchanged'])) >= date('Y-m-d H:i:s', strtotime($end_range, $now))) && ($data_matrix[$row][$col]['highest_phase_prev'] != NULL && $data_matrix[$row][$col]['highest_phase_prev'] != ''))
+				{
+					$data_matrix[$row][$col]['highest_phase_lastchanged_value']=1;
+					$data_matrix[$row][$col]['update_flag'] = 1;
+				}
+				
+				if(trim($cell_data['bomb']) == 'small')
+				{
+					$data_matrix[$row][$col]['bomb']['value']=trim($cell_data['bomb']);
+					
+					if(date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])) <= date('Y-m-d H:i:s', strtotime($start_range, $now)) && date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])) >= date('Y-m-d H:i:s', strtotime($end_range, $now)))
+					{
+						$data_matrix[$row][$col]['bomb']['src']='newred_sbomb.png';
+						$data_matrix[$row][$col]['exec_bomb']['src']='newred_sbomb.png'; //Excel bomb image
+						$data_matrix[$row][$col]['update_flag'] = 1;
+					}
+					else
+					{
+						$data_matrix[$row][$col]['bomb']['src']='new_sbomb.png';
+						$data_matrix[$row][$col]['exec_bomb']['src']='new_sbomb.png'; //Excel bomb image
+					}
 					$data_matrix[$row][$col]['bomb']['alt']='Small bomb';
 					$data_matrix[$row][$col]['bomb']['style']='width:11px; height:11px;';
 					$data_matrix[$row][$col]['bomb']['title']='Bomb Details';
 				}
-				elseif($cell_data['bomb'] == 'large')
+				elseif(trim($cell_data['bomb']) == 'large')
 				{
-					$data_matrix[$row][$col]['bomb']['value']=$cell_data['bomb'];
-					$data_matrix[$row][$col]['bomb']['src']='new_lbomb.png';
-					$data_matrix[$row][$col]['exec_bomb']['src']='lbomb.png';
+					$data_matrix[$row][$col]['bomb']['value']=trim($cell_data['bomb']);
+					
+					if((date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])) <= date('Y-m-d H:i:s', strtotime($start_range, $now))) && (date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])) >= date('Y-m-d H:i:s', strtotime($end_range, $now))))
+					{
+						$data_matrix[$row][$col]['bomb']['src']='newred_lbomb.png';
+						$data_matrix[$row][$col]['exec_bomb']['src']='newred_lbomb.png';
+						$data_matrix[$row][$col]['update_flag'] = 1;
+					}
+					else
+					{
+						$data_matrix[$row][$col]['bomb']['src']='new_lbomb.png';
+						$data_matrix[$row][$col]['exec_bomb']['src']='new_lbomb.png';
+					}
 					$data_matrix[$row][$col]['bomb']['alt']='Large bomb';
 					$data_matrix[$row][$col]['bomb']['style']='width:11px; height:11px;';
 					$data_matrix[$row][$col]['bomb']['title']='Bomb Details';
@@ -1592,16 +1678,6 @@ function Download_reports()
 					$data_matrix[$row][$col]['color']='background-color:#FF0000;';
 					$data_matrix[$row][$col]['color_code']='FF0000';
 				}
-				
-				$data_matrix[$row][$col]['last_update']=$cell_data['last_update'];
-				$data_matrix[$row][$col]['count_lastchanged']=$cell_data['count_lastchanged'];
-				$data_matrix[$row][$col]['bomb_lastchanged']=$cell_data['bomb_lastchanged'];
-				$data_matrix[$row][$col]['filing_lastchanged']=$cell_data['filing_lastchanged'];
-				$data_matrix[$row][$col]['phase_explain_lastchanged']=$cell_data['phase_explain_lastchanged'];
-				
-				$data_matrix[$row][$col]['active_prev']=$cell_data['count_active_prev'];
-				$data_matrix[$row][$col]['total_prev']=$cell_data['count_total_prev'];
-				$data_matrix[$row][$col]['indlead_prev']=$cell_data['count_active_indlead_prev'];
 			}
 			else
 			{
@@ -1617,6 +1693,7 @@ function Download_reports()
 				$data_matrix[$row][$col]['filing']='';
 				$data_matrix[$row][$col]['color']='background-color:#DDF;';
 				$data_matrix[$row][$col]['color_code']='DDF';
+				$data_matrix[$row][$col]['update_flag'] = 0;
 			}
 		}
 	}
@@ -1626,20 +1703,47 @@ function Download_reports()
 	{
 		$tooltip=$title="Active trials";
 		$pdftitle="<b>Active trials</b>";
+		$link_part = '&list=1&sr='.$sr.'&er='.$er.'&hm=' . $id;
 	}
 	elseif($_POST['dwcount']=='total')
 	{
 		$pdftitle=$tooltip=$title="All trials (Active + Inactive)";
+		$link_part = '&list=2&sr='.$sr.'&er='.$er.'&hm=' . $id;
 	}
 	else
 	{
 		$tooltip=$title="Active industry lead sponsor trials";
 		$pdftitle="<b>Active industry lead sponsor trials</b>";
+		$link_part = '&list=1&itype=0&sr='.$sr.'&er='.$er.'&hm=' . $id;
 	}
-		
-	if($_POST['dwformat']=='pdfdown' || $_POST['dwformat']=='htmldown')
+	$link_part=str_replace(' ','+',$link_part);	
+	if($_POST['dwformat']=='pdfdown')
 	{
 	
+		require_once('tcpdf/config/lang/eng.php');
+		require_once('tcpdf/tcpdf.php');  
+		$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+		// set document information
+		//$pdf->SetCreator(PDF_CREATOR);
+		$pdf->SetAuthor('Larvol Trials');
+		$pdf->SetTitle('Larvol Trials');
+		$pdf->SetSubject('Larvol Trials');
+		$pdf->SetKeywords('Larvol Trials Master Heatmap, Larvol Trials Master Heatmap PDF Export');
+		$pdf->SetFont('verdana', '', 8);
+		$pdf->setFontSubsetting(false);
+		$pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
+		$pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
+		
+		$pdf->setPageOrientation('l');
+			
+		// remove default header/footer
+		$pdf->setPrintHeader(false);
+		//set some language-dependent strings
+		$pdf->setLanguageArray($l);
+		//set auto page breaks
+		$pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+		$pdf->AddPage();
+			
 		$name = htmlspecialchars(strlen($name)>0?$name:('report '.$id.''));
 		
 		$pdfContent .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'
@@ -1647,21 +1751,11 @@ function Download_reports()
 						. '<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" />'
 						. '<title>Larvol Master Heatmap Export</title>'
 						. '<style type="text/css">'
-						. 'body { font-family:Verdana; font-color:black; font-size: 8px;}'
-						. 'a, a:hover{color:#000000;text-decoration:none; height:100%;}';
-						
-						if($_POST['dwformat']=='pdfdown') //0.5px border value does not work for Chrome and IE and 1px border looks dark in PDF
-						{
-							$pdfContent .= 'td, th {vertical-align:top; padding-top:10px; border-right: 0.5px solid blue; border-left:0.5px solid blue; border-top: 0.5px solid blue; border-bottom:0.5px solid blue;}';
-							$pdfContent .= 'tr {border-right: 0.5px solid blue; border-left: 0.5px solid blue; border-top: 0.5px solid blue; border-bottom: 0.5px solid blue;}';
-						}
-						else
-						{
-							$pdfContent .= 'td, th {vertical-align:top; padding-top:10px; border-right: 1px solid blue; border-left:1px solid blue; border-top: 1px solid blue; border-bottom:1px solid blue;}';
-							$pdfContent .= 'tr {border-right: 1px solid blue; border-left: 1px solid blue; border-top: 1px solid blue; border-bottom: 1px solid blue;}';
-						}
-							
-		$pdfContent .= '@page {margin-top: 1em; margin-bottom: 2em;}'
+						. 'body { font-family:Verdana; font-color:black; font-size: 8pt;}'
+						. 'a, a:hover{color:#000000;text-decoration:none; height:100%;}'
+						. 'td, th {vertical-align:top; padding-top:10px; border-right: 0.5px solid blue; border-left:0.5px solid blue; border-top: 0.5px solid blue; border-bottom:0.5px solid blue; background-color:#DDF;}'
+						. 'tr {border-right: 0.5px solid #DDF; border-right: 0.5px solid blue; border-left:0.5px solid blue; border-top: 0.5px solid blue; border-bottom:0.5px solid blue;}'
+						. '@page {margin-top: 1em; margin-bottom: 2em;}'
 						. '.nobr {white-space: nowrap}'
 						. '</style>'
 						. '<style type="text/css">'.file_get_contents('css/popup_form.css').'</style>'
@@ -1671,14 +1765,14 @@ function Download_reports()
 
 		$pdfContent .= '<div align="center">'
 						. '<table align="center" style="border-collapse:collapse; padding:10px; background-color:#DDF;">'
-						. '<tr style="page-break-inside:avoid;" nobr="true"><td width="300px" align="left"><b>Name: </b>'. htmlspecialchars($name) .'</td>'
-						. '<td width="300px" align="left"><b>Category: </b>'. htmlspecialchars($category) .'</td></tr>'
-						. '<tr style="page-break-inside:avoid;" nobr="true"><td width="300px" align="left" colspan="2"><b>Display Mode: </b>'. $pdftitle .'</td></tr>'
+						. '<tr style="page-break-inside:avoid;" nobr="true"><td align="left"><b>Name: </b>'. htmlspecialchars($name) .'</td>'
+						. '<td align="left"><b>Category: </b>'. htmlspecialchars($category) .'</td></tr>'
+						. '<tr style="page-break-inside:avoid;" nobr="true"><td align="left" colspan="2"><b>Display Mode: </b>'. $pdftitle .'</td></tr>'
 						. '</table>'
 						. '</div><br /><br/>';
 						
 		$pdfContent .= '<div align="center">'
-						. '<table style="border-collapse:collapse; background-color:#DDF; padding-top:5px;">'
+						. '<table border="1" style="background-color:#FFFFFF; padding-top:5px;">'
 						. '<thead><tr style="page-break-inside:avoid;" nobr="true"><th>&nbsp;</th>';
 				
 		foreach($columns as $col => $val)
@@ -1687,7 +1781,7 @@ function Download_reports()
 			$cdesc = (isset($columnsDescription[$col]) && $columnsDescription[$col] != '')?$columnsDescription[$col]:null;
 			$caltTitle = (isset($cdesc) && $cdesc != '')?' alt="'.$cdesc.'" title="'.$cdesc.'" ':null;
 				
-			$pdfContent .= '<th width="150px" '.$caltTitle.'><div align="center">'. $val .'<br />';
+			$pdfContent .= '<th '.$caltTitle.'><div align="center">'. $val .'<br />';
 				
 			if(isset($areaIds[$col]) && $areaIds[$col] != NULL && !empty($productIds))
 			{
@@ -1703,7 +1797,7 @@ function Download_reports()
 				{
 					$count_val=$col_indlead_total[$col];
 				}
-				$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. '&hm=' . $id . '" target="_blank" title="'. $title .'">'.$count_val.'</a>';
+				$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. $link_part . '" target="_blank" title="'. $title .'">'.$count_val.'</a>';
 			}
 			$pdfContent .='</div></th>';
 			
@@ -1711,7 +1805,7 @@ function Download_reports()
 		//if total checkbox is selected
 		if(isset($toal_fld) && $toal_fld == "1")
 		{
-			$pdfContent .= '<th width="150px"><div align="center">';
+			$pdfContent .= '<th><div align="center">';
 			if(!empty($productIds) && !empty($areaIds))
 			{
 				if($_POST['dwcount']=='active')
@@ -1728,28 +1822,27 @@ function Download_reports()
 				}
 				$productIds = array_filter($productIds);
 				$areaIds = array_filter($areaIds);
-				$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds). '&hm=' . $id . '" target="_blank" title="'. $title .'">'.$count_val.'</a>';
+				$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds). $link_part . '" target="_blank" title="'. $title .'">'.$count_val.'</a>';
 			}
 			$pdfContent .= '</div></th>';
 		}
 		$pdfContent .= '</tr></thead>';
 		
-		if($_POST['dwformat']=='pdfdown')//Extra row for alignment in PDF
-		{
-			$pdfContent .= '<tr style="page-break-inside:avoid;" nobr="true"><th height="0px" style="height:0px; border-top:none; border:none;">&nbsp;</th>';
-			foreach($columns as $col => $val)
-				$pdfContent .= '<th height="0px" style="height:0px; border-top:none; border:none;">&nbsp;</th>';
-			if(isset($toal_fld) && $toal_fld == "1")
-				$pdfContent .= '<th height="0px" style="height:0px; border-top:none; border:none;">&nbsp;</th>';
-			$pdfContent .= '</tr>';		
-		}
+		//Extra row for alignment in PDF
+		$pdfContent .= '<tr style="page-break-inside:avoid;" nobr="true"><th height="0px" style="height:0px; border-top:none; border:none;">&nbsp;</th>';
+		foreach($columns as $col => $val)
+			$pdfContent .= '<th height="0px" style="height:0px; border-top:none; border:none;">&nbsp;</th>';
+		if(isset($toal_fld) && $toal_fld == "1")
+			$pdfContent .= '<th height="0px" style="height:0px; border-top:none; border:none;">&nbsp;</th>';
+		$pdfContent .= '</tr>';		
+		
 		
 		foreach($rows as $row => $rval)
 		{
 			//$rval = (isset($rowsDisplayName[$row]) && $rowsDisplayName[$row] != '')?$rowsDisplayName[$row]:$rval;
 			$rdesc = (isset($rowsDescription[$row]) && $rowsDescription[$row] != '')?$rowsDescription[$row]:null;
 			$raltTitle = (isset($rdesc) && $rdesc != '')?' alt="'.$rdesc.'" title="'.$rdesc.'" ':null;
-			$pdfContent .= '<tr  style="page-break-inside:avoid;" nobr="true"><th width="150px" '.$raltTitle.'><div align="center">' . $rval .'<br />';
+			$pdfContent .= '<tr  style="page-break-inside:avoid;" nobr="true"><th '.$raltTitle.'><div align="center">' . $rval .'<br />';
 					
 			if(isset($productIds[$row]) && $productIds[$row] != NULL && !empty($areaIds))
 			{
@@ -1765,13 +1858,18 @@ function Download_reports()
 				{
 					$count_val=$row_indlead_total[$row];
 				}
-				$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). '&hm=' . $id . '" target="_blank" class="ottlink" title="'. $title .'">'.$count_val.'</a>';
+				$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). $link_part . '" target="_blank" class="ottlink" title="'. $title .'">'.$count_val.'</a>';
 			}
 			$pdfContent .= '</div></th>';
 			
 			foreach($columns as $col => $cval)
 			{
-				$pdfContent .= '<td width="150px" align="center" style="text-align:center; '.(($data_matrix[$row][$col]['total'] != 0) ? $data_matrix[$row][$col]['color']:'background-color:#BFBFBF;').'" align="center">&nbsp;&nbsp;&nbsp;&nbsp;';
+				if($data_matrix[$row][$col]['update_flag'] == 1)
+				{ $data_matrix[$row][$col]['bordercolor_code']='#FF0000'; } else { $data_matrix[$row][$col]['bordercolor_code']='blue'; }
+				if(($data_matrix[$row][$col]['total'] == 0))
+				{ $data_matrix[$row][$col]['color_code']='efefef'; $data_matrix[$row][$col]['bordercolor_code']='blue'; }
+				
+				$pdfContent .= '<td align="center" style="border-right: 0.5px solid '.$data_matrix[$row][$col]['bordercolor_code'].'; border-left:0.5px solid '.$data_matrix[$row][$col]['bordercolor_code'].'; border-top: 0.5px solid '.$data_matrix[$row][$col]['bordercolor_code'].'; border-bottom:0.5px solid '.$data_matrix[$row][$col]['bordercolor_code'].'; background-color:#'.$data_matrix[$row][$col]['color_code'].';">&nbsp;&nbsp;&nbsp;&nbsp;';
 				
 				if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL && $data_matrix[$row][$col]['total'] != 0)
 				{
@@ -1779,58 +1877,60 @@ function Download_reports()
 					if($_POST['dwcount']=='active')
 					{
 						$count_val=$data_matrix[$row][$col]['active'];
+						$count_val_prev=$data_matrix[$row][$col]['active_prev'];
 					}
 					elseif($_POST['dwcount']=='total')
 					{
 						$count_val=$data_matrix[$row][$col]['total'];
+						$count_val_prev=$data_matrix[$row][$col]['total_prev'];
 					}
 					else
 					{
 						$count_val=$data_matrix[$row][$col]['indlead'];
+						$count_val_prev=$data_matrix[$row][$col]['indlead_prev'];
 					}
 				
-					$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '&hm=' . $id . '" target="_blank" title="'. $title .'">'. $count_val.'</a><br/>';
+					$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. $link_part . '" target="_blank" title="'. $title .'" style="'.((trim($data_matrix[$row][$col]['color_code']) == 'FF0000' && $data_matrix[$row][$col]['count_lastchanged_value']==1) ? 'background-color:#FFFFFF;':'').'"><font style="'. (($data_matrix[$row][$col]['count_lastchanged_value']==1) ? 'color:#FF0000;':'color:#000000;').'" >'.$count_val.'</font></a>&nbsp;';
 					
+					$annotation_text = '';
+					if($data_matrix[$row][$col]['count_lastchanged_value']==1)
+					$annotation_text .= "Count updated from: ".$count_val_prev."\n";
+					if($data_matrix[$row][$col]['highest_phase_lastchanged_value']==1)
+					$annotation_text .= "Highest Phase updated from: ".$data_matrix[$row][$col]['highest_phase_prev']."\n";
+					if($data_matrix[$row][$col]['bomb_explain'] != NULL && trim($data_matrix[$row][$col]['bomb_explain']) != '' && ($data_matrix[$row][$col]['bomb']['value'] == 'small' || $data_matrix[$row][$col]['bomb']['value'] == 'large')) 
+					$annotation_text .= "Bomb details: ".$data_matrix[$row][$col]['bomb_explain']."\n";
+					if($data_matrix[$row][$col]['filing'] != NULL && trim($data_matrix[$row][$col]['filing']) != '')
+					$annotation_text .= "Filing details: ".$data_matrix[$row][$col]['filing']."\n";
+					if($data_matrix[$row][$col]['phase_explain'] != NULL && trim($data_matrix[$row][$col]['phase_explain']) != '')
+					$annotation_text .= "Phase explanation: ".$data_matrix[$row][$col]['phase_explain']."\n";
 					
-			
-			
-					if($_POST['dwformat']=='pdfdown') //As in PDF alignment not works space added to align it properly	
+					if($annotation_text != '')
 					{
-						if($data_matrix[$row][$col]['bomb']['src'] != 'new_square.png')
-						{
-							$pdfContent .= '&nbsp;<img align="right" title="'.$data_matrix[$row][$col]['bomb']['title'].'" src="'. urlPath() .'images/'.$data_matrix[$row][$col]['bomb']['src'].'" style="'. $data_matrix[$row][$col]['bomb']['style'] .' vertical-align:bottom; padding-right:10px; cursor:pointer;" alt="'.$data_matrix[$row][$col]['bomb']['alt'].'" />';
-							if($data_matrix[$row][$col]['bomb_explain'] != NULL && $data_matrix[$row][$col]['bomb_explain'] != '' && $data_matrix[$row][$col]['bomb']['src'] != 'square.png')
-							{
-								$count_fillbomb++;
-								$pdfContent .= '('.$count_fillbomb.')';
-							}
-						}
-						
-						if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
-						{
-							$pdfContent .= '&nbsp;<img align="right" title="Filing details" src="'. urlPath() .'images/new_file.png" style="width:11px; height:11px; vertical-align:bottom; cursor:pointer;" alt="Filing" />';
-							
-								$count_fillbomb++;
-								$pdfContent .= '('.$count_fillbomb.')';
-						}
-						
-						if($data_matrix[$row][$col]['phase_explain'] != NULL && $data_matrix[$row][$col]['phase_explain'] != '')
-						{
-							$pdfContent .= '&nbsp;<img align="right" title="Phase explain" src="'. urlPath() .'images/phaseexp.png" style="width:11px; height:11px; vertical-align:bottom; cursor:pointer;" alt="Phase explain" />';
-							
-								$count_fillbomb++;
-								$pdfContent .= '('.$count_fillbomb.')';
-						}
+						$params = $pdf->serializeTCPDFtagParameters(array('', '', 10, 10, $annotation_text, array('Subtype'=>'Text', 'Name' => 'Comment', 'T' => 'Details', 'Subj' => 'Information', 'C' => array(255, 255, 0))));
+						$pdfContent  .= '<tcpdf method="Annotation" params="'.$params.'" /><br/>';
 					}	
-
-						
-
-
-				}else{
-					$pdfContent .= '';
+	
+					if($data_matrix[$row][$col]['bomb']['value'] == 'small' || $data_matrix[$row][$col]['bomb']['value'] == 'large')
+					{
+						$pdfContent .= '&nbsp;<img align="right" title="'.$data_matrix[$row][$col]['bomb']['title'].'" src="images/'.$data_matrix[$row][$col]['bomb']['src'].'" style="'. $data_matrix[$row][$col]['bomb']['style'] .' vertical-align:bottom; padding-right:10px; cursor:pointer;" alt="'.$data_matrix[$row][$col]['bomb']['alt'].'" />';
 					}
+						
+					if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
+					{
+						$pdfContent .= '&nbsp;<img align="right" title="Filing details" src="'.$data_matrix[$row][$col]['filing_image'].'" style="width:11px; height:11px; vertical-align:bottom; cursor:pointer;" alt="Filing" />';
+					}
+						
+					if($data_matrix[$row][$col]['phase_explain'] != NULL && $data_matrix[$row][$col]['phase_explain'] != '')
+					{
+							$pdfContent .= '&nbsp;<img align="right" title="Phase explain" src="'.$data_matrix[$row][$col]['phase_explain_image'].'" style="width:11px; height:11px; vertical-align:bottom; cursor:pointer;" alt="Phase explain" />';
+					}	
+				}
+				else
+				{
+					$pdfContent .= '';
+				}
 				$pdfContent .= '</td>';
-			}
+			}//column foreach ends
 			//if total checkbox is selected
 			if(isset($toal_fld) && $toal_fld == "1")
 			{
@@ -1838,112 +1938,29 @@ function Download_reports()
 			}
 		
 			$pdfContent .= '</tr>';
-		}
-		$pdfContent .= '</table></div><br /><br/>'
-						. '<div align="center"><table align="center" style="border-collapse:collapse; vertical-align:middle; padding:10px; background-color:#DDF;">'
-						. '<tr style="page-break-inside:avoid;" nobr="true"><td width="300px" align="left"><b>Footnotes: </b><br/><div style="padding-left:10px;">'. $footnotes .'</div></td>'
-						. '<td width="300px" align="left"><b>Description: </b><br/><div style="padding-left:10px;">'. $description .'</div></td></tr>'
+		}//Row Foreach ends
+		
+		$pdfContent .= '</table></div><br /><br/>';
+		
+		if(($footnotes != NULL && trim($footnotes) != '') || ($description != NULL && trim($description) != ''))
+		$pdfContent .= '<div align="center"><table align="center" style="border-collapse:collapse; vertical-align:middle; padding:10px; background-color:#DDF;">'
+						. '<tr style="page-break-inside:avoid;" nobr="true">'
+						. (($footnotes != NULL && trim($footnotes) != '') ? '<td align="left"><b>Footnotes: </b><br/><div style="padding-left:10px;">'. $footnotes .'</div></td>':'')
+						. ((($description != NULL && trim($description) != '')) ? '<td align="left"><b>Description: </b><br/><div style="padding-left:10px;">'. $description .'</div></td>' : '').'</tr>'
 						. '</table></div>';
-						
-		if($_POST['dwformat']=='pdfdown' && $count_fillbomb > 0)
-		{
-			$pdfContent .= '<br style="page-break-before:always;" /><br/>'
-							. '<div align="center"><table align="center" width="100%" style="border-collapse:collapse; vertical-align:middle; background-color:#DDF;">'
-							. '<thead><tr style="border-bottom:none;"><th height="11px" style="width:30px; border-bottom:none;" align="left">No.</th><th style="width:70px; border-bottom:none;" align="left">Image</th><th style="width:675px; border-bottom:none;" align="left">Details</th></tr></thead>'
-							. '<tr height="1px" style="border:none; border-top:none;"><td style="width:30px; height:0px; border-top:none; border:none;"></td><td style="width:70px; height:0px; border-top:none; border:none;"></td><td style="width:675px; height:0px; border-top:none; border:none;"></td></tr>';
-								
-			$count_fillbomb_again=0;
-			foreach($rows as $row => $rval)
-			foreach($columns as $col => $cval)
-			{
-				if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL  && $data_matrix[$row][$col]['total'] != 0)
-				{
-					if($data_matrix[$row][$col]['bomb_explain'] != NULL && trim($data_matrix[$row][$col]['bomb_explain']) != '' && $data_matrix[$row][$col]['bomb']['src'] != 'new_square.png')
-					{
-						$count_fillbomb_again++;
-						$pdfContent .=  '<tr style="page-break-inside:avoid;" nobr="true"><td align="left"><div style="padding-left:10px;">'. $count_fillbomb_again .'</div></td>'
-							. '<td align="left" width="30px"><div style="padding-left:10px;"><img align="right" title="'.$data_matrix[$row][$col]['bomb']['title'].'" src="'. urlPath() .'images/'.$data_matrix[$row][$col]['bomb']['src'].'" style="'. $data_matrix[$row][$col]['bomb']['style'].' vertical-align:middle; padding-right:10px; cursor:pointer;" alt="'.$data_matrix[$row][$col]['bomb']['alt'].'" /></div></td>'
-							. '<td align="left"><div style="padding-left:10px;">'. $data_matrix[$row][$col]['bomb_explain'] .'</div></td></tr>';
-					}
-						
-					if($data_matrix[$row][$col]['filing'] != NULL && trim($data_matrix[$row][$col]['filing']) != '')
-					{
-						$count_fillbomb_again++;
-						$pdfContent .=  '<tr style="page-break-inside:avoid;" nobr="true"><td align="left" width="30px"><div style="padding-left:10px;">'. $count_fillbomb_again .'</div></td>'
-							. '<td align="left" width="30px"><div style="padding-left:10px;"><img align="right" title="Filing details" src="'. urlPath() .'images/new_file.png" style="width:15px; height:15px; vertical-align:top; cursor:pointer;" alt="Filing" /></div></td>'
-							. '<td align="left"><div style="padding-left:10px;">'. $data_matrix[$row][$col]['filing'] .'</div></td></tr>';
-					}
-					
-					if($data_matrix[$row][$col]['phase_explain'] != NULL && trim($data_matrix[$row][$col]['phase_explain']) != '')
-					{
-						$count_fillbomb_again++;
-						$pdfContent .=  '<tr style="page-break-inside:avoid;" nobr="true" ><td align="left" width="30px"><div style="padding-left:10px;">'. $count_fillbomb_again .'</div></td><td align="left" width="30px"><div style="padding-left:10px;"><img align="right" title="Phase explain" src="images/phaseexp.png" style="width:15px; height:15px; vertical-align:top; cursor:pointer;" alt="Filing" /></div></td><td align="left"><div style="padding-left:10px;">'. $data_matrix[$row][$col]['phase_explain'] .'</div></td></tr>';
-					}
-				}				
-			}
-			
-			$pdfContent .= '</table></div>';			
-		}
 						
 		$pdfContent .=  '</body>'
 						. '</html>';
 						
 		//echo $pdfContent;
-		if($_POST['dwformat']=='pdfdown')
-		{
-			require_once('tcpdf/config/lang/eng.php');
-			require_once('tcpdf/tcpdf.php');  
-			$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-			// set document information
-			//$pdf->SetCreator(PDF_CREATOR);
-			$pdf->SetAuthor('Larvol Trials');
-			$pdf->SetTitle('Larvol Trials');
-			$pdf->SetSubject('Larvol Trials');
-			$pdf->SetKeywords('Larvol Trials Master Heatmap, Larvol Trials Master Heatmap PDF Export');
-			$pdf->SetFont('verdana', '', 8);
-			$pdf->setFontSubsetting(false);
-			$pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
-			$pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
-			
-			$pdf->setPageOrientation('l');
-			
-			// remove default header/footer
-			$pdf->setPrintHeader(false);
-			//set some language-dependent strings
-			$pdf->setLanguageArray($l);
-			//set auto page breaks
-			$pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
-			$pdf->AddPage();
-			$pdfContent = preg_replace('/width="[0-9]{0,}(px){1}"/', '', $pdfContent);
-			//$pdfContent = preg_replace('/width="[0-9]{0,}(px){1}"/', 'width="20px"', $pdfContent);
-			ini_set('pcre.backtrack_limit',strlen($pdfContent));
-			// output the HTML content
-			$pdf->writeHTML($pdfContent, true, false, true, false, '');
-			ob_end_clean();
-			//Close and output PDF document
-			$pdf->Output('Larvol_'. substr($name,0,20) .'_PDF_Report_'. date("Y-m-d_H.i.s") .'.pdf', 'D');
-		
-		}//PDF Function Ends
-		//var_dump(urlPath());
-		//echo htmlspecialchars($pdfContent);
-		if($_POST['dwformat']=='htmldown')
-		{	
-			$filename = 'Larvol_'. substr($name,0,20) .'_HTML_Report_'. date("Y-m-d_H.i.s").'.html';
-			//!$handle = fopen($filename, 'w');
-			//fwrite($handle, $pdfContent);
-			//fclose($handle);
-			$pdfContent.='<script>'.file_get_contents('scripts/popup-window.js').'</script>';
-			//header("Cache-Control: public");
-			//header("Content-Description: File Transfer");
-			//header("Content-Length: ". filesize("$filename").";");
-			header("Content-Disposition: attachment; filename=$filename");
-			//header("Content-Type: application/octet-stream; "); 
-			//header("Content-Transfer-Encoding: binary");
-			echo $pdfContent;
-			//readfile($filename);
-		}//HTML Function Ends
-		
-	}//Pdf & HTML Function Ends
+		//$pdfContent = preg_replace('/width="[0-9]{0,}(px){1}"/', '', $pdfContent);
+		ini_set('pcre.backtrack_limit',strlen($pdfContent));
+		// output the HTML content
+		$pdf->writeHTML($pdfContent, true, false, true, false, '');
+		ob_end_clean();
+		//Close and output PDF document
+		$pdf->Output('Larvol_'. substr($name,0,20) .'_PDF_Report_'. date("Y-m-d_H.i.s") .'.pdf', 'D');
+	}//Pdf Functions Ends
 	
 	if($_POST['dwformat']=='exceldown')
 	{
@@ -1993,7 +2010,7 @@ function Download_reports()
 				$caltTitle = (isset($cdesc) && $cdesc != '')?' alt="'.$cdesc.'" title="'.$cdesc.'" ':null;
 								
 				$objPHPExcel->getActiveSheet()->setCellValue($cell, $val.$count_val);
-				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col].'&hm=' . $id);
+				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col].$link_part);
 				
 				if($cdesc)
 				{
@@ -2050,7 +2067,7 @@ function Download_reports()
 				$raltTitle = (isset($rdesc) && $rdesc != '')?' alt="'.$rdesc.'" title="'.$rdesc.'" ':null;
 				
 				$objPHPExcel->getActiveSheet()->setCellValue($cell, $rval.$count_val);
-				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds).'&hm=' . $id); 
+				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds).$link_part); 
  			    $objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip($tooltip);
  			    
  			    if($rdesc)
@@ -2077,20 +2094,43 @@ function Download_reports()
 					if($_POST['dwcount']=='active')
 					{
 						$count_val=$data_matrix[$row][$col]['active'];
+						$count_val_prev=$data_matrix[$row][$col]['active_prev'];
 					}
 					elseif($_POST['dwcount']=='total')
 					{
 						$count_val=$data_matrix[$row][$col]['total'];
+						$count_val_prev=$data_matrix[$row][$col]['total_prev'];
 					}
 					else
 					{
 						$count_val=$data_matrix[$row][$col]['indlead'];
+						$count_val_prev=$data_matrix[$row][$col]['indlead_prev'];
 					}
 					
+					$styleThinRedBorderOutline = array(
+						'borders' => array(
+						'inside' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => 'FF0000'),),
+						'outline' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => 'FF0000'),),
+											),
+						);
+						
+					if($data_matrix[$row][$col]['update_flag'] == 1)
+					$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($styleThinRedBorderOutline);
+					
+					if($data_matrix[$row][$col]['count_lastchanged_value']==1)
+					{
+						$red_font['font']['color']['rgb'] = 'FF0000';
+						//$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($red_font);
+					}
+					else
+					{
+						$red_font['font']['color']['rgb'] = '000000';
+						//$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($red_font);
+					}
 					
 					$objPHPExcel->getActiveSheet()->setCellValue($cell, $count_val);
-					$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col].'&hm=' . $id); 
- 			    	$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip(substr((($data_matrix[$row][$col]['filing'] != NULL && trim($data_matrix[$row][$col]['filing']) != '')? "\nFiling:- ". $data_matrix[$row][$col]['filing'] :'') . (($data_matrix[$row][$col]['bomb_explain'] != NULL && trim($data_matrix[$row][$col]['bomb_explain']) != '') ? "\nBomb details:- ". $data_matrix[$row][$col]['bomb_explain'] : '') . (($data_matrix[$row][$col]['phase_explain'] != NULL && trim($data_matrix[$row][$col]['phase_explain']) != '') ? "\nPhase explain:- ". $data_matrix[$row][$col]['phase_explain']:'' ),0,20) );
+					$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col].$link_part); 
+ 			    	$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip(substr((($data_matrix[$row][$col]['filing'] != NULL && trim($data_matrix[$row][$col]['filing']) != '')? "\nFiling:- ". $data_matrix[$row][$col]['filing'] :'') . (($data_matrix[$row][$col]['bomb_explain'] != NULL && trim($data_matrix[$row][$col]['bomb_explain']) != '' && ($data_matrix[$row][$col]['bomb']['value'] == 'small' || $data_matrix[$row][$col]['bomb']['value'] == 'large')) ? "\nBomb details:- ". $data_matrix[$row][$col]['bomb_explain'] : '') . (($data_matrix[$row][$col]['phase_explain'] != NULL && trim($data_matrix[$row][$col]['phase_explain']) != '') ? "\nPhase explain:- ". $data_matrix[$row][$col]['phase_explain']:'' ).(($data_matrix[$row][$col]['count_lastchanged_value']==1) ? "\nCount updated from: ".$count_val_prev:"").(($data_matrix[$row][$col]['highest_phase_lastchanged_value']==1) ? "\nHighest Phase updated from: ".$data_matrix[$row][$col]['highest_phase_prev']:""),0,255) );
 					
 					if($data_matrix[$row][$col]['exec_bomb']['src'] != '' && $data_matrix[$row][$col]['exec_bomb']['src'] != NULL && $data_matrix[$row][$col]['exec_bomb']['src'] !='new_square.png')
 					{
@@ -2099,6 +2139,8 @@ function Download_reports()
 						$objDrawing->setOffsetX(100);
 						$objDrawing->setOffsetY(3);
 						$objDrawing->setPath('images/'.$data_matrix[$row][$col]['exec_bomb']['src']);
+						$objDrawing->setHeight(16);
+						$objDrawing->setWidth(16); 
 						$objDrawing->setDescription($data_matrix[$row][$col]['bomb']['title']);
 						$objDrawing->setCoordinates($cell);
 					}
@@ -2131,7 +2173,7 @@ function Download_reports()
 					
 			$cell = num2char(count($columns)+1).'1';
 			$objPHPExcel->getActiveSheet()->setCellValue($cell, $count_val);
-			$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds).'&hm=' . $id);
+			$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds).$link_part);
 			$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip($tooltip);
 		}
 		

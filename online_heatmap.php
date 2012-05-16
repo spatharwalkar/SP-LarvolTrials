@@ -538,6 +538,8 @@ width:100px;
 	max-height:400px;
 	margin:2px;
 	height:auto;
+	filter: flipv fliph;
+	white-space:wrap;
 }
 
 .downldbox {
@@ -1159,7 +1161,7 @@ $htmlContent .= '<table width="100%" style="background-color:#FFFFFF;">'
 				. '<a style="display:inline;color:#0000FF;" target="_self" href="mailto:larvoltrials@larvol.com">'
 				. 'larvoltrials@larvol.com</a></span></td>'
 				. '<td style="background-color:#FFFFFF;" class="result">Name: ' . htmlspecialchars($name) . '</td></tr></table><br/>'
-				
+				. '<form action="master_heatmap.php" method="post">'
 				. '<table width="550px" border="0" cellspacing="0" class="controls" align="center">'
 				. '<tr><th>View mode</th><th class="right">Range</th></tr>'
 				. '<tr>'
@@ -1180,7 +1182,6 @@ $htmlContent .= '<table width="100%" style="background-color:#FFFFFF;">'
 				
 $htmlContent  .= '<div id="dropmenu" class="dropmenudiv" style="width: 310px;">'
 				.'<div style="height:100px;margin-top:10px; padding:6px;"><div class="downldbox"><div class="newtext">Download options</div>'
-				. '<form action="master_heatmap.php" method="post">'
 				. '<input type="hidden" name="id" id="id" value="' . $id . '" />'
 				. '<ul><li><label>Which format: </label></li>'
 				. '<li><select id="dwformat" name="dwformat">'
@@ -1194,8 +1195,8 @@ $htmlContent  .= '<div id="dropmenu" class="dropmenudiv" style="width: 310px;">'
 				. '<option value="total">All trials</option>'
 				. '</select></li></ul>'
 				. '<input type="submit" name="download" title="Download" value="Download file" style="margin-left:8px;"  />'
-				. '</form></div></div>'
-				.'</div><script type="text/javascript">cssdropdown.startchrome("chromemenu");</script>';
+				. '</div></div>'
+				.'</div><script type="text/javascript">cssdropdown.startchrome("chromemenu");</script></form>';
 						
 $htmlContent .= '<div align="center">'
 			. '<table style="padding-top:5px; height:100%; vertical-align:middle;" class="display">'
@@ -1396,7 +1397,7 @@ foreach($rows as $row => $rval)
 		
 $htmlContent .= '</table><input type="hidden" value="'.$online_HMCounter.'" name="Last_HM" id="Last_HM" /><input type="hidden" value="'.$Max_ViewCount.'" id="Max_ViewCount_value" /></div><br /><br/>';
 
-if(($footnotes != NULL && trim($footnotes) != '') && ($description != NULL && trim($description) != ''))
+if(($footnotes != NULL && trim($footnotes) != '') || ($description != NULL && trim($description) != ''))
 {
 	$htmlContent .='<div align="center"><table align="center" style="vertical-align:middle; padding:10px; background-color:#DDF;">'
 				. '<tr style="page-break-inside:avoid;" nobr="true">'
