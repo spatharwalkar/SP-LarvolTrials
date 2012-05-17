@@ -10578,7 +10578,7 @@ class TrialTracker
                             $outputStr .= ' href="' . $trials[$i]['source'] . '" ';
                         }
 			else if($trials[$i]['NCT/nct_id'] !== '' && $trials[$i]['NCT/nct_id'] !== NULL)
-			{   
+			{
 				$outputStr .= ' href="http://clinicaltrials.gov/ct2/show/' . padnct($trials[$i]['NCT/nct_id']) . '" ';
 			}
 			else 
@@ -10593,8 +10593,7 @@ class TrialTracker
 							.'<font id="ViewCount_'.$trials[$i]['larvol_id'].'">';
 				if($trials[$i]['viewcount'] != '' && $trials[$i]['viewcount'] != NULL && $trials[$i]['viewcount'] > 0)
 				{
-					$outputStr .= '<span style="background-color:#BDAEC6">' . $trials[$i]['viewcount'].'&nbsp;</span>'
-								. '<img src="images/statistics-icon.png" border="0" alt="ViewCount" />'; 
+					$outputStr .= '<span class="viewcount" title="Total views">' . $trials[$i]['viewcount'].'&nbsp;</span>'; 
 				}
 				$outputStr .= '</font>'; 
 			}

@@ -510,14 +510,22 @@ tr.upms td {
 }
 
 .dropmenudiv{
-position:absolute;
-top: 0;
-border: 1px solid #DDDDDD; /*THEME CHANGE HERE*/
-/*border-bottom-width: 0;*/
-font:normal 12px Verdana;
-line-height:18px;
-z-index:100;
-background-color: white;
-width: 50px;
-visibility: hidden;
+	position:absolute;
+	top: 0;
+	border: 1px solid #DDDDDD; /*THEME CHANGE HERE*/
+	/*border-bottom-width: 0;*/
+	font:normal 12px Verdana;
+	line-height:18px;
+	z-index:100;
+	background-color: white;
+	width: 50px;
+	visibility: hidden;
+}
+
+.viewcount{
+	float: left;
+   	background: url(../images/viewcount.png) no-repeat left center;
+	width: 16px;
+	height: 16px;
+	text-align:center;
 }
