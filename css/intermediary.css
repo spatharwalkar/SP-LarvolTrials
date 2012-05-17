@@ -497,13 +497,16 @@ tr.upms td {
 	padding-top:3px;
 }
 
-.button{
-      background: url(../images/search.png) no-repeat center;
-      width: 65px;
-      height: 30px;
-	  border-radius: 25px;
-	 -moz-border-radius: 25px;
-      /*color:white;*/
+.searchbutton{
+      background: url(../images/search.png) no-repeat right center;
+      width: 63px;
+      height: 25px;
+}
+
+.resetbutton{
+      background: url(../images/reset.png) no-repeat center center;
+      width: 61px;
+      height: 25px;
 }
 
 .dropmenudiv{

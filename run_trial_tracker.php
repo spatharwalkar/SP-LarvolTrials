@@ -10213,8 +10213,8 @@ class TrialTracker
 			$url .= '&amp;LI=1';
 		}
 		echo '<div style="float:left;margin-right:25px;">'
-				. '<input type="submit" id="Show" value="" class="button" />&nbsp;<a style="display:inline;" href="' . $url
-				. '"><input type="button" value="Reset" id="reset" /></a>'
+				. '<input type="submit" id="Show" value="" class="searchbutton" />&nbsp;<a style="display:inline;" href="' . $url
+				. '"><input type="button" value="" id="reset" class="resetbutton" /></a>'
 				. '&nbsp;&nbsp;&nbsp;<b>' . $shownCount . '&nbsp;Records</b></div>';
 	}
 	
