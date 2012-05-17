@@ -5606,7 +5606,8 @@ class TrialTracker
 	{	
 		$Values = array();
 		$linkExpiry = array();
-			
+		$productSelectorTitle = 'All Products';
+		
 		if($ottType == 'unstacked')
 		{
 			$Id = explode(".", $resultIds);
@@ -5630,7 +5631,7 @@ class TrialTracker
 			{
 				echo '<input type="hidden" id="upmstyle" value="expand"/>';
 			}
-			echo $this->displayWebPage($ottType, $Values['resultIds'], $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], 
+			echo $this->displayWebPage($productSelectorTitle, $ottType, $Values['resultIds'], $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], 
 			$globalOptions, $timeMachine, $Values['Trials'], $Values['TrialsInfo'], $Values['allTrialsforDownload'], $Values['linkExpiry']);
 		}
 		else if($ottType == 'rowstacked' || $ottType == 'colstacked')
@@ -5676,7 +5677,7 @@ class TrialTracker
 			}		
 			$Values = $this->processOTTData($ottType, $result, $timeMachine, $linkExpiry, $globalOptions);
 			
-			echo $this->displayWebPage($ottType, $Values['resultIds'], $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], 
+			echo $this->displayWebPage($productSelectorTitle, $ottType, $Values['resultIds'], $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], 
 			$globalOptions, $timeMachine, $Values['Trials'], $Values['TrialsInfo'], $Values['allTrialsforDownload'], $Values['linkExpiry']);
 		}
 		else if($ottType == 'indexed') 
@@ -5816,6 +5817,7 @@ class TrialTracker
 			{
 				if(count($resultIds['area']) > 1)
 				{
+					$productSelectorTitle = 'All Areas';
 					$res = mysql_query("SELECT `name`, `id` FROM `products` WHERE id IN ('" . implode("','", $resultIds['product']) 
 							. "') OR LI_id IN ('" . implode(',', $resultIds['product']) . "') ");
 					$row = mysql_fetch_assoc($res);
@@ -5984,7 +5986,7 @@ class TrialTracker
 			
 			$Values = $this->processIndexedOTTData($ottType, $Ids, $timeMachine, $globalOptions);
 			
-			echo $this->displayWebPage($ottType, $resultIds, $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], 
+			echo $this->displayWebPage($productSelectorTitle, $ottType, $resultIds, $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], 
 			$globalOptions, $timeMachine, $Values['Trials'], $TrialsInfo, $Values['allTrialsforDownload']);
 		}
 		else if($ottType == 'standalone')
@@ -6024,7 +6026,7 @@ class TrialTracker
 			}
 			unset($globalOptions['sectionHeader']);
 			
-			echo $this->displayWebPage($ottType, $nctIds, $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], 
+			echo $this->displayWebPage($productSelectorTitle, $ottType, $nctIds, $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], 
 			$globalOptions, $timeMachine, $Values['Trials'], $Values['TrialsInfo'], $Values['allTrialsforDownload']);
 		}
 		else if($ottType == 'unstackedoldlink')
@@ -6040,7 +6042,7 @@ class TrialTracker
 					
 			$Values = $this->processOldLinkMethod($ottType, array($resultIds['params']), array($resultIds['leading']), $globalOptions);
 			
-			echo $this->displayWebPage($ottType, array(), $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], 
+			echo $this->displayWebPage($productSelectorTitle, $ottType, array(), $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], 
 			$globalOptions, $timeMachine, $Values['Trials'], $Values['TrialsInfo'], $Values['allTrialsforDownload']);
 		}
 		else if($ottType == 'stackedoldlink')
@@ -6077,7 +6079,7 @@ class TrialTracker
 				
 			$Values = $this->processOldLinkMethod($ottType, $resultIds['params'], $resultIds['leading'], $globalOptions, $cparams);
 			
-			echo $this->displayWebPage($ottType, array(), $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], 
+			echo $this->displayWebPage($productSelectorTitle, $ottType, array(), $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], 
 			$globalOptions, $timeMachine, $Values['Trials'], $Values['TrialsInfo'], $Values['allTrialsforDownload']);
 		}
 	}
@@ -9603,7 +9605,7 @@ class TrialTracker
 		return  $Values;
 	}
 	
-	function displayWebPage($ottType, $resultIds, $totactivecount, $totinactivecount, $totalcount, $globalOptions, $timeMachine = NULL, $Trials, $TrialsInfo, 
+	function displayWebPage($productSelectorTitle, $ottType, $resultIds, $totactivecount, $totinactivecount, $totalcount, $globalOptions, $timeMachine = NULL, $Trials, $TrialsInfo, 
 	$allTrials, $linkExpiry = NULL)
 	{	
 		global $db;
@@ -9825,12 +9827,12 @@ class TrialTracker
 			if(isset($globalOptions['product']) && $globalOptions['product'] != '')
 			{	
 				echo '<li class="arrow"><a href="javascript: void(0);">' . $TrialsInfoList[$globalOptions['product']] . '</a>'
-						. '<ul><li><a href="' . $allproductsurl . '">All Products</a></li>';
+						. '<ul><li><a href="' . $allproductsurl . '">' . $productSelectorTitle . '</a></li>';
 				unset($TrialsInfoList[$globalOptions['product']]);
 			}
 			else
 			{
-				echo '<li class="arrow"><a href="' . $allproductsurl . '">All Products</a><ul>';
+				echo '<li class="arrow"><a href="' . $allproductsurl . '">' . $productSelectorTitle . '</a><ul>';
 			}
 			
 			foreach($TrialsInfoList as $infkey => $infvalue)
