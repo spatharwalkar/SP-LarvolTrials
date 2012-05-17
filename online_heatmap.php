@@ -9,7 +9,7 @@ global $now;
 if(!isset($_GET['id'])) return;
 $id = mysql_real_escape_string(htmlspecialchars($_GET['id']));
 if(!is_numeric($id)) return;
-$query = 'SELECT name,user,footnotes,description,category,shared,total, dtt FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
+$query = 'SELECT `name`, `user`, `footnotes`, `description`, `category`, `shared`, `total`, `dtt`, `display_name` FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
 $res = mysql_query($query) or die('Bad SQL query getting master heatmap report');
 $res = mysql_fetch_array($res) or die('Report not found.');
 $rptu = $res['user'];
@@ -17,6 +17,7 @@ $shared = $res['shared'];
 $toal_fld=$res['total'];
 $name = $res['name'];
 $dtt = $res['dtt'];
+$Report_DisplayName=$res['display_name'];
 $footnotes = htmlspecialchars($res['footnotes']);
 $description = htmlspecialchars($res['description']);
 $category = $res['category'];
@@ -921,16 +922,7 @@ function change_view()
 					if(viewcount_ele != null && viewcount_ele != '')
 					{
 						var view = viewcount_ele.value;
-						var new_value = (17*view)/maxview;
-						//new_value = round(new_value)
-						//alert(new_value);
-						var viewcount_Bar_ele = document.getElementById("ViewCount_Bar_"+i);
-						if(viewcount_Bar_ele != null && viewcount_Bar_ele != '' && (view > 0))
-						{
-							document.getElementById("ViewCount_Bar_"+i).innerHTML = '<img src="images/viewcount_bar.png" style="width:1px; height:'+new_value+'px; vertical-align:bottom; cursor:pointer; padding-top:'+(17-new_value)+'px;" align="right" alt="View Count Bar" />&nbsp;';
-							document.getElementById("ViewCount_"+i).innerHTML = '<font style="color:#206040; font-weight: 900;">Number of views: </font><font style="color:#000000; font-weight: 900;">'+view+'</font><input type="hidden" value="'+view+'" id="ViewCount_value_'+i+'" />';
-						}
-									
+						document.getElementById("ViewCount_"+i).innerHTML = '<font style="color:#206040; font-weight: 900;">Number of views: </font><font style="color:#000000; font-weight: 900;">'+view+'</font><input type="hidden" value="'+view+'" id="ViewCount_value_'+i+'" />';
 					}
 				}
 				
@@ -1115,7 +1107,7 @@ function refresh_data(cell_id)
 								}
 								refresh_data(cell_id);
 								change_view();
-						 }
+						}
 				});
 	        return;
 	}
@@ -1154,13 +1146,15 @@ $online_HMCounter=0;
 
 $name = htmlspecialchars(strlen($name)>0?$name:('report '.$id.''));
 
+$Report_Name = ((trim($Report_DisplayName) != '' && $Report_DisplayName != NULL)? trim($Report_DisplayName):'report '.$id.'');
+
 $htmlContent .= '<table width="100%" style="background-color:#FFFFFF;">'
 				. '<tr><td style="background-color:#FFFFFF;"><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" /></td>'
 				. '<td style="background-color:#FFFFFF;" nowrap="nowrap"><span style="color:#ff0000;font-weight:normal;margin-left:40px;">Interface work in progress</span>'
 				. '<br/><span style="font-weight:normal;">Send feedback to '
 				. '<a style="display:inline;color:#0000FF;" target="_self" href="mailto:larvoltrials@larvol.com">'
 				. 'larvoltrials@larvol.com</a></span></td>'
-				. '<td style="background-color:#FFFFFF;" class="result">Name: ' . htmlspecialchars($name) . '</td></tr></table><br/>'
+				. '<td style="background-color:#FFFFFF;" class="result">Name: ' . htmlspecialchars($Report_DisplayName) . '</td></tr></table><br/>'
 				. '<form action="master_heatmap.php" method="post">'
 				. '<table width="550px" border="0" cellspacing="0" class="controls" align="center">'
 				. '<tr><th>View mode</th><th class="right">Range</th></tr>'
@@ -1229,7 +1223,7 @@ foreach($columns as $col => $val)
 		$htmlContent .= '<input type="hidden" value="'.$col_active_total[$col].',endl,'.$col_count_total[$col].',endl,'.$col_indlead_total[$col].'" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
 		$htmlContent .= '<input type="hidden" value="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />';
 		
-		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. '&list=1&itype=0&sr=now&er=1 month ago&hm=' . $id . '" target="_blank">'.$val.'</a>';
+		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. '&list=1&itype=0&sr=now&er=1 month ago&hm=' . $id . '" target="_blank" style="text-decoration:underline;">'.$val.'</a>';
 	}
 	$htmlContent .='</th>';
 }
@@ -1307,14 +1301,14 @@ foreach($rows as $row => $rval)
 		$htmlContent .= '<input type="hidden" value="'.$row_active_total[$row].',endl,'.$row_count_total[$row].',endl,'.$row_indlead_total[$row].'" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
 		$htmlContent .= '<input type="hidden" value="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). '" name="Link_value_'.$online_HMCounter.'&list=1&itype=0&sr=now&er=1 month ago" id="Link_value_'.$online_HMCounter.'" />';
 		
-		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). '&list=1&sr=now&er=1 month ago&hm=' . $id . '" target="_blank" class="ottlink">'.$rval.'&nbsp;</a>';
+		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). '&list=1&sr=now&er=1 month ago&hm=' . $id . '" target="_blank" class="ottlink" style="text-decoration:underline;">'.$rval.'</a>';
 	}
 	$htmlContent .= '</div></th>';
 	
 	foreach($columns as $col => $cval)
 	{
 		$online_HMCounter++;
-		$htmlContent .= '<td class="tooltip" valign="middle" id="Cell_ID_'.$online_HMCounter.'" style="'. (($data_matrix[$row][$col]['total'] != 0) ? $data_matrix[$row][$col]['cell_start_style'] : 'background-color:#efefef; border:#efefef solid;') .' padding:1px; min-width:110px;  max-width:110px; height:100%; vertical-align:middle; text-align:center; " align="center" onmouseover="display_tooltip(\'on\','.$online_HMCounter.');" onmouseout="display_tooltip(\'off\','.$online_HMCounter.');">';
+		$htmlContent .= '<td class="tooltip" valign="middle" id="Cell_ID_'.$online_HMCounter.'" style="'. (($data_matrix[$row][$col]['total'] != 0) ? ' background-color:#'.$data_matrix[$row][$col]['color_code'].'; border:#'.$data_matrix[$row][$col]['color_code'].' solid;' : 'background-color:#dcdcdc; border:#dcdcdc solid;') .' padding:1px; min-width:110px;  max-width:110px; height:100%; vertical-align:middle; text-align:center; " align="center" onmouseover="display_tooltip(\'on\','.$online_HMCounter.');" onmouseout="display_tooltip(\'off\','.$online_HMCounter.');">';
 	
 		if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL && $data_matrix[$row][$col]['total'] != 0)
 		{
@@ -1340,11 +1334,6 @@ foreach($rows as $row => $rval)
 			if($data_matrix[$row][$col]['phase_explain'] != NULL && $data_matrix[$row][$col]['phase_explain'] != '')
 			$htmlContent .= '<img id="Cell_Phase_'.$online_HMCounter.'" src="images/phaseexp.png" title="Phase explanation" style="width:17px; height:17px; vertical-align:middle; cursor:pointer;" alt="Phase explanation" />&nbsp;';
 
-			$htmlContent .= '<font id="ViewCount_Bar_'.$online_HMCounter.'" style="text-align:right; float:right; vertical-align:bottom;">';
-			if($data_matrix[$row][$col]['viewcount'] > 0)
-			$htmlContent .= '<img src="images/viewcount_bar.png" style="width:1px; height:'.((17*$data_matrix[$row][$col]['viewcount'])/$Max_ViewCount).'px; vertical-align:bottom; cursor:pointer; padding-top:'.(17-((17*$data_matrix[$row][$col]['viewcount'])/$Max_ViewCount)).'px;" alt="View Count Bar" />&nbsp;';
-			$htmlContent .= '</font>';
-			
 			$htmlContent .= '</div>'; ///Div complete to avoid panel problem
 					
 			//Tool Tip Starts Here

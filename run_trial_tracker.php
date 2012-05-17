@@ -9812,8 +9812,8 @@ class TrialTracker
 			echo $paginate['paginate'];
 		}
 		
-		echo '<div style="float: left;margin-right: 20px; vertical-align:bottom; padding-top:7px;"><span id="addtoright"></span></div>';
-		echo '<div style="float: left;margin-right: 20px; padding-top:7px; vertical-align:bottom;" id="chromemenu"><a rel="dropmenu"><span style="padding:2px; padding-right:4px; border:1px solid; color:#000000; background-position:left center; background-repeat:no-repeat; background-image:url(\'./images/save.png\'); cursor:pointer; ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Export</b></span></a></div>';
+		echo '<div style="float: left;margin-right: 20px; vertical-align:bottom; padding-top:4px; height:22px;"><span id="addtoright"></span></div>';
+		echo '<div style="float: left;margin-right: 20px; padding-top:4px; vertical-align:bottom; height:22px;" id="chromemenu"><a rel="dropmenu"><span style="padding:2px; padding-right:4px; border:1px solid; color:#000000; background-position:left center; background-repeat:no-repeat; background-image:url(\'./images/save.png\'); cursor:pointer; ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Export</b></span></a></div>';
 		
 		natcasesort($TrialsInfoList);
 		
@@ -9823,16 +9823,17 @@ class TrialTracker
 			$paginate['url'] = preg_replace("/\&amp;page=[0-9].*?(\&amp;|$)/", '',   $paginate['url']);
 			$allproductsurl = preg_replace("/\&amp;pr=[0-9].*?(\&amp;|$)/", '',   $paginate['url']);
 			
-			echo '<div id="menuwrapper" style="padding-top:2px; vertical-align:bottom;"><ul>';
+			echo '<div id="menuwrapper" style="vertical-align:bottom;"><ul>';
 			if(isset($globalOptions['product']) && $globalOptions['product'] != '')
 			{	
 				echo '<li class="arrow"><a href="javascript: void(0);">' . $TrialsInfoList[$globalOptions['product']] . '</a>'
-						. '<ul><li><a href="' . $allproductsurl . '">' . $productSelectorTitle . '</a></li>';
+					.'<ul><li style="height:23px;"><a href="' . $allproductsurl . '">' . $productSelectorTitle . '</a></li>';
+
 				unset($TrialsInfoList[$globalOptions['product']]);
 			}
 			else
 			{
-				echo '<li class="arrow"><a href="' . $allproductsurl . '">' . $productSelectorTitle . '</a><ul>';
+				echo '<li class="arrow"  style="height:23px;"><a href="' . $allproductsurl . '">' . $productSelectorTitle . '</a><ul>';
 			}
 			
 			foreach($TrialsInfoList as $infkey => $infvalue)
@@ -10019,10 +10020,10 @@ class TrialTracker
 	
 	function displayFilterControls($shownCount, $activeCount, $inactiveCount, $totalCount, $globalOptions = array(), $ottType, $loggedIn)
 	{	
-		echo '<table width="75%" border="0" cellspacing="0" class="controls" align="center">'
-				. '<tr><th>Active</th><th>Status</th><th>Institution type</th>'
-				. '<th>Region</th><th>Phase</th><th class="right">Ranges</th></tr>'
-				. '<tr><td class="bottom">'
+		echo '<table border="0" cellspacing="0" class="controls" align="center">'
+				. '<tr><th>Active</th><th>Status</th><th style="width:170px">Institution type</th>'
+				. '<th style="width:80px">Region</th><th style="width:50px">Phase</th><th class="right" style="width:340px">Ranges</th></tr>'
+				. '<tr><td class="bottom" style="padding-right:5px;">'
       			. '<input type="radio" name="list" value="1"  id="active_1" '
 				. (($globalOptions['type'] == 'activeTrials') ? ' checked="checked" ' : '')
 				. ' onchange="javascript: showValues(\'active\');" '

@@ -698,13 +698,14 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 }	
 /*** RECALCULATION STATUS. ****/
 	
-	$query = 'SELECT name,user,footnotes,description,category,shared,total, dtt FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
+	$query = 'SELECT `name`, `user`, `footnotes`, `description`, `category`, `shared`, `total`, `dtt`, `display_name` FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
 	$res = mysql_query($query) or die('Bad SQL query getting master heatmap report'.$query);
 	$res = mysql_fetch_array($res) or die('Report not found.');
 	$rptu = $res['user'];
 	$shared = $res['shared'];
 	$toal_fld=$res['total'];
 	$dtt_fld=$res['dtt'];
+	$Report_DisplayName=$res['display_name'];
 	if($rptu !== NULL && $rptu != $db->user->id && !$shared) return;	//prevent anyone from viewing others' private reports
 	$name = $res['name'];
 	$footnotes = htmlspecialchars($res['footnotes']);
@@ -932,18 +933,20 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 	{
 		$title="All trials (Active+Inactive)";
 		$view_tp='total';
+		$link_part = '&list=2&hm=' . $id;
 	}
 	else if($_GET['view_type']=='indlead')
 	{
 		$title="Active industry lead sponsor trials";
 		$view_tp='indlead';
+		$link_part = '&list=1&itype=0&hm=' . $id;
 	}
 	else
 	{
 		$title="Active trials";
 		$view_tp='active';
+		$link_part = '&list=1&hm=' . $id;
 	}
-
 
 	$out = '<br/>&nbsp;&nbsp;<b>View type: </b> <select id="view_type" name="view_type" onchange="window.location.href=\'master_heatmap.php?id='.$_GET['id'].'&view_type=\'+this.value+\'\'">'
 			. '<option value="active" '.(($view_tp=='active')? "selected=\"selected\"":"").'>Active trials</option>'
@@ -1029,6 +1032,8 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 		. '<input type="hidden" name="id" value="' . $id . '" />'
 		. '<label>Name: <input type="text" '.(($disabled) ? ' readonly="readonly" ':'').' '
 		. 'name="reportname" value="' . htmlspecialchars($name) . '"/></label>'
+		. '<label>Display name: <input type="text" '.(($disabled) ? ' readonly="readonly" ':'').' '
+		. 'name="report_displayname" value="' . htmlspecialchars($Report_DisplayName) . '"/></label>'
 		. '<label>Category: <input type="text" '.(($disabled) ? ' readonly="readonly" ':'').' '
 		. 'name="reportcategory" value="' . htmlspecialchars($category)
 		. '"/></label>';		
@@ -1109,7 +1114,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 			{
 				$count_val=$col_indlead_total[$col];
 			}
-			$out .= '<a href="intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col] . '" target="_blank" class="ottlink" title="'.$title.'">'.$count_val.'</a>';
+			$out .= '<a href="intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col] . $link_part .'" target="_blank" class="ottlink" title="'.$title.'">'.$count_val.'</a>';
 		
 		
 		}
@@ -1137,7 +1142,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 				
 			$productIds = array_filter($productIds);
 			$areaIds = array_filter($areaIds);
-			$out .= '<a href="intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds) . '" target="_blank" class="ottlink" title="'.$title.'">'.$count_val.'</a>';
+			$out .= '<a href="intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds). $link_part . '" target="_blank" class="ottlink" title="'.$title.'">'.$count_val.'</a>';
 		}
 		$out .= '</th>';
 	}
@@ -1178,7 +1183,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 				$count_val='<b>'.$row_indlead_total[$row].'</b>';
 			}
 				
-			$out .= '<a href="intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds) . '" target="_blank" class="ottlink" title="'.$title.'">'.$count_val.'</a>';
+			$out .= '<a href="intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). $link_part . '" target="_blank" class="ottlink" title="'.$title.'">'.$count_val.'</a>';
 		}
 		$out .='<br/>';
 		$out .= '</th>';
@@ -1208,7 +1213,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 					$prev_count_val='<b>'.$data_matrix[$row][$col]['indlead_prev'].'</b>';
 				}
 					
-				$out .= '<a href="intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col] . '" target="_blank" class="ottlink" title="'.$title.'">'.$count_val.'</a><br/><br/>';
+				$out .= '<a href="intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col] . $link_part . '" target="_blank" class="ottlink" title="'.$title.'">'.$count_val.'</a><br/><br/>';
 				
 				$out .= '<input type="hidden" value=" ' . (($data_matrix[$row][$col]['phase4_override']) ? '1':'0') . ' " name="phase4_val['.$row.']['.$col.']" id="phase4_val_'.$row.'_'.$col.'" />';
 				$out .= '<input type="hidden" value=" ' . (($data_matrix[$row][$col]['phase4_override']) ? '1':'0') . ' " name="bk_phase4_val['.$row.']['.$col.']" id="bk_phase4_val_'.$row.'_'.$col.'" />';
@@ -1358,7 +1363,7 @@ function Download_reports()
 	if(!isset($_POST['id'])) return;
 	$id = mysql_real_escape_string(htmlspecialchars($_POST['id']));
 	if(!is_numeric($id)) return;
-	$query = 'SELECT name,user,footnotes,description,category,shared,dtt,total FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
+	$query = 'SELECT `name`, `user`, `footnotes`, `description`, `category`, `shared`, `total`, `dtt`, `display_name` FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
 	$res = mysql_query($query) or die('Bad SQL query getting master heatmap report'.$query);
 	$res = mysql_fetch_array($res) or die('Report not found.');
 	$rptu = $res['user'];
@@ -1366,6 +1371,7 @@ function Download_reports()
 	$toal_fld=$res['total'];
 	$dtt = $res['dtt'];
 	$name = $res['name'];
+	$Report_DisplayName=$res['display_name'];
 	$footnotes = htmlspecialchars($res['footnotes']);
 	$description = htmlspecialchars($res['description']);
 	$category = $res['category'];
@@ -1717,6 +1723,9 @@ function Download_reports()
 		$link_part = '&list=1&itype=0&sr='.$sr.'&er='.$er.'&hm=' . $id;
 	}
 	$link_part=str_replace(' ','+',$link_part);	
+	
+	$Report_Name = htmlspecialchars((trim($Report_DisplayName) != '' && $Report_DisplayName != NULL)? trim($Report_DisplayName):'report '.$id.'');
+	
 	if($_POST['dwformat']=='pdfdown')
 	{
 	
@@ -1760,12 +1769,11 @@ function Download_reports()
 						. '</style>'
 						. '<style type="text/css">'.file_get_contents('css/popup_form.css').'</style>'
 						. '</head>'
-						. '<body bgcolor="#FFFFFF">'
-						. '<div align="center"><img src="'.  urlPath() .'images/Larvol-Trial-Logo-notag.png" alt="Main" width="200" height="25" id="header" /></div><br/>';
+						. '<body bgcolor="#FFFFFF">';
 
 		$pdfContent .= '<div align="center">'
 						. '<table align="center" style="border-collapse:collapse; padding:10px; background-color:#DDF;">'
-						. '<tr style="page-break-inside:avoid;" nobr="true"><td align="left"><b>Name: </b>'. htmlspecialchars($name) .'</td>'
+						. '<tr style="page-break-inside:avoid;" nobr="true"><td align="left"><b>Name: </b>'. $Report_Name .'</td>'
 						. '<td align="left"><b>Category: </b>'. htmlspecialchars($category) .'</td></tr>'
 						. '<tr style="page-break-inside:avoid;" nobr="true"><td align="left" colspan="2"><b>Display Mode: </b>'. $pdftitle .'</td></tr>'
 						. '</table>'
@@ -1781,7 +1789,7 @@ function Download_reports()
 			$cdesc = (isset($columnsDescription[$col]) && $columnsDescription[$col] != '')?$columnsDescription[$col]:null;
 			$caltTitle = (isset($cdesc) && $cdesc != '')?' alt="'.$cdesc.'" title="'.$cdesc.'" ':null;
 				
-			$pdfContent .= '<th '.$caltTitle.'><div align="center">'. $val .'<br />';
+			$pdfContent .= '<th '.$caltTitle.'><div align="center">';
 				
 			if(isset($areaIds[$col]) && $areaIds[$col] != NULL && !empty($productIds))
 			{
@@ -1797,7 +1805,7 @@ function Download_reports()
 				{
 					$count_val=$col_indlead_total[$col];
 				}
-				$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. $link_part . '" target="_blank" title="'. $title .'">'.$count_val.'</a>';
+				$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. $link_part . '" target="_blank" title="'. $title .'">'.$val.'</a>';
 			}
 			$pdfContent .='</div></th>';
 			
@@ -1842,7 +1850,7 @@ function Download_reports()
 			//$rval = (isset($rowsDisplayName[$row]) && $rowsDisplayName[$row] != '')?$rowsDisplayName[$row]:$rval;
 			$rdesc = (isset($rowsDescription[$row]) && $rowsDescription[$row] != '')?$rowsDescription[$row]:null;
 			$raltTitle = (isset($rdesc) && $rdesc != '')?' alt="'.$rdesc.'" title="'.$rdesc.'" ':null;
-			$pdfContent .= '<tr  style="page-break-inside:avoid;" nobr="true"><th '.$raltTitle.'><div align="center">' . $rval .'<br />';
+			$pdfContent .= '<tr  style="page-break-inside:avoid;" nobr="true"><th '.$raltTitle.'><div align="center">';
 					
 			if(isset($productIds[$row]) && $productIds[$row] != NULL && !empty($areaIds))
 			{
@@ -1858,7 +1866,7 @@ function Download_reports()
 				{
 					$count_val=$row_indlead_total[$row];
 				}
-				$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). $link_part . '" target="_blank" class="ottlink" title="'. $title .'">'.$count_val.'</a>';
+				$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). $link_part . '" target="_blank" class="ottlink" title="'. $title .'">'.$rval.'</a>';
 			}
 			$pdfContent .= '</div></th>';
 			
@@ -1867,7 +1875,7 @@ function Download_reports()
 				if($data_matrix[$row][$col]['update_flag'] == 1)
 				{ $data_matrix[$row][$col]['bordercolor_code']='#FF0000'; } else { $data_matrix[$row][$col]['bordercolor_code']='blue'; }
 				if(($data_matrix[$row][$col]['total'] == 0))
-				{ $data_matrix[$row][$col]['color_code']='efefef'; $data_matrix[$row][$col]['bordercolor_code']='blue'; }
+				{ $data_matrix[$row][$col]['color_code']='dcdcdc'; $data_matrix[$row][$col]['bordercolor_code']='blue'; }
 				
 				$pdfContent .= '<td align="center" style="border-right: 0.5px solid '.$data_matrix[$row][$col]['bordercolor_code'].'; border-left:0.5px solid '.$data_matrix[$row][$col]['bordercolor_code'].'; border-top: 0.5px solid '.$data_matrix[$row][$col]['bordercolor_code'].'; border-bottom:0.5px solid '.$data_matrix[$row][$col]['bordercolor_code'].'; background-color:#'.$data_matrix[$row][$col]['color_code'].';">&nbsp;&nbsp;&nbsp;&nbsp;';
 				
@@ -1896,7 +1904,7 @@ function Download_reports()
 					if($data_matrix[$row][$col]['count_lastchanged_value']==1)
 					$annotation_text .= "Count updated from: ".$count_val_prev."\n";
 					if($data_matrix[$row][$col]['highest_phase_lastchanged_value']==1)
-					$annotation_text .= "Highest Phase updated from: ".$data_matrix[$row][$col]['highest_phase_prev']."\n";
+					$annotation_text .= "Highest Phase updated from: Phase ".$data_matrix[$row][$col]['highest_phase_prev']."\n";
 					if($data_matrix[$row][$col]['bomb_explain'] != NULL && trim($data_matrix[$row][$col]['bomb_explain']) != '' && ($data_matrix[$row][$col]['bomb']['value'] == 'small' || $data_matrix[$row][$col]['bomb']['value'] == 'large')) 
 					$annotation_text .= "Bomb details: ".$data_matrix[$row][$col]['bomb_explain']."\n";
 					if($data_matrix[$row][$col]['filing'] != NULL && trim($data_matrix[$row][$col]['filing']) != '')
@@ -1959,7 +1967,7 @@ function Download_reports()
 		$pdf->writeHTML($pdfContent, true, false, true, false, '');
 		ob_end_clean();
 		//Close and output PDF document
-		$pdf->Output('Larvol_'. substr($name,0,20) .'_PDF_Report_'. date("Y-m-d_H.i.s") .'.pdf', 'D');
+		$pdf->Output('Larvol_'. substr($Report_Name,0,20) .'_PDF_Report_'. date("Y-m-d_H.i.s") .'.pdf', 'D');
 	}//Pdf Functions Ends
 	
 	if($_POST['dwformat']=='exceldown')
@@ -2009,7 +2017,7 @@ function Download_reports()
 				$cdesc = (isset($columnsDescription[$col]) && $columnsDescription[$col] != '')?$columnsDescription[$col]:null;
 				$caltTitle = (isset($cdesc) && $cdesc != '')?' alt="'.$cdesc.'" title="'.$cdesc.'" ':null;
 								
-				$objPHPExcel->getActiveSheet()->setCellValue($cell, $val.$count_val);
+				$objPHPExcel->getActiveSheet()->setCellValue($cell, $val);
 				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col].$link_part);
 				
 				if($cdesc)
@@ -2066,7 +2074,7 @@ function Download_reports()
 				$rdesc = (isset($rowsDescription[$row]) && $rowsDescription[$row] != '')?$rowsDescription[$row]:null;
 				$raltTitle = (isset($rdesc) && $rdesc != '')?' alt="'.$rdesc.'" title="'.$rdesc.'" ':null;
 				
-				$objPHPExcel->getActiveSheet()->setCellValue($cell, $rval.$count_val);
+				$objPHPExcel->getActiveSheet()->setCellValue($cell, $rval);
 				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds).$link_part); 
  			    $objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip($tooltip);
  			    
@@ -2183,7 +2191,7 @@ function Download_reports()
 		$row = count($rows) + 1;
 		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$row, '');
 		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$row, 'Report name:');
-		$objPHPExcel->getActiveSheet()->SetCellValue('B' . $row, substr($name,0,250));
+		$objPHPExcel->getActiveSheet()->SetCellValue('B' . $row, substr($Report_Name,0,250));
 		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$row, 'Display Mode:');
 		$objPHPExcel->getActiveSheet()->SetCellValue('B' . $row, $tooltip);
 		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$row, 'Footnotes:');
@@ -2226,7 +2234,7 @@ function Download_reports()
 		header("Content-Type: application/force-download");
 		header("Content-Type: application/download");
 		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-		header('Content-Disposition: attachment;filename="Larvol_' . substr($name,0,20) . '_Excel_Report_' . date('Y-m-d_H.i.s') . '.xlsx"');
+		header('Content-Disposition: attachment;filename="Larvol_' . substr($Report_Name,0,20) . '_Excel_Report_' . date('Y-m-d_H.i.s') . '.xlsx"');
 			
 		header("Content-Transfer-Encoding: binary ");
 		$objWriter->save('php://output');
@@ -2366,7 +2374,7 @@ function postEd()
 		if(($rptu === NULL && $db->user->userlevel != 'user') || ($rptu !== NULL && $rptu == $db->user->id)) 	///Restriction on report saving
 		{
 		
-			$originDT_query = 'SELECT `name`, `user`, `footnotes`, `description`, `category`, `shared`, `total`, `dtt` FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
+			$originDT_query = 'SELECT `name`, `user`, `footnotes`, `description`, `category`, `shared`, `total`, `dtt`, `display_name` FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
 			$originDT=mysql_query($originDT_query) or die ('Bad SQL Query getting Original Master Header Table Information Before Updating.<br/>'.$query);
 			$originDT = mysql_fetch_array($originDT);
 		
@@ -2377,6 +2385,12 @@ function postEd()
 			if(trim($_POST['reportname']) != trim($originDT['name']))
 			{
 				$query .= ' `name`="' . mysql_real_escape_string($_POST['reportname']) . '",';
+				$change_flag=1;
+			}
+			
+			if(trim($_POST['report_displayname']) != trim($originDT['display_name']))
+			{
+				$query .= ' `display_name`="' . mysql_real_escape_string($_POST['report_displayname']) . '",';
 				$change_flag=1;
 			}
 			

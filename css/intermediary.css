@@ -365,7 +365,7 @@ tr.upms td {
 
 /* We apply the link style */
 #menuwrapper ul li a{
-    padding:4px 8px;
+    padding:3px 8px;
     color:#000000;
     display:inline-block;
     text-decoration:none;
@@ -381,10 +381,10 @@ tr.upms td {
 	overflow-x: hidden;
 }
 
-/* When user has hovered the li item, we show the ul list by applying display:block, note: 25px is the menu height.  */
+/* When user has hovered the li item, we show the ul list by applying display:block, note: 23px is the menu height.  */
 #menuwrapper ul li:hover ul{
     left:0;
-    top:25px;
+    top:23px;
     display:block;
 }
 
