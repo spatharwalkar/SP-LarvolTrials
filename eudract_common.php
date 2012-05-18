@@ -544,6 +544,15 @@ $ignore_fields = array(
         
 		return $study;
 	}
+	
+	function GetCountry($country)
+	{
+		if($country == 'Outside EU/EEA (PIP Studies)')
+		{
+			return '3rd';
+		}
+		return $country;
+	}
 
 	function ProcessNew($id, $countries) {
 
@@ -558,8 +567,9 @@ $ignore_fields = array(
 		$study = array();
 		foreach ($countries as $country)
 		{
+			$country_val = GetCountry($country);
 			$url = "https://www.clinicaltrialsregister.eu/ctr-search/trial/" .
-			$eudract_number . "/" . $country ;
+			$eudract_number . "/" . $country_val ;
 			$Html = curl_start($url);
 			ProcessHtml($Html, $study);
 			echo ("Finished Processing: " . $study['eudract_id'][0] . ", Country: " . $country . "<br>");
