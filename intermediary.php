@@ -299,6 +299,18 @@ $lastChangedTime = filectime("css/intermediary.css");
 			
 			return true;
 		});
+		
+		$(".arrow ul li a").click(function() 
+		{
+			$("#pr").val(this.rel);
+			var productTitle = $($("#menuwrapper ul li:first").not("ul").contents().get(0)).text();
+			var selectedProduct = $(this).text();
+			
+			$(this).text(productTitle);
+			$($("#menuwrapper ul li:first").not("ul").contents().get(0)).text(selectedProduct);
+
+			return false;  
+		}); 
 	});
 	
     </script>

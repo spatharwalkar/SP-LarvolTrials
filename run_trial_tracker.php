@@ -9634,8 +9634,6 @@ class TrialTracker
 		
 		if(isset($globalOptions['product']) && $globalOptions['product'] != '')
 		{	
-			echo '<input type="hidden" name="pr" value="' . $globalOptions['product'] . '" />';
-			
 			foreach($TrialsInfo as $k => $v)
 			{
 				if($k != $globalOptions['product'])
@@ -9652,6 +9650,7 @@ class TrialTracker
 			}
 			$Trials = array_values($Trials);
 		}
+		echo '<input type="hidden" id="pr" name="pr" value="" />';
 		
 		///Calculate new count values
 		foreach($allTrials as $i => $arr)
@@ -9749,7 +9748,6 @@ class TrialTracker
 		$start 	= ($globalOptions['page']-1) * $this->resultsPerPage + 1;
 		$last 	= ($globalOptions['page'] * $this->resultsPerPage > $count) ? $count : ($start + $this->resultsPerPage - 1);
 		$totalPages = ceil($count / $this->resultsPerPage);
-		$paginate = $this->pagination($globalOptions, $totalPages, $timeMachine, $ottType, $loggedIn);
 		
 		if(!empty($allTrials) && $globalOptions['minEnroll'] == 0 && $globalOptions['maxEnroll'] == 0)
 		{
@@ -9809,7 +9807,7 @@ class TrialTracker
 		
 		if($totalPages > 1)
 		{
-			echo $paginate['paginate'];
+			$this->pagination($globalOptions, $totalPages, $timeMachine, $ottType, $loggedIn);
 		}
 		
 		echo '<div style="float: left;margin-right: 20px; vertical-align:bottom; padding-top:4px; height:22px;"><span id="addtoright"></span></div>';
@@ -9820,25 +9818,22 @@ class TrialTracker
 		if(!empty($TrialsInfoList)
 		&& ($ottType != 'unstacked' && $ottType != 'indexed' && $ottType != 'standalone' && $ottType != 'unstackedoldlink'))
 		{
-			$paginate['url'] = preg_replace("/\&amp;page=[0-9].*?(\&amp;|$)/", '',   $paginate['url']);
-			$allproductsurl = preg_replace("/\&amp;pr=[0-9].*?(\&amp;|$)/", '',   $paginate['url']);
-			
 			echo '<div id="menuwrapper" style="vertical-align:bottom;"><ul>';
 			if(isset($globalOptions['product']) && $globalOptions['product'] != '')
 			{	
-				echo '<li class="arrow"><a href="javascript: void(0);">' . $TrialsInfoList[$globalOptions['product']] . '</a>'
-					.'<ul><li style="height:23px;"><a href="' . $allproductsurl . '">' . $productSelectorTitle . '</a></li>';
+				echo '<li class="arrow"><a href="javascript: void(0);" rel="' . $globalOptions['product'] . '">' . $TrialsInfoList[$globalOptions['product']] . '</a>'
+					.'<ul><li style="height:23px;"><a href="javascript: void(0);">' . $productSelectorTitle . '</a></li>';
 
 				unset($TrialsInfoList[$globalOptions['product']]);
 			}
 			else
 			{
-				echo '<li class="arrow"  style="height:23px;"><a href="' . $allproductsurl . '">' . $productSelectorTitle . '</a><ul>';
+				echo '<li class="arrow" style="height:23px;"><a href="javascript: void(0);">' . $productSelectorTitle . '</a><ul>';
 			}
 			
 			foreach($TrialsInfoList as $infkey => $infvalue)
 			{
-				echo '<li><a href="' . $paginate['url'] . '&amp;pr=' . $infkey .  '">' . $infvalue . '</a></li>';
+				echo '<li><a href="javascript: void(0);" rel="' . $infkey . '">' . $infvalue . '</a></li>';
 			}
 			echo '</ul></ul></div>';
 		}
@@ -9858,7 +9853,7 @@ class TrialTracker
 		if($totalPages > 1)
 		{
 			echo '<div style="height:10px;">&nbsp;</div>';
-			echo $paginate['paginate'];
+			$this->pagination($globalOptions, $totalPages, $timeMachine, $ottType, $loggedIn);
 		}
 		echo '</form><br/>';
 		
@@ -10409,7 +10404,7 @@ class TrialTracker
 		}
 		$paginateStr .= '</div>';
 		
-		return array('paginate' => $paginateStr, 'url' => $url);
+		echo $paginateStr;
 	}
 	
 	function displayTrials($globalOptions = array(), $loggedIn, $start, $end, $trials, $trialsInfo, $ottType)

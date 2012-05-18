@@ -404,7 +404,7 @@ tr.upms td {
 /* We style the color of level 2 links */
 #menuwrapper ul li ul li a{
     color:#000000;
-    display:inline-block;
+    display:block;
     width:400px;
 }
 
