@@ -148,6 +148,8 @@ foreach($columns as $col => $cval)
 $columns=$new_columns;
 /////Rearrange Completes //////////
 
+
+
 	// SELECT MAX ROW AND MAX COL
 $query = 'SELECT MAX(`num`) AS `num` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' AND type = \'product\'';
 $res = mysql_query($query) or die(mysql_error());
@@ -534,11 +536,8 @@ width:100px;
 	-moz-transform: rotate(270deg); /* For Firefox */
 	-o-transform: rotate(270deg); /* For Opera */
 	-webkit-transform: rotate(270deg); /* For Safari and Chrome */
+	white-space:wrap;
 	writing-mode: tb-rl; /* For IE */
-	max-width:20px;
-	max-height:400px;
-	margin:2px;
-	height:auto;
 	filter: flipv fliph;
 	white-space:wrap;
 }
@@ -573,6 +572,45 @@ width: 50px;
 visibility: hidden;
 }
 </style>
+<?php
+///Formula to calculate Height and Width of Row and category cell, depending on category name
+//style tag is used here as specifying height and width directly inside tag does not have any effect in IE7/IE8/Chrome
+foreach($rows as $row => $rval)
+{
+	$cat = (isset($rowsCategoryName[$row]) && $rowsCategoryName[$row] != '')? $rowsCategoryName[$row]:'Undefined';
+	
+	$height="20px";
+	$width = "20px";
+	if($cat != 'Undefined')
+	{
+		if($rows_Span[$row] > 0)
+		{
+			$height = ((strlen(max(explode(' ',$rowsCategoryName[$row])))*10)/$rows_Span[$row])+20;
+			$width = (count(explode(' ',$rowsCategoryName[$row]))*14);
+			while($width > $height)
+			$height=$width+$height;
+			$width = $width.'px';
+			$height = $height.'px';
+			$prev_width = $width;
+			$prev_height = $height;
+			
+		}
+		else if($rows_Span[$row] == 0)
+		{
+			$height = $prev_height;
+			$width = $prev_width;
+		}
+		
+	}
+	echo '<style type="text/css"> 
+	.Cat_Height_'.$row.' { height:'.$height.'; vertical-align:middle; } 
+	.Cell_Height_'.$row.' { min-height:'.$height.'; height:100%; max-height:inherit; vertical-align:middle; } 
+	.Cat_Width_'.$row.' { width:'.$width.'; vertical-align:middle;  } 
+	</style>';  
+	//echo  'Cat_Height_'.$row.' { height:'.$height.'; } .Cat_Width_'.$row.' { width:'.$width.'; } .Cell_Height_'.$row.' { min-height:'.$height.'; height:100%; max-height:inherit; vertical-align:middle; }  <br/>';
+}
+///End of height and width formula
+?>
 <script language="javascript" type="text/javascript">
 function change_view()
 {
@@ -1253,33 +1291,20 @@ foreach($rows as $row => $rval)
 	
 	$cat = (isset($rowsCategoryName[$row]) && $rowsCategoryName[$row] != '')? $rowsCategoryName[$row]:'Undefined';
 	
-	$height="100%";
-	if($cat != 'Undefined')
-	{
-		if($rows_Span[$row] > 0)
-		{
-			$height = ((strlen($rowsCategoryName[$row])*8)/$rows_Span[$row]).'px'; //Calculate height
-			$prev_height = $height;
-		}
-		else if($rows_Span[$row] == 0)
-		{
-			$height = $prev_height;
-		}
-		
-	}
-	$htmlContent .= '<tr height="'.$height.'" style="page-break-inside:avoid; vertical-align:middle; max-height:100%;">';
+	
+	$htmlContent .= '<tr style="page-break-inside:avoid; vertical-align:middle; max-height:100%;" class="Cat_Height_'.$row.'">';
 	
 	if($rows_Span[$row] > 0)
 	{
 		$online_HMCounter++;
-		$htmlContent .='<th align="left" style="vertical-align:bottom; padding-top:4px; background-color:#FFFFFF; '.(($cat != 'Undefined') ? ' border-left:#000000 solid 2px; border-top:#000000 solid 2px; border-bottom:#000000 solid 2px;' : '' ).'" rowspan="'.$rows_Span[$row].'" id="Cell_ID_'.$online_HMCounter.'"><div class="box_rotate">';
+		$htmlContent .='<th class="Cat_Width_'.$row.'" align="center" style="vertical-align:middle; background-color:#FFFFFF; '.(($cat != 'Undefined') ? ' border-left:#000000 solid 2px; border-top:#000000 solid 2px; border-bottom:#000000 solid 2px;' : '' ).'" rowspan="'.$rows_Span[$row].'" id="Cell_ID_'.$online_HMCounter.'"><div class="box_rotate Cat_Height_'.$row.'">';
 		if($dtt)
 		{
 			$htmlContent .= '<input type="hidden" value="0,endl,0,endl,0" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
 			$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . implode(',', $rows_categoryProducts[$cat]) . '&a=' . $last_area . '&list=1&sr=now&er=1 month ago" target="_blank" class="ottlink">';
 			$htmlContent .= '<input type="hidden" value="'. urlPath() .'intermediary.php?p=' . implode(',', $rows_categoryProducts[$cat]) . '&a=' . $last_area . '&list=1&itype=0&sr=now&er=1 month ago&hm=' . $id . '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />';
 		}
-		$htmlContent .='<b>'.(($cat != 'Undefined') ? $cat:'').'</b>';
+		$htmlContent .='<b>'.(($cat != 'Undefined') ? '<br/><br/>'.$cat:'').'</b>';
 		if($dtt)
 		$htmlContent .= '</a>';
 		$htmlContent .='</div></th>';
@@ -1313,7 +1338,7 @@ foreach($rows as $row => $rval)
 		if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL && $data_matrix[$row][$col]['total'] != 0)
 		{
 			
-			$htmlContent .= '<div id="Div_ID_'.$online_HMCounter.'" style="'.$data_matrix[$row][$col]['div_start_style'].' width:100%; height:100%;  vertical-align:middle; float:none; display:table;">';
+			$htmlContent .= '<div class="Cell_Height_'.$row.'" id="Div_ID_'.$online_HMCounter.'" style="'.$data_matrix[$row][$col]['div_start_style'].' width:100%; vertical-align:middle; float:none; display:table;">';
 			
 			$htmlContent .= '<input type="hidden" value="'.$data_matrix[$row][$col]['active'].',endl,'.$data_matrix[$row][$col]['total'].',endl,'.$data_matrix[$row][$col]['indlead'].',endl,'.$data_matrix[$row][$col]['active_prev'].',endl,'.$data_matrix[$row][$col]['total_prev'].',endl,'.$data_matrix[$row][$col]['indlead_prev'].',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['last_update'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['last_update'])).',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['count_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['count_lastchanged'])).',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])).',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['filing_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['filing_lastchanged'])).',endl,'.$data_matrix[$row][$col]['color_code'].',endl,'.$data_matrix[$row][$col]['bomb']['value'].',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['phase_explain_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['phase_explain_lastchanged'])).',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['phase4_override_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['phase4_override_lastchanged'])).',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['highest_phase_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['highest_phase_lastchanged'])).',endl,\''.$data_matrix[$row][$col]['highest_phase_prev'].'\'" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
 			
