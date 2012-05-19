@@ -681,6 +681,7 @@
 		 { name: 'NotRegex', displayname: 'NotRegex', op: " %f !='%s'", multipleval: false }
 		],
             chain: [
+         { name: '(', op: '(' },             
 		 { name: 'AND', op: 'AND' },
 		 { name: 'OR', op: 'OR' },
 		 { name: 'AND (', op: 'AND (' },
