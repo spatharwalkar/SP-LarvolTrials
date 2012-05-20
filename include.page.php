@@ -1033,6 +1033,7 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		echo "<tr><td>".$lnk."Preindex".$lnk2." Status:</td><td align=\"left\" class=\"norm\">";
 		echo "<span class=\"progressBar\" id=\"product_update\">{$options['preindexProgress']}</span>";
 		echo "&nbsp;<span>{$status[$options['preindexStatus']['status']]}.</span>";
+		echo "&nbsp;<span>".((isset($options['preindexStatus']['er_message']) && $options['preindexStatus']['er_message']!='')? $options['preindexStatus']['er_message'].'.': '')."</span>";
 		echo "</td></tr>";	
 	}
 	echo '<tr>&nbsp;<td></td><td><input name ="save" type="submit" value="Save"/></td>';
@@ -1393,12 +1394,14 @@ function parseProductsXmlAndSave($xmlImport,$table)
 * @param $type type of preindex data. Eg: PRODUCT2,AREA2
 * @author Jithu Thomas
 */
-function getPreindexProgress($type)
+function getPreindexProgress($type,$itemId)
 {
 	global $db;
+	$type = mysql_real_escape_string($type);
+	$itemId = mysql_real_escape_string($itemId);
 	$query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 							`update_items_total`,`update_items_progress`,`er_message`,TIMEDIFF(updated_time, start_time) AS timediff,
-							`update_items_complete_time` FROM update_status_fullhistory where trial_type="'.$type.'"';
+							`update_items_complete_time` FROM update_status_fullhistory where trial_type="'.$type.'" and item_id='.$itemId;
 	if(!$res = mysql_query($query))
 	{
 		$msg = 'There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
