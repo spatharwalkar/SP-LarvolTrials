@@ -391,7 +391,7 @@ tr.upms td {
 /* As the parent li has float:left property, we overwrite for the submenu (level 2) to float none (normal position)  */
 #menuwrapper ul li ul li{
     float:none;
-    width:400px;
+    width:390px;
     background-color:#D5D3E6;
 	text-align: left;
 }
@@ -405,7 +405,8 @@ tr.upms td {
 #menuwrapper ul li ul li a{
     color:#000000;
     display:block;
-    width:400px;
+	padding-right:10px;
+   /* width:400px;*/
 }
 
 /**** THIRD LEVEL MENU ****/
