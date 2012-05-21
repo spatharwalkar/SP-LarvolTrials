@@ -11869,7 +11869,7 @@ class TrialTracker
 				
 			//Query for checking updates for upms.
 			$sql = "SELECT `id`, `field`, `old_value` FROM `upm_history` "
-					. " WHERE `id` = '" . $row['id'] . "' AND (`change_date` <= '" . date('Y-m-d', $timeMachine) . "' AND `change_date` >= '" 
+					. " WHERE `id` = '" . $row['id'] . "' AND (CAST(`change_date` AS DATE) <= '" . date('Y-m-d', $timeMachine) . "' AND `change_date` >= '" 
 					. date('Y-m-d', strtotime($timeInterval ,$timeMachine)) . "') ORDER BY `change_date` DESC LIMIT 0,1 ";
 			$res = mysql_query($sql);
 			
