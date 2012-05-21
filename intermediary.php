@@ -311,6 +311,17 @@ $lastChangedTime = filectime("css/intermediary.css");
 
 			return false;  
 		}); 
+		
+		var config = {    
+			 over: makeTall, // function = onMouseOver callback (REQUIRED)    
+			 timeout: 500, // number = milliseconds delay before onMouseOut    
+			 out: makeShort// function = onMouseOut callback (REQUIRED)   
+		};
+		
+		function makeTall(){  $(this).animate({"height":'100%'}, 200);}
+		function makeShort(){ $(this).animate({"height":'1.1em'}, 500);}
+
+		$(".manage tr").hoverIntent(config)
 	});
 	
     </script>
