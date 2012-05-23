@@ -167,6 +167,7 @@ $lastChangedTime = filectime("css/intermediary.css");
     <script type="text/javascript" src="scripts/date/jquery.jdpicker.js"></script>
     <script type="text/javascript" src="date/init.js"></script>
     <script type="text/javascript" src="scripts/chrome.js"></script>
+    <script type="text/javascript" src="scripts/jquery.hoverIntent.minified.js"></script>
     <script type="text/javascript">
 		var _gaq = _gaq || [];
 		_gaq.push(['_setAccount', 'UA-18240582-3']);
