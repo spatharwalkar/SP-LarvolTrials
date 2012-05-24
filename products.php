@@ -332,8 +332,17 @@ $(document).ready(function () {
   </script>
   
 <?php 
+//preindex after successful save and change of search data as a seperate worker thread
 if($saveStatus == 1 && $searchDataOld != $_GET['searchdata'])
 {
 	echo input_tag(array('Type'=>'iframe','Field'=>urlPath().'index_product.php?id='.$_GET['id'].'&connection_close=1'),null,array('style'=>"display:none"));die;
+}
+//add predindex for full delete through a seperate worker thread
+if(isset($_GET['delsearch']) && is_array($_GET['delsearch']))
+{
+	foreach($_GET['delsearch'] as $delId => $wok)
+	{
+		echo input_tag(array('Type'=>'iframe','Field'=>urlPath().'index_product.php?id='.$delId.'&connection_close=1'),null,array('style'=>"display:none"));
+	}
 }
 echo '</html>';
