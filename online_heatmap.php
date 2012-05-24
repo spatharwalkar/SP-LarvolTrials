@@ -585,7 +585,7 @@ foreach($rows as $row => $rval)
 	{
 		if($rows_Span[$row] > 0)
 		{
-			$height = ((strlen(max(explode(' ',$rowsCategoryName[$row])))*10)/$rows_Span[$row])+20;
+			$height = ((strlen(max(explode(' ',$rowsCategoryName[$row])))*10)/$rows_Span[$row])+35;
 			$width = (count(explode(' ',$rowsCategoryName[$row]))*14);
 			while($width > $height)
 			$height=$width+$height;
@@ -773,10 +773,18 @@ function change_view()
 						document.getElementById("Cell_Link_"+i).style.fontWeight = "bold";
 						if(Cell_values_Arr[14]=='FF0000')
 						document.getElementById("Cell_Link_"+i).style.backgroundColor = "#FFFFFF";
-						if(latest_date < count_cdate || latest_date == '')
+						if((latest_date < count_cdate || latest_date == '') && (Cell_values_Arr[5] != Cell_values_Arr[2]))
 						{
 							qualify_title = "Active Industry Lead Count Changed from: "+ Cell_values_Arr[5] +" On: "+ Cell_values_Arr[9];
 							latest_date = count_cdate;
+							document.getElementById("Count_CDate_"+i).style.display = "inline";
+						}
+						else
+						{
+							document.getElementById("Cell_Link_"+i).style.color = "#000000";
+							document.getElementById("Cell_Link_"+i).style.backgroundColor = "#"+Cell_values_Arr[14];
+							document.getElementById("Cell_Link_"+i).style.fontWeight = "normal";
+							document.getElementById("Count_CDate_"+i).style.display = "none";
 						}
 					}
 					if(view_type.value == 'total')	//Compare Total values
@@ -786,10 +794,18 @@ function change_view()
 						document.getElementById("Cell_Link_"+i).style.fontWeight = "bold";
 						if(Cell_values_Arr[14]=='FF0000')
 						document.getElementById("Cell_Link_"+i).style.backgroundColor = "#FFFFFF";
-						if(latest_date < count_cdate || latest_date == '')
+						if((latest_date < count_cdate || latest_date == '') && (Cell_values_Arr[4] != Cell_values_Arr[1]))
 						{
 							qualify_title = "Total Count Changed from: "+ Cell_values_Arr[4] +" On: "+ Cell_values_Arr[9];
 							latest_date = count_cdate;
+							document.getElementById("Count_CDate_"+i).style.display = "inline";
+						}
+						else
+						{
+							document.getElementById("Cell_Link_"+i).style.color = "#000000";
+							document.getElementById("Cell_Link_"+i).style.backgroundColor = "#"+Cell_values_Arr[14];
+							document.getElementById("Cell_Link_"+i).style.fontWeight = "normal";
+							document.getElementById("Count_CDate_"+i).style.display = "none";
 						}
 					}
 					if(view_type.value == 'active')	//Compare Industry Lead Sponsor values
@@ -799,13 +815,20 @@ function change_view()
 						document.getElementById("Cell_Link_"+i).style.fontWeight = "bold";
 						if(Cell_values_Arr[14]=='FF0000')
 						document.getElementById("Cell_Link_"+i).style.backgroundColor = "#FFFFFF";
-						if(latest_date < count_cdate || latest_date == '')
+						if((latest_date < count_cdate || latest_date == '') && (Cell_values_Arr[3] != Cell_values_Arr[0]))
 						{
 							qualify_title = "Active Count Changed from: "+ Cell_values_Arr[3] +" On: "+ Cell_values_Arr[9];
 							latest_date = count_cdate;
+							document.getElementById("Count_CDate_"+i).style.display = "inline";
+						}
+						else
+						{
+							document.getElementById("Cell_Link_"+i).style.color = "#000000";
+							document.getElementById("Cell_Link_"+i).style.backgroundColor = "#"+Cell_values_Arr[14];
+							document.getElementById("Cell_Link_"+i).style.fontWeight = "normal";
+							document.getElementById("Count_CDate_"+i).style.display = "none";
 						}
 					}
-					document.getElementById("Count_CDate_"+i).style.display = "inline";
 				}
 				else	//Make Count to normal state if there is no change
 				{
@@ -824,7 +847,7 @@ function change_view()
 					document.getElementById("Cell_Link_"+i).style.color = "#000000";
 					document.getElementById("Cell_Link_"+i).style.backgroundColor = "#"+Cell_values_Arr[14];
 					document.getElementById("Cell_Link_"+i).style.fontWeight = "normal";
-					document.getElementById("Count_CDate_"+i).style.display = "none"
+					document.getElementById("Count_CDate_"+i).style.display = "none";
 				}
 					
 				///Change Bomb Color

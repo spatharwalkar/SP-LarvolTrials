@@ -1346,7 +1346,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 	$out .='<div id="dialog" title="Confirm"></div>';
 	if($owner_type == 'mine' || ($owner_type == 'global' && $db->user->userlevel != 'user') || ($owner_type == 'shared' && $rptu == $db->user->id))
 	{
-		$out .= '<br/><br/><br/><br/><div align="left"><fieldset style="margin-top:50px; padding:8px;"><legend>Advanced</legend>'
+		$out .= '<br clear="all"/><div align="left" style="vertical-align:bottom; float:left;"><fieldset style="margin-top:50px; padding:8px;"><legend>Advanced</legend>'
 				. '<label class="lbldeln"><input class="delrepe" type="checkbox" id="delrep" name="delrep['.$id.']" title="Delete" /></label>' 
 				. '&nbsp;&nbsp;&nbsp;&nbsp;Delete this master heatmap report</fieldset></div>';
 	};
