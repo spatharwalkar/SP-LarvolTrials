@@ -147,20 +147,20 @@ class TrialTracker
 		$objPHPExcel->getActiveSheet()->setCellValue('F1' , 'Sponsor');
 		$objPHPExcel->getActiveSheet()->setCellValue('G1' , 'Conditions');
 		$objPHPExcel->getActiveSheet()->setCellValue('H1' , 'Interventions');
-		$objPHPExcel->getActiveSheet()->setCellValue('I1' , 'Start');
-		$objPHPExcel->getActiveSheet()->setCellValue('J1' , 'End');
-		$objPHPExcel->getActiveSheet()->setCellValue('K1' , 'Ph');
-		$objPHPExcel->getActiveSheet()->setCellValue('L1' , 'Result');
-		$objPHPExcel->getActiveSheet()->setCellValue('M1' , '-');
-		$objPHPExcel->getActiveSheet()->mergeCells('M1:O1');
-		$objPHPExcel->getActiveSheet()->setCellValue('P1' , $currentYear);
-		$objPHPExcel->getActiveSheet()->mergeCells('P1:AA1');
-		$objPHPExcel->getActiveSheet()->setCellValue('AB1' , $secondYear);
-		$objPHPExcel->getActiveSheet()->mergeCells('AB1:AM1');
-		$objPHPExcel->getActiveSheet()->setCellValue('AN1' , $thirdYear);
-		$objPHPExcel->getActiveSheet()->mergeCells('AN1:AY1');
-		$objPHPExcel->getActiveSheet()->setCellValue('AZ1' , '+');
-		$objPHPExcel->getActiveSheet()->mergeCells('AZ1:BB1');
+		/*$objPHPExcel->getActiveSheet()->setCellValue('I1' , 'Start');*/
+		$objPHPExcel->getActiveSheet()->setCellValue('I1' , 'End');
+		$objPHPExcel->getActiveSheet()->setCellValue('J1' , 'Ph');
+		$objPHPExcel->getActiveSheet()->setCellValue('K1' , 'Result');
+		$objPHPExcel->getActiveSheet()->setCellValue('L1' , '-');
+		$objPHPExcel->getActiveSheet()->mergeCells('L1:N1');
+		$objPHPExcel->getActiveSheet()->setCellValue('O1' , $currentYear);
+		$objPHPExcel->getActiveSheet()->mergeCells('O1:Z1');
+		$objPHPExcel->getActiveSheet()->setCellValue('AA1' , $secondYear);
+		$objPHPExcel->getActiveSheet()->mergeCells('AA1:AL1');
+		$objPHPExcel->getActiveSheet()->setCellValue('AM1' , $thirdYear);
+		$objPHPExcel->getActiveSheet()->mergeCells('AM1:AX1');
+		$objPHPExcel->getActiveSheet()->setCellValue('AY1' , '+');
+		$objPHPExcel->getActiveSheet()->mergeCells('AY1:BA1');
 
 		$styleThinBlueBorderOutline = array(
 			'borders' => array(
@@ -171,7 +171,7 @@ class TrialTracker
 
 		$highlightChange =  array('font' => array('color' => array('rgb' => 'FF0000')));
 		
-		$objPHPExcel->getActiveSheet()->getStyle('A1:BB1')->applyFromArray($styleThinBlueBorderOutline);
+		$objPHPExcel->getActiveSheet()->getStyle('A1:BA1')->applyFromArray($styleThinBlueBorderOutline);
 			
 		$objPHPExcel->getProperties()->setCreator("The Larvol Group")
 										 ->setLastModifiedBy("TLG")
@@ -404,8 +404,8 @@ class TrialTracker
 			{
 				$sectionHeader = $Values['TrialsInfo'][$tvalue['section']]['sectionHeader'];
 				$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $sectionHeader);
-				$objPHPExcel->getActiveSheet()->mergeCells('A' . $i . ':BB'. $i);
-				$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':BB'. $i)->applyFromArray(
+				$objPHPExcel->getActiveSheet()->mergeCells('A' . $i . ':BA'. $i);
+				$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':BA'. $i)->applyFromArray(
 							array('fill' => array(
 											'type'       => PHPExcel_Style_Fill::FILL_SOLID,
 											'rotation'   => 0,
@@ -468,8 +468,8 @@ class TrialTracker
 			}
 			/////END PART - MERGE CELLS AND APPLY BORDER AS - FOR LOOP WAS NOT WORKING SET INDIVIDUALLY
 				
-			$objPHPExcel->getActiveSheet()->getStyle('"A' . $i . ':BB' . $i.'"')->applyFromArray($styleThinBlueBorderOutline);
-			$objPHPExcel->getActiveSheet()->getStyle('A1:BA1')->applyFromArray($styleThinBlueBorderOutline);
+			$objPHPExcel->getActiveSheet()->getStyle('"A' . $i . ':BA' . $i.'"')->applyFromArray($styleThinBlueBorderOutline);
+			$objPHPExcel->getActiveSheet()->getStyle('A1:AZ1')->applyFromArray($styleThinBlueBorderOutline);
 				
 			
 			//nct id	
@@ -650,7 +650,7 @@ class TrialTracker
 			
 			
 			//start date
-			if(isset($tvalue["NCT/start_date"])
+			/*if(isset($tvalue["NCT/start_date"])
 			&& $tvalue["NCT/start_date"] != '' 
 			&& $tvalue["NCT/start_date"] !== NULL 
 			&& $value["NCT/start_date"] != '0000-00-00')
@@ -668,7 +668,7 @@ class TrialTracker
 				 $objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray($highlightChange); 
 				 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($ctLink);
  			     $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('New record'); 
-			}
+			}*/
 				
 			
 			//end date	
@@ -677,19 +677,19 @@ class TrialTracker
 			&& $tvalue["inactive_date"] !== NULL 
 			&& $tvalue["inactive_date"] != '0000-00-00') 
 			{
-				$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, date('m/y',strtotime($tvalue["inactive_date"])));
+				$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, date('m/y',strtotime($tvalue["inactive_date"])));
 			}
 			if(!empty($tvalue['edited']) && array_key_exists('NCT/inactive_date', $tvalue['edited']))
 			{
-				 $objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($highlightChange);
-				 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink);
-				 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip(substr($tvalue['edited']['NCT/inactive_date'],0,255)); 
+				 $objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray($highlightChange);
+				 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($ctLink);
+				 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip(substr($tvalue['edited']['NCT/inactive_date'],0,255)); 
 			}
 			else if($tvalue['new'] == 'y')
 			{
-				 $objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($highlightChange);
-				 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink); 
- 			     $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip('New record'); 
+				 $objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray($highlightChange);
+				 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($ctLink); 
+ 			     $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('New record'); 
 			}
 				
 			
@@ -706,18 +706,18 @@ class TrialTracker
 				$phaseColor = $this->phaseValues[$phase];
 			}
 			
-			$objPHPExcel->getActiveSheet()->setCellValue('K' . $i, $phase);
+			$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, $phase);
 			if(!empty($tvalue['edited']) && array_key_exists('NCT/phase', $tvalue['edited']))
 			{
-				 $objPHPExcel->getActiveSheet()->getStyle('K' . $i)->applyFromArray($highlightChange);
-				 $objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setUrl($ctLink);
-				 $objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip(substr($tvalue['edited']['NCT/phase'],0,255)); 
+				 $objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($highlightChange);
+				 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink);
+				 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip(substr($tvalue['edited']['NCT/phase'],0,255)); 
 			}
 			else if($tvalue['new'] == 'y')
 			{
-				 $objPHPExcel->getActiveSheet()->getStyle('K' . $i)->applyFromArray($highlightChange); 
-				 $objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setUrl($ctLink);
- 			     $objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip('New record'); 
+				 $objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($highlightChange); 
+				 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink);
+ 			     $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip('New record'); 
 			}
 			
 			if($bgColor == "D5D3E6")
@@ -729,7 +729,7 @@ class TrialTracker
 				$bgColor = "D5D3E6";
 			}
 				
-			$objPHPExcel->getActiveSheet()->getStyle('A' . $i .':K' .$i)->applyFromArray(
+			$objPHPExcel->getActiveSheet()->getStyle('A' . $i .':J' .$i)->applyFromArray(
 					array(
 						'alignment' => array('horizontal'	=> PHPExcel_Style_Alignment::HORIZONTAL_LEFT,),
 						'fill' => array('type'       => PHPExcel_Style_Fill::FILL_SOLID,
@@ -753,7 +753,7 @@ class TrialTracker
 	
 			
 			$this->trialGnattChartforExcel($startMonth, $startYear, $endMonth, $endYear, $currentYear, $secondYear, $thirdYear, $phaseColor, 
-			$tvalue["NCT/start_date"], $tvalue['inactive_date'], $objPHPExcel, $i, 'M');
+			$tvalue["NCT/start_date"], $tvalue['inactive_date'], $objPHPExcel, $i, 'L');
 			
 			$i++;
 				
@@ -768,7 +768,7 @@ class TrialTracker
 					$upmTitle = htmlformat($mvalue['event_description']);
 					
 					//rendering diamonds in case of end date is prior to the current year
-					$objPHPExcel->getActiveSheet()->getStyle('"L' . $i . ':BB' . $i . '"')->applyFromArray($styleThinBlueBorderOutline);
+					$objPHPExcel->getActiveSheet()->getStyle('"K' . $i . ':BA' . $i . '"')->applyFromArray($styleThinBlueBorderOutline);
 					if($mvalue['result_link'] != '' && $mvalue['result_link'] !== NULL)
 					{
 						if((!empty($mvalue['edited']) && $mvalue['edited']['field'] == 'result_link') || ($mvalue['new'] == 'y')) 
@@ -793,9 +793,9 @@ class TrialTracker
 						{
 							$objDrawing->setPath('images/' . $imgColor . '-checkmark.png');
 						}
-						$objDrawing->setCoordinates('L' . $i);
-						$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl(urlencode($mvalue['result_link']));
-						$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setTooltip(substr($upmTitle,0,255));
+						$objDrawing->setCoordinates('K' . $i);
+						$objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setUrl(urlencode($mvalue['result_link']));
+						$objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip(substr($upmTitle,0,255));
 						
 					}
 					else if($mvalue['status'] == 'Pending')
@@ -805,17 +805,17 @@ class TrialTracker
 						$objDrawing->setOffsetX(40);
 						$objDrawing->setOffsetY(10);
 						$objDrawing->setPath('images/hourglass.png');
-						$objDrawing->setCoordinates('L' . $i);
+						$objDrawing->setCoordinates('K' . $i);
 						if($mvalue['event_link'] != '' && $mvalue['event_link'] !== NULL)
 						{
-							$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl(urlencode($mvalue['event_link']));
-							$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setTooltip(substr($upmTitle,0,255));
+							$objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setUrl(urlencode($mvalue['event_link']));
+							$objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip(substr($upmTitle,0,255));
 						}
 					}
 					
 					
 					$this->upmGnattChartforExcel($stMonth, $stYear, $edMonth, $edYear, $currentYear, $secondYear, $thirdYear, $mvalue['start_date'], 
-					$mvalue['end_date'], $mvalue['event_link'], $upmTitle, $objPHPExcel, $i, 'M');
+					$mvalue['end_date'], $mvalue['event_link'], $upmTitle, $objPHPExcel, $i, 'L');
 					
 					$objPHPExcel->getActiveSheet()->getRowDimension($i)->setRowHeight(36);
 					$i++;	
@@ -826,20 +826,20 @@ class TrialTracker
 		}
 		
 		$objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(13);
-		$objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(50);
+		$objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(62);
 		$objPHPExcel->getActiveSheet()->getColumnDimension('C')->setWidth(10);
 		$objPHPExcel->getActiveSheet()->getColumnDimension('D')->setWidth(15);
 		$objPHPExcel->getActiveSheet()->getColumnDimension('E')->setWidth(15);
 		$objPHPExcel->getActiveSheet()->getColumnDimension('F')->setWidth(15);
 		$objPHPExcel->getActiveSheet()->getColumnDimension('G')->setWidth(15);
 		$objPHPExcel->getActiveSheet()->getColumnDimension('H')->setWidth(15);
+		/*$objPHPExcel->getActiveSheet()->getColumnDimension('I')->setWidth(12);*/
 		$objPHPExcel->getActiveSheet()->getColumnDimension('I')->setWidth(12);
-		$objPHPExcel->getActiveSheet()->getColumnDimension('J')->setWidth(12);
-		$objPHPExcel->getActiveSheet()->getColumnDimension('K')->setWidth(9);
-		$objPHPExcel->getActiveSheet()->getColumnDimension('L')->setWidth(12);
+		$objPHPExcel->getActiveSheet()->getColumnDimension('J')->setWidth(9);
+		$objPHPExcel->getActiveSheet()->getColumnDimension('K')->setWidth(12);
 		
-		$Arr = array('M', 'N','O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'AA', 'AB', 'AC', 'AD', 'AE', 'AF', 'AG', 'AH', 'AI', 'AJ',
-					'AK', 'AL', 'AM', 'AN', 'AO', 'AP', 'AQ', 'AR', 'AS', 'AT', 'AU', 'AV', 'AW', 'AX', 'AY', 'AZ', 'BA', 'BB');
+		$Arr = array('L', 'M', 'N','O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'AA', 'AB', 'AC', 'AD', 'AE', 'AF', 'AG', 'AH', 'AI', 'AJ',
+					'AK', 'AL', 'AM', 'AN', 'AO', 'AP', 'AQ', 'AR', 'AS', 'AT', 'AU', 'AV', 'AW', 'AX', 'AY', 'AZ', 'BA');
 		
 		foreach($Arr as $akey => $avalue)
 		{
@@ -862,26 +862,26 @@ class TrialTracker
 		$objPHPExcel->getActiveSheet()->setCellValue('C1' , 'Event Description');
 		$objPHPExcel->getActiveSheet()->setCellValue('D1' , 'Status');
 		$objPHPExcel->getActiveSheet()->setCellValue('E1' , 'Conditions');
-		$objPHPExcel->getActiveSheet()->setCellValue('F1' , 'Start');
-		$objPHPExcel->getActiveSheet()->setCellValue('G1' , 'End');
-		$objPHPExcel->getActiveSheet()->setCellValue('H1' , 'Result');
-		$objPHPExcel->getActiveSheet()->setCellValue('I1' , '-');
-		$objPHPExcel->getActiveSheet()->mergeCells('I1:K1');
-		$objPHPExcel->getActiveSheet()->setCellValue('L1' , $currentYear);
-		$objPHPExcel->getActiveSheet()->mergeCells('L1:W1');
-		$objPHPExcel->getActiveSheet()->setCellValue('X1' , $secondYear);
-		$objPHPExcel->getActiveSheet()->mergeCells('X1:AI1');
-		$objPHPExcel->getActiveSheet()->setCellValue('AJ1' , $thirdYear);
-		$objPHPExcel->getActiveSheet()->mergeCells('AJ1:AU1');
-		$objPHPExcel->getActiveSheet()->setCellValue('AV1' , '+');
-		$objPHPExcel->getActiveSheet()->mergeCells('AV1:AX1');
-		$objPHPExcel->getActiveSheet()->getStyle('A1:AX1')->applyFromArray($styleThinBlueBorderOutline);
+		/*$objPHPExcel->getActiveSheet()->setCellValue('F1' , 'Start');*/
+		$objPHPExcel->getActiveSheet()->setCellValue('F1' , 'End');
+		$objPHPExcel->getActiveSheet()->setCellValue('G1' , 'Result');
+		$objPHPExcel->getActiveSheet()->setCellValue('H1' , '-');
+		$objPHPExcel->getActiveSheet()->mergeCells('H1:J1');
+		$objPHPExcel->getActiveSheet()->setCellValue('K1' , $currentYear);
+		$objPHPExcel->getActiveSheet()->mergeCells('K1:V1');
+		$objPHPExcel->getActiveSheet()->setCellValue('W1' , $secondYear);
+		$objPHPExcel->getActiveSheet()->mergeCells('W1:AH1');
+		$objPHPExcel->getActiveSheet()->setCellValue('AI1' , $thirdYear);
+		$objPHPExcel->getActiveSheet()->mergeCells('AI1:AT1');
+		$objPHPExcel->getActiveSheet()->setCellValue('AU1' , '+');
+		$objPHPExcel->getActiveSheet()->mergeCells('AU1:AW1');
+		$objPHPExcel->getActiveSheet()->getStyle('A1:AW1')->applyFromArray($styleThinBlueBorderOutline);
 
 		$i = 2;
 		/* Display - Unmatched UPM's */
 		foreach ($unMatchedUpms as $ukey => $uvalue)
 		{
-			$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':AX' . $i . '')->applyFromArray($styleThinBlueBorderOutline);
+			$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':AW' . $i . '')->applyFromArray($styleThinBlueBorderOutline);
 			
 			$eventLink = urlencode($uvalue['event_link']);
 			$resultLink = urlencode($uvalue['result_link']);
@@ -988,7 +988,7 @@ class TrialTracker
 				
 				
 			//upm start date
-			$objPHPExcel->getActiveSheet()->setCellValue('F' . $i, date('m/y',strtotime($uvalue["start_date"])));
+			/*$objPHPExcel->getActiveSheet()->setCellValue('F' . $i, date('m/y',strtotime($uvalue["start_date"])));
 			$dateStyle = (array('font' => array('color' => array('rgb' => '973535'))));
 			if(!empty($uvalue['edited']) && ($uvalue['edited']['field'] == 'start_date'))
 			{
@@ -1038,63 +1038,63 @@ class TrialTracker
 				{
 					$objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray($dateStyle);
 				}
-			}
+			}*/
 			
 			
 			//upm end date
-			$objPHPExcel->getActiveSheet()->setCellValue('G' . $i, date('m/y',strtotime($uvalue["end_date"])));
+			$objPHPExcel->getActiveSheet()->setCellValue('F' . $i, date('m/y',strtotime($uvalue["end_date"])));
 
 			$dateStyle = (array('font'    => array('color'     => array('rgb' => '973535'))));
 			if(!empty($uvalue['edited']) && ($uvalue['edited']['field'] == 'end_date'))
 			{
-				$objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($highlightChange);
+				$objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray($highlightChange);
 				if($eventLink != '' && $eventLink !== NULL)
 				{
 
 
-					$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($eventLink);
+					$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl($eventLink);
 					if($uvalue['edited']['end_date'] != '' && $uvalue['edited']['end_date'] !== NULL)
 					{
-						$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip(substr('Previous value: ' . $uvalue['edited']['end_date'],0,255)); 
+						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip(substr('Previous value: ' . $uvalue['edited']['end_date'],0,255)); 
 					}
 					else
 					{
-						$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip('No Previous value'); 
+						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('No Previous value'); 
 					}
 				}
 			}
 			else if(!empty($uvalue['edited']) && ($uvalue['edited']['field'] == 'end_date_type'))
 			{
-				$objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($highlightChange);
+				$objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray($highlightChange);
 				if($eventLink != '' && $eventLink !== NULL)
 				{
-					$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($eventLink);
+					$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl($eventLink);
 					if($uvalue['edited']['end_date_type'] != '' && $uvalue['edited']['end_date_type'] !== NULL)
 					{
-						$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip(substr('Previous value: ' . $uvalue['edited']['end_date_type'],0,255)); 
+						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip(substr('Previous value: ' . $uvalue['edited']['end_date_type'],0,255)); 
 					}
 					else
 					{
-						$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip('No Previous value'); 
+						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('No Previous value'); 
 					}
 				}
 				if($uvalue['end_date_type'] == 'anticipated') 
 				{
-					$objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($dateStyle);
+					$objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray($dateStyle);
 				}
 			}
 			else if($uvalue["new"] == 'y')
 			{
 
-				$objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($highlightChange);
+				$objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray($highlightChange);
 				if($eventLink != '' && $eventLink !== NULL)
 				{
-					$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($eventLink);
-					$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip('New record');  
+					$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl($eventLink);
+					$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('New record');  
 				}
 				if($uvalue['end_date_type'] == 'anticipated') 
 				{
-					$objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($dateStyle);
+					$objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray($dateStyle);
 				}
 			}
 			
@@ -1123,9 +1123,9 @@ class TrialTracker
 				{
 					$objDrawing->setPath('images/' . $imgColor . '-checkmark.png');
 				}
-				$objDrawing->setCoordinates('H' . $i);
-				$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($resultLink);
-				$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip(substr($uvalue['event_description'],0,255));
+				$objDrawing->setCoordinates('G' . $i);
+				$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($resultLink);
+				$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip(substr($uvalue['event_description'],0,255));
 			}
 			elseif($uvalue['status'] == 'Pending')
 			{
@@ -1134,11 +1134,11 @@ class TrialTracker
 				$objDrawing->setOffsetX(40);
 				$objDrawing->setOffsetY(4);
 				$objDrawing->setPath('images/hourglass.png');
-				$objDrawing->setCoordinates('H' . $i);
+				$objDrawing->setCoordinates('G' . $i);
 				if($eventLink != '' && $eventLink !== NULL)
 				{
-					$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($eventLink);
-					$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip(substr($uvalue['event_description'],0,255));
+					$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($eventLink);
+					$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip(substr($uvalue['event_description'],0,255));
 				}
 			}
 			
@@ -1149,9 +1149,9 @@ class TrialTracker
 			$edYear = date('Y', strtotime($uvalue['end_date']));
 					
 			$this->upmGnattChartforExcel($stMonth, $stYear, $edMonth, $edYear, $currentYear, $secondYear, $thirdYear, $uvalue['start_date'], 
-			$uvalue['end_date'], $uvalue['event_link'], $uvalue["event_description"], $objPHPExcel, $i, 'I');
+			$uvalue['end_date'], $uvalue['event_link'], $uvalue["event_description"], $objPHPExcel, $i, 'H');
 				
-			$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':G' . $i)->applyFromArray(
+			$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':F' . $i)->applyFromArray(
 					array('fill' => array(
 							'type'       => PHPExcel_Style_Fill::FILL_SOLID,
 							'rotation'   => 0,
@@ -1163,7 +1163,7 @@ class TrialTracker
 		}
 		/* End - Display - Unmatched UPM's */
 
-		$objPHPExcel->getActiveSheet()->getStyle('A1:AX1')->applyFromArray(
+		$objPHPExcel->getActiveSheet()->getStyle('A1:AW1')->applyFromArray(
 				array('font'    => array('bold' => true),
 					'alignment' => array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_LEFT,),
 					'borders' => array('top' => array('style' => PHPExcel_Style_Border::BORDER_THIN)),
@@ -1173,15 +1173,15 @@ class TrialTracker
 									'endcolor'   => array('argb' => 'FFDBFCFF'))));
 									
 		$objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(13);			
-		$objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(40);
+		$objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(50);
 		$objPHPExcel->getActiveSheet()->getColumnDimension('C')->setWidth(40);			
 		$objPHPExcel->getActiveSheet()->getColumnDimension('D')->setWidth(20);
 		$objPHPExcel->getActiveSheet()->getColumnDimension('E')->setWidth(26);
+		/*$objPHPExcel->getActiveSheet()->getColumnDimension('F')->setWidth(10);*/
 		$objPHPExcel->getActiveSheet()->getColumnDimension('F')->setWidth(10);
-		$objPHPExcel->getActiveSheet()->getColumnDimension('G')->setWidth(10);
-		$objPHPExcel->getActiveSheet()->getColumnDimension('H')->setWidth(12);
+		$objPHPExcel->getActiveSheet()->getColumnDimension('G')->setWidth(12);
 		
-		$chr = 'I';
+		$chr = 'H';
 		for($c=1; $c<43; $c++)
 		{
 			$objPHPExcel->getActiveSheet()->getColumnDimension($chr)->setWidth(2);
@@ -3291,6 +3291,7 @@ class TrialTracker
 					$from = $to;
 					$from++;
 					
+
 					$inc = (12-$endMonth);
 					$to = getColspanforExcelExport($from, $inc);
 					$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
@@ -4654,14 +4655,14 @@ class TrialTracker
 	{
 		$outputStr ='<table style="border-collapse:collapse;" width="100%" cellpadding="0" cellspacing="0" class="manage">'
 			 . '<thead><tr>'. (($loggedIn) ? '<th valign="bottom" align="center" style="width:30px; vertical-align:bottom;" >ID</th>' : '' )
-			 . '<th valign="bottom" height="11px" align="center" style="width:93px; vertical-align:bottom;">Title</th>'
+			 . '<th valign="bottom" height="11px" align="center" style="width:113px; vertical-align:bottom;">Title</th>'
 			 . '<th valign="bottom" align="center" style="width:18px; vertical-align:bottom;" title="Black: Actual&nbsp;&nbsp;Gray: Anticipated&nbsp;&nbsp;Red: Change greater than 20%">N</th>'
 			 . '<th valign="bottom" align="center" style="width:41px; vertical-align:bottom;" title="&quot;ROW&quot; = Rest of World">Region</th>'
 			 . '<th valign="bottom" align="center" style="width:60px; vertical-align:bottom;">Interventions</th>'
 			 . '<th valign="bottom" align="center" style="width:41px; vertical-align:bottom;">Sponsor</th>'
 			 . '<th valign="bottom" align="center" style="width:41px; vertical-align:bottom;">Status</th>'
 			 . '<th valign="bottom" align="center" style="width:60px; vertical-align:bottom;">Conditions</th>'
-			 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;" title="MM/YY">Start</th>'
+			/* . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;" title="MM/YY">Start</th>'*/
 			 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;" title="MM/YY">End</th>'
 			 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;">Ph</th>'
 			 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;">Result</th>'
@@ -4680,7 +4681,7 @@ class TrialTracker
 			 . '<td border="0" style="width:41px; height:0px; border-top:none; border:none;"></td>'
 			 . '<td border="0" style="width:41px; height:0px; border-top:none; border:none;"></td>'
 			 . '<td border="0" style="width:60px; height:0px; border-top:none; border:none;"></td>'
-			 . '<td border="0" style="width:20px; height:0px; border-top:none; border:none;"></td>'
+			/* . '<td border="0" style="width:20px; height:0px; border-top:none; border:none;"></td>'*/
 			 . '<td border="0" style="width:20px; height:0px; border-top:none; border:none;"></td>'
 			 . '<td border="0" style="width:20px; height:0px; border-top:none; border:none;"></td>'
 			 . '<td border="0" style="width:20px; height:0px; border-top:none; border:none;"></td>'
@@ -4691,8 +4692,6 @@ class TrialTracker
 			 . '<td border="0" style="width:6px; height:0px; border-top:none; border:none;" colspan="3"></td></tr>';
 			 
 		return $outputStr;
-
-
 	}
 
 	function displayTrials_TCPDF($globalOptions = array(), $loggedIn, $start, $end, $trials, $trialsInfo, $ottType)
@@ -4753,21 +4752,21 @@ class TrialTracker
 								$naUpmIndex = substr($naUpmIndex, 0, 7);
 								
 								$outputStr .= '<tr style="page-break-inside:avoid; width:'.$col_width.'px;" nobr="true" class="trialtitles">'
-										. '<td style="width:'.$col_width.'px;" colspan="' . getColspanBasedOnLogin($loggedIn) 
-										. '" class="upmpointer sectiontitles"'
-										. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
-										. $trialsInfo[$j]['sectionHeader'] . '</td></tr>';
+											. '<td style="width:'.$col_width.'px;" colspan="' . getColspanBasedOnLogin($loggedIn) 
+											. '" class="upmpointer sectiontitles"'
+											. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+											. $trialsInfo[$j]['sectionHeader'] . '</td></tr>';
 								$outputStr .= $this->displayUnMatchedUpms_TCPDF($loggedIn, $naUpmIndex, $trialsInfo[$j]['naUpms']);
 							}
 							else
 							{	
 								$outputStr .= '<tr style=" width:'.$col_width.'px; page-break-inside:avoid;" nobr="true"><td style="width:'.$col_width.'px;" colspan="' . getColspanBasedOnLogin($loggedIn)  
-								. '" class="sectiontitles">' . $trialsInfo[$j]['sectionHeader'] . '</td></tr>';
+											. '" class="sectiontitles">' . $trialsInfo[$j]['sectionHeader'] . '</td></tr>';
 							}
 							if($globalOptions['onlyUpdates'] == "no")
 							{
 								$outputStr .= '<tr style=" width:'.$col_width.'px; page-break-inside:avoid;" nobr="true"><td style="width:'.$col_width.'px;" colspan="' . getColspanBasedOnLogin($loggedIn) 
-								. '" class="norecord" align="left">No trials found</td></tr>';
+											. '" class="norecord" align="left">No trials found</td></tr>';
 							}
 						}
 					}
@@ -4795,9 +4794,9 @@ class TrialTracker
 						$naUpmIndex = substr($naUpmIndex, 0, 7);
 						
 						$outputStr .= '<tr style="width:'.$col_width.'px; page-break-inside:avoid;" nobr="true" class="trialtitles">'
-								. '<td style="width:'.$col_width.'px;" colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
-								. ' onclick="sh(this,\'' . $naUpmIndex . '\');">' 
-								. $trialsInfo[$sectionKey]['sectionHeader'] . '</td></tr>';
+									. '<td style="width:'.$col_width.'px;" colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
+									. ' onclick="sh(this,\'' . $naUpmIndex . '\');">' 
+									. $trialsInfo[$sectionKey]['sectionHeader'] . '</td></tr>';
 						$outputStr .= $this->displayUnMatchedUpms_TCPDF($loggedIn, $naUpmIndex, $trialsInfo[$sectionKey]['naUpms']);
 					}
 				}
@@ -4815,8 +4814,8 @@ class TrialTracker
 			if($loggedIn) 
 			{ 
 				$outputStr .= '<td style="width:30px; '.$rowOneBGType.'" class="' . $rowOneType . '" ' . (($trials[$i]['new'] == 'y') ? 'title="New record"' : '') 
-				. ' ><a style="color:' . $titleLinkColor . '" href="http://clinicaltrials.gov/ct2/show/' 
-				. padnct($trials[$i]['NCT/nct_id']) . '" target="_blank">' . $trials[$i]['NCT/nct_id'] . '</a></td>';
+							. ' ><a style="color:' . $titleLinkColor . '" href="http://clinicaltrials.gov/ct2/show/' 
+							. padnct($trials[$i]['NCT/nct_id']) . '" target="_blank">' . $trials[$i]['NCT/nct_id'] . '</a></td>';
 			}
 
 			//acroynm and title column
@@ -4963,7 +4962,7 @@ class TrialTracker
 					
 				
 			//start date column
-			$attr = ' ';
+			/*$attr = ' ';
 			if(isset($trials[$i]['edited']) && array_key_exists('NCT/start_date', $trials[$i]['edited'])) 
 			{
 				$attr = ' highlight" title="' . $trials[$i]['edited']['NCT/start_date'] ;
@@ -4981,7 +4980,7 @@ class TrialTracker
 			{
 				$outputStr .= '&nbsp;';
 			}
-			$outputStr .= '</span></td>';
+			$outputStr .= '</span></td>';*/
 				
 				
 			//end date column
@@ -5279,7 +5278,7 @@ class TrialTracker
 				
 				
 				//field upm start date
-				$title = '';
+				/*$title = '';
 				$attr = '';	
 				if(!empty($value['edited']) && ($value['edited']['field'] == 'start_date'))
 				{
@@ -5324,7 +5323,7 @@ class TrialTracker
 					$outputStr .= (($value['start_date'] != '' && $value['start_date'] !== NULL && $value['start_date'] != '0000-00-00') ? 
 									date('m/y',strtotime($value['start_date'])) : '' );
 				}
-				$outputStr .= '</span></td>';		
+				$outputStr .= '</span></td>';*/		
 				
 				
 				//field upm end date
@@ -7872,8 +7871,8 @@ class TrialTracker
 		}
 		
 		$fieldNames = array('end_date_lastchanged', 'region_lastchanged', 'brief_title_lastchanged', 'acronym_lastchanged', 'lead_sponsor_lastchanged',
-		'overall_status_lastchanged', 'start_date_lastchanged', 'phase_lastchanged', 'enrollment_lastchanged', 'enrollment_type_lastchanged',
-		'collaborator_lastchanged', 'condition_lastchanged', 'intervention_name_lastchanged');
+							'overall_status_lastchanged', 'phase_lastchanged', 'enrollment_lastchanged', 'enrollment_type_lastchanged',
+							'collaborator_lastchanged', 'condition_lastchanged', 'intervention_name_lastchanged');
 		
 		if(isset($globalOptions['itype']) && !empty($globalOptions['itype'])) 
 		{
@@ -7916,7 +7915,7 @@ class TrialTracker
 						. " dt.`region`, dt.`lastchanged_date`, dt.`phase`, dt.`firstreceived_date`, dt.`viewcount`, dt.`source`,"
 						. " dm.`larvol_id` AS manual_larvol_id, dm.`is_sourceless` AS manual_is_sourceless, dm.`brief_title` AS manual_brief_title,"
 						. " dm.`acronym` AS manual_acronym, dm.`lead_sponsor` AS manual_lead_sponsor, dm.`collaborator` AS manual_collaborator,"
-						. " dm.`condition` AS manual_condition, dm.`overall_status` AS manual_overall_status, dm.`start_date` AS manual_start_date,"
+						. " dm.`condition` AS manual_condition, dm.`overall_status` AS manual_overall_status, "
 						. " dm.`end_date` AS manual_end_date, dm.`enrollment` AS manual_enrollment, dm.`enrollment_type` AS manual_enrollment_type,"
 						. " dm.`intervention_name` AS manual_intervention_name, dm.`phase` AS manual_phase "
 						. " FROM `data_trials` dt "
@@ -10211,14 +10210,14 @@ class TrialTracker
 	{
 		$outputStr = '<table width="100%" cellpadding="5" cellspacing="0" class="manage">'
 			 . '<tr>' . (($loggedIn) ? '<th width="38px">ID</th>' : '' )
-			 . '<th width="245px">Title</th>'
+			 . '<th width="270px">Title</th>'
 			 . '<th width="30px" title="Black: Actual&nbsp;&nbsp;Gray: Anticipated&nbsp;&nbsp;Red: Change greater than 20%">N</th>'
 			 . '<th width="65px" title="&quot;ROW&quot; = Rest of World">Region</th>'
 			 . '<th width="115px">Interventions</th>'
 			 . '<th width="90px">Sponsor</th>'
 			 . '<th width="105px">Status</th>'
 			 . '<th width="110px">Conditions</th>'
-			 . '<th width="25px" title="MM/YY">Start</th>'
+			 /*. '<th width="25px" title="MM/YY">Start</th>'*/
 			 . '<th width="25px" title="MM/YY">End</th>'
 			 . '<th width="15px">Ph</th>'
 			 . '<th width="16px" style="padding-left:0;">Res</th>'
@@ -11145,7 +11144,7 @@ class TrialTracker
 					
 				
 			//start date column
-			$attr = ' ';
+			/*$attr = ' ';
 			if(isset($trials[$i]['manual_is_sourceless']))
 			{
 				if(!empty($trials[$i]['edited']) && array_key_exists('NCT/start_date', $trials[$i]['edited'])) 
@@ -11185,7 +11184,7 @@ class TrialTracker
 			{
 				$outputStr .= '&nbsp;';
 			}
-			$outputStr .= '</div></td>';
+			$outputStr .= '</div></td>';*/
 				
 				
 			//end date column
@@ -12064,8 +12063,8 @@ class TrialTracker
 		
 		$updates = array('edited' => array(), 'new' => 'n');
 		
-		$fieldnames = array('nct_id', 'brief_title', 'enrollment', 'acronym', 'start_date',
-							'overall_status','condition', 'intervention_name', 'phase', 'lead_sponsor', 'collaborator');
+		$fieldnames = array('nct_id', 'brief_title', 'enrollment', 'acronym', 'overall_status','condition', 
+							'intervention_name', 'phase', 'lead_sponsor', 'collaborator');
 
 		$studycatData = mysql_fetch_assoc(mysql_query("SELECT `dv`.`studycat` FROM `data_values` `dv` LEFT JOIN `data_cats_in_study` `dc` ON "
 				. "(`dc`.`id`=`dv`.`studycat`) WHERE `dv`.`field`='1' AND `dv`.`val_int`='" . $nctId . "' AND `dc`.`larvol_id`='" .$larvolId . "'"));
@@ -12479,7 +12478,7 @@ class TrialTracker
 				
 				
 				//field upm start date
-				$title = '';
+				/*$title = '';
 				$attr = '';	
 				if(!empty($value['edited']) && ($value['edited']['field'] == 'start_date'))
 				{
@@ -12525,7 +12524,7 @@ class TrialTracker
 					$outputStr .= (($value['start_date'] != '' && $value['start_date'] !== NULL && $value['start_date'] != '0000-00-00') ? 
 									date('m/y',strtotime($value['start_date'])) : '&nbsp;' );
 				}
-				$outputStr .= '</div></td>';		
+				$outputStr .= '</div></td>';*/		
 				
 				
 				//field upm end date
@@ -12699,7 +12698,7 @@ function getColspanforExcelExport($cell, $inc)
 
 function getColspanBasedOnLogin($loggedIn)
 {
-	return $colspan = (($loggedIn) ? 54 : 53 );
+	return $colspan = (($loggedIn) ? 53 : 52 );
 }
 
 function Build_OTT_Query($data, $Passed_where)
@@ -12889,3 +12888,4 @@ function get_WhereString($data, $alias, $pd_alias, $ar_alias)
 	}
 	return $wherestr;
 }
+?>
