@@ -4655,7 +4655,7 @@ class TrialTracker
 	{
 		$outputStr ='<table style="border-collapse:collapse;" width="100%" cellpadding="0" cellspacing="0" class="manage">'
 			 . '<thead><tr>'. (($loggedIn) ? '<th valign="bottom" align="center" style="width:30px; vertical-align:bottom;" >ID</th>' : '' )
-			 . '<th valign="bottom" height="11px" align="center" style="width:113px; vertical-align:bottom;">Title</th>'
+			 . '<th valign="bottom" height="11px" align="center" style="width:93px; vertical-align:bottom;">Title</th>'
 			 . '<th valign="bottom" align="center" style="width:18px; vertical-align:bottom;" title="Black: Actual&nbsp;&nbsp;Gray: Anticipated&nbsp;&nbsp;Red: Change greater than 20%">N</th>'
 			 . '<th valign="bottom" align="center" style="width:41px; vertical-align:bottom;" title="&quot;ROW&quot; = Rest of World">Region</th>'
 			 . '<th valign="bottom" align="center" style="width:60px; vertical-align:bottom;">Interventions</th>'
@@ -4710,9 +4710,9 @@ class TrialTracker
 		$sections = array_unique($sections);
 		
 		if($loggedIn)
-		$col_width=548;
+		$col_width=528;
 		else
-		$col_width=518;
+		$col_width=498;
 		
 		for($i=$start; $i<$end; $i++) 
 		{ 	
