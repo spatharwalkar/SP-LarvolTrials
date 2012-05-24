@@ -147,6 +147,7 @@ switch($globalOptions['change'])
 }
 	
 $lastChangedTime = filectime("css/intermediary.css");
+$maxEnrollLimit = 50;
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -511,27 +512,43 @@ global $db;
 		$enrollValues = '<?php echo $globalOptions['enroll'];?>';
 		if($enrollValues == '0')
 		{	
-			$minEnroll = $("#minenroll").val();
-			$maxEnroll = $("#maxenroll").val();
+			$minEnroll = parseInt($("#minenroll").val());
+			$maxEnroll = parseInt($("#maxenroll").val());
 		}
 		else
 		{
 			$enrollValues = $enrollValues.split(' - ');
-			$minEnroll = $enrollValues[0];
-			$maxEnroll = $enrollValues[1];
+			$minEnroll = parseInt($enrollValues[0]);
+			$maxEnroll = parseInt($enrollValues[1]);
 		}
 		
 		$("#slider-range").slider({
 			range: true,
-			min: parseInt($("#minenroll").val()),
-			max: parseInt($("#maxenroll").val()),
+			min: $("#minenroll").val(),
+			max: (($("#maxenroll").val() > <?php echo $maxEnrollLimit;?>) ? <?php echo $maxEnrollLimit;?> : $("#maxenroll").val() ),
 			values: [ parseInt($minEnroll), parseInt($maxEnroll) ],
 			slide: function( event, ui ) {
-				$("#amount").val(ui.values[ 0 ] + " - " + ui.values[ 1 ] );
+				if(ui.values[ 1 ] == <?php echo $maxEnrollLimit;?>)
+				{
+					$("#amount").val(ui.values[ 0 ] + " - " + <?php echo $maxEnrollLimit;?> + "+" );
+				}
+				else
+				{
+					$("#amount").val(ui.values[ 0 ] + " - " + ui.values[ 1 ] );
+				}
 			}
 		});
-		$("#amount").val( $("#slider-range").slider("values", 0 ) +
-			" - " + $("#slider-range").slider("values", 1 ) );
+		
+		if($("#slider-range").slider("values", 1) == <?php echo $maxEnrollLimit;?>)
+		{
+			$("#amount").val( $("#slider-range").slider("values", 0 ) +
+				" - " + <?php echo $maxEnrollLimit;?> + '+' );
+		}
+		else
+		{
+			$("#amount").val( $("#slider-range").slider("values", 0 ) +
+				" - " + $("#slider-range").slider("values", 1 ));
+		}
 		
 		<?php if($db->loggedIn()) { ?>
 		//highlight changes slider

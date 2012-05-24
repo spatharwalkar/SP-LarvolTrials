@@ -6272,7 +6272,6 @@ class TrialTracker
 					//unsetting value for field enrollment if the change is less than 20 percent
 					if(isset($dataset['trials']['edited']['NCT/enrollment']))
 					{
-
 						$prevValue = substr($dataset['trials']['edited']['NCT/enrollment'],16);
 						
 						if(!getDifference($prevValue, $rvalue['NCT/enrollment'])) 
@@ -6543,8 +6542,11 @@ class TrialTracker
 							{
 								$result[$index]['NCT/enrollment'] = 0;
 							}
-							if($result[$index]['NCT/enrollment'] < $enroll[0] || $result[$index]['NCT/enrollment'] > $enroll[1])
-							{	
+							
+							if(strpos($enroll[1], '+') !== FALSE)
+							{
+								if($result[$index]['NCT/enrollment'] < $enroll[0])
+								{	
 								foreach($Trials['allTrials'] as $k => $v)
 								{
 									if($v['NCT/nct_id'] == $nctId)
@@ -6572,6 +6574,40 @@ class TrialTracker
 									}
 								}
 							}
+							}
+							else
+							{
+								if($result[$index]['NCT/enrollment'] < $enroll[0] || $result[$index]['NCT/enrollment'] > $enroll[1])
+								{	
+								foreach($Trials['allTrials'] as $k => $v)
+								{
+									if($v['NCT/nct_id'] == $nctId)
+									{
+										unset($Trials['allTrials'][$k]);
+										$Trials['allTrials'] = array_values($Trials['allTrials']);
+									}
+								}
+								
+								foreach($Trials['inactiveTrials'] as $k => $v)
+								{
+									if($v['NCT/nct_id'] == $nctId)
+									{
+										unset($Trials['inactiveTrials'][$k]);
+										$Trials['inactiveTrials'] = array_values($Trials['inactiveTrials']);
+									}
+								}
+								
+								foreach($Trials['activeTrials'] as $k => $v)
+								{
+									if($v['NCT/nct_id'] == $nctId)
+									{
+										unset($Trials['activeTrials'][$k]);
+										$Trials['activeTrials'] = array_values($Trials['activeTrials']);
+									}
+								}
+							}
+							}
+							
 						}
 					}
 				} 
@@ -6829,8 +6865,11 @@ class TrialTracker
 						{
 							$result[$index]['NCT/enrollment'] = 0;
 						}
-						if($result[$index]['NCT/enrollment'] < $enroll[0] || $result[$index]['NCT/enrollment'] > $enroll[1])
-						{	
+						
+						if(strpos($enroll[1], '+') !== FALSE)
+						{
+							if($result[$index]['NCT/enrollment'] < $enroll[0])
+							{	
 							foreach($Trials['allTrials'] as $k => $v)
 							{
 								if($v['NCT/nct_id'] == $nctId)
@@ -6858,6 +6897,40 @@ class TrialTracker
 								}
 							}
 						}
+						}
+						else
+						{
+							if($result[$index]['NCT/enrollment'] < $enroll[0] || $result[$index]['NCT/enrollment'] > $enroll[1])
+							{	
+							foreach($Trials['allTrials'] as $k => $v)
+							{
+								if($v['NCT/nct_id'] == $nctId)
+								{
+									unset($Trials['allTrials'][$k]);
+									$Trials['allTrials'] = array_values($Trials['allTrials']);
+								}
+							}
+							
+							foreach($Trials['inactiveTrials'] as $k => $v)
+							{
+								if($v['NCT/nct_id'] == $nctId)
+								{
+									unset($Trials['inactiveTrials'][$k]);
+									$Trials['inactiveTrials'] = array_values($Trials['inactiveTrials']);
+								}
+							}
+							
+							foreach($Trials['activeTrials'] as $k => $v)
+							{
+								if($v['NCT/nct_id'] == $nctId)
+								{
+									unset($Trials['activeTrials'][$k]);
+									$Trials['activeTrials'] = array_values($Trials['activeTrials']);
+								}
+							}
+						}
+						}
+						
 					}
 				}
 				
@@ -7323,8 +7396,11 @@ class TrialTracker
 							{
 								$result[$index]['NCT/enrollment'] = 0;
 							}
-							if($result[$index]['NCT/enrollment'] < $enroll[0] || $result[$index]['NCT/enrollment'] > $enroll[1])
-							{	
+							
+							if(strpos($enroll[1], '+') !== FALSE)
+							{
+								if($result[$index]['NCT/enrollment'] < $enroll[0])
+								{	
 								foreach($Trials['allTrials'] as $k => $v)
 								{
 									if($v['NCT/nct_id'] == $nctId)
@@ -7352,6 +7428,40 @@ class TrialTracker
 									}
 								}
 							}
+							}
+							else
+							{
+								if($result[$index]['NCT/enrollment'] < $enroll[0] || $result[$index]['NCT/enrollment'] > $enroll[1])
+								{	
+								foreach($Trials['allTrials'] as $k => $v)
+								{
+									if($v['NCT/nct_id'] == $nctId)
+									{
+										unset($Trials['allTrials'][$k]);
+										$Trials['allTrials'] = array_values($Trials['allTrials']);
+									}
+								}
+								
+								foreach($Trials['inactiveTrials'] as $k => $v)
+								{
+									if($v['NCT/nct_id'] == $nctId)
+									{
+										unset($Trials['inactiveTrials'][$k]);
+										$Trials['inactiveTrials'] = array_values($Trials['inactiveTrials']);
+									}
+								}
+								
+								foreach($Trials['activeTrials'] as $k => $v)
+								{
+									if($v['NCT/nct_id'] == $nctId)
+									{
+										unset($Trials['activeTrials'][$k]);
+										$Trials['activeTrials'] = array_values($Trials['activeTrials']);
+									}
+								}
+							}
+							}
+							
 						}
 					}
 				} 
@@ -7607,8 +7717,11 @@ class TrialTracker
 						{
 							$result[$index]['NCT/enrollment'] = 0;
 						}
-						if($result[$index]['NCT/enrollment'] < $enroll[0] || $result[$index]['NCT/enrollment'] > $enroll[1])
-						{	
+						
+						if(strpos($enroll[1], '+') !== FALSE)
+						{
+							if($result[$index]['NCT/enrollment'] < $enroll[0])
+							{	
 							foreach($Trials['allTrials'] as $k => $v)
 							{
 								if($v['NCT/nct_id'] == $nctId)
@@ -7635,6 +7748,39 @@ class TrialTracker
 									$Trials['activeTrials'] = array_values($Trials['activeTrials']);
 								}
 							}
+						}
+						}
+						else
+						{
+							if($result[$index]['NCT/enrollment'] < $enroll[0] || $result[$index]['NCT/enrollment'] > $enroll[1])
+							{	
+							foreach($Trials['allTrials'] as $k => $v)
+							{
+								if($v['NCT/nct_id'] == $nctId)
+								{
+									unset($Trials['allTrials'][$k]);
+									$Trials['allTrials'] = array_values($Trials['allTrials']);
+								}
+							}
+							
+							foreach($Trials['inactiveTrials'] as $k => $v)
+							{
+								if($v['NCT/nct_id'] == $nctId)
+								{
+									unset($Trials['inactiveTrials'][$k]);
+									$Trials['inactiveTrials'] = array_values($Trials['inactiveTrials']);
+								}
+							}
+							
+							foreach($Trials['activeTrials'] as $k => $v)
+							{
+								if($v['NCT/nct_id'] == $nctId)
+								{
+									unset($Trials['activeTrials'][$k]);
+									$Trials['activeTrials'] = array_values($Trials['activeTrials']);
+								}
+							}
+						}
 						}
 					}
 				}
@@ -8296,8 +8442,11 @@ class TrialTracker
 							{
 								$result[$index]['NCT/enrollment'] = 0;
 							}
-							if($result[$index]['NCT/enrollment'] < $enroll[0] || $result[$index]['NCT/enrollment'] > $enroll[1])
-							{	
+							
+							if(strpos($enroll[1], '+') !== FALSE)
+							{
+								if($result[$index]['NCT/enrollment'] < $enroll[0])
+								{	
 								foreach($Trials['allTrials'] as $k => $v)
 								{
 									if($v['NCT/nct_id'] == $nctId)
@@ -8325,8 +8474,42 @@ class TrialTracker
 									}
 								}
 							}
+							}
+							else
+							{
+								if($result[$index]['NCT/enrollment'] < $enroll[0] || $result[$index]['NCT/enrollment'] > $enroll[1])
+								{	
+								foreach($Trials['allTrials'] as $k => $v)
+								{
+									if($v['NCT/nct_id'] == $nctId)
+									{
+										unset($Trials['allTrials'][$k]);
+										$Trials['allTrials'] = array_values($Trials['allTrials']);
+									}
+								}
+								
+								foreach($Trials['inactiveTrials'] as $k => $v)
+								{
+									if($v['NCT/nct_id'] == $nctId)
+									{
+										unset($Trials['inactiveTrials'][$k]);
+										$Trials['inactiveTrials'] = array_values($Trials['inactiveTrials']);
+									}
+								}
+								
+								foreach($Trials['activeTrials'] as $k => $v)
+								{
+									if($v['NCT/nct_id'] == $nctId)
+									{
+										unset($Trials['activeTrials'][$k]);
+										$Trials['activeTrials'] = array_values($Trials['activeTrials']);
+									}
+								}
+							}
+							}
+							
 						}
-						}
+					}
 				}
 				else 
 				{	
@@ -8580,8 +8763,11 @@ class TrialTracker
 						{
 							$result[$index]['NCT/enrollment'] = 0;
 						}
-						if($result[$index]['NCT/enrollment'] < $enroll[0] || $result[$index]['NCT/enrollment'] > $enroll[1])
+						
+						if(strpos($enroll[1], '+') !== FALSE)
 						{
+							if($result[$index]['NCT/enrollment'] < $enroll[0])
+							{
 							foreach($Trials['allTrials'] as $k => $v)
 							{	
 								if($v['NCT/nct_id'] == $nctId)
@@ -8608,6 +8794,39 @@ class TrialTracker
 									$Trials['activeTrials'] = array_values($Trials['activeTrials']);
 								}
 							}
+						}
+						}
+						else
+						{
+							if($result[$index]['NCT/enrollment'] < $enroll[0] || $result[$index]['NCT/enrollment'] > $enroll[1])
+							{
+							foreach($Trials['allTrials'] as $k => $v)
+							{	
+								if($v['NCT/nct_id'] == $nctId)
+								{
+									unset($Trials['allTrials'][$k]);
+									$Trials['allTrials'] = array_values($Trials['allTrials']);
+								}
+							}
+							
+							foreach($Trials['inactiveTrials'] as $k => $v)
+							{
+								if($v['NCT/nct_id'] == $nctId)
+								{
+									unset($Trials['inactiveTrials'][$k]);
+									$Trials['inactiveTrials'] = array_values($Trials['inactiveTrials']);
+								}
+							}
+							
+							foreach($Trials['activeTrials'] as $k => $v)
+							{
+								if($v['NCT/nct_id'] == $nctId)
+								{
+									unset($Trials['activeTrials'][$k]);
+									$Trials['activeTrials'] = array_values($Trials['activeTrials']);
+								}
+							}
+						}
 						}
 					}
 				}
@@ -9180,8 +9399,11 @@ class TrialTracker
 							{
 								$result[$index]['NCT/enrollment'] = 0;
 							}
-							if($result[$index]['NCT/enrollment'] < $enroll[0] || $result[$index]['NCT/enrollment'] > $enroll[1])
-							{	
+							
+							if(strpos($enroll[1], '+') !== FALSE)
+							{
+								if($result[$index]['NCT/enrollment'] < $enroll[0])
+								{	
 								foreach($Trials['allTrials'] as $k => $v)
 								{
 									if($v['NCT/nct_id'] == $nctId)
@@ -9208,6 +9430,39 @@ class TrialTracker
 										$Trials['activeTrials'] = array_values($Trials['activeTrials']);
 									}
 								}
+							}
+							}
+							else
+							{
+								if($result[$index]['NCT/enrollment'] < $enroll[0] || $result[$index]['NCT/enrollment'] > $enroll[1])
+								{	
+								foreach($Trials['allTrials'] as $k => $v)
+								{
+									if($v['NCT/nct_id'] == $nctId)
+									{
+										unset($Trials['allTrials'][$k]);
+										$Trials['allTrials'] = array_values($Trials['allTrials']);
+									}
+								}
+								
+								foreach($Trials['inactiveTrials'] as $k => $v)
+								{
+									if($v['NCT/nct_id'] == $nctId)
+									{
+										unset($Trials['inactiveTrials'][$k]);
+										$Trials['inactiveTrials'] = array_values($Trials['inactiveTrials']);
+									}
+								}
+								
+								foreach($Trials['activeTrials'] as $k => $v)
+								{
+									if($v['NCT/nct_id'] == $nctId)
+									{
+										unset($Trials['activeTrials'][$k]);
+										$Trials['activeTrials'] = array_values($Trials['activeTrials']);
+									}
+								}
+							}
 							}
 						}
 					}
@@ -9464,8 +9719,11 @@ class TrialTracker
 						{
 							$result[$index]['NCT/enrollment'] = 0;
 						}
-						if($result[$index]['NCT/enrollment'] < $enroll[0] || $result[$index]['NCT/enrollment'] > $enroll[1])
-						{	
+						
+						if(strpos($enroll[1], '+') !== FALSE)
+						{
+							if($result[$index]['NCT/enrollment'] < $enroll[0])
+							{	
 							foreach($Trials['allTrials'] as $k => $v)
 							{
 								if($v['NCT/nct_id'] == $nctId)
@@ -9492,6 +9750,39 @@ class TrialTracker
 									$Trials['activeTrials'] = array_values($Trials['activeTrials']);
 								}
 							}
+						}
+						}
+						else
+						{
+							if($result[$index]['NCT/enrollment'] < $enroll[0] || $result[$index]['NCT/enrollment'] > $enroll[1])
+							{	
+							foreach($Trials['allTrials'] as $k => $v)
+							{
+								if($v['NCT/nct_id'] == $nctId)
+								{
+									unset($Trials['allTrials'][$k]);
+									$Trials['allTrials'] = array_values($Trials['allTrials']);
+								}
+							}
+							
+							foreach($Trials['inactiveTrials'] as $k => $v)
+							{
+								if($v['NCT/nct_id'] == $nctId)
+								{
+									unset($Trials['inactiveTrials'][$k]);
+									$Trials['inactiveTrials'] = array_values($Trials['inactiveTrials']);
+								}
+							}
+							
+							foreach($Trials['activeTrials'] as $k => $v)
+							{
+								if($v['NCT/nct_id'] == $nctId)
+								{
+									unset($Trials['activeTrials'][$k]);
+									$Trials['activeTrials'] = array_values($Trials['activeTrials']);
+								}
+							}
+						}
 						}
 					}
 					
