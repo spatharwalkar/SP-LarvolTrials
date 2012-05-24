@@ -61,13 +61,15 @@ $deleteFlag = null;
 //Header controller
 $_GET['header']='<script type="text/javascript" src="progressbar/jquery.progressbar.js"></script>
 <link href="css/status.css" rel="stylesheet" type="text/css" media="all" />'."\n";
-//get product status & progress bar controller
-$areaStatus = getPreindexProgress('AREA2',$_GET['id']);
-if($areaStatus['update_items_start_time']!="0000-00-00 00:00:00"&&$areaStatus['update_items_complete_time']!="0000-00-00 00:00:00"&&$areaStatus['status']==COMPLETED)
-$areaPreindexProgress=100;
-else
-$areaPreindexProgress=number_format(($areaStatus['update_items_total']==0?0:(($areaStatus['update_items_progress'])*100/$areaStatus['update_items_total'])),2);
-
+if(is_numeric($_GET['id']))
+{
+	//get product status & progress bar controller
+	$areaStatus = getPreindexProgress('AREA2',$_GET['id']);
+	if($areaStatus['update_items_start_time']!="0000-00-00 00:00:00"&&$areaStatus['update_items_complete_time']!="0000-00-00 00:00:00"&&$areaStatus['status']==COMPLETED)
+	$areaPreindexProgress=100;
+	else
+	$areaPreindexProgress=number_format(($areaStatus['update_items_total']==0?0:(($areaStatus['update_items_progress'])*100/$areaStatus['update_items_total'])),2);
+}
 /* if(count($areaStatus)!=0 || 1)
  {
 $_GET['header'] .= '<script type="text/javascript">'."\n";
