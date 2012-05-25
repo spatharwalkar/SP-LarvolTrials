@@ -6,7 +6,8 @@ require_once('nct_common.php');
 require_once('include.import.php');
 require_once('include.import.history.php');
 
-if(!$db->loggedIn() || ($db->user->userlevel!='admin' && $db->user->userlevel!='root'))
+
+if(!$db->loggedIn() || ($db->user->userlevel!='admin' && $db->user->userlevel!='root') || !isset($_POST['mode']))
 {
 	header('Location: ' . urlPath() . 'index.php');
 	exit;
@@ -47,7 +48,7 @@ if(!$res) $nct_ids=get_nctids_from_web();
 else
 {
 	$nct_ids=array();
-	query='select nctid from nctids where id>0';
+	$query='select nctid from nctids where id>0';
 	$res = mysql_query($query);
 	if($res === false) die('Bad SQL query getting nctids from local table');
 	while($row = mysql_fetch_assoc($res)) $nct_ids[$row['nctid']] = 1;

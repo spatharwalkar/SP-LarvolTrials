@@ -6,6 +6,7 @@ require_once('searchhandler.php');
 ini_set('error_reporting', E_ALL ^ E_NOTICE);
 
 /*	
+
 function tindex() - to preindex a combination of one trial+one product, or  one trial+one area.  
 parameters : 
 		1.	NCTID (if a single trial is to be indexed)
@@ -82,6 +83,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 			if(!isset($value['id']) or empty($value['id'])) break;
 			$cid=$value['id'];
 			$searchdata = $value['searchdata'];
+
 			
 			$pid=$value['id'];
 			$prid=getmypid();
@@ -125,6 +127,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 				}
 				
 				/* remove overridden trials in case we are indexing a single trial */
+
 				$mystring=$query;
 				if( isset($sourceid) and !is_null($sourceid) and !empty($sourceid) )
 				{
@@ -390,7 +393,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 				$proc_id = getmypid();
 				$i++;
 			//	$ttype=$cat=='products' ? 'PRODUCT' : 'AREA';
-				//update status
+			//update status
 				if( is_null($productID) and !$scraper_run )	
 				{
 					$query = 'update update_status_fullhistory set process_id="'. $prid . '",er_message="",status="'. 2 . '",
@@ -437,6 +440,8 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 			
 			
 		}
+		/*
+		
 		$query = 'update update_status_fullhistory set status="'. 0 . '", er_message="",update_items_progress=update_items_total  where update_id= "'. $up_id .'" limit 1'  ; 
 			if(!$res = mysql_query($query))
 			{
@@ -445,20 +450,36 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 				echo $log;
 				return false;
 			}
+			
+		*/
+		$query = 'UPDATE update_status_fullhistory 
+				  SET status="'. 0 . '", er_message="",update_items_progress=update_items_total  
+				  WHERE update_id= "'. $up_id .'" LIMIT 1'  ; 
+			if(!$res = mysql_query($query))
+			{
+				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				$logger->error($log);
+				echo $log;
+				return false;
+			}
+			
 		if(!mysql_query('COMMIT'))
 				{
 					$log='Error - could not commit transaction. Query='.$query.' Error:' . mysql_error();
 					$logger->fatal($log);
 					mysql_query('ROLLBACK');
-					$query = 'update update_status_fullhistory set 
-					er_message="' . $log . '" where update_id= "'. $up_id .'" limit 1' ; 
+					$query = 'UPDATE update_status_fullhistory 
+							  SET er_message="' . $log . '" 
+							  WHERE update_id= "'. $up_id .'" limit 1' ; 
 					mysql_query($query);
 					echo $log;
 					return false;
 				}
 		if(!$scraper_run)
 		{
-			$query = 'update update_status_fullhistory set status="'. 0 . '",er_message="", update_items_progress=update_items_total  where update_id= "'. $up_id .'" limit 1'  ; 
+			$query = 'UPDATE update_status_fullhistory 
+					  SET status="'. 0 . '",er_message="", update_items_progress=update_items_total  
+					  WHERE update_id= "'. $up_id .'" limit 1'  ; 
 			if(!$res = mysql_query($query))
 			{
 				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();

@@ -6,7 +6,7 @@ ignore_user_abort(true);
 
 $data=array();$isactive=array();$instype=array();$ldate=array();$phases=array();$ostatus=array();$cnt_total=0;
 
-
+/*
 if(isset($_GET['area']) or isset($_GET['product']))
 {
 	$parameters=$_GET;
@@ -19,9 +19,16 @@ elseif( isset($_GET['calc']) and ($_GET['calc']=="all") )
 	if(!calc_cells($parameters))	echo '<br><b>Could complete calculating cells, there was an error.<br></b>';
 	echo '<br>All done.<br>';
 }
-
+*/
 function calc_cells($parameters,$update_id=NULL)
 {
+	/*
+	pr($parameters);
+	pr('ABOVE PARAMETERS');
+	$x=array();
+	$x['area']=29;
+	pr($x);
+	*/
 	global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_total;
 	$data=array();$isactive=array();$instype=array();$ldate=array();$phases=array();$ostatus=array();$cnt_total=0;
 	$cron_run = isset($update_id); 	// check if being run by cron.php

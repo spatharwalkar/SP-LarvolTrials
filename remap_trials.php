@@ -4,356 +4,359 @@ require_once('db.php');
 require_once('include.util.php');
 require_once ('include.derived.php');
 require_once('preindex_trial.php');
-//require_once ('include.import.php');
+require_once ('include.import_new.php');
 ini_set('max_execution_time', '9000000'); //250 hours
 ignore_user_abort(true);
 global $db;
 global $logger;
-
-if(isset($_GET['trial'])) // A single trial
+//remaptrials(null,null,'ALL');
+function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL  )
 {
-	$trial=padnct($_GET['trial']);
-	$query = 'SELECT `larvol_id` FROM data_trials where `source_id`="' . $trial . '"  LIMIT 1';
-
-	if(!$res = mysql_query($query))
-		{
-			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-			$logger->error($log);
-			echo $log;
-			return false;
-		}
-	$res = mysql_fetch_assoc($res);
-	$exists = $res !== false;
-	$oldtrial=$exists;
-	$larvol_id = NULL;
-	if($exists)
+	if(isset($source_id)) // A single trial
 	{
-		$larvol_id = $res['larvol_id'];
-	}
-	else 
-	{
-		echo 'Invalid trail';
-		return false;
-	}
-
-}
-elseif(isset($_GET['larvol_id'])) // A single larvol_id
-{
-	$trial=$_GET['larvol_id'];
-	$query = 'SELECT `larvol_id` FROM data_trials where `larvol_id`="' . $trial . '"  LIMIT 1';
-
-	if(!$res = mysql_query($query))
-		{
-			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-			$logger->error($log);
-			echo $log;
-			return false;
-		}
-	$res = mysql_fetch_assoc($res);
-	$exists = $res !== false;
-	$oldtrial=$exists;
-	$larvol_id = NULL;
-	if($exists)
-	{
-		$larvol_id = $res['larvol_id'];
-	}
-	else 
-	{
-		echo 'Invalid larvol_id';
-		return false;
-	}
-	
-}
-elseif(isset($_GET['source']) and $_GET['source']=="ALL")  // Entire database
-{
-
-$query = 'SELECT `larvol_id` FROM data_trials';
-
-	if(!$res = mysql_query($query))
-		{
-			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-			$logger->error($log);
-			echo $log;
-			return false;
-		}
-	
-	$exists = $res !== false;
-	$oldtrial=$exists;
-	$larvol_ids = array();
-	while ($row = mysql_fetch_assoc($res)) $larvol_ids[] = $row[larvol_id];
-	asort($larvol_ids);
-}
-
-elseif(isset($_GET['source']) and !empty($_GET['source']))  // single data source (eg. data_nct, data_eudract etc.)
-{
-$source='data_'.$_GET['source'];
-$query = 'SELECT `larvol_id` FROM '. $source .' ';
-
-	if(!$res = mysql_query($query))
-		{
-			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-			$logger->error($log);
-			echo $log;
-			return false;
-		}
-	
-	$exists = $res !== false;
-	$oldtrial=$exists;
-	$larvol_ids = array();
-	while ($row = mysql_fetch_assoc($res)) $larvol_ids[] = $row[larvol_id];
-	asort($larvol_ids);
-}
-else return false;
-
-	/* status */
-
-		$query = 'SELECT * FROM update_status_fullhistory where status="1" and trial_type="REMAP" order by update_id desc limit 1' ;
-			if(!$res = mysql_query($query))
-			{
-				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-				$logger->error($log);
-				echo $log;
-				return false;
-			}
-		$res = mysql_fetch_array($res) ;
-		
-	if ( isset($res['process_id']) )
-	{
-		
-		$pid = getmypid();
-		$up_id= ((int)$res['update_id']);
-		$cid = ((int)$res['current_nctid']); 
-		$maxid = ((int)$res['max_nctid']); 
-		$updateitems= ((int)$res['update_items_progress']);
-		$query = 'UPDATE  update_status_fullhistory SET status= "2",er_message=""  WHERE process_id = "' . $pr_id .'" ;' ;
-			if(!$res = mysql_query($query))
-			{
-				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-				$logger->error($log);
-				echo $log;
-				return false;
-			}
-	//	fetch_records($pid,$cid,$maxid,$up_id);
-	//	exit;
-	}
-	else
-	{
-
-		$query = 'SELECT MAX(update_id) AS maxid FROM update_status_fullhistory' ;
-			if(!$res = mysql_query($query))
-			{
-				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-				$logger->error($log);
-				echo $log;
-				return false;
-			}
-		$res = mysql_fetch_array($res) ;
-		$up_id = (isset($res['maxid'])) ? ((int)$res['maxid'])+1 : 1;
-		$fid = getFieldId('NCT','nct_id');
-		
-		$cid = 0; 
-		$cid_=$cid;
-		$pid = getmypid();
-		$totalncts=count($larvol_ids);
-		
-		
-		$query = 'INSERT into update_status_fullhistory (update_id,process_id,status,update_items_total,start_time,max_nctid,trial_type) 
-				  VALUES ("'.$up_id.'","'. $pid .'","'. 2 .'",
-				  "' . $totalncts . '","'. date("Y-m-d H:i:s", strtotime('now')) .'", "'. $maxid .'", "REMAP"  ) ;';
-			if(!$res = mysql_query($query))
-			{
-				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-				$logger->error($log);
-				echo $log;
-				return false;
-			}
-		
-		
-		
-//		echo('Remapping from: ' . $cid . ' to: ' . $maxid . '<br />'); @flush();
-		echo('<br>Current time ' . date('Y-m-d H:i:s', strtotime('now')) . '<br>');
-		echo str_repeat ("  ", 4000);
-		$i=1;
-		
-	}
-
-	/* STATUS */
-
-
-if(!isset($cid)) $cid = 0; 	
-
-
-if(!isset($larvol_ids)) $larvol_ids=array($larvol_id);
-
-$DTnow = date("Y-m-d H:i:s", strtotime('now'));
-
-$array1=array
-		(
-		'N/A',
-		'Phase 0',
-		'Phase 0/Phase 1',
-		'Phase 1',
-		'Phase 1/Phase 2',
-		'Phase 2',
-		'Phase 2/Phase 3',
-		'Phase 3',
-		'Phase 3/Phase 4',
-		'Phase 4',
-		'Phase 1a',
-		'Phase 1a/1b',
-		'Phase 1b',
-		'Phase 1b/2',
-		'Phase 1b/2a',
-		'Phase 1c',
-		'Phase 2a',
-		'Phase 2a/2b',
-		'Phase 2a/b',
-		'Phase 2b',
-		'Phase 2b/3',
-		'Phase 3a',
-		'Phase 3b',
-		'Phase 3b/4'
-		);
-		
-		$array2=array
-		(
-		'N/A',
-		'0',
-		'0/1',
-		'1',
-		'1/2',
-		'2',
-		'2/3',
-		'3',
-		'3/4',
-		'4',
-		'1a',
-		'1a/1b',
-		'1b',
-		'1b/2',
-		'1b/2a',
-		'1c',
-		'2a',
-		'2a/2b',
-		'2a/b',
-		'2b',
-		'2b/3',
-		'3a',
-		'3b',
-		'3b/4'
-		);
-
-/**/
-$counter=0;
-
-foreach($larvol_ids as $larvol_id)
-{
-
-
-	if($cid > $larvol_id) continue; 
-	
-	$counter++;
-//	if($counter>250) break;
-	$query = 'SELECT * FROM data_nct where `larvol_id`="' . $larvol_id . '"  LIMIT 1';
+		$trial=padnct($source_id);
+		$query = 'SELECT `larvol_id` FROM data_trials where `source_id`="' . $trial . '"  LIMIT 1';
 
 		if(!$res = mysql_query($query))
-		{
-			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-			$logger->error($log);
-			echo $log;
-			return false;
-		}
+			{
+				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				$logger->error($log);
+				echo $log;
+				return false;
+			}
 		$res = mysql_fetch_assoc($res);
 		$exists = $res !== false;
-		$larvol_id = $res['larvol_id'];
-		$nctid=padnct($res['nct_id']);
-		$record_data = $res;
-		
-	foreach($record_data as $fieldname => $value)
-	{
-		if($fieldname=='completion_date') 
+		$oldtrial=$exists;
+		$larvol_id = NULL;
+		if($exists)
 		{
-
-			$c_date = normal('date',(string)$value);
+			$larvol_id = $res['larvol_id'];
 		}
-		if($fieldname=='primary_completion_date') 
+		else 
 		{
-
-			$pc_date = normal('date',(string)$value);
-		}
-		if($fieldname=="phase") 
-		{
-
-			$phase_value=null;
-			$v=array_search($value,$array1,false);
-			if($v!==false)
-			{
-				$phase_value=$array2[$v];
-			}
-		}
-		
-	}
-
-	if(isset($c_date) and !is_null($c_date)) $end_date=$c_date;
-	else $end_date=$pc_date;
-	
-
-	$i=0;
-	foreach($record_data as $fieldname => $value)
-	{
-		if(!remap($larvol_id, $fieldname, $value,$record_data['lastchanged_date'],$oldtrial,NULL,$end_date,$phase_value))
-		logDataErr('<br>Could not save the value of <b>' . $fieldname . '</b>, Value: ' . $value );//Log in errorlog
-		$i++;
-		
-	}
-			
-			
-	//calculate institution type
-	$ins_type=getInstitutionType($record_data['collaborator'],$record_data['lead_sponsor'],$larvol_id);
-
-	//calculate region
-	$region=getRegions($record_data['location_country']);
-	if($region=='other') $region='RoW';
-	//calculate active or inactive
-	$inactiveStatus = 
-		array(
-			'test string',
-			'Withheld',
-			'Approved for marketing',
-			'Temporarily not available',
-			'No Longer Available',
-			'Withdrawn',
-			'Terminated',
-			'Suspended',
-			'Completed'	
-			);
-	
-	$inactive=1;
-	if(isset($record_data['overall_status']))
-	{
-		$x=array_search($record_data['overall_status'],$inactiveStatus);
-		if($x) $inactive=0; else $inactive=1;
-	}
-
-	$query = 'update data_trials set `institution_type`="' .$ins_type. '",`region`="'.$region.'", `is_active`='.$inactive.'  where `larvol_id`="' .$larvol_id . '" limit 1' ;	
-
-	if(!mysql_query($query))
-		{
-			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-			$logger->error($log);
-			echo $log;
+			echo 'Invalid trail';
 			return false;
 		}
-		echo('<br><b>' . date('Y-m-d H:i:s') .'</b> - Remapping of trial : ' . $nctid . ' completed.' .   str_repeat("     ",300) );
+
+	}
+	elseif(isset($larvolid)) // A single larvol_id
+	{
+		$trial=$larvolid;
+		$query = 'SELECT `larvol_id` FROM data_trials where `larvol_id`="' . $trial . '"  LIMIT 1';
+
+		if(!$res = mysql_query($query))
+			{
+				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				$logger->error($log);
+				echo $log;
+				return false;
+			}
+		$res = mysql_fetch_assoc($res);
+		$exists = $res !== false;
+		$oldtrial=$exists;
+		$larvol_id = NULL;
+		if($exists)
+		{
+			$larvol_id = $res['larvol_id'];
+		}
+		else 
+		{
+			echo 'Invalid larvol_id';
+			return false;
+		}
 		
-		tindex($nctid,'products');
-		tindex($nctid,'areas');
-		echo('<br><b>' . date('Y-m-d H:i:s') .'</b> - Preindexing of trial : ' . $nctid . ' completed.' .   str_repeat("     ",300) );
-		if(!isset($updateitems)) $updateitems=0;
-		$query = ' UPDATE  update_status_fullhistory SET process_id = "'. $pid  .'" , update_items_progress= "' . ( ($totalncts >= $updateitems+$counter) ? ($updateitems+$counter) : $totalncts  ) . '" , status="2", current_nctid="'. $larvol_id .'", updated_time="' . date("Y-m-d H:i:s", strtotime('now'))  . '" WHERE update_id="' . $up_id .'" and trial_type="REMAP"  ;' ;
+	}
+	elseif(isset($sourcedb) and $sourcedb=="ALL")  // Entire database
+	{
+
+	$query = 'SELECT `larvol_id` FROM data_trials';
+
+		if(!$res = mysql_query($query))
+			{
+				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				$logger->error($log);
+				echo $log;
+				return false;
+			}
 		
-		$res = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory. Query:' . $query);
-//	return true;
+		$exists = $res !== false;
+		$oldtrial=$exists;
+		$larvol_ids = array();
+		while ($row = mysql_fetch_assoc($res)) $larvol_ids[] = $row[larvol_id];
+		asort($larvol_ids);
+	}
+
+	elseif(isset($sourcedb) and !empty($sourcedb))  // single data source (eg. data_nct, data_eudract etc.)
+	{
+	$source='data_'.$sourcedb;
+	$query = 'SELECT `larvol_id` FROM '. $source .' ';
+
+		if(!$res = mysql_query($query))
+			{
+				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				$logger->error($log);
+				echo $log;
+				return false;
+			}
+		
+		$exists = $res !== false;
+		$oldtrial=$exists;
+		$larvol_ids = array();
+		while ($row = mysql_fetch_assoc($res)) $larvol_ids[] = $row[larvol_id];
+		asort($larvol_ids);
+	}
+	else return false;
+
+		/* status */
+
+			$query = 'SELECT * FROM update_status_fullhistory where status="1" and trial_type="REMAP" order by update_id desc limit 1' ;
+				if(!$res = mysql_query($query))
+				{
+					$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+					$logger->error($log);
+					echo $log;
+					return false;
+				}
+			$res = mysql_fetch_array($res) ;
+			
+		if ( isset($res['process_id']) )
+		{
+			
+			$pid = getmypid();
+			$up_id= ((int)$res['update_id']);
+			$cid = ((int)$res['current_nctid']); 
+			$maxid = ((int)$res['max_nctid']); 
+			$updateitems= ((int)$res['update_items_progress']);
+			$query = 'UPDATE  update_status_fullhistory SET status= "2",er_message=""  WHERE process_id = "' . $pr_id .'" ;' ;
+				if(!$res = mysql_query($query))
+				{
+					$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+					$logger->error($log);
+					echo $log;
+					return false;
+				}
+		//	fetch_records($pid,$cid,$maxid,$up_id);
+		//	exit;
+		}
+		else
+		{
+
+			$query = 'SELECT MAX(update_id) AS maxid FROM update_status_fullhistory' ;
+				if(!$res = mysql_query($query))
+				{
+					$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+					$logger->error($log);
+					echo $log;
+					return false;
+				}
+			$res = mysql_fetch_array($res) ;
+			$up_id = (isset($res['maxid'])) ? ((int)$res['maxid'])+1 : 1;
+			$fid = getFieldId('NCT','nct_id');
+			
+			$cid = 0; 
+			$cid_=$cid;
+			$pid = getmypid();
+			$totalncts=count($larvol_ids);
+			
+			
+			$query = 'INSERT into update_status_fullhistory (update_id,process_id,status,update_items_total,start_time,max_nctid,trial_type) 
+					  VALUES ("'.$up_id.'","'. $pid .'","'. 2 .'",
+					  "' . $totalncts . '","'. date("Y-m-d H:i:s", strtotime('now')) .'", "'. $maxid .'", "REMAP"  ) ;';
+				if(!$res = mysql_query($query))
+				{
+					$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+					$logger->error($log);
+					echo $log;
+					return false;
+				}
+			
+			
+			
+	//		echo('Remapping from: ' . $cid . ' to: ' . $maxid . '<br />'); @flush();
+			echo('<br>Current time ' . date('Y-m-d H:i:s', strtotime('now')) . '<br>');
+			echo str_repeat ("  ", 4000);
+			$i=1;
+			
+		}
+
+		/* STATUS */
+
+
+	if(!isset($cid)) $cid = 0; 	
+
+
+	if(!isset($larvol_ids)) $larvol_ids=array($larvol_id);
+
+	$DTnow = date("Y-m-d H:i:s", strtotime('now'));
+
+	$array1=array
+			(
+			'N/A',
+			'Phase 0',
+			'Phase 0/Phase 1',
+			'Phase 1',
+			'Phase 1/Phase 2',
+			'Phase 2',
+			'Phase 2/Phase 3',
+			'Phase 3',
+			'Phase 3/Phase 4',
+			'Phase 4',
+			'Phase 1a',
+			'Phase 1a/1b',
+			'Phase 1b',
+			'Phase 1b/2',
+			'Phase 1b/2a',
+			'Phase 1c',
+			'Phase 2a',
+			'Phase 2a/2b',
+			'Phase 2a/b',
+			'Phase 2b',
+			'Phase 2b/3',
+			'Phase 3a',
+			'Phase 3b',
+			'Phase 3b/4'
+			);
+			
+			$array2=array
+			(
+			'N/A',
+			'0',
+			'0/1',
+			'1',
+			'1/2',
+			'2',
+			'2/3',
+			'3',
+			'3/4',
+			'4',
+			'1a',
+			'1a/1b',
+			'1b',
+			'1b/2',
+			'1b/2a',
+			'1c',
+			'2a',
+			'2a/2b',
+			'2a/b',
+			'2b',
+			'2b/3',
+			'3a',
+			'3b',
+			'3b/4'
+			);
+
+	/**/
+	$counter=0;
+
+	foreach($larvol_ids as $larvol_id)
+	{
+
+
+		if($cid > $larvol_id) continue; 
+		
+		$counter++;
+	//	if($counter>250) break;
+		$query = 'SELECT * FROM data_nct where `larvol_id`="' . $larvol_id . '"  LIMIT 1';
+
+			if(!$res = mysql_query($query))
+			{
+				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				$logger->error($log);
+				echo $log;
+				return false;
+			}
+			$res = mysql_fetch_assoc($res);
+			$exists = $res !== false;
+			$larvol_id = $res['larvol_id'];
+			$nctid=padnct($res['nct_id']);
+			$record_data = $res;
+			
+		foreach($record_data as $fieldname => $value)
+		{
+			if($fieldname=='completion_date') 
+			{
+
+				$c_date = normal('date',(string)$value);
+			}
+			if($fieldname=='primary_completion_date') 
+			{
+
+				$pc_date = normal('date',(string)$value);
+			}
+			if($fieldname=="phase") 
+			{
+
+				$phase_value=null;
+				$v=array_search($value,$array1,false);
+				if($v!==false)
+				{
+					$phase_value=$array2[$v];
+				}
+			}
+			
+		}
+
+		if(isset($c_date) and !is_null($c_date)) $end_date=$c_date;
+		else $end_date=$pc_date;
+		
+
+		$i=0;
+		foreach($record_data as $fieldname => $value)
+		{
+			if(!remap($larvol_id, $fieldname, $value,$record_data['lastchanged_date'],$oldtrial,NULL,$end_date,$phase_value))
+			logDataErr('<br>Could not save the value of <b>' . $fieldname . '</b>, Value: ' . $value );//Log in errorlog
+			$i++;
+			
+		}
+				
+				
+		//calculate institution type
+		$ins_type=getInstitutionType($record_data['collaborator'],$record_data['lead_sponsor'],$larvol_id);
+
+		//calculate region
+		$region=getRegions($record_data['location_country']);
+		if($region=='other') $region='RoW';
+		//calculate active or inactive
+		$inactiveStatus = 
+			array(
+				'test string',
+				'Withheld',
+				'Approved for marketing',
+				'Temporarily not available',
+				'No Longer Available',
+				'Withdrawn',
+				'Terminated',
+				'Suspended',
+				'Completed'	
+				);
+		
+		$inactive=1;
+		if(isset($record_data['overall_status']))
+		{
+			$x=array_search($record_data['overall_status'],$inactiveStatus);
+			if($x) $inactive=0; else $inactive=1;
+		}
+
+		$query = 'update data_trials set `institution_type`="' .$ins_type. '",`region`="'.$region.'", `is_active`='.$inactive.'  where `larvol_id`="' .$larvol_id . '" limit 1' ;	
+
+		if(!mysql_query($query))
+			{
+				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				$logger->error($log);
+				echo $log;
+				return false;
+			}
+			echo('<br><b>' . date('Y-m-d H:i:s') .'</b> - Remapping of trial : ' . $nctid . ' completed.' .   str_repeat("     ",300) );
+			
+			tindex($nctid,'products');
+			tindex($nctid,'areas');
+			echo('<br><b>' . date('Y-m-d H:i:s') .'</b> - Preindexing of trial : ' . $nctid . ' completed.' .   str_repeat("     ",300) );
+			if(!isset($updateitems)) $updateitems=0;
+			$query = ' UPDATE  update_status_fullhistory SET process_id = "'. $pid  .'" , update_items_progress= "' . ( ($totalncts >= $updateitems+$counter) ? ($updateitems+$counter) : $totalncts  ) . '" , status="2", current_nctid="'. $larvol_id .'", updated_time="' . date("Y-m-d H:i:s", strtotime('now'))  . '" WHERE update_id="' . $up_id .'" and trial_type="REMAP"  ;' ;
+			
+			$res = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory. Query:' . $query);
+	//	return true;
+	}
 }
 function remap($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_type,$end_date,$phase_value)
 {
@@ -675,7 +678,7 @@ function remap($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_t
 	}
 
 }
-
+/*
 function normalize($type, $value)
 {
 	global $nctid;
@@ -701,6 +704,7 @@ function normalize($type, $value)
             }
 	}
 }
+
 function normal($type, $value)
 {
 	global $nctid;
@@ -726,4 +730,5 @@ function normal($type, $value)
             }
 	}
 }
+*/
 ?>

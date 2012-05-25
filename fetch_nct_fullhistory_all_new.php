@@ -1,5 +1,16 @@
 <?php
 require_once('db.php');
+
+
+
+if(!$db->loggedIn() || ($db->user->userlevel!='admin' && $db->user->userlevel!='root') || !isset($_POST['mode']))
+{
+	header('Location: ' . urlPath() . 'index.php');
+	exit;
+}
+
+
+
 require_once('include.search.php');
 require_once('include.util.php');
 require_once('nct_common.php');
@@ -7,11 +18,7 @@ require_once('include.import_new.php');
 require_once('include.import.history_new.php');
 
 
-if(!$db->loggedIn() || ($db->user->userlevel!='admin' && $db->user->userlevel!='root'))
-{
-	header('Location: ' . urlPath() . 'index.php');
-	exit;
-}
+
 if(!isset($_POST['mode'])) 
 {
 echo ' 

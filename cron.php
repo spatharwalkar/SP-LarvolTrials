@@ -746,6 +746,7 @@ if($current_tasks_count==0)
 						$days_to_fetch=$run_updates[$i]['updated_days'];
 						$update_id=$run_updates[$i]['update_id'];
 						require_once($filename);
+						run_incremental_scraper($days_to_fetch);
 						echo($nl . '<pre>Done with ' . $filename . '.' . $nl);
 
 						//Set status to 'complete' in 'update_status'
@@ -1394,6 +1395,7 @@ elseif($current_tasks_count==1)
 					$days_to_fetch=$run_updates[$i]['updated_days'];
 					$update_id=$run_updates[$i]['update_id'];
 					require_once($filename);
+					run_incremental_scraper($days_to_fetch);
 					echo($nl . '<pre>Done with ' . $filename . '.' . $nl);
 
 					//Set status to 'complete' in 'update_status'
@@ -2049,6 +2051,7 @@ elseif($current_tasks_count>1)
 								$days_to_fetch=$run_updates[$i]['updated_days'];
 								$update_id=$run_updates[$i]['update_id'];
 								require_once($filename);
+								run_incremental_scraper($days_to_fetch);
 								echo($nl . '<pre>Done with ' . $filename . '.' . $nl);
 								
 								//Set status to 'complete' in 'update_status'
@@ -2696,6 +2699,7 @@ elseif($current_tasks_count>1)
 									$days_to_fetch=$run_updates[$i]['updated_days'];
 									$update_id=$run_updates[$i]['update_id'];
 									require_once($filename);
+									run_incremental_scraper($days_to_fetch);
 									echo($nl . '<pre>Done with ' . $filename . '.' . $nl);
 
 									//Set status to 'complete' in 'update_status'
@@ -3341,6 +3345,7 @@ elseif($current_tasks_count>1)
 							$days_to_fetch=$run_updates[$i]['updated_days'];
 							$update_id=$run_updates[$i]['update_id'];
 							require_once($filename);
+							run_incremental_scraper($days_to_fetch);
 							echo($nl . '<pre>Done with ' . $filename . '.' . $nl);
 
 							//Set status to 'complete' in 'update_status'
@@ -3991,6 +3996,7 @@ elseif($current_tasks_count>1)
 							$days_to_fetch=$run_updates[$i]['updated_days'];
 							$update_id=$run_updates[$i]['update_id'];
 							require_once($filename);
+							run_incremental_scraper($days_to_fetch);
 							echo($nl . '<pre>Done with ' . $filename . '.' . $nl);
 
 							//Set status to 'complete' in 'update_status'

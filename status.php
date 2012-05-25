@@ -74,8 +74,8 @@ if(isset($_POST['pid']))
 			//remapping
 				elseif( $_POST['ttype']=="REMAP" )
 				{
-					$_GET['source']='ALL';
 					require('remap_trials.php');
+					remaptrials(null,null,'ALL');
 				}
 			//
 				

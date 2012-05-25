@@ -83,6 +83,11 @@ if($db->loggedIn())
 	.'<a href="products.php">Products</a>'
 	.'</div>');
 	
+	if($db->user->userlevel=='root')
+		$dbpage='<a href="database.php">Database</a><br />';
+	else
+		$dbpage='';
+	
 	if($db->user->userlevel=='admin'||$db->user->userlevel=='root')
 	{
 		echo('::');
@@ -91,6 +96,7 @@ if($db->loggedIn())
 			. '<a href="custom.php">Field editor</a><br />'
 			. '<a href="schedule.php">Scheduler</a><br />'
 			. '<a href="status.php">Status</a><br />'
+			. $dbpage
 			. '<a href="admin_settings.php">Settings</a><br />'			
 			. '</div>');
 	}

@@ -116,8 +116,9 @@ $fieldRArr = calculateRegionFieldIds();
 $fieldCRITArr = calculateCriteriaFieldIds();
 
 //returned array maps the IDs to lastchanged dates
-function getIDs($type) {
-    global $days;
+function getIDs($type,$days_passed=NULL) {
+	if(!is_null($days_passed)) $days=$days_passed;
+    else global $days;
     $fields = 'kp';
     $dstr = 'lup_d';
 
