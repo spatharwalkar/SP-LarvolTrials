@@ -1,12 +1,12 @@
 <?php
 require_once('db.php');
-require('header.php');
 
 if(!$db->loggedIn() || ($db->user->userlevel!='root'))
 {
 	header('Location: ' . urlPath() . 'index.php');
 	exit;
 }
+require('header.php');
 
 /**************/
 
