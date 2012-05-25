@@ -2106,7 +2106,8 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 				'select' => 'count(*)',
 				'from'   => $this->get_SQL_join_clause(),
 				'where'  => $this->get_SQL_where_from_query_opts());
-		
+			if( $_POST['sourceless_only'] and $_POST['sourceless_only'] == 'YES' and isset($count_parts['where']) and !empty($count_parts['where'])) $count_parts['where'] .= ' and ( PMEtable0.larvol_id in ( select `larvol_id` from data_manual) ) ';
+			elseif($_POST['sourceless_only'] and $_POST['sourceless_only'] == 'YES')  $count_parts['where'] = ' PMEtable0.larvol_id in ( select `larvol_id` from data_manual) ';
 		$res = $this->myquery($this->get_SQL_main_list_query($count_parts), __LINE__);
 		$row = $this->sql_fetch($res, 'n');
 		$this->total_recs = $row[0];
