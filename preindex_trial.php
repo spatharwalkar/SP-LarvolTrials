@@ -471,6 +471,21 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 			}
 		}
 	}
+	elseif(isset($productID) and !empty($productID))
+	{
+	$qry='DELETE from '. $table .' where `'. $field . '` = "'. $productID . '"';
+						if(!mysql_query($qry))
+						{
+							$log='Could not delete existing product indexes. Query='.$qry.' Error:' . mysql_error();
+							$logger->fatal($log);
+							$query = 'update update_status_fullhistory set 
+							er_message="' . $log . '" where update_id= "'. $up_id .'" limit 1' ; 
+							mysql_query($query);
+							mysql_query('ROLLBACK');
+							echo $log;
+							return false;
+						}
+	}
 }
 
 /*
