@@ -2,7 +2,7 @@
 require_once('db.php');
 require('header.php');
 
-if(!$db->loggedIn() || ($db->user->userlevel!='admin' && $db->user->userlevel!='root'))
+if(!$db->loggedIn() || ($db->user->userlevel!='root'))
 {
 	header('Location: ' . urlPath() . 'index.php');
 	exit;
