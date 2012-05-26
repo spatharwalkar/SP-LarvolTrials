@@ -10169,7 +10169,7 @@ class TrialTracker
 	
 	function downloadOptions($shownCnt, $foundCnt, $ottType, $result, $globalOptions) 
 	{	
-		$downloadOptions = '<div style="height:100px;margin-top:10px; padding:6px;"><div class="downldbox"><div class="newtext">Download Options</div>'
+		$downloadOptions = '<div style="height:155px; padding:6px;"><div class="downldbox"><div class="newtext">Download Options</div>'
 				. '<form  id="frmDOptions" name="frmDOptions" method="post" target="_self">'
 				. '<input type="hidden" name="ottType" value="' . $ottType . '" />';
 				foreach($result as $rkey => $rvalue)
@@ -10202,10 +10202,10 @@ class TrialTracker
 					}
 				}	
 		$downloadOptions .= '<ul><li><label>Number of Studies: </label></li>'
-				. '<li><select id="dOption" name="dOption">'
+				. '<li><select id="dOption" name="dOption" size="2" style="height:38px;">'
 				. '<option value="shown" selected="selected">' . $shownCnt . ' Shown Studies</option>'
 				. '<option value="all">' . $foundCnt . ' Found Studies</option></select></li>'
-				. '<li><label>Which Format: </label></li><li><select id="wFormat" name="wFormat">'
+				. '<li><label>Which Format: </label></li><li><select id="wFormat" name="wFormat" size="3" style="height:54px;">'
 				. '<option value="excel" selected="selected">Excel</option><option value="xml">XML</option><option value="pdf">PDF</option></select></li></ul>'
 				. '<input type="hidden" name="shownCnt" value="' . $shownCnt . '" />'
 				. '<input type="submit" id="btnDownload" name="btnDownload" value="Download File" style="margin-left:8px;"  />'

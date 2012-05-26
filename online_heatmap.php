@@ -560,16 +560,21 @@ width:100px;
 	margin:2px;
 }
 .dropmenudiv{
-position:absolute;
-top: 0;
-border: 1px solid #DDDDDD; /*THEME CHANGE HERE*/
-/*border-bottom-width: 0;*/
-font:normal 12px Verdana;
-line-height:18px;
-z-index:100;
-background-color: white;
-width: 50px;
-visibility: hidden;
+	position:absolute;
+	top: 0;
+	border: 1px solid #DDDDDD; /*THEME CHANGE HERE*/
+	/*border-bottom-width: 0;*/
+	font:normal 12px Verdana;
+	line-height:18px;
+	z-index:100;
+	background-color: white;
+	width: 50px;
+	visibility: hidden;
+}
+.td_width{
+	width:110px;
+	min-width:110px;
+	/*max-width:110px;*/
 }
 </style>
 <?php
@@ -604,7 +609,7 @@ foreach($rows as $row => $rval)
 	}
 	echo '<style type="text/css"> 
 	.Cat_Height_'.$row.' { height:'.$height.'; vertical-align:middle; } 
-	.Cell_Height_'.$row.' { min-height:'.$height.'; height:100%; max-height:inherit; vertical-align:middle; } 
+	.Cell_Height_'.$row.' { min-height:'.$height.';  height:100%; max-height:inherit; vertical-align:middle; _height:'.$height.'; } 
 	.Cat_Width_'.$row.' { width:'.$width.'; vertical-align:middle;  } 
 	</style>';  
 	//echo  'Cat_Height_'.$row.' { height:'.$height.'; } .Cat_Width_'.$row.' { width:'.$width.'; } .Cell_Height_'.$row.' { min-height:'.$height.'; height:100%; max-height:inherit; vertical-align:middle; }  <br/>';
@@ -1236,15 +1241,15 @@ $htmlContent .= '<table width="100%" style="background-color:#FFFFFF;">'
 				. '<br clear="all"/><br/>';
 				
 $htmlContent  .= '<div id="dropmenu" class="dropmenudiv" style="width: 310px;">'
-				.'<div style="height:100px;margin-top:10px; padding:6px;"><div class="downldbox"><div class="newtext">Download options</div>'
+				.'<div style="height:150px; padding:6px;"><div class="downldbox"><div class="newtext">Download options</div>'
 				. '<input type="hidden" name="id" id="id" value="' . $id . '" />'
 				. '<ul><li><label>Which format: </label></li>'
-				. '<li><select id="dwformat" name="dwformat">'
+				. '<li><select id="dwformat" name="dwformat" size="2" style="height:36px">'
 				. '<option value="exceldown" selected="selected">Excel</option>'
 				. '<option value="pdfdown">PDF</option>'
 				. '</select></li>'
 				. '<li><label>Counts display: </label></li>'
-				. '<li><select id="dwcount" name="dwcount">'
+				. '<li><select id="dwcount" name="dwcount" size="3" style="height:54px">'
 				. '<option value="indlead" selected="selected">Active industry trials</option>'
 				. '<option value="active">Active trials</option>'
 				. '<option value="total">All trials</option>'
@@ -1277,7 +1282,7 @@ foreach($columns as $col => $val)
 	$caltTitle = (isset($cdesc) && $cdesc != '')?' alt="'.$cdesc.'" title="'.$cdesc.'" ':null;
 	$cat = (isset($columnsCategoryName[$col]) && $columnsCategoryName[$col] != '')? ' ('.$columnsCategoryName[$col].') ':'';
 		
-	$htmlContent .= '<th id="Cell_ID_'.$online_HMCounter.'" width="80px" '.$caltTitle.'>';
+	$htmlContent .= '<th class="td_width" id="Cell_ID_'.$online_HMCounter.'" width="110px" '.$caltTitle.'>';
 	
 	if(isset($areaIds[$col]) && $areaIds[$col] != NULL && !empty($productIds))
 	{
