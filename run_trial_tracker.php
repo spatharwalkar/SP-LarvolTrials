@@ -13304,7 +13304,7 @@ function getDifference($valueOne, $valueTwo)
 	{
 		$diff = abs(($valueOne - $valueTwo) / $valueOne * 100);
 		$diff = round($diff);
-		if($diff > 20)
+		if($diff >= 20)
 		{
 			return true;
 		}
