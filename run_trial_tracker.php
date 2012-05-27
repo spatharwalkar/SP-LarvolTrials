@@ -13162,7 +13162,7 @@ class TrialTracker
 				//field upm end date
 				$title = '';
 				$attr = '';	
-				$dateStyle = '';
+				//$dateStyle = '';
 				$upmBorderRight = '';
 				
 				if(!empty($value['edited']) && ($value['edited']['field'] == 'end_date'))
