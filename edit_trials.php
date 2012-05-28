@@ -591,7 +591,10 @@ if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['overall_status'
                   "Approved for marketing",
                   "No longer recruiting",
                   "Withheld",
-                  "Temporarily Not Available"),
+                  "Temporarily Not Available",
+				  "Ongoing",
+				  "Not Authorized",
+				  "Prohibited"),
   'default'  => 'Not yet recruiting',
   'options'  => 'AVCPD', 'sort'     => false
 );
@@ -614,7 +617,10 @@ if($viewmode=='YES')
                   "Approved for marketing",
                   "No longer recruiting",
                   "Withheld",
-                  "Temporarily Not Available"),
+                  "Temporarily Not Available",
+				  "Ongoing",
+				  "Not Authorized",
+				  "Prohibited"),
   'default'  => 'Not yet recruiting',
   'options'  => 'AVCPD', 'sort'     => false
 ); 
