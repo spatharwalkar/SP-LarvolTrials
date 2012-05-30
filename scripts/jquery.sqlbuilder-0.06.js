@@ -11,7 +11,7 @@
 
    
 (function ($) {
-
+$.initialBracesFlag = 9;
 
 /************* Tree View Functions ***********/
     $.fn.sqlsimpletreeview = function (options) {
@@ -177,6 +177,10 @@
             }
             /*rebuild where data*/
             for (var i = 0; i < j.wheredata.length; i++) {
+            	if(i==0 && j.wheredata[i].chainname=='(' && j.wheredata[i].columnname=='' && j.wheredata[i].opname=='')
+            		{
+            			$.initialBracesFlag = 0;
+            		}
                 //j.wheredata[i].columnslot, j.wheredata[i].opslot,j.wheredata[i].chainslot,j.wheredata[i].columnvalue
             	var col_name = j.wheredata[i].columnname;
                 var col_slot = columnHash[col_name];
@@ -809,9 +813,22 @@
 
                 
                 data = data + '"wheredata":[';
+                sqlwhereloop = 0;
                 $('span.sqlwhere').each(function () {
                     //debugger;
-
+                	if(sqlwhereloop==0 && $('#9990').html() == '(')
+            		{
+                    data = data + '{' +
+                    //'columnslot:' + col_slot + ',' +
+                    '"columnname":"",' +
+                    //'opslot:' + op_slot + ',' +
+                    '"opname":"",' +
+                    //'chainslot:' + chain_slot + ',' +
+                    '"chainname":"' + $('#9990').html() + '",' +
+                    '"columnvalue":""' +
+                  '},';
+            		}
+            	sqlwhereloop++;
                     var col_slot = $(this).find('a.addnewsqlwhere').attr('href');
                     var index = $(this).find('a.addnewsqlwhere').attr('id');
                     var col_name = $(this).find('a.addnewsqlwhere').text();
@@ -1086,7 +1103,7 @@
             
             
             }
-            //debugger;           
+            //debugger;   
             $(this).html(
             		'<fieldset style="float:left;width:35em;"><legend>NCTid Override</legend>'
             				+ 'Enter a comma-delimited list of NCTids of records that must be returned by this search regardless of criteria<br />'
@@ -1100,7 +1117,11 @@
                     '<p class=sqlgroupbydata></p>' +
                     '<p class=sqlalldata></p>' +
                     '<font size="4" face="Bold" color="Grey">Conditions</font>' +
-                    '<p class=sqlbuilderwhere>' + '<br/>' + '<a class="addnewsqlwhere" id=9999 href="#">' + '<br/>' + opts.addnewwhere + '</a>' + '<br/><br/><br/>' + '</p>' +
+                    '<p class=sqlbuilderwhere>' + 
+                    '<span class="sqlwhere2" id="1">' +
+	                 '<a class="addnewsqlwherechain" id="9990" href="#0" >' + opts.chain[9].name + '</a>&nbsp;' +
+                   '</span>' +
+                    '<br/>' + '<a class="addnewsqlwhere" id=9999 href="#">' + '<br/>' + opts.addnewwhere + '</a>' + '<br/><br/><br/>' + '</p>' +
                     '<br/><br/>' +
                     '<font size="4" face="Bold" color="Grey">' + addnewsqlcolumn()  + '</font>' +
                     '<p class=sqlbuildercolumn>' + '<br/><br/>' + '<a class="addnewsqlcolumn" id=9999 href="#">' + opts.addnewcolumn + '</a>' + '<br/><br/><br/>' + '</p>' +
@@ -1115,7 +1136,7 @@
                    );
 
 
-
+            createSQLWhereChainEvent(9990);
             $(".sqldata").hide();
             $(".sqlalldata").hide();
             $(".sqlcolumndata").hide();
@@ -1729,6 +1750,10 @@
                     var chain_slot = (defval ? defval.chainslot : '0') ;
                     var sqlline = getSQLWhereLine(col_slot, op_slot, chain_slot, column_value, counter_id, counter_id);
                     var item = $(sqlline).hide();
+                    if($.initialBracesFlag == 0)
+                    	{
+                    		$('#9990').html('(');
+                    	}
                     $('[class=addnewsqlwhere][id=9999]').before(item);
                     
                     if (opts.animate) $(item).animate({ opacity: "show", height: "show" }, 150, "swing", function () { $(item).animate({ height: "+=3px" }, 75, "swing", function () { $(item).animate({ height: "-=3px" }, 50, "swing", function () { onchangeevent('new'); }); }); });
