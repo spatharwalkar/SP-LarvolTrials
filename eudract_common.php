@@ -311,6 +311,7 @@ $ignore_fields = array(
 					}
 					else {
 						$eudra_number=trim($td->nodeValue);
+						$eudra_number = unpadeudra($eudra_number);
 						//$eudra_number = substr($eudra_number, strpos($eudra_number, 'EudraCT Number: ') + strlen('EudraCT Number: '));
 						$pageids[$eudra_number] = array();
 
@@ -562,7 +563,8 @@ $ignore_fields = array(
 
 		//$combo = split(' - ', $id);
 
-		$eudract_number = unpadeudra($id);
+		//$eudract_number = unpadeudra($id);
+		$eudract_number = $id;
 		// Main One
 		$study = array();
 		foreach ($countries as $country)

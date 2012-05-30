@@ -259,11 +259,11 @@ $array1=array
 		$raw_value=$value;
 		$value=mysql_real_escape_string($value);
 		$raw_value=mysql_real_escape_string($raw_value);
-
-		$dn_array=array
-		(
-	'dummy', 'larvol_id', 'nct_id', 'download_date', 'brief_title', 'acronym', 'official_title', 'lead_sponsor', 'lead_sponsor_class', 'collaborator', 'collaborator_class', 'source', 'has_dmc', 'brief_summary', 'detailed_description', 'overall_status', 'why_stopped', 'start_date', 'end_date', 'completion_date', 'completion_date_type', 'primary_completion_date', 'primary_completion_date_type', 'study_type', 'study_design', 'number_of_arms', 'number_of_groups', 'enrollment', 'enrollment_type', 'biospec_retention', 'biospec_descr', 'study_pop', 'sampling_method', 'criteria', 'gender', 'minimum_age', 'maximum_age', 'healthy_volunteers', 'contact_name', 'contact_phone', 'contact_phone_ext', 'contact_email', 'backup_name', 'backup_phone', 'backup_phone_ext', 'backup_email', 'verification_date', 'lastchanged_date', 'firstreceived_date', 'responsible_party_name_title', 'responsible_party_organization', 'org_study_id', 'phase', 'nct_alias', 'condition', 'secondary_id', 'oversight_authority', 'rank', 'arm_group_label', 'arm_group_type', 'arm_group_description', 'intervention_type', 'intervention_name', 'intervention_other_name', 'intervention_description', 'link_url', 'link_description', 'primary_outcome_measure', 'primary_outcome_timeframe', 'primary_outcome_safety_issue', 'secondary_outcome_measure', 'secondary_outcome_timeframe', 'secondary_outcome_safety_issue', 'reference_citation', 'reference_PMID', 'results_reference_citation', 'results_reference_PMID', 'location_name', 'location_city', 'location_state', 'location_zip', 'location_country', 'location_status', 'location_contact_name', 'location_contact_phone', 'location_contact_phone_ext', 'location_contact_email', 'location_backup_name', 'location_backup_phone', 'location_backup_phone_ext', 'location_backup_email', 'investigator_name', 'investigator_role', 'overall_official_name', 'overall_official_role', 'overall_official_affiliation', 'keyword', 'is_fda_regulated', 'is_section_801'
-	);
+        $dn_array=array
+					(
+				'dummy', 'larvol_id', 'source_id', 'brief_title', 'acronym', 'official_title', 'lead_sponsor', 'collaborator', 'institution_type', 'source', 'has_dmc', 'brief_summary', 'detailed_description', 'overall_status', 'is_active', 'why_stopped', 'start_date', 'end_date', 'study_type', 'study_design', 'number_of_arms', 'number_of_groups', 'enrollment', 'enrollment_type',  'study_pop', 'sampling_method', 'criteria', 'gender', 'minimum_age', 'maximum_age', 'healthy_volunteers', 'verification_date', 'lastchanged_date', 'firstreceived_date', 'org_study_id', 'phase', 'condition', 'secondary_id', 'arm_group_label', 'arm_group_type', 'arm_group_description', 'intervention_type', 'intervention_name', 'intervention_other_name', 'intervention_description', 'primary_outcome_measure', 'primary_outcome_timeframe', 'primary_outcome_safety_issue', 'secondary_outcome_measure', 'secondary_outcome_timeframe', 'secondary_outcome_safety_issue', 'location_name', 'location_city', 'location_state', 'location_zip', 'location_country', 'region', 'keyword', 'is_fda_regulated', 'is_section_801'
+				);
+		
 	$as=array_search($fieldname,$dn_array);
 
 	if ( isset($as) and $as)
@@ -623,6 +623,15 @@ $array1=array
 		}
 		return $strval;
 	}
+	
+	function addMultiVal($input)
+	{
+		if(!empty($input))
+		{
+			return '`' . $input;
+		}
+		return '';
+	}
 
 	// Add or update a Eudract record from a SimpleXML object.
 	function addEudraCT($record)
@@ -730,7 +739,7 @@ $array1=array
 		$rec->tp_phase3_confirmatory,$rec->tp_phase4_use);
 		$condition = $rec->condition . '`' . $rec->lay_condition . '`' . $rec->therapeutic_area;
 		$intervention_type = eudraInterventionType($rec);
-		$intervention_name = $rec->product_name . '`' . $rec->product_code . '`' . $rec->product_pharm_form . '`' . $rec->imp_trade_name;
+		$intervention_name = $rec->product_name . addMultiVal($rec->product_code) . addMultiVal($rec->product_pharm_form) . addMultiVal($rec->imp_trade_name);
 		$ages = eudraAge($rec);
 		/*************************************/
 
