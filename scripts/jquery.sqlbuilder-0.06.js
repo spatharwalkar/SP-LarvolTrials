@@ -695,6 +695,10 @@ $.initialBracesFlag = 9;
 		 { name: ') AND', op: ') AND' },
 		 { name: ') OR', op: ') OR' },
 		 { name: ') .', op: ')' },
+		 { name: ') AND (', op: ') AND (' },
+		 { name: ') OR (', op: ') OR (' },
+		 { name: ') AND NOT(', op: ') AND NOT(' },
+		 { name: ') OR NOT(', op: ') OR NOT(' },
 		 { name: '.', op: '' }
 
 		],
