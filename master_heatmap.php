@@ -703,7 +703,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 	$res = mysql_fetch_array($res) or die('Report not found.');
 	$rptu = $res['user'];
 	$shared = $res['shared'];
-	$toal_fld=$res['total'];
+	$total_fld=$res['total'];
 	$dtt_fld=$res['dtt'];
 	$Report_DisplayName=$res['display_name'];
 	if($rptu !== NULL && $rptu != $db->user->id && !$shared) return;	//prevent anyone from viewing others' private reports
@@ -956,7 +956,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 	$out .= '<form action="master_heatmap.php" method="post">'
 			. '<fieldset><legend>Download Option</legend>'
 			. '<input type="hidden" name="id" value="' . $id . '" />';
-	if($toal_fld)
+	if($total_fld)
 	{
 		$out .='<input type="hidden" name="total_col" value="1" />';
 	}
@@ -1060,7 +1060,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 	}
 	
 	//total column checkbox
-	$out .= ' <label><input '.(($disabled) ? ' disabled="disabled" ':'').' type="checkbox" name="total"  value="1" ' . (($toal_fld) ? 'checked="checked"' : '') . ' />Total</label>';
+	$out .= ' <label><input '.(($disabled) ? ' disabled="disabled" ':'').' type="checkbox" name="total"  value="1" ' . (($total_fld) ? 'checked="checked"' : '') . ' />Total</label>';
 	$out .= ' <label><input '.(($disabled) ? ' disabled="disabled" ':'').' type="checkbox" name="dtt"  value="1" ' . (($dtt_fld) ? 'checked="checked"' : '') . ' />Last column is DTT</label>';
 	
 	$out .= '<br clear="all"/>';
@@ -1122,7 +1122,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 		$out .= '</th>';
 	}
 	//if total checkbox is selected
-	if($toal_fld)
+	if($total_fld)
 	{
 		$out .= '<th width="150px">';
 		if(!empty($productIds) && !empty($areaIds))
@@ -1331,7 +1331,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 					
 		}
 		//if total checkbox is selected
-		if($toal_fld)
+		if($total_fld)
 		{
 			$out .= '<th width="150px">&nbsp;</th>';
 		}
@@ -1368,7 +1368,7 @@ function Download_reports()
 	$res = mysql_fetch_array($res) or die('Report not found.');
 	$rptu = $res['user'];
 	$shared = $res['shared'];
-	$toal_fld=$res['total'];
+	$total_fld=$res['total'];
 	$dtt = $res['dtt'];
 	$name = $res['name'];
 	$Report_DisplayName=$res['display_name'];
@@ -1411,8 +1411,9 @@ function Download_reports()
 		{
 			if($header['type_id'] != NULL)
 			{
-				$result =  mysql_fetch_assoc(mysql_query("SELECT id, name, description FROM `products` WHERE id = '" . $header['type_id'] . "' "));
+				$result =  mysql_fetch_assoc(mysql_query("SELECT id, name, description, company FROM `products` WHERE id = '" . $header['type_id'] . "' "));
 				$rows[$header['num']] = $result['name'];
+				if($result['company'] != NULL && trim($result['company']) != '') $rows[$header['num']] = $result['name'].' / '.$result['company'];
 				$rowsDisplayName[$header['num']] = '';
 				$rowsDescription[$header['num']] = $result['description'];
 				$rowsCategoryName[$header['num']] = $header['category'];
@@ -1708,7 +1709,7 @@ function Download_reports()
 	if($_POST['dwcount']=='active')
 	{
 		$tooltip=$title="Active trials";
-		$pdftitle="<b>Active trials</b>";
+		$pdftitle="Active trials";
 		$link_part = '&list=1&sr='.$sr.'&er='.$er.'&hm=' . $id;
 	}
 	elseif($_POST['dwcount']=='total')
@@ -1719,7 +1720,7 @@ function Download_reports()
 	else
 	{
 		$tooltip=$title="Active industry lead sponsor trials";
-		$pdftitle="<b>Active industry lead sponsor trials</b>";
+		$pdftitle="Active industry lead sponsor trials";
 		$link_part = '&list=1&itype=0&sr='.$sr.'&er='.$er.'&hm=' . $id;
 	}
 	$link_part=str_replace(' ','+',$link_part);	
@@ -1752,44 +1753,47 @@ function Download_reports()
 		//set auto page breaks
 		$pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
 		$pdf->AddPage();
-			
+		//ini_set('pcre.backtrack_limit',strlen($pdfContent));	
 		$name = htmlspecialchars(strlen($name)>0?$name:('report '.$id.''));
 		
-		$pdfContent .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'
-						. '<html xmlns="http://www.w3.org/1999/xhtml">'
-						. '<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" />'
-						. '<title>Larvol Master Heatmap Export</title>'
-						. '<style type="text/css">'
-						. 'body { font-family:Verdana; font-color:black; font-size: 8pt;}'
-						. 'a, a:hover{color:#000000;text-decoration:none; height:100%;}'
-						. 'td, th {vertical-align:top; padding-top:10px; border-right: 0.5px solid blue; border-left:0.5px solid blue; border-top: 0.5px solid blue; border-bottom:0.5px solid blue; background-color:#DDF;}'
-						. 'tr {border-right: 0.5px solid #DDF; border-right: 0.5px solid blue; border-left:0.5px solid blue; border-top: 0.5px solid blue; border-bottom:0.5px solid blue;}'
-						. '@page {margin-top: 1em; margin-bottom: 2em;}'
-						. '.nobr {white-space: nowrap}'
-						. '</style>'
-						. '<style type="text/css">'.file_get_contents('css/popup_form.css').'</style>'
-						. '</head>'
-						. '<body bgcolor="#FFFFFF">';
-
-		$pdfContent .= '<div align="center">'
-						. '<table align="center" style="border-collapse:collapse; padding:10px; background-color:#DDF;">'
-						. '<tr style="page-break-inside:avoid;" nobr="true"><td align="left"><b>Name: </b>'. $Report_Name .'</td>'
-						. '<td align="left"><b>Category: </b>'. htmlspecialchars($category) .'</td></tr>'
-						. '<tr style="page-break-inside:avoid;" nobr="true"><td align="left" colspan="2"><b>Display Mode: </b>'. $pdftitle .'</td></tr>'
-						. '</table>'
-						. '</div><br /><br/>';
-						
-		$pdfContent .= '<div align="center">'
-						. '<table border="1" style="background-color:#FFFFFF; padding-top:5px;">'
-						. '<thead><tr style="page-break-inside:avoid;" nobr="true"><th>&nbsp;</th>';
-				
+		$pdf->SetFillColor(192, 196, 254);
+        $pdf->SetTextColor(0);
+		$pdf->setCellPaddings(1, 1, 1, 1);
+		$pdf->setCellMargins(0, 0, 0, 0);
+		$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));
+		$pdf->writeHTMLCell(137, 13, '', '', '<b>Name: </b>'. $Report_Name, $border, $ln=0, $fill=1, $reseth=true, $align='L', $autopadding=true);
+		$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));
+		$pdf->writeHTMLCell(137, 13, '', '', '<b>Category: </b>'. htmlspecialchars($category), $border, $ln=0, $fill=1, $reseth=true, $align='L', $autopadding=true);
+		$pdf->Ln(13);
+		
+		$pdf->setCellPaddings(1, 1, 1, 1);
+		$pdf->writeHTMLCell(274, 8, '', '', '<b>Display Mode: </b>'. $pdftitle, $border, $ln=0, $fill=1, $reseth=true, $align='L', $autopadding=true);
+		$pdf->Ln(20);
+		
+		$product_Col_Width = 25;
+		$area_Col_Width=20;
+		///Calculate height for area row
+		$Max_areaNumLines=0;
 		foreach($columns as $col => $val)
 		{
 			$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col]:$val;
+			$current_NumLines=$pdf->getNumLines($val, $area_Col_Width);
+			if($Max_areaNumLines < $current_NumLines)
+			$Max_areaNumLines = $current_NumLines;
+		}
+		$Area_Row_height = $Max_areaNumLines * 4.5;
+		
+		$pdf->SetFillColor(192, 196, 254);
+		$pdf->setCellMargins(1, 1, 1, 1);
+		$pdf->writeHTMLCell($product_Col_Width, $Area_Row_height, '', '', '', $border, $ln=0, $fill=1, $reseth=true, $align='L', $autopadding=true);
+		
+		foreach($columns as $col => $val)
+		{
+			$pdf->setCellMargins(1, 1, 1, 1);
+			
+			$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col]:$val;
 			$cdesc = (isset($columnsDescription[$col]) && $columnsDescription[$col] != '')?$columnsDescription[$col]:null;
 			$caltTitle = (isset($cdesc) && $cdesc != '')?' alt="'.$cdesc.'" title="'.$cdesc.'" ':null;
-				
-			$pdfContent .= '<th '.$caltTitle.'><div align="center">';
 				
 			if(isset($areaIds[$col]) && $areaIds[$col] != NULL && !empty($productIds))
 			{
@@ -1805,15 +1809,20 @@ function Download_reports()
 				{
 					$count_val=$col_indlead_total[$col];
 				}
-				$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. $link_part . '" target="_blank" title="'. $title .'">'.$val.'</a>';
+				$pdfContent = '<a style="color:#000000;text-decoration:none;" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. $link_part . '" target="_blank" title="'. $caltTitle .'">'.$val.'</a>';
+				$pdf->writeHTMLCell($area_Col_Width, $Area_Row_height, '', '', $pdfContent, $border=1, $ln=0, $fill=1, $reseth=true, $align='C', $autopadding=true);
 			}
-			$pdfContent .='</div></th>';
-			
+			else
+			{
+				$pdf->writeHTMLCell($area_Col_Width, $Area_Row_height, '', '', '', $border=1, $ln=0, $fill=1, $reseth=true, $align='C', $autopadding=true);
+			}
 		}
 		//if total checkbox is selected
-		if(isset($toal_fld) && $toal_fld == "1")
+		if(isset($total_fld) && $total_fld == "1")
 		{
-			$pdfContent .= '<th><div align="center">';
+			$pdf->getCellPaddings();
+			$pdf->setCellMargins(1, 1, 1, 1);
+				
 			if(!empty($productIds) && !empty($areaIds))
 			{
 				if($_POST['dwcount']=='active')
@@ -1830,28 +1839,113 @@ function Download_reports()
 				}
 				$productIds = array_filter($productIds);
 				$areaIds = array_filter($areaIds);
-				$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds). $link_part . '" target="_blank" title="'. $title .'">'.$count_val.'</a>';
+				$pdfContent = '<a style="color:#000000;text-decoration:none;" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds). $link_part . '" target="_blank" title="'. $title .'">'.$count_val.'</a>';
+				$pdf->MultiCell($area_Col_Width, $Area_Row_height, $pdfContent, $border, $align='C', $fill=1, $ln=0, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
 			}
-			$pdfContent .= '</div></th>';
+			else
+			{
+				$pdf->MultiCell($area_Col_Width, $Area_Row_height, '', $border, $align='C', $fill=1, $ln=0, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+			}
 		}
-		$pdfContent .= '</tr></thead>';
-		
-		//Extra row for alignment in PDF
-		$pdfContent .= '<tr style="page-break-inside:avoid;" nobr="true"><th height="0px" style="height:0px; border-top:none; border:none;">&nbsp;</th>';
-		foreach($columns as $col => $val)
-			$pdfContent .= '<th height="0px" style="height:0px; border-top:none; border:none;">&nbsp;</th>';
-		if(isset($toal_fld) && $toal_fld == "1")
-			$pdfContent .= '<th height="0px" style="height:0px; border-top:none; border:none;">&nbsp;</th>';
-		$pdfContent .= '</tr>';		
-		
+		$pdf->Ln($Area_Row_height+2);
 		
 		foreach($rows as $row => $rval)
 		{
-			//$rval = (isset($rowsDisplayName[$row]) && $rowsDisplayName[$row] != '')?$rowsDisplayName[$row]:$rval;
+			$dimensions = $pdf->getPageDimensions();
+			//Height calculation depending on product name
+			$rowcount = 0;
+ 			//work out the number of lines required
+			$rowcount = $pdf->getNumLines($rval, $product_Col_Width);
+ 			$startY = $pdf->GetY();
+ 			$height = ((($rowcount * 4.5) <15) ? 15:($rowcount * 4.5));	//15 is minimum height to accomodate images and other data
+			if (($startY + $height) + $dimensions['bm'] > ($dimensions['hk'])) {
+				//this row will cause a page break, draw the bottom border on previous row and give this a top border
+				//we could force a page break and rewrite grid headings here
+				$pdf->AddPage();
+				///Add the header row again at new page
+				$pdf->SetFillColor(192, 196, 254);
+				$pdf->setCellMargins(1, 1, 1, 1);
+				$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));
+				$pdf->writeHTMLCell($product_Col_Width, $Area_Row_height, '', '', '', $border, $ln=0, $fill=1, $reseth=true, $align='L', $autopadding=true);
+				
+				foreach($columns as $col => $val)
+				{
+					$pdf->setCellMargins(1, 1, 1, 1);
+					$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col]:$val;
+					$cdesc = (isset($columnsDescription[$col]) && $columnsDescription[$col] != '')?$columnsDescription[$col]:null;
+					$caltTitle = (isset($cdesc) && $cdesc != '')?' alt="'.$cdesc.'" title="'.$cdesc.'" ':null;
+				
+					if(isset($areaIds[$col]) && $areaIds[$col] != NULL && !empty($productIds))
+					{
+						if($_POST['dwcount']=='active')
+						{
+							$count_val=$col_active_total[$col];
+						}
+						elseif($_POST['dwcount']=='total')
+						{
+							$count_val=$col_count_total[$col];
+						}
+						else
+						{
+							$count_val=$col_indlead_total[$col];
+						}
+						$pdfContent = '<a style="color:#000000;text-decoration:none;" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. $link_part . '" target="_blank" title="'. $caltTitle .'">'.$val.'</a>';
+						$pdf->writeHTMLCell($area_Col_Width, $Area_Row_height, '', '', $pdfContent, $border=1, $ln=0, $fill=1, $reseth=true, $align='C', $autopadding=true);
+					}
+					else
+					{
+						$pdf->writeHTMLCell($area_Col_Width, $Area_Row_height, '', '', '', $border=1, $ln=0, $fill=1, $reseth=true, $align='C', $autopadding=true);
+					}
+				}
+				//if total checkbox is selected
+				if(isset($total_fld) && $total_fld == "1")
+				{
+					$pdf->getCellPaddings();
+					$pdf->setCellMargins(1, 1, 1, 1);
+				
+					if(!empty($productIds) && !empty($areaIds))
+					{
+						if($_POST['dwcount']=='active')
+						{
+							$count_val=$active_total;
+						}
+						elseif($_POST['dwcount']=='total')
+						{
+							$count_val=$count_total;
+						}
+						else
+						{
+							$count_val=$indlead_total;
+						}
+						$productIds = array_filter($productIds);
+						$areaIds = array_filter($areaIds);
+						$pdfContent = '<a style="color:#000000;text-decoration:none;" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds). $link_part . '" target="_blank" title="'. $title .'">'.$count_val.'</a>';
+						$pdf->MultiCell($area_Col_Width, $Area_Row_height, $pdfContent, $border, $align='C', $fill=1, $ln=0, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+					}
+					else
+					{
+						$pdf->MultiCell($area_Col_Width, $Area_Row_height, '', $border, $align='C', $fill=1, $ln=0, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+					}
+				}
+				$pdf->Ln($Area_Row_height+2);
+				///End of header row				
+			} elseif ((ceil($startY) + $height) + $dimensions['bm'] == floor($dimensions['hk'])) {
+				//fringe case where this cell will just reach the page break
+				//draw the cell with a bottom border as we cannot draw it otherwise
+				
+			} else {
+				//normal cell
+			}
+			//$rowcount = $pdf->getStringHeight(30,$rval,$reseth = true,$autopadding = true,$cellpadding = '',$border) ;	
+			
 			$rdesc = (isset($rowsDescription[$row]) && $rowsDescription[$row] != '')?$rowsDescription[$row]:null;
 			$raltTitle = (isset($rdesc) && $rdesc != '')?' alt="'.$rdesc.'" title="'.$rdesc.'" ':null;
-			$pdfContent .= '<tr  style="page-break-inside:avoid;" nobr="true"><th '.$raltTitle.'><div align="center">';
-					
+			
+			$pdf->SetFillColor(192, 196, 254);
+        	$pdf->SetTextColor(0);
+			$pdf->setCellMargins(1, 1, 1, 1);
+			$pdf->getCellPaddings();
+			$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));		
 			if(isset($productIds[$row]) && $productIds[$row] != NULL && !empty($areaIds))
 			{
 				if($_POST['dwcount']=='active')
@@ -1866,22 +1960,44 @@ function Download_reports()
 				{
 					$count_val=$row_indlead_total[$row];
 				}
-				$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). $link_part . '" target="_blank" class="ottlink" title="'. $title .'">'.$rval.'</a>';
+				$pdfContent = '<a style="color:#000000;text-decoration:none;" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). $link_part . '" target="_blank" class="ottlink" title="'. $raltTitle .'">'.$rval.'</a>';
+				
+				
+				$pdf->MultiCell($product_Col_Width, $height, $pdfContent, $border, $align='C', $fill=1, $ln=0, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
 			}
-			$pdfContent .= '</div></th>';
+			else
+			{
+				$pdf->SetFillColor(192, 196, 254);
+        		$pdf->SetTextColor(0);
+				$pdf->setCellMargins(1, 1, 1, 1);
+				$pdf->getCellPaddings();
 			
+				$dimensions = $pdf->getPageDimensions();
+				$startY = $pdf->GetY();
+				$height = 15;	//12 is default height
+				if (($startY + $height) + $dimensions['bm'] > ($dimensions['hk'])) {
+					//this row will cause a page break, draw the bottom border on previous row and give this a top border
+					//we could force a page break and rewrite grid headings here
+					$pdf->AddPage();					
+				}
+				$pdf->MultiCell($product_Col_Width, $height, ' ', $border, $align='C', $fill=1, $ln=0, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+			}
+			
+		
 			foreach($columns as $col => $cval)
 			{
-				if($data_matrix[$row][$col]['update_flag'] == 1)
-				{ $data_matrix[$row][$col]['bordercolor_code']='#FF0000'; } else { $data_matrix[$row][$col]['bordercolor_code']='blue'; }
-				if(($data_matrix[$row][$col]['total'] == 0))
-				{ $data_matrix[$row][$col]['color_code']='dcdcdc'; $data_matrix[$row][$col]['bordercolor_code']='blue'; }
-				
-				$pdfContent .= '<td align="center" style="border-right: 0.5px solid '.$data_matrix[$row][$col]['bordercolor_code'].'; border-left:0.5px solid '.$data_matrix[$row][$col]['bordercolor_code'].'; border-top: 0.5px solid '.$data_matrix[$row][$col]['bordercolor_code'].'; border-bottom:0.5px solid '.$data_matrix[$row][$col]['bordercolor_code'].'; background-color:#'.$data_matrix[$row][$col]['color_code'].';">&nbsp;&nbsp;&nbsp;&nbsp;';
+				$pdf->getCellPaddings();
+				$pdf->setCellMargins(1, 1, 1, 1);
+				$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(220,220,220)));
+				$pdf->SetFillColor(220,220,220);
 				
 				if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL && $data_matrix[$row][$col]['total'] != 0)
 				{
 					
+					$pdf->getCellPaddings();
+					$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(220,220,220)));
+					$pdf->SetFillColor(220,220,220);
+				
 					if($_POST['dwcount']=='active')
 					{
 						$count_val=$data_matrix[$row][$col]['active'];
@@ -1897,8 +2013,58 @@ function Download_reports()
 						$count_val=$data_matrix[$row][$col]['indlead'];
 						$count_val_prev=$data_matrix[$row][$col]['indlead_prev'];
 					}
+					
+					if($data_matrix[$row][$col]['color_code']=='BFBFBF')
+					{
+						$pdf->SetFillColor(191,191,191);
+						$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(191,191,191)));
+					}
+					else if($data_matrix[$row][$col]['color_code']=='00CCFF')
+					{
+						$pdf->SetFillColor(0,204,255);
+						$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,204,255)));
+					}
+					else if($data_matrix[$row][$col]['color_code']=='99CC00')
+					{
+						$pdf->SetFillColor(153,204,0);
+						$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(153,204,0)));
+					}
+					else if($data_matrix[$row][$col]['color_code']=='FFFF00')
+					{
+						$pdf->SetFillColor(255,255,0);
+						$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255,255,0)));
+					}
+					else if($data_matrix[$row][$col]['color_code']=='FF9900')
+					{
+						$pdf->SetFillColor(255,153,0);
+						$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255,153,0)));
+					}
+					else if($data_matrix[$row][$col]['color_code']='FF0000')
+					{
+						$pdf->SetFillColor(255,0,0);
+						$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255,0,0)));	
+					}
+					
+					if($data_matrix[$row][$col]['update_flag'] == 1)
+					{ 
+						$data_matrix[$row][$col]['bordercolor_code']='#FF0000';
+						$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255,0,0)));
+						//$pdf->SetFillColor(255,255,255);
+					}
+					
+					if(($data_matrix[$row][$col]['total'] == 0))
+					{ 
+						$data_matrix[$row][$col]['color_code']='dcdcdc'; 
+						$pdf->SetFillColor(220,220,220);
+						$data_matrix[$row][$col]['bordercolor_code']='blue'; 
+						$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(220,220,220)));
+					}
+					
+					//pixels = point * 96 / 72
+					$area_Col_Width_px = $area_Col_Width * 96 / 72;
+					$height_px = $height * 96 / 72;
 				
-					$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. $link_part . '" target="_blank" title="'. $title .'" style="'.((trim($data_matrix[$row][$col]['color_code']) == 'FF0000' && $data_matrix[$row][$col]['count_lastchanged_value']==1) ? 'background-color:#FFFFFF;':'').'"><font style="'. (($data_matrix[$row][$col]['count_lastchanged_value']==1) ? 'color:#FF0000;':'color:#000000;').'" >'.$count_val.'</font></a>&nbsp;';
+					$pdfContent = '<a href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. $link_part . '" target="_blank" title="'. $title .'" style="'.((trim($data_matrix[$row][$col]['color_code']) == 'FF0000' && $data_matrix[$row][$col]['count_lastchanged_value']==1) ? 'background-color:#FFFFFF;':'').' text-decoration:none;"><font style="'. (($data_matrix[$row][$col]['count_lastchanged_value']==1) ? 'color:#FF0000;':'color:#000000;').'" >'.$count_val.'</font></a>&nbsp;';
 					
 					$annotation_text = '';
 					if($data_matrix[$row][$col]['count_lastchanged_value']==1)
@@ -1915,9 +2081,11 @@ function Download_reports()
 					if($annotation_text != '')
 					{
 						$params = $pdf->serializeTCPDFtagParameters(array('', '', 10, 10, $annotation_text, array('Subtype'=>'Text', 'Name' => 'Comment', 'T' => 'Details', 'Subj' => 'Information', 'C' => array(255, 255, 0))));
-						$pdfContent  .= '<tcpdf method="Annotation" params="'.$params.'" /><br/>';
+						$pdfContent  .= '<tcpdf method="Annotation" params="'.$params.'" />';
 					}	
-	
+					
+					$pdfContent  .='<br/>';
+					
 					if($data_matrix[$row][$col]['bomb']['value'] == 'small' || $data_matrix[$row][$col]['bomb']['value'] == 'large')
 					{
 						$pdfContent .= '&nbsp;<img align="right" title="'.$data_matrix[$row][$col]['bomb']['title'].'" src="images/'.$data_matrix[$row][$col]['bomb']['src'].'" style="'. $data_matrix[$row][$col]['bomb']['style'] .' vertical-align:bottom; padding-right:10px; cursor:pointer;" alt="'.$data_matrix[$row][$col]['bomb']['alt'].'" />';
@@ -1931,45 +2099,61 @@ function Download_reports()
 					if($data_matrix[$row][$col]['phase_explain'] != NULL && $data_matrix[$row][$col]['phase_explain'] != '')
 					{
 							$pdfContent .= '&nbsp;<img align="right" title="Phase explain" src="'.$data_matrix[$row][$col]['phase_explain_image'].'" style="width:11px; height:11px; vertical-align:bottom; cursor:pointer;" alt="Phase explain" />';
-					}	
+					}
+					$pdfContent .= '';
+					$pdf->MultiCell($area_Col_Width, $height, $pdfContent, $border, $align='C', $fill=1, $ln=0, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
 				}
 				else
 				{
-					$pdfContent .= '';
+					$pdf->getCellPaddings();
+					if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL)
+					{
+						$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(220,220,220)));
+						$pdf->SetFillColor(220,220,220);
+					}
+					else
+					{
+						$pdf->SetFillColor(192, 196, 254);
+						$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));
+					}
+					$pdf->MultiCell($area_Col_Width, $height, ' ', $border, $align='C', $fill=1, $ln=0, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+
 				}
-				$pdfContent .= '</td>';
 			}//column foreach ends
 			//if total checkbox is selected
-			if(isset($toal_fld) && $toal_fld == "1")
+			if(isset($total_fld) && $total_fld == "1")
 			{
-				$pdfContent .= '<th>&nbsp;</th>';
+				$pdf->SetFillColor(192, 196, 254);
+        		$pdf->SetTextColor(0);
+				$pdf->getCellPaddings();
+				$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));	
+				$pdf->MultiCell($area_Col_Width, $height, ' ', $border, $align='C', $fill=1, $ln=0, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+
 			}
-		
-			$pdfContent .= '</tr>';
+		$pdf->Ln($height+2);
 		}//Row Foreach ends
 		
-		$pdfContent .= '</table></div><br /><br/>';
 		
 		if(($footnotes != NULL && trim($footnotes) != '') || ($description != NULL && trim($description) != ''))
-		$pdfContent .= '<div align="center"><table align="center" style="border-collapse:collapse; vertical-align:middle; padding:10px; background-color:#DDF;">'
-						. '<tr style="page-break-inside:avoid;" nobr="true">'
-						. (($footnotes != NULL && trim($footnotes) != '') ? '<td align="left"><b>Footnotes: </b><br/><div style="padding-left:10px;">'. $footnotes .'</div></td>':'')
-						. ((($description != NULL && trim($description) != '')) ? '<td align="left"><b>Description: </b><br/><div style="padding-left:10px;">'. $description .'</div></td>' : '').'</tr>'
-						. '</table></div>';
+		{
+			$pdf->Ln(''); $pdf->Ln('');
+			$pdf->SetFillColor(192, 196, 254);
+        	$pdf->SetTextColor(0);
+			$pdf->getCellPaddings();
+			$pdf->setCellMargins(0, 0, 0, 0);
+			$border = array('mode' => 'ext', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));
+			$pdf->writeHTMLCell(137, '', '', '', '<b>Footnotes: </b><br/>'. $footnotes, $border=1, $ln=0, $fill=1, $reseth=true, $align='L', $autopadding=true);
+			$pdf->writeHTMLCell(137, '', '', '', '<b>Description: </b><br/>'. $description, $border=1, $ln=0, $fill=1, $reseth=true, $align='L', $autopadding=true);
+		}
+		
+		
 						
-		$pdfContent .=  '</body>'
-						. '</html>';
-						
-		//echo $pdfContent;
-		//$pdfContent = preg_replace('/width="[0-9]{0,}(px){1}"/', '', $pdfContent);
-		ini_set('pcre.backtrack_limit',strlen($pdfContent));
-		// output the HTML content
-		$pdf->writeHTML($pdfContent, true, false, true, false, '');
 		ob_end_clean();
 		//Close and output PDF document
 		$pdf->Output('Larvol_'. substr($Report_Name,0,20) .'_PDF_Report_'. date("Y-m-d_H.i.s") .'.pdf', 'D');
 	}//Pdf Functions Ends
 	
+		
 	if($_POST['dwformat']=='exceldown')
 	{
 	  	$name = htmlspecialchars(strlen($name)>0?$name:('report '.$id.''));
@@ -2040,7 +2224,7 @@ function Download_reports()
 			}
 		}
 		
-		if(isset($toal_fld) && $toal_fld == "1")
+		if(isset($total_fld) && $total_fld == "1")
 		{
 			$objPHPExcel->getActiveSheet()->getColumnDimension(num2char($col+1))->setWidth(18);
 			$objPHPExcel->getActiveSheet()->getStyle(num2char($col+1))->getAlignment()->applyFromArray(
@@ -2167,7 +2351,7 @@ function Download_reports()
 			}
 		}
 		
-		if(isset($toal_fld) && $toal_fld == "1")
+		if(isset($total_fld) && $total_fld == "1")
 		{
 			if($_POST['dwcount']=='active')
 			{

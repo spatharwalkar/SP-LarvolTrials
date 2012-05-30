@@ -988,6 +988,7 @@ function change_view()
 					if(viewcount_ele != null && viewcount_ele != '')
 					{
 						var view = viewcount_ele.value;
+						if(view > 0)
 						document.getElementById("ViewCount_"+i).innerHTML = '<font style="color:#206040; font-weight: 900;">Number of views: </font><font style="color:#000000; font-weight: 900;">'+view+'</font><input type="hidden" value="'+view+'" id="ViewCount_value_'+i+'" />';
 					}
 				}
