@@ -330,6 +330,20 @@ class TrialTracker
 				$Ids[0]['area'] = implode("', '", $resultIds['area']);
 			}
 			
+			if(isset($globalOptions['product']) && $globalOptions['product'] != '' && $globalOptions['download'] != 'allTrialsforDownload')
+			{	
+				foreach($TrialsInfo as $tikey => $tivalue)
+				{
+					if($tikey != $globalOptions['product'])
+					{
+						unset($TrialsInfo[$tikey]);
+						unset($Ids[$tikey]);
+					}
+				}
+				$TrialsInfo = array_values($TrialsInfo);
+				$Ids = array_values($Ids);
+			}
+			
 			$Values = $this->processIndexedOTTData($ottType, $Ids, $timeMachine, $globalOptions);
 			$Values = array_merge($Values, array('TrialsInfo' => $TrialsInfo));
 		}
@@ -360,26 +374,6 @@ class TrialTracker
 		unset($Values['Trials']);
 		unset($Values['allTrialsforDownload']);	
 		
-		if(isset($globalOptions['product']) && $globalOptions['product'] != '')
-		{	
-			foreach($Values['TrialsInfo'] as $k => $v)
-			{
-				if($k != $globalOptions['product'])
-				{
-					unset($Values['TrialsInfo'][$k]);
-				}
-			}
-			foreach($Trials as $k => $v)
-			{
-				if($v['section'] != $globalOptions['product'])
-				{
-					unset($Trials[$k]);
-				}
-			}
-			$Trials = array_values($Trials);
-		}
-		
-	
 		$unMatchedUpms = array();
 		foreach($Values['TrialsInfo'] as $tkey => $tvalue)
 		{
@@ -5016,7 +5010,21 @@ class TrialTracker
 				$Ids[0]['product'] = $prow['id'];
 				$Ids[0]['area'] = implode("', '", $resultIds['area']);
 			}
-		
+			
+			if(isset($globalOptions['product']) && $globalOptions['product'] != '' && $globalOptions['download'] != 'allTrialsforDownload')
+			{	
+				foreach($TrialsInfo as $tikey => $tivalue)
+				{
+					if($tikey != $globalOptions['product'])
+					{
+						unset($TrialsInfo[$tikey]);
+						unset($Ids[$tikey]);
+					}
+				}
+				$TrialsInfo = array_values($TrialsInfo);
+				$Ids = array_values($Ids);
+			}
+			
 			$Values = $this->processIndexedOTTData($ottType, $Ids, $timeMachine, $globalOptions);
 			$Values = array_merge($Values, array('TrialsInfo' => $TrialsInfo));
 		}
@@ -5046,26 +5054,6 @@ class TrialTracker
 		
 		unset($Values['Trials']);
 		unset($Values['allTrialsforDownload']);
-		
-		if(isset($globalOptions['product']) && $globalOptions['product'] != '')
-		{	
-			foreach($Values['TrialsInfo'] as $k => $v)
-			{
-				if($k != $globalOptions['product'])
-				{
-					unset($Values['TrialsInfo'][$k]);
-				}
-			}
-			foreach($Trials as $k => $v)
-			{
-				if($v['section'] != $globalOptions['product'])
-				{
-					unset($Trials[$k]);
-				}
-			}
-			$Trials = array_values($Trials);
-			$count = count($Trials);
-		}
 		
 		$start 	= '';
 		$last = '';
@@ -6013,6 +6001,18 @@ class TrialTracker
 				$Ids[0]['area'] = implode("', '", $resultIds['area']);
 			}
 			
+			if(isset($globalOptions['product']) && $globalOptions['product'] != '' && $globalOptions['download'] != 'allTrialsforDownload')
+			{	
+				foreach($Ids as $ikey => $ivalue)
+				{
+					if($ikey != $globalOptions['product'])
+					{
+						unset($Ids[$ikey]);
+					}
+				}
+				$Ids = array_values($Ids);
+			}
+			
 			$Values = $this->processIndexedOTTData($ottType, $Ids, $timeMachine, $globalOptions);
 		}
 		else if($ottType == 'standalone')
@@ -6043,18 +6043,6 @@ class TrialTracker
 		else
 		{
 			$Trials = $Values['Trials'];
-		}
-		
-		if(isset($globalOptions['product']) && $globalOptions['product'] != '')
-		{	
-			foreach($Trials as $k => $v)
-			{
-				if($v['section'] != $globalOptions['product'])
-				{
-					unset($Trials[$k]);
-				}
-			}
-			$Trials = array_values($Trials);
 		}
 		
 		unset($Values['Trials']);
@@ -6308,6 +6296,7 @@ class TrialTracker
 				if(count($resultIds['area']) > 1)
 				{
 					$productSelectorTitle = 'All Areas';
+					
 					$res = mysql_query("SELECT `name`, `id` FROM `products` WHERE id IN ('" . implode("','", $resultIds['product']) 
 							. "') OR LI_id IN ('" . implode(',', $resultIds['product']) . "') ");
 					$row = mysql_fetch_assoc($res);
@@ -9323,6 +9312,7 @@ class TrialTracker
 				
 				$index++;
 			}	
+			
 			$totinactivecount  = $inactiveCount + $totinactivecount;
 			$totactivecount	= $activeCount + $totactivecount;
 			$totalcount		= $totalcount + $inactiveCount + $activeCount; 
@@ -10396,10 +10386,6 @@ class TrialTracker
 		  return $a['sectionHeader']; 
 		},  $TrialsInfo);
 		
-		
-		$new_active = 0; $new_inactive = 0; $new_total = 0; $prev_section ='';
-		$totinactivecount = 0; $totactivecount = 0; $totalcount = 0;
-		
 		if(strpos($globalOptions['startrange'], 'ago') !== FALSE)
 		{
 			$timeMachine = str_replace('ago', '', $globalOptions['startrange']);
@@ -10433,94 +10419,6 @@ class TrialTracker
 		}
 		echo '<input type="hidden" id="pr" name="pr" value="" />';
 		
-		///Calculate new count values
-		foreach($allTrials as $i => $arr)
-		{
-			if(isset($globalOptions['product']) && trim($globalOptions['product']) != '') ///When product field is set calculate new counts for that product
-			{
-				if($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed')	//Process indexed OTT link
-				{
-					if(trim($allTrials[$i]['section']) == trim($globalOptions['product']))
-					{
-						if(trim($allTrials[$i]['NCT/is_active']) == 1)
-						$new_active++;
-						else
-						$new_inactive++;
-					}
-				}
-				else	//Process old type of OTT link [Other than indexed]
-				{
-					if(trim($allTrials[$i]['section']) == trim($globalOptions['product']))
-					{
-						if(trim($allTrials[$i]['larvol_id']) != '' && $allTrials[$i]['larvol_id'] != NULL)
-						$larvolIds[] = trim($allTrials[$i]['larvol_id']);
-					}
-				}
-			}
-			else	//When product is unset count reset again
-			{
-				if($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed')	//Process indexed OTT link
-				{
-					if(trim($allTrials[$i]['NCT/is_active']) == 1)
-					$new_active++;
-					else
-					$new_inactive++;
-				}
-				else	//Process old type of OTT link [Other than indexed]
-				{
-					if(trim($prev_section) != trim($allTrials[$i]['section']) && trim($prev_section) != '')	//If encounterd different category calculate total counts
-					{
-						$new_total = count($larvolIds);
-						$new_active = getActiveCount($larvolIds, $timeMachine);
-						$new_inactive = $new_total - $new_active; 
-						
-						$totinactivecount  = $new_inactive + $totinactivecount;
-						$totactivecount	= $new_active + $totactivecount;
-						$totalcount		= $new_total + $totalcount; 
-						$larvolIds = array();	//reset array
-						$new_inactive = 0; $new_active = 0; $new_total = 0;
-						if(trim($allTrials[$i]['larvol_id']) != '' && $allTrials[$i]['larvol_id'] != NULL)	//insert record having new category in array
-						{
-							$larvolIds[] = trim($allTrials[$i]['larvol_id']);
-							$prev_Id = $allTrials[$i]['larvol_id'];
-							$prev_section = trim($allTrials[$i]['section']);	//get its category
-						}
-					}
-					else	//if same category or first pass of loop then just add it to array
-					{
-						if(trim($allTrials[$i]['larvol_id']) != '' && $allTrials[$i]['larvol_id'] != NULL)	//insert record having new/same prev category in array
-						{
-							$larvolIds[] = trim($allTrials[$i]['larvol_id']);
-							$prev_Id = $allTrials[$i]['larvol_id'];
-							$prev_section = trim($allTrials[$i]['section']);	//get its category
-						}
-					}
-				}
-			}
-		}
-		
-		if($ottType != 'indexed' && $ottType != 'rowstackedindexed' && $ottType != 'colstackedindexed')	//For other than indexed OTT
-		{
-			$new_total = count($larvolIds);	//if last category present calculates its count
-			if($new_total > 0)
-			{
-				$new_active = getActiveCount($larvolIds, $timeMachine);
-				$new_inactive = $new_total - $new_active; 
-			
-				$totinactivecount  = $new_inactive + $totinactivecount;
-				$totactivecount	= $new_active + $totactivecount;
-				$totalcount		= $new_total + $totalcount; 	
-				$larvolIds = array();
-			}
-				
-			$new_active = $totactivecount;
-			$new_inactive = $totinactivecount;
-			$new_total = $totalCount; 
-		}
-		
-		$new_total = $new_active+$new_inactive;
-		///End - Calculate new count values
-		
 		$count = count($Trials);
 		$start 	= '';
 		$last = '';
@@ -10551,40 +10449,9 @@ class TrialTracker
 			$totactivecount = $globalOptions['countDetails']['a'];
 			$totinactivecount = $globalOptions['countDetails']['in'];
 			$totalcount = $totactivecount + $totinactivecount;
-                        
-                        if($globalOptions['type'] == 'activeTrials')
-                        {
-                            $count = $totactivecount;
-                        }
-                        else if($globalOptions['type'] == 'inactiveTrials')
-                        {
-                            $count = $totinactivecount;
-                        }
-                        else
-                        {
-                            $count = $totalcount;
-                        }
 		}
-		if($new_total > 0 || (isset($globalOptions['product']) && $globalOptions['product'] != ''))
-		{
-			$totactivecount = $new_active;
-			$totinactivecount = $new_inactive;
-			$totalcount = $new_total;
-			if($globalOptions['type'] == 'activeTrials')
-            {
-                $count = $totactivecount;
-            }
-            else if($globalOptions['type'] == 'inactiveTrials')
-            {
-                $count = $totinactivecount;
-            }
-            else
-            {
-                $count = $totalcount;
-            }
-		}
-		$this->displayFilterControls($count, $totactivecount, $totinactivecount, $totalcount, $globalOptions, $ottType, $loggedIn);
 		
+		$this->displayFilterControls($count, $totactivecount, $totinactivecount, $totalcount, $globalOptions, $ottType, $loggedIn);
 		
 		if($totalPages > 1)
 		{
