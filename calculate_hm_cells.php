@@ -6,7 +6,7 @@ ignore_user_abort(true);
 
 $data=array();$isactive=array();$instype=array();$ldate=array();$phases=array();$ostatus=array();$cnt_total=0;
 
-/*
+
 if(isset($_GET['area']) or isset($_GET['product']))
 {
 	$parameters=$_GET;
@@ -19,7 +19,7 @@ elseif( isset($_GET['calc']) and ($_GET['calc']=="all") )
 	if(!calc_cells($parameters))	echo '<br><b>Could complete calculating cells, there was an error.<br></b>';
 	echo '<br>All done.<br>';
 }
-*/
+
 function calc_cells($parameters,$update_id=NULL)
 {
 	/*
@@ -29,6 +29,7 @@ function calc_cells($parameters,$update_id=NULL)
 	$x['area']=29;
 	pr($x);
 	*/
+
 	global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_total;
 	$data=array();$isactive=array();$instype=array();$ldate=array();$phases=array();$ostatus=array();$cnt_total=0;
 	$cron_run = isset($update_id); 	// check if being run by cron.php
@@ -186,6 +187,7 @@ function calc_cells($parameters,$update_id=NULL)
 	//pr($productids);
 	$counter=0;
 	$progress_count = 0;
+	
 	foreach ($areaids as $ak=>$av)
 	{
 	
@@ -204,14 +206,14 @@ function calc_cells($parameters,$update_id=NULL)
 			{
 				echo '<br> ';
 				continue;
-			}
+			}      
 			/*
 			$query_m='	SELECT a.trial from area_trials a 
 						JOIN product_trials p
 						ON a.trial=p.trial
 						where a.area="'.$av['id'].'" and p.product="'.$pv['id'].'"';
 			*/
-			$query_m='	SELECT a.trial,d.is_active,d.institution_type,d.lastchanged_date,d.phase,d.overall_status from area_trials a 
+			$query_m='	SELECT a.trial,d.source_id,d.is_active,d.institution_type,d.lastchanged_date,d.firstreceived_date,d.phase,d.overall_status from area_trials a 
 						JOIN product_trials p ON a.`trial`=p.`trial`
 						LEFT JOIN data_trials d ON p.`trial`=d.`larvol_id`
 						where a.`area`="'.$av['id'].'" and p.`product`="'.$pv['id'].'" ';
@@ -225,6 +227,28 @@ function calc_cells($parameters,$update_id=NULL)
 						return false;
 					}
 			$phasez=array();
+			
+			$overall_statuses=array();
+			$overall_statuses['not_yet_recruiting']=0;
+			$overall_statuses['recruiting']=0;
+			$overall_statuses['enrolling_by_invitation']=0;
+			$overall_statuses['active_not_recruiting']=0;
+			$overall_statuses['completed']=0;
+			$overall_statuses['suspended']=0;
+			$overall_statuses['terminated']=0;
+			$overall_statuses['withdrawn']=0;
+			$overall_statuses['available']=0;
+			$overall_statuses['no_longer_available']=0;
+			$overall_statuses['approved_for_marketing']=0;
+			$overall_statuses['no_longer_recruiting']=0;
+			$overall_statuses['withheld']=0;
+			$overall_statuses['temporarily_not_available']=0;
+			$overall_statuses['ongoing']=0;
+			$overall_statuses['not_authorized']=0;
+			$overall_statuses['prohibited']=0;
+			$overall_statuses['new_trials']=0;
+
+			
 			while ($row = mysql_fetch_assoc($res))
 			{	
 				if($row["trial"])
@@ -237,6 +261,156 @@ function calc_cells($parameters,$update_id=NULL)
 					if($row["phase"]<>'N/A') $phasez[] = $row["phase"];
 					$ostatus[] = $row["overall_status"];
 					$cnt_total++;
+
+					/*********** trial counts according to overallstatus values ***********/
+
+					$base_date = date('Y-m-d', strtotime("-7 days"));
+					if($row["firstreceived_date"]>=$base_date) $overall_statuses['new_trials']=$overall_statuses['new_trials']+1;
+					
+					if($row["lastchanged_date"]>=$base_date)
+					{
+					
+						switch ($row["overall_status"]) 
+						{
+							case 'Not yet recruiting':
+								$overall_statuses['not_yet_recruiting']=$overall_statuses['not_yet_recruiting']+1;
+								break;
+							case 'Recruiting':
+								$overall_statuses['recruiting']=$overall_statuses['recruiting']+1;
+								break;
+							case 'Enrolling by invitation':
+								$overall_statuses['enrolling_by_invitation']=$overall_statuses['enrolling_by_invitation']+1;
+								break;
+							case 'Active, not recruiting':
+								$overall_statuses['active_not_recruiting']=$overall_statuses['active_not_recruiting']+1;
+								break;
+							case 'Completed':
+								$overall_statuses['completed']=$overall_statuses['completed']+1;
+								break;
+							case 'Suspended':
+								$overall_statuses['suspended']=$overall_statuses['suspended']+1;
+								break;
+							case 'Terminated':
+								$overall_statuses['terminated']=$overall_statuses['terminated']+1;
+								break;
+							case 'Withdrawn':
+								$overall_statuses['withdrawn']=$overall_statuses['withdrawn']+1;
+								break;
+							case 'Available':
+								$overall_statuses['available']=$overall_statuses['available']+1;
+								break;
+							case 'No Longer Available':
+								$overall_statuses['no_longer_available']=$overall_statuses['no_longer_available']+1;
+								break;
+							case 'Approved for marketing':
+								$overall_statuses['approved_for_marketing']=$overall_statuses['approved_for_marketing']+1;
+								break;
+							case 'No longer recruiting':
+								$overall_statuses['no_longer_recruiting']=$overall_statuses['no_longer_recruiting']+1;
+								break;
+							case 'Withheld':
+								$overall_statuses['withheld']=$overall_statuses['withheld']+1;
+								break;
+							case 'Temporarily Not Available':
+								$overall_statuses['temporarily_not_available']=$overall_statuses['temporarily_not_available']+1;
+								break;
+							case 'Ongoing':
+								$overall_statuses['ongoing']=$overall_statuses['ongoing']+1;
+								break;
+							case 'Not Authorized':
+								$overall_statuses['not_authorized']=$overall_statuses['not_authorized']+1;
+								break;
+							case 'Prohibited':
+								$overall_statuses['prohibited']=$overall_statuses['prohibited']+1;
+								break;
+						}
+						
+					}
+					else
+					{
+					
+					
+						$query_dh= 'select larvol_id,overall_status_prev,overall_status_lastchanged from data_history 
+									where overall_status_lastchanged is not null  and  larvol_id='. $row["trial"] . '
+									limit 1 ';
+						
+						if(!$res = mysql_query($query_dh))
+								{
+									$log='There seems to be a problem with the SQL Query:'.$query_dh.' Error:' . mysql_error();
+									global $logger;
+									$logger->error($log);
+									echo $log;
+									return false;
+								}
+						while ($row = mysql_fetch_assoc($res))
+						{	
+							if($row["larvol_id"])
+							{
+								switch ($row["overall_status_prev"]) 
+								{
+									case 'Not yet recruiting':
+										$overall_statuses['not_yet_recruiting']=$overall_statuses['not_yet_recruiting']+1;
+										break;
+									case 'Recruiting':
+										$overall_statuses['recruiting']=$overall_statuses['recruiting']+1;
+										break;
+									case 'Enrolling by invitation':
+										$overall_statuses['enrolling_by_invitation']=$overall_statuses['enrolling_by_invitation']+1;
+										break;
+									case 'Active, not recruiting':
+										$overall_statuses['active_not_recruiting']=$overall_statuses['active_not_recruiting']+1;
+										break;
+									case 'Completed':
+										$overall_statuses['completed']=$overall_statuses['completed']+1;
+										break;
+									case 'Suspended':
+										$overall_statuses['suspended']=$overall_statuses['suspended']+1;
+										break;
+									case 'Terminated':
+										$overall_statuses['terminated']=$overall_statuses['terminated']+1;
+										break;
+									case 'Withdrawn':
+										$overall_statuses['withdrawn']=$overall_statuses['withdrawn']+1;
+										break;
+									case 'Available':
+										$overall_statuses['available']=$overall_statuses['available']+1;
+										break;
+									case 'No Longer Available':
+										$overall_statuses['no_longer_available']=$overall_statuses['no_longer_available']+1;
+										break;
+									case 'Approved for marketing':
+										$overall_statuses['approved_for_marketing']=$overall_statuses['approved_for_marketing']+1;
+										break;
+									case 'No longer recruiting':
+										$overall_statuses['no_longer_recruiting']=$overall_statuses['no_longer_recruiting']+1;
+										break;
+									case 'Withheld':
+										$overall_statuses['withheld']=$overall_statuses['withheld']+1;
+										break;
+									case 'Temporarily Not Available':
+										$overall_statuses['temporarily_not_available']=$overall_statuses['temporarily_not_available']+1;
+										break;
+									case 'Ongoing':
+										$overall_statuses['ongoing']=$overall_statuses['ongoing']+1;
+										break;
+									case 'Not Authorized':
+										$overall_statuses['not_authorized']=$overall_statuses['not_authorized']+1;
+										break;
+									case 'Prohibited':
+										$overall_statuses['prohibited']=$overall_statuses['prohibited']+1;
+										break;
+								}
+								
+							}
+						}
+					
+					
+					
+					
+					
+					}
+					
+					/*********** END : trial counts according to overallstatus values ***********/
 				}
 			}
 			
@@ -251,7 +425,7 @@ function calc_cells($parameters,$update_id=NULL)
 					echo '<br>20000 records added, sleeping 1 second....'.str_repeat("  ",800);
 					sleep(1);
 				}
-				add_data($av['id'],$pv['id'],0,0,0,'none','N/A');
+				add_data($av['id'],$pv['id'],0,0,0,'none','N/A',$overall_statuses);
 				$progress_count ++;
 				if($cron_run)
 				{
@@ -318,7 +492,7 @@ function calc_cells($parameters,$update_id=NULL)
 				sleep(1);
 			}
 			
-			add_data($av['id'],$pv['id'],$cnt_total,$cnt_active,$cnt_active_indlead,$bomb,$max_phase);
+			add_data($av['id'],$pv['id'],$cnt_total,$cnt_active,$cnt_active_indlead,$bomb,$max_phase,$overall_statuses);
 			$progress_count ++;
 			if($cron_run)
 			{
@@ -387,15 +561,18 @@ function calc_cells($parameters,$update_id=NULL)
 	return true;
 }			
 
-function add_data($arid,$prid,$cnt_total,$cnt_active,$cnt_active_indlead,$bomb,$max_phase)
+function add_data($arid,$prid,$cnt_total,$cnt_active,$cnt_active_indlead,$bomb,$max_phase,$overall_statuses=null)
 {
 /*********/
 global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_total;
 	$query='SELECT `area`,`product`
 			from rpt_masterhm_cells
 			where `area`="'.$arid.'" and `product`="'.$prid.'" limit 1';
-
-
+			/*
+			pr('---------------------------');
+			pr($overall_statuses);
+			pr('---------------------------');
+			*/
 	$curtime = date('Y-m-d H:i:s');
 	if(!$res = mysql_query($query))
 		{
@@ -448,19 +625,55 @@ global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_total;
 				`bomb_auto` = "'. $bomb .'",
 				`highest_phase` = "'. $max_phase .'",
 				`count_total` = "'. $cnt_total .'",
+				`not_yet_recruiting` = "'. $overall_statuses['not_yet_recruiting'] .'",
+				`recruiting` = "'. $overall_statuses['recruiting'] .'",
+				`enrolling_by_invitation` = "'. $overall_statuses['enrolling_by_invitation'] .'",
+				`active_not_recruiting` = "'. $overall_statuses['active_not_recruiting'] .'",
+				`completed` = "'. $overall_statuses['completed'] .'",
+				`suspended` = "'. $overall_statuses['suspended'] .'",
+				`terminated` = "'. $overall_statuses['terminated'] .'",
+				`withdrawn` = "'. $overall_statuses['withdrawn'] .'",
+				`available` = "'. $overall_statuses['available'] .'",
+				`no_longer_available` = "'. $overall_statuses['no_longer_available'] .'",
+				`approved_for_marketing` = "'. $overall_statuses['approved_for_marketing'] .'",
+				`no_longer_recruiting` = "'. $overall_statuses['no_longer_recruiting'] .'",
+				`withheld` = "'. $overall_statuses['withheld'] .'",
+				`temporarily_not_available` = "'. $overall_statuses['temporarily_not_available'] .'",
+				`ongoing` = "'. $overall_statuses['ongoing'] .'",
+				`not_authorized` = "'. $overall_statuses['not_authorized'] .'",
+				`prohibited` = "'. $overall_statuses['prohibited'] .'",
+				`new_trials` = "'. $overall_statuses['new_trials'] .'",
 				`last_calc` = "'. $curtime .'" where
 				`area`="'.$arid.'" and `product`="'.$prid.'" 
 				';
 		}
 		else
 		{
-//			pr('AA='.$aa);pr('bb='.$bb);pr('cc='.$cc);
+
 			$query='UPDATE rpt_masterhm_cells 
 				SET 
 				`count_active` ="'. $cnt_active.'",
 				`count_active_indlead` ="'. $cnt_active_indlead.'",
 				`bomb_auto` = "'. $bomb .'",
 				`highest_phase` = "'. $max_phase .'",
+				`not_yet_recruiting` = "'. $overall_statuses['not_yet_recruiting'] .'",
+				`recruiting` = "'. $overall_statuses['recruiting'] .'",
+				`enrolling_by_invitation` = "'. $overall_statuses['enrolling_by_invitation'] .'",
+				`active_not_recruiting` = "'. $overall_statuses['active_not_recruiting'] .'",
+				`completed` = "'. $overall_statuses['completed'] .'",
+				`suspended` = "'. $overall_statuses['suspended'] .'",
+				`terminated` = "'. $overall_statuses['terminated'] .'",
+				`withdrawn` = "'. $overall_statuses['withdrawn'] .'",
+				`available` = "'. $overall_statuses['available'] .'",
+				`no_longer_available` = "'. $overall_statuses['no_longer_available'] .'",
+				`approved_for_marketing` = "'. $overall_statuses['approved_for_marketing'] .'",
+				`no_longer_recruiting` = "'. $overall_statuses['no_longer_recruiting'] .'",
+				`withheld` = "'. $overall_statuses['withheld'] .'",
+				`temporarily_not_available` = "'. $overall_statuses['temporarily_not_available'] .'",
+				`ongoing` = "'. $overall_statuses['ongoing'] .'",
+				`not_authorized` = "'. $overall_statuses['not_authorized'] .'",
+				`prohibited` = "'. $overall_statuses['prohibited'] .'",
+				`new_trials` = "'. $overall_statuses['new_trials'] .'",
 				`count_total` = "'. $cnt_total .'",'
 				. $aa . $bb . $cc . $dd .
 				'`count_lastchanged` = "'. $curtime .'",
@@ -490,6 +703,24 @@ global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_total;
 				`count_active` ="'. $cnt_active.'",
 				`count_active_indlead` ="'. $cnt_active_indlead.'",
 				`bomb_auto` = "'. $bomb .'",
+				`not_yet_recruiting` = "'. $overall_statuses['not_yet_recruiting'] .'",
+				`recruiting` = "'. $overall_statuses['recruiting'] .'",
+				`enrolling_by_invitation` = "'. $overall_statuses['enrolling_by_invitation'] .'",
+				`active_not_recruiting` = "'. $overall_statuses['active_not_recruiting'] .'",
+				`completed` = "'. $overall_statuses['completed'] .'",
+				`suspended` = "'. $overall_statuses['suspended'] .'",
+				`terminated` = "'. $overall_statuses['terminated'] .'",
+				`withdrawn` = "'. $overall_statuses['withdrawn'] .'",
+				`available` = "'. $overall_statuses['available'] .'",
+				`no_longer_available` = "'. $overall_statuses['no_longer_available'] .'",
+				`approved_for_marketing` = "'. $overall_statuses['approved_for_marketing'] .'",
+				`no_longer_recruiting` = "'. $overall_statuses['no_longer_recruiting'] .'",
+				`withheld` = "'. $overall_statuses['withheld'] .'",
+				`temporarily_not_available` = "'. $overall_statuses['temporarily_not_available'] .'",
+				`ongoing` = "'. $overall_statuses['ongoing'] .'",
+				`not_authorized` = "'. $overall_statuses['not_authorized'] .'",
+				`prohibited` = "'. $overall_statuses['prohibited'] .'",
+				`new_trials` = "'. $overall_statuses['new_trials'] .'",
 				`highest_phase` = "'. $max_phase .'",
 				`count_total` = "'. $cnt_total .'",
 				`last_update` = "'. $curtime .'"
