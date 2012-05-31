@@ -2063,8 +2063,8 @@ function Download_reports()
 					//pixels = point * 96 / 72
 					$area_Col_Width_px = $area_Col_Width * 96 / 72;
 					$height_px = $height * 96 / 72;
-				
-					$pdfContent = '<a href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. $link_part . '" target="_blank" title="'. $title .'" style="'.((trim($data_matrix[$row][$col]['color_code']) == 'FF0000' && $data_matrix[$row][$col]['count_lastchanged_value']==1) ? 'background-color:#FFFFFF;':'').' text-decoration:none;"><font style="'. (($data_matrix[$row][$col]['count_lastchanged_value']==1) ? 'color:#FF0000;':'color:#000000;').'" >'.$count_val.'</font></a>&nbsp;';
+					
+					$pdfContent ='';
 					
 					$annotation_text = '';
 					if($data_matrix[$row][$col]['count_lastchanged_value']==1)
@@ -2080,9 +2080,12 @@ function Download_reports()
 					
 					if($annotation_text != '')
 					{
-						$params = $pdf->serializeTCPDFtagParameters(array('', '', 10, 10, $annotation_text, array('Subtype'=>'Text', 'Name' => 'Comment', 'T' => 'Details', 'Subj' => 'Information', 'C' => array(255, 255, 0))));
-						$pdfContent  .= '<tcpdf method="Annotation" params="'.$params.'" />';
-					}	
+						$pdf->Annotation('', '', $area_Col_Width-4, $height-4, $annotation_text, array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Details', 'Subj' => 'Information', 'C' => array()));	
+					}
+					
+					$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. $link_part . '" target="_blank" title="'. $title .'" style="'.((trim($data_matrix[$row][$col]['color_code']) == 'FF0000' && $data_matrix[$row][$col]['count_lastchanged_value']==1) ? 'background-color:#FFFFFF;':'').' text-decoration:none;"><font style="'. (($data_matrix[$row][$col]['count_lastchanged_value']==1) ? 'color:#FF0000;':'color:#000000;').'" >'.$count_val.'</font></a>';
+					
+					
 					
 					$pdfContent  .='<br/>';
 					

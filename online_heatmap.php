@@ -1444,8 +1444,8 @@ if(($footnotes != NULL && trim($footnotes) != '') || ($description != NULL && tr
 {
 	$htmlContent .='<div align="center"><table align="center" style="vertical-align:middle; padding:10px; background-color:#DDF;">'
 				. '<tr style="page-break-inside:avoid;" nobr="true">'
-				. '<td width="380px" align="left">'. (($footnotes != NULL && trim($footnotes) != '') ? '<b>Footnotes: </b><br/><div style="padding-left:10px;"><br/>'. $footnotes .'</div>' : '' ).'</td>'
-				. '<td width="380px" align="left">'. (($description != NULL && trim($description) != '') ? '<b>Description: </b><br/><div style="padding-left:10px;"><br/>'. $description .'</div>' : '' ).'</td></tr>'
+				. '<td width="380px" align="left"><b>Footnotes: </b>'. (($footnotes != NULL && trim($footnotes) != '') ? '<br/><div style="padding-left:10px;"><br/>'. $footnotes .'</div>' : '' ).'</td>'
+				. '<td width="380px" align="left"><b>Description: </b>'. (($description != NULL && trim($description) != '') ? '<br/><div style="padding-left:10px;"><br/>'. $description .'</div>' : '' ).'</td></tr>'
 				. '</table></div>';
 }
 			
