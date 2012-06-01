@@ -1565,8 +1565,30 @@ function Download_reports()
 				$data_matrix[$row][$col]['update_flag'] = 0;
 				if(date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['count_lastchanged'])) <= date('Y-m-d H:i:s', strtotime($start_range, $now)) && date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['count_lastchanged'])) >= date('Y-m-d H:i:s', strtotime($end_range, $now)))
 				{
-					$data_matrix[$row][$col]['count_lastchanged_value']=1;
-					$data_matrix[$row][$col]['update_flag'] = 1;
+					if($_POST['dwcount']=='active')
+					{
+						if($data_matrix[$row][$col]['active'] != $data_matrix[$row][$col]['active_prev'])
+						{
+							$data_matrix[$row][$col]['update_flag']=1;
+							$data_matrix[$row][$col]['count_lastchanged_value']=1;
+						}
+					}
+					elseif($_POST['dwcount']=='total')
+					{
+						if($data_matrix[$row][$col]['total'] != $data_matrix[$row][$col]['total_prev'])
+						{
+							$data_matrix[$row][$col]['update_flag']=1;
+							$data_matrix[$row][$col]['count_lastchanged_value']=1;
+						}
+					}
+					else
+					{
+						if($data_matrix[$row][$col]['indlead'] != $data_matrix[$row][$col]['indlead_prev'])
+						{
+							$data_matrix[$row][$col]['update_flag']=1;
+							$data_matrix[$row][$col]['count_lastchanged_value']=1;
+						}
+					}
 				}
 				
 				if(date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['filing_lastchanged'])) <= date('Y-m-d H:i:s', strtotime($start_range, $now)) && date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['filing_lastchanged'])) >= date('Y-m-d H:i:s', strtotime($end_range, $now)))
