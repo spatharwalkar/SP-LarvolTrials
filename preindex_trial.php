@@ -242,10 +242,12 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					}
 					continue;
 				}
+				// replace all intervention_other_name with intervention_name 
+				$query=str_replace('intervention_other_name','intervention_name',$query) ;
 				//pr($query);
 				if(!$resu = mysql_query($query))
 				{
-					$log='Bad SQL query getting larvol_id from data_trials table.<br>Query=' . $query;
+					$log='Bad SQL query getting larvol_id from data_trials table.<br>Query=' . $query . ' Mysql error:'. mysql_error();
 					$logger->fatal($log);
 					$query = 'update update_status_fullhistory set 
 					er_message="' . $log . '" where update_id= "'. $up_id .'" limit 1' ; 
