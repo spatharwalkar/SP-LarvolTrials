@@ -6,7 +6,7 @@ ignore_user_abort(true);
 
 $data=array();$isactive=array();$instype=array();$ldate=array();$phases=array();$ostatus=array();$cnt_total=0;
 
-
+/*
 if(isset($_GET['area']) or isset($_GET['product']))
 {
 	$parameters=$_GET;
@@ -19,7 +19,7 @@ elseif( isset($_GET['calc']) and ($_GET['calc']=="all") )
 	if(!calc_cells($parameters))	echo '<br><b>Could complete calculating cells, there was an error.<br></b>';
 	echo '<br>All done.<br>';
 }
-
+*/
 function calc_cells($parameters,$update_id=NULL)
 {
 	/*
@@ -334,7 +334,7 @@ function calc_cells($parameters,$update_id=NULL)
 									where overall_status_lastchanged is not null  and  larvol_id='. $row["trial"] . '
 									limit 1 ';
 						
-						if(!$res = mysql_query($query_dh))
+						if(!$res_dh = mysql_query($query_dh))
 								{
 									$log='There seems to be a problem with the SQL Query:'.$query_dh.' Error:' . mysql_error();
 									global $logger;
@@ -342,11 +342,11 @@ function calc_cells($parameters,$update_id=NULL)
 									echo $log;
 									return false;
 								}
-						while ($row = mysql_fetch_assoc($res))
+						while ($row_dh = mysql_fetch_assoc($res_dh))
 						{	
-							if($row["larvol_id"])
+							if($row_dh["larvol_id"])
 							{
-								switch ($row["overall_status_prev"]) 
+								switch ($row_dh["overall_status_prev"]) 
 								{
 									case 'Not yet recruiting':
 										$overall_statuses['not_yet_recruiting']=$overall_statuses['not_yet_recruiting']+1;
