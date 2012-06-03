@@ -702,6 +702,10 @@ $.initialBracesFlag = 9;
 		 { name: '.', op: '' }
 
 		],
+		chainInitial:[
+		        { name: '(', op: '(' },  
+		        { name: ') .', op: ')' }
+		        ],
             astagpre: '"',
             astagsuf: '"'
         };
@@ -1140,7 +1144,7 @@ $.initialBracesFlag = 9;
                    );
 
 
-            createSQLWhereChainEvent(9990);
+            createSQLWhereChainEventInitial(9990);
             $(".sqldata").hide();
             $(".sqlalldata").hide();
             $(".sqlcolumndata").hide();
@@ -1679,6 +1683,23 @@ $.initialBracesFlag = 9;
                });
 
            }
+           
+           function createSQLWhereChainEventInitial(counter_id)
+           {
+               //add a menu to newly added chain
+               $("[class=addnewsqlwherechain][id='" + counter_id + "']").sqlsimplemenu({
+                   menu: 'chainlist',
+                   fields: opts.chainInitial,
+                   onselect: function (action, el) {
+                       $("[class=addnewsqlwherechain][id=" + $(el).attr('id') + "]")
+			            .html(opts.chainInitial[action].name)
+			            .attr('href', "#" + action);
+                       onchangeevent('change');
+                       indent();
+                   }
+               });
+
+           }           
 
            function getSQLWhereLine(col_slot, op_slot, chain_slot, column_value, counter_id)
            {
