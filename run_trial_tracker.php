@@ -8398,10 +8398,15 @@ class TrialTracker
 						. " dm.`condition` AS manual_condition, dm.`overall_status` AS manual_overall_status, "
 						. " dm.`end_date` AS manual_end_date, dm.`enrollment` AS manual_enrollment, dm.`enrollment_type` AS manual_enrollment_type,"
 						. " dm.`intervention_name` AS manual_intervention_name, dm.`phase` AS manual_phase "
-						. " FROM `data_trials` dt "
-						. " JOIN `product_trials` pt ON dt.`larvol_id` = pt.`trial` "
-						. " JOIN `area_trials` at ON dt.`larvol_id` = at.`trial` "
-						. " LEFT JOIN `data_manual` dm ON dt.`larvol_id` = dm.`larvol_id` "
+						. " FROM `data_trials` dt ";
+						
+				if($ivalue['product'] != '')	//When Product is blank do not process Product in Query
+				$query .= " JOIN `product_trials` pt ON dt.`larvol_id` = pt.`trial` ";
+				
+				if($ivalue['area'] !='' )	//When Area is blank do not process Area in Query
+				$query .= " JOIN `area_trials` at ON dt.`larvol_id` = at.`trial` ";
+				
+				$query .= " LEFT JOIN `data_manual` dm ON dt.`larvol_id` = dm.`larvol_id` "
 						. " WHERE ";
 						
 				if($ivalue['product'] != '')	//When Product is blank do not process Product in Query
