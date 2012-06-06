@@ -9806,7 +9806,7 @@ class TrialTracker
 							.'<font id="ViewCount_'.$trials[$i]['larvol_id'].'">';
 				if($trials[$i]['viewcount'] != '' && $trials[$i]['viewcount'] != NULL && $trials[$i]['viewcount'] > 0)
 				{
-					$outputStr .= '<span class="viewcount" title="Total views">' . $trials[$i]['viewcount'].'&nbsp;</span>'; 
+					$outputStr .= '<span class="viewcount" title="Total views">' . $trials[$i]['viewcount'].'&nbsp;</span>&nbsp;'; 
 				}
 				$outputStr .= '</font>'; 
 			}

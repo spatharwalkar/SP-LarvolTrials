@@ -24,7 +24,7 @@ if(isset($_GET['larvol_id']) && isset($_GET['op']) && $_GET['op'] == 'Inc_ViewCo
 	$ViewCount=$res['viewcount'];
 	
 	if($NewLarvolID_query && $ViewCount > 0)
-	print '<span class="viewcount" title="Total views">'.$ViewCount.'&nbsp;</span>';	
+	print '<span class="viewcount" title="Total views">'.$ViewCount.'&nbsp;</span>&nbsp;';	
 }
 
 //Count the Number of Views in OHM
