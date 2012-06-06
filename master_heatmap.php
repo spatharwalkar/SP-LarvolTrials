@@ -1413,7 +1413,12 @@ function Download_reports()
 			{
 				$result =  mysql_fetch_assoc(mysql_query("SELECT id, name, description, company FROM `products` WHERE id = '" . $header['type_id'] . "' "));
 				$rows[$header['num']] = $result['name'];
-				if($result['company'] != NULL && trim($result['company']) != '') $rows[$header['num']] = $result['name'].' / '.$result['company'];
+				if($result['company'] != NULL && trim($result['company']) != '')
+				{
+					$result['company']=str_replace(',',', ',$result['company']);
+					$result['company']=str_replace(',  ',', ',$result['company']);
+					$rows[$header['num']] = $result['name'].' / '.$result['company'];
+				}
 				$rowsDisplayName[$header['num']] = '';
 				$rowsDescription[$header['num']] = $result['description'];
 				$rowsCategoryName[$header['num']] = $header['category'];
@@ -1569,7 +1574,6 @@ function Download_reports()
 					{
 						if($data_matrix[$row][$col]['active'] != $data_matrix[$row][$col]['active_prev'])
 						{
-							$data_matrix[$row][$col]['update_flag']=1;
 							$data_matrix[$row][$col]['count_lastchanged_value']=1;
 						}
 					}
@@ -1577,7 +1581,6 @@ function Download_reports()
 					{
 						if($data_matrix[$row][$col]['total'] != $data_matrix[$row][$col]['total_prev'])
 						{
-							$data_matrix[$row][$col]['update_flag']=1;
 							$data_matrix[$row][$col]['count_lastchanged_value']=1;
 						}
 					}
@@ -1585,7 +1588,6 @@ function Download_reports()
 					{
 						if($data_matrix[$row][$col]['indlead'] != $data_matrix[$row][$col]['indlead_prev'])
 						{
-							$data_matrix[$row][$col]['update_flag']=1;
 							$data_matrix[$row][$col]['count_lastchanged_value']=1;
 						}
 					}
@@ -1707,6 +1709,25 @@ function Download_reports()
 					$data_matrix[$row][$col]['color']='background-color:#FF0000;';
 					$data_matrix[$row][$col]['color_code']='FF0000';
 				}
+				
+				$data_matrix[$row][$col]['not_yet_recruiting']=$cell_data['not_yet_recruiting'];
+				$data_matrix[$row][$col]['recruiting']=$cell_data['recruiting'];
+				$data_matrix[$row][$col]['enrolling_by_invitation']=$cell_data['enrolling_by_invitation'];
+				$data_matrix[$row][$col]['active_not_recruiting']=$cell_data['active_not_recruiting'];
+				$data_matrix[$row][$col]['completed']=$cell_data['completed'];
+				$data_matrix[$row][$col]['suspended']=$cell_data['suspended'];
+				$data_matrix[$row][$col]['terminated']=$cell_data['terminated'];
+				$data_matrix[$row][$col]['withdrawn']=$cell_data['withdrawn'];
+				$data_matrix[$row][$col]['available']=$cell_data['available'];
+				$data_matrix[$row][$col]['no_longer_available']=$cell_data['no_longer_available'];
+				$data_matrix[$row][$col]['approved_for_marketing']=$cell_data['approved_for_marketing'];
+				$data_matrix[$row][$col]['no_longer_recruiting']=$cell_data['no_longer_recruiting'];
+				$data_matrix[$row][$col]['withheld']=$cell_data['withheld'];
+				$data_matrix[$row][$col]['temporarily_not_available']=$cell_data['temporarily_not_available'];
+				$data_matrix[$row][$col]['ongoing']=$cell_data['ongoing'];
+				$data_matrix[$row][$col]['not_authorized']=$cell_data['not_authorized'];
+				$data_matrix[$row][$col]['prohibited']=$cell_data['prohibited'];
+				$data_matrix[$row][$col]['new_trials']=$cell_data['new_trials'];
 			}
 			else
 			{
@@ -1765,7 +1786,7 @@ function Download_reports()
 		$pdf->setFontSubsetting(false);
 		$pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
 		$pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
-		
+		//// Landscape page orientation
 		$pdf->setPageOrientation('l');
 			
 		// remove default header/footer
@@ -1794,12 +1815,42 @@ function Download_reports()
 		
 		$product_Col_Width = 25;
 		$area_Col_Width=20;
+		
+		//// Give product column required maximum width when available to prevent wrapping
+		$Avail_Prod_Col_width = 274-(count($columns)*($area_Col_Width+2));
+		$Current_product_Col_Width = $product_Col_Width;
+		if($Avail_Prod_Col_width > 25)
+		{
+			foreach($rows as $row => $rval)
+			{
+				if(isset($productIds[$row]) && $productIds[$row] != NULL && !empty($areaIds))
+				{
+					$Min_productNumLines=0;
+					while($Min_productNumLines != 1)	///Check while we we dont get mimimum lines to display product name
+					{
+						$current_NumLines=$pdf->getNumLines($rval, $Current_product_Col_Width);	//get number of lines
+						if($current_NumLines == 1)	//if 1 line then stop processing, take next product
+						$Min_productNumLines = $current_NumLines;
+						else if($current_NumLines >= 1)	/// if more lines required to display text
+						{
+							if($Current_product_Col_Width < $Avail_Prod_Col_width)	/// if possible to increase width then increase it
+							$Current_product_Col_Width++;
+							if($Current_product_Col_Width >= $Avail_Prod_Col_width)	///if NOT possible to increase then stop execution take next product
+							$Min_productNumLines = 1;
+						}else if($current_NumLines < 1) $Min_productNumLines = 1;	/// if required line below range then stop and take next product
+					}
+				}
+			}
+			$product_Col_Width = $Current_product_Col_Width;	///new width
+		}
 		///Calculate height for area row
 		$Max_areaNumLines=0;
 		foreach($columns as $col => $val)
 		{
 			$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col]:$val;
+			if(isset($areaIds[$col]) && $areaIds[$col] != NULL && !empty($productIds))
 			$current_NumLines=$pdf->getNumLines($val, $area_Col_Width);
+			else $current_NumLines = 0;
 			if($Max_areaNumLines < $current_NumLines)
 			$Max_areaNumLines = $current_NumLines;
 		}
@@ -1880,6 +1931,7 @@ function Download_reports()
 			$rowcount = $pdf->getNumLines($rval, $product_Col_Width);
  			$startY = $pdf->GetY();
  			$height = ((($rowcount * 4.5) <15) ? 15:($rowcount * 4.5));	//15 is minimum height to accomodate images and other data
+			
 			if (($startY + $height) + $dimensions['bm'] > ($dimensions['hk'])) {
 				//this row will cause a page break, draw the bottom border on previous row and give this a top border
 				//we could force a page break and rewrite grid headings here
@@ -2011,7 +2063,7 @@ function Download_reports()
 				$pdf->getCellPaddings();
 				$pdf->setCellMargins(1, 1, 1, 1);
 				$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(220,220,220)));
-				$pdf->SetFillColor(220,220,220);
+				$pdf->SetFillColor(245,245,245);
 				
 				if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL && $data_matrix[$row][$col]['total'] != 0)
 				{
@@ -2076,10 +2128,10 @@ function Download_reports()
 					
 					if(($data_matrix[$row][$col]['total'] == 0))
 					{ 
-						$data_matrix[$row][$col]['color_code']='dcdcdc'; 
-						$pdf->SetFillColor(220,220,220);
+						$data_matrix[$row][$col]['color_code']='f5f5f5'; 
+						$pdf->SetFillColor(245,245,245);
 						$data_matrix[$row][$col]['bordercolor_code']='blue'; 
-						$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(220,220,220)));
+						$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(245,245,245)));
 					}
 					
 					//pixels = point * 96 / 72
@@ -2100,7 +2152,124 @@ function Download_reports()
 					if($data_matrix[$row][$col]['phase_explain'] != NULL && trim($data_matrix[$row][$col]['phase_explain']) != '')
 					$annotation_text .= "Phase explanation: ".$data_matrix[$row][$col]['phase_explain']."\n";
 					
-					if($annotation_text != '')
+					$Status_List_Flg=0;
+					$annotation_text2 = '';
+					if($data_matrix[$row][$col]['not_yet_recruiting'] > 0)
+					{
+						$Status_List_Flg=1;
+						$annotation_text2 .= "Trials changed to \"Not yet recruiting\" status: ". $data_matrix[$row][$col]['not_yet_recruiting'] ." \n";
+					}
+					
+					if($data_matrix[$row][$col]['recruiting'] > 0)
+					{
+						$Status_List_Flg=1;
+						$annotation_text2 .= "Trials changed to \"Recruiting\" status: ". $data_matrix[$row][$col]['recruiting'] ." \n";
+					}
+			
+					if($data_matrix[$row][$col]['enrolling_by_invitation'] > 0)
+					{
+						$Status_List_Flg=1;
+						$annotation_text2 .= "Trials changed to \"Enrolling by invitation\" status: ". $data_matrix[$row][$col]['enrolling_by_invitation'] ." \n";
+					}
+			
+					if($data_matrix[$row][$col]['active_not_recruiting'] > 0)
+					{
+						$Status_List_Flg=1;
+						$annotation_text2 .= "Trials changed to \"Active not recruiting\" status: ". $data_matrix[$row][$col]['active_not_recruiting'] ." \n";
+					}
+			
+					if($data_matrix[$row][$col]['completed'] > 0)
+					{
+						$Status_List_Flg=1;
+						$annotation_text2 .= "Trials changed to \"Completed\" status: ". $data_matrix[$row][$col]['completed'] ." \n";
+					}
+			
+					if($data_matrix[$row][$col]['suspended'] > 0)
+					{
+						$Status_List_Flg=1;
+						$annotation_text2 .= "Trials changed to \"Suspended\" status: ". $data_matrix[$row][$col]['suspended'] ." \n";
+					}
+			
+					if($data_matrix[$row][$col]['terminated'] > 0)
+					{
+						$Status_List_Flg=1;
+						$annotation_text2 .= "Trials changed to \"Terminated\" status: ". $data_matrix[$row][$col]['terminated'] ." \n";
+					}
+			
+					if($data_matrix[$row][$col]['withdrawn'] > 0)
+					{
+						$Status_List_Flg=1;
+						$annotation_text2 .= "Trials changed to \"Withdrawn\" status: ". $data_matrix[$row][$col]['withdrawn'] ." \n";
+					}
+			
+					if($data_matrix[$row][$col]['available'] > 0)
+					{
+						$Status_List_Flg=1;
+						$annotation_text2 .= "Trials changed to \"Available\" status: ". $data_matrix[$row][$col]['available'] ." \n";
+					}
+			
+					if($data_matrix[$row][$col]['no_longer_available'] > 0)
+					{
+						$Status_List_Flg=1;
+						$annotation_text2 .= "Trials changed to \"No longer available\" status: ". $data_matrix[$row][$col]['no_longer_available'] ." \n";
+					}
+			
+					if($data_matrix[$row][$col]['approved_for_marketing'] > 0)
+					{
+						$Status_List_Flg=1;
+						$annotation_text2 .= "Trials changed to \"Approved for marketing\" status: ". $data_matrix[$row][$col]['approved_for_marketing'] ." \n";
+					}
+			
+					if($data_matrix[$row][$col]['no_longer_recruiting'] > 0)
+					{
+						$Status_List_Flg=1;
+						$annotation_text2 .= "Trials changed to \"No longer recruiting\" status: ". $data_matrix[$row][$col]['no_longer_recruiting'] ." \n";
+					}
+			
+					if($data_matrix[$row][$col]['withheld'] > 0)
+					{
+						$Status_List_Flg=1;
+						$annotation_text2 .= "Trials changed to \"Withheld\" status: ". $data_matrix[$row][$col]['withheld'] ." \n";
+					}
+			
+					if($data_matrix[$row][$col]['temporarily_not_available'] > 0)
+					{
+						$Status_List_Flg=1;
+						$annotation_text2 .= "Trials changed to \"Temporarily not available\" status: ". $data_matrix[$row][$col]['temporarily_not_available'] ." \n";
+					}
+			
+					if($data_matrix[$row][$col]['ongoing'] > 0)
+					{
+						$Status_List_Flg=1;
+						$annotation_text2 .= "Trials changed to \"On going\" status: ". $data_matrix[$row][$col]['ongoing'] ." \n";
+					}
+			
+					if($data_matrix[$row][$col]['not_authorized'] > 0)
+					{
+						$Status_List_Flg=1;
+						$annotation_text2 .= "Trials changed to \"Not authorized\" status: ". $data_matrix[$row][$col]['not_authorized'] ." \n";
+					}
+			
+					if($data_matrix[$row][$col]['prohibited'] > 0)
+					{
+						$Status_List_Flg=1;
+						$annotation_text2 .= "Trials changed to \"Prohibited\" status: ". $data_matrix[$row][$col]['prohibited'] ." \n";
+					}
+			
+					if($data_matrix[$row][$col]['new_trials'] > 0)
+					{
+						$Status_List_Flg=1;
+						$annotation_text2 .= "New trials: ". $data_matrix[$row][$col]['new_trials'] ." \n";
+					}
+					
+			
+					if($Status_List_Flg==1 && ($er == 'now' || $er == '1 week ago'))
+					$annotation_text = $annotation_text.$annotation_text2;
+					
+					$annotation_text = strip_tags($annotation_text);	///Strip HTML tags
+
+					
+					if(trim($annotation_text) != '')
 					{
 						$pdf->Annotation('', '', $area_Col_Width-4, $height-4, $annotation_text, array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Details', 'Subj' => 'Information', 'C' => array()));	
 					}
@@ -2121,10 +2290,6 @@ function Download_reports()
 						$pdfContent .= '&nbsp;<img align="right" title="Filing details" src="'.$data_matrix[$row][$col]['filing_image'].'" style="width:11px; height:11px; vertical-align:bottom; cursor:pointer;" alt="Filing" />';
 					}
 						
-					if($data_matrix[$row][$col]['phase_explain'] != NULL && $data_matrix[$row][$col]['phase_explain'] != '')
-					{
-							$pdfContent .= '&nbsp;<img align="right" title="Phase explain" src="'.$data_matrix[$row][$col]['phase_explain_image'].'" style="width:11px; height:11px; vertical-align:bottom; cursor:pointer;" alt="Phase explain" />';
-					}
 					$pdfContent .= '';
 					$pdf->MultiCell($area_Col_Width, $height, $pdfContent, $border, $align='C', $fill=1, $ln=0, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
 				}
@@ -2133,8 +2298,8 @@ function Download_reports()
 					$pdf->getCellPaddings();
 					if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL)
 					{
-						$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(220,220,220)));
-						$pdf->SetFillColor(220,220,220);
+						$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(245,245,245)));
+						$pdf->SetFillColor(245,245,245);
 					}
 					else
 					{
@@ -2350,7 +2515,136 @@ function Download_reports()
 					
 					$objPHPExcel->getActiveSheet()->setCellValue($cell, $count_val);
 					$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col].$link_part); 
- 			    	$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip(substr((($data_matrix[$row][$col]['filing'] != NULL && trim($data_matrix[$row][$col]['filing']) != '')? "\nFiling:- ". $data_matrix[$row][$col]['filing'] :'') . (($data_matrix[$row][$col]['bomb_explain'] != NULL && trim($data_matrix[$row][$col]['bomb_explain']) != '' && ($data_matrix[$row][$col]['bomb']['value'] == 'small' || $data_matrix[$row][$col]['bomb']['value'] == 'large')) ? "\nBomb details:- ". $data_matrix[$row][$col]['bomb_explain'] : '') . (($data_matrix[$row][$col]['phase_explain'] != NULL && trim($data_matrix[$row][$col]['phase_explain']) != '') ? "\nPhase explain:- ". $data_matrix[$row][$col]['phase_explain']:'' ).(($data_matrix[$row][$col]['count_lastchanged_value']==1) ? "\nCount updated from: ".$count_val_prev:"").(($data_matrix[$row][$col]['highest_phase_lastchanged_value']==1) ? "\nHighest Phase updated from: ".$data_matrix[$row][$col]['highest_phase_prev']:""),0,255) );
+ 			    	$annotation_text = '';
+					if($data_matrix[$row][$col]['count_lastchanged_value']==1)
+					$annotation_text .= "Count updated from: ".$count_val_prev."\n";
+					if($data_matrix[$row][$col]['bomb_explain'] != NULL && trim($data_matrix[$row][$col]['bomb_explain']) != '' && ($data_matrix[$row][$col]['bomb']['value'] == 'small' || $data_matrix[$row][$col]['bomb']['value'] == 'large')) 
+					$annotation_text .= "Bomb details: ".$data_matrix[$row][$col]['bomb_explain']."\n";
+					if($data_matrix[$row][$col]['filing'] != NULL && trim($data_matrix[$row][$col]['filing']) != '')
+					$annotation_text .= "Filing details: ".$data_matrix[$row][$col]['filing']."\n";
+					if($data_matrix[$row][$col]['phase_explain'] != NULL && trim($data_matrix[$row][$col]['phase_explain']) != '')
+					$annotation_text .= "Phase explanation: ".$data_matrix[$row][$col]['phase_explain']."\n";
+					if($data_matrix[$row][$col]['highest_phase_lastchanged_value']==1)
+					$annotation_text .= "Highest Phase updated from: Phase ".$data_matrix[$row][$col]['highest_phase_prev']."\n";
+					
+					
+					$Status_List_Flg=0;
+					$annotation_text2 = '';
+					if($data_matrix[$row][$col]['not_yet_recruiting'] > 0)
+					{
+						$Status_List_Flg=1;
+						$annotation_text2 .= "Trials changed to \"Not yet recruiting\" status: ". $data_matrix[$row][$col]['not_yet_recruiting'] ." \n";
+					}
+					
+					if($data_matrix[$row][$col]['recruiting'] > 0)
+					{
+						$Status_List_Flg=1;
+						$annotation_text2 .= "Trials changed to \"Recruiting\" status: ". $data_matrix[$row][$col]['recruiting'] ." \n";
+					}
+			
+					if($data_matrix[$row][$col]['enrolling_by_invitation'] > 0)
+					{
+						$Status_List_Flg=1;
+						$annotation_text2 .= "Trials changed to \"Enrolling by invitation\" status: ". $data_matrix[$row][$col]['enrolling_by_invitation'] ." \n";
+					}
+			
+					if($data_matrix[$row][$col]['active_not_recruiting'] > 0)
+					{
+						$Status_List_Flg=1;
+						$annotation_text2 .= "Trials changed to \"Active not recruiting\" status: ". $data_matrix[$row][$col]['active_not_recruiting'] ." \n";
+					}
+			
+					if($data_matrix[$row][$col]['completed'] > 0)
+					{
+						$Status_List_Flg=1;
+						$annotation_text2 .= "Trials changed to \"Completed\" status: ". $data_matrix[$row][$col]['completed'] ." \n";
+					}
+			
+					if($data_matrix[$row][$col]['suspended'] > 0)
+					{
+						$Status_List_Flg=1;
+						$annotation_text2 .= "Trials changed to \"Suspended\" status: ". $data_matrix[$row][$col]['suspended'] ." \n";
+					}
+			
+					if($data_matrix[$row][$col]['terminated'] > 0)
+					{
+						$Status_List_Flg=1;
+						$annotation_text2 .= "Trials changed to \"Terminated\" status: ". $data_matrix[$row][$col]['terminated'] ." \n";
+					}
+			
+					if($data_matrix[$row][$col]['withdrawn'] > 0)
+					{
+						$Status_List_Flg=1;
+						$annotation_text2 .= "Trials changed to \"Withdrawn\" status: ". $data_matrix[$row][$col]['withdrawn'] ." \n";
+					}
+			
+					if($data_matrix[$row][$col]['available'] > 0)
+					{
+						$Status_List_Flg=1;
+						$annotation_text2 .= "Trials changed to \"Available\" status: ". $data_matrix[$row][$col]['available'] ." \n";
+					}
+			
+					if($data_matrix[$row][$col]['no_longer_available'] > 0)
+					{
+						$Status_List_Flg=1;
+						$annotation_text2 .= "Trials changed to \"No longer available\" status: ". $data_matrix[$row][$col]['no_longer_available'] ." \n";
+					}
+			
+					if($data_matrix[$row][$col]['approved_for_marketing'] > 0)
+					{
+						$Status_List_Flg=1;
+						$annotation_text2 .= "Trials changed to \"Approved for marketing\" status: ". $data_matrix[$row][$col]['approved_for_marketing'] ." \n";
+					}
+			
+					if($data_matrix[$row][$col]['no_longer_recruiting'] > 0)
+					{
+						$Status_List_Flg=1;
+						$annotation_text2 .= "Trials changed to \"No longer recruiting\" status: ". $data_matrix[$row][$col]['no_longer_recruiting'] ." \n";
+					}
+			
+					if($data_matrix[$row][$col]['withheld'] > 0)
+					{
+						$Status_List_Flg=1;
+						$annotation_text2 .= "Trials changed to \"Withheld\" status: ". $data_matrix[$row][$col]['withheld'] ." \n";
+					}
+			
+					if($data_matrix[$row][$col]['temporarily_not_available'] > 0)
+					{
+						$Status_List_Flg=1;
+						$annotation_text2 .= "Trials changed to \"Temporarily not available\" status: ". $data_matrix[$row][$col]['temporarily_not_available'] ." \n";
+					}
+			
+					if($data_matrix[$row][$col]['ongoing'] > 0)
+					{
+						$Status_List_Flg=1;
+						$annotation_text2 .= "Trials changed to \"On going\" status: ". $data_matrix[$row][$col]['ongoing'] ." \n";
+					}
+			
+					if($data_matrix[$row][$col]['not_authorized'] > 0)
+					{
+						$Status_List_Flg=1;
+						$annotation_text2 .= "Trials changed to \"Not authorized\" status: ". $data_matrix[$row][$col]['not_authorized'] ." \n";
+					}
+			
+					if($data_matrix[$row][$col]['prohibited'] > 0)
+					{
+						$Status_List_Flg=1;
+						$annotation_text2 .= "Trials changed to \"Prohibited\" status: ". $data_matrix[$row][$col]['prohibited'] ." \n";
+					}
+			
+					if($data_matrix[$row][$col]['new_trials'] > 0)
+					{
+						$Status_List_Flg=1;
+						$annotation_text2 .= "New trials: ". $data_matrix[$row][$col]['new_trials'] ." \n";
+					}
+					
+			
+					if($Status_List_Flg==1 && ($er == 'now' || $er == '1 week ago'))
+					$annotation_text = $annotation_text.$annotation_text2;
+					
+					$annotation_text = strip_tags($annotation_text);	///Strip HTML tags
+					
+					$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip(substr($annotation_text,0,255) );
 					
 					if($data_matrix[$row][$col]['exec_bomb']['src'] != '' && $data_matrix[$row][$col]['exec_bomb']['src'] != NULL && $data_matrix[$row][$col]['exec_bomb']['src'] !='new_square.png')
 					{
