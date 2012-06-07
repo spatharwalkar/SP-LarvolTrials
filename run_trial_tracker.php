@@ -6398,7 +6398,7 @@ class TrialTracker
 					{
 						$res = mysql_query("SELECT `display_name`, `name`, `id` FROM `areas` WHERE id IN ('" . implode("','", $resultIds['area']) . "') ");
 						$row = mysql_fetch_assoc($res);
-						$areaName = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : "Area ".$row['id'];;
+						$areaName = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : "Area ".$row['id'];
 						$areaId = $row['id'];
 					}
 					
@@ -9814,7 +9814,7 @@ class TrialTracker
 				elseif((isset($trials[$i]['manual_brief_title']) && $trials[$i]['manual_brief_title'] !== NULL)
 				|| (isset($trials[$i]['manual_acronym']) && $trials[$i]['manual_acronym'] !== NULL))
 				{
-					$attr = '" title="Manual curation';
+					$attr = '" title="Manual curation' ."\n" . 'Original value: ' . $trials[$i]['manual_brief_title'];
 					$titleLinkColor = '#FF7700';
 				}
 			}
@@ -9823,7 +9823,7 @@ class TrialTracker
 				if((isset($trials[$i]['manual_brief_title']) && $trials[$i]['manual_brief_title'] !== NULL)
 				|| (isset($trials[$i]['manual_acronym']) && $trials[$i]['manual_acronym'] !== NULL))
 				{
-					$attr = '" title="Manual curation';
+					$attr = '" title="Manual curation' . "\n" . 'Original value: ' . $trials[$i]['manual_brief_title'];
 					$titleLinkColor = '#FF7700';
 				}
 				elseif(!empty($trials[$i]['edited']) && array_key_exists('NCT/brief_title', $trials[$i]['edited']) &&   str_replace('Previous value: ', '', $trials[$i]['edited']['NCT/brief_title'])<> $trials[$i]['NCT/brief_title']) 
@@ -9894,7 +9894,11 @@ class TrialTracker
 				elseif((isset($trials[$i]['manual_enrollment']) && $trials[$i]['manual_enrollment'] !== NULL)
 				|| (isset($trials[$i]['manual_enrollment_type']) && $trials[$i]['manual_enrollment_type'] !== NULL))
 				{
-					$attr = ' manual" title="Manual curation';
+					if(isset($trials[$i]['manual_enrollment']) && $trials[$i]['manual_enrollment'] !== NULL)
+						$attr = ' manual" title="Manual curation' . "\n" . 'Original value: ' . $trials[$i]['manual_enrollment'];
+					else
+						$attr = ' manual" title="Manual curation' . "\n" . 'Original value: ' . $trials[$i]['manual_enrollment_type'];
+						
 					$enrollStyle = 'color:#C7846D;';
 				}
 			}
@@ -9903,7 +9907,11 @@ class TrialTracker
 				if((isset($trials[$i]['manual_enrollment']) && $trials[$i]['manual_enrollment'] !== NULL)
 				|| (isset($trials[$i]['manual_enrollment_type']) && $trials[$i]['manual_enrollment_type'] !== NULL))
 				{
-					$attr = ' manual" title="Manual curation';
+					if(isset($trials[$i]['manual_enrollment']) && $trials[$i]['manual_enrollment'] !== NULL)
+						$attr = ' manual" title="Manual curation' . "\n" . 'Original value: ' . $trials[$i]['manual_enrollment'];
+					else
+						$attr = ' manual" title="Manual curation' . "\n" . 'Original value: ' . $trials[$i]['manual_enrollment_type'];
+						
 					$enrollStyle = 'color:#C7846D;';
 				}
 				elseif(!empty($trials[$i]['edited']) && array_key_exists('NCT/enrollment',$trials[$i]['edited']) 
@@ -9965,14 +9973,14 @@ class TrialTracker
 				}
 				elseif(isset($trials[$i]['manual_intervention_name']) && $trials[$i]['manual_intervention_name'] !== NULL)
 				{
-					$attr = ' manual" title="Manual curation';
+					$attr = ' manual" title="Manual curation' . "\n" . 'Original value: ' . $trials[$i]['manual_intervention_name'];
 				}
 			}
 			else
 			{
 				if(isset($trials[$i]['manual_intervention_name']) && $trials[$i]['manual_intervention_name'] !== NULL)
 				{
-					$attr = ' manual" title="Manual curation';
+					$attr = ' manual" title="Manual curation' . "\n" . 'Original value: ' . $trials[$i]['manual_intervention_name'];
 				}
 				elseif(!empty($trials[$i]['edited']) && array_key_exists('NCT/intervention_name', $trials[$i]['edited']) && str_replace('Previous value: ', '', $trials[$i]['edited']['NCT/intervention_name'])<>$trials[$i]['NCT/intervention_name'])
 				{
@@ -10013,7 +10021,10 @@ class TrialTracker
 				elseif((isset($trials[$i]['manual_lead_sponsor']) && $trials[$i]['manual_lead_sponsor'] !== NULL)
 				|| (isset($trials[$i]['manual_collaborator']) && $trials[$i]['manual_collaborator'] !== NULL))
 				{
-					$attr = ' manual" title="Manual curation';
+					if(isset($trials[$i]['manual_lead_sponsor'])  && $trials[$i]['manual_lead_sponsor'] !== NULL)
+						$attr = ' manual" title="Manual curation' . "\n" . 'Original value: ' . $trials[$i]['manual_lead_sponsor'];
+					else
+						$attr = ' manual" title="Manual curation' . "\n" . 'Original value: ' . $trials[$i]['manual_collaborator'];
 				}
 			}
 			else
@@ -10021,7 +10032,10 @@ class TrialTracker
 				if((isset($trials[$i]['manual_lead_sponsor']) && $trials[$i]['manual_lead_sponsor'] !== NULL)
 				|| (isset($trials[$i]['manual_collaborator']) && $trials[$i]['manual_collaborator'] !== NULL))
 				{
-					$attr = ' manual" title="Manual curation';
+					if(isset($trials[$i]['manual_lead_sponsor'])  && $trials[$i]['manual_lead_sponsor'] !== NULL)
+						$attr = ' manual" title="Manual curation' . "\n" . 'Original value: ' . $trials[$i]['manual_lead_sponsor'];
+					else
+						$attr = ' manual" title="Manual curation' . "\n" . 'Original value: ' . $trials[$i]['manual_collaborator'];
 				}
 				elseif(!empty($trials[$i]['edited']) && (array_key_exists('NCT/collaborator', $trials[$i]['edited']) 
 				|| array_key_exists('NCT/lead_sponsor', $trials[$i]['edited'])) && ( str_replace('Previous value: ', '', $trials[$i]['edited']['NCT/lead_sponsor'])<>$trials[$i]['NCT/lead_sponsor'] or str_replace('Previous value: ', '', $trials[$i]['edited']['NCT/collaborator'])<>$trials[$i]['NCT/collaborator'] )) 
@@ -10061,14 +10075,14 @@ class TrialTracker
 				} 
 				elseif(isset($trials[$i]['manual_overall_status']) && $trials[$i]['manual_overall_status'] !== NULL)
 				{
-					$attr = ' manual" title="Manual curation';
+					$attr = ' manual" title="Manual curation' . "\n" . 'Original value: ' . $trials[$i]['manual_overall_status'];
 				}
 			}
 			else
 			{
 				if(isset($trials[$i]['manual_overall_status']) && $trials[$i]['manual_overall_status'] !== NULL)
 				{
-					$attr = ' manual" title="Manual curation';
+					$attr = ' manual" title="Manual curation' . "\n" . 'Original value: ' . $trials[$i]['manual_overall_status'];
 				}
 				elseif(!empty($trials[$i]['edited']) && array_key_exists('NCT/overall_status', $trials[$i]['edited']) && str_replace('Previous value: ', '', $trials[$i]['edited']['NCT/overall_status'])<>$trials[$i]['NCT/overall_status']) 
 				{
@@ -10098,14 +10112,14 @@ class TrialTracker
 				}
 				if(isset($trials[$i]['manual_condition']) && $trials[$i]['manual_condition'] !== NULL)
 				{
-					$attr = ' manual" title="Manual curation';
+					$attr = ' manual" title="Manual curation' . "\n" . 'Original value: ' . $trials[$i]['manual_condition'];
 				}
 			}
 			else
 			{
 				if(isset($trials[$i]['manual_condition']) && $trials[$i]['manual_condition'] !== NULL)
 				{
-					$attr = ' manual" title="Manual curation';
+					$attr = ' manual" title="Manual curation' . "\n" . 'Original value: ' . $trials[$i]['manual_condition'];
 				}
 				elseif(!empty($trials[$i]['edited']) && array_key_exists('NCT/condition', $trials[$i]['edited']) && str_replace('Previous value: ', '', $trials[$i]['edited']['NCT/condition'])<>$trials[$i]['NCT/condition']) 
 				{
@@ -10136,14 +10150,14 @@ class TrialTracker
 				}	
 				elseif(isset($trials[$i]['manual_end_date']) && $trials[$i]['manual_end_date'] !== NULL)
 				{
-					$attr = ' manual" title="Manual curation';
+					$attr = ' manual" title="Manual curation' . "\n" . 'Original value: ' . $trials[$i]['manual_end_date'];
 				}
 			}
 			else
 			{
 				if(isset($trials[$i]['manual_end_date']) && $trials[$i]['manual_end_date'] !== NULL)
 				{
-					$attr = ' manual" title="Manual curation';
+					$attr = ' manual" title="Manual curation' . "\n" . 'Original value: ' . $trials[$i]['manual_end_date'];
 				}
 				elseif(!empty($trials[$i]['edited']) && array_key_exists('inactive_date', $trials[$i]['edited']) && str_replace('Previous value: ', '', $trials[$i]['edited']['inactive_date'])<>$trials[$i]["inactive_date"]) 
 				{
@@ -10181,14 +10195,14 @@ class TrialTracker
 				}
 				elseif(isset($trials[$i]['manual_phase']) && $trials[$i]['manual_phase'] !== NULL)
 				{
-					$attr = ' manual" title="Manual curation';
+					$attr = ' manual" title="Manual curation' . "\n" . 'Original value: ' . $trials[$i]['manual_phase'];
 				}
 			}
 			else
 			{
 				if(isset($trials[$i]['manual_phase']) && $trials[$i]['manual_phase'] !== NULL)
 				{
-					$attr = ' manual" title="Manual curation';
+					$attr = ' manual" title="Manual curation' . "\n" . 'Original value: ' . $trials[$i]['manual_phase'];
 				}
 				elseif(!empty($trials[$i]['edited']) && array_key_exists('NCT/phase', $trials[$i]['edited']) && ( str_replace('Previous value: ', '', trim($trials[$i]['edited']['NCT/phase'])) <> trim($trials[$i]['NCT/phase'])) ) 
 				{
