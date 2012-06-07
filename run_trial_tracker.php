@@ -2595,6 +2595,7 @@ class TrialTracker
 			$from++;
 
 
+
 			
 		} 
 		else if($startDate == '' || $startDate === NULL || $startDate == '0000-00-00') 
@@ -4049,6 +4050,7 @@ class TrialTracker
 					}
 					$from++;
 					
+
 					if((12 - ($st+1)) != 0)
 					{
 						$inc = (12 - ($st+1));
@@ -6180,7 +6182,7 @@ class TrialTracker
 				$timeInterval = trim($globalOptions['endrange']);
 				$timeInterval = (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
 			}
-		
+			
 			$resultIds['product'] = explode(',', $resultIds['product']);
 			$resultIds['area'] = explode(',', $resultIds['area']);
 			
@@ -6193,13 +6195,26 @@ class TrialTracker
 				
 				foreach($resultIds['product'] as $pkey => $pvalue)
 				{
-					$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id = '" . $pvalue . "' OR LI_id = '" . $pvalue . "' ");
+					$res = mysql_query("SELECT `name`, `id`, `company`, `discontinuation_status`, `discontinuation_status_comment` FROM `products` WHERE id = '" . $pvalue . "' OR LI_id = '" . $pvalue . "' ");
 					if(mysql_num_rows($res) > 0)
 					{
 						while($row = mysql_fetch_assoc($res))
 						{
-							$TrialsInfo[$pkey]['sectionHeader'] = $row['name'] 
-							. (($row['company'] !== NULL && $row['company'] != '') ? " / <i>" . $row['company'] . "</i>" : '');
+							if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
+							{
+								$TrialsInfo[$pkey]['sectionHeader'] = "<span style='color:gray'>" . $row['name'] . "</span>";
+								if($row['company'] !== NULL && $row['company'] != '')
+									$TrialsInfo[$pkey]['sectionHeader'] .= " / <i>" . $row['company'] . "</i>";
+									
+								$TrialsInfo[$pkey]['sectionHeader'] .= "<span style='margin-left:30px;font-weight:normal;'>" . strip_tags($row['discontinuation_status_comment']) . "</span>";
+							}
+							else
+							{
+								$TrialsInfo[$pkey]['sectionHeader'] = $row['name'];
+								if($row['company'] !== NULL && $row['company'] != '')
+									$TrialsInfo[$pkey]['sectionHeader'] .= " / <i>" . $row['company'] . "</i>";
+							}
+							
 							$TrialsInfo[$pkey]['naUpms'] = 
 							$this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
 							
@@ -6218,13 +6233,26 @@ class TrialTracker
 					
 					foreach($resultIds['product'] as $pkey => $pvalue)
 					{
-						$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id = '" . $pvalue . "' OR LI_id = '" . $pvalue . "' ");
+						$res = mysql_query("SELECT `name`, `id`, `company`, `discontinuation_status`, `discontinuation_status_comment` FROM `products` WHERE id = '" . $pvalue . "' OR LI_id = '" . $pvalue . "' ");
 						if(mysql_num_rows($res) > 0)
 						{
 							while($row = mysql_fetch_assoc($res))
 							{
-								$TrialsInfo[$pkey]['sectionHeader'] = $row['name']
-								. (($row['company'] !== NULL && $row['company'] != '') ? " / <i>" . $row['company'] . "</i>" : '');
+								if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
+								{
+									$TrialsInfo[$pkey]['sectionHeader'] = "<span style='color:gray'>" . $row['name'] . "</span>";
+									if($row['company'] !== NULL && $row['company'] != '')
+										$TrialsInfo[$pkey]['sectionHeader'] .= " / <i>" . $row['company'] . "</i>";
+										
+									$TrialsInfo[$pkey]['sectionHeader'] .= "<span style='margin-left:30px;font-weight:normal;'>" . strip_tags($row['discontinuation_status_comment']) . "</span>";
+								}
+								else
+								{
+									$TrialsInfo[$pkey]['sectionHeader'] = $row['name'];
+									if($row['company'] !== NULL && $row['company'] != '')
+										$TrialsInfo[$pkey]['sectionHeader'] .= " / <i>" . $row['company'] . "</i>";
+								}
+				
 								$TrialsInfo[$pkey]['naUpms'] = 
 								$this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
 								
@@ -6329,6 +6357,7 @@ class TrialTracker
 						else	//if no hm field
 						{
 							$res = mysql_query("SELECT `display_name`, `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
+
 							if(mysql_num_rows($res) > 0)
 							{
 								while($row = mysql_fetch_assoc($res))
@@ -6348,7 +6377,6 @@ class TrialTracker
 				}
 				else
 				{
-					
 					if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve display name from heatmap report
 					{
 						$res = mysql_query("SELECT `display_name`, `type_id` FROM `rpt_masterhm_headers` WHERE `type_id` IN ('" . implode("','", $resultIds['area']) . "') AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'area'");
@@ -6362,8 +6390,8 @@ class TrialTracker
 						}
 						else	//if area not found in report, just display id
 						{
-								$areaName = "Area ".$avalue;
-								$areaId = $avalue;
+							$areaName = "Area ".$avalue;
+							$areaId = $avalue;
 						}
 					}
 					else
@@ -6381,14 +6409,26 @@ class TrialTracker
 					
 					foreach($resultIds['product'] as $pkey => $pvalue)
 					{
-						$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id = '" . $pvalue . "' OR LI_id = '" . $pvalue . "' ");
+						$res = mysql_query("SELECT `name`, `id`, `company`, `discontinuation_status`, `discontinuation_status_comment` FROM `products` WHERE id = '" . $pvalue . "' OR LI_id = '" . $pvalue . "' ");
 						if(mysql_num_rows($res) > 0)
-
 						{
 							while($row = mysql_fetch_assoc($res))
 							{
-								$TrialsInfo[$pkey]['sectionHeader'] = $row['name']
-								. (($row['company'] !== NULL && $row['company'] != '') ? " / <i>" . $row['company'] . "</i>" : '');
+								if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
+								{
+									$TrialsInfo[$pkey]['sectionHeader'] = "<span style='color:gray'>" . $row['name'] . "</span>";
+									if($row['company'] !== NULL && $row['company'] != '')
+										$TrialsInfo[$pkey]['sectionHeader'] .= " / <i>" . $row['company'] . "</i>";
+										
+									$TrialsInfo[$pkey]['sectionHeader'] .= "<span style='margin-left:30px;font-weight:normal;'>" . strip_tags($row['discontinuation_status_comment']) . "</span>";
+								}
+								else
+								{
+									$TrialsInfo[$pkey]['sectionHeader'] = $row['name'];
+									if($row['company'] !== NULL && $row['company'] != '')
+										$TrialsInfo[$pkey]['sectionHeader'] .= " / <i>" . $row['company'] . "</i>";
+								}
+								
 								$TrialsInfo[$pkey]['naUpms'] = 
 								$this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
 								
@@ -6432,14 +6472,26 @@ class TrialTracker
 				}
 				$this->displayHeader($t);
 				
-				$res = mysql_query("SELECT `name`, `id`, `company` FROM `products` WHERE id IN ('" . implode(',', $resultIds['product']) 
+				$res = mysql_query("SELECT `name`, `id`, `company`, `discontinuation_status`, `discontinuation_status_comment` FROM `products` WHERE id IN ('" . implode(',', $resultIds['product']) 
 						. "') OR LI_id IN ('" . implode(',', $resultIds['product']) . "') ");
 				$row = mysql_fetch_assoc($res);
 				
 				$Ids[0]['product'] = $row['id'];
 				
-				$TrialsInfo[0]['sectionHeader'] = $row['name']
-				. (($row['company'] !== NULL && $row['company'] != '') ? " / <i>" . $row['company'] . "</i>" : '');
+				if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
+				{
+					$TrialsInfo[0]['sectionHeader'] = "<span style='color:gray'>" . $row['name'] . "</span>";
+					if($row['company'] !== NULL && $row['company'] != '')
+						$TrialsInfo[0]['sectionHeader'] .= " / <i>" . $row['company'] . "</i>";
+						
+					$TrialsInfo[0]['sectionHeader'] .= "<span style='margin-left:30px;font-weight:normal;'>" . strip_tags($row['discontinuation_status_comment']) . "</span>";
+				}
+				else
+				{
+					$TrialsInfo[0]['sectionHeader'] = $row['name'];
+					if($row['company'] !== NULL && $row['company'] != '')
+						$TrialsInfo[0]['sectionHeader'] .= " / <i>" . $row['company'] . "</i>";
+				}
 				$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
 				if(!empty($TrialsInfo[0]['naUpms']))
 				{
@@ -11018,6 +11070,7 @@ class TrialTracker
 				if($val != 0) 
 				{
 					$outputStr .= '<td ' . $incViewCountLink . ' style="width:'.($val*2).'px; ' . $bgColor . $upmBorderRight . '" colspan="' . $val . '">' . '<div ' . $upmTitle .'>' . $anchorTag . '</div></td>'
+
 								. (((24 - ($val+$st)) != 0) ? '<td style="width:'.((24-($val+$st))*2).'px;" colspan="' .(24 - ($val+$st)) . '"><div ' . $upmTitle . '>' . $anchorTag . '</div></td>' : '');
 				} 
 				else 
