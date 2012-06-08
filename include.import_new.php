@@ -61,26 +61,37 @@ $array1=array
 /**** EUDRACT BEGIN ************/
 	$eudra_status=array
 	(
-	'Ongoing' => 'Ongoing',
-	'Restarted' => 'Ongoing',
-	'Completed'=> 'Completed',
-	'Temporarily Halted' => 'Temporarily Not Available',
-	'Prematurely Ended'=> 'Terminated',
-	'Not Authorised'=> 'Not Authorised',
-	'Prohibited by National Competent Authority'=> 'Prohibited',
-	'Suspended by National Competent Authority'=> 'Suspended'
+	"Ongoing" => "Ongoing",
+	"Restarted" => "Ongoing",
+	"Completed"=> "Completed",
+	"Temporarily Halted" => "Temporarily Not Available",
+	"Prematurely Ended"=> "Terminated",
+	"Not Authorised"=> "Not Authorised",
+	"Prohibited by National Competent Authority"=> "Prohibited",
+	"Suspended by National Competent Authority"=> "Suspended"
+	);
+	
+	$eudra_status_order=array
+	(
+	"Not Authorised"=> 1,
+	"Prohibited"=> 2,
+	"Suspended"=> 3,
+	"Terminated"=> 4, 	
+	"Temporarily Not Available" => 5,
+	"Ongoing" => 6,
+	"Completed"=> 7
 	);
 
 	$eudra_status_is_active=array
 	(
-	'Ongoing'=> '1',
-	'Restarted'=> '1',
-	'Completed'=> '0',
-	'Temporarily Halted'=> '0',
-	'Prematurely Ended'=> '0',
-	'Not Authorised'=> '0',
-	'Prohibited by National Competent Authority'=> '0',
-	'Suspended by National Competent Authority'=> '0'
+	"Ongoing"=> "1",
+	"Restarted"=> "1",
+	"Completed"=> "0",
+	"Temporarily Halted"=> "0",
+	"Prematurely Ended"=> "0",
+	"Not Authorised"=> "0",
+	"Prohibited by National Competent Authority"=> "0",
+	"Suspended by National Competent Authority"=> "0"
 	);
 	
 		function addEudraValToEudraCT($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_type,$end_date)
@@ -633,6 +644,72 @@ $array1=array
 		return '';
 	}
 
+	function eudraStatus($input)
+	{
+		global $eudra_status, $eudra_status_order;
+		$vals = explode("`", $input);
+		$max = 0;
+		$max_status = "";
+		foreach ($vals as $val)
+		{
+			$status = $eudra_status[$val];
+			$order = $eudra_status_order[$status];
+			if($order > $max)
+			{
+			 $max=$order;
+			 $max_status = $status;
+			}
+		}
+		return $max_status;
+		
+	}
+	
+	function eudraRegion($input)
+	{
+
+		$vals = explode("`", $input);
+		$arr = array();
+		foreach ($vals as $val)
+		{
+			//		echo("before transform: ");
+			//		var_dump($val);
+			//		echo("<br>");
+			$region=getRegions($val);
+			if($region=='other') $region='RoW';
+			array_push($arr, $region);
+		}
+		$uniq_arr = array_unique($arr);
+		$output="";
+		$cnt=count($uniq_arr);
+		$c1=1;
+		foreach($uniq_arr as $value)
+		{
+			if($c1<$cnt) $output .= $value."`";
+			else $output .= $value;
+			$c1++;
+		}
+		return $output;
+
+	}
+
+	function eudraCountry($input)
+	{
+		$vals = explode("`", $input);//split
+		$output="";
+		$cnt=count($vals);
+		$c1=1;
+		foreach ($vals as $val)
+		{
+			$arr = explode("-", $val);//split by eiphen and taken first value
+			$value = trim($arr[0]);
+			if($c1<$cnt) $output .= $value."`";
+			else $output .= $value;
+			$c1++;
+		}
+		return $output;
+
+	}
+	
 	// Add or update a Eudract record from a SimpleXML object.
 	function addEudraCT($record)
 	{
@@ -728,11 +805,12 @@ $array1=array
 		}
 		$rec = (object)$recordArray;
 		//All Mappings here
+		global $eudra_status_is_active;
 		/*************************************/
 		$brief_title = strlen($rec -> lay_title) == 0 ? $rec->full_title : $rec->lay_title;
 		$detailed_descr = $rec->main_objective . '`' . $rec->secondary_objective;
 		$study_design = eudraCalcStudyDesign($rec);
-		$enrollment = ''; eudraEnrollment($rec->enrollment_intl_all, $rec->enrollment_memberstate);
+		$enrollment = eudraEnrollment($rec->enrollment_intl_all, $rec->enrollment_memberstate);
 		$criteria = $rec->inclusion_criteria . '`' . $rec->exclusion_criteria;
 		$gender = eudraGender($rec->gender_male, $rec->gender_female);
 		$phase = eudraPhase($rec->tp_phase1_human_pharmacology,$rec->tp_phase2_explatory,
@@ -741,6 +819,13 @@ $array1=array
 		$intervention_type = eudraInterventionType($rec);
 		$intervention_name = $rec->product_name . addMultiVal($rec->product_code) . addMultiVal($rec->product_pharm_form) . addMultiVal($rec->imp_trade_name);
 		$ages = eudraAge($rec);
+		$overall_status = eudraStatus($rec->trial_status);
+		$is_active_overall = $eudra_status_is_active[$overall_status];
+		$country = eudraCountry($rec->member_state_concerned);
+		$region=eudraRegion($country);
+		$ins_type=getInstitutionType($rec->support_org_name,$rec->sponsor_name,$larvol_id);
+		
+		
 		/*************************************/
 
 		//Go through the parsed XML structure and pick out the data
@@ -750,9 +835,9 @@ $array1=array
 						 'lead_sponsor' => $rec->sponsor_name,
 		                'collaborator' => $rec->support_org_name,
 	                    'detailed_description' => $detailed_descr,
-						'overall_status' => $eudra_status[$rec->trial_status],
-	                    'is_active' => $eudra_status_is_active[$rec->trial_status],
-	    				'start_date' => $rec->start_date,
+						'overall_status' => $overall_status,
+	                    'is_active' => $is_active_overall,
+	    				'start_date' => $rec->start_date, 	
 						'end_date' => $rec->end_date_global,
 	                    'study_design' => $study_design,
 	                    'enrollment' => $enrollment,
@@ -773,11 +858,14 @@ $array1=array
 	'primary_outcome_timeframe' => $rec->secondary_endpoint_timeframe,
 	'location_city' => $rec->city,
 	'location_zip' => $rec->postcode,
-	'location_country' => $rec->country,
+	'location_country' => $country,
 	'investigator_name' => $rec->contact_point_func_name,
 	'route_of_administration' => $rec->product_route,
-	'ages' => $ages);	
-
+	'ages' => $ages,
+	'region' => $region,
+	'institution_type' => $ins_type);	
+		
+		
 		$end_date=normal('date',(string)$record_data->end_date);
 		foreach($record_data as $fieldname => $value)
 		if(!addEudraValToDataTrial($larvol_id, $fieldname, $value, $eudract_last_updated_date, $oldtrial,NULL,$end_date))
@@ -786,25 +874,18 @@ $array1=array
 		foreach($recordArray as $fieldname => $value)
 		if(!addEudraValToEudraCT($larvol_id, $fieldname, $value, $eudract_last_updated_date, $oldtrial,NULL,$end_date))
 		logDataErr('<br>To Eudra CT: Could not save the value of <b>' . $fieldname . '</b>, Value: ' . $value );//Log in errorlog
-			
-			
-		//calculate institution type
-		$ins_type=getInstitutionType($record_data['support_org_name'],$record_data['sponsor_name'],$larvol_id);
-
-		//calculate region
-		$region=getRegions($record_data['location_country']);
-		if($region=='other') $region='RoW';
-
-		//$inactive = $record_data['is_active'];
-		//$query = 'update data_trials set `institution_type`="' .$ins_type. '",`region`="'.$region.'", `is_active`='.$inactive.'  where `larvol_id`="' .$larvol_id . '" limit 1' ;
-		$query = 'update data_trials set `institution_type`="' .$ins_type. '",`region`="'.$region.'" where `larvol_id`="' .$larvol_id . '" limit 1' ;
-		if(!mysql_query($query))
-		{
-			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-			$logger->error($log);
-			echo $log;
-			return false;
-		}
+//		
+//		
+//		//$inactive = $record_data['is_active'];
+//		//$query = 'update data_trials set `institution_type`="' .$ins_type. '",`region`="'.$region.'", `is_active`='.$inactive.'  where `larvol_id`="' .$larvol_id . '" limit 1' ;
+//		$query = 'update data_trials set `institution_type`="' .$ins_type. '",`region`="'.$region.'" where `larvol_id`="' .$larvol_id . '" limit 1' ;
+//		if(!mysql_query($query))
+//		{
+//			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+//			$logger->error($log);
+//			echo $log;
+//			return false;
+//		}
 
 		return true;
 	}
