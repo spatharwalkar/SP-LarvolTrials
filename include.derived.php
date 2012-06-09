@@ -1025,11 +1025,19 @@ function get_header($header_text)
 
 function check_exclusion($line) //Check line is in Exclusion Criteria
 {
-	if(preg_match('/(.*)No (.*)/',$line, $out))
+	if(preg_match('/(.*)No (.*)/',$line, $out))	/// No inbetween
 	{
 		return 1;
 	}
-	if(preg_match('/(.*) no (.*)/',$line, $out))
+	elseif(preg_match('/^No (.*)/',$line, $out))	//Start with no
+	{
+		return 1;
+	}
+	elseif(preg_match('/(.*) no (.*)/',$line, $out))	///inbetween no
+	{
+		return 1;
+	}
+	elseif(preg_match('/^no (.*)/',$line, $out))	///start with no
 	{
 		return 1;
 	}
@@ -1041,13 +1049,23 @@ function check_exclusion($line) //Check line is in Exclusion Criteria
 	{
 		return 2;
 	}
-	elseif(preg_match('/(.*)Not (.*)/',$line, $out))
+	elseif(preg_match('/(.*)Not (.*)/',$line, $out))	////inbetween not
 	{
 		return 1;
-	}elseif(preg_match('/(.*)not (.*)/',$line, $out))
+	}
+	elseif(preg_match('/^Not (.*)/',$line, $out))	///start with not
 	{
 		return 1;
-	}else
+	}
+	elseif(preg_match('/(.*)not (.*)/',$line, $out))	///inbetween not
+	{
+		return 1;
+	}
+	elseif(preg_match('/^not (.*)/',$line, $out))	///start with not
+	{
+		return 1;
+	}
+	else
 	{
 		return 0;
 	}
@@ -1082,7 +1100,7 @@ function criteria_process($text)
 	$text=str_replace('Exclusion Criteria','Exclusion Criteria: \n',$text); //Replace all Exclusion Criteria with Exclusion Criteria: to make it like header
 
 	//This adds \n before heading as in many cases where text is contneous and we are unable to detect end of line
-	$text=preg_replace('/([A-Z]{1}[a-z]+){0,1}(\s){0,1}[A-Z]{1,}[a-z\s\/]+[a-z]+:{1}/','\n $0 \n',$text);
+	$text=preg_replace('/([A-Z]{1}[a-z]+){0,1}(\s){0,1}(-){0,1}[A-Z]{1,}[a-z\s\/]+[a-z]+:{1}/','\n $0 \n',$text);
 	
 	$text=preg_replace('/([A-Z]{1}[A-Z]+){0,1}(\s){0,1}[A-Z]{1,}[A-Z\s\/]+[A-Z]+:{1}/','\n $0 \n',$text); 
 	
@@ -1144,11 +1162,11 @@ function criteria_process($text)
 	
 	$data=explode('\n', $compress);
 	
-	for($m=0;$m< count($data); $m++)
+	for($m=0;$m< count($data); $m++)	//// for loop of data ---- first level
 	{
 		//print $data[$i].'<br>';
 			
-		if(trim($data[$m]) != '' && $data[$m] != NULL && trim($data[$m]) != " ") //check if data presents
+		if(trim($data[$m]) != '' && $data[$m] != NULL && trim($data[$m]) != " ") //check if data presents - First level
 		{
 			$line=trim($data[$m]);
 			
@@ -1203,88 +1221,101 @@ function criteria_process($text)
 			}
 			//var_dump($header);
 			
-			$checker=check_exclusion($line);
-			
-			if($excl_header == 1 && $checker !=2)
-			$checker=1;
-			
-			if(!$checker) //Check line is in inclusion or exclsion criteria
-			{	
-				$i=0;
-				
-				if($line != '' && $line != NULL)
-				{
-				$prev='line';
-				while($i < count($header))
-				{
-					if(($i<(count($header)-count($new_header))) && $header[$i]['spcl'] != 'Yes')
-					$header[$i]['incl']='Old';
-					
-					if($header[$i]['incl'] == 'New')
-					{
-						if(!strpos($header[$i]['val'],'Inclusion') && !preg_match('/(.*)Inclusion(.*)/',$header[$i]['val'], $out22) && !preg_match('/(.*)INCLUSION(.*)/',$header[$i]['val'], $out22) && !preg_match('/(.*)EXCLUSION(.*)/',$header[$i]['val'], $out22) && !preg_match('/(.*)Exclusion(.*)/',$header[$i]['val'], $out22))
-						$incl_print_data.="\n".trim($header[$i]['val'])."\n";
-						$header[$i]['incl']='Old';			//make headers status old if we displayed it for inclusion
-					}
-					$i++;
-				}
-				
-					$incl_print_data.=trim($line)."\n";
-				}
-				
-			} elseif($checker == 2) {
-			
-				$i=0;
-				if($line != '' && $line != NULL)
-				{
-					$prev='line';
-					while($i < count($header))
-					{
-						if(($i<(count($header)-count($new_header))) && $header[$i]['spcl'] != 'Yes')
-						$header[$i]['ntspec']='Old';
-						
-						if($header[$i]['ntspec'] == 'New')
-						{
-							$ntspec_print_data.="\n".trim($header[$i]['val'])."\n";
-							$header[$i]['ntspec']='Old';			//make headers status old if we displayed it for exclusion
-						}
-						$i++;
-					}
-					$ntspec_print_data.=trim($line)."\n";
-				}
-				
-			} else {
-			
-				$i=0;
-				if($line != '' && $line != NULL)
-				{
-				$prev='line';
-				while($i < count($header))
-				{
-					if(($i<(count($header)-count($new_header))) && $header[$i]['spcl'] != 'Yes')
-					$header[$i]['excl']='Old';
-					
-					if($header[$i]['excl'] == 'New')
-					{
-						if(!strpos($header[$i]['val'],'Exclusion') && !preg_match('/(.*)Inclusion(.*)/',$header[$i]['val'], $out22) && !preg_match('/(.*)INCLUSION(.*)/',$header[$i]['val'], $out22) && !preg_match('/(.*)EXCLUSION(.*)/',$header[$i]['val'], $out22) && !preg_match('/(.*)Exclusion(.*)/',$header[$i]['val'], $out22))
-						$excl_print_data.="\n".trim($header[$i]['val'])."\n";
-						$header[$i]['excl']='Old';			//make headers status old if we displayed it for exclusion
-					}
-					$i++;
-				}
-				$diff_criteria_present_flag=1; //make flag one if we get any line belongs to exclusion criteria
-				
-					$excl_print_data.=trim($line)."\n";
-				}
-				
+			///If line does not belongs to exclusion criteria section divide it at a no/not points so part without negation part will go to inclusion other to exclusion
+			if($excl_header != 1)	
+			{
+				$line = preg_replace('/ not /','\n not ',$line);
+				$line = preg_replace('/ Not /','\n Not ',$line);
+				$line = preg_replace('/ no /','\n no ',$line);
+				$line = preg_replace('/ No /','\n No ',$line);
 			}
-			
-			
-		
-	
-		}//data present if ends
-		
-	}///for loop ends of data counter
+			$data2=explode('\n', $line);
+			for($m2=0;$m2< count($data2); $m2++)	/// data for loop -- second level
+			{
+				//print $data[$i].'<br>';
+				if(trim($data2[$m2]) != '' && $data2[$m2] != NULL && trim($data2[$m2]) != " ") //check if data presents -- second level
+				{
+					$line=trim($data2[$m2]);
+					
+					/////Part to add lines in various sections
+					$checker=check_exclusion($line);
+							
+					if($excl_header == 1 && $checker !=2)
+					$checker=1;
+					
+					if(!$checker) //Check line is in inclusion or exclsion criteria
+					{	
+						$i=0;
+				
+						if($line != '' && $line != NULL)
+						{
+							$prev='line';
+							while($i < count($header))
+							{
+								if(($i<(count($header)-count($new_header))) && $header[$i]['spcl'] != 'Yes')
+								$header[$i]['incl']='Old';
+						
+								if($header[$i]['incl'] == 'New')
+								{
+									if(!strpos($header[$i]['val'],'Inclusion') && !preg_match('/(.*)Inclusion(.*)/',$header[$i]['val'], $out22) && !preg_match('/(.*)INCLUSION(.*)/',$header[$i]['val'], $out22) && !preg_match('/(.*)EXCLUSION(.*)/',$header[$i]['val'], $out22) && !preg_match('/(.*)Exclusion(.*)/',$header[$i]['val'], $out22))
+										$incl_print_data.="\n".trim($header[$i]['val'])."\n";
+									$header[$i]['incl']='Old';			//make headers status old if we displayed it for inclusion
+								}
+								$i++;
+							}
+							
+							$incl_print_data.=trim($line)."\n";
+						}
+					} 
+					elseif($checker == 2) 
+					{
+						$i=0;
+						if($line != '' && $line != NULL)
+						{
+							$prev='line';
+							while($i < count($header))
+							{
+								if(($i<(count($header)-count($new_header))) && $header[$i]['spcl'] != 'Yes')
+								$header[$i]['ntspec']='Old';
+						
+								if($header[$i]['ntspec'] == 'New')
+								{
+									$ntspec_print_data.="\n".trim($header[$i]['val'])."\n";
+									$header[$i]['ntspec']='Old';			//make headers status old if we displayed it for exclusion
+								}
+								$i++;
+							}
+							$ntspec_print_data.=trim($line)."\n";
+						}
+					} 
+					else 
+					{
+						$i=0;
+						if($line != '' && $line != NULL)
+						{
+							$prev='line';
+							while($i < count($header))
+							{
+								if(($i<(count($header)-count($new_header))) && $header[$i]['spcl'] != 'Yes')
+								$header[$i]['excl']='Old';
+					
+								if($header[$i]['excl'] == 'New')
+								{
+									if(!strpos($header[$i]['val'],'Exclusion') && !preg_match('/(.*)Inclusion(.*)/',$header[$i]['val'], $out22) && !preg_match('/(.*)INCLUSION(.*)/',$header[$i]['val'], $out22) && !preg_match('/(.*)EXCLUSION(.*)/',$header[$i]['val'], $out22) && !preg_match('/(.*)Exclusion(.*)/',$header[$i]['val'], $out22))
+										$excl_print_data.="\n".trim($header[$i]['val'])."\n";
+									$header[$i]['excl']='Old';			//make headers status old if we displayed it for exclusion
+								}
+								$i++;
+							}
+							$diff_criteria_present_flag=1; //make flag one if we get any line belongs to exclusion criteria
+								
+							$excl_print_data.=trim($line)."\n";
+						}
+					}	////End of part to add in different sections
+				}	////End of if for checking data presence - Second level
+			}	///End of for loop of data ends - Second level
+		}	//data present if ends - First level
+	}	///for loop ends of data counter	- First level
 	
 	
 	$incl_print_data=str_replace("########","/",$incl_print_data);
