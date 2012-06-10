@@ -1078,21 +1078,29 @@ function criteria_process($text)
 	
 	$text=str_replace("Inclusion Criteria:","Inclusion Criteria",$text);
 	$text=str_replace("Exclusion Criteria:","Exclusion Criteria",$text);
+	$text=str_replace("Inclusion:","Inclusion Criteria",$text);
+	$text=str_replace("Exclusion:","Exclusion Criteria",$text);
 	$text=str_replace("Inclusion Criteria","Inclusion Criteria",$text);
 	$text=str_replace("Exclusion Criteria","Exclusion Criteria",$text);
 	
 	$text=str_replace("inclusion criteria:","Inclusion Criteria",$text);
 	$text=str_replace("exclusion criteria:","Exclusion Criteria",$text);
+	$text=str_replace("inclusion:","Inclusion Criteria",$text);
+	$text=str_replace("exclusion:","Exclusion Criteria",$text);
 	$text=str_replace("inclusion criteria","Inclusion Criteria",$text);
 	$text=str_replace("exclusion criteria","Exclusion Criteria",$text);
 	
 	$text=str_replace("Inclusion criteria:","Inclusion Criteria",$text);
 	$text=str_replace("Exclusion criteria:","Exclusion Criteria",$text);
+	$text=str_replace("Inclusion:","Inclusion Criteria",$text);
+	$text=str_replace("Exclusion:","Exclusion Criteria",$text);
 	$text=str_replace("Inclusion criteria","Inclusion Criteria",$text);
 	$text=str_replace("Exclusion criteria","Exclusion Criteria",$text);
 	
 	$text=str_replace("INCLUSION CRITERIA:","Inclusion Criteria",$text);
 	$text=str_replace("EXCLUSION CRITERIA:","Exclusion Criteria",$text);
+	$text=str_replace("INCLUSION:","Inclusion Criteria",$text);
+	$text=str_replace("EXCLUSION:","Exclusion Criteria",$text);
 	$text=str_replace("INCLUSION CRITERIA","Inclusion Criteria",$text);
 	$text=str_replace("EXCLUSION CRITERIA","Exclusion Criteria",$text);
 	
@@ -1172,7 +1180,7 @@ function criteria_process($text)
 			
 			if(!$incl_header)
 			{
-				if(strpos($line,'Inclusion') || preg_match('/(.*)Inclusion(.*)/',$line, $out11) || preg_match('/(.*)INCLUSION(.*)/',$line, $out11) || preg_match('/(.*)inclusion(.*)/',$line, $out11))
+				if(strpos($line,'Inclusion Criteria') || preg_match('/(.*)Inclusion Criteria(.*)/',$line, $out11) || preg_match('/(.*)INCLUSION(.*)/',$line, $out11) || preg_match('/(.*)inclusion criteria(.*)/',$line, $out11))
 				{
 				$incl_header=1;
 				$excl_header=0;
@@ -1181,7 +1189,7 @@ function criteria_process($text)
 			
 			if(!$excl_header)
 			{
-				if(strpos($line,'Exclusion') || preg_match('/(.*)Exclusion(.*)/',$line, $out11) || preg_match('/(.*)EXCLUSION(.*)/',$line, $out11) || preg_match('/(.*)exclusion(.*)/',$line, $out11))
+				if(strpos($line,'Exclusion Criteria') || preg_match('/(.*)Exclusion Criteria(.*)/',$line, $out11) || preg_match('/(.*)EXCLUSION(.*)/',$line, $out11) || preg_match('/(.*)exclusion criteria(.*)/',$line, $out11))
 				{
 				$excl_header=1;
 				$incl_header=0;
