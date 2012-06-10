@@ -42,10 +42,10 @@ switch($_REQUEST['op']){
 
 function listSearchesInGrid()
 {
-	$page = $_GET['page']; // get the requested page
-	$limit = $_GET['rows']; // get how many rows we want to have into the grid
-	$sidx = $_GET['sidx']; // get index row - i.e. user click to sort
-	$sord = $_GET['sord']; // get the direction
+	$page = $_REQUEST['page']; // get the requested page
+	$limit = $_REQUEST['rows']; // get how many rows we want to have into the grid
+	$sidx = $_REQUEST['sidx']; // get index row - i.e. user click to sort
+	$sord = $_REQUEST['sord']; // get the direction
 	if(!$sidx) $sidx =1;
 
 	$result = mysql_query("SELECT COUNT(*) AS count FROM saved_searches");
@@ -180,7 +180,7 @@ function updateSearch()
 	if(!isset($_REQUEST['reportname']) || !strlen($_REQUEST['reportname'])) return;
 	$name = mysql_real_escape_string($_REQUEST['reportname']);
 	$searchId = mysql_real_escape_string($_REQUEST['searchId']);
-	//$user = isset($_POST['saveglobal']) ? NULL : $db->user->id;
+	//$user = isset($_REQUEST['saveglobal']) ? NULL : $db->user->id;
 	$user = $db->user->id;
 	$searchdata = $querytosave;
 	
@@ -254,7 +254,7 @@ function get_SearchData()
 	$row = mysql_fetch_array($res);
 	//if($row === false) return;	//In this case, either the ID is invalid or it doesn't belong to the current user.
 
-	//$show_value = 'showSearchData("' . $_GET['id'] . '");';
+	//$show_value = 'showSearchData("' . $_REQUEST['id'] . '");';
 	//echo($show_value);
 	$data = unserialize(base64_decode($row['searchdata']));
 	
