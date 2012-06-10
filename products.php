@@ -259,8 +259,16 @@ $(document).ready(function () {
     function testSQL()
     {
         var jsonData = getQueryData();   
+		if(jsonData.length > 500)
+		{
+			requestType = 'POST';
+		}
+		else
+		{
+			requestType = 'GET';
+		}        
           $.ajax({
-					type: 'GET',
+					type: requestType,
 					url:  'searchhandler.php' + '?op=testQuery',
 					data: 'data=' + jsonData,
 					beforeSend:function (){
