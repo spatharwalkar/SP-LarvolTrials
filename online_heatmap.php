@@ -553,16 +553,6 @@ width:100px;
 	padding-top:3px;
 }
 
-.box_rotate {
-	-moz-transform: rotate(270deg); /* For Firefox */
-	-o-transform: rotate(270deg); /* For Opera */
-	-webkit-transform: rotate(270deg); /* For Safari and Chrome */
-	white-space:wrap;
-	writing-mode: tb-rl; /* For IE */
-	filter: flipv fliph;
-	white-space:wrap;
-}
-
 .downldbox {
 	height:auto;
 	width:310px;
@@ -606,44 +596,76 @@ width:100px;
 <?php
 ///Formula to calculate Height and Width of Row and category cell, depending on category name
 //style tag is used here as specifying height and width directly inside tag does not have any effect in IE7/IE8/Chrome
+$max_strlen = 0;
 foreach($rows as $row => $rval)
 {
 	$cat = (isset($rowsCategoryName[$row]) && $rowsCategoryName[$row] != '')? $rowsCategoryName[$row]:'Undefined';
 	
-	$height="20px";
-	$width = "20px";
+	$height = "20";
+	$row_height = "22";
 	if($cat != 'Undefined')
 	{
 		if($rows_Span[$row] > 0)
 		{
-			$height = ((strlen(max(explode(' ',$rowsCategoryName[$row])))*10)/$rows_Span[$row]);
-			$width = (count(explode(' ',$rowsCategoryName[$row]))*14);
-			while($width > $height)
-			$height=$width+$height;
-			$height = $height / $rows_Span[$row];
-			$width = $width.'px';
-			$height = $height.'px';
-			$prev_width = $width;
-			$prev_height = $height;
 			
+			if($rows_Span[$row] == 1) $span = 3; else $span = $rows_Span[$row]+2;
+			$cat_height = $row_height * $span;
+			$spacing = round(($cat_height / 10),0);
+			$rows_Cat_Space[$row] =  $spacing;
+			
+			$num_lines = strlen($cat) / $spacing;
+			$width = $num_lines * 20;
+			if($max_width < $width)
+			{
+				$max_width = $width;
+			}
+			$cat_row_height = $cat_height / $rows_Span[$row];
+			$prev_height = $cat_row_height;
 		}
 		else if($rows_Span[$row] == 0)
 		{
-			$height = $prev_height;
-			$width = $prev_width;
+			$cat_row_height = $prev_height;
 		}
 		
 	}
+	else
+	{
+		$cat_row_height = $row_height;
+	}
 	echo '<style type="text/css"> 
-	.Cat_Height_'.$row.' { height:'.$height.'; vertical-align:middle; } 
-	.Cell_Height_'.$row.' { min-height:'.$height.';  height:100%; max-height:inherit; vertical-align:middle; _height:'.$height.'; } 
-	.Cat_Width_'.$row.' { width:'.$width.'; vertical-align:middle;  } 
-	</style>';  
-	//echo  'Cat_Height_'.$row.' { height:'.$height.'; } .Cat_Width_'.$row.' { width:'.$width.'; } .Cell_Height_'.$row.' { min-height:'.$height.'; height:100%; max-height:inherit; vertical-align:middle; }  <br/>';
+		 .Cat_Height_'.$row.' { height:'. $cat_row_height .'px; } 
+		 .Cell_Height_'.$row.' { min-height:'. $cat_row_height .'px;  height:100%; max-height:inherit; _height:'.$cat_row_height.'px; }
+		 .box_rotate_'.$row.' {
+		 </style>';  
+	/*echo  'Cat_Height_'.$row.' { height:'.$cat_height.'px; vertical-align:middle; word-wrap: break-word; } 
+		 Cell_Height_'.$row.' { min-height:'.$cat_row_height.'px;  height:100%; max-height:inherit; vertical-align:middle; _height:'.$height.'px; }  <br/>';*/
 }
-
+$adj_width = 40;
+$width = $max_width + $adj_width;
+//print $width;
+echo '<style type="text/css"> 
+	 .Cat_Width { width:'.$width.'px; min-width:'.$width.'px; max-width:'.$width.'px; vertical-align:top; } 
+	 </style>';
 ///End of height and width formula
 ?>
+
+<style type="text/css">
+.box_rotate {
+	-moz-transform: rotate(270deg); /* For Firefox */
+	/*-moz-transform-origin:100% 50%; /* Firefox */
+	-o-transform: rotate(270deg); /* For Opera */
+	-webkit-transform: rotate(270deg); /* For Safari and Chrome */
+	/*-webkit-transform-origin:100% 50%; /* Safari and Chrome */
+	transform: rotate(270deg);
+	/*transform-origin:100% 50%;*/
+	-ms-transform: rotate(270deg); /* IE 9 */
+	/*-ms-transform-origin:100% 50%; /* IE 9 */
+	white-space:nowrap;
+	writing-mode: tb-rl; /* For IE */
+	filter: flipv fliph;
+	/*font-family:"Courier New", Courier, monospace;*/
+}
+</style>
 <script language="javascript" type="text/javascript">
 function change_view()
 {
@@ -1326,14 +1348,20 @@ foreach($rows as $row => $rval)
 	{
 		$online_HMCounter++;
 		
-		$htmlContent .='<th class="Cat_Width_'.$row.'" align="center" style="vertical-align:middle; background-color:#FFFFFF; '.(($cat != 'Undefined') ? ' border-left:#000000 solid 2px; border-top:#000000 solid 2px; border-bottom:#000000 solid 2px;' : '' ).'" rowspan="'.$rows_Span[$row].'" id="Cell_ID_'.$online_HMCounter.'"><div class="box_rotate Cat_Height_'.$row.'">';
+		$htmlContent .='<th class="Cat_Width" align="center" style="vertical-align:middle; background-color:#FFFFFF; '.(($cat != 'Undefined') ? ' border-left:#000000 solid 2px; border-top:#000000 solid 2px; border-bottom:#000000 solid 2px;' : '' ).'" rowspan="'.$rows_Span[$row].'" id="Cell_ID_'.$online_HMCounter.'"><div class="box_rotate Cat_Height_'.$row.'">';
 		if($dtt)
 		{
 			$htmlContent .= '<input type="hidden" value="0,endl,0,endl,0" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
 			$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . implode(',', $rows_categoryProducts[$cat]) . '&a=' . $last_area . '&list=1&sr=now&er=1 month ago" target="_blank" class="ottlink" style="color:#000000;">';
 			$htmlContent .= '<input type="hidden" value="'. urlPath() .'intermediary.php?p=' . implode(',', $rows_categoryProducts[$cat]) . '&a=' . $last_area . '&list=1&itype=0&sr=now&er=1 month ago&hm=' . $id . '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />';
 		}
-		$htmlContent .='<b>'.(($cat != 'Undefined') ? '<br/>'.$cat:'').'</b>';
+		if($cat != 'Undefined')
+		{
+			$cat_name = str_replace(' ','`',trim($cat));
+			$cat_name = preg_replace('/([^\s-]{'.$rows_Cat_Space[$row].'})(?=[^\s-])/','$1<br/>',$cat_name);
+			$cat_name = str_replace('`',' ',$cat_name);
+			$htmlContent .='<b>'.$cat_name.'</b>';
+		}
 		if($dtt)
 		$htmlContent .= '</a>';
 		$htmlContent .='</div></th>';
@@ -1574,6 +1602,7 @@ if (docWidth > winWidth)
 {
 //alert("Horizontal Scrollbar Present");
 $('.product_col').css('max-width','400px');
+$('.product_col').css('min-width','400px');
 $('.product_col').css('white-space','wrap');
 $('.product_col').css('word-wrap','break-word');
 $('.product_col').css('_width','400px');
