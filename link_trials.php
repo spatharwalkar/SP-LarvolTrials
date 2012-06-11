@@ -147,8 +147,8 @@ else
 		$query = 	"
 				SELECT larvol_id, eudract_id
 				FROM data_eudract
-				WHERE nct_id = $source_id 
-				";
+				WHERE nct_id = '" . $source_id  . "'";
+				
 		$res1 		= mysql_query($query) ;
 		if($res1===false)
 		{
@@ -172,8 +172,7 @@ else
 		$query = 	"
 				SELECT larvol_id, nct_id
 				FROM data_nct
-				WHERE ((org_study_id = $source_id ) OR (secondary_id = $source_id ))
-				";
+				WHERE ((org_study_id ='".  $source_id  . "') OR (secondary_id = '" . $source_id ."' ))";
 		$res1 		= mysql_query($query) ;
 		if($res1===false)
 		{

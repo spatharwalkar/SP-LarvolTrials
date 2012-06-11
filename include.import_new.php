@@ -259,7 +259,6 @@ $array1=array
 		{
 			$value = null;
 			$nullvalue='YES';
-			//		return true;
 		}
 
 		$lastchanged_date = normal('date',$lastchanged_date);
@@ -268,36 +267,46 @@ $array1=array
 		$DTnow = date('Y-m-d H:i:s',$now);
 
 		$raw_value=$value;
+		if(is_null($value))
+		{
+			//do nothing
+			//echo("Field is null");
+		}
+		else
+		{
 		$value=mysql_real_escape_string($value);
 		$raw_value=mysql_real_escape_string($raw_value);
-        $dn_array=array
-					(
-				'dummy', 'larvol_id', 'source_id', 'brief_title', 'acronym', 'official_title', 'lead_sponsor', 'collaborator', 'institution_type', 'source', 'has_dmc', 'brief_summary', 'detailed_description', 'overall_status', 'is_active', 'why_stopped', 'start_date', 'end_date', 'study_type', 'study_design', 'number_of_arms', 'number_of_groups', 'enrollment', 'enrollment_type',  'study_pop', 'sampling_method', 'criteria', 'gender', 'minimum_age', 'maximum_age', 'healthy_volunteers', 'verification_date', 'lastchanged_date', 'firstreceived_date', 'org_study_id', 'phase', 'condition', 'secondary_id', 'arm_group_label', 'arm_group_type', 'arm_group_description', 'intervention_type', 'intervention_name', 'intervention_other_name', 'intervention_description', 'primary_outcome_measure', 'primary_outcome_timeframe', 'primary_outcome_safety_issue', 'secondary_outcome_measure', 'secondary_outcome_timeframe', 'secondary_outcome_safety_issue', 'location_name', 'location_city', 'location_state', 'location_zip', 'location_country', 'region', 'keyword', 'is_fda_regulated', 'is_section_801'
-				);
-		
-	$as=array_search($fieldname,$dn_array);
-
-	if ( isset($as) and $as)
-	{
-		$query = 'SELECT `' .$fieldname. '`, `lastchanged_date`  FROM data_trials WHERE `larvol_id`="'. $larvol_id . '" limit 1';
-		if(!$res = mysql_query($query))
-		{
-			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-			$logger->error($log);
-			mysql_query('ROLLBACK');
-			echo $log;
-			return false;
 		}
-		$row = mysql_fetch_assoc($res);
-		$olddate=$row['lastchanged_date'];
-		$oldval=$row[$fieldname];
-		$value=mysql_real_escape_string($value);
+		
 
-
-
-		//check if the data is manually overridden
-		$dn_array1=array
+		$dn_array=array
 		(
+				'dummy', 'larvol_id', 'source_id', 'brief_title', 'acronym', 'official_title', 'lead_sponsor', 'collaborator', 'institution_type', 'source', 'has_dmc', 'brief_summary', 'detailed_description', 'overall_status', 'is_active', 'why_stopped', 'start_date', 'end_date', 'study_type', 'study_design', 'number_of_arms', 'number_of_groups', 'enrollment', 'enrollment_type',  'study_pop', 'sampling_method', 'criteria', 'inclusion_criteria', 'exclusion_criteria', 'gender', 'minimum_age', 'maximum_age', 'healthy_volunteers', 'verification_date', 'lastchanged_date', 'firstreceived_date', 'org_study_id', 'phase', 'condition', 'secondary_id', 'arm_group_label', 'arm_group_type', 'arm_group_description', 'intervention_type', 'intervention_name', 'intervention_other_name', 'intervention_description', 'primary_outcome_measure', 'primary_outcome_timeframe', 'primary_outcome_safety_issue', 'secondary_outcome_measure', 'secondary_outcome_timeframe', 'secondary_outcome_safety_issue', 'location_name', 'location_city', 'location_state', 'location_zip', 'location_country', 'region', 'keyword', 'is_fda_regulated', 'is_section_801', 'viewcount', 'ages'
+				);
+
+				$as=array_search($fieldname,$dn_array);
+
+				if ( isset($as) and $as)
+				{
+					$query = 'SELECT `' .$fieldname. '`, `lastchanged_date`  FROM data_trials WHERE `larvol_id`="'. $larvol_id . '" limit 1';
+					if(!$res = mysql_query($query))
+					{
+						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+						$logger->error($log);
+						mysql_query('ROLLBACK');
+						echo $log;
+						return false;
+					}
+					$row = mysql_fetch_assoc($res);
+					$olddate=$row['lastchanged_date'];
+					$oldval=$row[$fieldname];
+					//$value=mysql_real_escape_string($value);
+
+
+
+					//check if the data is manually overridden
+					$dn_array1=array
+					(
 					'dummy', 'larvol_id', 'brief_title', 'acronym', 'official_title', 'lead_sponsor', 'collaborator', 'institution_type', 'source', 'has_dmc', 'brief_summary', 'detailed_description', 'overall_status', 'is_active', 'why_stopped', 'start_date', 'end_date', 'study_type', 'study_design', 'number_of_arms', 'number_of_groups', 'enrollment', 'enrollment_type', 'study_pop', 'sampling_method', 'criteria', 'gender', 'minimum_age', 'maximum_age', 'healthy_volunteers', 'verification_date', 'lastchanged_date', 'firstreceived_date', 'org_study_id', 'phase', 'condition', 'secondary_id', 'arm_group_label', 'arm_group_type', 'arm_group_description', 'intervention_type', 'intervention_name', 'intervention_other_name', 'intervention_description', 'primary_outcome_measure', 'primary_outcome_timeframe', 'primary_outcome_safety_issue', 'secondary_outcome_measure', 'secondary_outcome_timeframe', 'secondary_outcome_safety_issue', 'location_name', 'location_city', 'location_state', 'location_zip', 'location_country', 'region', 'keyword', 'is_fda_regulated', 'is_section_801'
 					);
 					$as1=array_search($fieldname,$dn_array1);
@@ -327,7 +336,7 @@ $array1=array
 
 					$dt_array=array
 					(
-				'dummy', 'larvol_id', 'source_id', 'brief_title', 'acronym', 'official_title', 'lead_sponsor', 'collaborator', 'institution_type', 'source', 'has_dmc', 'brief_summary', 'detailed_description', 'overall_status', 'is_active', 'why_stopped', 'start_date', 'end_date', 'study_type', 'study_design', 'number_of_arms', 'number_of_groups', 'enrollment', 'enrollment_type',  'study_pop', 'sampling_method', 'criteria', 'gender', 'minimum_age', 'maximum_age', 'healthy_volunteers', 'verification_date', 'lastchanged_date', 'firstreceived_date', 'org_study_id', 'phase', 'condition', 'secondary_id', 'arm_group_label', 'arm_group_type', 'arm_group_description', 'intervention_type', 'intervention_name', 'intervention_other_name', 'intervention_description', 'primary_outcome_measure', 'primary_outcome_timeframe', 'primary_outcome_safety_issue', 'secondary_outcome_measure', 'secondary_outcome_timeframe', 'secondary_outcome_safety_issue', 'location_name', 'location_city', 'location_state', 'location_zip', 'location_country', 'region', 'keyword', 'is_fda_regulated', 'is_section_801'
+				'dummy', 'larvol_id', 'source_id', 'brief_title', 'acronym', 'official_title', 'lead_sponsor', 'collaborator', 'institution_type', 'source', 'has_dmc', 'brief_summary', 'detailed_description', 'overall_status', 'is_active', 'why_stopped', 'start_date', 'end_date', 'study_type', 'study_design', 'number_of_arms', 'number_of_groups', 'enrollment', 'enrollment_type',  'study_pop', 'sampling_method', 'criteria', 'inclusion_criteria', 'exclusion_criteria', 'gender', 'minimum_age', 'maximum_age', 'healthy_volunteers', 'verification_date', 'lastchanged_date', 'firstreceived_date', 'org_study_id', 'phase', 'condition', 'secondary_id', 'arm_group_label', 'arm_group_type', 'arm_group_description', 'intervention_type', 'intervention_name', 'intervention_other_name', 'intervention_description', 'primary_outcome_measure', 'primary_outcome_timeframe', 'primary_outcome_safety_issue', 'secondary_outcome_measure', 'secondary_outcome_timeframe', 'secondary_outcome_safety_issue', 'location_name', 'location_city', 'location_state', 'location_zip', 'location_country', 'region', 'keyword', 'is_fda_regulated', 'is_section_801', 'viewcount', 'ages'
 				);
 				$as=array_search($fieldname,$dt_array);
 
@@ -411,10 +420,10 @@ $array1=array
 
 				}
 
-	}
+				}
 
 
-	return true;
+				return true;
 
 	}
 	
@@ -423,39 +432,43 @@ $array1=array
 		$strval = '';
 		if((strlen($rec->design_controlled) <> 0) && ($rec->design_controlled == 1))
 		{
-			$strval = $strval . '`' . 'design_controlled';
+			$strval = $strval . 'design_controlled' . '`' ;
 		}
 		if((strlen($rec->design_randomised) <> 0) && ($rec->design_randomised == 1))
 		{
-			$strval = $strval . '`' . 'design_randomised';
+			$strval = $strval  . 'design_randomised' . '`';
 		}
 		if((strlen($rec->design_open) <> 0) && ($rec->design_open == 1))
 		{
-			$strval = $strval . '`' . 'design_open';
+			$strval = $strval  . 'design_open' . '`';
 		}
 		if((strlen($rec->design_single_blind) <> 0) && ($rec->design_single_blind == 1))
 		{
-			$strval = $strval . '`' . 'design_single_blind';
+			$strval = $strval  . 'design_single_blind' . '`';
 		}
 		if((strlen($rec->design_double_blind) <> 0) && ($rec->design_double_blind == 1))
 		{
-			$strval = $strval . '`' . 'design_double_blind';
+			$strval = $strval  . 'design_double_blind' . '`';
 		}
 		if((strlen($rec->design_parallel_group) <> 0) && ($rec->design_parallel_group == 1))
 		{
-			$strval = $strval . '`' . 'design_parallel_group';
+			$strval = $strval  . 'design_parallel_group' . '`';
 		}
 		if((strlen($rec->design_crossover) <> 0) && ($rec->design_crossover == 1))
 		{
-			$strval = $strval . '`' . 'design_crossover';
+			$strval = $strval  . 'design_crossover' . '`';
 		}
 		if((strlen($rec->design_other) <> 0) && ($rec->design_other == 1))
 		{
-			$strval = $strval . '`' . 'design_other';
+			$strval = $strval  . 'design_other' . '`';
 		}
 		if(strlen($strval) == 0)
 		{
 			$strval = $rec->design_other_description;
+		}
+		else
+		{
+			$strval = substr($strval, 0, -1); //remove the last '`'
 		}
 		return $strval;
 	}
@@ -521,75 +534,80 @@ $array1=array
 		$strval = '';
 		if((strlen($rec->type_at) <> 0) && ($rec->type_at == 1))
 		{
-			$strval = $strval . '`' . 'type_at';
+			$strval = $strval  . 'type_at' . '`';
 		}
 		if((strlen($rec->type_somatic_cell) <> 0) && ($rec->type_somatic_cell == 1))
 		{
-			$strval = $strval . '`' . 'type_somatic_cell';
+			$strval = $strval . 'type_somatic_cell' . '`' ;
 		}
 		if((strlen($rec->type_gene) <> 0) && ($rec->type_gene == 1))
 		{
-			$strval = $strval . '`' . 'type_gene';
+			$strval = $strval  . 'type_gene' . '`';
 		}
 		if((strlen($rec->type_tissue) <> 0) && ($rec->type_tissue == 1))
 		{
-			$strval = $strval . '`' . 'type_tissue';
+			$strval = $strval  . 'type_tissue' . '`';
 		}
 		if((strlen($rec->type_combo_at) <> 0) && ($rec->type_combo_at == 1))
 		{
-			$strval = $strval . '`' . 'type_combo_at';
+			$strval = $strval  . 'type_combo_at' . '`';
 		}
 		if((strlen($rec->type_cat_class) <> 0) && ($rec->type_cat_class == 1))
 		{
-			$strval = $strval . '`' . 'type_cat_class';
+			$strval = $strval  . 'type_cat_class' . '`';
 		}
 		if((strlen($rec->type_cat_number) <> 0) && ($rec->type_cat_number == 1))
 		{
-			$strval = $strval . '`' . 'type_cat_number';
+			$strval = $strval  . 'type_cat_number' . '`';
 		}
 		if((strlen($rec->type_combo_device_not_at) <> 0) && ($rec->type_combo_device_not_at == 1))
 		{
-			$strval = $strval . '`' . 'type_combo_device_not_at';
+			$strval = $strval  . 'type_combo_device_not_at' . '`';
 		}
 		if((strlen($rec->type_radio) <> 0) && ($rec->type_radio == 1))
 		{
-			$strval = $strval . '`' . 'type_radio';
+			$strval = $strval  . 'type_radio' . '`';
 		}
 		if((strlen($rec->type_immune) <> 0) && ($rec->type_immune == 1))
 		{
-			$strval = $strval . '`' . 'type_immune';
+			$strval = $strval . 'type_immune'  . '`';
 		}
 		if((strlen($rec->type_plasma) <> 0) && ($rec->type_plasma == 1))
 		{
-			$strval = $strval . '`' . 'type_plasma';
+			$strval = $strval  . 'type_plasma' . '`';
 		}
 		if((strlen($rec->type_extract) <> 0) && ($rec->type_extract == 1))
 		{
-			$strval = $strval . '`' . 'type_extract';
+			$strval = $strval  . 'type_extract' . '`';
 		}
 		if((strlen($rec->type_recombinant) <> 0) && ($rec->type_recombinant == 1))
 		{
-			$strval = $strval . '`' . 'type_recombinant';
+			$strval = $strval  . 'type_recombinant' . '`';
 		}
 		if((strlen($rec->type_gmo) <> 0) && ($rec->type_gmo == 1))
 		{
-			$strval = $strval . '`' . 'type_gmo';
+			$strval = $strval  . 'type_gmo' . '`';
 		}
 		if((strlen($rec->type_herbal) <> 0) && ($rec->type_herbal == 1))
 		{
-			$strval = $strval . '`' . 'type_herbal';
+			$strval = $strval  . 'type_herbal' . '`';
 		}
 		if((strlen($rec->type_homeopathic) <> 0) && ($rec->type_homeopathic == 1))
 		{
-			$strval = $strval . '`' . 'type_homeopathic';
+			$strval = $strval  . 'type_homeopathic' . '`';
 		}
 		if((strlen($rec->type_other) <> 0) && ($rec->type_other == 1))
 		{
-			$strval = $strval . '`' . 'type_other';
+			$strval = $strval  . 'type_other' . '`';
 		}
+		
 		if(strlen($strval) == 0)
 		{
 			$strval = $rec->type_other_name;
+		}
+	    else
+		{
+			$strval = substr($strval, 0, -1); //remove the last '`'
 		}
 		return $strval;
 	}
@@ -598,39 +616,44 @@ $array1=array
 		$strval = '';
 		if((strlen($rec->age_has_under18) <> 0) && ($rec->age_has_under18 == 1))
 		{
-			$strval = $strval . '`' . 'age_has_under18';
+			$strval = $strval  . 'age_has_under18' . '`';
 		}
 		if((strlen($rec->age_has_in_utero) <> 0) && ($rec->age_has_in_utero == 1))
 		{
-			$strval = $strval . '`' . 'age_has_in_utero';
+			$strval = $strval  . 'age_has_in_utero' . '`';
 		}
 		if((strlen($rec->age_has_preterm_newborn) <> 0) && ($rec->age_has_preterm_newborn == 1))
 		{
-			$strval = $strval . '`' . 'age_has_preterm_newborn';
+			$strval = $strval  . 'age_has_preterm_newborn' . '`';
 		}
 		if((strlen($rec->age_has_newborn) <> 0) && ($rec->age_has_newborn == 1))
 		{
-			$strval = $strval . '`' . 'age_has_newborn';
+			$strval = $strval  . 'age_has_newborn' . '`';
 		}
 		if((strlen($rec->age_has_infant_toddler) <> 0) && ($rec->age_has_infant_toddler == 1))
 		{
-			$strval = $strval . '`' . 'age_has_infant_toddler';
+			$strval = $strval  . 'age_has_infant_toddler' . '`';
 		}
 		if((strlen($rec->age_has_children) <> 0) && ($rec->age_has_children == 1))
 		{
-			$strval = $strval . '`' . 'age_has_children';
+			$strval = $strval  . 'age_has_children' . '`';
 		}
 		if((strlen($rec->age_has_adolescent) <> 0) && ($rec->age_has_adolescent == 1))
 		{
-			$strval = $strval . '`' . 'age_has_adolescent';
+			$strval = $strval . 'age_has_adolescent'  . '`';
 		}
 		if((strlen($rec->age_has_adult) <> 0) && ($rec->age_has_adult == 1))
 		{
-			$strval = $strval . '`' . 'age_has_adult';
+			$strval = $strval  . 'age_has_adult' . '`';
 		}
 		if((strlen($rec->age_has_elderly) <> 0) && ($rec->age_has_elderly == 1))
 		{
-			$strval = $strval . '`' . 'age_has_elderly';
+			$strval = $strval  . 'age_has_elderly' . '`';
+		}
+		
+	    if(strlen($strval) > 0)
+		{
+			$strval = substr($strval, 0, -1); //remove the last '`'
 		}
 		return $strval;
 	}
@@ -815,7 +838,7 @@ $array1=array
 		$gender = eudraGender($rec->gender_male, $rec->gender_female);
 		$phase = eudraPhase($rec->tp_phase1_human_pharmacology,$rec->tp_phase2_explatory,
 		$rec->tp_phase3_confirmatory,$rec->tp_phase4_use);
-		$condition = $rec->condition . '`' . $rec->lay_condition . '`' . $rec->therapeutic_area;
+		$condition = $rec->condition . addMultiVal($rec->lay_condition) . addMultiVal($rec->therapeutic_area);
 		$intervention_type = eudraInterventionType($rec);
 		$intervention_name = $rec->product_name . addMultiVal($rec->product_code) . addMultiVal($rec->product_pharm_form) . addMultiVal($rec->imp_trade_name);
 		$ages = eudraAge($rec);
@@ -825,7 +848,10 @@ $array1=array
 		$region=eudraRegion($country);
 		$ins_type=getInstitutionType($rec->support_org_name,$rec->sponsor_name,$larvol_id);
 		
-		
+		echo("Start Date: ");
+		var_dump($rec->start_date);
+		echo("End Date: ");
+		var_dump($rec->end_date_global);
 		/*************************************/
 
 		//Go through the parsed XML structure and pick out the data
@@ -865,8 +891,14 @@ $array1=array
 	'region' => $region,
 	'institution_type' => $ins_type);	
 		
+		echo("Start Date 1: ");
+		var_dump($record_data->start_date);
+		echo("End Date 1: ");
+		var_dump($record_data->end_date);
 		
 		$end_date=normal('date',(string)$record_data->end_date);
+		echo("End Date 2: ");
+		var_dump($record_data->end_date);
 		foreach($record_data as $fieldname => $value)
 		if(!addEudraValToDataTrial($larvol_id, $fieldname, $value, $eudract_last_updated_date, $oldtrial,NULL,$end_date))
 		logDataErr('<br>To Data Trial: Could not save the value of <b>' . $fieldname . '</b>, Value: ' . $value );//Log in errorlog
