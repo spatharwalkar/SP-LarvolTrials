@@ -608,7 +608,7 @@ foreach($rows as $row => $rval)
 		if($rows_Span[$row] > 0)
 		{
 			
-			if($rows_Span[$row] == 1) $span = 3; else $span = $rows_Span[$row]+2;
+			if($rows_Span[$row] == 1) $span = 2.2; else $span = $rows_Span[$row]+1.5;
 			$cat_height = $row_height * $span;
 			$spacing = round(($cat_height / 10),0);
 			$rows_Cat_Space[$row] =  $spacing;
@@ -632,19 +632,19 @@ foreach($rows as $row => $rval)
 	{
 		$cat_row_height = $row_height;
 	}
+	$Cat_Height_Array[$row] = $cat_row_height;
 	echo '<style type="text/css"> 
-		 .Cat_Height_'.$row.' { height:'. $cat_row_height .'px; } 
+		 .Cat_Height_'.$row.' { height:'. $cat_row_height .'px; max-height:'. $cat_row_height .'px;  _height:'. $cat_row_height .'px; } 
 		 .Cell_Height_'.$row.' { min-height:'. $cat_row_height .'px;  height:100%; max-height:inherit; _height:'.$cat_row_height.'px; }
-		 .box_rotate_'.$row.' {
 		 </style>';  
 	/*echo  'Cat_Height_'.$row.' { height:'.$cat_height.'px; vertical-align:middle; word-wrap: break-word; } 
 		 Cell_Height_'.$row.' { min-height:'.$cat_row_height.'px;  height:100%; max-height:inherit; vertical-align:middle; _height:'.$height.'px; }  <br/>';*/
 }
-$adj_width = 40;
-$width = $max_width + $adj_width;
+$adj_width = 0;
+$width = $max_width + $adj_width; 
 //print $width;
 echo '<style type="text/css"> 
-	 .Cat_Width { width:'.$width.'px; min-width:'.$width.'px; max-width:'.$width.'px; vertical-align:top; } 
+	 .Cat_Width { width:'.$width.'px; min-width:'.$width.'px; max-width:'.$width.'px; vertical-align:middle;} 
 	 </style>';
 ///End of height and width formula
 ?>
@@ -652,20 +652,34 @@ echo '<style type="text/css">
 <style type="text/css">
 .box_rotate {
 	-moz-transform: rotate(270deg); /* For Firefox */
-	/*-moz-transform-origin:100% 50%; /* Firefox */
+	-moz-transform-origin:50% 50%; /* Firefox */
 	-o-transform: rotate(270deg); /* For Opera */
 	-webkit-transform: rotate(270deg); /* For Safari and Chrome */
-	/*-webkit-transform-origin:100% 50%; /* Safari and Chrome */
+	-webkit-transform-origin:50% 50%; /* Safari and Chrome */
 	transform: rotate(270deg);
-	/*transform-origin:100% 50%;*/
+	transform-origin:50% 50%;*/
 	-ms-transform: rotate(270deg); /* IE 9 */
-	/*-ms-transform-origin:100% 50%; /* IE 9 */
+	-ms-transform-origin:50% 50%; /* IE 9 */
 	white-space:nowrap;
 	writing-mode: tb-rl; /* For IE */
 	filter: flipv fliph;
 	/*font-family:"Courier New", Courier, monospace;*/
+	height:100%;
+	display:table-cell;
+	bottom:0;
+	vertical-align:baseline; 
+	float:none;
+}
+
+</style>
+<!--- CSS ONLY FOR IE8 AS "TABLE" VALUE IS USEFUL ONLY FOR IE8 WHILE IT CAUSE ISSUES IN OTHER BROWSERS AND "TABLE-CELL" VALUE WORKS IN OTHERS EXCEPT IE--->
+<!--[if IE]>
+<style type="text/css">
+.box_rotate {
+display:table;
 }
 </style>
+<![endif]-->
 <script language="javascript" type="text/javascript">
 function change_view()
 {
@@ -1266,7 +1280,7 @@ $htmlContent  .= '<div id="dropmenu" class="dropmenudiv" style="width: 310px;">'
 				.'<div style="height:150px; padding:6px;"><div class="downldbox"><div class="newtext">Download options</div>'
 				. '<input type="hidden" name="id" id="id" value="' . $id . '" />'
 				. '<ul><li><label>Which format: </label></li>'
-				. '<li><select id="dwformat" name="dwformat" size="2" style="height:36px">'
+				. '<li><select id="dwformat" name="dwformat" size="2" style="height:40px">'
 				. '<option value="exceldown" selected="selected">Excel</option>'
 				. '<option value="pdfdown">PDF</option>'
 				. '</select></li>'
@@ -1348,7 +1362,7 @@ foreach($rows as $row => $rval)
 	{
 		$online_HMCounter++;
 		
-		$htmlContent .='<th class="Cat_Width" align="center" style="vertical-align:middle; background-color:#FFFFFF; '.(($cat != 'Undefined') ? ' border-left:#000000 solid 2px; border-top:#000000 solid 2px; border-bottom:#000000 solid 2px;' : '' ).'" rowspan="'.$rows_Span[$row].'" id="Cell_ID_'.$online_HMCounter.'"><div class="box_rotate Cat_Height_'.$row.'">';
+		$htmlContent .='<th class="Cat_Width" align="center" style="vertical-align:middle; background-color:#FFFFFF; '.(($cat != 'Undefined') ? ' border-left:#000000 solid 2px; border-top:#000000 solid 2px; border-bottom:#000000 solid 2px;' : '' ).'" rowspan="'.$rows_Span[$row].'" id="Cell_ID_'.$online_HMCounter.'"><div class="box_rotate Cat_Width Cat_Height_'.$row.'" align="center">';
 		if($dtt)
 		{
 			$htmlContent .= '<input type="hidden" value="0,endl,0,endl,0" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
