@@ -703,7 +703,8 @@ $.initialBracesFlag = 9;
 
 		],
 		chainInitial:[
-		        { name: '(', op: '(' },  
+		        { name: '(', op: '(' },
+		        { name: 'NOT(', op: 'NOT(' }, 
 		        { name: ') .', op: ')' }
 		        ],
             astagpre: '"',
@@ -824,7 +825,7 @@ $.initialBracesFlag = 9;
                 sqlwhereloop = 0;
                 $('span.sqlwhere').each(function () {
                     //debugger;
-                	if(sqlwhereloop==0 && $('#9990').html() == '(')
+                	if(sqlwhereloop==0 && ($('#9990').html() == '(' || $('#9990').html() == 'NOT('))
             		{
                     data = data + '{' +
                     //'columnslot:' + col_slot + ',' +
@@ -835,6 +836,7 @@ $.initialBracesFlag = 9;
                     '"chainname":"' + $('#9990').html() + '",' +
                     '"columnvalue":""' +
                   '},';
+                    alert(data);
             		}
             	sqlwhereloop++;
                     var col_slot = $(this).find('a.addnewsqlwhere').attr('href');
