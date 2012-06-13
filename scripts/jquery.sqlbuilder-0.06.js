@@ -836,7 +836,6 @@ $.initialBracesFlag = 9;
                     '"chainname":"' + $('#9990').html() + '",' +
                     '"columnvalue":""' +
                   '},';
-                    alert(data);
             		}
             	sqlwhereloop++;
                     var col_slot = $(this).find('a.addnewsqlwhere').attr('href');
