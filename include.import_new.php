@@ -222,6 +222,7 @@ $array1=array
 			$newval="";
 			$cnt=count($value);
 			$c1=1;
+			$num_max = 0;
 			foreach($value as $key => $v)
 			{
 				$tt=strpos('a'.$fieldname, "_date")  ;
@@ -234,7 +235,15 @@ $array1=array
 				elseif(is_numeric($v))
 				{
 					$newval = normal('int',(int)$v);
-				}
+					if($newval > $num_max)
+					{
+						$num_max = $new_val;
+					}
+					else 
+					{
+						$new_val =$num_max;
+					}
+				} 	 	
 				elseif ($ynbool != 'NULL')
 				{
 					$newval = $ynbool;
@@ -714,6 +723,39 @@ $array1=array
 		return $output;
 
 	}
+	
+
+	function eudraDate($array, $is_min)
+	{
+		if($array == null)
+		{
+			return null;
+		}
+		$cnt = count($array);
+		if($cnt == 0) return null;
+
+		$out = normal('date', $array[0]);
+		foreach ($array as $val)
+		{
+			$new_val =  normal('date', $val);
+			if($is_min)
+			{
+				if($new_val < $min_date)
+				{
+					$out = $new_val;
+				}
+			}
+			else
+			{
+				if($new_val > $min_date)
+				{
+					$out = $new_val;
+				}
+			}
+		}
+
+		return $out;
+	}
 
 	function eudraCountry($input)
 	{
@@ -824,6 +866,11 @@ $array1=array
 		$recordArray = array();
 		foreach($record as $fieldname => $value)
 		{
+//			             echo("FieldName: ");
+//						var_dump($fieldname);
+//						echo("  Value: ");
+//						var_dump($value);
+//						echo("<br>");
 			$recordArray [$fieldname] = getEudraValue($fieldname, $value);
 		}
 		$rec = (object)$recordArray;
@@ -848,10 +895,16 @@ $array1=array
 		$region=eudraRegion($country);
 		$ins_type=getInstitutionType($rec->support_org_name,$rec->sponsor_name,$larvol_id);
 		
-		echo("Start Date: ");
-		var_dump($rec->start_date);
-		echo("End Date: ");
-		var_dump($rec->end_date_global);
+        //All Dates
+		$firstreceived_date = eudraDate($record[firstreceived_date], true);//get minimum
+	    $start_date = eudraDate($record[start_date], true);
+	    $end_date = eudraDate($record[end_date_global], false);
+	    
+	    //modify data going to eudra also w.r.t dates
+	    $recordArray[firstreceived_date] = $firstreceived_date;
+	    $recordArray[start_date] = $start_date;
+	    $recordArray[end_date_global] = $end_date;
+		
 		/*************************************/
 
 		//Go through the parsed XML structure and pick out the data
@@ -863,8 +916,8 @@ $array1=array
 	                    'detailed_description' => $detailed_descr,
 						'overall_status' => $overall_status,
 	                    'is_active' => $is_active_overall,
-	    				'start_date' => $rec->start_date, 	
-						'end_date' => $rec->end_date_global,
+	    				'start_date' => $start_date, 	
+						'end_date' => $end_date,
 	                    'study_design' => $study_design,
 	                    'enrollment' => $enrollment,
 	                    'criteria' => $criteria,
@@ -872,7 +925,7 @@ $array1=array
 	'exclusion_criteria' => $rec->exclusion_criteria,
 	'gender' => $gender,
 	'healthy_volunteers' => $rec->subjects_healthy_volunteers,
-	'firstreceived_date' => $rec->firstreceived_date,
+	'firstreceived_date' => $firstreceived_date,
 	'phase' => $phase,
 	'condition' => $condition,
 						'arm_group_description' => $rec->comp_other_products,
@@ -891,14 +944,9 @@ $array1=array
 	'region' => $region,
 	'institution_type' => $ins_type);	
 		
-		echo("Start Date 1: ");
-		var_dump($record_data->start_date);
-		echo("End Date 1: ");
-		var_dump($record_data->end_date);
 		
 		$end_date=normal('date',(string)$record_data->end_date);
-		echo("End Date 2: ");
-		var_dump($record_data->end_date);
+		
 		foreach($record_data as $fieldname => $value)
 		if(!addEudraValToDataTrial($larvol_id, $fieldname, $value, $eudract_last_updated_date, $oldtrial,NULL,$end_date))
 		logDataErr('<br>To Data Trial: Could not save the value of <b>' . $fieldname . '</b>, Value: ' . $value );//Log in errorlog

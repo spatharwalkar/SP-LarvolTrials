@@ -529,5 +529,4 @@ function confirmlinking()
 
 
 		}
-		?>
-
+?>
