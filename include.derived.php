@@ -1230,7 +1230,7 @@ function criteria_process($text)
 			//var_dump($header);
 			
 			///If line does not belongs to exclusion criteria section divide it at a no/not points so part without negation part will go to inclusion other to exclusion
-			if($excl_header != 1 && $incl_header = 1)	
+			if($excl_header != 1)	
 			{
 				$line = preg_replace('/ not /','\n not ',$line);
 				$line = preg_replace('/ Not /','\n Not ',$line);
