@@ -1748,12 +1748,32 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 									echo $log;
 									return false;
 								}
+								$query = '	update data_trials 
+											set `firstreceived_date` = "'.$archive_fdate.'"
+											WHERE `larvol_id`="'. $larvol_id . '"  limit 1';
+								if(!$res = mysql_query($query))
+								{
+									$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+									$logger->error($log);
+									echo $log;
+									return false;
+								}
 							}
 							else
 							{
 							$query = '	insert into data_manual 
 											set `firstreceived_date` = "'.$archive_fdate.'",
 											`larvol_id`="'. $larvol_id . '" ';
+								if(!$res = mysql_query($query))
+								{
+									$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+									$logger->error($log);
+									echo $log;
+									return false;
+								}
+							$query = '	update data_trials 
+											set `firstreceived_date` = "'.$archive_fdate.'"
+											WHERE `larvol_id`="'. $larvol_id . '"  limit 1';
 								if(!$res = mysql_query($query))
 								{
 									$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
