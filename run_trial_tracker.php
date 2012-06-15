@@ -7590,6 +7590,7 @@ class TrialTracker
 			if(isset($globalOptions['JSON_search']))
 			{
 				$query = Build_OTT_Query($globalOptions['JSON_search'], $where);
+				$fullRecordQry = $query;
 			}
 			else
 			{
