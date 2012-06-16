@@ -79,9 +79,9 @@ $globalOptions['minEnroll'] = "0";
 $globalOptions['maxEnroll'] = "0";
 $globalOptions['product'] = "";
 
-$globalOptions['change'] = '1 month';
+$globalOptions['change'] = '1 week';
 $globalOptions['startrange'] = "now";
-$globalOptions['endrange'] = "1 month ago";
+$globalOptions['endrange'] = "1 week ago";
 
 if(isset($_GET['minenroll']) && isset($_GET['maxenroll']))
 {

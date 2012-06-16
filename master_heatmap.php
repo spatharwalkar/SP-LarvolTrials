@@ -1463,9 +1463,9 @@ function Download_reports()
 	else
 	{
 		$start_range = 'now';
-		$end_range = '-1 month';
+		$end_range = '-1 week';
 		$sr = 'now';
-		$er = '1 month ago';
+		$er = '1 week ago';
 	}
 
 /* 	echo '<pre>';

@@ -1100,7 +1100,7 @@ $(function()
 <?php if(!$db->loggedIn()) { ?>		
 		$("#slider-range-min").slider({	//Single Slider - For NOT LoogedIN Users
 		range: "min",
-		value: 3,
+		value: 1,
 		min: 0,
 		max: 6,
 		step:1,
@@ -1109,7 +1109,7 @@ $(function()
 			change_view();
 		}
 	});
-	$timerange = "1 month ago";
+	$timerange = "1 week ago";
 	$("#endrange").val($timerange);
 <?php } else { ?>
 //highlight changes slider
@@ -1118,7 +1118,7 @@ $(function()
 			min: 0,
 			max: 6,
 			step: 1,
-			values: [ 0, 3 ],
+			values: [ 0, 1 ],
 			slide: function(event, ui) {
 				$("#startrange").val(timeEnum(ui.values[0]));
 				$("#endrange").val(timeEnum(ui.values[1]));
@@ -1269,7 +1269,7 @@ $htmlContent .= '<table width="100%" style="background-color:#FFFFFF;">'
 				. '<label for="startrange" style="float:left;margin-left:15px;"><b>Highlight updates:</b></label>'
 				. '<input type="text" id="startrange" name="sr" value="now" readonly="readonly" style="border:0; color:#f6931f; font-weight:bold; background-color:#FFFFFF; font-family:Verdana; font-size: 13px;" class="jdpicker" />'
 				. '<label style="color:#f6931f;float:left;">-</label> '
-				. '<input type="text" id="endrange"  name="er" value="1 month ago" readonly="readonly" style="border:0; color:#f6931f; font-weight:bold; background-color:#FFFFFF; font-family:Verdana; font-size: 13px;" class="jdpicker" />'
+				. '<input type="text" id="endrange"  name="er" value="1 week ago" readonly="readonly" style="border:0; color:#f6931f; font-weight:bold; background-color:#FFFFFF; font-family:Verdana; font-size: 13px;" class="jdpicker" />'
 				. '<br/><div id="slider-range-min" style="width:320px; margin:10px 10px 0 10px;margin-left:20px;" align="left"></div></p></div>'
 				. '<br/><div style="float: right; margin-right: 25px; vertical-align:bottom;" id="chromemenu"><a rel="dropmenu"><span style="padding:2px; padding-right:4px; border:1px solid; color:#000000; background-position:left center; background-repeat:no-repeat; background-image:url(\'./images/save.png\'); cursor:pointer; ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Export</b></span></a></div></td>'
 				. '</tr>'
@@ -1325,7 +1325,7 @@ foreach($columns as $col => $val)
 		$htmlContent .= '<input type="hidden" value="'.$col_active_total[$col].',endl,'.$col_count_total[$col].',endl,'.$col_indlead_total[$col].'" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
 		$htmlContent .= '<input type="hidden" value="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />';
 		
-		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. '&list=1&itype=0&sr=now&er=1 month ago&hm=' . $id . '" target="_blank" style="text-decoration:underline; color:#000000;">'.$val.'</a>';
+		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. '&list=1&itype=0&sr=now&er=1 week ago&hm=' . $id . '" target="_blank" style="text-decoration:underline; color:#000000;">'.$val.'</a>';
 	}
 	$htmlContent .='</th>';
 }
@@ -1343,7 +1343,7 @@ if($toal_fld)
 		$htmlContent .= '<input type="hidden" value="'.$active_total.',endl,'.$count_total.',endl,'.$indlead_total.'" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
 		$htmlContent .= '<input type="hidden" value="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds). '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />';
 		
-		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds). '&list=1&itype=0&sr=now&er=1 month ago&hm=' . $id . '" target="_blank" style="color:#000000;"><font id="Tot_ID_'.$online_HMCounter.'">'.$indlead_total.'</font></a>';
+		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds). '&list=1&itype=0&sr=now&er=1 week ago&hm=' . $id . '" target="_blank" style="color:#000000;"><font id="Tot_ID_'.$online_HMCounter.'">'.$indlead_total.'</font></a>';
 	}
 	$htmlContent .= '</div></th>';
 }
@@ -1366,8 +1366,8 @@ foreach($rows as $row => $rval)
 		if($dtt)
 		{
 			$htmlContent .= '<input type="hidden" value="0,endl,0,endl,0" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
-			$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . implode(',', $rows_categoryProducts[$cat]) . '&a=' . $last_area . '&list=1&sr=now&er=1 month ago" target="_blank" class="ottlink" style="color:#000000;">';
-			$htmlContent .= '<input type="hidden" value="'. urlPath() .'intermediary.php?p=' . implode(',', $rows_categoryProducts[$cat]) . '&a=' . $last_area . '&list=1&itype=0&sr=now&er=1 month ago&hm=' . $id . '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />';
+			$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . implode(',', $rows_categoryProducts[$cat]) . '&a=' . $last_area . '&list=1&sr=now&er=1 week ago" target="_blank" class="ottlink" style="color:#000000;">';
+			$htmlContent .= '<input type="hidden" value="'. urlPath() .'intermediary.php?p=' . implode(',', $rows_categoryProducts[$cat]) . '&a=' . $last_area . '&list=1&itype=0&sr=now&er=1 week ago&hm=' . $id . '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />';
 		}
 		if($cat != 'Undefined')
 		{
@@ -1395,9 +1395,9 @@ foreach($rows as $row => $rval)
 	if(isset($productIds[$row]) && $productIds[$row] != NULL && !empty($areaIds))
 	{
 		$htmlContent .= '<input type="hidden" value="'.$row_active_total[$row].',endl,'.$row_count_total[$row].',endl,'.$row_indlead_total[$row].'" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
-		$htmlContent .= '<input type="hidden" value="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). '" name="Link_value_'.$online_HMCounter.'&list=1&itype=0&sr=now&er=1 month ago" id="Link_value_'.$online_HMCounter.'" />';
+		$htmlContent .= '<input type="hidden" value="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). '" name="Link_value_'.$online_HMCounter.'&list=1&itype=0&sr=now&er=1 week ago" id="Link_value_'.$online_HMCounter.'" />';
 		
-		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). '&list=1&sr=now&er=1 month ago&hm=' . $id . '" target="_blank" class="ottlink" style="text-decoration:underline; color:#000000;">'.$rval.'</a>';
+		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). '&list=1&sr=now&er=1 week ago&hm=' . $id . '" target="_blank" class="ottlink" style="text-decoration:underline; color:#000000;">'.$rval.'</a>';
 	}
 	$htmlContent .= '</div></th>';
 	
@@ -1417,7 +1417,7 @@ foreach($rows as $row => $rval)
 			$htmlContent .= '<input type="hidden" value="' . $productIds[$row] . '" name="Product_value_'.$online_HMCounter.'" id="Product_value_'.$online_HMCounter.'" />&nbsp;';
 			$htmlContent .= '<input type="hidden" value="' . $areaIds[$col]. '" name="Area_value_'.$online_HMCounter.'" id="Area_value_'.$online_HMCounter.'" />&nbsp;';
 				
-			$htmlContent .= '<a onclick="INC_ViewCount(' . trim($productIds[$row]) . ',' . trim($areaIds[$col]) . ',' . $online_HMCounter .')" style="'.$data_matrix[$row][$col]['count_start_style'].' height:100%; vertical-align:middle; padding-top:0px; padding-bottom:0px; line-height:13px; text-decoration:underline;" id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '&list=1&itype=0&sr=now&er=1 month ago&hm=' . $id . '" target="_blank" title="'. $title .'"><b><font id="Font_ID_'.$online_HMCounter.'">'. $data_matrix[$row][$col]['active'] .'</font></b></a>&nbsp;';
+			$htmlContent .= '<a onclick="INC_ViewCount(' . trim($productIds[$row]) . ',' . trim($areaIds[$col]) . ',' . $online_HMCounter .')" style="'.$data_matrix[$row][$col]['count_start_style'].' height:100%; vertical-align:middle; padding-top:0px; padding-bottom:0px; line-height:13px; text-decoration:underline;" id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '&list=1&itype=0&sr=now&er=1 week ago&hm=' . $id . '" target="_blank" title="'. $title .'"><b><font id="Font_ID_'.$online_HMCounter.'">'. $data_matrix[$row][$col]['active'] .'</font></b></a>&nbsp;';
 					
 			if($data_matrix[$row][$col]['bomb']['src'] != 'new_square.png') //When bomb has square dont include it in pdf as size is big and no use
 			$htmlContent .= '<img id="Cell_Bomb_'.$online_HMCounter.'" title="'.$data_matrix[$row][$col]['bomb']['title'].'" src="'. urlPath() .'images/'.$data_matrix[$row][$col]['bomb']['src'].'"  style="'.$data_matrix[$row][$col]['bomb']['style'].' vertical-align:middle;" />&nbsp;';				
