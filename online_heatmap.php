@@ -1228,7 +1228,6 @@ function refresh_data(cell_id)
         <tr><td><img title="Phase explanation" src="images/phaseexp.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Phase explanation</td></tr>
         <tr><td><img title="Phase explanation" src="images/phaseexp_red.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Phase explanation (updated)</td></tr>
         <tr><td><img title="Red Border" src="images/outline.png"  style="width:20px; height:15px; cursor:pointer;" /></td><td>Red border (record updated)</td></tr>
-        <tr><td align="center"><img title="Views" src="images/viewcount_bar.png" align="middle"  style="width:1px; height:17px; cursor:pointer;" /></td><td>Views</td></tr>
         <tr><td colspan="2" style="padding-right: 1px;">
          <div style="float:left;padding-top:3px;">Phase&nbsp;</div>
          <div class="gray">N/A</div>
