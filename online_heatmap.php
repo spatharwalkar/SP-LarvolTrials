@@ -1433,22 +1433,9 @@ foreach($rows as $row => $rval)
 			$htmlContent .= '<span id="ToolTip_ID_'.$online_HMCounter.'" class="classic" style="text-align:left;">'
 							.'<input type="hidden" value="0" name="ToolTip_Visible_'.$online_HMCounter.'" id="ToolTip_Visible_'.$online_HMCounter.'" />';	
 				
-			$htmlContent .= '<font id="Count_CDate_'.$online_HMCounter.'" style="'.(($data_matrix[$row][$col]['active_prev'] != NULL && $data_matrix[$row][$col]['active_prev'] != '')? 'display:inline;':'display:none;').'"><font style="color:#206040; font-weight: 900;">Count </font><font style="color:#206040; font-weight: 900;">updated from : </font><font id="Popup_Count_ID_'.$online_HMCounter.'" style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['active_prev'] .'</font><br/></font>';
-							
-			
-			if($data_matrix[$row][$col]['highest_phase_prev'] != NULL && $data_matrix[$row][$col]['highest_phase_prev'] != '')
-			$htmlContent .= '<font id="Highest_Phase_'.$online_HMCounter.'"><font style="color:#206040; font-weight: 900;">Highest phase updated </font><font style="color:#206040; font-weight: 900;">from : </font> <font style="color:#000000; font-weight: 900;">Phase '.$data_matrix[$row][$col]['highest_phase_prev'].'</font></br></font>';
-							
-							
-							
 			if($data_matrix[$row][$col]['bomb']['src'] != 'new_square.png')
 			{
 				$htmlContent .= '<font style="color:#000000; font-weight: 900;" id="Bomb_Img_'.$online_HMCounter.'">'.$data_matrix[$row][$col]['bomb']['alt'].' </font>'.(($data_matrix[$row][$col]['bomb_explain'] != NULL && $data_matrix[$row][$col]['bomb_explain'] != '')? '<font style="color:#206040; font-weight: 900;">: </font>'. $data_matrix[$row][$col]['bomb_explain'] .'<input type="hidden" value="1" name="Bomb_Presence_'.$online_HMCounter.'" id="Bomb_Presence_'.$online_HMCounter.'" />':'' ).'</br>';
-			}
-							
-			if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
-			{
-				$htmlContent .= '<font style="color:#206040; font-weight: 900;" id="Filing_Img_'.$online_HMCounter.'">Filing </font><font style="color:#206040; font-weight: 900;">: </font>'. $data_matrix[$row][$col]['filing'] .'</br>';
 			}
 			
 			if($data_matrix[$row][$col]['phase_explain'] != NULL && $data_matrix[$row][$col]['phase_explain'] != '')
@@ -1456,6 +1443,16 @@ foreach($rows as $row => $rval)
 				$htmlContent .= '<font style="color:#206040; font-weight: 900;" id="Phaseexp_Img_'.$online_HMCounter.'">Phase explanation </font><font style="color:#206040; font-weight: 900;">: </font>'. $data_matrix[$row][$col]['phase_explain'] .'</br>';
 			}
 			
+			if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
+			{
+				$htmlContent .= '<font style="color:#206040; font-weight: 900;" id="Filing_Img_'.$online_HMCounter.'">Filing </font><font style="color:#206040; font-weight: 900;">: </font>'. $data_matrix[$row][$col]['filing'] .'</br>';
+			}
+			
+			$htmlContent .= '<font id="Count_CDate_'.$online_HMCounter.'" style="'.(($data_matrix[$row][$col]['active_prev'] != NULL && $data_matrix[$row][$col]['active_prev'] != '')? 'display:inline;':'display:none;').'"><font style="color:#206040; font-weight: 900;">Count </font><font style="color:#206040; font-weight: 900;">updated from : </font><font id="Popup_Count_ID_'.$online_HMCounter.'" style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['active_prev'] .'</font><br/></font>';
+							
+			if($data_matrix[$row][$col]['highest_phase_prev'] != NULL && $data_matrix[$row][$col]['highest_phase_prev'] != '')
+			$htmlContent .= '<font id="Highest_Phase_'.$online_HMCounter.'"><font style="color:#206040; font-weight: 900;">Highest phase updated </font><font style="color:#206040; font-weight: 900;">from : </font> <font style="color:#000000; font-weight: 900;">Phase '.$data_matrix[$row][$col]['highest_phase_prev'].'</font></br></font>';
+							
 			$Status_List_Flg=0;
 			$htmlContent .= '<font id="Status_List_'.$online_HMCounter.'">';
 			if($data_matrix[$row][$col]['not_yet_recruiting'] > 0)
