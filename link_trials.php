@@ -190,10 +190,8 @@ else
 	}
 
 }
-require_once('header.php');
 
 $cnt=count($data);
-
 
     if($cnt == 0)
 	{
@@ -201,6 +199,8 @@ $cnt=count($data);
 		exit;
 
 	}
+	
+require_once('header.php');
 
 //auto suggest
 ?>
