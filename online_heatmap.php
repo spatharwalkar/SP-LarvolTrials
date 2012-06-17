@@ -1140,6 +1140,16 @@ function display_tooltip(type, id)
 		{
 			tooltip_ele.style.display = "block";
 			tooltip_ele.style.zIndex = "99";
+			
+			///// Start Part - Position the tooltip properly for the cells which are at leftmost edge of window 
+			var windowedge=document.all && !window.opera? document.documentElement.scrollLeft+document.documentElement.clientWidth - 15 : window.pageXOffset+window.innerWidth - 15
+			var tooltipW = 280
+			if (windowedge-tooltip_ele.offsetLeft < tooltipW)  //move menu to the left?
+			{
+				edgeoffset = tooltipW - document.getElementById("Cell_ID_"+id).offsetWidth + 30
+				tooltip_ele.style.left = tooltip_ele.offsetLeft - edgeoffset +"px"
+			}
+			///// End Part - Position the tooltip properly for the cells which are at leftmost edge of window 
 		}
 		else
 		{
