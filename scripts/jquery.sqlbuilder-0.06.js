@@ -705,7 +705,7 @@ $.initialBracesFlag = 9;
 		chainInitial:[
 		        { name: '(', op: '(' },
 		        { name: 'NOT(', op: 'NOT(' }, 
-		        { name: ') .', op: ')' }
+		        { name: 'Begin', op: ')' }
 		        ],
             astagpre: '"',
             astagsuf: '"'
@@ -1128,7 +1128,7 @@ $.initialBracesFlag = 9;
                     '<font size="4" face="Bold" color="Grey">Conditions</font>' +
                     '<p class=sqlbuilderwhere>' + 
                     '<span class="sqlwhere2" id="1">' +
-	                 '<a class="addnewsqlwherechain" id="9990" href="#0" >' + opts.chain[9].name + '</a>&nbsp;' +
+	                 '<a class="addnewsqlwherechain" id="9990" href="#0" >' + opts.chainInitial[2].name + '</a>&nbsp;' +
                    '</span>' +
                     '<br/>' + '<a class="addnewsqlwhere" id=9999 href="#">' + '<br/>' + opts.addnewwhere + '</a>' + '<br/><br/><br/>' + '</p>' +
                     '<br/><br/>' +
