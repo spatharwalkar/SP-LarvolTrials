@@ -168,9 +168,7 @@ if(!$db->loggedIn())
 require_once('report_common.php');
 
 
-$_GET['header']='<script type="text/javascript" src="progressbar/jquery.js"></script>
-<script type="text/javascript" src="progressbar/jquery.progressbar.js"></script>
-<link href="css/status.css" rel="stylesheet" type="text/css" media="all" />';
+$_GET['header']='<link href="css/status.css" rel="stylesheet" type="text/css" media="all" />';
 
 require('header.php');
 ?>
@@ -582,6 +580,7 @@ function refresher(row, col, tot_rows, tot_cols)
 <script type="text/javascript" src="scripts/jquery-1.7.2.min.js"></script>
 <script type="text/javascript" src="scripts/jquery-ui-1.8.20.custom.min.js"></script>
 <script type="text/javascript" src="scripts/autosuggest/jquery.autocomplete-min.js"></script>
+<script type="text/javascript" src="progressbar/jquery.progressbar.js"></script>
 <?php
 
 postRL();
