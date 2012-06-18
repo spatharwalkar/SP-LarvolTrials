@@ -1,7 +1,7 @@
 <?php 
 header('P3P: CP="CAO PSA OUR"');
 session_start();
-error_reporting(E_ALL ^ E_NOTICE);
+
 require_once('krumo/class.krumo.php');
 require_once('db.php');
 require_once('include.search.php');
@@ -11,14 +11,14 @@ require('searchhandler.php');
 
 
 /********* If Report generation time is less than 1 Jan 2012, time machine is disabled **********/
-if($_GET['time'] != NULL && $_GET['time'] != '')
+if($_REQUEST['time'] != NULL && $_REQUEST['time'] != '')
 {
-if((date('Y-m-d H:i:s', $_GET['time'])) < date('Y-m-d H:i:s',strtotime('2012-01-01 00:00:00')))
-$_GET['time'] = NULL;
+if((date('Y-m-d H:i:s', $_REQUEST['time'])) < date('Y-m-d H:i:s',strtotime('2012-01-01 00:00:00')))
+$_REQUEST['time'] = NULL;
 }
 else
 {
-$_GET['time'] = NULL;
+$_REQUEST['time'] = NULL;
 }
 
 $tt = new TrialTracker;
@@ -83,25 +83,25 @@ $globalOptions['change'] = '1 week';
 $globalOptions['startrange'] = "now";
 $globalOptions['endrange'] = "1 week ago";
 
-if(isset($_GET['minenroll']) && isset($_GET['maxenroll']))
+if(isset($_REQUEST['minenroll']) && isset($_REQUEST['maxenroll']))
 {
-	$globalOptions['minEnroll'] = $_GET['minenroll'];
-	$globalOptions['maxEnroll'] = $_GET['maxenroll'];
+	$globalOptions['minEnroll'] = $_REQUEST['minenroll'];
+	$globalOptions['maxEnroll'] = $_REQUEST['maxenroll'];
 }
 
-if(isset($_GET['enroll']) && $_GET['enroll'] != '0')
+if(isset($_REQUEST['enroll']) && $_REQUEST['enroll'] != '0')
 {	
-	$globalOptions['enroll'] = $_GET['enroll'];
+	$globalOptions['enroll'] = $_REQUEST['enroll'];
 }
 
-if(isset($_GET['sr']))
+if(isset($_REQUEST['sr']))
 {	
-	$globalOptions['startrange'] = $_GET['sr'];
+	$globalOptions['startrange'] = $_REQUEST['sr'];
 }
 
-if(isset($_GET['er']))
+if(isset($_REQUEST['er']))
 {	
-	$globalOptions['endrange'] = $_GET['er'];
+	$globalOptions['endrange'] = $_REQUEST['er'];
 }
 
 
@@ -129,9 +129,9 @@ switch($globalOptions['endrange'])
 	default: $endtimerange = 3; break;
 }
 
-if(isset($_GET['change']) && $_GET['change'] != '')
+if(isset($_REQUEST['change']) && $_REQUEST['change'] != '')
 {
-	$globalOptions['change'] = $_GET['change'];
+	$globalOptions['change'] = $_REQUEST['change'];
 	$globalOptions['startrange'] = 'now';
 	$globalOptions['endrange'] = $globalOptions['change'] . ' ago';
 }
@@ -349,98 +349,98 @@ $maxEnrollLimit = 5000;
   <img id="loading-image" src="images/loading.gif" alt="Loading..." />
 </div>
 <?php
-if(isset($_GET['region']) && $_GET['region'] != '')
+if(isset($_REQUEST['region']) && $_REQUEST['region'] != '')
 {
-	$globalOptions['region'] = explode(',', $_GET['region']);
+	$globalOptions['region'] = explode(',', $_REQUEST['region']);
 }
 
-if(isset($_GET['phase']) && $_GET['phase'] != '')
+if(isset($_REQUEST['phase']) && $_REQUEST['phase'] != '')
 {
-	$globalOptions['phase'] = explode(',', $_GET['phase']);
+	$globalOptions['phase'] = explode(',', $_REQUEST['phase']);
 }
 
-if(isset($_GET['itype']) && $_GET['itype'] != '')
+if(isset($_REQUEST['itype']) && $_REQUEST['itype'] != '')
 {
-	$globalOptions['itype'] = explode(',', $_GET['itype']);
+	$globalOptions['itype'] = explode(',', $_REQUEST['itype']);
 }
 
-if(isset($_GET['status']) && $_GET['status'] != '')
+if(isset($_REQUEST['status']) && $_REQUEST['status'] != '')
 {
-	$globalOptions['status'] = explode(',', $_GET['status']);
+	$globalOptions['status'] = explode(',', $_REQUEST['status']);
 }
 
-if(isset($_GET['list']))
+if(isset($_REQUEST['list']))
 {
-	if($_GET['list'] == 0)
+	if($_REQUEST['list'] == 0)
 	{
 		$globalOptions['type'] = 'inactiveTrials';
 	}
-	elseif($_GET['list'] == 2)
+	elseif($_REQUEST['list'] == 2)
 	{
 		$globalOptions['type'] = 'allTrials';
 	}
 }
 
-if(isset($_GET['page']) && is_numeric($_GET['page']))
+if(isset($_REQUEST['page']) && is_numeric($_REQUEST['page']))
 {
-	$globalOptions['page'] = mysql_real_escape_string($_GET['page']);
+	$globalOptions['page'] = mysql_real_escape_string($_REQUEST['page']);
 }
 
-if(isset($_GET['v']))
+if(isset($_REQUEST['v']))
 {
-	$globalOptions['version'] = mysql_real_escape_string($_GET['v']);
+	$globalOptions['version'] = mysql_real_escape_string($_REQUEST['v']);
 }
 
-if(isset($_GET['osu']) && $_GET['osu'] == 'on')
+if(isset($_REQUEST['osu']) && $_REQUEST['osu'] == 'on')
 {
 	$globalOptions['onlyUpdates'] = "yes";
 }
 
-if(isset($_GET['cd']))
+if(isset($_REQUEST['cd']))
 {
-	$globalOptions['countDetails'] = unserialize(gzinflate(base64_decode(rawurldecode($_GET['cd']))));
+	$globalOptions['countDetails'] = unserialize(gzinflate(base64_decode(rawurldecode($_REQUEST['cd']))));
 }
 
 
-if(isset($_GET['format']) && $_GET['format'] == "new")
+if(isset($_REQUEST['format']) && $_REQUEST['format'] == "new")
 {
 	$globalOptions['encodeFormat'] = "new";
 }
 
 if((isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') !== FALSE)
-|| (isset($_GET['LI']) && $_GET['LI'] == 1))
+|| (isset($_REQUEST['LI']) && $_REQUEST['LI'] == 1))
 {
 	$globalOptions['LI'] = "1";
 }
 
-if(isset($_GET['pr']))
+if(isset($_REQUEST['pr']))
 {	
-	$globalOptions['product'] = $_GET['pr'];
+	$globalOptions['product'] = $_REQUEST['pr'];
 }
 
-if(isset($_GET['id']))
+if(isset($_REQUEST['id']))
 {	
-	$globalOptions['url'] = $_GET['id'];	
-	$tt->generateTrialTracker('webpage', $_GET['id'], NULL, 'standalone', $globalOptions);
+	$globalOptions['url'] = $_REQUEST['id'];	
+	$tt->generateTrialTracker('webpage', $_REQUEST['id'], NULL, 'standalone', $globalOptions);
 }
-else if(isset($_GET['results']) && isset($_GET['type']))
+else if(isset($_REQUEST['results']) && isset($_REQUEST['type']))
 {
-	$tt_type = $_GET['type'] . 'stacked';
-	$globalOptions['url'] = rawurlencode($_GET['results']).'&amp;type='.$_GET['type'];	
-	$tt->generateTrialTracker('webpage', $_GET['results'], $_GET['time'], $tt_type, $globalOptions);
+	$tt_type = $_REQUEST['type'] . 'stacked';
+	$globalOptions['url'] = rawurlencode($_REQUEST['results']).'&amp;type='.$_REQUEST['type'];	
+	$tt->generateTrialTracker('webpage', $_REQUEST['results'], $_REQUEST['time'], $tt_type, $globalOptions);
 }
-else if(isset($_GET['results']))
+else if(isset($_REQUEST['results']))
 {	
-	$globalOptions['url'] = $_GET['results'];	
-	$tt->generateTrialTracker('webpage', $_GET['results'], $_GET['time'], 'unstacked', $globalOptions);
+	$globalOptions['url'] = $_REQUEST['results'];	
+	$tt->generateTrialTracker('webpage', $_REQUEST['results'], $_REQUEST['time'], 'unstacked', $globalOptions);
 }
-else if(isset($_GET['p']) && isset($_GET['a']))
+else if(isset($_REQUEST['p']) && isset($_REQUEST['a']))
 {
-	if(count($_GET['p']) > 1 && count($_GET['a']) > 1)
+	if(count($_REQUEST['p']) > 1 && count($_REQUEST['a']) > 1)
 	{
 		$tt_type = 'totalindexed';
 	}
-	else if(count($_GET['p']) > 1 || count($_GET['a']) > 1)
+	else if(count($_REQUEST['p']) > 1 || count($_REQUEST['a']) > 1)
 	{
 		$tt_type = 'stackedindexed';
 	}
@@ -448,31 +448,31 @@ else if(isset($_GET['p']) && isset($_GET['a']))
 	{
 		$tt_type = 'singleindexed';
 	}
-	$globalOptions['url'] = 'p=' . $_GET['p'] . '&a=' . $_GET['a'];	
+	$globalOptions['url'] = 'p=' . $_REQUEST['p'] . '&a=' . $_REQUEST['a'];	
 	
-	if(isset($_GET['JSON_search']))
+	if(isset($_REQUEST['JSON_search']))
 	{
-		$globalOptions['url'] = 'p=' . $_GET['p'] . '&a=' . $_GET['a'] . '&JSON_search=' . $_GET['JSON_search'];
-		$globalOptions['JSON_search'] = $_GET['JSON_search'];
+		$globalOptions['url'] = 'p=' . $_REQUEST['p'] . '&a=' . $_REQUEST['a'] . '&JSON_search=' . $_REQUEST['JSON_search'];
+		$globalOptions['JSON_search'] = $_REQUEST['JSON_search'];
 	}
-	if(isset($_GET['hm']) && trim($_GET['hm']) != '' && $_GET['hm'] != NULL)
+	if(isset($_REQUEST['hm']) && trim($_REQUEST['hm']) != '' && $_REQUEST['hm'] != NULL)
 	{
-		$globalOptions['url'] .= '&hm=' . $_GET['hm'];
-		$globalOptions['hm'] = $_GET['hm'];
+		$globalOptions['url'] .= '&hm=' . $_REQUEST['hm'];
+		$globalOptions['hm'] = $_REQUEST['hm'];
 	}
 	
-	$tt->generateTrialTracker('indexed', array('product' => $_GET['p'], 'area' => $_GET['a']), $_GET['time'], 'indexed', $globalOptions);
+	$tt->generateTrialTracker('indexed', array('product' => $_REQUEST['p'], 'area' => $_REQUEST['a']), $_REQUEST['time'], 'indexed', $globalOptions);
 }
-else if(isset($_GET['cparams']) || (isset($_GET['leading']) && isset($_GET['params'])))
+else if(isset($_REQUEST['cparams']) || (isset($_REQUEST['leading']) && isset($_REQUEST['params'])))
 {
-	if(isset($_GET['cparams']))
+	if(isset($_REQUEST['cparams']))
 	{
-		$tt->generateTrialTracker('stackedoldlink', array('cparams' => $_GET['cparams'], 'leading' => $_GET['leading'], 'params' => $_GET['params']), 
+		$tt->generateTrialTracker('stackedoldlink', array('cparams' => $_REQUEST['cparams'], 'leading' => $_REQUEST['leading'], 'params' => $_REQUEST['params']), 
 		NULL, 'stackedoldlink', $globalOptions);
 	}
 	else
 	{
-		$tt->generateTrialTracker('unstackedoldlink', array('leading' => $_GET['leading'], 'params' => $_GET['params']), NULL, 'unstackedoldlink',
+		$tt->generateTrialTracker('unstackedoldlink', array('leading' => $_REQUEST['leading'], 'params' => $_REQUEST['params']), NULL, 'unstackedoldlink',
 		 $globalOptions);
 	}
 }
