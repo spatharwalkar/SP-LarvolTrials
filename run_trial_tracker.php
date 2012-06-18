@@ -9866,7 +9866,7 @@ class TrialTracker
 						elseif((isset($dvalue['manual_brief_title']) && $dvalue['manual_brief_title'] !== NULL)
 						|| (isset($dvalue['manual_acronym']) && $dvalue['manual_acronym'] !== NULL))
 						{
-							$attr = '" title="Manual curation' ."\n" . 'Original value: ' . $dvalue['manual_brief_title'];
+							$attr = '" title="Manual curation. Original value: ' . $dvalue['manual_brief_title'];
 							$titleLinkColor = '#FF7700';
 						}
 					}
@@ -9875,7 +9875,7 @@ class TrialTracker
 						if((isset($dvalue['manual_brief_title']) && $dvalue['manual_brief_title'] !== NULL)
 						|| (isset($dvalue['manual_acronym']) && $dvalue['manual_acronym'] !== NULL))
 						{
-							$attr = '" title="Manual curation' . "\n" . 'Original value: ' . $dvalue['manual_brief_title'];
+							$attr = '" title="Manual curation. Original value: ' . $dvalue['manual_brief_title'];
 							$titleLinkColor = '#FF7700';
 						}
 						elseif(!empty($dvalue['edited']) && array_key_exists('NCT/brief_title', $dvalue['edited']) &&   str_replace('Previous value: ', '', $dvalue['edited']['NCT/brief_title'])<> $dvalue['NCT/brief_title']) 
@@ -9945,9 +9945,9 @@ class TrialTracker
 						|| (isset($dvalue['manual_enrollment_type']) && $dvalue['manual_enrollment_type'] !== NULL))
 						{
 							if(isset($dvalue['manual_enrollment']) && $dvalue['manual_enrollment'] !== NULL)
-								$attr = ' manual" title="Manual curation' . "\n" . 'Original value: ' . $dvalue['manual_enrollment'];
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_enrollment'];
 							else
-								$attr = ' manual" title="Manual curation' . "\n" . 'Original value: ' . $dvalue['manual_enrollment_type'];
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_enrollment_type'];
 								
 							$enrollStyle = 'color:#C7846D;';
 						}
@@ -9958,9 +9958,9 @@ class TrialTracker
 						|| (isset($dvalue['manual_enrollment_type']) && $dvalue['manual_enrollment_type'] !== NULL))
 						{
 							if(isset($dvalue['manual_enrollment']) && $dvalue['manual_enrollment'] !== NULL)
-								$attr = ' manual" title="Manual curation' . "\n" . 'Original value: ' . $dvalue['manual_enrollment'];
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_enrollment'];
 							else
-								$attr = ' manual" title="Manual curation' . "\n" . 'Original value: ' . $dvalue['manual_enrollment_type'];
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_enrollment_type'];
 								
 							$enrollStyle = 'color:#C7846D;';
 						}
@@ -10009,14 +10009,14 @@ class TrialTracker
 						}
 						elseif(isset($dvalue['manual_region']) && $dvalue['manual_region'] !== NULL)
 						{
-							$attr = ' manual" title="Manual curation' . "\n" . 'Original value: ' . $dvalue['manual_region'];
+							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_region'];
 						}
 					}
 					else
 					{
 						if(isset($dvalue['manual_region']) && $dvalue['manual_region'] !== NULL)
 						{
-							$attr = ' manual" title="Manual curation' . "\n" . 'Original value: ' . $dvalue['manual_region'];
+							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_region'];
 						}
 						if($dvalue['new'] == 'y')
 						{
@@ -10041,14 +10041,14 @@ class TrialTracker
 						}
 						elseif(isset($dvalue['manual_intervention_name']) && $dvalue['manual_intervention_name'] !== NULL)
 						{
-							$attr = ' manual" title="Manual curation' . "\n" . 'Original value: ' . $dvalue['manual_intervention_name'];
+							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_intervention_name'];
 						}
 					}
 					else
 					{
 						if(isset($dvalue['manual_intervention_name']) && $dvalue['manual_intervention_name'] !== NULL)
 						{
-							$attr = ' manual" title="Manual curation' . "\n" . 'Original value: ' . $dvalue['manual_intervention_name'];
+							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_intervention_name'];
 						}
 						elseif(!empty($dvalue['edited']) && array_key_exists('NCT/intervention_name', $dvalue['edited']) && str_replace('Previous value: ', '', $dvalue['edited']['NCT/intervention_name'])<>$dvalue['NCT/intervention_name'])
 						{
@@ -10090,9 +10090,9 @@ class TrialTracker
 						|| (isset($dvalue['manual_collaborator']) && $dvalue['manual_collaborator'] !== NULL))
 						{
 							if(isset($dvalue['manual_lead_sponsor'])  && $dvalue['manual_lead_sponsor'] !== NULL)
-								$attr = ' manual" title="Manual curation' . "\n" . 'Original value: ' . $dvalue['manual_lead_sponsor'];
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_lead_sponsor'];
 							else
-								$attr = ' manual" title="Manual curation' . "\n" . 'Original value: ' . $dvalue['manual_collaborator'];
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_collaborator'];
 						}
 					}
 					else
@@ -10101,9 +10101,9 @@ class TrialTracker
 						|| (isset($dvalue['manual_collaborator']) && $dvalue['manual_collaborator'] !== NULL))
 						{
 							if(isset($dvalue['manual_lead_sponsor'])  && $dvalue['manual_lead_sponsor'] !== NULL)
-								$attr = ' manual" title="Manual curation' . "\n" . 'Original value: ' . $dvalue['manual_lead_sponsor'];
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_lead_sponsor'];
 							else
-								$attr = ' manual" title="Manual curation' . "\n" . 'Original value: ' . $dvalue['manual_collaborator'];
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_collaborator'];
 						}
 						elseif(!empty($dvalue['edited']) && (array_key_exists('NCT/collaborator', $dvalue['edited']) 
 						|| array_key_exists('NCT/lead_sponsor', $dvalue['edited'])) && ( str_replace('Previous value: ', '', $dvalue['edited']['NCT/lead_sponsor'])<>$dvalue['NCT/lead_sponsor'] or str_replace('Previous value: ', '', $dvalue['edited']['NCT/collaborator'])<>$dvalue['NCT/collaborator'] )) 
@@ -10143,14 +10143,14 @@ class TrialTracker
 						} 
 						elseif(isset($dvalue['manual_overall_status']) && $dvalue['manual_overall_status'] !== NULL)
 						{
-							$attr = ' manual" title="Manual curation' . "\n" . 'Original value: ' . $dvalue['manual_overall_status'];
+							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_overall_status'];
 						}
 					}
 					else
 					{
 						if(isset($dvalue['manual_overall_status']) && $dvalue['manual_overall_status'] !== NULL)
 						{
-							$attr = ' manual" title="Manual curation' . "\n" . 'Original value: ' . $dvalue['manual_overall_status'];
+							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_overall_status'];
 						}
 						elseif(!empty($dvalue['edited']) && array_key_exists('NCT/overall_status', $dvalue['edited']) && str_replace('Previous value: ', '', $dvalue['edited']['NCT/overall_status'])<>$dvalue['NCT/overall_status']) 
 						{
@@ -10180,14 +10180,14 @@ class TrialTracker
 						}
 						if(isset($dvalue['manual_condition']) && $dvalue['manual_condition'] !== NULL)
 						{
-							$attr = ' manual" title="Manual curation' . "\n" . 'Original value: ' . $dvalue['manual_condition'];
+							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_condition'];
 						}
 					}
 					else
 					{
 						if(isset($dvalue['manual_condition']) && $dvalue['manual_condition'] !== NULL)
 						{
-							$attr = ' manual" title="Manual curation' . "\n" . 'Original value: ' . $dvalue['manual_condition'];
+							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_condition'];
 						}
 						elseif(!empty($dvalue['edited']) && array_key_exists('NCT/condition', $dvalue['edited']) && str_replace('Previous value: ', '', $dvalue['edited']['NCT/condition'])<>$dvalue['NCT/condition']) 
 						{
@@ -10218,14 +10218,14 @@ class TrialTracker
 						}	
 						elseif(isset($dvalue['manual_end_date']) && $dvalue['manual_end_date'] !== NULL)
 						{
-							$attr = ' manual" title="Manual curation' . "\n" . 'Original value: ' . $dvalue['manual_end_date'];
+							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_end_date'];
 						}
 					}
 					else
 					{
 						if(isset($dvalue['manual_end_date']) && $dvalue['manual_end_date'] !== NULL)
 						{
-							$attr = ' manual" title="Manual curation' . "\n" . 'Original value: ' . $dvalue['manual_end_date'];
+							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_end_date'];
 						}
 						elseif(!empty($dvalue['edited']) && array_key_exists('inactive_date', $dvalue['edited']) && str_replace('Previous value: ', '', $dvalue['edited']['inactive_date'])<>$dvalue["inactive_date"]) 
 						{
@@ -10263,14 +10263,14 @@ class TrialTracker
 						}
 						elseif(isset($dvalue['manual_phase']) && $dvalue['manual_phase'] !== NULL)
 						{
-							$attr = ' manual" title="Manual curation' . "\n" . 'Original value: ' . $dvalue['manual_phase'];
+							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_phase'];
 						}
 					}
 					else
 					{
 						if(isset($dvalue['manual_phase']) && $dvalue['manual_phase'] !== NULL)
 						{
-							$attr = ' manual" title="Manual curation' . "\n" . 'Original value: ' . $dvalue['manual_phase'];
+							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_phase'];
 						}
 						elseif(!empty($dvalue['edited']) && array_key_exists('NCT/phase', $dvalue['edited']) && ( str_replace('Previous value: ', '', trim($dvalue['edited']['NCT/phase'])) <> trim($dvalue['NCT/phase'])) ) 
 						{
