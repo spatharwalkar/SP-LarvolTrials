@@ -1627,7 +1627,7 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 				$row = mysql_fetch_assoc($res);
 				$olddate=$row['lastchanged_date'];
 				$oldval=$row[$fieldname];
-				$value=mysql_real_escape_string($value);
+				//$value=mysql_real_escape_string($value);
 				
 				
 	
