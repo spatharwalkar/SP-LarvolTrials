@@ -83,6 +83,13 @@ $globalOptions['change'] = '1 week';
 $globalOptions['startrange'] = "now";
 $globalOptions['endrange'] = "1 week ago";
 
+$globalOptions['includeProductsWNoData'] = "off";
+
+if(isset($_REQUEST['ipwnd']) && $_REQUEST['ipwnd'] == "on")
+{	
+	$globalOptions['includeProductsWNoData'] = "on";
+}
+
 if(isset($_REQUEST['minenroll']) && isset($_REQUEST['maxenroll']))
 {
 	$globalOptions['minEnroll'] = $_REQUEST['minenroll'];
@@ -418,12 +425,7 @@ if(isset($_REQUEST['pr']))
 	$globalOptions['product'] = $_REQUEST['pr'];
 }
 
-if(isset($_REQUEST['id']))
-{	
-	$globalOptions['url'] = $_REQUEST['id'];	
-	$tt->generateTrialTracker('webpage', $_REQUEST['id'], NULL, 'standalone', $globalOptions);
-}
-else if(isset($_REQUEST['results']) && isset($_REQUEST['type']))
+if(isset($_REQUEST['results']) && isset($_REQUEST['type']))
 {
 	$tt_type = $_REQUEST['type'] . 'stacked';
 	$globalOptions['url'] = rawurlencode($_REQUEST['results']).'&amp;type='.$_REQUEST['type'];	
@@ -448,6 +450,7 @@ else if(isset($_REQUEST['p']) && isset($_REQUEST['a']))
 	{
 		$tt_type = 'singleindexed';
 	}
+	
 	$globalOptions['url'] = 'p=' . $_REQUEST['p'] . '&a=' . $_REQUEST['a'];	
 	
 	if(isset($_REQUEST['JSON_search']))

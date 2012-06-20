@@ -8977,6 +8977,9 @@ class TrialTracker
 		global $db;
 		$loggedIn	= $db->loggedIn();
 		
+		if($ottType == 'indexed' || $ottType == 'unstacked' || $ottType == 'unstackedoldlink')
+			$globalOptions['includeProductsWNoData'] = "on";
+			
 		if(strpos($globalOptions['startrange'], 'ago') !== FALSE)
 		{
 			$timeMachine = str_replace('ago', '', $globalOptions['startrange']);
@@ -9045,7 +9048,7 @@ class TrialTracker
 			$Values['totalcount'] = $Values['totactivecount'] + $Values['totinactivecount'];
 		}
 		
-		$this->displayFilterControls($count, $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], $globalOptions, $ottType, $loggedIn);
+		$this->displayFilterControls($productSelectorTitle, $count, $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], $globalOptions, $ottType, $loggedIn);
 		
 		if($totalPages > 1)
 		{
@@ -9093,47 +9096,91 @@ class TrialTracker
 		{	$outputStr = '';
 			foreach($Values['Trials'] as $tkey => $tvalue)
 			{
-				if(isset($tvalue['naUpms']) && !empty($tvalue['naUpms']))
+				if($globalOptions['includeProductsWNoData'] == "off")
 				{
-					if($ottType == 'rowstacked' || $ottType == 'rowstackedindexed')
+					if(isset($tvalue['naUpms']) && !empty($tvalue['naUpms']))
 					{
-						$outputStr .= '<tr class="trialtitles">'
-									. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
-									. 'style="background: url(\'images/down.png\') no-repeat left center;"'
-									. ' onclick="sh(this,\'rowstacked\');">&nbsp;</td></tr>'
-									. $this->displayUnMatchedUpms($loggedIn, 'rowstacked', $tvalue['naUpms'])
-									. '<tr class="trialtitles">'
-									. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles">' 
-									. $tvalue['sectionHeader'] . '</td></tr>';
-					}
-					else
-					{
-						if($ottType == 'colstacked' || $ottType == 'colstackedindexed')
-							$image = 'up';
+						if($ottType == 'rowstacked' || $ottType == 'rowstackedindexed')
+						{
+							$outputStr .= '<tr class="trialtitles">'
+										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
+										. 'style="background: url(\'images/down.png\') no-repeat left center;"'
+										. ' onclick="sh(this,\'rowstacked\');">&nbsp;</td></tr>'
+										. $this->displayUnMatchedUpms($loggedIn, 'rowstacked', $tvalue['naUpms'])
+										. '<tr class="trialtitles">'
+										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles">' 
+										. $tvalue['sectionHeader'] . '</td></tr>';
+						}
 						else
-							$image = 'down';
+						{
+							if($ottType == 'colstacked' || $ottType == 'colstackedindexed')
+								$image = 'up';
+							else
+								$image = 'down';
+							
+							$naUpmIndex = preg_replace('/[^a-zA_Z0-9]/i', '', $tvalue['sectionHeader']);
+							$naUpmIndex = substr($naUpmIndex, 0, 15);
+							
+							$outputStr .= '<tr class="trialtitles">'
+										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
+										. ' style="background: url(\'images/' . $image . '.png\') no-repeat left center;"'
+										. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+										. $tvalue['sectionHeader'] . '</td></tr>';
+							$outputStr .= $this->displayUnMatchedUpms($loggedIn, $naUpmIndex, $tvalue['naUpms']);
+						}
 						
-						$naUpmIndex = preg_replace('/[^a-zA_Z0-9]/i', '', $tvalue['sectionHeader']);
-						$naUpmIndex = substr($naUpmIndex, 0, 15);
-						
-						$outputStr .= '<tr class="trialtitles">'
-									. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
-									. ' style="background: url(\'images/' . $image . '.png\') no-repeat left center;"'
-									. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
-									. $tvalue['sectionHeader'] . '</td></tr>';
-						$outputStr .= $this->displayUnMatchedUpms($loggedIn, $naUpmIndex, $tvalue['naUpms']);
+						//No trial found row not shown when show only changed items is selected
+						if($globalOptions['onlyUpdates'] == "no")
+						{
+							$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
+						}
 					}
 				}
 				else
 				{
-					$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">'
-								. $tvalue['sectionHeader'] . '</td></tr>';
+					if(isset($tvalue['naUpms']) && !empty($tvalue['naUpms']))
+					{
+						if($ottType == 'rowstacked' || $ottType == 'rowstackedindexed')
+						{
+							$outputStr .= '<tr class="trialtitles">'
+										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
+										. 'style="background: url(\'images/down.png\') no-repeat left center;"'
+										. ' onclick="sh(this,\'rowstacked\');">&nbsp;</td></tr>'
+										. $this->displayUnMatchedUpms($loggedIn, 'rowstacked', $tvalue['naUpms'])
+										. '<tr class="trialtitles">'
+										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles">' 
+										. $tvalue['sectionHeader'] . '</td></tr>';
+						}
+						else
+						{
+							if($ottType == 'colstacked' || $ottType == 'colstackedindexed')
+								$image = 'up';
+							else
+								$image = 'down';
+							
+							$naUpmIndex = preg_replace('/[^a-zA_Z0-9]/i', '', $tvalue['sectionHeader']);
+							$naUpmIndex = substr($naUpmIndex, 0, 15);
+							
+							$outputStr .= '<tr class="trialtitles">'
+										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
+										. ' style="background: url(\'images/' . $image . '.png\') no-repeat left center;"'
+										. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+										. $tvalue['sectionHeader'] . '</td></tr>';
+							$outputStr .= $this->displayUnMatchedUpms($loggedIn, $naUpmIndex, $tvalue['naUpms']);
+						}
+					}
+					else
+					{
+						$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">'
+									. $tvalue['sectionHeader'] . '</td></tr>';
+					}
+					//No trial found row not shown when show only changed items is selected
+					if($globalOptions['onlyUpdates'] == "no")
+					{
+						$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
+					}
 				}
-				//No trial found row not shown when show only changed items is selected
-				if($globalOptions['onlyUpdates'] == "no")
-				{
-					$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
-				}
+				
 			}
 			echo $outputStr;
 		}
@@ -9310,7 +9357,7 @@ class TrialTracker
 		}
 	}
 	
-	function displayFilterControls($shownCount, $activeCount, $inactiveCount, $totalCount, $globalOptions = array(), $ottType, $loggedIn)
+	function displayFilterControls($productSelectorTitle, $shownCount, $activeCount, $inactiveCount, $totalCount, $globalOptions = array(), $ottType, $loggedIn)
 	{	
 		echo '<table border="0" cellspacing="0" class="controls" align="center">'
 				. '<tr><th>Active</th><th>Status</th><th style="width:170px">Institution type</th>'
@@ -9468,11 +9515,12 @@ class TrialTracker
 				. ' value="' . ((isset($globalOptions['enroll'])) ? $globalOptions['enroll'] : '' ) . '" autocomplete="off" />'
 				. '<div id="slider-range"></div>'
 				. '</p></div>';
-		/*if($ottType != 'unstacked' && $ottType != 'indexed' && $ottType != 'stackedoldlink' && $ottType != 'unstackedoldlink')
+		if($ottType != 'unstacked' && $ottType != 'indexed' && $ottType != 'unstackedoldlink')
 		{
+			$title = strtolower(str_replace('All', '', $productSelectorTitle));
 			echo '<br/><input type="checkbox" id="ipwnd" name="ipwnd" ' . (($globalOptions['includeProductsWNoData'] == "on") ? 'checked="checked"' : '') . ' />'
-				. '<label style="font-size:x-small;" for="ipwnd">Include products with no data</label>';
-		}*/
+				. '<label style="font-size:x-small;" for="ipwnd">Include ' . $title . ' with no data</label>';
+		}
 		echo  '</tr></table><br/><br/>'
 				. '<input type="hidden" name="status" id="status" value="' . implode(',', $globalOptions['status']) . '" />'
 				. '<input type="hidden" name="itype" id="itype" value="' . implode(',', $globalOptions['itype']) . '" />'
@@ -9726,44 +9774,117 @@ class TrialTracker
 		{
 			if(($counter >= $start && $counter < $end))
 			{
-				//Rendering Upms
-				if(isset($vvalue['naUpms']) && !empty($vvalue['naUpms']))
+				if($globalOptions['includeProductsWNoData'] == "off")
 				{
-					if($ottType == 'rowstacked' || $ottType == 'rowstackedindexed')
+					//Rendering Upms
+					if(isset($vvalue['naUpms']) && !empty($vvalue['naUpms']) && !empty($vvalue[$globalOptions['type']]))
 					{
-						$outputStr .= '<tr class="trialtitles">'
-									. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
-									. 'style="background: url(\'images/down.png\') no-repeat left center;"'
-									. ' onclick="sh(this,\'rowstacked\');">&nbsp;</td></tr>'
-									. $this->displayUnMatchedUpms($loggedIn, 'rowstacked', $vvalue['naUpms'])
-									. '<tr class="trialtitles">'
-									. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles">' 
-									. $vvalue['sectionHeader'] . '</td></tr>';
-					}
-					else
-					{
-						if($ottType == 'colstacked' || $ottType == 'colstackedindexed')
-							$image = 'up';
+						if($ottType == 'rowstacked' || $ottType == 'rowstackedindexed')
+						{
+							$outputStr .= '<tr class="trialtitles">'
+										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
+										. 'style="background: url(\'images/down.png\') no-repeat left center;"'
+										. ' onclick="sh(this,\'rowstacked\');">&nbsp;</td></tr>'
+										. $this->displayUnMatchedUpms($loggedIn, 'rowstacked', $vvalue['naUpms'])
+										. '<tr class="trialtitles">'
+										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles">' 
+										. $vvalue['sectionHeader'] . '</td></tr>';
+						}
 						else
-							$image = 'down';
-						
-						$naUpmIndex = preg_replace('/[^a-zA_Z0-9]/i', '', $vvalue['sectionHeader']);
-						$naUpmIndex = substr($naUpmIndex, 0, 15);
-						
-						$outputStr .= '<tr class="trialtitles">'
-									. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
-									. ' style="background: url(\'images/' . $image . '.png\') no-repeat left center;"'
-									. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+						{
+							if($ottType == 'colstacked' || $ottType == 'colstackedindexed')
+								$image = 'up';
+							else
+								$image = 'down';
+							
+							$naUpmIndex = preg_replace('/[^a-zA_Z0-9]/i', '', $vvalue['sectionHeader']);
+							$naUpmIndex = substr($naUpmIndex, 0, 15);
+							
+							$outputStr .= '<tr class="trialtitles">'
+										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
+										. ' style="background: url(\'images/' . $image . '.png\') no-repeat left center;"'
+										. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+										. $vvalue['sectionHeader'] . '</td></tr>';
+							$outputStr .= $this->displayUnMatchedUpms($loggedIn, $naUpmIndex, $vvalue['naUpms']);
+						}
+					}
+					else if(isset($vvalue['naUpms']) && !empty($vvalue['naUpms']) && empty($vvalue[$globalOptions['type']]))
+					{
+						if($ottType == 'rowstacked' || $ottType == 'rowstackedindexed')
+						{
+							$outputStr .= '<tr class="trialtitles">'
+										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
+										. 'style="background: url(\'images/down.png\') no-repeat left center;"'
+										. ' onclick="sh(this,\'rowstacked\');">&nbsp;</td></tr>'
+										. $this->displayUnMatchedUpms($loggedIn, 'rowstacked', $vvalue['naUpms'])
+										. '<tr class="trialtitles">'
+										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles">' 
+										. $vvalue['sectionHeader'] . '</td></tr>';
+						}
+						else
+						{
+							if($ottType == 'colstacked' || $ottType == 'colstackedindexed')
+								$image = 'up';
+							else
+								$image = 'down';
+							
+							$naUpmIndex = preg_replace('/[^a-zA_Z0-9]/i', '', $vvalue['sectionHeader']);
+							$naUpmIndex = substr($naUpmIndex, 0, 15);
+							
+							$outputStr .= '<tr class="trialtitles">'
+										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
+										. ' style="background: url(\'images/' . $image . '.png\') no-repeat left center;"'
+										. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+										. $vvalue['sectionHeader'] . '</td></tr>';
+							$outputStr .= $this->displayUnMatchedUpms($loggedIn, $naUpmIndex, $vvalue['naUpms']);
+						}
+					}
+					else if(empty($vvalue['naUpms']) && !empty($vvalue[$globalOptions['type']]))
+					{
+						$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">'
 									. $vvalue['sectionHeader'] . '</td></tr>';
-						$outputStr .= $this->displayUnMatchedUpms($loggedIn, $naUpmIndex, $vvalue['naUpms']);
 					}
 				}
 				else
 				{
-					$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">'
-								. $vvalue['sectionHeader'] . '</td></tr>';
+					//Rendering Upms
+					if(isset($vvalue['naUpms']) && !empty($vvalue['naUpms']))
+					{
+						if($ottType == 'rowstacked' || $ottType == 'rowstackedindexed')
+						{
+							$outputStr .= '<tr class="trialtitles">'
+										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
+										. 'style="background: url(\'images/down.png\') no-repeat left center;"'
+										. ' onclick="sh(this,\'rowstacked\');">&nbsp;</td></tr>'
+										. $this->displayUnMatchedUpms($loggedIn, 'rowstacked', $vvalue['naUpms'])
+										. '<tr class="trialtitles">'
+										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles">' 
+										. $vvalue['sectionHeader'] . '</td></tr>';
+						}
+						else
+						{
+							if($ottType == 'colstacked' || $ottType == 'colstackedindexed')
+								$image = 'up';
+							else
+								$image = 'down';
+							
+							$naUpmIndex = preg_replace('/[^a-zA_Z0-9]/i', '', $vvalue['sectionHeader']);
+							$naUpmIndex = substr($naUpmIndex, 0, 15);
+							
+							$outputStr .= '<tr class="trialtitles">'
+										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
+										. ' style="background: url(\'images/' . $image . '.png\') no-repeat left center;"'
+										. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+										. $vvalue['sectionHeader'] . '</td></tr>';
+							$outputStr .= $this->displayUnMatchedUpms($loggedIn, $naUpmIndex, $vvalue['naUpms']);
+						}
+					}
+					else
+					{
+						$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">'
+									. $vvalue['sectionHeader'] . '</td></tr>';
+					}
 				}
-				
 				$finalkey = $vkey;
 			}
 			
@@ -9812,6 +9933,7 @@ class TrialTracker
 						{
 							$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">' . $sectionHeader . '</td></tr>';
 						}
+						
 						$displayFlag = true;
 						$finalkey = $vkey;
 					}
@@ -10404,7 +10526,17 @@ class TrialTracker
 			
 			if($counter >= $start && $counter < $end && empty($vvalue[$globalOptions['type']]) && $globalOptions['onlyUpdates'] == "no")
 			{
-				$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
+				if($globalOptions['includeProductsWNoData'] == "off")
+				{
+					if(isset($vvalue['naUpms']) && !empty($vvalue['naUpms']))
+					{
+						$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
+					}
+				}
+				else
+				{
+					$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
+				}
 			}
 		}
 		
@@ -10412,50 +10544,90 @@ class TrialTracker
 		{
 			for($index = $finalkey+1; $index <= $vkey; $index++)
 			{
-				//Rendering Upms
-				if(isset($Values['Trials'][$index]['naUpms']) && !empty($Values['Trials'][$index]['naUpms']))
+				if($globalOptions['includeProductsWNoData'] == "off")
 				{
-					if($ottType == 'rowstacked' || $ottType == 'rowstackedindexed')
+					if(isset($Values['Trials'][$index]['naUpms']) && !empty($Values['Trials'][$index]['naUpms']))
 					{
-						$outputStr .= '<tr class="trialtitles">'
-									. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
-									. 'style="background: url(\'images/down.png\') no-repeat left center;"'
-									. ' onclick="sh(this,\'rowstacked\');">&nbsp;</td></tr>'
-									. $this->displayUnMatchedUpms($loggedIn, 'rowstacked', $Values['Trials'][$index]['naUpms'])
-									. '<tr class="trialtitles">'
-									. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles">' 
-									. $Values['Trials'][$index]['sectionHeader'] . '</td></tr>';
-					}
-					else
-					{
-						if($ottType == 'colstacked' || $ottType == 'colstackedindexed')
-							$image = 'up';
+						if($ottType == 'rowstacked' || $ottType == 'rowstackedindexed')
+						{
+							$outputStr .= '<tr class="trialtitles">'
+										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
+										. 'style="background: url(\'images/down.png\') no-repeat left center;"'
+										. ' onclick="sh(this,\'rowstacked\');">&nbsp;</td></tr>'
+										. $this->displayUnMatchedUpms($loggedIn, 'rowstacked', $Values['Trials'][$index]['naUpms'])
+										. '<tr class="trialtitles">'
+										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles">' 
+										. $Values['Trials'][$index]['sectionHeader'] . '</td></tr>';
+						}
 						else
-							$image = 'down';
-						
-						$naUpmIndex = preg_replace('/[^a-zA_Z0-9]/i', '', $Values['Trials'][$index]['sectionHeader']);
-						$naUpmIndex = substr($naUpmIndex, 0, 15);
-						
-						$outputStr .= '<tr class="trialtitles">'
-									. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
-									. ' style="background: url(\'images/' . $image . '.png\') no-repeat left center;"'
-									. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
-									. $Values['Trials'][$index]['sectionHeader'] . '</td></tr>';
-						$outputStr .= $this->displayUnMatchedUpms($loggedIn, $naUpmIndex, $Values['Trials'][$index]['naUpms']);
+						{
+							if($ottType == 'colstacked' || $ottType == 'colstackedindexed')
+								$image = 'up';
+							else
+								$image = 'down';
+							
+							$naUpmIndex = preg_replace('/[^a-zA_Z0-9]/i', '', $Values['Trials'][$index]['sectionHeader']);
+							$naUpmIndex = substr($naUpmIndex, 0, 15);
+							
+							$outputStr .= '<tr class="trialtitles">'
+										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
+										. ' style="background: url(\'images/' . $image . '.png\') no-repeat left center;"'
+										. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+										. $Values['Trials'][$index]['sectionHeader'] . '</td></tr>';
+							$outputStr .= $this->displayUnMatchedUpms($loggedIn, $naUpmIndex, $Values['Trials'][$index]['naUpms']);
+						}
+						if($globalOptions['onlyUpdates'] == "no")
+						{
+							$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
+						}
 					}
 				}
 				else
 				{
-					$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">'
-								. $Values['Trials'][$index]['sectionHeader'] . '</td></tr>';
+					//Rendering Upms
+					if(isset($Values['Trials'][$index]['naUpms']) && !empty($Values['Trials'][$index]['naUpms']))
+					{
+						if($ottType == 'rowstacked' || $ottType == 'rowstackedindexed')
+						{
+							$outputStr .= '<tr class="trialtitles">'
+										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
+										. 'style="background: url(\'images/down.png\') no-repeat left center;"'
+										. ' onclick="sh(this,\'rowstacked\');">&nbsp;</td></tr>'
+										. $this->displayUnMatchedUpms($loggedIn, 'rowstacked', $Values['Trials'][$index]['naUpms'])
+										. '<tr class="trialtitles">'
+										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles">' 
+										. $Values['Trials'][$index]['sectionHeader'] . '</td></tr>';
+						}
+						else
+						{
+							if($ottType == 'colstacked' || $ottType == 'colstackedindexed')
+								$image = 'up';
+							else
+								$image = 'down';
+							
+							$naUpmIndex = preg_replace('/[^a-zA_Z0-9]/i', '', $Values['Trials'][$index]['sectionHeader']);
+							$naUpmIndex = substr($naUpmIndex, 0, 15);
+							
+							$outputStr .= '<tr class="trialtitles">'
+										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
+										. ' style="background: url(\'images/' . $image . '.png\') no-repeat left center;"'
+										. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+										. $Values['Trials'][$index]['sectionHeader'] . '</td></tr>';
+							$outputStr .= $this->displayUnMatchedUpms($loggedIn, $naUpmIndex, $Values['Trials'][$index]['naUpms']);
+						}
+					}
+					else
+					{
+						$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">'
+									. $Values['Trials'][$index]['sectionHeader'] . '</td></tr>';
+					}
+					if($globalOptions['onlyUpdates'] == "no")
+					{
+						$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
+					}
 				}
 				
-				if($globalOptions['onlyUpdates'] == "no")
-				{
-					$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
-				}
 			}
-			//echo 'finalekey'.$finalkey;
 		}
 		
 		return $outputStr;
