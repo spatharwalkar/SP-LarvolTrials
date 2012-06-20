@@ -73,10 +73,19 @@ $(document).ready(function () {
 //         {
 //             return;
 //         }
-        var jsonData = getQueryData();   
+        var jsonData = getQueryData();
         var url = 'searchhandler.php' + '?op=runQuery&data=' + jsonData;
         //window.location.href=url;
-		window.open(url,'_blank')
+        if(jsonData.length > 500)
+        {
+            $('#runSqlForm_op').val('runQuery');
+            $('#runSqlForm_data').val(jsonData);
+            document.runSqlForm.submit();
+        }
+        else
+        {
+			window.open(url,'_blank')
+        }
         return;
     }
 
@@ -118,4 +127,11 @@ $(document).ready(function () {
 
 	</tr>
 </table>
+<form target="_blank" name="runSqlForm" id="runSqlForm" method="POST" action="intermediary.php">
+<input type="hidden" name="data" id="runSqlForm_data"/>
+<input type="hidden" name="op" id="runSqlForm_op"/>
+<input type="hidden" name="p"/>
+<input type="hidden" name="a"/>
+<input type="hidden" name="forcePost" value="1"/>
+</form>
 </body>

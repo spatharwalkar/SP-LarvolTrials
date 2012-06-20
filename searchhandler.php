@@ -489,15 +489,23 @@ function runQuery($jsonData)
 		$OT_Exist_Flg=1;
 	}
 	
-	$link=urlPath().'intermediary.php?p= '.$prod.'&a= '.$area;
-	if($OT_Exist_Flg)	//if OTT exists just send data as it is we will process it in run_trial_tracket
-	{
+	if(!isset($_REQUEST['forcePost']))
+	{	
+		$link=urlPath().'intermediary.php?p= '.$prod.'&a= '.$area;
+		if($OT_Exist_Flg)	//if OTT exists just send data as it is we will process it in run_trial_tracket
+		{
+			$link.='&JSON_search='.$jsonData;
+		}
+		else if($prod=='' && $area=='')
 		$link.='&JSON_search='.$jsonData;
+		
+	
+		header("Location: ".$link); 
 	}
-	else if($prod=='' && $area=='')
-	$link.='&JSON_search='.$jsonData;
-
-	header("Location: ".$link); 
+	elseif(isset($_REQUEST['forcePost']) && $_REQUEST['forcePost']==1)
+	{
+		$_REQUEST['JSON_search'] = $jsonData;
+	}
 }
 
 function buildQuery($data, $isCount=false)
