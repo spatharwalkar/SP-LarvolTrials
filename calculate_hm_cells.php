@@ -266,7 +266,7 @@ function calc_cells($parameters,$update_id=NULL)
 
 					$base_date = date('Y-m-d', strtotime("-7 days"));
 					if($row["firstreceived_date"]>=$base_date) $overall_statuses['new_trials']=$overall_statuses['new_trials']+1;
-					
+					/*
 					if($row["lastchanged_date"]>=$base_date)
 					{
 					
@@ -326,6 +326,7 @@ function calc_cells($parameters,$update_id=NULL)
 						}
 						
 					}
+					*/
 					else
 					{
 					
@@ -344,7 +345,7 @@ function calc_cells($parameters,$update_id=NULL)
 								}
 						while ($row_dh = mysql_fetch_assoc($res_dh))
 						{	
-							if($row_dh["larvol_id"])
+							if($row_dh["larvol_id"] and $row_dh["overall_status_lastchanged"]>=$base_date)
 							{
 								switch ($row_dh["overall_status_prev"]) 
 								{

@@ -2,6 +2,8 @@
 require_once('db.php');
 require_once ('include.derived.php');
 $newtrial='NO';
+$dt_lastchangedate=null;
+$dn_lastchangedate=null;
 $array1=array
 	(
 	'N/A',
@@ -1438,10 +1440,13 @@ else $ddesc=$rec->detailed_descr->textblock;
 	if(isset($c_date) and !is_null($c_date)) $end_date=$c_date;
 	else $end_date=$pc_date;
 	foreach($record_data as $fieldname => $value)
+	{
 		if(!addval($larvol_id, $fieldname, $value,$record_data['lastchanged_date'],$oldtrial,NULL,$end_date,$rec->id_info->nct_id))
 			logDataErr('<br>Could not save the value of <b>' . $fieldname . '</b>, Value: ' . $value );//Log in errorlog
-			
-			
+	}		
+	global $dt_lastchangedate,$dn_lastchangedate;
+	$dt_lastchangedate=null;
+	$dn_lastchangedate=null;	
 	//calculate institution type
 	$ins_type=getInstitutionType($record_data['collaborator'],$record_data['lead_sponsor'],$larvol_id);
 	
@@ -1496,7 +1501,7 @@ else $ddesc=$rec->detailed_descr->textblock;
 
 function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_type,$end_date,$sourceid=null)
 {
-	global $newtrial;
+	global $newtrial,$dt_lastchangedate,$dn_lastchangedate;
 	$nullvalue='NO';
 	if(	$fieldname=='enrollment' and(is_null($value) or empty($value) or $value=='') )	
 	{
@@ -1607,15 +1612,27 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 			'dummy', 'larvol_id', 'nct_id', 'download_date', 'brief_title', 'acronym', 'official_title', 'lead_sponsor', 'lead_sponsor_class', 'collaborator', 'collaborator_class', 'source', 'has_dmc', 'brief_summary', 'detailed_description', 'overall_status', 'why_stopped', 'start_date', 'end_date', 'completion_date', 'completion_date_type', 'primary_completion_date', 'primary_completion_date_type', 'study_type', 'study_design', 'number_of_arms', 'number_of_groups', 'enrollment', 'enrollment_type', 'study_pop', 'sampling_method', 'criteria', 'gender', 'minimum_age', 'maximum_age', 'healthy_volunteers', 'contact_name', 'contact_phone', 'contact_phone_ext', 'contact_email', 'backup_name', 'backup_phone', 'backup_phone_ext', 'backup_email', 'verification_date', 'lastchanged_date', 'firstreceived_date',  'org_study_id', 'phase', 'nct_alias', 'condition', 'secondary_id', 'rank', 'arm_group_label', 'arm_group_type', 'arm_group_description', 'intervention_type', 'intervention_name', 'intervention_description', 'link_url', 'link_description', 'primary_outcome_measure', 'primary_outcome_timeframe', 'primary_outcome_safety_issue', 'secondary_outcome_measure', 'secondary_outcome_timeframe', 'secondary_outcome_safety_issue', 'reference_citation', 'reference_PMID', 'results_reference_citation', 'results_reference_PMID', 'location_name', 'location_city', 'location_state', 'location_zip', 'location_country', 'location_contact_name', 'location_contact_phone', 'location_contact_phone_ext', 'location_contact_email', 'location_backup_name', 'location_backup_phone', 'location_backup_phone_ext', 'location_backup_email',  'keyword', 'is_fda_regulated', 'is_section_801'
 			);
 			$as=array_search($fieldname,$dn_array);
-			
+			$en_dt='NO';
 			if ( isset($as) and $as)
 			{
 				if($fieldname=='end_date')
 				{
+					$en_dt='YES';
 					$query = 'SELECT `' .$fieldname. '`, `lastchanged_date`  FROM data_trials WHERE `larvol_id`="'. $larvol_id . '" limit 1';
+					if(isset($dt_lastchangedate) and !is_null($dt_lastchangedate))
+					{
+						$olddate=$dt_lastchangedate;
+						
+					}
+					
 				}
 				else
+				{
+					$en_dt='NO';
 					$query = 'SELECT `' .$fieldname. '`, `lastchanged_date`  FROM data_nct WHERE `larvol_id`="'. $larvol_id . '" limit 1';
+					if(isset($dn_lastchangedate) and !is_null($dn_lastchangedate))
+						$olddate=$dn_lastchangedate;
+				}
 				if(!$res = mysql_query($query))
 				{
 					$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -1625,7 +1642,38 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 					return false;
 				}
 				$row = mysql_fetch_assoc($res);
-				$olddate=$row['lastchanged_date'];
+				
+				if($en_dt=='YES' and is_null($dt_lastchangedate) )
+				{
+					$olddate=$row['lastchanged_date'];
+					$dt_lastchangedate=$row['lastchanged_date'];
+				}
+				elseif($en_dt=='NO' and is_null($dn_lastchangedate) )
+				{
+					$olddate=$row['lastchanged_date'];
+					$dn_lastchangedate=$row['lastchanged_date'];
+				}
+				
+				
+				/*-*/
+				
+				if(is_null($dt_lastchangedate))
+				{
+					$qr1 = 'SELECT `lastchanged_date`  FROM data_trials WHERE `larvol_id`="'. $larvol_id . '" limit 1';
+					if(!$res = mysql_query($qr1))
+					{
+						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+						$logger->error($log);
+						mysql_query('ROLLBACK');
+						echo $log;
+						return false;
+					}
+					$rw1 = mysql_fetch_assoc($res);
+					$dt_lastchangedate=$rw1['lastchanged_date'];
+				}
+				/*--*/
+				
+				
 				$oldval=$row[$fieldname];
 				//$value=mysql_real_escape_string($value);
 				
