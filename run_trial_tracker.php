@@ -6108,7 +6108,7 @@ class TrialTracker
 			{
 				if(count($resultIds['product']) >= 1 && count($resultIds['area']) == 1 && ($resultIds['area'][0] == NULL || $resultIds['area'] == ''))
 				{
-					$t = 'Area: No Area';
+					$t = '';
 					$this->displayHeader($t);
 					
 					foreach($resultIds['product'] as $pkey => $pvalue)
@@ -6148,7 +6148,7 @@ class TrialTracker
 				}
 				else
 				{
-					$t = 'Product: No Product';
+					$t = '';
 					$this->displayHeader($t);
 					
 					foreach($resultIds['area'] as $akey => $avalue)
