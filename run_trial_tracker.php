@@ -549,44 +549,22 @@ class TrialTracker
 				if(!empty($dvalue['edited']) && array_key_exists('NCT/enrollment', $dvalue['edited']) 
 				&& (getDifference(substr($dvalue['edited']['NCT/enrollment'],16), $dvalue['NCT/enrollment'])))
 				{
-					 if($dvalue["NCT/enrollment_type"] != '' && $dvalue["NCT/enrollment_type"] == 'Anticipated') 
-					 {
-						 $objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray(array('font' => array('bold' => true),
-																							'color' => array('rgb' => 'CDC9C9')));
-					 }
-					 else
-					 {
-						 $objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($highlightChange);
-					 }
+					 $objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($highlightChange);
 					 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl($ctLink);
 					 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/enrollment'],0,255)); 
 				}
 				else if($dvalue['new'] == 'y')
 				{
-					if($dvalue["NCT/enrollment_type"] != '' && $dvalue["NCT/enrollment_type"] == 'Anticipated') 
-					 {
-						 $objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray(array('font' => array('bold' => true),
-																							'color' => array('rgb' => 'CDC9C9')));
-					 }
-					 else
-					 {
-						 $objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($highlightChange);
-					 }
+					 $objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($highlightChange);
 					 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl($ctLink);
 					 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip('New record'); 
 				}
 				if($dvalue["NCT/enrollment_type"] != '') 
 				{
-					if($dvalue["NCT/enrollment_type"] == 'Anticipated') 
+					if($dvalue["NCT/enrollment_type"] == 'Anticipated' || $dvalue["NCT/enrollment_type"] == 'Actual') 
 					{ 
 						$objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $dvalue["NCT/enrollment"]);
-						$objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray(array('font' => array('bold' => true),
-																							'color' => array('rgb' => 'CDC9C9'))); 
 					}
-					else if($dvalue["NCT/enrollment_type"] == 'Actual') 
-					{
-						$objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $dvalue["NCT/enrollment"]);
-					} 
 					else 
 					{ 
 						$objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $dvalue["NCT/enrollment"] . ' (' . $dvalue["NCT/enrollment_type"] . ')');
@@ -945,7 +923,7 @@ class TrialTracker
 			$objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $uvalue["event_description"]);
 			if($eventLink != '' && $eventLink !== NULL)
 			{
-			$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl(urlencode($eventLink));
+				$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl(urlencode($eventLink));
 			}
 			if(!empty($uvalue['edited']) && ($uvalue['edited']['field'] == 'event_description'))
 			{
@@ -1018,14 +996,11 @@ class TrialTracker
 			//upm end date
 			$objPHPExcel->getActiveSheet()->setCellValue('F' . $i, date('m/y',strtotime($uvalue["end_date"])));
 
-			$dateStyle = (array('font'    => array('color'     => array('rgb' => '973535'))));
 			if(!empty($uvalue['edited']) && ($uvalue['edited']['field'] == 'end_date'))
 			{
 				$objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray($highlightChange);
 				if($eventLink != '' && $eventLink !== NULL)
 				{
-
-
 					$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl($eventLink);
 					if($uvalue['edited']['end_date'] != '' && $uvalue['edited']['end_date'] !== NULL)
 					{
@@ -1052,10 +1027,6 @@ class TrialTracker
 						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('No Previous value'); 
 					}
 				}
-				if($uvalue['end_date_type'] == 'anticipated') 
-				{
-					$objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray($dateStyle);
-				}
 			}
 			else if($uvalue["new"] == 'y')
 			{
@@ -1065,10 +1036,6 @@ class TrialTracker
 				{
 					$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl($eventLink);
 					$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('New record');  
-				}
-				if($uvalue['end_date_type'] == 'anticipated') 
-				{
-					$objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray($dateStyle);
 				}
 			}
 			
@@ -5263,7 +5230,6 @@ class TrialTracker
 				}
 				
 				$rowspan = 1;
-				$enrollStyle = 'color:gray;';
 				$titleLinkColor = '#000000;';
 				
 				if(isset($dvalue['matchedupms']))  
@@ -5301,7 +5267,7 @@ class TrialTracker
 							. 'target="_blank">'; 
 				if(isset($dvalue['NCT/acronym']) && $dvalue['NCT/acronym'] != '') 
 				{
-					$outputStr .= '<b>' . htmlformat($dvalue['NCT/acronym']) . '</b>&nbsp;' . htmlformat($dvalue['NCT/brief_title']);
+					$outputStr .= htmlformat($dvalue['NCT/acronym']) . ' ' . htmlformat($dvalue['NCT/brief_title']);
 				} 
 				else 
 				{
@@ -5316,24 +5282,18 @@ class TrialTracker
 					&& (getDifference(substr($dvalue['edited']['NCT/enrollment'],16), $dvalue['NCT/enrollment']))) 
 				{
 					$attr = ' highlight" title="' . $dvalue['edited']['NCT/enrollment'];
-					$enrollStyle = 'color:#973535;';
 				}
 				else if($dvalue['new'] == 'y') 
 				{
 					$attr = '" title="New record';
-					$enrollStyle = 'color:#973535;';
 				}
 				$outputStr .= '<td style="width:18px; '.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><span>';
 				if($dvalue["NCT/enrollment_type"] != '') 
 				{
-					if($dvalue["NCT/enrollment_type"] == 'Anticipated') 
+					if($dvalue["NCT/enrollment_type"] == 'Anticipated' || $dvalue["NCT/enrollment_type"] == 'Actual') 
 					{ 
-						$outputStr .= '<span style="font-weight:bold;' . $enrollStyle . '">' . $dvalue["NCT/enrollment"] . '</span>';
-					}
-					else if($dvalue["NCT/enrollment_type"] == 'Actual') 
-					{
 						$outputStr .= $dvalue["NCT/enrollment"];
-					} 
+					}
 					else 
 					{ 
 						$outputStr .= $dvalue["NCT/enrollment"] . ' (' . $dvalue["NCT/enrollment_type"] . ')';
@@ -5383,7 +5343,6 @@ class TrialTracker
 					if(array_key_exists('NCT/collaborator', $dvalue['edited'])) 
 					{
 						$attr .= $dvalue['edited']['NCT/collaborator'];
-						$enrollStyle = 'color:#973535;';
 					}
 					$attr .= '';
 				} 
@@ -5392,8 +5351,7 @@ class TrialTracker
 					$attr = '" title="New record';
 				}
 				$outputStr .= '<td style="width:41px; '.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
-							. '<span>' . $dvalue['NCT/lead_sponsor'] . ' <span style="' . $enrollStyle . '"> ' 
-							. $dvalue["NCT/collaborator"] . ' </span></span></td>';
+							. '<span>' . $dvalue['NCT/lead_sponsor'] . ' ' . $dvalue["NCT/collaborator"] . '</span></td>';
 
 
 				//overall status column
@@ -5704,56 +5662,6 @@ class TrialTracker
 				$outputStr .= '<td style="width:60px;" class="' . $rowTwoType . $attr . '" ' . $title . '><span>' . $value['event_type'] . ' Milestone</span></td>';
 				
 				
-				//field upm start date
-				/*$title = '';
-				$attr = '';	
-				if(!empty($value['edited']) && ($value['edited']['field'] == 'start_date'))
-				{
-					$attr = ' highlight';
-					$dateStyle = 'color:#973535;'; 
-					if($value['edited']['start_date'] != '' && $value['edited']['start_date'] !== NULL)
-					{
-						$title = ' title="Previous value: ' . $value['edited']['start_date'] . '" '; 
-					} 
-					else 
-					{
-						$title = ' title="No Previous value" ';
-					}	
-				} 
-				else if(!empty($value['edited']) && ($value['edited']['field'] == 'start_date_type'))
-				{
-					$attr = ' highlight';
-					$dateStyle = 'color:#973535;';
-					if($value['edited']['start_date_type'] != '' && $value['edited']['start_date_type'] !== NULL) 
-					{
-						$title = ' title="Previous value: ' . $value['edited']['start_date_type'] . '" '; 
-					} 
-					else 
-					{
-						$title = ' title="No Previous value" ';
-					}
-				} 
-				else if($value['new'] == 'y')
-				{
-
-					$title = ' title = "New record" ';
-					$dateStyle = 'color:#973535;'; 
-				}
-				$outputStr .= '<td style="width:20px;" class="' . $rowTwoType . $attr . '" ' . $title . '><span>';
-				if($value['start_date_type'] == 'anticipated') 
-				{
-					$outputStr .= '<span style="font-weight:bold;' . $dateStyle . '">'
-					 			. (($value['start_date'] != '' && $value['start_date'] !== NULL && $value['start_date'] != '0000-00-00') ? 
-								date('m/y',strtotime($value['start_date'])) : '' )  . '</span>';
-				} 
-				else 
-				{
-					$outputStr .= (($value['start_date'] != '' && $value['start_date'] !== NULL && $value['start_date'] != '0000-00-00') ? 
-									date('m/y',strtotime($value['start_date'])) : '' );
-				}
-				$outputStr .= '</span></td>';*/		
-				
-				
 				//field upm end date
 				$title = '';
 				$attr = '';	
@@ -5761,7 +5669,6 @@ class TrialTracker
 				if(!empty($value['edited']) && ($value['edited']['field'] == 'end_date'))
 				{
 					$attr = ' highlight';
-					$dateStyle = 'color:#973535;';
 					$upmBorderRight = 'border-right:1px solid red;';
 					
 					if($value['edited']['end_date'] != '' && $value['edited']['end_date'] !== NULL)
@@ -5792,17 +5699,10 @@ class TrialTracker
 					$dateStyle = 'color:#973535;'; 
 				}
 				$outputStr .= '<td style="width:20px;" class="' . $rowTwoType . $attr . '" ' . $title . '><span>';
-				if($value['end_date_type'] == 'anticipated') 
-				{
-					$outputStr .= '<span style="font-weight:bold;' . $dateStyle . '">' 
-								. (($value['end_date'] != '' && $value['end_date'] !== NULL && $value['end_date'] != '0000-00-00') ? 
-									date('m/y',strtotime($value['end_date'])) : '' ) . '</span>';
-				} 
-				else 
-				{
-					$outputStr .= (($value['end_date'] != '' && $value['end_date'] !== NULL && $value['end_date'] != '0000-00-00') ? 
+				
+				$outputStr .= (($value['end_date'] != '' && $value['end_date'] !== NULL && $value['end_date'] != '0000-00-00') ? 
 									date('m/y',strtotime($value['end_date'])) : '');
-				}	
+									
 				$outputStr .= '</span></td><td style="width:20px;"><span></span></td>';
 				
 				
@@ -9944,7 +9844,6 @@ class TrialTracker
 						$rowOneType = 'title';
 					
 					$rowspan = 1;
-					$enrollStyle = 'color:gray;';
 					$titleLinkColor = '#000000;';
 				
 					if(isset($dvalue['matchedupms']))  
@@ -10040,7 +9939,7 @@ class TrialTracker
 								
 					if(isset($dvalue['NCT/acronym']) && $dvalue['NCT/acronym'] != '') 
 					{
-						$outputStr .= '<b>' . htmlformat($dvalue['NCT/acronym']) . '</b>&nbsp;' . htmlformat($dvalue['NCT/brief_title']);
+						$outputStr .= htmlformat($dvalue['NCT/acronym']) . ' ' . htmlformat($dvalue['NCT/brief_title']);
 					} 
 					else 
 					{
@@ -10056,12 +9955,10 @@ class TrialTracker
 						&& (getDifference(substr($dvalue['edited']['NCT/enrollment'],16), $dvalue['NCT/enrollment']))) 
 						{
 							$attr = ' highlight" title="' . $dvalue['edited']['NCT/enrollment'];
-							$enrollStyle = 'color:#973535;';
 						}
 						else if($dvalue['new'] == 'y') 
 						{
 							$attr = '" title="New record';
-							$enrollStyle = 'color:#973535;';
 						}
 						elseif((isset($dvalue['manual_enrollment']) && $dvalue['manual_enrollment'] !== NULL)
 						|| (isset($dvalue['manual_enrollment_type']) && $dvalue['manual_enrollment_type'] !== NULL))
@@ -10070,8 +9967,6 @@ class TrialTracker
 								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_enrollment'];
 							else
 								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_enrollment_type'];
-								
-							$enrollStyle = 'color:#C7846D;';
 						}
 					}
 					else
@@ -10083,32 +9978,24 @@ class TrialTracker
 								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_enrollment'];
 							else
 								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_enrollment_type'];
-								
-							$enrollStyle = 'color:#C7846D;';
 						}
 						elseif(!empty($dvalue['edited']) && array_key_exists('NCT/enrollment', $dvalue['edited']) 
 						&& (getDifference(substr($dvalue['edited']['NCT/enrollment'],16), $dvalue['NCT/enrollment']))) 
 						{
 							$attr = ' highlight" title="' . $dvalue['edited']['NCT/enrollment'];
-							$enrollStyle = 'color:#973535;';
 						}
 						else if($dvalue['new'] == 'y') 
 						{
 							$attr = '" title="New record';
-							$enrollStyle = 'color:#973535;';
 						}
 					}
 					$outputStr .= '<td nowrap="nowrap" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">';
 					if($dvalue["NCT/enrollment_type"] != '') 
 					{
-						if($dvalue["NCT/enrollment_type"] == 'Anticipated') 
+						if($dvalue["NCT/enrollment_type"] == 'Anticipated' || $dvalue["NCT/enrollment_type"] == 'Actual') 
 						{ 
-							$outputStr .= '<span style="font-weight:bold;' . $enrollStyle . '">' . $dvalue["NCT/enrollment"] . '</span>';
-						}
-						else if($dvalue["NCT/enrollment_type"] == 'Actual') 
-						{
 							$outputStr .= $dvalue["NCT/enrollment"];
-						} 
+						}
 						else 
 						{ 
 							$outputStr .= $dvalue["NCT/enrollment"] . ' (' . $dvalue["NCT/enrollment_type"] . ')';
@@ -10200,7 +10087,6 @@ class TrialTracker
 							if(array_key_exists('NCT/collaborator', $dvalue['edited'])) 
 							{
 								$attr .= $dvalue['edited']['NCT/collaborator'];
-								$enrollStyle = 'color:#973535;';
 							}
 							$attr .= '';
 						} 
@@ -10247,8 +10133,7 @@ class TrialTracker
 						}
 					}
 					$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
-								. '<div class="rowcollapse">' . $dvalue['NCT/lead_sponsor'] . ' <span style="' . $enrollStyle . '"> ' 
-								. $dvalue["NCT/collaborator"] . ' </span></div></td>';
+								. '<div class="rowcollapse">' . $dvalue['NCT/lead_sponsor'] . ' ' . $dvalue["NCT/collaborator"] . '</div></td>';
 								
 								
 					//overall status column
@@ -11833,56 +11718,6 @@ class TrialTracker
 				$outputStr .= '<td class="' . $attr . '" ' . $title . '>' . '<span>' . $value['event_type'] . ' Milestone</span></td>';
 				
 				
-				//field upm start date
-				/*$title = '';
-				$attr = '';	
-				if(!empty($value['edited']) && ($value['edited']['field'] == 'start_date'))
-				{
-					$attr = ' highlight';
-					$dateStyle = 'color:#973535;'; 
-					if($value['edited']['start_date'] != '' && $value['edited']['start_date'] !== NULL)
-					{
-						$title = ' title="Previous value: ' . $value['edited']['start_date'] . '" '; 
-					} 
-					else 
-					{
-						$title = ' title="No Previous value" ';
-					}	
-
-				} 
-				else if(!empty($value['edited']) && ($value['edited']['field'] == 'start_date_type'))
-				{
-					$attr = ' highlight';
-					$dateStyle = 'color:#973535;';
-					if($value['edited']['start_date_type'] != '' && $value['edited']['start_date_type'] !== NULL) 
-					{
-						$title = ' title="Previous value: ' . $value['edited']['start_date_type'] . '" '; 
-					} 
-					else 
-					{
-						$title = ' title="No Previous value" ';
-					}
-				} 
-				else if($value['new'] == 'y')
-				{
-					$title = ' title = "New record" ';
-					$dateStyle = 'color:#973535;'; 
-				}
-				$outputStr .= '<td class="' . $attr . '" ' . $title . '><div class="rowcollapse">';
-				if($value['start_date_type'] == 'anticipated') 
-				{
-					$outputStr .= '<span style="font-weight:bold;' . $dateStyle . '">'
-					 			. (($value['start_date'] != '' && $value['start_date'] !== NULL && $value['start_date'] != '0000-00-00') ? 
-								date('m/y',strtotime($value['start_date'])) : '&nbsp;' )  . '</span>';
-				} 
-				else 
-				{
-					$outputStr .= (($value['start_date'] != '' && $value['start_date'] !== NULL && $value['start_date'] != '0000-00-00') ? 
-									date('m/y',strtotime($value['start_date'])) : '&nbsp;' );
-				}
-				$outputStr .= '</div></td>';*/		
-				
-				
 				//field upm end date
 				$title = '';
 				$attr = '';	
@@ -11923,17 +11758,10 @@ class TrialTracker
 					$dateStyle = 'color:#973535;'; 
 				}
 				$outputStr .= '<td class="' . $attr . '" ' . $title . '><div class="rowcollapse">';
-				if($value['end_date_type'] == 'anticipated') 
-				{
-					$outputStr .= '<span style="font-weight:bold;' . $dateStyle . '">' 
-								. (($value['end_date'] != '' && $value['end_date'] !== NULL && $value['end_date'] != '0000-00-00') ? 
-									date('m/y',strtotime($value['end_date'])) : '&nbsp;' ) . '</span>';
-				} 
-				else 
-				{
-					$outputStr .= (($value['end_date'] != '' && $value['end_date'] !== NULL && $value['end_date'] != '0000-00-00') ? 
+				
+				$outputStr .= (($value['end_date'] != '' && $value['end_date'] !== NULL && $value['end_date'] != '0000-00-00') ? 
 									date('m/y',strtotime($value['end_date'])) : '&nbsp;');
-				}	
+									
 				$outputStr .= '</div></td><td><div class="rowcollapse">&nbsp;</div></td>';
 				
 				
