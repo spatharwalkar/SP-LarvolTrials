@@ -934,22 +934,22 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 		$view_tp='total';
 		$link_part = '&list=2&hm=' . $id;
 	}
-	else if($_GET['view_type']=='indlead')
-	{
-		$title="Active industry lead sponsor trials";
-		$view_tp='indlead';
-		$link_part = '&list=1&itype=0&hm=' . $id;
-	}
-	else
+	else if($_GET['view_type']=='active')
 	{
 		$title="Active trials";
 		$view_tp='active';
 		$link_part = '&list=1&hm=' . $id;
 	}
+	else
+	{
+		$title="Active industry lead sponsor trials";
+		$view_tp='indlead';
+		$link_part = '&list=1&itype=0&hm=' . $id;
+	}
 
 	$out = '<br/>&nbsp;&nbsp;<b>View type: </b> <select id="view_type" name="view_type" onchange="window.location.href=\'master_heatmap.php?id='.$_GET['id'].'&view_type=\'+this.value+\'\'">'
-			. '<option value="active" '.(($view_tp=='active')? "selected=\"selected\"":"").'>Active trials</option>'
 			. '<option value="indlead"'.(($view_tp=='indlead')? "selected=\"selected\"":"").'>Active Industry trials</option>'
+			. '<option value="active" '.(($view_tp=='active')? "selected=\"selected\"":"").'>Active trials</option>'
 			. '<option value="total" '.(($view_tp=='total')? "selected=\"selected\"":"").'>All trials</option></select><br/>';
 			
 	$out .= '<form action="master_heatmap.php" method="post">'
@@ -964,8 +964,8 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 		. '<option value="pdfdown">PDF</option>'
 		. '</select><br/><br/>';
 	$out .='<b>Counts display: </b><select id="dwcount" name="dwcount">'
-		. '<option value="active" '.(($view_tp=='active')? "selected=\"selected\"":"").'>Active trials</option>'
 		. '<option value="indlead" '.(($view_tp=='indlead')? "selected=\"selected\"":"").'>Active industry trials</option>'
+		. '<option value="active" '.(($view_tp=='active')? "selected=\"selected\"":"").'>Active trials</option>'
 		. '<option value="total" '.(($view_tp=='total')? "selected=\"selected\"":"").'>All trials</option></select><br/><br/><input type="submit" name="download" value="Download" title="Download" />'
 		. '</fieldset></form>';	
 		
@@ -1817,7 +1817,7 @@ function Download_reports()
 		$area_Col_Width=20;
 		
 		//// Give product column required maximum width when available to prevent wrapping
-		$Avail_Prod_Col_width = 274-(count($columns)*($area_Col_Width+2));
+		$Avail_Prod_Col_width = 274-((count($columns)+((isset($total_fld) && $total_fld == "1")? 1:0))*($area_Col_Width+2));
 		$Current_product_Col_Width = $product_Col_Width;
 		if($Avail_Prod_Col_width > 25)
 		{
@@ -1856,9 +1856,10 @@ function Download_reports()
 		}
 		$Area_Row_height = $Max_areaNumLines * 4.5;
 		
-		$pdf->SetFillColor(192, 196, 254);
+		$pdf->SetFillColor(255, 255, 255);
 		$pdf->setCellMargins(1, 1, 1, 1);
-		$pdf->writeHTMLCell($product_Col_Width, $Area_Row_height, '', '', '', $border, $ln=0, $fill=1, $reseth=true, $align='L', $autopadding=true);
+		$pdf->writeHTMLCell($product_Col_Width, $Area_Row_height, '', '', '', $border=0, $ln=0, $fill=1, $reseth=true, $align='L', $autopadding=true);
+		
 		
 		foreach($columns as $col => $val)
 		{
@@ -1937,7 +1938,7 @@ function Download_reports()
 				//we could force a page break and rewrite grid headings here
 				$pdf->AddPage();
 				///Add the header row again at new page
-				$pdf->SetFillColor(192, 196, 254);
+				$pdf->SetFillColor(255, 255, 255);
 				$pdf->setCellMargins(1, 1, 1, 1);
 				$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));
 				$pdf->writeHTMLCell($product_Col_Width, $Area_Row_height, '', '', '', $border, $ln=0, $fill=1, $reseth=true, $align='L', $autopadding=true);
@@ -2015,7 +2016,7 @@ function Download_reports()
 			$rdesc = (isset($rowsDescription[$row]) && $rowsDescription[$row] != '')?$rowsDescription[$row]:null;
 			$raltTitle = (isset($rdesc) && $rdesc != '')?' alt="'.$rdesc.'" title="'.$rdesc.'" ':null;
 			
-			$pdf->SetFillColor(192, 196, 254);
+			$pdf->SetFillColor(255, 255, 255);
         	$pdf->SetTextColor(0);
 			$pdf->setCellMargins(1, 1, 1, 1);
 			$pdf->getCellPaddings();
@@ -2041,7 +2042,7 @@ function Download_reports()
 			}
 			else
 			{
-				$pdf->SetFillColor(192, 196, 254);
+				$pdf->SetFillColor(255, 255, 255);
         		$pdf->SetTextColor(0);
 				$pdf->setCellMargins(1, 1, 1, 1);
 				$pdf->getCellPaddings();
@@ -2365,7 +2366,7 @@ function Download_reports()
 		$objPHPExcel->setActiveSheetIndex(0);
 		$objPHPExcel->getActiveSheet()->setTitle(substr($name,0,20));
 		//$objPHPExcel->getActiveSheet()->getStyle('A1:AA2000')->getAlignment()->setWrapText(true);
-		$objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(18);
+		$objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(36);
 		
 		
 		foreach($columns as $col => $val)
@@ -2651,10 +2652,10 @@ function Download_reports()
 						$objDrawing = new PHPExcel_Worksheet_Drawing();
 						$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
 						$objDrawing->setOffsetX(100);
-						$objDrawing->setOffsetY(3);
+						$objDrawing->setOffsetY(0);
 						$objDrawing->setPath('images/'.$data_matrix[$row][$col]['exec_bomb']['src']);
-						$objDrawing->setHeight(16);
-						$objDrawing->setWidth(16); 
+						$objDrawing->setHeight(15);
+						$objDrawing->setWidth(15); 
 						$objDrawing->setDescription($data_matrix[$row][$col]['bomb']['title']);
 						$objDrawing->setCoordinates($cell);
 					}
@@ -2666,6 +2667,16 @@ function Download_reports()
       											'vertical'   => PHPExcel_Style_Alignment::VERTICAL_CENTER,
      											'rotation'   => 0,
       											'wrap'       => true));
+				}
+				else
+				{
+					/////// To avoid product name overflow on side column when, first are columns is empty - putting 0 value with white color
+					if($col == 1)
+					{
+						$white_font['font']['color']['rgb'] = 'FFFFFF';
+						$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($white_font);
+						$objPHPExcel->getActiveSheet()->setCellValue($cell, '0');
+					}
 				}
 			}
 		}
