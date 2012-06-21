@@ -25,7 +25,7 @@ if(isset($_POST['delsch']) && is_array($_POST['delsch']))
    <?php
 
     $my_table = 'data_trials';
-    $query = "select * from information_schema.columns where table_name='data_trials';";
+    $query = "SELECT * FROM `information_schema`.`columns` WHERE `table_name`='data_trials' AND `table_schema`='".DB_NAME."';";
     $res = mysql_query($query) or die('Bad SQL query getting searchdata');
     $field_str='';
 	while ($row = mysql_fetch_array($res, MYSQL_BOTH)) {
