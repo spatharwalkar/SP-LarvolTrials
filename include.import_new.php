@@ -311,9 +311,6 @@ $array1=array
 					$row = mysql_fetch_assoc($res);
 					$olddate=$row['lastchanged_date'];
 					$oldval=$row[$fieldname];
-					//$value=mysql_real_escape_string($value);
-
-
 
 					//check if the data is manually overridden
 					$dn_array1=array
@@ -1675,9 +1672,6 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 				
 				
 				$oldval=$row[$fieldname];
-				//$value=mysql_real_escape_string($value);
-				
-				
 	
 				//check if the data is manually overridden
 				$dn_array1=array
