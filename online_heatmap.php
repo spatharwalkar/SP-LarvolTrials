@@ -130,7 +130,6 @@ while($header = mysql_fetch_array($res))
 		$prev_prod_category = $header['category'];
 		$rowsCategoryName[$header['num']] = $header['category'];
 		
-		//$rowsCategoryPrintStatus[$header['category']] = 0;
 		$rows_categoryProducts[$header['category']][] = $header['type_id'];
 	}
 }
@@ -187,7 +186,7 @@ foreach($rows as $row => $rval)
 			$col_indlead_total[$col]=$cell_data['count_active_indlead']+$col_indlead_total[$col];
 			$row_indlead_total[$row]=$cell_data['count_active_indlead']+$row_indlead_total[$row];
 			$active_total=$cell_data['count_active']+$active_total;
-			$count_total=$cell_data['count_active_total']+$count_total;
+			$count_total=$cell_data['count_total']+$count_total;
 			$indlead_total=$cell_data['count_active_indlead']+$indlead_total;
 			
 			if($cell_data['count_active'] != '' && $cell_data['count_active'] != NULL)
@@ -1173,7 +1172,7 @@ $name = htmlspecialchars(strlen($name)>0?$name:('report '.$id.''));
 
 $Report_Name = ((trim($Report_DisplayName) != '' && $Report_DisplayName != NULL)? trim($Report_DisplayName):'report '.$id.'');
 
-if(!isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE)
+if(isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE)
 {
 	$htmlContent .= '<table width="100%" style="background-color:#FFFFFF;">'
 				. '<tr><td style="background-color:#FFFFFF;"><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" /></td>'
