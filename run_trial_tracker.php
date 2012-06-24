@@ -9785,6 +9785,8 @@ class TrialTracker
 									. $vvalue['sectionHeader'] . '</td></tr>';
 					}
 				}
+				
+				$displayFlag = true;
 				$finalkey = $vkey;
 			}
 			
