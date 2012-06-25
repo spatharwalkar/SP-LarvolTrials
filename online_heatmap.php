@@ -14,7 +14,7 @@ $res = mysql_query($query) or die('Bad SQL query getting master heatmap report')
 $res = mysql_fetch_array($res) or die('Report not found.');
 $rptu = $res['user'];
 $shared = $res['shared'];
-$toal_fld=$res['total'];
+$total_fld=$res['total'];
 $name = $res['name'];
 $dtt = $res['dtt'];
 $Report_DisplayName=$res['display_name'];
@@ -72,12 +72,14 @@ while($header = mysql_fetch_array($res))
 			$columns_Span[$header['num']] = 0;
 			$prev_area = $prev_area;
 			$prev_areaSpan = $prev_areaSpan+1;
+			$last_cat_col = $last_cat_col;
 		}
 		else
 		{
 			$columns_Span[$header['num']] = 1;
 			$prev_area = $header['num'];
 			$prev_areaSpan = 1;
+			$last_cat_col = $header['num'];
 		}
 		
 		$prev_area_category = $header['category'];
@@ -139,7 +141,10 @@ $new_columns = array();
 foreach($columns as $col => $cval)
 {
 	if($dtt && $last_num == $col)
+	{
 		array_pop($areaIds); //In case of DTT enable skip last column vaules
+		$columns_Span[$last_cat_col] = $columns_Span[$last_cat_col] - 1;	/// Decrease last category column span
+	}
 	else
 	{
 		if($dtt && $second_last_num == $col && $rows_Span[$col] == 0)	//In case of DTT skipping last column can cause colspan problem of category
@@ -1172,7 +1177,7 @@ $name = htmlspecialchars(strlen($name)>0?$name:('report '.$id.''));
 
 $Report_Name = ((trim($Report_DisplayName) != '' && $Report_DisplayName != NULL)? trim($Report_DisplayName):'report '.$id.'');
 
-if(isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE)
+if((isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE) || !isset($_SERVER['HTTP_REFERER']))
 {
 	$htmlContent .= '<table width="100%" style="background-color:#FFFFFF;">'
 				. '<tr><td style="background-color:#FFFFFF;"><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" /></td>'
@@ -1258,7 +1263,7 @@ foreach($columns as $col => $val)
 
 		
 //if total checkbox is selected
-if($toal_fld)
+if($total_fld)
 {
 	$online_HMCounter++;
 	$htmlContent .= '<th id="Cell_ID_'.$online_HMCounter.'" width="80px"><div align="center">';
@@ -1285,7 +1290,7 @@ foreach($rows as $row => $rval)
 	{
 		$online_HMCounter++;
 		
-		$htmlContent .='<tr style="page-break-inside:avoid; vertical-align:middle; max-height:100%; background-color: #A2FF97;"  class="Cat_Height"><td align="center" style="vertical-align:middle; background-color: #A2FF97;" colspan="'.((count($columns)+1)+(($toal_fld)? 1:0)).'" id="Cell_ID_'.$online_HMCounter.'">';
+		$htmlContent .='<tr style="page-break-inside:avoid; vertical-align:middle; max-height:100%; background-color: #A2FF97;"  class="Cat_Height"><td align="center" style="vertical-align:middle; background-color: #A2FF97;" colspan="'.((count($columns)+1)+(($total_fld)? 1:0)).'" id="Cell_ID_'.$online_HMCounter.'">';
 		if($dtt)
 		{
 			$htmlContent .= '<input type="hidden" value="0,endl,0,endl,0" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
@@ -1502,7 +1507,7 @@ foreach($rows as $row => $rval)
 	}//Columns For loop Ends
 	
 	//if total checkbox is selected
-	if($toal_fld)
+	if($total_fld)
 	{
 		$htmlContent .= '<th>&nbsp;</th>';
 	}
