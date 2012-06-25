@@ -342,8 +342,10 @@ require_once('include.util.php');
 	        	{
 	        		//need to remove old index before adding blob and also suggest blob index if any present
 	        		if($old_field['indexFlag']==1)
-	        		$sql =  "ALTER table `{$table}` DROP INDEX {$old_field['key_primary']}";
-	        		echo $sql.';<br />';
+	        		{
+		        		$sql =  "ALTER table `{$table}` DROP INDEX {$old_field['key_primary']}";
+		        		echo $sql.';<br />';
+	        		}
 	        		$special_uni_key = ', ADD UNIQUE `'.$field.'` (`'.$field.'`('.$new_field['Sub_part'].'))';
 	        		$skipModify = 1;
     		
@@ -441,7 +443,69 @@ require_once('include.util.php');
         **/        
         function ChangeTableFieldQuery($table,$changeOrModify,$field,$new_field,$no_primary_def_needed,$special_mul_key,$indexKey,$special_uni_key,$after=null)
         {
-        	$sql = "ALTER TABLE `{$table}`  $changeOrModify ".($changeOrModify=='CHANGE'?"`{$field}`":null)." `{$new_field['name']}` {$new_field['type']} " . ($new_field['null']=='YES' ? '' : 'NOT') . ' NULL' . (strlen($new_field['default']) > 0 ? " default '{$new_field['default']}'" : '') . ($new_field['extra'] == 'auto_increment' ? ' auto_increment' : '') . ($new_field['key'] == 'PRI' && $no_primary_def_needed!=1  ? ", ADD PRIMARY KEY (`{$new_field['name']}`)" : '') . ($special_mul_key?$special_mul_key:''). ($indexKey?$indexKey:''). ($special_uni_key?$special_uni_key:''). ($after?' AFTER `'.$after.'`':'');
+            $sql = "ALTER TABLE `{$table}` ";
+        	
+        	$sql .= " $changeOrModify ";
+        	
+        	if($changeOrModify=='CHANGE')
+        	{
+        		$sql .= "`{$field}`";
+        	}
+        	else
+        	{ 
+        		$sql .= null;
+        	}
+        	$sql .= " `{$new_field['name']}` {$new_field['type']} ";
+        	
+        	if($new_field['null']=='YES')
+        	{
+        		$sql .= '';
+        	}
+        	else
+        	{
+        		$sql .= 'NOT';
+        	}
+        	
+        	$sql .= ' NULL';
+        	
+        	if(strlen($new_field['default']) > 0 )
+        	{
+        		$sql .= " default '{$new_field['default']}'";
+        	}
+
+        	
+        	if($new_field['extra'] == 'auto_increment')
+        	{
+        		$sql .=' auto_increment';
+        	}
+
+        	
+        	if($new_field['key'] == 'PRI' && $no_primary_def_needed!=1  )
+        	{
+        		$sql .= ", ADD PRIMARY KEY (`{$new_field['name']}`)";
+        	}
+
+
+       		if($special_mul_key)
+       		{
+       			$sql .=$special_mul_key;
+       		}
+       		
+       		if($indexKey)
+       		{
+       			$sql .=$indexKey;
+       		}
+       		
+       		if($special_uni_key)
+       		{
+       			$sql .=$special_uni_key;
+       		}
+       		
+       		if($after)
+       		{
+       			$sql .=' AFTER `'.$after.'`';
+       		}
+       		
         	return $sql;
         }
         
