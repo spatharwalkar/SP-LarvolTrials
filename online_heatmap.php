@@ -1067,6 +1067,16 @@ function display_tooltip(type, id)
 				tooltip_ele.style.left = tooltip_ele.offsetLeft - edgeoffset +"px"
 			}
 			///// End Part - Position the tooltip properly for the cells which are at leftmost edge of window 
+			
+			///// Start Part - Position the tooltip properly for the cells which are at bottommost edge of window 
+			var tooltipH=document.getElementById("ToolTip_ID_"+id).offsetHeight
+			var windowedge=document.all && !window.opera? document.documentElement.scrollTop+document.documentElement.clientHeight-15 : window.pageYOffset+window.innerHeight;
+			if ((windowedge- (tooltip_ele.offsetTop + document.getElementById("Cell_ID_"+id).offsetHeight)) < tooltipH)	//move up?
+			{ 	
+				edgeoffset = tooltipH + document.getElementById("Cell_ID_"+id).offsetHeight - 8;
+				tooltip_ele.style.top = tooltip_ele.offsetTop - edgeoffset +"px";
+			}
+			///// End Part - Position the tooltip properly for the cells which are at bottommost edge of window 
 		}
 		else
 		{

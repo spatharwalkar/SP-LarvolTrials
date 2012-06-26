@@ -1700,9 +1700,6 @@ function Download_reports()
 					$data_matrix[$row][$col]['bomb']['alt']='Small bomb';
 					$data_matrix[$row][$col]['bomb']['style']='width:11px; height:11px;';
 					$data_matrix[$row][$col]['bomb']['title']='Bomb Details';
-					
-					if($Flag_matrix[$row]['images_flag'] == 0 && $data_matrix[$row][$col]['total'] != 0)
-					$Flag_matrix[$row]['images_flag'] = 1;	/// Image present flag
 				}
 				elseif(trim($cell_data['bomb']) == 'large')
 				{
@@ -1722,9 +1719,6 @@ function Download_reports()
 					$data_matrix[$row][$col]['bomb']['alt']='Large bomb';
 					$data_matrix[$row][$col]['bomb']['style']='width:11px; height:11px;';
 					$data_matrix[$row][$col]['bomb']['title']='Bomb Details';
-					
-					if($Flag_matrix[$row]['images_flag'] == 0 && $data_matrix[$row][$col]['total'] != 0)
-					$Flag_matrix[$row]['images_flag'] = 1;	/// Image present flag
 				}
 				else
 				{
@@ -1737,11 +1731,7 @@ function Download_reports()
 				}
 				
 				$data_matrix[$row][$col]['filing']=trim($cell_data['filing']);
-				if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
-				{
-					if($Flag_matrix[$row]['images_flag'] == 0 && $data_matrix[$row][$col]['total'] != 0)
-					$Flag_matrix[$row]['images_flag'] = 1;	/// Image present flag
-				}
+				
 				
 				$data_matrix[$row][$col]['phase4_override']=$cell_data['phase4_override'];
 				
@@ -1822,9 +1812,6 @@ function Download_reports()
 				$data_matrix[$row][$col]['color']='background-color:#DDF;';
 				$data_matrix[$row][$col]['color_code']='DDF';
 				$data_matrix[$row][$col]['update_flag'] = 0;
-				
-				if($Flag_matrix[$row]['images_flag'] != 1)
-				$Flag_matrix[$row]['images_flag'] = 0;	/// Image present flag
 			}
 		}
 	}
@@ -1899,20 +1886,21 @@ function Download_reports()
         $pdf->SetTextColor(0);
 		$pdf->setCellPaddings(1, 1, 1, 1);
 		$pdf->setCellMargins(0, 0, 0, 0);
-		$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));
+		$border = array('mode' => 'int', 'LTR' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));
 		$pdf->MultiCell(($Page_Width/2), 13, '<b>Name: </b>'. $Report_Name, $border, $align='L', $fill=1, $ln=0, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
-		$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));
+		$border = array('mode' => 'int', 'TR' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));
 		$pdf->MultiCell(($Page_Width/2), 13, '<b>Category: </b>'. htmlspecialchars($category), $border, $align='L', $fill=1, $ln=0, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
 		$pdf->Ln(13);
 		
 		$pdf->setCellPaddings(0.5, 0.5, 0.5, 0.5);
+		$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));
 		$pdf->MultiCell($Page_Width, 8, '<b>Display Mode: </b>'. $pdftitle, $border, $align='L', $fill=1, $ln=0, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
 		$pdf->Ln(20);
 		$pdf->setCellPaddings(0.5, 0.5, 0.5, 0.5);
 		//// Give product column required maximum width when available to prevent wrapping
-		$Avail_Prod_Col_width = $Page_Width-((count($columns)+((isset($total_fld) && $total_fld == "1")? 1:0))*($area_Col_Width+2));
+		$Avail_Prod_Col_width = $Page_Width-((count($columns)+((isset($total_fld) && $total_fld == "1")? 1:0))*($area_Col_Width+1));
 		$Current_product_Col_Width = $product_Col_Width;
-		if($Avail_Prod_Col_width > 25)
+		if($Avail_Prod_Col_width > $product_Col_Width)
 		{
 			foreach($rows as $row => $rval)
 			{
@@ -2015,7 +2003,7 @@ function Download_reports()
 				{
 					$count_val=$col_indlead_total[$col];
 				}
-				$pdfContent = '<a style="color:#000000;" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. $link_part . '" target="_blank" title="'. $caltTitle .'">'.$val.'</a>';
+				$pdfContent = '<a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. $link_part . '" target="_blank" title="'. $caltTitle .'">'.$val.'</a>';
 				 //$pdf->StartTransform(); 
 				 //$pdf->Rotate(270,'','');
 				$pdf->MultiCell($area_Col_Width, $Area_Row_height, $pdfContent, $border, $align='C', $fill=1, $ln=0, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
@@ -2047,7 +2035,7 @@ function Download_reports()
 				}
 				$productIds = array_filter($productIds);
 				$areaIds = array_filter($areaIds);
-				$pdfContent = '<a style="color:#000000;" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds). $link_part . '" target="_blank" title="'. $title .'">'.$count_val.'</a>';
+				$pdfContent = '<a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds). $link_part . '" target="_blank" title="'. $title .'">'.$count_val.'</a>';
 				$pdf->MultiCell($area_Col_Width, $Area_Row_height, $pdfContent, $border, $align='C', $fill=1, $ln=0, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
 			}
 			else
@@ -2066,14 +2054,8 @@ function Download_reports()
 			$rowcount = $pdf->getNumLines($rval, $product_Col_Width);
 			if($rowcount < 1) $rowcount = 1;
  			$startY = $pdf->GetY();
-			if($Flag_matrix[$row]['images_flag'] == 1)	// if row does not contain images give minimum height as 13
-			{
-				$prod_row_height = ((($rowcount * 5.5) <13) ? 13:($rowcount * 5.5));	//13 is minimum height to accomodate images and other data
-			}
-			else
-			{
-				$prod_row_height = $rowcount * 5.5;
-			}
+			$prod_row_height = $rowcount * 4.5;
+			
  			
 			
 			if (($startY + $prod_row_height) + $dimensions['bm'] > ($dimensions['hk']))
@@ -2134,7 +2116,7 @@ function Download_reports()
 						{
 							$count_val=$col_indlead_total[$col];
 						}
-						$pdfContent = '<a style="color:#000000;" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. $link_part . '" target="_blank" title="'. $caltTitle .'">'.$val.'</a>';
+						$pdfContent = '<a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. $link_part . '" target="_blank" title="'. $caltTitle .'">'.$val.'</a>';
 						$pdf->MultiCell($area_Col_Width, $Area_Row_height, $pdfContent, $border, $align='C', $fill=1, $ln=0, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
 					}
 					else
@@ -2164,7 +2146,7 @@ function Download_reports()
 						}
 						$productIds = array_filter($productIds);
 						$areaIds = array_filter($areaIds);
-						$pdfContent = '<a style="color:#000000;" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds). $link_part . '" target="_blank" title="'. $title .'">'.$count_val.'</a>';
+						$pdfContent = '<a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds). $link_part . '" target="_blank" title="'. $title .'">'.$count_val.'</a>';
 						$pdf->MultiCell($area_Col_Width, $Area_Row_height, $pdfContent, $border, $align='C', $fill=1, $ln=0, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
 					}
 					else
@@ -2194,7 +2176,7 @@ function Download_reports()
 				$pdfContent = '';
 				if($dtt)
 				{
-					$pdfContent = '<a id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . implode(',', $rows_categoryProducts[$cat]) . '&a=' . $last_area . $link_part .'" target="_blank" style="color:#000000;">';
+					$pdfContent = '<a id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . implode(',', $rows_categoryProducts[$cat]) . '&a=' . $last_area . $link_part .'" target="_blank" style="color:#000000; text-decoration:none;">';
 				}
 				if($cat != 'Undefined')
 				{
@@ -2208,7 +2190,7 @@ function Download_reports()
 				$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));	
 			//	$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(162, 255, 151)));
 				$pdf->MultiCell($Product_Rowcat_width, $Product_Rowcat_height, $pdfContent, $border, $align='C', $fill=1, $ln=0, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
-				$pdf->Ln($Product_Rowcat_height+0.7);
+				$pdf->Ln($Product_Rowcat_height+0.8);
 			}
 				
 			
@@ -2234,7 +2216,7 @@ function Download_reports()
 				{
 					$count_val=$row_indlead_total[$row];
 				}
-				$pdfContent = '<a style="color:#000000;" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). $link_part . '" target="_blank" title="'. $raltTitle .'">'.$rval.'</a>';
+				$pdfContent = '<a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). $link_part . '" target="_blank" title="'. $raltTitle .'">'.$rval.'</a>';
 				
 				
 				$pdf->MultiCell($product_Col_Width, $prod_row_height, $pdfContent, $border, $align='C', $fill=1, $ln=0, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
@@ -2248,7 +2230,7 @@ function Download_reports()
 			
 				$dimensions = $pdf->getPageDimensions();
 				$startY = $pdf->GetY();
-				$prod_row_height = 5;	//12 is default height
+				$prod_row_height = 4.5;	//12 is default height
 				if (($startY + $prod_row_height) + $dimensions['bm'] > ($dimensions['hk'])) {
 					//this row will cause a page break, draw the bottom border on previous row and give this a top border
 					//we could force a page break and rewrite grid headings here
@@ -2469,28 +2451,32 @@ function Download_reports()
 					$annotation_text = strip_tags($annotation_text);	///Strip HTML tags
 
 					
+					$pdfContent .= '<div align="center" style="vertical-align:middle; float:none;"><br style="line-height:1.5px;" />';
+					
 					if(trim($annotation_text) != '')
 					{
 						$pdf->Annotation('', '', $area_Col_Width-4, $prod_row_height-4, $annotation_text, array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Details', 'Subj' => 'Information', 'C' => array()));	
 					}
 					
-					$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. $link_part . '" target="_blank" title="'. $title .'" style="'.((trim($data_matrix[$row][$col]['color_code']) == 'FF0000' && $data_matrix[$row][$col]['count_lastchanged_value']==1) ? 'background-color:#FFFFFF;':'').'"><font style="'. (($data_matrix[$row][$col]['count_lastchanged_value']==1) ? 'color:#FF0000;':'color:#000000;').'" >'.$count_val.'</font></a>';
+					$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. $link_part . '" target="_blank" title="'. $title .'" style="'.((trim($data_matrix[$row][$col]['color_code']) == 'FF0000' && $data_matrix[$row][$col]['count_lastchanged_value']==1) ? 'background-color:#FFFFFF;':'').'"><font style="'. (($data_matrix[$row][$col]['count_lastchanged_value']==1) ? 'color:#FF0000;':'').'" >'.$count_val.'</font></a> ';
 					
 					
 					if($data_matrix[$row][$col]['bomb']['value'] == 'small' || $data_matrix[$row][$col]['bomb']['value'] == 'large')
 					{
-						$pdfContent .= '<br/>&nbsp;<img align="center" title="'.$data_matrix[$row][$col]['bomb']['title'].'" src="images/'.$data_matrix[$row][$col]['bomb']['src'].'" style="'. $data_matrix[$row][$col]['bomb']['style'] .' vertical-align:top; padding-right:10px; cursor:pointer;" alt="'.$data_matrix[$row][$col]['bomb']['alt'].'" />';
+						$bomb_image = $pdf->serializeTCPDFtagParameters(array('images/'.$data_matrix[$row][$col]['bomb']['src'], '', '', 3.1, 3.1, '', '', '', false, 300, '', false, false, 0, false, false, false));
+						$pdfContent .= '<tcpdf method="Image" params="'.$bomb_image.'" /> &nbsp;';
+						//$pdfContent .= '&nbsp;<img align="center" title="'.$data_matrix[$row][$col]['bomb']['title'].'" src="images/'.$data_matrix[$row][$col]['bomb']['src'].'" style="width:8px; height:8px; padding-right:10px; cursor:pointer;" alt="'.$data_matrix[$row][$col]['bomb']['alt'].'" />';
 					}
 						
 					if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
 					{
-						if($data_matrix[$row][$col]['bomb']['value'] != 'small' && $data_matrix[$row][$col]['bomb']['value'] != 'large')
-						$pdfContent .='<br/>';
-						$pdfContent .= '&nbsp;<img align="center" title="Filing details" src="'.$data_matrix[$row][$col]['filing_image'].'" style="width:11px; height:11px; vertical-align:top; cursor:pointer;" alt="Filing" />';
+						$filing_image = $pdf->serializeTCPDFtagParameters(array($data_matrix[$row][$col]['filing_image'], '', '', 3.1, 3.1, '', '', '', false, 300, '', false, false, 0, false, false, false));
+						$pdfContent .= ' <tcpdf method="Image" params="'.$filing_image.'" />';
+						//$pdfContent .= '&nbsp;<img align="center" title="Filing details" src="'.$data_matrix[$row][$col]['filing_image'].'" style="width:8px; height:8px; cursor:pointer;" alt="Filing" />';
 					}
 						
-					$pdfContent .= '';
-					$pdf->MultiCell($area_Col_Width, $prod_row_height, $pdfContent, $border, $align='C', $fill=1, $ln=0, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+					$pdfContent .= '</div>';
+					$pdf->MultiCell($area_Col_Width, $prod_row_height, $pdfContent, $border, $align='C', $fill=1, $ln=0, '', '', $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$prod_row_height, 'M');
 				}
 				else
 				{
@@ -2530,7 +2516,6 @@ function Download_reports()
         	$pdf->SetTextColor(0);
 			$pdf->getCellPaddings();
 			$pdf->setCellMargins(0, 0, 0, 0);
-			$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));
 			
 			$footnotes_rowcount = $pdf->getNumLines('Footnotes:'. $footnotes, 137);
 			$description_rowcount = $pdf->getNumLines('Description:'. $description, 137);
@@ -2539,7 +2524,9 @@ function Download_reports()
 			else
 			$FD_height = 15;	/// When there is single line in footnote and description, it not looks good to have 4.5 height
 			
+			$border = array('mode' => 'int', 'LTB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));
 			$pdf->writeHTMLCell(($Page_Width/2), $FD_height, '', '', '<b>Footnotes: </b><br/>'. $footnotes, $border, $ln=0, $fill=1, $reseth=true, $align='L', $autopadding=true);
+			$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));
 			$pdf->writeHTMLCell(($Page_Width/2), $FD_height, '', '', '<b>Description: </b><br/>'. $description, $border, $ln=0, $fill=1, $reseth=true, $align='L', $autopadding=true);
 		}
 		
@@ -2915,12 +2902,25 @@ function Download_reports()
 					{
 						$objDrawing = new PHPExcel_Worksheet_Drawing();
 						$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
-						$objDrawing->setOffsetX(100);
+						$objDrawing->setOffsetX(80);
 						$objDrawing->setOffsetY(0);
 						$objDrawing->setPath('images/'.$data_matrix[$row][$col]['exec_bomb']['src']);
 						$objDrawing->setHeight(15);
 						$objDrawing->setWidth(15); 
 						$objDrawing->setDescription($data_matrix[$row][$col]['bomb']['title']);
+						$objDrawing->setCoordinates($cell);
+					}
+					
+					if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
+					{
+						$objDrawing = new PHPExcel_Worksheet_Drawing();
+						$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
+						$objDrawing->setOffsetX(100);
+						$objDrawing->setOffsetY(0);
+						$objDrawing->setPath($data_matrix[$row][$col]['filing_image']);
+						$objDrawing->setHeight(15);
+						$objDrawing->setWidth(15); 
+						$objDrawing->setDescription("Filing Details");
 						$objDrawing->setCoordinates($cell);
 					}
 					
@@ -3003,15 +3003,12 @@ function Download_reports()
 		$objPHPExcel->getActiveSheet()->SetCellValue('A' . $row, 'Legend:');
 		$col = 'A';
 		//get search results
-		$phases = array('N/A', 'Phase 0', 'Phase 0/Phase 1', 'Phase 1', 'Phase 1a', 'Phase 1b', 'Phase 1a/1b', 'Phase 1c', 'Phase 1/Phase 2', 'Phase 1b/2', 
-						'Phase 1b/2a', 'Phase 2','Phase 2a', 'Phase 2a/2b', 'Phase 2a/b', 'Phase 2b', 'Phase 2/Phase 3', 'Phase 2b/3','Phase 3', 'Phase 3a', 
-						'Phase 3b', 'Phase 3/Phase 4', 'Phase 3b/4', 'Phase 4');
+		$phases = array('N/A', 'Phase 0', 'Phase 1', 'Phase 2', 'Phase 3', 'Phase 4');
 		$phasenums = array(); foreach($phases as $k => $p)  $phasenums[$k] = str_ireplace(array('phase',' '),'',$p);
-		$phase_legend_nums = array('N/A', '0', '0/1', '1', '1/2', '2', '2/3', '3', '3/4', '4');
+		$phase_legend_nums = array('N/A', '0', '1', '2', '3', '4');
 		//$p_colors = array('DDDDDD', 'BBDDDD', 'AADDEE', '99DDFF', 'DDFF99', 'FFFF00', 'FFCC00', 'FF9900', 'FF7711', 'FF4422');
-		$p_colors = array('BFBFBF', '00CCFF', '99CC00', '99CC00', '99CC00', '99CC00', '99CC00', '99CC00', 'FFFF00', 'FFFF00', 'FFFF00', 'FFFF00', 'FFFF00', 'FFFF00', 
-		'FFFF00', 'FFFF00', 'FF9900', 'FF9900', 'FF9900', 'FF9900', 'FF9900', 'FF0000', 'FF0000', 'FF0000');
-		$phase_legend_colors = array('BFBFBF', '00CCFF', '99CC00', '99CC00', 'FFFF00', 'FFFF00', 'FF9900', 'FF9900', 'FF0000', 'FF0000');
+		$p_colors = array('BFBFBF', '00CCFF', '99CC00', 'FFFF00', 'FF9900', 'FF0000');
+		$phase_legend_colors = array('BFBFBF', '00CCFF', '99CC00', 'FFFF00', 'FF9900', 'FF0000');
 	
 		foreach($p_colors as $key => $color)
 		{
