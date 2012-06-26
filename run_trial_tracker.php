@@ -380,11 +380,11 @@ class TrialTracker
 			}
 			
 			
-			if(isset($globalOptions['product']) && $globalOptions['product'] != '' && $globalOptions['download'] != 'allTrialsforDownload')
+			if(isset($globalOptions['product']) && !empty($globalOptions['product']) && $globalOptions['download'] != 'allTrialsforDownload')
 			{	
 				foreach($TrialsInfo as $tikey => $tivalue)
 				{
-					if($tikey != $globalOptions['product'])
+					if(!(in_array($tikey, $globalOptions['product'])))
 					{
 						unset($TrialsInfo[$tikey]);
 						unset($Ids[$tikey]);
@@ -404,11 +404,11 @@ class TrialTracker
 			}
 			$Values = $this->processOTTData($ottType, $resultIds, $timeMachine, $linkExpiryDt = array(), $globalOptions);
 			
-			if(isset($globalOptions['product']) && $globalOptions['product'] != '' && $globalOptions['download'] != 'allTrialsforDownload')
+			if(isset($globalOptions['product']) && !empty($globalOptions['product']) && $globalOptions['download'] != 'allTrialsforDownload')
 			{	
 				foreach($Values['Trials'] as $tkey => $tvalue)
 				{
-					if($tkey != $globalOptions['product'])
+					if(!(in_array($tkey, $globalOptions['product'])))
 					{
 						unset($Values['Trials'][$tkey]);
 					}
@@ -5015,11 +5015,11 @@ class TrialTracker
 				$Ids[0]['area'] = implode("', '", $resultIds['area']);
 			}
 			
-			if(isset($globalOptions['product']) && $globalOptions['product'] != '' && $globalOptions['download'] != 'allTrialsforDownload')
+			if(isset($globalOptions['product']) && !empty($globalOptions['product']) && $globalOptions['download'] != 'allTrialsforDownload')
 			{	
 				foreach($TrialsInfo as $tikey => $tivalue)
 				{
-					if($tikey != $globalOptions['product'])
+					if(!(in_array($tikey, $globalOptions['product'])))
 					{
 						unset($TrialsInfo[$tikey]);
 						unset($Ids[$tikey]);
@@ -5037,12 +5037,14 @@ class TrialTracker
 			{
 				$resultIds = array($resultIds);
 			}
+			
 			$Values = $this->processOTTData($ottType, $resultIds, $timeMachine, $linkExpiryDt = array(), $globalOptions);
-			if(isset($globalOptions['product']) && $globalOptions['product'] != '' && $globalOptions['download'] != 'allTrialsforDownload')
+			
+			if(isset($globalOptions['product']) && !empty($globalOptions['product']) && $globalOptions['download'] != 'allTrialsforDownload')
 			{	
 				foreach($Values['Trials'] as $tkey => $tvalue)
 				{
-					if($tkey != $globalOptions['product'])
+					if(!(in_array($tkey, $globalOptions['product'])))
 					{
 						unset($Values['Trials'][$tkey]);
 					}
@@ -5308,9 +5310,27 @@ class TrialTracker
 
 				//region column
 				$attr = ' ';
-				if($dvalue['new'] == 'y')
-				{ 
-					$attr = 'title="New record"';
+				if(isset($dvalue['manual_is_sourceless']))
+				{
+					if($dvalue['new'] == 'y')
+					{
+						$attr = '" title="New record';
+					}
+					elseif(isset($dvalue['manual_region']) && $dvalue['manual_region'] !== NULL)
+					{
+						$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_region'];
+					}
+				}
+				else
+				{
+					if(isset($dvalue['manual_region']) && $dvalue['manual_region'] !== NULL)
+					{
+						$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_region'];
+					}
+					if($dvalue['new'] == 'y')
+					{
+						$attr = '" title="New record';
+					}
 				}
 				$outputStr .= '<td style="width:41px; '.$rowOneBGType.'" class="' . $rowOneType . '" rowspan="' . $rowspan . '" ' . $attr . '>'
 							. '<span>' . $dvalue['region'] . '</span></td>';
@@ -5854,11 +5874,11 @@ class TrialTracker
 				$Ids[0]['area'] = implode("', '", $resultIds['area']);
 			}
 			
-			if(isset($globalOptions['product']) && $globalOptions['product'] != '' && $globalOptions['download'] != 'allTrialsforDownload')
+			if(isset($globalOptions['product']) && !empty($globalOptions['product']) && $globalOptions['download'] != 'allTrialsforDownload')
 			{	
 				foreach($Ids as $ikey => $ivalue)
 				{
-					if($ikey != $globalOptions['product'])
+					if(!(in_array($ikey, $globalOptions['product'])))
 					{
 						unset($Ids[$ikey]);
 					}
@@ -6253,6 +6273,8 @@ class TrialTracker
 								}
 							}
 						}
+						
+						$productSelector[$akey] = $TrialsInfo[$akey]['sectionHeader'];
 					}
 					if(!empty($TrialsInfo[0]['naUpms']))
 					{
@@ -6518,7 +6540,6 @@ class TrialTracker
 			$params3 = array();
 			
 			$pval = unserialize(gzinflate(base64_decode($pvalue)));
-			//$timeMachine = $pval['time'];
 			
 			if(!empty($cparams))
 			{	
@@ -8893,17 +8914,19 @@ class TrialTracker
 		}
 		$timeMachine = strtotime($timeMachine);
 		
-		if(isset($globalOptions['product']) && $globalOptions['product'] != '')
+		if(isset($globalOptions['product']) && !empty($globalOptions['product']))
 		{	
 			foreach($Values['Trials'] as $key => $value)
-			{
-				if($key != $globalOptions['product'])
+			{	
+				if(!(in_array($key, $globalOptions['product'])))
 				{
 					unset($Values['Trials'][$key]);
 				}
 			}
+			$Values['Trials'] = array_values($Values['Trials']);
 		}
-		echo '<input type="hidden" id="pr" name="pr" value="' . $globalOptions['product'] . '" />';
+		
+		echo '<input type="hidden" name="pr" id="product" value="' . implode(',', $globalOptions['product']) . '" />';
 		
 		$count = 0;
 		foreach($Values['Trials'] as $tkey => $tvalue)
@@ -8965,22 +8988,27 @@ class TrialTracker
 		&& ($ottType != 'unstacked' && $ottType != 'indexed' && $ottType != 'unstackedoldlink'))
 		{
 			echo '<div id="menuwrapper" style="vertical-align:bottom;"><ul>';
-			if(isset($globalOptions['product']) && $globalOptions['product'] != '')
+			if(isset($globalOptions['product']) && !empty($globalOptions['product']))
 			{	
-				echo '<li class="arrow"><a href="javascript: void(0);" rel="' . $globalOptions['product'] . '">' . $productSelector[$globalOptions['product']] . '</a>'
-					.'<ul><li style="height:23px;"><a href="javascript: void(0);">' . $productSelectorTitle . '</a></li>';
+				if(count($globalOptions['product']) > 1)
+					$tTitle = count($globalOptions['product']) . strtolower(str_replace('All', '', $productSelectorTitle)) . ' selected';
+				else
+					$tTitle = $productSelector[$globalOptions['product'][0]];
+					
+				echo '<li class="arrow"><a href="javascript: void(0);">' . $tTitle . '</a><ul>';
 
-				unset($productSelector[$globalOptions['product']]);
 			}
 			else
-			{
-
+			{	
 				echo '<li class="arrow" style="height:23px;"><a href="javascript: void(0);">' . $productSelectorTitle . '</a><ul>';
 			}
 			
 			foreach($productSelector as $infkey => $infvalue)
 			{
-				echo '<li><a href="javascript: void(0);" rel="' . $infkey . '">' . $infvalue . '</a></li>';
+				echo '<li><a href="javascript: void(0);">'
+					. '<input type="checkbox" value="' . $infkey . '" id="product_' . $infkey . '" class="product" style="margin-right:5px;" ' 
+					. ((in_array($infkey, $globalOptions['product'])) ? 'checked="checked"' : '') . ' />' 
+					. '<label for="product_' . $infkey . '">' . $infvalue . '</label></a></li>';
 			}
 			echo '</ul></ul></div>';
 		}
@@ -8989,7 +9017,7 @@ class TrialTracker
 		
 		echo $this->displayTrialTableHeader($loggedIn, $globalOptions);
 		if($count > 0)
-		{
+		{	
 			echo $this->displayTrials($totalPages, $globalOptions, $loggedIn, $start, $last, $Values, $ottType);
 		}
 		else
@@ -9561,9 +9589,9 @@ class TrialTracker
 			$url .= '&amp;LI=1';
 		}
 		
-		if(isset($globalOptions['product']) && $globalOptions['product'] != '')
+		if(isset($globalOptions['product']) && !empty($globalOptions['product']))
 		{
-			$url .= '&amp;pr=' . $globalOptions['product'];
+			$url .= '&amp;pr=' . implode(',', $globalOptions['product']);
 		}
 		
 		$stages = 2;
@@ -10029,7 +10057,7 @@ class TrialTracker
 						{
 							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_region'];
 						}
-						if($dvalue['new'] == 'y')
+						elseif($dvalue['new'] == 'y')
 						{
 							$attr = '" title="New record';
 						}
@@ -11871,7 +11899,7 @@ function getDifference($valueOne, $valueTwo)
 
 //get difference between two dates in months
 function getColspan($startDate, $endDate) 
-{
+{	
 	$diff = round((strtotime($endDate)-strtotime($startDate))/2628000);
 	return $diff;
 }

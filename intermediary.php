@@ -77,7 +77,7 @@ $globalOptions['encodeFormat'] = "old";
 $globalOptions['LI'] = "0";
 $globalOptions['minEnroll'] = "0";
 $globalOptions['maxEnroll'] = "0";
-$globalOptions['product'] = "";
+$globalOptions['product'] = array();
 
 $globalOptions['change'] = '1 week';
 $globalOptions['startrange'] = "now";
@@ -155,6 +155,21 @@ switch($globalOptions['change'])
 	
 $lastChangedTime = filectime("css/intermediary.css");
 $maxEnrollLimit = 5000;
+
+$intermediaryCss = 'css/intermediary.css';
+$jueryUiCss 	= 'css/themes/cupertino/jquery-ui-1.8.17.custom.css';
+$dateInputCss 	= 'date/date_input.css';
+$jdPickerCss 	= 'scripts/date/jdpicker.css';
+
+$jqueryJs 		= 'scripts/jquery.js';
+$funcJs 		= 'scripts/func.js';
+$jqueryMinJs 	= 'scripts/jquery-1.7.1.min.js';
+$jqueryUiMinJs 	= 'scripts/jquery-ui-1.8.17.custom.min.js';
+$dateInputJs 	= 'date/jquery.date_input.js';
+$jdPickerJs 	= 'scripts/date/jquery.jdpicker.js';
+$initJs 		= 'date/init.js';
+$chromeJs 		= 'scripts/chrome.js';
+$hoverJs 		= 'scripts/jquery.hoverIntent.minified.js';
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -162,20 +177,21 @@ $maxEnrollLimit = 5000;
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>Online Trial Tracker</title>
-    <link href="css/intermediary.css?t=<?php echo $lastChangedTime;?>" rel="stylesheet" type="text/css" media="all" />
-    <link href="css/themes/cupertino/jquery-ui-1.8.17.custom.css" rel="stylesheet" type="text/css" media="all" />
-    <link href="date/date_input.css" rel="stylesheet" type="text/css" media="all" />
-    <link href="scripts/date/jdpicker.css" rel="stylesheet" type="text/css" media="screen" />
-    <script src="scripts/jquery.js" type="text/javascript"></script>
-    <script src="scripts/func.js" type="text/javascript"></script>	
-    <script src="scripts/jquery-1.7.1.min.js"></script>
-	<script src="scripts/jquery-ui-1.8.17.custom.min.js"></script>
-	<!--<script type="text/javascript" src="date/jquery.js"></script>-->
-    <script type="text/javascript" src="date/jquery.date_input.js"></script>
-    <script type="text/javascript" src="scripts/date/jquery.jdpicker.js"></script>
-    <script type="text/javascript" src="date/init.js"></script>
-    <script type="text/javascript" src="scripts/chrome.js"></script>
-    <script type="text/javascript" src="scripts/jquery.hoverIntent.minified.js"></script>
+    
+    <link href="<?php echo $intermediaryCss . '?t=' . filectime($intermediaryCss);?>" rel="stylesheet" type="text/css" media="all" />
+    <link href="<?php echo $jueryUiCss . '?t=' . filectime($jueryUiCss);?>" rel="stylesheet" type="text/css" media="all" />
+    <link href="<?php echo $dateInputCss . '?t=' . filectime($dateInputCss);?>" rel="stylesheet" type="text/css" media="all" />
+    <link href="<?php echo $jdPickerCss . '?t=' . filectime($jdPickerCss);?>" rel="stylesheet" type="text/css" media="screen" />
+    
+    <script type="text/javascript" src="<?php echo $jqueryJs . '?t=' . filectime($jqueryJs);?>" ></script>
+    <script type="text/javascript" src="<?php echo $funcJs . '?t=' . filectime($funcJs);?>"></script>	
+    <script type="text/javascript" src="<?php echo $jqueryMinJs . '?t=' . filectime($jqueryMinJs);?>"></script>
+	<script type="text/javascript" src="<?php echo $jqueryUiMinJs . '?t=' . filectime($jqueryUiMinJs);?>"></script>
+    <script type="text/javascript" src="<?php echo $dateInputJs . '?t=' . filectime($dateInputJs);?>"></script>
+    <script type="text/javascript" src="<?php echo $jdPickerJs . '?t=' . filectime($jdPickerJs);?>"></script>
+    <script type="text/javascript" src="<?php echo $initJs . '?t=' . filectime($initJs);?>"></script>
+    <script type="text/javascript" src="<?php echo $chromeJs . '?t=' . filectime($chromeJs);?>"></script>
+    <script type="text/javascript" src="<?php echo $hoverJs . '?t=' . filectime($hoverJs);?>"></script>
     <script type="text/javascript">
 		var _gaq = _gaq || [];
 		_gaq.push(['_setAccount', 'UA-18240582-3']);
@@ -270,6 +286,15 @@ $maxEnrollLimit = 5000;
 			});
 			$("#status").val(status);
 			
+			//set product filters
+			var product = new Array();
+			$('input.product:checked').each(function(index) 
+			{	
+				product.push($(this).val());
+			});
+			$("#product").val(product);
+			
+			
 			$("#change").val($("#amount3").val());
 			
 		});
@@ -308,18 +333,6 @@ $maxEnrollLimit = 5000;
 			
 			return true;
 		});
-		
-		$(".arrow ul li a").click(function() 
-		{
-			$("#pr").val(this.rel);
-			var productTitle = $($("#menuwrapper ul li:first").not("ul").contents().get(0)).text();
-			var selectedProduct = $(this).text();
-			
-			$(this).text(productTitle);
-			$($("#menuwrapper ul li:first").not("ul").contents().get(0)).text(selectedProduct);
-
-			return false;  
-		}); 
 		
 		var config = {    
 			 over: makeTall, // function = onMouseOver callback (REQUIRED)    
@@ -420,9 +433,9 @@ if((isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvoli
 	$globalOptions['LI'] = "1";
 }
 
-if(isset($_REQUEST['pr']))
+if(isset($_REQUEST['pr']) && $_REQUEST['pr'] != '')
 {	
-	$globalOptions['product'] = $_REQUEST['pr'];
+	$globalOptions['product'] =  explode(',', $_REQUEST['pr']);
 }
 
 if(isset($_REQUEST['results']) && isset($_REQUEST['type']))
