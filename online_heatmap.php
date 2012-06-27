@@ -1154,7 +1154,7 @@ function refresh_data(cell_id)
 	</script>
 </head>
 
-<body>
+<body bgcolor="#FFFFFF" style="background-color:#FFFFFF;">
 <div id="slideout">
     <img src="images/help.png" alt="Help" />
     <div class="slideout_inner">
@@ -1189,7 +1189,7 @@ $Report_Name = ((trim($Report_DisplayName) != '' && $Report_DisplayName != NULL)
 
 if((isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE) || !isset($_SERVER['HTTP_REFERER']))
 {
-	$htmlContent .= '<table width="100%" style="background-color:#FFFFFF;">'
+	$htmlContent .= '<table cellspacing="0" cellpadding="0" width="100%" style="background-color:#FFFFFF;">'
 				. '<tr><td style="background-color:#FFFFFF;"><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" /></td>'
 				. '<td style="background-color:#FFFFFF;" nowrap="nowrap"><span style="color:#ff0000;font-weight:normal;margin-left:40px;">Interface work in progress</span>'
 				. '<br/><span style="font-weight:normal;">Send feedback to '
@@ -1199,23 +1199,26 @@ if((isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvoli
 }
 				
 $htmlContent .= '<form action="master_heatmap.php" method="post">'
-				. '<table width="550px" border="0" cellspacing="0" class="controls" align="center">'
-				. '<tr><th>View mode</th><th class="right">Range</th></tr>'
+				. '<table width="640px" border="0" cellspacing="0" cellpadding="0" class="controls" align="center">'
+				. '<tr><th>View mode</th><th>Range</th><th class="right">Actions</th></tr>'
 				. '<tr>'
-				. '<td class="bottom"><p style="margin-top:10px;margin-right:5px;"><select id="view_type" name="view_type" onchange="change_view()">'
+				. '<td class="bottom"><p style="margin-top:8px;margin-right:5px;"><select id="view_type" name="view_type" onchange="change_view()">'
 				. '<option value="indlead" selected="selected">Active industry trials</option>'
 				. '<option value="active">Active trials</option>'
 				. '<option value="total">All trials</option></select></p></td>'
-				. '<td style="background-color:#FFFFFF; width:380px;" class="bottom right"><div class="demo"><p style="margin-top:10px;">'
+				. '<td style="background-color:#FFFFFF; width:380px;" class="bottom"><div class="demo"><p style="margin-top:5px;">'
 				. '<label for="startrange" style="float:left;margin-left:15px;"><b>Highlight updates:</b></label>'
 				. '<input type="text" id="startrange" name="sr" value="now" readonly="readonly" style="border:0; color:#f6931f; font-weight:bold; background-color:#FFFFFF; font-family:Verdana; font-size: 13px;" class="jdpicker" />'
 				. '<label style="color:#f6931f;float:left;">-</label> '
 				. '<input type="text" id="endrange"  name="er" value="1 week ago" readonly="readonly" style="border:0; color:#f6931f; font-weight:bold; background-color:#FFFFFF; font-family:Verdana; font-size: 13px;" class="jdpicker" />'
 				. '<br/><div id="slider-range-min" style="width:320px; margin:10px 10px 0 10px;margin-left:20px;" align="left"></div></p></div>'
-				. '<br/><div style="float: right; margin-right: 25px; vertical-align:bottom;" id="chromemenu"><a rel="dropmenu"><span style="padding:2px; padding-right:4px; border:1px solid; color:#000000; background-position:left center; background-repeat:no-repeat; background-image:url(\'./images/save.png\'); cursor:pointer; ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Export</b></span></a></div></td>'
+				. '</td>'
+				. '<td class="bottom right">'
+				. '<div style="float: left; margin-left: 15px; margin-top: 11px; vertical-align:bottom;" id="chromemenu"><a rel="dropmenu"><span style="padding:2px; padding-right:4px; border:1px solid; color:#000000; background-position:left center; background-repeat:no-repeat; background-image:url(\'./images/save.png\'); cursor:pointer; ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Export</b></span></a></div>'
+				. '</td>'
 				. '</tr>'
 				. '</table>'
-				. '<br clear="all"/><br/>';
+				. '<br style="line-height:11px;"/>';
 				
 $htmlContent  .= '<div id="dropmenu" class="dropmenudiv" style="width: 310px;">'
 				.'<div style="height:150px; padding:6px;"><div class="downldbox"><div class="newtext">Download options</div>'
@@ -1235,9 +1238,9 @@ $htmlContent  .= '<div id="dropmenu" class="dropmenudiv" style="width: 310px;">'
 				. '</div></div>'
 				.'</div><script type="text/javascript">cssdropdown.startchrome("chromemenu");</script></form>';
 						
-$htmlContent .= '<div align="center">'
-			. '<table style="padding-top:5px; height:100%; vertical-align:middle;" class="display">'
-			. '<thead><tr style="page-break-inside:avoid; height:100%;" nobr="true"><th style="background-color:#FFFFFF;">&nbsp;</th>';
+$htmlContent .= '<div align="center" style="vertical-align:top;">'
+			. '<table style="height:100%; vertical-align:middle;" class="display">'
+			. '<thead><tr style="page-break-inside:avoid; height:100%;" nobr="true"><th style="background-color:#FFFFFF;"></th>';
 						
 foreach($columns as $col => $val)
 {
@@ -1390,118 +1393,130 @@ foreach($rows as $row => $rval)
 			if($data_matrix[$row][$col]['highest_phase_prev'] != NULL && $data_matrix[$row][$col]['highest_phase_prev'] != '')
 			$htmlContent .= '<font id="Highest_Phase_'.$online_HMCounter.'"><font style="color:#206040; font-weight: 900;">Highest phase updated </font><font style="color:#206040; font-weight: 900;">from : </font> <font style="color:#000000; font-weight: 900;">Phase '.$data_matrix[$row][$col]['highest_phase_prev'].'</font></br></font>';
 							
-			$Status_List_Flg=0;
+			
 			$htmlContent .= '<font id="Status_List_'.$online_HMCounter.'">';
+			
+			$Status_List_Flg_1=0;
+			$Status_List_1 = '';
+			if($data_matrix[$row][$col]['new_trials'] > 0)
+			{
+				$Status_List_Flg_1=1;
+				$Status_List_1 = '<font style="color:#206040; font-weight: 900;">Number of new trials: </font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['new_trials'] .'</font></br>';
+			}
+			
+			if($Status_List_Flg_1==1)
+			$htmlContent .= $Status_List_1;
+			
+			$Status_List_Flg_2=0;
+			$Status_List_2 ='<font style="color:#206040; font-weight: 900;">Number of trials with updated status:<br/></font>';
 			if($data_matrix[$row][$col]['not_yet_recruiting'] > 0)
 			{
-				$Status_List_Flg=1;
-				$htmlContent .= '<font style="color:#206040; font-weight: 900;">Trials changed to "Not yet recruiting" status</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['not_yet_recruiting'] .'</font></br>';
+				$Status_List_Flg_2=1;
+				$Status_List_2 .= '<font style="color:#206040; font-weight: 900;">Not yet recruiting</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['not_yet_recruiting'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['recruiting'] > 0)
 			{
-				$Status_List_Flg=1;
-				$htmlContent .= '<font style="color:#206040; font-weight: 900;">Trials changed to "Recruiting" status</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['recruiting'] .'</font></br>';
+				$Status_List_Flg_2=1;
+				$Status_List_2 .= '<font style="color:#206040; font-weight: 900;">Recruiting</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['recruiting'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['enrolling_by_invitation'] > 0)
 			{
-				$Status_List_Flg=1;
-				$htmlContent .= '<font style="color:#206040; font-weight: 900;">Trials changed to "Enrolling by invitation" status</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['enrolling_by_invitation'] .'</font></br>';
+				$Status_List_Flg_2=1;
+				$Status_List_2 .= '<font style="color:#206040; font-weight: 900;">Enrolling by invitation</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['enrolling_by_invitation'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['active_not_recruiting'] > 0)
 			{
-				$Status_List_Flg=1;
-				$htmlContent .= '<font style="color:#206040; font-weight: 900;">Trials changed to "Active not recruiting" status</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['active_not_recruiting'] .'</font></br>';
+				$Status_List_Flg_2=1;
+				$Status_List_2 .= '<font style="color:#206040; font-weight: 900;">Active not recruiting</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['active_not_recruiting'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['completed'] > 0)
 			{
-				$Status_List_Flg=1;
-				$htmlContent .= '<font style="color:#206040; font-weight: 900;">Trials changed to "Completed" status</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['completed'] .'</font></br>';
+				$Status_List_Flg_2=1;
+				$Status_List_2 .= '<font style="color:#206040; font-weight: 900;">Completed</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['completed'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['suspended'] > 0)
 			{
-				$Status_List_Flg=1;
-				$htmlContent .= '<font style="color:#206040; font-weight: 900;">Trials changed to "Suspended" status</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['suspended'] .'</font></br>';
+				$Status_List_Flg_2=1;
+				$Status_List_2 .= '<font style="color:#206040; font-weight: 900;">Suspended</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['suspended'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['terminated'] > 0)
 			{
-				$Status_List_Flg=1;
-				$htmlContent .= '<font style="color:#206040; font-weight: 900;">Trials changed to "Terminated" status</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['terminated'] .'</font></br>';
+				$Status_List_Flg_2=1;
+				$Status_List_2 .= '<font style="color:#206040; font-weight: 900;">Terminated</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['terminated'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['withdrawn'] > 0)
 			{
-				$Status_List_Flg=1;
-				$htmlContent .= '<font style="color:#206040; font-weight: 900;">Trials changed to "Withdrawn" status</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['withdrawn'] .'</font></br>';
+				$Status_List_Flg_2=1;
+				$Status_List_2 .= '<font style="color:#206040; font-weight: 900;">Withdrawn</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['withdrawn'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['available'] > 0)
 			{
-				$Status_List_Flg=1;
-				$htmlContent .= '<font style="color:#206040; font-weight: 900;">Trials changed to "Available" status</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['available'] .'</font></br>';
+				$Status_List_Flg_2=1;
+				$Status_List_2 .= '<font style="color:#206040; font-weight: 900;">Available</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['available'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['no_longer_available'] > 0)
 			{
-				$Status_List_Flg=1;
-				$htmlContent .= '<font style="color:#206040; font-weight: 900;">Trials changed to "No longer available" status</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['no_longer_available'] .'</font></br>';
+				$Status_List_Flg_2=1;
+				$Status_List_2 .= '<font style="color:#206040; font-weight: 900;">No longer available</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['no_longer_available'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['approved_for_marketing'] > 0)
 			{
-				$Status_List_Flg=1;
-				$htmlContent .= '<font style="color:#206040; font-weight: 900;">Trials changed to "Approved for marketing" status</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['approved_for_marketing'] .'</font></br>';
+				$Status_List_Flg_2=1;
+				$Status_List_2 .= '<font style="color:#206040; font-weight: 900;">Approved for marketing</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['approved_for_marketing'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['no_longer_recruiting'] > 0)
 			{
-				$Status_List_Flg=1;
-				$htmlContent .= '<font style="color:#206040; font-weight: 900;">Trials changed to "No longer recruiting" status</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['no_longer_recruiting'] .'</font></br>';
+				$Status_List_Flg_2=1;
+				$Status_List_2 .= '<font style="color:#206040; font-weight: 900;">No longer recruiting</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['no_longer_recruiting'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['withheld'] > 0)
 			{
-				$Status_List_Flg=1;
-				$htmlContent .= '<font style="color:#206040; font-weight: 900;">Trials changed to "Withheld" status</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['withheld'] .'</font></br>';
+				$Status_List_Flg_2=1;
+				$Status_List_2 .= '<font style="color:#206040; font-weight: 900;">Withheld</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['withheld'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['temporarily_not_available'] > 0)
 			{
-				$Status_List_Flg=1;
-				$htmlContent .= '<font style="color:#206040; font-weight: 900;">Trials changed to "Temporarily not available" status</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['temporarily_not_available'] .'</font></br>';
+				$Status_List_Flg_2=1;
+				$Status_List_2 .= '<font style="color:#206040; font-weight: 900;">Temporarily not available</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['temporarily_not_available'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['ongoing'] > 0)
 			{
-				$Status_List_Flg=1;
-				$htmlContent .= '<font style="color:#206040; font-weight: 900;">Trials changed to "On going" status</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['ongoing'] .'</font></br>';
+				$Status_List_Flg_2=1;
+				$Status_List_2 .= '<font style="color:#206040; font-weight: 900;">On going</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['ongoing'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['not_authorized'] > 0)
 			{
-				$Status_List_Flg=1;
-				$htmlContent .= '<font style="color:#206040; font-weight: 900;">Trials changed to "Not authorized" status</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['not_authorized'] .'</font></br>';
+				$Status_List_Flg_2=1;
+				$Status_List_2 .= '<font style="color:#206040; font-weight: 900;">Not authorized</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['not_authorized'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['prohibited'] > 0)
 			{
-				$Status_List_Flg=1;
-				$htmlContent .= '<font style="color:#206040; font-weight: 900;">Trials changed to "Prohibited" status</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['prohibited'] .'</font></br>';
+				$Status_List_Flg_2=1;
+				$Status_List_2 .= '<font style="color:#206040; font-weight: 900;">Prohibited</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['prohibited'] .'</font></br>';
 			}
 			
-			if($data_matrix[$row][$col]['new_trials'] > 0)
-			{
-				$Status_List_Flg=1;
-				$htmlContent .= '<font style="color:#206040; font-weight: 900;">New trials </font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['new_trials'] .'</font></br>';
-			}
+			if($Status_List_Flg_2==1)
+			$htmlContent .= $Status_List_2;
+			
 			$htmlContent .= '</font>';
 			
-			if($Status_List_Flg==1)
+			if($Status_List_Flg_1==1 || $Status_List_Flg_2==1)
 			$htmlContent .= '<input type="hidden" value="1" id="Status_List_Flg_'.$online_HMCounter.'" />';
 			
 			$htmlContent .= '<font id="ViewCount_'.$online_HMCounter.'">'.(($data_matrix[$row][$col]['viewcount'] > 0) ? '<font style="color:#206040; font-weight: 900;">Number of views: </font><font style="color:#000000; font-weight: 900;">'.$data_matrix[$row][$col]['viewcount'].'</font><input type="hidden" value="'.$data_matrix[$row][$col]['viewcount'].'" id="ViewCount_value_'.$online_HMCounter.'" />':'<input type="hidden" value="'.$data_matrix[$row][$col]['viewcount'].'" id="ViewCount_value_'.$online_HMCounter.'" />' ).'</font>';

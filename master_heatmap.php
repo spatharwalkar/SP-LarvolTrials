@@ -1514,13 +1514,13 @@ function Download_reports()
 		$start_range = trim(str_replace('ago', '', $_REQUEST['sr']));
 		if($start_range == 'now')
 			$start_range = 'now';
-		else
+		else if($start_range == '1 week' || $start_range == '2 weeks' || $start_range == '1 month' || $start_range == '1 quarter' || $start_range == '6 months' || $start_range == '1 year')
 			$start_range = '-' . (($start_range == '1 quarter') ? '3 months' : $start_range);
 		
 		$end_range = trim(str_replace('ago', '', $_REQUEST['er']));
 		if($end_range == 'now')
 			$end_range = 'now';
-		else
+		else if($end_range == '1 week' || $end_range == '2 weeks' || $end_range == '1 month' || $end_range == '1 quarter' || $end_range == '6 months' || $end_range == '1 year')
 			$end_range = '-' . (($end_range == '1 quarter') ? '3 months' : $end_range);
 	}
 	else
@@ -1667,6 +1667,7 @@ function Download_reports()
 				}
 				else
 				$data_matrix[$row][$col]['filing_image']='images/new_file.png';
+				
 				
 				if(date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['phase_explain_lastchanged'])) <= date('Y-m-d H:i:s', strtotime($start_range, $now)) && date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['phase_explain_lastchanged'])) >= date('Y-m-d H:i:s', strtotime($end_range, $now)))
 				{
@@ -2334,118 +2335,129 @@ function Download_reports()
 					if($data_matrix[$row][$col]['phase_explain'] != NULL && trim($data_matrix[$row][$col]['phase_explain']) != '')
 					$annotation_text .= "Phase explanation: ".$data_matrix[$row][$col]['phase_explain']."\n";
 					
-					$Status_List_Flg=0;
+					
 					$annotation_text2 = '';
+					
+					$Status_List_Flg_1=0;
+					$Status_List_1 = '';
+					
+					if($data_matrix[$row][$col]['new_trials'] > 0)
+					{
+						$Status_List_Flg_1=1;
+						$Status_List_1 = "Number of new trials: ". $data_matrix[$row][$col]['new_trials'] ." \n";
+					}
+					
+					if($Status_List_Flg_1==1)
+					$annotation_text2 = $Status_List_1;
+					
+					$Status_List_Flg_2=0;
+					$Status_List_2 = "Number of trials with updated status: \n";
 					if($data_matrix[$row][$col]['not_yet_recruiting'] > 0)
 					{
-						$Status_List_Flg=1;
-						$annotation_text2 .= "Trials changed to \"Not yet recruiting\" status: ". $data_matrix[$row][$col]['not_yet_recruiting'] ." \n";
+						$Status_List_Flg_2=1;
+						$Status_List_2 .= "\"Not yet recruiting\": ". $data_matrix[$row][$col]['not_yet_recruiting'] ." \n";
 					}
 					
 					if($data_matrix[$row][$col]['recruiting'] > 0)
 					{
-						$Status_List_Flg=1;
-						$annotation_text2 .= "Trials changed to \"Recruiting\" status: ". $data_matrix[$row][$col]['recruiting'] ." \n";
+						$Status_List_Flg_2=1;
+						$Status_List_2 .= "\"Recruiting\": ". $data_matrix[$row][$col]['recruiting'] ." \n";
 					}
 			
 					if($data_matrix[$row][$col]['enrolling_by_invitation'] > 0)
 					{
-						$Status_List_Flg=1;
-						$annotation_text2 .= "Trials changed to \"Enrolling by invitation\" status: ". $data_matrix[$row][$col]['enrolling_by_invitation'] ." \n";
+						$Status_List_Flg_2=1;
+						$Status_List_2 .= "\"Enrolling by invitation\": ". $data_matrix[$row][$col]['enrolling_by_invitation'] ." \n";
 					}
 			
 					if($data_matrix[$row][$col]['active_not_recruiting'] > 0)
 					{
-						$Status_List_Flg=1;
-						$annotation_text2 .= "Trials changed to \"Active not recruiting\" status: ". $data_matrix[$row][$col]['active_not_recruiting'] ." \n";
+						$Status_List_Flg_2=1;
+						$Status_List_2 .= "\"Active not recruiting\": ". $data_matrix[$row][$col]['active_not_recruiting'] ." \n";
 					}
 			
 					if($data_matrix[$row][$col]['completed'] > 0)
 					{
-						$Status_List_Flg=1;
-						$annotation_text2 .= "Trials changed to \"Completed\" status: ". $data_matrix[$row][$col]['completed'] ." \n";
+						$Status_List_Flg_2=1;
+						$Status_List_2 .= "\"Completed\": ". $data_matrix[$row][$col]['completed'] ." \n";
 					}
 			
 					if($data_matrix[$row][$col]['suspended'] > 0)
 					{
-						$Status_List_Flg=1;
-						$annotation_text2 .= "Trials changed to \"Suspended\" status: ". $data_matrix[$row][$col]['suspended'] ." \n";
+						$Status_List_Flg_2=1;
+						$Status_List_2 .= "\"Suspended\": ". $data_matrix[$row][$col]['suspended'] ." \n";
 					}
 			
 					if($data_matrix[$row][$col]['terminated'] > 0)
 					{
-						$Status_List_Flg=1;
-						$annotation_text2 .= "Trials changed to \"Terminated\" status: ". $data_matrix[$row][$col]['terminated'] ." \n";
+						$Status_List_Flg_2=1;
+						$Status_List_2 .= "\"Terminated\": ". $data_matrix[$row][$col]['terminated'] ." \n";
 					}
 			
 					if($data_matrix[$row][$col]['withdrawn'] > 0)
 					{
-						$Status_List_Flg=1;
-						$annotation_text2 .= "Trials changed to \"Withdrawn\" status: ". $data_matrix[$row][$col]['withdrawn'] ." \n";
+						$Status_List_Flg_2=1;
+						$Status_List_2 .= "\"Withdrawn\": ". $data_matrix[$row][$col]['withdrawn'] ." \n";
 					}
 			
 					if($data_matrix[$row][$col]['available'] > 0)
 					{
-						$Status_List_Flg=1;
-						$annotation_text2 .= "Trials changed to \"Available\" status: ". $data_matrix[$row][$col]['available'] ." \n";
+						$Status_List_Flg_2=1;
+						$Status_List_2 .= "\"Available\": ". $data_matrix[$row][$col]['available'] ." \n";
 					}
 			
 					if($data_matrix[$row][$col]['no_longer_available'] > 0)
 					{
-						$Status_List_Flg=1;
-						$annotation_text2 .= "Trials changed to \"No longer available\" status: ". $data_matrix[$row][$col]['no_longer_available'] ." \n";
+						$Status_List_Flg_2=1;
+						$Status_List_2 .= "\"No longer available\": ". $data_matrix[$row][$col]['no_longer_available'] ." \n";
 					}
 			
 					if($data_matrix[$row][$col]['approved_for_marketing'] > 0)
 					{
-						$Status_List_Flg=1;
-						$annotation_text2 .= "Trials changed to \"Approved for marketing\" status: ". $data_matrix[$row][$col]['approved_for_marketing'] ." \n";
+						$Status_List_Flg_2=1;
+						$Status_List_2 .= "\"Approved for marketing\": ". $data_matrix[$row][$col]['approved_for_marketing'] ." \n";
 					}
 			
 					if($data_matrix[$row][$col]['no_longer_recruiting'] > 0)
 					{
-						$Status_List_Flg=1;
-						$annotation_text2 .= "Trials changed to \"No longer recruiting\" status: ". $data_matrix[$row][$col]['no_longer_recruiting'] ." \n";
+						$Status_List_Flg_2=1;
+						$Status_List_2 .= "\"No longer recruiting\": ". $data_matrix[$row][$col]['no_longer_recruiting'] ." \n";
 					}
 			
 					if($data_matrix[$row][$col]['withheld'] > 0)
 					{
-						$Status_List_Flg=1;
-						$annotation_text2 .= "Trials changed to \"Withheld\" status: ". $data_matrix[$row][$col]['withheld'] ." \n";
+						$Status_List_Flg_2=1;
+						$Status_List_2 .= "\"Withheld\": ". $data_matrix[$row][$col]['withheld'] ." \n";
 					}
 			
 					if($data_matrix[$row][$col]['temporarily_not_available'] > 0)
 					{
-						$Status_List_Flg=1;
-						$annotation_text2 .= "Trials changed to \"Temporarily not available\" status: ". $data_matrix[$row][$col]['temporarily_not_available'] ." \n";
+						$Status_List_Flg_2=1;
+						$Status_List_2 .= "\"Temporarily not available\": ". $data_matrix[$row][$col]['temporarily_not_available'] ." \n";
 					}
 			
 					if($data_matrix[$row][$col]['ongoing'] > 0)
 					{
-						$Status_List_Flg=1;
-						$annotation_text2 .= "Trials changed to \"On going\" status: ". $data_matrix[$row][$col]['ongoing'] ." \n";
+						$Status_List_Flg_2=1;
+						$Status_List_2 .= "\"On going\": ". $data_matrix[$row][$col]['ongoing'] ." \n";
 					}
 			
 					if($data_matrix[$row][$col]['not_authorized'] > 0)
 					{
-						$Status_List_Flg=1;
-						$annotation_text2 .= "Trials changed to \"Not authorized\" status: ". $data_matrix[$row][$col]['not_authorized'] ." \n";
+						$Status_List_Flg_2=1;
+						$Status_List_2 .= "\"Not authorized\": ". $data_matrix[$row][$col]['not_authorized'] ." \n";
 					}
 			
 					if($data_matrix[$row][$col]['prohibited'] > 0)
 					{
-						$Status_List_Flg=1;
-						$annotation_text2 .= "Trials changed to \"Prohibited\" status: ". $data_matrix[$row][$col]['prohibited'] ." \n";
-					}
-			
-					if($data_matrix[$row][$col]['new_trials'] > 0)
-					{
-						$Status_List_Flg=1;
-						$annotation_text2 .= "New trials: ". $data_matrix[$row][$col]['new_trials'] ." \n";
+						$Status_List_Flg_2=1;
+						$Status_List_2 .= "\"Prohibited\": ". $data_matrix[$row][$col]['prohibited'] ." \n";
 					}
 					
-			
-					if($Status_List_Flg==1 && ($er == 'now' || $er == '1 week ago'))
+					if($Status_List_Flg_2==1)
+					$annotation_text2 .= $Status_List_2;
+					
+					if(($Status_List_Flg_1==1 || $Status_List_Flg_2==1) && ($er == 'now' || $er == '1 week ago'))
 					$annotation_text = $annotation_text.$annotation_text2;
 					
 					$annotation_text = strip_tags($annotation_text);	///Strip HTML tags
@@ -2455,7 +2467,7 @@ function Download_reports()
 					
 					if(trim($annotation_text) != '')
 					{
-						$pdf->Annotation('', '', $area_Col_Width-4, $prod_row_height-4, $annotation_text, array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Details', 'Subj' => 'Information', 'C' => array()));	
+						$pdf->Annotation('', '', $area_Col_Width-4, $prod_row_height-1.5, $annotation_text, array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Details', 'Subj' => 'Information', 'C' => array()));	
 					}
 					
 					$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. $link_part . '" target="_blank" title="'. $title .'" style="'.((trim($data_matrix[$row][$col]['color_code']) == 'FF0000' && $data_matrix[$row][$col]['count_lastchanged_value']==1) ? 'background-color:#FFFFFF;':'').'"><font style="'. (($data_matrix[$row][$col]['count_lastchanged_value']==1) ? 'color:#FF0000;':'').'" >'.$count_val.'</font></a> ';
@@ -2780,118 +2792,128 @@ function Download_reports()
 					$annotation_text .= "Highest Phase updated from: Phase ".$data_matrix[$row][$col]['highest_phase_prev']."\n";
 					
 					
-					$Status_List_Flg=0;
 					$annotation_text2 = '';
+					
+					$Status_List_Flg_1=0;
+					$Status_List_1 = '';
+					
+					if($data_matrix[$row][$col]['new_trials'] > 0)
+					{
+						$Status_List_Flg_1=1;
+						$Status_List_1 = "Number of new trials: ". $data_matrix[$row][$col]['new_trials'] ." \n";
+					}
+					
+					if($Status_List_Flg_1==1)
+					$annotation_text2 = $Status_List_1;
+					
+					$Status_List_Flg_2=0;
+					$Status_List_2 = "Number of trials with updated status: \n";
 					if($data_matrix[$row][$col]['not_yet_recruiting'] > 0)
 					{
-						$Status_List_Flg=1;
-						$annotation_text2 .= "Trials changed to \"Not yet recruiting\" status: ". $data_matrix[$row][$col]['not_yet_recruiting'] ." \n";
+						$Status_List_Flg_2=1;
+						$Status_List_2 .= "\"Not yet recruiting\": ". $data_matrix[$row][$col]['not_yet_recruiting'] ." \n";
 					}
 					
 					if($data_matrix[$row][$col]['recruiting'] > 0)
 					{
-						$Status_List_Flg=1;
-						$annotation_text2 .= "Trials changed to \"Recruiting\" status: ". $data_matrix[$row][$col]['recruiting'] ." \n";
+						$Status_List_Flg_2=1;
+						$Status_List_2 .= "\"Recruiting\": ". $data_matrix[$row][$col]['recruiting'] ." \n";
 					}
 			
 					if($data_matrix[$row][$col]['enrolling_by_invitation'] > 0)
 					{
-						$Status_List_Flg=1;
-						$annotation_text2 .= "Trials changed to \"Enrolling by invitation\" status: ". $data_matrix[$row][$col]['enrolling_by_invitation'] ." \n";
+						$Status_List_Flg_2=1;
+						$Status_List_2 .= "\"Enrolling by invitation\": ". $data_matrix[$row][$col]['enrolling_by_invitation'] ." \n";
 					}
 			
 					if($data_matrix[$row][$col]['active_not_recruiting'] > 0)
 					{
-						$Status_List_Flg=1;
-						$annotation_text2 .= "Trials changed to \"Active not recruiting\" status: ". $data_matrix[$row][$col]['active_not_recruiting'] ." \n";
+						$Status_List_Flg_2=1;
+						$Status_List_2 .= "\"Active not recruiting\": ". $data_matrix[$row][$col]['active_not_recruiting'] ." \n";
 					}
 			
 					if($data_matrix[$row][$col]['completed'] > 0)
 					{
-						$Status_List_Flg=1;
-						$annotation_text2 .= "Trials changed to \"Completed\" status: ". $data_matrix[$row][$col]['completed'] ." \n";
+						$Status_List_Flg_2=1;
+						$Status_List_2 .= "\"Completed\": ". $data_matrix[$row][$col]['completed'] ." \n";
 					}
 			
 					if($data_matrix[$row][$col]['suspended'] > 0)
 					{
-						$Status_List_Flg=1;
-						$annotation_text2 .= "Trials changed to \"Suspended\" status: ". $data_matrix[$row][$col]['suspended'] ." \n";
+						$Status_List_Flg_2=1;
+						$Status_List_2 .= "\"Suspended\": ". $data_matrix[$row][$col]['suspended'] ." \n";
 					}
 			
 					if($data_matrix[$row][$col]['terminated'] > 0)
 					{
-						$Status_List_Flg=1;
-						$annotation_text2 .= "Trials changed to \"Terminated\" status: ". $data_matrix[$row][$col]['terminated'] ." \n";
+						$Status_List_Flg_2=1;
+						$Status_List_2 .= "\"Terminated\": ". $data_matrix[$row][$col]['terminated'] ." \n";
 					}
 			
 					if($data_matrix[$row][$col]['withdrawn'] > 0)
 					{
-						$Status_List_Flg=1;
-						$annotation_text2 .= "Trials changed to \"Withdrawn\" status: ". $data_matrix[$row][$col]['withdrawn'] ." \n";
+						$Status_List_Flg_2=1;
+						$Status_List_2 .= "\"Withdrawn\": ". $data_matrix[$row][$col]['withdrawn'] ." \n";
 					}
 			
 					if($data_matrix[$row][$col]['available'] > 0)
 					{
-						$Status_List_Flg=1;
-						$annotation_text2 .= "Trials changed to \"Available\" status: ". $data_matrix[$row][$col]['available'] ." \n";
+						$Status_List_Flg_2=1;
+						$Status_List_2 .= "\"Available\": ". $data_matrix[$row][$col]['available'] ." \n";
 					}
 			
 					if($data_matrix[$row][$col]['no_longer_available'] > 0)
 					{
-						$Status_List_Flg=1;
-						$annotation_text2 .= "Trials changed to \"No longer available\" status: ". $data_matrix[$row][$col]['no_longer_available'] ." \n";
+						$Status_List_Flg_2=1;
+						$Status_List_2 .= "\"No longer available\": ". $data_matrix[$row][$col]['no_longer_available'] ." \n";
 					}
 			
 					if($data_matrix[$row][$col]['approved_for_marketing'] > 0)
 					{
-						$Status_List_Flg=1;
-						$annotation_text2 .= "Trials changed to \"Approved for marketing\" status: ". $data_matrix[$row][$col]['approved_for_marketing'] ." \n";
+						$Status_List_Flg_2=1;
+						$Status_List_2 .= "\"Approved for marketing\": ". $data_matrix[$row][$col]['approved_for_marketing'] ." \n";
 					}
 			
 					if($data_matrix[$row][$col]['no_longer_recruiting'] > 0)
 					{
-						$Status_List_Flg=1;
-						$annotation_text2 .= "Trials changed to \"No longer recruiting\" status: ". $data_matrix[$row][$col]['no_longer_recruiting'] ." \n";
+						$Status_List_Flg_2=1;
+						$Status_List_2 .= "\"No longer recruiting\": ". $data_matrix[$row][$col]['no_longer_recruiting'] ." \n";
 					}
 			
 					if($data_matrix[$row][$col]['withheld'] > 0)
 					{
-						$Status_List_Flg=1;
-						$annotation_text2 .= "Trials changed to \"Withheld\" status: ". $data_matrix[$row][$col]['withheld'] ." \n";
+						$Status_List_Flg_2=1;
+						$Status_List_2 .= "\"Withheld\": ". $data_matrix[$row][$col]['withheld'] ." \n";
 					}
 			
 					if($data_matrix[$row][$col]['temporarily_not_available'] > 0)
 					{
-						$Status_List_Flg=1;
-						$annotation_text2 .= "Trials changed to \"Temporarily not available\" status: ". $data_matrix[$row][$col]['temporarily_not_available'] ." \n";
+						$Status_List_Flg_2=1;
+						$Status_List_2 .= "\"Temporarily not available\": ". $data_matrix[$row][$col]['temporarily_not_available'] ." \n";
 					}
 			
 					if($data_matrix[$row][$col]['ongoing'] > 0)
 					{
-						$Status_List_Flg=1;
-						$annotation_text2 .= "Trials changed to \"On going\" status: ". $data_matrix[$row][$col]['ongoing'] ." \n";
+						$Status_List_Flg_2=1;
+						$Status_List_2 .= "\"On going\": ". $data_matrix[$row][$col]['ongoing'] ." \n";
 					}
 			
 					if($data_matrix[$row][$col]['not_authorized'] > 0)
 					{
-						$Status_List_Flg=1;
-						$annotation_text2 .= "Trials changed to \"Not authorized\" status: ". $data_matrix[$row][$col]['not_authorized'] ." \n";
+						$Status_List_Flg_2=1;
+						$Status_List_2 .= "\"Not authorized\": ". $data_matrix[$row][$col]['not_authorized'] ." \n";
 					}
 			
 					if($data_matrix[$row][$col]['prohibited'] > 0)
 					{
-						$Status_List_Flg=1;
-						$annotation_text2 .= "Trials changed to \"Prohibited\" status: ". $data_matrix[$row][$col]['prohibited'] ." \n";
-					}
-			
-					if($data_matrix[$row][$col]['new_trials'] > 0)
-					{
-						$Status_List_Flg=1;
-						$annotation_text2 .= "New trials: ". $data_matrix[$row][$col]['new_trials'] ." \n";
+						$Status_List_Flg_2=1;
+						$Status_List_2 .= "\"Prohibited\": ". $data_matrix[$row][$col]['prohibited'] ." \n";
 					}
 					
-			
-					if($Status_List_Flg==1 && ($er == 'now' || $er == '1 week ago'))
+					if($Status_List_Flg_2==1)
+					$annotation_text2 .= $Status_List_2;
+					
+					if(($Status_List_Flg_1==1 || $Status_List_Flg_2==1) && ($er == 'now' || $er == '1 week ago'))
 					$annotation_text = $annotation_text.$annotation_text2;
 					
 					$annotation_text = strip_tags($annotation_text);	///Strip HTML tags
