@@ -74,6 +74,51 @@ $(document).ready(function () {
 //             return;
 //         }
         var jsonData = getQueryData();
+    	var ermsg = 'Null search data not allowed.';
+    	if(jsonData =='')
+    	{
+			alert(ermsg);
+			return false;        	
+    	}
+    	var jsonDataArr = eval('('+jsonData+')');
+    	if(jsonDataArr.wheredata == '')
+    	{
+			alert(ermsg);
+			return false;
+    	}        
+		if(jsonData.length > 500)
+		{
+			requestType = 'POST';
+		}
+		else
+		{
+			requestType = 'GET';
+		}
+		$('#larvolTestJsonStat').val('0');
+        $.ajax({
+            async: false,
+			type: requestType,
+			url:  'searchhandler.php' + '?op=testQuery&jsonOp=1',
+			data: 'data=' + jsonData,
+			beforeSend:function(){
+				$("#3009").html('');
+				},
+			success: function (data) {
+		           var testJson = eval("(" + data + ')');
+		   			$('#larvolTestJsonStat').val(testJson.status);
+		           if(testJson.status!=1)
+		           {
+						$("#3009").html(testJson.message);
+				        $("#3009").attr("style", "visibility:show");
+		           }
+		        	
+			}
+		}); 
+        if($('#larvolTestJsonStat').val() !=1)
+        {
+        	return;     
+        }
+		     
         var url = 'searchhandler.php' + '?op=runQuery&data=' + jsonData;
         //window.location.href=url;
         if(jsonData.length > 500)
@@ -134,4 +179,6 @@ $(document).ready(function () {
 <input type="hidden" name="a"/>
 <input type="hidden" name="forcePost" value="1"/>
 </form>
+<input type="hidden" id="larvolTestJsonStat" value="0"/>
+<input type="hidden" id="larvolTestJsonMessage" value=""/>
 </body>
