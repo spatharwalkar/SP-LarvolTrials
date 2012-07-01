@@ -79,6 +79,7 @@ while($header = mysql_fetch_array($res))
 			$columns_Span[$header['num']] = 1;
 			$prev_area = $header['num'];
 			$prev_areaSpan = 1;
+			$second_last_cat_col = $last_cat_col;
 			$last_cat_col = $header['num'];
 		}
 		
@@ -734,7 +735,7 @@ function change_view()
 						document.getElementById("Cell_Link_"+i).style.fontWeight = "bold";
 						if(Cell_values_Arr[14]=='FF0000')
 						document.getElementById("Cell_Link_"+i).style.backgroundColor = "#FFFFFF";
-						if(Cell_values_Arr[5] != Cell_values_Arr[2])
+						if(Cell_values_Arr[5] != Cell_values_Arr[2] && Cell_values_Arr[5] != '' && Cell_values_Arr[5] != null)
 						{
 							tooltip_flg = 1;
 							document.getElementById("Count_CDate_"+i).style.display = "inline";
@@ -754,7 +755,7 @@ function change_view()
 						document.getElementById("Cell_Link_"+i).style.fontWeight = "bold";
 						if(Cell_values_Arr[14]=='FF0000')
 						document.getElementById("Cell_Link_"+i).style.backgroundColor = "#FFFFFF";
-						if(Cell_values_Arr[4] != Cell_values_Arr[1])
+						if(Cell_values_Arr[4] != Cell_values_Arr[1] && Cell_values_Arr[4] != '' && Cell_values_Arr[4] != null)
 						{
 							tooltip_flg = 1;
 							document.getElementById("Count_CDate_"+i).style.display = "inline";
@@ -774,7 +775,7 @@ function change_view()
 						document.getElementById("Cell_Link_"+i).style.fontWeight = "bold";
 						if(Cell_values_Arr[14]=='FF0000')
 						document.getElementById("Cell_Link_"+i).style.backgroundColor = "#FFFFFF";
-						if(Cell_values_Arr[3] != Cell_values_Arr[0])
+						if(Cell_values_Arr[3] != Cell_values_Arr[0] && Cell_values_Arr[3] != '' && Cell_values_Arr[3] != null)
 						{
 							tooltip_flg = 1;
 							document.getElementById("Count_CDate_"+i).style.display = "inline";
