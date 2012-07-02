@@ -31,7 +31,7 @@
 	$.fn.hoverIntent = function(f,g) {
 		// default configuration options
 		var cfg = {
-			sensitivity: 7,
+			sensitivity: 1,
 			interval: 100,
 			timeout: 500
 		};

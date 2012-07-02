@@ -97,14 +97,14 @@ a, a:hover{
 
 .rowcollapse {
 	vertical-align:top;
-	max-height:1.1em;
-	overflow:visible;
 	padding-top:0;
 	margin:0;
+	height: 1.1em;
+	overflow: visible;
 }
 
 .rowcollapse:hover {
-	max-height:none;
+	height: 100%;
 }
 
 .bomb {
@@ -207,7 +207,7 @@ tr.upms td {
 	line-height: 1.6em;
 	width:auto;
 	float:left;
-	margin-right:20px;
+	margin-right:2px;
 }
 
 .pagination a:hover {

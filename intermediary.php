@@ -340,8 +340,8 @@ $hoverJs 		= 'scripts/jquery.hoverIntent.minified.js';
 			 out: makeShort// function = onMouseOut callback (REQUIRED)   
 		};
 		
-		function makeTall(){  $(this).animate({"height":'100%'}, 200);}
-		function makeShort(){ $(this).animate({"height":'1.1em'}, 500);}
+		function makeTall(){  $('td .rowcollapse', this).animate({"height":'100%'}, 500);}
+		function makeShort(){ $('td .rowcollapse', this).animate({"height":'1.1em'}, 500);}
 
 		$(".manage tr").hoverIntent(config)
 	});
