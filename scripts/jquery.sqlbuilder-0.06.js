@@ -685,8 +685,8 @@ $.initialBracesFlag = 9;
 		 { name: 'NotRegex', displayname: 'NotRegex', op: " %f !='%s'", multipleval: false }
 		],
             chain: [
-         { name: '(', op: '(' },             
 		 { name: 'AND', op: 'AND' },
+         { name: '(', op: '(' },     		 
 		 { name: 'OR', op: 'OR' },
 		 { name: 'AND (', op: 'AND (' },
 		 { name: 'AND NOT(', op: 'AND NOT(' },
