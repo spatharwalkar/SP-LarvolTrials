@@ -84,6 +84,12 @@ $.initialBracesFlag = 9;
         checkMatchingBraces: function () {
             var $tt = this[0];
             var openAndClose = 0;
+            chainTag = $("a[class=addnewsqlwherechain][id='9990']");
+            //check for initial ( or not(
+            if (chainTag.text().indexOf('(') != -1)
+            {
+            	openAndClose++;
+            }
             for (i = 0; i <= $tt.opts.counters[3]; i++) {
                 var chainTag = $("a[class=addnewsqlwherechain][id='" + i + "']");
                 if (chainTag.text().indexOf('(') != -1) {
@@ -176,11 +182,19 @@ $.initialBracesFlag = 9;
                 groupdiv[0].opts.onselect(slot, groupdiv, null);
             }
             /*rebuild where data*/
+            
+            //re-initialise to defaults needed for calls after document.ready.
+            $.initialBracesFlag = 9;
+            
             for (var i = 0; i < j.wheredata.length; i++) {
             	if(i==0 && j.wheredata[i].chainname=='(' && j.wheredata[i].columnname=='' && j.wheredata[i].opname=='')
             		{
             			$.initialBracesFlag = 0;
             		}
+            	if(i==0 && j.wheredata[i].chainname=='NOT(' && j.wheredata[i].columnname=='' && j.wheredata[i].opname=='')
+	        		{
+	        			$.initialBracesFlag = 1;
+	        		}            	
                 //j.wheredata[i].columnslot, j.wheredata[i].opslot,j.wheredata[i].chainslot,j.wheredata[i].columnvalue
             	var col_name = j.wheredata[i].columnname;
                 var col_slot = columnHash[col_name];
@@ -1777,8 +1791,17 @@ $.initialBracesFlag = 9;
                     var sqlline = getSQLWhereLine(col_slot, op_slot, chain_slot, column_value, counter_id, counter_id);
                     var item = $(sqlline).hide();
                     if($.initialBracesFlag == 0)
+	                    {
+	                    	$('#9990').html('(');
+	                    }
+                    else
+                    if($.initialBracesFlag == 1)
+	                	{
+	                		$('#9990').html('NOT(');
+	                	}
+                    else
                     	{
-                    		$('#9990').html('(');
+                    	$('#9990').html('Begin');
                     	}
                     $('[class=addnewsqlwhere][id=9999]').before(item);
                     
