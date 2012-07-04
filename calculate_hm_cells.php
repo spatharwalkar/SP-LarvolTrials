@@ -264,7 +264,8 @@ function calc_cells($parameters,$update_id=NULL)
 
 					/*********** trial counts according to overallstatus values ***********/
 
-					$base_date = date('Y-m-d', strtotime("-7 days"));
+					//$base_date = date('Y-m-d', strtotime("-7 days"));
+					$base_date = date('Y-m-d', strtotime("-30 days")); // consider one month's data.
 					if($row["firstreceived_date"]>=$base_date) $overall_statuses['new_trials']=$overall_statuses['new_trials']+1;
 					/*
 					if($row["lastchanged_date"]>=$base_date)
