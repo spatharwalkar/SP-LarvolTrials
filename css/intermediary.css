@@ -95,15 +95,15 @@ a, a:hover{
 	color:#FF0000!important;
 }
 
-.rowcollapse {
+.rowcollapse{
 	vertical-align:top;
 	padding-top:0;
 	margin:0;
-	height: 1.1em;
+	height: 16px;
 	overflow: visible;
 }
 
-.rowcollapse:hover {
+.rowcollapse:hover, .rowcollapse .hover{
 	height: 100%;
 }
 
@@ -386,6 +386,7 @@ tr.upms td {
     left:0;
     top:23px;
     display:block;
+	z-index: 2;
 }
 
 /* As the parent li has float:left property, we overwrite for the submenu (level 2) to float none (normal position)  */
