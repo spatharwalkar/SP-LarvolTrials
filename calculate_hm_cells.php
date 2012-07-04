@@ -347,7 +347,9 @@ function calc_cells($parameters,$update_id=NULL)
 						{	
 							if($row_dh["larvol_id"] and $row_dh["overall_status_lastchanged"]>=$base_date)
 							{
-								switch ($row_dh["overall_status_prev"]) 
+								//switch ($row_dh["overall_status_prev"]) 
+								
+								switch ($row["overall_status"]) // use the value from data_trials instead of data_history
 								{
 									case 'Not yet recruiting':
 										$overall_statuses['not_yet_recruiting']=$overall_statuses['not_yet_recruiting']+1;
