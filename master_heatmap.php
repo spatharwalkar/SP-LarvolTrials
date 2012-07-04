@@ -1557,11 +1557,13 @@ function Download_reports()
 	$active_total=0;
 	$count_total=0;
 	$data_matrix=array();
+	
+	$Line_Height = 3.96;
+	$Min_One_Liner = 4.5;
+	
+	
 	foreach($rows as $row => $rval)
 	{
-		if($Flag_matrix[$row]['images_flag'] != 1)
-		$Flag_matrix[$row]['images_flag'] = 0;	/// Image present flag
-		
 		foreach($columns as $col => $cval)
 		{
 			if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL)
@@ -1598,6 +1600,7 @@ function Download_reports()
 				
 				$data_matrix[$row][$col]['phase_explain']=trim($cell_data['phase_explain']);
 				
+				$Width = 0;
 				
 				if($cell_data['bomb_auto'] == 'small')
 				{
@@ -1691,6 +1694,7 @@ function Download_reports()
 				if(trim($cell_data['bomb']) == 'small')
 				{
 					$data_matrix[$row][$col]['bomb']['value']=trim($cell_data['bomb']);
+					$Width = $Width + 3.1 + 2.5;
 					
 					if(date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])) <= date('Y-m-d H:i:s', strtotime($start_range, $now)) && date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])) >= date('Y-m-d H:i:s', strtotime($end_range, $now)))
 					{
@@ -1710,6 +1714,7 @@ function Download_reports()
 				elseif(trim($cell_data['bomb']) == 'large')
 				{
 					$data_matrix[$row][$col]['bomb']['value']=trim($cell_data['bomb']);
+					$Width = $Width + 3.1 + 2.5;
 					
 					if((date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])) <= date('Y-m-d H:i:s', strtotime($start_range, $now))) && (date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])) >= date('Y-m-d H:i:s', strtotime($end_range, $now))))
 					{
@@ -1802,6 +1807,40 @@ function Download_reports()
 				$data_matrix[$row][$col]['not_authorized']=$cell_data['not_authorized'];
 				$data_matrix[$row][$col]['prohibited']=$cell_data['prohibited'];
 				$data_matrix[$row][$col]['new_trials']=$cell_data['new_trials'];
+				
+				////// Remaining Width calculation
+				
+				if($_POST['dwcount']=='active')
+				{
+					if($data_matrix[$row][$col]['active'] != NULL && $data_matrix[$row][$col]['active'] != '')
+					{
+						$Width = $Width + (strlen($data_matrix[$row][$col]['active']) * 2);
+					}
+				}
+				elseif($_POST['dwcount']=='total')
+				{
+					if($data_matrix[$row][$col]['total'] != NULL && $data_matrix[$row][$col]['total'] != '')
+					{
+						$Width = $Width + (strlen($data_matrix[$row][$col]['total']) * 2);
+					}
+				}
+				else
+				{
+					if($data_matrix[$row][$col]['indlead'] != NULL && $data_matrix[$row][$col]['indlead'] != '')
+					{
+						$Width = $Width + (strlen($data_matrix[$row][$col]['indlead']) * 2);
+					}
+				}
+				
+				if(trim($data_matrix[$row][$col]['filing']) != '' && $data_matrix[$row][$col]['filing'] == NULL)
+				$Width = $Width + 3.1 + 2.5;
+				
+				if($Width_matrix[$col]['width'] < ($Width+2) || $Width_matrix[$col]['width'] == '' || $Width_matrix[$col]['width'] == 0)
+				{
+					if(($Width+2) < $Min_One_Liner)
+					$Width_extra = $Min_One_Liner - ($Width+2);
+					$Width_matrix[$col]['width']=$Width + 2 + $Width_extra;
+				}
 			}
 			else
 			{
@@ -1818,6 +1857,9 @@ function Download_reports()
 				$data_matrix[$row][$col]['color']='background-color:#DDF;';
 				$data_matrix[$row][$col]['color_code']='DDF';
 				$data_matrix[$row][$col]['update_flag'] = 0;
+				$Width = $Line_Height;
+				if($Width_matrix[$col]['width'] < $Width || $Width_matrix[$col]['width'] == '' || $Width_matrix[$col]['width'] == 0)
+				$Width_matrix[$col]['width']=$Width+2;
 			}
 		}
 	}
@@ -1874,21 +1916,74 @@ function Download_reports()
 		$product_Col_Width = 25;
 		$area_Col_Width=17;
 		
-		$Page_Width = (((count($columns))+(($total_fld)? 1:0)) * $area_Col_Width) + $product_Col_Width;
-		if($Page_Width < 192)
+		$HColumn_Width = (((count($columns))+(($total_fld)? 1:0)) * ($area_Col_Width+0.5));
+		
+		$RColumn_Width = 0; 
+		foreach($columns as $col => $val)
+		{
+			$RColumn_Width = $RColumn_Width + $Width_matrix[$col]['width'] + 0.5;
+		}
+		
+		if($total_fld) 
+		{ 
+			if($_POST['dwcount']=='active')
+			{
+				$count_val=$active_total;
+			}
+			elseif($_POST['dwcount']=='total')
+			{
+				$count_val=$count_total;
+			}
+			else
+			{
+				$count_val=$indlead_total;
+			}
+			$RColumn_Width = $RColumn_Width + (strlen($count_val) * 2.5) + 2 + 0.5; 
+		}
+		
+		if(($HColumn_Width + $product_Col_Width + 0.5) < 192)
 		{
 			//// Landscape page orientation
 			$pdf->setPageOrientation('p');
 			$Page_Width = 192;
+			$Rotation_Flg = 0;
+			$All_Column_Width = $HColumn_Width;
+		}
+		else if(($RColumn_Width + $product_Col_Width + 0.5) < 192)
+		{
+			//// Landscape page orientation
+			$pdf->setPageOrientation('p');
+			$Page_Width = 192;
+			$Rotation_Flg = 1;
+			$All_Column_Width = $RColumn_Width;
+		}
+		else if(($HColumn_Width + $product_Col_Width + 0.5) < 274)
+		{
+			//// Landscape page orientation
+			$pdf->setPageOrientation('l');
+			$Page_Width = 274;
+			$Rotation_Flg = 0;
+			$All_Column_Width = $HColumn_Width;
 		}
 		else
 		{
 			//// Landscape page orientation
 			$pdf->setPageOrientation('l');
 			$Page_Width = 274;
+			$Rotation_Flg = 1;
+			$All_Column_Width = $RColumn_Width;
 		}
-		
-		$Line_Height = 3.9;
+		/*$pdf->setPageOrientation('p');
+		$Page_Width = 192;
+		$Rotation_Flg = 1;
+		$All_Column_Width = $RColumn_Width;*/
+		if($Rotation_Flg == 0)	//// Using this we dont have to use different code for specifying area column width
+		{
+			foreach($columns as $col => $val)
+			{
+				$Width_matrix[$col]['width'] = $area_Col_Width;
+			}
+		}
 		
 		$pdf->SetFillColor(192, 196, 254);
         $pdf->SetTextColor(0);
@@ -1896,7 +1991,7 @@ function Download_reports()
 		$pdf->setCellMargins(0, 0, 0, 0);
 		$border = array('mode' => 'int', 'LTR' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));
 		$pdf->MultiCell(($Page_Width/2), 13, '<b>Name: </b>'. $Report_Name, $border, $align='L', $fill=1, $ln=0, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
-		$border = array('mode' => 'int', 'TR' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));
+		$border = array('mode' => 'int', 'LTR' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));
 		$pdf->MultiCell(($Page_Width/2), 13, '<b>Category: </b>'. htmlspecialchars($category), $border, $align='L', $fill=1, $ln=0, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
 		$pdf->Ln(13);
 		
@@ -1905,8 +2000,9 @@ function Download_reports()
 		$pdf->MultiCell($Page_Width, 8, '<b>Display Mode: </b>'. $pdftitle, $border, $align='L', $fill=1, $ln=0, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
 		$pdf->Ln(20);
 		$pdf->setCellPaddings(0.5, 0.5, 0.5, 0.5);
+		
 		//// Give product column required maximum width when available to prevent wrapping
-		$Avail_Prod_Col_width = $Page_Width-((count($columns)+((isset($total_fld) && $total_fld == "1")? 1:0))*($area_Col_Width+1));
+		$Avail_Prod_Col_width = $Page_Width-$All_Column_Width;
 		$Current_product_Col_Width = $product_Col_Width;
 		if($Avail_Prod_Col_width > $product_Col_Width)
 		{
@@ -1932,20 +2028,29 @@ function Download_reports()
 			}
 			$product_Col_Width = $Current_product_Col_Width;	///new width
 		}
-		
+		//$product_Col_Width = 25;
 		///Calculate height for category area row
 		$Max_Cat_areaNumLines=0;
 		foreach($columns as $col => $val)
 		{
 			if($columns_Span[$col] > 0 && $columnsCategoryName[$col] != 'Undefined')
 			{
-				$current_NumLines=$pdf->getNumLines($columnsCategoryName[$col], ($area_Col_Width * $columns_Span[$col]));
+				$i = 1; $width = 0; $col_id = $col;
+				while($i <= $columns_Span[$col])
+				{
+					$width = $width + $Width_matrix[$col_id]['width'];
+					$i++; $col_id++;
+				}
+				$current_NumLines=$pdf->getNumLines($columnsCategoryName[$col], $width);
 				if($Max_Cat_areaNumLines < $current_NumLines)
 				$Max_Cat_areaNumLines = $current_NumLines;
 			}
 		}
+		if($Max_Cat_areaNumLines < 2)
+		$Cat_Area_Row_height = $Min_One_Liner;
+		else
 		$Cat_Area_Row_height = $Max_Cat_areaNumLines * $Line_Height;
-		
+		/////////// Print Category Row
 		$pdf->SetFillColor(255, 255, 255);
 		$pdf->setCellMargins(0.5, 0, 0, 0);
 		$pdf->MultiCell($product_Col_Width, $Cat_Area_Row_height, '', $border=0, $align='C', $fill=1, $ln=0, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
@@ -1968,43 +2073,79 @@ function Download_reports()
 				{
 					$border = array('mode' => 'int', 'LTR' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,0,0)));
 					
-					$Cat_Area_Row_width = (($area_Col_Width*$columns_Span[$col]) +((($columns_Span[$col] == 1) ? 0:0.5) * ($columns_Span[$col]-1)));
+					$i = 1; $width = 0; $col_id = $col;
+					while($i <= $columns_Span[$col])
+					{
+						$width = $width + $Width_matrix[$col_id]['width'];
+						$i++; $col_id++;
+					}
+					$Cat_Area_Row_width = $width +((($columns_Span[$col] == 1) ? 0:0.5) * ($columns_Span[$col]-1));
 					$pdfContent = '<div align="center" style="vertical-align:middle; float:none;">';
 					$current_NumLines=$pdf->getNumLines($columnsCategoryName[$col], $Cat_Area_Row_width);
 					if($Max_Cat_areaNumLines > $current_NumLines)
 					{
 						$extra_space = ($Max_Cat_areaNumLines - $current_NumLines) * $Line_Height;
-						$pdfContent .= '<br style="line-height:'.((($extra_space* 72 / 96)/2)).'px;" />';
+						$pdfContent .= '<br style="line-height:'.((($extra_space* 72 / 96)/2)+1).'px;" />';
 					}
 					$pdfContent .= $columnsCategoryName[$col].'</div>';
 					$pdf->MultiCell($Cat_Area_Row_width, $Cat_Area_Row_height, $pdfContent, $border, $align='C', $fill=1, $ln, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
 				}
 				else
 				{
-					$pdf->MultiCell((($area_Col_Width*$columns_Span[$col]) +((($columns_Span[$col] == 1) ? 0:0.5) * ($columns_Span[$col]-1))), $Cat_Area_Row_height, '', $border=0, $align='C', $fill=1, $ln, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+					$i = 1; $width = 0; $col_id = $col;
+					while($i <= $columns_Span[$col])
+					{
+						$width = $width + $Width_matrix[$col_id]['width'];
+						$i++; $col_id++;
+					}
+					$Cat_Area_Row_width = $width +((($columns_Span[$col] == 1) ? 0:0.5) * ($columns_Span[$col]-1));
+					$pdf->MultiCell($Cat_Area_Row_width, $Cat_Area_Row_height, '', $border=0, $align='C', $fill=1, $ln, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
 				}
 			}
 		}
-		$pdf->Ln(0.5);
+		$pdf->Ln(1);
 		
 		///Calculate height for area row
-		$Max_areaNumLines=0;
-		foreach($columns as $col => $val)
+		if($Rotation_Flg == 0)
 		{
-			$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col]:$val;
-			if(isset($areaIds[$col]) && $areaIds[$col] != NULL && !empty($productIds))
-			$current_NumLines=$pdf->getNumLines($val, $area_Col_Width);
-			else $current_NumLines = 0;
-			if($Max_areaNumLines < $current_NumLines)
-			$Max_areaNumLines = $current_NumLines;
+			$Max_areaNumLines=0;
+			foreach($columns as $col => $val)
+			{
+				$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col]:$val;
+				if(isset($areaIds[$col]) && $areaIds[$col] != NULL && !empty($productIds))
+				$current_NumLines=$pdf->getNumLines($val, $area_Col_Width);
+				else $current_NumLines = 0;
+				if($Max_areaNumLines < $current_NumLines)
+				$Max_areaNumLines = $current_NumLines;
+			}
+			$Area_Row_height = $Max_areaNumLines * $Line_Height;
 		}
-		$Area_Row_height = $Max_areaNumLines * $Line_Height;
+		else
+		{
+			$Max_areaStringLength=0;
+			foreach($columns as $col => $val)
+			{
+				$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col]:$val;
+				if(isset($areaIds[$col]) && $areaIds[$col] != NULL && !empty($productIds))
+				$current_StringLength = $pdf->GetStringWidth($val, 'verdana', '', 8);
+				else $current_StringLength = 0;
+				if($Max_areaStringLength < $current_StringLength)
+				$Max_areaStringLength = $current_StringLength;
+			}
+			$Area_Row_height = $Max_areaStringLength + 2;
+		}
 		
 		$pdf->SetFillColor(255, 255, 255);
 		$pdf->setCellMargins(0.5, 0, 0, 0);
 		$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));
+		
+		$Main_X = $pdf->GetX();
+		$Main_Y = $pdf->GetY();
+		
 		$pdf->MultiCell($product_Col_Width, $Area_Row_height, '', $border=0, $align='C', $fill=1, $ln=0, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
 		
+		$Place_X = $Main_X + $product_Col_Width + 1;
+		$Place_Y = $Main_Y;
 		
 		foreach($columns as $col => $val)
 		{
@@ -2037,18 +2178,54 @@ function Download_reports()
 					$count_val=$col_indlead_total[$col];
 				}
 				$pdfContent = '<div align="center" style="vertical-align:middle; float:none;">';
-				$current_NumLines=$pdf->getNumLines($val, $area_Col_Width);
-				if($Max_areaNumLines > $current_NumLines)
+				
+				if($Rotation_Flg == 1)
 				{
-					$extra_space = ($Max_areaNumLines - $current_NumLines) * $Line_Height;
+					$extra_space = $Width_matrix[$col]['width'] - $Line_Height;
 					$pdfContent .= '<br style="line-height:'.((($extra_space* 72 / 96)/2)).'px;" />';
 				}
+				else
+				{
+					$current_NumLines=$pdf->getNumLines($val, $Width_matrix[$col]['width']);
+					if($Max_areaNumLines > $current_NumLines)
+					{
+						$extra_space = ($Max_areaNumLines - $current_NumLines) * $Line_Height;
+						$pdfContent .= '<br style="line-height:'.((($extra_space* 72 / 96)/2)).'px;" />';
+					}
+				}
+				
 				$pdfContent .= '<a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. $link_part . '" target="_blank" title="'. $caltTitle .'">'.$val.'</a></div>';
-				$pdf->MultiCell($area_Col_Width, $Area_Row_height, $pdfContent, $border, $align='C', $fill=1, $ln, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+				
+				if($Rotation_Flg == 1)
+				{
+					$pdf->StartTransform(); 
+					$Place_Y = $Main_Y + $Area_Row_height;
+					$pdf->Rotate(90,$Place_X, $Place_Y);
+					$pdf->MultiCell($Area_Row_height, $Width_matrix[$col]['width'], $pdfContent, $border, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+					$pdf->StopTransform();
+					$Place_X = $Place_X + $Width_matrix[$col]['width'] + 0.5;
+				}
+				else
+				{
+					$pdf->MultiCell($Width_matrix[$col]['width'], $Area_Row_height, $pdfContent, $border, $align='C', $fill=1, $ln, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+				}
+				
 			}
 			else
 			{
-				$pdf->MultiCell($area_Col_Width, $Area_Row_height, '', $border, $align='C', $fill=1, $ln, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+				if($Rotation_Flg == 1)
+				{
+					$pdf->StartTransform(); 
+					$Place_Y = $Main_Y + $Area_Row_height;
+					$pdf->Rotate(90,$Place_X, $Place_Y);
+					$pdf->MultiCell($Area_Row_height, $Width_matrix[$col]['width'], '', $border, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+					$pdf->StopTransform();
+					$Place_X = $Place_X + $Width_matrix[$col]['width'] + 0.5;
+				}
+				else
+				{
+					$pdf->MultiCell($Width_matrix[$col]['width'], $Area_Row_height, '', $border, $align='C', $fill=1, $ln, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+				}
 			}
 		}
 		//if total checkbox is selected
@@ -2073,17 +2250,69 @@ function Download_reports()
 				$productIds = array_filter($productIds);
 				$areaIds = array_filter($areaIds);
 				$pdfContent = '<div align="center" style="vertical-align:middle; float:none;">';
-				$extra_space = ($Max_areaNumLines - 1) * $Line_Height;
+				
+				if($Rotation_Flg == 1)
+				{
+					$extra_space = (strlen($count_val) * 2) + 2  - $Line_Height;
+				}
+				else
+				{
+					$extra_space = ($Max_areaNumLines - 1) * $Line_Height;
+				}
+				
 				$pdfContent .= '<br style="line-height:'.((($extra_space* 72 / 96)/2)).'px;" />';
 				$pdfContent .= '<a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds). $link_part . '" target="_blank" title="'. $title .'">'.$count_val.'</a></div>';
-				$pdf->MultiCell($area_Col_Width, $Area_Row_height, $pdfContent, $border, $align='C', $fill=1, $ln=1, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+				
+				if($Rotation_Flg == 1)
+				{
+					if(strlen($count_val) < 2 && $Total_Col_width < 1)
+					$Total_Col_width = $Min_One_Liner;
+					else
+					$Total_Col_width = ((strlen($count_val) * 2.5) + 2);
+				
+					$pdf->StartTransform(); 
+					$Place_Y = $Main_Y + $Area_Row_height;
+					$pdf->Rotate(90,$Place_X, $Place_Y);
+					$pdf->MultiCell($Area_Row_height, $Total_Col_width, $pdfContent, $border, $align='C', $fill=1, $ln=1, $Place_X, $Place_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+					$pdf->StopTransform();
+					$Place_X = $Place_X + $Total_Col_width + 0.5;
+				}
+				else
+				{
+					$Total_Col_width = $area_Col_Width;
+					
+					$pdf->MultiCell($Total_Col_width, $Area_Row_height, $pdfContent, $border, $align='C', $fill=1, $ln=1, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+				}
 			}
 			else
 			{
-				$pdf->MultiCell($area_Col_Width, $Area_Row_height, '', $border, $align='C', $fill=1, $ln=1, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+				if($Rotation_Flg == 1)
+				{
+					if(($Total_Col_width != '' && $Total_Col_width != NULL) ||  $Total_Col_width == 0)
+					$Total_Col_width = $Min_One_Liner;
+					
+					$pdf->StartTransform(); 
+					$Place_Y = $Main_Y + $Area_Row_height;
+					$pdf->Rotate(90,$Place_X, $Place_Y);
+					$pdf->MultiCell($Area_Row_height, $Total_Col_width, '', $border, $align='C', $fill=1, $ln=1, $Place_X, $Place_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+					$pdf->StopTransform();
+					$Place_X = $Place_X + $Total_Col_width + 0.5;
+				}
+				else
+				{
+					$Total_Col_width = $area_Col_Width;
+					
+					$pdf->MultiCell($Total_Col_width, $Area_Row_height, '', $border, $align='C', $fill=1, $ln=1, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+				}
 			}
 		}
 		$pdf->Ln(0.5);
+		
+		if($Rotation_Flg == 1)
+		{
+			$pdf->SetX($Main_X);
+			$pdf->SetY(($Main_Y+$Area_Row_height));
+		}
 		
 		foreach($rows as $row => $rval)
 		{
@@ -2105,10 +2334,12 @@ function Download_reports()
 				$pdf->AddPage();
 				
 				////Add category row again
+				/////////// Print Category Row
 				$pdf->SetFillColor(255, 255, 255);
 				$pdf->setCellMargins(0.5, 0, 0, 0);
 				$pdf->MultiCell($product_Col_Width, $Cat_Area_Row_height, '', $border=0, $align='C', $fill=1, $ln=0, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
-				
+		
+		
 				foreach($columns as $col => $val)
 				{
 					$pdf->setCellMargins(0.5, 0, 0, 0);
@@ -2120,40 +2351,66 @@ function Download_reports()
 					{
 						if($last_cat_col==$col) $ln=1; else $ln=0;
 					}
-					
 					if($columns_Span[$col] > 0)
 					{
 						if($columnsCategoryName[$col] != 'Undefined')
 						{
 							$border = array('mode' => 'int', 'LTR' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,0,0)));
-							$Cat_Area_Row_width = (($area_Col_Width*$columns_Span[$col]) +((($columns_Span[$col] == 1) ? 0:0.5) * ($columns_Span[$col]-1)));
+					
+							$i = 1; $width = 0; $col_id = $col;
+							while($i <= $columns_Span[$col])
+							{
+								$width = $width + $Width_matrix[$col_id]['width'];
+								$i++; $col_id++;
+							}
+							$Cat_Area_Row_width = $width +((($columns_Span[$col] == 1) ? 0:0.5) * ($columns_Span[$col]-1));
 							$pdfContent = '<div align="center" style="vertical-align:middle; float:none;">';
 							$current_NumLines=$pdf->getNumLines($columnsCategoryName[$col], $Cat_Area_Row_width);
 							if($Max_Cat_areaNumLines > $current_NumLines)
 							{
 								$extra_space = ($Max_Cat_areaNumLines - $current_NumLines) * $Line_Height;
-								$pdfContent .= '<br style="line-height:'.((($extra_space* 72 / 96)/2)).'px;" />';
+								$pdfContent .= '<br style="line-height:'.((($extra_space* 72 / 96)/2)+1).'px;" />';
 							}
 							$pdfContent .= $columnsCategoryName[$col].'</div>';
 							$pdf->MultiCell($Cat_Area_Row_width, $Cat_Area_Row_height, $pdfContent, $border, $align='C', $fill=1, $ln, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
 						}
 						else
 						{
-							$pdf->MultiCell((($area_Col_Width*$columns_Span[$col]) +((($columns_Span[$col] == 1) ? 0:0.5) * ($columns_Span[$col]-1))), $Cat_Area_Row_height, '', $border=0, $align='C', $fill=1, $ln, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+							$i = 1; $width = 0; $col_id = $col;
+							while($i <= $columns_Span[$col])
+							{
+								$width = $width + $Width_matrix[$col_id]['width'];
+								$i++; $col_id++;
+							}
+							$Cat_Area_Row_width = $width +((($columns_Span[$col] == 1) ? 0:0.5) * ($columns_Span[$col]-1));
+							$pdf->MultiCell($Cat_Area_Row_width, $Cat_Area_Row_height, '', $border=0, $align='C', $fill=1, $ln, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
 						}
 					}
 				}
-				$pdf->Ln(0.5);
+				$pdf->Ln(1);
 				
 				
 				///Add the header row again at new page
 				$pdf->SetFillColor(255, 255, 255);
 				$pdf->setCellMargins(0.5, 0, 0, 0);
 				$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));
-				$pdf->MultiCell($product_Col_Width, $Area_Row_height, '', $border=0, $align='L', $fill=1, $ln=0, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+				
+				$Main_X = $pdf->GetX();
+				$Main_Y = $pdf->GetY();
+				
+				$pdf->MultiCell($product_Col_Width, $Area_Row_height, '', $border=0, $align='C', $fill=1, $ln=0, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+		
+				$Place_X = $Main_X + $product_Col_Width + 1;
+				$Place_Y = $Main_Y;
 				
 				foreach($columns as $col => $val)
 				{
+					$pdf->setCellMargins(0.5, 0, 0, 0);
+					$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));
+					$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col]:$val;
+					$cdesc = (isset($columnsDescription[$col]) && $columnsDescription[$col] != '')?$columnsDescription[$col]:null;
+					$caltTitle = (isset($cdesc) && $cdesc != '')?' alt="'.$cdesc.'" title="'.$cdesc.'" ':null;
+					
 					if(isset($total_fld) && $total_fld == "1")
 					$ln=0;
 					else if($dtt && $second_last_num == $col && $total_fld != "1")
@@ -2161,12 +2418,7 @@ function Download_reports()
 					else if($max_column['num'] == $col && $total_fld != "1")
 					$ln=1;
 					else $ln=0;
-			
-					$pdf->setCellMargins(0.5, 0, 0, 0);
-					$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col]:$val;
-					$cdesc = (isset($columnsDescription[$col]) && $columnsDescription[$col] != '')?$columnsDescription[$col]:null;
-					$caltTitle = (isset($cdesc) && $cdesc != '')?' alt="'.$cdesc.'" title="'.$cdesc.'" ':null;
-					$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));
+						
 					if(isset($areaIds[$col]) && $areaIds[$col] != NULL && !empty($productIds))
 					{
 						if($_POST['dwcount']=='active')
@@ -2182,18 +2434,53 @@ function Download_reports()
 							$count_val=$col_indlead_total[$col];
 						}
 						$pdfContent = '<div align="center" style="vertical-align:middle; float:none;">';
-						$current_NumLines=$pdf->getNumLines($val, $area_Col_Width);
-						if($Max_areaNumLines > $current_NumLines)
+						
+						if($Rotation_Flg == 1)
 						{
-							$extra_space = ($Max_areaNumLines - $current_NumLines) * $Line_Height;
+							$extra_space = $Width_matrix[$col]['width'] - $Line_Height;
 							$pdfContent .= '<br style="line-height:'.((($extra_space* 72 / 96)/2)).'px;" />';
 						}
+						else
+						{
+							$current_NumLines=$pdf->getNumLines($val, $Width_matrix[$col]['width']);
+							if($Max_areaNumLines > $current_NumLines)
+							{
+								$extra_space = ($Max_areaNumLines - $current_NumLines) * $Line_Height;
+								$pdfContent .= '<br style="line-height:'.((($extra_space* 72 / 96)/2)).'px;" />';
+							}
+						}
+						
 						$pdfContent .= '<a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. $link_part . '" target="_blank" title="'. $caltTitle .'">'.$val.'</a></div>';
-						$pdf->MultiCell($area_Col_Width, $Area_Row_height, $pdfContent, $border, $align='C', $fill=1, $ln, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+						
+						if($Rotation_Flg == 1)
+						{
+							$pdf->StartTransform(); 
+							$Place_Y = $Main_Y + $Area_Row_height;
+							$pdf->Rotate(90,$Place_X, $Place_Y);
+							$pdf->MultiCell($Area_Row_height, $Width_matrix[$col]['width'], $pdfContent, $border, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+							$pdf->StopTransform();
+							$Place_X = $Place_X + $Width_matrix[$col]['width'] + 0.5;
+						}
+						else
+						{
+							$pdf->MultiCell($Width_matrix[$col]['width'], $Area_Row_height, $pdfContent, $border, $align='C', $fill=1, $ln, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+						}
 					}
 					else
 					{
-						$pdf->MultiCell($area_Col_Width, $Area_Row_height, '', $border, $align='C', $fill=1, $ln, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+						if($Rotation_Flg == 1)
+						{
+							$pdf->StartTransform(); 
+							$Place_Y = $Main_Y + $Area_Row_height;
+							$pdf->Rotate(90,$Place_X, $Place_Y);
+							$pdf->MultiCell($Area_Row_height, $Width_matrix[$col]['width'], '', $border, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+							$pdf->StopTransform();
+							$Place_X = $Place_X + $Width_matrix[$col]['width'] + 0.5;
+						}
+						else
+						{
+							$pdf->MultiCell($Width_matrix[$col]['width'], $Area_Row_height, '', $border, $align='C', $fill=1, $ln, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+						}
 					}
 				}
 				//if total checkbox is selected
@@ -2201,7 +2488,6 @@ function Download_reports()
 				{
 					$pdf->getCellPaddings();
 					$pdf->setCellMargins(0.5, 0, 0, 0);
-				
 					if(!empty($productIds) && !empty($areaIds))
 					{
 						if($_POST['dwcount']=='active')
@@ -2218,15 +2504,58 @@ function Download_reports()
 						}
 						$productIds = array_filter($productIds);
 						$areaIds = array_filter($areaIds);
-						$pdfContent = '<a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds). $link_part . '" target="_blank" title="'. $title .'">'.$count_val.'</a>';
-						$pdf->MultiCell($area_Col_Width, $Area_Row_height, $pdfContent, $border, $align='C', $fill=1, $ln=1, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+						$pdfContent = '<div align="center" style="vertical-align:middle; float:none;">';
+						
+						if($Rotation_Flg == 1)
+						{
+							$extra_space = (strlen($count_val) * 2) + 2  - $Line_Height;
+						}
+						else
+						{
+							$extra_space = ($Max_areaNumLines - 1) * $Line_Height;
+						}
+				
+						$pdfContent .= '<br style="line-height:'.((($extra_space* 72 / 96)/2)).'px;" />';
+						$pdfContent .= '<a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds). $link_part . '" target="_blank" title="'. $title .'">'.$count_val.'</a></div>';
+				
+						if($Rotation_Flg == 1)
+						{
+							$pdf->StartTransform(); 
+							$Place_Y = $Main_Y + $Area_Row_height;
+							$pdf->Rotate(90,$Place_X, $Place_Y);
+							$pdf->MultiCell($Area_Row_height, $Total_Col_width, $pdfContent, $border, $align='C', $fill=1, $ln=1, $Place_X, $Place_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+							$pdf->StopTransform();
+							$Place_X = $Place_X + $Total_Col_width + 0.5;
+						}
+						else
+						{
+							$pdf->MultiCell($Total_Col_width, $Area_Row_height, $pdfContent, $border, $align='C', $fill=1, $ln=1, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+						}
 					}
 					else
 					{
-						$pdf->MultiCell($area_Col_Width, $Area_Row_height, '', $border, $align='C', $fill=1, $ln=1, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+						if($Rotation_Flg == 1)
+						{
+							$pdf->StartTransform(); 
+							$Place_Y = $Main_Y + $Area_Row_height;
+							$pdf->Rotate(90,$Place_X, $Place_Y);
+							$pdf->MultiCell($Area_Row_height, $Total_Col_width, '', $border, $align='C', $fill=1, $ln=1, $Place_X, $Place_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+							$pdf->StopTransform();
+							$Place_X = $Place_X + $Total_Col_width + 0.5;
+						}
+						else
+						{
+							$pdf->MultiCell($Total_Col_width, $Area_Row_height, '', $border, $align='C', $fill=1, $ln=1, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+						}
 					}
 				}
 				$pdf->Ln(0.5);
+				
+				if($Rotation_Flg == 1)
+				{
+					$pdf->SetX($Main_X);
+					$pdf->SetY(($Main_Y+$Area_Row_height));
+				}
 				
 				///End of header row				
 			} elseif ((ceil($startY) + $prod_row_height) + $dimensions['bm'] == floor($dimensions['hk'])) {
@@ -2242,8 +2571,7 @@ function Download_reports()
 			
 			if($rows_Span[$row] > 0 && $cat != 'Undefined')
 			{
-				$colspan=((count($columns))+(($total_fld)? 1:0));
-				$Product_Rowcat_width = ($product_Col_Width + (($area_Col_Width + 0.5)*$colspan));
+				$Product_Rowcat_width = ($product_Col_Width + $All_Column_Width);
 				$rowcount = $pdf->getNumLines($cat, $Product_Rowcat_width);
  				$Product_Rowcat_height = ($rowcount * $Line_Height);	//15 is minimum height to accomodate images and other data
 				$pdfContent = '';
@@ -2424,7 +2752,7 @@ function Download_reports()
 					if($data_matrix[$row][$col]['new_trials'] > 0)
 					{
 						$Status_List_Flg_1=1;
-						$Status_List_1 = "Number of new trials: ". $data_matrix[$row][$col]['new_trials'] ." \n";
+						$Status_List_1 = "New trials: ". $data_matrix[$row][$col]['new_trials'] ." \n";
 					}
 					
 					if($Status_List_Flg_1==1)
@@ -2543,31 +2871,73 @@ function Download_reports()
 					$annotation_text = strip_tags($annotation_text);	///Strip HTML tags
 
 					
-					$pdfContent .= '<div align="center" style="vertical-align:middle; float:none;"><br style="line-height:'.((($prod_row_height* 72 / 96)/2)).'px;" />';
+					$pdfContent .= '<div align="center" style="vertical-align:middle; float:none;">';
+					$extra_space = $prod_row_height - $Line_Height;
+					$pdfContent .= '<br style="line-height:'.((($extra_space * 72 / 96)/2)+1).'px;" />';
 					
 					if(trim($annotation_text) != '')
 					{
-						$pdf->Annotation('', '', ($area_Col_Width*3/4), ($prod_row_height*4/5), $annotation_text, array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Details', 'Subj' => 'Information', 'C' => array()));	
+						$pdf->Annotation('', '', ($Width_matrix[$col]['width']*3/4), ($prod_row_height*4/5), $annotation_text, array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Details', 'Subj' => 'Information', 'C' => array()));	
 					}
 					
-					$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. $link_part . '" target="_blank" title="'. $title .'" style="'.((trim($data_matrix[$row][$col]['color_code']) == 'FF0000' && $data_matrix[$row][$col]['count_lastchanged_value']==1) ? 'background-color:#FFFFFF;':'').'"><font style="'. (($data_matrix[$row][$col]['count_lastchanged_value']==1) ? 'color:#FF0000;':'').'" >'.$count_val.'</font></a> ';
+					$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. $link_part . '" target="_blank" title="'. $title .'" style="'.((trim($data_matrix[$row][$col]['color_code']) == 'FF0000' && $data_matrix[$row][$col]['count_lastchanged_value']==1) ? 'background-color:#FFFFFF;':'').'"><font style="'. (($data_matrix[$row][$col]['count_lastchanged_value']==1) ? 'color:#FF0000;':'').'" >'.$count_val.'</font></a>';
 					
+					if($Rotation_Flg == 1)
+					{
+						if($data_matrix[$row][$col]['bomb']['value'] == 'small' || $data_matrix[$row][$col]['bomb']['value'] == 'large')
+						$pdfContent .= '&nbsp;&nbsp;';
+						if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
+						$pdfContent .= '&nbsp;&nbsp;';
+					}
+					else
+					{
+						if(($data_matrix[$row][$col]['bomb']['value'] == 'small' || $data_matrix[$row][$col]['bomb']['value'] == 'large') || ($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != ''))
+						{
+							$Nbsp = 0;
+							while($Nbsp < strlen($count_val))
+							{
+								$pdfContent .= '&nbsp;';
+								$Nbsp++;
+							}
+						}
+					}
+					
+					
+					if($prod_row_height == $Line_Height)	$prod_row_height = $prod_row_height + 0.6; /// For adjustment as when height is min, html causes issue
+					
+					$y=($pdf->GetY()+($prod_row_height/2)-(3.1/2));
 					
 					if($data_matrix[$row][$col]['bomb']['value'] == 'small' || $data_matrix[$row][$col]['bomb']['value'] == 'large')
 					{
-						$bomb_image = $pdf->serializeTCPDFtagParameters(array('images/'.$data_matrix[$row][$col]['bomb']['src'], '', '', 3.1, 3.1, '', '', '', false, 300, '', false, false, 0, false, false, false));
-						$pdfContent .= '<tcpdf method="Image" params="'.$bomb_image.'" /> &nbsp;';
+						if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
+							$x=($pdf->GetX()+$Width_matrix[$col]['width']-6.1-0.4);
+						else
+						{
+							if($Rotation_Flg == 1)
+								$x=($pdf->GetX()+$Width_matrix[$col]['width']-3.1-0.2);
+							else
+								$x=($pdf->GetX()+$Width_matrix[$col]['width']-6.1-0.4);
+						}
+						$pdf->Image('images/'.$data_matrix[$row][$col]['bomb']['src'], $x, $y, 3.1, 3.1, '', '', '', false, 300, '', false, false, 0, false, false, false);
 					}
 						
 					if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
 					{
-						$filing_image = $pdf->serializeTCPDFtagParameters(array($data_matrix[$row][$col]['filing_image'], '', '', 3.1, 3.1, '', '', '', false, 300, '', false, false, 0, false, false, false));
-						$pdfContent .= ' <tcpdf method="Image" params="'.$filing_image.'" />';
+						if($Rotation_Flg == 1)
+							$x=($pdf->GetX()+$Width_matrix[$col]['width']-3.1-0.2);
+						else
+						{
+							if($data_matrix[$row][$col]['bomb']['value'] == 'small' || $data_matrix[$row][$col]['bomb']['value'] == 'large')
+								$x=($pdf->GetX()+$Width_matrix[$col]['width']-3.1-0.2);
+							else
+								$x=($pdf->GetX()+$Width_matrix[$col]['width']-6.1-0.4);
+						}
+						$pdf->Image($data_matrix[$row][$col]['filing_image'], $x, $y, 3.1, 3.1, '', '', '', false, 300, '', false, false, 0, false, false, false);
 					}
 						
 					$pdfContent .= '</div>';
-					if($prod_row_height == $Line_Height)	$prod_row_height = $prod_row_height + 0.6; /// For adjustment as when height is min, html causes issue
-					$pdf->MultiCell($area_Col_Width, $prod_row_height, $pdfContent, $border, $align='C', $fill=1, $ln, '', '', $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$prod_row_height, 'M');
+					
+					$pdf->MultiCell($Width_matrix[$col]['width'], $prod_row_height, $pdfContent, $border, $align='C', $fill=1, $ln, '', '', $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=0, 'M');
 				}
 				else
 				{
@@ -2582,8 +2952,7 @@ function Download_reports()
 						$pdf->SetFillColor(192, 196, 254);
 						$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));
 					}
-					$pdf->MultiCell($area_Col_Width, $prod_row_height, ' ', $border, $align='C', $fill=1, $ln, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
-
+					$pdf->MultiCell($Width_matrix[$col]['width'], $prod_row_height, ' ', $border, $align='C', $fill=1, $ln, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
 				}
 			}//column foreach ends
 			//if total checkbox is selected
@@ -2593,7 +2962,7 @@ function Download_reports()
         		$pdf->SetTextColor(0);
 				$pdf->getCellPaddings();
 				$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));	
-				$pdf->MultiCell($area_Col_Width, $prod_row_height, ' ', $border, $align='C', $fill=1, $ln=1, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+				$pdf->MultiCell($Total_Col_width, $prod_row_height, ' ', $border, $align='C', $fill=1, $ln=1, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
 
 			}
 		$pdf->Ln(0.5);
@@ -2613,7 +2982,7 @@ function Download_reports()
 			if($footnotes_rowcount > 1 && $description_rowcount > 1)
  			$FD_height = (($footnotes_rowcount > $description_rowcount) ? ($footnotes_rowcount * $Line_Height) : ($description_rowcount * $Line_Height));	
 			else
-			$FD_height = 15;	/// When there is single line in footnote and description, it not looks good to have 4.5 height
+			$FD_height = 15;	/// When there is single line in footnote and description, it not looks good to have $Min_One_Liner height
 			
 			$border = array('mode' => 'int', 'LTB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));
 			$pdf->writeHTMLCell(($Page_Width/2), $FD_height, '', '', '<b>Footnotes: </b><br/>'. $footnotes, $border, $ln=0, $fill=1, $reseth=true, $align='L', $autopadding=true);
@@ -2879,7 +3248,7 @@ function Download_reports()
 					if($data_matrix[$row][$col]['new_trials'] > 0)
 					{
 						$Status_List_Flg_1=1;
-						$Status_List_1 = "Number of new trials: ". $data_matrix[$row][$col]['new_trials'] ." \n";
+						$Status_List_1 = "New trials: ". $data_matrix[$row][$col]['new_trials'] ." \n";
 					}
 					
 					if($Status_List_Flg_1==1)
