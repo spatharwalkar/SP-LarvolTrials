@@ -9003,9 +9003,11 @@ class TrialTracker
 			echo '</ul></ul></div>';
 		}
 		
-		echo '<div style="float: left;margin-right: 10px; vertical-align:bottom; padding-top:4px; height:22px;"><span id="addtoright"></span></div>';
-		echo '<div style="float: left;padding-top:4px; vertical-align:bottom; height:22px;" id="chromemenu"><a rel="dropmenu">'
-			. '<span style="padding:2px;border:1px solid; color:#000000; background-position:left center; background-repeat:no-repeat; background-image:url(\'./images/save.png\'); cursor:pointer; ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Export</b></span></a></div>';
+		echo '<div style="float: right;padding-top:4px; vertical-align:bottom; height:22px;" id="chromemenu"><a rel="dropmenu">'
+				. '<span style="padding:2px;border:1px solid; color:#000000; background-position:left center; background-repeat:no-repeat; background-image:url(\'./images/save.png\'); cursor:pointer;">'
+				. '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Export</b></span></a></div>'
+				. '<div style="float: right;margin-right: 10px; vertical-align:bottom; padding-top:4px; height:22px;"><span id="addtoright"></span></div>';
+		
 		
 		echo '<br/><br/>';
 		
