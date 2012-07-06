@@ -180,7 +180,6 @@ class TrialTracker
 										 ->setCategory("Clinical Trials");
 
 		$bgColor = "D5D3E6";
-		$productStatusComment = array();
 		
 		if($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed')
 		{	
@@ -196,7 +195,7 @@ class TrialTracker
 					if($prow['discontinuation_status'] !== NULL && $prow['discontinuation_status'] != 'Active')
 					{
 						$TrialsInfo[$pkey]['sectionHeader'] = "<span style='color:gray'>" . $prow['name'] . "</span>";
-						$productStatusComment[$pkey] = strip_tags($prow['discontinuation_status_comment']);
+						$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($prow['discontinuation_status_comment']);
 					}
 					else
 					{
@@ -223,7 +222,7 @@ class TrialTracker
 						if($prow['discontinuation_status'] !== NULL && $prow['discontinuation_status'] != 'Active')
 						{
 							$TrialsInfo[$pkey]['sectionHeader'] = "<span style='color:gray'>" . $prow['name'] . "</span>";
-							$productStatusComment[$pkey] = strip_tags($prow['discontinuation_status_comment']);	
+							$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($prow['discontinuation_status_comment']);	
 						}
 						else
 						{
@@ -333,7 +332,7 @@ class TrialTracker
 						if($prow['discontinuation_status'] !== NULL && $prow['discontinuation_status'] != 'Active')
 						{
 							$TrialsInfo[$pkey]['sectionHeader'] = "<span style='color:gray'>" . $prow['name'] . "</span>";
-							$productStatusComment[$pkey] = strip_tags($prow['discontinuation_status_comment']);
+							$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($prow['discontinuation_status_comment']);
 						}
 						else
 						{
@@ -357,7 +356,7 @@ class TrialTracker
 				if($prow['discontinuation_status'] !== NULL && $prow['discontinuation_status'] != 'Active')
 				{
 					$TrialsInfo[0]['sectionHeader'] = "<span style='color:gray'>" . $prow['name'] . "</span>";
-					$productStatusComment[0] = strip_tags($prow['discontinuation_status_comment']);	
+					$TrialsInfo[0]['dStatusComment'] = strip_tags($prow['discontinuation_status_comment']);	
 				}
 				else
 				{
@@ -4811,7 +4810,6 @@ class TrialTracker
 		}
 		
 		$Values = array();
-		$productStatusComment = array();
 		
 		if($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed')
 		{	
@@ -4827,7 +4825,7 @@ class TrialTracker
 					if($prow['discontinuation_status'] !== NULL && $prow['discontinuation_status'] != 'Active')
 					{
 						$TrialsInfo[$pkey]['sectionHeader'] = "<span style='color:gray'>" . $prow['name'] . "</span>";
-						$productStatusComment[$pkey] = strip_tags($prow['discontinuation_status_comment']);
+						$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($prow['discontinuation_status_comment']);
 					}
 					else
 					{
@@ -4853,7 +4851,7 @@ class TrialTracker
 						if($prow['discontinuation_status'] !== NULL && $prow['discontinuation_status'] != 'Active')
 						{
 							$TrialsInfo[$pkey]['sectionHeader'] = "<span style='color:gray'>" . $prow['name'] . "</span>";
-							$productStatusComment[$pkey] = strip_tags($prow['discontinuation_status_comment']);	
+							$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($prow['discontinuation_status_comment']);	
 						}
 						else
 						{
@@ -4964,7 +4962,7 @@ class TrialTracker
 						if($prow['discontinuation_status'] !== NULL && $prow['discontinuation_status'] != 'Active')
 						{
 							$TrialsInfo[$pkey]['sectionHeader'] = "<span style='color:gray'>" . $prow['name'] . "</span>";
-							$productStatusComment[$pkey] = strip_tags($prow['discontinuation_status_comment']);			
+							$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($prow['discontinuation_status_comment']);			
 						}
 						else
 						{
@@ -4988,7 +4986,7 @@ class TrialTracker
 				if($prow['discontinuation_status'] !== NULL && $prow['discontinuation_status'] != 'Active')
 				{
 					$TrialsInfo[0]['sectionHeader'] = "<span style='color:gray'>" . $prow['name'] . "</span>";
-					$productStatusComment[0] = 	strip_tags($prow['discontinuation_status_comment']);		
+					$TrialsInfo[0]['dStatusComment'] = 	strip_tags($prow['discontinuation_status_comment']);		
 				}
 				else
 				{
@@ -5050,7 +5048,7 @@ class TrialTracker
 		
 		$pdfContent .= $this->displayTrialTableHeader_TCPDF($loggedIn, $globalOptions);
 		
-		$pdfContent .= $this->displayTrials_TCPDF($globalOptions, $loggedIn, $Values, $ottType, $productStatusComment);
+		$pdfContent .= $this->displayTrials_TCPDF($globalOptions, $loggedIn, $Values, $ottType);
 		
 		$pdfContent .= '</table></body></html>';
 		$pdfContent = preg_replace('/(background-image|background-position|background-repeat):(\w)*\s/', '', $pdfContent);
@@ -5143,7 +5141,7 @@ class TrialTracker
 		return $outputStr;
 	}
 
-	function displayTrials_TCPDF($globalOptions = array(), $loggedIn, $Values, $ottType, $productStatusComment = array())
+	function displayTrials_TCPDF($globalOptions = array(), $loggedIn, $Values, $ottType)
 	{	
 		$currentYear = date('Y');
 		$secondYear = (date('Y')+1);
@@ -5170,9 +5168,9 @@ class TrialTracker
 		foreach($Values['Trials'] as $tkey => $tvalue)
 		{
 			$hoverText = '';
-			if(!empty($productStatusComment) && isset($productStatusComment[$tkey]))
+			if(isset($tvalue['dStatusComment']) && $tvalue['dStatusComment'] != '')
 			{
-				$hoverText = ' title="' . $productStatusComment[$tkey] . '" ';
+				$hoverText = ' title="' . $tvalue['dStatusComment'] . '" ';
 			}
 			//Rendering Upms
 			if(isset($tvalue['naUpms']) && !empty($tvalue['naUpms']))
@@ -5968,7 +5966,6 @@ class TrialTracker
 		$linkExpiry = array();
 		$productSelectorTitle = 'All Products';
 		$productSelector = array();
-		$productStatusComment = array();
 		
 		if($ottType == 'unstacked')
 		{
@@ -5993,7 +5990,7 @@ class TrialTracker
 				echo '<input type="hidden" id="upmstyle" value="expand"/>';
 			}
 			
-			echo $this->displayWebPage($productSelectorTitle, $ottType, $Values['resultIds'], $timeMachine, $Values, array(), array(), $globalOptions, $Values['linkExpiry']);
+			echo $this->displayWebPage($productSelectorTitle, $ottType, $Values['resultIds'], $timeMachine, $Values, array(), $globalOptions, $Values['linkExpiry']);
 		}
 		else if($ottType == 'rowstacked' || $ottType == 'colstacked')
 		{
@@ -6043,7 +6040,7 @@ class TrialTracker
 			},  $Values['Trials']);
 			natcasesort($TrialsInfo);
 			
-			echo $this->displayWebPage($productSelectorTitle, $ottType, $Values['resultIds'], $timeMachine, $Values, $TrialsInfo, array(), $globalOptions, $Values['linkExpiry']);
+			echo $this->displayWebPage($productSelectorTitle, $ottType, $Values['resultIds'], $timeMachine, $Values, $TrialsInfo, $globalOptions, $Values['linkExpiry']);
 		}
 		else if($ottType == 'indexed') 
 		{	
@@ -6095,7 +6092,7 @@ class TrialTracker
 							if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
 							{
 								$TrialsInfo[$pkey]['sectionHeader'] = "<span style='color:gray'>" . $row['name'] . "</span>";
-								$productStatusComment[$pkey] = strip_tags($row['discontinuation_status_comment']);
+								$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($row['discontinuation_status_comment']);
 							}
 							else
 							{
@@ -6136,7 +6133,7 @@ class TrialTracker
 								if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
 								{
 									$TrialsInfo[$pkey]['sectionHeader'] = "<span style='color:gray'>" . $row['name'] . "</span>";
-									$productStatusComment[$pkey] = strip_tags($row['discontinuation_status_comment']);
+									$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($row['discontinuation_status_comment']);
 								}
 								else
 								{
@@ -6317,7 +6314,7 @@ class TrialTracker
 								if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
 								{
 									$TrialsInfo[$pkey]['sectionHeader'] = "<span style='color:gray'>" . $row['name'] . "</span>";
-									$productStatusComment[$pkey] = strip_tags($row['discontinuation_status_comment']);
+									$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($row['discontinuation_status_comment']);
 								}
 								else
 								{
@@ -6385,7 +6382,7 @@ class TrialTracker
 				if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
 				{
 					$TrialsInfo[0]['sectionHeader'] = "<span style='color:gray'>" . $row['name'] . "</span>";
-					$productStatusComment[0] = strip_tags($row['discontinuation_status_comment']);
+					$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($row['discontinuation_status_comment']);
 				}
 				else
 				{
@@ -6418,7 +6415,7 @@ class TrialTracker
 			
 			$Values = $this->processIndexedOTTData($TrialsInfo, $ottType, $Ids, $timeMachine, $globalOptions);
 			unset($TrialsInfo);
-			echo $this->displayWebPage($productSelectorTitle, $ottType, $resultIds, $timeMachine, $Values, $productSelector, $productStatusComment, $globalOptions);
+			echo $this->displayWebPage($productSelectorTitle, $ottType, $resultIds, $timeMachine, $Values, $productSelector, $globalOptions);
 		}
 		else if($ottType == 'unstackedoldlink')
 		{
@@ -8887,7 +8884,7 @@ class TrialTracker
 		return  $Values;
 	}
 	
-	function displayWebPage($productSelectorTitle, $ottType, $resultIds, $timeMachine = NULL, $Values, $productSelector = array(), $productStatusComment = array(), $globalOptions, $linkExpiry = NULL)
+	function displayWebPage($productSelectorTitle, $ottType, $resultIds, $timeMachine = NULL, $Values, $productSelector = array(), $globalOptions, $linkExpiry = NULL)
 	{	
 		global $db;
 		$loggedIn	= $db->loggedIn();
@@ -9014,7 +9011,7 @@ class TrialTracker
 		echo $this->displayTrialTableHeader($loggedIn, $globalOptions);
 		if($count > 0)
 		{	
-			echo $this->displayTrials($totalPages, $globalOptions, $loggedIn, $start, $last, $Values, $ottType, $productStatusComment);
+			echo $this->displayTrials($totalPages, $globalOptions, $loggedIn, $start, $last, $Values, $ottType);
 		}
 		else
 		{	
@@ -9023,9 +9020,9 @@ class TrialTracker
 			foreach($Values['Trials'] as $tkey => $tvalue)
 			{
 				$hoverText = '';
-				if(!empty($productStatusComment) && isset($productStatusComment[$tkey]))
+				if(isset($tvalue['dStatusComment']) && $tvalue['dStatusComment'] != '')
 				{
-					$hoverText = ' title="' . $productStatusComment[$tkey] . '" ';
+					$hoverText = ' title="' . $tvalue['dStatusComment'] . '" ';
 				}
 				
 				if($globalOptions['includeProductsWNoData'] == "off")
@@ -9598,6 +9595,11 @@ class TrialTracker
 			$url .= '&amp;pr=' . implode(',', $globalOptions['product']);
 		}
 		
+		if(isset($globalOptions['includeProductsWNoData']) && $globalOptions['includeProductsWNoData'] == "on")
+		{
+			$url .= '&amp;ipwnd=on';
+		}
+		
 		$stages = 2;
 		
 		$paginateStr = '<div class="pagination" style="float: left; padding-top:2px; vertical-align:bottom;">';
@@ -9689,7 +9691,7 @@ class TrialTracker
 		echo $paginateStr;
 	}
 	
-	function displayTrials($totalPages, $globalOptions = array(), $loggedIn, $start, $end, $Values, $ottType, $productStatusComment = array())
+	function displayTrials($totalPages, $globalOptions = array(), $loggedIn, $start, $end, $Values, $ottType)
 	{	
 		$currentYear = date('Y');
 		$secondYear = (date('Y')+1);
@@ -9705,9 +9707,9 @@ class TrialTracker
 		foreach($Values['Trials'] as $vkey => $vvalue)
 		{
 			$hoverText = '';
-			if(!empty($productStatusComment) && isset($productStatusComment[$vkey]))
+			if(isset($vvalue['dStatusComment']) && $vvalue['dStatusComment'] != '')
 			{
-				$hoverText = ' title="' . $productStatusComment[$vkey] . '" ';
+				$hoverText = ' title="' . $vvalue['dStatusComment'] . '" ';
 			}
 			if(($counter >= $start && $counter < $end))
 			{
@@ -9830,16 +9832,16 @@ class TrialTracker
 			foreach($vvalue[$globalOptions['type']] as $dkey => $dvalue)
 			{	
 				$hoverText = '';
-				if(!empty($productStatusComment) && isset($productStatusComment[$dkey]))
+				if(isset($vvalue['dStatusComment']) && $vvalue['dStatusComment'] != '')
 				{
-					$hoverText = ' title="' . $productStatusComment[$dkey] . '" ';
+					$hoverText = ' title="' . $vvalue['dStatusComment'] . '" ';
 				}
 				if($counter >= $start && $counter < $end)
 				{	
 					if(($displayFlag == false) && isset($globalOptions['page']) && $globalOptions['page'] > 1)
 					{	
-						$naUpms = $Values['Trials'][$dvalue['section']]['naUpms'];
-						$sectionHeader = $Values['Trials'][$dvalue['section']]['sectionHeader'];
+						$naUpms = $vvalue['naUpms'];//$Values['Trials'][$dvalue['section']]['naUpms'];
+						$sectionHeader = $vvalue['sectionHeader'];//$Values['Trials'][$dvalue['section']]['sectionHeader'];
 						
 						//Rendering Upms
 						if(isset($naUpms) && !empty($naUpms))
@@ -10468,9 +10470,9 @@ class TrialTracker
 			for($index = $finalkey+1; $index <= $vkey; $index++)
 			{
 				$hoverText = '';
-				if(!empty($productStatusComment) && isset($productStatusComment[$index]))
+				if(isset($Values['Trials'][$index]['dStatusComment']) && $Values['Trials'][$index]['dStatusComment'] != '')
 				{
-					$hoverText = ' title="' . $productStatusComment[$index] . '" ';
+					$hoverText = ' title="' . $Values['Trials'][$index]['dStatusComment'] . '" ';
 				}
 				if($globalOptions['includeProductsWNoData'] == "off")
 				{
