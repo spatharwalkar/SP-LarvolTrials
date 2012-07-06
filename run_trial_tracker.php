@@ -6072,8 +6072,8 @@ class TrialTracker
 				$timeInterval = (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
 			}
 			
-			$resultIds['product'] = explode(',', $resultIds['product']);
-			$resultIds['area'] = explode(',', $resultIds['area']);
+			$resultIds['product'] = explode(',', trim($resultIds['product']));
+			$resultIds['area'] = explode(',', trim($resultIds['area']));
 			
 			if(count($resultIds['product']) > 1 && count($resultIds['area']) > 1)
 			{	
