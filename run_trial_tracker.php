@@ -6118,7 +6118,7 @@ class TrialTracker
 			}
 			else if((count($resultIds['product']) >= 1 && count($resultIds['area']) == 1 && ($resultIds['area'][0] == NULL || trim($resultIds['area'][0]) == "")) || (count($resultIds['area']) >= 1 && count($resultIds['product']) == 1 && ($resultIds['product'][0] == NULL || trim($resultIds['product'][0]) == ""))) //Condition For Only Product OR When Only Area is Given
 			{
-				if(count($resultIds['product']) >= 1 && count($resultIds['area']) == 1 && ($resultIds['area'][0] == NULL || $resultIds['area'] == ''))
+				if(count($resultIds['product']) >= 1 && count($resultIds['area']) == 1 && $resultIds['area'][0] == NULL && trim($resultIds['area'][0]) == '' && $resultIds['product'][0] != NULL && trim($resultIds['product'][0]) != '')
 				{
 					$t = '';
 					$this->displayHeader($t);
@@ -6192,10 +6192,19 @@ class TrialTracker
 							{
 								while($row = mysql_fetch_assoc($res))
 								{
-									$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : "Area ".$row['id'];
+									if($row['id'] != '' && $row['id'] != NULL && $avalue != '' && $avalue != NULL)
+									{
+										$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : "Area ".$row['id'];
+										$Ids[$akey]['area'] = $row['id'];
+									}
+									else /// For case we dont have product names, area names
+									{
+										$TrialsInfo[$akey]['sectionHeader'] = '';
+										$Ids[$akey]['area'] = '';
+									}
 									
 									$Ids[$akey]['product'] = '';
-									$Ids[$akey]['area'] = $row['id'];
+									
 								}
 							}
 						}
@@ -6405,13 +6414,13 @@ class TrialTracker
 				}
 			}
 			
-			echo '<input type="hidden" name="p" value="' . $_GET['p'] . '"/><input type="hidden" name="a" value="' . $_GET['a'] . '"/>';
+			echo '<input type="hidden" name="p" value="' . $_REQUEST['p'] . '"/><input type="hidden" name="a" value="' . $_REQUEST['a'] . '"/>';
 			
-			if(isset($_GET['JSON_search']))
-			echo '<input type="hidden" name="JSON_search" value=\'' . $_GET['JSON_search'] . '\'/>';
+			if(isset($_REQUEST['JSON_search']))
+			echo '<input type="hidden" name="JSON_search" value=\'' . $_REQUEST['JSON_search'] . '\'/>';
 			
-			if(isset($_GET['hm']) && trim($_GET['hm']) != '' && $_GET['hm'] != NULL)
-			echo '<input type="hidden" name="hm" value="' . $_GET['hm'] . '"/>';
+			if(isset($_REQUEST['hm']) && trim($_REQUEST['hm']) != '' && $_REQUEST['hm'] != NULL)
+			echo '<input type="hidden" name="hm" value="' . $_REQUEST['hm'] . '"/>';
 			
 			$Values = $this->processIndexedOTTData($TrialsInfo, $ottType, $Ids, $timeMachine, $globalOptions);
 			unset($TrialsInfo);
