@@ -79,9 +79,8 @@ $globalOptions['minEnroll'] = "0";
 $globalOptions['maxEnroll'] = "0";
 $globalOptions['product'] = array();
 
-$globalOptions['change'] = '1 week';
 $globalOptions['startrange'] = "now";
-$globalOptions['endrange'] = "1 week ago";
+$globalOptions['endrange'] = "1 month ago";
 
 $globalOptions['includeProductsWNoData'] = "off";
 
@@ -111,6 +110,35 @@ if(isset($_REQUEST['er']))
 	$globalOptions['endrange'] = $_REQUEST['er'];
 }
 
+//// Part added to switch start range and end range if they look reverse order
+if($globalOptions['startrange'] != '' && $globalOptions['endrange'] != '')
+{	
+	global $now;
+	$st_limit = str_replace('ago', '', $globalOptions['startrange']);
+	$st_limit = trim($st_limit);
+	
+	if($st_limit == 'now')
+		$st_limit = 'now';
+	else if($st_limit == '1 week' || $st_limit == '2 weeks' || $st_limit == '1 month' || $st_limit == '1 quarter' || $st_limit == '6 months' || $st_limit == '1 year')
+		$st_limit = '-' . (($st_limit == '1 quarter') ? '3 months' : $st_limit);
+	$st_limit = date('Y-m-d', strtotime($st_limit, $now));
+	
+	$ed_limit = str_replace('ago', '', $globalOptions['endrange']);
+	$ed_limit = trim($ed_limit);
+	
+	if($ed_limit == 'now')
+		$ed_limit = 'now';
+	else if($ed_limit == '1 week' || $ed_limit == '2 weeks' || $ed_limit == '1 month' || $ed_limit == '1 quarter' || $ed_limit == '6 months' || $ed_limit == '1 year')
+		$ed_limit = '-' . (($ed_limit == '1 quarter') ? '3 months' : $ed_limit);
+	$ed_limit = date('Y-m-d', strtotime($ed_limit, $now));
+	
+	if($st_limit < $ed_limit)	/// switch is start is less than end
+	{
+		$temp = $globalOptions['endrange'];
+		$globalOptions['endrange'] = $globalOptions['startrange'];
+		$globalOptions['startrange'] = $temp;
+	}
+}
 
 switch($globalOptions['startrange'])
 {	
@@ -136,21 +164,9 @@ switch($globalOptions['endrange'])
 	default: $endtimerange = 3; break;
 }
 
-if(isset($_REQUEST['change']) && $_REQUEST['change'] != '')
+if(!$db->loggedIn()) 
 {
-	$globalOptions['change'] = $_REQUEST['change'];
 	$globalOptions['startrange'] = 'now';
-	$globalOptions['endrange'] = $globalOptions['change'] . ' ago';
-}
-
-switch($globalOptions['change'])
-{
-	case "1 week": $change_value = 1; break;
-	case "2 weeks": $change_value = 2; break;
-	case "1 month": $change_value = 3; break;
-	case "1 quarter": $change_value = 4; break;
-	case "6 months": $change_value = 5; break;
-	case "1 year": $change_value = 6; break;
 }
 	
 $lastChangedTime = filectime("css/intermediary.css");
@@ -295,7 +311,7 @@ $hoverJs 		= 'scripts/jquery.hoverIntent.minified.js';
 			$("#product").val(product);
 			
 			
-			$("#change").val($("#amount3").val());
+			//$("#change").val($("#amount3").val());
 			
 		});
 		
@@ -569,29 +585,37 @@ global $db;
 		<?php if($db->loggedIn()) { ?>
 		//highlight changes slider
 		$("#slider-range-min").slider({
-			range: true,
+			range: false,
 			min: 0,
 			max: 6,
 			step: 1,
 			values: [ <?php echo $starttimerange;?>, <?php echo $endtimerange;?> ],
 			slide: function(event, ui) {
-				$("#startrange").val(timeEnum(ui.values[0]));
-				$("#endrange").val(timeEnum(ui.values[1]));
+				if(ui.values[0] > ui.values[1])	/// Switch highlight range when sliders cross each other
+				{
+					$("#startrange").val(timeEnum(ui.values[1]));
+					$("#endrange").val(timeEnum(ui.values[0]));
+				}
+				else
+				{
+					$("#startrange").val(timeEnum(ui.values[0]));
+					$("#endrange").val(timeEnum(ui.values[1]));
+				}
 			}
 		});
 		<?php } else { ?>
 		$("#slider-range-min").slider({
 			range: "min",
-			value: <?php echo $change_value;?>,
-			min: 1,
+			value: <?php echo $endtimerange;?>,
+			min: 0,
 			max: 6,
 			step:1,
 			slide: function( event, ui ) {
-				$("#amount3").val(timeEnumforGuests(ui.value));
+				$("#endrange").val(timeEnumforGuests(ui.value));
 			}
 		});
-		$timerange = '<?php echo $globalOptions['change'];?>';
-		$("#amount3").val($timerange);
+		$timerange = '<?php echo $globalOptions['endrange'];?>';
+		$("#endrange").val($timerange);
 		<?php } ?>
 	});
 
@@ -614,12 +638,13 @@ global $db;
 	{
 		switch($timerange)
 		{
-			case 1: $timerange = "1 week"; break;
-			case 2: $timerange = "2 weeks"; break;
-			case 3: $timerange = "1 month"; break;
-			case 4: $timerange = "1 quarter"; break;
-			case 5: $timerange = "6 months"; break;
-			case 6: $timerange = "1 year"; break;
+			case 0: $timerange = "now"; break;
+			case 1: $timerange = "1 week ago"; break;
+			case 2: $timerange = "2 weeks ago"; break;
+			case 3: $timerange = "1 month ago"; break;
+			case 4: $timerange = "1 quarter ago"; break;
+			case 5: $timerange = "6 months ago"; break;
+			case 6: $timerange = "1 year ago"; break;
 		}
 		return $timerange;
 	}

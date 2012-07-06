@@ -9439,10 +9439,10 @@ class TrialTracker
 		else
 		{
 			echo '<label for="amount3">Highlight changes:</label>'
-					. '<input type="text" id="amount3" value="' . (($globalOptions['change'] == '3 months') ? '1 quarter' : $globalOptions['change']) 
+					. '<input type="hidden" id="startrange" name="sr" value="' . $globalOptions['startrange'] . '" />'
+					. '<input type="text" id="endrange" name="er" value="' . $globalOptions['endrange'] 
 					. '" readonly="readonly" style="border:0; color:#f6931f; font-weight:bold;" />'
-					. '<div id="slider-range-min"></div></p></div>'
-					. '<input type="hidden" id="change" name="change" value="' . $globalOptions['change'] . '" />';
+					. '<div id="slider-range-min"></div></p></div>';
 		}
 			
 		echo '<input type="checkbox" id="showonlyupdated" name="osu" ' 
@@ -9525,24 +9525,15 @@ class TrialTracker
 			$url .= 'id=' . $globalOptions['url'];
 		}
 		
-		if($loggedIn)
+		if(isset($globalOptions['startrange']))
 		{
-			if(isset($globalOptions['startrange']))
-			{
-				$url .= '&amp;sr=' . $globalOptions['startrange'];
-			}
-			if(isset($globalOptions['endrange']))
-			{
-				$url .= '&amp;er=' . $globalOptions['endrange'];
-			}
+			$url .= '&amp;sr=' . $globalOptions['startrange'];
 		}
-		else
+		if(isset($globalOptions['endrange']))
 		{
-			if(isset($globalOptions['change']))
-			{
-				$url .= '&amp;change=' . str_replace(' ', '+', $globalOptions['change']);
-			}
+			$url .= '&amp;er=' . $globalOptions['endrange'];
 		}
+		
 		if($globalOptions['version'] != 0)
 		{
 			$url .= '&amp;v=' . $globalOptions['version'];

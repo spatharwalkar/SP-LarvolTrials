@@ -650,6 +650,22 @@ function change_view()
 				 var ed_limit = new Date(ed_limit);
 				 break;
 	}
+	
+	/* If start limit is greater than end limit interchnage them */
+	if(st_limit < ed_limit)
+	{
+		var temp_limit = ed_limit;
+		ed_limit = st_limit;
+		st_limit = temp_limit;
+		
+		var temp_range = end_range;
+		end_range = start_range;
+		start_range = temp_range;
+		
+		var temp_range = bk_end_range;
+		bk_end_range = bk_start_range;
+		bk_start_range = temp_range;
+	}
 		
 	var i=1;
 	for(i=1;i<=limit;i++)
@@ -1032,15 +1048,24 @@ $(function()
 <?php } else { ?>
 //highlight changes slider
 		$("#slider-range-min").slider({	//Double Slider - For LoggedIN Users
-			range: true,
+			range: false,
 			min: 0,
 			max: 6,
 			step: 1,
 			values: [ 0, 3 ],
 			slide: function(event, ui) {
-				$("#startrange").val(timeEnum(ui.values[0]));
-				$("#endrange").val(timeEnum(ui.values[1]));
-				change_view();
+				if(ui.values[0] > ui.values[1])/// Switch highlight range when sliders cross each other
+				{
+					$("#startrange").val(timeEnum(ui.values[1]));
+					$("#endrange").val(timeEnum(ui.values[0]));
+					change_view();
+				}
+				else
+				{
+					$("#startrange").val(timeEnum(ui.values[0]));
+					$("#endrange").val(timeEnum(ui.values[1]));
+					change_view();
+				}
 			}
 		});
 <?php } ?>
