@@ -952,7 +952,7 @@ function change_view()
 				if(Status_List_Flg != 0)
 				{
 					var Status_List_ele = document.getElementById("Status_List_"+i);
-					if(bk_end_range == 'now' || bk_end_range == '1 week ago')
+					if(ed_limit >= one_month)
 					{
 						if(Status_List_ele != null && Status_List_ele != '')
 						{
