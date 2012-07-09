@@ -173,10 +173,12 @@
                         }
                         else
                         {
-/*                         	if($tables_home[$i] == 'rpt_ott_upm')
+                        	if($tables_home[$i] == 'rpt_ott_upm')
                         	{
-                        		pr($fields_home[2]);pr($fields_sync[2]);die;
-                        	} */
+                        		//pr($fields_home[2]);pr($fields_sync[2]);die;
+                        		//pr($fields_home);
+                        		//pr($fields_sync);die;
+                        	}
                         		$keys_home = $this->GetPrimaryKeys($fields_home_tmp);
 	                        	$k = $this->GetFieldIndex($fields_sync, $fields_home[$j]['name']);
 	                        	
@@ -200,7 +202,7 @@
 	                            	{
 	                            		pr($fields_sync[$k]);pr($fields_home[$j]);die;
 	                            	}	 */                            	
-		                            if (!$db_sync->ChangeTableField($tables_home[$i], $fields_home[$j]['name'], $fields_home[$j],$fields_sync[$k],0,$keys_home,$fieldNamesOrderHome,$fieldNamesOrderSync))
+		                            if (!$db_sync->ChangeTableField($tables_home[$i], $fields_home[$j]['name'], $fields_home[$j],$fields_sync[$k],0,$keys_home,$fieldNamesOrderHome,$fieldNamesOrderSync,$fields_home,$fields_sync))
 		                            {
 			                            $this->RaiseError("Could not change field <strong>{$fields_home[$j]['name']}</strong> on table <strong>{$tables_home[$i]}</strong> on database <strong>{$db_sync->database}</strong> at {$db_sync->user}@{$db_sync->host}: " . $db_sync->LastError());
 		                        	}

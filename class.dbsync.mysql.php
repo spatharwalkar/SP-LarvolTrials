@@ -100,6 +100,8 @@ require_once('include.util.php');
         	$foreignKeyAssoc = null;
         	$foreignKeyAssoc = $this->listForeignKeyAssociations($this->database,$table);
          	$result = mysql_query("SHOW COLUMNS FROM {$table}", $this->dbp);
+         	$keyDuplicateCountMemory = array();
+         	$keyDuplicateBefore = null;
             while ($row = mysql_fetch_row($result)) {
 	            $KeyName = null;
 	            $Non_unique = null;
@@ -107,10 +109,14 @@ require_once('include.util.php');
 	            $Cardinality = null;
 	            $Sub_part = null;
 	            $indexFlag = false;
+	            $multiColumnKeyNameTmp = array();
+	            $keyDuplicateCount = null;
 				foreach($indexArr as $index)
 				{
+					$multiColumnKeyNameTmp[] = $index['Key_name'];
 					if($row[0]==$index['Column_name'])
 					{
+						
 						$KeyName = $index['Key_name'];
 						$Non_unique = $index['Non_unique'];
 						$Seq_in_index = $index['Seq_in_index'];
@@ -120,6 +126,20 @@ require_once('include.util.php');
 						$indexFlag=true;
 					}
 				}
+				if($KeyName !='' && $KeyName!='PRIMARY')
+				{	
+					$multiColumnKeyNameTmp = array_count_values($multiColumnKeyNameTmp);
+					$keyDuplicateCount = $multiColumnKeyNameTmp[$KeyName];
+					if(in_array($multiColumnKeyNameTmp[$KeyName], $keyDuplicateCountMemory))
+					{
+						$keyDuplicateBefore = 1;
+					}					
+					$keyDuplicateCountMemory[] = $multiColumnKeyNameTmp[$KeyName];
+				}
+				else
+				{
+					$keyDuplicateCount = null;
+				} 
 				//add foreign key data if present for that field
 				foreach($foreignKeyAssoc as $foreignKey)
 				{
@@ -173,7 +193,9 @@ require_once('include.util.php');
 					'constraint_name' => $constraint_name,
 					'Engine' => $engine,
 					'Collation' => $collate,
-					'row_format' => $rowFormat
+					'row_format' => $rowFormat,
+					'key_duplicate_count' => $keyDuplicateCount	,
+					'key_duplicate_before' => $keyDuplicateBefore	
                 );
             }
             return $fields;
@@ -305,7 +327,7 @@ require_once('include.util.php');
          * @access	public
          * @return 	boolean	Success
          **/
-        function ChangeTableField($table, $field, $new_field,$old_field=array(),$foreignKeyCheck=0,$keys_home=array(),$fieldNamesOrderHome=array(),$fieldNamesOrderSync=array()) {
+        function ChangeTableField($table, $field, $new_field,$old_field=array(),$foreignKeyCheck=0,$keys_home=array(),$fieldNamesOrderHome=array(),$fieldNamesOrderSync=array(),$fields_home=array(),$fields_sync=array()) {
         	
         	switch($foreignKeyCheck)
         	{
@@ -318,12 +340,12 @@ require_once('include.util.php');
 	        	//pr($new_field);
 	        	//pr($old_field);
 	        	//die;
-	        	if($new_field['key']=='MUL' && $old_field['key']=='' && $new_field['Sub_part']!=$old_field['Sub_part'])
+	        	if($new_field['key']=='MUL' && $old_field['key']=='' && $new_field['Sub_part']!=$old_field['Sub_part'] && !$new_field['key_duplicate_before'] && !$new_field['key_duplicate_count'])
 	        	{
 	        		$special_mul_key = ', ADD KEY `'.$field.'` (`'.$field.'`('.$new_field['Sub_part'].'))';
 	        		$skipModify = 1;
 	        	}
-	        	if($new_field['key']=='MUL' && $old_field['key']=='MUL' && $new_field['Sub_part']!=$old_field['Sub_part'])
+	        	if($new_field['key']=='MUL' && $old_field['key']=='MUL' && $new_field['Sub_part']!=$old_field['Sub_part'] && !$new_field['key_duplicate_before'] && !$new_field['key_duplicate_count'])
 	        	{
 	        		$special_mul_key = ', DROP INDEX `'.$old_field['name'].'`, ADD KEY `'.$field.'` (`'.$field.'`('.$new_field['Sub_part'].'))';
 	        		$skipModify = 1;
@@ -333,21 +355,48 @@ require_once('include.util.php');
 	        		$special_mul_key = ', DROP INDEX `'.$old_field['name'].'` , ADD INDEX `'.$old_field['name'].'` ( `'.$old_field['name'].'` )';
 	        		$skipModify = 1;
 	        	}
-	        	if($new_field['key']=='MUL' && $old_field['key']=='' && $new_field['indexFlag']==1 && $old_field['indexFlag']=='')
+	        	if($new_field['key']=='MUL' && $old_field['key']=='' && $new_field['indexFlag']==1 && $old_field['indexFlag']=='' && !$new_field['key_duplicate_before'] && !$new_field['key_duplicate_count'])
 	        	{
 	        		$indexKey = ', ADD INDEX (`'.$field.'`) ';
 	        		$skipModify = 1;
 	        	}
 	        	if(($new_field['key']=='UNI' || $new_field['Non_unique'] == 0)  && $new_field['type']=='blob')
 	        	{
-	        		//need to remove old index before adding blob and also suggest blob index if any present
-	        		if($old_field['indexFlag']==1)
+	        		//if its a multi column key and already processed no need to worry about it again.
+	        		if(!$new_field['key_duplicate_before'])
 	        		{
-		        		$sql =  "ALTER table `{$table}` DROP INDEX {$old_field['key_primary']}";
-		        		echo $sql.';<br />';
+		        		//need to remove old index before adding blob and also suggest blob index if any present
+		        		if($old_field['indexFlag']==1)
+		        		{
+			        		$sql =  "ALTER table `{$table}` DROP INDEX {$old_field['key_primary']}";
+			        		echo $sql.';<br />';
+		        		}
+		        		if($new_field['key_duplicate_count'] > 1)
+		        		{
+		        			$keyPart = null;
+		        			$keyPartArr = null;
+		        			$new_fieldTmp = null;
+		        			$keyPart = '`'.$new_field['key_primary'].'` (';
+		        			foreach($fields_home as $new_fieldTmp)
+		        			{
+		        				if($new_fieldTmp['key_primary']==$new_field['key_primary'])
+		        				$keyPartArr[] = '`'.$new_fieldTmp['name'].'`('.$new_fieldTmp['Sub_part'].')';
+		        			}
+		        			$keyPart .= implode(',',$keyPartArr);
+		        			$keyPart .= ')';
+		        		}
+		        		else 
+		        		{
+		        			$keyPart = '`'.$field.'` (`'.$field.'`('.$new_field['Sub_part'].'))';
+		        		}
+		        		$special_uni_key = ', ADD UNIQUE '.$keyPart;
+		        		$skipModify = 1;
+	        		
 	        		}
-	        		$special_uni_key = ', ADD UNIQUE `'.$field.'` (`'.$field.'`('.$new_field['Sub_part'].'))';
-	        		$skipModify = 1;
+	        		else 
+	        		{
+	        			return true;
+	        		}
     		
 	        	}
 	        	//check primary key defintion needed or not
