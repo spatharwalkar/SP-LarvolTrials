@@ -304,6 +304,17 @@ $ignore_fields = array(
 					 
 					$number_pos = strpos($td->nodeValue,'EudraCT Number:');
 					$country_pos = strpos($td->nodeValue,'Country:');
+					//start date
+					$startdate = strpos($td->nodeValue,'Start Date');
+					
+					if($startdate === false) 
+					{
+
+					}
+					else 
+					{
+						$pageids[$eudra_number]['start_date']=substr(trim($td->nodeValue),-10);
+					}
 
 					if($number_pos === false) {
 
@@ -326,6 +337,7 @@ $ignore_fields = array(
 						}
 						 
 					}
+					
 					 
 				}
 			}
@@ -554,8 +566,7 @@ $ignore_fields = array(
 		return $country;
 	}
 
-	function ProcessNew($id, $countries) {
-
+	function ProcessNew($id, $countries,$startdate) {
 		global $parse_retry;
 		global $logger;
 		echo "<hr>Processing new Record " . $id . "<br/>";
@@ -580,7 +591,7 @@ $ignore_fields = array(
 
 		echo ("<br>......Storing in DB.....");
 
-		if (addRecord($study, "eudract") === false) {
+		if (addRecord($study, "eudract",$startdate) === false) {
 			echo('Import failed for this record.' . "\n<br />");
 		} else {
 			echo('Record imported.' . "\n<br />");

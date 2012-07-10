@@ -14,13 +14,13 @@ function scrape_history($id, $countries)
 	{
 		return 'No Eudract Number passed';
 	} 
-	
-		
+	$startdate=$countries['start_date'];
+	unset($countries['start_date']);
 	//$id = padnct($id);
 	//$unid = unpadnct($id);
 	echo('<br><b>' . date('Y-m-d H:i:s') .'</b> - Refreshing trial : ' . $id .   str_repeat("     ",300) . '<br>');
 		
-	ProcessNew($id, $countries);
+	ProcessNew($id, $countries,$startdate);
 	
 	echo('<br><b>' . date('Y-m-d H:i:s') .'</b> - Preindexing trial : ' . $id .   str_repeat("     ",300) );
 	tindex($id,'products');

@@ -773,7 +773,7 @@ $array1=array
 	}
 	
 	// Add or update a Eudract record from a SimpleXML object.
-	function addEudraCT($record)
+	function addEudraCT($record,$stdt)
 	{
 		global $db;
 		global $instMap;
@@ -831,7 +831,7 @@ $array1=array
 				echo $log;
 				exit;
 			}
-			$query = 'INSERT INTO data_trials SET `source_id`="' . $eud_id . '"' ;
+			$query = 'INSERT INTO data_trials SET `source_id`="' . $eud_id . '", `start_date`="' . $stdt . '" ' ;
 			if(!mysql_query($query))
 			{
 				$log='There seems to be a problem with the SQL  Query:'.$query.' Error:' . mysql_error();
@@ -841,7 +841,7 @@ $array1=array
 				exit;
 			}
 			$larvol_id = mysql_insert_id();
-			$query = 'INSERT INTO data_eudract SET `larvol_id`=' . $larvol_id . ',eudract_id="' . $eud_id .'"';
+			$query = 'INSERT INTO data_eudract SET `larvol_id`=' . $larvol_id . ',eudract_id="' . $eud_id .'" , `start_date`="' . $stdt . '" ';
 			if(!mysql_query($query))
 			{
 				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -899,7 +899,8 @@ $array1=array
 	    
 	    //modify data going to eudra also w.r.t dates
 	    $recordArray[firstreceived_date] = $firstreceived_date;
-	    $recordArray[start_date] = $start_date;
+	    //$recordArray[start_date] = $start_date;
+		$recordArray[start_date] = $stdt;
 	    $recordArray[end_date_global] = $end_date;
 		
 		/*************************************/
@@ -913,7 +914,8 @@ $array1=array
 	                    'detailed_description' => $detailed_descr,
 						'overall_status' => $overall_status,
 	                    'is_active' => $is_active_overall,
-	    				'start_date' => $start_date, 	
+						//'start_date' => $start_date, 	
+	    				'start_date' => $stdt, 	
 						'end_date' => $end_date,
 	                    'study_design' => $study_design,
 	                    'enrollment' => $enrollment,
@@ -940,7 +942,6 @@ $array1=array
 	'ages' => $ages,
 	'region' => $region,
 	'institution_type' => $ins_type);	
-		
 		
 		$end_date=normal('date',(string)$record_data->end_date);
 		
@@ -974,7 +975,7 @@ $array1=array
 
 //Adds a new record of any recognized type from a simpleXML object.
 //Autodetects the type if none is specified.
-function addRecord($in, $type='unspec')
+function addRecord($in, $type='unspec',$stdt=null)
 {
 	static $types = array('clinical_study' => 'nct', 'PubmedArticle' => 'pubmed', 'EudraCT' => 'EudraCT', 'isrctn' => 'isrctn');
 	$type = strtolower($type);
@@ -987,7 +988,7 @@ function addRecord($in, $type='unspec')
 		case 'pubmed':
 		return addPubmed($in);
 		case 'eudract':
-		return addEudraCT($in);
+		return addEudraCT($in,$stdt);
 		case 'isrctn':
 		return addisrctn($in);
 	}
@@ -1297,8 +1298,6 @@ else $ddesc=$rec->detailed_descr->textblock;
 	preg_match_all($phases_regex, $record_data['official_title'], $matches);
 	}
 
-	//	  pr($record_data);
-	//	pr($matches);
 
 	if(!count($matches[0]) >0 )
 	{
