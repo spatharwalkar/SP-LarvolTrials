@@ -57,7 +57,7 @@ class TrialTracker
 		$this->statusFilters = array('Not yet recruiting','Recruiting','Enrolling by invitation','Active, not recruiting','Available',
 									 'No longer recruiting','Withheld','Approved for marketing', 'Temporarily not available','No Longer Available',
 									 'Withdrawn','Terminated', 'Suspended','Completed');
-		$this->phaseFilters = array('N/A'=>'0', 'Phase 0'=>'0', 'Phase 0/Phase 1'=>'1', 'Phase 1'=>'1', 'Phase 1a'=>'1', 'Phase 1b'=>'1', 
+		$this->phaseFilters = array('N/A'=>'na', 'Phase 0'=>'0', 'Phase 0/Phase 1'=>'1', 'Phase 1'=>'1', 'Phase 1a'=>'1', 'Phase 1b'=>'1', 
 									'Phase 1a/1b'=>'1', 'Phase 1c'=>'1', 'Phase 1/Phase 2'=>'2', 'Phase 1b/2'=>'2', 'Phase 1b/2a'=>'2', 'Phase 2'=>'2', 
 									'Phase 2a'=>'2', 'Phase 2a/2b'=>'2', 'Phase 2a/b'=>'2', 'Phase 2b'=>'2', 'Phase 2/Phase 3'=>'3', 'Phase 2b/3'=>'3',
 									'Phase 3'=>'3', 'Phase 3a'=>'3', 'Phase 3b'=>'3', 'Phase 3/Phase 4'=>'4', 'Phase 3b/4'=>'4', 'Phase 4'=>'4');
@@ -432,19 +432,41 @@ class TrialTracker
 		{
 			$unMatchedUpms = array_merge($unMatchedUpms, $tvalue['naUpms']);
 			
-			$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $tvalue['sectionHeader']);
-			$objPHPExcel->getActiveSheet()->mergeCells('A' . $i . ':BA'. $i);
-			$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':BA'. $i)->applyFromArray(
-						array('fill' => array(
-										'type'       => PHPExcel_Style_Fill::FILL_SOLID,
-										'rotation'   => 0,
-										'startcolor' => array('rgb' => 'A2FF97'),
-										'endcolor'   => array('rgb' => 'A2FF97')),
-							  'borders' => array(
-										'inside' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => 'FF0000FF')),
-										'outline' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => 'FF0000FF'))),
-			));
-			$i++;
+			if($globalOptions['includeProductsWNoData'] == "off")
+			{
+				if(!empty($tvalue['naUpms']) || !empty($tvalue[$type]))
+				{
+					$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $tvalue['sectionHeader']);
+					$objPHPExcel->getActiveSheet()->mergeCells('A' . $i . ':BA'. $i);
+					$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':BA'. $i)->applyFromArray(
+								array('fill' => array(
+												'type'       => PHPExcel_Style_Fill::FILL_SOLID,
+												'rotation'   => 0,
+												'startcolor' => array('rgb' => 'A2FF97'),
+												'endcolor'   => array('rgb' => 'A2FF97')),
+									  'borders' => array(
+												'inside' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => 'FF0000FF')),
+												'outline' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => 'FF0000FF'))),
+					));
+					$i++;
+				}
+			}
+			else
+			{
+				$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $tvalue['sectionHeader']);
+				$objPHPExcel->getActiveSheet()->mergeCells('A' . $i . ':BA'. $i);
+				$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':BA'. $i)->applyFromArray(
+							array('fill' => array(
+											'type'       => PHPExcel_Style_Fill::FILL_SOLID,
+											'rotation'   => 0,
+											'startcolor' => array('rgb' => 'A2FF97'),
+											'endcolor'   => array('rgb' => 'A2FF97')),
+								  'borders' => array(
+											'inside' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => 'FF0000FF')),
+											'outline' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => 'FF0000FF'))),
+				));
+				$i++;
+			}
 			
 			foreach($tvalue[$type] as $dkey => $dvalue)
 			{
@@ -816,15 +838,31 @@ class TrialTracker
 			
 			if(empty($tvalue[$type]) && $globalOptions['onlyUpdates'] == "no")
 			{
-				$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, 'No trials found');
-				$objPHPExcel->getActiveSheet()->mergeCells('A' . $i . ':BA'. $i);
-				$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':BA'. $i)->applyFromArray(
-								array('borders' => array(
-											'inside' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => 'FF0000FF')),
-											'outline' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => 'FF0000FF'))),
-				));
-				$i++;
-				//$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
+				if($globalOptions['includeProductsWNoData'] == "off")
+				{
+					if(isset($tvalue['naUpms']) && !empty($tvalue['naUpms']))
+					{
+						$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, 'No trials found');
+						$objPHPExcel->getActiveSheet()->mergeCells('A' . $i . ':BA'. $i);
+						$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':BA'. $i)->applyFromArray(
+										array('borders' => array(
+													'inside' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => 'FF0000FF')),
+													'outline' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => 'FF0000FF'))),
+						));
+						$i++;
+					}
+				}
+				else
+				{
+					$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, 'No trials found');
+					$objPHPExcel->getActiveSheet()->mergeCells('A' . $i . ':BA'. $i);
+					$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':BA'. $i)->applyFromArray(
+									array('borders' => array(
+												'inside' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => 'FF0000FF')),
+												'outline' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => 'FF0000FF'))),
+					));
+					$i++;
+				}
 			}
 		}
 		
@@ -7401,7 +7439,7 @@ class TrialTracker
 		
 		$where = '';
 		$orderBy = " dt.`phase` DESC, dt.`end_date` ASC, dt.`start_date` ASC, dt.`overall_status` ASC, dt.`enrollment` ASC ";
-		$phaseFilters = array('N/A'=>'0', '0'=>'0', '0/1'=>'1', '1'=>'1', '1a'=>'1', '1b'=>'1', '1a/1b'=>'1', '1c'=>'1', 
+		$phaseFilters = array('N/A'=>'na', '0'=>'0', '0/1'=>'1', '1'=>'1', '1a'=>'1', '1b'=>'1', '1a/1b'=>'1', '1c'=>'1', 
 									'1/2'=>'2', '1b/2'=>'2', '1b/2a'=>'2', '2'=>'2', '2a'=>'2', '2a/2b'=>'2', '2a/b'=>'2', '2b'=>'2', 
 									'2/3'=>'3', '2b/3'=>'3','3'=>'3', '3a'=>'3', '3b'=>'3', '3/4'=>'4', '3b/4'=>'4', '4'=>'4');
 		
@@ -7561,7 +7599,7 @@ class TrialTracker
 					
 				//echo '<br/>fullRecordQry-->'.
 				$fullRecordQry = $query . " ORDER BY " . $orderBy;	
-				//echo '<br/>query-->'.
+				//echo '<br/><br/><br/>query-->'.
 				$query .= $where . " ORDER BY " . $orderBy;
 			}
 			
@@ -9441,24 +9479,27 @@ class TrialTracker
 				. (in_array(4, $globalOptions['region']) ? ' checked="checked" ' : '') . '/>'
 				. '<label for="region_4">RoW</label>'
 				. '</td><td class="bottom">'
+				. '<input type="checkbox" value="na" id="phase_na" class="phase" '
+				. (in_array('na', $globalOptions['phase']) ? ' checked="checked" ' : '') . '/>'
+				. '<label for="phase_na">N/A</label><br />'
 				. '<input type="checkbox" value="0" id="phase_0" class="phase" '
-				. (in_array(0, $globalOptions['phase']) ? ' checked="checked" ' : '') . '/>'
+				. (in_array('0', $globalOptions['phase']) ? ' checked="checked" ' : '') . '/>'
 				. '<label for="phase_0">0</label><br />'
 				. '<input type="checkbox" value="1" id="phase_1" class="phase" '
-				. (in_array(1, $globalOptions['phase']) ? ' checked="checked" ' : '') . '/>'
+				. (in_array('1', $globalOptions['phase']) ? ' checked="checked" ' : '') . '/>'
 				. '<label for="phase_1">1</label><br />'
 				. '<input type="checkbox" value="2" id="phase_2" class="phase" '
-				. (in_array(2, $globalOptions['phase']) ? ' checked="checked" ' : '') . '/>'
+				. (in_array('2', $globalOptions['phase']) ? ' checked="checked" ' : '') . '/>'
 				. '<label for="phase_2">2</label><br />'
 				. '<input type="checkbox" value="3" id="phase_3" class="phase" '
-				. (in_array(3, $globalOptions['phase']) ? ' checked="checked" ' : '') . '/>'
+				. (in_array('3', $globalOptions['phase']) ? ' checked="checked" ' : '') . '/>'
 				. '<label for="phase_3">3</label><br />'
 				. '<input type="checkbox" value="4" id="phase_4" class="phase" '
-				. (in_array(4, $globalOptions['phase']) ? ' checked="checked" ' : '') . '/>'
+				. (in_array('4', $globalOptions['phase']) ? ' checked="checked" ' : '') . '/>'
 				. '<label for="phase_4">4</label>'
 				. '</td><td class="right bottom">'
 				. '<div class="demo"><p>';
-				
+		
 		if($loggedIn) 
 		{
 			echo '<label for="startrange" style="float:left;">Highlight changes:</label>'
@@ -11816,7 +11857,7 @@ class TrialTracker
 					$titleLinkColor = 'style="color:#FF0000;"';
 					$title = ' title = "New record" ';
 				}
-				$outputStr .= '<td colspan="5" class="' .  $attr . '" ' . $title . '><span>';
+				$outputStr .= '<td colspan="5" class="' .  $attr . '" ' . $title . '><div class="rowcollapse">';
 				if($value['event_link'] !== NULL && $value['event_link'] != '') 
 				{
 					$outputStr .= '<a ' . $titleLinkColor . ' href="' . $value['event_link'] . '" target="_blank">' . $value['event_description'] . '</a>';
@@ -11825,7 +11866,7 @@ class TrialTracker
 				{
 					$outputStr .= $value['event_description'];
 				}
-				$outputStr .= '</span></td>';
+				$outputStr .= '</div></td>';
 				
 				
 				//field upm status
@@ -11834,7 +11875,7 @@ class TrialTracker
 				{
 					$title = ' title = "New record" ';
 				}
-				$outputStr .= '<td ' . $title . '><span>' . $value['status'] . '</span></td>';
+				$outputStr .= '<td ' . $title . '><div class="rowcollapse">' . $value['status'] . '</div></td>';
 
 			
 				//field upm event type
@@ -11856,7 +11897,7 @@ class TrialTracker
 				{
 					$title = ' title = "New record" ';
 				}
-				$outputStr .= '<td class="' . $attr . '" ' . $title . '>' . '<span>' . $value['event_type'] . ' Milestone</span></td>';
+				$outputStr .= '<td class="' . $attr . '" ' . $title . '><div class="rowcollapse">' . $value['event_type'] . ' Milestone</div></td>';
 				
 				
 				//field upm end date
@@ -11907,7 +11948,7 @@ class TrialTracker
 				
 				
 				//field upm result 
-				$outputStr .= '<td style="text-align:center;vertical-align:middle;"><div class="rowcollapse">';
+				$outputStr .= '<td style="text-align:center;vertical-align:middle;">';
 				if($value['result_link'] != '' && $value['result_link'] !== NULL)
 				{
 					if((!empty($value['edited']) && $value['edited']['field'] == 'result_link') || ($value['new'] == 'y')) 
@@ -11942,12 +11983,13 @@ class TrialTracker
 					{
 						$outputStr .= '<img src="images/hourglass.png" alt="Hourglass"  border="0" />';
 					}
+					$outputStr .= '</div>';
 				}
 				else
 				{
 					$outputStr .= '&nbsp;';
 				}
-				$outputStr .= '</div></td>';		
+				$outputStr .= '</td>';		
 				
 				
 				//upm gnatt chart
