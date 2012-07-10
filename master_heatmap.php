@@ -144,7 +144,9 @@ function  recalc_values($aval,$pval) // recalculate values
 	$parameters=array();
 	$parameters['area']=$aval;
 	$parameters['product']=$pval;
-	calc_cells($parameters);
+	// recalculate only if both area and product are supplied.
+	if( isset($parameters['area']) and isset($parameters['product']) )
+		calc_cells($parameters);
 	return true;
 }
 
