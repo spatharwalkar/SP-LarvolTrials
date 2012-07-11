@@ -215,7 +215,7 @@ class TrialTracker
 			}
 			else if((count($resultIds['product']) >= 1 && count($resultIds['area']) == 1 && ($resultIds['area'][0] == NULL || trim($resultIds['area'][0]) == "")) || (count($resultIds['area']) >= 1 && count($resultIds['product']) == 1 && ($resultIds['product'][0] == NULL || trim($resultIds['product'][0]) == ""))) //Condition For Only Product OR When Only Area is Given
 			{
-				if(count($resultIds['product']) >= 1 && count($resultIds['area']) == 1 && ($resultIds['area'][0] == NULL || $resultIds['area'] == ''))
+				if(count($resultIds['product']) >= 1 && count($resultIds['area']) == 1 && $resultIds['area'][0] == NULL && trim($resultIds['area'][0]) == '' && $resultIds['product'][0] != NULL && trim($resultIds['product'][0]) != '')
 				{
 					foreach($resultIds['product'] as $pkey => $pvalue)
 					{
@@ -275,10 +275,18 @@ class TrialTracker
 							{
 								while($row = mysql_fetch_assoc($res))
 								{
-									$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : "Area ".$row['id'];
+									if($row['id'] != '' && $row['id'] != NULL && $avalue != '' && $avalue != NULL)
+									{
+										$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : "Area ".$row['id'];
+										$Ids[$akey]['area'] = $row['id'];
+									}
+									else /// For case we dont have product names, area names
+									{
+										$TrialsInfo[$akey]['sectionHeader'] = '';
+										$Ids[$akey]['area'] = '';
+									}
 									
 									$Ids[$akey]['product'] = '';
-									$Ids[$akey]['area'] = $row['id'];
 								}
 							}
 						}
@@ -4921,7 +4929,7 @@ class TrialTracker
 			}
 			else if((count($resultIds['product']) >= 1 && count($resultIds['area']) == 1 && ($resultIds['area'][0] == NULL || trim($resultIds['area'][0]) == "")) || (count($resultIds['area']) >= 1 && count($resultIds['product']) == 1 && ($resultIds['product'][0] == NULL || trim($resultIds['product'][0]) == ""))) //Condition For Only Product OR When Only Area is Given
 			{
-				if(count($resultIds['product']) >= 1 && count($resultIds['area']) == 1 && ($resultIds['area'][0] == NULL || $resultIds['area'] == ''))
+				if(count($resultIds['product']) >= 1 && count($resultIds['area']) == 1 && $resultIds['area'][0] == NULL && trim($resultIds['area'][0]) == '' && $resultIds['product'][0] != NULL && trim($resultIds['product'][0]) != '')
 				{
 					foreach($resultIds['product'] as $pkey => $pvalue)
 					{
@@ -4982,10 +4990,18 @@ class TrialTracker
 							{
 								while($row = mysql_fetch_assoc($res))
 								{
-									$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : "Area ".$row['id'];
-								
+									if($row['id'] != '' && $row['id'] != NULL && $avalue != '' && $avalue != NULL)
+									{
+										$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : "Area ".$row['id'];
+										$Ids[$akey]['area'] = $row['id'];
+									}
+									else /// For case we dont have product names, area names
+									{
+										$TrialsInfo[$akey]['sectionHeader'] = '';
+										$Ids[$akey]['area'] = '';
+									}
+									
 									$Ids[$akey]['product'] = '';
-									$Ids[$akey]['area'] = $row['id'];
 								}
 							}
 						}
@@ -5879,7 +5895,7 @@ class TrialTracker
 			}
 			else if((count($resultIds['product']) >= 1 && count($resultIds['area']) == 1 && ($resultIds['area'][0] == NULL || trim($resultIds['area'][0]) == "")) || (count($resultIds['area']) >= 1 && count($resultIds['product']) == 1 && ($resultIds['product'][0] == NULL || trim($resultIds['product'][0]) == ""))) //Condition For Only Product OR When Only Area is Given
 			{
-				if(count($resultIds['product']) >= 1 && count($resultIds['area']) == 1 && ($resultIds['area'][0] == NULL || $resultIds['area'] == ''))
+				if(count($resultIds['product']) >= 1 && count($resultIds['area']) == 1 && $resultIds['area'][0] == NULL && trim($resultIds['area'][0]) == '' && $resultIds['product'][0] != NULL && trim($resultIds['product'][0]) != '')
 				{
 					foreach($resultIds['product'] as $pkey => $pvalue)
 					{
