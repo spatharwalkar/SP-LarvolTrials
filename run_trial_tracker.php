@@ -185,14 +185,13 @@ class TrialTracker
 		{	
 			$Ids = array();
 			$TrialsInfo = array();
-			$disContinuedTxt = '';
 			
 			if(count($resultIds['product']) > 1 && count($resultIds['area']) > 1)
 			{
 				foreach($resultIds['product'] as $pkey => $pvalue)
 				{
 					$prow = $this->getProductId(array($pvalue));
-					
+					$disContinuedTxt = '';
 					if($prow['discontinuation_status'] !== NULL && $prow['discontinuation_status'] != 'Active')
 					{
 						$TrialsInfo[$pkey]['sectionHeader'] = $prow['name'];
@@ -221,7 +220,7 @@ class TrialTracker
 					foreach($resultIds['product'] as $pkey => $pvalue)
 					{
 						$prow = $this->getProductId(array($pvalue));
-						
+						$disContinuedTxt = '';
 						if($prow['discontinuation_status'] !== NULL && $prow['discontinuation_status'] != 'Active')
 						{
 							$TrialsInfo[$pkey]['sectionHeader'] = $prow['name'];
@@ -333,7 +332,7 @@ class TrialTracker
 					foreach($resultIds['product'] as $pkey => $pvalue)
 					{
 						$prow = $this->getProductId(array($pvalue));
-						
+						$disContinuedTxt = '';
 						if($prow['discontinuation_status'] !== NULL && $prow['discontinuation_status'] != 'Active')
 						{
 							$TrialsInfo[$pkey]['sectionHeader'] = $prow['name'];
@@ -359,7 +358,7 @@ class TrialTracker
 			else
 			{
 				$prow = $this->getProductId($resultIds['product']);
-				
+				$disContinuedTxt = '';
 				if($prow['discontinuation_status'] !== NULL && $prow['discontinuation_status'] != 'Active')
 				{
 					$TrialsInfo[0]['sectionHeader'] = $prow['name'];
@@ -4893,14 +4892,13 @@ class TrialTracker
 		{	
 			$Ids = array();
 			$TrialsInfo = array();
-			$disContinuedTxt = '';
 			
 			if(count($resultIds['product']) > 1 && count($resultIds['area']) > 1)
 			{
 				foreach($resultIds['product'] as $pkey => $pvalue)
 				{	
 					$prow = $this->getProductId(array($pvalue));
-					
+					$disContinuedTxt = '';
 					if($prow['discontinuation_status'] !== NULL && $prow['discontinuation_status'] != 'Active')
 					{
 						$TrialsInfo[$pkey]['sectionHeader'] = "<span style='color:gray'>" . $prow['name'] . "</span>";
@@ -4928,7 +4926,7 @@ class TrialTracker
 					foreach($resultIds['product'] as $pkey => $pvalue)
 					{
 						$prow = $this->getProductId(array($pvalue));
-
+						$disContinuedTxt = '';
 						if($prow['discontinuation_status'] !== NULL && $prow['discontinuation_status'] != 'Active')
 						{
 							$TrialsInfo[$pkey]['sectionHeader'] = "<span style='color:gray'>" . $prow['name'] . "</span>";
@@ -5042,7 +5040,7 @@ class TrialTracker
 					foreach($resultIds['product'] as $pkey => $pvalue)
 					{	
 						$prow = $this->getProductId(array($pvalue));
-						
+						$disContinuedTxt = '';
 						if($prow['discontinuation_status'] !== NULL && $prow['discontinuation_status'] != 'Active')
 						{
 							$TrialsInfo[$pkey]['sectionHeader'] = "<span style='color:gray'>" . $prow['name'] . "</span>";
@@ -6173,6 +6171,7 @@ class TrialTracker
 				
 				foreach($resultIds['product'] as $pkey => $pvalue)
 				{
+					$disContinuedTxt = '';
 					$res = mysql_query("SELECT `name`, `id`, `company`, `discontinuation_status`, `discontinuation_status_comment` FROM `products` WHERE id = '" . $pvalue . "' OR LI_id = '" . $pvalue . "' ");
 					if(mysql_num_rows($res) > 0)
 					{
@@ -6216,6 +6215,7 @@ class TrialTracker
 					
 					foreach($resultIds['product'] as $pkey => $pvalue)
 					{
+						$disContinuedTxt = '';
 						$res = mysql_query("SELECT `name`, `id`, `company`, `discontinuation_status`, `discontinuation_status_comment` FROM `products` WHERE id = '" . $pvalue . "' OR LI_id = '" . $pvalue . "' ");
 						if(mysql_num_rows($res) > 0)
 						{
@@ -6408,6 +6408,7 @@ class TrialTracker
 					
 					foreach($resultIds['product'] as $pkey => $pvalue)
 					{
+						$disContinuedTxt = '';
 						$res = mysql_query("SELECT `name`, `id`, `company`, `discontinuation_status`, `discontinuation_status_comment` FROM `products` WHERE id = '" . $pvalue . "' OR LI_id = '" . $pvalue . "' ");
 						if(mysql_num_rows($res) > 0)
 						{
@@ -6447,7 +6448,6 @@ class TrialTracker
 			{	
 				if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve display name from heatmap report
 				{
-
 					$res = mysql_query("SELECT `display_name`, `type_id` FROM `rpt_masterhm_headers` WHERE `type_id` IN ('" . implode("','", $resultIds['area']) . "') AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'area'");
 					if(mysql_num_rows($res) > 0)
 					{
@@ -6477,6 +6477,7 @@ class TrialTracker
 				}
 				$this->displayHeader($t);
 				
+				$disContinuedTxt = '';
 				$res = mysql_query("SELECT `name`, `id`, `company`, `discontinuation_status`, `discontinuation_status_comment` FROM `products` WHERE id IN ('" . implode(',', $resultIds['product']) 
 						. "') OR LI_id IN ('" . implode(',', $resultIds['product']) . "') ");
 				$row = mysql_fetch_assoc($res);
