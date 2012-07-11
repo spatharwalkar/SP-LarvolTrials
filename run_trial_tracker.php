@@ -185,6 +185,7 @@ class TrialTracker
 		{	
 			$Ids = array();
 			$TrialsInfo = array();
+			$disContinuedTxt = '';
 			
 			if(count($resultIds['product']) > 1 && count($resultIds['area']) > 1)
 			{
@@ -196,6 +197,7 @@ class TrialTracker
 					{
 						$TrialsInfo[$pkey]['sectionHeader'] = $prow['name'];
 						$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($prow['discontinuation_status_comment']);
+						$disContinuedTxt = ' Discontinued';
 					}
 					else
 					{
@@ -205,6 +207,7 @@ class TrialTracker
 					if($prow['company'] !== NULL && $prow['company'] != '')
 						$TrialsInfo[$pkey]['sectionHeader'] .= " / (" . $prow['company'] . ")";
 					
+					$TrialsInfo[$pkey]['sectionHeader'] .= $disContinuedTxt;
 					$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
 							
 					$Ids[$pkey]['product'] = $prow['id'];
@@ -223,6 +226,7 @@ class TrialTracker
 						{
 							$TrialsInfo[$pkey]['sectionHeader'] = $prow['name'];
 							$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($prow['discontinuation_status_comment']);	
+							$disContinuedTxt = ' Discontinued';
 						}
 						else
 						{
@@ -232,6 +236,7 @@ class TrialTracker
 						if($prow['company'] !== NULL && $prow['company'] != '')
 							$TrialsInfo[$pkey]['sectionHeader'] .= " / (" . $prow['company'] . ")";
 
+						$TrialsInfo[$pkey]['sectionHeader'] .= $disContinuedTxt;
 						$TrialsInfo[$pkey]['naUpms'] = 
 						$this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
 						
@@ -333,6 +338,7 @@ class TrialTracker
 						{
 							$TrialsInfo[$pkey]['sectionHeader'] = $prow['name'];
 							$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($prow['discontinuation_status_comment']);
+							$disContinuedTxt = ' Discontinued';
 						}
 						else
 						{
@@ -342,6 +348,7 @@ class TrialTracker
 						if($prow['company'] !== NULL && $prow['company'] != '')
 							$TrialsInfo[$pkey]['sectionHeader'] .= " / (" . $prow['company'] . ")";
 						
+						$TrialsInfo[$pkey]['sectionHeader'] .= $disContinuedTxt;
 						$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
 								
 						$Ids[$pkey]['product'] = $prow['id'];
@@ -357,6 +364,7 @@ class TrialTracker
 				{
 					$TrialsInfo[0]['sectionHeader'] = $prow['name'];
 					$TrialsInfo[0]['dStatusComment'] = strip_tags($prow['discontinuation_status_comment']);	
+					$disContinuedTxt = ' Discontinued';
 				}
 				else
 				{
@@ -365,7 +373,8 @@ class TrialTracker
 				
 				if($prow['company'] !== NULL && $prow['company'] != '')
 					$TrialsInfo[0]['sectionHeader'] .= " / (" . $prow['company'] . ")";
-					
+				
+				$TrialsInfo[0]['sectionHeader'] .= $disContinuedTxt;	
 				$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
 				
 				$Ids[0]['product'] = $prow['id'];
@@ -625,6 +634,8 @@ class TrialTracker
 				$dvalue["NCT/collaborator"] = fix_special_chars($dvalue["NCT/collaborator"]);
 				
 				$objPHPExcel->getActiveSheet()->setCellValue('F' . $i, $dvalue["NCT/lead_sponsor"] . $dvalue["NCT/collaborator"]);
+
+
 				
 				if(!empty($dvalue['edited']) && (array_key_exists('NCT/lead_sponsor', $dvalue['edited']) || array_key_exists('NCT/collaborator', $dvalue['edited'])))
 				{
@@ -3014,6 +3025,7 @@ class TrialTracker
 				{
 					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
 					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+
 				}
 				$from = $to;
 				$from++;
@@ -4881,6 +4893,7 @@ class TrialTracker
 		{	
 			$Ids = array();
 			$TrialsInfo = array();
+			$disContinuedTxt = '';
 			
 			if(count($resultIds['product']) > 1 && count($resultIds['area']) > 1)
 			{
@@ -4892,6 +4905,7 @@ class TrialTracker
 					{
 						$TrialsInfo[$pkey]['sectionHeader'] = "<span style='color:gray'>" . $prow['name'] . "</span>";
 						$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($prow['discontinuation_status_comment']);
+						$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
 					}
 					else
 					{
@@ -4900,6 +4914,7 @@ class TrialTracker
 					if($prow['company'] !== NULL && $prow['company'] != '')
 						$TrialsInfo[$pkey]['sectionHeader'] .= " / (" . $prow['company'] . ")";
 					
+					$TrialsInfo[$pkey]['sectionHeader'] .= $disContinuedTxt;
 					$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
 							
 					$Ids[$pkey]['product'] = $prow['id'];
@@ -4918,6 +4933,7 @@ class TrialTracker
 						{
 							$TrialsInfo[$pkey]['sectionHeader'] = "<span style='color:gray'>" . $prow['name'] . "</span>";
 							$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($prow['discontinuation_status_comment']);	
+							$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
 						}
 						else
 						{
@@ -4926,6 +4942,8 @@ class TrialTracker
 						
 						if($prow['company'] !== NULL && $prow['company'] != '')
 							$TrialsInfo[$pkey]['sectionHeader'] .= " / (" . $prow['company'] . ")";
+						
+						$TrialsInfo[$pkey]['sectionHeader'] .= $disContinuedTxt;
 								
 						$TrialsInfo[$pkey]['naUpms'] = 
 						$this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
@@ -5028,7 +5046,8 @@ class TrialTracker
 						if($prow['discontinuation_status'] !== NULL && $prow['discontinuation_status'] != 'Active')
 						{
 							$TrialsInfo[$pkey]['sectionHeader'] = "<span style='color:gray'>" . $prow['name'] . "</span>";
-							$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($prow['discontinuation_status_comment']);			
+							$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($prow['discontinuation_status_comment']);		
+							$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";	
 						}
 						else
 						{
@@ -5038,6 +5057,7 @@ class TrialTracker
 						if($prow['company'] !== NULL && $prow['company'] != '')
 							$TrialsInfo[$pkey]['sectionHeader'] .= " / (" . $prow['company'] . ")";
 						
+						$TrialsInfo[$pkey]['sectionHeader'] .= $disContinuedTxt;
 						$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
 						
 						$Ids[$pkey]['product'] = $prow['id'];
@@ -6113,6 +6133,7 @@ class TrialTracker
 		{	
 			$TrialsInfo = array();
 			$Ids = array();
+			$disContinuedTxt = '';
 			
 			if(strpos($globalOptions['startrange'], 'ago') !== FALSE)
 			{
@@ -6161,6 +6182,7 @@ class TrialTracker
 							{
 								$TrialsInfo[$pkey]['sectionHeader'] = "<span style='color:gray'>" . $row['name'] . "</span>";
 								$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($row['discontinuation_status_comment']);
+								$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
 							}
 							else
 							{
@@ -6175,6 +6197,7 @@ class TrialTracker
 								$productSelector[$pkey] .= " / <i>" . $row['company'] . "</i>";
 							}
 							
+							$TrialsInfo[$pkey]['sectionHeader'] .= $disContinuedTxt;
 							$TrialsInfo[$pkey]['naUpms'] = 
 							$this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
 							
@@ -6202,6 +6225,7 @@ class TrialTracker
 								{
 									$TrialsInfo[$pkey]['sectionHeader'] = "<span style='color:gray'>" . $row['name'] . "</span>";
 									$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($row['discontinuation_status_comment']);
+									$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
 								}
 								else
 								{
@@ -6216,6 +6240,7 @@ class TrialTracker
 									$productSelector[$pkey] .= " / <i>" . $row['company'] . "</i>";
 								}
 				
+								$TrialsInfo[$pkey]['sectionHeader'] .= $disContinuedTxt;
 								$TrialsInfo[$pkey]['naUpms'] = 
 								$this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
 								
@@ -6392,6 +6417,7 @@ class TrialTracker
 								{
 									$TrialsInfo[$pkey]['sectionHeader'] = "<span style='color:gray'>" . $row['name'] . "</span>";
 									$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($row['discontinuation_status_comment']);
+									$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
 								}
 								else
 								{
@@ -6406,6 +6432,7 @@ class TrialTracker
 									$productSelector[$pkey] .= " / <i>" . $row['company'] . "</i>";
 								}
 								
+								$TrialsInfo[$pkey]['sectionHeader'] .= $disContinuedTxt;
 								$TrialsInfo[$pkey]['naUpms'] = 
 								$this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
 									
@@ -6459,7 +6486,8 @@ class TrialTracker
 				if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
 				{
 					$TrialsInfo[0]['sectionHeader'] = "<span style='color:gray'>" . $row['name'] . "</span>";
-					$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($row['discontinuation_status_comment']);
+					$TrialsInfo[0]['dStatusComment'] = strip_tags($row['discontinuation_status_comment']);
+					$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
 				}
 				else
 				{
@@ -6473,7 +6501,8 @@ class TrialTracker
 					$TrialsInfo[0]['sectionHeader'] .= " / <i>" . $row['company'] . "</i>";
 					$productSelector[0] .= " / <i>" . $row['company'] . "</i>"; 
 				}
-						
+				
+				$TrialsInfo[0]['sectionHeader'] .= $disContinuedTxt;		
 				$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
 				
 				if(!empty($TrialsInfo[0]['naUpms']))
@@ -8168,6 +8197,7 @@ class TrialTracker
 					}
 				}
 				++$indx;
+
 			}
 			
 			
@@ -8504,6 +8534,7 @@ class TrialTracker
 							}
 							else
 							{
+
 								if($result[$index]['NCT/enrollment'] < $enroll[0] || $result[$index]['NCT/enrollment'] > $enroll[1])
 								{	
 									foreach($Values['Trials'][$ikey]['allTrials'] as $k => $v)
@@ -9424,6 +9455,7 @@ class TrialTracker
 				 . '<input type="checkbox" class="status" value="8" ' 
 				 . (in_array('8', $globalOptions['status']) ? 'checked = "checked" ' : '') . '/>Temporarily not available<br/>'
 				 . '<input type="checkbox" class="status" value="9" ' 
+
 				 . (in_array('9', $globalOptions['status']) ? 'checked = "checked" ' : '') . '/>No longer available<br/>'
 				 . '<input type="checkbox" class="status" value="10" ' 
 				 . (in_array('10', $globalOptions['status']) ? 'checked = "checked" ' : '') . '/>Withdrawn<br/>'
