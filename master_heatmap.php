@@ -1834,7 +1834,7 @@ function Download_reports()
 					}
 				}
 				
-				if(trim($data_matrix[$row][$col]['filing']) != '' && $data_matrix[$row][$col]['filing'] == NULL)
+				if(trim($data_matrix[$row][$col]['filing']) != '' && $data_matrix[$row][$col]['filing'] != NULL)
 				$Width = $Width + 3.1 + 2.5;
 				
 				if($Width_matrix[$col]['width'] < ($Width+2) || $Width_matrix[$col]['width'] == '' || $Width_matrix[$col]['width'] == 0)
@@ -2867,7 +2867,7 @@ function Download_reports()
 					if($Status_List_Flg_2==1)
 					$annotation_text2 .= $Status_List_2;
 					
-					if(($Status_List_Flg_1==1 || $Status_List_Flg_2==1) && (date('Y-m-d H:i:s', strtotime($end_range, $now)) >= date('Y-m-d H:i:s', strtotime('-1 Month', $now))))
+					if(($Status_List_Flg_1==1 || $Status_List_Flg_2==1) && (date('Y-m-d H:i:s', strtotime($end_range, $now)) == date('Y-m-d H:i:s', strtotime('-1 Month', $now))))
 					$annotation_text = $annotation_text.$annotation_text2;
 					
 					$annotation_text = strip_tags($annotation_text);	///Strip HTML tags
@@ -3363,7 +3363,7 @@ function Download_reports()
 					if($Status_List_Flg_2==1)
 					$annotation_text2 .= $Status_List_2;
 					
-					if(($Status_List_Flg_1==1 || $Status_List_Flg_2==1) && (date('Y-m-d H:i:s', strtotime($end_range, $now)) >= date('Y-m-d H:i:s', strtotime('-1 Month', $now))))
+					if(($Status_List_Flg_1==1 || $Status_List_Flg_2==1) && (date('Y-m-d H:i:s', strtotime($end_range, $now)) == date('Y-m-d H:i:s', strtotime('-1 Month', $now))))
 					$annotation_text = $annotation_text.$annotation_text2;
 					
 					$annotation_text = strip_tags($annotation_text);	///Strip HTML tags
