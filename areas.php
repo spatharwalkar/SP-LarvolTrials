@@ -61,10 +61,10 @@ $deleteFlag = null;
 //Header controller
 $_GET['header']='<script type="text/javascript" src="progressbar/jquery.progressbar.js"></script>
 <link href="css/status.css" rel="stylesheet" type="text/css" media="all" />'."\n";
-if(is_numeric($_GET['id']))
+if(is_numeric($_REQUEST['id']))
 {
 	//get product status & progress bar controller
-	$areaStatus = getPreindexProgress('AREA2',$_GET['id']);
+	$areaStatus = getPreindexProgress('AREA2',$_REQUEST['id']);
 	if($areaStatus['update_items_start_time']!="0000-00-00 00:00:00"&&$areaStatus['update_items_complete_time']!="0000-00-00 00:00:00"&&$areaStatus['status']==COMPLETED)
 	$areaPreindexProgress=100;
 	else
@@ -140,16 +140,16 @@ $(document).ready(function(){
 //Start controller area
 //Start controller area
 //save operation controller
-if($_GET['save']=='Save')
+if($_REQUEST['save']=='Save')
 {
-	$searchDataOld = $_GET['id']?getSearchData('areas', 'searchdata', $_GET['id']):null;
-	$saveStatus = saveData($_GET,$table);
+	$searchDataOld = $_REQUEST['id']?getSearchData('areas', 'searchdata', $_REQUEST['id']):null;
+	$saveStatus = saveData($_REQUEST,$table);
 }
 
 //delete controller
-if(isset($_GET['deleteId']) && is_numeric($_GET['deleteId']) && $deleteFlag)
+if(isset($_REQUEST['deleteId']) && is_numeric($_REQUEST['deleteId']) && $deleteFlag)
 {
-	deleteData($_GET['deleteId'],$table);
+	deleteData($_REQUEST['deleteId'],$table);
 	$pattern = '/(\\?)(deleteId).*?(\\d+)/is';
 	$_SERVER['REQUEST_URI'] =  preg_replace($pattern, '', $_SERVER['REQUEST_URI']);
 	$_SERVER['REQUEST_URI'] = str_replace($script.'.php&', $script.'.php?', $_SERVER['REQUEST_URI']);
@@ -170,7 +170,7 @@ pagePagination($limit,$totalCount,$table,$script,$ignoreFields,array('import'=>f
 echo '<br/>';
 echo '<div class="clr">';
 //add edit form.
-if($_REQUEST['add_new_record']=='Add New Record' || $_REQUEST['id'] && !$_GET['save'] || $saveStatus===0)
+if($_REQUEST['add_new_record']=='Add New Record' || $_REQUEST['id'] && !$_REQUEST['save'] || $saveStatus===0)
 {
 	$id = ($_REQUEST['id'])?$_REQUEST['id']:null;
 	echo '<div>';
@@ -309,14 +309,14 @@ $(document).ready(function () {
   </script>
 <?php 
 //preindex after successful save and change of search data as a seperate worker thread
-if($saveStatus == 1 && $searchDataOld != $_GET['searchdata'])
+if($saveStatus == 1 && $searchDataOld != $_REQUEST['searchdata'])
 {
-	echo input_tag(array('Type'=>'iframe','Field'=>urlPath().'index_area.php?id='.$_GET['id'].'&connection_close=1'),null,array('style'=>"display:none"));
+	echo input_tag(array('Type'=>'iframe','Field'=>urlPath().'index_area.php?id='.$_REQUEST['id'].'&connection_close=1'),null,array('style'=>"display:none"));
 }
 //add predindex for full delete through a seperate worker thread
-if(isset($_GET['delsearch']) && is_array($_GET['delsearch']))
+if(isset($_REQUEST['delsearch']) && is_array($_REQUEST['delsearch']))
 {
-	foreach($_GET['delsearch'] as $delId => $wok)
+	foreach($_REQUEST['delsearch'] as $delId => $wok)
 	{
 		echo input_tag(array('Type'=>'iframe','Field'=>urlPath().'index_area.php?id='.$delId.'&connection_close=1'),null,array('style'=>"display:none"));
 	}

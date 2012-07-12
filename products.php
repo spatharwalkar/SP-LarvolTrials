@@ -61,10 +61,10 @@ $deleteFlag = null;
 //Header controller
 $_GET['header']='<script type="text/javascript" src="progressbar/jquery.progressbar.js"></script>
 <link href="css/status.css" rel="stylesheet" type="text/css" media="all" />'."\n";
-if(is_numeric($_GET['id']))
+if(is_numeric($_REQUEST['id']))
 {
 	//get product status & progress bar controller
-	$productStatus = getPreindexProgress('PRODUCT2',$_GET['id']);
+	$productStatus = getPreindexProgress('PRODUCT2',$_REQUEST['id']);
 	if($productStatus['update_items_start_time']!="0000-00-00 00:00:00"&&$productStatus['update_items_complete_time']!="0000-00-00 00:00:00"&&$productStatus['status']==COMPLETED)
 	$productPreindexProgress=100;
 	else
@@ -138,18 +138,18 @@ $(document).ready(function(){
 <?php 
 //Start controller area
 //delete controller should come above save controller if delete box is added in the add edit form
-if(isset($_GET['deleteId']) && is_numeric($_GET['deleteId']) && $deleteFlag)
+if(isset($_REQUEST['deleteId']) && is_numeric($_REQUEST['deleteId']) && $deleteFlag)
 {
-	deleteData($_GET['deleteId'],$table);
+	deleteData($_REQUEST['deleteId'],$table);
 	$pattern = '/(\\?)(deleteId).*?(\\d+)/is';
 	$_SERVER['REQUEST_URI'] =  preg_replace($pattern, '', $_SERVER['REQUEST_URI']);
 	$_SERVER['REQUEST_URI'] = str_replace($script.'.php&', $script.'.php?', $_SERVER['REQUEST_URI']);
 }
 //save operation controller
-if($_GET['save']=='Save')
+if($_REQUEST['save']=='Save')
 {
-	$searchDataOld = $_GET['id']?getSearchData('products', 'searchdata', $_GET['id']):null;	
-	$saveStatus = saveData($_GET,$table);
+	$searchDataOld = $_REQUEST['id']?getSearchData('products', 'searchdata', $_REQUEST['id']):null;	
+	$saveStatus = saveData($_REQUEST,$table);
 }
 
 //import controller
@@ -192,7 +192,7 @@ $skipArr = array('comments','product_type','licensing_mode','administration_mode
 echo '<br/>';
 echo '<div class="clr">';
 //add edit form.
-if($_REQUEST['add_new_record']=='Add New Record' || $_REQUEST['id'] && !$_GET['save'] || $saveStatus===0)
+if($_REQUEST['add_new_record']=='Add New Record' || $_REQUEST['id'] && !$_REQUEST['save'] || $saveStatus===0)
 {
 	$addEditFormStyle = $mainTableStyle = 'style="width:100%"';
 	$addEditGlobalInputStyle = 'style="width:99%;min-width:200px;"';
@@ -204,7 +204,7 @@ if($_REQUEST['add_new_record']=='Add New Record' || $_REQUEST['id'] && !$_GET['s
 }
 
 //import form
-if($_GET['import']=='Import' || $_GET['uploadedfile'])
+if($_REQUEST['import']=='Import' || $_REQUEST['uploadedfile'])
 {
 	importUpm('products','products');
 }
@@ -341,14 +341,14 @@ $(document).ready(function () {
   
 <?php 
 //preindex after successful save and change of search data as a seperate worker thread
-if($saveStatus == 1 && $searchDataOld != $_GET['searchdata'])
+if($saveStatus == 1 && $searchDataOld != $_REQUEST['searchdata'])
 {
-	echo input_tag(array('Type'=>'iframe','Field'=>urlPath().'index_product.php?id='.$_GET['id'].'&connection_close=1'),null,array('style'=>"display:none"));die;
+	echo input_tag(array('Type'=>'iframe','Field'=>urlPath().'index_product.php?id='.$_REQUEST['id'].'&connection_close=1'),null,array('style'=>"display:none"));die;
 }
 //add predindex for full delete through a seperate worker thread
-if(isset($_GET['delsearch']) && is_array($_GET['delsearch']))
+if(isset($_REQUEST['delsearch']) && is_array($_REQUEST['delsearch']))
 {
-	foreach($_GET['delsearch'] as $delId => $wok)
+	foreach($_REQUEST['delsearch'] as $delId => $wok)
 	{
 		echo input_tag(array('Type'=>'iframe','Field'=>urlPath().'index_product.php?id='.$delId.'&connection_close=1'),null,array('style'=>"display:none"));
 	}

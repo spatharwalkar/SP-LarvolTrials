@@ -906,7 +906,7 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 	echo '<div class="clr">';
 	echo '<fieldset>';
 	echo '<legend> '.$insertEdit.': </legend>';
-	echo '<form '.$formStyle.' id="umpInput" name="umpInput" '.$formOnSubmit.' method="get" action="'.$script.'.php">';
+	echo '<form '.$formStyle.' id="umpInput" name="umpInput" '.$formOnSubmit.' method="POST" action="'.$script.'.php">';
 	echo '<table '.$mainTableStyle.'>';
 	while($row = mysql_fetch_assoc($res))
 	{
@@ -929,7 +929,7 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		}
 		if(isset($options['saveStatus'])&& $options['saveStatus']===0)
 		{
-			$dbVal = (isset($_GET[$row['Field']]) && $_GET[$row['Field']]!='')?$_GET[$row['Field']]:$dbVal;
+			$dbVal = (isset($_REQUEST[$row['Field']]) && $_REQUEST[$row['Field']]!='')?$_REQUEST[$row['Field']]:$dbVal;
 			$saveStatusForInputTag=0;
 			
 		}
