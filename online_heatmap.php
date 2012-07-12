@@ -43,6 +43,9 @@ $prev_prod='';
 $prev_areaSpan=0;
 $prev_prodSpan=0;
 
+$Min_One_Liner=20;
+$Char_Size=9;
+
 while($header = mysql_fetch_array($res))
 {
 	if($header['type'] == 'area')
@@ -225,6 +228,8 @@ foreach($rows as $row => $rval)
 			if($cell_data['count_total'] > 0 && $data_matrix[$row][$col]['viewcount'] > $Max_ViewCount)
 			$Max_ViewCount = $data_matrix[$row][$col]['viewcount'];
 				
+			$Width = 0;
+			
 			if($cell_data['bomb_auto'] == 'small')
 			{
 				$data_matrix[$row][$col]['bomb_auto']['value']=$cell_data['bomb_auto'];
@@ -258,6 +263,8 @@ foreach($rows as $row => $rval)
 				$data_matrix[$row][$col]['bomb']['alt']='Small Bomb';
 				$data_matrix[$row][$col]['bomb']['style']='width:17px; height:17px;';
 				$data_matrix[$row][$col]['bomb']['title']='Bomb details';
+				
+				$Width = $Width + 17 + 1;
 			}
 			elseif($cell_data['bomb'] == 'large')
 			{
@@ -266,6 +273,8 @@ foreach($rows as $row => $rval)
 				$data_matrix[$row][$col]['bomb']['alt']='Large Bomb';
 				$data_matrix[$row][$col]['bomb']['style']='width:17px; height:17px;';
 				$data_matrix[$row][$col]['bomb']['title']='Bomb details';
+				
+				$Width = $Width + 17 + 1;
 			}
 			else
 			{
@@ -356,6 +365,20 @@ foreach($rows as $row => $rval)
 			$data_matrix[$row][$col]['not_authorized']=$cell_data['not_authorized'];
 			$data_matrix[$row][$col]['prohibited']=$cell_data['prohibited'];
 			$data_matrix[$row][$col]['new_trials']=$cell_data['new_trials'];
+			
+			///As stringlength of total will be more in all
+			$Width = $Width + (strlen($data_matrix[$row][$col]['total'])*$Char_Size);
+					
+			if(trim($data_matrix[$row][$col]['filing']) != '' && $data_matrix[$row][$col]['filing'] != NULL)
+			$Width = $Width + 17 + 1;
+			
+			if($Width_matrix[$col]['width'] < ($Width+4) || $Width_matrix[$col]['width'] == '' || $Width_matrix[$col]['width'] == 0)
+			{
+				$Width_extra = 0;
+				if(($Width+4) < $Min_One_Liner)
+				$Width_extra = $Min_One_Liner - ($Width+4);
+				$Width_matrix[$col]['width']=$Width + 4 + $Width_extra;
+			}
 		}
 		else
 		{
@@ -375,10 +398,91 @@ foreach($rows as $row => $rval)
 			$data_matrix[$row][$col]['color']='background-color:#DDF;';
 			$data_matrix[$row][$col]['color_code']='DDF';
 			$data_matrix[$row][$col]['record_update_class']='';
+			$Width = 22;
+			if($Width_matrix[$col]['width'] < $Width || $Width_matrix[$col]['width'] == '' || $Width_matrix[$col]['width'] == 0)
+			$Width_matrix[$col]['width']=22;
 		}
 	}
 }
+
+$Max_areaStringLength=0;
+foreach($columns as $col => $val)
+{
+	$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col]:$val;
+	if(isset($areaIds[$col]) && $areaIds[$col] != NULL && !empty($productIds))
+	$current_StringLength =strlen($val);
+	else $current_StringLength = 0;
+	if($Max_areaStringLength < $current_StringLength)
+	$Max_areaStringLength = $current_StringLength;
+}
+$area_Col_Height = $Max_areaStringLength * $Char_Size;
+
+$Max_productStringLength=0;
+foreach($rows as $row => $rval)
+{
+	if(isset($productIds[$row]) && $productIds[$row] != NULL && !empty($areaIds))
+	{
+		$current_StringLength =strlen($rval);
+	}
+	else $current_StringLength = 0;
+	if($Max_productStringLength < $current_StringLength)
+	$Max_productStringLength = $current_StringLength;
+}	
+
+if(($Max_productStringLength * $Char_Size) > 450)
+$product_Col_Width = 450;
+else
+$product_Col_Width = $Max_productStringLength * $Char_Size;
+
+$area_Col_Width=110;
+		
+$HColumn_Width = (((count($columns))+(($total_fld)? 1:0)) * ($area_Col_Width+1));
+
+if(($HColumn_Width + $product_Col_Width) > 1300)	////if hm lenth is greater than 1300 than move to rotate mode
+{
+	if($total_fld) 
+	{ 
+		$Total_Col_width = ((strlen($count_total) * $Char_Size) + 1);
+		if($Total_Col_width < $Min_One_Liner)
+		$Total_Col_width = $Min_One_Liner;
+	}
+	$Rotation_Flg = 1;
+}
+else
+{
+	if(($Max_productStringLength * $Char_Size) > 450)
+	$product_Col_Width = 450;
+	else
+	$product_Col_Width = $Max_productStringLength * $Char_Size;
 	
+	foreach($columns as $col => $val)
+	{
+		$Width_matrix[$col]['width'] = $area_Col_Width;
+	}
+	//$Total_Col_width = $area_Col_Width;
+	$Total_Col_width = ((strlen($count_total) * $Char_Size) + 1);
+	$Rotation_Flg = 0;
+}
+
+//$Rotation_Flg = 1;
+if($Rotation_Flg == 1)	////Create width for area category cells and put forcefully line break in category text
+{
+	foreach($columns as $col => $val)
+	{
+		if($columns_Span[$col] > 0)
+		{
+			$i = 1; $width = 0; $col_id = $col;
+			while($i <= $columns_Span[$col])
+			{
+				$width = $width + $Width_matrix[$col_id]['width'];
+				$i++; $col_id++;
+			}
+			$Cat_Area_Col_width[$col] = $width +((($columns_Span[$col] == 1) ? 0:1) * ($columns_Span[$col]-1));
+			$cols_Cat_Space[$col] = round($Cat_Area_Col_width[$col] / $Char_Size);
+		}
+	}
+}
+		
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -398,6 +502,58 @@ foreach($rows as $row => $rval)
 <link href="scripts/date/jdpicker.css" rel="stylesheet" type="text/css" media="screen" />
 <link href="css/popup_form.css" rel="stylesheet" type="text/css" media="all" />
 <link href="css/themes/cupertino/jquery-ui-1.8.17.custom.css" rel="stylesheet" type="text/css" media="screen" />
+<?php
+///Below part is added cause sometimes in some browser does not seems to work as per inline css
+if($Rotation_Flg == 1)
+{
+	print '<style type="text/css">
+		.box_rotate {
+		-moz-transform: rotate(270deg); /* For Firefox */
+		-o-transform: rotate(270deg); /* For Opera */
+		-webkit-transform: rotate(270deg); /* For Safari and Chrome */
+		transform: rotate(270deg);
+		-ms-transform: rotate(270deg); /* IE 9 */
+		-ms-transform-origin:0% 100%; /* IE 9 */
+		-moz-transform-origin:0% 100%; /* Firefox */
+		-webkit-transform-origin:0% 100%; /* Safari and Chrome */
+		transform-origin:0% 100%;
+		white-space:nowrap;
+		writing-mode: tb-rl; /* For IE */
+		filter: flipv fliph;
+		/*font-family:"Courier New", Courier, monospace;*/
+		margin-bottom:4px;
+	}
+	</style>
+	<style type="text/css">';
+	
+	foreach($columns as $col => $val)
+	{
+		print '
+		.Area_RowDiv_Class_'.$col.' {
+			margin-left:'.(($Width_matrix[$col]['width']/2)+($Char_Size)).'px;
+			}
+		.Area_Row_Class_'.$col.' {
+			width:'.$Width_matrix[$col]['width'].'px;
+			max-width:'.$Width_matrix[$col]['width'].'px;
+			height:'.($area_Col_Height).'px;
+			_height:'.($area_Col_Height).'px;
+			}
+		';
+	}
+	print '
+		.Total_RowDiv_Class {
+			margin-left:'.(($Total_Col_width/2)+($Char_Size)).'px;
+			}
+			.Total_Row_Class {
+			width:'.$Total_Col_width.'px;
+			max-width:'.$Total_Col_width.'px;
+			height:'.($area_Col_Height).'px;
+			_height:'.($area_Col_Height).'px;
+			}
+		';
+	}
+?>
+</style>
 <style type="text/css">
 body { font-family:Verdana; font-size: 13px;}
 a, a:hover{/*color:#000000; text-decoration:none;*/ height:100%;}
@@ -452,7 +608,7 @@ width:100px;
 </style>
 <style type="text/css">
 .tooltip {
-	border-bottom: 1px dotted #000000; color: #000000; outline: none;
+	color: #000000; outline: none;
 	cursor:default; text-decoration: none;
 }
 .tooltip span {
@@ -587,14 +743,8 @@ width:100px;
 	width: 50px;
 	visibility: hidden;
 }
-.td_width{
-	width:110px;
-	min-width:110px;
-	max-width:110px;
-	white-space:wrap;
-	_width:110px;
-}
-.area_cell{
+
+.break_words{
 	word-wrap: break-word;
 }
 </style>
@@ -952,7 +1102,7 @@ function change_view()
 				if(Status_List_Flg != 0)
 				{
 					var Status_List_ele = document.getElementById("Status_List_"+i);
-					if(ed_limit >= one_month)
+					if(ed_limit == one_month)
 					{
 						if(Status_List_ele != null && Status_List_ele != '')
 						{
@@ -1282,11 +1432,23 @@ foreach($columns as $col => $val)
 	if($columns_Span[$col] > 0)
 	{
 		$online_HMCounter++;
-		$htmlContent .= '<th style="background-color:#FFFFFF; '.(($columnsCategoryName[$col] != 'Undefined') ? 'border-left:#000000 solid 2px; border-top:#000000 solid 2px; border-right:#000000 solid 2px;':'').'" id="Cell_ID_'.$online_HMCounter.'" colspan="'.$columns_Span[$col].'" width="80px"><b>'.(($columnsCategoryName[$col] != 'Undefined') ? $columnsCategoryName[$col]:'').'</b></th>';
+		$htmlContent .= '<th class="break_words Cat_Area_Row_Class_'.$col.'" width="'.$Cat_Area_Col_width[$col].'px" style="max-width:'.$Cat_Area_Col_width[$col].';background-color:#FFFFFF; '.(($columnsCategoryName[$col] != 'Undefined') ? 'border-left:#000000 solid 2px; border-top:#000000 solid 2px; border-right:#000000 solid 2px;':'').'" id="Cell_ID_'.$online_HMCounter.'" colspan="'.$columns_Span[$col].'">';
+		if($columnsCategoryName[$col] != 'Undefined' && $Rotation_Flg == 1)
+		{
+			$cat_name = str_replace(' ','`',trim($columnsCategoryName[$col]));
+			$cat_name = preg_replace('/([^\s-]{'.$cols_Cat_Space[$col].'})(?=[^\s-])/','$1<br/>',$cat_name);
+			$cat_name = str_replace('`',' ',$cat_name);
+			$htmlContent .= '<b>'.$cat_name.'</b>';
+		}
+		else if($columnsCategoryName[$col] != 'Undefined')
+		{
+			$htmlContent .= '<b>'.$columnsCategoryName[$col].'</b>';	
+		}
+		$htmlContent .= '</th>';
 	}
 }
 
-$htmlContent .= '</tr><tr style="page-break-inside:avoid; height:100%;" nobr="true"><th style="background-color:#FFFFFF;">&nbsp;</th>';
+$htmlContent .= '</tr><tr style="page-break-inside:avoid; height:100%;" nobr="true"><th '.(($Rotation_Flg == 1) ? 'height="'.$area_Col_Height.'px"':'').' class="Product_Row_Class" width="'.$product_Col_Width.'px" style="background-color:#FFFFFF; '.(($Rotation_Flg == 1) ? 'width:'.$product_Col_Width.'px; max-width:'.$product_Col_Width.';px':'').' ">&nbsp;</th>';
 
 
 foreach($columns as $col => $val)
@@ -1297,7 +1459,7 @@ foreach($columns as $col => $val)
 	$caltTitle = (isset($cdesc) && $cdesc != '')?' alt="'.$cdesc.'" title="'.$cdesc.'" ':null;
 	$cat = (isset($columnsCategoryName[$col]) && $columnsCategoryName[$col] != '')? ' ('.$columnsCategoryName[$col].') ':'';
 		
-	$htmlContent .= '<th class="td_width area_cell" id="Cell_ID_'.$online_HMCounter.'" width="110px" '.$caltTitle.'>';
+	$htmlContent .= '<th style="'.(($Rotation_Flg == 1) ? 'vertical-align:bottom;':'vertical-align:middle;').' max-width:'.$Width_matrix[$col]['width'].'px;" class="Area_Row_Class_'.$col.'" id="Cell_ID_'.$online_HMCounter.'" width="'.$Width_matrix[$col]['width'].'px" '.(($Rotation_Flg == 1) ? 'height="'.$area_Col_Height.'px" align="left"':'align="center"').' '.$caltTitle.'><div class="box_rotate Area_RowDiv_Class_'.$col.' break_words">';
 	
 	if(isset($areaIds[$col]) && $areaIds[$col] != NULL && !empty($productIds))
 	{
@@ -1306,7 +1468,7 @@ foreach($columns as $col => $val)
 		
 		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. trim(urlPath()) .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. '&list=1&itype=0&sr=now&er=1 month ago&hm=' . $id . '" target="_blank" style="text-decoration:underline; color:#000000;">'.$val.'</a>';
 	}
-	$htmlContent .='</th>';
+	$htmlContent .='</div></th>';
 }
 
 		
@@ -1314,7 +1476,7 @@ foreach($columns as $col => $val)
 if($total_fld)
 {
 	$online_HMCounter++;
-	$htmlContent .= '<th id="Cell_ID_'.$online_HMCounter.'" width="80px"><div align="center">';
+	$htmlContent .= '<th id="Cell_ID_'.$online_HMCounter.'" '.(($Rotation_Flg == 1) ? 'height="'.$area_Col_Height.'px" align="left"':'align="center"').' width="'.$Total_Col_width.'px" style="'.(($Rotation_Flg == 1) ? 'vertical-align:bottom;':'vertical-align:middle;').' width:'.$Total_Col_width.'px; max-width:'.$Total_Col_width.'px;" class="Total_Row_Class"><div class="box_rotate Total_RowDiv_Class">';
 	if(!empty($productIds) && !empty($areaIds))
 	{
 		$productIds = array_filter($productIds);
@@ -1338,7 +1500,7 @@ foreach($rows as $row => $rval)
 	{
 		$online_HMCounter++;
 		
-		$htmlContent .='<tr style="page-break-inside:avoid; vertical-align:middle; max-height:100%; background-color: #A2FF97;"  class="Cat_Height"><td align="center" style="vertical-align:middle; background-color: #A2FF97;" colspan="'.((count($columns)+1)+(($total_fld)? 1:0)).'" id="Cell_ID_'.$online_HMCounter.'">';
+		$htmlContent .='<tr style="page-break-inside:avoid; vertical-align:middle; max-height:100%; background-color: #A2FF97;"><td align="center" style="vertical-align:middle; background-color: #A2FF97;" colspan="'.((count($columns)+1)+(($total_fld)? 1:0)).'" id="Cell_ID_'.$online_HMCounter.'">';
 		if($dtt)
 		{
 			$htmlContent .= '<input type="hidden" value="0,endl,0,endl,0" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
@@ -1378,7 +1540,7 @@ foreach($rows as $row => $rval)
 	foreach($columns as $col => $cval)
 	{
 		$online_HMCounter++;
-		$htmlContent .= '<td class="tooltip" valign="middle" id="Cell_ID_'.$online_HMCounter.'" style="'. (($data_matrix[$row][$col]['total'] != 0) ? ' background-color:#'.$data_matrix[$row][$col]['color_code'].'; border:#'.$data_matrix[$row][$col]['color_code'].' solid;' : 'background-color:#f5f5f5; border:#f5f5f5 solid;') .' padding:1px; min-width:110px;  max-width:110px; height:100%; vertical-align:middle; text-align:center; " align="center" onmouseover="display_tooltip(\'on\','.$online_HMCounter.');" onmouseout="display_tooltip(\'off\','.$online_HMCounter.');">';
+		$htmlContent .= '<td class="tooltip" valign="middle" id="Cell_ID_'.$online_HMCounter.'" style="'. (($data_matrix[$row][$col]['total'] != 0) ? ' background-color:#'.$data_matrix[$row][$col]['color_code'].'; border:#'.$data_matrix[$row][$col]['color_code'].' solid;' : 'background-color:#f5f5f5; border:#f5f5f5 solid;') .' padding:1px; min-width:'.$Width_matrix[$col]['width'].'px;  max-width:'.$Width_matrix[$col]['width'].'px; height:100%; vertical-align:middle; text-align:center; " align="center" onmouseover="display_tooltip(\'on\','.$online_HMCounter.');" onmouseout="display_tooltip(\'off\','.$online_HMCounter.');">';
 	
 		if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL && $data_matrix[$row][$col]['total'] != 0)
 		{
@@ -1387,19 +1549,19 @@ foreach($rows as $row => $rval)
 			
 			$htmlContent .= '<input type="hidden" value="'.$data_matrix[$row][$col]['active'].',endl,'.$data_matrix[$row][$col]['total'].',endl,'.$data_matrix[$row][$col]['indlead'].',endl,'.$data_matrix[$row][$col]['active_prev'].',endl,'.$data_matrix[$row][$col]['total_prev'].',endl,'.$data_matrix[$row][$col]['indlead_prev'].',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['last_update'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['last_update'])).',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['count_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['count_lastchanged'])).',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])).',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['filing_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['filing_lastchanged'])).',endl,'.$data_matrix[$row][$col]['color_code'].',endl,'.$data_matrix[$row][$col]['bomb']['value'].',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['phase_explain_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['phase_explain_lastchanged'])).',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['phase4_override_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['phase4_override_lastchanged'])).',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['highest_phase_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['highest_phase_lastchanged'])).',endl,\''.$data_matrix[$row][$col]['highest_phase_prev'].'\'" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
 			
-			$htmlContent .= '<input type="hidden" value="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />&nbsp;';
-			$htmlContent .= '<input type="hidden" value="' . $productIds[$row] . '" name="Product_value_'.$online_HMCounter.'" id="Product_value_'.$online_HMCounter.'" />&nbsp;';
-			$htmlContent .= '<input type="hidden" value="' . $areaIds[$col]. '" name="Area_value_'.$online_HMCounter.'" id="Area_value_'.$online_HMCounter.'" />&nbsp;';
+			$htmlContent .= '<input type="hidden" value="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />';
+			$htmlContent .= '<input type="hidden" value="' . $productIds[$row] . '" name="Product_value_'.$online_HMCounter.'" id="Product_value_'.$online_HMCounter.'" />';
+			$htmlContent .= '<input type="hidden" value="' . $areaIds[$col]. '" name="Area_value_'.$online_HMCounter.'" id="Area_value_'.$online_HMCounter.'" />';
 				
-			$htmlContent .= '<a onclick="INC_ViewCount(' . trim($productIds[$row]) . ',' . trim($areaIds[$col]) . ',' . $online_HMCounter .')" style="'.$data_matrix[$row][$col]['count_start_style'].' height:100%; vertical-align:middle; padding-top:0px; padding-bottom:0px; line-height:13px; text-decoration:underline;" id="Cell_Link_'.$online_HMCounter.'" href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '&list=1&itype=0&sr=now&er=1 month ago&hm=' . $id . '" target="_blank" title="'. $title .'"><b><font id="Font_ID_'.$online_HMCounter.'">'. $data_matrix[$row][$col]['active'] .'</font></b></a>&nbsp;';
+			$htmlContent .= '<a onclick="INC_ViewCount(' . trim($productIds[$row]) . ',' . trim($areaIds[$col]) . ',' . $online_HMCounter .')" style="'.$data_matrix[$row][$col]['count_start_style'].' height:100%; vertical-align:middle; padding-top:0px; padding-bottom:0px; line-height:13px; text-decoration:underline;" id="Cell_Link_'.$online_HMCounter.'" href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '&list=1&itype=0&sr=now&er=1 month ago&hm=' . $id . '" target="_blank" title="'. $title .'"><b><font id="Font_ID_'.$online_HMCounter.'">'. $data_matrix[$row][$col]['active'] .'</font></b></a>';
 					
 			if($data_matrix[$row][$col]['bomb']['src'] != 'new_square.png') //When bomb has square dont include it in pdf as size is big and no use
-			$htmlContent .= '<img id="Cell_Bomb_'.$online_HMCounter.'" title="'.$data_matrix[$row][$col]['bomb']['title'].'" src="'. trim(urlPath()) .'images/'.$data_matrix[$row][$col]['bomb']['src'].'"  style="'.$data_matrix[$row][$col]['bomb']['style'].' vertical-align:middle;" />&nbsp;';				
+			$htmlContent .= '<img id="Cell_Bomb_'.$online_HMCounter.'" title="'.$data_matrix[$row][$col]['bomb']['title'].'" src="'. trim(urlPath()) .'images/'.$data_matrix[$row][$col]['bomb']['src'].'"  style="'.$data_matrix[$row][$col]['bomb']['style'].' vertical-align:middle; margin-left:1px;" />';				
 			
 			
 			
 			if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
-			$htmlContent .= '<img id="Cell_Filing_'.$online_HMCounter.'" src="images/new_file.png" title="Filing Details" style="width:17px; height:17px; vertical-align:middle; cursor:pointer;" alt="Filing" />&nbsp;';
+			$htmlContent .= '<img id="Cell_Filing_'.$online_HMCounter.'" src="images/new_file.png" title="Filing Details" style="width:17px; height:17px; vertical-align:middle; cursor:pointer; margin-left:1px;" alt="Filing" />';
 				
 			
 			$htmlContent .= '</div>'; ///Div complete to avoid panel problem
