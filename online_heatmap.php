@@ -1336,11 +1336,8 @@ function refresh_data(cell_id)
     <div class="slideout_inner">
         <table bgcolor="#FFFFFF" cellpadding="0" cellspacing="0" class="table-slide">
         <tr><td width="15%"><img title="Bomb" src="images/new_lbomb.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Bomb</td></tr>
-        <tr><td><img title="Bomb" src="images/newred_lbomb.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Bomb (updated)</td></tr>
         <tr><td><img title="Filing" src="images/new_file.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Filing details</td></tr>
-        <tr><td><img title="Filing" src="images/newred_file.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Filing details (updated)</td></tr>
         <tr><td><img title="Phase explanation" src="images/phaseexp.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Phase explanation</td></tr>
-        <tr><td><img title="Phase explanation" src="images/phaseexp_red.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Phase explanation (updated)</td></tr>
         <tr><td><img title="Red Border" src="images/outline.png"  style="width:20px; height:15px; cursor:pointer;" /></td><td>Red border (record updated)</td></tr>
         <tr><td colspan="2" style="padding-right: 1px;">
          <div style="float:left;padding-top:3px;">Phase&nbsp;</div>
