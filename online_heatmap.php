@@ -459,8 +459,8 @@ else
 	{
 		$Width_matrix[$col]['width'] = $area_Col_Width;
 	}
-	//$Total_Col_width = $area_Col_Width;
-	$Total_Col_width = ((strlen($count_total) * $Char_Size) + 1);
+	$Total_Col_width = $area_Col_Width;
+	//$Total_Col_width = ((strlen($count_total) * $Char_Size) + 1);
 	$Rotation_Flg = 0;
 }
 
