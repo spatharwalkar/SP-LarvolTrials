@@ -405,6 +405,8 @@ foreach($rows as $row => $rval)
 	}
 }
 
+$Page_Width = 1100;
+
 $Max_areaStringLength=0;
 foreach($columns as $col => $val)
 {
@@ -429,8 +431,8 @@ foreach($rows as $row => $rval)
 	$Max_productStringLength = $current_StringLength;
 }	
 
-if(($Max_productStringLength * $Char_Size) > 450)
-$product_Col_Width = 450;
+if(($Max_productStringLength * $Char_Size) > 400)
+$product_Col_Width = 400;
 else
 $product_Col_Width = $Max_productStringLength * $Char_Size;
 
@@ -438,20 +440,28 @@ $area_Col_Width=110;
 		
 $HColumn_Width = (((count($columns))+(($total_fld)? 1:0)) * ($area_Col_Width+1));
 
-if(($HColumn_Width + $product_Col_Width) > 1300)	////if hm lenth is greater than 1300 than move to rotate mode
+$RColumn_Width = 0; 
+foreach($columns as $col => $val)
 {
+	$RColumn_Width = $RColumn_Width + $Width_matrix[$col]['width'] + 0.5;
+}
+
+if(($HColumn_Width + $product_Col_Width) > $Page_Width)	////if hm lenth is greater than 1200 than move to rotate mode
+{
+	$product_Col_Width = 450;
 	if($total_fld) 
 	{ 
 		$Total_Col_width = ((strlen($count_total) * $Char_Size) + 1);
 		if($Total_Col_width < $Min_One_Liner)
 		$Total_Col_width = $Min_One_Liner;
+		$RColumn_Width = $RColumn_Width + $Total_Col_width + 1;
 	}
 	$Rotation_Flg = 1;
 }
 else
 {
-	if(($Max_productStringLength * $Char_Size) > 450)
-	$product_Col_Width = 450;
+	if(($Max_productStringLength * $Char_Size) > 400)
+	$product_Col_Width = 400;
 	else
 	$product_Col_Width = $Max_productStringLength * $Char_Size;
 	
@@ -460,7 +470,6 @@ else
 		$Width_matrix[$col]['width'] = $area_Col_Width;
 	}
 	$Total_Col_width = $area_Col_Width;
-	//$Total_Col_width = ((strlen($count_total) * $Char_Size) + 1);
 	$Rotation_Flg = 0;
 }
 
@@ -480,6 +489,24 @@ if($Rotation_Flg == 1)	////Create width for area category cells and put forceful
 			$Cat_Area_Col_width[$col] = $width +((($columns_Span[$col] == 1) ? 0:1) * ($columns_Span[$col]-1));
 			$cols_Cat_Space[$col] = round($Cat_Area_Col_width[$col] / $Char_Size);
 		}
+	}
+}
+
+if($Rotation_Flg == 1)
+{
+	$Avail_Area_Col_width = $Page_Width - $product_Col_Width - $RColumn_Width;
+	$extra_width = $Avail_Area_Col_width / ((count($columns))+(($total_fld)? 1:0));
+	if($extra_width > 1)
+	{
+		foreach($columns as $col => $val)
+		{
+			$Width_matrix[$col]['width'] = $Width_matrix[$col]['width'] + $extra_width;
+		}
+		if($total_fld) 
+		{ 
+			$Total_Col_width = $Total_Col_width + $extra_width; 
+		}
+		//$product_Col_Width = $product_Col_Width + $extra_width;
 	}
 }
 		
@@ -1550,7 +1577,7 @@ foreach($rows as $row => $rval)
 			$htmlContent .= '<input type="hidden" value="' . $productIds[$row] . '" name="Product_value_'.$online_HMCounter.'" id="Product_value_'.$online_HMCounter.'" />';
 			$htmlContent .= '<input type="hidden" value="' . $areaIds[$col]. '" name="Area_value_'.$online_HMCounter.'" id="Area_value_'.$online_HMCounter.'" />';
 				
-			$htmlContent .= '<a onclick="INC_ViewCount(' . trim($productIds[$row]) . ',' . trim($areaIds[$col]) . ',' . $online_HMCounter .')" style="'.$data_matrix[$row][$col]['count_start_style'].' height:100%; vertical-align:middle; padding-top:0px; padding-bottom:0px; line-height:13px; text-decoration:underline;" id="Cell_Link_'.$online_HMCounter.'" href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '&list=1&itype=0&sr=now&er=1 month ago&hm=' . $id . '" target="_blank" title="'. $title .'"><b><font id="Font_ID_'.$online_HMCounter.'">'. $data_matrix[$row][$col]['active'] .'</font></b></a>';
+			$htmlContent .= '<a onclick="INC_ViewCount(' . trim($productIds[$row]) . ',' . trim($areaIds[$col]) . ',' . $online_HMCounter .')" style="'.$data_matrix[$row][$col]['count_start_style'].' height:100%; vertical-align:middle; padding-top:0px; padding-bottom:0px; line-height:13px; text-decoration:underline;" id="Cell_Link_'.$online_HMCounter.'" href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '&list=1&itype=0&sr=now&er=1 month ago&hm=' . $id . '" target="_blank" title="'. $title .'"><b><font id="Font_ID_'.$online_HMCounter.'">'. $data_matrix[$row][$col]['indlead'] .'</font></b></a>';
 					
 			if($data_matrix[$row][$col]['bomb']['src'] != 'new_square.png') //When bomb has square dont include it in pdf as size is big and no use
 			$htmlContent .= '<img id="Cell_Bomb_'.$online_HMCounter.'" title="'.$data_matrix[$row][$col]['bomb']['title'].'" src="'. trim(urlPath()) .'images/'.$data_matrix[$row][$col]['bomb']['src'].'"  style="'.$data_matrix[$row][$col]['bomb']['style'].' vertical-align:middle; margin-left:1px;" />';				
