@@ -1940,7 +1940,10 @@ function Download_reports()
 			{
 				$count_val=$indlead_total;
 			}
-			$RColumn_Width = $RColumn_Width + (strlen($count_val) * 2.5) + 2 + 0.5; 
+			$Total_Col_width = ((strlen($count_val) * 2) + 2);
+			if($Total_Col_width < $Min_One_Liner)
+			$Total_Col_width = $Min_One_Liner;
+			$RColumn_Width = $RColumn_Width + $Total_Col_width + 0.5; 
 		}
 		
 		if(($HColumn_Width + $product_Col_Width + 0.5) < 192)
@@ -1985,6 +1988,7 @@ function Download_reports()
 			{
 				$Width_matrix[$col]['width'] = $area_Col_Width;
 			}
+			$Total_Col_width = $area_Col_Width;
 		}
 		
 		$pdf->SetFillColor(192, 196, 254);
@@ -2031,6 +2035,30 @@ function Download_reports()
 			$product_Col_Width = $Current_product_Col_Width;	///new width
 		}
 		//$product_Col_Width = 25;
+		
+		///// Extra width addition part 
+		//- If after rotation and after giving max width to product column, extra width remains, distribute it equally to all columns, to achieve fitting
+		$Avail_Area_Col_width = $Page_Width - $product_Col_Width - $All_Column_Width;
+		$extra_width = $Avail_Area_Col_width / ((count($columns))+(($total_fld)? 1:0)+1);
+		if($extra_width > 1)
+		{
+			foreach($columns as $col => $val)
+			{
+				$Width_matrix[$col]['width'] = $Width_matrix[$col]['width'] + $extra_width;
+				$All_Column_Width = $All_Column_Width + $extra_width;
+			}
+			if($total_fld) 
+			{ 
+				if($Rotation_Flg != 1)
+				$Total_Col_width = $area_Col_Width;
+				$Total_Col_width = $Total_Col_width + $extra_width; 
+				$All_Column_Width = $All_Column_Width + $extra_width;
+			}
+			$product_Col_Width = $product_Col_Width + $extra_width;
+		}
+		
+		////////////////// End of Extra width addition part
+		
 		///Calculate height for category area row
 		$Max_Cat_areaNumLines=0;
 		foreach($columns as $col => $val)
@@ -2255,7 +2283,7 @@ function Download_reports()
 				
 				if($Rotation_Flg == 1)
 				{
-					$extra_space = (strlen($count_val) * 2) + 2  - $Line_Height;
+					$extra_space = $Total_Col_width  - $Line_Height;
 				}
 				else
 				{
@@ -2267,11 +2295,6 @@ function Download_reports()
 				
 				if($Rotation_Flg == 1)
 				{
-					if(strlen($count_val) < 2 && $Total_Col_width < 1)
-					$Total_Col_width = $Min_One_Liner;
-					else
-					$Total_Col_width = ((strlen($count_val) * 2.5) + 2);
-				
 					$pdf->StartTransform(); 
 					$Place_Y = $Main_Y + $Area_Row_height;
 					$pdf->Rotate(90,$Place_X, $Place_Y);
@@ -2281,8 +2304,6 @@ function Download_reports()
 				}
 				else
 				{
-					$Total_Col_width = $area_Col_Width;
-					
 					$pdf->MultiCell($Total_Col_width, $Area_Row_height, $pdfContent, $border, $align='C', $fill=1, $ln=1, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
 				}
 			}
@@ -2290,9 +2311,6 @@ function Download_reports()
 			{
 				if($Rotation_Flg == 1)
 				{
-					if(($Total_Col_width != '' && $Total_Col_width != NULL) ||  $Total_Col_width == 0)
-					$Total_Col_width = $Min_One_Liner;
-					
 					$pdf->StartTransform(); 
 					$Place_Y = $Main_Y + $Area_Row_height;
 					$pdf->Rotate(90,$Place_X, $Place_Y);
@@ -2302,8 +2320,6 @@ function Download_reports()
 				}
 				else
 				{
-					$Total_Col_width = $area_Col_Width;
-					
 					$pdf->MultiCell($Total_Col_width, $Area_Row_height, '', $border, $align='C', $fill=1, $ln=1, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
 				}
 			}
@@ -2882,59 +2898,72 @@ function Download_reports()
 						$pdf->Annotation('', '', ($Width_matrix[$col]['width']*3/4), ($prod_row_height*4/5), $annotation_text, array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Details', 'Subj' => 'Information', 'C' => array()));	
 					}
 					
+					$Aq_L = 0;
+					$Wrd_L = round($pdf->GetStringWidth($count_val, 'verdana', '', 8))+1;
+					$Aq_L = $Aq_L + $Wrd_L + 0.2;
+					if($data_matrix[$row][$col]['bomb']['value'] == 'small' || $data_matrix[$row][$col]['bomb']['value'] == 'large')
+					$Aq_L = $Aq_L + 3.1 + 0.2;
+					if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
+					$Aq_L = $Aq_L + 3.1 + 0.2;
+					
+					$Av_L = $Width_matrix[$col]['width'];
+					
+					$Ex_L = ($Av_L - $Aq_L)/2;
+					
 					$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. $link_part . '" target="_blank" title="'. $title .'" style="'.((trim($data_matrix[$row][$col]['color_code']) == 'FF0000' && $data_matrix[$row][$col]['count_lastchanged_value']==1) ? 'background-color:#FFFFFF;':'').'"><font style="'. (($data_matrix[$row][$col]['count_lastchanged_value']==1) ? 'color:#FF0000;':'').'" >'.$count_val.'</font></a>';
 					
-					if($Rotation_Flg == 1)
-					{
-						if($data_matrix[$row][$col]['bomb']['value'] == 'small' || $data_matrix[$row][$col]['bomb']['value'] == 'large')
-						$pdfContent .= '&nbsp;&nbsp;';
-						if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
-						$pdfContent .= '&nbsp;&nbsp;';
-					}
+					if($data_matrix[$row][$col]['bomb']['value'] == 'small' || $data_matrix[$row][$col]['bomb']['value'] == 'large')
+					$bomb_PR = 1;
 					else
-					{
-						if(($data_matrix[$row][$col]['bomb']['value'] == 'small' || $data_matrix[$row][$col]['bomb']['value'] == 'large') || ($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != ''))
-						{
-							$Nbsp = 0;
-							while($Nbsp < strlen($count_val))
-							{
-								$pdfContent .= '&nbsp;';
-								$Nbsp++;
-							}
-						}
-					}
+					$bomb_PR = 0;
 					
+					if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
+					$fill_PR = 1;
+					else
+					$fill_PR = 0;
 					
-					if($prod_row_height == $Line_Height)	$prod_row_height = $prod_row_height + 0.6; /// For adjustment as when height is min, html causes issue
+					if($bomb_PR)
+					$pdfContent .= '&nbsp;&nbsp;';
 					
-					$y=($pdf->GetY()+($prod_row_height/2)-(3.1/2));
+					if($bomb_PR && !$fill_PR)
+					$pdfContent .= '&nbsp;';
+					
+					if($bomb_PR && $fill_PR)
+					$pdfContent .= '&nbsp;';
+					
+					if($fill_PR)
+					$pdfContent .= '&nbsp;&nbsp;';
+					
+					if(!$bomb_PR && $fill_PR)
+					$pdfContent .= '&nbsp;';
+					
 					
 					if($data_matrix[$row][$col]['bomb']['value'] == 'small' || $data_matrix[$row][$col]['bomb']['value'] == 'large')
 					{
 						if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
-							$x=($pdf->GetX()+$Width_matrix[$col]['width']-6.1-0.4);
+						$bomb_x=($pdf->GetX()+$Av_L-$Ex_L-0.1-3.1-0.1-3.1-0.1);
 						else
-						{
-							if($Rotation_Flg == 1)
-								$x=($pdf->GetX()+$Width_matrix[$col]['width']-3.1-0.2);
-							else
-								$x=($pdf->GetX()+$Width_matrix[$col]['width']-6.1-0.4);
-						}
-						$pdf->Image('images/'.$data_matrix[$row][$col]['bomb']['src'], $x, $y, 3.1, 3.1, '', '', '', false, 300, '', false, false, 0, false, false, false);
+						$bomb_x=($pdf->GetX()+$Av_L-$Ex_L-0.1-3.1-0.1);
+					}
+					
+					if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
+					{
+						$fill_x=($pdf->GetX()+$Av_L-$Ex_L-0.1-3.1-0.1);
+					}
+					
+					$y=($pdf->GetY()+($prod_row_height/2)-(3.1/2));
+					/////// End of Space and co-ordinates pixel calculation
+					
+					if($prod_row_height == $Line_Height)	$prod_row_height = $prod_row_height + 0.6; /// For adjustment as when height is min, html causes issue
+					
+					if($data_matrix[$row][$col]['bomb']['value'] == 'small' || $data_matrix[$row][$col]['bomb']['value'] == 'large')
+					{
+						$pdf->Image('images/'.$data_matrix[$row][$col]['bomb']['src'], $bomb_x, $y, 3.1, 3.1, '', '', '', false, 300, '', false, false, 0, false, false, false);
 					}
 						
 					if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
 					{
-						if($Rotation_Flg == 1)
-							$x=($pdf->GetX()+$Width_matrix[$col]['width']-3.1-0.2);
-						else
-						{
-							if($data_matrix[$row][$col]['bomb']['value'] == 'small' || $data_matrix[$row][$col]['bomb']['value'] == 'large')
-								$x=($pdf->GetX()+$Width_matrix[$col]['width']-3.1-0.2);
-							else
-								$x=($pdf->GetX()+$Width_matrix[$col]['width']-6.1-0.4);
-						}
-						$pdf->Image($data_matrix[$row][$col]['filing_image'], $x, $y, 3.1, 3.1, '', '', '', false, 300, '', false, false, 0, false, false, false);
+						$pdf->Image($data_matrix[$row][$col]['filing_image'], $fill_x, $y, 3.1, 3.1, '', '', '', false, 300, '', false, false, 0, false, false, false);
 					}
 						
 					$pdfContent .= '</div>';
