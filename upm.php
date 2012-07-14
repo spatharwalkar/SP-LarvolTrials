@@ -45,29 +45,29 @@ $(document).ready(function(){
 <?php
 //Start controller area
 //save operation controller
-if($_GET['save']=='Save')
+if($_REQUEST['save']=='Save')
 {
-	$query = "select id from products where name='{$_GET['product']}'";
+	$query = "select id from products where name='{$_REQUEST['product']}'";
 	$res = mysql_query($query);
 	$pid = null;
 	while($row = mysql_fetch_assoc($res))
 	{
 		$pid = $row['id'];
 	}
-	unset($_GET['product_id']);
+	unset($_REQUEST['product_id']);
 	//$_GET['product'] = $_GET['product_id'];
 	
-	$_GET['product'] = $pid;
-	$saveStatus = saveData($_GET,$table);
+	$_REQUEST['product'] = $pid;
+	$saveStatus = saveData($_REQUEST,$table);
 	if(!$pid) 
 	{
 		softDieSession('Wrong/no product name selected.');
 	}
 }
 //delete controller
-if(isset($_GET['deleteId']) && is_numeric($_GET['deleteId']) && $deleteFlag)
+if(isset($_REQUEST['deleteId']) && is_numeric($_REQUEST['deleteId']) && $deleteFlag)
 {
-	deleteData($_GET['deleteId'],$table);
+	deleteData($_REQUEST['deleteId'],$table);
 	$pattern = '/(\\?)(deleteId).*?(\\d+)/is';
 	$_SERVER['REQUEST_URI'] =  preg_replace($pattern, '', $_SERVER['REQUEST_URI']);
 	$_SERVER['REQUEST_URI'] = str_replace($script.'.php&', $script.'.php?', $_SERVER['REQUEST_URI']);
@@ -165,7 +165,7 @@ if(isset($_GET['search']))
 echo '<br/>';
 echo '<div class="clr">';
 //add edit form.
-if($_GET['add_new_record']=='Add New Record' || $_GET['id'] || $saveStatus===0)
+if($_REQUEST['add_new_record']=='Add New Record' || $_REQUEST['id'] || $saveStatus===0)
 {
 	$addEditFormStyle = $mainTableStyle = 'style="width:100%"';
 	$addEditGlobalInputStyle = 'style="width:97%;min-width:200px;"';
@@ -176,7 +176,7 @@ if($_GET['add_new_record']=='Add New Record' || $_GET['id'] || $saveStatus===0)
 }
 
 //import controller
-if($_GET['import']=='Import' || $_GET['uploadedfile'])
+if($_REQUEST['import']=='Import' || $_REQUEST['uploadedfile'])
 {
 	importUpm();
 }
