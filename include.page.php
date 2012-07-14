@@ -529,6 +529,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 	unset($post['__utma']);
 	unset($post['__utmc']);
 	unset($post['__utmz']);	//print_r($post);die;	
+	unset($post['li_user']);
 	
 	//import save
 	if($import ==1 && $table=='upm')
