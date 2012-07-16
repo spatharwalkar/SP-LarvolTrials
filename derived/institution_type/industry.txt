@@ -181,6 +181,7 @@ Almirall, S.A.
 Almirall, SAS
 Alnara Pharmaceuticals
 Alnylam Pharmaceuticals
+Alphacore Pharma
 Alpharma ApS
 Alpharma Pharmaceuticals LLC
 Alphatec Spine, Inc.
@@ -1696,6 +1697,7 @@ Kiadis Pharma
 Kibow Biotech Inc.
 Kinamed Incorporated
 KineMed
+KineMed NIH
 Kinetic Concepts, Inc.
 Kinetic Muscles
 Kineticure
