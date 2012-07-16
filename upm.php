@@ -56,7 +56,7 @@ if($_REQUEST['save']=='Save')
 	}
 	unset($_REQUEST['product_id']);
 	//$_GET['product'] = $_GET['product_id'];
-	
+	$_REQUEST = array_merge($_GET, $_POST); 
 	$_REQUEST['product'] = $pid;
 	$saveStatus = saveData($_REQUEST,$table);
 	if(!$pid) 

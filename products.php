@@ -149,6 +149,7 @@ if(isset($_REQUEST['deleteId']) && is_numeric($_REQUEST['deleteId']) && $deleteF
 if($_REQUEST['save']=='Save')
 {
 	$searchDataOld = $_REQUEST['id']?getSearchData('products', 'searchdata', $_REQUEST['id']):null;	
+	$_REQUEST = array_merge($_GET, $_POST); 
 	$saveStatus = saveData($_REQUEST,$table);
 }
 

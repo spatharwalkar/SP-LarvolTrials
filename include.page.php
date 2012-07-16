@@ -523,14 +523,14 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 {
 	global $now;
 	global $db;
-	
+	/*
 	unset($post['qw_login']);
 	unset($post['PHPSESSID']);
 	unset($post['__utma']);
 	unset($post['__utmc']);
 	unset($post['__utmz']);	//print_r($post);die;	
 	unset($post['li_user']);
-	
+	*/
 	//import save
 	if($import ==1 && $table=='upm')
 	{

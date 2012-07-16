@@ -143,6 +143,7 @@ $(document).ready(function(){
 if($_REQUEST['save']=='Save')
 {
 	$searchDataOld = $_REQUEST['id']?getSearchData('areas', 'searchdata', $_REQUEST['id']):null;
+	$_REQUEST = array_merge($_GET, $_POST); 
 	$saveStatus = saveData($_REQUEST,$table);
 }
 
