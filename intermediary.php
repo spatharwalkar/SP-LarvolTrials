@@ -1,15 +1,22 @@
 <?php 
 header('P3P: CP="CAO PSA OUR"');
 session_start();
-
+//connect to Sphinx
+$sphinx = mysql_connect("127.0.0.1:9306") or die ("Couldn't connect to Sphinx server.");
 require_once('krumo/class.krumo.php');
 require_once('db.php');
 require_once('include.search.php');
 require_once('special_chars.php');
 require_once('run_trial_tracker.php');
 require('searchhandler.php');
-
-
+if(isset($_GET['sphinx_s']))
+{
+	$Sphinx_search=$_GET['sphinx_s'];
+	$_SESSION['sphinx_s']=$_GET['sphinx_s'];
+}
+else
+	$Sphinx_search=$_SESSION['sphinx_s'];
+	
 /********* If Report generation time is less than 1 Jan 2012, time machine is disabled **********/
 if($_REQUEST['time'] != NULL && $_REQUEST['time'] != '')
 {

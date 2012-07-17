@@ -450,4 +450,130 @@ function searchHandlerBackTicker(&$item,$key,$userKey)
 		$item = backTicker($item);
 	}
 }
+
+// Fulltext search using Sphinx
+function sphinx_search($srch_string=null)
+{
+	global $sphinx,$db;
+	if(!isset($srch_string)) return false;
+	$str=$srch_string;
+	$qry="SELECT * FROM rtindex1 where MATCH('".$str."')";
+	$rs = mysql_query($qry,$sphinx);
+	$cnt=0;
+	$idlist="";
+	while($row = mysql_fetch_assoc($rs)) 
+	{
+		if($cnt==0) $idlist.="'".$row['id']."'";
+		else $idlist.=",'".$row['id']."'";
+		$cnt++;
+	}
+
+	$qry="
+		SELECT dt.`larvol_id`, dt.`source_id`, dt.`brief_title`, dt.`acronym`, dt.`lead_sponsor`, dt.`collaborator`, dt.`condition`, 
+		dt.`overall_status`, dt.`is_active`, dt.`start_date`, dt.`end_date`, dt.`enrollment`, dt.`enrollment_type`, dt.`intervention_name`, 
+		dt.`region`, dt.`lastchanged_date`, dt.`phase`, dt.`firstreceived_date`, dt.`viewcount`, dt.`source`, dm.`larvol_id` 
+		AS manual_larvol_id, dm.`is_sourceless` AS manual_is_sourceless, dm.`brief_title` AS manual_brief_title, dm.`acronym` 
+		AS manual_acronym, dm.`lead_sponsor` AS manual_lead_sponsor, dm.`collaborator` AS manual_collaborator, dm.`condition` 
+		AS manual_condition, dm.`overall_status` AS manual_overall_status, dm.`region` AS manual_region, dm.`end_date` 
+		AS manual_end_date, dm.`enrollment` AS manual_enrollment, dm.`enrollment_type` AS manual_enrollment_type, dm.`intervention_name` 
+		AS manual_intervention_name, dm.`phase` AS manual_phase  FROM `data_trials` dt LEFT JOIN `data_manual` dm ON dt.`larvol_id` = dm.`larvol_id`
+		where dt.larvol_id in (" . $idlist . ") ORDER BY  dt.`phase` DESC, dt.`end_date` ASC, dt.`start_date` ASC, dt.`overall_status` ASC, 
+		dt.`enrollment` ASC ";
+	$res = mysql_query($qry);
+	return $res;
+
+}
+
+// Delete trial from Sphinx index
+function delete_sphinx_index($l_id)
+{
+	global $sphinx;
+	if(!$l_id) return false;
+	
+	$query ="DELETE FROM rtindex1 WHERE id =" . $l_id  ;
+	$result = mysql_query($query,$sphinx);
+	if (!$result) 
+	{
+		echo mysql_error($sphinx);
+		return false;
+	}
+	else return true;
+
+}
+
+
+//Update trial in Sphinx index
+function update_sphinx_index($l_id)
+{
+	if(!$l_id) return false;
+	$query = 'SELECT  
+				larvol_id, source_id, brief_title, acronym, official_title, lead_sponsor, collaborator, institution_type, source, 
+				brief_summary, detailed_description, overall_status, is_active, enrollment, criteria, inclusion_criteria, 
+				exclusion_criteria, org_study_id, phase, `condition`, intervention_name, intervention_description, 
+				primary_outcome_measure, primary_outcome_timeframe, region, keyword,lastchanged_date
+				from data_trials where larvol_id = '. $l_id .' limit 1 ';
+	
+
+	$res = mysql_query($query) or die(mysql_error());
+	if($res === false)
+	{
+		$log = 'Bad SQL query getting data from data_trials. Query='.$query.' , Error='.mysql_error();
+		return softDie($log);
+	}
+	$res = mysql_fetch_assoc($res);
+	if($res === false)
+	{
+		return false;
+	}
+    
+	$qry2="REPLACE INTO rtindex1 
+	(
+	id, source_id, brief_title, acronym, official_title, lead_sponsor, collaborator, institution_type, 
+	source,  brief_summary, detailed_description, overall_status, is_active,  enrollment, criteria, inclusion_criteria, 
+	exclusion_criteria, org_study_id, phase, condition, intervention_name, intervention_description, 
+	primary_outcome_measure, primary_outcome_timeframe, region, keyword,lastchanged_date 
+	)";
+	$qry="
+	VALUES 
+	(".
+	(($res['larvol_id'])?"'".str_replace("'", "",$res['larvol_id'])."'":"''").",".
+	(($res['source_id'])?"'".str_replace("'", "",$res['source_id'])."'":"''").",".
+	(($res['brief_title'])?"'".str_replace("'", "",$res['brief_title'])."'":"''").",".
+	(($res['acronym'])?"'".str_replace("'", "",$res['acronym'])."'":"''").",".
+	(($res['official_title'])?"'".str_replace("'", "",$res['official_title'])."'":"''").",".
+	(($res['lead_sponsor'])?"'".str_replace("'", "",$res['lead_sponsor'])."'":"''").",".
+	(($res['collaborator'])?"'".str_replace("'", "",$res['collaborator'])."'":"''").",".
+	(($res['institution_type'])?"'".str_replace("'", "",$res['institution_type'])."'":"''").",".
+	(($res['source'])?"'".str_replace("'", "",$res['source'])."'":"''").",".
+	(($res['brief_summary'])?"'".str_replace("'", "",$res['brief_summary'])."'":"''").",".
+	(($res['detailed_description'])?"'".str_replace("'", "",$res['detailed_description'])."'":"''").",".
+	(($res['overall_status'])?"'".str_replace("'", "",$res['overall_status'])."'":"''").",".
+	(($res['is_active'])?"'".str_replace("'", "",$res['is_active'])."'":"''").",".
+	(($res['enrollment'])?"'".str_replace("'", "",$res['enrollment'])."'":"''").",".
+	(($res['criteria'])?"'".str_replace("'", "",$res['criteria'])."'":"''").",".
+	(($res['inclusion_criteria'])?"'".str_replace("'", "",$res['inclusion_criteria'])."'":"''").",".
+	(($res['exclusion_criteria'])?"'".str_replace("'", "",$res['exclusion_criteria'])."'":"''").",".
+	(($res['org_study_id'])?"'".str_replace("'", "",$res['org_study_id'])."'":"''").",".
+	(($res['phase'])?"'".str_replace("'", "",$res['phase'])."'":"''").",".
+	(($res['condition'])?"'".str_replace("'", "",$res['condition'])."'":"''").",".
+	(($res['intervention_name'])?"'".str_replace("'", "",$res['intervention_name'])."'":"''").",".
+	(($res['intervention_description'])?"'".str_replace("'", "",$res['intervention_description'])."'":"''").",".
+	(($res['primary_outcome_measure'])?"'".str_replace("'", "",$res['primary_outcome_measure'])."'":"''").",".
+	(($res['primary_outcome_timeframe'])?"'".str_replace("'", "",$res['primary_outcome_timeframe'])."'":"''").",".
+	(($res['region'])?"'".str_replace("'", "",$res['region'])."'":"''").",".
+	(($res['keyword'])?"'".str_replace("'", "",$res['keyword'])."'":"''").",".
+	(($res['lastchanged_date'])?"'".str_replace("'", "",$res['lastchanged_date'])."'":"''")
+	.")";
+	
+	$qry=$qry2.$qry;
+	global $sphinx;
+	$res = mysql_query($qry,$sphinx);
+//	mysql_close($sphinx);
+	if($res === false)
+	{
+		$log = '<br>Bad SQL query updating Sphinx index. Query:<br>'.$qry.'<br> ,<b>Error:</b><br>'.mysql_error($sphinx) ;
+		return softDie($log);
+	}
+}
+
 ?>

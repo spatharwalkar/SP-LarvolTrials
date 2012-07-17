@@ -48,6 +48,7 @@ if(isset($_POST['delsch']) && is_array($_POST['delsch']))
 	 	$field_str .="{ field: 'product', name: 'product', id: 2, ftype: 'string', defaultval: '', type: 'product' , values:\"varchar(255)\"},";
 	 	$field_str .="{ field: 'area', name: 'area', id: 2, ftype: 'string', defaultval: '', type: 'area' , values:\"varchar(255)\"},";
 	}
+	$field_str .="{ field: 'All', name: 'All', id: 2, ftype: 'string', defaultval: '', type: 'sphinx' , values:\"varchar(255)\"},";
      $field_str = substr($field_str, 0, -1); //strip last comma
      //$field_str .= "],";
      echo($field_str);

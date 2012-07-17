@@ -9,6 +9,9 @@ require_once('PHPExcel/Writer/Excel2007.php');
 require_once('include.excel.php');
 require_once 'PHPExcel/IOFactory.php';
 require_once('special_chars.php');
+require_once('include.util.php');
+//require_once('get_sphinx_results.php');
+
 
 class TrialTracker
 {
@@ -69,6 +72,7 @@ class TrialTracker
 	
 	function generateTrialTracker($format, $resultIds, $timeMachine = NULL, $ottType, $globalOptions = array())
 	{	
+		global $Sphinx_search;
 		switch($format)
 		{
 			case 'xml':
@@ -6067,7 +6071,8 @@ class TrialTracker
 		$linkExpiry = array();
 		$productSelectorTitle = 'All Products';
 		$productSelector = array();
-		
+		global $sphinx;
+		global $Sphinx_search;
 		if($ottType == 'unstacked')
 		{
 			$Id = explode(".", $resultIds);
@@ -7478,6 +7483,7 @@ class TrialTracker
 	function processIndexedOTTData($TrialsInfo = array(), $ottType, $Ids = array(), $timeMachine = NULL, $globalOptions = array())
 	{	
 		global $logger;
+		global $Sphinx_search;
 		
 		$totinactivecount = 0;
 		$totactivecount = 0;
@@ -7589,7 +7595,7 @@ class TrialTracker
 			}
 		}
 					
-		if(isset($globalOptions['JSON_search']))
+		if(isset($globalOptions['JSON_search'])  or isset($_GET['sphinx_s']))
 		{
 			$Ids=array('Search Result' => 'Search'); //Set ID's Array so loop will be executed atleast one time
 		}
@@ -7648,10 +7654,28 @@ class TrialTracker
 				//echo '<br/><br/><br/>query-->'.
 				$query .= $where . " ORDER BY " . $orderBy;
 			}
-			
 			$res = mysql_query($query);
+			$data1=array();$data2=array();
 			while($row = mysql_fetch_assoc($res))
 			{	
+				$data1[]=$row;
+			}
+			if(isset($Sphinx_search))
+			{
+				$res = sphinx_search($Sphinx_search);
+				if($res!==false)
+				while($row = mysql_fetch_assoc($res))
+				{	
+					$data2[]=$row;
+				} 
+				$data1=array_merge($data1, $data2);
+			}
+			
+			
+			
+			foreach($data1 as $kk => $vv)
+			{
+				$row=$vv;
 				$result = $this->processData($ikey, $row, $timeMachine, $timeInterval);
 			
 				if($globalOptions['onlyUpdates'] == "yes")
@@ -7706,7 +7730,6 @@ class TrialTracker
 					}
 				}
 			}	
-			
 			$fullRecordRes = mysql_query($fullRecordQry);
 			while($fRow = mysql_fetch_assoc($fullRecordRes))
 			{
@@ -12152,6 +12175,12 @@ function Build_OTT_Query($data, $Passed_where)
 		$sort_datas = $filterData["sortdata"];
 		$isOverride = !empty($override_vals);
 		
+		foreach($sort_datas as $ky => $vl )
+			{
+				if($vl["columnname"] == '`All`')
+				unset($sort_datas[$ky]);
+			}
+		
 		$prod_flag=0; $area_flag=0; $prod_col=0; $area_col=0;
 		if(is_array($where_datas) && !empty($where_datas))
 		{
@@ -12267,13 +12296,12 @@ function get_WhereString($data, $alias, $pd_alias, $ar_alias)
 	$prevchain = ' ';
 	try {
 
-		foreach($wheredatas as $where_data)
+		foreach($wheredatas as $wh_key => $where_data)
 		{
 			$op_name = $where_data["opname"];
 			$column_name = $where_data["columnname"];
 			$column_value = $where_data["columnvalue"];
 			$chain_name = $where_data["chainname"];
-			
 			if($column_name == '`product`' || $column_name == '`area`')
 				$column_name='`id`';
 				

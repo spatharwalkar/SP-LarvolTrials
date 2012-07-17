@@ -1,7 +1,8 @@
 <?php
 
 require_once('db.php');
-
+require_once('include.util.php');
+$Sphinx_search=null;
 switch($_REQUEST['op']){
 
 	case 'load':
@@ -415,16 +416,23 @@ function testQuery($jsonOp=0,$scriptCall=0,$data=null)
 
 function runQuery($jsonData)
 {
+	
 	global $db;
+	global $Sphinx_search;
 	//$jsonData=$_REQUEST['data'];
 	$filterData = json_decode($jsonData, true, 10);
-	
 	///// Part To replace Product/Area name by id as its faster to search
 	if(is_array($filterData["wheredata"]) && !empty($filterData["wheredata"]))
 	{
 		foreach($filterData["wheredata"] as $key=>$where_data)
 		{
-			if($where_data["columnname"] == 'product' || $where_data["columnname"] == 'area')
+			if($where_data['columnname']=='All')
+			{
+				$Sphinx_search=$where_data['columnvalue'];
+				unset($filterData["wheredata"][$key]);
+				
+			}
+			elseif($where_data["columnname"] == 'product' || $where_data["columnname"] == 'area')
 			{
 				$ProdORAreaID=get_ProdORAreaID($where_data["columnvalue"], $where_data["columnname"]);
 				if($ProdORAreaID)
@@ -479,7 +487,11 @@ function runQuery($jsonData)
 	{
 		foreach($sort_datas as $sort_column)
 		{
-			if($sort_column["columnas"] != '' && $sort_column["columnas"] != NULL)
+			if($sort_column['columnas']=='All')
+			{
+				unset($filterData["sortdata"][$ky]);
+			}
+			elseif($sort_column["columnas"] != '' && $sort_column["columnas"] != NULL)
 			$OT_Exist_Flg=1;
 		}
 	}
@@ -492,17 +504,18 @@ function runQuery($jsonData)
 	if(!isset($_REQUEST['forcePost']))
 	{	
 		$link=urlPath().'intermediary.php?p= '.$prod.'&a= '.$area;
-		if($OT_Exist_Flg)	//if OTT exists just send data as it is we will process it in run_trial_tracket
+		if(!empty($Sphinx_search)) $link.='&sphinx_s='.mysql_real_escape_string($Sphinx_search);
+		if($OT_Exist_Flg and !empty($filterData["wheredata"]) )	//if OTT exists just send data as it is we will process it in run_trial_tracket
 		{
 			$link.='&JSON_search='.$jsonData;
 		}
-		else if($prod=='' && $area=='')
+		else if($prod=='' && $area==''  && !empty($filterData["wheredata"]))
 		$link.='&JSON_search='.$jsonData;
 		
 	
 		header("Location: ".$link); 
 	}
-	elseif(isset($_REQUEST['forcePost']) && $_REQUEST['forcePost']==1)
+	elseif(isset($_REQUEST['forcePost']) && $_REQUEST['forcePost']==1  && !empty($filterData["wheredata"]))
 	{
 		$_REQUEST['JSON_search'] = $jsonData;
 	}
@@ -514,6 +527,28 @@ function buildQuery($data, $isCount=false)
 	try {
 		$jsonData=$data;
 		$filterData = json_decode($jsonData, true, 10);
+		foreach($filterData["wheredata"] as $ky => $vl)
+		{
+			if($vl['columnname']=='All')
+			{
+				$Sphinx_search=$vl['columnvalue'];
+				unset($filterData["wheredata"][$ky]);
+			}
+		}
+		foreach($filterData["columndata"] as $ky => $vl)
+		{
+			if($vl['columnname']=='All')
+			{
+				unset($filterData["columndata"][$ky]);
+			}
+		}
+		foreach($filterData["sortdata"] as $ky => $vl)
+		{
+			if($vl['columnname']=='All')
+			{
+				unset($filterData["sortdata"][$ky]);
+			}
+		}
 		if(is_array($filterData))
 		array_walk_recursive($filterData, 'searchHandlerBackTicker','columnname');
 		if(is_array($filterData))
@@ -559,15 +594,18 @@ function buildQuery($data, $isCount=false)
 		
 		if(is_array($sort_datas) && !empty($sort_datas) && (!$prod_flag || !$area_flag))
 		{
-			foreach($sort_datas as $sort_column)
+			foreach($sort_datas as $ky => $sort_column)
 			{
-				if($sort_column["columnas"] == '`product`')
-				$prod_flag=1;
-				if($sort_column["columnas"] == '`area`')
-				$area_flag=1;
+				if($sort_column['columnas']=='All')
+				{
+					unset($sort_datas[$ky]);
+				}
+				elseif($sort_column["columnas"] == '`product`')
+					$prod_flag=1;
+				elseif($sort_column["columnas"] == '`area`')
+					$area_flag=1;
 			}
 		}
-		
 		$select_str = getSelectString($select_columns, $alias, $pd_alias, $ar_alias);
 		$where_str = getWhereString($where_datas, $alias, $pd_alias, $ar_alias);
 		$sort_str = getSortString($sort_datas, $alias, $pd_alias, $ar_alias);
@@ -676,7 +714,11 @@ function getSelectString($data, $alias, $pd_alias, $ar_alias)
 	{
 		foreach($select_columns as $selectcolumn)
 		{
-			if($selectcolumn["columnname"] == '`product`')
+			if($selectcolumn['columnname']=='All')
+			{
+				continue;
+			}
+			elseif($selectcolumn["columnname"] == '`product`')
 				$query .="" . $pd_alias . ".`name` AS " . $selectcolumn["columnas"] . ", ";
 			elseif($selectcolumn["columnname"] == '`area`')
 				$query .= "" . $ar_alias . ".`name` AS " . $selectcolumn["columnas"] . ", ";
@@ -701,7 +743,10 @@ function getSortString($data, $alias, $pd_alias, $ar_alias)
 	{
 		$sort_as = $sort_column["columnas"];
 		$sorttype = $sort_as=="Ascending"? "asc" : "desc";
-		
+		if($sort_column['columnname']=='All')
+		{
+			continue;
+		}
 		if($sort_column["columnname"] == '`product`')
 			$query .= $pd_alias.".`name` "  . $sorttype . ", ";
 		elseif($sort_column["columnname"] == '`area`')
@@ -733,7 +778,6 @@ function getWhereString($data, $alias, $pd_alias, $ar_alias)
 			$column_name = $where_data["columnname"];
 			$column_value = $where_data["columnvalue"];
 			$chain_name = $where_data["chainname"];
-			
 			if($column_name == '`product`' || $column_name == '`area`')
 				$column_name='`name`';
 				

@@ -196,6 +196,8 @@ $.initialBracesFlag = 9;
 	        			$.initialBracesFlag = 1;
 	        		}            	
                 //j.wheredata[i].columnslot, j.wheredata[i].opslot,j.wheredata[i].chainslot,j.wheredata[i].columnvalue
+				if(col_name != '`All`')
+				{
             	var col_name = j.wheredata[i].columnname;
                 var col_slot = columnHash[col_name];
                 if(col_slot == null)continue;
@@ -206,8 +208,8 @@ $.initialBracesFlag = 9;
                 var chain_slot = chainHash[chain_name];
                 if(chain_slot == null)continue;
 				
-                wherediv[0].opts.onselect(col_slot, wherediv, { columnslot: col_slot, opslot: op_slot, chainslot: chain_slot, columnvalue: j.wheredata[i].columnvalue });
-
+					wherediv[0].opts.onselect(col_slot, wherediv, { columnslot: col_slot, opslot: op_slot, chainslot: chain_slot, columnvalue: j.wheredata[i].columnvalue });
+				}
             }
 
         }
@@ -897,7 +899,10 @@ $.initialBracesFlag = 9;
                                   '"chainname":"' + chain_name + '",' +
                                   '"columnvalue":"' + col_value + '"' +
                                 '},';
-                    data = data + columndata;
+					if(col_name != '`All`')
+					{
+						data = data + columndata;
+					}
                 });
                 data = data.replace(/,$/, '');
                 data = data + '],'; //close where data   
@@ -1616,6 +1621,27 @@ $.initialBracesFlag = 9;
         	    break;
 				 case 'product':
 				 case 'area':
+        		   exclusion = [
+       	        			 { name: 'NotEqualTo'},
+							 { name: 'StartsWith'},
+							 { name: 'NotStartsWith'},
+							 { name: 'Contains'},
+							 { name: 'NotContains'},
+							 { name: 'BiggerThan'},
+							 { name: 'BiggerOrEqualTo'},
+							 { name: 'SmallerThan'},
+							 { name: 'SmallerOrEqualTo'},
+							 { name: 'InBetween'},
+							 { name: 'NotInBetween'},
+							 { name: 'IsIn'},
+							 { name: 'IsNotIn'},
+							 { name: 'IsNull'},
+							 { name: 'NotNull'},
+							 { name: 'Regex'},
+							 { name: 'NotRegex'}
+       	        			 ];
+        	    break;
+				case 'sphinx':
         		   exclusion = [
        	        			 { name: 'NotEqualTo'},
 							 { name: 'StartsWith'},
