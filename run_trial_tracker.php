@@ -9438,7 +9438,7 @@ class TrialTracker
 	
 	function displayFilterControls($productSelectorTitle, $shownCount, $activeCount, $inactiveCount, $totalCount, $globalOptions = array(), $ottType, $loggedIn)
 	{	
-		echo '<table border="0" cellspacing="0" class="controls" align="center">'
+		echo '<table border="0" cellspacing="0" class="controls" align="center" style="_width:80%; table-layout: fixed">'
 				. '<tr><th>Active</th><th>Status</th><th style="width:170px">Institution type</th>'
 				. '<th style="width:80px">Region</th><th style="width:50px">Phase</th><th class="right" style="width:340px">Ranges</th></tr>'
 				. '<tr><td class="bottom" style="padding-right:5px;">'
@@ -9579,7 +9579,7 @@ class TrialTracker
 					. '<label style="color:#f6931f;float:left;">-</label>'
 					. '<input type="text" id="endrange"  name="er" value="' . $globalOptions['endrange'] 
 					. '" style="width:auto;margin-left:15px;" class="jdpicker" />'
-					. '<br/><div id="slider-range-min" style="margin-top:5px;"></div></p></div>';
+					. '<br/><div id="slider-range-min" style="width:320px; margin:5px 0px 0 0px;" align="left"></div></p></div>';
 		}
 		else
 		{
@@ -9587,7 +9587,7 @@ class TrialTracker
 					. '<input type="hidden" id="startrange" name="sr" value="' . $globalOptions['startrange'] . '" />'
 					. '<input type="text" id="endrange" name="er" value="' . $globalOptions['endrange'] 
 					. '" readonly="readonly" style="border:0; color:#f6931f; font-weight:bold;" />'
-					. '<div id="slider-range-min"></div></p></div>';
+					. '<div id="slider-range-min" style="width:320px; margin:5px 0px 0 0px;" align="left"></div></p></div>';
 		}
 			
 		echo '<input type="checkbox" id="showonlyupdated" name="osu" ' 
@@ -9596,7 +9596,7 @@ class TrialTracker
 				. '<br/><div class="demo" style="padding-top:4px;"><p><label for="amount">Enrollment:</label>'
 				. '<input type="text" name="enroll" id="amount" style="border:0; color:#f6931f; font-weight:bold;" '
 				. ' value="' . ((isset($globalOptions['enroll'])) ? $globalOptions['enroll'] : '' ) . '" autocomplete="off" />'
-				. '<div id="slider-range"></div>'
+				. '<div id="slider-range" style="width:320px; margin:2px 0px 0 0px;" align="left"></div>'
 				. '</p></div>';
 		if($ottType != 'unstacked' && $ottType != 'indexed' && $ottType != 'unstackedoldlink')
 		{
