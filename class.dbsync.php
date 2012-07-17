@@ -173,17 +173,47 @@
                         }
                         else
                         {
-                        	if($tables_home[$i] == 'rpt_ott_upm')
-                        	{
-                        		//pr($fields_home[2]);pr($fields_sync[2]);die;
-                        		//pr($fields_home);
-                        		//pr($fields_sync);die;
-                        	}
+
                         		$keys_home = $this->GetPrimaryKeys($fields_home_tmp);
 	                        	$k = $this->GetFieldIndex($fields_sync, $fields_home[$j]['name']);
 	                        	
 	                        	//decision parameters for ordering
 	                        	$newFieldHomeKey = $newFieldSyncKey = null;
+	                        	
+	                        	/* avoid un-necessary modify queries due to a new field as it shifts all normal ordering & we can safely  
+	                        	 * remove the already handled new field through add query handled near $db_sync->AddTableField( code lying above.
+	                        	 * */ 
+	                        	if(count($fieldNamesOrderHome) > count($fieldNamesOrderSync))
+	                        	{
+	                        		$extraFields = array_diff(array_values($fieldNamesOrderHome), array_values($fieldNamesOrderSync));
+	                        		//the keys of extrafields is enof to unset is as its relative.
+	                        		foreach($extraFields as $extraKy =>$extraVal)
+	                        		{
+	                        			unset($fieldNamesOrderHome[$extraKy]);
+	                        		}
+	                        		//once unset make the keys to have a natural order for normal order compare.
+	                        		$fieldNamesOrderHome = array_values($fieldNamesOrderHome);
+	                        	}
+	                        	if(count($fieldNamesOrderHome) < count($fieldNamesOrderSync))
+	                        	{
+	                        		$extraFields = array_diff(array_values($fieldNamesOrderSync), array_values($fieldNamesOrderHome));
+	                        		//the keys of extrafields is enof to unset is as its relative.
+	                        		foreach($extraFields as $extraKy =>$extraVal)
+	                        		{
+	                        			unset($fieldNamesOrderSync[$extraKy]);
+	                        		}
+	                        		//once unset make the keys to have a natural order for normal order compare.
+	                        		$fieldNamesOrderSync = array_values($fieldNamesOrderSync);
+	                        	}	                        	
+/*	                        	if($tables_home[$i] == 'rpt_masterhm_headers')
+	                        	{
+	                        		//pr($fields_home[2]);pr($fields_sync[2]);die;
+	                        		//pr($fields_home);
+	                        		//pr($fields_sync);die;
+ 	                        		pr($fieldNamesOrderHome);
+	                        		pr($fieldNamesOrderSync);
+	                        		die; 
+	                        	}	*/                        	
 	                        	$newFieldHomeKey = array_search( $fields_home[$j]['name'],$fieldNamesOrderHome);
 	                        	$newFieldSyncKey = array_search($fields_sync[$k]['name'],$fieldNamesOrderSync);
 	                        	//
