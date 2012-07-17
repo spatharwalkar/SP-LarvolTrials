@@ -457,7 +457,7 @@ function sphinx_search($srch_string=null)
 	global $sphinx,$db;
 	if(!isset($srch_string)) return false;
 	$str=$srch_string;
-	$qry="SELECT * FROM rtindex1 where MATCH('".$str."')";
+	$qry="SELECT * FROM rtindex1 where MATCH('".$str."') limit 10000";
 	$rs = mysql_query($qry,$sphinx);
 	$cnt=0;
 	$idlist="";
