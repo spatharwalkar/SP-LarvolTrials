@@ -87,7 +87,7 @@ $globalOptions['maxEnroll'] = "0";
 $globalOptions['product'] = array();
 
 $globalOptions['startrange'] = "now";
-$globalOptions['endrange'] = "1 month ago";
+$globalOptions['endrange'] = "1 month";
 
 $globalOptions['includeProductsWNoData'] = "off";
 
@@ -150,24 +150,24 @@ if($globalOptions['startrange'] != '' && $globalOptions['endrange'] != '')
 switch($globalOptions['startrange'])
 {	
 	case "now": $starttimerange = 0; break;
-	case "1 week ago": $starttimerange = 1; break;
-	case "2 weeks ago": $starttimerange = 2; break;
-	case "1 month ago": $starttimerange = 3; break;
-	case "1 quarter ago": $starttimerange = 4; break;
-	case "6 months ago": $starttimerange = 5; break;
-	case "1 year ago": $starttimerange = 6; break;
+	case "1 week": $starttimerange = 1; break;
+	case "2 weeks": $starttimerange = 2; break;
+	case "1 month": $starttimerange = 3; break;
+	case "1 quarter": $starttimerange = 4; break;
+	case "6 months": $starttimerange = 5; break;
+	case "1 year": $starttimerange = 6; break;
 	default: $starttimerange = 0; break;
 }
 
 switch($globalOptions['endrange'])
 {
 	case "now": $endtimerange = 0; break;
-	case "1 week ago": $endtimerange = 1; break;
-	case "2 weeks ago": $endtimerange = 2; break;
-	case "1 month ago": $endtimerange = 3; break;
-	case "1 quarter ago": $endtimerange = 4; break;
-	case "6 months ago": $endtimerange = 5; break;
-	case "1 year ago": $endtimerange = 6; break;
+	case "1 week": $endtimerange = 1; break;
+	case "2 weeks": $endtimerange = 2; break;
+	case "1 month": $endtimerange = 3; break;
+	case "1 quarter": $endtimerange = 4; break;
+	case "6 months": $endtimerange = 5; break;
+	case "1 year": $endtimerange = 6; break;
 	default: $endtimerange = 3; break;
 }
 
@@ -631,12 +631,12 @@ global $db;
 		switch($timerange)
 		{
 			case 0: $timerange = "now"; break;
-			case 1: $timerange = "1 week ago"; break;
-			case 2: $timerange = "2 weeks ago"; break;
-			case 3: $timerange = "1 month ago"; break;
-			case 4: $timerange = "1 quarter ago"; break;
-			case 5: $timerange = "6 months ago"; break;
-			case 6: $timerange = "1 year ago"; break;
+			case 1: $timerange = "1 week"; break;
+			case 2: $timerange = "2 weeks"; break;
+			case 3: $timerange = "1 month"; break;
+			case 4: $timerange = "1 quarter"; break;
+			case 5: $timerange = "6 months"; break;
+			case 6: $timerange = "1 year"; break;
 		}
 		return $timerange;
 	}
@@ -646,12 +646,12 @@ global $db;
 		switch($timerange)
 		{
 			case 0: $timerange = "now"; break;
-			case 1: $timerange = "1 week ago"; break;
-			case 2: $timerange = "2 weeks ago"; break;
-			case 3: $timerange = "1 month ago"; break;
-			case 4: $timerange = "1 quarter ago"; break;
-			case 5: $timerange = "6 months ago"; break;
-			case 6: $timerange = "1 year ago"; break;
+			case 1: $timerange = "1 week"; break;
+			case 2: $timerange = "2 weeks"; break;
+			case 3: $timerange = "1 month"; break;
+			case 4: $timerange = "1 quarter"; break;
+			case 5: $timerange = "6 months"; break;
+			case 6: $timerange = "1 year"; break;
 		}
 		return $timerange;
 	}

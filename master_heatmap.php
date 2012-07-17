@@ -1535,7 +1535,7 @@ function Download_reports()
 		$start_range = 'now';
 		$end_range = '-1 month';
 		$sr = 'now';
-		$er = '1 month ago';
+		$er = '1 month';
 	}
 
 /* 	echo '<pre>';
