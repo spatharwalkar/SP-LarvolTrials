@@ -574,8 +574,12 @@ function refresher(row, col, tot_rows, tot_cols)
 }
 
 </script>
+<style type="text/css">
+img { behavior: url("css/iepngfix.htc"); }
+</style>
 <link href="css/popup_form.css" rel="stylesheet" type="text/css" media="all" />
 <link rel="stylesheet" type="text/css" href="css/chromestyle2.css" />
+<script type="text/javascript" src="scripts/iepngfix_tilebg.js"></script>
 <script type="text/javascript" src="scripts/popup-window.js"></script>
 <script type="text/javascript" src="scripts/chrome.js"></script>
 <link type="text/css" href="css/confirm_box.css" rel="stylesheet" />

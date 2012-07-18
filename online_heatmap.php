@@ -520,6 +520,7 @@ if($Rotation_Flg == 1)
 <script src="scripts/jquery-1.7.1.min.js"></script>
 <script src="scripts/jquery-ui-1.8.17.custom.min.js"></script>
 <script type="text/javascript" src="scripts/chrome.js"></script>
+<script type="text/javascript" src="scripts/iepngfix_tilebg.js"></script>
 <?php if($db->loggedIn()) { //No Date-Picker for NON-LoggedIN Users  ?>	
 <script type="text/javascript" src="date/jquery.date_input.js"></script>
 <script type="text/javascript" src="scripts/date/jquery.jdpicker.js"></script>
@@ -585,6 +586,7 @@ if($Rotation_Flg == 1)
 
 /* As in IE6 hover css does not works, below htc file is added which contains js script which will be executed only in IE, the script convert simple as well as complex hover css into compatible format for IE6 by replacing hover by class css - this file is used so that help tab as well as product selector will work in IE6 without any changes of code as well as css code and script can be also useful for making other css to work in IE6 like :hover and :active for IE6+, and additionally :focus for IE7 and IE8. */
 ul, li { behavior:url("css/csshover3.htc"); }
+img { behavior: url("css/iepngfix.htc"); }
 
 body { font-family:Verdana; font-size: 13px;}
 a, a:hover{/*color:#000000; text-decoration:none;*/ height:100%;}
