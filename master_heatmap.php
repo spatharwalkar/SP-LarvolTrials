@@ -815,7 +815,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 				if($cell_data['bomb_auto'] == 'small')
 				{
 					$data_matrix[$row][$col]['bomb_auto']['value']=$cell_data['bomb_auto'];
-					$data_matrix[$row][$col]['bomb_auto']['src']='sbomb.png';
+					$data_matrix[$row][$col]['bomb_auto']['src']='new_sbomb.png';
 					$data_matrix[$row][$col]['bomb_auto']['alt']='Small Bomb';
 					$data_matrix[$row][$col]['bomb_auto']['style']='width:9px; height:11px;';
 					$data_matrix[$row][$col]['bomb_auto']['title']='Suggested';
@@ -823,7 +823,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 				elseif($cell_data['bomb_auto'] == 'large')
 				{
 					$data_matrix[$row][$col]['bomb_auto']['value']=$cell_data['bomb_auto'];
-					$data_matrix[$row][$col]['bomb_auto']['src']='lbomb.png';
+					$data_matrix[$row][$col]['bomb_auto']['src']='new_lbomb.png';
 					$data_matrix[$row][$col]['bomb_auto']['alt']='Large Bomb';
 					$data_matrix[$row][$col]['bomb_auto']['style']='width:18px; height:20px;';
 					$data_matrix[$row][$col]['bomb_auto']['title']='Suggested';
