@@ -624,6 +624,19 @@ global $db;
 		$timerange = '<?php echo $globalOptions['endrange'];?>';
 		$("#endrange").val($timerange);
 		<?php } ?>
+		
+		$("#productbox li").click(function () {
+			//$checkbox = $(this).children(':checkbox');
+			if($(this).find('input:checkbox').attr('checked'))
+			{
+				$(this).find('input:checkbox').attr('checked', false);
+			}
+			else
+			{
+				$(this).find('input:checkbox').attr('checked', true);
+			}
+		});
+		
 	});
 
 	function timeEnum($timerange)

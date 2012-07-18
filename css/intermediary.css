@@ -407,8 +407,14 @@ tr.upms td {
     color:#000000;
     display:block;
 	padding-right:10px;
+	cursor: pointer;
    /* width:400px;*/
 }
+
+#menuwrapper ul li ul li a label{
+	cursor: pointer;
+}
+
 
 /**** THIRD LEVEL MENU ****/
 /* We need to hide the 3rd menu, when hovering the first level menu */
