@@ -9345,7 +9345,7 @@ class TrialTracker
 		$outputStr = '<table width="100%" cellpadding="5" cellspacing="0" class="manage">'
 			 . '<tr>' . (($loggedIn) ? '<th width="38px">ID</th>' : '' )
 			 . '<th width="270px">Title</th>'
-			 . '<th width="30px" title="Black: Actual&nbsp;&nbsp;Gray: Anticipated&nbsp;&nbsp;Red: Change greater than 20%">N</th>'
+			 . '<th width="30px" title="Red: Change greater than 20%">N</th>'
 			 . '<th width="65px" title="&quot;ROW&quot; = Rest of World">Region</th>'
 			 . '<th width="115px">Interventions</th>'
 			 . '<th width="90px">Sponsor</th>'
