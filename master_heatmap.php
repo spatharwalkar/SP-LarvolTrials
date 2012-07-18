@@ -2770,114 +2770,114 @@ function Download_reports()
 					if($data_matrix[$row][$col]['new_trials'] > 0)
 					{
 						$Status_List_Flg_1=1;
-						$Status_List_1 = "New trials: ". $data_matrix[$row][$col]['new_trials'] ." \n";
+						$Status_List_1 = "New trials: ". $data_matrix[$row][$col]['new_trials'] ."\n";
 					}
 					
 					if($Status_List_Flg_1==1)
 					$annotation_text2 = $Status_List_1;
 					
 					$Status_List_Flg_2=0;
-					$Status_List_2 = "Number of trials with updated status: \n";
+					$Status_List_2 = "Status changes to:\n";
 					if($data_matrix[$row][$col]['not_yet_recruiting'] > 0)
 					{
 						$Status_List_Flg_2=1;
-						$Status_List_2 .= "\"Not yet recruiting\": ". $data_matrix[$row][$col]['not_yet_recruiting'] ." \n";
+						$Status_List_2 .= "   \"Not yet recruiting\": ". $data_matrix[$row][$col]['not_yet_recruiting'] ."\n";
 					}
 					
 					if($data_matrix[$row][$col]['recruiting'] > 0)
 					{
 						$Status_List_Flg_2=1;
-						$Status_List_2 .= "\"Recruiting\": ". $data_matrix[$row][$col]['recruiting'] ." \n";
+						$Status_List_2 .= "   \"Recruiting\": ". $data_matrix[$row][$col]['recruiting'] ."\n";
 					}
 			
 					if($data_matrix[$row][$col]['enrolling_by_invitation'] > 0)
 					{
 						$Status_List_Flg_2=1;
-						$Status_List_2 .= "\"Enrolling by invitation\": ". $data_matrix[$row][$col]['enrolling_by_invitation'] ." \n";
+						$Status_List_2 .= "   \"Enrolling by invitation\": ". $data_matrix[$row][$col]['enrolling_by_invitation'] ."\n";
 					}
 			
 					if($data_matrix[$row][$col]['active_not_recruiting'] > 0)
 					{
 						$Status_List_Flg_2=1;
-						$Status_List_2 .= "\"Active not recruiting\": ". $data_matrix[$row][$col]['active_not_recruiting'] ." \n";
+						$Status_List_2 .= "   \"Active not recruiting\": ". $data_matrix[$row][$col]['active_not_recruiting'] ."\n";
 					}
 			
 					if($data_matrix[$row][$col]['completed'] > 0)
 					{
 						$Status_List_Flg_2=1;
-						$Status_List_2 .= "\"Completed\": ". $data_matrix[$row][$col]['completed'] ." \n";
+						$Status_List_2 .= "   \"Completed\": ". $data_matrix[$row][$col]['completed'] ."\n";
 					}
 			
 					if($data_matrix[$row][$col]['suspended'] > 0)
 					{
 						$Status_List_Flg_2=1;
-						$Status_List_2 .= "\"Suspended\": ". $data_matrix[$row][$col]['suspended'] ." \n";
+						$Status_List_2 .= "   \"Suspended\": ". $data_matrix[$row][$col]['suspended'] ."\n";
 					}
 			
 					if($data_matrix[$row][$col]['terminated'] > 0)
 					{
 						$Status_List_Flg_2=1;
-						$Status_List_2 .= "\"Terminated\": ". $data_matrix[$row][$col]['terminated'] ." \n";
+						$Status_List_2 .= "   \"Terminated\": ". $data_matrix[$row][$col]['terminated'] ."\n";
 					}
 			
 					if($data_matrix[$row][$col]['withdrawn'] > 0)
 					{
 						$Status_List_Flg_2=1;
-						$Status_List_2 .= "\"Withdrawn\": ". $data_matrix[$row][$col]['withdrawn'] ." \n";
+						$Status_List_2 .= "   \"Withdrawn\": ". $data_matrix[$row][$col]['withdrawn'] ."\n";
 					}
 			
 					if($data_matrix[$row][$col]['available'] > 0)
 					{
 						$Status_List_Flg_2=1;
-						$Status_List_2 .= "\"Available\": ". $data_matrix[$row][$col]['available'] ." \n";
+						$Status_List_2 .= "   \"Available\": ". $data_matrix[$row][$col]['available'] ."\n";
 					}
 			
 					if($data_matrix[$row][$col]['no_longer_available'] > 0)
 					{
 						$Status_List_Flg_2=1;
-						$Status_List_2 .= "\"No longer available\": ". $data_matrix[$row][$col]['no_longer_available'] ." \n";
+						$Status_List_2 .= "   \"No longer available\": ". $data_matrix[$row][$col]['no_longer_available'] ."\n";
 					}
 			
 					if($data_matrix[$row][$col]['approved_for_marketing'] > 0)
 					{
 						$Status_List_Flg_2=1;
-						$Status_List_2 .= "\"Approved for marketing\": ". $data_matrix[$row][$col]['approved_for_marketing'] ." \n";
+						$Status_List_2 .= "   \"Approved for marketing\": ". $data_matrix[$row][$col]['approved_for_marketing'] ."\n";
 					}
 			
 					if($data_matrix[$row][$col]['no_longer_recruiting'] > 0)
 					{
 						$Status_List_Flg_2=1;
-						$Status_List_2 .= "\"No longer recruiting\": ". $data_matrix[$row][$col]['no_longer_recruiting'] ." \n";
+						$Status_List_2 .= "   \"No longer recruiting\": ". $data_matrix[$row][$col]['no_longer_recruiting'] ."\n";
 					}
 			
 					if($data_matrix[$row][$col]['withheld'] > 0)
 					{
 						$Status_List_Flg_2=1;
-						$Status_List_2 .= "\"Withheld\": ". $data_matrix[$row][$col]['withheld'] ." \n";
+						$Status_List_2 .= "   \"Withheld\": ". $data_matrix[$row][$col]['withheld'] ."\n";
 					}
 			
 					if($data_matrix[$row][$col]['temporarily_not_available'] > 0)
 					{
 						$Status_List_Flg_2=1;
-						$Status_List_2 .= "\"Temporarily not available\": ". $data_matrix[$row][$col]['temporarily_not_available'] ." \n";
+						$Status_List_2 .= "   \"Temporarily not available\": ". $data_matrix[$row][$col]['temporarily_not_available'] ."\n";
 					}
 			
 					if($data_matrix[$row][$col]['ongoing'] > 0)
 					{
 						$Status_List_Flg_2=1;
-						$Status_List_2 .= "\"On going\": ". $data_matrix[$row][$col]['ongoing'] ." \n";
+						$Status_List_2 .= "   \"On going\": ". $data_matrix[$row][$col]['ongoing'] ."\n";
 					}
 			
 					if($data_matrix[$row][$col]['not_authorized'] > 0)
 					{
 						$Status_List_Flg_2=1;
-						$Status_List_2 .= "\"Not authorized\": ". $data_matrix[$row][$col]['not_authorized'] ." \n";
+						$Status_List_2 .= "   \"Not authorized\": ". $data_matrix[$row][$col]['not_authorized'] ."\n";
 					}
 			
 					if($data_matrix[$row][$col]['prohibited'] > 0)
 					{
 						$Status_List_Flg_2=1;
-						$Status_List_2 .= "\"Prohibited\": ". $data_matrix[$row][$col]['prohibited'] ." \n";
+						$Status_List_2 .= "   \"Prohibited\": ". $data_matrix[$row][$col]['prohibited'] ."\n";
 					}
 					
 					if($Status_List_Flg_2==1)
@@ -3279,114 +3279,114 @@ function Download_reports()
 					if($data_matrix[$row][$col]['new_trials'] > 0)
 					{
 						$Status_List_Flg_1=1;
-						$Status_List_1 = "New trials: ". $data_matrix[$row][$col]['new_trials'] ." \n";
+						$Status_List_1 = "New trials: ". $data_matrix[$row][$col]['new_trials'] ."\n";
 					}
 					
 					if($Status_List_Flg_1==1)
 					$annotation_text2 = $Status_List_1;
 					
 					$Status_List_Flg_2=0;
-					$Status_List_2 = "Number of trials with updated status: \n";
+					$Status_List_2 = "Status changes to:\n";
 					if($data_matrix[$row][$col]['not_yet_recruiting'] > 0)
 					{
 						$Status_List_Flg_2=1;
-						$Status_List_2 .= "\"Not yet recruiting\": ". $data_matrix[$row][$col]['not_yet_recruiting'] ." \n";
+						$Status_List_2 .= "   \"Not yet recruiting\": ". $data_matrix[$row][$col]['not_yet_recruiting'] ."\n";
 					}
 					
 					if($data_matrix[$row][$col]['recruiting'] > 0)
 					{
 						$Status_List_Flg_2=1;
-						$Status_List_2 .= "\"Recruiting\": ". $data_matrix[$row][$col]['recruiting'] ." \n";
+						$Status_List_2 .= "   \"Recruiting\": ". $data_matrix[$row][$col]['recruiting'] ."\n";
 					}
 			
 					if($data_matrix[$row][$col]['enrolling_by_invitation'] > 0)
 					{
 						$Status_List_Flg_2=1;
-						$Status_List_2 .= "\"Enrolling by invitation\": ". $data_matrix[$row][$col]['enrolling_by_invitation'] ." \n";
+						$Status_List_2 .= "   \"Enrolling by invitation\": ". $data_matrix[$row][$col]['enrolling_by_invitation'] ."\n";
 					}
 			
 					if($data_matrix[$row][$col]['active_not_recruiting'] > 0)
 					{
 						$Status_List_Flg_2=1;
-						$Status_List_2 .= "\"Active not recruiting\": ". $data_matrix[$row][$col]['active_not_recruiting'] ." \n";
+						$Status_List_2 .= "   \"Active not recruiting\": ". $data_matrix[$row][$col]['active_not_recruiting'] ."\n";
 					}
 			
 					if($data_matrix[$row][$col]['completed'] > 0)
 					{
 						$Status_List_Flg_2=1;
-						$Status_List_2 .= "\"Completed\": ". $data_matrix[$row][$col]['completed'] ." \n";
+						$Status_List_2 .= "   \"Completed\": ". $data_matrix[$row][$col]['completed'] ."\n";
 					}
 			
 					if($data_matrix[$row][$col]['suspended'] > 0)
 					{
 						$Status_List_Flg_2=1;
-						$Status_List_2 .= "\"Suspended\": ". $data_matrix[$row][$col]['suspended'] ." \n";
+						$Status_List_2 .= "   \"Suspended\": ". $data_matrix[$row][$col]['suspended'] ."\n";
 					}
 			
 					if($data_matrix[$row][$col]['terminated'] > 0)
 					{
 						$Status_List_Flg_2=1;
-						$Status_List_2 .= "\"Terminated\": ". $data_matrix[$row][$col]['terminated'] ." \n";
+						$Status_List_2 .= "   \"Terminated\": ". $data_matrix[$row][$col]['terminated'] ."\n";
 					}
 			
 					if($data_matrix[$row][$col]['withdrawn'] > 0)
 					{
 						$Status_List_Flg_2=1;
-						$Status_List_2 .= "\"Withdrawn\": ". $data_matrix[$row][$col]['withdrawn'] ." \n";
+						$Status_List_2 .= "   \"Withdrawn\": ". $data_matrix[$row][$col]['withdrawn'] ."\n";
 					}
 			
 					if($data_matrix[$row][$col]['available'] > 0)
 					{
 						$Status_List_Flg_2=1;
-						$Status_List_2 .= "\"Available\": ". $data_matrix[$row][$col]['available'] ." \n";
+						$Status_List_2 .= "   \"Available\": ". $data_matrix[$row][$col]['available'] ."\n";
 					}
 			
 					if($data_matrix[$row][$col]['no_longer_available'] > 0)
 					{
 						$Status_List_Flg_2=1;
-						$Status_List_2 .= "\"No longer available\": ". $data_matrix[$row][$col]['no_longer_available'] ." \n";
+						$Status_List_2 .= "   \"No longer available\": ". $data_matrix[$row][$col]['no_longer_available'] ."\n";
 					}
 			
 					if($data_matrix[$row][$col]['approved_for_marketing'] > 0)
 					{
 						$Status_List_Flg_2=1;
-						$Status_List_2 .= "\"Approved for marketing\": ". $data_matrix[$row][$col]['approved_for_marketing'] ." \n";
+						$Status_List_2 .= "   \"Approved for marketing\": ". $data_matrix[$row][$col]['approved_for_marketing'] ."\n";
 					}
 			
 					if($data_matrix[$row][$col]['no_longer_recruiting'] > 0)
 					{
 						$Status_List_Flg_2=1;
-						$Status_List_2 .= "\"No longer recruiting\": ". $data_matrix[$row][$col]['no_longer_recruiting'] ." \n";
+						$Status_List_2 .= "   \"No longer recruiting\": ". $data_matrix[$row][$col]['no_longer_recruiting'] ."\n";
 					}
 			
 					if($data_matrix[$row][$col]['withheld'] > 0)
 					{
 						$Status_List_Flg_2=1;
-						$Status_List_2 .= "\"Withheld\": ". $data_matrix[$row][$col]['withheld'] ." \n";
+						$Status_List_2 .= "   \"Withheld\": ". $data_matrix[$row][$col]['withheld'] ."\n";
 					}
 			
 					if($data_matrix[$row][$col]['temporarily_not_available'] > 0)
 					{
 						$Status_List_Flg_2=1;
-						$Status_List_2 .= "\"Temporarily not available\": ". $data_matrix[$row][$col]['temporarily_not_available'] ." \n";
+						$Status_List_2 .= "   \"Temporarily not available\": ". $data_matrix[$row][$col]['temporarily_not_available'] ."\n";
 					}
 			
 					if($data_matrix[$row][$col]['ongoing'] > 0)
 					{
 						$Status_List_Flg_2=1;
-						$Status_List_2 .= "\"On going\": ". $data_matrix[$row][$col]['ongoing'] ." \n";
+						$Status_List_2 .= "   \"On going\": ". $data_matrix[$row][$col]['ongoing'] ."\n";
 					}
 			
 					if($data_matrix[$row][$col]['not_authorized'] > 0)
 					{
 						$Status_List_Flg_2=1;
-						$Status_List_2 .= "\"Not authorized\": ". $data_matrix[$row][$col]['not_authorized'] ." \n";
+						$Status_List_2 .= "   \"Not authorized\": ". $data_matrix[$row][$col]['not_authorized'] ."\n";
 					}
 			
 					if($data_matrix[$row][$col]['prohibited'] > 0)
 					{
 						$Status_List_Flg_2=1;
-						$Status_List_2 .= "\"Prohibited\": ". $data_matrix[$row][$col]['prohibited'] ." \n";
+						$Status_List_2 .= "   \"Prohibited\": ". $data_matrix[$row][$col]['prohibited'] ."\n";
 					}
 					
 					if($Status_List_Flg_2==1)

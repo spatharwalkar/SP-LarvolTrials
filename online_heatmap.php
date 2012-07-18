@@ -1633,107 +1633,107 @@ foreach($rows as $row => $rval)
 			$htmlContent .= $Status_List_1;
 			
 			$Status_List_Flg_2=0;
-			$Status_List_2 ='<font style="color:#206040; font-weight: 900;">Number of trials with updated status:<br/></font>';
+			$Status_List_2 ='<font style="color:#206040; font-weight: 900;">Status changes to:<br/></font>';
 			if($data_matrix[$row][$col]['not_yet_recruiting'] > 0)
 			{
 				$Status_List_Flg_2=1;
-				$Status_List_2 .= '<font style="color:#206040; font-weight: 900;">Not yet recruiting</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['not_yet_recruiting'] .'</font></br>';
+				$Status_List_2 .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Not yet recruiting</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['not_yet_recruiting'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['recruiting'] > 0)
 			{
 				$Status_List_Flg_2=1;
-				$Status_List_2 .= '<font style="color:#206040; font-weight: 900;">Recruiting</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['recruiting'] .'</font></br>';
+				$Status_List_2 .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Recruiting</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['recruiting'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['enrolling_by_invitation'] > 0)
 			{
 				$Status_List_Flg_2=1;
-				$Status_List_2 .= '<font style="color:#206040; font-weight: 900;">Enrolling by invitation</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['enrolling_by_invitation'] .'</font></br>';
+				$Status_List_2 .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Enrolling by invitation</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['enrolling_by_invitation'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['active_not_recruiting'] > 0)
 			{
 				$Status_List_Flg_2=1;
-				$Status_List_2 .= '<font style="color:#206040; font-weight: 900;">Active not recruiting</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['active_not_recruiting'] .'</font></br>';
+				$Status_List_2 .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Active not recruiting</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['active_not_recruiting'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['completed'] > 0)
 			{
 				$Status_List_Flg_2=1;
-				$Status_List_2 .= '<font style="color:#206040; font-weight: 900;">Completed</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['completed'] .'</font></br>';
+				$Status_List_2 .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Completed</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['completed'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['suspended'] > 0)
 			{
 				$Status_List_Flg_2=1;
-				$Status_List_2 .= '<font style="color:#206040; font-weight: 900;">Suspended</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['suspended'] .'</font></br>';
+				$Status_List_2 .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Suspended</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['suspended'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['terminated'] > 0)
 			{
 				$Status_List_Flg_2=1;
-				$Status_List_2 .= '<font style="color:#206040; font-weight: 900;">Terminated</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['terminated'] .'</font></br>';
+				$Status_List_2 .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Terminated</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['terminated'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['withdrawn'] > 0)
 			{
 				$Status_List_Flg_2=1;
-				$Status_List_2 .= '<font style="color:#206040; font-weight: 900;">Withdrawn</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['withdrawn'] .'</font></br>';
+				$Status_List_2 .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Withdrawn</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['withdrawn'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['available'] > 0)
 			{
 				$Status_List_Flg_2=1;
-				$Status_List_2 .= '<font style="color:#206040; font-weight: 900;">Available</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['available'] .'</font></br>';
+				$Status_List_2 .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Available</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['available'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['no_longer_available'] > 0)
 			{
 				$Status_List_Flg_2=1;
-				$Status_List_2 .= '<font style="color:#206040; font-weight: 900;">No longer available</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['no_longer_available'] .'</font></br>';
+				$Status_List_2 .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">No longer available</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['no_longer_available'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['approved_for_marketing'] > 0)
 			{
 				$Status_List_Flg_2=1;
-				$Status_List_2 .= '<font style="color:#206040; font-weight: 900;">Approved for marketing</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['approved_for_marketing'] .'</font></br>';
+				$Status_List_2 .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Approved for marketing</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['approved_for_marketing'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['no_longer_recruiting'] > 0)
 			{
 				$Status_List_Flg_2=1;
-				$Status_List_2 .= '<font style="color:#206040; font-weight: 900;">No longer recruiting</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['no_longer_recruiting'] .'</font></br>';
+				$Status_List_2 .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">No longer recruiting</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['no_longer_recruiting'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['withheld'] > 0)
 			{
 				$Status_List_Flg_2=1;
-				$Status_List_2 .= '<font style="color:#206040; font-weight: 900;">Withheld</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['withheld'] .'</font></br>';
+				$Status_List_2 .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Withheld</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['withheld'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['temporarily_not_available'] > 0)
 			{
 				$Status_List_Flg_2=1;
-				$Status_List_2 .= '<font style="color:#206040; font-weight: 900;">Temporarily not available</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['temporarily_not_available'] .'</font></br>';
+				$Status_List_2 .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Temporarily not available</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['temporarily_not_available'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['ongoing'] > 0)
 			{
 				$Status_List_Flg_2=1;
-				$Status_List_2 .= '<font style="color:#206040; font-weight: 900;">On going</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['ongoing'] .'</font></br>';
+				$Status_List_2 .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">On going</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['ongoing'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['not_authorized'] > 0)
 			{
 				$Status_List_Flg_2=1;
-				$Status_List_2 .= '<font style="color:#206040; font-weight: 900;">Not authorized</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['not_authorized'] .'</font></br>';
+				$Status_List_2 .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Not authorized</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['not_authorized'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['prohibited'] > 0)
 			{
 				$Status_List_Flg_2=1;
-				$Status_List_2 .= '<font style="color:#206040; font-weight: 900;">Prohibited</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['prohibited'] .'</font></br>';
+				$Status_List_2 .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Prohibited</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['prohibited'] .'</font></br>';
 			}
 			
 			if($Status_List_Flg_2==1)
