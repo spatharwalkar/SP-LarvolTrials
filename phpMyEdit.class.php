@@ -2839,6 +2839,15 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 		if ($this->exec_triggers('insert', 'after', $oldvals, $changed, $newvals) == false) {
 			return false;
 		}
+		// new row added, so update sphinx index.
+		if(isset($lid) and !empty($lid) and $lid>0)
+		{
+			global $sphinx;
+			update_sphinx_index($lid);
+		}
+		
+		
+		
 		return true;
 	} /* }}} */
 
@@ -2984,7 +2993,12 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 		if (! $res) {
 			return false;
 		}
-		
+		// record updated, now update sphinx index too.
+		if(isset($this->rec) and !empty($this->rec) and $this->rec>0)
+		{
+			global $sphinx;
+			update_sphinx_index($this->rec);
+		}
 		$getsourceid='SELECT source_id from data_manual '. $where_part;
 			
 			$res1 	= mysql_query($getsourceid) ;

@@ -1,4 +1,6 @@
 <?php
+//connect to Sphinx
+$sphinx = mysql_connect("127.0.0.1:9306") or die ("Couldn't connect to Sphinx server.");
 require_once('db.php');
 require_once('include.import_new.php');
 require_once('nct_common.php');

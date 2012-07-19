@@ -9,14 +9,8 @@ require_once('include.search.php');
 require_once('special_chars.php');
 require_once('run_trial_tracker.php');
 require('searchhandler.php');
-if(isset($_GET['sphinx_s']))
-{
-	$Sphinx_search=$_GET['sphinx_s'];
-	$_SESSION['sphinx_s']=$_GET['sphinx_s'];
-}
-else
-	$Sphinx_search=$_SESSION['sphinx_s'];
-	
+
+
 /********* If Report generation time is less than 1 Jan 2012, time machine is disabled **********/
 if($_REQUEST['time'] != NULL && $_REQUEST['time'] != '')
 {
@@ -59,6 +53,16 @@ if(isset($_POST['btnDownload']))
 			break;
 	}
 	
+	if(isset($_REQUEST['sphinx_s']))
+	{	
+		$Sphinx_search=$_REQUEST['sphinx_s'];
+		$globalOptions['sphinx_s']=$_REQUEST['sphinx_s'];
+	}
+	elseif(isset($globalOptions['sphinx_s']))
+	{	
+		$Sphinx_search=$globalOptions['sphinx_s'];
+	}
+	
 	if(($shownCnt != 0 && is_numeric($shownCnt)) || $_POST['dOption'] == 'all')
 	{
 		$tt->generateTrialTracker($fileType, $resultIds, $timeMachine, $ottType, $globalOptions);
@@ -66,6 +70,16 @@ if(isset($_POST['btnDownload']))
 	}
 }
 $sortFields = array('phase' => 'pD', 'inactive_date' => 'iA', 'start_date' => 'sA', 'overall_status' => 'oA', 'enrollment' => 'eA');
+
+if(isset($_REQUEST['sphinx_s']))
+{	
+	$Sphinx_search=$_REQUEST['sphinx_s'];
+	$globalOptions['sphinx_s']=$_REQUEST['sphinx_s'];
+}
+elseif(isset($globalOptions['sphinx_s']))
+{	
+	$Sphinx_search=$globalOptions['sphinx_s'];
+}
 
 $globalOptions['sortOrder'] = $sortFields;
 
@@ -499,7 +513,15 @@ else if(isset($_REQUEST['p']) && isset($_REQUEST['a']))
 		$globalOptions['url'] .= '&hm=' . $_REQUEST['hm'];
 		$globalOptions['hm'] = $_REQUEST['hm'];
 	}
-	
+	if(isset($_REQUEST['sphinx_s']))
+	{
+		$globalOptions['sphinx_s'] = $_REQUEST['sphinx_s'];
+	}
+	elseif(isset($globalOptions['sphinx_s']))
+	{
+		$_REQUEST['sphinx_s'] = $globalOptions['sphinx_s'];
+	}
+		
 	$tt->generateTrialTracker('indexed', array('product' => $_REQUEST['p'], 'area' => $_REQUEST['a']), $_REQUEST['time'], 'indexed', $globalOptions);
 }
 else if(isset($_REQUEST['cparams']) || (isset($_REQUEST['leading']) && isset($_REQUEST['params'])))

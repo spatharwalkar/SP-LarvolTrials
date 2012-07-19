@@ -61,6 +61,8 @@ $max_process_per_item=1;
 //Mapping of type code to name
 $rtype_name=array(0=>"Heatmap","Updatescan");
 
+//connect to Sphinx
+$sphinx = mysql_connect("127.0.0.1:9306") or die ("Couldn't connect to Sphinx server.");
 require_once('db.php');
 require_once('run_updatereport.php');
 require_once('run_heatmap.php');

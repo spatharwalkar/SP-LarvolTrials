@@ -1,4 +1,6 @@
 <?php
+//connect to Sphinx
+$sphinx = mysql_connect("127.0.0.1:9306") or die ("Couldn't connect to Sphinx server.");
 require_once('db.php');
 require_once('include.util.php');
 //ini_set('error_reporting', E_ALL ^ E_NOTICE);
@@ -329,7 +331,12 @@ function confirmlinking()
 					echo $log;
 					return $log;
 				}
-
+				// update sphinx index
+				if(isset($lid) and !empty($lid) and $lid>0)
+				{
+					global $sphinx;
+					delete_sphinx_index($lid);
+				}
 
 				$_POST['sourceless_only']='YES';
 				header("Location: edit_trials.php?sourceless_only=YES");
@@ -387,7 +394,12 @@ function confirmlinking()
 					echo $log;
 					return $log;
 				}
-
+				// update sphinx index
+				if(isset($lid) and !empty($lid) and $lid>0)
+				{
+					global $sphinx;
+					delete_sphinx_index($lid);
+				}
 
 				$_POST['sourceless_only']='NO';
 				header("Location: edit_trials.php?sourceless_only=NO");
@@ -445,6 +457,13 @@ function confirmlinking()
 					$logger->fatal($log);
 					echo $log;
 					return $log;
+				}
+				
+				// update sphinx index
+				if(isset($lid) and !empty($lid) and $lid>0)
+				{
+					global $sphinx;
+					delete_sphinx_index($lid);
 				}
 
 
@@ -508,6 +527,12 @@ function confirmlinking()
 				{
 					if($ok===true)
 					{
+						// update sphinx index
+						if(isset($larvol_id) and !empty($larvol_id) and $larvol_id>0)
+						{
+							global $sphinx;
+							delete_sphinx_index($larvol_id);
+						}
 						//echo '<br><b><span style="color:red;font-size=+4;">Deleted the trial</span><b/>';
 						header("Location: edit_trials.php?sourceless_only=YES&deleted_trial=". $larvol_id);
 						exit;

@@ -10,8 +10,8 @@ require_once('include.excel.php');
 require_once 'PHPExcel/IOFactory.php';
 require_once('special_chars.php');
 require_once('include.util.php');
-//require_once('get_sphinx_results.php');
 
+global $Sphinx_search;
 
 class TrialTracker
 {
@@ -7595,7 +7595,7 @@ class TrialTracker
 			}
 		}
 					
-		if(isset($globalOptions['JSON_search'])  or isset($_GET['sphinx_s']))
+		if(isset($globalOptions['JSON_search'])  or isset($Sphinx_search))
 		{
 			$Ids=array('Search Result' => 'Search'); //Set ID's Array so loop will be executed atleast one time
 		}
@@ -7615,10 +7615,54 @@ class TrialTracker
 			$result = array();
 			$larvolIds = array();
 			
+			global $Sphinx_search;
+			if(isset($Sphinx_search))
+			{
+				$idlist = get_sphinx_idlist($Sphinx_search);
+			}
+			
 			if(isset($globalOptions['JSON_search']))
 			{
-				$query = Build_OTT_Query($globalOptions['JSON_search'], $where);
+			
+				$query = Build_OTT_Query($globalOptions['JSON_search'], $where );
+				if(isset($idlist))
+				{
+					$pos = strpos(strtoupper($query),'WHERE');
+					if ($pos === false) 
+					{
+						$pos = strpos(strtoupper($query),'ORDER');
+						$str1=substr($query,0,$pos);
+						$str2=substr($query,$pos);
+						$query=$str1.' where larvol_id IN ( '. $idlist . ' ) ' . $str2;
+					}
+					else 
+					{
+						$pos = strpos(strtoupper($query),'ORDER');
+						$str1=substr($query,0,$pos);
+						$str2=substr($query,$pos);
+						$query=$str1.' AND ( larvol_id IN ( '. $idlist . ' ) ) ' . $str2;
+					}
+				}
+				
 				$fullRecordQry = Build_OTT_Query($globalOptions['JSON_search'], '');
+				if(isset($idlist))
+				{
+					$pos = strpos(strtoupper($fullRecordQry),'WHERE');
+					if ($pos === false) 
+					{
+						$pos = strpos( strtoupper($fullRecordQry),'ORDER');
+						$str1=substr($fullRecordQry,0,$pos);
+						$str2=substr($fullRecordQry,$pos);
+						$fullRecordQry=$str1.' where larvol_id IN ( '. $idlist . ' ) ' . $str2;
+					}
+					else 
+					{
+						$pos = strpos(strtoupper($fullRecordQry),'ORDER');
+						$str1=substr($fullRecordQry,0,$pos);
+						$str2=substr($fullRecordQry,$pos);
+						$fullRecordQry=$str1.' AND ( larvol_id IN ( '. $idlist . ' ) ) ' . $str2;
+					}
+				}
 			}
 			else
 			{
@@ -7632,47 +7676,53 @@ class TrialTracker
 						. " dm.`intervention_name` AS manual_intervention_name, dm.`phase` AS manual_phase "
 						. " FROM `data_trials` dt ";
 						
-				if($ivalue['product'] != '')	//When Product is blank do not process Product in Query
-					$query .= " JOIN `product_trials` pt ON dt.`larvol_id` = pt.`trial` ";
-				
-				if($ivalue['area'] !='' )	//When Area is blank do not process Area in Query
-					$query .= " JOIN `area_trials` at ON dt.`larvol_id` = at.`trial` ";
-				
-				$query .= " LEFT JOIN `data_manual` dm ON dt.`larvol_id` = dm.`larvol_id` WHERE ";
+				if(!isset($idlist) or empty($idlist))
+				{
+					if($ivalue['product'] != '')	//When Product is blank do not process Product in Query
+						$query .= " JOIN `product_trials` pt ON dt.`larvol_id` = pt.`trial` ";
+					
+					if($ivalue['area'] !='' )	//When Area is blank do not process Area in Query
+						$query .= " JOIN `area_trials` at ON dt.`larvol_id` = at.`trial` ";
+					
+					$query .= " LEFT JOIN `data_manual` dm ON dt.`larvol_id` = dm.`larvol_id` WHERE ";
+							
+					if($ivalue['product'] != '')	//When Product is blank do not process Product in Query
+						$query .= "pt.`product` IN ('" . $ivalue['product'] . "') ";
 						
-				if($ivalue['product'] != '')	//When Product is blank do not process Product in Query
-					$query .= "pt.`product` IN ('" . $ivalue['product'] . "') ";
+					if($ivalue['product'] != '' && $ivalue['area']  != '')
+						$query .= "AND " ;
+						
+					if($ivalue['area'] !='' )	//When Area is blank do not process Area in Query
+						$query .= "at.`area` IN ('" . $ivalue['area'] . "') " ;
+					//echo '<br/>fullRecordQry-->'.
+					$fullRecordQry = $query . " ORDER BY " . $orderBy;	
+					//echo '<br/><br/><br/>query-->'.
+					$query .= $where . " ORDER BY " . $orderBy;
+				}
+				else
+				{
+					$query .= " LEFT JOIN `data_manual` dm ON dt.`larvol_id` = dm.`larvol_id` WHERE 1=1 ";
 					
-				if($ivalue['product'] != '' && $ivalue['area']  != '')
-					$query .= "AND " ;
+					$fullRecordQry = $query . " ORDER BY " . $orderBy;	
+					$pos = strpos( strtoupper($fullRecordQry),'ORDER');
+					$str1=substr($fullRecordQry,0,$pos);
+					$str2=substr($fullRecordQry,$pos);
+					$fullRecordQry=$str1.' AND dt.larvol_id IN ( '. $idlist . ' ) ' . $str2;
 					
-				if($ivalue['area'] !='' )	//When Area is blank do not process Area in Query
-					$query .= "at.`area` IN ('" . $ivalue['area'] . "') " ;
-					
-				//echo '<br/>fullRecordQry-->'.
-				$fullRecordQry = $query . " ORDER BY " . $orderBy;	
-				//echo '<br/><br/><br/>query-->'.
-				$query .= $where . " ORDER BY " . $orderBy;
+					$query .= $where . " ORDER BY " . $orderBy;
+					$pos = strpos(strtoupper($query),'ORDER');
+					$str1=substr($query,0,$pos);
+					$str2=substr($query,$pos);
+					$query=$str1.' AND dt.larvol_id IN ( '. $idlist . ' ) ' . $str2;
+				}
 			}
 			$res = mysql_query($query);
+			
 			$data1=array();$data2=array();
 			while($row = mysql_fetch_assoc($res))
 			{	
 				$data1[]=$row;
 			}
-			if(isset($Sphinx_search))
-			{
-				$res = sphinx_search($Sphinx_search);
-				if($res!==false)
-				while($row = mysql_fetch_assoc($res))
-				{	
-					$data2[]=$row;
-				} 
-				$data1=array_merge($data1, $data2);
-			}
-			
-			
-			
 			foreach($data1 as $kk => $vv)
 			{
 				$row=$vv;
@@ -9419,6 +9469,15 @@ class TrialTracker
 	{
 		echo '<form id="frmOtt" name="frmOtt" method="get" target="_self" action="intermediary.php">';
 		
+		if(isset($_REQUEST['sphinx_s']))
+			{
+				echo '<input type="hidden" name="sphinx_s" value="'.$_REQUEST['sphinx_s'].'" />';
+			}
+		elseif(isset($globalOptions['sphinx_s']))
+			{
+				echo '<input type="hidden" name="sphinx_s" value="'.$globalOptions['sphinx_s'].'" />';
+			}
+		
 		if((isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') !== FALSE) 
 		|| (isset($_GET['LI']) && $_GET['LI'] == 1))
 		{
@@ -9653,7 +9712,7 @@ class TrialTracker
 	function pagination($globalOptions = array(), $totalPages, $timeMachine = NULL, $ottType, $loggedIn)
 	{ 	
 		$url = 'intermediary.php?';
-		
+		 
 		if($ottType == 'unstacked')
 		{
 			$url .= 'results=' . $globalOptions['url'];
@@ -9744,6 +9803,15 @@ class TrialTracker
 		if(isset($globalOptions['includeProductsWNoData']) && $globalOptions['includeProductsWNoData'] == "on")
 		{
 			$url .= '&amp;ipwnd=on';
+		}
+		
+		if(isset($_REQUEST['sphinx_s']))
+		{
+			$url .= '&amp;sphinx_s=' . $_REQUEST['sphinx_s'];
+		}
+		if( !isset($_REQUEST['sphinx_s']) and isset($globalOptions['sphinx_s']))
+		{
+			$url .= '&amp;sphinx_s=' . $globalOptions['sphinx_s'];
 		}
 		
 		$stages = 2;

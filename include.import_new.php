@@ -359,6 +359,13 @@ $array1=array
 						echo $log;
 						return false;
 					}
+					// update sphinx index
+					if(isset($larvol_id) and !empty($larvol_id) and $larvol_id>0)
+					{
+						global $sphinx;
+						update_sphinx_index($larvol_id);
+					}
+					
 					$query = 'SELECT `larvol_id` FROM data_history where `larvol_id`="' . $larvol_id . '"  LIMIT 1';
 					if(!$res = mysql_query($query))
 					{
@@ -1488,6 +1495,14 @@ else $ddesc=$rec->detailed_descr->textblock;
 	//Calculate inclusion and exclusion criteria
 	refreshCriteria($larvol_id,'search',$fieldCRITArr);
 */	
+		// update sphinx index
+		if(isset($larvol_id) and !empty($larvol_id) and $larvol_id>0)
+		{
+			global $sphinx;
+			update_sphinx_index($larvol_id);
+		}
+
+	
 	return true;
 }
 
@@ -1690,6 +1705,15 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 						echo $log;
 						return false;
 					}
+					
+					// update sphinx index
+					if(isset($larvol_id) and !empty($larvol_id) and $larvol_id>0)
+					{
+						global $sphinx;
+						update_sphinx_index($larvol_id);
+					}
+
+					
 					// validation of first received date.  
 					// if first recieved date in archived version is older than that of the regular version, 
 					// then store the archived version's date, else store regular version's date.
@@ -1752,6 +1776,13 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 									echo $log;
 									return false;
 								}
+								// record updated, now update sphinx index too.
+								if(isset($larvol_id) and !empty($larvol_id) and $larvol_id>0)
+								{
+									global $sphinx;
+									update_sphinx_index($larvol_id);
+								}
+								
 							}
 							else
 							{
@@ -1775,6 +1806,13 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 									echo $log;
 									return false;
 								}
+								// update sphinx index
+								if(isset($larvol_id) and !empty($larvol_id) and $larvol_id>0)
+								{
+									global $sphinx;
+									update_sphinx_index($larvol_id);
+								}
+
 							}
 						}
 					
@@ -2041,6 +2079,13 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 			
 		}
 		
+		// update sphinx index
+		if(isset($larvol_id) and !empty($larvol_id) and $larvol_id>0)
+		{
+			global $sphinx;
+			update_sphinx_index($larvol_id);
+		}
+
 						
 	return true;
 	}

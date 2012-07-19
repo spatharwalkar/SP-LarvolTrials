@@ -454,10 +454,48 @@ function searchHandlerBackTicker(&$item,$key,$userKey)
 // Fulltext search using Sphinx
 function sphinx_search($srch_string=null)
 {
+global $sphinx,$db;
+if(!isset($srch_string)) return false;
+$_POST['sphinx_s']=$srch_string;
+$str=$srch_string;
+$qry="SELECT * FROM rtindex1 where MATCH('".$str."') limit 15000";
+$rs = mysql_query($qry,$sphinx);
+$cnt=0;
+$idlist="";
+while($row = mysql_fetch_assoc($rs)) {
+	if($cnt==0) $idlist.="'".$row['id']."'";
+	else $idlist.=",'".$row['id']."'";
+	$cnt++;
+}
+	
+
+$qry="
+	SELECT dt.`larvol_id`, dt.`source_id`, dt.`brief_title`, dt.`acronym`, dt.`lead_sponsor`, dt.`collaborator`, dt.`condition`, 
+	dt.`overall_status`, dt.`is_active`, dt.`start_date`, dt.`end_date`, dt.`enrollment`, dt.`enrollment_type`, dt.`intervention_name`, 
+	dt.`region`, dt.`lastchanged_date`, dt.`phase`, dt.`firstreceived_date`, dt.`viewcount`, dt.`source`, dm.`larvol_id` 
+	AS manual_larvol_id, dm.`is_sourceless` AS manual_is_sourceless, dm.`brief_title` AS manual_brief_title, dm.`acronym` 
+	AS manual_acronym, dm.`lead_sponsor` AS manual_lead_sponsor, dm.`collaborator` AS manual_collaborator, dm.`condition` 
+	AS manual_condition, dm.`overall_status` AS manual_overall_status, dm.`region` AS manual_region, dm.`end_date` 
+	AS manual_end_date, dm.`enrollment` AS manual_enrollment, dm.`enrollment_type` AS manual_enrollment_type, dm.`intervention_name` 
+	AS manual_intervention_name, dm.`phase` AS manual_phase  FROM `data_trials` dt LEFT JOIN `data_manual` dm ON dt.`larvol_id` = dm.`larvol_id`
+	where dt.larvol_id in (" . $idlist . ") ORDER BY  dt.`phase` DESC, dt.`end_date` ASC, dt.`start_date` ASC, dt.`overall_status` ASC, 
+	dt.`enrollment` ASC ";
+$res = mysql_query($qry);
+return $res;
+/*
+while($row = mysql_fetch_assoc($res)) {
+	pr($row);
+	}
+*/	
+}
+
+function get_sphinx_idlist($srch_string=null)
+{
 	global $sphinx,$db;
 	if(!isset($srch_string)) return false;
+	$_POST['sphinx_s']=$srch_string;
 	$str=$srch_string;
-	$qry="SELECT * FROM rtindex1 where MATCH('".$str."') limit 10000";
+	$qry="SELECT * FROM rtindex1 where MATCH('".$str."') limit 15000";
 	$rs = mysql_query($qry,$sphinx);
 	$cnt=0;
 	$idlist="";
@@ -467,21 +505,7 @@ function sphinx_search($srch_string=null)
 		else $idlist.=",'".$row['id']."'";
 		$cnt++;
 	}
-
-	$qry="
-		SELECT dt.`larvol_id`, dt.`source_id`, dt.`brief_title`, dt.`acronym`, dt.`lead_sponsor`, dt.`collaborator`, dt.`condition`, 
-		dt.`overall_status`, dt.`is_active`, dt.`start_date`, dt.`end_date`, dt.`enrollment`, dt.`enrollment_type`, dt.`intervention_name`, 
-		dt.`region`, dt.`lastchanged_date`, dt.`phase`, dt.`firstreceived_date`, dt.`viewcount`, dt.`source`, dm.`larvol_id` 
-		AS manual_larvol_id, dm.`is_sourceless` AS manual_is_sourceless, dm.`brief_title` AS manual_brief_title, dm.`acronym` 
-		AS manual_acronym, dm.`lead_sponsor` AS manual_lead_sponsor, dm.`collaborator` AS manual_collaborator, dm.`condition` 
-		AS manual_condition, dm.`overall_status` AS manual_overall_status, dm.`region` AS manual_region, dm.`end_date` 
-		AS manual_end_date, dm.`enrollment` AS manual_enrollment, dm.`enrollment_type` AS manual_enrollment_type, dm.`intervention_name` 
-		AS manual_intervention_name, dm.`phase` AS manual_phase  FROM `data_trials` dt LEFT JOIN `data_manual` dm ON dt.`larvol_id` = dm.`larvol_id`
-		where dt.larvol_id in (" . $idlist . ") ORDER BY  dt.`phase` DESC, dt.`end_date` ASC, dt.`start_date` ASC, dt.`overall_status` ASC, 
-		dt.`enrollment` ASC ";
-	$res = mysql_query($qry);
-	return $res;
-
+	return $idlist;
 }
 
 // Delete trial from Sphinx index
