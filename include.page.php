@@ -1322,6 +1322,7 @@ function parseProductsXmlAndSave($xmlImport,$table)
 		$modified = date('y-m-d H:i:s',time($product->getElementsByTagName('modified')->item(0)->nodeValue));
 		
 		$company = array();
+		$implodeStringForNames = ', ';
 		foreach($product->getElementsByTagName('Institutions') as $brandNames)
 		{
 			foreach($brandNames->getElementsByTagName('Institution') as $brandName)
@@ -1329,7 +1330,7 @@ function parseProductsXmlAndSave($xmlImport,$table)
 				($brandName->getElementsByTagName('is_active')->item(0)->nodeValue=='True')?$company[] = $brandName->getElementsByTagName('name')->item(0)->nodeValue:null;
 			}
 		}	
-		$company = implode(',',$company);
+		$company = implode($implodeStringForNames,$company);
 		
 		$brand_names = array();
 		foreach($product->getElementsByTagName('ProductBrandNames') as $brandNames)
@@ -1339,7 +1340,7 @@ function parseProductsXmlAndSave($xmlImport,$table)
 				($brandName->getElementsByTagName('is_active')->item(0)->nodeValue=='True')?$brand_names[] = $brandName->getElementsByTagName('name')->item(0)->nodeValue:null;
 			}
 		}
-		$brand_names = implode(',',$brand_names);
+		$brand_names = implode($implodeStringForNames,$brand_names);
 		
 		$generic_names = array();
 		foreach($product->getElementsByTagName('ProductGenericNames') as $brandNames)
@@ -1349,7 +1350,7 @@ function parseProductsXmlAndSave($xmlImport,$table)
 				($brandName->getElementsByTagName('is_active')->item(0)->nodeValue=='True')?$generic_names[] = $brandName->getElementsByTagName('name')->item(0)->nodeValue:null;
 			}
 		}
-		$generic_names = implode(',',$generic_names);
+		$generic_names = implode($implodeStringForNames,$generic_names);
 				
 		$code_names = array();
 		foreach($product->getElementsByTagName('ProductCodeNames') as $brandNames)
@@ -1359,7 +1360,7 @@ function parseProductsXmlAndSave($xmlImport,$table)
 				($brandName->getElementsByTagName('is_active')->item(0)->nodeValue=='True')?$code_names[] = $brandName->getElementsByTagName('name')->item(0)->nodeValue:null;
 			}
 		}
-		$code_names = implode(',',$code_names);
+		$code_names = implode($implodeStringForNames,$code_names);
 
 		$approvals = $product->getElementsByTagName('approvals')->item(0)->nodeValue;
 		$xmldump = $xmlImport->saveXML($product);
