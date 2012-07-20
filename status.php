@@ -1602,12 +1602,13 @@ function get_nctids_from_web()
 		echo "</table>";
 		echo "<table width=\"100%\" class=\"event\">";
 			echo "<tr>";
-				echo "<td width=\"20%\" align=\"left\" class=\"head\">Status</td>";
-				echo "<td width=\"20%\" align=\"left\" class=\"head\">Start Time</td>";
-				echo "<td width=\"19%\" align=\"left\" class=\"head\">Excution run time</td>";
-				echo "<td width=\"19%\" align=\"left\" class=\"head\">Last update time</td>";
+				echo "<td width=\"10%\" align=\"left\" class=\"head\">Status</td>";
+				echo "<td width=\"15%\" align=\"left\" class=\"head\">Start Time</td>";
+				echo "<td width=\"15%\" align=\"left\" class=\"head\">Excution run time</td>";
+				echo "<td width=\"15%\" align=\"left\" class=\"head\">Last update time</td>";
 //				echo "<td width=\"19%\" align=\"left\" class=\"head\">New Records</td>";
-				echo "<td width=\"17%\" align=\"left\" class=\"head\">Progress</td>";
+				echo "<td width=\"15%\" align=\"left\" class=\"head\">Progress</td>";
+				echo "<td width=\"25%\" align=\"left\" class=\"head\">Message</td>";
 				echo "<td width=\"5%\" align=\"center\" class=\"head\">Action</td>";
 			echo "</tr>";
 			echo "<tr>";
@@ -1633,6 +1634,7 @@ function get_nctids_from_web()
 				echo "<td align=\"left\" class=\"norm\">";
 					echo "<span class=\"progressBar\" id=\"product_update\">".$product_update_progress."</span>";
 				echo "</td>";
+				echo "<td align=\"left\" class=\"norm\">".$product_status['er_message']."</td>";
 				if($product_status['status']==READY)
 				{
 					echo "<td align=\"center\" class=\"norm\">";
@@ -1706,6 +1708,7 @@ function get_nctids_from_web()
 				echo "<td width=\"19%\" align=\"left\" class=\"head\">Last update time</td>";
 //				echo "<td width=\"19%\" align=\"left\" class=\"head\">New Records</td>";
 				echo "<td width=\"17%\" align=\"left\" class=\"head\">Progress</td>";
+				echo "<td width=\"25%\" align=\"left\" class=\"head\">Message</td>";
 				echo "<td width=\"5%\" align=\"center\" class=\"head\">Action</td>";
 			echo "</tr>";
 			echo "<tr>";
@@ -1731,6 +1734,7 @@ function get_nctids_from_web()
 				echo "<td align=\"left\" class=\"norm\">";
 					echo "<span class=\"progressBar\" id=\"area_update\">".$area_update_progress."</span>";
 				echo "</td>";
+				echo "<td align=\"left\" class=\"norm\">".$area_status['er_message']."</td>";
 				if($area_status['status']==READY)
 				{
 					echo "<td align=\"center\" class=\"norm\">";
@@ -1800,12 +1804,13 @@ function get_nctids_from_web()
 		echo "</table>";
 		echo "<table width=\"100%\" class=\"event\">";
 			echo "<tr>";
-				echo "<td width=\"20%\" align=\"left\" class=\"head\">Status</td>";
-				echo "<td width=\"20%\" align=\"left\" class=\"head\">Start Time</td>";
-				echo "<td width=\"19%\" align=\"left\" class=\"head\">Excution run time</td>";
-				echo "<td width=\"19%\" align=\"left\" class=\"head\">Last update time</td>";
+				echo "<td width=\"10%\" align=\"left\" class=\"head\">Status</td>";
+				echo "<td width=\"15%\" align=\"left\" class=\"head\">Start Time</td>";
+				echo "<td width=\"15%\" align=\"left\" class=\"head\">Excution run time</td>";
+				echo "<td width=\"15%\" align=\"left\" class=\"head\">Last update time</td>";
 //				echo "<td width=\"19%\" align=\"left\" class=\"head\">New Records</td>";
-				echo "<td width=\"17%\" align=\"left\" class=\"head\">Progress</td>";
+				echo "<td width=\"15%\" align=\"left\" class=\"head\">Progress</td>";
+				echo "<td width=\"25%\" align=\"left\" class=\"head\">Message</td>";
 				echo "<td width=\"5%\" align=\"center\" class=\"head\">Action</td>";
 			echo "</tr>";
 			echo "<tr>";
@@ -1831,6 +1836,7 @@ function get_nctids_from_web()
 				echo "<td align=\"left\" class=\"norm\">";
 					echo "<span class=\"progressBar\" id=\"product_update1\">".$product_update_progress1."</span>";
 				echo "</td>";
+				echo "<td align=\"left\" class=\"norm\">".$product_status1['er_message']."</td>";
 				if($product_status1['status']==READY)
 				{
 					echo "<td align=\"center\" class=\"norm\">";
@@ -1898,12 +1904,13 @@ function get_nctids_from_web()
 		echo "</table>";
 		echo "<table width=\"100%\" class=\"event\">";
 			echo "<tr>";
-				echo "<td width=\"20%\" align=\"left\" class=\"head\">Status</td>";
-				echo "<td width=\"20%\" align=\"left\" class=\"head\">Start Time</td>";
-				echo "<td width=\"19%\" align=\"left\" class=\"head\">Excution run time</td>";
-				echo "<td width=\"19%\" align=\"left\" class=\"head\">Last update time</td>";
+				echo "<td width=\"10%\" align=\"left\" class=\"head\">Status</td>";
+				echo "<td width=\"15%\" align=\"left\" class=\"head\">Start Time</td>";
+				echo "<td width=\"15%\" align=\"left\" class=\"head\">Excution run time</td>";
+				echo "<td width=\"15%\" align=\"left\" class=\"head\">Last update time</td>";
 //				echo "<td width=\"19%\" align=\"left\" class=\"head\">New Records</td>";
-				echo "<td width=\"17%\" align=\"left\" class=\"head\">Progress</td>";
+				echo "<td width=\"15%\" align=\"left\" class=\"head\">Progress</td>";
+				echo "<td width=\"25%\" align=\"left\" class=\"head\">Message</td>";
 				echo "<td width=\"5%\" align=\"center\" class=\"head\">Action</td>";
 			echo "</tr>";
 			echo "<tr>";
@@ -1929,6 +1936,7 @@ function get_nctids_from_web()
 				echo "<td align=\"left\" class=\"norm\">";
 					echo "<span class=\"progressBar\" id=\"area_update1\">".$area_update_progress1."</span>";
 				echo "</td>";
+				echo "<td align=\"left\" class=\"norm\">".$area_status1['er_message']."</td>";
 				if($area_status1['status']==READY)
 				{
 					echo "<td align=\"center\" class=\"norm\">";
@@ -1996,12 +2004,13 @@ function get_nctids_from_web()
 		echo "</table>";
 		echo "<table width=\"100%\" class=\"event\">";
 			echo "<tr>";
-				echo "<td width=\"20%\" align=\"left\" class=\"head\">Status</td>";
-				echo "<td width=\"20%\" align=\"left\" class=\"head\">Start Time</td>";
-				echo "<td width=\"19%\" align=\"left\" class=\"head\">Excution run time</td>";
-				echo "<td width=\"19%\" align=\"left\" class=\"head\">Last update time</td>";
+				echo "<td width=\"10%\" align=\"left\" class=\"head\">Status</td>";
+				echo "<td width=\"15%\" align=\"left\" class=\"head\">Start Time</td>";
+				echo "<td width=\"15%\" align=\"left\" class=\"head\">Excution run time</td>";
+				echo "<td width=\"15%\" align=\"left\" class=\"head\">Last update time</td>";
 //				echo "<td width=\"19%\" align=\"left\" class=\"head\">New Records</td>";
-				echo "<td width=\"17%\" align=\"left\" class=\"head\">Progress</td>";
+				echo "<td width=\"15%\" align=\"left\" class=\"head\">Progress</td>";
+				echo "<td width=\"25%\" align=\"left\" class=\"head\">Message</td>";
 				echo "<td width=\"5%\" align=\"center\" class=\"head\">Action</td>";
 			echo "</tr>";
 			echo "<tr>";
@@ -2027,6 +2036,7 @@ function get_nctids_from_web()
 				echo "<td align=\"left\" class=\"norm\">";
 					echo "<span class=\"progressBar\" id=\"remap_update\">".$remap_update_progress."</span>";
 				echo "</td>";
+				echo "<td align=\"left\" class=\"norm\">".$remap_status['er_message']."</td>";
 				if($remap_status['status']==READY)
 				{
 					echo "<td align=\"center\" class=\"norm\">";
