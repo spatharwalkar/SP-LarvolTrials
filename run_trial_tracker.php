@@ -7840,6 +7840,7 @@ class TrialTracker
 		$result['edited'] 				= array();
 		$result['viewcount'] 			= $dataRow['viewcount']; 
 		$result['source'] 				= $dataRow['source']; 
+		$result['source_id'] 			= $dataRow['source_id']; 
 		$result['section'] 				= $ikey; 
 		
 		$result['manual_larvol_id'] 		= $dataRow['manual_larvol_id']; 
@@ -10183,19 +10184,40 @@ class TrialTracker
 							$titleLinkColor = '#FF0000;';
 						}
 					}
-					$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse"><a style="color:' . $titleLinkColor . '"  ';
-					if(isset($dvalue['manual_is_sourceless']))
+					$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
+								. '<div class="rowcollapse"><a style="color:' . $titleLinkColor . '"  ';
+					
+					if($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed')
 					{
-						$outputStr .= ' href="' . $dvalue['source'] . '" ';
+						if(isset($dvalue['manual_is_sourceless']))
+						{
+							$outputStr .= ' href="' . $dvalue['source'] . '" ';
+						}
+						else if(isset($dvalue['source_id']) && strpos($dvalue['source_id'], 'NCT') === FALSE)
+						{	
+							$outputStr .= ' href="https://www.clinicaltrialsregister.eu/ctr-search/search?query=' . $dvalue['NCT/nct_id'] . '" ';
+						}
+						else if(isset($dvalue['source_id']) && strpos($dvalue['source_id'], 'NCT') !== FALSE)
+						{
+							$outputStr .= ' href="http://clinicaltrials.gov/ct2/show/' . padnct($dvalue['NCT/nct_id']) . '" ';
+						}
+						else 
+						{ 
+							$outputStr .= ' href="javascript:void(0);" ';
+						}
 					}
-					else if($dvalue['NCT/nct_id'] !== '' && $dvalue['NCT/nct_id'] !== NULL)
+					else
 					{
-						$outputStr .= ' href="http://clinicaltrials.gov/ct2/show/' . padnct($dvalue['NCT/nct_id']) . '" ';
+						if($dvalue['NCT/nct_id'] !== '' && $dvalue['NCT/nct_id'] !== NULL)
+						{
+							$outputStr .= ' href="http://clinicaltrials.gov/ct2/show/' . padnct($dvalue['NCT/nct_id']) . '" ';
+						}
+						else 
+						{ 
+							$outputStr .= ' href="javascript:void(0);" ';
+						}
 					}
-					else 
-					{ 
-						$outputStr .= ' href="javascript:void(0);" ';
-					}
+					
 					$outputStr .= ' target="_blank" ';
 					
 					if(($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed'))
