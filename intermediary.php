@@ -131,25 +131,26 @@ if(isset($_REQUEST['er']))
 	$globalOptions['endrange'] = $_REQUEST['er'];
 }
 
+$globalOptions['Highlight_Range'] = array('1 week', '2 weeks', '1 month', '1 quarter', '6 months', '1 year');
+
 //// Part added to switch start range and end range if they look reverse order
 if($globalOptions['startrange'] != '' && $globalOptions['endrange'] != '')
 {	
 	global $now;
-	$st_limit = str_replace('ago', '', $globalOptions['startrange']);
+	/// Below part is keep to support old links with ago
+	$globalOptions['startrange'] = str_replace('ago', '', $globalOptions['startrange']);
+	$globalOptions['endrange'] = str_replace('ago', '', $globalOptions['endrange']);
+	$st_limit = $globalOptions['startrange'];
 	$st_limit = trim($st_limit);
 	
-	if($st_limit == 'now')
-		$st_limit = 'now';
-	else if($st_limit == '1 week' || $st_limit == '2 weeks' || $st_limit == '1 month' || $st_limit == '1 quarter' || $st_limit == '6 months' || $st_limit == '1 year')
+	if(in_array($st_limit, $globalOptions['Highlight_Range']))
 		$st_limit = '-' . (($st_limit == '1 quarter') ? '3 months' : $st_limit);
 	$st_limit = date('Y-m-d', strtotime($st_limit, $now));
 	
-	$ed_limit = str_replace('ago', '', $globalOptions['endrange']);
+	$ed_limit = $globalOptions['endrange'];
 	$ed_limit = trim($ed_limit);
 	
-	if($ed_limit == 'now')
-		$ed_limit = 'now';
-	else if($ed_limit == '1 week' || $ed_limit == '2 weeks' || $ed_limit == '1 month' || $ed_limit == '1 quarter' || $ed_limit == '6 months' || $ed_limit == '1 year')
+	if(in_array($ed_limit, $globalOptions['Highlight_Range']))
 		$ed_limit = '-' . (($ed_limit == '1 quarter') ? '3 months' : $ed_limit);
 	$ed_limit = date('Y-m-d', strtotime($ed_limit, $now));
 	
