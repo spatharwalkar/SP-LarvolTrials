@@ -647,16 +647,14 @@ global $db;
 		$("#endrange").val($timerange);
 		<?php } ?>
 		
-		$("#productbox li").click(function () {
-			//$checkbox = $(this).children(':checkbox');
-			if($(this).find('input:checkbox').attr('checked'))
-			{
-				$(this).find('input:checkbox').attr('checked', false);
-			}
-			else
-			{
-				$(this).find('input:checkbox').attr('checked', true);
-			}
+		$("ul #productbox li").click(function () {
+			var $checkbox = $(this).find(":checkbox");
+			$checkbox.prop('checked', !$checkbox.attr('checked'));
+
+		});
+		
+		$('#productbox li input, #productbox li label').click(function(event){
+			event.stopPropagation();
 		});
 		
 	});

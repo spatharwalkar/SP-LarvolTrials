@@ -9286,9 +9286,9 @@ class TrialTracker
 				echo '<li><a href="javascript: void(0);">'
 					. '<input type="checkbox" value="' . $infkey . '" id="product_' . $infkey . '" class="product" style="margin-right:5px;" ' 
 					. ((in_array($infkey, $globalOptions['product'])) ? 'checked="checked"' : '') . ' />' 
-					. '<label for="product_' . $infkey . '">' . $infvalue . '</label></a></li>';
+					. $infvalue . '</a></li>';
 			}
-			echo '</ul></ul></div>';
+			echo '</ul></li></ul></div>';
 		}
 		
 		echo '<div style="float: right;padding-top:4px; vertical-align:bottom; height:22px;" id="chromemenu"><a rel="dropmenu">'
