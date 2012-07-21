@@ -405,6 +405,7 @@ function getFieldId($category,$name)
 	if($res === false)
 	{
 		$log = 'Bad SQL query getting field ID of ' . $category . '/' . $name;
+		
 		return softDie($log);
 	}
 	$res = mysql_fetch_assoc($res);

@@ -1,9 +1,9 @@
 <?php
 //connect to Sphinx
-$sphinx = mysql_connect("127.0.0.1:9306") or die ("Couldn't connect to Sphinx server.");
+if(!isset($sphinx) or empty($sphinx)) $sphinx = mysql_connect("127.0.0.1:9306") or die ("Couldn't connect to Sphinx server.");
 require_once('db.php');
 
-if(!$db->loggedIn() || ($db->user->userlevel!='root'))
+if(!$db->loggedIn() || ($db->user->userlevel!='root' && $db->user->userlevel!='admin'))
 {
 	header('Location: ' . urlPath() . 'index.php');
 	exit;
@@ -34,6 +34,9 @@ if (isset($_POST['ot_id']))
 //fetch from source new schema
 if (isset($_POST['scraper_n']) and isset($_POST['days_n'])) 
 {
+	require_once('include.import_new.php');
+	require_once('nct_common.php');
+	require_once('include.import.history_new.php');
 require_once($_POST['scraper_n']);
 run_incremental_scraper($_POST['days_n']);
 return ;

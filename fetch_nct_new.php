@@ -1,6 +1,6 @@
 <?php
 //connect to Sphinx
-$sphinx = mysql_connect("127.0.0.1:9306") or die ("Couldn't connect to Sphinx server.");
+if(!isset($sphinx) or empty($sphinx)) $sphinx = mysql_connect("127.0.0.1:9306") or die ("Couldn't connect to Sphinx server.");
 require_once('db.php');
 require_once('include.search.php');
 require_once('include.util.php');
@@ -17,7 +17,7 @@ global $logger;
 $days = 0;
 $last_id = 0;
 $id_field = 0;
-/******************************** 
+/*
 if(isset($_GET['days']))
 {
 	$days_to_fetch = (int)$_GET['days'];
@@ -31,7 +31,8 @@ else
 	$days=1;
 //	die('Need to set $days_to_fetch or $_GET[' . "'days'" . ']');
 }
-********************************/
+run_incremental_scraper($days);
+*/
 function run_incremental_scraper($days=NULL)
 {
 	global $update_id;

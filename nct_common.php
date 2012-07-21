@@ -121,7 +121,6 @@ function getIDs($type,$days_passed=NULL) {
     else global $days;
     $fields = 'kp';
     $dstr = 'lup_d';
-
     $ids = array();
     for ($page = 1; true; ++$page) {
         $fake = mysql_query('SELECT larvol_id FROM clinical_study LIMIT 1'); //keep alive
@@ -137,13 +136,18 @@ function getIDs($type,$days_passed=NULL) {
         $datatable = NULL;
         foreach ($tables as $table) {
             $right = false;
-            foreach ($table->attributes as $attr) {
-                if ($attr->name == 'class' && $attr->value == 'data_table') {
+            foreach ($table->attributes as $attr) 
+			{
+				//attribute name changed in ct.gov (from "data_table" to "data_table margin-top" and "data_table body3").
+				//if ($attr->name == 'class' && $attr->value == 'data_table') {
+				if ($attr->name == 'class' && substr($attr->value,0,10) == 'data_table') 
+				{
                     $right = true;
                     break;
                 }
             }
-            if ($right == true) {
+            if ($right == true) 
+			{
                 $datatable = $table;
                 break;
             }
