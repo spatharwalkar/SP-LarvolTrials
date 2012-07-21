@@ -7803,18 +7803,11 @@ class TrialTracker
 					$query=$str1.' AND dt.larvol_id IN ( '. $idlist . ' ) ' . $str2;
 				}
 			}
+			unset($idlist);
 			$res = mysql_query($query);
-			
-			$data1=array();$data2=array();
 			while($row = mysql_fetch_assoc($res))
 			{	
-				$data1[]=$row;
-			}
-			foreach($data1 as $kk => $vv)
-			{
-				$row=$vv;
 				$result = $this->processData($ikey, $row, $timeMachine, $timeInterval);
-			
 				if($globalOptions['onlyUpdates'] == "yes")
 				{
 					//unsetting value for field acroynm if it has a previous value and no current value
