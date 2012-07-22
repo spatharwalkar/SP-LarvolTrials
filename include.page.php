@@ -673,11 +673,11 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 		{
 			if($table=='products')
 			{
-				$_GET['id'] = mysql_insert_id();
+				$_REQUEST['id'] = mysql_insert_id();
 			}
 			if($table=='areas')
 			{
-				$_GET['id'] = mysql_insert_id();
+				$_REQUEST['id'] = mysql_insert_id();
 			}
 			return 1;
 		}
