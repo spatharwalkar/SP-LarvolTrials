@@ -11,7 +11,7 @@ if(!$db->loggedIn() || ($db->user->userlevel!='root' && $db->user->userlevel!='a
 require('header.php');
 
 /**************/
-
+ignore_user_abort(true);
 // single trial refresh new schema
 if (isset($_POST['nt_id'])) 
 {
