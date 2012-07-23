@@ -44,7 +44,7 @@ $prev_areaSpan=0;
 $prev_prodSpan=0;
 
 $Min_One_Liner=20;
-$Char_Size=9;
+$Char_Size=8.5;
 
 while($header = mysql_fetch_array($res))
 {
@@ -367,17 +367,17 @@ foreach($rows as $row => $rval)
 			$data_matrix[$row][$col]['new_trials']=$cell_data['new_trials'];
 			
 			///As stringlength of total will be more in all
-			$Width = $Width + (strlen($data_matrix[$row][$col]['total'])*$Char_Size);
+			$Width = $Width + (strlen($data_matrix[$row][$col]['total'])*($Char_Size+1));
 					
 			if(trim($data_matrix[$row][$col]['filing']) != '' && $data_matrix[$row][$col]['filing'] != NULL)
 			$Width = $Width + 17 + 1;
-			
-			if($Width_matrix[$col]['width'] < ($Width+4) || $Width_matrix[$col]['width'] == '' || $Width_matrix[$col]['width'] == 0)
+			$Width = $Width + 6;
+			if($Width_matrix[$col]['width'] < ($Width) || $Width_matrix[$col]['width'] == '' || $Width_matrix[$col]['width'] == 0)
 			{
 				$Width_extra = 0;
-				if(($Width+4) < $Min_One_Liner)
-				$Width_extra = $Min_One_Liner - ($Width+4);
-				$Width_matrix[$col]['width']=$Width + 4 + $Width_extra;
+				if(($Width) < $Min_One_Liner)
+				$Width_extra = $Min_One_Liner - ($Width);
+				$Width_matrix[$col]['width']=$Width + $Width_extra;
 			}
 		}
 		else
@@ -418,6 +418,8 @@ foreach($columns as $col => $val)
 	$Max_areaStringLength = $current_StringLength;
 }
 $area_Col_Height = $Max_areaStringLength * $Char_Size;
+if(($area_Col_Height+10) > 160)
+$area_Col_Height = 160;
 
 $Max_productStringLength=0;
 foreach($rows as $row => $rval)
@@ -441,9 +443,15 @@ $area_Col_Width=110;
 $HColumn_Width = (((count($columns))+(($total_fld)? 1:0)) * ($area_Col_Width+1));
 
 $RColumn_Width = 0; 
+
 foreach($columns as $col => $val)
 {
 	$RColumn_Width = $RColumn_Width + $Width_matrix[$col]['width'] + 0.5;
+	
+	if($Max_ColWidth < $Width_matrix[$col]['width'])
+		$Max_ColWidth = $Width_matrix[$col]['width'];	
+		
+	$Cat_Area_Rotation[$col] = 0;
 }
 
 if(($HColumn_Width + $product_Col_Width) > $Page_Width)	////if hm lenth is greater than 1200 than move to rotate mode
@@ -473,9 +481,79 @@ else
 	$Rotation_Flg = 0;
 }
 
+$Max_ColWidth = 0;
 //$Rotation_Flg = 1;
+$Line_Height = 16;
+$Max_H_AreaCatStringHeight = 0;
+$Max_V_AreaCatStringLength = 0;
+if($Rotation_Flg == 1)	////Adjustment in area column width as per area name
+{
+	foreach($columns as $col => $val)
+	{
+		if(isset($areaIds[$col]) && $areaIds[$col] != NULL && !empty($productIds))
+		{
+			$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col]:$val;
+			$cols_Area_Space[$col] = ceil(($area_Col_Height) / $Char_Size);
+			$cols_Area_Lines[$col] = ceil(strlen(trim($val))/$cols_Area_Space[$col]);
+			$width = ($cols_Area_Lines[$col] * $Line_Height);
+			if($Width_matrix[$col]['width'] < $width)
+				$Width_matrix[$col]['width'] = $width;
+			
+			if($Max_ColWidth < $Width_matrix[$col]['width'] && $cols_Area_Lines[$col] <= 4) 	//// if column do not hv area name with more than 4 lines
+				$Max_ColWidth = $Width_matrix[$col]['width'];
+		}
+	}
+	
+	
+	foreach($columns as $col => $val)
+	{
+		/// Assign same width to all cloumns -  except columns expanding due to number of lines more than 4
+		if($Max_ColWidth > $Width_matrix[$col]['width'] && $cols_Area_Lines[$col] <= 4)
+		$Width_matrix[$col]['width'] = $Max_ColWidth;
+		$Total_Col_width = $Max_ColWidth;
+		
+		///// Category height calculation from horizontal and vertical area names
+		if($columns_Span[$col] > 0 && $columnsCategoryName[$col] != 'Undefined')
+		{
+			$current_StringLength =strlen($columnsCategoryName[$col]);
+			if($columns_Span[$col] < 3)
+			{
+				if($Max_V_AreaCatStringLength < $current_StringLength)
+				{
+					$Max_V_AreaCatStringLength = $current_StringLength;
+				}
+			}
+			else
+			{
+				$i = 1; $width = 0; $col_id = $col;
+				while($i <= $columns_Span[$col])
+				{
+					$width = $width + $Width_matrix[$col_id]['width'];
+					$i++; $col_id++;
+				}
+				$Cat_Area_Col_width[$col] = $width +((($columns_Span[$col] == 1) ? 0:1) * ($columns_Span[$col]-1));
+				$cols_Cat_Space[$col] = ceil($Cat_Area_Col_width[$col] / $Char_Size);
+				$lines = ceil(strlen(trim($columnsCategoryName[$col]))/$cols_Cat_Space[$col]);
+				$height = ($lines * $Line_Height);
+				if($height > $Max_H_AreaCatStringHeight)
+					$Max_H_AreaCatStringHeight = $height;
+			}
+		}
+	}
+}
+
+
+
 if($Rotation_Flg == 1)	////Create width for area category cells and put forcefully line break in category text
 {
+	/// Assign minimum height to category row
+	if($Max_H_AreaCatStringHeight > 130)	/// if horizontal spanning category requires more height assign it
+		$area_Cat_Height = $Max_H_AreaCatStringHeight;
+	else if(($Max_V_AreaCatStringLength * $Char_Size) < 130)	//// if vertical spanning category requires less height assign it
+		$area_Cat_Height = $Max_V_AreaCatStringLength * $Char_Size;
+	else
+		$area_Cat_Height = 130;	/// Take default height
+	
 	foreach($columns as $col => $val)
 	{
 		if($columns_Span[$col] > 0)
@@ -486,14 +564,56 @@ if($Rotation_Flg == 1)	////Create width for area category cells and put forceful
 				$width = $width + $Width_matrix[$col_id]['width'];
 				$i++; $col_id++;
 			}
+			
 			$Cat_Area_Col_width[$col] = $width +((($columns_Span[$col] == 1) ? 0:1) * ($columns_Span[$col]-1));
-			$cols_Cat_Space[$col] = round($Cat_Area_Col_width[$col] / $Char_Size);
+			
+			if($columns_Span[$col] < 3)
+			{
+				$Cat_Area_Rotation[$col] = 1;
+				$cols_Cat_Space[$col] = ceil((($area_Cat_Height < 130)? ($area_Cat_Height):($area_Cat_Height)) / $Char_Size);
+				$cols_Cat_Lines[$col] = ceil(strlen(trim($columnsCategoryName[$col]))/$cols_Cat_Space[$col]);
+				$width = ($cols_Cat_Lines[$col] * $Line_Height);
+				if($Cat_Area_Col_width[$col] < $width) /// Assign new width
+				{
+					$extra_width = $width - $Cat_Area_Col_width[$col];
+					$Cat_Area_Col_width[$col] = $width;
+					/// Distribute extra width equally to all spanning columns
+					$i = 1; $col_id = $col;
+					while($i <= $columns_Span[$col])
+					{
+						$Width_matrix[$col_id]['width'] = $Width_matrix[$col_id]['width'] + ($extra_width/$columns_Span[$col]) - ((($columns_Span[$col] == 1) ? 0:1) * ($columns_Span[$col]-1));
+						$i++; $col_id++;
+					}
+				}
+			}
+			else
+			{
+				$Cat_Area_Rotation[$col] = 0;
+				$cols_Cat_Space[$col] = ceil($Cat_Area_Col_width[$col] / $Char_Size);
+			}
 		}
 	}
+	
+	$area_Cat_Height = $area_Cat_Height + 5; /// Small adjustment
+	$area_Col_Height = $area_Col_Height  + 5;
 }
 
+
+///// Assign remaining width of whole page to achieve fitting
 if($Rotation_Flg == 1)
 {
+	$RColumn_Width = 0; 
+
+	/// New width
+	foreach($columns as $col => $val)
+	{
+		$RColumn_Width = $RColumn_Width + $Width_matrix[$col]['width'] + 0.5;
+		if($total_fld) 
+		{ 
+			$RColumn_Width = $RColumn_Width + $Total_Col_width + 1;
+		}
+	}
+
 	$Avail_Area_Col_width = $Page_Width - $product_Col_Width - $RColumn_Width;
 	$extra_width = $Avail_Area_Col_width / ((count($columns))+(($total_fld)? 1:0));
 	if($extra_width > 1)
@@ -556,28 +676,86 @@ if($Rotation_Flg == 1)
 	
 	foreach($columns as $col => $val)
 	{
+		$width = $Width_matrix[$col]['width'] - ($cols_Area_Lines[$col]*($Line_Height));
+		
+		if(strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') == FALSE) 
 		print '
-		.Area_RowDiv_Class_'.$col.' {
-			margin-left:'.(($Width_matrix[$col]['width']/2)+($Char_Size)).'px;
-			}
-		.Area_Row_Class_'.$col.' {
+		.Area_RowDiv_Class_'.$col.' 
+		{
+			margin-left:'.((($Line_Height)*$cols_Area_Lines[$col]) + ($width/2)).'px;
+		}';
+		else
+		print '
+		.Area_RowDiv_Class_'.$col.' 
+		{
+			margin-left:'.($width/2).'px;
+		}';
+		
+		print '
+		.Area_Row_Class_'.$col.' 
+		{
 			width:'.$Width_matrix[$col]['width'].'px;
 			max-width:'.$Width_matrix[$col]['width'].'px;
 			height:'.($area_Col_Height).'px;
 			_height:'.($area_Col_Height).'px;
-			}
+		}
 		';
-	}
-	print '
-		.Total_RowDiv_Class {
-			margin-left:'.(($Total_Col_width/2)+($Char_Size)).'px;
+		
+		if($columns_Span[$col] > 0)
+		{
+			if($Cat_Area_Rotation[$col])
+			{
+				$width = $Cat_Area_Col_width[$col] - ($cols_Cat_Lines[$col]*($Line_Height));
+				
+				if(strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') == FALSE) 
+				print '
+						.Cat_RowDiv_Class_'.$col.' 
+						{
+							margin-left:'.((($Line_Height)*$cols_Cat_Lines[$col]) + ($width/2)).'px;
+						}
+					';
+				else
+				print '
+						.Cat_RowDiv_Class_'.$col.' 
+						{
+							margin-left:'.($width/2).'px;
+						}
+					';
 			}
-			.Total_Row_Class {
+			print '
+					.Cat_Area_Row_Class_'.$col.' 
+					{
+						width:'.$Cat_Area_Col_width[$col].'px;
+						max-width:'.$Cat_Area_Col_width[$col].'px;
+						height:'.($area_Cat_Height).'px;
+						_height:'.($area_Cat_Height).'px;
+					}
+				';
+		}
+	}
+	
+	$width = $Total_Col_width - $Line_Height;
+	if(strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') == FALSE) 
+	print '
+		.Total_RowDiv_Class 
+		{
+			margin-left:'.($Line_Height + ($width/2)).'px;
+		}';
+	else
+		print '
+		.Total_RowDiv_Class 
+		{
+			margin-left:'.(($width/2)).'px;
+		}';
+		
+	print '	
+		.Total_Row_Class 
+		{
 			width:'.$Total_Col_width.'px;
 			max-width:'.$Total_Col_width.'px;
 			height:'.($area_Col_Height).'px;
 			_height:'.($area_Col_Height).'px;
-			}
+		}
 		';
 	}
 ?>
@@ -585,7 +763,7 @@ if($Rotation_Flg == 1)
 <style type="text/css">
 
 /* As in IE6 hover css does not works, below htc file is added which contains js script which will be executed only in IE, the script convert simple as well as complex hover css into compatible format for IE6 by replacing hover by class css - this file is used so that help tab as well as product selector will work in IE6 without any changes of code as well as css code and script can be also useful for making other css to work in IE6 like :hover and :active for IE6+, and additionally :focus for IE7 and IE8. */
-ul, li { behavior:url("css/csshover3.htc"); }
+ul, li, slideout { behavior:url("css/csshover3.htc"); }
 img { behavior: url("css/iepngfix.htc"); }
 
 body { font-family:Verdana; font-size: 13px;}
@@ -655,7 +833,8 @@ width:100px;
 .classic {background: #FFFFAA; border: 1px solid #FFAD33; }
 
 #slideout {
-	position: absolute;
+	position: fixed;
+	_position:absolute;
 	top: 40px;
 	right: 0;
 	margin: 12px 0 0 0;
@@ -1268,8 +1447,8 @@ function display_tooltip(type, id)
 			tooltip_ele.style.zIndex = "99";
 			
 			///// Start Part - Position the tooltip properly for the cells which are at leftmost edge of window 
-			var windowedge=document.all && !window.opera? document.documentElement.scrollLeft+document.documentElement.clientWidth - 15 : window.pageXOffset+window.innerWidth - 15
-			var tooltipW = 280
+			var windowedge=document.all && !window.opera? document.documentElement.scrollLeft+document.documentElement.clientWidth - 25 : window.pageXOffset+window.innerWidth - 25
+			var tooltipW = 300
 			if (windowedge-tooltip_ele.offsetLeft < tooltipW)  //move menu to the left?
 			{
 				edgeoffset = tooltipW - document.getElementById("Cell_ID_"+id).offsetWidth + 30
@@ -1279,7 +1458,7 @@ function display_tooltip(type, id)
 			
 			///// Start Part - Position the tooltip properly for the cells which are at bottommost edge of window 
 			var tooltipH=document.getElementById("ToolTip_ID_"+id).offsetHeight
-			var windowedge=document.all && !window.opera? document.documentElement.scrollTop+document.documentElement.clientHeight-15 : window.pageYOffset+window.innerHeight;
+			var windowedge=document.all && !window.opera? document.documentElement.scrollTop+document.documentElement.clientHeight-25 : window.pageYOffset+window.innerHeight-25;
 			if ((windowedge- (tooltip_ele.offsetTop + document.getElementById("Cell_ID_"+id).offsetHeight)) < tooltipH)	//move up?
 			{ 	
 				edgeoffset = tooltipH + document.getElementById("Cell_ID_"+id).offsetHeight - 8;
@@ -1462,7 +1641,7 @@ foreach($columns as $col => $val)
 	if($columns_Span[$col] > 0)
 	{
 		$online_HMCounter++;
-		$htmlContent .= '<th class="break_words Cat_Area_Row_Class_'.$col.'" width="'.$Cat_Area_Col_width[$col].'px" style="max-width:'.$Cat_Area_Col_width[$col].';background-color:#FFFFFF; '.(($columnsCategoryName[$col] != 'Undefined') ? 'border-left:#000000 solid 2px; border-top:#000000 solid 2px; border-right:#000000 solid 2px;':'').'" id="Cell_ID_'.$online_HMCounter.'" colspan="'.$columns_Span[$col].'">';
+		$htmlContent .= '<th class="Cat_Area_Row_Class_'.$col.'" width="'.$Cat_Area_Col_width[$col].'px" style="'.(($Cat_Area_Rotation[$col]) ? 'vertical-align:bottom;':'vertical-align:middle;').'max-width:'.$Cat_Area_Col_width[$col].';background-color:#FFFFFF; '.(($columnsCategoryName[$col] != 'Undefined') ? 'border-left:#000000 solid 2px; border-top:#000000 solid 2px; border-right:#000000 solid 2px;':'').'" id="Cell_ID_'.$online_HMCounter.'" colspan="'.$columns_Span[$col].'"><div class="'.(($Cat_Area_Rotation[$col]) ? 'box_rotate Cat_RowDiv_Class_'.$col.' ':'break_words').'">';
 		if($columnsCategoryName[$col] != 'Undefined' && $Rotation_Flg == 1)
 		{
 			$cat_name = str_replace(' ','`',trim($columnsCategoryName[$col]));
@@ -1474,7 +1653,7 @@ foreach($columns as $col => $val)
 		{
 			$htmlContent .= '<b>'.$columnsCategoryName[$col].'</b>';	
 		}
-		$htmlContent .= '</th>';
+		$htmlContent .= '</div></th>';
 	}
 }
 
@@ -1489,14 +1668,25 @@ foreach($columns as $col => $val)
 	$caltTitle = (isset($cdesc) && $cdesc != '')?' alt="'.$cdesc.'" title="'.$cdesc.'" ':null;
 	$cat = (isset($columnsCategoryName[$col]) && $columnsCategoryName[$col] != '')? ' ('.$columnsCategoryName[$col].') ':'';
 		
-	$htmlContent .= '<th style="'.(($Rotation_Flg == 1) ? 'vertical-align:bottom;':'vertical-align:middle;').' max-width:'.$Width_matrix[$col]['width'].'px;" class="Area_Row_Class_'.$col.'" id="Cell_ID_'.$online_HMCounter.'" width="'.$Width_matrix[$col]['width'].'px" '.(($Rotation_Flg == 1) ? 'height="'.$area_Col_Height.'px" align="left"':'align="center"').' '.$caltTitle.'><div class="box_rotate Area_RowDiv_Class_'.$col.' break_words">';
+	$htmlContent .= '<th style="'.(($Rotation_Flg == 1) ? 'vertical-align:bottom;':'vertical-align:middle;').' max-width:'.$Width_matrix[$col]['width'].'px;" class="Area_Row_Class_'.$col.'" id="Cell_ID_'.$online_HMCounter.'" width="'.$Width_matrix[$col]['width'].'px" '.(($Rotation_Flg == 1) ? 'height="'.$area_Col_Height.'px" align="left"':'align="center"').' '.$caltTitle.'><div class="'.(($Rotation_Flg == 1) ? 'box_rotate Area_RowDiv_Class_'.$col.'':'break_words').'">';
 	
 	if(isset($areaIds[$col]) && $areaIds[$col] != NULL && !empty($productIds))
 	{
 		$htmlContent .= '<input type="hidden" value="'.$col_active_total[$col].',endl,'.$col_count_total[$col].',endl,'.$col_indlead_total[$col].'" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
 		$htmlContent .= '<input type="hidden" value="'. trim(urlPath()) .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />';
 		
-		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. trim(urlPath()) .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. '&list=1&itype=0&sr=now&er=1 month&hm=' . $id . '" target="_blank" style="text-decoration:underline; color:#000000;">'.$val.'</a>';
+		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. trim(urlPath()) .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. '&list=1&itype=0&sr=now&er=1 month&hm=' . $id . '" target="_blank" style="text-decoration:underline; color:#000000;">';
+		
+		if($Rotation_Flg == 1)
+		{
+			$area_name = str_replace(' ','`',trim($val));
+			$area_name = preg_replace('/([^\s-]{'.$cols_Area_Space[$col].'})(?=[^\s-])/','$1<br/>',$area_name);
+			$area_name = str_replace('`',' ',$area_name);
+			$htmlContent .= $area_name.'</a>';
+		}
+		else
+			$htmlContent .= trim($val).'</a>';
+			
 	}
 	$htmlContent .='</div></th>';
 }

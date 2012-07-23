@@ -1677,10 +1677,14 @@ function Download_reports()
 				if(date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['filing_lastchanged'])) <= date('Y-m-d H:i:s', strtotime($start_range, $now)) && date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['filing_lastchanged'])) >= date('Y-m-d H:i:s', strtotime($end_range, $now)))
 				{
 					$data_matrix[$row][$col]['filing_image']='images/newred_file.png';
+					$data_matrix[$row][$col]['exec_filing_image']='images/newred_file'; //Excel file image
 					$data_matrix[$row][$col]['update_flag'] = 1;
 				}
 				else
-				$data_matrix[$row][$col]['filing_image']='images/new_file.png';
+				{
+					$data_matrix[$row][$col]['filing_image']='images/new_file.png';
+					$data_matrix[$row][$col]['exec_filing_image']='images/new_file'; //Excel file image
+				}
 				
 				
 				if(date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['phase_explain_lastchanged'])) <= date('Y-m-d H:i:s', strtotime($start_range, $now)) && date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['phase_explain_lastchanged'])) >= date('Y-m-d H:i:s', strtotime($end_range, $now)))
@@ -1705,13 +1709,13 @@ function Download_reports()
 					if(date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])) <= date('Y-m-d H:i:s', strtotime($start_range, $now)) && date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])) >= date('Y-m-d H:i:s', strtotime($end_range, $now)))
 					{
 						$data_matrix[$row][$col]['bomb']['src']='newred_sbomb.png';
-						$data_matrix[$row][$col]['exec_bomb']['src']='newred_sbomb.png'; //Excel bomb image
+						$data_matrix[$row][$col]['exec_bomb']['src']='newred_sbomb'; //Excel bomb image
 						$data_matrix[$row][$col]['update_flag'] = 1;
 					}
 					else
 					{
 						$data_matrix[$row][$col]['bomb']['src']='new_sbomb.png';
-						$data_matrix[$row][$col]['exec_bomb']['src']='new_sbomb.png'; //Excel bomb image
+						$data_matrix[$row][$col]['exec_bomb']['src']='new_sbomb'; //Excel bomb image
 					}
 					$data_matrix[$row][$col]['bomb']['alt']='Small bomb';
 					$data_matrix[$row][$col]['bomb']['style']='width:11px; height:11px;';
@@ -1725,13 +1729,13 @@ function Download_reports()
 					if((date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])) <= date('Y-m-d H:i:s', strtotime($start_range, $now))) && (date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])) >= date('Y-m-d H:i:s', strtotime($end_range, $now))))
 					{
 						$data_matrix[$row][$col]['bomb']['src']='newred_lbomb.png';
-						$data_matrix[$row][$col]['exec_bomb']['src']='newred_lbomb.png';
+						$data_matrix[$row][$col]['exec_bomb']['src']='newred_lbomb';
 						$data_matrix[$row][$col]['update_flag'] = 1;
 					}
 					else
 					{
 						$data_matrix[$row][$col]['bomb']['src']='new_lbomb.png';
-						$data_matrix[$row][$col]['exec_bomb']['src']='new_lbomb.png';
+						$data_matrix[$row][$col]['exec_bomb']['src']='new_lbomb';
 					}
 					$data_matrix[$row][$col]['bomb']['alt']='Large bomb';
 					$data_matrix[$row][$col]['bomb']['style']='width:11px; height:11px;';
@@ -3409,7 +3413,7 @@ function Download_reports()
 						$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
 						$objDrawing->setOffsetX(80);
 						$objDrawing->setOffsetY(0);
-						$objDrawing->setPath('images/'.$data_matrix[$row][$col]['exec_bomb']['src']);
+						$objDrawing->setPath('images/'.$data_matrix[$row][$col]['exec_bomb']['src'].'_'.$data_matrix[$row][$col]['color_code'].'.png');
 						$objDrawing->setHeight(15);
 						$objDrawing->setWidth(15); 
 						$objDrawing->setDescription($data_matrix[$row][$col]['bomb']['title']);
@@ -3422,7 +3426,7 @@ function Download_reports()
 						$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
 						$objDrawing->setOffsetX(100);
 						$objDrawing->setOffsetY(0);
-						$objDrawing->setPath($data_matrix[$row][$col]['filing_image']);
+						$objDrawing->setPath($data_matrix[$row][$col]['exec_filing_image'].'_'.$data_matrix[$row][$col]['color_code'].'.png');
 						$objDrawing->setHeight(15);
 						$objDrawing->setWidth(15); 
 						$objDrawing->setDescription("Filing Details");
