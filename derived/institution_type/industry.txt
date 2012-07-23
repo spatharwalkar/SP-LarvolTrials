@@ -1697,7 +1697,6 @@ Kiadis Pharma
 Kibow Biotech Inc.
 Kinamed Incorporated
 KineMed
-KineMed NIH
 Kinetic Concepts, Inc.
 Kinetic Muscles
 Kineticure
@@ -2069,6 +2068,7 @@ Nexus Oncology Ltd
 Nfocus Neuromedical
 NicOx
 NicOx Inc.
+NIH
 Nihon Pharmaceutical Co., Ltd
 Nile Therapeutics
 NiliMedix
