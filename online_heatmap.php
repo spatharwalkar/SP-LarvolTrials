@@ -1510,6 +1510,38 @@ function refresh_data(cell_id)
 		}
 	}
 }
+
+//// Below function scale Div upto height of TD by using actual rendered height of product cell as referernce - Javascript is used as auto or 100% height not works in IE
+function Scale_Div()
+{
+	var limit = document.getElementById('Last_HM').value;
+	var i=1;
+	for(i=1;i<=limit;i++)
+	{
+		var IS_cell_Type = document.getElementById("Cell_Type_"+i);
+		if(IS_cell_Type != null && IS_cell_Type != '')
+		{
+			if(IS_cell_Type.value == 'product')
+			{
+				var Current_Row = document.getElementById("Cell_RowNum_"+i).value;
+				var Current_Height = document.getElementById("Cell_ID_"+i).offsetHeight
+			}
+			
+			if(IS_cell_Type.value == 'HM_Cell' && Current_Row != null && Current_Row != '')
+			{
+				if(Current_Row == document.getElementById("Cell_RowNum_"+i).value)
+				{
+					var Div_exist = document.getElementById("Div_ID_"+i);
+					if(Div_exist != null && Div_exist != '')
+					{
+						document.getElementById("Div_ID_"+i).style.height = (Current_Height-4)+'px';
+						document.getElementById("Div_ID_"+i).style.verticalAlign = "middle";
+					}
+				}
+			}
+		}
+	}
+}
 </script>
 <script type="text/javascript">
 	//Count the Number of View of Records
@@ -1748,6 +1780,9 @@ foreach($rows as $row => $rval)
 	
 	$htmlContent .='<th class="product_col" style="padding-left:4px; height:auto; vertical-align:middle;" id="Cell_ID_'.$online_HMCounter.'" '.$raltTitle.'><div align="left" style="vertical-align:middle; height:100%;">';
 			
+	$htmlContent .= '<input type="hidden" value="product" name="Cell_Type_'.$online_HMCounter.'" id="Cell_Type_'.$online_HMCounter.'" />';
+	$htmlContent .= '<input type="hidden" value="'.$row.'" name="Cell_RowNum_'.$online_HMCounter.'" id="Cell_RowNum_'.$online_HMCounter.'" />';
+
 	if(isset($productIds[$row]) && $productIds[$row] != NULL && !empty($areaIds))
 	{
 		$htmlContent .= '<input type="hidden" value="'.$row_active_total[$row].',endl,'.$row_count_total[$row].',endl,'.$row_indlead_total[$row].'" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
@@ -1761,6 +1796,9 @@ foreach($rows as $row => $rval)
 	{
 		$online_HMCounter++;
 		$htmlContent .= '<td class="tooltip" valign="middle" id="Cell_ID_'.$online_HMCounter.'" style="'. (($data_matrix[$row][$col]['total'] != 0) ? ' background-color:#'.$data_matrix[$row][$col]['color_code'].'; border:#'.$data_matrix[$row][$col]['color_code'].' solid;' : 'background-color:#f5f5f5; border:#f5f5f5 solid;') .' padding:1px; min-width:'.$Width_matrix[$col]['width'].'px;  max-width:'.$Width_matrix[$col]['width'].'px; height:100%; vertical-align:middle; text-align:center; " align="center" onmouseover="display_tooltip(\'on\','.$online_HMCounter.');" onmouseout="display_tooltip(\'off\','.$online_HMCounter.');">';
+	
+		$htmlContent .= '<input type="hidden" value="HM_Cell" name="Cell_Type_'.$online_HMCounter.'" id="Cell_Type_'.$online_HMCounter.'" />';
+		$htmlContent .= '<input type="hidden" value="'.$row.'" name="Cell_RowNum_'.$online_HMCounter.'" id="Cell_RowNum_'.$online_HMCounter.'" />';
 	
 		if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL && $data_matrix[$row][$col]['total'] != 0)
 		{
@@ -1987,4 +2025,5 @@ $('.product_col').css('word-wrap','break-word');
 $('.product_col').css('_width','400px');
 }
 change_view();
+Scale_Div();
 </script>
