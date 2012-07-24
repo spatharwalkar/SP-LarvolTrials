@@ -1186,6 +1186,20 @@ function change_view()
 					document.getElementById("Cell_Link_"+i).style.fontWeight = "normal";
 					document.getElementById("Count_CDate_"+i).style.display = "none";
 				}
+				
+				
+				/// if New trials greater than 0 chnage number to red
+				var New_Trials = document.getElementById("New_Trials_"+i);
+				if(New_Trials != null && New_Trials != '')
+				{
+					if(New_Trials.value == 'True')
+					{
+						document.getElementById("Cell_Link_"+i).style.color = "#FF0000";
+						document.getElementById("Cell_Link_"+i).style.fontWeight = "bold";
+						if(Cell_values_Arr[14]=='FF0000')
+						document.getElementById("Cell_Link_"+i).style.backgroundColor = "#FFFFFF";
+					}
+				}
 					
 				///Change Bomb Color
 				var bomb_cdate= new Date(Cell_values_Arr[10]);	//Bomb Chnage Date
@@ -1857,6 +1871,7 @@ foreach($rows as $row => $rval)
 			{
 				$Status_List_Flg_1=1;
 				$Status_List_1 = '<font style="color:#206040; font-weight: 900;">New trials</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['new_trials'] .'</font></br>';
+				$htmlContent .= '<input type="hidden" value="True" name="New_Trials_'.$online_HMCounter.'" id="New_Trials_'.$online_HMCounter.'" />';
 			}
 			
 			if($Status_List_Flg_1==1)
