@@ -1642,7 +1642,7 @@ foreach($columns as $col => $val)
 	{
 		$online_HMCounter++;
 		$htmlContent .= '<th class="Cat_Area_Row_Class_'.$col.'" width="'.$Cat_Area_Col_width[$col].'px" style="'.(($Cat_Area_Rotation[$col]) ? 'vertical-align:bottom;':'vertical-align:middle;').'max-width:'.$Cat_Area_Col_width[$col].';background-color:#FFFFFF; '.(($columnsCategoryName[$col] != 'Undefined') ? 'border-left:#000000 solid 2px; border-top:#000000 solid 2px; border-right:#000000 solid 2px;':'').'" id="Cell_ID_'.$online_HMCounter.'" colspan="'.$columns_Span[$col].'"><div class="'.(($Cat_Area_Rotation[$col]) ? 'box_rotate Cat_RowDiv_Class_'.$col.' ':'break_words').'">';
-		if($columnsCategoryName[$col] != 'Undefined' && $Rotation_Flg == 1)
+		if($columnsCategoryName[$col] != 'Undefined' && $Rotation_Flg == 1 && $Cat_Area_Rotation[$col])
 		{
 			$cat_name = str_replace(' ','`',trim($columnsCategoryName[$col]));
 			$cat_name = preg_replace('/([^\s-]{'.$cols_Cat_Space[$col].'})(?=[^\s-])/','$1<br/>',$cat_name);
