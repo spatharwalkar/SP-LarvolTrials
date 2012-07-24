@@ -2918,7 +2918,7 @@ function Download_reports()
 					
 					$Ex_L = ($Av_L - $Aq_L)/2;
 					
-					$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. $link_part . '" target="_blank" title="'. $title .'" style="'.((trim($data_matrix[$row][$col]['color_code']) == 'FF0000' && $data_matrix[$row][$col]['count_lastchanged_value']==1) ? 'background-color:#FFFFFF;':'').'"><font style="'. (($data_matrix[$row][$col]['count_lastchanged_value']==1) ? 'color:#FF0000;':'').'" >'.$count_val.'</font></a>';
+					$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. $link_part . '" target="_blank" title="'. $title .'" style="'.((trim($data_matrix[$row][$col]['color_code']) == 'FF0000' && ($data_matrix[$row][$col]['count_lastchanged_value']==1 || $data_matrix[$row][$col]['new_trials'] > 0)) ? 'background-color:#FFFFFF;':'').'"><font style="'. (($data_matrix[$row][$col]['count_lastchanged_value']==1 || $data_matrix[$row][$col]['new_trials'] > 0) ? 'color:#FF0000;':'').'" >'.$count_val.'</font></a>';
 					
 					if($data_matrix[$row][$col]['bomb']['value'] == 'small' || $data_matrix[$row][$col]['bomb']['value'] == 'large')
 					$bomb_PR = 1;
@@ -3250,7 +3250,7 @@ function Download_reports()
 					if($data_matrix[$row][$col]['update_flag'] == 1)
 					$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($styleThinRedBorderOutline);
 					
-					if($data_matrix[$row][$col]['count_lastchanged_value']==1)
+					if($data_matrix[$row][$col]['count_lastchanged_value']==1 || $data_matrix[$row][$col]['new_trials'] > 0)
 					{
 						if($data_matrix[$row][$col]['color_code'] != 'FF0000')
 						$red_font['font']['color']['rgb'] = 'FF0000';
