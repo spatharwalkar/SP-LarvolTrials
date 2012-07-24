@@ -660,7 +660,7 @@ if($Rotation_Flg == 1)
 		-o-transform: rotate(270deg); /* For Opera */
 		-webkit-transform: rotate(270deg); /* For Safari and Chrome */
 		transform: rotate(270deg);
-		-ms-transform: rotate(270deg); /* IE 9 */
+		-ms-transform: rotate(360deg); /* IE 9 */
 		-ms-transform-origin:0% 100%; /* IE 9 */
 		-moz-transform-origin:0% 100%; /* Firefox */
 		-webkit-transform-origin:0% 100%; /* Safari and Chrome */
@@ -1668,7 +1668,7 @@ foreach($columns as $col => $val)
 	$caltTitle = (isset($cdesc) && $cdesc != '')?' alt="'.$cdesc.'" title="'.$cdesc.'" ':null;
 	$cat = (isset($columnsCategoryName[$col]) && $columnsCategoryName[$col] != '')? ' ('.$columnsCategoryName[$col].') ':'';
 		
-	$htmlContent .= '<th style="'.(($Rotation_Flg == 1) ? 'vertical-align:bottom;':'vertical-align:middle;').' max-width:'.$Width_matrix[$col]['width'].'px;" class="Area_Row_Class_'.$col.'" id="Cell_ID_'.$online_HMCounter.'" width="'.$Width_matrix[$col]['width'].'px" '.(($Rotation_Flg == 1) ? 'height="'.$area_Col_Height.'px" align="left"':'align="center"').' '.$caltTitle.'><div class="'.(($Rotation_Flg == 1) ? 'box_rotate Area_RowDiv_Class_'.$col.'':'break_words').'">';
+	$htmlContent .= '<th style="'.(($Rotation_Flg == 1) ? 'vertical-align:bottom;':'vertical-align:middle;').' max-width:'.$Width_matrix[$col]['width'].'px;" class="Area_Row_Class_'.$col.'" id="Cell_ID_'.$online_HMCounter.'" width="'.$Width_matrix[$col]['width'].'px" '.(($Rotation_Flg == 1) ? 'height="'.$area_Col_Height.'px" align="left"':'align="center"').' '.$caltTitle.'><div class="'.(($Rotation_Flg == 1) ? 'box_rotate Area_RowDiv_Class_'.$col.'':'break_words').'" style="background-color:#DDF;">';
 	
 	if(isset($areaIds[$col]) && $areaIds[$col] != NULL && !empty($productIds))
 	{
