@@ -172,6 +172,7 @@ class TrialTracker
 		);
 
 		$highlightChange =  array('font' => array('color' => array('rgb' => 'FF0000')));
+		$manualChange =  array('font' => array('color' => array('rgb' => 'FF7700')));
 		
 		$objPHPExcel->getActiveSheet()->getStyle('A1:BA1')->applyFromArray($styleThinBlueBorderOutline);
 			
@@ -496,7 +497,38 @@ class TrialTracker
 				$endYear = date('Y',strtotime($dvalue['inactive_date']));
 				
 				$nctId = $dvalue["NCT/nct_id"];
-				$ctLink = urlencode('http://clinicaltrials.gov/ct2/show/' . padnct($nctId));
+				$nctIdText = padnct($nctId);
+				if($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed')
+				{
+					if(isset($dvalue['manual_is_sourceless']))
+					{
+						$ctLink = urlencode($dvalue['source']);
+					}
+					else if(isset($dvalue['source_id']) && strpos($dvalue['source_id'], 'NCT') === FALSE)
+					{	
+						$nctIdText = unpadnct($nctId);
+						$ctLink = urlencode('https://www.clinicaltrialsregister.eu/ctr-search/search?query=' . $nctId);
+					}
+					else if(isset($dvalue['source_id']) && strpos($dvalue['source_id'], 'NCT') !== FALSE)
+					{
+						$ctLink = urlencode('http://clinicaltrials.gov/ct2/show/' . padnct($nctId));
+					}
+					else 
+					{ 
+						$ctLink = urlencode('javascript:void(0)');
+					}
+				}
+				else
+				{
+					if($dvalue['NCT/nct_id'] !== '' && $dvalue['NCT/nct_id'] !== NULL)
+					{
+						$ctLink = urlencode('http://clinicaltrials.gov/ct2/show/' . padnct($nctId));
+					}
+					else 
+					{ 
+						$ctLink = urlencode('javascript:void(0)');
+					}
+				}
 				
 				$cellSpan = $i;
 				$rowspanLimit = 0;
@@ -549,9 +581,9 @@ class TrialTracker
 				$objPHPExcel->getActiveSheet()->getStyle('A1:AZ1')->applyFromArray($styleThinBlueBorderOutline);
 				
 				//nct id	
-				$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, 'NCT' . sprintf("%08s", $nctId));
+				$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $nctIdText);
 				$objPHPExcel->getActiveSheet()->getCell('A' . $i)->getHyperlink()->setUrl($ctLink);
-				if($tvalue['new'] == 'y')
+				if($dvalue['new'] == 'y')
 				{
 					 $objPHPExcel->getActiveSheet()->getStyle('A' . $i)->applyFromArray($highlightChange); 
 					 $objPHPExcel->getActiveSheet()->getCell('A' . $i)->getHyperlink()->setTooltip('New record'); 
@@ -562,39 +594,125 @@ class TrialTracker
 				$dvalue["NCT/brief_title"] = fix_special_chars($dvalue["NCT/brief_title"]);
 				$objPHPExcel->getActiveSheet()->setCellValue('B' . $i, $dvalue["NCT/brief_title"]);
 				$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setUrl($ctLink);
-				
-				if(!empty($dvalue['edited']) && array_key_exists('NCT/brief_title', $dvalue['edited']))
+				if(isset($dvalue['manual_is_sourceless']))
 				{
-					 $objPHPExcel->getActiveSheet()->getStyle('B' . $i)->applyFromArray($highlightChange);
-					 $objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/brief_title'],0,255));  //We can display only 255 character as tooltip in Excel
-				}
-				else if($dvalue['new'] == 'y')
-				{
-					 $objPHPExcel->getActiveSheet()->getStyle('B' . $i)->applyFromArray($highlightChange); 
-					 $objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('New record'); 
+					if(!empty($dvalue['edited']) && array_key_exists('NCT/brief_title', $dvalue['edited']))
+					{
+						 $objPHPExcel->getActiveSheet()->getStyle('B' . $i)->applyFromArray($highlightChange);
+						 $objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/brief_title'],0,255));  //We can display only 255 character as tooltip in Excel
+					}
+					else if($dvalue['new'] == 'y')
+					{
+						 $objPHPExcel->getActiveSheet()->getStyle('B' . $i)->applyFromArray($highlightChange); 
+						 $objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('New record'); 
+					}
+					elseif(isset($dvalue['manual_brief_title']))
+					{
+						$objPHPExcel->getActiveSheet()->getStyle('B' . $i)->applyFromArray($manualChange); 
+						if($dvalue['original_brief_title'] == $dvalue['NCT/brief_title'])
+						{
+							$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('Manual curation.');
+						}
+						else
+						{
+							$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_brief_title']);
+						}
+					}
+					else
+					{
+						 $objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('Source - ClinicalTrials.gov'); 
+					}
 				}
 				else
 				{
-					 $objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('Source - ClinicalTrials.gov'); 
+					if(isset($dvalue['manual_brief_title']))
+					{
+						$objPHPExcel->getActiveSheet()->getStyle('B' . $i)->applyFromArray($manualChange); 
+						if($dvalue['original_brief_title'] == $dvalue['NCT/brief_title'])
+						{
+							$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('Manual curation.');
+						}
+						else
+						{
+							$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_brief_title']);
+						}
+					}
+					else if(!empty($dvalue['edited']) && array_key_exists('NCT/brief_title', $dvalue['edited']))
+					{
+						 $objPHPExcel->getActiveSheet()->getStyle('B' . $i)->applyFromArray($highlightChange);
+						 $objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/brief_title'],0,255));  //We can display only 255 character as tooltip in Excel
+					}
+					else if($dvalue['new'] == 'y')
+					{
+						 $objPHPExcel->getActiveSheet()->getStyle('B' . $i)->applyFromArray($highlightChange); 
+						 $objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('New record'); 
+					}
+					else
+					{
+						 $objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('Source - ClinicalTrials.gov'); 
+					}
 				}
 				$objPHPExcel->getActiveSheet()->getStyle('B' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
 				
 				
 				//enrollment
-				if(!empty($dvalue['edited']) && array_key_exists('NCT/enrollment', $dvalue['edited']) 
-				&& (getDifference(substr($dvalue['edited']['NCT/enrollment'],16), $dvalue['NCT/enrollment'])))
+				if(isset($dvalue['manual_is_sourceless']))
 				{
-					 $objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($highlightChange);
-
-
-					 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl($ctLink);
-					 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/enrollment'],0,255)); 
+					if(!empty($dvalue['edited']) && array_key_exists('NCT/enrollment', $dvalue['edited']) 
+					&& (getDifference(substr($dvalue['edited']['NCT/enrollment'],16), $dvalue['NCT/enrollment'])))
+					{
+						 $objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($highlightChange);
+						 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl($ctLink);
+						 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/enrollment'],0,255)); 
+					}
+					else if($dvalue['new'] == 'y')
+					{
+						 $objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($highlightChange);
+						 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl($ctLink);
+						 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip('New record'); 
+					}
+					elseif(isset($dvalue['manual_enrollment']))
+					{
+						$objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($manualChange);
+						$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl($ctLink);
+						if($dvalue['original_enrollment'] == $dvalue['NCT/enrollment'])
+						{
+							 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip('Manual curation.');
+						}
+						else
+						{
+							$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_enrollment']);
+						}
+					}
 				}
-				else if($dvalue['new'] == 'y')
+				else
 				{
-					 $objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($highlightChange);
-					 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl($ctLink);
-					 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip('New record'); 
+					if(isset($dvalue['manual_enrollment']))
+					{
+						$objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($manualChange);
+						$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl($ctLink);
+						if($dvalue['original_enrollment'] == $dvalue['NCT/enrollment'])
+						{
+							 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip('Manual curation.');
+						}
+						else
+						{
+							$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_enrollment']);
+						}
+					}
+					elseif(!empty($dvalue['edited']) && array_key_exists('NCT/enrollment', $dvalue['edited']) 
+					&& (getDifference(substr($dvalue['edited']['NCT/enrollment'],16), $dvalue['NCT/enrollment'])))
+					{
+						 $objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($highlightChange);
+						 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl($ctLink);
+						 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/enrollment'],0,255)); 
+					}
+					else if($dvalue['new'] == 'y')
+					{
+						 $objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($highlightChange);
+						 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl($ctLink);
+						 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip('New record'); 
+					}
 				}
 				if($dvalue["NCT/enrollment_type"] != '') 
 				{
@@ -616,95 +734,330 @@ class TrialTracker
 				//region	
 				$dvalue["region"] = fix_special_chars($dvalue["region"]);
 				$objPHPExcel->getActiveSheet()->setCellValue('D' . $i, $dvalue["region"]);
-				if($dvalue['new'] == 'y')
+				if(isset($dvalue['manual_is_sourceless']))
 				{
-					$objPHPExcel->getActiveSheet()->getStyle('D' . $i)->applyFromArray($highlightChange);
-					$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setUrl($ctLink); 
-					$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setTooltip('New record'); 
+					if($dvalue['new'] == 'y')
+					{
+						$objPHPExcel->getActiveSheet()->getStyle('D' . $i)->applyFromArray($highlightChange);
+						$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setUrl($ctLink); 
+						$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setTooltip('New record'); 
+					}
+					elseif(isset($dvalue['manual_region']))
+					{
+						$objPHPExcel->getActiveSheet()->getStyle('D' . $i)->applyFromArray($manualChange);
+						$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setUrl($ctLink); 
+						$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+					}
 				}
+				else
+				{
+					if(isset($dvalue['manual_region']))
+					{
+						$objPHPExcel->getActiveSheet()->getStyle('D' . $i)->applyFromArray($manualChange);
+						$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setUrl($ctLink); 
+						$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+					}
+					elseif($dvalue['new'] == 'y')
+					{
+						$objPHPExcel->getActiveSheet()->getStyle('D' . $i)->applyFromArray($highlightChange);
+						$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setUrl($ctLink); 
+						$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setTooltip('New record'); 
+					}
+				}
+				
 				
 				
 				//status
 				$objPHPExcel->getActiveSheet()->setCellValue('E' . $i, $dvalue["NCT/overall_status"]);
-				if(!empty($dvalue['edited']) && array_key_exists('NCT/overall_status', $dvalue['edited']))
+				if(isset($dvalue['manual_is_sourceless']))
 				{
-					 $objPHPExcel->getActiveSheet()->getStyle('E' . $i)->applyFromArray($highlightChange);
-					 $objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setUrl($ctLink);
-					 $objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/overall_status'],0,255)); 
+					if(!empty($dvalue['edited']) && array_key_exists('NCT/overall_status', $dvalue['edited']))
+					{
+						 $objPHPExcel->getActiveSheet()->getStyle('E' . $i)->applyFromArray($highlightChange);
+						 $objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setUrl($ctLink);
+						 $objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/overall_status'],0,255)); 
+					}
+					else if($dvalue['new'] == 'y')
+					{
+						 $objPHPExcel->getActiveSheet()->getStyle('E' . $i)->applyFromArray($highlightChange); 
+						 $objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setUrl($ctLink);
+						 $objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip('New record'); 
+					}
+					elseif(isset($dvalue['manual_overall_status']))
+					{
+						$objPHPExcel->getActiveSheet()->getStyle('E' . $i)->applyFromArray($manualChange); 
+						$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setUrl($ctLink);
+						if($dvalue['original_overall_status'] == $dvalue['NCT/overall_status'])
+						{	
+							$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+						}
+						else
+						{	
+							$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_overall_status']); 
+						}
+					}
 				}
-				else if($dvalue['new'] == 'y')
+				else
 				{
-					 $objPHPExcel->getActiveSheet()->getStyle('E' . $i)->applyFromArray($highlightChange); 
-					 $objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setUrl($ctLink);
-					 $objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip('New record'); 
+					if(isset($dvalue['manual_overall_status']))
+					{
+						$objPHPExcel->getActiveSheet()->getStyle('E' . $i)->applyFromArray($manualChange); 
+						$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setUrl($ctLink);
+						if($dvalue['original_overall_status'] == $dvalue['NCT/overall_status'])
+						{
+							$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+						}
+						else
+						{
+							$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_overall_status']); 
+						}
+					}
+					else if(!empty($dvalue['edited']) && array_key_exists('NCT/overall_status', $dvalue['edited']))
+					{
+						 $objPHPExcel->getActiveSheet()->getStyle('E' . $i)->applyFromArray($highlightChange);
+						 $objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setUrl($ctLink);
+						 $objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/overall_status'],0,255)); 
+					}
+					else if($dvalue['new'] == 'y')
+					{
+						 $objPHPExcel->getActiveSheet()->getStyle('E' . $i)->applyFromArray($highlightChange); 
+						 $objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setUrl($ctLink);
+						 $objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip('New record'); 
+					}
 				}
 				
 				
 				//collaborator and lead sponsor	
 				$dvalue["NCT/lead_sponsor"] = fix_special_chars($dvalue["NCT/lead_sponsor"]);
 				$dvalue["NCT/collaborator"] = fix_special_chars($dvalue["NCT/collaborator"]);
-				
 				$objPHPExcel->getActiveSheet()->setCellValue('F' . $i, $dvalue["NCT/lead_sponsor"] . $dvalue["NCT/collaborator"]);
-
-
-				
-				if(!empty($dvalue['edited']) && (array_key_exists('NCT/lead_sponsor', $dvalue['edited']) || array_key_exists('NCT/collaborator', $dvalue['edited'])))
+				if(isset($dvalue['manual_is_sourceless']))
 				{
-					$value = '';
-					if(array_key_exists('NCT/lead_sponsor', $dvalue['edited']))
+					if(!empty($dvalue['edited']) && (array_key_exists('NCT/lead_sponsor', $dvalue['edited']) || array_key_exists('NCT/collaborator', $dvalue['edited'])))
 					{
-						$value .= $dvalue['edited']['NCT/lead_sponsor'];
+						$value = '';
+						if(array_key_exists('NCT/lead_sponsor', $dvalue['edited']))
+						{
+							$value .= $dvalue['edited']['NCT/lead_sponsor'];
+						}
+						
+						if(array_key_exists('NCT/collaborator', $tvalue['edited']))
+						{
+							$value .= $dvalue['edited']['NCT/collaborator'];
+						}
+						$objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray($highlightChange);
+						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl($ctLink);
+						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip(substr($value,0,255)); 
 					}
-					
-					if(array_key_exists('NCT/collaborator', $tvalue['edited']))
+					else if($tvalue['new'] == 'y')
 					{
-						$value .= $dvalue['edited']['NCT/collaborator'];
+						 $objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray($highlightChange); 
+						 $objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl($ctLink);
+						 $objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('New record'); 
 					}
-					
-					 $objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray($highlightChange);
-					 $objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl($ctLink);
-					 $objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip(substr($value,0,255)); 
+					elseif(isset($dvalue['manual_lead_sponsor']) || isset($dvalue['manual_collaborator']))
+					{
+						$objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray($manualChange); 
+						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl($ctLink);
+						if(isset($dvalue['manual_lead_sponsor']))
+						{
+							if($dvalue['original_lead_sponsor'] == $dvalue['NCT/lead_sponsor'])
+							{
+								$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+							}
+							else
+							{	
+								$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_lead_sponsor']); 
+							}
+						}
+						else
+						{
+							if($dvalue['original_collaborator'] == $dvalue['NCT/collaborator'])
+							{
+								$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+							}
+							else
+							{	
+								$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_collaborator']); 
+							}
+						}
+					}
 				}
-				else if($tvalue['new'] == 'y')
+				else
 				{
-					 $objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray($highlightChange); 
-					 $objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl($ctLink);
-					 $objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('New record'); 
+					if(isset($dvalue['manual_lead_sponsor']) || isset($dvalue['manual_collaborator']))
+					{
+						$objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray($manualChange); 
+						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl($ctLink);
+						if(isset($dvalue['manual_lead_sponsor']))
+						{
+							if($dvalue['original_lead_sponsor'] == $dvalue['NCT/lead_sponsor'])
+							{
+								$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+							}
+							else
+							{	
+								$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_lead_sponsor']); 
+							}
+						}
+						else
+						{
+							if($dvalue['original_collaborator'] == $dvalue['NCT/collaborator'])
+							{
+								$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+							}
+							else
+							{	
+								$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_collaborator']); 
+							}
+						}
+					}
+					elseif(!empty($dvalue['edited']) && (array_key_exists('NCT/lead_sponsor', $dvalue['edited']) || array_key_exists('NCT/collaborator', $dvalue['edited'])))
+					{
+						$value = '';
+						if(array_key_exists('NCT/lead_sponsor', $dvalue['edited']))
+						{
+							$value .= $dvalue['edited']['NCT/lead_sponsor'];
+						}
+						
+						if(array_key_exists('NCT/collaborator', $tvalue['edited']))
+						{
+							$value .= $dvalue['edited']['NCT/collaborator'];
+						}
+						$objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray($highlightChange);
+						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl($ctLink);
+						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip(substr($value,0,255)); 
+					}
+					else if($tvalue['new'] == 'y')
+					{
+						 $objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray($highlightChange); 
+						 $objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl($ctLink);
+						 $objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('New record'); 
+					}
 				}
 				
 				
 				//condition
 				$dvalue["NCT/condition"] = fix_special_chars($dvalue["NCT/condition"]);
 				$objPHPExcel->getActiveSheet()->setCellValue('G' . $i, $dvalue["NCT/condition"]);
-				if(!empty($dvalue['edited']) && array_key_exists('NCT/condition', $dvalue['edited']))
+				if(isset($dvalue['manual_is_sourceless']))
 				{
-					 $objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($highlightChange);
-					 $objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($ctLink);
-					 $objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/condition'],0,255)); 
+					if(!empty($dvalue['edited']) && array_key_exists('NCT/condition', $dvalue['edited']))
+					{
+						 $objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($highlightChange);
+						 $objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($ctLink);
+						 $objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/condition'],0,255)); 
+					}
+					else if($tvalue['new'] == 'y')
+					{
+						 $objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($highlightChange); 
+						 $objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($ctLink);
+						 $objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip('New record'); 
+					}
+					elseif(isset($dvalue['manual_condition']))
+					{
+						$objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($manualChange); 
+						$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($ctLink);
+						if($dvalue['original_condition'] == $dvalue['NCT/condition'])
+						{	
+							$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+						}
+						else
+						{	
+							$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_condition']); 
+						}
+					}
 				}
-				else if($tvalue['new'] == 'y')
+				else
 				{
-					 $objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($highlightChange); 
-					 $objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($ctLink);
-					 $objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip('New record'); 
+					if(isset($dvalue['manual_condition']))
+					{
+						$objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($manualChange); 
+						$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($ctLink);
+						if($dvalue['original_condition'] == $dvalue['NCT/condition'])
+						{	
+							$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+						}
+						else
+						{	
+							$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_condition']); 
+						}
+					}
+					elseif(!empty($dvalue['edited']) && array_key_exists('NCT/condition', $dvalue['edited']))
+					{
+						 $objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($highlightChange);
+						 $objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($ctLink);
+						 $objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/condition'],0,255)); 
+					}
+					else if($tvalue['new'] == 'y')
+					{
+						 $objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($highlightChange); 
+						 $objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($ctLink);
+						 $objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip('New record'); 
+					}
 				}
 				
 					
 				//intervention
 				$dvalue["NCT/intervention_name"] = fix_special_chars($dvalue["NCT/intervention_name"]);
 				$objPHPExcel->getActiveSheet()->setCellValue('H' . $i, $dvalue["NCT/intervention_name"]);
-				if(!empty($dvalue['edited']) && array_key_exists('NCT/intervention_name', $dvalue['edited']))
+				if(isset($dvalue['manual_is_sourceless']))
 				{
-					 $objPHPExcel->getActiveSheet()->getStyle('H' . $i)->applyFromArray($highlightChange);
-					 $objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($ctLink);
-					 $objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/intervention_name'],0,255)); 
+					if(!empty($dvalue['edited']) && array_key_exists('NCT/intervention_name', $dvalue['edited']))
+					{
+						 $objPHPExcel->getActiveSheet()->getStyle('H' . $i)->applyFromArray($highlightChange);
+						 $objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($ctLink);
+						 $objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/intervention_name'],0,255)); 
+					}
+					else if($dvalue['new'] == 'y')
+					{
+						 $objPHPExcel->getActiveSheet()->getStyle('H' . $i)->applyFromArray($highlightChange); 
+						 $objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($ctLink);
+						 $objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip('New record'); 
+					}
+					elseif(isset($dvalue['manual_intervention_name']))
+					{
+						$objPHPExcel->getActiveSheet()->getStyle('H' . $i)->applyFromArray($manualChange); 
+						$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($ctLink);
+						if($dvalue['original_intervention_name'] == $dvalue['NCT/intervention_name'])
+						{
+							$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+						}
+						else
+						{	
+							$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_intervention_name']); 
+						}
+					}
 				}
-				else if($dvalue['new'] == 'y')
+				else
 				{
-					 $objPHPExcel->getActiveSheet()->getStyle('H' . $i)->applyFromArray($highlightChange); 
-					 $objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($ctLink);
-					 $objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip('New record'); 
+					if(isset($dvalue['manual_intervention_name']))
+					{
+						$objPHPExcel->getActiveSheet()->getStyle('H' . $i)->applyFromArray($manualChange); 
+						$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($ctLink);
+						if($dvalue['original_intervention_name'] == $dvalue['NCT/intervention_name'])
+						{
+							$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+						}
+						else
+						{	
+							$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_intervention_name']); 
+						}
+					}
+					elseif(!empty($dvalue['edited']) && array_key_exists('NCT/intervention_name', $dvalue['edited']))
+					{
+						 $objPHPExcel->getActiveSheet()->getStyle('H' . $i)->applyFromArray($highlightChange);
+						 $objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($ctLink);
+						 $objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/intervention_name'],0,255)); 
+					}
+					else if($dvalue['new'] == 'y')
+					{
+						 $objPHPExcel->getActiveSheet()->getStyle('H' . $i)->applyFromArray($highlightChange); 
+						 $objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($ctLink);
+						 $objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip('New record'); 
+					}
 				}
+				
 				
 				
 				//end date	
@@ -715,18 +1068,63 @@ class TrialTracker
 				{
 					$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, date('m/y',strtotime($dvalue["inactive_date"])));
 				}
-				if(!empty($dvalue['edited']) && array_key_exists('NCT/inactive_date', $dvalue['edited']))
+				if(isset($dvalue['manual_is_sourceless']))
 				{
-					 $objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray($highlightChange);
-					 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($ctLink);
-					 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/inactive_date'],0,255)); 
+					if(!empty($dvalue['edited']) && array_key_exists('NCT/inactive_date', $dvalue['edited']))
+					{
+						 $objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray($highlightChange);
+						 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($ctLink);
+						 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/inactive_date'],0,255)); 
+					}
+					else if($dvalue['new'] == 'y')
+					{
+						 $objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray($highlightChange);
+						 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($ctLink); 
+						 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('New record'); 
+					}
+					elseif(isset($dvalue['manual_end_date']))
+					{
+						$objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray($manualChange);
+						$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($ctLink); 
+						if($dvalue['original_end_date'] == $dvalue['inactive_date'])
+						{
+							$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+						}
+						else
+						{
+							$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_end_date']); 
+						}
+					}
 				}
-				else if($dvalue['new'] == 'y')
+				else
 				{
-					 $objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray($highlightChange);
-					 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($ctLink); 
-					 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('New record'); 
+					if(isset($dvalue['manual_end_date']))
+					{
+						$objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray($manualChange);
+						$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($ctLink); 
+						if($dvalue['original_end_date'] == $dvalue['inactive_date'])
+						{
+							$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+						}
+						else
+						{
+							$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_end_date']); 
+						}
+					}
+					elseif(!empty($dvalue['edited']) && array_key_exists('NCT/inactive_date', $dvalue['edited']))
+					{
+						 $objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray($highlightChange);
+						 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($ctLink);
+						 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/inactive_date'],0,255)); 
+					}
+					else if($dvalue['new'] == 'y')
+					{
+						 $objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray($highlightChange);
+						 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($ctLink); 
+						 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('New record'); 
+					}
 				}
+				
 				
 				
 				//phase
@@ -742,18 +1140,63 @@ class TrialTracker
 					$phaseColor = $this->phaseValues[$phase];
 				}
 				$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, $phase);
-				if(!empty($tvalue['edited']) && array_key_exists('NCT/phase', $dvalue['edited']))
+				if(isset($dvalue['manual_is_sourceless']))
 				{
-					 $objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($highlightChange);
-					 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink);
-					 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/phase'],0,255)); 
+					if(!empty($tvalue['edited']) && array_key_exists('NCT/phase', $dvalue['edited']))
+					{
+						 $objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($highlightChange);
+						 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink);
+						 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/phase'],0,255)); 
+					}
+					else if($dvalue['new'] == 'y')
+					{
+						 $objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($highlightChange); 
+						 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink);
+						 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip('New record'); 
+					}
+					elseif(isset($dvalue['manual_phase']))
+					{
+						$objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($highlightChange); 
+						$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink);
+						if($dvalue['original_phase'] == $dvalue['NCT/phase'])
+						{	
+							$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+						}
+						else
+						{
+							$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_phase']); 
+						}
+					}
 				}
-				else if($dvalue['new'] == 'y')
+				else
 				{
-					 $objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($highlightChange); 
-					 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink);
-					 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip('New record'); 
+					if(isset($dvalue['manual_phase']))
+					{
+						$objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($highlightChange); 
+						$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink);
+						if($dvalue['original_phase'] == $dvalue['NCT/phase'])
+						{	
+							$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+						}
+						else
+						{
+							$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_phase']); 
+						}
+					}
+					elseif(!empty($tvalue['edited']) && array_key_exists('NCT/phase', $dvalue['edited']))
+					{
+						 $objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($highlightChange);
+						 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink);
+						 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/phase'],0,255)); 
+					}
+					else if($dvalue['new'] == 'y')
+					{
+						 $objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($highlightChange); 
+						 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink);
+						 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip('New record'); 
+					}
 				}
+				
 				
 				if($bgColor == "D5D3E6")
 				{
@@ -4854,6 +5297,7 @@ class TrialTracker
 						.'.title { background-color:#EDEAFF;}'
 						.'.alttitle { background-color:#D5D3E6;}'
 						.'.highlight {color:#FF0000;}'
+						.'.manual {color:#FF7700;}'
 						.'.manage {table-layout:fixed;border-top:0.5px solid blue;border-left:0.5px solid blue;border-bottom:0.5px solid blue;}'
 						.'.manage td{ margin:0; padding:0;}'
 						.'.manage th { border-top:0.5px solid blue;	border-left:0.5px solid blue; border-right:0.5px solid blue;color:#0000FF;white-space:nowrap;}'
@@ -5409,7 +5853,39 @@ class TrialTracker
 				if(isset($dvalue['matchedupms']))  
 					$rowspan = count($dvalue['matchedupms'])+1; 
 
-
+				$nctId = $dvalue['NCT/nct_id'];
+				if($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed')
+				{
+					if(isset($dvalue['manual_is_sourceless']))
+					{
+						$href = $dvalue['source'];
+					}
+					else if(isset($dvalue['source_id']) && strpos($dvalue['source_id'], 'NCT') === FALSE)
+					{	
+						$href = 'https://www.clinicaltrialsregister.eu/ctr-search/search?query=' . $dvalue['NCT/nct_id'];
+					}
+					else if(isset($dvalue['source_id']) && strpos($dvalue['source_id'], 'NCT') !== FALSE)
+					{
+						$href = 'http://clinicaltrials.gov/ct2/show/' . padnct($dvalue['NCT/nct_id']);
+					}
+					else 
+					{ 
+						$href = 'javascript:void(0);';
+					}
+				}
+				else
+				{
+					if($dvalue['NCT/nct_id'] !== '' && $dvalue['NCT/nct_id'] !== NULL)
+					{
+						$href = 'http://clinicaltrials.gov/ct2/show/' . padnct($dvalue['NCT/nct_id']);
+						$nctId = padnct($dvalue['NCT/nct_id']);
+					}
+					else 
+					{ 
+						$href = 'javascript:void(0);';
+					}
+				}
+				
 				//row starts  
 				$outputStr .= '<tr style="width:' . $col_width . 'px; height:'.(24).'px; page-break-inside:avoid;" nobr="true" ' 
 							. (($dvalue['new'] == 'y') ? 'class="newtrial" ' : ''). '>';  
@@ -5419,26 +5895,65 @@ class TrialTracker
 				if($loggedIn) 
 				{ 
 					$outputStr .= '<td style="width:30px; '.$rowOneBGType.'" class="' . $rowOneType . '" ' . (($dvalue['new'] == 'y') ? 'title="New record"' : '') 
-								. ' ><a style="color:' . $titleLinkColor . '" href="http://clinicaltrials.gov/ct2/show/' 
-								. padnct($dvalue['NCT/nct_id']) . '" target="_blank">' . $dvalue['NCT/nct_id'] . '</a></td>';
+								. ' ><a style="color:' . $titleLinkColor . '" href="' . $href . '" target="_blank">' . $nctId . '</a></td>';
 				}
 
 
 				//acroynm and title column
 				$attr = ' ';
-				if(isset($dvalue['edited']) && array_key_exists('NCT/brief_title', $dvalue['edited'])) 
+				if(isset($dvalue['manual_is_sourceless']))
 				{
-					$attr = ' highlight" title="' . $dvalue['edited']['NCT/brief_title'];
-					$titleLinkColor = '#FF0000;';
-				} 
-				else if($dvalue['new'] == 'y') 
+					if(isset($dvalue['edited']) && array_key_exists('NCT/brief_title', $dvalue['edited'])) 
+					{
+						$attr = ' highlight" title="' . $dvalue['edited']['NCT/brief_title'];
+						$titleLinkColor = '#FF0000;';
+					} 
+					else if($dvalue['new'] == 'y') 
+					{
+						$attr = '" title="New record';
+						$titleLinkColor = '#FF0000;';
+					}
+					elseif(isset($dvalue['manual_brief_title']))
+					{
+						if($dvalue['original_brief_title'] == $dvalue['NCT/brief_title'])
+						{
+							$attr = ' manual" title="Manual curation.';
+						}
+						else
+						{
+							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_brief_title'];
+						}
+						$titleLinkColor = '#FF7700';
+					}
+				}
+				else
 				{
-					$attr = '" title="New record';
-					$titleLinkColor = '#FF0000;';
-				}				
+					if(isset($dvalue['manual_brief_title']))
+					{
+						if($dvalue['original_brief_title'] == $dvalue['NCT/brief_title'])
+						{
+							$attr = ' manual" title="Manual curation.';
+						}
+						else
+						{
+							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_brief_title'];
+						}
+						$titleLinkColor = '#FF7700';
+					}
+					elseif(!empty($dvalue['edited']) && array_key_exists('NCT/brief_title', $dvalue['edited'])) 
+					{
+						$attr = ' highlight" title="' . $dvalue['edited']['NCT/brief_title'];
+						$titleLinkColor = '#FF0000;';
+					} 
+					elseif($dvalue['new'] == 'y') 
+					{
+						$attr = '" title="New record';
+						$titleLinkColor = '#FF0000;';
+					}
+				}
 				$outputStr .= '<td style="width:93px; '.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . ' ' . $attr . '"><span>'
-							. '<a style="color:' . $titleLinkColor . '" href="http://clinicaltrials.gov/ct2/show/' . padnct($dvalue['NCT/nct_id']) . '" '
-							. 'target="_blank">'; 
+							. '<a style="color:' . $titleLinkColor . '" ';
+				$outputStr .= ' href="' . $href . '"  target="_blank">';			 
 				if(isset($dvalue['NCT/acronym']) && $dvalue['NCT/acronym'] != '') 
 				{
 					$outputStr .= htmlformat($dvalue['NCT/acronym']) . ' ' . htmlformat($dvalue['NCT/brief_title']);
@@ -5452,14 +5967,51 @@ class TrialTracker
 				
 				//enrollment column
 				$attr = ' ';
-				if(isset($dvalue['edited']) && array_key_exists('NCT/enrollment',$dvalue['edited']) 
+				if(isset($dvalue['manual_is_sourceless']))
+				{
+					if(isset($dvalue['edited']) && array_key_exists('NCT/enrollment',$dvalue['edited']) 
 					&& (getDifference(substr($dvalue['edited']['NCT/enrollment'],16), $dvalue['NCT/enrollment']))) 
-				{
-					$attr = ' highlight" title="' . $dvalue['edited']['NCT/enrollment'];
+					{
+						$attr = ' highlight" title="' . $dvalue['edited']['NCT/enrollment'];
+					}
+					else if($dvalue['new'] == 'y') 
+					{
+						$attr = '" title="New record';
+					}
+					elseif(isset($dvalue['manual_enrollment']))
+					{
+						if($dvalue['original_enrollment'] == $dvalue['NCT/enrollment'])
+						{
+							$attr = ' manual" title="Manual curation.';
+						}
+						else
+						{
+							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_enrollment'];
+						}
+					}
 				}
-				else if($dvalue['new'] == 'y') 
+				else
 				{
-					$attr = '" title="New record';
+					if(isset($dvalue['manual_enrollment']))
+					{
+						if($dvalue['original_enrollment'] == $dvalue['NCT/enrollment'])
+						{
+							$attr = ' manual" title="Manual curation.';
+						}
+						else
+						{
+							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_enrollment'];
+						}
+					}
+					elseif(isset($dvalue['edited']) && array_key_exists('NCT/enrollment',$dvalue['edited']) 
+					&& (getDifference(substr($dvalue['edited']['NCT/enrollment'],16), $dvalue['NCT/enrollment']))) 
+					{
+						$attr = ' highlight" title="' . $dvalue['edited']['NCT/enrollment'];
+					}
+					else if($dvalue['new'] == 'y') 
+					{
+						$attr = '" title="New record';
+					}
 				}
 				$outputStr .= '<td style="width:18px; '.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><span>';
 				if($dvalue["NCT/enrollment_type"] != '') 
@@ -5488,18 +6040,18 @@ class TrialTracker
 					{
 						$attr = '" title="New record';
 					}
-					elseif(isset($dvalue['manual_region']) && $dvalue['manual_region'] !== NULL)
+					elseif(isset($dvalue['manual_region']))
 					{
-						$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_region'];
+						$attr = ' manual" title="Manual curation.';
 					}
 				}
 				else
 				{
-					if(isset($dvalue['manual_region']) && $dvalue['manual_region'] !== NULL)
+					if(isset($dvalue['manual_region']))
 					{
-						$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_region'];
+						$attr = ' manual" title="Manual curation.';
 					}
-					if($dvalue['new'] == 'y')
+					elseif($dvalue['new'] == 'y')
 					{
 						$attr = '" title="New record';
 					}
@@ -5509,13 +6061,49 @@ class TrialTracker
 
 				
 				//intervention name column
-				if(isset($dvalue['edited']) && array_key_exists('NCT/intervention_name', $dvalue['edited']))
+				if(isset($dvalue['manual_is_sourceless']))
 				{
-					$attr = ' highlight" title="' . $dvalue['edited']['NCT/intervention_name'];
-				} 
-				else if($dvalue['new'] == 'y')
+					if(isset($dvalue['edited']) && array_key_exists('NCT/intervention_name', $dvalue['edited']))
+					{
+						$attr = ' highlight" title="' . $dvalue['edited']['NCT/intervention_name'];
+					} 
+					else if($dvalue['new'] == 'y')
+					{
+						$attr = '" title="New record';
+					}
+					elseif(isset($dvalue['manual_intervention_name']))
+					{
+						if($dvalue['original_intervention_name'] == $dvalue['NCT/intervention_name'])
+						{
+							$attr = ' manual" title="Manual curation.';
+						}
+						else
+						{
+							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_intervention_name'];
+						}
+					}
+				}
+				else
 				{
-					$attr = '" title="New record';
+					if(isset($dvalue['manual_intervention_name']))
+					{
+						if($dvalue['original_intervention_name'] == $dvalue['NCT/intervention_name'])
+						{
+							$attr = ' manual" title="Manual curation.';
+						}
+						else
+						{
+							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_intervention_name'];
+						}
+					}
+					elseif(isset($dvalue['edited']) && array_key_exists('NCT/intervention_name', $dvalue['edited']))
+					{
+						$attr = ' highlight" title="' . $dvalue['edited']['NCT/intervention_name'];
+					} 
+					else if($dvalue['new'] == 'y')
+					{
+						$attr = '" title="New record';
+					}
 				}
 				$outputStr .= '<td style="width:60px; '.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
 							. '<span>' . $dvalue['NCT/intervention_name'] . '</span></td>';
@@ -5523,41 +6111,148 @@ class TrialTracker
 
 				//collaborator and sponsor column
 				$attr = ' ';
-				if(isset($dvalue['edited']) && (array_key_exists('NCT/collaborator', $dvalue['edited']) 
-				|| array_key_exists('NCT/lead_sponsor', $dvalue['edited']))) 
+				if(isset($dvalue['manual_is_sourceless']))
 				{
-						
-					$attr = ' highlight" title="';
-					if(array_key_exists('NCT/lead_sponsor', $dvalue['edited']))
+					if(isset($dvalue['edited']) && (array_key_exists('NCT/collaborator', $dvalue['edited']) 
+					|| array_key_exists('NCT/lead_sponsor', $dvalue['edited']))) 
 					{
-						$attr .= $dvalue['edited']['NCT/lead_sponsor'] . ' ';
-					}
-					if(array_key_exists('NCT/collaborator', $dvalue['edited'])) 
+							
+						$attr = ' highlight" title="';
+						if(array_key_exists('NCT/lead_sponsor', $dvalue['edited']))
+						{
+							$attr .= $dvalue['edited']['NCT/lead_sponsor'] . ' ';
+						}
+						if(array_key_exists('NCT/collaborator', $dvalue['edited'])) 
+						{
+							$attr .= $dvalue['edited']['NCT/collaborator'];
+						}
+						$attr .= '';
+					} 
+					else if($dvalue['new'] == 'y') 
 					{
-						$attr .= $dvalue['edited']['NCT/collaborator'];
+						$attr = '" title="New record';
 					}
-					$attr .= '';
-				} 
-				else if($dvalue['new'] == 'y') 
+					elseif(isset($dvalue['manual_lead_sponsor']) || isset($dvalue['manual_collaborator']))
+					{
+						if(isset($dvalue['manual_lead_sponsor']))
+						{
+							if($dvalue['original_lead_sponsor'] == $dvalue['NCT/lead_sponsor'])
+							{
+								$attr = ' manual" title="Manual curation.';
+							}
+							else
+							{
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_lead_sponsor'];
+							}
+						}
+						else
+						{
+							if($dvalue['original_collaborator'] == $dvalue['NCT/collaborator'])
+							{
+								$attr = ' manual" title="Manual curation.';
+							}
+							else
+							{
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_collaborator'];
+							}
+						}
+					}
+				}
+				else
 				{
-					$attr = '" title="New record';
+					if(isset($dvalue['manual_lead_sponsor']) || isset($dvalue['manual_collaborator']))
+					{
+						if(isset($dvalue['manual_lead_sponsor']))
+						{
+							if($dvalue['original_lead_sponsor'] == $dvalue['NCT/lead_sponsor'])
+							{
+								$attr = ' manual" title="Manual curation.';
+							}
+							else
+							{
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_lead_sponsor'];
+							}
+						}
+						else
+						{
+							if($dvalue['original_collaborator'] == $dvalue['NCT/collaborator'])
+							{
+								$attr = ' manual" title="Manual curation.';
+							}
+							else
+							{
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_collaborator'];
+							}
+						}
+					}
+					elseif(isset($dvalue['edited']) && (array_key_exists('NCT/collaborator', $dvalue['edited']) 
+					|| array_key_exists('NCT/lead_sponsor', $dvalue['edited']))) 
+					{
+							
+						$attr = ' highlight" title="';
+						if(array_key_exists('NCT/lead_sponsor', $dvalue['edited']))
+						{
+							$attr .= $dvalue['edited']['NCT/lead_sponsor'] . ' ';
+						}
+						if(array_key_exists('NCT/collaborator', $dvalue['edited'])) 
+						{
+							$attr .= $dvalue['edited']['NCT/collaborator'];
+						}
+						$attr .= '';
+					} 
+					else if($dvalue['new'] == 'y') 
+					{
+						$attr = '" title="New record';
+					}
 				}
 				$outputStr .= '<td style="width:41px; '.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
 							. '<span>' . $dvalue['NCT/lead_sponsor'] . ' ' . $dvalue["NCT/collaborator"] . '</span></td>';
 
 
 				//overall status column
-				if(isset($dvalue['edited']) && array_key_exists('NCT/overall_status', $dvalue['edited'])) 
+				if(isset($dvalue['manual_is_sourceless']))
 				{
-					$attr = 'class="highlight ' . $rowOneType . ' " title="' . $dvalue['edited']['NCT/overall_status'] . '" ';
-				} 
-				else if($dvalue['new'] == 'y') 
+					if(isset($dvalue['edited']) && array_key_exists('NCT/overall_status', $dvalue['edited'])) 
+					{
+						$attr = 'class="highlight ' . $rowOneType . ' " title="' . $dvalue['edited']['NCT/overall_status'] . '" ';
+					} 
+					else if($dvalue['new'] == 'y') 
+					{
+						$attr = 'title="New record" class="' . $rowOneType . '"' ;
+					}
+					else if(isset($dvalue['manual_overall_status']))
+					{
+						if($dvalue['original_overall_status'] == $dvalue['NCT/overall_status'])
+						{
+							$attr = ' manual" title="Manual curation.';
+						}
+						else
+						{
+							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_overall_status'];
+						}
+					} 
+				}
+				else
 				{
-					$attr = 'title="New record" class="' . $rowOneType . '"' ;
-				} 
-				else 
-				{
-					$attr = 'class="' . $rowOneType . '"';
+					if(isset($dvalue['manual_overall_status']))
+					{
+						if($dvalue['original_overall_status'] == $dvalue['NCT/overall_status'])
+						{
+							$attr = ' manual" title="Manual curation.';
+						}
+						else
+						{
+							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_overall_status'];
+						}
+					}
+					else if(isset($dvalue['edited']) && array_key_exists('NCT/overall_status', $dvalue['edited'])) 
+					{
+						$attr = 'class="highlight ' . $rowOneType . ' " title="' . $dvalue['edited']['NCT/overall_status'] . '" ';
+					} 
+					else if($dvalue['new'] == 'y') 
+					{
+						$attr = 'title="New record" class="' . $rowOneType . '"' ;
+					}
 				}
 				$outputStr .= '<td style="width:41px; '.$rowOneBGType.'" ' . $attr . ' rowspan="' . $rowspan . '">'  
 							. '<span>' . $dvalue['NCT/overall_status'] . '</span></td>';
@@ -5565,14 +6260,51 @@ class TrialTracker
 				
 				//condition column
 				$attr = ' ';
-				if(isset($dvalue['edited']) && array_key_exists('NCT/condition', $dvalue['edited'])) 
+				if(isset($dvalue['manual_is_sourceless']))
 				{
-					$attr = ' highlight" title="' . $dvalue['edited']['NCT/condition'];
-				} 
-				else if($dvalue['new'] == 'y') 
-				{
-					$attr = '" title="New record';
+					if(isset($dvalue['edited']) && array_key_exists('NCT/condition', $dvalue['edited'])) 
+					{
+						$attr = ' highlight" title="' . $dvalue['edited']['NCT/condition'];
+					} 
+					else if($dvalue['new'] == 'y') 
+					{
+						$attr = '" title="New record';
+					}
+					else if(isset($dvalue['manual_condition']))
+					{
+						if($dvalue['original_condition'] == $dvalue['NCT/condition'])
+						{
+							$attr = ' manual" title="Manual curation.';
+						}
+						else
+						{
+							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_condition'];
+						}
+					}
 				}
+				else
+				{
+					if(isset($dvalue['manual_condition']))
+					{
+						if($dvalue['original_condition'] == $dvalue['NCT/condition'])
+						{
+							$attr = ' manual" title="Manual curation.';
+						}
+						else
+						{
+							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_condition'];
+						}
+					}
+					else if(isset($dvalue['edited']) && array_key_exists('NCT/condition', $dvalue['edited'])) 
+					{
+						$attr = ' highlight" title="' . $dvalue['edited']['NCT/condition'];
+					} 
+					else if($dvalue['new'] == 'y') 
+					{
+						$attr = '" title="New record';
+					}
+				}
+				
 				$outputStr .= '<td style="width:60px; '.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
 							. '<span>' . $dvalue['NCT/condition'] . '</span></td>';
 					
@@ -5580,15 +6312,52 @@ class TrialTracker
 				//end date column
 				$attr = ' ';
 				$borderRight = '';
-				if(isset($dvalue['edited']) && array_key_exists('inactive_date', $dvalue['edited'])) 
+				if(isset($dvalue['manual_is_sourceless']))
 				{
-					$attr = ' highlight" title="' . $dvalue['edited']['inactive_date'];
-					$borderRight = 'border-right:1px solid red;';
-				} 
-				else if($dvalue['new'] == 'y') 
+					if(isset($dvalue['edited']) && array_key_exists('inactive_date', $dvalue['edited'])) 
+					{
+						$attr = ' highlight" title="' . $dvalue['edited']['inactive_date'];
+						$borderRight = 'border-right:1px solid red;';
+					} 
+					else if($dvalue['new'] == 'y') 
+					{
+						$attr = '" title="New record';
+					}
+					elseif(isset($dvalue['manual_end_date']))
+					{
+						if($dvalue['original_end_date'] == $dvalue['inactive_date'])
+						{
+							$attr = ' manual" title="Manual curation.';
+						}
+						else
+						{
+							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_end_date'];
+						}
+					}
+				}
+				else
 				{
-					$attr = '" title="New record';
-				}	
+					if(isset($dvalue['manual_end_date']))
+					{
+						if($dvalue['original_end_date'] == $dvalue['inactive_date'])
+						{
+							$attr = ' manual" title="Manual curation.';
+						}
+						else
+						{
+							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_end_date'];
+						}
+					}
+					else if(isset($dvalue['edited']) && array_key_exists('inactive_date', $dvalue['edited'])) 
+					{
+						$attr = ' highlight" title="' . $dvalue['edited']['inactive_date'];
+						$borderRight = 'border-right:1px solid red;';
+					} 
+					else if($dvalue['new'] == 'y') 
+					{
+						$attr = '" title="New record';
+					}
+				}
 				$outputStr .= '<td style="width:20px; '.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType  . $attr . '"><span>'; 
 				if($dvalue["inactive_date"] != '' && $dvalue["inactive_date"] != NULL && $dvalue["inactive_date"] != '0000-00-00') 
 				{
@@ -5602,13 +6371,49 @@ class TrialTracker
 					
 											
 				//phase column
-				if(isset($dvalue['edited']) && array_key_exists('NCT/phase', $dvalue['edited'])) 
+				if(isset($dvalue['manual_is_sourceless']))
 				{
-					$attr = ' highlight" title="' . $dvalue['edited']['NCT/phase'];
-				} 
-				else if($dvalue['new'] == 'y') 
+					if(isset($dvalue['edited']) && array_key_exists('NCT/phase', $dvalue['edited'])) 
+					{
+						$attr = ' highlight" title="' . $dvalue['edited']['NCT/phase'];
+					} 
+					else if($dvalue['new'] == 'y') 
+					{
+						$attr = '" title="New record';
+					}
+					elseif(isset($dvalue['manual_phase']))
+					{
+						if($dvalue['original_phase'] == $dvalue['NCT/phase'])
+						{
+							$attr = ' manual" title="Manual curation.';
+						}
+						else
+						{
+							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_phase'];
+						}
+					}
+				}
+				else
 				{
-					$attr = '" title="New record';
+					if(isset($dvalue['manual_phase']))
+					{
+						if($dvalue['original_phase'] == $dvalue['NCT/phase'])
+						{
+							$attr = ' manual" title="Manual curation.';
+						}
+						else
+						{
+							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_phase'];
+						}
+					}
+					elseif(isset($dvalue['edited']) && array_key_exists('NCT/phase', $dvalue['edited'])) 
+					{
+						$attr = ' highlight" title="' . $dvalue['edited']['NCT/phase'];
+					} 
+					else if($dvalue['new'] == 'y') 
+					{
+						$attr = '" title="New record';
+					}
 				}
 				if($dvalue['NCT/phase'] == 'N/A' || $dvalue['NCT/phase'] == '' || $dvalue['NCT/phase'] === NULL)
 				{
@@ -7760,7 +8565,11 @@ class TrialTracker
 						. " dm.`acronym` AS manual_acronym, dm.`lead_sponsor` AS manual_lead_sponsor, dm.`collaborator` AS manual_collaborator,"
 						. " dm.`condition` AS manual_condition, dm.`overall_status` AS manual_overall_status, dm.`region` AS manual_region,"
 						. " dm.`end_date` AS manual_end_date, dm.`enrollment` AS manual_enrollment, dm.`enrollment_type` AS manual_enrollment_type,"
-						. " dm.`intervention_name` AS manual_intervention_name, dm.`phase` AS manual_phase "
+						. " dm.`intervention_name` AS manual_intervention_name, dm.`phase` AS manual_phase, "
+						. " dn.`brief_title` AS original_brief_title, dn.`acronym` AS original_acronym, dn.`lead_sponsor` AS original_lead_sponsor, "
+						. " dn.`collaborator` AS original_collaborator, dn.`condition` AS original_condition, dn.`overall_status` AS original_overall_status, "
+						. " dn.`end_date` AS original_end_date, dn.`enrollment` AS original_enrollment, "
+						. " dn.`enrollment_type` AS original_enrollment_type, dn.`intervention_name` AS original_intervention_name, dn.`phase` AS original_phase "
 						. " FROM `data_trials` dt ";
 						
 				if(!isset($idlist) or empty($idlist))
@@ -7771,7 +8580,9 @@ class TrialTracker
 					if($ivalue['area'] !='' )	//When Area is blank do not process Area in Query
 						$query .= " JOIN `area_trials` at ON dt.`larvol_id` = at.`trial` ";
 					
-					$query .= " LEFT JOIN `data_manual` dm ON dt.`larvol_id` = dm.`larvol_id` WHERE ";
+					$query .= " LEFT JOIN `data_manual` dm ON dt.`larvol_id` = dm.`larvol_id` "
+							. " LEFT JOIN `data_nct` dn ON dt.`larvol_id` = dn.`larvol_id` "
+							. " WHERE ";
 							
 					if($ivalue['product'] != '')	//When Product is blank do not process Product in Query
 						$query .= "pt.`product` IN ('" . $ivalue['product'] . "') ";
@@ -7788,7 +8599,9 @@ class TrialTracker
 				}
 				else
 				{
-					$query .= " LEFT JOIN `data_manual` dm ON dt.`larvol_id` = dm.`larvol_id` WHERE 1=1 ";
+					$query .= " LEFT JOIN `data_manual` dm ON dt.`larvol_id` = dm.`larvol_id` "
+							. " LEFT JOIN `data_nct` dn ON dt.`larvol_id` = dn.`larvol_id` "
+							. " WHERE 1=1 ";
 					
 					$fullRecordQry = $query . " ORDER BY " . $orderBy;	
 					$pos = strpos( strtoupper($fullRecordQry),'ORDER');
@@ -7933,11 +8746,23 @@ class TrialTracker
 		$result['manual_start_date'] 		= $dataRow['manual_start_date']; 
 		$result['manual_end_date'] 			= $dataRow['manual_end_date']; 
 		$result['manual_enrollment'] 		= $dataRow['manual_enrollment']; 
-		$result['manual_enrollment_type'] 	= $dataRow['manual_enrollment_type']; 
 		$result['manual_intervention_name'] = $dataRow['manual_intervention_name']; 
 		$result['manual_phase'] 			= $dataRow['manual_phase'];
 		$result['manual_region'] 			= $dataRow['manual_region'];
 		$result['manual_is_sourceless'] 	= $dataRow['manual_is_sourceless'];
+		
+		$result['original_brief_title'] 	= $dataRow['original_brief_title']; 
+		$result['original_acronym'] 		= $dataRow['original_acronym']; 
+		$result['original_lead_sponsor'] 	= $dataRow['original_lead_sponsor']; 
+		$result['original_collaborator'] 	= $dataRow['original_collaborator']; 
+		$result['original_condition'] 		= $dataRow['original_condition']; 
+		$result['original_overall_status']	= $dataRow['original_overall_status']; 
+		$result['original_start_date'] 		= $dataRow['original_start_date']; 
+		$result['original_end_date'] 		= $dataRow['original_end_date']; 
+		$result['original_enrollment'] 		= $dataRow['original_enrollment']; 
+		$result['original_intervention_name'] = $dataRow['original_intervention_name']; 
+		$result['original_phase'] 			= $dataRow['original_phase'];
+		$result['original_region'] 			= $dataRow['original_region'];
 						
 		if($dataRow['firstreceived_date'] <= date('Y-m-d', $timeMachine) && $dataRow['firstreceived_date'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
 		{
@@ -10230,13 +11055,13 @@ class TrialTracker
 						}
 						elseif(isset($dvalue['manual_brief_title']))
 						{
-							if($dvalue['manual_brief_title'] == $dvalue['NCT/brief_title'])
+							if($dvalue['original_brief_title'] == $dvalue['NCT/brief_title'])
 							{
 								$attr = ' manual" title="Manual curation.';
 							}
 							else
 							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_brief_title'];
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_brief_title'];
 							}
 							$titleLinkColor = '#FF7700';
 						}
@@ -10245,13 +11070,13 @@ class TrialTracker
 					{ 	
 						if(isset($dvalue['manual_brief_title']))
 						{
-							if($dvalue['manual_brief_title'] == $dvalue['NCT/brief_title'])
+							if($dvalue['original_brief_title'] == $dvalue['NCT/brief_title'])
 							{
 								$attr = ' manual" title="Manual curation.';
 							}
 							else
 							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_brief_title'];
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_brief_title'];
 							}
 							$titleLinkColor = '#FF7700';
 						}
@@ -10339,13 +11164,13 @@ class TrialTracker
 						}
 						elseif(isset($dvalue['manual_enrollment']))
 						{
-							if($dvalue['manual_enrollment'] == $dvalue['NCT/enrollment'])
+							if($dvalue['original_enrollment'] == $dvalue['NCT/enrollment'])
 							{
 								$attr = ' manual" title="Manual curation.';
 							}
 							else
 							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_enrollment'];
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_enrollment'];
 							}
 						}
 					}
@@ -10353,13 +11178,13 @@ class TrialTracker
 					{
 						if(isset($dvalue['manual_enrollment']))
 						{
-							if($dvalue['manual_enrollment'] == $dvalue['NCT/enrollment'])
+							if($dvalue['original_enrollment'] == $dvalue['NCT/enrollment'])
 							{
 								$attr = ' manual" title="Manual curation.';
 							}
 							else
 							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_enrollment_type'];
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_enrollment'];
 							}
 						}
 						elseif(!empty($dvalue['edited']) && array_key_exists('NCT/enrollment', $dvalue['edited']) 
@@ -10401,28 +11226,14 @@ class TrialTracker
 						}
 						elseif(isset($dvalue['manual_region']))
 						{
-							if($dvalue['manual_region'] == $dvalue['region'])
-							{
-								$attr = ' manual" title="Manual curation.';
-							}
-							else
-							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_region'];
-							}
+							$attr = ' manual" title="Manual curation.';
 						}
 					}
 					else
 					{
 						if(isset($dvalue['manual_region']))
 						{
-							if($dvalue['manual_region'] == $dvalue['region'])
-							{
-								$attr = ' manual" title="Manual curation.';
-							}
-							else
-							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_region'];
-							}
+							$attr = ' manual" title="Manual curation.';
 						}
 						elseif($dvalue['new'] == 'y')
 						{
@@ -10447,13 +11258,13 @@ class TrialTracker
 						}
 						elseif(isset($dvalue['manual_intervention_name']))
 						{
-							if($dvalue['manual_intervention_name'] == $dvalue['NCT/intervention_name'])
+							if($dvalue['original_intervention_name'] == $dvalue['NCT/intervention_name'])
 							{
 								$attr = ' manual" title="Manual curation.';
 							}
 							else
 							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_intervention_name'];
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_intervention_name'];
 							}
 						}
 					}
@@ -10461,13 +11272,13 @@ class TrialTracker
 					{
 						if(isset($dvalue['manual_intervention_name']))
 						{
-							if($dvalue['manual_intervention_name'] == $dvalue['NCT/intervention_name'])
+							if($dvalue['original_intervention_name'] == $dvalue['NCT/intervention_name'])
 							{
 								$attr = ' manual" title="Manual curation.';
 							}
 							else
 							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_intervention_name'];
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_intervention_name'];
 							}
 						}
 						elseif(!empty($dvalue['edited']) && array_key_exists('NCT/intervention_name', $dvalue['edited']) && str_replace('Previous value: ', '', $dvalue['edited']['NCT/intervention_name'])<>$dvalue['NCT/intervention_name'])
@@ -10509,24 +11320,24 @@ class TrialTracker
 						{
 							if(isset($dvalue['manual_lead_sponsor']))
 							{
-								if($dvalue['manual_lead_sponsor'] == $dvalue['NCT/lead_sponsor'])
+								if($dvalue['original_lead_sponsor'] == $dvalue['NCT/lead_sponsor'])
 								{
 									$attr = ' manual" title="Manual curation.';
 								}
 								else
 								{
-									$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_lead_sponsor'];
+									$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_lead_sponsor'];
 								}
 							}
 							else
 							{
-								if($dvalue['manual_collaborator'] == $dvalue['NCT/collaborator'])
+								if($dvalue['original_collaborator'] == $dvalue['NCT/collaborator'])
 								{
 									$attr = ' manual" title="Manual curation.';
 								}
 								else
 								{
-									$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_collaborator'];
+									$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_collaborator'];
 								}
 							}
 						}
@@ -10537,24 +11348,24 @@ class TrialTracker
 						{
 							if(isset($dvalue['manual_lead_sponsor']))
 							{
-								if($dvalue['manual_lead_sponsor'] == $dvalue['NCT/lead_sponsor'])
+								if($dvalue['original_lead_sponsor'] == $dvalue['NCT/lead_sponsor'])
 								{
 									$attr = ' manual" title="Manual curation.';
 								}
 								else
 								{
-									$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_lead_sponsor'];
+									$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_lead_sponsor'];
 								}
 							}
 							else
 							{
-								if($dvalue['manual_collaborator'] == $dvalue['NCT/collaborator'])
+								if($dvalue['original_collaborator'] == $dvalue['NCT/collaborator'])
 								{
 									$attr = ' manual" title="Manual curation.';
 								}
 								else
 								{
-									$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_collaborator'];
+									$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_collaborator'];
 								}
 							}
 						}
@@ -10595,13 +11406,13 @@ class TrialTracker
 						} 
 						elseif(isset($dvalue['manual_overall_status']))
 						{
-							if($dvalue['manual_overall_status'] == $dvalue['NCT/overall_status'])
+							if($dvalue['original_overall_status'] == $dvalue['NCT/overall_status'])
 							{
 								$attr = ' manual" title="Manual curation.';
 							}
 							else
 							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_overall_status'];
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_overall_status'];
 							}
 						}
 					}
@@ -10609,13 +11420,13 @@ class TrialTracker
 					{
 						if(isset($dvalue['manual_overall_status']))
 						{
-							if($dvalue['manual_overall_status'] == $dvalue['NCT/overall_status'])
+							if($dvalue['original_overall_status'] == $dvalue['NCT/overall_status'])
 							{
 								$attr = ' manual" title="Manual curation.';
 							}
 							else
 							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_overall_status'];
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_overall_status'];
 							}
 						}
 						elseif(!empty($dvalue['edited']) && array_key_exists('NCT/overall_status', $dvalue['edited']) && str_replace('Previous value: ', '', $dvalue['edited']['NCT/overall_status'])<>$dvalue['NCT/overall_status']) 
@@ -10644,15 +11455,15 @@ class TrialTracker
 						{
 							$attr = '" title="New record';
 						}
-						if(isset($dvalue['manual_condition']))
+						else if(isset($dvalue['manual_condition']))
 						{
-							if($dvalue['manual_condition'] == $dvalue['NCT/condition'])
+							if($dvalue['original_condition'] == $dvalue['NCT/condition'])
 							{
 								$attr = ' manual" title="Manual curation.';
 							}
 							else
 							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_condition'];
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_condition'];
 							}
 						}
 					}
@@ -10660,13 +11471,13 @@ class TrialTracker
 					{
 						if(isset($dvalue['manual_condition']))
 						{
-							if($dvalue['manual_condition'] == $dvalue['NCT/condition'])
+							if($dvalue['original_condition'] == $dvalue['NCT/condition'])
 							{
 								$attr = ' manual" title="Manual curation.';
 							}
 							else
 							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_condition'];
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_condition'];
 							}
 						}
 						elseif(!empty($dvalue['edited']) && array_key_exists('NCT/condition', $dvalue['edited']) && str_replace('Previous value: ', '', $dvalue['edited']['NCT/condition'])<>$dvalue['NCT/condition']) 
@@ -10685,9 +11496,9 @@ class TrialTracker
 					//end date column
 					$attr = ' ';
 					$borderRight = '';
-					if(isset($trials[$i]['manual_is_sourceless']))
+					if(isset($dvalue['manual_is_sourceless']))
 					{
-						if(!empty($trials[$i]['edited']) && array_key_exists('inactive_date', $dvalue['edited'])) 
+						if(!empty($dvalue['edited']) && array_key_exists('inactive_date', $dvalue['edited'])) 
 						{
 							$attr = ' highlight" title="' . $dvalue['edited']['inactive_date'];
 							$borderRight = 'border-right-color:red;';
@@ -10698,13 +11509,13 @@ class TrialTracker
 						}	
 						elseif(isset($dvalue['manual_end_date']))
 						{
-							if($dvalue['manual_end_date'] == $dvalue['inactive_date'])
+							if($dvalue['original_end_date'] == $dvalue['inactive_date'])
 							{
 								$attr = ' manual" title="Manual curation.';
 							}
 							else
 							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_end_date'];
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_end_date'];
 							}
 						}
 					}
@@ -10712,13 +11523,13 @@ class TrialTracker
 					{
 						if(isset($dvalue['manual_end_date']))
 						{
-							if($dvalue['manual_end_date'] == $dvalue['inactive_date'])
+							if($dvalue['original_end_date'] == $dvalue['inactive_date'])
 							{
 								$attr = ' manual" title="Manual curation.';
 							}
 							else
 							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_end_date'];
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_end_date'];
 							}
 						}
 						elseif(!empty($dvalue['edited']) && array_key_exists('inactive_date', $dvalue['edited']) && str_replace('Previous value: ', '', $dvalue['edited']['inactive_date'])<>$dvalue["inactive_date"]) 
@@ -10757,13 +11568,13 @@ class TrialTracker
 						}
 						elseif(isset($dvalue['manual_phase']))
 						{
-							if($dvalue['manual_phase'] == $dvalue['NCT/phase'])
+							if($dvalue['original_phase'] == $dvalue['NCT/phase'])
 							{
 								$attr = ' manual" title="Manual curation.';
 							}
 							else
 							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_phase'];
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_phase'];
 							}
 						}
 					}
@@ -10771,13 +11582,13 @@ class TrialTracker
 					{
 						if(isset($dvalue['manual_phase']))
 						{
-							if($dvalue['manual_phase'] == $dvalue['NCT/phase'])
+							if($dvalue['original_phase'] == $dvalue['NCT/phase'])
 							{
 								$attr = ' manual" title="Manual curation.';
 							}
 							else
 							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['manual_phase'];
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_phase'];
 							}
 						}
 						elseif(!empty($dvalue['edited']) && array_key_exists('NCT/phase', $dvalue['edited']) && ( str_replace('Previous value: ', '', trim($dvalue['edited']['NCT/phase'])) <> trim($dvalue['NCT/phase'])) ) 
