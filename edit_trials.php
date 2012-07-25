@@ -174,7 +174,7 @@ $(document).ready(function(){
 </script>
 <style type="text/css">
 	hr.pme-hr		     { border: 0px solid; padding: 0px; margin: 0px; border-top-width: 1px; height: 5px; }
-	table.pme-main 	     { border: #004d9c 1px solid; border-collapse: collapse; width: 100%; }
+	table.pme-main 	     { border: #004d9c 1px solid; border-collapse: collapse; width:100%; }
 	table.pme-navigation { border: #004d9c 0px solid; border-collapse: collapse; width: 100%; }
 	td.pme-navigation-0, td.pme-navigation-1 { white-space: nowrap; }
 	th.pme-header	     { border: #004d9c 1px solid; padding: 4px; background: #add8e6; }
@@ -184,6 +184,7 @@ $(document).ready(function(){
 	height:50px;
 	width:50px
 	overflow:hidden;
+	word-wrap:break-word;
 	white-space:wrap;
 	padding-top:0;
 	margin:0;

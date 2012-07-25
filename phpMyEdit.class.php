@@ -1166,7 +1166,7 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 					{
 						
 						echo '<td class="pme-value-0"',$this->getColAttributes($kp),"style='vertical-align:top; padding-top:10px; padding-bottom:10px;' >";
-						echo ''. $row['qfh'.$kp];echo '</td>';
+						echo ''. wordwrap( $row['qfh'.$kp] ,55,"<br />\n",TRUE); echo '</td>';
 						$k=$kp;
 						$kp=$k+1;
 						echo '<td class="pme-value-0"',$this->getColAttributes($kp)," style='vertical-align:top; padding-top:10px; padding-bottom:10px;' >";
@@ -1292,7 +1292,7 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 		$css_postfix    = @$this->fdd[$k]['css']['postfix'];
 		$css_class_name = $this->getCSSclass('value', null, true, $css_postfix);
 		echo '<td class="',$css_class_name,'"',$this->getColAttributes($k)," style='vertical-align:top; padding-top:10px; padding-bottom:10px;' >\n";
-		echo $this->cellDisplay($k, $row, $css_class_name);
+		echo wordwrap( $this->cellDisplay($k, $row, $css_class_name)  ,55,"<br />\n",TRUE);
 		echo '</td>',"\n";
 	} /* }}} */
 	function display_delete_field1($row, $k) /* {{{ */
