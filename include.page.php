@@ -89,9 +89,9 @@ if($table !='upm')
 elseif($table=='upm')
 {
 	if($_GET['no_sort']!=1)
-	$query = "select upm.id,upm.event_type,upm.event_description,upm.event_link,upm.result_link,p.name as product,upm.corresponding_trial,upm.start_date,upm.start_date_type,upm.end_date,upm.end_date_type,upm.last_update from upm left join products p on upm.product=p.id $where $currentOrderBy $currentSortOrder limit $start , $limit";
+	$query = "select upm.id,upm.event_type,upm.event_description,upm.event_link,upm.result_link,p.name as product, a.name as area, upm.corresponding_trial,upm.start_date,upm.start_date_type,upm.end_date,upm.end_date_type,upm.last_update from upm left join products p on upm.product=p.id left join areas a on a.id=upm.area $where $currentOrderBy $currentSortOrder limit $start , $limit";
 	else
-	$query = "select upm.id,upm.event_type,upm.event_description,upm.event_link,upm.result_link,p.name as product,upm.corresponding_trial,upm.start_date,upm.start_date_type,upm.end_date,upm.end_date_type,upm.last_update from upm left join products p on upm.product=p.id $where limit $start , $limit";
+	$query = "select upm.id,upm.event_type,upm.event_description,upm.event_link,upm.result_link,p.name as product, a.name as area, upm.corresponding_trial,upm.start_date,upm.start_date_type,upm.end_date,upm.end_date_type,upm.last_update from upm left join products p on upm.product=p.id left join areas a on a.id=upm.area $where limit $start , $limit";
 }
 
 $res = mysql_query($query) or softDieSession('Cannot get '.$table.' data.'.$query);
@@ -689,6 +689,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 	}
 	else//update
 	{
+		//pr($post);die;
 		if($table=='upm')
 		{
 			
@@ -893,9 +894,13 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		$insertEdit = 'Edit';
 		
 		if($table=='upm')
-		$query = "SELECT u.id,u.event_type,u.event_description,u.event_link,u.result_link,p.name AS product,u.status,u.corresponding_trial,u.start_date,u.start_date_type,u.end_date,u.end_date_type,u.last_update,p.id as product_id FROM upm u LEFT JOIN products p ON u.product=p.id WHERE u.id=$id";
+		{
+			$query = "SELECT u.id,u.event_type,u.event_description,u.event_link,u.result_link,p.name AS product, a.name as area, u.status,u.corresponding_trial,u.start_date,u.start_date_type,u.end_date,u.end_date_type,u.last_update,p.id as product_id FROM upm u LEFT JOIN products p ON u.product=p.id LEFT JOIN areas a ON u.area=a.id WHERE u.id=$id";
+		}
 		else
-		$query = "SELECT * FROM $table WHERE id=$id";
+		{
+			$query = "SELECT * FROM $table WHERE id=$id";
+		}
 		$res = mysql_query($query) or die('Cannot get details for this '.$table.' id');
 		while($row = mysql_fetch_assoc($res))
 		{

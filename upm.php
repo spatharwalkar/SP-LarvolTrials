@@ -31,14 +31,24 @@ function upmdelsure(){ return confirm("Are you sure you want to delete this upm?
 function validateedit(){if(/*$('#product_id').val()==''*/false){alert('Select a proper product name from the list of suggestions.');return false}else return true;}
 function validatesearch(){/*if($('#search_product').val()==''){$('#search_product_id').val('');}if($('#search_product_id').val()=='' && $('#search_product').val()!=''){alert('Select a proper product name from the list of suggestions.');return false}else */return true;}
 $(document).ready(function(){
-	var options, a,b;
-	jQuery(function(){
-		  options1 = { serviceUrl:'autosuggest.php',params:{table:<?php echo "'$table'"?>,field:'product'},onSelect: function(value, data){ $('#product_id').val(data);},minChars:3 };
-		  options2 = { serviceUrl:'autosuggest.php',params:{table:<?php echo "'$table'"?>,field:'product'},onSelect: function(value, data){ $('#search_product_id').val(data);},minChars:3 };
-		  if($('#product').length>0)
+	var options, a,b,c,d;
+
+		  options1 = { serviceUrl:'autosuggest.php',params:{table:<?php echo "'$table'"?>,field:'product'} ,minChars:3 };
+		  options2 = { serviceUrl:'autosuggest.php',params:{table:<?php echo "'$table'"?>,field:'product'} ,minChars:3 };
+
+		  <?php if($_REQUEST['add_new_record']=='Add New Record' || $_REQUEST['id']):?>
 		  a = $('#product').autocomplete(options1);
+		  <?php endif;?>
 		  b = $('#search_product').autocomplete(options2);
-		});
+
+		  options_area1 = { serviceUrl:'autosuggest.php',params:{table:<?php echo "'$table'"?>,field:'area'}, minChars:3 };
+		  options_area2 = { serviceUrl:'autosuggest.php',params:{table:<?php echo "'$table'"?>,field:'area'} ,minChars:3 };
+
+		  <?php if($_REQUEST['add_new_record']=='Add New Record' || $_REQUEST['id']):?>
+		  c = $('#area').autocomplete(options_area1);
+		  <?php endif;?>
+		  d = $('#search_area').autocomplete(options_area2);		  
+
 });
 </script>
 
@@ -54,10 +64,19 @@ if($_REQUEST['save']=='Save')
 	{
 		$pid = $row['id'];
 	}
+	
+	$query = "select id from areas where name='{$_REQUEST['area']}'";
+	$res = mysql_query($query);
+	$aid = null;
+	while($row = mysql_fetch_assoc($res))
+	{
+		$aid = $row['id'];
+	}	
 	unset($_REQUEST['product_id']);
 	//$_GET['product'] = $_GET['product_id'];
 	$_REQUEST = array_merge($_GET, $_POST); 
 	$_REQUEST['product'] = $pid;
+	$_REQUEST['area'] = $aid;
 	$saveStatus = saveData($_REQUEST,$table);
 	if(!$pid) 
 	{
@@ -122,10 +141,20 @@ if(isset($_GET['search']))
 		$search_product_tmp_name = $_GET['search_product'];
 		$_GET['search_product'] = $pid;
 	}
-	else
+	
+	$query = "select id from areas where name='{$_GET['search_area']}' and name !=''";
+	$res = mysql_query($query);
+	$aid = null;
+	while($row = mysql_fetch_assoc($res))
 	{
-		//echo 'Select a proper product name.';
+		$aid = $row['id'];
 	}
+	if($aid)
+	{
+		$search_area_tmp_name = $_GET['search_area'];
+		$_GET['search_area'] = $aid;
+	}
+	
 
 }
 
@@ -143,6 +172,10 @@ if(isset($_GET['search']))
 	{
 		$_GET['search_product'] = $search_product_tmp_name;
 	}
+	if($aid)
+	{
+		$_GET['search_area'] = $search_area_tmp_name;
+	}	
 }
 
 
@@ -158,6 +191,11 @@ if(isset($_GET['search']))
 	{
 		$_GET['search_product'] = $pid;
 	}
+	
+	if($aid)
+	{
+		$_GET['search_area'] = $aid;
+	}	
 }
 //end search controller
 
@@ -183,7 +221,7 @@ if($_REQUEST['import']=='Import' || $_REQUEST['uploadedfile'])
 
 //normal upm listing
 $start = $page*$limit;
-$ignoreSort = array('product');
+$ignoreSort = array('product','area');
 contentListing($start,$limit,$table,$script,array(),array(),array('delete'=>true,'ignoresort'=>$ignoreSort));
 echo '</div>';
 echo '</html>';

@@ -11,12 +11,21 @@ $autoSuggestTables = array('areas','upm','products','data_trials');
 if(!in_array($table,$autoSuggestTables))die;
 
 if($table=='upm' && $field=='product')
-$query = "select p.id,p.name from products p where p.name like '%$search%' and (p.is_active=1 or p.is_active is null) order by name asc";
+{
+	$query = "select p.id,p.name from products p where p.name like '%$search%' and (p.is_active=1 or p.is_active is null) order by name asc";
+}
+elseif($table=='upm' && $field=='area')
+{
+	$query = "select a.id,a.name from areas a where a.name like '%$search%' order by name asc";
+}
+elseif($table=='products' || $table=='areas')
+{
+	$query = "select distinct $field, description from $table where $field like '%$search%' order by $field asc";
+}
 else
-if($table=='products' || $table=='areas')
-$query = "select distinct $field, description from $table where $field like '%$search%' order by $field asc";
-else
-$query = "select distinct $field from $table where $field like '%$search%' order by $field asc";
+{
+	$query = "select distinct $field from $table where $field like '%$search%' order by $field asc";
+}
 if( isset($hint) and !is_null($hint) and strlen($hint)>1 )
 $query = "select distinct $field from $table  where ( $field like '%$hint%' ) and ( $field <> '$hint' ) order by $field asc limit 50";
 
@@ -25,7 +34,7 @@ $data = array();
 $json = array();
 $suggestions = array();
 $datas = array();
-if($table=='upm' && $field=='product')
+if($table=='upm' && ($field=='product' || $field=='area'))
 {
 	while($row = mysql_fetch_assoc($result))
 	{

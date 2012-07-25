@@ -259,6 +259,7 @@ CREATE TABLE IF NOT EXISTS `upm` (
   `end_date_type` enum('anticipated','actual') COLLATE utf8_unicode_ci NOT NULL,
   `last_update` date NOT NULL,
   `product` int(10) unsigned DEFAULT NULL,
+  `area` int(10) unsigned DEFAULT NULL,  
   `status` enum('Upcoming','Occurred','Pending','Cancelled') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'Upcoming',
   PRIMARY KEY (`id`),
   KEY `product` (`product`)
@@ -1172,6 +1173,8 @@ ALTER TABLE `user_grants`
 
 ALTER TABLE `upm`
   ADD CONSTRAINT `FK_product` FOREIGN KEY (`product`) REFERENCES `products` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE; 
+ALTER TABLE `upm`
+  ADD CONSTRAINT `FK_area` FOREIGN KEY (`area`) REFERENCES `areas` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE;   
 
 ALTER TABLE `area_trials`
   ADD CONSTRAINT `area_trials_ibfk_1` FOREIGN KEY (`area`) REFERENCES `areas` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
