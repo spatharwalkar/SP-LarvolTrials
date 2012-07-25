@@ -194,16 +194,16 @@ else
 }
 
 $cnt=count($data);
-
+/*
     if($cnt == 0)
 	{
 		header("Location: edit_trials.php?err_message=Cannot proceed: larvol_id " . $lid  . " is not matched with any other trial.");
 		exit;
 
 	}
-	
+*/	
 require_once('header.php');
-
+$table='data_trials';
 //auto suggest
 ?>
 <script type="text/javascript">
@@ -214,7 +214,26 @@ function confirmlinking()
 		document.forms["link"].submit();
 	}
 }
+$(document).ready(function(){
+	var options,a,b;
 
+	jQuery(function(){
+	  options = { serviceUrl:'autosuggest.php',params:{table:<?php echo "'$table'"?>,field:'source_id'} };
+	  	  
+	  if($('#linkedtrial1').length>=0)
+	  a = $('#linkedtrial1').autocomplete(options);
+	  b = $('#source_id').autocomplete(options);
+	  
+	});
+	$(".ajax").colorbox({
+		onComplete:function(){ loadQueryData($('#searchdata').val());},
+		onClosed:function(){ newSearch(); },
+		inline:true, 
+		width:"100%",
+		height:"100%"
+			});
+	$("#inline_outer").hide();
+});
 </script>
 <!-- main form -->
 <div style="padding-top: 10px; padding-left: 20px;">
@@ -223,25 +242,40 @@ function confirmlinking()
 
 	<tr>
 		<td>Larvol Id</td>
-		<td><input type="text" name="lid" id="lid" value="<? echo $lid; ?>"
+		<td colspan="3"><input type="text" name="lid" id="lid" value="<? echo $lid; ?>"
 			readonly="readonly" size="150"></td>
 	</tr>
 	<tr>
 		<td>Brief Title</td>
-		<td><input type="text" value="<? echo $brief_title; ?>" size="150"
+		<td colspan="3"><input type="text" value="<? echo $brief_title; ?>" size="150"
 			readonly="readonly"></td>
 	</tr>
 	<tr>
 		<td>Source Id:</td>
-		<td><input type="text" name="source" value="<? echo $source_id ?>"
+		<td colspan="3"><input type="text" name="source" value="<? echo $source_id ?>"
 			size="150" readonly="readonly"></td>
 	</tr>
+	
+	<tr>
+
+	<td colspan="4" style="background-color: white; padding-left:65px;" ><br>Select a trial from the suggested trials, or manaually search for a trial by entering the source id, and then click the <b>LINK Trials</b> button.<br></td>
+	</tr>
+	
+	<tr>
+		<td style="background-color: white; " >&nbsp;</td>
+	<td  valign="top"  style="background-color: white; padding-left:145px;"  >
+
+		<input type="submit" name="submitit" value="LINK Trial(s)"  style=" font-size: 18px; color: red; valign: top"
+			onclick="confirmlinking();return false;" /></td>	
+	</tr>
+	
+	
 	<tr>
 		<td
 			style="background-color: white; font-size: 12px; color: darkred; valign: top">&nbsp;</td>
-		<td
+		<td colspan="1" 
 			style="background-color: white; font-size: 12px; color: darkred; valign: top">
-		Link with source trial <BR>
+		Suggested trials <BR>
 		<!--<input type="text" name="linked_trial" id="linked_trial"  size="150"> -->
 		<select name="linkedtrial" id="ltrial" size="<?php echo $cnt; ?>">
 
@@ -252,16 +286,19 @@ function confirmlinking()
 			<?php
 		}?>
 		</select></td>
+			
+		<td colspan="1" align="left" valign="top" 
+			style="background-color: white; font-size: 12px; color: darkred; ">
+			Search trials manually (enter source id)<BR>
+			<!--<input type="text" name="linked_trial" id="linked_trial"  size="150"> -->
+			<input type="text" name="linkedtrial1" id="linkedtrial1" value="" size="30" maxlength="40" />
+		</td>
+		<?php $space=str_repeat('&nbsp;',80);
+		?>
+		<td colspan="1" align="left" valign="top" style="background-color: white;" ><?php echo $space; ?></td>
+		
 	</tr>
-	<tr>
-		<td
-			style="background-color: white; font-size: 12px; color: darkred; valign: top">&nbsp;</td>
-		<td
-			style="background-color: white; font-size: 12px; color: darkred; valign: top">
 
-		&nbsp; <input type="submit" name="submitit" value="Link trial(s)"
-			onclick="confirmlinking();return false;" /></td>
-	</tr>
 	</form>
 </table>
 </div>
@@ -272,7 +309,8 @@ function confirmlinking()
 		{
 			global $logger;
 			$lid=$_POST['lid'];
-			$sid=$_POST['linkedtrial'];
+			if(isset($_POST['linkedtrial'])) $sid=$_POST['linkedtrial'];
+			else $sid=$_POST['linkedtrial1'];
 			//pr('posts');
 			//pr($_POST);
 			//pr('postsend');
