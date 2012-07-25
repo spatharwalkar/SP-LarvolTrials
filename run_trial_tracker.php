@@ -5878,7 +5878,6 @@ class TrialTracker
 					if($dvalue['NCT/nct_id'] !== '' && $dvalue['NCT/nct_id'] !== NULL)
 					{
 						$href = 'http://clinicaltrials.gov/ct2/show/' . padnct($dvalue['NCT/nct_id']);
-						$nctId = padnct($dvalue['NCT/nct_id']);
 					}
 					else 
 					{ 
