@@ -8516,7 +8516,7 @@ class TrialTracker
 			{
 			
 				$query = Build_OTT_Query($globalOptions['JSON_search'], $where );
-				if(isset($idlist))
+				if( isset($idlist) and !empty($idlist) )
 				{
 					$pos = strpos(strtoupper($query),'WHERE');
 					if ($pos === false) 
@@ -8536,7 +8536,7 @@ class TrialTracker
 				}
 				
 				$fullRecordQry = Build_OTT_Query($globalOptions['JSON_search'], '');
-				if(isset($idlist))
+				if( isset($idlist) and !empty($idlist) )
 				{
 					$pos = strpos(strtoupper($fullRecordQry),'WHERE');
 					if ($pos === false) 
