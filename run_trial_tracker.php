@@ -150,19 +150,20 @@ class TrialTracker
 		$objPHPExcel->getActiveSheet()->setCellValue('F1' , 'Sponsor');
 		$objPHPExcel->getActiveSheet()->setCellValue('G1' , 'Conditions');
 		$objPHPExcel->getActiveSheet()->setCellValue('H1' , 'Interventions');
-		$objPHPExcel->getActiveSheet()->setCellValue('I1' , 'End');
-		$objPHPExcel->getActiveSheet()->setCellValue('J1' , 'Ph');
-		$objPHPExcel->getActiveSheet()->setCellValue('K1' , 'Result');
-		$objPHPExcel->getActiveSheet()->setCellValue('L1' , '-');
-		$objPHPExcel->getActiveSheet()->mergeCells('L1:N1');
-		$objPHPExcel->getActiveSheet()->setCellValue('O1' , $currentYear);
-		$objPHPExcel->getActiveSheet()->mergeCells('O1:Z1');
-		$objPHPExcel->getActiveSheet()->setCellValue('AA1' , $secondYear);
-		$objPHPExcel->getActiveSheet()->mergeCells('AA1:AL1');
-		$objPHPExcel->getActiveSheet()->setCellValue('AM1' , $thirdYear);
-		$objPHPExcel->getActiveSheet()->mergeCells('AM1:AX1');
-		$objPHPExcel->getActiveSheet()->setCellValue('AY1' , '+');
-		$objPHPExcel->getActiveSheet()->mergeCells('AY1:BA1');
+		$objPHPExcel->getActiveSheet()->setCellValue('I1' , 'Start');
+		$objPHPExcel->getActiveSheet()->setCellValue('J1' , 'End');
+		$objPHPExcel->getActiveSheet()->setCellValue('K1' , 'Ph');
+		$objPHPExcel->getActiveSheet()->setCellValue('L1' , 'Result');
+		$objPHPExcel->getActiveSheet()->setCellValue('M1' , '-');
+		$objPHPExcel->getActiveSheet()->mergeCells('M1:O1');
+		$objPHPExcel->getActiveSheet()->setCellValue('P1' , $currentYear);
+		$objPHPExcel->getActiveSheet()->mergeCells('P1:AA1');
+		$objPHPExcel->getActiveSheet()->setCellValue('AB1' , $secondYear);
+		$objPHPExcel->getActiveSheet()->mergeCells('AB1:AM1');
+		$objPHPExcel->getActiveSheet()->setCellValue('AN1' , $thirdYear);
+		$objPHPExcel->getActiveSheet()->mergeCells('AN1:AY1');
+		$objPHPExcel->getActiveSheet()->setCellValue('AZ1' , '+');
+		$objPHPExcel->getActiveSheet()->mergeCells('AZ1:BB1');
 
 		$styleThinBlueBorderOutline = array(
 			'borders' => array(
@@ -174,7 +175,7 @@ class TrialTracker
 		$highlightChange =  array('font' => array('color' => array('rgb' => 'FF0000')));
 		$manualChange =  array('font' => array('color' => array('rgb' => 'FF7700')));
 		
-		$objPHPExcel->getActiveSheet()->getStyle('A1:BA1')->applyFromArray($styleThinBlueBorderOutline);
+		$objPHPExcel->getActiveSheet()->getStyle('A1:BB1')->applyFromArray($styleThinBlueBorderOutline);
 			
 		$objPHPExcel->getProperties()->setCreator("The Larvol Group")
 										 ->setLastModifiedBy("TLG")
@@ -458,8 +459,8 @@ class TrialTracker
 				if(!empty($tvalue['naUpms']) || !empty($tvalue[$type]))
 				{
 					$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $tvalue['sectionHeader']);
-					$objPHPExcel->getActiveSheet()->mergeCells('A' . $i . ':BA'. $i);
-					$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':BA'. $i)->applyFromArray(
+					$objPHPExcel->getActiveSheet()->mergeCells('A' . $i . ':BB'. $i);
+					$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':BB'. $i)->applyFromArray(
 								array('fill' => array(
 												'type'       => PHPExcel_Style_Fill::FILL_SOLID,
 												'rotation'   => 0,
@@ -475,8 +476,8 @@ class TrialTracker
 			else
 			{
 				$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $tvalue['sectionHeader']);
-				$objPHPExcel->getActiveSheet()->mergeCells('A' . $i . ':BA'. $i);
-				$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':BA'. $i)->applyFromArray(
+				$objPHPExcel->getActiveSheet()->mergeCells('A' . $i . ':BB'. $i);
+				$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':BB'. $i)->applyFromArray(
 							array('fill' => array(
 											'type'       => PHPExcel_Style_Fill::FILL_SOLID,
 											'rotation'   => 0,
@@ -577,8 +578,8 @@ class TrialTracker
 				}
 				/////END PART - MERGE CELLS AND APPLY BORDER AS - FOR LOOP WAS NOT WORKING SET INDIVIDUALLY
 				
-				$objPHPExcel->getActiveSheet()->getStyle('"A' . $i . ':BA' . $i.'"')->applyFromArray($styleThinBlueBorderOutline);
-				$objPHPExcel->getActiveSheet()->getStyle('A1:AZ1')->applyFromArray($styleThinBlueBorderOutline);
+				$objPHPExcel->getActiveSheet()->getStyle('"A' . $i . ':BB' . $i.'"')->applyFromArray($styleThinBlueBorderOutline);
+				$objPHPExcel->getActiveSheet()->getStyle('A1:BA1')->applyFromArray($styleThinBlueBorderOutline);
 				
 				//nct id	
 				$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $nctIdText);
@@ -1059,6 +1060,71 @@ class TrialTracker
 				}
 				
 				
+				//start date
+				if(isset($dvalue["NCT/start_date"])
+				&& $dvalue["NCT/start_date"] != '' 
+				&& $dvalue["NCT/start_date"] !== NULL 
+				&& $dvalue["NCT/start_date"] != '0000-00-00')
+				{ 	
+					$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, date('m/y',strtotime($dvalue["NCT/start_date"])));
+				}
+				if(isset($dvalue['manual_is_sourceless']))
+				{
+					if(!empty($dvalue['edited']) && array_key_exists('NCT/start_date', $dvalue['edited']))
+					{
+						 $objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray($highlightChange);
+						 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($ctLink);
+						 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/start_date']); 
+					}
+					elseif($dvalue['new'] == 'y')
+					{
+						 $objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray($highlightChange); 
+						 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($ctLink);
+						 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('New record'); 
+					}
+					elseif(isset($dvalue['manual_start_date']))
+					{
+						$objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray($manualChange);
+						$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($ctLink); 
+						if($dvalue['original_start_date'] == $dvalue['start_date'])
+						{
+							$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+						}
+						else
+						{
+							$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_start_date']); 
+						}
+					}
+				}
+				else
+				{
+					if(isset($dvalue['manual_start_date']))
+					{
+						$objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray($manualChange);
+						$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($ctLink); 
+						if($dvalue['original_start_date'] == $dvalue['start_date'])
+						{
+							$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+						}
+						else
+						{
+							$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_start_date']); 
+						}
+					}
+					elseif(!empty($dvalue['edited']) && array_key_exists('NCT/start_date', $dvalue['edited']))
+					{
+						 $objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray($highlightChange);
+						 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($ctLink);
+						 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/start_date']); 
+					}
+					elseif($dvalue['new'] == 'y')
+					{
+						 $objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray($highlightChange); 
+						 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($ctLink);
+						 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('New record'); 
+					}
+				}
+				
 				
 				//end date	
 				if(isset($dvalue["inactive_date"]) 
@@ -1066,33 +1132,33 @@ class TrialTracker
 				&& $dvalue["inactive_date"] !== NULL 
 				&& $dvalue["inactive_date"] != '0000-00-00') 
 				{
-					$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, date('m/y',strtotime($dvalue["inactive_date"])));
+					$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, date('m/y',strtotime($dvalue["inactive_date"])));
 				}
 				if(isset($dvalue['manual_is_sourceless']))
 				{
 					if(!empty($dvalue['edited']) && array_key_exists('NCT/inactive_date', $dvalue['edited']))
 					{
-						 $objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray($highlightChange);
-						 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($ctLink);
-						 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/inactive_date'],0,255)); 
+						 $objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($highlightChange);
+						 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink);
+						 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/inactive_date'],0,255)); 
 					}
 					else if($dvalue['new'] == 'y')
 					{
-						 $objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray($highlightChange);
-						 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($ctLink); 
-						 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('New record'); 
+						 $objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($highlightChange);
+						 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink); 
+						 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip('New record'); 
 					}
 					elseif(isset($dvalue['manual_end_date']))
 					{
-						$objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray($manualChange);
-						$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($ctLink); 
+						$objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($manualChange);
+						$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink); 
 						if($dvalue['original_end_date'] == $dvalue['inactive_date'])
 						{
-							$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+							$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
 						}
 						else
 						{
-							$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_end_date']); 
+							$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_end_date']); 
 						}
 					}
 				}
@@ -1100,31 +1166,30 @@ class TrialTracker
 				{
 					if(isset($dvalue['manual_end_date']))
 					{
-						$objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray($manualChange);
-						$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($ctLink); 
+						$objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($manualChange);
+						$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink); 
 						if($dvalue['original_end_date'] == $dvalue['inactive_date'])
 						{
-							$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+							$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
 						}
 						else
 						{
-							$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_end_date']); 
+							$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_end_date']); 
 						}
 					}
 					elseif(!empty($dvalue['edited']) && array_key_exists('NCT/inactive_date', $dvalue['edited']))
 					{
-						 $objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray($highlightChange);
-						 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($ctLink);
-						 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/inactive_date'],0,255)); 
+						 $objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($highlightChange);
+						 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink);
+						 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/inactive_date'],0,255)); 
 					}
 					else if($dvalue['new'] == 'y')
 					{
-						 $objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray($highlightChange);
-						 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($ctLink); 
-						 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('New record'); 
+						 $objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($highlightChange);
+						 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink); 
+						 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip('New record'); 
 					}
 				}
-				
 				
 				
 				//phase
@@ -1139,32 +1204,32 @@ class TrialTracker
 					$dvalue['NCT/phase'] = str_replace('Phase ', '', trim($dvalue['NCT/phase']));
 					$phaseColor = $this->phaseValues[$phase];
 				}
-				$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, $phase);
+				$objPHPExcel->getActiveSheet()->setCellValue('K' . $i, $phase);
 				if(isset($dvalue['manual_is_sourceless']))
 				{
 					if(!empty($tvalue['edited']) && array_key_exists('NCT/phase', $dvalue['edited']))
 					{
-						 $objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($highlightChange);
-						 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink);
-						 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/phase'],0,255)); 
+						 $objPHPExcel->getActiveSheet()->getStyle('K' . $i)->applyFromArray($highlightChange);
+						 $objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setUrl($ctLink);
+						 $objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/phase'],0,255)); 
 					}
 					else if($dvalue['new'] == 'y')
 					{
-						 $objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($highlightChange); 
-						 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink);
-						 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip('New record'); 
+						 $objPHPExcel->getActiveSheet()->getStyle('K' . $i)->applyFromArray($highlightChange); 
+						 $objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setUrl($ctLink);
+						 $objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip('New record'); 
 					}
 					elseif(isset($dvalue['manual_phase']))
 					{
-						$objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($highlightChange); 
-						$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink);
+						$objPHPExcel->getActiveSheet()->getStyle('K' . $i)->applyFromArray($highlightChange); 
+						$objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setUrl($ctLink);
 						if($dvalue['original_phase'] == $dvalue['NCT/phase'])
 						{	
-							$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+							$objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
 						}
 						else
 						{
-							$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_phase']); 
+							$objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_phase']); 
 						}
 					}
 				}
@@ -1172,28 +1237,28 @@ class TrialTracker
 				{
 					if(isset($dvalue['manual_phase']))
 					{
-						$objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($highlightChange); 
-						$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink);
+						$objPHPExcel->getActiveSheet()->getStyle('K' . $i)->applyFromArray($highlightChange); 
+						$objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setUrl($ctLink);
 						if($dvalue['original_phase'] == $dvalue['NCT/phase'])
 						{	
-							$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+							$objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
 						}
 						else
 						{
-							$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_phase']); 
+							$objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_phase']); 
 						}
 					}
 					elseif(!empty($tvalue['edited']) && array_key_exists('NCT/phase', $dvalue['edited']))
 					{
-						 $objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($highlightChange);
-						 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink);
-						 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/phase'],0,255)); 
+						 $objPHPExcel->getActiveSheet()->getStyle('K' . $i)->applyFromArray($highlightChange);
+						 $objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setUrl($ctLink);
+						 $objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/phase'],0,255)); 
 					}
 					else if($dvalue['new'] == 'y')
 					{
-						 $objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($highlightChange); 
-						 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink);
-						 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip('New record'); 
+						 $objPHPExcel->getActiveSheet()->getStyle('K' . $i)->applyFromArray($highlightChange); 
+						 $objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setUrl($ctLink);
+						 $objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip('New record'); 
 					}
 				}
 				
@@ -1207,7 +1272,7 @@ class TrialTracker
 					$bgColor = "D5D3E6";
 				}
 				
-				$objPHPExcel->getActiveSheet()->getStyle('A' . $i .':J' .$i)->applyFromArray(
+				$objPHPExcel->getActiveSheet()->getStyle('A' . $i .':K' .$i)->applyFromArray(
 					array(
 						'alignment' => array('horizontal'	=> PHPExcel_Style_Alignment::HORIZONTAL_LEFT,),
 						'fill' => array('type'       => PHPExcel_Style_Fill::FILL_SOLID,
@@ -1230,7 +1295,7 @@ class TrialTracker
 				);
 				
 				$this->trialGnattChartforExcel($startMonth, $startYear, $endMonth, $endYear, $currentYear, $secondYear, $thirdYear, $phaseColor, 
-				$dvalue["NCT/start_date"], $dvalue['inactive_date'], $objPHPExcel, $i, 'L');
+				$dvalue["NCT/start_date"], $dvalue['inactive_date'], $objPHPExcel, $i, 'M');
 				
 				$i++;
 				
@@ -1245,7 +1310,7 @@ class TrialTracker
 						$upmTitle = htmlformat($mvalue['event_description']);
 						
 						//rendering diamonds in case of end date is prior to the current year
-						$objPHPExcel->getActiveSheet()->getStyle('"K' . $i . ':BA' . $i . '"')->applyFromArray($styleThinBlueBorderOutline);
+						$objPHPExcel->getActiveSheet()->getStyle('"L' . $i . ':BB' . $i . '"')->applyFromArray($styleThinBlueBorderOutline);
 						if($mvalue['result_link'] != '' && $mvalue['result_link'] !== NULL)
 						{
 							if((!empty($mvalue['edited']) && $mvalue['edited']['field'] == 'result_link') || ($mvalue['new'] == 'y')) 
@@ -1270,9 +1335,9 @@ class TrialTracker
 							{
 								$objDrawing->setPath('images/' . $imgColor . '-checkmark.png');
 							}
-							$objDrawing->setCoordinates('K' . $i);
-							$objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setUrl(urlencode($mvalue['result_link']));
-							$objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip(substr($upmTitle,0,255));
+							$objDrawing->setCoordinates('L' . $i);
+							$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl(urlencode($mvalue['result_link']));
+							$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setTooltip(substr($upmTitle,0,255));
 							
 						}
 						else if($mvalue['status'] == 'Pending')
@@ -1282,17 +1347,17 @@ class TrialTracker
 							$objDrawing->setOffsetX(40);
 							$objDrawing->setOffsetY(10);
 							$objDrawing->setPath('images/hourglass.png');
-							$objDrawing->setCoordinates('K' . $i);
+							$objDrawing->setCoordinates('L' . $i);
 							if($mvalue['event_link'] != '' && $mvalue['event_link'] !== NULL)
 							{
-								$objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setUrl(urlencode($mvalue['event_link']));
-								$objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip(substr($upmTitle,0,255));
+								$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl(urlencode($mvalue['event_link']));
+								$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setTooltip(substr($upmTitle,0,255));
 							}
 						}
 						
 						
 						$this->upmGnattChartforExcel($stMonth, $stYear, $edMonth, $edYear, $currentYear, $secondYear, $thirdYear, $mvalue['start_date'], 
-						$mvalue['end_date'], $mvalue['event_link'], $upmTitle, $objPHPExcel, $i, 'L');
+						$mvalue['end_date'], $mvalue['event_link'], $upmTitle, $objPHPExcel, $i, 'M');
 						
 						$objPHPExcel->getActiveSheet()->getRowDimension($i)->setRowHeight(36);
 						$i++;	
@@ -1308,8 +1373,8 @@ class TrialTracker
 					if(isset($tvalue['naUpms']) && !empty($tvalue['naUpms']))
 					{
 						$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, 'No trials found');
-						$objPHPExcel->getActiveSheet()->mergeCells('A' . $i . ':BA'. $i);
-						$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':BA'. $i)->applyFromArray(
+						$objPHPExcel->getActiveSheet()->mergeCells('A' . $i . ':BB'. $i);
+						$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':BB'. $i)->applyFromArray(
 										array('borders' => array(
 													'inside' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => 'FF0000FF')),
 													'outline' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => 'FF0000FF'))),
@@ -1320,8 +1385,8 @@ class TrialTracker
 				else
 				{
 					$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, 'No trials found');
-					$objPHPExcel->getActiveSheet()->mergeCells('A' . $i . ':BA'. $i);
-					$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':BA'. $i)->applyFromArray(
+					$objPHPExcel->getActiveSheet()->mergeCells('A' . $i . ':BB'. $i);
+					$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':BB'. $i)->applyFromArray(
 									array('borders' => array(
 												'inside' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => 'FF0000FF')),
 												'outline' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => 'FF0000FF'))),
@@ -1332,7 +1397,7 @@ class TrialTracker
 		}
 		
 		$objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(13);
-		$objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(62);
+		$objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(50);
 		$objPHPExcel->getActiveSheet()->getColumnDimension('C')->setWidth(10);
 		$objPHPExcel->getActiveSheet()->getColumnDimension('D')->setWidth(15);
 		$objPHPExcel->getActiveSheet()->getColumnDimension('E')->setWidth(15);
@@ -1340,11 +1405,12 @@ class TrialTracker
 		$objPHPExcel->getActiveSheet()->getColumnDimension('G')->setWidth(15);
 		$objPHPExcel->getActiveSheet()->getColumnDimension('H')->setWidth(15);
 		$objPHPExcel->getActiveSheet()->getColumnDimension('I')->setWidth(12);
-		$objPHPExcel->getActiveSheet()->getColumnDimension('J')->setWidth(9);
-		$objPHPExcel->getActiveSheet()->getColumnDimension('K')->setWidth(12);
+		$objPHPExcel->getActiveSheet()->getColumnDimension('J')->setWidth(12);
+		$objPHPExcel->getActiveSheet()->getColumnDimension('K')->setWidth(9);
+		$objPHPExcel->getActiveSheet()->getColumnDimension('L')->setWidth(12);
 		
-		$Arr = array('L', 'M', 'N','O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'AA', 'AB', 'AC', 'AD', 'AE', 'AF', 'AG', 'AH', 'AI', 'AJ',
-					'AK', 'AL', 'AM', 'AN', 'AO', 'AP', 'AQ', 'AR', 'AS', 'AT', 'AU', 'AV', 'AW', 'AX', 'AY', 'AZ', 'BA');
+		$Arr = array('M', 'N','O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'AA', 'AB', 'AC', 'AD', 'AE', 'AF', 'AG', 'AH', 'AI', 'AJ',
+					'AK', 'AL', 'AM', 'AN', 'AO', 'AP', 'AQ', 'AR', 'AS', 'AT', 'AU', 'AV', 'AW', 'AX', 'AY', 'AZ', 'BA', 'BB');
 		
 		foreach($Arr as $akey => $avalue)
 		{
@@ -1367,25 +1433,26 @@ class TrialTracker
 		$objPHPExcel->getActiveSheet()->setCellValue('C1' , 'Event Description');
 		$objPHPExcel->getActiveSheet()->setCellValue('D1' , 'Status');
 		$objPHPExcel->getActiveSheet()->setCellValue('E1' , 'Conditions');
-		$objPHPExcel->getActiveSheet()->setCellValue('F1' , 'End');
-		$objPHPExcel->getActiveSheet()->setCellValue('G1' , 'Result');
-		$objPHPExcel->getActiveSheet()->setCellValue('H1' , '-');
-		$objPHPExcel->getActiveSheet()->mergeCells('H1:J1');
-		$objPHPExcel->getActiveSheet()->setCellValue('K1' , $currentYear);
-		$objPHPExcel->getActiveSheet()->mergeCells('K1:V1');
-		$objPHPExcel->getActiveSheet()->setCellValue('W1' , $secondYear);
-		$objPHPExcel->getActiveSheet()->mergeCells('W1:AH1');
+		$objPHPExcel->getActiveSheet()->setCellValue('F1' , 'Start');
+		$objPHPExcel->getActiveSheet()->setCellValue('G1' , 'End');
+		$objPHPExcel->getActiveSheet()->setCellValue('H1' , 'Result');
+		$objPHPExcel->getActiveSheet()->setCellValue('I1' , '-');
+		$objPHPExcel->getActiveSheet()->mergeCells('I1:K1');
+		$objPHPExcel->getActiveSheet()->setCellValue('L1' , $currentYear);
+		$objPHPExcel->getActiveSheet()->mergeCells('L1:W1');
+		$objPHPExcel->getActiveSheet()->setCellValue('X1' , $secondYear);
+		$objPHPExcel->getActiveSheet()->mergeCells('X1:AI1');
 		$objPHPExcel->getActiveSheet()->setCellValue('AI1' , $thirdYear);
-		$objPHPExcel->getActiveSheet()->mergeCells('AI1:AT1');
-		$objPHPExcel->getActiveSheet()->setCellValue('AU1' , '+');
-		$objPHPExcel->getActiveSheet()->mergeCells('AU1:AW1');
-		$objPHPExcel->getActiveSheet()->getStyle('A1:AW1')->applyFromArray($styleThinBlueBorderOutline);
+		$objPHPExcel->getActiveSheet()->mergeCells('AJ1:AU1');
+		$objPHPExcel->getActiveSheet()->setCellValue('AV1' , '+');
+		$objPHPExcel->getActiveSheet()->mergeCells('AV1:AX1');
+		$objPHPExcel->getActiveSheet()->getStyle('A1:AX1')->applyFromArray($styleThinBlueBorderOutline);
 
 		$i = 2;
 		/* Display - Unmatched UPM's */
 		foreach ($unMatchedUpms as $ukey => $uvalue)
 		{
-			$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':AW' . $i . '')->applyFromArray($styleThinBlueBorderOutline);
+			$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':AX' . $i . '')->applyFromArray($styleThinBlueBorderOutline);
 			
 			$eventLink = urlencode($uvalue['event_link']);
 			$resultLink = urlencode($uvalue['result_link']);
@@ -1491,18 +1558,17 @@ class TrialTracker
 			}
 				
 			
-			//upm end date
-			$objPHPExcel->getActiveSheet()->setCellValue('F' . $i, date('m/y',strtotime($uvalue["end_date"])));
-
-			if(!empty($uvalue['edited']) && ($uvalue['edited']['field'] == 'end_date'))
+			//upm start date
+			$objPHPExcel->getActiveSheet()->setCellValue('F' . $i, date('m/y',strtotime($uvalue["start_date"])));
+			if(!empty($uvalue['edited']) && ($uvalue['edited']['field'] == 'start_date'))
 			{
 				$objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray($highlightChange);
 				if($eventLink != '' && $eventLink !== NULL)
 				{
 					$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl($eventLink);
-					if($uvalue['edited']['end_date'] != '' && $uvalue['edited']['end_date'] !== NULL)
+					if($uvalue['edited']['start_date'] != '' && $uvalue['edited']['start_date'] !== NULL)
 					{
-						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip(substr('Previous value: ' . $uvalue['edited']['end_date'],0,255)); 
+						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip(substr('Previous value: ' . $uvalue['edited']['start_date'],0,255)); 
 					}
 					else
 					{
@@ -1510,15 +1576,15 @@ class TrialTracker
 					}
 				}
 			}
-			else if(!empty($uvalue['edited']) && ($uvalue['edited']['field'] == 'end_date_type'))
+			else if(!empty($uvalue['edited']) && ($uvalue['edited']['field'] == 'start_date_type'))
 			{
 				$objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray($highlightChange);
 				if($eventLink != '' && $eventLink !== NULL)
 				{
 					$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl($eventLink);
-					if($uvalue['edited']['end_date_type'] != '' && $uvalue['edited']['end_date_type'] !== NULL)
+					if($uvalue['edited']['start_date_type'] != '' && $uvalue['edited']['start_date_type'] !== NULL)
 					{
-						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip(substr('Previous value: ' . $uvalue['edited']['end_date_type'],0,255)); 
+						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip(substr('Previous value: ' . $uvalue['edited']['start_date_type'],0,255)); 
 					}
 					else
 					{
@@ -1528,12 +1594,57 @@ class TrialTracker
 			}
 			else if($uvalue["new"] == 'y')
 			{
-
 				$objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray($highlightChange);
 				if($eventLink != '' && $eventLink !== NULL)
 				{
 					$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl($eventLink);
 					$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('New record');  
+				}
+			}
+			
+			
+			//upm end date
+			$objPHPExcel->getActiveSheet()->setCellValue('G' . $i, date('m/y',strtotime($uvalue["end_date"])));
+			if(!empty($uvalue['edited']) && ($uvalue['edited']['field'] == 'end_date'))
+			{
+				$objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($highlightChange);
+				if($eventLink != '' && $eventLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($eventLink);
+					if($uvalue['edited']['end_date'] != '' && $uvalue['edited']['end_date'] !== NULL)
+					{
+						$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip(substr('Previous value: ' . $uvalue['edited']['end_date'],0,255)); 
+					}
+					else
+					{
+						$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip('No Previous value'); 
+					}
+				}
+			}
+			else if(!empty($uvalue['edited']) && ($uvalue['edited']['field'] == 'end_date_type'))
+			{
+				$objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($highlightChange);
+				if($eventLink != '' && $eventLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($eventLink);
+					if($uvalue['edited']['end_date_type'] != '' && $uvalue['edited']['end_date_type'] !== NULL)
+					{
+						$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip(substr('Previous value: ' . $uvalue['edited']['end_date_type'],0,255)); 
+					}
+					else
+					{
+						$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip('No Previous value'); 
+					}
+				}
+			}
+			else if($uvalue["new"] == 'y')
+			{
+
+				$objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($highlightChange);
+				if($eventLink != '' && $eventLink !== NULL)
+				{
+					$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($eventLink);
+					$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip('New record');  
 				}
 			}
 			
@@ -1562,9 +1673,9 @@ class TrialTracker
 				{
 					$objDrawing->setPath('images/' . $imgColor . '-checkmark.png');
 				}
-				$objDrawing->setCoordinates('G' . $i);
-				$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($resultLink);
-				$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip(substr($uvalue['event_description'],0,255));
+				$objDrawing->setCoordinates('H' . $i);
+				$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($resultLink);
+				$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip(substr($uvalue['event_description'],0,255));
 			}
 			elseif($uvalue['status'] == 'Pending')
 			{
@@ -1573,11 +1684,11 @@ class TrialTracker
 				$objDrawing->setOffsetX(40);
 				$objDrawing->setOffsetY(4);
 				$objDrawing->setPath('images/hourglass.png');
-				$objDrawing->setCoordinates('G' . $i);
+				$objDrawing->setCoordinates('H' . $i);
 				if($eventLink != '' && $eventLink !== NULL)
 				{
-					$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($eventLink);
-					$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip(substr($uvalue['event_description'],0,255));
+					$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($eventLink);
+					$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip(substr($uvalue['event_description'],0,255));
 				}
 			}
 			
@@ -1588,9 +1699,9 @@ class TrialTracker
 			$edYear = date('Y', strtotime($uvalue['end_date']));
 					
 			$this->upmGnattChartforExcel($stMonth, $stYear, $edMonth, $edYear, $currentYear, $secondYear, $thirdYear, $uvalue['start_date'], 
-			$uvalue['end_date'], $uvalue['event_link'], $uvalue["event_description"], $objPHPExcel, $i, 'H');
+			$uvalue['end_date'], $uvalue['event_link'], $uvalue["event_description"], $objPHPExcel, $i, 'I');
 				
-			$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':F' . $i)->applyFromArray(
+			$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':G' . $i)->applyFromArray(
 					array('fill' => array(
 							'type'       => PHPExcel_Style_Fill::FILL_SOLID,
 							'rotation'   => 0,
@@ -1602,7 +1713,7 @@ class TrialTracker
 		}
 		/* End - Display - Unmatched UPM's */
 
-		$objPHPExcel->getActiveSheet()->getStyle('A1:AW1')->applyFromArray(
+		$objPHPExcel->getActiveSheet()->getStyle('A1:AX1')->applyFromArray(
 				array('font'    => array('bold' => true),
 					'alignment' => array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_LEFT,),
 					'borders' => array('top' => array('style' => PHPExcel_Style_Border::BORDER_THIN)),
@@ -1612,14 +1723,15 @@ class TrialTracker
 									'endcolor'   => array('argb' => 'FFDBFCFF'))));
 									
 		$objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(13);			
-		$objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(50);
+		$objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(40);
 		$objPHPExcel->getActiveSheet()->getColumnDimension('C')->setWidth(40);			
 		$objPHPExcel->getActiveSheet()->getColumnDimension('D')->setWidth(20);
 		$objPHPExcel->getActiveSheet()->getColumnDimension('E')->setWidth(26);
 		$objPHPExcel->getActiveSheet()->getColumnDimension('F')->setWidth(10);
-		$objPHPExcel->getActiveSheet()->getColumnDimension('G')->setWidth(12);
+		$objPHPExcel->getActiveSheet()->getColumnDimension('G')->setWidth(10);
+		$objPHPExcel->getActiveSheet()->getColumnDimension('H')->setWidth(12);
 		
-		$chr = 'H';
+		$chr = 'I';
 		for($c=1; $c<43; $c++)
 		{
 			$objPHPExcel->getActiveSheet()->getColumnDimension($chr)->setWidth(2);
@@ -5657,6 +5769,7 @@ class TrialTracker
 			 . '<th valign="bottom" align="center" style="width:41px; vertical-align:bottom;">Sponsor</th>'
 			 . '<th valign="bottom" align="center" style="width:41px; vertical-align:bottom;">Status</th>'
 			 . '<th valign="bottom" align="center" style="width:60px; vertical-align:bottom;">Conditions</th>'
+			 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;" title="MM/YY">Start</th>'
 			 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;" title="MM/YY">End</th>'
 			 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;">Ph</th>'
 			 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;">Result</th>'
@@ -5675,7 +5788,7 @@ class TrialTracker
 			 . '<td border="0" style="width:41px; height:0px; border-top:none; border:none;"></td>'
 			 . '<td border="0" style="width:41px; height:0px; border-top:none; border:none;"></td>'
 			 . '<td border="0" style="width:60px; height:0px; border-top:none; border:none;"></td>'
-			/* . '<td border="0" style="width:20px; height:0px; border-top:none; border:none;"></td>'*/
+			 . '<td border="0" style="width:20px; height:0px; border-top:none; border:none;"></td>'
 			 . '<td border="0" style="width:20px; height:0px; border-top:none; border:none;"></td>'
 			 . '<td border="0" style="width:20px; height:0px; border-top:none; border:none;"></td>'
 			 . '<td border="0" style="width:20px; height:0px; border-top:none; border:none;"></td>'
@@ -5709,9 +5822,9 @@ class TrialTracker
 		$counter = 0;
 		
 		if($loggedIn)
-			$col_width = 528;
+			$col_width=548;
 		else
-			$col_width = 498;
+			$col_width=518;
 		
 		foreach($Values['Trials'] as $tkey => $tvalue)
 		{
@@ -6306,7 +6419,69 @@ class TrialTracker
 				
 				$outputStr .= '<td style="width:60px; '.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
 							. '<span>' . $dvalue['NCT/condition'] . '</span></td>';
+				
 					
+				//start date column
+				$attr = ' ';
+				$borderLeft = '';
+				if(isset($dvalue['manual_is_sourceless']))
+				{
+					if(isset($dvalue['edited']) && array_key_exists('NCT/start_date', $dvalue['edited'])) 
+					{
+						$attr = ' highlight" title="' . $dvalue['edited']['NCT/start_date'] ;
+						$borderLeft = 'border-left:1px solid red;';
+					} 
+					else if($trials[$i]['new'] == 'y') 
+					{
+						$attr = '" title="New record';
+					}
+					elseif(isset($dvalue['manual_start_date']))
+					{
+						if($dvalue['original_start_date'] == $dvalue['start_date'])
+						{
+							$attr = ' manual" title="Manual curation.';
+						}
+						else
+						{
+							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_start_date'];
+						}
+					}
+				}
+				else
+				{
+					if(isset($dvalue['manual_start_date']))
+					{
+						if($dvalue['original_start_date'] == $dvalue['start_date'])
+						{
+							$attr = ' manual" title="Manual curation.';
+						}
+						else
+						{
+							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_start_date'];
+						}
+					}
+					elseif(isset($dvalue['edited']) && array_key_exists('NCT/start_date', $dvalue['edited'])) 
+					{
+						$attr = ' highlight" title="' . $dvalue['edited']['NCT/start_date'];
+						$borderLeft = 'border-left:1px solid red;';
+					} 
+					else if($trials[$i]['new'] == 'y') 
+					{
+						$attr = '" title="New record';
+					}
+					
+				}
+				$outputStr .= '<td style="width:20px; '.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '" ><span>'; 
+				if($dvalue["NCT/start_date"] != '' && $dvalue["NCT/start_date"] != NULL && $dvalue["NCT/start_date"] != '0000-00-00') 
+				{
+					$outputStr .= date('m/y',strtotime($dvalue["NCT/start_date"]));
+				} 
+				else 
+				{
+					$outputStr .= '&nbsp;';
+				}
+				$outputStr .= '</span></td>';
+				
 				
 				//end date column
 				$attr = ' ';
@@ -6437,7 +6612,7 @@ class TrialTracker
 
 				//rendering project completion gnatt chart
 				$trialGnattChart = $this->trialGnattChart($startMonth, $startYear, $endMonth, $endYear, $currentYear, $secondYear, $thirdYear, 
-					$dvalue['NCT/start_date'], $dvalue['inactive_date'], $phaseColor, $borderRight);
+					$dvalue['NCT/start_date'], $dvalue['inactive_date'], $phaseColor, $borderRight, $borderLeft);
 				
 				
 				$trialGnattChart = preg_replace('/&nbsp;/', '<img src="images/trans_big.gif" />', $trialGnattChart);	
@@ -6479,7 +6654,6 @@ class TrialTracker
 						
 						$outputStr .= '<td style="width:20px; text-align:center;"><br />';
 						
-						
 
 						if($mvalue['result_link'] != '' && $mvalue['result_link'] !== NULL)
 						{
@@ -6517,6 +6691,12 @@ class TrialTracker
 						}
 						$outputStr .= '</td>';
 						
+						$upmBorderLeft = '';
+						if(!empty($mvalue['edited']) && $mvalue['edited']['field'] == 'start_date')
+						{
+							$upmBorderLeft = 'border-left-color:red;';
+						}
+							
 						$upmBorderRight = '';
 						if(!empty($mvalue['edited']) && $mvalue['edited']['field'] == 'end_date' && $mvalue['edited']['end_date'] !== NULL && $mvalue['edited']['end_date'] != '')
 						{
@@ -6525,7 +6705,7 @@ class TrialTracker
 						
 						//rendering upm (upcoming project completion) chart
 						$upmGnattChart = $this->upmGnattChart($stMonth, $stYear, $edMonth, $edYear, $currentYear, $secondYear, $thirdYear, $mvalue['start_date'],
-						$mvalue['end_date'], $mvalue['event_link'], $upmTitle, $upmBorderRight, $dvalue['larvol_id']);
+						$mvalue['end_date'], $mvalue['event_link'], $upmTitle, $upmBorderRight, $upmBorderLeft, $dvalue['larvol_id']);
 						
 						$upmGnattChart = preg_replace('/&nbsp;/', '<img src="images/trans_big.gif" />', $upmGnattChart);
 						
@@ -6564,10 +6744,11 @@ class TrialTracker
 	{
 		global $now;
 		$outputStr = '';
+		
 		if($loggedIn)
-		$col_width=570;
+			$col_width=570;
 		else
-		$col_width=548;
+			$col_width=548;
 		
 		if(!empty($naUpms))
 		{
@@ -6582,7 +6763,6 @@ class TrialTracker
 				$resultImage = '';
 				$class = 'class = "upms ' . $naUpmIndex . '" ';
 				$titleLinkColor = 'color:#000;';
-				$dateStyle = 'color:gray;';
 				$upmTitle = htmlformat($value['event_description']);
 				
 				//Highlighting the whole row in case of new trials
@@ -6671,6 +6851,45 @@ class TrialTracker
 				$outputStr .= '<td style="width:60px;" class="' . $rowTwoType . $attr . '" ' . $title . '><span>' . $value['event_type'] . ' Milestone</span></td>';
 				
 				
+				//field upm start date
+				$title = '';
+				$attr = '';	
+                $upmBorderLeft = '';
+				if(!empty($value['edited']) && ($value['edited']['field'] == 'start_date'))
+				{
+					$attr = ' highlight';
+                    $upmBorderLeft = 'border-left-color:red;';
+					if($value['edited']['start_date'] != '' && $value['edited']['start_date'] !== NULL)
+					{
+						$title = ' title="Previous value: ' . $value['edited']['start_date'] . '" '; 
+					} 
+					else 
+					{
+						$title = ' title="No Previous value" ';
+					}	
+				} 
+				else if(!empty($value['edited']) && ($value['edited']['field'] == 'start_date_type'))
+				{
+					$attr = ' highlight';
+					if($value['edited']['start_date_type'] != '' && $value['edited']['start_date_type'] !== NULL) 
+					{
+						$title = ' title="Previous value: ' . $value['edited']['start_date_type'] . '" '; 
+					} 
+					else 
+					{
+						$title = ' title="No Previous value" ';
+					}
+				} 
+				else if($value['new'] == 'y')
+				{
+					$title = ' title = "New record" ';
+				}
+				$outputStr .= '<td style="width:20px;" class="' . $rowTwoType . $attr . '" ' . $title . '><span>';
+				$outputStr .= (($value['start_date'] != '' && $value['start_date'] !== NULL && $value['start_date'] != '0000-00-00') ? 
+									date('m/y',strtotime($value['start_date'])) : '&nbsp;' );
+				$outputStr .= '</span></td>';
+
+				
 				//field upm end date
 				$title = '';
 				$attr = '';	
@@ -6692,7 +6911,6 @@ class TrialTracker
 				else if(!empty($value['edited']) && ($value['edited']['field'] == 'end_date_type'))
 				{
 					$attr = ' highlight';
-					$dateStyle = 'color:#973535;'; 
 					if($value['edited']['end_date_type'] != '' && $value['edited']['end_date_type'] !== NULL) 
 					{
 						$title = ' title="Previous value: ' .  $value['edited']['end_date_type'] . '" ';
@@ -6705,13 +6923,10 @@ class TrialTracker
 				else if($value['new'] == 'y') 
 				{
 					$title = ' title = "New record" ';
-					$dateStyle = 'color:#973535;'; 
 				}
 				$outputStr .= '<td style="width:20px;" class="' . $rowTwoType . $attr . '" ' . $title . '><span>';
-				
 				$outputStr .= (($value['end_date'] != '' && $value['end_date'] !== NULL && $value['end_date'] != '0000-00-00') ? 
 									date('m/y',strtotime($value['end_date'])) : '');
-									
 				$outputStr .= '</span></td><td style="width:20px;"><span></span></td>';
 				
 				
@@ -6749,7 +6964,7 @@ class TrialTracker
 				//upm gnatt chart
 				$upmGnattChart = $this->upmGnattChart(date('m',strtotime($value['start_date'])), date('Y',strtotime($value['start_date'])), 
 								date('m',strtotime($value['end_date'])), date('Y',strtotime($value['end_date'])), $currentYear, $secondYear, $thirdYear, 
-								$value['start_date'], $value['end_date'], $value['event_link'], $upmTitle, $upmBorderRight);
+								$value['start_date'], $value['end_date'], $value['event_link'], $upmTitle, $upmBorderRight, $upmBorderLeft);
 								
 				$upmGnattChart = preg_replace('/&nbsp;/', '<img src="images/trans_big.gif" />', $upmGnattChart);
 				
@@ -11491,7 +11706,13 @@ class TrialTracker
 					$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
 								. '<div class="rowcollapse">' . $dvalue['NCT/condition'] . '</div></td>';
 								
-								
+					
+					$borderLeft = '';	
+					if(!empty($dvalue['edited']) && array_key_exists('start_date', $dvalue['edited']))
+					{
+						$borderLeft = 'border-left-color:red;';
+					}
+							
 					//end date column
 					$attr = ' ';
 					$borderRight = '';
@@ -11622,7 +11843,7 @@ class TrialTracker
 	
 					//rendering project completion gnatt chart
 					$outputStr .= $this->trialGnattChart($startMonth, $startYear, $endMonth, $endYear, $currentYear, $secondYear, $thirdYear, 
-						$dvalue['NCT/start_date'], $dvalue['inactive_date'], $phaseColor, $borderRight);
+						$dvalue['NCT/start_date'], $dvalue['inactive_date'], $phaseColor, $borderRight, $borderLeft);
 						
 					$outputStr .= '</tr>';	
 					
@@ -11701,6 +11922,12 @@ class TrialTracker
 							}
 							$outputStr .= '</div></td>';
 							
+							$upmBorderLeft = '';
+							if(!empty($mvalue['edited']) && $mvalue['edited']['field'] == 'start_date')
+							{
+								$upmBorderLeft = 'border-left-color:red;';
+							}
+							
 							$upmBorderRight = '';
 							if(!empty($mvalue['edited']) && $mvalue['edited']['field'] == 'end_date')
 							{
@@ -11709,7 +11936,7 @@ class TrialTracker
 							
 							//rendering upm (upcoming project completion) chart
 							$outputStr .= $this->upmGnattChart($stMonth, $stYear, $edMonth, $edYear, $currentYear, $secondYear, $thirdYear, $mvalue['start_date'],
-							$mvalue['end_date'], $mvalue['event_link'], $upmTitle, $upmBorderRight, $dvalue['larvol_id'], $incViewCount);
+							$mvalue['end_date'], $mvalue['event_link'], $upmTitle, $upmBorderRight, $upmBorderLeft, $dvalue['larvol_id'], $incViewCount);
 							$outputStr .= '</tr>';
 						}
 					}	
@@ -11833,11 +12060,12 @@ class TrialTracker
 		return $outputStr;
 	}
 		
-	function trialGnattChart($startMonth, $startYear, $endMonth, $endYear, $currentYear, $secondYear, $thirdYear, $startDate, $endDate, $bgColor, $borderRight)
+	function trialGnattChart($startMonth, $startYear, $endMonth, $endYear, $currentYear, $secondYear, $thirdYear, $startDate, $endDate, $bgColor, $borderRight, $borderLeft)
 	{
 		$outputStr = '';
 		$hoverText = '';
-		
+		$bgColor = 'background-color:' . $bgColor . ';';
+		//echo '<br/>-->'.$borderLeft;
 		if(($startDate == '' || $startDate === NULL || $startDate == '0000-00-00') && ($endDate == '' || $endDate === NULL || $endDate == '0000-00-00'))
 		{
 			$hoverText = '';
@@ -11870,7 +12098,7 @@ class TrialTracker
 			$st = $endMonth-1;
 			if($endYear < $currentYear) 
 			{
-				$outputStr .= '<td colspan="3" style="width:6px;background-color:' . $bgColor . ';' . $borderRight . '" ' . $hoverText . '>&nbsp;</td>';
+				$outputStr .= '<td colspan="3" style="width:6px;' . $bgColor . $borderRight . $borderLeft . '" ' . $hoverText . '>&nbsp;</td>';
 				$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td><td  style="width:24px;" colspan="12">&nbsp;</td>'
 							. '<td style="width:24px;" colspan="12">&nbsp;</td><td style="width:6px;" colspan="3">&nbsp;</td>';	
 			} 
@@ -11878,7 +12106,7 @@ class TrialTracker
 			{
 				$outputStr .= '<td style="width:6px;" colspan="3">&nbsp;</td>';
 				$outputStr .= (($st != 0) ? '<td style="width:'. ($st*2) .'px;" colspan="' . $st . '">&nbsp;</td>' : '')
-							. '<td style="width:2px;background-color:' . $bgColor . ';' . $borderRight . '" ' . $hoverText . '>&nbsp;</td>'
+							. '<td style="width:2px;' . $bgColor. $borderRight . $borderLeft . '" ' . $hoverText . '>&nbsp;</td>'
 							. (((12 - ($st+1)) != 0) ? '<td style="width:'.((12-($st+1))*2).'px;" colspan="' .(12 - ($st+1)) . '">&nbsp;</td>' : '')
 							. '<td style="width:24px;" colspan="12">&nbsp;</td><td  style="width:24px;" colspan="12">&nbsp;</td>'
 							. '<td style="width:6px;" colspan="3">&nbsp;</td>';	
@@ -11888,7 +12116,7 @@ class TrialTracker
 				$outputStr .= '<td style="width:6px;" colspan="3">&nbsp;</td>';
 				$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td>' 
 							. (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '">&nbsp;</td>' : '')
-							. '<td style="background-color:' . $bgColor . ';width:2px;' . $borderRight . '" ' . $hoverText . '>&nbsp;</td>'
+							. '<td style="width:2px;' . $bgColor . $borderRight . $borderLeft . '" ' . $hoverText . '>&nbsp;</td>'
 							. (((12 - ($st+1)) != 0) ? '<td style="width:'.((12-($st+1))*2).'px;" colspan="' .(12 - ($st+1)) . '">&nbsp;</td>' : '')
 							. '<td style="width:24px;" colspan="12">&nbsp;</td><td style="width:6px;" colspan="3">&nbsp;</td>';
 			} 
@@ -11898,7 +12126,7 @@ class TrialTracker
 				$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td>'
 							. '<td style="width:24px;" colspan="12">&nbsp;</td>' 
 							. (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '">&nbsp;</td>' : '')
-							. '<td style="background-color:' . $bgColor . ';width:2px;' . $borderRight . '" ' . $hoverText . '>&nbsp;</td>'
+							. '<td style="width:2px;' . $bgColor . $borderRight . $borderLeft . '" ' . $hoverText . '>&nbsp;</td>'
 							. (((12 - ($st+1)) != 0) ? '<td style="width:'.((12-($st+1))*2).'px;" colspan="' .(12 - ($st+1)) . '">&nbsp;</td>' : '')
 							. '<td style="width:6px;" colspan="3">&nbsp;</td>';	
 			} 
@@ -11907,7 +12135,7 @@ class TrialTracker
 				$outputStr .= '<td style="width:6px;" colspan="3">&nbsp;</td>';
 				$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td>'
 							. '<td style="width:24px;" colspan="12">&nbsp;</td><td style="width:24px;" colspan="12">&nbsp;</td>'
-							. '<td colspan="3" style="background-color:' . $bgColor . ';width:6px;' . $borderRight . '" ' . $hoverText . '>&nbsp;</td>';
+							. '<td colspan="3" style="width:6px;' . $bgColor . $borderRight . $borderLeft . '" ' . $hoverText . '>&nbsp;</td>';
 			}
 		}
 		else if($endDate == '' || $endDate === NULL || $endDate == '0000-00-00')
@@ -11915,7 +12143,7 @@ class TrialTracker
 			$st = $startMonth-1;
 			if($startYear < $currentYear)
 			{
-				$outputStr .= '<td colspan="3" style="width:6px;background-color:' . $bgColor . ';' . $borderRight . '" ' . $hoverText . '>&nbsp;</td>';
+				$outputStr .= '<td colspan="3" style="width:6px;' . $bgColor . $borderRight . $borderLeft . '" ' . $hoverText . '>&nbsp;</td>';
 				$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td><td style="width:24px;" colspan="12">&nbsp;</td>'
 							. '<td style="width:24px;" colspan="12">&nbsp;</td><td style="width:6px;" colspan="3">&nbsp;</td>';	
 			}
@@ -11923,7 +12151,7 @@ class TrialTracker
 			{ 
 				$outputStr .= '<td style="width:6px;" colspan="3">&nbsp;</td>';
 				$outputStr .= (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '">&nbsp;</td>' : '')
-							. '<td style="background-color:' . $bgColor . ';width:2px;' . $borderRight . '" ' . $hoverText . '>&nbsp;</td>'
+							. '<td style="width:2px;' . $bgColor . $borderRight . $borderLeft . '" ' . $hoverText . '>&nbsp;</td>'
 							. (((12 - ($st+1)) != 0) ? '<td style="width:'.((12-($st+1))*2).'px;" colspan="' .(12 - ($st+1)) . '">&nbsp;</td>' : '')
 
 							. '<td style="width:24px;" colspan="12">&nbsp;</td><td style="width:24px;" colspan="12">&nbsp;</td>'
@@ -11934,7 +12162,7 @@ class TrialTracker
 				$outputStr .= '<td style="width:6px;" colspan="3">&nbsp;</td>';
 				$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td>'
 							. (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '">&nbsp;</td>' : '')
-							. '<td style="background-color:' . $bgColor . ';width:2px;' . $borderRight . '" ' . $hoverText . '>&nbsp;</td>'
+							. '<td style="width:2px;' . $bgColor . $borderRight . $borderLeft . '" ' . $hoverText . '>&nbsp;</td>'
 							. (((12 - ($st+1)) != 0) ? '<td style="width:'.((12-($st+1))*2).'px;" colspan="' .(12 - ($st+1)) . '">&nbsp;</td>' : '')
 							. '<td style="width:24px;" colspan="12">&nbsp;</td><td style="width:6px;" colspan="3">&nbsp;</td>';
 			}
@@ -11943,7 +12171,7 @@ class TrialTracker
 				$outputStr .= '<td style="width:6px;" colspan="3">&nbsp;</td>';
 				$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td><td style="width:24px;" colspan="12">&nbsp;</td>'
 							. (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '">&nbsp;</td>' : '')
-							. '<td style="background-color:' . $bgColor . ';width:2px;' . $borderRight . '" ' . $hoverText . '>&nbsp;</td>'
+							. '<td style="width:2px;' . $bgColor . $borderRight . $borderLeft . '" ' . $hoverText . '>&nbsp;</td>'
 							. (((12 - ($st+1)) != 0) ? '<td style="width:'.((12-($st+1))*2).'px;" colspan="' .(12 - ($st+1)) . '">&nbsp;</td>' : '')
 							. '<td style="width:6px;" colspan="3">&nbsp;</td>';	
 			} 
@@ -11953,7 +12181,7 @@ class TrialTracker
 				$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td>'
 							. '<td style="width:24px;" colspan="12">&nbsp;</td>'
 							. '<td style="width:24px;" colspan="12">&nbsp;</td>'
-							. '<td colspan="3" style="width:6px;background-color:' . $bgColor . ';' . $borderRight . '" ' . $hoverText . '>&nbsp;</td>';
+							. '<td colspan="3" style="width:6px;' . $bgColor . $borderRight . $borderLeft . '" ' . $hoverText . '>&nbsp;</td>';
 
 			}
 		} 
@@ -11962,7 +12190,7 @@ class TrialTracker
 			$st = $endMonth-1;
 			if($endYear < $currentYear) 
 			{
-				$outputStr .= '<td colspan="3" style="width:6px;background-color:' . $bgColor . ';' . $borderRight . '" ' . $hoverText . '>&nbsp;</td>';
+				$outputStr .= '<td colspan="3" style="width:6px;' . $bgColor . $borderRight . $borderLeft . '" ' . $hoverText . '>&nbsp;</td>';
 				$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td><td  style="width:24px;" colspan="12">&nbsp;</td>'
 							. '<td style="width:24px;" colspan="12">&nbsp;</td><td style="width:6px;" colspan="3">&nbsp;</td>';	
 			} 
@@ -11970,7 +12198,7 @@ class TrialTracker
 			{
 				$outputStr .= '<td style="width:6px;" colspan="3">&nbsp;</td>';
 				$outputStr .= (($st != 0) ? '<td style="width:'. ($st*2) .'px;" colspan="' . $st . '">&nbsp;</td>' : '')
-							. '<td style="width:2px;background-color:' . $bgColor . ';' . $borderRight . '" ' . $hoverText . '>&nbsp;</td>'
+							. '<td style="width:2px;' . $bgColor . $borderRight . $borderLeft . '" ' . $hoverText . '>&nbsp;</td>'
 							. (((12 - ($st+1)) != 0) ? '<td style="width:'.((12-($st+1))*2).'px;" colspan="' .(12 - ($st+1)) . '">&nbsp;</td>' : '')
 							. '<td style="width:24px;" colspan="12">&nbsp;</td><td  style="width:24px;" colspan="12">&nbsp;</td>'
 							. '<td style="width:6px;" colspan="3">&nbsp;</td>';	
@@ -11980,7 +12208,7 @@ class TrialTracker
 				$outputStr .= '<td style="width:6px;" colspan="3">&nbsp;</td>';
 				$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td>' 
 							. (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '">&nbsp;</td>' : '')
-							. '<td style="background-color:' . $bgColor . ';width:2px;' . $borderRight . '" ' . $hoverText . '>&nbsp;</td>'
+							. '<td style="width:2px;' . $bgColor . $borderRight . $borderLeft . '" ' . $hoverText . '>&nbsp;</td>'
 							. (((12 - ($st+1)) != 0) ? '<td style="width:'.((12-($st+1))*2).'px;" colspan="' .(12 - ($st+1)) . '">&nbsp;</td>' : '')
 							. '<td style="width:24px;" colspan="12">&nbsp;</td><td style="width:6px;" colspan="3">&nbsp;</td>';
 			} 
@@ -11990,7 +12218,7 @@ class TrialTracker
 				$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td>'
 							. '<td style="width:24px;" colspan="12">&nbsp;</td>' 
 							. (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '">&nbsp;</td>' : '')
-							. '<td style="background-color:' . $bgColor . ';width:2px;' . $borderRight . '" ' . $hoverText . '>&nbsp;</td>'
+							. '<td style="width:2px;' . $bgColor . $borderRight . $borderLeft . '" ' . $hoverText . '>&nbsp;</td>'
 							. (((12 - ($st+1)) != 0) ? '<td style="width:'.((12-($st+1))*2).'px;" colspan="' .(12 - ($st+1)) . '">&nbsp;</td>' : '')
 							. '<td style="width:6px;" colspan="3">&nbsp;</td>';	
 			} 
@@ -11999,14 +12227,14 @@ class TrialTracker
 				$outputStr .= '<td style="width:6px;" colspan="3">&nbsp;</td>';
 				$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td>'
 							. '<td style="width:24px;" colspan="12">&nbsp;</td><td style="width:24px;" colspan="12">&nbsp;</td>'
-							. '<td colspan="3" style="background-color:' . $bgColor . ';width:6px;' . $borderRight . '" ' . $hoverText . '>&nbsp;</td>';
+							. '<td colspan="3" style="width:6px;' . $bgColor . $borderRight . $borderLeft . '" ' . $hoverText . '>&nbsp;</td>';
 			}
 		} 
 		else if($startYear < $currentYear) 
 		{
 			if($endYear < $currentYear) 
 			{
-				$outputStr .= '<td colspan="3" style="width:6px;background-color:' . $bgColor . ';' . $borderRight . '" ' . $hoverText . '>&nbsp;</td>';
+				$outputStr .= '<td colspan="3" style="width:6px;' . $bgColor . $borderRight . $borderLeft . '" ' . $hoverText . '>&nbsp;</td>';
 				$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td><td style="width:24px;" colspan="12">&nbsp;</td>'
 							. '<td style="width:24px;" colspan="12">&nbsp;</td><td style="width:6px;" colspan="3">&nbsp;</td>';
 			} 
@@ -12014,14 +12242,14 @@ class TrialTracker
 			{
 				if($endMonth == 12) 
 				{
-					$outputStr .= '<td style="width:30px;background-color:' . $bgColor . ';' . $borderRight . '" colspan="15" ' . $hoverText . '>&nbsp;</td>' 
+					$outputStr .= '<td style="width:30px;' . $bgColor . $borderRight . $borderLeft . '" colspan="15" ' . $hoverText . '>&nbsp;</td>' 
 								. '<td style="width:24px;" colspan="12">&nbsp;</td>'
 								. '<td style="width:24px;" colspan="12">&nbsp;</td>'
 								. '<td style="width:6px;" colspan="3">&nbsp;</td>';
 				} 
 				else 
 				{ 
-					$outputStr .= '<td style="width:'.(($endMonth+3)*2).'px;background-color:' . $bgColor . ';' . $borderRight . '" colspan="' 
+					$outputStr .= '<td style="width:'.(($endMonth+3)*2).'px;' . $bgColor . $borderRight . $borderLeft . '" colspan="' 
 								. ($endMonth+3) . '" ' . $hoverText . '>&nbsp;</td>'
 								. '<td style="width:'.((12-$endMonth)*2).'px;" colspan="' . (12-$endMonth) . '">&nbsp;</td>'
 								. '<td style="width:24px;" colspan="12">&nbsp;</td>'
@@ -12033,14 +12261,14 @@ class TrialTracker
 			{ 
 				if($endMonth == 12) 
 				{
-					$outputStr .= '<td style="width:'.(27*2).'px;background-color:' . $bgColor . ';' . $borderRight . '" colspan="27" ' 
+					$outputStr .= '<td style="width:'.(27*2).'px;' . $bgColor . $borderRight . $borderLeft . '" colspan="27" ' 
 								. $hoverText . '>&nbsp;</td>'
 								. '<td  style="width:24px;" colspan="12">&nbsp;</td><td style="width:6px;" colspan="3">&nbsp;</td>';
 				} 
 				else 
 				{
-					$outputStr .= '<td style="width:'.((15+$endMonth)*2).'px;background-color:' . $bgColor . ';' . $borderRight 
-								. '" colspan="' . (15+$endMonth) . '" ' . $hoverText . '>&nbsp;</td>'
+					$outputStr .= '<td style="width:'.((15+$endMonth)*2).'px;' . $bgColor . $borderRight 
+								. $borderLeft . '" colspan="' . (15+$endMonth) . '" ' . $hoverText . '>&nbsp;</td>'
 								. '<td style="width:' . ((12-$endMonth)*2) . 'px;" colspan="' . (12-$endMonth) . '">&nbsp;</td>'
 								. '<td style="width:24px;" colspan="12">&nbsp;</td>'
 								. '<td style="width:6px;" colspan="3">&nbsp;</td>';
@@ -12050,21 +12278,21 @@ class TrialTracker
 			{ 
 				if($endMonth == 12) 
 				{
-					$outputStr .= '<td style="width:'.(39*2).'px;background-color:' . $bgColor . ';' . $borderRight . '" colspan="39" ' 
+					$outputStr .= '<td style="width:'.(39*2).'px;' . $bgColor . $borderRight . $borderLeft . '" colspan="39" ' 
 								. $hoverText . '>&nbsp;</td>'
 								. '<td style="width:6px;" colspan="3">&nbsp;</td>';
 				} 
 				else 
 				{
-					$outputStr .= '<td style="width:'.((27+$endMonth)*2).'px;background-color:' . $bgColor . ';' . $borderRight 
-								. '" colspan="' . (27+$endMonth) . '" ' . $hoverText . '>&nbsp;</td>'
+					$outputStr .= '<td style="width:'.((27+$endMonth)*2).'px;' . $bgColor . $borderRight 
+								. $borderLeft . '" colspan="' . (27+$endMonth) . '" ' . $hoverText . '>&nbsp;</td>'
 								. '<td style="width:'.((12-$endMonth)*2).'px;" colspan="' . (12-$endMonth) . '">&nbsp;</td>'
 								. '<td style="width:6px;" colspan="3">&nbsp;</td>';
 				}
 			} 
 			else if($endYear > $thirdYear)
 			{ 
-				$outputStr .= '<td colspan="42" style="width:'.(42*2).'px;background-color:' . $bgColor . ';' . $borderRight . '" ' 
+				$outputStr .= '<td colspan="42" style="width:'.(42*2).'px;' . $bgColor . $borderRight . $borderLeft . '" ' 
 							. $hoverText . '>&nbsp;</td>';		
 			}	
 		} 
@@ -12078,12 +12306,12 @@ class TrialTracker
 				$outputStr .= (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '">&nbsp;</td>' : '');
 				if($val != 0) 
 				{
-					$outputStr .= '<td style="width:'.($val*2).'px;background-color:' . $bgColor . ';' . $borderRight . '" colspan="' . $val . '" ' . $hoverText . '>&nbsp;</td>'
+					$outputStr .= '<td style="width:'.($val*2).'px;' . $bgColor . $borderRight . $borderLeft . '" colspan="' . $val . '" ' . $hoverText . '>&nbsp;</td>'
 								. (((12 - ($st+$val)) != 0) ? '<td style="width:' . ((12 - ($st+$val))*2) . 'px;" colspan="' .(12 - ($st+$val)) . '">&nbsp;</td>' : '');
 				} 
 				else 
 				{
-					$outputStr .= '<td style="width:2px;background-color:' . $bgColor . ';' . $borderRight . '" ' . $hoverText . '>&nbsp;</td>'
+					$outputStr .= '<td style="width:2px;' . $bgColor . $borderRight . $borderLeft . '" ' . $hoverText . '>&nbsp;</td>'
 								. (((12 - ($st+1)) != 0) ? '<td style="width:'.((12-($st+1))*2).'px;" colspan="' .(12 - ($st+1)) . '">&nbsp;</td>' : '');
 				}
 				$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td>'
@@ -12096,12 +12324,12 @@ class TrialTracker
 				$outputStr .= (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '">&nbsp;</td>' : '');
 				if($val != 0)
 				{
-					$outputStr .= '<td style="width:'.($val*2).'px;background-color:' . $bgColor . ';' . $borderRight . '" colspan="' . $val . '" ' . $hoverText . '>&nbsp;</td>'
+					$outputStr .= '<td style="width:'.($val*2).'px;' . $bgColor . $borderRight . $borderLeft . '" colspan="' . $val . '" ' . $hoverText . '>&nbsp;</td>'
 								. (((24 - ($val+$st)) != 0) ? '<td style="width:'.((24-($val+$st))*2).'px;" colspan="' .(24 - ($val+$st)) . '">&nbsp;</td>' : '');
 				} 
 				else 
 				{
-					$outputStr .= '<td style="width:2px;background-color:' . $bgColor . ';' . $borderRight . '" ' . $hoverText . '>&nbsp;</td>'
+					$outputStr .= '<td style="width:2px;' . $bgColor . $borderRight . $borderLeft . '" ' . $hoverText . '>&nbsp;</td>'
 								. (((24 - (1+$st)) != 0) ? '<td style="width:'.((24-(1+$st))*2).'px;" colspan="' .(24 - (1+$st)) . '">&nbsp;</td>' : '');			
 				}
 				$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td><td style="width:6px;" colspan="3">&nbsp;</td>';
@@ -12112,12 +12340,12 @@ class TrialTracker
 				$outputStr .= (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '">&nbsp;</td>' : '');
 				if($val != 0) 
 				{
-					$outputStr .= '<td style="width:'.($val*2).'px;background-color:' . $bgColor . ';' . $borderRight . '" colspan="' . $val . '" ' . $hoverText . '>&nbsp;</td>'
+					$outputStr .= '<td style="width:'.($val*2).'px;' . $bgColor . $borderRight . $borderLeft . '" colspan="' . $val . '" ' . $hoverText . '>&nbsp;</td>'
 								. (((36 - ($val+$st)) != 0) ? '<td style="width:'.((36-($val+$st))*2).'px;" colspan="' .(36 - ($val+$st)) . '">&nbsp;</td>' : '');
 				} 
 				else 
 				{
-					$outputStr .= '<td style="width:2px;background-color:' . $bgColor . ';' . $borderRight . '" ' . $hoverText . '>&nbsp;</td>'
+					$outputStr .= '<td style="width:2px;' . $bgColor . $borderRight . $borderLeft . '" ' . $hoverText . '>&nbsp;</td>'
 								. (((36 - (1+$st)) != 0) ? '<td style="width:'.((36-(1+$st))*2).'px;" colspan="' .(36 - (1+$st)) . '">&nbsp;</td>' : '');
 				}
 				$outputStr .= '<td style="width:6px;" colspan="3">&nbsp;</td>';
@@ -12126,8 +12354,8 @@ class TrialTracker
 			{
 				$outputStr .= '<td style="width:6px;" colspan="3">&nbsp;</td>';
 				$outputStr .= (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '">&nbsp;</td>' : '');
-				$outputStr .= '<td colspan="' .(39 - $st) . '" style="width:'.((39-$st)*2).'px;background-color:' . $bgColor 
-							. ';' . $borderRight . '" ' . $hoverText . '>&nbsp;</td>';		
+				$outputStr .= '<td colspan="' .(39 - $st) . '" style="width:'.((39-$st)*2).'px;' . $bgColor . $borderRight . $borderLeft . '" ' 
+							. $hoverText . '>&nbsp;</td>';		
 			}
 		}
 		else if($startYear == $secondYear) 
@@ -12141,12 +12369,12 @@ class TrialTracker
 				if($val != 0) 
 
 				{ 
-					$outputStr .= '<td style="width:'.($val*2).'px;background-color:' . $bgColor . ';' . $borderRight . '" colspan="' . $val . '" ' . $hoverText . '>&nbsp;</td>'
+					$outputStr .= '<td style="width:'.($val*2).'px;' . $bgColor . $borderRight . $borderLeft . '" colspan="' . $val . '" ' . $hoverText . '>&nbsp;</td>'
 								. (((12 - ($val+$st)) != 0) ? '<td style="width:'.((12-($val+$st))*2).'px;" colspan="' .(12 - ($val+$st)) . '">&nbsp;</td>' : '');
 				} 
 				else 
 				{ 
-					$outputStr .= '<td style="background-color:' . $bgColor . ';width:2px;' . $borderRight . '" ' . $hoverText . '></td>'
+					$outputStr .= '<td style="width:2px;' . $bgColor . $borderRight . $borderLeft . '" ' . $hoverText . '></td>'
 								. (((12 - (1+$st)) != 0) ? '<td style="width:'.((12-(1+$st))*2).'px;" colspan="' .(12 - (1+$st)) . '">&nbsp;</td>' : '');
 				}
 				$outputStr .= '<td colspan="12" style="width:24px;">&nbsp;</td><td colspan="3" style="width:6px;">&nbsp;</td>';		
@@ -12157,12 +12385,12 @@ class TrialTracker
 				$outputStr .= '<td colspan="12" style="width:24px;">&nbsp;</td>' . (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '">&nbsp;</td>' : '');
 				if($val != 0) 
 				{
-					$outputStr .= '<td style="width:'.($val*2).'px;background-color:' . $bgColor . ';' . $borderRight . '" colspan="' . $val . '" ' . $hoverText . '>&nbsp;</td>'
+					$outputStr .= '<td style="width:'.($val*2).'px;' . $bgColor . $borderRight . $borderLeft . '" colspan="' . $val . '" ' . $hoverText . '>&nbsp;</td>'
 								. (((24 - ($val+$st)) != 0) ? '<td style="width:'.((24-($val+$st))*2).'px;" colspan="' .(24 - ($val+$st)) . '">&nbsp;</td>' : '');
 				} 
 				else 
 				{
-					$outputStr .= '<td style="width:2px;background-color:' . $bgColor . ';' . $borderRight . '" ' . $hoverText . '>&nbsp;</td>'
+					$outputStr .= '<td style="width:2px;' . $bgColor . $borderRight . $borderLeft . '" ' . $hoverText . '>&nbsp;</td>'
 								. (((24 - (1+$st)) != 0) ? '<td style="width:'.((24-(1+$st))*2).'px;" colspan="' .(24 - (1+$st)) . '">&nbsp;</td>' : '');
 				}
 				$outputStr .= '<td style="width:6px;" colspan="3">&nbsp;</td>';
@@ -12172,7 +12400,7 @@ class TrialTracker
 			{
 				$outputStr .= '<td style="width:6px;" colspan="3">&nbsp;</td>';
 				$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td>' . (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '">&nbsp;</td>' : '');
-				$outputStr .= '<td colspan="' .(27 - $st) . '" style="background-color:' . $bgColor . '; width:'.((27-$st)*2).'px;' . $borderRight . '" ' . $hoverText . '>&nbsp;</td>';		
+				$outputStr .= '<td colspan="' .(27 - $st) . '" style="width:' . ((27-$st)*2) . 'px;' . $bgColor . $borderRight . $borderLeft . '" ' . $hoverText . '>&nbsp;</td>';		
 			}
 		} 
 		else if($startYear == $thirdYear) 
@@ -12187,12 +12415,12 @@ class TrialTracker
 							. (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '">&nbsp;</td>' : '');
 				if($val != 0) 
 				{
-					$outputStr .= '<td style="width:'.($val*2).'px; background-color:' . $bgColor . ';' . $borderRight . '" colspan="' . $val . '" ' . $hoverText . '>&nbsp;</td>'
+					$outputStr .= '<td style="width:'.($val*2).'px;' . $bgColor . $borderRight . $borderLeft . '" colspan="' . $val . '" ' . $hoverText . '>&nbsp;</td>'
 								. (((12 - ($val+$st)) != 0) ? '<td style="width:'.((12-($val+$st))*2).'px;" colspan="' .(12 - ($val+$st)) . '">&nbsp;</td>' : '');
 				} 
 				else 
 				{
-					$outputStr .= '<td style="background-color:' . $bgColor . ';width:2px;' . $borderRight . '" ' . $hoverText . '>&nbsp;</td>'
+					$outputStr .= '<td style="width:2px;' . $bgColor . $borderRight . $borderLeft . '" ' . $hoverText . '>&nbsp;</td>'
 								. (((12 - (1+$st)) != 0) ? '<td style="width:'.((12-(1+$st))*2).'px;" colspan="' .(12 - (1+$st)) . '">&nbsp;</td>' : '');
 				}
 				$outputStr .= '<td colspan="3" style="width:6px;">&nbsp;</td>';
@@ -12202,7 +12430,7 @@ class TrialTracker
 				$outputStr .= '<td style="width:6px;" colspan="3">&nbsp;</td>';
 				$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td>'
 							. '<td style="width:24px;" colspan="12">&nbsp;</td>' . (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '">&nbsp;</td>' : '');
-				$outputStr .= '<td colspan="' .(15 - $st) . '" style="width:'.((15-$st)*2).'px;background-color:' . $bgColor . ';' . $borderRight . '" ' . $hoverText . '>&nbsp;</td>';		
+				$outputStr .= '<td colspan="' .(15 - $st) . '" style="width:'.((15-$st)*2).'px;' . $bgColor . $borderRight . $borderLeft . '" ' . $hoverText . '>&nbsp;</td>';		
 			}
 		} 
 		else if($startYear > $thirdYear) 
@@ -12211,12 +12439,12 @@ class TrialTracker
 			$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td>'
 						. '<td style="width:24px;" colspan="12">&nbsp;</td>'
 						. '<td style="width:24px;" colspan="12">&nbsp;</td>'
-						. '<td colspan="3" style="width:6px;background-color:' . $bgColor . ';' . $borderRight . '" ' . $hoverText . '>&nbsp;</td>';	
+						. '<td colspan="3" style="width:6px;' . $bgColor . $borderRight . $borderLeft . '" ' . $hoverText . '>&nbsp;</td>';	
 		} 
 		return $outputStr;
 	}
 	
-	function upmGnattChart($startMonth, $startYear, $endMonth, $endYear, $currentYear, $secondYear, $thirdYear, $startDate, $endDate, $upmLink, $upmTitle, $upmBorderRight, $larvolId = NULL, $incViewCount = false)
+	function upmGnattChart($startMonth, $startYear, $endMonth, $endYear, $currentYear, $secondYear, $thirdYear, $startDate, $endDate, $upmLink, $upmTitle, $upmBorderRight, $upmBorderLeft, $larvolId = NULL, $incViewCount = false)
 	{	
 		$outputStr = '';
 		$bgColor = 'background-color:#9966FF;';
@@ -12263,7 +12491,7 @@ class TrialTracker
 			$st = $endMonth-1;
 			if($endYear < $currentYear) 
 			{
-				$outputStr .= '<td colspan="3" ' . $incViewCountLink . ' style="width:6px; ' . $bgColor . $upmBorderRight . '">'
+				$outputStr .= '<td colspan="3" ' . $incViewCountLink . ' style="width:6px; ' . $bgColor . $upmBorderRight . $upmBorderLeft . '">'
 							. ' <div title="' . $upmTitle . '">' . $anchorTag . '</div></td>';
 				$outputStr .= '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 							. '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
@@ -12274,7 +12502,7 @@ class TrialTracker
 			{
 				$outputStr .= '<td style="width:6px;" colspan="3"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>';
 				$outputStr .= (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>' : '')
-							. '<td ' . $incViewCountLink . ' style="width:2px; ' . $bgColor . $upmBorderRight . '">'
+							. '<td ' . $incViewCountLink . ' style="width:2px; ' . $bgColor . $upmBorderRight . $upmBorderLeft . '">'
 							. '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 							. (((12 - ($st+1)) != 0) ? '<td style="width:'.((12-($st+1))*2).'px;" colspan="' .(12 - ($st+1)) . '">'
 							. '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>' : '')
@@ -12287,7 +12515,7 @@ class TrialTracker
 				$outputStr .= '<td style="width:6px;" colspan="3"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>';
 				$outputStr .= '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 							. (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>' : '')
-							. '<td ' . $incViewCountLink . ' style="width:2px; ' . $bgColor . $upmBorderRight . '">'
+							. '<td ' . $incViewCountLink . ' style="width:2px; ' . $bgColor . $upmBorderRight . $upmBorderLeft . '">'
 							. '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 							. (((12 - ($st+1)) != 0) ? '<td style="width:'.((12-($st+1))*2).'px;" colspan="' .(12 - ($st+1)) . '">'
 							. '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>' : '')
@@ -12300,7 +12528,7 @@ class TrialTracker
 				$outputStr .= '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 							. '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 							. (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>' : '')
-							. '<td ' . $incViewCountLink . ' style="width:2px; ' . $bgColor . $upmBorderRight . '">'
+							. '<td ' . $incViewCountLink . ' style="width:2px; ' . $bgColor . $upmBorderRight . $upmBorderLeft . '">'
 							. '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 							. (((12 - ($st+1)) != 0) ? '<td style="width:'.((12-($st+1))*2).'px;" colspan="' .(12 - ($st+1)) . '">'
 							. '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>' : '')
@@ -12312,7 +12540,7 @@ class TrialTracker
 				$outputStr .= '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 							. '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 							. '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
-							. '<td ' . $incViewCountLink . ' colspan="3" style="width:6px; ' . $bgColor . $upmBorderRight . '">'
+							. '<td ' . $incViewCountLink . ' colspan="3" style="width:6px; ' . $bgColor . $upmBorderRight . $upmBorderLeft . '">'
 							. '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>';
 			}
 		} 
@@ -12322,7 +12550,7 @@ class TrialTracker
 			$st = $startMonth-1;
 			if($startYear < $currentYear) 
 			{
-				$outputStr .= '<td ' . $incViewCountLink . ' colspan="3" style="width:6px; ' . $bgColor . $upmBorderRight . '">'
+				$outputStr .= '<td ' . $incViewCountLink . ' colspan="3" style="width:6px; ' . $bgColor . $upmBorderRight . $upmBorderLeft . '">'
 							. '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>';
 				$outputStr .= '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 							. '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
@@ -12333,7 +12561,7 @@ class TrialTracker
 			{ 
 				$outputStr .= '<td style="width:6px;" colspan="3"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>';
 				$outputStr .= (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>' : '')
-							. '<td ' . $incViewCountLink . ' style="width:2px; ' . $bgColor . $upmBorderRight . '">'
+							. '<td ' . $incViewCountLink . ' style="width:2px; ' . $bgColor . $upmBorderRight . $upmBorderLeft . '">'
 							. '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 							. (((12 - ($st+1)) != 0) ? '<td style="width:'.((12-($st+1))*2).'px;" colspan="' .(12 - ($st+1)) . '"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>' : '')
 							. '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
@@ -12345,7 +12573,7 @@ class TrialTracker
 				$outputStr .= '<td style="width:6px;" colspan="3"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>';
 				$outputStr .= '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 							. (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>' : '')
-							. '<td ' . $incViewCountLink . ' style="width:2px; ' . $bgColor . $upmBorderRight . '">'
+							. '<td ' . $incViewCountLink . ' style="width:2px; ' . $bgColor . $upmBorderRight . $upmBorderLeft . '">'
 							. '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 							. (((12 - ($st+1)) != 0) ? '<td style="width:'.((12-($st+1))*2).'px;" colspan="' .(12 - ($st+1)) . '"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>' : '')
 							. '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
@@ -12357,9 +12585,8 @@ class TrialTracker
 				$outputStr .= '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 							. '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 							. (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>' : '')
-							. '<td ' . $incViewCountLink . ' style="width:2px; ' . $bgColor . $upmBorderRight . '">'
+							. '<td ' . $incViewCountLink . ' style="width:2px; ' . $bgColor . $upmBorderRight . $upmBorderLeft . '">'
 							. '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
-
 							. (((12 - ($st+1)) != 0) ? '<td style="width:'.((12-($st+1))*2).'px;" colspan="' .(12 - ($st+1)) . '"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>' : '')
 							. '<td style="width:6px;" colspan="3"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>';	
 			} 
@@ -12369,7 +12596,7 @@ class TrialTracker
 				$outputStr .= '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 							. '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 							. '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
-							. '<td ' . $incViewCountLink . ' colspan="3" style="width:6px; ' . $bgColor . $upmBorderRight . '">'
+							. '<td ' . $incViewCountLink . ' colspan="3" style="width:6px; ' . $bgColor . $upmBorderRight . $upmBorderLeft . '">'
 							. '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>';
 			}
 		} 
@@ -12378,7 +12605,7 @@ class TrialTracker
 			$st = $endMonth-1;
 			if($endYear < $currentYear) 
 			{
-				$outputStr .= '<td ' . $incViewCountLink . ' colspan="3" style="width:6px; ' . $bgColor . $upmBorderRight . '">'
+				$outputStr .= '<td ' . $incViewCountLink . ' colspan="3" style="width:6px; ' . $bgColor . $upmBorderRight . $upmBorderLeft . '">'
 							. '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>';
 				$outputStr .= '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 							. '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
@@ -12390,7 +12617,7 @@ class TrialTracker
 			{
 				$outputStr .= '<td style="width:6px;" colspan="3"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>';
 				$outputStr .= (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>' : '')
-							. '<td ' . $incViewCountLink . ' style="width:2px; ' . $bgColor . $upmBorderRight . '">'
+							. '<td ' . $incViewCountLink . ' style="width:2px; ' . $bgColor . $upmBorderRight . $upmBorderLeft . '">'
 							. '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 							. (((12 - ($st+1)) != 0) ? '<td style="width:'.((12-($st+1))*2).'px;" colspan="' .(12 - ($st+1)) . '"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>' : '')
 							. '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
@@ -12402,7 +12629,7 @@ class TrialTracker
 				$outputStr .= '<td style="width:6px;" colspan="3"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>';
 				$outputStr .= '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 							. (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>' : '')
-							. '<td ' . $incViewCountLink . ' style="width:2px; ' . $bgColor . $upmBorderRight . '">'
+							. '<td ' . $incViewCountLink . ' style="width:2px; ' . $bgColor . $upmBorderRight . $upmBorderLeft . '">'
 							. '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 							. (((12 - ($st+1)) != 0) ? '<td style="width:'.((12-($st+1))*2).'px;" colspan="' .(12 - ($st+1)) . '"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>' : '')
 							. '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
@@ -12414,7 +12641,7 @@ class TrialTracker
 				$outputStr .= '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 							. '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 							. (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>' : '')
-							. '<td ' . $incViewCountLink . ' style="width:2px; ' . $bgColor . $upmBorderRight . '">'
+							. '<td ' . $incViewCountLink . ' style="width:2px; ' . $bgColor . $upmBorderRight . $upmBorderLeft . '">'
 							. '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 							. (((12 - ($st+1)) != 0) ? '<td style="width:'.((12-($st+1))*2).'px;" colspan="' .(12 - ($st+1)) . '"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>' : '')
 							. '<td style="width:6px;" colspan="3"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>';	
@@ -12425,7 +12652,7 @@ class TrialTracker
 				$outputStr .= '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 							. '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 							. '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
-							. '<td ' . $incViewCountLink . ' colspan="3" style="width:6px; ' . $bgColor . $upmBorderRight . '">'
+							. '<td ' . $incViewCountLink . ' colspan="3" style="width:6px; ' . $bgColor . $upmBorderRight . $upmBorderLeft . '">'
 							. '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>';
 			}
 		} 
@@ -12435,7 +12662,7 @@ class TrialTracker
 			$st = $startMonth-1;
 			if($endYear < $currentYear) 
 			{
-				$outputStr .= '<td ' . $incViewCountLink . ' colspan="3" style="width:6px; ' . $bgColor . $upmBorderRight . '">'
+				$outputStr .= '<td ' . $incViewCountLink . ' colspan="3" style="width:6px; ' . $bgColor . $upmBorderRight . $upmBorderLeft . '">'
 							. '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>';
 				$outputStr .= '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 							. '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
@@ -12446,7 +12673,7 @@ class TrialTracker
 			{ 
 				if($endMonth == 12) 
 				{
-					$outputStr .= '<td ' . $incViewCountLink . ' style="width:'.(($endMonth+3)*2).'px; ' . $bgColor . $upmBorderRight . '" colspan="' . ($endMonth+3) . '">'
+					$outputStr .= '<td ' . $incViewCountLink . ' style="width:'.(($endMonth+3)*2).'px; ' . $bgColor . $upmBorderRight . $upmBorderLeft . '" colspan="' . ($endMonth+3) . '">'
 								. '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 								. '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 								. '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
@@ -12454,7 +12681,7 @@ class TrialTracker
 				} 
 				else 
 				{ 
-					$outputStr .= '<td ' . $incViewCountLink . ' style="width:'.(($endMonth+3)*2).'px; ' . $bgColor . $upmBorderRight . '" colspan="' . ($endMonth+3) . '">'
+					$outputStr .= '<td ' . $incViewCountLink . ' style="width:'.(($endMonth+3)*2).'px; ' . $bgColor . $upmBorderRight . $upmBorderLeft . '" colspan="' . ($endMonth+3) . '">'
 								. '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 								. '<td style="width:'.((12-$endMonth)*2).'px;" colspan="' . (12-$endMonth) . '"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 								. '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
@@ -12466,14 +12693,14 @@ class TrialTracker
 			{ 
 				if($endMonth == 12) 
 				{
-					$outputStr .= '<td ' . $incViewCountLink . ' style="width:'.(27*2).'px; ' . $bgColor . $upmBorderRight . '" colspan="27">'
+					$outputStr .= '<td ' . $incViewCountLink . ' style="width:'.(27*2).'px; ' . $bgColor . $upmBorderRight . $upmBorderLeft . '" colspan="27">'
 								. '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 								. '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 								. '<td style="width:6px;" colspan="3"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>';
 				} 
 				else 
 				{
-					$outputStr .= '<td ' . $incViewCountLink . ' style="width:'.(($endMonth+15)*2).'px; ' . $bgColor . $upmBorderRight . '" colspan="' . (15+$endMonth) . '">'
+					$outputStr .= '<td ' . $incViewCountLink . ' style="width:'.(($endMonth+15)*2).'px; ' . $bgColor . $upmBorderRight . $upmBorderLeft . '" colspan="' . (15+$endMonth) . '">'
 								. '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 								. '<td style="width:'.((12-$endMonth)*2).'px;" colspan="' . (12-$endMonth) . '"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 								. '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
@@ -12484,13 +12711,13 @@ class TrialTracker
 			{ 
 				if($endMonth == 12)
 				{
-					$outputStr .= '<td ' . $incViewCountLink . ' style="width:'.(39*2).'px; ' . $bgColor . $upmBorderRight . '" colspan="39">'
+					$outputStr .= '<td ' . $incViewCountLink . ' style="width:'.(39*2).'px; ' . $bgColor . $upmBorderRight . $upmBorderLeft . '" colspan="39">'
 								. '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 								. '<td style="width:6px;" colspan="3"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>';
 				}
 				else 
 				{
-					$outputStr .= '<td ' . $incViewCountLink . ' style="width:'.((27+$endMonth)*2).'px; ' . $bgColor . $upmBorderRight . '" colspan="' . (27+$endMonth) . '">' 
+					$outputStr .= '<td ' . $incViewCountLink . ' style="width:'.((27+$endMonth)*2).'px; ' . $bgColor . $upmBorderRight . $upmBorderLeft . '" colspan="' . (27+$endMonth) . '">' 
 								. '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 								. '<td style="width:'.((12-$endMonth)*2).'px;" colspan="' . (12-$endMonth) . '"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 								. '<td style="width:6px;" colspan="3"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>';
@@ -12498,7 +12725,7 @@ class TrialTracker
 			} 
 			else if($endYear > $thirdYear) 
 			{
-				$outputStr .= '<td ' . $incViewCountLink . ' colspan="42" style="width:'.(42*2).'px; ' . $bgColor . $upmBorderRight . '">'
+				$outputStr .= '<td ' . $incViewCountLink . ' colspan="42" style="width:'.(42*2).'px; ' . $bgColor . $upmBorderRight . $upmBorderLeft . '">'
 							. '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>';		
 			}	
 		} 
@@ -12512,13 +12739,13 @@ class TrialTracker
 				$outputStr .= (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '" ><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>' : '');
 				if($val != 0)
 				{
-					$outputStr .= '<td ' . $incViewCountLink . ' style="width:'.($val*2).'px; ' . $bgColor . $upmBorderRight . '" colspan="' . $val . '">'
+					$outputStr .= '<td ' . $incViewCountLink . ' style="width:'.($val*2).'px; ' . $bgColor . $upmBorderRight . $upmBorderLeft . '" colspan="' . $val . '">'
 								. '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 								. (((12 - ($st+$val)) != 0) ? '<td style="width:'.((12-($st+$val))*2).'px;" colspan="' .(12 - ($st+$val)) . '"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>' : '');
 				} 
 				else 
 				{
-					$outputStr .= '<td ' . $incViewCountLink . ' style="width:2px; ' . $bgColor . $upmBorderRight . '">'
+					$outputStr .= '<td ' . $incViewCountLink . ' style="width:2px; ' . $bgColor . $upmBorderRight . $upmBorderLeft . '">'
 								. '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 								. (((12 - ($st+1)) != 0) ? '<td style="width:'.((12-($st+1))*2).'px;" colspan="' .(12 - ($st+1)) . '"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>' : '');			
 				}
@@ -12532,14 +12759,14 @@ class TrialTracker
 				$outputStr .= (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>' : '');
 				if($val != 0) 
 				{
-					$outputStr .= '<td ' . $incViewCountLink . ' style="width:'.($val*2).'px; ' . $bgColor . $upmBorderRight . '" colspan="' . $val . '">'
+					$outputStr .= '<td ' . $incViewCountLink . ' style="width:'.($val*2).'px; ' . $bgColor . $upmBorderRight . $upmBorderLeft . '" colspan="' . $val . '">'
 								. '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 								. (((24 - ($val+$st)) != 0) ? '<td style="width:'.((24-($val+$st))*2).'px;" colspan="' .(24 - ($val+$st)) . '">'
 								. '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>' : '');
 				} 
 				else 
 				{
-					$outputStr .= '<td ' . $incViewCountLink . ' style="width:2px; ' . $bgColor . $upmBorderRight . '">'
+					$outputStr .= '<td ' . $incViewCountLink . ' style="width:2px; ' . $bgColor . $upmBorderRight . $upmBorderLeft . '">'
 								. '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 								. (((24 - (1+$st)) != 0) ? '<td style="width:'.((24-(1+$st))*2).'px;" colspan="' .(24 - (1+$st)) . '">'
 								. '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>' : '');			
@@ -12554,14 +12781,14 @@ class TrialTracker
 							. '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>' : '');
 				if($val != 0) 
 				{
-					$outputStr .= '<td style="width:'.($val*2).'px; ' . $bgColor . $upmBorderRight . '" colspan="' . $val . '">'
+					$outputStr .= '<td style="width:'.($val*2).'px; ' . $bgColor . $upmBorderRight . $upmBorderLeft . '" colspan="' . $val . '">'
 								. '<div title="' . $upmTitle . '">'. $anchorTag . '</div></td>'
 								. (((36 - ($val+$st)) != 0) ? '<td style="width:'.((36-($val+$st))*2).'px;" colspan="' .(36 - ($val+$st)) . '">'
 								. '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>' : '') ;
 				} 
 				else 
 				{
-					$outputStr .= '<td ' . $incViewCountLink . ' style="width:2px; ' . $bgColor . $upmBorderRight . '">'
+					$outputStr .= '<td ' . $incViewCountLink . ' style="width:2px; ' . $bgColor . $upmBorderRight . $upmBorderLeft . '">'
 								. '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 								. (((36 - (1+$st)) != 0) ? '<td style="width:'.((36-(1+$st))*2).'px;" colspan="' .(36 - (1+$st)) . '">'
 								. '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>' : '') ;			
@@ -12572,7 +12799,7 @@ class TrialTracker
 			{
 				$outputStr .= '<td style="width:6px;" colspan="3"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>';
 				$outputStr .= (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>' : '');
-				$outputStr .= '<td ' . $incViewCountLink . ' colspan="' .(39 - $st) . '" style="width:'.((39-$st)*2).'px; ' . $bgColor . $upmBorderRight . '">'
+				$outputStr .= '<td ' . $incViewCountLink . ' colspan="' .(39 - $st) . '" style="width:'.((39-$st)*2).'px; ' . $bgColor . $upmBorderRight . $upmBorderLeft . '">'
 							. '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>';		
 			}
 		} 
@@ -12588,12 +12815,12 @@ class TrialTracker
 							
 				if($val != 0) 
 				{
-					$outputStr .= '<td ' . $incViewCountLink . ' style="width:'.($val*2).'px; ' . $bgColor . $upmBorderRight . '" colspan="' . $val . '">' . '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
+					$outputStr .= '<td ' . $incViewCountLink . ' style="width:'.($val*2).'px; ' . $bgColor . $upmBorderRight . $upmBorderLeft . '" colspan="' . $val . '">' . '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 								. (((12 - ($val+$st)) != 0) ? '<td style="width:'.((12-($val+$st))*2).'px;" colspan="' .(12 - ($val+$st)) . '"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>' : '');
 				} 
 				else 
 				{
-					$outputStr .= '<td ' . $incViewCountLink . ' style="width:2px; ' . $bgColor . $upmBorderRight . '">' . '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
+					$outputStr .= '<td ' . $incViewCountLink . ' style="width:2px; ' . $bgColor . $upmBorderRight . $upmBorderLeft . '">' . '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 								. (((12 - (1+$st)) != 0) ? '<td style="width:'.((12-(1+$st))*2).'px;" colspan="' .(12 - (1+$st)) . '"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>' : '');
 				}
 				$outputStr .= '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
@@ -12607,13 +12834,13 @@ class TrialTracker
 							
 				if($val != 0) 
 				{
-					$outputStr .= '<td ' . $incViewCountLink . ' style="width:'.($val*2).'px; ' . $bgColor . $upmBorderRight . '" colspan="' . $val . '">'
+					$outputStr .= '<td ' . $incViewCountLink . ' style="width:'.($val*2).'px; ' . $bgColor . $upmBorderRight . $upmBorderLeft . '" colspan="' . $val . '">'
 								. '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 								. (((24 - ($val+$st)) != 0) ? '<td style="width:'.((24-($val+$st))*2).'px;" colspan="' .(24 - ($val+$st)) . '"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>' : '');
 				} 
 				else 
 				{
-					$outputStr .=  '<td ' . $incViewCountLink . ' style="width:2px; ' . $bgColor . $upmBorderRight . '">'
+					$outputStr .=  '<td ' . $incViewCountLink . ' style="width:2px; ' . $bgColor . $upmBorderRight . $upmBorderLeft . '">'
 								. '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 								. (((24 - (1+$st)) != 0) ? '<td style="width:'.((24-(1+$st))*2).'px;" colspan="' .(24 - (1+$st)) . '"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>' : '');			
 				}
@@ -12624,7 +12851,7 @@ class TrialTracker
 				$outputStr .= '<td style="width:6px;" colspan="3"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>';
 				$outputStr .= '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 							. (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>' : '');
-				$outputStr .= '<td ' . $incViewCountLink . ' colspan="' .(27 - $st) . '" style="width:'.((27-$st)*2).'px; ' . $bgColor . $upmBorderRight . '">'
+				$outputStr .= '<td ' . $incViewCountLink . ' colspan="' .(27 - $st) . '" style="width:'.((27-$st)*2).'px; ' . $bgColor . $upmBorderRight . $upmBorderLeft . '">'
 							. '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>';		
 			}
 		} 
@@ -12641,13 +12868,13 @@ class TrialTracker
 							
 				if($val != 0) 
 				{
-					$outputStr .= '<td ' . $incViewCountLink . ' style="width:'.($val*2).'px; ' . $bgColor . $upmBorderRight . '" colspan="' . $val . '">'
+					$outputStr .= '<td ' . $incViewCountLink . ' style="width:'.($val*2).'px; ' . $bgColor . $upmBorderRight . $upmBorderLeft . '" colspan="' . $val . '">'
 								. '<div title="' . $upmTitle .'">' . $anchorTag . '</div></td>'
 								. (((12 - ($val+$st)) != 0) ? '<td style="width:'.((12-($val+$st))*2).'px;" colspan="' .(12 - ($val+$st)) . '"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>' : '');
 				} 
 				else 
 				{
-					$outputStr .= '<td ' . $incViewCountLink . ' style="width:2px; ' . $bgColor . $upmBorderRight . '">'
+					$outputStr .= '<td ' . $incViewCountLink . ' style="width:2px; ' . $bgColor . $upmBorderRight . $upmBorderLeft . '">'
 								. '<div title="' . $upmTitle .'">' . $anchorTag . '</div></td>'
 								. (((12 - (1+$st)) != 0) ? '<td style="width:'.((12-(1+$st))*2).'px;" colspan="' .(12 - (1+$st)) . '"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>' : '');			
 				}
@@ -12659,7 +12886,7 @@ class TrialTracker
 				$outputStr .= '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">'. $anchorTag . '</div></td>'
 							. '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>' 
 							. (($st != 0) ? '<td style="width:'.($st*2).'px;" colspan="' . $st . '"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>' : '')
-							. '<td ' . $incViewCountLink . ' colspan="' . (15 - $st) . '" style="width:'.((15-$st)*2).'px; ' . $bgColor . $upmBorderRight . '">'
+							. '<td ' . $incViewCountLink . ' colspan="' . (15 - $st) . '" style="width:'.((15-$st)*2).'px; ' . $bgColor . $upmBorderRight . $upmBorderLeft . '">'
 							. '<div title="' . $upmTitle . '">'. $anchorTag . '</div></td>';
 			}
 		} 
@@ -12669,7 +12896,7 @@ class TrialTracker
 			$outputStr .= '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 						. '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 						. '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
-						. '<td ' . $incViewCountLink . ' colspan="3" style="width:6px; ' . $bgColor . $upmBorderRight . '">'
+						. '<td ' . $incViewCountLink . ' colspan="3" style="width:6px; ' . $bgColor . $upmBorderRight . $upmBorderLeft . '">'
 						. '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>';	
 		}
 		
@@ -13098,16 +13325,21 @@ class TrialTracker
 				$outputStr .= '<td class="' . $attr . '" ' . $title . '><div class="rowcollapse">' . $value['event_type'] . ' Milestone</div></td>';
 				
 				
+				//field upm start date
+				$upmBorderLeft = '';
+				if(!empty($mvalue['edited']) && $mvalue['edited']['field'] == 'start_date')
+				{
+					$upmBorderLeft = 'border-left-color:red;';
+				}
+				
 				//field upm end date
 				$title = '';
 				$attr = '';	
-				//$dateStyle = '';
 				$upmBorderRight = '';
 				
 				if(!empty($value['edited']) && ($value['edited']['field'] == 'end_date'))
 				{
 					$attr = ' highlight';
-					$dateStyle = 'color:#973535;';
 					$upmBorderRight = 'border-right-color:red;';
 					
 					if($value['edited']['end_date'] != '' && $value['edited']['end_date'] !== NULL)
@@ -13122,7 +13354,6 @@ class TrialTracker
 				else if(!empty($value['edited']) && ($value['edited']['field'] == 'end_date_type'))
 				{
 					$attr = ' highlight';
-					$dateStyle = 'color:#973535;'; 
 					if($value['edited']['end_date_type'] != '' && $value['edited']['end_date_type'] !== NULL) 
 					{
 						$title = ' title="Previous value: ' .  $value['edited']['end_date_type'] . '" ';
@@ -13193,7 +13424,7 @@ class TrialTracker
 				//upm gnatt chart
 				$outputStr .= $this->upmGnattChart(date('m',strtotime($value['start_date'])), date('Y',strtotime($value['start_date'])), 
 								date('m',strtotime($value['end_date'])), date('Y',strtotime($value['end_date'])), $currentYear, $secondYear, $thirdYear, 
-								$value['start_date'], $value['end_date'], $value['event_link'], $upmTitle, $upmBorderRight);
+								$value['start_date'], $value['end_date'], $value['event_link'], $upmTitle, $upmBorderRight, $upmBorderLeft);
 				
 				$outputStr .= '</tr>';
 			}
