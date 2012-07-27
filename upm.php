@@ -23,7 +23,9 @@ $deleteFlag = null;
 //reset controller
 if($_GET['reset'])
 header('Location: ' . urlPath() . 'upm.php');
+$_GET['header']='<script type="text/javascript" src="scripts/autosuggest/jquery.autocomplete-min.page.js"></script>';
 require('header.php');
+$_GET['header'];
 ?>
 
 <script type="text/javascript">

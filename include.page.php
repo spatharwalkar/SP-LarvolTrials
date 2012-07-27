@@ -1,5 +1,23 @@
 <?php
 /**
+ * @name tableColumns
+ * @tutorial outputs the table fields
+ * @param int $table The table for which columns need to be fetched
+ * @return array $columnList
+ * @author Jithu Thomas
+ */
+function tableColumns($table)
+{
+	$query = "SHOW COLUMNS FROM $table";	
+	$res = mysql_query($query);	
+	while($row = mysql_fetch_assoc($res))
+	{
+		$columnList[] = $row['Field'];
+	}	
+	return $columnList;
+}
+
+/**
  * @name contentListing
  * @tutorial Provides output of all the table entries in the upm table based on the params $start and $limit
  * @param int $start Start value of sql select query.
@@ -654,9 +672,12 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 		}
 	}
 	//end precheck
+	//column input filtering
+	$columnList = tableColumns($table);
+	$post = array_intersect_key($post, array_flip($columnList));
 	if(!$id)//insert
 	{
-		unset($post['save']);
+		//no longer required as input column filtering is in place now. unset($post['save']);
 		if($table=='upm')
 		{	
 			$post['last_update'] = 	date('Y-m-d',$now);		
@@ -703,7 +724,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			unset($historyArr['last_update']);
 			unset($historyArr['status']);
 			//remove post action name from insert query.
-			unset($post['save']);
+			//no longer required as input column filtering is in place now. unset($post['save']);
 			global $post_tmp;
 			$post_tmp = $post;
 			$historyArr = array_diff_assoc($historyArr,$post);
@@ -714,7 +735,8 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 				$change_date = date('Y-m-d H:i:s',$now);
 				return array('id'=>$post_tmp['id'],'change_date'=>"'".$change_date."'",'field'=>"'".$a."'",'old_value'=>"'".mysql_real_escape_string($b)."'",'new_value'=>"'".mysql_real_escape_string($post_tmp[$a])."'",'user'=>$db->user->id);
 				},array_keys($historyArr),$historyArr);
-			unset($post_tmp);	
+			unset($post_tmp);
+				
 			//changed nowarray_pop($post);	
 			$post['last_update'] = date('Y-m-d',$now);
 			$post = array_map(am1,array_keys($post),array_values($post));
