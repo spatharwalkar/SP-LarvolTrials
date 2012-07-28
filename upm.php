@@ -23,9 +23,7 @@ $deleteFlag = null;
 //reset controller
 if($_GET['reset'])
 header('Location: ' . urlPath() . 'upm.php');
-$_GET['header']='<script type="text/javascript" src="scripts/autosuggest/jquery.autocomplete-min.page.js"></script>';
 require('header.php');
-$_GET['header'];
 ?>
 
 <script type="text/javascript">
@@ -35,16 +33,16 @@ function validatesearch(){/*if($('#search_product').val()==''){$('#search_produc
 $(document).ready(function(){
 	var options, a,b,c,d;
 
-		  options1 = { serviceUrl:'autosuggest.php',params:{table:<?php echo "'$table'"?>,field:'product'} ,minChars:3 };
-		  options2 = { serviceUrl:'autosuggest.php',params:{table:<?php echo "'$table'"?>,field:'product'} ,minChars:3 };
+		  options1 = { serviceUrl:'autosuggest.php',params:{table:<?php echo "'$table'"?>,field:'product'} ,minChars:3, showOnSelect:true };
+		  options2 = { serviceUrl:'autosuggest.php',params:{table:<?php echo "'$table'"?>,field:'product'} ,minChars:3, showOnSelect:true };
 
 		  <?php if($_REQUEST['add_new_record']=='Add New Record' || $_REQUEST['id']):?>
 		  a = $('#product').autocomplete(options1);
 		  <?php endif;?>
 		  b = $('#search_product').autocomplete(options2);
 
-		  options_area1 = { serviceUrl:'autosuggest.php',params:{table:<?php echo "'$table'"?>,field:'area'}, minChars:3 };
-		  options_area2 = { serviceUrl:'autosuggest.php',params:{table:<?php echo "'$table'"?>,field:'area'} ,minChars:3 };
+		  options_area1 = { serviceUrl:'autosuggest.php',params:{table:<?php echo "'$table'"?>,field:'area'}, minChars:3, showOnSelect:true };
+		  options_area2 = { serviceUrl:'autosuggest.php',params:{table:<?php echo "'$table'"?>,field:'area'} ,minChars:3, showOnSelect:true };
 
 		  <?php if($_REQUEST['add_new_record']=='Add New Record' || $_REQUEST['id']):?>
 		  c = $('#area').autocomplete(options_area1);

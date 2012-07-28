@@ -118,7 +118,7 @@ function upmdelsure(){ return confirm("Are you sure you want to delete this prod
 $(document).ready(function(){
 	var options, a,b;
 	jQuery(function(){
-	  options = { serviceUrl:'autosuggest.php',params:{table:<?php echo "'$table'"?>,field:'name'} };
+	  options = { serviceUrl:'autosuggest.php',params:{table:<?php echo "'$table'"?>,field:'name'}, showOnSelect:true };
 	  if($('#name').length>0)
 	  a = $('#name').autocomplete(options);
 	  b = $('#search_name').autocomplete(options);
