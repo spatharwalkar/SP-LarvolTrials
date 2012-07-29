@@ -1691,7 +1691,8 @@ foreach($columns as $col => $val)
 		if($columnsCategoryName[$col] != 'Undefined' && $Rotation_Flg == 1 && $Cat_Area_Rotation[$col])
 		{
 			$cat_name = str_replace(' ','`',trim($columnsCategoryName[$col]));
-			$cat_name = preg_replace('/([^\s-]{'.$cols_Cat_Space[$col].'})(?=[^\s-])/','$1<br/>',$cat_name);
+			//$cat_name = preg_replace('/([^\s-]{'.$cols_Cat_Space[$col].'})(?=[^\s-])/','$1<br/>',$cat_name);
+			$cat_name = wordwrap($cat_name, $cols_Cat_Space[$col], "<br />\n", true);
 			$cat_name = str_replace('`',' ',$cat_name);
 			$htmlContent .= '<b>'.$cat_name.'</b>';
 		}
@@ -1726,7 +1727,8 @@ foreach($columns as $col => $val)
 		if($Rotation_Flg == 1)
 		{
 			$area_name = str_replace(' ','`',trim($val));
-			$area_name = preg_replace('/([^\s-]{'.$cols_Area_Space[$col].'})(?=[^\s-])/','$1<br/>',$area_name);
+			//$area_name = preg_replace('/([^\s-]{'.$cols_Area_Space[$col].'})(?=[^\s-])/','$1<br/>',$area_name);
+			$area_name = wordwrap($area_name, $cols_Area_Space[$col], "<br />\n", true);
 			$area_name = str_replace('`',' ',$area_name);
 			$htmlContent .= $area_name.'</a>';
 		}
