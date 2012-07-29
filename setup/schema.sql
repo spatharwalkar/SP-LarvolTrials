@@ -196,7 +196,8 @@ CREATE TABLE IF NOT EXISTS `schedule` (
   `format` enum('xlsx','doc') COLLATE utf8_unicode_ci NOT NULL,
   `selected` varchar(1) COLLATE utf8_unicode_ci DEFAULT NULL,
   `LI_sync` smallint(5) unsigned DEFAULT NULL COMMENT 'bit mask entry products and areas scheudler',
-  `calc_HM` tinyint(4) DEFAULT NULL,
+  `calc_HM` tinyint(4) unsigned DEFAULT NULL,
+  `upm_status` tinyint(4) unsigned DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 

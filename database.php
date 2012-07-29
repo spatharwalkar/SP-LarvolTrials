@@ -173,6 +173,22 @@ if (isset($_POST['recalculate_all']))
 	calc_cells(NULL);   // for all
 	return;
 }
+// Update UPM status values
+if (isset($_POST['upm_s'])) 
+{
+	require_once('upm_trigger.php');
+	echo '<br><br><b>Updating UPM status values ...</b><br><br>';
+	if(!fire_upm_trigger()) echo '<br><b>Could complete Updating UPM status values, there was an error.<br></b>';
+	else 
+	{
+		echo '<br><br><b>UPM status update completed.</b><br><br>';
+	}
+	return;
+}
+
+
+
+
 /****************************/
 echo(editor());
 echo('</body></html>');
@@ -296,7 +312,7 @@ function editor()
 		$out .= '<div style="clear:both;"><br><hr style="height:2px;"></div>';
 	
 	// RECALCULATE
-	$out .= '<div style="width:610px; padding:5px;"><fieldset class="schedule"><legend><b> RECALCULATING </b></legend>'
+	$out .= '<div style="width:610px; padding:5px;float:left;"><fieldset class="schedule"><legend><b> RECALCULATING </b></legend>'
 			. '<form action="database.php" method="post">'
 			. 'Enter Product id to recalculate : <input type="text" name="prod_id" value=""/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
 			. ''
@@ -313,7 +329,15 @@ function editor()
 			. 'Click <b>Recalc ALL</b> button to recalculate all trials in the database &nbsp;&nbsp;&nbsp;'
 			. ' <input type="hidden" name="recalculate_all" value="ALL"/>'
 			. '<input type="submit" name="reca_all" value="Recalc ALL" />'
-			. '</form>';
+			. '</form></div>';
+			
+	// UPM REFRESH
+	$out .= '<div style="width:610px; padding:5px;float:left;">'
+			. '<form action="database.php" method="post">'
+			. 'Click <b>Update UPM Status</b> button to update UPM status values: <input type="hidden" name="upm_s" id="upm_s" value="upm_s"/>'
+			. ''
+			. '<input type="submit" value="Update UPM Status" />'
+			. '</form></div>';
 	
 	/*
 	

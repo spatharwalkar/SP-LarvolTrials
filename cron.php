@@ -101,7 +101,7 @@ echo ('<pre>Checking schedule for updates and reports....' . $nl);
 //Fetch schedule data 
 $schedule = array();
 $fetch = array();
-$query = 'SELECT `id`,`name`,`fetch`,`runtimes`,`lastrun`,`emails`,`LI_sync`,`calc_HM` FROM schedule WHERE runtimes!=0';
+$query = 'SELECT `id`,`name`,`fetch`,`runtimes`,`lastrun`,`emails`,`LI_sync`,`calc_HM`,`upm_status` FROM schedule WHERE runtimes!=0';
 $res = mysql_query($query) or die('Bad SQL Query getting schedule');
 $tasks = array(); while($row = mysql_fetch_assoc($res)) $tasks[] = $row;
 
@@ -164,6 +164,27 @@ foreach($tasks as $row)
 			require_once('calculate_hm_cells.php');
 			if(!calc_cells(NULL,4)) echo '<br><b>Could complete calculating cells, there was an error.<br></b>';
 			else continue;
+		}
+		//Update UPM status (fire the trigger)  if scheduled
+		if( !is_null($row['upm_status']) and $row['upm_status']==1 )
+		{
+			echo '<br>Updating UPM status values ...<br>';
+			$query = 'UPDATE schedule SET lastrun="' . date("Y-m-d H:i:s",strtotime('now')) . '" WHERE id=' . $row['id'] . ' LIMIT 1';
+		
+			global $logger;
+			if(!mysql_query($query))
+			{
+				$log='Error saving changes to schedule: ' . mysql_error() . '('. mysql_errno() .'), Query:' . $query;
+				$logger->fatal($log);
+				die($log);
+			}
+			require_once('upm_trigger.php');
+			if(!fire_upm_trigger()) echo '<br><b>Could complete Updating UPM status values, there was an error.<br></b>';
+			else 
+			{
+				echo 'UPM status update completed.<br><br>';
+				continue;
+			}
 		}
 		
 		
