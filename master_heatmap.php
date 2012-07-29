@@ -2097,14 +2097,9 @@ function Download_reports()
 		foreach($columns as $col => $val)
 		{
 			$pdf->setCellMargins(0.5, 0, 0, 0);
-			if($dtt)
-			{
-				if($second_last_cat_col==$col) $ln=1; else $ln=0;
-			}
-			else
-			{
-				if($last_cat_col==$col) $ln=1; else $ln=0;
-			}
+			
+			if($last_cat_col==$col) $ln=1; else $ln=0;
+			
 			if($columns_Span[$col] > 0)
 			{
 				if($columnsCategoryName[$col] != 'Undefined')
@@ -2369,14 +2364,9 @@ function Download_reports()
 				foreach($columns as $col => $val)
 				{
 					$pdf->setCellMargins(0.5, 0, 0, 0);
-					if($dtt)
-					{
-						if($second_last_cat_col==$col) $ln=1; else $ln=0;
-					}
-					else
-					{
-						if($last_cat_col==$col) $ln=1; else $ln=0;
-					}
+					
+					if($last_cat_col==$col) $ln=1; else $ln=0;
+					
 					if($columns_Span[$col] > 0)
 					{
 						if($columnsCategoryName[$col] != 'Undefined')
@@ -3051,7 +3041,7 @@ function Download_reports()
 		$objPHPExcel->getProperties()->setSubject(substr($name,0,20));
 		$objPHPExcel->getProperties()->setDescription(substr($name,0,20));
 		
-		$objPHPExcel->getActiveSheet()->getDefaultStyle()->getFont()->setSize(8);
+		$objPHPExcel->getActiveSheet()->getDefaultStyle()->getFont()->setSize(10);
 		$objPHPExcel->getActiveSheet()->getDefaultStyle()->getFont()->setName('Verdana'); 
 	
 		// Build sheet
@@ -3412,7 +3402,7 @@ function Download_reports()
 						$objDrawing = new PHPExcel_Worksheet_Drawing();
 						$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
 						$objDrawing->setOffsetX(80);
-						$objDrawing->setOffsetY(0);
+						$objDrawing->setOffsetY(1);
 						$objDrawing->setPath('images/'.$data_matrix[$row][$col]['exec_bomb']['src'].'_'.$data_matrix[$row][$col]['color_code'].'.png');
 						$objDrawing->setHeight(15);
 						$objDrawing->setWidth(15); 
@@ -3425,7 +3415,7 @@ function Download_reports()
 						$objDrawing = new PHPExcel_Worksheet_Drawing();
 						$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
 						$objDrawing->setOffsetX(100);
-						$objDrawing->setOffsetY(0);
+						$objDrawing->setOffsetY(1);
 						$objDrawing->setPath($data_matrix[$row][$col]['exec_filing_image'].'_'.$data_matrix[$row][$col]['color_code'].'.png');
 						$objDrawing->setHeight(15);
 						$objDrawing->setWidth(15); 
