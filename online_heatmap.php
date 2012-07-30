@@ -727,11 +727,13 @@ if($Rotation_Flg == 1)
 					.Cat_Area_Row_Class_'.$col.' 
 					{
 						width:'.$Cat_Area_Col_width[$col].'px;
-						max-width:'.$Cat_Area_Col_width[$col].'px;
-						height:'.($area_Cat_Height).'px;
-						_height:'.($area_Cat_Height).'px;
-					}
-				';
+						max-width:'.$Cat_Area_Col_width[$col].'px';
+						if($Cat_Area_Rotation[$col])
+						{
+							print '	height:'.($area_Cat_Height).'px;
+								_height:'.($area_Cat_Height).'px;';
+						}
+			print '}';
 		}
 	}
 	
