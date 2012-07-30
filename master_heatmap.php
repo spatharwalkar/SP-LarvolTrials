@@ -724,7 +724,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 	else if($rptu !== NULL && $rptu == $db->user->id)
 	$owner_type="mine";
 	
-	$query = 'SELECT `num`,`type`,`type_id`, `display_name`, `category` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' ORDER BY num ASC';
+	$query = 'SELECT `num`,`type`,`type_id`, `display_name`, `category`, `tag` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' ORDER BY num ASC';
 	$res = mysql_query($query) or die('Bad SQL query getting master heatmap report headers'.$query);
 	$rows = array();
 	$columns = array();
@@ -760,6 +760,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 				$rows[$header['num']] = $header['type_id'];
 			}
 			$productIds[$header['num']] = $header['type_id'];
+			$rowsTagName[$header['num']] = $header['tag'];
 		}
 	}
 	// SELECT MAX ROW AND MAX COL
@@ -1160,6 +1161,9 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 				
 		$out .= 'Category name: <br/><input type="text" id="category_product' . $row . '" name="category_product[' . $row . ']" value="' . $cat . '" '.(($disabled) ? ' readonly="readonly" ':'').' /><br />';
 		
+		$tag = (isset($rowsTagName[$row]) && $rowsTagName[$row] != '')?$rowsTagName[$row]:'';
+		$out .= 'Tag: <br/><input type="text" id="tag_product' . $row . '" name="tag_product[' . $row . ']" value="' . $tag . '" '.(($disabled) ? ' readonly="readonly" ':'').' /><br />';
+		
 		$out .= 'Row : '.$row.' ';
 		
 		if($owner_type == 'mine' || ($owner_type == 'global' && $db->user->userlevel != 'user') || ($owner_type == 'shared' && $rptu == $db->user->id) || $db->user->userlevel == 'root')
@@ -1381,7 +1385,7 @@ function Download_reports()
 	$description = htmlspecialchars($res['description']);
 	$category = $res['category'];
 	
-	$query = 'SELECT `num`,`type`,`type_id`, `display_name`, `category` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' ORDER BY num ASC';
+	$query = 'SELECT `num`,`type`,`type_id`, `display_name`, `category`, `tag` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' ORDER BY num ASC';
 	$res = mysql_query($query) or die('Bad SQL query getting master heatmap report headers'.$query);
 	$rows = array();
 	$columns = array();
@@ -1461,7 +1465,7 @@ function Download_reports()
 				{
 					$result['company']=str_replace(',',', ',$result['company']);
 					$result['company']=str_replace(',  ',', ',$result['company']);
-					$rows[$header['num']] = $result['name'].' / '.$result['company'];
+					$rowsCompanyName[$header['num']] = ' / '.$result['company'];
 				} 
 				$rowsDescription[$header['num']] = $result['description'];
 				$header['category']=trim($header['category']);
@@ -1494,6 +1498,8 @@ function Download_reports()
 			$rowsCategoryName[$header['num']] = $header['category'];
 			
 			$rows_categoryProducts[$header['category']][] = $header['type_id'];
+			
+			$rowsTagName[$header['num']] = $header['tag'];
 		}
 	}
 
@@ -2027,7 +2033,7 @@ function Download_reports()
 					$Min_productNumLines=0;
 					while($Min_productNumLines != 1)	///Check while we we dont get mimimum lines to display product name
 					{
-						$current_NumLines=$pdf->getNumLines($rval, $Current_product_Col_Width);	//get number of lines
+						$current_NumLines=$pdf->getNumLines($rval.$rowsCompanyName[$row].' '.$rowsTagName[$row], $Current_product_Col_Width);	//get number of lines
 						if($current_NumLines == 1)	//if 1 line then stop processing, take next product
 						$Min_productNumLines = $current_NumLines;
 						else if($current_NumLines >= 1)	/// if more lines required to display text
@@ -2341,7 +2347,7 @@ function Download_reports()
 			//Height calculation depending on product name
 			$rowcount = 0;
  			//work out the number of lines required
-			$rowcount = $pdf->getNumLines($rval, $product_Col_Width);
+			$rowcount = $pdf->getNumLines($rval.$rowsCompanyName[$row].' '.$rowsTagName[$row], $product_Col_Width);
 			if($rowcount < 1) $rowcount = 1;
  			$startY = $pdf->GetY();
 			$prod_row_height = $rowcount * $Line_Height;
@@ -2633,7 +2639,7 @@ function Download_reports()
 				{
 					$count_val=$row_indlead_total[$row];
 				}
-				$pdfContent = '<a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). $link_part . '" target="_blank" title="'. $raltTitle .'">'.$rval.'</a>';
+				$pdfContent = '<a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). $link_part . '" target="_blank" title="'. $raltTitle .'">'.$rval.$rowsCompanyName[$row].((trim($rowsTagName[$row]) != '') ? ' <b><font style="color:#CC00FF; font-weight:bold">'.$rowsTagName[$row].'</font></b>':'').'</a>';
 				
 				
 				$pdf->MultiCell($product_Col_Width, $prod_row_height, $pdfContent, $border, $align='C', $fill=1, $ln=0, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
@@ -3189,7 +3195,7 @@ function Download_reports()
 				$rdesc = (isset($rowsDescription[$row]) && $rowsDescription[$row] != '')?$rowsDescription[$row]:null;
 				$raltTitle = (isset($rdesc) && $rdesc != '')?' alt="'.$rdesc.'" title="'.$rdesc.'" ':null;
 				
-				$objPHPExcel->getActiveSheet()->setCellValue($cell, $rval);
+				$objPHPExcel->getActiveSheet()->setCellValue($cell, $rval.$rowsCompanyName[$row].' '.$rowsTagName[$row]);
 				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds).$link_part); 
  			    $objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip($tooltip);
  			    
@@ -3801,13 +3807,18 @@ function postEd()
 						$display_name=mysql_real_escape_string($_POST['areas_display'][$num]);
 						else
 						$display_name='NULL';
+						
+						if($t != 'area')
+						$tag=mysql_real_escape_string($_POST['tag_product'][$num]);
+						else
+						$tag='NULL';
 							
 						$category=mysql_real_escape_string($_POST['category_'.$t][$num]);
 						
 						$query = "select id from " . $t . "s where name='" . mysql_real_escape_string($header) . "' ";
 						$row = mysql_fetch_assoc(mysql_query($query)) or die('Bad SQL Query getting ' . $t . ' names ');
 					
-						$originDT_query = 'SELECT `type_id`, `display_name`, `category` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' AND num=' . $num . ' AND type="' . $t . '" LIMIT 1';
+						$originDT_query = 'SELECT `type_id`, `display_name`, `category`, `tag` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' AND num=' . $num . ' AND type="' . $t . '" LIMIT 1';
 						$originDT=mysql_query($originDT_query) or die ('Bad SQL Query getting Original Master Header Table Information Before Updating.<br/>'.$query);
 						$originDT = mysql_fetch_array($originDT);
 						
@@ -3828,6 +3839,12 @@ function postEd()
 						if(trim($category) != trim($originDT['category']))
 						{
 							$query .= ' `category` = "' . $category . '",';
+							$change_flag=1;
+						}
+						
+						if(trim($tag) != trim($originDT['tag']))
+						{
+							$query .= ' `tag` = "' . $tag . '",';
 							$change_flag=1;
 						}
 						

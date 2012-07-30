@@ -469,6 +469,7 @@ CREATE TABLE IF NOT EXISTS `rpt_masterhm_headers` (
   `type_id` int(10) unsigned NULL COMMENT 'matches the id from the products/areas table',
   `display_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `category` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `tag` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   CONSTRAINT `rpt_masterhm_headers_pk` PRIMARY KEY (`id`),
   CONSTRAINT `rpt_masterhm_headers_fk_1` FOREIGN KEY (`report`) REFERENCES `rpt_masterhm` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

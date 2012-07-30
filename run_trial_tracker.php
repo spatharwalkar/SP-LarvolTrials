@@ -211,6 +211,18 @@ class TrialTracker
 					
 					if($prow['company'] !== NULL && $prow['company'] != '')
 						$TrialsInfo[$pkey]['sectionHeader'] .= " / (" . $prow['company'] . ")";
+						
+					if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve product tag from heatmap report
+					{
+						$tag_res = mysql_query("SELECT `tag` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $prow['id'] . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'product'");
+						if(mysql_num_rows($tag_res) > 0)
+						{
+							while($tag_row = mysql_fetch_assoc($tag_res))
+							{
+								$TrialsInfo[$pkey]['sectionHeader'] .= " " . $tag_row['tag'];
+							}
+						}
+					}
 					
 					$TrialsInfo[$pkey]['sectionHeader'] .= $disContinuedTxt;
 					$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
@@ -241,6 +253,18 @@ class TrialTracker
 						if($prow['company'] !== NULL && $prow['company'] != '')
 							$TrialsInfo[$pkey]['sectionHeader'] .= " / (" . $prow['company'] . ")";
 
+						if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve product tag from heatmap report
+						{
+							$tag_res = mysql_query("SELECT `tag` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $prow['id'] . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'product'");
+							if(mysql_num_rows($tag_res) > 0)
+							{
+								while($tag_row = mysql_fetch_assoc($tag_res))
+								{
+									$TrialsInfo[$pkey]['sectionHeader'] .= " " . $tag_row['tag'];
+								}
+							}
+						}
+					
 						$TrialsInfo[$pkey]['sectionHeader'] .= $disContinuedTxt;
 						$TrialsInfo[$pkey]['naUpms'] = 
 						$this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
@@ -361,6 +385,18 @@ class TrialTracker
 						if($prow['company'] !== NULL && $prow['company'] != '')
 							$TrialsInfo[$pkey]['sectionHeader'] .= " / (" . $prow['company'] . ")";
 						
+						if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve product tag from heatmap report
+						{
+							$tag_res = mysql_query("SELECT `tag` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $prow['id'] . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'product'");
+							if(mysql_num_rows($tag_res) > 0)
+							{
+								while($tag_row = mysql_fetch_assoc($tag_res))
+								{
+									$TrialsInfo[$pkey]['sectionHeader'] .= " " . $tag_row['tag'] ;
+								}
+							}
+						}
+					
 						$TrialsInfo[$pkey]['sectionHeader'] .= $disContinuedTxt;
 						$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
 								
@@ -387,6 +423,18 @@ class TrialTracker
 				if($prow['company'] !== NULL && $prow['company'] != '')
 					$TrialsInfo[0]['sectionHeader'] .= " / (" . $prow['company'] . ")";
 				
+				if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve product tag from heatmap report
+				{
+					$tag_res = mysql_query("SELECT `tag` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $prow['id'] . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'product'");
+					if(mysql_num_rows($tag_res) > 0)
+					{
+						while($tag_row = mysql_fetch_assoc($tag_res))
+						{
+							$TrialsInfo[0]['sectionHeader'] .= " " . $tag_row['tag'];
+						}
+					}
+				}
+					
 				$TrialsInfo[0]['sectionHeader'] .= $disContinuedTxt;	
 				$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
 				
@@ -5480,6 +5528,18 @@ class TrialTracker
 					if($prow['company'] !== NULL && $prow['company'] != '')
 						$TrialsInfo[$pkey]['sectionHeader'] .= " / (" . $prow['company'] . ")";
 					
+					if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve product tag from heatmap report
+					{
+						$tag_res = mysql_query("SELECT `tag` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $prow['id'] . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'product'");
+						if(mysql_num_rows($tag_res) > 0)
+						{
+							while($tag_row = mysql_fetch_assoc($tag_res))
+							{
+								$TrialsInfo[$pkey]['sectionHeader'] .= " <b><font style=\"color:#CC00FF; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
+							}
+						}
+					}
+							
 					$TrialsInfo[$pkey]['sectionHeader'] .= $disContinuedTxt;
 					$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
 							
@@ -5509,6 +5569,18 @@ class TrialTracker
 						if($prow['company'] !== NULL && $prow['company'] != '')
 							$TrialsInfo[$pkey]['sectionHeader'] .= " / (" . $prow['company'] . ")";
 						
+						if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve product tag from heatmap report
+						{
+							$tag_res = mysql_query("SELECT `tag` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $prow['id'] . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'product'");
+							if(mysql_num_rows($tag_res) > 0)
+							{
+								while($tag_row = mysql_fetch_assoc($tag_res))
+								{
+									$TrialsInfo[$pkey]['sectionHeader'] .= " <b><font style=\"color:#CC00FF; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
+								}
+							}
+						}
+					
 						$TrialsInfo[$pkey]['sectionHeader'] .= $disContinuedTxt;
 								
 						$TrialsInfo[$pkey]['naUpms'] = 
@@ -5631,6 +5703,18 @@ class TrialTracker
 						if($prow['company'] !== NULL && $prow['company'] != '')
 							$TrialsInfo[$pkey]['sectionHeader'] .= " / (" . $prow['company'] . ")";
 						
+						if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve product tag from heatmap report
+						{
+							$tag_res = mysql_query("SELECT `tag` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $prow['id'] . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'product'");
+							if(mysql_num_rows($tag_res) > 0)
+							{
+								while($tag_row = mysql_fetch_assoc($tag_res))
+								{
+									$TrialsInfo[$pkey]['sectionHeader'] .= " <b><font style=\"color:#CC00FF; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
+								}
+							}
+						}
+							
 						$TrialsInfo[$pkey]['sectionHeader'] .= $disContinuedTxt;
 						$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
 						
@@ -5657,6 +5741,18 @@ class TrialTracker
 					$TrialsInfo[0]['sectionHeader'] .= " / (" . $prow['company'] . ")";
 					
 
+				if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve product tag from heatmap report
+				{
+					$tag_res = mysql_query("SELECT `tag` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $prow['id'] . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'product'");
+					if(mysql_num_rows($tag_res) > 0)
+					{
+						while($tag_row = mysql_fetch_assoc($tag_res))
+						{
+							$TrialsInfo[0]['sectionHeader'] .= " <b><font style=\"color:#CC00FF; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
+						}
+					}
+				}
+						
 				$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
 
 				$Ids[0]['product'] = $prow['id'];
@@ -7323,6 +7419,19 @@ class TrialTracker
 								$productSelector[$pkey] .= " / <i>" . $row['company'] . "</i>";
 							}
 							
+							if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve product tag from heatmap report
+							{
+								$tag_res = mysql_query("SELECT `tag` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $pvalue . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'product'");
+								if(mysql_num_rows($tag_res) > 0)
+								{
+									while($tag_row = mysql_fetch_assoc($tag_res))
+									{
+										$TrialsInfo[$pkey]['sectionHeader'] .= " <b><font style=\"color:#CC00FF; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
+										$productSelector[$pkey] .=  " <b><font style=\"color:#CC00FF; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
+									}
+								}
+							}
+							
 							$TrialsInfo[$pkey]['sectionHeader'] .= $disContinuedTxt;
 							$TrialsInfo[$pkey]['naUpms'] = 
 							$this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
@@ -7365,6 +7474,19 @@ class TrialTracker
 								{
 									$TrialsInfo[$pkey]['sectionHeader'] .= " / <i>" . $row['company'] . "</i>";
 									$productSelector[$pkey] .= " / <i>" . $row['company'] . "</i>";
+								}
+								
+								if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve product tag from heatmap report
+								{
+									$tag_res = mysql_query("SELECT `tag` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $pvalue . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'product'");
+									if(mysql_num_rows($tag_res) > 0)
+									{
+										while($tag_row = mysql_fetch_assoc($tag_res))
+										{
+											$TrialsInfo[$pkey]['sectionHeader'] .= " <b><font style=\"color:#CC00FF; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
+											$productSelector[$pkey] .=  " <b><font style=\"color:#CC00FF; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
+										}
+									}
 								}
 				
 								$TrialsInfo[$pkey]['sectionHeader'] .= $disContinuedTxt;
@@ -7560,6 +7682,19 @@ class TrialTracker
 									$productSelector[$pkey] .= " / <i>" . $row['company'] . "</i>";
 								}
 								
+								if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve product tag from heatmap report
+								{
+									$tag_res = mysql_query("SELECT `tag` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $pvalue . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'product'");
+									if(mysql_num_rows($tag_res) > 0)
+									{
+										while($tag_row = mysql_fetch_assoc($tag_res))
+										{
+											$TrialsInfo[$pkey]['sectionHeader'] .= " <b><font style=\"color:#CC00FF; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
+											$productSelector[$pkey] .=  " <b><font style=\"color:#CC00FF; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
+										}
+									}
+								}
+								
 								$TrialsInfo[$pkey]['sectionHeader'] .= $disContinuedTxt;
 								$TrialsInfo[$pkey]['naUpms'] = 
 								$this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
@@ -7628,6 +7763,19 @@ class TrialTracker
 				{
 					$TrialsInfo[0]['sectionHeader'] .= " / <i>" . $row['company'] . "</i>";
 					$productSelector[0] .= " / <i>" . $row['company'] . "</i>"; 
+				}
+				
+				if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve product tag from heatmap report
+				{
+					$tag_res = mysql_query("SELECT `tag` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $row['id'] . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'product'");
+					if(mysql_num_rows($tag_res) > 0)
+					{
+						while($tag_row = mysql_fetch_assoc($tag_res))
+						{
+							$TrialsInfo[0]['sectionHeader'] .= " <b><font style=\"color:#CC00FF; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
+							$productSelector[0] .=  " <b><font style=\"color:#CC00FF; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
+						}
+					}
 				}
 				
 				$TrialsInfo[0]['sectionHeader'] .= $disContinuedTxt;		

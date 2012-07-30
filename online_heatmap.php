@@ -22,7 +22,7 @@ $footnotes = htmlspecialchars($res['footnotes']);
 $description = htmlspecialchars($res['description']);
 $category = $res['category'];
 	
-$query = 'SELECT `num`,`type`,`type_id`, `display_name`, `category` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' ORDER BY num ASC';
+$query = 'SELECT `num`,`type`,`type_id`, `display_name`, `category`, `tag` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' ORDER BY num ASC';
 $res = mysql_query($query) or die('Bad SQL query getting master heatmap report headers');
 $rows = array();
 $columns = array();
@@ -104,7 +104,7 @@ while($header = mysql_fetch_array($res))
 			{
 				$result['company']=str_replace(',',', ',$result['company']);
 				$result['company']=str_replace(',  ',', ',$result['company']);
-				$rows[$header['num']] = $result['name'].' / '.$result['company'];
+				$rowsCompanyName[$header['num']] = ' / '.$result['company'];
 			} 
 			$rowsDescription[$header['num']] = $result['description'];
 			$header['category']=trim($header['category']);
@@ -137,6 +137,7 @@ while($header = mysql_fetch_array($res))
 		$rowsCategoryName[$header['num']] = $header['category'];
 		
 		$rows_categoryProducts[$header['category']][] = $header['type_id'];
+		$rowsTagName[$header['num']] = $header['tag'];
 	}
 }
 
@@ -426,7 +427,7 @@ foreach($rows as $row => $rval)
 {
 	if(isset($productIds[$row]) && $productIds[$row] != NULL && !empty($areaIds))
 	{
-		$current_StringLength =strlen($rval);
+		$current_StringLength =strlen($rval.$rowsTagName[$row].$rowsCompanyName[$row]);
 	}
 	else $current_StringLength = 0;
 	if($Max_productStringLength < $current_StringLength)
@@ -1804,7 +1805,7 @@ foreach($rows as $row => $rval)
 		$htmlContent .= '<input type="hidden" value="'.$row_active_total[$row].',endl,'.$row_count_total[$row].',endl,'.$row_indlead_total[$row].'" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
 		$htmlContent .= '<input type="hidden" value="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). '" name="Link_value_'.$online_HMCounter.'&list=1&itype=0&sr=now&er=1 month" id="Link_value_'.$online_HMCounter.'" />';
 		
-		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). '&list=1&sr=now&er=1 month&hm=' . $id . '" target="_blank" class="ottlink" style="text-decoration:underline; color:#000000;">'.$rval.'</a>';
+		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). '&list=1&sr=now&er=1 month&hm=' . $id . '" target="_blank" class="ottlink" style="text-decoration:underline; color:#000000;">'.$rval.$rowsCompanyName[$row].((trim($rowsTagName[$row]) != '') ? ' <b><font style="color:#CC00FF; font-weight:bold">'.$rowsTagName[$row].'</font></b>':'').'</a>';
 	}
 	$htmlContent .= '</div></th>';
 	
