@@ -247,6 +247,44 @@ function calc_cells($parameters,$update_id=NULL)
 			$overall_statuses['not_authorized']=0;
 			$overall_statuses['prohibited']=0;
 			$overall_statuses['new_trials']=0;
+			
+			$overall_statuses['not_yet_recruiting_active']=0;
+			$overall_statuses['recruiting_active']=0;
+			$overall_statuses['enrolling_by_invitation_active']=0;
+			$overall_statuses['active_not_recruiting_active']=0;
+			$overall_statuses['completed_active']=0;
+			$overall_statuses['suspended_active']=0;
+			$overall_statuses['terminated_active']=0;
+			$overall_statuses['withdrawn_active']=0;
+			$overall_statuses['available_active']=0;
+			$overall_statuses['no_longer_available_active']=0;
+			$overall_statuses['approved_for_marketing_active']=0;
+			$overall_statuses['no_longer_recruiting_active']=0;
+			$overall_statuses['withheld_active']=0;
+			$overall_statuses['temporarily_not_available_active']=0;
+			$overall_statuses['ongoing_active']=0;
+			$overall_statuses['not_authorized_active']=0;
+			$overall_statuses['prohibited_active']=0;
+			$overall_statuses['new_trials_active']=0;
+			
+			$overall_statuses['not_yet_recruiting_active_indlead']=0;
+			$overall_statuses['recruiting_active_indlead']=0;
+			$overall_statuses['enrolling_by_invitation_active_indlead']=0;
+			$overall_statuses['active_not_recruiting_active_indlead']=0;
+			$overall_statuses['completed_active_indlead']=0;
+			$overall_statuses['suspended_active_indlead']=0;
+			$overall_statuses['terminated_active_indlead']=0;
+			$overall_statuses['withdrawn_active_indlead']=0;
+			$overall_statuses['available_active_indlead']=0;
+			$overall_statuses['no_longer_available_active_indlead']=0;
+			$overall_statuses['approved_for_marketing_active_indlead']=0;
+			$overall_statuses['no_longer_recruiting_active_indlead']=0;
+			$overall_statuses['withheld_active_indlead']=0;
+			$overall_statuses['temporarily_not_available_active_indlead']=0;
+			$overall_statuses['ongoing_active_indlead']=0;
+			$overall_statuses['not_authorized_active_indlead']=0;
+			$overall_statuses['prohibited_active_indlead']=0;
+			$overall_statuses['new_trials_active_indlead']=0;
 
 			
 			while ($row = mysql_fetch_assoc($res))
@@ -267,71 +305,8 @@ function calc_cells($parameters,$update_id=NULL)
 					//$base_date = date('Y-m-d', strtotime("-7 days"));
 					$base_date = date('Y-m-d', strtotime("-30 days")); // consider one month's data.
 					if($row["firstreceived_date"]>=$base_date) $overall_statuses['new_trials']=$overall_statuses['new_trials']+1;
-					/*
-					if($row["lastchanged_date"]>=$base_date)
-					{
-					
-						switch ($row["overall_status"]) 
-						{
-							case 'Not yet recruiting':
-								$overall_statuses['not_yet_recruiting']=$overall_statuses['not_yet_recruiting']+1;
-								break;
-							case 'Recruiting':
-								$overall_statuses['recruiting']=$overall_statuses['recruiting']+1;
-								break;
-							case 'Enrolling by invitation':
-								$overall_statuses['enrolling_by_invitation']=$overall_statuses['enrolling_by_invitation']+1;
-								break;
-							case 'Active, not recruiting':
-								$overall_statuses['active_not_recruiting']=$overall_statuses['active_not_recruiting']+1;
-								break;
-							case 'Completed':
-								$overall_statuses['completed']=$overall_statuses['completed']+1;
-								break;
-							case 'Suspended':
-								$overall_statuses['suspended']=$overall_statuses['suspended']+1;
-								break;
-							case 'Terminated':
-								$overall_statuses['terminated']=$overall_statuses['terminated']+1;
-								break;
-							case 'Withdrawn':
-								$overall_statuses['withdrawn']=$overall_statuses['withdrawn']+1;
-								break;
-							case 'Available':
-								$overall_statuses['available']=$overall_statuses['available']+1;
-								break;
-							case 'No Longer Available':
-								$overall_statuses['no_longer_available']=$overall_statuses['no_longer_available']+1;
-								break;
-							case 'Approved for marketing':
-								$overall_statuses['approved_for_marketing']=$overall_statuses['approved_for_marketing']+1;
-								break;
-							case 'No longer recruiting':
-								$overall_statuses['no_longer_recruiting']=$overall_statuses['no_longer_recruiting']+1;
-								break;
-							case 'Withheld':
-								$overall_statuses['withheld']=$overall_statuses['withheld']+1;
-								break;
-							case 'Temporarily Not Available':
-								$overall_statuses['temporarily_not_available']=$overall_statuses['temporarily_not_available']+1;
-								break;
-							case 'Ongoing':
-								$overall_statuses['ongoing']=$overall_statuses['ongoing']+1;
-								break;
-							case 'Not Authorized':
-								$overall_statuses['not_authorized']=$overall_statuses['not_authorized']+1;
-								break;
-							case 'Prohibited':
-								$overall_statuses['prohibited']=$overall_statuses['prohibited']+1;
-								break;
-						}
-						
-					}
-					*/
 					else
 					{
-					
-					
 						$query_dh= 'select larvol_id,overall_status_prev,overall_status_lastchanged from data_history 
 									where overall_status_lastchanged is not null  and  larvol_id='. $row["trial"] . '
 									limit 1 ';
@@ -349,59 +324,94 @@ function calc_cells($parameters,$update_id=NULL)
 							if($row_dh["larvol_id"] and $row_dh["overall_status_lastchanged"]>=$base_date)
 							{
 								//switch ($row_dh["overall_status_prev"]) 
-								
+								// in case of active/industry lead trial, add +1 to status change totals accordingly
 								switch ($row["overall_status"]) // use the value from data_trials instead of data_history
 								{
 									case 'Not yet recruiting':
 										$overall_statuses['not_yet_recruiting']=$overall_statuses['not_yet_recruiting']+1;
+										
+										if($row['is_active']==1 or $row['is_active']=="1")	$overall_statuses['not_yet_recruiting_active']=$overall_statuses['not_yet_recruiting_active']+1;
+										if( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='industry_lead_sponsor' )	$overall_statuses['not_yet_recruiting_active_indlead']=$overall_statuses['not_yet_recruiting_active_indlead']+1;
 										break;
 									case 'Recruiting':
 										$overall_statuses['recruiting']=$overall_statuses['recruiting']+1;
+										if($row['is_active']==1 or $row['is_active']=="1")	$overall_statuses['recruiting_active']=$overall_statuses['recruiting_active']+1;
+										if( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='industry_lead_sponsor' )	$overall_statuses['recruiting_active_indlead']=$overall_statuses['recruiting_active_indlead']+1;
 										break;
 									case 'Enrolling by invitation':
 										$overall_statuses['enrolling_by_invitation']=$overall_statuses['enrolling_by_invitation']+1;
+										if($row['is_active']==1 or $row['is_active']=="1")	$overall_statuses['enrolling_by_invitation_active']=$overall_statuses['enrolling_by_invitation_active']+1;
+										if( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='industry_lead_sponsor' )	$overall_statuses['enrolling_by_invitation_active_indlead']=$overall_statuses['enrolling_by_invitation_active_indlead']+1;
 										break;
 									case 'Active, not recruiting':
 										$overall_statuses['active_not_recruiting']=$overall_statuses['active_not_recruiting']+1;
+										if($row['is_active']==1 or $row['is_active']=="1")	$overall_statuses['active_not_recruiting_active']=$overall_statuses['active_not_recruiting_active']+1;
+										if( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='industry_lead_sponsor' )	$overall_statuses['active_not_recruiting_active_indlead']=$overall_statuses['active_not_recruiting_active_indlead']+1;
 										break;
 									case 'Completed':
 										$overall_statuses['completed']=$overall_statuses['completed']+1;
+										if($row['is_active']==1 or $row['is_active']=="1")	$overall_statuses['completed_active']=$overall_statuses['completed_active']+1;
+										if( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='industry_lead_sponsor' )	$overall_statuses['completed_active_indlead']=$overall_statuses['completed_active_indlead']+1;
 										break;
 									case 'Suspended':
 										$overall_statuses['suspended']=$overall_statuses['suspended']+1;
+										if($row['is_active']==1 or $row['is_active']=="1")	$overall_statuses['suspended_active']=$overall_statuses['suspended_active']+1;
+										if( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='industry_lead_sponsor' )	$overall_statuses['suspended_active_indlead']=$overall_statuses['suspended_active_indlead']+1;
 										break;
 									case 'Terminated':
 										$overall_statuses['terminated']=$overall_statuses['terminated']+1;
+										if($row['is_active']==1 or $row['is_active']=="1")	$overall_statuses['terminated_active']=$overall_statuses['terminated_active']+1;
+										if( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='industry_lead_sponsor' )	$overall_statuses['terminated_active_indlead']=$overall_statuses['terminated_active_indlead']+1;
 										break;
 									case 'Withdrawn':
 										$overall_statuses['withdrawn']=$overall_statuses['withdrawn']+1;
+										if($row['is_active']==1 or $row['is_active']=="1")	$overall_statuses['withdrawn_active']=$overall_statuses['withdrawn_active']+1;
+										if( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='industry_lead_sponsor' )	$overall_statuses['withdrawn_active_indlead']=$overall_statuses['withdrawn_active_indlead']+1;
 										break;
 									case 'Available':
 										$overall_statuses['available']=$overall_statuses['available']+1;
+										if($row['is_active']==1 or $row['is_active']=="1")	$overall_statuses['available_active']=$overall_statuses['available_active']+1;
+										if( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='industry_lead_sponsor' )	$overall_statuses['available_active_indlead']=$overall_statuses['available_active_indlead']+1;
 										break;
 									case 'No Longer Available':
 										$overall_statuses['no_longer_available']=$overall_statuses['no_longer_available']+1;
+										if($row['is_active']==1 or $row['is_active']=="1")	$overall_statuses['no_longer_available_active']=$overall_statuses['no_longer_available_active']+1;
+										if( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='industry_lead_sponsor' )	$overall_statuses['no_longer_available_active_indlead']=$overall_statuses['no_longer_available_active_indlead']+1;
 										break;
 									case 'Approved for marketing':
 										$overall_statuses['approved_for_marketing']=$overall_statuses['approved_for_marketing']+1;
+										if($row['is_active']==1 or $row['is_active']=="1")	$overall_statuses['approved_for_marketing_active']=$overall_statuses['approved_for_marketing_active']+1;
+										if( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='industry_lead_sponsor' )	$overall_statuses['approved_for_marketing_active_indlead']=$overall_statuses['approved_for_marketing_active_indlead']+1;
 										break;
 									case 'No longer recruiting':
 										$overall_statuses['no_longer_recruiting']=$overall_statuses['no_longer_recruiting']+1;
+										if($row['is_active']==1 or $row['is_active']=="1")	$overall_statuses['no_longer_recruiting_active']=$overall_statuses['no_longer_recruiting_active']+1;
+										if( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='industry_lead_sponsor' )	$overall_statuses['no_longer_recruiting_active_indlead']=$overall_statuses['no_longer_recruiting_active_indlead']+1;
 										break;
 									case 'Withheld':
 										$overall_statuses['withheld']=$overall_statuses['withheld']+1;
+										if($row['is_active']==1 or $row['is_active']=="1")	$overall_statuses['withheld_active']=$overall_statuses['withheld_active']+1;
+										if( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='industry_lead_sponsor' )	$overall_statuses['withheld_active_indlead']=$overall_statuses['withheld_active_indlead']+1;
 										break;
 									case 'Temporarily Not Available':
 										$overall_statuses['temporarily_not_available']=$overall_statuses['temporarily_not_available']+1;
+										if($row['is_active']==1 or $row['is_active']=="1")	$overall_statuses['temporarily_not_available_active']=$overall_statuses['temporarily_not_available_active']+1;
+										if( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='industry_lead_sponsor' )	$overall_statuses['temporarily_not_available_active_indlead']=$overall_statuses['temporarily_not_available_active_indlead']+1;
 										break;
 									case 'Ongoing':
 										$overall_statuses['ongoing']=$overall_statuses['ongoing']+1;
+										if($row['is_active']==1 or $row['is_active']=="1")	$overall_statuses['ongoing_active']=$overall_statuses['ongoing_active']+1;
+										if( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='industry_lead_sponsor' )	$overall_statuses['ongoing_active_indlead']=$overall_statuses['ongoing_active_indlead']+1;
 										break;
 									case 'Not Authorized':
 										$overall_statuses['not_authorized']=$overall_statuses['not_authorized']+1;
+										if($row['is_active']==1 or $row['is_active']=="1")	$overall_statuses['not_authorized_active']=$overall_statuses['not_authorized_active']+1;
+										if( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='industry_lead_sponsor' )	$overall_statuses['not_authorized_active_indlead']=$overall_statuses['not_authorized_active_indlead']+1;
 										break;
 									case 'Prohibited':
 										$overall_statuses['prohibited']=$overall_statuses['prohibited']+1;
+										if($row['is_active']==1 or $row['is_active']=="1")	$overall_statuses['prohibited_active']=$overall_statuses['prohibited_active']+1;
+										if( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='industry_lead_sponsor' )	$overall_statuses['prohibited_active_indlead']=$overall_statuses['prohibited_active_indlead']+1;
 										break;
 								}
 								
@@ -646,6 +656,40 @@ global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_total;
 				`ongoing` = "'. $overall_statuses['ongoing'] .'",
 				`not_authorized` = "'. $overall_statuses['not_authorized'] .'",
 				`prohibited` = "'. $overall_statuses['prohibited'] .'",
+				`not_yet_recruiting_active` = "'. $overall_statuses['not_yet_recruiting_active']. '",
+				`recruiting_active` = "'. $overall_statuses['recruiting_active']. '",
+				`enrolling_by_invitation_active` = "'. $overall_statuses['enrolling_by_invitation_active']. '",
+				`active_not_recruiting_active` = "'. $overall_statuses['active_not_recruiting_active']. '",
+				`completed_active` = "'. $overall_statuses['completed_active']. '",
+				`suspended_active` = "'. $overall_statuses['suspended_active']. '",
+				`terminated_active` = "'. $overall_statuses['terminated_active']. '",
+				`withdrawn_active` = "'. $overall_statuses['withdrawn_active']. '",
+				`available_active` = "'. $overall_statuses['available_active']. '",
+				`no_longer_available_active` = "'. $overall_statuses['no_longer_available_active']. '",
+				`approved_for_marketing_active` = "'. $overall_statuses['approved_for_marketing_active']. '",
+				`no_longer_recruiting_active` = "'. $overall_statuses['no_longer_recruiting_active']. '",
+				`withheld_active` = "'. $overall_statuses['withheld_active']. '",
+				`temporarily_not_available_active` = "'. $overall_statuses['temporarily_not_available_active']. '",
+				`ongoing_active` = "'. $overall_statuses['ongoing_active']. '",
+				`not_authorized_active` = "'. $overall_statuses['not_authorized_active']. '",
+				`prohibited_active` = "'. $overall_statuses['prohibited_active']. '",
+				`not_yet_recruiting_active_indlead` = "'. $overall_statuses['not_yet_recruiting_active_indlead']. '",
+				`recruiting_active_indlead` = "'. $overall_statuses['recruiting_active_indlead']. '",
+				`enrolling_by_invitation_active_indlead` = "'. $overall_statuses['enrolling_by_invitation_active_indlead']. '",
+				`active_not_recruiting_active_indlead` = "'. $overall_statuses['active_not_recruiting_active_indlead']. '",
+				`completed_active_indlead` = "'. $overall_statuses['completed_active_indlead']. '",
+				`suspended_active_indlead` = "'. $overall_statuses['suspended_active_indlead']. '",
+				`terminated_active_indlead` = "'. $overall_statuses['terminated_active_indlead']. '",
+				`withdrawn_active_indlead` = "'. $overall_statuses['withdrawn_active_indlead']. '",
+				`available_active_indlead` = "'. $overall_statuses['available_active_indlead']. '",
+				`no_longer_available_active_indlead` = "'. $overall_statuses['no_longer_available_active_indlead']. '",
+				`approved_for_marketing_active_indlead` = "'. $overall_statuses['approved_for_marketing_active_indlead']. '",
+				`no_longer_recruiting_active_indlead` = "'. $overall_statuses['no_longer_recruiting_active_indlead']. '",
+				`withheld_active_indlead` = "'. $overall_statuses['withheld_active_indlead']. '",
+				`temporarily_not_available_active_indlead` = "'. $overall_statuses['temporarily_not_available_active_indlead']. '",
+				`ongoing_active_indlead` = "'. $overall_statuses['ongoing_active_indlead']. '",
+				`not_authorized_active_indlead` = "'. $overall_statuses['not_authorized_active_indlead']. '",
+				`prohibited_active_indlead` = "'. $overall_statuses['prohibited_active_indlead']. '",				
 				`new_trials` = "'. $overall_statuses['new_trials'] .'",
 				`last_calc` = "'. $curtime .'" where
 				`area`="'.$arid.'" and `product`="'.$prid.'" 
@@ -653,7 +697,6 @@ global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_total;
 		}
 		else
 		{
-
 			$query='UPDATE rpt_masterhm_cells 
 				SET 
 				`count_active` ="'. $cnt_active.'",
@@ -677,6 +720,40 @@ global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_total;
 				`ongoing` = "'. $overall_statuses['ongoing'] .'",
 				`not_authorized` = "'. $overall_statuses['not_authorized'] .'",
 				`prohibited` = "'. $overall_statuses['prohibited'] .'",
+				`not_yet_recruiting_active` = "'. $overall_statuses['not_yet_recruiting_active']. '",
+				`recruiting_active` = "'. $overall_statuses['recruiting_active']. '",
+				`enrolling_by_invitation_active` = "'. $overall_statuses['enrolling_by_invitation_active']. '",
+				`active_not_recruiting_active` = "'. $overall_statuses['active_not_recruiting_active']. '",
+				`completed_active` = "'. $overall_statuses['completed_active']. '",
+				`suspended_active` = "'. $overall_statuses['suspended_active']. '",
+				`terminated_active` = "'. $overall_statuses['terminated_active']. '",
+				`withdrawn_active` = "'. $overall_statuses['withdrawn_active']. '",
+				`available_active` = "'. $overall_statuses['available_active']. '",
+				`no_longer_available_active` = "'. $overall_statuses['no_longer_available_active']. '",
+				`approved_for_marketing_active` = "'. $overall_statuses['approved_for_marketing_active']. '",
+				`no_longer_recruiting_active` = "'. $overall_statuses['no_longer_recruiting_active']. '",
+				`withheld_active` = "'. $overall_statuses['withheld_active']. '",
+				`temporarily_not_available_active` = "'. $overall_statuses['temporarily_not_available_active']. '",
+				`ongoing_active` = "'. $overall_statuses['ongoing_active']. '",
+				`not_authorized_active` = "'. $overall_statuses['not_authorized_active']. '",
+				`prohibited_active` = "'. $overall_statuses['prohibited_active']. '",
+				`not_yet_recruiting_active_indlead` = "'. $overall_statuses['not_yet_recruiting_active_indlead']. '",
+				`recruiting_active_indlead` = "'. $overall_statuses['recruiting_active_indlead']. '",
+				`enrolling_by_invitation_active_indlead` = "'. $overall_statuses['enrolling_by_invitation_active_indlead']. '",
+				`active_not_recruiting_active_indlead` = "'. $overall_statuses['active_not_recruiting_active_indlead']. '",
+				`completed_active_indlead` = "'. $overall_statuses['completed_active_indlead']. '",
+				`suspended_active_indlead` = "'. $overall_statuses['suspended_active_indlead']. '",
+				`terminated_active_indlead` = "'. $overall_statuses['terminated_active_indlead']. '",
+				`withdrawn_active_indlead` = "'. $overall_statuses['withdrawn_active_indlead']. '",
+				`available_active_indlead` = "'. $overall_statuses['available_active_indlead']. '",
+				`no_longer_available_active_indlead` = "'. $overall_statuses['no_longer_available_active_indlead']. '",
+				`approved_for_marketing_active_indlead` = "'. $overall_statuses['approved_for_marketing_active_indlead']. '",
+				`no_longer_recruiting_active_indlead` = "'. $overall_statuses['no_longer_recruiting_active_indlead']. '",
+				`withheld_active_indlead` = "'. $overall_statuses['withheld_active_indlead']. '",
+				`temporarily_not_available_active_indlead` = "'. $overall_statuses['temporarily_not_available_active_indlead']. '",
+				`ongoing_active_indlead` = "'. $overall_statuses['ongoing_active_indlead']. '",
+				`not_authorized_active_indlead` = "'. $overall_statuses['not_authorized_active_indlead']. '",
+				`prohibited_active_indlead` = "'. $overall_statuses['prohibited_active_indlead']. '",
 				`new_trials` = "'. $overall_statuses['new_trials'] .'",
 				`count_total` = "'. $cnt_total .'",'
 				. $aa . $bb . $cc . $dd .
@@ -724,11 +801,44 @@ global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_total;
 				`ongoing` = "'. $overall_statuses['ongoing'] .'",
 				`not_authorized` = "'. $overall_statuses['not_authorized'] .'",
 				`prohibited` = "'. $overall_statuses['prohibited'] .'",
+				`not_yet_recruiting_active` = "'. $overall_statuses['not_yet_recruiting_active']. '",
+				`recruiting_active` = "'. $overall_statuses['recruiting_active']. '",
+				`enrolling_by_invitation_active` = "'. $overall_statuses['enrolling_by_invitation_active']. '",
+				`active_not_recruiting_active` = "'. $overall_statuses['active_not_recruiting_active']. '",
+				`completed_active` = "'. $overall_statuses['completed_active']. '",
+				`suspended_active` = "'. $overall_statuses['suspended_active']. '",
+				`terminated_active` = "'. $overall_statuses['terminated_active']. '",
+				`withdrawn_active` = "'. $overall_statuses['withdrawn_active']. '",
+				`available_active` = "'. $overall_statuses['available_active']. '",
+				`no_longer_available_active` = "'. $overall_statuses['no_longer_available_active']. '",
+				`approved_for_marketing_active` = "'. $overall_statuses['approved_for_marketing_active']. '",
+				`no_longer_recruiting_active` = "'. $overall_statuses['no_longer_recruiting_active']. '",
+				`withheld_active` = "'. $overall_statuses['withheld_active']. '",
+				`temporarily_not_available_active` = "'. $overall_statuses['temporarily_not_available_active']. '",
+				`ongoing_active` = "'. $overall_statuses['ongoing_active']. '",
+				`not_authorized_active` = "'. $overall_statuses['not_authorized_active']. '",
+				`prohibited_active` = "'. $overall_statuses['prohibited_active']. '",
+				`not_yet_recruiting_active_indlead` = "'. $overall_statuses['not_yet_recruiting_active_indlead']. '",
+				`recruiting_active_indlead` = "'. $overall_statuses['recruiting_active_indlead']. '",
+				`enrolling_by_invitation_active_indlead` = "'. $overall_statuses['enrolling_by_invitation_active_indlead']. '",
+				`active_not_recruiting_active_indlead` = "'. $overall_statuses['active_not_recruiting_active_indlead']. '",
+				`completed_active_indlead` = "'. $overall_statuses['completed_active_indlead']. '",
+				`suspended_active_indlead` = "'. $overall_statuses['suspended_active_indlead']. '",
+				`terminated_active_indlead` = "'. $overall_statuses['terminated_active_indlead']. '",
+				`withdrawn_active_indlead` = "'. $overall_statuses['withdrawn_active_indlead']. '",
+				`available_active_indlead` = "'. $overall_statuses['available_active_indlead']. '",
+				`no_longer_available_active_indlead` = "'. $overall_statuses['no_longer_available_active_indlead']. '",
+				`approved_for_marketing_active_indlead` = "'. $overall_statuses['approved_for_marketing_active_indlead']. '",
+				`no_longer_recruiting_active_indlead` = "'. $overall_statuses['no_longer_recruiting_active_indlead']. '",
+				`withheld_active_indlead` = "'. $overall_statuses['withheld_active_indlead']. '",
+				`temporarily_not_available_active_indlead` = "'. $overall_statuses['temporarily_not_available_active_indlead']. '",
+				`ongoing_active_indlead` = "'. $overall_statuses['ongoing_active_indlead']. '",
+				`not_authorized_active_indlead` = "'. $overall_statuses['not_authorized_active_indlead']. '",
+				`prohibited_active_indlead` = "'. $overall_statuses['prohibited_active_indlead']. '",
 				`new_trials` = "'. $overall_statuses['new_trials'] .'",
 				`highest_phase` = "'. $max_phase .'",
 				`count_total` = "'. $cnt_total .'",
 				`last_update` = "'. $curtime .'"
-
 				';
 		if(!$res = mysql_query($query))
 		{
