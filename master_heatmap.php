@@ -711,7 +711,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 	$total_fld=$res['total'];
 	$dtt_fld=$res['dtt'];
 	$Report_DisplayName=$res['display_name'];
-	if($rptu !== NULL && $rptu != $db->user->id && !$shared) return;	//prevent anyone from viewing others' private reports
+	if($rptu !== NULL && $rptu != $db->user->id && !$shared && $db->user->userlevel != 'root') return;	//prevent anyone from viewing others' private reports
 	$name = $res['name'];
 	$footnotes = htmlspecialchars($res['footnotes']);
 	$description = htmlspecialchars($res['description']);
@@ -719,10 +719,10 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 	
 	if($shared && $rptu !== NULL)
 	$owner_type="shared";
-	else if($rptu !== NULL && $rptu == $db->user->id)
-	$owner_type="mine";
 	else if($rptu === NULL)
 	$owner_type="global";
+	else if($rptu !== NULL && $rptu == $db->user->id)
+	$owner_type="mine";
 	
 	$query = 'SELECT `num`,`type`,`type_id`, `display_name`, `category` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' ORDER BY num ASC';
 	$res = mysql_query($query) or die('Bad SQL query getting master heatmap report headers'.$query);
@@ -981,7 +981,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 	$disabled=0;
 	if(($owner_type == 'shared' && $rptu != $db->user->id) || ($owner_type == 'global' && $db->user->userlevel == 'user'))
 	$disabled=1;
-	
+	if($db->user->userlevel == 'root') $disabled=0;
 	/**Recalculate button***/
 	//check if the  HM is being recalculated
 		$id = mysql_real_escape_string($_GET['id']);	 
@@ -1047,15 +1047,15 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 		$out .= ' Ownership: '
 			. '<label><input type="radio" name="own" value="shared" '
 			. ($owner_type == 'shared' ? 'checked="checked"' : '')
-			. (($owner_type == 'shared' && $rptu != $db->user->id) ? ' disabled="disabled" ':'')
+			. (($disabled) ? ' disabled="disabled" ':'')
 			. '/>Shared</label> '
 			. '<label><input type="radio" name="own" value="global" '
 			. ($owner_type == 'global' ? 'checked="checked"' : '')
-			. (($owner_type == 'shared' && $rptu != $db->user->id) ? ' disabled="disabled" ':'')
+			. (($disabled) ? ' disabled="disabled" ':'')
 			. '/>Global</label> '
 			. '<label><input type="radio" name="own" value="mine" '
 			. ($owner_type == 'mine' ? 'checked="checked"' : '')
-			. (($owner_type == 'shared' && $rptu != $db->user->id) ? ' disabled="disabled" ':'')
+			. (($disabled) ? ' disabled="disabled" ':'')
 			. '/>Mine</label>';
 	}else{
 		$out .= ' Ownership: '
@@ -1074,7 +1074,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 	
 	if($db->user->userlevel != 'user' || $rptu !== NULL)
 	{
-		if($owner_type == 'mine' || ($owner_type == 'global' && $db->user->userlevel != 'user') || ($owner_type == 'shared' && $rptu == $db->user->id))
+		if($owner_type == 'mine' || ($owner_type == 'global' && $db->user->userlevel != 'user') || ($owner_type == 'shared' && $rptu == $db->user->id) || $db->user->userlevel == 'root')
 		$out .= '<input type="submit" name="addproduct" value="More rows" /> | '
 				. '<input type="submit" name="addarea" value="More columns" /> | ';
 	}
@@ -1094,7 +1094,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 				
 		$out .= 'Column : '.$col.' ';
 		
-		if($owner_type == 'mine' || ($owner_type == 'global' && $db->user->userlevel != 'user') || ($owner_type == 'shared' && $rptu == $db->user->id))
+		if($owner_type == 'mine' || ($owner_type == 'global' && $db->user->userlevel != 'user') || ($owner_type == 'shared' && $rptu == $db->user->id) || $db->user->userlevel == 'root')
 		{
 			// LEFT ARROW?
 			if($col > 1) $out .= ' <input type="image" name="move_col_left[' . $col . ']" src="images/left.png" title="Left"/>';
@@ -1162,7 +1162,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 		
 		$out .= 'Row : '.$row.' ';
 		
-		if($owner_type == 'mine' || ($owner_type == 'global' && $db->user->userlevel != 'user') || ($owner_type == 'shared' && $rptu == $db->user->id))
+		if($owner_type == 'mine' || ($owner_type == 'global' && $db->user->userlevel != 'user') || ($owner_type == 'shared' && $rptu == $db->user->id) || $db->user->userlevel == 'root')
 		{
 			// UP ARROW?
 			if($row > 1) $out .= ' <input type="image" name="move_row_up[' . $row . ']" src="images/asc.png" title="Up"/>';
@@ -1349,7 +1349,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 			. '<fieldset><legend>Description</legend><textarea '.(($disabled) ? ' readonly="readonly" ':'').' name="description" cols="45" rows="5">' . $description
 			. '</textarea></fieldset>';
 	$out .='<div id="dialog" title="Confirm"></div>';
-	if($owner_type == 'mine' || ($owner_type == 'global' && $db->user->userlevel != 'user') || ($owner_type == 'shared' && $rptu == $db->user->id))
+	if($owner_type == 'mine' || ($owner_type == 'global' && $db->user->userlevel != 'user') || ($owner_type == 'shared' && $rptu == $db->user->id) || $db->user->userlevel == 'root')
 	{
 		$out .= '<br clear="all"/><div align="left" style="vertical-align:bottom; float:left;"><fieldset style="margin-top:50px; padding:8px;"><legend>Advanced</legend>'
 				. '<label class="lbldeln"><input class="delrepe" type="checkbox" id="delrep" name="delrep['.$id.']" title="Delete" /></label>' 
@@ -3565,7 +3565,7 @@ function postEd()
 	if(count($res)==0){ die('Not found.'); }
 	$rptu = $res['user'];
 	$shared = $res['shared'];
-	if($rptu !== NULL && $rptu != $db->user->id && !$shared) return;
+	if($rptu !== NULL && $rptu != $db->user->id && !$shared && $db->user->userlevel != 'root') return;
 
 	// "Copy into new" is the exception for non-admins sending POSTdata about global reports
 	if(isset($_POST['reportcopy']))
@@ -3619,7 +3619,7 @@ function postEd()
 	$maxcolumn = 0;
 	$types = array('product','area');
 	
-	if(($rptu === NULL && $db->user->userlevel != 'user') || ($rptu !== NULL && $rptu == $db->user->id)) 	///Restriction on editing
+	if(($rptu === NULL && $db->user->userlevel != 'user') || ($rptu !== NULL && $rptu == $db->user->id) || $db->user->userlevel == 'root') 	///Restriction on editing
 	{
 		
 		foreach($types as $t)
@@ -3652,17 +3652,6 @@ function postEd()
 		$footnotes = mysql_real_escape_string($_POST['footnotes']);
 		$description = mysql_real_escape_string($_POST['description']);
 		
-		if(isset($_POST['own']) && $_POST['own'] == 'global')
-		{
-			$owner='NULL'; $shared=0;
-		} else if(isset($_POST['own']) && $_POST['own'] == 'shared')
-		{
-			$owner=$db->user->id; $shared=1;
-		} else
-		{
-			$owner=$db->user->id; $shared=0;
-		}
-		
 		if(isset($_POST['total']) && $_POST['total']==1)
 		$total_col=1;
 		else
@@ -3675,12 +3664,65 @@ function postEd()
 		
 		$category = mysql_real_escape_string($_POST['reportcategory']);
 		
-		if(($rptu === NULL && $db->user->userlevel != 'user') || ($rptu !== NULL && $rptu == $db->user->id)) 	///Restriction on report saving
+		if(($rptu === NULL && $db->user->userlevel != 'user') || ($rptu !== NULL && $rptu == $db->user->id) || $db->user->userlevel == 'root') 	///Restriction on report saving
 		{
 		
 			$originDT_query = 'SELECT `name`, `user`, `footnotes`, `description`, `category`, `shared`, `total`, `dtt`, `display_name` FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
 			$originDT=mysql_query($originDT_query) or die ('Bad SQL Query getting Original Master Header Table Information Before Updating.<br/>'.$query);
 			$originDT = mysql_fetch_array($originDT);
+			
+			
+			if(isset($_POST['own']) && $_POST['own'] == 'global')
+			{
+				$owner='NULL'; $shared=0;
+			} 
+			else if(isset($_POST['own']) && $_POST['own'] == 'shared')
+			{
+				if(trim($originDT['shared']) == 1) /// Already shared report
+				{
+					if(trim($db->user->id) == trim($originDT['user']))
+					{
+						$owner=$db->user->id; $shared=1;
+					}
+					else
+					{
+						$owner=trim($originDT['user']); $shared=1;
+					}
+				}
+				else
+				{
+					$owner=$db->user->id; $shared=1;	
+				}
+			} 
+			else
+			{
+				if($db->user->userlevel == 'user')
+				{
+					if(trim($db->user->id) == trim($originDT['user']))
+					{
+						$owner=$db->user->id; $shared=0;
+					}
+					else
+					{
+						$owner=trim($originDT['user']); $shared=trim($originDT['shared']);
+					}
+				}
+				else if($db->user->userlevel == 'admin')
+				{
+					$owner=$db->user->id; $shared=0;
+				}
+				else if($db->user->userlevel == 'root')
+				{
+					if($_POST['own'] == 'mine')
+					{
+						$owner=$db->user->id; $shared=0;
+					}
+					else
+					{
+						$owner=trim($originDT['user']); $shared=trim($originDT['shared']);
+					}
+				}
+			}
 		
 			$change_flag=0;
 			
@@ -3879,7 +3921,7 @@ function postEd()
 	
 	
 
-	if(($rptu === NULL && $db->user->userlevel == 'user') || ($rptu !== NULL && $rptu != $db->user->id)) return;	///Restriction on report saving
+	if(($rptu === NULL && $db->user->userlevel == 'user') || ($rptu !== NULL && $rptu != $db->user->id) || $db->user->userlevel == 'root') return;	///Restriction on report saving
 	
 	if(isset($_POST['move_row_down']))
 	{
@@ -4053,7 +4095,7 @@ function postRL()
 			$res = mysql_fetch_assoc($res);
 			if($res === false) continue;
 			$ru = $res['user'];
-			if($ru == $db->user->id || ($db->user->userlevel != 'user' && $ru === NULL))
+			if($ru == $db->user->id || ($db->user->userlevel != 'user' && $ru === NULL) || $db->user->userlevel == 'root')
 				mysql_query('DELETE FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1') or die('Bad SQL query deleting master heatmap report');
 		}
 	}
