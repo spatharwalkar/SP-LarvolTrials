@@ -2639,7 +2639,7 @@ function Download_reports()
 				{
 					$count_val=$row_indlead_total[$row];
 				}
-				$pdfContent = '<a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). $link_part . '" target="_blank" title="'. $raltTitle .'">'.$rval.$rowsCompanyName[$row].((trim($rowsTagName[$row]) != '') ? ' <b><font style="color:#CC00FF; font-weight:bold">'.$rowsTagName[$row].'</font></b>':'').'</a>';
+				$pdfContent = '<a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). $link_part . '" target="_blank" title="'. $raltTitle .'">'.$rval.$rowsCompanyName[$row].((trim($rowsTagName[$row]) != '') ? ' <b><font style="color:#0000A0; font-weight:bold">'.$rowsTagName[$row].'</font></b>':'').'</a>';
 				
 				
 				$pdf->MultiCell($product_Col_Width, $prod_row_height, $pdfContent, $border, $align='C', $fill=1, $ln=0, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
