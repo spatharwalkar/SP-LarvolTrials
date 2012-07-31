@@ -1453,7 +1453,7 @@ function Download_reports()
 	$prev_areaSpan=0;
 	$prev_prodSpan=0;
 	$last_cat_col = '';
-	
+	$area_Category_Presence = 0;
 	while($header = mysql_fetch_array($res))
 	{
 		if($header['type'] == 'area')
@@ -1501,6 +1501,9 @@ function Download_reports()
 			$second_last_num = $last_num;
 			$last_num = $header['num'];
 			$last_area = $header['type_id'];
+			
+			if(!$area_Category_Presence && $header['category'] != 'Undefined')
+			$area_Category_Presence = 1;
 		}
 		else
 		{
@@ -3051,29 +3054,6 @@ function Download_reports()
 		}//Row Foreach ends
 		
 		
-		if(($footnotes != NULL && trim($footnotes) != '') || ($description != NULL && trim($description) != ''))
-		{
-			$pdf->Ln(''); $pdf->Ln('');
-			$pdf->SetFillColor(192, 196, 254);
-        	$pdf->SetTextColor(0);
-			$pdf->getCellPaddings();
-			$pdf->setCellMargins(0, 0, 0, 0);
-			
-			$footnotes_rowcount = $pdf->getNumLines('Footnotes:'. $footnotes, 137);
-			$description_rowcount = $pdf->getNumLines('Description:'. $description, 137);
-			if($footnotes_rowcount > 1 && $description_rowcount > 1)
- 			$FD_height = (($footnotes_rowcount > $description_rowcount) ? ($footnotes_rowcount * $Line_Height) : ($description_rowcount * $Line_Height));	
-			else
-			$FD_height = 15;	/// When there is single line in footnote and description, it not looks good to have $Min_One_Liner height
-			
-			$border = array('mode' => 'int', 'LTB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));
-			$pdf->writeHTMLCell(($Page_Width/2), $FD_height, '', '', '<b>Footnotes: </b><br/>'. $footnotes, $border, $ln=0, $fill=1, $reseth=true, $align='L', $autopadding=true);
-			$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));
-			$pdf->writeHTMLCell(($Page_Width/2), $FD_height, '', '', '<b>Description: </b><br/>'. $description, $border, $ln=0, $fill=1, $reseth=true, $align='L', $autopadding=true);
-		}
-		
-		
-						
 		ob_end_clean();
 		//Close and output PDF document
 		$pdf->Output('Larvol_'. substr($Report_Name,0,20) .'_PDF_Report_'. date("Y-m-d_H.i.s") .'.pdf', 'D');
@@ -3105,30 +3085,49 @@ function Download_reports()
 		
 		$Excel_HMCounter = 0;
 		
-		$Excel_HMCounter++;
-		foreach($columns as $col => $val)
-		{
-			if($columns_Span[$col] > 0)
-			{
-				$from = num2char($col);
-				$to = getColspanforExcelExport($from, $columns_Span[$col]);
-				$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':' . $to . $Excel_HMCounter);
-				if($columnsCategoryName[$col] != 'Undefined')
-				{
-					$black_font['font']['color']['rgb'] = '000000';
-					$objPHPExcel->getActiveSheet()->getStyle($from)->applyFromArray($black_font);
-				}
-				else
-				{
-					$white_font['font']['color']['rgb'] = 'FFFFFF';
-					$objPHPExcel->getActiveSheet()->getStyle($from)->applyFromArray($white_font);
-				}
-				$objPHPExcel->getActiveSheet()->getStyle($from)->getAlignment()->applyFromArray(
-      									array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$Excel_HMCounter, 'Report name:');
+		$objPHPExcel->getActiveSheet()->getStyle('B' . $Excel_HMCounter)->getAlignment()->applyFromArray(
+      									array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_LEFT,
       											'vertical'   => PHPExcel_Style_Alignment::VERTICAL_CENTER,
      											'rotation'   => 0,
       											'wrap'       => false));
-				$objPHPExcel->getActiveSheet()->setCellValue($from . $Excel_HMCounter, $columnsCategoryName[$col]);
+		$objPHPExcel->getActiveSheet()->SetCellValue('B' . $Excel_HMCounter, substr($Report_Name,0,250));
+		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$Excel_HMCounter, 'Display Mode:');
+			$objPHPExcel->getActiveSheet()->getStyle('B' . $Excel_HMCounter)->getAlignment()->applyFromArray(
+      									array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_LEFT,
+      											'vertical'   => PHPExcel_Style_Alignment::VERTICAL_CENTER,
+     											'rotation'   => 0,
+      											'wrap'       => false));
+		$objPHPExcel->getActiveSheet()->SetCellValue('B' . $Excel_HMCounter, $tooltip);
+		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$Excel_HMCounter, '');
+		
+		if($area_Category_Presence)
+		{
+			$Excel_HMCounter++;
+			foreach($columns as $col => $val)
+			{
+				if($columns_Span[$col] > 0)
+				{
+					$from = num2char($col);
+					$to = getColspanforExcelExport($from, $columns_Span[$col]);
+					$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':' . $to . $Excel_HMCounter);
+					if($columnsCategoryName[$col] != 'Undefined')
+					{
+						$black_font['font']['color']['rgb'] = '000000';
+						$objPHPExcel->getActiveSheet()->getStyle($from)->applyFromArray($black_font);
+					}
+					else
+					{
+						$white_font['font']['color']['rgb'] = 'FFFFFF';
+						$objPHPExcel->getActiveSheet()->getStyle($from)->applyFromArray($white_font);
+					}
+					$objPHPExcel->getActiveSheet()->getStyle($from)->getAlignment()->applyFromArray(
+      										array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+      												'vertical'   => PHPExcel_Style_Alignment::VERTICAL_CENTER,
+     												'rotation'   => 0,
+      												'wrap'       => false));
+					$objPHPExcel->getActiveSheet()->setCellValue($from . $Excel_HMCounter, $columnsCategoryName[$col]);
+				}
 			}
 		}
 		
@@ -3158,7 +3157,7 @@ function Download_reports()
 				$caltTitle = (isset($cdesc) && $cdesc != '')?' alt="'.$cdesc.'" title="'.$cdesc.'" ':null;
 								
 				$black_font['font']['color']['rgb'] = '000000';
-				$objPHPExcel->getActiveSheet()->getStyle($from)->applyFromArray($black_font);
+				$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($black_font);
 					
 				$objPHPExcel->getActiveSheet()->setCellValue($cell, $val);
 				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col].$link_part);
@@ -3512,47 +3511,17 @@ function Download_reports()
 				$count_val=$indlead_total;
 			}
 					
-			$cell = num2char(count($columns)+1).'2';
+			$cell = num2char(count($columns)+1).(($area_Category_Presence) ? '5':'4');
 			$objPHPExcel->getActiveSheet()->setCellValue($cell, $count_val);
+			$black_font['font']['color']['rgb'] = '000000';
+			$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($black_font);
 			$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds).$link_part);
 			$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip($tooltip);
 		}
 		
-		$row = $Excel_HMCounter;
 		
-		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$row, '');
-		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$row, 'Report name:');
-		$objPHPExcel->getActiveSheet()->getStyle('B' . $row)->getAlignment()->applyFromArray(
-      									array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_LEFT,
-      											'vertical'   => PHPExcel_Style_Alignment::VERTICAL_CENTER,
-     											'rotation'   => 0,
-      											'wrap'       => false));
-		$objPHPExcel->getActiveSheet()->SetCellValue('B' . $row, substr($Report_Name,0,250));
-		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$row, 'Display Mode:');
-			$objPHPExcel->getActiveSheet()->getStyle('B' . $row)->getAlignment()->applyFromArray(
-      									array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_LEFT,
-      											'vertical'   => PHPExcel_Style_Alignment::VERTICAL_CENTER,
-     											'rotation'   => 0,
-      											'wrap'       => false));
-		$objPHPExcel->getActiveSheet()->SetCellValue('B' . $row, $tooltip);
-		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$row, 'Footnotes:');
-			$objPHPExcel->getActiveSheet()->getStyle('B' . $row)->getAlignment()->applyFromArray(
-      									array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_LEFT,
-      											'vertical'   => PHPExcel_Style_Alignment::VERTICAL_CENTER,
-     											'rotation'   => 0,
-      											'wrap'       => false));
-		$objPHPExcel->getActiveSheet()->SetCellValue('B' . $row, $footnotes);
-		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$row, 'Description:');
-			$objPHPExcel->getActiveSheet()->getStyle('B' . $row)->getAlignment()->applyFromArray(
-      									array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_LEFT,
-      											'vertical'   => PHPExcel_Style_Alignment::VERTICAL_CENTER,
-     											'rotation'   => 0,
-      											'wrap'       => false));
-		$objPHPExcel->getActiveSheet()->SetCellValue('B' . $row, $description);
-		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$row, 'Runtime:');
-		$objPHPExcel->getActiveSheet()->SetCellValue('B' . $row++, date("Y-m-d H:i:s", $now));
-		
-		$objPHPExcel->getActiveSheet()->SetCellValue('A' . $row, 'Phase:');
+		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$Excel_HMCounter, '');
+		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$Excel_HMCounter, 'Phase:');
 		$col = 'A';
 		//get search results
 		$phases = array('N/A', 'Phase 0', 'Phase 1', 'Phase 2', 'Phase 3', 'Phase 4');
@@ -3564,7 +3533,7 @@ function Download_reports()
 	
 		foreach($p_colors as $key => $color)
 		{
-			$cell = ++$col . $row;
+			$cell = ++$col . $Excel_HMCounter;
 			$objPHPExcel->getActiveSheet()->getStyle($cell)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID);
 			$objPHPExcel->getActiveSheet()->getStyle($cell)->getFill()->getStartColor()->setRGB($color);
 			$objPHPExcel->getActiveSheet()->getStyle($cell)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
