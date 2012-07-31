@@ -718,11 +718,28 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 	$category = $res['category'];
 	
 	if($shared && $rptu !== NULL)
-	$owner_type="shared";
+	{
+		$owner_type = "shared";
+		if($rptu == $db->user->id)
+			$owner_selector = "shared";
+		else
+			$owner_selector = "shared_other";
+	}
 	else if($rptu === NULL)
-	$owner_type="global";
-	else if($rptu !== NULL && $rptu == $db->user->id)
-	$owner_type="mine";
+	{
+		$owner_type = "global";
+		$owner_selector = "global";
+	}
+	else if($rptu !== NULL)
+	{
+		if($rptu == $db->user->id)
+		{
+			$owner_type = "mine";
+			$owner_selector = "mine";
+		}
+		else
+			$owner_selector = "mine_other";
+	}
 	
 	$query = 'SELECT `num`,`type`,`type_id`, `display_name`, `category`, `tag` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' ORDER BY num ASC';
 	$res = mysql_query($query) or die('Bad SQL query getting master heatmap report headers'.$query);
@@ -979,10 +996,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 	/*$out .='<input type="image" name="htmldown[]" src="images/html.png" title="HTML Download" />&nbsp;&nbsp;'
 		. '<input type="image" name="pdfdown[]" src="images/pdf.png" title="PDF Download" />&nbsp;&nbsp;'
 		. '<input type="image" name="exceldown[]" src="images/excel_new.png" title="Excel Download" /></div></form>';		*/
-	$disabled=0;
-	if(($owner_type == 'shared' && $rptu != $db->user->id) || ($owner_type == 'global' && $db->user->userlevel == 'user'))
-	$disabled=1;
-	if($db->user->userlevel == 'root') $disabled=0;
+	
 	/**Recalculate button***/
 	//check if the  HM is being recalculated
 		$id = mysql_real_escape_string($_GET['id']);	 
@@ -1033,6 +1047,10 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 	
 	/****/
 	
+	$disabled=0;
+	if(($owner_type == 'shared' && $rptu != $db->user->id) || ($owner_type == 'global' && $db->user->userlevel == 'user'))
+	$disabled=1;
+	if($db->user->userlevel == 'root') $disabled=0;
 	
 	$out .= '<br clear="both" /><form action="master_heatmap.php" name="master_heatmap" onsubmit="return validate('.count($rows).','.count($columns).');" method="post"><fieldset><legend>Edit report ' . $id . '</legend>'
 		. '<input type="hidden" name="id" value="' . $id . '" />'
@@ -1043,26 +1061,55 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 		. '<label>Category: <input type="text" '.(($disabled) ? ' readonly="readonly" ':'').' '
 		. 'name="reportcategory" value="' . htmlspecialchars($category)
 		. '"/></label>';		
+	
+	if($rptu !== NULL)
+	{
+		$owner_name_query = 'SELECT `username`, `userlevel` FROM `users` WHERE id=' . $rptu;
+		$owner_res = mysql_query($owner_name_query) or die('Bad SQL query retrieving username in master heatmap report');
+		if(mysql_num_rows($owner_res) > 0)
+		{
+			while($owner_row = mysql_fetch_array($owner_res))
+			{
+				$owner_name=$owner_row['username'];
+				$owner_type=$owner_row['userlevel'];
+			}
+		}
+	}
 	if($db->user->userlevel != 'user')
 	{
 		$out .= ' Ownership: '
-			. '<label><input type="radio" name="own" value="shared" '
-			. ($owner_type == 'shared' ? 'checked="checked"' : '')
-			. (($disabled) ? ' disabled="disabled" ':'')
-			. '/>Shared</label> '
 			. '<label><input type="radio" name="own" value="global" '
-			. ($owner_type == 'global' ? 'checked="checked"' : '')
+			. ($owner_selector == 'global' ? 'checked="checked"' : '')
 			. (($disabled) ? ' disabled="disabled" ':'')
 			. '/>Global</label> '
-			. '<label><input type="radio" name="own" value="mine" '
-			. ($owner_type == 'mine' ? 'checked="checked"' : '')
+			. '<label><input type="radio" name="own" value="shared" '
+			. ($owner_selector == 'shared' ? 'checked="checked"' : '')
 			. (($disabled) ? ' disabled="disabled" ':'')
-			. '/>Mine</label>';
+			. '/>Mine (Shared)</label> '
+			. '<label><input type="radio" name="own" value="mine" '
+			. ($owner_selector == 'mine' ? 'checked="checked"' : '')
+			. (($disabled) ? ' disabled="disabled" ':'')
+			. '/>Mine (Private)</label> ';
+			
+		if(($db->user->userlevel == 'root' || $db->user->userlevel == 'admin') && $rptu != $db->user->id && $rptu !== NULL && $owner_type != 'user')
+		$out .='<label><input type="radio" name="own" value="shared_other" '.($owner_selector == 'shared_other' ? 'checked="checked"' : '')
+			. (($disabled) ? ' disabled="disabled" ':'')
+			. '/>'.$owner_name.' (Shared)</label> ';
+			
+		if($db->user->userlevel == 'root' && $rptu != $db->user->id && $rptu !== NULL)	
+		$out .='<label><input type="radio" name="own" value="mine_other" '
+			. ($owner_selector == 'mine_other' ? 'checked="checked"' : '')
+			. (($disabled) ? ' disabled="disabled" ':'')
+			. '/>'.$owner_name.' (Private)</label>';
 	}else{
 		$out .= ' Ownership: '
-			. ($owner_type == 'shared' ? 'Shared' : '')
-			. ($owner_type == 'global' ? 'Global' : '')
-			. ($owner_type == 'mine' ? 'Mine' : '');
+			. ($owner_selector == 'global' ? 'Global <input type="hidden" name="own" value="global"/> ' : '')
+			. ($owner_selector == 'shared' ? 'Mine (Shared) <input type="hidden" name="own" value="shared"/> ' : '')
+			. ($owner_selector == 'mine' ? 'Mine (Private) <input type="hidden" name="own" value="mine"/> ' : '');
+			
+		$out .= ($owner_selector == 'shared_other' ? $owner_name.' (Shared) <input type="hidden" name="own" value="shared_other"/> ' : '');
+		
+		$out .= ($owner_selector == 'mine_other' ? $owner_name.' (Private) <input type="hidden" name="own" value="mine_other"/> ' : '');
 	}
 	
 	//total column checkbox
@@ -3505,7 +3552,7 @@ function Download_reports()
 		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$row, 'Runtime:');
 		$objPHPExcel->getActiveSheet()->SetCellValue('B' . $row++, date("Y-m-d H:i:s", $now));
 		
-		$objPHPExcel->getActiveSheet()->SetCellValue('A' . $row, 'Legend:');
+		$objPHPExcel->getActiveSheet()->SetCellValue('A' . $row, 'Phase:');
 		$col = 'A';
 		//get search results
 		$phases = array('N/A', 'Phase 0', 'Phase 1', 'Phase 2', 'Phase 3', 'Phase 4');
@@ -3684,51 +3731,25 @@ function postEd()
 			} 
 			else if(isset($_POST['own']) && $_POST['own'] == 'shared')
 			{
-				if(trim($originDT['shared']) == 1) /// Already shared report
-				{
-					if(trim($db->user->id) == trim($originDT['user']))
-					{
-						$owner=$db->user->id; $shared=1;
-					}
-					else
-					{
-						$owner=trim($originDT['user']); $shared=1;
-					}
-				}
-				else
-				{
-					$owner=$db->user->id; $shared=1;	
-				}
+				$owner=$db->user->id; $shared=1;
 			} 
+			else if(isset($_POST['own']) && $_POST['own'] == 'mine')
+			{
+				$owner=$db->user->id; $shared=0;
+			}
+			else if(isset($_POST['own']) && $_POST['own'] == 'shared_other' && ($db->user->userlevel == 'root' || $db->user->userlevel == 'admin'))
+			{
+				$owner=trim($originDT['user']); $shared=1;
+			} 
+			else if(isset($_POST['own']) && $_POST['own'] == 'mine_other' && $db->user->userlevel == 'root')
+			{
+				$owner=trim($originDT['user']); $shared=0;
+			}
 			else
 			{
-				if($db->user->userlevel == 'user')
-				{
-					if(trim($db->user->id) == trim($originDT['user']))
-					{
-						$owner=$db->user->id; $shared=0;
-					}
-					else
-					{
-						$owner=trim($originDT['user']); $shared=trim($originDT['shared']);
-					}
-				}
-				else if($db->user->userlevel == 'admin')
-				{
-					$owner=$db->user->id; $shared=0;
-				}
-				else if($db->user->userlevel == 'root')
-				{
-					if($_POST['own'] == 'mine')
-					{
-						$owner=$db->user->id; $shared=0;
-					}
-					else
-					{
-						$owner=trim($originDT['user']); $shared=trim($originDT['shared']);
-					}
-				}
+				$owner=trim($originDT['user']); $shared=0;
 			}
+			
 		
 			$change_flag=0;
 			
