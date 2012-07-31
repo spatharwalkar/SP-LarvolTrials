@@ -734,6 +734,7 @@ Cerevast Therapeutics, Inc.
 Cerexa, Inc.
 Cerimon Pharmaceuticals
 Cerimon Pharmaceuticals|PPD
+Cerulean Pharma Inc.
 Cerulean Pharma, Inc.
 Cerus Corporation
 Cetero Research
@@ -1638,6 +1639,7 @@ Janssen-Cilag S.p.A.
 Janssen-Cilag Turkey
 Janssen-Ortho Inc., Canada
 Janssen-Ortho LLC
+Janssen Research & Development, LLC
 Jarrow Formulas Inc
 Jarrow Pharmaceuticals
 Jarvik Heart, Inc.
@@ -2569,6 +2571,7 @@ Roxane Laboratories
 Roxro Pharma
 RTI Biologics
 Rubel GmbH, Heiligenhaus, Germany
+RXi Pharmaceuticals, Corp.
 RxKinetix
 S.L.A. Pharma AG
 Saebo, Inc.
