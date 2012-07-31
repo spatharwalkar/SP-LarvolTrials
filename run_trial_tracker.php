@@ -13661,7 +13661,7 @@ class TrialTracker
 				$upmTitle = htmlformat($value['event_description']);
 				
 				$upmBorderLeft = '';
-				if(!empty($mvalue['edited']) && $mvalue['edited']['field'] == 'start_date')
+				if(!empty($value['edited']) && $value['edited']['field'] == 'start_date')
 				{
 					$upmBorderLeft = 'startdatehighlight';
 				}
