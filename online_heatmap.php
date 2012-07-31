@@ -22,7 +22,7 @@ $footnotes = htmlspecialchars($res['footnotes']);
 $description = htmlspecialchars($res['description']);
 $category = $res['category'];
 	
-$query = 'SELECT `num`,`type`,`type_id`, `display_name`, `category` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' ORDER BY num ASC';
+$query = 'SELECT `num`,`type`,`type_id`, `display_name`, `category`, `tag` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' ORDER BY num ASC';
 $res = mysql_query($query) or die('Bad SQL query getting master heatmap report headers');
 $rows = array();
 $columns = array();
