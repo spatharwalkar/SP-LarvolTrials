@@ -174,19 +174,31 @@ if (isset($_POST['recalculate_all']))
 	return;
 }
 // Update UPM status values
-if (isset($_POST['upm_s'])) 
+if (isset($_POST['select_status'])) 
 {
+	$st=mysql_real_escape_string($_POST['select_status']);
 	require_once('upm_trigger.php');
-	echo '<br><br><b>Updating UPM status values ...</b><br><br>';
-	if(!fire_upm_trigger()) echo '<br><b>Could complete Updating UPM status values, there was an error.<br></b>';
+	echo '<br><br>Recalculating UPM status values (for status=<b>' . $st . '</b>)<br><br>';
+	if(!fire_upm_trigger_st($st)) echo '<br><b>Could complete Updating UPM status values, there was an error.<br></b>';
 	else 
 	{
-		echo '<br><br><b>UPM status update completed.</b><br><br>';
+		echo '<br><br><b>All done.</b><br><br>';
 	}
 	return;
 }
 
-
+if (isset($_POST['upm_s'])) 
+{
+	$st=mysql_real_escape_string($_POST['upm_s']);
+	require_once('upm_trigger.php');
+	echo '<br><br>Recalculating UPM status values (for <b> end_date in the past</b>)<br><br>';
+	if(!fire_upm_trigger_dt()) echo '<br><b>Could complete Updating UPM status values, there was an error.<br></b>';
+	else 
+	{
+		echo '<br><br><b>All done.</b><br><br>';
+	}
+	return;
+}
 
 
 /****************************/
@@ -331,23 +343,29 @@ function editor()
 			. '<input type="submit" name="reca_all" value="Recalc ALL" />'
 			. '</form></div>';
 			
-	// UPM REFRESH
+	// UPM REFRESH (for a particular status)
 	$out .= '<div style="width:610px; padding:5px;float:left;">'
 			. '<form action="database.php" method="post">'
-			. 'Click <b>Update UPM Status</b> button to update UPM status values: <input type="hidden" name="upm_s" id="upm_s" value="upm_s"/>'
-			. ''
-			. '<input type="submit" value="Update UPM Status" />'
+			. 'Recalculate Status of UPMs with status:
+				<select name="select_status">
+				<option value="Occurred" selected="selected">Occurred</option>
+				<option value="Pending">Pending</option>
+				<option value="Upcoming">Upcoming</option>
+				<option value="Cancelled">Cancelled</option>
+				</select>
+				'
+			. '<input type="submit" value="Recalculate" />'
 			. '</form></div>';
 	
-	/*
 	
-	
-	require('remap_trials.php');
-remaptrials(null,null,'ALL');  (trial, larvolid,  sourcedb)
-	data_nct
-	*/
-	
-	
+	// UPM REFRESH (for end date in the past)			
+	$out .= '<div style="width:610px; padding:5px;float:left;">'
+			. '<form action="database.php" method="post">'
+			. 'Recalculate Status of UPMs with end_date in the past: <input type="hidden" name="upm_s" id="upm_s" value="upm_s"/>'
+			. ''
+			. '<input type="submit" value="Recalculate" />'
+			. '</form></div>';
+			
 	return $out;
 	
 	
