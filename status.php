@@ -622,7 +622,7 @@ function showprogress($last_id)
 		}
 	}
 	$running_pids2=array();
-	$cmd = "ps aux|grep status";
+	$cmd = "ps aux|grep php";
 	exec($cmd, $output, $result);
 	for($i=0;$i < count($output); $i++)
 	{
@@ -630,18 +630,7 @@ function showprogress($last_id)
 		$exp_out=explode(" ",$output[$i]);
 		$running_pids2[$i]=$exp_out[1];
 	}
-	$cmd = "ps aux|grep preindex_trials";
-	exec($cmd, $output, $result);
-	$j=$i+1;
-	for($i=0;$i < count($output); $i++)
-	{
-		$output[$i] = preg_replace("/ {2,}/", ' ',$output[$i]);
-		$exp_out=explode(" ",$output[$i]);
-		$running_pids2[$j]=$exp_out[1];
-		$j++;
-	}
-	
-	
+
 	$running_pids = array_merge($running_pids, $running_pids2);
 
 	for($i=0;$i < $count_upids; $i++)
