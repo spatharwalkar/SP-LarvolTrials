@@ -1,6 +1,6 @@
 <?php
 //connect to Sphinx
-if(!isset($sphinx) or empty($sphinx)) $sphinx = mysql_connect("127.0.0.1:9306") or die ("Couldn't connect to Sphinx server.");
+if(!isset($sphinx) or empty($sphinx)) $sphinx = @mysql_connect("127.0.0.1:9306") or $sphinx=false;
 require_once('db.php');
 require_once('include.util.php');
 require_once('preindex_trial.php');

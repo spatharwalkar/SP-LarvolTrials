@@ -2,7 +2,7 @@
 header('P3P: CP="CAO PSA OUR"');
 session_start();
 //connect to Sphinx
-if(!isset($sphinx) or empty($sphinx)) $sphinx = mysql_connect("127.0.0.1:9306") or die ("Couldn't connect to Sphinx server.");
+if(!isset($sphinx) or empty($sphinx)) $sphinx = @mysql_connect("127.0.0.1:9306") or $sphinx=false;
 require_once('krumo/class.krumo.php');
 require_once('db.php');
 require_once('include.search.php');

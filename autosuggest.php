@@ -5,7 +5,7 @@ $search = mysql_real_escape_string($_GET['query']);
 $table = mysql_real_escape_string($_GET['table']);
 $field = mysql_real_escape_string($_GET['field']);
 $hint = mysql_real_escape_string($_GET['hint']);
-
+$c_lid = mysql_real_escape_string($_GET['c_lid']);
 //filter input
 $autoSuggestTables = array('areas','upm','products','data_trials');
 if(!in_array($table,$autoSuggestTables))die;
@@ -26,6 +26,12 @@ else
 {
 	$query = "select distinct $field from $table where $field like '%$search%' order by $field asc";
 }
+
+if(isset($c_lid) and !empty($c_lid)) 
+{
+	$query = "select distinct $field from $table where  $field like '%$search%'  and larvol_id<>$c_lid  order by $field asc";
+}
+
 if( isset($hint) and !is_null($hint) and strlen($hint)>1 )
 $query = "select distinct $field from $table  where ( $field like '%$hint%' ) and ( $field <> '$hint' ) order by $field asc limit 50";
 

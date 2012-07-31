@@ -456,6 +456,7 @@ function searchHandlerBackTicker(&$item,$key,$userKey)
 function sphinx_search($srch_string=null)
 {
 global $sphinx,$db;
+if(!isset($sphinx)) return false;
 if(!isset($srch_string)) return false;
 $_POST['sphinx_s']=$srch_string;
 $str=$srch_string;
@@ -493,6 +494,7 @@ while($row = mysql_fetch_assoc($res)) {
 function get_sphinx_idlist($srch_string=null)
 {
 	global $sphinx,$db;
+	if(!isset($sphinx)) return false;
 	if(!isset($srch_string)) return false;
 	$_POST['sphinx_s']=$srch_string;
 	$str=$srch_string;
@@ -514,6 +516,7 @@ function get_sphinx_idlist($srch_string=null)
 function delete_sphinx_index($l_id)
 {
 	global $sphinx;
+	if(!isset($sphinx)) return false;
 	if(!$l_id) return false;
 	
 	$query ="DELETE FROM rtindex1 WHERE id =" . $l_id  ;
@@ -593,6 +596,7 @@ function update_sphinx_index($l_id)
 	
 	$qry=$qry2.$qry;
 	global $sphinx;
+	if(!isset($sphinx)) return false;
 	$res = mysql_query($qry,$sphinx);
 //	mysql_close($sphinx);
 	if($res === false)

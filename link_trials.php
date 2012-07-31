@@ -1,6 +1,6 @@
 <?php
 //connect to Sphinx
-if(!isset($sphinx) or empty($sphinx)) $sphinx = mysql_connect("127.0.0.1:9306") or die ("Couldn't connect to Sphinx server.");
+if(!isset($sphinx) or empty($sphinx)) $sphinx = @mysql_connect("127.0.0.1:9306") or $sphinx=false;
 require_once('db.php');
 require_once('include.util.php');
 //ini_set('error_reporting', E_ALL ^ E_NOTICE);
@@ -218,7 +218,7 @@ $(document).ready(function(){
 	var options,a,b;
 
 	jQuery(function(){
-	  options = { serviceUrl:'autosuggest.php',params:{table:<?php echo "'$table'"?>,field:'source_id'} };
+	  options = { serviceUrl:'autosuggest.php',params:{table:<?php echo "'$table'"?>,field:'source_id',c_lid:<?php echo "$lid"?> } };
 	  	  
 	  if($('#linkedtrial1').length>=0)
 	  a = $('#linkedtrial1').autocomplete(options);
