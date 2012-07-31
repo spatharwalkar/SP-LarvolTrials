@@ -13429,8 +13429,9 @@ class TrialTracker
 				
 			//Query for checking updates for upms.
 			$sql = "SELECT `id`, `field`, `old_value` FROM `upm_history` "
-					. " WHERE `id` = '" . $row['id'] . "' AND (CAST(`change_date` AS DATE) <= '" . date('Y-m-d', $timeMachine) . "' AND `change_date` >= '" 
-					. date('Y-m-d', strtotime($timeInterval ,$timeMachine)) . "') ORDER BY `change_date` DESC LIMIT 0,1 ";
+					. " WHERE `id` = '" . $row['id'] . "' AND (CAST(`change_date` AS DATE) <= '" . date('Y-m-d', $timeMachine) 
+					. "' AND CAST(`change_date` AS DATE) >= '" . date('Y-m-d', strtotime($timeInterval ,$timeMachine)) 
+					. "') ORDER BY `change_date` DESC LIMIT 0,1 ";
 			$res = mysql_query($sql);
 			
 			$upm['matchedupms'][$i]['edited'] = array();
@@ -13525,8 +13526,8 @@ class TrialTracker
 							$naUpms[$i]['edited'] = array();
 							
 							$sql = "SELECT `id`, `field`, `old_value` FROM `upm_history` "
-									. " WHERE `id` = '" . $row['id'] . "' AND (`change_date` <= '" . date('Y-m-d', $timeMachine) 
-									. "' AND `change_date` >= '" . date('Y-m-d',strtotime($timeInterval, $timeMachine)) . "') ORDER BY `change_date` DESC LIMIT 0,1 ";
+									. " WHERE `id` = '" . $row['id'] . "' AND (CAST(`change_date` AS DATE) <= '" . date('Y-m-d', $timeMachine) 
+									. "' AND CAST(`change_date` AS DATE) >= '" . date('Y-m-d',strtotime($timeInterval, $timeMachine)) . "') ORDER BY `change_date` DESC LIMIT 0,1 ";
 							$ress = mysql_query($sql);
 							
 							if(mysql_num_rows($ress) > 0) 
@@ -13595,8 +13596,8 @@ class TrialTracker
 					$naUpms[$i]['edited'] = array();
 					
 					$sql = "SELECT `id`, `field`, `old_value` FROM `upm_history` "
-							. " WHERE `id` = '" . $row['id'] . "' AND (`change_date` <= '" . date('Y-m-d', $timeMachine) 
-							. "' AND `change_date` >= '" . date('Y-m-d',strtotime($timeInterval, $timeMachine)) . "') ORDER BY `change_date` DESC LIMIT 0,1 ";
+							. " WHERE `id` = '" . $row['id'] . "' AND (CAST(`change_date` AS DATE) <= '" . date('Y-m-d', $timeMachine) 
+							. "' AND CAST(`change_date` AS DATE) >= '" . date('Y-m-d',strtotime($timeInterval, $timeMachine)) . "') ORDER BY `change_date` DESC LIMIT 0,1 ";
 					$ress = mysql_query($sql);
 					
 					if(mysql_num_rows($ress) > 0) 
@@ -13675,7 +13676,10 @@ class TrialTracker
 				//rendering unmatched upms
 				$outputStr .= '<tr ' . $class . '>';
 				
+				
 				//field upm-id
+				$title = '';
+				$attr = '';	
 				if($loggedIn)
 				{
 					if($value['new'] == 'y')
@@ -13689,6 +13693,8 @@ class TrialTracker
 				
 				
 				//field upm event description
+				$title = '';
+				$attr = '';	
 				if(!empty($value['edited']) && ($value['edited']['field'] == 'event_description')) 
 				{
 					$titleLinkColor = 'style="color:#FF0000;"';
@@ -13722,6 +13728,7 @@ class TrialTracker
 				
 				//field upm status
 				$title = '';
+				$attr = '';	
 				if($value['new'] == 'y')
 				{
 					$title = ' title = "New record" ';
