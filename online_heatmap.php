@@ -22,7 +22,7 @@ $footnotes = htmlspecialchars($res['footnotes']);
 $description = htmlspecialchars($res['description']);
 $category = $res['category'];
 	
-$query = 'SELECT `num`,`type`,`type_id`, `display_name`, `category`, `tag` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' ORDER BY num ASC';
+$query = 'SELECT `num`,`type`,`type_id`, `display_name`, `category` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' ORDER BY num ASC';
 $res = mysql_query($query) or die('Bad SQL query getting master heatmap report headers');
 $rows = array();
 $columns = array();
@@ -487,6 +487,7 @@ $Max_ColWidth = 0;
 $Line_Height = 16;
 $Max_H_AreaCatStringHeight = 0;
 $Max_V_AreaCatStringLength = 0;
+$Cat_Area_Rotation_Flg = 0;
 if($Rotation_Flg == 1)	////Adjustment in area column width as per area name
 {
 	foreach($columns as $col => $val)
@@ -517,9 +518,10 @@ if($Rotation_Flg == 1)	////Adjustment in area column width as per area name
 		if($columns_Span[$col] > 0 && $columnsCategoryName[$col] != 'Undefined')
 		{
 			$current_StringLength =strlen($columnsCategoryName[$col]);
-			if($columns_Span[$col] < 3)
+			if($columns_Span[$col] < 3 && $columnsCategoryName[$col] != 'Undefined')
 			{
 				$Cat_Area_Rotation[$col] = 1;
+				$Cat_Area_Rotation_Flg = 1;
 				if($Max_V_AreaCatStringLength < $current_StringLength)
 				{
 					$Max_V_AreaCatStringLength = $current_StringLength;
@@ -548,13 +550,16 @@ if($Rotation_Flg == 1)	////Adjustment in area column width as per area name
 
 if($Rotation_Flg == 1)	////Create width for area category cells and put forcefully line break in category text
 {
-	/// Assign minimum height to category row
-	if($Max_H_AreaCatStringHeight > 130)	/// if horizontal spanning category requires more height assign it
-		$area_Cat_Height = $Max_H_AreaCatStringHeight;
-	else if(($Max_V_AreaCatStringLength * $Char_Size) < 130 && $Cat_Area_Rotation[$col])	//// if vertical spanning category requires less height assign it
-		$area_Cat_Height = $Max_V_AreaCatStringLength * $Char_Size;
-	else
-		$area_Cat_Height = 130;	/// Take default height
+	if($Cat_Area_Rotation_Flg)
+	{
+		/// Assign minimum height to category row
+		if($Max_H_AreaCatStringHeight > 130)	/// if horizontal spanning category requires more height assign it
+			$area_Cat_Height = $Max_H_AreaCatStringHeight;
+		else if(($Max_V_AreaCatStringLength * $Char_Size) < 130)	//// if vertical spanning category requires less height assign it
+			$area_Cat_Height = $Max_V_AreaCatStringLength * $Char_Size;
+		else
+			$area_Cat_Height = 130;	/// Take default height
+	}
 	
 	foreach($columns as $col => $val)
 	{
@@ -569,7 +574,7 @@ if($Rotation_Flg == 1)	////Create width for area category cells and put forceful
 			
 			$Cat_Area_Col_width[$col] = $width +((($columns_Span[$col] == 1) ? 0:1) * ($columns_Span[$col]-1));
 			
-			if($columns_Span[$col] < 3)
+			if($columns_Span[$col] < 3 && $columnsCategoryName[$col] != 'Undefined')
 			{
 				$cols_Cat_Space[$col] = ceil((($area_Cat_Height < 130)? ($area_Cat_Height):($area_Cat_Height)) / $Char_Size);
 				$cols_Cat_Lines[$col] = ceil(strlen(trim($columnsCategoryName[$col]))/$cols_Cat_Space[$col]);
@@ -670,7 +675,7 @@ if($Rotation_Flg == 1)
 		writing-mode: tb-rl; /* For IE */
 		filter: flipv fliph;
 		/*font-family:"Courier New", Courier, monospace;*/
-		margin-bottom:4px;
+		margin-bottom:2px;
 	}
 	</style>
 	<style type="text/css">';
@@ -712,7 +717,7 @@ if($Rotation_Flg == 1)
 				print '
 						.Cat_RowDiv_Class_'.$col.' 
 						{
-							margin-left:'.((($Line_Height)*$cols_Cat_Lines[$col]) + ($width/2)).'px;
+							margin-left:'.((($Line_Height)*$cols_Cat_Lines[$col]) + ($width/1.5)).'px;
 						}
 					';
 				else
@@ -727,8 +732,8 @@ if($Rotation_Flg == 1)
 					.Cat_Area_Row_Class_'.$col.' 
 					{
 						width:'.$Cat_Area_Col_width[$col].'px;
-						max-width:'.$Cat_Area_Col_width[$col].'px';
-						if($Cat_Area_Rotation[$col])
+						max-width:'.$Cat_Area_Col_width[$col].'px;';
+						if($Cat_Area_Rotation_Flg)
 						{
 							print '	height:'.($area_Cat_Height).'px;
 								_height:'.($area_Cat_Height).'px;';
@@ -1690,7 +1695,7 @@ foreach($columns as $col => $val)
 	if($columns_Span[$col] > 0)
 	{
 		$online_HMCounter++;
-		$htmlContent .= '<th class="Cat_Area_Row_Class_'.$col.'" width="'.$Cat_Area_Col_width[$col].'px" style="'.(($Cat_Area_Rotation[$col]) ? 'vertical-align:bottom;':'vertical-align:middle;').'max-width:'.$Cat_Area_Col_width[$col].';background-color:#FFFFFF; '.(($columnsCategoryName[$col] != 'Undefined') ? 'border-left:#000000 solid 2px; border-top:#000000 solid 2px; border-right:#000000 solid 2px;':'').'" id="Cell_ID_'.$online_HMCounter.'" colspan="'.$columns_Span[$col].'"><div class="'.(($Cat_Area_Rotation[$col]) ? 'box_rotate Cat_RowDiv_Class_'.$col.' ':'break_words').'">';
+		$htmlContent .= '<th class="Cat_Area_Row_Class_'.$col.'" width="'.$Cat_Area_Col_width[$col].'px" style="'.(($Cat_Area_Rotation[$col]) ? 'vertical-align:bottom;':'vertical-align:middle;').'max-width:'.$Cat_Area_Col_width[$col].'px;background-color:#FFFFFF; '.(($columnsCategoryName[$col] != 'Undefined') ? 'border-left:#000000 solid 2px; border-top:#000000 solid 2px; border-right:#000000 solid 2px;':'').'" id="Cell_ID_'.$online_HMCounter.'" colspan="'.$columns_Span[$col].'" '.(($Cat_Area_Rotation[$col]) ? 'height="'.$area_Cat_Height.'px" align="left"':'align="center"').'><div class="'.(($Cat_Area_Rotation[$col]) ? 'box_rotate Cat_RowDiv_Class_'.$col.' ':'break_words').'">';
 		if($columnsCategoryName[$col] != 'Undefined' && $Rotation_Flg == 1 && $Cat_Area_Rotation[$col])
 		{
 			$cat_name = str_replace(' ','`',trim($columnsCategoryName[$col]));
