@@ -3,6 +3,6 @@
 
 /* This is a general solution for simulating the missing :hover pseudo-class using
  a .hover real class plus Javascript. Feel free to include any tag that needs it */
-li,div,span,td{
-	behavior:url(css/IE6fixes.htc);
+body{
+	behavior:url(css/csshover3.htc);
 }
