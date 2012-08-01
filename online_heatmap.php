@@ -367,6 +367,42 @@ foreach($rows as $row => $rval)
 			$data_matrix[$row][$col]['prohibited']=$cell_data['prohibited'];
 			$data_matrix[$row][$col]['new_trials']=$cell_data['new_trials'];
 			
+			$data_matrix[$row][$col]['not_yet_recruiting_active_indlead']=$cell_data['not_yet_recruiting_active_indlead'];
+			$data_matrix[$row][$col]['recruiting_active_indlead']=$cell_data['recruiting_active_indlead'];
+			$data_matrix[$row][$col]['enrolling_by_invitation_active_indlead']=$cell_data['enrolling_by_invitation_active_indlead'];
+			$data_matrix[$row][$col]['active_not_recruiting_active_indlead']=$cell_data['active_not_recruiting_active_indlead'];
+			$data_matrix[$row][$col]['completed_active_indlead']=$cell_data['completed_active_indlead'];
+			$data_matrix[$row][$col]['suspended_active_indlead']=$cell_data['suspended_active_indlead'];
+			$data_matrix[$row][$col]['terminated_active_indlead']=$cell_data['terminated_active_indlead'];
+			$data_matrix[$row][$col]['withdrawn_active_indlead']=$cell_data['withdrawn_active_indlead'];
+			$data_matrix[$row][$col]['available_active_indlead']=$cell_data['available_active_indlead'];
+			$data_matrix[$row][$col]['no_longer_available_active_indlead']=$cell_data['no_longer_available_active_indlead'];
+			$data_matrix[$row][$col]['approved_for_marketing_active_indlead']=$cell_data['approved_for_marketing_active_indlead'];
+			$data_matrix[$row][$col]['no_longer_recruiting_active_indlead']=$cell_data['no_longer_recruiting_active_indlead'];
+			$data_matrix[$row][$col]['withheld_active_indlead']=$cell_data['withheld_active_indlead'];
+			$data_matrix[$row][$col]['temporarily_not_available_active_indlead']=$cell_data['temporarily_not_available_active_indlead'];
+			$data_matrix[$row][$col]['ongoing_active_indlead']=$cell_data['ongoing_active_indlead'];
+			$data_matrix[$row][$col]['not_authorized_active_indlead']=$cell_data['not_authorized_active_indlead'];
+			$data_matrix[$row][$col]['prohibited_active_indlead']=$cell_data['prohibited_active_indlead'];
+			
+			$data_matrix[$row][$col]['not_yet_recruiting_active']=$cell_data['not_yet_recruiting_active'];
+			$data_matrix[$row][$col]['recruiting_active']=$cell_data['recruiting_active'];
+			$data_matrix[$row][$col]['enrolling_by_invitation_active']=$cell_data['enrolling_by_invitation_active'];
+			$data_matrix[$row][$col]['active_not_recruiting_active']=$cell_data['active_not_recruiting_active'];
+			$data_matrix[$row][$col]['completed_active']=$cell_data['completed_active'];
+			$data_matrix[$row][$col]['suspended_active']=$cell_data['suspended_active'];
+			$data_matrix[$row][$col]['terminated_active']=$cell_data['terminated_active'];
+			$data_matrix[$row][$col]['withdrawn_active']=$cell_data['withdrawn_active'];
+			$data_matrix[$row][$col]['available_active']=$cell_data['available_active'];
+			$data_matrix[$row][$col]['no_longer_available_active']=$cell_data['no_longer_available_active'];
+			$data_matrix[$row][$col]['approved_for_marketing_active']=$cell_data['approved_for_marketing_active'];
+			$data_matrix[$row][$col]['no_longer_recruiting_active']=$cell_data['no_longer_recruiting_active'];
+			$data_matrix[$row][$col]['withheld_active']=$cell_data['withheld_active'];
+			$data_matrix[$row][$col]['temporarily_not_available_active']=$cell_data['temporarily_not_available_active'];
+			$data_matrix[$row][$col]['ongoing_active']=$cell_data['ongoing_active'];
+			$data_matrix[$row][$col]['not_authorized_active']=$cell_data['not_authorized_active'];
+			$data_matrix[$row][$col]['prohibited_active']=$cell_data['prohibited_active'];
+			
 			///As stringlength of total will be more in all
 			$Width = $Width + (strlen($data_matrix[$row][$col]['total'])*($Char_Size+1));
 					
@@ -1329,25 +1365,59 @@ function change_view()
 					}
 				}
 				
-				var Status_List_Flg_ele = document.getElementById("Status_List_Flg_"+i);
-				if(Status_List_Flg_ele != null && Status_List_Flg_ele != '')
-				var Status_List_Flg = Status_List_Flg_ele.value;
-				else Status_List_Flg = 0;
-				if(Status_List_Flg != 0)
+				var New_Trials_ele = document.getElementById("New_Trials_"+i);
+				if(New_Trials_ele != '' && New_Trials_ele != null)
 				{
-					var Status_List_ele = document.getElementById("Status_List_"+i);
 					if(ed_limit == one_month)
 					{
-						if(Status_List_ele != null && Status_List_ele != '')
-						{
-							tooltip_flg = 1;
-							document.getElementById("Status_List_"+i).style.display = "inline";
-						}
+						tooltip_flg = 1;
+						document.getElementById("New_Trials_"+i).style.display = "inline";
 					}
 					else
 					{
-						if(Status_List_ele != null && Status_List_ele != '')
-						document.getElementById("Status_List_"+i).style.display = "none";
+						document.getElementById("New_Trials_"+i).style.display = "none";
+					}
+				}
+				
+				var Status_Total_List_ele = document.getElementById("Status_Total_List_"+i);
+				if(Status_Total_List_ele != '' && Status_Total_List_ele != null)
+				{
+					if(ed_limit == one_month && view_type.value == 'total')
+					{
+						tooltip_flg = 1;
+						document.getElementById("Status_Total_List_"+i).style.display = "inline";
+					}
+					else
+					{
+						document.getElementById("Status_Total_List_"+i).style.display = "none";
+					}
+				}
+				
+				var Status_Indlead_List_ele = document.getElementById("Status_Indlead_List_"+i);
+				if(Status_Indlead_List_ele != '' && Status_Indlead_List_ele != null)
+				{
+					if(ed_limit == one_month && view_type.value == 'indlead')
+					{
+						tooltip_flg = 1;
+						document.getElementById("Status_Indlead_List_"+i).style.display = "inline";
+					}
+					else
+					{
+						document.getElementById("Status_Indlead_List_"+i).style.display = "none";
+					}
+				}
+				
+				var Status_Active_List_ele = document.getElementById("Status_Active_List_"+i);
+				if(Status_Active_List_ele != '' && Status_Active_List_ele != null)
+				{
+					if(ed_limit == one_month && view_type.value == 'active')
+					{
+						tooltip_flg = 1;
+						document.getElementById("Status_Active_List_"+i).style.display = "inline";
+					}
+					else
+					{
+						document.getElementById("Status_Active_List_"+i).style.display = "none";
 					}
 				}
 				
@@ -1873,131 +1943,341 @@ foreach($rows as $row => $rval)
 			$htmlContent .= '<font id="Highest_Phase_'.$online_HMCounter.'"><font style="color:#206040; font-weight: 900;">Highest phase updated </font><font style="color:#206040; font-weight: 900;">from : </font> <font style="color:#000000; font-weight: 900;">Phase '.$data_matrix[$row][$col]['highest_phase_prev'].'</font></br></font>';
 							
 			
-			$htmlContent .= '<font id="Status_List_'.$online_HMCounter.'">';
-			
-			$Status_List_Flg_1=0;
-			$Status_List_1 = '';
+			$New_Trials_Flg=0;
+			$New_Trials = '';
 			if($data_matrix[$row][$col]['new_trials'] > 0)
 			{
-				$Status_List_Flg_1=1;
-				$Status_List_1 = '<font style="color:#206040; font-weight: 900;">New trials</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['new_trials'] .'</font></br>';
-				$htmlContent .= '<input type="hidden" value="True" name="New_Trials_'.$online_HMCounter.'" id="New_Trials_'.$online_HMCounter.'" />';
+				$New_Trials_Flg=1;
+				$New_Trials = '<font id="New_Trials_'.$online_HMCounter.'"><font style="color:#206040; font-weight: 900;">New trials</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['new_trials'] .'</font></font></br>';
 			}
 			
-			if($Status_List_Flg_1==1)
-			$htmlContent .= $Status_List_1;
+			if($New_Trials_Flg==1)
+			$htmlContent .= $New_Trials;
 			
-			$Status_List_Flg_2=0;
-			$Status_List_2 ='<font style="color:#206040; font-weight: 900;">Status changes to:<br/></font>';
+			$Status_Total_Flg=0;
+			$Status_Total ='<font id="Status_Total_List_'.$online_HMCounter.'" style="display:none;"><font style="color:#206040; font-weight: 900;">Status changes to:<br/></font>';
+			
 			if($data_matrix[$row][$col]['not_yet_recruiting'] > 0)
 			{
-				$Status_List_Flg_2=1;
-				$Status_List_2 .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Not yet recruiting</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['not_yet_recruiting'] .'</font></br>';
+				$Status_Total_Flg=1;
+				$Status_Total .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Not yet recruiting</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['not_yet_recruiting'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['recruiting'] > 0)
 			{
-				$Status_List_Flg_2=1;
-				$Status_List_2 .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Recruiting</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['recruiting'] .'</font></br>';
+				$Status_Total_Flg=1;
+				$Status_Total .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Recruiting</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['recruiting'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['enrolling_by_invitation'] > 0)
 			{
-				$Status_List_Flg_2=1;
-				$Status_List_2 .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Enrolling by invitation</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['enrolling_by_invitation'] .'</font></br>';
+				$Status_Total_Flg=1;
+				$Status_Total .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Enrolling by invitation</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['enrolling_by_invitation'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['active_not_recruiting'] > 0)
 			{
-				$Status_List_Flg_2=1;
-				$Status_List_2 .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Active not recruiting</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['active_not_recruiting'] .'</font></br>';
+				$Status_Total_Flg=1;
+				$Status_Total .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Active not recruiting</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['active_not_recruiting'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['completed'] > 0)
 			{
-				$Status_List_Flg_2=1;
-				$Status_List_2 .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Completed</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['completed'] .'</font></br>';
+				$Status_Total_Flg=1;
+				$Status_Total .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Completed</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['completed'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['suspended'] > 0)
 			{
-				$Status_List_Flg_2=1;
-				$Status_List_2 .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Suspended</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['suspended'] .'</font></br>';
+				$Status_Total_Flg=1;
+				$Status_Total .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Suspended</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['suspended'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['terminated'] > 0)
 			{
-				$Status_List_Flg_2=1;
-				$Status_List_2 .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Terminated</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['terminated'] .'</font></br>';
+				$Status_Total_Flg=1;
+				$Status_Total .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Terminated</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['terminated'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['withdrawn'] > 0)
 			{
-				$Status_List_Flg_2=1;
-				$Status_List_2 .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Withdrawn</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['withdrawn'] .'</font></br>';
+				$Status_Total_Flg=1;
+				$Status_Total .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Withdrawn</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['withdrawn'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['available'] > 0)
 			{
-				$Status_List_Flg_2=1;
-				$Status_List_2 .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Available</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['available'] .'</font></br>';
+				$Status_Total_Flg=1;
+				$Status_Total .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Available</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['available'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['no_longer_available'] > 0)
 			{
-				$Status_List_Flg_2=1;
-				$Status_List_2 .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">No longer available</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['no_longer_available'] .'</font></br>';
+				$Status_Total_Flg=1;
+				$Status_Total .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">No longer available</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['no_longer_available'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['approved_for_marketing'] > 0)
 			{
-				$Status_List_Flg_2=1;
-				$Status_List_2 .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Approved for marketing</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['approved_for_marketing'] .'</font></br>';
+				$Status_Total_Flg=1;
+				$Status_Total .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Approved for marketing</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['approved_for_marketing'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['no_longer_recruiting'] > 0)
 			{
-				$Status_List_Flg_2=1;
-				$Status_List_2 .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">No longer recruiting</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['no_longer_recruiting'] .'</font></br>';
+				$Status_Total_Flg=1;
+				$Status_Total .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">No longer recruiting</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['no_longer_recruiting'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['withheld'] > 0)
 			{
-				$Status_List_Flg_2=1;
-				$Status_List_2 .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Withheld</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['withheld'] .'</font></br>';
+				$Status_Total_Flg=1;
+				$Status_Total .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Withheld</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['withheld'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['temporarily_not_available'] > 0)
 			{
-				$Status_List_Flg_2=1;
-				$Status_List_2 .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Temporarily not available</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['temporarily_not_available'] .'</font></br>';
+				$Status_Total_Flg=1;
+				$Status_Total .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Temporarily not available</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['temporarily_not_available'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['ongoing'] > 0)
 			{
-				$Status_List_Flg_2=1;
-				$Status_List_2 .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">On going</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['ongoing'] .'</font></br>';
+				$Status_Total_Flg=1;
+				$Status_Total .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">On going</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['ongoing'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['not_authorized'] > 0)
 			{
-				$Status_List_Flg_2=1;
-				$Status_List_2 .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Not authorized</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['not_authorized'] .'</font></br>';
+				$Status_Total_Flg=1;
+				$Status_Total .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Not authorized</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['not_authorized'] .'</font></br>';
 			}
 			
 			if($data_matrix[$row][$col]['prohibited'] > 0)
 			{
-				$Status_List_Flg_2=1;
-				$Status_List_2 .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Prohibited</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['prohibited'] .'</font></br>';
+				$Status_Total_Flg=1;
+				$Status_Total .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Prohibited</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['prohibited'] .'</font></br>';
 			}
 			
-			if($Status_List_Flg_2==1)
-			$htmlContent .= $Status_List_2;
+			if($Status_Total_Flg==1)
+			$htmlContent .= $Status_Total.'</font>';
 			
-			$htmlContent .= '</font>';
+			$Status_Indlead_Flg=0;
+			$Status_Indlead ='<font id="Status_Indlead_List_'.$online_HMCounter.'" style="display:inline;"><font style="color:#206040; font-weight: 900;">Status changes to:<br/></font>';
 			
-			if($Status_List_Flg_1==1 || $Status_List_Flg_2==1)
-			$htmlContent .= '<input type="hidden" value="1" id="Status_List_Flg_'.$online_HMCounter.'" />';
+			if($data_matrix[$row][$col]['not_yet_recruiting_active_indlead'] > 0)
+			{
+				$Status_Indlead_Flg=1;
+				$Status_Indlead .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Not yet recruiting</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['not_yet_recruiting_active_indlead'] .'</font></br>';
+			}
+			
+			if($data_matrix[$row][$col]['recruiting_active_indlead'] > 0)
+			{
+				$Status_Indlead_Flg=1;
+				$Status_Indlead .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Recruiting</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['recruiting_active_indlead'] .'</font></br>';
+			}
+			
+			if($data_matrix[$row][$col]['enrolling_by_invitation_active_indlead'] > 0)
+			{
+				$Status_Indlead_Flg=1;
+				$Status_Indlead .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Enrolling by invitation</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['enrolling_by_invitation_active_indlead'] .'</font></br>';
+			}
+			
+			if($data_matrix[$row][$col]['active_not_recruiting_active_indlead'] > 0)
+			{
+				$Status_Indlead_Flg=1;
+				$Status_Indlead .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Active not recruiting</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['active_not_recruiting_active_indlead'] .'</font></br>';
+			}
+			
+			if($data_matrix[$row][$col]['completed_active_indlead'] > 0)
+			{
+				$Status_Indlead_Flg=1;
+				$Status_Indlead .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Completed</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['completed_active_indlead'] .'</font></br>';
+			}
+			
+			if($data_matrix[$row][$col]['suspended_active_indlead'] > 0)
+			{
+				$Status_Indlead_Flg=1;
+				$Status_Indlead .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Suspended</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['suspended_active_indlead'] .'</font></br>';
+			}
+			
+			if($data_matrix[$row][$col]['terminated_active_indlead'] > 0)
+			{
+				$Status_Indlead_Flg=1;
+				$Status_Indlead .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Terminated</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['terminated_active_indlead'] .'</font></br>';
+			}
+			
+			if($data_matrix[$row][$col]['withdrawn_active_indlead'] > 0)
+			{
+				$Status_Indlead_Flg=1;
+				$Status_Indlead .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Withdrawn</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['withdrawn_active_indlead'] .'</font></br>';
+			}
+			
+			if($data_matrix[$row][$col]['available_active_indlead'] > 0)
+			{
+				$Status_Indlead_Flg=1;
+				$Status_Indlead .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Available</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['available_active_indlead'] .'</font></br>';
+			}
+			
+			if($data_matrix[$row][$col]['no_longer_available_active_indlead'] > 0)
+			{
+				$Status_Indlead_Flg=1;
+				$Status_Indlead .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">No longer available</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['no_longer_available_active_indlead'] .'</font></br>';
+			}
+			
+			if($data_matrix[$row][$col]['approved_for_marketing_active_indlead'] > 0)
+			{
+				$Status_Indlead_Flg=1;
+				$Status_Indlead .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Approved for marketing</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['approved_for_marketing_active_indlead'] .'</font></br>';
+			}
+			
+			if($data_matrix[$row][$col]['no_longer_recruiting_active_indlead'] > 0)
+			{
+				$Status_Indlead_Flg=1;
+				$Status_Indlead .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">No longer recruiting</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['no_longer_recruiting_active_indlead'] .'</font></br>';
+			}
+			
+			if($data_matrix[$row][$col]['withheld_active_indlead'] > 0)
+			{
+				$Status_Indlead_Flg=1;
+				$Status_Indlead .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Withheld</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['withheld_active_indlead'] .'</font></br>';
+			}
+			
+			if($data_matrix[$row][$col]['temporarily_not_available_active_indlead'] > 0)
+			{
+				$Status_Indlead_Flg=1;
+				$Status_Indlead .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Temporarily not available</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['temporarily_not_available_active_indlead'] .'</font></br>';
+			}
+			
+			if($data_matrix[$row][$col]['ongoing_active_indlead'] > 0)
+			{
+				$Status_Indlead_Flg=1;
+				$Status_Indlead .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">On going</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['ongoing_active_indlead'] .'</font></br>';
+			}
+			
+			if($data_matrix[$row][$col]['not_authorized_active_indlead'] > 0)
+			{
+				$Status_Indlead_Flg=1;
+				$Status_Indlead .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Not authorized</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['not_authorized_active_indlead'] .'</font></br>';
+			}
+			
+			if($data_matrix[$row][$col]['prohibited_active_indlead'] > 0)
+			{
+				$Status_Indlead_Flg=1;
+				$Status_Indlead .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Prohibited</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['prohibited_active_indlead'] .'</font></br>';
+			}
+			
+			if($Status_Indlead_Flg==1)
+			$htmlContent .= $Status_Indlead.'</font>';
+			
+			$Status_Active_Flg=0;
+			$Status_Active ='<font id="Status_Active_List_'.$online_HMCounter.'" style="display:none;"><font style="color:#206040; font-weight: 900;">Status changes to:<br/></font>';
+			
+			if($data_matrix[$row][$col]['not_yet_recruiting_active'] > 0)
+			{
+				$Status_Active_Flg=1;
+				$Status_Active .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Not yet recruiting</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['not_yet_recruiting_active'] .'</font></br>';
+			}
+			
+			if($data_matrix[$row][$col]['recruiting_active'] > 0)
+			{
+				$Status_Active_Flg=1;
+				$Status_Active .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Recruiting</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['recruiting_active'] .'</font></br>';
+			}
+			
+			if($data_matrix[$row][$col]['enrolling_by_invitation_active'] > 0)
+			{
+				$Status_Active_Flg=1;
+				$Status_Active .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Enrolling by invitation</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['enrolling_by_invitation_active'] .'</font></br>';
+			}
+			
+			if($data_matrix[$row][$col]['active_not_recruiting_active'] > 0)
+			{
+				$Status_Active_Flg=1;
+				$Status_Active .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Active not recruiting</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['active_not_recruiting_active'] .'</font></br>';
+			}
+			
+			if($data_matrix[$row][$col]['completed_active'] > 0)
+			{
+				$Status_Active_Flg=1;
+				$Status_Active .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Completed</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['completed_active'] .'</font></br>';
+			}
+			
+			if($data_matrix[$row][$col]['suspended_active'] > 0)
+			{
+				$Status_Active_Flg=1;
+				$Status_Active .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Suspended</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['suspended_active'] .'</font></br>';
+			}
+			
+			if($data_matrix[$row][$col]['terminated_active'] > 0)
+			{
+				$Status_Active_Flg=1;
+				$Status_Active .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Terminated</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['terminated_active'] .'</font></br>';
+			}
+			
+			if($data_matrix[$row][$col]['withdrawn_active'] > 0)
+			{
+				$Status_Active_Flg=1;
+				$Status_Active .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Withdrawn</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['withdrawn_active'] .'</font></br>';
+			}
+			
+			if($data_matrix[$row][$col]['available_active'] > 0)
+			{
+				$Status_Active_Flg=1;
+				$Status_Active .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Available</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['available_active'] .'</font></br>';
+			}
+			
+			if($data_matrix[$row][$col]['no_longer_available_active'] > 0)
+			{
+				$Status_Active_Flg=1;
+				$Status_Active .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">No longer available</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['no_longer_available_active'] .'</font></br>';
+			}
+			
+			if($data_matrix[$row][$col]['approved_for_marketing_active'] > 0)
+			{
+				$Status_Active_Flg=1;
+				$Status_Active .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Approved for marketing</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['approved_for_marketing_active'] .'</font></br>';
+			}
+			
+			if($data_matrix[$row][$col]['no_longer_recruiting_active'] > 0)
+			{
+				$Status_Active_Flg=1;
+				$Status_Active .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">No longer recruiting</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['no_longer_recruiting_active'] .'</font></br>';
+			}
+			
+			if($data_matrix[$row][$col]['withheld_active'] > 0)
+			{
+				$Status_Active_Flg=1;
+				$Status_Active .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Withheld</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['withheld_active'] .'</font></br>';
+			}
+			
+			if($data_matrix[$row][$col]['temporarily_not_available_active'] > 0)
+			{
+				$Status_Active_Flg=1;
+				$Status_Active .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Temporarily not available</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['temporarily_not_available_active'] .'</font></br>';
+			}
+			
+			if($data_matrix[$row][$col]['ongoing_active'] > 0)
+			{
+				$Status_Active_Flg=1;
+				$Status_Active .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">On going</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['ongoing_active'] .'</font></br>';
+			}
+			
+			if($data_matrix[$row][$col]['not_authorized_active'] > 0)
+			{
+				$Status_Active_Flg=1;
+				$Status_Active .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Not authorized</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['not_authorized_active'] .'</font></br>';
+			}
+			
+			if($data_matrix[$row][$col]['prohibited_active'] > 0)
+			{
+				$Status_Active_Flg=1;
+				$Status_Active .= '&nbsp;&nbsp;&nbsp;<font style="color:#206040; font-weight: 900;">Prohibited</font><font style="color:#206040; font-weight: 900;">: </font><font style="color:#000000; font-weight: 900;">'. $data_matrix[$row][$col]['prohibited_active'] .'</font></br>';
+			}
+			
+			if($Status_Active_Flg==1)
+			$htmlContent .= $Status_Active.'</font>';
+			
 			
 			$htmlContent .= '<font id="ViewCount_'.$online_HMCounter.'">'.(($data_matrix[$row][$col]['viewcount'] > 0) ? '<font style="color:#206040; font-weight: 900;">Number of views: </font><font style="color:#000000; font-weight: 900;">'.$data_matrix[$row][$col]['viewcount'].'</font><input type="hidden" value="'.$data_matrix[$row][$col]['viewcount'].'" id="ViewCount_value_'.$online_HMCounter.'" />':'<input type="hidden" value="'.$data_matrix[$row][$col]['viewcount'].'" id="ViewCount_value_'.$online_HMCounter.'" />' ).'</font>';
 							
