@@ -544,3 +544,8 @@ ul, li { behavior:url("css/csshover3.htc"); }
 .startdatehighlight {
 	border-right-color: red!important;
 }
+
+.tag {
+color:#120f3c;
+font-weight:bold;
+}

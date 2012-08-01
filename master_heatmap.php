@@ -2122,7 +2122,7 @@ function Download_reports()
 					$Min_productNumLines=0;
 					while($Min_productNumLines != 1)	///Check while we we dont get mimimum lines to display product name
 					{
-						$current_NumLines=$pdf->getNumLines($rval.$rowsCompanyName[$row].' '.$rowsTagName[$row], $Current_product_Col_Width);	//get number of lines
+						$current_NumLines=$pdf->getNumLines($rval.$rowsCompanyName[$row].((trim($rowsTagName[$row]) != '') ? ' ['.$rowsTagName[$row].']':''), $Current_product_Col_Width);	//get number of lines
 						if($current_NumLines == 1)	//if 1 line then stop processing, take next product
 						$Min_productNumLines = $current_NumLines;
 						else if($current_NumLines >= 1)	/// if more lines required to display text
@@ -2436,7 +2436,7 @@ function Download_reports()
 			//Height calculation depending on product name
 			$rowcount = 0;
  			//work out the number of lines required
-			$rowcount = $pdf->getNumLines($rval.$rowsCompanyName[$row].' '.$rowsTagName[$row], $product_Col_Width);
+			$rowcount = $pdf->getNumLines($rval.$rowsCompanyName[$row].((trim($rowsTagName[$row]) != '') ? ' ['.$rowsTagName[$row].']':''), $product_Col_Width);
 			if($rowcount < 1) $rowcount = 1;
  			$startY = $pdf->GetY();
 			$prod_row_height = $rowcount * $Line_Height;
@@ -2728,7 +2728,7 @@ function Download_reports()
 				{
 					$count_val=$row_indlead_total[$row];
 				}
-				$pdfContent = '<a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). $link_part . '" target="_blank" title="'. $raltTitle .'">'.$rval.$rowsCompanyName[$row].((trim($rowsTagName[$row]) != '') ? ' <b><font style="color:#0000A0; font-weight:bold">'.$rowsTagName[$row].'</font></b>':'').'</a>';
+				$pdfContent = '<a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). $link_part . '" target="_blank" title="'. $raltTitle .'">'.$rval.$rowsCompanyName[$row].'</a>'.((trim($rowsTagName[$row]) != '') ? ' <b><font style="color:#120f3c; font-weight:bold">['.$rowsTagName[$row].']</font></b>':'');
 				
 				
 				$pdf->MultiCell($product_Col_Width, $prod_row_height, $pdfContent, $border, $align='C', $fill=1, $ln=0, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
@@ -3500,7 +3500,7 @@ function Download_reports()
 				$rdesc = (isset($rowsDescription[$row]) && $rowsDescription[$row] != '')?$rowsDescription[$row]:null;
 				$raltTitle = (isset($rdesc) && $rdesc != '')?' alt="'.$rdesc.'" title="'.$rdesc.'" ':null;
 				
-				$objPHPExcel->getActiveSheet()->setCellValue($cell, $rval.$rowsCompanyName[$row].' '.$rowsTagName[$row]);
+				$objPHPExcel->getActiveSheet()->setCellValue($cell, $rval.$rowsCompanyName[$row].((trim($rowsTagName[$row]) != '') ? ' ['.$rowsTagName[$row].']':''));
 				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds).$link_part); 
  			    $objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip($tooltip);
  			    

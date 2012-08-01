@@ -219,7 +219,8 @@ class TrialTracker
 						{
 							while($tag_row = mysql_fetch_assoc($tag_res))
 							{
-								$TrialsInfo[$pkey]['sectionHeader'] .= " " . $tag_row['tag'];
+								if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
+									$TrialsInfo[$pkey]['sectionHeader'] .= " [" . $tag_row['tag'] ."] ";
 							}
 						}
 					}
@@ -260,7 +261,8 @@ class TrialTracker
 							{
 								while($tag_row = mysql_fetch_assoc($tag_res))
 								{
-									$TrialsInfo[$pkey]['sectionHeader'] .= " " . $tag_row['tag'];
+									if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
+										$TrialsInfo[$pkey]['sectionHeader'] .= " [" . $tag_row['tag'] ."]";
 								}
 							}
 						}
@@ -392,7 +394,8 @@ class TrialTracker
 							{
 								while($tag_row = mysql_fetch_assoc($tag_res))
 								{
-									$TrialsInfo[$pkey]['sectionHeader'] .= " " . $tag_row['tag'] ;
+									if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
+										$TrialsInfo[$pkey]['sectionHeader'] .= " [" . $tag_row['tag'] ."]";
 								}
 							}
 						}
@@ -430,7 +433,8 @@ class TrialTracker
 					{
 						while($tag_row = mysql_fetch_assoc($tag_res))
 						{
-							$TrialsInfo[0]['sectionHeader'] .= " " . $tag_row['tag'];
+							if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
+								$TrialsInfo[0]['sectionHeader'] .= " [" . $tag_row['tag'] ."]";
 						}
 					}
 				}
@@ -5536,7 +5540,8 @@ class TrialTracker
 						{
 							while($tag_row = mysql_fetch_assoc($tag_res))
 							{
-								$TrialsInfo[$pkey]['sectionHeader'] .= " <b><font style=\"color:#0000A0; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
+								if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
+									$TrialsInfo[$pkey]['sectionHeader'] .= " <b><font class=\"tag\">[" . $tag_row['tag'] . "]</font></b>";
 							}
 						}
 					}
@@ -5577,7 +5582,8 @@ class TrialTracker
 							{
 								while($tag_row = mysql_fetch_assoc($tag_res))
 								{
-									$TrialsInfo[$pkey]['sectionHeader'] .= " <b><font style=\"color:#0000A0; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
+									if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
+										$TrialsInfo[$pkey]['sectionHeader'] .= " <b><font class=\"tag\">[" . $tag_row['tag'] . "]</font></b>";
 								}
 							}
 						}
@@ -5711,7 +5717,8 @@ class TrialTracker
 							{
 								while($tag_row = mysql_fetch_assoc($tag_res))
 								{
-									$TrialsInfo[$pkey]['sectionHeader'] .= " <b><font style=\"color:#0000A0; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
+									if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
+										$TrialsInfo[$pkey]['sectionHeader'] .= " <b><font class=\"tag\">[" . $tag_row['tag'] . "]</font></b>";
 								}
 							}
 						}
@@ -5749,7 +5756,8 @@ class TrialTracker
 					{
 						while($tag_row = mysql_fetch_assoc($tag_res))
 						{
-							$TrialsInfo[0]['sectionHeader'] .= " <b><font style=\"color:#0000A0; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
+							if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
+								$TrialsInfo[0]['sectionHeader'] .= " <b><font class=\"tag\">[" . $tag_row['tag'] . "]</font></b>";
 						}
 					}
 				}
@@ -7427,8 +7435,11 @@ class TrialTracker
 								{
 									while($tag_row = mysql_fetch_assoc($tag_res))
 									{
-										$TrialsInfo[$pkey]['sectionHeader'] .= " <b><font style=\"color:#0000A0; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
-										$productSelector[$pkey] .=  " <b><font style=\"color:#0000A0; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
+										if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
+										{
+											$TrialsInfo[$pkey]['sectionHeader'] .= " <b><font class=\"tag\">[" . $tag_row['tag'] . "]</font></b>";
+											$productSelector[$pkey] .=  " <b><font class=\"tag\">[" . $tag_row['tag'] . "]</font></b>";
+										}
 									}
 								}
 							}
@@ -7484,8 +7495,11 @@ class TrialTracker
 									{
 										while($tag_row = mysql_fetch_assoc($tag_res))
 										{
-											$TrialsInfo[$pkey]['sectionHeader'] .= " <b><font style=\"color:#0000A0; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
-											$productSelector[$pkey] .=  " <b><font style=\"color:#0000A0; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
+											if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
+											{
+												$TrialsInfo[$pkey]['sectionHeader'] .= " <b><font class=\"tag\">[" . $tag_row['tag'] . "]</font></b>";
+												$productSelector[$pkey] .=  " <b><font class=\"tag\">[" . $tag_row['tag'] . "]</font></b>";
+											}
 										}
 									}
 								}
@@ -7690,8 +7704,11 @@ class TrialTracker
 									{
 										while($tag_row = mysql_fetch_assoc($tag_res))
 										{
-											$TrialsInfo[$pkey]['sectionHeader'] .= " <b><font style=\"color:#0000A0; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
-											$productSelector[$pkey] .=  " <b><font style=\"color:#0000A0; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
+											if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
+											{
+												$TrialsInfo[$pkey]['sectionHeader'] .= " <b><font class=\"tag\">[" . $tag_row['tag'] . "]</font></b>";
+												$productSelector[$pkey] .=  " <b><font class=\"tag\">[" . $tag_row['tag'] . "]</font></b>";
+											}
 										}
 									}
 								}
@@ -7773,8 +7790,11 @@ class TrialTracker
 					{
 						while($tag_row = mysql_fetch_assoc($tag_res))
 						{
-							$TrialsInfo[0]['sectionHeader'] .= " <b><font style=\"color:#0000A0; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
-							$productSelector[0] .=  " <b><font style=\"color:#0000A0; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
+							if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
+							{
+								$TrialsInfo[0]['sectionHeader'] .= " <b><font class=\"tag\">[" . $tag_row['tag'] . "]</font></b>";
+								$productSelector[0] .=  " <b><font class=\"tag\">[" . $tag_row['tag'] . "]</font></b>";
+							}
 						}
 					}
 				}
