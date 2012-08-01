@@ -1071,7 +1071,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 			while($owner_row = mysql_fetch_array($owner_res))
 			{
 				$owner_name=$owner_row['username'];
-				$owner_type=$owner_row['userlevel'];
+				$owner_level=$owner_row['userlevel'];
 			}
 		}
 	}
@@ -1091,7 +1091,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 			. (($disabled) ? ' disabled="disabled" ':'')
 			. '/>Mine (Private)</label> ';
 			
-		if(($db->user->userlevel == 'root' || $db->user->userlevel == 'admin') && $rptu != $db->user->id && $rptu !== NULL && $owner_type != 'user')
+		if(($db->user->userlevel == 'root' || $db->user->userlevel == 'admin') && $rptu != $db->user->id && $rptu !== NULL && $owner_level != 'user')
 		$out .='<label><input type="radio" name="own" value="shared_other" '.($owner_selector == 'shared_other' ? 'checked="checked"' : '')
 			. (($disabled) ? ' disabled="disabled" ':'')
 			. '/>'.$owner_name.' (Shared)</label> ';
