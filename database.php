@@ -9,7 +9,6 @@ if(!$db->loggedIn() || ($db->user->userlevel!='root' && $db->user->userlevel!='a
 	exit;
 }
 require('header.php');
-
 /**************/
 ignore_user_abort(true);
 // single trial refresh new schema
@@ -174,9 +173,31 @@ if (isset($_POST['recalculate_all']))
 	return;
 }
 // Update UPM status values
-if (isset($_POST['select_status'])) 
+if (isset($_POST['upm_status']) and $_POST['upm_status']=="1") 
 {
-	$st=mysql_real_escape_string($_POST['select_status']);
+	require_once('upm_trigger.php');
+	echo '<br><br>Recalculating UPM status values (for <b>all records.</b>)<br><br>';
+	if(!fire_upm_trigger()) echo '<br><b>Could complete Updating UPM status values, there was an error.<br></b>';
+	else 
+	{
+		echo '<br><br><b>All done.</b><br><br>';
+	}
+	return;
+}
+if (isset($_POST['upm_status']) and $_POST['upm_status']=="2") 
+{
+	require_once('upm_trigger.php');
+	echo '<br><br>Recalculating UPM status values (for <b> end_date in the past</b>)<br><br>';
+	if(!fire_upm_trigger_dt()) echo '<br><b>Could complete Updating UPM status values, there was an error.<br></b>';
+	else 
+	{
+		echo '<br><br><b>All done.</b><br><br>';
+	}
+	return;
+}
+if (isset($_POST['upm_status']) and $_POST['upm_status']=="3") 
+{
+	$st=mysql_real_escape_string($_POST['status']);
 	require_once('upm_trigger.php');
 	echo '<br><br>Recalculating UPM status values (for status=<b>' . $st . '</b>)<br><br>';
 	if(!fire_upm_trigger_st($st)) echo '<br><b>Could complete Updating UPM status values, there was an error.<br></b>';
@@ -187,18 +208,6 @@ if (isset($_POST['select_status']))
 	return;
 }
 
-if (isset($_POST['upm_s'])) 
-{
-	$st=mysql_real_escape_string($_POST['upm_s']);
-	require_once('upm_trigger.php');
-	echo '<br><br>Recalculating UPM status values (for <b> end_date in the past</b>)<br><br>';
-	if(!fire_upm_trigger_dt()) echo '<br><b>Could complete Updating UPM status values, there was an error.<br></b>';
-	else 
-	{
-		echo '<br><br><b>All done.</b><br><br>';
-	}
-	return;
-}
 
 
 /****************************/
@@ -212,7 +221,29 @@ function editor()
 		$chkd="1";
 		$id=1;
 	//SCRAPER - NEW SCHEMA
-	$out = '<br><div style="float:left;width:610px; padding:5px;"><fieldset class="schedule"><legend><b> SCRAPERS <font color="red">(NEW SCHEMA) </font> </b></legend>'
+	$out = '<style type="text/css">
+		  formset {
+		    padding:1em;
+		    width:10em;
+			}
+			label, .show {display:block}
+			.hide {display:none}
+		</style>
+	
+	<script type="text/javascript">
+		  toggles = new Array();
+		  if (document.getElementById) onload = function () {
+		    document.getElementById (\'more\').className = \'hide\';
+		    var t = document.getElementsByTagName (\'input\');
+		    for (var i = 0; i < t.length; i++) if (t[i].getAttribute (\'name\') == \'upm_status\') {
+					toggles.push (t[i]);
+					t[i].onclick = function () {
+		      	document.getElementById (\'more\').className = toggles[toggles.length - 1].checked ? \'show\' : \'hide\';
+					}
+		    }
+		  }
+		</script>
+		<br><div style="float:left;width:610px; padding:5px;"><fieldset class="schedule"><legend><b> SCRAPERS <font color="red">(NEW SCHEMA) </font> </b></legend>'
 			. '<form action="database.php" method="post">'
 			. 'Enter NCT Id to refresh a Single Trial: <input type="text" name="nt_id" value=""/>&nbsp;&nbsp;&nbsp;&nbsp;'
 			. ''
@@ -319,7 +350,7 @@ function editor()
 			. 'Click <b>Index ALL</b> button to index all trials in the database &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
 			. ' <input type="hidden" name="index_all" value="ALL"/>'
 			. '<input type="submit" name="ind_all" value="Index ALL" />'
-			. '</form></div>';
+			. '</form></fieldset></div>';
 			
 		$out .= '<div style="clear:both;"><br><hr style="height:2px;"></div>';
 	
@@ -341,30 +372,26 @@ function editor()
 			. 'Click <b>Recalc ALL</b> button to recalculate all trials in the database &nbsp;&nbsp;&nbsp;'
 			. ' <input type="hidden" name="recalculate_all" value="ALL"/>'
 			. '<input type="submit" name="reca_all" value="Recalc ALL" />'
-			. '</form></div>';
+			. '</form></fieldset></div>';
 			
-	// UPM REFRESH (for a particular status)
-	$out .= '<div style="width:610px; padding:5px;float:left;">'
-			. '<form action="database.php" method="post">'
-			. 'Recalculate Status of UPMs with status:
-				<select name="select_status">
-				<option value="Occurred" selected="selected">Occurred</option>
-				<option value="Pending">Pending</option>
-				<option value="Upcoming">Upcoming</option>
-				<option value="Cancelled">Cancelled</option>
-				</select>
+	// UPM REFRESH STATUS
+	$out .= '<div style="width:610px; padding:5px;float:left;"><fieldset class="schedule"><legend><b> RECALCULATE UPM STATUS </b></legend>'
+			. '<formset><form action="database.php" method="post">'
+			. '
+			<input type="radio" name="upm_status" value="1" selected="selcted"> All<br>
+			<input type="radio" name="upm_status" value="2"> UPMs with end date in the past<br>
+			<input type="radio" name="upm_status" value="3"> Having status
+		
+			<select name="status" id="more">
+			  <option>Occurred</option>
+			  <option>Pending</option>
+			  <option>Upcoming</option>
+			  <option>Cancelled</option></select>
 				'
-			. '<input type="submit" value="Recalculate" />'
-			. '</form></div>';
+			. '<br><input type="submit" value="Recalculate" />'
+			. '</form></formset></fieldset></div>';
 	
-	
-	// UPM REFRESH (for end date in the past)			
-	$out .= '<div style="width:610px; padding:5px;float:left;">'
-			. '<form action="database.php" method="post">'
-			. 'Recalculate Status of UPMs with end_date in the past: <input type="hidden" name="upm_s" id="upm_s" value="upm_s"/>'
-			. ''
-			. '<input type="submit" value="Recalculate" />'
-			. '</form></div>';
+
 			
 	return $out;
 	

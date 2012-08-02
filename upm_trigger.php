@@ -1,9 +1,9 @@
 <?php
 require_once('db.php');
 
+// Fire the UPM trigger for ALL records.
 function fire_upm_trigger()  
 {
-// Fire the UPM trigger
 	$trigger='	UPDATE upm 
 				SET end_date_type=end_date_type
 				WHERE id > "0" ';
@@ -19,6 +19,7 @@ function fire_upm_trigger()
 	return true;
 }
 
+// Fire the UPM trigger for records having a particular status.
 function fire_upm_trigger_st($st)  
 {
 	$trigger='	UPDATE upm 
@@ -36,9 +37,9 @@ function fire_upm_trigger_st($st)
 	return true;
 }
 
+// Fire the UPM trigger for records having end_date in the past.
 function fire_upm_trigger_dt()  
 {
-
 	$trigger='	UPDATE upm 
 				SET end_date_type=end_date_type
 				WHERE end_date <= left(now(),10)';
