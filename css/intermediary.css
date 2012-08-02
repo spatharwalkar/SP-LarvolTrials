@@ -285,6 +285,7 @@ tr.upms td {
 
 .right{
 	border-right:0px !important;
+	
 }
 
 .bottom{
@@ -300,11 +301,11 @@ tr.upms td {
 .checkscroll{
 	float:left;
 	height:10em;
-	width:15em;
+	width:200px;
 	overflow:auto;
 }
 
-.controls input{
+.controls .bottom input{
 	margin:0.1em;
 }
 
@@ -549,3 +550,13 @@ ul, li { behavior:url("css/csshover3.htc"); }
 color:#120f3c;
 font-weight:bold;
 }
+
+.demo #slider-range, .demo #slider-range-min {
+	width:382px;
+	margin:0 10px 0 10px;
+}
+
+.demo p{
+	margin-bottom: 3px;
+}
+

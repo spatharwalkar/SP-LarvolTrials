@@ -219,8 +219,7 @@ class TrialTracker
 						{
 							while($tag_row = mysql_fetch_assoc($tag_res))
 							{
-								if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
-									$TrialsInfo[$pkey]['sectionHeader'] .= " [" . $tag_row['tag'] ."] ";
+								$TrialsInfo[$pkey]['sectionHeader'] .= " " . $tag_row['tag'];
 							}
 						}
 					}
@@ -261,8 +260,7 @@ class TrialTracker
 							{
 								while($tag_row = mysql_fetch_assoc($tag_res))
 								{
-									if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
-										$TrialsInfo[$pkey]['sectionHeader'] .= " [" . $tag_row['tag'] ."]";
+									$TrialsInfo[$pkey]['sectionHeader'] .= " " . $tag_row['tag'];
 								}
 							}
 						}
@@ -394,8 +392,7 @@ class TrialTracker
 							{
 								while($tag_row = mysql_fetch_assoc($tag_res))
 								{
-									if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
-										$TrialsInfo[$pkey]['sectionHeader'] .= " [" . $tag_row['tag'] ."]";
+									$TrialsInfo[$pkey]['sectionHeader'] .= " " . $tag_row['tag'] ;
 								}
 							}
 						}
@@ -433,8 +430,7 @@ class TrialTracker
 					{
 						while($tag_row = mysql_fetch_assoc($tag_res))
 						{
-							if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
-								$TrialsInfo[0]['sectionHeader'] .= " [" . $tag_row['tag'] ."]";
+							$TrialsInfo[0]['sectionHeader'] .= " " . $tag_row['tag'];
 						}
 					}
 				}
@@ -711,8 +707,7 @@ class TrialTracker
 				//enrollment
 				if(isset($dvalue['manual_is_sourceless']))
 				{
-					if(!empty($dvalue['edited']) && array_key_exists('NCT/enrollment', $dvalue['edited']) 
-					&& (getDifference(substr($dvalue['edited']['NCT/enrollment'],16), $dvalue['NCT/enrollment'])))
+					if(!empty($dvalue['edited']) && array_key_exists('NCT/enrollment', $dvalue['edited']))
 					{
 						 $objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($highlightChange);
 						 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl($ctLink);
@@ -753,8 +748,7 @@ class TrialTracker
 							$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_enrollment']);
 						}
 					}
-					elseif(!empty($dvalue['edited']) && array_key_exists('NCT/enrollment', $dvalue['edited']) 
-					&& (getDifference(substr($dvalue['edited']['NCT/enrollment'],16), $dvalue['NCT/enrollment'])))
+					elseif(!empty($dvalue['edited']) && array_key_exists('NCT/enrollment', $dvalue['edited']))
 					{
 						 $objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($highlightChange);
 						 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl($ctLink);
@@ -5540,8 +5534,7 @@ class TrialTracker
 						{
 							while($tag_row = mysql_fetch_assoc($tag_res))
 							{
-								if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
-									$TrialsInfo[$pkey]['sectionHeader'] .= " <b><font class=\"tag\">[" . $tag_row['tag'] . "]</font></b>";
+								$TrialsInfo[$pkey]['sectionHeader'] .= " <b><font style=\"color:#0000A0; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
 							}
 						}
 					}
@@ -5582,8 +5575,7 @@ class TrialTracker
 							{
 								while($tag_row = mysql_fetch_assoc($tag_res))
 								{
-									if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
-										$TrialsInfo[$pkey]['sectionHeader'] .= " <b><font class=\"tag\">[" . $tag_row['tag'] . "]</font></b>";
+									$TrialsInfo[$pkey]['sectionHeader'] .= " <b><font style=\"color:#0000A0; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
 								}
 							}
 						}
@@ -5717,8 +5709,7 @@ class TrialTracker
 							{
 								while($tag_row = mysql_fetch_assoc($tag_res))
 								{
-									if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
-										$TrialsInfo[$pkey]['sectionHeader'] .= " <b><font class=\"tag\">[" . $tag_row['tag'] . "]</font></b>";
+									$TrialsInfo[$pkey]['sectionHeader'] .= " <b><font style=\"color:#0000A0; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
 								}
 							}
 						}
@@ -5756,8 +5747,7 @@ class TrialTracker
 					{
 						while($tag_row = mysql_fetch_assoc($tag_res))
 						{
-							if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
-								$TrialsInfo[0]['sectionHeader'] .= " <b><font class=\"tag\">[" . $tag_row['tag'] . "]</font></b>";
+							$TrialsInfo[0]['sectionHeader'] .= " <b><font style=\"color:#0000A0; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
 						}
 					}
 				}
@@ -6186,8 +6176,7 @@ class TrialTracker
 				$attr = ' ';
 				if(isset($dvalue['manual_is_sourceless']))
 				{
-					if(isset($dvalue['edited']) && array_key_exists('NCT/enrollment',$dvalue['edited']) 
-					&& (getDifference(substr($dvalue['edited']['NCT/enrollment'],16), $dvalue['NCT/enrollment']))) 
+					if(isset($dvalue['edited']) && array_key_exists('NCT/enrollment',$dvalue['edited'])) 
 					{
 						$attr = ' highlight" title="' . $dvalue['edited']['NCT/enrollment'];
 					}
@@ -6220,8 +6209,7 @@ class TrialTracker
 							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_enrollment'];
 						}
 					}
-					elseif(isset($dvalue['edited']) && array_key_exists('NCT/enrollment',$dvalue['edited']) 
-					&& (getDifference(substr($dvalue['edited']['NCT/enrollment'],16), $dvalue['NCT/enrollment']))) 
+					elseif(isset($dvalue['edited']) && array_key_exists('NCT/enrollment',$dvalue['edited'])) 
 					{
 						$attr = ' highlight" title="' . $dvalue['edited']['NCT/enrollment'];
 					}
@@ -7280,7 +7268,7 @@ class TrialTracker
 	{	
 		$Values = array();
 		$linkExpiry = array();
-		$productSelectorTitle = 'All Products';
+		$productSelectorTitle = 'Select Products';
 		$productSelector = array();
 		global $sphinx;
 		global $Sphinx_search;
@@ -7435,11 +7423,8 @@ class TrialTracker
 								{
 									while($tag_row = mysql_fetch_assoc($tag_res))
 									{
-										if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
-										{
-											$TrialsInfo[$pkey]['sectionHeader'] .= " <b><font class=\"tag\">[" . $tag_row['tag'] . "]</font></b>";
-											$productSelector[$pkey] .=  " <b><font class=\"tag\">[" . $tag_row['tag'] . "]</font></b>";
-										}
+										$TrialsInfo[$pkey]['sectionHeader'] .= " <b><font style=\"color:#0000A0; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
+										$productSelector[$pkey] .=  " <b><font style=\"color:#0000A0; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
 									}
 								}
 							}
@@ -7495,11 +7480,8 @@ class TrialTracker
 									{
 										while($tag_row = mysql_fetch_assoc($tag_res))
 										{
-											if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
-											{
-												$TrialsInfo[$pkey]['sectionHeader'] .= " <b><font class=\"tag\">[" . $tag_row['tag'] . "]</font></b>";
-												$productSelector[$pkey] .=  " <b><font class=\"tag\">[" . $tag_row['tag'] . "]</font></b>";
-											}
+											$TrialsInfo[$pkey]['sectionHeader'] .= " <b><font style=\"color:#0000A0; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
+											$productSelector[$pkey] .=  " <b><font style=\"color:#0000A0; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
 										}
 									}
 								}
@@ -7576,7 +7558,7 @@ class TrialTracker
 			{
 				if(count($resultIds['area']) > 1)
 				{
-					$productSelectorTitle = 'All Areas';
+					$productSelectorTitle = 'Select Areas';
 					
 					$res = mysql_query("SELECT `name`, `id` FROM `products` WHERE id IN ('" . implode("','", $resultIds['product']) 
 							. "') OR LI_id IN ('" . implode(',', $resultIds['product']) . "') ");
@@ -7704,11 +7686,8 @@ class TrialTracker
 									{
 										while($tag_row = mysql_fetch_assoc($tag_res))
 										{
-											if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
-											{
-												$TrialsInfo[$pkey]['sectionHeader'] .= " <b><font class=\"tag\">[" . $tag_row['tag'] . "]</font></b>";
-												$productSelector[$pkey] .=  " <b><font class=\"tag\">[" . $tag_row['tag'] . "]</font></b>";
-											}
+											$TrialsInfo[$pkey]['sectionHeader'] .= " <b><font style=\"color:#0000A0; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
+											$productSelector[$pkey] .=  " <b><font style=\"color:#0000A0; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
 										}
 									}
 								}
@@ -7790,11 +7769,8 @@ class TrialTracker
 					{
 						while($tag_row = mysql_fetch_assoc($tag_res))
 						{
-							if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
-							{
-								$TrialsInfo[0]['sectionHeader'] .= " <b><font class=\"tag\">[" . $tag_row['tag'] . "]</font></b>";
-								$productSelector[0] .=  " <b><font class=\"tag\">[" . $tag_row['tag'] . "]</font></b>";
-							}
+							$TrialsInfo[0]['sectionHeader'] .= " <b><font style=\"color:#0000A0; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
+							$productSelector[0] .=  " <b><font style=\"color:#0000A0; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
 						}
 					}
 				}
@@ -8055,7 +8031,7 @@ class TrialTracker
 					}
 					
 					//unsetting value for field enrollment if the change is less than 20 percent
-					if(isset($dataset['trials']['edited']['NCT/enrollment']))
+					/*if(isset($dataset['trials']['edited']['NCT/enrollment']))
 					{
 						$prevValue = substr($dataset['trials']['edited']['NCT/enrollment'],16);
 						
@@ -8063,7 +8039,7 @@ class TrialTracker
 						{
 							unset($dataset['trials']['edited']['NCT/enrollment']);
 						}
-					}
+					}*/
 					
 					//merge only if updates are found
 					foreach($dataset['matchedupms'] as $mkey => & $mvalue) 
@@ -9013,14 +8989,14 @@ class TrialTracker
 					}
 					
 					//unsetting value for field enrollment if the change is less than 20 percent
-					if(isset($result['edited']['NCT/enrollment'])) 
+					/*if(isset($result['edited']['NCT/enrollment'])) 
 					{ 
 						$prevValue = substr($result['edited']['NCT/enrollment'],16);
 						if(!getDifference($prevValue, $result['NCT/enrollment'])) 
 						{
 							unset($result['edited']['NCT/enrollment']);
 						}
-					}
+					}*/
 					
 					foreach($result['matchedupms'] as $mkey => & $mvalue) 
 					{
@@ -9606,7 +9582,7 @@ class TrialTracker
 					}
 					
 					//unsetting value for field enrollment if the change is less than 20 percent
-					if(isset($dataset['trials']['edited']['NCT/enrollment']))
+					/*if(isset($dataset['trials']['edited']['NCT/enrollment']))
 					{
 						$prevValue = substr($dataset['trials']['edited']['NCT/enrollment'],16);
 						
@@ -9614,7 +9590,7 @@ class TrialTracker
 						{
 							unset($dataset['trials']['edited']['NCT/enrollment']);
 						}
-					}
+					}*/
 					
 					//merge only if updates are found
 					foreach($dataset['matchedupms'] as $mkey => & $mvalue) 
@@ -10454,51 +10430,20 @@ class TrialTracker
 			$Values['totalcount'] = $Values['totactivecount'] + $Values['totinactivecount'];
 		}
 		
-		$this->displayFilterControls($productSelectorTitle, $count, $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], $globalOptions, $ottType, $loggedIn);
+		natcasesort($productSelector);
+		
+		$this->displayFilterControls($productSelector, $productSelectorTitle, $count, $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], $globalOptions, $ottType, $loggedIn);
 		
 		if($totalPages > 1)
 		{
 			$this->pagination($globalOptions, $totalPages, $timeMachine, $ottType, $loggedIn);
 		}
 		
-		natcasesort($productSelector);
-		
-		if(!empty($productSelector)
-		&& ($ottType != 'unstacked' && $ottType != 'indexed' && $ottType != 'unstackedoldlink'))
-		{
-			echo '<div id="menuwrapper" style="vertical-align:bottom;"><ul>';
-			if(isset($globalOptions['product']) && !empty($globalOptions['product']))
-			{	
-				if(count($globalOptions['product']) > 1)
-					$tTitle = count($globalOptions['product']) . strtolower(str_replace('All', '', $productSelectorTitle)) . ' selected';
-				else
-					$tTitle = $productSelector[$globalOptions['product'][0]];
-					
-				echo '<li class="arrow"><a href="javascript: void(0);">' . $tTitle . '</a>';
-
-			}
-			else
-			{	
-				echo '<li class="arrow" style="height:23px;"><a href="javascript: void(0);">' . $productSelectorTitle . '</a>';
-			}
-			
-			echo '<ul id="productbox">';
-			foreach($productSelector as $infkey => $infvalue)
-			{
-				echo '<li><a href="javascript: void(0);">'
-					. '<input type="checkbox" value="' . $infkey . '" id="product_' . $infkey . '" class="product" style="margin-right:5px;" ' 
-					. ((in_array($infkey, $globalOptions['product'])) ? 'checked="checked"' : '') . ' />' 
-					. $infvalue . '</a></li>';
-			}
-			echo '</ul></li></ul></div>';
-		}
-		
 		echo '<div style="float: right;padding-top:4px; vertical-align:bottom; height:22px;" id="chromemenu"><a rel="dropmenu">'
 				. '<span style="padding:2px;border:1px solid; color:#000000; background-position:left center; background-repeat:no-repeat; background-image:url(\'./images/save.png\'); cursor:pointer;">'
 				. '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Export</b></span></a></div>'
 				. '<div style="float: right;margin-right: 10px; vertical-align:bottom; padding-top:4px; height:22px;"><span id="addtoright"></span></div>';
-		
-		
+				
 		echo '<br/><br/>';
 		
 		echo $this->displayTrialTableHeader($loggedIn, $globalOptions);
@@ -10788,11 +10733,12 @@ class TrialTracker
 		}
 	}
 	
-	function displayFilterControls($productSelectorTitle, $shownCount, $activeCount, $inactiveCount, $totalCount, $globalOptions = array(), $ottType, $loggedIn)
+	function displayFilterControls($productSelector = array(), $productSelectorTitle, $shownCount, $activeCount, $inactiveCount, $totalCount, $globalOptions = array(), $ottType, $loggedIn)
 	{	
-		echo '<table border="0" cellspacing="0" class="controls" align="center" style="_width:80%; table-layout: fixed">'
-				. '<tr><th>Active</th><th>Status</th><th style="width:170px">Institution type</th>'
-				. '<th style="width:80px">Region</th><th style="width:50px">Phase</th><th class="right" style="width:340px">Ranges</th></tr>'
+		echo '<table border="0" cellspacing="0" class="controls" align="center" style="_width:100%; table-layout: fixed">'
+				. '<tr><th style="width:113px">Active</th><th style="width:210px">Status</th>'
+				. '<th style="width:170px">Institution type</th>'
+				. '<th style="width:80px">Region</th><th style="width:50px">Phase</th><th class="right" style="width:340px">Filter</th></tr>'
 				. '<tr><td class="bottom" style="padding-right:5px;">'
       			. '<input type="radio" name="list" value="1"  id="active_1" '
 				. (($globalOptions['type'] == 'activeTrials') ? ' checked="checked" ' : '')
@@ -10921,7 +10867,7 @@ class TrialTracker
 				. '<input type="checkbox" value="4" id="phase_4" class="phase" '
 				. (in_array('4', $globalOptions['phase']) ? ' checked="checked" ' : '') . '/>'
 				. '<label for="phase_4">4</label>'
-				. '</td><td class="right bottom">'
+				. '</td><td class="right" style="border-bottom:0px">'
 				. '<div class="demo"><p>';
 		
 		if($loggedIn) 
@@ -10931,7 +10877,7 @@ class TrialTracker
 					. '<label style="color:#f6931f;float:left;">-</label>'
 					. '<input type="text" id="endrange"  name="er" value="' . $globalOptions['endrange'] 
 					. '" style="width:auto;margin-left:15px;" class="jdpicker" />'
-					. '<br/><div id="slider-range-min" style="width:320px; margin:5px 0px 0 0px;" align="left"></div></p></div>';
+					. '<br/><div id="slider-range-min" align="left"></div></p>';
 		}
 		else
 		{
@@ -10939,24 +10885,62 @@ class TrialTracker
 					. '<input type="hidden" id="startrange" name="sr" value="' . $globalOptions['startrange'] . '" />'
 					. '<input type="text" id="endrange" name="er" value="' . $globalOptions['endrange'] 
 					. '" readonly="readonly" style="border:0; color:#f6931f; font-weight:bold;" />'
-					. '<div id="slider-range-min" style="width:320px; margin:5px 0px 0 0px;" align="left"></div></p></div>';
+					. '<div id="slider-range-min" align="left"></div></p>';
 		}
 			
 		echo '<input type="checkbox" id="showonlyupdated" name="osu" ' 
-				. ($globalOptions['onlyUpdates'] == 'yes' ? ' checked="checked" ' : '' ) . ' style="margin-left:20px;" />'
+				. ($globalOptions['onlyUpdates'] == 'yes' ? ' checked="checked" ' : '' ) . ' />'
 				. '<label for="showonlyupdated" style="font-size:x-small;">Show only changed items</label>'
-				. '<br/><div class="demo" style="padding-top:4px;"><p><label for="amount">Enrollment:</label>'
+				. '</div><br/><div class="demo"><p><label for="amount">Enrollment:</label>'
 				. '<input type="text" name="enroll" id="amount" style="border:0; color:#f6931f; font-weight:bold;" '
 				. ' value="' . ((isset($globalOptions['enroll'])) ? $globalOptions['enroll'] : '' ) . '" autocomplete="off" />'
-				. '<div id="slider-range" style="width:320px; margin:2px 0px 0 0px;" align="left"></div>'
+				. '<div id="slider-range" align="left"></div>'
 				. '</p></div>';
 		if($ottType != 'unstacked' && $ottType != 'indexed' && $ottType != 'unstackedoldlink')
 		{
-			$title = strtolower(str_replace('All', '', $productSelectorTitle));
+			$title = strtolower(str_replace('Select', '', $productSelectorTitle));
 			echo '<br/><input type="checkbox" id="ipwnd" name="ipwnd" ' . (($globalOptions['includeProductsWNoData'] == "on") ? 'checked="checked"' : '') . ' />'
 				. '<label style="font-size:x-small;" for="ipwnd">Include ' . $title . ' with no data</label>';
 		}
-		echo  '</tr></table><br/><br/>'
+		echo  '</tr><tr>'
+				. '<td class="bottom">&nbsp;</td><td class="bottom">&nbsp;</td>'
+				. '<td class="bottom">&nbsp;</td><td class="bottom">&nbsp;</td>'
+				. '<td class="bottom">&nbsp;</td><td class="right bottom">';
+				
+		if(!empty($productSelector)
+		&& ($ottType != 'unstacked' && $ottType != 'indexed' && $ottType != 'unstackedoldlink'))
+		{
+			echo '<div id="menuwrapper" style="vertical-align:bottom;margin-left: 2px;"><ul>';
+			if(isset($globalOptions['product']) && !empty($globalOptions['product']))
+			{	
+				if(count($globalOptions['product']) > 1)
+					$tTitle = count($globalOptions['product']) . strtolower(str_replace('Select', '', $productSelectorTitle)) . ' selected';
+				else
+					$tTitle = $productSelector[$globalOptions['product'][0]];
+					
+				echo '<li class="arrow"><a href="javascript: void(0);">' . $tTitle . '</a>';
+
+			}
+			else
+			{	
+				echo '<li class="arrow" style="height:23px;"><a href="javascript: void(0);">' . $productSelectorTitle . '</a>';
+			}
+			
+			echo '<ul id="productbox">';
+			foreach($productSelector as $infkey => $infvalue)
+			{
+				echo '<li><a href="javascript: void(0);">'
+					. '<input type="checkbox" value="' . $infkey . '" id="product_' . $infkey . '" class="product" style="margin-right:5px;" ' 
+					. ((in_array($infkey, $globalOptions['product'])) ? 'checked="checked"' : '') . ' />' 
+					. $infvalue . '</a></li>';
+			}
+			echo '</ul></li></ul></div>';
+		}		
+		else
+		{
+			echo '&nbsp;';
+		}
+		echo '</td></tr></table><br/><br/>'
 				. '<input type="hidden" name="status" id="status" value="' . implode(',', $globalOptions['status']) . '" />'
 				. '<input type="hidden" name="itype" id="itype" value="' . implode(',', $globalOptions['itype']) . '" />'
 				. '<input type="hidden" name="region" id="region" value="' . implode(',', $globalOptions['region']) . '" />'
@@ -11537,8 +11521,7 @@ class TrialTracker
 					$attr = ' ';
 					if(isset($dvalue['manual_is_sourceless']))
 					{
-						if(!empty($dvalue['edited']) && array_key_exists('NCT/enrollment', $dvalue['edited']) 
-						&& (getDifference(substr($dvalue['edited']['NCT/enrollment'],16), $dvalue['NCT/enrollment']))) 
+						if(!empty($dvalue['edited']) && array_key_exists('NCT/enrollment', $dvalue['edited'])) 
 						{
 							$attr = ' highlight" title="' . $dvalue['edited']['NCT/enrollment'];
 						}
@@ -11571,8 +11554,7 @@ class TrialTracker
 								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_enrollment'];
 							}
 						}
-						elseif(!empty($dvalue['edited']) && array_key_exists('NCT/enrollment', $dvalue['edited']) 
-						&& (getDifference(substr($dvalue['edited']['NCT/enrollment'],16), $dvalue['NCT/enrollment']))) 
+						elseif(!empty($dvalue['edited']) && array_key_exists('NCT/enrollment', $dvalue['edited'])) 
 						{
 							$attr = ' highlight" title="' . $dvalue['edited']['NCT/enrollment'];
 						}
