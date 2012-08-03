@@ -3,8 +3,7 @@ require_once('db.php');
 require_once('include.search.php');
 require_once('include.util.php');
 require_once('searchhandler.php');
-ini_set('error_reporting', E_ALL ^ E_NOTICE);
-
+ini_set('error_reporting', E_ALL ^E_NOTICE );
 /*	
 
 function tindex() - to preindex a combination of one trial+one product, or  one trial+one area.  
@@ -230,6 +229,43 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					if($up_id and !$scraper_run)
 					{
 						$query = 'update update_status_fullhistory set process_id="'. $prid . '",er_message="",status="2",update_items_total = "' . $total . '",trial_type="' . $ttype . '" where update_id= "'. $up_id .'" limit 1' ; 
+						
+						if(!$res = mysql_query($query))
+						{
+							$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+							$logger->error($log);
+							mysql_query('ROLLBACK');
+							echo $log;
+							return false;
+						}
+					}
+					if($scraper_run)
+					{
+						//insert new row in status
+						$query = 'SELECT MAX(update_id) AS maxid FROM update_status_fullhistory' ;
+						if(!$res = mysql_query($query))
+						{
+							$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+							$logger->error($log);
+							mysql_query('ROLLBACK');
+							echo $log;
+							return false;
+						}
+						$res = mysql_fetch_array($res) ;
+						$up_id = (isset($res['maxid'])) ? ((int)$res['maxid'])+1 : 1;
+						$prid = getmypid();
+				
+						$query = 'INSERT into update_status_fullhistory (update_id,process_id,status,update_items_total,start_time,trial_type,item_id) 
+						  VALUES ("'.$up_id.'","'. $prid .'","'. 2 .'",
+						  "' . $total . '","'. date("Y-m-d H:i:s", strtotime('now')) .'", "' . $ttype . '" , "' . $pid . '" ) ;';
+
+						//************/
+					
+				
+						$query = '	update update_status_fullhistory set process_id="'. $prid . '",';
+						$query .= '	er_message="Invalid JSON. table:'. $cat .', id:'.$cid.'",status="2",';
+						$query .= '	update_items_total = "' . $total . '",trial_type="' . $ttype . '" ';
+						$query .= '	where update_id= "'. $up_id .'" limit 1' ; 
 						
 						if(!$res = mysql_query($query))
 						{
