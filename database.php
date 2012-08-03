@@ -207,7 +207,57 @@ if (isset($_POST['upm_status']) and $_POST['upm_status']=="3")
 	}
 	return;
 }
+if (isset($_POST['li_s']) and $_POST['li_s']=="1") 
+{
+	require_once('fetch_li_products.php');
+	echo '<br><br>Importing all products from LI<br><br>';
+	fetch_li_products("0");
+	return;
+}
+if (isset($_POST['li_s']) and $_POST['li_s']=="2" and isset($_POST['updt_since']) ) 
+{
+	$upds=strtotime(mysql_real_escape_string($_POST['updt_since']));
+	if(!isset($upds) or empty($upds)) 
+	{
+		echo '<br> Invalid date entered:'.$litd.' Unable to proceed. ';
+		return false;
+	}
+	require_once('fetch_li_products.php');
+	echo '<br><br>Importing products updated since '.$_POST['updt_since'].' from LI<br><br>';
+	fetch_li_products($upds);
+	return;
+}
 
+if (isset($_POST['li_s']) and $_POST['li_s']=="3" and ( isset($_POST['p_lt_id']) or isset($_POST['p_li_id']) ) ) 
+{
+	if(isset($_POST['p_li_id'])) $liid=mysql_real_escape_string($_POST['p_li_id']);
+	elseif(isset($_POST['p_lt_id']))
+	{
+		$litd=mysql_real_escape_string($_POST['p_lt_id']);
+		
+		$query = 'select lI_id from products where id="'.$litd.'" limit 1' ;
+					if(!$res = mysql_query($query))
+					{
+						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+						global $logger;
+						$logger->error($log);
+						echo $log;
+						return false;
+					}
+					$res = mysql_fetch_array($res) ;
+					if(isset($res['lI_id']))
+						$liid = $res['lI_id'];
+					else
+					{
+						echo '<br> Could not find id '.$litd.' in products table.  ';
+						return false;
+					}
+	}
+	require_once('fetch_li_products.php');
+	echo '<br><br>Importing product with LI id:'.$liid.'<br><br>';
+	fetch_li_products($liid);
+	return;
+}
 
 
 /****************************/
@@ -232,16 +282,37 @@ function editor()
 	
 	<script type="text/javascript">
 		  toggles = new Array();
+		  toggles1 = new Array();
+		  toggles2 = new Array();
 		  if (document.getElementById) onload = function () {
 		    document.getElementById (\'more\').className = \'hide\';
+			document.getElementById (\'p_up_dt\').className = \'hide\';
+			document.getElementById (\'p_sing\').className = \'hide\';
 		    var t = document.getElementsByTagName (\'input\');
-		    for (var i = 0; i < t.length; i++) if (t[i].getAttribute (\'name\') == \'upm_status\') {
+		    for (var i = 0; i < t.length; i++) 
+			{
+				if (t[i].getAttribute (\'name\') == \'upm_status\') 
+				{
 					toggles.push (t[i]);
-					t[i].onclick = function () {
-		      	document.getElementById (\'more\').className = toggles[toggles.length - 1].checked ? \'show\' : \'hide\';
+					t[i].onclick = function () 
+					{
+						document.getElementById (\'more\').className = toggles[toggles.length - 1].checked ? \'show\' : \'hide\';
 					}
-		    }
+				}
+				
+				if (t[i].getAttribute (\'name\') == \'li_s\') 
+				{
+					toggles1.push (t[i]);
+					t[i].onclick = function () 
+					{
+						document.getElementById (\'p_up_dt\').className = toggles1[toggles1.length - 2].checked ? \'show\' : \'hide\';
+						document.getElementById (\'p_sing\').className = toggles1[toggles1.length - 1].checked ? \'show\' : \'hide\';
+					}
+				}
+				
+			}
 		  }
+		  
 		</script>
 		<br><div style="float:left;width:610px; padding:5px;"><fieldset class="schedule"><legend><b> SCRAPERS <font color="red">(NEW SCHEMA) </font> </b></legend>'
 			. '<form action="database.php" method="post">'
@@ -295,9 +366,9 @@ function editor()
 			
 	$out .= '</fieldset></div>';
 	
-	$out .= '<div style="clear:both;"><br><hr style="height:2px;"></div>';
+	$out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
 	// REMAPPING
-	$out .= '<br><div style="width:610px; padding:5px;float:left;"><fieldset class="schedule"><legend><b> REMAP TRIALS </b></legend>'
+	$out .= '<div style="width:610px; padding:5px;float:left;"><fieldset class="schedule"><legend><b> REMAP TRIALS </b></legend>'
 			. '<form action="database.php" method="post">'
 			. 'Enter NCT Id to remap : <input type="text" name="t_id" value=""/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
 			. ''
@@ -352,10 +423,10 @@ function editor()
 			. '<input type="submit" name="ind_all" value="Index ALL" />'
 			. '</form></fieldset></div>';
 			
-		$out .= '<div style="clear:both;"><br><hr style="height:2px;"></div>';
+		$out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
 	
 	// RECALCULATE
-	$out .= '<div style="width:610px; padding:5px;float:left;"><fieldset class="schedule"><legend><b> RECALCULATING </b></legend>'
+	$out .= '<div style="width:610px; padding:5px;float:left;"><fieldset class="schedule"><legend><b> RECALCULATE MASTER HEATMAP CELLS </b></legend>'
 			. '<form action="database.php" method="post">'
 			. 'Enter Product id to recalculate : <input type="text" name="prod_id" value=""/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
 			. ''
@@ -390,8 +461,21 @@ function editor()
 				'
 			. '<br><input type="submit" value="Recalculate" />'
 			. '</form></formset></fieldset></div>';
+			$out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
 	
-
+	// LI product scraper
+	$out .= '<div style="width:610px; padding:5px;float:left;"><fieldset class="schedule"><legend><b> IMPORT PRODUCTS FROM LI </b></legend>'
+			. '<formset><form action="database.php" method="post">'
+			. '
+			<input type="radio" name="li_s" value="1" selected="selcted"> All<br>
+			<input type="radio" name="li_s" value="2"> Products updated since <span id="p_up_dt" name="p_up_dt1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enter date as yyyy-mm-dd <input type="text" name="updt_since" id="updt_since" value="" size="10" length="10" title="( yyyy-mm-dd )"/></span> <br>
+			<input type="radio" name="li_s" value="3"> Single product (Either LT ID or LI ID) <span id="p_sing" name="p_sing1">LT ID: <input type="text" name="p_lt_id" id="p_ltid" value="" title="Enter LT id"/> LI ID: <input type="text" name="p_li_id" id="p_ltid" value="" title="Enter LI id"/></span><br>
+		
+				'
+			. '<br><input type="submit" value="Import" />'
+			. '</form></formset></fieldset></div>';
+	
+$out .= '<div style="clear:both">&nbsp;</div><br /><br /><br />';
 			
 	return $out;
 	
