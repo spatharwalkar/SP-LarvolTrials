@@ -219,7 +219,8 @@ class TrialTracker
 						{
 							while($tag_row = mysql_fetch_assoc($tag_res))
 							{
-								$TrialsInfo[$pkey]['sectionHeader'] .= " " . $tag_row['tag'];
+								if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
+									$TrialsInfo[$pkey]['sectionHeader'] .= " [" . $tag_row['tag'] ."] ";
 							}
 						}
 					}
@@ -260,7 +261,8 @@ class TrialTracker
 							{
 								while($tag_row = mysql_fetch_assoc($tag_res))
 								{
-									$TrialsInfo[$pkey]['sectionHeader'] .= " " . $tag_row['tag'];
+									if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
+										$TrialsInfo[$pkey]['sectionHeader'] .= " [" . $tag_row['tag'] ."]";
 								}
 							}
 						}
@@ -392,7 +394,8 @@ class TrialTracker
 							{
 								while($tag_row = mysql_fetch_assoc($tag_res))
 								{
-									$TrialsInfo[$pkey]['sectionHeader'] .= " " . $tag_row['tag'] ;
+									if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
+										$TrialsInfo[$pkey]['sectionHeader'] .= " [" . $tag_row['tag'] ."]";
 								}
 							}
 						}
@@ -430,7 +433,8 @@ class TrialTracker
 					{
 						while($tag_row = mysql_fetch_assoc($tag_res))
 						{
-							$TrialsInfo[0]['sectionHeader'] .= " " . $tag_row['tag'];
+							if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
+								$TrialsInfo[0]['sectionHeader'] .= " [" . $tag_row['tag'] ."]";
 						}
 					}
 				}
@@ -5471,6 +5475,7 @@ class TrialTracker
 						.'@page {margin-top: 1em; margin-bottom: 2em;}'
 						.'.nobr {white-space: nowrap}'
 						.'.startdatehighlight {border-right-color: red}'
+						.'.tag {color:#120f3c; font-weight:bold;}'
 						.'</style></head>'
 						.'<body>'
 						.'<div align="center"><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="200" height="25" id="header" /></div><br/>';
@@ -5534,7 +5539,8 @@ class TrialTracker
 						{
 							while($tag_row = mysql_fetch_assoc($tag_res))
 							{
-								$TrialsInfo[$pkey]['sectionHeader'] .= " <b><font style=\"color:#0000A0; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
+								if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
+									$TrialsInfo[$pkey]['sectionHeader'] .= " <font class=\"tag\">[" . $tag_row['tag'] . "]</font>";
 							}
 						}
 					}
@@ -5575,7 +5581,8 @@ class TrialTracker
 							{
 								while($tag_row = mysql_fetch_assoc($tag_res))
 								{
-									$TrialsInfo[$pkey]['sectionHeader'] .= " <b><font style=\"color:#0000A0; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
+									if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
+										$TrialsInfo[$pkey]['sectionHeader'] .= " <font class=\"tag\">[" . $tag_row['tag'] . "]</font>";
 								}
 							}
 						}
@@ -5709,7 +5716,8 @@ class TrialTracker
 							{
 								while($tag_row = mysql_fetch_assoc($tag_res))
 								{
-									$TrialsInfo[$pkey]['sectionHeader'] .= " <b><font style=\"color:#0000A0; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
+									if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
+										$TrialsInfo[$pkey]['sectionHeader'] .= " <font class=\"tag\">[" . $tag_row['tag'] . "]</font>";
 								}
 							}
 						}
@@ -5747,7 +5755,8 @@ class TrialTracker
 					{
 						while($tag_row = mysql_fetch_assoc($tag_res))
 						{
-							$TrialsInfo[0]['sectionHeader'] .= " <b><font style=\"color:#0000A0; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
+							if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
+								$TrialsInfo[0]['sectionHeader'] .= " <font class=\"tag\">[" . $tag_row['tag'] . "]</font>";
 						}
 					}
 				}
@@ -7423,8 +7432,11 @@ class TrialTracker
 								{
 									while($tag_row = mysql_fetch_assoc($tag_res))
 									{
-										$TrialsInfo[$pkey]['sectionHeader'] .= " <b><font style=\"color:#0000A0; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
-										$productSelector[$pkey] .=  " <b><font style=\"color:#0000A0; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
+										if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
+										{
+											$TrialsInfo[$pkey]['sectionHeader'] .= " <font class=\"tag\">[" . $tag_row['tag'] . "]</font>";
+											$productSelector[$pkey] .=  " <font class=\"tag\">[" . $tag_row['tag'] . "]</font>";
+										}
 									}
 								}
 							}
@@ -7480,8 +7492,11 @@ class TrialTracker
 									{
 										while($tag_row = mysql_fetch_assoc($tag_res))
 										{
-											$TrialsInfo[$pkey]['sectionHeader'] .= " <b><font style=\"color:#0000A0; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
-											$productSelector[$pkey] .=  " <b><font style=\"color:#0000A0; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
+											if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
+											{
+												$TrialsInfo[$pkey]['sectionHeader'] .= " <font class=\"tag\">[" . $tag_row['tag'] . "]</font>";
+												$productSelector[$pkey] .=  " <font class=\"tag\">[" . $tag_row['tag'] . "]</font>";
+											}
 										}
 									}
 								}
@@ -7686,8 +7701,11 @@ class TrialTracker
 									{
 										while($tag_row = mysql_fetch_assoc($tag_res))
 										{
-											$TrialsInfo[$pkey]['sectionHeader'] .= " <b><font style=\"color:#0000A0; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
-											$productSelector[$pkey] .=  " <b><font style=\"color:#0000A0; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
+											if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
+											{
+												$TrialsInfo[$pkey]['sectionHeader'] .= " <font class=\"tag\">[" . $tag_row['tag'] . "]</font>";
+												$productSelector[$pkey] .=  " <font class=\"tag\">[" . $tag_row['tag'] . "]</font>";
+											}
 										}
 									}
 								}
@@ -7769,8 +7787,11 @@ class TrialTracker
 					{
 						while($tag_row = mysql_fetch_assoc($tag_res))
 						{
-							$TrialsInfo[0]['sectionHeader'] .= " <b><font style=\"color:#0000A0; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
-							$productSelector[0] .=  " <b><font style=\"color:#0000A0; font-weight:bold\">" . $tag_row['tag'] . "</font></b>";
+							if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
+							{
+								$TrialsInfo[0]['sectionHeader'] .= " <font class=\"tag\">[" . $tag_row['tag'] . "]</font>";
+								$productSelector[0] .=  " <font class=\"tag\">[" . $tag_row['tag'] . "]</font>";
+							}
 						}
 					}
 				}
