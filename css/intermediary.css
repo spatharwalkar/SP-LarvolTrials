@@ -4,7 +4,8 @@ html {overflow-x:auto!important;} /* Overflow-x auto causes issue in ie6 for hel
 
 html,body {
 	height: 100%;
-	margin-bottom:1px;
+	margin:0px;
+	padding: 0px;
 }
 
 body {
@@ -89,6 +90,9 @@ a, a:hover{
 .manage th {
 	border-right:1px solid blue;
 	color:#54319F;
+	margin:0!important;
+	padding:0!important;
+	height: 25px;
 }
 
 .newtrial td, .newtrial td a{
@@ -370,6 +374,7 @@ tr.upms td {
     color:#000000;
     display:inline-block;
     text-decoration:none;
+	width:400px;
 }
 
 /**** SECOND LEVEL MENU ****/

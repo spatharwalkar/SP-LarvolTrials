@@ -10604,70 +10604,75 @@ class TrialTracker
 	
 	function downloadOptions($shownCnt, $foundCnt, $ottType, $result, $globalOptions) 
 	{	
-		$downloadOptions = '<div style="height:155px; padding:6px;"><div class="downldbox"><div class="newtext">Download Options</div>'
-				. '<form  id="frmDOptions" name="frmDOptions" method="post" target="_self">'
-				. '<input type="hidden" name="ottType" value="' . $ottType . '" />';
-				foreach($result as $rkey => $rvalue)
+		$downloadOptions = '<div style="height:170px; padding:6px;"><div class="downldbox"><div class="newtext">Download Options</div>'
+							. '<form  id="frmDOptions" name="frmDOptions" method="post" target="_self">'
+							. '<input type="hidden" name="ottType" value="' . $ottType . '" />';
+		foreach($result as $rkey => $rvalue)
+		{
+			if(is_array($rvalue))
+			{
+				foreach($rvalue as $rk => $rv)
 				{
-					if(is_array($rvalue))
-					{
-						foreach($rvalue as $rk => $rv)
-						{
-							$downloadOptions .= '<input type="hidden" name="resultIds[' . $rkey . '][' . $rk . ']" value="' . $rv . '" />';
-						}
-					}
-					else
-					{
-						$downloadOptions .= '<input type="hidden" name="resultIds[' . $rkey . ']" value="' . $rvalue . '" />';
-					}
-
+					$downloadOptions .= '<input type="hidden" name="resultIds[' . $rkey . '][' . $rk . ']" value="' . $rv . '" />';
 				}
-				foreach($globalOptions as $gkey => $gvalue)
+			}
+			else
+			{
+				$downloadOptions .= '<input type="hidden" name="resultIds[' . $rkey . ']" value="' . $rvalue . '" />';
+			}
+
+		}
+		foreach($globalOptions as $gkey => $gvalue)
+		{	
+			if(is_array($gvalue))
+			{	
+				foreach($gvalue as $gk => $gv)
 				{	
-					if(is_array($gvalue))
-					{	
-						foreach($gvalue as $gk => $gv)
-						{	
-							$downloadOptions .= '<input type="hidden" name="globalOptions[' . $gkey . '][' . $gk . ']" value=\'' . $gv . '\' />';
-						}
-					}
-					else
-					{	
-						$downloadOptions .= '<input type="hidden" name="globalOptions[' . $gkey . ']" value=\'' . $gvalue . '\' />';
-					}
-				}	
+					$downloadOptions .= '<input type="hidden" name="globalOptions[' . $gkey . '][' . $gk . ']" value=\'' . $gv . '\' />';
+				}
+			}
+			else
+			{	
+				$downloadOptions .= '<input type="hidden" name="globalOptions[' . $gkey . ']" value=\'' . $gvalue . '\' />';
+			}
+		}	
 		$downloadOptions .= '<ul><li><label>Number of Studies: </label></li>'
-				. '<li><select id="dOption" name="dOption" size="2" style="height:38px;">'
-				. '<option value="shown" selected="selected">' . $shownCnt . ' Shown Studies</option>'
-				. '<option value="all">' . $foundCnt . ' Found Studies</option></select></li>'
-				. '<li><label>Which Format: </label></li><li><select id="wFormat" name="wFormat" size="3" style="height:54px;">'
-				. '<option value="excel" selected="selected">Excel</option><option value="xml">XML</option><option value="pdf">PDF</option></select></li></ul>'
-				. '<input type="hidden" name="shownCnt" value="' . $shownCnt . '" />'
-				. '<input type="submit" id="btnDownload" name="btnDownload" value="Download File" style="margin-left:8px;"  />'
-				. '</form></div></div>';
-				return $downloadOptions;
+							. '<li><select id="dOption" name="dOption" size="2" style="height:38px;">'
+							. '<option value="shown" selected="selected">' . $shownCnt . ' Shown Studies</option>'
+							. '<option value="all">' . $foundCnt . ' Found Studies</option></select></li>'
+							. '<li><label>Which Format: </label></li>'
+							. '<li><select id="wFormat" name="wFormat" size="3" style="height:70px;">'
+							. '<option value="excel" selected="selected">Excel</option>'
+							. '<option value="xml">XML</option>'
+							. '<option value="pdf">PDF</option>'
+							. '<option value="tsv">TSV</option>'
+							. '</select></li></ul>'
+							. '<input type="hidden" name="shownCnt" value="' . $shownCnt . '" />'
+							. '<input type="submit" id="btnDownload" name="btnDownload" value="Download File" style="margin-left:8px;"  />'
+							. '</form></div></div>';
+		
+		return $downloadOptions;
 	}
 	
 	function displayTrialTableHeader($loggedIn, $globalOptions = array()) 
 	{
-		$outputStr = '<table width="100%" cellpadding="5" cellspacing="0" class="manage">'
+		$outputStr = '<table width="100%" cellpadding="3" cellspacing="0" class="manage">'
 			 . '<tr>' . (($loggedIn) ? '<th width="38px">ID</th>' : '' )
-			 . '<th width="270px">Title</th>'
+			 . '<th width="260px">Title</th>'
 			 . '<th width="30px" title="Red: Change greater than 20%">N</th>'
 			 . '<th width="65px" title="&quot;ROW&quot; = Rest of World">Region</th>'
-			 . '<th width="115px">Interventions</th>'
+			 . '<th width="100px">Interventions</th>'
 			 . '<th width="90px">Sponsor</th>'
-			 . '<th width="105px">Status</th>'
-			 . '<th width="110px">Conditions</th>'
-			 /*. '<th width="25px" title="MM/YY">Start</th>'*/
-			 . '<th width="25px" title="MM/YY">End</th>'
-			 . '<th width="15px">Ph</th>'
-			 . '<th width="16px" style="padding-left:0;">Res</th>'
-			 . '<th width="6px" colspan="3">-</th>'
-			 . '<th width="24px" colspan="12">' . (date('Y')) . '</th>'
-			 . '<th width="24px" colspan="12">' . (date('Y')+1) . '</th>'
-			 . '<th width="24px" colspan="12">' . (date('Y')+2) . '</th>'
-			 . '<th width="6px" colspan="3">+</th></tr>';
+			 . '<th width="100px">Status</th>'
+			 . '<th width="100px">Conditions</th>'
+			 . '<th width="27px" title="MM/YY">End</th>'
+			 . '<th width="25px">Ph</th>'
+			 . '<th width="22px">Res</th>'
+			 . '<th width="15px" colspan="3">-</th>'
+			 . '<th width="30px" colspan="12">' . (date('Y')) . '</th>'
+			 . '<th width="30px" colspan="12">' . (date('Y')+1) . '</th>'
+			 . '<th width="30px" colspan="12">' . (date('Y')+2) . '</th>'
+			 . '<th width="15px" colspan="3">+</th></tr>';
 		
 		return $outputStr;
 
