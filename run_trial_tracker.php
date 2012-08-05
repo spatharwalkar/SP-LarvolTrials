@@ -8,6 +8,7 @@ require_once('PHPExcel.php');
 require_once('PHPExcel/Writer/Excel2007.php');
 require_once('include.excel.php');
 require_once 'PHPExcel/IOFactory.php';
+//require_once ('php-export-data.class.php');
 require_once('special_chars.php');
 require_once('include.util.php');
 
@@ -83,6 +84,9 @@ class TrialTracker
 				break;
 			case 'pdf':
 				$this->generatePdfFile($resultIds, $timeMachine, $ottType, $globalOptions);
+				break;
+			case 'tsv':
+				$this->generateTsvFile($resultIds, $timeMachine, $ottType, $globalOptions);
 				break;
 			case 'webpage':
 				$this->generateOnlineTT($resultIds, $timeMachine, $ottType, $globalOptions);
@@ -1804,6 +1808,19 @@ class TrialTracker
 		header("Content-Transfer-Encoding: binary ");
 		$objWriter->save('php://output');
 		@flush();
+
+		exit;
+	}
+	
+	function generateTsvFile($resultIds, $timeMachine, $ottType, $globalOptions)
+	{
+		exit;
+		$objTsv = new ExportDataTSV('browser');
+		$objTsv->filename = 'DTT_' . date('Y-m-d_H.i.s') . '.xls';
+		$objTsv->initialize();
+		
+		$objTsv->addRow(array('NCT ID', 'Title', 'N', 'Region', 'Status', 'Sponsor', 'Conditions', 'Interventions', 'Start', 'Start', 'End', 'Ph'));
+		$objTsv->finalize();
 
 		exit;
 	}
@@ -10656,23 +10673,23 @@ class TrialTracker
 	
 	function displayTrialTableHeader($loggedIn, $globalOptions = array()) 
 	{
-		$outputStr = '<table width="100%" cellpadding="3" cellspacing="0" class="manage">'
+		$outputStr = '<table cellpadding="0" cellspacing="0" class="manage">'
 			 . '<tr>' . (($loggedIn) ? '<th width="38px">ID</th>' : '' )
-			 . '<th width="260px">Title</th>'
-			 . '<th width="30px" title="Red: Change greater than 20%">N</th>'
-			 . '<th width="65px" title="&quot;ROW&quot; = Rest of World">Region</th>'
-			 . '<th width="100px">Interventions</th>'
-			 . '<th width="90px">Sponsor</th>'
-			 . '<th width="100px">Status</th>'
-			 . '<th width="100px">Conditions</th>'
-			 . '<th width="27px" title="MM/YY">End</th>'
-			 . '<th width="25px">Ph</th>'
-			 . '<th width="22px">Res</th>'
-			 . '<th width="15px" colspan="3">-</th>'
-			 . '<th width="30px" colspan="12">' . (date('Y')) . '</th>'
-			 . '<th width="30px" colspan="12">' . (date('Y')+1) . '</th>'
-			 . '<th width="30px" colspan="12">' . (date('Y')+2) . '</th>'
-			 . '<th width="15px" colspan="3">+</th></tr>';
+			 . '<th style="width:270px;margin:0px;padding:0px;">Title</th>'
+			 . '<th style="width:30px" title="Red: Change greater than 20%">N</th>'
+			 . '<th style="width:65px" title="&quot;ROW&quot; = Rest of World">Region</th>'
+			 . '<th style="width:100px">Interventions</th>'
+			 . '<th style="width:90px">Sponsor</th>'
+			 . '<th style="width:100px">Status</th>'
+			 . '<th style="width:100px">Conditions</th>'
+			 . '<th style="width:27px" title="MM/YY">End</th>'
+			 . '<th style="width:25px">Ph</th>'
+			 . '<th style="width:22px">Res</th>'
+			 . '<th style="width:15px" colspan="3">-</th>'
+			 . '<th style="width:35px" colspan="12">' . (date('Y')) . '</th>'
+			 . '<th style="width:34px" colspan="12">' . (date('Y')+1) . '</th>'
+			 . '<th style="width:30px" colspan="12">' . (date('Y')+2) . '</th>'
+			 . '<th style="width:15px" colspan="3">+</th></tr>';
 		
 		return $outputStr;
 

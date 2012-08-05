@@ -76,6 +76,7 @@ a, a:hover{
 	border-top:1px solid blue;
 	border-left:1px solid blue;
 	border-bottom:1px solid blue;
+	width: 100%;
 }
 
 .manage td{
@@ -90,8 +91,8 @@ a, a:hover{
 .manage th {
 	border-right:1px solid blue;
 	color:#54319F;
-	margin:0!important;
-	padding:0!important;
+	margin:0px;
+	padding:0px;
 	height: 25px;
 }
 
