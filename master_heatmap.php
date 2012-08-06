@@ -576,6 +576,32 @@ function refresher(row, col, tot_rows, tot_cols)
 </script>
 <style type="text/css">
 img { behavior: url("css/iepngfix.htc"); }
+td {
+background-color:#FFFFFF;
+}
+.Insert {
+background-color:#FFFFFF;
+}
+.Total_Col{
+width:150px;
+min-width:150px;
+max-width:150px;
+}
+.Extra_Insert_Col {
+width:12.5px;
+min-width:12.5px;
+max-width:12.5px;
+}
+.Extra_Insert_FCol {
+width:28px;
+min-width:28px;
+max-width:28px;
+}
+.normal_cells {
+width:160px;
+max-width:160px;
+min-width:160px;
+}
 </style>
 <link href="css/popup_form.css" rel="stylesheet" type="text/css" media="all" />
 <link rel="stylesheet" type="text/css" href="css/chromestyle2.css" />
@@ -587,6 +613,61 @@ img { behavior: url("css/iepngfix.htc"); }
 <script type="text/javascript" src="scripts/jquery-ui-1.8.20.custom.min.js"></script>
 <script type="text/javascript" src="scripts/autosuggest/jquery.autocomplete-min.js"></script>
 <script type="text/javascript" src="progressbar/jquery.progressbar.js"></script>
+<script type="text/javascript">
+//// Below function SET all Row as Well as Column inserters at proper position, irrespective of type of browser after page load, as normal css causes position issue in different browser
+$(function () {
+
+	
+	var col_num = document.getElementById('Count_Columns');
+	var row_num = document.getElementById('Count_Rows');
+	if(col_num != null && col_num != '' && row_num != null && row_num != '')
+	{
+		
+		var count = 0;
+		while(count <= col_num.value+1)
+		{
+			var Insert_Column = document.getElementById('Insert_Column_'+count);
+			if(Insert_Column != null && Insert_Column != '')
+			{
+				if(count == 0)
+				{
+					var Area_Cell_1 = document.getElementById('Area_Cell_0');
+					Insert_Column.style.width = (Area_Cell_1.offsetWidth + 12.5)+'px';
+				}
+				else
+				{
+					var Area_Cell_1 = document.getElementById('Area_Cell_1');
+					var Area_Cell_Other = document.getElementById('Area_Cell_'+count);
+					Area_Cell_Other.style.width = Area_Cell_1.offsetWidth+'px';
+					var adj = (4.5 / col_num.value * count);
+					
+					Insert_Column.style.width = (Area_Cell_1.offsetWidth - adj)+'px';
+				}
+		//	alert(document.getElementById('Insert_Column_'+count).offsetWidth);	
+			}
+			count++;
+		}
+		
+		
+		var count = 0;
+		while(count <= row_num.value+1)
+		{
+			var Insert_Row = document.getElementById('Insert_Row_'+count);
+			if(Insert_Row != null && Insert_Row != '')
+			{
+				if(count == 0)
+					Insert_Row.style.height = (Product_Cell_1.offsetHeight + 12.5)+'px';
+				else
+					Insert_Row.style.height = (Product_Cell_1.offsetHeight)+'px';
+				
+			}
+			count++;
+		}
+		
+	
+	}
+});
+</script>
 <?php
 
 postRL();
@@ -1120,19 +1201,26 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 	
 	$out .= '<input type="submit" name="reportsave" value="Save edits" /><input type="hidden" id="reportsave_flg" name="reportsave_flg" value="0" /> | ';
 	
-	if($db->user->userlevel != 'user' || $rptu !== NULL)
-	{
-		if($owner_type == 'mine' || ($owner_type == 'global' && $db->user->userlevel != 'user') || ($owner_type == 'shared' && $rptu == $db->user->id) || $db->user->userlevel == 'root')
-		$out .= '<input type="submit" name="addproduct" value="More rows" /> | '
-				. '<input type="submit" name="addarea" value="More columns" /> | ';
-	}
+	
 	$out .= '<input type="submit" name="reportcopy" value="Copy into new" /> | '
-			. '<a href="masterhm_report_inputcheck.php?id=' . $id . '">Input check</a>'
-			. '<br /><table class="reportcell"><tr><th></th>';
+			. '<a href="masterhm_report_inputcheck.php?id=' . $id . '">Input check</a>';
+			
+	$out .= '<br/><table style="background-color:#FFFFFF; table-layout:fixed;"><tr><th style="background-color:#FFFFFF;" class="Extra_Insert_FCol"></th><th class="Insert" id="Insert_Column_0">'.(($owner_type == 'mine' || ($owner_type == 'global' && $db->user->userlevel != 'user') || ($owner_type == 'shared' && $rptu == $db->user->id) || $db->user->userlevel == 'root') ? '<input type="image" name="insert_area[0]" src="images/insert_column.png" title="Insert Column" align="right"/>':'').'</th>';
+	foreach($columns as $col => $val)
+	$out .= '<th class="Insert" id="Insert_Column_'.$col.'">'.(($owner_type == 'mine' || ($owner_type == 'global' && $db->user->userlevel != 'user') || ($owner_type == 'shared' && $rptu == $db->user->id) || $db->user->userlevel == 'root') ? '<input type="image" name="insert_area[' . $col . ']" src="images/insert_column.png" title="Insert Column" align="right"/>':'').'</th>';
+	$out .= '</tr></table>';
+	
+	$out .= '<table style="background-color:#FFFFFF;"><tr><td valign="top"  style="vertical-align:top;"><table style="background-color:#FFFFFF;"><tr><th class="Insert" id="Insert_Row_0" valign="bottom"  style="vertical-align:bottom;">'.(($owner_type == 'mine' || ($owner_type == 'global' && $db->user->userlevel != 'user') || ($owner_type == 'shared' && $rptu == $db->user->id) || $db->user->userlevel == 'root') ? '<input type="image" name="insert_product[0]" src="images/insert_row.png" title="Insert Column" valign="bottom"  style="vertical-align:bottom;"/>':'').'</th></tr>';
+	foreach($rows as $row => $rval)
+	$out .= '<tr><th class="Insert" valign="bottom"  style="vertical-align:bottom;" id="Insert_Row_'.$row.'">'.(($owner_type == 'mine' || ($owner_type == 'global' && $db->user->userlevel != 'user') || ($owner_type == 'shared' && $rptu == $db->user->id) || $db->user->userlevel == 'root') ? '<input type="image" name="insert_product[' . $row . ']" src="images/insert_row.png" title="Insert Column" valign="bottom"  style="vertical-align:bottom;"/>':'').'</th></tr>';
+	
+	$out .= '</table></td><td valign="top"  style="vertical-align:top;">';
+	
+	$out .= '<table class="reportcell" style="background-color:#FFFFFF;"><tr><th class="normal_cells" id="Area_Cell_0"></th>';
 			
 	foreach($columns as $col => $val)
 	{
-		$out .= '<th valign="top">Area:<br/><input type="text" id="areas' . $col . '" name="areas[' . $col . ']" value="' . $val . '" autocomplete="off" '
+		$out .= '<th valign="top" class="normal_cells" id="Area_Cell_'.$col.'">Area:<br/><input type="text" id="areas' . $col . '" name="areas[' . $col . ']" value="' . $val . '" autocomplete="off" '
 				. ' onkeyup="javascript:autoComplete(\'areas'.$col.'\')" '.(($disabled) ? ' readonly="readonly" ':'').' /><br />';
 				
 		$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col]:'';
@@ -1177,7 +1265,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 	//if total checkbox is selected
 	if($total_fld)
 	{
-		$out .= '<th width="150px">';
+		$out .= '<th width="150px" class="Total_Col">';
 		if(!empty($productIds) && !empty($areaIds))
 		{
 			if($view_tp=='active')
@@ -1199,11 +1287,18 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 		}
 		$out .= '</th>';
 	}
+	
+	// Extra column for proper arrangement of inserteres
+	if($owner_type == 'mine' || ($owner_type == 'global' && $db->user->userlevel != 'user') || ($owner_type == 'shared' && $rptu == $db->user->id) || $db->user->userlevel == 'root')
+	{
+		$out .= '<th style="background-color:#FFFFFF;"><img src="images/insert_column.png" style="visibility:hidden"></th>';
+	}
+	
 	$out .= '</tr>';
 	foreach($rows as $row => $rval)
 	{
 		$cat = (isset($rowsCategoryName[$row]) && $rowsCategoryName[$row] != '')?$rowsCategoryName[$row]:'';
-		$out .= '<tr><th>Product:<br/><input type="text" id="products' . $row . '"  name="products[' . $row . ']" value="' . $rval . '" autocomplete="off" '
+		$out .= '<tr><th class="normal_cells" id="Product_Cell_'.$row.'">Product:<br/><input type="text" id="products' . $row . '"  name="products[' . $row . ']" value="' . $rval . '" autocomplete="off" '
 				. ' onkeyup="javascript:autoComplete(\'products'.$row.'\')" '.(($disabled) ? ' readonly="readonly" ':'').' /><br />';
 				
 		$out .= 'Category name: <br/><input type="text" id="category_product' . $row . '" name="category_product[' . $row . ']" value="' . $cat . '" '.(($disabled) ? ' readonly="readonly" ':'').' /><br />';
@@ -1392,21 +1487,30 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 			$out .= '<th width="150px">&nbsp;</th>';
 		}
 		
+		// Extra column for proper arrangement of inserters
+		if($owner_type == 'mine' || ($owner_type == 'global' && $db->user->userlevel != 'user') || ($owner_type == 'shared' && $rptu == $db->user->id) || $db->user->userlevel == 'root')
+		{
+			$out .= '<th style="background-color:#FFFFFF;" class="Extra_Insert_Col"></th>';
+		}
+		
 		$out .= '</tr>';
 	}
-	$out .= '</table>'
+	$out .= '</table></td></tr></table>'
 			. '<fieldset><legend>Footnotes</legend><textarea '.(($disabled) ? ' readonly="readonly" ':'').' name="footnotes" cols="45" rows="5">' 
 			. $footnotes . '</textarea></fieldset>'
 			. '<fieldset><legend>Description</legend><textarea '.(($disabled) ? ' readonly="readonly" ':'').' name="description" cols="45" rows="5">' . $description
 			. '</textarea></fieldset>';
-	$out .='<div id="dialog" title="Confirm"></div>';
+	$out .='<div id="dialog" title="Confirm"></div>'
+			.'<input type="hidden" id="Count_Rows" name="Count_Rows" value="'. count($rows) .'" />'
+			.'<input type="hidden" id="Count_Columns" name="Count_Columns" value="'. count($columns) .'" />';
+			
 	if($owner_type == 'mine' || ($owner_type == 'global' && $db->user->userlevel != 'user') || ($owner_type == 'shared' && $rptu == $db->user->id) || $db->user->userlevel == 'root')
 	{
 		$out .= '<br clear="all"/><div align="left" style="vertical-align:bottom; float:left;"><fieldset style="margin-top:50px; padding:8px;"><legend>Advanced</legend>'
 				. '<label class="lbldeln"><input class="delrepe" type="checkbox" id="delrep" name="delrep['.$id.']" title="Delete" /></label>' 
 				. '&nbsp;&nbsp;&nbsp;&nbsp;Delete this master heatmap report</fieldset></div>';
 	};
-	$out .= '</form>';
+	$out .= '</form><script type="text/javascript">Reset_Inserters();</script>';
 
 	return $out;
 }
@@ -4125,27 +4229,32 @@ function postEd()
 		
 		foreach($types as $t)
 		{
-			$maxvar = 'max' . $t;
-			if(isset($_POST['add'.$t]) || isset($_POST['del'.$t]))
+			if(isset($_POST['insert_'.$t]) && is_array($_POST['insert_'.$t]))
 			{
-				$query = 'SELECT MAX(num) AS "prevnum" FROM rpt_masterhm_headers WHERE report=' . $id
-						. ' AND type="' . $t . '" GROUP BY report LIMIT 1';
-				$res = mysql_query($query) or die('Bad SQL query getting max ' . $t . ' number');
-				$res = mysql_fetch_array($res);
-				if($res !== false) $$maxvar = $res['prevnum'];
-			}
-			if(isset($_POST['add'.$t]))
-			{
-				$query = 'INSERT INTO rpt_masterhm_headers SET report=' . $id . ',type="' . $t . '",num=' . ($$maxvar + 1);
-				mysql_query($query) or die('Bad SQL Query adding ' . $t);
-			}
-			if(isset($_POST['del'.$t]))
-			{
-				$query = 'DELETE FROM rpt_masterhm_headers WHERE report=' . $id . ' AND num=' . $$maxvar . ' AND type="' . $t . '" LIMIT 1';
-				mysql_query($query) or die('Bad SQL Query removing ' . $t);
-				}
-		}
-	}
+				foreach($_POST['insert_'.$t] as $ins=>$stat)
+				{
+					//after all delete columns reorder columns
+					$query = "SELECT num FROM `rpt_masterhm_headers` WHERE `report` = $id AND `type` = '" . $t . "' ORDER BY `num` DESC";
+					$result = mysql_query($query);
+					$cnt = 0;
+					$cnt = mysql_num_rows($result);
+					$i=1;
+					$upd_flg = 0;
+					$ins_PT = $ins + 1;
+					while($row = mysql_fetch_assoc($result))
+					{
+						if($row['num'] >= $ins_PT)
+						{
+							$query = "UPDATE `rpt_masterhm_headers` set `num` = `num`+1 WHERE `report` = $id and `type` = '" . $t . "' AND `num` = ".$row['num'];
+							mysql_query($query) or die ('Bad SQL Query updating columns with new values after insert row/cols operation.<br/>'.$query);
+						}
+					}
+					$query = 'INSERT INTO rpt_masterhm_headers SET report=' . $id . ',type="' . $t . '",num=' . ($ins_PT);
+					mysql_query($query) or die('Bad SQL Query adding ' . $t);
+				}	
+			} // End of IF
+		} // End of Foreach
+	}	// End of add column / row IF
 	
 	
 	if(isset($_POST['reportsave']) || $_POST['reportsave_flg']==1)
@@ -4407,7 +4516,8 @@ function postEd()
 	
 	
 
-	if(($rptu === NULL && $db->user->userlevel == 'user') || ($rptu !== NULL && $rptu != $db->user->id) || $db->user->userlevel == 'root') return;	///Restriction on report saving
+	if($db->user->userlevel != 'root')
+	if(($rptu === NULL && $db->user->userlevel == 'user') || ($rptu !== NULL && $rptu != $db->user->id)) return;	///Restriction on report saving
 	
 	if(isset($_POST['move_row_down']))
 	{
