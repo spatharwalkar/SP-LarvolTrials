@@ -477,7 +477,7 @@ $.initialBracesFlag = 9;
                         }
                         else {
                             optstring = opts.fields[i].name;
-                            if (optstring.indexOf(searchstring) >= 0) {
+                            if (optstring.toLowerCase().indexOf(searchstring.toLowerCase()) >= 0) {
                                 mmenu += '<li><a href="#' + i + '">' + opts.fields[i].name + '</a></li>';
                             }
                         }
