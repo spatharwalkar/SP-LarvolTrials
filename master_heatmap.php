@@ -636,14 +636,10 @@ $(function () {
 				}
 				else
 				{
-					var Area_Cell_1 = document.getElementById('Area_Cell_1');
+					if(col_num.value <= 6) var adj = (4.5 / col_num.value * count); else var adj = 0;
 					var Area_Cell_Other = document.getElementById('Area_Cell_'+count);
-					Area_Cell_Other.style.width = Area_Cell_1.offsetWidth+'px';
-					var adj = (4.5 / col_num.value * count);
-					
-					Insert_Column.style.width = (Area_Cell_1.offsetWidth - adj)+'px';
+					Insert_Column.style.width = (Area_Cell_Other.offsetWidth - adj)+'px';
 				}
-		//	alert(document.getElementById('Insert_Column_'+count).offsetWidth);	
 			}
 			count++;
 		}
@@ -656,9 +652,15 @@ $(function () {
 			if(Insert_Row != null && Insert_Row != '')
 			{
 				if(count == 0)
+				{
+					var Product_Cell_1 = document.getElementById('Area_Cell_0');
 					Insert_Row.style.height = (Product_Cell_1.offsetHeight + 12.5)+'px';
+				}
 				else
+				{
+					var Product_Cell_1 = document.getElementById('Product_Cell_'+count);
 					Insert_Row.style.height = (Product_Cell_1.offsetHeight)+'px';
+				}
 				
 			}
 			count++;
@@ -1510,7 +1512,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 				. '<label class="lbldeln"><input class="delrepe" type="checkbox" id="delrep" name="delrep['.$id.']" title="Delete" /></label>' 
 				. '&nbsp;&nbsp;&nbsp;&nbsp;Delete this master heatmap report</fieldset></div>';
 	};
-	$out .= '</form><script type="text/javascript">Reset_Inserters();</script>';
+	$out .= '</form>';
 
 	return $out;
 }
@@ -1727,6 +1729,16 @@ function Download_reports()
 	$Line_Height = 3.96;
 	$Min_One_Liner = 4.5;
 	
+	//// Declare Tidy Configuration
+	$tidy_config = array(
+	                     'clean' => true,
+	                     'output-xhtml' => true,
+	                     'show-body-only' => true,
+	                     'wrap' => 0,
+	                    
+	                     );
+	$tidy = new tidy(); /// Create Tidy Object
+	
 	
 	foreach($rows as $row => $rval)
 	{
@@ -1763,8 +1775,22 @@ function Download_reports()
 				$data_matrix[$row][$col]['indlead']=0;
 				
 				$data_matrix[$row][$col]['bomb_explain']=trim($cell_data['bomb_explain']);
+				/// Clean HTML using Tidy
+				$tidy = tidy_parse_string($data_matrix[$row][$col]['bomb_explain'], $tidy_config, 'UTF8');
+				$tidy->cleanRepair(); 
+				$data_matrix[$row][$col]['bomb_explain']=trim($tidy);
+				
+				$data_matrix[$row][$col]['filing']=trim($cell_data['filing']);
+				/// Clean HTML using Tidy
+				$tidy = tidy_parse_string($data_matrix[$row][$col]['filing'], $tidy_config, 'UTF8');
+				$tidy->cleanRepair(); 
+				$data_matrix[$row][$col]['filing']=trim($tidy);
 				
 				$data_matrix[$row][$col]['phase_explain']=trim($cell_data['phase_explain']);
+				/// Clean HTML using Tidy
+				$tidy = tidy_parse_string($data_matrix[$row][$col]['phase_explain'], $tidy_config, 'UTF8');
+				$tidy->cleanRepair(); 
+				$data_matrix[$row][$col]['phase_explain']=trim($tidy);
 				
 				$Width = 0;
 				
@@ -1910,9 +1936,6 @@ function Download_reports()
 					$data_matrix[$row][$col]['bomb']['style']='width:11px; height:11px;';
 					$data_matrix[$row][$col]['bomb']['title']='Bomb details';
 				}
-				
-				$data_matrix[$row][$col]['filing']=trim($cell_data['filing']);
-				
 				
 				$data_matrix[$row][$col]['phase4_override']=$cell_data['phase4_override'];
 				
@@ -2805,7 +2828,7 @@ function Download_reports()
 				$pdf->setCellMargins(0.5, 0, 0, 0);
 				$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));	
 			//	$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(162, 255, 151)));
-				$pdf->MultiCell($Product_Rowcat_width, $Product_Rowcat_height, $pdfContent, $border, $align='C', $fill=1, $ln=1, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+				$pdf->MultiCell($Product_Rowcat_width, $Product_Rowcat_height, $pdfContent, $border, $align='L', $fill=1, $ln=1, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
 				$pdf->Ln(0.5);
 			}
 				
@@ -3570,7 +3593,7 @@ function Download_reports()
 				$objPHPExcel->getActiveSheet()->getStyle($from . $Excel_HMCounter)->getFill()->getStartColor()->setRGB('A2FF97');
 				$objPHPExcel->getActiveSheet()->setCellValue($from . $Excel_HMCounter, $cat);
 				$objPHPExcel->getActiveSheet()->getStyle($from . $Excel_HMCounter)->getAlignment()->applyFromArray(
-      									array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+      									array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_LEFT,
       											'vertical'   => PHPExcel_Style_Alignment::VERTICAL_CENTER,
      											'rotation'   => 0,
       											'wrap'       => true));
@@ -4444,12 +4467,31 @@ function postEd()
 			{
 				$prod=$_POST['cell_prod'][$row][$col];
 				$area=$_POST['cell_area'][$row][$col];
-				$filing=trim(mysql_real_escape_string($_POST['filing'][$row][$col]));
-				$bomb=trim($_POST['bomb'][$row][$col]);
+				
+				$tidy_config = array(
+                     'clean' => true,
+                     'output-xhtml' => true,
+                     'show-body-only' => true,
+                     'wrap' => 0,
+                    
+                     );
+				$tidy = new tidy();
+				
+				$tidy = tidy_parse_string($_POST['filing'][$row][$col], $tidy_config, 'UTF8');
+				$tidy->cleanRepair(); 
+				$filing=trim(mysql_real_escape_string($tidy));
 				$filing_presence=$_POST['filing_presence'][$row][$col];
+				
+				$bomb=trim($_POST['bomb'][$row][$col]);
+				$tidy = tidy_parse_string($_POST['bomb_explain'][$row][$col], $tidy_config, 'UTF8');
+				$tidy->cleanRepair(); 
+				$bomb_explain=trim(mysql_real_escape_string($tidy));
+				
 				$phaseexp_presence=$_POST['phaseexp_presence'][$row][$col];
-				$bomb_explain=mysql_real_escape_string($_POST['bomb_explain'][$row][$col]);
-				$phase_explain=trim(mysql_real_escape_string($_POST['phase_explain'][$row][$col]));
+				$tidy = tidy_parse_string($_POST['phase_explain'][$row][$col], $tidy_config, 'UTF8');
+				$tidy->cleanRepair(); 
+				$phase_explain=trim(mysql_real_escape_string($tidy));
+				
 				$phase4_val=mysql_real_escape_string($_POST['phase4_val'][$row][$col]);
 				
 				$up_time=date('Y-m-d H:i:s', $now);
@@ -4462,7 +4504,7 @@ function postEd()
 				
 				$query = "UPDATE `rpt_masterhm_cells` set ";
 				
-				if($bomb != $originDT['bomb'] || $_POST['bomb_explain'][$row][$col] != $originDT['bomb_explain'])
+				if($bomb != $originDT['bomb'] || trim($bomb_explain) != $originDT['bomb_explain'])
 				{
 					$query .="`bomb` = '$bomb', `bomb_explain` = '$bomb_explain', `bomb_lastchanged`= '$up_time', ";
 					$change_flag=1;

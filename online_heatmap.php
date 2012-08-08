@@ -179,6 +179,17 @@ $active_total=0;
 $count_total=0;
 $data_matrix=array();
 $Max_ViewCount = 0;
+
+//// Declare Tidy Configuration
+$tidy_config = array(
+                     'clean' => true,
+                     'output-xhtml' => true,
+                     'show-body-only' => true,
+                     'wrap' => 0,
+                    
+                     );
+$tidy = new tidy(); /// Create Tidy Object
+
 foreach($rows as $row => $rval)
 {
 	foreach($columns as $col => $cval)
@@ -219,10 +230,22 @@ foreach($rows as $row => $rval)
 			$data_matrix[$row][$col]['indlead_prev']=$cell_data['count_active_indlead_prev'];
 			
 			$data_matrix[$row][$col]['phase_explain']=trim($cell_data['phase_explain']);
+			/// Clean HTML using Tidy
+			$tidy = tidy_parse_string($data_matrix[$row][$col]['phase_explain'], $tidy_config, 'UTF8');
+			$tidy->cleanRepair(); 
+			$data_matrix[$row][$col]['phase_explain']=trim($tidy);
 			
 			$data_matrix[$row][$col]['bomb_explain']=trim($cell_data['bomb_explain']);
+			/// Clean HTML using Tidy
+			$tidy = tidy_parse_string($data_matrix[$row][$col]['bomb_explain'], $tidy_config, 'UTF8');
+			$tidy->cleanRepair(); 
+			$data_matrix[$row][$col]['bomb_explain']=trim($tidy);
 			
 			$data_matrix[$row][$col]['filing']=trim($cell_data['filing']);
+			/// Clean HTML using Tidy
+			$tidy = tidy_parse_string($data_matrix[$row][$col]['filing'], $tidy_config, 'UTF8');
+			$tidy->cleanRepair(); 
+			$data_matrix[$row][$col]['filing']=trim($tidy);
 			
 			$data_matrix[$row][$col]['viewcount']=$cell_data['viewcount'];
 			
@@ -1241,13 +1264,10 @@ function change_view()
 				var New_Trials = document.getElementById("New_Trials_"+i);
 				if(New_Trials != null && New_Trials != '')
 				{
-					if(New_Trials.value == 'True')
-					{
-						document.getElementById("Cell_Link_"+i).style.color = "#FF0000";
-						document.getElementById("Cell_Link_"+i).style.fontWeight = "bold";
-						if(Cell_values_Arr[14]=='FF0000')
-						document.getElementById("Cell_Link_"+i).style.backgroundColor = "#FFFFFF";
-					}
+					document.getElementById("Cell_Link_"+i).style.color = "#FF0000";
+					document.getElementById("Cell_Link_"+i).style.fontWeight = "bold";
+					if(Cell_values_Arr[14]=='FF0000')
+					document.getElementById("Cell_Link_"+i).style.backgroundColor = "#FFFFFF";
 				}
 					
 				///Change Bomb Color
@@ -1851,7 +1871,7 @@ foreach($rows as $row => $rval)
 	{
 		$online_HMCounter++;
 		
-		$htmlContent .='<tr style="page-break-inside:avoid; vertical-align:middle; max-height:100%; background-color: #A2FF97;"><td align="center" style="vertical-align:middle; background-color: #A2FF97;" colspan="'.((count($columns)+1)+(($total_fld)? 1:0)).'" id="Cell_ID_'.$online_HMCounter.'">';
+		$htmlContent .='<tr style="page-break-inside:avoid; vertical-align:middle; max-height:100%; background-color: #A2FF97;"><td align="left" style="vertical-align:middle; background-color: #A2FF97; padding-left:4px;" colspan="'.((count($columns)+1)+(($total_fld)? 1:0)).'" id="Cell_ID_'.$online_HMCounter.'">';
 		if($dtt)
 		{
 			$htmlContent .= '<input type="hidden" value="0,endl,0,endl,0" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
