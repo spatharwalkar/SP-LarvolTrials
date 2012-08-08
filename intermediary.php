@@ -53,10 +53,13 @@ if(isset($_POST['btnDownload']))
 			break;
 	}
 	
-	if(isset($_REQUEST['sphinx_s']))
+	if(isset($_REQUEST['sphinx_s']) && $_REQUEST['sphinx_s'] != '')
 	{	
 		$Sphinx_search=$_REQUEST['sphinx_s'];
 		$globalOptions['sphinx_s']=$_REQUEST['sphinx_s'];
+				
+		$_REQUEST['p'] = '';
+		$_REQUEST['a'] = '';
 	}
 	elseif(isset($globalOptions['sphinx_s']))
 	{	
@@ -71,10 +74,13 @@ if(isset($_POST['btnDownload']))
 }
 $sortFields = array('phase' => 'pD', 'inactive_date' => 'iA', 'start_date' => 'sA', 'overall_status' => 'oA', 'enrollment' => 'eA');
 
-if(isset($_REQUEST['sphinx_s']))
+if(isset($_REQUEST['sphinx_s']) && $_REQUEST['sphinx_s'] != '')
 {	
 	$Sphinx_search=$_REQUEST['sphinx_s'];
 	$globalOptions['sphinx_s']=$_REQUEST['sphinx_s'];
+					
+	$_REQUEST['p'] = '';
+	$_REQUEST['a'] = '';
 }
 elseif(isset($globalOptions['sphinx_s']))
 {	

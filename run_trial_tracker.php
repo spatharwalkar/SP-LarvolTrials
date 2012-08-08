@@ -8,7 +8,6 @@ require_once('PHPExcel.php');
 require_once('PHPExcel/Writer/Excel2007.php');
 require_once('include.excel.php');
 require_once 'PHPExcel/IOFactory.php';
-//require_once ('php-export-data.class.php');
 require_once('special_chars.php');
 require_once('include.util.php');
 
@@ -8065,7 +8064,7 @@ class TrialTracker
 					}
 					
 					//unsetting value for field enrollment if the change is less than 20 percent
-					/*if(isset($dataset['trials']['edited']['NCT/enrollment']))
+					if(isset($dataset['trials']['edited']['NCT/enrollment']))
 					{
 						$prevValue = substr($dataset['trials']['edited']['NCT/enrollment'],16);
 						
@@ -8073,7 +8072,7 @@ class TrialTracker
 						{
 							unset($dataset['trials']['edited']['NCT/enrollment']);
 						}
-					}*/
+					}
 					
 					//merge only if updates are found
 					foreach($dataset['matchedupms'] as $mkey => & $mvalue) 
@@ -9023,14 +9022,14 @@ class TrialTracker
 					}
 					
 					//unsetting value for field enrollment if the change is less than 20 percent
-					/*if(isset($result['edited']['NCT/enrollment'])) 
+					if(isset($result['edited']['NCT/enrollment'])) 
 					{ 
 						$prevValue = substr($result['edited']['NCT/enrollment'],16);
 						if(!getDifference($prevValue, $result['NCT/enrollment'])) 
 						{
 							unset($result['edited']['NCT/enrollment']);
 						}
-					}*/
+					}
 					
 					foreach($result['matchedupms'] as $mkey => & $mvalue) 
 					{
@@ -9616,7 +9615,7 @@ class TrialTracker
 					}
 					
 					//unsetting value for field enrollment if the change is less than 20 percent
-					/*if(isset($dataset['trials']['edited']['NCT/enrollment']))
+					if(isset($dataset['trials']['edited']['NCT/enrollment']))
 					{
 						$prevValue = substr($dataset['trials']['edited']['NCT/enrollment'],16);
 						
@@ -9624,7 +9623,7 @@ class TrialTracker
 						{
 							unset($dataset['trials']['edited']['NCT/enrollment']);
 						}
-					}*/
+					}
 					
 					//merge only if updates are found
 					foreach($dataset['matchedupms'] as $mkey => & $mvalue) 
@@ -10473,6 +10472,7 @@ class TrialTracker
 			$this->pagination($globalOptions, $totalPages, $timeMachine, $ottType, $loggedIn);
 		}
 		
+		echo '<input type="text" name="sphinx_s" autocomplete="off" style="width:300px;" value="' . $globalOptions['sphinx_s'] . '" />';
 		echo '<div style="float: right;padding-top:4px; vertical-align:bottom; height:22px;" id="chromemenu"><a rel="dropmenu">'
 				. '<span style="padding:2px;border:1px solid; color:#000000; background-position:left center; background-repeat:no-repeat; background-image:url(\'./images/save.png\'); cursor:pointer;">'
 				. '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Export</b></span></a></div>'
@@ -10654,11 +10654,11 @@ class TrialTracker
 							. '<option value="shown" selected="selected">' . $shownCnt . ' Shown Studies</option>'
 							. '<option value="all">' . $foundCnt . ' Found Studies</option></select></li>'
 							. '<li><label>Which Format: </label></li>'
-							. '<li><select id="wFormat" name="wFormat" size="3" style="height:70px;">'
+							. '<li><select id="wFormat" name="wFormat" size="3" style="height:54px;">'
 							. '<option value="excel" selected="selected">Excel</option>'
 							. '<option value="xml">XML</option>'
 							. '<option value="pdf">PDF</option>'
-							. '<option value="tsv">TSV</option>'
+							/*. '<option value="tsv">TSV</option>'*/
 							. '</select></li></ul>'
 							. '<input type="hidden" name="shownCnt" value="' . $shownCnt . '" />'
 							. '<input type="submit" id="btnDownload" name="btnDownload" value="Download File" style="margin-left:8px;"  />'
@@ -11558,9 +11558,15 @@ class TrialTracker
 					
 					//enrollment column
 					$attr = ' ';
+					$highlightFlag = true;
+					if($globalOptions['onlyUpdates'] != "yes")
+					{
+						$prevValue = substr($dvalue['edited']['NCT/enrollment'], 16);
+						$highlightFlag = getDifference($prevValue, $dvalue['NCT/enrollment']);
+					}
 					if(isset($dvalue['manual_is_sourceless']))
 					{
-						if(!empty($dvalue['edited']) && array_key_exists('NCT/enrollment', $dvalue['edited'])) 
+						if(!empty($dvalue['edited']) && array_key_exists('NCT/enrollment', $dvalue['edited']) && $highlightFlag) 
 						{
 							$attr = ' highlight" title="' . $dvalue['edited']['NCT/enrollment'];
 						}
@@ -11593,7 +11599,7 @@ class TrialTracker
 								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_enrollment'];
 							}
 						}
-						elseif(!empty($dvalue['edited']) && array_key_exists('NCT/enrollment', $dvalue['edited'])) 
+						elseif(!empty($dvalue['edited']) && array_key_exists('NCT/enrollment', $dvalue['edited']) && $highlightFlag) 
 						{
 							$attr = ' highlight" title="' . $dvalue['edited']['NCT/enrollment'];
 						}
@@ -13930,14 +13936,7 @@ function getDifference($valueOne, $valueTwo)
 {
 	if($valueOne == 0)
 	{
-		if($valueTwo > 20)
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
+		return true;
 	}
 	else
 	{
