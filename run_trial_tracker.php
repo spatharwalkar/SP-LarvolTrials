@@ -7452,7 +7452,6 @@ class TrialTracker
 										if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
 										{
 											$TrialsInfo[$pkey]['sectionHeader'] .= " <font class=\"tag\">[" . $tag_row['tag'] . "]</font>";
-											$productSelector[$pkey] .=  " <font class=\"tag\">[" . $tag_row['tag'] . "]</font>";
 										}
 									}
 								}
@@ -7512,7 +7511,6 @@ class TrialTracker
 											if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
 											{
 												$TrialsInfo[$pkey]['sectionHeader'] .= " <font class=\"tag\">[" . $tag_row['tag'] . "]</font>";
-												$productSelector[$pkey] .=  " <font class=\"tag\">[" . $tag_row['tag'] . "]</font>";
 											}
 										}
 									}
@@ -7721,7 +7719,6 @@ class TrialTracker
 											if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
 											{
 												$TrialsInfo[$pkey]['sectionHeader'] .= " <font class=\"tag\">[" . $tag_row['tag'] . "]</font>";
-												$productSelector[$pkey] .=  " <font class=\"tag\">[" . $tag_row['tag'] . "]</font>";
 											}
 										}
 									}
@@ -7807,7 +7804,6 @@ class TrialTracker
 							if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
 							{
 								$TrialsInfo[0]['sectionHeader'] .= " <font class=\"tag\">[" . $tag_row['tag'] . "]</font>";
-								$productSelector[0] .=  " <font class=\"tag\">[" . $tag_row['tag'] . "]</font>";
 							}
 						}
 					}
