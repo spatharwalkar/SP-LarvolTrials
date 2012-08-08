@@ -15,9 +15,9 @@ require_once('db.php');
 require_once('include.search.php');
 require_once('include.util.php');
 
-if(!isset($_POST['lid'])) die('<br> No larvol id pased.');
+if(!isset($_REQUEST['lid'])) die('<br> No larvol id pased.');
 
-$lid=$_POST['lid'];
+$lid=$_REQUEST['lid'];
 
 global $db;
 
@@ -60,7 +60,6 @@ else
 	}
 	else $sourced_trial='NO';
 }
-
 if(isset($_POST['source']) and isset($_POST['lid']))
 {
 	//	pr($_POST['source']);
@@ -126,7 +125,7 @@ else
 	//Get Brief Title and Source Id for display
 
 	$query = 	"
-				SELECT `larvol_id`, `source_id`, `brief_title`
+				SELECT `larvol_id`, `source_id`, `brief_title`, `org_study_id`,`secondary_id`
 				FROM `data_trials` 
 				WHERE `larvol_id` = $lid limit 1
 				";
@@ -141,6 +140,8 @@ else
 	$sourced=mysql_fetch_assoc($res1);
 	$brief_title = $sourced['brief_title'];
 	$source_id = $sourced['source_id'];
+	$orgid=$sourced['org_study_id'];
+	$secid=$sourced['secondary_id'];
 
 	if($source == 'NCT')
 	{
@@ -149,7 +150,9 @@ else
 		$query = 	"
 				SELECT larvol_id, eudract_id
 				FROM data_eudract
-				WHERE nct_id = '" . $source_id  . "'";
+				WHERE ( nct_id = '" . $source_id  . "' or 
+					    eudract_id = '" . $orgid  . "' or
+						eudract_id = '" . $secid ."' )" ;
 				
 		$res1 		= mysql_query($query) ;
 		if($res1===false)
@@ -258,7 +261,7 @@ $(document).ready(function(){
 	
 	<tr>
 
-	<td colspan="4" style="background-color: white; padding-left:65px;" ><br>Select a trial from the suggested trials, or manaually search for a trial by entering the source id, and then click the <b>LINK Trials</b> button.<br></td>
+	<td colspan="4" style="background-color: white; padding-left:65px;" ><br>Select a trial from the suggested trials list and click <b>LINK Trials</b> button.  If the list is empty, search for a trial by manually entering the source id.<br></td>
 	</tr>
 	
 	<tr>

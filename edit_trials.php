@@ -1,5 +1,6 @@
 <?php
 //connect to Sphinx
+
 if(!isset($sphinx) or empty($sphinx)) $sphinx = @mysql_connect("127.0.0.1:9306") or $sphinx=false;
 require_once('db.php');
 require_once('include.util.php');
@@ -2124,8 +2125,16 @@ $opts['fdd']['is_section_801_lastchanged'] = array(
 );
 }
 
+if( (!isset($_REQUEST['PME_sys_operation']) and !isset($_REQUEST['larvol_id'])) and ($db->loggedIn() and ($db->user->userlevel=='admin'||$db->user->userlevel=='root') )) 
+{
+	echo 
+	'<br /><span style="font-family: Helvetica;color:blue;font-size:18px;padding-left:15px;"> <a href="universal_linking.php">
+  	 Universal Linking of trials </a></span><br />';
+}
+
 require_once 'phpMyEdit.class.php';
 //require_once 'edit_trials_list.php';
+
 new phpMyEdit($opts);
 //pr($opts);
 ?>

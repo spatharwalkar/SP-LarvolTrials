@@ -2003,6 +2003,9 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 		foreach ($buttons as $name) {
 			$ret .= $this->display_button($name, $position)."\n";
 		}
+		
+		if($this->change_operation()) 
+		$ret .= '<a href="link_trials.php?lid='.$this->rec.'"><span class="pme-cancel" style="font-family: Helvetica;font-size:25; padding-left:5px;padding-right:5px;"> LINK TRIAL </span></a>';
 		return $ret;
 	} /* }}} */
 
