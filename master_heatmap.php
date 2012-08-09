@@ -2350,7 +2350,7 @@ function Download_reports()
 						$extra_space = ($Max_Cat_areaNumLines - $current_NumLines) * $Line_Height;
 						$pdfContent .= '<br style="line-height:'.((($extra_space* 72 / 96)/2)+1).'px;" />';
 					}
-					$pdfContent .= $columnsCategoryName[$col].$rr.'</div>';
+					$pdfContent .= $columnsCategoryName[$col].'</div>';
 					$pdf->MultiCell($Cat_Area_Row_width, $Cat_Area_Row_height, $pdfContent, $border, $align='C', $fill=1, $ln, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
 				}
 				else
