@@ -190,6 +190,10 @@ $tidy_config = array(
                      );
 $tidy = new tidy(); /// Create Tidy Object
 
+require_once('tcpdf/config/lang/eng.php');
+require_once('tcpdf/tcpdf.php');  
+$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+
 foreach($rows as $row => $rval)
 {
 	foreach($columns as $col => $cval)
@@ -555,7 +559,8 @@ if($Rotation_Flg == 1)	////Adjustment in area column width as per area name
 		{
 			$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col]:$val;
 			$cols_Area_Space[$col] = ceil(($area_Col_Height) / $Char_Size);
-			$cols_Area_Lines[$col] = ceil(strlen(trim($val))/$cols_Area_Space[$col]);
+			//$cols_Area_Lines[$col] = ceil(strlen(trim($val))/$cols_Area_Space[$col]);
+			$cols_Area_Lines[$col] = $pdf->getNumLines($val, ($area_Col_Height*17/90));
 			$width = ($cols_Area_Lines[$col] * $Line_Height);
 			if($Width_matrix[$col]['width'] < $width)
 				$Width_matrix[$col]['width'] = $width;
@@ -636,7 +641,8 @@ if($Rotation_Flg == 1)	////Create width for area category cells and put forceful
 			if($columns_Span[$col] < 3 && $columnsCategoryName[$col] != 'Undefined')
 			{
 				$cols_Cat_Space[$col] = ceil((($area_Cat_Height < 130)? ($area_Cat_Height):($area_Cat_Height)) / $Char_Size);
-				$cols_Cat_Lines[$col] = ceil(strlen(trim($columnsCategoryName[$col]))/$cols_Cat_Space[$col]);
+				//$cols_Cat_Lines[$col] = ceil(strlen(trim($columnsCategoryName[$col]))/$cols_Cat_Space[$col]);
+				$cols_Cat_Lines[$col] = $pdf->getNumLines($columnsCategoryName[$col], ($area_Cat_Height*17/90));
 				$width = ($cols_Cat_Lines[$col] * $Line_Height);
 				if($Cat_Area_Col_width[$col] < $width) /// Assign new width
 				{
@@ -747,7 +753,7 @@ if($Rotation_Flg == 1)
 		print '
 		.Area_RowDiv_Class_'.$col.' 
 		{
-			margin-left:'.((($Line_Height)*$cols_Area_Lines[$col]) + ($width/2)).'px;
+			margin-left:'.((($Line_Height)*$cols_Area_Lines[$col]) + ($width/2.5)).'px;
 		}';
 		else
 		print '
@@ -1793,7 +1799,7 @@ foreach($columns as $col => $val)
 		$htmlContent .= '<th class="Cat_Area_Row_Class_'.$col.'" width="'.$Cat_Area_Col_width[$col].'px" style="'.(($Cat_Area_Rotation[$col]) ? 'vertical-align:bottom;':'vertical-align:middle;').'max-width:'.$Cat_Area_Col_width[$col].'px;background-color:#FFFFFF; '.(($columnsCategoryName[$col] != 'Undefined') ? 'border-left:#000000 solid 2px; border-top:#000000 solid 2px; border-right:#000000 solid 2px;':'').'" id="Cell_ID_'.$online_HMCounter.'" colspan="'.$columns_Span[$col].'" '.(($Cat_Area_Rotation[$col]) ? 'height="'.$area_Cat_Height.'px" align="left"':'align="center"').'><div class="'.(($Cat_Area_Rotation[$col]) ? 'box_rotate Cat_RowDiv_Class_'.$col.' ':'break_words').'">';
 		if($columnsCategoryName[$col] != 'Undefined' && $Rotation_Flg == 1 && $Cat_Area_Rotation[$col])
 		{
-			$cat_name = str_replace(' ','`',trim($columnsCategoryName[$col]));
+			$cat_name = str_replace(' ',' ',trim($columnsCategoryName[$col]));
 			//$cat_name = preg_replace('/([^\s-]{'.$cols_Cat_Space[$col].'})(?=[^\s-])/','$1<br/>',$cat_name);
 			$cat_name = wordwrap($cat_name, $cols_Cat_Space[$col], "<br />\n", true);
 			$cat_name = str_replace('`',' ',$cat_name);
@@ -1829,7 +1835,7 @@ foreach($columns as $col => $val)
 		
 		if($Rotation_Flg == 1)
 		{
-			$area_name = str_replace(' ','`',trim($val));
+			$area_name = str_replace(' ',' ',trim($val));
 			//$area_name = preg_replace('/([^\s-]{'.$cols_Area_Space[$col].'})(?=[^\s-])/','$1<br/>',$area_name);
 			$area_name = wordwrap($area_name, $cols_Area_Space[$col], "<br />\n", true);
 			$area_name = str_replace('`',' ',$area_name);
