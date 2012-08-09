@@ -1603,6 +1603,7 @@ function Download_reports()
 			$prev_area_category = $header['category'];
 			$columnsCategoryName[$header['num']] = $header['category'];
 			
+			$second_last_category = $last_category;
 			$last_category = $header['category'];
 			$second_last_num = $last_num;
 			$last_num = $header['num'];
@@ -2320,7 +2321,14 @@ function Download_reports()
 		{
 			$pdf->setCellMargins(0.5, 0, 0, 0);
 			
-			if($last_cat_col==$col) $ln=1; else $ln=0;
+			if($dtt)
+			{
+				if($second_last_cat_col==$col && $second_last_category != $last_category) $ln=1; else if($last_cat_col==$col) $ln=1; else $ln=0;
+			}
+			else
+			{
+				if($last_cat_col==$col) $ln=1; else $ln=0;
+			}
 			
 			if($columns_Span[$col] > 0)
 			{
@@ -2342,7 +2350,7 @@ function Download_reports()
 						$extra_space = ($Max_Cat_areaNumLines - $current_NumLines) * $Line_Height;
 						$pdfContent .= '<br style="line-height:'.((($extra_space* 72 / 96)/2)+1).'px;" />';
 					}
-					$pdfContent .= $columnsCategoryName[$col].'</div>';
+					$pdfContent .= $columnsCategoryName[$col].$rr.'</div>';
 					$pdf->MultiCell($Cat_Area_Row_width, $Cat_Area_Row_height, $pdfContent, $border, $align='C', $fill=1, $ln, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
 				}
 				else
@@ -2587,7 +2595,14 @@ function Download_reports()
 				{
 					$pdf->setCellMargins(0.5, 0, 0, 0);
 					
-					if($last_cat_col==$col) $ln=1; else $ln=0;
+					if($dtt)
+					{
+						if($second_last_cat_col==$col && $second_last_category != $last_category) $ln=1; else if($last_cat_col==$col) $ln=1; else $ln=0;
+					}
+					else
+					{
+						if($last_cat_col==$col) $ln=1; else $ln=0;
+					}
 					
 					if($columns_Span[$col] > 0)
 					{
