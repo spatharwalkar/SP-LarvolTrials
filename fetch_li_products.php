@@ -22,11 +22,71 @@ function fetch_li_products($lastrun)
 	$liXmlProductList = file_get_contents('http://admin.larvolinsight.com/LT/Services/Products/Changed.ashx?timestamp='.$lastRunMinus24H);
 	$xmlImportProductList = new DOMDocument();
 	$xmlImportProductList->loadXML($liXmlProductList);
+	
+	//get total number products 
+	$total_products=0;
+	foreach($xmlImportProductList->getElementsByTagName('Product_ID') as $Product_ID)
+	{
+		$total_products++;
+	}
+
+	//** STATUS DISPLAY
+	$query = 'SELECT MAX(update_id) AS maxid FROM update_status_fullhistory' ;
+	if(!$res = mysql_query($query))
+	{
+		global $logger;
+		$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+		$logger->error($log);
+		mysql_query('ROLLBACK');
+		echo $log;
+		return false;
+	}
+	$res = mysql_fetch_array($res) ;
+	$up_id = (isset($res['maxid'])) ? ((int)$res['maxid'])+1 : 1;
+	$prid = getmypid();
+
+	$query = 'INSERT into update_status_fullhistory (update_id,process_id,status,update_items_total,start_time,trial_type,item_id) 
+	  VALUES ("'.$up_id.'","'. $prid .'","'. 2 .'",
+	  "' . $total_products . '","'. date("Y-m-d H:i:s", strtotime('now')) .'", "' . "LI_IMPORT" . '" , "' . 0 . '" ) ;';
+	 if( $total_products>1 ) mysql_query($query);
+
+	// STATUS DISPLAY **/
+	$i=1;
 	foreach($xmlImportProductList->getElementsByTagName('Product_ID') as $Product_ID)
 	{
 		$Product_ID = $Product_ID->nodeValue;
 		fetch_li_product_individual($Product_ID);
+
+		$query = '	update update_status_fullhistory set process_id="'. $prid . '",er_message="",status="'. 2 . '",
+					trial_type="' . "LI_IMPORT" . '", update_items_total=' . $total_products . ',
+					update_items_progress=' . ++$i .' , updated_time="' . date("Y-m-d H:i:s", strtotime('now')) . '"  
+					where update_id= "'. $up_id .'" limit 1'  ; 
+
+		if( $total_products>1 and isset($up_id) and isset($prid) )
+		{
+			if(!$res = mysql_query($query))
+			{
+				global $logger;
+				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				$logger->error($log);
+				mysql_query('ROLLBACK');
+				echo $log;
+				return false;
+			}
+		}
 	}
+	$query = '	update update_status_fullhistory set er_message="",	update_items_progress='. $total_products .', 
+				status=0, updated_time="' . date("Y-m-d H:i:s", strtotime('now')) . '"  
+				where update_id= "'. $up_id .'" limit 1'  ; 
+	if(!$res = mysql_query($query))
+		{
+			global $logger;
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			mysql_query('ROLLBACK');
+			echo $log;
+			return false;
+		}
 }
 /**
  * @name fetch_li_product_individual

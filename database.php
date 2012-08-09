@@ -230,7 +230,7 @@ if (isset($_POST['li_s']) and $_POST['li_s']=="2" and isset($_POST['updt_since']
 
 if (isset($_POST['li_s']) and $_POST['li_s']=="3" and ( isset($_POST['p_lt_id']) or isset($_POST['p_li_id']) ) ) 
 {
-	if(isset($_POST['p_li_id'])) $liid=mysql_real_escape_string($_POST['p_li_id']);
+	if( isset($_POST['p_li_id']) and !empty($_POST['p_li_id']) ) $liid=mysql_real_escape_string($_POST['p_li_id']);
 	elseif(isset($_POST['p_lt_id']))
 	{
 		$litd=mysql_real_escape_string($_POST['p_lt_id']);
@@ -255,7 +255,7 @@ if (isset($_POST['li_s']) and $_POST['li_s']=="3" and ( isset($_POST['p_lt_id'])
 	}
 	require_once('fetch_li_products.php');
 	echo '<br><br>Importing product with LI id:'.$liid.'<br><br>';
-	fetch_li_products($liid);
+	fetch_li_product_individual($liid);
 	return;
 }
 

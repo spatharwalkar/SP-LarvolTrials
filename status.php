@@ -206,7 +206,7 @@ while($row = mysql_fetch_assoc($res))
 
 
 //Get Process IDs of all currently running preindexers to check crashes
-	$query = 'SELECT `update_id`,`process_id` FROM update_status_fullhistory WHERE `status`='.RUNNING;
+	$query = 'SELECT `update_id`,`process_id`,`update_items_total`,`update_items_progress` FROM update_status_fullhistory WHERE `status`='.RUNNING;
 	if(!$res = mysql_query($query))
 		{
 			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -397,9 +397,23 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 	$remap_status = array();
 	while($row = mysql_fetch_assoc($res))
 	$remap_status = $row;
-	
 /******************/
-	
+
+/*************/
+$query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
+		 `update_items_total`,`update_items_progress`,`er_message`,TIMEDIFF(updated_time, start_time) AS timediff,
+		 `update_items_complete_time` FROM update_status_fullhistory where trial_type="LI_IMPORT" order by update_id desc limit 1';
+	if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
+	$li_import_status = array();
+	while($row = mysql_fetch_assoc($res))
+	$li_import_status = $row;
+/******************/	
 	
 
 //Get entry corresponding to eudract in 'update_status'
@@ -495,7 +509,11 @@ if(count($remap_status)!=0)
 	echo "$(\"#remap_new\").progressBar();";
 	echo "$(\"#remap_update\").progressBar({ barImage: 'images/progressbg_orange.gif'} );";
 }
-
+if(count($li_import_status)!=0)
+{
+	echo "$(\"#li_import_new\").progressBar();";
+	echo "$(\"#li_import_update\").progressBar({ barImage: 'images/progressbg_orange.gif'} );";
+}
 
 if(count($area_status1)!=0)
 {
@@ -581,7 +599,7 @@ function showprogress($last_id)
 
 
 	//Get Process IDs of all currently running updates to check crashes
-	$query = 'SELECT `update_id`,`process_id` FROM update_status_fullhistory WHERE `status`='.RUNNING;
+	$query = 'SELECT `update_id`,`process_id`,`update_items_total`,`update_items_progress` FROM update_status_fullhistory WHERE `status`='.RUNNING;
 	if(!$res = mysql_query($query))
 		{
 			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -594,6 +612,8 @@ function showprogress($last_id)
 	while($row = mysql_fetch_assoc($res))
 	{
 		$update_ids[$count_upids] = $row['update_id'];
+		$task_total[$count_upids] = $row['update_items_total'];		
+		$task_progress[$count_upids] = $row['update_items_progress'];		
 		$update_pids[$count_upids++] = $row['process_id'];
 	}
 
@@ -612,7 +632,7 @@ function showprogress($last_id)
 	for($i=0;$i < $count_upids; $i++)
 	{
 		
-		if(!in_array($update_pids[$i],$running_pids))
+		if(!in_array($update_pids[$i],$running_pids) and $task_progress[$i]<$task_total[$i])
 		{
 			$err[$i]='yes';
 		}
@@ -638,6 +658,17 @@ function showprogress($last_id)
 			if( !in_array($update_pids[$i],$running_pids) and $err[$i]=='yes')
 		{
 			$query = 'UPDATE update_status_fullhistory SET `status`="'.ERROR.'",`process_id`="0" WHERE `update_id`="' . $update_ids[$i].'"';
+			if(!$res = mysql_query($query))
+			{
+				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				$logger->error($log);
+				echo $log;
+				return false;
+			}
+		}
+		if( $task_progress[$i]==$task_total[$i] )
+		{
+			$query = 'UPDATE update_status_fullhistory SET `status`="'.COMPLETED.'",`process_id`="0" WHERE `update_id`="' . $update_ids[$i].'"';
 			if(!$res = mysql_query($query))
 			{
 				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -2080,6 +2111,110 @@ function get_nctids_from_web()
 					echo '<input type="hidden" name="upid" value="'.$remap_status['update_id'].'">';
 					echo '<input type="hidden" name="pid" value="'.$remap_status['process_id'].'">';
 					echo '<input type="hidden" name="ttype" value="REMAP">';
+					echo '<input type="hidden" name="fullhistory" value="1">';
+					echo '<input type="image" src="images/not.png" title="Delete" style="border=0px;">';
+					echo '</form>';
+					echo "</td>";
+				}
+			echo "</tr>";
+		echo "</table>";
+	}
+	if(count($li_import_status)!=0)
+	{
+		echo "<table width=\"100%\" class=\"event\">";
+			echo "<tr>";
+				echo "<th width=\"100%\" align=\"center\" class=\"head2\">LI product import</th>";
+			echo "</tr>";
+		echo "</table>";
+		echo "<table width=\"100%\" class=\"event\">";
+			echo "<tr>";
+				echo "<td width=\"10%\" align=\"left\" class=\"head\">Status</td>";
+				echo "<td width=\"15%\" align=\"left\" class=\"head\">Start Time</td>";
+				echo "<td width=\"15%\" align=\"left\" class=\"head\">Excution run time</td>";
+				echo "<td width=\"15%\" align=\"left\" class=\"head\">Last update time</td>";
+//				echo "<td width=\"19%\" align=\"left\" class=\"head\">New Records</td>";
+				echo "<td width=\"15%\" align=\"left\" class=\"head\">Progress</td>";
+				echo "<td width=\"25%\" align=\"left\" class=\"head\">Message</td>";
+				echo "<td width=\"5%\" align=\"center\" class=\"head\">Action</td>";
+			echo "</tr>";
+			echo "<tr>";
+				echo "<td align=\"left\" class=\"norm\">".$status[$li_import_status['status']]."</td>";
+				echo "<td align=\"left\" class=\"norm\">".$li_import_status['start_time']."</td>";
+				echo "<td align=\"left\" class=\"norm\">".$li_import_status['timediff']."</td>";
+				echo "<td align=\"left\" class=\"norm\">".$li_import_status['updated_time']."</td>";
+				if($li_import_status['add_items_start_time']!="0000-00-00 00:00:00"&&$li_import_status['add_items_complete_time']!="0000-00-00 00:00:00"&&$li_import_status['status']==COMPLETED)
+					$li_import_add_progress=100;
+				else
+					$li_import_add_progress=number_format(($li_import_status['add_items_total']==0?0:(($li_import_status['add_items_progress'])*100/$li_import_status['add_items_total'])),2);
+					
+				if($li_import_status['update_items_start_time']!="0000-00-00 00:00:00"&&$li_import_status['update_items_complete_time']!="0000-00-00 00:00:00"&&$li_import_status['status']==COMPLETED)
+					$li_import_update_progress=100;
+				else
+					$li_import_update_progress=number_format(($li_import_status['update_items_total']==0?0:(($li_import_status['update_items_progress'])*100/$li_import_status['update_items_total'])),2);
+				
+				//echo $nct_status['update_items_complete_time'];
+				
+//				echo "<td align=\"left\" class=\"norm\">";
+//					echo "<span class=\"progressBar\" id=\"nct_new\">".$nct_add_progress."%</span>";
+//				echo "</td>";
+				echo "<td align=\"left\" class=\"norm\">";
+					echo "<span class=\"progressBar\" id=\"li_import_update\">".$li_import_update_progress."</span>";
+				echo "</td>";
+				echo "<td align=\"left\" class=\"norm\">".$li_import_status['er_message']."</td>";
+				if($li_import_status['status']==READY)
+				{
+					echo "<td align=\"center\" class=\"norm\">";
+					echo '<form method="post" action="status.php">';
+					echo '<input type="hidden" name="action" value="4">';
+					echo '<input type="hidden" name="upid" value="'.$li_import_status['update_id'].'">';
+					echo '<input type="hidden" name="fullhistory" value="1">';
+					echo '<input type="hidden" name="ttype" value="LI_IMPORT">';
+					echo '<input type="image" src="images/not.png" title="Cancel" style="border=0px;">';
+					echo '</form>';
+					echo "</td>";
+				}
+				elseif($li_import_status['status']==RUNNING)
+				{
+					echo "<td align=\"center\" class=\"norm\">";
+					echo '<form method="post" action="status.php">';
+					echo '<input type="hidden" name="action" value="2">';
+					echo '<input type="hidden" name="upid" value="'.$li_import_status['update_id'].'">';
+					echo '<input type="hidden" name="pid" value="'.$li_import_status['process_id'].'">';
+					echo '<input type="hidden" name="ttype" value="LI_IMPORT">';
+					echo '<input type="hidden" name="fullhistory" value="1">';
+					echo '<input type="image" src="images/not.png" title="Cancel" style="border=0px;">';
+					echo '</form>';
+					echo "</td>";
+				}
+				elseif($li_import_status['status']==COMPLETED)
+				{
+					echo "<td align=\"center\" class=\"norm\">";
+					echo '<form method="post" action="status.php">';
+					echo '<input type="hidden" name="action" value="3">';
+					echo '<input type="hidden" name="upid" value="'.$li_import_status['update_id'].'">';
+					echo '<input type="hidden" name="pid" value="'.$li_import_status['process_id'].'">';
+					echo '<input type="hidden" name="ttype" value="LI_IMPORT">';
+					echo '<input type="hidden" name="fullhistory" value="1">';
+					echo '<input type="image" src="images/not.png" title="Delete" style="border=0px;">';
+					echo '</form>';
+					echo "</td>";
+				}
+				else if($li_import_status['status']==ERROR||$li_import_status['status']==CANCELLED)
+				{
+					echo "<td align=\"center\" class=\"norm\">";
+					echo '<form method="post" action="status.php">';
+					echo '<input type="hidden" name="action" value="1">';
+					echo '<input type="hidden" name="upid" value="'.$li_import_status['update_id'].'">';
+					echo '<input type="hidden" name="pid" value="'.$li_import_status['process_id'].'">';
+					echo '<input type="hidden" name="ttype" value="LI_IMPORT">';
+					echo '<input type="hidden" name="fullhistory" value="1">';
+					echo '<input type="image" src="images/check.png" title="Add" style="border=0px;">';
+					echo '</form>';
+					echo '<form method="post" action="status.php">';
+					echo '<input type="hidden" name="action" value="3">';
+					echo '<input type="hidden" name="upid" value="'.$li_import_status['update_id'].'">';
+					echo '<input type="hidden" name="pid" value="'.$li_import_status['process_id'].'">';
+					echo '<input type="hidden" name="ttype" value="LI_IMPORT">';
 					echo '<input type="hidden" name="fullhistory" value="1">';
 					echo '<input type="image" src="images/not.png" title="Delete" style="border=0px;">';
 					echo '</form>';
