@@ -211,37 +211,39 @@ echo ($current_tasks_count." new tasks found.".$nl);
 //no threading needed for LI sync so doing it now....
 //start LI sync
 echo count($LISyncTasks)." new LI sync tasks found.".$nl;
-foreach($LISyncTasks as $syncTask)
+if(isset($LISyncTasks) and !empty($LISyncTasks))
 {
-	$query = 'UPDATE schedule SET lastrun="' . date("Y-m-d H:i:s",strtotime('now')) . '" WHERE id=' . $syncTask['id'] . ' LIMIT 1';
-	if(mysql_query($query))
+	foreach($LISyncTasks as $syncTask)
 	{
-		echo 'LI sync schedule lastrun updated.'.$nl;
+		$query = 'UPDATE schedule SET lastrun="' . date("Y-m-d H:i:s",strtotime('now')) . '" WHERE id=' . $syncTask['id'] . ' LIMIT 1';
+		if(mysql_query($query))
+		{
+			echo 'LI sync schedule lastrun updated.'.$nl;
+		}
+		else
+		{
+			die('Bad SQL query setting LI sync lastrun in schedule. Error: '.mysql_error());
+		}
+		echo 'LI Sync in process...'.$nl;
+		switch($syncTask['LI_sync'])
+		{
+			case 1:
+				//product sync
+				require_once 'fetch_li_products.php';
+				fetch_li_products(strtotime($syncTask['lastrun']));
+				break;
+			case 2:
+				//area sync
+				break;
+			case 3:
+				//areas and product sync
+				require_once 'fetch_li_products.php';
+				fetch_li_products(strtotime($syncTask['lastrun']));
+				break;
+		}
+		//echo date('Y-m-d H:i:s',$now);die;
 	}
-	else
-	{
-		die('Bad SQL query setting LI sync lastrun in schedule. Error: '.mysql_error());
-	}
-	echo 'LI Sync in process...'.$nl;
-	switch($syncTask['LI_sync'])
-	{
-		case 1:
-			//product sync
-			require_once 'fetch_li_products.php';
-			fetch_li_products(strtotime($syncTask['lastrun']));
-			break;
-		case 2:
-			//area sync
-			break;
-		case 3:
-			//areas and product sync
-			require_once 'fetch_li_products.php';
-			fetch_li_products(strtotime($syncTask['lastrun']));
-			break;
-	}
-	//echo date('Y-m-d H:i:s',$now);die;
 }
-
 //end LI sync
 
 mysql_close($db->db_link) or die("Error disconnecting from database server!");
