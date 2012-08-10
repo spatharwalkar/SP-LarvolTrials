@@ -41,7 +41,7 @@ else
 {
 	//search in eudaract also
 	$query = "
-		SELECT `larvol_id` FROM `data_eudract` 
+		SELECT `larvol_id`,`nct_id` FROM `data_eudract` 
 		WHERE `larvol_id` = $lid limit 1
 		";
 	$res1 	= mysql_query($query) ;
@@ -57,6 +57,7 @@ else
 	{
 		$sourced_trial='YES';
 		$source = 'EUDRACT';
+		$nct_i = $sourced['nct_id'];
 	}
 	else $sourced_trial='NO';
 }
@@ -177,7 +178,7 @@ else
 		$query = 	"
 				SELECT larvol_id, nct_id
 				FROM data_nct
-				WHERE ((org_study_id ='".  $source_id  . "') OR (secondary_id = '" . $source_id ."' ))";
+				WHERE ((org_study_id ='".  $source_id  . "') OR (nct_id ='".  unpadnct($nct_i)  . "') OR (secondary_id = '" . $source_id ."' ))";
 		$res1 		= mysql_query($query) ;
 		if($res1===false)
 		{
