@@ -7,20 +7,20 @@ ignore_user_abort(true);
 $data=array();$isactive=array();$instype=array();$ldate=array();$phases=array();$ostatus=array();$cnt_total=0;
 
 /*
-if(isset($_GET['area']) or isset($_GET['product']))
-{
-	$parameters=$_GET;
-	if(!calc_cells($parameters))	echo '<br><b>Could complete calculating cells, there was an error.<br></b>';
-	echo '<br>All done.<br>';
-}
-elseif( isset($_GET['calc']) and ($_GET['calc']=="all") )
-{
-	$parameters=NULL;
-	if(!calc_cells($parameters))	echo '<br><b>Could complete calculating cells, there was an error.<br></b>';
-	echo '<br>All done.<br>';
-}
+	if(isset($_GET['area']) or isset($_GET['product']))
+	{
+		$parameters=$_GET;
+		if(!calc_cells($parameters))	echo '<br><b>Could complete calculating cells, there was an error.<br></b>';
+		echo '<br>All done.<br>';
+	}
+	elseif( isset($_GET['calc']) and ($_GET['calc']=="all") )
+	{
+		$parameters=NULL;
+		if(!calc_cells($parameters))	echo '<br><b>Could complete calculating cells, there was an error.<br></b>';
+		echo '<br>All done.<br>';
+	}
 */
-function calc_cells($parameters,$update_id=NULL)
+function calc_cells($parameters,$update_id=NULL,$rgx_changed=NULL)
 {
 	/*
 	pr($parameters);
@@ -29,7 +29,14 @@ function calc_cells($parameters,$update_id=NULL)
 	$x['area']=29;
 	pr($x);
 	*/
-
+	if(!mysql_query('SET autocommit = 1;'))
+			{
+				global $logger;
+				$log='Unable to begin transaction. Query='.$query.' Error:' . mysql_error();
+				$logger->fatal($log);
+				echo $log;
+				return false;
+			}
 	global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_total;
 	$data=array();$isactive=array();$instype=array();$ldate=array();$phases=array();$ostatus=array();$cnt_total=0;
 	$cron_run = isset($update_id); 	// check if being run by cron.php
@@ -439,7 +446,7 @@ function calc_cells($parameters,$update_id=NULL)
 					echo '<br>20000 records added, sleeping 1 second....'.str_repeat("  ",800);
 					sleep(1);
 				}
-				add_data($av['id'],$pv['id'],0,0,0,'none','N/A',$overall_statuses);
+				add_data($av['id'],$pv['id'],0,0,0,'none','N/A',$overall_statuses,$rgx_changed);
 				$progress_count ++;
 				if($cron_run)
 				{
@@ -506,7 +513,7 @@ function calc_cells($parameters,$update_id=NULL)
 				sleep(1);
 			}
 			
-			add_data($av['id'],$pv['id'],$cnt_total,$cnt_active,$cnt_active_indlead,$bomb,$max_phase,$overall_statuses);
+			add_data($av['id'],$pv['id'],$cnt_total,$cnt_active,$cnt_active_indlead,$bomb,$max_phase,$overall_statuses,$rgx_changed);
 			$progress_count ++;
 			if($cron_run)
 			{
@@ -575,10 +582,25 @@ function calc_cells($parameters,$update_id=NULL)
 	return true;
 }			
 
-function add_data($arid,$prid,$cnt_total,$cnt_active,$cnt_active_indlead,$bomb,$max_phase,$overall_statuses=null)
+function add_data($arid,$prid,$cnt_total,$cnt_active,$cnt_active_indlead,$bomb,$max_phase,$overall_statuses=null,$rgx_changed=null)
 {
 /*********/
 global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_total;
+if(isset($rgx_changed) and $rgx_changed=='yes')
+{
+	$query='delete from rpt_masterhm_cells  where
+		`area`="'.$arid.'" and `product`="'.$prid.'"';
+	if(!$res = mysql_query($query))
+	{
+		$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+		global $logger;
+		$logger->error($log);
+		echo $log;
+		return false;
+	}
+	pr($query);
+}
+
 	$query='SELECT `area`,`product`
 			from rpt_masterhm_cells
 			where `area`="'.$arid.'" and `product`="'.$prid.'" limit 1';
@@ -629,6 +651,13 @@ global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_total;
 		if($cnt_indlead_old<>$cnt_active_indlead) $cc='`count_active_indlead_prev` = "'. $cnt_indlead_old .'",';
 		if($highest_phase_old<>$max_phase) $dd='`highest_phase_prev` = "'. $highest_phase_old .'",';
 		
+		if(isset($rgx_changed) and $rgx_changed=='yes')
+		{
+			$aa='`count_active_prev` = null,';
+			$bb='`count_total_prev` = null,';
+			$cc='`count_active_indlead_prev` = null,';
+			$dd='`highest_phase_prev` = null,';
+		}
 		
 		if( empty($aa) && empty($bb) && empty($cc) && empty($dd))
 		{
@@ -773,7 +802,6 @@ global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_total;
 			echo $log;
 			return false;
 		}
-		
 	}
 	else
 	{
@@ -848,7 +876,6 @@ global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_total;
 			echo $log;
 			return false;
 		}
-	
 	
 	}
 	/**************/

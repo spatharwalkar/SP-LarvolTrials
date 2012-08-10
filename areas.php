@@ -312,14 +312,16 @@ $(document).ready(function () {
 //preindex after successful save and change of search data as a seperate worker thread
 if($saveStatus == 1 && $searchDataOld != $_REQUEST['searchdata'])
 {
-	echo input_tag(array('Type'=>'iframe','Field'=>urlPath().'index_area.php?id='.$_REQUEST['id'].'&connection_close=1'),null,array('style'=>"display:none"));
+	// added GET parameter rgx_changed to force recalculate of mhm cells without recording changes.
+	echo input_tag(array('Type'=>'iframe','Field'=>'index_area.php?id='.$_REQUEST['id'].'&connection_close=1&rgx_changed=yes'),null,array('style'=>"display:none"));
+	unset($_GET['rgx_changed']);
 }
 //add predindex for full delete through a seperate worker thread
 if(isset($_REQUEST['delsearch']) && is_array($_REQUEST['delsearch']))
 {
 	foreach($_REQUEST['delsearch'] as $delId => $wok)
 	{
-		echo input_tag(array('Type'=>'iframe','Field'=>urlPath().'index_area.php?id='.$delId.'&connection_close=1'),null,array('style'=>"display:none"));
+		echo input_tag(array('Type'=>'iframe','Field'=>urlPath().'index_area.php?id='.$delId.'&connection_close=1&rgx_changed=yes'),null,array('style'=>"display:none"));
 	}
 }
 echo '</html>';
