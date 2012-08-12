@@ -1426,7 +1426,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 				$out .= '<img align="middle" id="phase4img_'.$row.'_'.$col.'" title="Red cell override" src="images/phase4.png" style="width:20px; height:20px; vertical-align:bottom; cursor:pointer;" alt="Phase4_Override"/>&nbsp;';
 				$out .= '</font>';
 				
-				$out .= '<div style="float:left;"><font id="preclinical_pos_'.$row.'_'.$col.'">';
+				$out .= '<font id="preclinical_pos_'.$row.'_'.$col.'">';
 				if($data_matrix[$row][$col]['preclinical'])
 				$out .= '<img align="middle" id="preclinicalimg_'.$row.'_'.$col.'" title="Preclinical switch" src="images/preclinical.png" style="width:20px; height:20px; vertical-align:bottom; cursor:pointer;" alt="Preclinical switch"/>&nbsp;';
 				$out .= '</font>';
@@ -1448,7 +1448,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 				$out .= '</font></div>';
 				
 				
-				$out .= '<div align="right" style="height:25px; vertical-align: bottom; cursor:pointer;" class="chromestyle" id="chromemenu_'.$row.'_'.$col.'"><ul><li><a rel="dropmenu_'.$row.'_'.$col.'"><b>+<img src="images/down.gif" border="0" style="width:9px; height:5px;" /><b></a></li></ul></div>';
+				$out .= '<div align="right" style="height:25px; vertical-align: bottom; cursor:pointer; float:right;" class="chromestyle" id="chromemenu_'.$row.'_'.$col.'"><ul><li><a rel="dropmenu_'.$row.'_'.$col.'"><b>+<img src="images/down.gif" border="0" style="width:9px; height:5px;" /><b></a></li></ul></div>';
 				
 				
 				
@@ -1456,8 +1456,8 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 					 .'<a style="vertical-align:bottom;"><input  id="bombopt_'.$row.'_'.$col.'"  name="bombopt_'.$row.'_'.$col.'" type="checkbox" value="1" ' . (($data_matrix[$row][$col]['bomb']['src'] != 'new_square.png') ? 'checked="checked"':'') . ' onchange="update_icons(\'bomb\','.$row.','.$col.', '.count($rows).','.count($columns).',\''.$data_matrix[$row][$col]['color_code'].'\')" />Small/Large bomb&nbsp;<img align="right" src="images/new_lbomb.png"  style="vertical-align:bottom; width:11px; height:11px;"/></a>'
 					 .'<a style="vertical-align:bottom;"><input  id="filingopt_'.$row.'_'.$col.'"  name="filingopt_'.$row.'_'.$col.'" type="checkbox" value="1" ' . (($data_matrix[$row][$col]['filing'] != NULL) ? 'checked="checked"':'') . '  onchange="update_icons(\'filing\','.$row.','.$col.', '.count($rows).','.count($columns).',\''.$data_matrix[$row][$col]['color_code'].'\')" />Filing&nbsp;<img align="right" src="images/new_file.png"  style="vertical-align:bottom; width:11px; height:11px;"/></a>'
 					 .'<a style="vertical-align:bottom;"><input  id="phase4opt_'.$row.'_'.$col.'"  name="phase4opt_'.$row.'_'.$col.'" type="checkbox" value="1" ' . (($data_matrix[$row][$col]['phase4_override']) ? 'checked="checked"':'') . '  onchange="update_icons(\'phase4\','.$row.','.$col.', '.count($rows).','.count($columns).',\''.$data_matrix[$row][$col]['color_code'].'\')" />Red cell override&nbsp;<img align="right" src="images/phase4.png"  style="vertical-align:bottom; width:11px; height:11px;"/></a>'
-					  .'<a style="vertical-align:bottom;"><input  id="preclinicalopt_'.$row.'_'.$col.'"  name="preclinicalopt_'.$row.'_'.$col.'" type="checkbox" value="1" ' . (($data_matrix[$row][$col]['preclinical']) ? 'checked="checked"':'') . '  onchange="update_icons(\'preclinical\','.$row.','.$col.', '.count($rows).','.count($columns).',\''.$data_matrix[$row][$col]['color_code'].'\')" />Preclinical switch&nbsp;<img align="right" src="images/preclinical.png"  style="vertical-align:bottom; width:11px; height:11px;"/></a>'
 					 .'<a style="vertical-align:bottom;"><input  id="phaseexpopt_'.$row.'_'.$col.'"  name="phaseexpopt_'.$row.'_'.$col.'" type="checkbox" value="1" ' . (($data_matrix[$row][$col]['phase_explain'] != NULL) ? 'checked="checked"':'') . '  onchange="update_icons(\'phaseexp\','.$row.','.$col.', '.count($rows).','.count($columns).',\''.$data_matrix[$row][$col]['color_code'].'\')" />Phase explain&nbsp;<img align="right" src="images/phaseexp.png"  style="vertical-align:bottom; width:11px; height:11px;"/></a>'
+					 .'<a style="vertical-align:bottom;"><input  id="preclinicalopt_'.$row.'_'.$col.'"  name="preclinicalopt_'.$row.'_'.$col.'" type="checkbox" value="1" ' . (($data_matrix[$row][$col]['preclinical']) ? 'checked="checked"':'') . '  onchange="update_icons(\'preclinical\','.$row.','.$col.', '.count($rows).','.count($columns).',\''.$data_matrix[$row][$col]['color_code'].'\')" />Preclinical switch&nbsp;<img align="right" src="images/preclinical.png"  style="vertical-align:bottom; width:11px; height:11px;"/></a>'
 					 .'</div>';
 					 
 				$out .= '<script type="text/javascript">cssdropdown.startchrome("chromemenu_'.$row.'_'.$col.'");</script>';
