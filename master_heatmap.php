@@ -222,6 +222,21 @@ function update_icons(type, row, col, tot_rows, tot_cols, BG_color)
 	  }
 	}
 	
+	if(type=='preclinical')
+	{
+	  if(document.getElementById("preclinicalopt_"+row+"_"+col).checked == true)
+	  {
+	  	document.getElementById("preclinical_val_"+row+"_"+col).value=1;
+		document.getElementById("preclinical_pos_"+row+"_"+col).innerHTML = '<img align="middle" id="preclinicalimg_'+row+'_'+col+'" title="Preclinical swicth" src="images/preclinical.png" style="width:20px; height:20px; vertical-align:bottom; cursor:pointer;" alt="Preclinical switch"/>&nbsp;';
+	  }
+	  else
+	  {
+	 	// if(!confirm("Do you really want to unset preclinical")) {document.getElementById("preclinicalopt_"+row+"_"+col).checked = true; return true;}
+		 document.getElementById("preclinical_val_"+row+"_"+col).value=0;
+		 document.getElementById("preclinical_pos_"+row+"_"+col).innerHTML = '';
+	  }
+	}
+	
 	if(type=='bomb')
 	{
 	  if(document.getElementById("bombopt_"+row+"_"+col).checked == true)
@@ -373,7 +388,7 @@ function tree_grid_cookie(category_name)	///Categories listed in cookies will on
 
 function validate(rows, cols)
 {
-	flag=0; phase4_flag=0; bomb_flag=0; filing_flag=0; phaseexp_flag=0; data=''; ele='';
+	flag=0; phase4_flag=0; preclinical_flag=0; bomb_flag=0; filing_flag=0; phaseexp_flag=0; data=''; ele='';
 	for(pt1=1; pt1<=rows; pt1++)
 	{
 		for(pt2=1; pt2<=cols; pt2++)
@@ -392,6 +407,14 @@ function validate(rows, cols)
 			if(element.value == 0 && bk_element.value==1)
 			{
 				flag=1; phase4_flag=1;
+			}
+			
+			var element = document.getElementById('preclinical_val_'+pt1+'_'+pt2);
+			var bk_element = document.getElementById('bk_preclinical_val_'+pt1+'_'+pt2);
+			if((element != null && element !='') && (bk_element != null && bk_element !=''))
+			if(element.value == 0 && bk_element.value==1)
+			{
+				flag=1; preclinical_flag=1;
 			}
 			
 			var element = document.getElementById('bombselect_'+pt1+'_'+pt2);
@@ -420,13 +443,14 @@ function validate(rows, cols)
 				flag=1; phaseexp_flag=1;
 			}
 			if(phase4_flag) ele='red cell override';
+			if(preclinical_flag) ele='Preclinical Switch';
 			if(bomb_flag) { if(ele != '') ele=ele+', '; ele=ele+'bomb'};
 			if(filing_flag) { if(ele != '') ele=ele+', '; ele=ele+'filing'};
 			if(phaseexp_flag) { if(ele != '') ele=ele+', '; ele=ele+'phase explain'};
-			if(phase4_flag || bomb_flag || filing_flag || phaseexp_flag)
+			if(phase4_flag || bomb_flag || filing_flag || phaseexp_flag || preclinical_flag)
 			data=data+' <font style="color:red">'+ele+'</font> of <font style="color:blue">product '+product +' X '+ 'area '+ area +'</font>; '
 			
-			phase4_flag=0; bomb_flag=0; filing_flag=0; phaseexp_flag=0; ele='';
+			phase4_flag=0; preclinical_flag=0; bomb_flag=0; filing_flag=0; phaseexp_flag=0; ele='';
 		}
 	}
 	
@@ -514,6 +538,19 @@ function refresher(row, col, tot_rows, tot_cols)
 						document.getElementById("phase4opt_"+pt1+"_"+pt2).checked = false;
 					}
 					
+					/////Preclinical settings
+					document.getElementById("preclinical_val_"+pt1+"_"+pt2).value=document.getElementById("preclinical_val_"+row+"_"+col).value;
+					if(document.getElementById("preclinical_val_"+row+"_"+col).value == 1)
+					{
+						document.getElementById("preclinical_pos_"+pt1+"_"+pt2).innerHTML = '<img align="middle" id="preclinicalimg_'+pt1+'_'+pt2+'" title="Preclinical switch" src="images/preclinical.png" style="width:20px; height:20px; vertical-align:bottom; cursor:pointer;" alt="Preclinical switch"/>&nbsp;';
+						document.getElementById("preclinicalopt_"+pt1+"_"+pt2).checked = true;
+					}
+					else
+					{
+						document.getElementById("preclinical_pos_"+pt1+"_"+pt2).innerHTML = '';
+						document.getElementById("preclinicalopt_"+pt1+"_"+pt2).checked = false;
+					}
+					
 					///////bomb settings
 					 document.getElementById("bomb_explain_"+pt1+"_"+pt2).value= document.getElementById("bomb_explain_"+row+"_"+col).value;
 					 var or_bomb = document.getElementById("bombselect_"+row+"_"+col).value;
@@ -598,9 +635,9 @@ min-width:28px;
 max-width:28px;
 }
 .normal_cells {
-width:160px;
-max-width:160px;
-min-width:160px;
+width:180px;
+max-width:180px;
+min-width:180px;
 }
 </style>
 <link href="css/popup_form.css" rel="stylesheet" type="text/css" media="all" />
@@ -916,6 +953,8 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 				$data_matrix[$row][$col]['bomb_explain']=trim($cell_data['bomb_explain']);
 				
 				$data_matrix[$row][$col]['phase4_override']=$cell_data['phase4_override'];
+				
+				$data_matrix[$row][$col]['preclinical']=$cell_data['preclinical'];
 				
 				if($cell_data['bomb_auto'] == 'small')
 				{
@@ -1371,6 +1410,9 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 				$out .= '<input type="hidden" value=" ' . (($data_matrix[$row][$col]['phase4_override']) ? '1':'0') . ' " name="phase4_val['.$row.']['.$col.']" id="phase4_val_'.$row.'_'.$col.'" />';
 				$out .= '<input type="hidden" value=" ' . (($data_matrix[$row][$col]['phase4_override']) ? '1':'0') . ' " name="bk_phase4_val['.$row.']['.$col.']" id="bk_phase4_val_'.$row.'_'.$col.'" />';
 				
+				$out .= '<input type="hidden" value=" ' . (($data_matrix[$row][$col]['preclinical']) ? '1':'0') . ' " name="preclinical_val['.$row.']['.$col.']" id="preclinical_val_'.$row.'_'.$col.'" />';
+				$out .= '<input type="hidden" value=" ' . (($data_matrix[$row][$col]['preclinical']) ? '1':'0') . ' " name="bk_preclinical_val['.$row.']['.$col.']" id="bk_preclinical_val_'.$row.'_'.$col.'" />';
+				
 				$out .= '<input type="hidden" id="cell_prod_'.$row.'_'.$col.'" name="cell_prod['.$row.']['.$col.']" value="'. $productIds[$row] .'" />'
 						.'<input type="hidden" id="cell_area_'.$row.'_'.$col.'" name="cell_area['.$row.']['.$col.']" value="' . $areaIds[$col] . '" />'
 						.'<input type="hidden" name="filing_presence['.$row.']['.$col.']" id="filing_presence_'.$row.'_'.$col.'" value="' . (($data_matrix[$row][$col]['filing'] != NULL)? 1:0) . '" />'
@@ -1382,6 +1424,11 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 				$out .= '<div style="float:left;"><font id="phase4_pos_'.$row.'_'.$col.'">';
 				if($data_matrix[$row][$col]['phase4_override'])
 				$out .= '<img align="middle" id="phase4img_'.$row.'_'.$col.'" title="Red cell override" src="images/phase4.png" style="width:20px; height:20px; vertical-align:bottom; cursor:pointer;" alt="Phase4_Override"/>&nbsp;';
+				$out .= '</font>';
+				
+				$out .= '<div style="float:left;"><font id="preclinical_pos_'.$row.'_'.$col.'">';
+				if($data_matrix[$row][$col]['preclinical'])
+				$out .= '<img align="middle" id="preclinicalimg_'.$row.'_'.$col.'" title="Preclinical switch" src="images/preclinical.png" style="width:20px; height:20px; vertical-align:bottom; cursor:pointer;" alt="Preclinical switch"/>&nbsp;';
 				$out .= '</font>';
 				
 				$out .= '<font id="bomb_pos_'.$row.'_'.$col.'">';
@@ -1409,6 +1456,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 					 .'<a style="vertical-align:bottom;"><input  id="bombopt_'.$row.'_'.$col.'"  name="bombopt_'.$row.'_'.$col.'" type="checkbox" value="1" ' . (($data_matrix[$row][$col]['bomb']['src'] != 'new_square.png') ? 'checked="checked"':'') . ' onchange="update_icons(\'bomb\','.$row.','.$col.', '.count($rows).','.count($columns).',\''.$data_matrix[$row][$col]['color_code'].'\')" />Small/Large bomb&nbsp;<img align="right" src="images/new_lbomb.png"  style="vertical-align:bottom; width:11px; height:11px;"/></a>'
 					 .'<a style="vertical-align:bottom;"><input  id="filingopt_'.$row.'_'.$col.'"  name="filingopt_'.$row.'_'.$col.'" type="checkbox" value="1" ' . (($data_matrix[$row][$col]['filing'] != NULL) ? 'checked="checked"':'') . '  onchange="update_icons(\'filing\','.$row.','.$col.', '.count($rows).','.count($columns).',\''.$data_matrix[$row][$col]['color_code'].'\')" />Filing&nbsp;<img align="right" src="images/new_file.png"  style="vertical-align:bottom; width:11px; height:11px;"/></a>'
 					 .'<a style="vertical-align:bottom;"><input  id="phase4opt_'.$row.'_'.$col.'"  name="phase4opt_'.$row.'_'.$col.'" type="checkbox" value="1" ' . (($data_matrix[$row][$col]['phase4_override']) ? 'checked="checked"':'') . '  onchange="update_icons(\'phase4\','.$row.','.$col.', '.count($rows).','.count($columns).',\''.$data_matrix[$row][$col]['color_code'].'\')" />Red cell override&nbsp;<img align="right" src="images/phase4.png"  style="vertical-align:bottom; width:11px; height:11px;"/></a>'
+					  .'<a style="vertical-align:bottom;"><input  id="preclinicalopt_'.$row.'_'.$col.'"  name="preclinicalopt_'.$row.'_'.$col.'" type="checkbox" value="1" ' . (($data_matrix[$row][$col]['preclinical']) ? 'checked="checked"':'') . '  onchange="update_icons(\'preclinical\','.$row.','.$col.', '.count($rows).','.count($columns).',\''.$data_matrix[$row][$col]['color_code'].'\')" />Preclinical switch&nbsp;<img align="right" src="images/preclinical.png"  style="vertical-align:bottom; width:11px; height:11px;"/></a>'
 					 .'<a style="vertical-align:bottom;"><input  id="phaseexpopt_'.$row.'_'.$col.'"  name="phaseexpopt_'.$row.'_'.$col.'" type="checkbox" value="1" ' . (($data_matrix[$row][$col]['phase_explain'] != NULL) ? 'checked="checked"':'') . '  onchange="update_icons(\'phaseexp\','.$row.','.$col.', '.count($rows).','.count($columns).',\''.$data_matrix[$row][$col]['color_code'].'\')" />Phase explain&nbsp;<img align="right" src="images/phaseexp.png"  style="vertical-align:bottom; width:11px; height:11px;"/></a>'
 					 .'</div>';
 					 
@@ -1792,6 +1840,8 @@ function Download_reports()
 				$tidy = tidy_parse_string($data_matrix[$row][$col]['phase_explain'], $tidy_config, 'UTF8');
 				$tidy->cleanRepair(); 
 				$data_matrix[$row][$col]['phase_explain']=trim($tidy);
+				
+				$data_matrix[$row][$col]['preclinical']=$cell_data['preclinical'];
 				
 				$Width = 0;
 				
@@ -3430,8 +3480,16 @@ function Download_reports()
 					$pdf->getCellPaddings();
 					if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL)
 					{
-						$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(245,245,245)));
-						$pdf->SetFillColor(245,245,245);
+						if($data_matrix[$row][$col]['preclinical'])
+						{
+							$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(174,211,220)));
+							$pdf->SetFillColor(174,211,220);
+						}
+						else
+						{
+							$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(245,245,245)));
+							$pdf->SetFillColor(245,245,245);
+						}
 					}
 					else
 					{
@@ -4107,11 +4165,27 @@ function Download_reports()
 				else
 				{
 					/////// To avoid product name overflow on side column when, first are columns is empty - putting 0 value with white color
-					if($col == 1)
+					if($data_matrix[$row][$col]['preclinical'] && $col == 1)
+					{
+						$preclinical_font['font']['color']['rgb'] = 'aed3dc';
+						$preclinical_bgcolor = 'aed3dc';
+						$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($preclinical_font);
+						$objPHPExcel->getActiveSheet()->setCellValue($cell, '0');
+						$objPHPExcel->getActiveSheet()->getStyle($cell)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID);
+						$objPHPExcel->getActiveSheet()->getStyle($cell)->getFill()->getStartColor()->setRGB($preclinical_bgcolor);
+					}
+					else if($col == 1)
 					{
 						$white_font['font']['color']['rgb'] = 'FFFFFF';
 						$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($white_font);
 						$objPHPExcel->getActiveSheet()->setCellValue($cell, '0');
+					}
+					else if($data_matrix[$row][$col]['preclinical'])
+					{
+						$preclinical_font['font']['color']['rgb'] = 'aed3dc';
+						$preclinical_bgcolor = 'aed3dc';
+						$objPHPExcel->getActiveSheet()->getStyle($cell)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID);
+						$objPHPExcel->getActiveSheet()->getStyle($cell)->getFill()->getStartColor()->setRGB($preclinical_bgcolor);
 					}
 				}
 			}
@@ -4494,24 +4568,26 @@ function postEd()
 				
 				$tidy = tidy_parse_string($_POST['filing'][$row][$col], $tidy_config, 'UTF8');
 				$tidy->cleanRepair(); 
-				$filing=trim(mysql_real_escape_string($tidy));
+				$filing=trim($tidy);
 				$filing_presence=$_POST['filing_presence'][$row][$col];
 				
 				$bomb=trim($_POST['bomb'][$row][$col]);
 				$tidy = tidy_parse_string($_POST['bomb_explain'][$row][$col], $tidy_config, 'UTF8');
 				$tidy->cleanRepair(); 
-				$bomb_explain=trim(mysql_real_escape_string($tidy));
+				$bomb_explain=trim($tidy);
 				
 				$phaseexp_presence=$_POST['phaseexp_presence'][$row][$col];
 				$tidy = tidy_parse_string($_POST['phase_explain'][$row][$col], $tidy_config, 'UTF8');
 				$tidy->cleanRepair(); 
-				$phase_explain=trim(mysql_real_escape_string($tidy));
+				$phase_explain=trim($tidy);
 				
-				$phase4_val=mysql_real_escape_string($_POST['phase4_val'][$row][$col]);
+				$phase4_val=$_POST['phase4_val'][$row][$col];
+				
+				$preclinical_val=$_POST['preclinical_val'][$row][$col];
 				
 				$up_time=date('Y-m-d H:i:s', $now);
 				
-				$originDT_query = "SELECT `bomb`, `bomb_explain`, `filing`, `phase_explain`, `phase4_override` FROM `rpt_masterhm_cells` WHERE `product` = $prod AND `area` = $area";
+				$originDT_query = "SELECT `bomb`, `bomb_explain`, `filing`, `phase_explain`, `phase4_override`, `preclinical` FROM `rpt_masterhm_cells` WHERE `product` = $prod AND `area` = $area";
 				$originDT=mysql_query($originDT_query) or die ('Bad SQL Query getting Original Bomb and Filing Information Before Updating.<br/>'.$query);
 				$originDT = mysql_fetch_array($originDT);
 				
@@ -4519,9 +4595,9 @@ function postEd()
 				
 				$query = "UPDATE `rpt_masterhm_cells` set ";
 				
-				if($bomb != $originDT['bomb'] || trim($bomb_explain) != $originDT['bomb_explain'])
+				if($bomb != $originDT['bomb'] || trim($bomb_explain) != trim($originDT['bomb_explain']))
 				{
-					$query .="`bomb` = '$bomb', `bomb_explain` = '$bomb_explain', `bomb_lastchanged`= '$up_time', ";
+					$query .="`bomb` = '$bomb', `bomb_explain` = '".mysql_real_escape_string($bomb_explain)."', `bomb_lastchanged`= '$up_time', ";
 					$change_flag=1;
 				}
 				
@@ -4532,7 +4608,7 @@ function postEd()
 				}
 				else if((trim($filing) != trim($originDT['filing'])) && $filing_presence == 1)
 				{
-					$query .="`filing` = '$filing', `filing_lastchanged`= '$up_time', ";
+					$query .="`filing` = '".mysql_real_escape_string($filing)."', `filing_lastchanged`= '$up_time', ";
 					$change_flag=1;
 				}
 				else if($originDT['filing'] != NULL && $filing_presence == 0)
@@ -4548,7 +4624,7 @@ function postEd()
 				}
 				else if((trim($phase_explain) != trim($originDT['phase_explain'])) && $phaseexp_presence == 1)
 				{
-					$query .="`phase_explain` = '$phase_explain', `phase_explain_lastchanged`= '$up_time', ";
+					$query .="`phase_explain` = '".mysql_real_escape_string($phase_explain)."', `phase_explain_lastchanged`= '$up_time', ";
 					$change_flag=1;
 				}
 				else if($originDT['phase_explain'] != NULL && $phaseexp_presence == 0)
@@ -4559,7 +4635,13 @@ function postEd()
 				
 				if(trim($phase4_val) != trim($originDT['phase4_override']))
 				{
-					$query .="`phase4_override` = '$phase4_val', `phase4_override_lastchanged`= '$up_time', ";
+					$query .="`phase4_override` = '".mysql_real_escape_string($phase4_val)."', `phase4_override_lastchanged`= '$up_time', ";
+					$change_flag=1;
+				}
+				
+				if(trim($preclinical_val) != trim($originDT['preclinical']))
+				{
+					$query .="`preclinical` = '".mysql_real_escape_string($preclinical_val)."', ";
 					$change_flag=1;
 				}
 				

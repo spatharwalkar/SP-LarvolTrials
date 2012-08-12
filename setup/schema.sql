@@ -939,6 +939,7 @@ CREATE TABLE IF NOT EXISTS `rpt_masterhm_cells` (
   `ongoing_active_indlead`  int(10) unsigned NOT NULL DEFAULT '0',
   `not_authorized_active_indlead`  int(10) unsigned NOT NULL DEFAULT '0',
   `prohibited_active_indlead` int(10) unsigned NOT NULL DEFAULT '0',
+  `preclinical` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`product`,`area`),
   KEY `area` (`area`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
