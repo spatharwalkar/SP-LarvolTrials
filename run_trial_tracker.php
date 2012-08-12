@@ -1812,16 +1812,249 @@ class TrialTracker
 	}
 	
 	function generateTsvFile($resultIds, $timeMachine, $ottType, $globalOptions)
-	{
-		exit;
-		$objTsv = new ExportDataTSV('browser');
-		$objTsv->filename = 'DTT_' . date('Y-m-d_H.i.s') . '.xls';
-		$objTsv->initialize();
-		
-		$objTsv->addRow(array('NCT ID', 'Title', 'N', 'Region', 'Status', 'Sponsor', 'Conditions', 'Interventions', 'Start', 'Start', 'End', 'Ph'));
-		$objTsv->finalize();
+	{	
+		if(in_array($globalOptions['startrange'], $globalOptions['Highlight_Range']))
+		{
+			$timeMachine = str_replace('ago', '', $globalOptions['startrange']);
+			$timeMachine = trim($timeMachine);
+			$timeMachine = '-' . (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
+		}
+		else
+		{
+			$timeMachine = trim($globalOptions['startrange']);
+			$timeMachine = (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
+		}
+		$timeMachine = strtotime($timeMachine);
 
-		exit;
+		if(in_array($globalOptions['endrange'], $globalOptions['Highlight_Range']))
+		{
+			$timeInterval = str_replace('ago', '', $globalOptions['endrange']);
+			$timeInterval = trim($timeInterval);
+			$timeInterval = '-' . (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
+		}
+		else
+		{
+			$timeInterval = trim($globalOptions['endrange']);
+			$timeInterval = (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
+		}
+		
+		$Values = array();
+	
+		if($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed')
+		{	
+			$Ids = array();
+			$TrialsInfo = array();
+			
+			if(count($resultIds['product']) > 1 && count($resultIds['area']) > 1)
+			{
+				foreach($resultIds['product'] as $pkey => $pvalue)
+				{	
+					$Ids[$pkey]['product'] = $pvalue;
+					$Ids[$pkey]['area'] = implode("', '", $resultIds['area']);
+				}
+			}
+			else if((count($resultIds['product']) >= 1 && count($resultIds['area']) == 1 && ($resultIds['area'][0] == NULL || trim($resultIds['area'][0]) == "")) || (count($resultIds['area']) >= 1 && count($resultIds['product']) == 1 && ($resultIds['product'][0] == NULL || trim($resultIds['product'][0]) == ""))) //Condition For Only Product OR When Only Area is Given
+			{
+				if(count($resultIds['product']) >= 1 && count($resultIds['area']) == 1 && $resultIds['area'][0] == NULL && trim($resultIds['area'][0]) == '' && $resultIds['product'][0] != NULL && trim($resultIds['product'][0]) != '')
+				{
+					foreach($resultIds['product'] as $pkey => $pvalue)
+					{
+						$Ids[$pkey]['product'] = $pvalue;
+						$Ids[$pkey]['area'] = '';
+					}
+				}
+				else
+				{
+					foreach($resultIds['area'] as $akey => $avalue)
+					{
+						if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve display name from heatmap report
+						{
+							$Ids[$akey]['product'] = '';
+							
+							$res = mysql_query("SELECT `display_name`, `type_id` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $avalue . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'area'");
+							if(mysql_num_rows($res) > 0)
+							{
+								while($row = mysql_fetch_assoc($res))
+								{
+									$Ids[$akey]['area'] = $row['type_id'];
+								}
+							}
+							else	//if area not found in report, just display id
+							{
+								$Ids[$akey]['area'] = $avalue;
+							}
+						}
+						else	//if no hm field
+						{
+							$Ids[$akey]['product'] = '';
+							$res = mysql_query("SELECT `display_name`, `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
+							if(mysql_num_rows($res) > 0)
+							{
+								while($row = mysql_fetch_assoc($res))
+								{
+									if($row['id'] != '' && $row['id'] != NULL && $avalue != '' && $avalue != NULL)
+									{
+										$Ids[$akey]['area'] = $row['id'];
+									}
+									else /// For case we dont have product names, area names
+									{
+										$Ids[$akey]['area'] = '';
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			else if(count($resultIds['product']) > 1 || count($resultIds['area']) > 1)
+			{
+				if(count($resultIds['area']) > 1)
+				{
+					$prow = $resultIds['product'][0];
+					
+					foreach($resultIds['area'] as $akey => $avalue)
+					{
+						if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve display name from heatmap report
+						{
+							$res = mysql_query("SELECT `display_name`, `type_id` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $avalue . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'area'");
+							if(mysql_num_rows($res) > 0)
+							{
+								while($row = mysql_fetch_assoc($res))
+								{
+									$Ids[$akey]['product'] = $prow;
+									$Ids[$akey]['area'] = $row['type_id'];
+								}
+							}
+							else	//if area not found in report, just display id
+							{
+									$Ids[$akey]['product'] = $prow;
+									$Ids[$akey]['area'] = $avalue;
+							}
+						}
+						else	//if no hm field
+						{
+							$Ids[$akey]['area'] = $avalue;
+							$Ids[$akey]['product'] = $prow;
+						}
+					}
+				}
+				else
+				{
+					foreach($resultIds['product'] as $pkey => $pvalue)
+					{	
+						$Ids[$pkey]['product'] = $pvalue;
+						$Ids[$pkey]['area'] = implode("', '", $resultIds['area']);
+					}
+				}
+			}
+			else
+			{
+				$Ids[0]['product'] = $resultIds['product'][0];
+				$Ids[0]['area'] = implode("', '", $resultIds['area']);
+			}
+			
+			
+			if(isset($globalOptions['product']) && !empty($globalOptions['product']) && $globalOptions['download'] != 'allTrialsforDownload')
+			{	
+				foreach($TrialsInfo as $tikey => $tivalue)
+				{
+					if(!(in_array($tikey, $globalOptions['product'])))
+					{
+						unset($TrialsInfo[$tikey]);
+						unset($Ids[$tikey]);
+					}
+				}
+				$TrialsInfo = array_values($TrialsInfo);
+				$Ids = array_values($Ids);
+			}
+			
+			$Values = $this->processIndexedOTTData($TrialsInfo, $ottType, $Ids, $timeMachine, $globalOptions);
+		}
+		else
+		{
+			if(!is_array($resultIds))
+			{
+				$resultIds = array($resultIds);
+			}
+			
+			$Values = $this->processOTTData($ottType, $resultIds, $timeMachine, $linkExpiryDt = array(), $globalOptions);
+			
+			if(isset($globalOptions['product']) && !empty($globalOptions['product']) && $globalOptions['download'] != 'allTrialsforDownload')
+			{	
+				foreach($Values['Trials'] as $tkey => $tvalue)
+				{
+					if(!(in_array($tkey, $globalOptions['product'])))
+					{
+						unset($Values['Trials'][$tkey]);
+					}
+				}
+				$Values['Trials'] = array_values($Values['Trials']);
+			}
+		}
+		
+		unset($Ids);		
+		unset($TrialsInfo);
+		unset($Values['totactivecount']);
+		unset($Values['totinactivecount']);
+		unset($Values['totalcount']);
+		
+		$Trials['activeTrials'] = array();
+		$Trials['inactiveTrials'] = array();
+		$Trials['allTrials'] = array();
+		$Trials['allTrialsforDownload'] = array();
+		
+		
+		foreach($Values['Trials'] as $tkey => $tvalue)
+		{
+			$Trials['activeTrials'] = array_merge($Trials['activeTrials'], $tvalue['activeTrials']);
+			$Trials['inactiveTrials'] = array_merge($Trials['inactiveTrials'], $tvalue['inactiveTrials']);
+			$Trials['allTrials'] = array_merge($Trials['allTrials'], $tvalue['allTrials']);
+			$Trials['allTrialsforDownload'] = array_merge($Trials['allTrialsforDownload'], $tvalue['allTrialsforDownload']);
+		}
+		unset($Values);		
+		
+
+		if($globalOptions['download'] == 'allTrialsforDownload')
+		{
+			$type = 'allTrialsforDownload';
+		}
+		else
+		{
+			$type = $globalOptions['type'];
+		}
+		
+		$outputStr = "";
+		$outputStr = "NCT ID \t Title \t N \t Region \t Status \t Sponsor \t Condition \t Interventions \t Start \t End \t Ph \n";
+		
+		foreach($Trials[$type] as $key => $value)
+		{
+			$startDate = '';
+			$endDate = '';
+			if($value["NCT/start_date"] != '' && $value["NCT/start_date"] !== NULL && $value["NCT/start_date"] != '0000-00-00')
+			{
+				$startDate =  date('m/Y', strtotime($value["NCT/start_date"]));
+				
+			}
+			if($value["inactive_date"] != '' && $value["inactive_date"] !== NULL && $value["inactive_date"] != '0000-00-00')
+			{
+				$endDate = date('m/Y', strtotime($value["inactive_date"]));
+			}
+			
+			$outputStr .= $value['NCT/nct_id'] . "\t" . $value['NCT/brief_title'] . "\t" . $value['NCT/enrollment'] . "\t" . $value['region'] . "\t"
+						. $value['NCT/overall_status'] . "\t" . $value['NCT/lead_sponsor'] . " " . $value['NCT/collaborator'] . "\t" . $value['NCT/condition']
+						. "\t" . $value['NCT/intervention_name'] . "\t" . $startDate . "\t" . $endDate . "\n";
+		}
+		
+		header("Pragma: public");
+		header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
+		header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+		header("Cache-Control: no-cache, must-revalidate, post-check=0, pre-check=0");
+		header("Content-type: application/force-download"); 
+		header("Content-Type: application/tsv");
+		header('Content-Disposition: attachment;filename="DTT_Export_' . date('Y-m-d') . '.tsv"');
+		header("Content-Transfer-Encoding: binary ");
+		echo $outputStr;
+		exit();  
 	}
 	
 	function trialGnattChartforExcel($startMonth, $startYear, $endMonth, $endYear, $currentYear, $secondYear, $thirdYear, $bgColor, $startDate, 
@@ -10472,7 +10705,7 @@ class TrialTracker
 			$this->pagination($globalOptions, $totalPages, $timeMachine, $ottType, $loggedIn);
 		}
 		
-		echo '<input type="text" name="sphinx_s" autocomplete="off" style="width:300px;" value="' . $globalOptions['sphinx_s'] . '" />';
+		echo '<input type="text" name="ss" autocomplete="off" style="width:300px;" value="" />';
 		echo '<div style="float: right;padding-top:4px; vertical-align:bottom; height:22px;" id="chromemenu"><a rel="dropmenu">'
 				. '<span style="padding:2px;border:1px solid; color:#000000; background-position:left center; background-repeat:no-repeat; background-image:url(\'./images/save.png\'); cursor:pointer;">'
 				. '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Export</b></span></a></div>'
@@ -10617,7 +10850,7 @@ class TrialTracker
 	
 	function downloadOptions($shownCnt, $foundCnt, $ottType, $result, $globalOptions) 
 	{	
-		$downloadOptions = '<div style="height:170px; padding:6px;"><div class="downldbox"><div class="newtext">Download Options</div>'
+		$downloadOptions = '<div style="height:180px; padding:6px;"><div class="downldbox"><div class="newtext">Download Options</div>'
 							. '<form  id="frmDOptions" name="frmDOptions" method="post" target="_self">'
 							. '<input type="hidden" name="ottType" value="' . $ottType . '" />';
 		foreach($result as $rkey => $rvalue)
@@ -10650,15 +10883,15 @@ class TrialTracker
 			}
 		}	
 		$downloadOptions .= '<ul><li><label>Number of Studies: </label></li>'
-							. '<li><select id="dOption" name="dOption" size="2" style="height:38px;">'
+							. '<li><select id="dOption" name="dOption" size="2" style="height:54px;">'
 							. '<option value="shown" selected="selected">' . $shownCnt . ' Shown Studies</option>'
 							. '<option value="all">' . $foundCnt . ' Found Studies</option></select></li>'
 							. '<li><label>Which Format: </label></li>'
-							. '<li><select id="wFormat" name="wFormat" size="3" style="height:54px;">'
+							. '<li><select id="wFormat" name="wFormat" size="3" style="height:70px;">'
 							. '<option value="excel" selected="selected">Excel</option>'
 							. '<option value="xml">XML</option>'
 							. '<option value="pdf">PDF</option>'
-							/*. '<option value="tsv">TSV</option>'*/
+							. '<option value="tsv">TSV</option>'
 							. '</select></li></ul>'
 							. '<input type="hidden" name="shownCnt" value="' . $shownCnt . '" />'
 							. '<input type="submit" id="btnDownload" name="btnDownload" value="Download File" style="margin-left:8px;"  />'
