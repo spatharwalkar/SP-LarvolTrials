@@ -1541,7 +1541,7 @@ class TrialTracker
 			$objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $uvalue["event_description"]);
 			if($eventLink != '' && $eventLink !== NULL)
 			{
-				$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl(urlencode($eventLink));
+				$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl($eventLink);
 			}
 			if(!empty($uvalue['edited']) && ($uvalue['edited']['field'] == 'event_description'))
 			{
