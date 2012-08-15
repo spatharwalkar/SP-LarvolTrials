@@ -899,7 +899,30 @@ $array1=array
 		$region=eudraRegion($country);
 		$ins_type=getInstitutionType($rec->support_org_name,$rec->sponsor_name,$larvol_id);
 		
-        //All Dates
+		/** REMOVE initial backticks */
+		if(substr($brief_title,0,1)=='`') $brief_title=(substr($brief_title,1));
+		if(substr($detailed_descr,0,1)=='`') $detailed_descr=(substr($detailed_descr,1));
+		if(substr($study_design,0,1)=='`') $study_design=(substr($study_design,1));
+		if(substr($enrollment,0,1)=='`') $enrollment=(substr($enrollment,1));
+		if(substr($criteria,0,1)=='`') $criteria=(substr($criteria,1));
+		if(substr($gender,0,1)=='`') $gender=(substr($gender,1));
+		if(substr($phase,0,1)=='`') $phase=(substr($phase,1));
+		if(substr($condition,0,1)=='`') $condition=(substr($condition,1));
+		if(substr($intervention_type,0,1)=='`') $intervention_type=(substr($intervention_type,1));
+		if(substr($intervention_name,0,1)=='`') $intervention_name=(substr($intervention_name,1));
+		if(substr($ages,0,1)=='`') $ages=(substr($ages,1));
+		if(substr($overall_status,0,1)=='`') $overall_status=(substr($overall_status,1));
+		if(substr($is_active_overall,0,1)=='`') $is_active_overall=(substr($is_active_overall,1));
+		if(substr($country ,0,1)=='`') $country =(substr($country ,1));
+		if(substr($region,0,1)=='`') $region=(substr($region,1));
+		if(substr($ins_type,0,1)=='`') $ins_type=(substr($ins_type,1));
+		/*****************/
+		
+		/** FIX for  "`" separator displayed instead of "," */
+		$region=str_replace("`", ", ", $region);
+		/*****************/
+        
+		//All Dates
 		$firstreceived_date = eudraDate($record[firstreceived_date], true);//get minimum
 	    $start_date = eudraDate($record[start_date], true);
 	    $end_date = eudraDate($record[end_date_global], false);
