@@ -106,6 +106,9 @@ $globalOptions['product'] = array();
 $globalOptions['startrange'] = "now";
 $globalOptions['endrange'] = "1 month";
 
+//sphinx search option set to search only the trials shown in the result set.
+$globalOptions['sphinxSearch'] = '';
+
 $globalOptions['includeProductsWNoData'] = "off";
 
 if(isset($_REQUEST['ipwnd']) && $_REQUEST['ipwnd'] == "on")
@@ -132,6 +135,11 @@ if(isset($_REQUEST['sr']))
 if(isset($_REQUEST['er']))
 {	
 	$globalOptions['endrange'] = $_REQUEST['er'];
+}
+
+if(isset($_REQUEST['ss']) && $_REQUEST['ss'] != '')
+{
+	$globalOptions['sphinxSearch'] = $_REQUEST['ss'];
 }
 
 $globalOptions['Highlight_Range'] = array('1 week', '2 weeks', '1 month', '1 quarter', '6 months', '1 year');
