@@ -2003,13 +2003,14 @@ class TrialTracker
 		$Trials['allTrials'] = array();
 		$Trials['allTrialsforDownload'] = array();
 		
-		
 		foreach($Values['Trials'] as $tkey => $tvalue)
 		{
+			$Trials['allTrialsforDownload'] = array_merge($Trials['allTrialsforDownload'], $tvalue['allTrialsforDownload']);
+			
 			$Trials['activeTrials'] = array_merge($Trials['activeTrials'], $tvalue['activeTrials']);
 			$Trials['inactiveTrials'] = array_merge($Trials['inactiveTrials'], $tvalue['inactiveTrials']);
 			$Trials['allTrials'] = array_merge($Trials['allTrials'], $tvalue['allTrials']);
-			$Trials['allTrialsforDownload'] = array_merge($Trials['allTrialsforDownload'], $tvalue['allTrialsforDownload']);
+			
 		}
 		unset($Values);		
 		
@@ -6117,7 +6118,7 @@ class TrialTracker
 			 . '<thead><tr>'. (($loggedIn) ? '<th valign="bottom" align="center" style="width:30px; vertical-align:bottom;" >ID</th>' : '' )
 			 . '<th valign="bottom" height="11px" align="center" style="width:93px; vertical-align:bottom;">Title</th>'
 			 . '<th valign="bottom" align="center" style="width:18px; vertical-align:bottom;" title="Black: Actual&nbsp;&nbsp;Gray: Anticipated&nbsp;&nbsp;Red: Change greater than 20%">N</th>'
-			 . '<th valign="bottom" align="center" style="width:41px; vertical-align:bottom;" title="&quot;ROW&quot; = Rest of World">Region</th>'
+			 . '<th valign="bottom" align="center" style="width:41px; vertical-align:bottom;" title="&quot;RoW&quot; = Rest of World">Region</th>'
 			 . '<th valign="bottom" align="center" style="width:60px; vertical-align:bottom;">Interventions</th>'
 			 . '<th valign="bottom" align="center" style="width:41px; vertical-align:bottom;">Sponsor</th>'
 			 . '<th valign="bottom" align="center" style="width:41px; vertical-align:bottom;">Status</th>'
@@ -7086,7 +7087,7 @@ class TrialTracker
 				}
 			}
 		}
-		//echo '<pre>';print_r($outputStr);exit;
+		
 		return $outputStr;
 	}
 	
@@ -9005,6 +9006,21 @@ class TrialTracker
 		$totinactivecount = 0;
 		$totactivecount = 0;
 		$totalcount = 0;
+
+		
+		//sphinx_search
+		$larvolIds = array();
+		$sphinxSearchFlag = true;
+		if(isset($globalOptions['sphinxSearch']) && $globalOptions['sphinxSearch'] != '')
+		{
+			$larvolIds = get_sphinx_idlist($globalOptions['sphinxSearch']);
+			if($larvolIds != '')
+			{
+				$larvolIds = str_replace("'", "", $larvolIds);
+				$larvolIds = explode(',', $larvolIds);
+				$larvolIds = array_filter($larvolIds);
+			}
+		}
 		
 		$where = '';
 		$orderBy = " dt.`phase` DESC, dt.`end_date` ASC, dt.`start_date` ASC, dt.`overall_status` ASC, dt.`enrollment` ASC ";
@@ -9117,7 +9133,6 @@ class TrialTracker
 			$Ids=array('Search Result' => 'Search'); //Set ID's Array so loop will be executed atleast one time
 		}
 		
-		
 		foreach($Ids as $ikey => $ivalue)
 		{	
 			
@@ -9130,7 +9145,6 @@ class TrialTracker
 			$activeCount = 0;
 			
 			$result = array();
-			$larvolIds = array();
 			
 			global $Sphinx_search;
 			if(isset($Sphinx_search))
@@ -9242,10 +9256,28 @@ class TrialTracker
 				}
 			}
 			unset($idlist);
+			
 			$res = mysql_query($query);
 			while($row = mysql_fetch_assoc($res))
 			{	
 				$result = $this->processData($ikey, $row, $timeMachine, $timeInterval);
+				
+				if(isset($globalOptions['sphinxSearch']) && $globalOptions['sphinxSearch'] != '')
+				{	
+					if(in_array($result['larvol_id'], $larvolIds))
+					{
+						$sphinxSearchFlag = true;
+					}
+					else
+					{
+						$sphinxSearchFlag = false;
+					}
+				}
+				else
+				{
+					$sphinxSearchFlag = true;
+				}
+				//echo '<br/>-->'.$sphinxSearchFlag;
 				if($globalOptions['onlyUpdates'] == "yes")
 				{
 					//unsetting value for field acroynm if it has a previous value and no current value
@@ -9274,6 +9306,24 @@ class TrialTracker
 					
 					if(!empty($result['edited']) || $result['new'] == 'y')
 					{
+						if($sphinxSearchFlag == true)
+						{
+							$TrialsInfo[$ikey]['allTrials'][] = $result;
+							if($row['is_active'] == 1) 
+							{
+								$TrialsInfo[$ikey]['activeTrials'][] = $result;
+							}
+							else
+							{
+								$TrialsInfo[$ikey]['inactiveTrials'][] = $result;
+							}
+						}
+					}
+				}
+				else
+				{
+					if($sphinxSearchFlag == true)
+					{
 						$TrialsInfo[$ikey]['allTrials'][] = $result;
 						if($row['is_active'] == 1) 
 						{
@@ -9283,18 +9333,6 @@ class TrialTracker
 						{
 							$TrialsInfo[$ikey]['inactiveTrials'][] = $result;
 						}
-					}
-				}
-				else
-				{
-					$TrialsInfo[$ikey]['allTrials'][] = $result;
-					if($row['is_active'] == 1) 
-					{
-						$TrialsInfo[$ikey]['activeTrials'][] = $result;
-					}
-					else
-					{
-						$TrialsInfo[$ikey]['inactiveTrials'][] = $result;
 					}
 				}
 			}	
@@ -10705,7 +10743,7 @@ class TrialTracker
 			$this->pagination($globalOptions, $totalPages, $timeMachine, $ottType, $loggedIn);
 		}
 		
-		echo '<input type="text" name="ss" autocomplete="off" style="width:300px;" value="" />';
+		echo '<input type="text" name="ss" autocomplete="off" style="width:300px;" value="' . $globalOptions['sphinxSearch'] . '" />';
 		echo '<div style="float: right;padding-top:4px; vertical-align:bottom; height:22px;" id="chromemenu"><a rel="dropmenu">'
 				. '<span style="padding:2px;border:1px solid; color:#000000; background-position:left center; background-repeat:no-repeat; background-image:url(\'./images/save.png\'); cursor:pointer;">'
 				. '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Export</b></span></a></div>'
@@ -10906,7 +10944,7 @@ class TrialTracker
 			 . '<tr>' . (($loggedIn) ? '<th width="38px">ID</th>' : '' )
 			 . '<th style="width:270px;margin:0px;padding:0px;">Title</th>'
 			 . '<th style="width:30px" title="Red: Change greater than 20%">N</th>'
-			 . '<th style="width:65px" title="&quot;ROW&quot; = Rest of World">Region</th>'
+			 . '<th style="width:65px" title="&quot;RoW&quot; = Rest of World">Region</th>'
 			 . '<th style="width:100px">Interventions</th>'
 			 . '<th style="width:90px">Sponsor</th>'
 			 . '<th style="width:100px">Status</th>'
@@ -11360,6 +11398,11 @@ class TrialTracker
 		if( !isset($_REQUEST['sphinx_s']) and isset($globalOptions['sphinx_s']))
 		{
 			$url .= '&amp;sphinx_s=' . $globalOptions['sphinx_s'];
+		}
+		
+		if(isset($globalOptions['sphinxSearch']) && $globalOptions['sphinxSearch'] != '')
+		{
+			$url .= '&amp;ss=' . $globalOptions['sphinxSearch'];
 		}
 		
 		$stages = 2;
