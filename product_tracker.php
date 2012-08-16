@@ -743,12 +743,12 @@ foreach($rows as $row => $rval)
 	$htmlContent .= '</tr>';
 }			   
 			   
-$htmlContent .= '<tr class="last_tick_height"><th class="last_tick_height prod_col">&nbsp;</th><th class="graph_right last_tick_width">&nbsp;</th>';
+$htmlContent .= '<tr class="last_tick_height"><th class="last_tick_height prod_col"><font style="line-height:4px;">&nbsp;</font></th><th class="graph_right last_tick_width"><font style="line-height:4px;">&nbsp;</font></th>';
 for($j=0; $j < $columns; $j++)
-$htmlContent .= '<th width="'.$column_width.'px" colspan="'.$inner_columns.'" class="graph_top graph_right">&nbsp;</th>';
+$htmlContent .= '<th width="'.$column_width.'px" colspan="'.$inner_columns.'" class="graph_top graph_right"><font style="line-height:4px;">&nbsp;</font></th>';
 $htmlContent .= '</tr>';
 
-$htmlContent .= '<tr><th class="prod_col"></th><th width="2px" class="">&nbsp;</th>';
+$htmlContent .= '<tr><th class="prod_col"></th><th width="2px" class=""></th>';
 for($j=0; $j < $columns; $j++)
 $htmlContent .= '<th align="right" width="'.$column_width.'px" colspan="'.(($j==0)? $inner_columns+1 : $inner_columns).'" class="">'.(($j+1) * $column_interval).'</th>';
 $htmlContent .= '</tr>';
