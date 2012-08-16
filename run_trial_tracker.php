@@ -1507,8 +1507,8 @@ class TrialTracker
 		{
 			$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':AX' . $i . '')->applyFromArray($styleThinBlueBorderOutline);
 			
-			$eventLink = urlencode($uvalue['event_link']);
-			$resultLink = urlencode($uvalue['result_link']);
+			$eventLink = urlencode(trim($uvalue['event_link']));
+			$resultLink = urlencode(trim($uvalue['result_link']));
 			
 			//upm id
 			$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $uvalue["id"]);
