@@ -1244,7 +1244,8 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 	
 	
 	$out .= '<input type="submit" name="reportcopy" value="Copy into new" /> | '
-			. '<a href="masterhm_report_inputcheck.php?id=' . $id . '">Input check</a>';
+			. '<a href="masterhm_report_inputcheck.php?id=' . $id . '">Input check</a> | '
+			. '<a href="product_tracker.php?id=' . $id . '" target="_blank">Product Tracker</a>';
 			
 	$out .= '<br/><table style="background-color:#FFFFFF; table-layout:fixed;"><tr><th style="background-color:#FFFFFF;" class="Extra_Insert_FCol"></th><th class="Insert" id="Insert_Column_0">'.(($owner_type == 'mine' || ($owner_type == 'global' && $db->user->userlevel != 'user') || ($owner_type == 'shared' && $rptu == $db->user->id) || $db->user->userlevel == 'root') ? '<input type="image" name="insert_area[0]" src="images/insert_column.png" title="Insert Column" align="right"/>':'').'</th>';
 	foreach($columns as $col => $val)
