@@ -567,8 +567,8 @@ $htmlContent  .= '<div id="dropmenu" class="dropmenudiv" style="width: 310px;">'
 						
 $htmlContent .= '<table align="center" width="100%"><tr>';
 
-$htmlContent .= '<td width="80%" style="vertical-align:middle; padding-top:100px; padding-bottom:100px; padding-right:20px;">'
-				. '<table style="height:100%; vertical-align:middle;" cellpadding="0" cellspacing="0">'
+$htmlContent .= '<td width="80%" style="vertical-align:top; padding-top:0px; padding-bottom:0px; padding-right:20px;">'
+				. '<table style="height:100%; vertical-align:top;" cellpadding="0" cellspacing="0">'
 			    . '<thead>';
 
 $rows = array_reverse($rows, true);
