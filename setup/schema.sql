@@ -857,6 +857,7 @@ CREATE TABLE IF NOT EXISTS `data_trials` (
 CREATE TABLE IF NOT EXISTS `product_trials` (
   `product` int(10) unsigned NOT NULL,
   `trial` int(10) unsigned NOT NULL,
+  `sponsor_owned` tinyint(1) NULL, 
   PRIMARY KEY (`product`,`trial`),
   KEY `trial` (`trial`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

@@ -281,6 +281,25 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 				// replace all intervention_other_name with intervention_name 
 				$query=str_replace('intervention_other_name','intervention_name',$query) ;
 				//pr($query);
+				
+				/** add columns: source, lead_sponsor and collaborator to the query */
+				$findme   = 'FROM data_trials';
+				$pos = stripos($query, $findme);
+				if ($pos === false) 
+				{
+					$log='Error in MySql Query (no "FROM" clause is used in the query)  :' . $query;
+					$logger->fatal($log);
+					mysql_query('ROLLBACK');
+					echo $log;
+					return false;
+				} 
+				else 
+				{
+
+					$query = substr($query,0,$pos-1). ', dt.source, dt.lead_sponsor, dt.collaborator ' . substr($query,$pos-1) ;
+					
+				}  
+				 /************/
 				if(!$resu = mysql_query($query))
 				{
 					$log='Bad SQL query getting larvol_id from data_trials table.<br>Query=' . $query . ' Mysql error:'. mysql_error();
@@ -295,7 +314,6 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 				
 				$nctidz=array(); // search result
 				while($nctidz[]=mysql_fetch_array($resu));
-				
 				//in case of a single product, the total column of status should show the total number of trials.
 				if( !is_null($productID) )
 					$total=count($nctidz);
@@ -371,7 +389,27 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 						else
 						{
 							echo '<br>'. date("Y-m-d H:i:s", strtotime('now')) . ' - Indexing Larvol ID:'.$larvol_id . '<br>';
-							$query='INSERT INTO `'. $table .'` (`'. $field .'`, `trial`) VALUES ("' . $cid . '", "' . $larvol_id .'") ';
+							
+							/**** Mark sponsor owned trials *****/
+							
+							$pos = stripos($value['lead_sponsor'], trim($value['source']));
+							$pos1 = stripos($value['collaborator'], trim($value['source']));
+							
+							if( $pos !== false || $pos1 !== false ) 
+							{
+							
+								$sponsor_owned=1;
+							
+							}
+							else
+							{
+							
+								$sponsor_owned=0;
+							
+							}
+							/*******************************/
+							
+							$query='INSERT INTO `'. $table .'` (`'. $field .'`, `trial`, `sponsor_owned`) VALUES ("' . $cid . '", "' . $larvol_id .'" , "' . $sponsor_owned .'") ';
 							$res = mysql_query($query);
 							if($res === false)
 							{
