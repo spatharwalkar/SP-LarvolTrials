@@ -55,8 +55,12 @@ $query = 'SELECT MAX(`num`) AS `num` FROM `rpt_masterhm_headers` WHERE report=' 
 $res = mysql_query($query) or die(mysql_error());
 $max_row = mysql_fetch_array($res);
 
-	// SELECT LAST AREA
-$query = 'SELECT MAX(`num`) AS `num`, `type_id` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' AND type = \'area\'';
+	// SELECT MAX NUM of Area
+$query = 'SELECT MAX(`num`) AS `num` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' AND type = \'area\'';
+$res = mysql_query($query) or die(mysql_error());
+$header = mysql_fetch_array($res);
+// Max Area Id
+$query = 'SELECT `type_id` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' AND type = \'area\' AND `num`='.$header['num'];
 $res = mysql_query($query) or die(mysql_error());
 $header = mysql_fetch_array($res);
 
@@ -76,7 +80,7 @@ $data_matrix=array();
 
 ///// No of columns in our graph
 $columns = 10;
-$column_width = 60;
+$column_width = 80;
 $max_count = 0;
 
 foreach($rows as $row => $rval)
@@ -316,6 +320,43 @@ a, a:hover{ height:100%; display:block; text-decoration:none;}
 .classic { padding: 0.8em 1em; }
 .classic {background: #FFFFAA; border: 1px solid #FFAD33; }
 
+#slideout {
+	position: fixed;
+	_position:absolute;
+	top: 40px;
+	right: 0;
+	margin: 12px 0 0 0;
+}
+
+.slideout_inner {
+	position:absolute;
+	top: 40px;
+	right: -255px;
+	display:none;
+}
+
+#slideout:hover .slideout_inner{
+	display : block;
+	position:absolute;
+	top: 2px;
+	right: 0px;
+	width: 280px;
+	z-index:10;
+}
+
+.table-slide{
+	border:1px solid #000;
+	height:100px;
+	width:280px;
+}
+.table-slide td{
+	border-right:1px solid #000;
+	padding:8px;
+	padding-right:20px;
+	border-bottom:1px solid #000;
+}
+
+
 .gray {
 	background-color:#CCCCCC;
 	width: 35px;
@@ -422,10 +463,10 @@ border-bottom:1px solid #CCCCCC;
 }
 th { font-weight:normal; }
 .last_tick_height {
-height:8px;
+height:4px;
 }
 .last_tick_width {
-width:8px;
+width:4px;
 }
 .graph_top {
 border-top:1px solid #CCCCCC;
@@ -434,11 +475,12 @@ border-top:1px solid #CCCCCC;
 border-right:1px solid #CCCCCC;
 }
 .prod_col {
-width:300px;
-max-width:300px;
+/*width:300px;
+max-width:300px;*/
 }
 .side_tick_height {
-height:10px;
+height:6px;
+line-height:6px;
 }
 
 .graph_gray {
@@ -523,6 +565,23 @@ function change_view()
 </script>
 </head>
 
+<div id="slideout">
+    <img src="images/help.png" alt="Help" />
+    <div class="slideout_inner">
+        <table bgcolor="#FFFFFF" cellpadding="0" cellspacing="0" class="table-slide">
+       	<tr><td colspan="2" style="padding-right: 1px;">
+         <div style="float:left;padding-top:3px;">Phase&nbsp;</div>
+         <div class="gray">N/A</div>
+         <div class="blue">0</div>
+         <div class="green">1</div>
+         <div class="yellow">2</div>
+         <div class="orange">3</div>
+         <div class="red">4</div>
+         </td></tr>
+        </table>
+    </div>
+</div>
+
 <body bgcolor="#FFFFFF" style="background-color:#FFFFFF;">
 <?php 
 
@@ -543,7 +602,19 @@ if((isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvoli
 				   . '<td style="background-color:#FFFFFF;" class="report_name">Name: ' . htmlspecialchars($Report_Name) . '</td></tr></table><br/>';
 }
 				
-$htmlContent .= '<br style="line-height:11px;"/>';
+$htmlContent .= '<br style="line-height:11px;"/>'
+				. '<table width="264px" border="0" cellspacing="0" cellpadding="0" class="controls" align="center">'
+				. '<tr><th align="center">View mode</th><th align="center" class="right">Actions</th></tr>'
+				. '<tr>'
+				. '<td class="bottom"><p style="margin-top:8px;margin-right:5px;"><select id="view_type" name="view_type" onchange="change_view();">'
+				. '<option value="indlead" selected="selected">Active industry trials</option>'
+				. '<option value="active">Active trials</option>'
+				. '<option value="total">All trials</option></select></p></td>'
+				. '<td class="bottom right">'
+				. '<div style="float: left; margin-left: 15px; margin-top: 11px; vertical-align:bottom;" id="chromemenu"><a rel="dropmenu"><span style="padding:2px; padding-right:4px; border:1px solid; color:#000000; background-position:left center; background-repeat:no-repeat; background-image:url(\'./images/save.png\'); cursor:pointer; ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Export</b></span></a></div>'
+				. '</td>'
+				. '</tr>'
+				. '</table>';
 				
 $htmlContent  .= '<div id="dropmenu" class="dropmenudiv" style="width: 310px;">'
 				.'<form action="product_tracker.php" method="post">'
@@ -563,15 +634,12 @@ $htmlContent  .= '<div id="dropmenu" class="dropmenudiv" style="width: 310px;">'
 				. '<input type="submit" name="download" title="Download" value="Download file" style="margin-left:8px;"  />'
 				. '</div></div>'
 				. '</form>'
-				. '</div>';
+				. '</div><script type="text/javascript">cssdropdown.startchrome("chromemenu");</script>';
 						
-$htmlContent .= '<table align="center" width="100%"><tr>';
-
-$htmlContent .= '<td width="80%" style="vertical-align:top; padding-top:0px; padding-bottom:0px; padding-right:20px;">'
-				. '<table style="height:100%; vertical-align:top;" cellpadding="0" cellspacing="0">'
+$htmlContent .= '<div align="center" style="padding-left:10px; padding-right:15px; padding-top:20px; padding-bottom:20px;"><table align="center" style="height:100%; vertical-align:top;" cellpadding="0" cellspacing="0">'
 			    . '<thead>';
 
-$rows = array_reverse($rows, true);
+//$rows = array_reverse($rows, true);
 
 $htmlContent .= '<tr class="side_tick_height"><th class="prod_col">&nbsp;</th><th class="last_tick_width">&nbsp;</th>';
 for($j=0; $j < $columns; $j++)
@@ -753,38 +821,12 @@ for($j=0; $j < $columns; $j++)
 $htmlContent .= '<th align="right" width="'.$column_width.'px" colspan="'.(($j==0)? $inner_columns+1 : $inner_columns).'" class="">'.(($j+1) * $column_interval).'</th>';
 $htmlContent .= '</tr>';
 						
-$htmlContent .= '</thead></table>';
+$htmlContent .= '</thead></table></div>';
 
 //// Common Data
 $htmlContent .= '<input type="hidden" value="'.count($rows).'" name="Tot_rows" id="Tot_rows" />';
 ////// End of Common Data
 
-$htmlContent .= '</td>';
-///// End of td containing Graph
-
-$htmlContent .= '<td align="left" style="vertical-align:top;">'
-				. '<table width="264px" border="0" cellspacing="0" cellpadding="0" class="controls" align="center">'
-				. '<tr><th align="center">View mode</th><th align="center" class="right">Actions</th></tr>'
-				. '<tr>'
-				. '<td class="bottom"><p style="margin-top:8px;margin-right:5px;"><select id="view_type" name="view_type" onchange="change_view();">'
-				. '<option value="indlead" selected="selected">Active industry trials</option>'
-				. '<option value="active">Active trials</option>'
-				. '<option value="total">All trials</option></select></p></td>'
-				. '<td class="bottom right">'
-				. '<div style="float: left; margin-left: 15px; margin-top: 11px; vertical-align:bottom;" id="chromemenu"><a rel="dropmenu"><span style="padding:2px; padding-right:4px; border:1px solid; color:#000000; background-position:left center; background-repeat:no-repeat; background-image:url(\'./images/save.png\'); cursor:pointer; ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Export</b></span></a></div><script type="text/javascript">cssdropdown.startchrome("chromemenu");</script>'
-				. '</td>'
-				. '</tr>'
-				. '<tr><td colspan="2" style="padding-right: 1px;" class="bottom right">'
-       			. '<div style="float:left;padding-top:3px;">Phase&nbsp;</div>'
-        		. '<div class="gray">N/A</div>'
-        		. '<div class="blue">0</div>'
-        		. '<div class="green">1</div>'
-        		. '<div class="yellow">2</div>'
-        		. '<div class="orange">3</div>'
-        		. '<div class="red">4</div>'
-        		. '</td></tr>'
-				. '</table>'
-				.'</td></tr></table>';
 			
 print $htmlContent;
 ?>
