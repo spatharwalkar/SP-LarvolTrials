@@ -479,8 +479,8 @@ border-right:1px solid #CCCCCC;
 max-width:300px;*/
 }
 .side_tick_height {
-height:6px;
-line-height:6px;
+height:2px;
+line-height:2px;
 }
 
 .graph_gray {
@@ -604,9 +604,9 @@ if((isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvoli
 				
 $htmlContent .= '<br style="line-height:11px;"/>'
 				. '<table width="264px" border="0" cellspacing="0" cellpadding="0" class="controls" align="center">'
-				. '<tr><th align="center">View mode</th><th align="center" class="right">Actions</th></tr>'
+				//. '<tr><th align="center">View mode</th><th align="center" class="right">Actions</th></tr>'
 				. '<tr>'
-				. '<td class="bottom"><p style="margin-top:8px;margin-right:5px;"><select id="view_type" name="view_type" onchange="change_view();">'
+				. '<td class="bottom right"><p style="margin-top:8px;margin-right:5px;"><select id="view_type" name="view_type" onchange="change_view();">'
 				. '<option value="indlead" selected="selected">Active industry trials</option>'
 				. '<option value="active">Active trials</option>'
 				. '<option value="total">All trials</option></select></p></td>'
@@ -618,19 +618,14 @@ $htmlContent .= '<br style="line-height:11px;"/>'
 				
 $htmlContent  .= '<div id="dropmenu" class="dropmenudiv" style="width: 310px;">'
 				.'<form action="product_tracker.php" method="post">'
-				.'<div style="height:150px; padding:6px;"><div class="downldbox"><div class="newtext">Download options</div>'
+				.'<div style="height:100px; padding:6px;"><div class="downldbox"><div class="newtext">Download options</div>'
 				. '<input type="hidden" name="id" id="id" value="' . $id . '" />'
 				. '<ul><li><label>Which format: </label></li>'
 				. '<li><select id="dwformat" name="dwformat" size="2" style="height:40px">'
 				//. '<option value="exceldown" selected="selected">Excel</option>'
 				//. '<option value="pdfdown">PDF</option>'
 				. '</select></li>'
-				. '<li><label>Counts display: </label></li>'
-				. '<li><select id="dwcount" name="dwcount" size="3" style="height:54px">'
-				. '<option value="indlead" selected="selected">Active industry trials</option>'
-				. '<option value="active">Active trials</option>'
-				. '<option value="total">All trials</option>'
-				. '</select></li></ul>'
+				. '</ul>'
 				. '<input type="submit" name="download" title="Download" value="Download file" style="margin-left:8px;"  />'
 				. '</div></div>'
 				. '</form>'
@@ -651,7 +646,7 @@ $htmlContent .= '</tr>';
 
 foreach($rows as $row => $rval)
 {
-	$htmlContent .= '<tr class="side_tick_height"><th class="prod_col side_tick_height">&nbsp;</th><th class="'. (($max_row['num'] == $row) ? 'graph_top':'' ) .' graph_right last_tick_width">&nbsp;</th>';
+	$htmlContent .= '<tr class="side_tick_height"><th class="prod_col side_tick_height">&nbsp;</th><th class="'. (($row == 1) ? 'graph_top':'' ) .' graph_right last_tick_width">&nbsp;</th>';
 	for($j=0; $j < $columns; $j++)
 	{
 		$htmlContent .= '<th width="'.$column_width.'px" colspan="'.$inner_columns.'" class="graph_right">&nbsp;</th>';
@@ -661,40 +656,40 @@ foreach($rows as $row => $rval)
 	////// Color Graph - Bar Starts
 	
 	//// Code for Indlead
-	$htmlContent .= '<tr id="indlead_Graph_Row_'.$row.'"><th align="right" class="prod_col"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&itype=0&hm=' . $id . '" target="_blank" style="text-decoration:underline;">'.$rval.'</a></th><th class="graph_right last_tick_width">&nbsp;</th>';
+	$htmlContent .= '<tr id="indlead_Graph_Row_'.$row.'"><th align="right" class="prod_col"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&itype=0&hm=' . $id . '" target="_blank" style="text-decoration:underline;">'.$rval.$rowsCompanyName[$row].'</a></th><th class="graph_right last_tick_width">&nbsp;</th>';
 	
 	$total_cols = $inner_columns * $columns;
 	
 	$total_colspan = $original_max_count * $ratio;
 	
-	if($data_matrix[$row]['indlead_phase_4'] > 0)
-	$htmlContent .= '<th colspan="'.round($ratio * $data_matrix[$row]['indlead_phase_4']).'" class="side_tick_height graph_red" title="'.$data_matrix[$row]['indlead_phase_4'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&itype=0&phase=4&hm=' . $id . '" target="_blank">&nbsp;</a></th>';
+	if(ceil($ratio * $data_matrix[$row]['indlead_phase_4']) > 0)
+	$htmlContent .= '<th colspan="'.ceil($ratio * $data_matrix[$row]['indlead_phase_4']).'" class="side_tick_height graph_red" title="'.$data_matrix[$row]['indlead_phase_4'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&itype=0&phase=4&hm=' . $id . '" target="_blank">&nbsp;</a></th>';
 	
-	if($data_matrix[$row]['indlead_phase_3'] > 0)
-	$htmlContent .= '<th colspan="'.round($ratio * $data_matrix[$row]['indlead_phase_3']).'" class="side_tick_height graph_orange" title="'.$data_matrix[$row]['indlead_phase_3'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&itype=0&phase=3&hm=' . $id . '" target="_blank">&nbsp;</a></th>';
+	if(ceil($ratio * $data_matrix[$row]['indlead_phase_3']) > 0)
+	$htmlContent .= '<th colspan="'.ceil($ratio * $data_matrix[$row]['indlead_phase_3']).'" class="side_tick_height graph_orange" title="'.$data_matrix[$row]['indlead_phase_3'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&itype=0&phase=3&hm=' . $id . '" target="_blank">&nbsp;</a></th>';
 	
-	if($data_matrix[$row]['indlead_phase_2'] > 0)
-	$htmlContent .= '<th colspan="'.round($ratio * $data_matrix[$row]['indlead_phase_2']).'" class="side_tick_height graph_yellow" title="'.$data_matrix[$row]['indlead_phase_2'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&itype=0&phase=2&hm=' . $id . '" target="_blank">&nbsp;</a></th>';
+	if(ceil($ratio * $data_matrix[$row]['indlead_phase_2']) > 0)
+	$htmlContent .= '<th colspan="'.ceil($ratio * $data_matrix[$row]['indlead_phase_2']).'" class="side_tick_height graph_yellow" title="'.$data_matrix[$row]['indlead_phase_2'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&itype=0&phase=2&hm=' . $id . '" target="_blank">&nbsp;</a></th>';
 	
-	if($data_matrix[$row]['indlead_phase_1'] > 0)
-	$htmlContent .= '<th colspan="'.round($ratio * $data_matrix[$row]['indlead_phase_1']).'" class="side_tick_height graph_green" title="'.$data_matrix[$row]['indlead_phase_1'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&itype=0&phase=1&hm=' . $id . '" target="_blank">&nbsp;</a></th>';
+	if(ceil($ratio * $data_matrix[$row]['indlead_phase_1']) > 0)
+	$htmlContent .= '<th colspan="'.ceil($ratio * $data_matrix[$row]['indlead_phase_1']).'" class="side_tick_height graph_green" title="'.$data_matrix[$row]['indlead_phase_1'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&itype=0&phase=1&hm=' . $id . '" target="_blank">&nbsp;</a></th>';
 	
-	if($data_matrix[$row]['indlead_phase_0'] > 0)
-	$htmlContent .= '<th colspan="'.round($ratio * $data_matrix[$row]['indlead_phase_0']).'" class="side_tick_height graph_blue" title="'.$data_matrix[$row]['indlead_phase_0'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&itype=0&phase=0&hm=' . $id . '" target="_blank">&nbsp;</a></th>';
+	if(ceil($ratio * $data_matrix[$row]['indlead_phase_0']) > 0)
+	$htmlContent .= '<th colspan="'.ceil($ratio * $data_matrix[$row]['indlead_phase_0']).'" class="side_tick_height graph_blue" title="'.$data_matrix[$row]['indlead_phase_0'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&itype=0&phase=0&hm=' . $id . '" target="_blank">&nbsp;</a></th>';
 	
-	if($data_matrix[$row]['indlead_phase_na'] > 0)
-	$htmlContent .= '<th colspan="'.round($ratio * $data_matrix[$row]['indlead_phase_na']).'" class="side_tick_height graph_gray" title="'.$data_matrix[$row]['indlead_phase_na'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&itype=0&phase=na&hm=' . $id . '" target="_blank">&nbsp;</a></th>';
+	if(ceil($ratio * $data_matrix[$row]['indlead_phase_na']) > 0)
+	$htmlContent .= '<th colspan="'.ceil($ratio * $data_matrix[$row]['indlead_phase_na']).'" class="side_tick_height graph_gray" title="'.$data_matrix[$row]['indlead_phase_na'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&itype=0&phase=na&hm=' . $id . '" target="_blank">&nbsp;</a></th>';
 	
-	$phase_space = (round($ratio * $data_matrix[$row]['indlead_phase_4']) + round($ratio * $data_matrix[$row]['indlead_phase_3']) + round($ratio * $data_matrix[$row]['indlead_phase_2']) + round($ratio * $data_matrix[$row]['indlead_phase_1']) + round($ratio * $data_matrix[$row]['indlead_phase_0']) + round($ratio * $data_matrix[$row]['indlead_phase_na']));
+	$phase_space = (ceil($ratio * $data_matrix[$row]['indlead_phase_4']) + ceil($ratio * $data_matrix[$row]['indlead_phase_3']) + ceil($ratio * $data_matrix[$row]['indlead_phase_2']) + ceil($ratio * $data_matrix[$row]['indlead_phase_1']) + ceil($ratio * $data_matrix[$row]['indlead_phase_0']) + ceil($ratio * $data_matrix[$row]['indlead_phase_na']));
 	$remain_span = $total_cols - $phase_space;
 	
 	if($remain_span > 0)
 	{
 		$aq_sp = 0;
-		while($aq_sp < $remain_span)
+		while($aq_sp < $phase_space)
 		$aq_sp = $aq_sp + $inner_columns;
 		
-		$extra_sp = $aq_sp - $remain_span;
+		$extra_sp = $aq_sp - $phase_space;
 		if($extra_sp > 0)
 		$htmlContent .= '<th colspan="'.($extra_sp).'" class="graph_right side_tick_height">&nbsp;</th>';
 	
@@ -708,40 +703,40 @@ foreach($rows as $row => $rval)
 	$htmlContent .= '</tr>';
 	
 	//// Code for Active
-	$htmlContent .= '<tr style="display:none;" id="active_Graph_Row_'.$row.'"><th align="right" class="prod_col"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&hm=' . $id . '" target="_blank" style="text-decoration:underline;">'.$rval.'</a></th><th class="graph_right last_tick_width">&nbsp;</th>';
+	$htmlContent .= '<tr style="display:none;" id="active_Graph_Row_'.$row.'"><th align="right" class="prod_col"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&hm=' . $id . '" target="_blank" style="text-decoration:underline;">'.$rval.$rowsCompanyName[$row].'</a></th><th class="graph_right last_tick_width">&nbsp;</th>';
 	
 	$total_cols = $inner_columns * $columns;
 	
 	$total_colspan = $original_max_count * $ratio;
 	
-	if($data_matrix[$row]['active_phase_4'] > 0)
-	$htmlContent .= '<th colspan="'.round($ratio * $data_matrix[$row]['active_phase_4']).'" class="side_tick_height graph_red" title="'.$data_matrix[$row]['active_phase_4'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&phase=4&hm=' . $id . '" target="_blank">&nbsp;</a></th>';
+	if(ceil($ratio * $data_matrix[$row]['active_phase_4']) > 0)
+	$htmlContent .= '<th colspan="'.ceil($ratio * $data_matrix[$row]['active_phase_4']).'" class="side_tick_height graph_red" title="'.$data_matrix[$row]['active_phase_4'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&phase=4&hm=' . $id . '" target="_blank">&nbsp;</a></th>';
 	
-	if($data_matrix[$row]['active_phase_3'] > 0)
-	$htmlContent .= '<th colspan="'.round($ratio * $data_matrix[$row]['active_phase_3']).'" class="side_tick_height graph_orange" title="'.$data_matrix[$row]['active_phase_3'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&phase=3&hm=' . $id . '" target="_blank">&nbsp;</a></th>';
+	if(ceil($ratio * $data_matrix[$row]['active_phase_3']) > 0)
+	$htmlContent .= '<th colspan="'.ceil($ratio * $data_matrix[$row]['active_phase_3']).'" class="side_tick_height graph_orange" title="'.$data_matrix[$row]['active_phase_3'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&phase=3&hm=' . $id . '" target="_blank">&nbsp;</a></th>';
 	
-	if($data_matrix[$row]['active_phase_2'] > 0)
-	$htmlContent .= '<th colspan="'.round($ratio * $data_matrix[$row]['active_phase_2']).'" class="side_tick_height graph_yellow" title="'.$data_matrix[$row]['active_phase_2'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&phase=2&hm=' . $id . '" target="_blank">&nbsp;</a></th>';
+	if(ceil($ratio * $data_matrix[$row]['active_phase_2']) > 0)
+	$htmlContent .= '<th colspan="'.ceil($ratio * $data_matrix[$row]['active_phase_2']).'" class="side_tick_height graph_yellow" title="'.$data_matrix[$row]['active_phase_2'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&phase=2&hm=' . $id . '" target="_blank">&nbsp;</a></th>';
 	
-	if($data_matrix[$row]['active_phase_1'] > 0)
-	$htmlContent .= '<th colspan="'.round($ratio * $data_matrix[$row]['active_phase_1']).'" class="side_tick_height graph_green" title="'.$data_matrix[$row]['active_phase_1'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&phase=1&hm=' . $id . '" target="_blank">&nbsp;</a></th>';
+	if(ceil($ratio * $data_matrix[$row]['active_phase_1']) > 0)
+	$htmlContent .= '<th colspan="'.ceil($ratio * $data_matrix[$row]['active_phase_1']).'" class="side_tick_height graph_green" title="'.$data_matrix[$row]['active_phase_1'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&phase=1&hm=' . $id . '" target="_blank">&nbsp;</a></th>';
 	
-	if($data_matrix[$row]['active_phase_0'] > 0)
-	$htmlContent .= '<th colspan="'.round($ratio * $data_matrix[$row]['active_phase_0']).'" class="side_tick_height graph_blue" title="'.$data_matrix[$row]['active_phase_0'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&phase=0&hm=' . $id . '" target="_blank">&nbsp;</a></th>';
+	if(ceil($ratio * $data_matrix[$row]['active_phase_0']) > 0)
+	$htmlContent .= '<th colspan="'.ceil($ratio * $data_matrix[$row]['active_phase_0']).'" class="side_tick_height graph_blue" title="'.$data_matrix[$row]['active_phase_0'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&phase=0&hm=' . $id . '" target="_blank">&nbsp;</a></th>';
 	
-	if($data_matrix[$row]['active_phase_na'] > 0)
-	$htmlContent .= '<th colspan="'.round($ratio * $data_matrix[$row]['active_phase_na']).'" class="side_tick_height graph_gray" title="'.$data_matrix[$row]['active_phase_na'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&phase=na&hm=' . $id . '" target="_blank">&nbsp;</a></th>';
+	if(ceil($ratio * $data_matrix[$row]['active_phase_na']) > 0)
+	$htmlContent .= '<th colspan="'.ceil($ratio * $data_matrix[$row]['active_phase_na']).'" class="side_tick_height graph_gray" title="'.$data_matrix[$row]['active_phase_na'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&phase=na&hm=' . $id . '" target="_blank">&nbsp;</a></th>';
 	
-	$phase_space = (round($ratio * $data_matrix[$row]['active_phase_4']) + round($ratio * $data_matrix[$row]['active_phase_3']) + round($ratio * $data_matrix[$row]['active_phase_2']) + round($ratio * $data_matrix[$row]['active_phase_1']) + round($ratio * $data_matrix[$row]['active_phase_0']) + round($ratio * $data_matrix[$row]['active_phase_na']));
+	$phase_space = (ceil($ratio * $data_matrix[$row]['active_phase_4']) + ceil($ratio * $data_matrix[$row]['active_phase_3']) + ceil($ratio * $data_matrix[$row]['active_phase_2']) + ceil($ratio * $data_matrix[$row]['active_phase_1']) + ceil($ratio * $data_matrix[$row]['active_phase_0']) + ceil($ratio * $data_matrix[$row]['active_phase_na']));
 	$remain_span = $total_cols - $phase_space;
 	
 	if($remain_span > 0)
 	{
 		$aq_sp = 0;
-		while($aq_sp < $remain_span)
+		while($aq_sp < $phase_space)
 		$aq_sp = $aq_sp + $inner_columns;
 		
-		$extra_sp = $aq_sp - $remain_span;
+		$extra_sp = $aq_sp - $phase_space;
 		if($extra_sp > 0)
 		$htmlContent .= '<th colspan="'.($extra_sp).'" class="graph_right side_tick_height">&nbsp;</th>';
 	
@@ -755,40 +750,40 @@ foreach($rows as $row => $rval)
 	$htmlContent .= '</tr>';
 	
 	//// Code for Total
-	$htmlContent .= '<tr style="display:none;" id="total_Graph_Row_'.$row.'"><th align="right" class="prod_col"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=2&hm=' . $id . '" target="_blank" style="text-decoration:underline;">'.$rval.'</a></th><th class="graph_right last_tick_width">&nbsp;</th>';
+	$htmlContent .= '<tr style="display:none;" id="total_Graph_Row_'.$row.'"><th align="right" class="prod_col"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=2&hm=' . $id . '" target="_blank" style="text-decoration:underline;">'.$rval.$rowsCompanyName[$row].'</a></th><th class="graph_right last_tick_width">&nbsp;</th>';
 	
 	$total_cols = $inner_columns * $columns;
 	
 	$total_colspan = $original_max_count * $ratio;
 	
-	if($data_matrix[$row]['total_phase_4'] > 0)
-	$htmlContent .= '<th colspan="'.round($ratio * $data_matrix[$row]['total_phase_4']).'" class="side_tick_height graph_red" title="'.$data_matrix[$row]['total_phase_4'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=2&phase=4&hm=' . $id . '" target="_blank">&nbsp;</a></th>';
+	if(ceil($ratio * $data_matrix[$row]['total_phase_4']) > 0)
+	$htmlContent .= '<th colspan="'.ceil($ratio * $data_matrix[$row]['total_phase_4']).'" class="side_tick_height graph_red" title="'.$data_matrix[$row]['total_phase_4'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=2&phase=4&hm=' . $id . '" target="_blank">&nbsp;</a></th>';
 	
-	if($data_matrix[$row]['total_phase_3'] > 0)
-	$htmlContent .= '<th colspan="'.round($ratio * $data_matrix[$row]['total_phase_3']).'" class="side_tick_height graph_orange" title="'.$data_matrix[$row]['total_phase_3'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=2&phase=3&hm=' . $id . '" target="_blank">&nbsp;</a></th>';
+	if(ceil($ratio * $data_matrix[$row]['total_phase_3'])> 0)
+	$htmlContent .= '<th colspan="'.ceil($ratio * $data_matrix[$row]['total_phase_3']).'" class="side_tick_height graph_orange" title="'.$data_matrix[$row]['total_phase_3'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=2&phase=3&hm=' . $id . '" target="_blank">&nbsp;</a></th>';
 	
-	if($data_matrix[$row]['total_phase_2'] > 0)
-	$htmlContent .= '<th colspan="'.round($ratio * $data_matrix[$row]['total_phase_2']).'" class="side_tick_height graph_yellow" title="'.$data_matrix[$row]['total_phase_2'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=2&phase=2&hm=' . $id . '" target="_blank">&nbsp;</a></th>';
+	if(ceil($ratio * $data_matrix[$row]['total_phase_2']) > 0)
+	$htmlContent .= '<th colspan="'.ceil($ratio * $data_matrix[$row]['total_phase_2']).'" class="side_tick_height graph_yellow" title="'.$data_matrix[$row]['total_phase_2'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=2&phase=2&hm=' . $id . '" target="_blank">&nbsp;</a></th>';
 	
-	if($data_matrix[$row]['total_phase_1'] > 0)
-	$htmlContent .= '<th colspan="'.round($ratio * $data_matrix[$row]['total_phase_1']).'" class="side_tick_height graph_green" title="'.$data_matrix[$row]['total_phase_1'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=2&phase=1&hm=' . $id . '" target="_blank">&nbsp;</a></th>';
+	if(ceil($ratio * $data_matrix[$row]['total_phase_1']) > 0)
+	$htmlContent .= '<th colspan="'.ceil($ratio * $data_matrix[$row]['total_phase_1']).'" class="side_tick_height graph_green" title="'.$data_matrix[$row]['total_phase_1'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=2&phase=1&hm=' . $id . '" target="_blank">&nbsp;</a></th>';
 	
-	if($data_matrix[$row]['total_phase_0'] > 0)
-	$htmlContent .= '<th colspan="'.round($ratio * $data_matrix[$row]['total_phase_0']).'" class="side_tick_height graph_blue" title="'.$data_matrix[$row]['total_phase_0'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=2&phase=0&hm=' . $id . '" target="_blank">&nbsp;</a></th>';
+	if(ceil($ratio * $data_matrix[$row]['total_phase_0']) > 0)
+	$htmlContent .= '<th colspan="'.ceil($ratio * $data_matrix[$row]['total_phase_0']).'" class="side_tick_height graph_blue" title="'.$data_matrix[$row]['total_phase_0'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=2&phase=0&hm=' . $id . '" target="_blank">&nbsp;</a></th>';
 	
-	if($data_matrix[$row]['total_phase_na'] > 0)
-	$htmlContent .= '<th colspan="'.round($ratio * $data_matrix[$row]['total_phase_na']).'" class="side_tick_height graph_gray" title="'.$data_matrix[$row]['total_phase_na'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=2&phase=na&hm=' . $id . '" target="_blank">&nbsp;</a></th>';
+	if(ceil($ratio * $data_matrix[$row]['total_phase_na']) > 0)
+	$htmlContent .= '<th colspan="'.ceil($ratio * $data_matrix[$row]['total_phase_na']).'" class="side_tick_height graph_gray" title="'.$data_matrix[$row]['total_phase_na'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=2&phase=na&hm=' . $id . '" target="_blank">&nbsp;</a></th>';
 	
-	$phase_space = (round($ratio * $data_matrix[$row]['total_phase_4']) + round($ratio * $data_matrix[$row]['total_phase_3']) + round($ratio * $data_matrix[$row]['total_phase_2']) + round($ratio * $data_matrix[$row]['total_phase_1']) + round($ratio * $data_matrix[$row]['total_phase_0']) + round($ratio * $data_matrix[$row]['total_phase_na']));
+	$phase_space = (ceil($ratio * $data_matrix[$row]['total_phase_4']) + ceil($ratio * $data_matrix[$row]['total_phase_3']) + ceil($ratio * $data_matrix[$row]['total_phase_2']) + ceil($ratio * $data_matrix[$row]['total_phase_1']) + ceil($ratio * $data_matrix[$row]['total_phase_0']) + ceil($ratio * $data_matrix[$row]['total_phase_na']));
 	$remain_span = $total_cols - $phase_space;
 	
 	if($remain_span > 0)
 	{
 		$aq_sp = 0;
-		while($aq_sp < $remain_span)
+		while($aq_sp < $phase_space)
 		$aq_sp = $aq_sp + $inner_columns;
 		
-		$extra_sp = $aq_sp - $remain_span;
+		$extra_sp = $aq_sp - $phase_space;
 		if($extra_sp > 0)
 		$htmlContent .= '<th colspan="'.($extra_sp).'" class="graph_right side_tick_height">&nbsp;</th>';
 	
