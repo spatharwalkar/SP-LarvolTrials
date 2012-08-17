@@ -822,7 +822,7 @@ function getWhereString($data, $alias, $pd_alias, $ar_alias)
 		throw $e;
 	}
 	return $wherestr;
-
+	
 
 }
 
@@ -909,7 +909,10 @@ function text_equal($field,$value)
 		$result=validateMask_PCRE($value);
 		if(!$result)
 		throw new Exception("Bad regex: $field = $value", 6);
-		return 'PREG_RLIKE("' . '%s' . '",' . '%f' . ')';
+		
+		// return 'PREG_RLIKE("' . '%s' . '",' . '%f' . ')';
+		// Put all regexes in unicode mode since there is no disadvantage!
+		return 'PREG_RLIKE("' . '%s' . 'u' . '",' . '%f' . ')';
 	}
 	//	else{
 	//		return '%f' . '="' . '%s' . '"';
