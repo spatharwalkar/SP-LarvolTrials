@@ -2031,6 +2031,8 @@ class TrialTracker
 		{
 			$startDate = '';
 			$endDate = '';
+			$phase = '';
+			
 			if($value["NCT/start_date"] != '' && $value["NCT/start_date"] !== NULL && $value["NCT/start_date"] != '0000-00-00')
 			{
 				$startDate =  date('m/Y', strtotime($value["NCT/start_date"]));
@@ -2041,9 +2043,18 @@ class TrialTracker
 				$endDate = date('m/Y', strtotime($value["inactive_date"]));
 			}
 			
+			if($value['NCT/phase'] == 'N/A' || $value['NCT/phase'] == '' || $value['NCT/phase'] === NULL)
+			{
+				$phase = 'N/A';
+			}
+			else
+			{
+				$phase = str_replace('Phase ', '', trim($value['NCT/phase']));
+			}
+			
 			$outputStr .= $value['NCT/nct_id'] . "\t" . $value['NCT/brief_title'] . "\t" . $value['NCT/enrollment'] . "\t" . $value['region'] . "\t"
 						. $value['NCT/overall_status'] . "\t" . $value['NCT/lead_sponsor'] . " " . $value['NCT/collaborator'] . "\t" . $value['NCT/condition']
-						. "\t" . $value['NCT/intervention_name'] . "\t" . $startDate . "\t" . $endDate . "\n";
+						. "\t" . $value['NCT/intervention_name'] . "\t" . $startDate . "\t" . $endDate . "\t". $phase . "\n";
 		}
 		
 		header("Pragma: public");
@@ -9019,6 +9030,10 @@ class TrialTracker
 				$larvolIds = str_replace("'", "", $larvolIds);
 				$larvolIds = explode(',', $larvolIds);
 				$larvolIds = array_filter($larvolIds);
+			}
+			else
+			{
+				$larvolIds = array();
 			}
 		}
 		
