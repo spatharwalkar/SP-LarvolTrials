@@ -475,14 +475,14 @@ $field_exists = array_search('source',$cols) ;
 if ( isset($field_exists) and $field_exists > 0  ) $opts['fdd']['source'] = array(
   'name'     => 'Source',
   'select'   => 'T',
-  'maxlen'   => 127,
+  'maxlen'   => 65535,
   'options'  => 'AVCPD', 'sort'     => false
 );
 if($viewmode=='YES')
 {$opts['fdd']['source_prev'] = array(
   'name'     => 'Prev Source',
   'select'   => 'T',
-  'maxlen'   => 127,
+  'maxlen'   => 65535,
   'options'  => 'AVCPD', 'sort'     => false
 );
 $opts['fdd']['source_lastchanged'] = array(
