@@ -17,7 +17,7 @@ global $logger;
 $days = 0;
 $last_id = 0;
 $id_field = 0;
-
+$current_country='';
 if(isset($_GET['days']))
 {
 	$days_to_fetch = (int)$_GET['days'];

@@ -544,7 +544,32 @@ $ignore_fields = array(
 						$fieldvalue = $td->nodeValue;
 						$fieldname = preg_replace('/\s+/', ' ', trim($fieldname));
 						$dbfieldname = get_mapping($fieldname);
-						set_field($study, $dbfieldname, $fieldvalue);
+						/** Filter out all non-English text from fields that usually contain them.  */
+						$dbx=trim($dbfieldname);
+						//fields that may contain non-English text.
+						$field_regex='/lay_title|full_title|product_name|product_code|product_pharm_form|imp_trade_name|condition|lay_condition|therapeutic_area/i';
+						preg_match_all($field_regex, $dbx, $matches);
+						if(count($matches[0]) >0 and isset($dbx) and !empty($dbx) )
+						{
+							global $current_country;
+							//countries that product only English text (we may add more to the list if we  find more countries that product only English text).
+							$english_countries='/GB|LI/i';
+							preg_match_all($english_countries, $current_country, $matches2);
+						
+							if(!isset($study[$dbx]) or empty($study[$dbx]))
+							{
+								set_field($study, $dbfieldname, $fieldvalue);
+							}
+							elseif(count($matches2[0]) >0)
+							{
+								unset($study[$dbx]);
+								set_field($study, $dbfieldname, $fieldvalue);
+							}
+						}
+						else
+						{
+							set_field($study, $dbfieldname, $fieldvalue);
+						}
 					}
 				}
 			}
@@ -583,6 +608,8 @@ $ignore_fields = array(
 			$url = "https://www.clinicaltrialsregister.eu/ctr-search/trial/" .
 			$eudract_number . "/" . $country_val ;
 			$Html = curl_start($url);
+			global $current_country;
+			$current_country=$country;
 			ProcessHtml($Html, $study);
 			echo ("Finished Processing: " . $study['eudract_id'][0] . ", Country: " . $country . "<br>");
 			unset($Html);
