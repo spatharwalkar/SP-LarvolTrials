@@ -1053,7 +1053,7 @@ function change_view()
 	var one_year = new Date("<?php print date('m/d/Y H:i:s', strtotime('-1 Year', $now)); ?>");
 	
 	var limit = document.getElementById('Last_HM').value;
-	var view_type = document.getElementById('view_type');
+	var dwcount = document.getElementById('dwcount');
 	var start_range = document.getElementById('startrange').value;
 	var end_range = document.getElementById('endrange').value;
 	var bk_start_range = document.getElementById('startrange').value;
@@ -1131,7 +1131,7 @@ function change_view()
 			
 			if(cell_link_val != '' && cell_link_val != null)
 			{
-				if(view_type.value == 'active')
+				if(dwcount.value == 'active')
 				{
 					document.getElementById("Cell_Link_"+i).href = cell_link_val+'&list=1&sr='+start_range+'&er='+end_range+'&hm='+report;
 					
@@ -1144,7 +1144,7 @@ function change_view()
 						document.getElementById("Popup_Count_ID_"+i).innerHTML = Cell_values_Arr[3];
 					}
 				}
-				else if(view_type.value == 'total')
+				else if(dwcount.value == 'total')
 				{
 					document.getElementById("Cell_Link_"+i).href = cell_link_val+'&list=2&sr='+start_range+'&er='+end_range+'&hm='+report;
 					
@@ -1157,7 +1157,7 @@ function change_view()
 						document.getElementById("Popup_Count_ID_"+i).innerHTML = Cell_values_Arr[4];
 					}
 				}
-				else if(view_type.value == 'indlead')
+				else if(dwcount.value == 'indlead')
 				{
 					document.getElementById("Cell_Link_"+i).href = cell_link_val+'&list=1&itype=0&sr='+start_range+'&er='+end_range+'&hm='+report;
 					
@@ -1186,7 +1186,7 @@ function change_view()
 				
 				if((count_cdate <= st_limit) && (count_cdate >= ed_limit)) //Compare Count Change Dates
 				{
-					if(view_type.value == 'indlead')	//Compare Industry Lead Sponsor values
+					if(dwcount.value == 'indlead')	//Compare Industry Lead Sponsor values
 					{
 						document.getElementById("Cell_Link_"+i).title = "Active Industry Lead Count Changed from: "+ Cell_values_Arr[5] +" On: "+ Cell_values_Arr[9];
 						document.getElementById("Cell_Link_"+i).style.color = "#FF0000";
@@ -1206,7 +1206,7 @@ function change_view()
 							document.getElementById("Count_CDate_"+i).style.display = "none";
 						}
 					}
-					if(view_type.value == 'total')	//Compare Total values
+					if(dwcount.value == 'total')	//Compare Total values
 					{
 						document.getElementById("Cell_Link_"+i).title = "Total Count Changed from: "+ Cell_values_Arr[4] +" On: "+ Cell_values_Arr[9];
 						document.getElementById("Cell_Link_"+i).style.color = "#FF0000";
@@ -1226,7 +1226,7 @@ function change_view()
 							document.getElementById("Count_CDate_"+i).style.display = "none";
 						}
 					}
-					if(view_type.value == 'active')	//Compare Industry Lead Sponsor values
+					if(dwcount.value == 'active')	//Compare Industry Lead Sponsor values
 					{
 						document.getElementById("Cell_Link_"+i).title = "Active Count Changed from: "+ Cell_values_Arr[3] +" On: "+ Cell_values_Arr[9];
 						document.getElementById("Cell_Link_"+i).style.color = "#FF0000";
@@ -1249,15 +1249,15 @@ function change_view()
 				}
 				else	//Make Count to normal state if there is no change
 				{
-					if(view_type.value == 'active')
+					if(dwcount.value == 'active')
 					{
 							document.getElementById("Cell_Link_"+i).title = "Active Trials";
 					}
-					else if(view_type.value == 'total')
+					else if(dwcount.value == 'total')
 					{
 						document.getElementById("Cell_Link_"+i).title = "Total Trials (Active + Inactive)";
 					}
-					else if(view_type.value == 'indlead')
+					else if(dwcount.value == 'indlead')
 					{
 						document.getElementById("Cell_Link_"+i).title = "Active Industry Lead Sponsor Trials";
 					}
@@ -1415,7 +1415,7 @@ function change_view()
 				var Status_Total_List_ele = document.getElementById("Status_Total_List_"+i);
 				if(Status_Total_List_ele != '' && Status_Total_List_ele != null)
 				{
-					if(ed_limit == one_month && view_type.value == 'total')
+					if(ed_limit == one_month && dwcount.value == 'total')
 					{
 						tooltip_flg = 1;
 						document.getElementById("Status_Total_List_"+i).style.display = "inline";
@@ -1429,7 +1429,7 @@ function change_view()
 				var Status_Indlead_List_ele = document.getElementById("Status_Indlead_List_"+i);
 				if(Status_Indlead_List_ele != '' && Status_Indlead_List_ele != null)
 				{
-					if(ed_limit == one_month && view_type.value == 'indlead')
+					if(ed_limit == one_month && dwcount.value == 'indlead')
 					{
 						tooltip_flg = 1;
 						document.getElementById("Status_Indlead_List_"+i).style.display = "inline";
@@ -1443,7 +1443,7 @@ function change_view()
 				var Status_Active_List_ele = document.getElementById("Status_Active_List_"+i);
 				if(Status_Active_List_ele != '' && Status_Active_List_ele != null)
 				{
-					if(ed_limit == one_month && view_type.value == 'active')
+					if(ed_limit == one_month && dwcount.value == 'active')
 					{
 						tooltip_flg = 1;
 						document.getElementById("Status_Active_List_"+i).style.display = "inline";
@@ -1744,7 +1744,7 @@ $htmlContent .= '<form action="master_heatmap.php" method="post">'
 				. '<table width="640px" border="0" cellspacing="0" cellpadding="0" class="controls" align="center">'
 				. '<tr><th>View mode</th><th>Range</th><th class="right">Actions</th></tr>'
 				. '<tr>'
-				. '<td class="bottom"><p style="margin-top:8px;margin-right:5px;"><select id="view_type" name="view_type" onchange="change_view()">'
+				. '<td class="bottom"><p style="margin-top:8px;margin-right:5px;"><select id="dwcount" name="dwcount" onchange="change_view()">'
 				. '<option value="indlead" selected="selected">Active industry trials</option>'
 				. '<option value="active">Active trials</option>'
 				. '<option value="total">All trials</option></select></p></td>'
@@ -1772,19 +1772,14 @@ $htmlContent .= '<input type="text" id="endrange"  name="er" value="1 month" rea
 				. '<br style="line-height:11px;"/>';
 				
 $htmlContent  .= '<div id="dropmenu" class="dropmenudiv" style="width: 310px;">'
-				.'<div style="height:150px; padding:6px;"><div class="downldbox"><div class="newtext">Download options</div>'
+				.'<div style="height:100px; padding:6px;"><div class="downldbox"><div class="newtext">Download options</div>'
 				. '<input type="hidden" name="id" id="id" value="' . $id . '" />'
 				. '<ul><li><label>Which format: </label></li>'
 				. '<li><select id="dwformat" name="dwformat" size="2" style="height:40px">'
 				. '<option value="exceldown" selected="selected">Excel</option>'
 				. '<option value="pdfdown">PDF</option>'
 				. '</select></li>'
-				. '<li><label>Counts display: </label></li>'
-				. '<li><select id="dwcount" name="dwcount" size="3" style="height:54px">'
-				. '<option value="indlead" selected="selected">Active industry trials</option>'
-				. '<option value="active">Active trials</option>'
-				. '<option value="total">All trials</option>'
-				. '</select></li></ul>'
+				. '</ul>'
 				. '<input type="submit" name="download" title="Download" value="Download file" style="margin-left:8px;"  />'
 				. '</div></div>'
 				.'</div><script type="text/javascript">cssdropdown.startchrome("chromemenu");</script></form>';
