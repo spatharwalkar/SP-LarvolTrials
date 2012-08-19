@@ -1558,6 +1558,21 @@ class TrialTracker
 					}
 				}
 			}
+			else if(!empty($uvalue['edited']) && ($uvalue['edited']['field'] == 'event_link'))
+			{
+				$objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($highlightChange);
+				if($eventLink != '' && $eventLink !== NULL)
+				{
+					if($uvalue['edited']['event_link'] != '' && $uvalue['edited']['event_link'] !== NULL)
+					{
+						$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip(substr('Previous value: ' . $uvalue['edited']['event_link'],0,255)); 
+					}
+					else
+					{
+						$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip('No Previous value'); 
+					}
+				}
+			}
 			else if($uvalue["new"] == 'y')
 			{
 				$objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($highlightChange);
@@ -7165,6 +7180,20 @@ class TrialTracker
 						$title = ' title="No Previous value" ';
 					}
 				} 
+				else if(!empty($value['edited']) && ($value['edited']['field'] == 'event_link')) 
+				{
+					$titleLinkColor = 'color:#FF0000;';
+					$attr = ' highlight'; 
+					
+					if($value['edited']['event_link'] != '' && $value['edited']['event_link'] !== NULL)
+					{
+						$title = ' title="Previous value: '. $value['edited']['event_link'] . '" '; 
+					}
+					else
+					{
+						$title = ' title="No Previous value" ';
+					}
+				}
 				else if($value['new'] == 'y') 
 				{
 					$titleLinkColor = 'color:#FF0000;';
@@ -14047,6 +14076,20 @@ class TrialTracker
 						$title = ' title="No Previous value" ';
 					}
 				} 
+				else if(!empty($value['edited']) && ($value['edited']['field'] == 'event_link')) 
+				{
+					$titleLinkColor = 'style="color:#FF0000;"';
+					$attr = ' highlight'; 
+					
+					if($value['edited']['event_link'] != '' && $value['edited']['event_link'] !== NULL)
+					{
+						$title = ' title="Previous value: '. $value['edited']['event_link'] . '" '; 
+					}
+					else
+					{
+						$title = ' title="No Previous value" ';
+					}
+				}
 				else if($value['new'] == 'y') 
 				{
 					$titleLinkColor = 'style="color:#FF0000;"';
