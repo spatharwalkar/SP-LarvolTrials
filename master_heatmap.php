@@ -2260,10 +2260,10 @@ function Download_reports()
 			$Rotation_Flg = 1;
 			$All_Column_Width = $RColumn_Width;
 		}
-		/*$pdf->setPageOrientation('p');
-		$Page_Width = 192;
-		$Rotation_Flg = 1;
-		$All_Column_Width = $RColumn_Width;*/
+		//$pdf->setPageOrientation('p');
+		//$Page_Width = 192;
+		//$Rotation_Flg = 1;
+		//$All_Column_Width = $RColumn_Width;
 		if($Rotation_Flg == 0)	//// Using this we dont have to use different code for specifying area column width
 		{
 			foreach($columns as $col => $val)
@@ -2508,6 +2508,21 @@ function Download_reports()
 					}
 				}
 				
+				//// This part added to add padding on both side of area names as smaller area name links get misplaced in PDF
+				if($Rotation_Flg == 1)
+				{
+					while($pdf->getNumLines($val, $Area_Row_height) == 1)
+					{
+						if($pdf->getNumLines('.'.$val.'.', $Area_Row_height) == 1)
+							$val='.'.$val.'.';
+						else
+							break;
+					}
+					$val = str_replace('.','<font style="color:#FFFFFF">.</font>',$val);
+					$val = '<font style="color:#000000">'.$val.'</font>';
+				}
+				////////End of part added for padding
+				
 				$pdfContent .= '<a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. $link_part . '" target="_blank" title="'. $caltTitle .'">'.$val.'</a></div>';
 				
 				if($Rotation_Flg == 1)
@@ -2573,6 +2588,21 @@ function Download_reports()
 				{
 					$extra_space = ($Max_areaNumLines - 1) * $Line_Height;
 				}
+				
+				//// This part added to add padding on both side of area names as smaller area name links get misplaced in PDF
+				if($Rotation_Flg == 1)
+				{
+					while($pdf->getNumLines($count_val, $Area_Row_height) == 1)
+					{
+						if($pdf->getNumLines('.'.$count_val.'.', $Area_Row_height) == 1)
+							$count_val='.'.$count_val.'.';
+						else
+							break;
+					}
+					$count_val = str_replace('.','<font style="color:#FFFFFF">.</font>',$count_val);
+					$count_val = '<font style="color:#000000">'.$count_val.'</font>';
+				}
+				////////End of part added for padding
 				
 				$pdfContent .= '<br style="line-height:'.((($extra_space* 72 / 96)/2)).'px;" />';
 				$pdfContent .= '<a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds). $link_part . '" target="_blank" title="'. $title .'">'.$count_val.'</a></div>';
@@ -2754,6 +2784,21 @@ function Download_reports()
 							}
 						}
 						
+						//// This part added to add padding on both side of area names as smaller area name links get misplaced in PDF
+						if($Rotation_Flg == 1)
+						{
+							while($pdf->getNumLines($val, $Area_Row_height) == 1)
+							{
+								if($pdf->getNumLines('.'.$val.'.', $Area_Row_height) == 1)
+									$val='.'.$val.'.';
+								else
+									break;
+							}
+							$val = str_replace('.','<font style="color:#FFFFFF">.</font>',$val);
+							$val = '<font style="color:#000000">'.$val.'</font>';
+						}
+						////////End of part added for padding
+						
 						$pdfContent .= '<a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. $link_part . '" target="_blank" title="'. $caltTitle .'">'.$val.'</a></div>';
 						
 						if($Rotation_Flg == 1)
@@ -2818,6 +2863,21 @@ function Download_reports()
 						{
 							$extra_space = ($Max_areaNumLines - 1) * $Line_Height;
 						}
+						
+						//// This part added to add padding on both side of area names as smaller area name links get misplaced in PDF
+						if($Rotation_Flg == 1)
+						{
+							while($pdf->getNumLines($count_val, $Area_Row_height) == 1)
+							{
+								if($pdf->getNumLines('.'.$count_val.'.', $Area_Row_height) == 1)
+									$count_val='.'.$count_val.'.';
+								else
+									break;
+							}
+							$count_val = str_replace('.','<font style="color:#FFFFFF">.</font>',$count_val);
+							$count_val = '<font style="color:#000000">'.$count_val.'</font>';
+						}
+						////////End of part added for padding
 				
 						$pdfContent .= '<br style="line-height:'.((($extra_space* 72 / 96)/2)).'px;" />';
 						$pdfContent .= '<a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds). $link_part . '" target="_blank" title="'. $title .'">'.$count_val.'</a></div>';
