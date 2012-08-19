@@ -645,6 +645,7 @@ class TrialTracker
 					 $objPHPExcel->getActiveSheet()->getCell('A' . $i)->getHyperlink()->setTooltip('New record'); 
 				}
 				
+
 				
 				//brief title	
 				$dvalue["NCT/brief_title"] = fix_special_chars($dvalue["NCT/brief_title"]);
@@ -3451,6 +3452,7 @@ class TrialTracker
 			$hoverText = date('M Y', strtotime($startDate)) . ' - ' . date('M Y', strtotime($endDate));
 		}
 		
+
 		$upmTitle = $hoverText . ' ' . $upmTitle;
 		
 		if(($startDate == '' || $startDate === NULL || $startDate == '0000-00-00') && ($endDate == '' || $endDate === NULL || $endDate == '0000-00-00')) 
@@ -6448,6 +6450,7 @@ class TrialTracker
 				$outputStr .= ' href="' . $href . '"  target="_blank">';			 
 				if(isset($dvalue['NCT/acronym']) && $dvalue['NCT/acronym'] != '') 
 				{
+					$dvalue['NCT/brief_title'] = $this->replaceRedundantAcroynm($dvalue['NCT/acronym'], $dvalue['NCT/brief_title']);
 					$outputStr .= htmlformat($dvalue['NCT/acronym']) . ' ' . htmlformat($dvalue['NCT/brief_title']);
 				} 
 				else 
@@ -6498,6 +6501,7 @@ class TrialTracker
 					{
 						$attr = ' highlight" title="' . $dvalue['edited']['NCT/enrollment'];
 					}
+
 					else if($dvalue['new'] == 'y') 
 					{
 						$attr = '" title="New record';
@@ -9002,6 +9006,7 @@ class TrialTracker
 				}
 				
 				if(!in_array($rvalue['NCT/overall_status'],$this->activeStatusValues) && !in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues)) 
+
 				{ 
 					$log 	= 'WARN: A new value "' . $rvalue['NCT/overall_status'] 
 					. '" (not listed in the existing rule), was encountered for field overall_status.';
@@ -11868,6 +11873,7 @@ class TrialTracker
 								
 					if(isset($dvalue['NCT/acronym']) && $dvalue['NCT/acronym'] != '') 
 					{
+						$dvalue['NCT/brief_title'] = $this->replaceRedundantAcroynm($dvalue['NCT/acronym'], $dvalue['NCT/brief_title']);
 						$outputStr .= htmlformat($dvalue['NCT/acronym']) . ' ' . htmlformat($dvalue['NCT/brief_title']);
 					} 
 					else 
@@ -14257,6 +14263,14 @@ class TrialTracker
 		return $row;
 	}
 	
+	function replaceRedundantAcroynm($Acroynm, $briefTitle)
+	{
+		$pattern = '/^\(*"*' . $Acroynm . '*\)*:*/';
+		$replacement = '';
+		$result = preg_replace($pattern, $replacement, $briefTitle);
+		
+		return $result;
+	}
 }
 
 function htmlformat($str)
