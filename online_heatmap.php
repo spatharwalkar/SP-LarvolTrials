@@ -1596,6 +1596,7 @@ function display_tooltip(type, id)
 			tooltip_ele.style.display = "none";
 			tooltip_ele.style.zIndex = "0";
 			tooltip_ele.style.left = "";
+			tooltip_ele.style.top = "";
 		}
 	}
 }
