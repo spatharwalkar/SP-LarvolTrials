@@ -42,9 +42,6 @@ if(isset($_POST['btnDownload']))
 	
 	switch($_POST['wFormat'])
 	{
-		case 'xml': 
-			$fileType = 'xml';
-			break;
 		case 'excel': 
 			$fileType = 'excel';
 			break;
