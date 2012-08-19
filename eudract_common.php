@@ -502,6 +502,8 @@ $ignore_fields = array(
 		// Field Names are in <td class="cellGrey">
 		// Field Values are in <td class="cellLighterGrey">
 		// Create Dom
+		global $current_country;
+		$country_fields=array();
 		$doc = new DOMDocument();
 		for ($done = false, $tries = 0; $done == false && $tries < 5; $tries++) {
 			echo('.');
@@ -513,10 +515,13 @@ $ignore_fields = array(
 		// Look For FieldName and FieldValue values
 		// Need to go tru doc and store FieldName and FieldValues Respectively
 		$divs = $doc->getElementsByTagName('div');
-		foreach ($divs as $div) {
+		foreach ($divs as $div) 
+		{
 			$found = false;
-			foreach ($div->attributes as $divattr) {
-				if ($divattr->name == 'class' && $divattr->value == 'detail') {
+			foreach ($div->attributes as $divattr) 
+			{
+				if ($divattr->name == 'class' && $divattr->value == 'detail') 
+				{
 					$found = true;
 					break;
 				}
@@ -526,21 +531,29 @@ $ignore_fields = array(
 				continue;
 			}
 			$tds = $div->getElementsByTagName('td');
-			foreach ($tds as $td) {
-				foreach ($td->attributes as $attr) {
-					if ($attr->name == 'class' && $attr->value == 'cellGrey') {
+			global $current_country;
+			foreach ($tds as $td) 
+			{
+				foreach ($td->attributes as $attr) 
+				{
+					if ($attr->name == 'class' && $attr->value == 'cellGrey') 
+					{
 						$fieldname = $td->nodeValue;
 					}
-					if ($attr->name == 'class' && $attr->value == 'cellLighterGrey') {
+					if ($attr->name == 'class' && $attr->value == 'cellLighterGrey') 
+					{
 						$fieldvalue = $td->nodeValue;
 						$fieldname = preg_replace('/\s+/', ' ', trim($fieldname));
 						$dbfieldname = get_mapping($fieldname);
 						set_field($study, $dbfieldname, $fieldvalue);
+						$country_fields[$current_country][$dbfieldname]=1;
 					}
-					if ($attr->name == 'class' && $attr->value == 'second') {
+					if ($attr->name == 'class' && $attr->value == 'second') 
+					{
 						$fieldname = $td->nodeValue;
 					}
-					if ($attr->name == 'class' && $attr->value == 'third') {
+					if ($attr->name == 'class' && $attr->value == 'third') 
+					{
 						$fieldvalue = $td->nodeValue;
 						$fieldname = preg_replace('/\s+/', ' ', trim($fieldname));
 						$dbfieldname = get_mapping($fieldname);
@@ -552,18 +565,28 @@ $ignore_fields = array(
 						if(count($matches[0]) >0 and isset($dbx) and !empty($dbx) )
 						{
 							global $current_country;
-							//countries that product only English text (we may add more to the list if we  find more countries that product only English text).
+							//regex of countries that produce only English text(can add add more to the list if required).
 							$english_countries='/GB|LI/i';
 							preg_match_all($english_countries, $current_country, $matches2);
 						
-							if(!isset($study[$dbx]) or empty($study[$dbx]))
+							if(!isset($study[$dbx]) or empty($study[$dbx])) 
 							{
 								set_field($study, $dbfieldname, $fieldvalue);
+								$country_fields[$current_country][$dbfieldname]=1;
 							}
 							elseif(count($matches2[0]) >0)
 							{
-								unset($study[$dbx]);
+								if(!isset($country_fields[$current_country][$dbfieldname]) or $country_fields[$current_country][$dbfieldname]<>1) 
+								{
+									unset($study[$dbx]);
+								}
 								set_field($study, $dbfieldname, $fieldvalue);
+								$country_fields[$current_country][$dbfieldname]=1;
+							}
+							elseif(isset($country_fields[$current_country][$dbfieldname]) and $country_fields[$current_country][$dbfieldname]==1)
+							{
+								set_field($study, $dbfieldname, $fieldvalue);
+								$country_fields[$current_country][$dbfieldname]=1;
 							}
 						}
 						else
