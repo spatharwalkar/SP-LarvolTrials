@@ -9072,7 +9072,7 @@ class TrialTracker
 						. " dm.`intervention_name` AS manual_intervention_name, dm.`phase` AS manual_phase, "
 						. " dn.`brief_title` AS original_brief_title, dn.`acronym` AS original_acronym, dn.`lead_sponsor` AS original_lead_sponsor, "
 						. " dn.`collaborator` AS original_collaborator, dn.`condition` AS original_condition, dn.`overall_status` AS original_overall_status, "
-						. " dn.`end_date` AS original_end_date, dn.`enrollment` AS original_enrollment, "
+						. " dn.`end_date` AS original_end_date, dn.`enrollment` AS original_enrollment, pt.`sponsor_owned` AS sponsor_owned, "
 						. " dn.`enrollment_type` AS original_enrollment_type, dn.`intervention_name` AS original_intervention_name, dn.`phase` AS original_phase "
 						. " FROM `data_trials` dt ";
 						
@@ -9142,7 +9142,7 @@ class TrialTracker
 				{
 					$sphinxSearchFlag = true;
 				}
-				//echo '<br/>-->'.$sphinxSearchFlag;
+				
 				if($globalOptions['onlyUpdates'] == "yes")
 				{
 					//unsetting value for field acroynm if it has a previous value and no current value
@@ -9173,6 +9173,87 @@ class TrialTracker
 					{
 						if($sphinxSearchFlag == true)
 						{
+							if($globalOptions['showTrialsSponsoredByProductOwner'] == "on")
+							{
+								if($result['sponsor_owned'])
+								{
+									$TrialsInfo[$ikey]['allTrials'][] = $result;
+									if($row['is_active'] == 1) 
+									{
+										$TrialsInfo[$ikey]['activeTrials'][] = $result;
+									}
+									else
+									{
+										$TrialsInfo[$ikey]['inactiveTrials'][] = $result;
+									}
+								}
+							}
+							else
+							{
+								$TrialsInfo[$ikey]['allTrials'][] = $result;
+								if($row['is_active'] == 1) 
+								{
+									$TrialsInfo[$ikey]['activeTrials'][] = $result;
+								}
+								else
+								{
+									$TrialsInfo[$ikey]['inactiveTrials'][] = $result;
+								}
+							}
+						}
+						else
+						{
+							if($globalOptions['showTrialsSponsoredByProductOwner'] == "on")
+							{
+								if($result['sponsor_owned'])
+								{
+									$TrialsInfo[$ikey]['allTrials'][] = $result;
+									if($row['is_active'] == 1) 
+									{
+										$TrialsInfo[$ikey]['activeTrials'][] = $result;
+									}
+									else
+									{
+										$TrialsInfo[$ikey]['inactiveTrials'][] = $result;
+									}
+								}
+							}
+							else
+							{
+								$TrialsInfo[$ikey]['allTrials'][] = $result;
+								if($row['is_active'] == 1) 
+								{
+									$TrialsInfo[$ikey]['activeTrials'][] = $result;
+								}
+								else
+								{
+									$TrialsInfo[$ikey]['inactiveTrials'][] = $result;
+								}
+							}
+						}
+					}
+				}
+				else
+				{
+					if($sphinxSearchFlag == true)
+					{	
+						if($globalOptions['showTrialsSponsoredByProductOwner'] == "on")
+						{
+							if($result['sponsor_owned'] == 1)
+							{
+								$TrialsInfo[$ikey]['allTrials'][] = $result;
+								if($row['is_active'] == 1) 
+								{
+									$TrialsInfo[$ikey]['activeTrials'][] = $result;
+								}
+								else
+								{
+									$TrialsInfo[$ikey]['inactiveTrials'][] = $result;
+								}
+							}
+						}
+						else
+						{
 							$TrialsInfo[$ikey]['allTrials'][] = $result;
 							if($row['is_active'] == 1) 
 							{
@@ -9184,19 +9265,34 @@ class TrialTracker
 							}
 						}
 					}
-				}
-				else
-				{
-					if($sphinxSearchFlag == true)
+					else
 					{
-						$TrialsInfo[$ikey]['allTrials'][] = $result;
-						if($row['is_active'] == 1) 
+						if($globalOptions['showTrialsSponsoredByProductOwner'] == "on")
 						{
-							$TrialsInfo[$ikey]['activeTrials'][] = $result;
+							if($result['sponsor_owned'] == 1)
+							{
+								$TrialsInfo[$ikey]['allTrials'][] = $result;
+								if($row['is_active'] == 1) 
+								{
+									$TrialsInfo[$ikey]['activeTrials'][] = $result;
+								}
+								else
+								{
+									$TrialsInfo[$ikey]['inactiveTrials'][] = $result;
+								}
+							}
 						}
 						else
 						{
-							$TrialsInfo[$ikey]['inactiveTrials'][] = $result;
+							$TrialsInfo[$ikey]['allTrials'][] = $result;
+							if($row['is_active'] == 1) 
+							{
+								$TrialsInfo[$ikey]['activeTrials'][] = $result;
+							}
+							else
+							{
+								$TrialsInfo[$ikey]['inactiveTrials'][] = $result;
+							}
 						}
 					}
 				}
@@ -9263,6 +9359,7 @@ class TrialTracker
 		$result['source'] 				= $dataRow['source']; 
 		$result['source_id'] 			= $dataRow['source_id']; 
 		$result['section'] 				= $ikey; 
+		$result['sponsor_owned'] 			= $dataRow['sponsor_owned'];
 		
 		$result['manual_larvol_id'] 		= $dataRow['manual_larvol_id']; 
 		$result['manual_brief_title'] 		= $dataRow['manual_brief_title']; 
@@ -11076,6 +11173,10 @@ class TrialTracker
 			echo '<br/><input type="checkbox" id="ipwnd" name="ipwnd" ' . (($globalOptions['includeProductsWNoData'] == "on") ? 'checked="checked"' : '') . ' />'
 				. '<label style="font-size:x-small;" for="ipwnd">Include ' . $title . ' with no data</label>';
 		}
+		
+		echo '<br/><input type="checkbox" id="tspo" name="tspo" ' . (($globalOptions['showTrialsSponsoredByProductOwner'] == "on") ? 'checked="checked"' : '') . ' />'
+				. '<label style="font-size:x-small;" for="tspo">Show only trials sponsored by product owner</label>';
+				
 		echo  '</tr><tr>'
 				. '<td class="bottom">&nbsp;</td><td class="bottom">&nbsp;</td>'
 				. '<td class="bottom">&nbsp;</td><td class="bottom">&nbsp;</td>'
@@ -11267,6 +11368,11 @@ class TrialTracker
 		if(isset($globalOptions['sphinxSearch']) && $globalOptions['sphinxSearch'] != '')
 		{
 			$url .= '&amp;ss=' . $globalOptions['sphinxSearch'];
+		}
+		
+		if(isset($globalOptions['showTrialsSponsoredByProductOwner']) && $globalOptions['showTrialsSponsoredByProductOwner'] == "on")
+		{
+			$url .= '&amp;tspo=on';
 		}
 		
 		$stages = 2;

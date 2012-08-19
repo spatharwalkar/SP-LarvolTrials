@@ -107,10 +107,16 @@ $globalOptions['endrange'] = "1 month";
 $globalOptions['sphinxSearch'] = '';
 
 $globalOptions['includeProductsWNoData'] = "off";
+$globalOptions['showTrialsSponsoredByProductOwner'] = "off";
 
 if(isset($_REQUEST['ipwnd']) && $_REQUEST['ipwnd'] == "on")
 {	
 	$globalOptions['includeProductsWNoData'] = "on";
+}
+
+if(isset($_REQUEST['tspo']) && $_REQUEST['tspo'] == "on")
+{
+	$globalOptions['showTrialsSponsoredByProductOwner'] = "on";
 }
 
 if(isset($_REQUEST['minenroll']) && isset($_REQUEST['maxenroll']))
