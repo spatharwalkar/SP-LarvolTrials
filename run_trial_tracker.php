@@ -179,6 +179,7 @@ class TrialTracker
 		$manualChange =  array('font' => array('color' => array('rgb' => 'FF7700')));
 		
 		$objPHPExcel->getActiveSheet()->getStyle('A1:BB1')->applyFromArray($styleThinBlueBorderOutline);
+		$objPHPExcel->getActiveSheet()->getStyle('A1:BB1')->getFont()->setSize(10);
 			
 		$objPHPExcel->getProperties()->setCreator("The Larvol Group")
 										 ->setLastModifiedBy("TLG")
@@ -634,6 +635,7 @@ class TrialTracker
 				/////END PART - MERGE CELLS AND APPLY BORDER AS - FOR LOOP WAS NOT WORKING SET INDIVIDUALLY
 				
 				$objPHPExcel->getActiveSheet()->getStyle('"A' . $i . ':BB' . $i.'"')->applyFromArray($styleThinBlueBorderOutline);
+				$objPHPExcel->getActiveSheet()->getStyle('"A' . $i . ':BB' . $i.'"')->getFont()->setSize(10);
 				$objPHPExcel->getActiveSheet()->getStyle('A1:BA1')->applyFromArray($styleThinBlueBorderOutline);
 				
 				//nct id	
@@ -1365,6 +1367,7 @@ class TrialTracker
 						
 						//rendering diamonds in case of end date is prior to the current year
 						$objPHPExcel->getActiveSheet()->getStyle('"L' . $i . ':BB' . $i . '"')->applyFromArray($styleThinBlueBorderOutline);
+						$objPHPExcel->getActiveSheet()->getStyle('"L' . $i . ':BB' . $i.'"')->getFont()->setSize(10);
 						if($mvalue['result_link'] != '' && $mvalue['result_link'] !== NULL)
 						{
 							if((!empty($mvalue['edited']) && $mvalue['edited']['field'] == 'result_link') || ($mvalue['new'] == 'y')) 
@@ -1501,12 +1504,14 @@ class TrialTracker
 		$objPHPExcel->getActiveSheet()->setCellValue('AV1' , '+');
 		$objPHPExcel->getActiveSheet()->mergeCells('AV1:AX1');
 		$objPHPExcel->getActiveSheet()->getStyle('A1:AX1')->applyFromArray($styleThinBlueBorderOutline);
+		$objPHPExcel->getActiveSheet()->getStyle('A1:AX1')->getFont()->setSize(10);
 
 		$i = 2;
 		/* Display - Unmatched UPM's */
 		foreach ($unMatchedUpms as $ukey => $uvalue)
 		{
 			$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':AX' . $i . '')->applyFromArray($styleThinBlueBorderOutline);
+			$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':AX' . $i . '')->getFont()->setSize(10);
 			
 			$eventLink = urlencode(trim($uvalue['event_link']));
 			$resultLink = urlencode(trim($uvalue['result_link']));
