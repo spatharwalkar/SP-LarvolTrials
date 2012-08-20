@@ -7628,12 +7628,27 @@ class TrialTracker
 					{
 						if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve display name from heatmap report
 						{
-							$res = mysql_query("SELECT `display_name`, `type_id` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $avalue . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'area'");
+							$res = mysql_query("SELECT `display_name`, `type_id`, `category` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $avalue . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'area'");
 							if(mysql_num_rows($res) > 0)
 							{
 								while($row = mysql_fetch_assoc($res))
 								{
-									$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : "Area ".$row['type_id'];	//if area has no display name, just display id
+									$sectionHeader = '';
+									if($row['category'] != '' && $row['category'] !== NULL)
+									{
+										$sectionHeader = $row['category'];
+									}
+									
+									if($row['display_name'] != '' && $row['display_name'] !== NULL)
+									{
+										$sectionHeader .= ' ' . $row['display_name'];
+									}
+									else
+									{
+										$sectionHeader .= ' Area ' . $row['type_id'];
+									}
+									
+									$TrialsInfo[$akey]['sectionHeader'] = $sectionHeader;
 									
 									$Ids[$akey]['product'] = '';
 									$Ids[$akey]['area'] = $row['type_id'];
@@ -7649,14 +7664,29 @@ class TrialTracker
 						}
 						else	//if no hm field
 						{
-							$res = mysql_query("SELECT `display_name`, `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
+							$res = mysql_query("SELECT `display_name`, `name`, `id`, `category` FROM `areas` WHERE id = '" . $avalue . "' ");
 							if(mysql_num_rows($res) > 0)
 							{
 								while($row = mysql_fetch_assoc($res))
 								{
 									if($row['id'] != '' && $row['id'] != NULL && $avalue != '' && $avalue != NULL)
 									{
-										$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : "Area ".$row['id'];
+										$sectionHeader = '';
+										if($row['category'] != '' && $row['category'] !== NULL)
+										{
+											$sectionHeader = $row['category'];
+										}
+										
+										if($row['display_name'] != '' && $row['display_name'] !== NULL)
+										{
+											$sectionHeader .= ' ' . $row['display_name'];
+										}
+										else
+										{
+											$sectionHeader .= ' Area ' . $row['id'];
+										}
+										
+										$TrialsInfo[$akey]['sectionHeader'] = $sectionHeader;
 										$Ids[$akey]['area'] = $row['id'];
 									}
 									else /// For case we dont have product names, area names
@@ -7700,13 +7730,28 @@ class TrialTracker
 					{
 						if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve display name from heatmap report
 						{
-							$res = mysql_query("SELECT `display_name`, `type_id` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $avalue . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'area'");
+							$res = mysql_query("SELECT `display_name`, `type_id`, `category` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $avalue . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'area'");
 							
 							if(mysql_num_rows($res) > 0)
 							{
 								while($row = mysql_fetch_assoc($res))
 								{
-									$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : "Area ".$row['type_id'];	//if area has no display name, just display id
+									$sectionHeader = '';
+									if($row['category'] != '' && $row['category'] !== NULL)
+									{
+										$sectionHeader = $row['category'];
+									}
+									
+									if($row['display_name'] != '' && $row['display_name'] !== NULL)
+									{
+										$sectionHeader .= ' ' . $row['display_name'];
+									}
+									else
+									{
+										$sectionHeader .= ' Area ' . $row['type_id'];
+									}
+									
+									$TrialsInfo[$akey]['sectionHeader'] = $sectionHeader;	//if area has no display name, just display id
 									
 									$Ids[$akey]['product'] = $productId;
 									$Ids[$akey]['area'] = $row['type_id'];
@@ -7722,13 +7767,27 @@ class TrialTracker
 						}
 						else	//if no hm field
 						{
-							$res = mysql_query("SELECT `display_name`, `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
+							$res = mysql_query("SELECT `display_name`, `name`, `id`, `category` FROM `areas` WHERE id = '" . $avalue . "' ");
 
 							if(mysql_num_rows($res) > 0)
 							{
 								while($row = mysql_fetch_assoc($res))
 								{
-									$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : "Area ".$row['id'];
+									$sectionHeader = '';
+									if($row['category'] != '' && $row['category'] !== NULL)
+									{
+										$sectionHeader = $row['category'];
+									}
+									
+									if($row['display_name'] != '' && $row['display_name'] !== NULL)
+									{
+										$sectionHeader .= ' ' . $row['display_name'];
+									}
+									else
+									{
+										$sectionHeader .= ' Area ' . $row['id'];
+									}
+									$TrialsInfo[$akey]['sectionHeader'] = $sectionHeader;
 									
 									$Ids[$akey]['product'] = $productId;
 									$Ids[$akey]['area'] = $row['id'];
@@ -11748,9 +11807,9 @@ class TrialTracker
 								. '<div class="rowcollapse"><a style="color:' . $titleLinkColor . '"  ';
 					
 					if($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed')
-					{
+					{	
 						if(isset($dvalue['manual_is_sourceless']))
-						{
+						{	
 							$outputStr .= ' href="' . $dvalue['source'] . '" ';
 						}
 						else if(isset($dvalue['source_id']) && strpos($dvalue['source_id'], 'NCT') === FALSE)
@@ -11758,11 +11817,11 @@ class TrialTracker
 							$outputStr .= ' href="https://www.clinicaltrialsregister.eu/ctr-search/search?query=' . $dvalue['NCT/nct_id'] . '" ';
 						}
 						else if(isset($dvalue['source_id']) && strpos($dvalue['source_id'], 'NCT') !== FALSE)
-						{
+						{	
 							$outputStr .= ' href="http://clinicaltrials.gov/ct2/show/' . padnct($dvalue['NCT/nct_id']) . '" ';
 						}
 						else 
-						{ 
+						{ 	
 							$outputStr .= ' href="javascript:void(0);" ';
 						}
 					}
