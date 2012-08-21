@@ -144,7 +144,7 @@ class TrialTracker
 		ob_start();
 		$objPHPExcel = new PHPExcel();
 		$objPHPExcel->setActiveSheetIndex(0);
-		$objPHPExcel->getActiveSheet()->getStyle('B1:K2000')->getAlignment()->setWrapText(true);
+		$objPHPExcel->getActiveSheet()->getStyle('B1:K2000')->getAlignment()->setWrapText(false);
 		$objPHPExcel->getActiveSheet()->setCellValue('A1' , 'NCT ID');
 		$objPHPExcel->getActiveSheet()->setCellValue('B1' , 'Title');
 		$objPHPExcel->getActiveSheet()->setCellValue('C1' , 'N');
@@ -1474,7 +1474,7 @@ class TrialTracker
 			$objPHPExcel->getActiveSheet()->getColumnDimension($avalue)->setWidth(2);
 		}
 		
-		$objPHPExcel->getActiveSheet()->getStyle('A1:K900')->getAlignment()->setWrapText(true);
+		$objPHPExcel->getActiveSheet()->getStyle('A1:K900')->getAlignment()->setWrapText(false);
 		$objPHPExcel->getActiveSheet()->getStyle('A1:K900')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_TOP);
 		$objPHPExcel->getActiveSheet()->setCellValue('A1' , 'NCT ID');
 		$objPHPExcel->getActiveSheet()->setTitle('Larvol Trials');
@@ -1484,7 +1484,7 @@ class TrialTracker
 		$objPHPExcel->setActiveSheetIndex(1);
 		$objPHPExcel->getActiveSheet()->setTitle('UPMs');
 
-		$objPHPExcel->getActiveSheet()->getStyle('B1:F200')->getAlignment()->setWrapText(true);
+		$objPHPExcel->getActiveSheet()->getStyle('B1:F200')->getAlignment()->setWrapText(false);
 		$objPHPExcel->getActiveSheet()->setCellValue('A1' , 'ID');
 		$objPHPExcel->getActiveSheet()->setCellValue('B1' , 'Product');
 		$objPHPExcel->getActiveSheet()->setCellValue('C1' , 'Event Description');
@@ -6215,12 +6215,6 @@ class TrialTracker
 		
 		foreach($Values['Trials'] as $tkey => $tvalue)
 		{
-			$hoverText = '';
-			if(isset($tvalue['dStatusComment']) && $tvalue['dStatusComment'] != '')
-			{
-				$hoverText = ' title="' . $tvalue['dStatusComment'] . '" ';
-			}
-			
 			//Rendering Upms
 			if($globalOptions['includeProductsWNoData'] == "off")
 			{	
@@ -6234,7 +6228,7 @@ class TrialTracker
 									. ' onclick="sh(this,\'rowstacked\');" style="width:' . $col_width . 'px;">&nbsp;</td></tr>'
 									. $this->displayUnMatchedUpms_TCPDF($loggedIn, 'rowstacked', $tvalue['naUpms'])
 									. '<tr class="trialtitles" style=" width:'.$col_width.'px; page-break-inside:avoid;" nobr="true">'
-									. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles" ' . $hoverText .  ' style="width:' . $col_width . 'px;">' 
+									. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles" style="width:' . $col_width . 'px;">' 
 									. $tvalue['sectionHeader'] . '</td></tr>';
 					}
 					else
@@ -6250,7 +6244,7 @@ class TrialTracker
 						$outputStr .= '<tr class="trialtitles" style=" width:' . $col_width . 'px; page-break-inside:avoid;" nobr="true">'
 									. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
 									. ' style="background: url(\'images/' . $image . '.png\') no-repeat left center;"'
-									. ' onclick="sh(this,\'' . $naUpmIndex . '\');" style="width:' . $col_width . 'px;" ' . $hoverText .  '>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+									. ' onclick="sh(this,\'' . $naUpmIndex . '\');" style="width:' . $col_width . 'px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
 									. $tvalue['sectionHeader'] . '</td></tr>';
 						$outputStr .= $this->displayUnMatchedUpms_TCPDF($loggedIn, $naUpmIndex, $tvalue['naUpms']);
 					}
@@ -6265,7 +6259,7 @@ class TrialTracker
 									. ' onclick="sh(this,\'rowstacked\');" style="width:' . $col_width . 'px;">&nbsp;</td></tr>'
 									. $this->displayUnMatchedUpms_TCPDF($loggedIn, 'rowstacked', $tvalue['naUpms'])
 									. '<tr class="trialtitles" style=" width:'.$col_width.'px; page-break-inside:avoid;" nobr="true">'
-									. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles" ' . $hoverText .  ' style="width:' . $col_width . 'px;">' 
+									. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles" style="width:' . $col_width . 'px;">' 
 									. $tvalue['sectionHeader'] . '</td></tr>';
 					}
 					else
@@ -6281,7 +6275,7 @@ class TrialTracker
 						$outputStr .= '<tr class="trialtitles" style=" width:' . $col_width . 'px; page-break-inside:avoid;" nobr="true">'
 									. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
 									. ' style="background: url(\'images/' . $image . '.png\') no-repeat left center;"'
-									. ' onclick="sh(this,\'' . $naUpmIndex . '\');" style="width:' . $col_width . 'px;" ' . $hoverText .  '>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+									. ' onclick="sh(this,\'' . $naUpmIndex . '\');" style="width:' . $col_width . 'px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
 									. $tvalue['sectionHeader'] . '</td></tr>';
 						$outputStr .= $this->displayUnMatchedUpms_TCPDF($loggedIn, $naUpmIndex, $tvalue['naUpms']);
 					}
@@ -6289,7 +6283,7 @@ class TrialTracker
 				else if(empty($tvalue['naUpms']) && !empty($tvalue[$type]))
 				{
 					$outputStr .= '<tr style=" width:'.$col_width.'px; page-break-inside:avoid;" nobr="true"><td colspan="' 
-							. getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles" ' . $hoverText .  ' style="width:' . $col_width . 'px;">'
+							. getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles" style="width:' . $col_width . 'px;">'
 							. $tvalue['sectionHeader'] . '</td></tr>';
 				}
 			}
@@ -6305,7 +6299,7 @@ class TrialTracker
 									. ' onclick="sh(this,\'rowstacked\');" style="width:' . $col_width . 'px;">&nbsp;</td></tr>'
 									. $this->displayUnMatchedUpms_TCPDF($loggedIn, 'rowstacked', $tvalue['naUpms'])
 									. '<tr class="trialtitles" style=" width:'.$col_width.'px; page-break-inside:avoid;" nobr="true">'
-									. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles" ' . $hoverText .  ' style="width:' . $col_width . 'px;">' 
+									. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles" style="width:' . $col_width . 'px;">' 
 									. $tvalue['sectionHeader'] . '</td></tr>';
 					}
 					else
@@ -6321,7 +6315,7 @@ class TrialTracker
 						$outputStr .= '<tr class="trialtitles" style=" width:' . $col_width . 'px; page-break-inside:avoid;" nobr="true">'
 									. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
 									. ' style="background: url(\'images/' . $image . '.png\') no-repeat left center;"'
-									. ' onclick="sh(this,\'' . $naUpmIndex . '\');" style="width:' . $col_width . 'px;" ' . $hoverText .  '>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+									. ' onclick="sh(this,\'' . $naUpmIndex . '\');" style="width:' . $col_width . 'px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
 									. $tvalue['sectionHeader'] . '</td></tr>';
 						$outputStr .= $this->displayUnMatchedUpms_TCPDF($loggedIn, $naUpmIndex, $tvalue['naUpms']);
 					}
@@ -6329,7 +6323,7 @@ class TrialTracker
 				else
 				{
 					$outputStr .= '<tr style=" width:'.$col_width.'px; page-break-inside:avoid;" nobr="true"><td colspan="' 
-								. getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles" ' . $hoverText .  ' style="width:' . $col_width . 'px;">'
+								. getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles" style="width:' . $col_width . 'px;">'
 								. $tvalue['sectionHeader'] . '</td></tr>';
 				}
 			}
@@ -7523,7 +7517,7 @@ class TrialTracker
 						{
 							if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
 							{
-								$TrialsInfo[$pkey]['sectionHeader'] = "<span style='color:gray'>" . $row['name'] . "</span>";
+								$TrialsInfo[$pkey]['sectionHeader'] = $row['name'];
 								$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($row['discontinuation_status_comment']);
 								$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
 							}
@@ -7582,7 +7576,7 @@ class TrialTracker
 							{
 								if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
 								{
-									$TrialsInfo[$pkey]['sectionHeader'] = "<span style='color:gray'>" . $row['name'] . "</span>";
+									$TrialsInfo[$pkey]['sectionHeader'] = $row['name'];
 									$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($row['discontinuation_status_comment']);
 									$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
 								}
@@ -7849,7 +7843,7 @@ class TrialTracker
 							{
 								if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
 								{
-									$TrialsInfo[$pkey]['sectionHeader'] = "<span style='color:gray'>" . $row['name'] . "</span>";
+									$TrialsInfo[$pkey]['sectionHeader'] = $row['name'];
 									$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($row['discontinuation_status_comment']);
 									$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
 								}
@@ -7934,7 +7928,7 @@ class TrialTracker
 				
 				if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
 				{
-					$TrialsInfo[0]['sectionHeader'] = "<span style='color:gray'>" . $row['name'] . "</span>";
+					$TrialsInfo[0]['sectionHeader'] = $row['name'];
 					$TrialsInfo[0]['dStatusComment'] = strip_tags($row['discontinuation_status_comment']);
 					$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
 				}
@@ -10788,12 +10782,6 @@ class TrialTracker
 			
 			foreach($Values['Trials'] as $tkey => $tvalue)
 			{
-				$hoverText = '';
-				if(isset($tvalue['dStatusComment']) && $tvalue['dStatusComment'] != '')
-				{
-					$hoverText = ' title="' . $tvalue['dStatusComment'] . '" ';
-				}
-				
 				if($globalOptions['includeProductsWNoData'] == "off")
 				{
 					if(isset($tvalue['naUpms']) && !empty($tvalue['naUpms']))
@@ -10806,7 +10794,7 @@ class TrialTracker
 										. ' onclick="sh(this,\'rowstacked\');">&nbsp;</td></tr>'
 										. $this->displayUnMatchedUpms($loggedIn, 'rowstacked', $tvalue['naUpms'])
 										. '<tr class="trialtitles">'
-										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles" ' . $hoverText .  '>' 
+										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles">' 
 										. $tvalue['sectionHeader'] . '</td></tr>';
 						}
 						else
@@ -10822,7 +10810,7 @@ class TrialTracker
 							$outputStr .= '<tr class="trialtitles">'
 										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
 										. ' style="background: url(\'images/' . $image . '.png\') no-repeat left center;"'
-										. ' onclick="sh(this,\'' . $naUpmIndex . '\');" ' . $hoverText .  '>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+										. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
 										. $tvalue['sectionHeader'] . '</td></tr>';
 							$outputStr .= $this->displayUnMatchedUpms($loggedIn, $naUpmIndex, $tvalue['naUpms']);
 						}
@@ -10846,7 +10834,7 @@ class TrialTracker
 										. ' onclick="sh(this,\'rowstacked\');">&nbsp;</td></tr>'
 										. $this->displayUnMatchedUpms($loggedIn, 'rowstacked', $tvalue['naUpms'])
 										. '<tr class="trialtitles">'
-										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles" ' . $hoverText .  '>' 
+										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles">' 
 										. $tvalue['sectionHeader'] . '</td></tr>';
 						}
 						else
@@ -10862,14 +10850,14 @@ class TrialTracker
 							$outputStr .= '<tr class="trialtitles">'
 										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
 										. ' style="background: url(\'images/' . $image . '.png\') no-repeat left center;"'
-										. ' onclick="sh(this,\'' . $naUpmIndex . '\');" ' . $hoverText .  '>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+										. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
 										. $tvalue['sectionHeader'] . '</td></tr>';
 							$outputStr .= $this->displayUnMatchedUpms($loggedIn, $naUpmIndex, $tvalue['naUpms']);
 						}
 					}
 					else
 					{
-						$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles" ' . $hoverText .  '>'
+						$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">'
 									. $tvalue['sectionHeader'] . '</td></tr>';
 					}
 					//No trial found row not shown when show only changed items is selected
@@ -11545,11 +11533,6 @@ class TrialTracker
 		
 		foreach($Values['Trials'] as $vkey => $vvalue)
 		{
-			$hoverText = '';
-			if(isset($vvalue['dStatusComment']) && $vvalue['dStatusComment'] != '')
-			{
-				$hoverText = ' title="' . $vvalue['dStatusComment'] . '" ';
-			}
 			if(($counter >= $start && $counter < $end))
 			{
 				if($globalOptions['includeProductsWNoData'] == "off")
@@ -11565,7 +11548,7 @@ class TrialTracker
 										. ' onclick="sh(this,\'rowstacked\');">&nbsp;</td></tr>'
 										. $this->displayUnMatchedUpms($loggedIn, 'rowstacked', $vvalue['naUpms'])
 										. '<tr class="trialtitles">'
-										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles" ' . $hoverText .  '>' 
+										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles">' 
 										. $vvalue['sectionHeader'] . '</td></tr>';
 						}
 						else
@@ -11581,7 +11564,7 @@ class TrialTracker
 							$outputStr .= '<tr class="trialtitles">'
 										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
 										. ' style="background: url(\'images/' . $image . '.png\') no-repeat left center;"'
-										. ' onclick="sh(this,\'' . $naUpmIndex . '\');" ' . $hoverText .  '>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+										. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
 										. $vvalue['sectionHeader'] . '</td></tr>';
 							$outputStr .= $this->displayUnMatchedUpms($loggedIn, $naUpmIndex, $vvalue['naUpms']);
 						}
@@ -11596,7 +11579,7 @@ class TrialTracker
 										. ' onclick="sh(this,\'rowstacked\');">&nbsp;</td></tr>'
 										. $this->displayUnMatchedUpms($loggedIn, 'rowstacked', $vvalue['naUpms'])
 										. '<tr class="trialtitles">'
-										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles" ' . $hoverText .  '>' 
+										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles">' 
 										. $vvalue['sectionHeader'] . '</td></tr>';
 						}
 						else
@@ -11612,14 +11595,14 @@ class TrialTracker
 							$outputStr .= '<tr class="trialtitles">'
 										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
 										. ' style="background: url(\'images/' . $image . '.png\') no-repeat left center;"'
-										. ' onclick="sh(this,\'' . $naUpmIndex . '\');" ' . $hoverText .  '>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+										. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
 										. $vvalue['sectionHeader'] . '</td></tr>';
 							$outputStr .= $this->displayUnMatchedUpms($loggedIn, $naUpmIndex, $vvalue['naUpms']);
 						}
 					}
 					else if(empty($vvalue['naUpms']) && !empty($vvalue[$globalOptions['type']]))
 					{
-						$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles" ' . $hoverText .  '>'
+						$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">'
 									. $vvalue['sectionHeader'] . '</td></tr>';
 					}
 				}
@@ -11636,7 +11619,7 @@ class TrialTracker
 										. ' onclick="sh(this,\'rowstacked\');">&nbsp;</td></tr>'
 										. $this->displayUnMatchedUpms($loggedIn, 'rowstacked', $vvalue['naUpms'])
 										. '<tr class="trialtitles">'
-										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles" ' . $hoverText .  '>' 
+										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles">' 
 										. $vvalue['sectionHeader'] . '</td></tr>';
 						}
 						else
@@ -11652,14 +11635,14 @@ class TrialTracker
 							$outputStr .= '<tr class="trialtitles">'
 										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
 										. ' style="background: url(\'images/' . $image . '.png\') no-repeat left center;"'
-										. ' onclick="sh(this,\'' . $naUpmIndex . '\');" ' . $hoverText .  '>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+										. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
 										. $vvalue['sectionHeader'] . '</td></tr>';
 							$outputStr .= $this->displayUnMatchedUpms($loggedIn, $naUpmIndex, $vvalue['naUpms']);
 						}
 					}
 					else
 					{
-						$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles" ' . $hoverText .  '>'
+						$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">'
 									. $vvalue['sectionHeader'] . '</td></tr>';
 					}
 				}
@@ -11670,11 +11653,6 @@ class TrialTracker
 			
 			foreach($vvalue[$globalOptions['type']] as $dkey => $dvalue)
 			{	
-				$hoverText = '';
-				if(isset($vvalue['dStatusComment']) && $vvalue['dStatusComment'] != '')
-				{
-					$hoverText = ' title="' . $vvalue['dStatusComment'] . '" ';
-				}
 				if($counter >= $start && $counter < $end)
 				{	
 					if(($displayFlag == false) && isset($globalOptions['page']) && $globalOptions['page'] > 1)
@@ -11693,7 +11671,7 @@ class TrialTracker
 											. ' onclick="sh(this,\'rowstacked\');">&nbsp;</td></tr>'
 											. $this->displayUnMatchedUpms($loggedIn, 'rowstacked', $naUpms)
 											. '<tr class="trialtitles">'
-											. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles" ' . $hoverText .  '>' 
+											. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles">' 
 											. $sectionHeader . '</td></tr>';
 							}
 							else
@@ -11709,7 +11687,7 @@ class TrialTracker
 								$outputStr .= '<tr class="trialtitles">'
 											. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
 											. ' style="background: url(\'images/' . $image . '.png\') no-repeat left center;"'
-											. ' onclick="sh(this,\'' . $naUpmIndex . '\');" ' . $hoverText .  '>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+											. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
 											. $sectionHeader . '</td></tr>';
 								$outputStr .= $this->displayUnMatchedUpms($loggedIn, $naUpmIndex, $naUpms);
 							}
@@ -11717,7 +11695,7 @@ class TrialTracker
 						else
 						{
 							$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  
-										. '" class="sectiontitles" ' . $hoverText .  '>' . $sectionHeader . '</td></tr>';
+										. '" class="sectiontitles">' . $sectionHeader . '</td></tr>';
 						}
 						
 						$displayFlag = true;
@@ -12488,11 +12466,6 @@ class TrialTracker
 		{
 			for($index = $finalkey+1; $index <= $vkey; $index++)
 			{
-				$hoverText = '';
-				if(isset($Values['Trials'][$index]['dStatusComment']) && $Values['Trials'][$index]['dStatusComment'] != '')
-				{
-					$hoverText = ' title="' . $Values['Trials'][$index]['dStatusComment'] . '" ';
-				}
 				if($globalOptions['includeProductsWNoData'] == "off")
 				{
 					if(isset($Values['Trials'][$index]['naUpms']) && !empty($Values['Trials'][$index]['naUpms']))
@@ -12505,7 +12478,7 @@ class TrialTracker
 										. ' onclick="sh(this,\'rowstacked\');">&nbsp;</td></tr>'
 										. $this->displayUnMatchedUpms($loggedIn, 'rowstacked', $Values['Trials'][$index]['naUpms'])
 										. '<tr class="trialtitles">'
-										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles" ' . $hoverText .  '>' 
+										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles">' 
 										. $Values['Trials'][$index]['sectionHeader'] . '</td></tr>';
 						}
 						else
@@ -12521,7 +12494,7 @@ class TrialTracker
 							$outputStr .= '<tr class="trialtitles">'
 										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
 										. ' style="background: url(\'images/' . $image . '.png\') no-repeat left center;"'
-										. ' onclick="sh(this,\'' . $naUpmIndex . '\');" ' . $hoverText .  '>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+										. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
 										. $Values['Trials'][$index]['sectionHeader'] . '</td></tr>';
 							$outputStr .= $this->displayUnMatchedUpms($loggedIn, $naUpmIndex, $Values['Trials'][$index]['naUpms']);
 						}
@@ -12544,7 +12517,7 @@ class TrialTracker
 										. ' onclick="sh(this,\'rowstacked\');">&nbsp;</td></tr>'
 										. $this->displayUnMatchedUpms($loggedIn, 'rowstacked', $Values['Trials'][$index]['naUpms'])
 										. '<tr class="trialtitles">'
-										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles" ' . $hoverText .  '>' 
+										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles">' 
 										. $Values['Trials'][$index]['sectionHeader'] . '</td></tr>';
 						}
 						else
@@ -12560,14 +12533,14 @@ class TrialTracker
 							$outputStr .= '<tr class="trialtitles">'
 										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
 										. ' style="background: url(\'images/' . $image . '.png\') no-repeat left center;"'
-										. ' onclick="sh(this,\'' . $naUpmIndex . '\');" ' . $hoverText .  '>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+										. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
 										. $Values['Trials'][$index]['sectionHeader'] . '</td></tr>';
 							$outputStr .= $this->displayUnMatchedUpms($loggedIn, $naUpmIndex, $Values['Trials'][$index]['naUpms']);
 						}
 					}
 					else
 					{
-						$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles" ' . $hoverText .  '>'
+						$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">'
 									. $Values['Trials'][$index]['sectionHeader'] . '</td></tr>';
 					}
 					if($globalOptions['onlyUpdates'] == "no")
