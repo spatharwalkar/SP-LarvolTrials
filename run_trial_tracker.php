@@ -630,7 +630,7 @@ class TrialTracker
 				
 					//set default height which contains upm's as these rows does not support auto height cause Merged cells 
 					//+ wrap text + autofit row height = not working
-					$objPHPExcel->getActiveSheet()->getRowDimension($i)->setRowHeight(36);
+					$objPHPExcel->getActiveSheet()->getRowDimension($i)->setRowHeight(15);
 				}
 				/////END PART - MERGE CELLS AND APPLY BORDER AS - FOR LOOP WAS NOT WORKING SET INDIVIDUALLY
 				
@@ -1416,7 +1416,7 @@ class TrialTracker
 						$this->upmGnattChartforExcel($stMonth, $stYear, $edMonth, $edYear, $currentYear, $secondYear, $thirdYear, $mvalue['start_date'], 
 						$mvalue['end_date'], $mvalue['event_link'], $upmTitle, $objPHPExcel, $i, 'M');
 						
-						$objPHPExcel->getActiveSheet()->getRowDimension($i)->setRowHeight(36);
+						$objPHPExcel->getActiveSheet()->getRowDimension($i)->setRowHeight(15);
 						$i++;	
 					}
 				}
