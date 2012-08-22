@@ -9259,72 +9259,12 @@ class TrialTracker
 								}
 							}
 						}
-						else
-						{
-							if($globalOptions['showTrialsSponsoredByProductOwner'] == "on")
-							{
-								if($result['sponsor_owned'])
-								{
-									$TrialsInfo[$ikey]['allTrials'][] = $result;
-									if($row['is_active'] == 1) 
-									{
-										$TrialsInfo[$ikey]['activeTrials'][] = $result;
-									}
-									else
-									{
-										$TrialsInfo[$ikey]['inactiveTrials'][] = $result;
-									}
-								}
-							}
-							else
-							{
-								$TrialsInfo[$ikey]['allTrials'][] = $result;
-								if($row['is_active'] == 1) 
-								{
-									$TrialsInfo[$ikey]['activeTrials'][] = $result;
-								}
-								else
-								{
-									$TrialsInfo[$ikey]['inactiveTrials'][] = $result;
-								}
-							}
-						}
 					}
 				}
 				else
 				{
 					if($sphinxSearchFlag == true)
 					{	
-						if($globalOptions['showTrialsSponsoredByProductOwner'] == "on")
-						{
-							if($result['sponsor_owned'] == 1)
-							{
-								$TrialsInfo[$ikey]['allTrials'][] = $result;
-								if($row['is_active'] == 1) 
-								{
-									$TrialsInfo[$ikey]['activeTrials'][] = $result;
-								}
-								else
-								{
-									$TrialsInfo[$ikey]['inactiveTrials'][] = $result;
-								}
-							}
-						}
-						else
-						{
-							$TrialsInfo[$ikey]['allTrials'][] = $result;
-							if($row['is_active'] == 1) 
-							{
-								$TrialsInfo[$ikey]['activeTrials'][] = $result;
-							}
-							else
-							{
-								$TrialsInfo[$ikey]['inactiveTrials'][] = $result;
-							}
-						}
-					}
-					else
-					{
 						if($globalOptions['showTrialsSponsoredByProductOwner'] == "on")
 						{
 							if($result['sponsor_owned'] == 1)
