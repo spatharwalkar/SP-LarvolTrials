@@ -384,6 +384,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					else
 					{
 							/**** Mark sponsor owned trials *****/
+/*
 							$pos = stripos($value['lead_sponsor'], c);
 							$pos1 = stripos($value['collaborator'], trim($value['source']));
 							
@@ -392,10 +393,15 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 								$sponsor_owned=1;
 							
 							}
+*/
+							$pos1 = stripos($value['lead_sponsor'], trim($value['source']));
+							if( $pos1 !== false ) 
+							{
+								$sponsor_owned=1;
+							}
 							else
 							{
 								$sponsor_owned=0;
-							
 							}
 							/*******************************/
 					
