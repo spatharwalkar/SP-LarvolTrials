@@ -306,10 +306,12 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					$logger->fatal($log);
 					$query = 'update update_status_fullhistory set 
 					er_message="' . $log . '" where update_id= "'. $up_id .'" limit 1' ; 
-					mysql_query($query);
-					mysql_query('ROLLBACK');
+					//mysql_query($query);
+					//mysql_query('ROLLBACK');
 					echo $log;
-					return false;
+					// Error in mysql query / invalid searchdata.  Anyway, let us not stop indexing, just ignore this particular trial and continue.
+					continue;
+					//return false;
 				}
 				
 				$nctidz=array(); // search result
@@ -381,33 +383,46 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					}
 					else
 					{
+							/**** Mark sponsor owned trials *****/
+							$pos = stripos($value['lead_sponsor'], c);
+							$pos1 = stripos($value['collaborator'], trim($value['source']));
+							
+							if( $pos !== false || $pos1 !== false ) 
+							{
+								$sponsor_owned=1;
+							
+							}
+							else
+							{
+								$sponsor_owned=0;
+							
+							}
+							/*******************************/
 					
 						if(trial_indexed($larvol_id,$cat,$cid)) // check if the trial+product/trial+area index already exists
 						{
+							$query='UPDATE `'. $table .'`
+									SET `sponsor_owned` = ' . $sponsor_owned .'
+									WHERE `'. $field .'` = "' . $cid . '" AND  `trial` = "' . $larvol_id .'"';
+							$res = mysql_query($query);
+							if($res === false)
+							{
+								$log = 'Bad SQL query pre-indexing trial***. Query : ' . $query . '<br> MySql Error:'.mysql_error();
+								mysql_query('ROLLBACK');
+								$query = 'update update_status_fullhistory set 
+								er_message="' . $log . '" where update_id= "'. $up_id .'" limit 1' ; 
+								mysql_query($query);
+								$logger->fatal($log);
+								echo $log;
+								return false;
+							}
 							echo '<br>Larvol ID:'.$larvol_id . ' is already indexed. <br>';
 						}
 						else
 						{
 							echo '<br>'. date("Y-m-d H:i:s", strtotime('now')) . ' - Indexing Larvol ID:'.$larvol_id . '<br>';
 							
-							/**** Mark sponsor owned trials *****/
 							
-							$pos = stripos($value['lead_sponsor'], trim($value['source']));
-							$pos1 = stripos($value['collaborator'], trim($value['source']));
-							
-							if( $pos !== false || $pos1 !== false ) 
-							{
-							
-								$sponsor_owned=1;
-							
-							}
-							else
-							{
-							
-								$sponsor_owned=0;
-							
-							}
-							/*******************************/
 							
 							$query='INSERT INTO `'. $table .'` (`'. $field .'`, `trial`, `sponsor_owned`) VALUES ("' . $cid . '", "' . $larvol_id .'" , "' . $sponsor_owned .'") ';
 							$res = mysql_query($query);
