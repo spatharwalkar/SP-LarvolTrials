@@ -425,14 +425,14 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 						else
 						{
 							echo '<br>'. date("Y-m-d H:i:s", strtotime('now')) . ' - Indexing Larvol ID:'.$larvol_id . '<br>';
-							
+							$sp1="";$sp2='"';
 							if($cat=='products')
 							{
-								$sp1="`sponsor_owned`";
-								$sp2=$sponsor_owned;
+								$sp1=", `sponsor_owned`";
+								$sp2='" , "' . $sponsor_owned .'"';
 							}
 							
-							$query='INSERT INTO `'. $table .'` (`'. $field .'`, `trial`,' . $sp1 . ' ) VALUES ("' . $cid . '", "' . $larvol_id .'" , "' . $sp2 .'") ';
+							$query='INSERT INTO `'. $table .'` (`'. $field .'`, `trial`' . $sp1 . ' ) VALUES ("' . $cid . '", "' . $larvol_id .$sp2 .') ';
 							$res = mysql_query($query);
 							if($res === false)
 							{
