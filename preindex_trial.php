@@ -30,7 +30,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 	}
 
 	global $logger,$now,$db;
-	
+	$cmpny=$cat=='products' ? ', `company`' : '';
 	$scraper_run=( isset($sourceid) and !is_null($sourceid) and !empty($sourceid) );
 	$DTnow = date('Y-m-d H:i:s',$now);
 	if(!isset($i)) $i=0;
@@ -39,12 +39,13 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 		$productz=array();
 		if(is_null($productID))
 		{
-			$query = 'SELECT `id`,`name`,`searchdata` from '. $cat .' where searchdata IS NOT NULL and  `searchdata` <>"" ';
+			
+			$query = 'SELECT `id`,`name`,`searchdata`' . $cmpny . ' from '. $cat .' where searchdata IS NOT NULL and  `searchdata` <>"" ';
 			$ttype=$cat=='products' ? 'PRODUCT1' : 'AREA1';
 		}
 		else 
 		{
-			$query = 'SELECT `id`,`name`,`searchdata` from '. $cat .' where `searchdata` IS NOT NULL and  `searchdata` <>"" and `id`="' . $productID .'"' ;
+			$query = 'SELECT `id`,`name`,`searchdata`' . $cmpny . ' from '. $cat .' where `searchdata` IS NOT NULL and  `searchdata` <>"" and `id`="' . $productID .'"' ;
 			$ttype=$cat=='products' ? 'PRODUCT2' : 'AREA2';
 		}
 		
@@ -79,11 +80,10 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 	{
 		foreach ($productz as $key=>$value)
 		{
+			$company_name=$cat == 'products' ? explode( ',', $value['company'] ) : '';
 			if(!isset($value['id']) or empty($value['id'])) break;
 			$cid=$value['id'];
 			$searchdata = $value['searchdata'];
-
-			
 			$pid=$value['id'];
 			$prid=getmypid();
 			if(!is_null($productz) and $pid>=$startid)	
@@ -384,28 +384,26 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					else
 					{
 							/**** Mark sponsor owned trials *****/
-/*
-							$pos = stripos($value['lead_sponsor'], c);
-							$pos1 = stripos($value['collaborator'], trim($value['source']));
 							
-							if( $pos !== false || $pos1 !== false ) 
+							if(is_array($company_name) and !empty($company_name[0]))
 							{
-								$sponsor_owned=1;
-							
-							}
-*/
-							$pos1 = stripos($value['lead_sponsor'], trim($value['source']));
-							if( $pos1 !== false ) 
-							{
-								$sponsor_owned=1;
-							}
-							else
-							{
-								$sponsor_owned=0;
+								foreach($company_name as $cmp)
+								{
+									pr($cmp);
+									$pos1 = stripos($value['lead_sponsor'], trim($cmp));
+									if( $pos1 !== false ) 
+									{
+										$sponsor_owned=1;
+									}
+									else
+									{
+										$sponsor_owned=0;
+									}
+								}
 							}
 							/*******************************/
 					
-						if(trial_indexed($larvol_id,$cat,$cid)) // check if the trial+product/trial+area index already exists
+						if(trial_indexed($larvol_id,$cat,$cid) and $cat=='products') // check if the trial+product/trial+area index already exists
 						{
 							$query='UPDATE `'. $table .'`
 									SET `sponsor_owned` = ' . $sponsor_owned .'
@@ -428,9 +426,13 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 						{
 							echo '<br>'. date("Y-m-d H:i:s", strtotime('now')) . ' - Indexing Larvol ID:'.$larvol_id . '<br>';
 							
+							if($cat=='products')
+							{
+								$sp1="`sponsor_owned`";
+								$sp2=$sponsor_owned;
+							}
 							
-							
-							$query='INSERT INTO `'. $table .'` (`'. $field .'`, `trial`, `sponsor_owned`) VALUES ("' . $cid . '", "' . $larvol_id .'" , "' . $sponsor_owned .'") ';
+							$query='INSERT INTO `'. $table .'` (`'. $field .'`, `trial`,' . $sp1 . ' ) VALUES ("' . $cid . '", "' . $larvol_id .'" , "' . $sp2 .'") ';
 							$res = mysql_query($query);
 							if($res === false)
 							{
