@@ -408,12 +408,27 @@ $(document).ready(function(){
 
 				// update data_nct data (change larvol id)
 				$query = '
-			UPDATE data_nct 
-			set larvol_id="'  . $hint['larvol_id'] . '"
-			WHERE `larvol_id` ="' .  $lid .'" limit 1
-			';
+				UPDATE data_nct 
+				set larvol_id="'  . $hint['larvol_id'] . '"
+				WHERE `larvol_id` ="' .  $lid .'" limit 1
+				';
 				$res1 		= mysql_query($query) ;
 				//	pr($query);
+
+				if($res1===false)
+				{
+					$log = 'Bad SQL query. Query=' . $query;
+					$logger->fatal($log);
+					echo $log;
+					return $log;
+				}
+				
+				$query = '
+				UPDATE data_manual 
+				set larvol_id="'  . $hint['larvol_id'] . '"
+				WHERE `larvol_id` ="' .  $lid .'" limit 1
+				';
+				$res1 		= mysql_query($query) ;
 
 				if($res1===false)
 				{
@@ -425,9 +440,9 @@ $(document).ready(function(){
 				//delete the sourceless trial from data trial as it is no longer needed
 
 				$query = '
-			DELETE FROM `data_trials` 
-			where larvol_id="' .  $lid .'" limit 1
-			';
+				DELETE FROM `data_trials` 
+				where larvol_id="' .  $lid .'" limit 1
+				';
 				$res1 		= mysql_query($query) ;
 				if($res1===false)
 				{
@@ -472,12 +487,27 @@ $(document).ready(function(){
 
 				// update data_eudract data (change larvol id)
 				$query = '
-			UPDATE data_eudract 
-			set larvol_id="'  . $hint['larvol_id'] . '" 
-			WHERE `larvol_id` ="' .  $lid .'" limit 1
-			';
+				UPDATE data_eudract 
+				set larvol_id="'  . $hint['larvol_id'] . '" 
+				WHERE `larvol_id` ="' .  $lid .'" limit 1
+				';
 				$res1 		= mysql_query($query) ;
 				//	pr($query);
+
+				if($res1===false)
+				{
+					$log = 'Bad SQL query. Query=' . $query;
+					$logger->fatal($log);
+					echo $log;
+					return $log;
+				}
+				
+				$query = '
+				UPDATE data_manual 
+				set larvol_id="'  . $hint['larvol_id'] . '" 
+				WHERE `larvol_id` ="' .  $lid .'" limit 1
+				';
+				$res1 		= mysql_query($query) ;
 
 				if($res1===false)
 				{
@@ -489,9 +519,9 @@ $(document).ready(function(){
 				//delete the trial from data trial as it is no longer needed
 
 				$query = '
-			DELETE FROM `data_trials` 
-			where larvol_id="' .  $lid .'" limit 1
-			';
+				DELETE FROM `data_trials` 
+				where larvol_id="' .  $lid .'" limit 1
+				';
 				$res1 		= mysql_query($query) ;
 				if($res1===false)
 				{
