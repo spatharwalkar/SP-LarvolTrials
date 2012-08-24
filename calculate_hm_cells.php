@@ -586,20 +586,6 @@ function add_data($arid,$prid,$cnt_total,$cnt_active,$cnt_active_indlead,$bomb,$
 {
 /*********/
 global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_total;
-if(isset($rgx_changed) and $rgx_changed=='yes')
-{
-	$query='delete from rpt_masterhm_cells  where
-		`area`="'.$arid.'" and `product`="'.$prid.'"';
-	if(!$res = mysql_query($query))
-	{
-		$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-		global $logger;
-		$logger->error($log);
-		echo $log;
-		return false;
-	}
-	pr($query);
-}
 
 	$query='SELECT `area`,`product`
 			from rpt_masterhm_cells
@@ -646,17 +632,16 @@ if(isset($rgx_changed) and $rgx_changed=='yes')
 		
 		//if there is a difference in counts, then update the _prev fields
 		$aa='';$bb='';$cc='';$dd='';
-		if($count_active_old<>$cnt_active) $aa='`count_active_prev` = "'. $count_active_old .'",';
-		if($count_total_old<>$cnt_total) $bb='`count_total_prev` = "'. $count_total_old .'",';
-		if($cnt_indlead_old<>$cnt_active_indlead) $cc='`count_active_indlead_prev` = "'. $cnt_indlead_old .'",';
-		if($highest_phase_old<>$max_phase) $dd='`highest_phase_prev` = "'. $highest_phase_old .'",';
-		
 		if(isset($rgx_changed) and $rgx_changed=='yes')
 		{
-			$aa='`count_active_prev` = null,';
-			$bb='`count_total_prev` = null,';
-			$cc='`count_active_indlead_prev` = null,';
-			$dd='`highest_phase_prev` = null,';
+			$aa='';
+		}
+		else
+		{
+			if($count_active_old<>$cnt_active) $aa='`count_active_prev` = "'. $count_active_old .'",';
+			if($count_total_old<>$cnt_total) $bb='`count_total_prev` = "'. $count_total_old .'",';
+			if($cnt_indlead_old<>$cnt_active_indlead) $cc='`count_active_indlead_prev` = "'. $cnt_indlead_old .'",';
+			if($highest_phase_old<>$max_phase) $dd='`highest_phase_prev` = "'. $highest_phase_old .'",';
 		}
 		
 		if( empty($aa) && empty($bb) && empty($cc) && empty($dd))
