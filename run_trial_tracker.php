@@ -9130,8 +9130,10 @@ class TrialTracker
 						. " dm.`intervention_name` AS manual_intervention_name, dm.`phase` AS manual_phase, "
 						. " dn.`brief_title` AS original_brief_title, dn.`acronym` AS original_acronym, dn.`lead_sponsor` AS original_lead_sponsor, "
 						. " dn.`collaborator` AS original_collaborator, dn.`condition` AS original_condition, dn.`overall_status` AS original_overall_status, "
-						. " dn.`end_date` AS original_end_date, dn.`enrollment` AS original_enrollment, pt.`sponsor_owned` AS sponsor_owned, "
-						. " dn.`enrollment_type` AS original_enrollment_type, dn.`intervention_name` AS original_intervention_name, dn.`phase` AS original_phase "
+						. " dn.`end_date` AS original_end_date, dn.`enrollment` AS original_enrollment,";
+					if($ivalue['product'] != '')
+					$query .=" pt.`sponsor_owned` AS sponsor_owned, ";
+					$query .= " dn.`enrollment_type` AS original_enrollment_type, dn.`intervention_name` AS original_intervention_name, dn.`phase` AS original_phase "
 						. " FROM `data_trials` dt ";
 						
 				if(!isset($idlist) or empty($idlist))
