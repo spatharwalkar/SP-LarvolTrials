@@ -389,7 +389,6 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 							{
 								foreach($company_name as $cmp)
 								{
-									pr($cmp);
 									$pos1 = stripos($value['lead_sponsor'], trim($cmp));
 									if( $pos1 !== false ) 
 									{
@@ -403,24 +402,27 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 							}
 							/*******************************/
 					
-						if(trial_indexed($larvol_id,$cat,$cid) and $cat=='products') // check if the trial+product/trial+area index already exists
+						if(trial_indexed($larvol_id,$cat,$cid)) // check if the trial+product/trial+area index already exists
 						{
-							$query='UPDATE `'. $table .'`
-									SET `sponsor_owned` = ' . $sponsor_owned .'
-									WHERE `'. $field .'` = "' . $cid . '" AND  `trial` = "' . $larvol_id .'"';
-							$res = mysql_query($query);
-							if($res === false)
+							if($cat=='products')
 							{
-								$log = 'Bad SQL query pre-indexing trial***. Query : ' . $query . '<br> MySql Error:'.mysql_error();
-								mysql_query('ROLLBACK');
-								$query = 'update update_status_fullhistory set 
-								er_message="' . $log . '" where update_id= "'. $up_id .'" limit 1' ; 
-								mysql_query($query);
-								$logger->fatal($log);
-								echo $log;
-								return false;
+								$query='UPDATE `'. $table .'`
+										SET `sponsor_owned` = ' . $sponsor_owned .'
+										WHERE `'. $field .'` = "' . $cid . '" AND  `trial` = "' . $larvol_id .'"';
+								$res = mysql_query($query);
+								if($res === false)
+								{
+									$log = 'Bad SQL query pre-indexing trial***. Query : ' . $query . '<br> MySql Error:'.mysql_error();
+									mysql_query('ROLLBACK');
+									$query = 'update update_status_fullhistory set 
+									er_message="' . $log . '" where update_id= "'. $up_id .'" limit 1' ; 
+									mysql_query($query);
+									$logger->fatal($log);
+									echo $log;
+									return false;
+								}
+								echo '<br>Larvol ID:'.$larvol_id . ' is already indexed. <br>';
 							}
-							echo '<br>Larvol ID:'.$larvol_id . ' is already indexed. <br>';
 						}
 						else
 						{
