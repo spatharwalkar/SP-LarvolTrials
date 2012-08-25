@@ -665,6 +665,12 @@ foreach($rows as $row => $rval)
 	////// Color Graph - Bar Starts
 	
 	//// Code for Indlead
+	$Rounded = (($data_matrix[$row]['indlead_phase_4'] > 0 && round($ratio * $data_matrix[$row]['indlead_phase_4']) < 1) ? 1:round($ratio * $data_matrix[$row]['indlead_phase_4'])) + (($data_matrix[$row]['indlead_phase_3'] > 0 && round($ratio * $data_matrix[$row]['indlead_phase_3']) < 1) ? 1:round($ratio * $data_matrix[$row]['indlead_phase_3'])) + (($data_matrix[$row]['indlead_phase_2'] > 0 && round($ratio * $data_matrix[$row]['indlead_phase_2']) < 1) ? 1:round($ratio * $data_matrix[$row]['indlead_phase_2'])) + (($data_matrix[$row]['indlead_phase_1'] > 0 && round($ratio * $data_matrix[$row]['indlead_phase_1']) < 1) ? 1:round($ratio * $data_matrix[$row]['indlead_phase_1'])) + (($data_matrix[$row]['indlead_phase_0'] > 0 && round($ratio * $data_matrix[$row]['indlead_phase_0']) < 1) ? 1:round($ratio * $data_matrix[$row]['indlead_phase_0'])) + (($data_matrix[$row]['indlead_phase_na'] > 0 && round($ratio * $data_matrix[$row]['indlead_phase_na']) < 1) ? 1:round($ratio * $data_matrix[$row]['indlead_phase_na']));
+	$Actual = ($ratio * $data_matrix[$row]['indlead_phase_4']) + ($ratio * $data_matrix[$row]['indlead_phase_3']) + ($ratio * $data_matrix[$row]['indlead_phase_2']) + ($ratio * $data_matrix[$row]['indlead_phase_1']) + ($ratio * $data_matrix[$row]['indlead_phase_0'])+ ($ratio * $data_matrix[$row]['indlead_phase_na']);
+	$Err = floor($Rounded - $Actual);
+	
+	$Max_ValueKey = Max_ValueKey($data_matrix[$row]['indlead_phase_4'], $data_matrix[$row]['indlead_phase_3'], $data_matrix[$row]['indlead_phase_2'], $data_matrix[$row]['indlead_phase_1'], $data_matrix[$row]['indlead_phase_0'], $data_matrix[$row]['indlead_phase_na']);
+					
 	$htmlContent .= '<tr id="indlead_Graph_Row_'.$row.'"><th align="right" class="prod_col" id="ProdCol_'.$row.'"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&itype=0&hm=' . $id . '" target="_blank" style="text-decoration:underline;">'.$rval.$rowsCompanyName[$row].'</a></th><th class="graph_right last_tick_width">&nbsp;</th>';
 	
 	$total_cols = $inner_columns * $columns;
@@ -677,10 +683,16 @@ foreach($rows as $row => $rval)
 			$Mini_Bar_Width = round($ratio * $data_matrix[$row]['indlead_phase_4']);
 		else
 			$Mini_Bar_Width = 1;
+		
+		if($Max_ValueKey == 0 && $Mini_Bar_Width > 1)
+		$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+		
 		if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 			$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 		else
 			$Mini_Bar_Width = $Total_Bar_Width;
+		
+		
 		$phase_space =  $phase_space + $Mini_Bar_Width;					
 		$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height graph_red" title="'.$data_matrix[$row]['indlead_phase_4'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&itype=0&phase=4&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
 	}
@@ -691,10 +703,15 @@ foreach($rows as $row => $rval)
 			$Mini_Bar_Width = round($ratio * $data_matrix[$row]['indlead_phase_3']);
 		else
 			$Mini_Bar_Width = 1;
+		
+		if($Max_ValueKey == 1 && $Mini_Bar_Width > 1)
+		$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+		
 		if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 			$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 		else
 			$Mini_Bar_Width = $Total_Bar_Width;
+		
 		$phase_space =  $phase_space + $Mini_Bar_Width;					
 		$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height graph_orange" title="'.$data_matrix[$row]['indlead_phase_3'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&itype=0&phase=3&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
 	}
@@ -705,10 +722,15 @@ foreach($rows as $row => $rval)
 			$Mini_Bar_Width = round($ratio * $data_matrix[$row]['indlead_phase_2']);
 		else
 			$Mini_Bar_Width = 1;
+		
+		if($Max_ValueKey == 2 && $Mini_Bar_Width > 1)
+		$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+		
 		if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 			$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 		else
 			$Mini_Bar_Width = $Total_Bar_Width;
+		
 		$phase_space =  $phase_space + $Mini_Bar_Width;					
 		$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height graph_yellow" title="'.$data_matrix[$row]['indlead_phase_2'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&itype=0&phase=2&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
 	}
@@ -719,10 +741,15 @@ foreach($rows as $row => $rval)
 			$Mini_Bar_Width = round($ratio * $data_matrix[$row]['indlead_phase_1']);
 		else
 			$Mini_Bar_Width = 1;
+		
+		if($Max_ValueKey == 3 && $Mini_Bar_Width > 1)
+		$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+		
 		if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 			$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 		else
 			$Mini_Bar_Width = $Total_Bar_Width;
+		
 		$phase_space =  $phase_space + $Mini_Bar_Width;					
 		$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height graph_green" title="'.$data_matrix[$row]['indlead_phase_1'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&itype=0&phase=1&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
 	}
@@ -733,10 +760,15 @@ foreach($rows as $row => $rval)
 			$Mini_Bar_Width = round($ratio * $data_matrix[$row]['indlead_phase_0']);
 		else
 			$Mini_Bar_Width = 1;
+		
+		if($Max_ValueKey == 4 && $Mini_Bar_Width > 1)
+		$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+		
 		if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 			$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 		else
 			$Mini_Bar_Width = $Total_Bar_Width;
+		
 		$phase_space =  $phase_space + $Mini_Bar_Width;					
 		$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height graph_blue" title="'.$data_matrix[$row]['indlead_phase_0'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&itype=0&phase=0&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
 	}
@@ -747,10 +779,15 @@ foreach($rows as $row => $rval)
 			$Mini_Bar_Width = round($ratio * $data_matrix[$row]['indlead_phase_na']);
 		else
 			$Mini_Bar_Width = 1;
+		
+		if($Max_ValueKey == 5 && $Mini_Bar_Width > 1)
+		$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+		
 		if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 			$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 		else
 			$Mini_Bar_Width = $Total_Bar_Width;
+		
 		$phase_space =  $phase_space + $Mini_Bar_Width;					
 		$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height graph_gray" title="'.$data_matrix[$row]['indlead_phase_na'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&itype=0&phase=na&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
 	}
@@ -777,6 +814,12 @@ foreach($rows as $row => $rval)
 	$htmlContent .= '</tr>';
 	
 	//// Code for Active
+	
+	$Rounded = (($data_matrix[$row]['active_phase_4'] > 0 && round($ratio * $data_matrix[$row]['active_phase_4']) < 1) ? 1:round($ratio * $data_matrix[$row]['active_phase_4'])) + (($data_matrix[$row]['active_phase_3'] > 0 && round($ratio * $data_matrix[$row]['active_phase_3']) < 1) ? 1:round($ratio * $data_matrix[$row]['active_phase_3'])) + (($data_matrix[$row]['active_phase_2'] > 0 && round($ratio * $data_matrix[$row]['active_phase_2']) < 1) ? 1:round($ratio * $data_matrix[$row]['active_phase_2'])) + (($data_matrix[$row]['active_phase_1'] > 0 && round($ratio * $data_matrix[$row]['active_phase_1']) < 1) ? 1:round($ratio * $data_matrix[$row]['active_phase_1'])) + (($data_matrix[$row]['active_phase_0'] > 0 && round($ratio * $data_matrix[$row]['active_phase_0']) < 1) ? 1:round($ratio * $data_matrix[$row]['active_phase_0'])) + (($data_matrix[$row]['active_phase_na'] > 0 && round($ratio * $data_matrix[$row]['active_phase_na']) < 1) ? 1:round($ratio * $data_matrix[$row]['active_phase_na']));
+	$Actual = ($ratio * $data_matrix[$row]['active_phase_4']) + ($ratio * $data_matrix[$row]['active_phase_3']) + ($ratio * $data_matrix[$row]['active_phase_2']) + ($ratio * $data_matrix[$row]['active_phase_1']) + ($ratio * $data_matrix[$row]['active_phase_0'])+ ($ratio * $data_matrix[$row]['active_phase_na']);
+	$Err = floor($Rounded - $Actual);
+	$Max_ValueKey = Max_ValueKey($data_matrix[$row]['active_phase_4'], $data_matrix[$row]['active_phase_3'], $data_matrix[$row]['active_phase_2'], $data_matrix[$row]['active_phase_1'], $data_matrix[$row]['active_phase_0'], $data_matrix[$row]['active_phase_na']);
+					
 	$htmlContent .= '<tr style="display:none;" id="active_Graph_Row_'.$row.'"><th align="right" class="prod_col"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&hm=' . $id . '" target="_blank" style="text-decoration:underline;">'.$rval.$rowsCompanyName[$row].'</a></th><th class="graph_right last_tick_width">&nbsp;</th>';
 	
 	$total_cols = $inner_columns * $columns;
@@ -789,10 +832,15 @@ foreach($rows as $row => $rval)
 			$Mini_Bar_Width = round($ratio * $data_matrix[$row]['active_phase_4']);
 		else
 			$Mini_Bar_Width = 1;
+		
+		if($Max_ValueKey == 0 && $Mini_Bar_Width > 1)
+		$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+		
 		if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 			$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 		else
 			$Mini_Bar_Width = $Total_Bar_Width;
+		
 		$phase_space =  $phase_space + $Mini_Bar_Width;					
 		$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height graph_red" title="'.$data_matrix[$row]['active_phase_4'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&phase=4&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
 	}
@@ -803,10 +851,15 @@ foreach($rows as $row => $rval)
 			$Mini_Bar_Width = round($ratio * $data_matrix[$row]['active_phase_3']);
 		else
 			$Mini_Bar_Width = 1;
+		
+		if($Max_ValueKey == 1 && $Mini_Bar_Width > 1)
+		$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+		
 		if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 			$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 		else
 			$Mini_Bar_Width = $Total_Bar_Width;
+		
 		$phase_space =  $phase_space + $Mini_Bar_Width;					
 		$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height graph_orange" title="'.$data_matrix[$row]['active_phase_3'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&phase=3&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
 	}
@@ -817,10 +870,15 @@ foreach($rows as $row => $rval)
 			$Mini_Bar_Width = round($ratio * $data_matrix[$row]['active_phase_2']);
 		else
 			$Mini_Bar_Width = 1;
+		
+		if($Max_ValueKey == 2 && $Mini_Bar_Width > 1)
+		$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+		
 		if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 			$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 		else
 			$Mini_Bar_Width = $Total_Bar_Width;
+		
 		$phase_space =  $phase_space + $Mini_Bar_Width;					
 		$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height graph_yellow" title="'.$data_matrix[$row]['active_phase_2'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&phase=2&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
 	}
@@ -831,10 +889,15 @@ foreach($rows as $row => $rval)
 			$Mini_Bar_Width = round($ratio * $data_matrix[$row]['active_phase_1']);
 		else
 			$Mini_Bar_Width = 1;
+		
+		if($Max_ValueKey == 3 && $Mini_Bar_Width > 1)
+		$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+		
 		if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 			$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 		else
 			$Mini_Bar_Width = $Total_Bar_Width;
+		
 		$phase_space =  $phase_space + $Mini_Bar_Width;					
 		$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height graph_green" title="'.$data_matrix[$row]['active_phase_1'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&phase=1&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
 	}
@@ -845,10 +908,15 @@ foreach($rows as $row => $rval)
 			$Mini_Bar_Width = round($ratio * $data_matrix[$row]['active_phase_0']);
 		else
 			$Mini_Bar_Width = 1;
+		
+		if($Max_ValueKey == 4 && $Mini_Bar_Width > 1)
+		$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+		
 		if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 			$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 		else
 			$Mini_Bar_Width = $Total_Bar_Width;
+		
 		$phase_space =  $phase_space + $Mini_Bar_Width;					
 		$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height graph_blue" title="'.$data_matrix[$row]['active_phase_0'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&phase=0&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
 	}
@@ -859,10 +927,15 @@ foreach($rows as $row => $rval)
 			$Mini_Bar_Width = round($ratio * $data_matrix[$row]['active_phase_na']);
 		else
 			$Mini_Bar_Width = 1;
+		
+		if($Max_ValueKey == 5 && $Mini_Bar_Width > 1)
+		$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+		
 		if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 			$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 		else
 			$Mini_Bar_Width = $Total_Bar_Width;
+		
 		$phase_space =  $phase_space + $Mini_Bar_Width;					
 		$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height graph_gray" title="'.$data_matrix[$row]['active_phase_na'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=1&phase=na&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
 	}
@@ -889,6 +962,13 @@ foreach($rows as $row => $rval)
 	$htmlContent .= '</tr>';
 	
 	//// Code for Total
+	
+	$Rounded = (($data_matrix[$row]['total_phase_4'] > 0 && round($ratio * $data_matrix[$row]['total_phase_4']) < 1) ? 1:round($ratio * $data_matrix[$row]['total_phase_4'])) + (($data_matrix[$row]['total_phase_3'] > 0 && round($ratio * $data_matrix[$row]['total_phase_3']) < 1) ? 1:round($ratio * $data_matrix[$row]['total_phase_3'])) + (($data_matrix[$row]['total_phase_2'] > 0 && round($ratio * $data_matrix[$row]['total_phase_2']) < 1) ? 1:round($ratio * $data_matrix[$row]['total_phase_2'])) + (($data_matrix[$row]['total_phase_1'] > 0 && round($ratio * $data_matrix[$row]['total_phase_1']) < 1) ? 1:round($ratio * $data_matrix[$row]['total_phase_1'])) + (($data_matrix[$row]['total_phase_0'] > 0 && round($ratio * $data_matrix[$row]['total_phase_0']) < 1) ? 1:round($ratio * $data_matrix[$row]['total_phase_0'])) + (($data_matrix[$row]['total_phase_na'] > 0 && round($ratio * $data_matrix[$row]['total_phase_na']) < 1) ? 1:round($ratio * $data_matrix[$row]['total_phase_na']));
+	$Actual = ($ratio * $data_matrix[$row]['total_phase_4']) + ($ratio * $data_matrix[$row]['total_phase_3']) + ($ratio * $data_matrix[$row]['total_phase_2']) + ($ratio * $data_matrix[$row]['total_phase_1']) + ($ratio * $data_matrix[$row]['total_phase_0'])+ ($ratio * $data_matrix[$row]['total_phase_na']);
+	$Err = floor($Rounded - $Actual);
+	$Max_ValueKey = Max_ValueKey($data_matrix[$row]['total_phase_4'], $data_matrix[$row]['total_phase_3'], $data_matrix[$row]['total_phase_2'], $data_matrix[$row]['total_phase_1'], $data_matrix[$row]['total_phase_0'], $data_matrix[$row]['total_phase_na']);
+	
+	
 	$htmlContent .= '<tr style="display:none;" id="total_Graph_Row_'.$row.'"><th align="right" class="prod_col"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=2&hm=' . $id . '" target="_blank" style="text-decoration:underline;">'.$rval.$rowsCompanyName[$row].'</a></th><th class="graph_right last_tick_width">&nbsp;</th>';
 	
 	$total_cols = $inner_columns * $columns;
@@ -901,10 +981,15 @@ foreach($rows as $row => $rval)
 			$Mini_Bar_Width = round($ratio * $data_matrix[$row]['total_phase_4']);
 		else
 			$Mini_Bar_Width = 1;
+		
+		if($Max_ValueKey == 0 && $Mini_Bar_Width > 1)
+		$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+		
 		if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 			$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 		else
 			$Mini_Bar_Width = $Total_Bar_Width;
+		
 		$phase_space =  $phase_space + $Mini_Bar_Width;					
 		$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height graph_red" title="'.$data_matrix[$row]['total_phase_4'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=2&phase=4&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
 	}
@@ -915,10 +1000,15 @@ foreach($rows as $row => $rval)
 			$Mini_Bar_Width = round($ratio * $data_matrix[$row]['total_phase_3']);
 		else
 			$Mini_Bar_Width = 1;
+		
+		if($Max_ValueKey == 1 && $Mini_Bar_Width > 1)
+		$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+		
 		if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 			$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 		else
 			$Mini_Bar_Width = $Total_Bar_Width;
+			
 		$phase_space =  $phase_space + $Mini_Bar_Width;					
 		$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height graph_orange" title="'.$data_matrix[$row]['total_phase_3'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=2&phase=3&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
 	}
@@ -929,10 +1019,15 @@ foreach($rows as $row => $rval)
 			$Mini_Bar_Width = round($ratio * $data_matrix[$row]['total_phase_2']);
 		else
 			$Mini_Bar_Width = 1;
+		
+		if($Max_ValueKey == 2 && $Mini_Bar_Width > 1)
+		$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+		
 		if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 			$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 		else
 			$Mini_Bar_Width = $Total_Bar_Width;
+			
 		$phase_space =  $phase_space + $Mini_Bar_Width;					
 		$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height graph_yellow" title="'.$data_matrix[$row]['total_phase_2'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=2&phase=2&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
 	}
@@ -943,10 +1038,15 @@ foreach($rows as $row => $rval)
 			$Mini_Bar_Width = round($ratio * $data_matrix[$row]['total_phase_1']);
 		else
 			$Mini_Bar_Width = 1;
+		
+		if($Max_ValueKey == 3 && $Mini_Bar_Width > 1)
+		$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+		
 		if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 			$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 		else
 			$Mini_Bar_Width = $Total_Bar_Width;
+			
 		$phase_space =  $phase_space + $Mini_Bar_Width;					
 		$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height graph_green" title="'.$data_matrix[$row]['total_phase_1'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=2&phase=1&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
 	}
@@ -957,10 +1057,15 @@ foreach($rows as $row => $rval)
 			$Mini_Bar_Width = round($ratio * $data_matrix[$row]['total_phase_0']);
 		else
 			$Mini_Bar_Width = 1;
+		
+		if($Max_ValueKey == 4 && $Mini_Bar_Width > 1)
+		$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+		
 		if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 			$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 		else
 			$Mini_Bar_Width = $Total_Bar_Width;
+		
 		$phase_space =  $phase_space + $Mini_Bar_Width;					
 		$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height graph_blue" title="'.$data_matrix[$row]['total_phase_0'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=2&phase=0&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
 	}
@@ -971,10 +1076,15 @@ foreach($rows as $row => $rval)
 			$Mini_Bar_Width = round($ratio * $data_matrix[$row]['total_phase_na']);
 		else
 			$Mini_Bar_Width = 1;
+		
+		if($Max_ValueKey == 5 && $Mini_Bar_Width > 1)
+		$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+		
 		if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 			$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 		else
 			$Mini_Bar_Width = $Total_Bar_Width;
+		
 		$phase_space =  $phase_space + $Mini_Bar_Width;					
 		$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height graph_gray" title="'.$data_matrix[$row]['total_phase_na'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaId . '&list=2&phase=na&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
 	}
@@ -1421,6 +1531,11 @@ function Download_reports()
 				//// Graph starts
 				if($mode == 'indlead')
 				{
+					$Rounded = (($data_matrix[$row]['indlead_phase_4'] > 0 && round($ratio * $data_matrix[$row]['indlead_phase_4']) < 1) ? 1:round($ratio * $data_matrix[$row]['indlead_phase_4'])) + (($data_matrix[$row]['indlead_phase_3'] > 0 && round($ratio * $data_matrix[$row]['indlead_phase_3']) < 1) ? 1:round($ratio * $data_matrix[$row]['indlead_phase_3'])) + (($data_matrix[$row]['indlead_phase_2'] > 0 && round($ratio * $data_matrix[$row]['indlead_phase_2']) < 1) ? 1:round($ratio * $data_matrix[$row]['indlead_phase_2'])) + (($data_matrix[$row]['indlead_phase_1'] > 0 && round($ratio * $data_matrix[$row]['indlead_phase_1']) < 1) ? 1:round($ratio * $data_matrix[$row]['indlead_phase_1'])) + (($data_matrix[$row]['indlead_phase_0'] > 0 && round($ratio * $data_matrix[$row]['indlead_phase_0']) < 1) ? 1:round($ratio * $data_matrix[$row]['indlead_phase_0'])) + (($data_matrix[$row]['indlead_phase_na'] > 0 && round($ratio * $data_matrix[$row]['indlead_phase_na']) < 1) ? 1:round($ratio * $data_matrix[$row]['indlead_phase_na']));
+					$Actual = ($ratio * $data_matrix[$row]['indlead_phase_4']) + ($ratio * $data_matrix[$row]['indlead_phase_3']) + ($ratio * $data_matrix[$row]['indlead_phase_2']) + ($ratio * $data_matrix[$row]['indlead_phase_1']) + ($ratio * $data_matrix[$row]['indlead_phase_0'])+ ($ratio * $data_matrix[$row]['indlead_phase_na']);
+					$Err = floor($Rounded - $Actual);
+					$Max_ValueKey = Max_ValueKey($data_matrix[$row]['indlead_phase_4'], $data_matrix[$row]['indlead_phase_3'], $data_matrix[$row]['indlead_phase_2'], $data_matrix[$row]['indlead_phase_1'], $data_matrix[$row]['indlead_phase_0'], $data_matrix[$row]['indlead_phase_na']);
+				
 					$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['indlead']);
 					$phase_space = 0;
 					if($data_matrix[$row]['indlead_phase_4'] > 0)
@@ -1429,10 +1544,15 @@ function Download_reports()
 							$Mini_Bar_Width = round($ratio * $data_matrix[$row]['indlead_phase_4']);
 						else
 							$Mini_Bar_Width = 1;
+						
+						if($Max_ValueKey == 0 && $Mini_Bar_Width > 1)
+						$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+						
 						if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 							$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 						else
 							$Mini_Bar_Width = $Total_Bar_Width;
+						
 						$phase_space =  $phase_space + $Mini_Bar_Width;
 						$to = getColspanforExcelExport($from, $Mini_Bar_Width);
 						$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':' . $to . $Excel_HMCounter);
@@ -1449,10 +1569,15 @@ function Download_reports()
 							$Mini_Bar_Width = round($ratio * $data_matrix[$row]['indlead_phase_3']);
 						else
 							$Mini_Bar_Width = 1;
+						
+						if($Max_ValueKey == 1 && $Mini_Bar_Width > 1)
+						$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+						
 						if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 							$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 						else
 							$Mini_Bar_Width = $Total_Bar_Width;
+						
 						$phase_space =  $phase_space + $Mini_Bar_Width;	
 						$to = getColspanforExcelExport($from, $Mini_Bar_Width);
 						$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':' . $to . $Excel_HMCounter);
@@ -1469,10 +1594,15 @@ function Download_reports()
 							$Mini_Bar_Width = round($ratio * $data_matrix[$row]['indlead_phase_2']);
 						else
 							$Mini_Bar_Width = 1;
+						
+						if($Max_ValueKey == 2 && $Mini_Bar_Width > 1)
+						$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+						
 						if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 							$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 						else
 							$Mini_Bar_Width = $Total_Bar_Width;
+						
 						$phase_space =  $phase_space + $Mini_Bar_Width;	
 						$to = getColspanforExcelExport($from, $Mini_Bar_Width);
 						$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':' . $to . $Excel_HMCounter);
@@ -1489,10 +1619,15 @@ function Download_reports()
 							$Mini_Bar_Width = round($ratio * $data_matrix[$row]['indlead_phase_1']);
 						else
 							$Mini_Bar_Width = 1;
+						
+						if($Max_ValueKey == 3 && $Mini_Bar_Width > 1)
+						$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+						
 						if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 							$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 						else
 							$Mini_Bar_Width = $Total_Bar_Width;
+						
 						$phase_space =  $phase_space + $Mini_Bar_Width;	
 						$to = getColspanforExcelExport($from, $Mini_Bar_Width);
 						$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':' . $to . $Excel_HMCounter);
@@ -1509,10 +1644,15 @@ function Download_reports()
 							$Mini_Bar_Width = round($ratio * $data_matrix[$row]['indlead_phase_0']);
 						else
 							$Mini_Bar_Width = 1;
+						
+						if($Max_ValueKey == 4 && $Mini_Bar_Width > 1)
+						$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+						
 						if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 							$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 						else
 							$Mini_Bar_Width = $Total_Bar_Width;
+						
 						$phase_space =  $phase_space + $Mini_Bar_Width;	
 						$to = getColspanforExcelExport($from, $Mini_Bar_Width);
 						$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':' . $to . $Excel_HMCounter);
@@ -1529,10 +1669,15 @@ function Download_reports()
 							$Mini_Bar_Width = round($ratio * $data_matrix[$row]['indlead_phase_na']);
 						else
 							$Mini_Bar_Width = 1;
+						
+						if($Max_ValueKey == 5 && $Mini_Bar_Width > 1)
+						$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+						
 						if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 							$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 						else
 							$Mini_Bar_Width = $Total_Bar_Width;
+						
 						$phase_space =  $phase_space + $Mini_Bar_Width;	
 						$to = getColspanforExcelExport($from, $Mini_Bar_Width);
 						$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':' . $to . $Excel_HMCounter);
@@ -1545,6 +1690,11 @@ function Download_reports()
 				}
 				else if ($mode == 'active')
 				{
+					$Rounded = (($data_matrix[$row]['active_phase_4'] > 0 && round($ratio * $data_matrix[$row]['active_phase_4']) < 1) ? 1:round($ratio * $data_matrix[$row]['active_phase_4'])) + (($data_matrix[$row]['active_phase_3'] > 0 && round($ratio * $data_matrix[$row]['active_phase_3']) < 1) ? 1:round($ratio * $data_matrix[$row]['active_phase_3'])) + (($data_matrix[$row]['active_phase_2'] > 0 && round($ratio * $data_matrix[$row]['active_phase_2']) < 1) ? 1:round($ratio * $data_matrix[$row]['active_phase_2'])) + (($data_matrix[$row]['active_phase_1'] > 0 && round($ratio * $data_matrix[$row]['active_phase_1']) < 1) ? 1:round($ratio * $data_matrix[$row]['active_phase_1'])) + (($data_matrix[$row]['active_phase_0'] > 0 && round($ratio * $data_matrix[$row]['active_phase_0']) < 1) ? 1:round($ratio * $data_matrix[$row]['active_phase_0'])) + (($data_matrix[$row]['active_phase_na'] > 0 && round($ratio * $data_matrix[$row]['active_phase_na']) < 1) ? 1:round($ratio * $data_matrix[$row]['active_phase_na']));
+					$Actual = ($ratio * $data_matrix[$row]['active_phase_4']) + ($ratio * $data_matrix[$row]['active_phase_3']) + ($ratio * $data_matrix[$row]['active_phase_2']) + ($ratio * $data_matrix[$row]['active_phase_1']) + ($ratio * $data_matrix[$row]['active_phase_0'])+ ($ratio * $data_matrix[$row]['active_phase_na']);
+					$Err = floor($Rounded - $Actual);
+					$Max_ValueKey = Max_ValueKey($data_matrix[$row]['active_phase_4'], $data_matrix[$row]['active_phase_3'], $data_matrix[$row]['active_phase_2'], $data_matrix[$row]['active_phase_1'], $data_matrix[$row]['active_phase_0'], $data_matrix[$row]['active_phase_na']);
+	
 					$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['active']);
 					$phase_space = 	0;
 					if($data_matrix[$row]['active_phase_4'] > 0)
@@ -1553,10 +1703,15 @@ function Download_reports()
 							$Mini_Bar_Width = round($ratio * $data_matrix[$row]['active_phase_4']);
 						else
 							$Mini_Bar_Width = 1;
+						
+						if($Max_ValueKey == 0 && $Mini_Bar_Width > 1)
+						$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+						
 						if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 							$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 						else
 							$Mini_Bar_Width = $Total_Bar_Width;
+						
 						$phase_space =  $phase_space + $Mini_Bar_Width;	
 						$to = getColspanforExcelExport($from, $Mini_Bar_Width);
 						$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':' . $to . $Excel_HMCounter);
@@ -1573,10 +1728,15 @@ function Download_reports()
 							$Mini_Bar_Width = round($ratio * $data_matrix[$row]['active_phase_3']);
 						else
 							$Mini_Bar_Width = 1;
+						
+						if($Max_ValueKey == 1 && $Mini_Bar_Width > 1)
+						$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+						
 						if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 							$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 						else
 							$Mini_Bar_Width = $Total_Bar_Width;
+						
 						$phase_space =  $phase_space + $Mini_Bar_Width;	
 						$to = getColspanforExcelExport($from, $Mini_Bar_Width);
 						$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':' . $to . $Excel_HMCounter);
@@ -1593,10 +1753,15 @@ function Download_reports()
 							$Mini_Bar_Width = round($ratio * $data_matrix[$row]['active_phase_2']);
 						else
 							$Mini_Bar_Width = 1;
+						
+						if($Max_ValueKey == 2 && $Mini_Bar_Width > 1)
+						$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+						
 						if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 							$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 						else
 							$Mini_Bar_Width = $Total_Bar_Width;
+						
 						$phase_space =  $phase_space + $Mini_Bar_Width;	
 						$to = getColspanforExcelExport($from, $Mini_Bar_Width);
 						$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':' . $to . $Excel_HMCounter);
@@ -1613,10 +1778,15 @@ function Download_reports()
 							$Mini_Bar_Width = round($ratio * $data_matrix[$row]['active_phase_1']);
 						else
 							$Mini_Bar_Width = 1;
+						
+						if($Max_ValueKey == 3 && $Mini_Bar_Width > 1)
+						$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+						
 						if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 							$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 						else
 							$Mini_Bar_Width = $Total_Bar_Width;
+						
 						$phase_space =  $phase_space + $Mini_Bar_Width;	
 						$to = getColspanforExcelExport($from, $Mini_Bar_Width);
 						$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':' . $to . $Excel_HMCounter);
@@ -1633,10 +1803,15 @@ function Download_reports()
 							$Mini_Bar_Width = round($ratio * $data_matrix[$row]['active_phase_0']);
 						else
 							$Mini_Bar_Width = 1;
+						
+						if($Max_ValueKey == 4 && $Mini_Bar_Width > 1)
+						$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+						
 						if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 							$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 						else
 							$Mini_Bar_Width = $Total_Bar_Width;
+						
 						$phase_space =  $phase_space + $Mini_Bar_Width;	
 						$to = getColspanforExcelExport($from, $Mini_Bar_Width);
 						$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':' . $to . $Excel_HMCounter);
@@ -1653,10 +1828,15 @@ function Download_reports()
 							$Mini_Bar_Width = round($ratio * $data_matrix[$row]['active_phase_na']);
 						else
 							$Mini_Bar_Width = 1;
+						
+						if($Max_ValueKey == 5 && $Mini_Bar_Width > 1)
+						$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+						
 						if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 							$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 						else
 							$Mini_Bar_Width = $Total_Bar_Width;
+						
 						$phase_space =  $phase_space + $Mini_Bar_Width;	
 						$to = getColspanforExcelExport($from, $Mini_Bar_Width);
 						$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':' . $to . $Excel_HMCounter);
@@ -1669,6 +1849,11 @@ function Download_reports()
 				}
 				else
 				{
+					$Rounded = (($data_matrix[$row]['total_phase_4'] > 0 && round($ratio * $data_matrix[$row]['total_phase_4']) < 1) ? 1:round($ratio * $data_matrix[$row]['total_phase_4'])) + (($data_matrix[$row]['total_phase_3'] > 0 && round($ratio * $data_matrix[$row]['total_phase_3']) < 1) ? 1:round($ratio * $data_matrix[$row]['total_phase_3'])) + (($data_matrix[$row]['total_phase_2'] > 0 && round($ratio * $data_matrix[$row]['total_phase_2']) < 1) ? 1:round($ratio * $data_matrix[$row]['total_phase_2'])) + (($data_matrix[$row]['total_phase_1'] > 0 && round($ratio * $data_matrix[$row]['total_phase_1']) < 1) ? 1:round($ratio * $data_matrix[$row]['total_phase_1'])) + (($data_matrix[$row]['total_phase_0'] > 0 && round($ratio * $data_matrix[$row]['total_phase_0']) < 1) ? 1:round($ratio * $data_matrix[$row]['total_phase_0'])) + (($data_matrix[$row]['total_phase_na'] > 0 && round($ratio * $data_matrix[$row]['total_phase_na']) < 1) ? 1:round($ratio * $data_matrix[$row]['total_phase_na']));
+					$Actual = ($ratio * $data_matrix[$row]['total_phase_4']) + ($ratio * $data_matrix[$row]['total_phase_3']) + ($ratio * $data_matrix[$row]['total_phase_2']) + ($ratio * $data_matrix[$row]['total_phase_1']) + ($ratio * $data_matrix[$row]['total_phase_0'])+ ($ratio * $data_matrix[$row]['total_phase_na']);
+					$Err = floor($Rounded - $Actual);
+					$Max_ValueKey = Max_ValueKey($data_matrix[$row]['total_phase_4'], $data_matrix[$row]['total_phase_3'], $data_matrix[$row]['total_phase_2'], $data_matrix[$row]['total_phase_1'], $data_matrix[$row]['total_phase_0'], $data_matrix[$row]['total_phase_na']);
+				
 					$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['total']);
 					$phase_space = 	0;
 					if($data_matrix[$row]['total_phase_4'] > 0)
@@ -1677,6 +1862,10 @@ function Download_reports()
 							$Mini_Bar_Width = round($ratio * $data_matrix[$row]['total_phase_4']);
 						else
 							$Mini_Bar_Width = 1;
+						
+						if($Max_ValueKey == 0 && $Mini_Bar_Width > 1)
+						$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+						
 						if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 							$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 						else
@@ -1697,6 +1886,10 @@ function Download_reports()
 							$Mini_Bar_Width = round($ratio * $data_matrix[$row]['total_phase_3']);
 						else
 							$Mini_Bar_Width = 1;
+						
+						if($Max_ValueKey == 1 && $Mini_Bar_Width > 1)
+						$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+						
 						if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 							$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 						else
@@ -1717,6 +1910,10 @@ function Download_reports()
 							$Mini_Bar_Width = round($ratio * $data_matrix[$row]['total_phase_2']);
 						else
 							$Mini_Bar_Width = 1;
+						
+						if($Max_ValueKey == 2 && $Mini_Bar_Width > 1)
+						$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+						
 						if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 							$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 						else
@@ -1737,6 +1934,10 @@ function Download_reports()
 							$Mini_Bar_Width = round($ratio * $data_matrix[$row]['total_phase_1']);
 						else
 							$Mini_Bar_Width = 1;
+						
+						if($Max_ValueKey == 3 && $Mini_Bar_Width > 1)
+						$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+						
 						if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 							$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 						else
@@ -1757,6 +1958,10 @@ function Download_reports()
 							$Mini_Bar_Width = round($ratio * $data_matrix[$row]['total_phase_0']);
 						else
 							$Mini_Bar_Width = 1;
+						
+						if($Max_ValueKey == 4 && $Mini_Bar_Width > 1)
+						$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+						
 						if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 							$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 						else
@@ -1777,6 +1982,10 @@ function Download_reports()
 							$Mini_Bar_Width = round($ratio * $data_matrix[$row]['total_phase_na']);
 						else
 							$Mini_Bar_Width = 1;
+						
+						if($Max_ValueKey == 5 && $Mini_Bar_Width > 1)
+						$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+						
 						if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 							$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 						else
@@ -1830,6 +2039,18 @@ function Download_reports()
 		$from++;
 		for($j=0; $j < $columns; $j++)
 		{
+			$to = getColspanforExcelExport($from, $inner_columns);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':'. $to . $Excel_HMCounter);
+			$from = $to;
+			$from++;
+		}
+		$objPHPExcel->getActiveSheet()->getRowDimension($Excel_HMCounter)->setRowHeight(5);
+			
+		$Excel_HMCounter++;
+		$from = $Start_Char;
+		$from++;
+		for($j=0; $j < $columns; $j++)
+		{
 			$to = getColspanforExcelExport($from, (($j==0)? $inner_columns+1 : $inner_columns));
 			$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':'. $to . $Excel_HMCounter);
 			$objPHPExcel->getActiveSheet()->SetCellValue($from . $Excel_HMCounter, (($j+1) * $column_interval));
@@ -1837,6 +2058,35 @@ function Download_reports()
 			$from++;
 		}
 		//$objPHPExcel->getActiveSheet()->getRowDimension($Excel_HMCounter)->setRowHeight(5);
+		
+		/// Extra Row
+		$Excel_HMCounter++;
+		
+		
+		/////Phase Legend
+		$Excel_HMCounter++;
+		$objPHPExcel->getActiveSheet()->SetCellValue('A' . $Excel_HMCounter, 'Phase:');
+		
+		$phases = array('N/A', 'Phase 0', 'Phase 1', 'Phase 2', 'Phase 3', 'Phase 4');
+		$phasenums = array(); foreach($phases as $k => $p)  $phasenums[$k] = str_ireplace(array('phase',' '),'',$p);
+		$phase_legend_nums = array('N/A', '0', '1', '2', '3', '4');
+		//$p_colors = array('DDDDDD', 'BBDDDD', 'AADDEE', '99DDFF', 'DDFF99', 'FFFF00', 'FFCC00', 'FF9900', 'FF7711', 'FF4422');
+		$p_colors = array('BFBFBF', '00CCFF', '99CC00', 'FFFF00', 'FF9900', 'FF0000');
+		$phase_legend_colors = array('BFBFBF', '00CCFF', '99CC00', 'FFFF00', 'FF9900', 'FF0000');
+		
+		$from = $Start_Char;
+		$from++;
+		foreach($p_colors as $key => $color)
+		{
+			$to = getColspanforExcelExport($from, $inner_columns);
+			$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':'. $to . $Excel_HMCounter);
+			$objPHPExcel->getActiveSheet()->getStyle($from . $Excel_HMCounter)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID);
+			$objPHPExcel->getActiveSheet()->getStyle($from . $Excel_HMCounter)->getFill()->getStartColor()->setRGB($color);
+			$objPHPExcel->getActiveSheet()->getStyle($from . $Excel_HMCounter)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+			$objPHPExcel->getActiveSheet()->getCell($from . $Excel_HMCounter)->setValueExplicit($phasenums[$key], PHPExcel_Cell_DataType::TYPE_STRING);
+			$from = $to;
+			$from++;
+		}
 			
 		$objWriter = new PHPExcel_Writer_Excel2007($objPHPExcel);
 			
@@ -2060,6 +2310,11 @@ function Download_reports()
 			//// Graph starts
 			if($mode == 'indlead')
 			{
+				$Rounded = (($data_matrix[$row]['indlead_phase_4'] > 0 && round($ratio * $data_matrix[$row]['indlead_phase_4']) < 1) ? 1:round($ratio * $data_matrix[$row]['indlead_phase_4'])) + (($data_matrix[$row]['indlead_phase_3'] > 0 && round($ratio * $data_matrix[$row]['indlead_phase_3']) < 1) ? 1:round($ratio * $data_matrix[$row]['indlead_phase_3'])) + (($data_matrix[$row]['indlead_phase_2'] > 0 && round($ratio * $data_matrix[$row]['indlead_phase_2']) < 1) ? 1:round($ratio * $data_matrix[$row]['indlead_phase_2'])) + (($data_matrix[$row]['indlead_phase_1'] > 0 && round($ratio * $data_matrix[$row]['indlead_phase_1']) < 1) ? 1:round($ratio * $data_matrix[$row]['indlead_phase_1'])) + (($data_matrix[$row]['indlead_phase_0'] > 0 && round($ratio * $data_matrix[$row]['indlead_phase_0']) < 1) ? 1:round($ratio * $data_matrix[$row]['indlead_phase_0'])) + (($data_matrix[$row]['indlead_phase_na'] > 0 && round($ratio * $data_matrix[$row]['indlead_phase_na']) < 1) ? 1:round($ratio * $data_matrix[$row]['indlead_phase_na']));
+				$Actual = ($ratio * $data_matrix[$row]['indlead_phase_4']) + ($ratio * $data_matrix[$row]['indlead_phase_3']) + ($ratio * $data_matrix[$row]['indlead_phase_2']) + ($ratio * $data_matrix[$row]['indlead_phase_1']) + ($ratio * $data_matrix[$row]['indlead_phase_0'])+ ($ratio * $data_matrix[$row]['indlead_phase_na']);
+				$Err = floor($Rounded - $Actual);
+				$Max_ValueKey = Max_ValueKey($data_matrix[$row]['indlead_phase_4'], $data_matrix[$row]['indlead_phase_3'], $data_matrix[$row]['indlead_phase_2'], $data_matrix[$row]['indlead_phase_1'], $data_matrix[$row]['indlead_phase_0'], $data_matrix[$row]['indlead_phase_na']);
+					
 				$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['indlead']);
 				$phase_space = 0;
 				if($data_matrix[$row]['indlead_phase_4'] > 0)
@@ -2071,10 +2326,15 @@ function Download_reports()
 						$Mini_Bar_Width = round($ratio * $data_matrix[$row]['indlead_phase_4']);
 					else
 						$Mini_Bar_Width = 1;
+					
+					if($Max_ValueKey == 0 && $Mini_Bar_Width > 1)
+					$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+					
 					if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 						$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 					else
 						$Mini_Bar_Width = $Total_Bar_Width;
+					
 					$phase_space =  $phase_space + $Mini_Bar_Width;
 					
 					$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$row]['indlead_phase_4'], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
@@ -2098,10 +2358,15 @@ function Download_reports()
 						$Mini_Bar_Width = round($ratio * $data_matrix[$row]['indlead_phase_3']);
 					else
 						$Mini_Bar_Width = 1;
+						
+					if($Max_ValueKey == 1 && $Mini_Bar_Width > 1)
+					$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+					
 					if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 						$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 					else
 						$Mini_Bar_Width = $Total_Bar_Width;
+					
 					$phase_space =  $phase_space + $Mini_Bar_Width;
 					
 					$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$row]['indlead_phase_3'], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
@@ -2125,10 +2390,15 @@ function Download_reports()
 						$Mini_Bar_Width = round($ratio * $data_matrix[$row]['indlead_phase_2']);
 					else
 						$Mini_Bar_Width = 1;
+					
+					if($Max_ValueKey == 2 && $Mini_Bar_Width > 1)
+					$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+					
 					if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 						$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 					else
 						$Mini_Bar_Width = $Total_Bar_Width;
+					
 					$phase_space =  $phase_space + $Mini_Bar_Width;
 					
 					$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$row]['indlead_phase_2'], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
@@ -2152,10 +2422,15 @@ function Download_reports()
 						$Mini_Bar_Width = round($ratio * $data_matrix[$row]['indlead_phase_1']);
 					else
 						$Mini_Bar_Width = 1;
+					
+					if($Max_ValueKey == 3 && $Mini_Bar_Width > 1)
+					$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+					
 					if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 						$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 					else
 						$Mini_Bar_Width = $Total_Bar_Width;
+					
 					$phase_space =  $phase_space + $Mini_Bar_Width;
 					
 					$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$row]['indlead_phase_1'], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
@@ -2179,10 +2454,15 @@ function Download_reports()
 						$Mini_Bar_Width = round($ratio * $data_matrix[$row]['indlead_phase_0']);
 					else
 						$Mini_Bar_Width = 1;
+					
+					if($Max_ValueKey == 4 && $Mini_Bar_Width > 1)
+					$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+					
 					if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 						$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 					else
 						$Mini_Bar_Width = $Total_Bar_Width;
+					
 					$phase_space =  $phase_space + $Mini_Bar_Width;
 					
 					$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$row]['indlead_phase_0'], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
@@ -2206,10 +2486,15 @@ function Download_reports()
 						$Mini_Bar_Width = round($ratio * $data_matrix[$row]['indlead_phase_na']);
 					else
 						$Mini_Bar_Width = 1;
+					
+					if($Max_ValueKey == 5 && $Mini_Bar_Width > 1)
+					$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+					
 					if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 						$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 					else
 						$Mini_Bar_Width = $Total_Bar_Width;
+					
 					$phase_space =  $phase_space + $Mini_Bar_Width;
 					
 					$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$row]['indlead_phase_na'], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
@@ -2226,6 +2511,11 @@ function Download_reports()
 			} 
 			else if($mode == 'active')
 			{
+				$Rounded = (($data_matrix[$row]['active_phase_4'] > 0 && round($ratio * $data_matrix[$row]['active_phase_4']) < 1) ? 1:round($ratio * $data_matrix[$row]['active_phase_4'])) + (($data_matrix[$row]['active_phase_3'] > 0 && round($ratio * $data_matrix[$row]['active_phase_3']) < 1) ? 1:round($ratio * $data_matrix[$row]['active_phase_3'])) + (($data_matrix[$row]['active_phase_2'] > 0 && round($ratio * $data_matrix[$row]['active_phase_2']) < 1) ? 1:round($ratio * $data_matrix[$row]['active_phase_2'])) + (($data_matrix[$row]['active_phase_1'] > 0 && round($ratio * $data_matrix[$row]['active_phase_1']) < 1) ? 1:round($ratio * $data_matrix[$row]['active_phase_1'])) + (($data_matrix[$row]['active_phase_0'] > 0 && round($ratio * $data_matrix[$row]['active_phase_0']) < 1) ? 1:round($ratio * $data_matrix[$row]['active_phase_0'])) + (($data_matrix[$row]['active_phase_na'] > 0 && round($ratio * $data_matrix[$row]['active_phase_na']) < 1) ? 1:round($ratio * $data_matrix[$row]['active_phase_na']));
+				$Actual = ($ratio * $data_matrix[$row]['active_phase_4']) + ($ratio * $data_matrix[$row]['active_phase_3']) + ($ratio * $data_matrix[$row]['active_phase_2']) + ($ratio * $data_matrix[$row]['active_phase_1']) + ($ratio * $data_matrix[$row]['active_phase_0'])+ ($ratio * $data_matrix[$row]['active_phase_na']);
+				$Err = floor($Rounded - $Actual);
+				$Max_ValueKey = Max_ValueKey($data_matrix[$row]['active_phase_4'], $data_matrix[$row]['active_phase_3'], $data_matrix[$row]['active_phase_2'], $data_matrix[$row]['active_phase_1'], $data_matrix[$row]['active_phase_0'], $data_matrix[$row]['active_phase_na']);
+					
 				$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['active']);
 				$phase_space = 0;
 				if($data_matrix[$row]['active_phase_4'] > 0)
@@ -2237,10 +2527,15 @@ function Download_reports()
 						$Mini_Bar_Width = round($ratio * $data_matrix[$row]['active_phase_4']);
 					else
 						$Mini_Bar_Width = 1;
+					
+					if($Max_ValueKey == 0 && $Mini_Bar_Width > 1)
+					$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+					
 					if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 						$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 					else
 						$Mini_Bar_Width = $Total_Bar_Width;
+					
 					$phase_space =  $phase_space + $Mini_Bar_Width;
 					
 					$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$row]['active_phase_4'], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
@@ -2264,10 +2559,15 @@ function Download_reports()
 						$Mini_Bar_Width = round($ratio * $data_matrix[$row]['active_phase_3']);
 					else
 						$Mini_Bar_Width = 1;
+					
+					if($Max_ValueKey == 1 && $Mini_Bar_Width > 1)
+					$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+					
 					if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 						$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 					else
 						$Mini_Bar_Width = $Total_Bar_Width;
+					
 					$phase_space =  $phase_space + $Mini_Bar_Width;
 					
 					$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$row]['active_phase_3'], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
@@ -2291,10 +2591,15 @@ function Download_reports()
 						$Mini_Bar_Width = round($ratio * $data_matrix[$row]['active_phase_2']);
 					else
 						$Mini_Bar_Width = 1;
+					
+					if($Max_ValueKey == 2 && $Mini_Bar_Width > 1)
+					$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+					
 					if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 						$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 					else
 						$Mini_Bar_Width = $Total_Bar_Width;
+					
 					$phase_space =  $phase_space + $Mini_Bar_Width;
 					
 					$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$row]['active_phase_2'], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
@@ -2318,10 +2623,15 @@ function Download_reports()
 						$Mini_Bar_Width = round($ratio * $data_matrix[$row]['active_phase_1']);
 					else
 						$Mini_Bar_Width = 1;
+					
+					if($Max_ValueKey == 3 && $Mini_Bar_Width > 1)
+					$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+					
 					if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 						$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 					else
 						$Mini_Bar_Width = $Total_Bar_Width;
+					
 					$phase_space =  $phase_space + $Mini_Bar_Width;
 					
 					$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$row]['active_phase_1'], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
@@ -2345,10 +2655,15 @@ function Download_reports()
 						$Mini_Bar_Width = round($ratio * $data_matrix[$row]['active_phase_0']);
 					else
 						$Mini_Bar_Width = 1;
+					
+					if($Max_ValueKey == 4 && $Mini_Bar_Width > 1)
+					$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+					
 					if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 						$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 					else
 						$Mini_Bar_Width = $Total_Bar_Width;
+					
 					$phase_space =  $phase_space + $Mini_Bar_Width;
 					
 					$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$row]['active_phase_0'], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
@@ -2372,10 +2687,15 @@ function Download_reports()
 						$Mini_Bar_Width = round($ratio * $data_matrix[$row]['active_phase_na']);
 					else
 						$Mini_Bar_Width = 1;
+					
+					if($Max_ValueKey == 5 && $Mini_Bar_Width > 1)
+					$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+					
 					if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 						$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 					else
 						$Mini_Bar_Width = $Total_Bar_Width;
+					
 					$phase_space =  $phase_space + $Mini_Bar_Width;
 					
 					$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$row]['active_phase_na'], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
@@ -2392,6 +2712,11 @@ function Download_reports()
 			} 
 			else if($mode == 'total')
 			{
+				$Rounded = (($data_matrix[$row]['total_phase_4'] > 0 && round($ratio * $data_matrix[$row]['total_phase_4']) < 1) ? 1:round($ratio * $data_matrix[$row]['total_phase_4'])) + (($data_matrix[$row]['total_phase_3'] > 0 && round($ratio * $data_matrix[$row]['total_phase_3']) < 1) ? 1:round($ratio * $data_matrix[$row]['total_phase_3'])) + (($data_matrix[$row]['total_phase_2'] > 0 && round($ratio * $data_matrix[$row]['total_phase_2']) < 1) ? 1:round($ratio * $data_matrix[$row]['total_phase_2'])) + (($data_matrix[$row]['total_phase_1'] > 0 && round($ratio * $data_matrix[$row]['total_phase_1']) < 1) ? 1:round($ratio * $data_matrix[$row]['total_phase_1'])) + (($data_matrix[$row]['total_phase_0'] > 0 && round($ratio * $data_matrix[$row]['total_phase_0']) < 1) ? 1:round($ratio * $data_matrix[$row]['total_phase_0'])) + (($data_matrix[$row]['total_phase_na'] > 0 && round($ratio * $data_matrix[$row]['total_phase_na']) < 1) ? 1:round($ratio * $data_matrix[$row]['total_phase_na']));
+				$Actual = ($ratio * $data_matrix[$row]['total_phase_4']) + ($ratio * $data_matrix[$row]['total_phase_3']) + ($ratio * $data_matrix[$row]['total_phase_2']) + ($ratio * $data_matrix[$row]['total_phase_1']) + ($ratio * $data_matrix[$row]['total_phase_0'])+ ($ratio * $data_matrix[$row]['total_phase_na']);
+				$Err = floor($Rounded - $Actual);
+				$Max_ValueKey = Max_ValueKey($data_matrix[$row]['total_phase_4'], $data_matrix[$row]['total_phase_3'], $data_matrix[$row]['total_phase_2'], $data_matrix[$row]['total_phase_1'], $data_matrix[$row]['total_phase_0'], $data_matrix[$row]['total_phase_na']);
+					
 				$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['total']);
 				$phase_space = 0;
 				if($data_matrix[$row]['total_phase_4'] > 0)
@@ -2403,10 +2728,15 @@ function Download_reports()
 						$Mini_Bar_Width = round($ratio * $data_matrix[$row]['total_phase_4']);
 					else
 						$Mini_Bar_Width = 1;
+					
+					if($Max_ValueKey == 0 && $Mini_Bar_Width > 1)
+					$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+					
 					if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 						$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 					else
 						$Mini_Bar_Width = $Total_Bar_Width;
+					
 					$phase_space =  $phase_space + $Mini_Bar_Width;
 					
 					$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$row]['total_phase_4'], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
@@ -2430,10 +2760,15 @@ function Download_reports()
 						$Mini_Bar_Width = round($ratio * $data_matrix[$row]['total_phase_3']);
 					else
 						$Mini_Bar_Width = 1;
+					
+					if($Max_ValueKey == 1 && $Mini_Bar_Width > 1)
+					$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+					
 					if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 						$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 					else
 						$Mini_Bar_Width = $Total_Bar_Width;
+					
 					$phase_space =  $phase_space + $Mini_Bar_Width;
 					
 					$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$row]['total_phase_3'], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
@@ -2457,10 +2792,15 @@ function Download_reports()
 						$Mini_Bar_Width = round($ratio * $data_matrix[$row]['total_phase_2']);
 					else
 						$Mini_Bar_Width = 1;
+					
+					if($Max_ValueKey == 2 && $Mini_Bar_Width > 1)
+					$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+					
 					if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 						$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 					else
 						$Mini_Bar_Width = $Total_Bar_Width;
+					
 					$phase_space =  $phase_space + $Mini_Bar_Width;
 					
 					$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$row]['total_phase_2'], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
@@ -2484,10 +2824,15 @@ function Download_reports()
 						$Mini_Bar_Width = round($ratio * $data_matrix[$row]['total_phase_1']);
 					else
 						$Mini_Bar_Width = 1;
+					
+					if($Max_ValueKey == 3 && $Mini_Bar_Width > 1)
+					$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+					
 					if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 						$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 					else
 						$Mini_Bar_Width = $Total_Bar_Width;
+					
 					$phase_space =  $phase_space + $Mini_Bar_Width;
 					
 					$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$row]['total_phase_1'], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
@@ -2511,10 +2856,15 @@ function Download_reports()
 						$Mini_Bar_Width = round($ratio * $data_matrix[$row]['total_phase_0']);
 					else
 						$Mini_Bar_Width = 1;
+					
+					if($Max_ValueKey == 4 && $Mini_Bar_Width > 1)
+					$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+					
 					if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 						$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 					else
 						$Mini_Bar_Width = $Total_Bar_Width;
+					
 					$phase_space =  $phase_space + $Mini_Bar_Width;
 					
 					$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$row]['total_phase_0'], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
@@ -2538,10 +2888,15 @@ function Download_reports()
 						$Mini_Bar_Width = round($ratio * $data_matrix[$row]['total_phase_na']);
 					else
 						$Mini_Bar_Width = 1;
+					
+					if($Max_ValueKey == 5 && $Mini_Bar_Width > 1)
+					$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+					
 					if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
 						$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
 					else
 						$Mini_Bar_Width = $Total_Bar_Width;
+					
 					$phase_space =  $phase_space + $Mini_Bar_Width;
 					
 					$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$row]['total_phase_na'], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
@@ -2835,5 +3190,43 @@ function CreateLastTickBorder(&$pdf, $product_Col_Width, $Tic_dimension, $column
 	}
 	$pdf->SetX($Main_X);
 	$pdf->SetY($Place_Y);
+}
+
+function Max_ValueKey($val0, $val1, $val2, $val3, $val4, $val5)
+{
+$key = 0;
+$max = $val[0];
+$i = 1;
+	if($max < $val1)
+	{
+		$max = $val1;
+		$key = 1;
+	}
+	
+	if($max < $val2)
+	{
+		$max = $val2;
+		$key = 2;
+	}
+	
+	if($max < $val3)
+	{
+		$max = $val3;
+		$key = 3;
+	}
+	
+	if($max < $val4)
+	{
+		$max = $val4;
+		$key = 4;
+	}
+	
+	if($max < $val5)
+	{
+		$max = $val5;
+		$key = 5;
+	}
+	
+	return $key;
 }
 ?>
