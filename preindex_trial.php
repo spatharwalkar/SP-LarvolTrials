@@ -284,7 +284,10 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 				
 				/** add columns: source, lead_sponsor and collaborator to the query */
 				$findme   = 'FROM data_trials';
+				$findme2   = 'FROM `data_trials`';
 				$pos = stripos($query, $findme);
+//				$pos2 = stripos($query, $findme, $pos + strlen($findme));
+				
 				if ($pos === false) 
 				{
 					$log='Error in MySql Query (no "FROM" clause is used in the query)  :' . $query;
@@ -299,6 +302,13 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					$query = substr($query,0,$pos-1). ', dt.source, dt.lead_sponsor, dt.collaborator ' . substr($query,$pos-1) ;
 					
 				}  
+				$pos3 = stripos($query, $findme2, $pos + 16);
+				if ($pos3 !== false) 
+				{
+
+					$query = substr($query,0,$pos3-1). ', dt.source, dt.lead_sponsor, dt.collaborator ' . substr($query,$pos3-1) ;
+					
+				}
 				 /************/
 				if(!$resu = mysql_query($query))
 				{
