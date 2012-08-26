@@ -137,14 +137,6 @@ a, a:hover{
 
 .rowcollapse:hover .upmcollapse { display: block; }
 
-.region {
-	background-color:#FFFFFF;
-}
-
-.altregion {
-	background-color:#F2F2F2;
-}
-
 .downldbox {
 	height:auto;
 	width:310px;
@@ -312,6 +304,8 @@ tr.upms td {
 
 .controls .bottom input{
 	margin:0.1em;
+	width: 13px; /* for IE */
+	height: 13px; /* For IE */ 
 }
 
 .ui-slider-horizontal .ui-slider-handle {
@@ -513,13 +507,15 @@ tr.upms td {
 }
 
 .searchbutton{
-      background: url(../images/search.png) no-repeat right center;
+	  background-color:	#48006F;
+	  color: #FFF;
       width: 63px;
       height: 25px;
 }
 
 .resetbutton{
-      background: url(../images/reset.png) no-repeat center center;
+	  background-color: #48006F;
+	  color: #FFF;
       width: 61px;
       height: 25px;
 }

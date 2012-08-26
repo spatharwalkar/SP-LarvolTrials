@@ -5750,8 +5750,6 @@ class TrialTracker
 						.'.bomb { float:left; margin-top:20px; text-align:center;}'
 						.'.result {	font-weight:bold;font-size:18px;}'
 						.'.norecord { padding:0px; height:auto; line-height:normal; font-weight:normal;	background-color: #EDEAFF; color:#000000;}'
-						.'.region {	background-color:#FFFFFF;}'
-						.'.altregion { background-color:#F2F2F2;}'
 						.'.sectiontitles{ font-family: Arial; font-weight: bold; background-color: #A2FF97;}'
 						.'tr.upms td{ text-align: left;background-color:#C5E5FA;}'
 						.'tr.upms td a{	color:#0000FF; text-decoration:none;}'
@@ -7499,6 +7497,8 @@ class TrialTracker
 			
 			$resultIds['product'] = explode(',', trim($resultIds['product']));
 			$resultIds['area'] = explode(',', trim($resultIds['area']));
+			
+			$resultIds['product'] = array_unique($resultIds['product']);
 			
 			if(count($resultIds['product']) > 1 && count($resultIds['area']) > 1)
 			{	
@@ -11249,8 +11249,8 @@ class TrialTracker
 			$url .= '&amp;LI=1';
 		}
 		echo '<div style="float:left;margin-right:10px;">'
-				. '<input type="submit" id="Show" value="" class="searchbutton" />&nbsp;<a style="display:inline;" href="' . $url . '">'
-				. '<input type="button" value="" id="reset" class="resetbutton" onclick="javascript: window.location.href(\'' . urlPath() . $url . '\')" /></a>'
+				. '<input type="submit" id="Show" value="Search" class="searchbutton" />&nbsp;<a style="display:inline;" href="' . $url . '">'
+				. '<input type="button" value="Reset" id="reset" class="resetbutton" onclick="javascript: window.location.href(\'' . urlPath() . $url . '\')" /></a>'
 				. '&nbsp;&nbsp;&nbsp;<b>' . $shownCount . '&nbsp;Records</b></div>';
 	}
 	
@@ -14165,7 +14165,7 @@ class TrialTracker
 	
 	function replaceRedundantAcroynm($Acroynm, $briefTitle)
 	{
-		$pattern = '~^\(*"*' . $Acroynm . '*\)*:*~';
+		$pattern = '~^\(*' . $Acroynm . '*\)*~';
 		$replacement = '';
 		$result = preg_replace($pattern, $replacement, $briefTitle);
 		
