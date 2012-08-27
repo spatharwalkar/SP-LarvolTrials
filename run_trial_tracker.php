@@ -10897,7 +10897,7 @@ class TrialTracker
 	{
 		$outputStr = '<table cellpadding="0" cellspacing="0" class="manage">'
 			 . '<tr>' . (($loggedIn) ? '<th style="width:38px;">D</th>' : '' )
-			 . '<th style="width:260px;">Title</th>'
+			 . '<th style="width:270px;">Title</th>'
 			 . '<th style="width:30px;" title="Red: Change greater than 20%">N</th>'
 			 . '<th style="width:64px;" title="&quot;RoW&quot; = Rest of World">Region</th>'
 			 . '<th style="width:100px;">Interventions</th>'
@@ -10908,9 +10908,9 @@ class TrialTracker
 			 . '<th style="width:25px;">Ph</th>'
 			 . '<th style="width:25px;">Res</th>'
 			 . '<th colspan="3" style="width:12px;">-</th>'
-			 . '<th colspan="12" style="width:30px;">' . (date('Y')) . '</th>'
-			 . '<th colspan="12" style="width:30px;">' . (date('Y')+1) . '</th>'
-			 . '<th colspan="12" style="width:30px;">' . (date('Y')+2) . '</th>'
+			 . '<th colspan="12" style="width:32px;">' . (date('Y')) . '</th>'
+			 . '<th colspan="12" style="width:32px;">' . (date('Y')+1) . '</th>'
+			 . '<th colspan="12" style="width:32px;">' . (date('Y')+2) . '</th>'
 			 . '<th colspan="3" style="width:12px;">+</th></tr>';
 		
 		return $outputStr;
