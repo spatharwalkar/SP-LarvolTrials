@@ -10896,22 +10896,22 @@ class TrialTracker
 	function displayTrialTableHeader($loggedIn, $globalOptions = array()) 
 	{
 		$outputStr = '<table cellpadding="0" cellspacing="0" class="manage">'
-			 . '<tr>' . (($loggedIn) ? '<th width="38px">ID</th>' : '' )
-			 . '<th style="width:270px;margin:0px;padding:0px;">Title</th>'
-			 . '<th style="width:30px" title="Red: Change greater than 20%">N</th>'
-			 . '<th style="width:65px" title="&quot;RoW&quot; = Rest of World">Region</th>'
-			 . '<th style="width:100px">Interventions</th>'
-			 . '<th style="width:90px">Sponsor</th>'
-			 . '<th style="width:100px">Status</th>'
-			 . '<th style="width:100px">Conditions</th>'
-			 . '<th style="width:27px" title="MM/YY">End</th>'
-			 . '<th style="width:25px">Ph</th>'
-			 . '<th style="width:22px">Res</th>'
-			 . '<th style="width:15px" colspan="3">-</th>'
-			 . '<th style="width:35px" colspan="12">' . (date('Y')) . '</th>'
-			 . '<th style="width:34px" colspan="12">' . (date('Y')+1) . '</th>'
-			 . '<th style="width:30px" colspan="12">' . (date('Y')+2) . '</th>'
-			 . '<th style="width:15px" colspan="3">+</th></tr>';
+			 . '<tr>' . (($loggedIn) ? '<th style="width:38px;">D</th>' : '' )
+			 . '<th style="width:260px;">Title</th>'
+			 . '<th style="width:30px;" title="Red: Change greater than 20%">N</th>'
+			 . '<th style="width:64px;" title="&quot;RoW&quot; = Rest of World">Region</th>'
+			 . '<th style="width:100px;">Interventions</th>'
+			 . '<th style="width:90px;">Sponsor</th>'
+			 . '<th style="width:105px;">Status</th>'
+			 . '<th style="width:100px;">Conditions</th>'
+			 . '<th title="MM/YY" style="width:33px;">End</th>'
+			 . '<th style="width:25px;">Ph</th>'
+			 . '<th style="width:25px;">Res</th>'
+			 . '<th colspan="3" style="width:12px;">-</th>'
+			 . '<th colspan="12" style="width:30px;">' . (date('Y')) . '</th>'
+			 . '<th colspan="12" style="width:30px;">' . (date('Y')+1) . '</th>'
+			 . '<th colspan="12" style="width:30px;">' . (date('Y')+2) . '</th>'
+			 . '<th colspan="3" style="width:12px;">+</th></tr>';
 		
 		return $outputStr;
 
