@@ -684,7 +684,7 @@ foreach($rows as $row => $rval)
 		else
 			$Mini_Bar_Width = 1;
 		
-		if($Max_ValueKey == 0 && $Mini_Bar_Width > 1)
+		if($Max_ValueKey == 0 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 		$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 		
 		if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -704,7 +704,7 @@ foreach($rows as $row => $rval)
 		else
 			$Mini_Bar_Width = 1;
 		
-		if($Max_ValueKey == 1 && $Mini_Bar_Width > 1)
+		if($Max_ValueKey == 1 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 		$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 		
 		if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -723,7 +723,7 @@ foreach($rows as $row => $rval)
 		else
 			$Mini_Bar_Width = 1;
 		
-		if($Max_ValueKey == 2 && $Mini_Bar_Width > 1)
+		if($Max_ValueKey == 2 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 		$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 		
 		if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -742,7 +742,7 @@ foreach($rows as $row => $rval)
 		else
 			$Mini_Bar_Width = 1;
 		
-		if($Max_ValueKey == 3 && $Mini_Bar_Width > 1)
+		if($Max_ValueKey == 3 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 		$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 		
 		if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -761,7 +761,7 @@ foreach($rows as $row => $rval)
 		else
 			$Mini_Bar_Width = 1;
 		
-		if($Max_ValueKey == 4 && $Mini_Bar_Width > 1)
+		if($Max_ValueKey == 4 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 		$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 		
 		if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -780,7 +780,7 @@ foreach($rows as $row => $rval)
 		else
 			$Mini_Bar_Width = 1;
 		
-		if($Max_ValueKey == 5 && $Mini_Bar_Width > 1)
+		if($Max_ValueKey == 5 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 		$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 		
 		if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -833,7 +833,7 @@ foreach($rows as $row => $rval)
 		else
 			$Mini_Bar_Width = 1;
 		
-		if($Max_ValueKey == 0 && $Mini_Bar_Width > 1)
+		if($Max_ValueKey == 0 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 		$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 		
 		if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -852,7 +852,7 @@ foreach($rows as $row => $rval)
 		else
 			$Mini_Bar_Width = 1;
 		
-		if($Max_ValueKey == 1 && $Mini_Bar_Width > 1)
+		if($Max_ValueKey == 1 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 		$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 		
 		if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -871,7 +871,7 @@ foreach($rows as $row => $rval)
 		else
 			$Mini_Bar_Width = 1;
 		
-		if($Max_ValueKey == 2 && $Mini_Bar_Width > 1)
+		if($Max_ValueKey == 2 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 		$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 		
 		if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -890,7 +890,7 @@ foreach($rows as $row => $rval)
 		else
 			$Mini_Bar_Width = 1;
 		
-		if($Max_ValueKey == 3 && $Mini_Bar_Width > 1)
+		if($Max_ValueKey == 3 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 		$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 		
 		if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -909,7 +909,7 @@ foreach($rows as $row => $rval)
 		else
 			$Mini_Bar_Width = 1;
 		
-		if($Max_ValueKey == 4 && $Mini_Bar_Width > 1)
+		if($Max_ValueKey == 4 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 		$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 		
 		if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -928,7 +928,7 @@ foreach($rows as $row => $rval)
 		else
 			$Mini_Bar_Width = 1;
 		
-		if($Max_ValueKey == 5 && $Mini_Bar_Width > 1)
+		if($Max_ValueKey == 5 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 		$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 		
 		if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -982,7 +982,7 @@ foreach($rows as $row => $rval)
 		else
 			$Mini_Bar_Width = 1;
 		
-		if($Max_ValueKey == 0 && $Mini_Bar_Width > 1)
+		if($Max_ValueKey == 0 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 		$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 		
 		if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -1001,7 +1001,7 @@ foreach($rows as $row => $rval)
 		else
 			$Mini_Bar_Width = 1;
 		
-		if($Max_ValueKey == 1 && $Mini_Bar_Width > 1)
+		if($Max_ValueKey == 1 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 		$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 		
 		if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -1020,7 +1020,7 @@ foreach($rows as $row => $rval)
 		else
 			$Mini_Bar_Width = 1;
 		
-		if($Max_ValueKey == 2 && $Mini_Bar_Width > 1)
+		if($Max_ValueKey == 2 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 		$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 		
 		if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -1039,7 +1039,7 @@ foreach($rows as $row => $rval)
 		else
 			$Mini_Bar_Width = 1;
 		
-		if($Max_ValueKey == 3 && $Mini_Bar_Width > 1)
+		if($Max_ValueKey == 3 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 		$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 		
 		if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -1058,7 +1058,7 @@ foreach($rows as $row => $rval)
 		else
 			$Mini_Bar_Width = 1;
 		
-		if($Max_ValueKey == 4 && $Mini_Bar_Width > 1)
+		if($Max_ValueKey == 4 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 		$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 		
 		if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -1077,7 +1077,7 @@ foreach($rows as $row => $rval)
 		else
 			$Mini_Bar_Width = 1;
 		
-		if($Max_ValueKey == 5 && $Mini_Bar_Width > 1)
+		if($Max_ValueKey == 5 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 		$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 		
 		if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -1545,7 +1545,7 @@ function Download_reports()
 						else
 							$Mini_Bar_Width = 1;
 						
-						if($Max_ValueKey == 0 && $Mini_Bar_Width > 1)
+						if($Max_ValueKey == 0 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 						$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 						
 						if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -1570,7 +1570,7 @@ function Download_reports()
 						else
 							$Mini_Bar_Width = 1;
 						
-						if($Max_ValueKey == 1 && $Mini_Bar_Width > 1)
+						if($Max_ValueKey == 1 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 						$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 						
 						if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -1595,7 +1595,7 @@ function Download_reports()
 						else
 							$Mini_Bar_Width = 1;
 						
-						if($Max_ValueKey == 2 && $Mini_Bar_Width > 1)
+						if($Max_ValueKey == 2 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 						$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 						
 						if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -1620,7 +1620,7 @@ function Download_reports()
 						else
 							$Mini_Bar_Width = 1;
 						
-						if($Max_ValueKey == 3 && $Mini_Bar_Width > 1)
+						if($Max_ValueKey == 3 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 						$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 						
 						if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -1645,7 +1645,7 @@ function Download_reports()
 						else
 							$Mini_Bar_Width = 1;
 						
-						if($Max_ValueKey == 4 && $Mini_Bar_Width > 1)
+						if($Max_ValueKey == 4 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 						$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 						
 						if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -1670,7 +1670,7 @@ function Download_reports()
 						else
 							$Mini_Bar_Width = 1;
 						
-						if($Max_ValueKey == 5 && $Mini_Bar_Width > 1)
+						if($Max_ValueKey == 5 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 						$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 						
 						if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -1704,7 +1704,7 @@ function Download_reports()
 						else
 							$Mini_Bar_Width = 1;
 						
-						if($Max_ValueKey == 0 && $Mini_Bar_Width > 1)
+						if($Max_ValueKey == 0 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 						$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 						
 						if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -1729,7 +1729,7 @@ function Download_reports()
 						else
 							$Mini_Bar_Width = 1;
 						
-						if($Max_ValueKey == 1 && $Mini_Bar_Width > 1)
+						if($Max_ValueKey == 1 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 						$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 						
 						if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -1754,7 +1754,7 @@ function Download_reports()
 						else
 							$Mini_Bar_Width = 1;
 						
-						if($Max_ValueKey == 2 && $Mini_Bar_Width > 1)
+						if($Max_ValueKey == 2 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 						$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 						
 						if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -1779,7 +1779,7 @@ function Download_reports()
 						else
 							$Mini_Bar_Width = 1;
 						
-						if($Max_ValueKey == 3 && $Mini_Bar_Width > 1)
+						if($Max_ValueKey == 3 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 						$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 						
 						if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -1804,7 +1804,7 @@ function Download_reports()
 						else
 							$Mini_Bar_Width = 1;
 						
-						if($Max_ValueKey == 4 && $Mini_Bar_Width > 1)
+						if($Max_ValueKey == 4 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 						$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 						
 						if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -1829,7 +1829,7 @@ function Download_reports()
 						else
 							$Mini_Bar_Width = 1;
 						
-						if($Max_ValueKey == 5 && $Mini_Bar_Width > 1)
+						if($Max_ValueKey == 5 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 						$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 						
 						if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -1863,7 +1863,7 @@ function Download_reports()
 						else
 							$Mini_Bar_Width = 1;
 						
-						if($Max_ValueKey == 0 && $Mini_Bar_Width > 1)
+						if($Max_ValueKey == 0 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 						$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 						
 						if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -1887,7 +1887,7 @@ function Download_reports()
 						else
 							$Mini_Bar_Width = 1;
 						
-						if($Max_ValueKey == 1 && $Mini_Bar_Width > 1)
+						if($Max_ValueKey == 1 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 						$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 						
 						if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -1911,7 +1911,7 @@ function Download_reports()
 						else
 							$Mini_Bar_Width = 1;
 						
-						if($Max_ValueKey == 2 && $Mini_Bar_Width > 1)
+						if($Max_ValueKey == 2 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 						$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 						
 						if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -1935,7 +1935,7 @@ function Download_reports()
 						else
 							$Mini_Bar_Width = 1;
 						
-						if($Max_ValueKey == 3 && $Mini_Bar_Width > 1)
+						if($Max_ValueKey == 3 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 						$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 						
 						if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -1959,7 +1959,7 @@ function Download_reports()
 						else
 							$Mini_Bar_Width = 1;
 						
-						if($Max_ValueKey == 4 && $Mini_Bar_Width > 1)
+						if($Max_ValueKey == 4 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 						$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 						
 						if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -1983,7 +1983,7 @@ function Download_reports()
 						else
 							$Mini_Bar_Width = 1;
 						
-						if($Max_ValueKey == 5 && $Mini_Bar_Width > 1)
+						if($Max_ValueKey == 5 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 						$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 						
 						if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -2327,7 +2327,7 @@ function Download_reports()
 					else
 						$Mini_Bar_Width = 1;
 					
-					if($Max_ValueKey == 0 && $Mini_Bar_Width > 1)
+					if($Max_ValueKey == 0 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 					$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 					
 					if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -2359,7 +2359,7 @@ function Download_reports()
 					else
 						$Mini_Bar_Width = 1;
 						
-					if($Max_ValueKey == 1 && $Mini_Bar_Width > 1)
+					if($Max_ValueKey == 1 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 					$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 					
 					if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -2391,7 +2391,7 @@ function Download_reports()
 					else
 						$Mini_Bar_Width = 1;
 					
-					if($Max_ValueKey == 2 && $Mini_Bar_Width > 1)
+					if($Max_ValueKey == 2 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 					$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 					
 					if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -2423,7 +2423,7 @@ function Download_reports()
 					else
 						$Mini_Bar_Width = 1;
 					
-					if($Max_ValueKey == 3 && $Mini_Bar_Width > 1)
+					if($Max_ValueKey == 3 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 					$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 					
 					if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -2455,7 +2455,7 @@ function Download_reports()
 					else
 						$Mini_Bar_Width = 1;
 					
-					if($Max_ValueKey == 4 && $Mini_Bar_Width > 1)
+					if($Max_ValueKey == 4 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 					$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 					
 					if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -2487,7 +2487,7 @@ function Download_reports()
 					else
 						$Mini_Bar_Width = 1;
 					
-					if($Max_ValueKey == 5 && $Mini_Bar_Width > 1)
+					if($Max_ValueKey == 5 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 					$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 					
 					if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -2528,7 +2528,7 @@ function Download_reports()
 					else
 						$Mini_Bar_Width = 1;
 					
-					if($Max_ValueKey == 0 && $Mini_Bar_Width > 1)
+					if($Max_ValueKey == 0 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 					$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 					
 					if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -2560,7 +2560,7 @@ function Download_reports()
 					else
 						$Mini_Bar_Width = 1;
 					
-					if($Max_ValueKey == 1 && $Mini_Bar_Width > 1)
+					if($Max_ValueKey == 1 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 					$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 					
 					if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -2592,7 +2592,7 @@ function Download_reports()
 					else
 						$Mini_Bar_Width = 1;
 					
-					if($Max_ValueKey == 2 && $Mini_Bar_Width > 1)
+					if($Max_ValueKey == 2 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 					$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 					
 					if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -2624,7 +2624,7 @@ function Download_reports()
 					else
 						$Mini_Bar_Width = 1;
 					
-					if($Max_ValueKey == 3 && $Mini_Bar_Width > 1)
+					if($Max_ValueKey == 3 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 					$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 					
 					if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -2656,7 +2656,7 @@ function Download_reports()
 					else
 						$Mini_Bar_Width = 1;
 					
-					if($Max_ValueKey == 4 && $Mini_Bar_Width > 1)
+					if($Max_ValueKey == 4 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 					$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 					
 					if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -2688,7 +2688,7 @@ function Download_reports()
 					else
 						$Mini_Bar_Width = 1;
 					
-					if($Max_ValueKey == 5 && $Mini_Bar_Width > 1)
+					if($Max_ValueKey == 5 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 					$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 					
 					if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -2729,7 +2729,7 @@ function Download_reports()
 					else
 						$Mini_Bar_Width = 1;
 					
-					if($Max_ValueKey == 0 && $Mini_Bar_Width > 1)
+					if($Max_ValueKey == 0 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 					$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 					
 					if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -2761,7 +2761,7 @@ function Download_reports()
 					else
 						$Mini_Bar_Width = 1;
 					
-					if($Max_ValueKey == 1 && $Mini_Bar_Width > 1)
+					if($Max_ValueKey == 1 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 					$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 					
 					if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -2793,7 +2793,7 @@ function Download_reports()
 					else
 						$Mini_Bar_Width = 1;
 					
-					if($Max_ValueKey == 2 && $Mini_Bar_Width > 1)
+					if($Max_ValueKey == 2 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 					$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 					
 					if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -2825,7 +2825,7 @@ function Download_reports()
 					else
 						$Mini_Bar_Width = 1;
 					
-					if($Max_ValueKey == 3 && $Mini_Bar_Width > 1)
+					if($Max_ValueKey == 3 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 					$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 					
 					if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -2857,7 +2857,7 @@ function Download_reports()
 					else
 						$Mini_Bar_Width = 1;
 					
-					if($Max_ValueKey == 4 && $Mini_Bar_Width > 1)
+					if($Max_ValueKey == 4 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 					$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 					
 					if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
@@ -2889,7 +2889,7 @@ function Download_reports()
 					else
 						$Mini_Bar_Width = 1;
 					
-					if($Max_ValueKey == 5 && $Mini_Bar_Width > 1)
+					if($Max_ValueKey == 5 && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
 					$Mini_Bar_Width = $Mini_Bar_Width - $Err;
 					
 					if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
