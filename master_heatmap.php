@@ -3541,7 +3541,12 @@ function Download_reports()
 					$pdf->getCellPaddings();
 					if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL)
 					{
-						if($data_matrix[$row][$col]['preclinical'])
+						if($data_matrix[$row][$col]['phase4_override'])
+						{
+							$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255,0,0)));
+							$pdf->SetFillColor(255,0,0);
+						}
+						else if($data_matrix[$row][$col]['preclinical'])
 						{
 							$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(174,211,220)));
 							$pdf->SetFillColor(174,211,220);
@@ -4225,28 +4230,35 @@ function Download_reports()
 				}
 				else
 				{
-					/////// To avoid product name overflow on side column when, first are columns is empty - putting 0 value with white color
-					if($data_matrix[$row][$col]['preclinical'] && $col == 1)
+					/////// To avoid product name overflow on side column when, first columns is empty - putting 0 value with background color
+					$blank_cell_bgSet = false;
+					if($data_matrix[$row][$col]['phase4_override'])
 					{
-						$preclinical_font['font']['color']['rgb'] = 'aed3dc';
-						$preclinical_bgcolor = 'aed3dc';
-						$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($preclinical_font);
-						$objPHPExcel->getActiveSheet()->setCellValue($cell, '0');
-						$objPHPExcel->getActiveSheet()->getStyle($cell)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID);
-						$objPHPExcel->getActiveSheet()->getStyle($cell)->getFill()->getStartColor()->setRGB($preclinical_bgcolor);
-					}
-					else if($col == 1)
-					{
-						$white_font['font']['color']['rgb'] = 'FFFFFF';
-						$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($white_font);
-						$objPHPExcel->getActiveSheet()->setCellValue($cell, '0');
+						$blank_cell_font['font']['color']['rgb'] = $data_matrix[$row][$col]['color_code'];
+						$blank_cell_bgcolor = $data_matrix[$row][$col]['color_code'];
+						$blank_cell_bgSet = true;
 					}
 					else if($data_matrix[$row][$col]['preclinical'])
 					{
-						$preclinical_font['font']['color']['rgb'] = 'aed3dc';
-						$preclinical_bgcolor = 'aed3dc';
+						$blank_cell_font['font']['color']['rgb'] = 'aed3dc';
+						$blank_cell_bgcolor = 'aed3dc';
+						$blank_cell_bgSet = true;
+					}
+					else if($col == 1)
+					{
+						$blank_cell_font['font']['color']['rgb'] = 'FFFFFF';
+					}
+					
+					if($col == 1)
+					{
+						$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($blank_cell_font);
+						$objPHPExcel->getActiveSheet()->setCellValue($cell, '0');
+					}
+					
+					if($blank_cell_bgSet)
+					{
 						$objPHPExcel->getActiveSheet()->getStyle($cell)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID);
-						$objPHPExcel->getActiveSheet()->getStyle($cell)->getFill()->getStartColor()->setRGB($preclinical_bgcolor);
+						$objPHPExcel->getActiveSheet()->getStyle($cell)->getFill()->getStartColor()->setRGB($blank_cell_bgcolor);
 					}
 				}
 			}
