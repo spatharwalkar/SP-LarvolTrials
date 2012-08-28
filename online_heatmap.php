@@ -1650,7 +1650,7 @@ function Scale_Div()
 			if(IS_cell_Type.value == 'product')
 			{
 				var Current_Row = document.getElementById("Cell_RowNum_"+i).value;
-				var Current_Height = document.getElementById("Cell_ID_"+i).offsetHeight
+				var Current_Height = document.getElementById("Cell_ID_"+i).offsetHeight;
 			}
 			
 			if(IS_cell_Type.value == 'HM_Cell' && Current_Row != null && Current_Row != '')
@@ -1660,8 +1660,8 @@ function Scale_Div()
 					var Div_exist = document.getElementById("Div_ID_"+i);
 					if(Div_exist != null && Div_exist != '')
 					{
-						document.getElementById("Div_ID_"+i).style.height = (Current_Height-4)+'px';
-						document.getElementById("Div_ID_"+i).style.verticalAlign = "middle";
+						document.getElementById("Div_ID_"+i).style.height = (Current_Height)+'px';
+						document.getElementById("Div_ID_"+i).style.verticalAlign = "top";
 					}
 				}
 			}
@@ -1742,7 +1742,7 @@ if((isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvoli
 }
 				
 $htmlContent .= '<form action="master_heatmap.php" method="post">'
-				. '<table width="640px" border="0" cellspacing="0" cellpadding="0" class="controls" align="center">'
+				. '<table width="645px" border="0" cellspacing="0" cellpadding="0" class="controls" align="center">'
 				. '<tr><th>View mode</th><th>Range</th><th class="right">Actions</th></tr>'
 				. '<tr>'
 				. '<td class="bottom"><p style="margin-top:8px;margin-right:5px;"><select id="dwcount" name="dwcount" onchange="change_view()">'
@@ -1766,7 +1766,7 @@ $htmlContent .= '<input type="text" id="endrange"  name="er" value="1 month" rea
 				. '<br/><div id="slider-range-min" style="width:320px; margin:10px 0px 0 10px;margin-left:20px;" align="left"></div></p></div>'
 				. '</td>'
 				. '<td class="bottom right">'
-				. '<div style="float: left; margin-left: 15px; margin-top: 11px; vertical-align:bottom;" id="chromemenu"><a rel="dropmenu"><span style="padding:2px; padding-right:4px; border:1px solid; color:#000000; background-position:left center; background-repeat:no-repeat; background-image:url(\'./images/save.png\'); cursor:pointer; ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Export</b></span></a></div>'
+				. '<div style="border:1px solid #000000; float:left; margin-left: 15px; margin-top: 11px; vertical-align:bottom; padding:2px;" id="chromemenu"><a rel="dropmenu"><span style="padding:2px; padding-right:4px; background-position:left center; background-repeat:no-repeat; background-image:url(\'./images/save.png\'); cursor:pointer; ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Export</b></span></a></div>'
 				. '</td>'
 				. '</tr>'
 				. '</table>'
@@ -1810,8 +1810,8 @@ foreach($columns as $col => $val)
 		$htmlContent .= '</div></th>';
 	}
 }
-
-$htmlContent .= '</tr><tr style="page-break-inside:avoid; height:100%;" nobr="true"><th '.(($Rotation_Flg == 1) ? 'height="'.$area_Col_Height.'px"':'').' class="Product_Row_Class" width="'.$product_Col_Width.'px" style="background-color:#FFFFFF; '.(($Rotation_Flg == 1) ? 'width:'.$product_Col_Width.'px; max-width:'.$product_Col_Width.';px':'').' ">&nbsp;</th>';
+//width="'.$product_Col_Width.'px" currently not needed
+$htmlContent .= '</tr><tr style="page-break-inside:avoid; height:100%;" nobr="true"><th '.(($Rotation_Flg == 1) ? 'height="'.$area_Col_Height.'px"':'').' class="Product_Row_Class" style="background-color:#FFFFFF; '.(($Rotation_Flg == 1) ? 'width:'.$product_Col_Width.'px; max-width:'.$product_Col_Width.';px':'').' ">&nbsp;</th>';
 
 
 foreach($columns as $col => $val)
@@ -2314,7 +2314,7 @@ foreach($rows as $row => $rval)
 		}
 		else
 		{
-			$htmlContent .= '';
+			$htmlContent .= '<div id="Div_ID_'.$online_HMCounter.'" style="width:100%; height:100%; max-height:inherit; _height:100%;  vertical-align:middle; float:none; display:table;">&nbsp;</div>';
 		}
 		
 		$htmlContent .= '</td>';
@@ -2346,6 +2346,7 @@ print $htmlContent;
 </body>
 </html>
 <script language="javascript" type="text/javascript">
+change_view();
 var winWidth = $(window).width();
 var docWidth = $(document).width();
 //adjust for too small resolutions
@@ -2358,6 +2359,7 @@ $('.product_col').css('white-space','wrap');
 $('.product_col').css('word-wrap','break-word');
 $('.product_col').css('_width','400px');
 }
-change_view();
+$(function () {
 Scale_Div();
+})
 </script>
