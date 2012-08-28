@@ -672,6 +672,14 @@ global $db;
 			event.stopPropagation();
 		});
 		
+		$('body').keydown(function(e)
+		{	
+			if (e.keyCode == 13) 
+			{
+			  $('#frmOtt').submit();
+			} 
+		});
+		
 	});
 
 	function timeEnum($timerange)
