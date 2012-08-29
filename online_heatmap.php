@@ -1066,12 +1066,12 @@ function change_view()
 	switch(start_range)
 	{
 		case 'now': st_limit = today; document.getElementById("startrange").style.width = "30px"; break;
-		case '1 week': st_limit = one_week; document.getElementById("startrange").style.width = "50px"; break;
+		case '1 week': st_limit = one_week; document.getElementById("startrange").style.width = "55px"; break;
 		case '2 weeks': st_limit = two_week; document.getElementById("startrange").style.width = "60px"; break;
 		case '1 month': st_limit = one_month; document.getElementById("startrange").style.width = "60px"; break;
-		case '1 quarter': st_limit = three_month; document.getElementById("startrange").style.width = "70px"; break;
-		case '6 months': st_limit = six_month; document.getElementById("startrange").style.width = "70px"; break;
-		case '1 year': st_limit = one_year; document.getElementById("startrange").style.width = "50px"; break;
+		case '1 quarter': st_limit = three_month; document.getElementById("startrange").style.width = "65px"; break;
+		case '6 months': st_limit = six_month; document.getElementById("startrange").style.width = "65px"; break;
+		case '1 year': st_limit = one_year; document.getElementById("startrange").style.width = "45px"; break;
 		default: start_range = start_range.replace(/\s+/g, '') ;	//Remove space in between
 				 var date_arr = start_range.split('-'); 
 				 var st_limit = date_arr[1] + "/" + date_arr[2] + "/" + date_arr[0] + " 23:59:59";	///As date Picker format is NOT Supported by by Javascript in IE, manual creation in required format
@@ -1081,8 +1081,8 @@ function change_view()
 	}
 	switch(end_range)
 	{
-		case 'now': ed_limit = today; document.getElementById("endrange").style.width = "30px";  break;
-		case '1 week': ed_limit = one_week; document.getElementById("endrange").style.width = "50px";  break;
+		case 'now': ed_limit = today; document.getElementById("endrange").style.width = "40px";  break;
+		case '1 week': ed_limit = one_week; document.getElementById("endrange").style.width = "55px";  break;
 		case '2 weeks': ed_limit = two_week; document.getElementById("endrange").style.width = "60px";  break;
 		case '1 month': ed_limit = one_month; document.getElementById("endrange").style.width = "60px";  break;
 		case '1 quarter': ed_limit = three_month; document.getElementById("endrange").style.width = "70px";  break;
@@ -1761,10 +1761,10 @@ if(!$db->loggedIn())
 }
 else
 {			
-	$htmlContent .= '<td class="Range_Value_TD"><input type="text" id="startrange" name="sr" value="now" readonly="readonly" class="jdpicker Range_Value_Style Range_Value_Align Range_Value IE8_Padding" /></td><td style="vertical-align:middle;"><label style="color:#f6931f;">-</label></td>';
+	$htmlContent .= '<td class="Range_Value_TD"><input type="text" id="startrange" name="sr" value="now" readonly="readonly" class="jdpicker Range_Value_Style Range_Value_Align Range_Value" /></td><td style="vertical-align:middle;"><label style="color:#f6931f;">-</label></td>';
 }
 				
-$htmlContent .= '<td class="Range_Value_TD"><input type="text" id="endrange" name="er" value="1 month" readonly="readonly" class="jdpicker Range_Value_Style Range_Value_Align Range_Value IE8_Padding" /></td>'
+$htmlContent .= '<td class="Range_Value_TD"><input type="text" id="endrange" name="er" value="1 month" readonly="readonly" class="jdpicker Range_Value_Style Range_Value_Align Range_Value" /></td>'
 				. '<td style="vertical-align:middle; padding-left:5px;"><div id="slider-range-min" style="width:320px;"></div></td>'
 				. '</tr></table>'
 				. '</td>'
