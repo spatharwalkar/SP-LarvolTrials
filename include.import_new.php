@@ -811,8 +811,8 @@ $array1=array
 		echo "<br>EUD ID: " . $eud_id . "<br>";
 
 
-		$query = 'SELECT `larvol_id` FROM data_trials where `source_id`="' . $eud_id . '"  LIMIT 1';
-
+		//$query = 'SELECT `larvol_id` FROM data_trials where `source_id`="' . $eud_id . '"  LIMIT 1';
+		$query = 'SELECT `larvol_id` FROM data_trials where `source_id` like "%' . $eud_id . '%"  LIMIT 1';
 		if(!$res = mysql_query($query))
 		{
 			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -1039,7 +1039,7 @@ function addNCT($rec)
 	$nct_id = unpadnct($rec->id_info->nct_id);
 
 		
-	$query = 'SELECT `larvol_id` FROM data_trials where `source_id`="' . $rec->id_info->nct_id . '"  LIMIT 1';
+	$query = 'SELECT `larvol_id` FROM data_trials where `source_id` like "%' . $rec->id_info->nct_id . '%"  LIMIT 1';
 	
 	if(!$res = mysql_query($query))
 		{

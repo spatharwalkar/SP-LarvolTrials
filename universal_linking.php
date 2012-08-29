@@ -110,7 +110,7 @@ if(isset($_POST['autolink_all']) and $_POST['autolink_all']='YES')
 		$lid=$oid;
 		$strr=autolink_trials($sid,$lid,$source,$i);
 		/*
-		if($i>3)
+		if($i>0)
 		{
 			exit;
 		}
@@ -148,25 +148,53 @@ echo '</tr>';
 $j=1;
 foreach($org_ids as $key=>$oid)
 {
+	if(substr(trim($key),0,3)<>'NCT') 
+		$n_oid=get_larvolid($key);
+	else
+		$n_oid=$oid;
+		
 	echo '<tr><td style="font-family: Helvetica;  font-size:14;padding-left:5px;"> &nbsp;  &nbsp;  &nbsp;  '.$j++.' </td>';
 	echo '<td style="font-family: Helvetica;  font-size:14;padding-left:5px;"> &nbsp;  &nbsp;  &nbsp;  '.$oid .' </td>';
 	echo '<td style="font-family: Helvetica;  font-size:14;padding-left:5px;"> &nbsp;  &nbsp;  &nbsp;  '.$key .' </td>';	
 	echo '<td style="font-family: Helvetica;  font-size:14;padding-left:5px;"> 
-		  <form method="post" action="link_trials.php?lid='.$oid.'">
+		  <form method="post" action="link_trials.php?lid='.$n_oid.'">
 		  <input type="submit" value="Link"></form></td>';
 	echo '</tr>';
 }
 echo '</table>';
 echo '</div>';
 
+function get_larvolid($osid)
+{
+$osid=trim($osid);
+$query = "
+				SELECT `larvol_id`
+				FROM `data_eudract` 
+				WHERE `eudract_id` = '$osid' limit 1
+				";
+		$res1 	= mysql_query($query) ;
+		if($res1===false)
+		{
+			$log = 'Bad SQL query. Query=' . $query;
+			$logger->fatal($log);
+			$osid = array_search($lid, $allsourceids);
+			pr('<br><b><span style="color:red">'.$counter.'. COULD NOT LINK Larvol id/Source Id : ' .  $lid .'/'.$osid .' to SOURCE ID:'.$sid.' / larvol id:'. $source_trial['larvol_id'] .'.</span></b>');
+			return false;
+		}
+
+		$st=mysql_fetch_assoc($res1);
+		return $st['larvol_id'];
+}
+
 function autolink_trials($sid,$lid,$source,$counter)
 {
 	
 	global $logger,$allsourceids;
+	
 	if($source == 'NCT')
 	{
 		$query = "
-				SELECT `source_id`,`larvol_id`,`brief_title` 
+				SELECT `larvol_id`
 				FROM `data_trials` 
 				WHERE `source_id` = '$sid' limit 1
 				";
@@ -182,48 +210,15 @@ function autolink_trials($sid,$lid,$source,$counter)
 		}
 
 		$source_trial=mysql_fetch_assoc($res1);
-	
-		// check if manual entry exists for both larvol ids, and if yes, then linking not possible.
+		$new_lid=$source_trial['larvol_id'];
+		
 		$query = "
-				SELECT `larvol_id`
-				FROM `data_manual` 
-				WHERE larvol_id in 
-				(" . $source_trial['larvol_id'] . "," . $lid . ")
-				
+				SELECT `source_id`
+				FROM `data_trials` 
+				WHERE `larvol_id` = '$lid' limit 1
 				";
 
 		$res1 	= mysql_query($query) ;
-		$num_rows = mysql_num_rows($res1);
-		if($num_rows>1)
-		{
-			$osid = array_search($lid, $allsourceids);
-			pr('<br><b><span style="color:red">'.$counter.'. COULD NOT LINK Larvol id/Source Id : ' .  $lid .'/'.$osid .' to SOURCE ID:'.$sid.' / larvol id:'. $source_trial['larvol_id'] .' becuase manual entries exist for both trials.</span></b>');
-			return;
-		}
-		//
-		
-		// link data_nct data (change larvol id)
-		$query = '
-				UPDATE data_nct 
-				set larvol_id="'  . $source_trial['larvol_id'] . '"
-				WHERE `larvol_id` ="' .  $lid .'" limit 1
-				';
-		$res1 		= mysql_query($query) ;
-		if($res1===false)
-		{
-			$log = 'Bad SQL query. Query=' . $query;
-			$logger->fatal($log);
-			$osid = array_search($lid, $allsourceids);
-			pr('<br><b><span style="color:red">'.$counter.'. COULD NOT LINK Larvol id/Source Id : ' .  $lid .'/'.$osid .' to SOURCE ID:'.$sid.' / larvol id:'. $source_trial['larvol_id'] .'.</span></b>');
-			return $log;
-		}
-		
-		$query = '
-				UPDATE data_manual 
-				set larvol_id="'  . $source_trial['larvol_id'] . '"
-				WHERE `larvol_id` ="' .  $lid .'" limit 1
-				';
-		$res1 		= mysql_query($query) ;
 		if($res1===false)
 		{
 			$log = 'Bad SQL query. Query=' . $query;
@@ -233,34 +228,16 @@ function autolink_trials($sid,$lid,$source,$counter)
 			return $log;
 		}
 
-		$query = '
-				DELETE FROM `data_trials` 
-				where larvol_id="' .  $lid .'" limit 1
-				';
-		$res1 		= mysql_query($query) ;
-		if($res1===false)
-		{
-			$log = 'Bad SQL query. Query=' . $query;
-			$logger->fatal($log);
-			$osid = array_search($lid, $allsourceids);
-			pr('<br><b><span style="color:red">'.$counter.'. COULD NOT LINK Larvol id/Source Id : ' .  $lid .'/'.$osid .' to SOURCE ID:'.$sid.' / larvol id:'. $source_trial['larvol_id'] .'.</span></b>');
-			
-			return $log;
-		}
-		// update sphinx index
-		if(isset($lid) and !empty($lid) and $lid>0)
-		{
-			global $sphinx;
-			delete_sphinx_index($lid);
-		}
-		$osid = array_search($lid, $allsourceids);
-		pr('<br><b><span style="color:black">'.$counter.'. Larvol id/Source Id : ' .  $lid .'/'.$osid .' has been linked to SOURCE ID:'.$sid.' and larvol id:'. $source_trial['larvol_id'] .'.</span></b>');
-		//require_once('edit_trials.php');
-		return true;
-
+		$source_trial=mysql_fetch_assoc($res1);
+		$new_sid=$source_trial['source_id'];
+		$source = 'EUDRACT';
+		$sid=$new_sid;
+		$lid=$new_lid;
+		
 	}
-	elseif($source == 'EUDRACT')
+	if($source == 'EUDRACT')
 	{
+		$sid=padnct($sid);
 		$query = "
 			SELECT `source_id`,`larvol_id`,`brief_title` 
 			FROM `data_trials` 
@@ -332,8 +309,84 @@ function autolink_trials($sid,$lid,$source,$counter)
 			pr('<br><b><span style="color:red">'.$counter.'. COULD NOT LINK Larvol id/Source Id : ' .  $lid .'/'.$osid .' to SOURCE ID:'.$sid.' / larvol id:'. $source_trial['larvol_id'] .'.</span></b>');
 			return $log;
 		}
+		
+		/***********get all existing eudract data and merge it with nct data (only if no nct data exists for that field) */
+		
+		$query = 
+			'select brief_title,acronym,official_title,lead_sponsor,collaborator,inclusion_criteria,exclusion_criteria,
+			`condition`,source_id FROM `data_trials` 
+			where larvol_id="' .  $lid .'" limit 1';
+		$res1 		= mysql_query($query) ; // eudract data.
+		$res1=mysql_fetch_assoc($res1);
+		if($res1===false)
+		{
+			$log = 'Bad SQL query. Query=' . $query;
+			$logger->fatal($log);
+			$osid = array_search($lid, $allsourceids);
+			pr('<br><b><span style="color:red">'.$counter.'. COULD NOT LINK Larvol id/Source Id : ' .  $lid .'/'.$osid .' to SOURCE ID:'.$sid.' / larvol id:'. $source_trial['larvol_id'] .'.</span></b>');
+			return $log;
+		}
+		$lay_title =$res1['brief_title'];
+		$abbr_title =$res1['acronym'];
+		$full_title =$res1['official_title'];
+		$sponsor_name =$res1['lead_sponsor'];
+		$support_org_name =$res1['collaborator'];
+		$inclusion_criteria =$res1['inclusion_criteria'];
+		$exclusion_criteria =$res1['exclusion_criteria'];
+		$condition =$res1['condition'];
+		$eudract_id=$res1['source_id'];
+		
+		
+		$query = 
+			'select brief_title,acronym,official_title,lead_sponsor,collaborator,inclusion_criteria,exclusion_criteria,
+			`condition`,source_id FROM `data_trials` 
+			where larvol_id="' . $source_trial['larvol_id'] .'" limit 1';
+		$res1 		= mysql_query($query) ; // NCT data.
+		$res1=mysql_fetch_assoc($res1);
+		if($res1===false)
+		{
+			$log = 'Bad SQL query. Query=' . $query;
+			$logger->fatal($log);
+			$osid = array_search($lid, $allsourceids);
+			pr('<br><b><span style="color:red">'.$counter.'. COULD NOT LINK Larvol id/Source Id : ' .  $lid .'/'.$osid .' to SOURCE ID:'.$sid.' / larvol id:'. $source_trial['larvol_id'] .'.</span></b>');
+			return $log;
+		}
+		$Nlay_title =$res1['brief_title'];
+		$Nabbr_title =$res1['acronym'];
+		$Nfull_title =$res1['official_title'];
+		$Nsponsor_name =$res1['lead_sponsor'];
+		$Nsupport_org_name =$res1['collaborator'];
+		$Ninclusion_criteria =$res1['inclusion_criteria'];
+		$Nexclusion_criteria =$res1['exclusion_criteria'];
+		$Ncondition =$res1['condition'];
+		$fldlst="";
+		if(empty($Nlay_title) and !empty($lay_title)) $fldlst .= " , brief_title =  '". $lay_title."'" ;
+		if(empty($Nabbr_title) and !empty($abbr_title)) $fldlst .= " , acronym =  '". $abbr_title."'" ;
+		if(empty($Nfull_title) and !empty($full_title)) $fldlst .= " , official_title =  '". $full_title."'" ;
+		if(empty($Nsponsor_name) and !empty($Nsponsor_name)) $fldlst .= " , lead_sponsor =  '". $sponsor_name."'" ;
+		if(empty($Nsupport_org_name) and !empty($support_org_name)) $fldlst .= " , collaborator =  '". $support_org_name."'" ;
+		if(empty($Ninclusion_criteria) and !empty($inclusion_criteria)) $fldlst .= " , inclusion_criteria =  '". $inclusion_criteria."'";
+		if(empty($Nexclusion_criteria) and !empty($exclusion_criteria)) $fldlst .= " , exclusion_criteria =  '". $exclusion_criteria."'" ;
+		if(empty($Ncondition) and !empty($condition)) $fldlst .= " , `condition` =  '". $condition."'" ;
+		
+		$update_q='update data_trials set source_id = CONCAT(source_id ,"`","'.$eudract_id .'") ' ;
+		$update_q .=  $fldlst;
+		$update_q .= ' where larvol_id="' . $source_trial['larvol_id'] .'" limit 1'; 
+		$res1 		= mysql_query($update_q) ;
+		if($res1===false)
+		{
+			$log = 'Bad SQL query. Query=' . $query;
+			$logger->fatal($log);
+			$osid = array_search($lid, $allsourceids);
+			pr('<br><b><span style="color:red">'.$counter.'. COULD NOT LINK Larvol id/Source Id : ' .  $lid .'/'.$osid .' to SOURCE ID:'.$sid.' / larvol id:'. $source_trial['larvol_id'] .'.</span></b>');
+			return $log;
+		}
+		
+		
+		/******************/
+		
+		
 		//delete the trial from data trial as it is no longer needed
-
 		$query = '
 			DELETE FROM `data_trials` 
 			where larvol_id="' .  $lid .'" limit 1

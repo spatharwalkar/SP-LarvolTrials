@@ -193,7 +193,13 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					if( isset($sourceid) and !is_null($sourceid) and !empty($sourceid) )
 					{
 //						$ln=strlen('  `source_id` = "'. $sourceid . '"  and  ');
-						$query = substr($mystring,0,$pos+6). ' ( `source_id` = "'. $sourceid . '" )  and  ( ' . substr($mystring,$pos+6) . ' ) ';
+						if($sourceid<>$used_sourceid) $new_lid=get_larvolid($sourceid);
+						$used_sourceid=$sourceid;
+						if($new_lid !== false and !empty($new_lid) )
+							$limit_query='( larvol_id = ' .$new_lid .' ) and ';
+						else
+							$limit_query='';
+						$query = substr($mystring,0,$pos+6). $limit_query . ' ( ' . substr($mystring,$pos+6) . ' ) ';
 					}
 					else
 					{
@@ -219,7 +225,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 				
 //				$query.= ' and (  `source_id` = "'. $sourceid . '" )';
 //				pr($query);
-				
+//				exit;
 				if($query=='Invalid Json') 
 				{
 					echo '<br> Invalid JSON in table <b>'. $cat .'</b> and id=<b>'.$cid.'</b> : <br>';
@@ -381,7 +387,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 				{
 					if( isset($sourceid) and !is_null($sourceid) and !empty($sourceid) and !empty($value) )
 					{
-						$srch = array_search($sourceid, $value); 
+						$srch = array_search_partial($sourceid, $value); 
 						if($srch!==false) echo ''; else continue;
 					}
 					
@@ -659,6 +665,40 @@ function trial_indexed($larvol_id,$cat,$cid)
 		return false;
 	}
 
+}
+
+function array_search_partial($string, $array)
+{
+	foreach($array as $aval)
+	{
+		$pos = stripos("xx".$aval, $string);
+		if( $pos !== false ) 
+		{
+			return true;
+		}
+	}
+	
+	return false;
+}
+
+function get_larvolid($osid)
+{
+$osid=trim($osid);
+$query = "
+				SELECT `larvol_id`
+				FROM `data_trials` 
+				WHERE `source_id` like '%".$osid."%' limit 1
+				";
+		$res1 	= mysql_query($query) ;
+		if($res1===false)
+		{
+			$log = 'Bad SQL query. Query=' . $query;
+			$logger->fatal($log);
+			pr($log);
+			return false;
+		}
+		$st=mysql_fetch_assoc($res1);
+		return $st['larvol_id'];
 }
 
 ?>

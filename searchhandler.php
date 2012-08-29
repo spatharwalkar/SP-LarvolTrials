@@ -700,7 +700,7 @@ function getNCTOverrideString($data, $alias, $pd_alias, $ar_alias, $select_str, 
 	
 	$return .=  " WHERE "
 		
-	.$alias . ".`source_id` IN (".implode(',',$override_str_arr).")";
+	."left(" . $alias . ".source_id,11) IN (".implode(',',$override_str_arr).")";
 	return $return;
 
 

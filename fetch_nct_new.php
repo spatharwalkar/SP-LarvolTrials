@@ -66,7 +66,8 @@ function run_incremental_scraper($days=NULL)
 	} 
 	/***** get only new updates  */
 	$query = 'SELECT UNIX_TIMESTAMP(lastchanged_date) AS "lastchanged_date",source_id FROM data_trials WHERE 
-				source_id IN("' . implode('","', array_keys($ids)) . '")';
+				left(source_id,11) IN("' . implode('","', array_keys($ids)) . '")';
+
 	$res = mysql_query($query);
 	if ($res === false) return softDie('Bad SQL query getting lastchanged dates for existing nct_ids');
 	$totcnt=count($ids);
