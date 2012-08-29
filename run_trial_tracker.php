@@ -10896,7 +10896,7 @@ class TrialTracker
 	function displayTrialTableHeader($loggedIn, $globalOptions = array()) 
 	{
 		$outputStr = '<table cellpadding="0" cellspacing="0" class="manage">'
-			 . '<tr>' . (($loggedIn) ? '<th style="width:38px;">D</th>' : '' )
+			 . '<tr>' . (($loggedIn) ? '<th style="width:38px;">ID</th>' : '' )
 			 . '<th style="width:270px;">Title</th>'
 			 . '<th style="width:30px;" title="Red: Change greater than 20%">N</th>'
 			 . '<th style="width:64px;" title="&quot;RoW&quot; = Rest of World">Region</th>'
