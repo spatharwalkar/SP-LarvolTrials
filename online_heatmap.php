@@ -851,48 +851,12 @@ a, a:hover{/*color:#000000; text-decoration:none;*/ height:100%;}
 	font-weight:bold;
 	font-size:18px;
 }
-.manual {
-color:#FF7700;
-}
-	
-.jdpicker_w
-{
-width:90px;
-float:left;
-}
-.jdpicker
-{
-border:0;
-color:#f6931f;
-font-weight:bold;
-width:100px;
-}
-.demo div{
-	margin:0 10px 0 10px;
-}
-.controls td{
-	border-bottom:1px solid #44F;
-	border-right:1px solid #44F;
-	padding: 10px 0 0 3px;
-    vertical-align: top;
-}
-.controls th{
-	font-weight:normal;
-	border-bottom: 1px solid #4444FF;
-    border-right: 1px solid #4444FF;
-}
-.right{
-	border-right:0px !important;
+
+.jdpicker {
+	vertical-align:middle;
+	position:relative;
 }
 
-.bottom{
-	border-bottom:0px !important;
-}
-.controls input{
-	margin:0.1em;
-}
-</style>
-<style type="text/css">
 .tooltip {
 	color: #000000; outline: none;
 	cursor:default; text-decoration: none;
@@ -1059,6 +1023,23 @@ font-weight:900;
 margin-top:0px;
 margin-bottom:0px;
 }
+.Range_Value_TD {
+vertical-align:middle;
+display:table-row;
+}
+.Range_Value {
+vertical-align:middle;
+}
+.Range_Value_Style {
+color:#f6931f;
+border:0;
+background-color:#FFFFFF;
+font-family:Verdana, Arial, Helvetica, sans-serif;
+font-size:13px;
+}
+.Product_Col_WidthStyle {
+min-width:10em;
+}
 </style>
 <script language="javascript" type="text/javascript">
 function change_view()
@@ -1084,32 +1065,34 @@ function change_view()
 	
 	switch(start_range)
 	{
-		case 'now': st_limit = today; break;
-		case '1 week': st_limit = one_week; break;
-		case '2 weeks': st_limit = two_week; break;
-		case '1 month': st_limit = one_month; break;
-		case '1 quarter': st_limit = three_month; break;
-		case '6 months': st_limit = six_month; break;
-		case '1 year': st_limit = one_year; break;
+		case 'now': st_limit = today; document.getElementById("startrange").style.width = "30px"; break;
+		case '1 week': st_limit = one_week; document.getElementById("startrange").style.width = "50px"; break;
+		case '2 weeks': st_limit = two_week; document.getElementById("startrange").style.width = "60px"; break;
+		case '1 month': st_limit = one_month; document.getElementById("startrange").style.width = "60px"; break;
+		case '1 quarter': st_limit = three_month; document.getElementById("startrange").style.width = "70px"; break;
+		case '6 months': st_limit = six_month; document.getElementById("startrange").style.width = "70px"; break;
+		case '1 year': st_limit = one_year; document.getElementById("startrange").style.width = "50px"; break;
 		default: start_range = start_range.replace(/\s+/g, '') ;	//Remove space in between
 				 var date_arr = start_range.split('-'); 
 				 var st_limit = date_arr[1] + "/" + date_arr[2] + "/" + date_arr[0] + " 23:59:59";	///As date Picker format is NOT Supported by by Javascript in IE, manual creation in required format
 				 var st_limit = new Date(st_limit);
+				 document.getElementById("startrange").style.width = "80px";  
 				 break;
 	}
 	switch(end_range)
 	{
-		case 'now': ed_limit = today; break;
-		case '1 week': ed_limit = one_week; break;
-		case '2 weeks': ed_limit = two_week; break;
-		case '1 month': ed_limit = one_month; break;
-		case '1 quarter': ed_limit = three_month; break;
-		case '6 months': ed_limit = six_month; break;
-		case '1 year': ed_limit = one_year; break;
+		case 'now': ed_limit = today; document.getElementById("endrange").style.width = "30px";  break;
+		case '1 week': ed_limit = one_week; document.getElementById("endrange").style.width = "50px";  break;
+		case '2 weeks': ed_limit = two_week; document.getElementById("endrange").style.width = "60px";  break;
+		case '1 month': ed_limit = one_month; document.getElementById("endrange").style.width = "60px";  break;
+		case '1 quarter': ed_limit = three_month; document.getElementById("endrange").style.width = "70px";  break;
+		case '6 months': ed_limit = six_month; document.getElementById("endrange").style.width = "70px";  break;
+		case '1 year': ed_limit = one_year; document.getElementById("endrange").style.width = "50px";  break;
 		default: end_range = end_range.replace(/\s+/g, '') ;
 				 var date_arr = end_range.split('-');
 				 var ed_limit = date_arr[1] + "/" + date_arr[2] + "/" + date_arr[0] + " 00:00:01"; ///As date Picker format is NOT Supported by by Javascript in IE, manual creation in required format
 				 var ed_limit = new Date(ed_limit);
+				 document.getElementById("endrange").style.width = "80px";  
 				 break;
 	}
 	
@@ -1762,31 +1745,31 @@ if((isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvoli
 }
 				
 $htmlContent .= '<form action="master_heatmap.php" method="post">'
-				. '<table width="645px" border="0" cellspacing="0" cellpadding="0" class="controls" align="center">'
-				. '<tr><th>View mode</th><th>Range</th><th class="right">Actions</th></tr>'
+				. '<table border="0" cellspacing="0" cellpadding="0" align="center">'
 				. '<tr>'
-				. '<td class="bottom"><p style="margin-top:8px;margin-right:5px;"><select id="dwcount" name="dwcount" onchange="change_view()">'
+				. '<td style="vertical-align:middle; padding-right:8px;"><select id="dwcount" name="dwcount" onchange="change_view()">'
 				. '<option value="indlead" selected="selected">Active industry trials</option>'
 				. '<option value="active">Active trials</option>'
-				. '<option value="total">All trials</option></select></p></td>'
-				. '<td style="background-color:#FFFFFF; width:380px;" class="bottom"><div class="demo"><p style="margin-top:5px;">'
-				. '<label for="startrange" style="float:left;margin-left:15px;"><b>Highlight updates:</b></label>';
+				. '<option value="total">All trials</option></select></td>'
+				. '<td style="background-color:#FFFFFF;">'
+				. '<table border="0" cellspacing="0" cellpadding="0"><tr>'
+				. '<td style="vertical-align:middle;">Highlight updates:</td>';
 				
 if(!$db->loggedIn()) 
 { 				
-	$htmlContent .= '&nbsp;<input type="hidden" id="startrange" name="sr" value="now" style="border:0; color:#f6931f; font-weight:bold; background-color:#FFFFFF; font-family:Verdana; font-size: 13px;"/>';
+	$htmlContent .= '<td><input type="hidden" id="startrange" name="sr" value="now"/></td>';
 }
 else
 {			
-	$htmlContent .= '<input type="text" id="startrange" name="sr" value="now" readonly="readonly" style="border:0; color:#f6931f; font-weight:bold; background-color:#FFFFFF; font-family:Verdana; font-size: 13px;" class="jdpicker" />'
-					. '<label style="color:#f6931f;float:left;">-</label> ';
+	$htmlContent .= '<td class="Range_Value_TD"><input type="text" id="startrange" name="sr" value="now" readonly="readonly" class="jdpicker Range_Value_Style Range_Value_Align Range_Value IE8_Padding" /></td><td style="vertical-align:middle;"><label style="color:#f6931f;">-</label></td>';
 }
 				
-$htmlContent .= '<input type="text" id="endrange"  name="er" value="1 month" readonly="readonly" style="border:0; color:#f6931f; font-weight:bold; background-color:#FFFFFF; font-family:Verdana; font-size: 13px;" class="jdpicker" />'
-				. '<br/><div id="slider-range-min" style="width:320px; margin:10px 0px 0 10px;margin-left:20px;" align="left"></div></p></div>'
+$htmlContent .= '<td class="Range_Value_TD"><input type="text" id="endrange" name="er" value="1 month" readonly="readonly" class="jdpicker Range_Value_Style Range_Value_Align Range_Value IE8_Padding" /></td>'
+				. '<td style="vertical-align:middle; padding-left:5px;"><div id="slider-range-min" style="width:320px;"></div></td>'
+				. '</tr></table>'
 				. '</td>'
-				. '<td class="bottom right">'
-				. '<div style="border:1px solid #000000; float:left; margin-left: 15px; margin-top: 11px; vertical-align:bottom; padding:2px;" id="chromemenu"><a rel="dropmenu"><span style="padding:2px; padding-right:4px; background-position:left center; background-repeat:no-repeat; background-image:url(\'./images/save.png\'); cursor:pointer; ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Export</b></span></a></div>'
+				. '<td style="vertical-align:middle; padding-left:15px;">'
+				. '<div style="border:1px solid #000000; float:right; margin-top: 0px; padding:2px;" id="chromemenu"><a rel="dropmenu"><span style="padding:2px; padding-right:4px; background-position:left center; background-repeat:no-repeat; background-image:url(\'./images/save.png\'); cursor:pointer; ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Export</b></span></a></div>'
 				. '</td>'
 				. '</tr>'
 				. '</table>'
@@ -1831,7 +1814,7 @@ foreach($columns as $col => $val)
 	}
 }
 //width="'.$product_Col_Width.'px" currently not needed
-$htmlContent .= '</tr><tr style="page-break-inside:avoid; height:100%;" nobr="true"><th '.(($Rotation_Flg == 1) ? 'height="'.$area_Col_Height.'px"':'').' class="Product_Row_Class" style="background-color:#FFFFFF; '.(($Rotation_Flg == 1) ? 'width:'.$product_Col_Width.'px; max-width:'.$product_Col_Width.';px':'').' ">&nbsp;</th>';
+$htmlContent .= '</tr><tr style="page-break-inside:avoid; height:100%;" nobr="true"><th '.(($Rotation_Flg == 1) ? 'height="'.$area_Col_Height.'px"':'').' class="Product_Row_Class Product_Col_WidthStyle" style="background-color:#FFFFFF; '.(($Rotation_Flg == 1) ? 'width:'.$product_Col_Width.'px; max-width:'.$product_Col_Width.';px':'').' ">&nbsp;</th>';
 
 
 foreach($columns as $col => $val)
@@ -2397,4 +2380,7 @@ $('.product_col').css('_width','400px');
 $(function () {
 Scale_Div();
 })
+// Default size
+document.getElementById("startrange").style.width = "30px"
+document.getElementById("endrange").style.width = "60px"
 </script>
