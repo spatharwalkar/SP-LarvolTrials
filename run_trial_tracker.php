@@ -9334,13 +9334,20 @@ class TrialTracker
 							
 		$previousValue = 'Previous value: ';	
 		$noPreviousValue = 'No previous value';	
-							
-		$nctId = unpadnct($dataRow['source_id']);
-		
+		if(substr($dataRow['source_id'],0,3)=="NCT") $nctId = unpadnct(substr($dataRow['source_id'],0,11));
+		else $nctId = $dataRow['source_id'];
 		$result['larvol_id'] 			= $dataRow['larvol_id'];
 		$result['inactive_date'] 		= $dataRow['end_date'];
 		$result['region'] 				= $dataRow['region'];
 		$result['NCT/nct_id'] 			= $nctId;
+		if(strlen(trim($dataRow['source_id'])) > 15)
+		{
+			$result['NCT/full_id'] 			= $dataRow['source_id'];
+		}
+		else
+		{
+			$result['NCT/full_id'] 			= $nctId;
+		}
 		$result['NCT/brief_title'] 		= stripslashes($dataRow['brief_title']);
 		$result['NCT/enrollment_type'] 	= $dataRow['enrollment_type'];
 		$result['NCT/acronym'] 			= $dataRow['acronym'];
@@ -11666,7 +11673,7 @@ class TrialTracker
 						if($ottType == 'indexed' || $ottType == 'colstackedindexed' || $ottType == 'rowstackedindexed')
 						{
 							$outputStr .= '<a style="color:' . $titleLinkColor . '" href="' . urlPath() . 'edit_trials.php?larvol_id=' . $dvalue['larvol_id'] 
-										. '" target="_blank">' . $dvalue['NCT/nct_id'] . '</a>';
+										. '" target="_blank">' . $dvalue['NCT/full_id'] . '</a>';
 						}
 						else
 						{
