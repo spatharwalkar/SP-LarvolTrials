@@ -110,7 +110,7 @@ if(isset($_POST['autolink_all']) and $_POST['autolink_all']='YES')
 		$lid=$oid;
 		$strr=autolink_trials($sid,$lid,$source,$i);
 		/*
-		if($i>0)
+		if($i>2)
 		{
 			exit;
 		}
@@ -241,7 +241,7 @@ function autolink_trials($sid,$lid,$source,$counter)
 		$query = "
 			SELECT `source_id`,`larvol_id`,`brief_title` 
 			FROM `data_trials` 
-			WHERE `source_id` = '$sid' limit 1
+			WHERE left(`source_id`,11) = '$sid' limit 1
 			";
 
 		$res1 	= mysql_query($query) ;
@@ -264,7 +264,6 @@ function autolink_trials($sid,$lid,$source,$counter)
 				(" . $source_trial['larvol_id'] . "," . $lid . ")
 				
 				";
-
 		$res1 	= mysql_query($query) ;
 		$num_rows = mysql_num_rows($res1);
 		if($num_rows>1)
