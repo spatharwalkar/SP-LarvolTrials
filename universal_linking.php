@@ -166,25 +166,44 @@ echo '</div>';
 
 function get_larvolid($osid)
 {
-$osid=trim($osid);
-$query = "
-				SELECT `larvol_id`
+	$osid=trim($osid);
+	$query = "	SELECT `larvol_id`
 				FROM `data_eudract` 
 				WHERE `eudract_id` = '$osid' limit 1
-				";
-		$res1 	= mysql_query($query) ;
-		if($res1===false)
-		{
-			$log = 'Bad SQL query. Query=' . $query;
-			$logger->fatal($log);
-			$osid = array_search($lid, $allsourceids);
-			pr('<br><b><span style="color:red">'.$counter.'. COULD NOT LINK Larvol id/Source Id : ' .  $lid .'/'.$osid .' to SOURCE ID:'.$sid.' / larvol id:'. $source_trial['larvol_id'] .'.</span></b>');
-			return false;
-		}
+			 ";
+	$res1 	= mysql_query($query) ;
+	if($res1===false)
+	{
+		$log = 'Bad SQL query. Query=' . $query;
+		$logger->fatal($log);
+		$osid = array_search($lid, $allsourceids);
+		$sid=get_sourceid($source_trial['larvol_id']); //get full source id
+		pr('<br><b><span style="color:red">'.$counter.'. Cannot link Larvol id/Source Id : ' .  $lid .'/'.$osid .' with '.$source_trial['larvol_id'].' / '. $sid .'.</span></b>');
+		return false;
+	}
 
-		$st=mysql_fetch_assoc($res1);
-		return $st['larvol_id'];
+	$st=mysql_fetch_assoc($res1);
+	return $st['larvol_id'];
 }
+function get_sourceid($olid)
+{
+
+	$query = "	SELECT `source_id`
+				FROM `data_trials` 
+				WHERE `larvol_id` = '$olid' limit 1
+			 ";
+	$res1 	= mysql_query($query) ;
+	if($res1===false)
+	{
+		$log = 'Bad SQL query. Query=' . $query;
+		$logger->fatal($log);
+		return false;
+	}
+
+	$st=mysql_fetch_assoc($res1);
+	return $st['source_id'];
+}
+
 
 function autolink_trials($sid,$lid,$source,$counter)
 {
@@ -205,7 +224,8 @@ function autolink_trials($sid,$lid,$source,$counter)
 			$log = 'Bad SQL query. Query=' . $query;
 			$logger->fatal($log);
 			$osid = array_search($lid, $allsourceids);
-			pr('<br><b><span style="color:red">'.$counter.'. COULD NOT LINK Larvol id/Source Id : ' .  $lid .'/'.$osid .' to SOURCE ID:'.$sid.' / larvol id:'. $source_trial['larvol_id'] .'.</span></b>');
+			$sid=get_sourceid($source_trial['larvol_id']); //get full source id
+			pr('<br><b><span style="color:red">'.$counter.'. Cannot link Larvol id/Source Id : ' .  $lid .'/'.$osid .' with '.$source_trial['larvol_id'].' / '. $sid .'.</span></b>');
 			return $log;
 		}
 
@@ -224,7 +244,8 @@ function autolink_trials($sid,$lid,$source,$counter)
 			$log = 'Bad SQL query. Query=' . $query;
 			$logger->fatal($log);
 			$osid = array_search($lid, $allsourceids);
-			pr('<br><b><span style="color:red">'.$counter.'. COULD NOT LINK Larvol id/Source Id : ' .  $lid .'/'.$osid .' to SOURCE ID:'.$sid.' / larvol id:'. $source_trial['larvol_id'] .'.</span></b>');
+			$sid=get_sourceid($source_trial['larvol_id']); //get full source id
+			pr('<br><b><span style="color:red">'.$counter.'. Cannot link Larvol id/Source Id : ' .  $lid .'/'.$osid .' with '.$source_trial['larvol_id'].' / '. $sid .'.</span></b>');
 			return $log;
 		}
 
@@ -250,7 +271,9 @@ function autolink_trials($sid,$lid,$source,$counter)
 			$log = 'Bad SQL query. Query=' . $query;
 			$logger->fatal($log);
 			$osid = array_search($lid, $allsourceids);
-			pr('<br><b><span style="color:red">'.$counter.'. COULD NOT LINK Larvol id/Source Id : ' .  $lid .'/'.$osid .' to SOURCE ID:'.$sid.' / larvol id:'. $source_trial['larvol_id'] .'.</span></b>');
+			$sid=get_sourceid($source_trial['larvol_id']); //get full source id
+			pr('<br><b><span style="color:red">'.$counter.'. Cannot link Larvol id/Source Id : ' .  $lid .'/'.$osid .' with '. $source_trial['larvol_id'] .' / '. $sid .'.</span></b>');
+			
 			return $log;
 		}
 
@@ -265,7 +288,7 @@ function autolink_trials($sid,$lid,$source,$counter)
 				
 				";
 		$res1 	= mysql_query($query) ;
-		$num_rows = mysql_num_rows($res1);
+		if($res1) $num_rows = mysql_num_rows($res1);
 		if($num_rows>1)
 		{
 			$osid = array_search($lid, $allsourceids);
@@ -289,7 +312,8 @@ function autolink_trials($sid,$lid,$source,$counter)
 			$log = 'Bad SQL query. Query=' . $query;
 			$logger->fatal($log);
 			$osid = array_search($lid, $allsourceids);
-			pr('<br><b><span style="color:red">'.$counter.'. COULD NOT LINK Larvol id/Source Id : ' .  $lid .'/'.$osid .' to SOURCE ID:'.$sid.' / larvol id:'. $source_trial['larvol_id'] .'.</span></b>');
+			$sid=get_sourceid($source_trial['larvol_id']); //get full source id
+			pr('<br><b><span style="color:red">'.$counter.'. Cannot link Larvol id/Source Id : ' .  $lid .'/'.$osid .' with '.$source_trial['larvol_id'].' / '. $sid .'. . Another EudraCT trial has already been linked with it. </span></b>');
 			return $log;
 		}
 		
