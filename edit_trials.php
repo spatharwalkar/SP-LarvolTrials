@@ -54,7 +54,7 @@ if(!isset($_POST['PME_sys_operation']) and !isset($_GET['larvol_id']))
 }
 */
 ?>
-<?
+<?php
 require_once('krumo/class.krumo.php');
 require_once('db.php');
 require_once('include.search.php');
@@ -210,7 +210,7 @@ $(document).ready(function(){
 }
 </style>
 </head>
-<?
+<?php
 $opts['dbh'] = $db->db_link;
 $opts['tb'] = 'data_trials';
 $opts['key'] = 'larvol_id';

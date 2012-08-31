@@ -255,17 +255,17 @@ $(document).ready(function(){
 
 	<tr>
 		<td>Larvol Id</td>
-		<td colspan="3"><input type="text" name="lid" id="lid" value="<? echo $lid; ?>"
+		<td colspan="3"><input type="text" name="lid" id="lid" value="<?php echo $lid; ?>"
 			readonly="readonly" size="150"></td>
 	</tr>
 	<tr>
 		<td>Brief Title</td>
-		<td colspan="3"><input type="text" value="<? echo $brief_title; ?>" size="150"
+		<td colspan="3"><input type="text" value="<?php echo $brief_title; ?>" size="150"
 			readonly="readonly"></td>
 	</tr>
 	<tr>
 		<td>Source Id:</td>
-		<td colspan="3"><input type="text" name="source" value="<? echo $source_id ?>"
+		<td colspan="3"><input type="text" name="source" value="<?php echo $source_id ?>"
 			size="150" readonly="readonly"></td>
 	</tr>
 	
@@ -315,7 +315,7 @@ $(document).ready(function(){
 	</form>
 </table>
 </div>
-		<?
+		<?php
 		// function to link sourceless trial to sourced trial.
 
 		function link_trial()
