@@ -414,23 +414,6 @@ $hoverJs 		= 'scripts/jquery.hoverIntent.minified.js';
 	        return;
 	}
 	</script>
-    <script type="text/javascript">document.documentElement.className = 'js';</script>
-    <style type="text/css">
-		.js #uiblocker {
-			display: block;
-			left: 0;
-			top: 0;
-			width: 100%;
-			height: 100%;
-			position: fixed;
-			cursor: wait;
-			z-index:1001;
-			text-align: center;
-			opacity: 0.7;
-			line-height: 200px;
-			background: #fff url(images/loading.gif) no-repeat 50% 50%;
-		}
- 	</style>
     </head>
 <body>
 <div id="uiblocker"></div>
@@ -725,11 +708,6 @@ global $db;
 		}
 		return $timerange;
 	}
-	
-	$(window).bind('load', function()
-	{
-		$('#uiblocker').fadeOut();
-    });
 </script>
 </body>
 </html>
