@@ -1826,7 +1826,10 @@ foreach($columns as $col => $val)
 	$caltTitle = (isset($cdesc) && $cdesc != '')?' alt="'.$cdesc.'" title="'.$cdesc.'" ':null;
 	$cat = (isset($columnsCategoryName[$col]) && $columnsCategoryName[$col] != '')? ' ('.$columnsCategoryName[$col].') ':'';
 		
-	$htmlContent .= '<th style="'.(($Rotation_Flg == 1) ? 'vertical-align:bottom;':'vertical-align:middle;').' max-width:'.$Width_matrix[$col]['width'].'px;" class="Area_Row_Class_'.$col.'" id="Cell_ID_'.$online_HMCounter.'" width="'.$Width_matrix[$col]['width'].'px" '.(($Rotation_Flg == 1) ? 'height="'.$area_Col_Height.'px" align="left"':'align="center"').' '.$caltTitle.'><div class="'.(($Rotation_Flg == 1) ? 'box_rotate Area_RowDiv_Class_'.$col.'':'break_words').'" style="background-color:#DDF;">';
+	$htmlContent .= '<th style="'.(($Rotation_Flg == 1) ? 'vertical-align:bottom;':'vertical-align:middle;').' max-width:'.$Width_matrix[$col]['width'].'px; width:'.$Width_matrix[$col]['width'].'px;" class="Area_Row_Class_'.$col.'" id="Cell_ID_'.$online_HMCounter.'" width="'.$Width_matrix[$col]['width'].'px" '.(($Rotation_Flg == 1) ? 'height="'.$area_Col_Height.'px" align="left"':'align="center"').' '.$caltTitle.'><div class="'.(($Rotation_Flg == 1) ? 'box_rotate Area_RowDiv_Class_'.$col.'':'break_words').'" style="background-color:#DDF;">';
+	
+	if($Rotation_Flg != 1)
+	$htmlContent .= '<p style="overflow:hidden; width:'.$Width_matrix[$col]['width'].'px; padding:0px; margin:0px;">';
 	
 	if(isset($areaIds[$col]) && $areaIds[$col] != NULL && !empty($productIds))
 	{
@@ -1845,6 +1848,9 @@ foreach($columns as $col => $val)
 		}
 		else
 			$htmlContent .= trim($val).'</a>';
+		
+	if($Rotation_Flg != 1)
+	$htmlContent .= '</p>';
 			
 	}
 	$htmlContent .='</div></th>';
