@@ -832,7 +832,8 @@ if($Rotation_Flg == 1)
 			_height:'.($area_Col_Height).'px;
 		}
 		';
-	}
+}
+
 ?>
 </style>
 <style type="text/css">
@@ -1984,10 +1985,10 @@ foreach($rows as $row => $rval)
 				$htmlContent .= '<font class="Status_Label_Headers" id="Filing_Img_'.$online_HMCounter.'">Filing </font><font class="Status_Label_Headers">: </font>'. $data_matrix[$row][$col]['filing'] .'</br>';
 			}
 			
-			$htmlContent .= '<font id="Count_CDate_'.$online_HMCounter.'" style="'.(($data_matrix[$row][$col]['active_prev'] != NULL && $data_matrix[$row][$col]['active_prev'] != '')? 'display:inline;':'display:none;').'"><font class="Status_Label_Headers">Count </font><font class="Status_Label_Headers">updated from : </font><font id="Popup_Count_ID_'.$online_HMCounter.'" class="Data_values">'. $data_matrix[$row][$col]['active_prev'] .'</font><br/></font>';
+			$htmlContent .= '<font id="Count_CDate_'.$online_HMCounter.'" style="'.(($data_matrix[$row][$col]['active_prev'] != NULL && $data_matrix[$row][$col]['active_prev'] != '')? 'display:inline;':'display:none;').'"><font class="Status_Label_Headers">Count </font><font class="Status_Label_Headers">updated from: </font><font id="Popup_Count_ID_'.$online_HMCounter.'" class="Data_values">'. $data_matrix[$row][$col]['active_prev'] .'</font><br/></font>';
 							
 			if($data_matrix[$row][$col]['highest_phase_prev'] != NULL && $data_matrix[$row][$col]['highest_phase_prev'] != '')
-			$htmlContent .= '<font id="Highest_Phase_'.$online_HMCounter.'"><font class="Status_Label_Headers">Highest phase updated </font><font class="Status_Label_Headers">from : </font> <font class="Data_values">Phase '.$data_matrix[$row][$col]['highest_phase_prev'].'</font></br></font>';
+			$htmlContent .= '<font id="Highest_Phase_'.$online_HMCounter.'"><font class="Status_Label_Headers">Highest phase updated</font><font class="Status_Label_Headers"> from: </font> <font class="Data_values">Phase '.$data_matrix[$row][$col]['highest_phase_prev'].'</font></br></font>';
 							
 			
 			$New_Trials_Flg=0;

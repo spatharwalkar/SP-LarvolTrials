@@ -2152,7 +2152,7 @@ function Download_reports()
 		$pdf->SetAuthor('Larvol Trials');
 		$pdf->SetTitle('Larvol Trials');
 		$pdf->SetSubject('Larvol Trials');
-		$pdf->SetKeywords('Larvol Trials Master Heatmap, Larvol Trials Master Heatmap PDF Export');
+		$pdf->SetKeywords('Larvol Trials Product Analytics, Larvol Trials Product Analytics PDF Export');
 		$pdf->SetFont('verdana', '', 6);
 		$pdf->setFontSubsetting(false);
 		$pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
@@ -2174,20 +2174,10 @@ function Download_reports()
 		$Tic_dimension = 1;
 		$subColumn_width = 1.4;
 		
-		$pdf->SetFillColor(192, 196, 254);
-        $pdf->SetTextColor(0);
-		$pdf->setCellPaddings(1, 1, 1, 1);
-		$pdf->setCellMargins(0, 0, 0, 0);
-		$border = array('mode' => 'int', 'LTR' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));
-		$pdf->MultiCell(($Page_Width/2), 13, '<b>Name: </b>'. $Report_Name, $border, $align='L', $fill=1, $ln=0, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
-		$border = array('mode' => 'int', 'LTR' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));
-		$pdf->MultiCell(($Page_Width/2), 13, '<b>Category: </b>'. htmlspecialchars($category), $border, $align='L', $fill=1, $ln=0, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
-		$pdf->Ln(13);
-		
-		$pdf->setCellPaddings(0.5, 0.5, 0.5, 0.5);
-		$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));
-		$pdf->MultiCell($Page_Width, 8, '<b>Display Mode: </b>'. $pdftitle, $border, $align='L', $fill=1, $ln=0, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
-		$pdf->Ln(20);
+		$Repo_Heading = $Report_Name.', '.$pdftitle;
+		$current_StringLength = $pdf->GetStringWidth($Repo_Heading, 'verdana', '', 6);
+		$pdf->MultiCell('', '', '<h3>'.$Repo_Heading.'</h3>', $border=0, $align='C', $fill=0, $ln=1, ((($Page_Width/2) - $current_StringLength)), '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+		$pdf->Ln(5);
 		
 		$pdf->setCellPaddings(0, 0, 0, 0);
 		$pdf->setCellMargins(0, 0, 0, 0);
