@@ -3,6 +3,7 @@ require_once('db.php');
 require_once('include.search.php');
 require_once('include.util.php');
 require_once('searchhandler.php');
+ini_set('memory_limit','-1');
 ini_set('error_reporting', E_ALL ^E_NOTICE );
 /*	
 
