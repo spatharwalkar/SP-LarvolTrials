@@ -145,6 +145,38 @@ if(isset($_REQUEST['ss']) && $_REQUEST['ss'] != '')
 	$globalOptions['sphinxSearch'] = $_REQUEST['ss'];
 }
 
+
+$globalOptions['resetLink'] = '';
+if(!(isset($_REQUEST['rflag'])))
+{
+	$resetParams = array();
+	parse_str($_SERVER['QUERY_STRING'], $resetParams);
+	
+	unset($resetParams['p']);
+	unset($resetParams['a']);
+	unset($resetParams['JSON_search']);
+	
+	if(!empty($resetParams))
+	{
+		foreach($resetParams as $rkey => $rvalue)
+		{
+			$globalOptions['resetLink'] .= '&' . $rkey . '=' . $rvalue;
+		}
+	}
+}
+
+if(isset($_REQUEST['rlink']) && $_REQUEST['rlink'] != '')
+{
+	$globalOptions['resetLink'] = $_REQUEST['rlink'];
+}
+
+
+if(isset($_REQUEST['ss']) && $_REQUEST['ss'] != '')
+{
+	$globalOptions['sphinxSearch'] = $_REQUEST['ss'];
+}
+
+
 $globalOptions['Highlight_Range'] = array('1 week', '2 weeks', '1 month', '1 quarter', '6 months', '1 year');
 
 //// Part added to switch start range and end range if they look reverse order
@@ -416,7 +448,6 @@ $hoverJs 		= 'scripts/jquery.hoverIntent.minified.js';
 	</script>
     </head>
 <body>
-<div id="uiblocker"></div>
 <?php
 if(isset($_REQUEST['region']) && $_REQUEST['region'] != '')
 {
@@ -520,11 +551,7 @@ else if(isset($_REQUEST['p']) && isset($_REQUEST['a']))
 		$globalOptions['url'] = 'p=' . $_REQUEST['p'] . '&a=' . $_REQUEST['a'] . '&JSON_search=' . $_REQUEST['JSON_search'];
 		$globalOptions['JSON_search'] = $_REQUEST['JSON_search'];
 	}
-	if(isset($_REQUEST['hm']) && trim($_REQUEST['hm']) != '' && $_REQUEST['hm'] != NULL)
-	{
-		$globalOptions['url'] .= '&hm=' . $_REQUEST['hm'];
-		$globalOptions['hm'] = $_REQUEST['hm'];
-	}
+	
 	if(isset($_REQUEST['sphinx_s']))
 	{
 		$globalOptions['sphinx_s'] = $_REQUEST['sphinx_s'];

@@ -10719,6 +10719,7 @@ class TrialTracker
 				. '<div style="float: right;margin-right: 10px; vertical-align:bottom; padding-top:4px; height:22px;"><span id="addtoright"></span></div>';
 				
 		echo '<br/><br/>';
+		echo '<input type="hidden" name="rflag" value="1" /><input type="hidden1" name="rlink" value="' . $globalOptions['resetLink'] . '" />';
 		
 		echo $this->displayTrialTableHeader($loggedIn, $globalOptions);
 		if($count > 0)
@@ -11223,6 +11224,7 @@ class TrialTracker
 				. '<input type="hidden" name="phase" id="phase" value="' . implode(',', $globalOptions['phase']) . '" />';
 		
 		$url = 'intermediary.php?';
+		
 		if($ottType == 'unstacked')
 		{
 			$url .= 'results=' . $globalOptions['url'];
@@ -11239,22 +11241,8 @@ class TrialTracker
 		{
 			$url .= 'id=' . $globalOptions['url'];
 		}
-		if($timeMachine !== NULL)
-		{
-			$url .= '&amp;time=' . $timeMachine;
-		}
-		if($globalOptions['version'] != 0)
-		{
-			$url .= '&amp;v=' . $globalOptions['version'];
-		}
-		if(isset($globalOptions['encodeFormat']) && $globalOptions['encodeFormat'] != 'old')
-		{
-			$url .= '&amp;format=' . $globalOptions['encodeFormat'];
-		}
-		if(isset($globalOptions['LI']) && $globalOptions['LI'] == '1')
-		{
-			$url .= '&amp;LI=1';
-		}
+		
+		$url .= $globalOptions['resetLink'];
 		echo '<div style="float:left;margin-right:10px;">'
 				. '<input type="submit" id="Show" value="Search" class="searchbutton" />&nbsp;<a style="display:inline;" href="' . $url . '">'
 				. '<input type="button" value="Reset" id="reset" class="resetbutton" onclick="javascript: window.location.href(\'' . urlPath() . $url . '\')" /></a>'
