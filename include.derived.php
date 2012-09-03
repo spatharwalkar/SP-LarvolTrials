@@ -1198,10 +1198,21 @@ function criteria_process($text)
 		
 			preg_match('/(.*:)(.*)/',$line, $hd1);  //Check if Line contains Header is Present
 			
-			// If line qualifies as header due to colon, count the number of words inside it, if they are more than 6 take it as Line instead of header
-			if(count(str_word_count($line, 1)) > 6 && $hd1[1])
+			if($hd1[1])
 			{
-				$hd1[1] = 0;
+				// If line qualifies as header due to colon, first check them using last formatted and available general heading pattern in our data 
+				preg_match('/([A-Z]{1}[a-z]+){0,1}(\s){0,1}(-){0,1}[A-Z]{1,}[a-z\s\/]+[a-z]+:{1}/', $line, $Qualify_HD1);
+				preg_match('/([A-Z]{1}[A-Z]+){0,1}(\s){0,1}[A-Z]{1,}[A-Z\s\/]+[A-Z]+:{1}/', $line, $Qualify_HD2);
+				
+				/// If line follows general header pattern no need of anything
+				if($Qualify_HD1[0] || $Qualify_HD2[0])
+				{
+					$hd1[1] = 1;
+				}
+				else if(count(str_word_count($line, 1)) > 1)	//if general header pattern got false then count the number of words inside it, if they are more than 6 take it as Line instead of header
+				{
+					$hd1[1] = 0;
+				}
 			}
 			
 			if($hd1[1]) //If header present Execute this part
