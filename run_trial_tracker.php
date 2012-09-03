@@ -10719,7 +10719,7 @@ class TrialTracker
 				. '<div style="float: right;margin-right: 10px; vertical-align:bottom; padding-top:4px; height:22px;"><span id="addtoright"></span></div>';
 				
 		echo '<br/><br/>';
-		echo '<input type="hidden" name="rflag" value="1" /><input type="hidden1" name="rlink" value="' . $globalOptions['resetLink'] . '" />';
+		echo '<input type="hidden" name="rflag" value="1" /><input type="hidden" name="rlink" value="' . $globalOptions['resetLink'] . '" />';
 		
 		echo $this->displayTrialTableHeader($loggedIn, $globalOptions);
 		if($count > 0)
@@ -11241,8 +11241,8 @@ class TrialTracker
 		{
 			$url .= 'id=' . $globalOptions['url'];
 		}
-		
 		$url .= $globalOptions['resetLink'];
+		$url = htmlentities($url);
 		echo '<div style="float:left;margin-right:10px;">'
 				. '<input type="submit" id="Show" value="Search" class="searchbutton" />&nbsp;<a style="display:inline;" href="' . $url . '">'
 				. '<input type="button" value="Reset" id="reset" class="resetbutton" onclick="javascript: window.location.href(\'' . urlPath() . $url . '\')" /></a>'
