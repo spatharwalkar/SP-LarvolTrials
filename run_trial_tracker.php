@@ -11364,6 +11364,16 @@ class TrialTracker
 			$url .= '&amp;tspo=on';
 		}
 		
+		if(isset($globalOptions['sphinxSearch']) && $globalOptions['sphinxSearch'] != '')
+		{
+			$url .= '&amp;ss=' . $globalOptions['sphinxSearch'];
+		}
+		
+		if(isset($globalOptions['resetLink']))
+		{
+			$url .= '&amp;rlink=' . $globalOptions['resetLink'];
+		}
+		
 		$stages = 2;
 		
 		$paginateStr = '<div class="pagination" style="float: left; padding-top:2px; vertical-align:bottom;">';
