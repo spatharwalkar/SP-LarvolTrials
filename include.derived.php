@@ -1209,7 +1209,7 @@ function criteria_process($text)
 				{
 					$hd1[1] = 1;
 				}
-				else if(count(str_word_count($line, 1)) > 1)	//if general header pattern got false then count the number of words inside it, if they are more than 6 take it as Line instead of header
+				else if(count(str_word_count($line, 1)) > 6)	//if general header pattern got false then count the number of words inside it, if they are more than 6 take it as Line instead of header
 				{
 					$hd1[1] = 0;
 				}
