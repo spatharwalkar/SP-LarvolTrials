@@ -11373,7 +11373,7 @@ class TrialTracker
 		{
 			$url .= '&amp;rlink=' . $globalOptions['resetLink'];
 		}
-		
+		$url .= '&amp;rflag=1';
 		$stages = 2;
 		
 		$paginateStr = '<div class="pagination" style="float: left; padding-top:2px; vertical-align:bottom;">';
