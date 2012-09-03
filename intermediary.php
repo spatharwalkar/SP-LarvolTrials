@@ -160,7 +160,7 @@ if(!(isset($_REQUEST['rflag'])))
 	{
 		foreach($resetParams as $rkey => $rvalue)
 		{
-			$globalOptions['resetLink'] .= '&' . $rkey . '=' . $rvalue;
+			$globalOptions['resetLink'] .= ',' . $rkey . '=' . $rvalue;
 		}
 	}
 }

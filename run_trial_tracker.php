@@ -11241,7 +11241,7 @@ class TrialTracker
 		{
 			$url .= 'id=' . $globalOptions['url'];
 		}
-		$url .= $globalOptions['resetLink'];
+		$url .= str_replace(',', '&', $globalOptions['resetLink']);
 		$url = htmlentities($url);
 		echo '<div style="float:left;margin-right:10px;">'
 				. '<input type="submit" id="Show" value="Search" class="searchbutton" />&nbsp;<a style="display:inline;" href="' . $url . '">'
