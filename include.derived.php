@@ -1198,6 +1198,12 @@ function criteria_process($text)
 		
 			preg_match('/(.*:)(.*)/',$line, $hd1);  //Check if Line contains Header is Present
 			
+			// If line qualifies as header due to colon, count the number of words inside it, if they are more than 6 take it as Line instead of header
+			if(count(str_word_count($line, 1)) > 6 && $hd1[1])
+			{
+				$hd1[1] = 0;
+			}
+			
 			if($hd1[1]) //If header present Execute this part
 			{
 				if($prev=='header')
