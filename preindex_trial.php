@@ -194,7 +194,12 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					if( isset($sourceid) and !is_null($sourceid) and !empty($sourceid) )
 					{
 //						$ln=strlen('  `source_id` = "'. $sourceid . '"  and  ');
-						if($sourceid<>$used_sourceid) $new_lid=get_larvolid($sourceid);
+						if($sourceid<>$used_sourceid)
+						{
+							$new_lid=get_larvolid($sourceid);
+							if($new_lid === false or empty($new_lid) )
+								continue;
+						}
 						$used_sourceid=$sourceid;
 						if($new_lid !== false and !empty($new_lid) )
 							$limit_query='( larvol_id = ' .$new_lid .' ) and ';
