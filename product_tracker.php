@@ -773,22 +773,8 @@ for($incr=0; $incr < count($rows); $incr++)
 	$remain_span = $total_cols - $phase_space;
 	
 	if($remain_span > 0)
-	{
-		$aq_sp = 0;
-		while($aq_sp < $phase_space)
-		$aq_sp = $aq_sp + $inner_columns;
-		
-		$extra_sp = $aq_sp - $phase_space;
-		if($extra_sp > 0)
-		$htmlContent .= '<th colspan="'.($extra_sp).'" class="graph_right side_tick_height">&nbsp;</th>';
+	$htmlContent .= DrawExtraHTMLCells($phase_space, $inner_columns, $remain_span);
 	
-		$remain_span = $remain_span - $extra_sp;
-		while($remain_span > 0)
-		{
-			$htmlContent .= '<th colspan="'.($inner_columns).'" class="graph_right side_tick_height">&nbsp;</th>';
-			$remain_span = $remain_span - $inner_columns;
-		}
-	}
 	$htmlContent .= '</tr>';
 	
 	//// Code for Active
@@ -847,22 +833,8 @@ for($incr=0; $incr < count($rows); $incr++)
 	$remain_span = $total_cols - $phase_space;
 	
 	if($remain_span > 0)
-	{
-		$aq_sp = 0;
-		while($aq_sp < $phase_space)
-		$aq_sp = $aq_sp + $inner_columns;
-		
-		$extra_sp = $aq_sp - $phase_space;
-		if($extra_sp > 0)
-		$htmlContent .= '<th colspan="'.($extra_sp).'" class="graph_right side_tick_height">&nbsp;</th>';
+	$htmlContent .= DrawExtraHTMLCells($phase_space, $inner_columns, $remain_span);
 	
-		$remain_span = $remain_span - $extra_sp;
-		while($remain_span > 0)
-		{
-			$htmlContent .= '<th colspan="'.($inner_columns).'" class="graph_right side_tick_height">&nbsp;</th>';
-			$remain_span = $remain_span - $inner_columns;
-		}
-	}
 	$htmlContent .= '</tr>';
 	
 	//// Code for Total
@@ -921,22 +893,8 @@ for($incr=0; $incr < count($rows); $incr++)
 	$remain_span = $total_cols - $phase_space;
 	
 	if($remain_span > 0)
-	{
-		$aq_sp = 0;
-		while($aq_sp < $phase_space)
-		$aq_sp = $aq_sp + $inner_columns;
-		
-		$extra_sp = $aq_sp - $phase_space;
-		if($extra_sp > 0)
-		$htmlContent .= '<th colspan="'.($extra_sp).'" class="graph_right side_tick_height">&nbsp;</th>';
+	$htmlContent .= DrawExtraHTMLCells($phase_space, $inner_columns, $remain_span);
 	
-		$remain_span = $remain_span - $extra_sp;
-		while($remain_span > 0)
-		{
-			$htmlContent .= '<th colspan="'.($inner_columns).'" class="graph_right side_tick_height">&nbsp;</th>';
-			$remain_span = $remain_span - $inner_columns;
-		}
-	}
 	$htmlContent .= '</tr>';
 	
 	////// End Of - Color Graph - Bar Starts
@@ -967,6 +925,26 @@ $htmlContent .= '<input type="hidden" value="'.count($rows).'" name="Tot_rows" i
 
 			
 print $htmlContent;
+
+function DrawExtraHTMLCells($phase_space, $inner_columns, $remain_span)
+{
+	$aq_sp = 0;
+	while($aq_sp < $phase_space)
+	$aq_sp = $aq_sp + $inner_columns;
+	
+	$extra_sp = $aq_sp - $phase_space;
+	if($extra_sp > 0)
+	$extraHTMLContent .= '<th colspan="'.($extra_sp).'" class="graph_right side_tick_height">&nbsp;</th>';
+	
+	$remain_span = $remain_span - $extra_sp;
+	while($remain_span > 0)
+	{
+		$extraHTMLContent .= '<th colspan="'.($inner_columns).'" class="graph_right side_tick_height">&nbsp;</th>';
+		$remain_span = $remain_span - $inner_columns;
+	}
+	
+	return $extraHTMLContent;
+}
 ?>
 </body>
 </html>
