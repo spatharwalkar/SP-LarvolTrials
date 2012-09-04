@@ -567,6 +567,22 @@ function Set_Link_Height()
 	var i=0;
 	for(i=0;i<limit;i++)
 	{
+		 //// As links are not getting correct height in Larvol Insight page
+		//// Before getting height of each cell, make all rows visible and then again hide it at end as per requirement.
+		var row_type = document.getElementById('active_Graph_Row_'+i);
+		if(row_type != null && row_type != '')
+		{
+			<?php if(strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') == FALSE) { ?>
+			document.getElementById("active_Graph_Row_"+i).style.display = "table-row";
+			document.getElementById("total_Graph_Row_"+i).style.display = "table-row";
+			document.getElementById("indlead_Graph_Row_"+i).style.display = "table-row";
+			<? } else { ?>
+			document.getElementById("active_Graph_Row_"+i).style.display = "inline";
+			document.getElementById("total_Graph_Row_"+i).style.display = "inline";
+			document.getElementById("indlead_Graph_Row_"+i).style.display = "inline";
+			<?php } ?>
+		}
+			
 		var IS_Prod_Row = document.getElementById("ProdCol_"+i);
 		if(IS_Prod_Row != null && IS_Prod_Row != '')
 		{
@@ -575,6 +591,7 @@ function Set_Link_Height()
 			$(".Link_"+i).css('max-height', document.getElementById("ProdCol_"+i).offsetHeight+'px');
 		}
 	}
+	change_view();
 }
 </script>
 </head>
