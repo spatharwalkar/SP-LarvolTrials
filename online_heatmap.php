@@ -1039,7 +1039,7 @@ font-family:Verdana, Arial, Helvetica, sans-serif;
 font-size:13px;
 }
 .Product_Col_WidthStyle {
-min-width:10em;
+min-width:250px;
 }
 </style>
 <script language="javascript" type="text/javascript">
