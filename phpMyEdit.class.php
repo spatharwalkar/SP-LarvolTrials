@@ -2742,7 +2742,8 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 		}
 		$sourzeid="";
 		// Real query (no additional query in this method)
-		foreach ($newvals as $fd => $val) {
+		foreach ($newvals as $fd => $val) 
+		{
 			if ($fd == '') continue;
 			if ($this->col_has_sqlw($this->fdn[$fd])) 
 			{
@@ -2759,6 +2760,33 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 			{
 				$value = "'".addslashes($val)."'";
 			}
+			/****** set isactive field value */
+			if(trim($fd)=="is_active")
+			{
+			
+				$inactiveStatus = 
+				array(
+					'test string',
+					'Withheld',
+					'Approved for marketing',
+					'Temporarily not available',
+					'No Longer Available',
+					'Withdrawn',
+					'Terminated',
+					'Suspended',
+					'Completed'	
+					);
+				
+				$inactive=1;
+				if(isset($value))
+				{
+					
+					$x=array_search($newvals['overall_status'],$inactiveStatus);
+					if($x) $value=0; else $value=1;
+				}
+			}
+			/****** is_active ***********/
+			
 			if ($query == '') 
 			{
 				$query = 'INSERT INTO '.$this->sd.$this->tb.$this->ed.' ('.$this->sd.$fd.$this->ed.''; // )
@@ -2777,6 +2805,7 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 				
 				$sourzeid=substr($value,1,$l-2);
 			}
+			
 			
 			if ( isset($ignore) and $ignore > 0  ) 
 			{
@@ -2909,7 +2938,7 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 		// Build the real query respecting changes to the newvals array
 		foreach ($newvals as $fd => $val) {
 			if ($fd == '') continue;
-			if ($val == $oldvals[$fd]) 
+			if ($val == $oldvals[$fd] and $fd<>'is_active') 
 			{
 			continue;
 			}
@@ -2926,6 +2955,31 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 			} else {
 				$value = "'".addslashes($val)."'";
 			}
+			
+			/****** set isactive field value */
+			if(trim($fd)=="is_active")
+			{
+				$inactiveStatus = 
+				array(
+					'test string',
+					'Withheld',
+					'Approved for marketing',
+					'Temporarily not available',
+					'No Longer Available',
+					'Withdrawn',
+					'Terminated',
+					'Suspended',
+					'Completed'	
+					);
+			
+				$inactive=1;
+				if(isset($value))
+				{
+					$x=array_search($newvals['overall_status'],$inactiveStatus);
+					if($x) $value=0; else $value=1;
+				}
+			}
+			/****** is_active ***********/
 			if ($query_real == '') 
 			{
 //tkv
