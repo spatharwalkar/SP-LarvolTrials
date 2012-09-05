@@ -294,7 +294,7 @@ function DataGenerator($id)
 ul, li, slideout { behavior:url("css/csshover3.htc"); }
 img { behavior: url("css/iepngfix.htc"); }
 body { font-family:Verdana; font-size: 13px;}
-a, a:hover{ height:100%; display:block; text-decoration:none;}
+a, a:hover{ height:100%; width:100%; display:block; text-decoration:none;}
 
 .report_name {
 	font-weight:bold;
@@ -651,6 +651,8 @@ $column_width = $Return['column_width'];
 $ratio = $Return['ratio'];
 $areaId = $Return['areaId'];
 $column_interval = $Return['column_interval'];
+
+$phase_legend_nums = array('4', '3', '2', '1', '0', 'na');
 	
 $Report_Name = ((trim($Report_DisplayName) != '' && $Report_DisplayName != NULL)? trim($Report_DisplayName):'report '.$id.'');
 
@@ -707,7 +709,8 @@ for($j=0; $j < $columns; $j++)
 $htmlContent .= '</tr>';
 
 for($incr=0; $incr < count($rows); $incr++)
-{	$row = $incr;
+{	
+	$row = $incr;
 	$htmlContent .= '<tr class="side_tick_height"><th class="prod_col side_tick_height">&nbsp;</th><th class="'. (($row == 0) ? 'graph_top':'' ) .' graph_right last_tick_width">&nbsp;</th>';
 	for($j=0; $j < $columns; $j++)
 	{
@@ -728,46 +731,15 @@ for($incr=0; $incr < count($rows); $incr++)
 	$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['indlead']);
 	$phase_space = 0;
 	
-	if($data_matrix[$row]['indlead_phase_4'] > 0)
+	foreach($phase_legend_nums as $key => $phase_nums)
 	{
-		$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['indlead_phase_4'], '4', $Max_ValueKey, $Err, $Total_Bar_Width);
-		$phase_space =  $phase_space + $Mini_Bar_Width;					
-		$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height graph_red" title="'.$data_matrix[$row]['indlead_phase_4'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&itype=0&phase=4&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
-	}
-	
-	if($data_matrix[$row]['indlead_phase_3'] > 0)
-	{
-		$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['indlead_phase_3'], '3', $Max_ValueKey, $Err, $Total_Bar_Width);
-		$phase_space =  $phase_space + $Mini_Bar_Width;					
-		$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height graph_orange" title="'.$data_matrix[$row]['indlead_phase_3'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&itype=0&phase=3&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
-	}
-	
-	if($data_matrix[$row]['indlead_phase_2'] > 0)
-	{
-		$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['indlead_phase_2'], '2', $Max_ValueKey, $Err, $Total_Bar_Width);
-		$phase_space =  $phase_space + $Mini_Bar_Width;					
-		$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height graph_yellow" title="'.$data_matrix[$row]['indlead_phase_2'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&itype=0&phase=2&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
-	}
-	
-	if($data_matrix[$row]['indlead_phase_1'] > 0)
-	{
-		$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['indlead_phase_1'], '1', $Max_ValueKey, $Err, $Total_Bar_Width);
-		$phase_space =  $phase_space + $Mini_Bar_Width;					
-		$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height graph_green" title="'.$data_matrix[$row]['indlead_phase_1'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&itype=0&phase=1&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
-	}
-	
-	if($data_matrix[$row]['indlead_phase_0'] > 0)
-	{
-		$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['indlead_phase_0'], '0', $Max_ValueKey, $Err, $Total_Bar_Width);
-		$phase_space =  $phase_space + $Mini_Bar_Width;					
-		$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height graph_blue" title="'.$data_matrix[$row]['indlead_phase_0'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&itype=0&phase=0&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
-	}
-	
-	if($data_matrix[$row]['indlead_phase_na'] > 0)
-	{
-		$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['indlead_phase_4'], 'na', $Max_ValueKey, $Err, $Total_Bar_Width);
-		$phase_space =  $phase_space + $Mini_Bar_Width;					
-		$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height graph_gray" title="'.$data_matrix[$row]['indlead_phase_na'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&itype=0&phase=na&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
+		if($data_matrix[$row]['indlead_phase_'.$phase_nums] > 0)
+		{
+			$Color = getClassNColorforPhase($phase_nums);
+			$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['indlead_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
+			$phase_space =  $phase_space + $Mini_Bar_Width;					
+			$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height '.$Color[0].'" title="'.$data_matrix[$row]['indlead_phase_'.$phase_nums].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&itype=0&phase='.$phase_nums.'&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
+		}
 	}
 	
 	$remain_span = $total_cols - $phase_space;
@@ -788,46 +760,15 @@ for($incr=0; $incr < count($rows); $incr++)
 	$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['active']);
 	$phase_space = 0;
 	
-	if($data_matrix[$row]['active_phase_4'] > 0)
+	foreach($phase_legend_nums as $key => $phase_nums)
 	{
-		$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['active_phase_4'], '4', $Max_ValueKey, $Err, $Total_Bar_Width);
-		$phase_space =  $phase_space + $Mini_Bar_Width;					
-		$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height graph_red" title="'.$data_matrix[$row]['active_phase_4'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&phase=4&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
-	}
-	
-	if($data_matrix[$row]['active_phase_3'] > 0)
-	{
-		$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['active_phase_3'], '3', $Max_ValueKey, $Err, $Total_Bar_Width);
-		$phase_space =  $phase_space + $Mini_Bar_Width;					
-		$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height graph_orange" title="'.$data_matrix[$row]['active_phase_3'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&phase=3&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
-	}
-	
-	if($data_matrix[$row]['active_phase_2'] > 0)
-	{
-		$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['active_phase_2'], '2', $Max_ValueKey, $Err, $Total_Bar_Width);
-		$phase_space =  $phase_space + $Mini_Bar_Width;					
-		$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height graph_yellow" title="'.$data_matrix[$row]['active_phase_2'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&phase=2&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
-	}
-	
-	if($data_matrix[$row]['active_phase_1'] > 0)
-	{
-		$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['active_phase_1'], '1', $Max_ValueKey, $Err, $Total_Bar_Width);
-		$phase_space =  $phase_space + $Mini_Bar_Width;					
-		$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height graph_green" title="'.$data_matrix[$row]['active_phase_1'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&phase=1&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
-	}
-	
-	if($data_matrix[$row]['active_phase_0'] > 0)
-	{
-		$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['active_phase_0'], '0', $Max_ValueKey, $Err, $Total_Bar_Width);
-		$phase_space =  $phase_space + $Mini_Bar_Width;					
-		$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height graph_blue" title="'.$data_matrix[$row]['active_phase_0'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&phase=0&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
-	}
-	
-	if($data_matrix[$row]['active_phase_na'] > 0)
-	{
-		$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['active_phase_na'], 'na', $Max_ValueKey, $Err, $Total_Bar_Width);
-		$phase_space =  $phase_space + $Mini_Bar_Width;					
-		$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height graph_gray" title="'.$data_matrix[$row]['active_phase_na'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&phase=na&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
+		if($data_matrix[$row]['active_phase_'.$phase_nums] > 0)
+		{
+			$Color = getClassNColorforPhase($phase_nums);
+			$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['active_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
+			$phase_space =  $phase_space + $Mini_Bar_Width;					
+			$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height '.$Color[0].'" title="'.$data_matrix[$row]['active_phase_'.$phase_nums].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&phase='.$phase_nums.'&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
+		}
 	}
 	
 	$remain_span = $total_cols - $phase_space;
@@ -848,46 +789,15 @@ for($incr=0; $incr < count($rows); $incr++)
 	$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['total']);
 	$phase_space = 0;
 	
-	if($data_matrix[$row]['total_phase_4'] > 0)
+	foreach($phase_legend_nums as $key => $phase_nums)
 	{
-		$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['total_phase_4'], '4', $Max_ValueKey, $Err, $Total_Bar_Width);
-		$phase_space =  $phase_space + $Mini_Bar_Width;					
-		$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height graph_red" title="'.$data_matrix[$row]['total_phase_4'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=2&phase=4&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
-	}
-	
-	if($data_matrix[$row]['total_phase_3'] > 0)
-	{
-		$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['total_phase_3'], '3', $Max_ValueKey, $Err, $Total_Bar_Width);
-		$phase_space =  $phase_space + $Mini_Bar_Width;					
-		$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height graph_orange" title="'.$data_matrix[$row]['total_phase_3'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=2&phase=3&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
-	}
-	
-	if($data_matrix[$row]['total_phase_2'] > 0)
-	{
-		$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['total_phase_2'], '2', $Max_ValueKey, $Err, $Total_Bar_Width);
-		$phase_space =  $phase_space + $Mini_Bar_Width;					
-		$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height graph_yellow" title="'.$data_matrix[$row]['total_phase_2'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=2&phase=2&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
-	}
-	
-	if($data_matrix[$row]['total_phase_1'] > 0)
-	{
-		$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['total_phase_1'], '1', $Max_ValueKey, $Err, $Total_Bar_Width);
-		$phase_space =  $phase_space + $Mini_Bar_Width;					
-		$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height graph_green" title="'.$data_matrix[$row]['total_phase_1'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=2&phase=1&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
-	}
-	
-	if($data_matrix[$row]['total_phase_0'] > 0)
-	{
-		$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['total_phase_0'], '0', $Max_ValueKey, $Err, $Total_Bar_Width);
-		$phase_space =  $phase_space + $Mini_Bar_Width;					
-		$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height graph_blue" title="'.$data_matrix[$row]['total_phase_0'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=2&phase=0&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
-	}
-	
-	if($data_matrix[$row]['total_phase_na'] > 0)
-	{
-		$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['total_phase_na'], 'na', $Max_ValueKey, $Err, $Total_Bar_Width);
-		$phase_space =  $phase_space + $Mini_Bar_Width;					
-		$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height graph_gray" title="'.$data_matrix[$row]['total_phase_na'].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=2&phase=na&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
+		if($data_matrix[$row]['total_phase_'.$phase_nums] > 0)
+		{
+			$Color = getClassNColorforPhase($phase_nums);
+			$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['total_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
+			$phase_space =  $phase_space + $Mini_Bar_Width;					
+			$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height '.$Color[0].'" title="'.$data_matrix[$row]['total_phase_'.$phase_nums].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=2&phase='.$phase_nums.'&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
+		}
 	}
 	
 	$remain_span = $total_cols - $phase_space;
@@ -976,6 +886,8 @@ function Download_reports()
 	$column_interval = $Return['column_interval'];
 	
 	$total_cols = $inner_columns * $columns;
+	
+	$phase_legend_nums = array('4', '3', '2', '1', '0', 'na');
 	
 	$Report_Name = htmlspecialchars((trim($Report_DisplayName) != '' && $Report_DisplayName != NULL)? trim($Report_DisplayName):'report '.$id.'');
 	
@@ -1124,53 +1036,15 @@ function Download_reports()
 					$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['indlead']);
 					$phase_space = 0;
 					
-					if($data_matrix[$row]['indlead_phase_4'] > 0)
+					foreach($phase_legend_nums as $key => $phase_nums)
 					{
-						$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['indlead_phase_4'], '4', $Max_ValueKey, $Err, $Total_Bar_Width);
-						$phase_space =  $phase_space + $Mini_Bar_Width;
-						$url = urlPath() . 'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&phase=4' . $link_part;
-						$from = CreatePhaseCellforExcelExport($from, $Mini_Bar_Width, $url, $Excel_HMCounter, $data_matrix[$row]['indlead_phase_4'], '4', $objPHPExcel);
-					}
-					
-					if($data_matrix[$row]['indlead_phase_3'] > 0)
-					{
-						$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['indlead_phase_3'], '3', $Max_ValueKey, $Err, $Total_Bar_Width);
-						$phase_space =  $phase_space + $Mini_Bar_Width;	
-						$url = urlPath() . 'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&phase=3' . $link_part;
-						$from = CreatePhaseCellforExcelExport($from, $Mini_Bar_Width, $url, $Excel_HMCounter, $data_matrix[$row]['indlead_phase_3'], '3', $objPHPExcel);
-					}
-					
-					if($data_matrix[$row]['indlead_phase_2'] > 0)
-					{
-						$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['indlead_phase_2'], '2', $Max_ValueKey, $Err, $Total_Bar_Width);
-						$phase_space =  $phase_space + $Mini_Bar_Width;	
-						$url = urlPath() . 'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&phase=2' . $link_part;
-						$from = CreatePhaseCellforExcelExport($from, $Mini_Bar_Width, $url, $Excel_HMCounter, $data_matrix[$row]['indlead_phase_2'], '2', $objPHPExcel);
-					}
-					
-					if($data_matrix[$row]['indlead_phase_1'] > 0)
-					{
-						$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['indlead_phase_1'], '1', $Max_ValueKey, $Err, $Total_Bar_Width);
-						$phase_space =  $phase_space + $Mini_Bar_Width;	
-						$url = urlPath() . 'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&phase=1' . $link_part;
-						$from = CreatePhaseCellforExcelExport($from, $Mini_Bar_Width, $url, $Excel_HMCounter, $data_matrix[$row]['indlead_phase_1'], '1', $objPHPExcel);
-					}
-					
-					if($data_matrix[$row]['indlead_phase_0'] > 0)
-					{
-						$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['indlead_phase_0'], '0', $Max_ValueKey, $Err, $Total_Bar_Width);
-						$phase_space =  $phase_space + $Mini_Bar_Width;	
-						$url = urlPath() . 'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&phase=0' . $link_part;
-						$from = CreatePhaseCellforExcelExport($from, $Mini_Bar_Width, $url, $Excel_HMCounter, $data_matrix[$row]['indlead_phase_0'], '0', $objPHPExcel);
-						
-					}
-					
-					if($data_matrix[$row]['indlead_phase_na'] > 0)
-					{
-						$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['indlead_phase_na'], 'na', $Max_ValueKey, $Err, $Total_Bar_Width);
-						$phase_space =  $phase_space + $Mini_Bar_Width;	
-						$url = urlPath() . 'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&phase=na' . $link_part;
-						$from = CreatePhaseCellforExcelExport($from, $Mini_Bar_Width, $url, $Excel_HMCounter, $data_matrix[$row]['indlead_phase_na'], 'na', $objPHPExcel);
+						if($data_matrix[$row]['indlead_phase_'.$phase_nums] > 0)
+						{
+							$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['indlead_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
+							$phase_space =  $phase_space + $Mini_Bar_Width;
+							$url = urlPath() . 'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&phase=' . $phase_nums . $link_part;
+							$from = CreatePhaseCellforExcelExport($from, $Mini_Bar_Width, $url, $Excel_HMCounter, $data_matrix[$row]['indlead_phase_'.$phase_nums], $phase_nums, $objPHPExcel);
+						}
 					}
 				}
 				else if ($mode == 'active')
@@ -1180,54 +1054,15 @@ function Download_reports()
 					$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['active']);
 					$phase_space = 	0;
 					
-					if($data_matrix[$row]['active_phase_4'] > 0)
+					foreach($phase_legend_nums as $key => $phase_nums)
 					{
-						$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['active_phase_4'], '4', $Max_ValueKey, $Err, $Total_Bar_Width);
-						$phase_space =  $phase_space + $Mini_Bar_Width;	
-						$url = urlPath() . 'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&phase=4' . $link_part;
-						$from = CreatePhaseCellforExcelExport($from, $Mini_Bar_Width, $url, $Excel_HMCounter, $data_matrix[$row]['active_phase_4'], '4', $objPHPExcel);
-						
-					}
-					
-					if($data_matrix[$row]['active_phase_3'] > 0)
-					{
-						$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['active_phase_3'], '3', $Max_ValueKey, $Err, $Total_Bar_Width);
-						$phase_space =  $phase_space + $Mini_Bar_Width;	
-						$url = urlPath() . 'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&phase=3' . $link_part;
-						$from = CreatePhaseCellforExcelExport($from, $Mini_Bar_Width, $url, $Excel_HMCounter, $data_matrix[$row]['active_phase_3'], '3', $objPHPExcel);
-					}
-					
-					if($data_matrix[$row]['active_phase_2'] > 0)
-					{
-						$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['active_phase_2'], '2', $Max_ValueKey, $Err, $Total_Bar_Width);
-						$phase_space =  $phase_space + $Mini_Bar_Width;	
-						$url = urlPath() . 'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&phase=2' . $link_part;
-						$from = CreatePhaseCellforExcelExport($from, $Mini_Bar_Width, $url, $Excel_HMCounter, $data_matrix[$row]['active_phase_2'], '2', $objPHPExcel);
-					}
-					
-					if($data_matrix[$row]['active_phase_1'] > 0)
-					{
-						$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['active_phase_1'], '1', $Max_ValueKey, $Err, $Total_Bar_Width);
-						$phase_space =  $phase_space + $Mini_Bar_Width;	
-						$url = urlPath() . 'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&phase=1' . $link_part;
-						$from = CreatePhaseCellforExcelExport($from, $Mini_Bar_Width, $url, $Excel_HMCounter, $data_matrix[$row]['active_phase_1'], '1', $objPHPExcel);
-					}
-					
-					if($data_matrix[$row]['active_phase_0'] > 0)
-					{
-						$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['active_phase_0'], '0', $Max_ValueKey, $Err, $Total_Bar_Width);
-						$phase_space =  $phase_space + $Mini_Bar_Width;	
-						$url = urlPath() . 'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&phase=0' . $link_part;
-						$from = CreatePhaseCellforExcelExport($from, $Mini_Bar_Width, $url, $Excel_HMCounter, $data_matrix[$row]['active_phase_0'], '0', $objPHPExcel);
-						
-					}
-					
-					if($data_matrix[$row]['active_phase_na'] > 0)
-					{
-						$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['active_phase_na'], 'na', $Max_ValueKey, $Err, $Total_Bar_Width);
-						$phase_space =  $phase_space + $Mini_Bar_Width;	
-						$url = urlPath() . 'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&phase=na' . $link_part;
-						$from = CreatePhaseCellforExcelExport($from, $Mini_Bar_Width, $url, $Excel_HMCounter, $data_matrix[$row]['active_phase_na'], 'na', $objPHPExcel);
+						if($data_matrix[$row]['active_phase_'.$phase_nums] > 0)
+						{
+							$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['active_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
+							$phase_space =  $phase_space + $Mini_Bar_Width;
+							$url = urlPath() . 'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&phase=' . $phase_nums . $link_part;
+							$from = CreatePhaseCellforExcelExport($from, $Mini_Bar_Width, $url, $Excel_HMCounter, $data_matrix[$row]['active_phase_'.$phase_nums], $phase_nums, $objPHPExcel);
+						}
 					}
 				}
 				else
@@ -1237,52 +1072,15 @@ function Download_reports()
 					$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['total']);
 					$phase_space = 	0;
 					
-					if($data_matrix[$row]['total_phase_4'] > 0)
+					foreach($phase_legend_nums as $key => $phase_nums)
 					{
-						$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['total_phase_4'], '4', $Max_ValueKey, $Err, $Total_Bar_Width);
-						$phase_space =  $phase_space + $Mini_Bar_Width;	
-						$url = urlPath() . 'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&phase=4' . $link_part;
-						$from = CreatePhaseCellforExcelExport($from, $Mini_Bar_Width, $url, $Excel_HMCounter, $data_matrix[$row]['total_phase_4'], '4', $objPHPExcel);
-					}
-					
-					if($data_matrix[$row]['total_phase_3'] > 0)
-					{
-						$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['total_phase_3'], '3', $Max_ValueKey, $Err, $Total_Bar_Width);
-						$phase_space =  $phase_space + $Mini_Bar_Width;	
-						$url = urlPath() . 'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&phase=3' . $link_part;
-						$from = CreatePhaseCellforExcelExport($from, $Mini_Bar_Width, $url, $Excel_HMCounter, $data_matrix[$row]['total_phase_3'], '3', $objPHPExcel);
-					}
-					
-					if($data_matrix[$row]['total_phase_2'] > 0)
-					{
-						$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['total_phase_2'], '2', $Max_ValueKey, $Err, $Total_Bar_Width);
-						$phase_space =  $phase_space + $Mini_Bar_Width;	
-						$url = urlPath() . 'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&phase=2' . $link_part;
-						$from = CreatePhaseCellforExcelExport($from, $Mini_Bar_Width, $url, $Excel_HMCounter, $data_matrix[$row]['total_phase_2'], '2', $objPHPExcel);
-					}
-					
-					if($data_matrix[$row]['total_phase_1'] > 0)
-					{
-						$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['total_phase_1'], '1', $Max_ValueKey, $Err, $Total_Bar_Width);
-						$phase_space =  $phase_space + $Mini_Bar_Width;	
-						$url = urlPath() . 'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&phase=1' . $link_part;
-						$from = CreatePhaseCellforExcelExport($from, $Mini_Bar_Width, $url, $Excel_HMCounter, $data_matrix[$row]['total_phase_1'], '1', $objPHPExcel);
-					}
-					
-					if($data_matrix[$row]['total_phase_0'] > 0)
-					{
-						$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['total_phase_0'], '0', $Max_ValueKey, $Err, $Total_Bar_Width);
-						$phase_space =  $phase_space + $Mini_Bar_Width;	
-						$url = urlPath() . 'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&phase=0' . $link_part;
-						$from = CreatePhaseCellforExcelExport($from, $Mini_Bar_Width, $url, $Excel_HMCounter, $data_matrix[$row]['total_phase_0'], '0', $objPHPExcel);
-					}
-					
-					if($data_matrix[$row]['total_phase_na'] > 0)
-					{
-						$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['total_phase_na'], 'na', $Max_ValueKey, $Err, $Total_Bar_Width);
-						$phase_space =  $phase_space + $Mini_Bar_Width;	
-						$url = urlPath() . 'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&phase=na' . $link_part;
-						$from = CreatePhaseCellforExcelExport($from, $Mini_Bar_Width, $url, $Excel_HMCounter, $data_matrix[$row]['total_phase_na'], 'na', $objPHPExcel);
+						if($data_matrix[$row]['total_phase_'.$phase_nums] > 0)
+						{
+							$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['total_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
+							$phase_space =  $phase_space + $Mini_Bar_Width;
+							$url = urlPath() . 'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&phase=' . $phase_nums . $link_part;
+							$from = CreatePhaseCellforExcelExport($from, $Mini_Bar_Width, $url, $Excel_HMCounter, $data_matrix[$row]['total_phase_'.$phase_nums], $phase_nums, $objPHPExcel);
+						}
 					}
 				}
 				
@@ -1594,119 +1392,28 @@ function Download_reports()
 				$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['indlead']);
 				$phase_space = 0;
 				
-				if($data_matrix[$row]['indlead_phase_4'] > 0)
+				foreach($phase_legend_nums as $key => $phase_nums)
 				{
-					$border = setStyleforPDFExport('4', $pdf);
-					$Width = $subColumn_width;
-					$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['indlead_phase_4'], '4', $Max_ValueKey, $Err, $Total_Bar_Width);
-					$phase_space =  $phase_space + $Mini_Bar_Width;
-					
-					$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$row]['indlead_phase_4'], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
-						
-					$m=0;
-					while($m < $Mini_Bar_Width)
+					if($data_matrix[$row]['indlead_phase_'.$phase_nums] > 0)
 					{
-						$pdfContent = '<div align="center" style="vertical-align:top; float:none;"><a style="color:#FF0000; text-decoration:none; line-height:2px;" href="'. urlPath() .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId .'&phase=4'. $link_part . '" target="_blank" title="'. $title .'">&nbsp;</a></div>';
-						$pdf->MultiCell($Width, $Line_Height, $pdfContent, $border=0, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$Line_Height);
-						$Place_X = $Place_X + $Width;
-						$m++;
-					}
-				}
-				
-				if($data_matrix[$row]['indlead_phase_3'] > 0)
-				{
-					$border = setStyleforPDFExport('3', $pdf);
-					$Width = $subColumn_width;
-					$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['indlead_phase_3'], '3', $Max_ValueKey, $Err, $Total_Bar_Width);
-					$phase_space =  $phase_space + $Mini_Bar_Width;
-					
-					$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$row]['indlead_phase_3'], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
+						$border = setStyleforPDFExport($phase_nums, $pdf);
+						$Width = $subColumn_width;
+						$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['indlead_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
+						$phase_space =  $phase_space + $Mini_Bar_Width;
 						
-					$m=0;
-					while($m < $Mini_Bar_Width)
-					{
-						$pdfContent = '<div align="center" style="vertical-align:top; float:none;"><a style="color:#FF9900; text-decoration:none; line-height:2px;" href="'. urlPath() .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId .'&phase=3'. $link_part . '" target="_blank" title="'. $title .'">&nbsp;</a></div>';
-						$pdf->MultiCell($Width, $Line_Height, $pdfContent, $border=0, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$Line_Height);
-						$Place_X = $Place_X + $Width;
-						$m++;
-					}
-				}
-				
-				if($data_matrix[$row]['indlead_phase_2'] > 0)
-				{
-					$border = setStyleforPDFExport('2', $pdf);
-					$Width = $subColumn_width;
-					$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['indlead_phase_2'], '2', $Max_ValueKey, $Err, $Total_Bar_Width);
-					$phase_space =  $phase_space + $Mini_Bar_Width;
-					
-					$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$row]['indlead_phase_2'], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
+						$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$row]['indlead_phase_'.$phase_nums], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
 						
-					$m=0;
-					while($m < $Mini_Bar_Width)
-					{
-						$pdfContent = '<div align="center" style="vertical-align:middle; float:none;"><a style="color:#FFFF00; text-decoration:none; line-height:2px;" href="'. urlPath() .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId .'&phase=2'. $link_part . '" target="_blank" title="'. $title .'">&nbsp;</a></div>';
-						$pdf->MultiCell($Width, $Line_Height, $pdfContent, $border=0, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$Line_Height);
-						$Place_X = $Place_X + $Width;
-						$m++;
+						$m=0;
+						while($m < $Mini_Bar_Width)
+						{
+							$Color = getClassNColorforPhase($phase_nums);
+							$pdfContent = '<div align="center" style="vertical-align:top; float:none;"><a style="color:#'.$Color[1].'; text-decoration:none; line-height:2px;" href="'. urlPath() .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId .'&phase='. $phase_nums . $link_part . '" target="_blank" title="'. $title .'">&nbsp;</a></div>';
+							$pdf->MultiCell($Width, $Line_Height, $pdfContent, $border=0, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$Line_Height);
+							$Place_X = $Place_X + $Width;
+							$m++;
+						}
 					}
-				}
-				
-				if($data_matrix[$row]['indlead_phase_1'] > 0)
-				{
-					$border = setStyleforPDFExport('1', $pdf);
-					$Width = $subColumn_width;
-					$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['indlead_phase_1'], '1', $Max_ValueKey, $Err, $Total_Bar_Width);
-					$phase_space =  $phase_space + $Mini_Bar_Width;
-					
-					$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$row]['indlead_phase_1'], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
-						
-					$m=0;
-					while($m < $Mini_Bar_Width)
-					{
-						$pdfContent = '<div align="center" style="vertical-align:top; float:none;"><a style="color:#99CC00; text-decoration:none; line-height:2px;" href="'. urlPath() .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId .'&phase=1'. $link_part . '" target="_blank" title="'. $title .'">&nbsp;</a></div>';
-						$pdf->MultiCell($Width, $Line_Height, $pdfContent, $border=0, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$Line_Height);
-						$Place_X = $Place_X + $Width;
-						$m++;
-					}
-				}
-				
-				if($data_matrix[$row]['indlead_phase_0'] > 0)
-				{
-					$border = setStyleforPDFExport('0', $pdf);
-					$Width = $subColumn_width;
-					$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['indlead_phase_0'], '0', $Max_ValueKey, $Err, $Total_Bar_Width);
-					$phase_space =  $phase_space + $Mini_Bar_Width;
-					
-					$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$row]['indlead_phase_0'], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
-						
-					$m=0;
-					while($m < $Mini_Bar_Width)
-					{
-						$pdfContent = '<div align="center" style="vertical-align:top; float:none;"><a style="color:#00CCFF; text-decoration:none; line-height:2px;" href="'. urlPath() .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId .'&phase=0'. $link_part . '" target="_blank" title="'. $title .'">&nbsp;</a></div>';
-						$pdf->MultiCell($Width, $Line_Height, $pdfContent, $border=0, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$Line_Height);
-						$Place_X = $Place_X + $Width;
-						$m++;
-					}
-				}
-				
-				if($data_matrix[$row]['indlead_phase_na'] > 0)
-				{
-					$border = setStyleforPDFExport('na', $pdf);
-					$Width = $subColumn_width;
-					$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['indlead_phase_na'], 'na', $Max_ValueKey, $Err, $Total_Bar_Width);
-					$phase_space =  $phase_space + $Mini_Bar_Width;
-					
-					$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$row]['indlead_phase_na'], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
-						
-					$m=0;
-					while($m < $Mini_Bar_Width)
-					{
-						$pdfContent = '<div align="center" style="vertical-align:top; float:none;"><a style="color:#BFBFBF; text-decoration:none; line-height:2px;" href="'. urlPath() .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId .'&phase=na'. $link_part . '" target="_blank" title="'. $title .'">&nbsp;</a></div>';
-						$pdf->MultiCell($Width, $Line_Height, $pdfContent, $border=0, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$Line_Height);
-						$Place_X = $Place_X + $Width;
-						$m++;
-					}
-				}
+				} /// Foreach ends
 			} 
 			else if($mode == 'active')
 			{
@@ -1715,119 +1422,28 @@ function Download_reports()
 				$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['active']);
 				$phase_space = 0;
 				
-				if($data_matrix[$row]['active_phase_4'] > 0)
+				foreach($phase_legend_nums as $key => $phase_nums)
 				{
-					$border = setStyleforPDFExport('4', $pdf);
-					$Width = $subColumn_width;
-					$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['active_phase_4'], '4', $Max_ValueKey, $Err, $Total_Bar_Width);
-					$phase_space =  $phase_space + $Mini_Bar_Width;
-					
-					$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$row]['active_phase_4'], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
-						
-					$m=0;
-					while($m < $Mini_Bar_Width)
+					if($data_matrix[$row]['active_phase_'.$phase_nums] > 0)
 					{
-						$pdfContent = '<div align="center" style="vertical-align:top; float:none;"><a style="color:#FF0000; text-decoration:none; line-height:2px;" href="'. urlPath() .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId .'&phase=4'. $link_part . '" target="_blank" title="'. $title .'">&nbsp;</a></div>';
-						$pdf->MultiCell($Width, $Line_Height, $pdfContent, $border=0, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$Line_Height);
-						$Place_X = $Place_X + $Width;
-						$m++;
-					}
-				}
-				
-				if($data_matrix[$row]['active_phase_3'] > 0)
-				{
-					$border = setStyleforPDFExport('3', $pdf);
-					$Width = $subColumn_width;
-					$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['active_phase_3'], '3', $Max_ValueKey, $Err, $Total_Bar_Width);
-					$phase_space =  $phase_space + $Mini_Bar_Width;
-					
-					$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$row]['active_phase_3'], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
+						$border = setStyleforPDFExport($phase_nums, $pdf);
+						$Width = $subColumn_width;
+						$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['active_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
+						$phase_space =  $phase_space + $Mini_Bar_Width;
 						
-					$m=0;
-					while($m < $Mini_Bar_Width)
-					{
-						$pdfContent = '<div align="center" style="vertical-align:top; float:none;"><a style="color:#FF9900; text-decoration:none; line-height:2px;" href="'. urlPath() .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId .'&phase=3'. $link_part . '" target="_blank" title="'. $title .'">&nbsp;</a></div>';
-						$pdf->MultiCell($Width, $Line_Height, $pdfContent, $border=0, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$Line_Height);
-						$Place_X = $Place_X + $Width;
-						$m++;
-					}
-				}
-				
-				if($data_matrix[$row]['active_phase_2'] > 0)
-				{
-					$border = setStyleforPDFExport('2', $pdf);
-					$Width = $subColumn_width;
-					$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['active_phase_2'], '2', $Max_ValueKey, $Err, $Total_Bar_Width);
-					$phase_space =  $phase_space + $Mini_Bar_Width;
-					
-					$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$row]['active_phase_2'], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
+						$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$row]['active_phase_'.$phase_nums], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
 						
-					$m=0;
-					while($m < $Mini_Bar_Width)
-					{
-						$pdfContent = '<div align="center" style="vertical-align:middle; float:none;"><a style="color:#FFFF00; text-decoration:none; line-height:2px;" href="'. urlPath() .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId .'&phase=2'. $link_part . '" target="_blank" title="'. $title .'">&nbsp;</a></div>';
-						$pdf->MultiCell($Width, $Line_Height, $pdfContent, $border=0, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$Line_Height);
-						$Place_X = $Place_X + $Width;
-						$m++;
+						$m=0;
+						while($m < $Mini_Bar_Width)
+						{
+							$Color = getClassNColorforPhase($phase_nums);
+							$pdfContent = '<div align="center" style="vertical-align:top; float:none;"><a style="color:#'.$Color[1].'; text-decoration:none; line-height:2px;" href="'. urlPath() .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId .'&phase='. $phase_nums . $link_part . '" target="_blank" title="'. $title .'">&nbsp;</a></div>';
+							$pdf->MultiCell($Width, $Line_Height, $pdfContent, $border=0, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$Line_Height);
+							$Place_X = $Place_X + $Width;
+							$m++;
+						}
 					}
-				}
-				
-				if($data_matrix[$row]['active_phase_1'] > 0)
-				{
-					$border = setStyleforPDFExport('1', $pdf);
-					$Width = $subColumn_width;
-					$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['active_phase_1'], '1', $Max_ValueKey, $Err, $Total_Bar_Width);
-					$phase_space =  $phase_space + $Mini_Bar_Width;
-					
-					$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$row]['active_phase_1'], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
-						
-					$m=0;
-					while($m < $Mini_Bar_Width)
-					{
-						$pdfContent = '<div align="center" style="vertical-align:top; float:none;"><a style="color:#99CC00; text-decoration:none; line-height:2px;" href="'. urlPath() .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId .'&phase=1'. $link_part . '" target="_blank" title="'. $title .'">&nbsp;</a></div>';
-						$pdf->MultiCell($Width, $Line_Height, $pdfContent, $border=0, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$Line_Height);
-						$Place_X = $Place_X + $Width;
-						$m++;
-					}
-				}
-				
-				if($data_matrix[$row]['active_phase_0'] > 0)
-				{
-					$border = setStyleforPDFExport('0', $pdf);
-					$Width = $subColumn_width;
-					$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['active_phase_0'], '0', $Max_ValueKey, $Err, $Total_Bar_Width);
-					$phase_space =  $phase_space + $Mini_Bar_Width;
-					
-					$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$row]['active_phase_0'], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
-						
-					$m=0;
-					while($m < $Mini_Bar_Width)
-					{
-						$pdfContent = '<div align="center" style="vertical-align:top; float:none;"><a style="color:#00CCFF; text-decoration:none; line-height:2px;" href="'. urlPath() .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId .'&phase=0'. $link_part . '" target="_blank" title="'. $title .'">&nbsp;</a></div>';
-						$pdf->MultiCell($Width, $Line_Height, $pdfContent, $border=0, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$Line_Height);
-						$Place_X = $Place_X + $Width;
-						$m++;
-					}
-				}
-				
-				if($data_matrix[$row]['active_phase_na'] > 0)
-				{
-					$border = setStyleforPDFExport('na', $pdf);
-					$Width = $subColumn_width;
-					$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['active_phase_na'], 'na', $Max_ValueKey, $Err, $Total_Bar_Width);
-					$phase_space =  $phase_space + $Mini_Bar_Width;
-					
-					$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$row]['active_phase_na'], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
-						
-					$m=0;
-					while($m < $Mini_Bar_Width)
-					{
-						$pdfContent = '<div align="center" style="vertical-align:top; float:none;"><a style="color:#BFBFBF; text-decoration:none; line-height:2px;" href="'. urlPath() .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId .'&phase=na'. $link_part . '" target="_blank" title="'. $title .'">&nbsp;</a></div>';
-						$pdf->MultiCell($Width, $Line_Height, $pdfContent, $border=0, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$Line_Height);
-						$Place_X = $Place_X + $Width;
-						$m++;
-					}
-				}
+				} ///Foreach ends
 			} 
 			else if($mode == 'total')
 			{
@@ -1837,119 +1453,29 @@ function Download_reports()
 					
 				$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['total']);
 				$phase_space = 0;
-				if($data_matrix[$row]['total_phase_4'] > 0)
-				{
-					$border = setStyleforPDFExport('4', $pdf);
-					$Width = $subColumn_width;
-					$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['total_phase_4'], '4', $Max_ValueKey, $Err, $Total_Bar_Width);
-					$phase_space =  $phase_space + $Mini_Bar_Width;
-					
-					$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$row]['total_phase_4'], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
-						
-					$m=0;
-					while($m < $Mini_Bar_Width)
-					{
-						$pdfContent = '<div align="center" style="vertical-align:top; float:none;"><a style="color:#FF0000; text-decoration:none; line-height:2px;" href="'. urlPath() .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId .'&phase=4'. $link_part . '" target="_blank" title="'. $title .'">&nbsp;</a></div>';
-						$pdf->MultiCell($Width, $Line_Height, $pdfContent, $border=0, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$Line_Height);
-						$Place_X = $Place_X + $Width;
-						$m++;
-					}
-				}
 				
-				if($data_matrix[$row]['total_phase_3'] > 0)
+				foreach($phase_legend_nums as $key => $phase_nums)
 				{
-					$border = setStyleforPDFExport('3', $pdf);
-					$Width = $subColumn_width;
-					$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['total_phase_3'], '3', $Max_ValueKey, $Err, $Total_Bar_Width);
-					$phase_space =  $phase_space + $Mini_Bar_Width;
-					
-					$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$row]['total_phase_3'], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
-						
-					$m=0;
-					while($m < $Mini_Bar_Width)
+					if($data_matrix[$row]['total_phase_'.$phase_nums] > 0)
 					{
-						$pdfContent = '<div align="center" style="vertical-align:top; float:none;"><a style="color:#FF9900; text-decoration:none; line-height:2px;" href="'. urlPath() .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId .'&phase=3'. $link_part . '" target="_blank" title="'. $title .'">&nbsp;</a></div>';
-						$pdf->MultiCell($Width, $Line_Height, $pdfContent, $border=0, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$Line_Height);
-						$Place_X = $Place_X + $Width;
-						$m++;
-					}
-				}
-				
-				if($data_matrix[$row]['total_phase_2'] > 0)
-				{
-					$border = setStyleforPDFExport('2', $pdf);
-					$Width = $subColumn_width;
-					$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['total_phase_2'], '2', $Max_ValueKey, $Err, $Total_Bar_Width);
-					$phase_space =  $phase_space + $Mini_Bar_Width;
-					
-					$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$row]['total_phase_2'], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
+						$border = setStyleforPDFExport($phase_nums, $pdf);
+						$Width = $subColumn_width;
+						$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['total_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
+						$phase_space =  $phase_space + $Mini_Bar_Width;
 						
-					$m=0;
-					while($m < $Mini_Bar_Width)
-					{
-						$pdfContent = '<div align="center" style="vertical-align:middle; float:none;"><a style="color:#FFFF00; text-decoration:none; line-height:2px;" href="'. urlPath() .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId .'&phase=2'. $link_part . '" target="_blank" title="'. $title .'">&nbsp;</a></div>';
-						$pdf->MultiCell($Width, $Line_Height, $pdfContent, $border=0, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$Line_Height);
-						$Place_X = $Place_X + $Width;
-						$m++;
-					}
-				}
-				
-				if($data_matrix[$row]['total_phase_1'] > 0)
-				{
-					$border = setStyleforPDFExport('1', $pdf);
-					$Width = $subColumn_width;
-					$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['total_phase_1'], '1', $Max_ValueKey, $Err, $Total_Bar_Width);
-					$phase_space =  $phase_space + $Mini_Bar_Width;
-					
-					$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$row]['total_phase_1'], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
+						$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$row]['total_phase_'.$phase_nums], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
 						
-					$m=0;
-					while($m < $Mini_Bar_Width)
-					{
-						$pdfContent = '<div align="center" style="vertical-align:top; float:none;"><a style="color:#99CC00; text-decoration:none; line-height:2px;" href="'. urlPath() .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId .'&phase=1'. $link_part . '" target="_blank" title="'. $title .'">&nbsp;</a></div>';
-						$pdf->MultiCell($Width, $Line_Height, $pdfContent, $border=0, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$Line_Height);
-						$Place_X = $Place_X + $Width;
-						$m++;
+						$m=0;
+						while($m < $Mini_Bar_Width)
+						{
+							$Color = getClassNColorforPhase($phase_nums);
+							$pdfContent = '<div align="center" style="vertical-align:top; float:none;"><a style="color:#'.$Color[1].'; text-decoration:none; line-height:2px;" href="'. urlPath() .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId .'&phase='. $phase_nums . $link_part . '" target="_blank" title="'. $title .'">&nbsp;</a></div>';
+							$pdf->MultiCell($Width, $Line_Height, $pdfContent, $border=0, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$Line_Height);
+							$Place_X = $Place_X + $Width;
+							$m++;
+						}
 					}
-				}
-				
-				if($data_matrix[$row]['total_phase_0'] > 0)
-				{
-					$border = setStyleforPDFExport('0', $pdf);
-					$Width = $subColumn_width;
-					$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['total_phase_0'], '0', $Max_ValueKey, $Err, $Total_Bar_Width);
-					$phase_space =  $phase_space + $Mini_Bar_Width;
-					
-					$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$row]['total_phase_0'], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
-						
-					$m=0;
-					while($m < $Mini_Bar_Width)
-					{
-						$pdfContent = '<div align="center" style="vertical-align:top; float:none;"><a style="color:#00CCFF; text-decoration:none; line-height:2px;" href="'. urlPath() .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId .'&phase=0'. $link_part . '" target="_blank" title="'. $title .'">&nbsp;</a></div>';
-						$pdf->MultiCell($Width, $Line_Height, $pdfContent, $border=0, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$Line_Height);
-						$Place_X = $Place_X + $Width;
-						$m++;
-					}
-				}
-				
-				if($data_matrix[$row]['total_phase_na'] > 0)
-				{
-					$border = setStyleforPDFExport('na', $pdf);
-					$Width = $subColumn_width;
-					$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['total_phase_na'], 'na', $Max_ValueKey, $Err, $Total_Bar_Width);
-					$phase_space =  $phase_space + $Mini_Bar_Width;
-					
-					$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$row]['total_phase_na'], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
-						
-					$m=0;
-					while($m < $Mini_Bar_Width)
-					{
-						$pdfContent = '<div align="center" style="vertical-align:top; float:none;"><a style="color:#BFBFBF; text-decoration:none; line-height:2px;" href="'. urlPath() .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId .'&phase=na'. $link_part . '" target="_blank" title="'. $title .'">&nbsp;</a></div>';
-						$pdf->MultiCell($Width, $Line_Height, $pdfContent, $border=0, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$Line_Height);
-						$Place_X = $Place_X + $Width;
-						$m++;
-					}
-				}
+				} ///Foreach ends
 			}
 			
 			$total_cols = $inner_columns * $columns;
@@ -2134,6 +1660,48 @@ function getBGColorforExcelExport($phase)
 	}
 	
 	return $bgColor;
+}
+
+function getClassNColorforPhase($phase)
+{
+	$Color = array();
+	if($phase == '0')
+	{
+		$Color[0] = 'graph_blue';
+		$Color[1] = 'BFBFBF';
+	}
+	else if($phase == '1')
+	{
+		$Color[0] = 'graph_green';
+		$Color[1] = '99CC00';
+	}
+	else if($phase == '2')
+	{
+		$Color[0] = 'graph_yellow';
+		$Color[1] = 'FFFF00';
+	}
+	else if($phase == '3')
+	{
+		$Color[0] = 'graph_orange';
+		$Color[1] = 'FF9900';
+	}
+	else if($phase == '4')
+	{
+		$Color[0] = 'graph_red';
+		$Color[1] = 'FF0000';
+	}
+	else if($phase == 'na')
+	{
+		$Color[0] = 'graph_gray';
+		$Color[1] = 'BFBFBF';
+	}
+	else
+	{
+		$Color[0] = 'graph_gray';
+		$Color[1] = 'BFBFBF';
+	}
+	
+	return $Color;
 }
 
 function CreatePhaseCellforExcelExport($from, $Mini_Bar_Width, $url, $Excel_HMCounter, $countValue, $phase, &$objPHPExcel)
