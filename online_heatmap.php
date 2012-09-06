@@ -1068,10 +1068,10 @@ function change_view()
 	{
 		case 'now': st_limit = today; document.getElementById("startrange").style.width = "30px"; break;
 		case '1 week': st_limit = one_week; document.getElementById("startrange").style.width = "55px"; break;
-		case '2 weeks': st_limit = two_week; document.getElementById("startrange").style.width = "60px"; break;
-		case '1 month': st_limit = one_month; document.getElementById("startrange").style.width = "60px"; break;
-		case '1 quarter': st_limit = three_month; document.getElementById("startrange").style.width = "65px"; break;
-		case '6 months': st_limit = six_month; document.getElementById("startrange").style.width = "65px"; break;
+		case '2 weeks': st_limit = two_week; document.getElementById("startrange").style.width = "65px"; break;
+		case '1 month': st_limit = one_month; document.getElementById("startrange").style.width = "65px"; break;
+		case '1 quarter': st_limit = three_month; document.getElementById("startrange").style.width = "70px"; break;
+		case '6 months': st_limit = six_month; document.getElementById("startrange").style.width = "70px"; break;
 		case '1 year': st_limit = one_year; document.getElementById("startrange").style.width = "45px"; break;
 		default: start_range = start_range.replace(/\s+/g, '') ;	//Remove space in between
 				 var date_arr = start_range.split('-'); 
@@ -1084,10 +1084,10 @@ function change_view()
 	{
 		case 'now': ed_limit = today; document.getElementById("endrange").style.width = "40px";  break;
 		case '1 week': ed_limit = one_week; document.getElementById("endrange").style.width = "55px";  break;
-		case '2 weeks': ed_limit = two_week; document.getElementById("endrange").style.width = "60px";  break;
-		case '1 month': ed_limit = one_month; document.getElementById("endrange").style.width = "60px";  break;
-		case '1 quarter': ed_limit = three_month; document.getElementById("endrange").style.width = "70px";  break;
-		case '6 months': ed_limit = six_month; document.getElementById("endrange").style.width = "70px";  break;
+		case '2 weeks': ed_limit = two_week; document.getElementById("endrange").style.width = "65px";  break;
+		case '1 month': ed_limit = one_month; document.getElementById("endrange").style.width = "65px";  break;
+		case '1 quarter': ed_limit = three_month; document.getElementById("endrange").style.width = "75px";  break;
+		case '6 months': ed_limit = six_month; document.getElementById("endrange").style.width = "75px";  break;
 		case '1 year': ed_limit = one_year; document.getElementById("endrange").style.width = "50px";  break;
 		default: end_range = end_range.replace(/\s+/g, '') ;
 				 var date_arr = end_range.split('-');
@@ -2389,5 +2389,5 @@ Scale_Div();
 })
 // Default size
 document.getElementById("startrange").style.width = "30px"
-document.getElementById("endrange").style.width = "60px"
+document.getElementById("endrange").style.width = "65px"
 </script>
