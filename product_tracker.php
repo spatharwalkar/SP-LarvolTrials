@@ -503,8 +503,8 @@ th {
 }
 
 .side_tick_height {
-	height:2px;
-	line-height:2px;
+	height:1px;
+	line-height:1px;
 }
 
 .graph_gray {
@@ -530,6 +530,15 @@ th {
 .graph_red {
 	background-color:#ff0000;
 }
+
+.Link {
+height:20px;
+min-height:20px;
+max-height:20px;
+padding:0px;
+margin:0px;
+_height:20px;
+}
 </style>
 <script language="javascript" type="text/javascript">
 function change_view()
@@ -542,43 +551,67 @@ function change_view()
 	{
 		if(dwcount.value == 'active')
 		{
-			var row_type = document.getElementById('active_Graph_Row_'+i);
+			var row_type = document.getElementById('active_Graph_Row_A_'+i);
 			if(row_type != null && row_type != '')
 			{
 				<?php if(strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') == FALSE) { ?>
-				document.getElementById("active_Graph_Row_"+i).style.display = "table-row";
+				document.getElementById("active_Graph_Row_A_"+i).style.display = "table-row";
+				document.getElementById("active_Graph_Row_B_"+i).style.display = "table-row";
+				document.getElementById("active_Graph_Row_C_"+i).style.display = "table-row";
 				<? } else { ?>
-				document.getElementById("active_Graph_Row_"+i).style.display = "inline";
+				document.getElementById("active_Graph_Row_A_"+i).style.display = "inline";
+				document.getElementById("active_Graph_Row_B_"+i).style.display = "inline";
+				document.getElementById("active_Graph_Row_C_"+i).style.display = "inline";
 				<?php } ?>
-				document.getElementById("total_Graph_Row_"+i).style.display = "none";
-				document.getElementById("indlead_Graph_Row_"+i).style.display = "none";
+				document.getElementById("total_Graph_Row_A_"+i).style.display = "none";
+				document.getElementById("total_Graph_Row_B_"+i).style.display = "none";
+				document.getElementById("total_Graph_Row_C_"+i).style.display = "none";
+				document.getElementById("indlead_Graph_Row_A_"+i).style.display = "none";
+				document.getElementById("indlead_Graph_Row_B_"+i).style.display = "none";
+				document.getElementById("indlead_Graph_Row_C_"+i).style.display = "none";
 			}
 		}
 		else if(dwcount.value == 'total')
 		{
-			var row_type = document.getElementById('total_Graph_Row_'+i);
+			var row_type = document.getElementById('total_Graph_Row_A_'+i);
 			if(row_type != null && row_type != '')
 			{
-				document.getElementById("active_Graph_Row_"+i).style.display = "none";
+				document.getElementById("active_Graph_Row_A_"+i).style.display = "none";
+				document.getElementById("active_Graph_Row_B_"+i).style.display = "none";
+				document.getElementById("active_Graph_Row_C_"+i).style.display = "none";
 				<?php if(strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') == FALSE) { /// IE does not support table-row and moziall does not support inline ?>
-				document.getElementById("total_Graph_Row_"+i).style.display = "table-row";
+				document.getElementById("total_Graph_Row_A_"+i).style.display = "table-row";
+				document.getElementById("total_Graph_Row_B_"+i).style.display = "table-row";
+				document.getElementById("total_Graph_Row_C_"+i).style.display = "table-row";
 				<? } else { ?>
-				document.getElementById("total_Graph_Row_"+i).style.display = "inline";
+				document.getElementById("total_Graph_Row_A_"+i).style.display = "inline";
+				document.getElementById("total_Graph_Row_B_"+i).style.display = "inline";
+				document.getElementById("total_Graph_Row_C_"+i).style.display = "inline";
 				<?php } ?>
-				document.getElementById("indlead_Graph_Row_"+i).style.display = "none";
+				document.getElementById("indlead_Graph_Row_A_"+i).style.display = "none";
+				document.getElementById("indlead_Graph_Row_B_"+i).style.display = "none";
+				document.getElementById("indlead_Graph_Row_C_"+i).style.display = "none";
 			}
 		}
 		else
 		{
-			var row_type = document.getElementById('indlead_Graph_Row_'+i);
+			var row_type = document.getElementById('indlead_Graph_Row_A_'+i);
 			if(row_type != null && row_type != '')
 			{
-				document.getElementById("active_Graph_Row_"+i).style.display = "none";
-				document.getElementById("total_Graph_Row_"+i).style.display = "none";
+				document.getElementById("active_Graph_Row_A_"+i).style.display = "none";
+				document.getElementById("active_Graph_Row_B_"+i).style.display = "none";
+				document.getElementById("active_Graph_Row_C_"+i).style.display = "none";
+				document.getElementById("total_Graph_Row_A_"+i).style.display = "none";
+				document.getElementById("total_Graph_Row_B_"+i).style.display = "none";
+				document.getElementById("total_Graph_Row_C_"+i).style.display = "none";
 				<?php if(strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') == FALSE) { ?>
-				document.getElementById("indlead_Graph_Row_"+i).style.display = "table-row";
+				document.getElementById("indlead_Graph_Row_A_"+i).style.display = "table-row"; 
+				document.getElementById("indlead_Graph_Row_B_"+i).style.display = "table-row";
+				document.getElementById("indlead_Graph_Row_C_"+i).style.display = "table-row";
 				<? } else { ?>
-				document.getElementById("indlead_Graph_Row_"+i).style.display = "inline";
+				document.getElementById("indlead_Graph_Row_A_"+i).style.display = "inline";
+				document.getElementById("indlead_Graph_Row_B_"+i).style.display = "inline";
+				document.getElementById("indlead_Graph_Row_C_"+i).style.display = "inline";
 				<?php } ?>
 			}
 		}
@@ -595,7 +628,7 @@ function Set_Link_Height()
 	{
 		 //// As links are not getting correct height in Larvol Insight page
 		//// Before getting height of each cell, make all rows visible and then again hide it at end as per requirement.
-		var row_type = document.getElementById('indlead_Graph_Row_'+i);
+		/*var row_type = document.getElementById('indlead_Graph_Row_'+i);
 		if(row_type != null && row_type != '')
 		{
 			<?php if(strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') == FALSE) { ?>
@@ -603,7 +636,7 @@ function Set_Link_Height()
 			<? } else { ?>
 			document.getElementById("indlead_Graph_Row_"+i).style.display = "inline";
 			<?php } ?>
-		}
+		}*/
 			
 		var IS_Prod_Row = document.getElementById("ProdCol_"+i);
 		if(IS_Prod_Row != null && IS_Prod_Row != '')
@@ -697,7 +730,7 @@ $htmlContent  .= '<div id="dropmenu" class="dropmenudiv" style="width: 310px;">'
 				. '</form>';
 				
 						
-$htmlContent .= '<div align="center" style="padding-left:10px; padding-right:15px; padding-top:20px; padding-bottom:20px;"><table align="center" style="height:100%; vertical-align:top;" cellpadding="0" cellspacing="0">'
+$htmlContent .= '<div align="center" style="padding-left:10px; padding-right:15px; padding-top:20px; padding-bottom:20px;"><table border="0" align="center" style="vertical-align:middle; table-layout:fixed;" cellpadding="0" cellspacing="0">'
 			    . '<thead>';
 
 $htmlContent .= '<tr class="side_tick_height"><th class="prod_col">&nbsp;</th><th class="last_tick_width">&nbsp;</th>';
@@ -706,7 +739,7 @@ for($j=0; $j < $columns; $j++)
 	for($k=0; $k < $inner_columns; $k++)
 	$htmlContent .= '<th width="'.$inner_width .'px" colspan="1">&nbsp;</th>';
 }
-$htmlContent .= '</tr>';
+$htmlContent .= '<th class="last_tick_width"></th></tr>';
 
 for($incr=0; $incr < count($rows); $incr++)
 {	
@@ -716,7 +749,7 @@ for($incr=0; $incr < count($rows); $incr++)
 	{
 		$htmlContent .= '<th width="'.$column_width.'px" colspan="'.$inner_columns.'" class="graph_right">&nbsp;</th>';
 	}
-	$htmlContent .= '</tr>';
+	$htmlContent .= '<th class="last_tick_width"></th></tr>';
 	
 	////// Color Graph - Bar Starts
 	
@@ -725,7 +758,13 @@ for($incr=0; $incr < count($rows); $incr++)
 	
 	$Max_ValueKey = Max_ValueKey($data_matrix[$row]['indlead_phase_na'], $data_matrix[$row]['indlead_phase_0'], $data_matrix[$row]['indlead_phase_1'], $data_matrix[$row]['indlead_phase_2'], $data_matrix[$row]['indlead_phase_3'], $data_matrix[$row]['indlead_phase_4']);
 					
-	$htmlContent .= '<tr id="indlead_Graph_Row_'.$row.'"><th align="right" class="prod_col" id="ProdCol_'.$row.'"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&itype=0&hm=' . $id . '" target="_blank" style="text-decoration:underline;">'.$data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'].'</a></th><th class="graph_right last_tick_width">&nbsp;</th>';
+	$htmlContent .= '<tr id="indlead_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" id="ProdCol_'.$row.'" rowspan="3"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&itype=0&hm=' . $id . '" target="_blank" style="text-decoration:underline;">'.$data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'].'</a></th><th class="graph_right last_tick_width" rowspan="3">&nbsp;</th>';
+	
+	for($j=0; $j < $columns; $j++)
+	{
+		$htmlContent .= '<th width="'.$column_width.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
+	}
+	$htmlContent .= '<th class="last_tick_width"></th></tr><tr id="indlead_Graph_Row_B_'.$row.'" class="Link" >';
 	
 	$total_cols = $inner_columns * $columns;
 	$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['indlead']);
@@ -738,7 +777,7 @@ for($incr=0; $incr < count($rows); $incr++)
 			$Color = getClassNColorforPhase($phase_nums);
 			$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['indlead_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
 			$phase_space =  $phase_space + $Mini_Bar_Width;					
-			$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height '.$Color[0].'" title="'.$data_matrix[$row]['indlead_phase_'.$phase_nums].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&itype=0&phase='.$phase_nums.'&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
+			$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="Link '.$Color[0].'" title="'.$data_matrix[$row]['indlead_phase_'.$phase_nums].'" style="height:20px; _height:20px;"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&itype=0&phase='.$phase_nums.'&hm=' . $id . '" target="_blank" class="Link" >&nbsp;</a></th>';
 		}
 	}
 	
@@ -747,14 +786,25 @@ for($incr=0; $incr < count($rows); $incr++)
 	if($remain_span > 0)
 	$htmlContent .= DrawExtraHTMLCells($phase_space, $inner_columns, $remain_span);
 	
-	$htmlContent .= '</tr>';
+	$htmlContent .= '<th class="last_tick_width"></th></tr><tr id="indlead_Graph_Row_C_'.$row.'">';
+	for($j=0; $j < $columns; $j++)
+	{
+		$htmlContent .= '<th width="'.$column_width.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
+	}
+	$htmlContent .= '<th class="last_tick_width"></th></tr>';
 	
 	//// Code for Active
 	$Err = ActiveCountErr($data_matrix, $row, $ratio);
 	
 	$Max_ValueKey = Max_ValueKey($data_matrix[$row]['active_phase_na'], $data_matrix[$row]['active_phase_0'], $data_matrix[$row]['active_phase_1'], $data_matrix[$row]['active_phase_2'], $data_matrix[$row]['active_phase_3'], $data_matrix[$row]['active_phase_4']);
 					
-	$htmlContent .= '<tr style="display:none;" id="active_Graph_Row_'.$row.'"><th align="right" class="prod_col"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&hm=' . $id . '" target="_blank" style="text-decoration:underline;">'.$data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'].'</a></th><th class="graph_right last_tick_width">&nbsp;</th>';
+	$htmlContent .= '<tr style="display:none;" id="active_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" rowspan="3"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&hm=' . $id . '" target="_blank" style="text-decoration:underline;">'.$data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'].'</a></th><th class="graph_right last_tick_width" rowspan="3">&nbsp;</th>';
+	
+	for($j=0; $j < $columns; $j++)
+	{
+		$htmlContent .= '<th width="'.$column_width.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
+	}
+	$htmlContent .= '<th class="last_tick_width"></th></tr><tr style="display:none;" id="active_Graph_Row_B_'.$row.'" class="Link">';
 	
 	$total_cols = $inner_columns * $columns;
 	$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['active']);
@@ -767,7 +817,7 @@ for($incr=0; $incr < count($rows); $incr++)
 			$Color = getClassNColorforPhase($phase_nums);
 			$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['active_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
 			$phase_space =  $phase_space + $Mini_Bar_Width;					
-			$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height '.$Color[0].'" title="'.$data_matrix[$row]['active_phase_'.$phase_nums].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&phase='.$phase_nums.'&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
+			$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="Link '.$Color[0].'" title="'.$data_matrix[$row]['active_phase_'.$phase_nums].'" style="height:20px; _height:20px;"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&phase='.$phase_nums.'&hm=' . $id . '" target="_blank" class="Link" >&nbsp;</a></th>';
 		}
 	}
 	
@@ -776,14 +826,25 @@ for($incr=0; $incr < count($rows); $incr++)
 	if($remain_span > 0)
 	$htmlContent .= DrawExtraHTMLCells($phase_space, $inner_columns, $remain_span);
 	
-	$htmlContent .= '</tr>';
+	$htmlContent .= '<th class="last_tick_width"></th></tr><tr style="display:none;" id="active_Graph_Row_C_'.$row.'">';
+	for($j=0; $j < $columns; $j++)
+	{
+		$htmlContent .= '<th width="'.$column_width.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
+	}
+	$htmlContent .= '<th class="last_tick_width"></th></tr>';
 	
 	//// Code for Total
 	$Err = TotalCountErr($data_matrix, $row, $ratio);
 	
 	$Max_ValueKey = Max_ValueKey($data_matrix[$row]['total_phase_na'], $data_matrix[$row]['total_phase_0'], $data_matrix[$row]['total_phase_1'], $data_matrix[$row]['total_phase_2'], $data_matrix[$row]['total_phase_3'], $data_matrix[$row]['total_phase_4']);
 	
-	$htmlContent .= '<tr style="display:none;" id="total_Graph_Row_'.$row.'"><th align="right" class="prod_col"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=2&hm=' . $id . '" target="_blank" style="text-decoration:underline;">'.$data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'].'</a></th><th class="graph_right last_tick_width">&nbsp;</th>';
+	$htmlContent .= '<tr style="display:none;" id="total_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" rowspan="3"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=2&hm=' . $id . '" target="_blank" style="text-decoration:underline;">'.$data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'].'</a></th><th class="graph_right last_tick_width" rowspan="3">&nbsp;</th>';
+	
+	for($j=0; $j < $columns; $j++)
+	{
+		$htmlContent .= '<th width="'.$column_width.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
+	}
+	$htmlContent .= '<th class="last_tick_width"></th></tr><tr style="display:none;" id="total_Graph_Row_B_'.$row.'" class="Link" >';
 	
 	$total_cols = $inner_columns * $columns;
 	$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['total']);
@@ -796,7 +857,7 @@ for($incr=0; $incr < count($rows); $incr++)
 			$Color = getClassNColorforPhase($phase_nums);
 			$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['total_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
 			$phase_space =  $phase_space + $Mini_Bar_Width;					
-			$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="side_tick_height '.$Color[0].'" title="'.$data_matrix[$row]['total_phase_'.$phase_nums].'" ><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=2&phase='.$phase_nums.'&hm=' . $id . '" target="_blank" class="Link_'.$row.'">&nbsp;</a></th>';
+			$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="Link '.$Color[0].'" title="'.$data_matrix[$row]['total_phase_'.$phase_nums].'" style="height:20px; _height:20px;"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=2&phase='.$phase_nums.'&hm=' . $id . '" target="_blank" class="Link" >&nbsp;</a></th>';
 		}
 	}
 	
@@ -805,7 +866,12 @@ for($incr=0; $incr < count($rows); $incr++)
 	if($remain_span > 0)
 	$htmlContent .= DrawExtraHTMLCells($phase_space, $inner_columns, $remain_span);
 	
-	$htmlContent .= '</tr>';
+	$htmlContent .= '<th class="last_tick_width"></th></tr><tr style="display:none;" id="total_Graph_Row_C_'.$row.'">';
+	for($j=0; $j < $columns; $j++)
+	{
+		$htmlContent .= '<th width="'.$column_width.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
+	}
+	$htmlContent .= '<th class="last_tick_width"></th></tr>';
 	
 	////// End Of - Color Graph - Bar Starts
 	
@@ -814,15 +880,15 @@ for($incr=0; $incr < count($rows); $incr++)
 	{
 		$htmlContent .= '<th width="'.$column_width.'px" colspan="'.$inner_columns.'" class="graph_right">&nbsp;</th>';
 	}
-	$htmlContent .= '</tr>';
+	$htmlContent .= '<th class="last_tick_width"></th></tr>';
 }			   
 			   
 $htmlContent .= '<tr class="last_tick_height"><th class="last_tick_height prod_col"><font style="line-height:4px;">&nbsp;</font></th><th class="graph_right last_tick_width"><font style="line-height:4px;">&nbsp;</font></th>';
 for($j=0; $j < $columns; $j++)
 $htmlContent .= '<th width="'.$column_width.'px" colspan="'.$inner_columns.'" class="graph_top graph_right"><font style="line-height:4px;">&nbsp;</font></th>';
-$htmlContent .= '</tr>';
+$htmlContent .= '<th class="last_tick_width"></th></tr>';
 
-$htmlContent .= '<tr><th class="prod_col"></th><th width="2px" class=""></th>';
+$htmlContent .= '<tr><th class="prod_col"></th><th class="last_tick_width"></th>';
 for($j=0; $j < $columns; $j++)
 $htmlContent .= '<th align="right" width="'.$column_width.'px" colspan="'.(($j==0)? $inner_columns+1 : $inner_columns).'" class="">'.(($j+1) * $column_interval).'</th>';
 $htmlContent .= '</tr>';
@@ -844,12 +910,12 @@ function DrawExtraHTMLCells($phase_space, $inner_columns, $remain_span)
 	
 	$extra_sp = $aq_sp - $phase_space;
 	if($extra_sp > 0)
-	$extraHTMLContent .= '<th colspan="'.($extra_sp).'" class="graph_right side_tick_height">&nbsp;</th>';
+	$extraHTMLContent .= '<th colspan="'.($extra_sp).'" class="graph_right Link">&nbsp;</th>';
 	
 	$remain_span = $remain_span - $extra_sp;
 	while($remain_span > 0)
 	{
-		$extraHTMLContent .= '<th colspan="'.($inner_columns).'" class="graph_right side_tick_height">&nbsp;</th>';
+		$extraHTMLContent .= '<th colspan="'.($inner_columns).'" class="graph_right Link">&nbsp;</th>';
 		$remain_span = $remain_span - $inner_columns;
 	}
 	
@@ -860,7 +926,7 @@ function DrawExtraHTMLCells($phase_space, $inner_columns, $remain_span)
 </html>
 <script language="javascript" type="text/javascript">
 change_view();
-Set_Link_Height();
+//Set_Link_Height();
 </script>
 <?php
 function Download_reports()
