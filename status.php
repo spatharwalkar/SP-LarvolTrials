@@ -757,7 +757,7 @@ function showprogress($last_id)
 		{
 			echo "<table width=\"100%\" class=\"event\">";
 				echo "<tr>";
-					echo "<th width=\"100%\" align=\"center\" class=\"head2\" >NCT history update status</th>";
+					echo "<th width=\"100%\" align=\"center\" class=\"head2\" >NCT refresh status</th>";
 				echo "</tr>";
 			echo "</table>";
 			echo "<table width=\"100%\" class=\"event\">";
