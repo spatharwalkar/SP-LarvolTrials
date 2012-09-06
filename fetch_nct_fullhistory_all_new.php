@@ -352,7 +352,9 @@ function get_nctids_from_web()
 			$right = false;
 			foreach($table->attributes as $attr)
 			{
-				if($attr->name == 'class' && $attr->value == 'data_table')
+				//attribute name changed in ct.gov (from "data_table" to "data_table margin-top" and "data_table body3").
+				//if($attr->name == 'class' && $attr->value == 'data_table')
+				if ($attr->name == 'class' && substr($attr->value,0,10) == 'data_table') 
 				{
 					$right = true;
 					break;
