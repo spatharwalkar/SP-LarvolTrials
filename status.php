@@ -684,7 +684,8 @@ function showprogress($last_id)
 	//Get entry corresponding to nct in 'update_status_fullhistory'
 	$query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 						`update_items_total`,`update_items_progress`,`er_message`,TIMEDIFF(updated_time, start_time) AS timediff,
-						`update_items_complete_time` FROM update_status_fullhistory where trial_type="NCT" and update_id="'.$last_id.'" ';
+						`update_items_complete_time` FROM update_status_fullhistory where trial_type="NCT" and 
+						 ( update_id="'.$last_id.'" or status="'. RUNNING .'")' ;
 	if(!$res = mysql_query($query))
 		{
 			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
