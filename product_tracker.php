@@ -685,9 +685,15 @@ $ratio = $Return['ratio'];
 $areaId = $Return['areaId'];
 $column_interval = $Return['column_interval'];
 
+$Line_Width = 20;
+
 $phase_legend_nums = array('4', '3', '2', '1', '0', 'na');
 	
 $Report_Name = ((trim($Report_DisplayName) != '' && $Report_DisplayName != NULL)? trim($Report_DisplayName):'report '.$id.'');
+
+require_once('tcpdf/config/lang/eng.php');
+require_once('tcpdf/tcpdf.php');  
+$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 
 if((isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE) || !isset($_SERVER['HTTP_REFERER']))
 {
@@ -760,9 +766,14 @@ for($incr=0; $incr < count($rows); $incr++)
 					
 	$htmlContent .= '<tr id="indlead_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" id="ProdCol_'.$row.'" rowspan="3"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&itype=0&hm=' . $id . '" target="_blank" style="text-decoration:underline;">'.$data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'].'</a></th><th class="graph_right last_tick_width" rowspan="3">&nbsp;</th>';
 	
+	///Below function will derive number of lines required to display product name, as our graph size is fixed due to fixed scale, we can calculate approx max area  
+	///for product column. From that we can calculate extra height which will be distributed to up and down rows of graph bar, So now IE6/7 as well as chrome will not 
+	///have issue of unequal distrirbution of extra height due to rowspan and bar will remain in middle, without use of JS.
+	$ExtraAdjusterHeight = (($pdf->getNumLines($data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'], ((1400-($columns * $column_width))*17/90)) * $Line_Width)  - 20) / 2;
+	
 	for($j=0; $j < $columns; $j++)
 	{
-		$htmlContent .= '<th width="'.$column_width.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
+		$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" width="'.$column_width.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
 	}
 	$htmlContent .= '<th class="last_tick_width"></th></tr><tr id="indlead_Graph_Row_B_'.$row.'" class="Link" >';
 	
@@ -789,7 +800,7 @@ for($incr=0; $incr < count($rows); $incr++)
 	$htmlContent .= '<th class="last_tick_width"></th></tr><tr id="indlead_Graph_Row_C_'.$row.'">';
 	for($j=0; $j < $columns; $j++)
 	{
-		$htmlContent .= '<th width="'.$column_width.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
+		$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" width="'.$column_width.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
 	}
 	$htmlContent .= '<th class="last_tick_width"></th></tr>';
 	
@@ -802,7 +813,7 @@ for($incr=0; $incr < count($rows); $incr++)
 	
 	for($j=0; $j < $columns; $j++)
 	{
-		$htmlContent .= '<th width="'.$column_width.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
+		$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" width="'.$column_width.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
 	}
 	$htmlContent .= '<th class="last_tick_width"></th></tr><tr style="display:none;" id="active_Graph_Row_B_'.$row.'" class="Link">';
 	
@@ -829,7 +840,7 @@ for($incr=0; $incr < count($rows); $incr++)
 	$htmlContent .= '<th class="last_tick_width"></th></tr><tr style="display:none;" id="active_Graph_Row_C_'.$row.'">';
 	for($j=0; $j < $columns; $j++)
 	{
-		$htmlContent .= '<th width="'.$column_width.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
+		$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" width="'.$column_width.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
 	}
 	$htmlContent .= '<th class="last_tick_width"></th></tr>';
 	
@@ -842,7 +853,7 @@ for($incr=0; $incr < count($rows); $incr++)
 	
 	for($j=0; $j < $columns; $j++)
 	{
-		$htmlContent .= '<th width="'.$column_width.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
+		$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" width="'.$column_width.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
 	}
 	$htmlContent .= '<th class="last_tick_width"></th></tr><tr style="display:none;" id="total_Graph_Row_B_'.$row.'" class="Link" >';
 	
@@ -869,7 +880,7 @@ for($incr=0; $incr < count($rows); $incr++)
 	$htmlContent .= '<th class="last_tick_width"></th></tr><tr style="display:none;" id="total_Graph_Row_C_'.$row.'">';
 	for($j=0; $j < $columns; $j++)
 	{
-		$htmlContent .= '<th width="'.$column_width.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
+		$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" width="'.$column_width.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
 	}
 	$htmlContent .= '<th class="last_tick_width"></th></tr>';
 	
