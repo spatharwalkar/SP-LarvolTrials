@@ -426,6 +426,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					
 						if(trial_indexed($larvol_id,$cat,$cid)) // check if the trial+product/trial+area index already exists
 						{
+							if(!isset($sponsor_owned) or empty($sponsor_owned))	$sponsor_owned=0;
 							if($cat=='products')
 							{
 								$query='UPDATE `'. $table .'`
