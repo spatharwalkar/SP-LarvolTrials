@@ -385,6 +385,14 @@ if(isset($_POST['delsch']) && is_array($_POST['delsch']))
 								minChars:3 
 					}); 
 				}
+				else if(type=='sphinx')
+				{
+					var a = $('#'+fieldID).autocomplete({
+								serviceUrl:'sphinx_autosuggest.php',
+								params:{table:'areas', field:'name'},
+								minChars:3
+					}); 
+				}
 			}
 		});
 	}

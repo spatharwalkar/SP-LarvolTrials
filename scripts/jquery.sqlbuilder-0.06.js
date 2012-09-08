@@ -1431,6 +1431,10 @@ $.initialBracesFlag = 9;
 			   else if (opts.fields[col_slot].type == 'area') {
                    valstr = '<input type="text" class="addnewsqlwherevalue" id="' + counter_id + '_1" value="' + col_val + '" autocomplete="off" onkeyup="javascript:autoComplete(\'areas\',\''+ counter_id +'_1\')" />';
                }
+			   else if (opts.fields[col_slot].type == 'sphinx') 
+			   {
+                   valstr = '<input type="text" class="addnewsqlwherevalue" id="' + counter_id + '_1" value="' + col_val + '" autocomplete="off" onkeyup="javascript:autoComplete(\'sphinx\',\''+ counter_id +'_1\')" />';
+               }
 			   else {
                    valstr = '<input type="text" class="addnewsqlwherevalue" id="' + counter_id + '_1" value="' + col_val + '" />&nbsp;';
                    if(opts.operators[op_slot].multipleval)
