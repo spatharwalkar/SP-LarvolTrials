@@ -452,21 +452,25 @@ $hoverJs 		= 'scripts/jquery.hoverIntent.minified.js';
 if(isset($_REQUEST['region']) && $_REQUEST['region'] != '')
 {
 	$globalOptions['region'] = explode(',', $_REQUEST['region']);
+	$globalOptions['region'] = array_filter($globalOptions['region'], 'iszero');
 }
 
 if(isset($_REQUEST['phase']) && $_REQUEST['phase'] != '')
 {
 	$globalOptions['phase'] = explode(',', $_REQUEST['phase']);
+	$globalOptions['phase'] = array_filter($globalOptions['phase'], 'iszero');
 }
 
 if(isset($_REQUEST['itype']) && $_REQUEST['itype'] != '')
 {
 	$globalOptions['itype'] = explode(',', $_REQUEST['itype']);
+	$globalOptions['itype'] = array_filter($globalOptions['itype'], 'iszero');
 }
 
 if(isset($_REQUEST['status']) && $_REQUEST['status'] != '')
 {
 	$globalOptions['status'] = explode(',', $_REQUEST['status']);
+	$globalOptions['status'] = array_filter($globalOptions['status'], 'iszero');
 }
 
 if(isset($_REQUEST['list']))
@@ -516,6 +520,7 @@ if((isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvoli
 if(isset($_REQUEST['pr']) && $_REQUEST['pr'] != '')
 {	
 	$globalOptions['product'] =  explode(',', $_REQUEST['pr']);
+	$globalOptions['product'] = array_filter($globalOptions['product'], 'iszero');
 }
 
 if(isset($_REQUEST['results']) && isset($_REQUEST['type']))
@@ -544,11 +549,11 @@ else if(isset($_REQUEST['p']) && isset($_REQUEST['a']))
 		$tt_type = 'singleindexed';
 	}
 	
-	$globalOptions['url'] = 'p=' . $_REQUEST['p'] . '&a=' . $_REQUEST['a'];	
+	$globalOptions['url'] = 'p=' . $_REQUEST['p'] . '&amp;a=' . $_REQUEST['a'];	
 	
 	if(isset($_REQUEST['JSON_search']))
 	{
-		$globalOptions['url'] = 'p=' . $_REQUEST['p'] . '&a=' . $_REQUEST['a'] . '&JSON_search=' . $_REQUEST['JSON_search'];
+		$globalOptions['url'] = 'p=' . $_REQUEST['p'] . '&amp;a=' . $_REQUEST['a'] . '&amp;JSON_search=' . $_REQUEST['JSON_search'];
 		$globalOptions['JSON_search'] = $_REQUEST['JSON_search'];
 	}
 	

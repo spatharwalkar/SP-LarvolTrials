@@ -50,7 +50,7 @@ class TrialTracker
 									
 		$this->activeStatusValues = array('Not yet recruiting', 'Recruiting', 'Enrolling by invitation', 
 								'Active, not recruiting', 'Available', 'No longer recruiting');
-		$this->allStatusValues = array_merge($this->inactiveStatusValues, $this->activeStatusValues);
+		$this->allStatusValues = array_merge($this->activeStatusValues, $this->inactiveStatusValues);
 		
 		$this->phaseValues = array('N/A'=>'#BFBFBF', '0'=>'#00CCFF', '0/1'=>'#99CC00', '1'=>'#99CC00', '1a'=>'#99CC00', '1b'=>'#99CC00', '1a/1b'=>'#99CC00', 
 							'1c'=>'#99CC00', '1/2'=>'#FFFF00', '1b/2'=>'#FFFF00', '1b/2a'=>'#FFFF00', '2'=>'#FFFF00', '2a'=>'#FFFF00', '2a/2b'=>'#FFFF00', 
@@ -10673,6 +10673,10 @@ class TrialTracker
 		$start 	= ($globalOptions['page']-1) * $this->resultsPerPage + 1;
 		$last 	= ($globalOptions['page'] * $this->resultsPerPage > $count) ? $count : ($start + $this->resultsPerPage - 1);
 		$totalPages = ceil($count / $this->resultsPerPage);
+		$paginate = $this->pagination($globalOptions, $totalPages, $timeMachine, $ottType, $loggedIn);
+		
+		$urlParams = array();
+		parse_str($paginate[0], $urlParams);
 		
 		if($Values['totalcount'] != 0 && $globalOptions['minEnroll'] == 0 && $globalOptions['maxEnroll'] == 0)
 		{
@@ -10707,18 +10711,237 @@ class TrialTracker
 		
 		$this->displayFilterControls($productSelector, $productSelectorTitle, $count, $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], $globalOptions, $ottType, $loggedIn);
 		
-		if($totalPages > 1)
+		echo '<div style="width:100%;min-width:1200px;">'
+				. '<div style="float:left;margin:2px 10px 0px 0px;">&nbsp;<img src="images/funnel.png" alt="Show Filter" border="0" style="vertical-align:bottom;" onclick="$(\'.controls\').show();" />'
+				. '&nbsp;&nbsp;<b>' . $count . '&nbsp;Records</b></div>';
+		
+		
+		foreach($urlParams as $key => $value) 
 		{
-			$this->pagination($globalOptions, $totalPages, $timeMachine, $ottType, $loggedIn);
+			if(strpos($key, 'amp;') !== FALSE)
+			{
+				$newKey = str_replace('amp;', '', $key);
+				$urlParams[$newKey] = $value;
+				unset($urlParams[$key]);
+			}
 		}
 		
-		echo '<input type="text" name="ss" autocomplete="off" style="width:300px;" value="' . $globalOptions['sphinxSearch'] . '" />';
-		echo '<div style="float: right;padding-top:4px; vertical-align:bottom; height:22px;" id="chromemenu"><a rel="dropmenu">'
-				. '<span style="padding:2px;border:1px solid; color:#000000; background-position:left center; background-repeat:no-repeat; background-image:url(\'./images/save.png\'); cursor:pointer;">'
-				. '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Export</b></span></a></div>'
-				. '<div style="float: right;margin-right: 10px; vertical-align:bottom; padding-top:4px; height:22px;"><span id="addtoright"></span></div>';
+		echo '<div style="float:left;width:35%;overflow-x:scroll;margin-bottom:10px;"><div style="width:700px;">';
+		
+		$lParams = array();
+		if($globalOptions['type'] == 'inactiveTrials')
+		{
+			$lUrl = '';
+			$lParams =  array_replace($urlParams, array('list' => '1'));
+			$lUrl = http_build_query($lParams);
+			echo '<span class="filters"><label>Inactive Trials</label>'
+				. '<a href="intermediary.php?' . $lUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';;
+		}
+		else if($globalOptions['type'] == 'allTrials')
+		{
+			$lUrl = '';
+			$lParams =  array_replace($urlParams, array('list' => '1'));
+			$lUrl = http_build_query($lParams);
+			
+			echo '<span class="filters"><label>All Trials</label>'
+				. '<a href="intermediary.php?' . $lUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';;
+		}
+		
+		$sFilters = array();
+		$sParams = array();
+		if($globalOptions['type'] == "activeTrials")
+		{
+			$sFilters = $this->activeStatusValues;
+		}
+		else if($globalOptions['type'] == "inactiveTrials")
+		{
+			$sFilters = $this->inactiveStatusValues;
+		}
+		else if($globalOptions['type'] == "allTrials")
+		{
+			$sFilters = $this->allStatusValues;
+		}
+		foreach($globalOptions['status'] as $key => $value)
+		{	
+			$sUrl = '';
+			$sUrl = $urlParams['status'];
+			$sUrl = str_replace(',,', ',', str_replace($value, '', $sUrl));
+			
+			$sParams =  array_replace($urlParams, array('status' => $sUrl));
+			$sUrl = http_build_query($sParams);
+			
+			echo '<span class="filters"><label>' .  $sFilters[$value] . '</label>'
+				. '<a href="intermediary.php?' . $sUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
+		}
+		unset($sFilters);
+		unset($sParams);
+		unset($key);
+		unset($value);
+		
+		$iParams = array();
+		foreach($globalOptions['itype'] as $key => $value)
+		{
+			$iUrl = '';
+			$iUrl = $urlParams['itype'];
+			$iUrl = str_replace(',,', ',', str_replace($value, '', $iUrl));
+
+			$iParams =  array_replace($urlParams, array('itype' => $iUrl));
+			$iUrl = http_build_query($iParams);
+
+			$val = $this->institutionFilters[$value];
+			$val = str_replace('_', ' ', ucfirst($val));
+			echo '<span class="filters"><label>' . $val . '</label>'
+					. '<a href="intermediary.php?' . $iUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
+		}
+		unset($iParams);
+		unset($key);
+		unset($value);
+		
+		$rParams = array();
+		foreach($globalOptions['region'] as $key => $value)
+		{
+			$rUrl = '';
+			$rUrl = $urlParams['region'];
+			$rUrl = str_replace(',,', ',', str_replace($value, '', $rUrl));
+
+			$rParams =  array_replace($urlParams, array('region' => $rUrl));
+			$rUrl = http_build_query($rParams);
+			
+			echo '<span class="filters"><label>' .  $this->regionFilters[$value] . '</label>'
+				. '<a href="intermediary.php?' . $rUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
+		}
+		unset($rParams);
+		unset($key);
+		unset($value);
+		
+		$phases = array('na' => 'N/A', '0' => '0', '1' => '1', '2' => '2', '3' => '3', '4' => '4');
+		$pParams = array();
+		foreach($globalOptions['phase'] as $key => $value)
+		{
+			if(array_key_exists($value, $phases))
+			{
+				$pUrl = '';
+				$pUrl = $urlParams['phase'];
+				$pUrl = str_replace(',,', ',', str_replace($value, '', $pUrl));
 				
-		echo '<br/><br/>';
+				$pParams =  array_replace($urlParams, array('phase' => $pUrl));
+				$pUrl = http_build_query($pParams);
+
+				echo '<span class="filters"><label>Phase ' .  $phases[$value] . '</label>'
+				. '<a href="intermediary.php?' . $rUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
+			}
+		}
+		unset($phases);
+		unset($pParams);
+		unset($key);
+		unset($value);
+		
+		$hParams = array();
+		if($globalOptions['startrange'] != "now" || $globalOptions['endrange'] != "1 month")
+		{
+			$hUrl = '';
+			$hParams =  array_replace($urlParams, array('sr' => 'now', 'er' => '1 month'));
+			$hUrl = http_build_query($hParams);
+			
+			echo '<span class="filters"><label>' . $globalOptions['startrange'] . ' - ' . $globalOptions['endrange'] . '</label>'
+					. '<a href="intermediary.php?' . $hUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
+		}
+		unset($hParams);
+		
+		$oParams = array();
+		if($globalOptions['onlyUpdates'] != 'no')
+		{
+			$oUrl = '';
+			$oParams =  array_replace($urlParams, array('osu' => 'off'));
+			$oUrl = http_build_query($oParams);
+			
+			echo '<span class="filters"><label>Only updates</label>'
+				. '<a href="intermediary.php?' . $oUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
+		}
+		unset($oParams);
+		
+		$eParams = array();
+		if($globalOptions['enroll'] != ($globalOptions['minEnroll'] . ' - ' . $globalOptions['maxEnroll']))
+		{
+			$eUrl = '';
+			$eParams =  array_replace($urlParams, array('enroll' => $globalOptions['minEnroll'] . ' - ' . $globalOptions['maxEnroll']));
+			$eUrl = http_build_query($eParams);
+			
+			echo '<span class="filters"><label>' . $globalOptions['enroll'] . '<label>'
+					. '<a href="intermediary.php?' . $eUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
+		}
+		unset($eParams);
+		
+		$dParams = array();
+		if($globalOptions['includeProductsWNoData'] == 'on')
+		{
+			$dUrl = '';
+			$dParams =  array_replace($urlParams, array('ipwnd' => 'off'));
+			$dUrl = http_build_query($dParams);
+			
+			echo '<span class="filters"><label>' . str_replace('Select ', '', $productSelectorTitle) . ' with no data<label>'
+					. '<a href="intermediary.php?' . $dUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
+		}
+		unset($dParams);
+		
+		$tParams = array();
+		if(!empty($globalOptions['product']))
+		{
+			foreach($globalOptions['product'] as $key => $value)
+			{
+				$tUrl = '';
+				$tUrl = $urlParams['pr'];
+				$tUrl = str_replace(',,', ',', str_replace($value, '', $tUrl));
+				
+				$tParams =  array_replace($urlParams, array('pr' => $tUrl));
+				$tUrl = http_build_query($tParams);
+			
+				echo '<span class="filters"><label>' . $productSelector[$value] . '</label>'
+						. '<a href="intermediary.php?' . $tUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
+			}
+		}
+		unset($tParams);
+		unset($key);
+		unset($value);
+		
+		echo '</div></div>';
+		
+		if($totalPages > 1)
+		{
+			echo $paginate[1];
+			//$this->pagination($globalOptions, $totalPages, $timeMachine, $ottType, $loggedIn);
+		}
+		
+		echo '<div style="float:left;margin-left:5px;"><input type="text" name="ss" autocomplete="off" style="width:180px;" value="' . $globalOptions['sphinxSearch'] . '" /></div>'
+			. '<div class="milestones"><span id="addtoright"></span></div>'
+			. '<div class="export" id="chromemenu"><a rel="dropmenu"><span>&nbsp;&nbsp;&nbsp;&nbsp;<b>Export</b></span></a></div>';
+		
+		$resetUrl = 'intermediary.php?';
+		if($ottType == 'unstacked')
+		{
+			$resetUrl .= 'results=' . $globalOptions['url'];
+		}
+		else if($ottType == 'rowstacked' || $ottType == 'colstacked')
+		{	
+			$resetUrl .= 'results=' .  $globalOptions['url'];
+		}
+		else if($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed')
+		{
+			$resetUrl .= $globalOptions['url'];
+		}
+		else if($ottType == 'standalone')
+		{
+			$resetUrl .= 'id=' . $globalOptions['url'];
+		}
+		$resetUrl .= str_replace(',', '&', $globalOptions['resetLink']);
+		$resetUrl = htmlentities($url);
+			
+		echo '<div style="float:left">'
+			. '<input type="submit" id="Show" value="Search" class="searchbutton" />&nbsp;<a style="display:inline;" href="' . $url . '">'
+			. '<input type="button" value="Reset" id="reset" class="resetbutton" onclick="javascript: window.location.href(\'' . urlPath() . $resetUrl . '\')" /></a>'
+			. '</div>';
+				
+		echo '</div>';
 		echo '<input type="hidden" name="rflag" value="1" /><input type="hidden" name="rlink" value="' . $globalOptions['resetLink'] . '" />';
 		
 		echo $this->displayTrialTableHeader($loggedIn, $globalOptions);
@@ -10831,7 +11054,8 @@ class TrialTracker
 		if($totalPages > 1)
 		{
 			echo '<div style="height:10px;">&nbsp;</div>';
-			$this->pagination($globalOptions, $totalPages, $timeMachine, $ottType, $loggedIn);
+			echo $paginate[1];
+			//$this->pagination($globalOptions, $totalPages, $timeMachine, $ottType, $loggedIn);
 		}
 		echo '</form><br/>';
 		
@@ -11008,7 +11232,7 @@ class TrialTracker
 	
 	function displayFilterControls($productSelector = array(), $productSelectorTitle, $shownCount, $activeCount, $inactiveCount, $totalCount, $globalOptions = array(), $ottType, $loggedIn)
 	{	
-		echo '<table border="0" cellspacing="0" class="controls" align="center" style="_width:100%; table-layout: fixed">'
+		echo '<table border="0" cellspacing="0" class="controls" align="center" style="_width:100%; table-layout: fixed;display: none;">'
 				. '<tr><th style="width:113px">Active</th><th style="width:210px">Status</th>'
 				. '<th style="width:170px">Institution type</th>'
 				. '<th style="width:80px">Region</th><th style="width:50px">Phase</th><th class="right" style="width:340px">Filter</th></tr>'
@@ -11222,36 +11446,11 @@ class TrialTracker
 				. '<input type="hidden" name="itype" id="itype" value="' . implode(',', $globalOptions['itype']) . '" />'
 				. '<input type="hidden" name="region" id="region" value="' . implode(',', $globalOptions['region']) . '" />'
 				. '<input type="hidden" name="phase" id="phase" value="' . implode(',', $globalOptions['phase']) . '" />';
-		
-		$url = 'intermediary.php?';
-		
-		if($ottType == 'unstacked')
-		{
-			$url .= 'results=' . $globalOptions['url'];
-		}
-		else if($ottType == 'rowstacked' || $ottType == 'colstacked')
-		{	
-			$url .= 'results=' .  $globalOptions['url'];
-		}
-		else if($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed')
-		{
-			$url .= $globalOptions['url'];
-		}
-		else if($ottType == 'standalone')
-		{
-			$url .= 'id=' . $globalOptions['url'];
-		}
-		$url .= str_replace(',', '&', $globalOptions['resetLink']);
-		$url = htmlentities($url);
-		echo '<div style="float:left;margin-right:10px;">'
-				. '<input type="submit" id="Show" value="Search" class="searchbutton" />&nbsp;<a style="display:inline;" href="' . $url . '">'
-				. '<input type="button" value="Reset" id="reset" class="resetbutton" onclick="javascript: window.location.href(\'' . urlPath() . $url . '\')" /></a>'
-				. '&nbsp;&nbsp;&nbsp;<b>' . $shownCount . '&nbsp;Records</b></div>';
 	}
 	
 	function pagination($globalOptions = array(), $totalPages, $timeMachine = NULL, $ottType, $loggedIn)
 	{ 	
-		$url = 'intermediary.php?';
+		$url = '';//'intermediary.php?';
 		 
 		if($ottType == 'unstacked')
 		{
@@ -11352,11 +11551,6 @@ class TrialTracker
 		if( !isset($_REQUEST['sphinx_s']) and isset($globalOptions['sphinx_s']))
 		{
 			$url .= '&amp;sphinx_s=' . $globalOptions['sphinx_s'];
-		}
-		
-		if(isset($globalOptions['sphinxSearch']) && $globalOptions['sphinxSearch'] != '')
-		{
-			$url .= '&amp;ss=' . $globalOptions['sphinxSearch'];
 		}
 		
 		if(isset($globalOptions['showTrialsSponsoredByProductOwner']) && $globalOptions['showTrialsSponsoredByProductOwner'] == "on")
@@ -11462,7 +11656,7 @@ class TrialTracker
 		}
 		$paginateStr .= '</div>';
 		
-		echo $paginateStr;
+		return array($url, $paginateStr);
 	}
 	
 	function displayTrials($totalPages, $globalOptions = array(), $loggedIn, $start, $end, $Values, $ottType)
@@ -13680,7 +13874,7 @@ class TrialTracker
 		return $updates;
 	}
 	
-	 function getMatchedUPMs($trialId, $timeMachine = NULL, $timeInterval) 
+	function getMatchedUPMs($trialId, $timeMachine = NULL, $timeInterval) 
 	{
 		global $now;
 		$upm['matchedupms'] = array();
@@ -14431,4 +14625,6 @@ function get_WhereString($data, $alias, $pd_alias, $ar_alias)
 	}
 	return $wherestr;
 }
+
+function iszero($element) { return $element != ''; }
 ?>
