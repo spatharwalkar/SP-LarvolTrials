@@ -10726,7 +10726,7 @@ class TrialTracker
 			}
 		}
 		
-		echo '<div style="float:left;width:35%;overflow-x:scroll;margin-bottom:10px;"><div style="width:700px;">';
+		echo '<div style="float:left;width:35%;overflow-x:auto;margin-bottom:10px;"><div style="width:700px;">';
 		
 		$lParams = array();
 		if($globalOptions['type'] == 'inactiveTrials')
