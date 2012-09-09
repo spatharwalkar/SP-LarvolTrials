@@ -10861,7 +10861,7 @@ class TrialTracker
 		unset($oParams);
 		
 		$eParams = array();
-		if($globalOptions['enroll'] != ($globalOptions['minEnroll'] . ' - ' . $globalOptions['maxEnroll']))
+		if($globalOptions['enroll'] != ($globalOptions['minEnroll'] . ' - ' . $globalOptions['maxEnroll']) && $globalOptions['enroll'] != '0')
 		{
 			$eUrl = '';
 			$eParams =  array_replace($urlParams, array('enroll' => $globalOptions['minEnroll'] . ' - ' . $globalOptions['maxEnroll']));
@@ -11570,12 +11570,13 @@ class TrialTracker
 		$url .= '&amp;rflag=1';
 		$stages = 2;
 		
+		$rootUrl = 'intermediary.php?';
 		$paginateStr = '<div class="pagination" style="float: left; padding-top:2px; vertical-align:bottom;">';
 		///ALL Quotation Marks SIGN REPLACED BY Apostrophe, CAUSE JSON DATA URL GET PROBLEM WITH double quote.
 		// globalOptions Should always have Apostrophe instead of quote sign or data will not be passed
 		if($globalOptions['page'] != 1)
 		{
-			$paginateStr .= '<a href=\'' . $url . '&page=' . ($globalOptions['page']-1) . '\'>&laquo; Prev</a>';
+			$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . ($globalOptions['page']-1) . '\'>&laquo; Prev</a>';
 		}
 		
 		if($totalPages < 7 + ($stages * 2))
@@ -11588,7 +11589,7 @@ class TrialTracker
 				}
 				else
 				{
-					$paginateStr .= '<a href=\'' . $url . '&page=' . $counter . '\'>' . $counter . '</a>';
+					$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . $counter . '\'>' . $counter . '</a>';
 				}
 			}
 		}
@@ -11604,17 +11605,17 @@ class TrialTracker
 					}
 					else
 					{
-						$paginateStr .='<a href=\'' . $url . '&page=' . $counter . '\'>' . $counter . '</a>';
+						$paginateStr .='<a href=\'' . $rootUrl . $url . '&page=' . $counter . '\'>' . $counter . '</a>';
 					}
 				}
 				$paginateStr.= '<span>...</span>';
-				$paginateStr.= '<a href=\'' . $url . '&page=' . ($totalPages-1) . '\'>' .  ($totalPages-1) . '</a>';
-				$paginateStr.= '<a href=\'' . $url . '&page=' . $totalPages . '\'>' . $totalPages . '</a>';
+				$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=' . ($totalPages-1) . '\'>' .  ($totalPages-1) . '</a>';
+				$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=' . $totalPages . '\'>' . $totalPages . '</a>';
 			}
 			elseif($totalPages - ($stages * 2) > $globalOptions['page'] && $globalOptions['page'] > ($stages * 2))
 			{
-				$paginateStr.= '<a href=\'' . $url . '&page=1\'>1</a>';
-				$paginateStr.= '<a href=\'' . $url . '&page=2\'>2</a>';
+				$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=1\'>1</a>';
+				$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=2\'>2</a>';
 				$paginateStr.= '<span>...</span>';
 				for($counter = $globalOptions['page'] - $stages; $counter <= $globalOptions['page'] + $stages; $counter++)
 				{
@@ -11624,17 +11625,17 @@ class TrialTracker
 					}
 					else
 					{
-						$paginateStr.= '<a href=\'' . $url . '&page=' . $counter . '\'>' . $counter . '</a>';
+						$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=' . $counter . '\'>' . $counter . '</a>';
 					}
 				}
 				$paginateStr.= '<span>...</span>';
-				$paginateStr.= '<a href=\'' . $url . '&page=' . ($totalPages-1) . '\'>' . ($totalPages-1) . '</a>';
-				$paginateStr.= '<a href=\'' . $url . '&page=' . $totalPages . '\'>' . $totalPages . '</a>';
+				$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=' . ($totalPages-1) . '\'>' . ($totalPages-1) . '</a>';
+				$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=' . $totalPages . '\'>' . $totalPages . '</a>';
 			}
 			else
 			{
-				$paginateStr .= '<a href=\'' . $url . '&page=1\'>1</a>';
-				$paginateStr .= '<a href=\'' . $url . '&page=2\'>2</a>';
+				$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=1\'>1</a>';
+				$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=2\'>2</a>';
 				$paginateStr .= "<span>...</span>";
 				for($counter = $totalPages - (2 + ($stages * 2)); $counter <= $totalPages; $counter++)
 				{
@@ -11644,7 +11645,7 @@ class TrialTracker
 					}
 					else
 					{
-						$paginateStr .= '<a href=\'' . $url . '&page=' . $counter . '\'>' . $counter . '</a>';
+						$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . $counter . '\'>' . $counter . '</a>';
 					}
 				}
 			}
@@ -11652,7 +11653,7 @@ class TrialTracker
 		
 		if($globalOptions['page'] != $totalPages)
 		{
-			$paginateStr .= '<a href=\'' . $url . '&page=' . ($globalOptions['page']+1) . '\'>Next &raquo;</a>';
+			$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . ($globalOptions['page']+1) . '\'>Next &raquo;</a>';
 		}
 		$paginateStr .= '</div>';
 		
