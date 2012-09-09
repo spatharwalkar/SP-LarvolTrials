@@ -549,11 +549,11 @@ else if(isset($_REQUEST['p']) && isset($_REQUEST['a']))
 		$tt_type = 'singleindexed';
 	}
 	
-	$globalOptions['url'] = 'p=' . $_REQUEST['p'] . '&amp;a=' . $_REQUEST['a'];	
+	$globalOptions['url'] = 'p=' . $_REQUEST['p'] . '&a=' . $_REQUEST['a'];	
 	
 	if(isset($_REQUEST['JSON_search']))
 	{
-		$globalOptions['url'] = 'p=' . $_REQUEST['p'] . '&amp;a=' . $_REQUEST['a'] . '&amp;JSON_search=' . $_REQUEST['JSON_search'];
+		$globalOptions['url'] = 'p=' . $_REQUEST['p'] . '&a=' . $_REQUEST['a'] . '&JSON_search=' . $_REQUEST['JSON_search'];
 		$globalOptions['JSON_search'] = $_REQUEST['JSON_search'];
 	}
 	

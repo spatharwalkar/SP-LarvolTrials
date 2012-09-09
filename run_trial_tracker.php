@@ -10715,7 +10715,6 @@ class TrialTracker
 				. '<div style="float:left;margin:2px 10px 0px 0px;">&nbsp;<img src="images/funnel.png" alt="Show Filter" border="0" style="vertical-align:bottom;" onclick="$(\'.controls\').show();" />'
 				. '&nbsp;&nbsp;<b>' . $count . '&nbsp;Records</b></div>';
 		
-		
 		foreach($urlParams as $key => $value) 
 		{
 			if(strpos($key, 'amp;') !== FALSE)
@@ -10934,10 +10933,11 @@ class TrialTracker
 			$resetUrl .= 'id=' . $globalOptions['url'];
 		}
 		$resetUrl .= str_replace(',', '&', $globalOptions['resetLink']);
-		$resetUrl = htmlentities($url);
-			
+		$resetUrl = htmlentities($resetUrl);
+		
 		echo '<div style="float:left">'
-			. '<input type="submit" id="Show" value="Search" class="searchbutton" />&nbsp;<a style="display:inline;" href="' . $url . '">'
+			. '<input type="submit" id="Show" value="Search" class="searchbutton" />&nbsp;'
+			. '<a style="display:inline;" href="' . urlPath() . $resetUrl . '">'
 			. '<input type="button" value="Reset" id="reset" class="resetbutton" onclick="javascript: window.location.href(\'' . urlPath() . $resetUrl . '\')" /></a>'
 			. '</div>';
 				
