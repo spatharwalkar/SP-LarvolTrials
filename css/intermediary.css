@@ -287,8 +287,8 @@ tr.upms td {
 	margin:0.1em;
 	width: 13px; /* for IE */
 	height: 13px; /* For IE */ 
-	width: \13px/;
-	height: \13px/;
+	margin: 0px \ ;
+	padding: 0px \ ;
 }
 
 .ui-slider-horizontal .ui-slider-handle {
