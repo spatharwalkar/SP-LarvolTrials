@@ -5821,7 +5821,7 @@ class TrialTracker
 							while($tag_row = mysql_fetch_assoc($tag_res))
 							{
 								if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
-									$TrialsInfo[$pkey]['sectionHeader'] .= " <font class=\"tag\">[" . $tag_row['tag'] . "]</font>";
+									$TrialsInfo[$pkey]['sectionHeader'] .= " <span class=\"tag\">[" . $tag_row['tag'] . "]</span>";
 							}
 						}
 					}
@@ -5863,7 +5863,7 @@ class TrialTracker
 								while($tag_row = mysql_fetch_assoc($tag_res))
 								{
 									if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
-										$TrialsInfo[$pkey]['sectionHeader'] .= " <font class=\"tag\">[" . $tag_row['tag'] . "]</font>";
+										$TrialsInfo[$pkey]['sectionHeader'] .= " <span class=\"tag\">[" . $tag_row['tag'] . "]</span>";
 								}
 							}
 						}
@@ -5998,7 +5998,7 @@ class TrialTracker
 								while($tag_row = mysql_fetch_assoc($tag_res))
 								{
 									if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
-										$TrialsInfo[$pkey]['sectionHeader'] .= " <font class=\"tag\">[" . $tag_row['tag'] . "]</font>";
+										$TrialsInfo[$pkey]['sectionHeader'] .= " <span class=\"tag\">[" . $tag_row['tag'] . "]</span>";
 								}
 							}
 						}
@@ -6037,7 +6037,7 @@ class TrialTracker
 						while($tag_row = mysql_fetch_assoc($tag_res))
 						{
 							if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
-								$TrialsInfo[0]['sectionHeader'] .= " <font class=\"tag\">[" . $tag_row['tag'] . "]</font>";
+								$TrialsInfo[0]['sectionHeader'] .= " <span class=\"tag\">[" . $tag_row['tag'] . "]</span>";
 						}
 					}
 				}
@@ -7543,7 +7543,7 @@ class TrialTracker
 									{
 										if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
 										{
-											$TrialsInfo[$pkey]['sectionHeader'] .= " <font class=\"tag\">[" . $tag_row['tag'] . "]</font>";
+											$TrialsInfo[$pkey]['sectionHeader'] .= " <span class=\"tag\">[" . $tag_row['tag'] . "]</span>";
 										}
 									}
 								}
@@ -7602,7 +7602,7 @@ class TrialTracker
 										{
 											if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
 											{
-												$TrialsInfo[$pkey]['sectionHeader'] .= " <font class=\"tag\">[" . $tag_row['tag'] . "]</font>";
+												$TrialsInfo[$pkey]['sectionHeader'] .= " <span class=\"tag\">[" . $tag_row['tag'] . "]</span>";
 											}
 										}
 									}
@@ -7869,7 +7869,7 @@ class TrialTracker
 										{
 											if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
 											{
-												$TrialsInfo[$pkey]['sectionHeader'] .= " <font class=\"tag\">[" . $tag_row['tag'] . "]</font>";
+												$TrialsInfo[$pkey]['sectionHeader'] .= " <span class=\"tag\">[" . $tag_row['tag'] . "]</span>";
 											}
 										}
 									}
@@ -7954,7 +7954,7 @@ class TrialTracker
 						{
 							if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
 							{
-								$TrialsInfo[0]['sectionHeader'] .= " <font class=\"tag\">[" . $tag_row['tag'] . "]</font>";
+								$TrialsInfo[0]['sectionHeader'] .= " <span class=\"tag\">[" . $tag_row['tag'] . "]</span>";
 							}
 						}
 					}
@@ -7971,11 +7971,11 @@ class TrialTracker
 			
 			echo '<input type="hidden" name="p" value="' . $_REQUEST['p'] . '"/><input type="hidden" name="a" value="' . $_REQUEST['a'] . '"/>';
 			
-			if(isset($_REQUEST['JSON_search']))
-			echo '<input type="hidden" name="JSON_search" value=\'' . $_REQUEST['JSON_search'] . '\'/>';
+			if(isset($globalOptions['JSON_search']))
+			echo '<input type="hidden" name="JSON_search" value=\'' . $globalOptions['JSON_search'] . '\'/>';
 			
-			if(isset($_REQUEST['hm']) && trim($_REQUEST['hm']) != '' && $_REQUEST['hm'] != NULL)
-			echo '<input type="hidden" name="hm" value="' . $_REQUEST['hm'] . '"/>';
+			if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)
+			echo '<input type="hidden" name="hm" value="' . $globalOptions['hm'] . '"/>';
 			
 			$Values = $this->processIndexedOTTData($TrialsInfo, $ottType, $Ids, $timeMachine, $globalOptions);
 			unset($TrialsInfo);
@@ -10711,7 +10711,7 @@ class TrialTracker
 		
 		$this->displayFilterControls($productSelector, $productSelectorTitle, $count, $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], $globalOptions, $ottType, $loggedIn);
 		
-		echo '<div style="width:100%;min-width:1200px;">'
+		echo '<div style="width:100%;min-width:1300px;">'
 				. '<div style="float:left;margin:2px 10px 0px 0px;">&nbsp;<img src="images/funnel.png" alt="Show Filter" border="0" style="vertical-align:bottom;" onclick="$(\'.controls\').show();" />'
 				. '&nbsp;&nbsp;<b>' . $count . '&nbsp;Records</b></div>';
 		
@@ -10725,7 +10725,7 @@ class TrialTracker
 			}
 		}
 		
-		echo '<div style="float:left;width:35%;overflow-x:auto;margin-bottom:10px;"><div style="width:700px;">';
+		echo '<div style="float:left;width:12%;overflow-x:auto;margin-bottom:10px;"><div style="width:700px;">';
 		
 		$lParams = array();
 		if($globalOptions['type'] == 'inactiveTrials')
@@ -11561,6 +11561,11 @@ class TrialTracker
 		if(isset($globalOptions['sphinxSearch']) && $globalOptions['sphinxSearch'] != '')
 		{
 			$url .= '&amp;ss=' . $globalOptions['sphinxSearch'];
+		}
+		
+		if(isset($globalOptions['hm']) && $globalOptions['hm'] != '')
+		{
+			$url .= '&amp;hm=' . $globalOptions['hm'];
 		}
 		
 		if(isset($globalOptions['resetLink']))

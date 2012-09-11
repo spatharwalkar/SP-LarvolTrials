@@ -556,6 +556,10 @@ else if(isset($_REQUEST['p']) && isset($_REQUEST['a']))
 		$globalOptions['url'] = 'p=' . $_REQUEST['p'] . '&a=' . $_REQUEST['a'] . '&JSON_search=' . $_REQUEST['JSON_search'];
 		$globalOptions['JSON_search'] = $_REQUEST['JSON_search'];
 	}
+	if(isset($_REQUEST['hm']) && trim($_REQUEST['hm']) != '' && $_REQUEST['hm'] != NULL)
+	{
+		$globalOptions['hm'] = $_REQUEST['hm'];
+	}
 	
 	if(isset($_REQUEST['sphinx_s']))
 	{

@@ -533,7 +533,7 @@ ul, li { behavior:url("css/csshover3.htc"); }
 
 .tag {
 	color:#120f3c;
-	/*font-weight:bold;*/
+	font-weight:normal;
 }
 
 .demo #slider-range, .demo #slider-range-min {
