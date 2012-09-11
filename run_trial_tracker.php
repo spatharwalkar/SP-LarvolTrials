@@ -11234,7 +11234,7 @@ class TrialTracker
 	{	
 		echo '<table border="0" cellspacing="0" class="controls" align="center" style="_width:100%; table-layout: fixed;display: none;">'
 				. '<tr><th style="width:113px">Active</th><th style="width:210px">Status</th>'
-				. '<th style="width:170px">Institution type</th>'
+				. '<th style="width:180px">Institution type</th>'
 				. '<th style="width:80px">Region</th><th style="width:50px">Phase</th><th class="right" style="width:340px">Filter</th></tr>'
 				. '<tr><td class="bottom" style="padding-right:5px;">'
       			. '<input type="radio" name="list" value="1"  id="active_1" '
