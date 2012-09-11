@@ -152,8 +152,6 @@ foreach($columns as $col => $cval)
 	}
 	else
 	{
-		if($dtt && $second_last_num == $col && $rows_Span[$col] == 0)	//In case of DTT skipping last column can cause colspan problem of category
-		$rows_Span[$col] = $rows_Span[$last_num];
 		$new_columns[$col]=$cval;
 	}
 	

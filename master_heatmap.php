@@ -4355,7 +4355,7 @@ function postEd()
 	if(isset($_POST['reportcopy']))
 	{
 		mysql_query('BEGIN') or die("Couldn't begin SQL transaction");
-		$query = 'SELECT name,footnotes,description,category FROM rpt_masterhm WHERE id=' . $id . ' LIMIT 1';
+		$query = 'SELECT name, footnotes, description, category, total, dtt FROM rpt_masterhm WHERE id=' . $id . ' LIMIT 1';
 		$res = mysql_query($query) or die('Bad SQL Query getting old data');
 		$res = mysql_fetch_array($res);
 		if($res === false) return; //not found
@@ -4364,8 +4364,10 @@ function postEd()
 		$footnotes = mysql_real_escape_string($res['footnotes']);
 		$description = mysql_real_escape_string($res['description']);
 		$category = mysql_real_escape_string($res['category']);
+		$total = mysql_real_escape_string($res['total']);
+		$dtt = mysql_real_escape_string($res['dtt']);
 		$query = 'INSERT INTO rpt_masterhm SET name="Copy of ' . (strlen($oldname) ? $oldname : ('report '.$id)) . '",user='
-				. $db->user->id . ',footnotes="' . $footnotes . '",description="' . $description . '"' . ',category="'.$category.'"';
+				. $db->user->id . ',footnotes="' . $footnotes . '",description="' . $description . '"' . ',category="'.$category.'" , total="'.$total.'" , dtt="'.$dtt.'"';
 				
 		mysql_query($query) or die('Bad SQL Query saving name');
 		$newid = mysql_insert_id();
