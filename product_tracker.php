@@ -498,8 +498,8 @@ th {
 }
 
 .prod_col {
-	/*width:300px;
-	max-width:300px;*/
+	width:420px;
+	max-width:420px;
 }
 
 .side_tick_height {
@@ -769,7 +769,7 @@ for($incr=0; $incr < count($rows); $incr++)
 	///Below function will derive number of lines required to display product name, as our graph size is fixed due to fixed scale, we can calculate approx max area  
 	///for product column. From that we can calculate extra height which will be distributed to up and down rows of graph bar, So now IE6/7 as well as chrome will not 
 	///have issue of unequal distrirbution of extra height due to rowspan and bar will remain in middle, without use of JS.
-	$ExtraAdjusterHeight = (($pdf->getNumLines($data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'], ((1400-($columns * $column_width))*17/90)) * $Line_Width)  - 20) / 2;
+	$ExtraAdjusterHeight = (($pdf->getNumLines($data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'], ((650)*17/90)) * $Line_Width)  - 20) / 2;
 	
 	for($j=0; $j < $columns; $j++)
 	{
