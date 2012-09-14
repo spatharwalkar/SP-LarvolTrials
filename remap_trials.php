@@ -14,7 +14,10 @@ function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL  )
 {
 	if(isset($source_id)) // A single trial
 	{
-		$trial=padnct($source_id);
+		if(strlen($source_id)<=10) 
+			$trial=padnct($source_id);
+		else 
+			$trial = $source_id;
 		$query = 'SELECT `larvol_id` FROM data_trials where `source_id`="' . $trial . '"  LIMIT 1';
 		if(!$res = mysql_query($query))
 			{
@@ -260,49 +263,58 @@ function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL  )
 		
 		$counter++;
 	//	if($counter>250) break;
-		$query = 'SELECT * FROM data_nct where `larvol_id`="' . $larvol_id . '"  LIMIT 1';
-			if(!$res = mysql_query($query))
-			{
-				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-				$logger->error($log);
-				echo $log;
-				return false;
-			}
-			$res = mysql_fetch_assoc($res);
-			$exists = $res !== false;
-			if($exists)
-				$larvol_id = $res['larvol_id'];
-			else
-				$larvol_id = $orig_larvol_id;
-			$nctid=padnct($res['nct_id']);
-			$record_data = $res;
+		if(isset($sourcedb) and $sourcedb=='eudract')
+			$query = 'SELECT * FROM data_eudract where `larvol_id`="' . $larvol_id . '"  LIMIT 1';
+		else
+			$query = 'SELECT * FROM data_nct where `larvol_id`="' . $larvol_id . '"  LIMIT 1';
 			
-		foreach($record_data as $fieldname => $value)
+		if(!$res = mysql_query($query))
 		{
-			if($fieldname=='completion_date') 
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
+		$res = mysql_fetch_assoc($res);
+		$exists = $res !== false;
+		if($exists)
+			$larvol_id = $res['larvol_id'];
+		else
+			$larvol_id = $orig_larvol_id;
+		
+		if(isset($sourcedb) and $sourcedb=='eudract') 
+			$nctid=$res['nct_id'];
+		else
+			$nctid=padnct($res['nct_id']);
+		$record_data = $res;
+		if($exists)
+		{
+			foreach($record_data as $fieldname => $value)
 			{
-
-				$c_date = normal('date',(string)$value);
-			}
-			if($fieldname=='primary_completion_date') 
-			{
-
-				$pc_date = normal('date',(string)$value);
-			}
-			if($fieldname=="phase") 
-			{
-
-				$phase_value=null;
-				$v=array_search($value,$array1,false);
-				if($v!==false)
+				if($fieldname=='completion_date') 
 				{
-					$phase_value=$array2[$v];
+
+					$c_date = normal('date',(string)$value);
+				}
+				if($fieldname=='primary_completion_date') 
+				{
+
+					$pc_date = normal('date',(string)$value);
+				}
+				if($fieldname=="phase") 
+				{
+
+					$phase_value=null;
+					$v=array_search($value,$array1,false);
+					if($v!==false)
+					{
+						$phase_value=$array2[$v];
+					}
+					
 				}
 				
 			}
-			
 		}
-		
 		if(!$exists)
 		{
 			
@@ -329,7 +341,7 @@ function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL  )
 		$i=0;
 		foreach($record_data as $fieldname => $value)
 		{
-			if(!remap($larvol_id, $fieldname, $value,$record_data['lastchanged_date'],$oldtrial,NULL,$end_date,$phase_value))
+			if(!remap($larvol_id, $fieldname, $value,$record_data['lastchanged_date'],$oldtrial,NULL,$end_date,$phase_value,$sourcedb))
 			logDataErr('<br>Could not save the value of <b>' . $fieldname . '</b>, Value: ' . $value );//Log in errorlog
 			$i++;
 			
@@ -399,7 +411,7 @@ function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL  )
 	//	return true;
 	}
 }
-function remap($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_type,$end_date,$phase_value)
+function remap($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_type,$end_date,$phase_value,$sourcedb=null)
 {
 
 	$lastchanged_date = normal('date',$lastchanged_date);
@@ -457,11 +469,20 @@ function remap($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_t
 	
 
 	$value=mysql_real_escape_string($value);
-	
-	$dn_array=array
-			(
-				'dummy', 'larvol_id', 'nct_id', 'download_date', 'brief_title', 'acronym', 'official_title', 'lead_sponsor', 'lead_sponsor_class', 'collaborator', 'collaborator_class', 'source', 'has_dmc', 'brief_summary', 'detailed_description', 'overall_status', 'why_stopped', 'start_date', 'end_date', 'completion_date', 'completion_date_type', 'primary_completion_date', 'primary_completion_date_type', 'study_type', 'study_design', 'number_of_arms', 'number_of_groups', 'enrollment', 'enrollment_type', 'biospec_retention', 'biospec_descr', 'study_pop', 'sampling_method', 'criteria', 'gender', 'minimum_age', 'maximum_age', 'healthy_volunteers', 'contact_name', 'contact_phone', 'contact_phone_ext', 'contact_email', 'backup_name', 'backup_phone', 'backup_phone_ext', 'backup_email', 'verification_date', 'lastchanged_date', 'firstreceived_date', 'responsible_party_name_title', 'responsible_party_organization', 'org_study_id', 'phase', 'nct_alias', 'condition', 'secondary_id', 'oversight_authority', 'rank', 'arm_group_label', 'arm_group_type', 'arm_group_description', 'intervention_type', 'intervention_name', 'intervention_other_name', 'intervention_description', 'link_url', 'link_description', 'primary_outcome_measure', 'primary_outcome_timeframe', 'primary_outcome_safety_issue', 'secondary_outcome_measure', 'secondary_outcome_timeframe', 'secondary_outcome_safety_issue', 'reference_citation', 'reference_PMID', 'results_reference_citation', 'results_reference_PMID', 'location_name', 'location_city', 'location_state', 'location_zip', 'location_country', 'location_status', 'location_contact_name', 'location_contact_phone', 'location_contact_phone_ext', 'location_contact_email', 'location_backup_name', 'location_backup_phone', 'location_backup_phone_ext', 'location_backup_email', 'investigator_name', 'investigator_role', 'overall_official_name', 'overall_official_role', 'overall_official_affiliation', 'keyword', 'is_fda_regulated', 'is_section_801'
-			);
+	if(isset($sourcedb) and $sourcedb=='eudract') 
+	{
+		$dn_array=array
+		(
+	   'dummy', 'larvol_id'  ,'national_competent_authority'  ,'trial_type'  ,'trial_status'  ,'start_date' ,'firstreceived_date' ,'member_state_concerned'  ,'eudract_id'  ,'full_title'  ,'lay_title'  ,'abbr_title'  ,'sponsor_protocol_code'  ,'isrctn_id'  ,'nct_id'  ,'who_urtn'  ,'other_name'  ,'other_id'  ,'is_pip'  ,'pip_emad_number'  ,'sponsor_name'  ,'sponsor_country'  ,'sponsor_status'  ,'support_org_name'  ,'support_org_country'  ,'contact_org_name'  ,'contact_point_func_name'  ,'street_address'  ,'city'  ,'postcode'  ,'country'  ,'phone'  ,'fax'  ,'email'  ,'imp_role'  ,'imp_auth'  ,'imp_trade_name'  ,'marketing_auth_holder'  ,'marketing_auth_country'  ,'imp_orphan'  ,'imp_orphan_number'  ,'product_name'  ,'product_code'  ,'product_pharm_form'  ,'product_paediatric_form'  ,'product_route'  ,'inn'  ,'cas'  ,'sponsor_code'  ,'other_desc_name'  ,'ev_code'  ,'concentration_unit'  ,'concentration_type'  ,'concentration_number' ,'imp_active_chemical'  ,'imp_active_bio'  ,'type_at'  ,'type_somatic_cell'  ,'type_gene'  ,'type_tissue'  ,'type_combo_at'  ,'type_cat_class'  ,'type_cat_number'  ,'type_combo_device_not_at'  ,'type_radio'  ,'type_immune'  ,'type_plasma'  ,'type_extract'  ,'type_recombinant'  ,'type_gmo'  ,'type_herbal'  ,'type_homeopathic'  ,'type_other'  ,'type_other_name'  ,'placebo_used'  ,'placebo_form'  ,'placebo_route'  ,'condition'  ,'lay_condition'  ,'therapeutic_area'  ,'dra_version'  ,'dra_level'  ,'dra_code'  ,'dra_organ_class'  ,'dra_rare'  ,'main_objective'  ,'secondary_objective'  ,'has_sub_study'  ,'sub_studies'  ,'inclusion_criteria'  ,'exclusion_criteria'  ,'primary_endpoint'  ,'primary_endpoint_timeframe'  ,'secondary_endpoint'  ,'secondary_endpoint_timeframe'  ,'scope_diagnosis'  ,'scope_prophylaxis'  ,'scope_therapy'  ,'scope_safety'  ,'scope_efficacy'  ,'scope_pharmacokinectic'  ,'scope_pharmacodynamic'  ,'scope_bioequivalence'  ,'scope_dose_response'  ,'scope_pharmacogenetic'  ,'scope_pharmacogenomic'  ,'scope_pharmacoeconomic'  ,'scope_other'  ,'scope_other_description'  ,'tp_phase1_human_pharmacology'  ,'tp_first_administration_humans'  ,'tp_bioequivalence_study'  ,'tp_other'  ,'tp_other_description'  ,'tp_phase2_explatory'  ,'tp_phase3_confirmatory'  ,'tp_phase4_use'  ,'design_controlled'  ,'design_randomised'  ,'design_open'  ,'design_single_blind'  ,'design_double_blind'  ,'design_parallel_group'  ,'design_crossover'  ,'design_other'  ,'design_other_description'  ,'comp_other_products'  ,'comp_placebo'  ,'comp_other'  ,'comp_descr'  ,'comp_number_arms'  ,'single_site'  ,'multi_site'  ,'number_of_sites'  ,'multiple_member_state'  ,'number_sites_eea'  ,'eea_both_inside_outside'  ,'eea_outside_only'  ,'eea_inside_outside_regions'  ,'has_data_mon_comm'  ,'definition_of_end'  ,'dur_est_member_years'  ,'dur_est_member_months'  ,'dur_est_member_days'  ,'dur_est_all_years'  ,'dur_est_all_months'  ,'dur_est_all_days'  ,'age_has_under18'  ,'age_number_under18'  ,'age_has_in_utero'  ,'age_number_in_utero'  ,'age_has_preterm_newborn'  ,'age_number_preterm_newborn'  ,'age_has_newborn'  ,'age_number_newborn'  ,'age_has_infant_toddler'  ,'age_number_infant_toddler'  ,'age_has_children'  ,'age_number_children'  ,'age_has_adolescent'  ,'age_number_adolescent'  ,'age_has_adult'  ,'age_number_adult'  ,'age_has_elderly'  ,'age_number_elderly'  ,'gender_female'  ,'gender_male'  ,'subjects_healthy_volunteers'  ,'subjects_patients'  ,'subjects_vulnerable'  ,'subjects_childbearing_no_contraception'  ,'subjects_childbearing_with_contraception'  ,'subjects_pregnant'  ,'subjects_nursing'  ,'subjects_emergency'  ,'subjects_incapable_consent'  ,'subjects_incapable_consent_details'  ,'subjects_other'  ,'subjects_other_details'  ,'enrollment_memberstate'  ,'enrollment_intl_eea'  ,'enrollment_intl_all'  ,'aftercare'  ,'inv_network_org'  ,'inv_network_country'  ,'committee_third_first_auth'  ,'committee_first_auth_third'  ,'review_decision'  ,'review_decision_date'  ,'review_opinion'  ,'review_opinion_reason'  ,'review_opinion_date'  ,'end_status'  ,'end_date_global' 
+	   );
+	}
+	else
+	{
+		$dn_array=array
+		(
+			'dummy', 'larvol_id', 'nct_id', 'download_date', 'brief_title', 'acronym', 'official_title', 'lead_sponsor', 'lead_sponsor_class', 'collaborator', 'collaborator_class', 'source', 'has_dmc', 'brief_summary', 'detailed_description', 'overall_status', 'why_stopped', 'start_date', 'end_date', 'completion_date', 'completion_date_type', 'primary_completion_date', 'primary_completion_date_type', 'study_type', 'study_design', 'number_of_arms', 'number_of_groups', 'enrollment', 'enrollment_type', 'biospec_retention', 'biospec_descr', 'study_pop', 'sampling_method', 'criteria', 'gender', 'minimum_age', 'maximum_age', 'healthy_volunteers', 'contact_name', 'contact_phone', 'contact_phone_ext', 'contact_email', 'backup_name', 'backup_phone', 'backup_phone_ext', 'backup_email', 'verification_date', 'lastchanged_date', 'firstreceived_date', 'responsible_party_name_title', 'responsible_party_organization', 'org_study_id', 'phase', 'nct_alias', 'condition', 'secondary_id', 'oversight_authority', 'rank', 'arm_group_label', 'arm_group_type', 'arm_group_description', 'intervention_type', 'intervention_name', 'intervention_other_name', 'intervention_description', 'link_url', 'link_description', 'primary_outcome_measure', 'primary_outcome_timeframe', 'primary_outcome_safety_issue', 'secondary_outcome_measure', 'secondary_outcome_timeframe', 'secondary_outcome_safety_issue', 'reference_citation', 'reference_PMID', 'results_reference_citation', 'results_reference_PMID', 'location_name', 'location_city', 'location_state', 'location_zip', 'location_country', 'location_status', 'location_contact_name', 'location_contact_phone', 'location_contact_phone_ext', 'location_contact_email', 'location_backup_name', 'location_backup_phone', 'location_backup_phone_ext', 'location_backup_email', 'investigator_name', 'investigator_role', 'overall_official_name', 'overall_official_role', 'overall_official_affiliation', 'keyword', 'is_fda_regulated', 'is_section_801'
+		);
+	}
 		$dt_array=array
 			(
 				'dummy', 'larvol_id', 'source_id', 'brief_title', 'acronym', 'official_title', 'lead_sponsor', 'collaborator', 'institution_type', 'source', 'has_dmc', 'brief_summary', 'detailed_description', 'overall_status', 'is_active', 'why_stopped', 'start_date', 'end_date', 'study_type', 'study_design', 'number_of_arms', 'number_of_groups', 'enrollment', 'enrollment_type',  'study_pop', 'sampling_method', 'criteria', 'gender', 'minimum_age', 'maximum_age', 'healthy_volunteers', 'verification_date', 'lastchanged_date', 'firstreceived_date', 'org_study_id', 'phase', 'condition', 'secondary_id', 'arm_group_label', 'arm_group_type', 'arm_group_description', 'intervention_type', 'intervention_name',  'intervention_description', 'primary_outcome_measure', 'primary_outcome_timeframe', 'primary_outcome_safety_issue', 'secondary_outcome_measure', 'secondary_outcome_timeframe', 'secondary_outcome_safety_issue', 'location_name', 'location_city', 'location_state', 'location_zip', 'location_country', 'region', 'keyword', 'is_fda_regulated', 'is_section_801'

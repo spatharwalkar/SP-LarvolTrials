@@ -20,6 +20,19 @@ if (isset($_POST['nt_id']))
     scrape_history($_POST['nt_id']);
 	return;
 }
+// EudraCT trial refresh
+if (isset($_POST['eudract_id'])) 
+{
+	require_once('include.import_new.php');
+	require_once('eudract_common.php');
+	require_once('include.import.eudract.history.php');
+	$ids=getEudraIDs($_POST['eudract_id']);
+	foreach ($ids as $key => $value) 
+	{
+		scrape_history($key , $value);
+	}
+	return;
+}
 // single trial refresh old schema
 if (isset($_POST['ot_id'])) 
 {
@@ -36,9 +49,33 @@ if (isset($_POST['scraper_n']) and isset($_POST['days_n']))
 	require_once('include.import_new.php');
 	require_once('nct_common.php');
 	require_once('include.import.history_new.php');
-require_once($_POST['scraper_n']);
-run_incremental_scraper($_POST['days_n']);
-return ;
+	require_once($_POST['scraper_n']);
+	run_incremental_scraper($_POST['days_n']);
+	return ;
+}
+
+//fetch Eudract from source 
+if (isset($_POST['e_scraper_n']) and isset($_POST['days_n'])) 
+{
+	require_once('include.import_new.php');
+	require_once('eudract_common.php');
+	require_once('include.import.eudract.history.php');  
+	require_once($_POST['e_scraper_n']);
+	
+	if(!isset($sphinx) or empty($sphinx)) $sphinx = @mysql_connect("127.0.0.1:9306") or $sphinx=false;
+	require_once('db.php');
+	require_once('include.search.php');
+	require_once('include.util.php');
+	require_once('preindex_trial.php');
+	require_once('db.php');
+	require_once('include.import_new.php');
+	require_once('eudract_common.php');
+	require_once('include.import.eudract.history.php');
+	ini_set('max_execution_time', '36000'); //10 hours
+	ignore_user_abort(true);
+
+	run_incremental_scraper($_POST['days_n']);
+	return ;
 }
 
 //fetch from source old schema
@@ -53,40 +90,44 @@ return ;
 // FULL refresh new schema
 if (isset($_POST['nall']) and $_POST['nall']=='ALL') 
 {
-
-echo '
-    <form name="mode" action="fetch_nct_fullhistory_all_new.php" method="POST">
-<div align="center"><br><br><br><br><hr />
-<input type="radio" name="mode" value="db" checked> Use database for validating NCTIDs 
-&nbsp; &nbsp; &nbsp;
-<input type="radio" name="mode" value="web"> Use clinicaltrials.gov for validating NCTIDs
-&nbsp; &nbsp; &nbsp;
-<input type="submit" name="submit" value="Start Import" />
-<hr />
-</div>
-</form>'
-;
-exit;
-
+	echo '
+	<form name="mode" action="fetch_nct_fullhistory_all_new.php" method="POST">
+	<div align="center"><br><br><br><br><hr />
+	<input type="radio" name="mode" value="db" checked> Use database for validating NCTIDs 
+	&nbsp; &nbsp; &nbsp;
+	<input type="radio" name="mode" value="web"> Use clinicaltrials.gov for validating NCTIDs
+	&nbsp; &nbsp; &nbsp;
+	<input type="submit" name="submit" value="Start Import" />
+	<hr />
+	</div>
+	</form>'
+	;
+	exit;
 }
+
+// FULL refresh EudraCT 
+if (isset($_POST['e_nall']) and $_POST['e_nall']=='ALL') 
+{
+	require_once('fetch_eudract_fullhistory_all.php');
+	return;
+}
+
 // FULL refresh old schema
 if (isset($_POST['oall']) and $_POST['oall']=='ALL') 
 {
-
-echo '
-    <form name="mode" action="fetch_nct_fullhistory_all.php" method="POST">
-<div align="center"><br><br><br><br><hr />
-<input type="radio" name="mode" value="db" checked> Use database for validating NCTIDs 
-&nbsp; &nbsp; &nbsp;
-<input type="radio" name="mode" value="web"> Use clinicaltrials.gov for validating NCTIDs
-&nbsp; &nbsp; &nbsp;
-<input type="submit" name="submit" value="Start Import" />
-<hr />
-</div>
-</form>'
-;
-exit;
-
+	echo '
+		<form name="mode" action="fetch_nct_fullhistory_all.php" method="POST">
+	<div align="center"><br><br><br><br><hr />
+	<input type="radio" name="mode" value="db" checked> Use database for validating NCTIDs 
+	&nbsp; &nbsp; &nbsp;
+	<input type="radio" name="mode" value="web"> Use clinicaltrials.gov for validating NCTIDs
+	&nbsp; &nbsp; &nbsp;
+	<input type="submit" name="submit" value="Start Import" />
+	<hr />
+	</div>
+	</form>'
+	;
+	exit;
 }
 
 // single trial REMAP using NCTID
@@ -94,6 +135,13 @@ if (isset($_POST['t_id']))
 {
 	require_once('remap_trials.php');
 	remaptrials($_POST['t_id'],null,null);
+	return;
+}
+// single trial REMAP using EUDRACTID
+if (isset($_POST['e_t_id'])) 
+{
+	require_once('remap_trials.php');
+	remaptrials($_POST['e_t_id'],null,null);
 	return;
 }
 // single trial REMAP using LARVOLID
@@ -314,7 +362,7 @@ function editor()
 		  }
 		  
 		</script>
-		<br><div style="float:left;width:610px; padding:5px;"><fieldset class="schedule"><legend><b> SCRAPERS <font color="red">(NEW SCHEMA) </font> </b></legend>'
+		<br><div style="float:left;width:610px; padding:5px;"><fieldset class="schedule"><legend><b> SCRAPERS <font color="red">(NCT - NEW SCHEMA) </font> </b></legend>'
 			. '<form action="database.php" method="post">'
 			. 'Enter NCT Id to refresh a Single Trial: <input type="text" name="nt_id" value=""/>&nbsp;&nbsp;&nbsp;&nbsp;'
 			. ''
@@ -342,7 +390,7 @@ function editor()
 	$out .= '</fieldset></div>';
 	
 	//SCRAPER - OLD SCHEMA
-	$out .= '<div style="float:left;width:610px; padding:5px;"><fieldset class="schedule"><legend><b> SCRAPERS <font color="red">(OLD SCHEMA) </font> </b></legend>'
+	$out .= '<div style="float:left;width:610px; padding:5px;"><fieldset class="schedule"><legend><b> SCRAPERS <font color="red">(NCT - OLD SCHEMA) </font> </b></legend>'
 			. '<form action="database.php" method="post">'
 			. 'Enter NCT Id to refresh a Single Trial: <input type="text" name="ot_id" value=""/>&nbsp;&nbsp;&nbsp;&nbsp;'
 			. ''
@@ -368,7 +416,7 @@ function editor()
 	
 	$out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
 	// REMAPPING
-	$out .= '<div style="width:610px; padding:5px;float:left;"><fieldset class="schedule"><legend><b> REMAP TRIALS </b></legend>'
+	$out .= '<div style="width:610px; padding:5px;float:left;"><fieldset class="schedule"><legend><b> REMAP TRIALS <font color="red">(NCT) </font></b></legend>'
 			. '<form action="database.php" method="post">'
 			. 'Enter NCT Id to remap : <input type="text" name="t_id" value=""/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
 			. ''
@@ -397,7 +445,7 @@ function editor()
 	$out .= '</fieldset></div>';
 	
 	// PREINDEXING
-	$out .= '<div style="width:610px; padding:5px;float:left;"><fieldset class="schedule"><legend><b> PREINDEXING </b></legend>'
+	$out .= '<div style="width:610px; padding:5px;float:left;"><fieldset class="schedule"><legend><b> PREINDEXING <font color="red">(NCT) </font></b></legend>'
 			. '<form action="database.php" method="post">'
 			. 'Enter NCT Id to preindex : <input type="text" name="i_id" value=""/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
 			. ''
@@ -424,6 +472,58 @@ function editor()
 			. '</form></fieldset></div>';
 			
 		$out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
+		
+
+		
+
+	// EUDRACT
+	$out .= '<div style="float:left;width:610px; padding:5px;"><fieldset class="schedule"><legend><b> SCRAPERS <font color="red">(EUDRACT) </font> </b></legend>'
+			. '<form action="database.php" method="post">'
+			. 'Enter EudraCT Id to refresh a Single Trial: <input type="text" name="eudract_id" value=""/>&nbsp;&nbsp;&nbsp;&nbsp;'
+			. ''
+			. '<input type="submit" name="singletrial" value="Refresh Trial" />'
+			. '</form>'
+			
+			. '<form action="database.php" method="post">'
+			. 'Enter no. of days (look back period) : <input type="text" name="days_n" value=""/>&nbsp;&nbsp;&nbsp;
+				<input type="hidden" name="e_scraper_n" value="fetch_eudract.php"/>
+				'
+			. ''
+			. '<input type="submit" value="Fetch from source" />'
+			. '</form>'
+			. '<form action="database.php" method="post">'
+			. '<input type="hidden" name="e_nall" value="ALL"/>'
+			. 'Click <b>FULL Refresh</b> button to refresh all trials in the database &nbsp;'
+			. '<input type="submit" name="alleudracttrials" value="FULL Refresh" />'
+			. '</form>';
+			
+	$out .= '</fieldset></div>';
+	
+	
+		// REMAPPING EUDRACT
+	$out .= '<div style="width:610px; padding:5px;float:left;"><fieldset class="schedule"><legend><b> REMAP TRIALS <font color="red">(EUDRACT) </font></b></legend>'
+			. '<form action="database.php" method="post">'
+			. 'Enter EUDRACT Id to remap : <input type="text" name="t_id" value=""/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+			. ''
+			. '<input type="submit" name="singletrial" value="Remap Trial" />'
+			. '</form>'
+			
+			. '<form action="database.php" method="post">'
+			. 'Enter Larvol Id to remap : <input type="text" name="l_id" value=""/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+			. ''
+			. '<input type="submit" name="singletrial" value="Remap Trial" />'
+			. '</form>'
+			
+			. '<form action="database.php" method="post">'
+			. 'Click <b>Remap</b> button to remap all eudract trials  &nbsp;&nbsp;'
+			. ' <input type="hidden" name="map_source" value="eudract"/>'
+			. '<input type="submit" name="data_eudract" value="Remap" />'
+			. '</form>';
+			
+	$out 	.= '</fieldset></div>';
+	
+			$out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
+	
 	
 	// RECALCULATE
 	$out .= '<div style="width:610px; padding:5px;float:left;"><fieldset class="schedule"><legend><b> RECALCULATE MASTER HEATMAP CELLS </b></legend>'
