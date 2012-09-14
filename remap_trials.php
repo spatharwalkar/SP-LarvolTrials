@@ -16,7 +16,6 @@ function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL  )
 	{
 		$trial=padnct($source_id);
 		$query = 'SELECT `larvol_id` FROM data_trials where `source_id`="' . $trial . '"  LIMIT 1';
-
 		if(!$res = mysql_query($query))
 			{
 				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -52,6 +51,7 @@ function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL  )
 				return false;
 			}
 		$res = mysql_fetch_assoc($res);
+		
 		$exists = $res !== false;
 		$oldtrial=$exists;
 		$larvol_id = NULL;
@@ -186,7 +186,10 @@ function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL  )
 
 
 	if(!isset($larvol_ids)) $larvol_ids=array($larvol_id);
-
+	
+	$orig_larvol_id=$larvol_id;
+	
+	
 	$DTnow = date("Y-m-d H:i:s", strtotime('now'));
 
 	$array1=array
@@ -251,13 +254,13 @@ function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL  )
 	foreach($larvol_ids as $larvol_id)
 	{
 
+		
 
 		if($cid > $larvol_id) continue; 
 		
 		$counter++;
 	//	if($counter>250) break;
 		$query = 'SELECT * FROM data_nct where `larvol_id`="' . $larvol_id . '"  LIMIT 1';
-
 			if(!$res = mysql_query($query))
 			{
 				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -267,7 +270,10 @@ function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL  )
 			}
 			$res = mysql_fetch_assoc($res);
 			$exists = $res !== false;
-			$larvol_id = $res['larvol_id'];
+			if($exists)
+				$larvol_id = $res['larvol_id'];
+			else
+				$larvol_id = $orig_larvol_id;
 			$nctid=padnct($res['nct_id']);
 			$record_data = $res;
 			
@@ -292,7 +298,27 @@ function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL  )
 				{
 					$phase_value=$array2[$v];
 				}
+				
 			}
+			
+		}
+		
+		if(!$exists)
+		{
+			
+			$query = 'SELECT * FROM data_trials where `larvol_id`="' . $larvol_id . '"  LIMIT 1';
+			
+			if(!$res = mysql_query($query))
+			{
+				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				$logger->error($log);
+				echo $log;
+				return false;
+			}
+			$res = mysql_fetch_assoc($res);
+			$nctid=$res['source_id'];
+			$exists = $res !== false;
+			$record_data = $res;
 			
 		}
 
@@ -331,14 +357,29 @@ function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL  )
 				);
 		
 		$inactive=1;
+		
+		$query = 'SELECT overall_status FROM data_manual where `larvol_id`="' . $larvol_id . '"  LIMIT 1';
+		
+			if(!$res2 = mysql_query($query))
+			{
+				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				$logger->error($log);
+				echo $log;
+				return false;
+			}
+			$res2 = mysql_fetch_assoc($res2);
+			
+			if($res2['overall_status'])
+				$record_data['overall_status']=$res2['overall_status'];
+		
 		if(isset($record_data['overall_status']))
 		{
 			$x=array_search($record_data['overall_status'],$inactiveStatus);
 			if($x) $inactive=0; else $inactive=1;
 		}
-
+		
 		$query = 'update data_trials set `institution_type`="' .$ins_type. '",`region`="'.$region.'", `is_active`='.$inactive.'  where `larvol_id`="' .$larvol_id . '" limit 1' ;	
-
+		
 		if(!mysql_query($query))
 			{
 				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -377,10 +418,11 @@ function remap($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_t
 		}
 		elseif(is_numeric($value)) $value = normal('int',(int)$value); 
 		else   $value = preg_replace( '/\s+/', ' ', trim( $value ) );
+		if($fieldname=="phase") $value=$phase_value;
 	}
 
 	elseif(is_numeric($value[0])) $value=max($value); 
-	elseif($fieldname=="phase") $value=max($value);
+	elseif($fieldname=="phase") $value=max($phase_value);
 	else
 	{
 		$value=array_unique($value);
@@ -426,7 +468,7 @@ function remap($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_t
 			);
 		$dm_array=array
 			(
-				'dummy', 'larvol_id', 'brief_title', 'acronym', 'official_title', 'lead_sponsor', 'collaborator', 'institution_type', 'source', 'has_dmc', 'brief_summary', 'detailed_description', 'overall_status', 'is_active', 'why_stopped', 'start_date', 'end_date', 'study_type', 'study_design', 'number_of_arms', 'number_of_groups', 'enrollment', 'enrollment_type', 'study_pop', 'sampling_method', 'criteria', 'gender', 'minimum_age', 'maximum_age', 'healthy_volunteers', 'verification_date', 'lastchanged_date', 'firstreceived_date', 'org_study_id', 'phase', 'condition', 'secondary_id', 'arm_group_label', 'arm_group_type', 'arm_group_description', 'intervention_type', 'intervention_name',  'intervention_description', 'primary_outcome_measure', 'primary_outcome_timeframe', 'primary_outcome_safety_issue', 'secondary_outcome_measure', 'secondary_outcome_timeframe', 'secondary_outcome_safety_issue', 'location_name', 'location_city', 'location_state', 'location_zip', 'location_country', 'region', 'keyword', 'is_fda_regulated', 'is_section_801'
+				'dummy', 'larvol_id', 'brief_title', 'acronym', 'official_title', 'lead_sponsor', 'collaborator', 'institution_type', 'source', 'has_dmc', 'brief_summary', 'detailed_description', 'overall_status', 'why_stopped', 'start_date', 'end_date', 'study_type', 'study_design', 'number_of_arms', 'number_of_groups', 'enrollment', 'enrollment_type', 'study_pop', 'sampling_method', 'criteria', 'gender', 'minimum_age', 'maximum_age', 'healthy_volunteers', 'verification_date', 'lastchanged_date', 'firstreceived_date', 'org_study_id', 'phase', 'condition', 'secondary_id', 'arm_group_label', 'arm_group_type', 'arm_group_description', 'intervention_type', 'intervention_name',  'intervention_description', 'primary_outcome_measure', 'primary_outcome_timeframe', 'primary_outcome_safety_issue', 'secondary_outcome_measure', 'secondary_outcome_timeframe', 'secondary_outcome_safety_issue', 'location_name', 'location_city', 'location_state', 'location_zip', 'location_country', 'region', 'keyword', 'is_fda_regulated', 'is_section_801'
 			);
 	
 	$as=array_search($fieldname,$dn_array);
@@ -464,10 +506,16 @@ function remap($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_t
 					$overridden = $row !== false;
 					if($overridden and !empty($row[$fieldname]))
 					{
-						$value=mysql_real_escape_string($row[$fieldname]);
-						
-					
+						if($fieldname=='phase' and ( empty($row[$fieldname]) or $row[$fieldname]=='N/A' ) )
+						{
+							$value=mysql_real_escape_string($phase_value);
+						}
+						else
+						{
+							$value=mysql_real_escape_string($row[$fieldname]);
+						}
 					}
+
 				}
 								
 					$query = 'update data_trials set `' . $fieldname . '` = "' . $value .'", lastchanged_date = "' .$lastchanged_date.'" where larvol_id="' .$larvol_id . '"  limit 1' ;
