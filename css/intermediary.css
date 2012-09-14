@@ -572,3 +572,12 @@ ul, li { behavior:url("css/csshover3.htc"); }
 	display: inline;
 	padding: 0px 0px 0px 4px;
 }
+
+#outercontainer {
+	width:12%;
+	height:26px;
+	overflow:auto;
+	float:left;
+	border: 1px solid #777;
+	padding: 2px;
+}

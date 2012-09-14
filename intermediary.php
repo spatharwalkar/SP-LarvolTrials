@@ -243,6 +243,7 @@ $intermediaryCss = 'css/intermediary.css';
 $jueryUiCss 	= 'css/themes/cupertino/jquery-ui-1.8.17.custom.css';
 $dateInputCss 	= 'date/date_input.css';
 $jdPickerCss 	= 'scripts/date/jdpicker.css';
+$scrollBarCs	= 'css/jquery.mCustomScrollbar.css';
 
 $jqueryJs 		= 'scripts/jquery.js';
 $funcJs 		= 'scripts/func.js';
@@ -253,6 +254,8 @@ $jdPickerJs 	= 'scripts/date/jquery.jdpicker.js';
 $initJs 		= 'date/init.js';
 $chromeJs 		= 'scripts/chrome.js';
 $hoverJs 		= 'scripts/jquery.hoverIntent.minified.js';
+$mouseWheelJs 	= 'scripts/jquery.mousewheel.min.js';
+$scrollBarJs 	= 'scripts/jquery.mCustomScrollbar.js';
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -265,6 +268,7 @@ $hoverJs 		= 'scripts/jquery.hoverIntent.minified.js';
     <link href="<?php echo $jueryUiCss . '?t=' . filectime($jueryUiCss);?>" rel="stylesheet" type="text/css" media="all" />
     <link href="<?php echo $dateInputCss . '?t=' . filectime($dateInputCss);?>" rel="stylesheet" type="text/css" media="all" />
     <link href="<?php echo $jdPickerCss . '?t=' . filectime($jdPickerCss);?>" rel="stylesheet" type="text/css" media="screen" />
+    <link href="<?php echo $scrollBarCs . '?t=' . filectime($scrollBarCs);?>" rel="stylesheet" type="text/css" media="screen" />
     
     <script type="text/javascript" src="<?php echo $jqueryJs . '?t=' . filectime($jqueryJs);?>" ></script>
     <script type="text/javascript" src="<?php echo $funcJs . '?t=' . filectime($funcJs);?>"></script>	
@@ -275,6 +279,10 @@ $hoverJs 		= 'scripts/jquery.hoverIntent.minified.js';
     <script type="text/javascript" src="<?php echo $initJs . '?t=' . filectime($initJs);?>"></script>
     <script type="text/javascript" src="<?php echo $chromeJs . '?t=' . filectime($chromeJs);?>"></script>
     <script type="text/javascript" src="<?php echo $hoverJs . '?t=' . filectime($hoverJs);?>"></script>
+    
+    <script type="text/javascript" src="<?php echo $mouseWheelJs . '?t=' . filectime($mouseWheelJs);?>"></script>
+	<script type="text/javascript" src="<?php echo $scrollBarJs . '?t=' . filectime($scrollBarJs);?>"></script>
+    
     <script type="text/javascript">
 		var _gaq = _gaq || [];
 		_gaq.push(['_setAccount', 'UA-18240582-3']);
@@ -711,6 +719,17 @@ global $db;
 			{
 			  $('#frmOtt').submit();
 			} 
+		});
+		
+		$(window).load(function(){
+			$("#outercontainer").mCustomScrollbar({
+				horizontalScroll:true,
+				scrollButtons:{
+					enable:false,
+					scrollType:"pixels",
+					scrollAmount:116
+				}
+			});
 		});
 		
 	});

@@ -10711,8 +10711,7 @@ class TrialTracker
 		
 		$this->displayFilterControls($productSelector, $productSelectorTitle, $count, $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], $globalOptions, $ottType, $loggedIn);
 		
-		echo '<div style="width:100%;min-width:1300px;">'
-				. '<div style="float:left;margin:2px 10px 0px 0px;">&nbsp;<img src="images/funnel.png" alt="Show Filter" border="0" style="vertical-align:bottom;" onclick="$(\'.controls\').show();" />'
+		echo '<div style="float:left;margin:2px 10px 0px 0px;">&nbsp;<img src="images/funnel.png" alt="Show Filter" border="0" style="vertical-align:bottom;" onclick="$(\'.controls\').show();" />'
 				. '&nbsp;&nbsp;<b>' . $count . '&nbsp;Records</b></div>';
 		
 		foreach($urlParams as $key => $value) 
@@ -10725,7 +10724,7 @@ class TrialTracker
 			}
 		}
 		
-		echo '<div style="float:left;width:12%;overflow-x:auto;margin-bottom:10px;"><div style="width:700px;">';
+		echo '<div id="outercontainer" style=""><p style="overflow:hidden;margin: 0;">';
 		
 		$lParams = array();
 		if($globalOptions['type'] == 'inactiveTrials')
@@ -10903,7 +10902,7 @@ class TrialTracker
 		unset($key);
 		unset($value);
 		
-		echo '</div></div>';
+		echo '</p></div>';
 		
 		if($totalPages > 1)
 		{
@@ -10941,8 +10940,8 @@ class TrialTracker
 			. '<input type="button" value="Reset" id="reset" class="resetbutton" onclick="javascript: window.location.href(\'' . urlPath() . $resetUrl . '\')" /></a>'
 			. '</div>';
 				
-		echo '</div>';
 		echo '<input type="hidden" name="rflag" value="1" /><input type="hidden" name="rlink" value="' . $globalOptions['resetLink'] . '" />';
+		echo '<div style="clear:both;height:10px;">&nbsp;</div>';
 		
 		echo $this->displayTrialTableHeader($loggedIn, $globalOptions);
 		if($count > 0)
