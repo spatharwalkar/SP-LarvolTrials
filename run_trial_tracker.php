@@ -10724,7 +10724,7 @@ class TrialTracker
 			}
 		}
 		
-		echo '<div id="outercontainer" style=""><p style="overflow:hidden;margin: 0;">';
+		echo '<div id="outercontainer"><p style="overflow:hidden;margin: 0;">';
 		
 		$lParams = array();
 		if($globalOptions['type'] == 'inactiveTrials')
@@ -10826,7 +10826,7 @@ class TrialTracker
 				$pUrl = http_build_query($pParams);
 
 				echo '<span class="filters"><label>Phase ' .  $phases[$value] . '</label>'
-				. '<a href="intermediary.php?' . $rUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
+				. '<a href="intermediary.php?' . $pUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
 			}
 		}
 		unset($phases);
