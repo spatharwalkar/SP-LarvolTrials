@@ -700,16 +700,21 @@ if($Rotation_Flg == 1)
 		//$product_Col_Width = $product_Col_Width + $extra_width;
 	}
 }
-		
+
+if(strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') == FALSE)
+{	//Hiding doctype line incase of IE, as presence of it causes DIV scale issue in IE
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
+<?php
+}
+?>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>Larvol Trials :: Online Heatmap</title>
 <script type="text/javascript" src="scripts/popup-window.js"></script>
-<script src="scripts/jquery-1.7.1.min.js"></script>
-<script src="scripts/jquery-ui-1.8.17.custom.min.js"></script>
+<script type="text/javascript" src="scripts/jquery-1.7.1.min.js"></script>
+<script type="text/javascript" src="scripts/jquery-ui-1.8.17.custom.min.js"></script>
 <script type="text/javascript" src="scripts/chrome.js"></script>
 <script type="text/javascript" src="scripts/iepngfix_tilebg.js"></script>
 <?php if($db->loggedIn()) { //No Date-Picker for NON-LoggedIN Users  ?>	
@@ -841,7 +846,8 @@ ul, li, slideout { behavior:url("css/csshover3.htc"); }
 img { behavior: url("css/iepngfix.htc"); }
 
 body { font-family:Verdana; font-size: 13px;}
-a, a:hover{/*color:#000000; text-decoration:none;*/ height:100%;}
+a, a:hover{/*color:#000000; text-decoration:none;*/}
+table { font-size:13px;}
 .display td, .display th {font-weight:normal; background-color:#DDF; vertical-align:middle;}
 .active{font-weight:bold;}
 .total{visibility:hidden;}
@@ -1596,7 +1602,7 @@ function display_tooltip(type, id)
 			
 			///// Start Part - Position the tooltip properly for the cells which are at bottommost edge of window 
 			var tooltipH=document.getElementById("ToolTip_ID_"+id).offsetHeight
-			var windowedge=document.all && !window.opera? document.documentElement.scrollTop+document.documentElement.clientHeight-25 : window.pageYOffset+window.innerHeight-25;
+			var windowedge=document.all && !window.opera && !window.ActiveXObject? document.documentElement.scrollTop+document.documentElement.clientHeight-25 : window.pageYOffset+window.innerHeight-25;
 			if ((windowedge- (tooltip_ele.offsetTop + document.getElementById("Cell_ID_"+id).offsetHeight)) < tooltipH)	//move up?
 			{ 	
 				edgeoffset = tooltipH + document.getElementById("Cell_ID_"+id).offsetHeight - 8;
@@ -1643,38 +1649,6 @@ function refresh_data(cell_id)
 					{
 						document.getElementById("ViewCount_value_"+i).value=document.getElementById("ViewCount_value_"+cell_id).value;
 						change_view();
-					}
-				}
-			}
-		}
-	}
-}
-
-//// Below function scale Div upto height of TD by using actual rendered height of product cell as referernce - Javascript is used as auto or 100% height not works in IE
-function Scale_Div()
-{
-	var limit = document.getElementById('Last_HM').value;
-	var i=1;
-	for(i=1;i<=limit;i++)
-	{
-		var IS_cell_Type = document.getElementById("Cell_Type_"+i);
-		if(IS_cell_Type != null && IS_cell_Type != '')
-		{
-			if(IS_cell_Type.value == 'product')
-			{
-				var Current_Row = document.getElementById("Cell_RowNum_"+i).value;
-				var Current_Height = document.getElementById("Cell_ID_"+i).offsetHeight;
-			}
-			
-			if(IS_cell_Type.value == 'HM_Cell' && Current_Row != null && Current_Row != '')
-			{
-				if(Current_Row == document.getElementById("Cell_RowNum_"+i).value)
-				{
-					var Div_exist = document.getElementById("Div_ID_"+i);
-					if(Div_exist != null && Div_exist != '')
-					{
-						document.getElementById("Div_ID_"+i).style.height = (Current_Height)+'px';
-						document.getElementById("Div_ID_"+i).style.verticalAlign = "top";
 					}
 				}
 			}
@@ -1799,8 +1773,11 @@ $htmlContent  .= '<div id="dropmenu" class="dropmenudiv" style="width: 310px;">'
 				.'</div><script type="text/javascript">cssdropdown.startchrome("chromemenu");</script></form>';
 						
 $htmlContent .= '<div align="center" style="vertical-align:top;">'
-			. '<table style="height:100%; vertical-align:middle;" class="display">'
-			. '<thead><tr style="page-break-inside:avoid; height:100%;" nobr="true"><th style="background-color:#FFFFFF;"></th>';
+			. '<table style="vertical-align:middle; cellpadding:0px; cellspacing:0px;';
+			if(strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') == FALSE)
+				$htmlContent .=' height:100%;';	///100% height causes unwanted stretching of table cell in IE but it requires specially for chrome for div scaling
+$htmlContent .='" class="display">'
+			. '<thead><tr><th style="background-color:#FFFFFF;"></th>';
 						
 foreach($columns as $col => $val)
 {
@@ -1824,7 +1801,7 @@ foreach($columns as $col => $val)
 	}
 }
 //width="'.$product_Col_Width.'px" currently not needed
-$htmlContent .= '</tr><tr style="page-break-inside:avoid; height:100%;" nobr="true"><th '.(($Rotation_Flg == 1) ? 'height="'.$area_Col_Height.'px"':'').' class="Product_Row_Class Product_Col_WidthStyle" style="background-color:#FFFFFF; '.(($Rotation_Flg == 1) ? 'width:'.$product_Col_Width.'px; max-width:'.$product_Col_Width.';px':'').' ">&nbsp;</th>';
+$htmlContent .= '</tr><tr><th '.(($Rotation_Flg == 1) ? 'height="'.$area_Col_Height.'px"':'').' class="Product_Row_Class Product_Col_WidthStyle" style="background-color:#FFFFFF; '.(($Rotation_Flg == 1) ? 'width:'.$product_Col_Width.'px; max-width:'.$product_Col_Width.';px':'').' ">&nbsp;</th>';
 
 
 foreach($columns as $col => $val)
@@ -1894,7 +1871,7 @@ foreach($rows as $row => $rval)
 	{
 		$online_HMCounter++;
 		
-		$htmlContent .='<tr style="page-break-inside:avoid; vertical-align:middle; max-height:100%; background-color: #A2FF97;"><td align="left" style="vertical-align:middle; background-color: #A2FF97; padding-left:4px;" colspan="'.((count($columns)+1)+(($total_fld)? 1:0)).'" id="Cell_ID_'.$online_HMCounter.'">';
+		$htmlContent .='<tr style="vertical-align:middle; background-color: #A2FF97;"><td align="left" style="vertical-align:middle; background-color: #A2FF97; padding-left:4px;" colspan="'.((count($columns)+1)+(($total_fld)? 1:0)).'" id="Cell_ID_'.$online_HMCounter.'">';
 		if($dtt)
 		{
 			$htmlContent .= '<input type="hidden" value="0,endl,0,endl,0" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
@@ -1910,7 +1887,7 @@ foreach($rows as $row => $rval)
 		$htmlContent .='</td></tr>';
 	}
 	
-	$htmlContent .= '<tr style="page-break-inside:avoid; vertical-align:middle; max-height:100%;">';
+	$htmlContent .= '<tr style="vertical-align:middle;">';
 	
 	$online_HMCounter++;
 	//$rval = (isset($rowsDisplayName[$row]) && $rowsDisplayName[$row] != '')?$rowsDisplayName[$row]:$rval; //Commente as as planned to ignore display name in Product only
@@ -1920,7 +1897,7 @@ foreach($rows as $row => $rval)
 	
 	
 	
-	$htmlContent .='<th class="product_col" style="padding-left:4px; height:auto; vertical-align:middle;" id="Cell_ID_'.$online_HMCounter.'" '.$raltTitle.'><div align="left" style="vertical-align:middle; height:100%;">';
+	$htmlContent .='<th class="product_col" style="padding-left:4px; vertical-align:middle;" id="Cell_ID_'.$online_HMCounter.'" '.$raltTitle.'><div align="left" style="vertical-align:middle;">';
 			
 	$htmlContent .= '<input type="hidden" value="product" name="Cell_Type_'.$online_HMCounter.'" id="Cell_Type_'.$online_HMCounter.'" />';
 	$htmlContent .= '<input type="hidden" value="'.$row.'" name="Cell_RowNum_'.$online_HMCounter.'" id="Cell_RowNum_'.$online_HMCounter.'" />';
@@ -1952,7 +1929,7 @@ foreach($rows as $row => $rval)
 			$Td_Style = 'background-color:#f5f5f5; border:#f5f5f5 solid;';
 		}
 		
-		$htmlContent .= '<td class="tooltip" valign="middle" id="Cell_ID_'.$online_HMCounter.'" style="'. $Td_Style .' padding:1px; min-width:'.$Width_matrix[$col]['width'].'px;  max-width:'.$Width_matrix[$col]['width'].'px; height:100%; vertical-align:middle; text-align:center; " align="center" onmouseover="display_tooltip(\'on\','.$online_HMCounter.');" onmouseout="display_tooltip(\'off\','.$online_HMCounter.');">';
+		$htmlContent .= '<td class="tooltip" valign="middle" id="Cell_ID_'.$online_HMCounter.'" style="'. $Td_Style .' padding:1px; min-width:'.$Width_matrix[$col]['width'].'px;  max-width:'.$Width_matrix[$col]['width'].'px; vertical-align:middle; text-align:center; height:100%;" align="center" onmouseover="display_tooltip(\'on\','.$online_HMCounter.');" onmouseout="display_tooltip(\'off\','.$online_HMCounter.');">';
 	
 		$htmlContent .= '<input type="hidden" value="HM_Cell" name="Cell_Type_'.$online_HMCounter.'" id="Cell_Type_'.$online_HMCounter.'" />';
 		$htmlContent .= '<input type="hidden" value="'.$row.'" name="Cell_RowNum_'.$online_HMCounter.'" id="Cell_RowNum_'.$online_HMCounter.'" />';
@@ -1968,7 +1945,7 @@ foreach($rows as $row => $rval)
 			$htmlContent .= '<input type="hidden" value="' . $productIds[$row] . '" name="Product_value_'.$online_HMCounter.'" id="Product_value_'.$online_HMCounter.'" />';
 			$htmlContent .= '<input type="hidden" value="' . $areaIds[$col]. '" name="Area_value_'.$online_HMCounter.'" id="Area_value_'.$online_HMCounter.'" />';
 				
-			$htmlContent .= '<a onclick="INC_ViewCount(' . trim($productIds[$row]) . ',' . trim($areaIds[$col]) . ',' . $online_HMCounter .')" style="'.$data_matrix[$row][$col]['count_start_style'].' height:100%; vertical-align:middle; padding-top:0px; padding-bottom:0px; line-height:13px; text-decoration:underline;" id="Cell_Link_'.$online_HMCounter.'" href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '&list=1&itype=0&sr=now&er=1 month&hm=' . $id . '" target="_blank" title="'. $title .'"><b><font id="Font_ID_'.$online_HMCounter.'">'. $data_matrix[$row][$col]['indlead'] .'</font></b></a>';
+			$htmlContent .= '<a onclick="INC_ViewCount(' . trim($productIds[$row]) . ',' . trim($areaIds[$col]) . ',' . $online_HMCounter .')" style="'.$data_matrix[$row][$col]['count_start_style'].' vertical-align:middle; padding-top:0px; padding-bottom:0px; line-height:13px; text-decoration:underline;" id="Cell_Link_'.$online_HMCounter.'" href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '&list=1&itype=0&sr=now&er=1 month&hm=' . $id . '" target="_blank" title="'. $title .'"><b><font id="Font_ID_'.$online_HMCounter.'">'. $data_matrix[$row][$col]['indlead'] .'</font></b></a>';
 					
 			if($data_matrix[$row][$col]['bomb']['src'] != 'new_square.png') //When bomb has square dont include it in pdf as size is big and no use
 			$htmlContent .= '<img id="Cell_Bomb_'.$online_HMCounter.'" title="'.$data_matrix[$row][$col]['bomb']['title'].'" src="'. trim(urlPath()) .'images/'.$data_matrix[$row][$col]['bomb']['src'].'"  style="'.$data_matrix[$row][$col]['bomb']['style'].' vertical-align:middle; margin-left:1px;" />';				
@@ -2368,7 +2345,7 @@ $htmlContent .= '</table><input type="hidden" value="'.$online_HMCounter.'" name
 if(($footnotes != NULL && trim($footnotes) != '') || ($description != NULL && trim($description) != ''))
 {
 	$htmlContent .='<div align="center"><table align="center" style="vertical-align:middle; padding:10px; background-color:#FFFFFF;">'
-				. '<tr style="page-break-inside:avoid;" nobr="true">'
+				. '<tr>'
 				. '<td width="380px" align="left" style="vertical-align:top;  background-color:#DDF;"><b>Footnotes: </b>'. (($footnotes != NULL && trim($footnotes) != '') ? '<br/><div style="padding-left:10px;"><br/>'. $footnotes .'</div>' : '' ).'</td>'
 				. '<td width="380px" align="left" style="vertical-align:top;  background-color:#DDF;"><b>Description: </b>'. (($description != NULL && trim($description) != '') ? '<br/><div style="padding-left:10px;"><br/>'. $description .'</div>' : '' ).'</td></tr>'
 				. '</table></div>';
@@ -2393,9 +2370,6 @@ $('.product_col').css('white-space','wrap');
 $('.product_col').css('word-wrap','break-word');
 $('.product_col').css('_width','400px');
 }
-$(function () {
-Scale_Div();
-})
 // Default size
 document.getElementById("startrange").style.width = "30px"
 document.getElementById("endrange").style.width = "70px"
