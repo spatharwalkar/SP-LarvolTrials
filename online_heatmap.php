@@ -1006,7 +1006,6 @@ table { font-size:13px;}
 
 .tag {
 color:#120f3c;
-font-weight:bold;
 }
 
 .Status_Label_Style {

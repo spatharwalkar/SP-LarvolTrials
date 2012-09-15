@@ -2975,10 +2975,10 @@ function Download_reports()
 				{
 					$count_val=$row_indlead_total[$row];
 				}
-				$pdfContent = '<a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). $link_part . '" target="_blank" title="'. $raltTitle .'">'.$rval.$rowsCompanyName[$row].'</a>'.((trim($rowsTagName[$row]) != '') ? ' <b><font style="color:#120f3c; font-weight:bold">['.$rowsTagName[$row].']</font></b>':'');
+				$pdfContent = '<a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). $link_part . '" target="_blank" title="'. $raltTitle .'">'.$rval.$rowsCompanyName[$row].'</a>'.((trim($rowsTagName[$row]) != '') ? ' <font style="color:#120f3c;">['.$rowsTagName[$row].']</font>':'');
 				
 				
-				$pdf->MultiCell($product_Col_Width, $prod_row_height, $pdfContent, $border, $align='C', $fill=1, $ln=0, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+				$pdf->MultiCell($product_Col_Width, $prod_row_height, $pdfContent, $border, $align='L', $fill=1, $ln=0, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
 			}
 			else
 			{
