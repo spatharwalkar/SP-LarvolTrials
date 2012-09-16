@@ -10862,7 +10862,7 @@ class TrialTracker
 		unset($oParams);
 		
 		$eParams = array();
-		if($globalOptions['enroll'] != ($globalOptions['minEnroll'] . ' - ' . $globalOptions['maxEnroll']) && $globalOptions['enroll'] != '0')
+		if($globalOptions['enroll'] != ($globalOptions['minEnroll'] . ' - ' . $globalOptions['maxEnroll']) && $globalOptions['enroll'] != '0' && $globalOptions['enroll'] != '0 - 5000+')
 		{
 			$eUrl = '';
 			$eParams =  array_replace($urlParams, array('enroll' => $globalOptions['minEnroll'] . ' - ' . $globalOptions['maxEnroll']));
@@ -10876,7 +10876,7 @@ class TrialTracker
 		$dParams = array();
 		if($globalOptions['includeProductsWNoData'] == 'on')
 		{	
-			if($ottType != 'indexed' || $ottType != 'unstacked' || $ottType != 'unstackedoldlink')
+			if($ottType != 'indexed' && $ottType != 'unstacked' && $ottType != 'unstackedoldlink')
 			{
 				$dUrl = '';
 				$dParams =  array_replace($urlParams, array('ipwnd' => 'off'));
