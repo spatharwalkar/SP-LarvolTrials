@@ -1,8 +1,8 @@
 <?php
 /**
  * @name tableColumns
- * @tutorial outputs the table fields
- * @param int $table The table for which columns need to be fetched
+ * @tutorial outputs the table field Names
+ * @param string $table The table for which columns need to be fetched
  * @return array $columnList
  * @author Jithu Thomas
  */
@@ -13,7 +13,32 @@ function tableColumns($table)
 	while($row = mysql_fetch_assoc($res))
 	{
 		$columnList[] = $row['Field'];
-	}	
+	}
+
+	if($table == 'upm')
+	{
+		//TODO: make it dynamic.
+		//explicitly adding area column for upm as its a one to many in upm_areas
+		$columnList[] = 'area';
+	}
+	return $columnList;
+}
+
+/**
+ * @name tableColumnsDetails
+ * @tutorial outputs the table field details
+ * @param string $table The table for which columns need to be fetched
+ * @return array $columnList
+ * @author Jithu Thomas
+ */
+function tableColumnDetails($table)
+{
+	$query = "SHOW COLUMNS FROM $table";
+	$res = mysql_query($query);
+	while($row = mysql_fetch_assoc($res))
+	{
+		$columnList[] = $row;
+	}
 	return $columnList;
 }
 
@@ -34,6 +59,7 @@ $deleteFlag=false;
 $where = calculateWhere($table);
 
 //calculate sortable fields
+//upm area field is included directly from upm custom query so ignore sort& other customizations for upm areas should be done elsewhere.
 $query = "SHOW COLUMNS FROM $table";
 $res = mysql_query($query);
 $sortableRows = array();
@@ -107,11 +133,10 @@ if($table !='upm')
 elseif($table=='upm')
 {
 	if($_GET['no_sort']!=1)
-	$query = "select upm.id,upm.event_type,upm.event_description,upm.event_link,upm.result_link,p.name as product, a.name as area, upm.corresponding_trial,upm.start_date,upm.start_date_type,upm.end_date,upm.end_date_type,upm.last_update from upm left join products p on upm.product=p.id left join areas a on a.id=upm.area $where $currentOrderBy $currentSortOrder limit $start , $limit";
+	$query = "select upm.id,upm.event_type,upm.event_description,upm.event_link,upm.result_link,p.name as product, upm_areas.area_id as area, upm.corresponding_trial,upm.start_date,upm.start_date_type,upm.end_date,upm.end_date_type,upm.last_update from upm left join products p on upm.product=p.id left join upm_areas on upm_areas.upm_id=upm.id $where  group by upm.id $currentOrderBy $currentSortOrder limit $start , $limit";
 	else
-	$query = "select upm.id,upm.event_type,upm.event_description,upm.event_link,upm.result_link,p.name as product, a.name as area, upm.corresponding_trial,upm.start_date,upm.start_date_type,upm.end_date,upm.end_date_type,upm.last_update from upm left join products p on upm.product=p.id left join areas a on a.id=upm.area $where limit $start , $limit";
+	$query = "select upm.id,upm.event_type,upm.event_description,upm.event_link,upm.result_link,p.name as product, upm_areas.area_id as area, upm.corresponding_trial,upm.start_date,upm.start_date_type,upm.end_date,upm.end_date_type,upm.last_update from upm left join products p on upm.product=p.id left join upm_areas on upm_areas.upm_id=upm.id $where group by upm.id limit $start , $limit";
 }
-
 $res = mysql_query($query) or softDieSession('Cannot get '.$table.' data.'.$query);
 $i=0;
 $skip=0;
@@ -210,7 +235,14 @@ while ($row = mysql_fetch_assoc($res))
 				echo '<td>';
 				echo input_tag(array('Field'=>'searchdata'),$v,array('table'=>$table,'id'=>$upmId));
 				echo '</td>';				
-			}			
+			}
+			else
+			if($columnName == 'area' && $table == 'upm')
+			{
+					echo '<td>';
+					echo getUpmAreaNames($upmId);
+					echo '</td>';
+			}						
 			else 
 			{
 				echo '<td>';
@@ -262,6 +294,13 @@ while ($row = mysql_fetch_assoc($res))
 				echo '<td>';
 				echo input_tag(array('Field'=>'searchdata'),$v,array('table'=>$table,'id'=>$upmId));
 				echo '</td>';				
+			}
+			else 
+			if($columnName == 'area' && $table == 'upm')
+			{
+				echo '<td>';
+				echo getUpmAreaNames($upmId);
+				echo '</td>';
 			}			
 			else 
 			{
@@ -283,6 +322,24 @@ echo '<br/>';
 }
 
 /**
+ * @name getUpmAreaNames
+ * @tutorial Returns comma separated area names for a upm
+ * @author Jithu Thomas
+ */
+function getUpmAreaNames($upmId)
+{
+	global $db;
+	$query = "select a.name from upm_areas u left join areas a on a.id=u.area_id where u.upm_id=$upmId";
+	$result = mysql_query($query);
+	while($row = mysql_fetch_assoc($result))
+	{
+		$areaName[] = $row['name'];
+	}
+	
+	return implode(',', $areaName);
+}
+
+/**
  * @name calculateWhere
  * @tutorial Outputs the WHERE query substring.
  * Just follow the naming convention of get parameters passed start with search_ and
@@ -292,6 +349,7 @@ echo '<br/>';
  */
 function calculateWhere($table)
 {
+	//pr($_GET);
 	$postKeys = array_keys($_GET);
 	$whereArr = array();
 	foreach($postKeys as $keys)
@@ -299,7 +357,7 @@ function calculateWhere($table)
 		$explode = explode('search_',$keys);
 		if(isset($explode[1]))	
 		{
-			if(trim($_GET[$keys]) !='')
+			if(trim($_GET[$keys]) !='' || is_array($_GET[$keys]))
 			$whereArr[$explode[1]] = $_GET[$keys];
 		}
 		else
@@ -307,6 +365,7 @@ function calculateWhere($table)
 			continue;
 		}
 	}
+	//pr($whereArr);
 	if(count($whereArr)>0)
 	{
 		$whereKeys = array_keys($whereArr);
@@ -315,6 +374,13 @@ function calculateWhere($table)
 		$whereArr = array_map(
 							function($whereKeys,$whereValues)
 							{
+								
+								if(is_array($whereValues))
+								{
+									//TODOmake dynamic
+									//return ' '.$whereKeys.' IN( '.implode(',',$whereValues).') AND ';
+									return ' upm_areas.area_id IN( '.implode(',',$whereValues).') AND ';
+								}								
 								//real escape search values
 								$whereValues = mysql_real_escape_string($whereValues);
 								//check search keys are regex or not.
@@ -340,7 +406,8 @@ function calculateWhere($table)
 										$whereValues = implode(',',$whereValues);
 										return ' '.$whereKeys.' IN( '.$whereValues.') AND ';
 									}
-								}								
+								}
+
 								return ' '.$whereKeys.' = '. '\''.$whereValues.'\' AND ';
 							},
 							$whereKeys,
@@ -376,7 +443,14 @@ function getTotalCount($table)
 {
 	global $db;
 	$where = calculateWhere($table);
-	$query = "select count(id) as cnt from $table $where";
+	if($table == 'upm')
+	{
+		$query = "select count(distinct upm.id) as cnt from $table left join upm_areas on $table.id=upm_areas.upm_id $where";
+	}
+	else
+	{
+		$query = "select count(id) as cnt from $table $where";
+	}
 	$res = mysql_query($query);
 	$count = mysql_fetch_row($res);
 	return $count[0];
@@ -521,7 +595,24 @@ function input_tag($row,$dbVal=null,$options=array())
 			break;
 		default:
 			$dateinput = (strpos($row['Field'], 'date') !== false) ? ' class="jdpicker"' : '';
-			return '<input '.$style.' type="text" value="'.$dbVal.'" name="'.$nameIndex.$row['Field'].'" id="'.$nameIndex.$row['Field'].'"' . $dateinput . '/>';
+			
+			if(is_array($dbVal) && count($dbVal)>0 && isset($options['one_to_many']) && $options['one_to_many']==1)
+			{
+				foreach($dbVal as $dbValIndividual)
+				{
+					$out .= '<tr><td></td><td><input class="'.$nameIndex.$row['Field'].'_autosuggest_multiple" name="'.$nameIndex.$row['Field'].'[]" value="'.$dbValIndividual.'" checked="checked" type="checkbox"> '.$dbValIndividual.' <img style="border:0" title="Delete '.ucfirst($row['Field']).'" alt="Delete '.ucfirst($row['Field']).'" src="images/not.png" class="auto_suggest_multiple_delete"></td></tr>';
+				}
+				return $out;
+			}
+			elseif(is_array($dbVal) && count($dbVal)>0 && (isset($options['one_to_many']) || $options['one_to_many']!=1))
+			{
+				//nodb val support since dbval is array this option is proceeded with a options['one_to_many'] == 1 input_tag call
+				return '<input '.$style.' type="text" value="" name="'.$nameIndex.$row['Field'].'" id="'.$nameIndex.$row['Field'].'"' . $dateinput . '/>';
+			}
+			else 
+			{
+				return '<input '.$style.' type="text" value="'.$dbVal.'" name="'.$nameIndex.$row['Field'].'" id="'.$nameIndex.$row['Field'].'"' . $dateinput . '/>';
+			}
 			break;
 	}
 }
@@ -550,6 +641,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 	unset($post['li_user']);
 	*/
 	//import save
+	//pr($post);die;
 	if($import ==1 && $table=='upm')
 	{
 		$importVal = array_map(validateImport,$importKeys,$importVal);
@@ -680,7 +772,13 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 		//no longer required as input column filtering is in place now. unset($post['save']);
 		if($table=='upm')
 		{	
-			$post['last_update'] = 	date('Y-m-d',$now);		
+			$post['last_update'] = 	date('Y-m-d',$now);
+			
+			if(is_array($post['area']) && count($post['area'])>0)
+			{		
+				$upm_area = $post['area'];
+				unset($post['area']);
+			}
 		}
 		if($table=='products' && $post['name']=='')
 		{
@@ -700,6 +798,11 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			{
 				$_REQUEST['id'] = mysql_insert_id();
 			}
+			
+			if($table=='upm')
+			{
+				fillUpmAreas(mysql_insert_id(),$upm_area);
+			}
 			return 1;
 		}
 		else
@@ -714,12 +817,21 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 		if($table=='upm')
 		{
 			
+			
+			//the area data is stored in temporary array to be processed after update
+			if(is_array($post['area']) && count($post['area'])>0)
+			{		
+				$upm_area = $post['area'];
+				unset($post['area']);
+			}
 			$query = "select * from $table where id=$id";
 			$res = mysql_query($query)or softDieSession('Updating invalid row');
 			while($row = mysql_fetch_assoc($res))
 			{
 				$historyArr = $row;
 			}
+			//fetch previous upm area string.
+			$upmHistoryAreaString = getUpmAreaNames($id);
 			//last update not needed for upm_history
 			unset($historyArr['last_update']);
 			unset($historyArr['status']);
@@ -759,11 +871,24 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			//fire success actions upon successful save.
 			if($table=='upm')
 			{
+				
+				//update upm area one to many association
+				fillUpmAreas($id,$upm_area);
+				
+				//process upm history
 				foreach($historyArr as $history)
 				{
-					$query = "insert into upm_history (".implode(',',array_keys($history)).") values (".implode(',',$history).")";
+					echo $query = "insert into upm_history (".implode(',',array_keys($history)).") values (".implode(',',$history).")";
 					mysql_query($query)or softdieSession('Cannot update history for upm id '.$historyArr['id']);
-				}				
+				}
+				$upmCurrentAreaString = getUpmAreaNames($id);	
+				if($upmHistoryAreaString != $upmCurrentAreaString)
+				{
+					
+					$history = array('id'=>$id, 'change_date'=>"'".date('Y-m-d H:i:s')."'", 'field'=>"'".'area'."'", 'old_value'=>"'".$upmHistoryAreaString."'", 'new_value'=>"'".$upmCurrentAreaString."'", 'user'=>"'".$db->user->id."'");
+					echo $query = "insert into upm_history (".implode(',',array_keys($history)).") values (".implode(',',$history).")";
+					mysql_query($query)or softdieSession('Cannot update history for upm id '.$id);
+				}
 			}
 			
 			return 1;			
@@ -774,6 +899,54 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			return 0;	
 		}
 		
+	}
+}
+
+/**
+ * @name pagePagination
+ * @tutorial Provides pagination output for the upm input page.
+ * @param int $limit The total limit of records defined in the controller.
+ * @author Jithu Thomas
+ */
+function fillUpmAreas($upmId,$areaIds=array())
+{
+	global $db;
+	
+
+	//get current upm areas
+	$query = "select * from `upm_areas` where `upm_id`=$upmId";
+	$result = mysql_query($query);
+	$currentAreas = array();
+	while($row = mysql_fetch_assoc($result))
+	{
+		$currentAreas[] = $row['area_id'];
+	}
+	//add new areas
+	$newAreas = array_diff($areaIds,$currentAreas);
+	if(count($newAreas)>0)
+	{
+		$newAreas = array_map(function($upm_id,$area_id){
+			
+			return "(".$upm_id.",".$area_id.")";
+			
+		},array_fill(0, (count($newAreas)), $upmId),$newAreas);
+		
+		$insertAreasQuery = "insert into `upm_areas` (upm_id,area_id) values ".implode(',',$newAreas);
+		
+		if(!mysql_query($insertAreasQuery))
+		{
+			softDieSession('Cannot insert new areas into upm_areas table');
+		}
+	}
+	//delete old areas
+	$deletedAreas = array_diff($currentAreas,$areaIds);
+	if(count($deletedAreas)>0)
+	{
+		$deletedAreasQuery = "delete from `upm_areas` where `upm_id`=$upmId and `area_id` in (".implode(',',$deletedAreas).")";
+		if(!mysql_query($deletedAreasQuery))
+		{
+			softDieSession('Cannot delete areas from upm_areas table');
+		}		
 	}
 }
 
@@ -839,8 +1012,6 @@ function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),
 	echo  '<fieldset class="">'
 			. '<legend> Search: </legend>';
 
-	$query = "SHOW COLUMNS FROM $table";
-	$res = mysql_query($query);
 	echo '<table>';
 	if($options['searchDataCheck'])
 	{
@@ -849,8 +1020,40 @@ function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),
 		echo '<td>Search Data : </td><td>'.input_tag(array('Type'=>'checkbox','Field'=>'searchDataCheck'),$searchDataCheckStatus,array('alttitle'=>'Search for records having search data.')).'</td>';
 		echo '</tr>';
 	}
-	while($row = mysql_fetch_assoc($res))
+	
+	$res = tableColumnDetails($table);
+	//while($row = mysql_fetch_assoc($res))
+	//TODO:INJECT UPM.AREAS
+	/**
+	 * Array
+	 (
+	 [Field] => area
+	 [Type] => int(10) unsigned
+	 [Null] => YES
+	 [Key] => MUL
+	 [Default] =>
+	 [Extra] =>
+	 )
+	 *
+	 */		
+	
+	//TODO: make it dynamic for future one to many relationship and custom non existing columns
+	if($table == 'upm')
 	{
+		$res[] = array(
+				
+				 'Field' => 'area',
+				 'Type' => 'int(10) unsigned',
+				 'Null' => 'YES',
+				 'Key' => 'MUL',
+				 'Default' => '',
+				 'Extra' => '',
+				
+				);
+	}
+	foreach($res as $row)
+	{
+		//pr($row);
 		if(!in_array($row['Field'],$ignoreFields))
 		{
 			$dbVal = null;
@@ -859,7 +1062,12 @@ function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),
 				$dbVal = $_GET['search_'.$row['Field']];
 			}
 			echo '<tr><td>'.ucwords(implode(' ',explode('_',$row['Field']))) .' : </td><td>'.input_tag($row,$dbVal,array('null_options'=>true,'name_index'=>'search')).'</td></tr>';
+			if(is_array($dbVal) && count($dbVal)>0)
+			{
+				echo input_tag($row,$dbVal,array('null_options'=>true,'name_index'=>'search','one_to_many'=>1));
+			}
 		}
+		
 	}
 	echo '<tr><td colspan="2"><input type="submit" value="Search" name="search"><input type="submit" value="Reset" name="reset"></td></tr>';
 	echo '</table>';		
@@ -911,29 +1119,61 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 	$formStyle = isset($options['formStyle'])?$options['formStyle']:null;
 	$mainTableStyle = isset($options['mainTableStyle'])?$options['mainTableStyle']:null;
 	$addEditGlobalInputStyle = isset($options['addEditGlobalInputStyle'])?$options['addEditGlobalInputStyle']:null;
+	
+	//get current details if the id is passed.
 	if($id)
 	{
 		$insertEdit = 'Edit';
 		
 		if($table=='upm')
 		{
-			$query = "SELECT u.id,u.event_type,u.event_description,u.event_link,u.result_link,p.name AS product, a.name as area, u.status,u.corresponding_trial,u.start_date,u.start_date_type,u.end_date,u.end_date_type,u.last_update,p.id as product_id FROM upm u LEFT JOIN products p ON u.product=p.id LEFT JOIN areas a ON u.area=a.id WHERE u.id=$id";
+			$query = "SELECT u.id,u.event_type,u.event_description,u.event_link,u.result_link,p.name AS product, ar.name as area, u.status,u.corresponding_trial,u.start_date,u.start_date_type,u.end_date,u.end_date_type,u.last_update,p.id as product_id FROM upm u LEFT JOIN products p ON u.product=p.id LEFT JOIN upm_areas a ON u.id=a.upm_id left join areas ar on ar.id=a.area_id WHERE u.id=$id";
 		}
 		else
 		{
 			$query = "SELECT * FROM $table WHERE id=$id";
 		}
 		$res = mysql_query($query) or die('Cannot get details for this '.$table.' id');
-		while($row = mysql_fetch_assoc($res))
+		
+		if($table == 'upm')
 		{
-			$upmDetails = $row;
-			$upm_product_id = isset($upmDetails['product_id'])?$upmDetails['product_id']:null;
+			while($row = mysql_fetch_assoc($res))
+			{
+				$upmDetails = $row;
+				$upm_product_id = isset($upmDetails['product_id'])?$upmDetails['product_id']:null;
+				$area[] = $row['area'];
+			}
+			$upmDetails['area'] = $area;
+			
+		}
+		else
+		{	
+			while($row = mysql_fetch_assoc($res))
+			{
+				$upmDetails = $row;
+				$upm_product_id = isset($upmDetails['product_id'])?$upmDetails['product_id']:null;
+			}
 		}
 	}
 	
 	$columns = array();
-	$query = "SHOW COLUMNS FROM $table";
-	$res = mysql_query($query)or die('Cannot fetch column names from '.$table.' table.');
+	//$query = "SHOW COLUMNS FROM $table";
+	//$res = mysql_query($query)or die('Cannot fetch column names from '.$table.' table.');
+	$res = tableColumnDetails($table);
+	//TODO: make it dynamic for future one to many relationship and custom non existing columns
+	if($table == 'upm')
+	{
+		$res[] = array(
+	
+				'Field' => 'area',
+				'Type' => 'int(10) unsigned',
+				'Null' => 'YES',
+				'Key' => 'MUL',
+				'Default' => '',
+				'Extra' => '',
+	
+		);
+	}	
 	$i=0;
 	
 
@@ -943,7 +1183,8 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 	echo '<legend> '.$insertEdit.': </legend>';
 	echo '<form '.$formStyle.' id="umpInput" name="umpInput" '.$formOnSubmit.' method="POST" action="'.$script.'.php">';
 	echo '<table '.$mainTableStyle.'>';
-	while($row = mysql_fetch_assoc($res))
+	//while($row = mysql_fetch_assoc($res))
+	foreach($res as $row)
 	{
 		if($i==0)
 		{
@@ -997,6 +1238,12 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		echo '<tr>';
 		echo '<td>'.ucwords(implode(' ',explode('_',$row['Field']))).' : </td><td>'.input_tag($row,$dbVal,array('style'=>$addEditGlobalInputStyle)).'</td>';
 		echo '</tr>';
+		if($row['Field']=='area' && $table=='upm' && is_array($dbVal) && count($dbVal)>0)
+		{
+			//add explicit code for multiple 
+			echo input_tag($row,$dbVal,array('null_options'=>true,'one_to_many'=>1));
+		}
+		
 	}
 	if(($script == 'products' || $script == 'areas') && $searchType!==false)
 	{

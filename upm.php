@@ -9,6 +9,7 @@ if(!$db->loggedIn())
 	header('Location: ' . urlPath() . 'index.php');
 	exit;
 }
+//pr($_GET);die;
 //declare all globals
 global $db;
 global $page;
@@ -41,13 +42,73 @@ $(document).ready(function(){
 		  <?php endif;?>
 		  b = $('#search_product').autocomplete(options2);
 
-		  options_area1 = { serviceUrl:'autosuggest.php',params:{table:<?php echo "'$table'"?>,field:'area'}, minChars:3, showOnSelect:true };
-		  options_area2 = { serviceUrl:'autosuggest.php',params:{table:<?php echo "'$table'"?>,field:'area'} ,minChars:3, showOnSelect:true };
+		  options_area1 = { 
+				  			serviceUrl:'autosuggest.php',
+				  			params:{table:<?php echo "'$table'"?>,
+						  	field:'area'},
+						  	minChars:3,
+						  	showOnSelect:true,
+						  	onSelect: function (v,d){
+								var duplicateFlag = 0;
+							  	$('.area_autosuggest_multiple').each(function(){
+									if($(this).val() == v)
+									{
+										alert('This area has already been selected.');
+										duplicateFlag = 1;
+									}
+								  	});
+
+							  	if(duplicateFlag == 1)
+							  	{
+							  		$('#area').val('');
+								  	return false;
+							  	}
+								$('#area').closest('tr').after(
+										'<tr><td></td><td><input type="checkbox" class="area_autosuggest_multiple" name="area[]" value="'+v+'" checked="checked"/> '+v+' <img style="border:0" title="Delete Area" alt="Delete Area" src="images/not.png" class="auto_suggest_multiple_delete"></td></tr>'
+										);
+								$('#area').val('');
+						  	}
+
+						  	 };
+		  options_area2 = { serviceUrl:'autosuggest.php',
+				  			params:{table:<?php echo "'$table'"?>,
+						  	field:'area'} ,
+						  	minChars:3,
+						  	showOnSelect:true,
+						  	onSelect: function (v,d){
+								var duplicateFlag = 0;
+							  	$('.search_area_autosuggest_multiple').each(function(){
+									if($(this).val() == v)
+									{
+										alert('This area has already been selected.');
+										duplicateFlag = 1;
+									}
+								  	});
+
+							  	if(duplicateFlag == 1)
+							  	{
+							  		$('#search_area').val('');
+								  	return false;
+							  	}							  	
+									$('#search_area').closest('tr').after(
+											'<tr><td></td><td><input type="checkbox" class="search_area_autosuggest_multiple" name="search_area[]" value="'+v+'" checked="checked"/> '+v+' <img style="border:0" title="Delete Area" alt="Delete Area" src="images/not.png" class="auto_suggest_multiple_delete"></td></tr>'
+											);
+									$('#search_area').val('');
+							  	}
+
+				   };
 
 		  <?php if($_REQUEST['add_new_record']=='Add New Record' || $_REQUEST['id']):?>
 		  c = $('#area').autocomplete(options_area1);
 		  <?php endif;?>
-		  d = $('#search_area').autocomplete(options_area2);		  
+		  d = $('#search_area').autocomplete(options_area2);	
+
+
+		  //listener for autosuggest delete icon class
+		  $('.auto_suggest_multiple_delete').live('click',function(){
+			  
+				$(this).closest('tr').fadeOut("fast", function(){$(this).remove();});
+			  });	  
 
 });
 </script>
@@ -65,13 +126,24 @@ if($_REQUEST['save']=='Save')
 		$pid = $row['id'];
 	}
 	
-	$query = "select id from areas where name='{$_REQUEST['area']}'";
-	$res = mysql_query($query);
-	$aid = null;
-	while($row = mysql_fetch_assoc($res))
+	if(is_array($_REQUEST['area']) && count($_REQUEST['area'])>0)
 	{
-		$aid = $row['id'];
-	}	
+		$requestAreaTmp = $_REQUEST['area'];
+		
+		$_REQUEST['area'] = array_map(function($area){
+			return "'$area'";
+		},$_REQUEST['area']);
+		
+		$query = "select id from areas where areas.name in (".implode(',',$_REQUEST['area']).")";
+		$res = mysql_query($query);
+		$aid = null;
+		while($row = mysql_fetch_assoc($res))
+		{
+			$aid[] = $row['id'];
+		}
+	}
+
+	
 	unset($_REQUEST['product_id']);
 	//$_GET['product'] = $_GET['product_id'];
 	$_REQUEST = array_merge($_GET, $_POST); 
@@ -142,17 +214,23 @@ if(isset($_GET['search']))
 		$_GET['search_product'] = $pid;
 	}
 	
-	$query = "select id from areas where name='{$_GET['search_area']}' and name !=''";
-	$res = mysql_query($query);
-	$aid = null;
-	while($row = mysql_fetch_assoc($res))
-	{
-		$aid = $row['id'];
-	}
-	if($aid)
+	if(is_array($_GET['search_area']) && count($_GET['search_area'])>0)
 	{
 		$search_area_tmp_name = $_GET['search_area'];
-		$_GET['search_area'] = $aid;
+		$_GET['search_area'] = array_map(function($area){
+			return "'$area'";
+		},$_GET['search_area']);
+		$query = "select id from areas where name in (".implode(',',$_GET['search_area']).") and name !=''";
+		$res = mysql_query($query);
+		$aid = null;
+		while($row = mysql_fetch_assoc($res))
+		{
+			$aid[] = $row['id'];
+		}
+		if(is_array($aid) && count($aid)>0)
+		{
+			$_GET['search_area'] = $aid;
+		}
 	}
 	
 
@@ -184,7 +262,7 @@ pagePagination($limit,$totalCount,$table,$script,array(),array("import"=>false,"
 //pagination controller
 
 
-//search controller part3 should come before pagination call since search is embedded in it needs prefilled values.
+//search controller part3 should come after pagination call since search is embedded in it needs prefilled values.
 if(isset($_GET['search']))
 {
 	if($pid)

@@ -260,7 +260,6 @@ CREATE TABLE IF NOT EXISTS `upm` (
   `end_date_type` enum('anticipated','actual') COLLATE utf8_unicode_ci NOT NULL,
   `last_update` date NOT NULL,
   `product` int(10) unsigned DEFAULT NULL,
-  `area` int(10) unsigned DEFAULT NULL,  
   `status` enum('Upcoming','Occurred','Pending','Cancelled') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'Upcoming',
   PRIMARY KEY (`id`),
   KEY `product` (`product`)
@@ -318,6 +317,16 @@ CREATE TABLE IF NOT EXISTS `upm_history` (
   KEY `user` (`user`),
   KEY `id` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+
+CREATE TABLE IF NOT EXISTS `upm_areas` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `upm_id` int(10) unsigned DEFAULT NULL,
+  `area_id` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `upm_id` (`upm_id`),
+  KEY `area_id` (`area_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 ROW_FORMAT=COMPACT AUTO_INCREMENT=1 ;
 
 CREATE TABLE IF NOT EXISTS `users` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -1211,8 +1220,6 @@ ALTER TABLE `user_grants`
 
 ALTER TABLE `upm`
   ADD CONSTRAINT `FK_product` FOREIGN KEY (`product`) REFERENCES `products` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE; 
-ALTER TABLE `upm`
-  ADD CONSTRAINT `FK_area` FOREIGN KEY (`area`) REFERENCES `areas` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE;   
 
 ALTER TABLE `area_trials`
   ADD CONSTRAINT `area_trials_ibfk_1` FOREIGN KEY (`area`) REFERENCES `areas` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -1230,3 +1237,8 @@ ALTER TABLE `data_nct`
 ALTER TABLE `product_trials`
   ADD CONSTRAINT `product_trials_ibfk_1` FOREIGN KEY (`product`) REFERENCES `products` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `product_trials_ibfk_2` FOREIGN KEY (`trial`) REFERENCES `data_trials` (`larvol_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  
+ALTER TABLE `upm_areas`
+  ADD CONSTRAINT `upm_areas_ibfk_2` FOREIGN KEY (`area_id`) REFERENCES `areas` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `upm_areas_ibfk_1` FOREIGN KEY (`upm_id`) REFERENCES `upm` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  
