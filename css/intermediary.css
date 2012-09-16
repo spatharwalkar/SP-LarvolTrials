@@ -185,7 +185,10 @@ tr.upms td {
 	line-height: 1.6em;
 	width:auto;
 	float:left;
-	margin-right:2px;
+	margin-right:10px;
+	float: left; 
+	padding-top:2px; 
+	vertical-align:bottom;
 }
 
 .pagination a:hover {
@@ -287,7 +290,7 @@ tr.upms td {
 	margin:0.1em;
 	width: 13px; /* for IE */
 	height: 13px; /* For IE */ 
-	margin: 0px \ ;
+	margin: 0px 1px 0px 0px\ ;
 	padding: 0px \ ;
 }
 
@@ -549,12 +552,12 @@ ul, li { behavior:url("css/csshover3.htc"); }
 	float:left;
 	margin-right: 10px; 
 	vertical-align:bottom; 
-	padding-top:4px; 
-	height:22px;
-	display:block;
+	/*padding-top:4px; */
+	/*display:block;*/
+	height:20px;
 }
 
-.export span {
+.export div {
 	padding:2px;
 	border:1px solid; 
 	color:#000000;
@@ -573,6 +576,10 @@ ul, li { behavior:url("css/csshover3.htc"); }
 	padding: 0px 0px 0px 4px;
 }
 
+.filters a img{
+	border: 0px;
+}
+
 #outercontainer {
 	width:12%;
 	height:26px;
@@ -580,4 +587,24 @@ ul, li { behavior:url("css/csshover3.htc"); }
 	float:left;
 	border: 1px solid #777;
 	padding: 2px;
+	margin-right: 10px;
+}
+
+#parent {
+	height: 40px;
+	width:1280px;
+	clear: both;
+	overflow: auto;
+}
+
+#filter {
+	float:left;
+	margin:2px 10px 0px 0px;
+	width:90px;
+}
+
+#fulltextsearchbox {
+	float:left;
+	margin-right:10px;
+	width:183px;
 }

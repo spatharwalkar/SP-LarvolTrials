@@ -763,6 +763,21 @@ global $db;
 		}
 		return $timerange;
 	}
+	
+	function divresize() 
+	{  
+		 var windowidth = $(window).width();
+		 var filterwidth = $('#filter').width();
+		 var searchboxwidth = $('#fulltextsearchbox').width();
+		 var paginationwidth = $('.pagination').width();
+		 var milestoneswidth = $('.milestones').width();
+		 var exportwidth = $('.export').width();
+		 var buttonswidth = $('#buttons').width();
+		 
+		 var containerwidth = (windowidth) - (filterwidth+searchboxwidth+paginationwidth+milestoneswidth+exportwidth+buttonswidth+70);
+		 $('#outercontainer').width(containerwidth);
+ 	}  
+	divresize() ;
 </script>
 </body>
 </html>

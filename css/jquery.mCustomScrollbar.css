@@ -91,13 +91,13 @@
 	width:100%;
 	height:5px;
 	margin:7px 0;
-	-webkit-border-radius:10px;
+	/*-webkit-border-radius:10px;
 	-moz-border-radius:10px;
-	border-radius:10px;
+	border-radius:10px;*/
 }
 .mCSB_horizontal .mCSB_scrollTools .mCSB_dragger{
 	width:30px;
-	height:100%;
+	/*height:100%;*/
 }
 .mCSB_horizontal .mCSB_scrollTools .mCSB_dragger .mCSB_dragger_bar{
 	width:100%;
@@ -132,7 +132,7 @@
 	opacity:1;
 }
 .mCSB_scrollTools .mCSB_draggerRail{
-	background:#000; /* rgba fallback */
+	background:#CCC; /* rgba fallback */
 	background:rgba(0,0,0,0.4);
 	filter:"alpha(opacity=40)"; -ms-filter:"alpha(opacity=40)"; /* old ie */
 }

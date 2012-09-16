@@ -1,6 +1,6 @@
 $(document).ready(function()
 {
-	$('#addtoright').after('&nbsp;&nbsp;&nbsp;<span id="addedtoright">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Show all milestones</b></span>');
+	$('#addtoright').after('<div id="addedtoright">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Show all milestones</b></div>');
 	var image;
 	if($('#upmstyle').val() == 'expand') 
 	{

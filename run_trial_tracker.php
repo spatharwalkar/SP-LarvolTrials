@@ -10711,8 +10711,11 @@ class TrialTracker
 		
 		$this->displayFilterControls($productSelector, $productSelectorTitle, $count, $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], $globalOptions, $ottType, $loggedIn);
 		
-		echo '<div style="float:left;margin:2px 10px 0px 0px;">&nbsp;<img src="images/funnel.png" alt="Show Filter" border="0" style="vertical-align:bottom;" onclick="$(\'.controls\').show();" />'
-				. '&nbsp;&nbsp;<b>' . $count . '&nbsp;Records</b></div>';
+		echo '<div id="parent">';
+		echo '<div id="filter">'
+				. '<img src="images/funnel.png" alt="Show Filter" style="vertical-align:bottom;" onclick="$(\'.controls\').toggle();" />'
+				. '<b style="margin-left:6px;">' . $count . '&nbsp;Records</b>'
+				. '</div>';
 		
 		foreach($urlParams as $key => $value) 
 		{
@@ -10733,7 +10736,7 @@ class TrialTracker
 			$lParams =  array_replace($urlParams, array('list' => '1'));
 			$lUrl = http_build_query($lParams);
 			echo '<span class="filters"><label>Inactive Trials</label>'
-				. '<a href="intermediary.php?' . $lUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';;
+				. '<a href="intermediary.php?' . $lUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
 		}
 		else if($globalOptions['type'] == 'allTrials')
 		{
@@ -10872,13 +10875,16 @@ class TrialTracker
 		
 		$dParams = array();
 		if($globalOptions['includeProductsWNoData'] == 'on')
-		{
-			$dUrl = '';
-			$dParams =  array_replace($urlParams, array('ipwnd' => 'off'));
-			$dUrl = http_build_query($dParams);
-			
-			echo '<span class="filters"><label>' . str_replace('Select ', '', $productSelectorTitle) . ' with no data<label>'
-					. '<a href="intermediary.php?' . $dUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
+		{	
+			if($ottType != 'indexed' || $ottType != 'unstacked' || $ottType != 'unstackedoldlink')
+			{
+				$dUrl = '';
+				$dParams =  array_replace($urlParams, array('ipwnd' => 'off'));
+				$dUrl = http_build_query($dParams);
+				
+				echo '<span class="filters"><label>' . str_replace('Select ', '', $productSelectorTitle) . ' with no data<label>'
+						. '<a href="intermediary.php?' . $dUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
+			}
 		}
 		unset($dParams);
 		
@@ -10910,9 +10916,10 @@ class TrialTracker
 			//$this->pagination($globalOptions, $totalPages, $timeMachine, $ottType, $loggedIn);
 		}
 		
-		echo '<div style="float:left;margin-left:5px;"><input type="text" name="ss" autocomplete="off" style="width:180px;" value="' . $globalOptions['sphinxSearch'] . '" /></div>'
-			. '<div class="milestones"><span id="addtoright"></span></div>'
-			. '<div class="export" id="chromemenu"><a rel="dropmenu"><span>&nbsp;&nbsp;&nbsp;&nbsp;<b>Export</b></span></a></div>';
+		echo '<div  id="fulltextsearchbox">'
+			. '<input type="text" name="ss" autocomplete="off" style="width:180px;" value="' . $globalOptions['sphinxSearch'] . '" /></div>'
+			. '<div class="milestones" style="width:155px;"><div id="addtoright"></div></div>'
+			. '<div class="export" id="chromemenu" style="width:64px;"><div><a rel="dropmenu">&nbsp;&nbsp;&nbsp;&nbsp;<b>Export</b></a></div></div>';
 		
 		$resetUrl = 'intermediary.php?';
 		if($ottType == 'unstacked')
@@ -10934,14 +10941,14 @@ class TrialTracker
 		$resetUrl .= str_replace(',', '&', $globalOptions['resetLink']);
 		$resetUrl = htmlentities($resetUrl);
 		
-		echo '<div style="float:left">'
+		echo '<div style="float:left" id="buttons">'
 			. '<input type="submit" id="Show" value="Search" class="searchbutton" />&nbsp;'
 			. '<a style="display:inline;" href="' . urlPath() . $resetUrl . '">'
 			. '<input type="button" value="Reset" id="reset" class="resetbutton" onclick="javascript: window.location.href(\'' . urlPath() . $resetUrl . '\')" /></a>'
-			. '</div>';
+			. '</div></div>';
 				
 		echo '<input type="hidden" name="rflag" value="1" /><input type="hidden" name="rlink" value="' . $globalOptions['resetLink'] . '" />';
-		echo '<div style="clear:both;height:10px;">&nbsp;</div>';
+		//echo '<div style="clear:both;height:10px;">&nbsp;</div>';
 		
 		echo $this->displayTrialTableHeader($loggedIn, $globalOptions);
 		if($count > 0)
@@ -11575,7 +11582,7 @@ class TrialTracker
 		$stages = 2;
 		
 		$rootUrl = 'intermediary.php?';
-		$paginateStr = '<div class="pagination" style="float: left; padding-top:2px; vertical-align:bottom;">';
+		$paginateStr = '<div class="pagination">';
 		///ALL Quotation Marks SIGN REPLACED BY Apostrophe, CAUSE JSON DATA URL GET PROBLEM WITH double quote.
 		// globalOptions Should always have Apostrophe instead of quote sign or data will not be passed
 		if($globalOptions['page'] != 1)
