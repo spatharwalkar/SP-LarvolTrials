@@ -887,7 +887,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 				{
 					
 					$history = array('id'=>$id, 'change_date'=>"'".date('Y-m-d H:i:s')."'", 'field'=>"'".'area'."'", 'old_value'=>"'".$upmHistoryAreaString."'", 'new_value'=>"'".$upmCurrentAreaString."'", 'user'=>"'".$db->user->id."'");
-					echo $query = "insert into upm_history (".implode(',',array_keys($history)).") values (".implode(',',$history).")";
+					$query = "insert into upm_history (".implode(',',array_keys($history)).") values (".implode(',',$history).")";
 					mysql_query($query)or softdieSession('Cannot update history for upm id '.$id);
 				}
 			}
