@@ -331,6 +331,7 @@ function getUpmAreaNames($upmId)
 	global $db;
 	$query = "select a.name from upm_areas u left join areas a on a.id=u.area_id where u.upm_id=$upmId";
 	$result = mysql_query($query);
+	$areaName = array();
 	while($row = mysql_fetch_assoc($result))
 	{
 		$areaName[] = $row['name'];
