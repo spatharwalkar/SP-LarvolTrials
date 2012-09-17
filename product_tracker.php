@@ -57,6 +57,7 @@ function DataGenerator($id)
 				$rowsCompanyName[$header['num']] = ' / '.$result['company'];
 			} 
 			$rowsDescription[$header['num']] = $result['description'];
+			$rowsTagName[$header['num']] = $header['tag'];
 		}
 		else
 		{
@@ -105,6 +106,7 @@ function DataGenerator($id)
 		$data_matrix[$row]['productName'] = $rval;
 		$data_matrix[$row]['product_CompanyName'] = $rowsCompanyName[$row];
 		$data_matrix[$row]['productIds'] = $productIds[$row];
+		$data_matrix[$row]['productTag'] = $rowsTagName[$row];
 		
 		if(isset($areaId) && $areaId != NULL && isset($productIds[$row]) && $productIds[$row] != NULL)
 		{
@@ -539,6 +541,11 @@ padding:0px;
 margin:0px;
 _height:20px;
 }
+
+.tag {
+color:#120f3c;
+font-weight:normal;
+}
 </style>
 <script language="javascript" type="text/javascript">
 function change_view()
@@ -764,7 +771,7 @@ for($incr=0; $incr < count($rows); $incr++)
 	
 	$Max_ValueKey = Max_ValueKey($data_matrix[$row]['indlead_phase_na'], $data_matrix[$row]['indlead_phase_0'], $data_matrix[$row]['indlead_phase_1'], $data_matrix[$row]['indlead_phase_2'], $data_matrix[$row]['indlead_phase_3'], $data_matrix[$row]['indlead_phase_4']);
 					
-	$htmlContent .= '<tr id="indlead_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" id="ProdCol_'.$row.'" rowspan="3"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&itype=0&hm=' . $id . '" target="_blank" style="text-decoration:underline;">'.$data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'].'</a></th><th class="graph_right last_tick_width" rowspan="3">&nbsp;</th>';
+	$htmlContent .= '<tr id="indlead_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" id="ProdCol_'.$row.'" rowspan="3"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&itype=0&hm=' . $id . '" target="_blank" style="text-decoration:underline;">'.$data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right last_tick_width" rowspan="3">&nbsp;</th>';
 	
 	///Below function will derive number of lines required to display product name, as our graph size is fixed due to fixed scale, we can calculate approx max area  
 	///for product column. From that we can calculate extra height which will be distributed to up and down rows of graph bar, So now IE6/7 as well as chrome will not 
@@ -809,7 +816,7 @@ for($incr=0; $incr < count($rows); $incr++)
 	
 	$Max_ValueKey = Max_ValueKey($data_matrix[$row]['active_phase_na'], $data_matrix[$row]['active_phase_0'], $data_matrix[$row]['active_phase_1'], $data_matrix[$row]['active_phase_2'], $data_matrix[$row]['active_phase_3'], $data_matrix[$row]['active_phase_4']);
 					
-	$htmlContent .= '<tr style="display:none;" id="active_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" rowspan="3"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&hm=' . $id . '" target="_blank" style="text-decoration:underline;">'.$data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'].'</a></th><th class="graph_right last_tick_width" rowspan="3">&nbsp;</th>';
+	$htmlContent .= '<tr style="display:none;" id="active_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" rowspan="3"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&hm=' . $id . '" target="_blank" style="text-decoration:underline;">'.$data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right last_tick_width" rowspan="3">&nbsp;</th>';
 	
 	for($j=0; $j < $columns; $j++)
 	{
@@ -849,7 +856,7 @@ for($incr=0; $incr < count($rows); $incr++)
 	
 	$Max_ValueKey = Max_ValueKey($data_matrix[$row]['total_phase_na'], $data_matrix[$row]['total_phase_0'], $data_matrix[$row]['total_phase_1'], $data_matrix[$row]['total_phase_2'], $data_matrix[$row]['total_phase_3'], $data_matrix[$row]['total_phase_4']);
 	
-	$htmlContent .= '<tr style="display:none;" id="total_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" rowspan="3"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=2&hm=' . $id . '" target="_blank" style="text-decoration:underline;">'.$data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'].'</a></th><th class="graph_right last_tick_width" rowspan="3">&nbsp;</th>';
+	$htmlContent .= '<tr style="display:none;" id="total_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" rowspan="3"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=2&hm=' . $id . '" target="_blank" style="text-decoration:underline;">'.$data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right last_tick_width" rowspan="3">&nbsp;</th>';
 	
 	for($j=0; $j < $columns; $j++)
 	{
@@ -1086,7 +1093,7 @@ function Download_reports()
 				$raltTitle = (isset($rdesc) && $rdesc != '')?' alt="'.$rdesc.'" title="'.$rdesc.'" ':null;
 				
 				$cell = $Prod_Col . $Excel_HMCounter;
-				$objPHPExcel->getActiveSheet()->SetCellValue($cell, $data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName']);
+				$objPHPExcel->getActiveSheet()->SetCellValue($cell, $data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'].((trim($data_matrix[$row]['productTag']) != '') ? ' ['.$data_matrix[$row]['productTag'].']':''));
 				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId .$link_part); 
 				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip($tooltip);
 				if($rdesc)
@@ -1278,7 +1285,7 @@ function Download_reports()
 			
 			if(isset($data_matrix[$row]['productIds']) && $data_matrix[$row]['productIds'] != NULL && !empty($areaId))
 			{
-				$TSV_data .= $data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'] ." \t ";
+				$TSV_data .= $data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'] . ((trim($data_matrix[$row]['productTag']) != '') ? ' ['.$data_matrix[$row]['productTag'].']':''). " \t ";
 				if($mode == 'indlead')
 				{
 					$TSV_data .= $data_matrix[$row]['indlead_phase_4'] ." \t ". $data_matrix[$row]['indlead_phase_3'] ." \t ". $data_matrix[$row]['indlead_phase_2'] ." \t ". $data_matrix[$row]['indlead_phase_1'] ." \t ". $data_matrix[$row]['indlead_phase_0'] ." \t ". $data_matrix[$row]['indlead_phase_na'] ." \n";
@@ -1416,7 +1423,7 @@ function Download_reports()
 			$Place_Y = $pdf->GetY();
 		
 			$ln=0;
-			$pdfContent = '<div align="right" style="vertical-align:top; float:none;"><a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . $link_part . '" target="_blank" title="'. $title .'">'.$data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'].'</a></div>';
+			$pdfContent = '<div align="right" style="vertical-align:top; float:none;"><a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . $link_part . '" target="_blank" title="'. $title .'">'.$data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font style="color:#120f3c;">['.$data_matrix[$row]['productTag'].']</font>':'').'</div>';
 			$border = array('mode' => 'ext', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(204,204,204)));
 			$pdf->MultiCell($product_Col_Width, $row_height, $pdfContent, $border=0, $align='R', $fill=0, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$row_height);
 			$Place_X = $Place_X + $product_Col_Width;
