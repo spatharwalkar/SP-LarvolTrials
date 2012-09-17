@@ -230,7 +230,8 @@ tr.upms td {
 }
 
 .slideout_inner {
-	position:absolute;
+	position: fixed;
+	_position:absolute;
 	top: 40px;
 	right: -255px;
 	display:none;
