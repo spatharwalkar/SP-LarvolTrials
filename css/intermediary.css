@@ -223,15 +223,15 @@ tr.upms td {
 }
 
 #slideout {
-	position: absolute;
+	position: fixed;
+	_position:absolute;
 	top: 40px;
 	right: 0;
 	margin: 12px 0 0 0;
 }
 
 .slideout_inner {
-	position: fixed;
-	_position:absolute;
+	position:absolute;
 	top: 40px;
 	right: -255px;
 	display:none;
