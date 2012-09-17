@@ -789,7 +789,7 @@ CREATE TABLE IF NOT EXISTS `data_nct` (
 
 CREATE TABLE IF NOT EXISTS `data_trials` (
   `larvol_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `source_id` varchar(20) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `source_id` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `brief_title` text COLLATE utf8_unicode_ci DEFAULT NULL,
   `acronym` text COLLATE utf8_unicode_ci DEFAULT NULL,
   `official_title` text COLLATE utf8_unicode_ci,
