@@ -352,6 +352,7 @@ function calculateWhere($table)
 {
 	//pr($_GET);
 	$postKeys = array_keys($_GET);
+	
 	$whereArr = array();
 	foreach($postKeys as $keys)
 	{
@@ -366,7 +367,21 @@ function calculateWhere($table)
 			continue;
 		}
 	}
-	//pr($whereArr);
+	//pr($whereArr);die;
+	
+	
+	//start bool checkbox filtering
+	//TODO: make dynamic with tablecolumndetails & bool tinyint(1) type filtering
+	if($table == 'areas')
+	{
+		if(!isset($_GET['search_coverage_area']))
+		{
+			$whereArr['coverage_area'] = 0;
+		}
+	}
+	//pr($postKeys);die;
+	//end bool checkbox filtering
+	
 	if(count($whereArr)>0)
 	{
 		$whereKeys = array_keys($whereArr);
@@ -594,6 +609,13 @@ function input_tag($row,$dbVal=null,$options=array())
 		case 'iframe':
 			return '<iframe src="'.$row['Field'].'" style="'.(isset($options['style'])?$options['style']:'').'" class="'.(isset($options['class'])?$options['class']:'').'"></iframe>';
 			break;
+		case 'tinyint(1)':
+			if(isset($options) && isset($options['look_for_bool']) && $options['look_for_bool'] === true)
+			{
+				//normally mysql bool types are handled with a 1/0 for true/false case in php so we implmement the same handler here for this case.
+				$checkedStat = ($dbVal=='1')?'checked="checked"':null;
+				return '<input type="checkbox" name="'.$nameIndex.$row['Field'].'" id="'.$row['Field'].'" title="'.$altTitle.'" alt="'.$altTitle.'" '.$checkedStat.'/ value="1">';
+			}
 		default:
 			$dateinput = (strpos($row['Field'], 'date') !== false) ? ' class="jdpicker"' : '';
 			
@@ -764,9 +786,22 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			}
 		}
 	}
+
 	//end precheck
 	//column input filtering
 	$columnList = tableColumns($table);
+	
+	//start bool checkbox filtering 
+	//TODO: make dynamic with tablecolumndetails & bool tinyint(1) type filtering
+	if($table == 'areas')
+	{
+		if(!isset($post['coverage_area']))
+		{
+			$post['coverage_area'] = 0;
+		}
+	}
+	//end bool checkbox filtering
+	
 	$post = array_intersect_key($post, array_flip($columnList));
 	if(!$id)//insert
 	{
@@ -1062,7 +1097,7 @@ function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),
 			{
 				$dbVal = $_GET['search_'.$row['Field']];
 			}
-			echo '<tr><td>'.ucwords(implode(' ',explode('_',$row['Field']))) .' : </td><td>'.input_tag($row,$dbVal,array('null_options'=>true,'name_index'=>'search')).'</td></tr>';
+			echo '<tr><td>'.ucwords(implode(' ',explode('_',$row['Field']))) .' : </td><td>'.input_tag($row,$dbVal,array('null_options'=>true,'name_index'=>'search', 'look_for_bool'=>true)).'</td></tr>';
 			if(is_array($dbVal) && count($dbVal)>0)
 			{
 				echo input_tag($row,$dbVal,array('null_options'=>true,'name_index'=>'search','one_to_many'=>1));
@@ -1204,6 +1239,7 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		{
 			$options['deletebox'] = false;
 		}
+		
 		if(isset($options['saveStatus'])&& $options['saveStatus']===0)
 		{
 			$dbVal = (isset($_REQUEST[$row['Field']]) && $_REQUEST[$row['Field']]!='')?$_REQUEST[$row['Field']]:$dbVal;
@@ -1235,9 +1271,17 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 			echo '</tr>';		
 			$i++;	
 			continue;
-		}			
+		}
+		if($table == 'areas')
+		{
+			$defaultOptions['look_for_bool'] = true;
+		}
+		
+		$defaultOptions['style'] = $addEditGlobalInputStyle;
+		
+		///default 
 		echo '<tr>';
-		echo '<td>'.ucwords(implode(' ',explode('_',$row['Field']))).' : </td><td>'.input_tag($row,$dbVal,array('style'=>$addEditGlobalInputStyle)).'</td>';
+		echo '<td>'.ucwords(implode(' ',explode('_',$row['Field']))).' : </td><td>'.input_tag($row,$dbVal,$defaultOptions).'</td>';
 		echo '</tr>';
 		if($row['Field']=='area' && $table=='upm' && is_array($dbVal) && count($dbVal)>0)
 		{

@@ -16,7 +16,7 @@ if($table=='upm' && $field=='product')
 }
 elseif($table=='upm' && $field=='area')
 {
-	$query = "select a.id,a.name from areas a where a.name like '%$search%' order by name asc";
+	$query = "select a.id,a.name from areas a where a.name like '%$search%' and a.coverage_area=1 order by name asc";
 }
 elseif($table=='products' || $table=='areas')
 {
