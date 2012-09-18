@@ -962,7 +962,7 @@ CREATE TABLE `nctids` (
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `data_eudract`(
-	`larvol_id` int(10) NULL,
+	`larvol_id` int(10) NOT NULL,
 	`national_competent_authority` TEXT NULL,
 	`trial_type` TEXT NULL,
 	`trial_status` TEXT NULL,
@@ -1155,7 +1155,7 @@ CREATE TABLE IF NOT EXISTS `data_eudract`(
 	`review_opinion_date` date NULL,
 	`end_status` TEXT NULL,
 	`end_date_global` TEXT NULL,
-	PRIMARY KEY (`larvol_id`)
+	KEY `REGULAR` (`eudract_id`(255))
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=DYNAMIC;
 
 ALTER TABLE `rpt_masterhm_cells`

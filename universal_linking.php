@@ -96,6 +96,42 @@ foreach($euids as $key=>$val)
 }
 
 $org_ids=array_merge($sec_ids,$org_ids,$eud_ids);
+
+/***** Remove the trials that are already linked from the list. */
+$nctids=array(); $nonnctids=array();
+foreach($org_ids as $tid=>$lid)
+{
+	if(substr($tid,0,3)=='NCT') $nctids[] = $lid;
+	else $nonnctids[] = $lid;
+}
+$larvolids=implode(",", $nonnctids);
+$query = "select larvol_id from data_eudract where larvol_id in ($larvolids) ";
+$res1 		= mysql_query($query) ;
+while($row = mysql_fetch_assoc($res1))
+{
+	$linked  = array_search( $row['larvol_id'], $org_ids); 
+	if($linked !== false) 
+	{
+		unset($org_ids[$linked]);
+	}
+}
+
+$larvolids=implode(",", $nctids);
+$query = "select larvol_id from data_nct where larvol_id in ($larvolids) ";
+$res1 		= mysql_query($query) ;
+while($row = mysql_fetch_assoc($res1))
+{
+	$linked  = array_search( $row['larvol_id'], $org_ids); 
+	if($linked !== false) 
+	{
+		unset($org_ids[$linked]);
+	}
+}
+
+unset($larvolids); unset($row); unset($nctids); unset($nonnctids);
+/*****/
+
+
 unset($sec_ids);
 $i=0;
 if(isset($_POST['autolink_all']) and $_POST['autolink_all']='YES')
@@ -215,9 +251,9 @@ function autolink_trials($sid,$lid,$source,$counter)
 		$query = "
 				SELECT `larvol_id`
 				FROM `data_trials` 
-				WHERE `source_id` = '$sid' limit 1
+				WHERE `source_id` like '%$sid%' limit 1
 				";
-
+		
 		$res1 	= mysql_query($query) ;
 		if($res1===false)
 		{
@@ -330,6 +366,7 @@ function autolink_trials($sid,$lid,$source,$counter)
 			$logger->fatal($log);
 			$osid = array_search($lid, $allsourceids);
 			pr('<br><b><span style="color:red">'.$counter.'. COULD NOT LINK Larvol id/Source Id : ' .  $lid .'/'.$osid .' to SOURCE ID:'.$sid.' / larvol id:'. $source_trial['larvol_id'] .'.</span></b>');
+			
 			return $log;
 		}
 		
@@ -347,6 +384,7 @@ function autolink_trials($sid,$lid,$source,$counter)
 			$logger->fatal($log);
 			$osid = array_search($lid, $allsourceids);
 			pr('<br><b><span style="color:red">'.$counter.'. COULD NOT LINK Larvol id/Source Id : ' .  $lid .'/'.$osid .' to SOURCE ID:'.$sid.' / larvol id:'. $source_trial['larvol_id'] .'.</span></b>');
+
 			return $log;
 		}
 		$lay_title =$res1['brief_title'];
@@ -402,6 +440,7 @@ function autolink_trials($sid,$lid,$source,$counter)
 			$logger->fatal($log);
 			$osid = array_search($lid, $allsourceids);
 			pr('<br><b><span style="color:red">'.$counter.'. COULD NOT LINK Larvol id/Source Id : ' .  $lid .'/'.$osid .' to SOURCE ID:'.$sid.' / larvol id:'. $source_trial['larvol_id'] .'.</span></b>');
+
 			return $log;
 		}
 		
@@ -421,6 +460,7 @@ function autolink_trials($sid,$lid,$source,$counter)
 			$logger->fatal($log);
 			$osid = array_search($lid, $allsourceids);
 			pr('<br><b><span style="color:red">'.$counter.'. COULD NOT LINK Larvol id/Source Id : ' .  $lid .'/'.$osid .' to SOURCE ID:'.$sid.' / larvol id:'. $source_trial['larvol_id'] .'.</span></b>');
+
 			return $log;
 		}
 		
