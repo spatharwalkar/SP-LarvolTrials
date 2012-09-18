@@ -22,9 +22,9 @@ plugin home: http://manos.malihu.gr/jquery-custom-content-scroller
 					scrollAmount:40 /*scroll buttons pixels scroll amount: integer (pixels)*/
 				},
 				advanced:{
-					updateOnBrowserResize:true, /*update scrollbars on browser resize (for layouts based on percentages): boolean*/
-					updateOnContentResize:false, /*auto-update scrollbars on content resize (for dynamic content): boolean*/
-					autoExpandHorizontalScroll:false /*auto-expand width for horizontal scrolling: boolean*/
+					updateOnBrowserResize:false, /*update scrollbars on browser resize (for layouts based on percentages): boolean*/
+					updateOnContentResize:true, /*auto-update scrollbars on content resize (for dynamic content): boolean*/
+					autoExpandHorizontalScroll:true /*auto-expand width for horizontal scrolling: boolean*/
 				},
 				callbacks:{
 					onScroll:function(){}, /*user custom callback function on scroll event*/
@@ -56,7 +56,7 @@ plugin home: http://manos.malihu.gr/jquery-custom-content-scroller
 					var mCustomScrollbarIndex=parseInt($(document).data("mCustomScrollbar-index"));
 					$(document).data("mCustomScrollbar-index",mCustomScrollbarIndex+1);
 				}
-				$this.wrapInner("<div class='mCustomScrollBox' id='mCSB_"+$(document).data("mCustomScrollbar-index")+"' style='position:relative; height:100%; overflow:hidden; max-width:100%;' />").addClass("mCustomScrollbar _mCS_"+$(document).data("mCustomScrollbar-index"));
+				$this.wrapInner("<div class='mCustomScrollBox' id='mCSB_"+$(document).data("mCustomScrollbar-index")+"' style='position:relative; height:100%; overflow:hidden; _width:100%;max-width:100%;' />").addClass("mCustomScrollbar _mCS_"+$(document).data("mCustomScrollbar-index"));
 				var mCustomScrollBox=$this.children(".mCustomScrollBox");
 				if(options.horizontalScroll){
 					mCustomScrollBox.addClass("mCSB_horizontal").wrapInner("<div class='mCSB_h_wrapper' style='position:relative; left:0; width:999999px;' />");

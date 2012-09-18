@@ -10713,7 +10713,7 @@ class TrialTracker
 		
 		echo '<div id="parent">';
 		echo '<div id="filter">'
-				. '<img src="images/funnel.png" alt="Show Filter" style="vertical-align:bottom;" onclick="$(\'.controls\').toggle();" />'
+				. '<img src="images/funnel.png" alt="Show Filter" style="vertical-align:bottom;" id="togglefilters" />'
 				. '<b style="margin-left:6px;">' . $count . '&nbsp;Records</b>'
 				. '</div>';
 		
@@ -10919,7 +10919,7 @@ class TrialTracker
 		echo '<div  id="fulltextsearchbox">'
 			. '<input type="text" name="ss" autocomplete="off" style="width:180px;" value="' . $globalOptions['sphinxSearch'] . '" /></div>'
 			. '<div class="milestones" style="width:155px;"><div id="addtoright"></div></div>'
-			. '<div class="export" id="chromemenu" style="width:64px;"><div><a rel="dropmenu">&nbsp;&nbsp;&nbsp;&nbsp;<b>Export</b></a></div></div>';
+			. '<div class="export" id="chromemenu" style="width:64px;"><div><a rel="dropmenu"><b style="margin-left:16px;">Export</b></a></div></div>';
 		
 		$resetUrl = 'intermediary.php?';
 		if($ottType == 'unstacked')

@@ -103,9 +103,9 @@
 	width:100%;
 	height:6px;
 	margin:6px auto;
-	-webkit-border-radius:10px;
+	/*-webkit-border-radius:10px;
 	-moz-border-radius:10px;
-	border-radius:10px;
+	border-radius:10px;*/
 }
 .mCSB_horizontal .mCSB_scrollTools .mCSB_buttonLeft,
 .mCSB_horizontal .mCSB_scrollTools .mCSB_buttonRight{
@@ -126,29 +126,34 @@
 
 /* default scrollbar colors and backgrounds */
 .mCustomScrollBox .mCSB_scrollTools{
-	opacity:0.75;
+	/*opacity:0.4;*/
 }
 .mCustomScrollBox:hover .mCSB_scrollTools{
 	opacity:1;
 }
 .mCSB_scrollTools .mCSB_draggerRail{
-	background:#CCC; /* rgba fallback */
-	background:rgba(0,0,0,0.4);
-	filter:"alpha(opacity=40)"; -ms-filter:"alpha(opacity=40)"; /* old ie */
+	/*background:#CCC;*/ /* rgba fallback */
+	/*background:rgba(0,0,0,0.4);
+	filter:"alpha(opacity=40)"; -ms-filter:"alpha(opacity=40)";*/ /* old ie */
 }
 .mCSB_scrollTools .mCSB_dragger .mCSB_dragger_bar{
-	background:#fff; /* rgba fallback */
-	background:#000;
-	filter:"alpha(opacity=75)"; -ms-filter:"alpha(opacity=75)"; /* old ie */
+	background:#0000FF;
+	opacity:0.4;
+	filter:alpha(opacity=40); 
+	-ms-filter:alpha(opacity=40); /* old ie */
 }
 .mCSB_scrollTools .mCSB_dragger:hover .mCSB_dragger_bar{
-	background:#000;
-	filter:"alpha(opacity=85)"; -ms-filter:"alpha(opacity=85)"; /* old ie */
+	background:#0000FF;
+	opacity:0.4;
+	filter:alpha(opacity=40); 
+	-ms-filter:alpha(opacity=40); /* old ie */
 }
 .mCSB_scrollTools .mCSB_dragger:active .mCSB_dragger_bar,
 .mCSB_scrollTools .mCSB_dragger.mCSB_dragger_onDrag .mCSB_dragger_bar{
-	background:#000;
-	filter:"alpha(opacity=90)"; -ms-filter:"alpha(opacity=90)"; /* old ie */
+	background:#0000FF;
+	opacity:0.4;
+	filter:alpha(opacity=40); 
+	-ms-filter:alpha(opacity=40); /* old ie */
 }
 .mCSB_scrollTools .mCSB_buttonUp,
 .mCSB_scrollTools .mCSB_buttonDown,
@@ -157,7 +162,8 @@
 	background-image:url(mCSB_buttons.png);
 	background-repeat:no-repeat;
 	opacity:0.4;
-	filter:"alpha(opacity=40)"; -ms-filter:"alpha(opacity=40)"; /* old ie */
+	filter:alpha(opacity=40); 
+	-ms-filter:alpha(opacity=40); /* old ie */
 }
 .mCSB_scrollTools .mCSB_buttonUp{
 	background-position:0 0;

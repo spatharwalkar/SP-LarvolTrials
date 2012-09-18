@@ -732,6 +732,12 @@ global $db;
 			});
 		});
 		
+		$("#togglefilters").toggle( function() {
+		   $('.controls').css({ 'display' : ''});
+		}, function () {
+		   $('.controls').css({ 'display' : 'none'});
+		});
+
 	});
 
 	function timeEnum($timerange)
