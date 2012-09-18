@@ -451,6 +451,7 @@ CREATE TABLE IF NOT EXISTS `areas` (
   `description` text COLLATE utf8_unicode_ci DEFAULT NULL,
   `category` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `searchdata` text COLLATE utf8_unicode_ci NOT NULL,
+  `coverage_area` tinyint(1) NOT NULL DEFAULT '0',  
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
