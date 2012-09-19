@@ -2316,7 +2316,7 @@ function Download_reports()
 		//- If after rotation and after giving max width to product column, extra width remains, distribute it equally to all columns, to achieve fitting
 		$Avail_Area_Col_width = $Page_Width - $product_Col_Width - $All_Column_Width;
 		$extra_width = $Avail_Area_Col_width / ((count($columns))+(($total_fld)? 1:0)+1);
-		if($extra_width > 1)
+		if($Avail_Area_Col_width > 1)
 		{
 			foreach($columns as $col => $val)
 			{
@@ -3572,6 +3572,62 @@ function Download_reports()
 		$pdf->Ln(0.5);
 		}//Row Foreach ends
 		
+		$pdf->SetY($pdf->GetY() + 5);
+		$dimensions = $pdf->getPageDimensions();
+		$startY = $pdf->GetY();
+		if (($startY + 27) + $dimensions['bm'] > ($dimensions['hk']))
+		{
+			//this row will cause a page break, draw the bottom border on previous row and give this a top border
+			//we could force a page break and rewrite grid headings here
+			$pdf->AddPage();
+		}
+		
+		$helpTabImage_Header = array('Discontinued', 'Filing details', 'Phase explanation', 'Red border (record updated)');
+		$helpTabImages_Src = array('new_lbomb.png', 'new_file.png', 'phaseexp.png', 'outline.png');
+		$helpTabImages_Desc = array('Bomb', 'Filing', 'Phase explanation', 'Red Border');
+		
+		foreach($helpTabImage_Header as $key => $Header)
+		{
+			$Place_X = $pdf->GetX();
+			$Place_Y = $pdf->GetY();
+			$Place_X_Bk = $Place_X;
+			$Place_Y_Bk = $Place_Y;
+			if($key != 3)
+			$border = array('mode' => 'int', 'LT' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));
+			else
+			$border = array('mode' => 'int', 'LTB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));
+			
+			$pdf->MultiCell(11, 5, '', $border, $align='C', $fill=0, $ln=0, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=0, 'M');
+			$Place_X = $Place_X + 11;
+			$pdf->Image('images/'.$helpTabImages_Src[$key], ($Place_X_Bk + 4), ($Place_Y_Bk + 1), 3, 3, '', '', '', false, 300, '', false, false, 0, false, false, false);
+			if($key != 3)
+			$border = array('mode' => 'int', 'LTR' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));
+			else
+			$border = array('mode' => 'int', 'LTBR' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));
+			
+			$pdf->MultiCell(($Page_Width - 11), 5, $helpTabImage_Header[$key], $border, $align='L', $fill=0, $ln=1, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=0, 'M');
+			$Place_Y = $Place_Y + 5;
+			
+		}
+		
+		$Place_X = $pdf->GetX();
+		$Place_Y = $pdf->GetY()+1;
+		$pdf->MultiCell(11, 5, 'Phase: ', $border=0, $align='C', $fill=0, $ln=1, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=0, 'M');
+		$Place_X = $Place_X + 11;
+		//get search results
+		$phases = array('N/A', 'Phase 0', 'Phase 1', 'Phase 2', 'Phase 3', 'Phase 4');
+		$phasenums = array(); foreach($phases as $k => $p)  $phasenums[$k] = str_ireplace(array('phase',' '),'',$p);
+		$phase_legend_nums = array('N/A', '0', '1', '2', '3', '4');
+		//$p_colors = array('DDDDDD', 'BBDDDD', 'AADDEE', '99DDFF', 'DDFF99', 'FFFF00', 'FFCC00', 'FF9900', 'FF7711', 'FF4422');
+		$p_colors = array('BFBFBF', '00CCFF', '99CC00', 'FFFF00', 'FF9900', 'FF0000');
+		$phase_legend_colors = array(array(191,191,191), array(0,204,255), array(153,204,0), array(255,255,0), array(255,153,0), array(255,0,0));
+	
+		foreach($p_colors as $key => $color)
+		{
+			$pdf->SetFillColor($phase_legend_colors[$key][0], $phase_legend_colors[$key][1], $phase_legend_colors[$key][2]);
+			$pdf->MultiCell((($Page_Width - 16)/6), 5, $phasenums[$key], $border=0, $align='C', $fill=1, $ln=0, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=0, 'M');
+			$Place_X = $Place_X + (($Page_Width - 16)/6)+1;
+		}
 		
 		ob_end_clean();
 		//Close and output PDF document
@@ -4281,9 +4337,30 @@ function Download_reports()
 			$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip($tooltip);
 		}
 		
+		++$Excel_HMCounter;
+		++$Excel_HMCounter;
 		
-		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$Excel_HMCounter, '');
-		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$Excel_HMCounter, 'Phase:');
+		$helpTabImage_Header = array('Discontinued', 'Filing details', 'Phase explanation', 'Red border (record updated)');
+		$helpTabImages_Src = array('new_lbomb.png', 'new_file.png', 'phaseexp.png', 'outline.png');
+		$helpTabImages_Desc = array('Bomb', 'Filing', 'Phase explanation', 'Red Border');
+		
+		foreach($helpTabImage_Header as $key => $Header)
+		{
+			$objDrawing = new PHPExcel_Worksheet_Drawing();
+			$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
+			$objDrawing->setOffsetX(260);
+			$objDrawing->setOffsetY(2);
+			$objDrawing->setPath('images/'.$helpTabImages_Src[$key]);
+			$objDrawing->setHeight(15);
+			$objDrawing->setWidth(15); 
+			$objDrawing->setDescription($helpTabImages_Desc[$key]);
+			$objDrawing->setCoordinates('A' . ++$Excel_HMCounter);
+			$objPHPExcel->getActiveSheet()->SetCellValue('B' . $Excel_HMCounter, $helpTabImage_Header[$key]);
+			$objPHPExcel->getActiveSheet()->getStyle('B' . $Excel_HMCounter)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+		}
+		
+		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$Excel_HMCounter, 'Phase:  ');
+		$objPHPExcel->getActiveSheet()->getStyle('A' . $Excel_HMCounter)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
 		$col = 'A';
 		//get search results
 		$phases = array('N/A', 'Phase 0', 'Phase 1', 'Phase 2', 'Phase 3', 'Phase 4');
