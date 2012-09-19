@@ -10917,9 +10917,7 @@ class TrialTracker
 		}
 		
 		echo '<div  id="fulltextsearchbox">'
-			. '<input type="text" name="ss" autocomplete="off" style="width:180px;" value="' . $globalOptions['sphinxSearch'] . '" /></div>'
-			. '<div class="milestones" style="width:155px;"><div id="addtoright"></div></div>'
-			. '<div class="export" id="chromemenu" style="width:64px;"><div><a rel="dropmenu"><b style="margin-left:16px;">Export</b></a></div></div>';
+			. '<input type="text" name="ss" autocomplete="off" style="width:180px;" value="' . $globalOptions['sphinxSearch'] . '" /></div>';
 		
 		$resetUrl = 'intermediary.php?';
 		if($ottType == 'unstacked')
@@ -10941,11 +10939,13 @@ class TrialTracker
 		$resetUrl .= str_replace(',', '&', $globalOptions['resetLink']);
 		$resetUrl = htmlentities($resetUrl);
 		
-		echo '<div style="float:left" id="buttons">'
+		echo '<div style="float:left;margin-right: 10px;" id="buttons">'
 			. '<input type="submit" id="Show" value="Search" class="searchbutton" />&nbsp;'
 			. '<a style="display:inline;" href="' . urlPath() . $resetUrl . '">'
-			. '<input type="button" value="Reset" id="reset" class="resetbutton" onclick="javascript: window.location.href(\'' . urlPath() . $resetUrl . '\')" /></a>'
-			. '</div></div>';
+			. '<input type="button" value="Reset" id="reset" class="resetbutton" onclick="javascript: window.location.href(\'' . urlPath() . $resetUrl . '\')" /></a></div>'
+			. '<div class="milestones" style="width:155px;margin-right: 10px;"><div id="addtoright"></div></div>'
+			. '<div class="export" id="chromemenu" style="width:64px;"><div><a rel="dropmenu"><b style="margin-left:16px;">Export</b></a></div></div>'
+			. '</div>';
 				
 		echo '<input type="hidden" name="rflag" value="1" /><input type="hidden" name="rlink" value="' . $globalOptions['resetLink'] . '" />';
 		//echo '<div style="clear:both;height:10px;">&nbsp;</div>';
@@ -11241,8 +11241,10 @@ class TrialTracker
 		echo '<table border="0" cellspacing="0" class="controls" align="center" style="_width:100%; table-layout: fixed;display: none;">'
 				. '<tr><th style="width:113px">Active</th><th style="width:210px">Status</th>'
 				. '<th style="width:180px">Institution type</th>'
-				. '<th style="width:80px">Region</th><th style="width:50px">Phase</th><th class="right" style="width:340px">Filter</th></tr>'
-				. '<tr><td class="bottom" style="padding-right:5px;">'
+				. '<th style="width:80px">Region</th>'
+				. '<th style="width:50px">Phase</th>'
+				. '<th class="right" style="width:340px">Filter</th></tr>'
+				. '<tr><td class="bottom" style="padding-right:5px;"><div style="width:113px">'
       			. '<input type="radio" name="list" value="1"  id="active_1" '
 				. (($globalOptions['type'] == 'activeTrials') ? ' checked="checked" ' : '')
 				. ' onchange="javascript: showValues(\'active\');" '
@@ -11255,7 +11257,7 @@ class TrialTracker
 				. (($globalOptions['type'] == 'allTrials') ? ' checked="checked" ' : '')
 				. ' onchange="javascript: showValues(\'all\');" '
 				. '/><label for="active_2">' . $totalCount . ' All</label><br />' 
-				. '</td><td class="bottom"><div class="checkscroll" id="statuscontainer">';
+				. '</div></td><td class="bottom"><div class="checkscroll" id="statuscontainer" style="width:210px">';
 		if($globalOptions['type'] == "inactiveTrials")
 		{
 			echo '<input type="checkbox" class="status" value="6" ' 
@@ -11326,17 +11328,18 @@ class TrialTracker
 		
 		if(!empty($this->institutionFilters))
 		{
-			echo '<td class="bottom">';
+			echo '<td class="bottom"><div style="width:180px">';
 			foreach($this->institutionFilters as $ikey => $ivalue)
 			{
 				echo '<input type="checkbox" value="' . $ikey . '" id="institution_type_' . $ikey . '" class="institution" '
 						. (in_array($ikey, $globalOptions['itype']) ? ' checked="checked" ' : '') . '/>'
 						. '<label for="institution_type_' . $ikey . '">' . str_replace('_', ' ', ucfirst($ivalue)) . '</label><br />';
 			}
-			echo '</td>';
+			echo '</div></td>';
 		}
 		
-		echo '<td class="bottom"><input type="checkbox" value="0" id="region_0" class="region" '
+		echo '<td class="bottom"><div style="width:80px">'
+				. '<input type="checkbox" value="0" id="region_0" class="region" '
 				. (in_array(0, $globalOptions['region']) ? ' checked="checked" ' : '') . '/>'
 				. '<label for="region_0">US</label><br />'
 				. '<input type="checkbox" value="1" id="region_1" class="region" '
@@ -11351,7 +11354,8 @@ class TrialTracker
 				. '<input type="checkbox" value="4" id="region_4" class="region" '
 				. (in_array(4, $globalOptions['region']) ? ' checked="checked" ' : '') . '/>'
 				. '<label for="region_4">RoW</label>'
-				. '</td><td class="bottom">'
+				. '</div></td>'
+				. '<td class="bottom"><div style="width:50px">'
 				. '<input type="checkbox" value="na" id="phase_na" class="phase" '
 				. (in_array('na', $globalOptions['phase']) ? ' checked="checked" ' : '') . '/>'
 				. '<label for="phase_na">N/A</label><br />'
@@ -11370,8 +11374,8 @@ class TrialTracker
 				. '<input type="checkbox" value="4" id="phase_4" class="phase" '
 				. (in_array('4', $globalOptions['phase']) ? ' checked="checked" ' : '') . '/>'
 				. '<label for="phase_4">4</label>'
-				. '</td><td class="right" style="border-bottom:0px">'
-				. '<div class="demo"><p>';
+				. '</div></td>'
+				. '<td class="right" style="border-bottom:0px"><div class="demo" style="width:340px"><p>';
 		
 		if($loggedIn) 
 		{

@@ -551,7 +551,7 @@ ul, li { behavior:url("css/csshover3.htc"); }
 
 .milestones, .export {
 	float:left;
-	margin-right: 10px; 
+	/*margin-right: 10px; */
 	vertical-align:bottom; 
 	/*padding-top:4px; */
 	/*display:block;*/
@@ -586,22 +586,19 @@ ul, li { behavior:url("css/csshover3.htc"); }
 	height:26px;
 	overflow:auto;
 	float:left;
-	border: 1px solid #777;
+	/*border: 1px solid #777;*/
 	padding: 2px;
 	margin-right: 10px;
 }
 
 #parent {
-	height: 40px;
-	width:1280px;
-	clear: both;
-	overflow: auto;
+	height: 100%;
+    width: 100%;
 }
 
 #filter {
 	float:left;
 	margin:2px 10px 0px 0px;
-	width:115px;
 }
 
 #fulltextsearchbox {

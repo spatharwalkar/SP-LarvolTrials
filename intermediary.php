@@ -737,7 +737,8 @@ global $db;
 		}, function () {
 		   $('.controls').css({ 'display' : 'none'});
 		});
-
+		
+		divresize();
 	});
 
 	function timeEnum($timerange)
@@ -772,18 +773,31 @@ global $db;
 	
 	function divresize() 
 	{  
-		 var windowidth = $(window).width();
-		 var filterwidth = $('#filter').width();
-		 var searchboxwidth = $('#fulltextsearchbox').width();
-		 var paginationwidth = $('.pagination').width();
-		 var milestoneswidth = $('.milestones').width();
-		 var exportwidth = $('.export').width();
-		 var buttonswidth = $('#buttons').width();
+		var windowidth = $(window).width();
+		
+		var filterwidth = $('#filter').width();
+		var searchboxwidth = $('#fulltextsearchbox').width();
+		var paginationwidth = $('.pagination').width();
+		var milestoneswidth = $('.milestones').width();
+		var exportwidth = $('.export').width();
+		var buttonswidth = $('#buttons').width();
+		var parentwidth = $('#parent').width();
 		 
-		 var containerwidth = (windowidth) - (filterwidth+searchboxwidth+paginationwidth+milestoneswidth+exportwidth+buttonswidth+70);
-		 $('#outercontainer').width(containerwidth);
+		var ocontrolswidth = (filterwidth+searchboxwidth+paginationwidth+milestoneswidth+exportwidth+buttonswidth+70);
+		if(ocontrolswidth > windowidth)
+		{
+			$('#outercontainer').width('100');
+			$('#parent').width(ocontrolswidth+100);
+		}
+		else
+		{
+			$('#outercontainer').width(windowidth - ocontrolswidth);
+			$('#parent').width(windowidth);
+		}
  	}  
-	divresize() ;
+	$(window).resize(function() {
+		divresize();
+	});
 </script>
 </body>
 </html>
