@@ -175,9 +175,9 @@ $(document).ready(function(){
 </script>
 <style type="text/css">
 	hr.pme-hr		     { border: 0px solid; padding: 0px; margin: 0px; border-top-width: 1px; height: 5px; }
-	table.pme-main 	     { border: #004d9c 1px solid; border-collapse: collapse; width:100%; }
-	table.pme-navigation { border: #004d9c 0px solid; border-collapse: collapse; width: 100%; }
-	td.pme-navigation-0, td.pme-navigation-1 { white-space: nowrap; }
+	table.pme-main 	     { table-layout:fixed;border: #004d9c 1px solid; border-collapse: collapse; width:100%; }
+	table.pme-navigation { table-layout:fixed;border: #004d9c 0px solid; border-collapse: collapse; width: 100%; }
+	td.pme-navigation-0, td.pme-navigation-1 { white-space: nowrap; table-layout:fixed;word-wrap:break-word; }
 	th.pme-header	     { border: #004d9c 1px solid; padding: 4px; background: #add8e6; }
 	td.pme-key-5, td.pme-value-0, td.pme-help-0, td.pme-navigation-0, td.pme-cell-0,
 	td.pme-key-1, td.pme-value-1, td.pme-help-0, td.pme-navigation-1, td.pme-cell-1,
@@ -193,9 +193,10 @@ $(document).ready(function(){
 	tr.pme-key-5, tr.pme-value-0, tr.pme-help-0, tr.pme-navigation-0, tr.pme-cell-0,
 	tr.pme-key-1, tr.pme-value-1, tr.pme-help-0, tr.pme-navigation-1, tr.pme-cell-1,
 	tr.pme-sortinfo, tr.pme-filter { border: #0000ff 1px solid; padding: 1px; 
-	
+	table-layout:fixed; overflow:hidden; word-wrap:break-word;
 	height:10px;
 	overflow:hidden;
+	word-wrap:break-word;
 	white-space:nowrap;
 	padding-top:0;
 	margin:0;
@@ -204,10 +205,14 @@ $(document).ready(function(){
 	td.pme-message { text-align: center; }
 	td.pme-stats   { text-align: right;  }
 	td,th,label,form dd{
-	width:500px;
+	
+	table-layout:fixed; overflow:hidden; word-wrap:break-word;
 	/*background-color:#DDF;*/
 	background-color:#FFF;
-}
+	}
+	table td { table-layout:fixed;  overflow:hidden; word-wrap:break-word; } 
+
+
 </style>
 </head>
 <?php

@@ -1075,7 +1075,50 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 
 	function display_copy_change_delete_record() /* {{{ */
 	{
-
+		/** GET VALUES FROM SOURCES **/
+		$eudract_mapping	=	array	( 	lay_title => "brief_title",
+											abbr_title => "acronym",
+											full_title => 'official_title',
+											sponsor_name => 'lead_sponsor',
+											support_org_name => 'collaborator',
+											enrollment_intl_all => 'enrollment',
+											eudract_id => 'source_id'
+										);
+		
+		$qry = 'SELECT * FROM data_manual WHERE `larvol_id`="'. $this->rec  . '" limit 1';
+		if(!$res = mysql_query($qry))
+		{
+			global $logger;
+			$log='There seems to be a problem with the SQL Query:'.$qry.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
+		$manual_data = mysql_fetch_assoc($res);
+		
+		$qry = 'SELECT * FROM data_nct WHERE `larvol_id`="'. $this->rec  . '" limit 1';
+		if(!$res = mysql_query($qry))
+		{
+			global $logger;
+			$log='There seems to be a problem with the SQL Query:'.$qry.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
+		$nct_data = mysql_fetch_assoc($res);
+		
+		$qry = 'SELECT * FROM data_eudract WHERE `larvol_id`="'. $this->rec  . '" limit 1';
+		if(!$res = mysql_query($qry))
+		{
+			global $logger;
+			$log='There seems to be a problem with the SQL Query:'.$qry.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
+		$eudract_data = mysql_fetch_assoc($res);
+		
+		/****************************************/
 
 		$qparts['type']   = 'select';
 		$qparts['select'] = $this->get_SQL_column_list();
@@ -1088,6 +1131,12 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 			return false;
 		}
 //		pr($row);
+		$field_namez=array();
+		foreach ($this->fdd as $kx=>$vx)
+		{
+			$field_namez[]= $kx;
+		}
+
 		$column_headers_displayed=false;
 		$cntr=0;
 		for ($tab = 0, $k = 0; $k < $this->num_fds; $k++) {
@@ -1136,6 +1185,15 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 							echo '<font size="+1"><b>Field Name';
 							echo '</font></b></td>';
 							echo '<td class="pme-value-0"',$this->getColAttributes($k),">";
+							echo '<font size="+1"><b>Manual';
+							echo '</font></b></td>';
+							echo '<td class="pme-value-0"',$this->getColAttributes($k),">";
+							echo '<font size="+1"><b>EudraCT';
+							echo '</font></b></td>';
+							echo '<td class="pme-value-0"',$this->getColAttributes($k),">";
+							echo '<font size="+1"><b>NCT';
+							echo '</font></b></td>';
+							echo '<td class="pme-value-0"',$this->getColAttributes($k),">";
 							echo '<font size="+1"><b>Current Value';
 							echo '</font></b></td>';
 							echo '<td class="pme-value-0"',$this->getColAttributes($k),">";
@@ -1154,19 +1212,40 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 				} 
 				else 
 				{
-					$this->display_delete_field($row, $k);
+					
 					$kp=$k+1;
 					if($k>1 and !isset($row['qfh'.$kp]) and $cntr<2) 
 					{
 						$row['qfh'.$kp]='';
 						$cntr++;
 					}
+					
+					$manual_value=""; $eudract_value=""; $nct_value="";
+					
+					if(isset($manual_data[$field_namez[$k]]))
+						$manual_value=$manual_data[$field_namez[$k]];
+					
+					if(isset($eudract_data[$field_namez[$k]]))
+						$eudract_value=$eudract_data[$field_namez[$k]];
+					elseif(array_search($field_namez[$k], $eudract_mapping) !== false)
+						{
+							$ek=array_search($field_namez[$k], $eudract_mapping);
+							$eudract_value=$eudract_data[$ek];
+						}
+					if($field_namez[$k]=='source_id') $field_namez[$k]='nct_id';
+					if(isset($nct_data[$field_namez[$k]]))
+						$nct_value=$nct_data[$field_namez[$k]];
+					
 					if($cntr==2) $cntr=0; 
+					
+					echo '<td class="pme-value-0"',$this->getColAttributes($kp)," style='vertical-align:top; padding-top:10px; padding-bottom:10px;' >",$manual_value,"</td>";
+					echo '<td class="pme-value-0"',$this->getColAttributes($kp)," style='vertical-align:top; padding-top:10px; padding-bottom:10px;' >",$eudract_value,"</td>";
+					echo '<td class="pme-value-0"',$this->getColAttributes($kp)," style='vertical-align:top; padding-top:10px; padding-bottom:10px;' >", $nct_value , "</td>";
+					$this->display_delete_field($row, $k);
 					if(isset($row['qfh'.$kp])) 
-					{
-						
+					{	
 						echo '<td class="pme-value-0"',$this->getColAttributes($kp),"style='vertical-align:top; padding-top:10px; padding-bottom:10px;' >";
-						echo ''. wordwrap( $row['qfh'.$kp] ,55,"<br />\n",TRUE); echo '</td>';
+						echo  $row['qfh'.$kp]; echo '</td>';
 						$k=$kp;
 						$kp=$k+1;
 						echo '<td class="pme-value-0"',$this->getColAttributes($kp)," style='vertical-align:top; padding-top:10px; padding-bottom:10px;' >";
@@ -1190,6 +1269,14 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 						echo '</td>';
 						echo '<td class="pme-value-0"',$this->getColAttributes($k),">\n";
 						echo '</td>';
+						/*
+						echo '<td class="pme-value-0"',$this->getColAttributes($k),">\n";
+						echo '</td>';
+						echo '<td class="pme-value-0"',$this->getColAttributes($k),">\n";
+						echo '</td>';
+						echo '<td class="pme-value-0"',$this->getColAttributes($k),">\n";
+						echo '</td>';
+						*/
 					}
 					echo '</tr>',"\n";
 				}
@@ -1292,8 +1379,8 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 		$css_postfix    = @$this->fdd[$k]['css']['postfix'];
 		$css_class_name = $this->getCSSclass('value', null, true, $css_postfix);
 		echo '<td class="',$css_class_name,'"',$this->getColAttributes($k)," style='vertical-align:top; padding-top:10px; padding-bottom:10px;' >\n";
-		echo wordwrap( $this->cellDisplay($k, $row, $css_class_name)  ,55,"<br />\n",TRUE);
-		echo '</td>',"\n";
+		echo $this->cellDisplay($k, $row, $css_class_name);
+		echo '</td>';
 	} /* }}} */
 	function display_delete_field1($row, $k) /* {{{ */
 	{
