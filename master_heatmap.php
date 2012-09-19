@@ -3565,7 +3565,7 @@ function Download_reports()
 						else
 						{
 							$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(245,245,245)));
-							$pdf->SetFillColor(245,245,245);
+							$pdf->SetFillColor(230,230,230);
 						}
 					}
 					else

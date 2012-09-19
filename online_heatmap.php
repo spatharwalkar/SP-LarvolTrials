@@ -1925,7 +1925,10 @@ foreach($rows as $row => $rval)
 		}
 		else
 		{
-			$Td_Style = 'background-color:#f5f5f5; border:#f5f5f5 solid;';
+			if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL)
+			$Td_Style = 'background-color:#e6e6e6; border:#e6e6e6 solid;';
+			else
+			$Td_Style = 'background-color:#ddf; border:#ddf solid;';
 		}
 		
 		$htmlContent .= '<td class="tooltip" valign="middle" id="Cell_ID_'.$online_HMCounter.'" style="'. $Td_Style .' padding:1px; min-width:'.$Width_matrix[$col]['width'].'px;  max-width:'.$Width_matrix[$col]['width'].'px; vertical-align:middle; text-align:center; height:100%;" align="center" onmouseover="display_tooltip(\'on\','.$online_HMCounter.');" onmouseout="display_tooltip(\'off\','.$online_HMCounter.');">';
