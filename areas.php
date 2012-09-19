@@ -4,6 +4,20 @@ require_once('db.php');
 require_once('include.search.php');
 require_once('include.util.php');
 require_once 'include.page.php';
+/**
+ * 
+ * 
+ * [6] => Array
+        (
+            [Field] => coverage_area
+            [Type] => tinyint(1)
+            [Null] => NO
+            [Key] => 
+            [Default] => 0
+            [Extra] => 
+        )
+ * 
+ */
 if(!$db->loggedIn())
 {
 	header('Location: ' . urlPath() . 'index.php');
@@ -183,7 +197,7 @@ if($_REQUEST['add_new_record']=='Add New Record' || $_REQUEST['id'] && !$_REQUES
 
 //normal upm listing
 $start = $page*$limit;
-contentListing($start,$limit,$table,$script,array(),array(),array('delete'=>false));
+contentListing($start,$limit,$table,$script,array('coverage_area'),array(),array('delete'=>false));
 echo '</div>';
 ?>
 <div id="inline_outer" >

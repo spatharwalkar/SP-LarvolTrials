@@ -150,6 +150,15 @@ echo '<table border="1" width="99%">';
 while ($row = mysql_fetch_assoc($res))
 {
 	
+	if($table == 'areas' && $row['coverage_area'] == 1)
+	{
+		$defaultTdStyle = 'background-color:#7FBEFF';
+	}
+	else
+	{
+		$defaultTdStyle = null;
+	}
+	
 	if($i==0)
 	{
 
@@ -205,7 +214,7 @@ while ($row = mysql_fetch_assoc($res))
 			if($columnName == 'id')
 			{
 				$upmId = $v;
-				echo '<td><a href="'.$script.'.php?id='.$v.'">';
+				echo '<td style="'.$defaultTdStyle.'"><a href="'.$script.'.php?id='.$v.'">';
 				echo $v;
 				echo '</a></td>';				
 			}else
@@ -225,14 +234,14 @@ while ($row = mysql_fetch_assoc($res))
 			else
 			if($columnName == 'searchdata' && $table=='areas')
 			{
-				echo '<td>';
+				echo '<td style="'.$defaultTdStyle.'">';
 				echo input_tag(array('Field'=>'searchdata'),$v,array('table'=>$table,'id'=>$upmId,'callFrom'=>'contentListingAreas'));
 				echo '</td>';
 			}					
 			else
 			if($columnName == 'searchdata')
 			{
-				echo '<td>';
+				echo '<td style="'.$defaultTdStyle.'">';
 				echo input_tag(array('Field'=>'searchdata'),$v,array('table'=>$table,'id'=>$upmId));
 				echo '</td>';				
 			}
@@ -245,7 +254,7 @@ while ($row = mysql_fetch_assoc($res))
 			}						
 			else 
 			{
-				echo '<td>';
+				echo '<td style="'.$defaultTdStyle.'">';
 				echo $v;
 				echo '</td>';
 			}
@@ -264,7 +273,7 @@ while ($row = mysql_fetch_assoc($res))
 			if($columnName == 'id')
 			{
 				$upmId = $v;
-				echo '<td><a href="'.$script.'.php?id='.$v.'">';
+				echo '<td style="'.$defaultTdStyle.'"><a href="'.$script.'.php?id='.$v.'">';
 				echo $v;
 				echo '</a></td>';				
 			}else
@@ -284,7 +293,7 @@ while ($row = mysql_fetch_assoc($res))
 			else
 			if($columnName == 'searchdata' && $table=='areas')
 			{
-				echo '<td>';
+				echo '<td style="'.$defaultTdStyle.'">';
 				echo input_tag(array('Field'=>'searchdata'),$v,array('table'=>$table,'id'=>$upmId,'callFrom'=>'contentListingAreas'));
 				echo '</td>';
 			}					
@@ -304,7 +313,7 @@ while ($row = mysql_fetch_assoc($res))
 			}			
 			else 
 			{
-				echo '<td>';
+				echo '<td style="'.$defaultTdStyle.'">';
 				echo $v;
 				echo '</td>';
 			}
@@ -372,13 +381,14 @@ function calculateWhere($table)
 	
 	//start bool checkbox filtering
 	//TODO: make dynamic with tablecolumndetails & bool tinyint(1) type filtering
-	if($table == 'areas')
+	//commented out as for areas unchecked in search is considered as for showing both types of coverage area.
+/* 	if($table == 'areas')
 	{
 		if(!isset($_GET['search_coverage_area']))
 		{
 			$whereArr['coverage_area'] = 0;
 		}
-	}
+	} */
 	//pr($postKeys);die;
 	//end bool checkbox filtering
 	
