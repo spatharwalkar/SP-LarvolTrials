@@ -2960,7 +2960,7 @@ function Download_reports()
 				
 			$cat = (isset($rowsCategoryName[$row]) && $rowsCategoryName[$row] != '')? $rowsCategoryName[$row]:'Undefined';
 			
-			$pdf->SetFont('verdana', 'B ', 8); // Bold Font
+			$pdf->SetFont('verdana', 'B', 8); // Bold Font
 			if($rows_Span[$row] > 0 && $cat != 'Undefined')
 			{
 				$Product_Rowcat_width = ($product_Col_Width + $All_Column_Width);
