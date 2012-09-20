@@ -3644,32 +3644,21 @@ function Download_reports()
 		$helpTabImages_Src = array('new_lbomb.png', 'new_file.png', 'phaseexp.png', 'outline.png');
 		$helpTabImages_Desc = array('Bomb', 'Filing', 'Phase explanation', 'Red Border');
 		$helpTabRow_Height = 5;
+		$Place_X = $pdf->GetX();
+		$Place_Y = $pdf->GetY();
 		foreach($helpTabImage_Header as $key => $Header)
 		{
-			$Place_X = $pdf->GetX();
-			$Place_Y = $pdf->GetY();
-			$Place_X_Bk = $Place_X;
-			$Place_Y_Bk = $Place_Y;
-			if($key != 3)
-			$border = array('mode' => 'int', 'LT' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,0,0)));
-			else
-			$border = array('mode' => 'int', 'LTB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,0,0)));
+			$pdf->Image('images/'.$helpTabImages_Src[$key], $Place_X , $Place_Y + 1, 3, 3, '', '', '', false, 300, '', false, false, 0, false, false, false);
+			$Place_X = $Place_X + 3;
+			$current_StringLength = $pdf->GetStringWidth($helpTabImage_Header[$key], 'verdana', ' ', 8) + 2;
 			
-			$pdf->MultiCell(11, $helpTabRow_Height, ' ', $border, $align='C', $fill=0, $ln=0, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=true, $maxh=$helpTabRow_Height, 'M');
-			$Place_X = $Place_X + 11;
-			$pdf->Image('images/'.$helpTabImages_Src[$key], ($Place_X_Bk + 4), ($Place_Y_Bk + 1), 3, 3, '', '', '', false, 300, '', false, false, 0, false, false, false);
-			if($key != 3)
-			$border = array('mode' => 'int', 'LTR' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,0,0)));
-			else
-			$border = array('mode' => 'int', 'LTBR' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,0,0)));
-			
-			$pdf->MultiCell(($Page_Width - 11), $helpTabRow_Height, $helpTabImage_Header[$key], $border, $align='L', $fill=0, $ln=1, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=true, $maxh=$helpTabRow_Height, 'T');
-			$Place_Y = $Place_Y + $helpTabRow_Height;
+			$pdf->MultiCell($current_StringLength, $helpTabRow_Height, $helpTabImage_Header[$key], $border=0, $align='L', $fill=0, $ln=0, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=true, $maxh=$helpTabRow_Height, 'T');
+			$Place_X = $Place_X + $current_StringLength + 1;
 			
 		}
 		
 		$Place_X = $pdf->GetX();
-		$Place_Y = $pdf->GetY()+1;
+		$Place_Y = $pdf->GetY();
 		$pdf->MultiCell(11, $helpTabRow_Height, 'Phase: ', $border=0, $align='C', $fill=0, $ln=1, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=true, $maxh=$helpTabRow_Height, 'M');
 		$Place_X = $Place_X + 11;
 		//get search results
@@ -3683,8 +3672,8 @@ function Download_reports()
 		foreach($p_colors as $key => $color)
 		{
 			$pdf->SetFillColor($phase_legend_colors[$key][0], $phase_legend_colors[$key][1], $phase_legend_colors[$key][2]);
-			$pdf->MultiCell((($Page_Width - 16)/6), $helpTabRow_Height, $phasenums[$key], $border=0, $align='C', $fill=1, $ln=0, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=true, $maxh=$helpTabRow_Height, 'T');
-			$Place_X = $Place_X + (($Page_Width - 16)/6)+1;
+			$pdf->MultiCell(8, $helpTabRow_Height, $phasenums[$key], $border=0, $align='C', $fill=1, $ln=0, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=true, $maxh=$helpTabRow_Height, 'T');
+			$Place_X = $Place_X + 8 +1;
 		}
 		
 		ob_end_clean();
