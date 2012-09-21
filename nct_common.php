@@ -140,7 +140,15 @@ function getIDs($type,$days_passed=NULL) {
 			{
 				//attribute name changed in ct.gov (from "data_table" to "data_table margin-top" and "data_table body3").
 				//if ($attr->name == 'class' && $attr->value == 'data_table') {
-				if ($attr->name == 'class' && substr($attr->value,0,10) == 'data_table') 
+				
+				//if ($attr->name == 'class' && substr($attr->value,0,10) == 'data_table') 
+				
+				if ($attr->name == 'class' && $attr->value == 'data_table margin-top')
+				{
+					$correct_datatable = $table;
+				}
+				
+				if ($attr->name == 'class' && substr($attr->value,0,15) == 'data_table body') 
 				{
                     $right = true;
                     break;
@@ -148,7 +156,7 @@ function getIDs($type,$days_passed=NULL) {
             }
             if ($right == true) 
 			{
-                $datatable = $table;
+                $datatable = $correct_datatable;
                 break;
             }
         }

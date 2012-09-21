@@ -200,15 +200,24 @@ function get_nctids_from_web()
 			$right = false;
 			foreach($table->attributes as $attr)
 			{
-				if($attr->name == 'class' && $attr->value == 'data_table')
+				//if($attr->name == 'class' && $attr->value == 'data_table')
+				
+				if ($attr->name == 'class' && $attr->value == 'data_table margin-top')
 				{
-					$right = true;
-					break;
+					$correct_datatable = $table;
 				}
+				
+				if ($attr->name == 'class' && substr($attr->value,0,15) == 'data_table body') 
+				{
+                    $right = true;
+                    break;
+                }
+				
+			
 			}
 			if($right == true)
 			{
-				$datatable = $table;
+				$datatable = $correct_datatable;
 				break;
 			}
 		}
