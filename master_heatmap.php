@@ -2284,7 +2284,7 @@ function Download_reports()
 		$pdf->SetFont('verdana', ' ', 8); // Normal Font
 		$pdf->Ln(5);
 		
-		$pdf->SetFillColor(192, 196, 254);
+		$pdf->SetFillColor(221, 221, 255);
 		$pdf->setCellMargins(0, 0, 0, 0);
 		$pdf->setCellPaddings(0.5, 0, 0, 0);
 		
@@ -2474,7 +2474,7 @@ function Download_reports()
 		
 		foreach($columns as $col => $val)
 		{
-			$pdf->SetFillColor(192, 196, 254);
+			$pdf->SetFillColor(221, 221, 255);
 			$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));
 			$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col]:$val;
 			$cdesc = (isset($columnsDescription[$col]) && $columnsDescription[$col] != '')?$columnsDescription[$col]:null;
@@ -2574,7 +2574,7 @@ function Download_reports()
 		if(isset($total_fld) && $total_fld == "1")
 		{
 			$pdf->getCellPaddings();
-			$pdf->SetFillColor(192, 196, 254);
+			$pdf->SetFillColor(221, 221, 255);
 			if(!empty($productIds) && !empty($areaIds))
 			{
 				if($mode=='active')
@@ -2756,7 +2756,7 @@ function Download_reports()
 				
 				$pdf->MultiCell($product_Col_Width, $Area_Row_height, '', $border=0, $align='C', $fill=1, $ln=0, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
 				
-				$pdf->SetFillColor(192, 196, 254);
+				$pdf->SetFillColor(221, 221, 255);
 				$Place_X = $Place_X + $product_Col_Width + 0.5;
 				$Place_Y_Bk = $Place_Y;
 				$pdf->SetFont('verdana', 'B ', 8); // Bold Font
@@ -2860,7 +2860,7 @@ function Download_reports()
 				if(isset($total_fld) && $total_fld == "1")
 				{
 					$pdf->getCellPaddings();
-					$pdf->SetFillColor(192, 196, 254);
+					$pdf->SetFillColor(221, 221, 255);
 					if(!empty($productIds) && !empty($areaIds))
 					{
 						if($mode=='active')
@@ -2992,7 +2992,7 @@ function Download_reports()
 			$rdesc = (isset($rowsDescription[$row]) && $rowsDescription[$row] != '')?$rowsDescription[$row]:null;
 			$raltTitle = (isset($rdesc) && $rdesc != '')?' alt="'.$rdesc.'" title="'.$rdesc.'" ':null;
 			
-			$pdf->SetFillColor(192, 196, 254);
+			$pdf->SetFillColor(221, 221, 255);
         	$pdf->SetTextColor(0);
 			$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));		
 			if(isset($productIds[$row]) && $productIds[$row] != NULL && !empty($areaIds))
@@ -3018,7 +3018,7 @@ function Download_reports()
 			}
 			else
 			{
-				$pdf->SetFillColor(192, 196, 254);
+				$pdf->SetFillColor(221, 221, 255);
         		$pdf->SetTextColor(0);
 				
 			
@@ -3608,8 +3608,8 @@ function Download_reports()
 					}
 					else
 					{
-						$pdf->SetFillColor(192, 196, 254);
-						$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(192, 196, 254)));
+						$pdf->SetFillColor(221, 221, 255);
+						$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(221, 221, 255)));
 					}
 					$pdf->MultiCell($Width_matrix[$col]['width'], $prod_row_height, $pdfContent, $border, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=$prod_row_height);
 				}
@@ -3618,9 +3618,9 @@ function Download_reports()
 			//if total checkbox is selected
 			if(isset($total_fld) && $total_fld == "1")
 			{
-				$pdf->SetFillColor(192, 196, 254);
+				$pdf->SetFillColor(221, 221, 255);
         		$pdf->SetTextColor(0);
-				$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(192, 196, 254)));	
+				$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(221, 221, 255)));	
 				$pdf->MultiCell($Total_Col_width, $prod_row_height, ' ', $border, $align='C', $fill=1, $ln=1, $Place_X, $Place_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=$prod_row_height);
 				$Place_X = $Place_X + $Total_Col_width + 0.5;
 
