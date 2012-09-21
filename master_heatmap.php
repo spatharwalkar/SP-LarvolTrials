@@ -2529,7 +2529,7 @@ function Download_reports()
 						else
 							break;
 					}
-					$val = str_replace('.','<font style="color:#C0C4FE">.</font>',$val);
+					$val = str_replace('.','<font style="color:#ddddff">.</font>',$val);
 					$val = '<font style="color:#000000">'.$val.'</font>';
 				}
 				////////End of part added for padding
@@ -2612,7 +2612,7 @@ function Download_reports()
 						else
 							break;
 					}
-					$count_val = str_replace('.','<font style="color:#C0C4FE">.</font>',$count_val);
+					$count_val = str_replace('.','<font style="color:#ddddff">.</font>',$count_val);
 					$count_val = '<font style="color:#000000">'.$count_val.'</font>';
 				}
 				////////End of part added for padding
@@ -2816,7 +2816,7 @@ function Download_reports()
 								else
 									break;
 							}
-							$val = str_replace('.','<font style="color:#C0C4FE">.</font>',$val);
+							$val = str_replace('.','<font style="color:#ddddff">.</font>',$val);
 							$val = '<font style="color:#000000">'.$val.'</font>';
 						}
 						////////End of part added for padding
@@ -2898,7 +2898,7 @@ function Download_reports()
 								else
 									break;
 							}
-							$count_val = str_replace('.','<font style="color:#C0C4FE">.</font>',$count_val);
+							$count_val = str_replace('.','<font style="color:#ddddff">.</font>',$count_val);
 							$count_val = '<font style="color:#000000">'.$count_val.'</font>';
 						}
 						////////End of part added for padding
