@@ -152,6 +152,7 @@ if(isset($_POST['autolink_all']) and $_POST['autolink_all']='YES')
 		}
 		*/
 	}
+	return;
 }
 echo '
 <script type="text/javascript">
@@ -336,10 +337,9 @@ function autolink_trials($sid,$lid,$source,$counter)
 		$query = '
 			UPDATE data_eudract 
 			set larvol_id="'  . $source_trial['larvol_id'] . '" 
-			WHERE `larvol_id` ="' .  $lid .'" limit 1
+			WHERE `larvol_id` ="' .  $lid .'" limit 10
 			';
 		$res1 		= mysql_query($query) ;
-
 		if($res1===false)
 		{
 			$log = 'Bad SQL query. Query=' . $query;
@@ -359,7 +359,6 @@ function autolink_trials($sid,$lid,$source,$counter)
 			WHERE `larvol_id` ="' .  $lid .'" limit 1
 			';
 		$res1 		= mysql_query($query) ;
-
 		if($res1===false)
 		{
 			$log = 'Bad SQL query. Query=' . $query;
@@ -451,6 +450,27 @@ function autolink_trials($sid,$lid,$source,$counter)
 		
 		
 		/******************/
+		
+		//Update data_nct in case the trial exists in it 
+		
+	
+		$query ='
+				UPDATE data_nct
+				set larvol_id="'  . $source_trial['larvol_id'] . '" 
+				WHERE `larvol_id` ="' .  $lid .'" limit 10
+				';
+		$res1 	= mysql_query($query) ;
+		
+		if($res1===false)
+		{
+			$log = 'Bad SQL query. Query=' . $query;
+			$logger->fatal($log);
+			$osid = array_search($lid, $allsourceids);
+			pr('<br><b><span style="color:red">'.$counter.'. COULD NOT LINK Larvol id/Source Id : ' .  $lid .'/'.$osid .' to SOURCE ID:'.$sid.' / larvol id:'. $source_trial['larvol_id'] .'.</span></b>');
+			pr('Query:'.str_replace(array("\n", "\t", "\r"), '', $query));
+			pr('Mysql Error :'.mysql_error());
+			return false;
+		}
 		
 		
 		//delete the trial from data trial as it is no longer needed

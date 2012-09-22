@@ -777,7 +777,6 @@ CREATE TABLE IF NOT EXISTS `data_nct` (
   `keyword` text COLLATE utf8_unicode_ci DEFAULT NULL,
   `is_fda_regulated` tinyint(1) DEFAULT NULL,
   `is_section_801` tinyint(1) DEFAULT NULL,
-  PRIMARY KEY (`larvol_id`),
   UNIQUE KEY `nct_id` (`nct_id`),
   KEY `overall_status` (`overall_status`),
   KEY `enrollment` (`enrollment`),
@@ -785,7 +784,8 @@ CREATE TABLE IF NOT EXISTS `data_nct` (
   KEY `firstreceived_date` (`firstreceived_date`),
   KEY `phase` (`phase`(2)),
   KEY `condition` (`condition`(31)),
-  KEY `intervention_name` (`intervention_name`(31))
+  KEY `intervention_name` (`intervention_name`(31)),
+  KEY `larvol_id` (`larvol_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=DYNAMIC;
 
 CREATE TABLE IF NOT EXISTS `data_trials` (
