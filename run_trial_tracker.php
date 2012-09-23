@@ -10710,12 +10710,9 @@ class TrialTracker
 		natcasesort($productSelector);
 		
 		$this->displayFilterControls($productSelector, $productSelectorTitle, $count, $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], $globalOptions, $ottType, $loggedIn);
-		
 		echo '<div id="parent">';
-		echo '<div id="filter">'
-				. '<img src="images/funnel.png" alt="Show Filter" style="vertical-align:bottom;" id="togglefilters" />'
-				. '<b style="margin-left:6px;">' . $count . '&nbsp;Records</b>'
-				. '</div>';
+		echo '<div class="advanced" id="togglefilters"><img src="images/funnel.png" alt="Show Filter" style="vertical-align:bottom;" />&nbsp;Advanced</div>'
+				. '<div class="records">' . $count . '&nbsp;Records</div>';
 		
 		foreach($urlParams as $key => $value) 
 		{
@@ -10939,7 +10936,7 @@ class TrialTracker
 		$resetUrl .= str_replace(',', '&', $globalOptions['resetLink']);
 		$resetUrl = htmlentities($resetUrl);
 		
-		echo '<div style="float:left;margin-right: 10px;" id="buttons">'
+		echo '<div id="buttons">'
 			. '<input type="submit" id="Show" value="Search" class="searchbutton" />&nbsp;'
 			. '<a style="display:inline;" href="' . urlPath() . $resetUrl . '">'
 			. '<input type="button" value="Reset" id="reset" class="resetbutton" onclick="javascript: window.location.href(\'' . urlPath() . $resetUrl . '\')" /></a></div>'
@@ -11231,14 +11228,14 @@ class TrialTracker
 					. '<br/><span style="font-weight:normal;">Send feedback to '
 					. '<a style="display:inline;color:#0000FF;" target="_self" href="mailto:larvoltrials@larvol.com">'
 					. 'larvoltrials@larvol.com</a></span></td>'
-					. '<td class="result">' . $productAreaInfo . '</td></tr></table>'
-					. '<br clear="all"/><br/>';
+					. '<td class="result">' . $productAreaInfo . '</td></tr>';
 		}
 	}
 	
 	function displayFilterControls($productSelector = array(), $productSelectorTitle, $shownCount, $activeCount, $inactiveCount, $totalCount, $globalOptions = array(), $ottType, $loggedIn)
 	{	
 		echo '<table border="0" cellspacing="0" class="controls" align="center" style="_width:100%; table-layout: fixed;display: none;">'
+				. '<tr><td colspan="5" style="border: none;height:29px;"></td></tr>'
 				. '<tr><th style="width:113px">Active</th><th style="width:210px">Status</th>'
 				. '<th style="width:180px">Institution type</th>'
 				. '<th style="width:80px">Region</th>'
@@ -11451,11 +11448,12 @@ class TrialTracker
 		{
 			echo '&nbsp;';
 		}
-		echo '</td></tr></table><br/><br/>'
-				. '<input type="hidden" name="status" id="status" value="' . implode(',', $globalOptions['status']) . '" />'
-				. '<input type="hidden" name="itype" id="itype" value="' . implode(',', $globalOptions['itype']) . '" />'
-				. '<input type="hidden" name="region" id="region" value="' . implode(',', $globalOptions['region']) . '" />'
-				. '<input type="hidden" name="phase" id="phase" value="' . implode(',', $globalOptions['phase']) . '" />';
+		echo '</td></tr>'
+			. '<tr><td colspan="5" style="border: none;height:29px;"></td></tr></table>'
+			. '<input type="hidden" name="status" id="status" value="' . implode(',', $globalOptions['status']) . '" />'
+			. '<input type="hidden" name="itype" id="itype" value="' . implode(',', $globalOptions['itype']) . '" />'
+			. '<input type="hidden" name="region" id="region" value="' . implode(',', $globalOptions['region']) . '" />'
+			. '<input type="hidden" name="phase" id="phase" value="' . implode(',', $globalOptions['phase']) . '" />';
 	}
 	
 	function pagination($globalOptions = array(), $totalPages, $timeMachine = NULL, $ottType, $loggedIn)

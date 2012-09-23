@@ -22,7 +22,7 @@ plugin home: http://manos.malihu.gr/jquery-custom-content-scroller
 					scrollAmount:40 /*scroll buttons pixels scroll amount: integer (pixels)*/
 				},
 				advanced:{
-					updateOnBrowserResize:true, /*update scrollbars on browser resize (for layouts based on percentages): boolean*/
+					updateOnBrowserResize:false, /*update scrollbars on browser resize (for layouts based on percentages): boolean*/
 					updateOnContentResize:false, /*auto-update scrollbars on content resize (for dynamic content): boolean*/
 					autoExpandHorizontalScroll:false /*auto-expand width for horizontal scrolling: boolean*/
 				},

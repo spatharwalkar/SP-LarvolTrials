@@ -773,31 +773,20 @@ global $db;
 	
 	function divresize() 
 	{  
-		var windowidth = $(window).width();
+		var windowidth = $('.manage').width();
+		$('#parent').width(windowidth);
 		
-		var filterwidth = $('#filter').width();
+		var filterwidth = $('#togglefilters').width();
+		var recordswidth = $('.records').width();
 		var searchboxwidth = $('#fulltextsearchbox').width();
 		var paginationwidth = $('.pagination').width();
+		var buttonswidth = $('#buttons').width();
 		var milestoneswidth = $('.milestones').width();
 		var exportwidth = $('.export').width();
-		var buttonswidth = $('#buttons').width();
-		var parentwidth = $('#parent').width();
-		 
-		var ocontrolswidth = (filterwidth+searchboxwidth+paginationwidth+milestoneswidth+exportwidth+buttonswidth+70);
-		if(ocontrolswidth > windowidth)
-		{
-			$('#outercontainer').width('100');
-			$('#parent').width(ocontrolswidth+100);
-		}
-		else
-		{
-			$('#outercontainer').width(windowidth - ocontrolswidth);
-			$('#parent').width(windowidth);
-		}
+		
+		var ocontrolswidth = (filterwidth+recordswidth+searchboxwidth+paginationwidth+buttonswidth+milestoneswidth+exportwidth+120);
+		$('#outercontainer').width(windowidth - ocontrolswidth);
  	}  
-	$(window).resize(function() {
-		divresize();
-	});
 </script>
 </body>
 </html>
