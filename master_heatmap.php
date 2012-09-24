@@ -2204,7 +2204,7 @@ function Download_reports()
 		//ini_set('pcre.backtrack_limit',strlen($pdfContent));	
 		$name = htmlspecialchars(strlen($name)>0?$name:('report '.$id.''));
 		
-		$product_Col_Width = 25;
+		$product_Col_Width = 56;
 		$area_Col_Width=22;
 		
 		$HColumn_Width = (((count($columns))+(($total_fld)? 1:0)) * ($area_Col_Width+0.5));
@@ -2347,10 +2347,12 @@ function Download_reports()
 		$pdf->SetTextColor(0);
 		
 		$pdf->SetFont('verdanab', 'B ', 8); // Bold Font
-		$current_StringLength = $pdf->GetStringWidth($Report_Name, 'verdanab', 'B', 8);
-		$pdf->MultiCell($Page_Width, '', $Report_Name, $border=0, $align='C', $fill=0, $ln=1, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
-		$current_StringLength = $pdf->GetStringWidth($pdftitle, 'verdanab', 'B', 8);
-		$pdf->MultiCell($Page_Width, '', $pdftitle, $border=0, $align='C', $fill=0, $ln=1, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+		$current_StringLength = $pdf->GetStringWidth($Report_Name, 'verdanab', 'B', 8) + 5;
+		$newMarginWidth = (($dimensions['wk'] - ($current_StringLength))/2);
+		$pdf->MultiCell($current_StringLength, '', $Report_Name, $border=0, $align='C', $fill=0, $ln=1, $newMarginWidth, '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+		$current_StringLength = $pdf->GetStringWidth($pdftitle, 'verdanab', 'B', 8) + 5;
+		$newMarginWidth = (($dimensions['wk'] - ($current_StringLength))/2);
+		$pdf->MultiCell($current_StringLength, '', $pdftitle, $border=0, $align='C', $fill=0, $ln=1, $newMarginWidth, '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
 		$pdf->SetFont('verdana', ' ', 8); // Normal Font
 		$pdf->Ln(5);
 		
@@ -2577,7 +2579,7 @@ function Download_reports()
 				}
 				else
 				{
-					$pdf->MultiCell($Width_matrix[$col]['width'], $Area_Row_height, '', $border=0, $align='C', $fill=1, $ln, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=$Area_Row_height);
+					$pdf->MultiCell($Width_matrix[$col]['width'], $Area_Row_height, '', $border=0, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=$Area_Row_height);
 					$Place_X = $Place_X + $Width_matrix[$col]['width'] + 0.5;
 				}
 			}
@@ -2677,7 +2679,7 @@ function Download_reports()
 			//Height calculation depending on product name
 			$rowcount = 0;
  			//work out the number of lines required
-			$rowcount = $pdf->getNumLines($rval.$rowsCompanyName[$row].' '.((trim($rowsTagName[$row]) != '') ? ' ['.$rowsTagName[$row].']':''), $product_Col_Width);
+			$rowcount = $pdf->getNumLines($rval.$rowsCompanyName[$row].'       '.((trim($rowsTagName[$row]) != '') ? ' ['.$rowsTagName[$row].']':''), $product_Col_Width);
 			if($rowcount < 1) $rowcount = 1;
  			$startY = $pdf->GetY();
 			$prod_row_height = $rowcount * $Line_Height;
@@ -3457,7 +3459,7 @@ function Download_reports()
 					
 					$pdfContent .= '<div align="center" style="vertical-align:middle; float:none;">';
 					$extra_space = $prod_row_height - $Line_Height;
-					$pdfContent .= '<br style="line-height:'.((($extra_space * 72 / 96)/2)+1).'px;" />';
+					$pdfContent .= '<br style="line-height:'.((($extra_space * 72 / 96)/2)+0.6).'px;" />';
 					
 					if(trim($annotation_text) != '')
 					{
@@ -3489,7 +3491,7 @@ function Download_reports()
 					$fill_PR = 0;
 					
 					if($bomb_PR)
-					$pdfContent .= '&nbsp;&nbsp;';
+					$pdfContent .= '&nbsp;';
 					
 					if($bomb_PR && !$fill_PR)
 					$pdfContent .= '&nbsp;';
@@ -3498,11 +3500,19 @@ function Download_reports()
 					$pdfContent .= '&nbsp;';
 					
 					if($fill_PR)
-					$pdfContent .= '&nbsp;&nbsp;';
+					$pdfContent .= '&nbsp;';
 					
 					if(!$bomb_PR && $fill_PR)
 					$pdfContent .= '&nbsp;';
 					
+					/*for($padder=0; $padder < ($Ex_L + ($Aq_L - $Wrd_L)); $padder=$padder+3)
+					$pdfContent .= '&nbsp;';
+					
+					if(!$bomb_PR && $fill_PR)
+					$pdfContent .= ' ';
+					
+					if($bomb_PR && !$fill_PR)
+					$pdfContent .= ' ';*/
 					
 					if($data_matrix[$row][$col]['bomb']['value'] == 'small' || $data_matrix[$row][$col]['bomb']['value'] == 'large')
 					{
@@ -3645,7 +3655,7 @@ function Download_reports()
 		$pdf->SetY($pdf->GetY() + 5);
 		
 		$dimensions = $pdf->getPageDimensions();
-		$newMarginWidth = (($dimensions['wk'] - (190))/2);
+		$newMarginWidth = (($dimensions['wk'] - (143))/2);
 		$pdf->SetRightMargin($newMarginWidth);
 		$pdf->SetLeftMargin($newMarginWidth);
 		
@@ -3657,7 +3667,7 @@ function Download_reports()
 			$pdf->AddPage();
 		}
 		
-		$helpTabImage_Header = array('Discontinued', 'Filing details', 'Phase explanation', 'Red border (record updated)');
+		$helpTabImage_Header = array('Discontinued', 'Filing', 'Phase explanation', 'Updated');
 		$helpTabImages_Src = array('new_lbomb.png', 'new_file.png', 'phaseexp.png', 'outline.png');
 		$helpTabImages_Desc = array('Bomb', 'Filing', 'Phase explanation', 'Red Border');
 		$helpTabRow_Height = 5;
@@ -3669,18 +3679,17 @@ function Download_reports()
 		$Place_Y = $pdf->GetY();
 		foreach($helpTabImage_Header as $key => $Header)
 		{
-			$pdf->Image('images/'.$helpTabImages_Src[$key], $Place_X , $Place_Y + 1, 3, 3, '', '', '', false, 300, '', false, false, 0, false, false, false);
+			$pdf->Image('images/'.$helpTabImages_Src[$key], $Place_X , $Place_Y+0.2, 3, 3, '', '', '', false, 300, '', false, false, 0, false, false, false);
 			$Place_X = $Place_X + 3;
 			$current_StringLength = $pdf->GetStringWidth($helpTabImage_Header[$key], 'verdana', ' ', 8) + 2;
 			
-			$pdf->MultiCell($current_StringLength, $helpTabRow_Height, $helpTabImage_Header[$key], $border=0, $align='L', $fill=0, $ln=0, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=true, $maxh=$helpTabRow_Height, 'T');
+			$pdf->MultiCell($current_StringLength, $helpTabRow_Height, $helpTabImage_Header[$key], $border=0, $align='C', $fill=0, $ln=0, $Place_X, $Place_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=$helpTabRow_Height, 'T');
 			$Place_X = $Place_X + $current_StringLength + 1;
 			
 		}
 		
 		$Place_X = $pdf->GetX();
-		$Place_Y = $pdf->GetY();
-		$pdf->MultiCell(11, $helpTabRow_Height, 'Phase: ', $border=0, $align='C', $fill=0, $ln=1, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=true, $maxh=$helpTabRow_Height, 'M');
+		$pdf->MultiCell(11, $helpTabRow_Height, 'Phase: ', $border=0, $align='C', $fill=0, $ln=0, $Place_X, $Place_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=$helpTabRow_Height, 'T');
 		$Place_X = $Place_X + 11;
 		//get search results
 		$phases = array('N/A', 'Phase 0', 'Phase 1', 'Phase 2', 'Phase 3', 'Phase 4');
@@ -3693,7 +3702,7 @@ function Download_reports()
 		foreach($p_colors as $key => $color)
 		{
 			$pdf->SetFillColor($phase_legend_colors[$key][0], $phase_legend_colors[$key][1], $phase_legend_colors[$key][2]);
-			$pdf->MultiCell(8, $helpTabRow_Height, $phasenums[$key], $border=0, $align='C', $fill=1, $ln=0, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=true, $maxh=$helpTabRow_Height, 'T');
+			$pdf->MultiCell(8, $helpTabRow_Height, $phasenums[$key], $border=0, $align='C', $fill=1, $ln=0, $Place_X, $Place_Y-0.5, $reseth=false, $stretch=0, $ishtml=true, $autopadding=true, $maxh=$helpTabRow_Height, 'M');
 			$Place_X = $Place_X + 8 +1;
 		}
 		

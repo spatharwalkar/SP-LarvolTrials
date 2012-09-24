@@ -1906,7 +1906,7 @@ foreach($rows as $row => $rval)
 		$htmlContent .= '<input type="hidden" value="'.$row_active_total[$row].',endl,'.$row_count_total[$row].',endl,'.$row_indlead_total[$row].'" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
 		$htmlContent .= '<input type="hidden" value="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). '" name="Link_value_'.$online_HMCounter.'&list=1&itype=0&sr=now&er=1 month" id="Link_value_'.$online_HMCounter.'" />';
 		
-		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). '&list=1&sr=now&er=1 month&hm=' . $id . '" target="_blank" class="ottlink" style="text-decoration:underline; color:#000000;">'.$rval.$rowsCompanyName[$row].'</a>'.((trim($rowsTagName[$row]) != '') ? ' <font class="tag">['.$rowsTagName[$row].']</font>':'');
+		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). '&list=1&sr=now&er=1 month&hm=' . $id . '" target="_blank" class="ottlink" style="text-decoration:underline; color:#000000;">'.formatBrandName($rval.$rowsCompanyName[$row]).'</a>'.((trim($rowsTagName[$row]) != '') ? ' <font class="tag">['.$rowsTagName[$row].']</font>':'');
 	}
 	$htmlContent .= '</div></th>';
 	
