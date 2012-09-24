@@ -784,9 +784,13 @@ global $db;
 		var milestoneswidth = $('.milestones').width();
 		var exportwidth = $('.export').width();
 		
-		var ocontrolswidth = (filterwidth+recordswidth+searchboxwidth+paginationwidth+buttonswidth+milestoneswidth+exportwidth+120);
+		var ocontrolswidth = (filterwidth+recordswidth+searchboxwidth+paginationwidth+buttonswidth+milestoneswidth+exportwidth+110);
 		$('#outercontainer').width(windowidth - ocontrolswidth);
- 	}  
+ 	} 
+	
+	$(window).resize(function() {
+		divresize();
+	}); 
 </script>
 </body>
 </html>
