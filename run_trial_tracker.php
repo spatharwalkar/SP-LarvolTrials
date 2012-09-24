@@ -7709,7 +7709,7 @@ class TrialTracker
 			else if(count($resultIds['product']) > 1 || count($resultIds['area']) > 1)
 			{
 				if(count($resultIds['area']) > 1)
-				{
+				{	
 					$productSelectorTitle = 'Select Areas';
 					
 					$res = mysql_query("SELECT `name`, `id` FROM `products` WHERE id IN ('" . implode("','", $resultIds['product']) 
@@ -10957,7 +10957,8 @@ class TrialTracker
 			$outputStr = '';
 			
 			foreach($Values['Trials'] as $tkey => $tvalue)
-			{
+			{	
+				$tvalue['sectionHeader'] = formatBrandName($tvalue['sectionHeader']);
 				if($globalOptions['includeProductsWNoData'] == "off")
 				{
 					if(isset($tvalue['naUpms']) && !empty($tvalue['naUpms']))
@@ -11688,6 +11689,7 @@ class TrialTracker
 		
 		foreach($Values['Trials'] as $vkey => $vvalue)
 		{
+			$vvalue['sectionHeader'] = formatBrandName($vvalue['sectionHeader']);
 			if(($counter >= $start && $counter < $end))
 			{
 				if($globalOptions['includeProductsWNoData'] == "off")
@@ -11812,8 +11814,8 @@ class TrialTracker
 				{	
 					if(($displayFlag == false) && isset($globalOptions['page']) && $globalOptions['page'] > 1)
 					{	
-						$naUpms = $vvalue['naUpms'];//$Values['Trials'][$dvalue['section']]['naUpms'];
-						$sectionHeader = $vvalue['sectionHeader'];//$Values['Trials'][$dvalue['section']]['sectionHeader'];
+						$naUpms = $vvalue['naUpms'];
+						$sectionHeader = formatBrandName($vvalue['sectionHeader']);
 						
 						//Rendering Upms
 						if(isset($naUpms) && !empty($naUpms))

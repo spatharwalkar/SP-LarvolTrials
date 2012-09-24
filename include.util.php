@@ -606,4 +606,12 @@ function update_sphinx_index($l_id)
 	}
 }
 
+function formatBrandName($inputStr)
+{
+	$pattern = '~([A-Za-z0-9 ]*)(\(.*\))(\s*\\/*\s*)(.*)~';
+	$replacement = '<b>$1</b>$2$3$4';
+	$result = preg_replace($pattern, $replacement, $inputStr);
+	
+	return $result;
+}
 ?>
