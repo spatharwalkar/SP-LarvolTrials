@@ -598,8 +598,12 @@ ul, li { behavior:url("css/csshover3.htc"); }
 
 #fulltextsearchbox {
 	float:left;
-	margin-right:10px;
+	margin:-1px 10px 0px 0px;
 	width:183px;
+}
+
+#fulltextsearchbox input{
+	height:17px;
 }
 
 .advanced {
