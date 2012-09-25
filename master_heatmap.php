@@ -2679,6 +2679,8 @@ function Download_reports()
 			//Height calculation depending on product name
 			$rowcount = 0;
  			//work out the number of lines required
+			$rowcount = $pdf->getNumLines($rval.$rowsCompanyName[$row].((trim($rowsTagName[$row]) != '') ? ' ['.$rowsTagName[$row].']':''), $product_Col_Width);
+			if($rowcount > 1)
 			$rowcount = $pdf->getNumLines($rval.$rowsCompanyName[$row].'       '.((trim($rowsTagName[$row]) != '') ? ' ['.$rowsTagName[$row].']':''), $product_Col_Width);
 			if($rowcount < 1) $rowcount = 1;
  			$startY = $pdf->GetY();
@@ -3459,7 +3461,7 @@ function Download_reports()
 					
 					$pdfContent .= '<div align="center" style="vertical-align:middle; float:none;">';
 					$extra_space = $prod_row_height - $Line_Height;
-					$pdfContent .= '<br style="line-height:'.((($extra_space * 72 / 96)/2)+0.6).'px;" />';
+					$pdfContent .= '<br style="line-height:'.((($extra_space * 72 / 96)/2)+0.8).'px;" />';
 					
 					if(trim($annotation_text) != '')
 					{
