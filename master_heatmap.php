@@ -2204,7 +2204,37 @@ function Download_reports()
 		//ini_set('pcre.backtrack_limit',strlen($pdfContent));	
 		$name = htmlspecialchars(strlen($name)>0?$name:('report '.$id.''));
 		
+		////40% width formula - Now product column will expand maximum upto 40% of the page width not more than that at initial stage only
+		$Prod_Width40 = 192 * 40 / 100;	/// give product column upto 40% width of normal page orienation
+		//if($Avail_Prod_Col_width > $Prod_Width40)
+		$Avail_Prod_Col_width = $Prod_Width40;
 		$product_Col_Width = 56;
+		$Current_product_Col_Width = $product_Col_Width;
+		if($Avail_Prod_Col_width > $product_Col_Width)
+		{
+			foreach($rows as $row => $rval)
+			{
+				if(isset($productIds[$row]) && $productIds[$row] != NULL && !empty($areaIds))
+				{
+					$Min_productNumLines=0;
+					while($Min_productNumLines != 1)	///Check while we we dont get mimimum lines to display product name
+					{
+						$current_NumLines=$pdf->getNumLines($rval.$rowsCompanyName[$row].'  '.((trim($rowsTagName[$row]) != '') ? ' ['.$rowsTagName[$row].']':''), $Current_product_Col_Width);	//get number of lines
+						if($current_NumLines == 1)	//if 1 line then stop processing, take next product
+						$Min_productNumLines = $current_NumLines;
+						else if($current_NumLines >= 1)	/// if more lines required to display text
+						{
+							if($Current_product_Col_Width < $Avail_Prod_Col_width)	/// if possible to increase width then increase it
+							$Current_product_Col_Width++;
+							if($Current_product_Col_Width >= $Avail_Prod_Col_width)	///if NOT possible to increase then stop execution take next product
+							$Min_productNumLines = 1;
+						}else if($current_NumLines < 1) $Min_productNumLines = 1;	/// if required line below range then stop and take next product
+					}
+				}
+			}
+			$product_Col_Width = $Current_product_Col_Width;	///new width
+		}
+		
 		$area_Col_Width=22;
 		
 		$HColumn_Width = (((count($columns))+(($total_fld)? 1:0)) * ($area_Col_Width+0.5));
@@ -2282,38 +2312,6 @@ function Download_reports()
 		
 		//// Give product column required maximum width when available to prevent wrapping
 		$Avail_Prod_Col_width = $Page_Width-$All_Column_Width;
-		
-		////40% width formula - Now product column will expand maximum upto 40% of the page width not more than that
-		$Prod_Width40 = $Page_Width * 40 / 100;
-		if($Avail_Prod_Col_width > $Prod_Width40)
-		$Avail_Prod_Col_width = $Prod_Width40;
-		
-		$Current_product_Col_Width = $product_Col_Width;
-		if($Avail_Prod_Col_width > $product_Col_Width)
-		{
-			foreach($rows as $row => $rval)
-			{
-				if(isset($productIds[$row]) && $productIds[$row] != NULL && !empty($areaIds))
-				{
-					$Min_productNumLines=0;
-					while($Min_productNumLines != 1)	///Check while we we dont get mimimum lines to display product name
-					{
-						$current_NumLines=$pdf->getNumLines($rval.$rowsCompanyName[$row].'  '.((trim($rowsTagName[$row]) != '') ? ' ['.$rowsTagName[$row].']':''), $Current_product_Col_Width);	//get number of lines
-						if($current_NumLines == 1)	//if 1 line then stop processing, take next product
-						$Min_productNumLines = $current_NumLines;
-						else if($current_NumLines >= 1)	/// if more lines required to display text
-						{
-							if($Current_product_Col_Width < $Avail_Prod_Col_width)	/// if possible to increase width then increase it
-							$Current_product_Col_Width++;
-							if($Current_product_Col_Width >= $Avail_Prod_Col_width)	///if NOT possible to increase then stop execution take next product
-							$Min_productNumLines = 1;
-						}else if($current_NumLines < 1) $Min_productNumLines = 1;	/// if required line below range then stop and take next product
-					}
-				}
-			}
-			$product_Col_Width = $Current_product_Col_Width;	///new width
-		}
-		//$product_Col_Width = 25;
 		
 		///// Extra width addition part  - We dont need this part as we dont distribute extra widths
 		//- If after rotation and after giving max width to product column, extra width remains, distribute it equally to all columns, to achieve fitting
