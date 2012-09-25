@@ -565,7 +565,7 @@ ul, li { behavior:url("css/csshover3.htc"); }
 
 .filters {
 	float: left;
-	padding: 4px;
+	padding: 0px 4px;
 	font-size:11px;
 }
 
@@ -576,14 +576,16 @@ ul, li { behavior:url("css/csshover3.htc"); }
 
 .filters a img{
 	border: 0px;
+	margin-top: 2px;
+    width: 9px;
 }
 
 #outercontainer {
 	width:12%;
-	height:26px;
+	height:20px;
 	overflow:auto;
 	float:left;
-	padding: 2px 5px 2px 2px;
+	padding: 0px 5px 2px 2px;
 	margin-right: 10px;
 	background-color:#EDEAFF;
 }
@@ -613,8 +615,8 @@ ul, li { behavior:url("css/csshover3.htc"); }
 	background-color:#EDEAFF;
 	float:left;
 	font-weight: bold;
-	height: 21px;
-	padding: 5px;
+	height: 18px;
+	padding: 2px 4px;
 }
 
 #buttons {
