@@ -50,6 +50,7 @@ if (isset($_POST['scraper_n']) and isset($_POST['days_n']))
 	require_once('nct_common.php');
 	require_once('include.import.history_new.php');
 	require_once($_POST['scraper_n']);
+	$update_id = 3;
 	run_incremental_scraper($_POST['days_n']);
 	return ;
 }
@@ -73,7 +74,7 @@ if (isset($_POST['e_scraper_n']) and isset($_POST['days_n']))
 	require_once('include.import.eudract.history.php');
 	ini_set('max_execution_time', '36000'); //10 hours
 	ignore_user_abort(true);
-
+	$update_id = 1;
 	run_incremental_scraper($_POST['days_n']);
 	return ;
 }

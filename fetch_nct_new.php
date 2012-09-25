@@ -41,7 +41,10 @@ function run_incremental_scraper($days=NULL)
 	else $days = 30+(int)$days;
 	if($cron_run)
 	{
-		$query = 'UPDATE update_status SET start_time="' . date("Y-m-d H:i:s", strtotime('now')) . '", updated_days='.$days.' WHERE update_id="' . $update_id . '"';
+		if(update_row_exists($update_id,"update_status"))
+			$query = 'UPDATE update_status SET start_time="' . date("Y-m-d H:i:s", strtotime('now')) . '", updated_days='.$days.' ,  update_items_progress = "0"  WHERE update_id="' . $update_id . '"';
+		else
+			$query = 'INSERT INTO update_status SET update_id = "' . $update_id .'",  update_items_progress = "0",  start_time="' . date("Y-m-d H:i:s", strtotime('now')) . '", updated_days='.$days ;
 		if(!$res = mysql_query($query))
 			{
 				$log='Unable to update update_status. Query='.$query.' Error:' . mysql_error();
@@ -150,4 +153,16 @@ function run_incremental_scraper($days=NULL)
 	}
 	echo('Done with everything.');
 }
+function update_row_exists($update_id,$update_table)
+{
+	$query = 'SELECT update_id from ' . $update_table .' where update_id = "' . $update_id . '" limit 1';
+	$res = mysql_query($query);
+	if ($res === false) return false;
+	$row = mysql_fetch_assoc($res); 
+	if(isset($row['update_id']))
+		return true;
+	else
+		return false;
+}
+
 ?>  
