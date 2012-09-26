@@ -2674,15 +2674,19 @@ function Download_reports()
 		foreach($rows as $row => $rval)
 		{
 			$dimensions = $pdf->getPageDimensions();
+			$pdf->SetFont('verdanab', 'B ', 7.6); // Bold Font
+			
 			//Height calculation depending on product name
 			$rowcount = 0;
  			//work out the number of lines required
-			$rowcount = $pdf->getNumLines($rval.$rowsCompanyName[$row].((trim($rowsTagName[$row]) != '') ? ' ['.$rowsTagName[$row].']':''), $product_Col_Width);
-			if($rowcount > 1)
-			$rowcount = $pdf->getNumLines($rval.$rowsCompanyName[$row].'       '.((trim($rowsTagName[$row]) != '') ? ' ['.$rowsTagName[$row].']':''), $product_Col_Width);
+			$rowcount = $pdf->getNumLines($rval.$rowsCompanyName[$row].'   '.((trim($rowsTagName[$row]) != '') ? ' ['.$rowsTagName[$row].']':''), $product_Col_Width);
+			//if($rowcount > 1)
+			//$rowcount = $pdf->getNumLines($rval.$rowsCompanyName[$row].'       '.((trim($rowsTagName[$row]) != '') ? ' ['.$rowsTagName[$row].']':''), $product_Col_Width);
 			if($rowcount < 1) $rowcount = 1;
  			$startY = $pdf->GetY();
-			$prod_row_height = $rowcount * $Line_Height;
+			$prod_row_height = $rowcount * $Bold_Line_Height;
+			
+			$pdf->SetFont('verdana', ' ', 8); // Reset Font
 			
 			if($prod_row_height == $Line_Height)
 			$prod_row_height = $prod_row_height +0.5;
@@ -3023,7 +3027,7 @@ function Download_reports()
 				{
 					$count_val=$row_indlead_total[$row];
 				}
-				$pdfContent = '<a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). $link_part . '" target="_blank" title="'. $raltTitle .'">'.$rval.$rowsCompanyName[$row].'</a>'.((trim($rowsTagName[$row]) != '') ? ' <font style="color:#120f3c;">['.$rowsTagName[$row].']</font>':'');
+				$pdfContent = '<a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). $link_part . '" target="_blank" title="'. $raltTitle .'">'.formatBrandName($rval.$rowsCompanyName[$row]).'</a>'.((trim($rowsTagName[$row]) != '') ? ' <font style="color:#120f3c;">['.$rowsTagName[$row].']</font>':'');
 				
 				$Place_X = $pdf->GetX();
 				$Place_Y = $pdf->GetY();
