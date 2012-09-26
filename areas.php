@@ -160,7 +160,6 @@ if($_REQUEST['save']=='Save')
 	$_REQUEST = array_merge($_GET, $_POST); 
 	$saveStatus = saveData($_REQUEST,$table);
 }
-
 //delete controller
 if(isset($_REQUEST['deleteId']) && is_numeric($_REQUEST['deleteId']) && $deleteFlag)
 {
@@ -169,7 +168,6 @@ if(isset($_REQUEST['deleteId']) && is_numeric($_REQUEST['deleteId']) && $deleteF
 	$_SERVER['REQUEST_URI'] =  preg_replace($pattern, '', $_SERVER['REQUEST_URI']);
 	$_SERVER['REQUEST_URI'] = str_replace($script.'.php&', $script.'.php?', $_SERVER['REQUEST_URI']);
 }
-
 //set docs per list
 $limit = 50;
 $totalCount = getTotalCount($table);
@@ -326,9 +324,17 @@ $(document).ready(function () {
 //preindex after successful save and change of search data as a seperate worker thread
 if($saveStatus == 1 && $searchDataOld != $_REQUEST['searchdata'])
 {
-	// added GET parameter rgx_changed to force recalculate of mhm cells without recording changes.
-	echo input_tag(array('Type'=>'iframe','Field'=>'index_area.php?id='.$_REQUEST['id'].'&connection_close=1&rgx_changed=yes'),null,array('style'=>"display:none"));
-	unset($_GET['rgx_changed']);
+	if(source_id_list_changed($searchDataOld,$_REQUEST['searchdata'])) 	// source_id list changed, so dont run preindex in "special" mode.
+	{
+		echo input_tag(array('Type'=>'iframe','Field'=>'index_area.php?id='.$_REQUEST['id'].'&connection_close=1'),null,array('style'=>"display:none"));
+		unset($_GET['rgx_changed']);
+	}
+	else // source_id list not changed,  run preindex in "special" mode.
+	{
+		echo input_tag(array('Type'=>'iframe','Field'=>'index_area.php?id='.$_REQUEST['id'].'&connection_close=1&rgx_changed=yes'),null,array('style'=>"display:none"));
+		unset($_GET['rgx_changed']);
+	}
+
 }
 //add predindex for full delete through a seperate worker thread
 if(isset($_REQUEST['delsearch']) && is_array($_REQUEST['delsearch']))
@@ -339,3 +345,52 @@ if(isset($_REQUEST['delsearch']) && is_array($_REQUEST['delsearch']))
 	}
 }
 echo '</html>';
+
+function source_id_list_changed($oldd,$newd)
+{
+	$string='{"columnname":"source_id","opname":"Regex","chainname"';
+	$pos = strpos($oldd, $string);
+	$pos1 = strpos($newd, $string);
+
+	
+	if ($pos === false && $pos1 === false) // source id list DOES NOT EXIST. 
+	{
+		unset($oldd);
+		unset($newd);
+		return false;
+	}
+	
+
+	if( get_source_id_list($oldd) <> get_source_id_list($newd) ) // CHANGE in  the source id list
+	{
+		unset($oldd);
+		unset($newd);
+		return true;
+	}
+	
+	else  // NO CHANGE in the source id list.
+	{
+		unset($oldd);
+		unset($newd);
+		return false;
+	}
+}
+
+function get_source_id_list($list)	
+{
+	$string='"source_id","opname":"Regex","chainname"';
+	$pos_start = strpos($list, $string);
+	if(isset($pos_start) and !empty($pos_start))
+	{
+		$pos_2 = strpos($list, '"columnvalue":',$pos_start);
+		$strlen=strlen('"columnvalue":"');
+		$pos_start=$pos_2;
+		$pos_end = strpos($list, '"}',$pos_start);
+		$listA=substr($list,$pos_start+$strlen,$pos_end-($pos_start+$strlen));
+	}
+	else
+		$listA="";
+	return $listA;
+}
+
+?>
