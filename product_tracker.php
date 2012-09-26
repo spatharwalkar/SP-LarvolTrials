@@ -1014,7 +1014,7 @@ function Download_reports()
 		$objPHPExcel->getProperties()->setSubject(substr($name,0,20));
 		$objPHPExcel->getProperties()->setDescription(substr($name,0,20));
 		$objPHPExcel->getActiveSheet()->getDefaultStyle()->getFont()->setSize(8);
-		$objPHPExcel->getActiveSheet()->getDefaultStyle()->getFont()->setName('Verdana'); 
+		$objPHPExcel->getActiveSheet()->getDefaultStyle()->getFont()->setName('verdana_old'); 
 	
 		// Build sheet
 		$objPHPExcel->setActiveSheetIndex(0);
@@ -1327,7 +1327,7 @@ function Download_reports()
 		// cause to display font 8 or 7 we require more width upto 2mm
 		// we can't allocate 2mm width as we have total 100 subcolumsn of graph which leads to 200mm size only for Bar of Graph (total page size in normal orientation has only 210mm width including margin) so its not possible to have 8/7 font at any other places of graph otherwise PDF gets broken.
 		
-		$pdf->SetFont('verdana', '', 6);
+		$pdf->SetFont('verdana_old', '', 6);
 		$pdf->setFontSubsetting(false);
 		$pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
 		$pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
@@ -1355,7 +1355,7 @@ function Download_reports()
 		$current_StringLength = $pdf->GetStringWidth($Repo_Heading, 'verdanab', '', 8);
 		$pdf->MultiCell('', '', $Repo_Heading, $border=0, $align='C', $fill=0, $ln=1, ((($Page_Width/2) - $current_StringLength))-20, '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
 		$pdf->Ln(5);
-		$pdf->SetFont('verdana', '', 6);	//Reset font size as 6
+		$pdf->SetFont('verdana_old', '', 6);	//Reset font size as 6
 		$pdf->setCellPaddings(0, 0, 0, 0);
 		$pdf->setCellMargins(0, 0, 0, 0);
 		
@@ -1370,10 +1370,10 @@ function Download_reports()
 			//Height calculation depending on product name
 			$rowcount = 0;
 			
-			$pdf->SetFont('verdana', '', 8);	//set font size as 8
+			$pdf->SetFont('verdana_old', '', 8);	//set font size as 8
  			//work out the number of lines required
 			$rowcount = $pdf->getNumLines($data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'].((trim($data_matrix[$row]['productTag']) != '') ? ' ['.$data_matrix[$row]['productTag'].']':''), $product_Col_Width, $reseth = false, $autopadding = false, $cellpadding = '', $border = 0);
-			$pdf->SetFont('verdana', '', 6);	//Reset font size as 6
+			$pdf->SetFont('verdana_old', '', 6);	//Reset font size as 6
 			
 			if($rowcount < 1) $rowcount = 1;
  			$startY = $pdf->GetY();
@@ -1438,9 +1438,9 @@ function Download_reports()
 			$pdfContent = '<div align="right" style="vertical-align:top; float:none;"><a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . $link_part . '" target="_blank" title="'. $title .'">'.$data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font style="color:#120f3c;">['.$data_matrix[$row]['productTag'].']</font>':'').'</div>';
 			$border = array('mode' => 'ext', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(204,204,204)));
 			
-			$pdf->SetFont('verdana', '', 8);	//Set font size as 8
+			$pdf->SetFont('verdana_old', '', 8);	//Set font size as 8
 			$pdf->MultiCell($product_Col_Width, $row_height, $pdfContent, $border=0, $align='R', $fill=0, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$row_height);
-			$pdf->SetFont('verdana', '', 6);	//Reset font size as 6
+			$pdf->SetFont('verdana_old', '', 6);	//Reset font size as 6
 			
 			$Place_X = $Place_X + $product_Col_Width;
 			if($row==0)
