@@ -45,6 +45,7 @@ $prev_prodSpan=0;
 
 $Min_One_Liner=20;
 $Char_Size=8.5;
+$Bold_Char_Size=9.8;
 
 while($header = mysql_fetch_array($res))
 {
@@ -600,7 +601,7 @@ if($Rotation_Flg == 1)	////Adjustment in area column width as per area name
 					$i++; $col_id++;
 				}
 				$Cat_Area_Col_width[$col] = $width +((($columns_Span[$col] == 1) ? 0:1) * ($columns_Span[$col]-1));
-				$cols_Cat_Space[$col] = ceil($Cat_Area_Col_width[$col] / $Char_Size);
+				$cols_Cat_Space[$col] = ceil($Cat_Area_Col_width[$col] / $Bold_Char_Size);
 				$lines = ceil(strlen(trim($columnsCategoryName[$col]))/$cols_Cat_Space[$col]);
 				$height = ($lines * $Line_Height);
 				if($height > $Max_H_AreaCatStringHeight)
@@ -619,8 +620,8 @@ if($Rotation_Flg == 1)	////Create width for area category cells and put forceful
 		/// Assign minimum height to category row
 		if($Max_H_AreaCatStringHeight > 130)	/// if horizontal spanning category requires more height assign it
 			$area_Cat_Height = $Max_H_AreaCatStringHeight;
-		else if(($Max_V_AreaCatStringLength * $Char_Size) < 130)	//// if vertical spanning category requires less height assign it
-			$area_Cat_Height = $Max_V_AreaCatStringLength * $Char_Size;
+		else if(($Max_V_AreaCatStringLength * $Bold_Char_Size) < 130)	//// if vertical spanning category requires less height assign it
+			$area_Cat_Height = $Max_V_AreaCatStringLength * $Bold_Char_Size;
 		else
 			$area_Cat_Height = 130;	/// Take default height
 	}
@@ -640,7 +641,7 @@ if($Rotation_Flg == 1)	////Create width for area category cells and put forceful
 			
 			if($columns_Span[$col] < 3 && $columnsCategoryName[$col] != 'Undefined')
 			{
-				$cols_Cat_Space[$col] = ceil((($area_Cat_Height < 130)? ($area_Cat_Height):($area_Cat_Height)) / $Char_Size);
+				$cols_Cat_Space[$col] = ceil((($area_Cat_Height < 130)? ($area_Cat_Height):($area_Cat_Height)) / $Bold_Char_Size);
 				//$cols_Cat_Lines[$col] = ceil(strlen(trim($columnsCategoryName[$col]))/$cols_Cat_Space[$col]);
 				$cols_Cat_Lines[$col] = $pdf->getNumLines($columnsCategoryName[$col], ($area_Cat_Height*17/90));
 				$width = ($cols_Cat_Lines[$col] * $Line_Height);
@@ -660,7 +661,7 @@ if($Rotation_Flg == 1)	////Create width for area category cells and put forceful
 			else
 			{
 				$Cat_Area_Rotation[$col] = 0;
-				$cols_Cat_Space[$col] = ceil($Cat_Area_Col_width[$col] / $Char_Size);
+				$cols_Cat_Space[$col] = ceil($Cat_Area_Col_width[$col] / $Bold_Char_Size);
 			}
 		}
 	}
