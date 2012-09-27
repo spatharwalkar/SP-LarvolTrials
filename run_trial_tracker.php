@@ -7400,15 +7400,15 @@ class TrialTracker
 			
 			$this->displayHeader($t);
 			
-			echo '<input type="hidden" name="results" value="' . $resultIds . '"/>'
-					. '<input type="hidden" name="time" value="' . $timeMachine . '"/>'
-					. '<input type="hidden" name="v" value="' . $globalOptions['version'] . '"/>';
+			echo '<input type="hidden" name="results" value="' . $resultIds . '" />'
+					. '<input type="hidden" name="time" value="' . $timeMachine . '" />'
+					. '<input type="hidden" name="v" value="' . $globalOptions['version'] . '" />';
 				
 			$Values = $this->processOTTData($ottType, array($resultIds), $timeMachine, $linkExpiry, $globalOptions);
 			
 			if(!empty($Values['Trials'][0]['naUpms']))
 			{
-				echo '<input type="hidden" id="upmstyle" value="expand"/>';
+				echo '<input type="hidden" id="upmstyle" value="expand" />';
 			}
 			
 			echo $this->displayWebPage($productSelectorTitle, $ottType, $Values['resultIds'], $timeMachine, $Values, array(), $globalOptions, $Values['linkExpiry']);
@@ -7444,15 +7444,15 @@ class TrialTracker
 			
 			$this->displayHeader($t);
 			
-			echo '<input type="hidden" name="results" value="' . $resultIds . '"/>'
-					. '<input type="hidden" name="type" value="' . substr($ottType, 0, 3) . '"/>'
-					. '<input type="hidden" name="time" value="' . $timeMachine . '"/>'
-					. '<input type="hidden" name="format" value="' . $globalOptions['encodeFormat'] . '"/>'
-					. '<input type="hidden" name="v" value="' . $globalOptions['version'] . '"/>';
+			echo '<input type="hidden" name="results" value="' . $resultIds . '" />'
+					. '<input type="hidden" name="type" value="' . substr($ottType, 0, 3) . '" />'
+					. '<input type="hidden" name="time" value="' . $timeMachine . '" />'
+					. '<input type="hidden" name="format" value="' . $globalOptions['encodeFormat'] . '" />'
+					. '<input type="hidden" name="v" value="' . $globalOptions['version'] . '" />';
 			
 			if($ottType == 'rowstacked')
 			{
-				echo '<input type="hidden" id="upmstyle" value="expand"/>';
+				echo '<input type="hidden" id="upmstyle" value="expand" />';
 			}		
 			$Values = $this->processOTTData($ottType, $result, $timeMachine, $linkExpiry, $globalOptions);
 			
@@ -7703,7 +7703,7 @@ class TrialTracker
 				}
 				if(!empty($TrialsInfo[0]['naUpms']))
 				{
-					echo '<input type="hidden" id="upmstyle" value="expand"/>';
+					echo '<input type="hidden" id="upmstyle" value="expand" />';
 				}
 			}
 			else if(count($resultIds['product']) > 1 || count($resultIds['area']) > 1)
@@ -7798,7 +7798,7 @@ class TrialTracker
 					}
 					if(!empty($TrialsInfo[0]['naUpms']))
 					{
-						echo '<input type="hidden" id="upmstyle" value="expand"/>';
+						echo '<input type="hidden" id="upmstyle" value="expand" />';
 					}
 				}
 				else
@@ -7965,17 +7965,17 @@ class TrialTracker
 				
 				if(!empty($TrialsInfo[0]['naUpms']))
 				{
-					echo '<input type="hidden" id="upmstyle" value="expand"/>';
+					echo '<input type="hidden" id="upmstyle" value="expand" />';
 				}
 			}
 			
-			echo '<input type="hidden" name="p" value="' . $_REQUEST['p'] . '"/><input type="hidden" name="a" value="' . $_REQUEST['a'] . '"/>';
+			echo '<input type="hidden" name="p" value="' . $_REQUEST['p'] . '" /><input type="hidden" name="a" value="' . $_REQUEST['a'] . '" />';
 			
 			if(isset($globalOptions['JSON_search']))
-			echo '<input type="hidden" name="JSON_search" value=\'' . $globalOptions['JSON_search'] . '\'/>';
+			echo '<input type="hidden" name="JSON_search" value=\'' . $globalOptions['JSON_search'] . '\' />';
 			
 			if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)
-			echo '<input type="hidden" name="hm" value="' . $globalOptions['hm'] . '"/>';
+			echo '<input type="hidden" name="hm" value="' . $globalOptions['hm'] . '" />';
 			
 			$Values = $this->processIndexedOTTData($TrialsInfo, $ottType, $Ids, $timeMachine, $globalOptions);
 			unset($TrialsInfo);
@@ -7988,9 +7988,9 @@ class TrialTracker
 			$t = 'Area: ' . $params['columnlabel'];
 			$this->displayHeader($t);
 			
-			echo '<input type="hidden" name="leading" value="' . $resultIds['leading'] . '"/>'
-					. '<input type="hidden" name="params" value="' . $resultIds['params'] . '"/>'
-					.'<input type="hidden" id="upmstyle" value="expand"/>';
+			echo '<input type="hidden" name="leading" value="' . $resultIds['leading'] . '" />'
+					. '<input type="hidden" name="params" value="' . $resultIds['params'] . '" />'
+					.'<input type="hidden" id="upmstyle" value="expand" />';
 					
 			$Values = $this->processOldLinkMethod($ottType, array($resultIds['params']), array($resultIds['leading']), $globalOptions);
 
@@ -8012,19 +8012,19 @@ class TrialTracker
 			
 			$this->displayHeader($t);
 						
-			echo '<input type="hidden" name="cparams" value="' . $resultIds['cparams'] . '"/>';
+			echo '<input type="hidden" name="cparams" value="' . $resultIds['cparams'] . '" />';
 			foreach($resultIds['leading'] as $lkey => $lvalue)
 			{
-				echo '<input type="hidden" name="leading[' . $lkey . ']" value="' . $lvalue . '"/>';
+				echo '<input type="hidden" name="leading[' . $lkey . ']" value="' . $lvalue . '" />';
 			}
 			foreach($resultIds['params'] as $pkey => $pvalue)
 			{
-				echo '<input type="hidden" name="params[' . $pkey . ']" value="' . $pvalue . '"/>';
+				echo '<input type="hidden" name="params[' . $pkey . ']" value="' . $pvalue . '" />';
 			}
 				
 			if($cparams['type'] != 'col')
 			{
-				echo '<input type="hidden" id="upmstyle" value="expand"/>';
+				echo '<input type="hidden" id="upmstyle" value="expand" />';
 			}
 				
 			$Values = $this->processOldLinkMethod($ottType, $resultIds['params'], $resultIds['leading'], $globalOptions, $cparams);
@@ -10732,6 +10732,7 @@ class TrialTracker
 			$lUrl = '';
 			$lParams =  array_replace($urlParams, array('list' => '1'));
 			$lUrl = http_build_query($lParams);
+			
 			echo '<span class="filters"><label>Inactive Trials</label>'
 				. '<a href="intermediary.php?' . $lUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
 		}
@@ -10879,7 +10880,7 @@ class TrialTracker
 				$dParams =  array_replace($urlParams, array('ipwnd' => 'off'));
 				$dUrl = http_build_query($dParams);
 				
-				echo '<span class="filters"><label>' . str_replace('Select ', '', $productSelectorTitle) . ' with no data<label>'
+				echo '<span class="filters"><label>' . str_replace('Select ', '', $productSelectorTitle) . ' with no data</label>'
 						. '<a href="intermediary.php?' . $dUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
 			}
 		}
@@ -11081,7 +11082,7 @@ class TrialTracker
 	function downloadOptions($shownCnt, $foundCnt, $ottType, $result, $globalOptions) 
 	{	
 		$downloadOptions = '<div style="height:180px; padding:6px;"><div class="downldbox"><div class="newtext">Download Options</div>'
-							. '<form  id="frmDOptions" name="frmDOptions" method="post" target="_self">'
+							. '<form  id="frmDOptions" name="frmDOptions" method="post" target="_self" action="">'
 							. '<input type="hidden" name="ottType" value="' . $ottType . '" />';
 		foreach($result as $rkey => $rvalue)
 		{
@@ -11229,7 +11230,7 @@ class TrialTracker
 					. '<br/><span style="font-weight:normal;">Send feedback to '
 					. '<a style="display:inline;color:#0000FF;" target="_self" href="mailto:larvoltrials@larvol.com">'
 					. 'larvoltrials@larvol.com</a></span></td>'
-					. '<td class="result">' . $productAreaInfo . '</td></tr>';
+					. '<td class="result">' . $productAreaInfo . '</td></tr></table>';
 		}
 	}
 	
@@ -11386,7 +11387,7 @@ class TrialTracker
 		}
 		else
 		{
-			echo '<label for="amount3">Highlight changes:</label>'
+			echo '<label>Highlight changes:</label>'
 					. '<input type="hidden" id="startrange" name="sr" value="' . $globalOptions['startrange'] . '" />'
 					. '<input type="text" id="endrange" name="er" value="' . $globalOptions['endrange'] 
 					. '" readonly="readonly" style="border:0; color:#f6931f; font-weight:bold;" />'
@@ -11411,7 +11412,7 @@ class TrialTracker
 		/*echo '<br/><input type="checkbox" id="tspo" name="tspo" ' . (($globalOptions['showTrialsSponsoredByProductOwner'] == "on") ? 'checked="checked"' : '') . ' />'
 				. '<label style="font-size:x-small;" for="tspo">Show only trials sponsored by product owner</label>';*/
 				
-		echo  '</tr><tr>'
+		echo  '</td></tr><tr>'
 				. '<td class="bottom">&nbsp;</td><td class="bottom">&nbsp;</td>'
 				. '<td class="bottom">&nbsp;</td><td class="bottom">&nbsp;</td>'
 				. '<td class="bottom">&nbsp;</td><td class="right bottom">';
@@ -12000,7 +12001,7 @@ class TrialTracker
 					{
 						$outputStr .= htmlformat($dvalue['NCT/brief_title']);
 					}
-					
+					$outputStr .= '</a></div></td>';
 					
 					//enrollment column
 					$attr = ' ';
@@ -12623,6 +12624,7 @@ class TrialTracker
 		{
 			for($index = $finalkey+1; $index <= $vkey; $index++)
 			{
+				$Values['Trials'][$index]['sectionHeader'] = formatBrandName($Values['Trials'][$index]['sectionHeader']);
 				if($globalOptions['includeProductsWNoData'] == "off")
 				{
 					if(isset($Values['Trials'][$index]['naUpms']) && !empty($Values['Trials'][$index]['naUpms']))
@@ -14321,7 +14323,7 @@ class TrialTracker
 					else 
 						$imgColor = 'black'; 
 						
-					$outputStr .= '<div ' . $upmTitle . '><a href="' . $value['result_link'] . '" target="_blank">';
+					$outputStr .= '<div title="' . $upmTitle . '"><a href="' . $value['result_link'] . '" target="_blank">';
 					if($value['event_type'] == 'Clinical Data')
 					{
 						$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond" border="0" />';
@@ -14338,7 +14340,7 @@ class TrialTracker
 				}
 				else if($value['status'] == 'Pending')
 				{
-					$outputStr .= '<div ' . $upmTitle . '>';
+					$outputStr .= '<div title="' . $upmTitle . '">';
 					if($value['event_link'] != '' && $value['event_link'] !== NULL)
 					{
 						$outputStr .= '<a href="' . $value['event_link'] . '" target="_blank">'

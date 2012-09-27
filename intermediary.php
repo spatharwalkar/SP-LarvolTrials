@@ -444,14 +444,15 @@ $scrollBarJs 	= 'scripts/jquery.mCustomScrollbar.js';
 	function INC_ViewCount(larvol_id)
 	{
 		 $.ajax({
-						type: 'GET',
-						url:  'viewcount.php' + '?op=Inc_ViewCount&larvol_id=' + larvol_id,
-						success: function (data) {
-	        					//alert(data);
-	        					$("#ViewCount_"+larvol_id).html(data);
-	        		   }
-				});
-	        return;
+					type: 'GET',
+					url:  'viewcount.php',
+					data: "op=Inc_ViewCount&larvol_id="+larvol_id,
+					success: function (html) {
+						$("#ViewCount_"+larvol_id).html(html);
+				   }
+		});
+	    return;
+		
 	}
 	</script>
     </head>
@@ -604,13 +605,13 @@ global $db;
     <img src="images/help.png" alt="Help" />
     <div class="slideout_inner">
         <table bgcolor="#FFFFFF" cellpadding="0" cellspacing="0" class="table-slide">
-        <tr><td width="15%"><img src="images/black-diamond.png"/></td><td>Click for data release</td></tr>
-        <tr><td><img src="images/red-diamond.png"/></td><td>Click for data release (new)</td></tr>
-        <tr><td><img src="images/hourglass.png"/></td><td>Results pending</td></tr>
-        <tr><td><img src="images/black-checkmark.png"/></td><td>Click for milestone result</td></tr>
-        <tr><td><img src="images/red-checkmark.png"/></td><td>Click for milestone result (new)</td></tr>
-        <tr><td><img src="images/purple-bar.png"/></td><td>Click for milestone details</td></tr>
-        <tr><td><img src="images/down.png"/></td><td>Display milestones</td></tr>
+        <tr><td width="15%"><img src="images/black-diamond.png" alt="Data release" /></td><td>Click for data release</td></tr>
+        <tr><td><img src="images/red-diamond.png" alt="Data release (new)" /></td><td>Click for data release (new)</td></tr>
+        <tr><td><img src="images/hourglass.png" alt="Results pending" /></td><td>Results pending</td></tr>
+        <tr><td><img src="images/black-checkmark.png" alt="Milestone result" /></td><td>Click for milestone result</td></tr>
+        <tr><td><img src="images/red-checkmark.png" alt="Milestone result (new)" /></td><td>Click for milestone result (new)</td></tr>
+        <tr><td><img src="images/purple-bar.png" alt="Milestone details" /></td><td>Click for milestone details</td></tr>
+        <tr><td><img src="images/down.png" alt="Milestones" /></td><td>Display milestones</td></tr>
         <tr><td colspan="2" style="padding-right: 1px;">
          <div style="float:left;padding-top:3px;">Phase&nbsp;</div>
          <div class="gray">N/A</div>
