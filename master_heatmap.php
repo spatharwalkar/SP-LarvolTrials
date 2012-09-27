@@ -2182,7 +2182,7 @@ function Download_reports()
 	
 		require_once('tcpdf/config/lang/eng.php');
 		require_once('tcpdf/tcpdf.php');  
-		$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+		$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, 'LETTER', true, 'UTF-8', false);
 		// set document information
 		//$pdf->SetCreator(PDF_CREATOR);
 		$pdf->SetAuthor('Larvol Trials');
@@ -2205,7 +2205,7 @@ function Download_reports()
 		$name = htmlspecialchars(strlen($name)>0?$name:('report '.$id.''));
 		
 		////40% width formula - Now product column will expand maximum upto 40% of the page width not more than that at initial stage only
-		$Prod_Width40 = 192 * 40 / 100;	/// give product column upto 40% width of normal page orienation
+		$Prod_Width40 = 200.66 * 40 / 100;	/// give product column upto 40% width of normal page orienation
 		//if($Avail_Prod_Col_width > $Prod_Width40)
 		$Avail_Prod_Col_width = $Prod_Width40;
 		$product_Col_Width = 56;
@@ -2265,27 +2265,27 @@ function Download_reports()
 			$RColumn_Width = $RColumn_Width + $Total_Col_width + 0.5; 
 		}
 		
-		if(($HColumn_Width + $product_Col_Width + 0.5) < 192)
+		if(($HColumn_Width + $product_Col_Width + 0.5) < 200.66)
 		{
 			//// Landscape page orientation
 			$pdf->setPageOrientation('p');
-			$Page_Width = 192;
+			$Page_Width = 200.66;
 			$Rotation_Flg = 0;
 			$All_Column_Width = $HColumn_Width;
 		}
-		else if(($RColumn_Width + $product_Col_Width + 0.5) < 192)
+		else if(($RColumn_Width + $product_Col_Width + 0.5) < 200.66)
 		{
 			//// Landscape page orientation
 			$pdf->setPageOrientation('p');
-			$Page_Width = 192;
+			$Page_Width = 200.66;
 			$Rotation_Flg = 1;
 			$All_Column_Width = $RColumn_Width;
 		}
-		else if(($HColumn_Width + $product_Col_Width + 0.5) < 274)
+		else if(($HColumn_Width + $product_Col_Width + 0.5) < 287)
 		{
 			//// Landscape page orientation
 			$pdf->setPageOrientation('l');
-			$Page_Width = 279;
+			$Page_Width = 287;
 			$Rotation_Flg = 0;
 			$All_Column_Width = $HColumn_Width;
 		}
@@ -2293,7 +2293,7 @@ function Download_reports()
 		{
 			//// Landscape page orientation
 			$pdf->setPageOrientation('l');
-			$Page_Width = 279;
+			$Page_Width = 287;
 			$Rotation_Flg = 1;
 			$All_Column_Width = $RColumn_Width;
 		}
@@ -2312,7 +2312,7 @@ function Download_reports()
 		
 		//// Give product column required maximum width when available to prevent wrapping
 		$Avail_Prod_Col_width = $Page_Width-$All_Column_Width;
-		
+		$product_Col_Width = $Avail_Prod_Col_width;
 		///// Extra width addition part  - We dont need this part as we dont distribute extra widths
 		//- If after rotation and after giving max width to product column, extra width remains, distribute it equally to all columns, to achieve fitting
 		/*$Avail_Area_Col_width = $Page_Width - $product_Col_Width - $All_Column_Width;
