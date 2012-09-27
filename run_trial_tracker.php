@@ -11816,7 +11816,7 @@ class TrialTracker
 					if(($displayFlag == false) && isset($globalOptions['page']) && $globalOptions['page'] > 1)
 					{	
 						$naUpms = $vvalue['naUpms'];
-						$sectionHeader = formatBrandName($vvalue['sectionHeader']);
+						$sectionHeader = $vvalue['sectionHeader'];
 						
 						//Rendering Upms
 						if(isset($naUpms) && !empty($naUpms))
