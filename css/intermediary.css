@@ -567,6 +567,11 @@ ul, li { behavior:url("css/csshover3.htc"); }
 	float: left;
 	padding: 0px 4px;
 	font-size:11px;
+	display: block;
+}
+
+.filters label{
+	float: left;
 }
 
 .filters a{
@@ -577,7 +582,8 @@ ul, li { behavior:url("css/csshover3.htc"); }
 .filters a img{
 	border: 0px;
 	margin-top: 2px;
-    width: 9px;
+    width:10px;
+	height:10px;
 }
 
 #outercontainer {
@@ -594,6 +600,7 @@ ul, li { behavior:url("css/csshover3.htc"); }
 	height: 100%;
     width: 100%;
 	margin-bottom: 35px;
+	*height: 2px;
 }
 
 #fulltextsearchbox {
