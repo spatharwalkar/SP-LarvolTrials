@@ -777,7 +777,7 @@ CREATE TABLE IF NOT EXISTS `data_nct` (
   `keyword` text COLLATE utf8_unicode_ci DEFAULT NULL,
   `is_fda_regulated` tinyint(1) DEFAULT NULL,
   `is_section_801` tinyint(1) DEFAULT NULL,
-  UNIQUE KEY `nct_id` (`nct_id`),
+  PRIMARY KEY (`nct_id`),
   KEY `overall_status` (`overall_status`),
   KEY `enrollment` (`enrollment`),
   KEY `lastchanged_date` (`lastchanged_date`),
@@ -786,6 +786,7 @@ CREATE TABLE IF NOT EXISTS `data_nct` (
   KEY `condition` (`condition`(31)),
   KEY `intervention_name` (`intervention_name`(31)),
   KEY `larvol_id` (`larvol_id`)
+  
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=DYNAMIC;
 
 CREATE TABLE IF NOT EXISTS `data_trials` (
@@ -1156,9 +1157,10 @@ CREATE TABLE IF NOT EXISTS `data_eudract`(
 	`review_opinion_date` date NULL,
 	`end_status` TEXT NULL,
 	`end_date_global` TEXT NULL,
-	KEY `REGULAR` (`eudract_id`(255))
+	PRIMARY KEY (`eudract_id`(255)),
+	KEY `larvol_id` (`larvol_id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=DYNAMIC;
-
+	
 ALTER TABLE `rpt_masterhm_cells`
   ADD CONSTRAINT `rpt_masterhm_cells_ibfk_2` FOREIGN KEY (`area`) REFERENCES `areas` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `rpt_masterhm_cells_ibfk_1` FOREIGN KEY (`product`) REFERENCES `products` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
