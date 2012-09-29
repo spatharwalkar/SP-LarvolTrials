@@ -616,7 +616,7 @@ function formatBrandName($inputStr)
 	if(empty($outputArr))
 	{
 		$a = explode('/', $inputStr, 2);
-		$outputStr = '<b>' . $a[0] . '</b>/' . $a[1];
+		$outputStr = '<b>' . trim($a[0]) . '</b> /' . $a[1];
 	}
 	else
 	{
