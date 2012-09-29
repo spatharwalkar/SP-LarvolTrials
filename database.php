@@ -149,7 +149,20 @@ if (isset($_POST['e_t_id']))
 if (isset($_POST['l_id'])) 
 {
 	require_once('remap_trials.php');
-	remaptrials(null,$_POST['l_id'],null);
+	if(strpos($_POST['l_id'], ",")===false) 
+	{
+		remaptrials(null,$_POST['l_id'],null);
+	}
+	else
+	{
+		$listOfIds=explode( ',' , $_POST['l_id'] );
+		if(!is_array($listOfIds)) return false;
+		foreach ($listOfIds as $larvolId)
+		{
+			remaptrials(null,$larvolId,null);
+		}
+	}
+	
 	return;
 }
 // REMAP a source 

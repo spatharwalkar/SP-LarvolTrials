@@ -410,6 +410,7 @@ function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL  )
 			$res = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory. Query:' . $query);
 	//	return true;
 	}
+	return true;
 }
 function remap($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_type,$end_date,$phase_value,$sourcedb=null)
 {
