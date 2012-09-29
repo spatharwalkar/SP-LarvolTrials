@@ -606,23 +606,29 @@ function update_sphinx_index($l_id)
 	}
 }
 
-function formatBrandName($inputStr)
+function formatBrandName($inputStr, $headerType)
 {	
 	$outputStr = '';
 	$a = array();
 	$outputArr = array();
 	
-	preg_match('/^(.*)\s\((.*)\)\s\/\s(.*)$/', $inputStr, $outputArr);
-	if(empty($outputArr))
+	if($headerType == 'area')
 	{
-		$a = explode('/', $inputStr, 2);
-		$outputStr = '<b>' . trim($a[0]) . '</b> /' . $a[1];
+		$outputStr = '<b>' . $inputStr . '</b>';
 	}
 	else
 	{
-		$outputStr = '<b>' . $outputArr[1] . '</b> (' . $outputArr[2] . ') / ' . $outputArr[3];
+		preg_match('/^(.*)\s\((.*)\)\s\/\s(.*)$/', $inputStr, $outputArr);
+		if(empty($outputArr))
+		{
+			$a = explode('/', $inputStr, 2);
+			$outputStr = '<b>' . trim($a[0]) . '</b> /' . $a[1];
+		}
+		else
+		{
+			$outputStr = '<b>' . $outputArr[1] . '</b> (' . $outputArr[2] . ') / ' . $outputArr[3];
+		}
 	}
-	
 	return $outputStr;
 }
 ?>

@@ -10918,6 +10918,8 @@ class TrialTracker
 			. '<input type="text" name="ss" autocomplete="off" style="width:180px;" value="' . $globalOptions['sphinxSearch'] . '" /></div>';
 		
 		$resetUrl = 'intermediary.php?';
+		$headerType = '';
+		
 		if($ottType == 'unstacked')
 		{
 			$resetUrl .= 'results=' . $globalOptions['url'];
@@ -10928,6 +10930,15 @@ class TrialTracker
 		}
 		else if($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed')
 		{
+			if($ottType == 'rowstackedindexed')
+			{
+				$headerType = 'area';
+			}
+			else
+			{
+				$headerType = 'product';
+			}
+			
 			$resetUrl .= $globalOptions['url'];
 		}
 		else if($ottType == 'standalone')
@@ -10959,7 +10970,7 @@ class TrialTracker
 			
 			foreach($Values['Trials'] as $tkey => $tvalue)
 			{	
-				$tvalue['sectionHeader'] = formatBrandName($tvalue['sectionHeader']);
+				$tvalue['sectionHeader'] = formatBrandName($tvalue['sectionHeader'], $headerType);
 				if($globalOptions['includeProductsWNoData'] == "off")
 				{
 					if(isset($tvalue['naUpms']) && !empty($tvalue['naUpms']))
@@ -11687,10 +11698,20 @@ class TrialTracker
 		$start = $start - 1;
 		$counter = 0;
 		$finalkey = 0;
+		$headerType = '';
+		
+		if($ottType == 'rowstackedindexed')
+		{
+			$headerType = 'area';
+		}
+		else
+		{
+			$headerType = 'product';
+		}
 		
 		foreach($Values['Trials'] as $vkey => $vvalue)
 		{
-			$vvalue['sectionHeader'] = formatBrandName($vvalue['sectionHeader']);
+			$vvalue['sectionHeader'] = formatBrandName($vvalue['sectionHeader'], $headerType);
 			if(($counter >= $start && $counter < $end))
 			{
 				if($globalOptions['includeProductsWNoData'] == "off")
@@ -12624,7 +12645,7 @@ class TrialTracker
 		{
 			for($index = $finalkey+1; $index <= $vkey; $index++)
 			{
-				$Values['Trials'][$index]['sectionHeader'] = formatBrandName($Values['Trials'][$index]['sectionHeader']);
+				$Values['Trials'][$index]['sectionHeader'] = formatBrandName($Values['Trials'][$index]['sectionHeader'], $headerType);
 				if($globalOptions['includeProductsWNoData'] == "off")
 				{
 					if(isset($Values['Trials'][$index]['naUpms']) && !empty($Values['Trials'][$index]['naUpms']))
