@@ -1777,7 +1777,7 @@ function Download_reports()
 	$data_matrix=array();
 	
 	$Line_Height = 3.96;	// Normal Line Height
-	$Bold_Line_Height = 4.2;		// Bold Line Height
+	$Bold_Line_Height = 3.96;		// Bold Line Height
 	$Min_One_Liner = 7.2;
 	
 	//// Declare Tidy Configuration
@@ -2235,7 +2235,7 @@ function Download_reports()
 			$product_Col_Width = $Current_product_Col_Width;	///new width
 		}
 		
-		$area_Col_Width=22;
+		$area_Col_Width=23;
 		
 		$HColumn_Width = (((count($columns))+(($total_fld)? 1:0)) * ($area_Col_Width+0.5));
 		
@@ -2355,8 +2355,8 @@ function Download_reports()
 		$pdf->Ln(5);
 		
 		$pdf->SetFillColor(221, 221, 255);
-		$pdf->setCellMargins(0, 0, 0, 0);
-		$pdf->setCellPaddings(0.5, 0, 0, 0);
+		//$pdf->setCellMargins(0, 0, 0, 0);
+		//$pdf->setCellPaddings(0.5, 0, 0, 0);
 		
 		///Calculate height for category area row
 		$Max_Cat_areaNumLines=0;
@@ -2393,7 +2393,7 @@ function Download_reports()
 		
 		foreach($columns as $col => $val)
 		{
-			$pdf->setCellMargins(0, 0, 0, 0);
+			//$pdf->setCellMargins(0, 0, 0, 0);
 			
 			if($dtt)
 			{
@@ -2553,7 +2553,7 @@ function Download_reports()
 					$pdf->StartTransform(); 
 					$Place_Y = $Place_Y_Bk + $Area_Row_height;
 					$pdf->Rotate(90,$Place_X, $Place_Y);
-					$pdf->MultiCell($Area_Row_height, $Width_matrix[$col]['width'], $pdfContent, $border=0, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=true, $maxh=$Width_matrix[$col]['width']);
+					$pdf->MultiCell($Area_Row_height, $Width_matrix[$col]['width'], $pdfContent, $border=0, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=$Width_matrix[$col]['width']);
 					$pdf->StopTransform();
 					$Place_X = $Place_X + $Width_matrix[$col]['width'] + 0.5;
 				}
@@ -2679,7 +2679,7 @@ function Download_reports()
 			//Height calculation depending on product name
 			$rowcount = 0;
  			//work out the number of lines required
-			$rowcount = $pdf->getNumLines($rval.$rowsCompanyName[$row].'   '.((trim($rowsTagName[$row]) != '') ? ' ['.$rowsTagName[$row].']':''), $product_Col_Width);
+			$rowcount = $pdf->getNumLines($rval.$rowsCompanyName[$row].((trim($rowsTagName[$row]) != '') ? ' ['.$rowsTagName[$row].']':''), $product_Col_Width);
 			//if($rowcount > 1)
 			//$rowcount = $pdf->getNumLines($rval.$rowsCompanyName[$row].'       '.((trim($rowsTagName[$row]) != '') ? ' ['.$rowsTagName[$row].']':''), $product_Col_Width);
 			if($rowcount < 1) $rowcount = 1;
@@ -3659,7 +3659,7 @@ function Download_reports()
 		$pdf->SetY($pdf->GetY() + 5);
 		
 		$dimensions = $pdf->getPageDimensions();
-		$newMarginWidth = (($dimensions['wk'] - (143))/2);
+		$newMarginWidth = (($dimensions['wk'] - (147))/2);
 		$pdf->SetRightMargin($newMarginWidth);
 		$pdf->SetLeftMargin($newMarginWidth);
 		
@@ -3685,7 +3685,7 @@ function Download_reports()
 		{
 			$pdf->Image('images/'.$helpTabImages_Src[$key], $Place_X , $Place_Y+0.2, 3, 3, '', '', '', false, 300, '', false, false, 0, false, false, false);
 			$Place_X = $Place_X + 3;
-			$current_StringLength = $pdf->GetStringWidth($helpTabImage_Header[$key], 'verdana', ' ', 8) + 2;
+			$current_StringLength = $pdf->GetStringWidth($helpTabImage_Header[$key], 'verdana', ' ', 8) + 3;
 			
 			$pdf->MultiCell($current_StringLength, $helpTabRow_Height, $helpTabImage_Header[$key], $border=0, $align='C', $fill=0, $ln=0, $Place_X, $Place_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=$helpTabRow_Height, 'T');
 			$Place_X = $Place_X + $current_StringLength + 1;
@@ -3693,7 +3693,7 @@ function Download_reports()
 		}
 		
 		$Place_X = $pdf->GetX();
-		$pdf->MultiCell(11, $helpTabRow_Height, 'Phase: ', $border=0, $align='C', $fill=0, $ln=0, $Place_X, $Place_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=$helpTabRow_Height, 'T');
+		$pdf->MultiCell(12, $helpTabRow_Height, 'Phase: ', $border=0, $align='C', $fill=0, $ln=0, $Place_X, $Place_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=$helpTabRow_Height, 'T');
 		$Place_X = $Place_X + 11;
 		//get search results
 		$phases = array('N/A', 'Phase 0', 'Phase 1', 'Phase 2', 'Phase 3', 'Phase 4');
