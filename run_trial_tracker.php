@@ -10866,7 +10866,7 @@ class TrialTracker
 			$eParams =  array_replace($urlParams, array('enroll' => $globalOptions['minEnroll'] . ' - ' . $globalOptions['maxEnroll']));
 			$eUrl = http_build_query($eParams);
 			
-			echo '<span class="filters"><label>' . $globalOptions['enroll'] . '<label>'
+			echo '<span class="filters"><label>' . $globalOptions['enroll'] . '</label>'
 					. '<a href="intermediary.php?' . $eUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
 		}
 		unset($eParams);
