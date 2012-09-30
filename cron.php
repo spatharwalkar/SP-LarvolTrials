@@ -551,6 +551,12 @@ if($current_tasks_count==0)
 					}
 					else
 					{
+						//Remove previous entry corresponding to completed update
+						$query = 'DELETE FROM update_status WHERE update_id="' . $updtid .'"';
+						$res = mysql_query($query) or die('Bad SQL query removing update_status entry. Error: '.mysql_error());
+						if($res==1)
+							echo('Removed previous entry for '.$s.$nl);
+							
 						//Add new entry with status ready
 						echo('Adding entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
 						$query = 'INSERT INTO update_status SET update_items_progress=0, update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
@@ -1202,6 +1208,12 @@ elseif($current_tasks_count==1)
 					}
 					else
 					{
+						//Remove previous entry corresponding to completed update
+						$query = 'DELETE FROM update_status WHERE update_id="' . $updtid .'"';
+						$res = mysql_query($query) or die('Bad SQL query removing update_status entry. Error: '.mysql_error());
+						if($res==1)
+							echo('Removed previous entry for '.$s.$nl);
+							
 						//Add new entry with status ready
 						echo('Adding entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
 						$query = 'INSERT INTO update_status SET  update_items_progress="0", update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
@@ -1855,6 +1867,11 @@ elseif($current_tasks_count>1)
 								}
 								else
 								{
+									//Remove previous entry corresponding to completed update
+									$query = 'DELETE FROM update_status WHERE update_id="' . $updtid .'"';
+									$res = mysql_query($query) or die('Bad SQL query removing update_status entry. Error: '.mysql_error());
+									if($res==1)
+										echo('Removed previous entry for '.$s.$nl);
 									//Add new entry with status ready
 									echo('Adding entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
 									$query = 'INSERT INTO update_status SET  update_items_progress="0", update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
@@ -2504,6 +2521,12 @@ elseif($current_tasks_count>1)
 								}
 								else
 								{
+								//Remove previous entry corresponding to completed update
+								$query = 'DELETE FROM update_status WHERE update_id="' . $updtid .'"';
+								$res = mysql_query($query) or die('Bad SQL query removing update_status entry. Error: '.mysql_error());
+								if($res==1)
+									echo('Removed previous entry for '.$s.$nl);
+									
 									//Add new entry with status ready
 									echo('Adding entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
 									$query = 'INSERT INTO update_status SET  update_items_progress="0", update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
@@ -3151,6 +3174,11 @@ elseif($current_tasks_count>1)
 							}
 							else
 							{
+								//Remove previous entry corresponding to completed update
+								$query = 'DELETE FROM update_status WHERE update_id="' . $updtid .'"';
+								$res = mysql_query($query) or die('Bad SQL query removing update_status entry. Error: '.mysql_error());
+								if($res==1)
+									echo('Removed previous entry for '.$s.$nl);
 								//Add new entry with status ready
 								echo('Adding entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
 								$query = 'INSERT INTO update_status SET  update_items_progress="0", update_id="' . $updtid	.'",updated_days="' . (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).'",status="'.READY.'"';
@@ -3802,6 +3830,11 @@ elseif($current_tasks_count>1)
 						}
 						else
 						{
+							//Remove previous entry corresponding to completed update
+							$query = 'DELETE FROM update_status WHERE update_id="' . $updtid .'"';
+							$res = mysql_query($query) or die('Bad SQL query removing update_status entry. Error: '.mysql_error());
+							if($res==1)
+								echo('Removed previous entry for '.$s.$nl);
 							
 							//Add new entry with status ready
 							echo('Adding entry to update '.$s.' database fetching records from previous '. (ceil(($now - $lastrun) / 60 / 60 / 24) + 2).' days.' . $nl);
