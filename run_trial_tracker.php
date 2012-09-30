@@ -10712,7 +10712,7 @@ class TrialTracker
 		$this->displayFilterControls($productSelector, $productSelectorTitle, $count, $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], $globalOptions, $ottType, $loggedIn);
 		echo '<div id="parent">';
 		echo '<div class="advanced" id="togglefilters"><img src="images/funnel.png" alt="Show Filter" style="vertical-align:bottom;" />&nbsp;Advanced</div>'
-				. '<div class="records">' . $count . '&nbsp;Records</div>';
+				. '<div class="records">' . $count . '&nbsp;Trials</div>';
 		
 		foreach($urlParams as $key => $value) 
 		{
@@ -10860,7 +10860,7 @@ class TrialTracker
 		unset($oParams);
 		
 		$eParams = array();
-		if($globalOptions['enroll'] != ($globalOptions['minEnroll'] . ' - ' . $globalOptions['maxEnroll']) && $globalOptions['enroll'] != '0' && $globalOptions['enroll'] != '0 - 5000+')
+		if($globalOptions['enroll'] != ($globalOptions['minEnroll'] . ' - ' . $globalOptions['maxEnroll']) && $globalOptions['enroll'] != '0' && $globalOptions['enroll'] != '0 - 5000')
 		{
 			$eUrl = '';
 			$eParams =  array_replace($urlParams, array('enroll' => $globalOptions['minEnroll'] . ' - ' . $globalOptions['maxEnroll']));
@@ -10915,7 +10915,7 @@ class TrialTracker
 		}
 		
 		echo '<div  id="fulltextsearchbox">'
-			. '<input type="text" name="ss" autocomplete="off" style="width:180px;" value="' . $globalOptions['sphinxSearch'] . '" /></div>';
+			. '<input type="text" name="ss" autocomplete="off" style="width:153px;" value="' . $globalOptions['sphinxSearch'] . '" /></div>';
 		
 		$resetUrl = 'intermediary.php?';
 		$headerType = '';
@@ -11594,7 +11594,7 @@ class TrialTracker
 			$url .= '&amp;rlink=' . $globalOptions['resetLink'];
 		}
 		$url .= '&amp;rflag=1';
-		$stages = 2;
+		$stages = 1;
 		
 		$rootUrl = 'intermediary.php?';
 		$paginateStr = '<div class="pagination">';
@@ -11602,7 +11602,7 @@ class TrialTracker
 		// globalOptions Should always have Apostrophe instead of quote sign or data will not be passed
 		if($globalOptions['page'] != 1)
 		{
-			$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . ($globalOptions['page']-1) . '\'>&laquo; Prev</a>';
+			$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . ($globalOptions['page']-1) . '\'>&laquo;</a>';
 		}
 		
 		if($totalPages < 7 + ($stages * 2))
@@ -11679,7 +11679,7 @@ class TrialTracker
 		
 		if($globalOptions['page'] != $totalPages)
 		{
-			$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . ($globalOptions['page']+1) . '\'>Next &raquo;</a>';
+			$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . ($globalOptions['page']+1) . '\'>&raquo;</a>';
 		}
 		$paginateStr .= '</div>';
 		

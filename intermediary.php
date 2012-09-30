@@ -127,7 +127,7 @@ if(isset($_REQUEST['minenroll']) && isset($_REQUEST['maxenroll']))
 
 if(isset($_REQUEST['enroll']) && $_REQUEST['enroll'] != '0')
 {	
-	$globalOptions['enroll'] = $_REQUEST['enroll'];
+	$globalOptions['enroll'] = trim($_REQUEST['enroll']);
 }
 
 if(isset($_REQUEST['sr']))
