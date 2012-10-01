@@ -503,7 +503,11 @@ function calc_cells($parameters,$update_id=NULL,$rgx_changed=NULL)
 			if(!empty($phasez))
 				$max_phase = max($phasez);
 			else
-				$max_phase = 'N/A';
+			{
+			//	$max_phase = 'N/A';
+				$max_phase = null;
+			}
+			
 			
 			$bomb=getBombdtl();
 			if($counter>=5000)
