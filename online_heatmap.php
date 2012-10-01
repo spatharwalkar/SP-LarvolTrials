@@ -1217,7 +1217,7 @@ function change_view()
 						{
 							document.getElementById("Cell_Link_"+i).style.color = "#000000";
 							document.getElementById("Cell_Link_"+i).style.backgroundColor = "#"+Cell_values_Arr[14];
-							document.getElementById("Cell_Link_"+i).style.fontWeight = "normal";
+							document.getElementById("Cell_Link_"+i).style.fontWeight = "bold";
 							document.getElementById("Count_CDate_"+i).style.display = "none";
 						}
 					}
@@ -1233,7 +1233,7 @@ function change_view()
 						{
 							document.getElementById("Cell_Link_"+i).style.color = "#000000";
 							document.getElementById("Cell_Link_"+i).style.backgroundColor = "#"+Cell_values_Arr[14];
-							document.getElementById("Cell_Link_"+i).style.fontWeight = "normal";
+							document.getElementById("Cell_Link_"+i).style.fontWeight = "bold";
 							document.getElementById("Count_CDate_"+i).style.display = "none";
 						}
 					}
@@ -1249,7 +1249,7 @@ function change_view()
 						{
 							document.getElementById("Cell_Link_"+i).style.color = "#000000";
 							document.getElementById("Cell_Link_"+i).style.backgroundColor = "#"+Cell_values_Arr[14];
-							document.getElementById("Cell_Link_"+i).style.fontWeight = "normal";
+							document.getElementById("Cell_Link_"+i).style.fontWeight = "bold";
 							document.getElementById("Count_CDate_"+i).style.display = "none";
 						}
 					}
@@ -1927,7 +1927,7 @@ foreach($rows as $row => $rval)
 			$htmlContent .= '<input type="hidden" value="' . $productIds[$row] . '" name="Product_value_'.$online_HMCounter.'" id="Product_value_'.$online_HMCounter.'" />';
 			$htmlContent .= '<input type="hidden" value="' . $areaIds[$col]. '" name="Area_value_'.$online_HMCounter.'" id="Area_value_'.$online_HMCounter.'" />';
 				
-			$htmlContent .= '<a onclick="INC_ViewCount(' . trim($productIds[$row]) . ',' . trim($areaIds[$col]) . ',' . $online_HMCounter .')" style="'.$data_matrix[$row][$col]['count_start_style'].' vertical-align:middle; padding-top:0px; padding-bottom:0px; line-height:13px; text-decoration:underline;" id="Cell_Link_'.$online_HMCounter.'" href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '&list=1&itype=0&sr=now&er=1 month&hm=' . $id . '" target="_blank" title="'. $title .'"><b><font id="Font_ID_'.$online_HMCounter.'">'. $data_matrix[$row][$col]['indlead'] .'</font></b></a>';
+			$htmlContent .= '<a onclick="INC_ViewCount(' . trim($productIds[$row]) . ',' . trim($areaIds[$col]) . ',' . $online_HMCounter .')" style="color:#000000; '.$data_matrix[$row][$col]['count_start_style'].' vertical-align:middle; padding-top:0px; padding-bottom:0px; line-height:13px; text-decoration:underline;" id="Cell_Link_'.$online_HMCounter.'" href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '&list=1&itype=0&sr=now&er=1 month&hm=' . $id . '" target="_blank" title="'. $title .'"><b><font id="Font_ID_'.$online_HMCounter.'" style="color:#000000;">'. $data_matrix[$row][$col]['indlead'] .'</font></b></a>';
 					
 			if($data_matrix[$row][$col]['bomb']['src'] != 'new_square.png') //When bomb has square dont include it in pdf as size is big and no use
 			$htmlContent .= '<img id="Cell_Bomb_'.$online_HMCounter.'" title="'.$data_matrix[$row][$col]['bomb']['title'].'" src="'. trim(urlPath()) .'images/'.$data_matrix[$row][$col]['bomb']['src'].'"  style="'.$data_matrix[$row][$col]['bomb']['style'].' vertical-align:middle; margin-left:1px;" />';				
