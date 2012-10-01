@@ -1207,11 +1207,7 @@ function change_view()
 				{
 					if(dwcount.value == 'indlead')	//Compare Industry Lead Sponsor values
 					{
-						document.getElementById("Cell_Link_"+i).title = "Active Industry Lead Count Changed from: "+ Cell_values_Arr[5] +" On: "+ Cell_values_Arr[9];
-						document.getElementById("Cell_Link_"+i).style.color = "#FF0000";
 						document.getElementById("Cell_Link_"+i).style.fontWeight = "bold";
-						if(Cell_values_Arr[14]=='FF0000')
-						document.getElementById("Cell_Link_"+i).style.backgroundColor = "#FFFFFF";
 						if(Cell_values_Arr[5] != Cell_values_Arr[2] && Cell_values_Arr[5] != '' && Cell_values_Arr[5] != null)
 						{
 							tooltip_flg = 1;
@@ -1227,11 +1223,7 @@ function change_view()
 					}
 					if(dwcount.value == 'total')	//Compare Total values
 					{
-						document.getElementById("Cell_Link_"+i).title = "Total Count Changed from: "+ Cell_values_Arr[4] +" On: "+ Cell_values_Arr[9];
-						document.getElementById("Cell_Link_"+i).style.color = "#FF0000";
 						document.getElementById("Cell_Link_"+i).style.fontWeight = "bold";
-						if(Cell_values_Arr[14]=='FF0000')
-						document.getElementById("Cell_Link_"+i).style.backgroundColor = "#FFFFFF";
 						if(Cell_values_Arr[4] != Cell_values_Arr[1] && Cell_values_Arr[4] != '' && Cell_values_Arr[4] != null)
 						{
 							tooltip_flg = 1;
@@ -1247,11 +1239,7 @@ function change_view()
 					}
 					if(dwcount.value == 'active')	//Compare Industry Lead Sponsor values
 					{
-						document.getElementById("Cell_Link_"+i).title = "Active Count Changed from: "+ Cell_values_Arr[3] +" On: "+ Cell_values_Arr[9];
-						document.getElementById("Cell_Link_"+i).style.color = "#FF0000";
 						document.getElementById("Cell_Link_"+i).style.fontWeight = "bold";
-						if(Cell_values_Arr[14]=='FF0000')
-						document.getElementById("Cell_Link_"+i).style.backgroundColor = "#FFFFFF";
 						if(Cell_values_Arr[3] != Cell_values_Arr[0] && Cell_values_Arr[3] != '' && Cell_values_Arr[3] != null)
 						{
 							tooltip_flg = 1;
@@ -1287,15 +1275,6 @@ function change_view()
 				}
 				
 				
-				/// if New trials greater than 0 chnage number to red
-				var New_Trials = document.getElementById("New_Trials_"+i);
-				if(New_Trials != null && New_Trials != '')
-				{
-					document.getElementById("Cell_Link_"+i).style.color = "#FF0000";
-					document.getElementById("Cell_Link_"+i).style.fontWeight = "bold";
-					if(Cell_values_Arr[14]=='FF0000')
-					document.getElementById("Cell_Link_"+i).style.backgroundColor = "#FFFFFF";
-				}
 					
 				///Change Bomb Color
 				var bomb_cdate= new Date(Cell_values_Arr[10]);	//Bomb Chnage Date
@@ -1985,17 +1964,6 @@ foreach($rows as $row => $rval)
 			if($data_matrix[$row][$col]['highest_phase_prev'] != NULL && $data_matrix[$row][$col]['highest_phase_prev'] != '')
 			$htmlContent .= '<font id="Highest_Phase_'.$online_HMCounter.'"><font class="Status_Label_Headers">Highest phase updated</font><font class="Status_Label_Headers"> from: </font> <font class="Data_values">Phase '.$data_matrix[$row][$col]['highest_phase_prev'].'</font></br></font>';
 							
-			
-			$New_Trials_Flg=0;
-			$New_Trials = '';
-			if($data_matrix[$row][$col]['new_trials'] > 0)
-			{
-				$New_Trials_Flg=1;
-				$New_Trials = '<font id="New_Trials_'.$online_HMCounter.'"><font class="Status_Label_Headers">New trials</font><font class="Status_Label_Headers">: </font><font class="Data_values">'. $data_matrix[$row][$col]['new_trials'] .'</font></font></br>';
-			}
-			
-			if($New_Trials_Flg==1)
-			$htmlContent .= $New_Trials;
 			
 			$Status_Total_Flg=0;
 			$Status_Total ='<font id="Status_Total_List_'.$online_HMCounter.'" style="display:none;"><font class="Status_Label_Headers Status_Changes_Style">Status changes to:<br/></font><ul class="Status_ULStyle">';
