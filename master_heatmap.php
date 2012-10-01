@@ -2758,7 +2758,7 @@ function Download_reports()
 							}
 							$pdfContent .= $columnsCategoryName[$col].'</div>';
 							$pdf->MultiCell($Cat_Area_Row_width, $Cat_Area_Row_height, $pdfContent, $border, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=$Cat_Area_Row_height);
-							$Place_X = $Cat_Area_Row_width + $Place_X;
+							$Place_X = $Cat_Area_Row_width + $Place_X + 0.5;
 						}
 						else
 						{
@@ -2770,7 +2770,7 @@ function Download_reports()
 							}
 							$Cat_Area_Row_width = $width +((($columns_Span[$col] == 1) ? 0:0.5) * ($columns_Span[$col]-1));
 							$pdf->MultiCell($Cat_Area_Row_width, $Cat_Area_Row_height, '', $border=0, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=$Cat_Area_Row_height);
-							$Place_X = $Cat_Area_Row_width + $Place_X;
+							$Place_X = $Cat_Area_Row_width + $Place_X + 0.5;
 						}
 					}
 				}
