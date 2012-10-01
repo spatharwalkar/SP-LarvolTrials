@@ -1160,7 +1160,6 @@ function change_view()
 					if(font_element != null && font_element != '')
 					{
 						document.getElementById("Font_ID_"+i).innerHTML = Cell_values_Arr[0];
-						document.getElementById("Popup_Count_ID_"+i).innerHTML = Cell_values_Arr[3];
 					}
 				}
 				else if(dwcount.value == 'total')
@@ -1173,7 +1172,6 @@ function change_view()
 					if(font_element != null && font_element != '')
 					{
 						document.getElementById("Font_ID_"+i).innerHTML = Cell_values_Arr[1];
-						document.getElementById("Popup_Count_ID_"+i).innerHTML = Cell_values_Arr[4];
 					}
 				}
 				else if(dwcount.value == 'indlead')
@@ -1186,7 +1184,6 @@ function change_view()
 					if(font_element != null && font_element != '')
 					{
 						document.getElementById("Font_ID_"+i).innerHTML = Cell_values_Arr[2];
-						document.getElementById("Popup_Count_ID_"+i).innerHTML = Cell_values_Arr[5];
 					}
 					
 				}	
@@ -1203,76 +1200,7 @@ function change_view()
 				///Change Count Color
 				var count_cdate= new Date(Cell_values_Arr[8]);	//Count Chnage Date
 				
-				if((count_cdate <= st_limit) && (count_cdate >= ed_limit)) //Compare Count Change Dates
-				{
-					if(dwcount.value == 'indlead')	//Compare Industry Lead Sponsor values
-					{
-						document.getElementById("Cell_Link_"+i).style.fontWeight = "bold";
-						if(Cell_values_Arr[5] != Cell_values_Arr[2] && Cell_values_Arr[5] != '' && Cell_values_Arr[5] != null)
-						{
-							tooltip_flg = 1;
-							document.getElementById("Count_CDate_"+i).style.display = "inline";
-						}
-						else
-						{
-							document.getElementById("Cell_Link_"+i).style.color = "#000000";
-							document.getElementById("Cell_Link_"+i).style.backgroundColor = "#"+Cell_values_Arr[14];
-							document.getElementById("Cell_Link_"+i).style.fontWeight = "bold";
-							document.getElementById("Count_CDate_"+i).style.display = "none";
-						}
-					}
-					if(dwcount.value == 'total')	//Compare Total values
-					{
-						document.getElementById("Cell_Link_"+i).style.fontWeight = "bold";
-						if(Cell_values_Arr[4] != Cell_values_Arr[1] && Cell_values_Arr[4] != '' && Cell_values_Arr[4] != null)
-						{
-							tooltip_flg = 1;
-							document.getElementById("Count_CDate_"+i).style.display = "inline";
-						}
-						else
-						{
-							document.getElementById("Cell_Link_"+i).style.color = "#000000";
-							document.getElementById("Cell_Link_"+i).style.backgroundColor = "#"+Cell_values_Arr[14];
-							document.getElementById("Cell_Link_"+i).style.fontWeight = "bold";
-							document.getElementById("Count_CDate_"+i).style.display = "none";
-						}
-					}
-					if(dwcount.value == 'active')	//Compare Industry Lead Sponsor values
-					{
-						document.getElementById("Cell_Link_"+i).style.fontWeight = "bold";
-						if(Cell_values_Arr[3] != Cell_values_Arr[0] && Cell_values_Arr[3] != '' && Cell_values_Arr[3] != null)
-						{
-							tooltip_flg = 1;
-							document.getElementById("Count_CDate_"+i).style.display = "inline";
-						}
-						else
-						{
-							document.getElementById("Cell_Link_"+i).style.color = "#000000";
-							document.getElementById("Cell_Link_"+i).style.backgroundColor = "#"+Cell_values_Arr[14];
-							document.getElementById("Cell_Link_"+i).style.fontWeight = "bold";
-							document.getElementById("Count_CDate_"+i).style.display = "none";
-						}
-					}
-				}
-				else	//Make Count to normal state if there is no change
-				{
-					if(dwcount.value == 'active')
-					{
-							document.getElementById("Cell_Link_"+i).title = "Active Trials";
-					}
-					else if(dwcount.value == 'total')
-					{
-						document.getElementById("Cell_Link_"+i).title = "Total Trials (Active + Inactive)";
-					}
-					else if(dwcount.value == 'indlead')
-					{
-						document.getElementById("Cell_Link_"+i).title = "Active Industry Lead Sponsor Trials";
-					}
-					document.getElementById("Cell_Link_"+i).style.color = "#000000";
-					document.getElementById("Cell_Link_"+i).style.backgroundColor = "#"+Cell_values_Arr[14];
-					document.getElementById("Cell_Link_"+i).style.fontWeight = "normal";
-					document.getElementById("Count_CDate_"+i).style.display = "none";
-				}
+				
 				
 				
 					
@@ -1959,8 +1887,7 @@ foreach($rows as $row => $rval)
 				$htmlContent .= '<font class="Status_Label_Headers" id="Filing_Img_'.$online_HMCounter.'">Filing </font><font class="Status_Label_Headers">: </font>'. $data_matrix[$row][$col]['filing'] .'</br>';
 			}
 			
-			$htmlContent .= '<font id="Count_CDate_'.$online_HMCounter.'" style="'.(($data_matrix[$row][$col]['active_prev'] != NULL && $data_matrix[$row][$col]['active_prev'] != '')? 'display:inline;':'display:none;').'"><font class="Status_Label_Headers">Count </font><font class="Status_Label_Headers">updated from: </font><font id="Popup_Count_ID_'.$online_HMCounter.'" class="Data_values">'. $data_matrix[$row][$col]['active_prev'] .'</font><br/></font>';
-							
+			
 			if($data_matrix[$row][$col]['highest_phase_prev'] != NULL && $data_matrix[$row][$col]['highest_phase_prev'] != '')
 			$htmlContent .= '<font id="Highest_Phase_'.$online_HMCounter.'"><font class="Status_Label_Headers">Highest phase updated</font><font class="Status_Label_Headers"> from: </font> <font class="Data_values">Phase '.$data_matrix[$row][$col]['highest_phase_prev'].'</font></br></font>';
 							
