@@ -142,7 +142,7 @@ echo '<br/>';
 echo '<div class="clr">';
 
 //import form
-if($_REQUEST['import']=='Import' || $_REQUEST['uploadedfile'])
+if((isset($_REQUEST['import']) && $_REQUEST['import']=='Import') || (isset($_REQUEST['uploadedfile']) && $_REQUEST['uploadedfile']))
 {
 	importUpm('redtags','redtags');
 }
