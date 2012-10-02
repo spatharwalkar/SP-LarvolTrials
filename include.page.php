@@ -15,12 +15,14 @@ function tableColumns($table)
 		$columnList[] = $row['Field'];
 	}
 
+	/** - the column "area" has been removed from upm table, so not required.  
 	if($table == 'upm')
 	{
 		//TODO: make it dynamic.
 		//explicitly adding area column for upm as its a one to many in upm_areas
 		$columnList[] = 'area';
 	}
+	*/
 	return $columnList;
 }
 
@@ -956,9 +958,8 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
  */
 function fillUpmAreas($upmId,$areaIds=array())
 {
+	if(!is_array($areaIds))	return false;
 	global $db;
-	
-
 	//get current upm areas
 	$query = "select * from `upm_areas` where `upm_id`=$upmId";
 	$result = mysql_query($query);
