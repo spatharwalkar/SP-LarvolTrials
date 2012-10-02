@@ -1154,7 +1154,7 @@ function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),
 		echo '<input type="submit" value="Import" name="import">';
 		echo '</fieldset>';
 	//$_SESSION['page_errors'] = array('Sql error','What is this error.');
-	if(is_array($_SESSION['page_errors']) && count($_SESSION['page_errors'])>0)
+	if(isset($_SESSION['page_errors']) && is_array($_SESSION['page_errors']) && count($_SESSION['page_errors'])>0)
 	{
 		echo '<fieldset class="floatl">';
 		echo '<legend> Errors: </legend>';
