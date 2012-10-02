@@ -567,7 +567,6 @@ ul, li { behavior:url("css/csshover3.htc"); }
 	float: left;
 	padding: 0px 4px;
 	font-size:11px;
-	display: block;
 }
 
 .filters label{
@@ -576,6 +575,8 @@ ul, li { behavior:url("css/csshover3.htc"); }
 
 .filters a{
 	display: inline;
+	*display: ;
+	display: \;
 	padding: 0px 0px 0px 4px;
 }
 
