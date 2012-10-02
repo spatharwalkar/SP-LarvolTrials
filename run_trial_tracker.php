@@ -10859,8 +10859,9 @@ class TrialTracker
 		}
 		unset($oParams);
 		
+		global $maxEnrollLimit;
 		$eParams = array();
-		if($globalOptions['enroll'] != ($globalOptions['minEnroll'] . ' - ' . $globalOptions['maxEnroll']) && $globalOptions['enroll'] != '0' && $globalOptions['enroll'] != '0 - 5000')
+		if($globalOptions['enroll'] != ($globalOptions['minEnroll'] . ' - ' . $globalOptions['maxEnroll']) && $globalOptions['enroll'] != '0' && $globalOptions['enroll'] <= $maxEnrollLimit)
 		{
 			$eUrl = '';
 			$eParams =  array_replace($urlParams, array('enroll' => $globalOptions['minEnroll'] . ' - ' . $globalOptions['maxEnroll']));
@@ -11587,6 +11588,16 @@ class TrialTracker
 		if(isset($globalOptions['hm']) && $globalOptions['hm'] != '')
 		{
 			$url .= '&amp;hm=' . $globalOptions['hm'];
+		}
+		
+		if(isset($globalOptions['minEnroll']) && $globalOptions['minEnroll'] != '')
+		{
+			$url .= '&amp;minenroll=' . $globalOptions['minEnroll'];
+		}
+		
+		if(isset($globalOptions['maxEnroll']) && $globalOptions['maxEnroll'] != '')
+		{
+			$url .= '&amp;maxenroll=' . $globalOptions['maxEnroll'];
 		}
 		
 		if(isset($globalOptions['resetLink']))
