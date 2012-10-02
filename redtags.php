@@ -43,6 +43,9 @@ if(isset($_FILES['uploadedfile']) && $_FILES['uploadedfile']['size']>1)
 		//$rangeDetails = PHPExcel_Cell::splitRange($range);
 		
 		//echo '<table border=1>' . "\n";
+		$aVal = null;
+		$bVal = null;
+		$cVal = null;
 		foreach ($phpExcel->getRowIterator() as $row)
 		{
 			//echo '<tr>' . "\n";

@@ -177,7 +177,7 @@ while ($row = mysql_fetch_assoc($res))
 			$params = $params!=$script.'.php'?substr($params, 0,strpos($params,'order_by')-1):$params;
 			
 			$connector = $params!=$script.'.php'?'&':'?';
-			if($_GET['order_by']==$columnName && in_array($columnName,$sortableRows))
+			if(isset($_GET['order_by']) && $_GET['order_by']==$columnName && in_array($columnName,$sortableRows))
 			$url = urlPath().$params.$connector.'order_by='.$columnName.'&sort_order='.$sortOrder.$noSort;
 			elseif(in_array($columnName,$sortableRows))
 			{
@@ -696,6 +696,8 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 		$deleteFailCnt= 0;
 		$skipCnt = 0;
 		$skipEnumCnt = 0;
+		$invalidEnumSkipCnt = 0;
+		$updateSkipCnt = 0;
 		foreach($post as $redTagArray)
 		{
 			
