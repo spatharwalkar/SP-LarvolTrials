@@ -10627,7 +10627,7 @@ class TrialTracker
 	
 	function displayWebPage($productSelectorTitle, $ottType, $resultIds, $timeMachine = NULL, $Values, $productSelector = array(), $globalOptions, $linkExpiry = NULL)
 	{	
-		global $db;
+		global $db, $maxEnrollLimit;
 		$loggedIn	= $db->loggedIn();
 		
 		if($ottType == 'indexed' || $ottType == 'unstacked' || $ottType == 'unstackedoldlink')
@@ -10859,9 +10859,8 @@ class TrialTracker
 		}
 		unset($oParams);
 		
-		global $maxEnrollLimit;
 		$eParams = array();
-		if($globalOptions['enroll'] != ($globalOptions['minEnroll'] . ' - ' . $globalOptions['maxEnroll']) && $globalOptions['enroll'] != '0' && $globalOptions['enroll'] <= $maxEnrollLimit)
+		if($globalOptions['enroll'] != ($globalOptions['minEnroll'] . ' - ' . $globalOptions['maxEnroll']) && $globalOptions['enroll'] != '0' && $globalOptions['maxEnroll'] <= $maxEnrollLimit)
 		{
 			$eUrl = '';
 			$eParams =  array_replace($urlParams, array('enroll' => $globalOptions['minEnroll'] . ' - ' . $globalOptions['maxEnroll']));
