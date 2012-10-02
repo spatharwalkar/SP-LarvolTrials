@@ -81,6 +81,7 @@ $currentOrderBy = $orderBy;
 $sortArr = array('ASC','DESC','no_sort');
 $sortOrder = null;
 $noSort = null;
+$currentSortOrder = null;
 
 if($orderBy)
 {
@@ -112,22 +113,22 @@ if($orderBy)
 
 
 }
-if($_GET['no_sort']==1)
+if(isset($_GET['no_sort']) && $_GET['no_sort']==1)
 {
 	$sortImg = '';
 }
-if($_GET['sort_order']=='ASC' )
+if(isset($_GET['sort_order']) && $_GET['sort_order']=='ASC' )
 {
 	$sortImg = 'ASC';
 }
-if($_GET['sort_order']=='DESC' )
+if(isset($_GET['sort_order']) && $_GET['sort_order']=='DESC' )
 {
 	$sortImg = 'DESC';
 }
 
 if($table !='upm')
 {
-	if($_GET['no_sort']!=1)
+	if(isset($_GET['no_sort']) && $_GET['no_sort']!=1)
 	$query = "select * from $table $where $currentOrderBy $currentSortOrder limit $start , $limit";
 	else
 	$query = "select * from $table $where limit $start , $limit";
