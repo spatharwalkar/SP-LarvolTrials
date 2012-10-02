@@ -177,7 +177,7 @@ $page=0;
 
 //pagination
 $ignoreFields = array('searchdata');
-pagePagination($limit,$totalCount,$table,$script,$ignoreFields,array('import'=>false));
+pagePagination($limit,$totalCount,$table,$script,$ignoreFields,array('import'=>false,'add_new_record'=>true,'search'=>true));
 //pagination controller
 
 echo '<br/>';

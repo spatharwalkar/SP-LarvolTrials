@@ -475,6 +475,10 @@ function getTotalCount($table)
 	{
 		$query = "select count(distinct upm.id) as cnt from $table left join upm_areas on $table.id=upm_areas.upm_id $where";
 	}
+	elseif($table == 'redtags')
+	{
+		$query = "select count(name) as cnt from $table $where";
+	}
 	else
 	{
 		$query = "select count(id) as cnt from $table $where";
@@ -663,7 +667,7 @@ function input_tag($row,$dbVal=null,$options=array())
  * @param int $line Line number for error and notice usage. Related to import functionality.
  * @author Jithu Thomas
  */
-function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),$line=null)
+function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),$line=null, $extraData=array())
 {
 	global $now;
 	global $db;
@@ -677,6 +681,105 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 	*/
 	//import save
 	//pr($post);die;
+	
+	if($import ==1 && $table=='redtags')
+	{
+		//post values are already escaped before coming here.\
+		$existingRegTagName = array();
+		
+		$insertCnt = 0;
+		$insertFailCnt = 0;
+		$updateCnt = 0;
+		$updateFailCnt = 0;
+		$deleteCnt= 0;
+		$deleteFailCnt= 0;
+		$skipCnt = 0;
+		$skipEnumCnt = 0;
+		foreach($post as $redTagArray)
+		{
+			
+			if(!in_array($redTagArray['type'], $extraData['redTagEnums']))
+			{
+				softDieSession('Invalid enum type used :'.implode(',', $redTagArray));
+				$invalidEnumSkipCnt++;
+				continue;
+			}
+			$typeWithoutQuotes = $redTagArray['type'];
+			$redTagArray['name'] = "'".$redTagArray['name']."'";
+			$redTagArray['type'] = "'".$redTagArray['type']."'";
+			$name = $redTagArray['name'];
+			$type = $redTagArray['type'];	
+				
+				
+			//search for existing keys then reinsert it if type has changed
+			$query = "select `name`,`type` from `$table` where `name`=$name limit 1";
+			$result = mysql_query($query);
+			$update = false;
+			while($row = mysql_fetch_assoc($result))
+			{
+				$update = true;
+				$existingRegTagName[] = $name;
+				$currentType = $row['type'];
+			}
+			
+			if($update)
+			{
+				//update
+				if($currentType != $typeWithoutQuotes)
+				{
+					echo $currentType."---".$typeWithoutQuotes."---".$name."<br/>";
+					$query = "update `$table` set `name`=$name, `type`=$type where `name`=$name";
+					if(mysql_query($query))
+					{
+						$updateCnt++;
+					}
+					else
+					{
+						$updateFailCnt++;
+						softDieSession('updating redtags failed.<br/>'.$query,0,1,'error');
+					}
+					
+				}
+				else
+				{
+					$updateSkipCnt++;
+				}
+			}
+			else
+			{
+				//insert
+				$query = "insert into `$table` (".implode(',',$importKeys).") values (".implode(',',$redTagArray).")";
+				if(mysql_query($query))
+				{
+					$insertCnt++;
+				}
+				else 
+				{
+					$insertFailCnt++;
+					softDieSession('inserting redtags failed.<br/>'.$query);
+				}
+				$existingRegTagName[] = $name;
+			}
+		}
+		
+		//delete non existing redtags
+		if(count($existingRegTagName)>0)
+		{
+			$query = "delete from $table where `name` not in(".implode(',',$existingRegTagName).")";
+			if(mysql_query($query))
+			{
+				$deleteCnt = mysql_affected_rows();
+			}
+			else 
+			{
+				$deleteFailCnt++;
+				die('Deleting invalid redtags failed.<br/>'.$query);
+			}
+		}
+
+		return array('insertCnt'=>$insertCnt, 'insertFailCnt'=>$insertFailCnt,'updateCnt'=>$updateCnt,'updateFailCnt'=>$updateFailCnt, 'deleteCnt'=>$deleteCnt, 'deleteFailCnt'=>$deleteFailCnt, 'updateSkipCnt'=>$updateSkipCnt, 'invalidEnumSkipCnt'=>$invalidEnumSkipCnt);
+	}	
+	
 	if($import ==1 && $table=='upm')
 	{
 		$importVal = array_map(validateImport,$importKeys,$importVal);
@@ -1011,7 +1114,7 @@ function fillUpmAreas($upmId,$areaIds=array())
  * @param int $limit The total limit of records defined in the controller.
  * @author Jithu Thomas
  */
-function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),$options=array('import'=>true,'searchDataCheck'=>false))
+function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),$options=array('import'=>true,'searchDataCheck'=>false,'search'=>true,'add_new_record'=>true))
 {
 	global $page;	
 	$formOnSubmit = isset($options['formOnSubmit'])?$options['formOnSubmit']:null;
@@ -1042,10 +1145,11 @@ function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),
 			. '<input type="submit" name="jump" value="Jump" /> '
 			. ($visualPage<$maxPage?'<input type="submit" name="next" value="Next &gt;" />':'')
 			. '<input type="hidden" value="'.$oldVal.'" name="oldval">'
-			. '</fieldset>'
-			. '<fieldset class="floatl">'
-			. '<legend> Actions: </legend>'
-			. '<input type="submit" value="Add New Record" name="add_new_record">';
+			. '</fieldset>';
+	echo '<fieldset class="floatl">';
+	echo '<legend> Actions: </legend>';
+	if(isset($options['add_new_record']) && $options['add_new_record']!==false)
+	echo '<input type="submit" value="Add New Record" name="add_new_record">';
 		if($options['import'])
 		echo '<input type="submit" value="Import" name="import">';
 		echo '</fieldset>';
@@ -1063,7 +1167,9 @@ function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),
 		unset($_SESSION['page_errors']);
 		echo '</fieldset>';
 	}
-	echo '<br/>';			
+	echo '<br/>';
+	if(isset($options['search']) && $options['search'] == true):
+				
 	echo  '<fieldset class="">'
 			. '<legend> Search: </legend>';
 
@@ -1146,6 +1252,8 @@ function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),
 	{
 		//echo '<input type="hidden" id="search_product_id" name="search_product_id" value=""/>';
 	}
+	endif;//search active or not if
+	
 	echo '</form>';
 
 				

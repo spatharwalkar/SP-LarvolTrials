@@ -258,7 +258,7 @@ if(isset($_GET['search']))
 
 
 //pagination
-pagePagination($limit,$totalCount,$table,$script,array(),array("import"=>false,"formOnSubmit"=>"onsubmit=\"return validatesearch();\""));
+pagePagination($limit,$totalCount,$table,$script,array(),array("import"=>false,"formOnSubmit"=>"onsubmit=\"return validatesearch();\"",'add_new_record'=>true,'search'=>true));
 //pagination controller
 
 
