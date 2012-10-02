@@ -15,14 +15,14 @@ function tableColumns($table)
 		$columnList[] = $row['Field'];
 	}
 
-	/** - the column "area" has been removed from upm table, so not required.  
+
 	if($table == 'upm')
 	{
 		//TODO: make it dynamic.
 		//explicitly adding area column for upm as its a one to many in upm_areas
 		$columnList[] = 'area';
 	}
-	*/
+
 	return $columnList;
 }
 
@@ -821,7 +821,6 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 		if($table=='upm')
 		{	
 			$post['last_update'] = 	date('Y-m-d',$now);
-			
 			if(is_array($post['area']) && count($post['area'])>0)
 			{		
 				$upm_area = $post['area'];
@@ -835,7 +834,16 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 		}
 		$postKeys = array_keys($post);
 		$post = array_map(am,$postKeys,array_values($post));
-		$query = "insert into $table (".implode(',',$postKeys).") values(".implode(',',$post).")";
+		$newpostKeys=$postKeys;
+		$newpost=$post;
+		if($table=='upm' && array_search('area', $postKeys) )
+		{
+			$areaKey=array_search('area', $postKeys);
+			unset($newpostKeys[$areaKey]);
+			unset($newpost[$areaKey]);
+		}
+			
+		$query = "insert into $table (".implode(',',$newpostKeys).") values(".implode(',',$newpost).")";
 		if(mysql_query($query))
 		{
 			if($table=='products')
@@ -958,7 +966,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
  */
 function fillUpmAreas($upmId,$areaIds=array())
 {
-	if(!is_array($areaIds))	return false;
+//	if(!is_array($areaIds))	return false;
 	global $db;
 	//get current upm areas
 	$query = "select * from `upm_areas` where `upm_id`=$upmId";
