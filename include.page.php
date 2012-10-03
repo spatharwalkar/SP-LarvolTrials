@@ -1072,7 +1072,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
  */
 function fillUpmAreas($upmId,$areaIds=array())
 {
-//	if(!is_array($areaIds))	return false;
+	if(!is_array($areaIds))	return false;
 	global $db;
 	//get current upm areas
 	$query = "select * from `upm_areas` where `upm_id`=$upmId";
