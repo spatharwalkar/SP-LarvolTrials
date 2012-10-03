@@ -4520,7 +4520,7 @@ function getNumLinesPDFExport($productName, $OtherPart, $product_Col_Width, $Bol
 	$Height = 0;
 	$ExtraSpFlg = false;
 	$AvlblWidth = $product_Col_Width;
-	$Minus = 0.99342222222222;
+	$Minus = $pdf->GetStringWidth(' ', 'verdana', ' ', 8);
 	$Return = array();
 	
 	///Process Product Name
@@ -4538,13 +4538,13 @@ function getNumLinesPDFExport($productName, $OtherPart, $product_Col_Width, $Bol
 		{
 			$pdf->SetFont('verdanab', 'B', 8); // Bold Font
 			$current_Width = $pdf->GetStringWidth($data[$m], 'verdanab', 'B', 8);
-			$Minus = 1;
+			$Minus = $pdf->GetStringWidth(' ', 'verdanab', ' ', 8);
 		}
 		else
 		{
 			$pdf->SetFont('verdana', ' ', 8); // Bold Font
 			$current_Width = $pdf->GetStringWidth($data[$m], 'verdana', ' ', 8);
-			$Minus = 1;
+			$Minus = $pdf->GetStringWidth(' ', 'verdana', ' ', 8);
 		}
 		
 		if($current_Width < $AvlblWidth)
@@ -4556,7 +4556,7 @@ function getNumLinesPDFExport($productName, $OtherPart, $product_Col_Width, $Bol
 		{
 			$numberOfLines++;
 			$Height = $Height + (($flgBold)? $Bold_Line_Height : $Line_Height);
-			if($bracketDetect == 1)
+			if($bracketDetect)
 			{
 				$flgBold = false;
 			}
@@ -4573,7 +4573,7 @@ function getNumLinesPDFExport($productName, $OtherPart, $product_Col_Width, $Bol
 		$pdf->SetFont('verdana', ' ', 8); // Bold Font
 		if(!$ExtraSpFlg) { $AvlblWidth = $AvlblWidth - 0; $ExtraSpFlg = true;}
 		$current_Width = $pdf->GetStringWidth((($m == count($data)-1) ? $data[$m] : $data[$m]), 'verdana', '', 8);
-		if ($m != count($data)-1) $Minus = 1; else $Minus = 0;
+		if ($m != count($data)-1) $Minus = $pdf->GetStringWidth(' ', 'verdana', ' ', 8); else $Minus = 0;
 			
 		if($current_Width < $AvlblWidth)
 		{
