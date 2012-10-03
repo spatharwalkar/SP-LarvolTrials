@@ -1013,6 +1013,17 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 				
 			//changed nowarray_pop($post);	
 			$post['last_update'] = date('Y-m-d',$now);
+			
+			$newpostKeys=array_keys($post);
+			$newpost=array_values($post);
+			if($table=='upm' && array_search('area', $newpostKeys) )
+			{
+				$areaKey=array_search('area', $newpostKeys);
+				unset($newpostKeys[$areaKey]);
+				unset($newpost[$areaKey]);
+			}			
+
+			$postnew = array_map(am1,$newpostKeys,$newpost);
 			$post = array_map(am1,array_keys($post),array_values($post));
 		}
 		else
@@ -1027,7 +1038,8 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			$post = array_map(am1,array_keys($post),array_values($post));
 			//pr($post);//die;
 		}
-		$query = "update $table set ".implode(',',$post)." where id=".$id;
+		if($table<>'upm') $postnew = $post;
+		$query = "update $table set ".implode(',',$postnew)." where id=".$id;
 		if(mysql_query($query))
 		{
 			//fire success actions upon successful save.
@@ -1072,7 +1084,8 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
  */
 function fillUpmAreas($upmId,$areaIds=array())
 {
-	if(!is_array($areaIds))	return false;
+
+//	if(!is_array($areaIds))	return false;
 	global $db;
 	//get current upm areas
 	$query = "select * from `upm_areas` where `upm_id`=$upmId";
@@ -1083,7 +1096,7 @@ function fillUpmAreas($upmId,$areaIds=array())
 		$currentAreas[] = $row['area_id'];
 	}
 	//add new areas
-	$newAreas = array_diff($areaIds,$currentAreas);
+	$newAreas = @array_diff($areaIds,$currentAreas);
 	if(count($newAreas)>0)
 	{
 		$newAreas = array_map(function($upm_id,$area_id){
@@ -1100,7 +1113,9 @@ function fillUpmAreas($upmId,$areaIds=array())
 		}
 	}
 	//delete old areas
-	$deletedAreas = array_diff($currentAreas,$areaIds);
+	$deletedAreas = @array_diff($currentAreas,$areaIds);
+	if(count($currentAreas)>0 and empty($areaIds))
+		$deletedAreas=$currentAreas;
 	if(count($deletedAreas)>0)
 	{
 		$deletedAreasQuery = "delete from `upm_areas` where `upm_id`=$upmId and `area_id` in (".implode(',',$deletedAreas).")";
