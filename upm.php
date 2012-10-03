@@ -16,7 +16,8 @@ global $page;
 global $deleteFlag;
 $table = $script = 'upm';
 //calulate delete flag
-if($db->user->userlevel == 'admin')
+if($db->user->userlevel == 'admin' or $db->user->userlevel == 'root')
+
 $deleteFlag = 1;
 else
 $deleteFlag = null;
