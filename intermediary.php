@@ -301,14 +301,14 @@ $scrollBarJs 	= 'scripts/jquery.mCustomScrollbar.js';
           if(value == 'inactive') 
 		  {	
           	document.getElementById('statuscontainer').innerHTML = 
-				 "<input type='checkbox' class='status' value='6' />Withheld<br/>"+
-				 "<input type='checkbox' class='status' value='7' />Approved for marketing<br/>" +
-				 "<input type='checkbox' class='status' value='8' />Temporarily not available<br/>" + 
-				 "<input type='checkbox' class='status' value='9' />No Longer Available<br/>" + 
-				 "<input type='checkbox' class='status' value='10' />Withdrawn<br/>" + 
-				 "<input type='checkbox' class='status' value='11' />Terminated<br/>" +
-				 "<input type='checkbox' class='status' value='12' />Suspended<br/>" +
-				 "<input type='checkbox' class='status' value='13' />Completed<br/>";
+				 "<input type='checkbox' class='status' value='0' />Withheld<br/>"+
+				 "<input type='checkbox' class='status' value='1' />Approved for marketing<br/>" +
+				 "<input type='checkbox' class='status' value='2' />Temporarily not available<br/>" + 
+				 "<input type='checkbox' class='status' value='3' />No Longer Available<br/>" + 
+				 "<input type='checkbox' class='status' value='4' />Withdrawn<br/>" + 
+				 "<input type='checkbox' class='status' value='5' />Terminated<br/>" +
+				 "<input type='checkbox' class='status' value='6' />Suspended<br/>" +
+				 "<input type='checkbox' class='status' value='7' />Completed<br/>";
           } 
 		  else if(value == 'active') 
 		  {	

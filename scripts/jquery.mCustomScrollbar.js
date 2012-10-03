@@ -61,7 +61,7 @@ plugin home: http://manos.malihu.gr/jquery-custom-content-scroller
 				if(options.horizontalScroll){
 					mCustomScrollBox.addClass("mCSB_horizontal").wrapInner("<div class='mCSB_h_wrapper' style='position:relative; left:0; width:999999px;' />");
 					var mCSB_h_wrapper=mCustomScrollBox.children(".mCSB_h_wrapper");
-					mCSB_h_wrapper.wrapInner("<div class='mCSB_container' style='position:absolute; left:0;' />").children(".mCSB_container").css({"width":mCSB_h_wrapper.children().outerWidth(),"position":"relative"}).unwrap();
+					mCSB_h_wrapper.wrapInner("<div class='mCSB_container' style='position:absolute; left:0;' />").children(".mCSB_container").css({"width":mCSB_h_wrapper.children().outerWidth()+15,"position":"relative"}).unwrap();
 				}else{
 					mCustomScrollBox.wrapInner("<div class='mCSB_container' style='position:relative; top:0;' />");
 				}
