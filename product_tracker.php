@@ -1071,17 +1071,6 @@ function Download_reports()
 		{	
 			$row = $incr;
 			$Excel_HMCounter++;
-			$from = $Start_Char;
-			$from++;
-			for($j=0; $j < $columns; $j++)
-			{
-				$to = getColspanforExcelExport($from, $inner_columns);
-				$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':'. $to . $Excel_HMCounter);
-				$from = $to;
-				$from++;
-			}
-			$objPHPExcel->getActiveSheet()->getRowDimension($Excel_HMCounter)->setRowHeight(5);
-			$Excel_HMCounter++;
 	
 			////// Color Graph - Bar Starts
 				
