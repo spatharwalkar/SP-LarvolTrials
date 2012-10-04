@@ -2166,7 +2166,7 @@ function Download_reports()
 		$pdf->SetTitle('Larvol Trials');
 		$pdf->SetSubject('Larvol Trials');
 		$pdf->SetKeywords('Larvol Trials Master Heatmap, Larvol Trials Master Heatmap PDF Export');
-		$pdf->SetFont('verdana', ' ', 8); // Normal Font
+		$pdf->SetFont('freesans', ' ', 8); // Normal Font
 		$pdf->setFontSubsetting(false);
 		$pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
 		$pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
@@ -2176,7 +2176,7 @@ function Download_reports()
 		//set some language-dependent strings
 		$pdf->setLanguageArray($l);
 		//set auto page breaks
-		$pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+		$pdf->SetAutoPageBreak(TRUE, 10);
 		$pdf->AddPage();
 		//ini_set('pcre.backtrack_limit',strlen($pdfContent));	
 		$name = htmlspecialchars(strlen($name)>0?$name:('report '.$id.''));
@@ -2306,8 +2306,9 @@ function Download_reports()
 		}
 		
 		//// Give product column required maximum width when available to prevent wrapping
-		$Avail_Prod_Col_width = $Page_Width-$All_Column_Width;
-		$product_Col_Width = $Avail_Prod_Col_width;
+		$Avail_Prod_Col_width = $Page_Width - $All_Column_Width - $product_Col_Width;
+		if($Avail_Prod_Col_width > 0)
+		$product_Col_Width = $product_Col_Width + $Avail_Prod_Col_width;
 		
 		///// Extra width addition part  - We dont need this part as we dont distribute extra widths
 		//- If after rotation and after giving max width to product column, extra width remains, distribute it equally to all columns, to achieve fitting
@@ -2335,6 +2336,7 @@ function Download_reports()
 		///Perform all line number/height calculation at start only as after padding/margin value returned may be wrong
 		
 		///Calculate height for category area row
+		$pdf->SetFont('freesans', ' ', 8); // Bold Font
 		$Max_Cat_areaNumLines=0;
 		foreach($columns as $col => $val)
 		{
@@ -2357,7 +2359,7 @@ function Download_reports()
 		$Cat_Area_Row_height = $Max_Cat_areaNumLines * $Line_Height;
 		
 		///Calculate height for area row
-		$pdf->SetFont('verdanab', 'B ', 8); // Bold Font
+		$pdf->SetFont('freesansb', 'B ', 8); // Bold Font
 		if($Rotation_Flg == 0)
 		{
 			$Max_areaNumLines=0;
@@ -2379,14 +2381,14 @@ function Download_reports()
 			{
 				$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col]:$val;
 				if(isset($areaIds[$col]) && $areaIds[$col] != NULL && !empty($productIds))
-				$current_StringLength = $pdf->GetStringWidth($val, 'verdanab', 'B', 8)+2;
+				$current_StringLength = $pdf->GetStringWidth($val, 'freesansb', 'B', 8)+2;
 				else $current_StringLength = 5;
 				if($Max_areaStringLength < $current_StringLength)
 				$Max_areaStringLength = $current_StringLength;
 			}
 			$Area_Row_height = $Max_areaStringLength + 2;
 		}
-		$pdf->SetFont('verdana', ' ', 8); // Normal Font
+		$pdf->SetFont('freesans', ' ', 8); // Normal Font
 		
 		///Calculate height for product row
 		foreach($rows as $row => $rval)
@@ -2406,14 +2408,14 @@ function Download_reports()
 		
 		$pdf->SetTextColor(0);
 		
-		$pdf->SetFont('verdanab', 'B ', 8); // Bold Font
-		$current_StringLength = $pdf->GetStringWidth($Report_Name, 'verdanab', 'B', 8) + 5;
+		$pdf->SetFont('freesansb', 'B ', 8); // Bold Font
+		$current_StringLength = $pdf->GetStringWidth($Report_Name, 'freesansb', 'B', 8) + 5;
 		$newMarginWidth = (($dimensions['wk'] - ($current_StringLength))/2);
 		$pdf->MultiCell($current_StringLength, '', $Report_Name, $border=0, $align='C', $fill=0, $ln=1, $newMarginWidth, '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
-		$current_StringLength = $pdf->GetStringWidth($pdftitle, 'verdanab', 'B', 8) + 5;
+		$current_StringLength = $pdf->GetStringWidth($pdftitle, 'freesansb', 'B', 8) + 5;
 		$newMarginWidth = (($dimensions['wk'] - ($current_StringLength))/2);
 		$pdf->MultiCell($current_StringLength, '', $pdftitle, $border=0, $align='C', $fill=0, $ln=1, $newMarginWidth, '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
-		$pdf->SetFont('verdana', ' ', 8); // Normal Font
+		$pdf->SetFont('freesans', ' ', 8); // Normal Font
 		$pdf->Ln(5);
 		
 		$pdf->SetFillColor(221, 221, 255);
@@ -2425,7 +2427,7 @@ function Download_reports()
 		
 		$Place_X = $Main_X;
 		$Place_Y = $Main_Y;
-		
+		$pdf->SetFont('freesans', ' ', 8); // Normal Font
 		/////////// Print Category Row
 		$pdf->SetFillColor(255, 255, 255);
 		$pdf->MultiCell($product_Col_Width, $Cat_Area_Row_height, '', $border=0, $align='C', $fill=1, $ln=0, $Place_X, $Place_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=$Cat_Area_Row_height);
@@ -2462,10 +2464,12 @@ function Download_reports()
 					if($Max_Cat_areaNumLines > $current_NumLines)
 					{
 						$extra_space = ($Max_Cat_areaNumLines - $current_NumLines) * $Line_Height;
-						$pdfContent .= '<br style="line-height:'.((($extra_space* 72 / 96)/2)+1).'px;" />';
+						//$pdfContent .= '<br style="line-height:'.((($extra_space* 72 / 96)/2)+1).'px;" />';
+						$pdf->setCellPaddings(0, ($extra_space/2), 0, 0);
 					}
 					$pdfContent .= $columnsCategoryName[$col].'</div>';
 					$pdf->MultiCell($Cat_Area_Row_width, $Cat_Area_Row_height, $pdfContent, $border, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=$Cat_Area_Row_height);
+					$pdf->setCellPaddings(0, 0, 0, 0);
 				}
 				else
 				{
@@ -2485,7 +2489,7 @@ function Download_reports()
 		$Place_Y = $Place_Y + $Cat_Area_Row_height + 0.5;
 		$Place_X = $Main_X;
 		
-		$pdf->SetFont('verdanab', 'B ', 8); // Bold Font
+		$pdf->SetFont('freesansb', 'B ', 8); // Bold Font
 		$pdf->SetFillColor(255, 255, 255);
 		$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));
 		
@@ -2690,7 +2694,7 @@ function Download_reports()
 				}
 			}
 		}
-		$pdf->SetFont('verdana', ' ', 8); // Normal Font
+		$pdf->SetFont('freesans', ' ', 8); // Normal Font
 		
 		$pdf->SetX($Main_X);
 		$pdf->SetY(($Place_Y_Bk + $Area_Row_height + 0.5));
@@ -2700,7 +2704,7 @@ function Download_reports()
 		{
 			$dimensions = $pdf->getPageDimensions();
 			$startY = $pdf->GetY();
-			$pdf->SetFont('verdana', ' ', 8); // Reset Font
+			$pdf->SetFont('freesans', ' ', 8); // Reset Font
 			
 			$prod_row_height = $prod_row_height_calc[$row];
 			
@@ -2793,7 +2797,7 @@ function Download_reports()
 				$pdf->SetFillColor(221, 221, 255);
 				$Place_X = $Place_X + $product_Col_Width + 0.5;
 				$Place_Y_Bk = $Place_Y;
-				$pdf->SetFont('verdanab', 'B ', 8); // Bold Font
+				$pdf->SetFont('freesansb', 'B ', 8); // Bold Font
 				foreach($columns as $col => $val)
 				{
 					$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));
@@ -2993,7 +2997,7 @@ function Download_reports()
 				$pdf->SetX($Main_X);
 				$pdf->SetY(($Place_Y_Bk + $Area_Row_height + 0.5));
 				
-				$pdf->SetFont('verdana', ' ', 8); // Normal Font
+				$pdf->SetFont('freesans', ' ', 8); // Normal Font
 				///End of header row	
 							
 			} elseif ((ceil($startY) + $prod_row_height) + $dimensions['bm'] == floor($dimensions['hk'])) {
@@ -3010,7 +3014,7 @@ function Download_reports()
 				
 			$cat = (isset($rowsCategoryName[$row]) && $rowsCategoryName[$row] != '')? $rowsCategoryName[$row]:'Undefined';
 			
-			$pdf->SetFont('verdanab', 'B ', 8); // Bold Font
+			$pdf->SetFont('freesansb', 'B ', 8); // Bold Font
 			if($rows_Span[$row] > 0 && $cat != 'Undefined')
 			{
 				$Product_Rowcat_width = ($product_Col_Width + $All_Column_Width);
@@ -3034,7 +3038,7 @@ function Download_reports()
 				$pdf->MultiCell($Product_Rowcat_width, $Product_Rowcat_height, $pdfContent, $border=0, $align='L', $fill=1, $ln=1, $Place_X, $Place_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
 				$Place_Y = $Place_Y + $Product_Rowcat_height + 0.5;
 			}
-			$pdf->SetFont('verdana', ' ', 8); // Normal Font	
+			$pdf->SetFont('freesans', ' ', 8); // Normal Font	
 			
 			$pdf->SetX($Main_X);
 			$pdf->SetY($Place_Y);
@@ -3493,7 +3497,7 @@ function Download_reports()
 					if($prod_row_height == $Line_Height)	$prod_row_height = $prod_row_height + 0.6; /// For adjustment as when height is min, html causes issue
 					
 					$pdfContent .= '<div align="center" style="vertical-align:middle; float:none;">';
-					$extra_space = $prod_row_height - $Line_Height - 0.7;
+					$extra_space = $prod_row_height - $Line_Height + 0.4;
 					if($data_matrix[$row][$col]['update_flag'] == 1)
 					$extra_space = $extra_space - 0.6;
 					//$pdfContent .= '<br style="line-height:'.((($extra_space * 72 / 96)/2)+0.8).'px;" />';
@@ -3505,7 +3509,7 @@ function Download_reports()
 					}
 					
 					$Aq_L = 0;
-					$Wrd_L = round($pdf->GetStringWidth($count_val, 'verdana', '', 8))+1;
+					$Wrd_L = round($pdf->GetStringWidth($count_val, 'freesans', '', 8))+1;
 					$Aq_L = $Aq_L + $Wrd_L + 0.2;
 					if($data_matrix[$row][$col]['bomb']['value'] == 'small' || $data_matrix[$row][$col]['bomb']['value'] == 'large')
 					$Aq_L = $Aq_L + 3.1 + 0.2;
@@ -3529,19 +3533,19 @@ function Download_reports()
 					$fill_PR = 0;
 					
 					if($bomb_PR)
-					$pdfContent .= '&nbsp;';
+					$pdfContent .= '&nbsp;&nbsp;&nbsp;';
 					
 					if($bomb_PR && !$fill_PR)
-					$pdfContent .= '&nbsp;';
+					$pdfContent .= '&nbsp;&nbsp;';
 					
 					if($bomb_PR && $fill_PR)
-					$pdfContent .= '&nbsp;';
+					$pdfContent .= '&nbsp;&nbsp;';
 					
 					if($fill_PR)
-					$pdfContent .= '&nbsp;';
+					$pdfContent .= '&nbsp;&nbsp;&nbsp;';
 					
 					if(!$bomb_PR && $fill_PR)
-					$pdfContent .= '&nbsp;';
+					$pdfContent .= '&nbsp;&nbsp;';
 					
 					/*for($padder=0; $padder < ($Ex_L + ($Aq_L - $Wrd_L)); $padder=$padder+3)
 					$pdfContent .= '&nbsp;';
@@ -3565,7 +3569,7 @@ function Download_reports()
 						$fill_x=($Place_X+$Av_L-$Ex_L-0.1-3.1-0.1);
 					}
 					
-					$y=($Place_Y+($prod_row_height/2)-(3.1/2)) - 0.2;
+					$y=($Place_Y+($prod_row_height/2)-(3.1/2));
 					/////// End of Space and co-ordinates pixel calculation
 					
 					if($data_matrix[$row][$col]['bomb']['value'] == 'small' || $data_matrix[$row][$col]['bomb']['value'] == 'large')
@@ -3690,10 +3694,10 @@ function Download_reports()
 			$pdf->SetY($Place_Y);
 		}//Row Foreach ends
 		
-		$pdf->SetY($pdf->GetY() + 5);
+		$pdf->SetY($pdf->GetY() + 3);
 		
 		$dimensions = $pdf->getPageDimensions();
-		$newMarginWidth = (($dimensions['wk'] - (147))/2);
+		$newMarginWidth = (($dimensions['wk'] - (152))/2);
 		$pdf->SetRightMargin($newMarginWidth);
 		$pdf->SetLeftMargin($newMarginWidth);
 		
@@ -3715,18 +3719,7 @@ function Download_reports()
 		$Place_X = $newMarginWidth;
 		
 		$Place_Y = $pdf->GetY();
-		foreach($helpTabImage_Header as $key => $Header)
-		{
-			$pdf->Image('images/'.$helpTabImages_Src[$key], $Place_X , $Place_Y+0.2, 3, 3, '', '', '', false, 300, '', false, false, 0, false, false, false);
-			$Place_X = $Place_X + 3;
-			$current_StringLength = $pdf->GetStringWidth($helpTabImage_Header[$key], 'verdana', ' ', 8) + 3;
-			
-			$pdf->MultiCell($current_StringLength, $helpTabRow_Height, $helpTabImage_Header[$key], $border=0, $align='C', $fill=0, $ln=0, $Place_X, $Place_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=$helpTabRow_Height, 'T');
-			$Place_X = $Place_X + $current_StringLength + 1;
-			
-		}
 		
-		$Place_X = $pdf->GetX();
 		$pdf->MultiCell(12, $helpTabRow_Height, 'Phase: ', $border=0, $align='C', $fill=0, $ln=0, $Place_X, $Place_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=$helpTabRow_Height, 'T');
 		$Place_X = $Place_X + 11;
 		//get search results
@@ -3743,6 +3736,18 @@ function Download_reports()
 			$pdf->MultiCell(8, $helpTabRow_Height, $phasenums[$key], $border=0, $align='C', $fill=1, $ln=0, $Place_X, $Place_Y-0.5, $reseth=false, $stretch=0, $ishtml=true, $autopadding=true, $maxh=$helpTabRow_Height, 'M');
 			$Place_X = $Place_X + 8 +1;
 		}
+		$Place_X = $Place_X + 2;
+		foreach($helpTabImage_Header as $key => $Header)
+		{
+			$pdf->Image('images/'.$helpTabImages_Src[$key], $Place_X , $Place_Y+0.2, 3, 3, '', '', '', false, 300, '', false, false, 0, false, false, false);
+			$Place_X = $Place_X + 3;
+			$current_StringLength = $pdf->GetStringWidth($helpTabImage_Header[$key], 'freesans', ' ', 8) + 3;
+			
+			$pdf->MultiCell($current_StringLength, $helpTabRow_Height, $helpTabImage_Header[$key], $border=0, $align='C', $fill=0, $ln=0, $Place_X, $Place_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=$helpTabRow_Height, 'T');
+			$Place_X = $Place_X + $current_StringLength + 1;
+		}
+		
+		
 		
 		ob_end_clean();
 		//Close and output PDF document
@@ -3804,14 +3809,14 @@ function Download_reports()
 					if($columnsCategoryName[$col] != 'Undefined')
 					{
 						$black_font['font']['color']['rgb'] = '000000';
-						$objPHPExcel->getActiveSheet()->getStyle($from)->applyFromArray($black_font);
+						$objPHPExcel->getActiveSheet()->getStyle($from . $Excel_HMCounter)->applyFromArray($black_font);
 					}
 					else
 					{
 						$white_font['font']['color']['rgb'] = 'FFFFFF';
-						$objPHPExcel->getActiveSheet()->getStyle($from)->applyFromArray($white_font);
+						$objPHPExcel->getActiveSheet()->getStyle($from . $Excel_HMCounter)->applyFromArray($white_font);
 					}
-					$objPHPExcel->getActiveSheet()->getStyle($from)->getAlignment()->applyFromArray(
+					$objPHPExcel->getActiveSheet()->getStyle($from . $Excel_HMCounter)->getAlignment()->applyFromArray(
       										array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
       												'vertical'   => PHPExcel_Style_Alignment::VERTICAL_CENTER,
      												'rotation'   => 0,
@@ -4520,7 +4525,7 @@ function getNumLinesPDFExport($productName, $OtherPart, $product_Col_Width, $Bol
 	$Height = 0;
 	$ExtraSpFlg = false;
 	$AvlblWidth = $product_Col_Width;
-	$Minus = $pdf->GetStringWidth(' ', 'verdana', ' ', 8);
+	$Minus = $pdf->GetStringWidth(' ', 'freesans', ' ', 8);
 	$Return = array();
 	
 	///Process Product Name
@@ -4536,15 +4541,15 @@ function getNumLinesPDFExport($productName, $OtherPart, $product_Col_Width, $Bol
 		
 		if($flgBold && !$bracketDetect)
 		{
-			$pdf->SetFont('verdanab', 'B', 8); // Bold Font
-			$current_Width = $pdf->GetStringWidth($data[$m], 'verdanab', 'B', 8);
-			$Minus = $pdf->GetStringWidth(' ', 'verdanab', ' ', 8);
+			$pdf->SetFont('freesansb', 'B', 8); // Bold Font
+			$current_Width = $pdf->GetStringWidth($data[$m], 'freesansb', 'B', 8);
+			$Minus = $pdf->GetStringWidth(' ', 'freesansb', ' ', 8);
 		}
 		else
 		{
-			$pdf->SetFont('verdana', ' ', 8); // Bold Font
-			$current_Width = $pdf->GetStringWidth($data[$m], 'verdana', ' ', 8);
-			$Minus = $pdf->GetStringWidth(' ', 'verdana', ' ', 8);
+			$pdf->SetFont('freesans', ' ', 8); // Bold Font
+			$current_Width = $pdf->GetStringWidth($data[$m], 'freesans', ' ', 8);
+			$Minus = $pdf->GetStringWidth(' ', 'freesans', ' ', 8);
 		}
 		
 		if($current_Width < $AvlblWidth)
@@ -4570,10 +4575,10 @@ function getNumLinesPDFExport($productName, $OtherPart, $product_Col_Width, $Bol
 	$data = explode(' ', $OtherPart);
 	for($m=0;$m< count($data); $m++)	//// for loop of data ---- first level
 	{
-		$pdf->SetFont('verdana', ' ', 8); // Bold Font
+		$pdf->SetFont('freesans', ' ', 8); // Bold Font
 		if(!$ExtraSpFlg) { $AvlblWidth = $AvlblWidth - 0; $ExtraSpFlg = true;}
-		$current_Width = $pdf->GetStringWidth((($m == count($data)-1) ? $data[$m] : $data[$m]), 'verdana', '', 8);
-		if ($m != count($data)-1) $Minus = $pdf->GetStringWidth(' ', 'verdana', ' ', 8); else $Minus = 0;
+		$current_Width = $pdf->GetStringWidth((($m == count($data)-1) ? $data[$m] : $data[$m]), 'freesans', '', 8);
+		if ($m != count($data)-1) $Minus = $pdf->GetStringWidth(' ', 'freesans', ' ', 8); else $Minus = 0;
 			
 		if($current_Width < $AvlblWidth)
 		{
