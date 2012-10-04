@@ -11144,7 +11144,7 @@ class TrialTracker
 	function displayTrialTableHeader($loggedIn, $globalOptions = array()) 
 	{
 		$outputStr = '<table cellpadding="0" cellspacing="0" class="manage">'
-			 . '<tr>' . (($loggedIn) ? '<th style="width:38px;">ID</th>' : '' )
+			 . '<tr>' . (($loggedIn) ? '<th style="width:70px;">ID</th>' : '' )
 			 . '<th style="width:270px;">Title</th>'
 			 . '<th style="width:30px;" title="Red: Change greater than 20%">N</th>'
 			 . '<th style="width:64px;" title="&quot;RoW&quot; = Rest of World">Region</th>'
@@ -11909,17 +11909,21 @@ class TrialTracker
 					//nctid column
 					if($loggedIn) 
 					{ 
-						$outputStr .= '<td class="' . $rowOneType . '" ' . (($dvalue['new'] == 'y') ? 'title="New record"' : ''). ' >';
+						$outputStr .= '<td class="' . $rowOneType . '" ' . (($dvalue['new'] == 'y') ? 'title="New record"' : ''). ' ><div class="rowcollapse">';
 						if($ottType == 'indexed' || $ottType == 'colstackedindexed' || $ottType == 'rowstackedindexed')
 						{
+							if(strpos($dvalue['NCT/full_id'], 'NCT') !== FALSE)
+							{
+								$dvalue['NCT/full_id'] = str_replace('`', "\n", $dvalue['NCT/full_id']);
+							}
 							$outputStr .= '<a style="color:' . $titleLinkColor . '" href="' . urlPath() . 'edit_trials.php?larvol_id=' . $dvalue['larvol_id'] 
 										. '" target="_blank">' . $dvalue['NCT/full_id'] . '</a>';
 						}
 						else
 						{
-							$outputStr .= $dvalue['NCT/nct_id'] . '</a>';
+							$outputStr .= $dvalue['NCT/nct_id'];
 						}
-						$outputStr .= '</td>';
+						$outputStr .= '</div></td>';
 					}
 					
 					
