@@ -482,7 +482,7 @@ foreach($columns as $col => $val)
 	if($Max_areaStringLength < $current_StringLength)
 	$Max_areaStringLength = $current_StringLength;
 }
-$area_Col_Height = $Max_areaStringLength * $Char_Size;
+$area_Col_Height = $Max_areaStringLength * $Bold_Char_Size;
 if(($area_Col_Height+10) > 160)
 $area_Col_Height = 160;
 
@@ -524,7 +524,7 @@ if(($HColumn_Width + $product_Col_Width) > $Page_Width)	////if hm lenth is great
 	$product_Col_Width = 450;
 	if($total_fld) 
 	{ 
-		$Total_Col_width = ((strlen($count_total) * $Char_Size) + 1);
+		$Total_Col_width = ((strlen($count_total) * $Bold_Char_Size) + 1);
 		if($Total_Col_width < $Min_One_Liner)
 		$Total_Col_width = $Min_One_Liner;
 		$RColumn_Width = $RColumn_Width + $Total_Col_width + 1;
@@ -559,7 +559,7 @@ if($Rotation_Flg == 1)	////Adjustment in area column width as per area name
 		if(isset($areaIds[$col]) && $areaIds[$col] != NULL && !empty($productIds))
 		{
 			$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col]:$val;
-			$cols_Area_Space[$col] = ceil(($area_Col_Height) / $Char_Size);
+			$cols_Area_Space[$col] = ceil(($area_Col_Height) / $Bold_Char_Size);
 			//$cols_Area_Lines[$col] = ceil(strlen(trim($val))/$cols_Area_Space[$col]);
 			$cols_Area_Lines[$col] = $pdf->getNumLines($val, ($area_Col_Height*17/90));
 			$width = ($cols_Area_Lines[$col] * $Line_Height);
@@ -670,7 +670,7 @@ if($Rotation_Flg == 1)	////Create width for area category cells and put forceful
 	$area_Col_Height = $area_Col_Height  + 5;
 }
 
-
+/* We dont need this part at current stage
 ///// Assign remaining width of whole page to achieve fitting
 if($Rotation_Flg == 1)
 {
@@ -701,6 +701,7 @@ if($Rotation_Flg == 1)
 		//$product_Col_Width = $product_Col_Width + $extra_width;
 	}
 }
+*/
 
 if(strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') == FALSE)
 {	//Hiding doctype line incase of IE, as presence of it causes DIV scale issue in IE
@@ -774,6 +775,7 @@ if($Rotation_Flg == 1)
 			width:'.$Width_matrix[$col]['width'].'px;
 			max-width:'.$Width_matrix[$col]['width'].'px;
 			height:'.($area_Col_Height).'px;
+			max-height:'.($area_Col_Height).'px;
 			_height:'.($area_Col_Height).'px;
 		}
 		';
@@ -846,7 +848,7 @@ if($Rotation_Flg == 1)
 ul, li, slideout { behavior:url("css/csshover3.htc"); }
 img { behavior: url("css/iepngfix.htc"); }
 
-body { font-family:Verdana; font-size: 13px;}
+body { font-family:Arial; font-size: 13px;}
 a, a:hover{/*color:#000000; text-decoration:none;*/}
 table { font-size:13px;}
 .display td, .display th {font-weight:normal; background-color:#DDF; vertical-align:middle;}
@@ -870,7 +872,7 @@ table { font-size:13px;}
 .tooltip span {
 	border-radius: 5px 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px; 
 	box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.1); -webkit-box-shadow: 5px 5px rgba(0, 0, 0, 0.1); -moz-box-shadow: 5px 5px rgba(0, 0, 0, 0.1);
-	font-family:Verdana; font-size: 12px;
+	font-family:Arial; font-size: 12px;
 	position: absolute; 
 	margin-left: 0; width: 280px; display: none; z-index: 0;
 }
@@ -993,7 +995,7 @@ table { font-size:13px;}
 	top: 0;
 	border: 1px solid #DDDDDD; /*THEME CHANGE HERE*/
 	/*border-bottom-width: 0;*/
-	font:normal 12px Verdana;
+	font:normal 12px Arial;
 	line-height:18px;
 	z-index:100;
 	background-color: white;
@@ -1039,7 +1041,7 @@ vertical-align:middle;
 color:#f6931f;
 border:0;
 background-color:#FFFFFF;
-font-family:Verdana, Arial, Helvetica, sans-serif;
+font-family:Arial;
 font-size:13px;
 }
 .Product_Col_WidthStyle {
@@ -1737,10 +1739,10 @@ foreach($columns as $col => $val)
 			//$area_name = preg_replace('/([^\s-]{'.$cols_Area_Space[$col].'})(?=[^\s-])/','$1<br/>',$area_name);
 			$area_name = wordwrap($area_name, $cols_Area_Space[$col], "<br />\n", true);
 			$area_name = str_replace('`',' ',$area_name);
-			$htmlContent .= $area_name.'</a>';
+			$htmlContent .= formatBrandName($area_name, 'area').'</a>';
 		}
 		else
-			$htmlContent .= trim($val).'</a>';
+			$htmlContent .= trim(formatBrandName($val, 'area')).'</a>';
 		
 	if($Rotation_Flg != 1)
 	$htmlContent .= '</p>';
