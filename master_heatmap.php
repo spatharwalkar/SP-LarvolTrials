@@ -900,6 +900,11 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 			$rowsTagName[$header['num']] = $header['tag'];
 		}
 	}
+	
+	$ProdName_areaIds = $areaIds;
+	if($dtt_fld)
+	array_pop($ProdName_areaIds);
+	
 	// SELECT MAX ROW AND MAX COL
 	$query = 'SELECT MAX(`num`) AS `num` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' AND type = \'product\'';
 	$res = mysql_query($query) or die(mysql_error());
@@ -1325,7 +1330,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 				
 			$productIds = array_filter($productIds);
 			$areaIds = array_filter($areaIds);
-			$out .= '<a href="intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds). $link_part . '" target="_blank" class="ottlink" title="'.$title.'">'.$count_val.'</a>';
+			$out .= '<a href="intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $ProdName_areaIds). $link_part . '" target="_blank" class="ottlink" title="'.$title.'">'.$count_val.'</a>';
 		}
 		$out .= '</th>';
 	}
@@ -1376,7 +1381,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 				$count_val='<b>'.$row_indlead_total[$row].'</b>';
 			}
 				
-			$out .= '<a href="intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). $link_part . '" target="_blank" class="ottlink" title="'.$title.'">'.$count_val.'</a>';
+			$out .= '<a href="intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $ProdName_areaIds). $link_part . '" target="_blank" class="ottlink" title="'.$title.'">'.$count_val.'</a>';
 		}
 		$out .='<br/>';
 		$out .= '</th>';
