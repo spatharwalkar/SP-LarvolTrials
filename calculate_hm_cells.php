@@ -501,13 +501,14 @@ function calc_cells($parameters,$update_id=NULL,$rgx_changed=NULL)
 			}
 			
 			if(!empty($phasez))
+			{
 				$max_phase = max($phasez);
+			}
 			else
 			{
 			//	$max_phase = 'N/A';
 				$max_phase = null;
 			}
-			
 			
 			$bomb=getBombdtl();
 			if($counter>=5000)
@@ -591,7 +592,7 @@ function add_data($arid,$prid,$cnt_total,$cnt_active,$cnt_active_indlead,$bomb,$
 /*********/
 global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_total;
 
-	$query='SELECT `area`,`product`
+	$query='SELECT `area`,`product`,`count_total`
 			from rpt_masterhm_cells
 			where `area`="'.$arid.'" and `product`="'.$prid.'" limit 1';
 			/*
@@ -610,6 +611,14 @@ global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_total;
 		}
 	$row = mysql_fetch_assoc($res);
 	
+	if( is_null($max_phase) or empty($max_phase) )
+		$highestPhaseUpdateString = "`highest_phase` = NULL,";
+	elseif( ($max_phase=='N/A') and ( !isset($row["count_total"]) or is_null($row["count_total"]) or $cnt_total==0 or $row["count_total"]==0 ) )
+		$highestPhaseUpdateString = "`highest_phase` = NULL,";
+	else
+		$highestPhaseUpdateString = "`highest_phase` = \"$max_phase\",";
+	
+
 	if($row["area"])
 	{
 		//get existing counts before updating
@@ -648,15 +657,16 @@ global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_total;
 			if($highest_phase_old<>$max_phase) $dd='`highest_phase_prev` = "'. $highest_phase_old .'",';
 		}
 		
+	
 		if( empty($aa) && empty($bb) && empty($cc) && empty($dd))
 		{
 		$query='UPDATE rpt_masterhm_cells 
 				SET 
 				`count_active` ="'. $cnt_active.'",
 				`count_active_indlead` ="'. $cnt_active_indlead.'",
-				`bomb_auto` = "'. $bomb .'",
-				`highest_phase` = "'. $max_phase .'",
-				`count_total` = "'. $cnt_total .'",
+				`bomb_auto` = "'. $bomb .'",'.
+				$highestPhaseUpdateString.
+				'`count_total` = "'. $cnt_total .'",
 				`not_yet_recruiting` = "'. $overall_statuses['not_yet_recruiting'] .'",
 				`recruiting` = "'. $overall_statuses['recruiting'] .'",
 				`enrolling_by_invitation` = "'. $overall_statuses['enrolling_by_invitation'] .'",
@@ -719,9 +729,9 @@ global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_total;
 				SET 
 				`count_active` ="'. $cnt_active.'",
 				`count_active_indlead` ="'. $cnt_active_indlead.'",
-				`bomb_auto` = "'. $bomb .'",
-				`highest_phase` = "'. $max_phase .'",
-				`not_yet_recruiting` = "'. $overall_statuses['not_yet_recruiting'] .'",
+				`bomb_auto` = "'. $bomb .'",'.
+				$highestPhaseUpdateString.
+				'`not_yet_recruiting` = "'. $overall_statuses['not_yet_recruiting'] .'",
 				`recruiting` = "'. $overall_statuses['recruiting'] .'",
 				`enrolling_by_invitation` = "'. $overall_statuses['enrolling_by_invitation'] .'",
 				`active_not_recruiting` = "'. $overall_statuses['active_not_recruiting'] .'",
@@ -782,7 +792,6 @@ global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_total;
 				`area`="'.$arid.'" and `product`="'.$prid.'" 
 				';
 		}
-				
 		if(!$res = mysql_query($query))
 		{
 			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -852,9 +861,9 @@ global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_total;
 				`ongoing_active_indlead` = "'. $overall_statuses['ongoing_active_indlead']. '",
 				`not_authorized_active_indlead` = "'. $overall_statuses['not_authorized_active_indlead']. '",
 				`prohibited_active_indlead` = "'. $overall_statuses['prohibited_active_indlead']. '",
-				`new_trials` = "'. $overall_statuses['new_trials'] .'",
-				`highest_phase` = "'. $max_phase .'",
-				`count_total` = "'. $cnt_total .'",
+				`new_trials` = "'. $overall_statuses['new_trials'] .'",'.
+				$highestPhaseUpdateString.
+				'`count_total` = "'. $cnt_total .'",
 				`last_update` = "'. $curtime .'"
 				';
 		if(!$res = mysql_query($query))
