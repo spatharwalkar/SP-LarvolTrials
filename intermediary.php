@@ -774,8 +774,16 @@ global $db;
 	
 	function divresize() 
 	{  
-		var windowidth = $('.manage').width();
-		$('#parent').width(windowidth);
+		
+		var documentWidth = $(document).width();
+		var manageWidth = $('.manage').width();
+		var controlsWidth = $('.controls').width();
+		var windoWidth;
+		
+		windoWidth = (documentWidth > manageWidth && documentWidth > controlsWidth ? documentWidth : manageWidth > controlsWidth ? manageWidth : controlsWidth);
+		
+		$('#parent').width(windoWidth);
+		$('.manage').width(windoWidth);
 		
 		var filterwidth = $('#togglefilters').width();
 		var recordswidth = $('.records').width();
@@ -786,7 +794,7 @@ global $db;
 		var exportwidth = $('.export').width();
 		
 		var ocontrolswidth = (filterwidth+recordswidth+searchboxwidth+paginationwidth+buttonswidth+milestoneswidth+exportwidth+110);
-		$('#outercontainer').width(windowidth - ocontrolswidth);
+		$('#outercontainer').width(windoWidth - ocontrolswidth);
  	} 
 	
 	$(window).resize(function() {
