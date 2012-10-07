@@ -995,7 +995,23 @@ $array1=array
 //			return false;
 //		}
 
-		return true;
+ // Remap the trial if it is already merged with another trial
+		$query = 'select larvol_id from `data_nct` where `larvol_id`="' . $larvol_id . '"  LIMIT 1';
+		if(!$res = mysql_query($query))
+			{
+				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				$logger->error($log);
+				echo $log;
+				return false;
+			}
+		$res = mysql_fetch_assoc($res);
+		$mergedTrial = $res !== false;
+		if($mergedTrial)
+		{
+			require_once("remap_trials.php");
+			remaptrials(null,$larvol_id,null);
+			return true;
+		}
 	}
 	
 /******************EUDRACT END *********/	
