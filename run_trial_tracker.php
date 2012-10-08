@@ -7499,6 +7499,8 @@ class TrialTracker
 			$resultIds['area'] = explode(',', trim($resultIds['area']));
 			
 			$resultIds['product'] = array_unique($resultIds['product']);
+			$resultIds['product'] = array_values($resultIds['product']);
+			
 			
 			if(count($resultIds['product']) > 1 && count($resultIds['area']) > 1)
 			{	
