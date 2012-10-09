@@ -2411,21 +2411,24 @@ function Download_reports()
 		$pdf->SetRightMargin($newMarginWidth);
 		$pdf->SetLeftMargin($newMarginWidth);
 		
-		$pdf->SetTextColor(0);
-		
+		$pdf->SetTextColor(255);
+		$pdf->Ln(0);
+		$BorderStart_X = $pdf->GetX();
+		$BorderStart_Y = $pdf->GetY();
+		$pdf->SetFillColor(0, 0, 128);
 		$pdf->SetFont('freesansb', 'B ', 8); // Bold Font
 		$current_StringLength = $pdf->GetStringWidth($Report_Name, 'freesansb', 'B', 8) + 5;
 		$newMarginWidth = (($dimensions['wk'] - ($current_StringLength))/2);
-		$pdf->MultiCell($current_StringLength, '', $Report_Name, $border=0, $align='C', $fill=0, $ln=1, $newMarginWidth, '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+		$pdf->MultiCell(($product_Col_Width + $All_Column_Width), '', $Report_Name, $border=0, $align='C', $fill=1, $ln=1, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
 		$current_StringLength = $pdf->GetStringWidth($pdftitle, 'freesansb', 'B', 8) + 5;
 		$newMarginWidth = (($dimensions['wk'] - ($current_StringLength))/2);
-		$pdf->MultiCell($current_StringLength, '', $pdftitle, $border=0, $align='C', $fill=0, $ln=1, $newMarginWidth, '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+		$pdf->MultiCell(($product_Col_Width + $All_Column_Width), '', $pdftitle, $border=0, $align='C', $fill=1, $ln=1, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
 		$pdf->SetFont('freesans', ' ', 8); // Normal Font
-		$pdf->Ln(5);
+		$pdf->Ln(3);
 		
 		$pdf->SetFillColor(221, 221, 255);
-		//$pdf->setCellMargins(0, 0, 0, 0);
-		//$pdf->setCellPaddings(0.5, 0, 0, 0);
+		
+		$pdf->SetTextColor(0);
 		
 		$Main_X = $pdf->GetX();
 		$Main_Y = $pdf->GetY();
@@ -2434,6 +2437,7 @@ function Download_reports()
 		$Place_Y = $Main_Y;
 		$pdf->SetFont('freesans', ' ', 8); // Normal Font
 		/////////// Print Category Row
+		$CatPresenceFlg = 0;
 		$pdf->SetFillColor(255, 255, 255);
 		$pdf->MultiCell($product_Col_Width, $Cat_Area_Row_height, '', $border=0, $align='C', $fill=1, $ln=0, $Place_X, $Place_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=$Cat_Area_Row_height);
 		$Place_X = $Place_X + $product_Col_Width + 0.5;
@@ -2455,6 +2459,7 @@ function Download_reports()
 			{
 				if($columnsCategoryName[$col] != 'Undefined')
 				{
+					$CatPresenceFlg = 1;
 					$border = array('mode' => 'int', 'LTR' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,0,0)));
 					
 					$i = 1; $width = 0; $col_id = $col;
@@ -2490,7 +2495,7 @@ function Download_reports()
 				$Place_X = $Place_X + $Cat_Area_Row_width + 0.5;
 			}
 		}
-		
+		if($CatPresenceFlg == 1)
 		$Place_Y = $Place_Y + $Cat_Area_Row_height + 0.5;
 		$Place_X = $Main_X;
 		
@@ -2725,8 +2730,22 @@ function Download_reports()
 			if (($startY + $prod_row_height) + $dimensions['bm'] > ($dimensions['hk']))
 			{
 				//this row will cause a page break, draw the bottom border on previous row and give this a top border
+				
+				$BorderStop_X = $pdf->GetX();
+				$BorderStop_Y = $pdf->GetY();
+				
+				/// Create Border Around Heatmap before going to new page
+				$pdf->SetFillColor(0, 0, 128);
+				$border = array('mode' => 'ext', 'LTRB' => array('width' => 0.3, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,0,128)));
+				$pdf->MultiCell(($product_Col_Width + $All_Column_Width + 0.1), ($BorderStop_Y - $BorderStart_Y + $helpTabRow_Height + 1), '', $border, $align='C', $fill=0, $ln=0, $BorderStart_X, $BorderStart_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=false, $maxh=($BorderStop_Y - $BorderStart_Y), 'T');
+
+		
 				//we could force a page break and rewrite grid headings here
 				$pdf->AddPage();
+				
+				$BorderStart_X = $pdf->GetX();
+				$BorderStart_Y = $pdf->GetY();
+				$pdf->Ln(1);
 				
 				$Main_X = $pdf->GetX();
 				$Main_Y = $pdf->GetY();
@@ -2789,6 +2808,7 @@ function Download_reports()
 						}
 					}
 				}
+				if($CatPresenceFlg == 1)
 				$Place_Y = $Place_Y + $Cat_Area_Row_height + 0.5;
 				$Place_X = $Main_X;
 				
@@ -3086,8 +3106,21 @@ function Download_reports()
 				$prod_row_height = $Line_Height;	//12 is default height
 				if (($startY + $prod_row_height) + $dimensions['bm'] > ($dimensions['hk'])) {
 					//this row will cause a page break, draw the bottom border on previous row and give this a top border
+					$BorderStop_X = $pdf->GetX();
+					$BorderStop_Y = $pdf->GetY();
+					
+					/// Create Border Around Heatmap before going to new page
+					$pdf->SetFillColor(0, 0, 128);
+					$border = array('mode' => 'ext', 'LTRB' => array('width' => 0.3, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,0,128)));
+					$pdf->MultiCell(($product_Col_Width + $All_Column_Width + 0.1), ($BorderStop_Y - $BorderStart_Y + $helpTabRow_Height + 1), '', $border, $align='C', $fill=0, $ln=0, $BorderStart_X, $BorderStart_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=false, $maxh=($BorderStop_Y - $BorderStart_Y), 'T');
+
+		
 					//we could force a page break and rewrite grid headings here
-					$pdf->AddPage();					
+					$pdf->AddPage();
+					
+					$BorderStart_X = $pdf->GetX();
+					$BorderStart_Y = $pdf->GetY();
+					$pdf->Ln(0.5);					
 				}
 				
 				$Place_X = $pdf->GetX();
@@ -3710,8 +3743,20 @@ function Download_reports()
 		if (($startY + 12) + $dimensions['bm'] > ($dimensions['hk']))
 		{
 			//this row will cause a page break, draw the bottom border on previous row and give this a top border
+			$BorderStop_X = $pdf->GetX();
+			$BorderStop_Y = $pdf->GetY();
+			
+			/// Create Border Around Heatmap before going to new page
+			$pdf->SetFillColor(0, 0, 128);
+			$border = array('mode' => 'ext', 'LTRB' => array('width' => 0.3, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,0,128)));
+			$pdf->MultiCell(($product_Col_Width + $All_Column_Width + 0.1), ($BorderStop_Y - $BorderStart_Y + $helpTabRow_Height + 1), '', $border, $align='C', $fill=0, $ln=0, $BorderStart_X, $BorderStart_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=false, $maxh=($BorderStop_Y - $BorderStart_Y), 'T');
+
 			//we could force a page break and rewrite grid headings here
 			$pdf->AddPage();
+			
+			$BorderStart_X = $pdf->GetX();
+			$BorderStart_Y = $pdf->GetY();
+			$pdf->Ln(0.5);
 		}
 		
 		$helpTabImage_Header = array('Discontinued', 'Filing', 'Phase explanation', 'Updated');
@@ -3751,8 +3796,14 @@ function Download_reports()
 			$pdf->MultiCell($current_StringLength, $helpTabRow_Height, $helpTabImage_Header[$key], $border=0, $align='C', $fill=0, $ln=0, $Place_X, $Place_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=$helpTabRow_Height, 'T');
 			$Place_X = $Place_X + $current_StringLength + 1;
 		}
+		$BorderStop_X = $pdf->GetX();
+		$BorderStop_Y = $pdf->GetY();
 		
 		
+		/// Create Border Around Heatmap
+		$pdf->SetFillColor(0, 0, 128);
+		$border = array('mode' => 'ext', 'LTRB' => array('width' => 0.3, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,0,128)));
+		$pdf->MultiCell(($product_Col_Width + $All_Column_Width + 0.1), ($BorderStop_Y - $BorderStart_Y + $helpTabRow_Height + 1), '', $border, $align='C', $fill=0, $ln=0, $BorderStart_X, $BorderStart_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=false, $maxh=($BorderStop_Y - $BorderStart_Y), 'T');
 		
 		ob_end_clean();
 		//Close and output PDF document
