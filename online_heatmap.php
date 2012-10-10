@@ -702,14 +702,8 @@ if($Rotation_Flg == 1)
 	}
 }
 */
-
-if(strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') == FALSE)
-{	//Hiding doctype line incase of IE, as presence of it causes DIV scale issue in IE
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
-<?php
-}
-?>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -1683,7 +1677,7 @@ $htmlContent  .= '<div id="dropmenu" class="dropmenudiv" style="width: 310px;">'
 						
 $htmlContent .= '<div align="center" style="vertical-align:top;">'
 			. '<table style="vertical-align:middle; cellpadding:0px; cellspacing:0px;';
-			if(strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') == FALSE)
+			//if(strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') == FALSE)
 				$htmlContent .=' height:100%;';	///100% height causes unwanted stretching of table cell in IE but it requires specially for chrome for div scaling
 $htmlContent .='" class="display">'
 			. '<thead><tr><th style="background-color:#FFFFFF;"></th>';
