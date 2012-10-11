@@ -1334,8 +1334,12 @@ else $ddesc=$rec->detailed_descr->textblock;
 	/***** TKV
 	****** Detect and pick all irregular phases that exist in one or several of the various title or description fields */
 	global $array1,$array2;
-	$phases_regex='/phase4|phase2\/3|phase 2a\/2b|phase 1\/2|Phase l\/Phase ll|phase 1b\/2a|phase 1a\/1b|Phase 1a\/b|phase 3b\/4|Phase I\/II|Phase2b\/3|phase 1b\/2|phase 2a\/b|phase 1a|phase 1b|Phase 1C|Phase III(?![a-z.-\\/])|phase II(?![a-z.-\\/])|Phase I(?![a-z.-\\/])|phase 2a|PHASEII|PHASE iii|phase 2b|phase iib|phase iia|phase 3a|phase 3b|Phase I-II/i';
+	$phases_regex='/phase4|phase2\/3|phase 2a\/2b|phase 1\/2|Phase l\/Phase ll|phase 1b\/2a|phase 1a\/1b|Phase 1a\/b|phase 3b\/4|Phase I\/III|Phase I\/II|Phase2b\/3|phase 1b\/2|phase 2a\/b|phase 1a|phase 1b|Phase 1C|Phase III(?![a-z.-\\/])|phase II(?![a-z.-\\/])|Phase I(?![a-z.-\\/])|phase 2a|PHASEII|PHASE iii|phase 2b|phase iib|phase iia|phase 3a|phase 3b|Phase I-II/i';
 	preg_match_all($phases_regex, $record_data['brief_title'], $matches);
+	$currentPhase=$record_data['phase'];
+	$currentPhaseIndex=array_search($record_data['phase'],$array1);
+
+
 	
 	if(!count($matches[0]) >0 )
 	{
@@ -1379,6 +1383,9 @@ else $ddesc=$rec->detailed_descr->textblock;
 				break;
 			case 'Phase i/ii':
 				$record_data['phase']='Phase 1/Phase 2';
+				break;
+			case 'Phase i/iii':
+				$record_data['phase']='Phase 2/Phase 3';
 				break;
 			case 'Phase i/phase ii':
 				$record_data['phase']='Phase 1/Phase 2';
@@ -1464,6 +1471,12 @@ else $ddesc=$rec->detailed_descr->textblock;
 		}
 	}
 
+	$newPhaseIndex=array_search($record_data['phase'],$array1);
+
+	if( isset($newPhaseIndex) and isset($currentPhaseIndex) and ($currentPhaseIndex > $newPhaseIndex) )
+		$record_data['phase'] = $currentPhase;
+	
+	
 	//****
 	foreach($record_data as $fieldname => $value)
 	{
