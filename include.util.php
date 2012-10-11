@@ -537,8 +537,8 @@ function update_sphinx_index($l_id)
 	if(!$l_id) return false;
 	$query = 'SELECT  
 				larvol_id, source_id, brief_title, acronym, official_title, lead_sponsor, collaborator, institution_type, source, 
-				brief_summary, detailed_description, overall_status, is_active, enrollment, criteria, inclusion_criteria, 
-				exclusion_criteria, org_study_id, phase, `condition`, intervention_name, intervention_description, 
+				brief_summary, detailed_description, overall_status, is_active, enrollment,  inclusion_criteria, 
+				org_study_id, phase, `condition`, intervention_name, intervention_description, 
 				primary_outcome_measure, primary_outcome_timeframe, region, keyword,lastchanged_date
 				from data_trials where larvol_id = '. $l_id .' limit 1 ';
 	
@@ -558,8 +558,8 @@ function update_sphinx_index($l_id)
 	$qry2="REPLACE INTO rtindex1 
 	(
 	id, source_id, brief_title, acronym, official_title, lead_sponsor, collaborator, institution_type, 
-	source,  brief_summary, detailed_description, overall_status, is_active,  enrollment, criteria, inclusion_criteria, 
-	exclusion_criteria, org_study_id, phase, condition, intervention_name, intervention_description, 
+	source,  brief_summary, detailed_description, overall_status, is_active,  enrollment, inclusion_criteria, 
+	org_study_id, phase, condition, intervention_name, intervention_description, 
 	primary_outcome_measure, primary_outcome_timeframe, region, keyword,lastchanged_date 
 	)";
 	$qry="
@@ -579,9 +579,7 @@ function update_sphinx_index($l_id)
 	(($res['overall_status'])?"'".str_replace("'", "",$res['overall_status'])."'":"''").",".
 	(($res['is_active'])?"'".str_replace("'", "",$res['is_active'])."'":"''").",".
 	(($res['enrollment'])?"'".str_replace("'", "",$res['enrollment'])."'":"''").",".
-	(($res['criteria'])?"'".str_replace("'", "",$res['criteria'])."'":"''").",".
 	(($res['inclusion_criteria'])?"'".str_replace("'", "",$res['inclusion_criteria'])."'":"''").",".
-	(($res['exclusion_criteria'])?"'".str_replace("'", "",$res['exclusion_criteria'])."'":"''").",".
 	(($res['org_study_id'])?"'".str_replace("'", "",$res['org_study_id'])."'":"''").",".
 	(($res['phase'])?"'".str_replace("'", "",$res['phase'])."'":"''").",".
 	(($res['condition'])?"'".str_replace("'", "",$res['condition'])."'":"''").",".
