@@ -616,13 +616,13 @@ function formatBrandName($inputStr, $headerType)
 	}
 	else
 	{
-		if(preg_match('/^(.*)\s\((.*)\)$/', trim($inputStr), $outputArr))	//To process product Name (Tag Name)
+		if(preg_match('/^(.*)\s\((.*)\)\s\/\s(.*)$/', $inputStr, $outputArr))	//To process product Name (Tag Name) / Company Name
 		{	
-			$outputStr =  '<b>' . trim($outputArr[1]) . '</b> (' . trim($outputArr[2]) . ')';
-		}
-		else if(preg_match('/^(.*)\s\((.*)\)\s\/\s(.*)$/', $inputStr, $outputArr))	//To process product Name (Tag Name) / Company Name
-		{
 			$outputStr = '<b>' . $outputArr[1] . '</b> (' . $outputArr[2] . ') / ' . $outputArr[3];
+		}
+		else if(preg_match('/^(.*)\s\((.*)\)$/', trim($inputStr), $outputArr))	//To process product Name (Tag Name)
+		{
+			$outputStr =  '<b>' . trim($outputArr[1]) . '</b> (' . trim($outputArr[2]) . ')';
 		}
 		else if(preg_match('/^(.*)\s\/\s(.*)$/', $inputStr, $outputArr))	//To process product Name / Company Name
 		{
