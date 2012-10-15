@@ -1925,7 +1925,7 @@ function Download_reports()
 				if(trim($cell_data['bomb']) == 'small')
 				{
 					$data_matrix[$row][$col]['bomb']['value']=trim($cell_data['bomb']);
-					$Width = $Width + 3.1 + 2.5;
+					$Width = $Width + 3.1 + 0.5;
 					
 					if(date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])) <= date('Y-m-d H:i:s', strtotime($start_range, $now)) && date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])) >= date('Y-m-d H:i:s', strtotime($end_range, $now)))
 					{
@@ -1945,7 +1945,7 @@ function Download_reports()
 				elseif(trim($cell_data['bomb']) == 'large')
 				{
 					$data_matrix[$row][$col]['bomb']['value']=trim($cell_data['bomb']);
-					$Width = $Width + 3.1 + 2.5;
+					$Width = $Width + 3.1 + 0.5;
 					
 					if((date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])) <= date('Y-m-d H:i:s', strtotime($start_range, $now))) && (date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])) >= date('Y-m-d H:i:s', strtotime($end_range, $now))))
 					{
@@ -2073,40 +2073,46 @@ function Download_reports()
 				$data_matrix[$row][$col]['prohibited_active']=$cell_data['prohibited_active'];
 				
 				////// Remaining Width calculation
-				
+				require_once('tcpdf/config/lang/eng.php');
+				require_once('tcpdf/tcpdf.php');  
+				$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, 'LETTER', true, 'UTF-8', false);
+		
 				if($_POST['dwcount']=='active')
 				{
 					if($data_matrix[$row][$col]['active'] != NULL && $data_matrix[$row][$col]['active'] != '')
 					{
-						$Width = $Width + (strlen($data_matrix[$row][$col]['active']) * 2);
+						$Width = $Width + $pdf->GetStringWidth($data_matrix[$row][$col]['active'], 'freesansb', 'B', 8) + 0.85;
 					}
 				}
 				elseif($_POST['dwcount']=='total')
 				{
 					if($data_matrix[$row][$col]['total'] != NULL && $data_matrix[$row][$col]['total'] != '')
 					{
-						$Width = $Width + (strlen($data_matrix[$row][$col]['total']) * 2);
+						$Width = $Width + $pdf->GetStringWidth($data_matrix[$row][$col]['total'], 'freesansb', 'B', 8) + 0.85;
 					}
 				}
 				else
 				{
 					if($data_matrix[$row][$col]['indlead'] != NULL && $data_matrix[$row][$col]['indlead'] != '')
 					{
-						$Width = $Width + (strlen($data_matrix[$row][$col]['indlead']) * 2);
+						$Width = $Width + $pdf->GetStringWidth($data_matrix[$row][$col]['indlead'], 'freesansb', 'B', 8) + 0.85;
 					}
 				}
 				
 				if(trim($data_matrix[$row][$col]['filing']) != '' && $data_matrix[$row][$col]['filing'] != NULL)
-				$Width = $Width + 3.1 + 2.5;
+				$Width = $Width + 3.1 + 0.5;
 				
 				if($Width_matrix[$col]['width'] < ($Width+2) || $Width_matrix[$col]['width'] == '' || $Width_matrix[$col]['width'] == 0)
 				{
-					if(($Width+2) < $Min_One_Liner)
-					$Width_extra = $Min_One_Liner - ($Width+2);
-					$Width_matrix[$col]['width']=$Width + 2 + $Width_extra;
+					if($Width < $Min_One_Liner)
+					$Width_extra = $Min_One_Liner - $Width;
+					$Width_matrix[$col]['width']=$Width + $Width_extra;
 				}
 				if($Width_matrix[$col]['width'] < $Min_One_Liner)
 				$Width_matrix[$col]['width'] = $Min_One_Liner;
+				
+				if($data_matrix[$row][$col]['update_flag'] == 1)	// As we produce white border
+				$Width_matrix[$col]['width'] = $Width_matrix[$col]['width'] + 0.6;
 				
 			}
 			else
@@ -2727,7 +2733,7 @@ function Download_reports()
 			$Place_X = $Main_X;
 			$Place_Y = $Main_Y;
 			
-			if (($startY + $prod_row_height) + $dimensions['bm'] > ($dimensions['hk']))
+			if (($startY + $prod_row_height + 1) + $dimensions['bm'] > ($dimensions['hk']))
 			{
 				//this row will cause a page break, draw the bottom border on previous row and give this a top border
 				
@@ -3736,11 +3742,11 @@ function Download_reports()
 		
 		$dimensions = $pdf->getPageDimensions();
 		$newMarginWidth = (($dimensions['wk'] - (152))/2);
-		$pdf->SetRightMargin($newMarginWidth);
-		$pdf->SetLeftMargin($newMarginWidth);
+		//$pdf->SetRightMargin($newMarginWidth);
+		//$pdf->SetLeftMargin($newMarginWidth);
 		
 		$startY = $pdf->GetY();
-		if (($startY + 12) + $dimensions['bm'] > ($dimensions['hk']))
+		if (($startY + 13) + $dimensions['bm'] > ($dimensions['hk']))
 		{
 			//this row will cause a page break, draw the bottom border on previous row and give this a top border
 			$BorderStop_X = $pdf->GetX();
