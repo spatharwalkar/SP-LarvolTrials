@@ -561,7 +561,7 @@ if($Rotation_Flg == 1)	////Adjustment in area column width as per area name
 			$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col]:$val;
 			$cols_Area_Space[$col] = ceil(($area_Col_Height) / $Bold_Char_Size);
 			//$cols_Area_Lines[$col] = ceil(strlen(trim($val))/$cols_Area_Space[$col]);
-			$cols_Area_Lines[$col] = $pdf->getNumLines($val, ($area_Col_Height*17/90));
+			$cols_Area_Lines[$col] = $pdf->getNumLines($val, ($area_Col_Height*20/90));
 			$width = ($cols_Area_Lines[$col] * $Line_Height);
 			if($Width_matrix[$col]['width'] < $width)
 				$Width_matrix[$col]['width'] = $width;
@@ -1588,30 +1588,171 @@ function refresh_data(cell_id)
 	        return;
 	}
 	</script>
+    
+    <script type="text/javascript">
+        var currentFixedHeader;
+        var currentGhost;
+		var ScrollOn = false;
+        $(window).scroll(function() {
+            $.fn.reverse = [].reverse;
+			if(!ScrollOn)
+			{
+            	setAreaColWidth();
+				ScrollOn = true;
+			}
+            var createGhostHeader = function (header, topOffset) {
+                // Don't recreate if it is the same as the current one
+                if (header == currentFixedHeader && currentGhost)
+                {
+                    currentGhost.css('top', -topOffset + "px");
+                    return currentGhost;
+                }
+                
+                if (currentGhost)
+                    $(currentGhost).remove();
+                
+                var realTable = $(header).parents('#hmMainTable');
+                
+                var headerPosition = $(header).offset();
+                var tablePosition = $(realTable).offset();
+                
+                var container = $('<table></table>');
+                
+                // Copy attributes from old table (may not be what you want)
+                for (var i = 0; i < realTable[0].attributes.length; i++) {
+                    var attr = realTable[0].attributes[i];
+                    container.attr(attr.name, attr.value);
+                }
+                                
+                // Set up position of fixed row
+                container.css({
+                    position: 'fixed',
+                    top: -topOffset,
+                    left: tablePosition.left,
+                    width: $(realTable).outerWidth()
+                });
+                
+                // Create a deep copy of our actual header and put it in our container
+                var newHeader = $(header).clone().appendTo(container);
+                
+                var collection2 = $(newHeader).find('td');
+                
+                // TODO: Copy the width of each <td> manually
+                $(header).find('td').each(function () {
+                    var matchingElement = $(collection2.eq($(this).index()));
+                    $(matchingElement).width(this.offsetWidth + 0.5);
+                });
+				
+                currentGhost = container;
+                currentFixedHeader = header;
+                
+                // Add this fixed row to the same parent as the table
+                $(table).parent().append(currentGhost);
+                return currentGhost;
+            };
+
+            var currentScrollTop = $(window).scrollTop();
+
+            var activeHeader = null;
+            var table = $('#hmMainTable').first();
+            var tablePosition = table.offset();
+            var tableHeight = table.height();
+            
+            var lastHeaderHeight = $(table).find('thead').last().height();
+            var topOffset = 0;
+            
+            // Check that the table is visible and has space for a header
+            if (tablePosition.top + tableHeight - lastHeaderHeight >= currentScrollTop)
+            {
+                var lastCheckedHeader = null;
+                // We do these in reverse as we want the last good header
+                var headers = $(table).find('thead').reverse().each(function () {
+                    var position = $(this).offset();
+                    
+                    if (position.top <= currentScrollTop)
+                    {
+                        activeHeader = this;
+                        return false;
+                    }
+                    
+                    lastCheckedHeader = this;
+                });
+                
+                if (lastCheckedHeader)
+                {
+                    var offset = $(lastCheckedHeader).offset();
+                    if (offset.top - currentScrollTop < $(activeHeader).height())
+                        topOffset = $(activeHeader).height() - (offset.top - currentScrollTop) + 1;
+                }
+            }
+            // No row is needed, get rid of one if there is one
+            if (activeHeader == null && currentGhost)
+
+            {
+                currentGhost.remove();
+
+                currentGhost = null;
+                currentFixedHeader = null;
+            }
+            
+            // We have what we need, make a fixed header row
+            if (activeHeader)
+                createGhostHeader(activeHeader, topOffset);
+        });
+		
+	function setAreaColWidth()
+	{
+		var limit = document.getElementById('Last_HM').value;
+		var i=1, k=1, first;
+		for(i=1;i<=limit;i++)
+		{
+			var cell_exist=document.getElementById("Cell_ID_"+i);
+			if(cell_exist != null && cell_exist != '')
+			{
+				var cell_type = document.getElementById("Cell_Type_"+i);
+				var cell_row = document.getElementById("Cell_RowNum_"+i);
+				var cell_col = document.getElementById("Cell_ColNum_"+i);
+				if(cell_type != null && cell_type != '' && cell_row != null && cell_row != '' && cell_col != null && cell_col != '')
+				{
+					if(cell_type.value.replace(/\s+/g, '') == 'HM_Cell' && cell_row.value.replace(/\s+/g, '') == 1)
+					{
+						for(k=1;k<=limit;k++)
+						{
+							var cell_exist2=document.getElementById("Cell_ID_"+k);
+							if(cell_exist2 != null && cell_exist2 != '')
+							{
+								var cell_type2 = document.getElementById("Cell_Type_"+k);
+								var cell_col2 = document.getElementById("Cell_ColNum_"+k);
+								if(cell_type2 != null && cell_type2 != '' && cell_col2 != null && cell_col2 != '')
+								{
+									if(cell_type2.value.replace(/\s+/g, '') == 'area' && cell_col2.value.replace(/\s+/g, '') == cell_col.value.replace(/\s+/g, ''))
+									{
+										cell_exist2.style.width = (cell_exist.offsetWidth) + "px";
+										<?php $u_agent = $_SERVER['HTTP_USER_AGENT']; if(!preg_match('/Chrome/i',$u_agent)) { ?>
+										cell_exist2.style.border = 'medium solid rgb(221, 221, 255)';
+										cell_exist2.style.padding = '1px';
+										<?php } // chrome does not need borders to be specified but other browsers need it ?>
+									}
+								}
+							}
+						}
+					}
+					else if(cell_type.value.replace(/\s+/g, '') == 'product' && cell_row.value.replace(/\s+/g, '') == 1)
+					{
+						first = i;
+					}
+				}
+			}
+		}
+		document.getElementById("hmMainTable_HeaderFirstCell").style.width = (document.getElementById("Cell_ID_"+first).offsetWidth) + "px";
+		document.getElementById("hmMainTable_HeaderFirstCell").style.border = 'medium solid rgb(255, 255, 255)';
+		//document.getElementById("hmMainTable_HeaderFirstCell").style.padding = '1px';
+	}
+    </script>
+
 </head>
 
 <body bgcolor="#FFFFFF" style="background-color:#FFFFFF;">
-<div id="slideout">
-    <img src="images/help.png" alt="Help" />
-    <div class="slideout_inner">
-        <table bgcolor="#FFFFFF" cellpadding="0" cellspacing="0" class="table-slide">
-        <tr><td width="15%"><img title="Bomb" src="images/new_lbomb.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Discontinued</td></tr>
-        <tr><td><img title="Filing" src="images/new_file.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Filing details</td></tr>
-        <tr><td><img title="Phase explanation" src="images/phaseexp.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Phase explanation</td></tr>
-        <tr><td><img title="Red Border" src="images/outline.png"  style="width:20px; height:15px; cursor:pointer;" /></td><td>Red border (record updated)</td></tr>
-        <tr><td colspan="2" style="padding-right: 1px;">
-         <div style="float:left;padding-top:3px;">Phase&nbsp;</div>
-         <div class="gray">N/A</div>
-         <div class="blue">0</div>
-         <div class="green">1</div>
-         <div class="yellow">2</div>
-         <div class="orange">3</div>
-         <div class="red">4</div>
-         </td></tr>
-        </table>
-    </div>
-</div>
-
 <?php 
 
 $online_HMCounter=0;
@@ -1676,11 +1817,11 @@ $htmlContent  .= '<div id="dropmenu" class="dropmenudiv" style="width: 310px;">'
 				.'</div><script type="text/javascript">cssdropdown.startchrome("chromemenu");</script></form>';
 						
 $htmlContent .= '<div align="center" style="vertical-align:top;">'
-			. '<table style="vertical-align:middle; cellpadding:0px; cellspacing:0px;';
+			. '<table border="0" cellspacing="2" cellpadding="0" style="vertical-align:middle; background-color:#FFFFFF; ';
 			//if(strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') == FALSE)
-				$htmlContent .=' height:100%;';	///100% height causes unwanted stretching of table cell in IE but it requires specially for chrome for div scaling
-$htmlContent .='" class="display">'
-			. '<thead><tr><th style="background-color:#FFFFFF;"></th>';
+			//	$htmlContent .=' height:100%;';	///100% height causes unwanted stretching of table cell in IE but it requires specially for chrome for div scaling
+$htmlContent .='" class="display" id = "hmMainTable">'
+			. '<thead id = "hmMainTable_Header"><tr><th id="hmMainTable_HeaderFirstCell" style="background-color:#FFFFFF; '.(($Rotation_Flg == 1) ? 'width:'.$product_Col_Width.'px; max-width:'.$product_Col_Width.'px;':'').'"></th>';
 						
 foreach($columns as $col => $val)
 {
@@ -1703,8 +1844,13 @@ foreach($columns as $col => $val)
 		$htmlContent .= '</div></th>';
 	}
 }
+
+if($total_fld)
+{
+	$htmlContent .= '<th style="background-color:#FFFFFF;">&nbsp;</th>';
+}
 //width="'.$product_Col_Width.'px" currently not needed
-$htmlContent .= '</tr><tr><th '.(($Rotation_Flg == 1) ? 'height="'.$area_Col_Height.'px"':'').' class="Product_Row_Class Product_Col_WidthStyle" style="background-color:#FFFFFF; '.(($Rotation_Flg == 1) ? 'width:'.$product_Col_Width.'px; max-width:'.$product_Col_Width.';px':'').' ">&nbsp;</th>';
+$htmlContent .= '</tr><tr><th '.(($Rotation_Flg == 1) ? 'height="'.$area_Col_Height.'px"':'').' class="Product_Row_Class Product_Col_WidthStyle" style="background-color:#FFFFFF; '.(($Rotation_Flg == 1) ? 'width:'.$product_Col_Width.'px; max-width:'.$product_Col_Width.'px;':'').' ">&nbsp;</th>';
 
 
 foreach($columns as $col => $val)
@@ -1716,6 +1862,9 @@ foreach($columns as $col => $val)
 	$cat = (isset($columnsCategoryName[$col]) && $columnsCategoryName[$col] != '')? ' ('.$columnsCategoryName[$col].') ':'';
 		
 	$htmlContent .= '<th style="'.(($Rotation_Flg == 1) ? 'vertical-align:bottom;':'vertical-align:middle;').' max-width:'.$Width_matrix[$col]['width'].'px; width:'.$Width_matrix[$col]['width'].'px;" class="Area_Row_Class_'.$col.'" id="Cell_ID_'.$online_HMCounter.'" width="'.$Width_matrix[$col]['width'].'px" '.(($Rotation_Flg == 1) ? 'height="'.$area_Col_Height.'px" align="left"':'align="center"').' '.$caltTitle.'><div class="'.(($Rotation_Flg == 1) ? 'box_rotate Area_RowDiv_Class_'.$col.'':'break_words').'" style="background-color:#DDF;">';
+	
+	$htmlContent .= '<input type="hidden" value="area" name="Cell_Type_'.$online_HMCounter.'" id="Cell_Type_'.$online_HMCounter.'" />';
+	$htmlContent .= '<input type="hidden" value="'.$col.'" name="Cell_ColNum_'.$online_HMCounter.'" id="Cell_ColNum_'.$online_HMCounter.'" />';
 	
 	if($Rotation_Flg != 1)
 	$htmlContent .= '<p style="overflow:hidden; width:'.$Width_matrix[$col]['width'].'px; padding:0px; margin:0px;">';
@@ -1800,11 +1949,12 @@ foreach($rows as $row => $rval)
 	
 	
 	
-	$htmlContent .='<th class="product_col" style="padding-left:4px; vertical-align:middle;" id="Cell_ID_'.$online_HMCounter.'" '.$raltTitle.'><div align="left" style="vertical-align:middle;">';
+	$htmlContent .='<th class="product_col" style="padding-left:4px; vertical-align:middle;" id="Cell_ID_'.$online_HMCounter.'" '.$raltTitle.'><div align="left" style="vertical-align:middle; '.(($Rotation_Flg == 1) ? 'width:'.$product_Col_Width.'px; max-width:'.$product_Col_Width.'px;':'').'">';
 			
 	$htmlContent .= '<input type="hidden" value="product" name="Cell_Type_'.$online_HMCounter.'" id="Cell_Type_'.$online_HMCounter.'" />';
 	$htmlContent .= '<input type="hidden" value="'.$row.'" name="Cell_RowNum_'.$online_HMCounter.'" id="Cell_RowNum_'.$online_HMCounter.'" />';
-
+	$htmlContent .= '<input type="hidden" value="'.$col.'" name="Cell_ColNum_'.$online_HMCounter.'" id="Cell_ColNum_'.$online_HMCounter.'" />';
+	
 	if(isset($productIds[$row]) && $productIds[$row] != NULL && !empty($areaIds))
 	{
 		$htmlContent .= '<input type="hidden" value="'.$row_active_total[$row].',endl,'.$row_count_total[$row].',endl,'.$row_indlead_total[$row].'" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
@@ -1839,6 +1989,7 @@ foreach($rows as $row => $rval)
 	
 		$htmlContent .= '<input type="hidden" value="HM_Cell" name="Cell_Type_'.$online_HMCounter.'" id="Cell_Type_'.$online_HMCounter.'" />';
 		$htmlContent .= '<input type="hidden" value="'.$row.'" name="Cell_RowNum_'.$online_HMCounter.'" id="Cell_RowNum_'.$online_HMCounter.'" />';
+		$htmlContent .= '<input type="hidden" value="'.$col.'" name="Cell_ColNum_'.$online_HMCounter.'" id="Cell_ColNum_'.$online_HMCounter.'" />';
 	
 		if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL && $data_matrix[$row][$col]['total'] != 0)
 		{
@@ -2247,6 +2398,26 @@ if(($footnotes != NULL && trim($footnotes) != '') || ($description != NULL && tr
 			
 print $htmlContent;
 ?>
+<div id="slideout">
+    <img src="images/help.png" alt="Help" />
+    <div class="slideout_inner">
+        <table bgcolor="#FFFFFF" cellpadding="0" cellspacing="0" class="table-slide">
+        <tr><td width="15%"><img title="Bomb" src="images/new_lbomb.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Discontinued</td></tr>
+        <tr><td><img title="Filing" src="images/new_file.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Filing details</td></tr>
+        <tr><td><img title="Phase explanation" src="images/phaseexp.png"  style="width:17px; height:17px; cursor:pointer;" /></td><td>Phase explanation</td></tr>
+        <tr><td><img title="Red Border" src="images/outline.png"  style="width:20px; height:15px; cursor:pointer;" /></td><td>Red border (record updated)</td></tr>
+        <tr><td colspan="2" style="padding-right: 1px;">
+         <div style="float:left;padding-top:3px;">Phase&nbsp;</div>
+         <div class="gray">N/A</div>
+         <div class="blue">0</div>
+         <div class="green">1</div>
+         <div class="yellow">2</div>
+         <div class="orange">3</div>
+         <div class="red">4</div>
+         </td></tr>
+        </table>
+    </div>
+</div>
 
 </body>
 </html>
@@ -2265,6 +2436,6 @@ $('.product_col').css('word-wrap','break-word');
 $('.product_col').css('_width','400px');
 }
 // Default size
-document.getElementById("startrange").style.width = "30px"
-document.getElementById("endrange").style.width = "70px"
+document.getElementById("startrange").style.width = "30px";
+document.getElementById("endrange").style.width = "70px";
 </script>
