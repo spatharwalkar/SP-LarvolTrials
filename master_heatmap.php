@@ -2177,7 +2177,7 @@ function Download_reports()
 		$pdf->SetTitle('Larvol Trials');
 		$pdf->SetSubject('Larvol Trials');
 		$pdf->SetKeywords('Larvol Trials Master Heatmap, Larvol Trials Master Heatmap PDF Export');
-		$pdf->SetFont('freesans', ' ', 8); // Normal Font
+		$pdf->SetFont('freesans', ' ', 8, '', false); // Normal Font
 		$pdf->setFontSubsetting(false);
 		$pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
 		$pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
@@ -2347,7 +2347,7 @@ function Download_reports()
 		///Perform all line number/height calculation at start only as after padding/margin value returned may be wrong
 		
 		///Calculate height for category area row
-		$pdf->SetFont('freesans', ' ', 8); // Bold Font
+		$pdf->SetFont('freesans', ' ', 8, '', false); // Bold Font
 		$Max_Cat_areaNumLines=0;
 		foreach($columns as $col => $val)
 		{
@@ -2399,7 +2399,7 @@ function Download_reports()
 			}
 			$Area_Row_height = $Max_areaStringLength + 2;
 		}
-		$pdf->SetFont('freesans', ' ', 8); // Normal Font
+		$pdf->SetFont('freesans', ' ', 8, '', false); // Normal Font
 		
 		///Calculate height for product row
 		foreach($rows as $row => $rval)
@@ -2429,7 +2429,7 @@ function Download_reports()
 		$current_StringLength = $pdf->GetStringWidth($pdftitle, 'freesansb', 'B', 8) + 5;
 		$newMarginWidth = (($dimensions['wk'] - ($current_StringLength))/2);
 		$pdf->MultiCell(($product_Col_Width + $All_Column_Width), '', $pdftitle, $border=0, $align='C', $fill=1, $ln=1, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
-		$pdf->SetFont('freesans', ' ', 8); // Normal Font
+		$pdf->SetFont('freesans', ' ', 8, '', false); // Normal Font
 		$pdf->Ln(3);
 		
 		$pdf->SetFillColor(221, 221, 255);
@@ -2441,7 +2441,7 @@ function Download_reports()
 		
 		$Place_X = $Main_X;
 		$Place_Y = $Main_Y;
-		$pdf->SetFont('freesans', ' ', 8); // Normal Font
+		$pdf->SetFont('freesans', ' ', 8, '', false); // Normal Font
 		/////////// Print Category Row
 		$CatPresenceFlg = 0;
 		$pdf->SetFillColor(255, 255, 255);
@@ -2710,7 +2710,7 @@ function Download_reports()
 				}
 			}
 		}
-		$pdf->SetFont('freesans', ' ', 8); // Normal Font
+		$pdf->SetFont('freesans', ' ', 8, '', false); // Normal Font
 		
 		$pdf->SetX($Main_X);
 		$pdf->SetY(($Place_Y_Bk + $Area_Row_height + 0.5));
@@ -2720,7 +2720,7 @@ function Download_reports()
 		{
 			$dimensions = $pdf->getPageDimensions();
 			$startY = $pdf->GetY();
-			$pdf->SetFont('freesans', ' ', 8); // Reset Font
+			$pdf->SetFont('freesans', ' ', 8, '', false); // Reset Font
 			
 			$prod_row_height = $prod_row_height_calc[$row];
 			
@@ -3028,7 +3028,7 @@ function Download_reports()
 				$pdf->SetX($Main_X);
 				$pdf->SetY(($Place_Y_Bk + $Area_Row_height + 0.5));
 				
-				$pdf->SetFont('freesans', ' ', 8); // Normal Font
+				$pdf->SetFont('freesans', ' ', 8, '', false); // Normal Font
 				///End of header row	
 							
 			} elseif ((ceil($startY) + $prod_row_height) + $dimensions['bm'] == floor($dimensions['hk'])) {
@@ -3069,7 +3069,7 @@ function Download_reports()
 				$pdf->MultiCell($Product_Rowcat_width, $Product_Rowcat_height, $pdfContent, $border=0, $align='L', $fill=1, $ln=1, $Place_X, $Place_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
 				$Place_Y = $Place_Y + $Product_Rowcat_height + 0.5;
 			}
-			$pdf->SetFont('freesans', ' ', 8); // Normal Font	
+			$pdf->SetFont('freesans', ' ', 8, '', false); // Normal Font	
 			
 			$pdf->SetX($Main_X);
 			$pdf->SetY($Place_Y);
@@ -4609,7 +4609,7 @@ function getNumLinesPDFExport($productName, $OtherPart, $product_Col_Width, $Bol
 		}
 		else
 		{
-			$pdf->SetFont('freesans', ' ', 8); // Bold Font
+			$pdf->SetFont('freesans', ' ', 8, '', false); // Bold Font
 			$current_Width = $pdf->GetStringWidth($data[$m], 'freesans', ' ', 8);
 			$Minus = $pdf->GetStringWidth(' ', 'freesans', ' ', 8);
 		}
@@ -4637,7 +4637,7 @@ function getNumLinesPDFExport($productName, $OtherPart, $product_Col_Width, $Bol
 	$data = explode(' ', $OtherPart);
 	for($m=0;$m< count($data); $m++)	//// for loop of data ---- first level
 	{
-		$pdf->SetFont('freesans', ' ', 8); // Bold Font
+		$pdf->SetFont('freesans', ' ', 8, '', false); // Bold Font
 		if(!$ExtraSpFlg) { $AvlblWidth = $AvlblWidth - 0; $ExtraSpFlg = true;}
 		$current_Width = $pdf->GetStringWidth((($m == count($data)-1) ? $data[$m] : $data[$m]), 'freesans', '', 8);
 		if ($m != count($data)-1) $Minus = $pdf->GetStringWidth(' ', 'freesans', ' ', 8); else $Minus = 0;
