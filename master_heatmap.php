@@ -1828,7 +1828,7 @@ function Download_reports()
 				if($cell_data['count_active_indlead'] != '' && $cell_data['count_active_indlead'] != NULL)
 				$data_matrix[$row][$col]['indlead']=$cell_data['count_active_indlead'];
 				else
-				$data_matrix[$row][$col]['indlead']=0;
+				$data_matrix[$row][$col]['indlead']=0;$data_matrix[$row][$col]['indlead']=999;
 				
 				$data_matrix[$row][$col]['bomb_explain']=trim($cell_data['bomb_explain']);
 				/// Clean HTML using Tidy
@@ -1925,7 +1925,7 @@ function Download_reports()
 				if(trim($cell_data['bomb']) == 'small')
 				{
 					$data_matrix[$row][$col]['bomb']['value']=trim($cell_data['bomb']);
-					$Width = $Width + 3.1 + 0.5;
+					$Width = $Width + 3.1 + 1;
 					
 					if(date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])) <= date('Y-m-d H:i:s', strtotime($start_range, $now)) && date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])) >= date('Y-m-d H:i:s', strtotime($end_range, $now)))
 					{
@@ -1945,7 +1945,7 @@ function Download_reports()
 				elseif(trim($cell_data['bomb']) == 'large')
 				{
 					$data_matrix[$row][$col]['bomb']['value']=trim($cell_data['bomb']);
-					$Width = $Width + 3.1 + 0.5;
+					$Width = $Width + 3.1 + 1;
 					
 					if((date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])) <= date('Y-m-d H:i:s', strtotime($start_range, $now))) && (date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])) >= date('Y-m-d H:i:s', strtotime($end_range, $now))))
 					{
@@ -2081,38 +2081,39 @@ function Download_reports()
 				{
 					if($data_matrix[$row][$col]['active'] != NULL && $data_matrix[$row][$col]['active'] != '')
 					{
-						$Width = $Width + $pdf->GetStringWidth($data_matrix[$row][$col]['active'], 'freesansb', 'B', 8) + 0.85;
+						$Width = $Width + $pdf->GetStringWidth($data_matrix[$row][$col]['active'], 'freesansb', 'B', 8) + 1;
 					}
 				}
 				elseif($_POST['dwcount']=='total')
 				{
 					if($data_matrix[$row][$col]['total'] != NULL && $data_matrix[$row][$col]['total'] != '')
 					{
-						$Width = $Width + $pdf->GetStringWidth($data_matrix[$row][$col]['total'], 'freesansb', 'B', 8) + 0.85;
+						$Width = $Width + $pdf->GetStringWidth($data_matrix[$row][$col]['total'], 'freesansb', 'B', 8) + 1;
 					}
 				}
 				else
 				{
 					if($data_matrix[$row][$col]['indlead'] != NULL && $data_matrix[$row][$col]['indlead'] != '')
 					{
-						$Width = $Width + $pdf->GetStringWidth($data_matrix[$row][$col]['indlead'], 'freesansb', 'B', 8) + 0.85;
+						$Width = $Width + $pdf->GetStringWidth($data_matrix[$row][$col]['indlead'], 'freesansb', 'B', 8) + 1;
 					}
 				}
 				
 				if(trim($data_matrix[$row][$col]['filing']) != '' && $data_matrix[$row][$col]['filing'] != NULL)
-				$Width = $Width + 3.1 + 0.5;
+				$Width = $Width + 3.1 + 1;
 				
-				if($Width_matrix[$col]['width'] < ($Width+2) || $Width_matrix[$col]['width'] == '' || $Width_matrix[$col]['width'] == 0)
+				if($data_matrix[$row][$col]['update_flag'] == 1)	// As we produce white border
+				$Width_matrix[$col]['width'] = $Width + 0.8;
+				
+				if($Width_matrix[$col]['width'] < ($Width) || $Width_matrix[$col]['width'] == '' || $Width_matrix[$col]['width'] == 0)
 				{
 					if($Width < $Min_One_Liner)
 					$Width_extra = $Min_One_Liner - $Width;
 					$Width_matrix[$col]['width']=$Width + $Width_extra;
 				}
+				
 				if($Width_matrix[$col]['width'] < $Min_One_Liner)
 				$Width_matrix[$col]['width'] = $Min_One_Liner;
-				
-				if($data_matrix[$row][$col]['update_flag'] == 1)	// As we produce white border
-				$Width_matrix[$col]['width'] = $Width_matrix[$col]['width'] + 0.6;
 				
 			}
 			else
@@ -2227,30 +2228,6 @@ function Download_reports()
 		
 		$HColumn_Width = (((count($columns))+(($total_fld)? 1:0)) * ($area_Col_Width+0.5));
 		
-		/// Calculate Max Column width and set it to all columns
-		$maxArea_ConsistentWidth = 0;
-		foreach($columns as $col => $val)
-		{
-			if($maxArea_ConsistentWidth < $Width_matrix[$col]['width'])
-			$maxArea_ConsistentWidth = $Width_matrix[$col]['width'];
-		}
-			
-		if($maxArea_ConsistentWidth < $Total_Col_width)
-		$maxArea_ConsistentWidth = $Total_Col_width;
-		
-		foreach($columns as $col => $val)
-		{
-			$Width_matrix[$col]['width'] = $maxArea_ConsistentWidth;
-		}
-		$Total_Col_width = $maxArea_ConsistentWidth;
-		/// end of consistent width
-			
-		$RColumn_Width = 0; 
-		foreach($columns as $col => $val)
-		{
-			$RColumn_Width = $RColumn_Width + $Width_matrix[$col]['width'] + 0.5;
-		}
-		
 		if($total_fld) 
 		{ 
 			if($mode=='active')
@@ -2268,12 +2245,37 @@ function Download_reports()
 			$Total_Col_width = ((strlen($count_val) * 2) + 2);
 			if($Total_Col_width < $Min_One_Liner)
 			$Total_Col_width = $Min_One_Liner;
+		}
+		
+		/// Calculate Max Column width and set it to all columns
+		$maxArea_ConsistentWidth = 0;
+		foreach($columns as $col => $val)
+		{
+			if($maxArea_ConsistentWidth < $Width_matrix[$col]['width'])
+			$maxArea_ConsistentWidth = $Width_matrix[$col]['width'];
+		}
+			
+		if($maxArea_ConsistentWidth < $Total_Col_width)
+		$maxArea_ConsistentWidth = $Total_Col_width;
+		
+		$ConsistentRColumn_Width = (((count($columns))+(($total_fld)? 1:0)) * ($maxArea_ConsistentWidth+0.5));
+		$ConsistentFlg = false;
+		/// end of consistent width
+			
+		$RColumn_Width = 0; 
+		foreach($columns as $col => $val)
+		{
+			$RColumn_Width = $RColumn_Width + $Width_matrix[$col]['width'] + 0.5;
+		}
+		
+		if($total_fld) 
+		{ 
 			$RColumn_Width = $RColumn_Width + $Total_Col_width + 0.5; 
 		}
 		
 		if(($HColumn_Width + $product_Col_Width + 0.5) < 200.66)
 		{
-			//// Landscape page orientation
+			//// Potrait page orientation
 			$pdf->setPageOrientation('p');
 			$Page_Width = 200.66;
 			$Rotation_Flg = 0;
@@ -2281,11 +2283,19 @@ function Download_reports()
 		}
 		else if(($RColumn_Width + $product_Col_Width + 0.5) < 200.66)
 		{
-			//// Landscape page orientation
+			//// Potrait page orientation
 			$pdf->setPageOrientation('p');
 			$Page_Width = 200.66;
 			$Rotation_Flg = 1;
-			$All_Column_Width = $RColumn_Width;
+			if(($ConsistentRColumn_Width + $product_Col_Width + 0.5) < 200.66)	//Check whether after applying consistency rule OHM fits
+			{
+				$All_Column_Width = $ConsistentRColumn_Width;
+				$ConsistentFlg = true;
+			}
+			else	// If not go for inconsistent model
+			{
+				$All_Column_Width = $RColumn_Width;
+			}
 		}
 		else if(($HColumn_Width + $product_Col_Width + 0.5) < 264.16)
 		{
@@ -2301,7 +2311,15 @@ function Download_reports()
 			$pdf->setPageOrientation('l');
 			$Page_Width = 264.16;
 			$Rotation_Flg = 1;
-			$All_Column_Width = $RColumn_Width;
+			if(($ConsistentRColumn_Width + $product_Col_Width + 0.5) < 264.16)	//Check whether after applying consistency rule OHM fits
+			{
+				$All_Column_Width = $ConsistentRColumn_Width;
+				$ConsistentFlg =true;
+			}
+			else	// If not go for inconsistent model
+			{
+				$All_Column_Width = $RColumn_Width;
+			}
 		}
 		//$pdf->setPageOrientation('p');
 		//$Page_Width = 192;
@@ -2316,33 +2334,19 @@ function Download_reports()
 			$Total_Col_width = $area_Col_Width;
 		}
 		
+		if($ConsistentFlg)	//// Apply consistent width to all columns
+		{
+			foreach($columns as $col => $val)
+			{
+				$Width_matrix[$col]['width'] = $maxArea_ConsistentWidth;
+			}
+			$Total_Col_width = $maxArea_ConsistentWidth;
+		}
+		
 		//// Give product column required maximum width when available to prevent wrapping
 		$Avail_Prod_Col_width = $Page_Width - $All_Column_Width - $product_Col_Width;
 		if($Avail_Prod_Col_width > 0)
 		$product_Col_Width = $product_Col_Width + $Avail_Prod_Col_width;
-		
-		///// Extra width addition part  - We dont need this part as we dont distribute extra widths
-		//- If after rotation and after giving max width to product column, extra width remains, distribute it equally to all columns, to achieve fitting
-		/*$Avail_Area_Col_width = $Page_Width - $product_Col_Width - $All_Column_Width;
-		$extra_width = $Avail_Area_Col_width / ((count($columns))+(($total_fld)? 1:0)+1);
-		if($Avail_Area_Col_width > 1)
-		{
-			foreach($columns as $col => $val)
-			{
-				$Width_matrix[$col]['width'] = $Width_matrix[$col]['width'] + $extra_width;
-				$All_Column_Width = $All_Column_Width + $extra_width;
-			}
-			if($total_fld) 
-			{ 
-				if($Rotation_Flg != 1)
-				$Total_Col_width = $area_Col_Width;
-				$Total_Col_width = $Total_Col_width + $extra_width; 
-				$All_Column_Width = $All_Column_Width + $extra_width;
-			}
-			$product_Col_Width = $product_Col_Width + $extra_width;
-		}*/
-		
-		////////////////// End of Extra width addition part
 		
 		///Perform all line number/height calculation at start only as after padding/margin value returned may be wrong
 		
