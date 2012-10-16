@@ -1828,7 +1828,7 @@ function Download_reports()
 				if($cell_data['count_active_indlead'] != '' && $cell_data['count_active_indlead'] != NULL)
 				$data_matrix[$row][$col]['indlead']=$cell_data['count_active_indlead'];
 				else
-				$data_matrix[$row][$col]['indlead']=0;$data_matrix[$row][$col]['indlead']=999;
+				$data_matrix[$row][$col]['indlead']=0;
 				
 				$data_matrix[$row][$col]['bomb_explain']=trim($cell_data['bomb_explain']);
 				/// Clean HTML using Tidy
