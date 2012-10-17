@@ -1616,7 +1616,7 @@ function refresh_data(cell_id)
                 var headerPosition = $(header).offset();
                 var tablePosition = $(realTable).offset();
                 
-                var container = $('<table border="0" cellspacing="2" cellpadding="0" style="vertical-align:middle; background-color:#FFFFFF;  class="display" id = "hmMainTable"></table>');
+                var container = $('<table border="0" cellspacing="2" cellpadding="0" style="vertical-align:middle; background-color:#FFFFFF;"  class="display" id = "hmMainTable"></table>');
                 
                 // Copy attributes from old table (may not be what you want)
                 for (var i = 0; i < realTable[0].attributes.length; i++) {
@@ -1900,7 +1900,7 @@ foreach($columns as $col => $val)
 if($total_fld)
 {
 	$online_HMCounter++;
-	$htmlContent .= '<th id="Cell_ID_'.$online_HMCounter.'" '.(($Rotation_Flg == 1) ? 'height="'.$area_Col_Height.'px" align="left"':'align="center"').' width="'.$Total_Col_width.'px" style="'.(($Rotation_Flg == 1) ? 'vertical-align:bottom;':'vertical-align:middle;').' width:'.$Total_Col_width.'px; max-width:'.$Total_Col_width.'px;" class="Total_Row_Class"><div class="box_rotate Total_RowDiv_Class">';
+	$htmlContent .= '<th id="Cell_ID_'.$online_HMCounter.'" '.(($Rotation_Flg == 1) ? 'height="'.$area_Col_Height.'px" align="left"':'align="center"').' width="'.$Total_Col_width.'px" style="'.(($Rotation_Flg == 1) ? 'vertical-align:bottom;':'vertical-align:middle;').' width:'.$Total_Col_width.'px; max-width:'.$Total_Col_width.'px; background-color:#DDF;" class="Total_Row_Class"><div class="box_rotate Total_RowDiv_Class">';
 	if(!empty($productIds) && !empty($areaIds))
 	{
 		$productIds = array_filter($productIds);
@@ -1908,7 +1908,7 @@ if($total_fld)
 		$htmlContent .= '<input type="hidden" value="'.$active_total.',endl,'.$count_total.',endl,'.$indlead_total.'" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
 		$htmlContent .= '<input type="hidden" value="'. trim(urlPath()) .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds). '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />';
 		
-		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. trim(urlPath()) .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds). '&list=1&itype=0&sr=now&er=1 month&hm=' . $id . '" target="_blank" style="color:#000000;"><font id="Tot_ID_'.$online_HMCounter.'">'.$indlead_total.'</font></a>';
+		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. trim(urlPath()) .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds). '&list=1&itype=0&sr=now&er=1 month&hm=' . $id . '" target="_blank" style="color:#000000;"><b><font id="Tot_ID_'.$online_HMCounter.'">'.$indlead_total.'</font></b></a>';
 	}
 	$htmlContent .= '</div></th>';
 }
