@@ -2380,7 +2380,7 @@ function Download_reports()
 			$Max_areaNumLines=0;
 			foreach($columns as $col => $val)
 			{
-				$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col]:$val;
+				$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col] : 'Area '.$areaIds[$col];
 				if(isset($areaIds[$col]) && $areaIds[$col] != NULL && !empty($productIds))
 				$current_NumLines=$pdf->getNumLines($val, $area_Col_Width);
 				else $current_NumLines = 1;
@@ -2394,7 +2394,7 @@ function Download_reports()
 			$Max_areaStringLength=0;
 			foreach($columns as $col => $val)
 			{
-				$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col]:$val;
+				$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col] : 'Area '.$areaIds[$col];
 				if(isset($areaIds[$col]) && $areaIds[$col] != NULL && !empty($productIds))
 				$current_StringLength = $pdf->GetStringWidth($val, 'freesansb', 'B', 8)+2;
 				else $current_StringLength = 5;
@@ -2522,7 +2522,7 @@ function Download_reports()
 		{
 			$pdf->SetFillColor(221, 221, 255);
 			$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));
-			$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col]:$val;
+			$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col] : 'Area '.$areaIds[$col];
 			$cdesc = (isset($columnsDescription[$col]) && $columnsDescription[$col] != '')?$columnsDescription[$col]:null;
 			$caltTitle = (isset($cdesc) && $cdesc != '')?' alt="'.$cdesc.'" title="'.$cdesc.'" ':null;
 			
@@ -2836,7 +2836,7 @@ function Download_reports()
 				foreach($columns as $col => $val)
 				{
 					$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));
-					$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col]:$val;
+					$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col] : 'Area '.$areaIds[$col];
 					$cdesc = (isset($columnsDescription[$col]) && $columnsDescription[$col] != '')?$columnsDescription[$col]:null;
 					$caltTitle = (isset($cdesc) && $cdesc != '')?' alt="'.$cdesc.'" title="'.$cdesc.'" ':null;
 					
@@ -3913,7 +3913,7 @@ function Download_reports()
 				
 				$cell= num2char($col).$Excel_HMCounter;
 				//TODO
-				$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col]:$val;
+				$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col] : 'Area '.$areaIds[$col];
 				$cdesc = (isset($columnsDescription[$col]) && $columnsDescription[$col] != '')?$columnsDescription[$col]:null;
 				$caltTitle = (isset($cdesc) && $cdesc != '')?' alt="'.$cdesc.'" title="'.$cdesc.'" ':null;
 								

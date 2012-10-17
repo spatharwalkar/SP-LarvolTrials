@@ -475,7 +475,7 @@ $Page_Width = 1100;
 $Max_areaStringLength=0;
 foreach($columns as $col => $val)
 {
-	$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col]:$val;
+	$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col] : 'Area '.$areaIds[$col];
 	if(isset($areaIds[$col]) && $areaIds[$col] != NULL && !empty($productIds))
 	$current_StringLength =strlen($val);
 	else $current_StringLength = 0;
@@ -558,7 +558,7 @@ if($Rotation_Flg == 1)	////Adjustment in area column width as per area name
 	{
 		if(isset($areaIds[$col]) && $areaIds[$col] != NULL && !empty($productIds))
 		{
-			$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col]:$val;
+			$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col] : 'Area '.$areaIds[$col];;
 			$cols_Area_Space[$col] = ceil(($area_Col_Height) / $Bold_Char_Size);
 			//$cols_Area_Lines[$col] = ceil(strlen(trim($val))/$cols_Area_Space[$col]);
 			$cols_Area_Lines[$col] = $pdf->getNumLines($val, ($area_Col_Height*20/90));
@@ -1857,7 +1857,7 @@ $htmlContent .= '</tr><tr><th '.(($Rotation_Flg == 1) ? 'height="'.$area_Col_Hei
 foreach($columns as $col => $val)
 {
 	$online_HMCounter++;
-	$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col]:$val;
+	$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col] : 'Area '.$areaIds[$col];
 	$cdesc = (isset($columnsDescription[$col]) && $columnsDescription[$col] != '')?$columnsDescription[$col]:null;
 	$caltTitle = (isset($cdesc) && $cdesc != '')?' alt="'.$cdesc.'" title="'.$cdesc.'" ':null;
 	$cat = (isset($columnsCategoryName[$col]) && $columnsCategoryName[$col] != '')? ' ('.$columnsCategoryName[$col].') ':'';
