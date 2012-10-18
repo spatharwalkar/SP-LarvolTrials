@@ -2343,10 +2343,64 @@ function Download_reports()
 			$Total_Col_width = $maxArea_ConsistentWidth;
 		}
 		
-		//// Give product column required maximum width when available to prevent wrapping
+		//New Part to give required width to product column from extra width
 		$Avail_Prod_Col_width = $Page_Width - $All_Column_Width - $product_Col_Width;
+		$Current_product_Col_Width = $product_Col_Width;
 		if($Avail_Prod_Col_width > 0)
-		$product_Col_Width = $product_Col_Width + $Avail_Prod_Col_width;
+		{
+			foreach($rows as $row => $rval)
+			{
+				if(isset($productIds[$row]) && $productIds[$row] != NULL && !empty($areaIds))
+				{
+					$Min_productNumLines=0;
+					while($Min_productNumLines != 1)	///Check while we we dont get mimimum lines to display product name
+					{
+						$current_NumLines=$pdf->getNumLines($rval.$rowsCompanyName[$row].'  '.((trim($rowsTagName[$row]) != '') ? ' ['.$rowsTagName[$row].']':''), $Current_product_Col_Width);	//get number of lines
+						if($current_NumLines == 1)	//if 1 line then stop processing, take next product
+						$Min_productNumLines = $current_NumLines;
+						else if($current_NumLines >= 1)	/// if more lines required to display text
+						{
+							if($Avail_Prod_Col_width > 0)	/// if possible to increase width then increase it
+							{
+								if($Avail_Prod_Col_width < 1)
+								{
+									$Current_product_Col_Width = $Current_product_Col_Width + $Avail_Prod_Col_width;
+									$Avail_Prod_Col_width = 0;
+								}
+								else
+								{
+									$Current_product_Col_Width++;
+									$Avail_Prod_Col_width--;
+								}
+							}
+							if($Avail_Prod_Col_width <= 0)	///if NOT possible to increase then stop execution take next product
+							$Min_productNumLines = 1;
+						}else if($current_NumLines < 1) $Min_productNumLines = 1;	/// if required line below range then stop and take next product
+					}
+				}
+			}
+			$product_Col_Width = $Current_product_Col_Width;	///new width
+		}
+		//End of - New Part to give required width to product column from extra width
+		
+		///// Extra width addition part for area columns
+		//- If after rotation and after giving max width to product column, extra width remains, distribute it equally to all columns, to achieve fitting
+		$Avail_Area_Col_width = $Page_Width - $product_Col_Width - $All_Column_Width;
+		if($Avail_Area_Col_width > 0)
+		{
+			$extra_width = $Avail_Area_Col_width / ((count($columns))+(($total_fld)? 1:0));
+			foreach($columns as $col => $val)
+			{
+				$Width_matrix[$col]['width'] = $Width_matrix[$col]['width'] + $extra_width;
+				$All_Column_Width = $All_Column_Width + $extra_width;
+			}
+			if($total_fld) 
+			{ 
+				$Total_Col_width = $Total_Col_width + $extra_width; 
+				$All_Column_Width = $All_Column_Width + $extra_width;
+			}
+		}
+		////////////////// End of Extra width addition part for area columns
 		
 		///Perform all line number/height calculation at start only as after padding/margin value returned may be wrong
 		
