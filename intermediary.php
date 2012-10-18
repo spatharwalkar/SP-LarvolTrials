@@ -543,21 +543,8 @@ else if(isset($_REQUEST['results']))
 	$globalOptions['url'] = $_REQUEST['results'];	
 	$tt->generateTrialTracker('webpage', $_REQUEST['results'], $_REQUEST['time'], 'unstacked', $globalOptions);
 }
-else if(isset($_REQUEST['p']) && isset($_REQUEST['a']))
+else if(isset($_REQUEST['p']) || isset($_REQUEST['a']))
 {
-	if(count($_REQUEST['p']) > 1 && count($_REQUEST['a']) > 1)
-	{
-		$tt_type = 'totalindexed';
-	}
-	else if(count($_REQUEST['p']) > 1 || count($_REQUEST['a']) > 1)
-	{
-		$tt_type = 'stackedindexed';
-	}
-	else 
-	{
-		$tt_type = 'singleindexed';
-	}
-	
 	$globalOptions['url'] = 'p=' . $_REQUEST['p'] . '&a=' . $_REQUEST['a'];	
 	
 	if(isset($_REQUEST['JSON_search']))

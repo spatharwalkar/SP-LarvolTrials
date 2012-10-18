@@ -196,260 +196,17 @@ class TrialTracker
 			$Ids = array();
 			$TrialsInfo = array();
 			
-			if(count($resultIds['product']) > 1 && count($resultIds['area']) > 1)
+			if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '')
 			{
-				foreach($resultIds['product'] as $pkey => $pvalue)
-				{
-					$prow = $this->getProductId(array($pvalue));
-					$disContinuedTxt = '';
-					if($prow['discontinuation_status'] !== NULL && $prow['discontinuation_status'] != 'Active')
-					{
-						$TrialsInfo[$pkey]['sectionHeader'] = $prow['name'];
-						$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($prow['discontinuation_status_comment']);
-						$disContinuedTxt = ' Discontinued';
-					}
-					else
-					{
-						$TrialsInfo[$pkey]['sectionHeader'] = $prow['name'];
-					}
-					
-					if($prow['company'] !== NULL && $prow['company'] != '')
-						$TrialsInfo[$pkey]['sectionHeader'] .= " / (" . $prow['company'] . ")";
-						
-					if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve product tag from heatmap report
-					{
-						$tag_res = mysql_query("SELECT `tag` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $prow['id'] . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'product'");
-						if(mysql_num_rows($tag_res) > 0)
-						{
-							while($tag_row = mysql_fetch_assoc($tag_res))
-							{
-								if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
-									$TrialsInfo[$pkey]['sectionHeader'] .= " [" . $tag_row['tag'] ."] ";
-							}
-						}
-					}
-					
-					$TrialsInfo[$pkey]['sectionHeader'] .= $disContinuedTxt;
-					$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
-							
-					$Ids[$pkey]['product'] = $prow['id'];
-					$Ids[$pkey]['area'] = implode("', '", $resultIds['area']);
-				}
-			}
-			else if((count($resultIds['product']) >= 1 && count($resultIds['area']) == 1 && ($resultIds['area'][0] == NULL || trim($resultIds['area'][0]) == "")) || (count($resultIds['area']) >= 1 && count($resultIds['product']) == 1 && ($resultIds['product'][0] == NULL || trim($resultIds['product'][0]) == ""))) //Condition For Only Product OR When Only Area is Given
-			{
-				if(count($resultIds['product']) >= 1 && count($resultIds['area']) == 1 && $resultIds['area'][0] == NULL && trim($resultIds['area'][0]) == '' && $resultIds['product'][0] != NULL && trim($resultIds['product'][0]) != '')
-				{
-					foreach($resultIds['product'] as $pkey => $pvalue)
-					{
-						$prow = $this->getProductId(array($pvalue));
-						$disContinuedTxt = '';
-						if($prow['discontinuation_status'] !== NULL && $prow['discontinuation_status'] != 'Active')
-						{
-							$TrialsInfo[$pkey]['sectionHeader'] = $prow['name'];
-							$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($prow['discontinuation_status_comment']);	
-							$disContinuedTxt = ' Discontinued';
-						}
-						else
-						{
-							$TrialsInfo[$pkey]['sectionHeader'] = $prow['name'];
-						}
-						
-						if($prow['company'] !== NULL && $prow['company'] != '')
-							$TrialsInfo[$pkey]['sectionHeader'] .= " / (" . $prow['company'] . ")";
-
-						if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve product tag from heatmap report
-						{
-							$tag_res = mysql_query("SELECT `tag` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $prow['id'] . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'product'");
-							if(mysql_num_rows($tag_res) > 0)
-							{
-								while($tag_row = mysql_fetch_assoc($tag_res))
-								{
-									if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
-										$TrialsInfo[$pkey]['sectionHeader'] .= " [" . $tag_row['tag'] ."]";
-								}
-							}
-						}
-					
-						$TrialsInfo[$pkey]['sectionHeader'] .= $disContinuedTxt;
-						$TrialsInfo[$pkey]['naUpms'] = 
-						$this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
-						
-						$Ids[$pkey]['product'] = $prow['id'];
-						$Ids[$pkey]['area'] = '';
-					}
-				}
-				else
-				{
-					foreach($resultIds['area'] as $akey => $avalue)
-					{
-						if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve display name from heatmap report
-						{
-							$res = mysql_query("SELECT `display_name`, `type_id` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $avalue . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'area'");
-							if(mysql_num_rows($res) > 0)
-							{
-								while($row = mysql_fetch_assoc($res))
-								{
-									$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : "Area ".$row['type_id'];	//if area has no display name, just display id
-									
-									$Ids[$akey]['product'] = '';
-									$Ids[$akey]['area'] = $row['type_id'];
-								}
-							}
-							else	//if area not found in report, just display id
-							{
-									$TrialsInfo[$akey]['sectionHeader'] = "Area ".$avalue;
-									
-									$Ids[$akey]['product'] = '';
-									$Ids[$akey]['area'] = $avalue;
-							}
-						}
-						else	//if no hm field
-						{
-							$res = mysql_query("SELECT `display_name`, `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
-							if(mysql_num_rows($res) > 0)
-							{
-								while($row = mysql_fetch_assoc($res))
-								{
-									if($row['id'] != '' && $row['id'] != NULL && $avalue != '' && $avalue != NULL)
-									{
-										$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : "Area ".$row['id'];
-										$Ids[$akey]['area'] = $row['id'];
-									}
-									else /// For case we dont have product names, area names
-									{
-										$TrialsInfo[$akey]['sectionHeader'] = '';
-										$Ids[$akey]['area'] = '';
-									}
-									
-									$Ids[$akey]['product'] = '';
-								}
-							}
-						}
-					}
-				}
-			}
-			else if(count($resultIds['product']) > 1 || count($resultIds['area']) > 1)
-			{
-				if(count($resultIds['area']) > 1)
-				{
-					$prow = $this->getProductId($resultIds['product']);
-
-					$TrialsInfo[0]['naUpms'] = 
-					$this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
-					foreach($resultIds['area'] as $akey => $avalue)
-					{
-						if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve display name from heatmap report
-						{
-							$res = mysql_query("SELECT `display_name`, `type_id` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $avalue . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'area'");
-							if(mysql_num_rows($res) > 0)
-							{
-								while($row = mysql_fetch_assoc($res))
-								{
-									$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : "Area ".$row['type_id'];	//if area has no display name, just display id
-									
-									$Ids[$akey]['product'] = $prow['id'];
-									$Ids[$akey]['area'] = $row['type_id'];
-								}
-							}
-							else	//if area not found in report, just display id
-							{
-									$TrialsInfo[$akey]['sectionHeader'] = "Area ".$avalue;
-									
-									$Ids[$akey]['product'] = $prow['id'];
-									$Ids[$akey]['area'] = $avalue;
-							}
-						}
-						else	//if no hm field
-						{
-							$res = mysql_query("SELECT `display_name`, `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
-							$row = mysql_fetch_assoc($res);
-							
-							$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : "Area ".$row['id'];
-							$Ids[$akey]['area'] = $row['id'];
-							$Ids[$akey]['product'] = $prow['id'];
-						}
-					}
-				}
-				else
-				{
-					foreach($resultIds['product'] as $pkey => $pvalue)
-					{
-						$prow = $this->getProductId(array($pvalue));
-						$disContinuedTxt = '';
-						if($prow['discontinuation_status'] !== NULL && $prow['discontinuation_status'] != 'Active')
-						{
-							$TrialsInfo[$pkey]['sectionHeader'] = $prow['name'];
-							$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($prow['discontinuation_status_comment']);
-							$disContinuedTxt = ' Discontinued';
-						}
-						else
-						{
-							$TrialsInfo[$pkey]['sectionHeader'] = $prow['name'];
-						}
-						
-						if($prow['company'] !== NULL && $prow['company'] != '')
-							$TrialsInfo[$pkey]['sectionHeader'] .= " / (" . $prow['company'] . ")";
-						
-						if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve product tag from heatmap report
-						{
-							$tag_res = mysql_query("SELECT `tag` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $prow['id'] . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'product'");
-							if(mysql_num_rows($tag_res) > 0)
-							{
-								while($tag_row = mysql_fetch_assoc($tag_res))
-								{
-									if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
-										$TrialsInfo[$pkey]['sectionHeader'] .= " [" . $tag_row['tag'] ."]";
-								}
-							}
-						}
-					
-						$TrialsInfo[$pkey]['sectionHeader'] .= $disContinuedTxt;
-						$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
-								
-						$Ids[$pkey]['product'] = $prow['id'];
-						$Ids[$pkey]['area'] = implode("', '", $resultIds['area']);
-					}
-				}
+				$Arr = $this->processHmParams($resultIds, $globalOptions, $timeMachine, $timeInterval);
 			}
 			else
 			{
-				$prow = $this->getProductId($resultIds['product']);
-				$disContinuedTxt = '';
-				if($prow['discontinuation_status'] !== NULL && $prow['discontinuation_status'] != 'Active')
-				{
-					$TrialsInfo[0]['sectionHeader'] = $prow['name'];
-					$TrialsInfo[0]['dStatusComment'] = strip_tags($prow['discontinuation_status_comment']);	
-					$disContinuedTxt = ' Discontinued';
-				}
-				else
-				{
-					$TrialsInfo[0]['sectionHeader'] = $prow['name'];
-				}
-				
-				if($prow['company'] !== NULL && $prow['company'] != '')
-					$TrialsInfo[0]['sectionHeader'] .= " / (" . $prow['company'] . ")";
-				
-				if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve product tag from heatmap report
-				{
-					$tag_res = mysql_query("SELECT `tag` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $prow['id'] . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'product'");
-					if(mysql_num_rows($tag_res) > 0)
-					{
-						while($tag_row = mysql_fetch_assoc($tag_res))
-						{
-							if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
-								$TrialsInfo[0]['sectionHeader'] .= " [" . $tag_row['tag'] ."]";
-						}
-					}
-				}
-					
-				$TrialsInfo[0]['sectionHeader'] .= $disContinuedTxt;	
-				$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
-				
-				$Ids[0]['product'] = $prow['id'];
-				$Ids[0]['area'] = implode("', '", $resultIds['area']);
+				$Arr = $this->processNonHmParams($resultIds, $globalOptions, $timeMachine, $timeInterval);
 			}
 			
+			$Ids = $Arr[4];
+			$TrialsInfo = $Arr[5];
 			
 			if(isset($globalOptions['product']) && !empty($globalOptions['product']) && $globalOptions['download'] != 'allTrialsforDownload')
 			{	
@@ -509,7 +266,7 @@ class TrialTracker
 		foreach($Values['Trials'] as $tkey => $tvalue)
 		{
 			$unMatchedUpms = array_merge($unMatchedUpms, $tvalue['naUpms']);
-			
+			$tvalue['sectionHeader'] = strip_tags($tvalue['sectionHeader']);
 			if($globalOptions['includeProductsWNoData'] == "off")
 			{
 				if(!empty($tvalue['naUpms']) || !empty($tvalue[$type]))
@@ -1866,114 +1623,17 @@ class TrialTracker
 			$Ids = array();
 			$TrialsInfo = array();
 			
-			if(count($resultIds['product']) > 1 && count($resultIds['area']) > 1)
+			if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '')
 			{
-				foreach($resultIds['product'] as $pkey => $pvalue)
-				{	
-					$Ids[$pkey]['product'] = $pvalue;
-					$Ids[$pkey]['area'] = implode("', '", $resultIds['area']);
-				}
-			}
-			else if((count($resultIds['product']) >= 1 && count($resultIds['area']) == 1 && ($resultIds['area'][0] == NULL || trim($resultIds['area'][0]) == "")) || (count($resultIds['area']) >= 1 && count($resultIds['product']) == 1 && ($resultIds['product'][0] == NULL || trim($resultIds['product'][0]) == ""))) //Condition For Only Product OR When Only Area is Given
-			{
-				if(count($resultIds['product']) >= 1 && count($resultIds['area']) == 1 && $resultIds['area'][0] == NULL && trim($resultIds['area'][0]) == '' && $resultIds['product'][0] != NULL && trim($resultIds['product'][0]) != '')
-				{
-					foreach($resultIds['product'] as $pkey => $pvalue)
-					{
-						$Ids[$pkey]['product'] = $pvalue;
-						$Ids[$pkey]['area'] = '';
-					}
-				}
-				else
-				{
-					foreach($resultIds['area'] as $akey => $avalue)
-					{
-						if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve display name from heatmap report
-						{
-							$Ids[$akey]['product'] = '';
-							
-							$res = mysql_query("SELECT `display_name`, `type_id` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $avalue . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'area'");
-							if(mysql_num_rows($res) > 0)
-							{
-								while($row = mysql_fetch_assoc($res))
-								{
-									$Ids[$akey]['area'] = $row['type_id'];
-								}
-							}
-							else	//if area not found in report, just display id
-							{
-								$Ids[$akey]['area'] = $avalue;
-							}
-						}
-						else	//if no hm field
-						{
-							$Ids[$akey]['product'] = '';
-							$res = mysql_query("SELECT `display_name`, `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
-							if(mysql_num_rows($res) > 0)
-							{
-								while($row = mysql_fetch_assoc($res))
-								{
-									if($row['id'] != '' && $row['id'] != NULL && $avalue != '' && $avalue != NULL)
-									{
-										$Ids[$akey]['area'] = $row['id'];
-									}
-									else /// For case we dont have product names, area names
-									{
-										$Ids[$akey]['area'] = '';
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-			else if(count($resultIds['product']) > 1 || count($resultIds['area']) > 1)
-			{
-				if(count($resultIds['area']) > 1)
-				{
-					$prow = $resultIds['product'][0];
-					
-					foreach($resultIds['area'] as $akey => $avalue)
-					{
-						if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve display name from heatmap report
-						{
-							$res = mysql_query("SELECT `display_name`, `type_id` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $avalue . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'area'");
-							if(mysql_num_rows($res) > 0)
-							{
-								while($row = mysql_fetch_assoc($res))
-								{
-									$Ids[$akey]['product'] = $prow;
-									$Ids[$akey]['area'] = $row['type_id'];
-								}
-							}
-							else	//if area not found in report, just display id
-							{
-									$Ids[$akey]['product'] = $prow;
-									$Ids[$akey]['area'] = $avalue;
-							}
-						}
-						else	//if no hm field
-						{
-							$Ids[$akey]['area'] = $avalue;
-							$Ids[$akey]['product'] = $prow;
-						}
-					}
-				}
-				else
-				{
-					foreach($resultIds['product'] as $pkey => $pvalue)
-					{	
-						$Ids[$pkey]['product'] = $pvalue;
-						$Ids[$pkey]['area'] = implode("', '", $resultIds['area']);
-					}
-				}
+				$Arr = $this->processHmParams($resultIds, $globalOptions, $timeMachine, $timeInterval);
 			}
 			else
 			{
-				$Ids[0]['product'] = $resultIds['product'][0];
-				$Ids[0]['area'] = implode("', '", $resultIds['area']);
+				$Arr = $this->processNonHmParams($resultIds, $globalOptions, $timeMachine, $timeInterval);
 			}
 			
+			$Ids = $Arr[4];
+			$TrialsInfo = $Arr[5];
 			
 			if(isset($globalOptions['product']) && !empty($globalOptions['product']) && $globalOptions['download'] != 'allTrialsforDownload')
 			{	
@@ -5794,259 +5454,17 @@ class TrialTracker
 			$Ids = array();
 			$TrialsInfo = array();
 			
-			if(count($resultIds['product']) > 1 && count($resultIds['area']) > 1)
+			if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '')
 			{
-				foreach($resultIds['product'] as $pkey => $pvalue)
-				{	
-					$prow = $this->getProductId(array($pvalue));
-					$disContinuedTxt = '';
-					if($prow['discontinuation_status'] !== NULL && $prow['discontinuation_status'] != 'Active')
-					{
-						$TrialsInfo[$pkey]['sectionHeader'] = "<span style='color:gray'>" . $prow['name'] . "</span>";
-						$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($prow['discontinuation_status_comment']);
-						$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
-					}
-					else
-					{
-						$TrialsInfo[$pkey]['sectionHeader'] = $prow['name'];
-					}
-					if($prow['company'] !== NULL && $prow['company'] != '')
-						$TrialsInfo[$pkey]['sectionHeader'] .= " / (" . $prow['company'] . ")";
-					
-					if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve product tag from heatmap report
-					{
-						$tag_res = mysql_query("SELECT `tag` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $prow['id'] . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'product'");
-						if(mysql_num_rows($tag_res) > 0)
-						{
-							while($tag_row = mysql_fetch_assoc($tag_res))
-							{
-								if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
-									$TrialsInfo[$pkey]['sectionHeader'] .= " <span class=\"tag\">[" . $tag_row['tag'] . "]</span>";
-							}
-						}
-					}
-							
-					$TrialsInfo[$pkey]['sectionHeader'] .= $disContinuedTxt;
-					$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
-							
-					$Ids[$pkey]['product'] = $prow['id'];
-					$Ids[$pkey]['area'] = implode("', '", $resultIds['area']);
-				}
-			}
-			else if((count($resultIds['product']) >= 1 && count($resultIds['area']) == 1 && ($resultIds['area'][0] == NULL || trim($resultIds['area'][0]) == "")) || (count($resultIds['area']) >= 1 && count($resultIds['product']) == 1 && ($resultIds['product'][0] == NULL || trim($resultIds['product'][0]) == ""))) //Condition For Only Product OR When Only Area is Given
-			{
-				if(count($resultIds['product']) >= 1 && count($resultIds['area']) == 1 && $resultIds['area'][0] == NULL && trim($resultIds['area'][0]) == '' && $resultIds['product'][0] != NULL && trim($resultIds['product'][0]) != '')
-				{
-					foreach($resultIds['product'] as $pkey => $pvalue)
-					{
-						$prow = $this->getProductId(array($pvalue));
-						$disContinuedTxt = '';
-						if($prow['discontinuation_status'] !== NULL && $prow['discontinuation_status'] != 'Active')
-						{
-							$TrialsInfo[$pkey]['sectionHeader'] = "<span style='color:gray'>" . $prow['name'] . "</span>";
-							$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($prow['discontinuation_status_comment']);	
-							$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
-						}
-						else
-						{
-							$TrialsInfo[$pkey]['sectionHeader'] = $prow['name'];
-						}
-						
-						if($prow['company'] !== NULL && $prow['company'] != '')
-							$TrialsInfo[$pkey]['sectionHeader'] .= " / (" . $prow['company'] . ")";
-						
-						if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve product tag from heatmap report
-						{
-							$tag_res = mysql_query("SELECT `tag` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $prow['id'] . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'product'");
-							if(mysql_num_rows($tag_res) > 0)
-							{
-								while($tag_row = mysql_fetch_assoc($tag_res))
-								{
-									if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
-										$TrialsInfo[$pkey]['sectionHeader'] .= " <span class=\"tag\">[" . $tag_row['tag'] . "]</span>";
-								}
-							}
-						}
-					
-						$TrialsInfo[$pkey]['sectionHeader'] .= $disContinuedTxt;
-								
-						$TrialsInfo[$pkey]['naUpms'] = 
-						$this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
-						
-						$Ids[$pkey]['product'] = $prow['id'];
-						$Ids[$pkey]['area'] = '';
-					}
-				}
-				else
-				{
-					foreach($resultIds['area'] as $akey => $avalue)
-					{
-						if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve display name from heatmap report
-						{
-							$res = mysql_query("SELECT `display_name`, `type_id` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $avalue . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'area'");
-							if(mysql_num_rows($res) > 0)
-							{
-								while($row = mysql_fetch_assoc($res))
-								{
-									$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : "Area ".$row['type_id'];	//if area has no display name, just display id
-									
-									$Ids[$akey]['product'] = '';
-									$Ids[$akey]['area'] = $row['type_id'];
-								}
-							}
-							else	//if area not found in report, just display id
-							{
-									$TrialsInfo[$akey]['sectionHeader'] = "Area ".$avalue;
-									
-									$Ids[$akey]['product'] = '';
-									$Ids[$akey]['area'] = $avalue;
-							}
-						}
-						else	//if no hm field
-						{
-							$res = mysql_query("SELECT `display_name`, `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
-							if(mysql_num_rows($res) > 0)
-							{
-								while($row = mysql_fetch_assoc($res))
-								{
-									if($row['id'] != '' && $row['id'] != NULL && $avalue != '' && $avalue != NULL)
-									{
-										$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : "Area ".$row['id'];
-										$Ids[$akey]['area'] = $row['id'];
-									}
-									else /// For case we dont have product names, area names
-									{
-										$TrialsInfo[$akey]['sectionHeader'] = '';
-										$Ids[$akey]['area'] = '';
-									}
-									
-									$Ids[$akey]['product'] = '';
-								}
-							}
-						}
-					}
-				}
-			}
-			else if(count($resultIds['product']) > 1 || count($resultIds['area']) > 1)
-			{
-				if(count($resultIds['area']) > 1)
-				{
-					$prow = $this->getProductId($resultIds['product']);
-					$TrialsInfo[0]['naUpms'] = 
-					$this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
-					
-					foreach($resultIds['area'] as $akey => $avalue)
-					{
-						if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve display name from heatmap report
-						{
-							$res = mysql_query("SELECT `display_name`, `type_id` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $avalue . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'area'");
-							if(mysql_num_rows($res) > 0)
-							{
-								while($row = mysql_fetch_assoc($res))
-								{
-									$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : "Area ".$row['type_id'];	//if area has no display name, just display id
-									
-									$Ids[$akey]['product'] = $prow['id'];
-									$Ids[$akey]['area'] = $row['type_id'];
-								}
-							}
-							else	//if area not found in report, just display id
-							{
-									$TrialsInfo[$akey]['sectionHeader'] = "Area ".$avalue;
-									
-									$Ids[$akey]['product'] = $prow['id'];
-									$Ids[$akey]['area'] = $avalue;
-							}
-						}
-						else	//if no hm field
-						{
-							$res = mysql_query("SELECT `display_name`, `name`, `id` FROM `areas` WHERE id = '" . $avalue . "' ");
-							$row = mysql_fetch_assoc($res);
-							
-							$TrialsInfo[$akey]['sectionHeader'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : "Area ".$row['id'];
-							$Ids[$akey]['area'] = $row['id'];
-
-							$Ids[$akey]['product'] = $prow['id'];
-						}
-					}
-				}
-				else
-				{
-					foreach($resultIds['product'] as $pkey => $pvalue)
-					{	
-						$prow = $this->getProductId(array($pvalue));
-						$disContinuedTxt = '';
-						if($prow['discontinuation_status'] !== NULL && $prow['discontinuation_status'] != 'Active')
-						{
-							$TrialsInfo[$pkey]['sectionHeader'] = "<span style='color:gray'>" . $prow['name'] . "</span>";
-							$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($prow['discontinuation_status_comment']);		
-							$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";	
-						}
-						else
-						{
-							$TrialsInfo[$pkey]['sectionHeader'] = $prow['name'];
-						}
-						
-						if($prow['company'] !== NULL && $prow['company'] != '')
-							$TrialsInfo[$pkey]['sectionHeader'] .= " / (" . $prow['company'] . ")";
-						
-						if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve product tag from heatmap report
-						{
-							$tag_res = mysql_query("SELECT `tag` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $prow['id'] . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'product'");
-							if(mysql_num_rows($tag_res) > 0)
-							{
-								while($tag_row = mysql_fetch_assoc($tag_res))
-								{
-									if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
-										$TrialsInfo[$pkey]['sectionHeader'] .= " <span class=\"tag\">[" . $tag_row['tag'] . "]</span>";
-								}
-							}
-						}
-							
-						$TrialsInfo[$pkey]['sectionHeader'] .= $disContinuedTxt;
-						$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
-						
-						$Ids[$pkey]['product'] = $prow['id'];
-						$Ids[$pkey]['area'] = implode("', '", $resultIds['area']);
-					}
-				}
+				$Arr = $this->processHmParams($resultIds, $globalOptions, $timeMachine, $timeInterval);
 			}
 			else
 			{
-				$prow = $this->getProductId($resultIds['product']);
-
-				if($prow['discontinuation_status'] !== NULL && $prow['discontinuation_status'] != 'Active')
-				{
-					$TrialsInfo[0]['sectionHeader'] = "<span style='color:gray'>" . $prow['name'] . "</span>";
-					$TrialsInfo[0]['dStatusComment'] = 	strip_tags($prow['discontinuation_status_comment']);		
-				}
-				else
-				{
-					$TrialsInfo[0]['sectionHeader'] = $prow['name'];
-				}
-				
-				if($prow['company'] !== NULL && $prow['company'] != '')
-					$TrialsInfo[0]['sectionHeader'] .= " / (" . $prow['company'] . ")";
-					
-
-				if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve product tag from heatmap report
-				{
-					$tag_res = mysql_query("SELECT `tag` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $prow['id'] . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'product'");
-					if(mysql_num_rows($tag_res) > 0)
-					{
-						while($tag_row = mysql_fetch_assoc($tag_res))
-						{
-							if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
-								$TrialsInfo[0]['sectionHeader'] .= " <span class=\"tag\">[" . $tag_row['tag'] . "]</span>";
-						}
-					}
-				}
-						
-				$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $prow['id']);
-
-				$Ids[0]['product'] = $prow['id'];
-				$Ids[0]['area'] = implode("', '", $resultIds['area']);
+				$Arr = $this->processNonHmParams($resultIds, $globalOptions, $timeMachine, $timeInterval);
 			}
+			
+			$Ids = $Arr[4];
+			$TrialsInfo = $Arr[5];
 			
 			if(isset($globalOptions['product']) && !empty($globalOptions['product']) && $globalOptions['download'] != 'allTrialsforDownload')
 			{	
@@ -7377,8 +6795,1252 @@ class TrialTracker
 		
 		return $prow;
 	}
-
 	/*****END OF Functions ONLY FOR TCPDF *****************************/
+	
+	function processHmParams($resultIds, $globalOptions, $timeMachine, $timeInterval, $displayType = 'fileExport')
+	{
+		$productSelector = array();
+		$TrialsInfo = array();
+		$Ids = array();
+		
+		$productSelectorTitle = 'Select Products';
+		$tHeader = '';
+		$ottType = '';
+		
+		if(count($resultIds['product']) > 1 && count($resultIds['area']) > 1)
+		{
+			$productSelectorTitle = 'Select Products';
+			$ottType = 'colstackedindexed';
+			$tHeader = 'Area: Total';
+			
+			foreach($resultIds['product'] as $pkey => $pvalue)
+			{
+				$disContinuedTxt = '';
+				$Query = "SELECT `name`, `id`, `company`, `discontinuation_status`, `discontinuation_status_comment` FROM `products` WHERE id = '" . $pvalue . "' OR LI_id = '" . $pvalue . "' ";
+				$Res = mysql_query($Query);
+				if($Res)
+				{	
+					if(mysql_num_rows($Res) > 0)
+					{	
+						while($row = mysql_fetch_assoc($Res))
+						{
+							$productId = $row['id'];
+							if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
+							{
+								$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($row['discontinuation_status_comment']);
+								$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
+							}
+							
+							$TrialsInfo[$pkey]['sectionHeader'] = $productSelector[$pkey] = $row['name'];	
+							
+							if($row['company'] !== NULL && $row['company'] != '')
+							{
+								$TrialsInfo[$pkey]['sectionHeader'] .= " / <i>" . $row['company'] . "</i>";
+								$productSelector[$pkey] .= " / <i>" . $row['company'] . "</i>";
+							}
+							
+							$tagQuery = "SELECT `tag` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $pvalue . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'product' ";
+							$tagRes = mysql_query($tagQuery);
+							if($tagRes)
+							{
+								if(mysql_num_rows($tagRes) > 0)
+								{
+									while($tagRow = mysql_fetch_assoc($tagRes))
+									{
+										if($tagRow['tag'] != '' && $tagRow['tag'] !== NULL)
+										{
+											$TrialsInfo[$pkey]['sectionHeader'] .= " <span class='tag'>[" . $tagRow['tag'] . "]</span>";
+										}
+									}
+								}
+							}
+							else
+							{
+								$log 	= 'ERROR: Bad SQL query. ' . $tagQuery . mysql_error();
+								$logger->error($log);
+								unset($log);
+							}
+								
+							$TrialsInfo[$pkey]['sectionHeader'] .= $disContinuedTxt;
+							$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $productId);
+							
+							$Ids[$pkey]['product'] = $productId;
+							$Ids[$pkey]['area'] = implode(', ', $resultIds['area']);
+						}
+					}
+				}
+				else
+				{
+					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
+					$logger->error($log);
+					unset($log);
+				}
+			}
+		}
+		else if(count($resultIds['area']) > 1)
+		{
+			$productSelectorTitle = 'Select Areas';
+			$ottType = 'rowstackedindexed';
+				
+			if(empty($resultIds['product']))
+			{
+				$tHeader = 'All Products';
+				$productId = '';
+				
+				$Query = "SELECT type_id FROM `rpt_masterhm_headers` WHERE `report` = '" . $globalOptions['hm'] . "' AND `type` = 'product' ";
+				$Res = mysql_query($Query);
+				if($Res)
+				{
+					$rowCount = mysql_num_rows($Res);
+					if($rowCount > 0)
+					{
+						$productId = array();
+						while($Row = mysql_fetch_assoc($Res))
+						{
+							$productId[] = $Row['type_id'];
+						}
+						
+						$productId = implode(', ', $productId);
+						
+						$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $productId);
+						if(!empty($TrialsInfo[0]['naUpms']) && $displayType == 'webPage')
+						{
+							echo '<input type="hidden" id="upmstyle" value="expand" />';
+						}
+					}
+				}
+				else
+				{
+					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
+					$logger->error($log);
+					unset($log);
+				}
+			}
+			else
+			{
+				$tHeader = 'Product: ';
+				$productId = implode(', ', $resultIds['product']);
+				
+				$Query = "SELECT `name`, `id` FROM `products` WHERE id IN ('" . $productId . "') OR LI_id IN ('" . $productId . "') ";
+				$Res = mysql_query($Query);
+				if($Res)
+				{
+					if(mysql_num_rows($Res) > 0)
+					{
+						$Row = mysql_fetch_assoc($Res);
+						$tHeader .= htmlformat($Row['name']);
+						$productId = $Row['id'];
+					}
+					else
+					{
+						$tHeader .= $productId;
+					}
+				}
+				else
+				{
+					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
+					$logger->error($log);
+					unset($log);
+				}
+				
+				$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $productId);
+				if(!empty($TrialsInfo[0]['naUpms']) && $displayType == 'webPage')
+				{
+					echo '<input type="hidden" id="upmstyle" value="expand" />';
+				}
+			}
+			
+			foreach($resultIds['area'] as $akey => $avalue)
+			{
+				$Query = "SELECT rmh.`display_name`, rmh.`type_id`, rmh.`category`, ar.`coverage_area`, ar.`display_name` AS global_display_name "
+							. " FROM `rpt_masterhm_headers` rmh JOIN `areas` ar ON  rmh.`type_id` = ar.`id` "
+							. " WHERE rmh.`type_id` = '" . $avalue . "' AND rmh.`report` = '" . $globalOptions['hm'] . "' AND rmh.`type` = 'area' ";
+				$Res = mysql_query($Query);
+				if($Res)
+				{
+					if(mysql_num_rows($Res) > 0)
+					{
+						while($row = mysql_fetch_assoc($Res))
+						{
+							$sectionHeader = '';
+							if($row['category'] != '' && $row['category'] !== NULL)
+							{
+								$sectionHeader = $row['category'];
+							}
+							
+							if($row['coverage_area'])
+							{
+								if($row['display_name'] != '' && $row['display_name'] !== NULL)
+								{
+									$sectionHeader .= ' ' . $row['display_name'];
+								}
+								else if($row['global_display_name'] != '' && $row['global_display_name'] !== NULL)
+								{
+									$sectionHeader .= ' ' . $row['global_display_name'];
+								}
+								else
+								{
+									$sectionHeader .= ' Area ' . $row['type_id'];
+								}
+							}
+							else
+							{
+								if($row['display_name'] != '' && $row['display_name'] !== NULL)
+								{
+									$sectionHeader .= ' ' . $row['display_name'];
+								}
+								else
+								{
+									$sectionHeader .= ' Area ' . $row['type_id'];
+								}
+							}
+							
+							$TrialsInfo[$akey]['sectionHeader'] = $productSelector[$akey] = $sectionHeader;
+							
+							$Ids[$akey]['product'] = $productId;
+							$Ids[$akey]['area'] = $row['type_id'];
+						}
+					}
+				}
+				else
+				{
+					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
+					$logger->error($log);
+					unset($log);
+				}
+			}
+		}
+		else if(count($resultIds['product']) > 1)
+		{
+			$productSelectorTitle = 'Select Products';
+			$ottType = 'colstackedindexed';
+				
+			if(empty($resultIds['area']))
+			{
+				$tHeader = 'All Areas';
+				$areaId = '';
+				
+				$Query = "SELECT `type_id` FROM `rpt_masterhm_headers` WHERE `report` = '" . $globalOptions['hm'] . "' AND `type` = 'area' ";
+				$Res = mysql_query($Query);
+				if($Res)
+				{
+					if(mysql_num_rows($Res) > 0)
+					{
+						$areaId = array();
+						while($Row = mysql_fetch_assoc($Res))
+						{
+							$areaId[] = $Row['type_id'];
+						}
+						$areaId = implode(', ', $areaId);
+					}
+				}
+				else
+				{
+					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
+					$logger->error($log);
+					unset($log);
+				}
+			}
+			else
+			{
+				$tHeader = 'Area: ';
+				$areaId = implode(',', $resultIds['area']);
+				
+				$Query = "SELECT rmh.`display_name`, rmh.`type_id`, ar.`coverage_area`, ar.`display_name` AS global_display_name "
+						. " FROM `rpt_masterhm_headers` rmh JOIN `areas` ar ON  rmh.`type_id` = ar.`id` "
+						. " WHERE rmh.`type_id` IN ('" . $areaId . "') AND rmh.`report` = '" . $globalOptions['hm'] . "' AND rmh.`type` = 'area' ";
+				$Res = mysql_query($Query);
+				if($Res)
+				{
+					if(mysql_num_rows($Res) > 0)
+					{
+						$row = mysql_fetch_assoc($Res);
+						
+						if($row['coverage_area'])
+						{
+							if($row['display_name'] != '' && $row['display_name'] !== NULL)
+							{
+								$tHeader .= ' ' . $row['display_name'];
+							}
+							else if($row['global_display_name'] != '' && $row['global_display_name'] !== NULL)
+							{
+								$tHeader .= ' ' . $row['global_display_name'];
+							}
+							else
+							{
+								$tHeader .= ' Area ' . $row['type_id'];
+							}
+						}
+						else
+						{
+							if($row['display_name'] != '' && $row['display_name'] !== NULL)
+							{
+								$tHeader .= ' ' . $row['display_name'];
+							}
+							else
+							{
+								$tHeader .= 'Area ' . $row['type_id'];
+							}
+						}
+						$tHeader = htmlformat($tHeader);
+						$areaId = $row['type_id'];
+					}
+					else
+					{
+						$tHeader .= $areaId;
+					}
+				}
+				else
+				{
+					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
+					$logger->error($log);
+					unset($log);
+				}
+			}
+			
+			foreach($resultIds['product'] as $pkey => $pvalue)
+			{
+				$disContinuedTxt = '';
+				$Query = "SELECT `name`, `id`, `company`, `discontinuation_status`, `discontinuation_status_comment` FROM `products` WHERE id = '" . $pvalue . "' OR LI_id = '" . $pvalue . "' ";
+				$Res = mysql_query($Query);
+				if($Res)
+				{
+					if(mysql_num_rows($Res) > 0)
+					{
+						while($row = mysql_fetch_assoc($Res))
+						{
+							$productId = $row['id'];
+							if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
+							{
+								$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($row['discontinuation_status_comment']);
+								$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
+							}
+	
+							$TrialsInfo[$pkey]['sectionHeader'] = $productSelector[$pkey] = $row['name'];
+							
+							if($row['company'] !== NULL && $row['company'] != '')
+							{
+								$TrialsInfo[$pkey]['sectionHeader'] .= " / <i>" . $row['company'] . "</i>";
+								$productSelector[$pkey] .= " / <i>" . $row['company'] . "</i>";
+							}
+							
+							$tagQuery = "SELECT `tag` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $pvalue . "' AND `report` = '" . $globalOptions['hm'] . "' AND `type` = 'product' ";
+							$tagRes = mysql_query($tagQuery);
+							if($tagRes)
+							{
+								if(mysql_num_rows($tagRes) > 0)
+								{
+									$tagRow = mysql_fetch_assoc($tagRes);
+									if($tagRow['tag'] != '' && $tagRow['tag'] !== NULL)
+									{
+										$TrialsInfo[$pkey]['sectionHeader'] .= " <span class='tag'>[" . $tagRow['tag'] . "]</span>";
+									}
+								}
+							}
+							else
+							{
+								$log 	= 'ERROR: Bad SQL query. ' . $tagQuery . mysql_error();
+								$logger->error($log);
+								unset($log);
+							}
+							
+							$TrialsInfo[$pkey]['sectionHeader'] .= $disContinuedTxt;
+							$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $productId);
+								
+							$Ids[$pkey]['product'] = $productId;
+							$Ids[$pkey]['area'] = $areaId;
+						}
+					}
+				}
+				else
+				{
+					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
+					$logger->error($log);
+					unset($log);
+				}
+			}
+		}
+		else
+		{
+			if(empty($resultIds['product']) && empty($resultIds['area']))
+			{
+				$productSelectorTitle = 'Select Products';
+				$ottType = 'colstackedindexed';
+				
+				$tHeader = 'No Area';
+				$areaId = '';
+				
+				//fetching area(last column) from hm
+				$Query = "SELECT rmh.`display_name`, rmh.`type_id`, ar.`coverage_area`, ar.`display_name` AS global_display_name "
+							. " FROM `rpt_masterhm_headers` rmh JOIN `areas` ar ON  rmh.`type_id` = ar.`id` "
+							. " WHERE rmh.`report` = '" . $globalOptions['hm'] . "' AND rmh.`type` = 'area' ORDER BY rmh.`num` DESC LIMIT 0,1 ";
+				$Res = mysql_query($Query);
+				if($Res)
+				{
+					if(mysql_num_rows($Res) > 0)
+					{
+						$row = mysql_fetch_assoc($Res);
+						$tHeader = 'Area: ';
+						
+						if($row['coverage_area'])
+						{
+							if($row['display_name'] != '' && $row['display_name'] !== NULL)
+							{
+								$tHeader .= ' ' . $row['display_name'];
+							}
+							else if($row['global_display_name'] != '' && $row['global_display_name'] !== NULL)
+							{
+								$tHeader .= ' ' . $row['global_display_name'];
+							}
+							else
+							{
+								$tHeader .= ' Area ' . $row['type_id'];
+							}
+						}
+						else
+						{
+							if($row['display_name'] != '' && $row['display_name'] !== NULL)
+							{
+								$tHeader .= ' ' . $row['display_name'];
+							}
+							else
+							{
+								$tHeader .= ' Area ' . $row['type_id'];
+							}
+						}
+						$tHeader = htmlformat($tHeader);
+						$areaId = $row['type_id'];
+					}
+				}
+				else
+				{
+					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
+					$logger->error($log);
+					unset($log);
+				}
+				
+				//fetching products from hm
+				$Query = "SELECT `id`, `display_name`, `type_id` FROM `rpt_masterhm_headers` WHERE `report` = '" . $globalOptions['hm'] . "' AND `type` = 'product' ";
+				$Res = mysql_query($Query);
+				if($Res)
+				{
+					if(mysql_num_rows($Res) > 0)
+					{
+						$pkey = 0;
+						while($row = mysql_fetch_assoc($Res))
+						{
+							$productId = $row['type_id'];
+							$sectionHeader = '';
+							if($row['display_name'] != '' && $row['display_name'] !== NULL)
+							{
+								$sectionHeader .= $row['display_name'];
+							}
+							else
+							{
+								$sectionHeader .= 'Product ' . $row['type_id'];
+							}
+							$TrialsInfo[$pkey]['sectionHeader'] = $productSelector[$pkey] = $sectionHeader;
+							
+							$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $productId);
+							
+							$Ids[$pkey]['product'] = $productId;
+							$Ids[$pkey]['area'] = $areaId;
+							
+							$pkey++;
+						}
+					}
+				}
+				else
+				{
+					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
+					$logger->error($log);
+					unset($log);
+				}
+			}
+			else if(empty($resultIds['product']))
+			{
+				$productSelectorTitle = 'Select Products';
+				$ottType = 'indexed';
+				$tHeader = 'Area: ';
+				
+				$areaId = implode(', ', $resultIds['area']);
+				
+				$Query = "SELECT rmh.`display_name`, rmh.`type_id`, ar.`coverage_area`, ar.`display_name` AS global_display_name "
+						. " FROM `rpt_masterhm_headers` rmh JOIN `areas` ar ON  rmh.`type_id` = ar.`id` "
+						. " WHERE rmh.`type_id` IN ('" . $areaId . "') AND rmh.`report` = '" . $globalOptions['hm'] . "' AND rmh.`type` = 'area' ";
+				$Res = mysql_query($Query);
+				if($Res)
+				{
+					if(mysql_num_rows($Res) > 0)
+					{
+						$row = mysql_fetch_assoc($Res);
+						
+						if($row['coverage_area'])
+						{
+							if($row['display_name'] != '' && $row['display_name'] !== NULL)
+							{
+								$tHeader .= ' ' . $row['display_name'];
+							}
+							else if($row['global_display_name'] != '' && $row['global_display_name'] !== NULL)
+							{
+								$tHeader .= ' ' . $row['global_display_name'];
+							}
+							else
+							{
+								$tHeader .= 'Area ' . $row['type_id'];
+							}
+						}
+						else
+						{
+							if($row['display_name'] != '' && $row['display_name'] !== NULL)
+							{
+								$tHeader .= ' ' . $row['display_name'];
+							}
+							else
+							{
+								$tHeader .= 'Area ' . $row['type_id'];
+							}
+						}
+						$tHeader = htmlformat($tHeader);
+						$areaId = $row['type_id'];
+					}
+					else
+					{
+						$tHeader .= $areaId;
+					}
+				}
+				else
+				{
+					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
+					$logger->error($log);
+					unset($log);
+				}
+				
+				$Query = "SELECT `display_name`, `type_id`, `category`, `tag` FROM `rpt_masterhm_headers` WHERE `report` = '" . $globalOptions['hm'] . "' AND `type` = 'product' ";
+				$Res = mysql_query($Query);
+				if($Res)
+				{	
+					$countRow = mysql_num_rows($Res);
+					if($countRow > 0)
+					{
+						if($countRow > 1)
+						{
+							$ottType = 'colstackedindexed';
+						}
+						
+						$akey = 0;
+						
+						while($row = mysql_fetch_assoc($Res))
+						{
+							$productId = $row['type_id'];
+							$sectionHeader = '';
+							
+							if($row['category'] != '' && $row['category'] !== NULL)
+							{
+								$sectionHeader = $row['category'];
+							}
+							
+							if($row['display_name'] != '' && $row['display_name'] !== NULL)
+							{
+								$sectionHeader .= ' ' . $row['display_name'];
+							}
+							else
+							{
+								$sectionHeader .= ' Product ' . $row['type_id'];
+							}
+							
+							if($row['tag'] != '' && $row['tag'] != NULL)
+							{
+								$sectionHeader .= " <span class='tag'>[" . $row['tag'] . "]</span>";
+							}
+							
+							$TrialsInfo[$akey]['sectionHeader'] = $productSelector[$akey] = $sectionHeader;
+							$TrialsInfo[$akey]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $productId);
+							
+							$Ids[$akey]['product'] = $productId;
+							$Ids[$akey]['area'] = $areaId;
+							
+							$akey++;
+						}
+					}
+				}
+				else
+				{
+					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
+					$logger->error($log);
+					unset($log);
+				}
+			}
+			else if(empty($resultIds['area']))
+			{
+				$productSelectorTitle = 'Select Areas';
+				$ottType = 'indexed';
+				$tHeader = 'Product: ';
+				
+				$productId = implode(',', $resultIds['product']);
+				
+				$Query = "SELECT `name`, `id` FROM `products` WHERE id IN ('" . $productId . "') OR LI_id IN ('" . $productId . "') ";
+				$Res = mysql_query($Query);
+				if($Res)
+				{
+					if(mysql_num_rows($Res) > 0)
+					{
+						$row = mysql_fetch_assoc($Res);
+				
+						$productId = $row['id'];
+						
+						$tHeader .= htmlformat($row['name']);
+					}
+					else
+					{
+						$tHeader .= $productId;
+					}
+				}
+				else
+				{
+					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
+					$logger->error($log);
+					unset($log);
+				}
+				
+				$Query = "SELECT rmh.`display_name`, rmh.`type_id`, rmh.`category`, ar.`display_name` AS global_display_name "
+							. " FROM `rpt_masterhm_headers` rmh JOIN `areas` ar ON  rmh.`type_id` = ar.`id`"
+							. " WHERE rmh.`report` = '". $globalOptions['hm'] ."' AND rmh.`type` = 'area' ";
+				$Res = mysql_query($Query);
+				
+				if($Res)
+				{	
+					$countRow = mysql_num_rows($Res);
+					if($countRow > 0)
+					{
+						$akey = 0;
+						while($row = mysql_fetch_assoc($Res))
+						{
+							$sectionHeader = '';
+							if($countRow > 1)
+							{
+								$ottType = 'rowstackedindexed';
+							}
+						
+							$areaId = $row['type_id'];
+							if($row['category'] != '' && $row['category'] !== NULL)
+							{
+								$sectionHeader .= $row['category'];
+							}
+							
+							if($row['coverage_area'])
+							{
+								if($row['display_name'] != '' && $row['display_name'] !== NULL)
+								{
+									$sectionHeader .= ' ' . $row['display_name'];
+								}
+								else if($row['global_display_name'] != '' && $row['global_display_name'] !== NULL)
+								{
+									$sectionHeader .= ' ' . $row['global_display_name'];
+								}
+								else
+								{
+									$sectionHeader .= 'Area ' . $row['type_id'];
+								}
+							}
+							else
+							{
+								if($row['display_name'] != '' && $row['display_name'] !== NULL)
+								{
+									$sectionHeader .= ' ' . $row['display_name'];
+								}
+								else
+								{
+									$sectionHeader .= 'Area ' . $row['type_id'];
+								}
+							}
+							
+							$TrialsInfo[$akey]['sectionHeader'] = $productSelector[$akey] = $sectionHeader;
+							$Ids[$akey]['area'] = $areaId;
+							$Ids[$akey]['product'] = $productId;
+							
+							$akey++;
+						}
+					}
+				}
+				else
+				{
+					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
+					$logger->error($log);
+					unset($log);
+				}
+			}
+			else
+			{	
+				$productSelectorTitle = 'Select Areas';
+				$ottType = 'indexed';
+				$tHeader = 'Area: ';
+				
+				$areaId = implode(',', $resultIds['area']);
+				$productId = implode(',', $resultIds['product']);
+				
+				$Query = "SELECT rmh.`display_name`, rmh.`type_id`, ar.`display_name` AS global_display_name "
+							. " FROM `rpt_masterhm_headers` rmh JOIN `areas` ar ON  rmh.`type_id` = ar.`id` "
+							. " WHERE rmh.`type_id` IN ('" . $areaId . "') AND rmh.`report` = '" . $globalOptions['hm'] . "' AND rmh.`type` = 'area' ";
+				$Res = mysql_query($Query);
+				if($Res)
+				{
+					if(mysql_num_rows($Res))
+					{
+						$row = mysql_fetch_assoc($Res);
+					
+						$areaId = $row['type_id'];
+						if($row['coverage_area'])
+						{
+							if($row['display_name'] != '' && $row['display_name'] !== NULL)
+							{
+								$tHeader .= ' ' . $row['display_name'];
+							}
+							else if($row['global_display_name'] != '' && $row['global_display_name'] !== NULL)
+							{
+								$tHeader .= ' ' . $row['global_display_name'];
+							}
+							else
+							{
+								$tHeader .= 'Area ' . $row['type_id'];
+							}
+						}
+						else
+						{
+							if($row['display_name'] != '' && $row['display_name'] !== NULL)
+							{
+								$tHeader .= ' ' . $row['display_name'];
+							}
+							else
+							{
+								$tHeader .= 'Area ' . $row['type_id'];
+							}
+						}
+						$tHeader = htmlformat($tHeader);
+					}
+					else
+					{
+						$tHeader .= $areaId;
+					}
+				}
+				else
+				{
+					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
+					$logger->error($log);
+					unset($log);
+				}
+				
+				$disContinuedTxt = '';
+				$Query = "SELECT `name`, `id`, `company`, `discontinuation_status`, `discontinuation_status_comment` FROM `products` WHERE id IN ('" . $productId . "') OR LI_id IN ('" . $productId . "') ";
+				$Res = mysql_query($Query);
+				if($Res)
+				{
+					if(mysql_num_rows($Res) > 0)
+					{
+						$row = mysql_fetch_assoc($Res);
+				
+						$productId = $row['id'];
+					
+						if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
+						{
+							$TrialsInfo[0]['dStatusComment'] = strip_tags($row['discontinuation_status_comment']);
+							$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
+						}
+					
+						$TrialsInfo[0]['sectionHeader'] = $productSelector[0] = $row['name'];
+					
+						if($row['company'] !== NULL && $row['company'] != '')
+						{
+							$TrialsInfo[0]['sectionHeader'] .= " / <i>" . $row['company'] . "</i>";
+							$productSelector[0] .= " / <i>" . $row['company'] . "</i>"; 
+						}
+					
+						$tagQuery = "SELECT `tag` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $productId . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'product' ";
+						$tagRes = mysql_query($tagQuery);
+						if($tagRes)
+						{
+							if(mysql_num_rows($tagRes) > 0)
+							{
+								$tagRow = mysql_fetch_assoc($tagRes);
+								if(trim($tagRow['tag']) != '' && $tagRow['tag'] != NULL)
+								{
+									$TrialsInfo[0]['sectionHeader'] .= " <span class='tag'>[" . $tag_row['tag'] . "]</span>";
+								}
+							}
+						}
+				
+						$TrialsInfo[0]['sectionHeader'] .= $disContinuedTxt;		
+						$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $productId);
+					
+						$Ids[0]['product'] = $productId;
+						$Ids[0]['area'] = $areaId;
+						
+						if(!empty($TrialsInfo[0]['naUpms']) && $displayType == 'webPage')
+						{
+							echo '<input type="hidden" id="upmstyle" value="expand" />';
+						}
+					}
+				}
+				else
+				{
+					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
+					$logger->error($log);
+					unset($log);
+				}
+			}
+		}
+		
+		return array($tHeader, $ottType, $productSelectorTitle, $productSelector, $Ids, $TrialsInfo);
+	}
+	
+	function processNonHmParams($resultIds, $globalOptions, $timeMachine, $timeInterval, $displayType = 'fileExport')
+	{
+		$productSelector = array();
+		$TrialsInfo = array();
+		$Ids = array();
+		
+		$productSelectorTitle = 'Select Products';
+		$tHeader = '';
+		$ottType = '';
+		
+		if(count($resultIds['product']) > 1 && count($resultIds['area']) > 1)
+		{
+			$productSelectorTitle = 'Select Products';
+			$ottType = 'colstackedindexed';
+			$tHeader = 'Area: Total';
+			
+			foreach($resultIds['product'] as $pkey => $pvalue)
+			{
+				$disContinuedTxt = '';
+				$Query = "SELECT `name`, `id`, `company`, `discontinuation_status`, `discontinuation_status_comment` FROM `products` WHERE id = '" . $pvalue . "' OR LI_id = '" . $pvalue . "' ";
+				$Res = mysql_query($Query);
+				if($Res)
+				{	
+					if(mysql_num_rows($Res) > 0)
+					{	
+						while($row = mysql_fetch_assoc($Res))
+						{
+							$productId = $row['id'];
+							if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
+							{
+								$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($row['discontinuation_status_comment']);
+								$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
+							}
+							
+							$TrialsInfo[$pkey]['sectionHeader'] = $productSelector[$pkey] = $row['name'];	
+							
+							if($row['company'] !== NULL && $row['company'] != '')
+							{
+								$TrialsInfo[$pkey]['sectionHeader'] .= " / <i>" . $row['company'] . "</i>";
+								$productSelector[$pkey] .= " / <i>" . $row['company'] . "</i>";
+							}
+							
+							$TrialsInfo[$pkey]['sectionHeader'] .= $disContinuedTxt;
+							$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $productId);
+							
+							$Ids[$pkey]['product'] = $productId;
+							$Ids[$pkey]['area'] = implode(', ', $resultIds['area']);
+						}
+					}
+				}
+				else
+				{
+					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
+					$logger->error($log);
+					unset($log);
+				}
+			}
+		}
+		else if(count($resultIds['area']) > 1)
+		{
+			$productSelectorTitle = 'Select Areas';
+			$ottType = 'rowstackedindexed';
+				
+			if(empty($resultIds['product']))
+			{
+				$tHeader = 'No Product';
+				$productId = '';
+			}
+			else
+			{
+				$tHeader = 'Product: ';
+				$productId = implode(', ', $resultIds['product']);
+				
+				$Query = "SELECT `name`, `id` FROM `products` WHERE id IN ('" . $productId . "') OR LI_id IN ('" . $productId . "') ";
+				$Res = mysql_query($Query);
+				if($Res)
+				{
+					if(mysql_num_rows($Res) > 0)
+					{
+						$Row = mysql_fetch_assoc($Res);
+						$tHeader .= htmlformat($Row['name']);
+						$productId = $Row['id'];
+					}
+					else
+					{
+						$tHeader .= $productId;
+					}
+				}
+				else
+				{
+					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
+					$logger->error($log);
+					unset($log);
+				}
+				
+				$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $productId);
+				if(!empty($TrialsInfo[0]['naUpms']) && $displayType == 'webPage')
+				{
+					echo '<input type="hidden" id="upmstyle" value="expand" />';
+				}
+			}
+			
+			foreach($resultIds['area'] as $akey => $avalue)
+			{
+				$Query = "SELECT `display_name`, `name`, `id`, `category` FROM `areas` WHERE id = '" . $avalue . "' ";
+				$Res = mysql_query($Query);
+				if($Res)
+				{
+					if(mysql_num_rows($Res) > 0)
+					{
+						while($row = mysql_fetch_assoc($Res))
+						{
+							$sectionHeader = '';
+							$areaId = $row['id'];
+							if($row['category'] != '' && $row['category'] !== NULL)
+							{
+								$sectionHeader = $row['category'];
+							}
+							
+							if($row['display_name'] != '' && $row['display_name'] !== NULL)
+							{
+								$sectionHeader .= ' ' . $row['display_name'];
+							}
+							else
+							{
+								$sectionHeader .= ' Area ' . $areaId;
+							}
+							
+							$TrialsInfo[$akey]['sectionHeader'] = $productSelector[$akey] = $sectionHeader;
+							
+							$Ids[$akey]['product'] = $productId;
+							$Ids[$akey]['area'] = $areaId;
+						}
+					}
+				}
+				else
+				{
+					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
+					$logger->error($log);
+					unset($log);
+				}
+			}
+		}
+		else if(count($resultIds['product']) > 1)
+		{
+			$productSelectorTitle = 'Select Products';
+			$ottType = 'colstackedindexed';
+				
+			if(empty($resultIds['area']))
+			{
+				$tHeader = 'No Area';
+				$areaId = '';
+			}
+			else
+			{
+				$tHeader = 'Area: ';
+				$areaId = implode(',', $resultIds['area']);
+				
+				$Query = "SELECT `display_name`, `name`, `id` FROM `areas` WHERE id IN ('" . $areaId . "') ";
+				$Res = mysql_query($Query);
+				if($Res)
+				{
+					if(mysql_num_rows($Res) > 0)
+					{
+						$row = mysql_fetch_assoc($Res);
+						$areaId = $row['id'];
+						
+						if($row['display_name'] != '' && $row['display_name'] !== NULL)
+						{
+							$tHeader .= ' ' . $row['display_name'];
+						}
+						else
+						{
+							$tHeader .= 'Area ' . $areaId;
+						}
+						
+						$tHeader = htmlformat($tHeader);
+					}
+					else
+					{
+						$tHeader .= $areaId;
+					}
+				}
+				else
+				{
+					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
+					$logger->error($log);
+					unset($log);
+				}
+			}
+			
+			foreach($resultIds['product'] as $pkey => $pvalue)
+			{
+				$disContinuedTxt = '';
+				$Query = "SELECT `name`, `id`, `company`, `discontinuation_status`, `discontinuation_status_comment` FROM `products` WHERE id = '" . $pvalue . "' OR LI_id = '" . $pvalue . "' ";
+				$Res = mysql_query($Query);
+				if($Res)
+				{
+					if(mysql_num_rows($Res) > 0)
+					{
+						while($row = mysql_fetch_assoc($Res))
+						{
+							$productId = $row['id'];
+							if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
+							{
+								$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($row['discontinuation_status_comment']);
+								$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
+							}
+	
+							$TrialsInfo[$pkey]['sectionHeader'] = $productSelector[$pkey] = $row['name'];
+							
+							if($row['company'] !== NULL && $row['company'] != '')
+							{
+								$TrialsInfo[$pkey]['sectionHeader'] .= " / <i>" . $row['company'] . "</i>";
+								$productSelector[$pkey] .= " / <i>" . $row['company'] . "</i>";
+							}
+							
+							$tagQuery = "SELECT `tag` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $pvalue . "' AND `report` = '" . $globalOptions['hm'] . "' AND `type` = 'product' ";
+							$tagRes = mysql_query($tagQuery);
+							if($tagRes)
+							{
+								if(mysql_num_rows($tagRes) > 0)
+								{
+									$tagRow = mysql_fetch_assoc($tagRes);
+									if($tagRow['tag'] != '' && $tagRow['tag'] !== NULL)
+									{
+										$TrialsInfo[$pkey]['sectionHeader'] .= " <span class='tag'>[" . $tagRow['tag'] . "]</span>";
+									}
+								}
+							}
+							else
+							{
+								$log 	= 'ERROR: Bad SQL query. ' . $tagQuery . mysql_error();
+								$logger->error($log);
+								unset($log);
+							}
+							
+							$TrialsInfo[$pkey]['sectionHeader'] .= $disContinuedTxt;
+							$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $productId);
+								
+							$Ids[$pkey]['product'] = $productId;
+							$Ids[$pkey]['area'] = $areaId;
+						}
+					}
+				}
+				else
+				{
+					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
+					$logger->error($log);
+					unset($log);
+				}
+			}
+		}
+		else
+		{
+			if(empty($resultIds['product']) && empty($resultIds['area']))
+			{
+				$productSelectorTitle = 'Select Products';
+				$ottType = 'indexed';
+				
+				$tHeader = 'No Area';
+			}
+			else if(empty($resultIds['product']))
+			{
+				$productSelectorTitle = 'Select Products';
+				$ottType = 'indexed';
+				$tHeader = 'Area: ';
+				
+				$areaId = implode(', ', $resultIds['area']);
+				$productId = '';
+				
+				$Query = "SELECT `display_name`, `name`, `id` FROM `areas` WHERE id IN ('" . $areaId . "') ";
+				$Res = mysql_query($Query);
+				if($Res)
+				{
+					if(mysql_num_rows($Res) > 0)
+					{
+						$row = mysql_fetch_assoc($Res);
+						$areaId = $row['id'];
+						
+						if($row['display_name'] != '' && $row['display_name'] !== NULL)
+						{
+							$tHeader .= ' ' . $row['display_name'];
+						}
+						else
+						{
+							$tHeader .= 'Area ' . $areaId;
+						}
+						
+						$tHeader = htmlformat($tHeader);
+					}
+					else
+					{
+						$tHeader .= $areaId;
+					}
+				}
+				else
+				{
+					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
+					$logger->error($log);
+					unset($log);
+				}
+				
+				$TrialsInfo[0]['sectionHeader'] = 'No Product';
+				$Ids[0]['product'] = $productId;
+				$Ids[0]['area'] = $areaId;
+			}
+			else if(empty($resultIds['area']))
+			{
+				$productSelectorTitle = 'Select Areas';
+				$ottType = 'indexed';
+				$tHeader = 'No Area';
+				
+				$areaId = '';
+				$productId = implode(', ', $resultIds['product']);
+				
+				$disContinuedTxt = '';
+				$Query = "SELECT `name`, `id`, `company`, `discontinuation_status`, `discontinuation_status_comment` FROM `products` WHERE id IN ('" . $productId . "') OR LI_id IN ('" . $productId . "') ";
+				$Res = mysql_query($Query);
+				if($Res)
+				{
+					if(mysql_num_rows($Res) > 0)
+					{
+						$row = mysql_fetch_assoc($Res);
+				
+						$productId = $row['id'];
+					
+						if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
+						{
+							$TrialsInfo[0]['dStatusComment'] = strip_tags($row['discontinuation_status_comment']);
+							$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
+						}
+					
+						$TrialsInfo[0]['sectionHeader'] = $productSelector[0] = $row['name'];
+					
+						if($row['company'] !== NULL && $row['company'] != '')
+						{
+							$TrialsInfo[0]['sectionHeader'] .= " / <i>" . $row['company'] . "</i>";
+							$productSelector[0] .= " / <i>" . $row['company'] . "</i>"; 
+						}
+					
+						$TrialsInfo[0]['sectionHeader'] .= $disContinuedTxt;		
+						$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $productId);
+					
+						$Ids[0]['product'] = $productId;
+						$Ids[0]['area'] = $areaId;
+						
+						if(!empty($TrialsInfo[0]['naUpms']) && $displayType == 'webPage')
+						{
+							echo '<input type="hidden" id="upmstyle" value="expand" />';
+						}
+					}
+				}
+				else
+				{
+					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
+					$logger->error($log);
+					unset($log);
+				}
+			}
+			else
+			{	
+				$productSelectorTitle = 'Select Areas';
+				$ottType = 'indexed';
+				$tHeader = 'Area: ';
+				
+				$areaId = implode(',', $resultIds['area']);
+				$productId = implode(',', $resultIds['product']);
+				
+				$Query = "SELECT `display_name`, `name`, `id` FROM `areas` WHERE id IN ('" . $areaId . "') ";
+				$Res = mysql_query($Query);
+				if($Res)
+				{
+					if(mysql_num_rows($Res))
+					{
+						$row = mysql_fetch_assoc($Res);
+					
+						$areaId = $row['id'];
+						if($row['display_name'] != '' && $row['display_name'] !== NULL)
+						{
+							$tHeader .= ' ' . $row['display_name'];
+						}
+						else
+						{
+							$tHeader .= 'Area ' . $areaId;
+						}
+						$tHeader = htmlformat($tHeader);
+					}
+					else
+					{
+						$tHeader .= $areaId;
+					}
+				}
+				else
+				{
+					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
+					$logger->error($log);
+					unset($log);
+				}
+				
+				$disContinuedTxt = '';
+				$Query = "SELECT `name`, `id`, `company`, `discontinuation_status`, `discontinuation_status_comment` FROM `products` WHERE id IN ('" . $productId . "') OR LI_id IN ('" . $productId . "') ";
+				$Res = mysql_query($Query);
+				if($Res)
+				{
+					if(mysql_num_rows($Res) > 0)
+					{
+						$row = mysql_fetch_assoc($Res);
+				
+						$productId = $row['id'];
+					
+						if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
+						{
+							$TrialsInfo[0]['dStatusComment'] = strip_tags($row['discontinuation_status_comment']);
+							$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
+						}
+					
+						$TrialsInfo[0]['sectionHeader'] = $productSelector[0] = $row['name'];
+					
+						if($row['company'] !== NULL && $row['company'] != '')
+						{
+							$TrialsInfo[0]['sectionHeader'] .= " / <i>" . $row['company'] . "</i>";
+							$productSelector[0] .= " / <i>" . $row['company'] . "</i>"; 
+						}
+					
+						$TrialsInfo[0]['sectionHeader'] .= $disContinuedTxt;		
+						$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $productId);
+					
+						$Ids[0]['product'] = $productId;
+						$Ids[0]['area'] = $areaId;
+						
+						if(!empty($TrialsInfo[0]['naUpms']) && $displayType == 'webPage')
+						{
+							echo '<input type="hidden" id="upmstyle" value="expand" />';
+						}
+					}
+				}
+				else
+				{
+					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
+					$logger->error($log);
+					unset($log);
+				}
+			}
+		}
+		
+		return array($tHeader, $ottType, $productSelectorTitle, $productSelector, $Ids, $TrialsInfo);
+	}
 	
 	function generateOnlineTT($resultIds, $timeMachine = NULL, $ottType, $globalOptions = array())
 	{	
@@ -7388,6 +8050,9 @@ class TrialTracker
 		$productSelector = array();
 		global $sphinx;
 		global $Sphinx_search;
+		
+		echo '<form id="frmOtt" name="frmOtt" method="get" target="_self" action="intermediary.php">';
+		
 		if($ottType == 'unstacked')
 		{
 			$Id = explode(".", $resultIds);
@@ -7465,10 +8130,6 @@ class TrialTracker
 		}
 		else if($ottType == 'indexed') 
 		{	
-			$TrialsInfo = array();
-			$Ids = array();
-			$disContinuedTxt = '';
-			
 			if(in_array($globalOptions['startrange'], $globalOptions['Highlight_Range']))
 			{
 				$timeMachine = str_replace('ago', '', $globalOptions['startrange']);
@@ -7495,490 +8156,41 @@ class TrialTracker
 				$timeInterval = (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
 			}
 			
+			echo '<input type="hidden" name="p" value="' . $resultIds['product'] . '" />'
+					. '<input type="hidden" name="a" value="' . $resultIds['area'] . '" />';
+			
 			$resultIds['product'] = explode(',', trim($resultIds['product']));
 			$resultIds['area'] = explode(',', trim($resultIds['area']));
+			
+			$resultIds['product'] = array_filter($resultIds['product']);
+			$resultIds['area'] = array_filter($resultIds['area']);
 			
 			$resultIds['product'] = array_unique($resultIds['product']);
 			$resultIds['product'] = array_values($resultIds['product']);
 			
-			
-			if(count($resultIds['product']) > 1 && count($resultIds['area']) > 1)
-			{	
-				$t = 'Area: Total';
-				$this->displayHeader($t);
-				
-				$ottType = 'colstackedindexed';
-				
-				foreach($resultIds['product'] as $pkey => $pvalue)
-				{
-					$disContinuedTxt = '';
-					$res = mysql_query("SELECT `name`, `id`, `company`, `discontinuation_status`, `discontinuation_status_comment` FROM `products` WHERE id = '" . $pvalue . "' OR LI_id = '" . $pvalue . "' ");
-					if(mysql_num_rows($res) > 0)
-					{
-						while($row = mysql_fetch_assoc($res))
-						{
-							if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
-							{
-								$TrialsInfo[$pkey]['sectionHeader'] = $row['name'];
-								$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($row['discontinuation_status_comment']);
-								$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
-							}
-							else
-							{
-								$TrialsInfo[$pkey]['sectionHeader'] = $row['name'];
-							}
-							
-							$productSelector[$pkey] = $row['name'];
-							
-							if($row['company'] !== NULL && $row['company'] != '')
-							{
-								$TrialsInfo[$pkey]['sectionHeader'] .= " / <i>" . $row['company'] . "</i>";
-								$productSelector[$pkey] .= " / <i>" . $row['company'] . "</i>";
-							}
-							
-							if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve product tag from heatmap report
-							{
-								$tag_res = mysql_query("SELECT `tag` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $pvalue . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'product'");
-								if(mysql_num_rows($tag_res) > 0)
-								{
-									while($tag_row = mysql_fetch_assoc($tag_res))
-									{
-										if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
-										{
-											$TrialsInfo[$pkey]['sectionHeader'] .= " <span class=\"tag\">[" . $tag_row['tag'] . "]</span>";
-										}
-									}
-								}
-							}
-							
-							$TrialsInfo[$pkey]['sectionHeader'] .= $disContinuedTxt;
-							$TrialsInfo[$pkey]['naUpms'] = 
-							$this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
-							
-							$Ids[$pkey]['product'] = $row['id'];
-							$Ids[$pkey]['area'] = implode("', '", $resultIds['area']);
-						}
-					}
-				}
-			}
-			else if((count($resultIds['product']) >= 1 && count($resultIds['area']) == 1 && ($resultIds['area'][0] == NULL || trim($resultIds['area'][0]) == "")) || (count($resultIds['area']) >= 1 && count($resultIds['product']) == 1 && ($resultIds['product'][0] == NULL || trim($resultIds['product'][0]) == ""))) //Condition For Only Product OR When Only Area is Given
+			if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '')
 			{
-				if(count($resultIds['product']) >= 1 && count($resultIds['area']) == 1 && $resultIds['area'][0] == NULL && trim($resultIds['area'][0]) == '' && $resultIds['product'][0] != NULL && trim($resultIds['product'][0]) != '')
-				{
-					$t = '';
-					$this->displayHeader($t);
-					
-					foreach($resultIds['product'] as $pkey => $pvalue)
-					{
-						$disContinuedTxt = '';
-						$res = mysql_query("SELECT `name`, `id`, `company`, `discontinuation_status`, `discontinuation_status_comment` FROM `products` WHERE id = '" . $pvalue . "' OR LI_id = '" . $pvalue . "' ");
-						if(mysql_num_rows($res) > 0)
-						{
-							while($row = mysql_fetch_assoc($res))
-							{
-								if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
-								{
-									$TrialsInfo[$pkey]['sectionHeader'] = $row['name'];
-									$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($row['discontinuation_status_comment']);
-									$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
-								}
-								else
-								{
-									$TrialsInfo[$pkey]['sectionHeader'] = $row['name'];
-								}
-								
-								$productSelector[$pkey] = $row['name'];
-								
-								if($row['company'] !== NULL && $row['company'] != '')
-								{
-									$TrialsInfo[$pkey]['sectionHeader'] .= " / <i>" . $row['company'] . "</i>";
-									$productSelector[$pkey] .= " / <i>" . $row['company'] . "</i>";
-								}
-								
-								if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve product tag from heatmap report
-								{
-									$tag_res = mysql_query("SELECT `tag` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $pvalue . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'product'");
-									if(mysql_num_rows($tag_res) > 0)
-									{
-										while($tag_row = mysql_fetch_assoc($tag_res))
-										{
-											if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
-											{
-												$TrialsInfo[$pkey]['sectionHeader'] .= " <span class=\"tag\">[" . $tag_row['tag'] . "]</span>";
-											}
-										}
-									}
-								}
-				
-								$TrialsInfo[$pkey]['sectionHeader'] .= $disContinuedTxt;
-								$TrialsInfo[$pkey]['naUpms'] = 
-								$this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
-								
-								$Ids[$pkey]['product'] = $row['id'];
-								$Ids[$pkey]['area'] = '';
-							}
-						}
-					}
-				}
-				else
-				{
-					$t = '';
-					$this->displayHeader($t);
-					
-					foreach($resultIds['area'] as $akey => $avalue)
-					{
-						if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve display name from heatmap report
-						{
-							$res = mysql_query("SELECT `display_name`, `type_id`, `category` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $avalue . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'area'");
-							if(mysql_num_rows($res) > 0)
-							{
-								while($row = mysql_fetch_assoc($res))
-								{
-									$sectionHeader = '';
-									if($row['category'] != '' && $row['category'] !== NULL)
-									{
-										$sectionHeader = $row['category'];
-									}
-									
-									if($row['display_name'] != '' && $row['display_name'] !== NULL)
-									{
-										$sectionHeader .= ' ' . $row['display_name'];
-									}
-									else
-									{
-										$sectionHeader .= ' Area ' . $row['type_id'];
-									}
-									
-									$TrialsInfo[$akey]['sectionHeader'] = $sectionHeader;
-									
-									$Ids[$akey]['product'] = '';
-									$Ids[$akey]['area'] = $row['type_id'];
-								}
-							}
-							else	//if area not found in report, just display id
-							{
-									$TrialsInfo[$akey]['sectionHeader'] = "Area " . $avalue;
-									
-									$Ids[$akey]['product'] = '';
-									$Ids[$akey]['area'] = $avalue;
-							}
-						}
-						else	//if no hm field
-						{
-							$res = mysql_query("SELECT `display_name`, `name`, `id`, `category` FROM `areas` WHERE id = '" . $avalue . "' ");
-							if(mysql_num_rows($res) > 0)
-							{
-								while($row = mysql_fetch_assoc($res))
-								{
-									if($row['id'] != '' && $row['id'] != NULL && $avalue != '' && $avalue != NULL)
-									{
-										$sectionHeader = '';
-										if($row['category'] != '' && $row['category'] !== NULL)
-										{
-											$sectionHeader = $row['category'];
-										}
-										
-										if($row['display_name'] != '' && $row['display_name'] !== NULL)
-										{
-											$sectionHeader .= ' ' . $row['display_name'];
-										}
-										else
-										{
-											$sectionHeader .= ' Area ' . $row['id'];
-										}
-										
-										$TrialsInfo[$akey]['sectionHeader'] = $sectionHeader;
-										$Ids[$akey]['area'] = $row['id'];
-									}
-									else /// For case we dont have product names, area names
-									{
-										$TrialsInfo[$akey]['sectionHeader'] = '';
-										$Ids[$akey]['area'] = '';
-									}
-									
-									$Ids[$akey]['product'] = '';
-									
-								}
-							}
-						}
-					}
-				}
-				if(!empty($TrialsInfo[0]['naUpms']))
-				{
-					echo '<input type="hidden" id="upmstyle" value="expand" />';
-				}
+				echo '<input type="hidden" name="hm" value="' . $globalOptions['hm'] . '" />';
+				$Arr = $this->processHmParams($resultIds, $globalOptions, $timeMachine, $timeInterval, 'webPage');
 			}
-			else if(count($resultIds['product']) > 1 || count($resultIds['area']) > 1)
+			else
 			{
-				if(count($resultIds['area']) > 1)
-				{	
-					$productSelectorTitle = 'Select Areas';
-					
-					$res = mysql_query("SELECT `name`, `id` FROM `products` WHERE id IN ('" . implode("','", $resultIds['product']) 
-							. "') OR LI_id IN ('" . implode(',', $resultIds['product']) . "') ");
-					$row = mysql_fetch_assoc($res);
-					
-					$productName = $row['name'];
-					$productId = $row['id'];
-					
-					$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $productId);
-					$ottType = 'rowstackedindexed';
-					
-					$t = 'Product: ' . htmlformat($productName);
-					$this->displayHeader($t);
-					
-					foreach($resultIds['area'] as $akey => $avalue)
-					{
-						if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve display name from heatmap report
-						{
-							$res = mysql_query("SELECT `display_name`, `type_id`, `category` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $avalue . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'area'");
-							
-							if(mysql_num_rows($res) > 0)
-							{
-								while($row = mysql_fetch_assoc($res))
-								{
-									$sectionHeader = '';
-									if($row['category'] != '' && $row['category'] !== NULL)
-									{
-										$sectionHeader = $row['category'];
-									}
-									
-									if($row['display_name'] != '' && $row['display_name'] !== NULL)
-									{
-										$sectionHeader .= ' ' . $row['display_name'];
-									}
-									else
-									{
-										$sectionHeader .= ' Area ' . $row['type_id'];
-									}
-									
-									$TrialsInfo[$akey]['sectionHeader'] = $sectionHeader;	//if area has no display name, just display id
-									
-									$Ids[$akey]['product'] = $productId;
-									$Ids[$akey]['area'] = $row['type_id'];
-								}
-							}
-							else	//if area not found in report, just display id
-							{
-									$TrialsInfo[$akey]['sectionHeader'] = "Area " . $avalue;
-									
-									$Ids[$akey]['product'] = $productId;
-									$Ids[$akey]['area'] = $avalue;
-							}
-						}
-						else	//if no hm field
-						{
-							$res = mysql_query("SELECT `display_name`, `name`, `id`, `category` FROM `areas` WHERE id = '" . $avalue . "' ");
-
-							if(mysql_num_rows($res) > 0)
-							{
-								while($row = mysql_fetch_assoc($res))
-								{
-									$sectionHeader = '';
-									if($row['category'] != '' && $row['category'] !== NULL)
-									{
-										$sectionHeader = $row['category'];
-									}
-									
-									if($row['display_name'] != '' && $row['display_name'] !== NULL)
-									{
-										$sectionHeader .= ' ' . $row['display_name'];
-									}
-									else
-									{
-										$sectionHeader .= ' Area ' . $row['id'];
-									}
-									$TrialsInfo[$akey]['sectionHeader'] = $sectionHeader;
-									
-									$Ids[$akey]['product'] = $productId;
-									$Ids[$akey]['area'] = $row['id'];
-								}
-							}
-						}
-						
-						$productSelector[$akey] = $TrialsInfo[$akey]['sectionHeader'];
-					}
-					if(!empty($TrialsInfo[0]['naUpms']))
-					{
-						echo '<input type="hidden" id="upmstyle" value="expand" />';
-					}
-				}
-				else
-				{
-					if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve display name from heatmap report
-					{
-						$res = mysql_query("SELECT `display_name`, `type_id` FROM `rpt_masterhm_headers` WHERE `type_id` IN ('" . implode("','", $resultIds['area']) . "') AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'area'");
-						if(mysql_num_rows($res) > 0)
-						{
-							while($row = mysql_fetch_assoc($res))
-							{
-								$areaName = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : "Area ".$row['type_id'];	//if area has no display name, just display id
-								$areaId = $row['type_id'];
-							}
-						}
-						else	//if area not found in report, just display id
-						{
-							$areaName = "Area " . $avalue;
-							$areaId = $avalue;
-						}
-					}
-					else
-					{
-						$res = mysql_query("SELECT `display_name`, `name`, `id` FROM `areas` WHERE id IN ('" . implode("','", $resultIds['area']) . "') ");
-						$row = mysql_fetch_assoc($res);
-						$areaName = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : "Area ".$row['id'];
-						$areaId = $row['id'];
-					}
-					
-					$ottType = 'colstackedindexed';
-					
-					$t = 'Area: ' . htmlformat($areaName);
-					$this->displayHeader($t);
-					
-					foreach($resultIds['product'] as $pkey => $pvalue)
-					{
-						$disContinuedTxt = '';
-						$res = mysql_query("SELECT `name`, `id`, `company`, `discontinuation_status`, `discontinuation_status_comment` FROM `products` WHERE id = '" . $pvalue . "' OR LI_id = '" . $pvalue . "' ");
-						if(mysql_num_rows($res) > 0)
-						{
-							while($row = mysql_fetch_assoc($res))
-							{
-								if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
-								{
-									$TrialsInfo[$pkey]['sectionHeader'] = $row['name'];
-									$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($row['discontinuation_status_comment']);
-									$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
-								}
-								else
-								{
-									$TrialsInfo[$pkey]['sectionHeader'] = $row['name'];
-								}
-								
-								$productSelector[$pkey] = $row['name'];
-								
-								if($row['company'] !== NULL && $row['company'] != '')
-								{
-									$TrialsInfo[$pkey]['sectionHeader'] .= " / <i>" . $row['company'] . "</i>";
-									$productSelector[$pkey] .= " / <i>" . $row['company'] . "</i>";
-								}
-								
-								if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve product tag from heatmap report
-								{
-									$tag_res = mysql_query("SELECT `tag` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $pvalue . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'product'");
-									if(mysql_num_rows($tag_res) > 0)
-									{
-										while($tag_row = mysql_fetch_assoc($tag_res))
-										{
-											if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
-											{
-												$TrialsInfo[$pkey]['sectionHeader'] .= " <span class=\"tag\">[" . $tag_row['tag'] . "]</span>";
-											}
-										}
-									}
-								}
-								
-								$TrialsInfo[$pkey]['sectionHeader'] .= $disContinuedTxt;
-								$TrialsInfo[$pkey]['naUpms'] = 
-								$this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
-									
-								$Ids[$pkey]['product'] = $row['id'];
-								$Ids[$pkey]['area'] = $areaId;
-							}
-						}
-					}
-				}
-			}
-			else 
-			{	
-				if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve display name from heatmap report
-				{
-					$res = mysql_query("SELECT `display_name`, `type_id` FROM `rpt_masterhm_headers` WHERE `type_id` IN ('" . implode("','", $resultIds['area']) . "') AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'area'");
-					if(mysql_num_rows($res) > 0)
-					{
-						while($row = mysql_fetch_assoc($res))
-						{
-							$Ids[0]['area'] = $row['type_id'];
-							$areaName = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : "Area ".$row['type_id'];	//if area has no display name, just display id
-									
-							$t = 'Area: ' . htmlformat($areaName);
-						}
-					}
-					else	//if area not found in report, just display id
-					{
-						$Ids[0]['area'] = $row['type_id'];
-						$areaName = "Area ".$avalue;
-						
-						$t = 'Area: ' . htmlformat($areaName);
-					}
-				}
-				else
-				{
-					$res = mysql_query("SELECT `display_name`, `name`, `id` FROM `areas` WHERE id IN ('" . implode(',', $resultIds['area']) . "') ");
-					$row = mysql_fetch_assoc($res);
-					$Ids[0]['area'] = $row['id'];
-					$row['name'] = ($row['display_name'] != '' && $row['display_name'] !== NULL) ? $row['display_name'] : "Area ".$row['id'];
-					$t = 'Area: ' . htmlformat($row['name']);
-				}
-				$this->displayHeader($t);
-				
-				$disContinuedTxt = '';
-				$res = mysql_query("SELECT `name`, `id`, `company`, `discontinuation_status`, `discontinuation_status_comment` FROM `products` WHERE id IN ('" . implode(',', $resultIds['product']) 
-						. "') OR LI_id IN ('" . implode(',', $resultIds['product']) . "') ");
-				$row = mysql_fetch_assoc($res);
-				
-				$Ids[0]['product'] = $row['id'];
-				
-				if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
-				{
-					$TrialsInfo[0]['sectionHeader'] = $row['name'];
-					$TrialsInfo[0]['dStatusComment'] = strip_tags($row['discontinuation_status_comment']);
-					$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
-				}
-				else
-				{
-					$TrialsInfo[0]['sectionHeader'] = $row['name'];
-				}
-				
-				$productSelector[0] = $row['name'];
-				
-				if($row['company'] !== NULL && $row['company'] != '')
-				{
-					$TrialsInfo[0]['sectionHeader'] .= " / <i>" . $row['company'] . "</i>";
-					$productSelector[0] .= " / <i>" . $row['company'] . "</i>"; 
-				}
-				
-				if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)	//If hm field set, retrieve product tag from heatmap report
-				{
-					$tag_res = mysql_query("SELECT `tag` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $row['id'] . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'product'");
-					if(mysql_num_rows($tag_res) > 0)
-					{
-						while($tag_row = mysql_fetch_assoc($tag_res))
-						{
-							if(trim($tag_row['tag']) != '' && $tag_row['tag'] != NULL)
-							{
-								$TrialsInfo[0]['sectionHeader'] .= " <span class=\"tag\">[" . $tag_row['tag'] . "]</span>";
-							}
-						}
-					}
-				}
-				
-				$TrialsInfo[0]['sectionHeader'] .= $disContinuedTxt;		
-				$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $row['id']);
-				
-				if(!empty($TrialsInfo[0]['naUpms']))
-				{
-					echo '<input type="hidden" id="upmstyle" value="expand" />';
-				}
+				$Arr = $this->processNonHmParams($resultIds, $globalOptions, $timeMachine, $timeInterval, 'webPage');
 			}
 			
-			echo '<input type="hidden" name="p" value="' . $_REQUEST['p'] . '" /><input type="hidden" name="a" value="' . $_REQUEST['a'] . '" />';
+			$this->displayHeader($Arr[0]);
+			
+			$ottType = $Arr[1];
+			$productSelectorTitle = $Arr[2];
+			$productSelector = $Arr[3];
+			$Ids = $Arr[4];
+			$TrialsInfo = $Arr[5];
 			
 			if(isset($globalOptions['JSON_search']))
-			echo '<input type="hidden" name="JSON_search" value=\'' . $globalOptions['JSON_search'] . '\' />';
-			
-			if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '' && $globalOptions['hm'] != NULL)
-			echo '<input type="hidden" name="hm" value="' . $globalOptions['hm'] . '" />';
-			
+			{
+				echo '<input type="hidden" name="JSON_search" value=\'' . $globalOptions['JSON_search'] . '\' />';
+			}
+
 			$Values = $this->processIndexedOTTData($TrialsInfo, $ottType, $Ids, $timeMachine, $globalOptions);
 			unset($TrialsInfo);
 			echo $this->displayWebPage($productSelectorTitle, $ottType, $resultIds, $timeMachine, $Values, $productSelector, $globalOptions);
@@ -9151,16 +9363,17 @@ class TrialTracker
 							. " WHERE ";
 							
 					if($ivalue['product'] != '')	//When Product is blank do not process Product in Query
-						$query .= "pt.`product` IN ('" . $ivalue['product'] . "') ";
+						$query .= "pt.`product` IN (" . $ivalue['product'] . ") ";
 						
 					if($ivalue['product'] != '' && $ivalue['area']  != '')
 						$query .= "AND " ;
 						
 					if($ivalue['area'] !='' )	//When Area is blank do not process Area in Query
-						$query .= "at.`area` IN ('" . $ivalue['area'] . "') " ;
+						$query .= "at.`area` IN (" . $ivalue['area'] . ") " ;
 					
 					$fullRecordQry = $query . " ORDER BY " . $orderBy;	
 					
+					//echo '<br/><br/>-->'.
 					$query .= $where . " ORDER BY " . $orderBy;
 				}
 				else
@@ -11146,25 +11359,24 @@ class TrialTracker
 	function displayTrialTableHeader($loggedIn, $globalOptions = array()) 
 	{
 		$outputStr = '<table cellpadding="0" cellspacing="0" class="manage">'
-			 . '<tr>' . (($loggedIn) ? '<th style="width:70px;">ID</th>' : '' )
-			 . '<th style="width:270px;">Title</th>'
-			 . '<th style="width:30px;" title="Red: Change greater than 20%">N</th>'
-			 . '<th style="width:64px;" title="&quot;RoW&quot; = Rest of World">Region</th>'
-			 . '<th style="width:100px;">Interventions</th>'
-			 . '<th style="width:90px;">Sponsor</th>'
-			 . '<th style="width:105px;">Status</th>'
-			 . '<th style="width:100px;">Conditions</th>'
-			 . '<th title="MM/YY" style="width:33px;">End</th>'
-			 . '<th style="width:25px;">Ph</th>'
-			 . '<th style="width:25px;">Res</th>'
-			 . '<th colspan="3" style="width:12px;">-</th>'
-			 . '<th colspan="12" style="width:32px;">' . (date('Y')) . '</th>'
-			 . '<th colspan="12" style="width:32px;">' . (date('Y')+1) . '</th>'
-			 . '<th colspan="12" style="width:32px;">' . (date('Y')+2) . '</th>'
-			 . '<th colspan="3" style="width:12px;">+</th></tr>';
+					 . '<tr>' . (($loggedIn) ? '<th style="width:70px;">ID</th>' : '' )
+					 . '<th style="width:270px;">Title</th>'
+					 . '<th style="width:30px;" title="Red: Change greater than 20%">N</th>'
+					 . '<th style="width:64px;" title="&quot;RoW&quot; = Rest of World">Region</th>'
+					 . '<th style="width:100px;">Interventions</th>'
+					 . '<th style="width:90px;">Sponsor</th>'
+					 . '<th style="width:105px;">Status</th>'
+					 . '<th style="width:100px;">Conditions</th>'
+					 . '<th title="MM/YY" style="width:33px;">End</th>'
+					 . '<th style="width:25px;">Ph</th>'
+					 . '<th style="width:25px;">Res</th>'
+					 . '<th colspan="3" style="width:12px;">-</th>'
+					 . '<th colspan="12" style="width:32px;">' . (date('Y')) . '</th>'
+					 . '<th colspan="12" style="width:32px;">' . (date('Y')+1) . '</th>'
+					 . '<th colspan="12" style="width:32px;">' . (date('Y')+2) . '</th>'
+					 . '<th colspan="3" style="width:12px;">+</th></tr>';
 		
 		return $outputStr;
-
 	}
 		
 	function getResultSet($resultIds, $stackType)
@@ -11219,16 +11431,14 @@ class TrialTracker
 	
 	function displayHeader($productAreaInfo)
 	{
-		echo '<form id="frmOtt" name="frmOtt" method="get" target="_self" action="intermediary.php">';
-		
 		if(isset($_REQUEST['sphinx_s']))
-			{
-				echo '<input type="hidden" name="sphinx_s" value="'.$_REQUEST['sphinx_s'].'" />';
-			}
+		{
+			echo '<input type="hidden" name="sphinx_s" value="'.$_REQUEST['sphinx_s'].'" />';
+		}
 		elseif(isset($globalOptions['sphinx_s']))
-			{
-				echo '<input type="hidden" name="sphinx_s" value="'.$globalOptions['sphinx_s'].'" />';
-			}
+		{
+			echo '<input type="hidden" name="sphinx_s" value="'.$globalOptions['sphinx_s'].'" />';
+		}
 		
 		if((isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') !== FALSE) 
 		|| (isset($_GET['LI']) && $_GET['LI'] == 1))
@@ -11429,7 +11639,7 @@ class TrialTracker
 				. '<td class="bottom">&nbsp;</td><td class="bottom">&nbsp;</td>'
 				. '<td class="bottom">&nbsp;</td><td class="bottom">&nbsp;</td>'
 				. '<td class="bottom">&nbsp;</td><td class="right bottom">';
-				
+		
 		if(!empty($productSelector)
 		&& ($ottType != 'unstacked' && $ottType != 'indexed' && $ottType != 'unstackedoldlink'))
 		{
@@ -14099,10 +14309,12 @@ class TrialTracker
 		}
 		else
 		{
-			$productName = mysql_fetch_assoc(mysql_query("SELECT `name` FROM `products` WHERE `id` = '" . $productId . "' "));
+			//echo '<br/><br/>-->'."SELECT `name` FROM `products` WHERE `id` IN ('" . $productId . "') ";
+			$productName = mysql_fetch_assoc(mysql_query("SELECT `name` FROM `products` WHERE `id` IN ('" . $productId . "') "));
+			//echo '<br/><br/>-->'.
 			$query = "SELECT `id`, `event_description`, `event_link`, `result_link`, `event_type`, `start_date`, `status`, " 
-							. " `start_date_type`, `end_date`, `end_date_type` FROM `upm` WHERE `corresponding_trial` IS NULL AND `product` = '" . $productId 
-							. "' ORDER BY `end_date` ASC ";
+							. " `start_date_type`, `end_date`, `end_date_type` FROM `upm` WHERE `corresponding_trial` IS NULL AND `product` IN ('" . $productId 
+							. "') ORDER BY `end_date` ASC ";
 			$res = mysql_query($query)  or tex('Bad SQL query getting unmatched upms ' . $sql);
 			if(mysql_num_rows($res) > 0) 
 			{
