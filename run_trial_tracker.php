@@ -7220,7 +7220,7 @@ class TrialTracker
 				}
 				
 				//fetching products from hm
-				$Query = "SELECT `id`, `display_name`, `type_id` FROM `rpt_masterhm_headers` WHERE `report` = '" . $globalOptions['hm'] . "' AND `type` = 'product' ";
+				$Query = "SELECT `id`, `display_name`, `type_id`, `category` FROM `rpt_masterhm_headers` WHERE `report` = '" . $globalOptions['hm'] . "' AND `type` = 'product' ";
 				$Res = mysql_query($Query);
 				if($Res)
 				{
