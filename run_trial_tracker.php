@@ -14631,6 +14631,8 @@ class TrialTracker
 	
 	function replaceRedundantAcroynm($Acroynm, $briefTitle)
 	{
+		$Acroynm = preg_quote($Acroynm);
+		
 		$pattern = '~^\(*' . $Acroynm . '*\)*:*~';
 		$replacement = '';
 		$result = preg_replace($pattern, $replacement, $briefTitle);
