@@ -7231,6 +7231,11 @@ class TrialTracker
 						{
 							$productId = $row['type_id'];
 							$sectionHeader = '';
+							
+							if($row['category'] != '' && $row['category'] !== NULL)
+							{
+								$sectionHeader .= $row['category'];
+							}
 							if($row['display_name'] != '' && $row['display_name'] !== NULL)
 							{
 								$sectionHeader .= $row['display_name'];
