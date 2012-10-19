@@ -788,5 +788,13 @@ global $db;
 		divresize();
 	}); 
 </script>
+<?
+if($db->loggedIn())
+{
+	$cpageURL = 'http://';
+	$cpageURL .= $_SERVER["SERVER_NAME"].urldecode($_SERVER["REQUEST_URI"]);
+	echo '<a href="li/larvolinsight.php?url='. $cpageURL .'"><span style="color:red;font-weight:bold;margin-left:10px;">LI view</span></a><br>';
+}
+?>
 </body>
 </html>

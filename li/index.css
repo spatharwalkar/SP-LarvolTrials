@@ -1,0 +1,342 @@
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, font, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, dl, dt, dd, ol, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td { border: 0px none; outline: 0px none; vertical-align: baseline; background: none repeat scroll 0% 0% transparent; margin: 0px; padding: 0px; }
+html { font-size: 62.5%; }
+body { padding: 0px 0px 25px; }
+.clear { clear: both; height: 0px; font-size: 1px; line-height: 0; }
+a, a:visited {  }
+a:active, a:hover { color: rgb(0, 66, 118); text-decoration: none; }
+body { font-family: arial,helvetica,sans-serif; color: rgb(102, 102, 102); text-align: center; }
+#singleColumnMain p { font-size: 1em; line-height: 1.6em; padding: 0px 0px 15px; }
+#singleColumnMain ul, #singleColumnMain ol {  }
+#singleColumnMain li {  }
+.NewsItemSummaryLink:link { font-family: Arial,Helvetica,MS Sans-Serif; font-size: 13px; color: Blue; }
+a.NewsItemSummaryLink:visited { font-family: Arial,Helvetica,MS Sans-Serif; font-size: 13px; color: Blue; }
+a.NewsItemSummaryLink:active { font-family: Arial,Helvetica,MS Sans-Serif; font-size: 13px; color: Blue; }
+a.NewsItemSummaryLink:hover { font-family: Arial,Helvetica,MS Sans-Serif; font-size: 13px; color: Blue; }
+.NewsItemSummaryNewsSource { font-family: Arial,Helvetica,MS Sans-Serif; font-size: 13px; color: rgb(0, 0, 0); font-style: italic; }
+.NewsItemSummaryText { font-family: Arial,Helvetica,MS Sans-Serif; font-size: 13px; color: rgb(0, 0, 0); }
+.NewsItemSummaryRedTags { font-family: Arial,Helvetica,MS Sans-Serif; font-size: 13px; color: rgb(255, 0, 0); }
+.NewsItemSummarySocialMedia { font-family: Arial,Helvetica,MS Sans-Serif; font-size: 9pt; color: Purple; }
+#topBg { height: 96px; background-image: url('top_bg.jpg'); background-repeat: repeat-x; }
+#topWrapper { margin-left: 20px; width: 96%; text-align: left; }
+#topLogo { width: 236px; float: left; }
+#topButtons { text-align: right; }
+#topButtons img { margin: 22px 0px 0px 3px; }
+#topNav { padding: 0px; }
+#wrapper { margin: 0px auto; padding: 20px 0px 0px; width: 100%; min-height: 450px; height: auto ! important; text-align: left; }
+.padMainContentBottomOnly { padding: 0px 0px 20px; }
+#singleColumnMain { width: 969px; float: left; }
+.NewsItemSummarySocialMedia { margin-right: 5px; }
+.ImportanceBarBg { position: relative; float: left; width: 30px; height: 4px; padding: 2px; overflow: visible; background: none repeat scroll 0% 0% white; margin-top: 2px; margin-right: 3px; }
+.ImportanceBar { width: 0px; height: 7px; color: rgb(72, 0, 111); font-size: 12px; font-weight: bold; letter-spacing: 0px; line-height: 8px; display: inline; }
+.greyColor { color: rgb(217, 217, 217); }
+.optTable ul { list-style: none outside none; }
+.RadAjax_Larvol .raDiv { background-image: url('loading.gif'); }
+.RadAjax_Larvol .raColor { background-color: rgb(83, 55, 130); }
+.RadAjax_Larvol .raTransp { opacity: 0.3; }
+.RadMenu_Larvol ul.rmRootGroup, .RadMenu_Larvol div.rmRootGroup { padding: 1px 0px; border: 1px solid rgb(125, 125, 125); background-color: rgb(227, 227, 227); }
+.RadMenu_Larvol, .RadMenu_Larvol a.rmLink { font: 12px/19px "Segoe UI",Arial,sans-serif; color: rgb(0, 0, 0); text-decoration: none; }
+div.RadMenu_Larvol { padding: 3px 0px 0px; }
+div.RadMenu_Larvol .rmRootGroup { border-style: solid; border-width: 0px; background-color: transparent; }
+UL { margin: 0px 0px 0px 15px; padding: 0px; }
+.Section { font-size: 16px; font-weight: bold; color: rgb(95, 70, 109) ! important; background-color: rgb(228, 228, 228); padding: 2px 2px 2px 10px; border: 3px solid rgb(95, 73, 122); margin: 0px; }
+.ProductRow { padding: 0px; margin: 0px; }
+.ProductCell { font-size: 13px; color: rgb(0, 0, 0); padding: 0px; border: 1px solid rgb(191, 191, 191); margin: 0px; }
+.CommentCell { font-size: 13px; color: rgb(0, 0, 0); padding: 0px; border: 1px solid rgb(191, 191, 191); margin: 0px; }
+.NewsItemCell { font-size: 13px; color: rgb(0, 0, 0); padding: 0px; border: 1px solid rgb(191, 191, 191); margin: 0px; width: 600px; line-height: normal; }
+.optTable { background-color: rgb(255, 255, 255); border: 2px solid rgb(0, 0, 128); padding: 0px; margin: 0px; width: 100%; }
+.keywordTooltip { display: none; background: url('black_arrow_big_bottom.png') repeat scroll 0% 0% transparent; height: 146px; padding: 60px 30px 10px; width: 310px; }
+.keywordTooltip h5 { font-size: 14px; color: rgb(255, 255, 255); padding: 0px 0px 15px; margin: 0px; }
+.keywordTooltip p { font-size: 11px; color: rgb(255, 255, 255); padding: 0px 0px 10px; margin: 0px; }
+.RadGrid_Larvol { border: 1px solid rgb(211, 211, 211); background: none repeat scroll 0% 0% rgb(255, 255, 255); color: rgb(51, 51, 51); }
+.RadGrid_Larvol, .RadGrid_Larvol .rgMasterTable, .RadGrid_Larvol .rgDetailTable, .RadGrid_Larvol .rgGroupPanel table, .RadGrid_Larvol .rgCommandRow table, .RadGrid_Larvol .rgEditForm table, .GridToolTip_Larvol { font: 12px/16px "segoe ui",arial,sans-serif; }
+.RadGrid_Larvol .rgMasterTable, .RadGrid_Larvol .rgDetailTable { border-collapse: separate; }
+.RadGrid_Larvol .rgRow, .RadGrid_Larvol .rgAltRow, .RadGrid_Larvol .rgHeader, .RadGrid_Larvol .rgResizeCol, .RadGrid_Larvol .rgPager, .RadGrid_Larvol .rgGroupPanel, .RadGrid_Larvol .rgGroupHeader { cursor: default; }
+.RadGrid_Larvol .rgRow td, .RadGrid_Larvol .rgAltRow td, .RadGrid_Larvol .rgEditRow td, .RadGrid_Larvol .rgFooter td, .RadGrid_Larvol .rgFilterRow td, .RadGrid_Larvol .rgHeader, .RadGrid_Larvol .rgResizeCol, .RadGrid_Larvol .rgGroupHeader td { padding-left: 7px; padding-right: 7px; }
+.RadGrid_Larvol .rgAdd, .RadGrid_Larvol .rgRefresh, .RadGrid_Larvol .rgEdit, .RadGrid_Larvol .rgDel, .RadGrid_Larvol .rgFilter, .RadGrid_Larvol .rgPagePrev, .RadGrid_Larvol .rgPageNext, .RadGrid_Larvol .rgPageFirst, .RadGrid_Larvol .rgPageLast, .RadGrid_Larvol .rgExpand, .RadGrid_Larvol .rgCollapse, .RadGrid_Larvol .rgSortAsc, .RadGrid_Larvol .rgSortDesc, .RadGrid_Larvol .rgUpdate, .RadGrid_Larvol .rgCancel, .RadGrid_Larvol .rgUngroup { width: 16px; height: 16px; border: 0px none; margin: 0px; padding: 0px; background-color: transparent; background-image: url('sprite.gif'); background-repeat: no-repeat; vertical-align: middle; font-size: 1px; cursor: pointer; }
+.RadGrid_Larvol .rgHeader, .RadGrid_Larvol th.rgResizeCol { border-width: 0px 0px 1px; border-style: none none solid; border-color: -moz-use-text-color -moz-use-text-color rgb(130, 130, 130); -moz-border-top-colors: none; -moz-border-right-colors: none; -moz-border-bottom-colors: none; -moz-border-left-colors: none; border-image: none; padding-top: 5px; padding-bottom: 4px; background: url('sprite.gif') repeat-x scroll 0px -2300px rgb(234, 234, 234); text-align: left; font-weight: normal; }
+.RadGrid_Larvol .rgHeader, .RadGrid_Larvol .rgHeader a { color: rgb(102, 102, 102); text-decoration: none; }
+.RadGrid_Larvol .rgRow td, .RadGrid_Larvol .rgAltRow td, .RadGrid_Larvol .rgEditRow td, .RadGrid_Larvol .rgFooter td { border-width: 0px 0px 1px; border-style: none none solid; border-color: -moz-use-text-color; -moz-border-top-colors: none; -moz-border-right-colors: none; -moz-border-bottom-colors: none; -moz-border-left-colors: none; border-image: none; padding-top: 4px; padding-bottom: 3px; }
+.RadGrid_Larvol .rgRow td { border-color: rgb(255, 255, 255); }
+.RadGrid_Larvol .rgAltRow { background: none repeat scroll 0% 0% rgb(245, 245, 245); }
+.RadGrid_Larvol .rgAltRow td { border-color: rgb(242, 242, 242); }
+.RadGrid_Larvol .rgRow a, .RadGrid_Larvol .rgAltRow a, .RadGrid_Larvol .rgEditRow a, .RadGrid_Larvol .rgFooter a, .RadGrid_Larvol .rgEditForm a { color: rgb(0, 0, 0); }
+.RadGrid_Larvol .rgPager .rgStatus { width: 35px; border-width: 1px 1px 1px 0px; border-style: solid solid solid none; -moz-border-top-colors: none; -moz-border-right-colors: none; -moz-border-bottom-colors: none; -moz-border-left-colors: none; border-image: none; border-color: rgb(130, 130, 130) rgb(201, 201, 201) rgb(238, 238, 238) -moz-use-text-color; padding: 3px 0px 2px; }
+.RadGrid_Larvol .rgStatus div { width: 24px; height: 24px; overflow: hidden; border: 0px none; margin: 0px auto; padding: 0px; background: url('loading_001.gif') no-repeat scroll center center transparent; text-indent: -2222px; }
+.RadGrid_Larvol .rgPager { background: none repeat scroll 0% 0% rgb(238, 238, 238); }
+.RadGrid_Larvol .rgPager td { padding: 0px; }
+.RadGrid_Larvol .rgPager .rgPagerCell { border-width: 1px 0px 1px 1px; border-style: solid none solid solid; -moz-border-top-colors: none; -moz-border-right-colors: none; -moz-border-bottom-colors: none; -moz-border-left-colors: none; border-image: none; border-color: rgb(130, 130, 130) -moz-use-text-color rgb(238, 238, 238) rgb(238, 238, 238); padding: 3px 0px 2px; }
+.RadGrid_Larvol .rgWrap { float: left; padding: 0px 10px; line-height: 26px; white-space: nowrap; }
+.RadGrid_Larvol .rgArrPart1 { padding-right: 0px; line-height: 22px; }
+.RadGrid_Larvol .rgArrPart2 { padding-left: 0px; line-height: 22px; }
+.RadGrid_Larvol .rgInfoPart { float: right; color: rgb(138, 138, 138); }
+.RadGrid_Larvol .rgInfoPart strong { font-weight: normal; color: rgb(76, 78, 84); }
+.RadGrid_Larvol .rgPageFirst, .RadGrid_Larvol .rgPagePrev, .RadGrid_Larvol .rgPageNext, .RadGrid_Larvol .rgPageLast { width: 22px; height: 24px; }
+.RadGrid_Larvol .rgPageFirst { background-position: 0px -549px; }
+.RadGrid_Larvol .rgPageFirst:hover { background-position: 0px -599px; }
+.RadGrid_Larvol .rgPagePrev { background-position: 0px -699px; }
+.RadGrid_Larvol .rgPagePrev:hover { background-position: 0px -749px; }
+.RadGrid_Larvol .rgPageNext { background-position: 0px -849px; }
+.RadGrid_Larvol .rgPageNext:hover { background-position: 0px -899px; }
+.RadGrid_Larvol .rgPageLast { background-position: 0px -999px; }
+.RadGrid_Larvol .rgPageLast:hover { background-position: 0px -1049px; }
+.RadGrid_Larvol .rgNumPart { padding: 2px 0px; }
+.RadGrid_Larvol .rgNumPart a:hover, .RadGrid_Larvol .rgNumPart a:hover span, .RadGrid_Larvol .rgNumPart a.rgCurrentPage, .RadGrid_Larvol .rgNumPart a.rgCurrentPage span { background: url('sprite.gif') no-repeat scroll 0% 0% transparent; }
+.RadGrid_Larvol .rgNumPart a { float: left; line-height: 22px; margin: 0px; padding: 0px 5px 0px 0px; color: rgb(0, 0, 0); text-decoration: none; }
+.RadGrid_Larvol .rgNumPart span { float: left; padding: 0px 0px 0px 5px; }
+.RadGrid_Larvol .rgNumPart a:hover { background-position: 100% -1250px; }
+.RadGrid_Larvol .rgNumPart a:hover span { background-position: 0px -1150px; cursor: pointer; }
+.RadGrid_Larvol .rgNumPart a.rgCurrentPage, .RadGrid_Larvol .rgNumPart a.rgCurrentPage:hover { background-position: 100% -1450px; cursor: default; }
+.RadGrid_Larvol .rgNumPart a.rgCurrentPage span, .RadGrid_Larvol .rgNumPart a.rgCurrentPage:hover span { background-position: 0px -1350px; cursor: default; }
+.RadGrid_Larvol .rgPagerLabel, .RadGrid_Larvol .rgPager .RadComboBox, .RadGrid_Larvol .rgPager .RadInput_Larvol { margin: 0px 4px 0px 0px; vertical-align: middle; }
+.RadGrid_Larvol .rgPager .RadComboBox { margin-top: -1px; }
+.RadGrid_Larvol .rgCommandRow { background: url('sprite.gif') repeat-x scroll 0px -2099px rgb(197, 197, 197); color: rgb(0, 0, 0); }
+.RadGrid_Larvol .rgCommandRow td { border-right: 0px solid rgb(242, 242, 242); border-width: 0px; border-style: none solid solid; -moz-border-top-colors: none; -moz-border-right-colors: none; -moz-border-bottom-colors: none; -moz-border-left-colors: none; border-image: none; border-color: -moz-use-text-color rgb(242, 242, 242) rgb(153, 153, 153); padding: 0px; }
+.RadGrid_Larvol tr.rgCommandRow td td { border: 0px none; padding: 3px 7px 4px; }
+.RadGrid_Larvol .rgCommandRow table { border-right: 0px none; border-left: 0px none; -moz-border-top-colors: none; -moz-border-right-colors: none; -moz-border-bottom-colors: none; -moz-border-left-colors: none; border-image: none; border-width: 1px 0px; border-style: solid none; border-color: rgb(253, 253, 253) -moz-use-text-color rgb(231, 231, 231); }
+/* ::::: http://www.larvolinsight.com/CR/Custom/BI+Inflammatory+Bowel+Disease/~/CSS/jquery.loadmask.css ::::: */
+
+.rtsUL { margin-left: 0px ! important; }
+.rgCommandRow { display: none; }
+.keyProduct { color: rgb(82, 55, 129); float: left; width: 100%; }
+.conferenceNameCellContainer a { color: rgb(82, 82, 82); }
+.ProductCell { width: 360px; }
+.wordExport { margin: 0px 40px 0px 0px ! important; }
+.wordExportTooltip { position: absolute ! important; left: -89px ! important; top: 24px ! important; display: none; background: url('black_arrow_bottom.png') repeat scroll 0% 0% transparent; height: 50px; padding: 60px 30px 10px; width: 145px; font-size: 11px; color: whiteSmoke; }
+.Section { font-size: 16px; font-weight: bold; color: rgb(95, 70, 109) ! important; background-color: rgb(196, 190, 193) ! important; padding: 2px 2px 2px 10px; border: 3px solid rgb(95, 73, 122); margin: 0px; }
+#wrapper { min-height: 200px; }
+#singleColumnMain { width: 97%; margin-left: 20px; }
+#wrapper { margin: 0px auto; padding: 0px; }
+.NewsItemCell { min-width: 60%; width: auto; }
+.ProductCell { min-width: 20%; width: 20%; }
+.CommentCell { min-width: 20%; width: 20%; }
+.padMainContentBottomOnly { padding-bottom: 0px ! important; }
+/* ::::: http://www.larvolinsight.com/WebResource.axd?d=ZXBd82PjCfOSe81gxO6ikkZpfgt6r3wNv4wH9rpVdR18aJtPUFAMGuiTI84zRA8HtM3BcyzmYTE6DWk4QdtKmTCjrjMXLIlrU_RNGc2i2k9e8F7GN3gLrZkPo9QZNolLmfmHMhwOG4YeqBH74-N5dQ2&t=634849585635753750 ::::: */
+
+.RadMenu { white-space: nowrap; float: left; position: relative; }
+.RadMenu .rmRootGroup { margin: 0px; padding: 0px; position: relative; left: 0px; display: inline-block; }
+.RadMenu:after, .RadMenu .rmRootGroup:after { content: ""; display: block; height: 0px; overflow: hidden; line-height: 0; font-size: 0px; clear: both; visibility: hidden; }
+.RadMenu ul.rmVertical, .RadMenu ul.rmHorizontal, .RadMenu ul.rmRootScrollGroup, .RadMenu_Context ul.rmHorizontal { margin: 0px; padding: 0px; display: none; position: relative; left: 0px; float: left; }
+.rmSized ul.rmRootGroup { float: none; }
+.RadMenu ul.rmActive, .RadMenu ul.rmRootGroup { display: block; }
+/* ::::: http://www.larvolinsight.com/WebResource.axd?d=rlk0Mz3EAOWEUvJ4mqP-F8O09yfATT7h5qibzmEGC3afDwr1FBmDEGXGrLIc1xKLOZQwZZHGpkMojml79WMQ2NJdeP3YRGWID0k3HpLl2FqCty-eWFsSk7Lm9QmJiEqyZGIAb_usgLSarQAxDjyiHQ2&t=634849585635753750 ::::: */
+
+.RadTabStrip, .RadTabStripVertical { margin: 0px; padding: 0px; }
+.RadTabStrip .rtsLevel { clear: both; overflow: hidden; width: 100%; position: relative; padding-top: 1px; }
+.RadTabStrip .rtsLevel1 { padding-top: 0px; }
+.RadTabStrip .rtsUL, .RadTabStripVertical .rtsUL { overflow: hidden; float: left; margin: 0px; padding: 0px; }
+.RadTabStrip .rtsUL:after { clear: both; content: "."; display: block; visibility: hidden; height: 0px; line-height: 0; font-size: 0px; }
+.RadTabStrip .rtsLI, .RadTabStripVertical .rtsLI { overflow: hidden; list-style-type: none; margin: 0px; padding: 0px; }
+.RadTabStrip .rtsLI { float: left; display: inline; }
+.RadTabStrip .rtsLink, .RadTabStripVertical .rtsLink { display: block; outline: medium none; cursor: pointer; text-decoration: none; white-space: nowrap; padding-left: 9px; }
+.RadTabStrip .rtsLink { text-align: center; }
+.RadTabStrip .rtsLevel .rtsOut, .RadTabStrip .rtsLevel .rtsIn, .RadTabStrip .rtsLevel .rtsTxt { text-decoration: inherit; }
+.RadTabStrip .rtsOut, .RadTabStripVertical .rtsOut { display: block; padding-right: 9px; }
+.RadTabStrip .rtsIn, .RadTabStripVertical .rtsIn { display: block; padding: 0px 5px; }
+.RadTabStrip .rtsTxt, .RadTabStripVertical .rtsTxt { display: inline-block; }
+.RadTabStrip .rtsLevel1 .rtsTxt, .RadTabStripVertical .rtsLevel1 .rtsTxt { padding: 0px 5px; }
+.RadTabStrip .rtsTxt { display: inline-block; }
+@media screen and (min-width: 50px) {
+  :root .RadTabStripHorizontal .rtsScroll { width: auto; }
+  :root .RadTabStripHorizontal .rtsScroll .rtsLI { float: none; display: inline-block; }
+  :root .RadTabStripVertical .rtsScroll .rtsLI { float: none; }
+}
+/* ::::: http://www.larvolinsight.com/WebResource.axd?d=6YKezGH4fq-SuDF1-na1YyZcWZE5eEqAzd3jz4VZKBd-fLM-qhdbpxieRyYyfTpSqiZPj1vGeIDT2sC1gVru56GI-wUTzu-0-a0NhLDnEy2D9sGtT5SPfvydZ5tQmRyjNILIIW5-WrKA6QUghimv_gpr0qKR78NDZdE91GLHSSU1&t=634849585635753750 ::::: */
+
+.RadTabStrip_Default .rtsLI, .RadTabStrip_Default .rtsLink { color: rgb(0, 0, 0); font: 12px/26px "Segoe UI",Arial,sans-serif; }
+.RadTabStripTop_Default .rtsLevel { background-color: transparent; }
+.RadTabStripTop_Default .rtsLevel .rtsLink, .RadTabStripTop_Default .rtsLevel .rtsOut, .RadTabStripBottom_Default .rtsLevel .rtsLink, .RadTabStripBottom_Default .rtsLevel .rtsOut, .RadTabStripTop_Default_Baseline .rtsLevel, .RadTabStripBottom_Default_Baseline .rtsLevel { background-image: url('webresource_001.axd'); }
+.RadTabStripTop_Default .rtsLink { background-position: 0px -52px; }
+.RadTabStripTop_Default .rtsFirst .rtsLink { background-position: 0px 0px; }
+.RadTabStripTop_Default .rtsOut { background-position: 100% -52px; }
+.RadTabStripTop_Default .rtsLast .rtsOut { background-position: 100% 0px; }
+.RadTabStripTop_Default .rtsLI .rtsSelected { background-position: 0px -26px; }
+.RadTabStripTop_Default .rtsSelected .rtsOut { background-position: 100% -78px; }
+.RadTabStripTop_Default .rtsLI .rtsAfter { background-position: 0px -78px; }
+/* ::::: http://www.larvolinsight.com/WebResource.axd?d=124r7n77K2Re7dH82Urrna3RsrObN5GV6qtictocyqPI60N3w8fuB6yJHk4KkEtvZ_hy61xOMbaouzLV-UQ60OekPE-F4quFOiSgd1oXecK4efFy7BTgpLFEP0vNg88E2s46SccPULm-d_docTYcnw2&t=634849585635753750 ::::: */
+
+.rmpHiddenView { display: none; }
+/* ::::: http://www.larvolinsight.com/WebResource.axd?d=TAZuUKdkYpLZJYD6aILnOiap8n5jOPOziOU6pgFWiX963IOZq8feuDKjoDr_djaUvxTkNUOGGVOj4BMYCLZRYg1STtaN5CoSV7Cz9yYzgnOo9LWxW6c4dumOzK1z_Im1VztfefV53SDonPsWBnJxvQ2&t=634849585635753750 ::::: */
+
+.RadInput, .RadInputMgr { vertical-align: middle; }
+html body .RadInput .riTextBox, html body .RadInputMgr { border-width: 1px; border-style: solid; padding: 2px 1px 3px; }
+/* ::::: http://www.larvolinsight.com/WebResource.axd?d=tgKRKUuf00bzxwGfAj5YHEv7ZkF0Usqm63ogP_q6zIriIsCdssxYlDOybx8no96S84ZDOE_m7bPZPm4sT9GHvRXJ2aZ3yCHj9QfErDkfhwchtAif1SYiRVq4Lh_Y31iKj01SACagU-NNcGlRdzjH6IRTvqJCU8USfTGE2af92Lc1&t=634849585635753750 ::::: */
+
+.RadInput_Default, .RadInputMgr_Default { font: 12px "segoe ui",arial,sans-serif; }
+html body .RadInput_Default .riTextBox, html body .RadInputMgr_Default { border-color: rgb(142, 142, 142) rgb(184, 184, 184) rgb(184, 184, 184) rgb(142, 142, 142); background: none repeat scroll 0% 0% rgb(255, 255, 255); color: rgb(0, 0, 0); font: 12px "segoe ui",arial,sans-serif; }
+html body .RadInput_Default .riEmpty, html body .RadInput_Empty_Default { color: rgb(138, 138, 138); }
+/* ::::: http://www.larvolinsight.com/WebResource.axd?d=HtQVFu676fuQ2i931WqLhLUi3WtKGE4cFoRvfg62ipLWEqAO89eJcqPIpGGXFSl7mziEpxubDW0v9T1vhH_2usbk21gV1VDNa8qA7A8pNwgAOhPxrEakChD-G7lSagEbf9X25WiqBIBMo9Cb_S3q2g2&t=634849585635753750 ::::: */
+
+table.RadCalendar { table-layout: auto; border-collapse: separate; border: 0px none; width: 220px; }
+.RadCalendar .rcTitlebar { width: 100%; border-style: solid; border-width: 1px; padding: 0px; }
+.RadCalendar .rcTitlebar table { table-layout: auto; width: 100%; border-collapse: separate; border: 0px none; }
+.RadCalendar .rcTitlebar td { border: 0px none; padding: 0px; text-align: center; vertical-align: middle; }
+.RadCalendar .rcTitlebar .rcTitle { width: 100%; cursor: pointer; }
+.RadCalendar .rcTitlebar .rcPrev, .RadCalendar .rcTitlebar .rcNext, .RadCalendar .rcTitlebar .rcFastPrev, .RadCalendar .rcTitlebar .rcFastNext { display: block; width: 15px; height: 15px; overflow: hidden; margin: 0px 4px; background-color: transparent; background-repeat: no-repeat; text-indent: -2222px; text-decoration: none; }
+.RadCalendar .rcMain { width: 100%; border-style: solid; border-width: 0px 1px 1px; padding: 0px; }
+.RadCalendar .rcMainTable { table-layout: auto; border-collapse: separate; border: 0px none; width: 100%; }
+.RadCalendar .rcRow th, .RadCalendar .rcWeek th { border: 0px none; padding: 0px; font-weight: normal; vertical-align: middle; cursor: default; }
+.RadCalendar .rcWeek th { text-align: right; }
+.RadCalendar .rcWeek .rcViewSel, .RadCalendar .rcRow th { text-align: center; }
+.RadCalendar .rcRow td { border-style: solid; border-width: 1px; padding: 0px; text-align: right; vertical-align: middle; }
+.RadCalendar .rcMain .rcRow a, .RadCalendar .rcMain .rcRow span { display: block; padding: 1px 5px 1px 0px; text-decoration: none; }
+.RadPicker, .RadPicker td { vertical-align: middle; }
+.RadPicker .RadInput { vertical-align: baseline; }
+.RadPicker .rcTable { table-layout: auto; }
+.RadPicker table.rcTable, .RadPicker table.rcTable td { border: 0px none; margin: 0px; padding: 0px; }
+.RadPicker table.rcTable .rcInputCell { padding: 0px 4px 0px 0px; }
+.RadPicker td a { position: relative; outline: medium none; z-index: 2; margin: 0px 2px; text-decoration: none; }
+.RadPicker .rcCalPopup, .RadPicker .rcTimePopup { display: block; overflow: hidden; width: 22px; height: 22px; background-color: transparent; background-repeat: no-repeat; text-indent: -2222px; text-align: center; }
+/* ::::: http://www.larvolinsight.com/WebResource.axd?d=HpequZV_R8SZthrqEuWmtHlISF_X78fU8MYuTyivDFFGXywn5ONxVk2IPjHPv2gLZWm7MnSIysDUle5zFt4H1P9aS5KPonGLlfXEl8b13RDzPESHhH6NMOLo1WGVpPAhRorMi2CBiiv4iEb3xr0-kXg3qr82S2UvIRplDh_GE681&t=634849585635753750 ::::: */
+
+table.RadCalendar_Default { background: none repeat scroll 0% 0% rgb(255, 255, 255); font: 12px "segoe ui",arial,sans-serif; }
+.RadCalendar_Default .rcTitlebar { border-color: rgb(134, 134, 134) rgb(134, 134, 134) rgb(196, 196, 196); background: url('webresource_002.axd') repeat-x scroll 0px -1000px rgb(234, 234, 234); color: rgb(0, 0, 0); }
+.RadCalendar_Default .rcTitlebar table { font: 12px/23px "segoe ui",arial,sans-serif; }
+.RadCalendar_Default .rcTitlebar td { padding: 0px 0px 1px; }
+.RadCalendar_Default .rcTitlebar .rcPrev, .RadCalendar_Default .rcTitlebar .rcNext, .RadCalendar_Default .rcTitlebar .rcFastPrev, .RadCalendar_Default .rcTitlebar .rcFastNext { background-image: url('webresource_002.axd'); color: rgb(204, 204, 204); }
+.RadCalendar_Default .rcTitlebar .rcFastPrev { margin-left: 6px; background-position: 1px -197px; }
+.RadCalendar_Default .rcTitlebar a.rcFastPrev:hover { background-position: 1px -247px; }
+.RadCalendar_Default .rcTitlebar .rcPrev { background-position: 4px -297px; }
+.RadCalendar_Default .rcTitlebar a.rcPrev:hover { background-position: 4px -347px; }
+.RadCalendar_Default .rcTitlebar .rcNext { background-position: 3px -397px; }
+.RadCalendar_Default .rcTitlebar a.rcNext:hover { background-position: 3px -447px; }
+.RadCalendar_Default .rcTitlebar .rcFastNext { margin-right: 6px; background-position: 1px -497px; }
+.RadCalendar_Default .rcTitlebar a.rcFastNext:hover { background-position: 1px -547px; }
+.RadCalendar_Default .rcMain { border-color: rgb(134, 134, 134); }
+.RadCalendar_Default .rcMainTable { font: 12px/17px "segoe ui",arial,sans-serif; }
+.RadCalendar_Default .rcWeek th { border-bottom: 1px solid rgb(197, 197, 197); padding: 4px 6px 3px 0px; color: rgb(51, 51, 51); }
+.RadCalendar_Default .rcWeek .rcViewSel, .RadCalendar_Default .rcRow th { width: 13px; padding: 0px 7px 0px 9px; background: none repeat scroll 0% 0% rgb(238, 238, 238); }
+.RadCalendar_Default .rcRow th { color: rgb(119, 119, 119); }
+.RadCalendar_Default .rcRow td { border-color: rgb(255, 255, 255); }
+.RadCalendar_Default .rcMain .rcRow a, .RadCalendar_Default .rcMain .rcRow span { color: rgb(51, 51, 51); }
+.RadCalendar_Default .rcMain .rcWeekend a { color: rgb(102, 102, 102); }
+.RadCalendar_Default .rcMain .rcOtherMonth a { color: rgb(137, 137, 137); }
+.RadPicker_Default .rcCalPopup, .RadPicker_Default .rcTimePopup { background-image: url('webresource_002.axd'); }
+.RadPicker_Default .rcCalPopup, .RadPicker_Default a.rcDisabled.rcCalPopup:hover { background-position: 0px 0px; }
+.RadPicker_Default a.rcCalPopup:hover, .RadPicker_Default a.rcCalPopup:focus, .RadPicker_Default a.rcCalPopup:active { background-position: 0px -50px; }
+/* ::::: http://www.larvolinsight.com/WebResource.axd?d=en5dxEuSuRuLBAMEtFAQbtwb2YhTxVGTnPzvQzU5iTn8wiSKB0r8HW41n_WXAI0eVOfcdvKxZ9hsAzkG56IzKU_ISO9aVtJvKMbXUVqRrZFGy-klUvHrjorlIBsI_jerPApecBH3drzkFZNQc0mn6g2&t=634849585635753750 ::::: */
+
+.RadSlider { width: 22px; height: 22px; }
+.RadSlider, .RadSlider .rslItem, .RadSlider .rslLargeTick span { font: 10px "Segoe UI",Arial,Verdana,sans-serif; color: black; }
+.RadSlider .rslTrack { z-index: 1; border-style: solid; }
+.RadSlider a { display: block; text-indent: -9999px; text-decoration: none; text-align: center; overflow: hidden; }
+.RadSlider a:focus, .RadSlider a:active { outline: medium none; }
+.RadSlider .rslHandle span, .RadSlider .rslDraghandle span { display: block; }
+.RadSlider .rslHorizontal, .RadSlider .rslVertical { position: relative; -moz-user-select: none; font-size: 1px; line-height: 2px; }
+.RadSlider .rslHorizontal, .RadSlider .rslHorizontal a.rslHandle, .RadSlider .rslHorizontal a.rslDraghandle { height: 22px; line-height: 22px; }
+.RadSlider .rslHorizontal a.rslHandle { width: 25px; background-repeat: no-repeat; }
+.RadSlider .rslHorizontal .rslDecrease { background-position: 0px -22px; }
+.RadSlider .rslHorizontal .rslDecrease:hover { background-position: -25px -22px; }
+.RadSlider .rslHorizontal .rslIncrease { background-position: 0px 0px; }
+.RadSlider .rslHorizontal .rslIncrease:hover { background-position: -25px 0px; }
+.RadSlider .rslHorizontal a.rslDraghandle { width: 8px; margin-top: -8px; background-repeat: no-repeat; }
+.RadSlider .rslHorizontal a.rslDraghandle:hover { background-position: -9px 0px; }
+.RadSlider .rslHorizontal a.rslDraghandle:focus, .RadSlider .rslHorizontal a.rslDraghandle:active { background-position: -18px 0px; }
+.RadSlider .rslHorizontal .rslTrack, .RadSlider .rslHorizontal .rslSelectedregion { height: 6px; line-height: 6px; }
+.RadSlider .rslHorizontal .rslTrack { border-width: 0px 1px; }
+.RadSlider .rslHorizontal .rslItemsWrapper { margin: 0px 1px; }
+.RadSlider .rslItemsWrapper, .RadSlider .rslItem, .RadSlider .rslLargeTick, .RadSlider .rslSmallTick { margin: 0px; padding: 0px; list-style: none outside none ! important; }
+.RadSlider .rslItem span, .RadSlider .rslLargeTick span { font-size: 11px; }
+.RadSlider .rslVertical .rslItemsWrapper .rslItemFirst, .RadSlider .rslHorizontal .rslItemsWrapper .rslItemFirst { background-image: none; }
+.RadSlider .rslItem { text-overflow: ellipsis; overflow: hidden; cursor: default; background-repeat: no-repeat; }
+.RadSlider .rslHorizontal .rslItem { text-align: center; }
+.RadSlider .rslTop .rslItem { background-position: left top; }
+.RadSlider .rslHandle, .RadSlider .rslDraghandle, .RadSlider .rslTrack, .RadSlider .rslSelectedregion, .RadSlider .rslItemsWrapper, .RadSlider .rslLargeTick span { position: absolute; top: 0px; left: 0px; }
+.RadSlider .rslHorizontal .rslTrack, .RadSlider .rslHorizontal .rslItemsWrapper { left: 25px; }
+.RadSlider .rslHorizontal .rslIncrease, .RadSlider .rslRight .rslHandle, .RadSlider .rslLeft .rslItemsWrapper, .RadSlider .rslLeft .rslLargeTick span, .RadSlider .rslVertical .rslLargeTick span.rslBRItemText { left: auto; right: 0px; }
+.RadSlider .rslTop .rslItemsWrapper, .RadSlider .rslBottom .rslHandle, .RadSlider .rslVertical .rslIncrease, .RadSlider .rslTop .rslLargeTick span, .RadSlider .rslHorizontal .rslLargeTick span.rslBRItemText { top: auto; bottom: 0px; }
+.RadSlider .rslHorizontal .rslTrack { top: 8px; }
+.RadSlider .rslHorizontal .rslItem, .RadSlider .rslHorizontal .rslLargeTick, .RadSlider .rslHorizontal .rslSmallTick { float: left; }
+/* ::::: http://www.larvolinsight.com/WebResource.axd?d=4ml2gUCznSX2x95UhBKtAOtj7v7sEP22StfYcjwuNEJ0Khr3AUmY5afy_0gyXwo8QqOgxKpgHBIevJG8LGn80J-xGb6x8j5bHxYm8Xclm7FAMmVsACdMACL1cGWk7mGDjlhBZK9Dc9AIXWrJWg2g5zfVuTyqAoOhFPv6VM_6HmI1&t=634849585635753750 ::::: */
+
+.RadSlider_Default .rslTrack { border-color: rgb(185, 185, 185) rgb(147, 147, 147) rgb(147, 147, 147) rgb(185, 185, 185); }
+.RadSlider_Default .rslHorizontal a.rslHandle { background-image: url('webresource_003.axd'); }
+.RadSlider_Default .rslHorizontal a.rslDraghandle { background-image: url('webresource_004.axd'); }
+.RadSlider_Default .rslTop a.rslDraghandle { background-image: url('webresource_005.axd'); }
+.RadSlider_Default .rslHorizontal .rslTrack { background: url('webresource_006.axd') repeat-x scroll 0% 0% transparent; }
+.RadSlider_Default .rslHorizontal .rslSelectedregion { background: url('webresource_007.axd') no-repeat scroll right top transparent; }
+.RadSlider_Default .rslItem, .RadSlider_Default .rslLargeTick span { color: rgb(51, 51, 51); }
+.RadSlider_Default .rslItemsWrapper .rslItemSelected { color: rgb(0, 0, 0); }
+.RadSlider_Default .rslHorizontal .rslItem { background-image: url('webresource_008.axd'); }
+/* ::::: http://www.larvolinsight.com/WebResource.axd?d=ShE8Qih13M6naNezzAEm9cff-QyeeybxioK6y4aJPbVE96y7ki-6Q4zCjJ5lnod7Qd1pnAmfCIKh9CQuxVVUTzdltSUYLQoCMLCvKXmJhu9jiwC3a_vWiGhBitZN_UySVY4GoB7oBF7vvT20PBErkQ2&t=634849585635753750 ::::: */
+
+.RadAjax .raDiv, .RadAjax .raColor { width: 100%; height: 100%; margin: 0px; padding: 0px; }
+.RadAjax .raDiv { position: relative; z-index: 2; background-color: transparent; background-position: center center; background-repeat: no-repeat; }
+.RadAjax .raColor { position: absolute; top: 0px; left: 0px; z-index: 1; background-image: none; }
+.RadAjax .raTransp {  }
+.RadAjax .raTop { background-position: center top; }
+/* ::::: http://www.larvolinsight.com/WebResource.axd?d=ekBCjT2rcNjdObb2zzvB8W_At0Y5pPRVHZYilFdJCvgEjNT7wvuQ68jEtcmXva7pR1z0JNxCi8pqxlNUt7pGiq07UzyiKH-bUiviAQy4c9tBwtUlRPm31wIb3qUznKAuGfaeue6VprIvDw5T7caISw2&t=634849585635753750 ::::: */
+
+.RadGrid .rgMasterTable, .RadGrid .rgDetailTable { border-collapse: separate; }
+.RadGrid .rgRow, .RadGrid .rgAltRow, .RadGrid .rgHeader, .RadGrid .rgResizeCol, .RadGrid .rgPager, .RadGrid .rgGroupPanel, .RadGrid .rgGroupHeader { cursor: default; }
+.RadGrid .rgRow td, .RadGrid .rgAltRow td, .RadGrid .rgEditRow td, .RadGrid .rgFooter td, .RadGrid .rgFilterRow td, .RadGrid .rgHeader, .RadGrid .rgResizeCol, .RadGrid .rgGroupHeader td { padding-left: 7px; padding-right: 7px; }
+.RadGrid .rgAdd, .RadGrid .rgRefresh, .RadGrid .rgEdit, .RadGrid .rgDel, .RadGrid .rgDrag, .RadGrid .rgFilter, .RadGrid .rgPagePrev, .RadGrid .rgPageNext, .RadGrid .rgPageFirst, .RadGrid .rgPageLast, .RadGrid .rgExpand, .RadGrid .rgCollapse, .RadGrid .rgSortAsc, .RadGrid .rgSortDesc, .RadGrid .rgUpdate, .RadGrid .rgCancel, .RadGrid .rgUngroup, .RadGrid .rgExpXLS, .RadGrid .rgExpDOC, .RadGrid .rgExpPDF, .RadGrid .rgExpCSV { width: 16px; height: 16px; border: 0px none; margin: 0px; padding: 0px; background-color: transparent; background-repeat: no-repeat; vertical-align: middle; font-size: 1px; cursor: pointer; }
+.RadGrid .rgHeader, .RadGrid th.rgResizeCol { padding-top: 5px; padding-bottom: 4px; text-align: left; font-weight: normal; }
+.RadGrid .rgHeader a { text-decoration: none; }
+.RadGrid .rgRow td, .RadGrid .rgAltRow td, .RadGrid .rgEditRow td, .RadGrid .rgFooter td { padding-top: 4px; padding-bottom: 3px; }
+.RadGrid .rgPager .rgStatus { width: 35px; padding: 3px 0px 2px; }
+.RadGrid .rgStatus div { width: 24px; height: 24px; overflow: hidden; border: 0px none; margin: 0px auto; padding: 0px; background-color: transparent; background-position: center center; background-repeat: no-repeat; text-indent: -2222px; }
+.RadGrid .rgPager td { padding: 0px; }
+.RadGrid td.rgPagerCell { border: 0px none; padding: 5px 0px 4px; }
+.RadGrid .rgWrap { float: left; padding: 0px 10px; line-height: 22px; white-space: nowrap; }
+.RadGrid .rgArrPart1 { padding-right: 0px; }
+.RadGrid .rgArrPart2 { padding-left: 0px; }
+.RadGrid .rgInfoPart { float: right; }
+.RadGrid .rgInfoPart strong { font-weight: normal; }
+.RadGrid .rgPageFirst, .RadGrid .rgPagePrev, .RadGrid .rgPageNext, .RadGrid .rgPageLast { width: 22px; height: 22px; vertical-align: top; }
+.RadGrid .rgPageFirst, .RadGrid .rgPagePrev { margin-right: 1px; }
+.RadGrid .rgPageNext, .RadGrid .rgPageLast { margin-left: 1px; }
+.RadGrid .rgNumPart { padding: 0px; }
+.RadGrid .rgNumPart a { float: left; line-height: 22px; margin: 0px; padding: 0px 5px 0px 0px; text-decoration: none; }
+.RadGrid .rgNumPart span { float: left; padding: 0px 0px 0px 5px; }
+.RadGrid .rgNumPart a:hover span { cursor: pointer; }
+.RadGrid .rgNumPart a.rgCurrentPage, .RadGrid .rgNumPart a.rgCurrentPage:hover, .RadGrid .rgNumPart a.rgCurrentPage span, .RadGrid .rgNumPart a.rgCurrentPage:hover span { cursor: default; }
+.RadGrid .rgPagerLabel, .RadGrid .rgPager .RadComboBox, .RadGrid .rgPager .RadInput { margin: 0px 4px 0px 0px; vertical-align: middle; }
+/* ::::: http://www.larvolinsight.com/WebResource.axd?d=BDAQRsXGi9Mz4KxVzNkgg2KFDzgNNUvnVR9avRApKIRVfyUoVYGz3DIINlCtYaDvVycC_gNiBp5eI9K1OH5Qz3ZToBE7zcFv9tttBHwsnBFXN-uD7Xt9xw_F2uQNzUI7-O7BpJqvs7O0BhExMnmyGQ2&t=634849585635753750 ::::: */
+
+.RadComboBox * { margin: 0px; padding: 0px; }
+.RadComboBox, .RadComboBox .rcbInput, .RadComboBoxDropDown { text-align: left; }
+.RadComboBox { vertical-align: middle; display: inline-block; }
+.RadComboBox table { border: 0px none; border-collapse: collapse; }
+.RadComboBox table td.rcbInputCell { width: 100%; height: 20px; line-height: 20px; vertical-align: middle; padding: 0px; border: 0px none; }
+.RadComboBox .rcbInputCellLeft, .RadComboBox .rcbInputCellRight, .RadComboBox .rcbArrowCellLeft, .RadComboBox .rcbArrowCellRight { background-color: transparent; background-repeat: no-repeat; }
+.RadComboBox .rcbInputCell .rcbInput { width: 100%; background: none repeat scroll 0% 0% transparent; border: 0px none; vertical-align: middle; padding: 2px 0px 1px; outline: 0px none; }
+.RadComboBox .rcbReadOnly .rcbInput { cursor: default; }
+.RadComboBox table td.rcbInputCell, .RadComboBox .rcbInputCell .rcbInput { padding-left: 2px; }
+.RadComboBox table td.rcbArrowCell { width: 18px; padding: 0px; border: 0px none; }
+.RadComboBox .rcbArrowCell a { position: relative; outline: 0px none; overflow: hidden; display: block; width: 18px; height: 22px; cursor: default; text-decoration: none; text-indent: 9999px; font-size: 0px; line-height: 1px; }
+.RadComboBox .rcbReadOnly td.rcbArrowCell { width: 16px; }
+.RadComboBox .rcbReadOnly td.rcbArrowCell a { width: 16px; }
+.rcbSlide { position: absolute; overflow: hidden; display: none; float: left; }
+.RadComboBoxDropDown { position: absolute; cursor: default; font-size: 11px; border-width: 1px; border-style: solid; }
+.RadComboBoxDropDown .rcbScroll { overflow: auto; position: relative; }
+.RadComboBoxDropDown .rcbList { list-style: none outside none; position: relative; margin: 0px; padding: 0px; }
+.RadComboBoxDropDown .rcbItem, .RadComboBoxDropDown .rcbHovered, .RadComboBoxDropDown .rcbDisabled, .RadComboBoxDropDown .rcbLoading { padding: 2px 6px; margin: 0px 1px; }
+html > body .RadComboBoxDropDown .rcbItem, html > body .RadComboBoxDropDown .rcbHovered, html > body .RadComboBoxDropDown .rcbDisabled, html > body .RadComboBoxDropDown .rcbLoading { min-height: 13px; }
+@media screen and (min-width: 550px) {
+  .RadComboBoxDropDown_rtl .rcbItem, .RadComboBoxDropDown_rtl .rcbHovered, .RadComboBoxDropDown_rtl .rcbDisabled, .RadComboBoxDropDown_rtl .rcbLoading { padding: 2px 6px 2px 19px; }
+}
+TD { vertical-align: top; padding-bottom: 4px; }
+UL { margin: 0px 0px 0px 15px ! important; padding: 0px; }
+LI { color: rgb(0, 0, 255); padding: 0px 0px 5px; }
+.wordExport { float: right; margin: 35px 40px 0px 0px; }
+select { width: 150px; font-size: 11px; padding: 3px 2px; }
+.filterTable { margin-top: 10px; }
+.btnSubmitNewsTracker { margin-left: 10px; }
+.rslItemsWrapper { margin: 0px ! important; }
+div.RadGrid .myTable, div.RadGrid .myTable td { border: 0px none; padding: 0px; font-size: 13px ! important; font-family: arial,helvetica,sans-serif ! important; }
+.oldNewConferenceSeparation td { border-top: 1px solid red ! important; }
+.myTable td { border: medium none ! important; }
+.RadGrid_Larvol .rgAltRow { background: none repeat scroll 0% 0% rgb(223, 216, 232); }
+div.RadGrid { margin-bottom: 25px; padding: 2px; }
+th, td { font-size: 13px ! important; font-family: arial,helvetica,sans-serif ! important; }
+.RadGrid_Larvol .rgHeader, .RadGrid_Larvol th.rgResizeCol { background: none repeat scroll 0% 0% transparent; }
+th { background-color: rgb(95, 73, 122) ! important; color: rgb(255, 255, 255) ! important; }
+.RadGrid_Larvol .rgHeader, .RadGrid_Larvol .rgHeader a { color: rgb(255, 255, 255) ! important; }
+body { font-family: arial,helvetica,sans-serif ! important; }
+.passDateConference td { color: rgb(82, 82, 82) ! important; }
+.passDateConference td a { color: rgb(82, 82, 82) ! important; }
+.conferenceLink { text-decoration: none; }
+.conferenceNameCellContainer { overflow: hidden; }
+.centeredTable { margin-left: auto; margin-right: auto; width: 90%; min-width: 800px; max-width: 1350px; }
+.octButtons { height: 22px; vertical-align: middle; margin-top: 1px; }
+.MessageTable { border: 0px solid rgb(255, 255, 255); border-collapse: collapse; margin: 0px; padding: 0px; width: 300px; }

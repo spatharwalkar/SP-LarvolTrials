@@ -1,0 +1,637 @@
+@charset "utf-8";
+
+html {overflow-x:auto!important;} /* Overflow-x auto causes issue in ie6 for help tab */
+
+html,body {
+	height: 100%;
+	margin:0px;
+	padding: 0px;
+}
+
+body {
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:13px;
+	background-color:#ffffff;
+	width: 100%;
+}
+
+a, a:hover{
+	color:#000000;
+	text-decoration:none;
+	display:block;
+}
+
+.drop {
+	height:4.4em;
+	margin: 0 0 0 4px;
+	display:inline-block;
+	vertical-align:top;
+	text-align:left;
+	background-color:#ffffff;
+	opacity:0.92;
+	filter:alpha(opacity=92);
+	overflow:hidden;
+	padding:0 2px 0 2px;
+	position:absolute;
+	width:200px;
+	border: 1px solid black;
+}
+
+.drop .text {
+	clear:both;
+	text-align:center;
+	padding:10px;
+}
+
+.drop:hover, .drop.hover {
+	height:auto;
+	overflow:visible;
+	background-color:#ffffff;
+}
+
+.block {
+	float:left;
+	padding:0 10px 10px 10px;
+}
+
+.text {
+	clear:both;
+	text-align:center;
+	padding-bottom:10px;
+}
+
+.title {
+	background-color:#EDEAFF;
+}
+
+.alttitle {
+	background-color:#D5D3E6;
+}
+
+.highlight {
+	color:#FF0000!important;
+}
+
+.manage {
+	table-layout:fixed;
+	border-top:1px solid blue;
+	border-left:1px solid blue;
+	border-bottom:1px solid blue;
+	width: 100%;
+}
+
+.manage td{
+	border-top:1px solid blue;
+	border-right:1px solid blue;
+	margin:0;
+	padding:0;
+	overflow:hidden;
+	vertical-align:top;
+}
+
+.manage th {
+	border-right:1px solid blue;
+	color:#54319F;
+	margin:0px;
+	padding:0px;
+	height: 25px;
+}
+
+.newtrial td, .newtrial td a{
+	color:#FF0000!important;
+}
+
+.rowcollapse{
+	vertical-align:top;
+	padding-top:0;
+	margin:0;
+	height: 16px;
+	overflow: visible;
+}
+
+.rowcollapse:hover, .rowcollapse .hover{
+	height: 100%;
+}
+
+.bomb {
+	font-size:11px;
+	float:left;
+	margin-top:20px;
+	padding: 0 7px;
+	width:auto;
+	text-align:center;
+}
+
+.result {
+	font-weight:bold;
+	font-size:18px;
+}
+
+.norecord {
+	border-right: 1px solid blue!important;
+	padding:0px;
+	height:auto;
+	line-height:normal!important;
+	background-color: #EDEAFF;
+	color:#000000!important;
+}
+
+.rowcollapse:hover .upmcollapse { display: block; }
+
+.downldbox {
+	height:auto;
+	width:310px;
+	font-weight:bold;
+}
+
+.downldbox ul{
+	list-style:none;
+	margin:5px;
+	padding:0px;
+}
+
+.downldbox ul li{
+	width: 130px;
+	float:left;
+	margin:2px;
+}
+
+.sectiontitles{
+    /*font-weight: bold;*/
+    background-color: #A2FF97!important;
+}
+
+.upmpointer{
+    cursor:pointer;
+}
+
+.rowcollapseupm {
+	vertical-align:top;
+	max-height:1.3em;
+	overflow:visible;
+	padding-top:0;
+	margin:0;
+}
+.rowcollapseupm:hover {
+	max-height:none;
+}
+
+tr.upms td {
+	text-decoration:none;
+	background-color:#C5E5FA;
+}
+
+.pagination {
+	line-height: 1.6em;
+	width:auto;
+	float:left;
+	margin-right:10px;
+	float: left; 
+	padding-top:2px; 
+	vertical-align:bottom;
+}
+
+.pagination a:hover {
+	background-color: #BDBDBD;
+	color: #000;
+}
+
+.pagination a {
+	margin: 0 2px;
+	border: 1px solid #CCC;
+	background-color: #F2F2F7;
+	font-weight: normal;
+	padding: 2px 5px;
+	text-align: center;
+	color: #000;
+	text-decoration: none;
+	display:inline;
+}
+
+.pagination span {
+	padding: 2px 5px;
+}
+
+.table-slide{
+	border:1px solid #000;
+}
+.table-slide td{
+	border-right:1px solid #000;
+	padding:8px;
+	padding-right:20px;
+	border-bottom:1px solid #000;
+}
+
+#slideout {
+	position: fixed;
+	_position:absolute;
+	top: 40px;
+	right: 0;
+	margin: 12px 0 0 0;
+	z-index: 999;
+}
+
+.slideout_inner {
+	position:absolute;
+	top: 40px;
+	right: -255px;
+	display:none;
+}
+
+#slideout:hover .slideout_inner{
+	display : block;
+	position:absolute;
+	top: 2px;
+	right: 0px;
+	width: 280px;
+	z-index:10;
+}
+
+.controls {
+	border: none !important;
+	font-family: Verdana,Geneva,sans-serif;
+   /* font-size: smaller;*/
+}
+
+.controls td{
+	border-bottom:1px solid #44F;
+	border-right:1px solid #44F;
+	padding: 10px 0 0 3px;
+    vertical-align: top;
+}
+
+.controls th{
+	font-weight:normal;
+	border-bottom: 1px solid #4444FF;
+    border-right: 1px solid #4444FF;
+}
+
+.right{
+	border-right:0px !important;
+	
+}
+
+.bottom{
+	border-bottom:0px !important;
+}
+
+#demo-frame > div.demo { padding: 10px !important; };
+
+.demo div{
+	margin:0 10px 0 10px;
+}
+
+.checkscroll{
+	float:left;
+	height:10em;
+	width:200px;
+	overflow:auto;
+}
+
+.controls .bottom input{
+	margin:0.1em;
+	width: 13px; /* for IE */
+	height: 13px; /* For IE */ 
+	margin: 0px 1px 0px 0px\ ;
+	padding: 0px \ ;
+}
+
+.ui-slider-horizontal .ui-slider-handle {
+	margin-left:0 !important;
+}
+
+.controls p{
+	margin-bottom:0;
+	margin-top: 0;
+}
+
+.manual {
+	color:#FF7700;
+}
+
+.jdpicker_w
+{
+	width:90px;
+	float:left;
+}
+
+.jdpicker
+{
+	border:0;
+	color:#f6931f;
+	font-weight:bold;
+	width:100px;
+}
+
+/* We remove the margin, padding, and list style of UL and LI components */
+#menuwrapper ul, #menuwrapper ul li{
+    margin:0;
+    padding:0;
+    list-style:none;
+	width:400px;
+	float: left;
+	text-align: center;
+}
+
+#menuwrapper ul .arrow{
+	background: url(../images/bullet_arrow_down.png) no-repeat right center; 
+	background-color:#D5D3E6;
+}
+
+/* We float the li list to the left and apply background color and border right white */
+#menuwrapper ul li{
+    float:left;
+    background-color:#D5D3E6;
+    border-bottom:solid 1px white;
+}
+
+/* We apply the background hover color when user hover the mouse over of the li component */
+#menuwrapper ul li:hover{
+    background-color:#EDEAFF;
+    position:relative;
+}
+
+/* We apply the link style */
+#menuwrapper ul li a{
+    padding:3px 8px;
+    color:#000000;
+    display:inline-block;
+    text-decoration:none;
+	width:400px;
+}
+
+/**** SECOND LEVEL MENU ****/
+/* We make the position to absolute for flyout menu and hidden the ul until the user hover the parent li item */
+#menuwrapper ul li ul{
+    position:absolute;
+    display:none;
+	max-height: 300px;
+	overflow-y: scroll;
+	overflow-x: hidden;
+}
+
+/* When user has hovered the li item, we show the ul list by applying display:block, note: 23px is the menu height.  */
+#menuwrapper ul li:hover ul{
+    left:0;
+    top:23px;
+    display:block;
+	z-index: 2;
+}
+
+/* As the parent li has float:left property, we overwrite for the submenu (level 2) to float none (normal position)  */
+#menuwrapper ul li ul li{
+    float:none;
+    width:390px;
+    background-color:#D5D3E6;
+	text-align: left;
+}
+
+/* We change the background color for the level 2 submenu when hovering the menu */
+#menuwrapper ul li:hover ul li:hover{
+    background-color:#EDEAFF;
+}
+
+/* We style the color of level 2 links */
+#menuwrapper ul li ul li a{
+    color:#000000;
+    display:block;
+	padding-right:10px;
+	cursor: pointer;
+   /* width:400px;*/
+}
+
+#menuwrapper ul li ul li a label{
+	cursor: pointer;
+}
+
+
+/**** THIRD LEVEL MENU ****/
+/* We need to hide the 3rd menu, when hovering the first level menu */
+#menuwrapper ul li:hover ul li ul{
+    position:absolute;
+    display:none;
+}
+
+/* We show the third level menu only when they hover the second level menu parent */
+#menuwrapper ul li:hover ul li:hover ul{
+    display:block;
+    left:150px;
+    top:0;
+}
+
+/* We change the background color for the level 3 submenu*/
+#menuwrapper ul li:hover ul li:hover ul li{
+    background:#D5D3E6;
+}
+
+/* We change the background color for the level 3 submenu when hovering the menu */
+#menuwrapper ul li:hover ul li:hover ul li:hover{
+    background:#D5D3E6;
+}
+
+/* We change the level 3 link color */
+#menuwrapper ul li:hover ul li:hover ul li a{
+    color:#000000;
+}
+
+.gray {
+	background-color:#CCCCCC;
+	width: 35px;
+	height: 18px;
+	float: left;
+	text-align: center;
+	margin-right: 1px;
+	padding-top:3px;
+}
+
+.blue {
+	background-color:#00ccff;
+	width: 35px;
+	height: 18px;
+	float: left;
+	text-align: center;
+	margin-right: 1px;
+	padding-top:3px;
+}
+
+.green {
+	background-color:#99cc00;
+	width: 35px;
+	height: 18px;
+	float: left;
+	text-align: center;
+	margin-right: 1px;
+	padding-top:3px;
+}
+
+.yellow {
+	background-color:#ffff00;
+	width: 35px;
+	height: 18px;
+	float: left;
+	text-align: center;
+	margin-right: 1px;
+	padding-top:3px;
+}
+
+.orange {
+	background-color:#ff9900;
+	width: 35px;
+	height: 18px;
+	float: left;
+	text-align: center;
+	margin-right: 1px;
+	padding-top:3px;
+}
+
+.red {
+	background-color:#ff0000;
+	width: 35px;
+	height: 18px;
+	float: left;
+	text-align: center;
+	margin-right: 1px;
+	padding-top:3px;
+}
+
+.searchbutton{
+	  background-color:	#48006F;
+	  color: #FFF;
+      width: 63px;
+      height: 25px;
+}
+
+.resetbutton{
+	  background-color: #48006F;
+	  color: #FFF;
+      width: 61px;
+      height: 25px;
+}
+
+.dropmenudiv{
+	position:absolute;
+	top: 0;
+	border: 1px solid #DDDDDD; /*THEME CHANGE HERE*/
+	/*border-bottom-width: 0;*/
+	font:normal 12px Verdana;
+	line-height:18px;
+	z-index:100;
+	background-color: white;
+	width: 50px;
+	visibility: hidden;
+}
+
+.viewcount{
+	float: left;
+   	background: url(../images/viewcount.png) no-repeat left center;
+	width: 16px;
+	height: 16px;
+	text-align:center;
+}
+
+/* As in IE6 hover css does not works, below htc file is added which contains js script which will be executed only in IE, the script convert simple as well as complex hover css into compatible format for IE6 by replacing hover by class css - this file is used so that help tab as well as product selector will work in IE6 without any changes of code as well as css code and script can be also useful for making other css to work in IE6 like :hover and :active for IE6+, and additionally :focus for IE7 and IE8. */
+ul, li { behavior:url("css/csshover3.htc"); }
+
+.startdatehighlight {
+	border-right-color: red!important;
+}
+
+.tag {
+	color:#120f3c;
+	font-weight:normal;
+}
+
+.demo #slider-range, .demo #slider-range-min {
+	width:382px;
+	margin:0 10px 0 10px;
+}
+
+.demo p{
+	margin-bottom: 3px;
+}
+
+.milestones, .export {
+	float:left;
+	vertical-align:bottom; 
+	height:20px;
+}
+
+.export div {
+	padding:2px;
+	border:1px solid; 
+	color:#000000;
+	background:url('../images/save.png') no-repeat left center; 
+	cursor:pointer;
+}
+
+.filters {
+	float: left;
+	padding: 0px 4px;
+	font-size:11px;
+}
+
+.filters label{
+	float: left;
+}
+
+.filters a{
+	display: inline;
+	padding: 0px 0px 0px 4px;
+}
+
+.filters a img{
+	border: 0px;
+	margin-top: 2px;
+    width:10px;
+	height:10px;
+}
+
+#outercontainer {
+	width:12%;
+	height:20px;
+	overflow:auto;
+	float:left;
+	padding: 0px 5px 2px 2px;
+	margin-right: 10px;
+	background-color:#EDEAFF;
+}
+
+#parent {
+	height: 100%;
+    width: 100%;
+	margin-bottom: 35px;
+	*height: 2px;
+}
+
+#fulltextsearchbox {
+	float:left;
+	margin:-1px 10px 0px 0px;
+	width:156px;
+}
+
+#fulltextsearchbox input{
+	height:17px;
+}
+
+.advanced {
+	font-weight:bold;
+	float:left;
+	margin-right:10px;
+	padding: 2px;
+	border: 1px solid black;
+	cursor: pointer;
+}
+
+.records {
+	background-color:#EDEAFF;
+	float:left;
+	font-weight: bold;
+	height: 18px;
+	padding: 2px 4px;
+}
+
+#buttons {
+	float:left;
+	margin-right: 10px;
+	margin-top: -2px;
+}

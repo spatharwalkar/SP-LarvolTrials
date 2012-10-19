@@ -1,0 +1,118 @@
+/* ::::: http://larvoltrials.com/date/date_input.css ::::: */
+
+.date_selector, .date_selector * { width: auto; height: auto; border: medium none; background: none repeat scroll 0% 0% transparent; margin: 0px; padding: 0px; text-align: left; text-decoration: none; }
+.date_selector { background: none repeat scroll 0% 0% rgb(242, 242, 242); border: 1px solid rgb(187, 187, 187); padding: 5px; margin: -1px 0px 0px; position: absolute; z-index: 100000; display: none; }
+.date_selector .nav { width: 17.5em; }
+.date_selector .month_nav, .date_selector .year_nav { margin: 0px 0px 3px; padding: 0px; display: block; position: relative; text-align: center; }
+.date_selector .month_nav { float: left; width: 55%; }
+.date_selector .year_nav { float: right; width: 35%; margin-right: -8px; }
+.date_selector .month_name, .date_selector .year_name { font-weight: bold; line-height: 20px; }
+.date_selector .button { display: block; position: absolute; top: 0px; width: 18px; height: 18px; line-height: 17px; font-weight: bold; color: rgb(0, 60, 120); text-align: center; font-size: 120%; overflow: hidden; border: 1px solid rgb(242, 242, 242); }
+.date_selector .button:hover, .date_selector .button.hover { background: none repeat scroll 0% 0% transparent; color: rgb(0, 60, 120); cursor: pointer; border-color: rgb(204, 204, 204); }
+.date_selector .prev { left: 0px; }
+.date_selector .next { right: 0px; }
+.date_selector table { border-spacing: 0px; border-collapse: collapse; clear: both; }
+.date_selector th, .date_selector td { width: 2.5em; height: 2em; padding: 0px; text-align: center; color: black; }
+.date_selector td { border: 1px solid rgb(204, 204, 204); line-height: 2em; text-align: center; white-space: nowrap; color: rgb(0, 60, 120); background: none repeat scroll 0% 0% white; }
+.date_selector td.today { background: none repeat scroll 0% 0% rgb(255, 254, 179); }
+.date_selector td.unselected_month { color: rgb(204, 204, 204); }
+.date_selector td.selectable_day { cursor: pointer; }
+.date_selector td.selected { background: none repeat scroll 0% 0% rgb(216, 223, 229); font-weight: bold; }
+.date_selector td.selectable_day:hover, .date_selector td.selectable_day.hover { background: none repeat scroll 0% 0% rgb(0, 60, 120); color: white; }
+/* ::::: http://larvoltrials.com/scripts/date/jdpicker.css ::::: */
+
+.jdpicker_w .date_selector * { width: auto; height: auto; border: medium none; background: none repeat scroll 0% 0% transparent; margin: 0px; padding: 0px; text-align: left; text-decoration: none; font-size: 12px; }
+.jdpicker_w .date_selector { background: none repeat scroll 0% 0% rgb(255, 255, 255); border: 1px solid rgb(187, 187, 187); padding: 5px; margin: -1px 0px 0px; position: absolute; z-index: 100000; display: none; width: 210px; }
+.jdpicker_w .date_selector table { width: 210px; margin-left: 3px; }
+.jdpicker_w .date_clearer { color: rgb(170, 0, 0); padding-left: 3px; cursor: pointer; font-weight: bold; font-family: sans-serif; }
+.jdpicker_w .error_msg { display: none; text-align: center; font-size: 0.8em; color: rgb(102, 102, 102); }
+.jdpicker_w .date_selector .nav { width: 17.5em; }
+.jdpicker_w .date_selector .month_nav, .jdpicker_w .date_selector .year_nav { margin: 0px 0px 3px; padding: 0px; display: block; position: relative; text-align: center; }
+.jdpicker_w .date_selector .month_nav { float: left; width: 56%; }
+.jdpicker_w .date_selector .year_nav { float: right; width: 37%; position: relative; }
+.jdpicker_w .date_selector .month_name, .jdpicker_w .date_selector .year_name { font-weight: bold; line-height: 20px; }
+.jdpicker_w .date_selector .button { display: block; position: absolute; top: 0px; width: 18px; height: 18px; line-height: 17px; font-weight: bold; color: rgb(51, 51, 51); text-align: center; font-size: 120%; overflow: hidden; border: 1px solid rgb(242, 242, 242); cursor: pointer; }
+.jdpicker_w .date_selector .button:hover, .jdpicker_w .date_selector .button.hover { background: none repeat scroll 0% 0% transparent; color: rgb(51, 51, 51); cursor: pointer; border-color: rgb(204, 204, 204); }
+.jdpicker_w .date_selector .prev { left: 0px; }
+.jdpicker_w .date_selector .next { right: 0px; }
+.jdpicker_w .date_selector table { margin: 0px auto; border-spacing: 1px; clear: both; }
+.jdpicker_w .date_selector th { padding-top: 5px; }
+.jdpicker_w .date_selector th, .jdpicker_w .date_selector td { text-align: center; color: black; }
+.jdpicker_w .date_selector td { border: 1px solid rgb(204, 204, 204); line-height: 2em; text-align: center; white-space: nowrap; color: rgb(0, 60, 120); background: none repeat scroll 0% 0% white; }
+.jdpicker_w .date_selector td.today { background: none repeat scroll 0% 0% rgb(255, 254, 179); }
+.jdpicker_w .date_selector td.unselected_month { color: rgb(204, 204, 204); }
+.jdpicker_w .date_selector td.selectable_day, .jdpicker_w .date_selector tr.selectable_week td { cursor: pointer; background: url('bg_selectable_001.png') repeat scroll 0% 0% transparent; border: 1px solid rgb(170, 170, 170); color: rgb(51, 51, 51); }
+.jdpicker_w .date_selector td.selected, .jdpicker_w .date_selector tr.selected td { background: url('bg_selected_001.png') repeat scroll 0% 0% transparent; font-weight: bold; }
+/* ::::: http://larvoltrials.com/css/popup_form.css ::::: */
+
+/* ::::: http://larvoltrials.com/css/themes/cupertino/jquery-ui-1.8.17.custom.css ::::: */
+
+.ui-widget { font-family: Lucida Grande,Lucida Sans,Arial,sans-serif; font-size: 1.1em; }
+.ui-widget-content { border: 1px solid rgb(221, 221, 221); background: url('ui-bg_highlight-hard_100_f2f5f7_1x100_001.png') repeat-x scroll 50% top rgb(242, 245, 247); color: rgb(54, 43, 54); }
+.ui-widget-content a { color: rgb(54, 43, 54); }
+.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default { border: 1px solid rgb(174, 208, 234); background: url('ui-bg_glass_80_d7ebf9_1x400_001.png') repeat-x scroll 50% 50% rgb(215, 235, 249); font-weight: bold; color: rgb(39, 121, 170); }
+.ui-widget :active { outline: medium none; }
+.ui-corner-all, .ui-corner-top, .ui-corner-left, .ui-corner-tl { border-top-left-radius: 6px; }
+.ui-corner-all, .ui-corner-top, .ui-corner-right, .ui-corner-tr { border-top-right-radius: 6px; }
+.ui-corner-all, .ui-corner-bottom, .ui-corner-left, .ui-corner-bl { border-bottom-left-radius: 6px; }
+.ui-corner-all, .ui-corner-bottom, .ui-corner-right, .ui-corner-br { border-bottom-right-radius: 6px; }
+button.ui-button::-moz-focus-inner { border: 0px none; padding: 0px; }
+.ui-slider { position: relative; text-align: left; }
+.ui-slider .ui-slider-handle { position: absolute; z-index: 2; width: 1.2em; height: 1.2em; cursor: default; }
+.ui-slider-horizontal { height: 0.8em; }
+.ui-slider-horizontal .ui-slider-handle { top: -0.3em; margin-left: -0.6em ! important; }
+.box_rotate { -moz-transform: rotate(270deg); -moz-transform-origin: 0% 100%; white-space: nowrap; margin-bottom: 2px; }
+.Area_RowDiv_Class_1 { margin-left: 38.4px; }
+.Area_Row_Class_1 { width: 48px; max-width: 48px; height: 165px; max-height: 165px; }
+.Cat_Area_Row_Class_1 { width: 146px; max-width: 146px; }
+.Area_RowDiv_Class_2 { margin-left: 48px; }
+.Area_Row_Class_2 { width: 48px; max-width: 48px; height: 165px; max-height: 165px; }
+.Area_RowDiv_Class_3 { margin-left: 48px; }
+.Area_Row_Class_3 { width: 48px; max-width: 48px; height: 165px; max-height: 165px; }
+.Area_RowDiv_Class_4 { margin-left: 38.4px; }
+.Area_Row_Class_4 { width: 48px; max-width: 48px; height: 165px; max-height: 165px; }
+.Cat_Area_Row_Class_4 { width: 146px; max-width: 146px; }
+.Area_RowDiv_Class_5 { margin-left: 48px; }
+.Area_Row_Class_5 { width: 48px; max-width: 48px; height: 165px; max-height: 165px; }
+.Area_RowDiv_Class_6 { margin-left: 48px; }
+.Area_Row_Class_6 { width: 48px; max-width: 48px; height: 165px; max-height: 165px; }
+.Area_RowDiv_Class_7 { margin-left: 38.4px; }
+.Area_Row_Class_7 { width: 48px; max-width: 48px; height: 165px; max-height: 165px; }
+.Cat_Area_Row_Class_7 { width: 48px; max-width: 48px; }
+ul, li, slideout {  }
+img {  }
+body { font-family: Arial; font-size: 13px; }
+a, a:hover {  }
+table { font-size: 13px; }
+.display td, .display th { font-weight: normal; background-color: rgb(221, 221, 255); vertical-align: middle; }
+.jdpicker { vertical-align: middle; position: relative; }
+.tooltip { color: rgb(0, 0, 0); outline: medium none; cursor: default; text-decoration: none; }
+.tooltip span { border-radius: 5px 5px 5px 5px; box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.1); font-family: Arial; font-size: 12px; position: absolute; margin-left: 0px; width: 280px; display: none; z-index: 0; }
+.classic { padding: 0.8em 1em; }
+.classic { background: none repeat scroll 0% 0% rgb(255, 255, 170); border: 1px solid rgb(255, 173, 51); }
+#slideout { position: fixed; top: 40px; right: 0px; margin: 12px 0px 0px; }
+.slideout_inner { position: absolute; top: 40px; right: -255px; display: none; }
+#slideout:hover .slideout_inner { display: block; position: absolute; top: 2px; right: 0px; width: 280px; z-index: 10; }
+.table-slide { border: 1px solid rgb(0, 0, 0); }
+.table-slide td { border-right: 1px solid rgb(0, 0, 0); padding: 8px 20px 8px 8px; border-bottom: 1px solid rgb(0, 0, 0); }
+.gray { background-color: rgb(204, 204, 204); width: 35px; height: 18px; float: left; text-align: center; margin-right: 1px; padding-top: 3px; }
+.blue { background-color: rgb(0, 204, 255); width: 35px; height: 18px; float: left; text-align: center; margin-right: 1px; padding-top: 3px; }
+.green { background-color: rgb(153, 204, 0); width: 35px; height: 18px; float: left; text-align: center; margin-right: 1px; padding-top: 3px; }
+.yellow { background-color: rgb(255, 255, 0); width: 35px; height: 18px; float: left; text-align: center; margin-right: 1px; padding-top: 3px; }
+.orange { background-color: rgb(255, 153, 0); width: 35px; height: 18px; float: left; text-align: center; margin-right: 1px; padding-top: 3px; }
+.red { background-color: rgb(255, 0, 0); width: 35px; height: 18px; float: left; text-align: center; margin-right: 1px; padding-top: 3px; }
+.downldbox { height: auto; width: 310px; font-weight: bold; }
+.downldbox ul { list-style: none outside none; margin: 5px; padding: 0px; }
+.downldbox ul li { width: 130px; float: left; margin: 2px; }
+.dropmenudiv { position: absolute; top: 0px; border: 1px solid rgb(221, 221, 221); font: 12px/18px Arial; z-index: 100; background-color: white; width: 50px; visibility: hidden; }
+.break_words { word-wrap: break-word; }
+.Status_Label_Style { color: rgb(32, 96, 64); }
+.Status_Label_Headers { color: rgb(32, 96, 64); }
+.Status_Label_values { color: rgb(0, 0, 0); }
+.Data_values { color: rgb(0, 0, 0); }
+.Status_Changes_Style { font-weight: 900; }
+.Status_ULStyle { margin-top: 0px; margin-bottom: 0px; }
+.Range_Value_TD { vertical-align: middle; display: table-row; }
+.Range_Value { vertical-align: middle; }
+.Range_Value_Style { color: rgb(246, 147, 31); border: 0px none; background-color: rgb(255, 255, 255); font-family: Arial; font-size: 13px; }
+.Product_Col_WidthStyle { min-width: 250px; }

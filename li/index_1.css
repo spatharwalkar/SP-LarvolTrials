@@ -1,0 +1,161 @@
+/* ::::: http://www.larvoltrials.com/css/intermediary.css?t=1350073699 ::::: */
+
+html { overflow-x: auto ! important; }
+html, body { height: 100%; margin: 0px; padding: 0px; }
+body { font-family: Arial,Helvetica,sans-serif; font-size: 13px; background-color: rgb(255, 255, 255); width: 100%; }
+a, a:hover { color: rgb(0, 0, 0); text-decoration: none; display: block; }
+.title { background-color: rgb(237, 234, 255); }
+.alttitle { background-color: rgb(213, 211, 230); }
+.highlight { color: rgb(255, 0, 0) ! important; }
+.manage { table-layout: fixed; border-top: 1px solid blue; border-left: 1px solid blue; border-bottom: 1px solid blue; width: 100%; }
+.manage td { border-top: 1px solid blue; border-right: 1px solid blue; margin: 0px; padding: 0px; overflow: hidden; vertical-align: top; }
+.manage th { border-right: 1px solid blue; color: rgb(84, 49, 159); margin: 0px; padding: 0px; height: 25px; }
+.newtrial td, .newtrial td a { color: rgb(255, 0, 0) ! important; }
+.rowcollapse { vertical-align: top; padding-top: 0px; margin: 0px; height: 16px; overflow: visible; }
+.rowcollapse:hover, .rowcollapse .hover { height: 100%; }
+.norecord { border-right: 1px solid blue ! important; padding: 0px; height: auto; line-height: normal ! important; background-color: rgb(237, 234, 255); color: rgb(0, 0, 0) ! important; }
+.downldbox { height: auto; width: 310px; font-weight: bold; }
+.downldbox ul { list-style: none outside none; margin: 5px; padding: 0px; }
+.downldbox ul li { width: 130px; float: left; margin: 2px; }
+.sectiontitles { background-color: rgb(162, 255, 151) ! important; }
+.upmpointer { cursor: pointer; }
+tr.upms td { text-decoration: none; background-color: rgb(197, 229, 250); }
+.table-slide { border: 1px solid rgb(0, 0, 0); }
+.table-slide td { border-right: 1px solid rgb(0, 0, 0); padding: 8px 20px 8px 8px; border-bottom: 1px solid rgb(0, 0, 0); }
+#slideout { position: fixed; top: 40px; right: 0px; margin: 12px 0px 0px; z-index: 999; }
+.slideout_inner { position: absolute; top: 40px; right: -255px; display: none; }
+#slideout:hover .slideout_inner { display: block; position: absolute; top: 2px; right: 0px; width: 280px; z-index: 10; }
+.controls { border: medium none ! important; font-family: Verdana,Geneva,sans-serif; }
+.controls td { border-bottom: 1px solid rgb(68, 68, 255); border-right: 1px solid rgb(68, 68, 255); padding: 10px 0px 0px 3px; vertical-align: top; }
+.controls th { font-weight: normal; border-bottom: 1px solid rgb(68, 68, 255); border-right: 1px solid rgb(68, 68, 255); }
+.right { border-right: 0px none ! important; }
+.bottom { border-bottom: 0px none ! important; }
+.checkscroll { float: left; height: 10em; width: 200px; overflow: auto; }
+.controls .bottom input { margin: 0.1em; width: 13px; height: 13px; }
+.ui-slider-horizontal .ui-slider-handle { margin-left: 0px ! important; }
+.controls p { margin-bottom: 0px; margin-top: 0px; }
+.manual { color: rgb(255, 119, 0); }
+.jdpicker_w { width: 90px; float: left; }
+.jdpicker { border: 0px none; color: rgb(246, 147, 31); font-weight: bold; width: 100px; }
+#menuwrapper ul, #menuwrapper ul li { margin: 0px; padding: 0px; list-style: none outside none; width: 400px; float: left; text-align: center; }
+#menuwrapper ul .arrow { background: url('bullet_arrow_down.png') no-repeat scroll right center rgb(213, 211, 230); }
+#menuwrapper ul li { float: left; background-color: rgb(213, 211, 230); border-bottom: 1px solid white; }
+#menuwrapper ul li:hover { background-color: rgb(237, 234, 255); position: relative; }
+#menuwrapper ul li a { padding: 3px 8px; color: rgb(0, 0, 0); display: inline-block; text-decoration: none; width: 400px; }
+#menuwrapper ul li ul { position: absolute; display: none; max-height: 300px; overflow-y: scroll; overflow-x: hidden; }
+#menuwrapper ul li:hover ul { left: 0px; top: 23px; display: block; z-index: 2; }
+#menuwrapper ul li ul li { float: none; width: 390px; background-color: rgb(213, 211, 230); text-align: left; }
+#menuwrapper ul li:hover ul li:hover { background-color: rgb(237, 234, 255); }
+#menuwrapper ul li ul li a { color: rgb(0, 0, 0); display: block; padding-right: 10px; cursor: pointer; }
+.gray { background-color: rgb(204, 204, 204); width: 35px; height: 18px; float: left; text-align: center; margin-right: 1px; padding-top: 3px; }
+.blue { background-color: rgb(0, 204, 255); width: 35px; height: 18px; float: left; text-align: center; margin-right: 1px; padding-top: 3px; }
+.green { background-color: rgb(153, 204, 0); width: 35px; height: 18px; float: left; text-align: center; margin-right: 1px; padding-top: 3px; }
+.yellow { background-color: rgb(255, 255, 0); width: 35px; height: 18px; float: left; text-align: center; margin-right: 1px; padding-top: 3px; }
+.orange { background-color: rgb(255, 153, 0); width: 35px; height: 18px; float: left; text-align: center; margin-right: 1px; padding-top: 3px; }
+.red { background-color: rgb(255, 0, 0); width: 35px; height: 18px; float: left; text-align: center; margin-right: 1px; padding-top: 3px; }
+.searchbutton { background-color: rgb(72, 0, 111); color: rgb(255, 255, 255); width: 63px; height: 25px; }
+.resetbutton { background-color: rgb(72, 0, 111); color: rgb(255, 255, 255); width: 61px; height: 25px; }
+.dropmenudiv { position: absolute; top: 0px; border: 1px solid rgb(221, 221, 221); font: 12px/18px Verdana; z-index: 100; background-color: white; width: 50px; visibility: hidden; }
+.viewcount { float: left; background: url('viewcount.png') no-repeat scroll left center transparent; width: 16px; height: 16px; text-align: center; }
+ul, li {  }
+.demo #slider-range, .demo #slider-range-min { width: 382px; margin: 0px 10px; }
+.demo p { margin-bottom: 3px; }
+.milestones, .export { float: left; vertical-align: bottom; height: 20px; }
+.export div { padding: 2px; border: 1px solid; color: rgb(0, 0, 0); background: url('save.png') no-repeat scroll left center transparent; cursor: pointer; }
+.filters { float: left; padding: 0px 4px; font-size: 11px; }
+.filters label { float: left; }
+.filters a { display: inline; padding: 0px 0px 0px 4px; }
+.filters a img { border: 0px none; margin-top: 2px; width: 10px; height: 10px; }
+#outercontainer { width: 12%; height: 20px; overflow: auto; float: left; padding: 0px 5px 2px 2px; margin-right: 10px; background-color: rgb(237, 234, 255); }
+#parent { height: 100%; width: 100%; margin-bottom: 35px; }
+#fulltextsearchbox { float: left; margin: -1px 10px 0px 0px; width: 156px; }
+#fulltextsearchbox input { height: 17px; }
+.advanced { font-weight: bold; float: left; margin-right: 10px; padding: 2px; border: 1px solid black; cursor: pointer; }
+.records { background-color: rgb(237, 234, 255); float: left; font-weight: bold; height: 18px; padding: 2px 4px; }
+#buttons { float: left; margin-right: 10px; margin-top: -2px; }
+/* ::::: http://www.larvoltrials.com/css/themes/cupertino/jquery-ui-1.8.17.custom.css?t=1344545965 ::::: */
+
+.ui-widget { font-family: Lucida Grande,Lucida Sans,Arial,sans-serif; font-size: 1.1em; }
+.ui-widget-content { border: 1px solid rgb(221, 221, 221); background: url('ui-bg_highlight-hard_100_f2f5f7_1x100.png') repeat-x scroll 50% top rgb(242, 245, 247); color: rgb(54, 43, 54); }
+.ui-widget-content a { color: rgb(54, 43, 54); }
+.ui-widget-header { border: 1px solid rgb(174, 208, 234); background: url('ui-bg_highlight-soft_100_deedf7_1x100.png') repeat-x scroll 50% 50% rgb(222, 237, 247); color: rgb(34, 34, 34); font-weight: bold; }
+.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default { border: 1px solid rgb(174, 208, 234); background: url('ui-bg_glass_80_d7ebf9_1x400.png') repeat-x scroll 50% 50% rgb(215, 235, 249); font-weight: bold; color: rgb(39, 121, 170); }
+.ui-widget :active { outline: medium none; }
+.ui-corner-all, .ui-corner-top, .ui-corner-left, .ui-corner-tl { border-top-left-radius: 6px; }
+.ui-corner-all, .ui-corner-top, .ui-corner-right, .ui-corner-tr { border-top-right-radius: 6px; }
+.ui-corner-all, .ui-corner-bottom, .ui-corner-left, .ui-corner-bl { border-bottom-left-radius: 6px; }
+.ui-corner-all, .ui-corner-bottom, .ui-corner-right, .ui-corner-br { border-bottom-right-radius: 6px; }
+button.ui-button::-moz-focus-inner { border: 0px none; padding: 0px; }
+.ui-slider { position: relative; text-align: left; }
+.ui-slider .ui-slider-handle { position: absolute; z-index: 2; width: 1.2em; height: 1.2em; cursor: default; }
+.ui-slider .ui-slider-range { position: absolute; z-index: 1; font-size: 0.7em; display: block; border: 0px none; background-position: 0px 0px; }
+.ui-slider-horizontal { height: 0.8em; }
+.ui-slider-horizontal .ui-slider-handle { top: -0.3em; margin-left: -0.6em ! important; }
+.ui-slider-horizontal .ui-slider-range { top: 0px; height: 100%; }
+/* ::::: http://www.larvoltrials.com/date/date_input.css?t=1330719041 ::::: */
+
+.date_selector, .date_selector * { width: auto; height: auto; border: medium none; background: none repeat scroll 0% 0% transparent; margin: 0px; padding: 0px; text-align: left; text-decoration: none; }
+.date_selector { background: none repeat scroll 0% 0% rgb(242, 242, 242); border: 1px solid rgb(187, 187, 187); padding: 5px; margin: -1px 0px 0px; position: absolute; z-index: 100000; display: none; }
+.date_selector .nav { width: 17.5em; }
+.date_selector .month_nav, .date_selector .year_nav { margin: 0px 0px 3px; padding: 0px; display: block; position: relative; text-align: center; }
+.date_selector .month_nav { float: left; width: 55%; }
+.date_selector .year_nav { float: right; width: 35%; margin-right: -8px; }
+.date_selector .month_name, .date_selector .year_name { font-weight: bold; line-height: 20px; }
+.date_selector .button { display: block; position: absolute; top: 0px; width: 18px; height: 18px; line-height: 17px; font-weight: bold; color: rgb(0, 60, 120); text-align: center; font-size: 120%; overflow: hidden; border: 1px solid rgb(242, 242, 242); }
+.date_selector .button:hover, .date_selector .button.hover { background: none repeat scroll 0% 0% transparent; color: rgb(0, 60, 120); cursor: pointer; border-color: rgb(204, 204, 204); }
+.date_selector .prev { left: 0px; }
+.date_selector .next { right: 0px; }
+.date_selector table { border-spacing: 0px; border-collapse: collapse; clear: both; }
+.date_selector th, .date_selector td { width: 2.5em; height: 2em; padding: 0px; text-align: center; color: black; }
+.date_selector td { border: 1px solid rgb(204, 204, 204); line-height: 2em; text-align: center; white-space: nowrap; color: rgb(0, 60, 120); background: none repeat scroll 0% 0% white; }
+.date_selector td.today { background: none repeat scroll 0% 0% rgb(255, 254, 179); }
+.date_selector td.unselected_month { color: rgb(204, 204, 204); }
+.date_selector td.selectable_day { cursor: pointer; }
+.date_selector td.selected { background: none repeat scroll 0% 0% rgb(216, 223, 229); font-weight: bold; }
+.date_selector td.selectable_day:hover, .date_selector td.selectable_day.hover { background: none repeat scroll 0% 0% rgb(0, 60, 120); color: white; }
+/* ::::: http://www.larvoltrials.com/scripts/date/jdpicker.css?t=1330719041 ::::: */
+
+.jdpicker_w .date_selector * { width: auto; height: auto; border: medium none; background: none repeat scroll 0% 0% transparent; margin: 0px; padding: 0px; text-align: left; text-decoration: none; font-size: 12px; }
+.jdpicker_w .date_selector { background: none repeat scroll 0% 0% rgb(255, 255, 255); border: 1px solid rgb(187, 187, 187); padding: 5px; margin: -1px 0px 0px; position: absolute; z-index: 100000; display: none; width: 210px; }
+.jdpicker_w .date_selector table { width: 210px; margin-left: 3px; }
+.jdpicker_w .date_clearer { color: rgb(170, 0, 0); padding-left: 3px; cursor: pointer; font-weight: bold; font-family: sans-serif; }
+.jdpicker_w .error_msg { display: none; text-align: center; font-size: 0.8em; color: rgb(102, 102, 102); }
+.jdpicker_w .date_selector .nav { width: 17.5em; }
+.jdpicker_w .date_selector .month_nav, .jdpicker_w .date_selector .year_nav { margin: 0px 0px 3px; padding: 0px; display: block; position: relative; text-align: center; }
+.jdpicker_w .date_selector .month_nav { float: left; width: 56%; }
+.jdpicker_w .date_selector .year_nav { float: right; width: 37%; position: relative; }
+.jdpicker_w .date_selector .month_name, .jdpicker_w .date_selector .year_name { font-weight: bold; line-height: 20px; }
+.jdpicker_w .date_selector .button { display: block; position: absolute; top: 0px; width: 18px; height: 18px; line-height: 17px; font-weight: bold; color: rgb(51, 51, 51); text-align: center; font-size: 120%; overflow: hidden; border: 1px solid rgb(242, 242, 242); cursor: pointer; }
+.jdpicker_w .date_selector .button:hover, .jdpicker_w .date_selector .button.hover { background: none repeat scroll 0% 0% transparent; color: rgb(51, 51, 51); cursor: pointer; border-color: rgb(204, 204, 204); }
+.jdpicker_w .date_selector .prev { left: 0px; }
+.jdpicker_w .date_selector .next { right: 0px; }
+.jdpicker_w .date_selector table { margin: 0px auto; border-spacing: 1px; clear: both; }
+.jdpicker_w .date_selector th { padding-top: 5px; }
+.jdpicker_w .date_selector th, .jdpicker_w .date_selector td { text-align: center; color: black; }
+.jdpicker_w .date_selector td { border: 1px solid rgb(204, 204, 204); line-height: 2em; text-align: center; white-space: nowrap; color: rgb(0, 60, 120); background: none repeat scroll 0% 0% white; }
+.jdpicker_w .date_selector td.today { background: none repeat scroll 0% 0% rgb(255, 254, 179); }
+.jdpicker_w .date_selector td.unselected_month { color: rgb(204, 204, 204); }
+.jdpicker_w .date_selector td.selectable_day, .jdpicker_w .date_selector tr.selectable_week td { cursor: pointer; background: url('bg_selectable.png') repeat scroll 0% 0% transparent; border: 1px solid rgb(170, 170, 170); color: rgb(51, 51, 51); }
+.jdpicker_w .date_selector td.selected, .jdpicker_w .date_selector tr.selected td { background: url('bg_selected.png') repeat scroll 0% 0% transparent; font-weight: bold; }
+/* ::::: http://www.larvoltrials.com/css/jquery.mCustomScrollbar.css?t=1348863181 ::::: */
+
+.mCSB_container { width: auto; margin-right: 30px; overflow: hidden; }
+.mCSB_container.mCS_no_scrollbar { margin-right: 0px; }
+.mCustomScrollBox .mCSB_scrollTools { width: 16px; height: 100%; top: 0px; right: 0px; }
+.mCSB_scrollTools .mCSB_draggerContainer { height: 100%; }
+.mCSB_scrollTools .mCSB_draggerRail { width: 2px; height: 100%; margin: 0px auto; border-radius: 10px 10px 10px 10px; }
+.mCSB_scrollTools .mCSB_dragger { cursor: pointer; width: 100%; height: 30px; }
+.mCSB_scrollTools .mCSB_dragger .mCSB_dragger_bar { width: 4px; height: 100%; margin: 0px auto; border-radius: 10px 10px 10px 10px; text-align: center; }
+.mCSB_horizontal .mCSB_container { height: auto; margin-right: 0px; margin-bottom: 30px; overflow: hidden; }
+.mCSB_horizontal .mCSB_container.mCS_no_scrollbar { margin-bottom: 0px; }
+.mCSB_horizontal.mCustomScrollBox .mCSB_scrollTools { width: 100%; height: 13px; top: auto; right: auto; bottom: 0px; left: 0px; overflow: hidden; }
+.mCSB_horizontal .mCSB_scrollTools .mCSB_draggerContainer { height: 100%; width: auto; overflow: hidden; }
+.mCSB_horizontal .mCSB_scrollTools .mCSB_draggerRail { width: 100%; height: 5px; margin: 7px 0px; }
+.mCSB_horizontal .mCSB_scrollTools .mCSB_dragger { width: 30px; }
+.mCSB_horizontal .mCSB_scrollTools .mCSB_dragger .mCSB_dragger_bar { width: 100%; height: 4px; margin: 8px auto; }
+.mCustomScrollBox .mCSB_scrollTools {  }
+.mCustomScrollBox:hover .mCSB_scrollTools { opacity: 1; }
+.mCSB_scrollTools .mCSB_draggerRail {  }
+.mCSB_scrollTools .mCSB_dragger .mCSB_dragger_bar { background: none repeat scroll 0% 0% rgb(0, 0, 255); opacity: 0.4; }
+.mCSB_scrollTools .mCSB_dragger:hover .mCSB_dragger_bar { background: none repeat scroll 0% 0% rgb(0, 0, 255); opacity: 0.4; }
+.mCSB_scrollTools .mCSB_dragger:active .mCSB_dragger_bar, .mCSB_scrollTools .mCSB_dragger.mCSB_dragger_onDrag .mCSB_dragger_bar { background: none repeat scroll 0% 0% rgb(0, 0, 255); opacity: 0.4; }
