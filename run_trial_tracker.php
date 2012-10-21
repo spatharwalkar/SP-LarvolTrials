@@ -644,6 +644,12 @@ class TrialTracker
 				//collaborator and lead sponsor	
 				$dvalue["NCT/lead_sponsor"] = fix_special_chars($dvalue["NCT/lead_sponsor"]);
 				$dvalue["NCT/collaborator"] = fix_special_chars($dvalue["NCT/collaborator"]);
+				if($dvalue['NCT/lead_sponsor'] != '' && $dvalue['NCT/collaborator'] != ''
+				&& $dvalue['NCT/lead_sponsor'] != NULL && $dvalue['NCT/collaborator'] != NULL)
+				{
+					$dvalue["NCT/lead_sponsor"] .= ', ';
+				}
+						
 				$objPHPExcel->getActiveSheet()->setCellValue('F' . $i, $dvalue["NCT/lead_sponsor"] . $dvalue["NCT/collaborator"]);
 				if(isset($dvalue['manual_is_sourceless']))
 				{
@@ -654,7 +660,10 @@ class TrialTracker
 						{
 							$value .= $dvalue['edited']['NCT/lead_sponsor'];
 						}
-						
+						if(array_key_exists('NCT/lead_sponsor', $dvalue['edited']) && array_key_exists('NCT/collaborator', $dvalue['edited']))
+						{
+							$value .=  ', ';
+						}
 						if(array_key_exists('NCT/collaborator', $dvalue['edited']))
 						{
 							$value .= $dvalue['edited']['NCT/collaborator'];
@@ -733,7 +742,10 @@ class TrialTracker
 						{
 							$value .= $dvalue['edited']['NCT/lead_sponsor'];
 						}
-						
+						if(array_key_exists('NCT/lead_sponsor', $dvalue['edited']) && array_key_exists('NCT/collaborator', $dvalue['edited']))
+						{
+							$value .=  ', ';
+						}
 						if(array_key_exists('NCT/collaborator', $dvalue['edited']))
 						{
 							$value .= $dvalue['edited']['NCT/collaborator'];
@@ -1734,8 +1746,14 @@ class TrialTracker
 			}
 			
 			$outputStr .= $value['NCT/nct_id'] . "\t" . $value['NCT/brief_title'] . "\t" . $value['NCT/enrollment'] . "\t" . $value['region'] . "\t"
-						. $value['NCT/overall_status'] . "\t" . $value['NCT/lead_sponsor'] . " " . $value['NCT/collaborator'] . "\t" . $value['NCT/condition']
-						. "\t" . $value['NCT/intervention_name'] . "\t" . $startDate . "\t" . $endDate . "\t". $phase . "\n";
+						. $value['NCT/overall_status'] . "\t" . $value['NCT/lead_sponsor'];
+			if($value['NCT/lead_sponsor'] != '' && $value['NCT/collaborator'] != ''
+			&& $value['NCT/lead_sponsor'] != NULL && $value['NCT/collaborator'] != NULL)
+			{
+				$outputStr .= ', ';
+			}
+			$outputStr .= $value['NCT/collaborator'] . "\t" . $value['NCT/condition'] . "\t" . $value['NCT/intervention_name'] 
+							. "\t" . $startDate . "\t" . $endDate . "\t". $phase . "\n";		
 		}
 		
 		header("Pragma: public");
@@ -6029,7 +6047,11 @@ class TrialTracker
 						$attr = ' highlight" title="';
 						if(array_key_exists('NCT/lead_sponsor', $dvalue['edited']))
 						{
-							$attr .= $dvalue['edited']['NCT/lead_sponsor'] . ' ';
+							$attr .= $dvalue['edited']['NCT/lead_sponsor'];
+						}
+						if(array_key_exists('NCT/lead_sponsor', $dvalue['edited']) && array_key_exists('NCT/collaborator', $dvalue['edited']))
+						{
+							$attr .=  ', ';
 						}
 						if(array_key_exists('NCT/collaborator', $dvalue['edited'])) 
 						{
@@ -6101,7 +6123,11 @@ class TrialTracker
 						$attr = ' highlight" title="';
 						if(array_key_exists('NCT/lead_sponsor', $dvalue['edited']))
 						{
-							$attr .= $dvalue['edited']['NCT/lead_sponsor'] . ' ';
+							$attr .= $dvalue['edited']['NCT/lead_sponsor'];
+						}
+						if(array_key_exists('NCT/lead_sponsor', $dvalue['edited']) && array_key_exists('NCT/collaborator', $dvalue['edited']))
+						{
+							$attr .=  ', ';
 						}
 						if(array_key_exists('NCT/collaborator', $dvalue['edited'])) 
 						{
@@ -6115,8 +6141,13 @@ class TrialTracker
 					}
 				}
 				$outputStr .= '<td style="width:41px; '.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
-							. '<span>' . $dvalue['NCT/lead_sponsor'] . ' ' . $dvalue["NCT/collaborator"] . '</span></td>';
-
+							. '<span>' . $dvalue['NCT/lead_sponsor'];
+				if($dvalue['NCT/lead_sponsor'] != '' && $dvalue['NCT/collaborator'] != ''
+				&& $dvalue['NCT/lead_sponsor'] != NULL && $dvalue['NCT/collaborator'] != NULL)
+				{
+					$outputStr .= ', ';
+				}
+				$outputStr .= $dvalue["NCT/collaborator"] . '</span></td>';
 
 				//overall status column
 				if(isset($dvalue['manual_is_sourceless']))
@@ -7569,7 +7600,7 @@ class TrialTracker
 								$tagRow = mysql_fetch_assoc($tagRes);
 								if(trim($tagRow['tag']) != '' && $tagRow['tag'] != NULL)
 								{
-									$TrialsInfo[0]['sectionHeader'] .= " <span class='tag'>[" . $tag_row['tag'] . "]</span>";
+									$TrialsInfo[0]['sectionHeader'] .= " <span class='tag'>[" . $tagRow['tag'] . "]</span>";
 								}
 							}
 						}
@@ -12414,7 +12445,11 @@ class TrialTracker
 							$attr = ' highlight" title="';
 							if(array_key_exists('NCT/lead_sponsor', $dvalue['edited']))
 							{
-								$attr .= $dvalue['edited']['NCT/lead_sponsor'] . ' ';
+								$attr .= $dvalue['edited']['NCT/lead_sponsor'];
+							}
+							if(array_key_exists('NCT/lead_sponsor', $dvalue['edited']) && array_key_exists('NCT/collaborator', $dvalue['edited']))
+							{
+								$attr .=  ', ';
 							}
 							if(array_key_exists('NCT/collaborator', $dvalue['edited'])) 
 							{
@@ -12485,7 +12520,11 @@ class TrialTracker
 							$attr = ' highlight" title="';
 							if(array_key_exists('NCT/lead_sponsor', $dvalue['edited']))
 							{
-								$attr .= $dvalue['edited']['NCT/lead_sponsor'] . ' ';
+								$attr .= $dvalue['edited']['NCT/lead_sponsor'];
+							}
+							if(array_key_exists('NCT/lead_sponsor', $dvalue['edited']) && array_key_exists('NCT/collaborator', $dvalue['edited']))
+							{
+								$attr .=  ', ';
 							}
 							if(array_key_exists('NCT/collaborator', $dvalue['edited'])) 
 							{
@@ -12499,7 +12538,13 @@ class TrialTracker
 						}
 					}
 					$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
-								. '<div class="rowcollapse">' . $dvalue['NCT/lead_sponsor'] . ' ' . $dvalue["NCT/collaborator"] . '</div></td>';
+								. '<div class="rowcollapse">' . $dvalue['NCT/lead_sponsor'];
+					if($dvalue['NCT/lead_sponsor'] != '' && $dvalue['NCT/collaborator'] != ''
+					&& $dvalue['NCT/lead_sponsor'] != NULL && $dvalue['NCT/collaborator'] != NULL)
+					{
+						$outputStr .= ', ';
+					}
+					$outputStr .= $dvalue["NCT/collaborator"] . '</div></td>';
 								
 								
 					//overall status column
