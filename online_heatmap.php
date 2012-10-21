@@ -1600,11 +1600,12 @@ function refresh_data(cell_id)
             	setAreaColWidth();
 				ScrollOn = true;
 			}
-            var createGhostHeader = function (header, topOffset) {
+            var createGhostHeader = function (header, topOffset, leftOffset) {
                 // Don't recreate if it is the same as the current one
                 if (header == currentFixedHeader && currentGhost)
                 {
                     currentGhost.css('top', -topOffset + "px");
+					currentGhost.css('left',(-$(window).scrollLeft() + leftOffset) + "px");
                     return currentGhost;
                 }
                 
@@ -1616,7 +1617,7 @@ function refresh_data(cell_id)
                 var headerPosition = $(header).offset();
                 var tablePosition = $(realTable).offset();
                 
-                var container = $('<table border="0" cellspacing="2" cellpadding="0" style="vertical-align:middle; background-color:#FFFFFF;"  class="display" id = "hmMainTable"></table>');
+                var container = $('<table border="0" cellspacing="2" cellpadding="0" style="vertical-align:middle; background-color:#FFFFFF;" class="display" id="hmMainTable1"></table>');
                 
                 // Copy attributes from old table (may not be what you want)
                 for (var i = 0; i < realTable[0].attributes.length; i++) {
@@ -1629,7 +1630,7 @@ function refresh_data(cell_id)
                 container.css({
                     position: 'fixed',
                     top: -topOffset,
-                    left: tablePosition.left,
+                    left: (-$(window).scrollLeft() + leftOffset),
                     width: $(realTable).outerWidth()
                 });
                 
@@ -1698,7 +1699,9 @@ function refresh_data(cell_id)
             
             // We have what we need, make a fixed header row
             if (activeHeader)
-                createGhostHeader(activeHeader, topOffset);
+			{
+                createGhostHeader(activeHeader, topOffset, ($('#hmMainTable').offset().left));
+			}
         });
 		
 	function setAreaColWidth()
@@ -1731,7 +1734,7 @@ function refresh_data(cell_id)
 										cell_exist2.style.width = (cell_exist.offsetWidth) + "px";
 										<?php $u_agent = $_SERVER['HTTP_USER_AGENT']; if(!preg_match('/Chrome/i',$u_agent)) { ?>
 										cell_exist2.style.border = 'medium solid rgb(221, 221, 255)';
-										cell_exist2.style.padding = '1px';
+										//cell_exist2.style.padding = '1px';
 										<?php } // chrome does not need borders to be specified but other browsers need it ?>
 									}
 								}
@@ -1745,7 +1748,9 @@ function refresh_data(cell_id)
 				}
 			}
 		}
-		document.getElementById("hmMainTable_HeaderFirstCell").style.width = (document.getElementById("Cell_ID_"+first).offsetWidth) + "px";
+		//Set product column
+		document.getElementById("hmMainTable_HeaderFirstCell").style.width = (document.getElementById("Cell_ID_"+first).offsetWidth - <?php ((!preg_match('/Chrome/i',$u_agent)) ? print 19:print 0); ?>) + "px";
+		//if (docWidth <= winWidth)
 		document.getElementById("hmMainTable_HeaderFirstCell").style.border = 'medium solid rgb(255, 255, 255)';
 		//document.getElementById("hmMainTable_HeaderFirstCell").style.padding = '1px';
 	}
@@ -1819,10 +1824,10 @@ $htmlContent  .= '<div id="dropmenu" class="dropmenudiv" style="width: 310px;">'
 						
 $htmlContent .= '<div align="center" style="vertical-align:top;">'
 			. '<table border="0" cellspacing="2" cellpadding="0" style="vertical-align:middle; background-color:#FFFFFF; ';
-			//if(strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') == FALSE)
-			//	$htmlContent .=' height:100%;';	///100% height causes unwanted stretching of table cell in IE but it requires specially for chrome for div scaling
+			if(strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') == FALSE)
+				$htmlContent .=' height:100%;';	///100% height causes unwanted stretching of table cell in IE but it requires specially for chrome for div scaling
 $htmlContent .='" class="display" id = "hmMainTable">'
-			. '<thead id = "hmMainTable_Header"><tr><th id="hmMainTable_HeaderFirstCell" style="background-color:#FFFFFF; '.(($Rotation_Flg == 1) ? 'width:'.$product_Col_Width.'px; max-width:'.$product_Col_Width.'px;':'').'"></th>';
+			. '<thead id = "hmMainTable_Header"><tr><th id="hmMainTable_HeaderFirstCell" style="background-color:#FFFFFF;"></th>';
 						
 foreach($columns as $col => $val)
 {
@@ -1848,10 +1853,10 @@ foreach($columns as $col => $val)
 
 if($total_fld)
 {
-	$htmlContent .= '<th style="background-color:#FFFFFF;">&nbsp;</th>';
-}
+	$htmlContent .= '<th style="background-color:#FFFFFF;" id="CatTotalCol">&nbsp;</th>';
+} 
 //width="'.$product_Col_Width.'px" currently not needed
-$htmlContent .= '</tr><tr><th '.(($Rotation_Flg == 1) ? 'height="'.$area_Col_Height.'px"':'').' class="Product_Row_Class Product_Col_WidthStyle" style="background-color:#FFFFFF; '.(($Rotation_Flg == 1) ? 'width:'.$product_Col_Width.'px; max-width:'.$product_Col_Width.'px;':'').' ">&nbsp;</th>';
+$htmlContent .= '</tr><tr><th '.(($Rotation_Flg == 1) ? 'height="'.$area_Col_Height.'px"':'').' class="Product_Row_Class Product_Col_WidthStyle" style="background-color:#FFFFFF;">&nbsp;</th>';
 
 
 foreach($columns as $col => $val)
@@ -1862,7 +1867,7 @@ foreach($columns as $col => $val)
 	$caltTitle = (isset($cdesc) && $cdesc != '')?' alt="'.$cdesc.'" title="'.$cdesc.'" ':null;
 	$cat = (isset($columnsCategoryName[$col]) && $columnsCategoryName[$col] != '')? ' ('.$columnsCategoryName[$col].') ':'';
 		
-	$htmlContent .= '<th style="'.(($Rotation_Flg == 1) ? 'vertical-align:bottom;':'vertical-align:middle;').' max-width:'.$Width_matrix[$col]['width'].'px; width:'.$Width_matrix[$col]['width'].'px; background-color:#DDF;" class="Area_Row_Class_'.$col.'" id="Cell_ID_'.$online_HMCounter.'" width="'.$Width_matrix[$col]['width'].'px" '.(($Rotation_Flg == 1) ? 'height="'.$area_Col_Height.'px" align="left"':'align="center"').' '.$caltTitle.'><div class="'.(($Rotation_Flg == 1) ? 'box_rotate Area_RowDiv_Class_'.$col.'':'break_words').'" style="background-color:#DDF;">';
+	$htmlContent .= '<th style="'.(($Rotation_Flg == 1) ? 'vertical-align:bottom;':'vertical-align:middle;').'  background-color:#DDF;" class="Area_Row_Class_'.$col.'" id="Cell_ID_'.$online_HMCounter.'" '.(($Rotation_Flg == 1) ? 'height="'.$area_Col_Height.'px" align="left"':'align="center"').' '.$caltTitle.'><div class="'.(($Rotation_Flg == 1) ? 'box_rotate Area_RowDiv_Class_'.$col.'':'break_words').'" style="background-color:#DDF;">';
 	
 	$htmlContent .= '<input type="hidden" value="area" name="Cell_Type_'.$online_HMCounter.'" id="Cell_Type_'.$online_HMCounter.'" />';
 	$htmlContent .= '<input type="hidden" value="'.$col.'" name="Cell_ColNum_'.$online_HMCounter.'" id="Cell_ColNum_'.$online_HMCounter.'" />';
@@ -1900,7 +1905,7 @@ foreach($columns as $col => $val)
 if($total_fld)
 {
 	$online_HMCounter++;
-	$htmlContent .= '<th id="Cell_ID_'.$online_HMCounter.'" '.(($Rotation_Flg == 1) ? 'height="'.$area_Col_Height.'px" align="left"':'align="center"').' width="'.$Total_Col_width.'px" style="'.(($Rotation_Flg == 1) ? 'vertical-align:bottom;':'vertical-align:middle;').' width:'.$Total_Col_width.'px; max-width:'.$Total_Col_width.'px; background-color:#DDF;" class="Total_Row_Class"><div class="box_rotate Total_RowDiv_Class">';
+	$htmlContent .= '<th id="Cell_ID_'.$online_HMCounter.'" '.(($Rotation_Flg == 1) ? 'height="'.$area_Col_Height.'px" align="left"':'align="center"').' style="'.(($Rotation_Flg == 1) ? 'vertical-align:bottom;':'vertical-align:middle;').' background-color:#DDF;" class="Total_Row_Class"><div class="box_rotate Total_RowDiv_Class">';
 	if(!empty($productIds) && !empty($areaIds))
 	{
 		$productIds = array_filter($productIds);
