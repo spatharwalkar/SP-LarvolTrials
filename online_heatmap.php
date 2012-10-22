@@ -1143,6 +1143,12 @@ function change_view()
 			
 			var cell_link_val=document.getElementById("Link_value_"+i).value;	//Check in cell has link
 			
+			var TotalZero_Flg_ele = document.getElementById("TotalZero_Flg_"+i);	//Check in cell has Zero trials
+			if(TotalZero_Flg_ele != null && TotalZero_Flg_ele != '')
+			TotalZero_Flg = 1;
+			else
+			TotalZero_Flg = 0;
+			
 			
 			if(cell_link_val != '' && cell_link_val != null)
 			{
@@ -1183,6 +1189,14 @@ function change_view()
 					}
 					
 				}	
+				
+				
+				if(TotalZero_Flg == 1)
+				{
+					document.getElementById("Cell_Link_"+i).href = '#';
+					if(font_element != null && font_element != '')
+					document.getElementById("Font_ID_"+i).innerHTML = '';
+				}
 			}
 		
 			
@@ -1306,7 +1320,7 @@ function change_view()
 				
 				var viewcount_ele = document.getElementById("ViewCount_value_"+i);
 				var maxviewcount_ele = document.getElementById("Max_ViewCount_value");
-				if(maxviewcount_ele != null && maxviewcount_ele != '')
+				if(maxviewcount_ele != null && maxviewcount_ele != '' && TotalZero_Flg != 1)
 				{
 					var maxview = maxviewcount_ele.value;
 					if(viewcount_ele != null && viewcount_ele != '')
@@ -1321,7 +1335,7 @@ function change_view()
 				}
 				
 				var New_Trials_ele = document.getElementById("New_Trials_"+i);
-				if(New_Trials_ele != '' && New_Trials_ele != null)
+				if(New_Trials_ele != '' && New_Trials_ele != null && TotalZero_Flg != 1)
 				{
 					if(ed_limit == one_month)
 					{
@@ -1335,7 +1349,7 @@ function change_view()
 				}
 				
 				var Status_Total_List_ele = document.getElementById("Status_Total_List_"+i);
-				if(Status_Total_List_ele != '' && Status_Total_List_ele != null)
+				if(Status_Total_List_ele != '' && Status_Total_List_ele != null && TotalZero_Flg != 1)
 				{
 					if(ed_limit == one_month && dwcount.value == 'total')
 					{
@@ -1349,7 +1363,7 @@ function change_view()
 				}
 				
 				var Status_Indlead_List_ele = document.getElementById("Status_Indlead_List_"+i);
-				if(Status_Indlead_List_ele != '' && Status_Indlead_List_ele != null)
+				if(Status_Indlead_List_ele != '' && Status_Indlead_List_ele != null && TotalZero_Flg != 1)
 				{
 					if(ed_limit == one_month && dwcount.value == 'indlead')
 					{
@@ -1363,7 +1377,7 @@ function change_view()
 				}
 				
 				var Status_Active_List_ele = document.getElementById("Status_Active_List_"+i);
-				if(Status_Active_List_ele != '' && Status_Active_List_ele != null)
+				if(Status_Active_List_ele != '' && Status_Active_List_ele != null && TotalZero_Flg != 1)
 				{
 					if(ed_limit == one_month && dwcount.value == 'active')
 					{
@@ -1997,7 +2011,7 @@ foreach($rows as $row => $rval)
 		$htmlContent .= '<input type="hidden" value="'.$row.'" name="Cell_RowNum_'.$online_HMCounter.'" id="Cell_RowNum_'.$online_HMCounter.'" />';
 		$htmlContent .= '<input type="hidden" value="'.$col.'" name="Cell_ColNum_'.$online_HMCounter.'" id="Cell_ColNum_'.$online_HMCounter.'" />';
 	
-		if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL && $data_matrix[$row][$col]['total'] != 0)
+		if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL)
 		{
 			
 			$htmlContent .= '<div id="Div_ID_'.$online_HMCounter.'" style="'.$data_matrix[$row][$col]['div_start_style'].' width:100%; height:100%; max-height:inherit; _height:100%;  vertical-align:middle; float:none; display:table;">';
@@ -2007,6 +2021,8 @@ foreach($rows as $row => $rval)
 			$htmlContent .= '<input type="hidden" value="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />';
 			$htmlContent .= '<input type="hidden" value="' . $productIds[$row] . '" name="Product_value_'.$online_HMCounter.'" id="Product_value_'.$online_HMCounter.'" />';
 			$htmlContent .= '<input type="hidden" value="' . $areaIds[$col]. '" name="Area_value_'.$online_HMCounter.'" id="Area_value_'.$online_HMCounter.'" />';
+			if($data_matrix[$row][$col]['total'] == 0)
+			$htmlContent .= '<input type="hidden" value="1" name="TotalZero_Flg_'.$online_HMCounter.'" id="TotalZero_Flg_'.$online_HMCounter.'" />';
 				
 			$htmlContent .= '<a onclick="INC_ViewCount(' . trim($productIds[$row]) . ',' . trim($areaIds[$col]) . ',' . $online_HMCounter .')" style="color:#000000; '.$data_matrix[$row][$col]['count_start_style'].' vertical-align:middle; padding-top:0px; padding-bottom:0px; line-height:13px; text-decoration:underline;" id="Cell_Link_'.$online_HMCounter.'" href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '&list=1&itype=0&sr=now&er=1 month&hm=' . $id . '" target="_blank" title="'. $title .'"><b><font id="Font_ID_'.$online_HMCounter.'" style="color:#000000;">'. $data_matrix[$row][$col]['indlead'] .'</font></b></a>';
 					

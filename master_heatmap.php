@@ -3209,7 +3209,7 @@ function Download_reports()
 				$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(220,220,220)));
 				$pdf->SetFillColor(245,245,245);
 				
-				if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL && $data_matrix[$row][$col]['total'] != 0)
+				if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL)
 				{
 					
 					$pdf->getCellPaddings();
@@ -3591,7 +3591,7 @@ function Download_reports()
 					else
 						$Status_Indlead_Flg=0;
 					
-					if(($Status_New_Trials_Flg==1 || $Status_Total_Flg==1 || $Status_Active_Flg || $Status_Indlead_Flg) && (date('Y-m-d H:i:s', strtotime($end_range, $now)) == date('Y-m-d H:i:s', strtotime('-1 Month', $now))))
+					if($data_matrix[$row][$col]['total'] != 0 && ($Status_New_Trials_Flg==1 || $Status_Total_Flg==1 || $Status_Active_Flg || $Status_Indlead_Flg) && (date('Y-m-d H:i:s', strtotime($end_range, $now)) == date('Y-m-d H:i:s', strtotime('-1 Month', $now))))
 					$annotation_text = $annotation_text.$annotation_text2;
 					
 					$annotation_text = strip_tags($annotation_text);	///Strip HTML tags
@@ -3622,6 +3622,7 @@ function Download_reports()
 					
 					$Ex_L = ($Av_L - $Aq_L)/2;
 					
+					if($data_matrix[$row][$col]['total'] != 0)
 					$pdfContent .= '<a href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. $link_part . '" target="_blank" title="'. $title .'" ><font style="color:#000000;" >'.$count_val.'</font></a>';
 					
 					if($data_matrix[$row][$col]['bomb']['value'] == 'small' || $data_matrix[$row][$col]['bomb']['value'] == 'large')
@@ -3730,14 +3731,6 @@ function Download_reports()
 						$data_matrix[$row][$col]['bordercolor_code']='#FFFFFF';
 						$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255,255,255)));
 						//$pdf->SetFillColor(255,255,255);
-					}
-					
-					if(($data_matrix[$row][$col]['total'] == 0))
-					{ 
-						$data_matrix[$row][$col]['color_code']='f5f5f5'; 
-						$pdf->SetFillColor(245,245,245);
-						$data_matrix[$row][$col]['bordercolor_code']='blue'; 
-						$border = array('mode' => 'int', 'LTRB' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(245,245,245)));
 					}
 					
 					if($data_matrix[$row][$col]['update_flag'] == 1)
@@ -4079,7 +4072,7 @@ function Download_reports()
 			foreach($columns as $col => $cval)
 			{
 				$cell = num2char($col) . ($Excel_HMCounter);
-				if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL  && $data_matrix[$row][$col]['total'] != 0)
+				if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL)
 				{
 					if($mode=='active')
 					{
@@ -4110,8 +4103,11 @@ function Download_reports()
 					$red_font['font']['color']['rgb'] = '000000';
 					$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($red_font);
 					
-					
+					if($data_matrix[$row][$col]['total'] != 0)	///In case of zero trials dont disply count
 					$objPHPExcel->getActiveSheet()->setCellValue($cell, $count_val);
+					
+					//we require to set hyperlink to to zero trials cell as well cause without hyperlink we cant display mouseover text 
+					// and it will give excel error
 					$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col].$link_part); 
  			    	$annotation_text = '';
 					if($data_matrix[$row][$col]['bomb_explain'] != NULL && trim($data_matrix[$row][$col]['bomb_explain']) != '' && ($data_matrix[$row][$col]['bomb']['value'] == 'small' || $data_matrix[$row][$col]['bomb']['value'] == 'large')) 
@@ -4465,17 +4461,20 @@ function Download_reports()
 					else
 						$Status_Indlead_Flg=0;
 					
-					if(($Status_New_Trials_Flg==1 || $Status_Total_Flg==1 || $Status_Active_Flg || $Status_Indlead_Flg) && (date('Y-m-d H:i:s', strtotime($end_range, $now)) == date('Y-m-d H:i:s', strtotime('-1 Month', $now))))
+					if($data_matrix[$row][$col]['total'] != 0 && ($Status_New_Trials_Flg==1 || $Status_Total_Flg==1 || $Status_Active_Flg || $Status_Indlead_Flg) && (date('Y-m-d H:i:s', strtotime($end_range, $now)) == date('Y-m-d H:i:s', strtotime('-1 Month', $now))))
 					$annotation_text = $annotation_text.$annotation_text2;
 					
 					$annotation_text = strip_tags($annotation_text);	///Strip HTML tags
 					
 					$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip(substr($annotation_text,0,255) );
-					
+					$bomb_PR = 0;
 					if($data_matrix[$row][$col]['exec_bomb']['src'] != '' && $data_matrix[$row][$col]['exec_bomb']['src'] != NULL && $data_matrix[$row][$col]['exec_bomb']['src'] !='new_square.png')
 					{
 						$objDrawing = new PHPExcel_Worksheet_Drawing();
 						$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
+						if($data_matrix[$row][$col]['total'] == 0)
+						$objDrawing->setOffsetX(60);
+						else
 						$objDrawing->setOffsetX(80);
 						$objDrawing->setOffsetY(1);
 						$objDrawing->setPath('images/'.$data_matrix[$row][$col]['exec_bomb']['src'].'_'.$data_matrix[$row][$col]['color_code'].'.png');
@@ -4483,13 +4482,22 @@ function Download_reports()
 						$objDrawing->setWidth(12); 
 						$objDrawing->setDescription($data_matrix[$row][$col]['bomb']['title']);
 						$objDrawing->setCoordinates($cell);
+						$bomb_PR = 1;
 					}
 					
 					if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
 					{
+						if($bomb_PR)
+						{
+							if($data_matrix[$row][$col]['total'] == 0) $ptr_x = 80; else $ptr_x = 100;
+						}
+						else
+						{
+							if($data_matrix[$row][$col]['total'] == 0) $ptr_x = 60; else $ptr_x = 80;
+						}
 						$objDrawing = new PHPExcel_Worksheet_Drawing();
 						$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
-						$objDrawing->setOffsetX(100);
+						$objDrawing->setOffsetX($ptr_x);
 						$objDrawing->setOffsetY(1);
 						$objDrawing->setPath($data_matrix[$row][$col]['exec_filing_image'].'_'.$data_matrix[$row][$col]['color_code'].'.png');
 						$objDrawing->setHeight(12);
