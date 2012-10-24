@@ -1524,7 +1524,7 @@ function am($k,$v)
 {
 	if($k=='corresponding_trial')
 	{
-		$v = unpadnct($v);
+//		$v = unpadnct($v);
 	}		
 	$explicitNullFields = array('corresponding_trial','event_link','result_link','start_date','end_date','oldproduct', 'product', 'area');
 	if(in_array($k,$explicitNullFields) && $v=='')
@@ -1539,7 +1539,7 @@ function am1($k,$v)
 	$explicitNullFields = array('corresponding_trial','event_link','result_link','start_date','end_date','oldproduct','product','area','searchdata');
 	if($k=='corresponding_trial')
 	{
-		$v = unpadnct($v);
+//		$v = unpadnct($v);
 	}		
 	if(in_array($k,$explicitNullFields) && $v=='')
 	{
@@ -1560,7 +1560,7 @@ function validateImport($k,$v)
 {
 	if($k=='corresponding_trial')
 	{
-		$v = unpadnct($v);
+//		$v = unpadnct($v);
 	}	
 	$explicitNullFields = array('corresponding_trial','event_link','result_link','start_date','end_date');
 	if(in_array($k,$explicitNullFields) && !is_numeric($v))

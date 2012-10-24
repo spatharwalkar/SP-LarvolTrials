@@ -253,7 +253,7 @@ CREATE TABLE IF NOT EXISTS `upm` (
   `event_description` text COLLATE utf8_unicode_ci NOT NULL,
   `event_link` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `result_link` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `corresponding_trial` int(10) unsigned DEFAULT NULL,
+  `corresponding_trial` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `start_date` date DEFAULT NULL,
   `start_date_type` enum('anticipated','actual') COLLATE utf8_unicode_ci NOT NULL,
   `end_date` date DEFAULT NULL,

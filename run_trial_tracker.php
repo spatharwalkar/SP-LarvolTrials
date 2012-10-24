@@ -8406,6 +8406,7 @@ class TrialTracker
 			//Added to consolidate the data returned in an mutidimensional array format as opposed to earlier 
 			//when it was not returned in an mutidimensional array format.
 			$indx = 0;
+			
 			foreach($Array as $akey => $avalue) 
 			{
 				if(!isset($avalue['NCT/enrollment']) || $avalue['NCT/enrollment'] > 1000000)
@@ -8440,12 +8441,11 @@ class TrialTracker
 				}
 				++$indx;
 			}
-			
 			//Process to check for changes/updates in trials, matched & unmatched upms.
 			foreach($Array2 as $rkey => $rvalue) 
 			{ 
 				$nctId = $rvalue['NCT/nct_id'];
-				
+				$nctIdForUPM = $dataRow['source_id'];
 				$dataset['trials'] = array();
 				$dataset['matchedupms'] = array();
 				
@@ -8454,7 +8454,7 @@ class TrialTracker
 				$dataset['trials'] = array_merge($dataset['trials'], array('section' => $pkey));
 				
 				//checking for updated and new unmatched upms.
-				$dataset['matchedupms'] = $this->getMatchedUPMs($nctId, $timeMachine, $timeInterval);
+				$dataset['matchedupms'] = $this->getMatchedUPMs($nctIdForUPM, $timeMachine, $timeInterval);
 				$Values['Trials'][$pkey]['allTrialsforDownload'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
 				
 				if($globalOptions['onlyUpdates'] == "yes")
@@ -9587,6 +9587,8 @@ class TrialTracker
 		$noPreviousValue = 'No previous value';	
 		if(substr($dataRow['source_id'],0,3)=="NCT") $nctId = unpadnct(substr($dataRow['source_id'],0,11));
 		else $nctId = $dataRow['source_id'];
+		if(substr($dataRow['source_id'],0,3)=="NCT") $nctIdForUPM = substr($dataRow['source_id'],0,11); 
+		else $nctIdForUPM = $dataRow['source_id'];
 		$result['larvol_id'] 			= $dataRow['larvol_id'];
 		$result['inactive_date'] 		= $dataRow['end_date'];
 		$result['region'] 				= $dataRow['region'];
@@ -9594,10 +9596,12 @@ class TrialTracker
 		if(strlen(trim($dataRow['source_id'])) > 15)
 		{
 			$result['NCT/full_id'] 			= $dataRow['source_id'];
+			$result['NCT/id_for_upm'] 			= $dataRow['source_id'];
 		}
 		else
 		{
 			$result['NCT/full_id'] 			= $nctId;
+			$result['NCT/id_for_upm'] 			= $dataRow['source_id'];
 		}
 		$result['NCT/brief_title'] 		= stripslashes($dataRow['brief_title']);
 		$result['NCT/enrollment_type'] 	= $dataRow['enrollment_type'];
@@ -9823,7 +9827,7 @@ class TrialTracker
 			}
 		}
 		//echo '<pre>';print_r($result);
-		$matchedUpms = $this->getMatchedUPMs($nctId, $timeMachine, $timeInterval);
+		$matchedUpms = $this->getMatchedUPMs($nctIdForUPM, $timeMachine, $timeInterval);
 		
 		$result = array_merge($result, $matchedUpms);
 		return $result;
