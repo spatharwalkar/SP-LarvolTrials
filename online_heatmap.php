@@ -1746,10 +1746,12 @@ function refresh_data(cell_id)
 									if(cell_type2.value.replace(/\s+/g, '') == 'area' && cell_col2.value.replace(/\s+/g, '') == cell_col.value.replace(/\s+/g, ''))
 									{
 										cell_exist2.style.width = (cell_exist.offsetWidth) + "px";
-										<?php $u_agent = $_SERVER['HTTP_USER_AGENT']; if(!preg_match('/Chrome/i',$u_agent)) { ?>
-										cell_exist2.style.border = 'medium solid rgb(221, 221, 255)';
-										//cell_exist2.style.padding = '1px';
-										<?php } // chrome does not need borders to be specified but other browsers need it ?>
+										$.browser.chrome = /chrome/.test(navigator.userAgent.toLowerCase()); 
+										if(!$.browser.chrome)
+										{
+											cell_exist2.style.border = 'medium solid rgb(221, 221, 255)';
+											//cell_exist2.style.padding = '1px';
+										} // chrome does not need borders to be specified but other browsers need it ?>
 									}
 								}
 							}
@@ -1763,7 +1765,25 @@ function refresh_data(cell_id)
 			}
 		}
 		//Set product column
-		document.getElementById("hmMainTable_HeaderFirstCell").style.width = (document.getElementById("Cell_ID_"+first).offsetWidth - <?php ((!preg_match('/Chrome/i',$u_agent)) ? print 19:print 0); ?>) + "px";
+		var adjuster = 0;
+		$.browser.chrome = /chrome/.test(navigator.userAgent.toLowerCase()); 
+		<?php
+		if( ( (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE) || !isset($_SERVER['HTTP_REFERER']) ) && ( !isset($_REQUEST['LI']) || $_REQUEST['LI'] != 1) )
+{
+		$u_agent = $_SERVER['HTTP_USER_AGENT']; if(!preg_match('/Chrome/i',$u_agent)) {
+		?>
+		var adjuster = -18;
+		<?php } } else { ?>
+		if($('#hmMainTable').outerWidth() > $(window).width())
+		{
+			if(!$.browser.chrome){var adjuster = -13;};	//Chrome correctly adjustes width no need for chrome
+		}
+		else
+		{
+			if(!$.browser.chrome){var adjuster = -18;};
+		}
+		<?php } ?>
+		document.getElementById("hmMainTable_HeaderFirstCell").style.width = (document.getElementById("Cell_ID_"+first).offsetWidth + adjuster) + "px";
 		//if (docWidth <= winWidth)
 		document.getElementById("hmMainTable_HeaderFirstCell").style.border = 'medium solid rgb(255, 255, 255)';
 		//document.getElementById("hmMainTable_HeaderFirstCell").style.padding = '1px';
@@ -1870,7 +1890,7 @@ if($total_fld)
 	$htmlContent .= '<th style="background-color:#FFFFFF;" id="CatTotalCol">&nbsp;</th>';
 } 
 //width="'.$product_Col_Width.'px" currently not needed
-$htmlContent .= '</tr><tr><th '.(($Rotation_Flg == 1) ? 'height="'.$area_Col_Height.'px"':'').' class="Product_Row_Class Product_Col_WidthStyle" style="background-color:#FFFFFF;">&nbsp;</th>';
+$htmlContent .= '</tr><tr><th '.(($Rotation_Flg == 1) ? 'height="'.$area_Col_Height.'px"':'').' class="Product_Row_Class" style="background-color:#FFFFFF;">&nbsp;</th>';
 
 
 foreach($columns as $col => $val)
@@ -1969,7 +1989,7 @@ foreach($rows as $row => $rval)
 	
 	
 	
-	$htmlContent .='<th class="product_col break_words" style="padding-left:4px; vertical-align:middle; '.(($Rotation_Flg == 1) ? 'width:'.$product_Col_Width.'px; max-width:'.$product_Col_Width.'px;':'').'" id="Cell_ID_'.$online_HMCounter.'" '.$raltTitle.'><div align="left" style="vertical-align:middle;">';
+	$htmlContent .='<th class="product_col break_words Product_Col_WidthStyle" style="padding-left:4px; vertical-align:middle; '.(($Rotation_Flg == 1) ? 'width:'.$product_Col_Width.'px; max-width:'.$product_Col_Width.'px;':'').'" id="Cell_ID_'.$online_HMCounter.'" '.$raltTitle.'><div align="left" style="vertical-align:middle;">';
 			
 	$htmlContent .= '<input type="hidden" value="product" name="Cell_Type_'.$online_HMCounter.'" id="Cell_Type_'.$online_HMCounter.'" />';
 	$htmlContent .= '<input type="hidden" value="'.$row.'" name="Cell_RowNum_'.$online_HMCounter.'" id="Cell_RowNum_'.$online_HMCounter.'" />';
