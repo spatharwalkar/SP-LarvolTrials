@@ -316,31 +316,31 @@ class TrialTracker
 				{
 					if(isset($dvalue['manual_is_sourceless']))
 					{
-						$ctLink = urlencode($dvalue['source']);
+						$ctLink = $dvalue['source'];
 					}
 					else if(isset($dvalue['source_id']) && strpos($dvalue['source_id'], 'NCT') === FALSE)
 					{	
 						$nctIdText = unpadnct($nctId);
-						$ctLink = urlencode('https://www.clinicaltrialsregister.eu/ctr-search/search?query=' . $nctId);
+						$ctLink = 'https://www.clinicaltrialsregister.eu/ctr-search/search?query=' . $nctId;
 					}
 					else if(isset($dvalue['source_id']) && strpos($dvalue['source_id'], 'NCT') !== FALSE)
 					{
-						$ctLink = urlencode('http://clinicaltrials.gov/ct2/show/' . padnct($nctId));
+						$ctLink = 'http://clinicaltrials.gov/ct2/show/' . padnct($nctId);
 					}
 					else 
 					{ 
-						$ctLink = urlencode('javascript:void(0)');
+						$ctLink = 'javascript:void(0)';
 					}
 				}
 				else
 				{
 					if($dvalue['NCT/nct_id'] !== '' && $dvalue['NCT/nct_id'] !== NULL)
 					{
-						$ctLink = urlencode('http://clinicaltrials.gov/ct2/show/' . padnct($nctId));
+						$ctLink = 'http://clinicaltrials.gov/ct2/show/' . padnct($nctId);
 					}
 					else 
 					{ 
-						$ctLink = urlencode('javascript:void(0)');
+						$ctLink = 'javascript:void(0)';
 					}
 				}
 				
@@ -414,13 +414,14 @@ class TrialTracker
 				{
 					if(!empty($dvalue['edited']) && array_key_exists('NCT/brief_title', $dvalue['edited']))
 					{
-						 $objPHPExcel->getActiveSheet()->getStyle('B' . $i)->applyFromArray($highlightChange);
-						 $objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/brief_title'],0,255));  //We can display only 255 character as tooltip in Excel
+						$dvalue['edited']['NCT/brief_title'] = substr($dvalue['edited']['NCT/brief_title'], 0, 255);
+						$objPHPExcel->getActiveSheet()->getStyle('B' . $i)->applyFromArray($highlightChange);
+						$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/brief_title']);
 					}
 					else if($dvalue['new'] == 'y')
 					{
-						 $objPHPExcel->getActiveSheet()->getStyle('B' . $i)->applyFromArray($highlightChange); 
-						 $objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('New record'); 
+						$objPHPExcel->getActiveSheet()->getStyle('B' . $i)->applyFromArray($highlightChange); 
+						$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('New record'); 
 					}
 					elseif(isset($dvalue['manual_brief_title']))
 					{
@@ -431,7 +432,8 @@ class TrialTracker
 						}
 						else
 						{
-							$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_brief_title']);
+							$dvalue['original_brief_title'] = 'Manual curation. Original value: ' . substr($dvalue['original_brief_title'], 0, 210);
+							$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip($dvalue['original_brief_title']);
 						}
 					}
 					else
@@ -450,13 +452,15 @@ class TrialTracker
 						}
 						else
 						{
-							$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_brief_title']);
+							$dvalue['original_brief_title'] = 'Manual curation. Original value: ' . substr($dvalue['original_brief_title'], 0, 210);
+							$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip($dvalue['original_brief_title']);
 						}
 					}
 					else if(!empty($dvalue['edited']) && array_key_exists('NCT/brief_title', $dvalue['edited']))
 					{
-						 $objPHPExcel->getActiveSheet()->getStyle('B' . $i)->applyFromArray($highlightChange);
-						 $objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/brief_title'],0,255));  //We can display only 255 character as tooltip in Excel
+						$dvalue['edited']['NCT/brief_title'] = substr($dvalue['edited']['NCT/brief_title'], 0, 255);
+						$objPHPExcel->getActiveSheet()->getStyle('B' . $i)->applyFromArray($highlightChange);
+						$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/brief_title']);
 					}
 					else if($dvalue['new'] == 'y')
 					{
@@ -476,9 +480,10 @@ class TrialTracker
 				{
 					if(!empty($dvalue['edited']) && array_key_exists('NCT/enrollment', $dvalue['edited']))
 					{
-						 $objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($highlightChange);
-						 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl($ctLink);
-						 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/enrollment'],0,255)); 
+						$dvalue['edited']['NCT/enrollment'] = substr($dvalue['edited']['NCT/enrollment'], 0, 255);
+						$objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($highlightChange);
+						$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl($ctLink);
+						$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/enrollment']); 
 					}
 					else if($dvalue['new'] == 'y')
 					{
@@ -496,7 +501,8 @@ class TrialTracker
 						}
 						else
 						{
-							$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_enrollment']);
+							$dvalue['original_enrollment'] = 'Manual curation. Original value: ' . substr($dvalue['original_enrollment'], 0, 210);
+							$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip($dvalue['original_enrollment']);
 						}
 					}
 				}
@@ -512,20 +518,22 @@ class TrialTracker
 						}
 						else
 						{
-							$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_enrollment']);
+							$dvalue['original_enrollment'] = 'Manual curation. Original value: ' . substr($dvalue['original_enrollment'], 0, 210);
+							$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip($dvalue['original_enrollment']);
 						}
 					}
 					elseif(!empty($dvalue['edited']) && array_key_exists('NCT/enrollment', $dvalue['edited']))
 					{
-						 $objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($highlightChange);
-						 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl($ctLink);
-						 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/enrollment'],0,255)); 
+						$dvalue['edited']['NCT/enrollment'] = substr($dvalue['edited']['NCT/enrollment'], 0, 255);
+						$objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($highlightChange);
+						$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl($ctLink);
+						$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/enrollment']); 
 					}
 					else if($dvalue['new'] == 'y')
 					{
-						 $objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($highlightChange);
-						 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl($ctLink);
-						 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip('New record'); 
+						$objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($highlightChange);
+						$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl($ctLink);
+						$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip('New record'); 
 					}
 				}
 				if($dvalue["NCT/enrollment_type"] != '') 
@@ -587,9 +595,10 @@ class TrialTracker
 				{
 					if(!empty($dvalue['edited']) && array_key_exists('NCT/overall_status', $dvalue['edited']))
 					{
-						 $objPHPExcel->getActiveSheet()->getStyle('E' . $i)->applyFromArray($highlightChange);
-						 $objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setUrl($ctLink);
-						 $objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/overall_status'],0,255)); 
+						$dvalue['edited']['NCT/overall_status'] = substr($dvalue['edited']['NCT/overall_status'], 0, 255);
+						$objPHPExcel->getActiveSheet()->getStyle('E' . $i)->applyFromArray($highlightChange);
+						$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setUrl($ctLink);
+						$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/overall_status']); 
 					}
 					else if($dvalue['new'] == 'y')
 					{
@@ -607,7 +616,8 @@ class TrialTracker
 						}
 						else
 						{	
-							$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_overall_status']); 
+							$dvalue['original_overall_status'] = 'Manual curation. Original value: ' . substr($dvalue['original_overall_status'], 0, 210);
+							$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip($dvalue['original_overall_status']); 
 						}
 					}
 				}
@@ -623,14 +633,16 @@ class TrialTracker
 						}
 						else
 						{
-							$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_overall_status']); 
+							$dvalue['original_overall_status'] = 'Manual curation. Original value: ' . substr($dvalue['original_overall_status'], 0, 210);
+							$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip($dvalue['original_overall_status']); 
 						}
 					}
 					else if(!empty($dvalue['edited']) && array_key_exists('NCT/overall_status', $dvalue['edited']))
 					{
-						 $objPHPExcel->getActiveSheet()->getStyle('E' . $i)->applyFromArray($highlightChange);
-						 $objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setUrl($ctLink);
-						 $objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/overall_status'],0,255)); 
+						$dvalue['edited']['NCT/overall_status'] = substr($dvalue['edited']['NCT/overall_status'], 0, 255);
+						$objPHPExcel->getActiveSheet()->getStyle('E' . $i)->applyFromArray($highlightChange);
+						$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setUrl($ctLink);
+						$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/overall_status']); 
 					}
 					else if($dvalue['new'] == 'y')
 					{
@@ -668,9 +680,10 @@ class TrialTracker
 						{
 							$value .= $dvalue['edited']['NCT/collaborator'];
 						}
+						$value = substr($value, 0, 255);
 						$objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray($highlightChange);
 						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl($ctLink);
-						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip(substr($value,0,255)); 
+						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip($value); 
 					}
 					else if($dvalue['new'] == 'y')
 					{
@@ -690,7 +703,8 @@ class TrialTracker
 							}
 							else
 							{	
-								$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_lead_sponsor']); 
+								$dvalue['original_lead_sponsor'] = 'Manual curation. Original value: ' . substr($dvalue['original_lead_sponsor'], 0, 210);
+								$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip($dvalue['original_lead_sponsor']); 
 							}
 						}
 						else
@@ -701,6 +715,7 @@ class TrialTracker
 							}
 							else
 							{	
+								$dvalue['original_collaborator'] = 'Manual curation. Original value: ' . substr($dvalue['original_collaborator'], 0, 210);
 								$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_collaborator']); 
 							}
 						}
@@ -720,6 +735,7 @@ class TrialTracker
 							}
 							else
 							{	
+								$dvalue['original_lead_sponsor'] = 'Manual curation. Original value: ' . substr($dvalue['original_lead_sponsor'], 0, 210);
 								$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_lead_sponsor']); 
 							}
 						}
@@ -731,6 +747,7 @@ class TrialTracker
 							}
 							else
 							{	
+								$dvalue['original_collaborator'] = 'Manual curation. Original value: ' . substr($dvalue['original_collaborator'], 0, 210);
 								$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_collaborator']); 
 							}
 						}
@@ -750,9 +767,10 @@ class TrialTracker
 						{
 							$value .= $dvalue['edited']['NCT/collaborator'];
 						}
+						$value = substr($value, 0, 255);
 						$objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray($highlightChange);
 						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl($ctLink);
-						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip(substr($value,0,255)); 
+						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip($value); 
 					}
 					else if($dvalue['new'] == 'y')
 					{
@@ -770,9 +788,10 @@ class TrialTracker
 				{
 					if(!empty($dvalue['edited']) && array_key_exists('NCT/condition', $dvalue['edited']))
 					{
-						 $objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($highlightChange);
-						 $objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($ctLink);
-						 $objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/condition'],0,255)); 
+						$dvalue['edited']['NCT/condition'] = substr($dvalue['edited']['NCT/condition'], 0, 250);
+						$objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($highlightChange);
+						$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($ctLink);
+						$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/condition']); 
 					}
 					else if($dvalue['new'] == 'y')
 					{
@@ -790,7 +809,8 @@ class TrialTracker
 						}
 						else
 						{	
-							$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_condition']); 
+							$dvalue['original_condition'] = 'Manual curation. Original value: ' . substr($dvalue['original_condition'], 0, 210);
+							$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip($dvalue['original_condition']); 
 						}
 					}
 				}
@@ -806,14 +826,16 @@ class TrialTracker
 						}
 						else
 						{	
-							$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_condition']); 
+							$dvalue['original_condition'] = 'Manual curation. Original value: ' . substr($dvalue['original_condition'], 0, 210);
+							$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip($dvalue['original_condition']); 
 						}
 					}
 					elseif(!empty($dvalue['edited']) && array_key_exists('NCT/condition', $dvalue['edited']))
 					{
-						 $objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($highlightChange);
-						 $objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($ctLink);
-						 $objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/condition'],0,255)); 
+						$dvalue['edited']['NCT/condition'] = substr($dvalue['edited']['NCT/condition'], 0, 250);
+						$objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($highlightChange);
+						$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($ctLink);
+						$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/condition']); 
 					}
 					else if($dvalue['new'] == 'y')
 					{
@@ -831,9 +853,10 @@ class TrialTracker
 				{
 					if(!empty($dvalue['edited']) && array_key_exists('NCT/intervention_name', $dvalue['edited']))
 					{
-						 $objPHPExcel->getActiveSheet()->getStyle('H' . $i)->applyFromArray($highlightChange);
-						 $objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($ctLink);
-						 $objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/intervention_name'],0,255)); 
+						$dvalue['edited']['NCT/intervention_name'] = substr($dvalue['edited']['NCT/intervention_name'], 0, 255);
+						$objPHPExcel->getActiveSheet()->getStyle('H' . $i)->applyFromArray($highlightChange);
+						$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($ctLink);
+						$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/intervention_name']); 
 					}
 					else if($dvalue['new'] == 'y')
 					{
@@ -851,7 +874,8 @@ class TrialTracker
 						}
 						else
 						{	
-							$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_intervention_name']); 
+							$dvalue['original_intervention_name'] = 'Manual curation. Original value: ' . substr($dvalue['original_intervention_name'], 0, 210);
+							$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip($dvalue['original_intervention_name']); 
 						}
 					}
 				}
@@ -867,14 +891,16 @@ class TrialTracker
 						}
 						else
 						{	
-							$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_intervention_name']); 
+							$dvalue['original_intervention_name'] = 'Manual curation. Original value: ' . substr($dvalue['original_intervention_name'], 0, 210);
+							$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip($dvalue['original_intervention_name']); 
 						}
 					}
 					elseif(!empty($dvalue['edited']) && array_key_exists('NCT/intervention_name', $dvalue['edited']))
 					{
-						 $objPHPExcel->getActiveSheet()->getStyle('H' . $i)->applyFromArray($highlightChange);
-						 $objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($ctLink);
-						 $objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/intervention_name'],0,255)); 
+						$dvalue['edited']['NCT/intervention_name'] = substr($dvalue['edited']['NCT/intervention_name'], 0, 255);
+						$objPHPExcel->getActiveSheet()->getStyle('H' . $i)->applyFromArray($highlightChange);
+						$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($ctLink);
+						$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/intervention_name']); 
 					}
 					else if($dvalue['new'] == 'y')
 					{
@@ -917,7 +943,8 @@ class TrialTracker
 						}
 						else
 						{
-							$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_start_date']); 
+							$dvalue['original_start_date'] = 'Manual curation. Original value: ' . $dvalue['original_start_date'];
+							$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip($dvalue['original_start_date']); 
 						}
 					}
 				}
@@ -933,7 +960,8 @@ class TrialTracker
 						}
 						else
 						{
-							$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_start_date']); 
+							$dvalue['original_start_date'] = 'Manual curation. Original value: ' . $dvalue['original_start_date'];
+							$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip($dvalue['original_start_date']); 
 						}
 					}
 					elseif(!empty($dvalue['edited']) && array_key_exists('NCT/start_date', $dvalue['edited']))
@@ -965,7 +993,7 @@ class TrialTracker
 					{
 						 $objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($highlightChange);
 						 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink);
-						 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['inactive_date'],0,255)); 
+						 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($dvalue['edited']['inactive_date']); 
 					}
 					else if($dvalue['new'] == 'y')
 					{
@@ -983,7 +1011,8 @@ class TrialTracker
 						}
 						else
 						{
-							$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_end_date']); 
+							$dvalue['original_end_date'] = 'Manual curation. Original value: ' . $dvalue['original_end_date'];
+							$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($dvalue['original_end_date']); 
 						}
 					}
 				}
@@ -999,14 +1028,15 @@ class TrialTracker
 						}
 						else
 						{
-							$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_end_date']); 
+							$dvalue['original_end_date'] = 'Manual curation. Original value: ' . $dvalue['original_end_date'];
+							$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($dvalue['original_end_date']); 
 						}
 					}
 					elseif(!empty($dvalue['edited']) && array_key_exists('inactive_date', $dvalue['edited']))
 					{
 						 $objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($highlightChange);
 						 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink);
-						 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['inactive_date'],0,255)); 
+						 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($dvalue['edited']['inactive_date']); 
 					}
 					else if($dvalue['new'] == 'y')
 					{
@@ -1036,7 +1066,7 @@ class TrialTracker
 					{
 						 $objPHPExcel->getActiveSheet()->getStyle('K' . $i)->applyFromArray($highlightChange);
 						 $objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setUrl($ctLink);
-						 $objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/phase'],0,255)); 
+						 $objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/phase']); 
 					}
 					else if($dvalue['new'] == 'y')
 					{
@@ -1054,7 +1084,8 @@ class TrialTracker
 						}
 						else
 						{
-							$objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_phase']); 
+							$dvalue['original_phase'] = 'Manual curation. Original value: ' . $dvalue['original_phase'];
+							$objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip($dvalue['original_phase']); 
 						}
 					}
 				}
@@ -1070,14 +1101,15 @@ class TrialTracker
 						}
 						else
 						{
-							$objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_phase']); 
+							$dvalue['original_phase'] = 'Manual curation. Original value: ' . $dvalue['original_phase'];
+							$objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip($dvalue['original_phase']); 
 						}
 					}
 					elseif(!empty($dvalue['edited']) && array_key_exists('NCT/phase', $dvalue['edited']))
 					{
 						 $objPHPExcel->getActiveSheet()->getStyle('K' . $i)->applyFromArray($highlightChange);
 						 $objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setUrl($ctLink);
-						 $objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip(substr($dvalue['edited']['NCT/phase'],0,255)); 
+						 $objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/phase']); 
 					}
 					else if($dvalue['new'] == 'y')
 					{
@@ -1162,7 +1194,7 @@ class TrialTracker
 								$objDrawing->setPath('images/' . $imgColor . '-checkmark.png');
 							}
 							$objDrawing->setCoordinates('L' . $i);
-							$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl(urlencode($mvalue['result_link']));
+							$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl($mvalue['result_link']);
 							$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setTooltip(substr($upmTitle,0,255));
 							
 						}
@@ -1176,7 +1208,7 @@ class TrialTracker
 							$objDrawing->setCoordinates('L' . $i);
 							if($mvalue['event_link'] != '' && $mvalue['event_link'] !== NULL)
 							{
-								$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl(urlencode($mvalue['event_link']));
+								$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl($mvalue['event_link']);
 								$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setTooltip(substr($upmTitle,0,255));
 							}
 						}
@@ -1282,8 +1314,8 @@ class TrialTracker
 			$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':AX' . $i . '')->applyFromArray($styleThinBlueBorderOutline);
 			$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':AX' . $i . '')->getFont()->setSize(10);
 			
-			$eventLink = urlencode(trim($uvalue['event_link']));
-			$resultLink = urlencode(trim($uvalue['result_link']));
+			$eventLink = trim($uvalue['event_link']);
+			$resultLink = trim($uvalue['result_link']);
 			
 			//upm id
 			$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $uvalue["id"]);
@@ -1325,7 +1357,8 @@ class TrialTracker
 				{
 					if($uvalue['edited']['event_description'] != '' && $uvalue['edited']['event_description'] !== NULL)
 					{
-						$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip(substr('Previous value: ' . $uvalue['edited']['event_description'],0,255)); 
+						$uvalue['edited']['event_description'] = 'Previous value: ' . substr($uvalue['edited']['event_description'], 0, 230);
+						$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip($uvalue['edited']['event_description']); 
 					}
 					else
 					{
@@ -1340,7 +1373,8 @@ class TrialTracker
 				{
 					if($uvalue['edited']['event_link'] != '' && $uvalue['edited']['event_link'] !== NULL)
 					{
-						$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip(substr('Previous value: ' . $uvalue['edited']['event_link'],0,255)); 
+						$uvalue['edited']['event_link'] = 'Previous value: ' . substr($uvalue['edited']['event_link'], 0, 230);
+						$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip($uvalue['edited']['event_link']); 
 					}
 					else
 					{
@@ -1382,7 +1416,8 @@ class TrialTracker
 					$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setUrl($eventLink);
 					if($uvalue['edited']['event_type'] != '' && $uvalue['edited']['event_type'] !== NULL)
 					{
-						$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip(substr('Previous value: '.$uvalue['edited']['event_type'],0,255));
+						$uvalue['edited']['event_type'] = 'Previous value: ' . substr($uvalue['edited']['event_type'], 0, 230);
+						$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip($uvalue['edited']['event_type']);
 					}
 					else
 					{
@@ -1411,7 +1446,8 @@ class TrialTracker
 					$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl($eventLink);
 					if($uvalue['edited']['start_date'] != '' && $uvalue['edited']['start_date'] !== NULL)
 					{
-						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip(substr('Previous value: ' . $uvalue['edited']['start_date'],0,255)); 
+						$uvalue['edited']['start_date'] = 'Previous value: ' . $uvalue['edited']['start_date'];
+						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip($uvalue['edited']['start_date']); 
 					}
 					else
 					{
@@ -1427,7 +1463,8 @@ class TrialTracker
 					$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl($eventLink);
 					if($uvalue['edited']['start_date_type'] != '' && $uvalue['edited']['start_date_type'] !== NULL)
 					{
-						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip(substr('Previous value: ' . $uvalue['edited']['start_date_type'],0,255)); 
+						$uvalue['edited']['start_date_type'] = 'Previous value: ' . $uvalue['edited']['start_date_type'];
+						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip($uvalue['edited']['start_date_type']); 
 					}
 					else
 					{
@@ -1456,7 +1493,8 @@ class TrialTracker
 					$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($eventLink);
 					if($uvalue['edited']['end_date'] != '' && $uvalue['edited']['end_date'] !== NULL)
 					{
-						$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip(substr('Previous value: ' . $uvalue['edited']['end_date'],0,255)); 
+						$uvalue['edited']['end_date'] = 'Previous value: ' . $uvalue['edited']['end_date'];
+						$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip($uvalue['edited']['end_date']); 
 					}
 					else
 					{
@@ -1472,7 +1510,8 @@ class TrialTracker
 					$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($eventLink);
 					if($uvalue['edited']['end_date_type'] != '' && $uvalue['edited']['end_date_type'] !== NULL)
 					{
-						$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip(substr('Previous value: ' . $uvalue['edited']['end_date_type'],0,255)); 
+						$uvalue['edited']['end_date_type'] = 'Previous value: ' . $uvalue['edited']['end_date_type'];
+						$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip($uvalue['edited']['end_date_type']); 
 					}
 					else
 					{
@@ -1516,9 +1555,10 @@ class TrialTracker
 				{
 					$objDrawing->setPath('images/' . $imgColor . '-checkmark.png');
 				}
+				$uvalue['event_description'] = substr($uvalue['event_description'], 0, 255);
 				$objDrawing->setCoordinates('H' . $i);
 				$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($resultLink);
-				$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip(substr($uvalue['event_description'],0,255));
+				$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip($uvalue['event_description']);
 			}
 			elseif($uvalue['status'] == 'Pending')
 			{
@@ -1530,8 +1570,9 @@ class TrialTracker
 				$objDrawing->setCoordinates('H' . $i);
 				if($eventLink != '' && $eventLink !== NULL)
 				{
+					$uvalue['event_description'] = substr($uvalue['event_description'], 0, 255);
 					$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($eventLink);
-					$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip(substr($uvalue['event_description'],0,255));
+					$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip($uvalue['event_description']);
 				}
 			}
 			
@@ -1592,7 +1633,7 @@ class TrialTracker
 		header("Cache-Control: no-cache, must-revalidate, post-check=0, pre-check=0");
 		header("Content-Type: application/force-download");
 		header("Content-Type: application/download");
-		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset=UTF-8');
 		header('Content-Disposition: attachment;filename="  DTT  _' . date('Y-m-d_H.i.s') . '.xlsx"');
 		header("Content-Transfer-Encoding: binary ");
 		$objWriter->save('php://output');
@@ -3105,7 +3146,7 @@ class TrialTracker
 	function upmGnattChartforExcel($startMonth, $startYear, $endMonth, $endYear, $currentYear, $secondYear, $thirdYear, $startDate, $endDate, 
 	$upmLink, $upmTitle, &$objPHPExcel, $i, $from)
 	{
-		$upmLink = urlencode($upmLink);
+		//$upmLink = urlencode($upmLink);
 		$upmTitle = substr($upmTitle,0,255); //Take 255 characters only to disply as tooltip
 		$bgColor = (array('fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,
 									'rotation'   => 0,
