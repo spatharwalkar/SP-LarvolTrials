@@ -3726,6 +3726,12 @@ function Download_reports()
 						$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255,0,0)));	
 					}
 					
+					if($data_matrix[$row][$col]['total'] == 0)
+					{
+						$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(230,230,230)));
+						$pdf->SetFillColor(230,230,230);
+					}
+					
 					if($data_matrix[$row][$col]['update_flag'] == 1)
 					{ 
 						$data_matrix[$row][$col]['bordercolor_code']='#FFFFFF';
@@ -4477,7 +4483,12 @@ function Download_reports()
 						else
 						$objDrawing->setOffsetX(80);
 						$objDrawing->setOffsetY(1);
-						$objDrawing->setPath('images/'.$data_matrix[$row][$col]['exec_bomb']['src'].'_'.$data_matrix[$row][$col]['color_code'].'.png');
+						
+						$img = $data_matrix[$row][$col]['exec_bomb']['src'];
+						if($data_matrix[$row][$col]['total'] != 0)
+						$img .= '_'.$data_matrix[$row][$col]['color_code'];
+						
+						$objDrawing->setPath('images/'.$img.'.png');
 						$objDrawing->setHeight(12);
 						$objDrawing->setWidth(12); 
 						$objDrawing->setDescription($data_matrix[$row][$col]['bomb']['title']);
@@ -4499,15 +4510,23 @@ function Download_reports()
 						$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
 						$objDrawing->setOffsetX($ptr_x);
 						$objDrawing->setOffsetY(1);
-						$objDrawing->setPath($data_matrix[$row][$col]['exec_filing_image'].'_'.$data_matrix[$row][$col]['color_code'].'.png');
+						
+						$img = $data_matrix[$row][$col]['exec_filing_image'];
+						if($data_matrix[$row][$col]['total'] != 0)
+						$img .= '_'.$data_matrix[$row][$col]['color_code'];
+						
+						$objDrawing->setPath($img.'.png');
 						$objDrawing->setHeight(12);
 						$objDrawing->setWidth(12); 
 						$objDrawing->setDescription("Filing Details");
 						$objDrawing->setCoordinates($cell);
 					}
 					
-					$objPHPExcel->getActiveSheet()->getStyle($cell)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID);
-					$objPHPExcel->getActiveSheet()->getStyle($cell)->getFill()->getStartColor()->setRGB($data_matrix[$row][$col]['color_code']);
+					if($data_matrix[$row][$col]['total'] != 0)
+					{
+						$objPHPExcel->getActiveSheet()->getStyle($cell)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID);
+						$objPHPExcel->getActiveSheet()->getStyle($cell)->getFill()->getStartColor()->setRGB($data_matrix[$row][$col]['color_code']);
+					}
 					$objPHPExcel->getActiveSheet()->getStyle($cell)->getAlignment()->applyFromArray(
       									array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
       											'vertical'   => PHPExcel_Style_Alignment::VERTICAL_CENTER,
