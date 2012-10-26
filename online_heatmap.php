@@ -2003,7 +2003,11 @@ foreach($rows as $row => $rval)
 		else
 		{
 			if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL)
-			$Td_Style = 'background-color:#e6e6e6; border:#e6e6e6 solid;';
+			{
+				$Td_Style = 'background-color:#e6e6e6; border:#e6e6e6 solid;';
+				$data_matrix[$row][$col]['color_code'] = 'e6e6e6';
+				$data_matrix[$row][$col]['div_start_style'] = 'background-color:#e6e6e6;';
+			}
 			else
 			$Td_Style = 'background-color:#ddf; border:#ddf solid;';
 		}
