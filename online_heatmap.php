@@ -1750,7 +1750,7 @@ function refresh_data(cell_id)
 										if(!$.browser.chrome)
 										{
 											cell_exist2.style.border = 'medium solid rgb(221, 221, 255)';
-											//cell_exist2.style.padding = '1px';
+											cell_exist2.style.padding = '1px';
 										} // chrome does not need borders to be specified but other browsers need it ?>
 									}
 								}
@@ -1766,26 +1766,9 @@ function refresh_data(cell_id)
 		}
 		//Set product column
 		var adjuster = 0;
-		$.browser.chrome = /chrome/.test(navigator.userAgent.toLowerCase()); 
-		<?php
-		if( ( (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE) || !isset($_SERVER['HTTP_REFERER']) ) && ( !isset($_REQUEST['LI']) || $_REQUEST['LI'] != 1) )
-{
-		$u_agent = $_SERVER['HTTP_USER_AGENT']; if(!preg_match('/Chrome/i',$u_agent)) {
-		?>
-		var adjuster = -18;
-		<?php } } else { ?>
-		if($('#hmMainTable').outerWidth() > $(window).width())
-		{
-			if(!$.browser.chrome){var adjuster = -13;};	//Chrome correctly adjustes width no need for chrome
-		}
-		else
-		{
-			if(!$.browser.chrome){var adjuster = -18;};
-		}
-		<?php } ?>
 		document.getElementById("hmMainTable_HeaderFirstCell").style.width = (document.getElementById("Cell_ID_"+first).offsetWidth + adjuster) + "px";
 		//if (docWidth <= winWidth)
-		document.getElementById("hmMainTable_HeaderFirstCell").style.border = 'medium solid rgb(255, 255, 255)';
+		//document.getElementById("hmMainTable_HeaderFirstCell").style.border = 'medium solid rgb(255, 255, 255)';
 		//document.getElementById("hmMainTable_HeaderFirstCell").style.padding = '1px';
 	}
     </script>
