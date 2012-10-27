@@ -833,6 +833,29 @@ if($Rotation_Flg == 1)
 		}
 		';
 }
+else
+{
+	print '<style type="text/css">';
+	
+	foreach($columns as $col => $val)
+	{
+		print '
+		.Area_Row_Class_'.$col.' 
+		{
+			width:110px;
+			max-width:110px;
+		}
+		';
+	}
+	print '	
+		.Total_Row_Class 
+		{
+			width:110px;
+			max-width:110px;
+		}
+		';
+	
+}
 
 ?>
 </style>
@@ -1868,12 +1891,6 @@ function refresh_data(cell_id)
 				}
 			}
 		}
-		//Set product column
-		var adjuster = 0;
-		//document.getElementById("hmMainTable_HeaderFirstCell").style.width = (document.getElementById("Cell_ID_"+first).offsetWidth + adjuster) + "px";
-		//if (docWidth <= winWidth)
-		//document.getElementById("hmMainTable_HeaderFirstCell").style.border = 'medium solid rgb(255, 255, 255)';
-		//document.getElementById("hmMainTable_HeaderFirstCell").style.padding = '1px';
 	}
     </script>
 
@@ -2512,7 +2529,7 @@ foreach($rows as $row => $rval)
 	//if total checkbox is selected
 	if($total_fld)
 	{
-		$htmlContent .= '<th>&nbsp;</th>';
+		$htmlContent .= '<th '.(($Rotation_Flg != 1) ? 'class="Total_Row_Class"><div class="Total_Row_Class">&nbsp;</div>' : '&nbsp;' ).'</th>';
 	}
 		
 	$htmlContent .= '</tr>';
