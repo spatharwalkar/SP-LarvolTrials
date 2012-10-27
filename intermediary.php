@@ -543,7 +543,7 @@ else if(isset($_REQUEST['results']))
 	$globalOptions['url'] = $_REQUEST['results'];	
 	$tt->generateTrialTracker('webpage', $_REQUEST['results'], $_REQUEST['time'], 'unstacked', $globalOptions);
 }
-else if(isset($_REQUEST['p']) || isset($_REQUEST['a']))
+else if(isset($_REQUEST['p']) || isset($_REQUEST['a']) || isset($_REQUEST['hm']))
 {
 	$globalOptions['url'] = 'p=' . $_REQUEST['p'] . '&a=' . $_REQUEST['a'];	
 	

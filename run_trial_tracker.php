@@ -7300,15 +7300,15 @@ class TrialTracker
 					{
 						$pkey = 0;
 						while($row = mysql_fetch_assoc($Res))
-						{
+						{	
 							$productId = $row['type_id'];
 							$sectionHeader = '';
 							
-							if($row['category'] != '' && $row['category'] !== NULL)
+							if($row['category'] != '' && $row['category'] !== NULL && $row['category'] !== 'NULL')
 							{
 								$sectionHeader .= $row['category'];
 							}
-							if($row['display_name'] != '' && $row['display_name'] !== NULL)
+							if($row['display_name'] != '' && $row['display_name'] !== NULL && $row['display_name'] !== 'NULL')
 							{
 								$sectionHeader .= $row['display_name'];
 							}
@@ -7412,12 +7412,12 @@ class TrialTracker
 							$productId = $row['type_id'];
 							$sectionHeader = '';
 							
-							if($row['category'] != '' && $row['category'] !== NULL)
+							if($row['category'] != '' && $row['category'] !== NULL && $row['category'] !== 'NULL')
 							{
 								$sectionHeader = $row['category'];
 							}
 							
-							if($row['display_name'] != '' && $row['display_name'] !== NULL)
+							if($row['display_name'] != '' && $row['display_name'] !== NULL && $row['display_name'] !== 'NULL')
 							{
 								$sectionHeader .= ' ' . $row['display_name'];
 							}
