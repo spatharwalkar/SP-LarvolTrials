@@ -7480,7 +7480,7 @@ class TrialTracker
 					unset($log);
 				}
 				
-				$Query = "SELECT rmh.`display_name`, rmh.`type_id`, rmh.`category`, ar.`display_name` AS global_display_name "
+				$Query = "SELECT rmh.`display_name`, rmh.`type_id`, rmh.`category`, ar.`coverage_area`, ar.`display_name` AS global_display_name "
 							. " FROM `rpt_masterhm_headers` rmh JOIN `areas` ar ON  rmh.`type_id` = ar.`id`"
 							. " WHERE rmh.`report` = '". $globalOptions['hm'] ."' AND rmh.`type` = 'area' ";
 				$Res = mysql_query($Query);
@@ -7556,7 +7556,7 @@ class TrialTracker
 				$areaId = implode(',', $resultIds['area']);
 				$productId = implode(',', $resultIds['product']);
 				
-				$Query = "SELECT rmh.`display_name`, rmh.`type_id`, ar.`display_name` AS global_display_name "
+				$Query = "SELECT rmh.`display_name`, rmh.`type_id`, ar.`coverage_area`, ar.`display_name` AS global_display_name "
 							. " FROM `rpt_masterhm_headers` rmh JOIN `areas` ar ON  rmh.`type_id` = ar.`id` "
 							. " WHERE rmh.`type_id` IN ('" . $areaId . "') AND rmh.`report` = '" . $globalOptions['hm'] . "' AND rmh.`type` = 'area' ";
 				$Res = mysql_query($Query);
