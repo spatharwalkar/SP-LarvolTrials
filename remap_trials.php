@@ -511,6 +511,7 @@ function remap($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_t
 				//check if the data is manually overridden
 			
 				$as2=array_search($fieldname,$dm_array);
+				$overridden_enddate=null;
 				if ( isset($as2) and $as2)
 				{
 					
@@ -526,6 +527,7 @@ function remap($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_t
 
 					$row = mysql_fetch_assoc($res);
 					$overridden = $row !== false;
+					
 					if($overridden and !empty($row[$fieldname]))
 					{
 						if($fieldname=='phase' and ( empty($row[$fieldname]) or $row[$fieldname]=='N/A' ) )
@@ -535,6 +537,11 @@ function remap($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_t
 						else
 						{
 							$value=mysql_real_escape_string($row[$fieldname]);
+						}
+						if($fieldname=='end_date' and  !empty($row[$fieldname]) )
+						{
+							$value=mysql_real_escape_string($row[$fieldname]);
+							$overridden_enddate=$value;
 						}
 					}
 
@@ -573,7 +580,7 @@ function remap($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_t
 		$str=criteria_process($str);
 		$str['inclusion']=mysql_real_escape_string($str['inclusion']);
 		$str['exclusion']=mysql_real_escape_string($str['exclusion']);
-		
+		if(!empty($overridden_enddate)) $cdate=$overridden_enddate;
 		/*********/
 		if( !is_null($cdate) and  $cdate <>'0000-00-00' )	// completion date
 		{
