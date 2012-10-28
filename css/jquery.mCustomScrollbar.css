@@ -65,6 +65,7 @@
 }
 .mCSB_horizontal .mCSB_container.mCS_no_scrollbar{
 	margin-bottom:0;
+	min-width:150px;
 }
 .mCSB_horizontal.mCustomScrollBox .mCSB_scrollTools{
 	width:100%;
