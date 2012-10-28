@@ -110,6 +110,9 @@ class TrialTracker
 	
 	function generateExcelFile($resultIds, $timeMachine = NULL, $ottType, $globalOptions)
 	{	
+		global $db;
+		$loggedIn	= $db->loggedIn();
+		
 		$Values = array();
 		
 		if(in_array($globalOptions['startrange'], $globalOptions['Highlight_Range']))
@@ -265,7 +268,11 @@ class TrialTracker
 		
 		foreach($Values['Trials'] as $tkey => $tvalue)
 		{
-			$unMatchedUpms = array_merge($unMatchedUpms, $tvalue['naUpms']);
+			if(isset($tvalue['naUpms']) && is_array($tvalue['naUpms']))
+			{
+				$unMatchedUpms = array_merge($unMatchedUpms, $tvalue['naUpms']);
+			}
+			
 			$tvalue['sectionHeader'] = strip_tags($tvalue['sectionHeader']);
 			if($globalOptions['includeProductsWNoData'] == "off")
 			{
@@ -1166,11 +1173,21 @@ class TrialTracker
 						$edYear = date('Y', strtotime($mvalue['end_date']));
 						$upmTitle = htmlformat($mvalue['event_description']);
 						
+						if(!$loggedIn && !$this->liLoggedIn())
+						{
+							$mvalue['event_link'] = NULL;
+						}
+							
 						//rendering diamonds in case of end date is prior to the current year
 						$objPHPExcel->getActiveSheet()->getStyle('"L' . $i . ':BB' . $i . '"')->applyFromArray($styleThinBlueBorderOutline);
 						$objPHPExcel->getActiveSheet()->getStyle('"L' . $i . ':BB' . $i.'"')->getFont()->setSize(10);
 						if($mvalue['result_link'] != '' && $mvalue['result_link'] !== NULL)
 						{
+							if(!$loggedIn && !$this->liLoggedIn())
+							{
+								$mvalue['result_link'] = NULL;
+							}
+						
 							if((!empty($mvalue['edited']) && $mvalue['edited']['field'] == 'result_link') || ($mvalue['new'] == 'y')) 
 								$imgColor = 'red';
 							else 
@@ -1194,8 +1211,11 @@ class TrialTracker
 								$objDrawing->setPath('images/' . $imgColor . '-checkmark.png');
 							}
 							$objDrawing->setCoordinates('L' . $i);
-							$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl($mvalue['result_link']);
-							$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setTooltip(substr($upmTitle,0,255));
+							if($mvalue['result_link'] != '' && $mvalue['result_link'] !== NULL)
+							{
+								$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl($mvalue['result_link']);
+								$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setTooltip(substr($upmTitle,0,255));
+							}
 							
 						}
 						else if($mvalue['status'] == 'Pending')
@@ -1316,6 +1336,11 @@ class TrialTracker
 			
 			$eventLink = trim($uvalue['event_link']);
 			$resultLink = trim($uvalue['result_link']);
+			
+			if(!$loggedIn && !$this->liLoggedIn())
+			{
+				$eventLink = NULL;
+			}
 			
 			//upm id
 			$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $uvalue["id"]);
@@ -1534,6 +1559,11 @@ class TrialTracker
 			//upm result column
 			if($resultLink != '' && $resultLink !== NULL) 
 			{
+				if(!$loggedIn && !$this->liLoggedIn())
+				{
+					$resultLink = NULL;
+				}
+								
 				if((!empty($uvalue['edited']) && $uvalue['edited']['field'] == 'result_link') || ($uvalue['new'] == 'y')) 
 					$imgColor = 'red';
 				else 
@@ -1557,8 +1587,11 @@ class TrialTracker
 				}
 				$uvalue['event_description'] = substr($uvalue['event_description'], 0, 255);
 				$objDrawing->setCoordinates('H' . $i);
-				$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($resultLink);
-				$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip($uvalue['event_description']);
+				if($resultLink != '' && $resultLink !== NULL) 
+				{
+					$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($resultLink);
+					$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip($uvalue['event_description']);
+				}
 			}
 			elseif($uvalue['status'] == 'Pending')
 			{
@@ -1583,7 +1616,7 @@ class TrialTracker
 			$edYear = date('Y', strtotime($uvalue['end_date']));
 					
 			$this->upmGnattChartforExcel($stMonth, $stYear, $edMonth, $edYear, $currentYear, $secondYear, $thirdYear, $uvalue['start_date'], 
-			$uvalue['end_date'], $uvalue['event_link'], $uvalue["event_description"], $objPHPExcel, $i, 'I');
+			$uvalue['end_date'], $eventLink, $uvalue["event_description"], $objPHPExcel, $i, 'I');
 				
 			$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':G' . $i)->applyFromArray(
 					array('fill' => array(
@@ -6521,30 +6554,58 @@ class TrialTracker
 							. '" href="' . urlPath() . 'upm.php?search_id=' . $mvalue['id'] . '" target="_blank">' . $mvalue['id'] . '</a></td>';
 						}
 						
+						if(!$loggedIn && !$this->liLoggedIn())
+						{
+							$mvalue['event_link'] = NULL;
+						}
+						
 						$outputStr .= '<td style="width:20px; text-align:center;"><br />';
 						
 
 						if($mvalue['result_link'] != '' && $mvalue['result_link'] !== NULL)
 						{
+							if(!$loggedIn && !$this->liLoggedIn())
+							{
+								$mvalue['result_link'] = NULL;
+							}
+								
 							if((!empty($mvalue['edited']) && $mvalue['edited']['field'] == 'result_link') || ($mvalue['new'] == 'y')) 
 								$imgColor = 'red';
 							else 
 								$imgColor = 'black'; 
-								
-							$outputStr .= '<a href="' . $mvalue['result_link'] . '" style="color:#000;">';
-							if($mvalue['event_type'] == 'Clinical Data')
+							
+							if($mvalue['result_link'] != '' && $mvalue['result_link'] !== NULL)
 							{
-								$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond" height="6px" width="6px" style="margin:4px;" border="0" />';
-							}
-							else if($mvalue['status'] == 'Cancelled')
-							{
-								$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel" height="6px" width="6px" style="margin:4px;" border="0" />';
+								$outputStr .= '<a href="' . $mvalue['result_link'] . '" style="color:#000;">';
+								if($mvalue['event_type'] == 'Clinical Data')
+								{
+									$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond" height="6px" width="6px" style="margin:4px;" border="0" />';
+								}
+								else if($mvalue['status'] == 'Cancelled')
+								{
+									$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel" height="6px" width="6px" style="margin:4px;" border="0" />';
+								}
+								else
+								{
+									$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark" height="6px" width="6px" style="margin:4px;" border="0" />';
+								}
+								$outputStr .= '</a>';
 							}
 							else
 							{
-								$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark" height="6px" width="6px" style="margin:4px;" border="0" />';
+								if($mvalue['event_type'] == 'Clinical Data')
+								{
+									$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond" height="6px" width="6px" style="margin:4px;" border="0" />';
+								}
+								else if($mvalue['status'] == 'Cancelled')
+								{
+									$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel" height="6px" width="6px" style="margin:4px;" border="0" />';
+								}
+								else
+								{
+									$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark" height="6px" width="6px" style="margin:4px;" border="0" />';
+								}
 							}
-							$outputStr .= '</a>';
 						}
 						else if($mvalue['status'] == 'Pending')
 						{
@@ -6655,7 +6716,11 @@ class TrialTracker
 							. '" href="' . urlPath() . 'upm.php?search_id=' . $value['id'] . '" target="_blank">' . $value['id'] . '</a></td>';
 				}
 				
-				
+				if(!$loggedIn && !$this->liLoggedIn())
+				{
+					$value['event_link'] = NULL;
+				}
+							
 				//field upm event description
 				if(!empty($value['edited']) && ($value['edited']['field'] == 'event_description')) 
 				{
@@ -6817,25 +6882,50 @@ class TrialTracker
 				$outputStr .= '<td style="width:20px; text-align:center;"><span><br />';
 				if($value['result_link'] != '' && $value['result_link'] !== NULL)
 				{
+					if(!$loggedIn && !$this->liLoggedIn())
+					{
+						$value['result_link'] = NULL;
+					}
+								
 					if((!empty($value['edited']) && $value['edited']['field'] == 'result_link') || ($value['new'] == 'y')) 
 							$imgColor = 'red';
 					else 
 						$imgColor = 'black'; 
-						
-					$outputStr .= '<span ' . $upmTitle . '><a href="' . $value['result_link'] . '" style="color:#000;">';
-					if($value['event_type'] == 'Clinical Data')
+					
+					$outputStr .= '<span ' . $upmTitle . '>';
+					if($value['result_link'] != '' && $value['result_link'] !== NULL)
 					{
-						$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond" height="6px" width="6px" style="margin:4px;" border="0" />';
-					}
-					else if($value['status'] == 'Cancelled')
-					{
-						$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel" height="6px" width="6px" style="margin:4px;" border="0" />';
+						$outputStr .= '<a href="' . $value['result_link'] . '" style="color:#000;">';
+						if($value['event_type'] == 'Clinical Data')
+						{
+							$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond" height="6px" width="6px" style="margin:4px;" border="0" />';
+						}
+						else if($value['status'] == 'Cancelled')
+						{
+							$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel" height="6px" width="6px" style="margin:4px;" border="0" />';
+						}
+						else
+						{
+							$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark" height="6px" width="6px" style="margin:4px;" border="0" />';
+						}
+						$outputStr .= '</a>';
 					}
 					else
 					{
-						$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark" height="6px" width="6px" style="margin:4px;" border="0" />';
+						if($value['event_type'] == 'Clinical Data')
+						{
+							$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond" height="6px" width="6px" style="margin:4px;" border="0" />';
+						}
+						else if($value['status'] == 'Cancelled')
+						{
+							$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel" height="6px" width="6px" style="margin:4px;" border="0" />';
+						}
+						else
+						{
+							$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark" height="6px" width="6px" style="margin:4px;" border="0" />';
+						}
 					}
-					$outputStr .= '</a></span>';
+					$outputStr .= '</span>';
 				}
 				else if($value['status'] == 'Pending')
 				{
@@ -12871,12 +12961,16 @@ class TrialTracker
 									$idColor = '#973535';
 								}
 								else
-		
 								{
 									$idColor = 'gray';
 								}
 								$outputStr .= '<td style="border-top:0px;" class="' . $rowOneType . '"><a style="color:' . $idColor 
 								. '" href="' . urlPath() . 'upm.php?search_id=' . $mvalue['id'] . '" target="_blank">' . $mvalue['id'] . '</a></td>';
+							}
+							
+							if(!$loggedIn && !$this->liLoggedIn())
+							{
+								$mvalue['event_link'] = NULL;
 							}
 							
 							$outputStr .= '<td ';
@@ -12890,25 +12984,50 @@ class TrialTracker
 							$outputStr .= '<div ' . $upmTitle . '>';
 							if($mvalue['result_link'] != '' && $mvalue['result_link'] !== NULL)
 							{
+								if(!$loggedIn && !$this->liLoggedIn())
+								{
+									$mvalue['result_link'] = NULL;
+								}
+								
 								if((!empty($mvalue['edited']) && $mvalue['edited']['field'] == 'result_link') || ($mvalue['new'] == 'y')) 
 									$imgColor = 'red';
 								else 
 									$imgColor = 'black'; 
-									
-								$outputStr .= '<a href="' . $mvalue['result_link'] . '" target="_blank">';
-								if($mvalue['event_type'] == 'Clinical Data')
+								
+								
+								if($mvalue['result_link'] != '' && $mvalue['result_link'] !== NULL)
 								{
-									$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond"';
-								}
-								else if($mvalue['status'] == 'Cancelled')
-								{
-									$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel"';
+									$outputStr .= '<a href="' . $mvalue['result_link'] . '" target="_blank">';
+									if($mvalue['event_type'] == 'Clinical Data')
+									{
+										$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond"';
+									}
+									else if($mvalue['status'] == 'Cancelled')
+									{
+										$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel"';
+									}
+									else
+									{
+										$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark"';
+									}
+									$outputStr .= ' style="padding-top: 3px;" border="0" onclick="INC_ViewCount('.$dvalue['larvol_id'].')" /></a>';
 								}
 								else
 								{
-									$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark"';
+									if($mvalue['event_type'] == 'Clinical Data')
+									{
+										$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond"';
+									}
+									else if($mvalue['status'] == 'Cancelled')
+									{
+										$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel"';
+									}
+									else
+									{
+										$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark"';
+									}
+									$outputStr .= ' style="padding-top: 3px;" border="0" onclick="INC_ViewCount('.$dvalue['larvol_id'].')" />';
 								}
-								$outputStr .= ' style="padding-top: 3px;" border="0" onclick="INC_ViewCount('.$dvalue['larvol_id'].')" /></a>';
 							}
 							else if($mvalue['status'] == 'Pending')
 							{
@@ -14525,6 +14644,10 @@ class TrialTracker
 								. $value['id'] . '" target="_blank">' . $value['id'] . '</a></td>';
 				}
 				
+				if(!$loggedIn && !$this->liLoggedIn())
+				{
+					$value['event_link'] = NULL;
+				}
 				
 				//field upm event description
 				$title = '';
@@ -14662,25 +14785,50 @@ class TrialTracker
 				
 				if($value['result_link'] != '' && $value['result_link'] !== NULL)
 				{
+					if(!$loggedIn && !$this->liLoggedIn())
+					{
+						$value['result_link'] = NULL;
+					}
+								
 					if((!empty($value['edited']) && $value['edited']['field'] == 'result_link') || ($value['new'] == 'y')) 
 							$imgColor = 'red';
 					else 
 						$imgColor = 'black'; 
-						
-					$outputStr .= '<div title="' . $upmTitle . '"><a href="' . $value['result_link'] . '" target="_blank">';
-					if($value['event_type'] == 'Clinical Data')
+					
+					$outputStr .= '<div title="' . $upmTitle . '">';
+					if($value['result_link'] != '' && $value['result_link'] !== NULL)
 					{
-						$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond" border="0" />';
-					}
-					else if($value['status'] == 'Cancelled')
-					{
-						$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel" border="0" />';
+						$outputStr .= '<a href="' . $value['result_link'] . '" ' . $target . '>';
+						if($value['event_type'] == 'Clinical Data')
+						{
+							$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond" border="0" />';
+						}
+						else if($value['status'] == 'Cancelled')
+						{
+							$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel" border="0" />';
+						}
+						else
+						{
+							$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark" border="0" />';
+						}
+						$outputStr .= '</a>';
 					}
 					else
 					{
-						$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark" border="0" />';
+						if($value['event_type'] == 'Clinical Data')
+						{
+							$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond" border="0" />';
+						}
+						else if($value['status'] == 'Cancelled')
+						{
+							$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel" border="0" />';
+						}
+						else
+						{
+							$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark" border="0" />';
+						}
 					}
-					$outputStr .= '</a></div>';
+					$outputStr .= '</div>';
 				}
 				else if($value['status'] == 'Pending')
 				{
@@ -14733,6 +14881,15 @@ class TrialTracker
 		$result = preg_replace($pattern, $replacement, $briefTitle);
 		
 		return $result;
+	}
+	
+	function liLoggedIn()
+	{
+		if(isset($_COOKIE['li_user']))
+		{
+			return true;
+		}
+		return false;
 	}
 }
 
