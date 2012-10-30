@@ -1175,9 +1175,10 @@ function change_view()
 			
 			if(cell_link_val != '' && cell_link_val != null)
 			{
+				var new_link = '';
 				if(dwcount.value == 'active')
 				{
-					document.getElementById("Cell_Link_"+i).href = cell_link_val+'&list=1&sr='+start_range+'&er='+end_range+'&hm='+report;
+					new_link = cell_link_val+'&list=1';
 					
 					if(tot_element != null && tot_element != '')
 					document.getElementById("Tot_ID_"+i).innerHTML = Cell_values_Arr[0];
@@ -1189,7 +1190,7 @@ function change_view()
 				}
 				else if(dwcount.value == 'total')
 				{
-					document.getElementById("Cell_Link_"+i).href = cell_link_val+'&list=2&sr='+start_range+'&er='+end_range+'&hm='+report;
+					new_link = cell_link_val+'&list=2';
 					
 					if(tot_element != null && tot_element != '')
 					document.getElementById("Tot_ID_"+i).innerHTML = Cell_values_Arr[1];
@@ -1201,7 +1202,7 @@ function change_view()
 				}
 				else if(dwcount.value == 'indlead')
 				{
-					document.getElementById("Cell_Link_"+i).href = cell_link_val+'&list=1&itype=0&sr='+start_range+'&er='+end_range+'&hm='+report;
+					new_link = cell_link_val+'&list=1&itype=0';
 					
 					if(tot_element != null && tot_element != '')
 					document.getElementById("Tot_ID_"+i).innerHTML = Cell_values_Arr[2];
@@ -1213,6 +1214,11 @@ function change_view()
 					
 				}	
 				
+				//if slider has default range dont add these parameters in links as OTT has same default range
+				if(start_range != 'now' || end_range != '1 month')	
+				new_link = new_link + '&sr='+start_range+'&er='+end_range;
+				new_link = new_link + '&hm='+report;
+				document.getElementById("Cell_Link_"+i).href = new_link;
 				
 				if(TotalZero_Flg == 1)
 				{
@@ -2017,9 +2023,9 @@ foreach($columns as $col => $val)
 	if(isset($areaIds[$col]) && $areaIds[$col] != NULL && !empty($productIds))
 	{
 		$htmlContent .= '<input type="hidden" value="'.$col_active_total[$col].',endl,'.$col_count_total[$col].',endl,'.$col_indlead_total[$col].'" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
-		$htmlContent .= '<input type="hidden" value="'. trim(urlPath()) .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />';
+		$htmlContent .= '<input type="hidden" value="'. trim(urlPath()) .'intermediary.php?a=' . $areaIds[$col]. '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />';
 		
-		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. trim(urlPath()) .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. '&list=1&itype=0&sr=now&er=1 month&hm=' . $id . '" target="_blank" style="text-decoration:underline; color:#000000;">';
+		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. trim(urlPath()) .'intermediary.php?a=' . $areaIds[$col]. '&list=1&itype=0&hm=' . $id . '" target="_blank" style="text-decoration:underline; color:#000000;">';
 		
 		if($Rotation_Flg == 1)
 		{
@@ -2103,9 +2109,9 @@ foreach($rows as $row => $rval)
 	if(isset($productIds[$row]) && $productIds[$row] != NULL && !empty($areaIds))
 	{
 		$htmlContent .= '<input type="hidden" value="'.$row_active_total[$row].',endl,'.$row_count_total[$row].',endl,'.$row_indlead_total[$row].'" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
-		$htmlContent .= '<input type="hidden" value="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). '" name="Link_value_'.$online_HMCounter.'&list=1&itype=0&sr=now&er=1 month" id="Link_value_'.$online_HMCounter.'" />';
+		$htmlContent .= '<input type="hidden" value="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '" name="Link_value_'.$online_HMCounter.'&list=1&itype=0&sr=now&er=1 month" id="Link_value_'.$online_HMCounter.'" />';
 		
-		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). '&list=1&sr=now&er=1 month&hm=' . $id . '" target="_blank" class="ottlink" style="text-decoration:underline; color:#000000;">'.formatBrandName($rval.$rowsCompanyName[$row], 'product').'</a>'.((trim($rowsTagName[$row]) != '') ? ' <font class="tag">['.$rowsTagName[$row].']</font>':'');
+		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). '&list=1&hm=' . $id . '" target="_blank" class="ottlink" style="text-decoration:underline; color:#000000;">'.formatBrandName($rval.$rowsCompanyName[$row], 'product').'</a>'.((trim($rowsTagName[$row]) != '') ? ' <font class="tag">['.$rowsTagName[$row].']</font>':'');
 	}
 	$htmlContent .= '</div></th>';
 	

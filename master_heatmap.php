@@ -1302,7 +1302,9 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 			{
 				$count_val=$col_indlead_total[$col];
 			}
-			$out .= '<a href="intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col] . $link_part .'" target="_blank" class="ottlink" title="'.$title.'">'.$count_val.'</a>';
+			
+			//In case of last column DTT just get hm id and view type
+			$out .= '<a href="intermediary.php?' . (($dtt_fld && ($max_column['num'] == $col)) ? substr($link_part, 1) : 'a='.$areaIds[$col] . $link_part) .'" target="_blank" class="ottlink" title="'.$title.'">'.$count_val.'</a>';
 		
 		
 		}
@@ -1381,7 +1383,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 				$count_val='<b>'.$row_indlead_total[$row].'</b>';
 			}
 				
-			$out .= '<a href="intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $ProdName_areaIds). $link_part . '" target="_blank" class="ottlink" title="'.$title.'">'.$count_val.'</a>';
+			$out .= '<a href="intermediary.php?p=' . $productIds[$row] . $link_part . '" target="_blank" class="ottlink" title="'.$title.'">'.$count_val.'</a>';
 		}
 		$out .='<br/>';
 		$out .= '</th>';
@@ -2146,22 +2148,29 @@ function Download_reports()
 	{
 		$tooltip=$title="Active trials";
 		$pdftitle="Active trials";
-		$link_part = '&list=1&sr='.$sr.'&er='.$er.'&hm=' . $id;
+		$link_part = '&list=1';
 		$mode = 'active';
 	}
 	elseif($_POST['dwcount']=='total')
 	{
 		$pdftitle=$tooltip=$title="All trials (Active + Inactive)";
-		$link_part = '&list=2&sr='.$sr.'&er='.$er.'&hm=' . $id;
+		$link_part = '&list=2';
 		$mode = 'total';
 	}
 	else
 	{
 		$tooltip=$title="Active industry lead sponsor trials";
 		$pdftitle="Active industry lead sponsor trials";
-		$link_part = '&list=1&itype=0&sr='.$sr.'&er='.$er.'&hm=' . $id;
+		$link_part = '&list=1&itype=0';
 		$mode = 'indlead';
 	}
+	//if slider has default range dont add these parameters in links as OTT has same default range
+	if($sr != 'now' || $er != '1 month')
+	{
+		$link_part .= '&sr='.$sr.'&er='.$er;
+	}
+	$link_part .= '&hm=' . $id;
+	
 	$link_part=str_replace(' ','+',$link_part);	
 	
 	$Report_Name = htmlspecialchars((trim($Report_DisplayName) != '' && $Report_DisplayName != NULL)? trim($Report_DisplayName):'report '.$id.'');
@@ -2640,7 +2649,7 @@ function Download_reports()
 				}
 				////////End of part added for padding
 				
-				$pdfContent .= '<a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. $link_part . '" target="_blank" title="'. $caltTitle .'">'.$val.'</a></div>';
+				$pdfContent .= '<a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?a=' . $areaIds[$col]. $link_part . '" target="_blank" title="'. $caltTitle .'">'.$val.'</a></div>';
 				
 				if($Rotation_Flg == 1)
 				{
@@ -2954,7 +2963,7 @@ function Download_reports()
 						}
 						////////End of part added for padding
 						
-						$pdfContent .= '<a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col]. $link_part . '" target="_blank" title="'. $caltTitle .'">'.$val.'</a></div>';
+						$pdfContent .= '<a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?a=' . $areaIds[$col]. $link_part . '" target="_blank" title="'. $caltTitle .'">'.$val.'</a></div>';
 						
 						if($Rotation_Flg == 1)
 						{
@@ -3152,7 +3161,7 @@ function Download_reports()
 				{
 					$count_val=$row_indlead_total[$row];
 				}
-				$pdfContent = '<a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). $link_part . '" target="_blank" title="'. $raltTitle .'">'.trim(formatBrandName($rval.$rowsCompanyName[$row], 'product')).'</a>'.((trim($rowsTagName[$row]) != '') ? ' <font style="color:#120f3c;">['.$rowsTagName[$row].']</font>':'');
+				$pdfContent = '<a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . $link_part . '" target="_blank" title="'. $raltTitle .'">'.trim(formatBrandName($rval.$rowsCompanyName[$row], 'product')).'</a>'.((trim($rowsTagName[$row]) != '') ? ' <font style="color:#120f3c;">['.$rowsTagName[$row].']</font>':'');
 				
 				$Place_X = $pdf->GetX();
 				$Place_Y = $pdf->GetY();
@@ -3974,7 +3983,7 @@ function Download_reports()
 				$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($black_font);
 					
 				$objPHPExcel->getActiveSheet()->setCellValue($cell, $val);
-				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?p=' . implode(',', $productIds) . '&a=' . $areaIds[$col].$link_part);
+				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?a=' . $areaIds[$col].$link_part);
 				
 				if($cdesc)
 				{
@@ -4056,7 +4065,7 @@ function Download_reports()
 				$raltTitle = (isset($rdesc) && $rdesc != '')?' alt="'.$rdesc.'" title="'.$rdesc.'" ':null;
 				
 				$objPHPExcel->getActiveSheet()->setCellValue($cell, $rval.$rowsCompanyName[$row].((trim($rowsTagName[$row]) != '') ? ' ['.$rowsTagName[$row].']':''));
-				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds).$link_part); 
+				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?p=' . $productIds[$row] .$link_part); 
  			    $objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip($tooltip);
  			    
  			    if($rdesc)
