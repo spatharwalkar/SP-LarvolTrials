@@ -3161,7 +3161,7 @@ function Download_reports()
 				{
 					$count_val=$row_indlead_total[$row];
 				}
-				$pdfContent = '<a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . $link_part . '" target="_blank" title="'. $raltTitle .'">'.trim(formatBrandName($rval.$rowsCompanyName[$row], 'product')).'</a>'.((trim($rowsTagName[$row]) != '') ? ' <font style="color:#120f3c;">['.$rowsTagName[$row].']</font>':'');
+				$pdfContent = '<a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?p=' . $productIds[$row] . $link_part . '" target="_blank" title="'. $raltTitle .'">'.trim(formatBrandName($rval, 'product')).$rowsCompanyName[$row].'</a>'.((trim($rowsTagName[$row]) != '') ? ' <font style="color:#120f3c;">['.$rowsTagName[$row].']</font>':'');
 				
 				$Place_X = $pdf->GetX();
 				$Place_Y = $pdf->GetY();

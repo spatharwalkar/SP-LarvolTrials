@@ -6993,7 +6993,8 @@ class TrialTracker
 								$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
 							}
 							
-							$TrialsInfo[$pkey]['sectionHeader'] = $productSelector[$pkey] = $row['name'];	
+							$TrialsInfo[$pkey]['sectionHeader'] = $productSelector[$pkey] = $row['name'];
+							$TrialsInfo[$pkey]['sectionHeader']	= formatBrandName($TrialsInfo[$pkey]['sectionHeader'], 'product');
 							
 							if($row['company'] !== NULL && $row['company'] != '')
 							{
@@ -7158,6 +7159,7 @@ class TrialTracker
 							}
 							
 							$TrialsInfo[$akey]['sectionHeader'] = $productSelector[$akey] = $sectionHeader;
+							$TrialsInfo[$akey]['sectionHeader']	= formatBrandName($TrialsInfo[$akey]['sectionHeader'], 'area');
 							
 							$Ids[$akey]['product'] = $productId;
 							$Ids[$akey]['area'] = $row['type_id'];
@@ -7279,6 +7281,7 @@ class TrialTracker
 							}
 	
 							$TrialsInfo[$pkey]['sectionHeader'] = $productSelector[$pkey] = $row['name'];
+							$TrialsInfo[$pkey]['sectionHeader']	= formatBrandName($TrialsInfo[$pkey]['sectionHeader'], 'product');
 							
 							if($row['company'] !== NULL && $row['company'] != '')
 							{
@@ -7407,6 +7410,7 @@ class TrialTracker
 								$sectionHeader .= 'Product ' . $row['type_id'];
 							}
 							$TrialsInfo[$pkey]['sectionHeader'] = $productSelector[$pkey] = $sectionHeader;
+							$TrialsInfo[$pkey]['sectionHeader']	= formatBrandName($TrialsInfo[$pkey]['sectionHeader'], 'product');
 							
 							$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $productId);
 							
@@ -7522,6 +7526,7 @@ class TrialTracker
 							}
 							
 							$TrialsInfo[$akey]['sectionHeader'] = $productSelector[$akey] = $sectionHeader;
+							$TrialsInfo[$akey]['sectionHeader']	= formatBrandName($TrialsInfo[$akey]['sectionHeader'], 'area');
 							$TrialsInfo[$akey]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $productId);
 							
 							$Ids[$akey]['product'] = $productId;
@@ -7623,6 +7628,7 @@ class TrialTracker
 							}
 							
 							$TrialsInfo[$akey]['sectionHeader'] = $productSelector[$akey] = $sectionHeader;
+							$TrialsInfo[$akey]['sectionHeader']	= formatBrandName($TrialsInfo[$akey]['sectionHeader'], 'area');
 							$Ids[$akey]['area'] = $areaId;
 							$Ids[$akey]['product'] = $productId;
 							
@@ -7715,6 +7721,7 @@ class TrialTracker
 						}
 					
 						$TrialsInfo[0]['sectionHeader'] = $productSelector[0] = $row['name'];
+						$TrialsInfo[0]['sectionHeader']	= formatBrandName($TrialsInfo[0]['sectionHeader'], 'product');
 					
 						if($row['company'] !== NULL && $row['company'] != '')
 						{
@@ -7794,7 +7801,8 @@ class TrialTracker
 								$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
 							}
 							
-							$TrialsInfo[$pkey]['sectionHeader'] = $productSelector[$pkey] = $row['name'];	
+							$TrialsInfo[$pkey]['sectionHeader'] = $productSelector[$pkey] = $row['name'];
+							$TrialsInfo[$pkey]['sectionHeader']	= formatBrandName($TrialsInfo[$pkey]['sectionHeader'], 'product');	
 							
 							if($row['company'] !== NULL && $row['company'] != '')
 							{
@@ -7889,6 +7897,7 @@ class TrialTracker
 							}
 							
 							$TrialsInfo[$akey]['sectionHeader'] = $productSelector[$akey] = $sectionHeader;
+							$TrialsInfo[$akey]['sectionHeader']	= formatBrandName($TrialsInfo[$akey]['sectionHeader'], 'area');
 							
 							$Ids[$akey]['product'] = $productId;
 							$Ids[$akey]['area'] = $areaId;
@@ -7970,6 +7979,7 @@ class TrialTracker
 							}
 	
 							$TrialsInfo[$pkey]['sectionHeader'] = $productSelector[$pkey] = $row['name'];
+							$TrialsInfo[$pkey]['sectionHeader']	= formatBrandName($TrialsInfo[$pkey]['sectionHeader'], 'product');
 							
 							if($row['company'] !== NULL && $row['company'] != '')
 							{
@@ -8064,6 +8074,7 @@ class TrialTracker
 				}
 				
 				$TrialsInfo[0]['sectionHeader'] = 'No Product';
+				$TrialsInfo[0]['sectionHeader']	= formatBrandName($TrialsInfo[0]['sectionHeader'], 'product');
 				$Ids[0]['product'] = $productId;
 				$Ids[0]['area'] = $areaId;
 			}
@@ -8094,6 +8105,7 @@ class TrialTracker
 						}
 					
 						$TrialsInfo[0]['sectionHeader'] = $productSelector[0] = $row['name'];
+						$TrialsInfo[0]['sectionHeader']	= formatBrandName($TrialsInfo[0]['sectionHeader'], 'product');
 					
 						if($row['company'] !== NULL && $row['company'] != '')
 						{
@@ -8178,6 +8190,7 @@ class TrialTracker
 						}
 					
 						$TrialsInfo[0]['sectionHeader'] = $productSelector[0] = $row['name'];
+						$TrialsInfo[0]['sectionHeader']	= formatBrandName($TrialsInfo[0]['sectionHeader'], 'product');
 					
 						if($row['company'] !== NULL && $row['company'] != '')
 						{
@@ -11356,7 +11369,7 @@ class TrialTracker
 			
 			foreach($Values['Trials'] as $tkey => $tvalue)
 			{	
-				$tvalue['sectionHeader'] = formatBrandName($tvalue['sectionHeader'], $headerType);
+				$tvalue['sectionHeader'] = $tvalue['sectionHeader'];
 				if($globalOptions['includeProductsWNoData'] == "off")
 				{
 					if(isset($tvalue['naUpms']) && !empty($tvalue['naUpms']))
@@ -12104,7 +12117,7 @@ class TrialTracker
 		
 		foreach($Values['Trials'] as $vkey => $vvalue)
 		{
-			$vvalue['sectionHeader'] = formatBrandName($vvalue['sectionHeader'], $headerType);
+			$vvalue['sectionHeader'] = $vvalue['sectionHeader'];
 			if(($counter >= $start && $counter < $end))
 			{
 				if($globalOptions['includeProductsWNoData'] == "off")
@@ -13085,7 +13098,7 @@ class TrialTracker
 		{
 			for($index = $finalkey+1; $index <= $vkey; $index++)
 			{
-				$Values['Trials'][$index]['sectionHeader'] = formatBrandName($Values['Trials'][$index]['sectionHeader'], $headerType);
+				$Values['Trials'][$index]['sectionHeader'] = $Values['Trials'][$index]['sectionHeader'];
 				if($globalOptions['includeProductsWNoData'] == "off")
 				{
 					if(isset($Values['Trials'][$index]['naUpms']) && !empty($Values['Trials'][$index]['naUpms']))
