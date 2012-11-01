@@ -1895,6 +1895,10 @@ function refresh_data(cell_id)
 					{
 						first = i;
 					}
+					
+					//when we complete row 1, return back as no need of further processing
+					if(cell_row.value.replace(/\s+/g, '') > 1)
+					return;
 				}
 			}
 		}
