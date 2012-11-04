@@ -2433,13 +2433,13 @@ function Download_reports()
 					$width = $width + $Width_matrix[$col_id]['width'];
 					$i++; $col_id++;
 				}
-				$current_NumLines=$pdf->getNumLines($columnsCategoryName[$col].'  ', $width);
+				$current_NumLines=$pdf->getNumLines($columnsCategoryName[$col], $width);
 				if($Max_Cat_areaNumLines < $current_NumLines)
 				$Max_Cat_areaNumLines = $current_NumLines;
 			}
 		}
 		if($Max_Cat_areaNumLines < 2)
-		$Cat_Area_Row_height = $Min_One_Liner;
+		$Cat_Area_Row_height = $Line_Height;
 		else
 		$Cat_Area_Row_height = $Max_Cat_areaNumLines * $Line_Height;
 		
@@ -2579,6 +2579,9 @@ function Download_reports()
 		$Place_Y = $Place_Y + $Cat_Area_Row_height + 0.5;
 		$Place_X = $Main_X;
 		
+		if($Rotation_Flg == 1)
+		$Area_Row_height = $Area_Row_height + 0.5;	//padding adjustment in calculated height of area cell
+		
 		$pdf->SetFont('freesansb', 'B ', 8); // Bold Font
 		$pdf->SetFillColor(255, 255, 255);
 		$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));
@@ -2628,7 +2631,7 @@ function Download_reports()
 				{
 					$extra_space = $Width_matrix[$col]['width'] - $Bold_Line_Height;
 					//$pdfContent .= '<br style="line-height:'.((($extra_space* 72 / 96)/2)).'px;" />';
-					$pdf->setCellPaddings(0, ($extra_space/2), 0, 0);
+					$pdf->setCellPaddings(0.5, ($extra_space/2), 0, 0);
 				}
 				else
 				{
@@ -2644,9 +2647,9 @@ function Download_reports()
 				//// This part added to add padding on both side of area names as smaller area name links get misplaced in PDF
 				if($Rotation_Flg == 1)
 				{
-					while($pdf->getNumLines($val, $Area_Row_height) == 1)
+					while($pdf->getNumLines($val, ($Area_Row_height - 0.5)) == 1)
 					{
-						if($pdf->getNumLines($val.'.', $Area_Row_height) == 1)
+						if($pdf->getNumLines($val.'.', ($Area_Row_height - 0.5)) == 1)
 							$val=$val.'.';
 						else
 							break;
@@ -2732,9 +2735,9 @@ function Download_reports()
 				//// This part added to add padding on both side of area names as smaller area name links get misplaced in PDF
 				if($Rotation_Flg == 1)
 				{
-					while($pdf->getNumLines($count_val, $Area_Row_height) == 1)
+					while($pdf->getNumLines($count_val, ($Area_Row_height-0.5)) == 1)
 					{
-						if($pdf->getNumLines($count_val.'.', $Area_Row_height) == 1)
+						if($pdf->getNumLines($count_val.'.', ($Area_Row_height-0.5)) == 1)
 							$count_val=$count_val.'.';
 						else
 							break;
@@ -2942,7 +2945,7 @@ function Download_reports()
 						{
 							$extra_space = $Width_matrix[$col]['width'] - $Bold_Line_Height;
 							//$pdfContent .= '<br style="line-height:'.((($extra_space* 72 / 96)/2)).'px;" />';
-							$pdf->setCellPaddings(0, ($extra_space/2), 0, 0);
+							$pdf->setCellPaddings(0.5, ($extra_space/2), 0, 0);
 						}
 						else
 						{
@@ -2958,9 +2961,9 @@ function Download_reports()
 						//// This part added to add padding on both side of area names as smaller area name links get misplaced in PDF
 						if($Rotation_Flg == 1)
 						{
-							while($pdf->getNumLines($val, $Area_Row_height) == 1)
+							while($pdf->getNumLines($val, ($Area_Row_height-0.5)) == 1)
 							{
-								if($pdf->getNumLines($val.'.', $Area_Row_height) == 1)
+								if($pdf->getNumLines($val.'.', ($Area_Row_height-0.5)) == 1)
 									$val=$val.'.';
 								else
 									break;
@@ -3046,9 +3049,9 @@ function Download_reports()
 						//// This part added to add padding on both side of area names as smaller area name links get misplaced in PDF
 						if($Rotation_Flg == 1)
 						{
-							while($pdf->getNumLines($count_val, $Area_Row_height) == 1)
+							while($pdf->getNumLines($count_val, ($Area_Row_height-0.5)) == 1)
 							{
-								if($pdf->getNumLines($count_val.'.', $Area_Row_height) == 1)
+								if($pdf->getNumLines($count_val.'.', ($Area_Row_height-0.5)) == 1)
 									$count_val=$count_val.'.';
 								else
 									break;
@@ -3140,8 +3143,10 @@ function Download_reports()
 				$pdf->SetFillColor(162, 255, 151);
 				$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));	
 			//	$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(162, 255, 151)));
+				$pdf->setCellPaddings(0.5, 0, 0, 0);
 				$pdf->MultiCell($Product_Rowcat_width, $Product_Rowcat_height, $pdfContent, $border=0, $align='L', $fill=1, $ln=1, $Place_X, $Place_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
 				$Place_Y = $Place_Y + $Product_Rowcat_height + 0.5;
+				$pdf->setCellPaddings(0, 0, 0, 0);
 			}
 			$pdf->SetFont('freesans', ' ', 8, '', false); // Normal Font	
 			
@@ -3173,7 +3178,11 @@ function Download_reports()
 				$Place_X = $pdf->GetX();
 				$Place_Y = $pdf->GetY();
 				
+				$pdf->setCellPaddings(0.5, 0, 0, 0);
+				
 				$pdf->MultiCell($product_Col_Width, $prod_row_height, $pdfContent, $border=0, $align='L', $fill=1, $ln=0, $Place_X, $Place_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+				
+				$pdf->setCellPaddings(0, 0, 0, 0);
 			}
 			else
 			{
@@ -3813,10 +3822,6 @@ function Download_reports()
 		
 		$pdf->SetY($pdf->GetY() + 3);
 		
-		$dimensions = $pdf->getPageDimensions();
-		$newMarginWidth = (($dimensions['wk'] - (152))/2);
-		//$pdf->SetRightMargin($newMarginWidth);
-		//$pdf->SetLeftMargin($newMarginWidth);
 		
 		$startY = $pdf->GetY();
 		if (($startY + 13) + $dimensions['bm'] > ($dimensions['hk']))
@@ -3837,6 +3842,11 @@ function Download_reports()
 			$BorderStart_Y = $pdf->GetY();
 			$pdf->Ln(0.5);
 		}
+		
+		$dimensions = $pdf->getPageDimensions();
+		$newMarginWidth = (($dimensions['wk'] - (160.4))/2);
+		//$pdf->SetRightMargin($newMarginWidth);
+		//$pdf->SetLeftMargin($newMarginWidth);
 		
 		$helpTabImage_Header = array('Discontinued', 'Filing', 'Phase explanation', 'Updated');
 		$helpTabImages_Src = array('new_lbomb.png', 'new_file.png', 'phaseexp.png', 'outline.png');
@@ -3865,7 +3875,7 @@ function Download_reports()
 			$pdf->MultiCell(8, $helpTabRow_Height, $phasenums[$key], $border=0, $align='C', $fill=1, $ln=0, $Place_X, $Place_Y-0.5, $reseth=false, $stretch=0, $ishtml=true, $autopadding=true, $maxh=$helpTabRow_Height, 'M');
 			$Place_X = $Place_X + 8 +1;
 		}
-		$Place_X = $Place_X + 2;
+		$Place_X = $Place_X + 5;
 		foreach($helpTabImage_Header as $key => $Header)
 		{
 			$pdf->Image('images/'.$helpTabImages_Src[$key], $Place_X , $Place_Y+0.2, 3, 3, '', '', '', false, 300, '', false, false, 0, false, false, false);
@@ -3873,7 +3883,7 @@ function Download_reports()
 			$current_StringLength = $pdf->GetStringWidth($helpTabImage_Header[$key], 'freesans', ' ', 8) + 3;
 			
 			$pdf->MultiCell($current_StringLength, $helpTabRow_Height, $helpTabImage_Header[$key], $border=0, $align='C', $fill=0, $ln=0, $Place_X, $Place_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=$helpTabRow_Height, 'T');
-			$Place_X = $Place_X + $current_StringLength + 1;
+			$Place_X = $Place_X + $current_StringLength + 3;
 		}
 		$BorderStop_X = $pdf->GetX();
 		$BorderStop_Y = $pdf->GetY();
@@ -4680,7 +4690,7 @@ function getColspanforExcelExport($cell, $inc)
 
 function getNumLinesPDFExport($productName, $OtherPart, $product_Col_Width, $Bold_Line_Height, $Line_Height, &$pdf)
 {
-	$product_Col_Width = $product_Col_Width;
+	$product_Col_Width = $product_Col_Width - 0.5;
 	$line = '';
 	$numberOfLines = 0;
 	$flgBold = true;
