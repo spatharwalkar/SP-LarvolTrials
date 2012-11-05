@@ -310,7 +310,7 @@ DELIMITER ;
 CREATE TABLE IF NOT EXISTS `upm_history` (
   `id` int(10) unsigned NOT NULL,
   `change_date` datetime NOT NULL,
-  `field` enum('event_type','event_description','event_link','result_link','corresponding_trial','start_date','start_date_type','end_date','end_date_type','last_update','product','area','status') COLLATE utf8_unicode_ci NOT NULL,
+  `field` enum('event_type','event_description','event_link','result_link','corresponding_trial','start_date','start_date_type','end_date','end_date_type','last_update','product','area','status', 'larvol_id') COLLATE utf8_unicode_ci NOT NULL,
   `old_value` text COLLATE utf8_unicode_ci,
   `new_value` text COLLATE utf8_unicode_ci,
   `user` int(10) unsigned DEFAULT NULL,
@@ -1167,6 +1167,17 @@ CREATE TABLE IF NOT EXISTS `redtags` (
   `type` enum('Clinical','Clinical data','Clinical New Trial','New Trial','Clinical Trial status','Trial status','Clinical Enrollment status','Enrollment status','Clinical Other','Other','Regulatory','Regulatory FDA event','FDA event','Regulatory Non-US regulatory','Non-US regulatory','Regulatory Other','Reimbursement','Reimbursement US reimbursement','US reimbursement','Reimbursement NICE','Commercial','Commercial Sales','Sales','Commercial Licensing / partnership','Licensing / partnership','Commercial Patent','Patent','Commercial Launch','Launch','Commercial Launch Non-US','Launch Non-US','Commercial Other','Other Preclinical') NOT NULL,
   UNIQUE KEY `name` (`name`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `upm_trials` (
+  `upm_id` int(10) unsigned NOT NULL,
+  `larvol_id` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`upm_id`,`larvol_id`),
+  KEY `upm_id` (`upm_id`),
+  KEY `trial` (`larvol_id`),
+  CONSTRAINT `upm_trials_ibfk_1` FOREIGN KEY (`upm_id`) REFERENCES `upm` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `upm_trials_ibfk_2` FOREIGN KEY (`larvol_id`) REFERENCES `data_trials` (`larvol_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 	
 ALTER TABLE `rpt_masterhm_cells`
   ADD CONSTRAINT `rpt_masterhm_cells_ibfk_2` FOREIGN KEY (`area`) REFERENCES `areas` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,

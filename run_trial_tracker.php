@@ -14417,8 +14417,7 @@ class TrialTracker
 		
 		if($timeMachine === NULL) $timeMachine = $now;
 		
-		$result = mysql_query("SELECT id, event_type, corresponding_trial, event_description, event_link, result_link, start_date, end_date, status "
-								. "FROM upm WHERE corresponding_trial = '" . $trialId . "' ORDER BY `end_date` ASC, `start_date` ASC ");
+		$result = mysql_query("SELECT upm.`id`, upm.`event_type`, upm.`event_description`, upm.`event_link`, upm.`result_link`, upm.`start_date`, upm.`end_date`, upm.`status` FROM upm RIGHT JOIN upm_trials ut ON upm.`id` = ut.`upm_id` LEFT JOIN data_trials dt ON dt.`larvol_id` = ut.`larvol_id` WHERE dt.`source_id` = '" . $trialId . "' ORDER BY upm.`end_date` ASC, upm.`start_date` ASC ");
 		
 		$i = 0;			
 		while($row = mysql_fetch_assoc($result)) 
@@ -14511,7 +14510,7 @@ class TrialTracker
 				while($rows = mysql_fetch_assoc($result)) 
 				{
 					$query = "SELECT `id`, `event_description`, `event_link`, `result_link`, `event_type`, `start_date`, `status`, " 
-							. " `start_date_type`, `end_date`, `end_date_type` FROM `upm` WHERE `corresponding_trial` IS NULL AND `product` = '" . $rows['id'] 
+							. " `start_date_type`, `end_date`, `end_date_type` FROM `upm` LEFT JOIN `upm_trials` ut ON ut.`upm_id` = upm.`id` WHERE `larvol_id` IS NULL AND `product` = '" . $rows['id'] 
 							. "' ORDER BY `end_date` ASC, `start_date` ASC ";
 					$res = mysql_query($query)  or tex('Bad SQL query getting unmatched upms ' . $sql);
 					if(mysql_num_rows($res) > 0) 
@@ -14582,8 +14581,9 @@ class TrialTracker
 			//echo '<br/><br/>-->'."SELECT `name` FROM `products` WHERE `id` IN ('" . $productId . "') ";
 			$productName = mysql_fetch_assoc(mysql_query("SELECT `name` FROM `products` WHERE `id` IN ('" . $productId . "') "));
 			//echo '<br/><br/>-->'.
+			//Retrieve only those records that are not present in upm_trials table
 			$query = "SELECT `id`, `event_description`, `event_link`, `result_link`, `event_type`, `start_date`, `status`, " 
-							. " `start_date_type`, `end_date`, `end_date_type` FROM `upm` WHERE `corresponding_trial` IS NULL AND `product` IN ('" . $productId 
+							. " `start_date_type`, `end_date`, `end_date_type` FROM `upm` LEFT JOIN `upm_trials` ut ON ut.`upm_id` = upm.`id` WHERE `larvol_id` IS NULL AND `product` IN ('" . $productId 
 							. "') ORDER BY `end_date` ASC ";
 			$res = mysql_query($query)  or tex('Bad SQL query getting unmatched upms ' . $sql);
 			if(mysql_num_rows($res) > 0) 

@@ -21,6 +21,7 @@ function tableColumns($table)
 		//TODO: make it dynamic.
 		//explicitly adding area column for upm as its a one to many in upm_areas
 		$columnList[] = 'area';
+		$columnList[] = 'larvol_id';
 	}
 
 	return $columnList;
@@ -136,9 +137,9 @@ if($table !='upm')
 elseif($table=='upm')
 {
 	if($_GET['no_sort']!=1)
-	$query = "select upm.id,upm.event_type,upm.event_description,upm.event_link,upm.result_link,p.name as product, upm_areas.area_id as area, upm.corresponding_trial,upm.start_date,upm.start_date_type,upm.end_date,upm.end_date_type,upm.last_update from upm left join products p on upm.product=p.id left join upm_areas on upm_areas.upm_id=upm.id $where  group by upm.id $currentOrderBy $currentSortOrder limit $start , $limit";
+	$query = "select upm.id,upm.event_type,upm.event_description,upm.event_link,upm.result_link,p.name as product, upm_areas.area_id as area, upm_trials.larvol_id as larvol_id, upm.corresponding_trial,upm.start_date,upm.start_date_type,upm.end_date,upm.end_date_type,upm.last_update from upm left join products p on upm.product=p.id left join upm_areas on upm_areas.upm_id=upm.id left join upm_trials on upm_trials.upm_id = upm.id $where  group by upm.id $currentOrderBy $currentSortOrder limit $start , $limit";
 	else
-	$query = "select upm.id,upm.event_type,upm.event_description,upm.event_link,upm.result_link,p.name as product, upm_areas.area_id as area, upm.corresponding_trial,upm.start_date,upm.start_date_type,upm.end_date,upm.end_date_type,upm.last_update from upm left join products p on upm.product=p.id left join upm_areas on upm_areas.upm_id=upm.id $where group by upm.id limit $start , $limit";
+	$query = "select upm.id,upm.event_type,upm.event_description,upm.event_link,upm.result_link,p.name as product, upm_areas.area_id as area, upm_trials.larvol_id as larvol_id, upm.corresponding_trial,upm.start_date,upm.start_date_type,upm.end_date,upm.end_date_type,upm.last_update from upm left join products p on upm.product=p.id left join upm_areas on upm_areas.upm_id=upm.id left join upm_trials on upm_trials.upm_id = upm.id $where group by upm.id limit $start , $limit";
 }
 $res = mysql_query($query) or softDieSession('Cannot get '.$table.' data.'.$query);
 $i=0;
@@ -254,6 +255,13 @@ while ($row = mysql_fetch_assoc($res))
 					echo '<td>';
 					echo getUpmAreaNames($upmId);
 					echo '</td>';
+			}
+			else
+			if($columnName == 'larvol_id' && $table == 'upm')
+			{
+					echo '<td>';
+					echo getUpmLarvolIDs($upmId);
+					echo '</td>';
 			}						
 			else 
 			{
@@ -313,6 +321,13 @@ while ($row = mysql_fetch_assoc($res))
 				echo '<td>';
 				echo getUpmAreaNames($upmId);
 				echo '</td>';
+			}
+			else
+			if($columnName == 'larvol_id' && $table == 'upm')
+			{
+					echo '<td>';
+					echo getUpmLarvolIDs($upmId);
+					echo '</td>';
 			}			
 			else 
 			{
@@ -353,6 +368,38 @@ function getUpmAreaNames($upmId)
 }
 
 /**
+ * @name getUpmLarvolIds
+ * @tutorial Returns comma separated larvol ids for a upm
+ */
+function getUpmLarvolIDs($upmId)
+{
+	global $db;
+	$query = "select ut.larvol_id from upm_trials ut left join upm u on u.id=ut.upm_id where u.id=$upmId";
+	$result = mysql_query($query);
+	$larvol_id = array();
+	while($row = mysql_fetch_assoc($result))
+	{
+		$larvol_id[] = $row['larvol_id'];
+	}
+	
+	return implode(',', $larvol_id);
+}
+
+/**
+ * @name getUpmLarvolIds
+ * @tutorial Returns comma separated larvol ids for a upm
+ */
+function getUpmSourceIDFrmLarvolIDs($LarvolId)
+{
+	global $db;
+	$SourceIDQuery = mysql_query("select source_id from `data_trials` where `larvol_id`='$LarvolId'");
+	while($SourceIdFrmLarvolArray = mysql_fetch_assoc($SourceIDQuery))
+	$SrcIDfrmLarvol = $SourceIdFrmLarvolArray['source_id'];
+	return $SrcIDfrmLarvol;
+}
+
+
+/**
  * @name calculateWhere
  * @tutorial Outputs the WHERE query substring.
  * Just follow the naming convention of get parameters passed start with search_ and
@@ -371,7 +418,11 @@ function calculateWhere($table)
 		$explode = explode('search_',$keys);
 		if(isset($explode[1]))	
 		{
-			if(trim($_GET[$keys]) !='' || is_array($_GET[$keys]))
+			if(is_array($_GET[$keys]))
+			{
+				$whereArr[$explode[1]] = $_GET[$keys];
+			}
+			else if(trim($_GET[$keys]) !='')
 			$whereArr[$explode[1]] = $_GET[$keys];
 		}
 		else
@@ -403,8 +454,15 @@ function calculateWhere($table)
 		$whereArr = array_map(
 							function($whereKeys,$whereValues)
 							{
-								
-								if(is_array($whereValues))
+								if(is_array($whereValues) && trim($whereKeys) == 'upm.larvol_id')
+								{
+									$whereValues = array_filter($whereValues);
+									if(!empty($whereValues))
+									return ' upm_trials.larvol_id IN( '.implode(',',$whereValues).') AND ';
+									else
+									return;
+								}
+								else if(is_array($whereValues))
 								{
 									//TODOmake dynamic
 									//return ' '.$whereKeys.' IN( '.implode(',',$whereValues).') AND ';
@@ -474,7 +532,7 @@ function getTotalCount($table)
 	$where = calculateWhere($table);
 	if($table == 'upm')
 	{
-		$query = "select count(distinct upm.id) as cnt from $table left join upm_areas on $table.id=upm_areas.upm_id $where";
+		$query = "select count(distinct upm.id) as cnt from $table left join upm_areas on $table.id=upm_areas.upm_id left join upm_trials on $table.id=upm_trials.upm_id $where";
 	}
 	elseif($table == 'redtags')
 	{
@@ -932,7 +990,15 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 				$upm_area = $post['area'];
 				unset($post['area']);
 			}
+			
+			if(is_array($post['larvol_id']) && count($post['larvol_id'])>0)
+			{		
+				$upm_larvolids = $post['larvol_id'];
+				$upm_larvolids = array_filter($upm_larvolids);
+				unset($post['larvol_id']);
+			}
 		}
+		
 		if($table=='products' && $post['name']=='')
 		{
 			softDieSession('Cannot insert '.$table.' entry. Product name cannot empty.');
@@ -947,6 +1013,13 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			$areaKey=array_search('area', $postKeys);
 			unset($newpostKeys[$areaKey]);
 			unset($newpost[$areaKey]);
+		}
+		
+		if($table=='upm' && array_search('larvol_id', $postKeys) )
+		{
+			$LarvolIdKey=array_search('larvol_id', $postKeys);
+			unset($newpostKeys[$LarvolIdKey]);
+			unset($newpost[$LarvolIdKey]);
 		}
 			
 		$query = "insert into $table (".implode(',',$newpostKeys).") values(".implode(',',$newpost).")";
@@ -963,7 +1036,9 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			
 			if($table=='upm')
 			{
-				fillUpmAreas(mysql_insert_id(),$upm_area);
+				$InsertPnt = mysql_insert_id();
+				fillUpmAreas($InsertPnt,$upm_area);
+				fillUpmLarvolIDs($InsertPnt,$upm_larvolids);
 			}
 			return 1;
 		}
@@ -986,6 +1061,14 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 				$upm_area = $post['area'];
 				unset($post['area']);
 			}
+			
+			if(is_array($post['larvol_id']) && count($post['larvol_id'])>0)
+			{		
+				$upm_larvolids = $post['larvol_id'];
+				$upm_larvolids = array_filter($upm_larvolids);
+				unset($post['larvol_id']);
+			}
+			
 			$query = "select * from $table where id=$id";
 			$res = mysql_query($query)or softDieSession('Updating invalid row');
 			while($row = mysql_fetch_assoc($res))
@@ -994,6 +1077,8 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			}
 			//fetch previous upm area string.
 			$upmHistoryAreaString = getUpmAreaNames($id);
+			//Put previous larvol id
+			$upmHistoryLarvolIDs = getUpmLarvolIDs($id);
 			//last update not needed for upm_history
 			unset($historyArr['last_update']);
 			unset($historyArr['status']);
@@ -1021,6 +1106,13 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 				$areaKey=array_search('area', $newpostKeys);
 				unset($newpostKeys[$areaKey]);
 				unset($newpost[$areaKey]);
+			}
+			
+			if($table=='upm' && array_search('larvol_id', $newpostKeys) )
+			{
+				$LarvolIdKey=array_search('larvol_id', $newpostKeys);
+				unset($newpostKeys[$LarvolIdKey]);
+				unset($newpost[$LarvolIdKey]);
 			}			
 
 			$postnew = array_map(am1,$newpostKeys,$newpost);
@@ -1048,6 +1140,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 				
 				//update upm area one to many association
 				fillUpmAreas($id,$upm_area);
+				fillUpmLarvolIDs($id,$upm_larvolids);
 				
 				//process upm history
 				foreach($historyArr as $history)
@@ -1060,6 +1153,15 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 				{
 					
 					$history = array('id'=>$id, 'change_date'=>"'".date('Y-m-d H:i:s')."'", 'field'=>"'".'area'."'", 'old_value'=>"'".$upmHistoryAreaString."'", 'new_value'=>"'".$upmCurrentAreaString."'", 'user'=>"'".$db->user->id."'");
+					$query = "insert into upm_history (".implode(',',array_keys($history)).") values (".implode(',',$history).")";
+					mysql_query($query)or softdieSession('Cannot update history for upm id '.$id);
+				}
+				
+				$upmCurrentLarvolIDs = getUpmLarvolIDs($id);	
+				if($upmHistoryLarvolIDs != $upmCurrentLarvolIDs)
+				{
+					
+					$history = array('id'=>$id, 'change_date'=>"'".date('Y-m-d H:i:s')."'", 'field'=>"'".'larvol_id'."'", 'old_value'=>"'".$upmHistoryLarvolIDs."'", 'new_value'=>"'".$upmCurrentLarvolIDs."'", 'user'=>"'".$db->user->id."'");
 					$query = "insert into upm_history (".implode(',',array_keys($history)).") values (".implode(',',$history).")";
 					mysql_query($query)or softdieSession('Cannot update history for upm id '.$id);
 				}
@@ -1125,6 +1227,73 @@ function fillUpmAreas($upmId,$areaIds=array())
 		}		
 	}
 }
+
+/*
+ * Fill new larvol ids in database
+ * Replace sourceID by larvolID if any in input
+ */
+function fillUpmLarvolIDs($upmId,$LarvolIDs=array())
+{
+
+	global $db;
+	//get current upm larvolids
+	$query = "select * from `upm_trials` where `upm_id`=$upmId";
+	$result = mysql_query($query);
+	$currentLarvolIDs = array();
+	while($row = mysql_fetch_assoc($result))
+	{
+		$currentLarvolIDs[] = $row['larvol_id'];
+	}
+	//add new larvol ids
+	///Replace source id by larvol id if any
+	$TempLarvolIDs =  array();
+	foreach($LarvolIDs as $key=> $IDs)
+	{
+		if(strpos(" ".$IDs." ", "NCT") || strpos(" ".$IDs." ", "-"))
+		{
+			$SourceIDQuery = mysql_query("select larvol_id from `data_trials` where `source_id`='$IDs'");
+			while($LarvolIDfrmSrcArray = mysql_fetch_assoc($SourceIDQuery))
+			$LarvolIDfrmSrc = $LarvolIDfrmSrcArray['larvol_id'];
+			if($LarvolIDfrmSrc != NULL && $LarvolIDfrmSrc != '')
+			$TempLarvolIDs[] = $LarvolIDfrmSrc;
+		}
+		else
+		{
+			$TempLarvolIDs[] = $IDs;
+		}
+	}
+	$LarvolIDs = $TempLarvolIDs;
+	
+	$newLarvolIDs = @array_diff($LarvolIDs,$currentLarvolIDs);
+	if(count($newLarvolIDs)>0)
+	{
+		$newLarvolIDs = array_map(function($upm_id,$larvol_id){
+			
+			return "(".$upm_id.",".$larvol_id.")";
+			
+		},array_fill(0, (count($newLarvolIDs)), $upmId),$newLarvolIDs);
+		
+		$insertLarvolIDsQuery = "insert into `upm_trials` (upm_id,larvol_id) values ".implode(',',$newLarvolIDs);
+		
+		if(!mysql_query($insertLarvolIDsQuery))
+		{
+			softDieSession('Cannot insert new larvol id into upm_trials table');
+		}
+	}
+	//delete old areas
+	$deletedLarvolIDs = @array_diff($currentLarvolIDs,$LarvolIDs);
+	if(count($currentLarvolIDs)>0 and empty($LarvolIDs))
+		$deletedLarvolIDs=$currentLarvolIDs;
+	if(count($deletedLarvolIDs)>0)
+	{
+		$deletedLarvolIDsQuery = "delete from `upm_trials` where `upm_id`=$upmId and `larvol_id` in (".implode(',',$deletedLarvolIDs).")";
+		if(!mysql_query($deletedLarvolIDsQuery))
+		{
+			softDieSession('Cannot delete larvol ids from upm_trials table');
+		}		
+	}
+}
+
 
 /**
  * @name pagePagination
@@ -1229,6 +1398,16 @@ function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),
 				 'Extra' => '',
 				
 				);
+		$res[] = array(
+	
+				'Field' => 'larvol_id',
+				'Type' => 'int(10) unsigned',
+				'Null' => 'YES',
+				'Key' => 'MUL',
+				'Default' => '',
+				'Extra' => '',
+	
+		);
 	}
 	foreach($res as $row)
 	{
@@ -1240,8 +1419,29 @@ function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),
 			{
 				$dbVal = $_GET['search_'.$row['Field']];
 			}
-			echo '<tr><td>'.ucwords(implode(' ',explode('_',$row['Field']))) .' : </td><td>'.input_tag($row,$dbVal,array('null_options'=>true,'name_index'=>'search', 'look_for_bool'=>true)).'</td></tr>';
-			if(is_array($dbVal) && count($dbVal)>0)
+			
+			///default
+			if($row['Field']!='larvol_id' || $table!='upm')
+			{
+				echo '<tr><td>'.ucwords(implode(' ',explode('_',$row['Field']))) .' : </td><td>'.input_tag($row,$dbVal,array('null_options'=>true,'name_index'=>'search', 'look_for_bool'=>true)).'</td></tr>';
+			}
+			else if($row['Field']=='larvol_id' && $table=='upm')
+			{
+				echo '<tr>';
+				echo '<td>'.ucwords(implode(' ',explode('_',$row['Field']))).' : </td><td><input type="text" value="" name="search_'.$row['Field'].'[]" id="search_'.$row['Field'].'[]" /> <img style="border:0; height:20px; width:20px; vertical-align:middle;" title="Add Larvol Id" alt="Add Larvol Id" src="images/add.gif" class="add_multiple_larvol_id"></td>';
+				echo '</tr>';
+
+			}
+		
+			if($row['Field']=='larvol_id' && $table=='upm' && is_array($dbVal) && count($dbVal)>0)
+			{
+				foreach($dbVal as $key=>$dbValIndividual)
+				{
+					if($dbValIndividual != NULL && $dbValIndividual != '')
+					print '<tr><td></td><td><input name="search_'.$row['Field'].'[]" value="'.$dbValIndividual.'" checked="checked" type="checkbox"> <font title="Larvol Id">'.$dbValIndividual.'</font>'.((getUpmSourceIDFrmLarvolIDs($dbValIndividual) != NULL && getUpmSourceIDFrmLarvolIDs($dbValIndividual) != '') ? ' <font title="Source Id">['.getUpmSourceIDFrmLarvolIDs($dbValIndividual).']</font>':'').' <img style="border:0; vertical-align:middle;" title="Delete Larvol Id" alt="Delete Larvol Id" src="images/not.png" class="auto_suggest_multiple_delete"></td></tr>';
+				}
+			}
+			else if(is_array($dbVal) && count($dbVal)>0)
 			{
 				echo input_tag($row,$dbVal,array('null_options'=>true,'name_index'=>'search','one_to_many'=>1));
 			}
@@ -1296,6 +1496,7 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 	global $db;
 	$searchType = calculateSearchType($db->sources,unserialize(base64_decode($searchData)));
 	$insertEdit = 'Insert';
+	$area = $larvol_id = $source_id = array();
 	$formOnSubmit = isset($options['formOnSubmit'])?$options['formOnSubmit']:null;
 	$formStyle = isset($options['formStyle'])?$options['formStyle']:null;
 	$mainTableStyle = isset($options['mainTableStyle'])?$options['mainTableStyle']:null;
@@ -1308,7 +1509,7 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		
 		if($table=='upm')
 		{
-			$query = "SELECT u.id,u.event_type,u.event_description,u.event_link,u.result_link,p.name AS product, ar.name as area, u.status,u.corresponding_trial,u.start_date,u.start_date_type,u.end_date,u.end_date_type,u.last_update,p.id as product_id FROM upm u LEFT JOIN products p ON u.product=p.id LEFT JOIN upm_areas a ON u.id=a.upm_id left join areas ar on ar.id=a.area_id WHERE u.id=$id";
+			$query = "SELECT u.id,u.event_type,u.event_description,u.event_link,u.result_link,p.name AS product, ar.name as area, upmt.larvol_id as larvol_id, dt.source_id as source_id, u.status, u.corresponding_trial, u.start_date, u.start_date_type, u.end_date, u.end_date_type,u.last_update,p.id as product_id FROM upm u LEFT JOIN products p ON u.product=p.id LEFT JOIN upm_areas a ON u.id=a.upm_id left join areas ar on ar.id=a.area_id left join upm_trials upmt on upmt.upm_id = u.id left join data_trials dt on dt.larvol_id = upmt.larvol_id WHERE u.id=$id";
 		}
 		else
 		{
@@ -1322,10 +1523,17 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 			{
 				$upmDetails = $row;
 				$upm_product_id = isset($upmDetails['product_id'])?$upmDetails['product_id']:null;
+				if (!in_array($row['area'], $area))
 				$area[] = $row['area'];
+				if (!in_array($row['larvol_id'], $larvol_id))
+				{
+					$larvol_id[] = $row['larvol_id'];
+					$source_id[] = $row['source_id'];
+				}
 			}
 			$upmDetails['area'] = $area;
-			
+			$upmDetails['larvol_id'] = $larvol_id;
+			$upmDetails['source_id'] = $source_id;
 		}
 		else
 		{	
@@ -1347,6 +1555,16 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		$res[] = array(
 	
 				'Field' => 'area',
+				'Type' => 'int(10) unsigned',
+				'Null' => 'YES',
+				'Key' => 'MUL',
+				'Default' => '',
+				'Extra' => '',
+	
+		);
+		$res[] = array(
+	
+				'Field' => 'larvol_id',
 				'Type' => 'int(10) unsigned',
 				'Null' => 'YES',
 				'Key' => 'MUL',
@@ -1424,14 +1642,33 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		
 		$defaultOptions['style'] = $addEditGlobalInputStyle;
 		
-		///default 
-		echo '<tr>';
-		echo '<td>'.ucwords(implode(' ',explode('_',$row['Field']))).' : </td><td>'.input_tag($row,$dbVal,$defaultOptions).'</td>';
-		echo '</tr>';
+		///default
+		if($row['Field']!='larvol_id' || $table!='upm')
+		{ 
+			echo '<tr>';
+			echo '<td>'.ucwords(implode(' ',explode('_',$row['Field']))).' : </td><td>'.input_tag($row,$dbVal,$defaultOptions).'</td>';
+			echo '</tr>';
+		}
+		else if($row['Field']=='larvol_id' && $table=='upm')
+		{
+			echo '<tr>';
+			echo '<td>'.ucwords(implode(' ',explode('_',$row['Field']))).' : </td><td><input type="text" value="" name="'.$row['Field'].'[]" id="'.$row['Field'].'[]" /> <img style="border:0; height:20px; width:20px; vertical-align:middle;" title="Add Larvol Id" alt="Add Larvol Id" src="images/add.gif" class="add_multiple_larvol_id"></td>';
+			echo '</tr>';
+
+		}
 		if($row['Field']=='area' && $table=='upm' && is_array($dbVal) && count($dbVal)>0)
 		{
 			//add explicit code for multiple 
 			echo input_tag($row,$dbVal,array('null_options'=>true,'one_to_many'=>1));
+		}
+		
+		if($row['Field']=='larvol_id' && $table=='upm' && is_array($dbVal) && count($dbVal)>0)
+		{
+			foreach($dbVal as $key=>$dbValIndividual)
+			{
+				if($dbValIndividual != NULL && $dbValIndividual != '')
+				print '<tr><td></td><td><input class="'.$row['Field'].'_autosuggest_multiple"  name="'.$row['Field'].'[]" value="'.$dbValIndividual.'" checked="checked" type="checkbox"> <font title="Larvol Id">'.$dbValIndividual.'</font> <font title="Source Id">['.$upmDetails['source_id'][$key].']</font> <img style="border:0" title="Delete '.ucfirst($row['Field']).'" alt="Delete '.ucfirst($row['Field']).'" src="images/not.png" class="auto_suggest_multiple_delete"></td></tr>';
+			}
 		}
 		
 	}

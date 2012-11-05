@@ -109,6 +109,14 @@ $(document).ready(function(){
 		  $('.auto_suggest_multiple_delete').live('click',function(){
 			  
 				$(this).closest('tr').fadeOut("fast", function(){$(this).remove();});
+			  });
+		
+		//listener to add multiple larvol id input box
+		  $('.add_multiple_larvol_id').live('click',function(){
+			  
+				$(this).closest('tr').after(
+											'<tr><td></td><td><input type="text" value="" name="larvol_id[]" id="larvol_id[]" /> <img style="border:0; height:20px; width:20px; vertical-align:middle;" title="Add Larvol Id" alt="Add Larvol Id" src="images/add.gif" class="add_multiple_larvol_id"> <img style="border:0; vertical-align:middle;" title="Delete Larvol Id" alt="Delete Larvol Id" src="images/not.png" class="auto_suggest_multiple_delete"></td></tr>'
+											);
 			  });	  
 
 });
@@ -232,6 +240,35 @@ if(isset($_GET['search']))
 		{
 			$_GET['search_area'] = $aid;
 		}
+	}
+	
+	if(is_array($_GET['search_larvol_id']) && count($_GET['search_larvol_id'])>0)
+	{
+		$LarvolIDs = $_GET['search_larvol_id'];
+		
+		///Replace source id by larvol id if any
+		$TempLarvolIDs =  array();
+		foreach($LarvolIDs as $key=> $IDs)
+		{
+			if(strpos(" ".$IDs." ", "NCT") || strpos(" ".$IDs." ", "-"))
+			{
+				$SourceIDQuery = mysql_query("select larvol_id from `data_trials` where `source_id`='$IDs'");
+				while($LarvolIDfrmSrcArray = mysql_fetch_assoc($SourceIDQuery))
+				$LarvolIDfrmSrc = $LarvolIDfrmSrcArray['larvol_id'];
+				if($LarvolIDfrmSrc != NULL && $LarvolIDfrmSrc != '')
+				$TempLarvolIDs[] = $LarvolIDfrmSrc;
+			}
+			else
+			{
+				if($IDs != '' && $IDs != NULL)
+				$TempLarvolIDs[] = $IDs;
+			}
+		}
+		$_GET['search_larvol_id'] = array_filter($TempLarvolIDs);
+		if(count($_GET['search_larvol_id'])>0)
+		$_GET['search_larvol_id'] = array_filter($TempLarvolIDs);
+		else
+		$_GET['search_larvol_id'] = '';
 	}
 	
 
