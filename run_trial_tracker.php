@@ -7407,10 +7407,32 @@ class TrialTracker
 							}
 							else
 							{
-								$sectionHeader .= 'Product ' . $row['type_id'];
+							/************* pick name from products table */
+								$qry = "SELECT `name`, `id`, `company`, `discontinuation_status` FROM `products` WHERE id = '" . $row['type_id'] . "'";
+								$res1 = mysql_query($qry);
+								if($res1 and mysql_num_rows($res1) > 0)
+								{
+									while($row = mysql_fetch_assoc($res1))
+									{
+										$productId = $row['id'];
+		
+										$sh = $row['name'];
+										$sh = formatBrandName($sh, 'product');
+										
+										if($row['company'] !== NULL && $row['company'] != '')
+										{
+											$sh .= " / <i>" . $row['company'] . "</i>";
+										}
+									}
+								}
+							
+							/*************************************************/
+								if(isset($sh)) $sectionHeader .= ' '. $sh;
+								else $sectionHeader .= ' Product ' . $row['type_id'];	
 							}
+					
 							$TrialsInfo[$pkey]['sectionHeader'] = $productSelector[$pkey] = $sectionHeader;
-							$TrialsInfo[$pkey]['sectionHeader']	= formatBrandName($TrialsInfo[$pkey]['sectionHeader'], 'product');
+							if(!isset($sh)) $TrialsInfo[$pkey]['sectionHeader']	= formatBrandName($TrialsInfo[$pkey]['sectionHeader'], 'product');
 							
 							$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $productId);
 							
@@ -7517,16 +7539,37 @@ class TrialTracker
 							}
 							else
 							{
-								$sectionHeader .= ' Product ' . $row['type_id'];
-							}
+							/************* pick name from products table */
+								$qry = "SELECT `name`, `id`, `company`, `discontinuation_status` FROM `products` WHERE id = '" . $row['type_id'] . "'";
+								$res1 = mysql_query($qry);
+								if($res1 and mysql_num_rows($res1) > 0)
+								{
+									while($row = mysql_fetch_assoc($res1))
+									{
+										$productId = $row['id'];
+		
+										$sh = $row['name'];
+										$sh = formatBrandName($sh, 'product');
+										
+										if($row['company'] !== NULL && $row['company'] != '')
+										{
+											$sh .= " / <i>" . $row['company'] . "</i>";
+										}
+									}
+								}
 							
+							/*************************************************/
+								if(isset($sh)) $sectionHeader .= ' '. $sh;
+								else $sectionHeader .= ' Product ' . $row['type_id'];	
+							}
+													
 							if($row['tag'] != '' && $row['tag'] != NULL)
 							{
 								$sectionHeader .= " <span class='tag'>[" . $row['tag'] . "]</span>";
 							}
 							
 							$TrialsInfo[$akey]['sectionHeader'] = $productSelector[$akey] = $sectionHeader;
-							$TrialsInfo[$akey]['sectionHeader']	= formatBrandName($TrialsInfo[$akey]['sectionHeader'], 'area');
+							if(!isset($sh)) $TrialsInfo[$akey]['sectionHeader']	= formatBrandName($TrialsInfo[$akey]['sectionHeader'], 'area');
 							$TrialsInfo[$akey]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $productId);
 							
 							$Ids[$akey]['product'] = $productId;
