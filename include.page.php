@@ -137,9 +137,9 @@ if($table !='upm')
 elseif($table=='upm')
 {
 	if($_GET['no_sort']!=1)
-	$query = "select upm.id,upm.event_type,upm.event_description,upm.event_link,upm.result_link,p.name as product, upm_areas.area_id as area, upm_trials.larvol_id as larvol_id, upm.corresponding_trial,upm.start_date,upm.start_date_type,upm.end_date,upm.end_date_type,upm.last_update from upm left join products p on upm.product=p.id left join upm_areas on upm_areas.upm_id=upm.id left join upm_trials on upm_trials.upm_id = upm.id $where  group by upm.id $currentOrderBy $currentSortOrder limit $start , $limit";
+	$query = "select upm.id,upm.event_type,upm.event_description,upm.event_link,upm.result_link,p.name as product, upm_areas.area_id as area, upm_trials.larvol_id as larvol_id, upm.start_date,upm.start_date_type,upm.end_date,upm.end_date_type,upm.last_update from upm left join products p on upm.product=p.id left join upm_areas on upm_areas.upm_id=upm.id left join upm_trials on upm_trials.upm_id = upm.id $where  group by upm.id $currentOrderBy $currentSortOrder limit $start , $limit";
 	else
-	$query = "select upm.id,upm.event_type,upm.event_description,upm.event_link,upm.result_link,p.name as product, upm_areas.area_id as area, upm_trials.larvol_id as larvol_id, upm.corresponding_trial,upm.start_date,upm.start_date_type,upm.end_date,upm.end_date_type,upm.last_update from upm left join products p on upm.product=p.id left join upm_areas on upm_areas.upm_id=upm.id left join upm_trials on upm_trials.upm_id = upm.id $where group by upm.id limit $start , $limit";
+	$query = "select upm.id,upm.event_type,upm.event_description,upm.event_link,upm.result_link,p.name as product, upm_areas.area_id as area, upm_trials.larvol_id as larvol_id, upm.start_date,upm.start_date_type,upm.end_date,upm.end_date_type,upm.last_update from upm left join products p on upm.product=p.id left join upm_areas on upm_areas.upm_id=upm.id left join upm_trials on upm_trials.upm_id = upm.id $where group by upm.id limit $start , $limit";
 }
 $res = mysql_query($query) or softDieSession('Cannot get '.$table.' data.'.$query);
 $i=0;
@@ -1509,7 +1509,7 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		
 		if($table=='upm')
 		{
-			$query = "SELECT u.id,u.event_type,u.event_description,u.event_link,u.result_link,p.name AS product, ar.name as area, upmt.larvol_id as larvol_id, dt.source_id as source_id, u.status, u.corresponding_trial, u.start_date, u.start_date_type, u.end_date, u.end_date_type,u.last_update,p.id as product_id FROM upm u LEFT JOIN products p ON u.product=p.id LEFT JOIN upm_areas a ON u.id=a.upm_id left join areas ar on ar.id=a.area_id left join upm_trials upmt on upmt.upm_id = u.id left join data_trials dt on dt.larvol_id = upmt.larvol_id WHERE u.id=$id";
+			$query = "SELECT u.id,u.event_type,u.event_description,u.event_link,u.result_link,p.name AS product, ar.name as area, upmt.larvol_id as larvol_id, dt.source_id as source_id, u.status, u.start_date, u.start_date_type, u.end_date, u.end_date_type,u.last_update,p.id as product_id FROM upm u LEFT JOIN products p ON u.product=p.id LEFT JOIN upm_areas a ON u.id=a.upm_id left join areas ar on ar.id=a.area_id left join upm_trials upmt on upmt.upm_id = u.id left join data_trials dt on dt.larvol_id = upmt.larvol_id WHERE u.id=$id";
 		}
 		else
 		{
