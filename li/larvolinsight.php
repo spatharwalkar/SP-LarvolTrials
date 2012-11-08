@@ -1,5 +1,6 @@
 <?php
 //include_once('../include.util.php');
+ini_set('max_execution_time','3600');
 if (isset($_GET['url'])) 
 {
 	// delete existing temporary files
@@ -14,9 +15,14 @@ if (isset($_GET['url']))
 	$url=substr($pageURL,$pos+4);
 	$url .= '&LI=1';
 	$LIpage = getContents( $url );
-	if ( $LIpage['errno'] != 0 ) die('Could not load the page ('.$url.')');
+	if ( isset($LIpage['errno']) and $LIpage['errno'] != 0 ) die('Could not load the page ('.$url.')');
 //	elseif ( $LIpage['http_code'] != 200 ) die('Could not load the page - access denied. ('.$url .')');
-	
+	// correct relative path of files
+	$LIpage = str_replace("images/", "../images/", $LIpage);
+	$LIpage = str_replace("/date/date_input.css", "../date/date_input.css", $LIpage);
+	$LIpage = str_replace("css/", "../css/", $LIpage);
+	$LIpage = str_replace("scripts/", "../scripts/", $LIpage);
+	// 
 	$tmpfname = getTempFileName();
 	$handle = fopen($tmpfname, "w");
 	fwrite($handle, $LIpage);
@@ -318,8 +324,14 @@ Sys.WebForms.PageRequestManager._initialize('ctl00$ScriptManager1', 'form1', ['t
     
     <div id="ContentPlaceholderMain_rtsCRTabsTabs" class="RadTabStrip RadTabStrip_Default RadTabStripTop_Default" style="margin-top: -21px; border-bottom: 1px solid silver;">
 	<div class="rtsLevel rtsLevel1">
-		<ul class="rtsUL"><li class="rtsLI rtsFirst"><a class="rtsLink" href="#"><span class="rtsOut"><span class="rtsIn"><span class="rtsTxt">News Tracker</span></span></span></a></li><li class="rtsLI"><a class="rtsLink rtsBefore" href="#"><span class="rtsOut"><span class="rtsIn"><span class="rtsTxt"><span style="color: Red;"></span> Conferences</span></span></span></a></li><li class="rtsLI"><a class="rtsLink rtsSelected" href="#"><span class="rtsOut"><span class="rtsIn"><span class="rtsTxt"><span style="color: Red;"></span> Trials</span></span></span></a></li><li class="rtsLI rtsLast"><a class="rtsLink rtsAfter" href="#"><span class="rtsOut"><span class="rtsIn"><span class="rtsTxt"><span style="color: Red;">(Beta)</span> Heatmap</span></span></span></a></li></ul>
-	</div><input value="{&quot;selectedIndexes&quot;:[&quot;2&quot;],&quot;logEntries&quot;:[],&quot;scrollState&quot;:{}}" autocomplete="off" id="ContentPlaceholderMain_rtsCRTabsTabs_ClientState" name="ContentPlaceholderMain_rtsCRTabsTabs_ClientState" type="hidden">
+		<ul class="rtsUL">
+			<li class="rtsLI rtsFirst"><a class="rtsLink" href="#"><span class="rtsOut"><span class="rtsIn"><span class="rtsTxt">News Tracker</span></span></span></a></li>
+			<li class="rtsLI"><a class="rtsLink rtsBefore" href="#"><span class="rtsOut"><span class="rtsIn"><span class="rtsTxt"><span style="color: Red;"></span> Conferences</span></span></span></a></li>
+			<li class="rtsLI"><a class="rtsLink rtsSelected" href="#"><span class="rtsOut"><span class="rtsIn"><span class="rtsTxt"><span style="color: Red;"></span> LI View</span></span></span></a></li>
+			<li class="rtsLI rtsLast"><a class="rtsLink rtsAfter" href="#"><span class="rtsOut"><span class="rtsIn"><span class="rtsTxt"><span style="color: Red;">(Beta)</span> Heatmap</span></span></span></a></li>
+		</ul>
+	</div>
+	<input value="{&quot;selectedIndexes&quot;:[&quot;2&quot;],&quot;logEntries&quot;:[],&quot;scrollState&quot;:{}}" autocomplete="off" id="ContentPlaceholderMain_rtsCRTabsTabs_ClientState" name="ContentPlaceholderMain_rtsCRTabsTabs_ClientState" type="hidden">
 </div>
     <div id="ContentPlaceholderMain_rtsCRTabsPages" style="height: 100%; width: 100%; margin-top: 20px; border-bottom: 1px solid rgb(192, 192, 192);">
 	<div class="rmpHiddenView" id="ContentPlaceholderMain_rpvCR" style="height: 100%; margin: -30px auto auto; width: 90%; min-width: 800px; max-width: 1350px; display: none;">
@@ -1484,12 +1496,13 @@ function boldProduct(){
 		</div>
             
         
-	</div><div id="ContentPlaceholderMain_rpvTrialTracker" class="" style="height: 100%; display: block;">
+	</div>
+	<div id="ContentPlaceholderMain_rpvTrialTracker" class="" style="height: 100%; display: block;">
 		
-            <iframe id="ContentPlaceholderMain_iframeLarvolTracker" style="border: 0px none; margin: 0px; padding: 0px; height: 407px;" src="index_1.html" frameborder="0" height="50" width="100%"></iframe>
+            <iframe id="ContentPlaceholderMain_iframeLarvolTracker" style="border: 0px none; margin: 0px; padding: 0px; height: 407px;" src="<? echo $tmpfname; ?>" frameborder="0" height="50" width="100%"></iframe>
         
 	</div><div id="ContentPlaceholderMain_http://larvoltrials.com/online_heatmap.php?id=179" class="rmpHiddenView">
-		<iframe src="<? echo $tmpfname; ?>" style="border: 0px none; margin: 0px; padding: 0px; height: 407px;" runat="server" class="heatmapIframe" frameborder="0" height="50" width="100%"></iframe>
+
 	</div><input value="{&quot;selectedIndex&quot;:3,&quot;changeLog&quot;:[]}" autocomplete="off" id="ContentPlaceholderMain_rtsCRTabsPages_ClientState" name="ContentPlaceholderMain_rtsCRTabsPages_ClientState" type="hidden">
 </div>
     
