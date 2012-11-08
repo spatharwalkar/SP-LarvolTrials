@@ -6892,7 +6892,7 @@ class TrialTracker
 					else 
 						$imgColor = 'black'; 
 					
-					$outputStr .= '<span ' . $upmTitle . '>';
+					$outputStr .= '<span title="' . $upmTitle . '">';
 					if($value['result_link'] != '' && $value['result_link'] !== NULL)
 					{
 						$outputStr .= '<a href="' . $value['result_link'] . '" style="color:#000;">';
@@ -6929,8 +6929,8 @@ class TrialTracker
 				}
 				else if($value['status'] == 'Pending')
 				{
-					$outputStr .= '<span ' . $upmTitle 
-					. '><img src="images/hourglass.png" alt="Hourglass" height="8px" width="8px" style="margin:3px; padding:10px;" border="0" /></span>';
+					$outputStr .= '<span title="' . $upmTitle 
+					. '"><img src="images/hourglass.png" alt="Hourglass" height="8px" width="8px" style="margin:3px; padding:10px;" border="0" /></span>';
 				}
 				$outputStr .= '</span></td>';		
 				
