@@ -169,7 +169,7 @@ a:visited {color:#6600bc;}  /* visited link */
 <table width="100%" border="0" class="TopBorder">
 	<tr>
     	<td width="33%" style="font-weight:bold; color:#FFFFFF; padding-left:5px;">
-        	Triazilla
+        	Trialzilla
         </td>
         <td width="33%" align="center">
 			<font style="color:#FFFFFF; font-size:11px; padding-top:0px; font-weight:bold;">
@@ -191,7 +191,7 @@ a:visited {color:#6600bc;}  /* visited link */
 	        	<img src="images/Larvol-Trial-Logo-notag.png" width="300" height="47" />
 	        </td>
 	        <td width="600px" style="vertical-align:bottom; padding-left:20px;" align="left">
-	        	<input class="SearchBox" type="text" value="<?php echo $globalOptions['TzSearch']; ?>" autocomplete="off" style="font-weight:bold;" name="TzSearch" id="TzSearch" />
+	        	<input class="SearchBox" type="text" value="<?php echo htmlspecialchars($globalOptions['TzSearch']); ?>" autocomplete="off" style="font-weight:bold;" name="TzSearch" id="TzSearch" />
 	        </td>
 	        <td style="vertical-align:bottom; padding-left:10px;" align="left">
 	        	<input type="submit" name="Search" title="Search" value="Search" style="vertical-align:bottom;" class="SearchBttn1" />
@@ -239,9 +239,8 @@ a:visited {color:#6600bc;}  /* visited link */
 			print'<tr>
     			  	<td style="border:0px; padding-left:5px;" align="left">
     		      		<a href="'. trim(urlPath()) .'intermediary.php?p='. trim($DataArray[$index]['id']) .'" title="Product" target="_blank">'.formatBrandName($DataArray[$index]['name'], 'product') . $DataArray[$index]['company'] .'</a>
-    		        	<br />
-						<font style="color:#009933; font-size:11px; padding-top:6px; font-weight:bold;" title="Link">'. trim(urlPath()) .'intermediary.php?p='. trim($DataArray[$index]['id']) .'</font>
-				  	</td>
+    		        	<br /><br style="line-height:6px;" />
+					</td>
     			  </tr>';
 		}
 	}
