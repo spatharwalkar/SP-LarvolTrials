@@ -10,7 +10,7 @@ require_once('include.excel.php');
 require_once 'PHPExcel/IOFactory.php';
 require_once('special_chars.php');
 require_once('include.util.php');
-
+$li_user=null;
 global $Sphinx_search;
 
 class TrialTracker
@@ -11658,6 +11658,7 @@ class TrialTracker
 	
 	function displayHeader($productAreaInfo)
 	{
+		global $li_user;
 		if(isset($_REQUEST['sphinx_s']))
 		{
 			echo '<input type="hidden" name="sphinx_s" value="'.$_REQUEST['sphinx_s'].'" />';
@@ -11666,14 +11667,15 @@ class TrialTracker
 		{
 			echo '<input type="hidden" name="sphinx_s" value="'.$globalOptions['sphinx_s'].'" />';
 		}
-		
 		if((isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') !== FALSE) 
 		|| (isset($_GET['LI']) && $_GET['LI'] == 1))
 		{
 			echo '<input type="hidden" name="LI" value="1" />';
+			$li_user='YES';
 		}
 		else
 		{
+			$li_user=null;
 			echo '<table width="100%">'
 					. '<tr><td><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" /></td>'
 					. '<td nowrap="nowrap"><span style="color:#ff0000;font-weight:normal;margin-left:40px;">Interface work in progress</span>'
@@ -14512,7 +14514,7 @@ class TrialTracker
 					$query = "SELECT `id`, `event_description`, `event_link`, `result_link`, `event_type`, `start_date`, `status`, " 
 							. " `start_date_type`, `end_date`, `end_date_type` FROM `upm` LEFT JOIN `upm_trials` ut ON ut.`upm_id` = upm.`id` WHERE `larvol_id` IS NULL AND `product` = '" . $rows['id'] 
 							. "' ORDER BY `end_date` ASC, `start_date` ASC ";
-					$res = mysql_query($query)  or tex('Bad SQL query getting unmatched upms ' . $sql);
+					$res = mysql_query($query)  or tex('Bad SQL query getting unmatched upms ' . $query);
 					if(mysql_num_rows($res) > 0) 
 					{
 						while($row = mysql_fetch_assoc($res)) 
@@ -14585,7 +14587,7 @@ class TrialTracker
 			$query = "SELECT `id`, `event_description`, `event_link`, `result_link`, `event_type`, `start_date`, `status`, " 
 							. " `start_date_type`, `end_date`, `end_date_type` FROM `upm` LEFT JOIN `upm_trials` ut ON ut.`upm_id` = upm.`id` WHERE `larvol_id` IS NULL AND `product` IN ('" . $productId 
 							. "') ORDER BY `end_date` ASC ";
-			$res = mysql_query($query)  or tex('Bad SQL query getting unmatched upms ' . $sql);
+			$res = mysql_query($query)  or tex('Bad SQL query getting unmatched upms ' . $query);
 			if(mysql_num_rows($res) > 0) 
 			{
 				while($row = mysql_fetch_assoc($res)) 
@@ -14941,7 +14943,8 @@ class TrialTracker
 	
 	function liLoggedIn()
 	{
-		if(isset($_COOKIE['li_user']))
+		global $li_user;
+		if( isset($_COOKIE['li_user']) or (isset($li_user) and $li_user == 'YES') )
 		{
 			return true;
 		}
