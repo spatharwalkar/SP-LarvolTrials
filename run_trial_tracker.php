@@ -14418,8 +14418,8 @@ class TrialTracker
 		$values = array();
 		
 		if($timeMachine === NULL) $timeMachine = $now;
-		
-		$result = mysql_query("SELECT upm.`id`, upm.`event_type`, upm.`event_description`, upm.`event_link`, upm.`result_link`, upm.`start_date`, upm.`end_date`, upm.`status` FROM upm RIGHT JOIN upm_trials ut ON upm.`id` = ut.`upm_id` LEFT JOIN data_trials dt ON dt.`larvol_id` = ut.`larvol_id` WHERE dt.`source_id` = '" . $trialId . "' ORDER BY upm.`end_date` ASC, upm.`start_date` ASC ");
+		$trial_length=strlen($trialId);
+		$result = mysql_query("SELECT upm.`id`, upm.`event_type`, upm.`event_description`, upm.`event_link`, upm.`result_link`, upm.`start_date`, upm.`end_date`, upm.`status` FROM upm RIGHT JOIN upm_trials ut ON upm.`id` = ut.`upm_id` LEFT JOIN data_trials dt ON dt.`larvol_id` = ut.`larvol_id` WHERE left(dt.`source_id`," . $trial_length . ") = '" . $trialId . "' ORDER BY upm.`end_date` ASC, upm.`start_date` ASC ");
 		
 		$i = 0;			
 		while($row = mysql_fetch_assoc($result)) 
