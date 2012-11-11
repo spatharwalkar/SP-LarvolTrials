@@ -6,42 +6,42 @@ require_once('db.php');
 require_once('include.util.php');
 require_once('header.php');
 
-//allow only admins to continue
-if($db->loggedIn() and ($db->user->userlevel=='admin'||$db->user->userlevel=='root'))
-{
-	//continue;
-}
-else
-{
-	die(' Plelase login as admin to use this feature.');
-}
-
 // get all secondary ids and org ids into an arrays
 $query = "select a.secondary_id,a.org_study_id,a.larvol_id,nct_id from data_nct a";
 $sec_ids=array();	
-$org_ids=array();	
+$org_ids=array();
 $nctids=array();
 $allsourceids=array();
 $res1 		= mysql_query($query) ;
+if(isset($res1) and !empty($res1))
+{
 while($row = mysql_fetch_assoc($res1))
 {
 	$sec_ids[$row['secondary_id']] =  $row['larvol_id'];
 	$org_ids[$row['org_study_id']] = $row['larvol_id'];
+	
 	$nc= padnct($row['nct_id']);
 	$nctids[$nc] =  $row['larvol_id'];
 	$allsourceids[$nc] =  $row['larvol_id'];
 }
-
+}
 // get all eudract ids into an array
-$query ="select a.eudract_id,a.larvol_id,a.nct_id from data_eudract a";
-$eud_ids=array();	
+$query ="select a.eudract_id,a.sponsor_protocol_code,a.larvol_id,a.nct_id from data_eudract a";
+$eud_ids=array();
+	
 $euids=array();	
 $res1 		= mysql_query($query) ;
+if(isset($res1) and !empty($res1))
+{
 while($row = mysql_fetch_assoc($res1))
 {
 	$eud_ids[$row['eudract_id']] = $row['larvol_id'];
+	$sp_prot_code[$row['sponsor_protocol_code']] = $row['eudract_id'];
+	$sp_prot_code_lid[$row['sponsor_protocol_code']] = $row['larvol_id'];
 	$euids[$row['nct_id']] = $row['eudract_id'];
+	$euids_lid[$row['nct_id']] = $row['larvol_id'];
 	$allsourceids[$row['eudract_id']] = $row['larvol_id'];
+}
 }
 //delete unwanted  secondary_ids.
 
@@ -51,16 +51,28 @@ foreach($sec_ids as $key=>$val)
 	{
 		continue;
 	}
+	elseif (isset($sp_prot_code[$key]) and !empty($key) and $sp_prot_code_lid[$key]<>$val ) 
+	{
+		$sec_ids[$sp_prot_code[$key]] = $val; // store eudract id in place of sponsor protocol code for linking
+		unset($sec_ids[$key]);
+		continue;
+	}
 	else 
 	{
 		unset($sec_ids[$key]);
 	}
 }
-//delete unwanted  org_study_ids.
+
 foreach($org_ids as $key=>$val)
 {
 	if (array_key_exists($key, $eud_ids)and !empty($key) and $eud_ids[$key]<>$val) 
 	{
+		continue;
+	}
+	elseif ( ( isset($sp_prot_code[$key]) and array_key_exists($key, $sp_prot_code) ) and !empty($key) and $sp_prot_code[$key]<>$val ) 
+	{
+		$org_ids[$sp_prot_code[$key]] = $val; 
+		unset($org_ids[$key]);
 		continue;
 	}
 	else 
@@ -68,11 +80,11 @@ foreach($org_ids as $key=>$val)
 		unset($org_ids[$key]);
 	}
 }
-//delete unwanted  eudract_ids.
+
 foreach($eud_ids as $key=>$val)
 {
 	$as=array_search($key,$euids);
-	if ( isset($as) and $as)
+	if ( isset($as) and $as and $euids_lid[$as] <> $val)
 	{
 		continue;
 	}
@@ -81,23 +93,9 @@ foreach($eud_ids as $key=>$val)
 		unset($eud_ids[$key]);
 	}
 }
-foreach($euids as $key=>$val)
-{
-	if (array_key_exists($key, $nctids)and !empty($key) and $eud_ids[$val]<>$nctids[$key]) 
-	{
-		$eud_ids[$key]=$eud_ids[$val];
-		unset($eud_ids[$val]);
-		continue;
-	}
-	else 
-	{
-		unset($eud_ids[$val]);
-	}
-}
 
 $org_ids=array_merge($sec_ids,$org_ids,$eud_ids);
 
-/***** Remove the trials that are already linked from the list. */
 $nctids=array(); $nonnctids=array();
 foreach($org_ids as $tid=>$lid)
 {
@@ -107,6 +105,8 @@ foreach($org_ids as $tid=>$lid)
 $larvolids=implode(",", $nonnctids);
 $query = "select larvol_id from data_eudract where larvol_id in ($larvolids) ";
 $res1 		= mysql_query($query) ;
+if(isset($res1) and !empty($res1))
+{
 while($row = mysql_fetch_assoc($res1))
 {
 	$linked  = array_search( $row['larvol_id'], $org_ids); 
@@ -115,19 +115,22 @@ while($row = mysql_fetch_assoc($res1))
 		unset($org_ids[$linked]);
 	}
 }
-
+}
 $larvolids=implode(",", $nctids);
+pr($larvolids);
 $query = "select larvol_id from data_nct where larvol_id in ($larvolids) ";
 $res1 		= mysql_query($query) ;
-while($row = mysql_fetch_assoc($res1))
+if(isset($res1) and !empty($res1))
 {
-	$linked  = array_search( $row['larvol_id'], $org_ids); 
-	if($linked !== false) 
+	while($row = mysql_fetch_assoc($res1))
 	{
-		unset($org_ids[$linked]);
+		$linked  = array_search( $row['larvol_id'], $org_ids); 
+		if($linked !== false) 
+		{
+			unset($org_ids[$linked]);
+		}
 	}
 }
-
 unset($larvolids); unset($row); unset($nctids); unset($nonnctids);
 /*****/
 
