@@ -6,6 +6,17 @@ require_once('db.php');
 require_once('include.util.php');
 require_once('header.php');
 
+//allow only admins to continue
+if($db->loggedIn() and ($db->user->userlevel=='admin'||$db->user->userlevel=='root'))
+{
+	//continue;
+}
+else
+{
+	die(' Plelase login as admin to use this feature.');
+}
+
+
 // get all secondary ids and org ids into an arrays
 $query = "select a.secondary_id,a.org_study_id,a.larvol_id,nct_id from data_nct a";
 $sec_ids=array();	
