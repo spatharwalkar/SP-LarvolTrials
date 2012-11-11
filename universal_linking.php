@@ -43,7 +43,17 @@ while($row = mysql_fetch_assoc($res1))
 	$allsourceids[$row['eudract_id']] = $row['larvol_id'];
 }
 }
-//delete unwanted  secondary_ids.
+
+foreach($sec_ids as $key=>$val)  // To pick up ids with additional text with them
+{
+	$pos = stripos($key, 'EudraCT N');
+	if($pos !== false) 
+	{
+		$newkey=right($key,14);
+		unset($sec_ids[$key]);
+		$sec_ids[$newkey] = $val;
+	}
+}
 
 foreach($sec_ids as $key=>$val)
 {
@@ -62,6 +72,19 @@ foreach($sec_ids as $key=>$val)
 		unset($sec_ids[$key]);
 	}
 }
+
+
+foreach($org_ids as $key=>$val) // To pick up ids with additional text with them
+{
+	$pos = stripos($key, 'EudraCT N');
+	if($pos !== false) 
+	{
+		$newkey=right($key,14);
+		unset($org_ids[$key]);
+		$org_ids[$newkey] = $val;
+	}
+}
+
 
 foreach($org_ids as $key=>$val)
 {
@@ -95,7 +118,6 @@ foreach($eud_ids as $key=>$val)
 }
 
 $org_ids=array_merge($sec_ids,$org_ids,$eud_ids);
-
 $nctids=array(); $nonnctids=array();
 foreach($org_ids as $tid=>$lid)
 {
@@ -117,7 +139,7 @@ while($row = mysql_fetch_assoc($res1))
 }
 }
 $larvolids=implode(",", $nctids);
-pr($larvolids);
+
 $query = "select larvol_id from data_nct where larvol_id in ($larvolids) ";
 $res1 		= mysql_query($query) ;
 if(isset($res1) and !empty($res1))
@@ -148,12 +170,12 @@ if(isset($_POST['autolink_all']) and $_POST['autolink_all']='YES')
 		else $source='NCT';
 		$lid=$oid;
 		$strr=autolink_trials($sid,$lid,$source,$i);
-		/*
-		if($i>2)
+		
+		if($i>12)
 		{
 			exit;
 		}
-		*/
+		
 	}
 	return;
 }
