@@ -722,11 +722,12 @@ if($Rotation_Flg == 1)
 <link href="scripts/date/jdpicker.css" rel="stylesheet" type="text/css" media="screen" />
 <link href="css/popup_form.css" rel="stylesheet" type="text/css" media="all" />
 <link href="css/themes/cupertino/jquery-ui-1.8.17.custom.css" rel="stylesheet" type="text/css" media="screen" />
+<style type="text/css">
 <?php
 ///Below part is added cause sometimes in some browser does not seems to work as per inline css
 if($Rotation_Flg == 1)
 {
-	print '<style type="text/css">
+	print '
 		.box_rotate {
 		-moz-transform: rotate(270deg); /* For Firefox */
 		-o-transform: rotate(270deg); /* For Opera */
@@ -741,27 +742,11 @@ if($Rotation_Flg == 1)
 		writing-mode: tb-rl; /* For IE */
 		filter: flipv fliph;
 		/*font-family:"Courier New", Courier, monospace;*/
-	}
-	</style>
-	<style type="text/css">';
+		margin-bottom:2px;
+	}';
 	
 	foreach($columns as $col => $val)
 	{
-		$width = $Width_matrix[$col]['width'] - ($cols_Area_Lines[$col]*($Line_Height));
-		
-		if(strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') == FALSE) 
-		print '
-		.Area_RowDiv_Class_'.$col.' 
-		{
-			margin-left:'.((($Line_Height)*$cols_Area_Lines[$col]) + ($width/2.5)).'px;
-		}';
-		else
-		print '
-		.Area_RowDiv_Class_'.$col.' 
-		{
-			margin-left:'.($width/2).'px;
-		}';
-		
 		print '
 		.Area_Row_Class_'.$col.' 
 		{
@@ -775,53 +760,20 @@ if($Rotation_Flg == 1)
 		
 		if($columns_Span[$col] > 0)
 		{
-			if($Cat_Area_Rotation[$col])
-			{
-				$width = $Cat_Area_Col_width[$col] - ($cols_Cat_Lines[$col]*($Line_Height));
-				
-				if(strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') == FALSE) 
-				print '
-						.Cat_RowDiv_Class_'.$col.' 
-						{
-							margin-left:'.((($Line_Height)*$cols_Cat_Lines[$col]) + ($width/1.5)).'px;
-						}
-					';
-				else
-				print '
-						.Cat_RowDiv_Class_'.$col.' 
-						{
-							margin-left:'.($width/2).'px;
-						}
-					';
-			}
 			print '
-					.Cat_Area_Row_Class_'.$col.' 
+				.Cat_Area_Row_Class_'.$col.' 
+				{
+					width:'.$Cat_Area_Col_width[$col].'px;
+					max-width:'.$Cat_Area_Col_width[$col].'px;';
+					if($Cat_Area_Rotation_Flg)
 					{
-						width:'.$Cat_Area_Col_width[$col].'px;
-						max-width:'.$Cat_Area_Col_width[$col].'px;';
-						if($Cat_Area_Rotation_Flg)
-						{
-							print '	height:'.($area_Cat_Height).'px;
-								_height:'.($area_Cat_Height).'px;';
-						}
+						print '	height:'.($area_Cat_Height).'px;
+							_height:'.($area_Cat_Height).'px;';
+					}
 			print '}';
 		}
 	}
 	
-	$width = $Total_Col_width - $Line_Height;
-	if(strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') == FALSE) 
-	print '
-		.Total_RowDiv_Class 
-		{
-			margin-left:'.($Line_Height + ($width/2)).'px;
-		}';
-	else
-		print '
-		.Total_RowDiv_Class 
-		{
-			margin-left:'.(($width/2)).'px;
-		}';
-		
 	print '	
 		.Total_Row_Class_height 
 		{
@@ -838,8 +790,6 @@ if($Rotation_Flg == 1)
 }
 else
 {
-	print '<style type="text/css">';
-	
 	foreach($columns as $col => $val)
 	{
 		print '
@@ -856,10 +806,8 @@ else
 			width:110px;
 			max-width:110px;
 		}
-		';
-	
+		';	
 }
-
 ?>
 </style>
 <style type="text/css">
@@ -1429,15 +1377,13 @@ function change_view()
 					document.getElementById("ToolTip_Visible_"+i).value = "1"
 					if(qualify_flg == 1)
 					{
-						document.getElementById("Cell_ID_"+i).style.border = "#FFFFFF solid 2px";
-						document.getElementById("Cell_ID_"+i).style.outline = "#FF0000 solid 2px";
-						//document.getElementById("Cell_ID_"+i).style.backgroundColor = "#FFFFFF";
+						document.getElementById("Cell_ID_"+i).style.border = "#FF0000 solid";
+						document.getElementById("Cell_ID_"+i).style.backgroundColor = "#FFFFFF";
 					}
 					else
 					{
-						document.getElementById("Cell_ID_"+i).style.border = "#"+Cell_values_Arr[14]+" solid 2px";
-						document.getElementById("Cell_ID_"+i).style.outline = "#"+Cell_values_Arr[14]+" solid 2px";
-						//document.getElementById("Cell_ID_"+i).style.backgroundColor = "#"+Cell_values_Arr[14];
+						document.getElementById("Cell_ID_"+i).style.border = "#"+Cell_values_Arr[14]+" solid";
+						document.getElementById("Cell_ID_"+i).style.backgroundColor = "#"+Cell_values_Arr[14];
 					}
 				}
 				else
@@ -1457,10 +1403,10 @@ function change_view()
 					{
 						document.getElementById("ToolTip_Visible_"+i).value = "0";
 					}
-					document.getElementById("Cell_ID_"+i).style.border = "#"+Cell_values_Arr[14]+" solid 2px";
-					document.getElementById("Cell_ID_"+i).style.outline = "#"+Cell_values_Arr[14]+" solid 2px";
-					//document.getElementById("Cell_ID_"+i).style.backgroundColor = "#"+Cell_values_Arr[14];
+					document.getElementById("Cell_ID_"+i).style.border = "#"+Cell_values_Arr[14]+" solid";
+					document.getElementById("Cell_ID_"+i).style.backgroundColor = "#"+Cell_values_Arr[14];
 				}
+				document.getElementById("Div_ID_"+i).title = '';
 				document.getElementById("Cell_Link_"+i).title = '';
 				if(bomb_ele != null && bomb_ele != '')
 				document.getElementById("Cell_Bomb_"+i).title = '';
@@ -1656,7 +1602,7 @@ function refresh_data(cell_id)
                 var headerPosition = $(header).offset();
                 var tablePosition = $(realTable).offset();
                 
-                var container = $('<table border="0" cellspacing="6" cellpadding="0" style="vertical-align:middle; background-color:#FFFFFF;" class="display" id="hmMainTable1"></table>');
+                var container = $('<table border="0" cellspacing="2" cellpadding="0" style="vertical-align:middle; background-color:#FFFFFF;" class="display" id="hmMainTable1"></table>');
                 
                 // Copy attributes from old table (may not be what you want)
                 for (var i = 0; i < realTable[0].attributes.length; i++) {
@@ -1749,7 +1695,7 @@ function refresh_data(cell_id)
             $.fn.reverse = [].reverse;
 			if(!ScrollOn)
 			{
-            	//setAreaColWidth();
+            	setAreaColWidth();
 				ScrollOn = true;
 			}
             var createGhostHeader = function (header, topOffset, leftOffset) {
@@ -1769,7 +1715,7 @@ function refresh_data(cell_id)
                 var headerPosition = $(header).offset();
                 var tablePosition = $(realTable).offset();
                 
-                var container = $('<table border="0" cellspacing="6" cellpadding="0" style="vertical-align:middle; background-color:#FFFFFF;" class="display" id="hmMainTable1"></table>');
+                var container = $('<table border="0" cellspacing="2" cellpadding="0" style="vertical-align:middle; background-color:#FFFFFF;" class="display" id="hmMainTable1"></table>');
                 
                 // Copy attributes from old table (may not be what you want)
                 for (var i = 0; i < realTable[0].attributes.length; i++) {
@@ -1884,12 +1830,12 @@ function refresh_data(cell_id)
 								{
 									if(cell_type2.value.replace(/\s+/g, '') == 'area' && cell_col2.value.replace(/\s+/g, '') == cell_col.value.replace(/\s+/g, ''))
 									{
-										//cell_exist2.style.width = (cell_exist.offsetWidth) + "px";
+										cell_exist2.style.width = (cell_exist.offsetWidth) + "px";
 										$.browser.chrome = /chrome/.test(navigator.userAgent.toLowerCase()); 
 										if(!$.browser.chrome)
 										{
-											//cell_exist2.style.border = 'solid rgb(221, 221, 255) 1px';
-											//cell_exist2.style.padding = '1px';
+											cell_exist2.style.border = 'solid rgb(221, 221, 255)';
+											cell_exist2.style.padding = '1px';
 										} // chrome does not need borders to be specified but other browsers need it ?>
 									}
 								}
@@ -1977,15 +1923,18 @@ $htmlContent  .= '<div id="dropmenu" class="dropmenudiv" style="width: 310px;">'
 				.'</div><script type="text/javascript">cssdropdown.startchrome("chromemenu");</script></form>';
 						
 $htmlContent .= '<div align="center" style="vertical-align:top;">'
-			. '<table border="0" cellspacing="6" cellpadding="0" style="vertical-align:middle; background-color:#FFFFFF;" class="display" id = "hmMainTable">'
-			. '<thead id = "hmMainTable_Header"><tr><th id="hmMainTable_HeaderFirstCell" style="background-color:#FFFFFF; border:#FFFFFF solid 2px; outline:solid #FFFFFF 2px;"></th>';
+			. '<table border="0" cellspacing="2" cellpadding="0" style="vertical-align:middle; background-color:#FFFFFF; ';
+			if(strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') == FALSE)
+				$htmlContent .=' height:100%;';	///100% height causes unwanted stretching of table cell in IE but it requires specially for chrome for div scaling
+$htmlContent .='" class="display" id = "hmMainTable">'
+			. '<thead id = "hmMainTable_Header"><tr><th id="hmMainTable_HeaderFirstCell" style="background-color:#FFFFFF;"></th>';
 						
 foreach($columns as $col => $val)
 {
 	if($columns_Span[$col] > 0)
 	{
 		$online_HMCounter++;
-		$htmlContent .= '<th class="Cat_Area_Row_Class_'.$col.'" width="'.$Cat_Area_Col_width[$col].'px" style="'.(($Cat_Area_Rotation[$col]) ? 'vertical-align:bottom;':'vertical-align:middle;').'max-width:'.$Cat_Area_Col_width[$col].'px;background-color:#FFFFFF; outline:solid #FFFFFF 2px; '.(($columnsCategoryName[$col] != 'Undefined') ? 'border:#000000 solid 2px; border-bottom:#FFFFFF solid 2px;':'border:#FFFFFF solid 2px;').'" id="Cell_ID_'.$online_HMCounter.'" colspan="'.$columns_Span[$col].'" '.(($Cat_Area_Rotation[$col]) ? 'height="'.$area_Cat_Height.'px" align="left"':'align="center"').'><div class="'.(($Cat_Area_Rotation[$col]) ? 'box_rotate Cat_RowDiv_Class_'.$col.' ':'break_words').'">';
+		$htmlContent .= '<th class="Cat_Area_Row_Class_'.$col.'" width="'.$Cat_Area_Col_width[$col].'px" style="'.(($Cat_Area_Rotation[$col]) ? 'vertical-align:bottom;':'vertical-align:middle;').'max-width:'.$Cat_Area_Col_width[$col].'px;background-color:#FFFFFF; '.(($columnsCategoryName[$col] != 'Undefined') ? 'border-left:#000000 solid 2px; border-top:#000000 solid 2px; border-right:#000000 solid 2px;':'border:#FFFFFF solid 2px;').'" id="Cell_ID_'.$online_HMCounter.'" colspan="'.$columns_Span[$col].'" '.(($Cat_Area_Rotation[$col]) ? 'height="'.$area_Cat_Height.'px" align="left"':'align="center"').'><div class="'.(($Cat_Area_Rotation[$col]) ? 'box_rotate Cat_RowDiv_Class_'.$col.' ':'break_words').'">';
 		if($columnsCategoryName[$col] != 'Undefined' && $Rotation_Flg == 1 && $Cat_Area_Rotation[$col])
 		{
 			$cat_name = str_replace(' ',' ',trim($columnsCategoryName[$col]));
@@ -2004,10 +1953,10 @@ foreach($columns as $col => $val)
 
 if($total_fld)
 {
-	$htmlContent .= '<th style="background-color:#FFFFFF; border:#FFFFFF solid 2px; outline:solid #FFFFFF 2px;" id="CatTotalCol">&nbsp;</th>';
+	$htmlContent .= '<th style="background-color:#FFFFFF; border:#FFFFFF solid 2px;" id="CatTotalCol">&nbsp;</th>';
 } 
 //width="'.$product_Col_Width.'px" currently not needed
-$htmlContent .= '</tr><tr><th '.(($Rotation_Flg == 1) ? 'height="'.$area_Col_Height.'px"':'').' class="Product_Row_Class" style="background-color:#FFFFFF; border:#FFFFFF solid 2px; outline:solid #FFFFFF 2px;">&nbsp;</th>';
+$htmlContent .= '</tr><tr><th '.(($Rotation_Flg == 1) ? 'height="'.$area_Col_Height.'px"':'').' class="Product_Row_Class" style="background-color:#FFFFFF;">&nbsp;</th>';
 
 
 foreach($columns as $col => $val)
@@ -2018,7 +1967,7 @@ foreach($columns as $col => $val)
 	$caltTitle = (isset($cdesc) && $cdesc != '')?' alt="'.$cdesc.'" title="'.$cdesc.'" ':null;
 	$cat = (isset($columnsCategoryName[$col]) && $columnsCategoryName[$col] != '')? ' ('.$columnsCategoryName[$col].') ':'';
 		
-	$htmlContent .= '<th style="'.(($Rotation_Flg == 1) ? 'vertical-align:bottom;':'vertical-align:middle;').'  background-color:#DDF;  border:#DDF solid 2px; outline:solid #DDF 2px;" class="Area_Row_Class_'.$col.'" id="Cell_ID_'.$online_HMCounter.'" '.(($Rotation_Flg == 1) ? 'height="'.$area_Col_Height.'px" align="left"':'align="center"').' '.$caltTitle.'><div class="'.(($Rotation_Flg == 1) ? 'box_rotate Area_RowDiv_Class_'.$col.'':'break_words').'" style="background-color:#DDF;">';
+	$htmlContent .= '<th style="'.(($Rotation_Flg == 1) ? 'vertical-align:bottom;':'vertical-align:middle;').'  background-color:#DDF;" class="Area_Row_Class_'.$col.'" id="Cell_ID_'.$online_HMCounter.'" '.(($Rotation_Flg == 1) ? 'height="'.$area_Col_Height.'px" align="left"':'align="center"').' '.$caltTitle.'><div class="'.(($Rotation_Flg == 1) ? 'box_rotate Area_RowDiv_Class_'.$col.'':'break_words').'" style="background-color:#DDF;">';
 	
 	$htmlContent .= '<input type="hidden" value="area" name="Cell_Type_'.$online_HMCounter.'" id="Cell_Type_'.$online_HMCounter.'" />';
 	$htmlContent .= '<input type="hidden" value="'.$col.'" name="Cell_ColNum_'.$online_HMCounter.'" id="Cell_ColNum_'.$online_HMCounter.'" />';
@@ -2056,7 +2005,7 @@ foreach($columns as $col => $val)
 if($total_fld)
 {
 	$online_HMCounter++;
-	$htmlContent .= '<th id="Cell_ID_'.$online_HMCounter.'" '.(($Rotation_Flg == 1) ? 'height="'.$area_Col_Height.'px" align="left"':'align="center"').' style="'.(($Rotation_Flg == 1) ? 'vertical-align:bottom;':'vertical-align:middle;').' background-color:#DDF; border:#DDF solid 2px; outline:solid #DDF 2px;" class="Total_Row_Class_width Total_Row_Class_height"><div class="box_rotate Total_RowDiv_Class">';
+	$htmlContent .= '<th id="Cell_ID_'.$online_HMCounter.'" '.(($Rotation_Flg == 1) ? 'height="'.$area_Col_Height.'px" align="left"':'align="center"').' style="'.(($Rotation_Flg == 1) ? 'vertical-align:bottom;':'vertical-align:middle;').' background-color:#DDF; border:#DDF solid 2px;" class="Total_Row_Class_width Total_Row_Class_height"><div class="box_rotate Total_RowDiv_Class">';
 	if(!empty($productIds) && !empty($areaIds))
 	{
 		$productIds = array_filter($productIds);
@@ -2080,7 +2029,7 @@ foreach($rows as $row => $rval)
 	{
 		$online_HMCounter++;
 		
-		$htmlContent .='<tr style="vertical-align:middle; background-color: #A2FF97;"><td align="left" style="vertical-align:middle; background-color: #A2FF97;  border:#A2FF97 solid 2px; outline:solid #A2FF97 2px; padding-left:4px;" colspan="'.((count($columns)+1)+(($total_fld)? 1:0)).'" id="Cell_ID_'.$online_HMCounter.'">';
+		$htmlContent .='<tr style="vertical-align:middle; background-color: #A2FF97;"><td align="left" style="vertical-align:middle; background-color: #A2FF97; padding-left:4px;" colspan="'.((count($columns)+1)+(($total_fld)? 1:0)).'" id="Cell_ID_'.$online_HMCounter.'">';
 		if($dtt)
 		{
 			$htmlContent .= '<input type="hidden" value="0,endl,0,endl,0" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
@@ -2106,7 +2055,7 @@ foreach($rows as $row => $rval)
 	
 	
 	
-	$htmlContent .='<th class="product_col break_words Product_Col_WidthStyle" style="padding-left:4px;  border:#DDF solid 2px; outline:solid #DDF 2px; vertical-align:middle; '.(($Rotation_Flg == 1) ? 'width:'.$product_Col_Width.'px; max-width:'.$product_Col_Width.'px;':'').'" id="Cell_ID_'.$online_HMCounter.'" '.$raltTitle.'><div align="left" style="vertical-align:middle;">';
+	$htmlContent .='<th class="product_col break_words Product_Col_WidthStyle" style="padding-left:4px; vertical-align:middle; '.(($Rotation_Flg == 1) ? 'width:'.$product_Col_Width.'px; max-width:'.$product_Col_Width.'px;':'').'" id="Cell_ID_'.$online_HMCounter.'" '.$raltTitle.'><div align="left" style="vertical-align:middle;">';
 			
 	$htmlContent .= '<input type="hidden" value="product" name="Cell_Type_'.$online_HMCounter.'" id="Cell_Type_'.$online_HMCounter.'" />';
 	$htmlContent .= '<input type="hidden" value="'.$row.'" name="Cell_RowNum_'.$online_HMCounter.'" id="Cell_RowNum_'.$online_HMCounter.'" />';
@@ -2128,32 +2077,25 @@ foreach($rows as $row => $rval)
 		$Td_Style = '';
 		if($data_matrix[$row][$col]['total'] != 0 || $data_matrix[$row][$col]['phase4_override'])
 		{
-			$Td_Style = 'background-color:#'.$data_matrix[$row][$col]['color_code'].'; border:#'.$data_matrix[$row][$col]['color_code'].' solid 2px; outline:solid #'.$data_matrix[$row][$col]['color_code'].' 2px;';
+			$Td_Style = 'background-color:#'.$data_matrix[$row][$col]['color_code'].'; border:#'.$data_matrix[$row][$col]['color_code'].' solid;';
 		}
 		else if($data_matrix[$row][$col]['preclinical'])
 		{
-			$Td_Style = 'background-color:#aed3dc; border:#aed3dc solid 2px; outline:solid #aed3dc 2px;';
+			$Td_Style = 'background-color:#aed3dc; border:#aed3dc solid;';
 		}
 		else
 		{
 			if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL)
 			{
-				if($data_matrix[$row][$col]['total'] != 0)
-				{
-					$Td_Style = 'background-color:#'.$data_matrix[$row][$col]['color_code'].'; border:#'.$data_matrix[$row][$col]['color_code'].' solid 2px; outline:solid #'.$data_matrix[$row][$col]['color_code'].' 2px;';
-				}
-				else
-				{
-					$Td_Style = 'background-color:#e6e6e6; border:#e6e6e6 solid 2px; outline:solid #e6e6e6 2px;';
-					$data_matrix[$row][$col]['color_code'] = 'e6e6e6';
-					$data_matrix[$row][$col]['div_start_style'] = 'background-color:#e6e6e6;';
-				}
+				$Td_Style = 'background-color:#e6e6e6; border:#e6e6e6 solid;';
+				$data_matrix[$row][$col]['color_code'] = 'e6e6e6';
+				$data_matrix[$row][$col]['div_start_style'] = 'background-color:#e6e6e6;';
 			}
 			else
-			$Td_Style = 'background-color:#ddf; border:#ddf solid 2px; outline:solid #DDF 2px;';
+			$Td_Style = 'background-color:#ddf; border:#ddf solid;';
 		}
 		
-		$htmlContent .= '<td class="tooltip" valign="middle" id="Cell_ID_'.$online_HMCounter.'" style="'. $Td_Style .' min-width:'.$Width_matrix[$col]['width'].'px;  max-width:'.$Width_matrix[$col]['width'].'px; vertical-align:middle; text-align:center; height:100%;" align="center" onmouseover="display_tooltip(\'on\','.$online_HMCounter.');" onmouseout="display_tooltip(\'off\','.$online_HMCounter.');">';
+		$htmlContent .= '<td class="tooltip" valign="middle" id="Cell_ID_'.$online_HMCounter.'" style="'. $Td_Style .' padding:1px; min-width:'.$Width_matrix[$col]['width'].'px;  max-width:'.$Width_matrix[$col]['width'].'px; vertical-align:middle; text-align:center; height:100%;" align="center" onmouseover="display_tooltip(\'on\','.$online_HMCounter.');" onmouseout="display_tooltip(\'off\','.$online_HMCounter.');">';
 	
 		$htmlContent .= '<input type="hidden" value="HM_Cell" name="Cell_Type_'.$online_HMCounter.'" id="Cell_Type_'.$online_HMCounter.'" />';
 		$htmlContent .= '<input type="hidden" value="'.$row.'" name="Cell_RowNum_'.$online_HMCounter.'" id="Cell_RowNum_'.$online_HMCounter.'" />';
@@ -2161,6 +2103,9 @@ foreach($rows as $row => $rval)
 	
 		if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL)
 		{
+			
+			$htmlContent .= '<div id="Div_ID_'.$online_HMCounter.'" style="'.$data_matrix[$row][$col]['div_start_style'].' width:100%; height:100%; max-height:inherit; _height:100%;  vertical-align:middle; float:none; display:table;">';
+			
 			$htmlContent .= '<input type="hidden" value="'.$data_matrix[$row][$col]['active'].',endl,'.$data_matrix[$row][$col]['total'].',endl,'.$data_matrix[$row][$col]['indlead'].',endl,'.$data_matrix[$row][$col]['active_prev'].',endl,'.$data_matrix[$row][$col]['total_prev'].',endl,'.$data_matrix[$row][$col]['indlead_prev'].',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['last_update'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['last_update'])).',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['count_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['count_lastchanged'])).',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])).',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['filing_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['filing_lastchanged'])).',endl,'.$data_matrix[$row][$col]['color_code'].',endl,'.$data_matrix[$row][$col]['bomb']['value'].',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['phase_explain_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['phase_explain_lastchanged'])).',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['phase4_override_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['phase4_override_lastchanged'])).',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['highest_phase_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['highest_phase_lastchanged'])).',endl,\''.$data_matrix[$row][$col]['highest_phase_prev'].'\'" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
 			
 			$htmlContent .= '<input type="hidden" value="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />';
@@ -2179,6 +2124,9 @@ foreach($rows as $row => $rval)
 			if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
 			$htmlContent .= '<img id="Cell_Filing_'.$online_HMCounter.'" src="images/new_file.png" title="Filing Details" style="width:17px; height:17px; vertical-align:middle; cursor:pointer; margin-left:1px;" alt="Filing" />';
 				
+			
+			$htmlContent .= '</div>'; ///Div complete to avoid panel problem
+					
 			//Tool Tip Starts Here
 			$htmlContent .= '<span id="ToolTip_ID_'.$online_HMCounter.'" class="classic" style="text-align:left;">'
 							.'<input type="hidden" value="0" name="ToolTip_Visible_'.$online_HMCounter.'" id="ToolTip_Visible_'.$online_HMCounter.'" />';	
@@ -2534,7 +2482,7 @@ foreach($rows as $row => $rval)
 		}
 		else
 		{
-			$htmlContent .= '&nbsp;';
+			$htmlContent .= '<div id="Div_ID_'.$online_HMCounter.'" style="width:100%; height:100%; max-height:inherit; _height:100%;  vertical-align:middle; float:none; display:table;">&nbsp;</div>';
 		}
 		
 		$htmlContent .= '</td>';
@@ -2543,7 +2491,7 @@ foreach($rows as $row => $rval)
 	//if total checkbox is selected
 	if($total_fld)
 	{
-		$htmlContent .= '<th class="Total_Row_Class_width break_words" style="background-color:#DDF; border:#DDF solid 2px; outline:solid #DDF 2px; min-width:'.$Total_Col_width.'px;  max-width:'.$Total_Col_width.'px; vertical-align:middle; text-align:center; height:100%;" align="center"><div class="Total_RowDiv_Class" style="float:none;">&nbsp;</div></th>';
+		$htmlContent .= '<th class="Total_Row_Class_width break_words" style="background-color:#DDF; border:#DDF solid 2px; min-width:'.$Total_Col_width.'px;  max-width:'.$Total_Col_width.'px; vertical-align:middle; text-align:center; height:100%;" align="center"><div class="Total_RowDiv_Class" style="float:none;">&nbsp;</div></th>';
 	}
 		
 	$htmlContent .= '</tr>';
@@ -2592,6 +2540,36 @@ if($db->loggedIn())
 ?>
 </body>
 </html>
+<script type="text/javascript">
+/* Now browser specific width is set using JS browser detection as browser detection via php does not seems to work in LI IFRAME*/
+$.browser.ie = /msie/.test(navigator.userAgent.toLowerCase());
+<?php
+if($Rotation_Flg == 1)
+{
+
+	foreach($columns as $col => $val)
+	{
+		$width = $Width_matrix[$col]['width'] - ($cols_Area_Lines[$col]*($Line_Height));
+		
+		print "if(!$.browser.ie) { $('.Area_RowDiv_Class_".$col."').css('margin-left','".((($Line_Height)*$cols_Area_Lines[$col]) + ($width/2.5))."px'); } else { $('.Area_RowDiv_Class_".$col."').css('padding-right','".(($width/2))."px'); }";
+
+		if($columns_Span[$col] > 0)
+		{
+			if($Cat_Area_Rotation[$col])
+			{
+				$width = $Cat_Area_Col_width[$col] - ($cols_Cat_Lines[$col]*($Line_Height));
+				
+				print "if(!$.browser.ie) { $('.Cat_RowDiv_Class_".$col."').css('margin-left','".((($Line_Height)*$cols_Cat_Lines[$col]) + ($width/1.5))."px'); } else { $('.Cat_RowDiv_Class_".$col."').css('padding-right','".(($width/2))."px'); }";
+			}
+		}
+	}
+	
+	$width = $Total_Col_width - $Line_Height;
+	print "if(!$.browser.ie) { $('.Total_RowDiv_Class').css('margin-left','".($Line_Height + ($width/2))."px'); } else { $('.Total_RowDiv_Class').css('padding-right','".(($width/2))."px'); }";
+}
+?>
+</script>
+
 <script language="javascript" type="text/javascript">
 change_view();
 var winWidth = $(window).width();
