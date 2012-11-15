@@ -7128,7 +7128,8 @@ class TrialTracker
 							$sectionHeader = '';
 							if($row['category'] != '' && $row['category'] !== NULL)
 							{
-								$sectionHeader = $row['category'];
+								// product category names not required in ott
+								//$sectionHeader = $row['category'];
 							}
 							
 							if($row['coverage_area'])
@@ -7399,7 +7400,8 @@ class TrialTracker
 							
 							if($row['category'] != '' && $row['category'] !== NULL && $row['category'] !== 'NULL')
 							{
-								$sectionHeader .= $row['category'];
+								// product category names not required in ott
+								//$sectionHeader .= $row['category'];
 							}
 							if($row['display_name'] != '' && $row['display_name'] !== NULL && $row['display_name'] !== 'NULL')
 							{
@@ -7530,7 +7532,8 @@ class TrialTracker
 							
 							if($row['category'] != '' && $row['category'] !== NULL && $row['category'] !== 'NULL')
 							{
-								$sectionHeader = $row['category'];
+								// product category names not required in ott
+								//$sectionHeader = $row['category'];
 							}
 							
 							if($row['display_name'] != '' && $row['display_name'] !== NULL && $row['display_name'] !== 'NULL')
@@ -7640,7 +7643,8 @@ class TrialTracker
 							$areaId = $row['type_id'];
 							if($row['category'] != '' && $row['category'] !== NULL)
 							{
-								$sectionHeader .= $row['category'];
+								// product category names not required in ott
+								// $sectionHeader .= $row['category'];
 							}
 							
 							if($row['coverage_area'])
@@ -7927,7 +7931,8 @@ class TrialTracker
 							$areaId = $row['id'];
 							if($row['category'] != '' && $row['category'] !== NULL)
 							{
-								$sectionHeader = $row['category'];
+								// product category names not required in ott
+								//$sectionHeader = $row['category'];
 							}
 							
 							if($row['display_name'] != '' && $row['display_name'] !== NULL)
