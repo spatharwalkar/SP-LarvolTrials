@@ -41,7 +41,7 @@ function find_product($q)
 	if ( $select )				$cl->SetSelect ( $select );
 	if ( $limit )				$cl->SetLimits ( $offset, $limit, ( $limit>1000 ) ? $limit : 1000 );
 	$cl->SetRankingMode ( $ranker );
-	if(strlen($q)>=4) $q = '*'.$q.'*';
+	if(strlen($q)>=2) $q = '*'.$q.'*';
 	$res = $cl->Query ( $q, $index );
 
 	if ( $res===false )
