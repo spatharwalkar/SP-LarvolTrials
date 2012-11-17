@@ -1835,7 +1835,8 @@ function refresh_data(cell_id)
 										if(!$.browser.chrome)
 										{
 											cell_exist2.style.border = 'solid rgb(221, 221, 255)';
-											cell_exist2.style.padding = '1px';
+											cell_exist2.style.paddingLeft = '1px';
+											cell_exist2.style.paddingRight = '1px';
 										} // chrome does not need borders to be specified but other browsers need it ?>
 									}
 								}
@@ -2566,6 +2567,8 @@ if($Rotation_Flg == 1)
 	
 	$width = $Total_Col_width - $Line_Height;
 	print "if(!$.browser.ie) { $('.Total_RowDiv_Class').css('margin-left','".($Line_Height + ($width/2))."px'); } else { $('.Total_RowDiv_Class').css('padding-right','".(($width/2))."px'); }";
+	
+	print "if(!$.browser.ie) { $('.box_rotate').css('margin-bottom','4px'); } else { $('.box_rotate').css('padding-top','4px'); }";
 }
 ?>
 </script>
