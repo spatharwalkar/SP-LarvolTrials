@@ -6302,18 +6302,18 @@ class TrialTracker
 		
 		$where = " rmh.`report` = '" . $hmId . "' AND rmh.`type` = 'product' ";
 		$from = " `rpt_masterhm_headers` rmh ";
-		$join = " `products` pr ON pr.`id` = rmh.`type_id` ";
+		$join = "  JOIN `products` pr ON pr.`id` = rmh.`type_id` ";
 		
 		if(!empty($productIds))
 		{
 			$from = " `products` pr ";
-			$join = " `rpt_masterhm_headers` rmh ON rmh.`type_id` = pr.`id` ";
+			$join = " LEFT JOIN `rpt_masterhm_headers` rmh ON rmh.`type_id` = pr.`id` ";
 			$where .= " AND pr.`id` IN ('" . implode("','", $productIds) . "') OR pr.LI_id IN ('" . implode("','", $productIds) . "') ";
 		}
 		
 		$Query = "SELECT pr.`id`, pr.`name`, pr.`company`, pr.`discontinuation_status`, rmh.`display_name`, rmh.`category`, rmh.`tag` "
 						. " FROM " . $from
-						. " LEFT JOIN " . $join
+						. $join
 						. " WHERE " . $where;
 		$Res = mysql_query($Query);
 		if($Res)
@@ -7172,6 +7172,7 @@ class TrialTracker
 		$Values['enrollment'] = 0;
 		$Values['totactivecount'] = 0;
 		$Values['totinactivecount'] = 0;
+		$Values['totalcount'] = 0;
 		$Values['count'] = 0;
 		
 		$pIds = array();
