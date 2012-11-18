@@ -10,41 +10,27 @@ require_once('include.excel.php');
 require_once 'PHPExcel/IOFactory.php';
 require_once('special_chars.php');
 require_once('include.util.php');
-$li_user=null;
+
 global $Sphinx_search;
 
 class TrialTracker
 {
-	private $fid = array();
 	private $inactiveStatusValues = array();
 	private $activeStatusValues = array();
 	private $allStatusValues = array();
-	private $resultsPerPage = 100;
 	private $phaseValues = array();
-	
 	private $statusFilters = array();
 	private $phaseFilters = array();
 	private $institutionFilters = array();
 	private $regionFilters = array();
 	
+	private $resultsPerPage = 100;
+	private $timeMachine;
+	private $timeInterval;
+	private $fieldNames = array();
+	
 	function TrialTracker()
 	{
-		$this->fid['nct_id'] 					= '_' . getFieldId('NCT', 'nct_id');
-		$this->fid['overall_status'] 			= '_' . getFieldId('NCT', 'overall_status');
-		$this->fid['brief_title'] 				= '_' . getFieldId('NCT', 'brief_title');
-		$this->fid['sponsor'] 					= '_' . getFieldId('NCT', 'lead_sponsor');
-		$this->fid['collaborator'] 				= '_' . getFieldId('NCT', 'collaborator');
-		$this->fid['condition'] 				= '_' . getFieldId('NCT', 'condition');
-		$this->fid['intervention_name'] 		= '_' . getFieldId('NCT', 'intervention_name');
-		$this->fid['phase'] 					= '_' . getFieldId('NCT', 'phase');
-		$this->fid['enrollment'] 				= '_' . getFieldId('NCT', 'enrollment');
-		$this->fid['enrollment_type'] 			= '_' . getFieldId('NCT', 'enrollment_type');
-		$this->fid['start_date'] 				= '_' . getFieldId('NCT', 'start_date');
-		$this->fid['acronym'] 					= '_' . getFieldId('NCT', 'acronym');
-		$this->fid['inactive_date']				= 'inactive_date';
-		$this->fid['institution_type'] 			= 'institution_type';
-		$this->fid['region']					= 'region';
-		
 		$this->inactiveStatusValues = array('Withheld', 'Approved for marketing', 'Temporarily not available', 'No Longer Available', 
 									'Withdrawn', 'Terminated','Suspended', 'Completed');
 									
@@ -68,78 +54,46 @@ class TrialTracker
 		$this->regionFilters = array('US','Canada','Japan','Europe','RestOfWorld');
 		
 		$this->institutionFilters = getEnumValues('clinical_study', 'institution_type');
+		
+		$this->fieldNames = array('end_date_lastchanged', 'region_lastchanged', 'brief_title_lastchanged', 'acronym_lastchanged', 'lead_sponsor_lastchanged',
+							'overall_status_lastchanged', 'phase_lastchanged', 'enrollment_lastchanged', 'enrollment_type_lastchanged',
+							'collaborator_lastchanged', 'condition_lastchanged', 'intervention_name_lastchanged', 'start_date_lastchanged');
 	}
 	
-	function generateTrialTracker($format, $resultIds, $timeMachine = NULL, $ottType, $globalOptions = array())
+	function generateTrialTracker($format, $resultIds, $globalOptions = array())
 	{	
 		global $Sphinx_search;
 		switch($format)
 		{
-			case 'xml':
-				$this->generateXmlFile($resultIds, $timeMachine, $ottType, $globalOptions);
-				break;
 			case 'excel':
-				$this->generateExcelFile($resultIds, $timeMachine, $ottType, $globalOptions);
+				$this->generateExcelFile($resultIds, $globalOptions);
 				break;
 			case 'pdf':
-				$this->generatePdfFile($resultIds, $timeMachine, $ottType, $globalOptions);
+				$this->generatePdfFile($resultIds, $globalOptions);
 				break;
 			case 'tsv':
-				$this->generateTsvFile($resultIds, $timeMachine, $ottType, $globalOptions);
-				break;
-			case 'webpage':
-				$this->generateOnlineTT($resultIds, $timeMachine, $ottType, $globalOptions);
-				break;
-			case 'word':
-				$this->generateWord();
+				$this->generateTsvFile($resultIds, $globalOptions);
 				break;
 			case 'indexed':
-				$this->generateOnlineTT($resultIds, $timeMachine, $ottType, $globalOptions);
+				$this->generateOnlineTT($resultIds, $globalOptions);
 				break;
-			case 'indexed_search':
-				$this->generateOnlineTT($resultIds, $timeMachine, $ottType, $globalOptions);
-				break;
-			case 'unstackedoldlink':
-				$this->generateOnlineTT($resultIds, $timeMachine, $ottType, $globalOptions);
-				break;
-			case 'stackedoldlink':
-				$this->generateOnlineTT($resultIds, $timeMachine, $ottType, $globalOptions);
+			default:
+				$this->generateOnlineTT($resultIds, $globalOptions);
 				break;
 		}
 	}
 	
-	function generateExcelFile($resultIds, $timeMachine = NULL, $ottType, $globalOptions)
+	function generateExcelFile($resultIds, $globalOptions)
 	{	
 		global $db;
 		$loggedIn	= $db->loggedIn();
 		
 		$Values = array();
 		
-		if(in_array($globalOptions['startrange'], $globalOptions['Highlight_Range']))
-		{
-			$timeMachine = str_replace('ago', '', $globalOptions['startrange']);
-			$timeMachine = trim($timeMachine);
-			$timeMachine = '-' . (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
-		}
-		else
-		{
-			$timeMachine = trim($globalOptions['startrange']);
-			$timeMachine = (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
-		}
-		$timeMachine = strtotime($timeMachine);
+		$time = $this->timeParams($globalOptions);
+		$timeMachine = $time[0];
+		$timeInterval = $time[1];
 
-		if(in_array($globalOptions['endrange'], $globalOptions['Highlight_Range']))
-		{
-			$timeInterval = str_replace('ago', '', $globalOptions['endrange']);
-			$timeInterval = trim($timeInterval);
-			$timeInterval = '-' . (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
-		}
-		else
-		{
-			$timeInterval = trim($globalOptions['endrange']);
-			$timeInterval = (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
-		}
-					
 		$currentYear = date('Y');
 		$secondYear	= date('Y')+1;
 		$thirdYear	= date('Y')+2;	
@@ -194,89 +148,41 @@ class TrialTracker
 
 		$bgColor = "D5D3E6";
 		
-		if($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed')
-		{	
-			$Ids = array();
-			$TrialsInfo = array();
-			
-			if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '')
-			{
-				$Arr = $this->processHmParams($resultIds, $globalOptions, $timeMachine, $timeInterval);
-			}
-			else
-			{
-				$Arr = $this->processNonHmParams($resultIds, $globalOptions, $timeMachine, $timeInterval);
-			}
-			
-			$Ids = $Arr[4];
-			$TrialsInfo = $Arr[5];
-			
-			if(isset($globalOptions['product']) && !empty($globalOptions['product']) && $globalOptions['download'] != 'allTrialsforDownload')
-			{	
-				foreach($TrialsInfo as $tikey => $tivalue)
-				{
-					if(!(in_array($tikey, $globalOptions['product'])))
-					{
-						unset($TrialsInfo[$tikey]);
-						unset($Ids[$tikey]);
-					}
-				}
-				$TrialsInfo = array_values($TrialsInfo);
-				$Ids = array_values($Ids);
-			}
-			
-			$Values = $this->processIndexedOTTData($TrialsInfo, $ottType, $Ids, $timeMachine, $globalOptions);
-		}
-		else
-		{	
-			if(!is_array($resultIds))
-			{
-				$resultIds = array($resultIds);
-			}
-			$Values = $this->processOTTData($ottType, $resultIds, $timeMachine, $linkExpiryDt = array(), $globalOptions);
-			
-			if(isset($globalOptions['product']) && !empty($globalOptions['product']) && $globalOptions['download'] != 'allTrialsforDownload')
-			{	
-				foreach($Values['Trials'] as $tkey => $tvalue)
-				{
-					if(!(in_array($tkey, $globalOptions['product'])))
-					{
-						unset($Values['Trials'][$tkey]);
-					}
-				}
-				$Values['Trials'] = array_values($Values['Trials']);
-			}
-		}
+		$Ids = array();
+		$TrialsInfo = array();
 		
-		//these values are not needed at present
-		unset($Values['totactivecount']);
-		unset($Values['totinactivecount']);
-		unset($Values['totalcount']);
-		
-		
-		$unMatchedUpms = array();
-		if($globalOptions['download'] == 'allTrialsforDownload')
+		if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '')
 		{
-			$type = 'allTrialsforDownload';
+			$Arr = $this->processHmParams($resultIds, $globalOptions);
 		}
 		else
 		{
-			$type = $globalOptions['type'];
+			$Arr = $this->processNonHmParams($resultIds, $globalOptions);
 		}
+		
+		$ottType = $Arr['ottType'];
+		$Ids = $Arr['Ids'];
+		$TrialsInfo = $Arr['TrialsInfo'];
+			
+		$Values = $this->compileOTTData($ottType, $TrialsInfo, $Ids, $globalOptions, 'excel');
+		
+		unset($Ids, $productSelector, $TrialsInfo);
 		
 		$i = 2;
+		$naUpms = array();
 		
-		foreach($Values['Trials'] as $tkey => $tvalue)
+		foreach($Values['Data'] as $tkey => $tvalue)
 		{
-			if(isset($tvalue['naUpms']) && is_array($tvalue['naUpms']))
+			if(!empty($tvalue['naUpms']))
 			{
-				$unMatchedUpms = array_merge($unMatchedUpms, $tvalue['naUpms']);
+				$naUpms = array_merge($naUpms, $tvalue['naUpms']);
 			}
 			
 			$tvalue['sectionHeader'] = strip_tags($tvalue['sectionHeader']);
+			
 			if($globalOptions['includeProductsWNoData'] == "off")
 			{
-				if(!empty($tvalue['naUpms']) || !empty($tvalue[$type]))
+				if(!empty($tvalue['naUpms']) || isset($tvalue['Trials']))
 				{
 					$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $tvalue['sectionHeader']);
 					$objPHPExcel->getActiveSheet()->mergeCells('A' . $i . ':BB'. $i);
@@ -310,17 +216,18 @@ class TrialTracker
 				$i++;
 			}
 			
-			foreach($tvalue[$type] as $dkey => $dvalue)
+			if(isset($tvalue['Trials']) && !empty($tvalue['Trials']))
 			{
-				$startMonth = date('m',strtotime($dvalue['NCT/start_date']));
-				$startYear = date('Y',strtotime($dvalue['NCT/start_date']));
-				$endMonth = date('m',strtotime($dvalue['inactive_date']));
-				$endYear = date('Y',strtotime($dvalue['inactive_date']));
-				
-				$nctId = $dvalue["NCT/nct_id"];
-				$nctIdText = padnct($nctId);
-				if($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed')
+				foreach($tvalue['Trials'] as $dkey => $dvalue)
 				{
+					$startMonth = date('m',strtotime($dvalue['NCT/start_date']));
+					$startYear = date('Y',strtotime($dvalue['NCT/start_date']));
+					$endMonth = date('m',strtotime($dvalue['inactive_date']));
+					$endYear = date('Y',strtotime($dvalue['inactive_date']));
+					
+					$nctId = $dvalue["NCT/nct_id"];
+					$nctIdText = padnct($nctId);
+					
 					if(isset($dvalue['manual_is_sourceless']))
 					{
 						$ctLink = $dvalue['source'];
@@ -338,929 +245,901 @@ class TrialTracker
 					{ 
 						$ctLink = 'javascript:void(0)';
 					}
-				}
-				else
-				{
-					if($dvalue['NCT/nct_id'] !== '' && $dvalue['NCT/nct_id'] !== NULL)
-					{
-						$ctLink = 'http://clinicaltrials.gov/ct2/show/' . padnct($nctId);
-					}
-					else 
-					{ 
-						$ctLink = 'javascript:void(0)';
-					}
-				}
-				
-				$cellSpan = $i;
-				$rowspanLimit = 0;
-				
-				if(!empty($dvalue['matchedupms'])) 
-				{
+					
 					$cellSpan = $i;
-					$rowspanLimit = count($dvalue['matchedupms']);
-					$ct = 0;
-					while($ct < $rowspanLimit)
+					$rowspanLimit = 0;
+					
+					if(!empty($dvalue['upms'])) 
 					{
-						$cellSpan = $cellSpan+1;
-						$ct++;
-					}
-				}
-				
-				/////MERGE CELLS AND APPLY BORDER AS - FOR LOOP WAS NOT WORKING SET INDIVIDUALLY
-				if(($rowspanLimit+1) > 1)
-				{
-					$objPHPExcel->getActiveSheet()->mergeCells('A' . $i . ':A'. $cellSpan);
-					$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':A'. $cellSpan)->applyFromArray($styleThinBlueBorderOutline);
-					$objPHPExcel->getActiveSheet()->mergeCells('B' . $i . ':B'. $cellSpan);
-					$objPHPExcel->getActiveSheet()->getStyle('B' . $i . ':B'. $cellSpan)->applyFromArray($styleThinBlueBorderOutline);
-					$objPHPExcel->getActiveSheet()->mergeCells('C' . $i . ':C'. $cellSpan);
-					$objPHPExcel->getActiveSheet()->getStyle('C' . $i . ':C'. $cellSpan)->applyFromArray($styleThinBlueBorderOutline);
-					$objPHPExcel->getActiveSheet()->mergeCells('D' . $i . ':D'. $cellSpan);
-					$objPHPExcel->getActiveSheet()->getStyle('D' . $i . ':D'. $cellSpan)->applyFromArray($styleThinBlueBorderOutline);
-					$objPHPExcel->getActiveSheet()->mergeCells('E' . $i . ':E'. $cellSpan);
-					$objPHPExcel->getActiveSheet()->getStyle('E' . $i . ':E'. $cellSpan)->applyFromArray($styleThinBlueBorderOutline);
-					$objPHPExcel->getActiveSheet()->mergeCells('F' . $i . ':F'. $cellSpan);
-					$objPHPExcel->getActiveSheet()->getStyle('F' . $i . ':F'. $cellSpan)->applyFromArray($styleThinBlueBorderOutline);
-					$objPHPExcel->getActiveSheet()->mergeCells('G' . $i . ':G'. $cellSpan);
-					$objPHPExcel->getActiveSheet()->getStyle('G' . $i . ':G'. $cellSpan)->applyFromArray($styleThinBlueBorderOutline);
-					$objPHPExcel->getActiveSheet()->mergeCells('H' . $i . ':H'. $cellSpan);
-					$objPHPExcel->getActiveSheet()->getStyle('H' . $i . ':H'. $cellSpan)->applyFromArray($styleThinBlueBorderOutline);
-					$objPHPExcel->getActiveSheet()->mergeCells('I' . $i . ':I'. $cellSpan);
-					$objPHPExcel->getActiveSheet()->getStyle('I' . $i . ':I'. $cellSpan)->applyFromArray($styleThinBlueBorderOutline);
-					$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':J'. $cellSpan);
-					$objPHPExcel->getActiveSheet()->getStyle('J' . $i . ':J'. $cellSpan)->applyFromArray($styleThinBlueBorderOutline);
-					$objPHPExcel->getActiveSheet()->mergeCells('K' . $i . ':K'. $cellSpan);
-					$objPHPExcel->getActiveSheet()->getStyle('K' . $i . ':K'. $cellSpan)->applyFromArray($styleThinBlueBorderOutline);
-				
-					//set default height which contains upm's as these rows does not support auto height cause Merged cells 
-					//+ wrap text + autofit row height = not working
-					$objPHPExcel->getActiveSheet()->getRowDimension($i)->setRowHeight(15);
-				}
-				/////END PART - MERGE CELLS AND APPLY BORDER AS - FOR LOOP WAS NOT WORKING SET INDIVIDUALLY
-				
-				$objPHPExcel->getActiveSheet()->getStyle('"A' . $i . ':BB' . $i.'"')->applyFromArray($styleThinBlueBorderOutline);
-				$objPHPExcel->getActiveSheet()->getStyle('"A' . $i . ':BB' . $i.'"')->getFont()->setSize(10);
-				$objPHPExcel->getActiveSheet()->getStyle('A1:BA1')->applyFromArray($styleThinBlueBorderOutline);
-				
-				//nct id	
-				$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $nctIdText);
-				$objPHPExcel->getActiveSheet()->getCell('A' . $i)->getHyperlink()->setUrl($ctLink);
-				if($dvalue['new'] == 'y')
-				{
-					 $objPHPExcel->getActiveSheet()->getStyle('A' . $i)->applyFromArray($highlightChange); 
-					 $objPHPExcel->getActiveSheet()->getCell('A' . $i)->getHyperlink()->setTooltip('New record'); 
-				}
-				
-
-				
-				//brief title	
-				$dvalue["NCT/brief_title"] = fix_special_chars($dvalue["NCT/brief_title"]);
-				$objPHPExcel->getActiveSheet()->setCellValue('B' . $i, $dvalue["NCT/brief_title"]);
-				$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setUrl($ctLink);
-				if(isset($dvalue['manual_is_sourceless']))
-				{
-					if(!empty($dvalue['edited']) && array_key_exists('NCT/brief_title', $dvalue['edited']))
-					{
-						$dvalue['edited']['NCT/brief_title'] = substr($dvalue['edited']['NCT/brief_title'], 0, 255);
-						$objPHPExcel->getActiveSheet()->getStyle('B' . $i)->applyFromArray($highlightChange);
-						$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/brief_title']);
-					}
-					else if($dvalue['new'] == 'y')
-					{
-						$objPHPExcel->getActiveSheet()->getStyle('B' . $i)->applyFromArray($highlightChange); 
-						$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('New record'); 
-					}
-					elseif(isset($dvalue['manual_brief_title']))
-					{
-						$objPHPExcel->getActiveSheet()->getStyle('B' . $i)->applyFromArray($manualChange); 
-						if($dvalue['original_brief_title'] == $dvalue['NCT/brief_title'])
+						$cellSpan = $i;
+						$rowspanLimit = count($dvalue['upms']);
+						$ct = 0;
+						while($ct < $rowspanLimit)
 						{
-							$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('Manual curation.');
-						}
-						else
-						{
-							$dvalue['original_brief_title'] = 'Manual curation. Original value: ' . substr($dvalue['original_brief_title'], 0, 210);
-							$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip($dvalue['original_brief_title']);
+							$cellSpan = $cellSpan+1;
+							$ct++;
 						}
 					}
-					else
+					
+					/////MERGE CELLS AND APPLY BORDER AS - FOR LOOP WAS NOT WORKING SET INDIVIDUALLY
+					if(($rowspanLimit+1) > 1)
 					{
-						 $objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('Source - ClinicalTrials.gov'); 
+						$objPHPExcel->getActiveSheet()->mergeCells('A' . $i . ':A'. $cellSpan);
+						$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':A'. $cellSpan)->applyFromArray($styleThinBlueBorderOutline);
+						$objPHPExcel->getActiveSheet()->mergeCells('B' . $i . ':B'. $cellSpan);
+						$objPHPExcel->getActiveSheet()->getStyle('B' . $i . ':B'. $cellSpan)->applyFromArray($styleThinBlueBorderOutline);
+						$objPHPExcel->getActiveSheet()->mergeCells('C' . $i . ':C'. $cellSpan);
+						$objPHPExcel->getActiveSheet()->getStyle('C' . $i . ':C'. $cellSpan)->applyFromArray($styleThinBlueBorderOutline);
+						$objPHPExcel->getActiveSheet()->mergeCells('D' . $i . ':D'. $cellSpan);
+						$objPHPExcel->getActiveSheet()->getStyle('D' . $i . ':D'. $cellSpan)->applyFromArray($styleThinBlueBorderOutline);
+						$objPHPExcel->getActiveSheet()->mergeCells('E' . $i . ':E'. $cellSpan);
+						$objPHPExcel->getActiveSheet()->getStyle('E' . $i . ':E'. $cellSpan)->applyFromArray($styleThinBlueBorderOutline);
+						$objPHPExcel->getActiveSheet()->mergeCells('F' . $i . ':F'. $cellSpan);
+						$objPHPExcel->getActiveSheet()->getStyle('F' . $i . ':F'. $cellSpan)->applyFromArray($styleThinBlueBorderOutline);
+						$objPHPExcel->getActiveSheet()->mergeCells('G' . $i . ':G'. $cellSpan);
+						$objPHPExcel->getActiveSheet()->getStyle('G' . $i . ':G'. $cellSpan)->applyFromArray($styleThinBlueBorderOutline);
+						$objPHPExcel->getActiveSheet()->mergeCells('H' . $i . ':H'. $cellSpan);
+						$objPHPExcel->getActiveSheet()->getStyle('H' . $i . ':H'. $cellSpan)->applyFromArray($styleThinBlueBorderOutline);
+						$objPHPExcel->getActiveSheet()->mergeCells('I' . $i . ':I'. $cellSpan);
+						$objPHPExcel->getActiveSheet()->getStyle('I' . $i . ':I'. $cellSpan)->applyFromArray($styleThinBlueBorderOutline);
+						$objPHPExcel->getActiveSheet()->mergeCells('J' . $i . ':J'. $cellSpan);
+						$objPHPExcel->getActiveSheet()->getStyle('J' . $i . ':J'. $cellSpan)->applyFromArray($styleThinBlueBorderOutline);
+						$objPHPExcel->getActiveSheet()->mergeCells('K' . $i . ':K'. $cellSpan);
+						$objPHPExcel->getActiveSheet()->getStyle('K' . $i . ':K'. $cellSpan)->applyFromArray($styleThinBlueBorderOutline);
+					
+						//set default height which contains upm's as these rows does not support auto height cause Merged cells 
+						//+ wrap text + autofit row height = not working
+						$objPHPExcel->getActiveSheet()->getRowDimension($i)->setRowHeight(15);
 					}
-				}
-				else
-				{
-					if(isset($dvalue['manual_brief_title']))
-					{
-						$objPHPExcel->getActiveSheet()->getStyle('B' . $i)->applyFromArray($manualChange); 
-						if($dvalue['original_brief_title'] == $dvalue['NCT/brief_title'])
-						{
-							$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('Manual curation.');
-						}
-						else
-						{
-							$dvalue['original_brief_title'] = 'Manual curation. Original value: ' . substr($dvalue['original_brief_title'], 0, 210);
-							$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip($dvalue['original_brief_title']);
-						}
-					}
-					else if(!empty($dvalue['edited']) && array_key_exists('NCT/brief_title', $dvalue['edited']))
-					{
-						$dvalue['edited']['NCT/brief_title'] = substr($dvalue['edited']['NCT/brief_title'], 0, 255);
-						$objPHPExcel->getActiveSheet()->getStyle('B' . $i)->applyFromArray($highlightChange);
-						$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/brief_title']);
-					}
-					else if($dvalue['new'] == 'y')
-					{
-						 $objPHPExcel->getActiveSheet()->getStyle('B' . $i)->applyFromArray($highlightChange); 
-						 $objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('New record'); 
-					}
-					else
-					{
-						 $objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('Source - ClinicalTrials.gov'); 
-					}
-				}
-				$objPHPExcel->getActiveSheet()->getStyle('B' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
-				
-				
-				//enrollment
-				if(isset($dvalue['manual_is_sourceless']))
-				{
-					if(!empty($dvalue['edited']) && array_key_exists('NCT/enrollment', $dvalue['edited']))
-					{
-						$dvalue['edited']['NCT/enrollment'] = substr($dvalue['edited']['NCT/enrollment'], 0, 255);
-						$objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($highlightChange);
-						$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl($ctLink);
-						$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/enrollment']); 
-					}
-					else if($dvalue['new'] == 'y')
-					{
-						 $objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($highlightChange);
-						 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl($ctLink);
-						 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip('New record'); 
-					}
-					elseif(isset($dvalue['manual_enrollment']))
-					{
-						$objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($manualChange);
-						$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl($ctLink);
-						if($dvalue['original_enrollment'] == $dvalue['NCT/enrollment'])
-						{
-							 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip('Manual curation.');
-						}
-						else
-						{
-							$dvalue['original_enrollment'] = 'Manual curation. Original value: ' . substr($dvalue['original_enrollment'], 0, 210);
-							$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip($dvalue['original_enrollment']);
-						}
-					}
-				}
-				else
-				{
-					if(isset($dvalue['manual_enrollment']))
-					{
-						$objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($manualChange);
-						$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl($ctLink);
-						if($dvalue['original_enrollment'] == $dvalue['NCT/enrollment'])
-						{
-							 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip('Manual curation.');
-						}
-						else
-						{
-							$dvalue['original_enrollment'] = 'Manual curation. Original value: ' . substr($dvalue['original_enrollment'], 0, 210);
-							$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip($dvalue['original_enrollment']);
-						}
-					}
-					elseif(!empty($dvalue['edited']) && array_key_exists('NCT/enrollment', $dvalue['edited']))
-					{
-						$dvalue['edited']['NCT/enrollment'] = substr($dvalue['edited']['NCT/enrollment'], 0, 255);
-						$objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($highlightChange);
-						$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl($ctLink);
-						$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/enrollment']); 
-					}
-					else if($dvalue['new'] == 'y')
-					{
-						$objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($highlightChange);
-						$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl($ctLink);
-						$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip('New record'); 
-					}
-				}
-				if($dvalue["NCT/enrollment_type"] != '') 
-				{
-					if($dvalue["NCT/enrollment_type"] == 'Anticipated' || $dvalue["NCT/enrollment_type"] == 'Actual') 
-					{ 
-						$objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $dvalue["NCT/enrollment"]);
-					}
-					else 
-					{ 
-						$objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $dvalue["NCT/enrollment"] . ' (' . $dvalue["NCT/enrollment_type"] . ')');
-					}
-				} 
-				else 
-				{
-					$objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $dvalue["NCT/enrollment"]);
-				}
-				
-				
-				//region	
-				$dvalue["region"] = fix_special_chars($dvalue["region"]);
-				$objPHPExcel->getActiveSheet()->setCellValue('D' . $i, $dvalue["region"]);
-				if(isset($dvalue['manual_is_sourceless']))
-				{
+					/////END PART - MERGE CELLS AND APPLY BORDER AS - FOR LOOP WAS NOT WORKING SET INDIVIDUALLY
+					
+					$objPHPExcel->getActiveSheet()->getStyle('"A' . $i . ':BB' . $i.'"')->applyFromArray($styleThinBlueBorderOutline);
+					$objPHPExcel->getActiveSheet()->getStyle('"A' . $i . ':BB' . $i.'"')->getFont()->setSize(10);
+					$objPHPExcel->getActiveSheet()->getStyle('A1:BA1')->applyFromArray($styleThinBlueBorderOutline);
+					
+					//nct id	
+					$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $nctIdText);
+					$objPHPExcel->getActiveSheet()->getCell('A' . $i)->getHyperlink()->setUrl($ctLink);
 					if($dvalue['new'] == 'y')
 					{
-						$objPHPExcel->getActiveSheet()->getStyle('D' . $i)->applyFromArray($highlightChange);
-						$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setUrl($ctLink); 
-						$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setTooltip('New record'); 
+						 $objPHPExcel->getActiveSheet()->getStyle('A' . $i)->applyFromArray($highlightChange); 
+						 $objPHPExcel->getActiveSheet()->getCell('A' . $i)->getHyperlink()->setTooltip('New record'); 
 					}
-					elseif(isset($dvalue['manual_region']))
-					{
-						$objPHPExcel->getActiveSheet()->getStyle('D' . $i)->applyFromArray($manualChange);
-						$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setUrl($ctLink); 
-						$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
-					}
-				}
-				else
-				{
-					if(isset($dvalue['manual_region']))
-					{
-						$objPHPExcel->getActiveSheet()->getStyle('D' . $i)->applyFromArray($manualChange);
-						$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setUrl($ctLink); 
-						$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
-					}
-					elseif($dvalue['new'] == 'y')
-					{
-						$objPHPExcel->getActiveSheet()->getStyle('D' . $i)->applyFromArray($highlightChange);
-						$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setUrl($ctLink); 
-						$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setTooltip('New record'); 
-					}
-				}
-				
-				
-				
-				//status
-				$objPHPExcel->getActiveSheet()->setCellValue('E' . $i, $dvalue["NCT/overall_status"]);
-				if(isset($dvalue['manual_is_sourceless']))
-				{
-					if(!empty($dvalue['edited']) && array_key_exists('NCT/overall_status', $dvalue['edited']))
-					{
-						$dvalue['edited']['NCT/overall_status'] = substr($dvalue['edited']['NCT/overall_status'], 0, 255);
-						$objPHPExcel->getActiveSheet()->getStyle('E' . $i)->applyFromArray($highlightChange);
-						$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setUrl($ctLink);
-						$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/overall_status']); 
-					}
-					else if($dvalue['new'] == 'y')
-					{
-						 $objPHPExcel->getActiveSheet()->getStyle('E' . $i)->applyFromArray($highlightChange); 
-						 $objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setUrl($ctLink);
-						 $objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip('New record'); 
-					}
-					elseif(isset($dvalue['manual_overall_status']))
-					{
-						$objPHPExcel->getActiveSheet()->getStyle('E' . $i)->applyFromArray($manualChange); 
-						$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setUrl($ctLink);
-						if($dvalue['original_overall_status'] == $dvalue['NCT/overall_status'])
-						{	
-							$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
-						}
-						else
-						{	
-							$dvalue['original_overall_status'] = 'Manual curation. Original value: ' . substr($dvalue['original_overall_status'], 0, 210);
-							$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip($dvalue['original_overall_status']); 
-						}
-					}
-				}
-				else
-				{
-					if(isset($dvalue['manual_overall_status']))
-					{
-						$objPHPExcel->getActiveSheet()->getStyle('E' . $i)->applyFromArray($manualChange); 
-						$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setUrl($ctLink);
-						if($dvalue['original_overall_status'] == $dvalue['NCT/overall_status'])
-						{
-							$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
-						}
-						else
-						{
-							$dvalue['original_overall_status'] = 'Manual curation. Original value: ' . substr($dvalue['original_overall_status'], 0, 210);
-							$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip($dvalue['original_overall_status']); 
-						}
-					}
-					else if(!empty($dvalue['edited']) && array_key_exists('NCT/overall_status', $dvalue['edited']))
-					{
-						$dvalue['edited']['NCT/overall_status'] = substr($dvalue['edited']['NCT/overall_status'], 0, 255);
-						$objPHPExcel->getActiveSheet()->getStyle('E' . $i)->applyFromArray($highlightChange);
-						$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setUrl($ctLink);
-						$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/overall_status']); 
-					}
-					else if($dvalue['new'] == 'y')
-					{
-						 $objPHPExcel->getActiveSheet()->getStyle('E' . $i)->applyFromArray($highlightChange); 
-						 $objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setUrl($ctLink);
-						 $objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip('New record'); 
-					}
-				}
-				
-				
-				//collaborator and lead sponsor	
-				$dvalue["NCT/lead_sponsor"] = fix_special_chars($dvalue["NCT/lead_sponsor"]);
-				$dvalue["NCT/collaborator"] = fix_special_chars($dvalue["NCT/collaborator"]);
-				if($dvalue['NCT/lead_sponsor'] != '' && $dvalue['NCT/collaborator'] != ''
-				&& $dvalue['NCT/lead_sponsor'] != NULL && $dvalue['NCT/collaborator'] != NULL)
-				{
-					$dvalue["NCT/lead_sponsor"] .= ', ';
-				}
-						
-				$objPHPExcel->getActiveSheet()->setCellValue('F' . $i, $dvalue["NCT/lead_sponsor"] . $dvalue["NCT/collaborator"]);
-				if(isset($dvalue['manual_is_sourceless']))
-				{
-					if(!empty($dvalue['edited']) && (array_key_exists('NCT/lead_sponsor', $dvalue['edited']) || array_key_exists('NCT/collaborator', $dvalue['edited'])))
-					{
-						$value = '';
-						if(array_key_exists('NCT/lead_sponsor', $dvalue['edited']))
-						{
-							$value .= $dvalue['edited']['NCT/lead_sponsor'];
-						}
-						if(array_key_exists('NCT/lead_sponsor', $dvalue['edited']) && array_key_exists('NCT/collaborator', $dvalue['edited']))
-						{
-							$value .=  ', ';
-						}
-						if(array_key_exists('NCT/collaborator', $dvalue['edited']))
-						{
-							$value .= $dvalue['edited']['NCT/collaborator'];
-						}
-						$value = substr($value, 0, 255);
-						$objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray($highlightChange);
-						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl($ctLink);
-						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip($value); 
-					}
-					else if($dvalue['new'] == 'y')
-					{
-						 $objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray($highlightChange); 
-						 $objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl($ctLink);
-						 $objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('New record'); 
-					}
-					elseif(isset($dvalue['manual_lead_sponsor']) || isset($dvalue['manual_collaborator']))
-					{
-						$objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray($manualChange); 
-						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl($ctLink);
-						if(isset($dvalue['manual_lead_sponsor']))
-						{
-							if($dvalue['original_lead_sponsor'] == $dvalue['NCT/lead_sponsor'])
-							{
-								$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
-							}
-							else
-							{	
-								$dvalue['original_lead_sponsor'] = 'Manual curation. Original value: ' . substr($dvalue['original_lead_sponsor'], 0, 210);
-								$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip($dvalue['original_lead_sponsor']); 
-							}
-						}
-						else
-						{
-							if($dvalue['original_collaborator'] == $dvalue['NCT/collaborator'])
-							{
-								$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
-							}
-							else
-							{	
-								$dvalue['original_collaborator'] = 'Manual curation. Original value: ' . substr($dvalue['original_collaborator'], 0, 210);
-								$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_collaborator']); 
-							}
-						}
-					}
-				}
-				else
-				{
-					if(isset($dvalue['manual_lead_sponsor']) || isset($dvalue['manual_collaborator']))
-					{
-						$objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray($manualChange); 
-						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl($ctLink);
-						if(isset($dvalue['manual_lead_sponsor']))
-						{
-							if($dvalue['original_lead_sponsor'] == $dvalue['NCT/lead_sponsor'])
-							{
-								$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
-							}
-							else
-							{	
-								$dvalue['original_lead_sponsor'] = 'Manual curation. Original value: ' . substr($dvalue['original_lead_sponsor'], 0, 210);
-								$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_lead_sponsor']); 
-							}
-						}
-						else
-						{
-							if($dvalue['original_collaborator'] == $dvalue['NCT/collaborator'])
-							{
-								$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
-							}
-							else
-							{	
-								$dvalue['original_collaborator'] = 'Manual curation. Original value: ' . substr($dvalue['original_collaborator'], 0, 210);
-								$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_collaborator']); 
-							}
-						}
-					}
-					elseif(!empty($dvalue['edited']) && (array_key_exists('NCT/lead_sponsor', $dvalue['edited']) || array_key_exists('NCT/collaborator', $dvalue['edited'])))
-					{
-						$value = '';
-						if(array_key_exists('NCT/lead_sponsor', $dvalue['edited']))
-						{
-							$value .= $dvalue['edited']['NCT/lead_sponsor'];
-						}
-						if(array_key_exists('NCT/lead_sponsor', $dvalue['edited']) && array_key_exists('NCT/collaborator', $dvalue['edited']))
-						{
-							$value .=  ', ';
-						}
-						if(array_key_exists('NCT/collaborator', $dvalue['edited']))
-						{
-							$value .= $dvalue['edited']['NCT/collaborator'];
-						}
-						$value = substr($value, 0, 255);
-						$objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray($highlightChange);
-						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl($ctLink);
-						$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip($value); 
-					}
-					else if($dvalue['new'] == 'y')
-					{
-						 $objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray($highlightChange); 
-						 $objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl($ctLink);
-						 $objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('New record'); 
-					}
-				}
-				
-				
-				//condition
-				$dvalue["NCT/condition"] = fix_special_chars($dvalue["NCT/condition"]);
-				$objPHPExcel->getActiveSheet()->setCellValue('G' . $i, $dvalue["NCT/condition"]);
-				if(isset($dvalue['manual_is_sourceless']))
-				{
-					if(!empty($dvalue['edited']) && array_key_exists('NCT/condition', $dvalue['edited']))
-					{
-						$dvalue['edited']['NCT/condition'] = substr($dvalue['edited']['NCT/condition'], 0, 250);
-						$objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($highlightChange);
-						$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($ctLink);
-						$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/condition']); 
-					}
-					else if($dvalue['new'] == 'y')
-					{
-						 $objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($highlightChange); 
-						 $objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($ctLink);
-						 $objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip('New record'); 
-					}
-					elseif(isset($dvalue['manual_condition']))
-					{
-						$objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($manualChange); 
-						$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($ctLink);
-						if($dvalue['original_condition'] == $dvalue['NCT/condition'])
-						{	
-							$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
-						}
-						else
-						{	
-							$dvalue['original_condition'] = 'Manual curation. Original value: ' . substr($dvalue['original_condition'], 0, 210);
-							$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip($dvalue['original_condition']); 
-						}
-					}
-				}
-				else
-				{
-					if(isset($dvalue['manual_condition']))
-					{
-						$objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($manualChange); 
-						$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($ctLink);
-						if($dvalue['original_condition'] == $dvalue['NCT/condition'])
-						{	
-							$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
-						}
-						else
-						{	
-							$dvalue['original_condition'] = 'Manual curation. Original value: ' . substr($dvalue['original_condition'], 0, 210);
-							$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip($dvalue['original_condition']); 
-						}
-					}
-					elseif(!empty($dvalue['edited']) && array_key_exists('NCT/condition', $dvalue['edited']))
-					{
-						$dvalue['edited']['NCT/condition'] = substr($dvalue['edited']['NCT/condition'], 0, 250);
-						$objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($highlightChange);
-						$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($ctLink);
-						$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/condition']); 
-					}
-					else if($dvalue['new'] == 'y')
-					{
-						 $objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($highlightChange); 
-						 $objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($ctLink);
-						 $objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip('New record'); 
-					}
-				}
-				
 					
-				//intervention
-				$dvalue["NCT/intervention_name"] = fix_special_chars($dvalue["NCT/intervention_name"]);
-				$objPHPExcel->getActiveSheet()->setCellValue('H' . $i, $dvalue["NCT/intervention_name"]);
-				if(isset($dvalue['manual_is_sourceless']))
-				{
-					if(!empty($dvalue['edited']) && array_key_exists('NCT/intervention_name', $dvalue['edited']))
+					//brief title	
+					$dvalue["NCT/brief_title"] = fix_special_chars($dvalue["NCT/brief_title"]);
+					$objPHPExcel->getActiveSheet()->setCellValue('B' . $i, $dvalue["NCT/brief_title"]);
+					$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setUrl($ctLink);
+					if(isset($dvalue['manual_is_sourceless']))
 					{
-						$dvalue['edited']['NCT/intervention_name'] = substr($dvalue['edited']['NCT/intervention_name'], 0, 255);
-						$objPHPExcel->getActiveSheet()->getStyle('H' . $i)->applyFromArray($highlightChange);
-						$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($ctLink);
-						$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/intervention_name']); 
-					}
-					else if($dvalue['new'] == 'y')
-					{
-						 $objPHPExcel->getActiveSheet()->getStyle('H' . $i)->applyFromArray($highlightChange); 
-						 $objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($ctLink);
-						 $objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip('New record'); 
-					}
-					elseif(isset($dvalue['manual_intervention_name']))
-					{
-						$objPHPExcel->getActiveSheet()->getStyle('H' . $i)->applyFromArray($manualChange); 
-						$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($ctLink);
-						if($dvalue['original_intervention_name'] == $dvalue['NCT/intervention_name'])
+						if(!empty($dvalue['edited']) && array_key_exists('NCT/brief_title', $dvalue['edited']))
 						{
-							$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+							$dvalue['edited']['NCT/brief_title'] = substr($dvalue['edited']['NCT/brief_title'], 0, 255);
+							$objPHPExcel->getActiveSheet()->getStyle('B' . $i)->applyFromArray($highlightChange);
+							$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/brief_title']);
 						}
-						else
-						{	
-							$dvalue['original_intervention_name'] = 'Manual curation. Original value: ' . substr($dvalue['original_intervention_name'], 0, 210);
-							$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip($dvalue['original_intervention_name']); 
-						}
-					}
-				}
-				else
-				{
-					if(isset($dvalue['manual_intervention_name']))
-					{
-						$objPHPExcel->getActiveSheet()->getStyle('H' . $i)->applyFromArray($manualChange); 
-						$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($ctLink);
-						if($dvalue['original_intervention_name'] == $dvalue['NCT/intervention_name'])
+						else if($dvalue['new'] == 'y')
 						{
-							$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+							$objPHPExcel->getActiveSheet()->getStyle('B' . $i)->applyFromArray($highlightChange); 
+							$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('New record'); 
 						}
-						else
-						{	
-							$dvalue['original_intervention_name'] = 'Manual curation. Original value: ' . substr($dvalue['original_intervention_name'], 0, 210);
-							$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip($dvalue['original_intervention_name']); 
-						}
-					}
-					elseif(!empty($dvalue['edited']) && array_key_exists('NCT/intervention_name', $dvalue['edited']))
-					{
-						$dvalue['edited']['NCT/intervention_name'] = substr($dvalue['edited']['NCT/intervention_name'], 0, 255);
-						$objPHPExcel->getActiveSheet()->getStyle('H' . $i)->applyFromArray($highlightChange);
-						$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($ctLink);
-						$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/intervention_name']); 
-					}
-					else if($dvalue['new'] == 'y')
-					{
-						 $objPHPExcel->getActiveSheet()->getStyle('H' . $i)->applyFromArray($highlightChange); 
-						 $objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($ctLink);
-						 $objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip('New record'); 
-					}
-				}
-				
-				
-				//start date
-				if(isset($dvalue["NCT/start_date"])
-				&& $dvalue["NCT/start_date"] != '' 
-				&& $dvalue["NCT/start_date"] !== NULL 
-				&& $dvalue["NCT/start_date"] != '0000-00-00')
-				{ 	
-					$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, date('m/y',strtotime($dvalue["NCT/start_date"])));
-				}
-				if(isset($dvalue['manual_is_sourceless']))
-				{
-					if(!empty($dvalue['edited']) && array_key_exists('NCT/start_date', $dvalue['edited']))
-					{
-						 $objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray($highlightChange);
-						 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($ctLink);
-						 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/start_date']); 
-					}
-					elseif($dvalue['new'] == 'y')
-					{
-						 $objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray($highlightChange); 
-						 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($ctLink);
-						 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('New record'); 
-					}
-					elseif(isset($dvalue['manual_start_date']))
-					{
-						$objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray($manualChange);
-						$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($ctLink); 
-						if($dvalue['original_start_date'] == $dvalue['start_date'])
+						elseif(isset($dvalue['manual_brief_title']))
 						{
-							$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+							$objPHPExcel->getActiveSheet()->getStyle('B' . $i)->applyFromArray($manualChange); 
+							if($dvalue['original_brief_title'] == $dvalue['NCT/brief_title'])
+							{
+								$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('Manual curation.');
+							}
+							else
+							{
+								$dvalue['original_brief_title'] = 'Manual curation. Original value: ' . substr($dvalue['original_brief_title'], 0, 210);
+								$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip($dvalue['original_brief_title']);
+							}
 						}
 						else
 						{
-							$dvalue['original_start_date'] = 'Manual curation. Original value: ' . $dvalue['original_start_date'];
-							$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip($dvalue['original_start_date']); 
+							 $objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('Source - ClinicalTrials.gov'); 
 						}
 					}
-				}
-				else
-				{
-					if(isset($dvalue['manual_start_date']))
+					else
 					{
-						$objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray($manualChange);
-						$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($ctLink); 
-						if($dvalue['original_start_date'] == $dvalue['start_date'])
+						if(isset($dvalue['manual_brief_title']))
 						{
-							$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+							$objPHPExcel->getActiveSheet()->getStyle('B' . $i)->applyFromArray($manualChange); 
+							if($dvalue['original_brief_title'] == $dvalue['NCT/brief_title'])
+							{
+								$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('Manual curation.');
+							}
+							else
+							{
+								$dvalue['original_brief_title'] = 'Manual curation. Original value: ' . substr($dvalue['original_brief_title'], 0, 210);
+								$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip($dvalue['original_brief_title']);
+							}
+						}
+						else if(!empty($dvalue['edited']) && array_key_exists('NCT/brief_title', $dvalue['edited']))
+						{
+							$dvalue['edited']['NCT/brief_title'] = substr($dvalue['edited']['NCT/brief_title'], 0, 255);
+							$objPHPExcel->getActiveSheet()->getStyle('B' . $i)->applyFromArray($highlightChange);
+							$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/brief_title']);
+						}
+						else if($dvalue['new'] == 'y')
+						{
+							 $objPHPExcel->getActiveSheet()->getStyle('B' . $i)->applyFromArray($highlightChange); 
+							 $objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('New record'); 
 						}
 						else
 						{
-							$dvalue['original_start_date'] = 'Manual curation. Original value: ' . $dvalue['original_start_date'];
-							$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip($dvalue['original_start_date']); 
+							 $objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('Source - ClinicalTrials.gov'); 
 						}
 					}
-					elseif(!empty($dvalue['edited']) && array_key_exists('NCT/start_date', $dvalue['edited']))
-					{
-						 $objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray($highlightChange);
-						 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($ctLink);
-						 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/start_date']); 
-					}
-					elseif($dvalue['new'] == 'y')
-					{
-						 $objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray($highlightChange); 
-						 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($ctLink);
-						 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('New record'); 
-					}
-				}
-				
-				
-				//end date	
-				if(isset($dvalue["inactive_date"]) 
-				&& $dvalue["inactive_date"] != '' 
-				&& $dvalue["inactive_date"] !== NULL 
-				&& $dvalue["inactive_date"] != '0000-00-00') 
-				{
-					$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, date('m/y',strtotime($dvalue["inactive_date"])));
-				}
-				if(isset($dvalue['manual_is_sourceless']))
-				{
-					if(!empty($dvalue['edited']) && array_key_exists('inactive_date', $dvalue['edited']))
-					{
-						 $objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($highlightChange);
-						 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink);
-						 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($dvalue['edited']['inactive_date']); 
-					}
-					else if($dvalue['new'] == 'y')
-					{
-						 $objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($highlightChange);
-						 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink); 
-						 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip('New record'); 
-					}
-					elseif(isset($dvalue['manual_end_date']))
-					{
-						$objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($manualChange);
-						$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink); 
-						if($dvalue['original_end_date'] == $dvalue['inactive_date'])
-						{
-							$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
-						}
-						else
-						{
-							$dvalue['original_end_date'] = 'Manual curation. Original value: ' . $dvalue['original_end_date'];
-							$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($dvalue['original_end_date']); 
-						}
-					}
-				}
-				else
-				{
-					if(isset($dvalue['manual_end_date']))
-					{
-						$objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($manualChange);
-						$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink); 
-						if($dvalue['original_end_date'] == $dvalue['inactive_date'])
-						{
-							$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
-						}
-						else
-						{
-							$dvalue['original_end_date'] = 'Manual curation. Original value: ' . $dvalue['original_end_date'];
-							$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($dvalue['original_end_date']); 
-						}
-					}
-					elseif(!empty($dvalue['edited']) && array_key_exists('inactive_date', $dvalue['edited']))
-					{
-						 $objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($highlightChange);
-						 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink);
-						 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($dvalue['edited']['inactive_date']); 
-					}
-					else if($dvalue['new'] == 'y')
-					{
-						 $objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($highlightChange);
-						 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink); 
-						 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip('New record'); 
-					}
-				}
-				
-				
-				//phase
-				if($dvalue['NCT/phase'] == 'N/A' || $dvalue['NCT/phase'] == '' || $dvalue['NCT/phase'] === NULL)
-				{
-					$phase = 'N/A';
-					$phaseColor = $this->phaseValues['N/A'];
-				}
-				else
-				{
-					$phase = str_replace('Phase ', '', trim($dvalue['NCT/phase']));
-					$dvalue['NCT/phase'] = str_replace('Phase ', '', trim($dvalue['NCT/phase']));
-					$phaseColor = $this->phaseValues[$phase];
-				}
-				$objPHPExcel->getActiveSheet()->setCellValue('K' . $i, $phase);
-				if(isset($dvalue['manual_is_sourceless']))
-				{
-					if(!empty($dvalue['edited']) && array_key_exists('NCT/phase', $dvalue['edited']))
-					{
-						 $objPHPExcel->getActiveSheet()->getStyle('K' . $i)->applyFromArray($highlightChange);
-						 $objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setUrl($ctLink);
-						 $objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/phase']); 
-					}
-					else if($dvalue['new'] == 'y')
-					{
-						 $objPHPExcel->getActiveSheet()->getStyle('K' . $i)->applyFromArray($highlightChange); 
-						 $objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setUrl($ctLink);
-						 $objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip('New record'); 
-					}
-					elseif(isset($dvalue['manual_phase']))
-					{
-						$objPHPExcel->getActiveSheet()->getStyle('K' . $i)->applyFromArray($highlightChange); 
-						$objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setUrl($ctLink);
-						if($dvalue['original_phase'] == $dvalue['NCT/phase'])
-						{	
-							$objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
-						}
-						else
-						{
-							$dvalue['original_phase'] = 'Manual curation. Original value: ' . $dvalue['original_phase'];
-							$objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip($dvalue['original_phase']); 
-						}
-					}
-				}
-				else
-				{
-					if(isset($dvalue['manual_phase']))
-					{
-						$objPHPExcel->getActiveSheet()->getStyle('K' . $i)->applyFromArray($highlightChange); 
-						$objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setUrl($ctLink);
-						if($dvalue['original_phase'] == $dvalue['NCT/phase'])
-						{	
-							$objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
-						}
-						else
-						{
-							$dvalue['original_phase'] = 'Manual curation. Original value: ' . $dvalue['original_phase'];
-							$objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip($dvalue['original_phase']); 
-						}
-					}
-					elseif(!empty($dvalue['edited']) && array_key_exists('NCT/phase', $dvalue['edited']))
-					{
-						 $objPHPExcel->getActiveSheet()->getStyle('K' . $i)->applyFromArray($highlightChange);
-						 $objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setUrl($ctLink);
-						 $objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/phase']); 
-					}
-					else if($dvalue['new'] == 'y')
-					{
-						 $objPHPExcel->getActiveSheet()->getStyle('K' . $i)->applyFromArray($highlightChange); 
-						 $objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setUrl($ctLink);
-						 $objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip('New record'); 
-					}
-				}
-				
-				
-				if($bgColor == "D5D3E6")
-				{
-					$bgColor = "EDEAFF";
-				}
-				else 
-				{
-					$bgColor = "D5D3E6";
-				}
-				
-				$objPHPExcel->getActiveSheet()->getStyle('A' . $i .':K' .$i)->applyFromArray(
-					array(
-						'alignment' => array('horizontal'	=> PHPExcel_Style_Alignment::HORIZONTAL_LEFT,),
-						'fill' => array('type'       => PHPExcel_Style_Fill::FILL_SOLID,
-										'rotation'   => 0,
-										'startcolor' => array('rgb' => $bgColor),
-										'endcolor'   => array('rgb' => $bgColor))
-					)
-				);
+					$objPHPExcel->getActiveSheet()->getStyle('B' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
 					
-				$objPHPExcel->getActiveSheet()->getStyle('A1:BA1')->applyFromArray(
-					array(
-						'font'    	=> array('bold'      	=> true),
-						'alignment' => array('horizontal'	=> PHPExcel_Style_Alignment::HORIZONTAL_LEFT,),
-						'borders'	=> array('top'     		=> array('style' => PHPExcel_Style_Border::BORDER_THIN)),
-						'fill'		=> array('type'       => PHPExcel_Style_Fill::FILL_GRADIENT_LINEAR,
-											'rotation'   => 90,
-											'startcolor' => array('argb' => 'FFA0A0A0'),
-											'endcolor'   => array('argb' => 'FFFFFFFF'))
-					)
-				);
-				
-				$this->trialGnattChartforExcel($startMonth, $startYear, $endMonth, $endYear, $currentYear, $secondYear, $thirdYear, $phaseColor, 
-				$dvalue["NCT/start_date"], $dvalue['inactive_date'], $objPHPExcel, $i, 'M');
-				
-				$i++;
-				
-				if(isset($dvalue['matchedupms']) && !empty($dvalue['matchedupms'])) 
-				{
-					foreach($dvalue['matchedupms'] as $mkey => $mvalue)
-					{ 
-						$stMonth = date('m', strtotime($mvalue['start_date']));
-						$stYear = date('Y', strtotime($mvalue['start_date']));
-						$edMonth = date('m', strtotime($mvalue['end_date']));
-						$edYear = date('Y', strtotime($mvalue['end_date']));
-						$upmTitle = htmlformat($mvalue['event_description']);
-						
-						if(!$loggedIn && !$this->liLoggedIn())
+					
+					//enrollment
+					if(isset($dvalue['manual_is_sourceless']))
+					{
+						if(!empty($dvalue['edited']) && array_key_exists('NCT/enrollment', $dvalue['edited']))
 						{
-							$mvalue['event_link'] = NULL;
+							$dvalue['edited']['NCT/enrollment'] = substr($dvalue['edited']['NCT/enrollment'], 0, 255);
+							$objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($highlightChange);
+							$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl($ctLink);
+							$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/enrollment']); 
 						}
+						else if($dvalue['new'] == 'y')
+						{
+							 $objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($highlightChange);
+							 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl($ctLink);
+							 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip('New record'); 
+						}
+						elseif(isset($dvalue['manual_enrollment']))
+						{
+							$objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($manualChange);
+							$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl($ctLink);
+							if($dvalue['original_enrollment'] == $dvalue['NCT/enrollment'])
+							{
+								 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip('Manual curation.');
+							}
+							else
+							{
+								$dvalue['original_enrollment'] = 'Manual curation. Original value: ' . substr($dvalue['original_enrollment'], 0, 210);
+								$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip($dvalue['original_enrollment']);
+							}
+						}
+					}
+					else
+					{
+						if(isset($dvalue['manual_enrollment']))
+						{
+							$objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($manualChange);
+							$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl($ctLink);
+							if($dvalue['original_enrollment'] == $dvalue['NCT/enrollment'])
+							{
+								 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip('Manual curation.');
+							}
+							else
+							{
+								$dvalue['original_enrollment'] = 'Manual curation. Original value: ' . substr($dvalue['original_enrollment'], 0, 210);
+								$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip($dvalue['original_enrollment']);
+							}
+						}
+						elseif(!empty($dvalue['edited']) && array_key_exists('NCT/enrollment', $dvalue['edited']))
+						{
+							$dvalue['edited']['NCT/enrollment'] = substr($dvalue['edited']['NCT/enrollment'], 0, 255);
+							$objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($highlightChange);
+							$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl($ctLink);
+							$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/enrollment']); 
+						}
+						else if($dvalue['new'] == 'y')
+						{
+							$objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($highlightChange);
+							$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl($ctLink);
+							$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip('New record'); 
+						}
+					}
+					if($dvalue["NCT/enrollment_type"] != '') 
+					{
+						if($dvalue["NCT/enrollment_type"] == 'Anticipated' || $dvalue["NCT/enrollment_type"] == 'Actual') 
+						{ 
+							$objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $dvalue["NCT/enrollment"]);
+						}
+						else 
+						{ 
+							$objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $dvalue["NCT/enrollment"] . ' (' . $dvalue["NCT/enrollment_type"] . ')');
+						}
+					} 
+					else 
+					{
+						$objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $dvalue["NCT/enrollment"]);
+					}
+					
+					
+					//region	
+					$dvalue["region"] = fix_special_chars($dvalue["region"]);
+					$objPHPExcel->getActiveSheet()->setCellValue('D' . $i, $dvalue["region"]);
+					if(isset($dvalue['manual_is_sourceless']))
+					{
+						if($dvalue['new'] == 'y')
+						{
+							$objPHPExcel->getActiveSheet()->getStyle('D' . $i)->applyFromArray($highlightChange);
+							$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setUrl($ctLink); 
+							$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setTooltip('New record'); 
+						}
+						elseif(isset($dvalue['manual_region']))
+						{
+							$objPHPExcel->getActiveSheet()->getStyle('D' . $i)->applyFromArray($manualChange);
+							$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setUrl($ctLink); 
+							$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+						}
+					}
+					else
+					{
+						if(isset($dvalue['manual_region']))
+						{
+							$objPHPExcel->getActiveSheet()->getStyle('D' . $i)->applyFromArray($manualChange);
+							$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setUrl($ctLink); 
+							$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+						}
+						elseif($dvalue['new'] == 'y')
+						{
+							$objPHPExcel->getActiveSheet()->getStyle('D' . $i)->applyFromArray($highlightChange);
+							$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setUrl($ctLink); 
+							$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setTooltip('New record'); 
+						}
+					}
+					
+					
+					
+					//status
+					$objPHPExcel->getActiveSheet()->setCellValue('E' . $i, $dvalue["NCT/overall_status"]);
+					if(isset($dvalue['manual_is_sourceless']))
+					{
+						if(!empty($dvalue['edited']) && array_key_exists('NCT/overall_status', $dvalue['edited']))
+						{
+							$dvalue['edited']['NCT/overall_status'] = substr($dvalue['edited']['NCT/overall_status'], 0, 255);
+							$objPHPExcel->getActiveSheet()->getStyle('E' . $i)->applyFromArray($highlightChange);
+							$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setUrl($ctLink);
+							$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/overall_status']); 
+						}
+						else if($dvalue['new'] == 'y')
+						{
+							 $objPHPExcel->getActiveSheet()->getStyle('E' . $i)->applyFromArray($highlightChange); 
+							 $objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setUrl($ctLink);
+							 $objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip('New record'); 
+						}
+						elseif(isset($dvalue['manual_overall_status']))
+						{
+							$objPHPExcel->getActiveSheet()->getStyle('E' . $i)->applyFromArray($manualChange); 
+							$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setUrl($ctLink);
+							if($dvalue['original_overall_status'] == $dvalue['NCT/overall_status'])
+							{	
+								$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+							}
+							else
+							{	
+								$dvalue['original_overall_status'] = 'Manual curation. Original value: ' . substr($dvalue['original_overall_status'], 0, 210);
+								$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip($dvalue['original_overall_status']); 
+							}
+						}
+					}
+					else
+					{
+						if(isset($dvalue['manual_overall_status']))
+						{
+							$objPHPExcel->getActiveSheet()->getStyle('E' . $i)->applyFromArray($manualChange); 
+							$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setUrl($ctLink);
+							if($dvalue['original_overall_status'] == $dvalue['NCT/overall_status'])
+							{
+								$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+							}
+							else
+							{
+								$dvalue['original_overall_status'] = 'Manual curation. Original value: ' . substr($dvalue['original_overall_status'], 0, 210);
+								$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip($dvalue['original_overall_status']); 
+							}
+						}
+						else if(!empty($dvalue['edited']) && array_key_exists('NCT/overall_status', $dvalue['edited']))
+						{
+							$dvalue['edited']['NCT/overall_status'] = substr($dvalue['edited']['NCT/overall_status'], 0, 255);
+							$objPHPExcel->getActiveSheet()->getStyle('E' . $i)->applyFromArray($highlightChange);
+							$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setUrl($ctLink);
+							$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/overall_status']); 
+						}
+						else if($dvalue['new'] == 'y')
+						{
+							 $objPHPExcel->getActiveSheet()->getStyle('E' . $i)->applyFromArray($highlightChange); 
+							 $objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setUrl($ctLink);
+							 $objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip('New record'); 
+						}
+					}
+					
+					
+					//collaborator and lead sponsor	
+					$dvalue["NCT/lead_sponsor"] = fix_special_chars($dvalue["NCT/lead_sponsor"]);
+					$dvalue["NCT/collaborator"] = fix_special_chars($dvalue["NCT/collaborator"]);
+					if($dvalue['NCT/lead_sponsor'] != '' && $dvalue['NCT/collaborator'] != ''
+					&& $dvalue['NCT/lead_sponsor'] != NULL && $dvalue['NCT/collaborator'] != NULL)
+					{
+						$dvalue["NCT/lead_sponsor"] .= ', ';
+					}
 							
-						//rendering diamonds in case of end date is prior to the current year
-						$objPHPExcel->getActiveSheet()->getStyle('"L' . $i . ':BB' . $i . '"')->applyFromArray($styleThinBlueBorderOutline);
-						$objPHPExcel->getActiveSheet()->getStyle('"L' . $i . ':BB' . $i.'"')->getFont()->setSize(10);
-						if($mvalue['result_link'] != '' && $mvalue['result_link'] !== NULL)
+					$objPHPExcel->getActiveSheet()->setCellValue('F' . $i, $dvalue["NCT/lead_sponsor"] . $dvalue["NCT/collaborator"]);
+					if(isset($dvalue['manual_is_sourceless']))
+					{
+						if(!empty($dvalue['edited']) && (array_key_exists('NCT/lead_sponsor', $dvalue['edited']) || array_key_exists('NCT/collaborator', $dvalue['edited'])))
 						{
+							$value = '';
+							if(array_key_exists('NCT/lead_sponsor', $dvalue['edited']))
+							{
+								$value .= $dvalue['edited']['NCT/lead_sponsor'];
+							}
+							if(array_key_exists('NCT/lead_sponsor', $dvalue['edited']) && array_key_exists('NCT/collaborator', $dvalue['edited']))
+							{
+								$value .=  ', ';
+							}
+							if(array_key_exists('NCT/collaborator', $dvalue['edited']))
+							{
+								$value .= $dvalue['edited']['NCT/collaborator'];
+							}
+							$value = substr($value, 0, 255);
+							$objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray($highlightChange);
+							$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl($ctLink);
+							$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip($value); 
+						}
+						else if($dvalue['new'] == 'y')
+						{
+							 $objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray($highlightChange); 
+							 $objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl($ctLink);
+							 $objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('New record'); 
+						}
+						elseif(isset($dvalue['manual_lead_sponsor']) || isset($dvalue['manual_collaborator']))
+						{
+							$objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray($manualChange); 
+							$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl($ctLink);
+							if(isset($dvalue['manual_lead_sponsor']))
+							{
+								if($dvalue['original_lead_sponsor'] == $dvalue['NCT/lead_sponsor'])
+								{
+									$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+								}
+								else
+								{	
+									$dvalue['original_lead_sponsor'] = 'Manual curation. Original value: ' . substr($dvalue['original_lead_sponsor'], 0, 210);
+									$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip($dvalue['original_lead_sponsor']); 
+								}
+							}
+							else
+							{
+								if($dvalue['original_collaborator'] == $dvalue['NCT/collaborator'])
+								{
+									$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+								}
+								else
+								{	
+									$dvalue['original_collaborator'] = 'Manual curation. Original value: ' . substr($dvalue['original_collaborator'], 0, 210);
+									$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_collaborator']); 
+								}
+							}
+						}
+					}
+					else
+					{
+						if(isset($dvalue['manual_lead_sponsor']) || isset($dvalue['manual_collaborator']))
+						{
+							$objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray($manualChange); 
+							$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl($ctLink);
+							if(isset($dvalue['manual_lead_sponsor']))
+							{
+								if($dvalue['original_lead_sponsor'] == $dvalue['NCT/lead_sponsor'])
+								{
+									$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+								}
+								else
+								{	
+									$dvalue['original_lead_sponsor'] = 'Manual curation. Original value: ' . substr($dvalue['original_lead_sponsor'], 0, 210);
+									$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_lead_sponsor']); 
+								}
+							}
+							else
+							{
+								if($dvalue['original_collaborator'] == $dvalue['NCT/collaborator'])
+								{
+									$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+								}
+								else
+								{	
+									$dvalue['original_collaborator'] = 'Manual curation. Original value: ' . substr($dvalue['original_collaborator'], 0, 210);
+									$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('Manual curation. Original value: ' . $dvalue['original_collaborator']); 
+								}
+							}
+						}
+						elseif(!empty($dvalue['edited']) && (array_key_exists('NCT/lead_sponsor', $dvalue['edited']) || array_key_exists('NCT/collaborator', $dvalue['edited'])))
+						{
+							$value = '';
+							if(array_key_exists('NCT/lead_sponsor', $dvalue['edited']))
+							{
+								$value .= $dvalue['edited']['NCT/lead_sponsor'];
+							}
+							if(array_key_exists('NCT/lead_sponsor', $dvalue['edited']) && array_key_exists('NCT/collaborator', $dvalue['edited']))
+							{
+								$value .=  ', ';
+							}
+							if(array_key_exists('NCT/collaborator', $dvalue['edited']))
+							{
+								$value .= $dvalue['edited']['NCT/collaborator'];
+							}
+							$value = substr($value, 0, 255);
+							$objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray($highlightChange);
+							$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl($ctLink);
+							$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip($value); 
+						}
+						else if($dvalue['new'] == 'y')
+						{
+							 $objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray($highlightChange); 
+							 $objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl($ctLink);
+							 $objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('New record'); 
+						}
+					}
+					
+					
+					//condition
+					$dvalue["NCT/condition"] = fix_special_chars($dvalue["NCT/condition"]);
+					$objPHPExcel->getActiveSheet()->setCellValue('G' . $i, $dvalue["NCT/condition"]);
+					if(isset($dvalue['manual_is_sourceless']))
+					{
+						if(!empty($dvalue['edited']) && array_key_exists('NCT/condition', $dvalue['edited']))
+						{
+							$dvalue['edited']['NCT/condition'] = substr($dvalue['edited']['NCT/condition'], 0, 250);
+							$objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($highlightChange);
+							$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($ctLink);
+							$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/condition']); 
+						}
+						else if($dvalue['new'] == 'y')
+						{
+							 $objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($highlightChange); 
+							 $objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($ctLink);
+							 $objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip('New record'); 
+						}
+						elseif(isset($dvalue['manual_condition']))
+						{
+							$objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($manualChange); 
+							$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($ctLink);
+							if($dvalue['original_condition'] == $dvalue['NCT/condition'])
+							{	
+								$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+							}
+							else
+							{	
+								$dvalue['original_condition'] = 'Manual curation. Original value: ' . substr($dvalue['original_condition'], 0, 210);
+								$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip($dvalue['original_condition']); 
+							}
+						}
+					}
+					else
+					{
+						if(isset($dvalue['manual_condition']))
+						{
+							$objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($manualChange); 
+							$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($ctLink);
+							if($dvalue['original_condition'] == $dvalue['NCT/condition'])
+							{	
+								$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+							}
+							else
+							{	
+								$dvalue['original_condition'] = 'Manual curation. Original value: ' . substr($dvalue['original_condition'], 0, 210);
+								$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip($dvalue['original_condition']); 
+							}
+						}
+						elseif(!empty($dvalue['edited']) && array_key_exists('NCT/condition', $dvalue['edited']))
+						{
+							$dvalue['edited']['NCT/condition'] = substr($dvalue['edited']['NCT/condition'], 0, 250);
+							$objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($highlightChange);
+							$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($ctLink);
+							$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/condition']); 
+						}
+						else if($dvalue['new'] == 'y')
+						{
+							 $objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($highlightChange); 
+							 $objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($ctLink);
+							 $objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip('New record'); 
+						}
+					}
+					
+						
+					//intervention
+					$dvalue["NCT/intervention_name"] = fix_special_chars($dvalue["NCT/intervention_name"]);
+					$objPHPExcel->getActiveSheet()->setCellValue('H' . $i, $dvalue["NCT/intervention_name"]);
+					if(isset($dvalue['manual_is_sourceless']))
+					{
+						if(!empty($dvalue['edited']) && array_key_exists('NCT/intervention_name', $dvalue['edited']))
+						{
+							$dvalue['edited']['NCT/intervention_name'] = substr($dvalue['edited']['NCT/intervention_name'], 0, 255);
+							$objPHPExcel->getActiveSheet()->getStyle('H' . $i)->applyFromArray($highlightChange);
+							$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($ctLink);
+							$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/intervention_name']); 
+						}
+						else if($dvalue['new'] == 'y')
+						{
+							 $objPHPExcel->getActiveSheet()->getStyle('H' . $i)->applyFromArray($highlightChange); 
+							 $objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($ctLink);
+							 $objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip('New record'); 
+						}
+						elseif(isset($dvalue['manual_intervention_name']))
+						{
+							$objPHPExcel->getActiveSheet()->getStyle('H' . $i)->applyFromArray($manualChange); 
+							$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($ctLink);
+							if($dvalue['original_intervention_name'] == $dvalue['NCT/intervention_name'])
+							{
+								$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+							}
+							else
+							{	
+								$dvalue['original_intervention_name'] = 'Manual curation. Original value: ' . substr($dvalue['original_intervention_name'], 0, 210);
+								$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip($dvalue['original_intervention_name']); 
+							}
+						}
+					}
+					else
+					{
+						if(isset($dvalue['manual_intervention_name']))
+						{
+							$objPHPExcel->getActiveSheet()->getStyle('H' . $i)->applyFromArray($manualChange); 
+							$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($ctLink);
+							if($dvalue['original_intervention_name'] == $dvalue['NCT/intervention_name'])
+							{
+								$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+							}
+							else
+							{	
+								$dvalue['original_intervention_name'] = 'Manual curation. Original value: ' . substr($dvalue['original_intervention_name'], 0, 210);
+								$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip($dvalue['original_intervention_name']); 
+							}
+						}
+						elseif(!empty($dvalue['edited']) && array_key_exists('NCT/intervention_name', $dvalue['edited']))
+						{
+							$dvalue['edited']['NCT/intervention_name'] = substr($dvalue['edited']['NCT/intervention_name'], 0, 255);
+							$objPHPExcel->getActiveSheet()->getStyle('H' . $i)->applyFromArray($highlightChange);
+							$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($ctLink);
+							$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/intervention_name']); 
+						}
+						else if($dvalue['new'] == 'y')
+						{
+							 $objPHPExcel->getActiveSheet()->getStyle('H' . $i)->applyFromArray($highlightChange); 
+							 $objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($ctLink);
+							 $objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip('New record'); 
+						}
+					}
+					
+					
+					//start date
+					if(isset($dvalue["NCT/start_date"])
+					&& $dvalue["NCT/start_date"] != '' 
+					&& $dvalue["NCT/start_date"] !== NULL 
+					&& $dvalue["NCT/start_date"] != '0000-00-00')
+					{ 	
+						$objPHPExcel->getActiveSheet()->setCellValue('I' . $i, date('m/y',strtotime($dvalue["NCT/start_date"])));
+					}
+					if(isset($dvalue['manual_is_sourceless']))
+					{
+						if(!empty($dvalue['edited']) && array_key_exists('NCT/start_date', $dvalue['edited']))
+						{
+							 $objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray($highlightChange);
+							 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($ctLink);
+							 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/start_date']); 
+						}
+						elseif($dvalue['new'] == 'y')
+						{
+							 $objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray($highlightChange); 
+							 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($ctLink);
+							 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('New record'); 
+						}
+						elseif(isset($dvalue['manual_start_date']))
+						{
+							$objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray($manualChange);
+							$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($ctLink); 
+							if($dvalue['original_start_date'] == $dvalue['start_date'])
+							{
+								$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+							}
+							else
+							{
+								$dvalue['original_start_date'] = 'Manual curation. Original value: ' . $dvalue['original_start_date'];
+								$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip($dvalue['original_start_date']); 
+							}
+						}
+					}
+					else
+					{
+						if(isset($dvalue['manual_start_date']))
+						{
+							$objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray($manualChange);
+							$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($ctLink); 
+							if($dvalue['original_start_date'] == $dvalue['start_date'])
+							{
+								$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+							}
+							else
+							{
+								$dvalue['original_start_date'] = 'Manual curation. Original value: ' . $dvalue['original_start_date'];
+								$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip($dvalue['original_start_date']); 
+							}
+						}
+						elseif(!empty($dvalue['edited']) && array_key_exists('NCT/start_date', $dvalue['edited']))
+						{
+							 $objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray($highlightChange);
+							 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($ctLink);
+							 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/start_date']); 
+						}
+						elseif($dvalue['new'] == 'y')
+						{
+							 $objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray($highlightChange); 
+							 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($ctLink);
+							 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('New record'); 
+						}
+					}
+					
+					
+					//end date	
+					if(isset($dvalue["inactive_date"]) 
+					&& $dvalue["inactive_date"] != '' 
+					&& $dvalue["inactive_date"] !== NULL 
+					&& $dvalue["inactive_date"] != '0000-00-00') 
+					{
+						$objPHPExcel->getActiveSheet()->setCellValue('J' . $i, date('m/y',strtotime($dvalue["inactive_date"])));
+					}
+					if(isset($dvalue['manual_is_sourceless']))
+					{
+						if(!empty($dvalue['edited']) && array_key_exists('inactive_date', $dvalue['edited']))
+						{
+							 $objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($highlightChange);
+							 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink);
+							 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($dvalue['edited']['inactive_date']); 
+						}
+						else if($dvalue['new'] == 'y')
+						{
+							 $objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($highlightChange);
+							 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink); 
+							 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip('New record'); 
+						}
+						elseif(isset($dvalue['manual_end_date']))
+						{
+							$objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($manualChange);
+							$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink); 
+							if($dvalue['original_end_date'] == $dvalue['inactive_date'])
+							{
+								$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+							}
+							else
+							{
+								$dvalue['original_end_date'] = 'Manual curation. Original value: ' . $dvalue['original_end_date'];
+								$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($dvalue['original_end_date']); 
+							}
+						}
+					}
+					else
+					{
+						if(isset($dvalue['manual_end_date']))
+						{
+							$objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($manualChange);
+							$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink); 
+							if($dvalue['original_end_date'] == $dvalue['inactive_date'])
+							{
+								$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+							}
+							else
+							{
+								$dvalue['original_end_date'] = 'Manual curation. Original value: ' . $dvalue['original_end_date'];
+								$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($dvalue['original_end_date']); 
+							}
+						}
+						elseif(!empty($dvalue['edited']) && array_key_exists('inactive_date', $dvalue['edited']))
+						{
+							 $objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($highlightChange);
+							 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink);
+							 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($dvalue['edited']['inactive_date']); 
+						}
+						else if($dvalue['new'] == 'y')
+						{
+							 $objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($highlightChange);
+							 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink); 
+							 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip('New record'); 
+						}
+					}
+					
+					
+					//phase
+					if($dvalue['NCT/phase'] == 'N/A' || $dvalue['NCT/phase'] == '' || $dvalue['NCT/phase'] === NULL)
+					{
+						$phase = 'N/A';
+						$phaseColor = $this->phaseValues['N/A'];
+					}
+					else
+					{
+						$phase = str_replace('Phase ', '', trim($dvalue['NCT/phase']));
+						$dvalue['NCT/phase'] = str_replace('Phase ', '', trim($dvalue['NCT/phase']));
+						$phaseColor = $this->phaseValues[$phase];
+					}
+					$objPHPExcel->getActiveSheet()->setCellValue('K' . $i, $phase);
+					if(isset($dvalue['manual_is_sourceless']))
+					{
+						if(!empty($dvalue['edited']) && array_key_exists('NCT/phase', $dvalue['edited']))
+						{
+							 $objPHPExcel->getActiveSheet()->getStyle('K' . $i)->applyFromArray($highlightChange);
+							 $objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setUrl($ctLink);
+							 $objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/phase']); 
+						}
+						else if($dvalue['new'] == 'y')
+						{
+							 $objPHPExcel->getActiveSheet()->getStyle('K' . $i)->applyFromArray($highlightChange); 
+							 $objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setUrl($ctLink);
+							 $objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip('New record'); 
+						}
+						elseif(isset($dvalue['manual_phase']))
+						{
+							$objPHPExcel->getActiveSheet()->getStyle('K' . $i)->applyFromArray($highlightChange); 
+							$objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setUrl($ctLink);
+							if($dvalue['original_phase'] == $dvalue['NCT/phase'])
+							{	
+								$objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+							}
+							else
+							{
+								$dvalue['original_phase'] = 'Manual curation. Original value: ' . $dvalue['original_phase'];
+								$objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip($dvalue['original_phase']); 
+							}
+						}
+					}
+					else
+					{
+						if(isset($dvalue['manual_phase']))
+						{
+							$objPHPExcel->getActiveSheet()->getStyle('K' . $i)->applyFromArray($highlightChange); 
+							$objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setUrl($ctLink);
+							if($dvalue['original_phase'] == $dvalue['NCT/phase'])
+							{	
+								$objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+							}
+							else
+							{
+								$dvalue['original_phase'] = 'Manual curation. Original value: ' . $dvalue['original_phase'];
+								$objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip($dvalue['original_phase']); 
+							}
+						}
+						elseif(!empty($dvalue['edited']) && array_key_exists('NCT/phase', $dvalue['edited']))
+						{
+							 $objPHPExcel->getActiveSheet()->getStyle('K' . $i)->applyFromArray($highlightChange);
+							 $objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setUrl($ctLink);
+							 $objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip($dvalue['edited']['NCT/phase']); 
+						}
+						else if($dvalue['new'] == 'y')
+						{
+							 $objPHPExcel->getActiveSheet()->getStyle('K' . $i)->applyFromArray($highlightChange); 
+							 $objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setUrl($ctLink);
+							 $objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip('New record'); 
+						}
+					}
+					
+					
+					if($bgColor == "D5D3E6")
+					{
+						$bgColor = "EDEAFF";
+					}
+					else 
+					{
+						$bgColor = "D5D3E6";
+					}
+					
+					$objPHPExcel->getActiveSheet()->getStyle('A' . $i .':K' .$i)->applyFromArray(
+						array(
+							'alignment' => array('horizontal'	=> PHPExcel_Style_Alignment::HORIZONTAL_LEFT,),
+							'fill' => array('type'       => PHPExcel_Style_Fill::FILL_SOLID,
+											'rotation'   => 0,
+											'startcolor' => array('rgb' => $bgColor),
+											'endcolor'   => array('rgb' => $bgColor))
+						)
+					);
+						
+					$objPHPExcel->getActiveSheet()->getStyle('A1:BA1')->applyFromArray(
+						array(
+							'font'    	=> array('bold'      	=> true),
+							'alignment' => array('horizontal'	=> PHPExcel_Style_Alignment::HORIZONTAL_LEFT,),
+							'borders'	=> array('top'     		=> array('style' => PHPExcel_Style_Border::BORDER_THIN)),
+							'fill'		=> array('type'       => PHPExcel_Style_Fill::FILL_GRADIENT_LINEAR,
+												'rotation'   => 90,
+												'startcolor' => array('argb' => 'FFA0A0A0'),
+												'endcolor'   => array('argb' => 'FFFFFFFF'))
+						)
+					);
+					
+					$this->trialGnattChartforExcel($startMonth, $startYear, $endMonth, $endYear, $currentYear, $secondYear, $thirdYear, $phaseColor, 
+					$dvalue["NCT/start_date"], $dvalue['inactive_date'], $objPHPExcel, $i, 'M');
+					
+					$i++;
+					
+					if(isset($dvalue['upms']) && !empty($dvalue['upms'])) 
+					{
+						foreach($dvalue['upms'] as $mkey => $mvalue)
+						{ 
+							$stMonth = date('m', strtotime($mvalue['start_date']));
+							$stYear = date('Y', strtotime($mvalue['start_date']));
+							$edMonth = date('m', strtotime($mvalue['end_date']));
+							$edYear = date('Y', strtotime($mvalue['end_date']));
+							$upmTitle = htmlformat($mvalue['event_description']);
+							
 							if(!$loggedIn && !$this->liLoggedIn())
 							{
-								$mvalue['result_link'] = NULL;
+								$mvalue['event_link'] = NULL;
 							}
-						
-							if((!empty($mvalue['edited']) && $mvalue['edited']['field'] == 'result_link') || ($mvalue['new'] == 'y')) 
-								$imgColor = 'red';
-							else 
-								$imgColor = 'black'; 
 								
-							$objDrawing = new PHPExcel_Worksheet_Drawing();
-							$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
-							$objDrawing->setOffsetX(40);
-							$objDrawing->setOffsetY(10);
-							
-							if($mvalue['event_type'] == 'Clinical Data')
-							{
-								$objDrawing->setPath('images/' . $imgColor . '-diamond.png');
-							}
-							else if($mvalue['status'] == 'Cancelled')
-							{
-								$objDrawing->setPath('images/' . $imgColor . '-cancel.png');
-							}
-							else
-							{
-								$objDrawing->setPath('images/' . $imgColor . '-checkmark.png');
-							}
-							$objDrawing->setCoordinates('L' . $i);
+							//rendering diamonds in case of end date is prior to the current year
+							$objPHPExcel->getActiveSheet()->getStyle('"L' . $i . ':BB' . $i . '"')->applyFromArray($styleThinBlueBorderOutline);
+							$objPHPExcel->getActiveSheet()->getStyle('"L' . $i . ':BB' . $i.'"')->getFont()->setSize(10);
 							if($mvalue['result_link'] != '' && $mvalue['result_link'] !== NULL)
 							{
-								$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl($mvalue['result_link']);
-								$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setTooltip(substr($upmTitle,0,255));
+								if(!$loggedIn && !$this->liLoggedIn())
+								{
+									$mvalue['result_link'] = NULL;
+								}
+							
+								if((isset($mvalue['edited']) && $mvalue['edited']['field'] == 'result_link') || ($mvalue['new'] == 'y')) 
+									$imgColor = 'red';
+								else 
+									$imgColor = 'black'; 
+									
+								$objDrawing = new PHPExcel_Worksheet_Drawing();
+								$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
+								$objDrawing->setOffsetX(40);
+								$objDrawing->setOffsetY(10);
+								
+								if($mvalue['event_type'] == 'Clinical Data')
+								{
+									$objDrawing->setPath('images/' . $imgColor . '-diamond.png');
+								}
+								else if($mvalue['status'] == 'Cancelled')
+								{
+									$objDrawing->setPath('images/' . $imgColor . '-cancel.png');
+								}
+								else
+								{
+									$objDrawing->setPath('images/' . $imgColor . '-checkmark.png');
+								}
+								$objDrawing->setCoordinates('L' . $i);
+								if($mvalue['result_link'] != '' && $mvalue['result_link'] !== NULL)
+								{
+									$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl($mvalue['result_link']);
+									$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setTooltip(substr($upmTitle,0,255));
+								}
+								
+							}
+							else if($mvalue['status'] == 'Pending')
+							{
+								$objDrawing = new PHPExcel_Worksheet_Drawing();
+								$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
+								$objDrawing->setOffsetX(40);
+								$objDrawing->setOffsetY(10);
+								$objDrawing->setPath('images/hourglass.png');
+								$objDrawing->setCoordinates('L' . $i);
+								if($mvalue['event_link'] != '' && $mvalue['event_link'] !== NULL)
+								{
+									$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl($mvalue['event_link']);
+									$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setTooltip(substr($upmTitle,0,255));
+								}
 							}
 							
+							
+							$this->upmGnattChartforExcel($stMonth, $stYear, $edMonth, $edYear, $currentYear, $secondYear, $thirdYear, $mvalue['start_date'], 
+							$mvalue['end_date'], $mvalue['event_link'], $upmTitle, $objPHPExcel, $i, 'M');
+							
+							$objPHPExcel->getActiveSheet()->getRowDimension($i)->setRowHeight(15);
+							$i++;	
 						}
-						else if($mvalue['status'] == 'Pending')
-						{
-							$objDrawing = new PHPExcel_Worksheet_Drawing();
-							$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
-							$objDrawing->setOffsetX(40);
-							$objDrawing->setOffsetY(10);
-							$objDrawing->setPath('images/hourglass.png');
-							$objDrawing->setCoordinates('L' . $i);
-							if($mvalue['event_link'] != '' && $mvalue['event_link'] !== NULL)
-							{
-								$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl($mvalue['event_link']);
-								$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setTooltip(substr($upmTitle,0,255));
-							}
-						}
-						
-						
-						$this->upmGnattChartforExcel($stMonth, $stYear, $edMonth, $edYear, $currentYear, $secondYear, $thirdYear, $mvalue['start_date'], 
-						$mvalue['end_date'], $mvalue['event_link'], $upmTitle, $objPHPExcel, $i, 'M');
-						
-						$objPHPExcel->getActiveSheet()->getRowDimension($i)->setRowHeight(15);
-						$i++;	
 					}
+				
 				}
-			
 			}
-			
-			if(empty($tvalue[$type]) && $globalOptions['onlyUpdates'] == "no")
+			/*else
 			{
-				if($globalOptions['includeProductsWNoData'] == "off")
-				{
-					if(isset($tvalue['naUpms']) && !empty($tvalue['naUpms']))
-					{
-						$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, 'No trials found');
-						$objPHPExcel->getActiveSheet()->mergeCells('A' . $i . ':BB'. $i);
-						$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':BB'. $i)->applyFromArray(
-										array('borders' => array(
-													'inside' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => 'FF0000FF')),
-													'outline' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => 'FF0000FF'))),
-						));
-						$i++;
-					}
-				}
-				else
+				if($globalOptions['onlyUpdates'] == "no")
 				{
 					$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, 'No trials found');
 					$objPHPExcel->getActiveSheet()->mergeCells('A' . $i . ':BB'. $i);
@@ -1271,7 +1150,7 @@ class TrialTracker
 					));
 					$i++;
 				}
-			}
+			}*/
 		}
 		
 		$objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(13);
@@ -1325,11 +1204,13 @@ class TrialTracker
 		$objPHPExcel->getActiveSheet()->setCellValue('AV1' , '+');
 		$objPHPExcel->getActiveSheet()->mergeCells('AV1:AX1');
 		$objPHPExcel->getActiveSheet()->getStyle('A1:AX1')->applyFromArray($styleThinBlueBorderOutline);
+
 		$objPHPExcel->getActiveSheet()->getStyle('A1:AX1')->getFont()->setSize(10);
 
 		$i = 2;
+		
 		/* Display - Unmatched UPM's */
-		foreach ($unMatchedUpms as $ukey => $uvalue)
+		foreach ($naUpms as $ukey => $uvalue)
 		{
 			$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':AX' . $i . '')->applyFromArray($styleThinBlueBorderOutline);
 			$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':AX' . $i . '')->getFont()->setSize(10);
@@ -1375,7 +1256,7 @@ class TrialTracker
 			{
 				$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl($eventLink);
 			}
-			if(!empty($uvalue['edited']) && ($uvalue['edited']['field'] == 'event_description'))
+			if(isset($uvalue['edited']) && ($uvalue['edited']['field'] == 'event_description'))
 			{
 				$objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($highlightChange);
 				if($eventLink != '' && $eventLink !== NULL)
@@ -1391,7 +1272,7 @@ class TrialTracker
 					}
 				}
 			}
-			else if(!empty($uvalue['edited']) && ($uvalue['edited']['field'] == 'event_link'))
+			else if(isset($uvalue['edited']) && ($uvalue['edited']['field'] == 'event_link'))
 			{
 				$objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($highlightChange);
 				if($eventLink != '' && $eventLink !== NULL)
@@ -1433,7 +1314,7 @@ class TrialTracker
 			
 			//upm type
 			$objPHPExcel->getActiveSheet()->setCellValue('E' . $i, $uvalue["event_type"] . ' Milestone');
-			if(!empty($uvalue['edited']) && ($uvalue['edited']['field'] == 'event_type'))
+			if(isset($uvalue['edited']) && ($uvalue['edited']['field'] == 'event_type'))
 			{
 				$objPHPExcel->getActiveSheet()->getStyle('E' . $i)->applyFromArray($highlightChange);
 				if($eventLink != '' && $eventLink != NULL)
@@ -1463,7 +1344,7 @@ class TrialTracker
 			
 			//upm start date
 			$objPHPExcel->getActiveSheet()->setCellValue('F' . $i, date('m/y',strtotime($uvalue["start_date"])));
-			if(!empty($uvalue['edited']) && ($uvalue['edited']['field'] == 'start_date'))
+			if(isset($uvalue['edited']) && ($uvalue['edited']['field'] == 'start_date'))
 			{
 				$objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray($highlightChange);
 				if($eventLink != '' && $eventLink !== NULL)
@@ -1480,7 +1361,7 @@ class TrialTracker
 					}
 				}
 			}
-			else if(!empty($uvalue['edited']) && ($uvalue['edited']['field'] == 'start_date_type'))
+			else if(isset($uvalue['edited']) && ($uvalue['edited']['field'] == 'start_date_type'))
 			{
 				$objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray($highlightChange);
 				if($eventLink != '' && $eventLink !== NULL)
@@ -1510,7 +1391,7 @@ class TrialTracker
 			
 			//upm end date
 			$objPHPExcel->getActiveSheet()->setCellValue('G' . $i, date('m/y',strtotime($uvalue["end_date"])));
-			if(!empty($uvalue['edited']) && ($uvalue['edited']['field'] == 'end_date'))
+			if(isset($uvalue['edited']) && ($uvalue['edited']['field'] == 'end_date'))
 			{
 				$objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($highlightChange);
 				if($eventLink != '' && $eventLink !== NULL)
@@ -1527,7 +1408,7 @@ class TrialTracker
 					}
 				}
 			}
-			else if(!empty($uvalue['edited']) && ($uvalue['edited']['field'] == 'end_date_type'))
+			else if(isset($uvalue['edited']) && ($uvalue['edited']['field'] == 'end_date_type'))
 			{
 				$objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($highlightChange);
 				if($eventLink != '' && $eventLink !== NULL)
@@ -1564,7 +1445,7 @@ class TrialTracker
 					$resultLink = NULL;
 				}
 								
-				if((!empty($uvalue['edited']) && $uvalue['edited']['field'] == 'result_link') || ($uvalue['new'] == 'y')) 
+				if((isset($uvalue['edited']) && $uvalue['edited']['field'] == 'result_link') || ($uvalue['new'] == 'y')) 
 					$imgColor = 'red';
 				else 
 					$imgColor = 'black'; 
@@ -1670,131 +1551,58 @@ class TrialTracker
 		header('Content-Disposition: attachment;filename="  DTT  _' . date('Y-m-d_H.i.s') . '.xlsx"');
 		header("Content-Transfer-Encoding: binary ");
 		$objWriter->save('php://output');
+
+
+
+
 		@flush();
 
 		exit;
 	}
 	
-	function generateTsvFile($resultIds, $timeMachine, $ottType, $globalOptions)
+	function generateTsvFile($resultIds,$globalOptions)
 	{	
-		if(in_array($globalOptions['startrange'], $globalOptions['Highlight_Range']))
-		{
-			$timeMachine = str_replace('ago', '', $globalOptions['startrange']);
-			$timeMachine = trim($timeMachine);
-			$timeMachine = '-' . (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
-		}
-		else
-		{
-			$timeMachine = trim($globalOptions['startrange']);
-			$timeMachine = (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
-		}
-		$timeMachine = strtotime($timeMachine);
-
-		if(in_array($globalOptions['endrange'], $globalOptions['Highlight_Range']))
-		{
-			$timeInterval = str_replace('ago', '', $globalOptions['endrange']);
-			$timeInterval = trim($timeInterval);
-			$timeInterval = '-' . (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
-		}
-		else
-		{
-			$timeInterval = trim($globalOptions['endrange']);
-			$timeInterval = (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
-		}
+		$time = $this->timeParams($globalOptions);
+		$timeMachine = $time[0];
+		$timeInterval = $time[1];
 		
 		$Values = array();
 	
-		if($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed')
-		{	
-			$Ids = array();
-			$TrialsInfo = array();
-			
-			if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '')
-			{
-				$Arr = $this->processHmParams($resultIds, $globalOptions, $timeMachine, $timeInterval);
-			}
-			else
-			{
-				$Arr = $this->processNonHmParams($resultIds, $globalOptions, $timeMachine, $timeInterval);
-			}
-			
-			$Ids = $Arr[4];
-			$TrialsInfo = $Arr[5];
-			
-			if(isset($globalOptions['product']) && !empty($globalOptions['product']) && $globalOptions['download'] != 'allTrialsforDownload')
-			{	
-				foreach($TrialsInfo as $tikey => $tivalue)
-				{
-					if(!(in_array($tikey, $globalOptions['product'])))
-					{
-						unset($TrialsInfo[$tikey]);
-						unset($Ids[$tikey]);
-					}
-				}
-				$TrialsInfo = array_values($TrialsInfo);
-				$Ids = array_values($Ids);
-			}
-			
-			$Values = $this->processIndexedOTTData($TrialsInfo, $ottType, $Ids, $timeMachine, $globalOptions);
+		$Ids = array();
+		$TrialsInfo = array();
+		$Trials = array();
+		
+		if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '')
+		{
+			$Arr = $this->processHmParams($resultIds, $globalOptions, $timeMachine, $timeInterval);
 		}
 		else
 		{
-			if(!is_array($resultIds))
+			$Arr = $this->processNonHmParams($resultIds, $globalOptions, $timeMachine, $timeInterval);
+		}
+			
+		$ottType = $Arr['ottType'];
+		$Ids = $Arr['Ids'];
+		$TrialsInfo = $Arr['TrialsInfo'];
+		
+		$Values = $this->compileOTTData($ottType, $TrialsInfo, $Ids, $globalOptions, 'tsv');
+		
+		unset($Ids, $productSelector, $TrialsInfo);
+		
+		foreach($Values['Data'] as $tkey => $tvalue)
+		{
+			unset($Values['sectionHeader'], $Values['naUpms']);
+			
+			foreach($tvalue['Trials'] as $tkey => & $tvalue)
 			{
-				$resultIds = array($resultIds);
-			}
-			
-			$Values = $this->processOTTData($ottType, $resultIds, $timeMachine, $linkExpiryDt = array(), $globalOptions);
-			
-			if(isset($globalOptions['product']) && !empty($globalOptions['product']) && $globalOptions['download'] != 'allTrialsforDownload')
-			{	
-				foreach($Values['Trials'] as $tkey => $tvalue)
-				{
-					if(!(in_array($tkey, $globalOptions['product'])))
-					{
-						unset($Values['Trials'][$tkey]);
-					}
-				}
-				$Values['Trials'] = array_values($Values['Trials']);
+				$Trials[] = $tvalue;
 			}
 		}
+		unset($Values);
 		
-		unset($Ids);		
-		unset($TrialsInfo);
-		unset($Values['totactivecount']);
-		unset($Values['totinactivecount']);
-		unset($Values['totalcount']);
-		
-		$Trials['activeTrials'] = array();
-		$Trials['inactiveTrials'] = array();
-		$Trials['allTrials'] = array();
-		$Trials['allTrialsforDownload'] = array();
-		
-		foreach($Values['Trials'] as $tkey => $tvalue)
-		{
-			$Trials['allTrialsforDownload'] = array_merge($Trials['allTrialsforDownload'], $tvalue['allTrialsforDownload']);
-			
-			$Trials['activeTrials'] = array_merge($Trials['activeTrials'], $tvalue['activeTrials']);
-			$Trials['inactiveTrials'] = array_merge($Trials['inactiveTrials'], $tvalue['inactiveTrials']);
-			$Trials['allTrials'] = array_merge($Trials['allTrials'], $tvalue['allTrials']);
-			
-		}
-		unset($Values);		
-		
-
-		if($globalOptions['download'] == 'allTrialsforDownload')
-		{
-			$type = 'allTrialsforDownload';
-		}
-		else
-		{
-			$type = $globalOptions['type'];
-		}
-		
-		$outputStr = "";
 		$outputStr = "NCT ID \t Title \t N \t Region \t Status \t Sponsor \t Condition \t Interventions \t Start \t End \t Ph \n";
 		
-		foreach($Trials[$type] as $key => $value)
+		foreach($Trials as $key => $value)
 		{
 			$startDate = '';
 			$endDate = '';
@@ -3302,6 +3110,7 @@ class TrialTracker
 					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
 				}
 				$from = $to;
+
 				$from++;
 				
 				$to = getColspanforExcelExport($from, 12);
@@ -3407,6 +3216,7 @@ class TrialTracker
 				$to = getColspanforExcelExport($from, 3);
 				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
 				if( $upmLink != '' && $upmLink !== NULL)
+
 				{
 					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
 					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
@@ -4137,6 +3947,7 @@ class TrialTracker
 				$from++;
 				
 				if((12 - ($st+1)) != 0)
+
 				{
 					$inc = (12 - ($st+1));
 					$to = getColspanforExcelExport($from, $inc);
@@ -4237,6 +4048,7 @@ class TrialTracker
 					}
 					$from = $to;
 					$from++;
+
 				}
 				
 				$to = getColspanforExcelExport($from, 3);
@@ -4339,11 +4151,13 @@ class TrialTracker
 					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
 				}
 				$from = $to;
+
 				$from++;
 				
 				$to = getColspanforExcelExport($from, 12);
 				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
 				if( $upmLink != '' && $upmLink !== NULL)
+
 				{
 					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
 					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
@@ -5084,6 +4898,7 @@ class TrialTracker
 				}
 				
 				$to = getColspanforExcelExport($from, 12);
+
 				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
 				if( $upmLink != '' && $upmLink !== NULL)
 				{
@@ -5477,10 +5292,11 @@ class TrialTracker
 		}
 	}
 	
-	function generatePdfFile($resultIds, $timeMachine = NULL, $ottType, $globalOptions)
+	function generatePdfFile($resultIds, $globalOptions)
 	{
 		global $db;
 		$loggedIn	= $db->loggedIn();
+		
 		$pdfContent = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'
 						. '<html xmlns="http://www.w3.org/1999/xhtml">'
 						. '<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" />'
@@ -5513,97 +5329,920 @@ class TrialTracker
 						.'<body>'
 						.'<div align="center"><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="200" height="25" id="header" /></div><br/>';
 		
-
-		if(in_array($globalOptions['startrange'], $globalOptions['Highlight_Range']))
-		{
-			$timeMachine = str_replace('ago', '', $globalOptions['startrange']);
-			$timeMachine = trim($timeMachine);
-			$timeMachine = '-' . (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
-		}
-		else
-		{
-			$timeMachine = trim($globalOptions['startrange']);
-			$timeMachine = (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
-		}
-		$timeMachine = strtotime($timeMachine);
-
-		if(in_array($globalOptions['endrange'], $globalOptions['Highlight_Range']))
-		{
-			$timeInterval = str_replace('ago', '', $globalOptions['endrange']);
-			$timeInterval = trim($timeInterval);
-			$timeInterval = '-' . (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
-		}
-		else
-		{
-			$timeInterval = trim($globalOptions['endrange']);
-			$timeInterval = (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
-		}
+		$time = $this->timeParams($globalOptions);
+		$timeMachine = $time[0];
+		$timeInterval = $time[1];
 		
 		$Values = array();
+		$Ids = array();
+		$TrialsInfo = array();
 		
-		if($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed')
-		{	
-			$Ids = array();
-			$TrialsInfo = array();
+		if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '')
+		{
+			$Arr = $this->processHmParams($resultIds, $globalOptions);
+		}
+		else
+		{
+			$Arr = $this->processNonHmParams($resultIds, $globalOptions);
+		}
+		
+		$ottType = $Arr['ottType'];
+		$Ids = $Arr['Ids'];
+		$TrialsInfo = $Arr['TrialsInfo'];
 			
-			if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '')
+		$Values = $this->compileOTTData($ottType, $TrialsInfo, $Ids, $globalOptions, 'excel');	
+		
+		unset($Ids, $productSelector, $TrialsInfo);
+		
+		$pdfContent .='<table style="border-collapse:collapse;" width="100%" cellpadding="0" cellspacing="0" class="manage">'
+						 . '<thead><tr>'. (($loggedIn) ? '<th valign="bottom" align="center" style="width:30px; vertical-align:bottom;" >ID</th>' : '' )
+						 . '<th valign="bottom" height="11px" align="center" style="width:93px; vertical-align:bottom;">Title</th>'
+						 . '<th valign="bottom" align="center" style="width:18px; vertical-align:bottom;" title="Black: Actual&nbsp;&nbsp;Gray: Anticipated&nbsp;&nbsp;Red: Change greater than 20%">N</th>'
+						 . '<th valign="bottom" align="center" style="width:41px; vertical-align:bottom;" title="&quot;RoW&quot; = Rest of World">Region</th>'
+						 . '<th valign="bottom" align="center" style="width:60px; vertical-align:bottom;">Interventions</th>'
+						 . '<th valign="bottom" align="center" style="width:41px; vertical-align:bottom;">Sponsor</th>'
+						 . '<th valign="bottom" align="center" style="width:41px; vertical-align:bottom;">Status</th>'
+						 . '<th valign="bottom" align="center" style="width:60px; vertical-align:bottom;">Conditions</th>'
+						 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;" title="MM/YY">Start</th>'
+						 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;" title="MM/YY">End</th>'
+						 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;">Ph</th>'
+						 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;">Result</th>'
+						  . '<th valign="bottom" align="center" style="width:6px; vertical-align:bottom;" colspan="3">-</th>'
+						 . '<th valign="bottom" align="center" style="width:24px; vertical-align:bottom;" colspan="12">' . (date('Y')) . '</th>'
+						 . '<th valign="bottom" align="center" style="width:24px; vertical-align:bottom;" colspan="12">' . (date('Y')+1) . '</th>'
+						 . '<th valign="bottom" align="center" style="width:24px; vertical-align:bottom;" colspan="12">' . (date('Y')+2) . '</th>'
+						 . '<th valign="bottom" align="center" style="width:6px; vertical-align:bottom;" colspan="3">+</th></tr></thead>'
+						 . '<tr style="border:none; border-top:none;">'
+						 . (($loggedIn) ? '<td border="0" style="width:30px; height:0px; border-top:none; border:none;" ></td>' : '' )
+						 . '<td border="0" height="0px" style="width:93px; height:0px; border-top:none; border:none;"></td>'
+						 . '<td border="0" style="width:18px; height:0px; border-top:none; border:none;"></td>'
+						 . '<td border="0" style="width:41px; height:0px; border-top:none; border:none;"></td>'
+						 . '<td border="0" style="width:60px; height:0px; border-top:none; border:none;"></td>'
+						 . '<td border="0" style="width:41px; height:0px; border-top:none; border:none;"></td>'
+						 . '<td border="0" style="width:41px; height:0px; border-top:none; border:none;"></td>'
+						 . '<td border="0" style="width:60px; height:0px; border-top:none; border:none;"></td>'
+						 . '<td border="0" style="width:20px; height:0px; border-top:none; border:none;"></td>'
+						 . '<td border="0" style="width:20px; height:0px; border-top:none; border:none;"></td>'
+						 . '<td border="0" style="width:20px; height:0px; border-top:none; border:none;"></td>'
+						 . '<td border="0" style="width:20px; height:0px; border-top:none; border:none;"></td>'
+						 . '<td border="0" style="width:6px; height:0px; border-top:none; border:none;" colspan="3"></td>'
+						 . '<td border="0" style="width:24px; height:0px; border-top:none; border:none;" colspan="12"></td>'
+						 . '<td border="0" style="width:24px; height:0px; border-top:none; border:none;" colspan="12"></td>'
+						 . '<td border="0" style="width:24px; height:0px; border-top:none; border:none;" colspan="12"></td>'
+						 . '<td border="0" style="width:6px; height:0px; border-top:none; border:none;" colspan="3"></td></tr>';
+		
+		$counter = 0;
+		
+		if($loggedIn)
+			$col_width=548;
+		else
+			$col_width=518;
+			
+		$outputStr = '';
+		foreach($Values['Data'] as $tkey => $tvalue)
+		{
+			$sectionHeader = $dvalue['sectionHeader'];
+			$naUpms = $dvalue['naUpms'];
+			
+			//Rendering Upms
+			if($globalOptions['includeProductsWNoData'] == "off")
 			{
-				$Arr = $this->processHmParams($resultIds, $globalOptions, $timeMachine, $timeInterval);
+				if(!empty($naUpms) || (isset($dvalue['Trials']) && !empty($dvalue['Trials'])))
+				{
+					if(!empty($naUpms))
+					{
+						$outputStr .= $this->displayUpmHeaders_TCPDF($ottType, $naUpms, $sectionHeader);
+					}
+					else
+					{
+						$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">' . $sectionHeader . '</td></tr>';
+					}
+				}
 			}
 			else
 			{
-				$Arr = $this->processNonHmParams($resultIds, $globalOptions, $timeMachine, $timeInterval);
-			}
-			
-			$Ids = $Arr[4];
-			$TrialsInfo = $Arr[5];
-			
-			if(isset($globalOptions['product']) && !empty($globalOptions['product']) && $globalOptions['download'] != 'allTrialsforDownload')
-			{	
-				foreach($TrialsInfo as $tikey => $tivalue)
+				if(!empty($naUpms))
 				{
-					if(!(in_array($tikey, $globalOptions['product'])))
-					{
-						unset($TrialsInfo[$tikey]);
-						unset($Ids[$tikey]);
-					}
+					$outputStr .= $this->displayUpmHeaders_TCPDF($ottType, $naUpms, $sectionHeader);
 				}
-				$TrialsInfo = array_values($TrialsInfo);
-				$Ids = array_values($Ids);
+				else
+				{
+					$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">' . $sectionHeader . '</td></tr>';
+				}
 			}
 			
-			$Values = $this->processIndexedOTTData($TrialsInfo, $ottType, $Ids, $timeMachine, $globalOptions);
-		}
-		else
-		{
-			if(!is_array($resultIds))
+			if(isset($tvalue['Trials']) && !empty($tvalue['Trials']))
 			{
-				$resultIds = array($resultIds);
-			}
-			
-			$Values = $this->processOTTData($ottType, $resultIds, $timeMachine, $linkExpiryDt = array(), $globalOptions);
-			
-			if(isset($globalOptions['product']) && !empty($globalOptions['product']) && $globalOptions['download'] != 'allTrialsforDownload')
-			{	
-				foreach($Values['Trials'] as $tkey => $tvalue)
+				foreach($tvalue['Trials'] as $dkey => $dvalue)
 				{
-					if(!(in_array($tkey, $globalOptions['product'])))
+					if($counter%2 == 1) 
+					{ 
+						$rowOneType = 'alttitle';
+						$rowOneBGType = 'background-color:#D5D3E6;';
+					}	
+					else
 					{
-						unset($Values['Trials'][$tkey]);
+						$rowOneType = 'title';
+						$rowOneBGType = 'background-color:#EDEAFF;';
 					}
+					
+					$rowspan = 1;
+					$titleLinkColor = '#000000;';
+					
+					if(isset($dvalue['upms']))  
+						$rowspan = count($dvalue['upms'])+1; 
+	
+					$nctId = $dvalue['NCT/nct_id'];
+					
+					if(isset($dvalue['manual_is_sourceless']))
+					{
+						$href = $dvalue['source'];
+					}
+					else if(isset($dvalue['source_id']) && strpos($dvalue['source_id'], 'NCT') === FALSE)
+					{	
+						$href = 'https://www.clinicaltrialsregister.eu/ctr-search/search?query=' . $dvalue['NCT/nct_id'];
+					}
+					else if(isset($dvalue['source_id']) && strpos($dvalue['source_id'], 'NCT') !== FALSE)
+					{
+						$href = 'http://clinicaltrials.gov/ct2/show/' . padnct($dvalue['NCT/nct_id']);
+					}
+					else 
+					{ 
+						$href = 'javascript:void(0);';
+					}
+					
+					//row starts  
+					$outputStr .= '<tr style="width:' . $col_width . 'px; height:'.(24).'px; page-break-inside:avoid;" nobr="true" ' 
+								. (($dvalue['new'] == 'y') ? 'class="newtrial" ' : ''). '>';  
+				
+				
+					//nctid column
+					if($loggedIn) 
+					{ 
+						$outputStr .= '<td style="width:30px; '.$rowOneBGType.'" class="' . $rowOneType . '" ' . (($dvalue['new'] == 'y') ? 'title="New record"' : '') 
+									. ' ><a style="color:' . $titleLinkColor . '" href="' . $href . '" target="_blank">' . $nctId . '</a></td>';
+					}
+	
+	
+					//acroynm and title column
+					$attr = ' ';
+					if(isset($dvalue['manual_is_sourceless']))
+					{
+						if(isset($dvalue['edited']) && array_key_exists('NCT/brief_title', $dvalue['edited'])) 
+						{
+							$attr = ' highlight" title="' . $dvalue['edited']['NCT/brief_title'];
+							$titleLinkColor = '#FF0000;';
+						} 
+						else if($dvalue['new'] == 'y') 
+						{
+							$attr = '" title="New record';
+							$titleLinkColor = '#FF0000;';
+						}
+						elseif(isset($dvalue['manual_brief_title']))
+						{
+							if($dvalue['original_brief_title'] == $dvalue['NCT/brief_title'])
+							{
+								$attr = ' manual" title="Manual curation.';
+							}
+							else
+							{
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_brief_title'];
+							}
+							$titleLinkColor = '#FF7700';
+						}
+					}
+					else
+					{
+						if(isset($dvalue['manual_brief_title']))
+						{
+							if($dvalue['original_brief_title'] == $dvalue['NCT/brief_title'])
+							{
+								$attr = ' manual" title="Manual curation.';
+							}
+							else
+							{
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_brief_title'];
+							}
+							$titleLinkColor = '#FF7700';
+						}
+						elseif(!empty($dvalue['edited']) && array_key_exists('NCT/brief_title', $dvalue['edited'])) 
+						{
+							$attr = ' highlight" title="' . $dvalue['edited']['NCT/brief_title'];
+							$titleLinkColor = '#FF0000;';
+						} 
+						elseif($dvalue['new'] == 'y') 
+						{
+							$attr = '" title="New record';
+							$titleLinkColor = '#FF0000;';
+						}
+					}
+					$outputStr .= '<td style="width:93px; '.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . ' ' . $attr . '"><span>'
+								. '<a style="color:' . $titleLinkColor . '" ';
+					$outputStr .= ' href="' . $href . '"  target="_blank">';			 
+					if(isset($dvalue['NCT/acronym']) && $dvalue['NCT/acronym'] != '') 
+					{
+						$dvalue['NCT/brief_title'] = $this->replaceRedundantAcroynm($dvalue['NCT/acronym'], $dvalue['NCT/brief_title']);
+						$outputStr .= htmlformat($dvalue['NCT/acronym']) . ' ' . htmlformat($dvalue['NCT/brief_title']);
+					} 
+					else 
+					{
+						$outputStr .= htmlformat($dvalue['NCT/brief_title']);
+					}
+					$outputStr .= '</a></span></td>';
+				
+					
+					//enrollment column
+					$attr = ' ';
+					if(isset($dvalue['manual_is_sourceless']))
+					{
+						if(isset($dvalue['edited']) && array_key_exists('NCT/enrollment',$dvalue['edited'])) 
+						{
+							$attr = ' highlight" title="' . $dvalue['edited']['NCT/enrollment'];
+						}
+						else if($dvalue['new'] == 'y') 
+						{
+							$attr = '" title="New record';
+						}
+						elseif(isset($dvalue['manual_enrollment']))
+						{
+							if($dvalue['original_enrollment'] == $dvalue['NCT/enrollment'])
+							{
+								$attr = ' manual" title="Manual curation.';
+							}
+							else
+							{
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_enrollment'];
+							}
+						}
+					}
+					else
+					{
+						if(isset($dvalue['manual_enrollment']))
+						{
+							if($dvalue['original_enrollment'] == $dvalue['NCT/enrollment'])
+							{
+								$attr = ' manual" title="Manual curation.';
+							}
+							else
+							{
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_enrollment'];
+							}
+						}
+						elseif(isset($dvalue['edited']) && array_key_exists('NCT/enrollment',$dvalue['edited'])) 
+						{
+							$attr = ' highlight" title="' . $dvalue['edited']['NCT/enrollment'];
+						}
+	
+						else if($dvalue['new'] == 'y') 
+						{
+							$attr = '" title="New record';
+						}
+					}
+					$outputStr .= '<td style="width:18px; '.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><span>';
+					if($dvalue["NCT/enrollment_type"] != '') 
+					{
+						if($dvalue["NCT/enrollment_type"] == 'Anticipated' || $dvalue["NCT/enrollment_type"] == 'Actual') 
+						{ 
+							$outputStr .= $dvalue["NCT/enrollment"];
+						}
+						else 
+						{ 
+							$outputStr .= $dvalue["NCT/enrollment"] . ' (' . $dvalue["NCT/enrollment_type"] . ')';
+						}
+					} 
+					else 
+					{
+						$outputStr .= $dvalue["NCT/enrollment"];
+					}
+					$outputStr .= '</span></td>';				
+	
+	
+					//region column
+					$attr = ' ';
+					if(isset($dvalue['manual_is_sourceless']))
+					{
+						if($dvalue['new'] == 'y')
+						{
+							$attr = '" title="New record';
+						}
+						elseif(isset($dvalue['manual_region']))
+						{
+							$attr = ' manual" title="Manual curation.';
+						}
+					}
+					else
+					{
+						if(isset($dvalue['manual_region']))
+						{
+							$attr = ' manual" title="Manual curation.';
+						}
+						elseif($dvalue['new'] == 'y')
+						{
+							$attr = '" title="New record';
+						}
+					}
+					$outputStr .= '<td style="width:41px; '.$rowOneBGType.'" class="' . $rowOneType . '" rowspan="' . $rowspan . '" ' . $attr . '>'
+								. '<span>' . $dvalue['region'] . '</span></td>';
+	
+					
+					//intervention name column
+					if(isset($dvalue['manual_is_sourceless']))
+					{
+						if(isset($dvalue['edited']) && array_key_exists('NCT/intervention_name', $dvalue['edited']))
+						{
+							$attr = ' highlight" title="' . $dvalue['edited']['NCT/intervention_name'];
+						} 
+						else if($dvalue['new'] == 'y')
+						{
+							$attr = '" title="New record';
+						}
+						elseif(isset($dvalue['manual_intervention_name']))
+						{
+							if($dvalue['original_intervention_name'] == $dvalue['NCT/intervention_name'])
+							{
+								$attr = ' manual" title="Manual curation.';
+							}
+							else
+							{
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_intervention_name'];
+							}
+						}
+					}
+					else
+					{
+						if(isset($dvalue['manual_intervention_name']))
+						{
+							if($dvalue['original_intervention_name'] == $dvalue['NCT/intervention_name'])
+							{
+								$attr = ' manual" title="Manual curation.';
+							}
+							else
+							{
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_intervention_name'];
+							}
+						}
+						elseif(isset($dvalue['edited']) && array_key_exists('NCT/intervention_name', $dvalue['edited']))
+						{
+							$attr = ' highlight" title="' . $dvalue['edited']['NCT/intervention_name'];
+						} 
+						else if($dvalue['new'] == 'y')
+						{
+							$attr = '" title="New record';
+						}
+					}
+					$outputStr .= '<td style="width:60px; '.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
+								. '<span>' . $dvalue['NCT/intervention_name'] . '</span></td>';
+	
+	
+					//collaborator and sponsor column
+					$attr = ' ';
+					if(isset($dvalue['manual_is_sourceless']))
+					{
+						if(isset($dvalue['edited']) && (array_key_exists('NCT/collaborator', $dvalue['edited']) 
+						|| array_key_exists('NCT/lead_sponsor', $dvalue['edited']))) 
+						{
+								
+							$attr = ' highlight" title="';
+							if(array_key_exists('NCT/lead_sponsor', $dvalue['edited']))
+							{
+								$attr .= $dvalue['edited']['NCT/lead_sponsor'];
+							}
+							if(array_key_exists('NCT/lead_sponsor', $dvalue['edited']) && array_key_exists('NCT/collaborator', $dvalue['edited']))
+							{
+								$attr .=  ', ';
+							}
+							if(array_key_exists('NCT/collaborator', $dvalue['edited'])) 
+							{
+								$attr .= $dvalue['edited']['NCT/collaborator'];
+							}
+							$attr .= '';
+						} 
+						else if($dvalue['new'] == 'y') 
+						{
+							$attr = '" title="New record';
+						}
+						elseif(isset($dvalue['manual_lead_sponsor']) || isset($dvalue['manual_collaborator']))
+						{
+							if(isset($dvalue['manual_lead_sponsor']))
+							{
+								if($dvalue['original_lead_sponsor'] == $dvalue['NCT/lead_sponsor'])
+								{
+									$attr = ' manual" title="Manual curation.';
+								}
+								else
+								{
+									$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_lead_sponsor'];
+								}
+							}
+							else
+							{
+								if($dvalue['original_collaborator'] == $dvalue['NCT/collaborator'])
+								{
+									$attr = ' manual" title="Manual curation.';
+								}
+								else
+								{
+									$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_collaborator'];
+								}
+							}
+						}
+					}
+					else
+					{
+						if(isset($dvalue['manual_lead_sponsor']) || isset($dvalue['manual_collaborator']))
+						{
+							if(isset($dvalue['manual_lead_sponsor']))
+							{
+								if($dvalue['original_lead_sponsor'] == $dvalue['NCT/lead_sponsor'])
+								{
+									$attr = ' manual" title="Manual curation.';
+								}
+								else
+								{
+									$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_lead_sponsor'];
+								}
+							}
+							else
+							{
+								if($dvalue['original_collaborator'] == $dvalue['NCT/collaborator'])
+								{
+									$attr = ' manual" title="Manual curation.';
+								}
+								else
+								{
+									$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_collaborator'];
+								}
+							}
+						}
+						elseif(isset($dvalue['edited']) && (array_key_exists('NCT/collaborator', $dvalue['edited']) 
+						|| array_key_exists('NCT/lead_sponsor', $dvalue['edited']))) 
+						{
+								
+							$attr = ' highlight" title="';
+							if(array_key_exists('NCT/lead_sponsor', $dvalue['edited']))
+							{
+								$attr .= $dvalue['edited']['NCT/lead_sponsor'];
+							}
+							if(array_key_exists('NCT/lead_sponsor', $dvalue['edited']) && array_key_exists('NCT/collaborator', $dvalue['edited']))
+							{
+								$attr .=  ', ';
+							}
+							if(array_key_exists('NCT/collaborator', $dvalue['edited'])) 
+							{
+								$attr .= $dvalue['edited']['NCT/collaborator'];
+							}
+							$attr .= '';
+						} 
+						else if($dvalue['new'] == 'y') 
+						{
+							$attr = '" title="New record';
+						}
+					}
+					$outputStr .= '<td style="width:41px; '.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
+								. '<span>' . $dvalue['NCT/lead_sponsor'];
+					if($dvalue['NCT/lead_sponsor'] != '' && $dvalue['NCT/collaborator'] != ''
+					&& $dvalue['NCT/lead_sponsor'] != NULL && $dvalue['NCT/collaborator'] != NULL)
+					{
+						$outputStr .= ', ';
+					}
+					$outputStr .= $dvalue["NCT/collaborator"] . '</span></td>';
+	
+					//overall status column
+					if(isset($dvalue['manual_is_sourceless']))
+					{
+						if(isset($dvalue['edited']) && array_key_exists('NCT/overall_status', $dvalue['edited'])) 
+						{
+							$attr = 'class="highlight ' . $rowOneType . ' " title="' . $dvalue['edited']['NCT/overall_status'] . '" ';
+						} 
+						else if($dvalue['new'] == 'y') 
+						{
+							$attr = 'title="New record" class="' . $rowOneType . '"' ;
+						}
+						else if(isset($dvalue['manual_overall_status']))
+						{
+							if($dvalue['original_overall_status'] == $dvalue['NCT/overall_status'])
+							{
+								$attr = ' manual" title="Manual curation.';
+							}
+							else
+							{
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_overall_status'];
+							}
+						} 
+					}
+					else
+					{
+						if(isset($dvalue['manual_overall_status']))
+						{
+							if($dvalue['original_overall_status'] == $dvalue['NCT/overall_status'])
+							{
+								$attr = ' manual" title="Manual curation.';
+							}
+							else
+							{
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_overall_status'];
+							}
+						}
+						else if(isset($dvalue['edited']) && array_key_exists('NCT/overall_status', $dvalue['edited'])) 
+						{
+							$attr = 'class="highlight ' . $rowOneType . ' " title="' . $dvalue['edited']['NCT/overall_status'] . '" ';
+						} 
+						else if($dvalue['new'] == 'y') 
+						{
+							$attr = 'title="New record" class="' . $rowOneType . '"' ;
+						}
+					}
+					$outputStr .= '<td style="width:41px; '.$rowOneBGType.'" ' . $attr . ' rowspan="' . $rowspan . '">'  
+								. '<span>' . $dvalue['NCT/overall_status'] . '</span></td>';
+					
+					
+					//condition column
+					$attr = ' ';
+
+					if(isset($dvalue['manual_is_sourceless']))
+					{
+						if(isset($dvalue['edited']) && array_key_exists('NCT/condition', $dvalue['edited'])) 
+						{
+							$attr = ' highlight" title="' . $dvalue['edited']['NCT/condition'];
+						} 
+						else if($dvalue['new'] == 'y') 
+						{
+							$attr = '" title="New record';
+						}
+						else if(isset($dvalue['manual_condition']))
+						{
+							if($dvalue['original_condition'] == $dvalue['NCT/condition'])
+							{
+								$attr = ' manual" title="Manual curation.';
+							}
+							else
+							{
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_condition'];
+							}
+						}
+					}
+					else
+					{
+						if(isset($dvalue['manual_condition']))
+						{
+							if($dvalue['original_condition'] == $dvalue['NCT/condition'])
+							{
+								$attr = ' manual" title="Manual curation.';
+							}
+							else
+							{
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_condition'];
+							}
+						}
+						else if(isset($dvalue['edited']) && array_key_exists('NCT/condition', $dvalue['edited'])) 
+						{
+							$attr = ' highlight" title="' . $dvalue['edited']['NCT/condition'];
+						} 
+						else if($dvalue['new'] == 'y') 
+						{
+							$attr = '" title="New record';
+						}
+					}
+					
+					$outputStr .= '<td style="width:60px; '.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
+								. '<span>' . $dvalue['NCT/condition'] . '</span></td>';
+					
+						
+					//start date column
+					$attr = ' ';
+					$borderLeft = '';
+					if(isset($dvalue['manual_is_sourceless']))
+					{
+						if(isset($dvalue['edited']) && array_key_exists('NCT/start_date', $dvalue['edited'])) 
+						{
+							$attr = ' highlight" title="' . $dvalue['edited']['NCT/start_date'] ;
+							$borderLeft = 'startdatehighlight';
+						} 
+						else if($trials[$i]['new'] == 'y') 
+						{
+							$attr = '" title="New record';
+						}
+						elseif(isset($dvalue['manual_start_date']))
+						{
+							if($dvalue['original_start_date'] == $dvalue['start_date'])
+							{
+								$attr = ' manual" title="Manual curation.';
+							}
+							else
+							{
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_start_date'];
+							}
+						}
+					}
+					else
+					{
+						if(isset($dvalue['manual_start_date']))
+						{
+							if($dvalue['original_start_date'] == $dvalue['start_date'])
+							{
+								$attr = ' manual" title="Manual curation.';
+							}
+							else
+							{
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_start_date'];
+							}
+						}
+						elseif(isset($dvalue['edited']) && array_key_exists('NCT/start_date', $dvalue['edited'])) 
+						{
+							$attr = ' highlight" title="' . $dvalue['edited']['NCT/start_date'];
+							$borderLeft = 'startdatehighlight';
+						} 
+						else if($trials[$i]['new'] == 'y') 
+						{
+							$attr = '" title="New record';
+						}
+						
+					}
+					$outputStr .= '<td style="width:20px; '.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '" ><span>'; 
+					if($dvalue["NCT/start_date"] != '' && $dvalue["NCT/start_date"] != NULL && $dvalue["NCT/start_date"] != '0000-00-00') 
+					{
+						$outputStr .= date('m/y',strtotime($dvalue["NCT/start_date"]));
+					} 
+					else 
+					{
+						$outputStr .= '&nbsp;';
+					}
+					$outputStr .= '</span></td>';
+					
+					
+					//end date column
+					$attr = ' ';
+					$borderRight = '';
+					if(isset($dvalue['manual_is_sourceless']))
+					{
+						if(isset($dvalue['edited']) && array_key_exists('inactive_date', $dvalue['edited'])) 
+						{
+							$attr = ' highlight" title="' . $dvalue['edited']['inactive_date'];
+							$borderRight = 'border-right:1px solid red;';
+						} 
+						else if($dvalue['new'] == 'y') 
+						{
+							$attr = '" title="New record';
+						}
+						elseif(isset($dvalue['manual_end_date']))
+						{
+							if($dvalue['original_end_date'] == $dvalue['inactive_date'])
+							{
+								$attr = ' manual" title="Manual curation.';
+							}
+							else
+							{
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_end_date'];
+							}
+						}
+					}
+					else
+					{
+						if(isset($dvalue['manual_end_date']))
+						{
+							if($dvalue['original_end_date'] == $dvalue['inactive_date'])
+							{
+								$attr = ' manual" title="Manual curation.';
+							}
+							else
+							{
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_end_date'];
+							}
+						}
+						else if(isset($dvalue['edited']) && array_key_exists('inactive_date', $dvalue['edited'])) 
+						{
+							$attr = ' highlight" title="' . $dvalue['edited']['inactive_date'];
+							$borderRight = 'border-right:1px solid red;';
+						} 
+						else if($dvalue['new'] == 'y') 
+						{
+							$attr = '" title="New record';
+						}
+					}
+					$outputStr .= '<td style="width:20px; '.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType  . $attr . '"><span>'; 
+					if($dvalue["inactive_date"] != '' && $dvalue["inactive_date"] != NULL && $dvalue["inactive_date"] != '0000-00-00') 
+					{
+						$outputStr .= date('m/y',strtotime($dvalue["inactive_date"]));
+					} 
+					else 
+					{
+						$outputStr .= '&nbsp;';
+					}
+					$outputStr .= '</span></td>';
+						
+												
+					//phase column
+					if(isset($dvalue['manual_is_sourceless']))
+					{
+						if(isset($dvalue['edited']) && array_key_exists('NCT/phase', $dvalue['edited'])) 
+						{
+							$attr = ' highlight" title="' . $dvalue['edited']['NCT/phase'];
+						} 
+						else if($dvalue['new'] == 'y') 
+						{
+							$attr = '" title="New record';
+						}
+						elseif(isset($dvalue['manual_phase']))
+						{
+							if($dvalue['original_phase'] == $dvalue['NCT/phase'])
+							{
+								$attr = ' manual" title="Manual curation.';
+							}
+							else
+							{
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_phase'];
+							}
+						}
+					}
+					else
+					{
+						if(isset($dvalue['manual_phase']))
+						{
+							if($dvalue['original_phase'] == $dvalue['NCT/phase'])
+							{
+								$attr = ' manual" title="Manual curation.';
+							}
+							else
+							{
+								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_phase'];
+							}
+						}
+						elseif(isset($dvalue['edited']) && array_key_exists('NCT/phase', $dvalue['edited'])) 
+						{
+							$attr = ' highlight" title="' . $dvalue['edited']['NCT/phase'];
+						} 
+						else if($dvalue['new'] == 'y') 
+						{
+							$attr = '" title="New record';
+						}
+					}
+					if($dvalue['NCT/phase'] == 'N/A' || $dvalue['NCT/phase'] == '' || $dvalue['NCT/phase'] === NULL)
+					{
+						$phase = 'N/A';
+						$phaseColor = $this->phaseValues['N/A'];
+					}
+					else
+					{
+						$phase = str_replace('Phase ', '', trim($dvalue['NCT/phase']));
+						$phaseColor = $this->phaseValues[$phase];
+					}
+					$outputStr .= '<td align="center" style="width:20px; '.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">' 
+								. '<span>' . $phase . '</span></td>';				
+				
+					$outputStr .= '<td style="width:20px;">&nbsp;</td>';
+					
+					$startMonth = date('m',strtotime($dvalue['NCT/start_date']));
+					$startYear = date('Y',strtotime($dvalue['NCT/start_date']));
+					$endMonth = date('m',strtotime($dvalue['inactive_date']));
+					$endYear = date('Y',strtotime($dvalue['inactive_date']));
+	
+	
+					//rendering project completion gnatt chart
+					$trialGnattChart = $this->trialGnattChart($startMonth, $startYear, $endMonth, $endYear, $currentYear, $secondYear, $thirdYear, 
+						$dvalue['NCT/start_date'], $dvalue['inactive_date'], $phaseColor, $borderRight, $borderLeft);
+					
+					
+					$trialGnattChart = preg_replace('/&nbsp;/', '<img src="images/trans_big.gif" />', $trialGnattChart);	
+					$outputStr .= $trialGnattChart;	
+					
+					$outputStr .= '</tr>';
+				
+				
+					//rendering matched upms
+					if(isset($dvalue['upms']) && !empty($dvalue['upms'])) 
+					{
+						foreach($dvalue['upms'] as $mkey => $mvalue) 
+						{ 
+							$str = '';
+							$diamond = '';
+							$resultImage = '';
+			
+							$stMonth = date('m', strtotime($mvalue['start_date']));
+							$stYear = date('Y', strtotime($mvalue['start_date']));
+							$edMonth = date('m', strtotime($mvalue['end_date']));
+							$edYear = date('Y', strtotime($mvalue['end_date']));
+							$upmTitle = htmlformat($mvalue['event_description']);
+							
+							$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true">';
+							
+							if($loggedIn) 
+							{
+								if($mvalue['new'] == 'y')
+								{
+									$idColor = '#973535';
+								}
+								else
+								{
+									$idColor = 'gray';
+								}
+								$outputStr .= '<td style="width:30px; border-top:none;" class="' . $rowOneType . '"><a style="color:' . $idColor 
+								. '" href="' . urlPath() . 'upm.php?search_id=' . $mvalue['id'] . '" target="_blank">' . $mvalue['id'] . '</a></td>';
+							}
+							
+							if(!$loggedIn && !$this->liLoggedIn())
+							{
+								$mvalue['event_link'] = NULL;
+							}
+							
+							$outputStr .= '<td style="width:20px; text-align:center;"><br />';
+							
+	
+							if($mvalue['result_link'] != '' && $mvalue['result_link'] !== NULL)
+							{
+								if(!$loggedIn && !$this->liLoggedIn())
+								{
+									$mvalue['result_link'] = NULL;
+								}
+									
+								if((isset($mvalue['edited']) && $mvalue['edited']['field'] == 'result_link') || ($mvalue['new'] == 'y')) 
+									$imgColor = 'red';
+								else 
+									$imgColor = 'black'; 
+								
+								if($mvalue['result_link'] != '' && $mvalue['result_link'] !== NULL)
+								{
+									$outputStr .= '<a href="' . $mvalue['result_link'] . '" style="color:#000;">';
+									if($mvalue['event_type'] == 'Clinical Data')
+									{
+										$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond" height="6px" width="6px" style="margin:4px;" border="0" />';
+									}
+									else if($mvalue['status'] == 'Cancelled')
+									{
+										$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel" height="6px" width="6px" style="margin:4px;" border="0" />';
+									}
+									else
+									{
+										$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark" height="6px" width="6px" style="margin:4px;" border="0" />';
+									}
+									$outputStr .= '</a>';
+								}
+								else
+								{
+									if($mvalue['event_type'] == 'Clinical Data')
+									{
+										$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond" height="6px" width="6px" style="margin:4px;" border="0" />';
+									}
+									else if($mvalue['status'] == 'Cancelled')
+									{
+										$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel" height="6px" width="6px" style="margin:4px;" border="0" />';
+									}
+									else
+									{
+										$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark" height="6px" width="6px" style="margin:4px;" border="0" />';
+									}
+								}
+							}
+							else if($mvalue['status'] == 'Pending')
+							{
+								if($mvalue['event_link'] != '' && $mvalue['event_link'] !== NULL)
+								{
+									$outputStr .= '<a href="' . $mvalue['event_link'] . '" target="_blank">'
+												. '<img src="images/hourglass.png" alt="Hourglass" height="8px" width="8px" style="margin:3px;" border="0" /></a>';
+								}
+								else
+								{
+									$outputStr .= '<img src="images/hourglass.png" alt="Hourglass" height="8px" width="8px" style="margin:3px;" border="0" />';
+								}
+							}
+							$outputStr .= '</td>';
+							
+							$upmBorderLeft = '';
+							if(isset($mvalue['edited']) && $mvalue['edited']['field'] == 'start_date')
+							{
+								$upmBorderLeft = 'startdatehighlight';
+							}
+								
+
+							$upmBorderRight = '';
+							if(isset($mvalue['edited']) && $mvalue['edited']['field'] == 'end_date' && $mvalue['edited']['end_date'] !== NULL && $mvalue['edited']['end_date'] != '')
+							{
+								$upmBorderRight = 'border-right:1px solid red;';
+							}
+							
+							//rendering upm (upcoming project completion) chart
+							$upmGnattChart = $this->upmGnattChart($stMonth, $stYear, $edMonth, $edYear, $currentYear, $secondYear, $thirdYear, $mvalue['start_date'],
+							$mvalue['end_date'], $mvalue['event_link'], $upmTitle, $upmBorderRight, $upmBorderLeft, $dvalue['larvol_id']);
+							
+							$upmGnattChart = preg_replace('/&nbsp;/', '<img src="images/trans_big.gif" />', $upmGnattChart);
+							
+							$outputStr .= $upmGnattChart;
+							$outputStr .= '</tr>';
+						}
+					}
+					
+					$counter++;
 				}
-				$Values['Trials'] = array_values($Values['Trials']);
 			}
+			/*else
+			{
+				if($globalOptions['onlyUpdates'] = "no")
+				{
+					$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
+				}
+			}*/
 		}
 		
-		//these values are not needed at present
-		unset($Values['totactivecount']);
-		unset($Values['totinactivecount']);
-		unset($Values['totalcount']);
-		
-		$pdfContent .= $this->displayTrialTableHeader_TCPDF($loggedIn, $globalOptions);
-		
-		$pdfContent .= $this->displayTrials_TCPDF($globalOptions, $loggedIn, $Values, $ottType);
+		$pdfContent .= $outputStr;
 		
 		$pdfContent .= '</table></body></html>';
 		$pdfContent = preg_replace('/(background-image|background-position|background-repeat):(\w)*\s/', '', $pdfContent);
@@ -5652,1451 +6291,239 @@ class TrialTracker
 		
 	}
 	
-	/***** Functions ONLY FOR TCPDF *****************************/
-	function displayTrialTableHeader_TCPDF($loggedIn, $globalOptions = array()) 
+	function getProductHmHeaders($hmId, $productIds, $onlyUpdates)
 	{
-		$outputStr ='<table style="border-collapse:collapse;" width="100%" cellpadding="0" cellspacing="0" class="manage">'
-			 . '<thead><tr>'. (($loggedIn) ? '<th valign="bottom" align="center" style="width:30px; vertical-align:bottom;" >ID</th>' : '' )
-			 . '<th valign="bottom" height="11px" align="center" style="width:93px; vertical-align:bottom;">Title</th>'
-			 . '<th valign="bottom" align="center" style="width:18px; vertical-align:bottom;" title="Black: Actual&nbsp;&nbsp;Gray: Anticipated&nbsp;&nbsp;Red: Change greater than 20%">N</th>'
-			 . '<th valign="bottom" align="center" style="width:41px; vertical-align:bottom;" title="&quot;RoW&quot; = Rest of World">Region</th>'
-			 . '<th valign="bottom" align="center" style="width:60px; vertical-align:bottom;">Interventions</th>'
-			 . '<th valign="bottom" align="center" style="width:41px; vertical-align:bottom;">Sponsor</th>'
-			 . '<th valign="bottom" align="center" style="width:41px; vertical-align:bottom;">Status</th>'
-			 . '<th valign="bottom" align="center" style="width:60px; vertical-align:bottom;">Conditions</th>'
-			 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;" title="MM/YY">Start</th>'
-			 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;" title="MM/YY">End</th>'
-			 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;">Ph</th>'
-			 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;">Result</th>'
-			  . '<th valign="bottom" align="center" style="width:6px; vertical-align:bottom;" colspan="3">-</th>'
-			 . '<th valign="bottom" align="center" style="width:24px; vertical-align:bottom;" colspan="12">' . (date('Y')) . '</th>'
-			 . '<th valign="bottom" align="center" style="width:24px; vertical-align:bottom;" colspan="12">' . (date('Y')+1) . '</th>'
-			 . '<th valign="bottom" align="center" style="width:24px; vertical-align:bottom;" colspan="12">' . (date('Y')+2) . '</th>'
-			 . '<th valign="bottom" align="center" style="width:6px; vertical-align:bottom;" colspan="3">+</th></tr></thead>';
+		global $logger;
 		
-		$outputStr.= '<tr style="border:none; border-top:none;">' //Extra row used for Alignment[IMP]
-			 . (($loggedIn) ? '<td border="0" style="width:30px; height:0px; border-top:none; border:none;" ></td>' : '' )
-			 . '<td border="0" height="0px" style="width:93px; height:0px; border-top:none; border:none;"></td>'
-			 . '<td border="0" style="width:18px; height:0px; border-top:none; border:none;"></td>'
-			 . '<td border="0" style="width:41px; height:0px; border-top:none; border:none;"></td>'
-			 . '<td border="0" style="width:60px; height:0px; border-top:none; border:none;"></td>'
-			 . '<td border="0" style="width:41px; height:0px; border-top:none; border:none;"></td>'
-			 . '<td border="0" style="width:41px; height:0px; border-top:none; border:none;"></td>'
-			 . '<td border="0" style="width:60px; height:0px; border-top:none; border:none;"></td>'
-			 . '<td border="0" style="width:20px; height:0px; border-top:none; border:none;"></td>'
-			 . '<td border="0" style="width:20px; height:0px; border-top:none; border:none;"></td>'
-			 . '<td border="0" style="width:20px; height:0px; border-top:none; border:none;"></td>'
-			 . '<td border="0" style="width:20px; height:0px; border-top:none; border:none;"></td>'
-			 . '<td border="0" style="width:6px; height:0px; border-top:none; border:none;" colspan="3"></td>'
-			 . '<td border="0" style="width:24px; height:0px; border-top:none; border:none;" colspan="12"></td>'
-			 . '<td border="0" style="width:24px; height:0px; border-top:none; border:none;" colspan="12"></td>'
-			 . '<td border="0" style="width:24px; height:0px; border-top:none; border:none;" colspan="12"></td>'
-			 . '<td border="0" style="width:6px; height:0px; border-top:none; border:none;" colspan="3"></td></tr>';
+		$productSelector = array();
+		$naUpms = array();
+		$TrialsInfo = array();
+		$Ids = array();
 		
-		//echo '<br/>outputStr-->'.$outputStr;exit; 
-		return $outputStr;
-	}
-
-	function displayTrials_TCPDF($globalOptions = array(), $loggedIn, $Values, $ottType)
-	{	
-		$currentYear = date('Y');
-		$secondYear = (date('Y')+1);
-		$thirdYear = (date('Y')+2);
+		$where = " rmh.`report` = '" . $hmId . "' AND rmh.`type` = 'product' ";
+		$from = " `rpt_masterhm_headers` rmh ";
+		$join = " `products` pr ON pr.`id` = rmh.`type_id` ";
 		
-		$Trials = array();
-		if($globalOptions['download'] == 'allTrialsforDownload')
+		if(!empty($productIds))
 		{
-			$type = 'allTrialsforDownload';
+			$from = " `products` pr ";
+			$join = " `rpt_masterhm_headers` rmh ON rmh.`type_id` = pr.`id` ";
+			$where .= " AND pr.`id` IN ('" . implode("','", $productIds) . "') OR pr.LI_id IN ('" . implode("','", $productIds) . "') ";
+		}
+		
+		$Query = "SELECT pr.`id`, pr.`name`, pr.`company`, pr.`discontinuation_status`, rmh.`display_name`, rmh.`category`, rmh.`tag` "
+						. " FROM " . $from
+						. " LEFT JOIN " . $join
+						. " WHERE " . $where;
+		$Res = mysql_query($Query);
+		if($Res)
+		{
+			if(mysql_num_rows($Res) > 0)
+			{
+				$counter = 0;
+				while($row = mysql_fetch_assoc($Res))
+				{
+					$disContinuedTxt = "";
+					$sectionHeader = "";
+					
+					$productIds[] = $productId = $row['id'];
+					
+					if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
+					{
+						$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
+					}
+					
+					$productSelector[$productId] = $row['name'];
+					$sectionHeader = formatBrandName($row['name'], 'product');
+					
+					if($row['company'] !== NULL && $row['company'] != '')
+					{
+						$productSelector[$productId] .= " / <i>" . $row['company'] . "</i>";
+						$sectionHeader .= " / <i>" . $row['company'] . "</i>";
+					}
+						
+					if($row['tag'] != '' && $row['tag'] !== NULL)
+					{
+						$sectionHeader .= " <span class='tag'>[" . $row['tag'] . "]</span>";
+					}
+					
+					$sectionHeader .= $disContinuedTxt;
+					
+					$TrialsInfo[$counter]['Id'] = $productId;
+					$TrialsInfo[$counter]['sectionHeader'] = $sectionHeader;
+					
+					$Ids[$productId]['product'] = $productId;
+					
+					unset($disContinuedTxt);
+					++$counter;
+				}
+			}
 		}
 		else
 		{
-			$type = $globalOptions['type'];
+			$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
+			$logger->error($log);
+			unset($log);
 		}
 		
-		$outputStr = '';
-		$counter = 0;
+		$naUpms = $this->getUnMatchedUPMs($onlyUpdates, $productIds);
 		
-		if($loggedIn)
-			$col_width=548;
-		else
-			$col_width=518;
-		
-		foreach($Values['Trials'] as $tkey => $tvalue)
+		foreach($TrialsInfo as $tkey => & $tvalue)
 		{
-			//Rendering Upms
-			if($globalOptions['includeProductsWNoData'] == "off")
-			{	
-				if(!empty($tvalue['naUpms']) && !empty($tvalue[$type]))
-				{
-					if($ottType == 'rowstacked' || $ottType == 'rowstackedindexed')
-					{
-						$outputStr .= '<tr class="trialtitles" style=" width:' . $col_width . 'px; page-break-inside:avoid;" nobr="true">'
-									. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
-									. 'style="background: url(\'images/down.png\') no-repeat left center;"'
-									. ' onclick="sh(this,\'rowstacked\');" style="width:' . $col_width . 'px;">&nbsp;</td></tr>'
-									. $this->displayUnMatchedUpms_TCPDF($loggedIn, 'rowstacked', $tvalue['naUpms'])
-									. '<tr class="trialtitles" style=" width:'.$col_width.'px; page-break-inside:avoid;" nobr="true">'
-									. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles" style="width:' . $col_width . 'px;">' 
-									. $tvalue['sectionHeader'] . '</td></tr>';
-					}
-					else
-					{
-						if($ottType == 'colstacked' || $ottType == 'colstackedindexed')
-							$image = 'up';
-						else
-							$image = 'down';
-						
-						$naUpmIndex = preg_replace('/[^a-zA_Z0-9]/i', '', $tvalue['sectionHeader']);
-						$naUpmIndex = substr($naUpmIndex, 0, 15);
-						
-						$outputStr .= '<tr class="trialtitles" style=" width:' . $col_width . 'px; page-break-inside:avoid;" nobr="true">'
-									. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
-									. ' style="background: url(\'images/' . $image . '.png\') no-repeat left center;"'
-									. ' onclick="sh(this,\'' . $naUpmIndex . '\');" style="width:' . $col_width . 'px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
-									. $tvalue['sectionHeader'] . '</td></tr>';
-						$outputStr .= $this->displayUnMatchedUpms_TCPDF($loggedIn, $naUpmIndex, $tvalue['naUpms']);
-					}
-				}
-				else if(!empty($tvalue['naUpms']) && empty($tvalue[$type]))
-				{
-					if($ottType == 'rowstacked' || $ottType == 'rowstackedindexed')
-					{
-						$outputStr .= '<tr class="trialtitles" style=" width:' . $col_width . 'px; page-break-inside:avoid;" nobr="true">'
-									. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
-									. 'style="background: url(\'images/down.png\') no-repeat left center;"'
-									. ' onclick="sh(this,\'rowstacked\');" style="width:' . $col_width . 'px;">&nbsp;</td></tr>'
-									. $this->displayUnMatchedUpms_TCPDF($loggedIn, 'rowstacked', $tvalue['naUpms'])
-									. '<tr class="trialtitles" style=" width:'.$col_width.'px; page-break-inside:avoid;" nobr="true">'
-									. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles" style="width:' . $col_width . 'px;">' 
-									. $tvalue['sectionHeader'] . '</td></tr>';
-					}
-					else
-					{
-						if($ottType == 'colstacked' || $ottType == 'colstackedindexed')
-							$image = 'up';
-						else
-							$image = 'down';
-						
-						$naUpmIndex = preg_replace('/[^a-zA_Z0-9]/i', '', $tvalue['sectionHeader']);
-						$naUpmIndex = substr($naUpmIndex, 0, 15);
-						
-						$outputStr .= '<tr class="trialtitles" style=" width:' . $col_width . 'px; page-break-inside:avoid;" nobr="true">'
-									. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
-									. ' style="background: url(\'images/' . $image . '.png\') no-repeat left center;"'
-									. ' onclick="sh(this,\'' . $naUpmIndex . '\');" style="width:' . $col_width . 'px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
-									. $tvalue['sectionHeader'] . '</td></tr>';
-						$outputStr .= $this->displayUnMatchedUpms_TCPDF($loggedIn, $naUpmIndex, $tvalue['naUpms']);
-					}
-				}
-				else if(empty($tvalue['naUpms']) && !empty($tvalue[$type]))
-				{
-					$outputStr .= '<tr style=" width:'.$col_width.'px; page-break-inside:avoid;" nobr="true"><td colspan="' 
-							. getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles" style="width:' . $col_width . 'px;">'
-							. $tvalue['sectionHeader'] . '</td></tr>';
-				}
-			}
-			else
+			$Id = $tvalue['Id'];
+			$tvalue['naUpms'] = array();
+			if(isset($naUpms[$Id]))
 			{
-				if(isset($tvalue['naUpms']) && !empty($tvalue['naUpms']))
-				{
-					if($ottType == 'rowstacked' || $ottType == 'rowstackedindexed')
-					{
-						$outputStr .= '<tr class="trialtitles" style=" width:' . $col_width . 'px; page-break-inside:avoid;" nobr="true">'
-									. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
-									. 'style="background: url(\'images/down.png\') no-repeat left center;"'
-									. ' onclick="sh(this,\'rowstacked\');" style="width:' . $col_width . 'px;">&nbsp;</td></tr>'
-									. $this->displayUnMatchedUpms_TCPDF($loggedIn, 'rowstacked', $tvalue['naUpms'])
-									. '<tr class="trialtitles" style=" width:'.$col_width.'px; page-break-inside:avoid;" nobr="true">'
-									. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles" style="width:' . $col_width . 'px;">' 
-									. $tvalue['sectionHeader'] . '</td></tr>';
-					}
-					else
-					{
-						if($ottType == 'colstacked' || $ottType == 'colstackedindexed')
-							$image = 'up';
-						else
-							$image = 'down';
-						
-						$naUpmIndex = preg_replace('/[^a-zA_Z0-9]/i', '', $tvalue['sectionHeader']);
-						$naUpmIndex = substr($naUpmIndex, 0, 15);
-						
-						$outputStr .= '<tr class="trialtitles" style=" width:' . $col_width . 'px; page-break-inside:avoid;" nobr="true">'
-									. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
-									. ' style="background: url(\'images/' . $image . '.png\') no-repeat left center;"'
-									. ' onclick="sh(this,\'' . $naUpmIndex . '\');" style="width:' . $col_width . 'px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
-									. $tvalue['sectionHeader'] . '</td></tr>';
-						$outputStr .= $this->displayUnMatchedUpms_TCPDF($loggedIn, $naUpmIndex, $tvalue['naUpms']);
-					}
-				}
-				else
-				{
-					$outputStr .= '<tr style=" width:'.$col_width.'px; page-break-inside:avoid;" nobr="true"><td colspan="' 
-								. getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles" style="width:' . $col_width . 'px;">'
-								. $tvalue['sectionHeader'] . '</td></tr>';
-				}
-			}
-			
-			foreach($tvalue[$type] as $dkey => $dvalue)
-			{
-				if($counter%2 == 1) 
-				{ 
-					$rowOneType = 'alttitle';
-					$rowOneBGType = 'background-color:#D5D3E6;';
-				}	
-				else
-				{
-					$rowOneType = 'title';
-					$rowOneBGType = 'background-color:#EDEAFF;';
-				}
-				
-				$rowspan = 1;
-				$titleLinkColor = '#000000;';
-				
-				if(isset($dvalue['matchedupms']))  
-					$rowspan = count($dvalue['matchedupms'])+1; 
-
-				$nctId = $dvalue['NCT/nct_id'];
-				if($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed')
-				{
-					if(isset($dvalue['manual_is_sourceless']))
-					{
-						$href = $dvalue['source'];
-					}
-					else if(isset($dvalue['source_id']) && strpos($dvalue['source_id'], 'NCT') === FALSE)
-					{	
-						$href = 'https://www.clinicaltrialsregister.eu/ctr-search/search?query=' . $dvalue['NCT/nct_id'];
-					}
-					else if(isset($dvalue['source_id']) && strpos($dvalue['source_id'], 'NCT') !== FALSE)
-					{
-						$href = 'http://clinicaltrials.gov/ct2/show/' . padnct($dvalue['NCT/nct_id']);
-					}
-					else 
-					{ 
-						$href = 'javascript:void(0);';
-					}
-				}
-				else
-				{
-					if($dvalue['NCT/nct_id'] !== '' && $dvalue['NCT/nct_id'] !== NULL)
-					{
-						$href = 'http://clinicaltrials.gov/ct2/show/' . padnct($dvalue['NCT/nct_id']);
-					}
-					else 
-					{ 
-						$href = 'javascript:void(0);';
-					}
-				}
-				
-				//row starts  
-				$outputStr .= '<tr style="width:' . $col_width . 'px; height:'.(24).'px; page-break-inside:avoid;" nobr="true" ' 
-							. (($dvalue['new'] == 'y') ? 'class="newtrial" ' : ''). '>';  
-			
-			
-				//nctid column
-				if($loggedIn) 
-				{ 
-					$outputStr .= '<td style="width:30px; '.$rowOneBGType.'" class="' . $rowOneType . '" ' . (($dvalue['new'] == 'y') ? 'title="New record"' : '') 
-								. ' ><a style="color:' . $titleLinkColor . '" href="' . $href . '" target="_blank">' . $nctId . '</a></td>';
-				}
-
-
-				//acroynm and title column
-				$attr = ' ';
-				if(isset($dvalue['manual_is_sourceless']))
-				{
-					if(isset($dvalue['edited']) && array_key_exists('NCT/brief_title', $dvalue['edited'])) 
-					{
-						$attr = ' highlight" title="' . $dvalue['edited']['NCT/brief_title'];
-						$titleLinkColor = '#FF0000;';
-					} 
-					else if($dvalue['new'] == 'y') 
-					{
-						$attr = '" title="New record';
-						$titleLinkColor = '#FF0000;';
-					}
-					elseif(isset($dvalue['manual_brief_title']))
-					{
-						if($dvalue['original_brief_title'] == $dvalue['NCT/brief_title'])
-						{
-							$attr = ' manual" title="Manual curation.';
-						}
-						else
-						{
-							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_brief_title'];
-						}
-						$titleLinkColor = '#FF7700';
-					}
-				}
-				else
-				{
-					if(isset($dvalue['manual_brief_title']))
-					{
-						if($dvalue['original_brief_title'] == $dvalue['NCT/brief_title'])
-						{
-							$attr = ' manual" title="Manual curation.';
-						}
-						else
-						{
-							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_brief_title'];
-						}
-						$titleLinkColor = '#FF7700';
-					}
-					elseif(!empty($dvalue['edited']) && array_key_exists('NCT/brief_title', $dvalue['edited'])) 
-					{
-						$attr = ' highlight" title="' . $dvalue['edited']['NCT/brief_title'];
-						$titleLinkColor = '#FF0000;';
-					} 
-					elseif($dvalue['new'] == 'y') 
-					{
-						$attr = '" title="New record';
-						$titleLinkColor = '#FF0000;';
-					}
-				}
-				$outputStr .= '<td style="width:93px; '.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . ' ' . $attr . '"><span>'
-							. '<a style="color:' . $titleLinkColor . '" ';
-				$outputStr .= ' href="' . $href . '"  target="_blank">';			 
-				if(isset($dvalue['NCT/acronym']) && $dvalue['NCT/acronym'] != '') 
-				{
-					$dvalue['NCT/brief_title'] = $this->replaceRedundantAcroynm($dvalue['NCT/acronym'], $dvalue['NCT/brief_title']);
-					$outputStr .= htmlformat($dvalue['NCT/acronym']) . ' ' . htmlformat($dvalue['NCT/brief_title']);
-				} 
-				else 
-				{
-					$outputStr .= htmlformat($dvalue['NCT/brief_title']);
-				}
-				$outputStr .= '</a></span></td>';
-			
-				
-				//enrollment column
-				$attr = ' ';
-				if(isset($dvalue['manual_is_sourceless']))
-				{
-					if(isset($dvalue['edited']) && array_key_exists('NCT/enrollment',$dvalue['edited'])) 
-					{
-						$attr = ' highlight" title="' . $dvalue['edited']['NCT/enrollment'];
-					}
-					else if($dvalue['new'] == 'y') 
-					{
-						$attr = '" title="New record';
-					}
-					elseif(isset($dvalue['manual_enrollment']))
-					{
-						if($dvalue['original_enrollment'] == $dvalue['NCT/enrollment'])
-						{
-							$attr = ' manual" title="Manual curation.';
-						}
-						else
-						{
-							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_enrollment'];
-						}
-					}
-				}
-				else
-				{
-					if(isset($dvalue['manual_enrollment']))
-					{
-						if($dvalue['original_enrollment'] == $dvalue['NCT/enrollment'])
-						{
-							$attr = ' manual" title="Manual curation.';
-						}
-						else
-						{
-							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_enrollment'];
-						}
-					}
-					elseif(isset($dvalue['edited']) && array_key_exists('NCT/enrollment',$dvalue['edited'])) 
-					{
-						$attr = ' highlight" title="' . $dvalue['edited']['NCT/enrollment'];
-					}
-
-					else if($dvalue['new'] == 'y') 
-					{
-						$attr = '" title="New record';
-					}
-				}
-				$outputStr .= '<td style="width:18px; '.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><span>';
-				if($dvalue["NCT/enrollment_type"] != '') 
-				{
-					if($dvalue["NCT/enrollment_type"] == 'Anticipated' || $dvalue["NCT/enrollment_type"] == 'Actual') 
-					{ 
-						$outputStr .= $dvalue["NCT/enrollment"];
-					}
-					else 
-					{ 
-						$outputStr .= $dvalue["NCT/enrollment"] . ' (' . $dvalue["NCT/enrollment_type"] . ')';
-					}
-				} 
-				else 
-				{
-					$outputStr .= $dvalue["NCT/enrollment"];
-				}
-				$outputStr .= '</span></td>';				
-
-
-				//region column
-				$attr = ' ';
-				if(isset($dvalue['manual_is_sourceless']))
-				{
-					if($dvalue['new'] == 'y')
-					{
-						$attr = '" title="New record';
-					}
-					elseif(isset($dvalue['manual_region']))
-					{
-						$attr = ' manual" title="Manual curation.';
-					}
-				}
-				else
-				{
-					if(isset($dvalue['manual_region']))
-					{
-						$attr = ' manual" title="Manual curation.';
-					}
-					elseif($dvalue['new'] == 'y')
-					{
-						$attr = '" title="New record';
-					}
-				}
-				$outputStr .= '<td style="width:41px; '.$rowOneBGType.'" class="' . $rowOneType . '" rowspan="' . $rowspan . '" ' . $attr . '>'
-							. '<span>' . $dvalue['region'] . '</span></td>';
-
-				
-				//intervention name column
-				if(isset($dvalue['manual_is_sourceless']))
-				{
-					if(isset($dvalue['edited']) && array_key_exists('NCT/intervention_name', $dvalue['edited']))
-					{
-						$attr = ' highlight" title="' . $dvalue['edited']['NCT/intervention_name'];
-					} 
-					else if($dvalue['new'] == 'y')
-					{
-						$attr = '" title="New record';
-					}
-					elseif(isset($dvalue['manual_intervention_name']))
-					{
-						if($dvalue['original_intervention_name'] == $dvalue['NCT/intervention_name'])
-						{
-							$attr = ' manual" title="Manual curation.';
-						}
-						else
-						{
-							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_intervention_name'];
-						}
-					}
-				}
-				else
-				{
-					if(isset($dvalue['manual_intervention_name']))
-					{
-						if($dvalue['original_intervention_name'] == $dvalue['NCT/intervention_name'])
-						{
-							$attr = ' manual" title="Manual curation.';
-						}
-						else
-						{
-							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_intervention_name'];
-						}
-					}
-					elseif(isset($dvalue['edited']) && array_key_exists('NCT/intervention_name', $dvalue['edited']))
-					{
-						$attr = ' highlight" title="' . $dvalue['edited']['NCT/intervention_name'];
-					} 
-					else if($dvalue['new'] == 'y')
-					{
-						$attr = '" title="New record';
-					}
-				}
-				$outputStr .= '<td style="width:60px; '.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
-							. '<span>' . $dvalue['NCT/intervention_name'] . '</span></td>';
-
-
-				//collaborator and sponsor column
-				$attr = ' ';
-				if(isset($dvalue['manual_is_sourceless']))
-				{
-					if(isset($dvalue['edited']) && (array_key_exists('NCT/collaborator', $dvalue['edited']) 
-					|| array_key_exists('NCT/lead_sponsor', $dvalue['edited']))) 
-					{
-							
-						$attr = ' highlight" title="';
-						if(array_key_exists('NCT/lead_sponsor', $dvalue['edited']))
-						{
-							$attr .= $dvalue['edited']['NCT/lead_sponsor'];
-						}
-						if(array_key_exists('NCT/lead_sponsor', $dvalue['edited']) && array_key_exists('NCT/collaborator', $dvalue['edited']))
-						{
-							$attr .=  ', ';
-						}
-						if(array_key_exists('NCT/collaborator', $dvalue['edited'])) 
-						{
-							$attr .= $dvalue['edited']['NCT/collaborator'];
-						}
-						$attr .= '';
-					} 
-					else if($dvalue['new'] == 'y') 
-					{
-						$attr = '" title="New record';
-					}
-					elseif(isset($dvalue['manual_lead_sponsor']) || isset($dvalue['manual_collaborator']))
-					{
-						if(isset($dvalue['manual_lead_sponsor']))
-						{
-							if($dvalue['original_lead_sponsor'] == $dvalue['NCT/lead_sponsor'])
-							{
-								$attr = ' manual" title="Manual curation.';
-							}
-							else
-							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_lead_sponsor'];
-							}
-						}
-						else
-						{
-							if($dvalue['original_collaborator'] == $dvalue['NCT/collaborator'])
-							{
-								$attr = ' manual" title="Manual curation.';
-							}
-							else
-							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_collaborator'];
-							}
-						}
-					}
-				}
-				else
-				{
-					if(isset($dvalue['manual_lead_sponsor']) || isset($dvalue['manual_collaborator']))
-					{
-						if(isset($dvalue['manual_lead_sponsor']))
-						{
-							if($dvalue['original_lead_sponsor'] == $dvalue['NCT/lead_sponsor'])
-							{
-								$attr = ' manual" title="Manual curation.';
-							}
-							else
-							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_lead_sponsor'];
-							}
-						}
-						else
-						{
-							if($dvalue['original_collaborator'] == $dvalue['NCT/collaborator'])
-							{
-								$attr = ' manual" title="Manual curation.';
-							}
-							else
-							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_collaborator'];
-							}
-						}
-					}
-					elseif(isset($dvalue['edited']) && (array_key_exists('NCT/collaborator', $dvalue['edited']) 
-					|| array_key_exists('NCT/lead_sponsor', $dvalue['edited']))) 
-					{
-							
-						$attr = ' highlight" title="';
-						if(array_key_exists('NCT/lead_sponsor', $dvalue['edited']))
-						{
-							$attr .= $dvalue['edited']['NCT/lead_sponsor'];
-						}
-						if(array_key_exists('NCT/lead_sponsor', $dvalue['edited']) && array_key_exists('NCT/collaborator', $dvalue['edited']))
-						{
-							$attr .=  ', ';
-						}
-						if(array_key_exists('NCT/collaborator', $dvalue['edited'])) 
-						{
-							$attr .= $dvalue['edited']['NCT/collaborator'];
-						}
-						$attr .= '';
-					} 
-					else if($dvalue['new'] == 'y') 
-					{
-						$attr = '" title="New record';
-					}
-				}
-				$outputStr .= '<td style="width:41px; '.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
-							. '<span>' . $dvalue['NCT/lead_sponsor'];
-				if($dvalue['NCT/lead_sponsor'] != '' && $dvalue['NCT/collaborator'] != ''
-				&& $dvalue['NCT/lead_sponsor'] != NULL && $dvalue['NCT/collaborator'] != NULL)
-				{
-					$outputStr .= ', ';
-				}
-				$outputStr .= $dvalue["NCT/collaborator"] . '</span></td>';
-
-				//overall status column
-				if(isset($dvalue['manual_is_sourceless']))
-				{
-					if(isset($dvalue['edited']) && array_key_exists('NCT/overall_status', $dvalue['edited'])) 
-					{
-						$attr = 'class="highlight ' . $rowOneType . ' " title="' . $dvalue['edited']['NCT/overall_status'] . '" ';
-					} 
-					else if($dvalue['new'] == 'y') 
-					{
-						$attr = 'title="New record" class="' . $rowOneType . '"' ;
-					}
-					else if(isset($dvalue['manual_overall_status']))
-					{
-						if($dvalue['original_overall_status'] == $dvalue['NCT/overall_status'])
-						{
-							$attr = ' manual" title="Manual curation.';
-						}
-						else
-						{
-							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_overall_status'];
-						}
-					} 
-				}
-				else
-				{
-					if(isset($dvalue['manual_overall_status']))
-					{
-						if($dvalue['original_overall_status'] == $dvalue['NCT/overall_status'])
-						{
-							$attr = ' manual" title="Manual curation.';
-						}
-						else
-						{
-							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_overall_status'];
-						}
-					}
-					else if(isset($dvalue['edited']) && array_key_exists('NCT/overall_status', $dvalue['edited'])) 
-					{
-						$attr = 'class="highlight ' . $rowOneType . ' " title="' . $dvalue['edited']['NCT/overall_status'] . '" ';
-					} 
-					else if($dvalue['new'] == 'y') 
-					{
-						$attr = 'title="New record" class="' . $rowOneType . '"' ;
-					}
-				}
-				$outputStr .= '<td style="width:41px; '.$rowOneBGType.'" ' . $attr . ' rowspan="' . $rowspan . '">'  
-							. '<span>' . $dvalue['NCT/overall_status'] . '</span></td>';
-				
-				
-				//condition column
-				$attr = ' ';
-				if(isset($dvalue['manual_is_sourceless']))
-				{
-					if(isset($dvalue['edited']) && array_key_exists('NCT/condition', $dvalue['edited'])) 
-					{
-						$attr = ' highlight" title="' . $dvalue['edited']['NCT/condition'];
-					} 
-					else if($dvalue['new'] == 'y') 
-					{
-						$attr = '" title="New record';
-					}
-					else if(isset($dvalue['manual_condition']))
-					{
-						if($dvalue['original_condition'] == $dvalue['NCT/condition'])
-						{
-							$attr = ' manual" title="Manual curation.';
-						}
-						else
-						{
-							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_condition'];
-						}
-					}
-				}
-				else
-				{
-					if(isset($dvalue['manual_condition']))
-					{
-						if($dvalue['original_condition'] == $dvalue['NCT/condition'])
-						{
-							$attr = ' manual" title="Manual curation.';
-						}
-						else
-						{
-							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_condition'];
-						}
-					}
-					else if(isset($dvalue['edited']) && array_key_exists('NCT/condition', $dvalue['edited'])) 
-					{
-						$attr = ' highlight" title="' . $dvalue['edited']['NCT/condition'];
-					} 
-					else if($dvalue['new'] == 'y') 
-					{
-						$attr = '" title="New record';
-					}
-				}
-				
-				$outputStr .= '<td style="width:60px; '.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
-							. '<span>' . $dvalue['NCT/condition'] . '</span></td>';
-				
-					
-				//start date column
-				$attr = ' ';
-				$borderLeft = '';
-				if(isset($dvalue['manual_is_sourceless']))
-				{
-					if(isset($dvalue['edited']) && array_key_exists('NCT/start_date', $dvalue['edited'])) 
-					{
-						$attr = ' highlight" title="' . $dvalue['edited']['NCT/start_date'] ;
-						$borderLeft = 'startdatehighlight';
-					} 
-					else if($trials[$i]['new'] == 'y') 
-					{
-						$attr = '" title="New record';
-					}
-					elseif(isset($dvalue['manual_start_date']))
-					{
-						if($dvalue['original_start_date'] == $dvalue['start_date'])
-						{
-							$attr = ' manual" title="Manual curation.';
-						}
-						else
-						{
-							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_start_date'];
-						}
-					}
-				}
-				else
-				{
-					if(isset($dvalue['manual_start_date']))
-					{
-						if($dvalue['original_start_date'] == $dvalue['start_date'])
-						{
-							$attr = ' manual" title="Manual curation.';
-						}
-						else
-						{
-							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_start_date'];
-						}
-					}
-					elseif(isset($dvalue['edited']) && array_key_exists('NCT/start_date', $dvalue['edited'])) 
-					{
-						$attr = ' highlight" title="' . $dvalue['edited']['NCT/start_date'];
-						$borderLeft = 'startdatehighlight';
-					} 
-					else if($trials[$i]['new'] == 'y') 
-					{
-						$attr = '" title="New record';
-					}
-					
-				}
-				$outputStr .= '<td style="width:20px; '.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '" ><span>'; 
-				if($dvalue["NCT/start_date"] != '' && $dvalue["NCT/start_date"] != NULL && $dvalue["NCT/start_date"] != '0000-00-00') 
-				{
-					$outputStr .= date('m/y',strtotime($dvalue["NCT/start_date"]));
-				} 
-				else 
-				{
-					$outputStr .= '&nbsp;';
-				}
-				$outputStr .= '</span></td>';
-				
-				
-				//end date column
-				$attr = ' ';
-				$borderRight = '';
-				if(isset($dvalue['manual_is_sourceless']))
-				{
-					if(isset($dvalue['edited']) && array_key_exists('inactive_date', $dvalue['edited'])) 
-					{
-						$attr = ' highlight" title="' . $dvalue['edited']['inactive_date'];
-						$borderRight = 'border-right:1px solid red;';
-					} 
-					else if($dvalue['new'] == 'y') 
-					{
-						$attr = '" title="New record';
-					}
-					elseif(isset($dvalue['manual_end_date']))
-					{
-						if($dvalue['original_end_date'] == $dvalue['inactive_date'])
-						{
-							$attr = ' manual" title="Manual curation.';
-						}
-						else
-						{
-							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_end_date'];
-						}
-					}
-				}
-				else
-				{
-					if(isset($dvalue['manual_end_date']))
-					{
-						if($dvalue['original_end_date'] == $dvalue['inactive_date'])
-						{
-							$attr = ' manual" title="Manual curation.';
-						}
-						else
-						{
-							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_end_date'];
-						}
-					}
-					else if(isset($dvalue['edited']) && array_key_exists('inactive_date', $dvalue['edited'])) 
-					{
-						$attr = ' highlight" title="' . $dvalue['edited']['inactive_date'];
-						$borderRight = 'border-right:1px solid red;';
-					} 
-					else if($dvalue['new'] == 'y') 
-					{
-						$attr = '" title="New record';
-					}
-				}
-				$outputStr .= '<td style="width:20px; '.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType  . $attr . '"><span>'; 
-				if($dvalue["inactive_date"] != '' && $dvalue["inactive_date"] != NULL && $dvalue["inactive_date"] != '0000-00-00') 
-				{
-					$outputStr .= date('m/y',strtotime($dvalue["inactive_date"]));
-				} 
-				else 
-				{
-					$outputStr .= '&nbsp;';
-				}
-				$outputStr .= '</span></td>';
-					
-											
-				//phase column
-				if(isset($dvalue['manual_is_sourceless']))
-				{
-					if(isset($dvalue['edited']) && array_key_exists('NCT/phase', $dvalue['edited'])) 
-					{
-						$attr = ' highlight" title="' . $dvalue['edited']['NCT/phase'];
-					} 
-					else if($dvalue['new'] == 'y') 
-					{
-						$attr = '" title="New record';
-					}
-					elseif(isset($dvalue['manual_phase']))
-					{
-						if($dvalue['original_phase'] == $dvalue['NCT/phase'])
-						{
-							$attr = ' manual" title="Manual curation.';
-						}
-						else
-						{
-							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_phase'];
-						}
-					}
-				}
-				else
-				{
-					if(isset($dvalue['manual_phase']))
-					{
-						if($dvalue['original_phase'] == $dvalue['NCT/phase'])
-						{
-							$attr = ' manual" title="Manual curation.';
-						}
-						else
-						{
-							$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_phase'];
-						}
-					}
-					elseif(isset($dvalue['edited']) && array_key_exists('NCT/phase', $dvalue['edited'])) 
-					{
-						$attr = ' highlight" title="' . $dvalue['edited']['NCT/phase'];
-					} 
-					else if($dvalue['new'] == 'y') 
-					{
-						$attr = '" title="New record';
-					}
-				}
-				if($dvalue['NCT/phase'] == 'N/A' || $dvalue['NCT/phase'] == '' || $dvalue['NCT/phase'] === NULL)
-				{
-					$phase = 'N/A';
-					$phaseColor = $this->phaseValues['N/A'];
-				}
-				else
-				{
-					$phase = str_replace('Phase ', '', trim($dvalue['NCT/phase']));
-					$phaseColor = $this->phaseValues[$phase];
-				}
-				$outputStr .= '<td align="center" style="width:20px; '.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">' 
-							. '<span>' . $phase . '</span></td>';				
-			
-				$outputStr .= '<td style="width:20px;">&nbsp;</td>';
-				
-				$startMonth = date('m',strtotime($dvalue['NCT/start_date']));
-				$startYear = date('Y',strtotime($dvalue['NCT/start_date']));
-				$endMonth = date('m',strtotime($dvalue['inactive_date']));
-				$endYear = date('Y',strtotime($dvalue['inactive_date']));
-
-
-				//rendering project completion gnatt chart
-				$trialGnattChart = $this->trialGnattChart($startMonth, $startYear, $endMonth, $endYear, $currentYear, $secondYear, $thirdYear, 
-					$dvalue['NCT/start_date'], $dvalue['inactive_date'], $phaseColor, $borderRight, $borderLeft);
-				
-				
-				$trialGnattChart = preg_replace('/&nbsp;/', '<img src="images/trans_big.gif" />', $trialGnattChart);	
-				$outputStr .= $trialGnattChart;	
-				
-				$outputStr .= '</tr>';
-			
-			
-				//rendering matched upms
-				if(isset($dvalue['matchedupms']) && !empty($dvalue['matchedupms'])) 
-				{
-					foreach($dvalue['matchedupms'] as $mkey => $mvalue) 
-					{ 
-						$str = '';
-						$diamond = '';
-						$resultImage = '';
-		
-						$stMonth = date('m', strtotime($mvalue['start_date']));
-						$stYear = date('Y', strtotime($mvalue['start_date']));
-						$edMonth = date('m', strtotime($mvalue['end_date']));
-						$edYear = date('Y', strtotime($mvalue['end_date']));
-						$upmTitle = htmlformat($mvalue['event_description']);
-						
-						$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true">';
-						
-						if($loggedIn) 
-						{
-							if($mvalue['new'] == 'y')
-							{
-								$idColor = '#973535';
-							}
-							else
-							{
-								$idColor = 'gray';
-							}
-							$outputStr .= '<td style="width:30px; border-top:none;" class="' . $rowOneType . '"><a style="color:' . $idColor 
-							. '" href="' . urlPath() . 'upm.php?search_id=' . $mvalue['id'] . '" target="_blank">' . $mvalue['id'] . '</a></td>';
-						}
-						
-						if(!$loggedIn && !$this->liLoggedIn())
-						{
-							$mvalue['event_link'] = NULL;
-						}
-						
-						$outputStr .= '<td style="width:20px; text-align:center;"><br />';
-						
-
-						if($mvalue['result_link'] != '' && $mvalue['result_link'] !== NULL)
-						{
-							if(!$loggedIn && !$this->liLoggedIn())
-							{
-								$mvalue['result_link'] = NULL;
-							}
-								
-							if((!empty($mvalue['edited']) && $mvalue['edited']['field'] == 'result_link') || ($mvalue['new'] == 'y')) 
-								$imgColor = 'red';
-							else 
-								$imgColor = 'black'; 
-							
-							if($mvalue['result_link'] != '' && $mvalue['result_link'] !== NULL)
-							{
-								$outputStr .= '<a href="' . $mvalue['result_link'] . '" style="color:#000;">';
-								if($mvalue['event_type'] == 'Clinical Data')
-								{
-									$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond" height="6px" width="6px" style="margin:4px;" border="0" />';
-								}
-								else if($mvalue['status'] == 'Cancelled')
-								{
-									$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel" height="6px" width="6px" style="margin:4px;" border="0" />';
-								}
-								else
-								{
-									$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark" height="6px" width="6px" style="margin:4px;" border="0" />';
-								}
-								$outputStr .= '</a>';
-							}
-							else
-							{
-								if($mvalue['event_type'] == 'Clinical Data')
-								{
-									$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond" height="6px" width="6px" style="margin:4px;" border="0" />';
-								}
-								else if($mvalue['status'] == 'Cancelled')
-								{
-									$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel" height="6px" width="6px" style="margin:4px;" border="0" />';
-								}
-								else
-								{
-									$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark" height="6px" width="6px" style="margin:4px;" border="0" />';
-								}
-							}
-						}
-						else if($mvalue['status'] == 'Pending')
-						{
-							if($mvalue['event_link'] != '' && $mvalue['event_link'] !== NULL)
-							{
-								$outputStr .= '<a href="' . $mvalue['event_link'] . '" target="_blank">'
-											. '<img src="images/hourglass.png" alt="Hourglass" height="8px" width="8px" style="margin:3px;" border="0" /></a>';
-							}
-							else
-							{
-								$outputStr .= '<img src="images/hourglass.png" alt="Hourglass" height="8px" width="8px" style="margin:3px;" border="0" />';
-							}
-						}
-						$outputStr .= '</td>';
-						
-						$upmBorderLeft = '';
-						if(!empty($mvalue['edited']) && $mvalue['edited']['field'] == 'start_date')
-						{
-							$upmBorderLeft = 'startdatehighlight';
-						}
-							
-						$upmBorderRight = '';
-						if(!empty($mvalue['edited']) && $mvalue['edited']['field'] == 'end_date' && $mvalue['edited']['end_date'] !== NULL && $mvalue['edited']['end_date'] != '')
-						{
-							$upmBorderRight = 'border-right:1px solid red;';
-						}
-						
-						//rendering upm (upcoming project completion) chart
-						$upmGnattChart = $this->upmGnattChart($stMonth, $stYear, $edMonth, $edYear, $currentYear, $secondYear, $thirdYear, $mvalue['start_date'],
-						$mvalue['end_date'], $mvalue['event_link'], $upmTitle, $upmBorderRight, $upmBorderLeft, $dvalue['larvol_id']);
-						
-						$upmGnattChart = preg_replace('/&nbsp;/', '<img src="images/trans_big.gif" />', $upmGnattChart);
-						
-						$outputStr .= $upmGnattChart;
-						$outputStr .= '</tr>';
-					}
-				}
-				
-				$counter++;
-			}
-			
-			
-			if(empty($tvalue[$type]) && $globalOptions['onlyUpdates'] == "no")
-			{
-				if($globalOptions['includeProductsWNoData'] == "off")
-				{
-					if(isset($tvalue['naUpms']) && !empty($tvalue['naUpms']))
-					{
-						$outputStr .= '<tr style=" width:'.$col_width.'px; page-break-inside:avoid;" nobr="true"><td colspan="' 
-							. getColspanBasedOnLogin($loggedIn) . '" class="norecord" style="width:' . $col_width . 'px;">No trials found</td></tr>';
-					}
-				}
-				else
-				{
-					$outputStr .= '<tr style=" width:'.$col_width.'px; page-break-inside:avoid;" nobr="true"><td colspan="' 
-							. getColspanBasedOnLogin($loggedIn) . '" class="norecord" style="width:' . $col_width . 'px;">No trials found</td></tr>';
-				}
+				$tvalue['naUpms'] = $naUpms[$Id];
 			}
 		}
 		
-		return $outputStr;
+		unset($naUpms);
+		
+		return array('Ids' => $Ids, 'TrialsInfo' => $TrialsInfo, 'productSelector' => $productSelector);
 	}
 	
-
-	function displayUnMatchedUpms_TCPDF($loggedIn, $naUpmIndex, $naUpms)
+	function getAreaHmHeaders($hmId, $areaIds, $lastRow = false)
 	{
-		global $now;
-		$outputStr = '';
+		global $logger;
 		
-		if($loggedIn)
-			$col_width=570;
-		else
-			$col_width=548;
-		
-		if(!empty($naUpms))
-		{
-			$currentYear = date('Y');
-			$secondYear = (date('Y')+1);
-			$thirdYear = (date('Y')+2);
-			
-			$cntr = 0;
-			foreach($naUpms as $key => $value)
-			{
-				$attr = '';
-				$resultImage = '';
-				$class = 'class = "upms ' . $naUpmIndex . '" ';
-				$titleLinkColor = 'color:#000;';
-				$upmTitle = htmlformat($value['event_description']);
-				
-				//Highlighting the whole row in case of new trials
-				if($value['new'] == 'y') 
-				{
-					$class = 'class="upms newtrial ' . $upmHeader . '" ';
-				}
-				
-				//rendering unmatched upms
-				$outputStr .= '<tr style="width:'.$col_width.'px; page-break-inside:avoid; background-color:#000;" nobr="true" ' . $class . '>';
-				
-				//field upm-id
-				if($loggedIn)
-				{
-					if($value['new'] == 'y')
-					{
-						$titleLinkColor = 'color:#FF0000;';
-						$title = ' title = "New record" ';
-					}
-					$outputStr .= '<td style="width:30px;" ' . $title . '><a style="' . $titleLinkColor 
-							. '" href="' . urlPath() . 'upm.php?search_id=' . $value['id'] . '" target="_blank">' . $value['id'] . '</a></td>';
-				}
-				
-				if(!$loggedIn && !$this->liLoggedIn())
-				{
-					$value['event_link'] = NULL;
-				}
-							
-				//field upm event description
-				if(!empty($value['edited']) && ($value['edited']['field'] == 'event_description')) 
-				{
-					$titleLinkColor = 'color:#FF0000;';
-					$attr = ' highlight'; 
-					
-					if($value['edited']['event_description'] != '' && $value['edited']['event_description'] !== NULL)
-					{
-						$title = ' title="Previous value: '. $value['edited']['event_description'] . '" '; 
-					}
-					else
-					{
-						$title = ' title="No Previous value" ';
-					}
-				} 
-				else if(!empty($value['edited']) && ($value['edited']['field'] == 'event_link')) 
-				{
-					$titleLinkColor = 'color:#FF0000;';
-					$attr = ' highlight'; 
-					
-					if($value['edited']['event_link'] != '' && $value['edited']['event_link'] !== NULL)
-					{
-						$title = ' title="Previous value: '. $value['edited']['event_link'] . '" '; 
-					}
-					else
-					{
-						$title = ' title="No Previous value" ';
-					}
-				}
-				else if($value['new'] == 'y') 
-				{
-					$titleLinkColor = 'color:#FF0000;';
-					$title = ' title = "New record" ';
-				}
-				$outputStr .= '<td style="width:253px;" colspan="5" class="' . $rowOneType .  $attr . '" ' . $title . '><span>';
-				if($value['event_link'] !== NULL && $value['event_link'] != '') 
-				{
-					$outputStr .= '<a style="' . $titleLinkColor . '" href="' . $value['event_link'] . '" target="_blank">' . $value['event_description'] . '</a>';
-				} 
-				else 
-				{
-					$outputStr .= $value['event_description'];
-				}
-				$outputStr .= '</span></td>';
-				
-				
-				//field upm status
-				$title = '';
-				if($value['new'] == 'y')
-				{
-					$title = ' title = "New record" ';
-				}
-				$outputStr .= '<td style="width:41px;"class="' . $rowTwoType . '" ' . $title . '><span>' . $value['status'] . '</span></td>';
-
-			
-				//field upm event type
-				$title = '';
-				$attr = '';	
-				if(!empty($value['edited']) && ($value['edited']['field'] == 'event_type')) 
-				{
-					$attr = ' highlight'; 
-					if($value['edited']['event_type'] != '' && $value['edited']['event_type'] !== NULL)
-					{
-						$title = ' title="Previous value: '. $value['edited']['event_type'] . '" '; 
-					}
-
-					else
-					{
-						$title = ' title="No Previous value" ';
-					}	
-				} 
-				else if($value['new'] == 'y') 
-				{
-					$title = ' title = "New record" ';
-				}
-				$outputStr .= '<td style="width:60px;" class="' . $rowTwoType . $attr . '" ' . $title . '><span>' . $value['event_type'] . ' Milestone</span></td>';
-				
-				
-				//field upm start date
-				$title = '';
-				$attr = '';	
-                $upmBorderLeft = '';
-				if(!empty($value['edited']) && ($value['edited']['field'] == 'start_date'))
-				{
-					$attr = ' highlight';
-                    $upmBorderLeft = 'startdatehighlight';
-					if($value['edited']['start_date'] != '' && $value['edited']['start_date'] !== NULL)
-					{
-						$title = ' title="Previous value: ' . $value['edited']['start_date'] . '" '; 
-					} 
-					else 
-					{
-						$title = ' title="No Previous value" ';
-					}	
-				} 
-				else if(!empty($value['edited']) && ($value['edited']['field'] == 'start_date_type'))
-				{
-					$attr = ' highlight';
-					if($value['edited']['start_date_type'] != '' && $value['edited']['start_date_type'] !== NULL) 
-					{
-						$title = ' title="Previous value: ' . $value['edited']['start_date_type'] . '" '; 
-					} 
-					else 
-					{
-						$title = ' title="No Previous value" ';
-					}
-				} 
-				else if($value['new'] == 'y')
-				{
-					$title = ' title = "New record" ';
-				}
-				$outputStr .= '<td style="width:20px;" class="' . $rowTwoType . $attr . '" ' . $title . '><span>';
-				$outputStr .= (($value['start_date'] != '' && $value['start_date'] !== NULL && $value['start_date'] != '0000-00-00') ? 
-									date('m/y',strtotime($value['start_date'])) : '&nbsp;' );
-				$outputStr .= '</span></td>';
-
-				
-				//field upm end date
-				$title = '';
-				$attr = '';	
-				$upmBorderRight = '';
-				if(!empty($value['edited']) && ($value['edited']['field'] == 'end_date'))
-				{
-					$attr = ' highlight';
-					$upmBorderRight = 'border-right:1px solid red;';
-					
-					if($value['edited']['end_date'] != '' && $value['edited']['end_date'] !== NULL)
-					{
-						$title = ' title="Previous value: ' . $value['edited']['end_date'] . '" '; 
-					}
-					else 
-					{
-						$title = ' title="No Previous value" ';
-					}
-				} 
-				else if(!empty($value['edited']) && ($value['edited']['field'] == 'end_date_type'))
-				{
-					$attr = ' highlight';
-					if($value['edited']['end_date_type'] != '' && $value['edited']['end_date_type'] !== NULL) 
-					{
-						$title = ' title="Previous value: ' .  $value['edited']['end_date_type'] . '" ';
-					} 
-					else 
-					{
-						$title = ' title="No Previous value" ';
-					}
-				} 
-				else if($value['new'] == 'y') 
-				{
-					$title = ' title = "New record" ';
-				}
-				$outputStr .= '<td style="width:20px;" class="' . $rowTwoType . $attr . '" ' . $title . '><span>';
-				$outputStr .= (($value['end_date'] != '' && $value['end_date'] !== NULL && $value['end_date'] != '0000-00-00') ? 
-									date('m/y',strtotime($value['end_date'])) : '');
-				$outputStr .= '</span></td><td style="width:20px;"><span></span></td>';
-				
-				
-				//field upm result 
-				$outputStr .= '<td style="width:20px; text-align:center;"><span><br />';
-				if($value['result_link'] != '' && $value['result_link'] !== NULL)
-				{
-					if(!$loggedIn && !$this->liLoggedIn())
-					{
-						$value['result_link'] = NULL;
-					}
-								
-					if((!empty($value['edited']) && $value['edited']['field'] == 'result_link') || ($value['new'] == 'y')) 
-							$imgColor = 'red';
-					else 
-						$imgColor = 'black'; 
-					
-					$outputStr .= '<span title="' . $upmTitle . '">';
-					if($value['result_link'] != '' && $value['result_link'] !== NULL)
-					{
-						$outputStr .= '<a href="' . $value['result_link'] . '" style="color:#000;">';
-						if($value['event_type'] == 'Clinical Data')
-						{
-							$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond" height="6px" width="6px" style="margin:4px;" border="0" />';
-						}
-						else if($value['status'] == 'Cancelled')
-						{
-							$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel" height="6px" width="6px" style="margin:4px;" border="0" />';
-						}
-						else
-						{
-							$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark" height="6px" width="6px" style="margin:4px;" border="0" />';
-						}
-						$outputStr .= '</a>';
-					}
-					else
-					{
-						if($value['event_type'] == 'Clinical Data')
-						{
-							$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond" height="6px" width="6px" style="margin:4px;" border="0" />';
-						}
-						else if($value['status'] == 'Cancelled')
-						{
-							$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel" height="6px" width="6px" style="margin:4px;" border="0" />';
-						}
-						else
-						{
-							$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark" height="6px" width="6px" style="margin:4px;" border="0" />';
-						}
-					}
-					$outputStr .= '</span>';
-				}
-				else if($value['status'] == 'Pending')
-				{
-					$outputStr .= '<span title="' . $upmTitle 
-					. '"><img src="images/hourglass.png" alt="Hourglass" height="8px" width="8px" style="margin:3px; padding:10px;" border="0" /></span>';
-				}
-				$outputStr .= '</span></td>';		
-				
-				//upm gnatt chart
-				$upmGnattChart = $this->upmGnattChart(date('m',strtotime($value['start_date'])), date('Y',strtotime($value['start_date'])), 
-								date('m',strtotime($value['end_date'])), date('Y',strtotime($value['end_date'])), $currentYear, $secondYear, $thirdYear, 
-								$value['start_date'], $value['end_date'], $value['event_link'], $upmTitle, $upmBorderRight, $upmBorderLeft);
-								
-				$upmGnattChart = preg_replace('/&nbsp;/', '<img src="images/trans_big.gif" />', $upmGnattChart);
-				
-				//$outputStr .= preg_replace('/width:([0-9]*)px;/', '', $upmGnattChart);
-				$outputStr .= $upmGnattChart;				
-				
-				$outputStr .= '</tr>';
-			}
-		}
-		return $outputStr;
-	}
-
-	function getProductId($productIds = array())
-	{
-		$res = mysql_query("SELECT `id`, `name`, `company`, `discontinuation_status`, `discontinuation_status_comment` FROM `products` WHERE id IN ('" . implode(',', $productIds) . "') OR LI_id IN ('" . implode(',', $productIds) . "') ");
-		$prow = mysql_fetch_assoc($res);
-		
-		return $prow;
-	}
-	/*****END OF Functions ONLY FOR TCPDF *****************************/
-	
-	function processHmParams($resultIds, $globalOptions, $timeMachine, $timeInterval, $displayType = 'fileExport')
-	{
 		$productSelector = array();
 		$TrialsInfo = array();
 		$Ids = array();
 		
-		$productSelectorTitle = 'Select Products';
+		$where = " 1 ";
+		$orderby = " ";
+		$limit = " ";
+		
+		if(!empty($areaIds))
+		{
+			$where .= " AND rmh.`type_id` IN ('" . implode('", "', $areaIds) . "') ";
+		}
+		
+		if($lastRow)
+		{
+			$orderby = " ORDER BY rmh.`num` DESC ";
+			$limit = " LIMIT 0,1 ";
+		}
+		
+		$Query = "SELECT rmh.`display_name`, rmh.`type_id`, rmh.`category`, ar.`coverage_area`, ar.`display_name` AS global_display_name "
+					. " FROM `rpt_masterhm_headers` rmh "
+					. " JOIN `areas` ar ON  rmh.`type_id` = ar.`id` "
+					. " WHERE " . $where . " AND rmh.`report` = '" . $hmId . "' AND rmh.`type` = 'area' " . $orderby . $limit;
+		$Res = mysql_query($Query);
+		if($Res)
+		{
+			if(mysql_num_rows($Res) > 0)
+			{
+				$counter = 0;
+				while($row = mysql_fetch_assoc($Res))
+				{
+					$sectionHeader = "";
+					$areaId = $row['type_id'];
+					
+					if($row['coverage_area'])
+					{
+						if($row['display_name'] != '' && $row['display_name'] !== NULL)
+						{
+							$sectionHeader = $row['display_name'];
+						}
+						else if($row['global_display_name'] != '' && $row['global_display_name'] !== NULL)
+						{
+							$sectionHeader = $row['global_display_name'];
+						}
+						else
+						{
+							$sectionHeader = 'Area ' . $areaId;
+						}
+					}
+					else
+					{
+						if($row['display_name'] != '' && $row['display_name'] !== NULL)
+						{
+							$sectionHeader = $row['display_name'];
+						}
+						else
+						{
+							$sectionHeader = 'Area ' . $areaId;
+						}
+					}
+					
+					$Ids[$areaId]['area'] = $areaId;
+					$productSelector[$areaId] = $sectionHeader;
+					
+					$TrialsInfo[$counter]['sectionHeader'] = formatBrandName($sectionHeader, 'area');
+					$TrialsInfo[$counter]['Id'] = $areaId;
+					++$counter;
+				}
+			}
+		}
+		else
+
+		{
+			$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
+			$logger->error($log);
+			unset($log);
+		}
+		
+		return array('Ids' => $Ids, 'TrialsInfo' => $TrialsInfo, 'productSelector' => $productSelector);
+	}
+	
+	function processHmParams($resultIds, $globalOptions, $displayType = 'fileExport')
+	{
+		global $logger;
+		
+		$hmId = $globalOptions['hm'];
+		$onlyUpdates = $globalOptions['onlyUpdates'];
+		
+		$aDetails = array();
+		$pDetails = array();
+		
+		$Ids = array();
+		$TrialsInfo = array();
+		$productSelector = array();
+		
 		$tHeader = '';
 		$ottType = '';
 		
 		if(count($resultIds['product']) > 1 && count($resultIds['area']) > 1)
 		{
-			$productSelectorTitle = 'Select Products';
-			$ottType = 'colstackedindexed';
+			$ottType = 'colstacked';
 			$tHeader = 'Area: Total';
 			
-			foreach($resultIds['product'] as $pkey => $pvalue)
+			$productIds = $resultIds['product'];
+			
+			$pDetails = $this->getProductHmHeaders($hmId, $productIds, $onlyUpdates);
+			
+			foreach($pDetails['Ids'] as $ikey => $ivalue)
 			{
-				$disContinuedTxt = '';
-				$Query = "SELECT `name`, `id`, `company`, `discontinuation_status`, `discontinuation_status_comment` FROM `products` WHERE id = '" . $pvalue . "' OR LI_id = '" . $pvalue . "' ";
-				$Res = mysql_query($Query);
-				if($Res)
-				{	
-					if(mysql_num_rows($Res) > 0)
-					{	
-						while($row = mysql_fetch_assoc($Res))
-						{
-							$productId = $row['id'];
-							if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
-							{
-								$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($row['discontinuation_status_comment']);
-								$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
-							}
-							
-							$TrialsInfo[$pkey]['sectionHeader'] = $productSelector[$pkey] = $row['name'];
-							$TrialsInfo[$pkey]['sectionHeader']	= formatBrandName($TrialsInfo[$pkey]['sectionHeader'], 'product');
-							
-							if($row['company'] !== NULL && $row['company'] != '')
-							{
-								$TrialsInfo[$pkey]['sectionHeader'] .= " / <i>" . $row['company'] . "</i>";
-								$productSelector[$pkey] .= " / <i>" . $row['company'] . "</i>";
-							}
-							
-							$tagQuery = "SELECT `tag` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $pvalue . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'product' ";
-							$tagRes = mysql_query($tagQuery);
-							if($tagRes)
-							{
-								if(mysql_num_rows($tagRes) > 0)
-								{
-									while($tagRow = mysql_fetch_assoc($tagRes))
-									{
-										if($tagRow['tag'] != '' && $tagRow['tag'] !== NULL)
-										{
-											$TrialsInfo[$pkey]['sectionHeader'] .= " <span class='tag'>[" . $tagRow['tag'] . "]</span>";
-										}
-									}
-								}
-							}
-							else
-							{
-								$log 	= 'ERROR: Bad SQL query. ' . $tagQuery . mysql_error();
-								$logger->error($log);
-								unset($log);
-							}
-								
-							$TrialsInfo[$pkey]['sectionHeader'] .= $disContinuedTxt;
-							$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $productId);
-							
-							$Ids[$pkey]['product'] = $productId;
-							$Ids[$pkey]['area'] = implode(', ', $resultIds['area']);
-						}
-					}
-				}
-				else
-				{
-					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
-					$logger->error($log);
-					unset($log);
-				}
+				$pDetails['Ids'][$ikey]['area'] = implode("','", $resultIds['area']);
 			}
+			
+			$Ids = $pDetails['Ids'];
+			$TrialsInfo = $pDetails['TrialsInfo'];
+			$productSelector = $pDetails['productSelector'];
+			
+			unset($pDetails);
 		}
 		else if(count($resultIds['area']) > 1)
 		{
-			$productSelectorTitle = 'Select Areas';
-			$ottType = 'rowstackedindexed';
-				
+			$naUpms = array();
+			$ottType = 'rowstacked';
+			$areaIds = $resultIds['area'];
+			
 			if(empty($resultIds['product']))
 			{
 				$tHeader = 'All Products';
-				$productId = '';
+				$productIds = array();
 				
-				$Query = "SELECT type_id FROM `rpt_masterhm_headers` WHERE `report` = '" . $globalOptions['hm'] . "' AND `type` = 'product' ";
-				$Res = mysql_query($Query);
-				if($Res)
-				{
-					$rowCount = mysql_num_rows($Res);
-					if($rowCount > 0)
-					{
-						$productId = array();
-						while($Row = mysql_fetch_assoc($Res))
-						{
-							$productId[] = $Row['type_id'];
-						}
-						
-						$productId = implode(', ', $productId);
-						
-						$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $productId);
-						if(!empty($TrialsInfo[0]['naUpms']) && $displayType == 'webPage')
-						{
-							echo '<input type="hidden" id="upmstyle" value="expand" />';
-						}
-					}
-				}
-				else
-				{
-					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
-					$logger->error($log);
-					unset($log);
-				}
-			}
-			else
-			{
-				$tHeader = 'Product: ';
-				$productId = implode(', ', $resultIds['product']);
-				
-				$Query = "SELECT `name`, `id` FROM `products` WHERE id IN ('" . $productId . "') OR LI_id IN ('" . $productId . "') ";
+				$Query = "SELECT GROUP_CONCAT(type_id) AS type_id FROM `rpt_masterhm_headers` WHERE `report` = '" . $hmId . "' AND `type` = 'product' ";
 				$Res = mysql_query($Query);
 				if($Res)
 				{
 					if(mysql_num_rows($Res) > 0)
 					{
 						$Row = mysql_fetch_assoc($Res);
-						$tHeader .= htmlformat($Row['name']);
-						$productId = $Row['id'];
-					}
-					else
-					{
-						$tHeader .= $productId;
+						$productIds = explode(',', $Row['type_id']);
 					}
 				}
 				else
@@ -7105,98 +6532,70 @@ class TrialTracker
 					$logger->error($log);
 					unset($log);
 				}
+			}
+			else
+			{
+				$tHeader = 'Product: ';
+				$productIds = $resultIds['product'];
 				
-				$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $productId);
-				if(!empty($TrialsInfo[0]['naUpms']) && $displayType == 'webPage')
+				$Query = "SELECT `name`, `id` FROM `products` WHERE id IN ('" . implode("','", $productIds) . "') OR LI_id IN ('" . implode("','", $productIds) . "') ";
+				$Res = mysql_query($Query);
+				if($Res)
 				{
-					echo '<input type="hidden" id="upmstyle" value="expand" />';
+					if(mysql_num_rows($Res) > 0)
+					{
+						$Row = mysql_fetch_assoc($Res);
+						$tHeader .= htmlformat(strip_tags($Row['name']));
+					}
+				}
+				else
+				{
+					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
+					$logger->error($log);
+					unset($log);
 				}
 			}
 			
-			foreach($resultIds['area'] as $akey => $avalue)
+			$naUpms = $this->getUnMatchedUPMs($onlyUpdates, $productIds);
+			
+			$aDetails = $this->getAreaHmHeaders($hmId, $areaIds);
+			
+			foreach($aDetails['Ids'] as $ikey => $ivalue)
 			{
-				$Query = "SELECT rmh.`display_name`, rmh.`type_id`, rmh.`category`, ar.`coverage_area`, ar.`display_name` AS global_display_name "
-							. " FROM `rpt_masterhm_headers` rmh JOIN `areas` ar ON  rmh.`type_id` = ar.`id` "
-							. " WHERE rmh.`type_id` = '" . $avalue . "' AND rmh.`report` = '" . $globalOptions['hm'] . "' AND rmh.`type` = 'area' ";
-				$Res = mysql_query($Query);
-				if($Res)
-				{
-					if(mysql_num_rows($Res) > 0)
-					{
-						while($row = mysql_fetch_assoc($Res))
-						{
-							$sectionHeader = '';
-							if($row['category'] != '' && $row['category'] !== NULL)
-							{
-								// product category names not required in ott
-								//$sectionHeader = $row['category'];
-							}
-							
-							if($row['coverage_area'])
-							{
-								if($row['display_name'] != '' && $row['display_name'] !== NULL)
-								{
-									$sectionHeader .= ' ' . $row['display_name'];
-								}
-								else if($row['global_display_name'] != '' && $row['global_display_name'] !== NULL)
-								{
-									$sectionHeader .= ' ' . $row['global_display_name'];
-								}
-								else
-								{
-									$sectionHeader .= ' Area ' . $row['type_id'];
-								}
-							}
-							else
-							{
-								if($row['display_name'] != '' && $row['display_name'] !== NULL)
-								{
-									$sectionHeader .= ' ' . $row['display_name'];
-								}
-								else
-								{
-									$sectionHeader .= ' Area ' . $row['type_id'];
-								}
-							}
-							
-							$TrialsInfo[$akey]['sectionHeader'] = $productSelector[$akey] = $sectionHeader;
-							$TrialsInfo[$akey]['sectionHeader']	= formatBrandName($TrialsInfo[$akey]['sectionHeader'], 'area');
-							
-							$Ids[$akey]['product'] = $productId;
-							$Ids[$akey]['area'] = $row['type_id'];
-						}
-					}
-				}
-				else
-				{
-					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
-					$logger->error($log);
-					unset($log);
-				}
+				$aDetails['Ids'][$ikey]['product'] = implode("','", $productIds);
 			}
+			
+			$aDetails['TrialsInfo'][0]['naUpms'] = array();
+			foreach($naUpms as $nkey => $nvalue)
+			{
+				$aDetails['TrialsInfo'][0]['naUpms'] = array_merge($aDetails['TrialsInfo'][0]['naUpms'], $nvalue);
+			}
+			
+			$Ids = $aDetails['Ids'];
+			$TrialsInfo = $aDetails['TrialsInfo'];
+			$productSelector = $aDetails['productSelector'];
+			
+			unset($aDetails);
+			unset($naUpms);
 		}
 		else if(count($resultIds['product']) > 1)
 		{
-			$productSelectorTitle = 'Select Products';
-			$ottType = 'colstackedindexed';
-				
+			$ottType = 'colstacked';
+			$productIds = $resultIds['product'];
+			
 			if(empty($resultIds['area']))
 			{
 				$tHeader = 'All Areas';
-				$areaId = '';
+				$areaIds = array();
 				
-				$Query = "SELECT `type_id` FROM `rpt_masterhm_headers` WHERE `report` = '" . $globalOptions['hm'] . "' AND `type` = 'area' ";
+				$Query = "SELECT GROUP_CONCAT(type_id) AS type_id FROM `rpt_masterhm_headers` WHERE `report` = '" . $hmId . "' AND `type` = 'area' ";
 				$Res = mysql_query($Query);
 				if($Res)
 				{
 					if(mysql_num_rows($Res) > 0)
 					{
-						$areaId = array();
-						while($Row = mysql_fetch_assoc($Res))
-						{
-							$areaId[] = $Row['type_id'];
-						}
-						$areaId = implode(', ', $areaId);
+						$Row = mysql_fetch_assoc($Res);
+						$areaIds = explode(',', $Row['type_id']);
 					}
 				}
 				else
@@ -7209,409 +6608,103 @@ class TrialTracker
 			else
 			{
 				$tHeader = 'Area: ';
-				$areaId = implode(',', $resultIds['area']);
+				$areaIds = $resultIds['area'];
 				
-				$Query = "SELECT rmh.`display_name`, rmh.`type_id`, ar.`coverage_area`, ar.`display_name` AS global_display_name "
-						. " FROM `rpt_masterhm_headers` rmh JOIN `areas` ar ON  rmh.`type_id` = ar.`id` "
-						. " WHERE rmh.`type_id` IN ('" . $areaId . "') AND rmh.`report` = '" . $globalOptions['hm'] . "' AND rmh.`type` = 'area' ";
-				$Res = mysql_query($Query);
-				if($Res)
+				$aDetails = $this->getAreaHmHeaders($hmId, $areaIds);
+				foreach($aDetails['TrialsInfo'] as $akey => $value)
 				{
-					if(mysql_num_rows($Res) > 0)
-					{
-						$row = mysql_fetch_assoc($Res);
-						
-						if($row['coverage_area'])
-						{
-							if($row['display_name'] != '' && $row['display_name'] !== NULL)
-							{
-								$tHeader .= ' ' . $row['display_name'];
-							}
-							else if($row['global_display_name'] != '' && $row['global_display_name'] !== NULL)
-							{
-								$tHeader .= ' ' . $row['global_display_name'];
-							}
-							else
-							{
-								$tHeader .= ' Area ' . $row['type_id'];
-							}
-						}
-						else
-						{
-							if($row['display_name'] != '' && $row['display_name'] !== NULL)
-							{
-								$tHeader .= ' ' . $row['display_name'];
-							}
-							else
-							{
-								$tHeader .= 'Area ' . $row['type_id'];
-							}
-						}
-						$tHeader = htmlformat($tHeader);
-						$areaId = $row['type_id'];
-					}
-					else
-					{
-						$tHeader .= $areaId;
-					}
+					$tHeader .= $value['sectionHeader'];
 				}
-				else
-				{
-					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
-					$logger->error($log);
-					unset($log);
-				}
+				
+				unset($aDetails);
 			}
 			
-			foreach($resultIds['product'] as $pkey => $pvalue)
+			$pDetails = $this->getProductHmHeaders($hmId, $resultIds['product'], $onlyUpdates);
+			
+			foreach($pDetails['Ids'] as $ikey => $ivalue)
 			{
-				$disContinuedTxt = '';
-				$Query = "SELECT `name`, `id`, `company`, `discontinuation_status`, `discontinuation_status_comment` FROM `products` WHERE id = '" . $pvalue . "' OR LI_id = '" . $pvalue . "' ";
-				$Res = mysql_query($Query);
-				if($Res)
-				{
-					if(mysql_num_rows($Res) > 0)
-					{
-						while($row = mysql_fetch_assoc($Res))
-						{
-							$productId = $row['id'];
-							if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
-							{
-								$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($row['discontinuation_status_comment']);
-								$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
-							}
-	
-							$TrialsInfo[$pkey]['sectionHeader'] = $productSelector[$pkey] = $row['name'];
-							$TrialsInfo[$pkey]['sectionHeader']	= formatBrandName($TrialsInfo[$pkey]['sectionHeader'], 'product');
-							
-							if($row['company'] !== NULL && $row['company'] != '')
-							{
-								$TrialsInfo[$pkey]['sectionHeader'] .= " / <i>" . $row['company'] . "</i>";
-								$productSelector[$pkey] .= " / <i>" . $row['company'] . "</i>";
-							}
-							
-							$tagQuery = "SELECT `tag` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $pvalue . "' AND `report` = '" . $globalOptions['hm'] . "' AND `type` = 'product' ";
-							$tagRes = mysql_query($tagQuery);
-							if($tagRes)
-							{
-								if(mysql_num_rows($tagRes) > 0)
-								{
-									$tagRow = mysql_fetch_assoc($tagRes);
-									if($tagRow['tag'] != '' && $tagRow['tag'] !== NULL)
-									{
-										$TrialsInfo[$pkey]['sectionHeader'] .= " <span class='tag'>[" . $tagRow['tag'] . "]</span>";
-									}
-								}
-							}
-							else
-							{
-								$log 	= 'ERROR: Bad SQL query. ' . $tagQuery . mysql_error();
-								$logger->error($log);
-								unset($log);
-							}
-							
-							$TrialsInfo[$pkey]['sectionHeader'] .= $disContinuedTxt;
-							$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $productId);
-								
-							$Ids[$pkey]['product'] = $productId;
-							$Ids[$pkey]['area'] = $areaId;
-						}
-					}
-				}
-				else
-				{
-					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
-					$logger->error($log);
-					unset($log);
-				}
+				$pDetails['Ids'][$ikey]['area'] = implode("','", $areaIds);
 			}
+			
+			$Ids = $pDetails['Ids'];
+			$TrialsInfo = $pDetails['TrialsInfo'];
+			$productSelector = $pDetails['productSelector'];
+			
+			unset($pDetails);
 		}
 		else
 		{
 			if(empty($resultIds['product']) && empty($resultIds['area']))
 			{
-				$productSelectorTitle = 'Select Products';
-				$ottType = 'colstackedindexed';
-				
-				$tHeader = 'No Area';
-				$areaId = '';
+				$ottType = 'colstacked';
+				$tHeader = 'Area: ';
+				$areaIds = array();
 				
 				//fetching area(last column) from hm
-				$Query = "SELECT rmh.`display_name`, rmh.`type_id`, ar.`coverage_area`, ar.`display_name` AS global_display_name "
-							. " FROM `rpt_masterhm_headers` rmh JOIN `areas` ar ON  rmh.`type_id` = ar.`id` "
-							. " WHERE rmh.`report` = '" . $globalOptions['hm'] . "' AND rmh.`type` = 'area' ORDER BY rmh.`num` DESC LIMIT 0,1 ";
-				$Res = mysql_query($Query);
-				if($Res)
+				$aDetails = $this->getAreaHmHeaders($hmId, $areaIds, $lastRow = true);
+				foreach($aDetails['TrialsInfo'] as $akey => $value)
 				{
-					if(mysql_num_rows($Res) > 0)
-					{
-						$row = mysql_fetch_assoc($Res);
-						$tHeader = 'Area: ';
-						
-						if($row['coverage_area'])
-						{
-							if($row['display_name'] != '' && $row['display_name'] !== NULL)
-							{
-								$tHeader .= ' ' . $row['display_name'];
-							}
-							else if($row['global_display_name'] != '' && $row['global_display_name'] !== NULL)
-							{
-								$tHeader .= ' ' . $row['global_display_name'];
-							}
-							else
-							{
-								$tHeader .= ' Area ' . $row['type_id'];
-							}
-						}
-						else
-						{
-							if($row['display_name'] != '' && $row['display_name'] !== NULL)
-							{
-								$tHeader .= ' ' . $row['display_name'];
-							}
-							else
-							{
-								$tHeader .= ' Area ' . $row['type_id'];
-							}
-						}
-						$tHeader = htmlformat($tHeader);
-						$areaId = $row['type_id'];
-					}
-				}
-				else
-				{
-					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
-					$logger->error($log);
-					unset($log);
+					$tHeader .= strip_tags($value['sectionHeader']);
+					$areaIds = $value['Id'];
 				}
 				
-				//fetching products from hm
-				$Query = "SELECT `id`, `display_name`, `type_id`, `category` FROM `rpt_masterhm_headers` WHERE `report` = '" . $globalOptions['hm'] . "' AND `type` = 'product' ";
-				$Res = mysql_query($Query);
-				if($Res)
+				$pDetails = $this->getProductHmHeaders($hmId, array(), $onlyUpdates);
+				
+				foreach($pDetails['Ids'] as $ikey => $ivalue)
 				{
-					if(mysql_num_rows($Res) > 0)
-					{
-						$pkey = 0;
-						while($row = mysql_fetch_assoc($Res))
-						{	
-							$productId = $row['type_id'];
-							$sectionHeader = '';
-							
-							if($row['category'] != '' && $row['category'] !== NULL && $row['category'] !== 'NULL')
-							{
-								// product category names not required in ott
-								//$sectionHeader .= $row['category'];
-							}
-							if($row['display_name'] != '' && $row['display_name'] !== NULL && $row['display_name'] !== 'NULL')
-							{
-								$sectionHeader .= $row['display_name'];
-							}
-							else
-							{
-							/************* pick name from products table */
-								$qry = "SELECT `name`, `id`, `company`, `discontinuation_status` FROM `products` WHERE id = '" . $row['type_id'] . "'";
-								$res1 = mysql_query($qry);
-								if($res1 and mysql_num_rows($res1) > 0)
-								{
-									while($row = mysql_fetch_assoc($res1))
-									{
-										$productId = $row['id'];
-		
-										$sh = $row['name'];
-										$sh = formatBrandName($sh, 'product');
-										
-										if($row['company'] !== NULL && $row['company'] != '')
-										{
-											$sh .= " / <i>" . $row['company'] . "</i>";
-										}
-									}
-								}
-							
-							/*************************************************/
-								if(isset($sh)) $sectionHeader .= ' '. $sh;
-								else $sectionHeader .= ' Product ' . $row['type_id'];	
-							}
-					
-							$TrialsInfo[$pkey]['sectionHeader'] = $productSelector[$pkey] = $sectionHeader;
-							if(!isset($sh)) $TrialsInfo[$pkey]['sectionHeader']	= formatBrandName($TrialsInfo[$pkey]['sectionHeader'], 'product');
-							
-							$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $productId);
-							
-							$Ids[$pkey]['product'] = $productId;
-							$Ids[$pkey]['area'] = $areaId;
-							
-							$pkey++;
-						}
-					}
+					$pDetails['Ids'][$ikey]['area'] = $areaIds;
 				}
-				else
-				{
-					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
-					$logger->error($log);
-					unset($log);
-				}
+				
+				$Ids = $pDetails['Ids'];
+				$TrialsInfo = $pDetails['TrialsInfo'];
+				$productSelector = $pDetails['productSelector'];
+				
+				unset($aDetails);
+				unset($pDetails);
 			}
 			else if(empty($resultIds['product']))
 			{
-				$productSelectorTitle = 'Select Products';
-				$ottType = 'indexed';
+				$ottType = 'colstacked';
 				$tHeader = 'Area: ';
 				
-				$areaId = implode(', ', $resultIds['area']);
+				$areaIds = $resultIds['area'];
 				
-				$Query = "SELECT rmh.`display_name`, rmh.`type_id`, ar.`coverage_area`, ar.`display_name` AS global_display_name "
-						. " FROM `rpt_masterhm_headers` rmh JOIN `areas` ar ON  rmh.`type_id` = ar.`id` "
-						. " WHERE rmh.`type_id` IN ('" . $areaId . "') AND rmh.`report` = '" . $globalOptions['hm'] . "' AND rmh.`type` = 'area' ";
-				$Res = mysql_query($Query);
-				if($Res)
+				$aDetails = $this->getAreaHmHeaders($hmId, $areaIds);
+				
+				foreach($aDetails['TrialsInfo'] as $akey => $value)
 				{
-					if(mysql_num_rows($Res) > 0)
-					{
-						$row = mysql_fetch_assoc($Res);
-						
-						if($row['coverage_area'])
-						{
-							if($row['display_name'] != '' && $row['display_name'] !== NULL)
-							{
-								$tHeader .= ' ' . $row['display_name'];
-							}
-							else if($row['global_display_name'] != '' && $row['global_display_name'] !== NULL)
-							{
-								$tHeader .= ' ' . $row['global_display_name'];
-							}
-							else
-							{
-								$tHeader .= 'Area ' . $row['type_id'];
-							}
-						}
-						else
-						{
-							if($row['display_name'] != '' && $row['display_name'] !== NULL)
-							{
-								$tHeader .= ' ' . $row['display_name'];
-							}
-							else
-							{
-								$tHeader .= 'Area ' . $row['type_id'];
-							}
-						}
-						$tHeader = htmlformat($tHeader);
-						$areaId = $row['type_id'];
-					}
-					else
-					{
-						$tHeader .= $areaId;
-					}
-				}
-				else
-				{
-					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
-					$logger->error($log);
-					unset($log);
+					$tHeader .= strip_tags($value['sectionHeader']);
 				}
 				
-				$Query = "SELECT `display_name`, `type_id`, `category`, `tag` FROM `rpt_masterhm_headers` WHERE `report` = '" . $globalOptions['hm'] . "' AND `type` = 'product' ";
-				$Res = mysql_query($Query);
-				if($Res)
-				{	
-					$countRow = mysql_num_rows($Res);
-					if($countRow > 0)
-					{
-						if($countRow > 1)
-						{
-							$ottType = 'colstackedindexed';
-						}
-						
-						$akey = 0;
-						
-						while($row = mysql_fetch_assoc($Res))
-						{
-							$productId = $row['type_id'];
-							$sectionHeader = '';
-							
-							if($row['category'] != '' && $row['category'] !== NULL && $row['category'] !== 'NULL')
-							{
-								// product category names not required in ott
-								//$sectionHeader = $row['category'];
-							}
-							
-							if($row['display_name'] != '' && $row['display_name'] !== NULL && $row['display_name'] !== 'NULL')
-							{
-								$sectionHeader .= ' ' . $row['display_name'];
-							}
-							else
-							{
-							/************* pick name from products table */
-								$qry = "SELECT `name`, `id`, `company`, `discontinuation_status` FROM `products` WHERE id = '" . $row['type_id'] . "'";
-								$res1 = mysql_query($qry);
-								if($res1 and mysql_num_rows($res1) > 0)
-								{
-									while($row = mysql_fetch_assoc($res1))
-									{
-										$productId = $row['id'];
-		
-										$sh = $row['name'];
-										$sh = formatBrandName($sh, 'product');
-										
-										if($row['company'] !== NULL && $row['company'] != '')
-										{
-											$sh .= " / <i>" . $row['company'] . "</i>";
-										}
-									}
-								}
-							
-							/*************************************************/
-								if(isset($sh)) $sectionHeader .= ' '. $sh;
-								else $sectionHeader .= ' Product ' . $row['type_id'];	
-							}
-													
-							if($row['tag'] != '' && $row['tag'] != NULL)
-							{
-								$sectionHeader .= " <span class='tag'>[" . $row['tag'] . "]</span>";
-							}
-							
-							$TrialsInfo[$akey]['sectionHeader'] = $productSelector[$akey] = $sectionHeader;
-							if(!isset($sh)) $TrialsInfo[$akey]['sectionHeader']	= formatBrandName($TrialsInfo[$akey]['sectionHeader'], 'area');
-							$TrialsInfo[$akey]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $productId);
-							
-							$Ids[$akey]['product'] = $productId;
-							$Ids[$akey]['area'] = $areaId;
-							
-							$akey++;
-						}
-					}
-				}
-				else
+				$pDetails = $this->getProductHmHeaders($hmId, array(), $onlyUpdates);
+				
+				foreach($pDetails['Ids'] as $ikey => $ivalue)
 				{
-					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
-					$logger->error($log);
-					unset($log);
+					$pDetails['Ids'][$ikey]['area'] = implode("','", $areaIds);
 				}
+				
+				$Ids = $pDetails['Ids'];
+				$TrialsInfo = $pDetails['TrialsInfo'];
+				$productSelector = $pDetails['productSelector'];
+				
+				unset($aDetails);
+				unset($pDetails);
 			}
 			else if(empty($resultIds['area']))
 			{
-				$productSelectorTitle = 'Select Areas';
-				$ottType = 'indexed';
+				$ottType = 'rowstacked';
 				$tHeader = 'Product: ';
 				
-				$productId = implode(',', $resultIds['product']);
+				$productIds = $resultIds['product'];
 				
-				$Query = "SELECT `name`, `id` FROM `products` WHERE id IN ('" . $productId . "') OR LI_id IN ('" . $productId . "') ";
+				$Query = "SELECT `name`, `id` FROM `products` WHERE id IN ('" . implode("','", $productIds) . "') OR LI_id IN ('" . implode("','", $productIds) . "') ";
 				$Res = mysql_query($Query);
 				if($Res)
 				{
 					if(mysql_num_rows($Res) > 0)
 					{
 						$row = mysql_fetch_assoc($Res);
-				
-						$productId = $row['id'];
-						
-						$tHeader .= htmlformat($row['name']);
-					}
-					else
-					{
-						$tHeader .= $productId;
+						$tHeader .= strip_tags(htmlformat($row['name']));
 					}
 				}
 				else
@@ -7621,864 +6714,384 @@ class TrialTracker
 					unset($log);
 				}
 				
-				$Query = "SELECT rmh.`display_name`, rmh.`type_id`, rmh.`category`, ar.`coverage_area`, ar.`display_name` AS global_display_name "
-							. " FROM `rpt_masterhm_headers` rmh JOIN `areas` ar ON  rmh.`type_id` = ar.`id`"
-							. " WHERE rmh.`report` = '". $globalOptions['hm'] ."' AND rmh.`type` = 'area' ";
-				$Res = mysql_query($Query);
-				
-				if($Res)
-				{	
-					$countRow = mysql_num_rows($Res);
-					if($countRow > 0)
-					{
-						$akey = 0;
-						while($row = mysql_fetch_assoc($Res))
-						{
-							$sectionHeader = '';
-							if($countRow > 1)
-							{
-								$ottType = 'rowstackedindexed';
-							}
-						
-							$areaId = $row['type_id'];
-							if($row['category'] != '' && $row['category'] !== NULL)
-							{
-								// product category names not required in ott
-								// $sectionHeader .= $row['category'];
-							}
-							
-							if($row['coverage_area'])
-							{
-								if($row['display_name'] != '' && $row['display_name'] !== NULL)
-								{
-									$sectionHeader .= ' ' . $row['display_name'];
-								}
-								else if($row['global_display_name'] != '' && $row['global_display_name'] !== NULL)
-								{
-									$sectionHeader .= ' ' . $row['global_display_name'];
-								}
-								else
-								{
-									$sectionHeader .= 'Area ' . $row['type_id'];
-								}
-							}
-							else
-							{
-								if($row['display_name'] != '' && $row['display_name'] !== NULL)
-								{
-									$sectionHeader .= ' ' . $row['display_name'];
-								}
-								else
-								{
-									$sectionHeader .= 'Area ' . $row['type_id'];
-								}
-							}
-							
-							$TrialsInfo[$akey]['sectionHeader'] = $productSelector[$akey] = $sectionHeader;
-							$TrialsInfo[$akey]['sectionHeader']	= formatBrandName($TrialsInfo[$akey]['sectionHeader'], 'area');
-							$Ids[$akey]['area'] = $areaId;
-							$Ids[$akey]['product'] = $productId;
-							
-							$akey++;
-						}
-					}
-				}
-				else
+				$aDetails = $this->getAreaHmHeaders($hmId, array());
+				foreach($aDetails['Ids'] as $ikey => $ivalue)
 				{
-					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
-					$logger->error($log);
-					unset($log);
+					$aDetails['Ids'][$ikey]['product'] = implode("','", $productIds);
 				}
+				
+				$aDetails['TrialsInfo'][0]['naUpms'] = array();
+				$naUpms = $this->getUnMatchedUPMs($onlyUpdates, $productIds);
+				
+				foreach($naUpms as $nkey => $nvalue)
+				{
+					$aDetails['TrialsInfo'][0]['naUpms'] = array_merge($aDetails['TrialsInfo'][0]['naUpms'], $nvalue);
+				}
+				
+				$Ids = $aDetails['Ids'];
+				$TrialsInfo = $aDetails['TrialsInfo'];
+				$productSelector = $aDetails['productSelector'];
+				
+				unset($naUpms);
+				unset($aDetails);
 			}
 			else
 			{	
-				$productSelectorTitle = 'Select Areas';
 				$ottType = 'indexed';
 				$tHeader = 'Area: ';
 				
-				$areaId = implode(',', $resultIds['area']);
-				$productId = implode(',', $resultIds['product']);
+				$areaIds = $resultIds['area'];
+				$productIds = $resultIds['product'];
 				
-				$Query = "SELECT rmh.`display_name`, rmh.`type_id`, ar.`coverage_area`, ar.`display_name` AS global_display_name "
-							. " FROM `rpt_masterhm_headers` rmh JOIN `areas` ar ON  rmh.`type_id` = ar.`id` "
-							. " WHERE rmh.`type_id` IN ('" . $areaId . "') AND rmh.`report` = '" . $globalOptions['hm'] . "' AND rmh.`type` = 'area' ";
-				$Res = mysql_query($Query);
-				if($Res)
+				$aDetails = $this->getAreaHmHeaders($hmId, $areaIds);
+				
+				foreach($aDetails['TrialsInfo'] as $akey => $value)
 				{
-					if(mysql_num_rows($Res))
-					{
-						$row = mysql_fetch_assoc($Res);
-					
-						$areaId = $row['type_id'];
-						if($row['coverage_area'])
-						{
-							if($row['display_name'] != '' && $row['display_name'] !== NULL)
-							{
-								$tHeader .= ' ' . $row['display_name'];
-							}
-							else if($row['global_display_name'] != '' && $row['global_display_name'] !== NULL)
-							{
-								$tHeader .= ' ' . $row['global_display_name'];
-							}
-							else
-							{
-								$tHeader .= 'Area ' . $row['type_id'];
-							}
-						}
-						else
-						{
-							if($row['display_name'] != '' && $row['display_name'] !== NULL)
-							{
-								$tHeader .= ' ' . $row['display_name'];
-							}
-							else
-							{
-								$tHeader .= 'Area ' . $row['type_id'];
-							}
-						}
-						$tHeader = htmlformat($tHeader);
-					}
-					else
-					{
-						$tHeader .= $areaId;
-					}
-				}
-				else
-				{
-					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
-					$logger->error($log);
-					unset($log);
+					$tHeader .= strip_tags($value['sectionHeader']);
 				}
 				
-				$disContinuedTxt = '';
-				$Query = "SELECT `name`, `id`, `company`, `discontinuation_status`, `discontinuation_status_comment` FROM `products` WHERE id IN ('" . $productId . "') OR LI_id IN ('" . $productId . "') ";
-				$Res = mysql_query($Query);
-				if($Res)
-				{
-					if(mysql_num_rows($Res) > 0)
-					{
-						$row = mysql_fetch_assoc($Res);
+				$pDetails = $this->getProductHmHeaders($hmId, $productIds, $onlyUpdates);
 				
-						$productId = $row['id'];
-					
-						if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
-						{
-							$TrialsInfo[0]['dStatusComment'] = strip_tags($row['discontinuation_status_comment']);
-							$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
-						}
-					
-						$TrialsInfo[0]['sectionHeader'] = $productSelector[0] = $row['name'];
-						$TrialsInfo[0]['sectionHeader']	= formatBrandName($TrialsInfo[0]['sectionHeader'], 'product');
-					
-						if($row['company'] !== NULL && $row['company'] != '')
-						{
-							$TrialsInfo[0]['sectionHeader'] .= " / <i>" . $row['company'] . "</i>";
-							$productSelector[0] .= " / <i>" . $row['company'] . "</i>"; 
-						}
-					
-						$tagQuery = "SELECT `tag` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $productId . "' AND `report` = '". $globalOptions['hm'] ."' AND `type` = 'product' ";
-						$tagRes = mysql_query($tagQuery);
-						if($tagRes)
-						{
-							if(mysql_num_rows($tagRes) > 0)
-							{
-								$tagRow = mysql_fetch_assoc($tagRes);
-								if(trim($tagRow['tag']) != '' && $tagRow['tag'] != NULL)
-								{
-									$TrialsInfo[0]['sectionHeader'] .= " <span class='tag'>[" . $tagRow['tag'] . "]</span>";
-								}
-							}
-						}
-				
-						$TrialsInfo[0]['sectionHeader'] .= $disContinuedTxt;		
-						$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $productId);
-					
-						$Ids[0]['product'] = $productId;
-						$Ids[0]['area'] = $areaId;
-						
-						if(!empty($TrialsInfo[0]['naUpms']) && $displayType == 'webPage')
-						{
-							echo '<input type="hidden" id="upmstyle" value="expand" />';
-						}
-					}
-				}
-				else
+				foreach($pDetails['Ids'] as $ikey => $ivalue)
 				{
-					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
-					$logger->error($log);
-					unset($log);
+					$pDetails['Ids'][$ikey]['area'] = implode("','", $areaIds);
 				}
+				
+				$Ids = $pDetails['Ids'];
+				$TrialsInfo = $pDetails['TrialsInfo'];
+				$productSelector = $pDetails['productSelector'];
+				
+				unset($aDetails);
+				unset($pDetails);
 			}
 		}
 		
-		return array($tHeader, $ottType, $productSelectorTitle, $productSelector, $Ids, $TrialsInfo);
+		return array('tHeader' => $tHeader, 'ottType' => $ottType,'Ids' => $Ids, 'TrialsInfo' => $TrialsInfo, 'productSelector' => $productSelector);
 	}
 	
-	function processNonHmParams($resultIds, $globalOptions, $timeMachine, $timeInterval, $displayType = 'fileExport')
+	function getProductHeaders($productIds, $onlyUpdates)
 	{
+		global $logger;
+		
 		$productSelector = array();
 		$TrialsInfo = array();
 		$Ids = array();
 		
-		$productSelectorTitle = 'Select Products';
+		$Query = "SELECT `name`, `id`, `company`, `discontinuation_status`, `discontinuation_status_comment` "
+					. " FROM `products` WHERE id IN ('" . implode("','", $productIds) . "') OR LI_id IN ('" . implode("','", $productIds) . "') ";
+		$Res = mysql_query($Query);
+		if($Res)
+		{	
+			if(mysql_num_rows($Res) > 0)
+			{	
+				$counter = 0;
+				while($row = mysql_fetch_assoc($Res))
+				{
+					$disContinuedTxt = "";
+					$sectionHeader = "";
+					
+					$productIds[] = $productId = $row['id'];
+					
+					if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
+					{
+						$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
+					}
+					
+
+					$productSelector[$productId] = $row['name'];
+					$sectionHeader = formatBrandName($row['name'], 'product');
+					
+					if($row['company'] !== NULL && $row['company'] != '')
+					{
+						$sectionHeader .= " / <i>" . $row['company'] . "</i>";
+						$productSelector[$productId] .= " / <i>" . $row['company'] . "</i>";
+					}
+					
+					$sectionHeader .= $disContinuedTxt;
+					
+					$TrialsInfo[$counter]['Id'] = $productId;
+					$TrialsInfo[$counter]['sectionHeader'] = $sectionHeader;
+					
+					$Ids[$productId]['product'] = $productId;
+					
+					unset($disContinuedTxt);
+					++$counter;
+				}
+			}
+		}
+		else
+		{
+			$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
+			$logger->error($log);
+			unset($log);
+		}
+		
+		$naUpms = $this->getUnMatchedUPMs($onlyUpdates, $productIds);
+		
+		foreach($TrialsInfo as $tkey => & $tvalue)
+		{
+			if(isset($naUpms[$tkey]))
+			{
+				$tvalue['naUpms'] = $naUpms[$tkey];
+			}
+		}
+		unset($naUpms);
+		
+		return array('Ids' => $Ids, 'TrialsInfo' => $TrialsInfo, 'productSelector' => $productSelector);
+	}
+	
+	function getAreaHeaders($areaIds)
+	{
+		global $logger;
+		
+		$productSelector = array();
+		$TrialsInfo = array();
+		$Ids = array();
+		
+		$Query = "SELECT `display_name`, `name`, `id`, `category` FROM `areas` WHERE id IN ('" . implode("','", $areaIds) . "') ";
+		$Res = mysql_query($Query);
+		if($Res)
+		{
+			if(mysql_num_rows($Res) > 0)
+			{
+				$counter = 0;
+				while($row = mysql_fetch_assoc($Res))
+				{
+					$sectionHeader = "";
+					$areaId = $row['id'];
+					
+					if($row['category'] != '' && $row['category'] !== NULL)
+					{
+						$sectionHeader = $row['category'];
+					}
+					
+					if($row['display_name'] != '' && $row['display_name'] !== NULL)
+					{
+						$sectionHeader .= ' ' . $row['display_name'];
+					}
+					else
+					{
+						$sectionHeader .= ' Area ' . $areaId;
+					}
+					
+					$Ids[$areaId]['area'] = $areaId;
+					$productSelector[$areaId] = $sectionHeader;
+					
+					$TrialsInfo[$counter]['sectionHeader'] = formatBrandName($sectionHeader, 'area');
+					$TrialsInfo[$counter]['Id'] = $areaId;
+					
+					++$counter;
+					
+				}
+			}
+		}
+		else
+		{
+			$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
+			$logger->error($log);
+			unset($log);
+		}
+		
+		return array('Ids' => $Ids, 'TrialsInfo' => $TrialsInfo, 'productSelector' => $productSelector);
+	}
+	
+	function processNonHmParams($resultIds, $globalOptions, $displayType = 'fileExport')
+	{
+		$onlyUpdates = $globalOptions['onlyUpdates'];
+		
+		$aDetails = array();
+		$pDetails = array();
+		
+		$Ids = array();
+		$TrialsInfo = array();
+		$productSelector = array();
+		
 		$tHeader = '';
 		$ottType = '';
 		
 		if(count($resultIds['product']) > 1 && count($resultIds['area']) > 1)
 		{
-			$productSelectorTitle = 'Select Products';
-			$ottType = 'colstackedindexed';
+			$ottType = 'colstacked';
 			$tHeader = 'Area: Total';
 			
-			foreach($resultIds['product'] as $pkey => $pvalue)
+			$productIds = $resultIds['product'];
+			
+			$pDetails = $this->getProductHeaders($productIds, $onlyUpdates);
+			
+			foreach($pDetails['Ids'] as $ikey => $ivalue)
 			{
-				$disContinuedTxt = '';
-				$Query = "SELECT `name`, `id`, `company`, `discontinuation_status`, `discontinuation_status_comment` FROM `products` WHERE id = '" . $pvalue . "' OR LI_id = '" . $pvalue . "' ";
-				$Res = mysql_query($Query);
-				if($Res)
-				{	
-					if(mysql_num_rows($Res) > 0)
-					{	
-						while($row = mysql_fetch_assoc($Res))
-						{
-							$productId = $row['id'];
-							if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
-							{
-								$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($row['discontinuation_status_comment']);
-								$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
-							}
-							
-							$TrialsInfo[$pkey]['sectionHeader'] = $productSelector[$pkey] = $row['name'];
-							$TrialsInfo[$pkey]['sectionHeader']	= formatBrandName($TrialsInfo[$pkey]['sectionHeader'], 'product');	
-							
-							if($row['company'] !== NULL && $row['company'] != '')
-							{
-								$TrialsInfo[$pkey]['sectionHeader'] .= " / <i>" . $row['company'] . "</i>";
-								$productSelector[$pkey] .= " / <i>" . $row['company'] . "</i>";
-							}
-							
-							$TrialsInfo[$pkey]['sectionHeader'] .= $disContinuedTxt;
-							$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $productId);
-							
-							$Ids[$pkey]['product'] = $productId;
-							$Ids[$pkey]['area'] = implode(', ', $resultIds['area']);
-						}
-					}
-				}
-				else
-				{
-					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
-					$logger->error($log);
-					unset($log);
-				}
+				$pDetails['Ids'][$ikey]['area'] = implode("','", $resultIds['area']);
 			}
+			
+			$Ids = $pDetails['Ids'];
+			$TrialsInfo = $pDetails['TrialsInfo'];
+			$productSelector = $pDetails['productSelector'];
+			
+			unset($pDetails);
 		}
 		else if(count($resultIds['area']) > 1)
 		{
-			$productSelectorTitle = 'Select Areas';
-			$ottType = 'rowstackedindexed';
+			$naUpms = array();
+			$ottType = 'rowstacked';
+			$areaIds = $resultIds['area'];
 				
 			if(empty($resultIds['product']))
 			{
 				$tHeader = 'No Product';
-				$productId = '';
+				$productIds = '';
 			}
 			else
 			{
 				$tHeader = 'Product: ';
-				$productId = implode(', ', $resultIds['product']);
+				$productIds = $resultIds['product'];
 				
-				$Query = "SELECT `name`, `id` FROM `products` WHERE id IN ('" . $productId . "') OR LI_id IN ('" . $productId . "') ";
-				$Res = mysql_query($Query);
-				if($Res)
+				$pDetails = $this->getProductHeaders($productIds, $onlyUpdates);
+				
+				foreach($pDetails['TrialsInfo'] as $akey => $value)
 				{
-					if(mysql_num_rows($Res) > 0)
-					{
-						$Row = mysql_fetch_assoc($Res);
-						$tHeader .= htmlformat($Row['name']);
-						$productId = $Row['id'];
-					}
-					else
-					{
-						$tHeader .= $productId;
-					}
-				}
-				else
-				{
-					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
-					$logger->error($log);
-					unset($log);
+					$tHeader .= strip_tags($value['sectionHeader']);
 				}
 				
-				$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $productId);
-				if(!empty($TrialsInfo[0]['naUpms']) && $displayType == 'webPage')
-				{
-					echo '<input type="hidden" id="upmstyle" value="expand" />';
-				}
+				$naUpms = $this->getUnMatchedUPMs($onlyUpdates, $productIds);
 			}
 			
-			foreach($resultIds['area'] as $akey => $avalue)
+			$aDetails = $this->getAreaHeaders($areaIds);
+			
+			foreach($aDetails['Ids'] as $ikey => $ivalue)
 			{
-				$Query = "SELECT `display_name`, `name`, `id`, `category` FROM `areas` WHERE id = '" . $avalue . "' ";
-				$Res = mysql_query($Query);
-				if($Res)
-				{
-					if(mysql_num_rows($Res) > 0)
-					{
-						while($row = mysql_fetch_assoc($Res))
-						{
-							$sectionHeader = '';
-							$areaId = $row['id'];
-							if($row['category'] != '' && $row['category'] !== NULL)
-							{
-								// product category names not required in ott
-								//$sectionHeader = $row['category'];
-							}
-							
-							if($row['display_name'] != '' && $row['display_name'] !== NULL)
-							{
-								$sectionHeader .= ' ' . $row['display_name'];
-							}
-							else
-							{
-								$sectionHeader .= ' Area ' . $areaId;
-							}
-							
-							$TrialsInfo[$akey]['sectionHeader'] = $productSelector[$akey] = $sectionHeader;
-							$TrialsInfo[$akey]['sectionHeader']	= formatBrandName($TrialsInfo[$akey]['sectionHeader'], 'area');
-							
-							$Ids[$akey]['product'] = $productId;
-							$Ids[$akey]['area'] = $areaId;
-						}
-					}
-				}
-				else
-				{
-					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
-					$logger->error($log);
-					unset($log);
-				}
+				$aDetails['Ids'][$ikey]['product'] = implode("','", $productIds);
 			}
+			
+			$aDetails['TrialsInfo'][0]['naUpms'] = array();
+			foreach($naUpms as $nkey => $nvalue)
+			{
+				$aDetails['TrialsInfo'][0]['naUpms'] = array_merge($aDetails['TrialsInfo'][0]['naUpms'], $nvalue);
+			}
+			
+			$Ids = $aDetails['Ids'];
+			$TrialsInfo = $aDetails['TrialsInfo'];
+			$productSelector = $aDetails['productSelector'];
+			
+			unset($pDetails);
+			unset($aDetails);
+			unset($naUpms);
 		}
 		else if(count($resultIds['product']) > 1)
 		{
-			$productSelectorTitle = 'Select Products';
-			$ottType = 'colstackedindexed';
+			$ottType = 'colstacked';
+			$productIds = $resultIds['product'];
 				
 			if(empty($resultIds['area']))
 			{
 				$tHeader = 'No Area';
-				$areaId = '';
+				$areaIds = array();
 			}
 			else
 			{
 				$tHeader = 'Area: ';
-				$areaId = implode(',', $resultIds['area']);
+				$areaIds = $resultIds['area'];
 				
-				$Query = "SELECT `display_name`, `name`, `id` FROM `areas` WHERE id IN ('" . $areaId . "') ";
-				$Res = mysql_query($Query);
-				if($Res)
+				$aDetails = $this->getAreaHeaders($areaIds);
+				
+				foreach($aDetails['TrialsInfo'] as $akey => $value)
 				{
-					if(mysql_num_rows($Res) > 0)
-					{
-						$row = mysql_fetch_assoc($Res);
-						$areaId = $row['id'];
-						
-						if($row['display_name'] != '' && $row['display_name'] !== NULL)
-						{
-							$tHeader .= ' ' . $row['display_name'];
-						}
-						else
-						{
-							$tHeader .= 'Area ' . $areaId;
-						}
-						
-						$tHeader = htmlformat($tHeader);
-					}
-					else
-					{
-						$tHeader .= $areaId;
-					}
+					$tHeader .= strip_tags($value['sectionHeader']);
 				}
-				else
-				{
-					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
-					$logger->error($log);
-					unset($log);
-				}
+				unset($aDetails);			
 			}
 			
-			foreach($resultIds['product'] as $pkey => $pvalue)
+			$pDetails = $this->getProductHeaders($productIds, $onlyUpdates);
+			
+			foreach($pDetails['Ids'] as $ikey => $ivalue)
 			{
-				$disContinuedTxt = '';
-				$Query = "SELECT `name`, `id`, `company`, `discontinuation_status`, `discontinuation_status_comment` FROM `products` WHERE id = '" . $pvalue . "' OR LI_id = '" . $pvalue . "' ";
-				$Res = mysql_query($Query);
-				if($Res)
-				{
-					if(mysql_num_rows($Res) > 0)
-					{
-						while($row = mysql_fetch_assoc($Res))
-						{
-							$productId = $row['id'];
-							if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
-							{
-								$TrialsInfo[$pkey]['dStatusComment'] = strip_tags($row['discontinuation_status_comment']);
-								$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
-							}
-	
-							$TrialsInfo[$pkey]['sectionHeader'] = $productSelector[$pkey] = $row['name'];
-							$TrialsInfo[$pkey]['sectionHeader']	= formatBrandName($TrialsInfo[$pkey]['sectionHeader'], 'product');
-							
-							if($row['company'] !== NULL && $row['company'] != '')
-							{
-								$TrialsInfo[$pkey]['sectionHeader'] .= " / <i>" . $row['company'] . "</i>";
-								$productSelector[$pkey] .= " / <i>" . $row['company'] . "</i>";
-							}
-							
-							$tagQuery = "SELECT `tag` FROM `rpt_masterhm_headers` WHERE `type_id` = '" . $pvalue . "' AND `report` = '" . $globalOptions['hm'] . "' AND `type` = 'product' ";
-							$tagRes = mysql_query($tagQuery);
-							if($tagRes)
-							{
-								if(mysql_num_rows($tagRes) > 0)
-								{
-									$tagRow = mysql_fetch_assoc($tagRes);
-									if($tagRow['tag'] != '' && $tagRow['tag'] !== NULL)
-									{
-										$TrialsInfo[$pkey]['sectionHeader'] .= " <span class='tag'>[" . $tagRow['tag'] . "]</span>";
-									}
-								}
-							}
-							else
-							{
-								$log 	= 'ERROR: Bad SQL query. ' . $tagQuery . mysql_error();
-								$logger->error($log);
-								unset($log);
-							}
-							
-							$TrialsInfo[$pkey]['sectionHeader'] .= $disContinuedTxt;
-							$TrialsInfo[$pkey]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $productId);
-								
-							$Ids[$pkey]['product'] = $productId;
-							$Ids[$pkey]['area'] = $areaId;
-						}
-					}
-				}
-				else
-				{
-					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
-					$logger->error($log);
-					unset($log);
-				}
+				$pDetails['Ids'][$ikey]['area'] = implode("','", $areaIds);
 			}
+			
+			$Ids = $pDetails['Ids'];
+			$TrialsInfo = $pDetails['TrialsInfo'];
+			$productSelector = $pDetails['productSelector'];
+			
+			unset($pDetails);
 		}
 		else
 		{
 			if(empty($resultIds['product']) && empty($resultIds['area']))
 			{
-				$productSelectorTitle = 'Select Products';
 				$ottType = 'indexed';
-				
 				$tHeader = 'No Area';
 			}
 			else if(empty($resultIds['product']))
 			{
-				$productSelectorTitle = 'Select Products';
 				$ottType = 'indexed';
 				$tHeader = 'Area: ';
 				
-				$areaId = implode(', ', $resultIds['area']);
-				$productId = '';
-				
-				$Query = "SELECT `display_name`, `name`, `id` FROM `areas` WHERE id IN ('" . $areaId . "') ";
-				$Res = mysql_query($Query);
-				if($Res)
+				$areaIds = $resultIds['area'];
+
+				$aDetails = $this->getAreaHeaders($areaIds);
+				foreach($aDetails['TrialsInfo'] as $akey => $value)
 				{
-					if(mysql_num_rows($Res) > 0)
-					{
-						$row = mysql_fetch_assoc($Res);
-						$areaId = $row['id'];
-						
-						if($row['display_name'] != '' && $row['display_name'] !== NULL)
-						{
-							$tHeader .= ' ' . $row['display_name'];
-						}
-						else
-						{
-							$tHeader .= 'Area ' . $areaId;
-						}
-						
-						$tHeader = htmlformat($tHeader);
-					}
-					else
-					{
-						$tHeader .= $areaId;
-					}
-				}
-				else
-				{
-					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
-					$logger->error($log);
-					unset($log);
+					$tHeader .= strip_tags($value['sectionHeader']);
 				}
 				
 				$TrialsInfo[0]['sectionHeader'] = 'No Product';
-				$TrialsInfo[0]['sectionHeader']	= formatBrandName($TrialsInfo[0]['sectionHeader'], 'product');
-				$Ids[0]['product'] = $productId;
-				$Ids[0]['area'] = $areaId;
+				$Ids[0]['product'] = '';
+				$Ids[0]['area'] = implode("','", $areaIds);
 			}
 			else if(empty($resultIds['area']))
 			{
-				$productSelectorTitle = 'Select Areas';
 				$ottType = 'indexed';
 				$tHeader = 'No Area';
 				
-				$areaId = '';
-				$productId = implode(', ', $resultIds['product']);
+				$productIds = $resultIds['product'];
 				
-				$disContinuedTxt = '';
-				$Query = "SELECT `name`, `id`, `company`, `discontinuation_status`, `discontinuation_status_comment` FROM `products` WHERE id IN ('" . $productId . "') OR LI_id IN ('" . $productId . "') ";
-				$Res = mysql_query($Query);
-				if($Res)
+				$pDetails = $this->getProductHeaders($productIds, $onlyUpdates);
+				foreach($pDetails['Ids'] as $ikey => $ivalue)
 				{
-					if(mysql_num_rows($Res) > 0)
-					{
-						$row = mysql_fetch_assoc($Res);
+					$pDetails['Ids'][$ikey]['area'] = '';
+				}
 				
-						$productId = $row['id'];
-					
-						if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
-						{
-							$TrialsInfo[0]['dStatusComment'] = strip_tags($row['discontinuation_status_comment']);
-							$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
-						}
-					
-						$TrialsInfo[0]['sectionHeader'] = $productSelector[0] = $row['name'];
-						$TrialsInfo[0]['sectionHeader']	= formatBrandName($TrialsInfo[0]['sectionHeader'], 'product');
-					
-						if($row['company'] !== NULL && $row['company'] != '')
-						{
-							$TrialsInfo[0]['sectionHeader'] .= " / <i>" . $row['company'] . "</i>";
-							$productSelector[0] .= " / <i>" . $row['company'] . "</i>"; 
-						}
-					
-						$TrialsInfo[0]['sectionHeader'] .= $disContinuedTxt;		
-						$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $productId);
-					
-						$Ids[0]['product'] = $productId;
-						$Ids[0]['area'] = $areaId;
-						
-						if(!empty($TrialsInfo[0]['naUpms']) && $displayType == 'webPage')
-						{
-							echo '<input type="hidden" id="upmstyle" value="expand" />';
-						}
-					}
-				}
-				else
-				{
-					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
-					$logger->error($log);
-					unset($log);
-				}
+				$Ids = $pDetails['Ids'];
+				$TrialsInfo = $pDetails['TrialsInfo'];
+				$productSelector = $pDetails['productSelector'];
+				
+				unset($pDetails);
 			}
 			else
 			{	
-				$productSelectorTitle = 'Select Areas';
 				$ottType = 'indexed';
 				$tHeader = 'Area: ';
 				
-				$areaId = implode(',', $resultIds['area']);
-				$productId = implode(',', $resultIds['product']);
+				$areaIds = $resultIds['area'];
+				$productIds = $resultIds['product'];
 				
-				$Query = "SELECT `display_name`, `name`, `id` FROM `areas` WHERE id IN ('" . $areaId . "') ";
-				$Res = mysql_query($Query);
-				if($Res)
+				$aDetails = $this->getAreaHeaders($areaIds);
+				
+				foreach($aDetails['TrialsInfo'] as $akey => $value)
 				{
-					if(mysql_num_rows($Res))
-					{
-						$row = mysql_fetch_assoc($Res);
-					
-						$areaId = $row['id'];
-						if($row['display_name'] != '' && $row['display_name'] !== NULL)
-						{
-							$tHeader .= ' ' . $row['display_name'];
-						}
-						else
-						{
-							$tHeader .= 'Area ' . $areaId;
-						}
-						$tHeader = htmlformat($tHeader);
-					}
-					else
-					{
-						$tHeader .= $areaId;
-					}
-				}
-				else
-				{
-					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
-					$logger->error($log);
-					unset($log);
+					$tHeader .= strip_tags($value['sectionHeader']);
 				}
 				
-				$disContinuedTxt = '';
-				$Query = "SELECT `name`, `id`, `company`, `discontinuation_status`, `discontinuation_status_comment` FROM `products` WHERE id IN ('" . $productId . "') OR LI_id IN ('" . $productId . "') ";
-				$Res = mysql_query($Query);
-				if($Res)
-				{
-					if(mysql_num_rows($Res) > 0)
-					{
-						$row = mysql_fetch_assoc($Res);
+				$pDetails = $this->getProductHeaders($productIds, $onlyUpdates);
 				
-						$productId = $row['id'];
-					
-						if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
-						{
-							$TrialsInfo[0]['dStatusComment'] = strip_tags($row['discontinuation_status_comment']);
-							$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
-						}
-					
-						$TrialsInfo[0]['sectionHeader'] = $productSelector[0] = $row['name'];
-						$TrialsInfo[0]['sectionHeader']	= formatBrandName($TrialsInfo[0]['sectionHeader'], 'product');
-					
-						if($row['company'] !== NULL && $row['company'] != '')
-						{
-							$TrialsInfo[0]['sectionHeader'] .= " / <i>" . $row['company'] . "</i>";
-							$productSelector[0] .= " / <i>" . $row['company'] . "</i>"; 
-						}
-					
-						$TrialsInfo[0]['sectionHeader'] .= $disContinuedTxt;		
-						$TrialsInfo[0]['naUpms'] = $this->getUnMatchedUPMs(array(), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates'], $productId);
-					
-						$Ids[0]['product'] = $productId;
-						$Ids[0]['area'] = $areaId;
-						
-						if(!empty($TrialsInfo[0]['naUpms']) && $displayType == 'webPage')
-						{
-							echo '<input type="hidden" id="upmstyle" value="expand" />';
-						}
-					}
-				}
-				else
+				foreach($pDetails['Ids'] as $ikey => $ivalue)
 				{
-					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
-					$logger->error($log);
-					unset($log);
+					$pDetails['Ids'][$ikey]['area'] = implode("','", $areaIds);
 				}
+				
+				$Ids = $pDetails['Ids'];
+				$TrialsInfo = $pDetails['TrialsInfo'];
+				$productSelector = $pDetails['productSelector'];
+				
+				unset($aDetails);
+				unset($pDetails);
 			}
 		}
 		
-		return array($tHeader, $ottType, $productSelectorTitle, $productSelector, $Ids, $TrialsInfo);
+		return array('tHeader' => $tHeader, 'ottType' => $ottType,'Ids' => $Ids, 'TrialsInfo' => $TrialsInfo, 'productSelector' => $productSelector);
 	}
 	
-	function generateOnlineTT($resultIds, $timeMachine = NULL, $ottType, $globalOptions = array())
-	{	
-		$Values = array();
-		$linkExpiry = array();
-		$productSelectorTitle = 'Select Products';
-		$productSelector = array();
-		global $sphinx;
-		global $Sphinx_search;
-		
-		echo '<form id="frmOtt" name="frmOtt" method="get" target="_self" action="intermediary.php">';
-		
-		if($ottType == 'unstacked')
-		{
-			$Id = explode(".", $resultIds);
-			$res = $this->getInfo('rpt_ott_header', array('header', 'id', 'expiry'), 'id', $Id[1]);
-			
-			if($res['expiry'] != '' &&  $res['expiry'] !== NULL)
-			{
-				$linkExpiry[] = $res['expiry'];
-			}
-			
-			$this->displayHeader($t);
-			
-			echo '<input type="hidden" name="results" value="' . $resultIds . '" />'
-					. '<input type="hidden" name="time" value="' . $timeMachine . '" />'
-					. '<input type="hidden" name="v" value="' . $globalOptions['version'] . '" />';
-				
-			$Values = $this->processOTTData($ottType, array($resultIds), $timeMachine, $linkExpiry, $globalOptions);
-			
-			if(!empty($Values['Trials'][0]['naUpms']))
-			{
-				echo '<input type="hidden" id="upmstyle" value="expand" />';
-			}
-			
-			echo $this->displayWebPage($productSelectorTitle, $ottType, $Values['resultIds'], $timeMachine, $Values, array(), $globalOptions, $Values['linkExpiry']);
-		}
-		else if($ottType == 'rowstacked' || $ottType == 'colstacked')
-		{
-			if($globalOptions['encodeFormat'] == 'new') 
-			{
-				$result = unpack("l*", gzinflate(base64_decode(rawurldecode($resultIds))));
-				$result = $this->getResultSet($result,  $ottType);
-			}
-			else
-			{
-				$result = explode(',', gzinflate(base64_decode($resultIds)));
-			}
-			
-			$Id = explode('.', $result[0]);
-			if($ottType == 'colstacked')
-			{
-				$res = $this->getInfo('rpt_ott_header', array('header', 'id', 'expiry'), 'id', $Id[1]);
-				$t = 'Area: ' . htmlformat(trim($res['header']));
-			}
-			else
-			{
-				$res = $this->getInfo('rpt_ott_header', array('header', 'id', 'expiry'), 'id', $Id[0]);
-				$t = 'Product: ' . htmlformat(trim($res['header']));
-			}
-			
-			if($res['expiry'] != '' &&  $res['expiry'] !== NULL)
-			{
-				$linkExpiry[] = $res['expiry'];
-			}
-			
-			$this->displayHeader($t);
-			
-			echo '<input type="hidden" name="results" value="' . $resultIds . '" />'
-					. '<input type="hidden" name="type" value="' . substr($ottType, 0, 3) . '" />'
-					. '<input type="hidden" name="time" value="' . $timeMachine . '" />'
-					. '<input type="hidden" name="format" value="' . $globalOptions['encodeFormat'] . '" />'
-					. '<input type="hidden" name="v" value="' . $globalOptions['version'] . '" />';
-			
-			if($ottType == 'rowstacked')
-			{
-				echo '<input type="hidden" id="upmstyle" value="expand" />';
-			}		
-			$Values = $this->processOTTData($ottType, $result, $timeMachine, $linkExpiry, $globalOptions);
-			
-			$TrialsInfo = array_map(function($a) { 
-		 		return $a['sectionHeader']; 
-			},  $Values['Trials']);
-			natcasesort($TrialsInfo);
-			
-			echo $this->displayWebPage($productSelectorTitle, $ottType, $Values['resultIds'], $timeMachine, $Values, $TrialsInfo, $globalOptions, $Values['linkExpiry']);
-		}
-		else if($ottType == 'indexed') 
-		{	
-			if(in_array($globalOptions['startrange'], $globalOptions['Highlight_Range']))
-			{
-				$timeMachine = str_replace('ago', '', $globalOptions['startrange']);
-				$timeMachine = trim($timeMachine);
-				$timeMachine = '-' . (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
-			}
-			else
-			{
-				$timeMachine = trim($globalOptions['startrange']);
-				$timeMachine = (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
-			}
-			$timeMachine = strtotime($timeMachine);
-
-	
-			if(in_array($globalOptions['endrange'], $globalOptions['Highlight_Range']))
-			{
-				$timeInterval = str_replace('ago', '', $globalOptions['endrange']);
-				$timeInterval = trim($timeInterval);
-				$timeInterval = '-' . (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
-			}
-			else
-			{
-				$timeInterval = trim($globalOptions['endrange']);
-				$timeInterval = (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
-			}
-			
-			echo '<input type="hidden" name="p" value="' . $resultIds['product'] . '" />'
-					. '<input type="hidden" name="a" value="' . $resultIds['area'] . '" />';
-			
-			$resultIds['product'] = explode(',', trim($resultIds['product']));
-			$resultIds['area'] = explode(',', trim($resultIds['area']));
-			
-			$resultIds['product'] = array_filter($resultIds['product']);
-			$resultIds['area'] = array_filter($resultIds['area']);
-			
-			$resultIds['product'] = array_unique($resultIds['product']);
-			$resultIds['product'] = array_values($resultIds['product']);
-			
-			if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '')
-			{
-				echo '<input type="hidden" name="hm" value="' . $globalOptions['hm'] . '" />';
-				$Arr = $this->processHmParams($resultIds, $globalOptions, $timeMachine, $timeInterval, 'webPage');
-			}
-			else
-			{
-				$Arr = $this->processNonHmParams($resultIds, $globalOptions, $timeMachine, $timeInterval, 'webPage');
-			}
-			
-			$this->displayHeader($Arr[0]);
-			
-			$ottType = $Arr[1];
-			$productSelectorTitle = $Arr[2];
-			$productSelector = $Arr[3];
-			$Ids = $Arr[4];
-			$TrialsInfo = $Arr[5];
-			
-			if(isset($globalOptions['JSON_search']))
-			{
-				echo '<input type="hidden" name="JSON_search" value=\'' . $globalOptions['JSON_search'] . '\' />';
-			}
-
-			$Values = $this->processIndexedOTTData($TrialsInfo, $ottType, $Ids, $timeMachine, $globalOptions);
-			unset($TrialsInfo);
-			echo $this->displayWebPage($productSelectorTitle, $ottType, $resultIds, $timeMachine, $Values, $productSelector, $globalOptions);
-		}
-		else if($ottType == 'unstackedoldlink')
-		{
-			$params 	= unserialize(gzinflate(base64_decode($resultIds['params'])));
-			
-			$t = 'Area: ' . $params['columnlabel'];
-			$this->displayHeader($t);
-			
-			echo '<input type="hidden" name="leading" value="' . $resultIds['leading'] . '" />'
-					. '<input type="hidden" name="params" value="' . $resultIds['params'] . '" />'
-					.'<input type="hidden" id="upmstyle" value="expand" />';
-					
-			$Values = $this->processOldLinkMethod($ottType, array($resultIds['params']), array($resultIds['leading']), $globalOptions);
-
-			echo $this->displayWebPage($productSelectorTitle, $ottType, array(), $timeMachine, $Values, array(), array(), $globalOptions);
-		}
-		else if($ottType == 'stackedoldlink')
-		{
-			$cparams 	= unserialize(gzinflate(base64_decode($resultIds['cparams'])));
-			
-			if($cparams['type'] == 'col')
-			{
-				$t = 'Area: ' . $cparams['columnlabel'];
-			}
-			else
-			{
-				$t = 'Product: ' . $cparams['rowlabel'];
-				$ottType = 'rowstacked';
-			}
-			
-			$this->displayHeader($t);
-						
-			echo '<input type="hidden" name="cparams" value="' . $resultIds['cparams'] . '" />';
-			foreach($resultIds['leading'] as $lkey => $lvalue)
-			{
-				echo '<input type="hidden" name="leading[' . $lkey . ']" value="' . $lvalue . '" />';
-			}
-			foreach($resultIds['params'] as $pkey => $pvalue)
-			{
-				echo '<input type="hidden" name="params[' . $pkey . ']" value="' . $pvalue . '" />';
-			}
-				
-			if($cparams['type'] != 'col')
-			{
-				echo '<input type="hidden" id="upmstyle" value="expand" />';
-			}
-				
-			$Values = $this->processOldLinkMethod($ottType, $resultIds['params'], $resultIds['leading'], $globalOptions, $cparams);
-			
-			echo $this->displayWebPage($productSelectorTitle, $ottType, array(), $timeMachine, $Values, array(), array(), $globalOptions);
-		}
-	}
-	
-	function processOldLinkMethod($ottType, $params, $leadingIds, $globalOptions = array(), $cparams = array())
+	function timeParams($globalOptions)
 	{
-		global $logger;
-		
 		if(in_array($globalOptions['startrange'], $globalOptions['Highlight_Range']))
 		{
 			$timeMachine = str_replace('ago', '', $globalOptions['startrange']);
@@ -8490,8 +7103,8 @@ class TrialTracker
 			$timeMachine = trim($globalOptions['startrange']);
 			$timeMachine = (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
 		}
-		$timeMachine = strtotime($timeMachine);
-
+		$this->timeMachine = strtotime($timeMachine);
+		
 		if(in_array($globalOptions['endrange'], $globalOptions['Highlight_Range']))
 		{
 			$timeInterval = str_replace('ago', '', $globalOptions['endrange']);
@@ -8503,919 +7116,145 @@ class TrialTracker
 			$timeInterval = trim($globalOptions['endrange']);
 			$timeInterval = (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
 		}
+		$this->timeInterval = $timeInterval;
 		
+	}
+	
+	function generateOnlineTT($resultIds, $globalOptions = array())
+	{	
 		$Values = array();
-		$Values['Trials'] = array();
+		$productSelectorTitle = 'Select Products';
+		$productSelector = array();
 		
-		$totinactivecount = 0;
-		$totactivecount = 0;
-		$totalcount = 0;
+		$this->timeParams($globalOptions);
 		
-		$params = array_values($params);
-		$leadingIds = array_values($leadingIds);
+		echo '<form id="frmOtt" name="frmOtt" method="get" target="_self" action="intermediary.php">'
+				.'<input type="hidden" name="p" value="' . $resultIds['product'] . '" />'
+				. '<input type="hidden" name="a" value="' . $resultIds['area'] . '" />';
 		
-		foreach($params as $pkey => $pvalue)
+		$resultIds['product'] = explode(',', trim($resultIds['product']));
+		$resultIds['area'] = explode(',', trim($resultIds['area']));
+		
+		$resultIds['product'] = array_filter($resultIds['product']);
+		//$resultIds['product'] = array_unique($resultIds['product']);
+			
+		$resultIds['area'] = array_filter($resultIds['area']);
+			
+		if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '')
 		{
-			$activeCount = 0;
-			$inactiveCount = 0;
-			$totalCount = 0;
-			
-			$Array = array();
-			$Array2 = array();
-			
-			$larvolIds = array();
-			$Values['Trials'][$pkey]['naUpms'] = array();
-			$Values['Trials'][$pkey]['activeTrials'] = array();
-			$Values['Trials'][$pkey]['inactiveTrials'] = array();
-			$Values['Trials'][$pkey]['allTrials'] = array();
-			$Values['Trials'][$pkey]['allTrialsforDownload'] = array();
-			
-			$Params = array();
-			$params1 = array();
-			$params2 = array();
-			$params3 = array();
-			
-			$pval = unserialize(gzinflate(base64_decode($pvalue)));
-			
-			if(!empty($cparams))
-			{	
-				if($cparams['type'] == 'row')
-				{
-					$Values['Trials'][$pkey]['sectionHeader'] = $pval['columnlabel'];
-					if($pkey == 0)
-					{	
-						$Values['Trials'][$pkey]['naUpms'] = $this->getUnMatchedUPMs(array($pval['upm']), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates']);
-					}
-				}
-				else
-				{
-					$Values['Trials'][$pkey]['sectionHeader'] = $pval['rowlabel'];
-					$Values['Trials'][$pkey]['naUpms'] = $this->getUnMatchedUPMs(array($pval['upm']), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates']);
-				}
-			}
-			else
-			{
-				$Values['Trials'][$pkey]['sectionHeader'] = $pval['rowlabel'];
-				$Values['Trials'][$pkey]['naUpms'] = $this->getUnMatchedUPMs(array($pval['upm']), array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates']);
-			}
-			
-			if($pval['params'] === NULL)
-			{ 	
-				$packedLeadingIDs = gzinflate(base64_decode($leadingIds[$pkey]));
-				$leadingIDs = unpack('l*', $packedLeadingIDs);
-				if($packedLeadingIDs === false) $leadingIDs = array();
-				
-				$sp = new SearchParam();
-				$sp->field = 'larvol_id';
-				$sp->action = 'search';
-				$sp->value = implode(' OR ', $leadingIDs);
-				$params2 = array($sp);
-			} 
-			else 
-			{
-				$params2 = $pval;
-			}
-			
-			if(isset($globalOptions['itype']) && !empty($globalOptions['itype'])) 
-			{
-				foreach($globalOptions['itype'] as $ikey => $ivalue)
-				{
-					$sp = new SearchParam();
-					$sp->field 	= 'institution_type';
-					$sp->action = 'search';
-					$sp->value 	= $this->institutionFilters[$ivalue];
-					$params3[] = $sp;
-				}
-				$params3 = $params3;
-			}
-			
-			$Params = array_merge($params1, $params2, $params3);
-			if(!empty($params2)) 
-			{
-				$Array = search($Params,$this->fid, NULL, $timeMachine);
-			} 
-			
-			//Added to consolidate the data returned in an mutidimensional array format as opposed to earlier 
-			//when it was not returned in an mutidimensional array format.
-			$indx = 0;
-			
-			foreach($Array as $akey => $avalue) 
-			{
-				if(!isset($avalue['NCT/enrollment']) || $avalue['NCT/enrollment'] > 1000000)
-				{
-					$avalue['NCT/enrollment'] = NULL;
-				}
-				foreach($avalue as $key => $value) 
-				{
-					if(is_array($value))
-					{
-						if($key == 'NCT/condition' || $key == 'NCT/intervention_name' || $key == 'NCT/lead_sponsor')
-						{
-							$Array2[$indx][$key] = implode(', ', $value);
-						}
-						elseif($key == 'NCT/start_date' || $key == 'inactive_date')
-						{
-							$Array2[$indx][$key] = $value[0];
-						}
-						elseif($key == 'NCT/phase' || $key == 'NCT/overall_status' || $key == 'NCT/enrollment' || $key == 'NCT/brief_title')
-						{
-							$Array2[$indx][$key] = end($value);
-						}
-						else
-						{
-							$Array2[$indx][$key] = implode(' ', $value);
-						}
-					}
-					else
-					{
-						$Array2[$indx][$key] = $value;
-					}
-				}
-				++$indx;
-			}
-			//Process to check for changes/updates in trials, matched & unmatched upms.
-			foreach($Array2 as $rkey => $rvalue) 
-			{ 
-				$nctId = $rvalue['NCT/nct_id'];
-				$nctIdForUPM = $dataRow['source_id'];
-				$dataset['trials'] = array();
-				$dataset['matchedupms'] = array();
-				
-				//checking for updated and new trials
-				$dataset['trials'] = $this->getTrialUpdates($nctId, $rvalue['larvol_id'], $timeMachine, $timeInterval);
-				$dataset['trials'] = array_merge($dataset['trials'], array('section' => $pkey));
-				
-				//checking for updated and new unmatched upms.
-				$dataset['matchedupms'] = $this->getMatchedUPMs($nctIdForUPM, $timeMachine, $timeInterval);
-				$Values['Trials'][$pkey]['allTrialsforDownload'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-				
-				if($globalOptions['onlyUpdates'] == "yes")
-				{
-					//unsetting value for field acroynm if it has a previous value and no current value
-					if(isset($dataset['trials']['edited']['NCT/acronym']) && !isset($rvalue['NCT/acronym'])) 
-					{
-						unset($dataset['trials']['edited']['NCT/acronym']);
-					}
-					
-					//unsetting value for field enrollment if the change is less than 20 percent
-					if(isset($dataset['trials']['edited']['NCT/enrollment']))
-					{
-						$prevValue = substr($dataset['trials']['edited']['NCT/enrollment'],16);
-						
-						if(!getDifference($prevValue, $rvalue['NCT/enrollment'])) 
-						{
-							unset($dataset['trials']['edited']['NCT/enrollment']);
-						}
-					}
-					
-					//merge only if updates are found
-					foreach($dataset['matchedupms'] as $mkey => & $mvalue) 
-					{
-						if(empty($mvalue['edited']) && $mvalue['new'] != 'y') 
-						{
-							unset($mvalue);
-						}
-					}
-					
-					//merge only if updates are found
-					if(!empty($dataset['trials']['edited']) || $dataset['trials']['new'] == 'y')
-					{	
-						if(!empty($globalOptions['status']) && !empty($globalOptions['phase']) && !empty($globalOptions['region']))
-						{
-							$status = array();
-							foreach($globalOptions['status'] as $skey => $svalue)
-							{
-								$status[] = $this->statusFilters[$svalue];
-							}
-							
-							$phase = array();
-							foreach($globalOptions['phase'] as $pkey => $pvalue)
-							{	
-								$ph = array_keys($this->phaseFilters, $pvalue);
-								$phase = array_merge($phase, $ph);
-							}
-							
-							$region = array();
-							foreach($globalOptions['region'] as $rkey => $rgvalue)
-							{
-								$region[] = $this->regionFilters[$rgvalue];
-							}
-							
-							$trialRegion = array();
-							$trialRegion = explode(',', $result[$index]['region']);
-							$matchedRegion = array_intersect($region, $trialRegion);
-							
-							if(in_array($rvalue['NCT/overall_status'], $status) 
-							&& in_array($rvalue['NCT/phase'], $phase) 
-							&& !empty($matchedRegion))
-							{
-								$Values['Trials'][$pkey]['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
-								{
-									$Values['Trials'][$pkey]['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								}
-								else
-								{
-									$Values['Trials'][$pkey]['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								}
-							}
-							
-							unset($status);
-							unset($phase);
-							unset($region);
-							unset($trialRegion);
-							unset($matchedRegion);
-						}
-						else if(!empty($globalOptions['status']) && !empty($globalOptions['phase'])) 
-						{
-							$status = array();
-							foreach($globalOptions['status'] as $skey => $svalue)
-							{
-								$status[] = $this->statusFilters[$svalue];
-							}
-							
-							$phase = array();
-							foreach($globalOptions['phase'] as $pkey => $pvalue)
-							{	
-								$ph = array_keys($this->phaseFilters, $pvalue);
-								$phase = array_merge($phase, $ph);
-							}
-							
-							if(in_array($rvalue['NCT/overall_status'], $status) 
-							&& in_array($rvalue['NCT/phase'], $phase))
-							{
-								$Values['Trials'][$pkey]['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
-								{
-									$Values['Trials'][$pkey]['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								}
-								else
-								{
-									$Values['Trials'][$pkey]['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								}
-							}
-							
-							unset($status);
-							unset($phase);
-						}
-						else if(!empty($globalOptions['phase']) && !empty($globalOptions['region']))
-						{
-							$phase = array();
-							foreach($globalOptions['phase'] as $pkey => $pvalue)
-							{	
-								$ph = array_keys($this->phaseFilters, $pvalue);
-								$phase = array_merge($phase, $ph);
-							}
-							
-							$region = array();
-							foreach($globalOptions['region'] as $rkey => $rgvalue)
-							{
-								$region[] = $this->regionFilters[$rgvalue];
-							}
-							
-							$trialRegion = array();
-							$trialRegion = explode(',', $result[$index]['region']);
-							$matchedRegion = array_intersect($region, $trialRegion);
-							
-							if(in_array($rvalue['NCT/phase'], $phase) 
-							&& !empty($matchedRegion))
-							{
-								$Values['Trials'][$pkey]['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
-								{
-									$Values['Trials'][$pkey]['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								}
-								else
-								{
-									$Values['Trials'][$pkey]['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								}
-							}
-							
-							unset($phase);
-							unset($region);
-							unset($trialRegion);
-							unset($matchedRegion);
-						}
-						else if(!empty($globalOptions['status']) && !empty($globalOptions['region']))
-						{
-							$status = array();
-							foreach($globalOptions['status'] as $skey => $svalue)
-							{
-								$status[] = $this->statusFilters[$svalue];
-							}
-							
-							$region = array();
-							foreach($globalOptions['region'] as $rkey => $rgvalue)
-							{
-								$region[] = $this->regionFilters[$rgvalue];
-							}
-							
-							$trialRegion = array();
-							$trialRegion = explode(',', $result[$index]['region']);
-							$matchedRegion = array_intersect($region, $trialRegion);
-							
-							if(in_array($rvalue['NCT/overall_status'], $status) 
-							&& !empty($matchedRegion))
-							{
-								$Values['Trials'][$pkey]['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
-								{
-									$Values['Trials'][$pkey]['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								}
-								else
-								{
-									$Values['Trials'][$pkey]['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								}
-							}
-							
-							unset($status);
-							unset($region);
-							unset($trialRegion);
-							unset($matchedRegion);
-						}
-						else if(!empty($globalOptions['status']))
-						{
-							$status = array();
-							foreach($globalOptions['status'] as $skey => $svalue)
-							{
-								$status[] = $this->statusFilters[$svalue];
-							}
-							
-							if(in_array($rvalue['NCT/overall_status'], $status))
-
-							{
-								$Values['Trials'][$pkey]['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
-								{
-									$Values['Trials'][$pkey]['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								}
-								else
-								{
-									$Values['Trials'][$pkey]['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								}
-							}
-							
-							unset($status);
-						}
-						else if(!empty($globalOptions['phase']))
-						{
-							$phase = array();
-							foreach($globalOptions['phase'] as $pkey => $pvalue)
-							{	
-								$ph = array_keys($this->phaseFilters, $pvalue);
-								$phase = array_merge($phase, $ph);
-							}
-							
-							if(in_array($rvalue['NCT/phase'], $phase))
-							{
-								$Values['Trials'][$pkey]['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
-								{
-									$Values['Trials'][$pkey]['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								}
-								else
-								{
-									$Values['Trials'][$pkey]['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								}
-							}
-							
-							unset($phase);
-						}
-						else if(!empty($globalOptions['region']))
-						{
-							$region = array();
-							foreach($globalOptions['region'] as $rkey => $rgvalue)
-							{
-								$region[] = $this->regionFilters[$rgvalue];
-							}
-							
-							$trialRegion = array();
-							$trialRegion = explode(',', $result[$index]['region']);
-							$matchedRegion = array_intersect($region, $trialRegion);
-							
-							if(!empty($matchedRegion))
-							{
-								$Values['Trials'][$pkey]['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
-								{
-									$Values['Trials'][$pkey]['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								}
-								else
-								{
-									$Values['Trials'][$pkey]['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								}
-							}
-							
-							unset($region);
-							unset($trialRegion);
-							unset($matchedRegion);
-						}
-						else
-						{	
-							$Values['Trials'][$pkey]['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							if(in_array($rvalue['NCT/overall_status'], $this->inactiveStatusValues))
-							{
-								$Values['Trials'][$pkey]['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							}
-							else
-							{
-								$Values['Trials'][$pkey]['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							}
-						}
-						
-						if($globalOptions['enroll'] != '0')
-						{
-							$enroll = explode(' - ', $globalOptions['enroll']);
-							
-							if($result[$index]['NCT/enrollment'] === NULL || $result[$index]['NCT/enrollment'] == '')
-							{
-								$result[$index]['NCT/enrollment'] = 0;
-							}
-							
-							if(strpos($enroll[1], '+') !== FALSE)
-							{
-								if($result[$index]['NCT/enrollment'] < $enroll[0])
-								{	
-									foreach($Values['Trials'][$pkey]['allTrials'] as $k => $v)
-									{
-										if($v['NCT/nct_id'] == $nctId)
-										{
-											unset($Values['Trials'][$pkey]['allTrials'][$k]);
-											$Values['Trials'][$pkey]['allTrials'] = array_values($Values['Trials'][$pkey]['allTrials']);
-										}
-									}
-								
-									foreach($Values['Trials'][$pkey]['inactiveTrials'] as $k => $v)
-									{
-										if($v['NCT/nct_id'] == $nctId)
-										{
-											unset($Values['Trials'][$pkey]['inactiveTrials'][$k]);
-											$Values['Trials'][$pkey]['inactiveTrials'] = array_values($Values['Trials'][$pkey]['inactiveTrials']);
-										}
-									}
-								
-									foreach($Values['Trials'][$pkey]['activeTrials'] as $k => $v)
-									{
-										if($v['NCT/nct_id'] == $nctId)
-										{
-											unset($Values['Trials'][$pkey]['activeTrials'][$k]);
-											$Values['Trials'][$pkey]['activeTrials'] = array_values($Values['Trials'][$pkey]['activeTrials']);
-										}
-									}
-								}
-							}
-							else
-							{
-								if($result[$index]['NCT/enrollment'] < $enroll[0] || $result[$index]['NCT/enrollment'] > $enroll[1])
-								{	
-									foreach($Values['Trials'][$pkey]['allTrials'] as $k => $v)
-									{
-										if($v['NCT/nct_id'] == $nctId)
-										{
-											unset($Values['Trials'][$pkey]['allTrials'][$k]);
-											$Values['Trials'][$pkey]['allTrials'] = array_values($Values['Trials'][$pkey]['allTrials']);
-										}
-									}
-								
-									foreach($Values['Trials'][$pkey]['inactiveTrials'] as $k => $v)
-									{
-										if($v['NCT/nct_id'] == $nctId)
-										{
-											unset($Values['Trials'][$pkey]['inactiveTrials'][$k]);
-											$Values['Trials'][$pkey]['inactiveTrials'] = array_values($Values['Trials'][$pkey]['inactiveTrials']);
-										}
-									}
-								
-									foreach($Values['Trials'][$pkey]['activeTrials'] as $k => $v)
-									{
-										if($v['NCT/nct_id'] == $nctId)
-										{
-											unset($Values['Trials'][$pkey]['activeTrials'][$k]);
-											$Values['Trials'][$pkey]['activeTrials'] = array_values($Values['Trials'][$pkey]['activeTrials']);
-										}
-									}
-								}
-							}
-							
-						}
-					}
-				} 
-				else 
-				{
-					if(!empty($globalOptions['status']) && !empty($globalOptions['phase']) && !empty($globalOptions['region']))
-					{
-						$status = array();
-						foreach($globalOptions['status'] as $skey => $svalue)
-						{
-							$status[] = $this->statusFilters[$svalue];
-						}
-						
-						$phase = array();
-						foreach($globalOptions['phase'] as $pkey => $pvalue)
-						{	
-							$ph = array_keys($this->phaseFilters, $pvalue);
-							$phase = array_merge($phase, $ph);
-						}
-						
-						$region = array();
-						foreach($globalOptions['region'] as $rkey => $rgvalue)
-						{
-							$region[] = $this->regionFilters[$rgvalue];
-						}
-						
-						$trialRegion = array();
-						$trialRegion = explode(',', $result[$index]['region']);
-						$matchedRegion = array_intersect($region, $trialRegion);
-						
-						if(in_array($rvalue['NCT/overall_status'], $status) 
-						&& in_array($rvalue['NCT/phase'], $phase) 
-						&& !empty($matchedRegion))
-						{
-							$Values['Trials'][$pkey]['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
-							{
-								$Values['Trials'][$pkey]['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							}
-							else
-							{
-								$Values['Trials'][$pkey]['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							}
-						}
-						
-						unset($status);
-						unset($phase);
-						unset($region);
-						unset($trialRegion);
-						unset($matchedRegion);
-					}
-					else if(!empty($globalOptions['status']) && !empty($globalOptions['phase'])) 
-					{
-						$status = array();
-						foreach($globalOptions['status'] as $skey => $svalue)
-						{
-							$status[] = $this->statusFilters[$svalue];
-						}
-						
-						$phase = array();
-						foreach($globalOptions['phase'] as $pkey => $pvalue)
-						{	
-							$ph = array_keys($this->phaseFilters, $pvalue);
-							$phase = array_merge($phase, $ph);
-						}
-						
-						if(in_array($rvalue['NCT/overall_status'], $status) 
-						&& in_array($rvalue['NCT/phase'], $phase))
-						{
-							$Values['Trials'][$pkey]['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
-							{
-								$Values['Trials'][$pkey]['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							}
-							else
-							{
-								$Values['Trials'][$pkey]['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							}
-						}
-						
-						unset($status);
-						unset($phase);
-					}
-					else if(!empty($globalOptions['phase']) && !empty($globalOptions['region']))
-					{
-						$phase = array();
-						foreach($globalOptions['phase'] as $pkey => $pvalue)
-						{	
-							$ph = array_keys($this->phaseFilters, $pvalue);
-							$phase = array_merge($phase, $ph);
-						}
-						
-						$region = array();
-						foreach($globalOptions['region'] as $rkey => $rgvalue)
-						{
-							$region[] = $this->regionFilters[$rgvalue];
-						}
-						
-						$trialRegion = array();
-						$trialRegion = explode(',', $result[$index]['region']);
-						$matchedRegion = array_intersect($region, $trialRegion);
-						
-						if(in_array($rvalue['NCT/phase'], $phase) 
-						&& !empty($matchedRegion))
-						{
-							$Values['Trials'][$pkey]['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
-							{
-								$Values['Trials'][$pkey]['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							}
-							else
-							{
-								$Values['Trials'][$pkey]['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							}
-						}
-						
-						unset($phase);
-						unset($region);
-						unset($trialRegion);
-						unset($matchedRegion);
-					}
-					else if(!empty($globalOptions['status']) && !empty($globalOptions['region']))
-					{
-						$status = array();
-						foreach($globalOptions['status'] as $skey => $svalue)
-						{
-							$status[] = $this->statusFilters[$svalue];
-						}
-						
-						$region = array();
-						foreach($globalOptions['region'] as $rkey => $rgvalue)
-						{
-							$region[] = $this->regionFilters[$rgvalue];
-						}
-						
-						$trialRegion = array();
-						$trialRegion = explode(',', $result[$index]['region']);
-						$matchedRegion = array_intersect($region, $trialRegion);
-						
-						if(in_array($rvalue['NCT/overall_status'], $status) 
-						&& !empty($matchedRegion))
-						{
-							$Values['Trials'][$pkey]['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
-							{
-								$Values['Trials'][$pkey]['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							}
-							else
-							{
-								$Values['Trials'][$pkey]['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							}
-						}
-						
-						unset($status);
-						unset($region);
-						unset($trialRegion);
-						unset($matchedRegion);
-					}
-					else if(!empty($globalOptions['status']))
-					{
-						$status = array();
-						foreach($globalOptions['status'] as $skey => $svalue)
-						{
-							$status[] = $this->statusFilters[$svalue];
-						}
-						
-						if(in_array($rvalue['NCT/overall_status'], $status))
-						{
-							$Values['Trials'][$pkey]['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
-							{
-								$Values['Trials'][$pkey]['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							}
-							else
-							{
-								$Values['Trials'][$pkey]['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							}
-						}
-						
-						unset($status);
-					}
-					else if(!empty($globalOptions['phase']))
-					{
-						$phase = array();
-						foreach($globalOptions['phase'] as $pkey => $pvalue)
-						{	
-							$ph = array_keys($this->phaseFilters, $pvalue);
-							$phase = array_merge($phase, $ph);
-						}
-						
-						if(in_array($rvalue['NCT/phase'], $phase))
-						{
-							$Values['Trials'][$pkey]['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
-							{
-								$Values['Trials'][$pkey]['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							}
-							else
-							{
-								$Values['Trials'][$pkey]['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							}
-						}
-						
-						unset($phase);
-					}
-					else if(!empty($globalOptions['region']))
-					{
-						$region = array();
-						foreach($globalOptions['region'] as $rkey => $rgvalue)
-						{
-							$region[] = $this->regionFilters[$rgvalue];
-						}
-						
-						$trialRegion = array();
-						$trialRegion = explode(',', $result[$index]['region']);
-						$matchedRegion = array_intersect($region, $trialRegion);
-						
-						if(!empty($matchedRegion))
-						{
-							$Values['Trials'][$pkey]['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
-							{
-
-								$Values['Trials'][$pkey]['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							}
-							else
-							{
-								$Values['Trials'][$pkey]['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							}
-						}
-						
-						unset($region);
-						unset($trialRegion);
-						unset($matchedRegion);
-					}
-					else
-					{	
-						$Values['Trials'][$pkey]['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-						if(in_array($rvalue['NCT/overall_status'], $this->inactiveStatusValues))
-						{
-							$Values['Trials'][$pkey]['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-						}
-						else
-						{
-							$Values['Trials'][$pkey]['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-						}
-					}
-					
-					if($globalOptions['enroll'] != '0')
-					{
-						$enroll = explode(' - ', $globalOptions['enroll']);
-						
-						if($result[$index]['NCT/enrollment'] === NULL || $result[$index]['NCT/enrollment'] == '')
-						{
-							$result[$index]['NCT/enrollment'] = 0;
-						}
-						
-						if(strpos($enroll[1], '+') !== FALSE)
-						{
-							if($result[$index]['NCT/enrollment'] < $enroll[0])
-							{	
-								foreach($Values['Trials'][$pkey]['allTrials'] as $k => $v)
-								{
-									if($v['NCT/nct_id'] == $nctId)
-									{
-										unset($Values['Trials'][$pkey]['allTrials'][$k]);
-										$Values['Trials'][$pkey]['allTrials'] = array_values($Values['Trials'][$pkey]['allTrials']);
-									}
-								}
-							
-								foreach($Values['Trials'][$pkey]['inactiveTrials'] as $k => $v)
-								{
-									if($v['NCT/nct_id'] == $nctId)
-									{
-										unset($Values['Trials'][$pkey]['inactiveTrials'][$k]);
-										$Values['Trials'][$pkey]['inactiveTrials'] = array_values($Values['Trials'][$pkey]['inactiveTrials']);
-									}
-								}
-							
-								foreach($Values['Trials'][$pkey]['activeTrials'] as $k => $v)
-								{
-									if($v['NCT/nct_id'] == $nctId)
-									{
-										unset($Values['Trials'][$pkey]['activeTrials'][$k]);
-										$Values['Trials'][$pkey]['activeTrials'] = array_values($Values['Trials'][$pkey]['activeTrials']);
-									}
-								}
-							}
-						}
-						else
-						{
-							if($result[$index]['NCT/enrollment'] < $enroll[0] || $result[$index]['NCT/enrollment'] > $enroll[1])
-							{	
-								foreach($Values['Trials'][$pkey]['allTrials'] as $k => $v)
-								{
-									if($v['NCT/nct_id'] == $nctId)
-									{
-										unset($Values['Trials'][$pkey]['allTrials'][$k]);
-										$Values['Trials'][$pkey]['allTrials'] = array_values($Values['Trials'][$pkey]['allTrials']);
-									}
-								}
-							
-								foreach($Values['Trials'][$pkey]['inactiveTrials'] as $k => $v)
-								{
-									if($v['NCT/nct_id'] == $nctId)
-									{
-										unset($Values['Trials'][$pkey]['inactiveTrials'][$k]);
-										$Values['Trials'][$pkey]['inactiveTrials'] = array_values($Values['Trials'][$pkey]['inactiveTrials']);
-									}
-								}
-							
-								foreach($Values['Trials'][$pkey]['activeTrials'] as $k => $v)
-								{
-									if($v['NCT/nct_id'] == $nctId)
-									{
-										unset($Values['Trials'][$pkey]['activeTrials'][$k]);
-										$Values['Trials'][$pkey]['activeTrials'] = array_values($Values['Trials'][$pkey]['activeTrials']);
-									}
-								}
-							}
-						}
-					}
-				}
-				
-				if(!in_array($rvalue['NCT/overall_status'],$this->activeStatusValues) && !in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues)) 
-
-				{ 
-					$log 	= 'WARN: A new value "' . $rvalue['NCT/overall_status'] 
-					. '" (not listed in the existing rule), was encountered for field overall_status.';
-					$logger->warn($log);
-					unset($log);
-				}
-				
-				//getting count of active trials from a common function used in run_heatmap.php and here
-				$larvolIds[] = $rvalue['larvol_id'];
-				sort($larvolIds); 
-				
-				$totalCount = count($larvolIds);
-				$activeCount = getActiveCount($larvolIds, $timeMachine);
-				$inactiveCount = $totalCount - $activeCount; 
-			}
-			
-			$totinactivecount  = $inactiveCount + $totinactivecount;
-			$totactivecount	= $activeCount + $totactivecount;
-			$totalcount		= $totalcount + $totalCount; 
+			echo '<input type="hidden" name="hm" value="' . $globalOptions['hm'] . '" />';
+			$Arr = $this->processHmParams($resultIds, $globalOptions, 'webPage');
+		}
+		else
+		{
+			$Arr = $this->processNonHmParams($resultIds, $globalOptions, 'webPage');
 		}
 		
-		$Values['totactivecount'] = $totactivecount;
-		$Values['totinactivecount'] = $totinactivecount;
-		$Values['totalcount'] = $totalcount;
+		$this->displayHeader($Arr['tHeader']);
+			
+		$ottType = $Arr['ottType'];
+		$productSelector = $Arr['productSelector'];
+		$Ids = $Arr['Ids'];
+		$TrialsInfo = $Arr['TrialsInfo'];
 		
-		return  $Values;
+		$Values = $this->compileOTTData($ottType, $TrialsInfo, $Ids, $globalOptions);
+		
+		echo $this->displayWebPage($ottType, $resultIds, $Values, $productSelector, $globalOptions);
+		
+		unset($Ids, $productSelector, $TrialsInfo);
 	}
 	
-	function getEnumIds($fieldId, $value)
-	{
-		$query = "SELECT id FROM `data_enumvals` WHERE field = '" . $fieldId . "' AND value = '" . $value . "' ";
-		$result = mysql_query($query);
-		$row = mysql_fetch_assoc($result);
-		return $row['id'];
-	}
-	
-	function processIndexedOTTData($TrialsInfo = array(), $ottType, $Ids = array(), $timeMachine = NULL, $globalOptions = array())
+	function compileOTTData($ottType, $TrialsInfo = array(), $Ids = array(), $globalOptions = array(), $display = 'web')
 	{	
 		global $logger;
-		global $Sphinx_search;
 		
-		$totinactivecount = 0;
-		$totactivecount = 0;
-		$totalcount = 0;
-
+		$Values['Data'] = $TrialsInfo;
+		$Values['enrollment'] = 0;
+		$Values['totactivecount'] = 0;
+		$Values['totinactivecount'] = 0;
+		$Values['count'] = 0;
 		
-		//sphinx_search
+		$pIds = array();
+		$aIds = array();
+		
 		$larvolIds = array();
-		$sphinxSearchFlag = true;
-		if(isset($globalOptions['sphinxSearch']) && $globalOptions['sphinxSearch'] != '')
-		{
-			$larvolIds = get_sphinx_idlist($globalOptions['sphinxSearch']);
-			if($larvolIds != '')
-			{
-				$larvolIds = str_replace("'", "", $larvolIds);
-				$larvolIds = explode(',', $larvolIds);
-				$larvolIds = array_filter($larvolIds);
-			}
-			else
-			{
-				$larvolIds = array();
-			}
-		}
+		$IdsForUpm = array();
 		
-		$where = '';
-		$orderBy = " dt.`phase` DESC, dt.`end_date` ASC, dt.`start_date` ASC, dt.`overall_status` ASC, dt.`enrollment` ASC ";
+		$startRange = date('Y-m-d', strtotime($this->timeInterval, $this->timeMachine));
+		$endRange = date('Y-m-d', $this->timeMachine);
+		
+		$pIds = array_map(function($item) { return $item['product']; }, $Ids);
+		$pIds = array_unique($pIds);	
+		
+		$aIds = array_map(function($item) { return $item['area']; }, $Ids);	
+		$aIds = array_unique($aIds);
+			
+		$filters = " ";
+		$lstart = ($globalOptions['page']-1) * $this->resultsPerPage;
+		$limit = " LIMIT " . $lstart . ", 100 ";
+		$orderBy = " ORDER BY FIELD(pt.`product`, " . implode(",", $pIds) . "), dt.`phase` DESC, dt.`end_date` ASC, dt.`start_date` ASC, dt.`overall_status` ASC, dt.`enrollment` ASC ";
+		
+		
 		$phaseFilters = array('N/A'=>'na', '0'=>'0', '0/1'=>'1', '1'=>'1', '1a'=>'1', '1b'=>'1', '1a/1b'=>'1', '1c'=>'1', 
 									'1/2'=>'2', '1b/2'=>'2', '1b/2a'=>'2', '2'=>'2', '2a'=>'2', '2a/2b'=>'2', '2a/b'=>'2', '2b'=>'2', 
 									'2/3'=>'3', '2b/3'=>'3','3'=>'3', '3a'=>'3', '3b'=>'3', '3/4'=>'4', '3b/4'=>'4', '4'=>'4');
+							
+		$time = $this->timeParams($globalOptions);
+		$timeMachine = $time[0];
+		$timeInterval = $time[1];
 		
-		if(in_array($globalOptions['startrange'], $globalOptions['Highlight_Range']))
+		$query = "SELECT dt.`larvol_id`, dt.`source_id`, dt.`brief_title`, dt.`acronym`, dt.`lead_sponsor`, dt.`collaborator`, dt.`condition`,"
+						. " dt.`overall_status`, dt.`is_active`, dt.`start_date`, dt.`end_date`, dt.`enrollment`, dt.`enrollment_type`, dt.`intervention_name`,"
+						. " dt.`region`, dt.`lastchanged_date`, dt.`phase`, dt.`firstreceived_date`, dt.`viewcount`, dt.`source`,"
+						. " dm.`larvol_id` AS manual_larvol_id, dm.`is_sourceless` AS manual_is_sourceless, dm.`brief_title` AS manual_brief_title,"
+						. " dm.`acronym` AS manual_acronym, dm.`lead_sponsor` AS manual_lead_sponsor, dm.`collaborator` AS manual_collaborator,"
+						. " dm.`condition` AS manual_condition, dm.`overall_status` AS manual_overall_status, dm.`region` AS manual_region,"
+						. " dm.`end_date` AS manual_end_date, dm.`enrollment` AS manual_enrollment, dm.`enrollment_type` AS manual_enrollment_type,"
+						. " dm.`intervention_name` AS manual_intervention_name, dm.`phase` AS manual_phase, "
+						. " dn.`brief_title` AS original_brief_title, dn.`acronym` AS original_acronym, dn.`lead_sponsor` AS original_lead_sponsor, "
+						. " dn.`collaborator` AS original_collaborator, dn.`condition` AS original_condition, dn.`overall_status` AS original_overall_status, "
+						. " dn.`end_date` AS original_end_date, dn.`enrollment` AS original_enrollment, dn.`enrollment_type` AS original_enrollment_type, "
+						. " dn.`intervention_name` AS original_intervention_name, dn.`phase` AS original_phase, "
+						. " pt.`product` AS productid,  at.`area` AS areaid "
+						. " FROM `data_trials` dt "
+						. " JOIN `product_trials` pt ON dt.`larvol_id` = pt.`trial` "
+						. " JOIN `area_trials` at ON dt.`larvol_id` = at.`trial` "
+						. " LEFT JOIN `data_manual` dm ON dt.`larvol_id` = dm.`larvol_id` "
+						. " LEFT JOIN `data_nct` dn ON dt.`larvol_id` = dn.`larvol_id` ";
+						
+		if($display == 'web')
 		{
-			$timeMachine = str_replace('ago', '', $globalOptions['startrange']);
-			$timeMachine = trim($timeMachine);
-			$timeMachine = '-' . (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
-		}
-		else
-		{
-			$timeMachine = trim($globalOptions['startrange']);
-			$timeMachine = (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
-		}
-		$timeMachine = strtotime($timeMachine);
-
-		if(in_array($globalOptions['endrange'], $globalOptions['Highlight_Range']))
-		{
-			$timeInterval = str_replace('ago', '', $globalOptions['endrange']);
-			$timeInterval = trim($timeInterval);
-			$timeInterval = '-' . (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
-		}
-		else
-		{
-			$timeInterval = trim($globalOptions['endrange']);
-			$timeInterval = (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
+			$where = " WHERE pt.`product` IN (" . implode(", ", $pIds) . ") ";
+			$where .= " AND at.`area` IN (" . implode(", ", $aIds) . ") ";
+			
+			$aQuery =  $query . $where;
+			$aRes = mysql_query($aQuery);
+			if($aRes)
+			{
+				while($aRow = mysql_fetch_assoc($aRes))
+				{	
+					if($aRow['is_active'] == 1) 
+					{
+						++$Values['totactivecount'];
+					}
+					else
+					{
+						++$Values['totinactivecount'];
+					}
+					++$Values['totalcount'];
+					
+					if($aRow['enrollment'] > $Values['enrollment'])
+					{
+						$Values['enrollment'] = $aRow['enrollment'];
+					}
+				}
+			}
+			else
+			{
+				$log 	= 'ERROR: Bad SQL query. ' . $aQuery . mysql_error();
+				$logger->error($log);
+				unset($log);
+			}
 		}
 		
 		//Filtering Options
@@ -9427,7 +7266,7 @@ class TrialTracker
 				$status[] = $this->statusFilters[$svalue];
 			}
 			
-			$where .= " AND (dt.`overall_status` IN ('"  . implode("','", $status) . "') )";
+			$filters .= " AND (dt.`overall_status` IN ('"  . implode("','", $status) . "') )";
 			unset($status);
 		}
 		
@@ -9439,14 +7278,14 @@ class TrialTracker
 				$itype[] = $this->institutionFilters[$ivalue];
 			}
 			
-			$where .= " AND (dt.`institution_type` IN ('"  . implode("','", $itype) . "') )";
+			$filters .= " AND (dt.`institution_type` IN ('"  . implode("','", $itype) . "') )";
 			unset($itype);
 		}
 		
 		if(isset($globalOptions['region']) && !empty($globalOptions['region'])) 
 		{
 			$region = array();
-			$where .= " AND (";
+			$filters .= " AND (";
 			foreach($globalOptions['region'] as $rkey => $rvalue)
 			{
 				$r = $this->regionFilters[$rvalue];
@@ -9455,8 +7294,8 @@ class TrialTracker
 				else
 					$region[] = " (dt.`region` LIKE '%" . $this->regionFilters[$rvalue] . "%' ) ";
 			}
-			$where .= implode(' OR ', $region);
-			$where .= " ) ";
+			$filters .= implode(' OR ', $region);
+			$filters .= " ) ";
 			unset($region);
 		}
 		
@@ -9469,8 +7308,17 @@ class TrialTracker
 				$phase = array_merge($phase, $ph);
 			}
 			
-			$where .= " AND (dt.`phase` IN ('"  . implode("','", $phase) . "') )";
+			$filters .= " AND (dt.`phase` IN ('"  . implode("','", $phase) . "') )";
 			unset($phase);
+		}
+		
+		if($globalOptions['type'] == 'activeTrials') 
+		{
+			$filters .= " AND (dt.`is_active` = 1) ";
+		}
+		else if($globalOptions['type'] == 'inactiveTrials') 
+		{
+			$filters .= " AND (dt.`is_active` != 1) ";
 		}
 		
 		if($globalOptions['enroll'] != '0')
@@ -9480,1647 +7328,618 @@ class TrialTracker
 			if(strpos($enroll[1], '+') !== FALSE)
 			{
 				if($enroll[0] == 0)
-					$where .= " AND (dt.`enrollment` >= '" . $enroll[0] . "' OR  dt.`enrollment` = '' OR dt.`enrollment` IS NULL) " ;
+					$filters .= " AND (dt.`enrollment` >= '" . $enroll[0] . "' OR  dt.`enrollment` = '' OR dt.`enrollment` IS NULL) " ;
 				else
-					$where .= " AND (dt.`enrollment` >= '" . $enroll[0] . "' ) " ;
+					$filters .= " AND (dt.`enrollment` >= '" . $enroll[0] . "' ) " ;
 			}
 			else
 			{
 				if($enroll[0] == 0)
-					$where .= " AND (dt.`enrollment` = '' OR dt.`enrollment` IS NULL OR dt.`enrollment` >= '" . $enroll[0] . "' AND dt.`enrollment` <= '" . $enroll[1] . "' ) " ;
+					$filters .= " AND (dt.`enrollment` = '' OR dt.`enrollment` IS NULL OR dt.`enrollment` >= '" . $enroll[0] . "' AND dt.`enrollment` <= '" . $enroll[1] . "' ) " ;
 				else
-					$where .= " AND (dt.`enrollment` >= '" . $enroll[0] . "' AND dt.`enrollment` <= '" . $enroll[1] . "' ) " ;
+					$filters .= " AND (dt.`enrollment` >= '" . $enroll[0] . "' AND dt.`enrollment` <= '" . $enroll[1] . "' ) " ;
 			}
-		}
-					
-		if(isset($globalOptions['JSON_search'])  or isset($Sphinx_search))
-		{
-			$Ids=array('Search Result' => 'Search'); //Set ID's Array so loop will be executed atleast one time
 		}
 		
-		foreach($Ids as $ikey => $ivalue)
+		
+		if(isset($globalOptions['product']) && !empty($globalOptions['product']))
 		{	
-			
-			$TrialsInfo[$ikey]['activeTrials'] = array();
-			$TrialsInfo[$ikey]['inactiveTrials'] = array();
-			$TrialsInfo[$ikey]['allTrials'] = array();
-			$TrialsInfo[$ikey]['allTrialsforDownload'] = array();
-				
-			$inactiveCount = 0;
-			$activeCount = 0;
-			
-			$result = array();
-			
-			global $Sphinx_search;
-			if(isset($Sphinx_search))
+			if($ottType == 'rowstacked')
 			{
-				$idlist = get_sphinx_idlist($Sphinx_search);
-			}
-			
-			if(isset($globalOptions['JSON_search']))
-			{
-			
-				$query = Build_OTT_Query($globalOptions['JSON_search'], $where );
-				if( isset($idlist) and !empty($idlist) )
+				$diff = array_diff($aIds, $globalOptions['product']);
+				foreach($diff as $key => $value)
 				{
-					$pos = strpos(strtoupper($query),'WHERE');
-					if ($pos === false) 
-					{
-						$pos = strpos(strtoupper($query),'ORDER');
-						$str1=substr($query,0,$pos);
-						$str2=substr($query,$pos);
-						$query=$str1.' where larvol_id IN ( '. $idlist . ' ) ' . $str2;
-					}
-					else 
-					{
-						$pos = strpos(strtoupper($query),'ORDER');
-						$str1=substr($query,0,$pos);
-						$str2=substr($query,$pos);
-						$query=$str1.' AND ( larvol_id IN ( '. $idlist . ' ) ) ' . $str2;
-					}
-				}
-				
-				$fullRecordQry = Build_OTT_Query($globalOptions['JSON_search'], '');
-				if( isset($idlist) and !empty($idlist) )
-				{
-					$pos = strpos(strtoupper($fullRecordQry),'WHERE');
-					if ($pos === false) 
-					{
-						$pos = strpos( strtoupper($fullRecordQry),'ORDER');
-						$str1=substr($fullRecordQry,0,$pos);
-						$str2=substr($fullRecordQry,$pos);
-						$fullRecordQry=$str1.' where larvol_id IN ( '. $idlist . ' ) ' . $str2;
-					}
-					else 
-					{
-						$pos = strpos(strtoupper($fullRecordQry),'ORDER');
-						$str1=substr($fullRecordQry,0,$pos);
-						$str2=substr($fullRecordQry,$pos);
-						$fullRecordQry=$str1.' AND ( larvol_id IN ( '. $idlist . ' ) ) ' . $str2;
-					}
+					unset($aIds[$key]);
 				}
 			}
 			else
-			{
-				$query = "SELECT dt.`larvol_id`, dt.`source_id`, dt.`brief_title`, dt.`acronym`, dt.`lead_sponsor`, dt.`collaborator`, dt.`condition`,"
-						. " dt.`overall_status`, dt.`is_active`, dt.`start_date`, dt.`end_date`, dt.`enrollment`, dt.`enrollment_type`, dt.`intervention_name`,"
-						. " dt.`region`, dt.`lastchanged_date`, dt.`phase`, dt.`firstreceived_date`, dt.`viewcount`, dt.`source`,"
-						. " dm.`larvol_id` AS manual_larvol_id, dm.`is_sourceless` AS manual_is_sourceless, dm.`brief_title` AS manual_brief_title,"
-						. " dm.`acronym` AS manual_acronym, dm.`lead_sponsor` AS manual_lead_sponsor, dm.`collaborator` AS manual_collaborator,"
-						. " dm.`condition` AS manual_condition, dm.`overall_status` AS manual_overall_status, dm.`region` AS manual_region,"
-						. " dm.`end_date` AS manual_end_date, dm.`enrollment` AS manual_enrollment, dm.`enrollment_type` AS manual_enrollment_type,"
-						. " dm.`intervention_name` AS manual_intervention_name, dm.`phase` AS manual_phase, "
-						. " dn.`brief_title` AS original_brief_title, dn.`acronym` AS original_acronym, dn.`lead_sponsor` AS original_lead_sponsor, "
-						. " dn.`collaborator` AS original_collaborator, dn.`condition` AS original_condition, dn.`overall_status` AS original_overall_status, "
-						. " dn.`end_date` AS original_end_date, dn.`enrollment` AS original_enrollment,";
-					if($ivalue['product'] != '')
-					$query .=" pt.`sponsor_owned` AS sponsor_owned, ";
-					$query .= " dn.`enrollment_type` AS original_enrollment_type, dn.`intervention_name` AS original_intervention_name, dn.`phase` AS original_phase "
-						. " FROM `data_trials` dt ";
-						
-				if(!isset($idlist) or empty($idlist))
+			{	
+				$diff = array_diff($pIds, $globalOptions['product']);
+				foreach($diff as $key => $value)
 				{
-					if($ivalue['product'] != '')	//When Product is blank do not process Product in Query
-						$query .= " JOIN `product_trials` pt ON dt.`larvol_id` = pt.`trial` ";
-					
-					if($ivalue['area'] !='' )	//When Area is blank do not process Area in Query
-						$query .= " JOIN `area_trials` at ON dt.`larvol_id` = at.`trial` ";
-					
-					$query .= " LEFT JOIN `data_manual` dm ON dt.`larvol_id` = dm.`larvol_id` "
-							. " LEFT JOIN `data_nct` dn ON dt.`larvol_id` = dn.`larvol_id` "
-							. " WHERE ";
-							
-					if($ivalue['product'] != '')	//When Product is blank do not process Product in Query
-						$query .= "pt.`product` IN (" . $ivalue['product'] . ") ";
-						
-					if($ivalue['product'] != '' && $ivalue['area']  != '')
-						$query .= "AND " ;
-						
-					if($ivalue['area'] !='' )	//When Area is blank do not process Area in Query
-						$query .= "at.`area` IN (" . $ivalue['area'] . ") " ;
-					
-					$fullRecordQry = $query . " ORDER BY " . $orderBy;	
-					
-					//echo '<br/><br/>-->'.
-					$query .= $where . " ORDER BY " . $orderBy;
-				}
-				else
-				{
-					$query .= " LEFT JOIN `data_manual` dm ON dt.`larvol_id` = dm.`larvol_id` "
-							. " LEFT JOIN `data_nct` dn ON dt.`larvol_id` = dn.`larvol_id` "
-							. " WHERE 1=1 ";
-					
-					$fullRecordQry = $query . " ORDER BY " . $orderBy;	
-					$pos = strpos( strtoupper($fullRecordQry),'ORDER');
-					$str1=substr($fullRecordQry,0,$pos);
-					$str2=substr($fullRecordQry,$pos);
-					$fullRecordQry=$str1.' AND dt.larvol_id IN ( '. $idlist . ' ) ' . $str2;
-					
-					$query .= $where . " ORDER BY " . $orderBy;
-					$pos = strpos(strtoupper($query),'ORDER');
-					$str1=substr($query,0,$pos);
-					$str2=substr($query,$pos);
-					$query=$str1.' AND dt.larvol_id IN ( '. $idlist . ' ) ' . $str2;
+					unset($pIds[$key]);
 				}
 			}
-			unset($idlist);
+		}
+		
+		$where = " WHERE 1 ";
+		$where .= " AND pt.`product` IN ('" . implode("','", $pIds) . "') ";
+		$where .= " AND at.`area` IN ('" . implode("','", $aIds) . "') ";
+		
+		if($globalOptions['onlyUpdates'] == "yes")
+		{
+			$startRange = date('Y-m-d', strtotime($this->timeInterval, $this->timeMachine));
+			$endRange = date('Y-m-d', $this->timeMachine);
 			
-			$res = mysql_query($query);
-			while($row = mysql_fetch_assoc($res))
-			{	
-				$result = $this->processData($ikey, $row, $timeMachine, $timeInterval);
-				
-				if(isset($globalOptions['sphinxSearch']) && $globalOptions['sphinxSearch'] != '')
+			// OR (ABS((dh.`enrollment_prev` - dt.`enrollment`)/ dh.`enrollment_prev`) = 0.2)
+			$query .= " LEFT JOIN `data_history` dh ON dh.`larvol_id` = dt.`larvol_id` ";
+			$where .= " AND ( (`" . implode('` BETWEEN "' . $startRange . '" AND "' . $endRange . '") OR (`', $this->fieldNames) . "` BETWEEN '" . $startRange . "' AND '" . $endRange . "') )";
+			//$where .= " AND (ABS((dh.`enrollment_prev` - dt.`enrollment`)/ dh.`enrollment_prev`) = 0.2) ";
+		}
+		
+		$Query = $query . $where;	
+		if($display == 'web')
+		{
+			$Query .= $filters . $orderBy . $limit;
+		}
+		else
+		{
+			if($globalOptions['type'] == 'allTrials')
+			{
+				$Query .= $orderBy;
+			}
+			else
+			{
+				$Query .= $filters . $orderBy;
+			}
+		}
+		
+		$Data = array();
+		
+		$res = mysql_query($Query);
+		if($res)
+		{
+			if(mysql_num_rows($res) > 0)
+			{
+				while($row = mysql_fetch_assoc($res))
 				{	
-					if(in_array($result['larvol_id'], $larvolIds))
+					$result = array();
+					
+					$larvolId = $row['larvol_id'];
+				
+					$pId = $row['productid'];
+					
+					if($ottType == 'rowstacked')
 					{
-						$sphinxSearchFlag = true;
+						$pId = $row['areaid'];
+					}
+					if(substr($row['source_id'], 0, 3) == "NCT")
+					{ 
+						$nctId = unpadnct(substr($row['source_id'], 0, 11));
+						$nctIdForUPM = substr($row['source_id'], 0, 11); 
 					}
 					else
 					{
-						$sphinxSearchFlag = false;
+						$nctId = $row['source_id'];
+						$nctIdForUPM = $row['source_id'];
 					}
+					
+					$result['larvol_id'] 	= $row['larvol_id'];
+					$result['inactive_date'] = $row['end_date'];
+					$result['region'] 		= $row['region'];
+					$result['NCT/nct_id'] 	= $nctId;
+					
+					if(strlen(trim($row['source_id'])) > 15)
+					{
+						$result['NCT/full_id'] 		= $row['source_id'];
+					}
+					else
+					{
+						$result['NCT/full_id'] 		= $nctId;
+					}
+					
+					$result['NCT/id_for_upm'] 	= $row['source_id'];
+					$result['NCT/brief_title'] 		= $row['brief_title'];
+					$result['NCT/enrollment_type'] 	= $row['enrollment_type'];
+					$result['NCT/acronym'] 			= $row['acronym'];
+					$result['NCT/lead_sponsor'] 	= str_replace('`', ', ', $row['lead_sponsor']);
+					$result['NCT/start_date'] 		= $row['start_date'];
+					$result['NCT/phase'] 			= $row['phase'];
+					$result['NCT/enrollment'] 		= $row['enrollment'];
+					$result['NCT/collaborator'] 	= str_replace('`', ', ', $row['collaborator']);
+					$result['NCT/condition'] 		= str_replace('`', ', ', $row['condition']);
+					$result['NCT/intervention_name']= str_replace('`', ', ', $row['intervention_name']);
+					$result['NCT/overall_status'] 	= $row['overall_status'];
+					$result['NCT/is_active'] 		= $row['is_active'];
+					$result['new'] 					= 'n';
+					
+					$result['viewcount'] 			= $row['viewcount']; 
+					$result['source'] 				= $row['source']; 
+					$result['source_id'] 			= $row['source_id']; 
+					$result['sponsor_owned'] 		= $row['sponsor_owned'];
+					
+					$result['manual_larvol_id'] 		= $row['manual_larvol_id']; 
+					$result['manual_brief_title'] 		= $row['manual_brief_title']; 
+					$result['manual_acronym'] 			= $row['manual_acronym']; 
+					$result['manual_lead_sponsor'] 		= $row['manual_lead_sponsor']; 
+					$result['manual_collaborator'] 		= $row['manual_collaborator']; 
+					$result['manual_condition'] 		= $row['manual_condition']; 
+					$result['manual_overall_status']	= $row['manual_overall_status']; 
+					$result['manual_start_date'] 		= $row['manual_start_date']; 
+					$result['manual_end_date'] 			= $row['manual_end_date']; 
+					$result['manual_enrollment'] 		= $row['manual_enrollment']; 
+					$result['manual_intervention_name'] = $row['manual_intervention_name']; 
+					$result['manual_phase'] 			= $row['manual_phase'];
+					$result['manual_region'] 			= $row['manual_region'];
+					$result['manual_is_sourceless'] 	= $row['manual_is_sourceless'];
+					
+					$result['original_brief_title'] 	= $row['original_brief_title']; 
+					$result['original_acronym'] 		= $row['original_acronym']; 
+					$result['original_lead_sponsor'] 	= $row['original_lead_sponsor']; 
+					$result['original_collaborator'] 	= $row['original_collaborator']; 
+					$result['original_condition'] 		= $row['original_condition']; 
+					$result['original_overall_status']	= $row['original_overall_status']; 
+					$result['original_start_date'] 		= $row['original_start_date']; 
+					$result['original_end_date'] 		= $row['original_end_date']; 
+					$result['original_enrollment'] 		= $row['original_enrollment']; 
+					$result['original_intervention_name'] = $row['original_intervention_name']; 
+					$result['original_phase'] 			= $row['original_phase'];
+					$result['original_region'] 			= $row['original_region'];
+									
+					if($row['firstreceived_date'] <= $endRange && $row['firstreceived_date'] >= $startRange)
+					{
+						$result['new'] = 'y';
+					}
+					
+					$larvolIds[] = $larvolId;
+					$IdsForUpm[] = $result['NCT/id_for_upm'];
+					$Data[$pId][$larvolId] = $result;
 				}
-				else
-				{
-					$sphinxSearchFlag = true;
-				}
+				//pr($Data);
+				$dataHistory = $this->getDataHistory($larvolIds);
+				$dataUpms = $this->getMatchedUpms($globalOptions['onlyUpdates'], $IdsForUpm);
 				
-				if($globalOptions['onlyUpdates'] == "yes")
+				foreach($Values['Data'] as $key => $value)
 				{
-					//unsetting value for field acroynm if it has a previous value and no current value
-					if(isset($result['edited']['NCT/acronym']) && !isset($result['NCT/acronym'])) 
+					$Id = $value['Id'];
+					if(isset($Data[$Id]))
 					{
-						unset($result['edited']['NCT/acronym']);
-					}
-					
-					//unsetting value for field enrollment if the change is less than 20 percent
-					if(isset($result['edited']['NCT/enrollment'])) 
-					{ 
-						$prevValue = substr($result['edited']['NCT/enrollment'],16);
-						if(!getDifference($prevValue, $result['NCT/enrollment'])) 
+						foreach($Data[$Id] as $dkey => $dvalue)
 						{
-							unset($result['edited']['NCT/enrollment']);
-						}
-					}
-					
-					foreach($result['matchedupms'] as $mkey => & $mvalue) 
-					{
-						if(empty($mvalue['edited']) && $mvalue['new'] != 'y') 
-						{
-							unset($mvalue);
-						}
-					}
-					
-					if(!empty($result['edited']) || $result['new'] == 'y')
-					{
-						if($sphinxSearchFlag == true)
-						{
-							if($globalOptions['showTrialsSponsoredByProductOwner'] == "on")
+							if(isset($dataHistory[$dkey]) && !empty($dataHistory[$dkey]))
 							{
-								if($result['sponsor_owned'])
-								{
-									$TrialsInfo[$ikey]['allTrials'][] = $result;
-									if($row['is_active'] == 1) 
-									{
-										$TrialsInfo[$ikey]['activeTrials'][] = $result;
-									}
-									else
-									{
-										$TrialsInfo[$ikey]['inactiveTrials'][] = $result;
-									}
-								}
+								$Data[$Id][$dkey]['edited'] = $dataHistory[$dkey];
 							}
-							else
+							
+							if(isset($dataUpms[$dkey]))
 							{
-								$TrialsInfo[$ikey]['allTrials'][] = $result;
-								if($row['is_active'] == 1) 
-								{
-									$TrialsInfo[$ikey]['activeTrials'][] = $result;
-								}
-								else
-								{
-									$TrialsInfo[$ikey]['inactiveTrials'][] = $result;
-								}
+								$Data[$Id][$dkey]['upms'] = $dataUpms[$dkey];
 							}
 						}
+						$Values['Data'][$key]['Trials'] = $Data[$Id];
 					}
 				}
-				else
-				{
-					if($sphinxSearchFlag == true)
-					{	
-						if($globalOptions['showTrialsSponsoredByProductOwner'] == "on")
-						{
-							if($result['sponsor_owned'] == 1)
-							{
-								$TrialsInfo[$ikey]['allTrials'][] = $result;
-								if($row['is_active'] == 1) 
-								{
-									$TrialsInfo[$ikey]['activeTrials'][] = $result;
-								}
-								else
-								{
-									$TrialsInfo[$ikey]['inactiveTrials'][] = $result;
-								}
-							}
-						}
-						else
-						{
-							$TrialsInfo[$ikey]['allTrials'][] = $result;
-							if($row['is_active'] == 1) 
-							{
-								$TrialsInfo[$ikey]['activeTrials'][] = $result;
-							}
-							else
-							{
-								$TrialsInfo[$ikey]['inactiveTrials'][] = $result;
-							}
-						}
-					}
-				}
-			}	
-			$fullRecordRes = mysql_query($fullRecordQry);
-			while($fRow = mysql_fetch_assoc($fullRecordRes))
-			{
-				if($fRow['is_active'] == 1) 
-				{
-					$activeCount++;
-				}
-				else
-				{
-					$inactiveCount++;
-				}
-
-				$TrialsInfo[$ikey]['allTrialsforDownload'][] = $this->processData($ikey, $fRow, $timeMachine, $timeInterval);
+				unset($dataHistory, $dataUpms, $Data);
 			}
-			
-			$totinactivecount  = $inactiveCount + $totinactivecount;
-			$totactivecount	= $activeCount + $totactivecount;
-			$totalcount		= $totalcount + $inactiveCount + $activeCount; 
+		}
+		else
+		{
+			$log 	= 'ERROR: Bad SQL query. ' . $query . mysql_error();
+			$logger->error($log);
+			unset($log);
 		}
 		
-		$Values['totactivecount'] = $totactivecount;
-		$Values['totinactivecount'] = $totinactivecount;
-		$Values['totalcount'] = $totalcount;
-		$Values['Trials'] = $TrialsInfo;
+		$cQuery = $query . $where . $filters . $orderBy;
+		$res = mysql_query($cQuery);
+		if($res)
+		{
+			$Values['count'] = mysql_num_rows($res);
+		}
+		else
+		{
+			$log 	= 'ERROR: Bad SQL query. ' . $query . mysql_error();
+			$logger->error($log);
+			unset($log);
+		}
+		
+		if(isset($globalOptions['product']) && !empty($globalOptions['product']))
+		{
+			foreach($Values['Data'] as $dkey => & $dvalue)
+			{
+				if(!in_array($dvalue['Id'], $globalOptions['product']))
+				{
+					unset($Values['Data'][$dkey]);
+				}
+			}
+			$Values['Data'] = array_values($Values['Data']);
+		}
+		
+		unset($TrialsInfo);
 		
 		return  $Values;
 	}
 	
-	function processData($ikey, $dataRow = array(), $timeMachine, $timeInterval)
+	function getDataHistory($larvolIds = array())
 	{
-		$matchedUpms = array();
-		$fieldNames = array('end_date_lastchanged', 'region_lastchanged', 'brief_title_lastchanged', 'acronym_lastchanged', 'lead_sponsor_lastchanged',
-							'overall_status_lastchanged', 'phase_lastchanged', 'enrollment_lastchanged', 'enrollment_type_lastchanged',
-							'collaborator_lastchanged', 'condition_lastchanged', 'intervention_name_lastchanged', 'start_date_lastchanged');
-							
+		global $logger;
+		
 		$previousValue = 'Previous value: ';	
 		$noPreviousValue = 'No previous value';	
-		if(substr($dataRow['source_id'],0,3)=="NCT") $nctId = unpadnct(substr($dataRow['source_id'],0,11));
-		else $nctId = $dataRow['source_id'];
-		if(substr($dataRow['source_id'],0,3)=="NCT") $nctIdForUPM = substr($dataRow['source_id'],0,11); 
-		else $nctIdForUPM = $dataRow['source_id'];
-		$result['larvol_id'] 			= $dataRow['larvol_id'];
-		$result['inactive_date'] 		= $dataRow['end_date'];
-		$result['region'] 				= $dataRow['region'];
-		$result['NCT/nct_id'] 			= $nctId;
-		if(strlen(trim($dataRow['source_id'])) > 15)
-		{
-			$result['NCT/full_id'] 			= $dataRow['source_id'];
-			$result['NCT/id_for_upm'] 			= $dataRow['source_id'];
-		}
-		else
-		{
-			$result['NCT/full_id'] 			= $nctId;
-			$result['NCT/id_for_upm'] 			= $dataRow['source_id'];
-		}
-		$result['NCT/brief_title'] 		= stripslashes($dataRow['brief_title']);
-		$result['NCT/enrollment_type'] 	= $dataRow['enrollment_type'];
-		$result['NCT/acronym'] 			= $dataRow['acronym'];
-		$result['NCT/lead_sponsor'] 	= str_replace('`', ', ', $dataRow['lead_sponsor']);
-		$result['NCT/start_date'] 		= $dataRow['start_date'];
-		$result['NCT/phase'] 			= $dataRow['phase'];
-		$result['NCT/enrollment'] 		= $dataRow['enrollment'];
-		$result['NCT/collaborator'] 	= str_replace('`', ', ', $dataRow['collaborator']);
-		$result['NCT/condition'] 		= str_replace('`', ', ', stripslashes($dataRow['condition']));
-		$result['NCT/intervention_name']= str_replace('`', ', ', stripslashes($dataRow['intervention_name']));
-		$result['NCT/overall_status'] 	= $dataRow['overall_status'];
-		$result['NCT/is_active'] 		= $dataRow['is_active'];
-		$result['new'] 					= 'n';
-		$result['edited'] 				= array();
-		$result['viewcount'] 			= $dataRow['viewcount']; 
-		$result['source'] 				= $dataRow['source']; 
-		$result['source_id'] 			= $dataRow['source_id']; 
-		$result['section'] 				= $ikey; 
-		$result['sponsor_owned'] 			= $dataRow['sponsor_owned'];
 		
-		$result['manual_larvol_id'] 		= $dataRow['manual_larvol_id']; 
-		$result['manual_brief_title'] 		= $dataRow['manual_brief_title']; 
-		$result['manual_acronym'] 			= $dataRow['manual_acronym']; 
-		$result['manual_lead_sponsor'] 		= $dataRow['manual_lead_sponsor']; 
-		$result['manual_collaborator'] 		= $dataRow['manual_collaborator']; 
-		$result['manual_condition'] 		= $dataRow['manual_condition']; 
-		$result['manual_overall_status']	= $dataRow['manual_overall_status']; 
-		$result['manual_start_date'] 		= $dataRow['manual_start_date']; 
-		$result['manual_end_date'] 			= $dataRow['manual_end_date']; 
-		$result['manual_enrollment'] 		= $dataRow['manual_enrollment']; 
-		$result['manual_intervention_name'] = $dataRow['manual_intervention_name']; 
-		$result['manual_phase'] 			= $dataRow['manual_phase'];
-		$result['manual_region'] 			= $dataRow['manual_region'];
-		$result['manual_is_sourceless'] 	= $dataRow['manual_is_sourceless'];
+		$startRange = date('Y-m-d', strtotime($this->timeInterval, $this->timeMachine));
+		$endRange = date('Y-m-d', $this->timeMachine);
+		 
+		$result = array();
 		
-		$result['original_brief_title'] 	= $dataRow['original_brief_title']; 
-		$result['original_acronym'] 		= $dataRow['original_acronym']; 
-		$result['original_lead_sponsor'] 	= $dataRow['original_lead_sponsor']; 
-		$result['original_collaborator'] 	= $dataRow['original_collaborator']; 
-		$result['original_condition'] 		= $dataRow['original_condition']; 
-		$result['original_overall_status']	= $dataRow['original_overall_status']; 
-		$result['original_start_date'] 		= $dataRow['original_start_date']; 
-		$result['original_end_date'] 		= $dataRow['original_end_date']; 
-		$result['original_enrollment'] 		= $dataRow['original_enrollment']; 
-		$result['original_intervention_name'] = $dataRow['original_intervention_name']; 
-		$result['original_phase'] 			= $dataRow['original_phase'];
-		$result['original_region'] 			= $dataRow['original_region'];
-						
-		if($dataRow['firstreceived_date'] <= date('Y-m-d', $timeMachine) && $dataRow['firstreceived_date'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
-		{
-			$result['new'] = 'y';
-		}
-			
-		if($dataRow['lastchanged_date'] <= date('Y-m-d', $timeMachine) && $dataRow['lastchanged_date'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
-		{	
-			$query = "SELECT `end_date_prev`, `region_prev`, `brief_title_prev`, `acronym_prev`, `lead_sponsor_prev`, `overall_status_prev`, "
+		//echo '<br/><br/><br/>--->'.
+		$query = "SELECT `larvol_id`, `end_date_prev`, `region_prev`, `brief_title_prev`, `acronym_prev`, `lead_sponsor_prev`, `overall_status_prev`, "
 					. "`overall_status_lastchanged`, `start_date_prev`, `phase_prev`, `enrollment_prev`, `enrollment_type_prev`,`collaborator_prev`, "
-					. " `condition_prev`, `intervention_name_prev`, `"
-					. implode("`, `", $fieldNames) . "` FROM `data_history` WHERE `larvol_id` = '" . $dataRow['larvol_id'] . "' AND ( (`" 
-					. implode('` BETWEEN "' . date('Y-m-d', strtotime($timeInterval, $timeMachine)) . '" AND "' . date('Y-m-d', $timeMachine) 
-					. '") OR (`', $fieldNames) . "` BETWEEN '" . date('Y-m-d', strtotime($timeInterval, $timeMachine)) . "' AND '" 
-					. date('Y-m-d', $timeMachine) . "') ) ";
-			$res = mysql_query($query);
+					. " `condition_prev`, `intervention_name_prev`, `" . implode("`, `", $this->fieldNames) . "` "
+					. " FROM `data_history` "
+					. " WHERE `larvol_id` IN ('" . implode("', '", $larvolIds) . "') "
+					. " AND ( (`" . implode('` BETWEEN "' . $startRange . '" AND "' . $endRange . '") OR (`', $this->fieldNames) . "` BETWEEN '" . $startRange . "' AND '" . $endRange . "') ) ";
+		$res = mysql_query($query);			
+		if($res)
+		{
 			while($row = mysql_fetch_assoc($res))
 			{
-				if($row['end_date_lastchanged'] <= date('Y-m-d', $timeMachine) 
-				&& $row['end_date_lastchanged'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
+				$larvolId = $row['larvol_id'];
+				
+				if($row['end_date_lastchanged'] <= $endRange && $row['end_date_lastchanged'] >= $startRange)
 				{
 					if($row['end_date_prev'] != '' && $row['end_date_prev'] !== NULL)
 					{
-						$result['edited']['inactive_date'] = $previousValue . $row['end_date_prev'];
+						$result[$larvolId]['inactive_date'] = $previousValue . $row['end_date_prev'];
 					}
 					else
 					{
-						$result['edited']['inactive_date'] = $noPreviousValue;
+						$result[$larvolId]['inactive_date'] = $noPreviousValue;
 					}
 				}
 				
-				if($row['region_lastchanged'] <= date('Y-m-d', $timeMachine) 
-				&& $row['region_lastchanged'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
+				if($row['region_lastchanged'] <= $endRange && $row['region_lastchanged'] >= $startRange)
 				{
 					if($row['region_prev'] != '' && $row['region_prev'] !== NULL)
 					{
-						$result['edited']['NCT/region'] = $previousValue . $row['region_prev'];
+						$result[$larvolId]['NCT/region'] = $previousValue . $row['region_prev'];
 					}
 					else
 					{
-						$result['edited']['NCT/region'] = $noPreviousValue;
+						$result[$larvolId]['NCT/region'] = $noPreviousValue;
 					}
 				}
 				
-				if($row['brief_title_lastchanged'] <= date('Y-m-d', $timeMachine) 
-				&& $row['brief_title_lastchanged'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
+				if($row['brief_title_lastchanged'] <= $endRange && $row['brief_title_lastchanged'] >= $startRange)
 				{
 					if($row['brief_title_prev'] != '' && $row['brief_title_prev'] !== NULL)
 					{
-						$result['edited']['NCT/brief_title'] = $previousValue . stripslashes($row['brief_title_prev']);
+						$result[$larvolId]['NCT/brief_title'] = $previousValue . stripslashes($row['brief_title_prev']);
 					}
 					else
 					{
-						$result['edited']['NCT/brief_title'] = $noPreviousValue;
+						$result[$larvolId]['NCT/brief_title'] = $noPreviousValue;
 					}
 				}
 				
-				if($row['acronym_lastchanged'] <= date('Y-m-d', $timeMachine) 
-				&& $row['acronym_lastchanged'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
+				/*if($row['acronym_lastchanged'] <= $endRange && $row['acronym_lastchanged'] >= $startRange)
 				{
 					if($row['acronym_prev'] != '' && $row['acronym_prev'] !== NULL)
 					{
-						$result['edited']['NCT/acronym'] = $previousValue . $row['acronym_prev'];
+						$result[$larvolId]['NCT/acronym'] = $previousValue . $row['acronym_prev'];
 					}
 					else
 					{
-						$result['edited']['NCT/acronym'] = $noPreviousValue;
+						$result[$larvolId]['NCT/acronym'] = $noPreviousValue;
 					}
-				}
+				}*/
 				
-				if($row['lead_sponsor_lastchanged'] <= date('Y-m-d', $timeMachine) 
-				&& $row['lead_sponsor_lastchanged'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
+				if($row['lead_sponsor_lastchanged'] <= $endRange && $row['lead_sponsor_lastchanged'] >= $startRange)
 				{
 					if($row['lead_sponsor_prev'] != '' && $row['lead_sponsor_prev'] !== NULL)
 					{
-						$result['edited']['NCT/lead_sponsor'] = $previousValue . str_replace('`', ', ', $row['lead_sponsor_prev']);
+						$result[$larvolId]['NCT/lead_sponsor'] = $previousValue . str_replace('`', ', ', $row['lead_sponsor_prev']);
 					}
 					else
 					{
-						$result['edited']['NCT/lead_sponsor'] = $noPreviousValue;
+						$result[$larvolId]['NCT/lead_sponsor'] = $noPreviousValue;
 					}
 				}
 
-				if($row['start_date_lastchanged'] <= date('Y-m-d', $timeMachine) 
-				&& $row['start_date_lastchanged'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
-				{
-					if($row['start_date_prev'] != '' && $row['start_date_prev'] !== NULL)
-					{
-						$result['edited']['NCT/start_date'] = $previousValue . $row['start_date_prev'];
-					}
-					else
-					{
-						$result['edited']['NCT/start_date'] = $noPreviousValue;
-					}
-				}
-
-				if($row['phase_lastchanged'] <= date('Y-m-d', $timeMachine) 
-				&& $row['phase_lastchanged'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
+				if($row['phase_lastchanged'] <= $endRange && $row['phase_lastchanged'] >= $startRange)
 				{
 					if($row['phase_prev'] != '' && $row['phase_prev'] !== NULL)
 					{
-						$result['edited']['NCT/phase'] = $previousValue . $row['phase_prev'];
+						$result[$larvolId]['NCT/phase'] = $previousValue . $row['phase_prev'];
 					}
 					else
 
 					{
-						$result['edited']['NCT/phase'] = $noPreviousValue;
+						$result[$larvolId]['NCT/phase'] = $noPreviousValue;
 					}
 				}
 					
-				if($row['enrollment_lastchanged'] <= date('Y-m-d', $timeMachine) 
-				&& $row['enrollment_lastchanged'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
+				if($row['enrollment_lastchanged'] <= $endRange && $row['enrollment_lastchanged'] >= $startRange)
 				{
 					if($row['enrollment_prev'] != '' && $row['enrollment_prev'] !== NULL)
 					{
-						$result['edited']['NCT/enrollment'] = $previousValue . $row['enrollment_prev'];
+						$result[$larvolId]['NCT/enrollment'] = $previousValue . $row['enrollment_prev'];
 					}
 					else
 					{
-						$result['edited']['NCT/enrollment'] = $noPreviousValue;
+						$result[$larvolId]['NCT/enrollment'] = $noPreviousValue;
 					}
 				}
 
-				if($row['collaborator_lastchanged'] <= date('Y-m-d', $timeMachine) 
-				&& $row['collaborator_lastchanged'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
+				if($row['collaborator_lastchanged'] <= $endRange && $row['collaborator_lastchanged'] >= $startRange)
 				{
 					if($row['collaborator_prev'] != '' && $row['collaborator_prev'] !== NULL)
 					{
-						$result['edited']['NCT/collaborator'] = $previousValue . str_replace('`', ', ', $row['collaborator_prev']);
+						$result[$larvolId]['NCT/collaborator'] = $previousValue . str_replace('`', ', ', $row['collaborator_prev']);
 					}
 					else
 					{
-						$result['edited']['NCT/collaborator'] = $noPreviousValue;
+						$result[$larvolId]['NCT/collaborator'] = $noPreviousValue;
 					}
 				}
 
-				if($row['condition_lastchanged'] <= date('Y-m-d', $timeMachine) 
-				&& $row['condition_lastchanged'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
+
+				if($row['condition_lastchanged'] <= $endRange && $row['condition_lastchanged'] >= $startRange)
 				{
 					if($row['condition_prev'] != '' && $row['condition_prev'] !== NULL)
 					{
-						$result['edited']['NCT/condition'] = $previousValue . str_replace('`', ', ', stripslashes($row['condition_prev']));
+						$result[$larvolId]['NCT/condition'] = $previousValue . str_replace('`', ', ', stripslashes($row['condition_prev']));
 					}
 					else
 					{
-						$result['edited']['NCT/condition'] = $noPreviousValue;
+						$result[$larvolId]['NCT/condition'] = $noPreviousValue;
 					}
 				}
 
-				if($row['intervention_name_lastchanged'] <= date('Y-m-d', $timeMachine) 
-				&& $row['intervention_name_lastchanged'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
+				if($row['intervention_name_lastchanged'] <= $endRange && $row['intervention_name_lastchanged'] >= $startRange)
 				{
 					if($row['intervention_name_prev'] != '' && $row['intervention_name_prev'] !== NULL)
 					{
-						$result['edited']['NCT/intervention_name'] = $previousValue . str_replace('`', ', ', $row['intervention_name_prev']);
+						$result[$larvolId]['NCT/intervention_name'] = $previousValue . str_replace('`', ', ', $row['intervention_name_prev']);
 					}
 					else
 					{
-						$result['edited']['NCT/intervention_name'] = $noPreviousValue;
+						$result[$larvolId]['NCT/intervention_name'] = $noPreviousValue;
 					}
 				}
 
-				if($row['overall_status_lastchanged'] <= date('Y-m-d', $timeMachine) 
-				&& $row['overall_status_lastchanged'] >= date('Y-m-d', strtotime($timeInterval, $timeMachine)))
+				if($row['overall_status_lastchanged'] <= $endRange && $row['overall_status_lastchanged'] >= $startRange)
 				{
 					if($row['overall_status_prev'] != '' && $row['overall_status_prev'] !== NULL)
 					{
-						$result['edited']['NCT/overall_status'] = $previousValue . str_replace('`', ', ', $row['overall_status_prev']);
+						$result[$larvolId]['NCT/overall_status'] = $previousValue . str_replace('`', ', ', $row['overall_status_prev']);
 					}
 					else
 					{
-						$result['edited']['NCT/overall_status'] = $noPreviousValue;
+						$result[$larvolId]['NCT/overall_status'] = $noPreviousValue;
 					}
 				}
 			}
 		}
-		//echo '<pre>';print_r($result);
-		$matchedUpms = $this->getMatchedUPMs($nctIdForUPM, $timeMachine, $timeInterval);
+		else
+		{
+			$log 	= 'ERROR: Bad SQL query. ' . $query . mysql_error();
+			$logger->error($log);
+			unset($log);
+		}
 		
-		$result = array_merge($result, $matchedUpms);
 		return $result;
 	}
 	
-	function processOTTData($ottType, $resultIds, $timeMachine = NULL, $linkExpiryDt = array(), $globalOptions = array())
-	{	
+	function getUnMatchedUpms($onlyUpdates, $productIds = array())
+	{
 		global $logger;
 		
-		$Ids = array();
-		$linkExpiry = array();
-		$Values = array();
-		$Values['Trials'] = array();
+		$startRange = date('Y-m-d', strtotime($this->timeInterval ,$this->timeMachine));
+		$endRange = date('Y-m-d', $this->timeMachine);
 		
-		$totinactivecount = 0;
-		$totactivecount = 0;
-		$totalcount = 0;
-
-		if(in_array($globalOptions['startrange'], $globalOptions['Highlight_Range']))
-		{
-			$timeMachine = str_replace('ago', '', $globalOptions['startrange']);
-			$timeMachine = trim($timeMachine);
-			$timeMachine = '-' . (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
-		}
-		else
-		{
-			$timeMachine = trim($globalOptions['startrange']);
-			$timeMachine = (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
-		}
-		$timeMachine = strtotime($timeMachine);
-
-		if(in_array($globalOptions['endrange'], $globalOptions['Highlight_Range']))
-		{
-			$timeInterval = str_replace('ago', '', $globalOptions['endrange']);
-			$timeInterval = trim($timeInterval);
-			$timeInterval = '-' . (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
-		}
-		else
-		{
-			$timeInterval = trim($globalOptions['endrange']);
-			$timeInterval = (($timeInterval == '1 quarter') ? '3 months' : $timeInterval);
-		}
+		$result = array();
+		$upmIds = array();
+		$upmHistory = array();
 		
-		foreach($resultIds as $ikey => $ivalue)
+		$query = "SELECT u.`id`, u.`event_description`, u.`event_link`, u.`result_link`, u.`event_type`, u.`start_date`, u.`status`, u.`start_date_type`, "
+				. " u.`end_date`, u.`end_date_type`, pr.`name`, pr.`id` AS productid, u.`last_update`, uh.`id` AS historyid "
+				. " FROM `upm` u "
+				. " LEFT JOIN `upm_trials` ut ON ut.`upm_id` = u.`id` "
+				. " LEFT JOIN `products` pr ON pr.`id` = u.`product` "
+				. " LEFT JOIN `upm_history` uh ON uh.`id` = u.`id` "
+				. " WHERE ut.`larvol_id` IS NULL AND u.`product` IN ('" . implode("', '", $productIds) . "') "
+				. " ORDER BY `end_date` ASC ";
+		$res = mysql_query($query);
+		if($res)
 		{
-			$activeCount = 0;
-			$inactiveCount = 0;
-			$totalCount = 0;
-			
-			$linkExpiry[$ikey] = array();
-			$Array = array();
-			$Array2 = array();
-			
-			$larvolIds = array();
-			$Values['Trials'][$ikey]['naUpms'] = array();
-			$Values['Trials'][$ikey]['activeTrials'] = array();
-			$Values['Trials'][$ikey]['inactiveTrials'] = array();
-			$Values['Trials'][$ikey]['allTrials'] = array();
-			$Values['Trials'][$ikey]['allTrialsforDownload'] = array();
-			
-			$Params = array();
-			$params1 = array();
-			$params2 = array();
-			$params3 = array();
-			
-			$Ids = explode('.', $ivalue);
-			
-			//Retrieving headers
-			if($ottType == 'rowstacked') 
+			if(mysql_num_rows($res) > 0)
 			{
-				$res = $this->getInfo('rpt_ott_header', array('header', 'id', 'expiry'), 'id', $Ids[1]);
-			} 
-			else
-			{
-				$res = $this->getInfo('rpt_ott_header', array('header', 'id', 'expiry'), 'id', $Ids[0]);
-			}
-			
-			if($res['expiry'] != '' &&  $res['expiry'] !== NULL)
-			{
-				$linkExpiry[$ikey] = array_merge($linkExpiryDt, array($res['expiry']));
-			}
-			
-			$sectionHeader = htmlentities($res['header']);
-			
-			if($Ids[2] == '-1' || $Ids[2] == '-2') 
-			{
-				if($Ids[2] == '-2') 
+				while($row = mysql_fetch_assoc($res))
 				{
-					$res = $this->getInfo('rpt_ott_searchdata', array('result_set', 'id', 'expiry'), 'id', $Ids[3]);
-					$params2 = unserialize(stripslashes(gzinflate(base64_decode($res['result_set']))));
-				}
-				else
-				{
-					$res = $this->getInfo('rpt_ott_trials', array('result_set', 'id', 'expiry'), 'id', $Ids[3]);
-					if($res['result_set'] != '') 
+					$productId = $row['productid'];
+					$upmIds[] = $upmId = $row['id'];
+					
+					$result[$productId][$upmId]['new']	= 'n';
+					
+					$result[$productId][$upmId]['id'] 			= $row['id'];
+					$result[$productId][$upmId]['product_name'] = $row['name'];
+					$result[$productId][$upmId]['event_description'] = htmlspecialchars($row['event_description']);
+					$result[$productId][$upmId]['status']			= $row['status'];
+					$result[$productId][$upmId]['event_link'] 		= $row['event_link'];
+					$result[$productId][$upmId]['result_link'] 		= $row['result_link'];
+					$result[$productId][$upmId]['event_type'] 		= $row['event_type'];
+					$result[$productId][$upmId]['start_date'] 		= $row['start_date'];
+					$result[$productId][$upmId]['start_date_type'] 	= $row['start_date_type'];
+					$result[$productId][$upmId]['end_date'] 		= $row['end_date'];
+					$result[$productId][$upmId]['end_date_type'] 	= $row['end_date_type'];
+					
+					if($row['last_update'] <= $endRange &&  $row['last_update'] >= $startRange && $row['historyid'] === NULL)
 					{
-
-						$sp = new SearchParam();
-						$sp->field = 'larvol_id';
-						$sp->action = 'search';
-						$sp->value = str_replace(',', ' OR ', $res['result_set']);
-						$params2 = array($sp);
+						$result[$productId][$upmId]['new']	= 'y';
 					}
 				}
 				
-				if($res['expiry'] != '' && $res['expiry'] !== NULL)
-				{	
-					$linkExpiry[$ikey] = array_merge($linkExpiryDt, array($res['expiry']));
-				}
+				$upmHistory = $this->getUpmHistory($upmIds);
 				
-				if(isset($Ids[4]))
+				foreach($result as $rkey => & $rvalue)
 				{	
-					$res = $this->getInfo('rpt_ott_upm', array('intervention_name', 'intervention_name_negate','id', 'expiry'), 'id', $Ids[4]);
-					
-					if($globalOptions['version'] == 1)
-					{
-						$res['intervention_name'] = explode('\n', $res['intervention_name']);
-						$res['intervention_name_negate'] = explode('\n', $res['intervention_name_negate']);
+					foreach($rvalue as $key => & $value)
+					{	
+						if(isset($upmHistory[$key]))
+						{
+							$value['edited'] = $upmHistory[$key];
+						}
+						else
+						{
+							if($onlyUpdates == "yes" && $result[$rkey][$key]['new'] == "n")
+							{
+								unset($result[$rkey][$key]);
+							}
+						}
 					}
-					else
-					{
-						$res['intervention_name'] = explode(',', $res['intervention_name']);
-						$res['intervention_name_negate'] = array();
-					}
-					
-					if($res['expiry'] != '' &&  $res['expiry'] !== NULL)
-					{
-						$linkExpiry[$ikey] = array_merge($linkExpiryDt, array($res['expiry']));
-					}
-					
-					$Values['Trials'][$ikey]['naUpms'] = $this->getUnMatchedUPMs($res['intervention_name'], $res['intervention_name_negate'], $timeMachine, $timeInterval, $globalOptions['onlyUpdates']);	
 				}
+				unset($upmHistory);
 			}
 			else
 			{
-				$searchData = substr($Ids[2],0,3);
-				if(dechex($searchData) == '73' && chr($searchData) == 's') 
-				{
-					$res = $this->getInfo('rpt_ott_searchdata', array('result_set', 'id', 'expiry'), 'id', substr($Ids[2],3));
-					$params2 = unserialize(stripslashes(gzinflate(base64_decode($res['result_set']))));
-				}
-				else
-				{
-					$res = $this->getInfo('rpt_ott_trials', array('result_set', 'id', 'expiry'), 'id', $Ids[2]);
-					if($res['result_set'] != '') 
-					{	
-						$sp = new SearchParam();
-						$sp->field = 'larvol_id';
-						$sp->action = 'search';
-						$sp->value = str_replace(',', ' OR ', $res['result_set']);
-						$params2 = array($sp);
-					}
-				}
-				
-				if($res['expiry'] != '' &&  $res['expiry'] !== NULL)
-				{
-					$linkExpiry[$ikey] = array_merge($linkExpiryDt, array($res['expiry']));
-				}
-				
-				if(isset($Ids[3])) 
-				{ 
-					$res = $this->getInfo('rpt_ott_upm', array('intervention_name', 'id', 'expiry'), 'id', $Ids[3]);
-					if($globalOptions['version'] == 1)
-					{
-						$res['intervention_name'] = explode('\n', $res['intervention_name']);
-					}
-					else
-					{
-						$res['intervention_name'] = explode(',', $res['intervention_name']);
-					}
-					
-					if($res['expiry'] != '' &&  $res['expiry'] !== NULL)
-					{
-						$linkExpiry[$ikey] = array_merge($linkExpiryDt, array($res['expiry']));
-					}
-					
-					$Values['Trials'][$ikey]['naUpms'] = $this->getUnMatchedUPMs($res['intervention_name'],array(), $timeMachine, $timeInterval, $globalOptions['onlyUpdates']);	
-				}
-			}
-			
-			$Values['Trials'][$ikey]['sectionHeader'] = $sectionHeader;
-			
-			if(isset($globalOptions['itype']) && !empty($globalOptions['itype'])) 
-			{
-				foreach($globalOptions['itype'] as $iskey => $isvalue)
-				{
-					$sp = new SearchParam();
-					$sp->field 	= 'institution_type';
-					$sp->action = 'search';
-					$sp->value 	= $this->institutionFilters[$isvalue];
-					$params[] = $sp;
-				}
-				$params3 = $params;
-			}
-			
-			if(!empty($globalOptions['sortOrder'])) 
-			{
-				foreach($globalOptions['sortOrder'] as $skey => $svalue)
-				{
-					$sortType = substr($svalue, 1, 1);
-					if($sortType == 'A' || $sortType == 'D')
-					{
-						$sp = new SearchParam();
-						$sp->field = ($skey != 'inactive_date') ? '_' . getFieldId('NCT', $skey) : $skey;
-						$sp->action = ($sortType == 'A') ? 'ascending' : (($sortType == 'D') ? 'descending' : '');
-						$params1[] = $sp;
-					}
-				}
-			}
-			
-			$Params = array_merge($params1, $params2, $params3);
-			
-			if(!empty($params2)) 
-			{
-				$Array = search($Params,$this->fid, NULL, $timeMachine);
-			} 
-			
-			//Added to consolidate the data returned in an mutidimensional array format as opposed to earlier 
-			//when it was not returned in an mutidimensional array format.
-			$indx = 0;
-			foreach($Array as $akey => $avalue) 
-			{
-				if(!isset($avalue['NCT/enrollment']) || $avalue['NCT/enrollment'] > 1000000)
-				{
-					$avalue['NCT/enrollment'] = NULL;
-				}
-				foreach($avalue as $key => $value) 
-				{
-					if(is_array($value))
-					{
-						if($key == 'NCT/condition' || $key == 'NCT/intervention_name' || $key == 'NCT/lead_sponsor')
-						{
-							$Array2[$indx][$key] = implode(', ', $value);
-						}
-						elseif($key == 'NCT/start_date' || $key == 'inactive_date')
-						{
-							$Array2[$indx][$key] = $value[0];
-						}
-						elseif($key == 'NCT/phase' || $key == 'NCT/overall_status' || $key == 'NCT/enrollment' || $key == 'NCT/brief_title')
-						{
-							$Array2[$indx][$key] = end($value);
-						}
-						else
-						{
-							$Array2[$indx][$key] = implode(' ', $value);
-						}
-					}
-					else
-					{
-						$Array2[$indx][$key] = $value;
-					}
-				}
-				++$indx;
-
-			}
-			
-			
-			//Process to check for changes/updates in trials, matched & unmatched upms.
-			foreach($Array2 as $rkey => $rvalue) 
-			{ 
-				$nctId = $rvalue['NCT/nct_id'];
-				
-				$dataset['trials'] = array();
-				$dataset['matchedupms'] = array();
-				
-				//checking for updated and new trials
-				$dataset['trials'] = $this->getTrialUpdates($nctId, $rvalue['larvol_id'], $timeMachine, $timeInterval);
-				$dataset['trials'] = array_merge($dataset['trials'], array('section' => $ikey));
-				
-				//checking for updated and new unmatched upms.
-				$dataset['matchedupms'] = $this->getMatchedUPMs($nctId, $timeMachine, $timeInterval);
-				$Values['Trials'][$ikey]['allTrialsforDownload'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-				
-				if($globalOptions['onlyUpdates'] == "yes")
-				{
-					//unsetting value for field acroynm if it has a previous value and no current value
-					if(isset($dataset['trials']['edited']['NCT/acronym']) && !isset($rvalue['NCT/acronym'])) 
-					{
-						unset($dataset['trials']['edited']['NCT/acronym']);
-					}
-					
-					//unsetting value for field enrollment if the change is less than 20 percent
-					if(isset($dataset['trials']['edited']['NCT/enrollment']))
-					{
-						$prevValue = substr($dataset['trials']['edited']['NCT/enrollment'],16);
-						
-						if(!getDifference($prevValue, $rvalue['NCT/enrollment'])) 
-						{
-							unset($dataset['trials']['edited']['NCT/enrollment']);
-						}
-					}
-					
-					//merge only if updates are found
-					foreach($dataset['matchedupms'] as $mkey => & $mvalue) 
-					{
-						if(empty($mvalue['edited']) && $mvalue['new'] != 'y') 
-						{
-							unset($mvalue);
-						}
-					}
-					
-					//merge only if updates are found
-					if(!empty($dataset['trials']['edited']) || $dataset['trials']['new'] == 'y')
-					{	
-						if(!empty($globalOptions['status']) && !empty($globalOptions['phase']) && !empty($globalOptions['region']))
-						{
-							$status = array();
-							foreach($globalOptions['status'] as $skey => $svalue)
-							{
-								$status[] = $this->statusFilters[$svalue];
-							}
-							
-							$phase = array();
-							foreach($globalOptions['phase'] as $pkey => $pvalue)
-							{	
-								$ph = array_keys($this->phaseFilters, $pvalue);
-								$phase = array_merge($phase, $ph);
-							}
-							
-							$region = array();
-							foreach($globalOptions['region'] as $rkey => $rgvalue)
-							{
-								$region[] = $this->regionFilters[$rgvalue];
-							}
-							
-							$trialRegion = array();
-							$trialRegion = explode(',', $result[$index]['region']);
-							$matchedRegion = array_intersect($region, $trialRegion);
-							
-							if(in_array($rvalue['NCT/overall_status'], $status) 
-							&& in_array($rvalue['NCT/phase'], $phase) 
-							&& !empty($matchedRegion))
-							{
-								$Values['Trials'][$ikey]['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
-								{
-									$Values['Trials'][$ikey]['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								}
-								else
-								{
-									$Values['Trials'][$ikey]['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								}
-							}
-							
-							unset($status);
-							unset($phase);
-							unset($region);
-							unset($trialRegion);
-							unset($matchedRegion);
-						}
-						else if(!empty($globalOptions['status']) && !empty($globalOptions['phase'])) 
-						{
-							$status = array();
-							foreach($globalOptions['status'] as $skey => $svalue)
-							{
-								$status[] = $this->statusFilters[$svalue];
-							}
-							
-							$phase = array();
-							foreach($globalOptions['phase'] as $pkey => $pvalue)
-							{	
-
-								$ph = array_keys($this->phaseFilters, $pvalue);
-								$phase = array_merge($phase, $ph);
-							}
-							
-							if(in_array($rvalue['NCT/overall_status'], $status) 
-							&& in_array($rvalue['NCT/phase'], $phase))
-							{
-								$Values['Trials'][$ikey]['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-
-								if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
-								{
-									$Values['Trials'][$ikey]['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								}
-								else
-								{
-									$Values['Trials'][$ikey]['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								}
-							}
-							
-							unset($status);
-							unset($phase);
-						}
-						else if(!empty($globalOptions['phase']) && !empty($globalOptions['region']))
-						{
-							$phase = array();
-							foreach($globalOptions['phase'] as $pkey => $pvalue)
-							{	
-								$ph = array_keys($this->phaseFilters, $pvalue);
-								$phase = array_merge($phase, $ph);
-							}
-							
-							$region = array();
-							foreach($globalOptions['region'] as $rkey => $rgvalue)
-							{
-								$region[] = $this->regionFilters[$rgvalue];
-							}
-							
-							$trialRegion = array();
-							$trialRegion = explode(',', $result[$index]['region']);
-							$matchedRegion = array_intersect($region, $trialRegion);
-							
-							if(in_array($rvalue['NCT/phase'], $phase) 
-							&& !empty($matchedRegion))
-							{
-								$Values['Trials'][$ikey]['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
-								{
-									$Values['Trials'][$ikey]['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								}
-								else
-								{
-									$Values['Trials'][$ikey]['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								}
-							}
-							
-							unset($phase);
-							unset($region);
-							unset($trialRegion);
-							unset($matchedRegion);
-						}
-						else if(!empty($globalOptions['status']) && !empty($globalOptions['region']))
-						{
-							$status = array();
-							foreach($globalOptions['status'] as $skey => $svalue)
-							{
-								$status[] = $this->statusFilters[$svalue];
-							}
-							
-							$region = array();
-							foreach($globalOptions['region'] as $rkey => $rgvalue)
-							{
-								$region[] = $this->regionFilters[$rgvalue];
-							}
-							
-							$trialRegion = array();
-							$trialRegion = explode(',', $result[$index]['region']);
-							$matchedRegion = array_intersect($region, $trialRegion);
-							
-							if(in_array($rvalue['NCT/overall_status'], $status) 
-							&& !empty($matchedRegion))
-							{
-								$Values['Trials'][$ikey]['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
-								{
-									$Values['Trials'][$ikey]['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								}
-								else
-								{
-									$Values['Trials'][$ikey]['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								}
-							}
-							
-							unset($status);
-							unset($region);
-							unset($trialRegion);
-							unset($matchedRegion);
-						}
-						else if(!empty($globalOptions['status']))
-						{
-							$status = array();
-							foreach($globalOptions['status'] as $skey => $svalue)
-							{
-								$status[] = $this->statusFilters[$svalue];
-							}
-							
-							if(in_array($rvalue['NCT/overall_status'], $status))
-							{
-								$Values['Trials'][$ikey]['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
-								{
-									$Values['Trials'][$ikey]['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								}
-								else
-								{
-									$Values['Trials'][$ikey]['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								}
-							}
-							
-							unset($status);
-						}
-						else if(!empty($globalOptions['phase']))
-						{
-							$phase = array();
-							foreach($globalOptions['phase'] as $pkey => $pvalue)
-							{	
-								$ph = array_keys($this->phaseFilters, $pvalue);
-								$phase = array_merge($phase, $ph);
-							}
-							
-							if(in_array($rvalue['NCT/phase'], $phase))
-							{
-								$Values['Trials'][$ikey]['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
-								{
-									$Values['Trials'][$ikey]['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								}
-								else
-								{
-									$Values['Trials'][$ikey]['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								}
-							}
-							
-							unset($phase);
-						}
-						else if(!empty($globalOptions['region']))
-						{
-							$region = array();
-							foreach($globalOptions['region'] as $rkey => $rgvalue)
-							{
-								$region[] = $this->regionFilters[$rgvalue];
-							}
-							
-							$trialRegion = array();
-							$trialRegion = explode(',', $result[$index]['region']);
-							$matchedRegion = array_intersect($region, $trialRegion);
-							
-							if(!empty($matchedRegion))
-							{
-								$Values['Trials'][$ikey]['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
-								{
-									$Values['Trials'][$ikey]['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								}
-								else
-								{
-									$Values['Trials'][$ikey]['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-								}
-							}
-							
-							unset($region);
-							unset($trialRegion);
-							unset($matchedRegion);
-						}
-						else
-						{	
-							$Values['Trials'][$ikey]['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							if(in_array($rvalue['NCT/overall_status'], $this->inactiveStatusValues))
-							{
-								$Values['Trials'][$ikey]['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							}
-							else
-							{
-								$Values['Trials'][$ikey]['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							}
-						}
-						
-						if($globalOptions['enroll'] != '0')
-						{
-							$enroll = explode(' - ', $globalOptions['enroll']);
-
-							if($result[$index]['NCT/enrollment'] === NULL || $result[$index]['NCT/enrollment'] == '')
-							{
-								$result[$index]['NCT/enrollment'] = 0;
-							}
-							
-							if(strpos($enroll[1], '+') !== FALSE)
-							{
-								if($result[$index]['NCT/enrollment'] < $enroll[0])
-								{	
-									foreach($Values['Trials'][$ikey]['allTrials'] as $k => $v)
-									{
-										if($v['NCT/nct_id'] == $nctId)
-										{
-											unset($Values['Trials'][$ikey]['allTrials'][$k]);
-											$Values['Trials'][$ikey]['allTrials'] = array_values($Values['Trials'][$ikey]['allTrials']);
-										}
-									}
-								
-									foreach($Values['Trials'][$ikey]['inactiveTrials'] as $k => $v)
-									{
-										if($v['NCT/nct_id'] == $nctId)
-										{
-											unset($Values['Trials'][$ikey]['inactiveTrials'][$k]);
-											$Trials['inactiveTrials'] = array_values($Values['Trials'][$ikey]['inactiveTrials']);
-										}
-									}
-								
-									foreach($Values['Trials'][$ikey]['activeTrials'] as $k => $v)
-									{
-										if($v['NCT/nct_id'] == $nctId)
-										{
-											unset($Values['Trials'][$ikey]['activeTrials'][$k]);
-											$Values['Trials'][$ikey]['activeTrials'] = array_values($Values['Trials'][$ikey]['activeTrials']);
-										}
-									}
-								}
-							}
-							else
-							{
-
-								if($result[$index]['NCT/enrollment'] < $enroll[0] || $result[$index]['NCT/enrollment'] > $enroll[1])
-								{	
-									foreach($Values['Trials'][$ikey]['allTrials'] as $k => $v)
-									{
-										if($v['NCT/nct_id'] == $nctId)
-										{
-											unset($Values['Trials'][$ikey]['allTrials'][$k]);
-											$Values['Trials'][$ikey]['allTrials'] = array_values($Values['Trials'][$ikey]['allTrials']);
-										}
-									}
-									
-									foreach($Values['Trials'][$ikey]['inactiveTrials'] as $k => $v)
-									{
-										if($v['NCT/nct_id'] == $nctId)
-										{
-											unset($Values['Trials'][$ikey]['inactiveTrials'][$k]);
-											$Values['Trials'][$ikey]['inactiveTrials'] = array_values($Values['Trials'][$ikey]['inactiveTrials']);
-										}
-									}
-								
-									foreach($Trials['activeTrials'] as $k => $v)
-									{
-										if($v['NCT/nct_id'] == $nctId)
-										{
-											unset($Values['Trials'][$ikey]['activeTrials'][$k]);
-											$Values['Trials'][$ikey]['activeTrials'] = array_values($Values['Trials'][$ikey]['activeTrials']);
-										}
-									}
-								}
-							}
-						}
-					}
-				} 
-				else 
-				{
-					if(!empty($globalOptions['status']) && !empty($globalOptions['phase']) && !empty($globalOptions['region']))
-					{
-						$status = array();
-						foreach($globalOptions['status'] as $skey => $svalue)
-						{
-							$status[] = $this->statusFilters[$svalue];
-						}
-						
-						$phase = array();
-						foreach($globalOptions['phase'] as $pkey => $pvalue)
-						{	
-							$ph = array_keys($this->phaseFilters, $pvalue);
-							$phase = array_merge($phase, $ph);
-						}
-						
-						$region = array();
-						foreach($globalOptions['region'] as $rkey => $rgvalue)
-						{
-							$region[] = $this->regionFilters[$rgvalue];
-						}
-						
-						$trialRegion = array();
-						$trialRegion = explode(',', $result[$index]['region']);
-						$matchedRegion = array_intersect($region, $trialRegion);
-							
-						if(in_array($rvalue['NCT/overall_status'], $status) 
-						&& in_array($rvalue['NCT/phase'], $phase) 
-						&& !empty($matchedRegion))
-						{
-							$Values['Trials'][$ikey]['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
-							{
-								$Values['Trials'][$ikey]['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							}
-							else
-							{
-								$Values['Trials'][$ikey]['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							}
-						}
-						
-						unset($status);
-						unset($phase);
-						unset($region);
-						unset($trialRegion);
-						unset($matchedRegion);
-					}
-					else if(!empty($globalOptions['status']) && !empty($globalOptions['phase'])) 
-					{
-						$status = array();
-						foreach($globalOptions['status'] as $skey => $svalue)
-						{
-							$status[] = $this->statusFilters[$svalue];
-						}
-						
-						$phase = array();
-						foreach($globalOptions['phase'] as $pkey => $pvalue)
-						{	
-							$ph = array_keys($this->phaseFilters, $pvalue);
-							$phase = array_merge($phase, $ph);
-						}
-						
-						if(in_array($rvalue['NCT/overall_status'], $status) 
-						&& in_array($rvalue['NCT/phase'], $phase))
-						{
-							$Values['Trials'][$ikey]['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
-							{
-								$Values['Trials'][$ikey]['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							}
-							else
-							{
-								$Values['Trials'][$ikey]['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							}
-						}
-						
-						unset($status);
-						unset($phase);
-					}
-					else if(!empty($globalOptions['phase']) && !empty($globalOptions['region']))
-					{
-						$phase = array();
-						foreach($globalOptions['phase'] as $pkey => $pvalue)
-						{	
-							$ph = array_keys($this->phaseFilters, $pvalue);
-							$phase = array_merge($phase, $ph);
-						}
-						
-						$region = array();
-						foreach($globalOptions['region'] as $rkey => $rgvalue)
-						{
-							$region[] = $this->regionFilters[$rgvalue];
-						}
-						
-						$trialRegion = array();
-						$trialRegion = explode(',', $result[$index]['region']);
-						$matchedRegion = array_intersect($region, $trialRegion);
-						
-						if(in_array($rvalue['NCT/phase'], $phase) 
-						&& !empty($matchedRegion))
-						{
-							$Values['Trials'][$ikey]['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
-							{
-								$Values['Trials'][$ikey]['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							}
-							else
-							{
-								$Values['Trials'][$ikey]['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							}
-						}
-						
-						unset($phase);
-						unset($region);
-						unset($trialRegion);
-						unset($matchedRegion);
-					}
-					else if(!empty($globalOptions['status']) && !empty($globalOptions['region']))
-					{
-						$status = array();
-						foreach($globalOptions['status'] as $skey => $svalue)
-						{
-							$status[] = $this->statusFilters[$svalue];
-						}
-						
-						$region = array();
-						foreach($globalOptions['region'] as $rkey => $rgvalue)
-						{
-							$region[] = $this->regionFilters[$rgvalue];
-						}
-						
-						$trialRegion = array();
-						$trialRegion = explode(',', $result[$index]['region']);
-						$matchedRegion = array_intersect($region, $trialRegion);
-						
-						if(in_array($rvalue['NCT/overall_status'], $status) 
-						&& !empty($matchedRegion))
-						{
-							$Trials['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
-							{
-								$Values['Trials'][$ikey]['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							}
-							else
-							{
-								$Values['Trials'][$ikey]['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							}
-						}
-						
-						unset($status);
-						unset($region);
-						unset($trialRegion);
-						unset($matchedRegion);
-					}
-					else if(!empty($globalOptions['status']))
-					{
-						$status = array();
-						foreach($globalOptions['status'] as $skey => $svalue)
-						{
-							$status[] = $this->statusFilters[$svalue];
-						}
-						
-						if(in_array($rvalue['NCT/overall_status'], $status))
-						{
-							$Values['Trials'][$ikey]['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
-							{
-								$Values['Trials'][$ikey]['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							}
-							else
-							{
-								$Values['Trials'][$ikey]['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							}
-						}
-						
-						unset($status);
-					}
-					else if(!empty($globalOptions['phase']))
-					{
-						$phase = array();
-						foreach($globalOptions['phase'] as $pkey => $pvalue)
-						{	
-							$ph = array_keys($this->phaseFilters, $pvalue);
-							$phase = array_merge($phase, $ph);
-						}
-						
-						if(in_array($rvalue['NCT/phase'], $phase))
-						{
-							$Values['Trials'][$ikey]['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
-							{
-								$Values['Trials'][$ikey]['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							}
-							else
-							{
-								$Values['Trials'][$ikey]['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							}
-						}
-						
-						unset($phase);
-					}
-					else if(!empty($globalOptions['region']))
-					{
-						$region = array();
-						foreach($globalOptions['region'] as $rkey => $rgvalue)
-						{
-							$region[] = $this->regionFilters[$rgvalue];
-						}
-						
-						$trialRegion = array();
-						$trialRegion = explode(',', $result[$index]['region']);
-						$matchedRegion = array_intersect($region, $trialRegion);
-							
-						if(!empty($matchedRegion))
-						{
-							$Values['Trials'][$ikey]['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							if(in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues))
-							{
-								$Values['Trials'][$ikey]['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							}
-							else
-							{
-								$Values['Trials'][$ikey]['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-							}
-						}
-						
-						unset($region);
-						unset($trialRegion);
-						unset($matchedRegion);
-					}
-					else
-					{	
-						$Values['Trials'][$ikey]['allTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-						if(in_array($rvalue['NCT/overall_status'], $this->inactiveStatusValues))
-						{
-							$Values['Trials'][$ikey]['inactiveTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-						}
-						else
-						{
-							$Values['Trials'][$ikey]['activeTrials'][] = array_merge($dataset['trials'], $rvalue, $dataset['matchedupms']);
-						}
-					}
-					
-					if($globalOptions['enroll'] != '0')
-					{
-						$enroll = explode(' - ', $globalOptions['enroll']);
-
-						if($result[$index]['NCT/enrollment'] === NULL || $result[$index]['NCT/enrollment'] == '')
-						{
-							$result[$index]['NCT/enrollment'] = 0;
-						}
-						
-						if(strpos($enroll[1], '+') !== FALSE)
-						{
-							if($result[$index]['NCT/enrollment'] < $enroll[0])
-							{	
-								foreach($Values['Trials'][$ikey]['allTrials'] as $k => $v)
-								{
-									if($v['NCT/nct_id'] == $nctId)
-									{
-										unset($Values['Trials'][$ikey]['allTrials'][$k]);
-										$Values['Trials'][$ikey]['allTrials'] = array_values($Values['Trials'][$ikey]['allTrials']);
-									}
-								}
-							
-								foreach($Values['Trials'][$ikey]['inactiveTrials'] as $k => $v)
-								{
-									if($v['NCT/nct_id'] == $nctId)
-									{
-										unset($Values['Trials'][$ikey]['inactiveTrials'][$k]);
-										$Values['Trials'][$ikey]['inactiveTrials'] = array_values($Values['Trials'][$ikey]['inactiveTrials']);
-									}
-								}
-							
-								foreach($Values['Trials'][$ikey]['activeTrials'] as $k => $v)
-								{
-									if($v['NCT/nct_id'] == $nctId)
-									{
-										unset($Values['Trials'][$ikey]['activeTrials'][$k]);
-										$Values['Trials'][$ikey]['activeTrials'] = array_values($Values['Trials'][$ikey]['activeTrials']);
-									}
-								}
-							}
-						}
-						else
-						{
-							if($result[$index]['NCT/enrollment'] < $enroll[0] || $result[$index]['NCT/enrollment'] > $enroll[1])
-							{	
-								foreach($Values['Trials'][$ikey]['allTrials'] as $k => $v)
-								{
-									if($v['NCT/nct_id'] == $nctId)
-									{
-										unset($Values['Trials'][$ikey]['allTrials'][$k]);
-										$Values['Trials'][$ikey]['allTrials'] = array_values($Values['Trials'][$ikey]['allTrials']);
-									}
-								}
-							
-								foreach($Values['Trials'][$ikey]['inactiveTrials'] as $k => $v)
-								{
-									if($v['NCT/nct_id'] == $nctId)
-									{
-										unset($Values['Trials'][$ikey]['inactiveTrials'][$k]);
-										$Values['Trials'][$ikey]['inactiveTrials'] = array_values($Values['Trials'][$ikey]['inactiveTrials']);
-									}
-								}
-							
-								foreach($Values['Trials'][$ikey]['activeTrials'] as $k => $v)
-								{
-									if($v['NCT/nct_id'] == $nctId)
-									{
-										unset($Values['Trials'][$ikey]['activeTrials'][$k]);
-										$Values['Trials'][$ikey]['activeTrials'] = array_values($Values['Trials'][$ikey]['activeTrials']);
-									}
-								}
-							}
-						}
-					}
-					
-				}
-				
-				if(!in_array($rvalue['NCT/overall_status'],$this->activeStatusValues) && !in_array($rvalue['NCT/overall_status'],$this->inactiveStatusValues)) 
-				{ 
-					$log 	= 'WARN: A new value "' . $rvalue['NCT/overall_status'] 
-					. '" (not listed in the existing rule), was encountered for field overall_status.';
-					$logger->warn($log);
-					unset($log);
-				}
-				
-				//getting count of active trials from a common function used in run_heatmap.php and here
-				$larvolIds[] = $rvalue['larvol_id'];
-				sort($larvolIds); 
-				
-				$totalCount = count($larvolIds);
-				$activeCount = getActiveCount($larvolIds, $timeMachine);
-				$inactiveCount = $totalCount - $activeCount; 
-			}
-			
-			$totinactivecount  = $inactiveCount + $totinactivecount;
-			$totactivecount	= $activeCount + $totactivecount;
-			$totalcount		= $totalcount + $totalCount; 
-			
-			//expiry feature for new link method
-			$linkExpiry[$ikey] = array_unique($linkExpiry[$ikey]);
-			if(!empty($linkExpiry[$ikey])) 
-			{
-				usort($linkExpiry[$ikey], "cmpdate");
-				if(!empty($linkExpiry[$ikey])) 
-				{
-					$linkExpiryDate = $linkExpiry[$ikey][0];
-					
-					if(($linkExpiryDate < date('Y-m-d', $now)) || ($linkExpiryDate < date('Y-m-d',strtotime('+1 week', $now)))) 
-					{
-						$query = "UPDATE `rpt_ott_header` SET `expiry` = '" . date('Y-m-d',strtotime('+1 week', $now)) . "' WHERE id = '" . $Ids[0] . "' ";
-						$res = mysql_query($query) or tex('Bad SQL Query setting expiry date for row header' . "\n" . $query);
-						
-						$query = "UPDATE `rpt_ott_header` SET `expiry` = '" . date('Y-m-d',strtotime('+1 week', $now)) . "' WHERE id = '" . $Ids[1] . "' ";
-						$res = mysql_query($query) or tex('Bad SQL Query setting expiry date for col header' . "\n" . $query);
-						
-						if($Ids[2] == '-1' || $Ids[2] == '-2') 
-						{
-							if($Ids[2] == '-1')
-							{
-								$tableName = 'rpt_ott_trials';
-							}
-							if($Ids[2] == '-2')
-							{
-								$tableName = 'rpt_ott_searchdata';
-							}
-							$query = "UPDATE " . $tableName . " SET `expiry` = '" . date('Y-m-d',strtotime('+1 week', $now)) . "' WHERE id = '" . $Ids[3] . "' ";
-							$res = mysql_query($query) or tex('Bad SQL Query setting expiry date for trials result set' . "\n" . $query);
-							
-							if(isset($Ids[4]) && $Ids[4] != '') 
-							{
-								$query = "UPDATE `rpt_ott_upm` SET `expiry` = '" . date('Y-m-d',strtotime('+1 week',$now)) . "' WHERE id = '" . $Ids[4] . "' ";
-								$res = mysql_query($query) or tex('Bad SQL Query setting expiry date for upms' . "\n" . $query);
-							}
-						}
-						else
-						{
-							$searchData = substr($Ids[2],0,3);
-							if(dechex($searchData) == '73' && chr($searchData) == 's') 
-							{
-								$tableName = 'rpt_ott_searchdata';
-							}
-							else
-							{
-								$tableName = 'rpt_ott_trials';
-							}
-							$query = "UPDATE " . $tableName . " SET `expiry` = '" . date('Y-m-d',strtotime('+1 week',$now)) . "' WHERE id = '" . $Ids[2] . "' ";
-							$res = mysql_query($query) or tex('Bad SQL Query setting expiry date for trials result set' . "\n" . $query);
-							
-							if(isset($Ids[3]) && $Ids[3] != '') 
-							{
-								$query = "UPDATE `rpt_ott_upm` SET `expiry` = '" . date('Y-m-d',strtotime('+1 week',$now)) . "' WHERE id = '" . $Ids[3] . "' ";
-								$res = mysql_query($query) or tex('Bad SQL Query setting expiry date for upms' . "\n" . $query);
-							}
-						}
-					}
-					unset($linkExpiryDate);
-				}
+				$log 	= 'ERROR: Bad SQL query. ' . $query . mysql_error();
+				$logger->error($log);
+				unset($log);
 			}
 		}
 		
-		$linkExpiryDate = array();
-		foreach($linkExpiry as $lkey => $lvalue) 
-		{
-			foreach($lvalue as $lk => $lv) 
-			{
-				$linkExpiryDate[] = $lv;
-			}
-
-		}
-		if(!empty($linkExpiryDate)) 
-		{	
-			$Values['linkExpiry'] = $linkExpiryDate[0];
-			unset($linkExpiryDate);
-		}
-		
-		$Values['resultIds'] = $resultIds;
-		$Values['totactivecount'] = $totactivecount;
-		$Values['totinactivecount'] = $totinactivecount;
-		$Values['totalcount'] = $totalcount;
-		
-		return  $Values;
+		return $result;
 	}
 	
-	function displayWebPage($productSelectorTitle, $ottType, $resultIds, $timeMachine = NULL, $Values, $productSelector = array(), $globalOptions, $linkExpiry = NULL)
+	function getMatchedUpms($onlyUpdates, $larvolIds = array())
+	{
+		global $logger;
+		
+		$startRange = date('Y-m-d', strtotime($this->timeInterval ,$this->timeMachine));
+		$endRange = date('Y-m-d', $this->timeMachine);
+		
+		$result = array();
+		$upmIds = array();
+		$upmHistory = array();
+		
+		$query = " SELECT u.`id`, u.`event_type`, u.`event_description`, u.`event_link`, "
+					. " u.`result_link`, u.`start_date`, u.`end_date`, u.`status`, dt.`larvol_id`, u.`last_update`, uh.`id` AS historyid "
+					. " FROM upm u "
+					. " RIGHT JOIN upm_trials ut ON u.`id` = ut.`upm_id` "
+					. " LEFT JOIN data_trials dt ON dt.`larvol_id` = ut.`larvol_id` "
+					. " LEFT JOIN `upm_history` uh ON uh.`id` = u.`id` "
+					. " WHERE dt.`source_id` IN ('" . implode("','", $larvolIds) . "') "
+					. " ORDER BY u.`end_date` ASC, u.`start_date` ASC ";	
+					
+		$res = mysql_query($query);
+		if($res)
+		{
+			if(mysql_num_rows($res) > 0)
+			{
+				while($row = mysql_fetch_assoc($res))
+				{
+					$larvolId =  $row['larvol_id'];
+					$upmIds[] = $upmId = $row['id'];
+					
+					$result[$larvolId][$upmId]['new']	= 'n';
+					
+					$result[$larvolId][$upmId]['id'] = $upmId;
+					$result[$larvolId][$upmId]['event_description'] = htmlspecialchars($row['event_description']);
+					$result[$larvolId][$upmId]['status'] 		= $row['status'];
+					$result[$larvolId][$upmId]['event_link'] 	= $row['event_link'];
+					$result[$larvolId][$upmId]['result_link']	= $row['result_link'];
+					$result[$larvolId][$upmId]['event_type'] 	= $row['event_type'];
+					$result[$larvolId][$upmId]['start_date'] 	= $row['start_date'];
+					$result[$larvolId][$upmId]['start_date_type'] 	= $row['start_date_type'];
+					$result[$larvolId][$upmId]['end_date'] 			= $row['end_date'];
+					$result[$larvolId][$upmId]['end_date_type'] 	= $row['end_date_type'];
+					
+					if($row['last_update'] <= $endRange &&  $row['last_update'] >= $startRange && $row['historyid'] === NULL)
+					{
+						$result[$larvolId][$upmId]['new']	= 'y';
+					}
+					
+				}
+				
+				$upmHistory = $this->getUpmHistory($upmIds);
+				
+				foreach($result as $rkey => & $rvalue)
+				{
+					foreach($rvalue as $key => & $value)
+					{
+						if(isset($upmHistory[$key]))
+						{
+							$value['edited'] = $upmHistory[$key];
+						}
+						else
+						{
+							if($onlyUpdates == "yes" && $result[$rkey][$key]['new'] == "n")
+							{
+								unset($result[$rkey][$key]);
+							}
+						}
+					}
+				}
+				unset($upmHistory);
+			}
+		}
+		else
+		{
+			$log 	= 'ERROR: Bad SQL query. ' . $query . mysql_error();
+			$logger->error($log);
+			unset($log);
+		}
+		
+		return $result;
+	}
+	
+	function getUpmHistory($upmIds = array())
+	{	
+		$result = array();
+		$startRange = date('Y-m-d', strtotime($this->timeInterval ,$this->timeMachine));
+		$endRange = date('Y-m-d', $this->timeMachine);
+		
+		$query = "SELECT `id`, `field`, `old_value`, MAX(`change_date`) AS change_date FROM `upm_history` "
+					. " WHERE `id` IN ('" . implode("','", $upmIds) . "') AND (CAST(`change_date` AS DATE) <= '" . $endRange . "' AND "
+					. " CAST(`change_date` AS DATE) >= '" . $startRange . "') GROUP BY `id` ";
+		$res = mysql_query($query);
+		if($res)
+		{
+
+			while($row = mysql_fetch_assoc($res))
+			{
+				$upmId = $row['id'];
+				$field = $row['field'];
+				
+				$result[$upmId]['id'] = $upmId;
+				$result[$upmId]['field'] 	= $row['field'];
+				$result[$upmId][$field] = $row['old_value'];
+			}
+		}
+		else
+		{
+			$log 	= 'ERROR: Bad SQL query. ' . $query . mysql_error();
+			$logger->error($log);
+			unset($log);
+		}
+		
+		return $result;
+	}
+	
+	function displayWebPage($ottType, $resultIds, $Values, $productSelector = array(), $globalOptions)
 	{	
 		global $db, $maxEnrollLimit;
 		$loggedIn	= $db->loggedIn();
 		
-		if($ottType == 'indexed' || $ottType == 'unstacked' || $ottType == 'unstackedoldlink')
+		if($ottType == 'indexed')
 			$globalOptions['includeProductsWNoData'] = "on";
 			
-		if(in_array($globalOptions['startrange'], $globalOptions['Highlight_Range']))
-		{
-			$timeMachine = str_replace('ago', '', $globalOptions['startrange']);
-			$timeMachine = trim($timeMachine);
-			$timeMachine = '-' . (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
-		}
-		else
-		{
-			$timeMachine = trim($globalOptions['startrange']);
-			$timeMachine = (($timeMachine == '1 quarter') ? '3 months' : $timeMachine);
-		}
-		$timeMachine = strtotime($timeMachine);
-		
-		if(isset($globalOptions['product']) && !empty($globalOptions['product']))
-		{	
-			foreach($Values['Trials'] as $key => $value)
-			{	
-				if(!(in_array($key, $globalOptions['product'])))
-				{
-					unset($Values['Trials'][$key]);
-				}
-			}
-			$Values['Trials'] = array_values($Values['Trials']);
-		}
-		
 		echo '<input type="hidden" name="pr" id="product" value="' . implode(',', $globalOptions['product']) . '" />';
 		
-		$count = 0;
-		foreach($Values['Trials'] as $tkey => $tvalue)
-		{
-			$count += count($tvalue[$globalOptions['type']]);
-		}
-		
-		$start 	= '';
-		$last = '';
-		$totalPages = '';
-		
-		$start 	= ($globalOptions['page']-1) * $this->resultsPerPage + 1;
-		$last 	= ($globalOptions['page'] * $this->resultsPerPage > $count) ? $count : ($start + $this->resultsPerPage - 1);
+		$count = $Values['count'];
 		$totalPages = ceil($count / $this->resultsPerPage);
-		$paginate = $this->pagination($globalOptions, $totalPages, $timeMachine, $ottType, $loggedIn);
+		
+		$paginate = $this->pagination($globalOptions, $totalPages, $loggedIn);
 		
 		$urlParams = array();
 		parse_str($paginate[0], $urlParams);
@@ -11129,16 +7948,8 @@ class TrialTracker
 		{
 			$enrollments = array();
 			
-			foreach($Values['Trials'] as $tkey => $tvalue)
-			{
-				foreach($tvalue['allTrialsforDownload'] as $akey => $avalue)
-				{
-					$enrollments[] = $avalue['NCT/enrollment'];
-				}
-			}
-
 			$globalOptions['minEnroll'] = 0;
-			$globalOptions['maxEnroll'] = max($enrollments);
+			$globalOptions['maxEnroll'] = $Values['enrollment'];
 		}
 		else
 		{
@@ -11146,17 +7957,9 @@ class TrialTracker
 			$globalOptions['maxEnroll'] = $globalOptions['maxEnroll'];		
 		}
 		
-		if(isset($globalOptions['countDetails']) && !empty($globalOptions['countDetails']) 
-		&& $ottType != 'indexed' && $ottType != 'colstackedindexed' && $ottType != 'rowstackedindexed') 
-		{
-			$Values['totactivecount'] = $globalOptions['countDetails']['a'];
-			$Values['totinactivecount'] = $globalOptions['countDetails']['in'];
-			$Values['totalcount'] = $Values['totactivecount'] + $Values['totinactivecount'];
-		}
-		
 		natcasesort($productSelector);
 		
-		$this->displayFilterControls($productSelector, $productSelectorTitle, $count, $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], $globalOptions, $ottType, $loggedIn);
+		$this->displayFilterControls($productSelector, $count, $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], $globalOptions, $ottType, $loggedIn);
 		echo '<div id="parent">';
 		echo '<div class="advanced" id="togglefilters"><img src="images/funnel.png" alt="Show Filter" style="vertical-align:bottom;" />&nbsp;Advanced</div>'
 				. '<div class="records">' . $count . '&nbsp;Trials</div>';
@@ -11358,40 +8161,15 @@ class TrialTracker
 		if($totalPages > 1)
 		{
 			echo $paginate[1];
-			//$this->pagination($globalOptions, $totalPages, $timeMachine, $ottType, $loggedIn);
 		}
 		
 		echo '<div  id="fulltextsearchbox">'
-			. '<input type="text" name="ss" autocomplete="off" style="width:153px;" value="' . $globalOptions['sphinxSearch'] . '" /></div>';
+			//. '<input type="text" name="ss" autocomplete="off" style="width:153px;" value="' . $globalOptions['sphinxSearch'] . '" />'
+			. '</div>';
 		
 		$resetUrl = 'intermediary.php?';
-		$headerType = '';
+		$resetUrl .= $globalOptions['url'];
 		
-		if($ottType == 'unstacked')
-		{
-			$resetUrl .= 'results=' . $globalOptions['url'];
-		}
-		else if($ottType == 'rowstacked' || $ottType == 'colstacked')
-		{	
-			$resetUrl .= 'results=' .  $globalOptions['url'];
-		}
-		else if($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed')
-		{
-			if($ottType == 'rowstackedindexed')
-			{
-				$headerType = 'area';
-			}
-			else
-			{
-				$headerType = 'product';
-			}
-			
-			$resetUrl .= $globalOptions['url'];
-		}
-		else if($ottType == 'standalone')
-		{
-			$resetUrl .= 'id=' . $globalOptions['url'];
-		}
 		$resetUrl .= str_replace(',', '&', $globalOptions['resetLink']);
 		$resetUrl = htmlentities($resetUrl);
 		
@@ -11404,113 +8182,53 @@ class TrialTracker
 			. '</div>';
 				
 		echo '<input type="hidden" name="rflag" value="1" /><input type="hidden" name="rlink" value="' . $globalOptions['resetLink'] . '" />';
-		//echo '<div style="clear:both;height:10px;">&nbsp;</div>';
 		
-		echo $this->displayTrialTableHeader($loggedIn, $globalOptions);
+		echo '<table cellpadding="0" cellspacing="0" class="manage">'
+					 . '<tr>' . (($loggedIn) ? '<th style="width:70px;">ID</th>' : '' )
+					 . '<th style="width:270px;">Title</th>'
+					 . '<th style="width:30px;" title="Red: Change greater than 20%">N</th>'
+					 . '<th style="width:64px;" title="&quot;RoW&quot; = Rest of World">Region</th>'
+					 . '<th style="width:100px;">Interventions</th>'
+					 . '<th style="width:90px;">Sponsor</th>'
+					 . '<th style="width:105px;">Status</th>'
+					 . '<th style="width:100px;">Conditions</th>'
+					 . '<th title="MM/YY" style="width:33px;">End</th>'
+					 . '<th style="width:25px;">Ph</th>'
+					 . '<th style="width:25px;">Res</th>'
+					 . '<th colspan="3" style="width:12px;">-</th>'
+					 . '<th colspan="12" style="width:32px;">' . (date('Y')) . '</th>'
+					 . '<th colspan="12" style="width:32px;">' . (date('Y')+1) . '</th>'
+					 . '<th colspan="12" style="width:32px;">' . (date('Y')+2) . '</th>'
+					 . '<th colspan="3" style="width:12px;">+</th></tr>';
+		
 		if($count > 0)
-		{	
-			echo $this->displayTrials($totalPages, $globalOptions, $loggedIn, $start, $last, $Values, $ottType);
+		{
+			echo $this->displayTrials($globalOptions, $loggedIn, $Values, $ottType, $totalPages);
 		}
 		else
-		{	
+		{
 			$outputStr = '';
-			
-			foreach($Values['Trials'] as $tkey => $tvalue)
-			{	
-				$tvalue['sectionHeader'] = $tvalue['sectionHeader'];
-				if($globalOptions['includeProductsWNoData'] == "off")
+			foreach($Values['Data'] as $dkey => $dvalue)
+			{
+				$sectionHeader = $dvalue['sectionHeader'];
+				$naUpms = $dvalue['naUpms'];
+				
+				if(!empty($naUpms))
 				{
-					if(isset($tvalue['naUpms']) && !empty($tvalue['naUpms']))
-					{
-						if($ottType == 'rowstacked' || $ottType == 'rowstackedindexed')
-						{
-							$outputStr .= '<tr class="trialtitles">'
-										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
-										. 'style="background: url(\'images/down.png\') no-repeat left center;"'
-										. ' onclick="sh(this,\'rowstacked\');">&nbsp;</td></tr>'
-										. $this->displayUnMatchedUpms($loggedIn, 'rowstacked', $tvalue['naUpms'])
-										. '<tr class="trialtitles">'
-										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles">' 
-										. $tvalue['sectionHeader'] . '</td></tr>';
-						}
-						else
-						{
-							if($ottType == 'colstacked' || $ottType == 'colstackedindexed')
-								$image = 'up';
-							else
-								$image = 'down';
-							
-							$naUpmIndex = preg_replace('/[^a-zA_Z0-9]/i', '', $tvalue['sectionHeader']);
-							$naUpmIndex = substr($naUpmIndex, 0, 15);
-							
-							$outputStr .= '<tr class="trialtitles">'
-										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
-										. ' style="background: url(\'images/' . $image . '.png\') no-repeat left center;"'
-										. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
-										. $tvalue['sectionHeader'] . '</td></tr>';
-							$outputStr .= $this->displayUnMatchedUpms($loggedIn, $naUpmIndex, $tvalue['naUpms']);
-						}
-						
-						//No trial found row not shown when show only changed items is selected
-						if($globalOptions['onlyUpdates'] == "no")
-						{
-							$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
-						}
-					}
+					$outputStr .= $this->displayUpmHeaders($ottType, $naUpms, $sectionHeader);
 				}
 				else
 				{
-					if(isset($tvalue['naUpms']) && !empty($tvalue['naUpms']))
-					{
-						if($ottType == 'rowstacked' || $ottType == 'rowstackedindexed')
-						{
-							$outputStr .= '<tr class="trialtitles">'
-										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
-										. 'style="background: url(\'images/down.png\') no-repeat left center;"'
-										. ' onclick="sh(this,\'rowstacked\');">&nbsp;</td></tr>'
-										. $this->displayUnMatchedUpms($loggedIn, 'rowstacked', $tvalue['naUpms'])
-										. '<tr class="trialtitles">'
-										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles">' 
-										. $tvalue['sectionHeader'] . '</td></tr>';
-						}
-						else
-						{
-							if($ottType == 'colstacked' || $ottType == 'colstackedindexed')
-								$image = 'up';
-							else
-								$image = 'down';
-							
-							$naUpmIndex = preg_replace('/[^a-zA_Z0-9]/i', '', $tvalue['sectionHeader']);
-							$naUpmIndex = substr($naUpmIndex, 0, 15);
-							
-							$outputStr .= '<tr class="trialtitles">'
-										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
-										. ' style="background: url(\'images/' . $image . '.png\') no-repeat left center;"'
-										. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
-										. $tvalue['sectionHeader'] . '</td></tr>';
-							$outputStr .= $this->displayUnMatchedUpms($loggedIn, $naUpmIndex, $tvalue['naUpms']);
-						}
-					}
-					else
-					{
-						$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">'
-									. $tvalue['sectionHeader'] . '</td></tr>';
-					}
-					//No trial found row not shown when show only changed items is selected
-					if($globalOptions['onlyUpdates'] == "no")
-					{
-						$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
-					}
+					$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">' . $sectionHeader . '</td></tr>';
 				}
-				
+				$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
 			}
+			
 			echo $outputStr;
 		}
 		
 		echo '</table>';
 		
-		echo '<input type="hidden" name="cd" value="' 
-			. rawurlencode(base64_encode(gzdeflate(serialize(array('a' => $Values['totactivecount'], 'in' => $Values['totinactivecount']))))) . '" />';
 		echo '<input type="hidden" name="minenroll" id="minenroll" value="' . $globalOptions['minEnroll'] 
 			. '" /><input type="hidden" name="maxenroll" id="maxenroll" value="' . $globalOptions['maxEnroll'] . '" />';	
 		
@@ -11522,19 +8240,13 @@ class TrialTracker
 		}
 		echo '</form><br/>';
 		
-		if($Values['totalcount'] > 0 && ($ottType != 'unstackedoldlink' && $ottType != 'stackedoldlink')) 
+		if($Values['totalcount'] > 0) 
 		{
 			echo '<div id="dropmenu" class="dropmenudiv" style="width: 310px;">'
 				. $this->downloadOptions($count, $Values['totalcount'], $ottType, $resultIds, $globalOptions)
 				. '</div><script type="text/javascript">cssdropdown.startchrome("chromemenu");</script>';
-			
 		}
-		echo '<br/><br/>';
-		if($linkExpiry !== NULL && $loggedIn)
-		{
-			echo '<span style="font-size:10px;color:red;">Expires on: ' . $linkExpiry  . '</span>';
-		}
-		echo '<div style="height:50px;"></div>';	//50Pixels extra space
+		echo '<br/><br/><div style="height:50px;"></div>';
 	}
 	
 	function downloadOptions($shownCnt, $foundCnt, $ottType, $result, $globalOptions) 
@@ -11578,8 +8290,7 @@ class TrialTracker
 							. '<li><label>Which Format: </label></li>'
 							. '<li><select id="wFormat" name="wFormat" size="3" style="height:54px;">'
 							. '<option value="excel" selected="selected">Excel</option>'
-							// hiding pdf export temporarily
-							// . '<option value="pdf">PDF</option>'
+							//. '<option value="pdf">PDF</option>'
 							. '<option value="tsv">TSV</option>'
 							. '</select></li></ul>'
 							. '<input type="hidden" name="shownCnt" value="' . $shownCnt . '" />'
@@ -11589,99 +8300,24 @@ class TrialTracker
 		return $downloadOptions;
 	}
 	
-	function displayTrialTableHeader($loggedIn, $globalOptions = array()) 
-	{
-		$outputStr = '<table cellpadding="0" cellspacing="0" class="manage">'
-					 . '<tr>' . (($loggedIn) ? '<th style="width:70px;">ID</th>' : '' )
-					 . '<th style="width:270px;">Title</th>'
-					 . '<th style="width:30px;" title="Red: Change greater than 20%">N</th>'
-					 . '<th style="width:64px;" title="&quot;RoW&quot; = Rest of World">Region</th>'
-					 . '<th style="width:100px;">Interventions</th>'
-					 . '<th style="width:90px;">Sponsor</th>'
-					 . '<th style="width:105px;">Status</th>'
-					 . '<th style="width:100px;">Conditions</th>'
-					 . '<th title="MM/YY" style="width:33px;">End</th>'
-					 . '<th style="width:25px;">Ph</th>'
-					 . '<th style="width:25px;">Res</th>'
-					 . '<th colspan="3" style="width:12px;">-</th>'
-					 . '<th colspan="12" style="width:32px;">' . (date('Y')) . '</th>'
-					 . '<th colspan="12" style="width:32px;">' . (date('Y')+1) . '</th>'
-					 . '<th colspan="12" style="width:32px;">' . (date('Y')+2) . '</th>'
-					 . '<th colspan="3" style="width:12px;">+</th></tr>';
-		
-		return $outputStr;
-	}
-		
-	function getResultSet($resultIds, $stackType)
-	{	
-		$three = 0;
-		$lengthcounter = 0; 
-		$string = '';
-		$ouput = array();
-		
-		foreach($resultIds as $value)
-		{
-			if($lengthcounter == 0)
-			{
-				$lengthcounter = $value;
-				continue;
-			}
-			$string .= $value . '.';
-			$three++;
-			if($three == $lengthcounter)
-			{
-				$output[] = substr($string, 0, -1);
-				$three = 0;
-				$lengthcounter = 0;
-				$string = '';
-			}
-		}
-		
-		$id = explode('.', $output[0]);
-		foreach($output as $okey => &$ovalue)
-		{	
-			if($okey != 0)
-			{
-				$out = array();
-				$out = explode('.', $ovalue);
-				if($stackType == 'colstacked')
-				{
-					array_splice($out, 1, 0, $id[1]);
-				}
-				else
-				{
-					array_splice($out, 0, 0, $id[0]);
-					if(isset($out[4])) 
-					{
-						array_pop($out);
-					}
-				}
-				$ovalue = implode('.', $out);
-			}	
-		}
-		return $output;
-	}
-	
 	function displayHeader($productAreaInfo)
 	{
-		global $li_user;
-		if(isset($_REQUEST['sphinx_s']))
+		/*if(isset($_REQUEST['sphinx_s']))
 		{
 			echo '<input type="hidden" name="sphinx_s" value="'.$_REQUEST['sphinx_s'].'" />';
 		}
 		elseif(isset($globalOptions['sphinx_s']))
 		{
 			echo '<input type="hidden" name="sphinx_s" value="'.$globalOptions['sphinx_s'].'" />';
-		}
+		}*/
+		
 		if((isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') !== FALSE) 
 		|| (isset($_GET['LI']) && $_GET['LI'] == 1))
 		{
 			echo '<input type="hidden" name="LI" value="1" />';
-			$li_user='YES';
 		}
 		else
 		{
-			$li_user=null;
 			echo '<table width="100%">'
 					. '<tr><td><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" /></td>'
 					. '<td nowrap="nowrap"><span style="color:#ff0000;font-weight:normal;margin-left:40px;">Interface work in progress</span>'
@@ -11692,7 +8328,7 @@ class TrialTracker
 		}
 	}
 	
-	function displayFilterControls($productSelector = array(), $productSelectorTitle, $shownCount, $activeCount, $inactiveCount, $totalCount, $globalOptions = array(), $ottType, $loggedIn)
+	function displayFilterControls($productSelector = array(), $shownCount, $activeCount, $inactiveCount, $totalCount, $globalOptions = array(), $ottType, $loggedIn)
 	{	
 		echo '<table border="0" cellspacing="0" class="controls" align="center" style="_width:100%; table-layout: fixed;display: none;">'
 				. '<tr><td colspan="5" style="border: none;height:29px;"></td></tr>'
@@ -11765,6 +8401,7 @@ class TrialTracker
 				 . (in_array('12', $globalOptions['status']) ? 'checked = "checked" ' : '') . '/>Suspended<br/>'
 				 . '<input type="checkbox" class="status" value="13" ' 
 				 . (in_array('13', $globalOptions['status']) ? 'checked = "checked" ' : '') . '/>Completed<br/>';
+
 		}
 		else
 		{
@@ -11823,6 +8460,7 @@ class TrialTracker
 				. (in_array('1', $globalOptions['phase']) ? ' checked="checked" ' : '') . '/>'
 				. '<label for="phase_1">1</label><br />'
 				. '<input type="checkbox" value="2" id="phase_2" class="phase" '
+
 				. (in_array('2', $globalOptions['phase']) ? ' checked="checked" ' : '') . '/>'
 				. '<label for="phase_2">2</label><br />'
 				. '<input type="checkbox" value="3" id="phase_3" class="phase" '
@@ -11860,9 +8498,9 @@ class TrialTracker
 				. ' value="' . ((isset($globalOptions['enroll'])) ? $globalOptions['enroll'] : '' ) . '" autocomplete="off" />'
 				. '<div id="slider-range" align="left"></div>'
 				. '</p></div>';
-		if($ottType != 'unstacked' && $ottType != 'indexed' && $ottType != 'unstackedoldlink')
+		if($ottType != 'indexed')
 		{
-			$title = strtolower(str_replace('Select', '', $productSelectorTitle));
+			$title = (($ottType == 'colstacked') ? 'products' : 'areas');
 			echo '<br/><input type="checkbox" id="ipwnd" name="ipwnd" ' . (($globalOptions['includeProductsWNoData'] == "on") ? 'checked="checked"' : '') . ' />'
 				. '<label style="font-size:x-small;" for="ipwnd">Include ' . $title . ' with no data</label>';
 		}
@@ -11876,13 +8514,13 @@ class TrialTracker
 				. '<td class="bottom">&nbsp;</td><td class="right bottom">';
 		
 		if(!empty($productSelector)
-		&& ($ottType != 'unstacked' && $ottType != 'indexed' && $ottType != 'unstackedoldlink'))
+		&& ($ottType != 'indexed'))
 		{
 			echo '<div id="menuwrapper" style="vertical-align:bottom;margin-left: 2px;"><ul>';
 			if(isset($globalOptions['product']) && !empty($globalOptions['product']))
 			{	
 				if(count($globalOptions['product']) > 1)
-					$tTitle = count($globalOptions['product']) . strtolower(str_replace('Select', '', $productSelectorTitle)) . ' selected';
+					$tTitle = count($globalOptions['product']) . ' ' . $title  . ' selected';
 				else
 					$tTitle = $productSelector[$globalOptions['product'][0]];
 					
@@ -11891,7 +8529,7 @@ class TrialTracker
 			}
 			else
 			{	
-				echo '<li class="arrow" style="height:23px;"><a href="javascript: void(0);">' . $productSelectorTitle . '</a>';
+				echo '<li class="arrow" style="height:23px;"><a href="javascript: void(0);">Select ' . $title . '</a>';
 			}
 			
 			echo '<ul id="productbox">';
@@ -11915,27 +8553,11 @@ class TrialTracker
 			. '<input type="hidden" name="region" id="region" value="' . implode(',', $globalOptions['region']) . '" />'
 			. '<input type="hidden" name="phase" id="phase" value="' . implode(',', $globalOptions['phase']) . '" />';
 	}
+
 	
-	function pagination($globalOptions = array(), $totalPages, $timeMachine = NULL, $ottType, $loggedIn)
+	function pagination($globalOptions = array(), $totalPages, $loggedIn)
 	{ 	
-		$url = '';//'intermediary.php?';
-		 
-		if($ottType == 'unstacked')
-		{
-			$url .= 'results=' . $globalOptions['url'];
-		}
-		else if($ottType == 'rowstacked' || $ottType == 'colstacked')
-		{	
-			$url .= 'results=' .  $globalOptions['url'];
-		}
-		else if($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed')
-		{
-			$url .= $globalOptions['url'];
-		}
-		else if($ottType == 'standalone')
-		{
-			$url .= 'id=' . $globalOptions['url'];
-		}
+		$url = $globalOptions['url'];
 		
 		if(isset($globalOptions['startrange']))
 		{
@@ -11946,10 +8568,6 @@ class TrialTracker
 			$url .= '&amp;er=' . $globalOptions['endrange'];
 		}
 		
-		if($globalOptions['version'] != 0)
-		{
-			$url .= '&amp;v=' . $globalOptions['version'];
-		}
 		if(isset($globalOptions['type']) && $globalOptions['type'] != 'activeTrials')
 		{	
 			if($globalOptions['type'] == 'inactiveTrials')
@@ -11958,6 +8576,7 @@ class TrialTracker
 			}
 			else
 			{	
+
 				$url .= '&amp;list=2';
 			}
 		}
@@ -11988,15 +8607,6 @@ class TrialTracker
 			$url .= '&amp;enroll=' . $globalOptions['enroll'];
 		}
 		
-		if(isset($globalOptions['countDetails']) && !empty($globalOptions['countDetails']))
-		{
-			$url .= '&amp;cd=' . rawurlencode(base64_encode(gzdeflate(serialize($globalOptions['countDetails']))));
-		}
-		if(isset($globalOptions['encodeFormat']) && $globalOptions['encodeFormat'] != 'old')
-		{
-			$url .= '&amp;format=' . $globalOptions['encodeFormat'];
-		}
-		
 		if(isset($globalOptions['LI']) && $globalOptions['LI'] == '1')
 		{
 			$url .= '&amp;LI=1';
@@ -12012,24 +8622,24 @@ class TrialTracker
 			$url .= '&amp;ipwnd=on';
 		}
 		
-		if(isset($_REQUEST['sphinx_s']))
+		/*if(isset($_REQUEST['sphinx_s']))
 		{
 			$url .= '&amp;sphinx_s=' . $_REQUEST['sphinx_s'];
 		}
 		if( !isset($_REQUEST['sphinx_s']) and isset($globalOptions['sphinx_s']))
 		{
 			$url .= '&amp;sphinx_s=' . $globalOptions['sphinx_s'];
-		}
+		}*/
 		
 		if(isset($globalOptions['showTrialsSponsoredByProductOwner']) && $globalOptions['showTrialsSponsoredByProductOwner'] == "on")
 		{
 			$url .= '&amp;tspo=on';
 		}
 		
-		if(isset($globalOptions['sphinxSearch']) && $globalOptions['sphinxSearch'] != '')
+		/*if(isset($globalOptions['sphinxSearch']) && $globalOptions['sphinxSearch'] != '')
 		{
 			$url .= '&amp;ss=' . $globalOptions['sphinxSearch'];
-		}
+		}*/
 		
 		if(isset($globalOptions['hm']) && $globalOptions['hm'] != '')
 		{
@@ -12143,201 +8753,167 @@ class TrialTracker
 		return array($url, $paginateStr);
 	}
 	
-	function displayTrials($totalPages, $globalOptions = array(), $loggedIn, $start, $end, $Values, $ottType)
+	function displayUpmHeaders_TCPDF($ottType, $naUpms, $sectionHeader)
+	{
+		global $db;
+		$loggedIn	= $db->loggedIn();
+		
+		$outputStr = '';
+		if($loggedIn)
+			$col_width=548;
+		else
+			$col_width=518;
+		
+		if($ottType == 'rowstacked')
+		{
+			$outputStr .= '<tr class="trialtitles" style=" width:' . $col_width . 'px; page-break-inside:avoid;" nobr="true">'
+						. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
+						. 'style="background: url(\'images/down.png\') no-repeat left center;"'
+						. ' onclick="sh(this,\'rowstacked\');" style="width:' . $col_width . 'px;">&nbsp;</td></tr>'
+						. $this->displayUnMatchedUpms_TCPDF($loggedIn, 'rowstacked', $naUpms)
+						. '<tr class="trialtitles" style=" width:'.$col_width.'px; page-break-inside:avoid;" nobr="true">'
+						. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles" style="width:' . $col_width . 'px;">' 
+						. $sectionHeader . '</td></tr>';
+		}
+		else
+		{
+			if($ottType == 'colstacked')
+				$image = 'up';
+			else
+				$image = 'down';
+			
+			$naUpmIndex = preg_replace('/[^a-zA_Z0-9]/i', '', $sectionHeader);
+			$naUpmIndex = substr($naUpmIndex, 0, 15);
+			
+			$outputStr .= '<tr class="trialtitles" style=" width:' . $col_width . 'px; page-break-inside:avoid;" nobr="true">'
+						. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
+						. ' style="background: url(\'images/' . $image . '.png\') no-repeat left center;"'
+						. ' onclick="sh(this,\'' . $naUpmIndex . '\');" style="width:' . $col_width . 'px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+						. $sectionHeader . '</td></tr>';
+			$outputStr .= $this->displayUnMatchedUpms_TCPDF($loggedIn, $naUpmIndex, $naUpms);
+		}
+		
+		return $outputStr;
+	}
+	
+	function displayUpmHeaders($ottType, $naUpms, $sectionHeader)
+	{
+		global $db;
+		$loggedIn	= $db->loggedIn();
+		
+		if($ottType == 'rowstacked')
+		{
+			$outputStr .= '<tr class="trialtitles">'
+						. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
+						. 'style="background: url(\'images/down.png\') no-repeat left center;"'
+						. ' onclick="sh(this,\'rowstacked\');">&nbsp;</td></tr>'
+						. $this->displayUnMatchedUpms($loggedIn, 'rowstacked', $naUpms)
+						. '<tr class="trialtitles">'
+						. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles">' 
+						. $sectionHeader . '</td></tr>';
+		}
+		else
+		{
+			if($ottType == 'colstacked')
+				$image = 'up';
+			else
+				$image = 'down';
+			
+			$naUpmIndex = preg_replace('/[^a-zA_Z0-9]/i', '', $sectionHeader);
+			$naUpmIndex = substr($naUpmIndex, 0, 15);
+			
+			$outputStr .= '<tr class="trialtitles">'
+						. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
+						. ' style="background: url(\'images/' . $image . '.png\') no-repeat left center;"'
+						. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+						. $sectionHeader . '</td></tr>';
+			$outputStr .= $this->displayUnMatchedUpms($loggedIn, $naUpmIndex, $naUpms);
+		}
+		
+		return $outputStr;
+	}
+	
+	function displayTrials($globalOptions = array(), $loggedIn, $Values, $ottType, $totalPages)
 	{	
 		$currentYear = date('Y');
 		$secondYear = (date('Y')+1);
 		$thirdYear = (date('Y')+2);
 		
-		$displayFlag = false;
-		$outputStr = '';
-		
-		$start = $start - 1;
 		$counter = 0;
-		$finalkey = 0;
-		$headerType = '';
 		
-		if($ottType == 'rowstackedindexed')
+		$outputStr = '';
+		$lastKey = '-1';
+		foreach($Values['Data'] as $dkey => $dvalue)
 		{
-			$headerType = 'area';
-		}
-		else
-		{
-			$headerType = 'product';
-		}
-		
-		foreach($Values['Trials'] as $vkey => $vvalue)
-		{
-			$vvalue['sectionHeader'] = $vvalue['sectionHeader'];
-			if(($counter >= $start && $counter < $end))
+			$sectionHeader = $dvalue['sectionHeader'];
+			$naUpms = $dvalue['naUpms'];
+			
+			$lastKey = $dkey;
+			
+			if($globalOptions['page'] == 1 && $lastKey == $dkey )
 			{
+				//Rendering Upms
 				if($globalOptions['includeProductsWNoData'] == "off")
 				{
-					//Rendering Upms
-					if(isset($vvalue['naUpms']) && !empty($vvalue['naUpms']) && !empty($vvalue[$globalOptions['type']]))
+					if(!empty($naUpms) || (isset($dvalue['Trials']) && !empty($dvalue['Trials'])))
 					{
-						if($ottType == 'rowstacked' || $ottType == 'rowstackedindexed')
+						if(!empty($naUpms))
 						{
-							$outputStr .= '<tr class="trialtitles">'
-										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
-										. 'style="background: url(\'images/down.png\') no-repeat left center;"'
-										. ' onclick="sh(this,\'rowstacked\');">&nbsp;</td></tr>'
-										. $this->displayUnMatchedUpms($loggedIn, 'rowstacked', $vvalue['naUpms'])
-										. '<tr class="trialtitles">'
-										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles">' 
-										. $vvalue['sectionHeader'] . '</td></tr>';
+							$outputStr .= $this->displayUpmHeaders($ottType, $naUpms, $sectionHeader);
 						}
 						else
 						{
-							if($ottType == 'colstacked' || $ottType == 'colstackedindexed')
-								$image = 'up';
-							else
-								$image = 'down';
-							
-							$naUpmIndex = preg_replace('/[^a-zA_Z0-9]/i', '', $vvalue['sectionHeader']);
-							$naUpmIndex = substr($naUpmIndex, 0, 15);
-							
-							$outputStr .= '<tr class="trialtitles">'
-										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
-										. ' style="background: url(\'images/' . $image . '.png\') no-repeat left center;"'
-										. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
-										. $vvalue['sectionHeader'] . '</td></tr>';
-							$outputStr .= $this->displayUnMatchedUpms($loggedIn, $naUpmIndex, $vvalue['naUpms']);
+							$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">' . $sectionHeader . '</td></tr>';
 						}
-					}
-					else if(isset($vvalue['naUpms']) && !empty($vvalue['naUpms']) && empty($vvalue[$globalOptions['type']]))
-					{
-						if($ottType == 'rowstacked' || $ottType == 'rowstackedindexed')
-						{
-							$outputStr .= '<tr class="trialtitles">'
-										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
-										. 'style="background: url(\'images/down.png\') no-repeat left center;"'
-										. ' onclick="sh(this,\'rowstacked\');">&nbsp;</td></tr>'
-										. $this->displayUnMatchedUpms($loggedIn, 'rowstacked', $vvalue['naUpms'])
-										. '<tr class="trialtitles">'
-										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles">' 
-										. $vvalue['sectionHeader'] . '</td></tr>';
-						}
-						else
-						{
-							if($ottType == 'colstacked' || $ottType == 'colstackedindexed')
-								$image = 'up';
-							else
-								$image = 'down';
-							
-							$naUpmIndex = preg_replace('/[^a-zA_Z0-9]/i', '', $vvalue['sectionHeader']);
-							$naUpmIndex = substr($naUpmIndex, 0, 15);
-							
-							$outputStr .= '<tr class="trialtitles">'
-										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
-										. ' style="background: url(\'images/' . $image . '.png\') no-repeat left center;"'
-										. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
-										. $vvalue['sectionHeader'] . '</td></tr>';
-							$outputStr .= $this->displayUnMatchedUpms($loggedIn, $naUpmIndex, $vvalue['naUpms']);
-						}
-					}
-					else if(empty($vvalue['naUpms']) && !empty($vvalue[$globalOptions['type']]))
-					{
-						$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">'
-									. $vvalue['sectionHeader'] . '</td></tr>';
 					}
 				}
 				else
-				{
-					//Rendering Upms
-					if(isset($vvalue['naUpms']) && !empty($vvalue['naUpms']))
+				{	
+					if(!empty($naUpms))
 					{
-						if($ottType == 'rowstacked' || $ottType == 'rowstackedindexed')
-						{
-							$outputStr .= '<tr class="trialtitles">'
-										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
-										. 'style="background: url(\'images/down.png\') no-repeat left center;"'
-										. ' onclick="sh(this,\'rowstacked\');">&nbsp;</td></tr>'
-										. $this->displayUnMatchedUpms($loggedIn, 'rowstacked', $vvalue['naUpms'])
-										. '<tr class="trialtitles">'
-										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles">' 
-										. $vvalue['sectionHeader'] . '</td></tr>';
-						}
-						else
-						{
-							if($ottType == 'colstacked' || $ottType == 'colstackedindexed')
-								$image = 'up';
-							else
-								$image = 'down';
-							
-							$naUpmIndex = preg_replace('/[^a-zA_Z0-9]/i', '', $vvalue['sectionHeader']);
-							$naUpmIndex = substr($naUpmIndex, 0, 15);
-							
-							$outputStr .= '<tr class="trialtitles">'
-										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
-										. ' style="background: url(\'images/' . $image . '.png\') no-repeat left center;"'
-										. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
-										. $vvalue['sectionHeader'] . '</td></tr>';
-							$outputStr .= $this->displayUnMatchedUpms($loggedIn, $naUpmIndex, $vvalue['naUpms']);
-						}
+						$outputStr .= $this->displayUpmHeaders($ottType, $naUpms, $sectionHeader);
 					}
 					else
 					{
-						$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">'
-									. $vvalue['sectionHeader'] . '</td></tr>';
+						$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">' . $sectionHeader . '</td></tr>';
 					}
 				}
-				
-				$displayFlag = true;
-				$finalkey = $vkey;
 			}
-			
-			foreach($vvalue[$globalOptions['type']] as $dkey => $dvalue)
-			{	
-				if($counter >= $start && $counter < $end)
-				{	
-					if(($displayFlag == false) && isset($globalOptions['page']) && $globalOptions['page'] > 1)
-					{	
-						$naUpms = $vvalue['naUpms'];
-						$sectionHeader = $vvalue['sectionHeader'];
-						
-						//Rendering Upms
-						if(isset($naUpms) && !empty($naUpms))
+				
+			if(isset($dvalue['Trials']) && !empty($dvalue['Trials']))
+			{
+				if($globalOptions['page'] > 1 && $lastKey == $dkey)
+				{
+					//Rendering Upms
+					if($globalOptions['includeProductsWNoData'] == "off")
+					{
+						if(!empty($naUpms) || (isset($dvalue['Trials']) && !empty($dvalue['Trials'])))
 						{
-							if($ottType == 'rowstacked' || $ottType == 'rowstackedindexed')
+							if(!empty($naUpms))
 							{
-								$outputStr .= '<tr class="trialtitles">'
-											. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
-											. 'style="background: url(\'images/down.png\') no-repeat left center;"'
-											. ' onclick="sh(this,\'rowstacked\');">&nbsp;</td></tr>'
-											. $this->displayUnMatchedUpms($loggedIn, 'rowstacked', $naUpms)
-											. '<tr class="trialtitles">'
-											. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles">' 
-											. $sectionHeader . '</td></tr>';
+								$outputStr .= $this->displayUpmHeaders($ottType, $naUpms, $sectionHeader);
 							}
 							else
 							{
-								if($ottType == 'colstacked' || $ottType == 'colstackedindexed')
-									$image = 'up';
-								else
-									$image = 'down';
-								
-								$naUpmIndex = preg_replace('/[^a-zA_Z0-9]/i', '', $sectionHeader);
-								$naUpmIndex = substr($naUpmIndex, 0, 15);
-								
-								$outputStr .= '<tr class="trialtitles">'
-											. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
-											. ' style="background: url(\'images/' . $image . '.png\') no-repeat left center;"'
-											. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
-											. $sectionHeader . '</td></tr>';
-								$outputStr .= $this->displayUnMatchedUpms($loggedIn, $naUpmIndex, $naUpms);
+								$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">' . $sectionHeader . '</td></tr>';
 							}
+						}
+					}
+					else
+					{	
+						if(!empty($naUpms))
+						{
+							$outputStr .= $this->displayUpmHeaders($ottType, $naUpms, $sectionHeader);
 						}
 						else
 						{
-							$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  
-										. '" class="sectiontitles">' . $sectionHeader . '</td></tr>';
+							$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">' . $sectionHeader . '</td></tr>';
 						}
-						
-						$displayFlag = true;
-						$finalkey = $vkey;
 					}
-					
+				}
+				
+				foreach($dvalue['Trials'] as $tkey => $tvalue)
+				{
 					if($counter%2 == 1) 
 						$rowOneType = 'alttitle';
 					else
@@ -12346,81 +8922,77 @@ class TrialTracker
 					$rowspan = 1;
 					$titleLinkColor = '#000000;';
 				
-					if(isset($dvalue['matchedupms']))  
-						$rowspan = count($dvalue['matchedupms'])+1; 
+					if(isset($tvalue['upms']))  
+						$rowspan = count($tvalue['upms'])+1; 
 						
 					//row starts  
-					$outputStr .= '<tr ' . (($dvalue['new'] == 'y') ? 'class="newtrial" ' : ''). '>';  
+					$outputStr .= '<tr ' . (($tvalue['new'] == 'y') ? 'class="newtrial" ' : ''). '>';  
 					
 					
 					//nctid column
 					if($loggedIn) 
 					{ 
-						$outputStr .= '<td class="' . $rowOneType . '" ' . (($dvalue['new'] == 'y') ? 'title="New record"' : ''). ' ><div class="rowcollapse">';
-						if($ottType == 'indexed' || $ottType == 'colstackedindexed' || $ottType == 'rowstackedindexed')
-						{
-							if(strpos($dvalue['NCT/full_id'], 'NCT') !== FALSE)
+						$outputStr .= '<td class="' . $rowOneType . '" ' . (($tvalue['new'] == 'y') ? 'title="New record"' : ''). ' ><div class="rowcollapse">';
+						if(strpos($tvalue['NCT/full_id'], 'NCT') !== FALSE)
 							{
-								$dvalue['NCT/full_id'] = str_replace('`', "\n", $dvalue['NCT/full_id']);
+								$tvalue['NCT/full_id'] = str_replace('`', "\n", $tvalue['NCT/full_id']);
 							}
-							$outputStr .= '<a style="color:' . $titleLinkColor . '" href="' . urlPath() . 'edit_trials.php?larvol_id=' . $dvalue['larvol_id'] 
-										. '" target="_blank">' . $dvalue['NCT/full_id'] . '</a>';
-						}
-						else
-						{
-							$outputStr .= $dvalue['NCT/nct_id'];
-						}
+							$outputStr .= '<a style="color:' . $titleLinkColor . '" href="' . urlPath() . 'edit_trials.php?larvol_id=' . $tvalue['larvol_id'] 
+										. '" target="_blank">' . $tvalue['NCT/full_id'] . '</a>';
 						$outputStr .= '</div></td>';
 					}
 					
 					
 					//acroynm and title column
 					$attr = ' ';
-					if(isset($dvalue['manual_is_sourceless']))
+					if(isset($tvalue['manual_is_sourceless']))
 					{	
-						if(!empty($dvalue['edited']) && array_key_exists('NCT/brief_title', $dvalue['edited'])) 
+						if(!empty($tvalue['edited']) && array_key_exists('NCT/brief_title', $tvalue['edited'])) 
 						{
-							$attr = ' highlight" title="' . $dvalue['edited']['NCT/brief_title'];
+
+							$attr = ' highlight" title="' . $tvalue['edited']['NCT/brief_title'];
 							$titleLinkColor = '#FF0000;';
 						} 
-						elseif($dvalue['new'] == 'y') 
+						elseif($tvalue['new'] == 'y') 
 						{
 							$attr = '" title="New record';
 							$titleLinkColor = '#FF0000;';
 						}
-						elseif(isset($dvalue['manual_brief_title']))
+						elseif(isset($tvalue['manual_brief_title']))
 						{
-							if($dvalue['original_brief_title'] == $dvalue['NCT/brief_title'])
+							if($tvalue['original_brief_title'] == $tvalue['NCT/brief_title'])
 							{
 								$attr = ' manual" title="Manual curation.';
 							}
 							else
 							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_brief_title'];
+								$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['original_brief_title'];
 							}
 							$titleLinkColor = '#FF7700';
 						}
+
 					}
 					else
 					{ 	
-						if(isset($dvalue['manual_brief_title']))
+						if(isset($tvalue['manual_brief_title']))
 						{
-							if($dvalue['original_brief_title'] == $dvalue['NCT/brief_title'])
+							if($tvalue['original_brief_title'] == $tvalue['NCT/brief_title'])
 							{
 								$attr = ' manual" title="Manual curation.';
 							}
 							else
 							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_brief_title'];
+								$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['original_brief_title'];
 							}
+
 							$titleLinkColor = '#FF7700';
 						}
-						elseif(!empty($dvalue['edited']) && array_key_exists('NCT/brief_title', $dvalue['edited']) &&   str_replace('Previous value: ', '', $dvalue['edited']['NCT/brief_title'])<> $dvalue['NCT/brief_title']) 
+						elseif(!empty($tvalue['edited']) && array_key_exists('NCT/brief_title', $tvalue['edited']) &&   str_replace('Previous value: ', '', $tvalue['edited']['NCT/brief_title'])<> $tvalue['NCT/brief_title']) 
 						{
-							$attr = ' highlight" title="' . $dvalue['edited']['NCT/brief_title'];
+							$attr = ' highlight" title="' . $tvalue['edited']['NCT/brief_title'];
 							$titleLinkColor = '#FF0000;';
 						} 
-						elseif($dvalue['new'] == 'y') 
+						elseif($tvalue['new'] == 'y') 
 						{
 							$attr = '" title="New record';
 							$titleLinkColor = '#FF0000;';
@@ -12429,426 +9001,396 @@ class TrialTracker
 					$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
 								. '<div class="rowcollapse"><a style="color:' . $titleLinkColor . '"  ';
 					
-					if($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed')
+					if(isset($tvalue['manual_is_sourceless']))
 					{	
-						if(isset($dvalue['manual_is_sourceless']))
-						{	
-							$outputStr .= ' href="' . $dvalue['source'] . '" ';
-						}
-						else if(isset($dvalue['source_id']) && strpos($dvalue['source_id'], 'NCT') === FALSE)
-						{	
-							$outputStr .= ' href="https://www.clinicaltrialsregister.eu/ctr-search/search?query=' . $dvalue['NCT/nct_id'] . '" ';
-						}
-						else if(isset($dvalue['source_id']) && strpos($dvalue['source_id'], 'NCT') !== FALSE)
-						{	
-							$outputStr .= ' href="http://clinicaltrials.gov/ct2/show/' . padnct($dvalue['NCT/nct_id']) . '" ';
-						}
-						else 
-						{ 	
-							$outputStr .= ' href="javascript:void(0);" ';
-						}
+						$outputStr .= ' href="' . $tvalue['source'] . '" ';
 					}
-					else
-					{
-						if($dvalue['NCT/nct_id'] !== '' && $dvalue['NCT/nct_id'] !== NULL)
-						{
-							$outputStr .= ' href="http://clinicaltrials.gov/ct2/show/' . padnct($dvalue['NCT/nct_id']) . '" ';
-						}
-						else 
-						{ 
-							$outputStr .= ' href="javascript:void(0);" ';
-						}
+					else if(isset($tvalue['source_id']) && strpos($tvalue['source_id'], 'NCT') === FALSE)
+					{	
+						$outputStr .= ' href="https://www.clinicaltrialsregister.eu/ctr-search/search?query=' . $tvalue['NCT/nct_id'] . '" ';
+					}
+					else if(isset($tvalue['source_id']) && strpos($tvalue['source_id'], 'NCT') !== FALSE)
+					{	
+						$outputStr .= ' href="http://clinicaltrials.gov/ct2/show/' . padnct($tvalue['NCT/nct_id']) . '" ';
+					}
+					else 
+					{ 	
+						$outputStr .= ' href="javascript:void(0);" ';
 					}
 					
 					$outputStr .= ' target="_blank" ';
 					
-					if(($ottType == 'indexed' || $ottType == 'rowstackedindexed' || $ottType == 'colstackedindexed'))
+					$outputStr .= ' onclick="INC_ViewCount(' . $tvalue['larvol_id'] . ')"><font id="ViewCount_' . $tvalue['larvol_id'] . '">';
+					if($tvalue['viewcount'] != '' && $tvalue['viewcount'] != NULL && $tvalue['viewcount'] > 0)
 					{
-						$outputStr .= ' onclick="INC_ViewCount(' . $dvalue['larvol_id'] . ')"><font id="ViewCount_' . $dvalue['larvol_id'] . '">';
-						if($dvalue['viewcount'] != '' && $dvalue['viewcount'] != NULL && $dvalue['viewcount'] > 0)
-						{
-							$outputStr .= '<span class="viewcount" title="Total views">' . $dvalue['viewcount'].'&nbsp;</span>&nbsp;'; 
-						}
-						$outputStr .= '</font>'; 
+						$outputStr .= '<span class="viewcount" title="Total views">' . $tvalue['viewcount'].'&nbsp;</span>&nbsp;'; 
 					}
-					else
-						$outputStr .= '>'; 
+					$outputStr .= '</font>'; 
 								
-					if(isset($dvalue['NCT/acronym']) && $dvalue['NCT/acronym'] != '') 
+					if(isset($tvalue['NCT/acronym']) && $tvalue['NCT/acronym'] != '') 
 					{
-						$dvalue['NCT/brief_title'] = $this->replaceRedundantAcroynm($dvalue['NCT/acronym'], $dvalue['NCT/brief_title']);
-						$outputStr .= htmlformat($dvalue['NCT/acronym']) . ' ' . htmlformat($dvalue['NCT/brief_title']);
+						//$dvalue['NCT/brief_title'] = $this->replaceRedundantAcroynm($dvalue['NCT/acronym'], $dvalue['NCT/brief_title']);
+						$outputStr .= htmlformat($tvalue['NCT/acronym']) . ' ' . htmlformat($tvalue['NCT/brief_title']);
 					} 
 					else 
 					{
-						$outputStr .= htmlformat($dvalue['NCT/brief_title']);
+						$outputStr .= htmlformat($tvalue['NCT/brief_title']);
 					}
 					$outputStr .= '</a></div></td>';
+					
 					
 					//enrollment column
 					$attr = ' ';
 					$highlightFlag = true;
 					if($globalOptions['onlyUpdates'] != "yes")
 					{
-						$prevValue = substr($dvalue['edited']['NCT/enrollment'], 16);
-						$highlightFlag = getDifference($prevValue, $dvalue['NCT/enrollment']);
+						$prevValue = substr($tvalue['edited']['NCT/enrollment'], 16);
+						$highlightFlag = getDifference($prevValue, $tvalue['NCT/enrollment']);
 					}
-					if(isset($dvalue['manual_is_sourceless']))
+					if(isset($tvalue['manual_is_sourceless']))
 					{
-						if(!empty($dvalue['edited']) && array_key_exists('NCT/enrollment', $dvalue['edited']) && $highlightFlag) 
+						if(!empty($tvalue['edited']) && array_key_exists('NCT/enrollment', $tvalue['edited']) && $highlightFlag) 
 						{
-							$attr = ' highlight" title="' . $dvalue['edited']['NCT/enrollment'];
+							$attr = ' highlight" title="' . $tvalue['edited']['NCT/enrollment'];
 						}
-						else if($dvalue['new'] == 'y') 
+						else if($tvalue['new'] == 'y') 
 						{
 							$attr = '" title="New record';
 						}
-						elseif(isset($dvalue['manual_enrollment']))
+						elseif(isset($tvalue['manual_enrollment']))
 						{
-							if($dvalue['original_enrollment'] == $dvalue['NCT/enrollment'])
+							if($tvalue['original_enrollment'] == $tvalue['NCT/enrollment'])
 							{
 								$attr = ' manual" title="Manual curation.';
 							}
 							else
 							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_enrollment'];
+								$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['original_enrollment'];
 							}
 						}
 					}
 					else
 					{
-						if(isset($dvalue['manual_enrollment']))
+
+						if(isset($tvalue['manual_enrollment']))
 						{
-							if($dvalue['original_enrollment'] == $dvalue['NCT/enrollment'])
+							if($tvalue['original_enrollment'] == $tvalue['NCT/enrollment'])
 							{
 								$attr = ' manual" title="Manual curation.';
 							}
 							else
 							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_enrollment'];
+								$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['original_enrollment'];
 							}
 						}
-						elseif(!empty($dvalue['edited']) && array_key_exists('NCT/enrollment', $dvalue['edited']) && $highlightFlag) 
+
+						elseif(!empty($tvalue['edited']) && array_key_exists('NCT/enrollment', $tvalue['edited']) && $highlightFlag) 
 						{
-							$attr = ' highlight" title="' . $dvalue['edited']['NCT/enrollment'];
+							$attr = ' highlight" title="' . $tvalue['edited']['NCT/enrollment'];
 						}
-						else if($dvalue['new'] == 'y') 
+						else if($tvalue['new'] == 'y') 
 						{
 							$attr = '" title="New record';
 						}
 					}
-					$outputStr .= '<td nowrap="nowrap" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">';
-					if($dvalue["NCT/enrollment_type"] != '') 
-					{
-						if($dvalue["NCT/enrollment_type"] == 'Anticipated' || $dvalue["NCT/enrollment_type"] == 'Actual') 
-						{ 
-							$outputStr .= $dvalue["NCT/enrollment"];
-						}
-						else 
-						{ 
-							$outputStr .= $dvalue["NCT/enrollment"] . ' (' . $dvalue["NCT/enrollment_type"] . ')';
-						}
-					} 
-					else 
-					{
-						$outputStr .= $dvalue["NCT/enrollment"];
-					}
-					$outputStr .= '</div></td>';	
+					$outputStr .= '<td nowrap="nowrap" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">'
+								. $tvalue["NCT/enrollment"] . '</div></td>';	
 					
 					
 					//region column
 					$attr = ' ';
-					if(isset($dvalue['manual_is_sourceless']))
+					if(isset($tvalue['manual_is_sourceless']))
 					{
-						if($dvalue['new'] == 'y')
+						if($tvalue['new'] == 'y')
 						{
 							$attr = '" title="New record';
 						}
-						elseif(isset($dvalue['manual_region']))
+						elseif(isset($tvalue['manual_region']))
 						{
 							$attr = ' manual" title="Manual curation.';
 						}
 					}
 					else
 					{
-						if(isset($dvalue['manual_region']))
+						if(isset($tvalue['manual_region']))
 						{
 							$attr = ' manual" title="Manual curation.';
 						}
-						elseif($dvalue['new'] == 'y')
+						elseif($tvalue['new'] == 'y')
 						{
 							$attr = '" title="New record';
 						}
 					}
 					$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">' . '<div class="rowcollapse">' 
-								. (($dvalue['region'] != '' && $dvalue['region'] !== NULL) ? $dvalue['region'] : '&nbsp;') . '</div></td>';	
+								. (($tvalue['region'] != '' && $tvalue['region'] !== NULL) ? $tvalue['region'] : '&nbsp;') . '</div></td>';	
 								
 					
 					//intervention name column
 					$attr = ' ';
-					if(isset($dvalue['manual_is_sourceless']))
+					if(isset($tvalue['manual_is_sourceless']))
 					{
-						if(!empty($dvalue['edited']) && array_key_exists('NCT/intervention_name', $dvalue['edited']))
+						if(!empty($tvalue['edited']) && array_key_exists('NCT/intervention_name', $tvalue['edited']))
 						{
-							$attr = ' highlight" title="' . $dvalue['edited']['NCT/intervention_name'];
+							$attr = ' highlight" title="' . $tvalue['edited']['NCT/intervention_name'];
 						} 
-						else if($dvalue['new'] == 'y')
+						else if($tvalue['new'] == 'y')
 						{
 							$attr = '" title="New record';
 						}
-						elseif(isset($dvalue['manual_intervention_name']))
+						elseif(isset($tvalue['manual_intervention_name']))
 						{
-							if($dvalue['original_intervention_name'] == $dvalue['NCT/intervention_name'])
+							if($tvalue['original_intervention_name'] == $tvalue['NCT/intervention_name'])
 							{
 								$attr = ' manual" title="Manual curation.';
 							}
 							else
 							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_intervention_name'];
+								$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['original_intervention_name'];
 							}
 						}
 					}
 					else
 					{
-						if(isset($dvalue['manual_intervention_name']))
+						if(isset($tvalue['manual_intervention_name']))
 						{
-							if($dvalue['original_intervention_name'] == $dvalue['NCT/intervention_name'])
+							if($tvalue['original_intervention_name'] == $tvalue['NCT/intervention_name'])
 							{
 								$attr = ' manual" title="Manual curation.';
 							}
 							else
 							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_intervention_name'];
+								$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['original_intervention_name'];
 							}
 						}
-						elseif(!empty($dvalue['edited']) && array_key_exists('NCT/intervention_name', $dvalue['edited']) && str_replace('Previous value: ', '', $dvalue['edited']['NCT/intervention_name'])<>$dvalue['NCT/intervention_name'])
+						elseif(!empty($tvalue['edited']) && array_key_exists('NCT/intervention_name', $tvalue['edited']) && str_replace('Previous value: ', '', $tvalue['edited']['NCT/intervention_name'])<>$tvalue['NCT/intervention_name'])
 						{
-							$attr = ' highlight" title="' . $dvalue['edited']['NCT/intervention_name'];
+							$attr = ' highlight" title="' . $tvalue['edited']['NCT/intervention_name'];
 						} 
-						else if($dvalue['new'] == 'y')
+						else if($tvalue['new'] == 'y')
 						{
 							$attr = '" title="New record';
 						}
 					}
 					$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
-								. '<div class="rowcollapse">' . $dvalue['NCT/intervention_name'] . '</div></td>';	
+								. '<div class="rowcollapse">' . $tvalue['NCT/intervention_name'] . '</div></td>';	
 								
 					
 					//collaborator and sponsor column
 					$attr = ' ';
-					if(isset($dvalue['manual_is_sourceless']))
+					if(isset($tvalue['manual_is_sourceless']))
 					{
-						if(!empty($dvalue['edited']) && (array_key_exists('NCT/collaborator', $dvalue['edited']) 
-						|| array_key_exists('NCT/lead_sponsor', $dvalue['edited']))) 
+						if(!empty($tvalue['edited']) && (array_key_exists('NCT/collaborator', $tvalue['edited']) 
+						|| array_key_exists('NCT/lead_sponsor', $tvalue['edited']))) 
 						{
 							$attr = ' highlight" title="';
-							if(array_key_exists('NCT/lead_sponsor', $dvalue['edited']))
+							if(array_key_exists('NCT/lead_sponsor', $tvalue['edited']))
 							{
-								$attr .= $dvalue['edited']['NCT/lead_sponsor'];
+								$attr .= $tvalue['edited']['NCT/lead_sponsor'];
 							}
-							if(array_key_exists('NCT/lead_sponsor', $dvalue['edited']) && array_key_exists('NCT/collaborator', $dvalue['edited']))
+							if(array_key_exists('NCT/lead_sponsor', $tvalue['edited']) && array_key_exists('NCT/collaborator', $tvalue['edited']))
 							{
 								$attr .=  ', ';
 							}
-							if(array_key_exists('NCT/collaborator', $dvalue['edited'])) 
+							if(array_key_exists('NCT/collaborator', $tvalue['edited'])) 
 							{
-								$attr .= $dvalue['edited']['NCT/collaborator'];
+								$attr .= $tvalue['edited']['NCT/collaborator'];
 							}
 							$attr .= '';
 						} 
-						else if($dvalue['new'] == 'y') 
+						else if($tvalue['new'] == 'y') 
 						{
 							$attr = '" title="New record';
 						}
-						elseif(isset($dvalue['manual_lead_sponsor']) || isset($dvalue['manual_collaborator']))
+						elseif(isset($tvalue['manual_lead_sponsor']) || isset($tvalue['manual_collaborator']))
 						{
-							if(isset($dvalue['manual_lead_sponsor']))
+							if(isset($tvalue['manual_lead_sponsor']))
 							{
-								if($dvalue['original_lead_sponsor'] == $dvalue['NCT/lead_sponsor'])
+								if($tvalue['original_lead_sponsor'] == $tvalue['NCT/lead_sponsor'])
 								{
 									$attr = ' manual" title="Manual curation.';
 								}
 								else
 								{
-									$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_lead_sponsor'];
+									$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['original_lead_sponsor'];
 								}
 							}
+
 							else
 							{
-								if($dvalue['original_collaborator'] == $dvalue['NCT/collaborator'])
+								if($tvalue['original_collaborator'] == $tvalue['NCT/collaborator'])
 								{
 									$attr = ' manual" title="Manual curation.';
 								}
 								else
 								{
-									$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_collaborator'];
+									$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['original_collaborator'];
 								}
 							}
 						}
 					}
 					else
 					{
-						if(isset($dvalue['manual_lead_sponsor']) || isset($dvalue['manual_collaborator']))
+						if(isset($tvalue['manual_lead_sponsor']) || isset($tvalue['manual_collaborator']))
 						{
-							if(isset($dvalue['manual_lead_sponsor']))
+							if(isset($tvalue['manual_lead_sponsor']))
 							{
-								if($dvalue['original_lead_sponsor'] == $dvalue['NCT/lead_sponsor'])
+								if($tvalue['original_lead_sponsor'] == $tvalue['NCT/lead_sponsor'])
 								{
 									$attr = ' manual" title="Manual curation.';
 								}
 								else
 								{
-									$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_lead_sponsor'];
+									$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['original_lead_sponsor'];
 								}
 							}
 							else
 							{
-								if($dvalue['original_collaborator'] == $dvalue['NCT/collaborator'])
+								if($tvalue['original_collaborator'] == $tvalue['NCT/collaborator'])
 								{
 									$attr = ' manual" title="Manual curation.';
 								}
 								else
 								{
-									$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_collaborator'];
+									$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['original_collaborator'];
 								}
 							}
 						}
-						elseif(!empty($dvalue['edited']) && (array_key_exists('NCT/collaborator', $dvalue['edited']) 
-						|| array_key_exists('NCT/lead_sponsor', $dvalue['edited'])) && ( str_replace('Previous value: ', '', $dvalue['edited']['NCT/lead_sponsor'])<>$dvalue['NCT/lead_sponsor'] or str_replace('Previous value: ', '', $dvalue['edited']['NCT/collaborator'])<>$dvalue['NCT/collaborator'] )) 
+						elseif(!empty($tvalue['edited']) && (array_key_exists('NCT/collaborator', $tvalue['edited']) 
+						|| array_key_exists('NCT/lead_sponsor', $tvalue['edited'])) && ( str_replace('Previous value: ', '', $tvalue['edited']['NCT/lead_sponsor'])<>$tvalue['NCT/lead_sponsor'] or str_replace('Previous value: ', '', $tvalue['edited']['NCT/collaborator'])<>$tvalue['NCT/collaborator'] )) 
 						{
 							$attr = ' highlight" title="';
-							if(array_key_exists('NCT/lead_sponsor', $dvalue['edited']))
+							if(array_key_exists('NCT/lead_sponsor', $tvalue['edited']))
 							{
-								$attr .= $dvalue['edited']['NCT/lead_sponsor'];
+								$attr .= $tvalue['edited']['NCT/lead_sponsor'];
 							}
-							if(array_key_exists('NCT/lead_sponsor', $dvalue['edited']) && array_key_exists('NCT/collaborator', $dvalue['edited']))
+							if(array_key_exists('NCT/lead_sponsor', $tvalue['edited']) && array_key_exists('NCT/collaborator', $tvalue['edited']))
 							{
 								$attr .=  ', ';
 							}
-							if(array_key_exists('NCT/collaborator', $dvalue['edited'])) 
+							if(array_key_exists('NCT/collaborator', $tvalue['edited'])) 
 							{
-								$attr .= $dvalue['edited']['NCT/collaborator'];
+								$attr .= $tvalue['edited']['NCT/collaborator'];
 							}
 							$attr .= '';
 						} 
-						else if($dvalue['new'] == 'y') 
+						else if($tvalue['new'] == 'y') 
 						{
 							$attr = '" title="New record';
 						}
 					}
 					$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
-								. '<div class="rowcollapse">' . $dvalue['NCT/lead_sponsor'];
-					if($dvalue['NCT/lead_sponsor'] != '' && $dvalue['NCT/collaborator'] != ''
-					&& $dvalue['NCT/lead_sponsor'] != NULL && $dvalue['NCT/collaborator'] != NULL)
+								. '<div class="rowcollapse">' . $tvalue['NCT/lead_sponsor'];
+					if($tvalue['NCT/lead_sponsor'] != '' && $tvalue['NCT/collaborator'] != ''
+					&& $tvalue['NCT/lead_sponsor'] != NULL && $tvalue['NCT/collaborator'] != NULL)
 					{
 						$outputStr .= ', ';
 					}
-					$outputStr .= $dvalue["NCT/collaborator"] . '</div></td>';
+					$outputStr .= $tvalue["NCT/collaborator"] . '</div></td>';
 								
 								
 					//overall status column
 					$attr = ' ';
-					if(isset($dvalue['manual_is_sourceless']))
+					if(isset($tvalue['manual_is_sourceless']))
 					{
-						if(!empty($dvalue['edited']) && array_key_exists('NCT/overall_status', $dvalue['edited'])) 
+						if(!empty($tvalue['edited']) && array_key_exists('NCT/overall_status', $tvalue['edited'])) 
 						{
-							$attr = ' highlight" title="' . $dvalue['edited']['NCT/overall_status'];
+							$attr = ' highlight" title="' . $tvalue['edited']['NCT/overall_status'];
 						} 
-						else if($dvalue['new'] == 'y') 
+						else if($tvalue['new'] == 'y') 
 						{
 							$attr = '" title="New record' ;
 						} 
-						elseif(isset($dvalue['manual_overall_status']))
+						elseif(isset($tvalue['manual_overall_status']))
 						{
-							if($dvalue['original_overall_status'] == $dvalue['NCT/overall_status'])
+							if($tvalue['original_overall_status'] == $tvalue['NCT/overall_status'])
 							{
 								$attr = ' manual" title="Manual curation.';
 							}
 							else
 							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_overall_status'];
+								$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['original_overall_status'];
 							}
 						}
 					}
 					else
 					{
-						if(isset($dvalue['manual_overall_status']))
+						if(isset($tvalue['manual_overall_status']))
 						{
-							if($dvalue['original_overall_status'] == $dvalue['NCT/overall_status'])
+							if($tvalue['original_overall_status'] == $tvalue['NCT/overall_status'])
 							{
 								$attr = ' manual" title="Manual curation.';
 							}
 							else
 							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_overall_status'];
+								$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['original_overall_status'];
 							}
 						}
-						elseif(!empty($dvalue['edited']) && array_key_exists('NCT/overall_status', $dvalue['edited']) && str_replace('Previous value: ', '', $dvalue['edited']['NCT/overall_status'])<>$dvalue['NCT/overall_status']) 
+						elseif(!empty($tvalue['edited']) && array_key_exists('NCT/overall_status', $tvalue['edited']) && str_replace('Previous value: ', '', $tvalue['edited']['NCT/overall_status'])<>$tvalue['NCT/overall_status']) 
 						{
-							$attr = ' highlight" title="' . $dvalue['edited']['NCT/overall_status'];
+							$attr = ' highlight" title="' . $tvalue['edited']['NCT/overall_status'];
 						} 
-						else if($dvalue['new'] == 'y') 
+						else if($tvalue['new'] == 'y') 
 						{
 							$attr = '" title="New record' ;
 						} 
 					}
 					$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">' . '<div class="rowcollapse">' 
-								. (($dvalue['NCT/overall_status'] != '' && $dvalue['NCT/overall_status'] !== NULL) ? $dvalue['NCT/overall_status'] : '&nbsp;')
+								. (($tvalue['NCT/overall_status'] != '' && $tvalue['NCT/overall_status'] !== NULL) ? $tvalue['NCT/overall_status'] : '&nbsp;')
 								. '</div></td>';
 								
 								
 					//condition column
 					$attr = ' ';
-					if(isset($dvalue['manual_is_sourceless']))
+					if(isset($tvalue['manual_is_sourceless']))
 					{
-						if(!empty($dvalue['edited']) && array_key_exists('NCT/condition', $dvalue['edited'])) 
+						if(!empty($tvalue['edited']) && array_key_exists('NCT/condition', $tvalue['edited'])) 
 						{
-							$attr = ' highlight" title="' . $dvalue['edited']['NCT/condition'];
+							$attr = ' highlight" title="' . $tvalue['edited']['NCT/condition'];
 						} 
-						else if($dvalue['new'] == 'y') 
+						else if($tvalue['new'] == 'y') 
 						{
 							$attr = '" title="New record';
 						}
-						else if(isset($dvalue['manual_condition']))
+						else if(isset($tvalue['manual_condition']))
 						{
-							if($dvalue['original_condition'] == $dvalue['NCT/condition'])
+							if($tvalue['original_condition'] == $tvalue['NCT/condition'])
 							{
 								$attr = ' manual" title="Manual curation.';
 							}
 							else
 							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_condition'];
+								$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['original_condition'];
 							}
 						}
 					}
 					else
 					{
-						if(isset($dvalue['manual_condition']))
+						if(isset($tvalue['manual_condition']))
 						{
-							if($dvalue['original_condition'] == $dvalue['NCT/condition'])
+							if($tvalue['original_condition'] == $tvalue['NCT/condition'])
 							{
 								$attr = ' manual" title="Manual curation.';
 							}
 							else
 							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_condition'];
+								$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['original_condition'];
 							}
 						}
-						elseif(!empty($dvalue['edited']) && array_key_exists('NCT/condition', $dvalue['edited']) && str_replace('Previous value: ', '', $dvalue['edited']['NCT/condition'])<>$dvalue['NCT/condition']) 
+						elseif(!empty($tvalue['edited']) && array_key_exists('NCT/condition', $tvalue['edited']) && str_replace('Previous value: ', '', $tvalue['edited']['NCT/condition'])<>$tvalue['NCT/condition']) 
 						{
-							$attr = ' highlight" title="' . $dvalue['edited']['NCT/condition'];
+							$attr = ' highlight" title="' . $tvalue['edited']['NCT/condition'];
 						} 
-						else if($dvalue['new'] == 'y') 
+						else if($tvalue['new'] == 'y') 
 						{
 							$attr = '" title="New record';
 						}
 					}
 					$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
-								. '<div class="rowcollapse">' . $dvalue['NCT/condition'] . '</div></td>';
+								. '<div class="rowcollapse">' . $tvalue['NCT/condition'] . '</div></td>';
 								
 					
 					$borderLeft = '';	
-					if(!empty($dvalue['edited']) && array_key_exists('NCT/start_date', $dvalue['edited']))
+					if(!empty($tvalue['edited']) && array_key_exists('NCT/start_date', $tvalue['edited']))
 					{
 						$borderLeft = 'startdatehighlight';
 					}
@@ -12856,56 +9398,57 @@ class TrialTracker
 					//end date column
 					$attr = ' ';
 					$borderRight = '';
-					if(isset($dvalue['manual_is_sourceless']))
+					if(isset($tvalue['manual_is_sourceless']))
 					{
-						if(!empty($dvalue['edited']) && array_key_exists('inactive_date', $dvalue['edited'])) 
+						if(!empty($tvalue['edited']) && array_key_exists('inactive_date', $tvalue['edited'])) 
 						{
-							$attr = ' highlight" title="' . $dvalue['edited']['inactive_date'];
+							$attr = ' highlight" title="' . $tvalue['edited']['inactive_date'];
 							$borderRight = 'border-right-color:red;';
 						} 
-						else if($dvalue['new'] == 'y') 
+						else if($tvalue['new'] == 'y') 
 						{
 							$attr = '" title="New record';
 						}	
-						elseif(isset($dvalue['manual_end_date']))
+						elseif(isset($tvalue['manual_end_date']))
 						{
-							if($dvalue['original_end_date'] == $dvalue['inactive_date'])
+							if($tvalue['original_end_date'] == $tvalue['inactive_date'])
 							{
 								$attr = ' manual" title="Manual curation.';
 							}
 							else
 							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_end_date'];
+								$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['original_end_date'];
 							}
 						}
 					}
 					else
+
 					{
-						if(isset($dvalue['manual_end_date']))
+						if(isset($tvalue['manual_end_date']))
 						{
-							if($dvalue['original_end_date'] == $dvalue['inactive_date'])
+							if($tvalue['original_end_date'] == $tvalue['inactive_date'])
 							{
 								$attr = ' manual" title="Manual curation.';
 							}
 							else
 							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_end_date'];
+								$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['original_end_date'];
 							}
 						}
-						elseif(!empty($dvalue['edited']) && array_key_exists('inactive_date', $dvalue['edited']) && str_replace('Previous value: ', '', $dvalue['edited']['inactive_date'])<>$dvalue["inactive_date"]) 
+						elseif(!empty($tvalue['edited']) && array_key_exists('inactive_date', $tvalue['edited']) && str_replace('Previous value: ', '', $tvalue['edited']['inactive_date'])<>$tvalue["inactive_date"]) 
 						{
-							$attr = ' highlight" title="' . $dvalue['edited']['inactive_date'];
+							$attr = ' highlight" title="' . $tvalue['edited']['inactive_date'];
 							$borderRight =  'border-right-color:red;';
 						} 
-						elseif($dvalue['new'] == 'y') 
+						elseif($tvalue['new'] == 'y') 
 						{
 							$attr = '" title="New record';
 						}	
 					}
 					$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">'; 
-					if($dvalue["inactive_date"] != '' && $dvalue["inactive_date"] != NULL && $dvalue["inactive_date"] != '0000-00-00') 
+					if($tvalue["inactive_date"] != '' && $tvalue["inactive_date"] != NULL && $tvalue["inactive_date"] != '0000-00-00') 
 					{
-						$outputStr .= date('m/y',strtotime($dvalue["inactive_date"]));
+						$outputStr .= date('m/y',strtotime($tvalue["inactive_date"]));
 					} 
 					else 
 					{
@@ -12916,68 +9459,68 @@ class TrialTracker
 					
 					//phase column
 					$attr = ' ';
-					if(isset($dvalue['manual_is_sourceless']))
+					if(isset($tvalue['manual_is_sourceless']))
 					{
-						if(!empty($dvalue['edited']) && array_key_exists('NCT/phase', $dvalue['edited'])) 
+						if(!empty($tvalue['edited']) && array_key_exists('NCT/phase', $tvalue['edited'])) 
 						{
-							$attr = ' highlight" title="' . $dvalue['edited']['NCT/phase'];
+							$attr = ' highlight" title="' . $tvalue['edited']['NCT/phase'];
 						} 
-						elseif($dvalue['new'] == 'y') 
+						elseif($tvalue['new'] == 'y') 
 						{
 							$attr = '" title="New record';
 						}
-						elseif(isset($dvalue['manual_phase']))
+						elseif(isset($tvalue['manual_phase']))
 						{
-							if($dvalue['original_phase'] == $dvalue['NCT/phase'])
+							if($tvalue['original_phase'] == $tvalue['NCT/phase'])
 							{
 								$attr = ' manual" title="Manual curation.';
 							}
 							else
 							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_phase'];
+								$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['original_phase'];
 							}
 						}
 					}
 					else
 					{
-						if(isset($dvalue['manual_phase']))
+						if(isset($tvalue['manual_phase']))
 						{
-							if($dvalue['original_phase'] == $dvalue['NCT/phase'])
+							if($tvalue['original_phase'] == $tvalue['NCT/phase'])
 							{
 								$attr = ' manual" title="Manual curation.';
 							}
 							else
 							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $dvalue['original_phase'];
+								$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['original_phase'];
 							}
 						}
-						elseif(!empty($dvalue['edited']) && array_key_exists('NCT/phase', $dvalue['edited']) && ( str_replace('Previous value: ', '', trim($dvalue['edited']['NCT/phase'])) <> trim($dvalue['NCT/phase'])) ) 
+						elseif(!empty($tvalue['edited']) && array_key_exists('NCT/phase', $tvalue['edited']) && ( str_replace('Previous value: ', '', trim($tvalue['edited']['NCT/phase'])) <> trim($tvalue['NCT/phase'])) ) 
 						{
-							$attr = ' highlight" title="' . $dvalue['edited']['NCT/phase'];
+							$attr = ' highlight" title="' . $tvalue['edited']['NCT/phase'];
 						} 
-						elseif($dvalue['new'] == 'y') 
+						elseif($tvalue['new'] == 'y') 
 						{
 							$attr = '" title="New record';
 						}
 					}
 					
-					if($dvalue['NCT/phase'] == 'N/A' || $dvalue['NCT/phase'] == '' || $dvalue['NCT/phase'] === NULL)
+					if($tvalue['NCT/phase'] == 'N/A' || $tvalue['NCT/phase'] == '' || $tvalue['NCT/phase'] === NULL)
 					{
 						$phase = 'N/A';
 						$phaseColor = $this->phaseValues['N/A'];
 					}
 					else
 					{
-						$phase = str_replace('Phase ', '', trim($dvalue['NCT/phase']));
+						$phase = str_replace('Phase ', '', trim($tvalue['NCT/phase']));
 						$phaseColor = $this->phaseValues[$phase];
 					}
 					$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">' 
 								. '<div class="rowcollapse">' . $phase . '</div></td>';				
 					
-					$startMonth = date('m',strtotime($dvalue['NCT/start_date']));
-					$startYear = date('Y',strtotime($dvalue['NCT/start_date']));
-					$endMonth = date('m',strtotime($dvalue['inactive_date']));
-					$endYear = date('Y',strtotime($dvalue['inactive_date']));
+					$startMonth = date('m',strtotime($tvalue['NCT/start_date']));
+					$startYear = date('Y',strtotime($tvalue['NCT/start_date']));
+					$endMonth = date('m',strtotime($tvalue['inactive_date']));
+					$endYear = date('Y',strtotime($tvalue['inactive_date']));
 					
 					if($startYear < $currentYear)
 					{
@@ -12990,14 +9533,14 @@ class TrialTracker
 	
 					//rendering project completion gnatt chart
 					$outputStr .= $this->trialGnattChart($startMonth, $startYear, $endMonth, $endYear, $currentYear, $secondYear, $thirdYear, 
-						$dvalue['NCT/start_date'], $dvalue['inactive_date'], $phaseColor, $borderRight, $borderLeft);
+						$tvalue['NCT/start_date'], $tvalue['inactive_date'], $phaseColor, $borderRight, $borderLeft);
 						
 					$outputStr .= '</tr>';	
 					
 					//rendering matched upms
-					if(isset($dvalue['matchedupms']) && !empty($dvalue['matchedupms'])) 
+					if(isset($tvalue['upms']) && !empty($tvalue['upms'])) 
 					{
-						foreach($dvalue['matchedupms'] as $mkey => $mvalue) 
+						foreach($tvalue['upms'] as $mkey => $mvalue) 
 						{ 
 							$incViewCount = true;
 							$str = '';
@@ -13011,7 +9554,7 @@ class TrialTracker
 							$upmTitle = htmlformat($mvalue['event_description']);
 							
 							$upmBorderLeft = '';
-							if(!empty($mvalue['edited']) && $mvalue['edited']['field'] == 'start_date')
+							if(isset($mvalue['edited']) && $mvalue['edited']['field'] == 'start_date')
 							{
 								$upmBorderLeft = 'startdatehighlight';
 							}
@@ -13053,7 +9596,7 @@ class TrialTracker
 									$mvalue['result_link'] = NULL;
 								}
 								
-								if((!empty($mvalue['edited']) && $mvalue['edited']['field'] == 'result_link') || ($mvalue['new'] == 'y')) 
+								if((isset($mvalue['edited']) && $mvalue['edited']['field'] == 'result_link') || ($mvalue['new'] == 'y')) 
 									$imgColor = 'red';
 								else 
 									$imgColor = 'black'; 
@@ -13074,7 +9617,7 @@ class TrialTracker
 									{
 										$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark"';
 									}
-									$outputStr .= ' style="padding-top: 3px;" border="0" onclick="INC_ViewCount('.$dvalue['larvol_id'].')" /></a>';
+									$outputStr .= ' style="padding-top: 3px;" border="0" onclick="INC_ViewCount('.$tvalue['larvol_id'].')" /></a>';
 								}
 								else
 								{
@@ -13090,12 +9633,12 @@ class TrialTracker
 									{
 										$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark"';
 									}
-									$outputStr .= ' style="padding-top: 3px;" border="0" onclick="INC_ViewCount('.$dvalue['larvol_id'].')" />';
+									$outputStr .= ' style="padding-top: 3px;" border="0" onclick="INC_ViewCount('.$tvalue['larvol_id'].')" />';
 								}
 							}
 							else if($mvalue['status'] == 'Pending')
 							{
-								$icon = '<img src="images/hourglass.png" alt="Hourglass"  border="0" onclick="INC_ViewCount(' . $dvalue['larvol_id'] . ')" />';
+								$icon = '<img src="images/hourglass.png" alt="Hourglass"  border="0" onclick="INC_ViewCount(' . $tvalue['larvol_id'] . ')" />';
 								if($mvalue['event_link'] != '' && $mvalue['event_link'] !== NULL)
 								{	
 									$outputStr .= '<a href="' . $mvalue['event_link'] . '" target="_blank">' . $icon . '</a>';
@@ -13112,133 +9655,50 @@ class TrialTracker
 							$outputStr .= '</div></td>';
 							
 							$upmBorderRight = '';
-							if(!empty($mvalue['edited']) && $mvalue['edited']['field'] == 'end_date')
+							if(isset($mvalue['edited']) && $mvalue['edited']['field'] == 'end_date')
 							{
 								$upmBorderRight = 'border-right-color:red;';
 							}
 							
 							//rendering upm (upcoming project completion) chart
 							$outputStr .= $this->upmGnattChart($stMonth, $stYear, $edMonth, $edYear, $currentYear, $secondYear, $thirdYear, $mvalue['start_date'],
-							$mvalue['end_date'], $mvalue['event_link'], $upmTitle, $upmBorderRight, $upmBorderLeft, $dvalue['larvol_id'], $incViewCount);
+							$mvalue['end_date'], $mvalue['event_link'], $upmTitle, $upmBorderRight, $upmBorderLeft, $tvalue['larvol_id'], $incViewCount);
 							$outputStr .= '</tr>';
 						}
-					}	
+					}
 					
-				}
-				$counter++;
-				//$displayFlag = true;
-			}
-			
-			if($counter >= $start && $counter < $end && empty($vvalue[$globalOptions['type']]) && $globalOptions['onlyUpdates'] == "no")
-			{
-				if($globalOptions['includeProductsWNoData'] == "off")
-				{
-					if(isset($vvalue['naUpms']) && !empty($vvalue['naUpms']))
+					++$counter;
+					
+					if($counter == 100 && $globalOptions['page'] != $totalPages)
 					{
-						$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
+						break 2;
 					}
 				}
-				else
-				{
-					$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
-				}
 			}
-		}
-		
-		if($globalOptions['page'] == $totalPages && $finalkey < $vkey)
-		{
-			for($index = $finalkey+1; $index <= $vkey; $index++)
+			/*else
 			{
-				$Values['Trials'][$index]['sectionHeader'] = $Values['Trials'][$index]['sectionHeader'];
 				if($globalOptions['includeProductsWNoData'] == "off")
-				{
-					if(isset($Values['Trials'][$index]['naUpms']) && !empty($Values['Trials'][$index]['naUpms']))
 					{
-						if($ottType == 'rowstacked' || $ottType == 'rowstackedindexed')
+						if(!empty($naUpms) || (isset($dvalue['Trials']) && !empty($dvalue['Trials'])))
 						{
-							$outputStr .= '<tr class="trialtitles">'
-										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
-										. 'style="background: url(\'images/down.png\') no-repeat left center;"'
-										. ' onclick="sh(this,\'rowstacked\');">&nbsp;</td></tr>'
-										. $this->displayUnMatchedUpms($loggedIn, 'rowstacked', $Values['Trials'][$index]['naUpms'])
-										. '<tr class="trialtitles">'
-										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles">' 
-										. $Values['Trials'][$index]['sectionHeader'] . '</td></tr>';
+							if($globalOptions['onlyUpdates'] == "no")
+							{
+								$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
+							}
 						}
-						else
-						{
-							if($ottType == 'colstacked' || $ottType == 'colstackedindexed')
-								$image = 'up';
-							else
-								$image = 'down';
-							
-							$naUpmIndex = preg_replace('/[^a-zA_Z0-9]/i', '', $Values['Trials'][$index]['sectionHeader']);
-							$naUpmIndex = substr($naUpmIndex, 0, 15);
-							
-							$outputStr .= '<tr class="trialtitles">'
-										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
-										. ' style="background: url(\'images/' . $image . '.png\') no-repeat left center;"'
-										. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
-										. $Values['Trials'][$index]['sectionHeader'] . '</td></tr>';
-							$outputStr .= $this->displayUnMatchedUpms($loggedIn, $naUpmIndex, $Values['Trials'][$index]['naUpms']);
-						}
+					}
+					else
+					{
 						if($globalOptions['onlyUpdates'] == "no")
 						{
 							$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
 						}
 					}
-				}
-				else
-				{
-					//Rendering Upms
-					if(isset($Values['Trials'][$index]['naUpms']) && !empty($Values['Trials'][$index]['naUpms']))
-					{
-						if($ottType == 'rowstacked' || $ottType == 'rowstackedindexed')
-						{
-							$outputStr .= '<tr class="trialtitles">'
-										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
-										. 'style="background: url(\'images/down.png\') no-repeat left center;"'
-										. ' onclick="sh(this,\'rowstacked\');">&nbsp;</td></tr>'
-										. $this->displayUnMatchedUpms($loggedIn, 'rowstacked', $Values['Trials'][$index]['naUpms'])
-										. '<tr class="trialtitles">'
-										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles">' 
-										. $Values['Trials'][$index]['sectionHeader'] . '</td></tr>';
-						}
-						else
-						{
-							if($ottType == 'colstacked' || $ottType == 'colstackedindexed')
-								$image = 'up';
-							else
-								$image = 'down';
-							
-							$naUpmIndex = preg_replace('/[^a-zA_Z0-9]/i', '', $Values['Trials'][$index]['sectionHeader']);
-							$naUpmIndex = substr($naUpmIndex, 0, 15);
-							
-							$outputStr .= '<tr class="trialtitles">'
-										. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
-										. ' style="background: url(\'images/' . $image . '.png\') no-repeat left center;"'
-										. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
-										. $Values['Trials'][$index]['sectionHeader'] . '</td></tr>';
-							$outputStr .= $this->displayUnMatchedUpms($loggedIn, $naUpmIndex, $Values['Trials'][$index]['naUpms']);
-						}
-					}
-					else
-					{
-						$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">'
-									. $Values['Trials'][$index]['sectionHeader'] . '</td></tr>';
-					}
-					if($globalOptions['onlyUpdates'] == "no")
-					{
-						$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
-					}
-				}
-				
-			}
+			}*/
 		}
-		
 		return $outputStr;
 	}
-		
+	
 	function trialGnattChart($startMonth, $startYear, $endMonth, $endYear, $currentYear, $secondYear, $thirdYear, $startDate, $endDate, $bgColor, $borderRight, $borderLeft)
 	{
 		$outputStr = '';
@@ -13689,6 +10149,7 @@ class TrialTracker
 				{
 					$outputStr .= '<td style="width:24px;" colspan="12">&nbsp;</td>'
 								. '<td style="width:'.($st*2).'px;" colspan="' . $st . '" class="' . $borderLeft . '">&nbsp;</td>';
+
 				}
 				else
 				{
@@ -14035,6 +10496,7 @@ class TrialTracker
 			}
 		} 
 		else if($startYear < $currentYear) 
+
 		{
 			$val = getColspan($startDate, $endDate);
 			$st = $startMonth-1;
@@ -14231,6 +10693,7 @@ class TrialTracker
 				} 
 				else 
 				{
+
 					$outputStr .= '<td ' . $incViewCountLink . ' style="width:2px; ' . $bgColor . $upmBorderRight . '">' . '<div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 								. (((12 - (1+$st)) != 0) ? '<td style="width:'.((12-(1+$st))*2).'px;" colspan="' .(12 - (1+$st)) . '"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>' : '');
 				}
@@ -14340,600 +10803,543 @@ class TrialTracker
 		return $outputStr;	
 	}
 	
-	function getTrialUpdates($nctId, $larvolId, $timeMachine = NULL, $timeInterval)
-	{	
-		global $now;
-		
-		if($timeMachine === NULL) $timeMachine = $now;
-		
-		$updates = array('edited' => array(), 'new' => 'n');
-		
-		$fieldnames = array('nct_id', 'brief_title', 'enrollment', 'acronym', 'overall_status','condition', 
-							'intervention_name', 'phase', 'lead_sponsor', 'collaborator', 'start_date');
-
-		$studycatData = mysql_fetch_assoc(mysql_query("SELECT `dv`.`studycat` FROM `data_values` `dv` LEFT JOIN `data_cats_in_study` `dc` ON "
-				. "(`dc`.`id`=`dv`.`studycat`) WHERE `dv`.`field`='1' AND `dv`.`val_int`='" . $nctId . "' AND `dc`.`larvol_id`='" .$larvolId . "'"));
-
-		$res = mysql_query("SELECT DISTINCT `df`.`name` AS `fieldname`, `df`.`id` AS `fieldid`, `df`.`type` AS `fieldtype`, `dv`.`studycat` "
-				. "FROM `data_values` `dv` LEFT JOIN `data_fields` `df` ON (`df`.`id`=`dv`.`field`) WHERE `df`.`name` IN ('" 
-				. join("','", $fieldnames) . "') AND `studycat` = '" . $studycatData['studycat'] 
-				. "' AND (`dv`.`superceded`<= '" . date('Y-m-d', $timeMachine) . "' AND `dv`.`superceded`>= '" 
-				. date('Y-m-d', strtotime($timeInterval, $timeMachine)) . "') ");
-		
-		while ($row = mysql_fetch_assoc($res)) 
-		{
-			//getting previous value for updated trials
-			$result = mysql_fetch_assoc(mysql_query("SELECT `" . 'val_'.$row['fieldtype'] . "` AS value FROM `data_values` WHERE `studycat` = '" 
-				. $studycatData['studycat'] . "' AND `field` =  '" . $row['fieldid'] . "' AND (`superceded` <= '" . date('Y-m-d', $timeMachine) 
-				. "' AND `superceded` >= '" . date('Y-m-d', strtotime($timeInterval, $timeMachine)) . "') "));
-		
-			$val = $result['value'];
-			
-			//special case for enum fields
-			if($row['fieldtype'] == 'enum') 
-			{
-				$result = mysql_fetch_assoc(mysql_query("SELECT `value` FROM `data_enumvals` WHERE `field` = '" . $row['fieldid'] . "' AND `id` = '" . $val . "' "));
-				$val 	= $result['value'];
-			}
-			
-			if(isset($val) && $val != '')
-				$updates['edited']['NCT/'.$row['fieldname']] = 'Previous value: ' . $val;
-			else 
-				$updates['edited']['NCT/'.$row['fieldname']] = 'No previous value';
-		}
-		
-		$query = "SELECT inactive_date_prev FROM `clinical_study` WHERE larvol_id = '" . $larvolId . "' AND (inactive_date_lastchanged <= '" 
-			. date('Y-m-d',$timeMachine) . "' AND inactive_date_lastchanged >= '" . date('Y-m-d',strtotime($timeInterval,$timeMachine)) . "')";
-		$res = mysql_query($query);
-		
-		if(mysql_num_rows($res) > 0)
-		{	
-			$row = mysql_fetch_assoc($res);
-			if($row['inactive_date_prev'] !== NULL)
-			{
-				$updates['edited']['inactive_date'] = 'Previous value: ' . $row['inactive_date_prev'];
-			}
-			else
-			{
-				$updates['edited']['inactive_date'] = 'No previous value';
-			}
-		}
-		
-		$frd = getFieldId('NCT', 'firstreceived_date');
-
-		$sql = "SELECT cs.larvol_id,dv.val_date 
-		FROM clinical_study cs 
-		LEFT JOIN data_cats_in_study dcis ON cs.larvol_id = dcis.larvol_id 
-		LEFT JOIN data_values dv ON dcis.id = dv.studycat 
-		WHERE dv.field='" . $frd . "' and dv.val_date <= '". date('Y-m-d',$timeMachine) . "' 
-		AND cs.larvol_id = '" .  $larvolId . "' 
-		AND dv.val_date >= '" . date('Y-m-d',strtotime($timeInterval,$timeMachine)) . "' ";
-		$reslt = mysql_query($query);		
-	
-		if(mysql_num_rows($reslt) > 0) 
-		{
-			$updates['new'] = 'y';
-		}
-		return $updates;
-	}
-	
-	function getMatchedUPMs($trialId, $timeMachine = NULL, $timeInterval) 
-	{
-		global $now;
-		$upm['matchedupms'] = array();
-		$values = array();
-		
-		if($timeMachine === NULL) $timeMachine = $now;
-		$trial_length=strlen($trialId);
-		$result = mysql_query("SELECT upm.`id`, upm.`event_type`, upm.`event_description`, upm.`event_link`, upm.`result_link`, upm.`start_date`, upm.`end_date`, upm.`status` FROM upm RIGHT JOIN upm_trials ut ON upm.`id` = ut.`upm_id` LEFT JOIN data_trials dt ON dt.`larvol_id` = ut.`larvol_id` WHERE left(dt.`source_id`," . $trial_length . ") = '" . $trialId . "' ORDER BY upm.`end_date` ASC, upm.`start_date` ASC ");
-		
-		$i = 0;			
-		while($row = mysql_fetch_assoc($result)) 
-		{
-			$upm['matchedupms'][$i]['id'] = $row['id'];
-			$upm['matchedupms'][$i]['event_description'] = htmlspecialchars($row['event_description']);
-			$upm['matchedupms'][$i]['status'] = $row['status'];
-			$upm['matchedupms'][$i]['event_link'] = $row['event_link'];
-			$upm['matchedupms'][$i]['result_link'] = $row['result_link'];
-			$upm['matchedupms'][$i]['event_type'] = $row['event_type'];
-			$upm['matchedupms'][$i]['start_date'] = $row['start_date'];
-			$upm['matchedupms'][$i]['start_date_type'] = $row['start_date_type'];
-			$upm['matchedupms'][$i]['end_date'] 	= $row['end_date'];
-			$upm['matchedupms'][$i]['end_date_type'] = $row['end_date_type'];
-				
-			//Query for checking updates for upms.
-			$sql = "SELECT `id`, `field`, `old_value` FROM `upm_history` "
-					. " WHERE `id` = '" . $row['id'] . "' AND (CAST(`change_date` AS DATE) <= '" . date('Y-m-d', $timeMachine) 
-					. "' AND CAST(`change_date` AS DATE) >= '" . date('Y-m-d', strtotime($timeInterval ,$timeMachine)) 
-					. "') ORDER BY `change_date` DESC LIMIT 0,1 ";
-			$res = mysql_query($sql);
-			
-			$upm['matchedupms'][$i]['edited'] = array();
-			$upm['matchedupms'][$i]['new'] = 'n';
-			
-			while($arr = mysql_fetch_assoc($res)) 
-			{
-				$upm['matchedupms'][$i]['edited']['id'] = $arr['id'];
-				$upm['matchedupms'][$i]['edited']['field'] = $arr['field'];
-				$upm['matchedupms'][$i]['edited'][$arr['field']] = $arr['old_value'];
-			}
-			
-			$query = " SELECT u.id FROM `upm` u LEFT JOIN `upm_history` uh ON u.`id` = uh.`id` WHERE u.`id` = '" . $row['id'] . "' AND u.`last_update` <= '" 
-				. date('Y-m-d', $timeMachine) . "' AND u.`last_update` >=  '" . date('Y-m-d', strtotime($timeInterval, $timeMachine)) . "' AND uh.`id` IS NULL ";
-		
-			$ress = mysql_query($query);
-			if(mysql_num_rows($ress) > 0)
-			{
-				$upm['matchedupms'][$i]['new'] = 'y';
-			}
-			$i++;
-		}
-		return $upm;	
-	}
-
-	function getUnMatchedUPMs($naUpmsRegex, $naUpmsNegateRegex,$timeMachine = NULL, $timeInterval = NULL, $onlyUpdates, $productId = NULL)
-	{	
-		global $now;
-		
-		$where = '';
-		$naUpms = array();
-		$i = 0;
-		
-		if($timeMachine === NULL) $timeMachine = $now;
-		
-		$naUpmsRegex = array_filter($naUpmsRegex);
-		$naUpmsNegateRegex = array_filter($naUpmsNegateRegex);
-		
-		if(!empty($naUpmsRegex))
-		{	$where = ' ( ';
-			foreach($naUpmsRegex as $ukey => $uvalue)
-			{
-				$where .= textEqual('`search_name`', $uvalue) . ' OR ';
-			}
-			$where = substr($where, 0, -3);
-			$where .= ' ) ';
-		}
-		
-		if(!empty($naUpmsNegateRegex))
-		{	
-			if(!empty($naUpmsRegex))
-			{
-				$where .= ' AND ';
-			}
-			
-			$where .= ' (`id` NOT IN (SELECT `id` FROM `upm` WHERE ( ';
-			foreach($naUpmsNegateRegex as $nkey => $nvalue)
-			{
-				$where .= textEqual('`search_name`', $nvalue) . ' OR ';
-			}
-			$where = substr($where, 0, -3);
-			$where .= ' ) ) )';
-		}
-		
-		if(!empty($where) && $where != "")
-		{	
-			$result = mysql_query("SELECT `id`, `name` FROM `products` WHERE " . $where . " ");
-			if(mysql_num_rows($result) > 0) 
-			{
-				while($rows = mysql_fetch_assoc($result)) 
-				{
-					$query = "SELECT `id`, `event_description`, `event_link`, `result_link`, `event_type`, `start_date`, `status`, " 
-							. " `start_date_type`, `end_date`, `end_date_type` FROM `upm` LEFT JOIN `upm_trials` ut ON ut.`upm_id` = upm.`id` WHERE `larvol_id` IS NULL AND `product` = '" . $rows['id'] 
-							. "' ORDER BY `end_date` ASC, `start_date` ASC ";
-					$res = mysql_query($query)  or tex('Bad SQL query getting unmatched upms ' . $query);
-					if(mysql_num_rows($res) > 0) 
-					{
-						while($row = mysql_fetch_assoc($res)) 
-						{ 
-							$naUpms[$i]['id'] = $row['id'];
-							$naUpms[$i]['product_name'] = $rows['name'];
-							$naUpms[$i]['event_description'] = htmlspecialchars($row['event_description']);
-							$naUpms[$i]['status'] = $row['status'];
-							$naUpms[$i]['event_link'] = $row['event_link'];
-							$naUpms[$i]['result_link'] = $row['result_link'];
-							$naUpms[$i]['event_type'] = $row['event_type'];
-							$naUpms[$i]['start_date'] = $row['start_date'];
-							$naUpms[$i]['start_date_type'] = $row['start_date_type'];
-							$naUpms[$i]['end_date'] 	= $row['end_date'];
-							$naUpms[$i]['end_date_type'] = $row['end_date_type'];
-							$naUpms[$i]['new'] = 'n';
-							$naUpms[$i]['edited'] = array();
-							
-							$sql = "SELECT `id`, `field`, `old_value` FROM `upm_history` "
-									. " WHERE `id` = '" . $row['id'] . "' AND (CAST(`change_date` AS DATE) <= '" . date('Y-m-d', $timeMachine) 
-									. "' AND CAST(`change_date` AS DATE) >= '" . date('Y-m-d',strtotime($timeInterval, $timeMachine)) . "') ORDER BY `change_date` DESC LIMIT 0,1 ";
-							$ress = mysql_query($sql);
-							
-							if(mysql_num_rows($ress) > 0) 
-							{
-								while($roww = mysql_fetch_assoc($ress)) 
-								{
-									$naUpms[$i]['edited']['id'] = $roww['id'];
-									$naUpms[$i]['edited']['field'] = $roww['field'];
-									$naUpms[$i]['edited'][$roww['field']] = $roww['old_value'];
-								}
-							}
-							
-							$sql = " SELECT u.id FROM `upm` u LEFT JOIN `upm_history` uh ON u.`id` = uh.`id` WHERE u.`id` = '" . $row['id'] 
-									. "' AND u.`last_update` <= '" . date('Y-m-d', $timeMachine) . "' AND u.`last_update` >=  '" 
-									. date('Y-m-d', strtotime($timeInterval, $timeMachine)) . "' AND uh.`id` IS NULL ";
-							$reslt = mysql_query($sql);
-							if(mysql_num_rows($reslt) > 0)
-							{
-								$naUpms[$i]['new'] = 'y';
-							}
-							
-							if($onlyUpdates == 'yes')
-							{
-								if(!empty($naUpms[$i]['edited']) && $naUpms[$i]['new'] == 'n') 
-								{
-									$fldName = $naUpms[$i]['edited']['field'];
-									if($naUpms[$i][$fldName] == $naUpms[$i]['edited'][$fldName]) 
-									{ 
-										unset($naUpms[$i]);
-									} 
-								} 
-								else if(empty($naUpms[$i]['edited']) && $naUpms[$i]['new'] == 'n') 
-								{
-									unset($naUpms[$i]);
-								}
-							}
-							$i++;
-						}
-					}
-				}
-			}
-		}
-		else
-		{
-			//echo '<br/><br/>-->'."SELECT `name` FROM `products` WHERE `id` IN ('" . $productId . "') ";
-			$productName = mysql_fetch_assoc(mysql_query("SELECT `name` FROM `products` WHERE `id` IN ('" . $productId . "') "));
-			//echo '<br/><br/>-->'.
-			//Retrieve only those records that are not present in upm_trials table
-			$query = "SELECT `id`, `event_description`, `event_link`, `result_link`, `event_type`, `start_date`, `status`, " 
-							. " `start_date_type`, `end_date`, `end_date_type` FROM `upm` LEFT JOIN `upm_trials` ut ON ut.`upm_id` = upm.`id` WHERE `larvol_id` IS NULL AND `product` IN ('" . $productId 
-							. "') ORDER BY `end_date` ASC ";
-			$res = mysql_query($query)  or tex('Bad SQL query getting unmatched upms ' . $query);
-			if(mysql_num_rows($res) > 0) 
-			{
-				while($row = mysql_fetch_assoc($res)) 
-				{ 
-					$naUpms[$i]['id'] = $row['id'];
-					$naUpms[$i]['product_name'] = $productName['name'];
-					$naUpms[$i]['event_description'] = htmlspecialchars($row['event_description']);
-					$naUpms[$i]['status'] = $row['status'];
-					$naUpms[$i]['event_link'] = $row['event_link'];
-					$naUpms[$i]['result_link'] = $row['result_link'];
-					$naUpms[$i]['event_type'] = $row['event_type'];
-					$naUpms[$i]['start_date'] = $row['start_date'];
-					$naUpms[$i]['start_date_type'] = $row['start_date_type'];
-					$naUpms[$i]['end_date'] 	= $row['end_date'];
-					$naUpms[$i]['end_date_type'] = $row['end_date_type'];
-					$naUpms[$i]['new'] = 'n';
-					$naUpms[$i]['edited'] = array();
-					
-					$sql = "SELECT `id`, `field`, `old_value` FROM `upm_history` "
-							. " WHERE `id` = '" . $row['id'] . "' AND (CAST(`change_date` AS DATE) <= '" . date('Y-m-d', $timeMachine) 
-							. "' AND CAST(`change_date` AS DATE) >= '" . date('Y-m-d',strtotime($timeInterval, $timeMachine)) . "') ORDER BY `change_date` DESC LIMIT 0,1 ";
-					$ress = mysql_query($sql);
-					
-					if(mysql_num_rows($ress) > 0) 
-					{
-						while($roww = mysql_fetch_assoc($ress)) 
-						{
-							$naUpms[$i]['edited']['id'] = $roww['id'];
-							$naUpms[$i]['edited']['field'] = $roww['field'];
-							$naUpms[$i]['edited'][$roww['field']] = $roww['old_value'];
-						}
-					}
-					
-					$sql = " SELECT u.id FROM `upm` u LEFT JOIN `upm_history` uh ON u.`id` = uh.`id` WHERE u.`id` = '" . $row['id'] 
-							. "' AND u.`last_update` <= '" . date('Y-m-d', $timeMachine) . "' AND u.`last_update` >=  '" 
-							. date('Y-m-d', strtotime($timeInterval, $timeMachine)) . "' AND uh.`id` IS NULL ";
-					$reslt = mysql_query($sql);
-					if(mysql_num_rows($reslt) > 0)
-					{
-						$naUpms[$i]['new'] = 'y';
-					}
-					
-					if($onlyUpdates == 'yes')
-					{
-						if(!empty($naUpms[$i]['edited']) && $naUpms[$i]['new'] == 'n') 
-						{
-							$fldName = $naUpms[$i]['edited']['field'];
-							if($naUpms[$i][$fldName] == $naUpms[$i]['edited'][$fldName]) 
-							{ 
-								unset($naUpms[$i]);
-							} 
-						} 
-						else if(empty($naUpms[$i]['edited']) && $naUpms[$i]['new'] == 'n') 
-						{
-							unset($naUpms[$i]);
-						}
-					}
-					$i++;
-				}
-			}
-		}
-		
-		return $naUpms;
-	}
-	
 	function displayUnMatchedUpms($loggedIn, $naUpmIndex, $naUpms)
 	{
 		global $now;
 		$outputStr = '';
-		if(!empty($naUpms))
+		$currentYear = date('Y');
+		$secondYear = (date('Y')+1);
+		$thirdYear = (date('Y')+2);
+		
+		$cntr = 0;
+		foreach($naUpms as $key => $value)
 		{
-			$currentYear = date('Y');
-			$secondYear = (date('Y')+1);
-			$thirdYear = (date('Y')+2);
+			$attr = '';
+			$resultImage = '';
+			$class = 'class = "upms ' . $naUpmIndex . '" ';
+			$titleLinkColor = '';
+			$upmTitle = htmlformat($value['event_description']);
 			
-			$cntr = 0;
-			foreach($naUpms as $key => $value)
+			$upmBorderLeft = '';
+			if(isset($value['edited']) && $value['edited']['field'] == 'start_date')
 			{
-				$attr = '';
-				$resultImage = '';
-				$class = 'class = "upms ' . $naUpmIndex . '" ';
-				$titleLinkColor = '';
-				$upmTitle = htmlformat($value['event_description']);
-				
-				$upmBorderLeft = '';
-				if(!empty($value['edited']) && $value['edited']['field'] == 'start_date')
-				{
-					$upmBorderLeft = 'startdatehighlight';
-				}
-				
-				//Highlighting the whole row in case of new trials
-				if($value['new'] == 'y') 
-				{
-					$class = 'class="upms newtrial ' . $naUpmIndex . '" ';
-				}
-				
-				//rendering unmatched upms
-				$outputStr .= '<tr ' . $class . '>';
-				
-				
-				//field upm-id
-				$title = '';
-				$attr = '';	
-				if($loggedIn)
-				{
-					if($value['new'] == 'y')
-					{
-						$titleLinkColor = 'style="color:#FF0000;"';
-						$title = ' title = "New record" ';
-					}
-					$outputStr .= '<td ' . $title . '><a ' . $titleLinkColor . ' href="' . urlPath() . 'upm.php?search_id=' 
-								. $value['id'] . '" target="_blank">' . $value['id'] . '</a></td>';
-				}
-				
-				if(!$loggedIn && !$this->liLoggedIn())
-				{
-					$value['event_link'] = NULL;
-				}
-				
-				//field upm event description
-				$title = '';
-				$attr = '';	
-				if(!empty($value['edited']) && ($value['edited']['field'] == 'event_description')) 
-				{
-					$titleLinkColor = 'style="color:#FF0000;"';
-					$attr = ' highlight'; 
-					
-					if($value['edited']['event_description'] != '' && $value['edited']['event_description'] !== NULL)
-					{
-						$title = ' title="Previous value: '. $value['edited']['event_description'] . '" '; 
-					}
-					else
-					{
-						$title = ' title="No Previous value" ';
-					}
-				} 
-				else if(!empty($value['edited']) && ($value['edited']['field'] == 'event_link')) 
-				{
-					$titleLinkColor = 'style="color:#FF0000;"';
-					$attr = ' highlight'; 
-					
-					if($value['edited']['event_link'] != '' && $value['edited']['event_link'] !== NULL)
-					{
-						$title = ' title="Previous value: '. $value['edited']['event_link'] . '" '; 
-					}
-					else
-					{
-						$title = ' title="No Previous value" ';
-					}
-				}
-				else if($value['new'] == 'y') 
-				{
-					$titleLinkColor = 'style="color:#FF0000;"';
-					$title = ' title = "New record" ';
-				}
-				$outputStr .= '<td colspan="5" class="' .  $attr . '" ' . $title . '><div class="rowcollapse">';
-				if($value['event_link'] !== NULL && $value['event_link'] != '') 
-				{
-					$outputStr .= '<a ' . $titleLinkColor . ' href="' . $value['event_link'] . '" target="_blank">' . $value['event_description'] . '</a>';
-				} 
-				else 
-				{
-					$outputStr .= $value['event_description'];
-				}
-				$outputStr .= '</div></td>';
-				
-				
-				//field upm status
-				$title = '';
-				$attr = '';	
+				$upmBorderLeft = 'startdatehighlight';
+			}
+			
+			//Highlighting the whole row in case of new trials
+			if($value['new'] == 'y') 
+			{
+				$class = 'class="upms newtrial ' . $naUpmIndex . '" ';
+			}
+			
+			//rendering unmatched upms
+			$outputStr .= '<tr ' . $class . '>';
+			
+			
+			//field upm-id
+			$title = '';
+			$attr = '';	
+			if($loggedIn)
+			{
 				if($value['new'] == 'y')
 				{
+					$titleLinkColor = 'style="color:#FF0000;"';
 					$title = ' title = "New record" ';
 				}
-				$outputStr .= '<td ' . $title . '><div class="rowcollapse">' . $value['status'] . '</div></td>';
-
+				$outputStr .= '<td ' . $title . '><a ' . $titleLinkColor . ' href="' . urlPath() . 'upm.php?search_id=' 
+							. $value['id'] . '" target="_blank">' . $value['id'] . '</a></td>';
+			}
 			
-				//field upm event type
-				$title = '';
-				$attr = '';	
-				if(!empty($value['edited']) && ($value['edited']['field'] == 'event_type')) 
-				{
-					$attr = ' highlight'; 
-					if($value['edited']['event_type'] != '' && $value['edited']['event_type'] !== NULL)
-					{
-						$title = ' title="Previous value: '. $value['edited']['event_type'] . '" '; 
-					}
-					else
-					{
-						$title = ' title="No Previous value" ';
-					}	
-				} 
-				else if($value['new'] == 'y') 
-				{
-					$title = ' title = "New record" ';
-				}
-				$outputStr .= '<td class="' . $attr . '" ' . $title . '><div class="rowcollapse">' . $value['event_type'] . ' Milestone</div></td>';
+			if(!$loggedIn && !$this->liLoggedIn())
+			{
+				$value['event_link'] = NULL;
+			}
+			
+			//field upm event description
+			$title = '';
+			$attr = '';	
+			if(isset($value['edited']) && ($value['edited']['field'] == 'event_description')) 
+			{
+				$titleLinkColor = 'style="color:#FF0000;"';
+				$attr = ' highlight'; 
 				
-				
-				//field upm end date
-				$title = '';
-				$attr = '';	
-				$upmBorderRight = '';
-				
-				if(!empty($value['edited']) && ($value['edited']['field'] == 'end_date'))
+				if($value['edited']['event_description'] != '' && $value['edited']['event_description'] !== NULL)
 				{
-					$attr = ' highlight';
-					$upmBorderRight = 'border-right-color:red;';
-					
-					if($value['edited']['end_date'] != '' && $value['edited']['end_date'] !== NULL)
-					{
-						$title = ' title="Previous value: ' . $value['edited']['end_date'] . '" '; 
-					}
-					else 
-					{
-						$title = ' title="No Previous value" ';
-					}
-				} 
-				else if(!empty($value['edited']) && ($value['edited']['field'] == 'end_date_type'))
-				{
-					$attr = ' highlight';
-					if($value['edited']['end_date_type'] != '' && $value['edited']['end_date_type'] !== NULL) 
-					{
-						$title = ' title="Previous value: ' .  $value['edited']['end_date_type'] . '" ';
-					} 
-					else 
-					{
-						$title = ' title="No Previous value" ';
-					}
-				} 
-				else if($value['new'] == 'y') 
-				{
-					$title = ' title = "New record" ';
-					$dateStyle = 'color:#973535;'; 
-				}
-				$outputStr .= '<td class="' . $attr . '" ' . $title . '><div class="rowcollapse">';
-				
-				$outputStr .= (($value['end_date'] != '' && $value['end_date'] !== NULL && $value['end_date'] != '0000-00-00') ? 
-									date('m/y',strtotime($value['end_date'])) : '&nbsp;');
-									
-				$outputStr .= '</div></td><td><div class="rowcollapse">&nbsp;</div></td>';
-				
-				
-				//field upm result 
-				$stYear = date('Y',strtotime($value['start_date']));
-				$stMonth = date('m',strtotime($value['start_date']));
-				$outputStr .= '<td style="text-align:center;vertical-align:middle;" ';
-				if($stYear < $currentYear)
-				{
-					$outputStr .= ' class="' . $upmBorderLeft . '" ';
-				}
-				$outputStr .= '>';
-				
-				if($value['result_link'] != '' && $value['result_link'] !== NULL)
-				{
-					if(!$loggedIn && !$this->liLoggedIn())
-					{
-						$value['result_link'] = NULL;
-					}
-								
-					if((!empty($value['edited']) && $value['edited']['field'] == 'result_link') || ($value['new'] == 'y')) 
-							$imgColor = 'red';
-					else 
-						$imgColor = 'black'; 
-					
-					$outputStr .= '<div title="' . $upmTitle . '">';
-					if($value['result_link'] != '' && $value['result_link'] !== NULL)
-					{
-						$outputStr .= '<a href="' . $value['result_link'] . '" ' . $target . '>';
-						if($value['event_type'] == 'Clinical Data')
-						{
-							$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond" border="0" />';
-						}
-						else if($value['status'] == 'Cancelled')
-						{
-							$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel" border="0" />';
-						}
-						else
-						{
-							$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark" border="0" />';
-						}
-						$outputStr .= '</a>';
-					}
-					else
-					{
-						if($value['event_type'] == 'Clinical Data')
-						{
-							$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond" border="0" />';
-						}
-						else if($value['status'] == 'Cancelled')
-						{
-							$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel" border="0" />';
-						}
-						else
-						{
-							$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark" border="0" />';
-						}
-					}
-					$outputStr .= '</div>';
-				}
-				else if($value['status'] == 'Pending')
-				{
-					$outputStr .= '<div title="' . $upmTitle . '">';
-					if($value['event_link'] != '' && $value['event_link'] !== NULL)
-					{
-						$outputStr .= '<a href="' . $value['event_link'] . '" target="_blank">'
-									. '<img src="images/hourglass.png" alt="Hourglass"  border="0" /></a>';
-					}
-					else
-					{
-						$outputStr .= '<img src="images/hourglass.png" alt="Hourglass"  border="0" />';
-					}
-					$outputStr .= '</div>';
+					$title = ' title="Previous value: '. $value['edited']['event_description'] . '" '; 
 				}
 				else
 				{
-					$outputStr .= '&nbsp;';
+					$title = ' title="No Previous value" ';
 				}
-				$outputStr .= '</td>';		
+			} 
+			else if(isset($value['edited']) && ($value['edited']['field'] == 'event_link')) 
+			{
+				$titleLinkColor = 'style="color:#FF0000;"';
+				$attr = ' highlight'; 
 				
-				
-				//upm gnatt chart
-				$outputStr .= $this->upmGnattChart($stMonth, $stYear, 
-								date('m',strtotime($value['end_date'])), date('Y',strtotime($value['end_date'])), $currentYear, $secondYear, $thirdYear, 
-								$value['start_date'], $value['end_date'], $value['event_link'], $upmTitle, $upmBorderRight, $upmBorderLeft);
-				
-				$outputStr .= '</tr>';
+				if($value['edited']['event_link'] != '' && $value['edited']['event_link'] !== NULL)
+				{
+					$title = ' title="Previous value: '. $value['edited']['event_link'] . '" '; 
+				}
+				else
+				{
+					$title = ' title="No Previous value" ';
+				}
 			}
+			else if($value['new'] == 'y') 
+			{
+				$titleLinkColor = 'style="color:#FF0000;"';
+				$title = ' title = "New record" ';
+			}
+			$outputStr .= '<td colspan="5" class="' .  $attr . '" ' . $title . '><div class="rowcollapse">';
+			if($value['event_link'] !== NULL && $value['event_link'] != '') 
+			{
+				$outputStr .= '<a ' . $titleLinkColor . ' href="' . $value['event_link'] . '" target="_blank">' . $value['event_description'] . '</a>';
+			} 
+			else 
+			{
+				$outputStr .= $value['event_description'];
+			}
+			$outputStr .= '</div></td>';
+			
+			
+			//field upm status
+			$title = '';
+			$attr = '';	
+			if($value['new'] == 'y')
+			{
+				$title = ' title = "New record" ';
+			}
+			$outputStr .= '<td ' . $title . '><div class="rowcollapse">' . $value['status'] . '</div></td>';
+
+		
+			//field upm event type
+			$title = '';
+			$attr = '';	
+			if(isset($value['edited']) && ($value['edited']['field'] == 'event_type')) 
+			{
+
+				$attr = ' highlight'; 
+				if($value['edited']['event_type'] != '' && $value['edited']['event_type'] !== NULL)
+				{
+					$title = ' title="Previous value: '. $value['edited']['event_type'] . '" '; 
+				}
+				else
+				{
+					$title = ' title="No Previous value" ';
+				}	
+			} 
+			else if($value['new'] == 'y') 
+			{
+				$title = ' title = "New record" ';
+			}
+			$outputStr .= '<td class="' . $attr . '" ' . $title . '><div class="rowcollapse">' . $value['event_type'] . ' Milestone</div></td>';
+			
+			
+			//field upm end date
+			$title = '';
+			$attr = '';	
+			$upmBorderRight = '';
+			
+			if(isset($value['edited']) && ($value['edited']['field'] == 'end_date'))
+			{
+				$attr = ' highlight';
+				$upmBorderRight = 'border-right-color:red;';
+				
+				if($value['edited']['end_date'] != '' && $value['edited']['end_date'] !== NULL)
+				{
+					$title = ' title="Previous value: ' . $value['edited']['end_date'] . '" '; 
+				}
+				else 
+				{
+					$title = ' title="No Previous value" ';
+				}
+			} 
+			else if(isset($value['edited']) && ($value['edited']['field'] == 'end_date_type'))
+			{
+				$attr = ' highlight';
+				if($value['edited']['end_date_type'] != '' && $value['edited']['end_date_type'] !== NULL) 
+				{
+					$title = ' title="Previous value: ' .  $value['edited']['end_date_type'] . '" ';
+				} 
+				else 
+				{
+					$title = ' title="No Previous value" ';
+				}
+			} 
+			else if($value['new'] == 'y') 
+			{
+				$title = ' title = "New record" ';
+				$dateStyle = 'color:#973535;'; 
+			}
+			$outputStr .= '<td class="' . $attr . '" ' . $title . '><div class="rowcollapse">';
+			
+			$outputStr .= (($value['end_date'] != '' && $value['end_date'] !== NULL && $value['end_date'] != '0000-00-00') ? 
+								date('m/y',strtotime($value['end_date'])) : '&nbsp;');
+								
+			$outputStr .= '</div></td><td><div class="rowcollapse">&nbsp;</div></td>';
+			
+			
+			//field upm result 
+			$stYear = date('Y',strtotime($value['start_date']));
+			$stMonth = date('m',strtotime($value['start_date']));
+			$outputStr .= '<td style="text-align:center;vertical-align:middle;" ';
+			if($stYear < $currentYear)
+			{
+				$outputStr .= ' class="' . $upmBorderLeft . '" ';
+			}
+			$outputStr .= '>';
+			
+			if($value['result_link'] != '' && $value['result_link'] !== NULL)
+			{
+				if(!$loggedIn && !$this->liLoggedIn())
+				{
+					$value['result_link'] = NULL;
+				}
+							
+				if((isset($value['edited']) && $value['edited']['field'] == 'result_link') || ($value['new'] == 'y')) 
+						$imgColor = 'red';
+				else 
+					$imgColor = 'black'; 
+				
+				$outputStr .= '<div title="' . $upmTitle . '">';
+				if($value['result_link'] != '' && $value['result_link'] !== NULL)
+				{
+					$outputStr .= '<a href="' . $value['result_link'] . '" ' . $target . '>';
+					if($value['event_type'] == 'Clinical Data')
+					{
+						$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond" border="0" />';
+					}
+					else if($value['status'] == 'Cancelled')
+					{
+						$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel" border="0" />';
+					}
+					else
+					{
+						$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark" border="0" />';
+					}
+					$outputStr .= '</a>';
+				}
+				else
+				{
+					if($value['event_type'] == 'Clinical Data')
+					{
+						$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond" border="0" />';
+					}
+					else if($value['status'] == 'Cancelled')
+					{
+						$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel" border="0" />';
+					}
+					else
+					{
+						$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark" border="0" />';
+					}
+				}
+				$outputStr .= '</div>';
+			}
+			else if($value['status'] == 'Pending')
+			{
+				$outputStr .= '<div title="' . $upmTitle . '">';
+				if($value['event_link'] != '' && $value['event_link'] !== NULL)
+				{
+					$outputStr .= '<a href="' . $value['event_link'] . '" target="_blank">'
+								. '<img src="images/hourglass.png" alt="Hourglass"  border="0" /></a>';
+				}
+				else
+				{
+					$outputStr .= '<img src="images/hourglass.png" alt="Hourglass"  border="0" />';
+				}
+				$outputStr .= '</div>';
+			}
+			else
+			{
+				$outputStr .= '&nbsp;';
+			}
+			$outputStr .= '</td>';		
+			
+			
+			//upm gnatt chart
+			$outputStr .= $this->upmGnattChart($stMonth, $stYear, 
+							date('m',strtotime($value['end_date'])), date('Y',strtotime($value['end_date'])), $currentYear, $secondYear, $thirdYear, 
+							$value['start_date'], $value['end_date'], $value['event_link'], $upmTitle, $upmBorderRight, $upmBorderLeft);
+			
+			$outputStr .= '</tr>';
 		}
+		
 		return $outputStr;
 	}
 	
-	
-	function getInfo($tablename, $fieldnames, $id, $value)
+	function displayUnMatchedUpms_TCPDF($loggedIn, $naUpmIndex, $naUpms)
 	{
-		$query = "SELECT " . implode(', ', $fieldnames) . " FROM " . $tablename . " WHERE " . $id . " = '" . $value . "' ";
-		$result = mysql_query($query);
-		$row = mysql_fetch_assoc($result);
+		global $now;
 		
-		return $row;
+		if($loggedIn)
+			$col_width=570;
+		else
+			$col_width=548;
+			
+		$outputStr = '';
+		$currentYear = date('Y');
+		$secondYear = (date('Y')+1);
+		$thirdYear = (date('Y')+2);
+		
+		$cntr = 0;
+		foreach($naUpms as $key => $value)
+		{
+			$attr = '';
+			$resultImage = '';
+			$class = 'class = "upms ' . $naUpmIndex . '" ';
+			$titleLinkColor = '';
+			$upmTitle = htmlformat($value['event_description']);
+			
+			$upmBorderLeft = '';
+			if(isset($value['edited']) && $value['edited']['field'] == 'start_date')
+			{
+				$upmBorderLeft = 'startdatehighlight';
+			}
+			
+			//Highlighting the whole row in case of new trials
+			if($value['new'] == 'y') 
+			{
+				$class = 'class="upms newtrial ' . $naUpmIndex . '" ';
+			}
+			
+			//rendering unmatched upms
+			$outputStr .= '<tr style="width:'.$col_width.'px; page-break-inside:avoid; background-color:#000;" nobr="true" ' . $class . '>';
+			
+			
+			//field upm-id
+			$title = '';
+			$attr = '';	
+			if($loggedIn)
+			{
+				if($value['new'] == 'y')
+				{
+					$titleLinkColor = 'style="color:#FF0000;"';
+					$title = ' title = "New record" ';
+				}
+				$outputStr .= '<td style="width:30px;" ' . $title . '><a ' . $titleLinkColor . ' href="' . urlPath() . 'upm.php?search_id=' 
+							. $value['id'] . '" target="_blank">' . $value['id'] . '</a></td>';
+			}
+			
+			if(!$loggedIn && !$this->liLoggedIn())
+			{
+				$value['event_link'] = NULL;
+			}
+			
+			//field upm event description
+			$title = '';
+			$attr = '';	
+			if(isset($value['edited']) && ($value['edited']['field'] == 'event_description')) 
+			{
+				$titleLinkColor = 'style="color:#FF0000;"';
+				$attr = ' highlight'; 
+				
+				if($value['edited']['event_description'] != '' && $value['edited']['event_description'] !== NULL)
+				{
+					$title = ' title="Previous value: '. $value['edited']['event_description'] . '" '; 
+				}
+				else
+				{
+					$title = ' title="No Previous value" ';
+				}
+			} 
+			else if(isset($value['edited']) && ($value['edited']['field'] == 'event_link')) 
+			{
+				$titleLinkColor = 'style="color:#FF0000;"';
+				$attr = ' highlight'; 
+				
+				if($value['edited']['event_link'] != '' && $value['edited']['event_link'] !== NULL)
+				{
+					$title = ' title="Previous value: '. $value['edited']['event_link'] . '" '; 
+				}
+				else
+				{
+					$title = ' title="No Previous value" ';
+				}
+			}
+			else if($value['new'] == 'y') 
+			{
+				$titleLinkColor = 'style="color:#FF0000;"';
+				$title = ' title = "New record" ';
+			}
+			$outputStr .= '<td style="width:200px;" colspan="5" class="' .  $attr . '" ' . $title . '><span>';
+			if($value['event_link'] !== NULL && $value['event_link'] != '') 
+			{
+				$outputStr .= '<a ' . $titleLinkColor . ' href="' . $value['event_link'] . '" target="_blank">' . $value['event_description'] . '</a>';
+			} 
+			else 
+			{
+				$outputStr .= $value['event_description'];
+			}
+			$outputStr .= '</span></td>';
+			
+			
+			//field upm status
+			$title = '';
+			$attr = '';	
+			if($value['new'] == 'y')
+			{
+				$title = ' title = "New record" ';
+			}
+			$outputStr .= '<td style="width:41px;" ' . $title . '><span>' . $value['status'] . '</span></td>';
+
+		
+			//field upm event type
+			$title = '';
+			$attr = '';	
+			if(isset($value['edited']) && ($value['edited']['field'] == 'event_type')) 
+			{
+
+				$attr = ' highlight'; 
+				if($value['edited']['event_type'] != '' && $value['edited']['event_type'] !== NULL)
+				{
+					$title = ' title="Previous value: '. $value['edited']['event_type'] . '" '; 
+				}
+				else
+				{
+					$title = ' title="No Previous value" ';
+				}	
+			} 
+			else if($value['new'] == 'y') 
+			{
+				$title = ' title = "New record" ';
+			}
+			$outputStr .= '<td style="width:60px;" class="' . $attr . '" ' . $title . '><span>' . $value['event_type'] . ' Milestone</span></td>';
+			
+			
+			//field upm end date
+			$title = '';
+			$attr = '';	
+			$upmBorderRight = '';
+			
+			if(isset($value['edited']) && ($value['edited']['field'] == 'end_date'))
+			{
+				$attr = ' highlight';
+				$upmBorderRight = 'border-right-color:red;';
+				
+				if($value['edited']['end_date'] != '' && $value['edited']['end_date'] !== NULL)
+				{
+					$title = ' title="Previous value: ' . $value['edited']['end_date'] . '" '; 
+				}
+				else 
+				{
+					$title = ' title="No Previous value" ';
+				}
+			} 
+			else if(isset($value['edited']) && ($value['edited']['field'] == 'end_date_type'))
+			{
+				$attr = ' highlight';
+				if($value['edited']['end_date_type'] != '' && $value['edited']['end_date_type'] !== NULL) 
+				{
+					$title = ' title="Previous value: ' .  $value['edited']['end_date_type'] . '" ';
+				} 
+				else 
+				{
+					$title = ' title="No Previous value" ';
+				}
+			} 
+			else if($value['new'] == 'y') 
+			{
+				$title = ' title = "New record" ';
+				$dateStyle = 'color:#973535;'; 
+			}
+			$outputStr .= '<td style="width:20px;"  class="' . $attr . '" ' . $title . '><span>';
+			
+			$outputStr .= (($value['end_date'] != '' && $value['end_date'] !== NULL && $value['end_date'] != '0000-00-00') ? 
+								date('m/y',strtotime($value['end_date'])) : '&nbsp;');
+								
+			$outputStr .= '</span></td><td style="width:20px;"><span>&nbsp;</span></td>';
+			
+			
+			//field upm result 
+			$stYear = date('Y',strtotime($value['start_date']));
+			$stMonth = date('m',strtotime($value['start_date']));
+			$outputStr .= '<td style="width:20px;text-align:center;vertical-align:middle;" ';
+			if($stYear < $currentYear)
+			{
+				$outputStr .= ' class="' . $upmBorderLeft . '" ';
+			}
+			$outputStr .= '>';
+			
+			if($value['result_link'] != '' && $value['result_link'] !== NULL)
+			{
+				if(!$loggedIn && !$this->liLoggedIn())
+				{
+					$value['result_link'] = NULL;
+				}
+							
+				if((isset($value['edited']) && $value['edited']['field'] == 'result_link') || ($value['new'] == 'y')) 
+						$imgColor = 'red';
+				else 
+					$imgColor = 'black'; 
+				
+				$outputStr .= '<div title="' . $upmTitle . '">';
+				if($value['result_link'] != '' && $value['result_link'] !== NULL)
+				{
+					$outputStr .= '<a href="' . $value['result_link'] . '" ' . $target . '>';
+					if($value['event_type'] == 'Clinical Data')
+					{
+						$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond" border="0" />';
+					}
+					else if($value['status'] == 'Cancelled')
+					{
+						$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel" border="0" />';
+					}
+					else
+					{
+						$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark" border="0" />';
+					}
+					$outputStr .= '</a>';
+				}
+				else
+				{
+					if($value['event_type'] == 'Clinical Data')
+					{
+						$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond" border="0" />';
+					}
+					else if($value['status'] == 'Cancelled')
+					{
+						$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel" border="0" />';
+					}
+					else
+					{
+						$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark" border="0" />';
+					}
+				}
+				$outputStr .= '</div>';
+			}
+			else if($value['status'] == 'Pending')
+			{
+				$outputStr .= '<span title="' . $upmTitle . '">';
+				if($value['event_link'] != '' && $value['event_link'] !== NULL)
+				{
+					$outputStr .= '<a href="' . $value['event_link'] . '" target="_blank">'
+								. '<img src="images/hourglass.png" alt="Hourglass"  border="0" /></a>';
+				}
+				else
+				{
+					$outputStr .= '<img src="images/hourglass.png" alt="Hourglass"  border="0" />';
+				}
+				$outputStr .= '</span>';
+			}
+			else
+			{
+				$outputStr .= '&nbsp;';
+			}
+			$outputStr .= '</td>';		
+			
+			
+			//upm gnatt chart
+			$outputStr .= $this->upmGnattChart($stMonth, $stYear, 
+							date('m',strtotime($value['end_date'])), date('Y',strtotime($value['end_date'])), $currentYear, $secondYear, $thirdYear, 
+							$value['start_date'], $value['end_date'], $value['event_link'], $upmTitle, $upmBorderRight, $upmBorderLeft);
+			
+			$outputStr = preg_replace('/&nbsp;/', '<img src="images/trans_big.gif" />', $outputStr);
+			$outputStr .= '</tr>';
+		}
+		
+		return $outputStr;
 	}
 	
 	function replaceRedundantAcroynm($Acroynm, $briefTitle)
@@ -14949,8 +11355,7 @@ class TrialTracker
 	
 	function liLoggedIn()
 	{
-		global $li_user;
-		if( isset($_COOKIE['li_user']) or (isset($li_user) and $li_user == 'YES') )
+		if(isset($_COOKIE['li_user']))
 		{
 			return true;
 		}
@@ -14965,7 +11370,6 @@ function htmlformat($str)
 }
 
 function getDifference($valueOne, $valueTwo) 
-
 {
 	if($valueOne == 0)
 	{
@@ -15017,199 +11421,6 @@ function getColspanforExcelExport($cell, $inc)
 function getColspanBasedOnLogin($loggedIn)
 {
 	return $colspan = (($loggedIn) ? 53 : 52 );
-}
-
-function Build_OTT_Query($data, $Passed_where)
-{
-	$actual_query = "";
-	try {
-		$jsonData=$data;
-		$filterData = json_decode($jsonData, true, 10);
-		if(is_array($filterData))
-		array_walk_recursive($filterData, 'searchHandlerBackTicker','columnname');
-		if(is_array($filterData))
-		array_walk_recursive($filterData['columndata'], 'searchHandlerBackTicker','columnas');
-		$alias= " dt"; //data_trial table alias
-		$pd_alias= " pd"; //Products table alias
-		$ar_alias= " ar"; //Areas table alias
-		
-		$where_datas = $filterData["wheredata"];
-		$select_columns=$filterData["columndata"];
-		$override_vals = trim($filterData["override"]);
-		$sort_datas = $filterData["sortdata"];
-		$isOverride = !empty($override_vals);
-		
-		foreach($sort_datas as $ky => $vl )
-			{
-				if($vl["columnname"] == '`All`')
-				unset($sort_datas[$ky]);
-			}
-		
-		$prod_flag=0; $area_flag=0; $prod_col=0; $area_col=0;
-		if(is_array($where_datas) && !empty($where_datas))
-		{
-			foreach($where_datas as $where_data)
-			{
-				if($where_data["columnname"] == '`product`')
-				$prod_flag=1;
-				if($where_data["columnname"] == '`area`')
-				$area_flag=1;
-			}
-		}
-		
-		if(is_array($select_columns) && !empty($select_columns))
-		{
-			foreach($select_columns as $selectcolumn)
-			{
-				if($selectcolumn["columnname"] == '`product`')
-				{
-					$prod_flag=1;
-					$prod_col=1;	//This will need in overrriding Query
-				}
-				if($selectcolumn["columnname"] == '`area`')
-				{
-					$area_flag=1;
-					$area_col=1;	//This will need in overrriding Query
-				}
-			}
-		}
-		
-		if(is_array($sort_datas) && !empty($sort_datas) && (!$prod_flag || !$area_flag))
-		{
-			foreach($sort_datas as $sort_column)
-			{
-				if($sort_column["columnas"] == '`product`')
-				$prod_flag=1;
-				if($sort_column["columnas"] == '`area`')
-				$area_flag=1;
-			}
-		}
-		
-		//$select_str = getSelectString($select_columns, $alias, $pd_alias, $ar_alias);	////////////// CURRENTLY WE DONE NEED THIS PART AS OTT HAS FIXED COLUMNS
-		$select_str = "".$alias.".`larvol_id`, ".$alias.".`source_id`, ".$alias.".`brief_title`, ".$alias.".`acronym`, ".$alias.".`lead_sponsor`, ".$alias.".`collaborator`, ".$alias.".`condition`,"
-					. " ".$alias.".`overall_status`, ".$alias.".`is_active`, ".$alias.".`start_date`, ".$alias.".`end_date`, ".$alias.".`enrollment`, ".$alias.".`enrollment_type`, ".$alias.".`intervention_name`,"
-					. " ".$alias.".`region`, ".$alias.".`lastchanged_date`, ".$alias.".`phase`, ".$alias.".`overall_status`, ".$alias.".`lastchanged_date`, ".$alias.".`firstreceived_date`, ".$alias.".`viewcount` ";
-		
-		$where_str = get_WhereString($where_datas, $alias, $pd_alias, $ar_alias);
-		$sort_str = getSortString($sort_datas, $alias, $pd_alias, $ar_alias);
-
-
-		if($isOverride)
-		{
-			$actual_query .= "(";
-		}
-
-		$actual_query .= "SELECT ";
-
-		$actual_query .= $select_str;
-		
-
-		$actual_query .= " FROM data_trials " . $alias;
-		
-		if($prod_flag)
-		$actual_query .= " JOIN product_trials pt ON (pt.`trial`=".$alias.".`larvol_id`) JOIN products ". $pd_alias ." ON (". $pd_alias .".`id`=pt.`product`)";
-		
-		if($area_flag)
-		$actual_query .= " JOIN area_trials at ON (at.`trial`=".$alias.".`larvol_id`) JOIN areas ". $ar_alias ." ON (". $ar_alias .".`id`=at.`area`)";
-
-		
-		if(strlen(trim($where_str)) != 0 || strlen(trim($Passed_where)) != 0)
-		{
-			$actual_query .= " WHERE ";
-			if(strlen(trim($Passed_where)) != 0) 
-			{
-				$Passed_where = substr($Passed_where, 4);
-				$actual_query .= $Passed_where;
-			}
-			if(strlen(trim($where_str)) != 0 && strlen(trim($Passed_where)) != 0) $actual_query .= " AND ";
-			if(strlen(trim($where_str)) != 0) $actual_query .= $where_str;
-		}
-
-		if((strlen(trim($sort_str)) != 0))//Sort
-		{
-			$actual_query .= " ORDER BY " . $sort_str;
-		}
-		else
-		{
-			$actual_query .=" ORDER BY ".$alias.".`phase` DESC, ".$alias.".`end_date` ASC, ".$alias.".`start_date` ASC, ".$alias.".`overall_status` ASC, ".$alias.".`enrollment` ASC ";	//Default Sort
-		}
-
-		if($isOverride)//override string present
-		{
-
-	 		$override_str = getNCTOverrideString($override_vals, $alias, $pd_alias, $ar_alias, $select_str, $isCount, $prod_col, $area_col);
-	  		$actual_query .= ") UNION (" . $override_str . ")";
-	  	}
-	}
-	catch(Exception $e)
-	{
-		throw $e;
-	}
-	return $actual_query;
-}
-
-function get_WhereString($data, $alias, $pd_alias, $ar_alias)
-{
-	$wheredatas = $data;
-    if(empty($wheredatas))
-	{
-	   return '';
-	}
-	$wheres = array();
-	$wcount = 0;
-	$prevchain = ' ';
-	try {
-
-		foreach($wheredatas as $wh_key => $where_data)
-		{
-			$op_name = $where_data["opname"];
-			$column_name = $where_data["columnname"];
-			$column_value = $where_data["columnvalue"];
-			$chain_name = $where_data["chainname"];
-			if($column_name == '`product`' || $column_name == '`area`')
-				$column_name='`id`';
-				
-			$op_string = getOperator($op_name, $column_name, $column_value);
-			$wstr = " " . $prevchain . " " . $op_string;
-			
-			if($where_data["columnname"] == '`product`')
-				$wstr = str_replace('%f', $pd_alias . "." . $column_name,$wstr);
-			elseif($where_data["columnname"] == '`area`')
-				$wstr = str_replace('%f', $ar_alias . "." . $column_name,$wstr);
-			else
-				$wstr = str_replace('%f', $alias . "." . $column_name,$wstr);
-			
-			$pos = strpos($op_string,'%s1');
-
-			if($pos === false) {
-				$wstr = str_replace('%s', $column_value, $wstr);
-			}
-			else {
-				$xx = explode('and;endl', $column_value);//and;endl
-				$wstr = str_replace('%s1', $xx[0],$wstr);
-				$wstr = str_replace('%s2', $xx[1],$wstr);
-			}
-			$prevchain = $chain_name;
-			$wheres[$wcount++] = $wstr;
-		}
-		$wherestr = implode(' ', $wheres);
-		$pos = strpos($prevchain,'.');
-		if($pos === false)
-		{
-			//do nothing
-		}
-		else
-		{
-			$wherestr .= str_replace('.', '', $prevchain);//if . is present remove it and empty
-		}
-		//                if($pos == true)
-		//                    $wherestr .= $prevchain;
-	}
-	catch(Exception $e)
-	{
-		throw $e;
-	}
-	return $wherestr;
 }
 
 function iszero($element) { return $element != ''; }

@@ -11,33 +11,15 @@ require_once('run_trial_tracker.php');
 require('searchhandler.php');
 
 
-/********* If Report generation time is less than 1 Jan 2012, time machine is disabled **********/
-if($_REQUEST['time'] != NULL && $_REQUEST['time'] != '')
-{
-if((date('Y-m-d H:i:s', $_REQUEST['time'])) < date('Y-m-d H:i:s',strtotime('2012-01-01 00:00:00')))
-$_REQUEST['time'] = NULL;
-}
-else
-{
-$_REQUEST['time'] = NULL;
-}
-
 $tt = new TrialTracker;
 if(isset($_POST['btnDownload'])) 
 {	
-	$shownCnt = mysql_real_escape_string($_POST['shownCnt']);
-	$ottType = $_POST['ottType'];
 	$resultIds = $_POST['resultIds'];
-	$timeMachine = (isset($_POST['timeMachine']) && $_POST['timeMachine'] != '') ? mysql_real_escape_string($_POST['timeMachine']) : NULL;
 	$globalOptions = $_POST['globalOptions'];
 	
 	if($_POST['dOption'] == 'all')
 	{
-		$globalOptions['download'] = 'allTrialsforDownload';
-	}
-	else
-	{
-		$globalOptions['download'] = $globalOptions['type'];
+		$globalOptions['type'] = 'allTrials';
 	}
 	
 	switch($_POST['wFormat'])
@@ -52,8 +34,9 @@ if(isset($_POST['btnDownload']))
 			$fileType = 'tsv';
 			break;
 	}
-	
-	if(isset($_REQUEST['sphinx_s']))
+	$tt->generateTrialTracker($fileType, $resultIds, $globalOptions);
+	exit;
+	/*if(isset($_REQUEST['sphinx_s']))
 	{	
 		$Sphinx_search=$_REQUEST['sphinx_s'];
 		$globalOptions['sphinx_s']=$_REQUEST['sphinx_s'];
@@ -67,11 +50,11 @@ if(isset($_POST['btnDownload']))
 	{
 		$tt->generateTrialTracker($fileType, $resultIds, $timeMachine, $ottType, $globalOptions);
 		exit;
-	}
+	}*/
 }
 $sortFields = array('phase' => 'pD', 'inactive_date' => 'iA', 'start_date' => 'sA', 'overall_status' => 'oA', 'enrollment' => 'eA');
 
-if(isset($_REQUEST['sphinx_s']))
+/*if(isset($_REQUEST['sphinx_s']))
 {	
 	$Sphinx_search=$_REQUEST['sphinx_s'];
 	$globalOptions['sphinx_s']=$_REQUEST['sphinx_s'];
@@ -79,7 +62,7 @@ if(isset($_REQUEST['sphinx_s']))
 elseif(isset($globalOptions['sphinx_s']))
 {	
 	$Sphinx_search=$globalOptions['sphinx_s'];
-}
+}*/
 
 $globalOptions['sortOrder'] = $sortFields;
 
@@ -90,11 +73,9 @@ $globalOptions['itype'] = array();
 $globalOptions['region'] = array();
 $globalOptions['phase'] = array();
 
-$globalOptions['version'] = rawurlencode(base64_encode('0'));
 
 $globalOptions['page'] = 1;
 $globalOptions['onlyUpdates'] = "no";
-$globalOptions['encodeFormat'] = "old";
 $globalOptions['LI'] = "0";
 $globalOptions['minEnroll'] = "0";
 $globalOptions['maxEnroll'] = "0";
@@ -104,7 +85,7 @@ $globalOptions['startrange'] = "now";
 $globalOptions['endrange'] = "1 month";
 
 //sphinx search option set to search only the trials shown in the result set.
-$globalOptions['sphinxSearch'] = '';
+//$globalOptions['sphinxSearch'] = '';
 
 $globalOptions['includeProductsWNoData'] = "off";
 $globalOptions['showTrialsSponsoredByProductOwner'] = "off";
@@ -171,10 +152,10 @@ if(isset($_REQUEST['rlink']) && $_REQUEST['rlink'] != '')
 }
 
 
-if(isset($_REQUEST['ss']) && $_REQUEST['ss'] != '')
+/*if(isset($_REQUEST['ss']) && $_REQUEST['ss'] != '')
 {
 	$globalOptions['sphinxSearch'] = $_REQUEST['ss'];
-}
+}*/
 
 
 $globalOptions['Highlight_Range'] = array('1 week', '2 weeks', '1 month', '1 quarter', '6 months', '1 year');
@@ -499,25 +480,9 @@ if(isset($_REQUEST['page']) && is_numeric($_REQUEST['page']))
 	$globalOptions['page'] = mysql_real_escape_string($_REQUEST['page']);
 }
 
-if(isset($_REQUEST['v']))
-{
-	$globalOptions['version'] = mysql_real_escape_string($_REQUEST['v']);
-}
-
 if(isset($_REQUEST['osu']) && $_REQUEST['osu'] == 'on')
 {
 	$globalOptions['onlyUpdates'] = "yes";
-}
-
-if(isset($_REQUEST['cd']))
-{
-	$globalOptions['countDetails'] = unserialize(gzinflate(base64_decode(rawurldecode($_REQUEST['cd']))));
-}
-
-
-if(isset($_REQUEST['format']) && $_REQUEST['format'] == "new")
-{
-	$globalOptions['encodeFormat'] = "new";
 }
 
 if((isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') !== FALSE)
@@ -532,54 +497,30 @@ if(isset($_REQUEST['pr']) && $_REQUEST['pr'] != '')
 	$globalOptions['product'] = array_filter($globalOptions['product'], 'iszero');
 }
 
-if(isset($_REQUEST['results']) && isset($_REQUEST['type']))
-{
-	$tt_type = $_REQUEST['type'] . 'stacked';
-	$globalOptions['url'] = rawurlencode($_REQUEST['results']).'&amp;type='.$_REQUEST['type'];	
-	$tt->generateTrialTracker('webpage', $_REQUEST['results'], $_REQUEST['time'], $tt_type, $globalOptions);
-}
-else if(isset($_REQUEST['results']))
-{	
-	$globalOptions['url'] = $_REQUEST['results'];	
-	$tt->generateTrialTracker('webpage', $_REQUEST['results'], $_REQUEST['time'], 'unstacked', $globalOptions);
-}
-else if(isset($_REQUEST['p']) || isset($_REQUEST['a']) || isset($_REQUEST['hm']))
+if(isset($_REQUEST['p']) || isset($_REQUEST['a']) || isset($_REQUEST['hm']))
 {
 	$globalOptions['url'] = 'p=' . $_REQUEST['p'] . '&a=' . $_REQUEST['a'];	
 	
-	if(isset($_REQUEST['JSON_search']))
+	/*if(isset($_REQUEST['JSON_search']))
 	{
 		$globalOptions['url'] = 'p=' . $_REQUEST['p'] . '&a=' . $_REQUEST['a'] . '&JSON_search=' . $_REQUEST['JSON_search'];
 		$globalOptions['JSON_search'] = $_REQUEST['JSON_search'];
-	}
+	}*/
 	if(isset($_REQUEST['hm']) && trim($_REQUEST['hm']) != '' && $_REQUEST['hm'] != NULL)
 	{
 		$globalOptions['hm'] = $_REQUEST['hm'];
 	}
 	
-	if(isset($_REQUEST['sphinx_s']))
+	/*if(isset($_REQUEST['sphinx_s']))
 	{
 		$globalOptions['sphinx_s'] = $_REQUEST['sphinx_s'];
 	}
 	elseif(isset($globalOptions['sphinx_s']))
 	{
 		$_REQUEST['sphinx_s'] = $globalOptions['sphinx_s'];
-	}
-		
-	$tt->generateTrialTracker('indexed', array('product' => $_REQUEST['p'], 'area' => $_REQUEST['a']), $_REQUEST['time'], 'indexed', $globalOptions);
-}
-else if(isset($_REQUEST['cparams']) || (isset($_REQUEST['leading']) && isset($_REQUEST['params'])))
-{
-	if(isset($_REQUEST['cparams']))
-	{
-		$tt->generateTrialTracker('stackedoldlink', array('cparams' => $_REQUEST['cparams'], 'leading' => $_REQUEST['leading'], 'params' => $_REQUEST['params']), 
-		NULL, 'stackedoldlink', $globalOptions);
-	}
-	else
-	{
-		$tt->generateTrialTracker('unstackedoldlink', array('leading' => $_REQUEST['leading'], 'params' => $_REQUEST['params']), NULL, 'unstackedoldlink',
-		 $globalOptions);
-	}
+	}*/
+	//pr($globalOptions);
+	$tt->generateTrialTracker('indexed', array('product' => $_REQUEST['p'], 'area' => $_REQUEST['a']), $globalOptions);
 }
 else
 {
@@ -761,14 +702,6 @@ global $db;
 	
 	function divresize() 
 	{  
-		/*var windoWidth;
-		var documentWidth = $(document).width();
-		var manageWidth = $('.manage').width();
-		var controlsWidth = $('.controls').width();
-		windoWidth = (documentWidth > manageWidth && documentWidth > controlsWidth ? documentWidth : manageWidth > controlsWidth ? manageWidth : controlsWidth);
-		$('#parent').width(windoWidth);
-		$('.manage').width(windoWidth);*/
-		
 		var windowidth = $('.manage').width();
 		$('#parent').width(windowidth);
 		
@@ -788,7 +721,7 @@ global $db;
 		divresize();
 	}); 
 </script>
-<?
+<?php
 if($db->loggedIn())
 {
 	$cpageURL = 'http://';
