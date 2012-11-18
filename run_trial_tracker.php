@@ -8291,7 +8291,8 @@ class TrialTracker
 							. '<li><label>Which Format: </label></li>'
 							. '<li><select id="wFormat" name="wFormat" size="3" style="height:54px;">'
 							. '<option value="excel" selected="selected">Excel</option>'
-							//. '<option value="pdf">PDF</option>'
+							//comment the folowing line to hide pdf export
+							. '<option value="pdf">PDF</option>'
 							. '<option value="tsv">TSV</option>'
 							. '</select></li></ul>'
 							. '<input type="hidden" name="shownCnt" value="' . $shownCnt . '" />'
