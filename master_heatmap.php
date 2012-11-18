@@ -3619,7 +3619,7 @@ function Download_reports()
 					if($data_matrix[$row][$col]['total'] != 0 && ($Status_New_Trials_Flg==1 || $Status_Total_Flg==1 || $Status_Active_Flg || $Status_Indlead_Flg) && (date('Y-m-d H:i:s', strtotime($end_range, $now)) == date('Y-m-d H:i:s', strtotime('-1 Month', $now))))
 					$annotation_text = $annotation_text.$annotation_text2;
 					
-					$annotation_text = strip_tags($annotation_text);	///Strip HTML tags
+					$annotation_text = htmlspecialchars_decode(strip_tags($annotation_text));	///Strip HTML tags then Convert special HTML entities back to characters like &amp; to &
 
 					if($prod_row_height == $Line_Height)	$prod_row_height = $prod_row_height + 0.6; /// For adjustment as when height is min, html causes issue
 					
@@ -4496,7 +4496,7 @@ function Download_reports()
 					if($data_matrix[$row][$col]['total'] != 0 && ($Status_New_Trials_Flg==1 || $Status_Total_Flg==1 || $Status_Active_Flg || $Status_Indlead_Flg) && (date('Y-m-d H:i:s', strtotime($end_range, $now)) == date('Y-m-d H:i:s', strtotime('-1 Month', $now))))
 					$annotation_text = $annotation_text.$annotation_text2;
 					
-					$annotation_text = strip_tags($annotation_text);	///Strip HTML tags
+					$annotation_text = htmlspecialchars_decode(strip_tags($annotation_text));	///Strip HTML tags then Convert special HTML entities back to characters like &amp; to &
 					
 					$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip(substr($annotation_text,0,255) );
 					$bomb_PR = 0;
