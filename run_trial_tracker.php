@@ -6315,7 +6315,7 @@ class TrialTracker
 						. " FROM " . $from
 						. $join
 						. " WHERE " . $where;
-		$Res = mysql_query($Query);
+		$Res = m_query(__LINE__,$Query);
 		if($Res)
 		{
 			if(mysql_num_rows($Res) > 0)
@@ -6410,7 +6410,7 @@ class TrialTracker
 					. " FROM `rpt_masterhm_headers` rmh "
 					. " JOIN `areas` ar ON  rmh.`type_id` = ar.`id` "
 					. " WHERE " . $where . " AND rmh.`report` = '" . $hmId . "' AND rmh.`type` = 'area' " . $orderby . $limit;
-		$Res = mysql_query($Query);
+		$Res = m_query(__LINE__,$Query);
 		if($Res)
 		{
 			if(mysql_num_rows($Res) > 0)
@@ -6517,7 +6517,7 @@ class TrialTracker
 				$productIds = array();
 				
 				$Query = "SELECT GROUP_CONCAT(type_id) AS type_id FROM `rpt_masterhm_headers` WHERE `report` = '" . $hmId . "' AND `type` = 'product' ";
-				$Res = mysql_query($Query);
+				$Res = m_query(__LINE__,$Query);
 				if($Res)
 				{
 					if(mysql_num_rows($Res) > 0)
@@ -6539,7 +6539,7 @@ class TrialTracker
 				$productIds = $resultIds['product'];
 				
 				$Query = "SELECT `name`, `id` FROM `products` WHERE id IN ('" . implode("','", $productIds) . "') OR LI_id IN ('" . implode("','", $productIds) . "') ";
-				$Res = mysql_query($Query);
+				$Res = m_query(__LINE__,$Query);
 				if($Res)
 				{
 					if(mysql_num_rows($Res) > 0)
@@ -6589,7 +6589,7 @@ class TrialTracker
 				$areaIds = array();
 				
 				$Query = "SELECT GROUP_CONCAT(type_id) AS type_id FROM `rpt_masterhm_headers` WHERE `report` = '" . $hmId . "' AND `type` = 'area' ";
-				$Res = mysql_query($Query);
+				$Res = m_query(__LINE__,$Query);
 				if($Res)
 				{
 					if(mysql_num_rows($Res) > 0)
@@ -6698,7 +6698,7 @@ class TrialTracker
 				$productIds = $resultIds['product'];
 				
 				$Query = "SELECT `name`, `id` FROM `products` WHERE id IN ('" . implode("','", $productIds) . "') OR LI_id IN ('" . implode("','", $productIds) . "') ";
-				$Res = mysql_query($Query);
+				$Res = m_query(__LINE__,$Query);
 				if($Res)
 				{
 					if(mysql_num_rows($Res) > 0)
@@ -6779,7 +6779,7 @@ class TrialTracker
 		
 		$Query = "SELECT `name`, `id`, `company`, `discontinuation_status`, `discontinuation_status_comment` "
 					. " FROM `products` WHERE id IN ('" . implode("','", $productIds) . "') OR LI_id IN ('" . implode("','", $productIds) . "') ";
-		$Res = mysql_query($Query);
+		$Res = m_query(__LINE__,$Query);
 		if($Res)
 		{	
 			if(mysql_num_rows($Res) > 0)
@@ -6849,7 +6849,7 @@ class TrialTracker
 		$Ids = array();
 		
 		$Query = "SELECT `display_name`, `name`, `id`, `category` FROM `areas` WHERE id IN ('" . implode("','", $areaIds) . "') ";
-		$Res = mysql_query($Query);
+		$Res = m_query(__LINE__,$Query);
 		if($Res)
 		{
 			if(mysql_num_rows($Res) > 0)
@@ -7229,7 +7229,7 @@ class TrialTracker
 			$where .= " AND at.`area` IN (" . implode(", ", $aIds) . ") ";
 			
 			$aQuery =  $query . $where;
-			$aRes = mysql_query($aQuery);
+			$aRes = m_query(__LINE__,$aQuery);
 			if($aRes)
 			{
 				while($aRow = mysql_fetch_assoc($aRes))
@@ -7397,7 +7397,7 @@ class TrialTracker
 		
 		$Data = array();
 		
-		$res = mysql_query($Query);
+		$res = m_query(__LINE__,$Query);
 		if($res)
 		{
 			if(mysql_num_rows($res) > 0)
@@ -7531,7 +7531,7 @@ class TrialTracker
 		}
 		
 		$cQuery = $query . $where . $filters . $orderBy;
-		$res = mysql_query($cQuery);
+		$res = m_query(__LINE__,$cQuery);
 		if($res)
 		{
 			$Values['count'] = mysql_num_rows($res);
@@ -7579,7 +7579,7 @@ class TrialTracker
 					. " FROM `data_history` "
 					. " WHERE `larvol_id` IN ('" . implode("', '", $larvolIds) . "') "
 					. " AND ( (`" . implode('` BETWEEN "' . $startRange . '" AND "' . $endRange . '") OR (`', $this->fieldNames) . "` BETWEEN '" . $startRange . "' AND '" . $endRange . "') ) ";
-		$res = mysql_query($query);			
+		$res = m_query(__LINE__,$query);			
 		if($res)
 		{
 			while($row = mysql_fetch_assoc($res))
@@ -7750,7 +7750,7 @@ class TrialTracker
 				. " LEFT JOIN `upm_history` uh ON uh.`id` = u.`id` "
 				. " WHERE ut.`larvol_id` IS NULL AND u.`product` IN ('" . implode("', '", $productIds) . "') "
 				. " ORDER BY `end_date` ASC ";
-		$res = mysql_query($query);
+		$res = m_query(__LINE__,$query);
 		if($res)
 		{
 			if(mysql_num_rows($res) > 0)
@@ -7832,7 +7832,7 @@ class TrialTracker
 					. " WHERE dt.`source_id` IN ('" . implode("','", $larvolIds) . "') "
 					. " ORDER BY u.`end_date` ASC, u.`start_date` ASC ";	
 					
-		$res = mysql_query($query);
+		$res = m_query(__LINE__,$query);
 		if($res)
 		{
 			if(mysql_num_rows($res) > 0)
@@ -7903,7 +7903,7 @@ class TrialTracker
 		$query = "SELECT `id`, `field`, `old_value`, MAX(`change_date`) AS change_date FROM `upm_history` "
 					. " WHERE `id` IN ('" . implode("','", $upmIds) . "') AND (CAST(`change_date` AS DATE) <= '" . $endRange . "' AND "
 					. " CAST(`change_date` AS DATE) >= '" . $startRange . "') GROUP BY `id` ";
-		$res = mysql_query($query);
+		$res = m_query(__LINE__,$query);
 		if($res)
 		{
 
@@ -11430,4 +11430,21 @@ function getColspanBasedOnLogin($loggedIn)
 }
 
 function iszero($element) { return $element != ''; }
+
+
+function m_query($n,$q)
+{
+			global $logger;
+			
+			$time_start = microtime(true);
+			$res = mysql_query($q);
+			$time_end = microtime(true);
+			$time_taken = $time_end-$time_start;
+			$log = 'TIME:'.$time_taken.'  QUERY:'.$q.'  LINE# '.$n;
+			$logger->info($log);
+			unset($log);
+			return $res;
+
+}
+
 ?>
