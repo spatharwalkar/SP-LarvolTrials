@@ -10,7 +10,7 @@ require_once('include.excel.php');
 require_once 'PHPExcel/IOFactory.php';
 require_once('special_chars.php');
 require_once('include.util.php');
-
+$li_user=null;
 global $Sphinx_search;
 
 class TrialTracker
@@ -8304,6 +8304,7 @@ class TrialTracker
 	
 	function displayHeader($productAreaInfo)
 	{
+		global $li_user;
 		/*if(isset($_REQUEST['sphinx_s']))
 		{
 			echo '<input type="hidden" name="sphinx_s" value="'.$_REQUEST['sphinx_s'].'" />';
@@ -8317,9 +8318,11 @@ class TrialTracker
 		|| (isset($_GET['LI']) && $_GET['LI'] == 1))
 		{
 			echo '<input type="hidden" name="LI" value="1" />';
+			$li_user='YES';
 		}
 		else
 		{
+			$li_user=null;
 			echo '<table width="100%">'
 					. '<tr><td><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" /></td>'
 					. '<td nowrap="nowrap"><span style="color:#ff0000;font-weight:normal;margin-left:40px;">Interface work in progress</span>'
@@ -11357,7 +11360,8 @@ class TrialTracker
 	
 	function liLoggedIn()
 	{
-		if(isset($_COOKIE['li_user']))
+		global $li_user;
+		if( isset($_COOKIE['li_user']) or (isset($li_user) and $li_user == 'YES') )
 		{
 			return true;
 		}
