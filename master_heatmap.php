@@ -2810,7 +2810,32 @@ function Download_reports()
 			$Place_X = $Main_X;
 			$Place_Y = $Main_Y;
 			
-			if (($startY + $prod_row_height + 1) + $dimensions['bm'] > ($dimensions['hk']))
+			$checkHeight = $prod_row_height;
+			
+			$cat = (isset($rowsCategoryName[$row]) && $rowsCategoryName[$row] != '')? $rowsCategoryName[$row]:'Undefined';
+			$rowsCategoryNamePrint = false;
+			$pdf->SetFont('freesansb', 'B ', 8); // Bold Font
+			if($rows_Span[$row] > 0 && $cat != 'Undefined')
+			{
+				$Product_Rowcat_width = ($product_Col_Width + $All_Column_Width);
+				$rowcount = $pdf->getNumLines($cat, $Product_Rowcat_width);
+ 				$Product_Rowcat_height = ($rowcount * $Bold_Line_Height);
+				if (($startY + $Product_Rowcat_height + 1) + $dimensions['bm'] < ($dimensions['hk']))
+				{	
+					PrintProductCategoryforPDFExport($dtt, $rows_categoryProducts[$cat], $last_area, $link_part, $cat, $Product_Rowcat_width, $Product_Rowcat_height, $Place_X, $Place_Y, $pdf);								
+					$Place_Y = $Place_Y + $Product_Rowcat_height + 0.5;
+					$startY = $Place_Y;
+					$pdf->SetY($Place_Y);
+					$rowsCategoryNamePrint = true;
+				}
+				else
+				{
+					$checkHeight = $Product_Rowcat_height;
+				}				
+			}
+			$pdf->SetFont('freesans', ' ', 8, '', false); // Normal Font
+			
+			if (($startY + $checkHeight + 1) + $dimensions['bm'] > ($dimensions['hk']))
 			{
 				//this row will cause a page break, draw the bottom border on previous row and give this a top border
 				
@@ -3123,28 +3148,12 @@ function Download_reports()
 			$cat = (isset($rowsCategoryName[$row]) && $rowsCategoryName[$row] != '')? $rowsCategoryName[$row]:'Undefined';
 			
 			$pdf->SetFont('freesansb', 'B ', 8); // Bold Font
-			if($rows_Span[$row] > 0 && $cat != 'Undefined')
+			if($rows_Span[$row] > 0 && $cat != 'Undefined' && !$rowsCategoryNamePrint)
 			{
 				$Product_Rowcat_width = ($product_Col_Width + $All_Column_Width);
 				$rowcount = $pdf->getNumLines($cat, $Product_Rowcat_width);
- 				$Product_Rowcat_height = ($rowcount * $Bold_Line_Height);	//15 is minimum height to accomodate images and other data
-				$pdfContent = '';
-				if($dtt)
-				{
-					$pdfContent = '<a id="Cell_Link_'.$online_HMCounter.'" href="'. urlPath() .'intermediary.php?p=' . implode(',', $rows_categoryProducts[$cat]) . '&a=' . $last_area . $link_part .'" target="_blank" style="color:#000000; text-decoration:none;">';
-				}
-				if($cat != 'Undefined')
-				{
-					$pdfContent .=''.$cat.'';
-				}
-				if($dtt)
-				$pdfContent .= '</a>';
-				
-				$pdf->SetFillColor(162, 255, 151);
-				$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));	
-			//	$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(162, 255, 151)));
-				$pdf->setCellPaddings(0.5, 0, 0, 0);
-				$pdf->MultiCell($Product_Rowcat_width, $Product_Rowcat_height, $pdfContent, $border=0, $align='L', $fill=1, $ln=1, $Place_X, $Place_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+ 				$Product_Rowcat_height = ($rowcount * $Bold_Line_Height);	
+				PrintProductCategoryforPDFExport($dtt, $rows_categoryProducts[$cat], $last_area, $link_part, $cat, $Product_Rowcat_width, $Product_Rowcat_height, $Place_X, $Place_Y, $pdf);								
 				$Place_Y = $Place_Y + $Product_Rowcat_height + 0.5;
 				$pdf->setCellPaddings(0, 0, 0, 0);
 			}
@@ -3188,29 +3197,6 @@ function Download_reports()
 			{
 				$pdf->SetFillColor(221, 221, 255);
         		$pdf->SetTextColor(0);
-				
-			
-				$dimensions = $pdf->getPageDimensions();
-				$startY = $pdf->GetY();
-				$prod_row_height = $Line_Height;	//12 is default height
-				if (($startY + $prod_row_height) + $dimensions['bm'] > ($dimensions['hk'])) {
-					//this row will cause a page break, draw the bottom border on previous row and give this a top border
-					$BorderStop_X = $pdf->GetX();
-					$BorderStop_Y = $pdf->GetY();
-					
-					/// Create Border Around Heatmap before going to new page
-					$pdf->SetFillColor(0, 0, 128);
-					$border = array('mode' => 'ext', 'LTRB' => array('width' => 0.3, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,0,128)));
-					$pdf->MultiCell(($product_Col_Width + $All_Column_Width + 0.1), ($BorderStop_Y - $BorderStart_Y + $helpTabRow_Height + 1), '', $border, $align='C', $fill=0, $ln=0, $BorderStart_X, $BorderStart_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=false, $maxh=($BorderStop_Y - $BorderStart_Y), 'T');
-
-		
-					//we could force a page break and rewrite grid headings here
-					$pdf->AddPage();
-					
-					$BorderStart_X = $pdf->GetX();
-					$BorderStart_Y = $pdf->GetY();
-					$pdf->Ln(0.5);					
-				}
 				
 				$Place_X = $pdf->GetX();
 				$Place_Y = $pdf->GetY();
@@ -4686,6 +4672,28 @@ function getColspanforExcelExport($cell, $inc)
 		$cell++;
 	}
 	return $cell;
+}
+
+function PrintProductCategoryforPDFExport($dtt, $rows_categoryProducts, $last_area, $link_part, $cat, $Product_Rowcat_width, $Product_Rowcat_height, $Place_X, $Place_Y, &$pdf)
+{
+	$pdfContent = '';
+	if($dtt)
+	{
+		$pdfContent = '<a href="'. urlPath() .'intermediary.php?p=' . implode(',', $rows_categoryProducts) . '&a=' . $last_area . $link_part .'" target="_blank" style="color:#000000; text-decoration:none;">';
+	}
+	if($cat != 'Undefined')
+	{
+		$pdfContent .=''.$cat.'';
+	}
+	if($dtt)
+	$pdfContent .= '</a>';
+			
+	$pdf->SetFillColor(162, 255, 151);
+	$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,13,223)));	
+	//	$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(162, 255, 151)));
+	$pdf->setCellPaddings(0.5, 0, 0, 0);
+	$pdf->MultiCell($Product_Rowcat_width, $Product_Rowcat_height, $pdfContent, $border=0, $align='L', $fill=1, $ln=1, $Place_X, $Place_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+	$pdf->setCellPaddings(0, 0, 0, 0);					
 }
 
 function getNumLinesPDFExport($productName, $OtherPart, $product_Col_Width, $Bold_Line_Height, $Line_Height, &$pdf)
