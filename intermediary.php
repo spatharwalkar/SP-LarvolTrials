@@ -722,7 +722,7 @@ global $db;
 	}); 
 </script>
 <?php
-if($db->loggedIn())
+if($db->loggedIn() && (strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE))
 {
 	$cpageURL = 'http://';
 	$cpageURL .= $_SERVER["SERVER_NAME"].urldecode($_SERVER["REQUEST_URI"]);
