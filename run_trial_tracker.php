@@ -173,7 +173,7 @@ class TrialTracker
 		
 		foreach($Values['Data'] as $tkey => $tvalue)
 		{
-			if(!empty($tvalue['naUpms']))
+			if(isset($tvalue['naUpms']))
 			{
 				$naUpms = array_merge($naUpms, $tvalue['naUpms']);
 			}
@@ -182,7 +182,7 @@ class TrialTracker
 			
 			if($globalOptions['includeProductsWNoData'] == "off")
 			{
-				if(!empty($tvalue['naUpms']) || isset($tvalue['Trials']))
+				if(isset($tvalue['naUpms']) || isset($tvalue['Trials']))
 				{
 					$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $tvalue['sectionHeader']);
 					$objPHPExcel->getActiveSheet()->mergeCells('A' . $i . ':BB'. $i);
@@ -249,7 +249,7 @@ class TrialTracker
 					$cellSpan = $i;
 					$rowspanLimit = 0;
 					
-					if(!empty($dvalue['upms'])) 
+					if(isset($dvalue['upms'])) 
 					{
 						$cellSpan = $i;
 						$rowspanLimit = count($dvalue['upms']);
@@ -1066,6 +1066,9 @@ class TrialTracker
 							$edYear = date('Y', strtotime($mvalue['end_date']));
 							$upmTitle = htmlformat($mvalue['event_description']);
 							
+							$mvalue['event_link'] = trim($mvalue['event_link']);
+							$mvalue['result_link'] = trim($mvalue['result_link']);
+							
 							if(!$loggedIn && !$this->liLoggedIn())
 							{
 								$mvalue['event_link'] = NULL;
@@ -1137,20 +1140,50 @@ class TrialTracker
 				
 				}
 			}
-			/*else
+			else
 			{
-				if($globalOptions['onlyUpdates'] == "no")
+				if($globalOptions['includeProductsWNoData'] == "off")
 				{
-					$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, 'No trials found');
-					$objPHPExcel->getActiveSheet()->mergeCells('A' . $i . ':BB'. $i);
-					$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':BB'. $i)->applyFromArray(
-									array('borders' => array(
-												'inside' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => 'FF0000FF')),
-												'outline' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => 'FF0000FF'))),
-					));
-					$i++;
+					if(isset($tvalue['naUpms']) || isset($tvalue['Trials']))
+					{
+						if($globalOptions['onlyUpdates'] == "no")
+						{
+							$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, 'No trials found');
+							$objPHPExcel->getActiveSheet()->mergeCells('A' . $i . ':BB'. $i);
+							$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':BB'. $i)->applyFromArray(
+											array('fill' => array(
+													'type'       => PHPExcel_Style_Fill::FILL_SOLID,
+													'rotation'   => 0,
+													'startcolor' => array('rgb' => 'EDEAFF'),
+													'endcolor'   => array('rgb' => 'EDEAFF')),
+											'borders' => array(
+														'inside' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => 'FF0000FF')),
+														'outline' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => 'FF0000FF'))),
+							));
+							$i++;
+						}
+					}
 				}
-			}*/
+				else
+				{
+					if($globalOptions['onlyUpdates'] == "no")
+					{
+						$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, 'No trials found');
+						$objPHPExcel->getActiveSheet()->mergeCells('A' . $i . ':BB'. $i);
+						$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':BB'. $i)->applyFromArray(
+										array('fill' => array(
+												'type'       => PHPExcel_Style_Fill::FILL_SOLID,
+												'rotation'   => 0,
+												'startcolor' => array('rgb' => 'EDEAFF'),
+												'endcolor'   => array('rgb' => 'EDEAFF')),
+										'borders' => array(
+													'inside' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => 'FF0000FF')),
+													'outline' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => 'FF0000FF'))),
+						));
+						$i++;
+					}
+				}
+			}
 		}
 		
 		$objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(13);
@@ -1199,7 +1232,7 @@ class TrialTracker
 		$objPHPExcel->getActiveSheet()->mergeCells('L1:W1');
 		$objPHPExcel->getActiveSheet()->setCellValue('X1' , $secondYear);
 		$objPHPExcel->getActiveSheet()->mergeCells('X1:AI1');
-		$objPHPExcel->getActiveSheet()->setCellValue('AI1' , $thirdYear);
+		$objPHPExcel->getActiveSheet()->setCellValue('AJ1' , $thirdYear);
 		$objPHPExcel->getActiveSheet()->mergeCells('AJ1:AU1');
 		$objPHPExcel->getActiveSheet()->setCellValue('AV1' , '+');
 		$objPHPExcel->getActiveSheet()->mergeCells('AV1:AX1');
@@ -1591,11 +1624,14 @@ class TrialTracker
 		
 		foreach($Values['Data'] as $tkey => $tvalue)
 		{
-			unset($Values['sectionHeader'], $Values['naUpms']);
+			unset($Values['sectionHeader']);
 			
-			foreach($tvalue['Trials'] as $tkey => & $tvalue)
+			if(isset($tvalue['Trials']))
 			{
-				$Trials[] = $tvalue;
+				foreach($tvalue['Trials'] as $tkey => & $tvalue)
+				{
+					$Trials[] = $tvalue;
+				}
 			}
 		}
 		unset($Values);
@@ -2203,6 +2239,8 @@ class TrialTracker
 					$inc = $st;
 					$to = getColspanforExcelExport($from, $inc);
 					$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+
+
 					$from = $to;
 					$from++;
 				}
@@ -2877,6 +2915,7 @@ class TrialTracker
 				if($st != 0)
 				{
 					$inc = $st;
+
 					$to = getColspanforExcelExport($from, $inc);
 					$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
 					$from = $to;
@@ -3530,6 +3569,7 @@ class TrialTracker
 				
 				$to = getColspanforExcelExport($from, 12);
 				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
+
 				if( $upmLink != '' && $upmLink !== NULL)
 				{
 					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
@@ -3632,6 +3672,7 @@ class TrialTracker
 				{
 					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
 					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+
 				}
 				$from = $to;
 				$from++;
@@ -4461,6 +4502,7 @@ class TrialTracker
 				{
 					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setUrl($upmLink);
 					$objPHPExcel->getActiveSheet()->getCell($from . $i)->getHyperlink()->setTooltip($upmTitle);
+
 				}
 				$objPHPExcel->getActiveSheet()->getStyle($from . $i)->applyFromArray($bgColor);
 				$from = $to;
@@ -6291,7 +6333,7 @@ class TrialTracker
 		
 	}
 	
-	function getProductHmHeaders($hmId, $productIds, $onlyUpdates)
+	function getProductHmHeaders($hmId, $productIds)
 	{
 		global $logger;
 		
@@ -6320,7 +6362,6 @@ class TrialTracker
 		{
 			if(mysql_num_rows($Res) > 0)
 			{
-				$counter = 0;
 				while($row = mysql_fetch_assoc($Res))
 				{
 					$disContinuedTxt = "";
@@ -6349,13 +6390,12 @@ class TrialTracker
 					
 					$sectionHeader .= $disContinuedTxt;
 					
-					$TrialsInfo[$counter]['Id'] = $productId;
-					$TrialsInfo[$counter]['sectionHeader'] = $sectionHeader;
+					$TrialsInfo[$productId]['Id'] = $productId;
+					$TrialsInfo[$productId]['sectionHeader'] = $sectionHeader;
 					
 					$Ids[$productId]['product'] = $productId;
 					
 					unset($disContinuedTxt);
-					++$counter;
 				}
 			}
 		}
@@ -6365,20 +6405,6 @@ class TrialTracker
 			$logger->error($log);
 			unset($log);
 		}
-		
-		$naUpms = $this->getUnMatchedUPMs($onlyUpdates, $productIds);
-		
-		foreach($TrialsInfo as $tkey => & $tvalue)
-		{
-			$Id = $tvalue['Id'];
-			$tvalue['naUpms'] = array();
-			if(isset($naUpms[$Id]))
-			{
-				$tvalue['naUpms'] = $naUpms[$Id];
-			}
-		}
-		
-		unset($naUpms);
 		
 		return array('Ids' => $Ids, 'TrialsInfo' => $TrialsInfo, 'productSelector' => $productSelector);
 	}
@@ -6415,7 +6441,6 @@ class TrialTracker
 		{
 			if(mysql_num_rows($Res) > 0)
 			{
-				$counter = 0;
 				while($row = mysql_fetch_assoc($Res))
 				{
 					$sectionHeader = "";
@@ -6451,9 +6476,8 @@ class TrialTracker
 					$Ids[$areaId]['area'] = $areaId;
 					$productSelector[$areaId] = $sectionHeader;
 					
-					$TrialsInfo[$counter]['sectionHeader'] = formatBrandName($sectionHeader, 'area');
-					$TrialsInfo[$counter]['Id'] = $areaId;
-					++$counter;
+					$TrialsInfo[$areaId]['sectionHeader'] = formatBrandName($sectionHeader, 'area');
+					$TrialsInfo[$areaId]['Id'] = $areaId;
 				}
 			}
 		}
@@ -6464,6 +6488,7 @@ class TrialTracker
 			$logger->error($log);
 			unset($log);
 		}
+
 		
 		return array('Ids' => $Ids, 'TrialsInfo' => $TrialsInfo, 'productSelector' => $productSelector);
 	}
@@ -6473,7 +6498,6 @@ class TrialTracker
 		global $logger;
 		
 		$hmId = $globalOptions['hm'];
-		$onlyUpdates = $globalOptions['onlyUpdates'];
 		
 		$aDetails = array();
 		$pDetails = array();
@@ -6492,8 +6516,7 @@ class TrialTracker
 			
 			$productIds = $resultIds['product'];
 			
-			$pDetails = $this->getProductHmHeaders($hmId, $productIds, $onlyUpdates);
-			
+			$pDetails = $this->getProductHmHeaders($hmId, $productIds);
 			foreach($pDetails['Ids'] as $ikey => $ivalue)
 			{
 				$pDetails['Ids'][$ikey]['area'] = implode("','", $resultIds['area']);
@@ -6556,19 +6579,10 @@ class TrialTracker
 				}
 			}
 			
-			$naUpms = $this->getUnMatchedUPMs($onlyUpdates, $productIds);
-			
 			$aDetails = $this->getAreaHmHeaders($hmId, $areaIds);
-			
 			foreach($aDetails['Ids'] as $ikey => $ivalue)
 			{
 				$aDetails['Ids'][$ikey]['product'] = implode("','", $productIds);
-			}
-			
-			$aDetails['TrialsInfo'][0]['naUpms'] = array();
-			foreach($naUpms as $nkey => $nvalue)
-			{
-				$aDetails['TrialsInfo'][0]['naUpms'] = array_merge($aDetails['TrialsInfo'][0]['naUpms'], $nvalue);
 			}
 			
 			$Ids = $aDetails['Ids'];
@@ -6576,7 +6590,6 @@ class TrialTracker
 			$productSelector = $aDetails['productSelector'];
 			
 			unset($aDetails);
-			unset($naUpms);
 		}
 		else if(count($resultIds['product']) > 1)
 		{
@@ -6615,12 +6628,10 @@ class TrialTracker
 				{
 					$tHeader .= $value['sectionHeader'];
 				}
-				
 				unset($aDetails);
 			}
 			
-			$pDetails = $this->getProductHmHeaders($hmId, $resultIds['product'], $onlyUpdates);
-			
+			$pDetails = $this->getProductHmHeaders($hmId, $resultIds['product']);
 			foreach($pDetails['Ids'] as $ikey => $ivalue)
 			{
 				$pDetails['Ids'][$ikey]['area'] = implode("','", $areaIds);
@@ -6648,8 +6659,7 @@ class TrialTracker
 					$areaIds = $value['Id'];
 				}
 				
-				$pDetails = $this->getProductHmHeaders($hmId, array(), $onlyUpdates);
-				
+				$pDetails = $this->getProductHmHeaders($hmId, array());
 				foreach($pDetails['Ids'] as $ikey => $ivalue)
 				{
 					$pDetails['Ids'][$ikey]['area'] = $areaIds;
@@ -6668,7 +6678,6 @@ class TrialTracker
 				$tHeader = 'Area: ';
 				
 				$areaIds = $resultIds['area'];
-				
 				$aDetails = $this->getAreaHmHeaders($hmId, $areaIds);
 				
 				foreach($aDetails['TrialsInfo'] as $akey => $value)
@@ -6676,8 +6685,7 @@ class TrialTracker
 					$tHeader .= strip_tags($value['sectionHeader']);
 				}
 				
-				$pDetails = $this->getProductHmHeaders($hmId, array(), $onlyUpdates);
-				
+				$pDetails = $this->getProductHmHeaders($hmId, array());
 				foreach($pDetails['Ids'] as $ikey => $ivalue)
 				{
 					$pDetails['Ids'][$ikey]['area'] = implode("','", $areaIds);
@@ -6720,19 +6728,10 @@ class TrialTracker
 					$aDetails['Ids'][$ikey]['product'] = implode("','", $productIds);
 				}
 				
-				$aDetails['TrialsInfo'][0]['naUpms'] = array();
-				$naUpms = $this->getUnMatchedUPMs($onlyUpdates, $productIds);
-				
-				foreach($naUpms as $nkey => $nvalue)
-				{
-					$aDetails['TrialsInfo'][0]['naUpms'] = array_merge($aDetails['TrialsInfo'][0]['naUpms'], $nvalue);
-				}
-				
 				$Ids = $aDetails['Ids'];
 				$TrialsInfo = $aDetails['TrialsInfo'];
 				$productSelector = $aDetails['productSelector'];
 				
-				unset($naUpms);
 				unset($aDetails);
 			}
 			else
@@ -6744,14 +6743,12 @@ class TrialTracker
 				$productIds = $resultIds['product'];
 				
 				$aDetails = $this->getAreaHmHeaders($hmId, $areaIds);
-				
 				foreach($aDetails['TrialsInfo'] as $akey => $value)
 				{
 					$tHeader .= strip_tags($value['sectionHeader']);
 				}
 				
-				$pDetails = $this->getProductHmHeaders($hmId, $productIds, $onlyUpdates);
-				
+				$pDetails = $this->getProductHmHeaders($hmId, $productIds);
 				foreach($pDetails['Ids'] as $ikey => $ivalue)
 				{
 					$pDetails['Ids'][$ikey]['area'] = implode("','", $areaIds);
@@ -6769,136 +6766,8 @@ class TrialTracker
 		return array('tHeader' => $tHeader, 'ottType' => $ottType,'Ids' => $Ids, 'TrialsInfo' => $TrialsInfo, 'productSelector' => $productSelector);
 	}
 	
-	function getProductHeaders($productIds, $onlyUpdates)
-	{
-		global $logger;
-		
-		$productSelector = array();
-		$TrialsInfo = array();
-		$Ids = array();
-		
-		$Query = "SELECT `name`, `id`, `company`, `discontinuation_status`, `discontinuation_status_comment` "
-					. " FROM `products` WHERE id IN ('" . implode("','", $productIds) . "') OR LI_id IN ('" . implode("','", $productIds) . "') ";
-		$Res = m_query(__LINE__,$Query);
-		if($Res)
-		{	
-			if(mysql_num_rows($Res) > 0)
-			{	
-				$counter = 0;
-				while($row = mysql_fetch_assoc($Res))
-				{
-					$disContinuedTxt = "";
-					$sectionHeader = "";
-					
-					$productIds[] = $productId = $row['id'];
-					
-					if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
-					{
-						$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
-					}
-					
-
-					$productSelector[$productId] = $row['name'];
-					$sectionHeader = formatBrandName($row['name'], 'product');
-					
-					if($row['company'] !== NULL && $row['company'] != '')
-					{
-						$sectionHeader .= " / <i>" . $row['company'] . "</i>";
-						$productSelector[$productId] .= " / <i>" . $row['company'] . "</i>";
-					}
-					
-					$sectionHeader .= $disContinuedTxt;
-					
-					$TrialsInfo[$counter]['Id'] = $productId;
-					$TrialsInfo[$counter]['sectionHeader'] = $sectionHeader;
-					
-					$Ids[$productId]['product'] = $productId;
-					
-					unset($disContinuedTxt);
-					++$counter;
-				}
-			}
-		}
-		else
-		{
-			$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
-			$logger->error($log);
-			unset($log);
-		}
-		
-		$naUpms = $this->getUnMatchedUPMs($onlyUpdates, $productIds);
-		
-		foreach($TrialsInfo as $tkey => & $tvalue)
-		{
-			if(isset($naUpms[$tkey]))
-			{
-				$tvalue['naUpms'] = $naUpms[$tkey];
-			}
-		}
-		unset($naUpms);
-		
-		return array('Ids' => $Ids, 'TrialsInfo' => $TrialsInfo, 'productSelector' => $productSelector);
-	}
-	
-	function getAreaHeaders($areaIds)
-	{
-		global $logger;
-		
-		$productSelector = array();
-		$TrialsInfo = array();
-		$Ids = array();
-		
-		$Query = "SELECT `display_name`, `name`, `id`, `category` FROM `areas` WHERE id IN ('" . implode("','", $areaIds) . "') ";
-		$Res = m_query(__LINE__,$Query);
-		if($Res)
-		{
-			if(mysql_num_rows($Res) > 0)
-			{
-				$counter = 0;
-				while($row = mysql_fetch_assoc($Res))
-				{
-					$sectionHeader = "";
-					$areaId = $row['id'];
-					
-					if($row['category'] != '' && $row['category'] !== NULL)
-					{
-						$sectionHeader = $row['category'];
-					}
-					
-					if($row['display_name'] != '' && $row['display_name'] !== NULL)
-					{
-						$sectionHeader .= ' ' . $row['display_name'];
-					}
-					else
-					{
-						$sectionHeader .= ' Area ' . $areaId;
-					}
-					
-					$Ids[$areaId]['area'] = $areaId;
-					$productSelector[$areaId] = $sectionHeader;
-					
-					$TrialsInfo[$counter]['sectionHeader'] = formatBrandName($sectionHeader, 'area');
-					$TrialsInfo[$counter]['Id'] = $areaId;
-					
-					++$counter;
-					
-				}
-			}
-		}
-		else
-		{
-			$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
-			$logger->error($log);
-			unset($log);
-		}
-		
-		return array('Ids' => $Ids, 'TrialsInfo' => $TrialsInfo, 'productSelector' => $productSelector);
-	}
-	
 	function processNonHmParams($resultIds, $globalOptions, $displayType = 'fileExport')
 	{
-		$onlyUpdates = $globalOptions['onlyUpdates'];
-		
 		$aDetails = array();
 		$pDetails = array();
 		
@@ -6916,7 +6785,7 @@ class TrialTracker
 			
 			$productIds = $resultIds['product'];
 			
-			$pDetails = $this->getProductHeaders($productIds, $onlyUpdates);
+			$pDetails = $this->getProductHeaders($productIds);
 			
 			foreach($pDetails['Ids'] as $ikey => $ivalue)
 			{
@@ -6931,7 +6800,6 @@ class TrialTracker
 		}
 		else if(count($resultIds['area']) > 1)
 		{
-			$naUpms = array();
 			$ottType = 'rowstacked';
 			$areaIds = $resultIds['area'];
 				
@@ -6951,8 +6819,6 @@ class TrialTracker
 				{
 					$tHeader .= strip_tags($value['sectionHeader']);
 				}
-				
-				$naUpms = $this->getUnMatchedUPMs($onlyUpdates, $productIds);
 			}
 			
 			$aDetails = $this->getAreaHeaders($areaIds);
@@ -6962,19 +6828,12 @@ class TrialTracker
 				$aDetails['Ids'][$ikey]['product'] = implode("','", $productIds);
 			}
 			
-			$aDetails['TrialsInfo'][0]['naUpms'] = array();
-			foreach($naUpms as $nkey => $nvalue)
-			{
-				$aDetails['TrialsInfo'][0]['naUpms'] = array_merge($aDetails['TrialsInfo'][0]['naUpms'], $nvalue);
-			}
-			
 			$Ids = $aDetails['Ids'];
 			$TrialsInfo = $aDetails['TrialsInfo'];
 			$productSelector = $aDetails['productSelector'];
 			
 			unset($pDetails);
 			unset($aDetails);
-			unset($naUpms);
 		}
 		else if(count($resultIds['product']) > 1)
 		{
@@ -6992,7 +6851,6 @@ class TrialTracker
 				$areaIds = $resultIds['area'];
 				
 				$aDetails = $this->getAreaHeaders($areaIds);
-				
 				foreach($aDetails['TrialsInfo'] as $akey => $value)
 				{
 					$tHeader .= strip_tags($value['sectionHeader']);
@@ -7001,7 +6859,6 @@ class TrialTracker
 			}
 			
 			$pDetails = $this->getProductHeaders($productIds, $onlyUpdates);
-			
 			foreach($pDetails['Ids'] as $ikey => $ivalue)
 			{
 				$pDetails['Ids'][$ikey]['area'] = implode("','", $areaIds);
@@ -7044,7 +6901,7 @@ class TrialTracker
 				
 				$productIds = $resultIds['product'];
 				
-				$pDetails = $this->getProductHeaders($productIds, $onlyUpdates);
+				$pDetails = $this->getProductHeaders($productIds);
 				foreach($pDetails['Ids'] as $ikey => $ivalue)
 				{
 					$pDetails['Ids'][$ikey]['area'] = '';
@@ -7065,14 +6922,12 @@ class TrialTracker
 				$productIds = $resultIds['product'];
 				
 				$aDetails = $this->getAreaHeaders($areaIds);
-				
 				foreach($aDetails['TrialsInfo'] as $akey => $value)
 				{
 					$tHeader .= strip_tags($value['sectionHeader']);
 				}
 				
 				$pDetails = $this->getProductHeaders($productIds, $onlyUpdates);
-				
 				foreach($pDetails['Ids'] as $ikey => $ivalue)
 				{
 					$pDetails['Ids'][$ikey]['area'] = implode("','", $areaIds);
@@ -7088,6 +6943,115 @@ class TrialTracker
 		}
 		
 		return array('tHeader' => $tHeader, 'ottType' => $ottType,'Ids' => $Ids, 'TrialsInfo' => $TrialsInfo, 'productSelector' => $productSelector);
+	}
+	
+	function getProductHeaders($productIds)
+	{
+		global $logger;
+		
+		$productSelector = array();
+		$TrialsInfo = array();
+		$Ids = array();
+		
+		$Query = "SELECT `name`, `id`, `company`, `discontinuation_status`, `discontinuation_status_comment` "
+					. " FROM `products` WHERE id IN ('" . implode("','", $productIds) . "') OR LI_id IN ('" . implode("','", $productIds) . "') ";
+		$Res = m_query(__LINE__,$Query);
+		if($Res)
+		{	
+			if(mysql_num_rows($Res) > 0)
+			{	
+				while($row = mysql_fetch_assoc($Res))
+				{
+					$disContinuedTxt = "";
+					$sectionHeader = "";
+					
+					$productIds[] = $productId = $row['id'];
+					
+					if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
+					{
+						$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
+					}
+					
+
+					$productSelector[$productId] = $row['name'];
+					$sectionHeader = formatBrandName($row['name'], 'product');
+					
+					if($row['company'] !== NULL && $row['company'] != '')
+					{
+						$sectionHeader .= " / <i>" . $row['company'] . "</i>";
+						$productSelector[$productId] .= " / <i>" . $row['company'] . "</i>";
+					}
+					
+					$sectionHeader .= $disContinuedTxt;
+					
+					$TrialsInfo[$productId]['Id'] = $productId;
+					$TrialsInfo[$productId]['sectionHeader'] = $sectionHeader;
+					
+					$Ids[$productId]['product'] = $productId;
+					
+					unset($disContinuedTxt);
+				}
+			}
+		}
+		else
+		{
+			$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
+			$logger->error($log);
+			unset($log);
+		}
+		
+		return array('Ids' => $Ids, 'TrialsInfo' => $TrialsInfo, 'productSelector' => $productSelector);
+	}
+	
+	function getAreaHeaders($areaIds)
+	{
+		global $logger;
+		
+		$productSelector = array();
+		$TrialsInfo = array();
+		$Ids = array();
+		
+		$Query = "SELECT `display_name`, `name`, `id`, `category` FROM `areas` WHERE id IN ('" . implode("','", $areaIds) . "') ";
+		$Res = m_query(__LINE__,$Query);
+		if($Res)
+		{
+			if(mysql_num_rows($Res) > 0)
+			{
+				while($row = mysql_fetch_assoc($Res))
+				{
+					$sectionHeader = "";
+					$areaId = $row['id'];
+					
+					if($row['category'] != '' && $row['category'] !== NULL)
+					{
+						$sectionHeader = $row['category'];
+					}
+					
+					if($row['display_name'] != '' && $row['display_name'] !== NULL)
+					{
+						$sectionHeader .= ' ' . $row['display_name'];
+					}
+					else
+					{
+						$sectionHeader .= ' Area ' . $areaId;
+					}
+					
+					$Ids[$areaId]['area'] = $areaId;
+					$productSelector[$areaId] = $sectionHeader;
+					
+					$TrialsInfo[$areaId]['sectionHeader'] = formatBrandName($sectionHeader, 'area');
+					$TrialsInfo[$areaId]['Id'] = $areaId;
+				}
+			}
+		}
+		else
+		{
+			$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
+			$logger->error($log);
+			unset($log);
+		}
+		
+		return array('Ids' => $Ids, 'TrialsInfo' => $TrialsInfo, 'productSelector' => $productSelector);
 	}
 	
 	function timeParams($globalOptions)
@@ -7158,51 +7122,60 @@ class TrialTracker
 		$TrialsInfo = $Arr['TrialsInfo'];
 		
 		$Values = $this->compileOTTData($ottType, $TrialsInfo, $Ids, $globalOptions);
-		
+		//pr($Values);
 		echo $this->displayWebPage($ottType, $resultIds, $Values, $productSelector, $globalOptions);
 		
-		unset($Ids, $productSelector, $TrialsInfo);
+		unset($ottType, $productSelector, $Ids, $TrialsInfo, $Arr);
 	}
 	
 	function compileOTTData($ottType, $TrialsInfo = array(), $Ids = array(), $globalOptions = array(), $display = 'web')
 	{	
 		global $logger;
 		
-		$Values['Data'] = $TrialsInfo;
+		$Values['Data'] = array();
 		$Values['enrollment'] = 0;
-		$Values['totactivecount'] = 0;
-		$Values['totinactivecount'] = 0;
+		$Values['activecount'] = 0;
+		$Values['inactivecount'] = 0;
 		$Values['totalcount'] = 0;
 		$Values['count'] = 0;
 		
-		$pIds = array();
-		$aIds = array();
+		$cCount = array();
+		$naUpms = array();
 		
 		$larvolIds = array();
 		$IdsForUpm = array();
 		
-		$startRange = date('Y-m-d', strtotime($this->timeInterval, $this->timeMachine));
-		$endRange = date('Y-m-d', $this->timeMachine);
+		$pIds = array();
+		$aIds = array();
 		
 		$pIds = array_map(function($item) { return $item['product']; }, $Ids);
 		$pIds = array_unique($pIds);	
 		
 		$aIds = array_map(function($item) { return $item['area']; }, $Ids);	
 		$aIds = array_unique($aIds);
-			
-		$filters = " ";
+		
+		$startRange = date('Y-m-d', strtotime($this->timeInterval, $this->timeMachine));
+		$endRange = date('Y-m-d', $this->timeMachine);
+	
 		$lstart = ($globalOptions['page']-1) * $this->resultsPerPage;
 		$limit = " LIMIT " . $lstart . ", 100 ";
-		$orderBy = " ORDER BY FIELD(pt.`product`, " . implode(",", $pIds) . "), dt.`phase` DESC, dt.`end_date` ASC, dt.`start_date` ASC, dt.`overall_status` ASC, dt.`enrollment` ASC ";
 		
+		if($ottType == 'rowstacked')
+		{
+			$orderBy = " ORDER BY FIELD(at.`area`, " . implode(",", $aIds) . "), dt.`phase` DESC, dt.`end_date` ASC, dt.`start_date` ASC, dt.`overall_status` ASC, dt.`enrollment` ASC ";
+		}
+		else
+		{
+			$orderBy = " ORDER BY FIELD(pt.`product`, " . implode(",", $pIds) . "), dt.`phase` DESC, dt.`end_date` ASC, dt.`start_date` ASC, dt.`overall_status` ASC, dt.`enrollment` ASC ";
+		}
 		
 		$phaseFilters = array('N/A'=>'na', '0'=>'0', '0/1'=>'1', '1'=>'1', '1a'=>'1', '1b'=>'1', '1a/1b'=>'1', '1c'=>'1', 
 									'1/2'=>'2', '1b/2'=>'2', '1b/2a'=>'2', '2'=>'2', '2a'=>'2', '2a/2b'=>'2', '2a/b'=>'2', '2b'=>'2', 
 									'2/3'=>'3', '2b/3'=>'3','3'=>'3', '3a'=>'3', '3b'=>'3', '3/4'=>'4', '3b/4'=>'4', '4'=>'4');
-							
-		$time = $this->timeParams($globalOptions);
-		$timeMachine = $time[0];
-		$timeInterval = $time[1];
+									
+		$where = " WHERE 1 ";
+		$where .= " AND pt.`product` IN ('" . implode("','", $pIds) . "') ";
+		$where .= " AND at.`area` IN ('" . implode("','", $aIds) . "') ";	
 		
 		$query = "SELECT dt.`larvol_id`, dt.`source_id`, dt.`brief_title`, dt.`acronym`, dt.`lead_sponsor`, dt.`collaborator`, dt.`condition`,"
 						. " dt.`overall_status`, dt.`is_active`, dt.`start_date`, dt.`end_date`, dt.`enrollment`, dt.`enrollment_type`, dt.`intervention_name`,"
@@ -7222,12 +7195,10 @@ class TrialTracker
 						. " JOIN `area_trials` at ON dt.`larvol_id` = at.`trial` "
 						. " LEFT JOIN `data_manual` dm ON dt.`larvol_id` = dm.`larvol_id` "
 						. " LEFT JOIN `data_nct` dn ON dt.`larvol_id` = dn.`larvol_id` ";
-						
+		
+		//calcultaing count and enrollment max value only for webpage display and not for file exports				
 		if($display == 'web')
 		{
-			$where = " WHERE pt.`product` IN (" . implode(", ", $pIds) . ") ";
-			$where .= " AND at.`area` IN (" . implode(", ", $aIds) . ") ";
-			
 			$aQuery =  $query . $where;
 			$aRes = m_query(__LINE__,$aQuery);
 			if($aRes)
@@ -7236,11 +7207,11 @@ class TrialTracker
 				{	
 					if($aRow['is_active'] == 1) 
 					{
-						++$Values['totactivecount'];
+						++$Values['activecount'];
 					}
 					else
 					{
-						++$Values['totinactivecount'];
+						++$Values['inactivecount'];
 					}
 					++$Values['totalcount'];
 					
@@ -7259,6 +7230,7 @@ class TrialTracker
 		}
 		
 		//Filtering Options
+		$filters = " ";
 		if(isset($globalOptions['status']) && !empty($globalOptions['status'])) 
 		{
 			$status = array();
@@ -7342,7 +7314,7 @@ class TrialTracker
 			}
 		}
 		
-		
+
 		if(isset($globalOptions['product']) && !empty($globalOptions['product']))
 		{	
 			if($ottType == 'rowstacked')
@@ -7351,6 +7323,7 @@ class TrialTracker
 				foreach($diff as $key => $value)
 				{
 					unset($aIds[$key]);
+					unset($TrialsInfo[$key]);
 				}
 			}
 			else
@@ -7359,19 +7332,16 @@ class TrialTracker
 				foreach($diff as $key => $value)
 				{
 					unset($pIds[$key]);
+					unset($TrialsInfo[$key]);
 				}
 			}
+			$where = " WHERE 1 ";
+			$where .= " AND pt.`product` IN ('" . implode("','", $pIds) . "') ";
+			$where .= " AND at.`area` IN ('" . implode("','", $aIds) . "') ";	
 		}
-		
-		$where = " WHERE 1 ";
-		$where .= " AND pt.`product` IN ('" . implode("','", $pIds) . "') ";
-		$where .= " AND at.`area` IN ('" . implode("','", $aIds) . "') ";
 		
 		if($globalOptions['onlyUpdates'] == "yes")
 		{
-			$startRange = date('Y-m-d', strtotime($this->timeInterval, $this->timeMachine));
-			$endRange = date('Y-m-d', $this->timeMachine);
-			
 			// OR (ABS((dh.`enrollment_prev` - dt.`enrollment`)/ dh.`enrollment_prev`) = 0.2)
 			$query .= " LEFT JOIN `data_history` dh ON dh.`larvol_id` = dt.`larvol_id` ";
 			$where .= " AND ( (`" . implode('` BETWEEN "' . $startRange . '" AND "' . $endRange . '") OR (`', $this->fieldNames) . "` BETWEEN '" . $startRange . "' AND '" . $endRange . "') )";
@@ -7379,11 +7349,91 @@ class TrialTracker
 		}
 		
 		$Query = $query . $where;	
+		
+		//limit clause for pagination in webpage display and unsetting section headers which are not required in each page
 		if($display == 'web')
 		{
 			$Query .= $filters . $orderBy . $limit;
+			
+			$groupBy = " GROUP BY ";
+			
+			if($ottType == 'rowstacked')
+			{
+				foreach($aIds as $value)
+				{
+					$cCount[$value]['Count'] = 0;
+				}
+				$rowType = 'area';
+				$groupBy .= " at.`area` ";
+			}
+			else
+			{
+				foreach($pIds as $value)
+				{
+					$cCount[$value]['Count'] = 0;
+				}
+				$rowType = 'product';
+				$groupBy .= " pt.`product` ";
+			}
+		
+			$q = " SELECT count(dt.larvol_id) AS trialcount, pt.`product`, at.`area` "
+					. " FROM data_trials dt "
+					. " LEFT JOIN `product_trials` pt ON dt.`larvol_id` = pt.`trial` " 
+					. " LEFT JOIN `area_trials` at ON dt.`larvol_id` = at.`trial` "
+					. $where . $filters . $groupBy . $orderBy;
+			$res = m_query(__LINE__,$q);
+			if($res)
+			{
+				while($row = mysql_fetch_assoc($res))
+				{
+					$type = $row[$rowType];
+					$cCount[$type]['Count'] = $row['trialcount'];
+				}
+			}
+			else
+			{
+				$log 	= 'ERROR: Bad SQL query. ' . $query . mysql_error();
+				$logger->error($log);
+				unset($log);
+			}
+			
+			$start = ($globalOptions['page']-1) * $this->resultsPerPage;
+			$end = $start + $this->resultsPerPage;
+			$c = 0;
+			$prevCount = 0;
+			foreach($cCount as $ckey => $cvalue)
+			{
+				$c += $cvalue['Count'];
+				
+				if($c < $start || $prevCount >= $end)
+				{	
+					unset($TrialsInfo[$ckey]);
+				}
+				$prevCount = $c;
+			}
+			
+			if($ottType != 'rowstacked')
+			{
+				foreach($pIds as $key => $value)
+				{
+					if(!array_key_exists($key, $TrialsInfo))
+					{
+						unset($pIds[$key]);
+					}
+				}
+			}
+			else
+			{
+				foreach($aIds as $key => $value)
+				{
+					if(!array_key_exists($key, $TrialsInfo))
+					{
+						unset($aIds[$key]);
+					}
+				}
+			}
 		}
-		else
+		else//without limit clause for file exports
 		{
 			if($globalOptions['type'] == 'allTrials')
 			{
@@ -7395,8 +7445,29 @@ class TrialTracker
 			}
 		}
 		
-		$Data = array();
+		$Values['Data'] = $TrialsInfo;
+		unset($cCount, $TrialsInfo);
 		
+		//fetching unmatched upms
+		$naUpms = $this->getUnMatchedUpms($globalOptions['onlyUpdates'], $pIds);
+		foreach($naUpms as $nkey => $nvalue)
+		{
+			/*if($ottType == 'rowstacked')
+			{
+				$Values['Data'][0]['naUpms'] = $nvalue;
+			}
+			else
+			{
+				$Values['Data'][$nkey]['naUpms'] = $nvalue;
+			}*/
+			if($ottType != 'rowstacked')
+			{
+				$Values['Data'][$nkey]['naUpms'] = $nvalue;
+			}
+			
+		}
+		
+		//echo "<br/>===>".$Query;
 		$res = m_query(__LINE__,$Query);
 		if($res)
 		{
@@ -7494,33 +7565,32 @@ class TrialTracker
 					
 					$larvolIds[] = $larvolId;
 					$IdsForUpm[] = $result['NCT/id_for_upm'];
-					$Data[$pId][$larvolId] = $result;
+					$Values['Data'][$pId]['Trials'][$larvolId] = $result;
 				}
-				//pr($Data);
+				
 				$dataHistory = $this->getDataHistory($larvolIds);
 				$dataUpms = $this->getMatchedUpms($globalOptions['onlyUpdates'], $IdsForUpm);
 				
-				foreach($Values['Data'] as $key => $value)
+				foreach($Values['Data'] as $dkey => & $dvalue)
 				{
-					$Id = $value['Id'];
-					if(isset($Data[$Id]))
+					$Id = $dvalue['Id'];
+					if(isset($dvalue['Trials']))
 					{
-						foreach($Data[$Id] as $dkey => $dvalue)
+						foreach($dvalue['Trials'] as $tkey => & $tvalue)
 						{
-							if(isset($dataHistory[$dkey]) && !empty($dataHistory[$dkey]))
+							if(isset($dataHistory[$tkey]))
 							{
-								$Data[$Id][$dkey]['edited'] = $dataHistory[$dkey];
+								$tvalue['edited'] = $dataHistory[$tkey];
 							}
 							
-							if(isset($dataUpms[$dkey]))
+							if(isset($dataUpms[$tkey]))
 							{
-								$Data[$Id][$dkey]['upms'] = $dataUpms[$dkey];
+								$tvalue['upms'] = $dataUpms[$tkey];
 							}
 						}
-						$Values['Data'][$key]['Trials'] = $Data[$Id];
 					}
 				}
-				unset($dataHistory, $dataUpms, $Data);
+				unset($dataHistory, $dataUpms);
 			}
 		}
 		else
@@ -7530,6 +7600,7 @@ class TrialTracker
 			unset($log);
 		}
 		
+		//fetching active count
 		$cQuery = $query . $where . $filters . $orderBy;
 		$res = m_query(__LINE__,$cQuery);
 		if($res)
@@ -7542,21 +7613,6 @@ class TrialTracker
 			$logger->error($log);
 			unset($log);
 		}
-		
-		if(isset($globalOptions['product']) && !empty($globalOptions['product']))
-		{
-			foreach($Values['Data'] as $dkey => & $dvalue)
-			{
-				if(!in_array($dvalue['Id'], $globalOptions['product']))
-				{
-					unset($Values['Data'][$dkey]);
-				}
-			}
-			$Values['Data'] = array_values($Values['Data']);
-		}
-		
-		unset($TrialsInfo);
-		
 		return  $Values;
 	}
 	
@@ -7960,7 +8016,7 @@ class TrialTracker
 		
 		natcasesort($productSelector);
 		
-		$this->displayFilterControls($productSelector, $count, $Values['totactivecount'], $Values['totinactivecount'], $Values['totalcount'], $globalOptions, $ottType, $loggedIn);
+		$this->displayFilterControls($productSelector, $count, $Values['activecount'], $Values['inactivecount'], $Values['totalcount'], $globalOptions, $ottType, $loggedIn);
 		echo '<div id="parent">';
 		echo '<div class="advanced" id="togglefilters"><img src="images/funnel.png" alt="Show Filter" style="vertical-align:bottom;" />&nbsp;Advanced</div>'
 				. '<div class="records">' . $count . '&nbsp;Trials</div>';
@@ -8129,6 +8185,7 @@ class TrialTracker
 			{
 				$dUrl = '';
 				$dParams =  array_replace($urlParams, array('ipwnd' => 'off'));
+
 				$dUrl = http_build_query($dParams);
 				
 				echo '<span class="filters"><label>' . str_replace('Select ', '', $productSelectorTitle) . ' with no data</label>'
@@ -8844,36 +8901,20 @@ class TrialTracker
 		$secondYear = (date('Y')+1);
 		$thirdYear = (date('Y')+2);
 		
+		$naUpms = array();
 		$counter = 0;
-		
 		$outputStr = '';
-		$lastKey = '-1';
+		
 		foreach($Values['Data'] as $dkey => $dvalue)
 		{
 			$sectionHeader = $dvalue['sectionHeader'];
 			$naUpms = $dvalue['naUpms'];
 			
-			$lastKey = $dkey;
-			
-			if($globalOptions['page'] == 1 && $lastKey == $dkey )
+			//Rendering Upms
+			if($globalOptions['includeProductsWNoData'] == "off")
 			{
-				//Rendering Upms
-				if($globalOptions['includeProductsWNoData'] == "off")
+				if(!empty($naUpms) || (isset($dvalue['Trials']) && !empty($dvalue['Trials'])))
 				{
-					if(!empty($naUpms) || (isset($dvalue['Trials']) && !empty($dvalue['Trials'])))
-					{
-						if(!empty($naUpms))
-						{
-							$outputStr .= $this->displayUpmHeaders($ottType, $naUpms, $sectionHeader);
-						}
-						else
-						{
-							$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">' . $sectionHeader . '</td></tr>';
-						}
-					}
-				}
-				else
-				{	
 					if(!empty($naUpms))
 					{
 						$outputStr .= $this->displayUpmHeaders($ottType, $naUpms, $sectionHeader);
@@ -8884,39 +8925,20 @@ class TrialTracker
 					}
 				}
 			}
+			else
+			{	
+				if(!empty($naUpms))
+				{
+					$outputStr .= $this->displayUpmHeaders($ottType, $naUpms, $sectionHeader);
+				}
+				else
+				{
+					$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">' . $sectionHeader . '</td></tr>';
+				}
+			}
 				
 			if(isset($dvalue['Trials']) && !empty($dvalue['Trials']))
 			{
-				if($globalOptions['page'] > 1 && $lastKey == $dkey)
-				{
-					//Rendering Upms
-					if($globalOptions['includeProductsWNoData'] == "off")
-					{
-						if(!empty($naUpms) || (isset($dvalue['Trials']) && !empty($dvalue['Trials'])))
-						{
-							if(!empty($naUpms))
-							{
-								$outputStr .= $this->displayUpmHeaders($ottType, $naUpms, $sectionHeader);
-							}
-							else
-							{
-								$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">' . $sectionHeader . '</td></tr>';
-							}
-						}
-					}
-					else
-					{	
-						if(!empty($naUpms))
-						{
-							$outputStr .= $this->displayUpmHeaders($ottType, $naUpms, $sectionHeader);
-						}
-						else
-						{
-							$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">' . $sectionHeader . '</td></tr>';
-						}
-					}
-				}
-				
 				foreach($dvalue['Trials'] as $tkey => $tvalue)
 				{
 					if($counter%2 == 1) 
@@ -9631,6 +9653,7 @@ class TrialTracker
 										$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond"';
 									}
 									else if($mvalue['status'] == 'Cancelled')
+
 									{
 										$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel"';
 									}
@@ -9673,33 +9696,28 @@ class TrialTracker
 					}
 					
 					++$counter;
-					
-					if($counter == 100 && $globalOptions['page'] != $totalPages)
-					{
-						break 2;
-					}
 				}
 			}
-			/*else
+			else
 			{
 				if($globalOptions['includeProductsWNoData'] == "off")
-					{
-						if(!empty($naUpms) || (isset($dvalue['Trials']) && !empty($dvalue['Trials'])))
-						{
-							if($globalOptions['onlyUpdates'] == "no")
-							{
-								$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
-							}
-						}
-					}
-					else
+				{
+					if(!empty($naUpms) || (isset($dvalue['Trials']) && !empty($dvalue['Trials'])))
 					{
 						if($globalOptions['onlyUpdates'] == "no")
 						{
 							$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
 						}
 					}
-			}*/
+				}
+				else
+				{
+					if($globalOptions['onlyUpdates'] == "no")
+					{
+						$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
+					}
+				}
+			}
 		}
 		return $outputStr;
 	}
@@ -10817,6 +10835,7 @@ class TrialTracker
 		$thirdYear = (date('Y')+2);
 		
 		$cntr = 0;
+		
 		foreach($naUpms as $key => $value)
 		{
 			$attr = '';
@@ -11431,20 +11450,17 @@ function getColspanBasedOnLogin($loggedIn)
 
 function iszero($element) { return $element != ''; }
 
-
 function m_query($n,$q)
 {
-			global $logger;
-			$res = mysql_query('flush query cache');
-			$time_start = microtime(true);
-			$res = mysql_query($q);
-			$time_end = microtime(true);
-			$time_taken = $time_end-$time_start;
-			$log = 'TIME:'.$time_taken.'  QUERY:'.$q.'  LINE# '.$n;
-			$logger->info($log);
-			unset($log);
-			return $res;
-
+	global $logger;
+	$res = mysql_query('flush query cache');
+	$time_start = microtime(true);
+	$res = mysql_query($q);
+	$time_end = microtime(true);
+	$time_taken = $time_end-$time_start;
+	$log = 'TIME:'.$time_taken.'  QUERY:'.$q.'  LINE# '.$n;
+	$logger->info($log);
+	unset($log);
+	return $res;
 }
-
 ?>
