@@ -7,7 +7,7 @@ $field = mysql_real_escape_string($_GET['field']);
 $hint = mysql_real_escape_string($_GET['hint']);
 $c_lid = mysql_real_escape_string($_GET['c_lid']);
 //filter input
-$autoSuggestTables = array('areas','upm','products','data_trials');
+$autoSuggestTables = array('areas','upm','products','data_trials', 'redtags');
 if(!in_array($table,$autoSuggestTables))die;
 
 if($table=='upm' && $field=='product')
@@ -17,6 +17,10 @@ if($table=='upm' && $field=='product')
 elseif($table=='upm' && $field=='area')
 {
 	$query = "select a.id,a.name from areas a where a.name like '%$search%' and a.coverage_area=1 order by name asc";
+}
+elseif($table=='upm' && $field=='redtag')
+{
+	$query = "select r.name from redtags r where r.name like '%$search%' order by name asc";
 }
 elseif($table=='products' || $table=='areas')
 {
@@ -40,12 +44,15 @@ $data = array();
 $json = array();
 $suggestions = array();
 $datas = array();
-if($table=='upm' && ($field=='product' || $field=='area'))
+if($table=='upm' && ($field=='product' || $field=='area' || $field=='redtag'))
 {
 	while($row = mysql_fetch_assoc($result))
 	{
 		$suggestions[] = $row['name'];
-		$datas[] = $row['id'];
+		if($field=='redtag')
+			$datas[] = $row['name'];
+		else
+			$datas[] = $row['id'];
 	}	
 }
 else 

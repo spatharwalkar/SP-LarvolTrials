@@ -137,9 +137,9 @@ if($table !='upm')
 elseif($table=='upm')
 {
 	if($_GET['no_sort']!=1)
-	$query = "select upm.id,upm.event_type,upm.event_description,upm.event_link,upm.result_link,p.name as product, upm_areas.area_id as area, upm_trials.larvol_id as larvol_id, upm.start_date,upm.start_date_type,upm.end_date,upm.end_date_type,upm.last_update from upm left join products p on upm.product=p.id left join upm_areas on upm_areas.upm_id=upm.id left join upm_trials on upm_trials.upm_id = upm.id $where  group by upm.id $currentOrderBy $currentSortOrder limit $start , $limit";
+	$query = "select upm.`id`,upm.`event_type`,upm.`event_description`,upm.`event_link`,upm.`result_link`,p.`name` as product, upm_areas.`area_id` as area, upm_trials.`larvol_id` as larvol_id, upm.`redtag`, upm.`condition`, upm.`start_date`, upm.`start_date_type`, upm.`end_date`, upm.`end_date_type`, upm.`last_update` from upm left join products p on upm.product=p.id left join upm_areas on upm_areas.upm_id=upm.id left join upm_trials on upm_trials.upm_id = upm.id $where  group by upm.id $currentOrderBy $currentSortOrder limit $start , $limit";
 	else
-	$query = "select upm.id,upm.event_type,upm.event_description,upm.event_link,upm.result_link,p.name as product, upm_areas.area_id as area, upm_trials.larvol_id as larvol_id, upm.start_date,upm.start_date_type,upm.end_date,upm.end_date_type,upm.last_update from upm left join products p on upm.product=p.id left join upm_areas on upm_areas.upm_id=upm.id left join upm_trials on upm_trials.upm_id = upm.id $where group by upm.id limit $start , $limit";
+	$query = "select upm.`id`,upm.`event_type`,upm.`event_description`,upm.`event_link`,upm.`result_link`,p.`name` as product, upm_areas.`area_id` as area, upm_trials.`larvol_id` as larvol_id, upm.`redtag`, upm.`condition`, upm.`start_date`, upm.`start_date_type`, upm.`end_date`, upm.`end_date_type`, upm.`last_update` from upm left join products p on upm.product=p.id left join upm_areas on upm_areas.upm_id=upm.id left join upm_trials on upm_trials.upm_id = upm.id $where group by upm.id limit $start , $limit";
 }
 $res = mysql_query($query) or softDieSession('Cannot get '.$table.' data.'.$query);
 $i=0;
@@ -449,12 +449,12 @@ function calculateWhere($table)
 	if(count($whereArr)>0)
 	{
 		$whereKeys = array_keys($whereArr);
-		foreach($whereKeys as $k => $v) $whereKeys[$k] = $table . '.' . $v;
+		foreach($whereKeys as $k => $v) $whereKeys[$k] = $table . '.`' . $v . '`';
 		$whereValues = array_values($whereArr);
 		$whereArr = array_map(
 							function($whereKeys,$whereValues)
 							{
-								if(is_array($whereValues) && trim($whereKeys) == 'upm.larvol_id')
+								if(is_array($whereValues) && trim($whereKeys) == 'upm.`larvol_id`')
 								{
 									$whereValues = array_filter($whereValues);
 									if(!empty($whereValues))
@@ -901,7 +901,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			}
 			
 			$importVal = array_map(function ($v){return "'".mysql_real_escape_string($v)."'";},$importVal);
-			$query = "insert into $table (".implode(',',$importKeys).") values (".implode(',',$importVal).")";
+			$query = "insert into $table (`".implode('`,`',$importKeys)."`) values (".implode(',',$importVal).")";
 		}
 		if(mysql_query($query))
 		{
@@ -1022,7 +1022,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			unset($newpost[$LarvolIdKey]);
 		}
 			
-		$query = "insert into $table (".implode(',',$newpostKeys).") values(".implode(',',$newpost).")";
+		$query = "insert into $table (`".implode('`,`',$newpostKeys)."`) values(".implode(',',$newpost).")";
 		if(mysql_query($query))
 		{
 			if($table=='products')
@@ -1145,7 +1145,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 				//process upm history
 				foreach($historyArr as $history)
 				{
-					echo $query = "insert into upm_history (".implode(',',array_keys($history)).") values (".implode(',',$history).")";
+					$query = "insert into upm_history (`".implode('`,`',array_keys($history))."`) values (".implode(',',$history).")";
 					mysql_query($query)or softdieSession('Cannot update history for upm id '.$historyArr['id']);
 				}
 				$upmCurrentAreaString = getUpmAreaNames($id);	
@@ -1153,7 +1153,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 				{
 					
 					$history = array('id'=>$id, 'change_date'=>"'".date('Y-m-d H:i:s')."'", 'field'=>"'".'area'."'", 'old_value'=>"'".$upmHistoryAreaString."'", 'new_value'=>"'".$upmCurrentAreaString."'", 'user'=>"'".$db->user->id."'");
-					$query = "insert into upm_history (".implode(',',array_keys($history)).") values (".implode(',',$history).")";
+					$query = "insert into upm_history (`".implode('`,`',array_keys($history))."`) values (".implode(',',$history).")";
 					mysql_query($query)or softdieSession('Cannot update history for upm id '.$id);
 				}
 				
@@ -1162,7 +1162,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 				{
 					
 					$history = array('id'=>$id, 'change_date'=>"'".date('Y-m-d H:i:s')."'", 'field'=>"'".'larvol_id'."'", 'old_value'=>"'".$upmHistoryLarvolIDs."'", 'new_value'=>"'".$upmCurrentLarvolIDs."'", 'user'=>"'".$db->user->id."'");
-					$query = "insert into upm_history (".implode(',',array_keys($history)).") values (".implode(',',$history).")";
+					$query = "insert into upm_history (`".implode('`,`',array_keys($history))."`) values (".implode(',',$history).")";
 					mysql_query($query)or softdieSession('Cannot update history for upm id '.$id);
 				}
 			}
@@ -1509,7 +1509,7 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		
 		if($table=='upm')
 		{
-			$query = "SELECT u.id,u.event_type,u.event_description,u.event_link,u.result_link,p.name AS product, ar.name as area, upmt.larvol_id as larvol_id, dt.source_id as source_id, u.status, u.start_date, u.start_date_type, u.end_date, u.end_date_type,u.last_update,p.id as product_id FROM upm u LEFT JOIN products p ON u.product=p.id LEFT JOIN upm_areas a ON u.id=a.upm_id left join areas ar on ar.id=a.area_id left join upm_trials upmt on upmt.upm_id = u.id left join data_trials dt on dt.larvol_id = upmt.larvol_id WHERE u.id=$id";
+			$query = "SELECT u.`id`, u.`event_type`, u.`event_description`, u.`event_link`, u.`result_link`, p.`name` AS product, ar.`name` as area, upmt.`larvol_id` as larvol_id, u.`redtag`, u.`condition`, dt.`source_id` as source_id, u.`status`, u.`start_date`, u.`start_date_type`, u.`end_date`, u.`end_date_type`,u.`last_update`, p.`id` as product_id FROM upm u LEFT JOIN products p ON u.product=p.id LEFT JOIN upm_areas a ON u.id=a.upm_id left join areas ar on ar.id=a.area_id left join upm_trials upmt on upmt.upm_id = u.id left join data_trials dt on dt.larvol_id = upmt.larvol_id WHERE u.id=$id";
 		}
 		else
 		{
@@ -1781,9 +1781,9 @@ function am1($k,$v)
 	if(in_array($k,$explicitNullFields) && $v=='')
 	{
 		$v = 'null';
-		return $k."=".mysql_real_escape_string($v);
+		return "`".$k."`=".mysql_real_escape_string($v);
 	}	
-	return $k."='".mysql_real_escape_string($v)."'";
+	return "`".$k."`='".mysql_real_escape_string($v)."'";
 }
 function am2($v,$dbVal)
 {

@@ -102,7 +102,15 @@ $(document).ready(function(){
 		  <?php if($_REQUEST['add_new_record']=='Add New Record' || $_REQUEST['id']):?>
 		  c = $('#area').autocomplete(options_area1);
 		  <?php endif;?>
-		  d = $('#search_area').autocomplete(options_area2);	
+		  d = $('#search_area').autocomplete(options_area2);
+		  
+		  options_redtag1 = { serviceUrl:'autosuggest.php',params:{table:<?php echo "'$table'"?>,field:'redtag'} ,minChars:3, showOnSelect:true };
+		  options_redtag2 = { serviceUrl:'autosuggest.php',params:{table:<?php echo "'$table'"?>,field:'redtag'} ,minChars:3, showOnSelect:true };
+
+		  <?php if($_REQUEST['add_new_record']=='Add New Record' || $_REQUEST['id']):?>
+		  e = $('#redtag').autocomplete(options_redtag1);
+		  <?php endif;?>
+		  f = $('#search_redtag').autocomplete(options_redtag2);	
 
 
 		  //listener for autosuggest delete icon class
