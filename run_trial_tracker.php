@@ -11453,7 +11453,7 @@ function iszero($element) { return $element != ''; }
 function m_query($n,$q)
 {
 	global $logger;
-	$res = mysql_query('flush query cache');
+	$res = mysql_query('RESET QUERY CACHE');
 	$time_start = microtime(true);
 	$res = mysql_query($q);
 	$time_end = microtime(true);
