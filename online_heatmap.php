@@ -45,7 +45,7 @@ $prev_prodSpan=0;
 
 $Min_One_Liner=20;
 $Char_Size=8.5;
-$Bold_Char_Size=9.8;
+$Bold_Char_Size=9;
 
 while($header = mysql_fetch_array($res))
 {
@@ -483,7 +483,7 @@ foreach($columns as $col => $val)
 	$Max_areaStringLength = $current_StringLength;
 }
 $area_Col_Height = $Max_areaStringLength * $Bold_Char_Size;
-if(($area_Col_Height+10) > 160)
+if(($area_Col_Height) > 160)
 $area_Col_Height = 160;
 
 $Max_productStringLength=0;
@@ -561,7 +561,8 @@ if($Rotation_Flg == 1)	////Adjustment in area column width as per area name
 			$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col] : 'Area '.$areaIds[$col];;
 			$cols_Area_Space[$col] = ceil(($area_Col_Height) / $Bold_Char_Size);
 			//$cols_Area_Lines[$col] = ceil(strlen(trim($val))/$cols_Area_Space[$col]);
-			$cols_Area_Lines[$col] = $pdf->getNumLines($val, ($area_Col_Height*20/90));
+			//$cols_Area_Lines[$col] = $pdf->getNumLines($val, ($area_Col_Height*20/90));
+			$cols_Area_Lines[$col] = getNumLinesHTML($val, $cols_Area_Space[$col], 'lines');
 			$width = ($cols_Area_Lines[$col] * $Line_Height);
 			if($Width_matrix[$col]['width'] < $width)
 				$Width_matrix[$col]['width'] = $width;
@@ -643,7 +644,8 @@ if($Rotation_Flg == 1)	////Create width for area category cells and put forceful
 			{
 				$cols_Cat_Space[$col] = ceil((($area_Cat_Height < 130)? ($area_Cat_Height):($area_Cat_Height)) / $Bold_Char_Size);
 				//$cols_Cat_Lines[$col] = ceil(strlen(trim($columnsCategoryName[$col]))/$cols_Cat_Space[$col]);
-				$cols_Cat_Lines[$col] = $pdf->getNumLines($columnsCategoryName[$col], ($area_Cat_Height*17/90));
+				//$cols_Cat_Lines[$col] = $pdf->getNumLines($columnsCategoryName[$col], ($area_Cat_Height*17/90));
+				$cols_Cat_Lines[$col] = getNumLinesHTML($columnsCategoryName[$col], $cols_Cat_Space[$col], 'lines');
 				$width = ($cols_Cat_Lines[$col] * $Line_Height);
 				if($Cat_Area_Col_width[$col] < $width) /// Assign new width
 				{
@@ -665,43 +667,78 @@ if($Rotation_Flg == 1)	////Create width for area category cells and put forceful
 			}
 		}
 	}
-	
-	$area_Cat_Height = $area_Cat_Height + 5; /// Small adjustment
-	$area_Col_Height = $area_Col_Height  + 5;
 }
 
-/* We dont need this part at current stage
-///// Assign remaining width of whole page to achieve fitting
+//Height Recalculator - Due number of line formation and wrapping actual height taken is sometime less
 if($Rotation_Flg == 1)
 {
-	$RColumn_Width = 0; 
-
-	/// New width
+	//category height calculation
+	$Newarea_Cat_Height = 0;
+	$NewMaxarea_Cat_StrLength = 0;
 	foreach($columns as $col => $val)
 	{
-		$RColumn_Width = $RColumn_Width + $Width_matrix[$col]['width'] + 0.5;
-		if($total_fld) 
-		{ 
-			$RColumn_Width = $RColumn_Width + $Total_Col_width + 1;
-		}
-	}
-
-	$Avail_Area_Col_width = $Page_Width - $product_Col_Width - $RColumn_Width;
-	$extra_width = $Avail_Area_Col_width / ((count($columns))+(($total_fld)? 1:0));
-	if($extra_width > 1)
-	{
-		foreach($columns as $col => $val)
+		if($columns_Span[$col] > 0)
 		{
-			$Width_matrix[$col]['width'] = $Width_matrix[$col]['width'] + $extra_width;
+			if($columnsCategoryName[$col] != 'Undefined' && $Cat_Area_Rotation[$col])
+			{
+				$LineArray = getNumLinesHTML(trim($columnsCategoryName[$col]), $cols_Cat_Space[$col], 'array');
+				foreach($LineArray as $data1)
+				{
+					$current_StringLength =strlen($data1);
+					if($current_StringLength > $NewMaxarea_Cat_StrLength)
+					$NewMaxarea_Cat_StrLength = $current_StringLength;
+				}
+			}
 		}
-		if($total_fld) 
-		{ 
-			$Total_Col_width = $Total_Col_width + $extra_width; 
-		}
-		//$product_Col_Width = $product_Col_Width + $extra_width;
 	}
+	
+	$Newarea_Cat_Height = $NewMaxarea_Cat_StrLength * $Bold_Char_Size;
+	//If new height is less assign it
+	if($Newarea_Cat_Height < $area_Cat_Height && $Max_H_AreaCatStringHeight < $Newarea_Cat_Height)
+	$area_Cat_Height = $Newarea_Cat_Height;
+	
+	//Area cell height calcuation
+	$Newarea_Col_Height = 0;
+	$NewMax_areaStringLength = 0;
+	foreach($columns as $col => $val)
+	{
+		$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col] : 'Area '.$areaIds[$col];
+		if(isset($areaIds[$col]) && $areaIds[$col] != NULL && !empty($productIds))
+		{
+			$LineArray = getNumLinesHTML(trim($val), $cols_Area_Space[$col], 'array');
+			foreach($LineArray as $data1)
+			{
+				$current_StringLength =strlen($data1);
+				if($NewMax_areaStringLength < $current_StringLength)
+				$NewMax_areaStringLength = $current_StringLength;
+			}
+		}
+	}
+	$Newarea_Col_Height = $NewMax_areaStringLength * $Bold_Char_Size;
+	//If new height is less assign it
+	if($Newarea_Col_Height < $area_Col_Height)
+	$area_Col_Height = $Newarea_Col_Height;
 }
-*/
+
+//Calculate line numbers
+function getNumLinesHTML($text, $gap, $type)
+{
+	$data_array = array();
+	if($text != '' && $text != NULL)
+	{
+		$newtext = wordwrap($text, $gap, "****", true);
+		$data_array = array_filter(explode("****", $newtext));
+		$lines = (count($data_array));
+	}
+	else
+	{
+		$lines = 1;
+	}
+	if($type == 'lines')
+		return $lines;
+	else
+		return $data_array;
+}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -2552,7 +2589,7 @@ if($Rotation_Flg == 1)
 	{
 		$width = $Width_matrix[$col]['width'] - ($cols_Area_Lines[$col]*($Line_Height));
 		
-		print "if(!$.browser.ie) { $('.Area_RowDiv_Class_".$col."').css('margin-left','".((($Line_Height)*$cols_Area_Lines[$col]) + ($width/2.5))."px'); } else { $('.Area_RowDiv_Class_".$col."').css('padding-right','".(($width/2))."px'); }";
+		print "if(!$.browser.ie) { $('.Area_RowDiv_Class_".$col."').css('margin-left','".((($Line_Height)*$cols_Area_Lines[$col]) + ($width/1.8))."px'); } else { $('.Area_RowDiv_Class_".$col."').css('padding-right','".(($width/1.8))."px'); $('.Area_RowDiv_Class_".$col."').css('margin-left','1px'); }";
 
 		if($columns_Span[$col] > 0)
 		{
@@ -2560,7 +2597,7 @@ if($Rotation_Flg == 1)
 			{
 				$width = $Cat_Area_Col_width[$col] - ($cols_Cat_Lines[$col]*($Line_Height));
 				
-				print "if(!$.browser.ie) { $('.Cat_RowDiv_Class_".$col."').css('margin-left','".((($Line_Height)*$cols_Cat_Lines[$col]) + ($width/1.5))."px'); } else { $('.Cat_RowDiv_Class_".$col."').css('padding-right','".(($width/2))."px'); }";
+				print "if(!$.browser.ie) { $('.Cat_RowDiv_Class_".$col."').css('margin-left','".((($Line_Height)*$cols_Cat_Lines[$col]) + ($width/1.8))."px'); } else { $('.Cat_RowDiv_Class_".$col."').css('padding-right','".(($width/1.8))."px'); }";
 			}
 		}
 	}
