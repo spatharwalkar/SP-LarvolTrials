@@ -159,6 +159,21 @@ if($_REQUEST['save']=='Save')
 			$aid[] = $row['id'];
 		}
 	}
+	
+	$redtag = null;
+	$Wrong_redtag = false;
+	if($_REQUEST['redtag'] != NULL && $_REQUEST['redtag'] != '')	//if redtag field has some data check if its correct
+	{
+		$query = "select name from redtags where name='{$_REQUEST['redtag']}'";
+		$res = mysql_query($query);
+		$redtag = null;
+		while($row = mysql_fetch_assoc($res))
+		{
+			$redtag = $row['name'];
+		}
+		if($redtag == null)
+		$Wrong_redtag = true;
+	}
 
 	
 	unset($_REQUEST['product_id']);
@@ -166,10 +181,17 @@ if($_REQUEST['save']=='Save')
 	$_REQUEST = array_merge($_GET, $_POST); 
 	$_REQUEST['product'] = $pid;
 	$_REQUEST['area'] = $aid;
+	$_REQUEST['redtag'] = $redtag;
+	
 	$saveStatus = saveData($_REQUEST,$table);
 	if(!$pid) 
 	{
 		softDieSession('Wrong/no product name selected.');
+	}
+	
+	if($Wrong_redtag) 
+	{
+		softDieSession('Wrong redtag name selected.');
 	}
 }
 //delete controller

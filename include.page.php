@@ -1763,7 +1763,7 @@ function am($k,$v)
 	{
 //		$v = unpadnct($v);
 	}		
-	$explicitNullFields = array('corresponding_trial','event_link','result_link','start_date','end_date','oldproduct', 'product', 'area');
+	$explicitNullFields = array('corresponding_trial','event_link','result_link','start_date','end_date','oldproduct', 'product', 'area', 'redtag');
 	if(in_array($k,$explicitNullFields) && $v=='')
 	{
 		$v = 'null';
@@ -1773,7 +1773,7 @@ function am($k,$v)
 }
 function am1($k,$v)
 {
-	$explicitNullFields = array('corresponding_trial','event_link','result_link','start_date','end_date','oldproduct','product','area','searchdata');
+	$explicitNullFields = array('corresponding_trial','event_link','result_link','start_date','end_date','oldproduct','product','area','searchdata', 'redtag');
 	if($k=='corresponding_trial')
 	{
 //		$v = unpadnct($v);
@@ -1799,7 +1799,7 @@ function validateImport($k,$v)
 	{
 //		$v = unpadnct($v);
 	}	
-	$explicitNullFields = array('corresponding_trial','event_link','result_link','start_date','end_date');
+	$explicitNullFields = array('corresponding_trial','event_link','result_link','start_date','end_date','redtag');
 	if(in_array($k,$explicitNullFields) && !is_numeric($v))
 	{
 		
