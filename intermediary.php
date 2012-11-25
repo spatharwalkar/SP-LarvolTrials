@@ -77,8 +77,6 @@ $globalOptions['phase'] = array();
 $globalOptions['page'] = 1;
 $globalOptions['onlyUpdates'] = "no";
 $globalOptions['LI'] = "0";
-$globalOptions['minEnroll'] = "0";
-$globalOptions['maxEnroll'] = "0";
 $globalOptions['product'] = array();
 
 $globalOptions['startrange'] = "now";
@@ -106,7 +104,7 @@ if(isset($_REQUEST['minenroll']) && isset($_REQUEST['maxenroll']))
 	$globalOptions['maxEnroll'] = $_REQUEST['maxenroll'];
 }
 
-if(isset($_REQUEST['enroll']) && $_REQUEST['enroll'] != '0')
+if(isset($_REQUEST['enroll']))
 {	
 	$globalOptions['enroll'] = trim($_REQUEST['enroll']);
 }
@@ -555,40 +553,54 @@ global $db;
 <script type="text/javascript">
 	$(function() 
 	{
-		$enrollValues = '<?php echo $globalOptions['enroll'];?>';
-		if($enrollValues == '0')
+		var minv = 0;
+		var maxv = 0;
+		var maxLimit = <?php echo $maxEnrollLimit;?>;
+		var maxValue = $("#maxenroll").val();
+		
+		if(maxValue > maxLimit)
+		{
+			maxValue = maxLimit;
+		}
+		
+		var enroll = '<?php echo $globalOptions['enroll'];?>';
+		if(enroll == '0')
 		{	
-			$minEnroll = parseInt($("#minenroll").val());
-			$maxEnroll = parseInt($("#maxenroll").val());
+			minv = 0;
+			maxv = maxValue;
 		}
 		else
 		{
-			$enrollValues = $enrollValues.split(' - ');
-			$minEnroll = parseInt($enrollValues[0]);
-			$maxEnroll = parseInt($enrollValues[1]);
+			var e = enroll.split('-');
+			minv = e[0];
+			maxv = e[1];
 		}
 		
 		$("#slider-range").slider({
 			range: true,
-			min: $("#minenroll").val(),
-			max: (($("#maxenroll").val() > <?php echo $maxEnrollLimit;?>) ? <?php echo $maxEnrollLimit;?> : $("#maxenroll").val() ),
-			values: [ parseInt($minEnroll), parseInt($maxEnroll) ],
+			min: 0,
+			max: maxValue,
+			values: [ minv, maxv ],
 			slide: function( event, ui ) {
-				if(ui.values[ 1 ] == <?php echo $maxEnrollLimit;?>)
+				var ev;
+				if(ui.values[ 1 ] == maxLimit)
 				{
-					$("#amount").val(ui.values[ 0 ] + " - " + <?php echo $maxEnrollLimit;?> + "+" );
+					$("#amount").val(ui.values[ 0 ] + " - " + maxLimit + "+" );
+					ev = ui.values[ 0 ] + "-" + maxLimit;
 				}
 				else
 				{
 					$("#amount").val(ui.values[ 0 ] + " - " + ui.values[ 1 ] );
+					ev = ui.values[ 0 ] + "-" + ui.values[ 1 ];
 				}
+				$('input[name=enroll]').val(ev);
 			}
 		});
 		
-		if($("#slider-range").slider("values", 1) == <?php echo $maxEnrollLimit;?>)
+		if($("#slider-range").slider("values", 1) == maxLimit)
 		{
 			$("#amount").val( $("#slider-range").slider("values", 0 ) +
-				" - " + <?php echo $maxEnrollLimit;?> + '+' );
+				" - " + maxLimit + '+' );
 		}
 		else
 		{

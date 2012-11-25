@@ -5738,6 +5738,7 @@ class TrialTracker
 	
 					//collaborator and sponsor column
 					$attr = ' ';
+
 					if(isset($dvalue['manual_is_sourceless']))
 					{
 						if(isset($dvalue['edited']) && (array_key_exists('NCT/collaborator', $dvalue['edited']) 
@@ -7130,7 +7131,7 @@ class TrialTracker
 	
 	function compileOTTData($ottType, $TrialsInfo = array(), $Ids = array(), $globalOptions = array(), $display = 'web')
 	{	
-		global $logger;
+		global $logger, $maxEnrollLimit;
 		
 		$Values['Data'] = array();
 		$Values['enrollment'] = 0;
@@ -7199,26 +7200,25 @@ class TrialTracker
 		//calcultaing count and enrollment max value only for webpage display and not for file exports				
 		if($display == 'web')
 		{
-			$aQuery =  $query . $where;
+			$aQuery = "SELECT COUNT(dt.`larvol_id`) AS `total`, MAX(dt.`enrollment`) AS enrollment, "
+    					. " SUM(CASE dt.`is_active` WHEN '0' THEN 1 ELSE 0 END) AS `inactive`, "
+						. " SUM(CASE dt.`is_active` WHEN '1' THEN 1 ELSE 0 END) AS `active` "
+						. " FROM `data_trials` dt "
+						. " JOIN `product_trials` pt ON dt.`larvol_id` = pt.`trial` "
+						. " JOIN `area_trials` at ON dt.`larvol_id` = at.`trial` ";
+						
+			$aQuery .=  $where;
 			$aRes = m_query(__LINE__,$aQuery);
 			if($aRes)
 			{
-				while($aRow = mysql_fetch_assoc($aRes))
-				{	
-					if($aRow['is_active'] == 1) 
-					{
-						++$Values['activecount'];
-					}
-					else
-					{
-						++$Values['inactivecount'];
-					}
-					++$Values['totalcount'];
-					
-					if($aRow['enrollment'] > $Values['enrollment'])
-					{
-						$Values['enrollment'] = $aRow['enrollment'];
-					}
+				$aRow = mysql_fetch_assoc($aRes);
+				
+				if($aRow['total'])
+				{
+					$Values['activecount'] = $aRow['active'];
+					$Values['inactivecount'] = $aRow['inactive'];
+					$Values['totalcount'] = $aRow['total'];
+					$Values['enrollment'] = $aRow['enrollment'];
 				}
 			}
 			else
@@ -7294,23 +7294,20 @@ class TrialTracker
 			$filters .= " AND (dt.`is_active` != 1) ";
 		}
 		
-		if($globalOptions['enroll'] != '0')
+		if($globalOptions['enroll'] != '0' && $globalOptions['enroll'] != ('0-'.$maxEnrollLimit) && $globalOptions['enroll'] != ('0-'.$Values['enrollment']))
 		{
-			$enroll = explode(' - ', $globalOptions['enroll']);
-		
-			if(strpos($enroll[1], '+') !== FALSE)
+			$enroll = explode('-', $globalOptions['enroll']);
+			if($enroll[0] == '0')
 			{
-				if($enroll[0] == 0)
-					$filters .= " AND (dt.`enrollment` >= '" . $enroll[0] . "' OR  dt.`enrollment` = '' OR dt.`enrollment` IS NULL) " ;
-				else
-					$filters .= " AND (dt.`enrollment` >= '" . $enroll[0] . "' ) " ;
+				$filters .= " AND (dt.`enrollment` <= '" . $enroll[1] . "' ) " ;
+			}
+			else if($enroll[1] == $maxEnrollLimit || $enroll[1] == $Values['enrollment'])
+			{
+				$filters .= " AND (dt.`enrollment` >= '" . $enroll[0] . "') " ;
 			}
 			else
 			{
-				if($enroll[0] == 0)
-					$filters .= " AND (dt.`enrollment` = '' OR dt.`enrollment` IS NULL OR dt.`enrollment` >= '" . $enroll[0] . "' AND dt.`enrollment` <= '" . $enroll[1] . "' ) " ;
-				else
-					$filters .= " AND (dt.`enrollment` >= '" . $enroll[0] . "' AND dt.`enrollment` <= '" . $enroll[1] . "' ) " ;
+				$filters .= " AND (dt.`enrollment` >= '" . $enroll[0] . "' AND dt.`enrollment` <= '" . $enroll[1] . "' ) " ;
 			}
 		}
 		
@@ -7344,7 +7341,7 @@ class TrialTracker
 		{
 			// OR (ABS((dh.`enrollment_prev` - dt.`enrollment`)/ dh.`enrollment_prev`) = 0.2)
 			$query .= " LEFT JOIN `data_history` dh ON dh.`larvol_id` = dt.`larvol_id` ";
-			$where .= " AND ( (`" . implode('` BETWEEN "' . $startRange . '" AND "' . $endRange . '") OR (`', $this->fieldNames) . "` BETWEEN '" . $startRange . "' AND '" . $endRange . "') )";
+			$where .= " AND ((dt.`firstreceived_date` BETWEEN '" . $startRange . "' AND '" . $endRange . "') OR (`" . implode('` BETWEEN "' . $startRange . '" AND "' . $endRange . '") OR (`', $this->fieldNames) . "` BETWEEN '" . $startRange . "' AND '" . $endRange . "') )";
 			//$where .= " AND (ABS((dh.`enrollment_prev` - dt.`enrollment`)/ dh.`enrollment_prev`) = 0.2) ";
 		}
 		
@@ -7984,7 +7981,7 @@ class TrialTracker
 	}
 	
 	function displayWebPage($ottType, $resultIds, $Values, $productSelector = array(), $globalOptions)
-	{	
+	{
 		global $db, $maxEnrollLimit;
 		$loggedIn	= $db->loggedIn();
 		
@@ -8000,19 +7997,6 @@ class TrialTracker
 		
 		$urlParams = array();
 		parse_str($paginate[0], $urlParams);
-		
-		if($Values['totalcount'] != 0 && $globalOptions['minEnroll'] == 0 && $globalOptions['maxEnroll'] == 0)
-		{
-			$enrollments = array();
-			
-			$globalOptions['minEnroll'] = 0;
-			$globalOptions['maxEnroll'] = $Values['enrollment'];
-		}
-		else
-		{
-			$globalOptions['minEnroll'] = $globalOptions['minEnroll'];
-			$globalOptions['maxEnroll'] = $globalOptions['maxEnroll'];		
-		}
 		
 		natcasesort($productSelector);
 		
@@ -8167,13 +8151,22 @@ class TrialTracker
 		unset($oParams);
 		
 		$eParams = array();
-		if($globalOptions['enroll'] != ($globalOptions['minEnroll'] . ' - ' . $globalOptions['maxEnroll']) && $globalOptions['enroll'] != '0' && $globalOptions['maxEnroll'] <= $maxEnrollLimit)
+		if($globalOptions['enroll'] != '0' && $globalOptions['enroll'] != ('0-'.$maxEnrollLimit) && $globalOptions['enroll'] != ('0-'.$Values['enrollment']))
 		{
+			$ev = str_replace('-', ' - ', $globalOptions['enroll']);
+			
+			$e = explode('-', $globalOptions['enroll']);
+			if($e[1] == $maxEnrollLimit)
+			{
+				$ev = $e[0] . ' - ' . $e[1] . '+';
+			}
+			
 			$eUrl = '';
-			$eParams =  array_replace($urlParams, array('enroll' => $globalOptions['minEnroll'] . ' - ' . $globalOptions['maxEnroll']));
+			unset($urlParams['enroll']);
+			$eParams =  $urlParams;
 			$eUrl = http_build_query($eParams);
 			
-			echo '<span class="filters"><label>' . $globalOptions['enroll'] . '</label>'
+			echo '<span class="filters"><label>' . $ev . '</label>'
 					. '<a href="intermediary.php?' . $eUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
 		}
 		unset($eParams);
@@ -8215,7 +8208,6 @@ class TrialTracker
 		unset($value);
 		
 		echo '</p></div>';
-		
 		if($totalPages > 1)
 		{
 			echo $paginate[1];
@@ -8287,8 +8279,8 @@ class TrialTracker
 		
 		echo '</table>';
 		
-		echo '<input type="hidden" name="minenroll" id="minenroll" value="' . $globalOptions['minEnroll'] 
-			. '" /><input type="hidden" name="maxenroll" id="maxenroll" value="' . $globalOptions['maxEnroll'] . '" />';	
+		echo '<input type="hidden" name="enroll" value="' . ((isset($globalOptions['enroll'])) ? $globalOptions['enroll'] : '' ) . '" />'
+				. '<input type="hidden" id="maxenroll" value="' . $Values['enrollment'] . '" />';	
 		
 		if($totalPages > 1)
 		{
@@ -8522,7 +8514,6 @@ class TrialTracker
 				. (in_array('1', $globalOptions['phase']) ? ' checked="checked" ' : '') . '/>'
 				. '<label for="phase_1">1</label><br />'
 				. '<input type="checkbox" value="2" id="phase_2" class="phase" '
-
 				. (in_array('2', $globalOptions['phase']) ? ' checked="checked" ' : '') . '/>'
 				. '<label for="phase_2">2</label><br />'
 				. '<input type="checkbox" value="3" id="phase_3" class="phase" '
@@ -8556,8 +8547,7 @@ class TrialTracker
 				. ($globalOptions['onlyUpdates'] == 'yes' ? ' checked="checked" ' : '' ) . ' />'
 				. '<label for="showonlyupdated" style="font-size:x-small;">Show only changed items</label>'
 				. '</div><br/><div class="demo"><p><label for="amount">Enrollment:</label>'
-				. '<input type="text" name="enroll" id="amount" style="border:0; color:#f6931f; font-weight:bold;" '
-				. ' value="' . ((isset($globalOptions['enroll'])) ? $globalOptions['enroll'] : '' ) . '" autocomplete="off" />'
+				. '<input type="text" id="amount" style="border:0; color:#f6931f; font-weight:bold;" autocomplete="off" />'
 				. '<div id="slider-range" align="left"></div>'
 				. '</p></div>';
 		if($ottType != 'indexed')
