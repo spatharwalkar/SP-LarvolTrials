@@ -1792,7 +1792,7 @@ function Download_reports()
 	
 	$Line_Height = 3.96;	// Normal Line Height
 	$Bold_Line_Height = 3.96;		// Bold Line Height
-	$Min_One_Liner = 7.2;
+	$Min_One_Liner = 4.5;
 	
 	//// Declare Tidy Configuration
 	$tidy_config = array(
@@ -1934,7 +1934,7 @@ function Download_reports()
 				if(trim($cell_data['bomb']) == 'small')
 				{
 					$data_matrix[$row][$col]['bomb']['value']=trim($cell_data['bomb']);
-					$Width = $Width + 3.1 + 1;
+					$Width = $Width + 3.2 + 0.2;
 					
 					if(date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])) <= date('Y-m-d H:i:s', strtotime($start_range, $now)) && date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])) >= date('Y-m-d H:i:s', strtotime($end_range, $now)))
 					{
@@ -1954,7 +1954,7 @@ function Download_reports()
 				elseif(trim($cell_data['bomb']) == 'large')
 				{
 					$data_matrix[$row][$col]['bomb']['value']=trim($cell_data['bomb']);
-					$Width = $Width + 3.1 + 1;
+					$Width = $Width + 3.2 + 0.2;
 					
 					if((date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])) <= date('Y-m-d H:i:s', strtotime($start_range, $now))) && (date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])) >= date('Y-m-d H:i:s', strtotime($end_range, $now))))
 					{
@@ -2090,40 +2090,37 @@ function Download_reports()
 				{
 					if($data_matrix[$row][$col]['active'] != NULL && $data_matrix[$row][$col]['active'] != '')
 					{
-						$Width = $Width + $pdf->GetStringWidth($data_matrix[$row][$col]['active'], 'freesansb', 'B', 8) + 1;
+						$Width = $Width + $pdf->GetStringWidth($data_matrix[$row][$col]['active'], 'freesansb', 'B', 8) + 0.6;
 					}
 				}
 				elseif($_POST['dwcount']=='total')
 				{
 					if($data_matrix[$row][$col]['total'] != NULL && $data_matrix[$row][$col]['total'] != '')
 					{
-						$Width = $Width + $pdf->GetStringWidth($data_matrix[$row][$col]['total'], 'freesansb', 'B', 8) + 1;
+						$Width = $Width + $pdf->GetStringWidth($data_matrix[$row][$col]['total'], 'freesansb', 'B', 8) + 0.6;
 					}
 				}
 				else
 				{
 					if($data_matrix[$row][$col]['indlead'] != NULL && $data_matrix[$row][$col]['indlead'] != '')
 					{
-						$Width = $Width + $pdf->GetStringWidth($data_matrix[$row][$col]['indlead'], 'freesansb', 'B', 8) + 1;
+						$Width = $Width + $pdf->GetStringWidth($data_matrix[$row][$col]['indlead'], 'freesansb', 'B', 8) + 0.6;
 					}
 				}
 				
 				if(trim($data_matrix[$row][$col]['filing']) != '' && $data_matrix[$row][$col]['filing'] != NULL)
-				$Width = $Width + 3.1 + 1;
+				$Width = $Width + 3.4 + 0.2;
 				
 				if($data_matrix[$row][$col]['update_flag'] == 1)	// As we produce white border
-				$Width_matrix[$col]['width'] = $Width + 0.8;
+				$Width = $Width + 0.8;
 				
+				if($Width < $Min_One_Liner)
+				$Width = $Min_One_Liner;
+					
 				if($Width_matrix[$col]['width'] < ($Width) || $Width_matrix[$col]['width'] == '' || $Width_matrix[$col]['width'] == 0)
 				{
-					if($Width < $Min_One_Liner)
-					$Width_extra = $Min_One_Liner - $Width;
-					$Width_matrix[$col]['width']=$Width + $Width_extra;
+					$Width_matrix[$col]['width'] = $Width;
 				}
-				
-				if($Width_matrix[$col]['width'] < $Min_One_Liner)
-				$Width_matrix[$col]['width'] = $Min_One_Liner;
-				
 			}
 			else
 			{
@@ -2141,8 +2138,8 @@ function Download_reports()
 				$data_matrix[$row][$col]['color_code']='DDF';
 				$data_matrix[$row][$col]['update_flag'] = 0;
 				$Width = $Bold_Line_Height;
-				if($Width_matrix[$col]['width'] < $Width || $Width_matrix[$col]['width'] == '' || $Width_matrix[$col]['width'] == 0)
-				$Width_matrix[$col]['width']=$Width+2;
+				//if($Width_matrix[$col]['width'] < $Width || $Width_matrix[$col]['width'] == '' || $Width_matrix[$col]['width'] == 0)
+				//$Width_matrix[$col]['width']=$Width+2;
 				
 				if($Width_matrix[$col]['width'] < $Min_One_Liner)
 				$Width_matrix[$col]['width'] = $Min_One_Liner;
@@ -2258,7 +2255,7 @@ function Download_reports()
 			{
 				$count_val=$indlead_total;
 			}
-			$Total_Col_width = ((strlen($count_val) * 2) + 2);
+			$Total_Col_width = ($pdf->GetStringWidth($count_val, 'freesansb', 'B', 8) + 0.6);
 			if($Total_Col_width < $Min_One_Liner)
 			$Total_Col_width = $Min_One_Liner;
 		}
@@ -2270,9 +2267,12 @@ function Download_reports()
 			if($maxArea_ConsistentWidth < $Width_matrix[$col]['width'])
 			$maxArea_ConsistentWidth = $Width_matrix[$col]['width'];
 		}
-			
-		if($maxArea_ConsistentWidth < $Total_Col_width)
-		$maxArea_ConsistentWidth = $Total_Col_width;
+		
+		if($total_fld)
+		{	
+			if($maxArea_ConsistentWidth < $Total_Col_width)
+			$maxArea_ConsistentWidth = $Total_Col_width;
+		}
 		
 		$ConsistentRColumn_Width = (((count($columns))+(($total_fld)? 1:0)) * ($maxArea_ConsistentWidth+0.5));
 		$ConsistentFlg = false;
@@ -3609,25 +3609,36 @@ function Download_reports()
 
 					if($prod_row_height == $Line_Height)	$prod_row_height = $prod_row_height + 0.6; /// For adjustment as when height is min, html causes issue
 					
-					$pdfContent .= '<div align="center" style="vertical-align:middle; float:none;">';
+					$pdfContent .= '<div align="left" style="vertical-align:middle; float:none;">';
 					$extra_space = $prod_row_height - $Line_Height + 0.4;
 					if($data_matrix[$row][$col]['update_flag'] == 1)
 					$extra_space = $extra_space - 0.6;
 					//$pdfContent .= '<br style="line-height:'.((($extra_space * 72 / 96)/2)+0.8).'px;" />';
-					$pdf->setCellPaddings(0, ($extra_space/2), 0, 0);
 					
 					if(trim($annotation_text) != '')
 					{
 						$pdf->Annotation($Place_X, $Place_Y, ($Width_matrix[$col]['width']*3/4), ($prod_row_height*4/5), $annotation_text, array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Details', 'Subj' => 'Information', 'C' => array()));	
 					}
 					
+					if($data_matrix[$row][$col]['update_flag'] == 1)
+					{ 
+						$data_matrix[$row][$col]['bordercolor_code']='#FF0000';
+						$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255,0,0)));
+						$pdf->SetFillColor(255,0,0);
+						$pdf->MultiCell($Width_matrix[$col]['width'], $prod_row_height, '', $border, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$prod_row_height, 'M');
+					}
+					
 					$Aq_L = 0;
-					$Wrd_L = round($pdf->GetStringWidth($count_val, 'freesans', '', 8))+1;
-					$Aq_L = $Aq_L + $Wrd_L + 0.2;
+					$Ex_L = $Wrd_L = 0;
+					if($count_val != '' && $count_val != NULL && $data_matrix[$row][$col]['total'] != 0)
+					{
+						$Wrd_L = $pdf->GetStringWidth($count_val, 'freesans', '', 8) + 0.2;
+						$Aq_L = $Aq_L + $Wrd_L;
+					}
 					if($data_matrix[$row][$col]['bomb']['value'] == 'small' || $data_matrix[$row][$col]['bomb']['value'] == 'large')
 					$Aq_L = $Aq_L + 3.1 + 0.2;
 					if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
-					$Aq_L = $Aq_L + 3.1 + 0.2;
+					$Aq_L = $Aq_L + 3.1;
 					
 					$Av_L = $Width_matrix[$col]['width'];
 					
@@ -3647,44 +3658,30 @@ function Download_reports()
 					$fill_PR = 0;
 					
 					if($bomb_PR)
-					$pdfContent .= '&nbsp;&nbsp;&nbsp;';
-					
-					if($bomb_PR && !$fill_PR)
-					$pdfContent .= '&nbsp;&nbsp;';
-					
-					if($bomb_PR && $fill_PR)
-					$pdfContent .= '&nbsp;&nbsp;';
-					
-					if($fill_PR)
-					$pdfContent .= '&nbsp;&nbsp;&nbsp;';
-					
-					if(!$bomb_PR && $fill_PR)
-					$pdfContent .= '&nbsp;&nbsp;';
-					
-					/*for($padder=0; $padder < ($Ex_L + ($Aq_L - $Wrd_L)); $padder=$padder+3)
-					$pdfContent .= '&nbsp;';
-					
-					if(!$bomb_PR && $fill_PR)
-					$pdfContent .= ' ';
-					
-					if($bomb_PR && !$fill_PR)
-					$pdfContent .= ' ';*/
-					
-					if($data_matrix[$row][$col]['bomb']['value'] == 'small' || $data_matrix[$row][$col]['bomb']['value'] == 'large')
 					{
-						if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
-						$bomb_x=($Place_X+$Av_L-$Ex_L-0.1-3.1-0.1-3.1-0.1);
-						else
-						$bomb_x=($Place_X+$Av_L-$Ex_L-0.1-3.1-0.1);
+						$bomb_x=($Place_X + $Ex_L + $Wrd_L);
+						if($data_matrix[$row][$col]['update_flag'] == 1)
+						$bomb_x = $bomb_x + 0.3;
 					}
 					
-					if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
+					if($fill_PR)
 					{
-						$fill_x=($Place_X+$Av_L-$Ex_L-0.1-3.1-0.1);
+						if($bomb_PR)
+							$fill_x=($bomb_x + 3.1 + 0.2);
+						else
+							$fill_x=($Place_X + $Ex_L + $Wrd_L);
+							
+						if($data_matrix[$row][$col]['update_flag'] == 1)
+						$fill_x = $fill_x + 0.3;
 					}
 					
 					$y=($Place_Y+($prod_row_height/2)-(3.1/2));
 					/////// End of Space and co-ordinates pixel calculation
+					
+					if($data_matrix[$row][$col]['update_flag'] == 1)
+					$Ex_L = $Ex_L - 0.3;
+					
+					$pdf->setCellPaddings($Ex_L, ($extra_space/2), 0, 0);
 					
 					if($data_matrix[$row][$col]['bomb']['value'] == 'small' || $data_matrix[$row][$col]['bomb']['value'] == 'large')
 					{
@@ -3697,14 +3694,6 @@ function Download_reports()
 					}
 						
 					$pdfContent .= '</div>';
-					
-					if($data_matrix[$row][$col]['update_flag'] == 1)
-					{ 
-						$data_matrix[$row][$col]['bordercolor_code']='#FF0000';
-						$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255,0,0)));
-						$pdf->SetFillColor(255,0,0);
-						$pdf->MultiCell($Width_matrix[$col]['width'], $prod_row_height, '', $border, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$prod_row_height, 'M');
-					}
 					
 					if($data_matrix[$row][$col]['color_code']=='BFBFBF')
 					{
@@ -3752,11 +3741,11 @@ function Download_reports()
 					
 					if($data_matrix[$row][$col]['update_flag'] == 1)
 					{
-						$pdf->MultiCell($Width_matrix[$col]['width']-0.6, $prod_row_height-0.6, $pdfContent, $border, $align='C', $fill=1, $ln, $Place_X+0.3, $Place_Y+0.3, $reseth=false, $stretch=0, $ishtml=true, $autopadding=true, $maxh=$prod_row_height-0.6, 'M');
+						$pdf->MultiCell($Width_matrix[$col]['width']-0.6, $prod_row_height-0.6, $pdfContent, $border, $align='L', $fill=1, $ln, $Place_X+0.3, $Place_Y+0.3, $reseth=false, $stretch=0, $ishtml=true, $autopadding=true, $maxh=$prod_row_height-0.6, 'M');
 					}
 					else
 					{
-						$pdf->MultiCell($Width_matrix[$col]['width'], $prod_row_height, $pdfContent, $border, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=true, $maxh=$prod_row_height, 'M');
+						$pdf->MultiCell($Width_matrix[$col]['width'], $prod_row_height, $pdfContent, $border, $align='L', $fill=1, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=true, $maxh=$prod_row_height, 'M');
 					}
 					
 					$pdf->setCellPaddings(0, 0, 0, 0);
