@@ -11453,13 +11453,12 @@ function iszero($element) { return $element != ''; }
 function m_query($n,$q)
 {
 	global $logger;
-	$res = mysql_query('RESET QUERY CACHE');
 	$time_start = microtime(true);
 	$res = mysql_query($q);
 	$time_end = microtime(true);
 	$time_taken = $time_end-$time_start;
 	$log = 'TIME:'.$time_taken.'  QUERY:'.$q.'  LINE# '.$n;
-	$logger->info($log);
+	$logger->debug($log);
 	unset($log);
 	return $res;
 }
