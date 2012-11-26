@@ -7376,8 +7376,12 @@ class TrialTracker
 			$q = " SELECT count(dt.larvol_id) AS trialcount, pt.`product`, at.`area` "
 					. " FROM data_trials dt "
 					. " LEFT JOIN `product_trials` pt ON dt.`larvol_id` = pt.`trial` " 
-					. " LEFT JOIN `area_trials` at ON dt.`larvol_id` = at.`trial` "
-					. $where . $filters . $groupBy . $orderBy;
+					. " LEFT JOIN `area_trials` at ON dt.`larvol_id` = at.`trial` ";
+			if($globalOptions['onlyUpdates'] == "yes")
+			{
+				$q .= " LEFT JOIN `data_history` dh ON dh.`larvol_id` = dt.`larvol_id` ";
+			}	
+			$q .= $where . $filters . $groupBy . $orderBy;
 			$res = m_query(__LINE__,$q);
 			if($res)
 			{
