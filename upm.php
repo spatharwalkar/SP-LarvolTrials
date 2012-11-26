@@ -160,18 +160,18 @@ if($_REQUEST['save']=='Save')
 		}
 	}
 	
-	$redtag = null;
+	$rid = null;
 	$Wrong_redtag = false;
 	if($_REQUEST['redtag'] != NULL && $_REQUEST['redtag'] != '')	//if redtag field has some data check if its correct
 	{
-		$query = "select name from redtags where name='{$_REQUEST['redtag']}'";
+		$query = "select id from redtags where name='{$_REQUEST['redtag']}'";
 		$res = mysql_query($query);
-		$redtag = null;
+		$rid = null;
 		while($row = mysql_fetch_assoc($res))
 		{
-			$redtag = $row['name'];
+			$rid = $row['id'];
 		}
-		if($redtag == null)
+		if($rid == null)
 		$Wrong_redtag = true;
 	}
 
@@ -181,7 +181,7 @@ if($_REQUEST['save']=='Save')
 	$_REQUEST = array_merge($_GET, $_POST); 
 	$_REQUEST['product'] = $pid;
 	$_REQUEST['area'] = $aid;
-	$_REQUEST['redtag'] = $redtag;
+	$_REQUEST['redtag'] = $rid;
 	
 	$saveStatus = saveData($_REQUEST,$table);
 	if(!$pid) 
@@ -301,7 +301,18 @@ if(isset($_GET['search']))
 		$_GET['search_larvol_id'] = '';
 	}
 	
-
+	$query = "select id from redtags where name='{$_GET['search_redtag']}' and name !=''";
+	$res = mysql_query($query);
+	$rid = null;
+	while($row = mysql_fetch_assoc($res))
+	{
+		$rid = $row['id'];
+	}
+	if($rid)
+	{
+		$search_redtag_tmp_name = $_GET['search_redtag'];
+		$_GET['search_redtag'] = $rid;
+	}
 }
 
 //set docs per list
@@ -321,6 +332,10 @@ if(isset($_GET['search']))
 	if($aid)
 	{
 		$_GET['search_area'] = $search_area_tmp_name;
+	}
+	if($rid)
+	{
+		$_GET['search_redtag'] = $search_redtag_tmp_name;
 	}	
 }
 
@@ -341,6 +356,11 @@ if(isset($_GET['search']))
 	if($aid)
 	{
 		$_GET['search_area'] = $aid;
+	}
+	
+	if($rid)
+	{
+		$_GET['search_redtag'] = $rid;
 	}	
 }
 //end search controller
@@ -367,7 +387,7 @@ if($_REQUEST['import']=='Import' || $_REQUEST['uploadedfile'])
 
 //normal upm listing
 $start = $page*$limit;
-$ignoreSort = array('product','area');
+$ignoreSort = array('product','area', 'redtag');
 contentListing($start,$limit,$table,$script,array(),array(),array('delete'=>true,'ignoresort'=>$ignoreSort));
 echo '</div>';
 echo '</html>';

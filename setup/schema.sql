@@ -260,7 +260,7 @@ CREATE TABLE IF NOT EXISTS `upm` (
   `last_update` date NOT NULL,
   `product` int(10) unsigned DEFAULT NULL,
   `status` enum('Upcoming','Occurred','Pending','Cancelled') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'Upcoming',
-  `redtag` varchar(63) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `redtag` int(10) unsigned DEFAULT NULL,
   `condition` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `product` (`product`),
@@ -312,7 +312,7 @@ DELIMITER ;
 CREATE TABLE IF NOT EXISTS `upm_history` (
   `id` int(10) unsigned NOT NULL,
   `change_date` datetime NOT NULL,
-  `field` enum('event_type','event_description','event_link','result_link','corresponding_trial','start_date','start_date_type','end_date','end_date_type','last_update','product','area','status', 'larvol_id') COLLATE utf8_unicode_ci NOT NULL,
+  `field` enum('event_type','event_description','event_link','result_link','corresponding_trial','start_date','start_date_type','end_date','end_date_type','last_update','product','area','status', 'larvol_id', 'redtag') COLLATE utf8_unicode_ci NOT NULL,
   `old_value` text COLLATE utf8_unicode_ci,
   `new_value` text COLLATE utf8_unicode_ci,
   `user` int(10) unsigned DEFAULT NULL,
@@ -1165,8 +1165,10 @@ CREATE TABLE IF NOT EXISTS `data_eudract`(
 
 
 CREATE TABLE IF NOT EXISTS `redtags` (
+   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(63) COLLATE utf8_unicode_ci NOT NULL,
   `type` enum('Clinical','Clinical data','Clinical New Trial','New Trial','Clinical Trial status','Trial status','Clinical Enrollment status','Enrollment status','Clinical Other','Other','Regulatory','Regulatory FDA event','FDA event','Regulatory Non-US regulatory','Non-US regulatory','Regulatory Other','Reimbursement','Reimbursement US reimbursement','US reimbursement','Reimbursement NICE','Commercial','Commercial Sales','Sales','Commercial Licensing / partnership','Licensing / partnership','Commercial Patent','Patent','Commercial Launch','Launch','Commercial Launch Non-US','Launch Non-US','Commercial Other','Other Preclinical') COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -1243,7 +1245,7 @@ ALTER TABLE `user_grants`
 
 ALTER TABLE `upm`
   ADD CONSTRAINT `FK_product` FOREIGN KEY (`product`) REFERENCES `products` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  ADD CONSTRAINT `upm_ibfk_2` FOREIGN KEY (`redtag`) REFERENCES `redtags` (`name`) ON DELETE SET NULL ON UPDATE CASCADE;
+  ADD CONSTRAINT `upm_ibfk_2` FOREIGN KEY (`redtag`) REFERENCES `redtags` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 ALTER TABLE `area_trials`
   ADD CONSTRAINT `area_trials_ibfk_1` FOREIGN KEY (`area`) REFERENCES `areas` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,

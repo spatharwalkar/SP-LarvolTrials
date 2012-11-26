@@ -137,9 +137,9 @@ if($table !='upm')
 elseif($table=='upm')
 {
 	if($_GET['no_sort']!=1)
-	$query = "select upm.`id`,upm.`event_type`,upm.`event_description`,upm.`event_link`,upm.`result_link`,p.`name` as product, upm_areas.`area_id` as area, upm_trials.`larvol_id` as larvol_id, upm.`redtag`, upm.`condition`, upm.`start_date`, upm.`start_date_type`, upm.`end_date`, upm.`end_date_type`, upm.`last_update` from upm left join products p on upm.product=p.id left join upm_areas on upm_areas.upm_id=upm.id left join upm_trials on upm_trials.upm_id = upm.id $where  group by upm.id $currentOrderBy $currentSortOrder limit $start , $limit";
+	$query = "select upm.`id`,upm.`event_type`,upm.`event_description`,upm.`event_link`,upm.`result_link`,p.`name` as product, upm_areas.`area_id` as area, upm_trials.`larvol_id` as larvol_id, redtags.`name` as redtag, upm.`condition`, upm.`start_date`, upm.`start_date_type`, upm.`end_date`, upm.`end_date_type`, upm.`last_update` from upm left join products p on upm.product=p.id left join upm_areas on upm_areas.upm_id=upm.id left join upm_trials on upm_trials.upm_id = upm.id left join redtags on upm.redtag = redtags.id $where  group by upm.id $currentOrderBy $currentSortOrder limit $start , $limit";
 	else
-	$query = "select upm.`id`,upm.`event_type`,upm.`event_description`,upm.`event_link`,upm.`result_link`,p.`name` as product, upm_areas.`area_id` as area, upm_trials.`larvol_id` as larvol_id, upm.`redtag`, upm.`condition`, upm.`start_date`, upm.`start_date_type`, upm.`end_date`, upm.`end_date_type`, upm.`last_update` from upm left join products p on upm.product=p.id left join upm_areas on upm_areas.upm_id=upm.id left join upm_trials on upm_trials.upm_id = upm.id $where group by upm.id limit $start , $limit";
+	$query = "select upm.`id`,upm.`event_type`,upm.`event_description`,upm.`event_link`,upm.`result_link`,p.`name` as product, upm_areas.`area_id` as area, upm_trials.`larvol_id` as larvol_id, redtags.`name` as redtag, upm.`condition`, upm.`start_date`, upm.`start_date_type`, upm.`end_date`, upm.`end_date_type`, upm.`last_update` from upm left join products p on upm.product=p.id left join upm_areas on upm_areas.upm_id=upm.id left join upm_trials on upm_trials.upm_id = upm.id left join redtags on upm.redtag = redtags.id $where group by upm.id limit $start , $limit";
 }
 $res = mysql_query($query) or softDieSession('Cannot get '.$table.' data.'.$query);
 $i=0;
@@ -480,11 +480,11 @@ function calculateWhere($table)
 									throw new Exception("Bad regex: $whereKeys = $whereValues", 6);
 									return ' PREG_RLIKE("' . $whereValues . '",' . $whereKeys . ') AND ';
 								}
-								if($whereKeys=='upm.event_description' || $whereKeys=='products.name')
+								if($whereKeys=='upm.`event_description`' || $whereKeys=='products.`name`')
 								{
 									return ' '.$whereKeys.' LIKE '. '\'%'.$whereValues.'%\' AND ';
 								}
-								if($whereKeys == 'upm.id' || $whereKeys == 'products.id' || $whereKeys == 'areas.id')
+								if($whereKeys == 'upm.`id`' || $whereKeys == 'products.`id`' || $whereKeys == 'areas.`id`')
 								{
 									if(strpos($whereValues,','))
 									{
@@ -844,7 +844,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 	if($import ==1 && $table=='upm')
 	{
 		$importVal = array_map(validateImport,$importKeys,$importVal);
-		$query = "insert into upm (".implode(',',$importKeys).") values (".implode(',',$importVal).")";
+		$query = "insert into upm (`".implode('`,`',$importKeys)."`) values (".implode(',',$importVal).")";
 		if(mysql_query($query))
 		{
 			return true;
@@ -1145,6 +1145,18 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 				//process upm history
 				foreach($historyArr as $history)
 				{
+					/* Replace product id and redtag id by name while storing in history table*/
+					if($history["field"] == "'product'")
+					{
+						$history["old_value"] = "'".getUPMProdOrRedtagName("products", $history["old_value"])."'";
+						$history["new_value"] = "'".getUPMProdOrRedtagName("products", $history["new_value"])."'"; 
+					}
+					else if($history["field"] == "'redtag'")
+					{
+						$history["old_value"] = "'".getUPMProdOrRedtagName("redtags", $history["old_value"])."'";
+						$history["new_value"] = "'".getUPMProdOrRedtagName("redtags", $history["new_value"])."'"; 
+					}
+					
 					$query = "insert into upm_history (`".implode('`,`',array_keys($history))."`) values (".implode(',',$history).")";
 					mysql_query($query)or softdieSession('Cannot update history for upm id '.$historyArr['id']);
 				}
@@ -1509,7 +1521,7 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		
 		if($table=='upm')
 		{
-			$query = "SELECT u.`id`, u.`event_type`, u.`event_description`, u.`event_link`, u.`result_link`, p.`name` AS product, ar.`name` as area, upmt.`larvol_id` as larvol_id, u.`redtag`, u.`condition`, dt.`source_id` as source_id, u.`status`, u.`start_date`, u.`start_date_type`, u.`end_date`, u.`end_date_type`,u.`last_update`, p.`id` as product_id FROM upm u LEFT JOIN products p ON u.product=p.id LEFT JOIN upm_areas a ON u.id=a.upm_id left join areas ar on ar.id=a.area_id left join upm_trials upmt on upmt.upm_id = u.id left join data_trials dt on dt.larvol_id = upmt.larvol_id WHERE u.id=$id";
+			$query = "SELECT u.`id`, u.`event_type`, u.`event_description`, u.`event_link`, u.`result_link`, p.`name` AS product, ar.`name` as area, upmt.`larvol_id` as larvol_id, redtags.`name` as redtag, redtags.`id` as redtag_id, u.`condition`, dt.`source_id` as source_id, u.`status`, u.`start_date`, u.`start_date_type`, u.`end_date`, u.`end_date_type`,u.`last_update`, p.`id` as product_id FROM upm u LEFT JOIN products p ON u.product=p.id LEFT JOIN upm_areas a ON u.id=a.upm_id left join areas ar on ar.id=a.area_id left join upm_trials upmt on upmt.upm_id = u.id left join data_trials dt on dt.larvol_id = upmt.larvol_id left join redtags on u.`redtag` = redtags.`id` WHERE u.id=$id";
 		}
 		else
 		{
@@ -1523,6 +1535,7 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 			{
 				$upmDetails = $row;
 				$upm_product_id = isset($upmDetails['product_id'])?$upmDetails['product_id']:null;
+				$upm_redtag_id = isset($upmDetails['redtag_id'])?$upmDetails['redtag_id']:null;
 				if (!in_array($row['area'], $area))
 				$area[] = $row['area'];
 				if (!in_array($row['larvol_id'], $larvol_id))
@@ -2124,4 +2137,19 @@ function getPreindexProgress($type,$itemId)
 	$status = $row;	
 	
 	return $status;
+}
+
+/*
+Function to get product or redtag name from there id's to store it in history table
+*/
+function getUPMProdOrRedtagName($table, $value)
+{
+	$query = "select `name` from $table where id=$value";
+	$res = mysql_query($query);
+	$val = null;
+	while($row = mysql_fetch_assoc($res))
+	{
+		$val = $row['name'];
+	}
+	return $val;
 }

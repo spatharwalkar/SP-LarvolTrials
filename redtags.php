@@ -6,7 +6,7 @@ require_once('include.util.php');
 require_once 'include.page.php';
 require_once 'PHPExcel/IOFactory.php';
 
-error_reporting(E_ALL);
+error_reporting(E_ALL & ~E_NOTICE);
 
 if(!$db->loggedIn())
 {
