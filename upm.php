@@ -282,7 +282,7 @@ if(isset($_GET['search']))
 		{
 			if(strpos(" ".$IDs." ", "NCT") || strpos(" ".$IDs." ", "-"))
 			{
-				$SourceIDQuery = mysql_query("select larvol_id from `data_trials` where `source_id`='$IDs'");
+				$SourceIDQuery = mysql_query("select larvol_id from `data_trials` where `source_id` LIKE '%$IDs%'");
 				while($LarvolIDfrmSrcArray = mysql_fetch_assoc($SourceIDQuery))
 				$LarvolIDfrmSrc = $LarvolIDfrmSrcArray['larvol_id'];
 				if($LarvolIDfrmSrc != NULL && $LarvolIDfrmSrc != '')

@@ -189,6 +189,10 @@ while ($row = mysql_fetch_assoc($res))
 			
 			if($url)
 			echo '<a href="'.$url.'">';
+			
+			if($table == 'upm' && $columnName == 'larvol_id')
+			echo 'Trial Id';
+			else
 			echo ucwords(implode(' ',explode('_',$columnName)));
 			if($url)
 			{
@@ -1263,7 +1267,7 @@ function fillUpmLarvolIDs($upmId,$LarvolIDs=array())
 	{
 		if(strpos(" ".$IDs." ", "NCT") || strpos(" ".$IDs." ", "-"))
 		{
-			$SourceIDQuery = mysql_query("select larvol_id from `data_trials` where `source_id`='$IDs'");
+			$SourceIDQuery = mysql_query("select larvol_id from `data_trials` where `source_id` LIKE '%$IDs%'");
 			while($LarvolIDfrmSrcArray = mysql_fetch_assoc($SourceIDQuery))
 			$LarvolIDfrmSrc = $LarvolIDfrmSrcArray['larvol_id'];
 			if($LarvolIDfrmSrc != NULL && $LarvolIDfrmSrc != '')
@@ -1440,7 +1444,7 @@ function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),
 			else if($row['Field']=='larvol_id' && $table=='upm')
 			{
 				echo '<tr>';
-				echo '<td>'.ucwords(implode(' ',explode('_',$row['Field']))).' : </td><td><input type="text" value="" name="search_'.$row['Field'].'[]" id="search_'.$row['Field'].'[]" /> <img style="border:0; height:20px; width:20px; vertical-align:middle;" title="Add Larvol Id" alt="Add Larvol Id" src="images/add.gif" class="add_multiple_larvol_id"></td>';
+				echo '<td>Trial ID : </td><td><input type="text" value="" name="search_'.$row['Field'].'[]" id="search_'.$row['Field'].'[]" /> <img style="border:0; height:20px; width:20px; vertical-align:middle;" title="Add Trial Id" alt="Add Trial Id" src="images/add.gif" class="add_multiple_larvol_id"></td>';
 				echo '</tr>';
 
 			}
@@ -1450,7 +1454,7 @@ function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),
 				foreach($dbVal as $key=>$dbValIndividual)
 				{
 					if($dbValIndividual != NULL && $dbValIndividual != '')
-					print '<tr><td></td><td><input name="search_'.$row['Field'].'[]" value="'.$dbValIndividual.'" checked="checked" type="checkbox"> <font title="Larvol Id">'.$dbValIndividual.'</font>'.((getUpmSourceIDFrmLarvolIDs($dbValIndividual) != NULL && getUpmSourceIDFrmLarvolIDs($dbValIndividual) != '') ? ' <font title="Source Id">['.getUpmSourceIDFrmLarvolIDs($dbValIndividual).']</font>':'').' <img style="border:0; vertical-align:middle;" title="Delete Larvol Id" alt="Delete Larvol Id" src="images/not.png" class="auto_suggest_multiple_delete"></td></tr>';
+					print '<tr><td></td><td><input name="search_'.$row['Field'].'[]" value="'.$dbValIndividual.'" checked="checked" type="checkbox"> <font title="Larvol Id">'.$dbValIndividual.'</font>'.((getUpmSourceIDFrmLarvolIDs($dbValIndividual) != NULL && getUpmSourceIDFrmLarvolIDs($dbValIndividual) != '') ? ' <font title="Source Id">['.implode("] [",explode("`",getUpmSourceIDFrmLarvolIDs($dbValIndividual))).']</font>':'').' <img style="border:0; vertical-align:middle;" title="Delete Trial Id" alt="Delete Trial Id" src="images/not.png" class="auto_suggest_multiple_delete"></td></tr>';
 				}
 			}
 			else if(is_array($dbVal) && count($dbVal)>0)
@@ -1665,7 +1669,7 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		else if($row['Field']=='larvol_id' && $table=='upm')
 		{
 			echo '<tr>';
-			echo '<td>'.ucwords(implode(' ',explode('_',$row['Field']))).' : </td><td><input type="text" value="" name="'.$row['Field'].'[]" id="'.$row['Field'].'[]" /> <img style="border:0; height:20px; width:20px; vertical-align:middle;" title="Add Larvol Id" alt="Add Larvol Id" src="images/add.gif" class="add_multiple_larvol_id"></td>';
+			echo '<td>Trial ID : </td><td><input type="text" value="" name="'.$row['Field'].'[]" id="'.$row['Field'].'[]" /> <img style="border:0; height:20px; width:20px; vertical-align:middle;" title="Add Trial Id" alt="Add Trial Id" src="images/add.gif" class="add_multiple_larvol_id"></td>';
 			echo '</tr>';
 
 		}
@@ -1680,7 +1684,7 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 			foreach($dbVal as $key=>$dbValIndividual)
 			{
 				if($dbValIndividual != NULL && $dbValIndividual != '')
-				print '<tr><td></td><td><input class="'.$row['Field'].'_autosuggest_multiple"  name="'.$row['Field'].'[]" value="'.$dbValIndividual.'" checked="checked" type="checkbox"> <font title="Larvol Id">'.$dbValIndividual.'</font> <font title="Source Id">['.$upmDetails['source_id'][$key].']</font> <img style="border:0" title="Delete '.ucfirst($row['Field']).'" alt="Delete '.ucfirst($row['Field']).'" src="images/not.png" class="auto_suggest_multiple_delete"></td></tr>';
+				print '<tr><td></td><td><input class="'.$row['Field'].'_autosuggest_multiple"  name="'.$row['Field'].'[]" value="'.$dbValIndividual.'" checked="checked" type="checkbox"> <font title="Larvol Id">'.$dbValIndividual.'</font> <font title="Source Id">['.implode("] [",explode("`",$upmDetails['source_id'][$key])).']</font> <img style="border:0" title="Delete Trial Id" alt="Delete Trial Id" src="images/not.png" class="auto_suggest_multiple_delete"></td></tr>';
 			}
 		}
 		
