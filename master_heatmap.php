@@ -1105,7 +1105,8 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 			
 	$out .= '<form action="master_heatmap.php" method="post">'
 			. '<fieldset><legend>Download Option</legend>'
-			. '<input type="hidden" name="id" value="' . $id . '" />';
+			. '<input type="hidden" name="id" value="' . $id . '" />'
+			. '<input type="hidden" name="pageType" id="pageType" value="editPage" />';
 	if($total_fld)
 	{
 		$out .='<input type="hidden" name="total_col" value="1" />';
@@ -2198,11 +2199,32 @@ function Download_reports()
 			
 		// remove default header/footer
 		$pdf->setPrintHeader(false);
+	
+		if($_POST['pageType']== 'editPage')
+		$pdf->setPrintFooter(false);
+		
+		$marginBottom = 10;
+		if($_POST['pageType']== 'editPage')
+		{
+			$pdf->setPrintFooter(false);
+			$CustomFooter = true;
+			$CustomFooterSize = 8;
+		}
+		else
+		{
+			$CustomFooter =  false;
+			$CustomFooterSize = 0;
+		}
+		
+		$PageNum = 0;
+		
 		//set some language-dependent strings
 		$pdf->setLanguageArray($l);
 		//set auto page breaks
-		$pdf->SetAutoPageBreak(TRUE, 10);
+		$pdf->SetAutoPageBreak(TRUE, $marginBottom);
 		$pdf->AddPage();
+		$PageNum = 1;
+		
 		//ini_set('pcre.backtrack_limit',strlen($pdfContent));	
 		$name = htmlspecialchars(strlen($name)>0?$name:('report '.$id.''));
 		
@@ -2820,7 +2842,7 @@ function Download_reports()
 				$Product_Rowcat_width = ($product_Col_Width + $All_Column_Width);
 				$rowcount = $pdf->getNumLines($cat, $Product_Rowcat_width);
  				$Product_Rowcat_height = ($rowcount * $Bold_Line_Height);
-				if (($startY + $Product_Rowcat_height + 1) + $dimensions['bm'] < ($dimensions['hk']))
+				if (($startY + $Product_Rowcat_height + 1) + $CustomFooterSize + $dimensions['bm'] < ($dimensions['hk']))
 				{	
 					PrintProductCategoryforPDFExport($dtt, $rows_categoryProducts[$cat], $last_area, $link_part, $cat, $Product_Rowcat_width, $Product_Rowcat_height, $Place_X, $Place_Y, $pdf);								
 					$Place_Y = $Place_Y + $Product_Rowcat_height + 0.5;
@@ -2835,7 +2857,7 @@ function Download_reports()
 			}
 			$pdf->SetFont('freesans', ' ', 8, '', false); // Normal Font
 			
-			if (($startY + $checkHeight + 1) + $dimensions['bm'] > ($dimensions['hk']))
+			if (($startY + $checkHeight + 1) + $CustomFooterSize + $dimensions['bm'] > ($dimensions['hk']))
 			{
 				//this row will cause a page break, draw the bottom border on previous row and give this a top border
 				
@@ -2845,11 +2867,15 @@ function Download_reports()
 				/// Create Border Around Heatmap before going to new page
 				$pdf->SetFillColor(0, 0, 128);
 				$border = array('mode' => 'ext', 'LTRB' => array('width' => 0.3, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,0,128)));
-				$pdf->MultiCell(($product_Col_Width + $All_Column_Width + 0.1), ($BorderStop_Y - $BorderStart_Y + $helpTabRow_Height + 1), '', $border, $align='C', $fill=0, $ln=0, $BorderStart_X, $BorderStart_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=false, $maxh=($BorderStop_Y - $BorderStart_Y), 'T');
+				$pdf->MultiCell(($product_Col_Width + $All_Column_Width + 0.1), ($BorderStop_Y - $BorderStart_Y + 0.5), '', $border, $align='C', $fill=0, $ln=0, $BorderStart_X, $BorderStart_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=false, $maxh=($BorderStop_Y - $BorderStart_Y + 0.5), 'T');
+				
+				if($CustomFooter)
+				PrintFooterPDFExport($pdf, $BorderStart_X, ($dimensions['hk'] - $dimensions['bm'] - $CustomFooterSize + 0.5), ($CustomFooterSize-1), ($product_Col_Width + $All_Column_Width + 0.1), $PageNum);
 
 		
 				//we could force a page break and rewrite grid headings here
 				$pdf->AddPage();
+				$PageNum = $PageNum + 1;
 				
 				$BorderStart_X = $pdf->GetX();
 				$BorderStart_Y = $pdf->GetY();
@@ -3795,11 +3821,9 @@ function Download_reports()
 			$pdf->SetY($Place_Y);
 		}//Row Foreach ends
 		
-		$pdf->SetY($pdf->GetY() + 3);
-		
-		
 		$startY = $pdf->GetY();
-		if (($startY + 13) + $dimensions['bm'] > ($dimensions['hk']))
+		$helpTabRow_Height = 5;
+		if ((($startY + $helpTabRow_Height + 3) + $dimensions['bm'] + $CustomFooterSize) > ($dimensions['hk']))
 		{
 			//this row will cause a page break, draw the bottom border on previous row and give this a top border
 			$BorderStop_X = $pdf->GetX();
@@ -3808,10 +3832,14 @@ function Download_reports()
 			/// Create Border Around Heatmap before going to new page
 			$pdf->SetFillColor(0, 0, 128);
 			$border = array('mode' => 'ext', 'LTRB' => array('width' => 0.3, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,0,128)));
-			$pdf->MultiCell(($product_Col_Width + $All_Column_Width + 0.1), ($BorderStop_Y - $BorderStart_Y + $helpTabRow_Height + 1), '', $border, $align='C', $fill=0, $ln=0, $BorderStart_X, $BorderStart_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=false, $maxh=($BorderStop_Y - $BorderStart_Y), 'T');
-
+			$pdf->MultiCell(($product_Col_Width + $All_Column_Width + 0.1), ($BorderStop_Y - $BorderStart_Y + 0.5), '', $border, $align='C', $fill=0, $ln=0, $BorderStart_X, $BorderStart_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=false, $maxh=($BorderStop_Y - $BorderStart_Y + 0.5), 'T');
+			
+			if($CustomFooter)
+			PrintFooterPDFExport($pdf, $BorderStart_X, ($dimensions['hk'] - $dimensions['bm'] - $CustomFooterSize + 0.5), ($CustomFooterSize-1), ($product_Col_Width + $All_Column_Width + 0.1), $PageNum);
+			
 			//we could force a page break and rewrite grid headings here
 			$pdf->AddPage();
+			$PageNum = $PageNum + 1;
 			
 			$BorderStart_X = $pdf->GetX();
 			$BorderStart_Y = $pdf->GetY();
@@ -3819,20 +3847,19 @@ function Download_reports()
 		}
 		
 		$dimensions = $pdf->getPageDimensions();
-		$newMarginWidth = (($dimensions['wk'] - (160.4))/2);
+		$newMarginWidth = (($dimensions['wk'] - (194.4))/2);
 		//$pdf->SetRightMargin($newMarginWidth);
 		//$pdf->SetLeftMargin($newMarginWidth);
-		
-		$helpTabImage_Header = array('Discontinued', 'Filing', 'Phase explanation', 'Updated');
+		$updateTime = ' ('.date('Y/m/d', strtotime($end_range, $now)).' - '.date('Y/m/d', strtotime($start_range, $now)).')';
+		$helpTabImage_Header = array('Discontinued', 'Filing', 'Phase explanation', 'Updated'.$updateTime);
 		$helpTabImages_Src = array('new_lbomb.png', 'new_file.png', 'phaseexp.png', 'outline.png');
 		$helpTabImages_Desc = array('Bomb', 'Filing', 'Phase explanation', 'Red Border');
-		$helpTabRow_Height = 5;
 		
 		///we can not set margins using available pdf function multiple times so set X-cordinate value expicitly
 		//$Place_X = $pdf->GetX();
 		$Place_X = $newMarginWidth;
 		
-		$Place_Y = $pdf->GetY();
+		$Place_Y = $pdf->GetY() + 3;
 		
 		$pdf->MultiCell(12, $helpTabRow_Height, 'Phase: ', $border=0, $align='C', $fill=0, $ln=0, $Place_X, $Place_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=$helpTabRow_Height, 'T');
 		$Place_X = $Place_X + 11;
@@ -3867,7 +3894,10 @@ function Download_reports()
 		/// Create Border Around Heatmap
 		$pdf->SetFillColor(0, 0, 128);
 		$border = array('mode' => 'ext', 'LTRB' => array('width' => 0.3, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,0,128)));
-		$pdf->MultiCell(($product_Col_Width + $All_Column_Width + 0.1), ($BorderStop_Y - $BorderStart_Y + $helpTabRow_Height + 1), '', $border, $align='C', $fill=0, $ln=0, $BorderStart_X, $BorderStart_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=false, $maxh=($BorderStop_Y - $BorderStart_Y), 'T');
+		$pdf->MultiCell(($product_Col_Width + $All_Column_Width + 0.1), ($BorderStop_Y - $BorderStart_Y + $helpTabRow_Height + 0.5), '', $border, $align='C', $fill=0, $ln=0, $BorderStart_X, $BorderStart_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=false, $maxh=($BorderStop_Y - $BorderStart_Y + $helpTabRow_Height + 0.5), 'T');
+		
+		if($CustomFooter)
+		PrintFooterPDFExport($pdf, $BorderStart_X, ($dimensions['hk'] - $dimensions['bm'] - $CustomFooterSize + 0.5), ($CustomFooterSize-1), ($product_Col_Width + $All_Column_Width + 0.1), $PageNum);
 		
 		ob_end_clean();
 		//Close and output PDF document
@@ -4774,6 +4804,33 @@ function getNumLinesPDFExport($productName, $OtherPart, $product_Col_Width, $Bol
 	$Return[0] = $numberOfLines;
 	$Return[1] = $Height;
 	return $Return;
+}
+
+function PrintFooterPDFExport(&$pdf, $Place_X, $Place_Y, $Height, $Width, $PageNum)
+{
+	$BkPlace_X = $Place_X;
+	$pdf->SetFillColor(0, 0, 128);
+	$border = array('mode' => 'ext', 'TB' => array('width' => 0.3, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,0,0)));
+	$pdf->MultiCell($Width, $Height, '', $border, $align='C', $fill=0, $ln=0, $Place_X, $Place_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$Height, 'T');
+	
+	$Place_X = $Place_X + 3;
+	$Place_Y = $Place_Y + 2;
+	$pdf->Image('images/larvol_logo.gif', $Place_X , $Place_Y, 14, 3.2, '', '', '', false, 300, '', false, false, 0, false, false, false);
+	
+	$Place_X = $Place_X + 14 + 3;
+	$Place_Y = $Place_Y - 0.2;
+	$copyRight = '&copy; The Larvol Group, 2012';
+	$current_StringLength = $pdf->GetStringWidth($copyRight, 'freesans', ' ', 8) + 3;
+	$pdf->MultiCell($current_StringLength, 3, '<font style="color:#332b66; font-size:25px; font-style:italic; font-weight:normal;">'.$copyRight.'</font>', $border=0, $align='L', $fill=0, $ln=0, $Place_X, $Place_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$Height, 'T');
+	
+	$Text = 'For internal use only';
+	$current_StringLength = $pdf->GetStringWidth($Text, 'freesans', ' ', 8) + 3;
+	$Place_X = $BkPlace_X + $Width - $current_StringLength - 3;
+	$pdf->MultiCell($current_StringLength, 3, '<font style="color:#332b66; font-size:25px; font-style:italic; font-weight:normal;">'.$Text.'</font>', $border=0, $align='L', $fill=0, $ln=0, $Place_X, $Place_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$Height, 'T');
+	
+	$current_StringLength = ceil($pdf->GetStringWidth($PageNum, 'freesans', ' ', 8));
+	$Place_X = $BkPlace_X + ($Width/2) - $current_StringLength;
+	$pdf->MultiCell($current_StringLength, 3, '<font style="color:#000000; font-size:25px; font-style:italic; font-weight:normal;">'.$PageNum.'</font>', $border=0, $align='L', $fill=0, $ln=0, $Place_X, $Place_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$Height, 'T');
 }
 
 //process POST for editor
