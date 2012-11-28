@@ -1043,6 +1043,11 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 				$InsertPnt = mysql_insert_id();
 				fillUpmAreas($InsertPnt,$upm_area);
 				fillUpmLarvolIDs($InsertPnt,$upm_larvolids);
+				//Insert new upm records history
+				$newHistory = array('id'=>$InsertPnt, 'change_date'=>"'".date('Y-m-d H:i:s')."'", 'field'=>"'".'new'."'", 'old_value'=>"''", 'new_value'=>"''", 'user'=>"'".$db->user->id."'");
+				$newHistoryquery = "insert into upm_history (`".implode('`,`',array_keys($newHistory))."`) values (".implode(',',$newHistory).")";
+				mysql_query($newHistoryquery)or softdieSession('Cannot update history for upm id '.$InsertPnt);
+
 			}
 			return 1;
 		}
