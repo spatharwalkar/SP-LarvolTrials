@@ -12,6 +12,9 @@ require('searchhandler.php');
 
 
 $tt = new TrialTracker;
+
+$maxEnrollLimit = 5000;
+
 if(isset($_POST['btnDownload'])) 
 {	
 	$resultIds = $_POST['resultIds'];
@@ -96,12 +99,6 @@ if(isset($_REQUEST['ipwnd']) && $_REQUEST['ipwnd'] == "on")
 if(isset($_REQUEST['tspo']) && $_REQUEST['tspo'] == "on")
 {
 	$globalOptions['showTrialsSponsoredByProductOwner'] = "on";
-}
-
-if(isset($_REQUEST['minenroll']) && isset($_REQUEST['maxenroll']))
-{
-	$globalOptions['minEnroll'] = $_REQUEST['minenroll'];
-	$globalOptions['maxEnroll'] = $_REQUEST['maxenroll'];
 }
 
 if(isset($_REQUEST['enroll']))
@@ -216,7 +213,7 @@ if(!$db->loggedIn())
 	$globalOptions['startrange'] = 'now';
 }
 	
-$maxEnrollLimit = 5000;
+
 
 $intermediaryCss = 'css/intermediary.css';
 $jueryUiCss 	= 'css/themes/cupertino/jquery-ui-1.8.17.custom.css';
@@ -553,24 +550,14 @@ global $db;
 <script type="text/javascript">
 	$(function() 
 	{
-		var minv = 0;
-		var maxv = 0;
-		var maxLimit = <?php echo $maxEnrollLimit;?>;
-		var maxValue = $("#maxenroll").val();
+		var maxE = <?php echo $maxEnrollLimit;?>;
 		
-		if(maxValue > maxLimit)
-		{
-			maxValue = maxLimit;
-		}
+		var minv = 0;
+		var maxv = maxE;
 		
 		var enroll = '<?php echo $globalOptions['enroll'];?>';
-		if(enroll == '0')
+		if(enroll != '0')
 		{	
-			minv = 0;
-			maxv = maxValue;
-		}
-		else
-		{
 			var e = enroll.split('-');
 			minv = e[0];
 			maxv = e[1];
@@ -579,14 +566,14 @@ global $db;
 		$("#slider-range").slider({
 			range: true,
 			min: 0,
-			max: maxValue,
+			max: maxE,
 			values: [ minv, maxv ],
 			slide: function( event, ui ) {
 				var ev;
-				if(ui.values[ 1 ] == maxLimit)
+				if(ui.values[ 1 ] == maxE)
 				{
-					$("#amount").val(ui.values[ 0 ] + " - " + maxLimit + "+" );
-					ev = ui.values[ 0 ] + "-" + maxLimit;
+					$("#amount").val(ui.values[ 0 ] + " - " + maxE + "+" );
+					ev = ui.values[ 0 ] + "-" + maxE;
 				}
 				else
 				{
@@ -597,10 +584,10 @@ global $db;
 			}
 		});
 		
-		if($("#slider-range").slider("values", 1) == maxLimit)
+		if($("#slider-range").slider("values", 1) == maxE)
 		{
 			$("#amount").val( $("#slider-range").slider("values", 0 ) +
-				" - " + maxLimit + '+' );
+				" - " + maxE + '+' );
 		}
 		else
 		{
