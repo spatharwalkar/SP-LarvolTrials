@@ -8102,8 +8102,8 @@ class TrialTracker
 				$dParams =  array_replace($urlParams, array('ipwnd' => 'off'));
 
 				$dUrl = http_build_query($dParams);
-				
-				echo '<span class="filters"><label>' . str_replace('Select ', '', $productSelectorTitle) . ' with no data</label>'
+				$title = (($ottType == 'colstacked') ? 'Products' : 'Areas');
+				echo '<span class="filters"><label>' . $title . ' with no data</label>'
 						. '<a href="intermediary.php?' . $dUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
 			}
 		}
