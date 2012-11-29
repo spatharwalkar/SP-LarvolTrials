@@ -944,7 +944,9 @@ $array1=array
 
 		//Go through the parsed XML structure and pick out the data
 		$record_data =array('brief_title' => $brief_title,
-						'acronym' => $rec->abbr_title,
+						//'acronym' => $rec->abbr_title,
+						//unmapped abbr_title 
+						'acronym' => null,
 						'official_title' => $rec->full_title,
 						 'lead_sponsor' => $rec->sponsor_name,
 		                'collaborator' => $rec->support_org_name,

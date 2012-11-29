@@ -408,10 +408,13 @@ function autolink_trials($sid,$lid,$source,$counter)
 		
 		/***********get all existing eudract data and merge it with nct data (only if no nct data exists for that field) */
 		
-		$query = 
-			'select brief_title,acronym,official_title,lead_sponsor,collaborator,inclusion_criteria,exclusion_criteria,
-			`condition`,source_id FROM `data_trials` 
-			where larvol_id="' .  $lid .'" limit 1';
+		
+		$query = 	'select brief_title,acronym,official_title,lead_sponsor,collaborator,
+					inclusion_criteria,exclusion_criteria,`condition`,source_id 
+					FROM `data_trials` 
+					where larvol_id="' .  $lid .'" limit 1
+					';
+		
 		$res1 		= mysql_query($query) ; // eudract data.
 		$res1=mysql_fetch_assoc($res1);
 		if($res1===false)
@@ -424,7 +427,9 @@ function autolink_trials($sid,$lid,$source,$counter)
 			pr('Mysql Error :'. mysql_error() );
 			return $log;
 		}
+		
 		$lay_title =$res1['brief_title'];
+		
 		$abbr_title =$res1['acronym'];
 		$full_title =$res1['official_title'];
 		$sponsor_name =$res1['lead_sponsor'];
@@ -451,6 +456,7 @@ function autolink_trials($sid,$lid,$source,$counter)
 			pr('Mysql Error :'. mysql_error() );
 			return $log;
 		}
+		
 		$Nlay_title =$res1['brief_title'];
 		$Nabbr_title =$res1['acronym'];
 		$Nfull_title =$res1['official_title'];
@@ -459,9 +465,12 @@ function autolink_trials($sid,$lid,$source,$counter)
 		$Ninclusion_criteria =$res1['inclusion_criteria'];
 		$Nexclusion_criteria =$res1['exclusion_criteria'];
 		$Ncondition =$res1['condition'];
+		
 		$fldlst="";
+		
 		if(empty($Nlay_title) and !empty($lay_title)) $fldlst .= " , brief_title =  '". $lay_title."'" ;
-		if(empty($Nabbr_title) and !empty($abbr_title)) $fldlst .= " , acronym =  '". $abbr_title."'" ;
+		//abbreviated title usually has >30 chars, so dont store its value in acronym 
+		//if(empty($Nabbr_title) and !empty($abbr_title)) $fldlst .= " , acronym =  '". $abbr_title."'" ;
 		if(empty($Nfull_title) and !empty($full_title)) $fldlst .= " , official_title =  '". $full_title."'" ;
 		if(empty($Nsponsor_name) and !empty($Nsponsor_name)) $fldlst .= " , lead_sponsor =  '". $sponsor_name."'" ;
 		if(empty($Nsupport_org_name) and !empty($support_org_name)) $fldlst .= " , collaborator =  '". $support_org_name."'" ;
