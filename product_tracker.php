@@ -499,9 +499,14 @@ th {
 	border-right:1px solid #CCCCCC;
 }
 
+.graph_rightWhite {
+	border-right:1px solid #FFFFFF;
+}
+
 .prod_col {
 	width:420px;
 	max-width:420px;
+	word-wrap: break-word;
 }
 
 .side_tick_height {
@@ -656,6 +661,241 @@ function Set_Link_Height()
 	change_view();
 }
 </script>
+
+<script type="text/javascript">
+        var currentFixedHeader;
+        var currentGhost;
+		var ScrollOn = false;
+		
+		//Start - Header recreation in case of window resizing
+		$(window).resize(function() {
+			$.fn.reverse = [].reverse;
+			var createGhostHeader = function (header, topOffset, leftOffset) {
+                // Recreate heaaderin case of window resizing even if there is current ghost header exists
+              if (currentGhost)
+                    $(currentGhost).remove();
+                
+                var realTable = $(header).parents('#ProdTrackerTable');
+                
+                var headerPosition = $(header).offset();
+                var tablePosition = $(realTable).offset();
+                
+                var container = $('<table border="0" cellspacing="0" cellpadding="0" style="vertical-align:middle; background-color:#FFFFFF;" id="ProdTrackerTable1"></table>');
+                
+                // Copy attributes from old table (may not be what you want)
+                for (var i = 0; i < realTable[0].attributes.length; i++) {
+                    var attr = realTable[0].attributes[i];
+					//We are not manually copying table attributes so below line is commented cause it does not work in IE6 and IE7
+                    //container.attr(attr.name, attr.value);
+                }
+                                
+                // Set up position of fixed row
+                container.css({
+                    position: 'fixed',
+                    top: -topOffset,
+                    left: (-$(window).scrollLeft() + leftOffset),
+                    width: $(realTable).outerWidth()
+                });
+                
+                // Create a deep copy of our actual header and put it in our container
+                var newHeader = $(header).clone().appendTo(container);
+                
+                var collection2 = $(newHeader).find('td');
+                
+                // TODO: Copy the width of each <td> manually
+                $(header).find('td').each(function () {
+                    var matchingElement = $(collection2.eq($(this).index()));
+                    $(matchingElement).width(this.offsetWidth + 0.5);
+                });
+				
+                currentGhost = container;
+                currentFixedHeader = header;
+                
+                // Add this fixed row to the same parent as the table
+                $(table).parent().append(currentGhost);
+                return currentGhost;
+            };
+
+            var currentScrollTop = $(window).scrollTop();
+
+            var activeHeader = null;
+            var table = $('#ProdTrackerTable').first();
+            var tablePosition = table.offset();
+            var tableHeight = table.height();
+            
+            var lastHeaderHeight = $(table).find('thead').last().height();
+            var topOffset = 0;
+            
+            // Check that the table is visible and has space for a header
+            if (tablePosition.top + tableHeight - lastHeaderHeight >= currentScrollTop)
+            {
+                var lastCheckedHeader = null;
+                // We do these in reverse as we want the last good header
+                var headers = $(table).find('thead').reverse().each(function () {
+                    var position = $(this).offset();
+                    
+                    if (position.top <= currentScrollTop)
+                    {
+                        activeHeader = this;
+                        return false;
+                    }
+                    
+                    lastCheckedHeader = this;
+                });
+                
+                if (lastCheckedHeader)
+                {
+                    var offset = $(lastCheckedHeader).offset();
+                    if (offset.top - currentScrollTop < $(activeHeader).height())
+                        topOffset = $(activeHeader).height() - (offset.top - currentScrollTop) + 1;
+                }
+            }
+            // No row is needed, get rid of one if there is one
+            if (activeHeader == null && currentGhost)
+
+            {
+                currentGhost.remove();
+
+                currentGhost = null;
+                currentFixedHeader = null;
+            }
+            
+            // We have what we need, make a fixed header row
+            if (activeHeader)
+			{
+                createGhostHeader(activeHeader, topOffset, ($('#ProdTrackerTable').offset().left));
+			}
+		});
+		//End - Header recreation in case of window resizing
+		
+        ///Start - Header creation or align header incase of scrolling
+		$(window).scroll(function() {
+            $.fn.reverse = [].reverse;
+			if(!ScrollOn)
+			{
+            	setProdTrackerColWidth();
+				ScrollOn = true;
+			}
+            var createGhostHeader = function (header, topOffset, leftOffset) {
+                // Don't recreate if it is the same as the current one
+                if (header == currentFixedHeader && currentGhost)
+                {
+                    currentGhost.css('top', -topOffset + "px");
+					currentGhost.css('left',(-$(window).scrollLeft() + leftOffset) + "px");
+                    return currentGhost;
+                }
+                
+                if (currentGhost)
+                    $(currentGhost).remove();
+                
+                var realTable = $(header).parents('#ProdTrackerTable');
+                
+                var headerPosition = $(header).offset();
+                var tablePosition = $(realTable).offset();
+                
+                var container = $('<table border="0" cellspacing="0" cellpadding="0" style="vertical-align:middle; background-color:#FFFFFF;" id="ProdTrackerTable1"></table>');
+                
+                // Copy attributes from old table (may not be what you want)
+                for (var i = 0; i < realTable[0].attributes.length; i++) {
+                    var attr = realTable[0].attributes[i];
+					//We are not manually copying table attributes so below line is commented cause it does not work in IE6 and IE7
+                    //container.attr(attr.name, attr.value);
+                }
+                                
+                // Set up position of fixed row
+                container.css({
+                    position: 'fixed',
+                    top: -topOffset,
+                    left: (-$(window).scrollLeft() + leftOffset),
+                    width: $(realTable).outerWidth()
+                });
+                
+                // Create a deep copy of our actual header and put it in our container
+                var newHeader = $(header).clone().appendTo(container);
+                
+                var collection2 = $(newHeader).find('td');
+                
+                // TODO: Copy the width of each <td> manually
+                $(header).find('td').each(function () {
+                    var matchingElement = $(collection2.eq($(this).index()));
+                    $(matchingElement).width(this.offsetWidth + 0.5);
+                });
+				
+                currentGhost = container;
+                currentFixedHeader = header;
+                
+                // Add this fixed row to the same parent as the table
+                $(table).parent().append(currentGhost);
+                return currentGhost;
+            };
+
+            var currentScrollTop = $(window).scrollTop();
+
+            var activeHeader = null;
+            var table = $('#ProdTrackerTable').first();
+            var tablePosition = table.offset();
+            var tableHeight = table.height();
+            
+            var lastHeaderHeight = $(table).find('thead').last().height();
+            var topOffset = 0;
+            
+            // Check that the table is visible and has space for a header
+            if (tablePosition.top + tableHeight - lastHeaderHeight >= currentScrollTop)
+            {
+                var lastCheckedHeader = null;
+                // We do these in reverse as we want the last good header
+                var headers = $(table).find('thead').reverse().each(function () {
+                    var position = $(this).offset();
+                    
+                    if (position.top <= currentScrollTop)
+                    {
+                        activeHeader = this;
+                        return false;
+                    }
+                    
+                    lastCheckedHeader = this;
+                });
+                
+                if (lastCheckedHeader)
+                {
+                    var offset = $(lastCheckedHeader).offset();
+                    if (offset.top - currentScrollTop < $(activeHeader).height())
+                        topOffset = $(activeHeader).height() - (offset.top - currentScrollTop) + 1;
+                }
+            }
+            // No row is needed, get rid of one if there is one
+            if (activeHeader == null && currentGhost)
+
+            {
+                currentGhost.remove();
+
+                currentGhost = null;
+                currentFixedHeader = null;
+            }
+            
+            // We have what we need, make a fixed header row
+            if (activeHeader)
+			{
+                createGhostHeader(activeHeader, topOffset, ($('#ProdTrackerTable').offset().left));
+			}
+        });
+		///End - Header creation or align header incase of scrolling
+		function setProdTrackerColWidth()
+		{
+			//FixProdTrackCol12
+			//document.getElementById("FixProdTrackCol11").style.width = document.getElementById("FixProdTrackCol21").offsetWidth + "px";
+			/*var width = $('#FixProdTrackCol21').width()
+			$('#FixProdTrackCol11').width(document.getElementById("FixProdTrackCol21").offsetWidth)
+			document.getElementById("FixProdTrackCol11").style.width = document.getElementById("FixProdTrackCol21").offsetWidth + "px";
+			//document.getElementById("FixProdTrackCol12").style.width = document.getElementById("FixProdTrackCol22").offsetWidth + "px"; 
+			$.browser.chrome = /chrome/.test(navigator.userAgent.toLowerCase()); 
+			$.browser.ie6 = /msie 6/.test(navigator.userAgent.toLowerCase()); 
+			$.browser.ie7 = /msie 7/.test(navigator.userAgent.toLowerCase());
+			$.browser.ie8 = /msie 8/.test(navigator.userAgent.toLowerCase()); 
+			//if(!$.browser.chrome && !$.browser.ie6 && !$.browser.ie7 && !$.browser.ie8)
+			//$('#ProdTrackerTable').width('100%')*/
+		}
+</script>
 </head>
 <div id="slideout">
     <img src="images/help.png" alt="Help" />
@@ -743,26 +983,51 @@ $htmlContent  .= '<div id="dropmenu" class="dropmenudiv" style="width: 310px;">'
 				. '</form>';
 				
 						
-$htmlContent .= '<div align="center" style="padding-left:10px; padding-right:15px; padding-top:20px; padding-bottom:20px;"><table border="0" align="center" style="vertical-align:middle; table-layout:fixed;" cellpadding="0" cellspacing="0">'
+$htmlContent .= '<div align="center" style="padding-left:10px; padding-right:15px; padding-top:20px; padding-bottom:20px;">'
+				. '<table border="0" align="center" width="'.(420+8+($inner_columns*$columns*8)+8+11).'px" style="vertical-align:middle;" cellpadding="0" cellspacing="0" id="ProdTrackerTable">'
 			    . '<thead>';
-
-$htmlContent .= '<tr class="side_tick_height"><th class="prod_col">&nbsp;</th><th class="last_tick_width">&nbsp;</th>';
+//scale
+//Row to keep alignement perfect at time of floating headers
+$htmlContent .= '<tr class="side_tick_height"><th class="prod_col" id="FixProdTrackCol11 width="420px">&nbsp;</th><th width="8px" class="graph_rightWhite">&nbsp;</th>';
 for($j=0; $j < $columns; $j++)
 {
 	for($k=0; $k < $inner_columns; $k++)
-	$htmlContent .= '<th width="'.$inner_width .'px" colspan="1">&nbsp;</th>';
+	$htmlContent .= '<th width="8px" colspan="1" '. (($k == ($inner_columns-1)) ? 'class="graph_rightWhite" ':'' ) .'>&nbsp;</th>';
 }
-$htmlContent .= '<th class="last_tick_width"></th></tr>';
+$htmlContent .= '<th width="8px"></th></tr>';
+
+
+$htmlContent .= '<tr><th class="prod_col" align="right">Trials</th><th width="8px" class="graph_rightWhite">&nbsp;</th>';
+for($j=0; $j < $columns; $j++)
+$htmlContent .= '<th align="right" class="graph_rightWhite" colspan="'.(($j==0)? $inner_columns+1 : $inner_columns).'">'.(($j+1) * $column_interval).'</th>';
+$htmlContent .= '</tr>';
+
+$htmlContent .= '<tr class="last_tick_height"><th class="last_tick_height prod_col"><font style="line-height:4px;">&nbsp;</font></th><th class="graph_right"><font style="line-height:4px;">&nbsp;</font></th>';
+for($j=0; $j < $columns; $j++)
+$htmlContent .= '<th colspan="'.$inner_columns.'" class="graph_right graph_bottom"><font style="line-height:4px;">&nbsp;</font></th>';
+$htmlContent .= '<th></th></tr>';
+
+
+$htmlContent .='</thead>';
+//scale ends
+
+$htmlContent .= '<tr class="side_tick_height"><th class="prod_col" id="FixProdTrackCol21" width="420px">&nbsp;</th><th width="8px" class="graph_right">&nbsp;</th>';
+for($j=0; $j < $columns; $j++)
+{
+	for($k=0; $k < $inner_columns; $k++)
+	$htmlContent .= '<th width="8px" colspan="1" class="'. (($k == ($inner_columns-1)) ? 'graph_right':'' ) .'">&nbsp;</th>';
+}
+$htmlContent .= '<th width="8px"></th></tr>';
 
 for($incr=0; $incr < count($rows); $incr++)
 {	
 	$row = $incr;
-	$htmlContent .= '<tr class="side_tick_height"><th class="prod_col side_tick_height">&nbsp;</th><th class="'. (($row == 0) ? 'graph_top':'' ) .' graph_right last_tick_width">&nbsp;</th>';
+	$htmlContent .= '<tr class="side_tick_height"><th class="prod_col side_tick_height">&nbsp;</th><th class="graph_right">&nbsp;</th>';
 	for($j=0; $j < $columns; $j++)
 	{
-		$htmlContent .= '<th width="'.$column_width.'px" colspan="'.$inner_columns.'" class="graph_right">&nbsp;</th>';
+		$htmlContent .= '<th colspan="'.$inner_columns.'" class="graph_right">&nbsp;</th>';
 	}
-	$htmlContent .= '<th class="last_tick_width"></th></tr>';
+	$htmlContent .= '<th></th></tr>';
 	
 	////// Color Graph - Bar Starts
 	
@@ -771,7 +1036,7 @@ for($incr=0; $incr < count($rows); $incr++)
 	
 	$Max_ValueKey = Max_ValueKey($data_matrix[$row]['indlead_phase_na'], $data_matrix[$row]['indlead_phase_0'], $data_matrix[$row]['indlead_phase_1'], $data_matrix[$row]['indlead_phase_2'], $data_matrix[$row]['indlead_phase_3'], $data_matrix[$row]['indlead_phase_4']);
 					
-	$htmlContent .= '<tr id="indlead_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" id="ProdCol_'.$row.'" rowspan="3"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&itype=0&hm=' . $id . '" target="_blank" style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right last_tick_width" rowspan="3">&nbsp;</th>';
+	$htmlContent .= '<tr id="indlead_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" id="ProdCol_'.$row.'" rowspan="3"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&itype=0&hm=' . $id . '" target="_blank" style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
 	
 	///Below function will derive number of lines required to display product name, as our graph size is fixed due to fixed scale, we can calculate approx max area  
 	///for product column. From that we can calculate extra height which will be distributed to up and down rows of graph bar, So now IE6/7 as well as chrome will not 
@@ -780,9 +1045,9 @@ for($incr=0; $incr < count($rows); $incr++)
 	
 	for($j=0; $j < $columns; $j++)
 	{
-		$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" width="'.$column_width.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
+		$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
 	}
-	$htmlContent .= '<th class="last_tick_width"></th></tr><tr id="indlead_Graph_Row_B_'.$row.'" class="Link" >';
+	$htmlContent .= '<th></th></tr><tr id="indlead_Graph_Row_B_'.$row.'" class="Link" >';
 	
 	$total_cols = $inner_columns * $columns;
 	$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['indlead']);
@@ -804,25 +1069,25 @@ for($incr=0; $incr < count($rows); $incr++)
 	if($remain_span > 0)
 	$htmlContent .= DrawExtraHTMLCells($phase_space, $inner_columns, $remain_span);
 	
-	$htmlContent .= '<th class="last_tick_width"></th></tr><tr id="indlead_Graph_Row_C_'.$row.'">';
+	$htmlContent .= '<th></th></tr><tr id="indlead_Graph_Row_C_'.$row.'">';
 	for($j=0; $j < $columns; $j++)
 	{
-		$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" width="'.$column_width.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
+		$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
 	}
-	$htmlContent .= '<th class="last_tick_width"></th></tr>';
+	$htmlContent .= '<th></th></tr>';
 	
 	//// Code for Active
 	$Err = ActiveCountErr($data_matrix, $row, $ratio);
 	
 	$Max_ValueKey = Max_ValueKey($data_matrix[$row]['active_phase_na'], $data_matrix[$row]['active_phase_0'], $data_matrix[$row]['active_phase_1'], $data_matrix[$row]['active_phase_2'], $data_matrix[$row]['active_phase_3'], $data_matrix[$row]['active_phase_4']);
 					
-	$htmlContent .= '<tr style="display:none;" id="active_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" rowspan="3"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&hm=' . $id . '" target="_blank" style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right last_tick_width" rowspan="3">&nbsp;</th>';
+	$htmlContent .= '<tr style="display:none;" id="active_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" rowspan="3"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&hm=' . $id . '" target="_blank" style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
 	
 	for($j=0; $j < $columns; $j++)
 	{
-		$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" width="'.$column_width.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
+		$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
 	}
-	$htmlContent .= '<th class="last_tick_width"></th></tr><tr style="display:none;" id="active_Graph_Row_B_'.$row.'" class="Link">';
+	$htmlContent .= '<th></th></tr><tr style="display:none;" id="active_Graph_Row_B_'.$row.'" class="Link">';
 	
 	$total_cols = $inner_columns * $columns;
 	$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['active']);
@@ -844,25 +1109,25 @@ for($incr=0; $incr < count($rows); $incr++)
 	if($remain_span > 0)
 	$htmlContent .= DrawExtraHTMLCells($phase_space, $inner_columns, $remain_span);
 	
-	$htmlContent .= '<th class="last_tick_width"></th></tr><tr style="display:none;" id="active_Graph_Row_C_'.$row.'">';
+	$htmlContent .= '<th></th></tr><tr style="display:none;" id="active_Graph_Row_C_'.$row.'">';
 	for($j=0; $j < $columns; $j++)
 	{
-		$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" width="'.$column_width.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
+		$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
 	}
-	$htmlContent .= '<th class="last_tick_width"></th></tr>';
+	$htmlContent .= '<th></th></tr>';
 	
 	//// Code for Total
 	$Err = TotalCountErr($data_matrix, $row, $ratio);
 	
 	$Max_ValueKey = Max_ValueKey($data_matrix[$row]['total_phase_na'], $data_matrix[$row]['total_phase_0'], $data_matrix[$row]['total_phase_1'], $data_matrix[$row]['total_phase_2'], $data_matrix[$row]['total_phase_3'], $data_matrix[$row]['total_phase_4']);
 	
-	$htmlContent .= '<tr style="display:none;" id="total_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" rowspan="3"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=2&hm=' . $id . '" target="_blank" style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right last_tick_width" rowspan="3">&nbsp;</th>';
+	$htmlContent .= '<tr style="display:none;" id="total_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" rowspan="3"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=2&hm=' . $id . '" target="_blank" style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
 	
 	for($j=0; $j < $columns; $j++)
 	{
-		$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" width="'.$column_width.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
+		$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
 	}
-	$htmlContent .= '<th class="last_tick_width"></th></tr><tr style="display:none;" id="total_Graph_Row_B_'.$row.'" class="Link" >';
+	$htmlContent .= '<th></th></tr><tr style="display:none;" id="total_Graph_Row_B_'.$row.'" class="Link" >';
 	
 	$total_cols = $inner_columns * $columns;
 	$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['total']);
@@ -884,34 +1149,36 @@ for($incr=0; $incr < count($rows); $incr++)
 	if($remain_span > 0)
 	$htmlContent .= DrawExtraHTMLCells($phase_space, $inner_columns, $remain_span);
 	
-	$htmlContent .= '<th class="last_tick_width"></th></tr><tr style="display:none;" id="total_Graph_Row_C_'.$row.'">';
+	$htmlContent .= '<th></th></tr><tr style="display:none;" id="total_Graph_Row_C_'.$row.'">';
 	for($j=0; $j < $columns; $j++)
 	{
-		$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" width="'.$column_width.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
+		$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
 	}
-	$htmlContent .= '<th class="last_tick_width"></th></tr>';
+	$htmlContent .= '<th></th></tr>';
 	
 	////// End Of - Color Graph - Bar Starts
 	
-	$htmlContent .= '<tr class="side_tick_height"><th class="prod_col side_tick_height">&nbsp;</th><th class="graph_bottom graph_right last_tick_width">&nbsp;</th>';
+	$htmlContent .= '<tr class="side_tick_height"><th class="prod_col side_tick_height">&nbsp;</th><th class="'. (($incr == (count($rows)-1)) ? '':'graph_bottom') .' graph_right">&nbsp;</th>';
 	for($j=0; $j < $columns; $j++)
 	{
-		$htmlContent .= '<th width="'.$column_width.'px" colspan="'.$inner_columns.'" class="graph_right">&nbsp;</th>';
+		$htmlContent .= '<th colspan="'.$inner_columns.'" class="graph_right">&nbsp;</th>';
 	}
-	$htmlContent .= '<th class="last_tick_width"></th></tr>';
+	$htmlContent .= '<th></th></tr>';
 }			   
-			   
-$htmlContent .= '<tr class="last_tick_height"><th class="last_tick_height prod_col"><font style="line-height:4px;">&nbsp;</font></th><th class="graph_right last_tick_width"><font style="line-height:4px;">&nbsp;</font></th>';
-for($j=0; $j < $columns; $j++)
-$htmlContent .= '<th width="'.$column_width.'px" colspan="'.$inner_columns.'" class="graph_top graph_right"><font style="line-height:4px;">&nbsp;</font></th>';
-$htmlContent .= '<th class="last_tick_width"></th></tr>';
 
-$htmlContent .= '<tr><th class="prod_col"></th><th class="last_tick_width"></th>';
+//Draw scale			   
+$htmlContent .= '<tr class="last_tick_height"><th class="last_tick_height prod_col"><font style="line-height:4px;">&nbsp;</font></th><th class="graph_right"><font style="line-height:4px;">&nbsp;</font></th>';
 for($j=0; $j < $columns; $j++)
-$htmlContent .= '<th align="right" width="'.$column_width.'px" colspan="'.(($j==0)? $inner_columns+1 : $inner_columns).'" class="">'.(($j+1) * $column_interval).'</th>';
+$htmlContent .= '<th colspan="'.$inner_columns.'" class="graph_top graph_right"><font style="line-height:4px;">&nbsp;</font></th>';
+$htmlContent .= '<th></th></tr>';
+/* Current no need of lower scale
+$htmlContent .= '<tr><th class="prod_col"></th><th class="graph_rightWhite"></th>';
+for($j=0; $j < $columns; $j++)
+$htmlContent .= '<th align="right" class="graph_rightWhite" colspan="'.(($j==0)? $inner_columns+1 : $inner_columns).'">'.(($j+1) * $column_interval).'</th>';
 $htmlContent .= '</tr>';
-						
-$htmlContent .= '</thead></table></div>';
+//End of draw scale
+*/						
+$htmlContent .= '</table></div>';
 
 //// Common Data
 $htmlContent .= '<input type="hidden" value="'.count($rows).'" name="Tot_rows" id="Tot_rows" />';
