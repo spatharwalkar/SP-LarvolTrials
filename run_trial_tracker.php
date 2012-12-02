@@ -1252,7 +1252,12 @@ class TrialTracker
 				
 			
 			//product name	
-			$objPHPExcel->getActiveSheet()->setCellValue('B' . $i, $uvalue["product_name"]);
+			$pId =  $uvalue["product"];
+			if(isset($Values['Data'][$pId]))
+			{
+				$uvalue["product"] = strip_tags($Values['Data'][$pId]['sectionHeader']);
+			}
+			$objPHPExcel->getActiveSheet()->setCellValue('B' . $i, $uvalue["product"]);
 			if($uvalue["new"] == 'y')
 			{
 				$objPHPExcel->getActiveSheet()->getStyle('B' . $i)->applyFromArray($highlightChange);
@@ -1827,6 +1832,7 @@ class TrialTracker
 				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
 				$from = $to;
 				$from++;
+
 			} 
 			else if($endYear == $secondYear) 
 			{
@@ -7335,84 +7341,6 @@ class TrialTracker
 		if($display == 'web')
 		{
 			$Query .= $filters . $orderBy . $limit;
-			
-			$groupBy = " GROUP BY ";
-			
-			if($ottType == 'rowstacked')
-			{
-				foreach($aIds as $value)
-				{
-					$cCount[$value]['Count'] = 0;
-				}
-				$rowType = 'area';
-				$groupBy .= " at.`area` ";
-			}
-			else
-			{
-				foreach($pIds as $value)
-				{
-					$cCount[$value]['Count'] = 0;
-				}
-				$rowType = 'product';
-				$groupBy .= " pt.`product` ";
-			}
-		
-			$q = " SELECT count(dt.larvol_id) AS trialcount, pt.`product`, at.`area` "
-					. " FROM data_trials dt "
-					. " JOIN `product_trials` pt ON dt.`larvol_id` = pt.`trial` " 
-					. " JOIN `area_trials` at ON dt.`larvol_id` = at.`trial` ";
-			$q .= $where . $filters . $groupBy . $orderBy;
-			$res = m_query(__LINE__,$q);
-			if($res)
-			{
-				while($row = mysql_fetch_assoc($res))
-				{
-					$type = $row[$rowType];
-					$cCount[$type]['Count'] = $row['trialcount'];
-				}
-			}
-			else
-			{
-				$log 	= 'ERROR: Bad SQL query. ' . $query . mysql_error();
-				$logger->error($log);
-				unset($log);
-			}
-			
-			$start = ($globalOptions['page']-1) * $this->resultsPerPage;
-			$end = $start + $this->resultsPerPage;
-			$c = 0;
-			$prevCount = 0;
-			foreach($cCount as $ckey => $cvalue)
-			{
-				$c += $cvalue['Count'];
-				
-				if($c < $start || $prevCount >= $end)
-				{	
-					unset($TrialsInfo[$ckey]);
-				}
-				$prevCount = $c;
-			}
-			
-			if($ottType != 'rowstacked')
-			{
-				foreach($pIds as $key => $value)
-				{
-					if(!array_key_exists($key, $TrialsInfo))
-					{
-						unset($pIds[$key]);
-					}
-				}
-			}
-			else
-			{
-				foreach($aIds as $key => $value)
-				{
-					if(!array_key_exists($key, $TrialsInfo))
-					{
-						unset($aIds[$key]);
-					}
-				}
-			}
 		}
 		else//without limit clause for file exports
 		{
@@ -7427,7 +7355,7 @@ class TrialTracker
 		}
 		
 		$Values['Data'] = $TrialsInfo;
-		unset($cCount, $TrialsInfo);
+		unset($TrialsInfo);
 		
 		//fetching unmatched upms
 		$naUpms = $this->getUnMatchedUpms($globalOptions['onlyUpdates'], $pIds);
@@ -7463,6 +7391,15 @@ class TrialTracker
 					else
 					{
 						$nctId = $row['source_id'];
+					}
+					
+					if($ottType == 'rowstacked')
+					{
+						$result['sectionid'] 	= $row['areaid'];
+					}
+					else
+					{
+						$result['sectionid'] 	= $row['productid'];
 					}
 					
 					$result['larvol_id'] 	= $larvolId;
@@ -7753,6 +7690,7 @@ class TrialTracker
 					$result[$productId][$upmId]['event_type'] 		= $row['event_type'];
 					$result[$productId][$upmId]['start_date'] 		= $row['start_date'];
 					$result[$productId][$upmId]['end_date'] 		= $row['end_date'];
+					$result[$productId][$upmId]['product'] 			= $row['product'];
 					
 					/*if($row['last_update'] <= $endRange &&  $row['last_update'] >= $startRange && $row['historyid'] === NULL)
 					{
@@ -7830,6 +7768,7 @@ class TrialTracker
 					$result[$larvolId][$upmId]['event_type'] 	= $row['event_type'];
 					$result[$larvolId][$upmId]['start_date'] 	= $row['start_date'];
 					$result[$larvolId][$upmId]['end_date'] 		= $row['end_date'];
+					$result[$larvolId][$upmId]['product'] 		= $row['product'];
 					
 					/*if($row['last_update'] <= $endRange &&  $row['last_update'] >= $startRange && $row['historyid'] === NULL)
 					{
@@ -8812,20 +8751,102 @@ class TrialTracker
 		$secondYear = (date('Y')+1);
 		$thirdYear = (date('Y')+2);
 		
-		$naUpms = array();
 		$counter = 0;
 		$outputStr = '';
+		$sectionId = '';
 		
-		foreach($Values['Data'] as $dkey => $dvalue)
+		$Ids = array_map(function($item) { return $item['Id']; }, $Values['Data']);
+		$Ids = array_values($Ids);
+		
+		$Trials = array();
+		foreach($Values['Data'] as $key => & $value)
 		{
-			$sectionHeader = $dvalue['sectionHeader'];
-			$naUpms = $dvalue['naUpms'];
-			
-			//Rendering Upms
-			if($globalOptions['includeProductsWNoData'] == "off")
+			if(isset($value['Trials']))
 			{
-				if(!empty($naUpms) || (isset($dvalue['Trials']) && !empty($dvalue['Trials'])))
+				$Trials = array_merge($Trials, $value['Trials']);
+				unset($value['Trials']);
+			}
+		}
+		
+		foreach($Trials as $tkey => $tvalue)
+		{
+			if($tvalue['sectionid'] != $sectionId)
+			{	
+				if($sectionId != '')
 				{
+					$nUpms = array();
+					$missedElements = array();
+					$startIndex = array_search($sectionId, $Ids);
+					$endIndex = array_search($tvalue['sectionid'], $Ids);
+					
+					if($endIndex === false) 
+					{
+						$endIndex = count($Ids) - 1;
+					}
+					$missedElements = array_slice($Ids, ($startIndex+1), ($endIndex - $startIndex - 1));
+					
+					if(!empty($missedElements))
+					{
+					foreach($missedElements as $mkey => $mvalue)
+					{
+						$sHeader = $Values['Data'][$mvalue]['sectionHeader'];
+						$nUpms = $Values['Data'][$mvalue]['naUpms'];
+						
+						//Rendering Upms
+						if($globalOptions['includeProductsWNoData'] == "off")
+						{
+							if(!empty($nUpms))
+							{
+								$outputStr .= $this->displayUpmHeaders($ottType, $nUpms, $sHeader);
+								if($globalOptions['onlyUpdates'] == "no")
+								{
+									$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
+								}
+							}
+							
+						}
+						else
+						{	
+							if(!empty($nUpms))
+							{
+								$outputStr .= $this->displayUpmHeaders($ottType, $nUpms, $sHeader);
+							}
+							else
+							{
+								$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">' . $sHeader . '</td></tr>';
+							}
+							if($globalOptions['onlyUpdates'] == "no")
+							{
+								$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
+							}
+						}
+						
+					}
+				}
+				}
+				
+				$sectionId = $tvalue['sectionid'];
+				
+				$sectionHeader =  $Values['Data'][$sectionId]['sectionHeader'];
+				$naUpms = $Values['Data'][$sectionId]['naUpms'];
+				
+				//Rendering Upms
+				if($globalOptions['includeProductsWNoData'] == "off")
+				{
+					if(!empty($naUpms) || (isset($dvalue['Trials']) && !empty($dvalue['Trials'])))
+					{
+						if(!empty($naUpms))
+						{
+							$outputStr .= $this->displayUpmHeaders($ottType, $naUpms, $sectionHeader);
+						}
+						else
+						{
+							$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">' . $sectionHeader . '</td></tr>';
+						}
+					}
+				}
+				else
+				{	
 					if(!empty($naUpms))
 					{
 						$outputStr .= $this->displayUpmHeaders($ottType, $naUpms, $sectionHeader);
@@ -8836,796 +8857,802 @@ class TrialTracker
 					}
 				}
 			}
+			
+			if($counter%2 == 1) 
+				$rowOneType = 'alttitle';
 			else
+				$rowOneType = 'title';
+			
+			$rowspan = 1;
+			$titleLinkColor = '#000000;';
+		
+			if(isset($tvalue['upms']))  
+				$rowspan = count($tvalue['upms'])+1; 
+				
+			//row starts  
+			$outputStr .= '<tr ' . (($tvalue['new'] == 'y') ? 'class="newtrial" ' : ''). '>';  
+			
+			
+			//nctid column
+			if($loggedIn) 
+			{ 
+				$outputStr .= '<td class="' . $rowOneType . '" ' . (($tvalue['new'] == 'y') ? 'title="New record"' : ''). ' ><div class="rowcollapse">';
+				if(strpos($tvalue['full_id'], 'NCT') !== FALSE)
+					{
+						$tvalue['full_id'] = str_replace('`', "\n", $tvalue['full_id']);
+					}
+					$outputStr .= '<a style="color:' . $titleLinkColor . '" href="' . urlPath() . 'edit_trials.php?larvol_id=' . $tvalue['larvol_id'] 
+								. '" target="_blank">' . $tvalue['full_id'] . '</a>';
+				$outputStr .= '</div></td>';
+			}
+			
+			
+			//acroynm and title column
+			$attr = ' ';
+			if(isset($tvalue['manual_is_sourceless']))
 			{	
-				if(!empty($naUpms))
+				if(!empty($tvalue['edited']) && array_key_exists('brief_title', $tvalue['edited']) && str_replace('Previous value: ', '', $tvalue['edited']['brief_title']) <> $tvalue['brief_title']) 
 				{
-					$outputStr .= $this->displayUpmHeaders($ottType, $naUpms, $sectionHeader);
+					$attr = ' highlight" title="' . $tvalue['edited']['brief_title'];
+					$titleLinkColor = '#FF0000;';
+				} 
+				elseif($tvalue['new'] == 'y') 
+				{
+					$attr = '" title="New record';
+					$titleLinkColor = '#FF0000;';
 				}
-				else
+				elseif(isset($tvalue['manual_brief_title']))
 				{
-					$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">' . $sectionHeader . '</td></tr>';
+					if($tvalue['brief_title_prev'] == $tvalue['brief_title'])
+					{
+						$attr = ' manual" title="Manual curation.';
+					}
+					else
+					{
+						$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['brief_title_prev'];
+					}
+					$titleLinkColor = '#FF7700';
 				}
 			}
-				
-			if(isset($dvalue['Trials']) && !empty($dvalue['Trials']))
-			{
-				foreach($dvalue['Trials'] as $tkey => $tvalue)
+			else
+			{ 	
+				if(isset($tvalue['manual_brief_title']))
 				{
-					if($counter%2 == 1) 
-						$rowOneType = 'alttitle';
+					if($tvalue['brief_title_prev'] == $tvalue['brief_title'])
+					{
+						$attr = ' manual" title="Manual curation.';
+					}
 					else
-						$rowOneType = 'title';
-					
-					$rowspan = 1;
-					$titleLinkColor = '#000000;';
-				
-					if(isset($tvalue['upms']))  
-						$rowspan = count($tvalue['upms'])+1; 
+					{
+						$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['brief_title_prev'];
+					}
+
+					$titleLinkColor = '#FF7700';
+				}
+				elseif(!empty($tvalue['edited']) && array_key_exists('brief_title', $tvalue['edited']) && str_replace('Previous value: ', '', $tvalue['edited']['brief_title']) <> $tvalue['brief_title']) 
+				{
+					$attr = ' highlight" title="' . $tvalue['edited']['brief_title'];
+					$titleLinkColor = '#FF0000;';
+				} 
+				elseif($tvalue['new'] == 'y') 
+				{
+					$attr = '" title="New record';
+					$titleLinkColor = '#FF0000;';
+				}
+			}
+			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
+						. '<div class="rowcollapse"><a style="color:' . $titleLinkColor . '"  ';
+			
+			if(isset($tvalue['manual_is_sourceless']))
+			{	
+				$outputStr .= ' href="' . $tvalue['source'] . '" ';
+			}
+			else if(isset($tvalue['source_id']) && strpos($tvalue['source_id'], 'NCT') === FALSE)
+			{	
+				$outputStr .= ' href="https://www.clinicaltrialsregister.eu/ctr-search/search?query=' . $tvalue['nct_id'] . '" ';
+			}
+			else if(isset($tvalue['source_id']) && strpos($tvalue['source_id'], 'NCT') !== FALSE)
+			{	
+				$outputStr .= ' href="http://clinicaltrials.gov/ct2/show/' . padnct($tvalue['nct_id']) . '" ';
+			}
+			else 
+			{ 	
+				$outputStr .= ' href="javascript:void(0);" ';
+			}
+			
+			$outputStr .= ' target="_blank" ';
+			
+			$outputStr .= ' onclick="INC_ViewCount(' . $tvalue['larvol_id'] . ')"><font id="ViewCount_' . $tvalue['larvol_id'] . '">';
+			if($tvalue['viewcount'] != '' && $tvalue['viewcount'] != NULL && $tvalue['viewcount'] > 0)
+			{
+				$outputStr .= '<span class="viewcount" title="Total views">' . $tvalue['viewcount'].'&nbsp;</span>&nbsp;'; 
+			}
+			$outputStr .= '</font>'; 
 						
-					//row starts  
-					$outputStr .= '<tr ' . (($tvalue['new'] == 'y') ? 'class="newtrial" ' : ''). '>';  
+			if(isset($tvalue['acronym']) && $tvalue['acronym'] != '') 
+			{
+				//$dvalue['NCT/brief_title'] = $this->replaceRedundantAcroynm($dvalue['NCT/acronym'], $dvalue['NCT/brief_title']);
+				$outputStr .= htmlformat($tvalue['acronym']) . ' ' . htmlformat($tvalue['brief_title']);
+			} 
+			else 
+			{
+				$outputStr .= htmlformat($tvalue['brief_title']);
+			}
+			$outputStr .= '</a></div></td>';
+			
+			
+			//enrollment column
+			$attr = ' ';
+			$highlightFlag = true;
+			if($globalOptions['onlyUpdates'] != "yes")
+			{
+				$prevValue = substr($tvalue['edited']['enrollment'], 16);
+				$highlightFlag = getDifference($prevValue, $tvalue['NCT/enrollment']);
+			}
+			if(isset($tvalue['manual_is_sourceless']))
+			{
+				if(!empty($tvalue['edited']) && array_key_exists('enrollment', $tvalue['edited']) && $highlightFlag) 
+				{
+					$attr = ' highlight" title="' . $tvalue['edited']['enrollment'];
+				}
+				else if($tvalue['new'] == 'y') 
+				{
+					$attr = '" title="New record';
+				}
+				elseif(isset($tvalue['manual_enrollment']))
+				{
+					if($tvalue['enrollment_prev'] == $tvalue['enrollment'])
+					{
+						$attr = ' manual" title="Manual curation.';
+					}
+					else
+					{
+						$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['enrollment_prev'];
+					}
+				}
+			}
+			else
+			{
+
+				if(isset($tvalue['manual_enrollment']))
+				{
+					if($tvalue['enrollment_prev'] == $tvalue['enrollment'])
+					{
+						$attr = ' manual" title="Manual curation.';
+					}
+					else
+					{
+						$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['enrollment_prev'];
+					}
+				}
+				elseif(!empty($tvalue['edited']) && array_key_exists('enrollment', $tvalue['edited']) && $highlightFlag) 
+				{
+					$attr = ' highlight" title="' . $tvalue['edited']['enrollment'];
+				}
+				else if($tvalue['new'] == 'y') 
+				{
+					$attr = '" title="New record';
+				}
+			}
+			$outputStr .= '<td nowrap="nowrap" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">'
+						. $tvalue["enrollment"] . '</div></td>';	
+			
+			
+			//region column
+			$attr = ' ';
+			if(isset($tvalue['manual_is_sourceless']))
+			{
+				if($tvalue['new'] == 'y')
+				{
+					$attr = '" title="New record';
+				}
+				elseif(isset($tvalue['manual_region']))
+				{
+					$attr = ' manual" title="Manual curation.';
+				}
+			}
+			else
+			{
+				if(isset($tvalue['manual_region']))
+				{
+					$attr = ' manual" title="Manual curation.';
+				}
+				elseif($tvalue['new'] == 'y')
+				{
+					$attr = '" title="New record';
+				}
+			}
+			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">' 
+						. (($tvalue['region'] != '' && $tvalue['region'] !== NULL) ? $tvalue['region'] : '&nbsp;') . '</div></td>';	
+						
+			
+			//intervention name column
+			$attr = ' ';
+			if(isset($tvalue['manual_is_sourceless']))
+			{
+				if(!empty($tvalue['edited']) && array_key_exists('intervention_name', $tvalue['edited']))
+				{
+					$attr = ' highlight" title="' . $tvalue['edited']['intervention_name'];
+				} 
+				else if($tvalue['new'] == 'y')
+				{
+					$attr = '" title="New record';
+				}
+				elseif(isset($tvalue['manual_intervention_name']))
+				{
+					if($tvalue['intervention_name_prev'] == $tvalue['intervention_name'])
+					{
+						$attr = ' manual" title="Manual curation.';
+					}
+					else
+					{
+						$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['intervention_name_prev'];
+					}
+				}
+			}
+			else
+			{
+				if(isset($tvalue['manual_intervention_name']))
+				{
+					if($tvalue['intervention_name_prev'] == $tvalue['intervention_name'])
+					{
+						$attr = ' manual" title="Manual curation.';
+					}
+					else
+					{
+						$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['intervention_name_prev'];
+					}
+				}
+				elseif(!empty($tvalue['edited']) && array_key_exists('intervention_name', $tvalue['edited']) && str_replace('Previous value: ', '', $tvalue['edited']['intervention_name']) <> $tvalue['intervention_name'])
+				{
+					$attr = ' highlight" title="' . $tvalue['edited']['intervention_name'];
+				} 
+				else if($tvalue['new'] == 'y')
+				{
+					$attr = '" title="New record';
+				}
+			}
+			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
+						. '<div class="rowcollapse">' . $tvalue['intervention_name'] . '</div></td>';	
+						
+			
+			//collaborator and sponsor column
+			$attr = ' ';
+			if(isset($tvalue['manual_is_sourceless']))
+			{
+				if(!empty($tvalue['edited']) && (array_key_exists('collaborator', $tvalue['edited']) 
+				|| array_key_exists('lead_sponsor', $tvalue['edited']))) 
+				{
+					$attr = ' highlight" title="';
+					if(array_key_exists('lead_sponsor', $tvalue['edited']))
+					{
+						$attr .= $tvalue['edited']['lead_sponsor'];
+					}
+					if(array_key_exists('lead_sponsor', $tvalue['edited']) && array_key_exists('collaborator', $tvalue['edited']))
+					{
+						$attr .=  ', ';
+					}
+					if(array_key_exists('collaborator', $tvalue['edited'])) 
+					{
+						$attr .= $tvalue['edited']['collaborator'];
+					}
+					$attr .= '';
+				} 
+				else if($tvalue['new'] == 'y') 
+				{
+					$attr = '" title="New record';
+				}
+				elseif(isset($tvalue['manual_lead_sponsor']) || isset($tvalue['manual_collaborator']))
+				{
+					if(isset($tvalue['manual_lead_sponsor']))
+					{
+						if($tvalue['lead_sponsor_prev'] == $tvalue['lead_sponsor'])
+						{
+							$attr = ' manual" title="Manual curation.';
+						}
+						else
+						{
+							$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['lead_sponsor_prev'];
+						}
+					}
+
+					else
+					{
+						if($tvalue['collaborator_prev'] == $tvalue['collaborator'])
+						{
+							$attr = ' manual" title="Manual curation.';
+						}
+						else
+						{
+							$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['collaborator_prev'];
+						}
+					}
+				}
+			}
+			else
+			{
+				if(isset($tvalue['manual_lead_sponsor']) || isset($tvalue['manual_collaborator']))
+				{
+					if(isset($tvalue['manual_lead_sponsor']))
+					{
+						if($tvalue['lead_sponsor_prev'] == $tvalue['lead_sponsor'])
+						{
+							$attr = ' manual" title="Manual curation.';
+						}
+						else
+						{
+							$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['lead_sponsor_prev'];
+						}
+					}
+					else
+					{
+						if($tvalue['collaborator_prev'] == $tvalue['collaborator'])
+						{
+							$attr = ' manual" title="Manual curation.';
+						}
+						else
+						{
+							$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['collaborator_prev'];
+						}
+					}
+				}
+				elseif(!empty($tvalue['edited']) && (array_key_exists('collaborator', $tvalue['edited']) 
+				|| array_key_exists('lead_sponsor', $tvalue['edited'])) && ( str_replace('Previous value: ', '', $tvalue['edited']['lead_sponsor']) <> $tvalue['lead_sponsor'] or str_replace('Previous value: ', '', $tvalue['edited']['collaborator']) <> $tvalue['collaborator'] )) 
+				{
+					$attr = ' highlight" title="';
+					if(array_key_exists('lead_sponsor', $tvalue['edited']))
+					{
+						$attr .= $tvalue['edited']['lead_sponsor'];
+					}
+					if(array_key_exists('lead_sponsor', $tvalue['edited']) && array_key_exists('collaborator', $tvalue['edited']))
+					{
+						$attr .=  ', ';
+					}
+					if(array_key_exists('collaborator', $tvalue['edited'])) 
+					{
+						$attr .= $tvalue['edited']['collaborator'];
+					}
+					$attr .= '';
+				} 
+				else if($tvalue['new'] == 'y') 
+				{
+					$attr = '" title="New record';
+				}
+			}
+			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">' . $tvalue['lead_sponsor'];
+			if($tvalue['lead_sponsor'] != '' && $tvalue['collaborator'] != ''
+			&& $tvalue['lead_sponsor'] != NULL && $tvalue['collaborator'] != NULL)
+			{
+				$outputStr .= ', ';
+			}
+			$outputStr .= $tvalue["collaborator"] . '</div></td>';
+						
+						
+			//overall status column
+			$attr = ' ';
+			if(isset($tvalue['manual_is_sourceless']))
+			{
+				if(!empty($tvalue['edited']) && array_key_exists('overall_status', $tvalue['edited'])) 
+				{
+					$attr = ' highlight" title="' . $tvalue['edited']['overall_status'];
+				} 
+				else if($tvalue['new'] == 'y') 
+				{
+					$attr = '" title="New record' ;
+				} 
+				elseif(isset($tvalue['manual_overall_status']))
+				{
+					if($tvalue['overall_status_prev'] == $tvalue['overall_status'])
+					{
+						$attr = ' manual" title="Manual curation.';
+					}
+					else
+					{
+						$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['overall_status_prev'];
+					}
+				}
+			}
+			else
+			{
+				if(isset($tvalue['manual_overall_status']))
+				{
+					if($tvalue['overall_status_prev'] == $tvalue['overall_status'])
+					{
+						$attr = ' manual" title="Manual curation.';
+					}
+					else
+					{
+						$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['overall_status_prev'];
+					}
+				}
+				elseif(!empty($tvalue['edited']) && array_key_exists('overall_status', $tvalue['edited']) && str_replace('Previous value: ', '', $tvalue['edited']['overall_status']) <> $tvalue['overall_status']) 
+				{
+					$attr = ' highlight" title="' . $tvalue['edited']['overall_status'];
+				} 
+				else if($tvalue['new'] == 'y') 
+				{
+					$attr = '" title="New record' ;
+				} 
+			}
+			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">' 
+						. (($tvalue['overall_status'] != '' && $tvalue['overall_status'] !== NULL) ? $tvalue['overall_status'] : '&nbsp;')
+						. '</div></td>';
+						
+						
+			//condition column
+			$attr = ' ';
+			if(isset($tvalue['manual_is_sourceless']))
+			{
+				if(!empty($tvalue['edited']) && array_key_exists('condition', $tvalue['edited'])) 
+				{
+					$attr = ' highlight" title="' . $tvalue['edited']['condition'];
+				} 
+				else if($tvalue['new'] == 'y') 
+				{
+					$attr = '" title="New record';
+				}
+				else if(isset($tvalue['manual_condition']))
+				{
+					if($tvalue['condition_prev'] == $tvalue['condition'])
+					{
+						$attr = ' manual" title="Manual curation.';
+					}
+					else
+					{
+						$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['condition_prev'];
+					}
+				}
+			}
+			else
+			{
+				if(isset($tvalue['manual_condition']))
+				{
+					if($tvalue['condition_prev'] == $tvalue['condition'])
+					{
+						$attr = ' manual" title="Manual curation.';
+					}
+					else
+					{
+						$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['condition_prev'];
+					}
+				}
+				elseif(!empty($tvalue['edited']) && array_key_exists('condition', $tvalue['edited']) && str_replace('Previous value: ', '', $tvalue['edited']['condition']) <> $tvalue['condition']) 
+				{
+					$attr = ' highlight" title="' . $tvalue['edited']['condition'];
+				} 
+				else if($tvalue['new'] == 'y') 
+				{
+					$attr = '" title="New record';
+				}
+			}
+			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
+						. '<div class="rowcollapse">' . $tvalue['condition'] . '</div></td>';
+						
+			
+			$borderLeft = '';	
+			if(!empty($tvalue['edited']) && array_key_exists('start_date', $tvalue['edited']))
+			{
+				$borderLeft = 'startdatehighlight';
+			}
 					
+			//end date column
+			$attr = ' ';
+			$borderRight = '';
+			if(isset($tvalue['manual_is_sourceless']))
+			{
+				if(!empty($tvalue['edited']) && array_key_exists('end_date', $tvalue['edited'])) 
+				{
+					$attr = ' highlight" title="' . $tvalue['edited']['end_date'];
+					$borderRight = 'border-right-color:red;';
+				} 
+				else if($tvalue['new'] == 'y') 
+				{
+					$attr = '" title="New record';
+				}	
+				elseif(isset($tvalue['manual_end_date']))
+				{
+					if($tvalue['end_date_prev'] == $tvalue['end_date'])
+					{
+						$attr = ' manual" title="Manual curation.';
+					}
+					else
+					{
+						$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['end_date_prev'];
+					}
+				}
+			}
+			else
+
+			{
+				if(isset($tvalue['manual_end_date']))
+				{
+					if($tvalue['end_date_prev'] == $tvalue['end_date'])
+					{
+						$attr = ' manual" title="Manual curation.';
+					}
+					else
+					{
+						$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['end_date_prev'];
+					}
+				}
+				elseif(!empty($tvalue['edited']) && array_key_exists('end_date', $tvalue['edited']) && str_replace('Previous value: ', '', $tvalue['edited']['end_date']) <> $tvalue["end_date"]) 
+				{
+					$attr = ' highlight" title="' . $tvalue['edited']['end_date'];
+					$borderRight =  'border-right-color:red;';
+				} 
+				elseif($tvalue['new'] == 'y') 
+				{
+					$attr = '" title="New record';
+				}	
+			}
+			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">'; 
+			if($tvalue["end_date"] != '' && $tvalue["end_date"] != NULL && $tvalue["end_date"] != '0000-00-00') 
+			{
+				$outputStr .= date('m/y',strtotime($tvalue["end_date"]));
+			} 
+			else 
+			{
+				$outputStr .= '&nbsp;';
+			}
+			$outputStr .= '</div></td>';
+			
+			
+			//phase column
+			$attr = ' ';
+			if(isset($tvalue['manual_is_sourceless']))
+			{
+				if(!empty($tvalue['edited']) && array_key_exists('phase', $tvalue['edited'])) 
+				{
+					$attr = ' highlight" title="' . $tvalue['edited']['phase'];
+				} 
+				elseif($tvalue['new'] == 'y') 
+				{
+					$attr = '" title="New record';
+				}
+				elseif(isset($tvalue['manual_phase']))
+				{
+					if($tvalue['phase_prev'] == $tvalue['phase'])
+					{
+						$attr = ' manual" title="Manual curation.';
+					}
+					else
+					{
+						$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['phase_prev'];
+					}
+				}
+			}
+			else
+			{
+				if(isset($tvalue['manual_phase']))
+				{
+					if($tvalue['phase_prev'] == $tvalue['phase'])
+					{
+						$attr = ' manual" title="Manual curation.';
+					}
+					else
+					{
+						$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['phase_prev'];
+					}
+				}
+				elseif(!empty($tvalue['edited']) && array_key_exists('phase', $tvalue['edited']) && ( str_replace('Previous value: ', '', trim($tvalue['edited']['phase'])) <> trim($tvalue['phase'])) ) 
+				{
+					$attr = ' highlight" title="' . $tvalue['edited']['phase'];
+				} 
+				elseif($tvalue['new'] == 'y') 
+				{
+					$attr = '" title="New record';
+				}
+			}
+			
+			if($tvalue['phase'] == 'N/A' || $tvalue['phase'] == '' || $tvalue['phase'] === NULL)
+			{
+				$phase = 'N/A';
+				$phaseColor = $this->phaseValues['N/A'];
+			}
+			else
+			{
+				$phase = str_replace('Phase ', '', trim($tvalue['phase']));
+				$phaseColor = $this->phaseValues[$phase];
+			}
+			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">' 
+						. '<div class="rowcollapse">' . $phase . '</div></td>';				
+			
+			$startMonth = date('m',strtotime($tvalue['start_date']));
+			$startYear = date('Y',strtotime($tvalue['start_date']));
+			$endMonth = date('m',strtotime($tvalue['end_date']));
+			$endYear = date('Y',strtotime($tvalue['end_date']));
+			
+			if($startYear < $currentYear)
+			{
+				$outputStr .= '<td class="' . $borderLeft . '">&nbsp;</td>';
+			}
+			else
+			{
+				$outputStr .= '<td>&nbsp;</td>';
+			}
+
+			//rendering project completion gnatt chart
+			$outputStr .= $this->trialGnattChart($startMonth, $startYear, $endMonth, $endYear, $currentYear, $secondYear, $thirdYear, 
+				$tvalue['start_date'], $tvalue['end_date'], $phaseColor, $borderRight, $borderLeft);
+				
+			$outputStr .= '</tr>';	
+			
+			//rendering matched upms
+			if(isset($tvalue['upms']) && !empty($tvalue['upms'])) 
+			{
+				foreach($tvalue['upms'] as $mkey => $mvalue) 
+				{ 
+					$incViewCount = true;
+					$str = '';
+					$diamond = '';
+					$resultImage = '';
+	
+					$stMonth = date('m', strtotime($mvalue['start_date']));
+					$stYear = date('Y', strtotime($mvalue['start_date']));
+					$edMonth = date('m', strtotime($mvalue['end_date']));
+					$edYear = date('Y', strtotime($mvalue['end_date']));
+					$upmTitle = htmlformat($mvalue['event_description']);
 					
-					//nctid column
+					$upmBorderLeft = '';
+					if(isset($mvalue['edited']) && $mvalue['edited']['field'] == 'start_date')
+					{
+						$upmBorderLeft = 'startdatehighlight';
+					}
+					
+					$outputStr .= '<tr>';
+					
 					if($loggedIn) 
-					{ 
-						$outputStr .= '<td class="' . $rowOneType . '" ' . (($tvalue['new'] == 'y') ? 'title="New record"' : ''). ' ><div class="rowcollapse">';
-						if(strpos($tvalue['full_id'], 'NCT') !== FALSE)
-							{
-								$tvalue['full_id'] = str_replace('`', "\n", $tvalue['full_id']);
-							}
-							$outputStr .= '<a style="color:' . $titleLinkColor . '" href="' . urlPath() . 'edit_trials.php?larvol_id=' . $tvalue['larvol_id'] 
-										. '" target="_blank">' . $tvalue['full_id'] . '</a>';
-						$outputStr .= '</div></td>';
+					{
+						if($mvalue['new'] == 'y')
+						{
+							$idColor = '#973535';
+						}
+						else
+						{
+							$idColor = 'gray';
+						}
+						$outputStr .= '<td style="border-top:0px;" class="' . $rowOneType . '"><a style="color:' . $idColor 
+						. '" href="' . urlPath() . 'upm.php?search_id=' . $mvalue['id'] . '" target="_blank">' . $mvalue['id'] . '</a></td>';
 					}
 					
+					if(!$loggedIn && !$this->liLoggedIn())
+					{
+						$mvalue['event_link'] = NULL;
+					}
 					
-					//acroynm and title column
-					$attr = ' ';
-					if(isset($tvalue['manual_is_sourceless']))
-					{	
-						if(!empty($tvalue['edited']) && array_key_exists('brief_title', $tvalue['edited']) && str_replace('Previous value: ', '', $tvalue['edited']['brief_title']) <> $tvalue['brief_title']) 
+					$outputStr .= '<td ';
+					if($stYear < $currentYear)
+					{
+						$outputStr .= 'class="' . $upmBorderLeft . '"';
+					}
+					
+					$outputStr .= ' style="text-align:center;vertical-align:middle;' . (($mkey != 0) ? 'border-top:0px;' : '') . '">';
+					
+					$outputStr .= '<div ' . $upmTitle . '>';
+					if($mvalue['result_link'] != '' && $mvalue['result_link'] !== NULL)
+					{
+						if(!$loggedIn && !$this->liLoggedIn())
 						{
-							$attr = ' highlight" title="' . $tvalue['edited']['brief_title'];
-							$titleLinkColor = '#FF0000;';
-						} 
-						elseif($tvalue['new'] == 'y') 
-						{
-							$attr = '" title="New record';
-							$titleLinkColor = '#FF0000;';
+							$mvalue['result_link'] = NULL;
 						}
-						elseif(isset($tvalue['manual_brief_title']))
+						
+						if((isset($mvalue['edited']) && $mvalue['edited']['field'] == 'result_link') || ($mvalue['new'] == 'y')) 
+							$imgColor = 'red';
+						else 
+							$imgColor = 'black'; 
+						
+						
+						if($mvalue['result_link'] != '' && $mvalue['result_link'] !== NULL)
 						{
-							if($tvalue['brief_title_prev'] == $tvalue['brief_title'])
+							$outputStr .= '<a href="' . $mvalue['result_link'] . '" target="_blank">';
+							if($mvalue['event_type'] == 'Clinical Data')
 							{
-								$attr = ' manual" title="Manual curation.';
+								$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond"';
+							}
+							else if($mvalue['status'] == 'Cancelled')
+							{
+								$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel"';
 							}
 							else
 							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['brief_title_prev'];
+								$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark"';
 							}
-							$titleLinkColor = '#FF7700';
+							$outputStr .= ' style="padding-top: 3px;" border="0" onclick="INC_ViewCount('.$tvalue['larvol_id'].')" /></a>';
 						}
-					}
-					else
-					{ 	
-						if(isset($tvalue['manual_brief_title']))
+						else
 						{
-							if($tvalue['brief_title_prev'] == $tvalue['brief_title'])
+							if($mvalue['event_type'] == 'Clinical Data')
 							{
-								$attr = ' manual" title="Manual curation.';
+								$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond"';
 							}
-							else
-							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['brief_title_prev'];
-							}
+							else if($mvalue['status'] == 'Cancelled')
 
-							$titleLinkColor = '#FF7700';
-						}
-						elseif(!empty($tvalue['edited']) && array_key_exists('brief_title', $tvalue['edited']) && str_replace('Previous value: ', '', $tvalue['edited']['brief_title']) <> $tvalue['brief_title']) 
-						{
-							$attr = ' highlight" title="' . $tvalue['edited']['brief_title'];
-							$titleLinkColor = '#FF0000;';
-						} 
-						elseif($tvalue['new'] == 'y') 
-						{
-							$attr = '" title="New record';
-							$titleLinkColor = '#FF0000;';
-						}
-					}
-					$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
-								. '<div class="rowcollapse"><a style="color:' . $titleLinkColor . '"  ';
-					
-					if(isset($tvalue['manual_is_sourceless']))
-					{	
-						$outputStr .= ' href="' . $tvalue['source'] . '" ';
-					}
-					else if(isset($tvalue['source_id']) && strpos($tvalue['source_id'], 'NCT') === FALSE)
-					{	
-						$outputStr .= ' href="https://www.clinicaltrialsregister.eu/ctr-search/search?query=' . $tvalue['nct_id'] . '" ';
-					}
-					else if(isset($tvalue['source_id']) && strpos($tvalue['source_id'], 'NCT') !== FALSE)
-					{	
-						$outputStr .= ' href="http://clinicaltrials.gov/ct2/show/' . padnct($tvalue['nct_id']) . '" ';
-					}
-					else 
-					{ 	
-						$outputStr .= ' href="javascript:void(0);" ';
-					}
-					
-					$outputStr .= ' target="_blank" ';
-					
-					$outputStr .= ' onclick="INC_ViewCount(' . $tvalue['larvol_id'] . ')"><font id="ViewCount_' . $tvalue['larvol_id'] . '">';
-					if($tvalue['viewcount'] != '' && $tvalue['viewcount'] != NULL && $tvalue['viewcount'] > 0)
-					{
-						$outputStr .= '<span class="viewcount" title="Total views">' . $tvalue['viewcount'].'&nbsp;</span>&nbsp;'; 
-					}
-					$outputStr .= '</font>'; 
-								
-					if(isset($tvalue['acronym']) && $tvalue['acronym'] != '') 
-					{
-						//$dvalue['NCT/brief_title'] = $this->replaceRedundantAcroynm($dvalue['NCT/acronym'], $dvalue['NCT/brief_title']);
-						$outputStr .= htmlformat($tvalue['acronym']) . ' ' . htmlformat($tvalue['brief_title']);
-					} 
-					else 
-					{
-						$outputStr .= htmlformat($tvalue['brief_title']);
-					}
-					$outputStr .= '</a></div></td>';
-					
-					
-					//enrollment column
-					$attr = ' ';
-					$highlightFlag = true;
-					if($globalOptions['onlyUpdates'] != "yes")
-					{
-						$prevValue = substr($tvalue['edited']['enrollment'], 16);
-						$highlightFlag = getDifference($prevValue, $tvalue['NCT/enrollment']);
-					}
-					if(isset($tvalue['manual_is_sourceless']))
-					{
-						if(!empty($tvalue['edited']) && array_key_exists('enrollment', $tvalue['edited']) && $highlightFlag) 
-						{
-							$attr = ' highlight" title="' . $tvalue['edited']['enrollment'];
-						}
-						else if($tvalue['new'] == 'y') 
-						{
-							$attr = '" title="New record';
-						}
-						elseif(isset($tvalue['manual_enrollment']))
-						{
-							if($tvalue['enrollment_prev'] == $tvalue['enrollment'])
 							{
-								$attr = ' manual" title="Manual curation.';
+								$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel"';
 							}
 							else
 							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['enrollment_prev'];
+								$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark"';
 							}
+							$outputStr .= ' style="padding-top: 3px;" border="0" onclick="INC_ViewCount('.$tvalue['larvol_id'].')" />';
+						}
+					}
+					else if($mvalue['status'] == 'Pending')
+					{
+						$icon = '<img src="images/hourglass.png" alt="Hourglass"  border="0" onclick="INC_ViewCount(' . $tvalue['larvol_id'] . ')" />';
+						if($mvalue['event_link'] != '' && $mvalue['event_link'] !== NULL)
+						{	
+							$outputStr .= '<a href="' . $mvalue['event_link'] . '" target="_blank">' . $icon . '</a>';
+						}
+						else
+						{
+							$outputStr .= $icon;
 						}
 					}
 					else
-					{
-
-						if(isset($tvalue['manual_enrollment']))
-						{
-							if($tvalue['enrollment_prev'] == $tvalue['enrollment'])
-							{
-								$attr = ' manual" title="Manual curation.';
-							}
-							else
-							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['enrollment_prev'];
-							}
-						}
-						elseif(!empty($tvalue['edited']) && array_key_exists('enrollment', $tvalue['edited']) && $highlightFlag) 
-						{
-							$attr = ' highlight" title="' . $tvalue['edited']['enrollment'];
-						}
-						else if($tvalue['new'] == 'y') 
-						{
-							$attr = '" title="New record';
-						}
-					}
-					$outputStr .= '<td nowrap="nowrap" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">'
-								. $tvalue["enrollment"] . '</div></td>';	
-					
-					
-					//region column
-					$attr = ' ';
-					if(isset($tvalue['manual_is_sourceless']))
-					{
-						if($tvalue['new'] == 'y')
-						{
-							$attr = '" title="New record';
-						}
-						elseif(isset($tvalue['manual_region']))
-						{
-							$attr = ' manual" title="Manual curation.';
-						}
-					}
-					else
-					{
-						if(isset($tvalue['manual_region']))
-						{
-							$attr = ' manual" title="Manual curation.';
-						}
-						elseif($tvalue['new'] == 'y')
-						{
-							$attr = '" title="New record';
-						}
-					}
-					$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">' 
-								. (($tvalue['region'] != '' && $tvalue['region'] !== NULL) ? $tvalue['region'] : '&nbsp;') . '</div></td>';	
-								
-					
-					//intervention name column
-					$attr = ' ';
-					if(isset($tvalue['manual_is_sourceless']))
-					{
-						if(!empty($tvalue['edited']) && array_key_exists('intervention_name', $tvalue['edited']))
-						{
-							$attr = ' highlight" title="' . $tvalue['edited']['intervention_name'];
-						} 
-						else if($tvalue['new'] == 'y')
-						{
-							$attr = '" title="New record';
-						}
-						elseif(isset($tvalue['manual_intervention_name']))
-						{
-							if($tvalue['intervention_name_prev'] == $tvalue['intervention_name'])
-							{
-								$attr = ' manual" title="Manual curation.';
-							}
-							else
-							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['intervention_name_prev'];
-							}
-						}
-					}
-					else
-					{
-						if(isset($tvalue['manual_intervention_name']))
-						{
-							if($tvalue['intervention_name_prev'] == $tvalue['intervention_name'])
-							{
-								$attr = ' manual" title="Manual curation.';
-							}
-							else
-							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['intervention_name_prev'];
-							}
-						}
-						elseif(!empty($tvalue['edited']) && array_key_exists('intervention_name', $tvalue['edited']) && str_replace('Previous value: ', '', $tvalue['edited']['intervention_name']) <> $tvalue['intervention_name'])
-						{
-							$attr = ' highlight" title="' . $tvalue['edited']['intervention_name'];
-						} 
-						else if($tvalue['new'] == 'y')
-						{
-							$attr = '" title="New record';
-						}
-					}
-					$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
-								. '<div class="rowcollapse">' . $tvalue['intervention_name'] . '</div></td>';	
-								
-					
-					//collaborator and sponsor column
-					$attr = ' ';
-					if(isset($tvalue['manual_is_sourceless']))
-					{
-						if(!empty($tvalue['edited']) && (array_key_exists('collaborator', $tvalue['edited']) 
-						|| array_key_exists('lead_sponsor', $tvalue['edited']))) 
-						{
-							$attr = ' highlight" title="';
-							if(array_key_exists('lead_sponsor', $tvalue['edited']))
-							{
-								$attr .= $tvalue['edited']['lead_sponsor'];
-							}
-							if(array_key_exists('lead_sponsor', $tvalue['edited']) && array_key_exists('collaborator', $tvalue['edited']))
-							{
-								$attr .=  ', ';
-							}
-							if(array_key_exists('collaborator', $tvalue['edited'])) 
-							{
-								$attr .= $tvalue['edited']['collaborator'];
-							}
-							$attr .= '';
-						} 
-						else if($tvalue['new'] == 'y') 
-						{
-							$attr = '" title="New record';
-						}
-						elseif(isset($tvalue['manual_lead_sponsor']) || isset($tvalue['manual_collaborator']))
-						{
-							if(isset($tvalue['manual_lead_sponsor']))
-							{
-								if($tvalue['lead_sponsor_prev'] == $tvalue['lead_sponsor'])
-								{
-									$attr = ' manual" title="Manual curation.';
-								}
-								else
-								{
-									$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['lead_sponsor_prev'];
-								}
-							}
-
-							else
-							{
-								if($tvalue['collaborator_prev'] == $tvalue['collaborator'])
-								{
-									$attr = ' manual" title="Manual curation.';
-								}
-								else
-								{
-									$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['collaborator_prev'];
-								}
-							}
-						}
-					}
-					else
-					{
-						if(isset($tvalue['manual_lead_sponsor']) || isset($tvalue['manual_collaborator']))
-						{
-							if(isset($tvalue['manual_lead_sponsor']))
-							{
-								if($tvalue['lead_sponsor_prev'] == $tvalue['lead_sponsor'])
-								{
-									$attr = ' manual" title="Manual curation.';
-								}
-								else
-								{
-									$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['lead_sponsor_prev'];
-								}
-							}
-							else
-							{
-								if($tvalue['collaborator_prev'] == $tvalue['collaborator'])
-								{
-									$attr = ' manual" title="Manual curation.';
-								}
-								else
-								{
-									$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['collaborator_prev'];
-								}
-							}
-						}
-						elseif(!empty($tvalue['edited']) && (array_key_exists('collaborator', $tvalue['edited']) 
-						|| array_key_exists('lead_sponsor', $tvalue['edited'])) && ( str_replace('Previous value: ', '', $tvalue['edited']['lead_sponsor']) <> $tvalue['lead_sponsor'] or str_replace('Previous value: ', '', $tvalue['edited']['collaborator']) <> $tvalue['collaborator'] )) 
-						{
-							$attr = ' highlight" title="';
-							if(array_key_exists('lead_sponsor', $tvalue['edited']))
-							{
-								$attr .= $tvalue['edited']['lead_sponsor'];
-							}
-							if(array_key_exists('lead_sponsor', $tvalue['edited']) && array_key_exists('collaborator', $tvalue['edited']))
-							{
-								$attr .=  ', ';
-							}
-							if(array_key_exists('collaborator', $tvalue['edited'])) 
-							{
-								$attr .= $tvalue['edited']['collaborator'];
-							}
-							$attr .= '';
-						} 
-						else if($tvalue['new'] == 'y') 
-						{
-							$attr = '" title="New record';
-						}
-					}
-					$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">' . $tvalue['lead_sponsor'];
-					if($tvalue['lead_sponsor'] != '' && $tvalue['collaborator'] != ''
-					&& $tvalue['lead_sponsor'] != NULL && $tvalue['collaborator'] != NULL)
-					{
-						$outputStr .= ', ';
-					}
-					$outputStr .= $tvalue["collaborator"] . '</div></td>';
-								
-								
-					//overall status column
-					$attr = ' ';
-					if(isset($tvalue['manual_is_sourceless']))
-					{
-						if(!empty($tvalue['edited']) && array_key_exists('overall_status', $tvalue['edited'])) 
-						{
-							$attr = ' highlight" title="' . $tvalue['edited']['overall_status'];
-						} 
-						else if($tvalue['new'] == 'y') 
-						{
-							$attr = '" title="New record' ;
-						} 
-						elseif(isset($tvalue['manual_overall_status']))
-						{
-							if($tvalue['overall_status_prev'] == $tvalue['overall_status'])
-							{
-								$attr = ' manual" title="Manual curation.';
-							}
-							else
-							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['overall_status_prev'];
-							}
-						}
-					}
-					else
-					{
-						if(isset($tvalue['manual_overall_status']))
-						{
-							if($tvalue['overall_status_prev'] == $tvalue['overall_status'])
-							{
-								$attr = ' manual" title="Manual curation.';
-							}
-							else
-							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['overall_status_prev'];
-							}
-						}
-						elseif(!empty($tvalue['edited']) && array_key_exists('overall_status', $tvalue['edited']) && str_replace('Previous value: ', '', $tvalue['edited']['overall_status']) <> $tvalue['overall_status']) 
-						{
-							$attr = ' highlight" title="' . $tvalue['edited']['overall_status'];
-						} 
-						else if($tvalue['new'] == 'y') 
-						{
-							$attr = '" title="New record' ;
-						} 
-					}
-					$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">' 
-								. (($tvalue['overall_status'] != '' && $tvalue['overall_status'] !== NULL) ? $tvalue['overall_status'] : '&nbsp;')
-								. '</div></td>';
-								
-								
-					//condition column
-					$attr = ' ';
-					if(isset($tvalue['manual_is_sourceless']))
-					{
-						if(!empty($tvalue['edited']) && array_key_exists('condition', $tvalue['edited'])) 
-						{
-							$attr = ' highlight" title="' . $tvalue['edited']['condition'];
-						} 
-						else if($tvalue['new'] == 'y') 
-						{
-							$attr = '" title="New record';
-						}
-						else if(isset($tvalue['manual_condition']))
-						{
-							if($tvalue['condition_prev'] == $tvalue['condition'])
-							{
-								$attr = ' manual" title="Manual curation.';
-							}
-							else
-							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['condition_prev'];
-							}
-						}
-					}
-					else
-					{
-						if(isset($tvalue['manual_condition']))
-						{
-							if($tvalue['condition_prev'] == $tvalue['condition'])
-							{
-								$attr = ' manual" title="Manual curation.';
-							}
-							else
-							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['condition_prev'];
-							}
-						}
-						elseif(!empty($tvalue['edited']) && array_key_exists('condition', $tvalue['edited']) && str_replace('Previous value: ', '', $tvalue['edited']['condition']) <> $tvalue['condition']) 
-						{
-							$attr = ' highlight" title="' . $tvalue['edited']['condition'];
-						} 
-						else if($tvalue['new'] == 'y') 
-						{
-							$attr = '" title="New record';
-						}
-					}
-					$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
-								. '<div class="rowcollapse">' . $tvalue['condition'] . '</div></td>';
-								
-					
-					$borderLeft = '';	
-					if(!empty($tvalue['edited']) && array_key_exists('start_date', $tvalue['edited']))
-					{
-						$borderLeft = 'startdatehighlight';
-					}
-							
-					//end date column
-					$attr = ' ';
-					$borderRight = '';
-					if(isset($tvalue['manual_is_sourceless']))
-					{
-						if(!empty($tvalue['edited']) && array_key_exists('end_date', $tvalue['edited'])) 
-						{
-							$attr = ' highlight" title="' . $tvalue['edited']['end_date'];
-							$borderRight = 'border-right-color:red;';
-						} 
-						else if($tvalue['new'] == 'y') 
-						{
-							$attr = '" title="New record';
-						}	
-						elseif(isset($tvalue['manual_end_date']))
-						{
-							if($tvalue['end_date_prev'] == $tvalue['end_date'])
-							{
-								$attr = ' manual" title="Manual curation.';
-							}
-							else
-							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['end_date_prev'];
-							}
-						}
-					}
-					else
-
-					{
-						if(isset($tvalue['manual_end_date']))
-						{
-							if($tvalue['end_date_prev'] == $tvalue['end_date'])
-							{
-								$attr = ' manual" title="Manual curation.';
-							}
-							else
-							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['end_date_prev'];
-							}
-						}
-						elseif(!empty($tvalue['edited']) && array_key_exists('end_date', $tvalue['edited']) && str_replace('Previous value: ', '', $tvalue['edited']['end_date']) <> $tvalue["end_date"]) 
-						{
-							$attr = ' highlight" title="' . $tvalue['edited']['end_date'];
-							$borderRight =  'border-right-color:red;';
-						} 
-						elseif($tvalue['new'] == 'y') 
-						{
-							$attr = '" title="New record';
-						}	
-					}
-					$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">'; 
-					if($tvalue["end_date"] != '' && $tvalue["end_date"] != NULL && $tvalue["end_date"] != '0000-00-00') 
-					{
-						$outputStr .= date('m/y',strtotime($tvalue["end_date"]));
-					} 
-					else 
 					{
 						$outputStr .= '&nbsp;';
 					}
 					$outputStr .= '</div></td>';
 					
-					
-					//phase column
-					$attr = ' ';
-					if(isset($tvalue['manual_is_sourceless']))
+					$upmBorderRight = '';
+					if(isset($mvalue['edited']) && $mvalue['edited']['field'] == 'end_date')
 					{
-						if(!empty($tvalue['edited']) && array_key_exists('phase', $tvalue['edited'])) 
-						{
-							$attr = ' highlight" title="' . $tvalue['edited']['phase'];
-						} 
-						elseif($tvalue['new'] == 'y') 
-						{
-							$attr = '" title="New record';
-						}
-						elseif(isset($tvalue['manual_phase']))
-						{
-							if($tvalue['phase_prev'] == $tvalue['phase'])
-							{
-								$attr = ' manual" title="Manual curation.';
-							}
-							else
-							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['phase_prev'];
-							}
-						}
-					}
-					else
-					{
-						if(isset($tvalue['manual_phase']))
-						{
-							if($tvalue['phase_prev'] == $tvalue['phase'])
-							{
-								$attr = ' manual" title="Manual curation.';
-							}
-							else
-							{
-								$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['phase_prev'];
-							}
-						}
-						elseif(!empty($tvalue['edited']) && array_key_exists('phase', $tvalue['edited']) && ( str_replace('Previous value: ', '', trim($tvalue['edited']['phase'])) <> trim($tvalue['phase'])) ) 
-						{
-							$attr = ' highlight" title="' . $tvalue['edited']['phase'];
-						} 
-						elseif($tvalue['new'] == 'y') 
-						{
-							$attr = '" title="New record';
-						}
+						$upmBorderRight = 'border-right-color:red;';
 					}
 					
-					if($tvalue['phase'] == 'N/A' || $tvalue['phase'] == '' || $tvalue['phase'] === NULL)
-					{
-						$phase = 'N/A';
-						$phaseColor = $this->phaseValues['N/A'];
-					}
-					else
-					{
-						$phase = str_replace('Phase ', '', trim($tvalue['phase']));
-						$phaseColor = $this->phaseValues[$phase];
-					}
-					$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">' 
-								. '<div class="rowcollapse">' . $phase . '</div></td>';				
-					
-					$startMonth = date('m',strtotime($tvalue['start_date']));
-					$startYear = date('Y',strtotime($tvalue['start_date']));
-					$endMonth = date('m',strtotime($tvalue['end_date']));
-					$endYear = date('Y',strtotime($tvalue['end_date']));
-					
-					if($startYear < $currentYear)
-					{
-						$outputStr .= '<td class="' . $borderLeft . '">&nbsp;</td>';
-					}
-					else
-					{
-						$outputStr .= '<td>&nbsp;</td>';
-					}
-	
-					//rendering project completion gnatt chart
-					$outputStr .= $this->trialGnattChart($startMonth, $startYear, $endMonth, $endYear, $currentYear, $secondYear, $thirdYear, 
-						$tvalue['start_date'], $tvalue['end_date'], $phaseColor, $borderRight, $borderLeft);
-						
-					$outputStr .= '</tr>';	
-					
-					//rendering matched upms
-					if(isset($tvalue['upms']) && !empty($tvalue['upms'])) 
-					{
-						foreach($tvalue['upms'] as $mkey => $mvalue) 
-						{ 
-							$incViewCount = true;
-							$str = '';
-							$diamond = '';
-							$resultImage = '';
-			
-							$stMonth = date('m', strtotime($mvalue['start_date']));
-							$stYear = date('Y', strtotime($mvalue['start_date']));
-							$edMonth = date('m', strtotime($mvalue['end_date']));
-							$edYear = date('Y', strtotime($mvalue['end_date']));
-							$upmTitle = htmlformat($mvalue['event_description']);
-							
-							$upmBorderLeft = '';
-							if(isset($mvalue['edited']) && $mvalue['edited']['field'] == 'start_date')
-							{
-								$upmBorderLeft = 'startdatehighlight';
-							}
-							
-							$outputStr .= '<tr>';
-							
-							if($loggedIn) 
-							{
-								if($mvalue['new'] == 'y')
-								{
-									$idColor = '#973535';
-								}
-								else
-								{
-									$idColor = 'gray';
-								}
-								$outputStr .= '<td style="border-top:0px;" class="' . $rowOneType . '"><a style="color:' . $idColor 
-								. '" href="' . urlPath() . 'upm.php?search_id=' . $mvalue['id'] . '" target="_blank">' . $mvalue['id'] . '</a></td>';
-							}
-							
-							if(!$loggedIn && !$this->liLoggedIn())
-							{
-								$mvalue['event_link'] = NULL;
-							}
-							
-							$outputStr .= '<td ';
-							if($stYear < $currentYear)
-							{
-								$outputStr .= 'class="' . $upmBorderLeft . '"';
-							}
-							
-							$outputStr .= ' style="text-align:center;vertical-align:middle;' . (($mkey != 0) ? 'border-top:0px;' : '') . '">';
-							
-							$outputStr .= '<div ' . $upmTitle . '>';
-							if($mvalue['result_link'] != '' && $mvalue['result_link'] !== NULL)
-							{
-								if(!$loggedIn && !$this->liLoggedIn())
-								{
-									$mvalue['result_link'] = NULL;
-								}
-								
-								if((isset($mvalue['edited']) && $mvalue['edited']['field'] == 'result_link') || ($mvalue['new'] == 'y')) 
-									$imgColor = 'red';
-								else 
-									$imgColor = 'black'; 
-								
-								
-								if($mvalue['result_link'] != '' && $mvalue['result_link'] !== NULL)
-								{
-									$outputStr .= '<a href="' . $mvalue['result_link'] . '" target="_blank">';
-									if($mvalue['event_type'] == 'Clinical Data')
-									{
-										$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond"';
-									}
-									else if($mvalue['status'] == 'Cancelled')
-									{
-										$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel"';
-									}
-									else
-									{
-										$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark"';
-									}
-									$outputStr .= ' style="padding-top: 3px;" border="0" onclick="INC_ViewCount('.$tvalue['larvol_id'].')" /></a>';
-								}
-								else
-								{
-									if($mvalue['event_type'] == 'Clinical Data')
-									{
-										$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond"';
-									}
-									else if($mvalue['status'] == 'Cancelled')
-
-									{
-										$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel"';
-									}
-									else
-									{
-										$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark"';
-									}
-									$outputStr .= ' style="padding-top: 3px;" border="0" onclick="INC_ViewCount('.$tvalue['larvol_id'].')" />';
-								}
-							}
-							else if($mvalue['status'] == 'Pending')
-							{
-								$icon = '<img src="images/hourglass.png" alt="Hourglass"  border="0" onclick="INC_ViewCount(' . $tvalue['larvol_id'] . ')" />';
-								if($mvalue['event_link'] != '' && $mvalue['event_link'] !== NULL)
-								{	
-									$outputStr .= '<a href="' . $mvalue['event_link'] . '" target="_blank">' . $icon . '</a>';
-								}
-								else
-								{
-									$outputStr .= $icon;
-								}
-							}
-							else
-							{
-								$outputStr .= '&nbsp;';
-							}
-							$outputStr .= '</div></td>';
-							
-							$upmBorderRight = '';
-							if(isset($mvalue['edited']) && $mvalue['edited']['field'] == 'end_date')
-							{
-								$upmBorderRight = 'border-right-color:red;';
-							}
-							
-							//rendering upm (upcoming project completion) chart
-							$outputStr .= $this->upmGnattChart($stMonth, $stYear, $edMonth, $edYear, $currentYear, $secondYear, $thirdYear, $mvalue['start_date'],
-							$mvalue['end_date'], $mvalue['event_link'], $upmTitle, $upmBorderRight, $upmBorderLeft, $tvalue['larvol_id'], $incViewCount);
-							$outputStr .= '</tr>';
-						}
-					}
-					
-					++$counter;
+					//rendering upm (upcoming project completion) chart
+					$outputStr .= $this->upmGnattChart($stMonth, $stYear, $edMonth, $edYear, $currentYear, $secondYear, $thirdYear, $mvalue['start_date'],
+					$mvalue['end_date'], $mvalue['event_link'], $upmTitle, $upmBorderRight, $upmBorderLeft, $tvalue['larvol_id'], $incViewCount);
+					$outputStr .= '</tr>';
 				}
 			}
-			else
+			
+			++$counter;
+		}
+		
+		if($globalOptions['page'] == $totalPages )
+		{
+			if($endIndex < count($Ids))
 			{
-				if($globalOptions['includeProductsWNoData'] == "off")
+				for($i=($endIndex+1);$i<count($Ids);$i++)
 				{
-					if(!empty($naUpms) || (isset($dvalue['Trials']) && !empty($dvalue['Trials'])))
+					$index = $Ids[$i];
+					$sheader = $Values['Data'][$index]['sectionHeader'];
+					$nupms = $Values['Data'][$index]['naUpms'];
+					
+					//Rendering Upms
+					if($globalOptions['includeProductsWNoData'] == "off")
 					{
+						if(!empty($nupms))
+						{
+							$outputStr .= $this->displayUpmHeaders($ottType, $nupms, $sheader);
+							if($globalOptions['onlyUpdates'] == "no")
+							{
+								$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
+							}
+						}
+						
+					}
+					else
+					{	
+						if(!empty($nupms))
+						{
+							$outputStr .= $this->displayUpmHeaders($ottType, $nupms, $sheader);
+						}
+						else
+						{
+							$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">' . $sheader . '</td></tr>';
+						}
 						if($globalOptions['onlyUpdates'] == "no")
 						{
 							$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
 						}
 					}
 				}
-				else
-				{
-					if($globalOptions['onlyUpdates'] == "no")
-					{
-						$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
-					}
-				}
 			}
 		}
+		
 		return $outputStr;
 	}
 	
