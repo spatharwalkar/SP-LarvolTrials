@@ -773,8 +773,7 @@ function Set_Link_Height()
             $.fn.reverse = [].reverse;
 			if(!ScrollOn)
 			{
-            	setProdTrackerColWidth();
-				ScrollOn = true;
+            	ScrollOn = true;
 			}
             var createGhostHeader = function (header, topOffset, leftOffset) {
                 // Don't recreate if it is the same as the current one
@@ -880,21 +879,6 @@ function Set_Link_Height()
 			}
         });
 		///End - Header creation or align header incase of scrolling
-		function setProdTrackerColWidth()
-		{
-			//FixProdTrackCol12
-			//document.getElementById("FixProdTrackCol11").style.width = document.getElementById("FixProdTrackCol21").offsetWidth + "px";
-			/*var width = $('#FixProdTrackCol21').width()
-			$('#FixProdTrackCol11').width(document.getElementById("FixProdTrackCol21").offsetWidth)
-			document.getElementById("FixProdTrackCol11").style.width = document.getElementById("FixProdTrackCol21").offsetWidth + "px";
-			//document.getElementById("FixProdTrackCol12").style.width = document.getElementById("FixProdTrackCol22").offsetWidth + "px"; 
-			$.browser.chrome = /chrome/.test(navigator.userAgent.toLowerCase()); 
-			$.browser.ie6 = /msie 6/.test(navigator.userAgent.toLowerCase()); 
-			$.browser.ie7 = /msie 7/.test(navigator.userAgent.toLowerCase());
-			$.browser.ie8 = /msie 8/.test(navigator.userAgent.toLowerCase()); 
-			//if(!$.browser.chrome && !$.browser.ie6 && !$.browser.ie7 && !$.browser.ie8)
-			//$('#ProdTrackerTable').width('100%')*/
-		}
 </script>
 </head>
 <div id="slideout">
@@ -988,7 +972,7 @@ $htmlContent .= '<div align="center" style="padding-left:10px; padding-right:15p
 			    . '<thead>';
 //scale
 //Row to keep alignement perfect at time of floating headers
-$htmlContent .= '<tr class="side_tick_height"><th class="prod_col" id="FixProdTrackCol11 width="420px">&nbsp;</th><th width="8px" class="graph_rightWhite">&nbsp;</th>';
+$htmlContent .= '<tr class="side_tick_height"><th class="prod_col" width="420px">&nbsp;</th><th width="8px" class="graph_rightWhite">&nbsp;</th>';
 for($j=0; $j < $columns; $j++)
 {
 	for($k=0; $k < $inner_columns; $k++)
@@ -1011,7 +995,7 @@ $htmlContent .= '<th></th></tr>';
 $htmlContent .='</thead>';
 //scale ends
 
-$htmlContent .= '<tr class="side_tick_height"><th class="prod_col" id="FixProdTrackCol21" width="420px">&nbsp;</th><th width="8px" class="graph_right">&nbsp;</th>';
+$htmlContent .= '<tr class="side_tick_height"><th class="prod_col" width="420px">&nbsp;</th><th width="8px" class="graph_right">&nbsp;</th>';
 for($j=0; $j < $columns; $j++)
 {
 	for($k=0; $k < $inner_columns; $k++)
