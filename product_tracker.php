@@ -952,13 +952,14 @@ $htmlContent .= '<br style="line-height:11px;"/>'
 				. '</table>';
 				
 $htmlContent  .= '<div id="dropmenu" class="dropmenudiv" style="width: 310px;">'
-				.'<div style="height:110px; padding:6px;"><div class="downldbox"><div class="newtext">Download options</div>'
+				.'<div style="height:124px; padding:6px;"><div class="downldbox"><div class="newtext">Download options</div>'
 				. '<input type="hidden" name="id" id="id" value="' . $id . '" />'
 				. '<ul><li><label>Which format: </label></li>'
-				. '<li><select id="dwformat" name="dwformat" size="3" style="height:54px">'
+				. '<li><select id="dwformat" name="dwformat" size="3" style="height:68px">'
 				. '<option value="exceldown" selected="selected">Excel</option>'
 				. '<option value="pdfdown">PDF</option>'
 				. '<option value="tsvdown">TSV</option>'
+				. '<option value="excelchartdown">Excel Chart</option>'
 				. '</select></li>'
 				. '</ul>'
 				. '<input type="submit" name="download" title="Download" value="Download file" style="margin-left:8px;"  />'
@@ -1937,6 +1938,164 @@ function Download_reports()
 		$pdf->Output('Larvol_'. substr($Report_Name,0,20) .'_PDF_Report_'. date("Y-m-d_H.i.s") .'.pdf', 'D');
 	}	/// End of PDF Function
 	
+	//Start of Real Chart Excel
+	if($_POST['dwformat']=='excelchartdown')
+	{
+		$name = htmlspecialchars(strlen($name)>0?$name:('report '.$id.''));
+		$Repo_Heading = $Report_Name.', '.$pdftitle;
+		
+		$objPHPExcel = new PHPExcel();
+		$WorksheetName = 'Product_Tracker';
+		$objPHPExcel->getActiveSheet()->setTitle($WorksheetName);
+		$sheetPHPExcel = $objPHPExcel->getActiveSheet();
+		
+		//Create Input Array for Excel Sheet in required format
+		$ExcelChartArray = array();	///Input array
+		
+		$FirstGraphPnt = 4;
+		$LastGraphPnt = ($FirstGraphPnt + (count($rows) * 2.5));
+		
+		//Start placing data after the 20 rows plus after our graph ends
+		$CurrentExcelRow = $LastGraphPnt + 20;
+		$DataStartRow = $CurrentExcelRow;
+		
+		$DataColumns = array('BA', 'BB', 'BC', 'BD', 'BE', 'BF', 'BG', 'BH');
+		
+		//Add Phase Array to Input Array
+		$CurrentExcelChartArray = array(  '', 'phase N/A', 'phase 0', 'phase 1', 'phase 2', 'phase 3', 'phase 4');
+		$ExcelChartArray[] = $CurrentExcelChartArray;
+		
+		foreach($DataColumns as $colId=>$colName)
+		{
+			$objPHPExcel->getActiveSheet()->setCellValue($colName.$CurrentExcelRow, $CurrentExcelChartArray[$colId]);
+			//Set row dimenstion minimum as dont want to view data
+			$objPHPExcel->getActiveSheet()->getRowDimension($CurrentExcelRow)->setRowHeight(0.1);
+		
+		}
+		
+		//Add each product data array to Input Array
+		for($decr=(count($rows) - 1); $decr >= 0 ; $decr--)
+		{
+			$currentRow = $decr;
+			if(isset($data_matrix[$currentRow]['productIds']) && $data_matrix[$currentRow]['productIds'] != NULL && !empty($areaId))
+			{
+				if($_POST['dwcount']=='active')
+					$CurrentExcelChartArray = array($data_matrix[$currentRow]['productName'].$data_matrix[$currentRow]['product_CompanyName'], $data_matrix[$currentRow]['active_phase_na'], $data_matrix[$currentRow]['active_phase_0'], $data_matrix[$currentRow]['active_phase_1'], $data_matrix[$currentRow]['active_phase_2'], $data_matrix[$currentRow]['active_phase_3'], $data_matrix[$currentRow]['active_phase_4']);
+				else 
+					if($_POST['dwcount']=='total')
+						$CurrentExcelChartArray = array($data_matrix[$currentRow]['productName'].$data_matrix[$currentRow]['product_CompanyName'], $data_matrix[$currentRow]['total_phase_na'], $data_matrix[$currentRow]['total_phase_0'], $data_matrix[$currentRow]['total_phase_1'], $data_matrix[$currentRow]['total_phase_2'], $data_matrix[$currentRow]['total_phase_3'], $data_matrix[$currentRow]['total_phase_4']);
+					else
+						$CurrentExcelChartArray = array($data_matrix[$currentRow]['productName'].$data_matrix[$currentRow]['product_CompanyName'], $data_matrix[$currentRow]['indlead_phase_na'], $data_matrix[$currentRow]['indlead_phase_0'], $data_matrix[$currentRow]['indlead_phase_1'], $data_matrix[$currentRow]['indlead_phase_2'], $data_matrix[$currentRow]['indlead_phase_3'], $data_matrix[$currentRow]['indlead_phase_4']);
+			}
+			else
+			{
+				$ExcelChartArray = array('', 0, 0, 0, 0, 0, 0);
+			}
+			
+			$ExcelChartArray[] = $CurrentExcelChartArray;
+			$CurrentExcelRow++;
+			foreach($DataColumns as $colId=>$colName)
+			{
+				$objPHPExcel->getActiveSheet()->setCellValue($colName.$CurrentExcelRow, $CurrentExcelChartArray[$colId]);
+			}
+			
+			//Set row dimenstion zero as dont want to view data
+			$objPHPExcel->getActiveSheet()->getRowDimension($CurrentExcelRow)->setRowHeight(0.1);
+		}
+		//End of Input Array
+		
+		//Below will automatically places data starting from 'A' column but we are putting manually as we dont want to start from column 'A'
+		//$sheetPHPExcel->fromArray($ExcelChartArray);
+		
+		//Add reference to data columns
+		$labels = $values = array();
+		foreach($DataColumns as $colName)
+		{
+			//set width of data columns minimum as we dont want to view this data
+			$objPHPExcel->getActiveSheet()->getColumnDimension($colName)->setWidth(0.1);
+			if($colName == 'BA') continue;
+			$labels[] = new PHPExcel_Chart_DataSeriesValues('String', $WorksheetName.'!$'.$colName.'$'.$DataStartRow, null, 1);
+			$values[] = new PHPExcel_Chart_DataSeriesValues('Number', $WorksheetName.'!$'.$colName.'$'.($DataStartRow+1).':$'.$colName.'$'.($DataStartRow + count($rows)), null, 4);
+		}
+		
+		$categories = array(
+		  new PHPExcel_Chart_DataSeriesValues('String', $WorksheetName.'!$'.$DataColumns[0].'$'.($DataStartRow+1).':$'.$DataColumns[0].'$'.($DataStartRow + count($rows)), null, 4),
+		);
+	
+		$series = new PHPExcel_Chart_DataSeries(
+		  PHPExcel_Chart_DataSeries::TYPE_BARCHART,       // plotType
+		  PHPExcel_Chart_DataSeries::GROUPING_STACKED,    // plotGrouping
+		  array(5, 4, 3, 2, 1, 0),                        // plotOrder
+		  $labels,                                        // plotLabel
+		  $categories,                                    // plotCategory
+		  $values                                         // plotValues
+		);
+		
+		$series->setPlotDirection(PHPExcel_Chart_DataSeries::DIRECTION_BAR);
+		$plotarea = new PHPExcel_Chart_PlotArea(null, array($series));
+		$legend = new PHPExcel_Chart_Legend(PHPExcel_Chart_Legend::POSITION_RIGHT, null, false);
+		$title = new PHPExcel_Chart_Title('');
+		$X_Label = new PHPExcel_Chart_Title('Products');
+		$Y_Label = new PHPExcel_Chart_Title('Number of Trials');
+		$chart = new PHPExcel_Chart(
+		  'Product Tracker',                                // name
+		  $title,                                           // title
+		  $legend,                                        	// legend
+		  $plotarea,                                      	// plotArea
+		  true,                                          	// plotVisibleOnly
+		  0,                                              	// displayBlanksAs
+		 $X_Label,                                          // xAxisLabel
+		 $Y_Label                                           // yAxisLabel
+		);
+
+		$chart->setTopLeftPosition('A'.$FirstGraphPnt);
+		$chart->setBottomRightPosition('T'.$LastGraphPnt);
+		$sheetPHPExcel->addChart($chart);
+		$Writer = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
+		$Writer->setIncludeCharts(TRUE);
+		
+		$objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(20);
+		
+		//Set report name
+		$objPHPExcel->getActiveSheet()->SetCellValue('A1', 'Report name:');
+		$objPHPExcel->getActiveSheet()->mergeCells('B1:AA1');
+		$objPHPExcel->getActiveSheet()->getStyle('B1')->getAlignment()->applyFromArray(
+      									array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_LEFT,
+      											'vertical'   => PHPExcel_Style_Alignment::VERTICAL_CENTER,
+     											'rotation'   => 0,
+      											'wrap'       => false));
+		$objPHPExcel->getActiveSheet()->SetCellValue('B1', $Report_Name);
+		
+		$objPHPExcel->getActiveSheet()->SetCellValue('A2', 'Display Mode:');
+		$objPHPExcel->getActiveSheet()->mergeCells('B2:AA2');
+		$objPHPExcel->getActiveSheet()->getStyle('B2')->getAlignment()->applyFromArray(
+      									array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_LEFT,
+      											'vertical'   => PHPExcel_Style_Alignment::VERTICAL_CENTER,
+     											'rotation'   => 0,
+      											'wrap'       => false));
+		$objPHPExcel->getActiveSheet()->SetCellValue('B2', $tooltip);
+		
+		$objPHPExcel->getProperties()->setCreator(SITE_NAME);
+		$objPHPExcel->getProperties()->setLastModifiedBy(SITE_NAME);
+		$objPHPExcel->getProperties()->setTitle(substr($name,0,20));
+		$objPHPExcel->getProperties()->setSubject(substr($name,0,20));
+		$objPHPExcel->getProperties()->setDescription(substr($name,0,20));
+		
+		ob_end_clean(); 
+		
+		header("Pragma: public");
+		header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
+		header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+		header("Cache-Control: no-cache, must-revalidate, post-check=0, pre-check=0");
+		header("Content-Type: application/force-download");
+		header("Content-Type: application/download");
+		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		header('Content-Disposition: attachment;filename="Larvol_' . substr($Report_Name,0,20) . '_Excel_Report_' . date('Y-m-d_H.i.s') . '.xlsx"');
+		header("Content-Transfer-Encoding: binary ");
+		
+		$Writer->save('php://output');
+	}
+	//End of Real Chart Excel
 }
 
 function getColspanforExcelExport($cell, $inc)
