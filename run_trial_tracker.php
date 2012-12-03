@@ -321,14 +321,14 @@ class TrialTracker
 							$objPHPExcel->getActiveSheet()->getStyle('B' . $i)->applyFromArray($highlightChange); 
 							$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('New record'); 
 						}
-						elseif(isset($dvalue['manual_brief_title']))
+						elseif($dvalue['manual_brief_title'] != '' && $dvalue['manual_brief_title'] !== NULL)
 						{
 							$objPHPExcel->getActiveSheet()->getStyle('B' . $i)->applyFromArray($manualChange); 
 							if($dvalue['brief_title_prev'] == $dvalue['brief_title'])
 							{
 								$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('Manual curation.');
 							}
-							else
+							elseif($dvalue['brief_title_prev'] != '' && $dvalue['brief_title_prev'] !== NULL)
 							{
 								$dvalue['brief_title_prev'] = 'Manual curation. Original value: ' . substr($dvalue['brief_title_prev'], 0, 210);
 								$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip($dvalue['brief_title_prev']);
@@ -341,14 +341,14 @@ class TrialTracker
 					}
 					else
 					{
-						if(isset($dvalue['manual_brief_title']))
+						if($dvalue['manual_brief_title'] != '' && $dvalue['manual_brief_title'] !== NULL)
 						{
 							$objPHPExcel->getActiveSheet()->getStyle('B' . $i)->applyFromArray($manualChange); 
 							if($dvalue['brief_title_prev'] == $dvalue['brief_title'])
 							{
 								$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip('Manual curation.');
 							}
-							else
+							elseif($dvalue['brief_title_prev'] != '' && $dvalue['brief_title_prev'] !== NULL)
 							{
 								$dvalue['original_brief_title'] = 'Manual curation. Original value: ' . substr($dvalue['brief_title_prev'], 0, 210);
 								$objPHPExcel->getActiveSheet()->getCell('B' . $i)->getHyperlink()->setTooltip($dvalue['brief_title_prev']);
@@ -374,6 +374,7 @@ class TrialTracker
 					
 					
 					//enrollment
+					$objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $dvalue["enrollment"]);
 					if(isset($dvalue['manual_is_sourceless']))
 					{
 						if(!empty($dvalue['edited']) && array_key_exists('enrollment', $dvalue['edited']))
@@ -389,7 +390,7 @@ class TrialTracker
 							 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl($ctLink);
 							 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip('New record'); 
 						}
-						elseif(isset($dvalue['manual_enrollment']))
+						elseif($dvalue['manual_enrollment'] != '' && $dvalue['manual_enrollment'] !== NULL)
 						{
 							$objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($manualChange);
 							$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl($ctLink);
@@ -397,7 +398,7 @@ class TrialTracker
 							{
 								 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip('Manual curation.');
 							}
-							else
+							elseif($dvalue['enrollment_prev'] != '' && $dvalue['enrollment_prev'] !== NULL)
 							{
 								$dvalue['enrollment_prev'] = 'Manual curation. Original value: ' . substr($dvalue['enrollment_prev'], 0, 210);
 								$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip($dvalue['enrollment_prev']);
@@ -406,7 +407,7 @@ class TrialTracker
 					}
 					else
 					{
-						if(isset($dvalue['manual_enrollment']))
+						if($dvalue['manual_enrollment'] != '' && $dvalue['manual_enrollment'] !== NULL)
 						{
 							$objPHPExcel->getActiveSheet()->getStyle('C' . $i)->applyFromArray($manualChange);
 							$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setUrl($ctLink);
@@ -414,7 +415,7 @@ class TrialTracker
 							{
 								 $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip('Manual curation.');
 							}
-							else
+							elseif($dvalue['enrollment_prev'] != '' && $dvalue['enrollment_prev'] !== NULL)
 							{
 								$dvalue['enrollment_prev'] = 'Manual curation. Original value: ' . substr($dvalue['enrollment_prev'], 0, 210);
 								$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip($dvalue['enrollment_prev']);
@@ -446,20 +447,37 @@ class TrialTracker
 							$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setUrl($ctLink); 
 							$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setTooltip('New record'); 
 						}
-						elseif(isset($dvalue['manual_region']))
+						elseif($dvalue['manual_region'] != '' && $dvalue['manual_region'] !== NULL)
 						{
 							$objPHPExcel->getActiveSheet()->getStyle('D' . $i)->applyFromArray($manualChange);
 							$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setUrl($ctLink); 
-							$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+							if($dvalue['region_prev'] == $dvalue['region'])
+							{
+								$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+							}
+							elseif($dvalue['region_prev'] != '' && $dvalue['region_prev'] !== NULL)
+							{
+								$dvalue['region_prev'] = 'Manual curation. Original value: ' . substr($dvalue['region_prev'], 0, 210);
+								$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setTooltip($dvalue['region_prev']);
+							}
 						}
 					}
 					else
 					{
-						if(isset($dvalue['manual_region']))
+						if($dvalue['manual_region'] != '' && $dvalue['manual_region'] !== NULL)
 						{
 							$objPHPExcel->getActiveSheet()->getStyle('D' . $i)->applyFromArray($manualChange);
 							$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setUrl($ctLink); 
-							$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+							if($dvalue['region_prev'] == $dvalue['region'])
+							{
+								$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
+							}
+							elseif($dvalue['region_prev'] != '' && $dvalue['region_prev'] !== NULL)
+							{
+								$dvalue['region_prev'] = 'Manual curation. Original value: ' . substr($dvalue['region_prev'], 0, 210);
+								$objPHPExcel->getActiveSheet()->getCell('D' . $i)->getHyperlink()->setTooltip($dvalue['region_prev']);
+							}
+							
 						}
 						elseif($dvalue['new'] == 'y')
 						{
@@ -488,7 +506,7 @@ class TrialTracker
 							 $objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setUrl($ctLink);
 							 $objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip('New record'); 
 						}
-						elseif(isset($dvalue['manual_overall_status']))
+						elseif($dvalue['manual_overall_status'] != '' && $dvalue['manual_overall_status'] !== NULL)
 						{
 							$objPHPExcel->getActiveSheet()->getStyle('E' . $i)->applyFromArray($manualChange); 
 							$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setUrl($ctLink);
@@ -496,7 +514,7 @@ class TrialTracker
 							{	
 								$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
 							}
-							else
+							elseif($dvalue['overall_status_prev'] != '' && $dvalue['overall_status_prev'] !== NULL)
 							{	
 								$dvalue['overall_status_prev'] = 'Manual curation. Original value: ' . substr($dvalue['overall_status_prev'], 0, 210);
 								$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip($dvalue['overall_status_prev']); 
@@ -505,7 +523,7 @@ class TrialTracker
 					}
 					else
 					{
-						if(isset($dvalue['manual_overall_status']))
+						if($dvalue['manual_overall_status'] != '' && $dvalue['manual_overall_status'] !== NULL)
 						{
 							$objPHPExcel->getActiveSheet()->getStyle('E' . $i)->applyFromArray($manualChange); 
 							$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setUrl($ctLink);
@@ -513,7 +531,7 @@ class TrialTracker
 							{
 								$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
 							}
-							else
+							elseif($dvalue['overall_status_prev'] != '' && $dvalue['overall_status_prev'] !== NULL)
 							{
 								$dvalue['overall_status_prev'] = 'Manual curation. Original value: ' . substr($dvalue['overall_status_prev'], 0, 210);
 								$objPHPExcel->getActiveSheet()->getCell('E' . $i)->getHyperlink()->setTooltip($dvalue['overall_status_prev']); 
@@ -573,17 +591,19 @@ class TrialTracker
 							 $objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl($ctLink);
 							 $objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('New record'); 
 						}
-						elseif(isset($dvalue['manual_lead_sponsor']) || isset($dvalue['manual_collaborator']))
+						elseif(($dvalue['manual_lead_sponsor'] != '' && $dvalue['manual_lead_sponsor'] !== NULL) 
+						|| ($dvalue['manual_collaborator'] != '' && $dvalue['manual_collaborator'] !== NULL))
 						{
 							$objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray($manualChange); 
 							$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl($ctLink);
-							if(isset($dvalue['manual_lead_sponsor']))
+							
+							if($dvalue['manual_lead_sponsor'] != '' && $dvalue['manual_lead_sponsor'] !== NULL)
 							{
 								if($dvalue['lead_sponsor_prev'] == $dvalue['lead_sponsor'])
 								{
 									$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
 								}
-								else
+								elseif($dvalue['lead_sponsor_prev'] != '' && $dvalue['lead_sponsor_prev'] !== NULL)
 								{	
 									$dvalue['lead_sponsor_prev'] = 'Manual curation. Original value: ' . substr($dvalue['lead_sponsor_prev'], 0, 210);
 									$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip($dvalue['lead_sponsor_prev']); 
@@ -595,7 +615,7 @@ class TrialTracker
 								{
 									$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
 								}
-								else
+								elseif($dvalue['collaborator_prev'] != '' && $dvalue['collaborator_prev'] !== NULL)
 								{	
 									$dvalue['collaborator_prev'] = 'Manual curation. Original value: ' . substr($dvalue['collaborator_prev'], 0, 210);
 									$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip($dvalue['collaborator_prev']); 
@@ -605,17 +625,19 @@ class TrialTracker
 					}
 					else
 					{
-						if(isset($dvalue['manual_lead_sponsor']) || isset($dvalue['manual_collaborator']))
+						if(($dvalue['manual_lead_sponsor'] != '' && $dvalue['manual_lead_sponsor'] !== NULL) 
+						|| ($dvalue['manual_collaborator'] != '' && $dvalue['manual_collaborator'] !== NULL))
 						{
 							$objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray($manualChange); 
 							$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl($ctLink);
-							if(isset($dvalue['manual_lead_sponsor']))
+							
+							if($dvalue['manual_lead_sponsor'] != '' && $dvalue['manual_lead_sponsor'] !== NULL)
 							{
 								if($dvalue['lead_sponsor_prev'] == $dvalue['lead_sponsor'])
 								{
 									$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
 								}
-								else
+								elseif($dvalue['lead_sponsor_prev'] != '' && $dvalue['lead_sponsor_prev'] !== NULL)
 								{	
 									$dvalue['lead_sponsor_prev'] = 'Manual curation. Original value: ' . substr($dvalue['lead_sponsor_prev'], 0, 210);
 									$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip($dvalue['lead_sponsor_prev']); 
@@ -627,7 +649,7 @@ class TrialTracker
 								{
 									$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
 								}
-								else
+								elseif($dvalue['collaborator_prev'] != '' && $dvalue['collaborator_prev'] !== NULL)
 								{	
 									$dvalue['collaborator_prev'] = 'Manual curation. Original value: ' . substr($dvalue['collaborator_prev'], 0, 210);
 									$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setTooltip($dvalue['collaborator_prev']); 
@@ -681,7 +703,7 @@ class TrialTracker
 							 $objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($ctLink);
 							 $objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip('New record'); 
 						}
-						elseif(isset($dvalue['manual_condition']))
+						elseif($dvalue['manual_condition'] != '' && $dvalue['manual_condition'] !== NULL)
 						{
 							$objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($manualChange); 
 							$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($ctLink);
@@ -689,7 +711,7 @@ class TrialTracker
 							{	
 								$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
 							}
-							else
+							elseif($dvalue['condition_prev'] != '' && $dvalue['condition_prev'] !== NULL)
 							{	
 								$dvalue['condition_prev'] = 'Manual curation. Original value: ' . substr($dvalue['condition_prev'], 0, 210);
 								$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip($dvalue['condition_prev']); 
@@ -698,7 +720,7 @@ class TrialTracker
 					}
 					else
 					{
-						if(isset($dvalue['manual_condition']))
+						if($dvalue['manual_condition'] != '' && $dvalue['manual_condition'] !== NULL)
 						{
 							$objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($manualChange); 
 							$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setUrl($ctLink);
@@ -706,7 +728,7 @@ class TrialTracker
 							{	
 								$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
 							}
-							else
+							elseif($dvalue['condition_prev'] != '' && $dvalue['condition_prev'] !== NULL)
 							{	
 								$dvalue['condition_prev'] = 'Manual curation. Original value: ' . substr($dvalue['condition_prev'], 0, 210);
 								$objPHPExcel->getActiveSheet()->getCell('G' . $i)->getHyperlink()->setTooltip($dvalue['condition_prev']); 
@@ -746,7 +768,7 @@ class TrialTracker
 							 $objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($ctLink);
 							 $objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip('New record'); 
 						}
-						elseif(isset($dvalue['manual_intervention_name']))
+						elseif($dvalue['manual_intervention_name'] != '' && $dvalue['manual_intervention_name'] !== NULL)
 						{
 							$objPHPExcel->getActiveSheet()->getStyle('H' . $i)->applyFromArray($manualChange); 
 							$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($ctLink);
@@ -754,7 +776,7 @@ class TrialTracker
 							{
 								$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
 							}
-							else
+							elseif($dvalue['intervention_name_prev'] != '' && $dvalue['intervention_name_prev'] !== NULL)
 							{	
 								$dvalue['intervention_name_prev'] = 'Manual curation. Original value: ' . substr($dvalue['intervention_name_prev'], 0, 210);
 								$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip($dvalue['intervention_name_prev']); 
@@ -763,7 +785,7 @@ class TrialTracker
 					}
 					else
 					{
-						if(isset($dvalue['manual_intervention_name']))
+						if($dvalue['manual_intervention_name'] != '' && $dvalue['manual_intervention_name'] !== NULL)
 						{
 							$objPHPExcel->getActiveSheet()->getStyle('H' . $i)->applyFromArray($manualChange); 
 							$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($ctLink);
@@ -771,7 +793,7 @@ class TrialTracker
 							{
 								$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
 							}
-							else
+							if($dvalue['intervention_name_prev'] != '' && $dvalue['intervention_name_prev'] !== NULL)
 							{	
 								$dvalue['intervention_name_prev'] = 'Manual curation. Original value: ' . substr($dvalue['intervention_name_prev'], 0, 210);
 								$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip($dvalue['intervention_name_prev']); 
@@ -815,7 +837,7 @@ class TrialTracker
 							 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($ctLink);
 							 $objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('New record'); 
 						}
-						elseif(isset($dvalue['manual_start_date']))
+						elseif($dvalue['manual_start_date'] != '' && $dvalue['manual_start_date'] !== NULL)
 						{
 							$objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray($manualChange);
 							$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($ctLink); 
@@ -823,7 +845,7 @@ class TrialTracker
 							{
 								$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
 							}
-							else
+							elseif($dvalue['start_date_prev'] != '' && $dvalue['start_date_prev'] !== NULL)
 							{
 								$dvalue['start_date_prev'] = 'Manual curation. Original value: ' . $dvalue['start_date_prev'];
 								$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip($dvalue['start_date_prev']); 
@@ -832,7 +854,7 @@ class TrialTracker
 					}
 					else
 					{
-						if(isset($dvalue['manual_start_date']))
+						if($dvalue['manual_start_date'] != '' && $dvalue['manual_start_date'] !== NULL)
 						{
 							$objPHPExcel->getActiveSheet()->getStyle('I' . $i)->applyFromArray($manualChange);
 							$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setUrl($ctLink); 
@@ -840,7 +862,7 @@ class TrialTracker
 							{
 								$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
 							}
-							else
+							elseif($dvalue['start_date_prev'] != '' && $dvalue['start_date_prev'] !== NULL)
 							{
 								$dvalue['start_date_prev'] = 'Manual curation. Original value: ' . $dvalue['start_date_prev'];
 								$objPHPExcel->getActiveSheet()->getCell('I' . $i)->getHyperlink()->setTooltip($dvalue['start_date_prev']); 
@@ -883,7 +905,7 @@ class TrialTracker
 							 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink); 
 							 $objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip('New record'); 
 						}
-						elseif(isset($dvalue['manual_end_date']))
+						elseif($dvalue['manual_end_date'] != '' && $dvalue['manual_end_date'] !== NULL)
 						{
 							$objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($manualChange);
 							$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink); 
@@ -891,7 +913,7 @@ class TrialTracker
 							{
 								$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
 							}
-							else
+							elseif($dvalue['end_date_prev'] != '' && $dvalue['end_date_prev'] !== NULL)
 							{
 								$dvalue['end_date_prev'] = 'Manual curation. Original value: ' . $dvalue['end_date_prev'];
 								$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($dvalue['end_date_prev']); 
@@ -900,7 +922,7 @@ class TrialTracker
 					}
 					else
 					{
-						if(isset($dvalue['manual_end_date']))
+						if($dvalue['manual_end_date'] != '' && $dvalue['manual_end_date'] !== NULL)
 						{
 							$objPHPExcel->getActiveSheet()->getStyle('J' . $i)->applyFromArray($manualChange);
 							$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setUrl($ctLink); 
@@ -908,7 +930,7 @@ class TrialTracker
 							{
 								$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
 							}
-							else
+							elseif($dvalue['end_date_prev'] != '' && $dvalue['end_date_prev'] !== NULL)
 							{
 								$dvalue['end_date_prev'] = 'Manual curation. Original value: ' . $dvalue['end_date_prev'];
 								$objPHPExcel->getActiveSheet()->getCell('J' . $i)->getHyperlink()->setTooltip($dvalue['end_date_prev']); 
@@ -956,7 +978,7 @@ class TrialTracker
 							 $objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setUrl($ctLink);
 							 $objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip('New record'); 
 						}
-						elseif(isset($dvalue['manual_phase']))
+						elseif($dvalue['manual_phase'] != '' && $dvalue['manual_phase'] !== NULL)
 						{
 							$objPHPExcel->getActiveSheet()->getStyle('K' . $i)->applyFromArray($highlightChange); 
 							$objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setUrl($ctLink);
@@ -964,7 +986,7 @@ class TrialTracker
 							{	
 								$objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
 							}
-							else
+							elseif($dvalue['phase_prev'] != '' && $dvalue['phase_prev'] !== NULL)
 							{
 								$dvalue['phase_prev'] = 'Manual curation. Original value: ' . $dvalue['phase_prev'];
 								$objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip($dvalue['phase_prev']); 
@@ -973,7 +995,7 @@ class TrialTracker
 					}
 					else
 					{
-						if(isset($dvalue['manual_phase']))
+						if($dvalue['manual_phase'] != '' && $dvalue['manual_phase'] !== NULL)
 						{
 							$objPHPExcel->getActiveSheet()->getStyle('K' . $i)->applyFromArray($highlightChange); 
 							$objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setUrl($ctLink);
@@ -981,7 +1003,7 @@ class TrialTracker
 							{	
 								$objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip('Manual curation.'); 
 							}
-							else
+							elseif($dvalue['phase_prev'] != '' && $dvalue['phase_prev'] !== NULL)
 							{
 								$dvalue['phase_prev'] = 'Manual curation. Original value: ' . $dvalue['phase_prev'];
 								$objPHPExcel->getActiveSheet()->getCell('K' . $i)->getHyperlink()->setTooltip($dvalue['phase_prev']); 
@@ -8905,33 +8927,35 @@ class TrialTracker
 					$attr = '" title="New record';
 					$titleLinkColor = '#FF0000;';
 				}
-				elseif(isset($tvalue['manual_brief_title']))
+				elseif($tvalue['manual_brief_title'] != '' && $tvalue['manual_brief_title'] !== NULL)
 				{
 					if($tvalue['brief_title_prev'] == $tvalue['brief_title'])
 					{
 						$attr = ' manual" title="Manual curation.';
+						$titleLinkColor = '#FF7700';
 					}
-					else
+					elseif($tvalue['brief_title_prev'] != '' && $tvalue['brief_title_prev'] !== NULL)
 					{
 						$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['brief_title_prev'];
+						$titleLinkColor = '#FF7700';
 					}
-					$titleLinkColor = '#FF7700';
+					
 				}
 			}
 			else
 			{ 	
-				if(isset($tvalue['manual_brief_title']))
+				if($tvalue['manual_brief_title'] != '' && $tvalue['manual_brief_title'] !== NULL)
 				{
 					if($tvalue['brief_title_prev'] == $tvalue['brief_title'])
 					{
 						$attr = ' manual" title="Manual curation.';
+						$titleLinkColor = '#FF7700';
 					}
-					else
+					elseif($tvalue['brief_title_prev'] != '' && $tvalue['brief_title_prev'] !== NULL)
 					{
 						$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['brief_title_prev'];
+						$titleLinkColor = '#FF7700';
 					}
-
-					$titleLinkColor = '#FF7700';
 				}
 				elseif(isset($tvalue['edited']) && array_key_exists('brief_title', $tvalue['edited']) && str_replace('Previous value: ', '', $tvalue['edited']['brief_title']) <> $tvalue['brief_title']) 
 				{
@@ -8993,13 +9017,13 @@ class TrialTracker
 				{
 					$attr = '" title="New record';
 				}
-				elseif(isset($tvalue['manual_enrollment']))
+				elseif($tvalue['manual_enrollment'] != '' && $tvalue['manual_enrollment'] !== NULL)
 				{
 					if($tvalue['enrollment_prev'] == $tvalue['enrollment'])
 					{
 						$attr = ' manual" title="Manual curation.';
 					}
-					else
+					elseif($tvalue['enrollment_prev'] != '' && $tvalue['enrollment_prev'] !== NULL)
 					{
 						$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['enrollment_prev'];
 					}
@@ -9007,14 +9031,13 @@ class TrialTracker
 			}
 			else
 			{
-
-				if(isset($tvalue['manual_enrollment']))
+				if($tvalue['manual_enrollment'] != '' && $tvalue['manual_enrollment'] !== NULL)
 				{
 					if($tvalue['enrollment_prev'] == $tvalue['enrollment'])
 					{
 						$attr = ' manual" title="Manual curation.';
 					}
-					else
+					elseif($tvalue['enrollment_prev'] != '' && $tvalue['enrollment_prev'] !== NULL)
 					{
 						$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['enrollment_prev'];
 					}
@@ -9040,16 +9063,30 @@ class TrialTracker
 				{
 					$attr = '" title="New record';
 				}
-				elseif(isset($tvalue['manual_region']))
+				elseif($tvalue['manual_region'] != '' && $tvalue['manual_region'] !== NULL)
 				{
-					$attr = ' manual" title="Manual curation.';
+					if($tvalue['region_prev'] == $tvalue['region'])
+					{
+						$attr = ' manual" title="Manual curation.';
+					}
+					elseif($tvalue['region_prev'] != '' && $tvalue['region_prev'] !== NULL)
+					{
+						$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['region_prev'];
+					}
 				}
 			}
 			else
 			{
-				if(isset($tvalue['manual_region']))
+				if($tvalue['manual_region'] != '' && $tvalue['manual_region'] !== NULL)
 				{
-					$attr = ' manual" title="Manual curation.';
+					if($tvalue['region_prev'] == $tvalue['region'])
+					{
+						$attr = ' manual" title="Manual curation.';
+					}
+					elseif($tvalue['region_prev'] != '' && $tvalue['region_prev'] !== NULL)
+					{
+						$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['region_prev'];
+					}
 				}
 				elseif($tvalue['new'] == 'y')
 				{
@@ -9072,13 +9109,13 @@ class TrialTracker
 				{
 					$attr = '" title="New record';
 				}
-				elseif(isset($tvalue['manual_intervention_name']))
+				elseif($tvalue['manual_intervention_name'] != '' && $tvalue['manual_intervention_name'] !== NULL)
 				{
 					if($tvalue['intervention_name_prev'] == $tvalue['intervention_name'])
 					{
 						$attr = ' manual" title="Manual curation.';
 					}
-					else
+					elseif($tvalue['intervention_name_prev'] != '' && $tvalue['intervention_name_prev'] !== NULL)
 					{
 						$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['intervention_name_prev'];
 					}
@@ -9086,13 +9123,13 @@ class TrialTracker
 			}
 			else
 			{
-				if(isset($tvalue['manual_intervention_name']))
+				if($tvalue['manual_intervention_name'] != '' && $tvalue['manual_intervention_name'] !== NULL)
 				{
 					if($tvalue['intervention_name_prev'] == $tvalue['intervention_name'])
 					{
 						$attr = ' manual" title="Manual curation.';
 					}
-					else
+					elseif($tvalue['intervention_name_prev'] != '' && $tvalue['intervention_name_prev'] !== NULL)
 					{
 						$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['intervention_name_prev'];
 					}
@@ -9136,27 +9173,27 @@ class TrialTracker
 				{
 					$attr = '" title="New record';
 				}
-				elseif(isset($tvalue['manual_lead_sponsor']) || isset($tvalue['manual_collaborator']))
+				elseif(($tvalue['manual_lead_sponsor'] != '' && $tvalue['manual_lead_sponsor'] !== NULL) 
+				|| ($tvalue['manual_collaborator'] != '' && $tvalue['manual_collaborator'] !== NULL))
 				{
-					if(isset($tvalue['manual_lead_sponsor']))
+					if($tvalue['manual_lead_sponsor'] != '' && $tvalue['manual_lead_sponsor'] !== NULL)
 					{
 						if($tvalue['lead_sponsor_prev'] == $tvalue['lead_sponsor'])
 						{
 							$attr = ' manual" title="Manual curation.';
 						}
-						else
+						elseif($tvalue['lead_sponsor_prev'] != '' && $tvalue['lead_sponsor_prev'] !== NULL)
 						{
 							$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['lead_sponsor_prev'];
 						}
 					}
-
 					else
 					{
 						if($tvalue['collaborator_prev'] == $tvalue['collaborator'])
 						{
 							$attr = ' manual" title="Manual curation.';
 						}
-						else
+						elseif($tvalue['collaborator_prev'] != '' && $tvalue['collaborator_prev'] !== NULL)
 						{
 							$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['collaborator_prev'];
 						}
@@ -9165,15 +9202,16 @@ class TrialTracker
 			}
 			else
 			{
-				if(isset($tvalue['manual_lead_sponsor']) || isset($tvalue['manual_collaborator']))
+				if(($tvalue['manual_lead_sponsor'] != '' && $tvalue['manual_lead_sponsor'] !== NULL) 
+				|| ($tvalue['manual_collaborator'] != '' && $tvalue['manual_collaborator'] !== NULL))
 				{
-					if(isset($tvalue['manual_lead_sponsor']))
+					if($tvalue['manual_lead_sponsor'] != '' && $tvalue['manual_lead_sponsor'] !== NULL)
 					{
 						if($tvalue['lead_sponsor_prev'] == $tvalue['lead_sponsor'])
 						{
 							$attr = ' manual" title="Manual curation.';
 						}
-						else
+						elseif($tvalue['lead_sponsor_prev'] != '' && $tvalue['lead_sponsor_prev'] !== NULL)
 						{
 							$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['lead_sponsor_prev'];
 						}
@@ -9184,7 +9222,7 @@ class TrialTracker
 						{
 							$attr = ' manual" title="Manual curation.';
 						}
-						else
+						elseif($tvalue['collaborator_prev'] != '' && $tvalue['collaborator_prev'] !== NULL)
 						{
 							$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['collaborator_prev'];
 						}
@@ -9234,13 +9272,13 @@ class TrialTracker
 				{
 					$attr = '" title="New record' ;
 				} 
-				elseif(isset($tvalue['manual_overall_status']))
+				elseif($tvalue['manual_overall_status'] != '' && $tvalue['manual_overall_status'] !== NULL)
 				{
 					if($tvalue['overall_status_prev'] == $tvalue['overall_status'])
 					{
 						$attr = ' manual" title="Manual curation.';
 					}
-					else
+					elseif($tvalue['overall_status_prev'] != '' && $tvalue['overall_status_prev'] !== NULL)
 					{
 						$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['overall_status_prev'];
 					}
@@ -9248,13 +9286,13 @@ class TrialTracker
 			}
 			else
 			{
-				if(isset($tvalue['manual_overall_status']))
+				if($tvalue['manual_overall_status'] != '' && $tvalue['manual_overall_status'] !== NULL)
 				{
 					if($tvalue['overall_status_prev'] == $tvalue['overall_status'])
 					{
 						$attr = ' manual" title="Manual curation.';
 					}
-					else
+					elseif($tvalue['overall_status_prev'] != '' && $tvalue['overall_status_prev'] !== NULL)
 					{
 						$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['overall_status_prev'];
 					}
@@ -9285,13 +9323,13 @@ class TrialTracker
 				{
 					$attr = '" title="New record';
 				}
-				else if(isset($tvalue['manual_condition']))
+				elseif($tvalue['manual_condition'] != '' && $tvalue['manual_condition'] !== NULL)
 				{
 					if($tvalue['condition_prev'] == $tvalue['condition'])
 					{
 						$attr = ' manual" title="Manual curation.';
 					}
-					else
+					elseif($tvalue['condition_prev'] != '' && $tvalue['condition_prev'] !== NULL)
 					{
 						$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['condition_prev'];
 					}
@@ -9299,13 +9337,13 @@ class TrialTracker
 			}
 			else
 			{
-				if(isset($tvalue['manual_condition']))
+				if($tvalue['manual_condition'] != '' && $tvalue['manual_condition'] !== NULL)
 				{
 					if($tvalue['condition_prev'] == $tvalue['condition'])
 					{
 						$attr = ' manual" title="Manual curation.';
 					}
-					else
+					elseif($tvalue['condition_prev'] != '' && $tvalue['condition_prev'] !== NULL)
 					{
 						$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['condition_prev'];
 					}
@@ -9339,17 +9377,17 @@ class TrialTracker
 					$attr = ' highlight" title="' . $tvalue['edited']['end_date'];
 					$borderRight = 'border-right-color:red;';
 				} 
-				else if($tvalue['new'] == 'y') 
+				elseif($tvalue['new'] == 'y') 
 				{
 					$attr = '" title="New record';
 				}	
-				elseif(isset($tvalue['manual_end_date']))
+				elseif($tvalue['manual_end_date'] != '' && $tvalue['manual_end_date'] !== NULL)
 				{
 					if($tvalue['end_date_prev'] == $tvalue['end_date'])
 					{
 						$attr = ' manual" title="Manual curation.';
 					}
-					else
+					elseif($tvalue['end_date_prev'] != '' && $tvalue['end_date_prev'] !== NULL)
 					{
 						$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['end_date_prev'];
 					}
@@ -9358,13 +9396,13 @@ class TrialTracker
 			else
 
 			{
-				if(isset($tvalue['manual_end_date']))
+				if($tvalue['manual_end_date'] != '' && $tvalue['manual_end_date'] !== NULL)
 				{
 					if($tvalue['end_date_prev'] == $tvalue['end_date'])
 					{
 						$attr = ' manual" title="Manual curation.';
 					}
-					else
+					elseif($tvalue['end_date_prev'] != '' && $tvalue['end_date_prev'] !== NULL)
 					{
 						$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['end_date_prev'];
 					}
@@ -9403,13 +9441,13 @@ class TrialTracker
 				{
 					$attr = '" title="New record';
 				}
-				elseif(isset($tvalue['manual_phase']))
+				elseif($tvalue['manual_phase'] != '' && $tvalue['manual_phase'] !== NULL)
 				{
 					if($tvalue['phase_prev'] == $tvalue['phase'])
 					{
 						$attr = ' manual" title="Manual curation.';
 					}
-					else
+					elseif($tvalue['phase_prev'] != '' && $tvalue['phase_prev'] !== NULL)
 					{
 						$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['phase_prev'];
 					}
@@ -9417,13 +9455,13 @@ class TrialTracker
 			}
 			else
 			{
-				if(isset($tvalue['manual_phase']))
+				if($tvalue['manual_phase'] != '' && $tvalue['manual_phase'] !== NULL)
 				{
 					if($tvalue['phase_prev'] == $tvalue['phase'])
 					{
 						$attr = ' manual" title="Manual curation.';
 					}
-					else
+					elseif($tvalue['phase_prev'] != '' && $tvalue['phase_prev'] !== NULL)
 					{
 						$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['phase_prev'];
 					}
