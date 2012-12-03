@@ -1833,6 +1833,7 @@ class TrialTracker
 				$from = $to;
 				$from++;
 
+
 			} 
 			else if($endYear == $secondYear) 
 			{
@@ -6406,7 +6407,7 @@ class TrialTracker
 		
 		if(!empty($areaIds))
 		{
-			$where .= " AND rmh.`type_id` IN ('" . implode('", "', $areaIds) . "') ";
+			$where .= " AND rmh.`type_id` IN ('" . implode("', '", $areaIds) . "') ";
 		}
 		
 		if($lastRow)
@@ -7403,25 +7404,31 @@ class TrialTracker
 					}
 					
 					$result['larvol_id'] 	= $larvolId;
-					$result['end_date'] = $row['end_date'];
-					$result['region'] 		= $row['region'];
-					$result['nct_id'] 	= $nctId;
-					
+					$result['nct_id'] 		= $nctId;
 					if(strlen(trim($row['source_id'])) > 15)
 					{
-						$result['full_id'] 		= $row['source_id'];
+						$result['full_id'] 	= $row['source_id'];
 					}
 					else
 					{
-						$result['full_id'] 		= $nctId;
+						$result['full_id'] 	= $nctId;
+					}
+					$result['id_for_upm'] 	= $row['source_id'];
+					
+					
+					
+					$result['brief_title'] 	= $row['brief_title'];
+					$result['acronym'] 		= $row['acronym'];
+					
+					if($row['acronym'] != '') 
+					{
+						$result['brief_title'] = $this->replaceRedundantAcroynm($row['acronym'], $row['brief_title']);
 					}
 					
-					$result['id_for_upm'] 	= $row['source_id'];
-					$result['brief_title'] 		= $row['brief_title'];
-					$result['enrollment_type'] 	= $row['enrollment_type'];
-					$result['acronym'] 			= $row['acronym'];
+					$result['region'] 			= $row['region'];
 					$result['lead_sponsor'] 	= str_replace('`', ', ', $row['lead_sponsor']);
 					$result['start_date'] 		= $row['start_date'];
+					$result['end_date'] 		= $row['end_date'];
 					$result['phase'] 			= $row['phase'];
 					$result['enrollment'] 		= $row['enrollment'];
 					$result['collaborator'] 	= str_replace('`', ', ', $row['collaborator']);
@@ -7429,7 +7436,7 @@ class TrialTracker
 					$result['intervention_name']= str_replace('`', ', ', $row['intervention_name']);
 					$result['overall_status'] 	= $row['overall_status'];
 					$result['is_active'] 		= $row['is_active'];
-					$result['new'] 					= 'n';
+					$result['new'] 				= 'n';
 					
 					$result['viewcount'] 			= $row['viewcount']; 
 					$result['source'] 				= $row['source']; 
@@ -8787,17 +8794,34 @@ class TrialTracker
 					
 					if(!empty($missedElements))
 					{
-					foreach($missedElements as $mkey => $mvalue)
-					{
-						$sHeader = $Values['Data'][$mvalue]['sectionHeader'];
-						$nUpms = $Values['Data'][$mvalue]['naUpms'];
-						
-						//Rendering Upms
-						if($globalOptions['includeProductsWNoData'] == "off")
+						foreach($missedElements as $mkey => $mvalue)
 						{
-							if(!empty($nUpms))
+							$sHeader = $Values['Data'][$mvalue]['sectionHeader'];
+							$nUpms = $Values['Data'][$mvalue]['naUpms'];
+							
+							//Rendering Upms
+							if($globalOptions['includeProductsWNoData'] == "off")
 							{
-								$outputStr .= $this->displayUpmHeaders($ottType, $nUpms, $sHeader);
+								if(!empty($nUpms))
+								{
+									$outputStr .= $this->displayUpmHeaders($ottType, $nUpms, $sHeader);
+									if($globalOptions['onlyUpdates'] == "no")
+									{
+										$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
+									}
+								}
+								
+							}
+							else
+							{	
+								if(!empty($nUpms))
+								{
+									$outputStr .= $this->displayUpmHeaders($ottType, $nUpms, $sHeader);
+								}
+								else
+								{
+									$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">' . $sHeader . '</td></tr>';
+								}
 								if($globalOptions['onlyUpdates'] == "no")
 								{
 									$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
@@ -8805,24 +8829,7 @@ class TrialTracker
 							}
 							
 						}
-						else
-						{	
-							if(!empty($nUpms))
-							{
-								$outputStr .= $this->displayUpmHeaders($ottType, $nUpms, $sHeader);
-							}
-							else
-							{
-								$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">' . $sHeader . '</td></tr>';
-							}
-							if($globalOptions['onlyUpdates'] == "no")
-							{
-								$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
-							}
-						}
-						
 					}
-				}
 				}
 				
 				$sectionId = $tvalue['sectionid'];
@@ -8833,17 +8840,15 @@ class TrialTracker
 				//Rendering Upms
 				if($globalOptions['includeProductsWNoData'] == "off")
 				{
-					if(!empty($naUpms) || (isset($dvalue['Trials']) && !empty($dvalue['Trials'])))
+					if(!empty($naUpms))
 					{
-						if(!empty($naUpms))
-						{
-							$outputStr .= $this->displayUpmHeaders($ottType, $naUpms, $sectionHeader);
-						}
-						else
-						{
-							$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">' . $sectionHeader . '</td></tr>';
-						}
+						$outputStr .= $this->displayUpmHeaders($ottType, $naUpms, $sectionHeader);
 					}
+					else
+					{
+						$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">' . $sectionHeader . '</td></tr>';
+					}
+					
 				}
 				else
 				{	
@@ -8878,12 +8883,11 @@ class TrialTracker
 			{ 
 				$outputStr .= '<td class="' . $rowOneType . '" ' . (($tvalue['new'] == 'y') ? 'title="New record"' : ''). ' ><div class="rowcollapse">';
 				if(strpos($tvalue['full_id'], 'NCT') !== FALSE)
-					{
-						$tvalue['full_id'] = str_replace('`', "\n", $tvalue['full_id']);
-					}
-					$outputStr .= '<a style="color:' . $titleLinkColor . '" href="' . urlPath() . 'edit_trials.php?larvol_id=' . $tvalue['larvol_id'] 
-								. '" target="_blank">' . $tvalue['full_id'] . '</a>';
-				$outputStr .= '</div></td>';
+				{
+					$tvalue['full_id'] = str_replace('`', "\n", $tvalue['full_id']);
+				}
+				$outputStr .= '<a style="color:' . $titleLinkColor . '" href="' . urlPath() . 'edit_trials.php?larvol_id=' . $tvalue['larvol_id'] 
+								. '" target="_blank">' . $tvalue['full_id'] . '</a></div></td>';
 			}
 			
 			
@@ -8891,7 +8895,7 @@ class TrialTracker
 			$attr = ' ';
 			if(isset($tvalue['manual_is_sourceless']))
 			{	
-				if(!empty($tvalue['edited']) && array_key_exists('brief_title', $tvalue['edited']) && str_replace('Previous value: ', '', $tvalue['edited']['brief_title']) <> $tvalue['brief_title']) 
+				if(isset($tvalue['edited']) && array_key_exists('brief_title', $tvalue['edited']) && str_replace('Previous value: ', '', $tvalue['edited']['brief_title']) <> $tvalue['brief_title']) 
 				{
 					$attr = ' highlight" title="' . $tvalue['edited']['brief_title'];
 					$titleLinkColor = '#FF0000;';
@@ -8929,7 +8933,7 @@ class TrialTracker
 
 					$titleLinkColor = '#FF7700';
 				}
-				elseif(!empty($tvalue['edited']) && array_key_exists('brief_title', $tvalue['edited']) && str_replace('Previous value: ', '', $tvalue['edited']['brief_title']) <> $tvalue['brief_title']) 
+				elseif(isset($tvalue['edited']) && array_key_exists('brief_title', $tvalue['edited']) && str_replace('Previous value: ', '', $tvalue['edited']['brief_title']) <> $tvalue['brief_title']) 
 				{
 					$attr = ' highlight" title="' . $tvalue['edited']['brief_title'];
 					$titleLinkColor = '#FF0000;';
@@ -8968,17 +8972,7 @@ class TrialTracker
 				$outputStr .= '<span class="viewcount" title="Total views">' . $tvalue['viewcount'].'&nbsp;</span>&nbsp;'; 
 			}
 			$outputStr .= '</font>'; 
-						
-			if(isset($tvalue['acronym']) && $tvalue['acronym'] != '') 
-			{
-				//$dvalue['NCT/brief_title'] = $this->replaceRedundantAcroynm($dvalue['NCT/acronym'], $dvalue['NCT/brief_title']);
-				$outputStr .= htmlformat($tvalue['acronym']) . ' ' . htmlformat($tvalue['brief_title']);
-			} 
-			else 
-			{
-				$outputStr .= htmlformat($tvalue['brief_title']);
-			}
-			$outputStr .= '</a></div></td>';
+			$outputStr .= htmlformat($tvalue['brief_title']) . '</a></div></td>';
 			
 			
 			//enrollment column
@@ -10557,6 +10551,7 @@ class TrialTracker
 							. '<td style="width:24px;" colspan="12"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>'
 							. '<td style="width:6px;" colspan="3"><div title="' . $upmTitle . '">' . $anchorTag . '</div></td>';
 			}
+
 			else if($endYear == $secondYear) 
 			{ 
 				if($st != 0)
@@ -11302,13 +11297,18 @@ class TrialTracker
 	
 	function replaceRedundantAcroynm($Acroynm, $briefTitle)
 	{
-		$Acroynm = preg_quote($Acroynm);
+		$extract = substr($briefTitle, 0, strlen($Acroynm));
 		
-		$pattern = '~^\(*' . $Acroynm . '*\)*:*~';
-		$replacement = '';
-		$result = preg_replace($pattern, $replacement, $briefTitle);
+		if($extract === $Acroynm)
+		{
+			$output = $briefTitle;
+		}
+		else
+		{
+			$output = $Acroynm . ' ' . $briefTitle;
+		}
 		
-		return $result;
+		return $output;
 	}
 	
 	function liLoggedIn()
