@@ -94,7 +94,7 @@ $array1=array
 	"Suspended by National Competent Authority"=> "0"
 	);
 	
-		function addEudraValToEudraCT($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_type,$end_date)
+	function addEudraValToEudraCT($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_type,$end_date)
 	{
 		$nullvalue='NO';
 		if(	$fieldname=='enrollment' and(is_null($value) or empty($value) or $value=='') )
@@ -121,61 +121,54 @@ $array1=array
 
 	   if ( isset($as) and $as)
 	   {
+			$query = 'SELECT `' .$fieldname. '`  FROM data_eudract WHERE `larvol_id`="'. $larvol_id . '" limit 1';
+			if(!$res = mysql_query($query))
+			{
+				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				$logger->error($log);
+				echo $log;
+				return false;
+			}
+			$row = mysql_fetch_assoc($res);
 
+			$change = ($row[$fieldname]===null and $value !== null) or ($value != $row[$fieldname]);
 
-	   	$query = 'SELECT `' .$fieldname. '`  FROM data_eudract WHERE `larvol_id`="'. $larvol_id . '" limit 1';
-	   	if(!$res = mysql_query($query))
-	   	{
-	   		$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-	   		$logger->error($log);
-	   		echo $log;
-	   		return false;
-	   	}
-	   	$row = mysql_fetch_assoc($res);
+			if(!mysql_query('BEGIN'))
+			{
+				$log='Could not begin transaction.   SQL Query:'.$query.' Error:' . mysql_error();
+				$logger->error($log);
+				echo $log;
+				return false;
+			}
+			if(1)
+			{
 
-	   	$change = ($row[$fieldname]===null and $value !== null) or ($value != $row[$fieldname]);
+				$dn_array=array('dummy', 'larvol_id'  ,'national_competent_authority'  ,'trial_type'  ,'trial_status'  ,'start_date' ,'firstreceived_date' ,'member_state_concerned'  ,'eudract_id'  ,'full_title'  ,'lay_title'  ,'abbr_title'  ,'sponsor_protocol_code'  ,'isrctn_id'  ,'nct_id'  ,'who_urtn'  ,'other_name'  ,'other_id'  ,'is_pip'  ,'pip_emad_number'  ,'sponsor_name'  ,'sponsor_country'  ,'sponsor_status'  ,'support_org_name'  ,'support_org_country'  ,'contact_org_name'  ,'contact_point_func_name'  ,'street_address'  ,'city'  ,'postcode'  ,'country'  ,'phone'  ,'fax'  ,'email'  ,'imp_role'  ,'imp_auth'  ,'imp_trade_name'  ,'marketing_auth_holder'  ,'marketing_auth_country'  ,'imp_orphan'  ,'imp_orphan_number'  ,'product_name'  ,'product_code'  ,'product_pharm_form'  ,'product_paediatric_form'  ,'product_route'  ,'inn'  ,'cas'  ,'sponsor_code'  ,'other_desc_name'  ,'ev_code'  ,'concentration_unit'  ,'concentration_type'  ,'concentration_number' ,'imp_active_chemical'  ,'imp_active_bio'  ,'type_at'  ,'type_somatic_cell'  ,'type_gene'  ,'type_tissue'  ,'type_combo_at'  ,'type_cat_class'  ,'type_cat_number'  ,'type_combo_device_not_at'  ,'type_radio'  ,'type_immune'  ,'type_plasma'  ,'type_extract'  ,'type_recombinant'  ,'type_gmo'  ,'type_herbal'  ,'type_homeopathic'  ,'type_other'  ,'type_other_name'  ,'placebo_used'  ,'placebo_form'  ,'placebo_route'  ,'condition'  ,'lay_condition'  ,'therapeutic_area'  ,'dra_version'  ,'dra_level'  ,'dra_code'  ,'dra_organ_class'  ,'dra_rare'  ,'main_objective'  ,'secondary_objective'  ,'has_sub_study'  ,'sub_studies'  ,'inclusion_criteria'  ,'exclusion_criteria'  ,'primary_endpoint'  ,'primary_endpoint_timeframe'  ,'secondary_endpoint'  ,'secondary_endpoint_timeframe'  ,'scope_diagnosis'  ,'scope_prophylaxis'  ,'scope_therapy'  ,'scope_safety'  ,'scope_efficacy'  ,'scope_pharmacokinectic'  ,'scope_pharmacodynamic'  ,'scope_bioequivalence'  ,'scope_dose_response'  ,'scope_pharmacogenetic'  ,'scope_pharmacogenomic'  ,'scope_pharmacoeconomic'  ,'scope_other'  ,'scope_other_description'  ,'tp_phase1_human_pharmacology'  ,'tp_first_administration_humans'  ,'tp_bioequivalence_study'  ,'tp_other'  ,'tp_other_description'  ,'tp_phase2_explatory'  ,'tp_phase3_confirmatory'  ,'tp_phase4_use'  ,'design_controlled'  ,'design_randomised'  ,'design_open'  ,'design_single_blind'  ,'design_double_blind'  ,'design_parallel_group'  ,'design_crossover'  ,'design_other'  ,'design_other_description'  ,'comp_other_products'  ,'comp_placebo'  ,'comp_other'  ,'comp_descr'  ,'comp_number_arms'  ,'single_site'  ,'multi_site'  ,'number_of_sites'  ,'multiple_member_state'  ,'number_sites_eea'  ,'eea_both_inside_outside'  ,'eea_outside_only'  ,'eea_inside_outside_regions'  ,'has_data_mon_comm'  ,'definition_of_end'  ,'dur_est_member_years'  ,'dur_est_member_months'  ,'dur_est_member_days'  ,'dur_est_all_years'  ,'dur_est_all_months'  ,'dur_est_all_days'  ,'age_has_under18'  ,'age_number_under18'  ,'age_has_in_utero'  ,'age_number_in_utero'  ,'age_has_preterm_newborn'  ,'age_number_preterm_newborn'  ,'age_has_newborn'  ,'age_number_newborn'  ,'age_has_infant_toddler'  ,'age_number_infant_toddler'  ,'age_has_children'  ,'age_number_children'  ,'age_has_adolescent'  ,'age_number_adolescent'  ,'age_has_adult'  ,'age_number_adult'  ,'age_has_elderly'  ,'age_number_elderly'  ,'gender_female'  ,'gender_male'  ,'subjects_healthy_volunteers'  ,'subjects_patients'  ,'subjects_vulnerable'  ,'subjects_childbearing_no_contraception'  ,'subjects_childbearing_with_contraception'  ,'subjects_pregnant'  ,'subjects_nursing'  ,'subjects_emergency'  ,'subjects_incapable_consent'  ,'subjects_incapable_consent_details'  ,'subjects_other'  ,'subjects_other_details'  ,'enrollment_memberstate'  ,'enrollment_intl_eea'  ,'enrollment_intl_all'  ,'aftercare'  ,'inv_network_org'  ,'inv_network_country'  ,'committee_third_first_auth'  ,'committee_first_auth_third'  ,'review_decision'  ,'review_decision_date'  ,'review_opinion'  ,'review_opinion_reason'  ,'review_opinion_date'  ,'end_status'  ,'end_date_global');
+				$as=array_search($fieldname,$dn_array);
 
-	   	if(!mysql_query('BEGIN'))
-	   	{
-	   		$log='Could not begin transaction.   SQL Query:'.$query.' Error:' . mysql_error();
-	   		$logger->error($log);
-	   		echo $log;
-	   		return false;
-	   	}
-	   	if(1)
-	   	{
+				if ( isset($as) and $as)
+				{
+					if($fieldname=='end_date')
+					{
+						$query = 'SELECT `' .$fieldname. '`, `lastchanged_date`  FROM data_trials WHERE `larvol_id`="'. $larvol_id . '" limit 1';
+					}
+					else
+						$query = 'SELECT data_eudract.`' .$fieldname. '`, data_trials.`lastchanged_date` FROM data_eudract, data_trials WHERE data_eudract.larvol_id = data_trials.larvol_id and data_trials.`larvol_id`="'. $larvol_id . '" limit 1';
 
-	   	$dn_array=array
-		   (
-			'dummy', 'larvol_id'  ,'national_competent_authority'  ,'trial_type'  ,'trial_status'  ,'start_date' ,'firstreceived_date' ,'member_state_concerned'  ,'eudract_id'  ,'full_title'  ,'lay_title'  ,'abbr_title'  ,'sponsor_protocol_code'  ,'isrctn_id'  ,'nct_id'  ,'who_urtn'  ,'other_name'  ,'other_id'  ,'is_pip'  ,'pip_emad_number'  ,'sponsor_name'  ,'sponsor_country'  ,'sponsor_status'  ,'support_org_name'  ,'support_org_country'  ,'contact_org_name'  ,'contact_point_func_name'  ,'street_address'  ,'city'  ,'postcode'  ,'country'  ,'phone'  ,'fax'  ,'email'  ,'imp_role'  ,'imp_auth'  ,'imp_trade_name'  ,'marketing_auth_holder'  ,'marketing_auth_country'  ,'imp_orphan'  ,'imp_orphan_number'  ,'product_name'  ,'product_code'  ,'product_pharm_form'  ,'product_paediatric_form'  ,'product_route'  ,'inn'  ,'cas'  ,'sponsor_code'  ,'other_desc_name'  ,'ev_code'  ,'concentration_unit'  ,'concentration_type'  ,'concentration_number' ,'imp_active_chemical'  ,'imp_active_bio'  ,'type_at'  ,'type_somatic_cell'  ,'type_gene'  ,'type_tissue'  ,'type_combo_at'  ,'type_cat_class'  ,'type_cat_number'  ,'type_combo_device_not_at'  ,'type_radio'  ,'type_immune'  ,'type_plasma'  ,'type_extract'  ,'type_recombinant'  ,'type_gmo'  ,'type_herbal'  ,'type_homeopathic'  ,'type_other'  ,'type_other_name'  ,'placebo_used'  ,'placebo_form'  ,'placebo_route'  ,'condition'  ,'lay_condition'  ,'therapeutic_area'  ,'dra_version'  ,'dra_level'  ,'dra_code'  ,'dra_organ_class'  ,'dra_rare'  ,'main_objective'  ,'secondary_objective'  ,'has_sub_study'  ,'sub_studies'  ,'inclusion_criteria'  ,'exclusion_criteria'  ,'primary_endpoint'  ,'primary_endpoint_timeframe'  ,'secondary_endpoint'  ,'secondary_endpoint_timeframe'  ,'scope_diagnosis'  ,'scope_prophylaxis'  ,'scope_therapy'  ,'scope_safety'  ,'scope_efficacy'  ,'scope_pharmacokinectic'  ,'scope_pharmacodynamic'  ,'scope_bioequivalence'  ,'scope_dose_response'  ,'scope_pharmacogenetic'  ,'scope_pharmacogenomic'  ,'scope_pharmacoeconomic'  ,'scope_other'  ,'scope_other_description'  ,'tp_phase1_human_pharmacology'  ,'tp_first_administration_humans'  ,'tp_bioequivalence_study'  ,'tp_other'  ,'tp_other_description'  ,'tp_phase2_explatory'  ,'tp_phase3_confirmatory'  ,'tp_phase4_use'  ,'design_controlled'  ,'design_randomised'  ,'design_open'  ,'design_single_blind'  ,'design_double_blind'  ,'design_parallel_group'  ,'design_crossover'  ,'design_other'  ,'design_other_description'  ,'comp_other_products'  ,'comp_placebo'  ,'comp_other'  ,'comp_descr'  ,'comp_number_arms'  ,'single_site'  ,'multi_site'  ,'number_of_sites'  ,'multiple_member_state'  ,'number_sites_eea'  ,'eea_both_inside_outside'  ,'eea_outside_only'  ,'eea_inside_outside_regions'  ,'has_data_mon_comm'  ,'definition_of_end'  ,'dur_est_member_years'  ,'dur_est_member_months'  ,'dur_est_member_days'  ,'dur_est_all_years'  ,'dur_est_all_months'  ,'dur_est_all_days'  ,'age_has_under18'  ,'age_number_under18'  ,'age_has_in_utero'  ,'age_number_in_utero'  ,'age_has_preterm_newborn'  ,'age_number_preterm_newborn'  ,'age_has_newborn'  ,'age_number_newborn'  ,'age_has_infant_toddler'  ,'age_number_infant_toddler'  ,'age_has_children'  ,'age_number_children'  ,'age_has_adolescent'  ,'age_number_adolescent'  ,'age_has_adult'  ,'age_number_adult'  ,'age_has_elderly'  ,'age_number_elderly'  ,'gender_female'  ,'gender_male'  ,'subjects_healthy_volunteers'  ,'subjects_patients'  ,'subjects_vulnerable'  ,'subjects_childbearing_no_contraception'  ,'subjects_childbearing_with_contraception'  ,'subjects_pregnant'  ,'subjects_nursing'  ,'subjects_emergency'  ,'subjects_incapable_consent'  ,'subjects_incapable_consent_details'  ,'subjects_other'  ,'subjects_other_details'  ,'enrollment_memberstate'  ,'enrollment_intl_eea'  ,'enrollment_intl_all'  ,'aftercare'  ,'inv_network_org'  ,'inv_network_country'  ,'committee_third_first_auth'  ,'committee_first_auth_third'  ,'review_decision'  ,'review_decision_date'  ,'review_opinion'  ,'review_opinion_reason'  ,'review_opinion_date'  ,'end_status'  ,'end_date_global' 
-		   );
-	   $as=array_search($fieldname,$dn_array);
+					if(!$res = mysql_query($query))
+					{
+						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+						$logger->error($log);
+						mysql_query('ROLLBACK');
+						echo $log;
+						return false;
+					}
+					$row = mysql_fetch_assoc($res);
+					$olddate=$row['lastchanged_date'];
+					$oldval=$row[$fieldname];
+					$value=mysql_real_escape_string($value);
 
-	   if ( isset($as) and $as)
-	   {
-	   	if($fieldname=='end_date')
-	   	{
-	   		$query = 'SELECT `' .$fieldname. '`, `lastchanged_date`  FROM data_trials WHERE `larvol_id`="'. $larvol_id . '" limit 1';
-	   	}
-	   	else
-	   	$query = 'SELECT data_eudract.`' .$fieldname. '`, data_trials.`lastchanged_date` FROM data_eudract, data_trials WHERE data_eudract.larvol_id = data_trials.larvol_id and data_trials.`larvol_id`="'. $larvol_id . '" limit 1';
-	   	//$query = 'SELECT `' .$fieldname. '`, `lastchanged_date`  FROM data_nct WHERE `larvol_id`="'. $larvol_id . '" limit 1';
-	   	//$query = 'SELECT `de.' .$fieldname. '`, `dt.lastchanged_date`  FROM data_eudract de INNER JOIN data_trials dt ON de.larvol_id = dt.larvol_id and `dt.larvol_id`="'. $larvol_id . '" limit 1';
-	   	if(!$res = mysql_query($query))
-	   	{
-	   		$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-	   		$logger->error($log);
-	   		mysql_query('ROLLBACK');
-	   		echo $log;
-	   		return false;
-	   	}
-	   	$row = mysql_fetch_assoc($res);
-	   	$olddate=$row['lastchanged_date'];
-	   	$oldval=$row[$fieldname];
-	   	$value=mysql_real_escape_string($value);
-
-					//$query = 'update `data_eudract` set `' . $fieldname . '` = "' . $value .'", `lastchanged_date` = "' .$lastchanged_date.'" where `larvol_id`="' .$larvol_id . '"  limit 1'  ;
-	   	$query = 'update `data_eudract` set `' . $fieldname . '` = "' . $value .'" where `larvol_id`="' .$larvol_id . '"  limit 1'  ;
+					$query = 'update `data_eudract` set `' . $fieldname . '` = "' . $value .'" where `larvol_id`="' .$larvol_id . '"  limit 1'  ;
 					if(!mysql_query($query))
 					{
 						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -184,13 +177,13 @@ $array1=array
 						echo $log;
 						return false;
 					}
-	   }
-	   	}
+				}
+			}
 	   	 
 	   }
 	   else
 	   {
-	   	logDataErr('<br>To Eudra CT: Not present in dataschema : IGNORED the value of <b>' . $fieldname . '</b>, Value: ' . $value );//Log in errorlog
+			logDataErr('<br>To Eudra CT: Not present in dataschema : IGNORED the value of <b>' . $fieldname . '</b>, Value: ' . $value );//Log in errorlog
 	   }
 	   return true;
 	}	
@@ -230,7 +223,6 @@ $array1=array
 				if(isset($tt) and !empty($tt))
 				{
 					$newval = normal('date',(string)$v);
-
 				}
 				elseif(is_numeric($v))
 				{
@@ -339,6 +331,11 @@ $array1=array
 						$raw_value=null;
 						$value=null;
 					}
+					// set all fields to null if their value is "ND"
+					if($value=='ND')
+					{
+						$value=null;
+					}
 
 					$dt_array=array
 					(
@@ -392,8 +389,8 @@ $array1=array
 					if ($fieldname=='phase' and ( is_null($oldval) or strlen(trim($oldval)) ==0 or empty($oldval)) )
 					$cond2=false; else $cond2=true;
 
-
-					if($cond1 and $cond2 and $nullvalue=='NO')
+					
+					if($cond1 and $cond2 and $nullvalue=='NO' and $oldval<> "ND")
 					{
 						$query = 'update data_history set `' . $fieldname . '_prev` = "' . $oldval .'", `' . $fieldname . '_lastchanged` = "' . $olddate .'" where `larvol_id`="' .$larvol_id . '" limit 1' ;
 						if(!mysql_query($query))
@@ -408,7 +405,7 @@ $array1=array
 					}
 					else
 					{
-						if(  $oldtrial  and $nullvalue=='NO' )
+						if(  $oldtrial  and $nullvalue=='NO' and $oldval<> "ND" )
 						{
 							$val1=str_replace("\\", "", $oldval);
 							$val2=str_replace("\\", "", $value);
@@ -677,7 +674,6 @@ $array1=array
 		}
 		return $strval;
 	}
-	
 	function addMultiVal($input)
 	{
 		if(!empty($input))
@@ -732,7 +728,6 @@ $array1=array
 			$c1++;
 		}
 		return $output;
-
 	}
 	
 
