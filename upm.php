@@ -193,6 +193,12 @@ if($_REQUEST['save']=='Save')
 	{
 		softDieSession('Wrong redtag name selected.');
 	}
+	
+	$_GET['id'] = $_REQUEST['id'];	//After saving, keep that upm opened for further editing
+	if($saveStatus === 0 || !$pid || $Wrong_redtag)
+		$UPMSaveSuccess = false;	//Turn OFF save success flag
+	else
+		$UPMSaveSuccess = true;	//Turn ON save success flag
 }
 //delete controller
 if(isset($_REQUEST['deleteId']) && is_numeric($_REQUEST['deleteId']) && $deleteFlag)
@@ -344,6 +350,10 @@ if(isset($_GET['search']))
 pagePagination($limit,$totalCount,$table,$script,array(),array("import"=>false,"formOnSubmit"=>"onsubmit=\"return validatesearch();\"",'add_new_record'=>true,'search'=>true));
 //pagination controller
 
+if($_REQUEST['save']=='Save' && $UPMSaveSuccess)	//If upm saved successfully display success message 
+{
+	echo '<fieldset class="floatl"><legend> Success: </legend> <font style="color:#4f2683;">UPM Successfully saved & available for further editing.</font></fieldset>';
+}
 
 //search controller part3 should come after pagination call since search is embedded in it needs prefilled values.
 if(isset($_GET['search']))
