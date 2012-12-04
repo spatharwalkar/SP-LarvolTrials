@@ -352,7 +352,7 @@ pagePagination($limit,$totalCount,$table,$script,array(),array("import"=>false,"
 
 if($_REQUEST['save']=='Save' && $UPMSaveSuccess)	//If upm saved successfully display success message 
 {
-	echo '<fieldset class="floatl"><legend> Success: </legend> <font style="color:#4f2683;">UPM Successfully saved & available for further editing.</font></fieldset>';
+	echo '<fieldset class="floatl"><legend> Success: </legend> <font style="color:#4f2683;">UPM Successfully saved'.($_REQUEST['id'] ?' & available for further editing':'').'</font></fieldset>';
 }
 
 //search controller part3 should come after pagination call since search is embedded in it needs prefilled values.
