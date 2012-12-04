@@ -448,6 +448,7 @@ CREATE TABLE IF NOT EXISTS `products` (
 
 CREATE TABLE IF NOT EXISTS `areas` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `LI_id` varchar(63) COLLATE utf8_unicode_ci DEFAULT NULL,
   `name` varchar(127) COLLATE utf8_unicode_ci NOT NULL,
   `display_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `description` text COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -455,7 +456,8 @@ CREATE TABLE IF NOT EXISTS `areas` (
   `searchdata` text COLLATE utf8_unicode_ci NOT NULL,
   `coverage_area` tinyint(1) NOT NULL DEFAULT '0',  
   PRIMARY KEY (`id`),
-  UNIQUE KEY `name` (`name`)
+  UNIQUE KEY `name` (`name`),
+  UNIQUE KEY `LI_id` (`LI_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `rpt_masterhm` (
