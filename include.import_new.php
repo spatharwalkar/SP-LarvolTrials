@@ -388,7 +388,6 @@ $array1=array
 
 					if ($fieldname=='phase' and ( is_null($oldval) or strlen(trim($oldval)) ==0 or empty($oldval)) )
 					$cond2=false; else $cond2=true;
-
 					
 					if($cond1 and $cond2 and $nullvalue=='NO' and $oldval<> "ND")
 					{
@@ -899,7 +898,27 @@ $array1=array
 		$is_active_overall = $eudra_status_is_active[$overall_status];
 		$country = eudraCountry($rec->member_state_concerned);
 		$region=eudraRegion($country);
-		$ins_type=getInstitutionType($rec->support_org_name,$rec->sponsor_name,$larvol_id);
+		//$ins_type=getInstitutionType($rec->support_org_name,$rec->sponsor_name,$larvol_id);
+		
+		/* institution type */
+		$qitp = 'SELECT institution_type FROM data_manual where `larvol_id`="' . $larvol_id . '"  LIMIT 1';
+		if(!$ritp = mysql_query($qitp))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
+		$ritp = mysql_fetch_assoc($ritp);
+		if($ritp['institution_type'])
+		{
+			//store the value from data_manual
+			$ins_type	=	$ritp['institution_type'];
+		}
+		else	
+		{	$ins_type	=	getInstitutionType($rec->support_org_name,$rec->sponsor_name,$larvol_id);	}
+
+		/*************/		
 		
 		/** REMOVE initial backticks */
 		if(substr($brief_title,0,1)=='`') $brief_title=(substr($brief_title,1));
@@ -1501,8 +1520,29 @@ else $ddesc=$rec->detailed_descr->textblock;
 			logDataErr('<br>Could not save the value of <b>' . $fieldname . '</b>, Value: ' . $value );//Log in errorlog
 	}		
 
-	//calculate institution type
-	$ins_type=getInstitutionType($record_data['collaborator'],$record_data['lead_sponsor'],$larvol_id);
+	
+	
+	
+	/* institution type */
+		$qitp = 'SELECT institution_type FROM data_manual where `larvol_id`="' . $larvol_id . '"  LIMIT 1';
+		if(!$ritp = mysql_query($qitp))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
+		$ritp = mysql_fetch_assoc($ritp);
+		if($ritp['institution_type'])
+		{
+			//store the value from data_manual
+			$ins_type	=	$ritp['institution_type'];
+		}
+		else	
+		{	$ins_type	=	getInstitutionType($record_data['collaborator'],$record_data['lead_sponsor'],$larvol_id);	}
+		
+
+		/*************/		
 	
 	//calculate region
 	$region=getRegions($record_data['location_country']);
@@ -1911,7 +1951,6 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 					
 					if ($fieldname=='phase' and ( is_null($oldval) or strlen(trim($oldval)) ==0 or empty($oldval)) )
 						$cond2=false; else $cond2=true;
-					
 		
 					if($cond1 and $cond2 and $nullvalue=='NO')
 					{

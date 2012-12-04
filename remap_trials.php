@@ -12,6 +12,7 @@ global $logger;
 //remaptrials(null,null,'ALL');
 function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL  )
 {
+	global $logger;
 	if(isset($source_id)) // A single trial
 	{
 		if(strlen($source_id)<=10) 
@@ -71,8 +72,7 @@ function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL  )
 	}
 	elseif(isset($sourcedb) and $sourcedb=="ALL")  // Entire database
 	{
-
-	$query = 'SELECT `larvol_id` FROM data_trials';
+		$query = 'SELECT `larvol_id` FROM data_trials';
 
 		if(!$res = mysql_query($query))
 			{
@@ -81,18 +81,21 @@ function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL  )
 				echo $log;
 				return false;
 			}
-		
+
 		$exists = $res !== false;
 		$oldtrial=$exists;
 		$larvol_ids = array();
-		while ($row = mysql_fetch_assoc($res)) $larvol_ids[] = $row[larvol_id];
+		while ($row = mysql_fetch_assoc($res)) 
+		{
+			$larvol_ids[] = $row[larvol_id];
+		}
 		asort($larvol_ids);
 	}
 
 	elseif(isset($sourcedb) and !empty($sourcedb))  // single data source (eg. data_nct, data_eudract etc.)
 	{
-	$source='data_'.$sourcedb;
-	$query = 'SELECT `larvol_id` FROM '. $source .' ';
+		$source='data_'.$sourcedb;
+		$query = 'SELECT `larvol_id` FROM '. $source .' ';
 
 		if(!$res = mysql_query($query))
 			{
@@ -348,9 +351,28 @@ function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL  )
 		}
 				
 				
-		//calculate institution type
-		$ins_type=getInstitutionType($record_data['collaborator'],$record_data['lead_sponsor'],$larvol_id);
+			
+		/* institution type */
+		$qitp = 'SELECT institution_type FROM data_manual where `larvol_id`="' . $larvol_id . '"  LIMIT 1';
+		if(!$ritp = mysql_query($qitp))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
+		$ritp = mysql_fetch_assoc($ritp);
+		if($ritp['institution_type'])
+		{
+			//store the value from data_manual
+			$ins_type	=	$ritp['institution_type'];
+		}
+		else	
+		{	$ins_type	=	getInstitutionType($record_data['collaborator'],$record_data['lead_sponsor'],$larvol_id);	}
 
+		/*************/		
+				
+		
 		//calculate region
 		$region=getRegions($record_data['location_country']);
 		if($region=='other') $region='RoW';
@@ -390,15 +412,126 @@ function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL  )
 			if($x) $inactive=0; else $inactive=1;
 		}
 		
-		$query = 'update data_trials set `institution_type`="' .$ins_type. '",`region`="'.$region.'", `is_active`='.$inactive.'  where `larvol_id`="' .$larvol_id . '" limit 1' ;	
+		/************* store history incase of value change */
+					$query = 'SELECT institution_type, `region`,is_active  FROM data_trials WHERE `larvol_id`="'. $larvol_id . '" limit 1';
+					if(!$res = mysql_query($query))
+					{
+						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+						$logger->error($log);
+						mysql_query('ROLLBACK');
+						echo $log;
+						return false;
+					}
+					$row = mysql_fetch_assoc($res);
+					$olddate=mysql_real_escape_string($row['lastchanged_date']);
+					$oldval1=mysql_real_escape_string($row['institution_type']);
+					$oldval2=mysql_real_escape_string($row['region']);
+					$oldval3=mysql_real_escape_string($row['is_active']);
+
+					
+			
+						if($overridden and ( !empty($ins_type) or !empty($region) or !empty($inactive) ))
+						{
+							$value1=mysql_real_escape_string($ins_type);
+							$value2=mysql_real_escape_string($region);
+							$value3=mysql_real_escape_string($inactive);
+						}
+					
+						if(empty($value1)) $str1=" institution_type = null "; else $str1=' institution_type = "' . $value1 .'"';
+						if(empty($value2)) $str2=", region = null "; else $str2=', region = "' . $value2 .'"';
+						if(empty($value3)) $str3=", is_active = null "; else $str3=', is_active = "' . $value3 .'"';
+						
+						
+					$query = 'update data_trials set '. $str1 . $str2 . $str3  .'  , lastchanged_date = "' .$lastchanged_date.'" where larvol_id="' .$larvol_id . '"  limit 1' ;
+
+					if(!mysql_query($query))
+					{
+						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+						$logger->error($log);
+						mysql_query('ROLLBACK');
+						echo $log;
+						return false;
+					}
+						
+					$query = 'SELECT `larvol_id` FROM data_history where `larvol_id`="' . $larvol_id . '"  LIMIT 1';
+					if(!$res = mysql_query($query))
+					{
+						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+						$logger->error($log);
+						mysql_query('ROLLBACK');
+						echo $log;
+						return false;
+					}
+					$res = mysql_fetch_assoc($res);
+					$exists = $res !== false;
+
+					$oldval1=str_replace("\\", "", $oldval1);
+					$oldval2=str_replace("\\", "", $oldval2);
+					$oldval3=str_replace("\\", "", $oldval3);
+					$value1=str_replace("\\", "", $value1);
+					$value2=str_replace("\\", "", $value2);
+					$value3=str_replace("\\", "", $value3);
+					
+					if (trim($oldval1)<>trim($value1) and !empty($oldval1)) 
+						{
+							$str1 = ' institution_type_prev = "'. $oldval1 .'", institution_type_lastchanged = "' . $olddate .'"'; 
+							$comma=", ";
+						}	
+					else 
+						{
+							$str1 = "";
+							$comma="";
+						}
+					if (trim($oldval2)<>trim($value2) and !empty($oldval2))
+						{
+							$str2 = $comma . ' region_prev = "'. $oldval2 .'", region_lastchanged = "' . $olddate .'"'; 
+							$comma=", ";
+						}	
+					elseif(strlen(str1)<5) 
+						{
+							$str2 = "";
+							$comma="";
+						}
+					else
+						{
+							$str2 = "";
+							$comma=", ";
+						}
+					if (trim($oldval3)<>trim($value3) and !empty($oldval3)) 
+						$str3 = $comma . ' is_active_prev = "'. $oldval3 .'", is_active_lastchanged = "' . $olddate .'"';  else $str3 = "";
+					$cond1 = strlen($str1.$str2.$str3)>5;
+					if($exists and $cond1)
+					{
+						$query = 'update data_history set ' . $str1.$str2.$str3  .'  where `larvol_id`="' .$larvol_id . '" limit 1' ;
+						if(!mysql_query($query))
+						{
+							$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+							$logger->error($log);
+							mysql_query('ROLLBACK');
+							echo $log;
+							return false;
+						}
+
+					}
+					else
+					{
+						if(  $cond1 )
+						{
+						$query = 'insert into data_history set ' . $str1.$str2.$str3  .'  limit 1' ;
+						if(!mysql_query($query))
+						{
+							$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+							$logger->error($log);
+							mysql_query('ROLLBACK');
+							echo $log;
+							return false;
+						}
+						}
+					}
+
 		
-		if(!mysql_query($query))
-			{
-				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-				$logger->error($log);
-				echo $log;
-				return false;
-			}
+		/*****************/
+		
 			echo('<br><b>' . date('Y-m-d H:i:s') .'</b> - Remapping of trial : ' . $nctid . ' completed.' .   str_repeat("     ",300) );
 			
 			tindex($nctid,'products');
@@ -546,17 +679,10 @@ function remap($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_t
 					}
 
 				}
+				
+				update_history($larvol_id,$fieldname,$value,null);
 								
-					$query = 'update data_trials set `' . $fieldname . '` = "' . $value .'", lastchanged_date = "' .$lastchanged_date.'" where larvol_id="' .$larvol_id . '"  limit 1' ;
-					if(!mysql_query($query))
-					{
-						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-						$logger->error($log);
-//						mysql_query('ROLLBACK');
-						echo $log;
-						return false;
-					}
-								
+							
 			}
 		
 	
@@ -585,32 +711,17 @@ function remap($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_t
 		if( !is_null($cdate) and  $cdate <>'0000-00-00' )	// completion date
 		{
 			$cdate=normalize('date',$cdate);
-			$query = 'update `data_trials` set `inclusion_criteria` = "'. $str['inclusion'] . '", `exclusion_criteria` = "'. $str['exclusion'] .'" where `larvol_id`="' .$larvol_id . '" limit 1' ;
-			
-			if(!mysql_query($query))
-					{
-						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-						$logger->error($log);
-						echo $log;
-						return false;
-					}
-					
+			update_history($larvol_id,'inclusion_criteria',$str['inclusion'],$lastchanged_date);
+			update_history($larvol_id,'exclusion_criteria',$str['exclusion'],$lastchanged_date);
 		}
 		
 		elseif( !is_null($pcdate) and  $pcdate <>'0000-00-00') 	// primary completion date
 		{
 		
 			$pcdate=normalize('date',$pcdate);
-			$query = 'update `data_trials` set  `inclusion_criteria` = "'. $str['inclusion'] . '", `exclusion_criteria` = "'. $str['exclusion'] .'" where `larvol_id`="' .$larvol_id . '" limit 1' ;
-//			$query = 'update data_trials set end_date = "' . $pcdate . '" where larvol_id="' .$larvol_id . '"  limit 1' ;
-			if(!mysql_query($query))
-					{
-						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-						$logger->error($log);
-						echo $log;
-						return false;
-					}
-					
+			update_history($larvol_id,'inclusion_criteria',$str['inclusion'],$lastchanged_date);
+			update_history($larvol_id,'exclusion_criteria',$str['exclusion'],$lastchanged_date);
+				
 		}
 
 		
@@ -636,31 +747,17 @@ function remap($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_t
 			{
 				
 				$cdate=normalize('date',$cdate);
-				$query = 'update `data_trials` set `inclusion_criteria` = "'. $str['inclusion'] . '", `exclusion_criteria` = "'. $str['exclusion'] .'" where `larvol_id`="' .$larvol_id . '" limit 1' ;
-//				$query = 'update data_trials set end_date = "' . $cdate . '" where larvol_id="' .$larvol_id . '"  limit 1' ;
-				if(!mysql_query($query))
-					{
-						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-						$logger->error($log);
-						echo $log;
-						return false;
-					}
-				
+				update_history($larvol_id,'inclusion_criteria',$str['inclusion'],$lastchanged_date);
+				update_history($larvol_id,'exclusion_criteria',$str['exclusion'],$lastchanged_date);
+			
 			}
 
 			else	// replace with null
 			{
-						
-				$query = 'update `data_trials` set `inclusion_criteria` = "'. $str['inclusion'] . '", `exclusion_criteria` = "'. $str['exclusion'] .'" where `larvol_id`="' .$larvol_id . '" limit 1' ;
-//				$query = 'update data_trials set end_date = null where larvol_id="' .$larvol_id . '"  limit 1' ;
-				if(!mysql_query($query))
-					{
-						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-						$logger->error($log);
-						echo $log;
-						return false;
-					}
-					
+				
+				update_history($larvol_id,'inclusion_criteria',$str['inclusion'],$lastchanged_date);
+				update_history($larvol_id,'exclusion_criteria',$str['exclusion'],$lastchanged_date)	;			
+				
 			}
 		}
 		
@@ -668,19 +765,10 @@ function remap($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_t
 				
 		if( !is_null($cdate) and  $cdate <>'0000-00-00' and $fieldname=='end_date')	// completion date
 		{
-		
-		
 			$cdate=normalize('date',$cdate);
-			$query = 'update `data_trials` set `end_date` = "' . $cdate . '", `inclusion_criteria` = "'. $str['inclusion'] . '", `exclusion_criteria` = "'. $str['exclusion'] .'" where `larvol_id`="' .$larvol_id . '" limit 1' ;
-			
-//			$query = 'update data_trials set end_date = "' . $cdate . '" where larvol_id="' .$larvol_id . '"  limit 1' ;
-			if(!mysql_query($query))
-					{
-						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-						$logger->error($log);
-						echo $log;
-						return false;
-					}
+			update_history($larvol_id,'end_date',$cdate,$lastchanged_date);
+			update_history($larvol_id,'inclusion_criteria',$str['inclusion'],$lastchanged_date);
+			update_history($larvol_id,'exclusion_criteria',$str['exclusion'],$lastchanged_date);
 					
 		}
 		
@@ -688,18 +776,10 @@ function remap($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_t
 		{
 		
 			$pcdate=normalize('date',$pcdate);
-			$query = 'update `data_trials` set `end_date` = "' . $pcdate . '", `inclusion_criteria` = "'. $str['inclusion'] . '", `exclusion_criteria` = "'. $str['exclusion'] .'" where `larvol_id`="' .$larvol_id . '" limit 1' ;
-//			$query = 'update data_trials set end_date = "' . $pcdate . '" where larvol_id="' .$larvol_id . '"  limit 1' ;
-			if(!mysql_query($query))
-					{
-						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-						$logger->error($log);
-						echo $log;
-						return false;
-					}
-			
+			update_history($larvol_id,'end_date',$pcdate,$lastchanged_date);
+			update_history($larvol_id,'inclusion_criteria',$str['inclusion'],$lastchanged_date);
+			update_history($larvol_id,'exclusion_criteria',$str['exclusion'],$lastchanged_date);
 		}
-		
 		
 		else	
 		{
@@ -722,31 +802,17 @@ function remap($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_t
 			if( !is_null($cdate) and  $cdate <>'0000-00-00' and !is_null($is_active) and $is_active<>1 and $fieldname=='end_date') // last changed date
 			{
 				$cdate=normalize('date',$cdate);
-				$query = 'update `data_trials` set `end_date` = "' . $cdate . '", `inclusion_criteria` = "'. $str['inclusion'] . '", `exclusion_criteria` = "'. $str['exclusion'] .'" where `larvol_id`="' .$larvol_id . '" limit 1' ;
-//				$query = 'update data_trials set end_date = "' . $cdate . '" where larvol_id="' .$larvol_id . '"  limit 1' ;
-				if(!mysql_query($query))
-					{
-						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-						$logger->error($log);
-						echo $log;
-						return false;
-					}
+				update_history($larvol_id,'end_date',$cdate,$lastchanged_date);
+				update_history($larvol_id,'inclusion_criteria',$str['inclusion'],$lastchanged_date);
+				update_history($larvol_id,'exclusion_criteria',$str['exclusion'],$lastchanged_date);
 					
 			}
 			
 			elseif($fieldname=='end_date')	// replace with null
 			{
-			
-				$query = 'update `data_trials` set `end_date` = null, `inclusion_criteria` = "'. $str['inclusion'] . '", `exclusion_criteria` = "'. $str['exclusion'] .'" where `larvol_id`="' .$larvol_id . '" limit 1' ;
-//				$query = 'update data_trials set end_date = null where larvol_id="' .$larvol_id . '"  limit 1' ;
-				if(!mysql_query($query))
-					{
-						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-						$logger->error($log);
-						echo $log;
-						return false;
-					}
-					
+				update_history($larvol_id,'end_date',null,$lastchanged_date);
+				update_history($larvol_id,'inclusion_criteria',$str['inclusion'],$lastchanged_date);
+				update_history($larvol_id,'exclusion_criteria',$str['exclusion'],$lastchanged_date);
 			}
 				
 			
@@ -755,57 +821,84 @@ function remap($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_t
 	}
 
 }
-/*
-function normalize($type, $value)
+
+function update_history($larvol_id,$fld,$val,$lastchanged_date)
 {
-	global $nctid;
-    $value = preg_replace( '/\s+/', ' ', trim( $value ) );         
-    if ($value == " " || $value == "") return NULL;
-	if(!strlen($value) || $value === NULL) return NULL;
-	switch($type)
-	{
-		case 'varchar':
-		case 'text':
-		case 'enum':
-		return $value;
+			if(empty($larvol_id) or empty($fld) or empty($val)) return "";
+			$query = 'SELECT ' . $fld . ' FROM data_trials WHERE `larvol_id`="'. $larvol_id . '" limit 1';
+			if(!$res = mysql_query($query)) return false;
+			$row = mysql_fetch_assoc($res);
+			$oldval1=mysql_real_escape_string($row[$fld]);
+			$value1=mysql_real_escape_string($val);
 		
-		case 'date':
-		return date('Y-m-d', strtotime($value));
+			if(empty($value1)) $str1=$fld . "  = null "; else $str1= $fld . ' = "' . $value1 .'"';
+
+			 if(empty($lastchanged_date)) $lastchanged_date = (string)date("Y-m-d", strtotime('now'));
+			 
+			 
+			$query = 'update data_trials set '. $str1 . '  , lastchanged_date = "' .$lastchanged_date.'" where larvol_id="' .$larvol_id . '"  limit 1' ;
+
+			if(!mysql_query($query))
+			{
+				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				$logger->error($log);
+				mysql_query('ROLLBACK');
+				echo $log;
+				return false;
+			}
+				
+			$query = 'SELECT `larvol_id` FROM data_history where `larvol_id`="' . $larvol_id . '"  LIMIT 1';
+			if(!$res = mysql_query($query))
+			{
+				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				$logger->error($log);
+				mysql_query('ROLLBACK');
+				echo $log;
+				return false;
+			}
+			$res = mysql_fetch_assoc($res);
+			$exists = $res !== false;
+
+			$oldval1=str_replace("\\", "", $oldval1);
+			$value1=str_replace("\\", "", $value1);
+			
+			if (trim($oldval1)<>trim($value1)) 
+				{
+					$str1 = $fld .'_prev' . ' = "'. $oldval1 .'", '. $fld . '_lastchanged = "' . $lastchanged_date .'"'; 
+				}
+			else $str1="";	
+			
+			$cond1 = strlen($str1)>5;
+			if($exists and $cond1)
+			{
+				$query = 'update data_history set ' . $str1  .'  where `larvol_id`="' .$larvol_id . '" limit 1' ;
+				if(!mysql_query($query))
+				{
+					$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+					mysql_query('ROLLBACK');
+					echo $log;
+					return false;
+				}
+
+			}
+			else
+			{
+				if(  $cond1 )
+				{
+				$query = 'insert into data_history set ' . $str1 .' , larvol_id="' .$larvol_id . '"' ;
+				if(!mysql_query($query))
+				{
+					$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+					//$logger->error($log);
+					mysql_query('ROLLBACK');
+					echo $log;
+					return false;
+				}
+				}
+			}
+
 		
-		case 'int':
-		case 'bool':
-            if ($value == "Yes") {
-                return 1;
-            } else {
-                return (int) $value;
-            }
-	}
+
 }
 
-function normal($type, $value)
-{
-	global $nctid;
-    $value = preg_replace( '/\s+/', ' ', trim( $value ) );         
-    if ($value == " " || $value == "") return NULL;
-	if(!strlen($value) || $value === NULL) return NULL;
-	switch($type)
-	{
-		case 'varchar':
-		case 'text':
-		case 'enum':
-		return $value;
-		
-		case 'date':
-		return date('Y-m-d', strtotime($value));
-		
-		case 'int':
-		case 'bool':
-            if ($value == "Yes") {
-                return 1;
-            } else {
-                return (int) $value;
-            }
-	}
-}
-*/
 ?>

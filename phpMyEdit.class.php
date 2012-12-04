@@ -2886,7 +2886,6 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 			}
 		}
 		$query .= $query2.')';
-	
 		$res    = $this->myquery($query, __LINE__);
 		if (! $res) 
 		{
@@ -3052,8 +3051,7 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 					$query_real   = 'UPDATE '.$this->sd."data_manual".$this->ed.' SET '.$this->sd.$fd.$this->ed.'='.$value;
 				}
 				$query_real1   = 'UPDATE '.$this->sd."data_trials".$this->ed.' SET '.$this->sd.$fd.$this->ed.'='.$value;
-				
-				
+	
 				
 			} 
 			else 
@@ -3084,15 +3082,18 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 			}
 		
 		}
-		
+		//commented below block b/c data_trails will get  changed during remapping
+		/*
 		$res = $this->myquery($query_real1, __LINE__);
 		$this->message = $this->sql_affected_rows($this->dbh).' '.$this->labels['record changed'];
 		if (! $res) {
 			return false;
 		}
+		*/
 		require_once('remap_trials.php');
 		ob_start();
-		remaptrials(NULL,$this->rec,NULL);
+		if(isset($lid)) remaptrials(NULL,$lid,NULL);
+		else remaptrials(NULL,$this->rec,NULL);
 		ob_end_clean();
 
 		// record updated, now update sphinx index too.
