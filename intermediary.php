@@ -407,7 +407,17 @@ $scrollBarJs 	= 'scripts/jquery.mCustomScrollbar.js';
 			 out: makeShort// function = onMouseOut callback (REQUIRED)   
 		};
 		
-		function makeTall(){  $(this).animate({"height":"100%"}, 500);}
+		//If javascript works override stylesheet  - as hover css and JS tries to execute same time at first instance
+		$(".rowcollapse").css('height' , '16px');
+		
+		function makeTall()
+		{  
+			//JQuery animate function does not work correctly for 100% height, so first retrieve actual height by setting it to 100% then, give actual height to animate function
+			var fullHeight = $(this).css('height' , '100%').height();	//get actual height
+			$(this).css('height' , '16px'); //reset back height
+    		$(this).animate({height:fullHeight}, 500);	//give actual height
+		}
+
 		function makeShort(){ $(this).animate({"height":"16px"}, 500);}
 
 		$(".rowcollapse").hoverIntent(config);
