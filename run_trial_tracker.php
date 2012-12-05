@@ -291,8 +291,8 @@ class TrialTracker
 					}
 					/////END PART - MERGE CELLS AND APPLY BORDER AS - FOR LOOP WAS NOT WORKING SET INDIVIDUALLY
 					
-					$objPHPExcel->getActiveSheet()->getStyle('"A' . $i . ':BB' . $i.'"')->applyFromArray($styleThinBlueBorderOutline);
-					$objPHPExcel->getActiveSheet()->getStyle('"A' . $i . ':BB' . $i.'"')->getFont()->setSize(10);
+					$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':BB' . $i)->applyFromArray($styleThinBlueBorderOutline);
+					$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':BB' . $i)->getFont()->setSize(10);
 					$objPHPExcel->getActiveSheet()->getStyle('A1:BA1')->applyFromArray($styleThinBlueBorderOutline);
 					
 					//nct id	
@@ -1079,8 +1079,8 @@ class TrialTracker
 							}
 								
 							//rendering diamonds in case of end date is prior to the current year
-							$objPHPExcel->getActiveSheet()->getStyle('"L' . $i . ':BB' . $i . '"')->applyFromArray($styleThinBlueBorderOutline);
-							$objPHPExcel->getActiveSheet()->getStyle('"L' . $i . ':BB' . $i.'"')->getFont()->setSize(10);
+							$objPHPExcel->getActiveSheet()->getStyle('L' . $i . ':BB' . $i)->applyFromArray($styleThinBlueBorderOutline);
+							$objPHPExcel->getActiveSheet()->getStyle('L' . $i . ':BB' . $i)->getFont()->setSize(10);
 							if($mvalue['result_link'] != '' && $mvalue['result_link'] !== NULL)
 							{
 								if(!$loggedIn && !$this->liLoggedIn())
