@@ -6812,7 +6812,7 @@ class TrialTracker
 			if(empty($resultIds['product']))
 			{
 				$tHeader = 'No Product';
-				$productIds = '';
+				$productIds = array();
 			}
 			else
 			{
@@ -6885,20 +6885,22 @@ class TrialTracker
 			}
 			else if(empty($resultIds['product']))
 			{
-				$ottType = 'indexed';
-				$tHeader = 'Area: ';
+				$ottType = 'rowstacked';
+				$tHeader = 'No Product';
 				
 				$areaIds = $resultIds['area'];
 
 				$aDetails = $this->getAreaHeaders($areaIds);
-				foreach($aDetails['TrialsInfo'] as $akey => $value)
+				foreach($aDetails['Ids'] as $akey => $value)
 				{
-					$tHeader .= strip_tags($value['sectionHeader']);
+					$aDetails['Ids'][$akey]['product'] = '';
 				}
 				
-				$TrialsInfo[0]['sectionHeader'] = 'No Product';
-				$Ids[0]['product'] = '';
-				$Ids[0]['area'] = implode("','", $areaIds);
+				$Ids = $aDetails['Ids'];
+				$TrialsInfo = $aDetails['TrialsInfo'];
+				$productSelector = $aDetails['productSelector'];
+				
+				unset($aDetails);
 			}
 			else if(empty($resultIds['area']))
 			{
@@ -6960,7 +6962,8 @@ class TrialTracker
 		$Ids = array();
 		
 		$Query = "SELECT `name`, `id`, `company`, `discontinuation_status`, `discontinuation_status_comment` "
-					. " FROM `products` WHERE id IN ('" . implode("','", $productIds) . "') OR LI_id IN ('" . implode("','", $productIds) . "') ";
+					. " FROM `products` WHERE id IN ('" . implode("','", $productIds) . "') OR LI_id IN ('" . implode("','", $productIds) . "') "
+					. " ORDER BY FIELD(`id`, " . implode(",", $productIds) . ") ";
 		$Res = m_query(__LINE__,$Query);
 		if($Res)
 		{	
@@ -7093,6 +7096,12 @@ class TrialTracker
 	function generateOnlineTT($resultIds, $globalOptions = array())
 	{	
 		$Values = array();
+		$Values['Data'] = array();
+		$Values['activecount'] = 0;
+		$Values['inactivecount'] = 0;
+		$Values['totalcount'] = 0;
+		$Values['count'] = 0;
+		
 		$productSelectorTitle = 'Select Products';
 		$productSelector = array();
 		
@@ -7127,7 +7136,10 @@ class TrialTracker
 		$Ids = $Arr['Ids'];
 		$TrialsInfo = $Arr['TrialsInfo'];
 		
-		$Values = $this->compileOTTData($ottType, $TrialsInfo, $Ids, $globalOptions);
+		if(!empty($resultIds['product']) || !empty($resultIds['area']) || isset($globalOptions['hm']))
+		{
+			$Values = $this->compileOTTData($ottType, $TrialsInfo, $Ids, $globalOptions);
+		}
 		
 		echo $this->displayWebPage($ottType, $resultIds, $Values, $productSelector, $globalOptions);
 		
@@ -7153,9 +7165,11 @@ class TrialTracker
 		$aIds = array();
 		
 		$pIds = array_map(function($item) { return $item['product']; }, $Ids);
+		$pIds = array_filter($pIds);	
 		$pIds = array_unique($pIds);	
 		
 		$aIds = array_map(function($item) { return $item['area']; }, $Ids);	
+		$aIds = array_filter($aIds);
 		$aIds = array_unique($aIds);
 		
 		$startRange = date('Y-m-d', strtotime($this->timeInterval, $this->timeMachine));
@@ -7181,8 +7195,7 @@ class TrialTracker
 									'2/3'=>'3', '2b/3'=>'3','3'=>'3', '3a'=>'3', '3b'=>'3', '3/4'=>'4', '3b/4'=>'4', '4'=>'4');
 									
 		$where = " WHERE 1 ";
-		$where .= " AND pt.`product` IN ('" . implode("','", $pIds) . "') ";
-		$where .= " AND at.`area` IN ('" . implode("','", $aIds) . "') ";	
+		$join = "";
 		
 		$query = "SELECT SQL_CALC_FOUND_ROWS dt.`larvol_id`, dt.`source_id`, dt.`brief_title`, dt.`acronym`, dt.`lead_sponsor`, dt.`collaborator`, dt.`condition`,"
 						. " dt.`overall_status`, dt.`is_active`, dt.`start_date`, dt.`end_date`, dt.`enrollment`, dt.`intervention_name`,"
@@ -7196,21 +7209,30 @@ class TrialTracker
 						. " dh.`start_date_prev`, dh.`enrollment_prev`, dh.`intervention_name_prev`, dh.`phase_prev`, dh.`region_prev`, dh.`brief_title_lastchanged`, "
 						. " dh.`end_date_lastchanged`, dh.`lead_sponsor_lastchanged`, dh.`collaborator_lastchanged`, dh.`condition_lastchanged`, "
 						. " dh.`overall_status_lastchanged`, dh.`start_date_lastchanged`, dh.`enrollment_lastchanged`, dh.`intervention_name_lastchanged`, "
-						. " dh.`phase_lastchanged`, dh.`region_lastchanged`, pt.`product` AS productid,  at.`area` AS areaid "
-						. " FROM `data_trials` dt "
-						. " JOIN `product_trials` pt ON dt.`larvol_id` = pt.`trial` "
-						. " JOIN `area_trials` at ON dt.`larvol_id` = at.`trial` "
-						. " LEFT OUTER JOIN `data_manual` dm ON dt.`larvol_id` = dm.`larvol_id` "
+						. " dh.`phase_lastchanged`, dh.`region_lastchanged` ";
+		
+		if(!empty($pIds))
+		{
+			$query .= ", pt.`product` AS productid ";
+			$where .= " AND pt.`product` IN ('" . implode("','", $pIds) . "') ";
+			$join .= " JOIN `product_trials` pt ON dt.`larvol_id` = pt.`trial` ";
+		}
+		if(!empty($aIds))
+		{
+			$query .= ", at.`area` AS areaid ";
+			$where .= " AND at.`area` IN ('" . implode("','", $aIds) . "') ";	
+			$join .= " JOIN `area_trials` at ON dt.`larvol_id` = at.`trial` ";
+		}
+		$query .= " FROM `data_trials` dt ";
+		$query .= $join . " LEFT OUTER JOIN `data_manual` dm ON dt.`larvol_id` = dm.`larvol_id` "
 						. " LEFT OUTER JOIN `data_history` dh ON dh.`larvol_id` = dt.`larvol_id` ";
 		
 		//calcultaing count and enrollment max value only for webpage display and not for file exports				
 		if($display == 'web')
 		{
 			$tQuery = "SELECT COUNT(*) AS totalcount "
-						. " FROM `data_trials` dt "
-						. " JOIN `area_trials` at ON dt.`larvol_id` = at.`trial` "
-						. " JOIN `product_trials` pt ON dt.`larvol_id` = pt.`trial` ";
-			$tQuery .=  $where;
+						. " FROM `data_trials` dt ";
+			$tQuery .=  $join . $where;
 			$tRes = m_query(__LINE__,$tQuery);
 			if($tRes)
 			{
@@ -7225,10 +7247,8 @@ class TrialTracker
 			}
 			
 			$aQuery = "SELECT COUNT(*) AS activecount "
-						. " FROM `data_trials` dt "
-						. " JOIN `area_trials` at ON dt.`larvol_id` = at.`trial` "
-						. " JOIN `product_trials` pt ON dt.`larvol_id` = pt.`trial` ";
-			$aQuery .=  $where . " AND dt.`is_active` = 1 ";
+						. " FROM `data_trials` dt ";
+			$aQuery .=  $join . $where . " AND dt.`is_active` = 1 ";
 			$aRes = m_query(__LINE__,$aQuery);
 			if($aRes)
 			{
@@ -7349,8 +7369,14 @@ class TrialTracker
 				}
 			}
 			$where = " WHERE 1 ";
-			$where .= " AND pt.`product` IN ('" . implode("','", $pIds) . "') ";
-			$where .= " AND at.`area` IN ('" . implode("','", $aIds) . "') ";	
+			if(!empty($pIds))
+			{
+				$where .= " AND pt.`product` IN ('" . implode("','", $pIds) . "') ";
+			}
+			if(!empty($aIds))
+			{
+				$where .= " AND at.`area` IN ('" . implode("','", $aIds) . "') ";	
+			}
 		}
 		
 		if($globalOptions['onlyUpdates'] == "yes")
@@ -8153,15 +8179,32 @@ class TrialTracker
 				$sectionHeader = $dvalue['sectionHeader'];
 				$naUpms = $dvalue['naUpms'];
 				
-				if(!empty($naUpms))
+				if($globalOptions['includeProductsWNoData'] == "off")
 				{
-					$outputStr .= $this->displayUpmHeaders($ottType, $naUpms, $sectionHeader);
+					if(!empty($naUpms))
+					{
+						$outputStr .= $this->displayUpmHeaders($ottType, $naUpms, $sectionHeader);
+						if($globalOptions['onlyUpdates'] == "no")
+						{
+							$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
+						}
+					}
 				}
 				else
 				{
-					$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">' . $sectionHeader . '</td></tr>';
+					if(!empty($naUpms))
+					{
+						$outputStr .= $this->displayUpmHeaders($ottType, $naUpms, $sectionHeader);
+					}
+					else
+					{
+						$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">' . $sectionHeader . '</td></tr>';
+					}
+					if($globalOptions['onlyUpdates'] == "no")
+					{
+						$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
+					}
 				}
-				$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
 			}
 			
 			echo $outputStr;
@@ -8746,7 +8789,7 @@ class TrialTracker
 		{
 			$outputStr .= '<tr class="trialtitles">'
 						. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
-						. 'style="background: url(\'images/down.png\') no-repeat left center;"'
+						. 'style="background: url(\'images/up.png\') no-repeat left center;"'
 						. ' onclick="sh(this,\'rowstacked\');">&nbsp;</td></tr>'
 						. $this->displayUnMatchedUpms($loggedIn, 'rowstacked', $naUpms)
 						. '<tr class="trialtitles">'
@@ -8758,7 +8801,7 @@ class TrialTracker
 			if($ottType == 'colstacked')
 				$image = 'up';
 			else
-				$image = 'down';
+				$image = 'up';
 			
 			$naUpmIndex = preg_replace('/[^a-zA_Z0-9]/i', '', $sectionHeader);
 			$naUpmIndex = substr($naUpmIndex, 0, 15);
@@ -8794,6 +8837,51 @@ class TrialTracker
 			{
 				$Trials = array_merge($Trials, $value['Trials']);
 				unset($value['Trials']);
+			}
+		}
+		
+		//if the start sections has 0 trials
+		if($globalOptions['page'] == 1)
+		{
+			$startIndex = 0;
+			$endIndex = array_search($Trials[0]['sectionid'], $Ids);
+			if($startIndex < $endIndex)
+			{
+				for($i=($startIndex);$i<$endIndex;$i++)
+				{
+					$index = $Ids[$i];
+					$sectionHeader = $Values['Data'][$index]['sectionHeader'];
+					$naUpms = $Values['Data'][$index]['naUpms'];
+					
+					//Rendering Upms
+					if($globalOptions['includeProductsWNoData'] == "off")
+					{
+						if(!empty($naUpms))
+						{
+							$outputStr .= $this->displayUpmHeaders($ottType, $naUpms, $sectionHeader);
+							if($globalOptions['onlyUpdates'] == "no")
+							{
+								$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
+							}
+						}
+						
+					}
+					else
+					{	
+						if(!empty($naUpms))
+						{
+							$outputStr .= $this->displayUpmHeaders($ottType, $naUpms, $sectionHeader);
+						}
+						else
+						{
+							$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">' . $sectionHeader . '</td></tr>';
+						}
+						if($globalOptions['onlyUpdates'] == "no")
+						{
+							$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
+						}
+					}
+				}
 			}
 		}
 		
@@ -9643,22 +9731,25 @@ class TrialTracker
 			++$counter;
 		}
 		
-		if($globalOptions['page'] == $totalPages )
+		//if the end sections has 0 trials
+		if($globalOptions['page'] == $totalPages)
 		{
-			if($endIndex < count($Ids))
+			$startIndex = array_search($Trials[count($Trials)-1]['sectionid'], $Ids)+1;
+			$endIndex = count($Ids);
+			if($startIndex < $endIndex)
 			{
-				for($i=($endIndex+1);$i<count($Ids);$i++)
+				for($i=$startIndex;$i<$endIndex;$i++)
 				{
 					$index = $Ids[$i];
-					$sheader = $Values['Data'][$index]['sectionHeader'];
-					$nupms = $Values['Data'][$index]['naUpms'];
+					$sectionHeader = $Values['Data'][$index]['sectionHeader'];
+					$naUpms = $Values['Data'][$index]['naUpms'];
 					
 					//Rendering Upms
 					if($globalOptions['includeProductsWNoData'] == "off")
 					{
-						if(!empty($nupms))
+						if(!empty($naUpms))
 						{
-							$outputStr .= $this->displayUpmHeaders($ottType, $nupms, $sheader);
+							$outputStr .= $this->displayUpmHeaders($ottType, $naUpms, $sectionHeader);
 							if($globalOptions['onlyUpdates'] == "no")
 							{
 								$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
@@ -9668,13 +9759,13 @@ class TrialTracker
 					}
 					else
 					{	
-						if(!empty($nupms))
+						if(!empty($naUpms))
 						{
-							$outputStr .= $this->displayUpmHeaders($ottType, $nupms, $sheader);
+							$outputStr .= $this->displayUpmHeaders($ottType, $naUpms, $sectionHeader);
 						}
 						else
 						{
-							$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">' . $sheader . '</td></tr>';
+							$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">' . $sectionHeader . '</td></tr>';
 						}
 						if($globalOptions['onlyUpdates'] == "no")
 						{
