@@ -1268,19 +1268,23 @@ function fillUpmLarvolIDs($upmId,$LarvolIDs=array())
 	//add new larvol ids
 	///Replace source id by larvol id if any
 	$TempLarvolIDs =  array();
-	foreach($LarvolIDs as $key=> $IDs)
+	
+	if(count($LarvolIDs) > 0)
 	{
-		if(strpos(" ".$IDs." ", "NCT") || strpos(" ".$IDs." ", "-"))
+		foreach($LarvolIDs as $key=> $IDs)
 		{
-			$SourceIDQuery = mysql_query("select larvol_id from `data_trials` where `source_id` LIKE '%$IDs%'");
-			while($LarvolIDfrmSrcArray = mysql_fetch_assoc($SourceIDQuery))
-			$LarvolIDfrmSrc = $LarvolIDfrmSrcArray['larvol_id'];
-			if($LarvolIDfrmSrc != NULL && $LarvolIDfrmSrc != '')
-			$TempLarvolIDs[] = $LarvolIDfrmSrc;
-		}
-		else
-		{
-			$TempLarvolIDs[] = $IDs;
+			if(strpos(" ".$IDs." ", "NCT") || strpos(" ".$IDs." ", "-"))
+			{
+				$SourceIDQuery = mysql_query("select larvol_id from `data_trials` where `source_id` LIKE '%$IDs%'");
+				while($LarvolIDfrmSrcArray = mysql_fetch_assoc($SourceIDQuery))
+				$LarvolIDfrmSrc = $LarvolIDfrmSrcArray['larvol_id'];
+				if($LarvolIDfrmSrc != NULL && $LarvolIDfrmSrc != '')
+				$TempLarvolIDs[] = $LarvolIDfrmSrc;
+			}
+			else
+			{
+				$TempLarvolIDs[] = $IDs;
+			}
 		}
 	}
 	$LarvolIDs = $TempLarvolIDs;
@@ -1741,12 +1745,12 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 	}
 	if($table=='products') 
 	{
-		$lnk='<a href="intermediary.php?p=' . $_GET['id'] . '&a=" target="_blank">';
+		$lnk='<a href="intermediary.php?p=' . $_GET['id'] . '" target="_blank">';
 	}
 		
 	elseif($table=='areas') 
 	{
-		$lnk='<a href="intermediary.php?p=&a=' . $_GET['id'] . '">';
+		$lnk='<a href="intermediary.php?a=' . $_GET['id'] . '" target="_blank">';
 	}
 	
 	if(isset($lnk)) 
