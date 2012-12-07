@@ -1953,7 +1953,7 @@ function Download_reports()
 		$ExcelChartArray = array();	///Input array
 		
 		$FirstGraphPnt = 4;
-		$LastGraphPnt = ($FirstGraphPnt + (count($rows) * 2.5));
+		$LastGraphPnt = round($FirstGraphPnt + (count($rows) * 2.5));
 		
 		//Start placing data after the 20 rows plus after our graph ends
 		$CurrentExcelRow = $LastGraphPnt + 20;
