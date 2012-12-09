@@ -8,11 +8,22 @@
  */
 function tableColumns($table)
 {
+	global $logger;
+	
 	$query = "SHOW COLUMNS FROM $table";	
-	$res = mysql_query($query);	
-	while($row = mysql_fetch_assoc($res))
+	$res = mysql_query($query);
+	if($res)
+	{	
+		while($row = mysql_fetch_assoc($res))
+		{
+			$columnList[] = $row['Field'];
+		}
+	}
+	else
 	{
-		$columnList[] = $row['Field'];
+		$log 	= 'ERROR: Bad SQL query. ' . $query . mysql_error();
+		$logger->error($log);
+		unset($log);
 	}
 
 
@@ -36,12 +47,24 @@ function tableColumns($table)
  */
 function tableColumnDetails($table)
 {
+	global $logger;
+	
 	$query = "SHOW COLUMNS FROM $table";
 	$res = mysql_query($query);
-	while($row = mysql_fetch_assoc($res))
+	if($res)
 	{
-		$columnList[] = $row;
+		while($row = mysql_fetch_assoc($res))
+		{
+			$columnList[] = $row;
+		}
 	}
+	else
+	{
+		$log 	= 'ERROR: Bad SQL query. ' . $query . mysql_error();
+		$logger->error($log);
+		unset($log);
+	}
+
 	return $columnList;
 }
 
@@ -359,13 +382,23 @@ echo '<br/>';
  */
 function getUpmAreaNames($upmId)
 {
-	global $db;
+	global $db, $logger;
 	$query = "select a.name from upm_areas u left join areas a on a.id=u.area_id where u.upm_id=$upmId";
 	$result = mysql_query($query);
 	$areaName = array();
-	while($row = mysql_fetch_assoc($result))
+	
+	if($result)
 	{
-		$areaName[] = $row['name'];
+		while($row = mysql_fetch_assoc($result))
+		{
+			$areaName[] = $row['name'];
+		}
+	}
+	else
+	{
+		$log 	= 'ERROR: Bad SQL query. ' . $query . mysql_error();
+		$logger->error($log);
+		unset($log);
 	}
 	
 	return implode(',', $areaName);
@@ -377,13 +410,23 @@ function getUpmAreaNames($upmId)
  */
 function getUpmLarvolIDs($upmId)
 {
-	global $db;
+	global $db, $logger;
 	$query = "select ut.larvol_id from upm_trials ut left join upm u on u.id=ut.upm_id where u.id=$upmId";
 	$result = mysql_query($query);
 	$larvol_id = array();
-	while($row = mysql_fetch_assoc($result))
+	
+	if($result)
 	{
-		$larvol_id[] = $row['larvol_id'];
+		while($row = mysql_fetch_assoc($result))
+		{
+			$larvol_id[] = $row['larvol_id'];
+		}
+	}
+	else
+	{
+		$log 	= 'ERROR: Bad SQL query. ' . $query . mysql_error();
+		$logger->error($log);
+		unset($log);
 	}
 	
 	return implode(',', $larvol_id);
@@ -395,10 +438,21 @@ function getUpmLarvolIDs($upmId)
  */
 function getUpmSourceIDFrmLarvolIDs($LarvolId)
 {
-	global $db;
-	$SourceIDQuery = mysql_query("select source_id from `data_trials` where `larvol_id`='$LarvolId'");
-	while($SourceIdFrmLarvolArray = mysql_fetch_assoc($SourceIDQuery))
-	$SrcIDfrmLarvol = $SourceIdFrmLarvolArray['source_id'];
+	global $db, $logger;
+	$query = "select source_id from `data_trials` where `larvol_id`='".mysql_real_escape_string($LarvolId)."'";
+	$SourceIDQuery = mysql_query($query);
+	if($SourceIDQuery)
+	{
+		while($SourceIdFrmLarvolArray = mysql_fetch_assoc($SourceIDQuery))
+		$SrcIDfrmLarvol = $SourceIdFrmLarvolArray['source_id'];
+	}
+	else
+	{
+		$log 	= 'ERROR: Bad SQL query. ' . $query . mysql_error();
+		$logger->error($log);
+		unset($log);
+	}
+	
 	return $SrcIDfrmLarvol;
 }
 
@@ -532,7 +586,7 @@ function calculateWhere($table)
  */
 function getTotalCount($table)
 {
-	global $db;
+	global $db, $logger;
 	$where = calculateWhere($table);
 	if($table == 'upm')
 	{
@@ -547,7 +601,17 @@ function getTotalCount($table)
 		$query = "select count(id) as cnt from $table $where";
 	}
 	$res = mysql_query($query);
-	$count = mysql_fetch_row($res);
+	if($res)
+	{
+		$count = mysql_fetch_row($res);
+	}
+	else
+	{
+		$log 	= 'ERROR: Bad SQL query. ' . $query . mysql_error();
+		$logger->error($log);
+		unset($log);
+	}
+
 	return $count[0];
 }
 
@@ -1256,7 +1320,7 @@ function fillUpmAreas($upmId,$areaIds=array())
 function fillUpmLarvolIDs($upmId,$LarvolIDs=array())
 {
 
-	global $db;
+	global $db, $logger;
 	//get current upm larvolids
 	$query = "select * from `upm_trials` where `upm_id`=$upmId";
 	$result = mysql_query($query);
@@ -1275,11 +1339,21 @@ function fillUpmLarvolIDs($upmId,$LarvolIDs=array())
 		{
 			if(strpos(" ".$IDs." ", "NCT") || strpos(" ".$IDs." ", "-"))
 			{
-				$SourceIDQuery = mysql_query("select larvol_id from `data_trials` where `source_id` LIKE '%$IDs%'");
-				while($LarvolIDfrmSrcArray = mysql_fetch_assoc($SourceIDQuery))
-				$LarvolIDfrmSrc = $LarvolIDfrmSrcArray['larvol_id'];
-				if($LarvolIDfrmSrc != NULL && $LarvolIDfrmSrc != '')
-				$TempLarvolIDs[] = $LarvolIDfrmSrc;
+				$SourceIDQuery = "select larvol_id from `data_trials` where `source_id` LIKE '%".mysql_real_escape_string($IDs)."%'";
+				$SourceIDQueryRes = mysql_query($SourceIDQuery);
+				if($SourceIDQueryRes)
+				{
+					while($LarvolIDfrmSrcArray = mysql_fetch_assoc($SourceIDQueryRes))
+					$LarvolIDfrmSrc = $LarvolIDfrmSrcArray['larvol_id'];
+					if($LarvolIDfrmSrc != NULL && $LarvolIDfrmSrc != '')
+					$TempLarvolIDs[] = $LarvolIDfrmSrc;
+				}
+				else
+				{
+					$log 	= 'ERROR: Bad SQL query. ' . $SourceIDQuery . mysql_error();
+					$logger->error($log);
+					unset($log);
+				}
 			}
 			else
 			{
@@ -2157,12 +2231,22 @@ Function to get product or redtag name from there id's to store it in history ta
 */
 function getUPMProdOrRedtagName($table, $value)
 {
-	$query = "select `name` from $table where id=$value";
+	$query = "select `name` from $table where id=".mysql_real_escape_string($value)."";
 	$res = mysql_query($query);
-	$val = null;
-	while($row = mysql_fetch_assoc($res))
+	if($res)
 	{
-		$val = $row['name'];
+		$val = null;
+		while($row = mysql_fetch_assoc($res))
+		{
+			$val = $row['name'];
+		}
 	}
+	else
+	{
+		$log 	= 'ERROR: Bad SQL query. ' . $query . mysql_error();
+		$logger->error($log);
+		unset($log);
+	}
+
 	return $val;
 }

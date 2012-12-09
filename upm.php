@@ -288,7 +288,7 @@ if(isset($_GET['search']))
 		{
 			if(strpos(" ".$IDs." ", "NCT") || strpos(" ".$IDs." ", "-"))
 			{
-				$SourceIDQuery = mysql_query("select larvol_id from `data_trials` where `source_id` LIKE '%$IDs%'");
+				$SourceIDQuery = mysql_query("select larvol_id from `data_trials` where `source_id` LIKE '%".mysql_real_escape_string($IDs)."%'");
 				while($LarvolIDfrmSrcArray = mysql_fetch_assoc($SourceIDQuery))
 				$LarvolIDfrmSrc = $LarvolIDfrmSrcArray['larvol_id'];
 				if($LarvolIDfrmSrc != NULL && $LarvolIDfrmSrc != '')
@@ -296,8 +296,12 @@ if(isset($_GET['search']))
 			}
 			else
 			{
-				if($IDs != '' && $IDs != NULL)
-				$TempLarvolIDs[] = $IDs;
+				//validate at first stage only - so we will run further procesing on valid larvol ids only and not any text
+				$LarvolIDQuery = mysql_query("select larvol_id from `data_trials` where `larvol_id`='".mysql_real_escape_string($IDs)."'");
+				while($LarvolIDArray = mysql_fetch_assoc($LarvolIDQuery))
+				$SingleLarvolID = $LarvolIDArray['larvol_id'];
+				if($SingleLarvolID != NULL && $SingleLarvolID != '')
+				$TempLarvolIDs[] = $SingleLarvolID;
 			}
 		}
 		$_GET['search_larvol_id'] = array_filter($TempLarvolIDs);
