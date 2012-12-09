@@ -6423,8 +6423,24 @@ class TrialTracker
 		$TrialsInfo = array();
 		$Ids = array();
 		
+		$dtt = 0;
+		
+		$Query = "SELECT dtt FROM `rpt_masterhm` WHERE id = '" . $hmId . "' ";
+		$Res = m_query(__LINE__,$Query);
+		if($Res)
+		{
+			$Row = mysql_fetch_assoc($Res);
+			$dtt = $Row['dtt'];
+		}
+		else
+		{
+			$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
+			$logger->error($log);
+			unset($log);
+		}
+		
 		$where = " 1 ";
-		$orderby = " ";
+		$orderby = " ORDER BY rmh.`num` ASC ";
 		$limit = " ";
 		
 		if(!empty($areaIds))
@@ -6436,6 +6452,11 @@ class TrialTracker
 		{
 			$orderby = " ORDER BY rmh.`num` DESC ";
 			$limit = " LIMIT 0,1 ";
+			
+			if($dtt)
+			{
+				$limit = " LIMIT 1,1 ";
+			}
 		}
 		
 		$Query = "SELECT rmh.`display_name`, rmh.`type_id`, rmh.`category`, ar.`coverage_area`, ar.`display_name` AS global_display_name "
@@ -6488,11 +6509,17 @@ class TrialTracker
 			}
 		}
 		else
-
 		{
 			$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
 			$logger->error($log);
 			unset($log);
+		}
+		
+		if($dtt && !$lastRow)
+		{
+			array_pop($Ids);
+			array_pop($TrialsInfo);
+			array_pop($productSelector);
 		}
 
 		
