@@ -89,7 +89,7 @@ require_once('include.util.php');
         	}
         	
         	//get row format
-        	$queryRowFormat = 'SELECT row_format FROM information_schema.tables WHERE table_schema="'.$this->database.'" AND table_name="'.$table.'" LIMIT 1';
+        	$queryRowFormat = 'SELECT row_format, engine FROM information_schema.tables WHERE table_schema="'.$this->database.'" AND table_name="'.$table.'" LIMIT 1';
         	$resultRowFormat = mysql_query($queryRowFormat,$this->dbp);
         	while($rw = mysql_fetch_assoc($resultRowFormat))
         	{
@@ -111,6 +111,24 @@ require_once('include.util.php');
 	            $indexFlag = false;
 	            $multiColumnKeyNameTmp = array();
 	            $keyDuplicateCount = null;
+				
+				//Get collation type and characterset for each field as some time collation type of field is different from table
+				$FieldDetails = mysql_query("SELECT `CHARACTER_SET_NAME`, `COLLATION_NAME` FROM information_schema.columns WHERE table_schema='".$this->database."' AND table_name='".$table."' AND `COLUMN_NAME`= '{$row[0]}' LIMIT 1", $this->dbp);
+				
+				if($FieldDetails)
+				{
+					while ($FieldDetailsRow = mysql_fetch_row($FieldDetails))
+					{
+						$characterSet_Field = $FieldDetailsRow[0];
+						$collateName_Field = $FieldDetailsRow[1];
+					}
+				}
+				else
+				{
+					mysql_error();
+				}
+				//End of retrieval
+						
 				foreach($indexArr as $index)
 				{
 					$multiColumnKeyNameTmp[] = $index['Key_name'];
@@ -192,7 +210,8 @@ require_once('include.util.php');
 					'delete_rule' => $delete_rule,
 					'constraint_name' => $constraint_name,
 					'Engine' => $engine,
-					'Collation' => $collate,
+					'Collation' => (($collateName_Field) ? $collateName_Field:$collate),	//if field collation is specified use it otherwise use table collation for that field
+					'CharacterSet' => $characterSet_Field,	//if field collation set is specified use it
 					'row_format' => $rowFormat,
 					'key_duplicate_count' => $keyDuplicateCount	,
 					'key_duplicate_before' => $keyDuplicateBefore	
@@ -271,7 +290,7 @@ require_once('include.util.php');
                 		$unique_keys[] = $fields[$i]['name'];
                 	}
                 }
-                $sql_f[] = "`{$fields[$i]['name']}` {$fields[$i]['type']} " . ($fields[$i]['null'] =='YES'?'' : 'NOT') . ' NULL' . (strlen($fields[$i]['default']) > 0 ? " default '{$fields[$i]['default']}'" : '') . ($fields[$i]['extra'] == 'auto_increment' ? ' auto_increment' : '');
+                $sql_f[] = "`{$fields[$i]['name']}` {$fields[$i]['type']} " . ($fields[$i]['CharacterSet']!='' ? " CHARACTER SET {$fields[$i]['CharacterSet']} " : '') . ($fields[$i]['Collation']!='' ? " COLLATE {$fields[$i]['Collation']} " : '') . ($fields[$i]['null'] =='YES'?'' : 'NOT') . ' NULL' . (strlen($fields[$i]['default']) > 0 ? " default '{$fields[$i]['default']}'" : '') . ($fields[$i]['extra'] == 'auto_increment' ? ' auto_increment' : '');
             }
 
             $sql = "CREATE TABLE `{$name}` (" . implode(', ', $sql_f) . (count($primary_keys) > 0 ? ", PRIMARY KEY (`" . implode('`, `', $primary_keys) . "`)" : '') . (count($index_keys) > 0 ? ", INDEX (`" . implode('`, `', $index_keys) . "`)" : '') . (count($unique_keys) > 0 ? ", UNIQUE (`" . implode('`, `', $unique_keys) . "`)" : '') .  ($special_mul_key?$special_mul_key:'') . ') ENGINE='.$fields[0]['Engine'].' COLLATE='.$fields[0]['Collation'].' ROW_FORMAT='.$fields[0]['row_format'];
@@ -311,7 +330,7 @@ require_once('include.util.php');
          **/
         function AddTableField($table, $field, $field_before = 0) {
         	$sql1 = "ALTER TABLE `{$table}` DROP PRIMARY KEY";
-			$sql = "ALTER TABLE `{$table}` ADD `{$field['name']}` {$field['type']} " . ($field['null']=='YES' ? '' : 'NOT') . ' NULL' . (strlen($field['default']) > 0 ? " default '{$field['default']}'" : '') . ($field['extra'] == 'auto_increment' ? ' auto_increment' : '') . (!is_string($field_before) ? ' FIRST' : " AFTER `{$field_before}`") . ($field['key'] == 'PRIdisabled' ? ", ADD PRIMARY KEY (`{$field['name']}`)" : '');
+			$sql = "ALTER TABLE `{$table}` ADD `{$field['name']}` {$field['type']} " . (trim($field['CharacterSet'])!='' ? " CHARACTER SET {$field['CharacterSet']} " : '') . (trim($field['Collation'])!='' ? " COLLATE {$field['Collation']} " : '') . ($field['null']=='YES' ? '' : 'NOT') . ' NULL' . (strlen($field['default']) > 0 ? " default '{$field['default']}'" : '') . ($field['extra'] == 'auto_increment' ? ' auto_increment' : '') . (!is_string($field_before) ? ' FIRST' : " AFTER `{$field_before}`") . ($field['key'] == 'PRIdisabled' ? ", ADD PRIMARY KEY (`{$field['name']}`)" : '');
 			echo($sql.';<br />');
             return true;
         }
@@ -337,6 +356,8 @@ require_once('include.util.php');
 	        	//special case detected for mul keys
 	        	$special_mul_key = null;
 	        	$indexKey = null;
+				$Collation = null;
+				$AlreadyIndex = null;
 	        	//pr($new_field);
 	        	//pr($old_field);
 	        	//die;
@@ -344,22 +365,44 @@ require_once('include.util.php');
 	        	{
 	        		$special_mul_key = ', ADD KEY `'.$field.'` (`'.$field.'`('.$new_field['Sub_part'].'))';
 	        		$skipModify = 1;
+					$AlreadyIndex = 1;
 	        	}
 	        	if($new_field['key']=='MUL' && $old_field['key']=='MUL' && $new_field['Sub_part']!=$old_field['Sub_part'] && !$new_field['key_duplicate_before'] && !$new_field['key_duplicate_count'])
 	        	{
 	        		$special_mul_key = ', DROP INDEX `'.$old_field['name'].'`, ADD KEY `'.$field.'` (`'.$field.'`('.$new_field['Sub_part'].'))';
 	        		$skipModify = 1;
+					$AlreadyIndex = 1;
 	        	}	        	
 	        	if($new_field['Non_unique']=='1' && $old_field['Non_unique']=='0' && $new_field['indexFlag']==1 && $old_field['indexFlag']==1)
 	        	{
 	        		$special_mul_key = ', DROP INDEX `'.$old_field['name'].'` , ADD INDEX `'.$old_field['name'].'` ( `'.$old_field['name'].'` )';
 	        		$skipModify = 1;
+					$AlreadyIndex = 1;
 	        	}
 	        	if($new_field['key']=='MUL' && $old_field['key']=='' && $new_field['indexFlag']==1 && $old_field['indexFlag']=='' && !$new_field['key_duplicate_before'] && !$new_field['key_duplicate_count'])
 	        	{
 	        		$indexKey = ', ADD INDEX (`'.$field.'`) ';
 	        		$skipModify = 1;
+					$AlreadyIndex = 1;
 	        	}
+				
+				if(($new_field['key']=='MUL' && $old_field['key']=='' || $new_field['indexFlag']==1 && $old_field['indexFlag']=='') && !$AlreadyIndex && $new_field['key']!='PRI')
+	        	{
+	        		$indexKey = ', ADD INDEX (`'.$field.'`) ';	//Special case when key is not primary and we have not indexed it, but change is to make it index
+	        		$skipModify = 1;
+	        	}
+				
+				if($new_field['Collation'] != $old_field['Collation'] || $new_field['CharacterSet'] != $old_field['CharacterSet'])
+	        	{
+	        		$Collation = '';
+					if(trim($new_field['CharacterSet']) != '')
+					$Collation = ' CHARACTER SET ' . $new_field['CharacterSet'] . ' ';
+					if(trim($new_field['Collation']) != '')
+					$Collation = ' COLLATE ' . $new_field['Collation'] .' ';
+					if(trim($Collation) != '')
+	        		$skipModify = 1;
+	        	}
+				
 	        	if(($new_field['key']=='UNI' || $new_field['Non_unique'] == 0)  && $new_field['type']=='blob')
 	        	{
 	        		//if its a multi column key and already processed no need to worry about it again.
@@ -437,7 +480,7 @@ require_once('include.util.php');
 	        		$after = $fieldNamesOrderHome[$newFieldHomeKey-1];
 	        	}
 	        	
-				$sql = $this->ChangeTableFieldQuery($table, $change, $field, $new_field, $no_primary_def_needed, $special_mul_key, $indexKey, $special_uni_key,$after);
+				$sql = $this->ChangeTableFieldQuery($table, $change, $field, $new_field, $no_primary_def_needed, $special_mul_key, $indexKey, $special_uni_key,$after,$Collation);
 				echo($sql.';<br />');
 /* 				if($table=='rpt_ott_upm' && ($new_field['name'] == 'intervention_name_negate' || $new_field['name'] == 'intervention_name'))
 				{
@@ -490,7 +533,7 @@ require_once('include.util.php');
         * @return 	mysql result
         * @author Jithu Thomas
         **/        
-        function ChangeTableFieldQuery($table,$changeOrModify,$field,$new_field,$no_primary_def_needed,$special_mul_key,$indexKey,$special_uni_key,$after=null)
+        function ChangeTableFieldQuery($table,$changeOrModify,$field,$new_field,$no_primary_def_needed,$special_mul_key,$indexKey,$special_uni_key,$after=null,$Collation)
         {
             $sql = "ALTER TABLE `{$table}` ";
         	
@@ -505,6 +548,11 @@ require_once('include.util.php');
         		$sql .= null;
         	}
         	$sql .= " `{$new_field['name']}` {$new_field['type']} ";
+			
+			if($Collation)
+			{
+				$sql .= $Collation;
+			}
         	
         	if($new_field['null']=='YES')
         	{
@@ -531,7 +579,10 @@ require_once('include.util.php');
         	
         	if($new_field['key'] == 'PRI' && $no_primary_def_needed!=1  )
         	{
-        		$sql .= ", ADD PRIMARY KEY (`{$new_field['name']}`)";
+        		$sql .= ", ADD PRIMARY KEY (`{$new_field['name']}` ";
+				if($new_field['type']=='text')	//For primary key of type text we reqire to specify size
+				$sql .= " ({$new_field['Sub_part']}) ";
+				$sql .= ") ";
         	}
 
 
@@ -565,12 +616,12 @@ require_once('include.util.php');
         * @return 	mysql result
         * @author Jithu Thomas
         **/
-        function ChangeTableRowFormat($table,$new_field,$old_field)
+        function ChangeTableRowFormatEngine($table,$new_field,$old_field)
         {
             //check row_format
 	        if($old_field['row_format'] != $new_field['row_format'])
 	        {
-	        	$sql = "ALTER TABLE `$table` ROW_FORMAT={$new_field['row_format']}";
+	        	$sql = "ALTER TABLE `$table`  ENGINE = {$new_field['Engine']} ROW_FORMAT={$new_field['row_format']}";
 	        	echo $sql.';<br />';
 	        }
         }        

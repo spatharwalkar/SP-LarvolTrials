@@ -148,9 +148,9 @@
                     } */
                     
                     //check for table_format changes
-                    if($fields_sync[0]['row_format'] != $fields_home[0]['row_format'])
+                    if($fields_sync[0]['row_format'] != $fields_home[0]['row_format'] || $fields_sync[0]['Engine'] != $fields_home[0]['Engine'])
                     {
-                    	$db_sync->ChangeTableRowFormat($tables_home[$i],$fields_home[0],$fields_sync[0]);
+                    	$db_sync->ChangeTableRowFormatEngine($tables_home[$i],$fields_home[0],$fields_sync[0]);
                     }                    
                     
                     for ($j = 0; $j < count($fields_home); $j++)
@@ -225,7 +225,9 @@
 		                                $fields_sync[$k]['default'] != $fields_home[$j]['default'] ||
 		                                $fields_sync[$k]['extra'] != $fields_home[$j]['extra'] ||
 	                            		$newFieldHomeKey != $newFieldSyncKey ||
-	                            		$fields_sync[$k]['Sub_part'] != $fields_home[$j]['Sub_part']
+	                            		$fields_sync[$k]['Sub_part'] != $fields_home[$j]['Sub_part'] ||
+										$fields_sync[$k]['Collation'] != $fields_home[$j]['Collation'] ||
+										$fields_sync[$k]['CharacterSet'] != $fields_home[$j]['CharacterSet']
 	                                )
 	                            {
 /* 	                            	if($fields_sync[$k]['name'] == 'intervention_name')
