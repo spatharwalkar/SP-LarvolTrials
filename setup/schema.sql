@@ -478,7 +478,7 @@ CREATE TABLE IF NOT EXISTS `rpt_masterhm` (
 CREATE TABLE IF NOT EXISTS `rpt_masterhm_headers` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `report` int(10) unsigned NOT NULL,
-  `num` tinyint(3) unsigned NOT NULL,
+  `num` int(3) unsigned NOT NULL,
   `type` enum('product','area') COLLATE utf8_unicode_ci NOT NULL,
   `type_id` int(10) unsigned NULL COMMENT 'matches the id from the products/areas table',
   `display_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
