@@ -7255,6 +7255,7 @@ class TrialTracker
 						. " LEFT OUTER JOIN `data_history` dh ON dh.`larvol_id` = dt.`larvol_id` ";
 		
 		//calcultaing count and enrollment max value only for webpage display and not for file exports				
+
 		if($display == 'web')
 		{
 			$tQuery = "SELECT COUNT(*) AS totalcount "
@@ -7440,6 +7441,10 @@ class TrialTracker
 			if($ottType != 'rowstacked')
 			{
 				$Values['Data'][$nkey]['naUpms'] = $nvalue;
+			}
+			else
+			{
+				$Values['Data'][0]['naUpms'] = $nvalue;
 			}
 		}
 		
@@ -8025,6 +8030,7 @@ class TrialTracker
 			$val = str_replace('_', ' ', ucfirst($val));
 			echo '<span class="filters"><label>' . $val . '</label>'
 					. '<a href="intermediary.php?' . $iUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
+
 		}
 		unset($iParams);
 		unset($key);
@@ -8204,34 +8210,17 @@ class TrialTracker
 			foreach($Values['Data'] as $dkey => $dvalue)
 			{
 				$sectionHeader = $dvalue['sectionHeader'];
-				$naUpms = $dvalue['naUpms'];
-				
-				if($globalOptions['includeProductsWNoData'] == "off")
+				if($ottType == 'rowstacked')
 				{
-					if(!empty($naUpms))
-					{
-						$outputStr .= $this->displayUpmHeaders($ottType, $naUpms, $sectionHeader);
-						if($globalOptions['onlyUpdates'] == "no")
-						{
-							$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
-						}
-					}
+					$naUpms = $Values['Data'][0]['naUpms'];
+					unset($Values['Data'][0]['naUpms']);
 				}
 				else
 				{
-					if(!empty($naUpms))
-					{
-						$outputStr .= $this->displayUpmHeaders($ottType, $naUpms, $sectionHeader);
-					}
-					else
-					{
-						$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">' . $sectionHeader . '</td></tr>';
-					}
-					if($globalOptions['onlyUpdates'] == "no")
-					{
-						$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
-					}
+					$naUpms = $dvalue['naUpms'];
 				}
+				
+				$outputStr .= $this->dUnmatchedUpms($globalOptions, $ottType, $sectionHeader, $naUpms);
 			}
 			
 			echo $outputStr;
@@ -8256,6 +8245,93 @@ class TrialTracker
 				. '</div><script type="text/javascript">cssdropdown.startchrome("chromemenu");</script>';
 		}
 		echo '<br/><br/><div style="height:50px;"></div>';
+	}
+	
+	function dUnmatchedUpms($globalOptions, $ottType, $sectionHeader, $naUpms, $noRecordRow = 'y')
+	{
+		global $db;
+		$loggedIn	= $db->loggedIn();
+		
+		$outputStr = '';
+		
+		if($globalOptions['includeProductsWNoData'] == "off")
+		{
+			if(!empty($naUpms))
+			{
+				$outputStr .= $this->displayUpmHeaders($ottType, $naUpms, $sectionHeader);
+				if($noRecordRow == 'y')
+				{
+					if($globalOptions['onlyUpdates'] == "no")
+					{
+						$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
+					}
+				}
+			}
+			else
+			{
+				if($noRecordRow == 'n')
+				{
+					$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">' . $sectionHeader . '</td></tr>';
+				}
+			}
+		}
+		else
+		{
+			if(!empty($naUpms))
+			{
+				$outputStr .= $this->displayUpmHeaders($ottType, $naUpms, $sectionHeader);
+			}
+			else
+			{
+				$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">' . $sectionHeader . '</td></tr>';
+			}
+			if($noRecordRow == 'y')
+			{
+				if($globalOptions['onlyUpdates'] == "no")
+				{
+					$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
+				}
+			}
+		}
+		return $outputStr;
+	}
+	
+	function displayUpmHeaders($ottType, $naUpms, $sectionHeader)
+	{
+		global $db;
+		$loggedIn	= $db->loggedIn();
+		$outputStr = '';
+		
+		$naUpmIndex = preg_replace('/[^a-zA_Z0-9]/i', '', $sectionHeader);
+		$naUpmIndex = substr($naUpmIndex, 0, 15);
+			
+		if($ottType == 'rowstacked')
+		{
+			$outputStr .= '<tr class="trialtitles">'
+						. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
+						. 'style="background: url(\'images/down.png\') no-repeat left center;"'
+						. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;</td></tr>'
+						. $this->displayUnMatchedUpms($ottType, $loggedIn, $naUpmIndex, $naUpms)
+						. '<tr class="trialtitles">'
+						. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles">' 
+						. $sectionHeader . '</td></tr>';
+		}
+		else
+		{
+			if($ottType == 'indexed')
+				$image = 'down';
+			else
+				$image = 'up';
+			
+			$outputStr .= '<tr class="trialtitles">'
+						. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
+						. ' style="background: url(\'images/' . $image . '.png\') no-repeat left center;"'
+						. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
+						. $sectionHeader . '</td></tr>';
+			$outputStr .= $this->displayUnMatchedUpms($ottType, $loggedIn, $naUpmIndex, $naUpms);
+		}
+		
+		return $outputStr;
 	}
 	
 	function downloadOptions($shownCnt, $foundCnt, $ottType, $result, $globalOptions) 
@@ -8565,7 +8641,6 @@ class TrialTracker
 			. '<input type="hidden" name="phase" id="phase" value="' . implode(',', $globalOptions['phase']) . '" />';
 	}
 
-	
 	function pagination($globalOptions = array(), $totalPages, $loggedIn)
 	{ 	
 		$url = $globalOptions['url'];
@@ -8807,45 +8882,8 @@ class TrialTracker
 		return $outputStr;
 	}
 	
-	function displayUpmHeaders($ottType, $naUpms, $sectionHeader)
-	{
-		global $db;
-		$loggedIn	= $db->loggedIn();
-		
-		if($ottType == 'rowstacked')
-		{
-			$outputStr .= '<tr class="trialtitles">'
-						. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
-						. 'style="background: url(\'images/up.png\') no-repeat left center;"'
-						. ' onclick="sh(this,\'rowstacked\');">&nbsp;</td></tr>'
-						. $this->displayUnMatchedUpms($loggedIn, 'rowstacked', $naUpms)
-						. '<tr class="trialtitles">'
-						. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="sectiontitles">' 
-						. $sectionHeader . '</td></tr>';
-		}
-		else
-		{
-			if($ottType == 'colstacked')
-				$image = 'up';
-			else
-				$image = 'up';
-			
-			$naUpmIndex = preg_replace('/[^a-zA_Z0-9]/i', '', $sectionHeader);
-			$naUpmIndex = substr($naUpmIndex, 0, 15);
-			
-			$outputStr .= '<tr class="trialtitles">'
-						. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
-						. ' style="background: url(\'images/' . $image . '.png\') no-repeat left center;"'
-						. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
-						. $sectionHeader . '</td></tr>';
-			$outputStr .= $this->displayUnMatchedUpms($loggedIn, $naUpmIndex, $naUpms);
-		}
-		
-		return $outputStr;
-	}
-	
 	function displayTrials($globalOptions = array(), $loggedIn, $Values, $ottType, $totalPages)
-	{	
+	{
 		$currentYear = date('Y');
 		$secondYear = (date('Y')+1);
 		$thirdYear = (date('Y')+2);
@@ -8878,36 +8916,19 @@ class TrialTracker
 				{
 					$index = $Ids[$i];
 					$sectionHeader = $Values['Data'][$index]['sectionHeader'];
-					$naUpms = $Values['Data'][$index]['naUpms'];
 					
-					//Rendering Upms
-					if($globalOptions['includeProductsWNoData'] == "off")
+					if($ottType == 'rowstacked')
 					{
-						if(!empty($naUpms))
-						{
-							$outputStr .= $this->displayUpmHeaders($ottType, $naUpms, $sectionHeader);
-							if($globalOptions['onlyUpdates'] == "no")
-							{
-								$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
-							}
-						}
-						
+						$naUpms = $Values['Data'][0]['naUpms'];
+						unset($Values['Data'][0]['naUpms']);
 					}
 					else
-					{	
-						if(!empty($naUpms))
-						{
-							$outputStr .= $this->displayUpmHeaders($ottType, $naUpms, $sectionHeader);
-						}
-						else
-						{
-							$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">' . $sectionHeader . '</td></tr>';
-						}
-						if($globalOptions['onlyUpdates'] == "no")
-						{
-							$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
-						}
+					{
+						$naUpms = $Values['Data'][$index]['naUpms'];
 					}
+					
+					//Rendering Upms
+					$outputStr .= $this->dUnmatchedUpms($globalOptions, $ottType, $sectionHeader, $naUpms);
 				}
 			}
 		}
@@ -8937,67 +8958,29 @@ class TrialTracker
 							$nUpms = $Values['Data'][$mvalue]['naUpms'];
 							
 							//Rendering Upms
-							if($globalOptions['includeProductsWNoData'] == "off")
-							{
-								if(!empty($nUpms))
-								{
-									$outputStr .= $this->displayUpmHeaders($ottType, $nUpms, $sHeader);
-									if($globalOptions['onlyUpdates'] == "no")
-									{
-										$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
-									}
-								}
-								
-							}
-							else
-							{	
-								if(!empty($nUpms))
-								{
-									$outputStr .= $this->displayUpmHeaders($ottType, $nUpms, $sHeader);
-								}
-								else
-								{
-									$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">' . $sHeader . '</td></tr>';
-								}
-								if($globalOptions['onlyUpdates'] == "no")
-								{
-									$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
-								}
-							}
-							
+							$outputStr .= $this->dUnmatchedUpms($globalOptions, $ottType, $sHeader, $nUpms);
 						}
 					}
 				}
 				
 				$sectionId = $tvalue['sectionid'];
-				
 				$sectionHeader =  $Values['Data'][$sectionId]['sectionHeader'];
-				$naUpms = $Values['Data'][$sectionId]['naUpms'];
-				
-				//Rendering Upms
-				if($globalOptions['includeProductsWNoData'] == "off")
+				if($ottType == 'rowstacked')
 				{
-					if(!empty($naUpms))
+					$naUpms = array();
+					if($globalOptions['page'] == 1)
 					{
-						$outputStr .= $this->displayUpmHeaders($ottType, $naUpms, $sectionHeader);
+						$naUpms = $Values['Data'][0]['naUpms'];
+						unset($Values['Data'][0]['naUpms']);
 					}
-					else
-					{
-						$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">' . $sectionHeader . '</td></tr>';
-					}
-					
 				}
 				else
-				{	
-					if(!empty($naUpms))
-					{
-						$outputStr .= $this->displayUpmHeaders($ottType, $naUpms, $sectionHeader);
-					}
-					else
-					{
-						$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">' . $sectionHeader . '</td></tr>';
-					}
+				{
+					$naUpms = $Values['Data'][$sectionId]['naUpms'];
 				}
+				
+				//Rendering Upms
+				$outputStr .= $this->dUnmatchedUpms($globalOptions, $ottType, $sectionHeader, $naUpms, 'n');
 			}
 			
 			if($counter%2 == 1) 
@@ -9772,33 +9755,7 @@ class TrialTracker
 					$naUpms = $Values['Data'][$index]['naUpms'];
 					
 					//Rendering Upms
-					if($globalOptions['includeProductsWNoData'] == "off")
-					{
-						if(!empty($naUpms))
-						{
-							$outputStr .= $this->displayUpmHeaders($ottType, $naUpms, $sectionHeader);
-							if($globalOptions['onlyUpdates'] == "no")
-							{
-								$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
-							}
-						}
-						
-					}
-					else
-					{	
-						if(!empty($naUpms))
-						{
-							$outputStr .= $this->displayUpmHeaders($ottType, $naUpms, $sectionHeader);
-						}
-						else
-						{
-							$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn)  . '" class="sectiontitles">' . $sectionHeader . '</td></tr>';
-						}
-						if($globalOptions['onlyUpdates'] == "no")
-						{
-							$outputStr .= '<tr><td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="norecord">No trials found</td></tr>';
-						}
-					}
+					$outputStr .= $this->dUnmatchedUpms($globalOptions, $ottType, $sectionHeader, $naUpms);
 				}
 			}
 		}
@@ -10911,7 +10868,7 @@ class TrialTracker
 		return $outputStr;	
 	}
 	
-	function displayUnMatchedUpms($loggedIn, $naUpmIndex, $naUpms)
+	function displayUnMatchedUpms($ottType, $loggedIn, $naUpmIndex, $naUpms)
 	{
 		global $now;
 		$outputStr = '';
@@ -10920,6 +10877,12 @@ class TrialTracker
 		$thirdYear = (date('Y')+2);
 		
 		$cntr = 0;
+		
+		$display = 'style="display: none;"';
+		if($ottType == 'indexed' || $ottType == 'rowstacked')
+		{
+			$display = 'style="display: table-row;"';
+		}
 		
 		foreach($naUpms as $key => $value)
 		{
@@ -10942,7 +10905,7 @@ class TrialTracker
 			}
 			
 			//rendering unmatched upms
-			$outputStr .= '<tr ' . $class . '>';
+			$outputStr .= '<tr ' . $class . ' ' . $display . '>';
 			
 			
 			//field upm-id

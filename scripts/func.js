@@ -1,15 +1,19 @@
 $(document).ready(function()
 {
 	$('#addtoright').after('<div id="addedtoright">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Show all milestones</b></div>');
-	var image;
-	if($('#upmstyle').val() == 'expand') 
+	
+	var image = 'up.png';
+
+	if($('.trialtitles').length)
 	{
-		image = 'down.png';
-	}
-	else 
-	{
-		$('.upms').hide();
-		image = 'up.png';
+		var updown = $('.trialtitles').find('td').css('background-image').replace(/^url\((.*?)\)$/, '$1');		
+		var s = updown.split("/");
+		var filename = s[s.length-1].split('.')[0];
+		
+		if(filename == 'down')
+		{
+			image = 'down.png';
+		}
 	}
 	
 	$('#addedtoright').css('background-image','url(\'./images/'+image+'\')')
