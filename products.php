@@ -148,6 +148,15 @@ if(isset($_REQUEST['deleteId']) && is_numeric($_REQUEST['deleteId']) && $deleteF
 //save operation controller
 if($_REQUEST['save']=='Save')
 {
+	//defined readonly table fields here as well to avoid them in query will be better
+	$ReadOnlyArr = array('comments','product_type','licensing_mode','administration_mode','discontinuation_status','discontinuation_status_comment','is_key','created','modified','company','brand_names','generic_names','code_names','approvals','display_name');
+	foreach($ReadOnlyArr as $Rfield)
+	{
+		if(array_key_exists($Rfield,$_GET))
+		unset($_GET[$Rfield]);
+		if(array_key_exists($Rfield,$_POST))
+		unset($_POST[$Rfield]);
+	}
 	$searchDataOld = $_REQUEST['id']?getSearchData('products', 'searchdata', $_REQUEST['id']):null;	
 	$_REQUEST = array_merge($_GET, $_POST); 
 	$saveStatus = saveData($_REQUEST,$table);
@@ -183,12 +192,12 @@ if(!isset($_GET['oldval']))
 $page=0;
 
 //pagination
-$ignoreFields = array('searchdata');
+$ignoreFields = array('searchdata','xml');
 pagePagination($limit,$totalCount,$table,$script,$ignoreFields,array('import'=>true,'searchDataCheck'=>true,'add_new_record'=>true,'search'=>true));
 //pagination controller
 
 //define skip array table fields
-$skipArr = array('comments','product_type','licensing_mode','administration_mode','discontinuation_status','discontinuation_status_comment','is_key','is_active','created','modified','company','brand_names','generic_names','code_names','approvals','xml','display_name');
+$skipArr = array('xml','is_active');
 
 echo '<br/>';
 echo '<div class="clr">';
@@ -210,9 +219,12 @@ if($_REQUEST['import']=='Import' || $_REQUEST['uploadedfile'])
 	importUpm('products','products');
 }
 
+//define skip array table fields
+$skipArr = array('comments','product_type','licensing_mode','administration_mode','discontinuation_status','discontinuation_status_comment','is_key','created','modified','brand_names','generic_names','code_names','approvals','xml','display_name', 'description', 'category');
+
 //normal upm listing
 $start = $page*$limit;
-contentListing($start,$limit,$table,$script,$skipArr,$includeArr,array('delete'=>false));
+contentListing($start,$limit,$table,$script,$skipArr,$includeArr,array('delete'=>false,'ignoresort'=>array('is_active')));
 echo '</div>';
 /* echo '<div class="querybuilder" id="inline_content">
 </div></div>'; */

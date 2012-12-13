@@ -289,6 +289,13 @@ while ($row = mysql_fetch_assoc($res))
 					echo '<td>';
 					echo getUpmLarvolIDs($upmId);
 					echo '</td>';
+			}
+			else
+			if($columnName == 'is_active' && $table == 'products')
+			{
+					echo '<td>';
+					echo (($v==='0')?'False':'True');
+					echo '</td>';
 			}						
 			else 
 			{
@@ -354,6 +361,13 @@ while ($row = mysql_fetch_assoc($res))
 			{
 					echo '<td>';
 					echo getUpmLarvolIDs($upmId);
+					echo '</td>';
+			}
+			else
+			if($columnName == 'is_active' && $table == 'products')
+			{
+					echo '<td>';
+					echo (($v==='0')?'False':'True');
 					echo '</td>';
 			}			
 			else 
@@ -1746,12 +1760,32 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		
 		$defaultOptions['style'] = $addEditGlobalInputStyle;
 		
+		$ProductReadOnlyArr = array('comments','product_type','licensing_mode','administration_mode','discontinuation_status','discontinuation_status_comment','is_key','created','modified','company','brand_names','generic_names','code_names','approvals','display_name');
+		
 		///default
 		if($row['Field']!='larvol_id' || $table!='upm')
 		{ 
-			echo '<tr>';
-			echo '<td>'.ucwords(implode(' ',explode('_',$row['Field']))).' : </td><td>'.input_tag($row,$dbVal,$defaultOptions).'</td>';
-			echo '</tr>';
+			if(in_array($row['Field'], $ProductReadOnlyArr) && $table=='products')
+			{
+				echo '<tr>';
+				if($row['Field'] == 'is_key')
+				{
+					echo '<td>Key : </td><td>'.(($dbVal==='0')?'False':'True').'</td>';
+				}
+				else
+				{
+					$defaultOptionsReadonly = $defaultOptions;
+					$defaultOptionsReadonly['style'] .= ' readonly="readonly" ';
+					echo '<td>'.ucwords(implode(' ',explode('_',$row['Field']))).' : </td><td>'.input_tag($row,$dbVal,$defaultOptionsReadonly).'</td>';
+				}
+				echo '</tr>';
+			}
+			else
+			{
+				echo '<tr>';
+				echo '<td>'.ucwords(implode(' ',explode('_',$row['Field']))).' : </td><td>'.input_tag($row,$dbVal,$defaultOptions).'</td>';
+				echo '</tr>';
+			}
 		}
 		else if($row['Field']=='larvol_id' && $table=='upm')
 		{
