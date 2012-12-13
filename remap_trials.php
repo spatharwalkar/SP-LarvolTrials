@@ -390,7 +390,7 @@ function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL  )
 				'Completed'	
 				);
 		
-		$inactive=1;
+		$inactive=null;
 		
 		$query = 'SELECT overall_status FROM data_manual where `larvol_id`="' . $larvol_id . '"  LIMIT 1';
 		
@@ -403,15 +403,14 @@ function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL  )
 			}
 			$res2 = mysql_fetch_assoc($res2);
 			
+			
 			if($res2['overall_status'])
 				$record_data['overall_status']=$res2['overall_status'];
-		
 		if(isset($record_data['overall_status']))
 		{
 			$x=array_search($record_data['overall_status'],$inactiveStatus);
 			if($x) $inactive=0; else $inactive=1;
 		}
-		
 		/************* store history incase of value change */
 					$query = 'SELECT institution_type, `region`,is_active  FROM data_trials WHERE `larvol_id`="'. $larvol_id . '" limit 1';
 					if(!$res = mysql_query($query))
@@ -430,20 +429,21 @@ function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL  )
 
 					
 			
-						if($overridden and ( !empty($ins_type) or !empty($region) or !empty($inactive) ))
+						if( !empty($ins_type) or !empty($region) or !is_null($inactive) )
 						{
 							$value1=mysql_real_escape_string($ins_type);
 							$value2=mysql_real_escape_string($region);
-							$value3=mysql_real_escape_string($inactive);
+							$value3=$inactive;
 						}
 					
 						if(empty($value1)) $str1=" institution_type = null "; else $str1=' institution_type = "' . $value1 .'"';
 						if(empty($value2)) $str2=", region = null "; else $str2=', region = "' . $value2 .'"';
-						if(empty($value3)) $str3=", is_active = null "; else $str3=', is_active = "' . $value3 .'"';
+						
+						
+						if(is_null($value3)) $str3="  "; elseif($value3==1 or $value3==0) $str3=', is_active = "' . $value3 .'"';
 						
 						
 					$query = 'update data_trials set '. $str1 . $str2 . $str3  .'  , lastchanged_date = "' .$lastchanged_date.'" where larvol_id="' .$larvol_id . '"  limit 1' ;
-
 					if(!mysql_query($query))
 					{
 						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
