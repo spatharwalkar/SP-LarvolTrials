@@ -222,9 +222,10 @@ if($_REQUEST['import']=='Import' || $_REQUEST['uploadedfile'])
 //define skip array table fields
 $skipArr = array('comments','product_type','licensing_mode','administration_mode','discontinuation_status','discontinuation_status_comment','is_key','created','modified','brand_names','generic_names','code_names','approvals','xml','display_name', 'description', 'category');
 
+$ExtraSortFields = array(0=>'LI_id',1=>'name',2=>'company');
 //normal upm listing
 $start = $page*$limit;
-contentListing($start,$limit,$table,$script,$skipArr,$includeArr,array('delete'=>false,'ignoresort'=>array('is_active')));
+contentListing($start,$limit,$table,$script,$skipArr,$includeArr,array('delete'=>false,'ignoresort'=>array('is_active'),'extrasort'=>$ExtraSortFields));
 echo '</div>';
 /* echo '<div class="querybuilder" id="inline_content">
 </div></div>'; */

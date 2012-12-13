@@ -75,7 +75,7 @@ function tableColumnDetails($table)
  * @param int $limit The total limit of records defined in the controller.
  * @author Jithu Thomas
  */
-function contentListing($start=0,$limit=50,$table,$script,$ignoreFields=array(),$includeFields=array(),$options=array('delete'=>true,'ignoresort'=>array()))
+function contentListing($start=0,$limit=50,$table,$script,$ignoreFields=array(),$includeFields=array(),$options=array('delete'=>true,'ignoresort'=>array(),'extrasort'=>array()))
 {
 global $deleteFlag;
 if($options['delete']===false)
@@ -88,7 +88,7 @@ $where = calculateWhere($table);
 //upm area field is included directly from upm custom query so ignore sort& other customizations for upm areas should be done elsewhere.
 $query = "SHOW COLUMNS FROM $table";
 $res = mysql_query($query);
-$sortableRows = array();
+$sortableRows = $options['extrasort'];
 while($row = mysql_fetch_assoc($res))
 {
 	$type = $row['Type'];
@@ -152,7 +152,7 @@ if(isset($_GET['sort_order']) && $_GET['sort_order']=='DESC' )
 
 if($table !='upm')
 {
-	if(isset($_GET['no_sort']) && $_GET['no_sort']!=1)
+	if($_GET['no_sort']!=1)
 	$query = "select * from $table $where $currentOrderBy $currentSortOrder limit $start , $limit";
 	else
 	$query = "select * from $table $where limit $start , $limit";
