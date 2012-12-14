@@ -89,11 +89,12 @@ require_once('include.util.php');
         	}
         	
         	//get row format
-        	$queryRowFormat = 'SELECT row_format, engine FROM information_schema.tables WHERE table_schema="'.$this->database.'" AND table_name="'.$table.'" LIMIT 1';
+        	$queryRowFormat = 'SELECT row_format, engine, table_collation FROM information_schema.tables WHERE table_schema="'.$this->database.'" AND table_name="'.$table.'" LIMIT 1';
         	$resultRowFormat = mysql_query($queryRowFormat,$this->dbp);
         	while($rw = mysql_fetch_assoc($resultRowFormat))
         	{
         		$rowFormat = $rw['row_format'];
+				$tableCollation = $rw['table_collation'];
         	}        	
         	
         	//get foreign key associations if present for all fields in the table
@@ -214,7 +215,8 @@ require_once('include.util.php');
 					'CharacterSet' => $characterSet_Field,	//if field collation set is specified use it
 					'row_format' => $rowFormat,
 					'key_duplicate_count' => $keyDuplicateCount	,
-					'key_duplicate_before' => $keyDuplicateBefore	
+					'key_duplicate_before' => $keyDuplicateBefore,
+					'tableCollation' => $tableCollation	
                 );
             }
             return $fields;
@@ -619,9 +621,9 @@ require_once('include.util.php');
         function ChangeTableRowFormatEngine($table,$new_field,$old_field)
         {
             //check row_format
-	        if($old_field['row_format'] != $new_field['row_format'])
+	        if($old_field['row_format'] != $new_field['row_format'] || $old_field['Engine'] != $new_field['Engine'] || $old_field['tableCollation'] != $new_field['tableCollation'])
 	        {
-	        	$sql = "ALTER TABLE `$table`  ENGINE = {$new_field['Engine']} ROW_FORMAT={$new_field['row_format']}";
+	        	$sql = "ALTER TABLE `$table`  ENGINE = {$new_field['Engine']} COLLATE={$new_field['tableCollation']} ROW_FORMAT={$new_field['row_format']}";
 	        	echo $sql.';<br />';
 	        }
         }        

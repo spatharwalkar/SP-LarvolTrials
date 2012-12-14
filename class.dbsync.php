@@ -148,7 +148,7 @@
                     } */
                     
                     //check for table_format changes
-                    if($fields_sync[0]['row_format'] != $fields_home[0]['row_format'] || $fields_sync[0]['Engine'] != $fields_home[0]['Engine'])
+                    if($fields_sync[0]['row_format'] != $fields_home[0]['row_format'] || $fields_sync[0]['Engine'] != $fields_home[0]['Engine'] || $fields_sync[0]['tableCollation'] != $fields_home[0]['tableCollation'])
                     {
                     	$db_sync->ChangeTableRowFormatEngine($tables_home[$i],$fields_home[0],$fields_sync[0]);
                     }                    
