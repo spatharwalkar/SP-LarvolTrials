@@ -46,24 +46,27 @@ function DataGenerator($id)
 	
 	while($header = mysql_fetch_array($res))
 	{
-		if($header['type_id'] != NULL)
+		if(!in_array($header['type_id'], $productIds)) //Duplicate ids avoided
 		{
-			$result =  mysql_fetch_assoc(mysql_query("SELECT id, name, description, company FROM `products` WHERE id = '" . $header['type_id'] . "' "));
-			$rows[$header['num']] = $result['name'];
-			if($result['company'] != NULL && trim($result['company']) != '')
+			if($header['type_id'] != NULL)
 			{
-				$result['company']=str_replace(',',', ',$result['company']);
-				$result['company']=str_replace(',  ',', ',$result['company']);
-				$rowsCompanyName[$header['num']] = ' / '.$result['company'];
-			} 
-			$rowsDescription[$header['num']] = $result['description'];
-			$rowsTagName[$header['num']] = $header['tag'];
+				$result =  mysql_fetch_assoc(mysql_query("SELECT id, name, description, company FROM `products` WHERE id = '" . $header['type_id'] . "' "));
+				$rows[$header['num']] = $result['name'];
+				if($result['company'] != NULL && trim($result['company']) != '')
+				{
+					$result['company']=str_replace(',',', ',$result['company']);
+					$result['company']=str_replace(',  ',', ',$result['company']);
+					$rowsCompanyName[$header['num']] = ' / '.$result['company'];
+				} 
+				$rowsDescription[$header['num']] = $result['description'];
+				$rowsTagName[$header['num']] = $header['tag'];
+			}
+			else
+			{
+				$rows[$header['num']] = $header['type_id'];
+			}
+			$productIds[$header['num']] = $header['type_id'];
 		}
-		else
-		{
-			$rows[$header['num']] = $header['type_id'];
-		}
-		$productIds[$header['num']] = $header['type_id'];
 	}
 
 	// SELECT MAX ROW AND MAX COL
