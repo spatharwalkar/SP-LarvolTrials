@@ -7736,9 +7736,10 @@ class TrialTracker
 		$upmHistory = array();
 		
 		$query = "SELECT u.`id`, ut.`larvol_id`, u.`product`, u.`event_description`, u.`event_link`, "
-				. " u.`result_link`, u.`start_date`, u.`end_date`, u.`status`, u.`last_update`, u.`redtag`, u.`condition` "
+				. " u.`result_link`, u.`start_date`, u.`end_date`, u.`status`, u.`last_update`, rt.`name` AS redtag, u.`condition` "
 				. " FROM `upm` u "
 				. " LEFT OUTER JOIN `upm_trials` ut ON ut.`upm_id` = u.`id` "
+				. " LEFT OUTER JOIN `redtags` rt ON rt.`id` = u.`redtag` "
 				. " WHERE ut.`larvol_id` IS NULL AND u.`product` IN ('" . implode("', '", $productIds) . "') "
 				. " ORDER BY u.`end_date` ASC, u.`start_date` ASC ";
 		$res = m_query(__LINE__,$query);
@@ -7762,6 +7763,7 @@ class TrialTracker
 					$result[$productId][$upmId]['start_date'] 		= $row['start_date'];
 					$result[$productId][$upmId]['end_date'] 		= $row['end_date'];
 					$result[$productId][$upmId]['product'] 			= $row['product'];
+					$result[$productId][$upmId]['redtag'] 			= $row['redtag'];
 				}
 				
 				$upmHistory = $this->getUpmHistory($upmIds);
