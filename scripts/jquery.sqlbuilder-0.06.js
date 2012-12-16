@@ -46,8 +46,8 @@ $.initialBracesFlag = 9;
                     }
                     //its one of our directory nodes so stop propigation
                     e.stopPropagation();
-                } else if (node.attr('href') == '#' | node.hasClass('item')) {
-                    /*//its a file node with a href of # so execute the call back
+                } else if (node.attr('alt') == '#' | node.hasClass('item')) {
+                    /*//its a file node with a alt of # so execute the call back
                     // if the item that fired the click is not either a folder or a file it cascades as normal
                     // so that contained links behave like normal*/
                     opts.onselect(node);
@@ -264,10 +264,10 @@ $.initialBracesFlag = 9;
                 		dispName = opts.fields[i].displayname;
                 	}
                     if (opts.fields[i].ftype == '{')
-                        mmenu = mmenu + '<li><a href="#' + i + '">' + dispName + '</a><ul>';
+                        mmenu = mmenu + '<li><a href="javascript:void(0)" alt="#' + i + '">' + dispName + '</a><ul>';
                     else if (opts.fields[i].ftype == '}')
                         mmenu = mmenu + '</ul></li>';
-                    else mmenu = mmenu + '<li><a href="#' + i + '">' + dispName + '</a></li>';
+                    else mmenu = mmenu + '<li><a href="javascript:void(0)" alt="#' + i + '">' + dispName + '</a></li>';
                 }
             }
             //remove any visible menus
@@ -313,9 +313,9 @@ $.initialBracesFlag = 9;
 
 
             if (opts.fields.length > 0) {
-                mmenu = mmenu + '<li><input type="checkbox" href="#0" id="' + opts.checkalltext + '">' + opts.checkalltext + '</li>';
+                mmenu = mmenu + '<li><input type="checkbox" href="javascript:void(0)" alt="#0" id="' + opts.checkalltext + '">' + opts.checkalltext + '</li>';
                 for (var i = 0; i < opts.fields.length; i++) {
-                    mmenu = mmenu + '<li><input type="checkbox" ' + (opts.checkeditems.indexOf(opts.fields[i].name) != -1 ? ' checked ' : '') + 'href="#' + (i + 1) + '" id="' + opts.fields[i].name + '">' + opts.fields[i].name + '</li>';
+                    mmenu = mmenu + '<li><input type="checkbox" ' + (opts.checkeditems.indexOf(opts.fields[i].name) != -1 ? ' checked ' : '') + 'href="javascript:void(0)" alt="#' + (i + 1) + '" id="' + opts.fields[i].name + '">' + opts.fields[i].name + '</li>';
                 }
             }
 
@@ -377,9 +377,9 @@ $.initialBracesFlag = 9;
                 $('div#' + opts.menu).find('input[type=checkbox]').unbind('click')
                                                                      .click(function (e) {
                                                                          e.stopPropagation();
-                                                                         var vhref = $(this).attr('href');
-                                                                         vhref = vhref.split('#')[1];
-                                                                         if (vhref == 0)
+                                                                         var valt = $(this).attr('alt');
+                                                                         valt = valt.split('#')[1];
+                                                                         if (valt == 0)
                                                                              $('div#' + opts.menu).find('input[type=checkbox]').attr('checked', $(this).attr('checked') ? true : false);
                                                                          else
                                                                              $(this).attr('checked', $(this).attr('checked') ? true : false);
@@ -388,9 +388,9 @@ $.initialBracesFlag = 9;
                                                                          var k = 0;
                                                                          $('div#' + opts.menu).find('input[type=checkbox]').each(function () {
                                                                              //if not select all(first item in the list...)
-                                                                             var v1href = $(this).attr('href');
-                                                                             v1href = v1href.split('#')[1];
-                                                                             if (v1href != '0') {
+                                                                             var v1alt = $(this).attr('alt');
+                                                                             v1alt = v1alt.split('#')[1];
+                                                                             if (v1alt != '0') {
                                                                                  items[k] = ($(this).attr('checked') ? $(this).attr('id') : '');
                                                                                  if ($(this).attr('checked')) k++;
                                                                              }
@@ -400,15 +400,15 @@ $.initialBracesFlag = 9;
                                                                          var items_str = items.join(',');
                                                                          //alert(items_str.substr(-1,1));
                                                                          //alert(items_str.substr(0,items_str.length-1));
-                                                                         var v2href = items_str.substring(items_str.length - 1, items_str.length);
-                                                                         if (v2href == ',')
+                                                                         var v2alt = items_str.substring(items_str.length - 1, items_str.length);
+                                                                         if (v2alt == ',')
                                                                              items_str = items_str.substring(0, items_str.length - 1);
 
 
-                                                                         var v3href = $(this).attr('href');
-                                                                         v3href = v3href.split('#')[1];
+                                                                         var v3alt = $(this).attr('alt');
+                                                                         v3alt = v3alt.split('#')[1];
 
-                                                                         if (opts.onselect) opts.oncheck(v3href, $(srcelement), $(this), items_str);
+                                                                         if (opts.onselect) opts.oncheck(v3alt, $(srcelement), $(this), items_str);
                                                                          //return false;
                                                                      });
 
@@ -424,12 +424,12 @@ $.initialBracesFlag = 9;
 						               value != 'Annotations >' && value != 'PubMed >') {
                                                               $('div#' + opts.menu).slideUp(200, function () {
                                                                   /*console.log("sqlsimplemenu:this.each:click:find(a):unbind:"+'div#'+opts.menu+":slideup(200): %o",this);
-                                                                  if( opts.onselect ) opts.onselect( $(selitem).attr('href').substr(1), $(srcelement),null );*/
+                                                                  if( opts.onselect ) opts.onselect( $(selitem).attr('alt').substr(1), $(srcelement),null );*/
                                                               });
 
-                                                              var v5href = $(selitem).attr('href');
-                                                              v5href = v5href.split('#')[1];
-                                                              if (opts.onselect) opts.onselect(v5href, $(srcelement), null);
+                                                              var v5alt = $(selitem).attr('alt');
+                                                              v5alt = v5alt.split('#')[1];
+                                                              if (opts.onselect) opts.onselect(v5alt, $(srcelement), null);
 
                                                               return false;
                                                           }
@@ -442,11 +442,11 @@ $.initialBracesFlag = 9;
 
                                                               $('div#' + opts.menu).slideUp(200, function () {
                                                                   /*console.log("sqlsimplemenu:this.each:click:find(a):unbind:"+'div#'+opts.menu+":slideup(200): %o",this);
-                                                                  if( opts.onselect ) opts.onselect( $(selitem).attr('href').substr(1), $(srcelement),null );*/
+                                                                  if( opts.onselect ) opts.onselect( $(selitem).attr('alt').substr(1), $(srcelement),null );*/
                                                               });
-                                                              var v4href = $(selitem).attr('href');
-                                                              v4href = v4href.split('#')[1];
-                                                              if (opts.onselect) opts.onselect(v4href, $(srcelement), null);
+                                                              var v4alt = $(selitem).attr('alt');
+                                                              v4alt = v4alt.split('#')[1];
+                                                              if (opts.onselect) opts.onselect(v4alt, $(srcelement), null);
 
                                                               return false;
                                                           }
@@ -469,16 +469,16 @@ $.initialBracesFlag = 9;
                             $('#ulsqlmenulist ul').remove();
 
                             if (opts.fields[i].ftype == '{')
-                                mmenu = mmenu + '<li><a href="#' + i + '">' + opts.fields[i].name + '</a><ul>';
+                                mmenu = mmenu + '<li><a href="javascript:void(0)" alt="#' + i + '">' + opts.fields[i].name + '</a><ul>';
                             else if (opts.fields[i].ftype == '}')
                                 mmenu = mmenu + '</ul></li>';
-                            else mmenu = mmenu + '<li><a href="#' + i + '">' + opts.fields[i].name + '</a></li>';
+                            else mmenu = mmenu + '<li><a href="javascript:void(0)" alt="#' + i + '">' + opts.fields[i].name + '</a></li>';
 
                         }
                         else {
                             optstring = opts.fields[i].name;
                             if (optstring.toLowerCase().indexOf(searchstring.toLowerCase()) >= 0) {
-                                mmenu += '<li><a href="#' + i + '">' + opts.fields[i].name + '</a></li>';
+                                mmenu += '<li><a href="javascript:void(0)" alt="#' + i + '">' + opts.fields[i].name + '</a></li>';
                             }
                         }
                     }
@@ -496,12 +496,12 @@ $.initialBracesFlag = 9;
 						               value != 'Annotations >' && value != 'PubMed >') {
                                                               $('div#' + opts.menu).slideUp(200, function () {
                                                                   /*console.log("sqlsimplemenu:this.each:click:find(a):unbind:"+'div#'+opts.menu+":slideup(200): %o",this);
-                                                                  if( opts.onselect ) opts.onselect( $(selitem).attr('href').substr(1), $(srcelement),null );*/
+                                                                  if( opts.onselect ) opts.onselect( $(selitem).attr('alt').substr(1), $(srcelement),null );*/
                                                               });
 
-                                                              var v5href = $(selitem).attr('href');
-                                                              v5href = v5href.split('#')[1];
-                                                              if (opts.onselect) opts.onselect(v5href, $(srcelement), null);
+                                                              var v5alt = $(selitem).attr('alt');
+                                                              v5alt = v5alt.split('#')[1];
+                                                              if (opts.onselect) opts.onselect(v5alt, $(srcelement), null);
 
                                                               return false;
                                                           }
@@ -515,12 +515,12 @@ $.initialBracesFlag = 9;
 
                                                               $('div#' + opts.menu).slideUp(200, function () {
                                                                   /*console.log("sqlsimplemenu:this.each:click:find(a):unbind:"+'div#'+opts.menu+":slideup(200): %o",this);
-                                                                  if( opts.onselect ) opts.onselect( $(selitem).attr('href').substr(1), $(srcelement),null );*/
+                                                                  if( opts.onselect ) opts.onselect( $(selitem).attr('alt').substr(1), $(srcelement),null );*/
                                                               });
 
-                                                              var v5href = $(selitem).attr('href');
-                                                              v5href = v5href.split('#')[1];
-                                                              if (opts.onselect) opts.onselect(v5href, $(srcelement), null);
+                                                              var v5alt = $(selitem).attr('alt');
+                                                              v5alt = v5alt.split('#')[1];
+                                                              if (opts.onselect) opts.onselect(v5alt, $(srcelement), null);
 
                                                               return false;
                                                           }
@@ -537,10 +537,10 @@ $.initialBracesFlag = 9;
 
                                                       $('div#' + opts.menu).slideUp(200, function () {
                                                       });
-                                                      //								var v6href= $(this).attr('href');
+                                                      //								var v6alt= $(this).attr('alt');
                                                       //								alert($(this));
-                                                      //								v6href=v6href.split('#')[0];
-                                                      //								alert(v6href);
+                                                      //								v6alt=v6alt.split('#')[0];
+                                                      //								alert(v6alt);
                                                       //								if( opts.onselect ) opts.onselect( $(this)., $(srcelement),null );
 
                                                       //								return false;
@@ -594,7 +594,7 @@ $.initialBracesFlag = 9;
             ////	  		        optstring=opts.fields[i].name;
             ////	  		        if(optstring.indexOf(searchstring)>=0)
             ////	  		        {
-            ////						mmenu += '<li><a href="#'+i+'">'+opts.fields[i].name+'</a></li>';
+            ////						mmenu += '<li><a href="javascript:void(0)" alt="#'+i+'">'+opts.fields[i].name+'</a></li>';
             ////	  		        }
             ////	  		    }			                   
             ////                    $("ul#ulsqlmenulist").append(mmenu); 
@@ -612,10 +612,10 @@ $.initialBracesFlag = 9;
             ////												  
             ////							$('div#'+opts.menu).slideUp(200,function(){								
             ////					                /*console.log("sqlsimplemenu:this.each:click:find(a):unbind:"+'div#'+opts.menu+":slideup(200): %o",this);
-            ////								            if( opts.onselect ) opts.onselect( $(selitem).attr('href').substr(1), $(srcelement),null );*/
+            ////								            if( opts.onselect ) opts.onselect( $(selitem).attr('alt').substr(1), $(srcelement),null );*/
             ////								});
             ////								
-            ////								if( opts.onselect ) opts.onselect( $(selitem).attr('href').substr(1), $(srcelement),null );
+            ////								if( opts.onselect ) opts.onselect( $(selitem).attr('alt').substr(1), $(srcelement),null );
 
             ////								return false;
             ////						     }				        
@@ -630,7 +630,7 @@ $.initialBracesFlag = 9;
             ////							$('div#'+opts.menu).slideUp(200,function(){								
             ////					               							});
             ////								
-            ////								if( opts.onselect ) opts.onselect( $(selitem).attr('href').substr(1), $(srcelement),null );
+            ////								if( opts.onselect ) opts.onselect( $(selitem).attr('alt').substr(1), $(srcelement),null );
 
             ////								return false;
             ////						   
@@ -791,7 +791,7 @@ $.initialBracesFlag = 9;
                 data = data + '"override":"' + override + '",';
                 data = data + '"columndata":[';
                 $('span.sqlcolumn').each(function () {
-                    var col_slot = $(this).find('a.addnewsqlcolumn').attr('href');
+                    var col_slot = $(this).find('a.addnewsqlcolumn').attr('alt');
                     col_slot = col_slot.split('#')[1];
                     var col_name = $(this).find('a.addnewsqlcolumn').text();
                     var col_as = $(this).find('input.addnewsqlcolumnvalue').val();
@@ -808,7 +808,7 @@ $.initialBracesFlag = 9;
 
                 data = data + '"sortdata":[';
                 $('span.sqlsort').each(function () {
-                    var col_slot = $(this).find('a.addnewsqlsort').attr('href');
+                    var col_slot = $(this).find('a.addnewsqlsort').attr('alt');
                     col_slot = col_slot.split('#')[1];
                     var col_name = $(this).find('a.addnewsqlsort').text();
                     var col_as = $(this).find('span.addnewsqlsortvalue').html();
@@ -824,7 +824,7 @@ $.initialBracesFlag = 9;
 
                 data = data + '"groupdata":[';
                 $('span.sqlgroup').each(function () {
-                    var col_slot = $(this).find('a.addnewsqlgroup').attr('href');
+                    var col_slot = $(this).find('a.addnewsqlgroup').attr('alt');
                     col_slot = col_slot.split('#')[1];
                     var col_name = $(this).find('a.addnewsqlgroup').text();
                     var columndata = '{' +
@@ -854,16 +854,16 @@ $.initialBracesFlag = 9;
                   '},';
             		}
             	sqlwhereloop++;
-                    var col_slot = $(this).find('a.addnewsqlwhere').attr('href');
+                    var col_slot = $(this).find('a.addnewsqlwhere').attr('alt');
                     var index = $(this).find('a.addnewsqlwhere').attr('id');
                     var col_name = $(this).find('a.addnewsqlwhere').text();
                     col_slot = col_slot.split('#')[1];
                     //alert(col_slot);
-                    var op_slot = $(this).find('a.addnewsqlwhereoperator').attr('href');
+                    var op_slot = $(this).find('a.addnewsqlwhereoperator').attr('alt');
                     op_slot = op_slot.split('#')[1];
                     //var op_name = $(this).find('a.addnewsqlwhereoperator').text();
                     var op_name = opts.operators[op_slot].name;
-                    var chain_slot = $(this).find('a.addnewsqlwherechain').attr('href');
+                    var chain_slot = $(this).find('a.addnewsqlwherechain').attr('alt');
                     chain_slot = chain_slot.split('#')[1];
                     var chain_name = $(this).find('a.addnewsqlwherechain').text();
                     var col_value = '';
@@ -924,7 +924,7 @@ $.initialBracesFlag = 9;
                 var ccount = 0;
                 var tablehash = new Array();
                 $('span.sqlcolumn').each(function () {
-                    var col_slot = $(this).find('a.addnewsqlcolumn').attr('href');
+                    var col_slot = $(this).find('a.addnewsqlcolumn').attr('alt');
                     col_slot = col_slot.split('#')[1];
                     var col_as = $(this).find('input.addnewsqlcolumnvalue').val();
                     var fieldstr = opts.fields[col_slot].field;
@@ -949,7 +949,7 @@ $.initialBracesFlag = 9;
                 var sorts = new Array();
                 var scount = 0;
                 $('span.sqlsort').each(function () {
-                    var col_slot = $(this).find('a.addnewsqlsort').attr('href');
+                    var col_slot = $(this).find('a.addnewsqlsort').attr('alt');
                     col_slot = col_slot.split('#')[1];
                     var col_as = $(this).find('span.addnewsqlsortvalue').html();
                     sorts[scount++] = opts.fields[col_slot].field + '  ' + (col_as == 'Descending' ? 'desc' : '');
@@ -965,7 +965,7 @@ $.initialBracesFlag = 9;
                 var groups = new Array();
                 var gcount = 0;
                 $('span.sqlgroup').each(function () {
-                    var col_slot = $(this).find('a.addnewsqlgroup').attr('href');
+                    var col_slot = $(this).find('a.addnewsqlgroup').attr('alt');
                     col_slot = col_slot.split('#')[1];
                     groups[gcount++] = opts.fields[col_slot].field;
                     var xx = opts.fields[col_slot].field.split('.'); //table.field
@@ -983,11 +983,11 @@ $.initialBracesFlag = 9;
                 var wcount = 0;
                 var prevchain = ' ', prevchainstr = ' ';
                 $('span.sqlwhere').each(function () {
-                    var col_slot = $(this).find('a.addnewsqlwhere').attr('href');
+                    var col_slot = $(this).find('a.addnewsqlwhere').attr('alt');
                     col_slot = col_slot.split('#')[1];
-                    var op_slot = $(this).find('a.addnewsqlwhereoperator').attr('href');
+                    var op_slot = $(this).find('a.addnewsqlwhereoperator').attr('alt');
                     op_slot = op_slot.split('#')[1];
-                    var chain_slot = $(this).find('a.addnewsqlwherechain').attr('href');
+                    var chain_slot = $(this).find('a.addnewsqlwherechain').attr('alt');
                     chain_slot = chain_slot.split('#')[1];
                     //debugger;
                     //                   var col_value=$(this).find('span.addnewsqlwherevalue').html();
@@ -1147,19 +1147,19 @@ $.initialBracesFlag = 9;
                     '<font size="4" face="Bold" color="Grey">Conditions</font>' +
                     '<p class=sqlbuilderwhere>' + 
                     '<span class="sqlwhere2" id="1">' +
-	                 '<a class="addnewsqlwherechain" id="9990" href="#0" >' + opts.chainInitial[2].name + '</a>&nbsp;' +
+	                 '<a class="addnewsqlwherechain" id="9990" href="javascript:void(0)" alt="#0" >' + opts.chainInitial[2].name + '</a>&nbsp;' +
                    '</span>' +
-                    '<br/>' + '<a class="addnewsqlwhere" id=9999 href="#">' + '<br/>' + opts.addnewwhere + '</a>' + '<br/><br/><br/>' + '</p>' +
+                    '<br/>' + '<a class="addnewsqlwhere" id=9999 href="javascript:void(0)" alt="#">' + '<br/>' + opts.addnewwhere + '</a>' + '<br/><br/><br/>' + '</p>' +
                     '<br/><br/>' +
                     '<font size="4" face="Bold" color="Grey">' + addnewsqlcolumn()  + '</font>' +
-                    '<p class=sqlbuildercolumn>' + '<br/><br/>' + '<a class="addnewsqlcolumn" id=9999 href="#">' + opts.addnewcolumn + '</a>' + '<br/><br/><br/>' + '</p>' +
+                    '<p class=sqlbuildercolumn>' + '<br/><br/>' + '<a class="addnewsqlcolumn" id=9999 href="javascript:void(0)" alt="#">' + opts.addnewcolumn + '</a>' + '<br/><br/><br/>' + '</p>' +
                     '<br/>' +
                     '<font size="4" face="Bold" color="Grey">' + addnewsqlsort() + '</font>' +
-                    '<p class=sqlbuildersort>' + '<br/>' + '<a class="addnewsqlsort" id=9999 href="#">' + '<br/>' + opts.addnewsort + '</a>' + '<br/><br/><br/>' + '</p>' +
+                    '<p class=sqlbuildersort>' + '<br/>' + '<a class="addnewsqlsort" id=9999 href="javascript:void(0)" alt="#">' + '<br/>' + opts.addnewsort + '</a>' + '<br/><br/><br/>' + '</p>' +
                     '<br/><br/>' +
                    
 
-                    '<p class=sqlbuildergroup>' + '<br/>' + '<a class="addnewsqlgroup" id=9999 href="#">' + '<br/>' + opts.addnewgroup + '</a>' + '<br/><br/><br/>' + '</p>' +
+                    '<p class=sqlbuildergroup>' + '<br/>' + '<a class="addnewsqlgroup" id=9999 href="javascript:void(0)" alt="#">' + '<br/>' + opts.addnewgroup + '</a>' + '<br/><br/><br/>' + '</p>' +
                     '<br/>' 
                    );
 
@@ -1216,8 +1216,8 @@ $.initialBracesFlag = 9;
                     if (menutype == 'column') {
                         sqlline =
 					          '<span class="sql' + menutype + '" id=' + (opts.counters[countertype]) + '>' +
-				                 '<a class="addnewsql' + menutype + 'delete" id=' + (opts.counters[countertype]) + ' href="#' + action + '">' + opts.deletetext + '</a>&nbsp;' +
-				                 '<a class="addnewsql' + menutype + '" id=' + (opts.counters[countertype]) + ' href="#' + action + '">' + opts.fields[action].name + '</a>' + (countertype == 2 ? '' : '&nbsp;as &nbsp;') +
+				                 '<a class="addnewsql' + menutype + 'delete" id=' + (opts.counters[countertype]) + ' href="javascript:void(0)" alt="#' + action + '">' + opts.deletetext + '</a>&nbsp;' +
+				                 '<a class="addnewsql' + menutype + '" id=' + (opts.counters[countertype]) + ' href="javascript:void(0)" alt="#' + action + '">' + opts.fields[action].name + '</a>' + (countertype == 2 ? '' : '&nbsp;as &nbsp;') +
    			                     '<input type="text" class="addnewsql' + menutype + 'value" id=' + (opts.counters[countertype]) + ' value="' + (defval ? defval.columnas : opts.fields[action].name) + '" />' +
 				                 '</span>';
                     }
@@ -1225,9 +1225,9 @@ $.initialBracesFlag = 9;
 
                         sqlline =
 				                 '<span class="sql' + menutype + '" id=' + (opts.counters[countertype]) + '>' +
-				                 '<a class="addnewsql' + menutype + 'delete" id=' + (opts.counters[countertype]) + ' href="#' + action + '">' + opts.deletetext + '</a>&nbsp;' +
-				                 '<a class="addnewsql' + menutype + '" id=' + (opts.counters[countertype]) + ' href="#' + action + '">' + opts.fields[action].name + '</a>' + (countertype == 2 ? '' : '&nbsp;as &nbsp;') +
-   			                     '<span class="addnewsql' + menutype + 'value" id=' + (opts.counters[countertype]) + ' href="#0">' + ((countertype == 0 || countertype == 2) ? (countertype == 0 ? (defval ? defval.columnas : opts.fields[action].name) : '') : (defval ? defval.columnas : 'Ascending')) + '</span>&nbsp;' +
+				                 '<a class="addnewsql' + menutype + 'delete" id=' + (opts.counters[countertype]) + ' href="javascript:void(0)" alt="#' + action + '">' + opts.deletetext + '</a>&nbsp;' +
+				                 '<a class="addnewsql' + menutype + '" id=' + (opts.counters[countertype]) + ' href="javascript:void(0)" alt="#' + action + '">' + opts.fields[action].name + '</a>' + (countertype == 2 ? '' : '&nbsp;as &nbsp;') +
+   			                     '<span class="addnewsql' + menutype + 'value" id=' + (opts.counters[countertype]) + ' href="javascript:void(0)" alt="#0">' + ((countertype == 0 || countertype == 2) ? (countertype == 0 ? (defval ? defval.columnas : opts.fields[action].name) : '') : (defval ? defval.columnas : 'Ascending')) + '</span>&nbsp;' +
 				                 '</span>';
 
                     }
@@ -1270,8 +1270,8 @@ $.initialBracesFlag = 9;
 				                   var element = $(this);
 
 
-				                   var vhref = $('a[class=addnewsql' + menutype + '][id=' + element.attr('id') + ']').attr('href');
-				                   var fieldid = vhref.split('#')[1];
+				                   var valt = $('a[class=addnewsql' + menutype + '][id=' + element.attr('id') + ']').attr('alt');
+				                   var fieldid = valt.split('#')[1];
 
 				                   var slotid = element.attr('id');
 
@@ -1334,7 +1334,7 @@ $.initialBracesFlag = 9;
 
                             $("[class=addnewsql" + menutype + "][id=" + $(el).attr('id') + "]")
 				            .html(opts.fields[action].name)
-				            .attr('href', "#" + action);
+				            .attr('alt', "#" + action);
                             onchangeevent('change');
 
                         }
@@ -1569,12 +1569,12 @@ $.initialBracesFlag = 9;
 
                        $("[class=addnewsqlwhere][id=" + $(el).attr('id') + "]")
 			            .html(opts.fields[action].name)
-			            .attr('href', "#" + action);
+			            .attr('alt', "#" + action);
                         //var op_slot1 = $("[class=addnewsqlwhereoperator][id=" + $(el).attr('id') + "]")
-			//            .attr('href').substr(1);
+			//            .attr('alt').substr(1);
 		       $("[class=addnewsqlwhereoperator][id=" + $(el).attr('id') + "]")
 					            .html(opts.operators[0].displayname)
-		            .attr('href', "#" + "0");
+		            .attr('alt', "#" + "0");
 			var op_slot1 = "0";
                         var col_slot1 = action;
                         var counter_id1 = $(el).attr('id');
@@ -1683,9 +1683,9 @@ $.initialBracesFlag = 9;
                    onselect: function (action, el) {
                  $("[class=addnewsqlwhereoperator][id=" + $(el).attr('id') + "]")
 		            .html(opts.operators[action].displayname)
-		            .attr('href', "#" + action);
+		            .attr('alt', "#" + action);
                   var col_slot1 = $("[class=addnewsqlwhere][id=" + $(el).attr('id') + "]")
-		            .attr('href').substr(1);
+		            .attr('alt').substr(1);
                   var op_slot1 = action;
                   var counter_id1 = $(el).attr('id');
 				  
@@ -1721,7 +1721,7 @@ $.initialBracesFlag = 9;
                    onselect: function (action, el) {
                        $("[class=addnewsqlwherechain][id=" + $(el).attr('id') + "]")
 			            .html(opts.chain[action].name)
-			            .attr('href', "#" + action);
+			            .attr('alt', "#" + action);
                        onchangeevent('change');
                        indent();
                    }
@@ -1738,7 +1738,7 @@ $.initialBracesFlag = 9;
                    onselect: function (action, el) {
                        $("[class=addnewsqlwherechain][id=" + $(el).attr('id') + "]")
 			            .html(opts.chainInitial[action].name)
-			            .attr('href', "#" + action);
+			            .attr('alt', "#" + action);
                        onchangeevent('change');
                        indent();
                    }
@@ -1753,16 +1753,16 @@ $.initialBracesFlag = 9;
         	    var sqlline =
 			                 '<span class="sqlwhere" id=' + counter_id + '>' +
                              '<span class="sqlwhere1" id=' + counter_id + '>' +
-                             '<a class="addnewsqlwhereadd" id=' + counter_id + ' href="#' + col_slot + '">' + '<img src="images/add.gif" style="border:none;">' + '</a>&nbsp;' +
-			                 '<a class="addnewsqlwheredelete" id=' + counter_id + ' href="#' + col_slot + '">' + opts.deletetext + '</a>&nbsp;' +
+                             '<a class="addnewsqlwhereadd" id=' + counter_id + ' href="javascript:void(0)" alt="#' + col_slot + '">' + '<img src="images/add.gif" style="border:none;">' + '</a>&nbsp;' +
+			                 '<a class="addnewsqlwheredelete" id=' + counter_id + ' href="javascript:void(0)" alt="#' + col_slot + '">' + opts.deletetext + '</a>&nbsp;' +
 			                 '<div class="divnewsqlwhere" id=' + counter_id + '>' +
-			                '<a class="addnewsqlwhere" id=' + counter_id + ' href="#' + col_slot + '">' + opts.fields[col_slot].name + '</a></div>&nbsp;' +
+			                '<a class="addnewsqlwhere" id=' + counter_id + ' href="javascript:void(0)" alt="#' + col_slot + '">' + opts.fields[col_slot].name + '</a></div>&nbsp;' +
 			                '<div class="divnewsqlwhereoperator" id=' + counter_id + '>' +
-			                 '<a class="addnewsqlwhereoperator" id=' + counter_id + ' href="#' + op_slot + '">' + opts.operators[op_slot].displayname + '</a></div>&nbsp;' +
+			                 '<a class="addnewsqlwhereoperator" id=' + counter_id + ' href="javascript:void(0)" alt="#' + op_slot + '">' + opts.operators[op_slot].displayname + '</a></div>&nbsp;' +
 			                 sqlwherevalue +
                              '</span><br />' +
                              '<span class="sqlwhere2" id=' + counter_id + '>' +
-			                 '<a class="addnewsqlwherechain" id=' + counter_id + ' href="#' + chain_slot + '">' + opts.chain[chain_slot].name + '</a>&nbsp;' +
+			                 '<a class="addnewsqlwherechain" id=' + counter_id + ' href="javascript:void(0)" alt="#' + chain_slot + '">' + opts.chain[chain_slot].name + '</a>&nbsp;' +
                               '</span>' +
 			                 '</span>';
                 return sqlline;
