@@ -6415,7 +6415,7 @@ class TrialTracker
 		return array('Ids' => $Ids, 'TrialsInfo' => $TrialsInfo, 'productSelector' => $productSelector);
 	}
 	
-	function getAreaHmHeaders($hmId, $areaIds, $lastRow = false)
+	function getAreaHmHeaders($hmId, $areaIds, $dttFlag = false, $lastRow = false)
 	{
 		global $logger;
 		
@@ -6452,11 +6452,6 @@ class TrialTracker
 		{
 			$orderby = " ORDER BY rmh.`num` DESC ";
 			$limit = " LIMIT 0,1 ";
-			
-			if($dtt)
-			{
-				$limit = " LIMIT 1,1 ";
-			}
 		}
 		
 		$Query = "SELECT rmh.`display_name`, rmh.`type_id`, rmh.`category`, ar.`coverage_area`, ar.`display_name` AS global_display_name "
@@ -6515,14 +6510,13 @@ class TrialTracker
 			unset($log);
 		}
 		
-		if($dtt && !$lastRow)
+		if($dtt && $dttFlag)
 		{
 			array_pop($Ids);
 			array_pop($TrialsInfo);
 			array_pop($productSelector);
 		}
 
-		
 		return array('Ids' => $Ids, 'TrialsInfo' => $TrialsInfo, 'productSelector' => $productSelector);
 	}
 	
@@ -6612,7 +6606,7 @@ class TrialTracker
 				}
 			}
 			
-			$aDetails = $this->getAreaHmHeaders($hmId, $areaIds);
+			$aDetails = $this->getAreaHmHeaders($hmId, $areaIds, false);
 			foreach($aDetails['Ids'] as $ikey => $ivalue)
 			{
 				$aDetails['Ids'][$ikey]['product'] = implode("','", $productIds);
@@ -6634,29 +6628,19 @@ class TrialTracker
 				$tHeader = 'All Areas';
 				$areaIds = array();
 				
-				$Query = "SELECT GROUP_CONCAT(type_id) AS type_id FROM `rpt_masterhm_headers` WHERE `report` = '" . $hmId . "' AND `type` = 'area' ";
-				$Res = m_query(__LINE__,$Query);
-				if($Res)
+				$aDetails = $this->getAreaHmHeaders($hmId, $areaIds, true);
+				foreach($aDetails['TrialsInfo'] as $akey => $value)
 				{
-					if(mysql_num_rows($Res) > 0)
-					{
-						$Row = mysql_fetch_assoc($Res);
-						$areaIds = explode(',', $Row['type_id']);
-					}
+					$areaIds[] = $value['Id'];
 				}
-				else
-				{
-					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
-					$logger->error($log);
-					unset($log);
-				}
+				unset($aDetails);
 			}
 			else
 			{
 				$tHeader = 'Area: ';
 				$areaIds = $resultIds['area'];
 				
-				$aDetails = $this->getAreaHmHeaders($hmId, $areaIds);
+				$aDetails = $this->getAreaHmHeaders($hmId, $areaIds, false);
 				foreach($aDetails['TrialsInfo'] as $akey => $value)
 				{
 					$tHeader .= $value['sectionHeader'];
@@ -6685,7 +6669,7 @@ class TrialTracker
 				$areaIds = array();
 				
 				//fetching area(last column) from hm
-				$aDetails = $this->getAreaHmHeaders($hmId, $areaIds, $lastRow = true);
+				$aDetails = $this->getAreaHmHeaders($hmId, $areaIds, false, $lastRow = true);
 				foreach($aDetails['TrialsInfo'] as $akey => $value)
 				{
 					$tHeader .= strip_tags($value['sectionHeader']);
@@ -6711,7 +6695,7 @@ class TrialTracker
 				$tHeader = 'Area: ';
 				
 				$areaIds = $resultIds['area'];
-				$aDetails = $this->getAreaHmHeaders($hmId, $areaIds);
+				$aDetails = $this->getAreaHmHeaders($hmId, $areaIds, false);
 				
 				foreach($aDetails['TrialsInfo'] as $akey => $value)
 				{
@@ -6755,7 +6739,7 @@ class TrialTracker
 					unset($log);
 				}
 				
-				$aDetails = $this->getAreaHmHeaders($hmId, array());
+				$aDetails = $this->getAreaHmHeaders($hmId, array(), true);
 				foreach($aDetails['Ids'] as $ikey => $ivalue)
 				{
 					$aDetails['Ids'][$ikey]['product'] = implode("','", $productIds);
@@ -6775,7 +6759,7 @@ class TrialTracker
 				$areaIds = $resultIds['area'];
 				$productIds = $resultIds['product'];
 				
-				$aDetails = $this->getAreaHmHeaders($hmId, $areaIds);
+				$aDetails = $this->getAreaHmHeaders($hmId, $areaIds, false);
 				foreach($aDetails['TrialsInfo'] as $akey => $value)
 				{
 					$tHeader .= strip_tags($value['sectionHeader']);
@@ -7751,8 +7735,8 @@ class TrialTracker
 		$upmIds = array();
 		$upmHistory = array();
 		
-		$query = "SELECT u.`id`, ut.`larvol_id`, u.`product`, u.`event_type`, u.`event_description`, u.`event_link`, "
-				. " u.`result_link`, u.`start_date`, u.`end_date`, u.`status`, u.`last_update` "
+		$query = "SELECT u.`id`, ut.`larvol_id`, u.`product`, u.`event_description`, u.`event_link`, "
+				. " u.`result_link`, u.`start_date`, u.`end_date`, u.`status`, u.`last_update`, u.`redtag`, u.`condition` "
 				. " FROM `upm` u "
 				. " LEFT OUTER JOIN `upm_trials` ut ON ut.`upm_id` = u.`id` "
 				. " WHERE ut.`larvol_id` IS NULL AND u.`product` IN ('" . implode("', '", $productIds) . "') "
@@ -7774,15 +7758,10 @@ class TrialTracker
 					$result[$productId][$upmId]['status']			= $row['status'];
 					$result[$productId][$upmId]['event_link'] 		= $row['event_link'];
 					$result[$productId][$upmId]['result_link'] 		= $row['result_link'];
-					$result[$productId][$upmId]['event_type'] 		= $row['event_type'];
+					$result[$productId][$upmId]['condition'] 		= $row['condition'];
 					$result[$productId][$upmId]['start_date'] 		= $row['start_date'];
 					$result[$productId][$upmId]['end_date'] 		= $row['end_date'];
 					$result[$productId][$upmId]['product'] 			= $row['product'];
-					
-					/*if($row['last_update'] <= $endRange &&  $row['last_update'] >= $startRange && $row['historyid'] === NULL)
-					{
-						$result[$productId][$upmId]['new']	= 'y';
-					}*/
 				}
 				
 				$upmHistory = $this->getUpmHistory($upmIds);
@@ -7856,11 +7835,6 @@ class TrialTracker
 					$result[$larvolId][$upmId]['start_date'] 	= $row['start_date'];
 					$result[$larvolId][$upmId]['end_date'] 		= $row['end_date'];
 					$result[$larvolId][$upmId]['product'] 		= $row['product'];
-					
-					/*if($row['last_update'] <= $endRange &&  $row['last_update'] >= $startRange && $row['historyid'] === NULL)
-					{
-						$result[$larvolId][$upmId]['new']	= 'y';
-					}*/
 				}
 				
 				$upmHistory = $this->getUpmHistory($upmIds);
@@ -7916,6 +7890,10 @@ class TrialTracker
 				$result[$upmId]['id'] = $upmId;
 				$result[$upmId]['field'] 	= $row['field'];
 				$result[$upmId][$field] = $row['old_value'];
+				/*if($row['field'] == 'new')
+				{
+					$result[$upmId]['new']	= 'y';
+				}*/
 			}
 		}
 		else
@@ -8894,6 +8872,7 @@ class TrialTracker
 		
 		$Ids = array_map(function($item) { return $item['Id']; }, $Values['Data']);
 		$Ids = array_values($Ids);
+		$Ids = array_filter($Ids);
 		
 		$Trials = array();
 		foreach($Values['Data'] as $key => & $value)
@@ -10904,6 +10883,11 @@ class TrialTracker
 				$class = 'class="upms newtrial ' . $naUpmIndex . '" ';
 			}
 			
+			if($value['redtag'] != '' && $value['redtag'] !== NULL)
+			{
+				$value['event_description'] = $value['redtag'] . ': ' . $value['event_description'];
+			}
+			
 			//rendering unmatched upms
 			$outputStr .= '<tr ' . $class . ' ' . $display . '>';
 			
@@ -10988,13 +10972,13 @@ class TrialTracker
 			//field upm event type
 			$title = '';
 			$attr = '';	
-			if(isset($value['edited']) && ($value['edited']['field'] == 'event_type')) 
+			if(isset($value['edited']) && ($value['edited']['field'] == 'condition')) 
 			{
 
 				$attr = ' highlight'; 
-				if($value['edited']['event_type'] != '' && $value['edited']['event_type'] !== NULL)
+				if($value['edited']['condition'] != '' && $value['edited']['condition'] !== NULL)
 				{
-					$title = ' title="Previous value: '. $value['edited']['event_type'] . '" '; 
+					$title = ' title="Previous value: '. $value['edited']['condition'] . '" '; 
 				}
 				else
 				{
@@ -11005,7 +10989,7 @@ class TrialTracker
 			{
 				$title = ' title = "New record" ';
 			}
-			$outputStr .= '<td class="' . $attr . '" ' . $title . '><div class="rowcollapse">' . $value['event_type'] . ' Milestone</div></td>';
+			$outputStr .= '<td class="' . $attr . '" ' . $title . '><div class="rowcollapse">' . $value['condition'] . '</div></td>';
 			
 			
 			//field upm end date
