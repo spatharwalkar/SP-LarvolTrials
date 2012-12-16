@@ -7772,7 +7772,7 @@ class TrialTracker
 					{	
 						if(isset($upmHistory[$key]))
 						{
-							$value['edited'] = $upmHistory[$key];
+							$value = array_merge($value, $upmHistory[$key]);
 						}
 						else
 						{
@@ -7845,7 +7845,7 @@ class TrialTracker
 					{
 						if(isset($upmHistory[$key]))
 						{
-							$value['edited'] = $upmHistory[$key];
+							$value = array_merge($value, $upmHistory[$key]);
 						}
 						else
 						{
@@ -7887,13 +7887,17 @@ class TrialTracker
 				$upmId = $row['id'];
 				$field = $row['field'];
 				
-				$result[$upmId]['id'] = $upmId;
-				$result[$upmId]['field'] 	= $row['field'];
-				$result[$upmId][$field] = $row['old_value'];
-				/*if($row['field'] == 'new')
+				
+				if($field == 'new')
 				{
 					$result[$upmId]['new']	= 'y';
-				}*/
+				}
+				else
+				{
+					$result[$upmId]['edited']['id'] = $upmId;
+					$result[$upmId]['edited']['field'] 	= $field;
+					$result[$upmId]['edited'][$field] = $row['old_value'];
+				}
 			}
 		}
 		else
