@@ -11423,7 +11423,7 @@ class TrialTracker
 	function liLoggedIn()
 	{
 		global $li_user;
-		if( isset($_COOKIE['li_user']) or (isset($li_user) and $li_user == 'YES') )
+		if( isset($_COOKIE['li_user']) or isset($_SESSION['li_user']) or (isset($li_user) and $li_user == 'YES') )
 		{
 			return true;
 		}
