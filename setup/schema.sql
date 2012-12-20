@@ -291,6 +291,14 @@ DELIMITER ;
 DELIMITER $$
 CREATE TRIGGER upm_status2 BEFORE INSERT ON upm FOR EACH ROW
 BEGIN
+set @found := false;
+select true into @found from upm where 
+product=new.product and event_type = new.event_type and event_description = new.event_description and event_link = new.event_link and result_link = new.result_link;
+
+if @found then
+signal sqlstate '45000' set message_text = '<br>Duplicate UPM entry!<br>';
+end if;
+
   IF NEW.result_link IS NOT NULL THEN
     IF NEW.end_date IS NULL THEN
       SET NEW.`status`='Cancelled';

@@ -1131,7 +1131,8 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 		}
 		else
 		{
-			softDieSession('Cannot insert '.$table.' entry');
+			$merr = mysql_error();
+			softDieSession('Cannot insert '.$table.' entry '. $merr );
 			return 0;
 		}
 	}
@@ -2269,6 +2270,7 @@ Function to get product or redtag name from there id's to store it in history ta
 */
 function getUPMProdOrRedtagName($table, $value)
 {
+	global $db, $logger;
 	$query = "select `name` from $table where id=".mysql_real_escape_string($value)."";
 	$res = mysql_query($query);
 	if($res)
