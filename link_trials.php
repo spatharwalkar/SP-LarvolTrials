@@ -558,7 +558,7 @@ $(document).ready(function(){
 				
 				
 				$query = 
-					'select brief_title,acronym,official_title,lead_sponsor,collaborator,inclusion_criteria,exclusion_criteria,
+					'select brief_title,`phase`,acronym,official_title,lead_sponsor,collaborator,inclusion_criteria,exclusion_criteria,
 					`condition`,source_id FROM `data_trials` 
 					where larvol_id="' . $hint['larvol_id'] .'" limit 1';
 				$res1 		= mysql_query($query) ; // NCT data.
@@ -579,14 +579,18 @@ $(document).ready(function(){
 				$Ninclusion_criteria =$res1['inclusion_criteria'];
 				$Nexclusion_criteria =$res1['exclusion_criteria'];
 				$Ncondition =$res1['condition'];
+				//pick NCT's phase
+				$Nphase =$res1['phase'];
 				$fldlst="";
 				if(empty($Nlay_title) and !empty($lay_title)) $fldlst .= " , brief_title =  '". $lay_title."'" ;
-				if(empty($Nabbr_title) and !empty($abbr_title)) $fldlst .= " , acronym =  '". $abbr_title."'" ;
+				//
+				//if(empty($Nabbr_title) and !empty($abbr_title)) $fldlst .= " , acronym =  '". $abbr_title."'" ;
 				if(empty($Nfull_title) and !empty($full_title)) $fldlst .= " , official_title =  '". $full_title."'" ;
 				if(empty($Nsponsor_name) and !empty($Nsponsor_name)) $fldlst .= " , lead_sponsor =  '". $sponsor_name."'" ;
 				if(empty($Nsupport_org_name) and !empty($support_org_name)) $fldlst .= " , collaborator =  '". $support_org_name."'" ;
 				if(empty($Ninclusion_criteria) and !empty($inclusion_criteria)) $fldlst .= " , inclusion_criteria =  '". $inclusion_criteria."'";
 				if(empty($Nexclusion_criteria) and !empty($exclusion_criteria)) $fldlst .= " , exclusion_criteria =  '". $exclusion_criteria."'" ;
+				if(!empty($Nphase)) 	$fldlst .= " , `phase` =  '". $Nphase."'" ;
 				if(empty($Ncondition) and !empty($condition)) $fldlst .= " , `condition` =  '". $condition."'" ;
 				
 				$update_q='update data_trials set source_id = CONCAT(source_id ,"`","'.$eudract_id .'") ' ;
