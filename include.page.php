@@ -2271,7 +2271,7 @@ Function to get product or redtag name from there id's to store it in history ta
 function getUPMProdOrRedtagName($table, $value)
 {
 	global $db, $logger;
-	$query = "select `name` from $table where id=".mysql_real_escape_string($value)."";
+	$query = "select `name` from $table where id=".$value."";
 	$res = mysql_query($query);
 	if($res)
 	{
