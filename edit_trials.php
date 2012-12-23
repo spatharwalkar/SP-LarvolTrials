@@ -1,6 +1,5 @@
 <?php
 //connect to Sphinx
-
 if(!isset($sphinx) or empty($sphinx)) $sphinx = @mysql_connect("127.0.0.1:9306") or $sphinx=false;
 require_once('db.php');
 require_once('include.util.php');
@@ -64,6 +63,10 @@ global $logger;
 $table = 'products';
 $table1 = 'data_trials';
 $script = 'edit_trials';
+
+// The table is not displayed properly in Chrome, but works fine in MSIE and FireFox.  Something to do with Doctype
+// So a hack is used to fix the issue. 
+if(stripos($_SERVER['HTTP_USER_AGENT'],'chrome')) echo '<!DOCTYPE>';
 		
 require_once('header.php');	
 global $db;
