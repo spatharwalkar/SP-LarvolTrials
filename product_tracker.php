@@ -955,14 +955,14 @@ $htmlContent .= '<br style="line-height:11px;"/>'
 				. '</table>';
 				
 $htmlContent  .= '<div id="dropmenu" class="dropmenudiv" style="width: 310px;">'
-				.'<div style="height:124px; padding:6px;"><div class="downldbox"><div class="newtext">Download options</div>'
+				.'<div style="height:100px; padding:6px;"><div class="downldbox"><div class="newtext">Download options</div>'
 				. '<input type="hidden" name="id" id="id" value="' . $id . '" />'
 				. '<ul><li><label>Which format: </label></li>'
-				. '<li><select id="dwformat" name="dwformat" size="3" style="height:68px">'
-				. '<option value="exceldown" selected="selected">Excel</option>'
+				. '<li><select id="dwformat" name="dwformat" size="3" style="height:50px">'
+				//. '<option value="exceldown" selected="selected">Excel</option>'
 				. '<option value="pdfdown">PDF</option>'
-				. '<option value="tsvdown">TSV</option>'
 				. '<option value="excelchartdown">Excel Chart</option>'
+				. '<option value="tsvdown">TSV</option>'
 				. '</select></li>'
 				. '</ul>'
 				. '<input type="submit" name="download" title="Download" value="Download file" style="margin-left:8px;"  />'
@@ -2274,6 +2274,8 @@ function CreateLastTickBorder(&$pdf, $product_Col_Width, $Tic_dimension, $column
 	$Main_X = $pdf->GetX();
 	$Main_Y = $pdf->GetY();
 	/// Bypass product column
+	$pdf->MultiCell($product_Col_Width, $Tic_dimension, 'Trials', 0, $align='R', $fill=0, $ln, $Main_X, $Main_Y, $reseth=false, $stretch=0, $ishtml=false, $autopadding=false, $maxh=0);
+
 	$Place_X = $Main_X+$product_Col_Width;
 	$Place_Y = $Main_Y;
 	/// SET NOT REQUIRED BORDERS TO WHITE COLORS THAT WILL MAKE TABLE COMPACT OTHERWISE HEIGHT/WIDTH ISSUE HAPPENS
