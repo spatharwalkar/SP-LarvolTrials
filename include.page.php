@@ -2149,7 +2149,7 @@ function parseProductsXmlAndSave($xmlImport,$table)
 	{
 		$importVal = array();
 		$product_id = $product->getElementsByTagName('product_id')->item(0)->nodeValue;
-		$name = $product->getElementsByTagName('name')->item(0)->nodeValue;
+		$prodname = $product->getElementsByTagName('name')->item(0)->nodeValue;
 		$comments = $product->getElementsByTagName('comments')->item(0)->nodeValue;
 		$product_type = $product->getElementsByTagName('product_type')->item(0)->nodeValue;
 		$licensing_mode = $product->getElementsByTagName('licensing_mode')->item(0)->nodeValue;
@@ -2160,79 +2160,141 @@ function parseProductsXmlAndSave($xmlImport,$table)
 		$is_active = ($product->getElementsByTagName('is_active')->item(0)->nodeValue == 'True')?1:0;
 		$created = date('y-m-d H:i:s',time($product->getElementsByTagName('created')->item(0)->nodeValue));
 		$modified = date('y-m-d H:i:s',time($product->getElementsByTagName('modified')->item(0)->nodeValue));
-		
-		$company = array();
-		$implodeStringForNames = ', ';
-		foreach($product->getElementsByTagName('Institutions') as $brandNames)
-		{
-			foreach($brandNames->getElementsByTagName('Institution') as $brandName)
-			{
-				($brandName->getElementsByTagName('is_active')->item(0)->nodeValue=='True')?$company[] = $brandName->getElementsByTagName('name')->item(0)->nodeValue:null;
-			}
-		}	
-		$company = implode($implodeStringForNames,$company);
-		
-		$brand_names = array();
-		foreach($product->getElementsByTagName('ProductBrandNames') as $brandNames)
-		{
-			foreach($brandNames->getElementsByTagName('ProductBrandName') as $brandName)
-			{
-				($brandName->getElementsByTagName('is_active')->item(0)->nodeValue=='True')?$brand_names[] = $brandName->getElementsByTagName('name')->item(0)->nodeValue:null;
-			}
-		}
-		$brand_names = implode($implodeStringForNames,$brand_names);
-		
-		$generic_names = array();
-		foreach($product->getElementsByTagName('ProductGenericNames') as $brandNames)
-		{
-			foreach($brandNames->getElementsByTagName('ProductGenericName') as $brandName)
-			{
-				($brandName->getElementsByTagName('is_active')->item(0)->nodeValue=='True')?$generic_names[] = $brandName->getElementsByTagName('name')->item(0)->nodeValue:null;
-			}
-		}
-		$generic_names = implode($implodeStringForNames,$generic_names);
-				
-		$code_names = array();
-		foreach($product->getElementsByTagName('ProductCodeNames') as $brandNames)
-		{
-			foreach($brandNames->getElementsByTagName('ProductCodeName') as $brandName)
-			{
-				($brandName->getElementsByTagName('is_active')->item(0)->nodeValue=='True')?$code_names[] = $brandName->getElementsByTagName('name')->item(0)->nodeValue:null;
-			}
-		}
-		$code_names = implode($implodeStringForNames,$code_names);
-
-		$approvals = $product->getElementsByTagName('approvals')->item(0)->nodeValue;
-		$xmldump = $xmlImport->saveXML($product);
-		
-		
-		$importVal = array('LI_id'=>$product_id,'name'=>$name,'comments'=>$comments,'product_type'=>$product_type,'licensing_mode'=>$licensing_mode,'administration_mode'=>$administration_mode,'discontinuation_status'=>$discontinuation_status,'discontinuation_status_comment'=>$discontinuation_status_comment,'is_key'=>$is_key,'is_active'=>$is_active,'created'=>$created,'modified'=>$modified,'company'=>$company,'brand_names'=>$brand_names,'generic_names'=>$generic_names,'code_names'=>$code_names,'approvals'=>$approvals,'xml'=>$xmldump);
-		//ob_start();
-		$out = saveData(null,$table,1,$importKeys,$importVal,$k);
-		if($out ==1)
-		{
-			$success ++;
-			ob_start();
-			echo 'Product Id : '.$product_id.' Done .. <br/>'."\n";
-			ob_end_flush();
-		}
-		elseif($out==2) 
-		{
-			echo 'Product Id : '.$product_id.' Fail !! <br/>'."\n";
-			$fail ++;
-		}
-		elseif($out==3)
-		{
-			echo 'Product Id : '.$product_id.' Skipped !! <br/>'."\n";
-			$skip ++;
-		}	
-		elseif($out==4)
-		{
-			echo 'Product Id : '.$product_id.' Deleted !! <br/>'."\n";
-			$delete ++;
-		}			
-		//ob_end_clean();
 	}
+	
+	$implodeStringForNames = ', ';
+	
+	//Get Company names
+	$company = array();
+	foreach($xmlImport->getElementsByTagName('Institutions') as $brandNames)
+	{	
+		$name = $active = array();
+		foreach($brandNames->getElementsByTagName('name') as $names)
+		{
+			$name[] = $names->nodeValue;
+		}
+		foreach($brandNames->getElementsByTagName('is_active') as $actives)
+		{
+			$active[] = $actives->nodeValue;
+		}
+		foreach($name as $key=>$value)
+		{
+			($active[$key]=='True') ? ($company[] = $name[$key]):null;
+		}
+	}
+	$company = implode($implodeStringForNames,$company);
+	
+	//Get product brand names
+	$brand_names = array();
+	foreach($xmlImport->getElementsByTagName('ProductBrandNames') as $brandNames)
+	{	
+		$name = $active = array();
+		foreach($brandNames->getElementsByTagName('name') as $names)
+		{
+			$name[] = $names->nodeValue;
+		}
+		foreach($brandNames->getElementsByTagName('is_active') as $actives)
+		{
+			$active[] = $actives->nodeValue;
+		}
+		foreach($name as $key=>$value)
+		{
+			($active[$key]=='True') ? ($brand_names[] = $name[$key]):null;
+		}
+	}
+	$brand_names = implode($implodeStringForNames,$brand_names);
+	
+	//Get product brand names
+	$brand_names = array();
+	foreach($xmlImport->getElementsByTagName('ProductBrandNames') as $brandNames)
+	{	
+		$name = $active = array();
+		foreach($brandNames->getElementsByTagName('name') as $names)
+		{
+			$name[] = $names->nodeValue;
+		}
+		foreach($brandNames->getElementsByTagName('is_active') as $actives)
+		{
+			$active[] = $actives->nodeValue;
+		}
+		foreach($name as $key=>$value)
+		{
+			($active[$key]=='True') ? ($brand_names[] = $name[$key]):null;
+		}
+	}
+	$brand_names = implode($implodeStringForNames,$brand_names);
+	
+	//Get Generic names
+	$generic_names = array();
+	foreach($xmlImport->getElementsByTagName('ProductGenericNames') as $brandNames)
+	{	
+		$name = $active = array();
+		foreach($brandNames->getElementsByTagName('name') as $names)
+		{
+			$name[] = $names->nodeValue;
+		}
+		foreach($brandNames->getElementsByTagName('is_active') as $actives)
+		{
+			$active[] = $actives->nodeValue;
+		}
+		foreach($name as $key=>$value)
+		{
+			($active[$key]=='True') ? ($generic_names[] = $name[$key]):null;
+		}
+	}
+	$generic_names = implode($implodeStringForNames,$generic_names);
+	
+	//Get Product Code names
+	$code_names = array();
+	foreach($xmlImport->getElementsByTagName('ProductCodeNames') as $brandNames)
+	{	
+		$name = $active = array();
+		foreach($brandNames->getElementsByTagName('name') as $names)
+		{
+			$name[] = $names->nodeValue;
+		}
+		foreach($brandNames->getElementsByTagName('is_active') as $actives)
+		{
+			$active[] = $actives->nodeValue;
+		}
+		foreach($name as $key=>$value)
+		{
+			($active[$key]=='True') ? ($code_names[] = $name[$key]):null;
+		}
+	}
+	$code_names = implode($implodeStringForNames,$code_names);
+	
+	$approvals = $xmlImport->getElementsByTagName('ProductApprovals')->item(0)->nodeValue;
+	
+	$xmldump = $xmlImport->saveXML($xmlImport);
+		
+	$importVal = array('LI_id'=>$product_id,'name'=>$prodname,'comments'=>$comments,'product_type'=>$product_type,'licensing_mode'=>$licensing_mode,'administration_mode'=>$administration_mode,'discontinuation_status'=>$discontinuation_status,'discontinuation_status_comment'=>$discontinuation_status_comment,'is_key'=>$is_key,'is_active'=>$is_active,'created'=>$created,'modified'=>$modified,'company'=>$company,'brand_names'=>$brand_names,'generic_names'=>$generic_names,'code_names'=>$code_names,'approvals'=>$approvals,'xml'=>$xmldump);
+	//var_dump($importVal);
+	//ob_start();
+	$out = saveData(null,$table,1,$importKeys,$importVal,$k);
+	if($out ==1)
+	{
+		$success ++;
+		ob_start();
+		echo 'Product Id : '.$product_id.' Done .. <br/>'."\n";
+		ob_end_flush();
+	}
+	elseif($out==2) 
+	{
+		echo 'Product Id : '.$product_id.' Fail !! <br/>'."\n";
+		$fail ++;
+	}
+	elseif($out==3)
+	{
+		echo 'Product Id : '.$product_id.' Skipped !! <br/>'."\n";
+		$skip ++;
+	}	
+	elseif($out==4)
+	{
+		echo 'Product Id : '.$product_id.' Deleted !! <br/>'."\n";
+		$delete ++;
+	}			
+	//ob_end_clean();
 	return array('success'=>$success,'fail'=>$fail,'skip'=>$skip,'delete'=>$delete);
 }
 

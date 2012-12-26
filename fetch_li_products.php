@@ -19,13 +19,13 @@ function fetch_li_products($lastrun)
 	
 	//fetch all available li products within the $lastRunMinus24H timeframe.
 	
-	$liXmlProductList = file_get_contents('http://admin.larvolinsight.com/LT/Services/Products/Changed.ashx?timestamp='.$lastRunMinus24H);
+	$liXmlProductList = file_get_contents(LI_API.'?tablename=product&timestamp='.$lastRunMinus24H);
 	$xmlImportProductList = new DOMDocument();
 	$xmlImportProductList->loadXML($liXmlProductList);
 	
 	//get total number products 
 	$total_products=0;
-	foreach($xmlImportProductList->getElementsByTagName('Product_ID') as $Product_ID)
+	foreach($xmlImportProductList->getElementsByTagName('product_id') as $Product_ID)
 	{
 		$total_products++;
 	}
@@ -52,7 +52,7 @@ function fetch_li_products($lastrun)
 
 	// STATUS DISPLAY **/
 	$i=1;
-	foreach($xmlImportProductList->getElementsByTagName('Product_ID') as $Product_ID)
+	foreach($xmlImportProductList->getElementsByTagName('product_id') as $Product_ID)
 	{
 		$Product_ID = $Product_ID->nodeValue;
 		fetch_li_product_individual($Product_ID);
@@ -96,7 +96,7 @@ function fetch_li_products($lastrun)
  */
 function fetch_li_product_individual($Product_ID)
 {
-	$liXmlProduct = file_get_contents('http://admin.larvolinsight.com/LT/Services/Products/Detail.ashx?product_id='.$Product_ID);
+	$liXmlProduct = file_get_contents(LI_API.'?tablename=product&id='.$Product_ID);
 	$xmlImportProduct = new DOMDocument();
 	$xmlImportProduct->loadXML($liXmlProduct);
 	$out = parseProductsXmlAndSave($xmlImportProduct,'products');

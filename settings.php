@@ -40,6 +40,7 @@ else
 }
 //Don't change these
 define('HASH_ALGO', 'tiger192,4');
+define('LI_API', 'http://apistage.larvolinsight.com/api.ashx');
 ini_set('magic_quotes_gpc','Off');
 ini_set('magic_quotes_runtime','Off');
 ini_set('magic_quotes_sybase','Off');
