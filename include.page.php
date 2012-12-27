@@ -2167,19 +2167,10 @@ function parseProductsXmlAndSave($xmlImport,$table)
 	//Get Company names
 	$company = array();
 	foreach($xmlImport->getElementsByTagName('Institutions') as $brandNames)
-	{	
-		$name = $active = array();
-		foreach($brandNames->getElementsByTagName('name') as $names)
+	{
+		foreach($brandNames->getElementsByTagName('Institution') as $brandName)
 		{
-			$name[] = $names->nodeValue;
-		}
-		foreach($brandNames->getElementsByTagName('is_active') as $actives)
-		{
-			$active[] = $actives->nodeValue;
-		}
-		foreach($name as $key=>$value)
-		{
-			($active[$key]=='True') ? ($company[] = $name[$key]):null;
+			($brandName->getElementsByTagName('is_active')->item(0)->nodeValue=='True')?$company[] = $brandName->getElementsByTagName('name')->item(0)->nodeValue:null;
 		}
 	}
 	$company = implode($implodeStringForNames,$company);
@@ -2187,59 +2178,21 @@ function parseProductsXmlAndSave($xmlImport,$table)
 	//Get product brand names
 	$brand_names = array();
 	foreach($xmlImport->getElementsByTagName('ProductBrandNames') as $brandNames)
-	{	
-		$name = $active = array();
-		foreach($brandNames->getElementsByTagName('name') as $names)
+	{
+		foreach($brandNames->getElementsByTagName('ProductBrandName') as $brandName)
 		{
-			$name[] = $names->nodeValue;
-		}
-		foreach($brandNames->getElementsByTagName('is_active') as $actives)
-		{
-			$active[] = $actives->nodeValue;
-		}
-		foreach($name as $key=>$value)
-		{
-			($active[$key]=='True') ? ($brand_names[] = $name[$key]):null;
+			($brandName->getElementsByTagName('is_active')->item(0)->nodeValue=='True')?$brand_names[] = $brandName->getElementsByTagName('name')->item(0)->nodeValue:null;
 		}
 	}
 	$brand_names = implode($implodeStringForNames,$brand_names);
-	
-	//Get product brand names
-	$brand_names = array();
-	foreach($xmlImport->getElementsByTagName('ProductBrandNames') as $brandNames)
-	{	
-		$name = $active = array();
-		foreach($brandNames->getElementsByTagName('name') as $names)
-		{
-			$name[] = $names->nodeValue;
-		}
-		foreach($brandNames->getElementsByTagName('is_active') as $actives)
-		{
-			$active[] = $actives->nodeValue;
-		}
-		foreach($name as $key=>$value)
-		{
-			($active[$key]=='True') ? ($brand_names[] = $name[$key]):null;
-		}
-	}
-	$brand_names = implode($implodeStringForNames,$brand_names);
-	
+		
 	//Get Generic names
 	$generic_names = array();
 	foreach($xmlImport->getElementsByTagName('ProductGenericNames') as $brandNames)
-	{	
-		$name = $active = array();
-		foreach($brandNames->getElementsByTagName('name') as $names)
+	{
+		foreach($brandNames->getElementsByTagName('GenericName') as $brandName)
 		{
-			$name[] = $names->nodeValue;
-		}
-		foreach($brandNames->getElementsByTagName('is_active') as $actives)
-		{
-			$active[] = $actives->nodeValue;
-		}
-		foreach($name as $key=>$value)
-		{
-			($active[$key]=='True') ? ($generic_names[] = $name[$key]):null;
+			($brandName->getElementsByTagName('is_active')->item(0)->nodeValue=='True')?$generic_names[] = $brandName->getElementsByTagName('name')->item(0)->nodeValue:null;
 		}
 	}
 	$generic_names = implode($implodeStringForNames,$generic_names);
@@ -2247,19 +2200,10 @@ function parseProductsXmlAndSave($xmlImport,$table)
 	//Get Product Code names
 	$code_names = array();
 	foreach($xmlImport->getElementsByTagName('ProductCodeNames') as $brandNames)
-	{	
-		$name = $active = array();
-		foreach($brandNames->getElementsByTagName('name') as $names)
+	{
+		foreach($brandNames->getElementsByTagName('CodeName') as $brandName)
 		{
-			$name[] = $names->nodeValue;
-		}
-		foreach($brandNames->getElementsByTagName('is_active') as $actives)
-		{
-			$active[] = $actives->nodeValue;
-		}
-		foreach($name as $key=>$value)
-		{
-			($active[$key]=='True') ? ($code_names[] = $name[$key]):null;
+			($brandName->getElementsByTagName('is_active')->item(0)->nodeValue=='True')?$code_names[] = $brandName->getElementsByTagName('name')->item(0)->nodeValue:null;
 		}
 	}
 	$code_names = implode($implodeStringForNames,$code_names);
