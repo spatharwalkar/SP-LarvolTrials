@@ -972,7 +972,7 @@ $htmlContent  .= '<div id="dropmenu" class="dropmenudiv" style="width: 310px;">'
 				
 						
 $htmlContent .= '<div align="center" style="padding-left:10px; padding-right:15px; padding-top:20px; padding-bottom:20px;">'
-				. '<table border="0" align="center" width="'.(420+8+($inner_columns*$columns*8)+8+11).'px" style="vertical-align:middle;" cellpadding="0" cellspacing="0" id="ProdTrackerTable">'
+				. '<table border="0" align="center" width="'.(420+8+($inner_columns*$columns*8)+8+10).'px" style="vertical-align:middle;" cellpadding="0" cellspacing="0" id="ProdTrackerTable">'
 			    . '<thead>';
 //scale
 //Row to keep alignement perfect at time of floating headers
@@ -986,8 +986,9 @@ $htmlContent .= '<th width="8px"></th></tr>';
 
 
 $htmlContent .= '<tr><th class="prod_col" align="right">Trials</th><th width="8px" class="graph_rightWhite">&nbsp;</th>';
+$htmlContent .= '<th align="right" class="graph_rightWhite" colspan="1" width="8px">0</th>';
 for($j=0; $j < $columns; $j++)
-$htmlContent .= '<th align="right" class="graph_rightWhite" colspan="'.(($j==0)? $inner_columns+1 : $inner_columns).'">'.(($j+1) * $column_interval).'</th>';
+$htmlContent .= '<th align="right" class="graph_rightWhite" colspan="'.$inner_columns.'">'.(($j+1) * $column_interval).'</th>';
 $htmlContent .= '</tr>';
 
 $htmlContent .= '<tr class="last_tick_height"><th class="last_tick_height prod_col"><font style="line-height:4px;">&nbsp;</font></th><th class="graph_right"><font style="line-height:4px;">&nbsp;</font></th>';
@@ -1468,9 +1469,16 @@ function Download_reports()
 		$Excel_HMCounter++;
 		$from = $Start_Char;
 		$from++;
+		
+		$to = getColspanforExcelExport($from, 2);
+		$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':'. $to . $Excel_HMCounter);
+		$objPHPExcel->getActiveSheet()->SetCellValue($from . $Excel_HMCounter, 0);
+		$from = $to;
+		$from++;
+			
 		for($j=0; $j < $columns; $j++)
 		{
-			$to = getColspanforExcelExport($from, (($j==0)? $inner_columns+1 : $inner_columns));
+			$to = getColspanforExcelExport($from, (($j==0)? $inner_columns : $inner_columns));
 			$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':'. $to . $Excel_HMCounter);
 			$objPHPExcel->getActiveSheet()->SetCellValue($from . $Excel_HMCounter, (($j+1) * $column_interval));
 			$from = $to;
@@ -2280,7 +2288,7 @@ function CreateLastTickBorder(&$pdf, $product_Col_Width, $Tic_dimension, $column
 	$Place_Y = $Main_Y;
 	/// SET NOT REQUIRED BORDERS TO WHITE COLORS THAT WILL MAKE TABLE COMPACT OTHERWISE HEIGHT/WIDTH ISSUE HAPPENS
 	$border = array('mode' => 'ext', 'RT' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(204,204,204)));
-	$pdf->MultiCell($Tic_dimension, $Tic_dimension, '', $border, $align='C', $fill=0, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=false, $autopadding=false, $maxh=0);
+	$pdf->MultiCell($Tic_dimension, $Tic_dimension, '', $border, $align='C', $fill=0, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=false, $autopadding=false, $maxh=$Tic_dimension);
 	$Place_X = $Main_X+$Tic_dimension;
 	$Place_Y = $Main_Y;
 	for($j=0; $j < $columns; $j++)
@@ -2304,13 +2312,13 @@ function CreateLastTickBorder(&$pdf, $product_Col_Width, $Tic_dimension, $column
 	$Place_Y = $Main_Y;
 	/// SET NOT REQUIRED BORDERS TO WHITE COLORS THAT WILL MAKE TABLE COMPACT OTHERWISE HEIGHT/WIDTH ISSUE HAPPENS
 	$border = 0;
-	$pdf->MultiCell($Tic_dimension, $Tic_dimension, '', $border, $align='R', $fill=0, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=false, $autopadding=false, $maxh=0);
+	$pdf->MultiCell(($Tic_dimension * 2.5), $Tic_dimension, '0', $border, $align='R', $fill=0, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=false, $autopadding=false, $maxh=0);
 	$Place_X = $Main_X+$Tic_dimension;
 	$Place_Y = $Main_Y;
 	for($j=0; $j < $columns; $j++)
 	{
 		if($j==0)
-		$Width = ($inner_columns * $subColumn_width) + $subColumn_width;
+		$Width = ($inner_columns * $subColumn_width);
 		else
 		$Width = $inner_columns * $subColumn_width;
 		$border = 0;
