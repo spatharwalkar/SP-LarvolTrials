@@ -321,6 +321,58 @@ if (isset($_POST['li_s']) and $_POST['li_s']=="3" and ( isset($_POST['p_lt_id'])
 	return;
 }
 
+if (isset($_POST['li_inst']) and $_POST['li_inst']=="1") 
+{
+	require_once('fetch_li_institutions.php');
+	echo '<br><br>Importing all institutions from LI<br><br>';
+	fetch_li_institutions("0");
+	return;
+}
+if (isset($_POST['li_inst']) and $_POST['li_inst']=="2" and isset($_POST['inst_updt_since']) ) 
+{
+	$upds=strtotime(mysql_real_escape_string($_POST['inst_updt_since']));
+	if(!isset($upds) or empty($upds)) 
+	{
+		echo '<br> Invalid date entered:'.$litd.' Unable to proceed. ';
+		return false;
+	}
+	require_once('fetch_li_institutions.php');
+	echo '<br><br>Importing institutions updated since '.$_POST['inst_updt_since'].' from LI<br><br>';
+	fetch_li_institutions($upds);
+	return;
+}
+
+if (isset($_POST['li_inst']) and $_POST['li_inst']=="3" and ( isset($_POST['inst_lt_id']) or isset($_POST['inst_li_id']) ) ) 
+{
+	if( isset($_POST['inst_li_id']) and !empty($_POST['inst_li_id']) ) $liid=mysql_real_escape_string($_POST['inst_li_id']);
+	elseif(isset($_POST['inst_lt_id']))
+	{
+		$litd=mysql_real_escape_string($_POST['inst_lt_id']);
+		
+		$query = 'select lI_id from institutions where id="'.$litd.'" limit 1' ;
+					if(!$res = mysql_query($query))
+					{
+						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+						global $logger;
+						$logger->error($log);
+						echo $log;
+						return false;
+					}
+					$res = mysql_fetch_array($res) ;
+					if(isset($res['lI_id']))
+						$liid = $res['lI_id'];
+					else
+					{
+						echo '<br> Could not find id '.$litd.' in institutions table.  ';
+						return false;
+					}
+	}
+	require_once('fetch_li_institutions.php');
+	echo '<br><br>Importing institutions with LI id:'.$liid.'<br><br>';
+	fetch_li_institution_individual($liid);
+	return;
+}
+
 
 /****************************/
 echo(editor());
@@ -346,10 +398,13 @@ function editor()
 		  toggles = new Array();
 		  toggles1 = new Array();
 		  toggles2 = new Array();
+		  toggles3 = new Array();
 		  if (document.getElementById) onload = function () {
 		    document.getElementById (\'more\').className = \'hide\';
 			document.getElementById (\'p_up_dt\').className = \'hide\';
 			document.getElementById (\'p_sing\').className = \'hide\';
+		    document.getElementById (\'inst_sing\').className = \'hide\';
+			document.getElementById (\'inst_up_dt\').className = \'hide\';
 		    var t = document.getElementsByTagName (\'input\');
 		    for (var i = 0; i < t.length; i++) 
 			{
@@ -369,6 +424,16 @@ function editor()
 					{
 						document.getElementById (\'p_up_dt\').className = toggles1[toggles1.length - 2].checked ? \'show\' : \'hide\';
 						document.getElementById (\'p_sing\').className = toggles1[toggles1.length - 1].checked ? \'show\' : \'hide\';
+					}
+				}
+				
+				if (t[i].getAttribute (\'name\') == \'li_inst\') 
+				{
+					toggles3.push (t[i]);
+					t[i].onclick = function () 
+					{
+						document.getElementById (\'inst_up_dt\').className = toggles3[toggles3.length - 2].checked ? \'show\' : \'hide\';
+						document.getElementById (\'inst_sing\').className = toggles3[toggles3.length - 1].checked ? \'show\' : \'hide\';
 					}
 				}
 				
@@ -588,6 +653,19 @@ function editor()
 				'
 			. '<br><input type="submit" value="Import" />'
 			. '</form></formset></fieldset></div>';
+
+	// LI Institution scraper
+	$out .= '<div style="width:610px; padding:5px;float:left;"><fieldset class="schedule"><legend><b> IMPORT INSTITUTIONS FROM LI </b></legend>'
+			. '<formset><form action="database.php" method="post">'
+			. '
+			<input type="radio" name="li_inst" value="1" selected="selcted"> All<br>
+			<input type="radio" name="li_inst" value="2"> Institutions updated since <span id="inst_up_dt" name="inst_up_dt1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enter date as yyyy-mm-dd <input type="text" name="inst_updt_since" id="inst_updt_since" value="" size="10" length="10" title="( yyyy-mm-dd )"/></span> <br>
+			<input type="radio" name="li_inst" value="3"> Single institution (Either LT ID or LI ID) <span id="inst_sing" name="inst_sing1">LT ID: <input type="text" name="inst_lt_id" id="inst_ltid" value="" title="Enter LT id"/> LI ID: <input type="text" name="inst_li_id" id="inst_ltid" value="" title="Enter LI id"/></span><br>
+		
+				'
+			. '<br><input type="submit" value="Import" />'
+			. '</form></formset></fieldset></div>';
+
 	
 $out .= '<div style="clear:both">&nbsp;</div><br /><br /><br />';
 			

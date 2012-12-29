@@ -1192,11 +1192,39 @@ CREATE TABLE IF NOT EXISTS `upm_trials` (
   CONSTRAINT `upm_trials_ibfk_2` FOREIGN KEY (`larvol_id`) REFERENCES `data_trials` (`larvol_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+CREATE TABLE IF NOT EXISTS `institutions` (
+ `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+ `LI_id` varchar(63) COLLATE utf8_unicode_ci DEFAULT NULL,
+ `name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+ `type` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+ `display_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+ `is_active` tinyint(1) DEFAULT NULL,
+ `created` datetime DEFAULT NULL,
+ `modified` datetime DEFAULT NULL,
+ `search_terms` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+ `client_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+ `xml` text COLLATE utf8_unicode_ci,
+ PRIMARY KEY (`id`),
+ UNIQUE KEY `LI_id` (`LI_id`),
+ UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `products_institutions` (
+ `product` int(10) unsigned NOT NULL,
+ `institution` int(10) unsigned NOT NULL,
+ PRIMARY KEY (`product`,`institution`),
+ KEY `institution` (`institution`),
+ KEY `product` (`product`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+
+ALTER TABLE `products_institutions`
+  ADD CONSTRAINT `products_institutions_ibfk_2` FOREIGN KEY (`institution`) REFERENCES `institutions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `products_institutions_ibfk_1` FOREIGN KEY (`product`) REFERENCES `products` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 	
 ALTER TABLE `rpt_masterhm_cells`
   ADD CONSTRAINT `rpt_masterhm_cells_ibfk_2` FOREIGN KEY (`area`) REFERENCES `areas` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `rpt_masterhm_cells_ibfk_1` FOREIGN KEY (`product`) REFERENCES `products` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
 
 ALTER TABLE `data_cats_in_study`
   ADD CONSTRAINT `data_cats_in_study_ibfk_1` FOREIGN KEY (`larvol_id`) REFERENCES `clinical_study` (`larvol_id`) ON DELETE CASCADE ON UPDATE CASCADE,
