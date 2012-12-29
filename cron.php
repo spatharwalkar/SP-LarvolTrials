@@ -240,6 +240,31 @@ if(isset($LISyncTasks) and !empty($LISyncTasks))
 				require_once 'fetch_li_products.php';
 				fetch_li_products(strtotime($syncTask['lastrun']));
 				break;
+			case 4:
+				//institution sync
+				require_once 'fetch_li_institutions.php';
+				fetch_li_institutions(strtotime($syncTask['lastrun']));
+				break;
+			case 5:
+				//institution and product sync
+				require_once 'fetch_li_products.php';
+				fetch_li_products(strtotime($syncTask['lastrun']));
+				require_once 'fetch_li_institutions.php';
+				fetch_li_institutions(strtotime($syncTask['lastrun']));
+				break;
+			case 6:
+				//areas and institution sync
+				require_once 'fetch_li_institutions.php';
+				fetch_li_institutions(strtotime($syncTask['lastrun']));
+				break;
+			case 7:
+				//areas, product and institutionsync
+				require_once 'fetch_li_products.php';
+				fetch_li_products(strtotime($syncTask['lastrun']));
+				require_once 'fetch_li_institutions.php';
+				fetch_li_institutions(strtotime($syncTask['lastrun']));
+				break;
+
 		}
 		//echo date('Y-m-d H:i:s',$now);die;
 	}

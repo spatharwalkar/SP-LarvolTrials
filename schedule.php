@@ -80,6 +80,7 @@ function editor()
 	//put product/areas schedule list prodcuts=1 areas=2 using bitmask.
 	$LISync['LI_sync1'] = 'LI Product Sync';
 	$LISync['LI_sync2'] = 'LI Areas Sync';
+	$LISync['LI_sync4'] = 'LI Institutions Sync';
 	//end
 	
 	$selectedreports = array();
@@ -112,6 +113,22 @@ function editor()
 			case '3':
 				$selectedLISync[] = 'LI_sync1';
 				$selectedLISync[] = 'LI_sync2';
+				break;
+			case '4':
+				$selectedLISync[] = 'LI_sync' . $row['LI_sync'];
+				break;
+			case '5':
+				$selectedLISync[] = 'LI_sync1';
+				$selectedLISync[] = 'LI_sync4';
+				break;
+			case '6':
+				$selectedLISync[] = 'LI_sync2';
+				$selectedLISync[] = 'LI_sync4';
+				break;
+			case '7':
+				$selectedLISync[] = 'LI_sync1';
+				$selectedLISync[] = 'LI_sync2';
+				$selectedLISync[] = 'LI_sync4';
 				break;
 		}
 	}
