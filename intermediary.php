@@ -62,16 +62,6 @@ if(isset($_POST['btnDownload']))
 }
 $sortFields = array('phase' => 'pD', 'inactive_date' => 'iA', 'start_date' => 'sA', 'overall_status' => 'oA', 'enrollment' => 'eA');
 
-/*if(isset($_REQUEST['sphinx_s']))
-{	
-	$Sphinx_search=$_REQUEST['sphinx_s'];
-	$globalOptions['sphinx_s']=$_REQUEST['sphinx_s'];
-}
-elseif(isset($globalOptions['sphinx_s']))
-{	
-	$Sphinx_search=$globalOptions['sphinx_s'];
-}*/
-
 $globalOptions['sortOrder'] = $sortFields;
 
 $globalOptions['type'] = 'activeTrials';
@@ -90,8 +80,9 @@ $globalOptions['product'] = array();
 $globalOptions['startrange'] = "now";
 $globalOptions['endrange'] = "1 month";
 
-//sphinx search option set to search only the trials shown in the result set.
-//$globalOptions['sphinxSearch'] = '';
+//sphinx search option.
+$globalOptions['sphinxSearch'] = '';
+//$globalOptions['sphinx_s'] = '';
 
 $globalOptions['includeProductsWNoData'] = "off";
 $globalOptions['showTrialsSponsoredByProductOwner'] = "off";
@@ -121,12 +112,6 @@ if(isset($_REQUEST['er']))
 	$globalOptions['endrange'] = $_REQUEST['er'];
 }
 
-if(isset($_REQUEST['ss']) && $_REQUEST['ss'] != '')
-{
-	$globalOptions['sphinxSearch'] = $_REQUEST['ss'];
-}
-
-
 $globalOptions['resetLink'] = '';
 if(!(isset($_REQUEST['rflag'])))
 {
@@ -150,13 +135,6 @@ if(isset($_REQUEST['rlink']) && $_REQUEST['rlink'] != '')
 {
 	$globalOptions['resetLink'] = $_REQUEST['rlink'];
 }
-
-
-/*if(isset($_REQUEST['ss']) && $_REQUEST['ss'] != '')
-{
-	$globalOptions['sphinxSearch'] = $_REQUEST['ss'];
-}*/
-
 
 $globalOptions['Highlight_Range'] = array('1 week', '2 weeks', '1 month', '1 quarter', '6 months', '1 year');
 
@@ -217,8 +195,6 @@ if(!$db->loggedIn())
 {
 	$globalOptions['startrange'] = 'now';
 }
-	
-
 
 $intermediaryCss = 'css/intermediary.css';
 $jueryUiCss 	= 'css/themes/cupertino/jquery-ui-1.8.17.custom.css';
@@ -521,15 +497,16 @@ if(isset($_REQUEST['p']) || isset($_REQUEST['a']) || isset($_REQUEST['hm']))
 		$globalOptions['hm'] = $_REQUEST['hm'];
 	}
 	
-	/*if(isset($_REQUEST['sphinx_s']))
+	if(isset($_REQUEST['sphinx_s']))
 	{
 		$globalOptions['sphinx_s'] = $_REQUEST['sphinx_s'];
 	}
-	elseif(isset($globalOptions['sphinx_s']))
+	
+	if(isset($_REQUEST['ss']) && $_REQUEST['ss'] != '')
 	{
-		$_REQUEST['sphinx_s'] = $globalOptions['sphinx_s'];
-	}*/
-	//pr($globalOptions);
+		$globalOptions['sphinxSearch'] = $_REQUEST['ss'];
+	}
+	
 	$tt->generateTrialTracker('indexed', array('product' => $_REQUEST['p'], 'area' => $_REQUEST['a']), $globalOptions);
 }
 else
@@ -604,7 +581,6 @@ global $db;
 			$("#amount").val( $("#slider-range").slider("values", 0 ) +
 				" - " + maxE + '+' );
 		}
-
 		else
 		{
 			$("#amount").val( $("#slider-range").slider("values", 0 ) +

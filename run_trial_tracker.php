@@ -11,7 +11,6 @@ require_once 'PHPExcel/IOFactory.php';
 require_once('special_chars.php');
 require_once('include.util.php');
 $li_user=null;
-global $Sphinx_search;
 
 class TrialTracker
 {
@@ -62,7 +61,6 @@ class TrialTracker
 	
 	function generateTrialTracker($format, $resultIds, $globalOptions = array())
 	{	
-		global $Sphinx_search;
 		switch($format)
 		{
 			case 'excel':
@@ -5410,8 +5408,15 @@ class TrialTracker
 		$ottType = $Arr['ottType'];
 		$Ids = $Arr['Ids'];
 		$TrialsInfo = $Arr['TrialsInfo'];
-			
-		$Values = $this->compileOTTData($ottType, $TrialsInfo, $Ids, $globalOptions, 'excel');	
+		
+		if(isset($globalOptions['JSON_search']))
+		{
+			$Values = $this->compileJsonData($globalOptions, 'tsv');
+		}
+		else
+		{	
+			$Values = $this->compileOTTData($ottType, $TrialsInfo, $Ids, $globalOptions, 'excel');	
+		}
 		
 		unset($Ids, $productSelector, $TrialsInfo);
 		
@@ -5576,7 +5581,6 @@ class TrialTracker
 					{
 						if(isset($dvalue['manual_brief_title']))
 						{
-
 							if($dvalue['original_brief_title'] == $dvalue['NCT/brief_title'])
 							{
 								$attr = ' manual" title="Manual curation.';
@@ -7287,6 +7291,24 @@ class TrialTracker
 			$where .= " AND ((dt.`firstreceived_date` BETWEEN '" . $startRange . "' AND '" . $endRange . "') OR (`" . implode('` BETWEEN "' . $startRange . '" AND "' . $endRange . '") OR (`', $this->fieldNames) . "` BETWEEN '" . $startRange . "' AND '" . $endRange . "') )";
 		}
 		
+		if(isset($globalOptions['sphinxSearch']) && $globalOptions['sphinxSearch'] != '')
+		{
+			$lIds = get_sphinx_idlist($globalOptions['sphinxSearch']);
+			if($lIds != '')
+			{
+				$where .= " AND dt.`larvol_id` IN (" . $lIds . ") ";
+			}
+		}
+		
+		if(isset($globalOptions['sphinx_s']))
+		{
+			$lIds = get_sphinx_idlist($globalOptions['sphinx_s']);
+			if($lIds != '')
+			{
+				$where .= " AND dt.`larvol_id` IN (" . $lIds . ") ";
+			}
+		}
+		
 		$filters = $this->getActiveFilters($globalOptions);
 		
 		try 
@@ -7898,6 +7920,24 @@ class TrialTracker
 			if(!empty($aIds))
 			{
 				$where .= " AND at.`area` IN ('" . implode("','", $aIds) . "') ";	
+			}
+		}
+		
+		if(isset($globalOptions['sphinxSearch']) && $globalOptions['sphinxSearch'] != '')
+		{
+			$lIds = get_sphinx_idlist($globalOptions['sphinxSearch']);
+			if($lIds != '')
+			{
+				$where .= " AND dt.`larvol_id` IN (" . $lIds . ") ";
+			}
+		}
+		
+		if(isset($globalOptions['sphinx_s']))
+		{
+			$lIds = get_sphinx_idlist($globalOptions['sphinx_s']);
+			if($lIds != '')
+			{
+				$where .= " AND dt.`larvol_id` IN (" . $lIds . ") ";
 			}
 		}
 		
@@ -8657,7 +8697,7 @@ class TrialTracker
 		}
 		
 		echo '<div  id="fulltextsearchbox">'
-			//. '<input type="text" name="ss" autocomplete="off" style="width:153px;" value="' . $globalOptions['sphinxSearch'] . '" />'
+			. '<input type="text" name="ss" autocomplete="off" style="width:153px;" value="' . $globalOptions['sphinxSearch'] . '" />'
 			. '</div>';
 		
 		$resetUrl = 'intermediary.php?';
@@ -8675,6 +8715,10 @@ class TrialTracker
 			. '</div>';
 				
 		echo '<input type="hidden" name="rflag" value="1" /><input type="hidden" name="rlink" value="' . $globalOptions['resetLink'] . '" />';
+		if(isset($globalOptions['sphinx_s']))
+		{
+			echo '<input type="hidden" name="sphinx_s" value="' . $globalOptions['sphinx_s'] . '" />';
+		}
 		
 		echo '<table cellpadding="0" cellspacing="0" class="manage">'
 					 . '<tr>' . (($loggedIn) ? '<th style="width:70px;">ID</th>' : '' )
@@ -8883,14 +8927,6 @@ class TrialTracker
 	function displayHeader($productAreaInfo)
 	{
 		global $li_user;
-		/*if(isset($_REQUEST['sphinx_s']))
-		{
-			echo '<input type="hidden" name="sphinx_s" value="'.$_REQUEST['sphinx_s'].'" />';
-		}
-		elseif(isset($globalOptions['sphinx_s']))
-		{
-			echo '<input type="hidden" name="sphinx_s" value="'.$globalOptions['sphinx_s'].'" />';
-		}*/
 		
 		if((isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') !== FALSE) 
 		|| (isset($_GET['LI']) && $_GET['LI'] == 1))
@@ -9202,38 +9238,24 @@ class TrialTracker
 			$url .= '&amp;ipwnd=on';
 		}
 		
-		/*if(isset($_REQUEST['sphinx_s']))
-		{
-			$url .= '&amp;sphinx_s=' . $_REQUEST['sphinx_s'];
-		}
-		if( !isset($_REQUEST['sphinx_s']) and isset($globalOptions['sphinx_s']))
+		if(isset($globalOptions['sphinx_s']))
 		{
 			$url .= '&amp;sphinx_s=' . $globalOptions['sphinx_s'];
-		}*/
+		}
 		
+		if(isset($globalOptions['sphinxSearch']) && $globalOptions['sphinxSearch'] != '')
+		{
+			$url .= '&amp;ss=' . $globalOptions['sphinxSearch'];
+		}
+
 		if(isset($globalOptions['showTrialsSponsoredByProductOwner']) && $globalOptions['showTrialsSponsoredByProductOwner'] == "on")
 		{
 			$url .= '&amp;tspo=on';
 		}
 		
-		/*if(isset($globalOptions['sphinxSearch']) && $globalOptions['sphinxSearch'] != '')
-		{
-			$url .= '&amp;ss=' . $globalOptions['sphinxSearch'];
-		}*/
-		
 		if(isset($globalOptions['hm']) && $globalOptions['hm'] != '')
 		{
 			$url .= '&amp;hm=' . $globalOptions['hm'];
-		}
-		
-		if(isset($globalOptions['minEnroll']) && $globalOptions['minEnroll'] != '')
-		{
-			$url .= '&amp;minenroll=' . $globalOptions['minEnroll'];
-		}
-		
-		if(isset($globalOptions['maxEnroll']) && $globalOptions['maxEnroll'] != '')
-		{
-			$url .= '&amp;maxenroll=' . $globalOptions['maxEnroll'];
 		}
 		
 		if(isset($globalOptions['resetLink']))
