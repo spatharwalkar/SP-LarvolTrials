@@ -2519,9 +2519,9 @@ function Download_reports()
 		$BorderStart_Y = $pdf->GetY();
 		$pdf->SetFillColor(0, 0, 128);
 		$pdf->SetFont('freesansb', 'B ', 8); // Bold Font
-		$current_StringLength = $pdf->GetStringWidth($Report_Name, 'freesansb', 'B', 8) + 5;
+		$current_StringLength = $pdf->GetStringWidth($Report_Name.' Heatmap', 'freesansb', 'B', 8) + 5;
 		$newMarginWidth = (($dimensions['wk'] - ($current_StringLength))/2);
-		$pdf->MultiCell(($product_Col_Width + $All_Column_Width), '', $Report_Name, $border=0, $align='C', $fill=1, $ln=1, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+		$pdf->MultiCell(($product_Col_Width + $All_Column_Width), '', $Report_Name.' Heatmap', $border=0, $align='C', $fill=1, $ln=1, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
 		$current_StringLength = $pdf->GetStringWidth($pdftitle, 'freesansb', 'B', 8) + 5;
 		$newMarginWidth = (($dimensions['wk'] - ($current_StringLength))/2);
 		$pdf->MultiCell(($product_Col_Width + $All_Column_Width), '', $pdftitle, $border=0, $align='C', $fill=1, $ln=1, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
@@ -3901,7 +3901,7 @@ function Download_reports()
 		
 		ob_end_clean();
 		//Close and output PDF document
-		$pdf->Output('Larvol_'. substr($Report_Name,0,20) .'_PDF_Report_'. date("Y-m-d_H.i.s") .'.pdf', 'D');
+		$pdf->Output(''. substr($Report_Name,0,20) .'_Heatmap_'. date("Y-m-d_H.i.s") .'.pdf', 'D');
 	}//Pdf Functions Ends
 	
 		
@@ -3915,16 +3915,16 @@ function Download_reports()
 		// Set properties
 		$objPHPExcel->getProperties()->setCreator(SITE_NAME);
 		$objPHPExcel->getProperties()->setLastModifiedBy(SITE_NAME);
-		$objPHPExcel->getProperties()->setTitle(substr($name,0,20));
-		$objPHPExcel->getProperties()->setSubject(substr($name,0,20));
-		$objPHPExcel->getProperties()->setDescription(substr($name,0,20));
+		$objPHPExcel->getProperties()->setTitle(substr($Report_Name,0,20).' Heatmap');
+		$objPHPExcel->getProperties()->setSubject(substr($Report_Name,0,20).' Heatmap');
+		$objPHPExcel->getProperties()->setDescription(substr($Report_Name,0,20).' Heatmap');
 		
 		$objPHPExcel->getActiveSheet()->getDefaultStyle()->getFont()->setSize(8);
 		$objPHPExcel->getActiveSheet()->getDefaultStyle()->getFont()->setName('Verdana'); 
 	
 		// Build sheet
 		$objPHPExcel->setActiveSheetIndex(0);
-		$objPHPExcel->getActiveSheet()->setTitle(substr($name,0,20));
+		$objPHPExcel->getActiveSheet()->setTitle(substr($Report_Name,0,20).' Heatmap');
 		//$objPHPExcel->getActiveSheet()->getStyle('A1:AA2000')->getAlignment()->setWrapText(true);
 		$objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(36);
 		
@@ -3936,9 +3936,10 @@ function Download_reports()
       											'vertical'   => PHPExcel_Style_Alignment::VERTICAL_CENTER,
      											'rotation'   => 0,
       											'wrap'       => false));
-		$objPHPExcel->getActiveSheet()->SetCellValue('B' . $Excel_HMCounter, substr($Report_Name,0,250));
+		$objPHPExcel->getActiveSheet()->mergeCells('B' . $Excel_HMCounter . ':M' . $Excel_HMCounter);
+		$objPHPExcel->getActiveSheet()->SetCellValue('B' . $Excel_HMCounter, $Report_Name.' Heatmap');
 		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$Excel_HMCounter, 'Display Mode:');
-			$objPHPExcel->getActiveSheet()->getStyle('B' . $Excel_HMCounter)->getAlignment()->applyFromArray(
+		$objPHPExcel->getActiveSheet()->getStyle('B' . $Excel_HMCounter)->getAlignment()->applyFromArray(
       									array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_LEFT,
       											'vertical'   => PHPExcel_Style_Alignment::VERTICAL_CENTER,
      											'rotation'   => 0,
@@ -4676,7 +4677,7 @@ function Download_reports()
 		header("Content-Type: application/force-download");
 		header("Content-Type: application/download");
 		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-		header('Content-Disposition: attachment;filename="Larvol_' . substr($Report_Name,0,20) . '_Excel_Report_' . date('Y-m-d_H.i.s') . '.xlsx"');
+		header('Content-Disposition: attachment;filename="' . substr($Report_Name,0,20) . '_Heatmap_' . date('Y-m-d_H.i.s') . '.xlsx"');
 			
 		header("Content-Transfer-Encoding: binary ");
 		$objWriter->save('php://output');

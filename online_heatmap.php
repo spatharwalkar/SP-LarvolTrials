@@ -1908,12 +1908,12 @@ $Report_Name = ((trim($Report_DisplayName) != '' && $Report_DisplayName != NULL)
 if( ( (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE) || !isset($_SERVER['HTTP_REFERER']) ) && ( !isset($_REQUEST['LI']) || $_REQUEST['LI'] != 1) )
 {
 	$htmlContent .= '<table cellspacing="0" cellpadding="0" width="100%" style="background-color:#FFFFFF;">'
-				. '<tr><td style="background-color:#FFFFFF;"><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" /></td>'
-				. '<td style="background-color:#FFFFFF;" nowrap="nowrap"><span style="color:#ff0000;font-weight:normal;margin-left:40px;">Interface work in progress</span>'
+				. '<tr><td  width="33%" style="background-color:#FFFFFF;"><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" /></td>'
+				. '<td width="34%" align="center" style="background-color:#FFFFFF;" nowrap="nowrap"><span style="color:#ff0000;font-weight:normal;margin-left:0px;">Interface work in progress</span>'
 				. '<br/><span style="font-weight:normal;">Send feedback to '
 				. '<a style="display:inline;color:#0000FF;" target="_self" href="mailto:larvoltrials@larvol.com">'
 				. 'larvoltrials@larvol.com</a></span></td>'
-				. '<td style="background-color:#FFFFFF;" class="result">Name: ' . htmlspecialchars($Report_Name) . '</td></tr></table><br/>';
+				. '<td width="33%" align="right" style="background-color:#FFFFFF; padding-right:20px;" class="result">Name: ' . htmlspecialchars($Report_Name) . ' Heatmap</td></tr></table><br/>';
 }
 				
 $htmlContent .= '<form action="master_heatmap.php" method="post">'

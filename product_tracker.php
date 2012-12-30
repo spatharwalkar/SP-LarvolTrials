@@ -932,12 +932,12 @@ $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8',
 if( ( (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE) || !isset($_SERVER['HTTP_REFERER']) ) && ( !isset($_REQUEST['LI']) || $_REQUEST['LI'] != 1) )
 {
 	$htmlContent .= '<table cellspacing="0" cellpadding="0" width="100%" style="background-color:#FFFFFF;">'
-				   . '<tr><td style="background-color:#FFFFFF;"><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" /></td>'
-				   . '<td style="background-color:#FFFFFF;" nowrap="nowrap"><span style="color:#ff0000;font-weight:normal;margin-left:40px;">Interface work in progress</span>'
+				   . '<tr><td width="33%" style="background-color:#FFFFFF;"><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" /></td>'
+				   . '<td width="34%" align="center" style="background-color:#FFFFFF;" nowrap="nowrap"><span style="color:#ff0000;font-weight:normal;margin-left:40px;">Interface work in progress</span>'
 				   . '<br/><span style="font-weight:normal;">Send feedback to '
 				   . '<a style="display:inline;color:#0000FF;" target="_self" href="mailto:larvoltrials@larvol.com">'
 				   . 'larvoltrials@larvol.com</a></span></td>'
-				   . '<td style="background-color:#FFFFFF;" class="report_name">Name: ' . htmlspecialchars($Report_Name) . '</td></tr></table><br/>';
+				   . '<td width="33%" align="right" style="background-color:#FFFFFF; padding-right:20px;" class="report_name">Name: ' . htmlspecialchars($Report_Name) . ' Product Tracker</td></tr></table><br/>';
 }
 				
 $htmlContent .= '<br style="line-height:11px;"/>'
@@ -1295,7 +1295,7 @@ function Download_reports()
       											'vertical'   => PHPExcel_Style_Alignment::VERTICAL_CENTER,
      											'rotation'   => 0,
       											'wrap'       => false));
-		$objPHPExcel->getActiveSheet()->SetCellValue('B' . $Excel_HMCounter, substr($Report_Name,0,250));
+		$objPHPExcel->getActiveSheet()->SetCellValue('B' . $Excel_HMCounter, $Report_Name.' Product Tracker');
 		
 		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$Excel_HMCounter, 'Display Mode:');
 		$objPHPExcel->getActiveSheet()->mergeCells('B' . $Excel_HMCounter . ':BH' . $Excel_HMCounter);
@@ -1567,7 +1567,7 @@ function Download_reports()
 		header("Cache-Control: no-cache, must-revalidate, post-check=0, pre-check=0");
 		header("Content-type: application/force-download"); 
 		header("Content-Type: application/tsv");
-		header('Content-Disposition: attachment;filename="Larvol_' . substr($Report_Name,0,20) . '_Product_Analytic_TSV_' . date('Y-m-d_H.i.s'). '.tsv"');
+		header('Content-Disposition: attachment;filename="' . substr($Report_Name,0,20) . '_Product_Tracker_' . date('Y-m-d_H.i.s'). '.tsv"');
 		header("Content-Transfer-Encoding: binary ");
 		echo $TSV_data;
 	}	/// TSV FUNCTION ENDS HERE
@@ -1611,9 +1611,9 @@ function Download_reports()
 		$subColumn_width = 1.4;
 		
 		$pdf->SetFont('verdanab', '', 8);	//Set font size as 8
-		$Repo_Heading = $Report_Name.', '.$pdftitle;
+		$Repo_Heading = $Report_Name.' Product Tracker, '.$pdftitle;
 		$current_StringLength = $pdf->GetStringWidth($Repo_Heading, 'verdanab', '', 8);
-		$pdf->MultiCell('', '', $Repo_Heading, $border=0, $align='C', $fill=0, $ln=1, ((($Page_Width/2) - $current_StringLength))-20, '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
+		$pdf->MultiCell($Page_Width, '', $Repo_Heading, $border=0, $align='C', $fill=0, $ln=1, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
 		$pdf->Ln(5);
 		$pdf->SetFont('verdana_old', '', 6);	//Reset font size as 6
 		$pdf->setCellPaddings(0, 0, 0, 0);
@@ -1946,7 +1946,7 @@ function Download_reports()
 			
 		ob_end_clean();
 		//Close and output PDF document
-		$pdf->Output('Larvol_'. substr($Report_Name,0,20) .'_PDF_Report_'. date("Y-m-d_H.i.s") .'.pdf', 'D');
+		$pdf->Output(''. substr($Report_Name,0,20) .'_Product_Tracker_'. date("Y-m-d_H.i.s") .'.pdf', 'D');
 	}	/// End of PDF Function
 	
 	//Start of Real Chart Excel
@@ -2075,7 +2075,7 @@ function Download_reports()
       											'vertical'   => PHPExcel_Style_Alignment::VERTICAL_CENTER,
      											'rotation'   => 0,
       											'wrap'       => false));
-		$objPHPExcel->getActiveSheet()->SetCellValue('B1', $Report_Name);
+		$objPHPExcel->getActiveSheet()->SetCellValue('B1', $Report_Name.' Product Tracker');
 		
 		$objPHPExcel->getActiveSheet()->SetCellValue('A2', 'Display Mode:');
 		$objPHPExcel->getActiveSheet()->mergeCells('B2:AA2');
@@ -2101,7 +2101,7 @@ function Download_reports()
 		header("Content-Type: application/force-download");
 		header("Content-Type: application/download");
 		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-		header('Content-Disposition: attachment;filename="Larvol_' . substr($Report_Name,0,20) . '_Excel_Report_' . date('Y-m-d_H.i.s') . '.xlsx"');
+		header('Content-Disposition: attachment;filename="' . substr($Report_Name,0,20) . '_Product_Tracker_' . date('Y-m-d_H.i.s') . '.xlsx"');
 		header("Content-Transfer-Encoding: binary ");
 		
 		$Writer->save('php://output');
