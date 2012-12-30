@@ -24,7 +24,12 @@ if(isset($_POST['btnDownload']))
 	{
 		$globalOptions['type'] = 'allTrials';
 	}
+	else
+	{
+		$globalOptions['type'] = 'shownTrials';
+	}
 	
+	//pr($globalOptions);exit;
 	switch($_POST['wFormat'])
 	{
 		case 'excel': 
@@ -506,11 +511,11 @@ if(isset($_REQUEST['p']) || isset($_REQUEST['a']) || isset($_REQUEST['hm']))
 {
 	$globalOptions['url'] = 'p=' . $_REQUEST['p'] . '&a=' . $_REQUEST['a'];	
 	
-	/*if(isset($_REQUEST['JSON_search']))
+	if(isset($_REQUEST['JSON_search']))
 	{
 		$globalOptions['url'] = 'p=' . $_REQUEST['p'] . '&a=' . $_REQUEST['a'] . '&JSON_search=' . $_REQUEST['JSON_search'];
 		$globalOptions['JSON_search'] = $_REQUEST['JSON_search'];
-	}*/
+	}
 	if(isset($_REQUEST['hm']) && trim($_REQUEST['hm']) != '' && $_REQUEST['hm'] != NULL)
 	{
 		$globalOptions['hm'] = $_REQUEST['hm'];
@@ -599,6 +604,7 @@ global $db;
 			$("#amount").val( $("#slider-range").slider("values", 0 ) +
 				" - " + maxE + '+' );
 		}
+
 		else
 		{
 			$("#amount").val( $("#slider-range").slider("values", 0 ) +

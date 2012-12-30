@@ -46,10 +46,10 @@ class TrialTracker
 		$this->statusFilters = array('Not yet recruiting','Recruiting','Enrolling by invitation','Active, not recruiting','Available',
 									 'No longer recruiting','Withheld','Approved for marketing', 'Temporarily not available','No Longer Available',
 									 'Withdrawn','Terminated', 'Suspended','Completed');
-		$this->phaseFilters = array('N/A'=>'na', 'Phase 0'=>'0', 'Phase 0/Phase 1'=>'1', 'Phase 1'=>'1', 'Phase 1a'=>'1', 'Phase 1b'=>'1', 
-									'Phase 1a/1b'=>'1', 'Phase 1c'=>'1', 'Phase 1/Phase 2'=>'2', 'Phase 1b/2'=>'2', 'Phase 1b/2a'=>'2', 'Phase 2'=>'2', 
-									'Phase 2a'=>'2', 'Phase 2a/2b'=>'2', 'Phase 2a/b'=>'2', 'Phase 2b'=>'2', 'Phase 2/Phase 3'=>'3', 'Phase 2b/3'=>'3',
-									'Phase 3'=>'3', 'Phase 3a'=>'3', 'Phase 3b'=>'3', 'Phase 3/Phase 4'=>'4', 'Phase 3b/4'=>'4', 'Phase 4'=>'4');
+									 
+		$this->phaseFilters = array('N/A'=>'na', '0'=>'0', '0/1'=>'1', '1'=>'1', '1a'=>'1', '1b'=>'1', '1a/1b'=>'1', '1c'=>'1', 
+									'1/2'=>'2', '1b/2'=>'2', '1b/2a'=>'2', '2'=>'2', '2a'=>'2', '2a/2b'=>'2', '2a/b'=>'2', '2b'=>'2', 
+									'2/3'=>'3', '2b/3'=>'3','3'=>'3', '3a'=>'3', '3b'=>'3', '3/4'=>'4', '3b/4'=>'4', '4'=>'4');
 		
 		$this->regionFilters = array('US','Canada','Japan','Europe','RestOfWorld');
 		
@@ -84,7 +84,7 @@ class TrialTracker
 	}
 	
 	function generateExcelFile($resultIds, $globalOptions)
-	{	
+	{
 		global $db;
 		$loggedIn	= $db->loggedIn();
 		
@@ -161,8 +161,15 @@ class TrialTracker
 		$ottType = $Arr['ottType'];
 		$Ids = $Arr['Ids'];
 		$TrialsInfo = $Arr['TrialsInfo'];
-			
-		$Values = $this->compileOTTData($ottType, $TrialsInfo, $Ids, $globalOptions, 'excel');
+		
+		if(isset($globalOptions['JSON_search']))
+		{	
+			$Values = $this->compileJsonData($globalOptions, 'excel');
+		}
+		else
+		{
+			$Values = $this->compileOTTData($ottType, $TrialsInfo, $Ids, $globalOptions, 'excel');
+		}
 		
 		unset($Ids, $productSelector, $TrialsInfo);
 		
@@ -1593,10 +1600,6 @@ class TrialTracker
 		header('Content-Disposition: attachment;filename="  DTT  _' . date('Y-m-d_H.i.s') . '.xlsx"');
 		header("Content-Transfer-Encoding: binary ");
 		$objWriter->save('php://output');
-
-
-
-
 		@flush();
 
 		exit;
@@ -1625,8 +1628,15 @@ class TrialTracker
 		$Ids = $Arr['Ids'];
 		$TrialsInfo = $Arr['TrialsInfo'];
 		
-		$Values = $this->compileOTTData($ottType, $TrialsInfo, $Ids, $globalOptions, 'tsv');
-		
+		if(isset($globalOptions['JSON_search']))
+		{
+			$Values = $this->compileJsonData($globalOptions, 'tsv');
+		}
+		else
+		{
+			$Values = $this->compileOTTData($ottType, $TrialsInfo, $Ids, $globalOptions, 'tsv');
+		}
+		//pr($Values);
 		unset($Ids, $productSelector, $TrialsInfo);
 		
 		foreach($Values['Data'] as $tkey => $tvalue)
@@ -1644,7 +1654,7 @@ class TrialTracker
 		unset($Values);
 		
 		$outputStr = "NCT ID \t Title \t N \t Region \t Status \t Sponsor \t Condition \t Interventions \t Start \t End \t Ph \n";
-		
+		//pr($Trials);exit;
 		foreach($Trials as $key => $value)
 		{
 			$startDate = '';
@@ -5566,6 +5576,7 @@ class TrialTracker
 					{
 						if(isset($dvalue['manual_brief_title']))
 						{
+
 							if($dvalue['original_brief_title'] == $dvalue['NCT/brief_title'])
 							{
 								$attr = ' manual" title="Manual curation.';
@@ -7147,7 +7158,12 @@ class TrialTracker
 		$Ids = $Arr['Ids'];
 		$TrialsInfo = $Arr['TrialsInfo'];
 		
-		if(!empty($resultIds['product']) || !empty($resultIds['area']) || isset($globalOptions['hm']))
+		if(isset($globalOptions['JSON_search']))
+		{
+			echo '<input type="hidden" name="JSON_search" value=\'' . $globalOptions['JSON_search'] . '\' />';
+			$Values = $this->compileJsonData($globalOptions);
+		}
+		else
 		{
 			$Values = $this->compileOTTData($ottType, $TrialsInfo, $Ids, $globalOptions);
 		}
@@ -7157,127 +7173,11 @@ class TrialTracker
 		unset($ottType, $productSelector, $Ids, $TrialsInfo, $Arr);
 	}
 	
-	function compileOTTData($ottType, $TrialsInfo = array(), $Ids = array(), $globalOptions = array(), $display = 'web')
-	{	
-		global $logger, $maxEnrollLimit;
+	//Filtering Options
+	function getActiveFilters($globalOptions = array())
+	{
+		global $maxEnrollLimit;
 		
-		$Values['Data'] = array();
-		$Values['activecount'] = 0;
-		$Values['inactivecount'] = 0;
-		$Values['totalcount'] = 0;
-		$Values['count'] = 0;
-		
-		$cCount = array();
-		$naUpms = array();
-		
-		$larvolIds = array();
-		
-		$pIds = array();
-		$aIds = array();
-		
-		$pIds = array_map(function($item) { return $item['product']; }, $Ids);
-		$pIds = array_filter($pIds);	
-		$pIds = array_unique($pIds);	
-		
-		$aIds = array_map(function($item) { return $item['area']; }, $Ids);	
-		$aIds = array_filter($aIds);
-		$aIds = array_unique($aIds);
-		
-		$startRange = date('Y-m-d', strtotime($this->timeInterval, $this->timeMachine));
-		$endRange = date('Y-m-d', $this->timeMachine);
-		
-		$previousValue = 'Previous value: ';	
-		$noPreviousValue = 'No previous value';	
-		
-		$lstart = ($globalOptions['page']-1) * $this->resultsPerPage;
-		$limit = " LIMIT " . $lstart . ", 100 ";
-		
-		if($ottType == 'rowstacked')
-		{
-			$orderBy = " ORDER BY FIELD(at.`area`, " . implode(",", $aIds) . "), dt.`phase` DESC, dt.`end_date` ASC, dt.`start_date` ASC, dt.`overall_status` ASC, dt.`enrollment` ASC ";
-		}
-		else
-		{
-			$orderBy = " ORDER BY FIELD(pt.`product`, " . implode(",", $pIds) . "), dt.`phase` DESC, dt.`end_date` ASC, dt.`start_date` ASC, dt.`overall_status` ASC, dt.`enrollment` ASC ";
-		}
-		
-		$phaseFilters = array('N/A'=>'na', '0'=>'0', '0/1'=>'1', '1'=>'1', '1a'=>'1', '1b'=>'1', '1a/1b'=>'1', '1c'=>'1', 
-									'1/2'=>'2', '1b/2'=>'2', '1b/2a'=>'2', '2'=>'2', '2a'=>'2', '2a/2b'=>'2', '2a/b'=>'2', '2b'=>'2', 
-									'2/3'=>'3', '2b/3'=>'3','3'=>'3', '3a'=>'3', '3b'=>'3', '3/4'=>'4', '3b/4'=>'4', '4'=>'4');
-									
-		$where = " WHERE 1 ";
-		$join = "";
-		
-		$query = "SELECT SQL_CALC_FOUND_ROWS dt.`larvol_id`, dt.`source_id`, dt.`brief_title`, dt.`acronym`, dt.`lead_sponsor`, dt.`collaborator`, dt.`condition`,"
-						. " dt.`overall_status`, dt.`is_active`, dt.`start_date`, dt.`end_date`, dt.`enrollment`, dt.`intervention_name`,"
-						. " dt.`region`, dt.`phase`, dt.`firstreceived_date`, dt.`viewcount`, dt.`source`, "
-						. " dm.`is_sourceless` AS manual_is_sourceless, dm.`brief_title` AS manual_brief_title, dm.`acronym` AS manual_acronym, "
-						. " dm.`lead_sponsor` AS manual_lead_sponsor, dm.`collaborator` AS manual_collaborator,"
-						. " dm.`condition` AS manual_condition, dm.`overall_status` AS manual_overall_status, dm.`region` AS manual_region,"
-						. " dm.`start_date` AS manual_start_date, dm.`end_date` AS manual_end_date, dm.`enrollment` AS manual_enrollment, "
-						. " dm.`intervention_name` AS manual_intervention_name, dm.`phase` AS manual_phase, dh.`brief_title_prev`, "
-						. " dh.`end_date_prev`, dh.`lead_sponsor_prev`, dh.`collaborator_prev`, dh.`condition_prev`, dh.`overall_status_prev`, "
-						. " dh.`start_date_prev`, dh.`enrollment_prev`, dh.`intervention_name_prev`, dh.`phase_prev`, dh.`region_prev`, dh.`brief_title_lastchanged`, "
-						. " dh.`end_date_lastchanged`, dh.`lead_sponsor_lastchanged`, dh.`collaborator_lastchanged`, dh.`condition_lastchanged`, "
-						. " dh.`overall_status_lastchanged`, dh.`start_date_lastchanged`, dh.`enrollment_lastchanged`, dh.`intervention_name_lastchanged`, "
-						. " dh.`phase_lastchanged`, dh.`region_lastchanged` ";
-		
-		if(!empty($pIds))
-		{
-			$query .= ", pt.`product` AS productid ";
-			$where .= " AND pt.`product` IN ('" . implode("','", $pIds) . "') ";
-			$join .= " JOIN `product_trials` pt ON dt.`larvol_id` = pt.`trial` ";
-		}
-		if(!empty($aIds))
-		{
-			$query .= ", at.`area` AS areaid ";
-			$where .= " AND at.`area` IN ('" . implode("','", $aIds) . "') ";	
-			$join .= " JOIN `area_trials` at ON dt.`larvol_id` = at.`trial` ";
-		}
-		$query .= " FROM `data_trials` dt ";
-		$query .= $join . " LEFT OUTER JOIN `data_manual` dm ON dt.`larvol_id` = dm.`larvol_id` "
-						. " LEFT OUTER JOIN `data_history` dh ON dh.`larvol_id` = dt.`larvol_id` ";
-		
-		//calcultaing count and enrollment max value only for webpage display and not for file exports				
-
-		if($display == 'web')
-		{
-			$tQuery = "SELECT COUNT(*) AS totalcount "
-						. " FROM `data_trials` dt ";
-			$tQuery .=  $join . $where;
-			$tRes = m_query(__LINE__,$tQuery);
-			if($tRes)
-			{
-				$tRow = mysql_fetch_assoc($tRes);
-				$Values['totalcount'] = $tRow['totalcount'];
-			}
-			else
-			{
-				$log 	= 'ERROR: Bad SQL query. ' . $tQuery . mysql_error();
-				$logger->error($log);
-				unset($log);
-			}
-			
-			$aQuery = "SELECT COUNT(*) AS activecount "
-						. " FROM `data_trials` dt ";
-			$aQuery .=  $join . $where . " AND dt.`is_active` = 1 ";
-			$aRes = m_query(__LINE__,$aQuery);
-			if($aRes)
-			{
-				$aRow = mysql_fetch_assoc($aRes);
-				$Values['activecount'] = $aRow['activecount'];
-			}
-			else
-			{
-				$log 	= 'ERROR: Bad SQL query. ' . $aQuery . mysql_error();
-				$logger->error($log);
-				unset($log);
-			}
-			
-			$Values['inactivecount'] = $Values['totalcount'] - $Values['activecount'];
-		}
-		
-		//Filtering Options
 		$filters = " ";
 		if(isset($globalOptions['status']) && !empty($globalOptions['status'])) 
 		{
@@ -7325,7 +7225,7 @@ class TrialTracker
 			$phase = array();
 			foreach($globalOptions['phase'] as $pkey => $pvalue)
 			{
-				$ph = array_keys($phaseFilters, $pvalue);
+				$ph = array_keys($this->phaseFilters, $pvalue);
 				$phase = array_merge($phase, $ph);
 			}
 			
@@ -7359,6 +7259,616 @@ class TrialTracker
 				$filters .= " AND (dt.`enrollment` >= '" . $enroll[0] . "' AND dt.`enrollment` <= '" . $enroll[1] . "' ) " ;
 			}
 		}
+		
+		return $filters;
+	}
+	
+	function compileJsonData($globalOptions = array(), $display = 'web')
+	{	
+		global $logger;
+		
+		$startRange = date('Y-m-d', strtotime($this->timeInterval, $this->timeMachine));
+		$endRange = date('Y-m-d', $this->timeMachine);
+		
+		$lstart = ($globalOptions['page']-1) * $this->resultsPerPage;
+		$limit = " LIMIT " . $lstart . ", 100 ";
+		
+		$Values['Data'] = array();
+		$Values['activecount'] = 0;
+		$Values['inactivecount'] = 0;
+		$Values['totalcount'] = 0;
+		$Values['count'] = 0;
+		
+		$Query = "";
+		
+		$where = " WHERE 1 ";
+		if($globalOptions['onlyUpdates'] == "yes")
+		{
+			$where .= " AND ((dt.`firstreceived_date` BETWEEN '" . $startRange . "' AND '" . $endRange . "') OR (`" . implode('` BETWEEN "' . $startRange . '" AND "' . $endRange . '") OR (`', $this->fieldNames) . "` BETWEEN '" . $startRange . "' AND '" . $endRange . "') )";
+		}
+		
+		$filters = $this->getActiveFilters($globalOptions);
+		
+		try 
+		{
+			$jsonData = $globalOptions['JSON_search'];
+			$filterData = json_decode($jsonData, true, 10);
+			
+			if(is_array($filterData))
+			{
+				array_walk_recursive($filterData, 'searchHandlerBackTicker','columnname');
+				array_walk_recursive($filterData['columndata'], 'searchHandlerBackTicker','columnas');
+			}
+			
+			$where_datas = $filterData["wheredata"];
+			$select_columns=$filterData["columndata"];
+			$override_vals = trim($filterData["override"]);
+			$sort_datas = $filterData["sortdata"];
+			$isOverride = !empty($override_vals);
+			
+			unset($filterData);
+			foreach($sort_datas as $ky => $vl )
+			{
+				if($vl["columnname"] == '`All`')
+				unset($sort_datas[$ky]);
+			}
+			
+			$prod_flag=0; $area_flag=0; $prod_col=0; $area_col=0;
+			if(is_array($where_datas) && !empty($where_datas))
+			{
+				foreach($where_datas as $where_data)
+				{
+					if($where_data["columnname"] == '`product`')
+					$prod_flag=1;
+					if($where_data["columnname"] == '`area`')
+					$area_flag=1;
+				}
+			}
+			
+			if(is_array($select_columns) && !empty($select_columns))
+			{
+				foreach($select_columns as $selectcolumn)
+				{
+					if($selectcolumn["columnname"] == '`product`')
+					{
+						$prod_flag=1;
+						$prod_col=1;	//This will need in overrriding Query
+					}
+					if($selectcolumn["columnname"] == '`area`')
+					{
+						$area_flag=1;
+						$area_col=1;	//This will need in overrriding Query
+					}
+				}
+			}
+			
+			if(is_array($sort_datas) && !empty($sort_datas) && (!$prod_flag || !$area_flag))
+			{
+				foreach($sort_datas as $sort_column)
+				{
+					if($sort_column["columnas"] == '`product`')
+					$prod_flag=1;
+					if($sort_column["columnas"] == '`area`')
+					$area_flag=1;
+				}
+			}
+			
+			$from = " FROM data_trials dt";
+			
+			if($prod_flag)
+			{
+				$from .= " JOIN product_trials pt ON pt.`trial`= dt.`larvol_id`";
+			}
+			if($area_flag)
+			{
+				$from .= " JOIN area_trials at ON at.`trial`= dt.`larvol_id`";
+			}
+			
+			$from .= " LEFT OUTER JOIN `data_manual` dm ON dt.`larvol_id` = dm.`larvol_id` "
+					. " LEFT OUTER JOIN `data_history` dh ON dh.`larvol_id` = dt.`larvol_id` ";
+					
+			if($isOverride)
+			{
+				$override_str_arr = explode(',', $override_vals);
+				$override_str_arr = array_map(function($v){
+					$v = trim($v);
+					return "'".padnct($v)."' ";
+				}, $override_str_arr);
+					
+				$Query .= "(";
+			}
+			
+			$select = " dt.`larvol_id`, dt.`source_id`, dt.`brief_title`, dt.`acronym`, dt.`lead_sponsor`, dt.`collaborator`, dt.`condition`,"
+						. " dt.`overall_status`, dt.`is_active`, dt.`start_date`, dt.`end_date`, dt.`enrollment`, dt.`intervention_name`,"
+						. " dt.`region`, dt.`phase`, dt.`firstreceived_date`, dt.`viewcount`, dt.`source`, "
+						. " dm.`is_sourceless` AS manual_is_sourceless, dm.`brief_title` AS manual_brief_title, dm.`acronym` AS manual_acronym, "
+						. " dm.`lead_sponsor` AS manual_lead_sponsor, dm.`collaborator` AS manual_collaborator,"
+						. " dm.`condition` AS manual_condition, dm.`overall_status` AS manual_overall_status, dm.`region` AS manual_region,"
+						. " dm.`start_date` AS manual_start_date, dm.`end_date` AS manual_end_date, dm.`enrollment` AS manual_enrollment, "
+						. " dm.`intervention_name` AS manual_intervention_name, dm.`phase` AS manual_phase, dh.`brief_title_prev`, "
+						. " dh.`end_date_prev`, dh.`lead_sponsor_prev`, dh.`collaborator_prev`, dh.`condition_prev`, dh.`overall_status_prev`, "
+						. " dh.`start_date_prev`, dh.`enrollment_prev`, dh.`intervention_name_prev`, dh.`phase_prev`, dh.`region_prev`, dh.`brief_title_lastchanged`, "
+						. " dh.`end_date_lastchanged`, dh.`lead_sponsor_lastchanged`, dh.`collaborator_lastchanged`, dh.`condition_lastchanged`, "
+						. " dh.`overall_status_lastchanged`, dh.`start_date_lastchanged`, dh.`enrollment_lastchanged`, dh.`intervention_name_lastchanged`, "
+						. " dh.`phase_lastchanged`, dh.`region_lastchanged` ";
+						
+			$Query .= " SELECT SQL_CALC_FOUND_ROWS " . $select . $from . $where;
+			
+			$where_str = get_WhereString($where_datas, 'dt', 'pt', 'at');
+			$sort_str = getSortString($sort_datas, $alias, $pd_alias, $ar_alias);
+			
+			if(strlen(trim($where_str)) != 0 || strlen($filters) != 0)
+			{
+				if(strlen($filters) != 0) 
+				{
+					if($display == 'web')
+					{
+						$Query .= $filters;
+					}
+					else
+					{
+						if($globalOptions['type'] != 'allTrials')
+						{
+							$Query .= $filters;
+						}
+					}
+				}
+				if(strlen(trim($where_str)) != 0 && strlen($filters) != 0) $Query .= " AND ";
+				if(strlen(trim($where_str)) != 0) $Query .= $where_str;
+			}
+			
+			$orderBy = " ORDER BY ";
+			if((strlen(trim($sort_str)) != 0))//Sort
+			{
+				$orderBy .= $sort_str;
+			}
+			else
+			{
+				$orderBy .= "dt.`phase` DESC, dt.`end_date` ASC, dt.`start_date` ASC, dt.`overall_status` ASC, dt.`enrollment` ASC ";
+			}
+	
+			$Query .= $orderBy;
+			
+			if($isOverride)//override string present
+			{
+				$Query .= ") UNION ALL (SELECT " . $select . $from . $where;
+				if($display == 'web')
+				{
+					$Query .= $filters;
+				}
+				else
+				{
+					if($globalOptions['type'] != 'allTrials')
+					{
+						$Query .= $filters;
+					}
+				}
+				$Query .= " AND LEFT(dt.source_id,11) IN (" . implode(',', $override_str_arr) . "))";
+			}
+			
+			
+			if($display == 'web')
+			{
+				$tQuery = "SELECT COUNT(*) AS totalcount " . $from . $where . " AND " . $where_str;
+				$aQuery = "SELECT COUNT(*) AS activecount " . $from . $where . " AND dt.`is_active` = 1 AND " . $where_str;
+				
+				if($isOverride)//override string present
+				{
+					$tQuery .= " UNION SELECT COUNT(*) AS totalcount " . $from . $where . " AND LEFT(dt.source_id,11) IN (" . implode(',', $override_str_arr) . ")";
+					$aQuery .= " UNION SELECT COUNT(*) AS activecount " . $from . $where . " AND dt.`is_active` = 1 AND LEFT(dt.source_id,11) IN (" . implode(',',$override_str_arr) . ")";
+				}
+				
+				$tRes = m_query(__LINE__,$tQuery);
+				if($tRes)
+				{
+					$tRow = mysql_fetch_assoc($tRes);
+					$Values['totalcount'] = $tRow['totalcount'];
+				}
+				else
+				{
+					$log 	= 'ERROR: Bad SQL query. ' . $tQuery . mysql_error();
+					$logger->error($log);
+					unset($log);
+				}
+				
+				$aRes = m_query(__LINE__, $aQuery);
+				if($aRes)
+				{
+					$aRow = mysql_fetch_assoc($aRes);
+					$Values['activecount'] = $aRow['activecount'];
+				}
+				else
+				{
+					$log 	= 'ERROR: Bad SQL query. ' . $aQuery . mysql_error();
+					$logger->error($log);
+					unset($log);
+				}
+				$Values['inactivecount'] = $Values['totalcount'] - $Values['activecount'];
+				
+				$Query .= $limit;
+			}
+			//pr($globalOptions);
+			//echo '<br/><br/>==>'.$Query;//exit;
+			$res = m_query(__LINE__,$Query);
+			if($res)
+			{
+				if(mysql_num_rows($res) > 0)
+				{
+					while($row = mysql_fetch_assoc($res))
+					{	
+						$result = array();
+						
+						$larvolIds[] = $larvolId = $row['larvol_id'];
+					
+						if(substr($row['source_id'], 0, 3) == "NCT")
+						{ 
+							$nctId = unpadnct(substr($row['source_id'], 0, 11));
+						}
+						else
+						{
+							$nctId = $row['source_id'];
+						}
+						
+						$result['sectionid'] = 0;
+						
+						$result['larvol_id'] 	= $larvolId;
+						$result['nct_id'] 		= $nctId;
+						if(strlen(trim($row['source_id'])) > 15)
+						{
+							$result['full_id'] 	= $row['source_id'];
+						}
+						else
+						{
+							$result['full_id'] 	= $nctId;
+						}
+						$result['id_for_upm'] 	= $row['source_id'];
+						
+						$result['brief_title'] 	= $row['brief_title'];
+						$result['acronym'] 		= $row['acronym'];
+						
+						if($row['acronym'] != '') 
+						{
+							$result['brief_title'] = $this->replaceRedundantAcroynm($row['acronym'], $row['brief_title']);
+						}
+						
+						$result['region'] 			= $row['region'];
+						$result['lead_sponsor'] 	= str_replace('`', ', ', $row['lead_sponsor']);
+						$result['start_date'] 		= $row['start_date'];
+						$result['end_date'] 		= $row['end_date'];
+						$result['phase'] 			= $row['phase'];
+						$result['enrollment'] 		= $row['enrollment'];
+						$result['collaborator'] 	= str_replace('`', ', ', $row['collaborator']);
+						$result['condition'] 		= str_replace('`', ', ', $row['condition']);
+						$result['intervention_name']= str_replace('`', ', ', $row['intervention_name']);
+						$result['overall_status'] 	= $row['overall_status'];
+						$result['is_active'] 		= $row['is_active'];
+						$result['new'] 				= 'n';
+						
+						$result['viewcount'] 			= $row['viewcount']; 
+						$result['source'] 				= $row['source']; 
+						$result['source_id'] 			= $row['source_id']; 
+						$result['sponsor_owned'] 		= $row['sponsor_owned'];
+						
+						$result['manual_brief_title'] 		= $row['manual_brief_title']; 
+						$result['manual_acronym'] 			= $row['manual_acronym']; 
+						$result['manual_lead_sponsor'] 		= $row['manual_lead_sponsor']; 
+						$result['manual_collaborator'] 		= $row['manual_collaborator']; 
+						$result['manual_condition'] 		= $row['manual_condition']; 
+						$result['manual_overall_status']	= $row['manual_overall_status']; 
+						$result['manual_start_date'] 		= $row['manual_start_date']; 
+						$result['manual_end_date'] 			= $row['manual_end_date']; 
+						$result['manual_enrollment'] 		= $row['manual_enrollment']; 
+						$result['manual_intervention_name'] = $row['manual_intervention_name']; 
+						$result['manual_phase'] 			= $row['manual_phase'];
+						$result['manual_region'] 			= $row['manual_region'];
+						$result['manual_is_sourceless'] 	= $row['manual_is_sourceless'];
+						
+						$result['end_date_prev'] 		= $row['end_date_prev']; 
+						$result['lead_sponsor_prev'] 	= $row['lead_sponsor_prev']; 
+						$result['brief_title_prev'] 	= $row['brief_title_prev']; 
+						$result['collaborator_prev'] 	= $row['collaborator_prev']; 
+						$result['condition_prev'] 		= $row['condition_prev']; 
+						$result['overall_status_prev'] 	= $row['overall_status_prev']; 
+						$result['start_date_prev']		= $row['start_date_prev']; 
+						$result['enrollment_prev'] 		= $row['enrollment_prev']; 
+						$result['intervention_name_prev'] = $row['intervention_name_prev']; 
+						$result['phase_prev'] 		= $row['phase_prev']; 
+						$result['region_prev'] 		= $row['region_prev']; 
+						
+						if($row['start_date_lastchanged'] <= $endRange && $row['start_date_lastchanged'] >= $startRange)
+						{
+							if($row['start_date_prev'] != '' && $row['start_date_prev'] !== NULL)
+							{
+								$result['edited']['start_date'] = $previousValue . $row['start_date_prev'];
+							}
+							else
+							{
+								$result['edited']['start_date'] = $noPreviousValue;
+							}
+						}
+						
+						if($row['end_date_lastchanged'] <= $endRange && $row['end_date_lastchanged'] >= $startRange)
+						{
+							if($row['end_date_prev'] != '' && $row['end_date_prev'] !== NULL)
+							{
+								$result['edited']['end_date'] = $previousValue . $row['end_date_prev'];
+							}
+							else
+							{
+								$result['edited']['end_date'] = $noPreviousValue;
+							}
+						}
+						
+						if($row['region_lastchanged'] <= $endRange && $row['region_lastchanged'] >= $startRange)
+						{
+							if($row['region_prev'] != '' && $row['region_prev'] !== NULL)
+							{
+								$result['edited']['region'] = $previousValue . $row['region_prev'];
+							}
+							else
+							{
+								$result['edited']['region'] = $noPreviousValue;
+							}
+						}
+						
+						if($row['brief_title_lastchanged'] <= $endRange && $row['brief_title_lastchanged'] >= $startRange)
+						{
+							if($row['brief_title_prev'] != '' && $row['brief_title_prev'] !== NULL)
+							{
+								$result['edited']['brief_title'] = $previousValue . $row['brief_title_prev'];
+							}
+							else
+							{
+								$result['edited']['brief_title'] = $noPreviousValue;
+							}
+						}
+						
+						if($row['lead_sponsor_lastchanged'] <= $endRange && $row['lead_sponsor_lastchanged'] >= $startRange)
+						{
+							if($row['lead_sponsor_prev'] != '' && $row['lead_sponsor_prev'] !== NULL)
+							{
+								$row['lead_sponsor_prev'] 	= str_replace('`', ', ', $row['lead_sponsor_prev']);
+								$result['edited']['lead_sponsor'] = $previousValue . $row['lead_sponsor_prev'];
+							}
+							else
+							{
+								$result['edited']['lead_sponsor'] = $noPreviousValue;
+							}
+						}
+						
+						if($row['phase_lastchanged'] <= $endRange && $row['phase_lastchanged'] >= $startRange)
+						{
+							if($row['phase_prev'] != '' && $row['phase_prev'] !== NULL)
+							{
+								$result['edited']['phase'] = $previousValue . $row['phase_prev'];
+							}
+							else
+		
+							{
+								$result['edited']['phase'] = $noPreviousValue;
+							}
+						}
+						
+						if($row['enrollment_lastchanged'] <= $endRange && $row['enrollment_lastchanged'] >= $startRange)
+						{
+							if($row['enrollment_prev'] != '' && $row['enrollment_prev'] !== NULL)
+							{
+								$result['edited']['enrollment'] = $previousValue . $row['enrollment_prev'];
+							}
+							else
+							{
+								$result['edited']['enrollment'] = $noPreviousValue;
+							}
+						}
+						
+						if($row['collaborator_lastchanged'] <= $endRange && $row['collaborator_lastchanged'] >= $startRange)
+						{
+							if($row['collaborator_prev'] != '' && $row['collaborator_prev'] !== NULL)
+							{
+								$row['collaborator_prev'] = str_replace('`', ', ', $row['collaborator_prev']);
+								$result['edited']['collaborator'] = $previousValue . $row['collaborator_prev'];
+							}
+							else
+							{
+								$result['edited']['collaborator'] = $noPreviousValue;
+							}
+						}
+						
+						if($row['condition_lastchanged'] <= $endRange && $row['condition_lastchanged'] >= $startRange)
+						{
+							if($row['condition_prev'] != '' && $row['condition_prev'] !== NULL)
+							{
+								$row['condition_prev'] = str_replace('`', ', ', $row['condition_prev']);
+								$result['edited']['condition'] = $previousValue . $row['condition_prev'];
+							}
+							else
+							{
+								$result['edited']['condition'] = $noPreviousValue;
+							}
+						}
+						
+						if($row['intervention_name_lastchanged'] <= $endRange && $row['intervention_name_lastchanged'] >= $startRange)
+						{
+							if($row['intervention_name_prev'] != '' && $row['intervention_name_prev'] !== NULL)
+							{
+								$row['intervention_name_prev'] = str_replace('`', ', ', $row['intervention_name_prev']);
+								$result['edited']['intervention_name'] = $previousValue . $row['intervention_name_prev'];
+							}
+							else
+							{
+								$result['edited']['intervention_name'] = $noPreviousValue;
+							}
+						}
+						
+						if($row['overall_status_lastchanged'] <= $endRange && $row['overall_status_lastchanged'] >= $startRange)
+						{
+							if($row['overall_status_prev'] != '' && $row['overall_status_prev'] !== NULL)
+							{
+								$row['overall_status_prev'] = str_replace('`', ', ', $row['overall_status_prev']);
+								$result['edited']['overall_status'] = $previousValue . $row['overall_status_prev'];
+							}
+							else
+							{
+								$result['edited']['overall_status'] = $noPreviousValue;
+							}
+						}
+					
+						if($row['firstreceived_date'] <= $endRange && $row['firstreceived_date'] >= $startRange)
+						{
+							$result['new'] = 'y';
+						}
+						
+						$Values['Data'][0]['Trials'][$larvolId] = $result;
+					}
+				}
+			}
+			else
+			{
+				$log 	= 'ERROR: Bad SQL query. ' . $query . mysql_error();
+				$logger->error($log);
+				unset($log);
+			}
+			
+			//fetching active count
+			$cQuery = "SELECT FOUND_ROWS() AS total";
+			$cRes = m_query(__LINE__, $cQuery);
+			if($cRes)
+			{
+				$cRow = mysql_fetch_assoc($cRes);
+				$Values['count'] = $cRow['total'];
+			}
+			else
+			{
+				$log 	= 'ERROR: Bad SQL query. ' . $cQuery . mysql_error();
+				$logger->error($log);
+				unset($log);
+			}
+		}
+		catch(Exception $e)
+		{
+			throw $e;
+		}
+		//pr($Values);//exit;
+		return  $Values;
+	}
+	
+	function compileOTTData($ottType, $TrialsInfo = array(), $Ids = array(), $globalOptions = array(), $display = 'web')
+	{	
+		global $logger, $maxEnrollLimit;
+		
+		$Values['Data'] = array();
+		$Values['activecount'] = 0;
+		$Values['inactivecount'] = 0;
+		$Values['totalcount'] = 0;
+		$Values['count'] = 0;
+		
+		$cCount = array();
+		$naUpms = array();
+		
+		$larvolIds = array();
+		
+		$pIds = array();
+		$aIds = array();
+		
+		$pIds = array_map(function($item) { return $item['product']; }, $Ids);
+		$pIds = array_filter($pIds);	
+		$pIds = array_unique($pIds);	
+		
+		$aIds = array_map(function($item) { return $item['area']; }, $Ids);	
+		$aIds = array_filter($aIds);
+		$aIds = array_unique($aIds);
+		
+		$startRange = date('Y-m-d', strtotime($this->timeInterval, $this->timeMachine));
+		$endRange = date('Y-m-d', $this->timeMachine);
+		
+		$previousValue = 'Previous value: ';	
+		$noPreviousValue = 'No previous value';	
+		
+		$lstart = ($globalOptions['page']-1) * $this->resultsPerPage;
+		$limit = " LIMIT " . $lstart . ", 100 ";
+		
+		if($ottType == 'rowstacked')
+		{
+			$orderBy = " ORDER BY FIELD(at.`area`, " . implode(",", $aIds) . "), dt.`phase` DESC, dt.`end_date` ASC, dt.`start_date` ASC, dt.`overall_status` ASC, dt.`enrollment` ASC ";
+		}
+		else
+		{
+			$orderBy = " ORDER BY FIELD(pt.`product`, " . implode(",", $pIds) . "), dt.`phase` DESC, dt.`end_date` ASC, dt.`start_date` ASC, dt.`overall_status` ASC, dt.`enrollment` ASC ";
+		}
+		
+		$where = " WHERE 1 ";
+		$join = "";
+		
+		$query = "SELECT SQL_CALC_FOUND_ROWS dt.`larvol_id`, dt.`source_id`, dt.`brief_title`, dt.`acronym`, dt.`lead_sponsor`, dt.`collaborator`, dt.`condition`,"
+						. " dt.`overall_status`, dt.`is_active`, dt.`start_date`, dt.`end_date`, dt.`enrollment`, dt.`intervention_name`,"
+						. " dt.`region`, dt.`phase`, dt.`firstreceived_date`, dt.`viewcount`, dt.`source`, "
+						. " dm.`is_sourceless` AS manual_is_sourceless, dm.`brief_title` AS manual_brief_title, dm.`acronym` AS manual_acronym, "
+						. " dm.`lead_sponsor` AS manual_lead_sponsor, dm.`collaborator` AS manual_collaborator,"
+						. " dm.`condition` AS manual_condition, dm.`overall_status` AS manual_overall_status, dm.`region` AS manual_region,"
+						. " dm.`start_date` AS manual_start_date, dm.`end_date` AS manual_end_date, dm.`enrollment` AS manual_enrollment, "
+						. " dm.`intervention_name` AS manual_intervention_name, dm.`phase` AS manual_phase, dh.`brief_title_prev`, "
+						. " dh.`end_date_prev`, dh.`lead_sponsor_prev`, dh.`collaborator_prev`, dh.`condition_prev`, dh.`overall_status_prev`, "
+						. " dh.`start_date_prev`, dh.`enrollment_prev`, dh.`intervention_name_prev`, dh.`phase_prev`, dh.`region_prev`, dh.`brief_title_lastchanged`, "
+						. " dh.`end_date_lastchanged`, dh.`lead_sponsor_lastchanged`, dh.`collaborator_lastchanged`, dh.`condition_lastchanged`, "
+						. " dh.`overall_status_lastchanged`, dh.`start_date_lastchanged`, dh.`enrollment_lastchanged`, dh.`intervention_name_lastchanged`, "
+						. " dh.`phase_lastchanged`, dh.`region_lastchanged` ";
+		
+		if(!empty($pIds))
+		{
+			$query .= ", pt.`product` AS productid ";
+			$where .= " AND pt.`product` IN ('" . implode("','", $pIds) . "') ";
+			$join .= " JOIN `product_trials` pt ON dt.`larvol_id` = pt.`trial` ";
+		}
+		if(!empty($aIds))
+		{
+			$query .= ", at.`area` AS areaid ";
+			$where .= " AND at.`area` IN ('" . implode("','", $aIds) . "') ";	
+			$join .= " JOIN `area_trials` at ON dt.`larvol_id` = at.`trial` ";
+		}
+		$query .= " FROM `data_trials` dt ";
+		$query .= $join . " LEFT OUTER JOIN `data_manual` dm ON dt.`larvol_id` = dm.`larvol_id` "
+						. " LEFT OUTER JOIN `data_history` dh ON dh.`larvol_id` = dt.`larvol_id` ";
+		
+		//calcultaing count and enrollment max value only for webpage display and not for file exports				
+		if($display == 'web')
+		{
+			$tQuery = "SELECT COUNT(*) AS totalcount "
+						. " FROM `data_trials` dt ";
+			$tQuery .=  $join . $where;
+			$tRes = m_query(__LINE__,$tQuery);
+			if($tRes)
+			{
+				$tRow = mysql_fetch_assoc($tRes);
+				$Values['totalcount'] = $tRow['totalcount'];
+			}
+			else
+			{
+				$log 	= 'ERROR: Bad SQL query. ' . $tQuery . mysql_error();
+				$logger->error($log);
+				unset($log);
+			}
+			
+			$aQuery = "SELECT COUNT(*) AS activecount "
+						. " FROM `data_trials` dt ";
+			$aQuery .=  $join . $where . " AND dt.`is_active` = 1 ";
+			$aRes = m_query(__LINE__,$aQuery);
+			if($aRes)
+			{
+				$aRow = mysql_fetch_assoc($aRes);
+				$Values['activecount'] = $aRow['activecount'];
+			}
+			else
+			{
+				$log 	= 'ERROR: Bad SQL query. ' . $aQuery . mysql_error();
+				$logger->error($log);
+				unset($log);
+			}
+			
+			$Values['inactivecount'] = $Values['totalcount'] - $Values['activecount'];
+		}
+		
+		//Filtering Options
+		$filters = $this->getActiveFilters($globalOptions);
 		
 		if(isset($globalOptions['product']) && !empty($globalOptions['product']))
 		{	
@@ -11431,6 +11941,64 @@ class TrialTracker
 	}
 }
 
+function get_WhereString($data, $alias, $pd_alias, $ar_alias)
+{
+	$wheredatas = $data;
+    if(empty($wheredatas))
+	{
+	   return '';
+	}
+	$wheres = array();
+	$wcount = 0;
+	$prevchain = ' ';
+	try {
+
+		foreach($wheredatas as $wh_key => $where_data)
+		{
+			$op_name = $where_data["opname"];
+			$column_name = $where_data["columnname"];
+			$column_value = $where_data["columnvalue"];
+			$chain_name = $where_data["chainname"];
+			if($column_name == '`product`' || $column_name == '`area`')
+				$column_name='`id`';
+				
+			$op_string = getOperator($op_name, $column_name, $column_value);
+			$wstr = " " . $prevchain . " " . $op_string;
+			
+			if($where_data["columnname"] == '`product`')
+				$wstr = str_replace('%f', $pd_alias . "." . $column_name,$wstr);
+			elseif($where_data["columnname"] == '`area`')
+				$wstr = str_replace('%f', $ar_alias . "." . $column_name,$wstr);
+			else
+				$wstr = str_replace('%f', $alias . "." . $column_name,$wstr);
+			
+			$pos = strpos($op_string,'%s1');
+
+			if($pos === false) {
+				$wstr = str_replace('%s', $column_value, $wstr);
+			}
+			else {
+				$xx = explode('and;endl', $column_value);//and;endl
+				$wstr = str_replace('%s1', $xx[0],$wstr);
+				$wstr = str_replace('%s2', $xx[1],$wstr);
+			}
+			$prevchain = $chain_name;
+			$wheres[$wcount++] = $wstr;
+		}
+		$wherestr = implode(' ', $wheres);
+		$pos = strpos($prevchain,'.');
+		if($pos === true)
+		{
+			$wherestr .= str_replace('.', '', $prevchain);//if . is present remove it and empty
+		}
+	}
+	catch(Exception $e)
+	{
+		throw $e;
+	}
+	return $wherestr;
+}
+
 function htmlformat($str)
 {
 	$str = fix_special_chars($str);
@@ -11494,7 +12062,7 @@ function getColspanBasedOnLogin($loggedIn)
 function iszero($element) { return $element != ''; }
 
 function m_query($n,$q)
-{
+{	
 	global $logger;
 	$time_start = microtime(true);
 	$res = mysql_query($q);
