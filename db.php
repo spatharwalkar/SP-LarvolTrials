@@ -7,7 +7,7 @@ $logger = Logger::getLogger('tlg');
 
 require_once('settings.php');
 require_once('include.util.php');
-
+ini_set('error_reporting', E_ALL ^ E_NOTICE);
 $db = new DatabaseManager();
 $db->loggedIn();	//check login status and load userinfo
 $now = strtotime('now');

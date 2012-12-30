@@ -24,6 +24,16 @@ if(!$db->loggedIn())
 	exit;
 }
 
+if(stripos($_REQUEST['searchdata'],'"ignore_changes":"no"')>2)
+{	
+	$_GET['ignore_changes']='no';
+}
+elseif(stripos($_REQUEST['searchdata'],'"ignore_changes":"yes"')>2)
+{
+	$_GET['ignore_changes']='yes';
+}
+	
+
 //declare all globals
 global $db;
 global $page;
@@ -321,27 +331,18 @@ $(document).ready(function () {
     $('#product_update').progressBar();
   </script>
 <?php 
-//preindex after successful save and change of search data as a seperate worker thread
+//preindex after successful save and change of search data as a seperate worker thread.
 if($saveStatus == 1 && $searchDataOld != $_REQUEST['searchdata'])
 {
-	if(source_id_list_changed($searchDataOld,$_REQUEST['searchdata'])) 	// source_id list changed, so dont run preindex in "special" mode.
-	{
-		echo input_tag(array('Type'=>'iframe','Field'=>'index_area.php?id='.$_REQUEST['id'].'&connection_close=1'),null,array('style'=>"display:none"));
-		unset($_GET['rgx_changed']);
-	}
-	else // source_id list not changed,  run preindex in "special" mode.
-	{
-		echo input_tag(array('Type'=>'iframe','Field'=>'index_area.php?id='.$_REQUEST['id'].'&connection_close=1&rgx_changed=yes'),null,array('style'=>"display:none"));
-		unset($_GET['rgx_changed']);
-	}
-
+	echo input_tag(array('Type'=>'iframe','Field'=>'index_area.php?id='.$_REQUEST['id'].'&connection_close=1&ignore_changes='.$_GET['ignore_changes']),null,array('style'=>"display:none"));
+	unset($_GET['ignore_changes']);
 }
 //add predindex for full delete through a seperate worker thread
 if(isset($_REQUEST['delsearch']) && is_array($_REQUEST['delsearch']))
 {
 	foreach($_REQUEST['delsearch'] as $delId => $wok)
 	{
-		echo input_tag(array('Type'=>'iframe','Field'=>urlPath().'index_area.php?id='.$delId.'&connection_close=1&rgx_changed=yes'),null,array('style'=>"display:none"));
+		echo input_tag(array('Type'=>'iframe','Field'=>urlPath().'index_area.php?id='.$delId.'&connection_close=1&ignore_changes='.$_GET['ignore_changes']),null,array('style'=>"display:none"));
 	}
 }
 echo '</html>';

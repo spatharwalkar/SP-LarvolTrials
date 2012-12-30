@@ -33,12 +33,13 @@ tindex(NULL,'products',NULL,NULL,NULL,$productID);
 echo '<br><br>All done.<br>';
 
 // recalculate mhm cells without recording changes incase of regex change
-if(isset($_GET['rgx_changed']) and $_GET['rgx_changed']=='yes' and !empty($productID))
+if(isset($_GET['ignore_changes']) and !empty($productID))
 {
 	$parameters=array(); 
 	$parameters['product']=$productID;
 	require_once('calculate_hm_cells.php');
-	calc_cells($parameters,NULL,$_GET['rgx_changed']);
+	calc_cells($parameters,NULL,$_GET['ignore_changes']);
 }
+
 
 ?>  

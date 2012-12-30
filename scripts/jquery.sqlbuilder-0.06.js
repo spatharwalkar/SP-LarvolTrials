@@ -128,6 +128,7 @@ $.initialBracesFlag = 9;
             $('.sqlsort').remove();
 
             $('#override').val('');
+//			$('#ignore_changes').val('');
             
             if(jsonstr.length == 0)
             {
@@ -135,7 +136,7 @@ $.initialBracesFlag = 9;
             }
             var j = eval('(' + jsonstr + ')');
             $('#override').val(j.override);
-           
+//			$('#ignore_changes').val(j.ignore_changes);
 
             var coldiv = $(".addnewsqlcolumn");
             var sortdiv = $('.addnewsqlsort');
@@ -237,6 +238,8 @@ $.initialBracesFlag = 9;
         };
         $('input:text:first').focus();
         var opts = $.extend({}, $.fn.sqlsimplemenu.defaults, options);
+		
+		
 
         function buildsimplemenu() {
             /*console.log("buildsimplemenu: %o", this);*/
@@ -270,6 +273,7 @@ $.initialBracesFlag = 9;
                     else mmenu = mmenu + '<li><a href="javascript:void(0)" alt="#' + i + '">' + dispName + '</a></li>';
                 }
             }
+			
             //remove any visible menus
             $("#sqlmenulist").remove();
             $("#operatorlist").remove();
@@ -777,18 +781,30 @@ $.initialBracesFlag = 9;
             }
             return "";
         }
+		
+		
 
 
         function onchangeevent(type) {
             //debugger;
             //$.get('/callback/', {cache: true});
+			
             if (opts.datadiv) {
-
-
+			
+				if($('#ignore_changes').is(":checked")) 
+				{
+					ignore_changes.value='no';
+				} 
+				else 
+				{
+					ignore_changes.value='yes';
+				}
+					
                 var data = '{' +
                          '"reportid":"' + opts.reportid + '",';
                 var override = $('#override').val();
                 data = data + '"override":"' + override + '",';
+				data = data + '"ignore_changes":"' + ignore_changes.value + '",';
                 data = data + '"columndata":[';
                 $('span.sqlcolumn').each(function () {
                     var col_slot = $(this).find('a.addnewsqlcolumn').attr('alt');
@@ -1145,6 +1161,10 @@ $.initialBracesFlag = 9;
                     '<p class=sqlgroupbydata></p>' +
                     '<p class=sqlalldata></p>' +
                     '<font size="4" face="Bold" color="Grey">Conditions</font>' +
+					'<div style="text-align:right">'+
+					'<b>Record changes resulting from this action:</b>'+
+					'<input type="checkbox" id="ignore_changes">'+
+					'</div>'+
                     '<p class=sqlbuilderwhere>' + 
                     '<span class="sqlwhere2" id="1">' +
 	                 '<a class="addnewsqlwherechain" id="9990" href="javascript:void(0)" alt="#0" >' + opts.chainInitial[2].name + '</a>&nbsp;' +
@@ -1188,12 +1208,16 @@ $.initialBracesFlag = 9;
 		            	   $('#override').blur(function () {
 		                       $('.sqlsyntaxhelp').remove();
 		                       onchangeevent('change');
-
-
-
 		                   });
 
 		               });
+					   
+			$("#ignore_changes").change
+				( function() 
+					{
+						onchangeevent('change');
+					}
+				);
 
 
             /*************************************************************************************************************/

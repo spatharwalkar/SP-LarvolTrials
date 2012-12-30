@@ -20,7 +20,7 @@ $data=array();$isactive=array();$instype=array();$ldate=array();$phases=array();
 		echo '<br>All done.<br>';
 	}
 */
-function calc_cells($parameters,$update_id=NULL,$rgx_changed=NULL)
+function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 {
 	/*
 	pr($parameters);
@@ -446,7 +446,7 @@ function calc_cells($parameters,$update_id=NULL,$rgx_changed=NULL)
 					echo '<br>20000 records added, sleeping 1 second....'.str_repeat("  ",800);
 					sleep(1);
 				}
-				add_data($av['id'],$pv['id'],0,0,0,'none','N/A',$overall_statuses,$rgx_changed);
+				add_data($av['id'],$pv['id'],0,0,0,'none','N/A',$overall_statuses,$ignore_changes);
 				$progress_count ++;
 				if($cron_run)
 				{
@@ -518,7 +518,7 @@ function calc_cells($parameters,$update_id=NULL,$rgx_changed=NULL)
 				sleep(1);
 			}
 			
-			add_data($av['id'],$pv['id'],$cnt_total,$cnt_active,$cnt_active_indlead,$bomb,$max_phase,$overall_statuses,$rgx_changed);
+			add_data($av['id'],$pv['id'],$cnt_total,$cnt_active,$cnt_active_indlead,$bomb,$max_phase,$overall_statuses,$ignore_changes);
 			$progress_count ++;
 			if($cron_run)
 			{
@@ -587,7 +587,7 @@ function calc_cells($parameters,$update_id=NULL,$rgx_changed=NULL)
 	return true;
 }			
 
-function add_data($arid,$prid,$cnt_total,$cnt_active,$cnt_active_indlead,$bomb,$max_phase,$overall_statuses=null,$rgx_changed=null)
+function add_data($arid,$prid,$cnt_total,$cnt_active,$cnt_active_indlead,$bomb,$max_phase,$overall_statuses=null,$ignore_changes=null)
 {
 /*********/
 global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_total;
@@ -642,10 +642,9 @@ global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_total;
 		$cnt_indlead_old = $row["count_active_indlead"];
 		$count_total_old = $row["count_total"];
 		$highest_phase_old = $row["highest_phase"];
-		
 		//if there is a difference in counts, then update the _prev fields
 		$aa='';$bb='';$cc='';$dd='';
-		if(isset($rgx_changed) and $rgx_changed=='yes')
+		if(isset($ignore_changes) and $ignore_changes=='yes')
 		{
 			$aa='';
 		}
