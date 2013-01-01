@@ -3847,13 +3847,13 @@ function Download_reports()
 		}
 		
 		$dimensions = $pdf->getPageDimensions();
-		$newMarginWidth = (($dimensions['wk'] - (194.4))/2);
+		$newMarginWidth = (($dimensions['wk'] - (162))/2);
 		//$pdf->SetRightMargin($newMarginWidth);
 		//$pdf->SetLeftMargin($newMarginWidth);
 		$updateTime = ' ('.date('Y/m/d', strtotime($end_range, $now)).' - '.date('Y/m/d', strtotime($start_range, $now)).')';
-		$helpTabImage_Header = array('Discontinued', 'Filing', 'Phase explanation', 'Updated'.$updateTime);
-		$helpTabImages_Src = array('new_lbomb.png', 'new_file.png', 'phaseexp.png', 'outline.png');
-		$helpTabImages_Desc = array('Bomb', 'Filing', 'Phase explanation', 'Red Border');
+		$helpTabImage_Header = array('Discontinued', 'Filing', 'Updated'.$updateTime);
+		$helpTabImages_Src = array('new_lbomb.png', 'new_file.png', 'outline.png');
+		$helpTabImages_Desc = array('Bomb', 'Filing', 'Red Border');
 		
 		///we can not set margins using available pdf function multiple times so set X-cordinate value expicitly
 		//$Place_X = $pdf->GetX();
@@ -4627,9 +4627,9 @@ function Download_reports()
 		++$Excel_HMCounter;
 		++$Excel_HMCounter;
 		
-		$helpTabImage_Header = array('Discontinued', 'Filing details', 'Phase explanation', 'Red border (record updated)');
-		$helpTabImages_Src = array('new_lbomb.png', 'new_file.png', 'phaseexp.png', 'outline.png');
-		$helpTabImages_Desc = array('Bomb', 'Filing', 'Phase explanation', 'Red Border');
+		$helpTabImage_Header = array('Discontinued', 'Filing details', 'Red border (record updated)');
+		$helpTabImages_Src = array('new_lbomb.png', 'new_file.png', 'outline.png');
+		$helpTabImages_Desc = array('Bomb', 'Filing', 'Red Border');
 		
 		foreach($helpTabImage_Header as $key => $Header)
 		{
