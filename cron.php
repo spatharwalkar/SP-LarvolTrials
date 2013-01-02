@@ -264,7 +264,62 @@ if(isset($LISyncTasks) and !empty($LISyncTasks))
 				require_once 'fetch_li_institutions.php';
 				fetch_li_institutions(strtotime($syncTask['lastrun']));
 				break;
-
+			case 8:
+				//moas
+				require_once 'fetch_li_moas.php';
+				fetch_li_moas(strtotime($syncTask['lastrun']));
+				break;
+			case 9:
+				//product and moas
+				require_once 'fetch_li_products.php';
+				fetch_li_products(strtotime($syncTask['lastrun']));
+				require_once 'fetch_li_moas.php';
+				fetch_li_moas(strtotime($syncTask['lastrun']));
+				break;
+			case 10:
+				//areas and moas
+				require_once 'fetch_li_moas.php';
+				fetch_li_moas(strtotime($syncTask['lastrun']));
+				break;
+			case 11:
+				//areas, product and institution sync
+				require_once 'fetch_li_products.php';
+				fetch_li_products(strtotime($syncTask['lastrun']));
+				require_once 'fetch_li_moas.php';
+				fetch_li_moas(strtotime($syncTask['lastrun']));
+				break;
+			case 12:
+				//institution and moa sync
+				require_once 'fetch_li_institutions.php';
+				fetch_li_institutions(strtotime($syncTask['lastrun']));
+				require_once 'fetch_li_moas.php';
+				fetch_li_moas(strtotime($syncTask['lastrun']));
+				break;
+			case 13:
+				//product, institution and moa sync
+				require_once 'fetch_li_products.php';
+				fetch_li_products(strtotime($syncTask['lastrun']));
+				require_once 'fetch_li_institutions.php';
+				fetch_li_institutions(strtotime($syncTask['lastrun']));
+				require_once 'fetch_li_moas.php';
+				fetch_li_moas(strtotime($syncTask['lastrun']));
+				break;
+			case 14:
+				//areas, institution and moa sync
+				require_once 'fetch_li_institutions.php';
+				fetch_li_institutions(strtotime($syncTask['lastrun']));
+				require_once 'fetch_li_moas.php';
+				fetch_li_moas(strtotime($syncTask['lastrun']));
+				break;
+			case 15:
+				//areas, product, institution and moa sync
+				require_once 'fetch_li_products.php';
+				fetch_li_products(strtotime($syncTask['lastrun']));
+				require_once 'fetch_li_institutions.php';
+				fetch_li_institutions(strtotime($syncTask['lastrun']));
+				require_once 'fetch_li_moas.php';
+				fetch_li_moas(strtotime($syncTask['lastrun']));
+				break;
 		}
 		//echo date('Y-m-d H:i:s',$now);die;
 	}

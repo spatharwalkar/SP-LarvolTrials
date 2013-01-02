@@ -1001,7 +1001,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			require 'index_product.php';
 			ob_end_clean();	
 			
-			//Insert product institue association
+			//Insert product instituttion association
 			ob_start();
 			foreach($extraData['institutionIdsArray'] as $KeyInst=> $InstId)
 			{
@@ -1049,6 +1049,55 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			}
 			ob_end_clean();	
 			//End of Insert product institue association
+			
+			//Insert product Moa association
+			ob_start();
+			foreach($extraData['moaIdsArray'] as $KeyMoa=> $MoaId)
+			{
+				$escMoalid = mysql_real_escape_string($MoaId);
+				$escMoaname = mysql_real_escape_string($extraData['moaNamesArray'][$KeyMoa]);
+				$Moaquery = "select id from moas where `LI_id`='{$escMoalid}' OR `name`='{$escMoaname}' limit 1";
+				$Moaresult = mysql_query($Moaquery);
+				$MoaPresent = false;
+				while($Moarow = mysql_fetch_assoc($Moaresult))
+				{
+					$MoaPresent = true;
+					$MoaIdLocal = $Moarow['id'];
+				}
+				$MoaAssoInsert = false;
+				if($MoaPresent)
+				{
+					$MoaAssocquery = "select moa from products_moas where `moa`='{$MoaIdLocal}' AND `product`='{$ProdID}' limit 1";
+					$MoaAssocresult = mysql_query($MoaAssocquery);
+					$MoaAssocPresent = false;
+					while($MoaAssocrow = mysql_fetch_assoc($MoaAssocresult))
+					{
+						$MoaAssocPresent = true;
+					}
+					if(!$MoaAssocPresent) $MoaAssoInsert = true;
+				}
+				else
+				{
+					require_once 'fetch_li_moas.php';
+					fetch_li_moa_individual($MoaId);
+					$Moaquery_2 = "select id from moas where `LI_id`='{$escMoalid}' OR `name`='{$escMoaname}' limit 1";
+					$Moaresult_2 = mysql_query($Moaquery_2);
+					$MoaPresent = false;
+					while($Moarow_2 = mysql_fetch_assoc($Moaresult_2))
+					{
+						$MoaPresent = true;
+						$MoaIdLocal = $Moarow_2['id'];
+					}
+					if($MoaPresent) $MoaAssoInsert = true;
+				}
+				if($MoaAssoInsert)
+				{
+					$MoaAssocInsertquery = "INSERT INTO products_moas (`product`, `moa`) VALUES ('{$ProdID}','{$MoaIdLocal}')";
+					$MoaAssocInsertresult = mysql_query($MoaAssocInsertquery);
+				}
+			}
+			ob_end_clean();	
+			//End of Insert product Moa association
 			
 			return 1;
 		}
@@ -1114,8 +1163,68 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 		}
 		else
 		{
-			echo 'Institution Id : '.$product_id.' Fail !! <br/>'."\n";
+			echo 'Institution Id : '.$importVal['LI_id'].' Fail !! <br/>'."\n";
 			softdie('Cannot import institution id '.$importVal['LI_id'].'<br/>'.$query.'<br/>');
+			//softdie('Cannot import product id '.$importVal['LI_id'].'<br/>');
+			return 2;
+		}
+	}
+	
+	if($import==1 && $table=='moas')
+	{
+		ini_set('max_execution_time','360000');	//100 hours
+		//check for insert update case
+		$esclid = mysql_real_escape_string($importVal['LI_id']);
+		$escname = mysql_real_escape_string($importVal['name']);
+		$query = "select id from moas where LI_id='{$esclid}' OR name='{$escname}' limit 1";
+		$result = mysql_query($query);
+		$update = false;
+		ob_start();
+		while($row = mysql_fetch_assoc($result))
+		{
+			$update = true;
+			$id = $row['id'];
+		}
+		ob_end_clean();
+		if($update)
+		{
+			if($importVal['is_active'] == 0)
+			{
+				deleteData($id, $table);
+				return 4;
+			}			
+			$importVal = array_map(am1,$importKeys,array_values($importVal));
+			$query = "update $table set ".implode(',',$importVal)." where id=".$id;
+		}
+		else 
+		{
+			//if insert check the moa is_active. We dont need it in an import, skipping...
+			if($importVal['is_active'] == 0)
+			{
+				//skipping.
+				//return false can show as failed attempt on higher level controller.
+				return 3;
+			}
+			
+			$importVal = array_map(function ($v){return "'".mysql_real_escape_string($v)."'";},$importVal);
+			$query = "insert into $table (`".implode('`,`',$importKeys)."`) values (".implode(',',$importVal).")";
+		}
+		if(mysql_query($query))
+		{
+			if($id)
+			{
+				$_GET['id'] = $id;
+			}
+			else 
+			{
+				$_GET['id'] = mysql_insert_id();
+			}
+			return 1;
+		}
+		else
+		{
+			echo 'Moa Id : '.$importVal['LI_id'].' Fail !! <br/>'."\n";
+			softdie('Cannot import moa id '.$importVal['LI_id'].'<br/>'.$query.'<br/>');
 			//softdie('Cannot import product id '.$importVal['LI_id'].'<br/>');
 			return 2;
 		}
@@ -2324,7 +2433,7 @@ function parseProductsXmlAndSave($xmlImport,$table)
 	
 	$xmldump = $xmlImport->saveXML($xmlImport);
 	
-	//Get Product Code names
+	//Get associated institution id and names
 	$inst_ids = array();
 	$inst_names = array();
 	foreach($xmlImport->getElementsByTagName('Institutions') as $brandNames)
@@ -2335,11 +2444,23 @@ function parseProductsXmlAndSave($xmlImport,$table)
 			($brandName->getElementsByTagName('is_active')->item(0)->nodeValue=='True')?$inst_names[] = $brandName->getElementsByTagName('name')->item(0)->nodeValue:null;
 		}
 	}
+	
+	//Get associated moa id and names
+	$moa_ids = array();
+	$moa_names = array();
+	foreach($xmlImport->getElementsByTagName('MOAs') as $brandNames)
+	{
+		foreach($brandNames->getElementsByTagName('MOA') as $brandName)
+		{
+			($brandName->getElementsByTagName('is_active')->item(0)->nodeValue=='True')?$moa_ids[] = $brandName->getElementsByTagName('moa_id')->item(0)->nodeValue:null;
+			($brandName->getElementsByTagName('is_active')->item(0)->nodeValue=='True')?$moa_names[] = $brandName->getElementsByTagName('name')->item(0)->nodeValue:null;
+		}
+	}
 			
 	$importVal = array('LI_id'=>$product_id,'name'=>$prodname,'comments'=>$comments,'product_type'=>$product_type,'licensing_mode'=>$licensing_mode,'administration_mode'=>$administration_mode,'discontinuation_status'=>$discontinuation_status,'discontinuation_status_comment'=>$discontinuation_status_comment,'is_key'=>$is_key,'is_active'=>$is_active,'created'=>$created,'modified'=>$modified,'company'=>$company,'brand_names'=>$brand_names,'generic_names'=>$generic_names,'code_names'=>$code_names,'approvals'=>$approvals,'xml'=>$xmldump);
 	//var_dump($importVal);
 	//ob_start();
-	$out = saveData(null,$table,1,$importKeys,$importVal,$k,array('institutionIdsArray'=>$inst_ids, 'institutionNamesArray'=>$inst_names));
+	$out = saveData(null,$table,1,$importKeys,$importVal,$k,array('institutionIdsArray'=>$inst_ids, 'institutionNamesArray'=>$inst_names, 'moaIdsArray'=>$moa_ids, 'moaNamesArray'=>$moa_names));
 	if($out ==1)
 	{
 		$success ++;
@@ -2513,5 +2634,59 @@ function parseInstitutionsXmlAndSave($xmlImport,$table)
 		$delete ++;
 	}			
 	//ob_end_clean();
+	return array('success'=>$success,'fail'=>$fail,'skip'=>$skip,'delete'=>$delete);
+}
+
+/**
+* @name parseMoasXmlAndSave
+* @tutorial parse and get ready Moas xml for saving.
+* @param $table,$searchdata,$id
+*/
+function parseMoasXmlAndSave($xmlImport,$table)
+{
+	$importKeys = array('LI_id', 'name', 'display_name', 'is_active', 'created', 'modified','xml');
+	$success = $fail = $skip = $delete = 0;
+	foreach($xmlImport->getElementsByTagName('Moa') as $moa)
+	{
+		$importVal = array();
+		$moa_id = $moa->getElementsByTagName('moa_id')->item(0)->nodeValue;
+		$moa_name = $moa->getElementsByTagName('name')->item(0)->nodeValue;
+		$display_name = $moa->getElementsByTagName('display_name')->item(0)->nodeValue;
+		$is_active = ($moa->getElementsByTagName('is_active')->item(0)->nodeValue == 'True')?1:0;
+		$created = date('y-m-d H:i:s',time($moa->getElementsByTagName('created')->item(0)->nodeValue));
+		$modified = date('y-m-d H:i:s',time($moa->getElementsByTagName('modified')->item(0)->nodeValue));
+		
+		$implodeStringForNames = ', ';
+	
+		$xmldump = $xmlImport->saveXML($moa);
+			
+		$importVal = array('LI_id'=>$moa_id,'name'=>$moa_name,'display_name'=>$display_name,'is_active'=>$is_active,'created'=>$created,'modified'=>$modified,'xml'=>$xmldump);
+		//var_dump($importVal);
+		//ob_start();
+		$out = saveData(null,$table,1,$importKeys,$importVal,$k);
+		if($out ==1)
+		{
+			$success ++;
+			ob_start();
+			echo 'Moa Id : '.$moa_id.' Done .. <br/>'."\n";
+			ob_end_flush();
+		}
+		elseif($out==2) 
+		{
+			echo 'Moa Id : '.$moa_id.' Fail !! <br/>'."\n";
+			$fail ++;
+		}
+		elseif($out==3)
+		{
+			echo 'Moa Id : '.$moa_id.' Skipped !! <br/>'."\n";
+			$skip ++;
+		}		
+		elseif($out==4)
+		{
+			echo 'Moa Id : '.$moa_id.' Deleted !! <br/>'."\n";
+			$delete ++;
+		}			
+		//ob_end_clean();
+	}
 	return array('success'=>$success,'fail'=>$fail,'skip'=>$skip,'delete'=>$delete);
 }

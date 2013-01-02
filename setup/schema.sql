@@ -1217,6 +1217,31 @@ CREATE TABLE IF NOT EXISTS `products_institutions` (
  KEY `product` (`product`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS `moas` (
+ `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+ `LI_id` varchar(63) COLLATE utf8_unicode_ci DEFAULT NULL,
+ `name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+ `display_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+ `is_active` tinyint(1) DEFAULT NULL,
+ `created` datetime DEFAULT NULL,
+ `modified` datetime DEFAULT NULL,
+ `xml` text COLLATE utf8_unicode_ci,
+ PRIMARY KEY (`id`),
+ UNIQUE KEY `LI_id` (`LI_id`),
+ UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `products_moas` (
+ `product` int(10) unsigned NOT NULL,
+ `moa` int(10) unsigned NOT NULL,
+ PRIMARY KEY (`product`,`moa`),
+ KEY `moa` (`moa`),
+ KEY `product` (`product`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+ALTER TABLE `products_moas`
+  ADD CONSTRAINT `products_moas_ibfk_1` FOREIGN KEY (`product`) REFERENCES `products` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `products_moas_ibfk_2` FOREIGN KEY (`moa`) REFERENCES `moas` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `products_institutions`
   ADD CONSTRAINT `products_institutions_ibfk_2` FOREIGN KEY (`institution`) REFERENCES `institutions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,

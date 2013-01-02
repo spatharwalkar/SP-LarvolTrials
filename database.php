@@ -373,6 +373,58 @@ if (isset($_POST['li_inst']) and $_POST['li_inst']=="3" and ( isset($_POST['inst
 	return;
 }
 
+if (isset($_POST['li_moa']) and $_POST['li_moa']=="1") 
+{
+	require_once('fetch_li_moas.php');
+	echo '<br><br>Importing all moas from LI<br><br>';
+	fetch_li_moas("0");
+	return;
+}
+if (isset($_POST['li_moa']) and $_POST['li_moa']=="2" and isset($_POST['moa_updt_since']) ) 
+{
+	$upds=strtotime(mysql_real_escape_string($_POST['moa_updt_since']));
+	if(!isset($upds) or empty($upds)) 
+	{
+		echo '<br> Invalid date entered:'.$litd.' Unable to proceed. ';
+		return false;
+	}
+	require_once('fetch_li_moas.php');
+	echo '<br><br>Importing moas updated since '.$_POST['moa_updt_since'].' from LI<br><br>';
+	fetch_li_moas($upds);
+	return;
+}
+
+if (isset($_POST['li_moa']) and $_POST['li_moa']=="3" and ( isset($_POST['moa_lt_id']) or isset($_POST['moa_li_id']) ) ) 
+{
+	if( isset($_POST['moa_li_id']) and !empty($_POST['moa_li_id']) ) $liid=mysql_real_escape_string($_POST['moa_li_id']);
+	elseif(isset($_POST['moa_lt_id']))
+	{
+		$litd=mysql_real_escape_string($_POST['moa_lt_id']);
+		
+		$query = 'select lI_id from moas where id="'.$litd.'" limit 1' ;
+					if(!$res = mysql_query($query))
+					{
+						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+						global $logger;
+						$logger->error($log);
+						echo $log;
+						return false;
+					}
+					$res = mysql_fetch_array($res) ;
+					if(isset($res['lI_id']))
+						$liid = $res['lI_id'];
+					else
+					{
+						echo '<br> Could not find id '.$litd.' in moas table.  ';
+						return false;
+					}
+	}
+	require_once('fetch_li_moas.php');
+	echo '<br><br>Importing moas with LI id:'.$liid.'<br><br>';
+	fetch_li_moa_individual($liid);
+	return;
+}
+
 
 /****************************/
 echo(editor());
@@ -405,6 +457,8 @@ function editor()
 			document.getElementById (\'p_sing\').className = \'hide\';
 		    document.getElementById (\'inst_sing\').className = \'hide\';
 			document.getElementById (\'inst_up_dt\').className = \'hide\';
+			document.getElementById (\'moa_sing\').className = \'hide\';
+			document.getElementById (\'moa_up_dt\').className = \'hide\';
 		    var t = document.getElementsByTagName (\'input\');
 		    for (var i = 0; i < t.length; i++) 
 			{
@@ -434,6 +488,16 @@ function editor()
 					{
 						document.getElementById (\'inst_up_dt\').className = toggles3[toggles3.length - 2].checked ? \'show\' : \'hide\';
 						document.getElementById (\'inst_sing\').className = toggles3[toggles3.length - 1].checked ? \'show\' : \'hide\';
+					}
+				}
+				
+				if (t[i].getAttribute (\'name\') == \'li_moa\') 
+				{
+					toggles3.push (t[i]);
+					t[i].onclick = function () 
+					{
+						document.getElementById (\'moa_up_dt\').className = toggles3[toggles3.length - 2].checked ? \'show\' : \'hide\';
+						document.getElementById (\'moa_sing\').className = toggles3[toggles3.length - 1].checked ? \'show\' : \'hide\';
 					}
 				}
 				
@@ -661,6 +725,20 @@ function editor()
 			<input type="radio" name="li_inst" value="1" selected="selcted"> All<br>
 			<input type="radio" name="li_inst" value="2"> Institutions updated since <span id="inst_up_dt" name="inst_up_dt1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enter date as yyyy-mm-dd <input type="text" name="inst_updt_since" id="inst_updt_since" value="" size="10" length="10" title="( yyyy-mm-dd )"/></span> <br>
 			<input type="radio" name="li_inst" value="3"> Single institution (Either LT ID or LI ID) <span id="inst_sing" name="inst_sing1">LT ID: <input type="text" name="inst_lt_id" id="inst_ltid" value="" title="Enter LT id"/> LI ID: <input type="text" name="inst_li_id" id="inst_ltid" value="" title="Enter LI id"/></span><br>
+		
+				'
+			. '<br><input type="submit" value="Import" />'
+			. '</form></formset></fieldset></div>';
+			
+	$out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
+	
+	// LI moa scraper
+	$out .= '<div style="width:610px; padding:5px;float:left;"><fieldset class="schedule"><legend><b> IMPORT MOA\'s FROM LI </b></legend>'
+			. '<formset><form action="database.php" method="post">'
+			. '
+			<input type="radio" name="li_moa" value="1" selected="selcted"> All<br>
+			<input type="radio" name="li_moa" value="2"> Moas updated since <span id="moa_up_dt" name="moa_up_dt1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enter date as yyyy-mm-dd <input type="text" name="moa_updt_since" id="moa_updt_since" value="" size="10" length="10" title="( yyyy-mm-dd )"/></span> <br>
+			<input type="radio" name="li_moa" value="3"> Single institution (Either LT ID or LI ID) <span id="moa_sing" name="moa_sing1">LT ID: <input type="text" name="moa_lt_id" id="moa_ltid" value="" title="Enter LT id"/> LI ID: <input type="text" name="moa_li_id" id="moa_ltid" value="" title="Enter LI id"/></span><br>
 		
 				'
 			. '<br><input type="submit" value="Import" />'
