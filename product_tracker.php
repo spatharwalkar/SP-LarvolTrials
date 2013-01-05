@@ -19,79 +19,49 @@ if($_POST['dwformat'])
 	exit;
 }
 
-function DataGenerator($id)
+////Process Report Tracker
+function showProductTracker($id, $TrackerType='PT')
+{
+	$HTMLContent = '';
+	$Return = DataGenerator($id, $TrackerType);
+
+	///Required Data restored
+	$data_matrix = $Return['matrix'];
+	$Report_DisplayName = $Return['report_name'];
+	$id = $Return['id'];
+	$rows = $Return['rows'];
+	$columns = $Return['columns'];
+	$productIds = $Return['ProductIds'];
+	$inner_columns = $Return['inner_columns'];
+	$inner_width = $Return['inner_width'];
+	$column_width = $Return['column_width'];
+	$ratio = $Return['ratio'];
+	$areaId = $Return['areaId'];
+	$column_interval = $Return['column_interval'];
+	$TrackerType = $Return['TrackerType'];
+	$dtt = $Return['dtt'];
+	
+	if($TrackerType=='PT')
+	$HTMLContent .= TrackerHeaderHTMLContent($Report_DisplayName);
+	
+	$HTMLContent .= TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $inner_columns, $inner_width, $column_width, $ratio, $areaId, $column_interval, $TrackerType, $dtt);
+	
+	return $HTMLContent;
+
+}
+///End of Process Report Tracker
+
+function DataGenerator($id, $TrackerType)
 {
 	global $db;
 	global $now;
 
-	$query = 'SELECT `name`, `user`, `footnotes`, `description`, `category`, `shared`, `total`, `dtt`, `display_name` FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
-	$res = mysql_query($query) or die('Bad SQL query getting master heatmap report');
-	$res = mysql_fetch_array($res) or die('Report not found.');
-	$rptu = $res['user'];
-	$shared = $res['shared'];
-	$total_fld=$res['total'];
-	$name = $res['name'];
-	$dtt = $res['dtt'];
-	$Report_DisplayName=$res['display_name'];
-	$footnotes = htmlspecialchars($res['footnotes']);
-	$description = htmlspecialchars($res['description']);
-	$category = $res['category'];
-	
-	$query = 'SELECT `num`,`type`,`type_id`, `display_name`, `category`, `tag` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' AND type = \'product\' ORDER BY num ASC';
-	$res = mysql_query($query) or die('Bad SQL query getting master heatmap report headers');
-
 	$rows = array();
 	$productIds = array();
 	$rowsDisplayName = array();
+	$rowsTagName = array();
 	
-	while($header = mysql_fetch_array($res))
-	{
-		if(!in_array($header['type_id'], $productIds)) //Duplicate ids avoided
-		{
-			if($header['type_id'] != NULL)
-			{
-				$result =  mysql_fetch_assoc(mysql_query("SELECT id, name, description, company FROM `products` WHERE id = '" . $header['type_id'] . "' "));
-				$rows[$header['num']] = $result['name'];
-				if($result['company'] != NULL && trim($result['company']) != '')
-				{
-					$result['company']=str_replace(',',', ',$result['company']);
-					$result['company']=str_replace(',  ',', ',$result['company']);
-					$rowsCompanyName[$header['num']] = ' / '.$result['company'];
-				} 
-				$rowsDescription[$header['num']] = $result['description'];
-				$rowsTagName[$header['num']] = $header['tag'];
-			}
-			else
-			{
-				$rows[$header['num']] = $header['type_id'];
-			}
-			$productIds[$header['num']] = $header['type_id'];
-		}
-	}
-
-	// SELECT MAX ROW AND MAX COL
-	$query = 'SELECT MAX(`num`) AS `num` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' AND type = \'product\'';
-	$res = mysql_query($query) or die(mysql_error());
-	$max_row = mysql_fetch_array($res);
-
-	// SELECT MAX NUM of Area
-	$query = 'SELECT MAX(`num`) AS `num` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' AND type = \'area\'';
-	$res = mysql_query($query) or die(mysql_error());
-	$header = mysql_fetch_array($res);
-
-	// Max Area Id
-	$query = 'SELECT `type_id` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' AND type = \'area\' AND `num`='.$header['num'];
-	$res = mysql_query($query) or die(mysql_error());
-	$header = mysql_fetch_array($res);
-	
-	if($header['type_id'] != NULL)
-	{
-		$result =  mysql_fetch_assoc(mysql_query("SELECT id, name, display_name, description FROM `areas` WHERE id = '" . $header['type_id'] . "' "));
-		$areaDisplayName = $header['display_name'];	///Display name from master hm header table
-		$areaDescription = $result['description'];
-	}
-	$areaId = $header['type_id'];
-	
+	//IMP DATA
 	$row_total=array();
 	$col_total=array();
 	$active_total=0;
@@ -100,9 +70,83 @@ function DataGenerator($id)
 	
 	///// No of columns in our graph
 	$columns = 10;
+	$inner_columns = 10;
 	$column_width = 80;
 	$max_count = 0;
 
+	$dtt = 0;
+	$Report_DisplayName = NULL;
+	$areaId = NULL;
+	//END DATA
+	
+	if($TrackerType == 'PT')
+	{
+		$query = 'SELECT `name`, `user`, `footnotes`, `description`, `category`, `shared`, `total`, `dtt`, `display_name` FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
+		$res = mysql_query($query) or die('Bad SQL query getting master heatmap report');
+		$res = mysql_fetch_array($res) or die('Report not found.');
+		$dtt = $res['dtt'];
+		$Report_DisplayName=$res['display_name'];
+		
+		$query = 'SELECT `num`,`type`,`type_id`, `display_name`, `category`, `tag` FROM `rpt_masterhm_headers` WHERE `report`=' . $id . ' AND type = \'product\' ORDER BY num ASC';
+		$res = mysql_query($query) or die('Bad SQL query getting master heatmap report headers');
+		while($header = mysql_fetch_array($res))
+		{
+			if(!in_array($header['type_id'], $productIds)) //Duplicate ids avoided
+			{
+				if($header['type_id'] != NULL)
+				{
+					$productIds[] = $header['type_id'];
+					$rowsTagName[] = $header['tag'];
+				}
+			}
+		}
+		
+		// SELECT MAX NUM of Area
+		$query = 'SELECT MAX(`num`) AS `num` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' AND type = \'area\'';
+		$res = mysql_query($query) or die(mysql_error());
+		$header = mysql_fetch_array($res);
+
+		// Max Area Id
+		$query = 'SELECT `type_id` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' AND type = \'area\' AND `num`='.$header['num'];
+		$res = mysql_query($query) or die(mysql_error());
+		$header = mysql_fetch_array($res);
+		$areaId = $header['type_id'];
+	}
+	else if($TrackerType == 'CT')
+	{
+		$query = 'SELECT `name`, `id` FROM `institutions` WHERE id=' . $id;
+		$res = mysql_query($query) or die(mysql_error());
+		$header = mysql_fetch_array($res);
+		$Report_DisplayName = $header['name'];
+		$productIds = GetProductsFromCompany($header['id']);
+		$id=$header['id'];
+	}
+	else if($TrackerType == 'MT')
+	{
+		$query = 'SELECT `name`, `id` FROM `moas` WHERE id=' . $id;
+		$res = mysql_query($query) or die(mysql_error());
+		$header = mysql_fetch_array($res);
+		$Report_DisplayName = $header['name'];
+		$productIds = GetProductsFromMOA($header['id']);
+		$id=$header['id'];
+	}
+	
+	$rowsCompanyName=array();
+	$rowsDescription=array();
+	foreach($productIds as $key=> $product)
+	{
+		$result =  mysql_fetch_assoc(mysql_query("SELECT id, name, description, company FROM `products` WHERE id = '" . $product . "' "));
+		$rows[$key] = $result['name'];
+		if($result['company'] != NULL && trim($result['company']) != '')
+		{
+			$result['company']=str_replace(',',', ',$result['company']);
+			$result['company']=str_replace(',  ',', ',$result['company']);
+			$rowsCompanyName[$key] = ' / '.$result['company'];
+		} 
+		$rowsDescription[$key] = $result['description'];
+	}
+	
+	
 	foreach($rows as $row => $rval)
 	{
 		/// Fill up all data in Data Matrix only, so we can sort all data at one place
@@ -111,7 +155,7 @@ function DataGenerator($id)
 		$data_matrix[$row]['productIds'] = $productIds[$row];
 		$data_matrix[$row]['productTag'] = $rowsTagName[$row];
 		
-		if(isset($areaId) && $areaId != NULL && isset($productIds[$row]) && $productIds[$row] != NULL)
+		if(isset($productIds[$row]) && $productIds[$row] != NULL)
 		{
 			///// Initialize data
 			$data_matrix[$row]['active']=0;
@@ -140,7 +184,15 @@ function DataGenerator($id)
 			$data_matrix[$row]['indlead_phase_4']=0;
 			
 			//// To avoid multiple queries to database, we are quering only one time and retrieveing all data and seprating each type
-			$phase_query = 'SELECT dt.`is_active`, dt.`phase`, dt.`institution_type` FROM rpt_masterhm_cells rpt JOIN product_trials pt ON (rpt.`product` = pt.`product`) JOIN area_trials ar ON (rpt.`area` = ar.`area`) JOIN data_trials dt ON (dt.`larvol_id` = pt.`trial` && dt.`larvol_id` = ar.`trial`) WHERE pt.`product`=' . $productIds[$row] . ' AND ar.`area`='. $areaId;
+			if($TrackerType == 'PT')
+			{
+				$phase_query = "SELECT dt.`is_active`, dt.`phase`, dt.`institution_type` FROM rpt_masterhm_cells rpt JOIN product_trials pt ON (rpt.`product` = pt.`product`) JOIN area_trials ar ON (rpt.`area` = ar.`area`) JOIN data_trials dt ON (dt.`larvol_id` = pt.`trial` && dt.`larvol_id` = ar.`trial`) WHERE pt.`product`='" . $productIds[$row] . "' AND ar.`area`='". $areaId ."'";
+			}
+			else
+			{
+				$phase_query = "SELECT dt.`is_active`, dt.`phase`, dt.`institution_type` FROM product_trials pt JOIN data_trials dt ON (dt.`larvol_id` = pt.`trial`) WHERE pt.`product`='" . $productIds[$row] ."'";
+			}
+			
 			$phase_res = mysql_query($phase_query) or die(mysql_error());
 			while($phase_row=mysql_fetch_array($phase_res))
 			{
@@ -276,6 +328,8 @@ function DataGenerator($id)
 	$Return['ratio'] = $ratio;
 	$Return['areaId'] = $areaId;
 	$Return['column_interval'] = $column_interval;
+	$Return['TrackerType'] = $TrackerType;
+	$Return['dtt'] = $dtt;
 	
 	return $Return;
 }
@@ -327,20 +381,6 @@ a, a:hover{ height:100%; width:100%; display:block; text-decoration:none;}
 .controls input{
 	margin:0.1em;
 }
-
-.tooltip {
-	color: #000000; outline: none;
-	cursor:default; text-decoration: none;
-}
-.tooltip span {
-	border-radius: 5px 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px; 
-	box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.1); -webkit-box-shadow: 5px 5px rgba(0, 0, 0, 0.1); -moz-box-shadow: 5px 5px rgba(0, 0, 0, 0.1);
-	font-family:Verdana; font-size: 12px;
-	position: absolute; 
-	margin-left: 0; width: 280px; display: none; z-index: 0;
-}
-.classic { padding: 0.8em 1em; }
-.classic {background: #FFFFAA; border: 1px solid #FFAD33; }
 
 #slideout {
 	position: fixed;
@@ -633,36 +673,6 @@ function change_view()
 			
 	}	
 }
-
-function Set_Link_Height()
-{
-	var limit = document.getElementById('Tot_rows').value;
-	var dwcount = document.getElementById('dwcount');
-	var i=0;
-	for(i=0;i<limit;i++)
-	{
-		 //// As links are not getting correct height in Larvol Insight page
-		//// Before getting height of each cell, make all rows visible and then again hide it at end as per requirement.
-		/*var row_type = document.getElementById('indlead_Graph_Row_'+i);
-		if(row_type != null && row_type != '')
-		{
-			<?php if(strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') == FALSE) { ?>
-			document.getElementById("indlead_Graph_Row_"+i).style.display = "table-row";
-			<? } else { ?>
-			document.getElementById("indlead_Graph_Row_"+i).style.display = "inline";
-			<?php } ?>
-		}*/
-			
-		var IS_Prod_Row = document.getElementById("ProdCol_"+i);
-		if(IS_Prod_Row != null && IS_Prod_Row != '')
-		{
-			$(".Link_"+i).css('height', document.getElementById("ProdCol_"+i).offsetHeight+'px');
-			$(".Link_"+i).css('min-height', document.getElementById("ProdCol_"+i).offsetHeight+'px');
-			$(".Link_"+i).css('max-height', document.getElementById("ProdCol_"+i).offsetHeight+'px');
-		}
-	}
-	change_view();
-}
 </script>
 
 <script type="text/javascript">
@@ -903,278 +913,274 @@ function Set_Link_Height()
 <body bgcolor="#FFFFFF" style="background-color:#FFFFFF;">
 <?php 
 
-$Return = DataGenerator($id);
-
-///Required Data restored
-$data_matrix = $Return['matrix'];
-$Report_DisplayName = $Return['report_name'];
-$id = $Return['id'];
-$rows = $Return['rows'];
-$columns = $Return['columns'];
-$productIds = $Return['ProductIds'];
-$inner_columns = $Return['inner_columns'];
-$inner_width = $Return['inner_width'];
-$column_width = $Return['column_width'];
-$ratio = $Return['ratio'];
-$areaId = $Return['areaId'];
-$column_interval = $Return['column_interval'];
-
-$Line_Width = 20;
-
-$phase_legend_nums = array('4', '3', '2', '1', '0', 'na');
+function TrackerHeaderHTMLContent($Report_DisplayName)
+{	
+	$Report_Name = ((trim($Report_DisplayName) != '' && $Report_DisplayName != NULL)? trim($Report_DisplayName):'report '.$id.'');
+	$htmlContent = '';
 	
-$Report_Name = ((trim($Report_DisplayName) != '' && $Report_DisplayName != NULL)? trim($Report_DisplayName):'report '.$id.'');
-
-require_once('tcpdf/config/lang/eng.php');
-require_once('tcpdf/tcpdf.php');  
-$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-
-if( ( (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE) || !isset($_SERVER['HTTP_REFERER']) ) && ( !isset($_REQUEST['LI']) || $_REQUEST['LI'] != 1) )
-{
-	$htmlContent .= '<table cellspacing="0" cellpadding="0" width="100%" style="background-color:#FFFFFF;">'
-				   . '<tr><td width="33%" style="background-color:#FFFFFF;"><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" /></td>'
-				   . '<td width="34%" align="center" style="background-color:#FFFFFF;" nowrap="nowrap"><span style="color:#ff0000;font-weight:normal;margin-left:40px;">Interface work in progress</span>'
-				   . '<br/><span style="font-weight:normal;">Send feedback to '
-				   . '<a style="display:inline;color:#0000FF;" target="_self" href="mailto:larvoltrials@larvol.com">'
-				   . 'larvoltrials@larvol.com</a></span></td>'
-				   . '<td width="33%" align="right" style="background-color:#FFFFFF; padding-right:20px;" class="report_name">Name: ' . htmlspecialchars($Report_Name) . ' Product Tracker</td></tr></table><br/>';
+	if( ( (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE) || !isset($_SERVER['HTTP_REFERER']) ) && ( !isset($_REQUEST['LI']) || $_REQUEST['LI'] != 1) )
+	{
+		$htmlContent .= '<table cellspacing="0" cellpadding="0" width="100%" style="background-color:#FFFFFF;">'
+					   . '<tr><td width="33%" style="background-color:#FFFFFF;"><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" /></td>'
+					   . '<td width="34%" align="center" style="background-color:#FFFFFF;" nowrap="nowrap"><span style="color:#ff0000;font-weight:normal;margin-left:40px;">Interface work in progress</span>'
+					   . '<br/><span style="font-weight:normal;">Send feedback to '
+					   . '<a style="display:inline;color:#0000FF;" target="_self" href="mailto:larvoltrials@larvol.com">'
+					   . 'larvoltrials@larvol.com</a></span></td>'
+					   . '<td width="33%" align="right" style="background-color:#FFFFFF; padding-right:20px;" class="report_name">Name: ' . htmlspecialchars($Report_Name) . ' Product Tracker</td></tr></table><br/>';
+	}
+	return $htmlContent;
 }
+
+function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $inner_columns, $inner_width, $column_width, $ratio, $areaId, $column_interval, $TrackerType, $dtt)
+{				
+	if(count($productIds) == 0 && $TrackerType == 'CT') return 'No Products Available for this Company';
+	if(!$dtt  && $TrackerType == 'PT') return 'Last Column DTT not Enabled';
+	if(count($productIds) == 0  && $TrackerType == 'PT') return 'No Products Available for this Heatmap';
+	
+	require_once('tcpdf/config/lang/eng.php');
+	require_once('tcpdf/tcpdf.php');  
+	$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+	
+	$Line_Width = 20;
+	$phase_legend_nums = array('4', '3', '2', '1', '0', 'na');
+
+	$htmlContent = '';
+	$htmlContent .= '<br style="line-height:11px;"/>'
+					.'<form action="product_tracker.php" method="post">'
+					. '<table width="264px" border="0" cellspacing="0" cellpadding="0" class="controls" align="center">'
+					. '<tr>'
+					. '<td class="bottom right"><select id="dwcount" name="dwcount" onchange="change_view();">'
+					. '<option value="indlead" selected="selected">Active industry trials</option>'
+					. '<option value="active">Active trials</option>'
+					. '<option value="total">All trials</option></select></td>'
+					. '<td class="bottom right">'
+					. '<div style="border:1px solid #000000; float:right; margin-top: 0px; padding:2px; color:#000000;" id="chromemenu"><a rel="dropmenu"><span style="padding:2px; padding-right:4px; background-position:left center; background-repeat:no-repeat; background-image:url(\'./images/save.png\'); cursor:pointer; ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><font color="#000000">Export</font></b></span></a></div>'
+					. '</td>'
+					. '</tr>'
+					. '</table>';
 				
-$htmlContent .= '<br style="line-height:11px;"/>'
-				.'<form action="product_tracker.php" method="post">'
-				. '<table width="264px" border="0" cellspacing="0" cellpadding="0" class="controls" align="center">'
-				. '<tr>'
-				. '<td class="bottom right"><select id="dwcount" name="dwcount" onchange="change_view();">'
-				. '<option value="indlead" selected="selected">Active industry trials</option>'
-				. '<option value="active">Active trials</option>'
-				. '<option value="total">All trials</option></select></td>'
-				. '<td class="bottom right">'
-				. '<div style="border:1px solid #000000; float:right; margin-top: 0px; padding:2px;" id="chromemenu"><a rel="dropmenu"><span style="padding:2px; padding-right:4px; background-position:left center; background-repeat:no-repeat; background-image:url(\'./images/save.png\'); cursor:pointer; ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Export</b></span></a></div>'
-				. '</td>'
-				. '</tr>'
-				. '</table>';
-				
-$htmlContent  .= '<div id="dropmenu" class="dropmenudiv" style="width: 310px;">'
-				.'<div style="height:100px; padding:6px;"><div class="downldbox"><div class="newtext">Download options</div>'
-				. '<input type="hidden" name="id" id="id" value="' . $id . '" />'
-				. '<ul><li><label>Which format: </label></li>'
-				. '<li><select id="dwformat" name="dwformat" size="3" style="height:50px">'
-				//. '<option value="exceldown" selected="selected">Excel</option>'
-				. '<option value="pdfdown">PDF</option>'
-				. '<option value="excelchartdown">Excel Chart</option>'
-				. '<option value="tsvdown">TSV</option>'
-				. '</select></li>'
-				. '</ul>'
-				. '<input type="submit" name="download" title="Download" value="Download file" style="margin-left:8px;"  />'
-				. '</div></div>'
-				. '</div><script type="text/javascript">cssdropdown.startchrome("chromemenu");</script>'
-				. '</form>';
+	$htmlContent  .= '<div id="dropmenu" class="dropmenudiv" style="width: 310px;">'
+					.'<div style="height:100px; padding:6px;"><div class="downldbox"><div class="newtext">Download options</div>'
+					. '<input type="hidden" name="id" id="id" value="' . $id . '" />'
+					. '<input type="hidden" name="TrackerType" id="TrackerType" value="'. $TrackerType .'" />'
+					. '<ul><li><label>Which format: </label></li>'
+					. '<li><select id="dwformat" name="dwformat" size="3" style="height:50px">'
+					//. '<option value="exceldown" selected="selected">Excel</option>'
+					. '<option value="pdfdown">PDF</option>'
+					. '<option value="excelchartdown">Excel Chart</option>'
+					. '<option value="tsvdown">TSV</option>'
+					. '</select></li>'
+					. '</ul>'
+					. '<input type="submit" name="download" title="Download" value="Download file" style="margin-left:8px;"  />'
+					. '</div></div>'
+					. '</div><script type="text/javascript">cssdropdown.startchrome("chromemenu");</script>'
+					. '</form>';
 				
 						
-$htmlContent .= '<div align="center" style="padding-left:10px; padding-right:15px; padding-top:20px; padding-bottom:20px;">'
-				. '<table border="0" align="center" width="'.(420+8+($inner_columns*$columns*8)+8+10).'px" style="vertical-align:middle;" cellpadding="0" cellspacing="0" id="ProdTrackerTable">'
-			    . '<thead>';
-//scale
-//Row to keep alignement perfect at time of floating headers
-$htmlContent .= '<tr class="side_tick_height"><th class="prod_col" width="420px">&nbsp;</th><th width="8px" class="graph_rightWhite">&nbsp;</th>';
-for($j=0; $j < $columns; $j++)
-{
-	for($k=0; $k < $inner_columns; $k++)
-	$htmlContent .= '<th width="8px" colspan="1" '. (($k == ($inner_columns-1)) ? 'class="graph_rightWhite" ':'' ) .'>&nbsp;</th>';
-}
-$htmlContent .= '<th width="8px"></th></tr>';
-
-
-$htmlContent .= '<tr><th class="prod_col" align="right">Trials</th><th width="8px" class="graph_rightWhite">&nbsp;</th>';
-$htmlContent .= '<th align="right" class="graph_rightWhite" colspan="1" width="8px">0</th>';
-for($j=0; $j < $columns; $j++)
-$htmlContent .= '<th align="right" class="graph_rightWhite" colspan="'.$inner_columns.'">'.(($j+1) * $column_interval).'</th>';
-$htmlContent .= '</tr>';
-
-$htmlContent .= '<tr class="last_tick_height"><th class="last_tick_height prod_col"><font style="line-height:4px;">&nbsp;</font></th><th class="graph_right"><font style="line-height:4px;">&nbsp;</font></th>';
-for($j=0; $j < $columns; $j++)
-$htmlContent .= '<th colspan="'.$inner_columns.'" class="graph_right graph_bottom"><font style="line-height:4px;">&nbsp;</font></th>';
-$htmlContent .= '<th></th></tr>';
-
-
-$htmlContent .='</thead>';
-//scale ends
-
-$htmlContent .= '<tr class="side_tick_height"><th class="prod_col" width="420px">&nbsp;</th><th width="8px" class="graph_right">&nbsp;</th>';
-for($j=0; $j < $columns; $j++)
-{
-	for($k=0; $k < $inner_columns; $k++)
-	$htmlContent .= '<th width="8px" colspan="1" class="'. (($k == ($inner_columns-1)) ? 'graph_right':'' ) .'">&nbsp;</th>';
-}
-$htmlContent .= '<th width="8px"></th></tr>';
-
-for($incr=0; $incr < count($rows); $incr++)
-{	
-	$row = $incr;
-	$htmlContent .= '<tr class="side_tick_height"><th class="prod_col side_tick_height">&nbsp;</th><th class="graph_right">&nbsp;</th>';
+	$htmlContent .= '<div align="center" style="padding-left:10px; padding-right:15px; padding-top:20px; padding-bottom:20px;">'
+					. '<table border="0" align="center" width="'.(420+8+($inner_columns*$columns*8)+8+10).'px" style="vertical-align:middle;" cellpadding="0" cellspacing="0" id="ProdTrackerTable">'
+				    . '<thead>';
+	//scale
+	//Row to keep alignement perfect at time of floating headers
+	$htmlContent .= '<tr class="side_tick_height"><th class="prod_col" width="420px">&nbsp;</th><th width="8px" class="graph_rightWhite">&nbsp;</th>';
 	for($j=0; $j < $columns; $j++)
 	{
-		$htmlContent .= '<th colspan="'.$inner_columns.'" class="graph_right">&nbsp;</th>';
+		for($k=0; $k < $inner_columns; $k++)
+		$htmlContent .= '<th width="8px" colspan="1" '. (($k == ($inner_columns-1)) ? 'class="graph_rightWhite" ':'' ) .'>&nbsp;</th>';
 	}
+	$htmlContent .= '<th width="8px"></th></tr>';
+
+
+	$htmlContent .= '<tr><th class="prod_col" align="right">Trials</th><th width="8px" class="graph_rightWhite">&nbsp;</th>';
+	$htmlContent .= '<th align="right" class="graph_rightWhite" colspan="1" width="8px">0</th>';
+	for($j=0; $j < $columns; $j++)
+	$htmlContent .= '<th align="right" class="graph_rightWhite" colspan="'.$inner_columns.'">'.(($j+1) * $column_interval).'</th>';
+	$htmlContent .= '</tr>';
+	
+	$htmlContent .= '<tr class="last_tick_height"><th class="last_tick_height prod_col"><font style="line-height:4px;">&nbsp;</font></th><th class="graph_right"><font style="line-height:4px;">&nbsp;</font></th>';
+	for($j=0; $j < $columns; $j++)
+	$htmlContent .= '<th colspan="'.$inner_columns.'" class="graph_right graph_bottom"><font style="line-height:4px;">&nbsp;</font></th>';
 	$htmlContent .= '<th></th></tr>';
 	
-	////// Color Graph - Bar Starts
 	
-	//// Code for Indlead
-	$Err = IndleadCountErr($data_matrix, $row, $ratio);
+	$htmlContent .='</thead>';
+	//scale ends
+
+	$htmlContent .= '<tr class="side_tick_height"><th class="prod_col" width="420px">&nbsp;</th><th width="8px" class="graph_right">&nbsp;</th>';
+	for($j=0; $j < $columns; $j++)
+	{
+		for($k=0; $k < $inner_columns; $k++)
+		$htmlContent .= '<th width="8px" colspan="1" class="'. (($k == ($inner_columns-1)) ? 'graph_right':'' ) .'">&nbsp;</th>';
+	}
+	$htmlContent .= '<th width="8px"></th></tr>';
+
+	for($incr=0; $incr < count($rows); $incr++)
+	{	
+		$row = $incr;
+		$htmlContent .= '<tr class="side_tick_height"><th class="prod_col side_tick_height">&nbsp;</th><th class="graph_right">&nbsp;</th>';
+		for($j=0; $j < $columns; $j++)
+		{
+			$htmlContent .= '<th colspan="'.$inner_columns.'" class="graph_right">&nbsp;</th>';
+		}
+		$htmlContent .= '<th></th></tr>';
+		
+		////// Color Graph - Bar Starts
+		
+		//// Code for Indlead
+		$Err = IndleadCountErr($data_matrix, $row, $ratio);
+		
+		$Max_ValueKey = Max_ValueKey($data_matrix[$row]['indlead_phase_na'], $data_matrix[$row]['indlead_phase_0'], $data_matrix[$row]['indlead_phase_1'], $data_matrix[$row]['indlead_phase_2'], $data_matrix[$row]['indlead_phase_3'], $data_matrix[$row]['indlead_phase_4']);
+						
+		$htmlContent .= '<tr id="indlead_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" id="ProdCol_'.$row.'" rowspan="3"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&itype=0&hm=' . $id . '" target="_blank" style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
 	
-	$Max_ValueKey = Max_ValueKey($data_matrix[$row]['indlead_phase_na'], $data_matrix[$row]['indlead_phase_0'], $data_matrix[$row]['indlead_phase_1'], $data_matrix[$row]['indlead_phase_2'], $data_matrix[$row]['indlead_phase_3'], $data_matrix[$row]['indlead_phase_4']);
+		///Below function will derive number of lines required to display product name, as our graph size is fixed due to fixed scale, we can calculate approx max area  
+		///for product column. From that we can calculate extra height which will be distributed to up and down rows of graph bar, So now IE6/7 as well as chrome will not 
+		///have issue of unequal distrirbution of extra height due to rowspan and bar will remain in middle, without use of JS.
+		$ExtraAdjusterHeight = (($pdf->getNumLines($data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'], ((650)*17/90)) * $Line_Width)  - 20) / 2;
+		
+		for($j=0; $j < $columns; $j++)
+		{
+			$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
+		}
+		$htmlContent .= '<th></th></tr><tr id="indlead_Graph_Row_B_'.$row.'" class="Link" >';
+		
+		$total_cols = $inner_columns * $columns;
+		$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['indlead']);
+		$phase_space = 0;
+	
+		foreach($phase_legend_nums as $key => $phase_nums)
+		{
+			if($data_matrix[$row]['indlead_phase_'.$phase_nums] > 0)
+			{
+				$Color = getClassNColorforPhase($phase_nums);
+				$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['indlead_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
+				$phase_space =  $phase_space + $Mini_Bar_Width;					
+				$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="Link '.$Color[0].'" title="'.$data_matrix[$row]['indlead_phase_'.$phase_nums].'" style="height:20px; _height:20px;"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&itype=0&phase='.$phase_nums.'&hm=' . $id . '" target="_blank" class="Link" >&nbsp;</a></th>';
+			}
+		}
+	
+		$remain_span = $total_cols - $phase_space;
+		
+		if($remain_span > 0)
+		$htmlContent .= DrawExtraHTMLCells($phase_space, $inner_columns, $remain_span);
+		
+		$htmlContent .= '<th></th></tr><tr id="indlead_Graph_Row_C_'.$row.'">';
+		for($j=0; $j < $columns; $j++)
+		{
+			$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
+		}
+		$htmlContent .= '<th></th></tr>';
+	
+		//// Code for Active
+		$Err = ActiveCountErr($data_matrix, $row, $ratio);
+	
+		$Max_ValueKey = Max_ValueKey($data_matrix[$row]['active_phase_na'], $data_matrix[$row]['active_phase_0'], $data_matrix[$row]['active_phase_1'], $data_matrix[$row]['active_phase_2'], $data_matrix[$row]['active_phase_3'], $data_matrix[$row]['active_phase_4']);
 					
-	$htmlContent .= '<tr id="indlead_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" id="ProdCol_'.$row.'" rowspan="3"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&itype=0&hm=' . $id . '" target="_blank" style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
+		$htmlContent .= '<tr style="display:none;" id="active_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" rowspan="3"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&hm=' . $id . '" target="_blank" style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
 	
-	///Below function will derive number of lines required to display product name, as our graph size is fixed due to fixed scale, we can calculate approx max area  
-	///for product column. From that we can calculate extra height which will be distributed to up and down rows of graph bar, So now IE6/7 as well as chrome will not 
-	///have issue of unequal distrirbution of extra height due to rowspan and bar will remain in middle, without use of JS.
-	$ExtraAdjusterHeight = (($pdf->getNumLines($data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'], ((650)*17/90)) * $Line_Width)  - 20) / 2;
-	
-	for($j=0; $j < $columns; $j++)
-	{
-		$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
-	}
-	$htmlContent .= '<th></th></tr><tr id="indlead_Graph_Row_B_'.$row.'" class="Link" >';
-	
-	$total_cols = $inner_columns * $columns;
-	$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['indlead']);
-	$phase_space = 0;
-	
-	foreach($phase_legend_nums as $key => $phase_nums)
-	{
-		if($data_matrix[$row]['indlead_phase_'.$phase_nums] > 0)
+		for($j=0; $j < $columns; $j++)
 		{
-			$Color = getClassNColorforPhase($phase_nums);
-			$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['indlead_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
-			$phase_space =  $phase_space + $Mini_Bar_Width;					
-			$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="Link '.$Color[0].'" title="'.$data_matrix[$row]['indlead_phase_'.$phase_nums].'" style="height:20px; _height:20px;"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&itype=0&phase='.$phase_nums.'&hm=' . $id . '" target="_blank" class="Link" >&nbsp;</a></th>';
+			$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
 		}
-	}
+		$htmlContent .= '<th></th></tr><tr style="display:none;" id="active_Graph_Row_B_'.$row.'" class="Link">';
+		
+		$total_cols = $inner_columns * $columns;
+		$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['active']);
+		$phase_space = 0;
 	
-	$remain_span = $total_cols - $phase_space;
-	
-	if($remain_span > 0)
-	$htmlContent .= DrawExtraHTMLCells($phase_space, $inner_columns, $remain_span);
-	
-	$htmlContent .= '<th></th></tr><tr id="indlead_Graph_Row_C_'.$row.'">';
-	for($j=0; $j < $columns; $j++)
-	{
-		$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
-	}
-	$htmlContent .= '<th></th></tr>';
-	
-	//// Code for Active
-	$Err = ActiveCountErr($data_matrix, $row, $ratio);
-	
-	$Max_ValueKey = Max_ValueKey($data_matrix[$row]['active_phase_na'], $data_matrix[$row]['active_phase_0'], $data_matrix[$row]['active_phase_1'], $data_matrix[$row]['active_phase_2'], $data_matrix[$row]['active_phase_3'], $data_matrix[$row]['active_phase_4']);
-					
-	$htmlContent .= '<tr style="display:none;" id="active_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" rowspan="3"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&hm=' . $id . '" target="_blank" style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
-	
-	for($j=0; $j < $columns; $j++)
-	{
-		$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
-	}
-	$htmlContent .= '<th></th></tr><tr style="display:none;" id="active_Graph_Row_B_'.$row.'" class="Link">';
-	
-	$total_cols = $inner_columns * $columns;
-	$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['active']);
-	$phase_space = 0;
-	
-	foreach($phase_legend_nums as $key => $phase_nums)
-	{
-		if($data_matrix[$row]['active_phase_'.$phase_nums] > 0)
+		foreach($phase_legend_nums as $key => $phase_nums)
 		{
-			$Color = getClassNColorforPhase($phase_nums);
-			$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['active_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
-			$phase_space =  $phase_space + $Mini_Bar_Width;					
-			$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="Link '.$Color[0].'" title="'.$data_matrix[$row]['active_phase_'.$phase_nums].'" style="height:20px; _height:20px;"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&phase='.$phase_nums.'&hm=' . $id . '" target="_blank" class="Link" >&nbsp;</a></th>';
+			if($data_matrix[$row]['active_phase_'.$phase_nums] > 0)
+			{
+				$Color = getClassNColorforPhase($phase_nums);
+				$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['active_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
+				$phase_space =  $phase_space + $Mini_Bar_Width;					
+				$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="Link '.$Color[0].'" title="'.$data_matrix[$row]['active_phase_'.$phase_nums].'" style="height:20px; _height:20px;"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&phase='.$phase_nums.'&hm=' . $id . '" target="_blank" class="Link" >&nbsp;</a></th>';
+			}
 		}
-	}
 	
-	$remain_span = $total_cols - $phase_space;
-	
-	if($remain_span > 0)
-	$htmlContent .= DrawExtraHTMLCells($phase_space, $inner_columns, $remain_span);
-	
-	$htmlContent .= '<th></th></tr><tr style="display:none;" id="active_Graph_Row_C_'.$row.'">';
-	for($j=0; $j < $columns; $j++)
-	{
-		$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
-	}
-	$htmlContent .= '<th></th></tr>';
-	
-	//// Code for Total
-	$Err = TotalCountErr($data_matrix, $row, $ratio);
-	
-	$Max_ValueKey = Max_ValueKey($data_matrix[$row]['total_phase_na'], $data_matrix[$row]['total_phase_0'], $data_matrix[$row]['total_phase_1'], $data_matrix[$row]['total_phase_2'], $data_matrix[$row]['total_phase_3'], $data_matrix[$row]['total_phase_4']);
-	
-	$htmlContent .= '<tr style="display:none;" id="total_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" rowspan="3"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=2&hm=' . $id . '" target="_blank" style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
-	
-	for($j=0; $j < $columns; $j++)
-	{
-		$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
-	}
-	$htmlContent .= '<th></th></tr><tr style="display:none;" id="total_Graph_Row_B_'.$row.'" class="Link" >';
-	
-	$total_cols = $inner_columns * $columns;
-	$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['total']);
-	$phase_space = 0;
-	
-	foreach($phase_legend_nums as $key => $phase_nums)
-	{
-		if($data_matrix[$row]['total_phase_'.$phase_nums] > 0)
+		$remain_span = $total_cols - $phase_space;
+		
+		if($remain_span > 0)
+		$htmlContent .= DrawExtraHTMLCells($phase_space, $inner_columns, $remain_span);
+		
+		$htmlContent .= '<th></th></tr><tr style="display:none;" id="active_Graph_Row_C_'.$row.'">';
+		for($j=0; $j < $columns; $j++)
 		{
-			$Color = getClassNColorforPhase($phase_nums);
-			$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['total_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
-			$phase_space =  $phase_space + $Mini_Bar_Width;					
-			$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="Link '.$Color[0].'" title="'.$data_matrix[$row]['total_phase_'.$phase_nums].'" style="height:20px; _height:20px;"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=2&phase='.$phase_nums.'&hm=' . $id . '" target="_blank" class="Link" >&nbsp;</a></th>';
+			$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
 		}
-	}
+		$htmlContent .= '<th></th></tr>';
 	
-	$remain_span = $total_cols - $phase_space;
+		//// Code for Total
+		$Err = TotalCountErr($data_matrix, $row, $ratio);
+		
+		$Max_ValueKey = Max_ValueKey($data_matrix[$row]['total_phase_na'], $data_matrix[$row]['total_phase_0'], $data_matrix[$row]['total_phase_1'], $data_matrix[$row]['total_phase_2'], $data_matrix[$row]['total_phase_3'], $data_matrix[$row]['total_phase_4']);
 	
-	if($remain_span > 0)
-	$htmlContent .= DrawExtraHTMLCells($phase_space, $inner_columns, $remain_span);
+		$htmlContent .= '<tr style="display:none;" id="total_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" rowspan="3"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=2&hm=' . $id . '" target="_blank" style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
 	
-	$htmlContent .= '<th></th></tr><tr style="display:none;" id="total_Graph_Row_C_'.$row.'">';
+		for($j=0; $j < $columns; $j++)
+		{
+			$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
+		}
+		$htmlContent .= '<th></th></tr><tr style="display:none;" id="total_Graph_Row_B_'.$row.'" class="Link" >';
+	
+		$total_cols = $inner_columns * $columns;
+		$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['total']);
+		$phase_space = 0;
+	
+		foreach($phase_legend_nums as $key => $phase_nums)
+		{
+			if($data_matrix[$row]['total_phase_'.$phase_nums] > 0)
+			{
+				$Color = getClassNColorforPhase($phase_nums);
+				$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['total_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
+				$phase_space =  $phase_space + $Mini_Bar_Width;					
+				$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="Link '.$Color[0].'" title="'.$data_matrix[$row]['total_phase_'.$phase_nums].'" style="height:20px; _height:20px;"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=2&phase='.$phase_nums.'&hm=' . $id . '" target="_blank" class="Link" >&nbsp;</a></th>';
+			}
+		}
+	
+		$remain_span = $total_cols - $phase_space;
+	
+		if($remain_span > 0)
+		$htmlContent .= DrawExtraHTMLCells($phase_space, $inner_columns, $remain_span);
+		
+		$htmlContent .= '<th></th></tr><tr style="display:none;" id="total_Graph_Row_C_'.$row.'">';
+		for($j=0; $j < $columns; $j++)
+		{
+			$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
+		}
+		$htmlContent .= '<th></th></tr>';
+		
+		////// End Of - Color Graph - Bar Starts
+		
+		$htmlContent .= '<tr class="side_tick_height"><th class="prod_col side_tick_height">&nbsp;</th><th class="'. (($incr == (count($rows)-1)) ? '':'graph_bottom') .' graph_right">&nbsp;</th>';
+		for($j=0; $j < $columns; $j++)
+		{
+			$htmlContent .= '<th colspan="'.$inner_columns.'" class="graph_right">&nbsp;</th>';
+		}
+		$htmlContent .= '<th></th></tr>';
+	}			   
+
+	//Draw scale			   
+	$htmlContent .= '<tr class="last_tick_height"><th class="last_tick_height prod_col"><font style="line-height:4px;">&nbsp;</font></th><th class="graph_right"><font style="line-height:4px;">&nbsp;</font></th>';
 	for($j=0; $j < $columns; $j++)
-	{
-		$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
-	}
+	$htmlContent .= '<th colspan="'.$inner_columns.'" class="graph_top graph_right"><font style="line-height:4px;">&nbsp;</font></th>';
 	$htmlContent .= '<th></th></tr>';
-	
-	////// End Of - Color Graph - Bar Starts
-	
-	$htmlContent .= '<tr class="side_tick_height"><th class="prod_col side_tick_height">&nbsp;</th><th class="'. (($incr == (count($rows)-1)) ? '':'graph_bottom') .' graph_right">&nbsp;</th>';
+	/* Current no need of lower scale
+	$htmlContent .= '<tr><th class="prod_col"></th><th class="graph_rightWhite"></th>';
 	for($j=0; $j < $columns; $j++)
-	{
-		$htmlContent .= '<th colspan="'.$inner_columns.'" class="graph_right">&nbsp;</th>';
-	}
-	$htmlContent .= '<th></th></tr>';
-}			   
+	$htmlContent .= '<th align="right" class="graph_rightWhite" colspan="'.(($j==0)? $inner_columns+1 : $inner_columns).'">'.(($j+1) * $column_interval).'</th>';
+	$htmlContent .= '</tr>';
+	//End of draw scale
+	*/						
+	$htmlContent .= '</table></div>';
 
-//Draw scale			   
-$htmlContent .= '<tr class="last_tick_height"><th class="last_tick_height prod_col"><font style="line-height:4px;">&nbsp;</font></th><th class="graph_right"><font style="line-height:4px;">&nbsp;</font></th>';
-for($j=0; $j < $columns; $j++)
-$htmlContent .= '<th colspan="'.$inner_columns.'" class="graph_top graph_right"><font style="line-height:4px;">&nbsp;</font></th>';
-$htmlContent .= '<th></th></tr>';
-/* Current no need of lower scale
-$htmlContent .= '<tr><th class="prod_col"></th><th class="graph_rightWhite"></th>';
-for($j=0; $j < $columns; $j++)
-$htmlContent .= '<th align="right" class="graph_rightWhite" colspan="'.(($j==0)? $inner_columns+1 : $inner_columns).'">'.(($j+1) * $column_interval).'</th>';
-$htmlContent .= '</tr>';
-//End of draw scale
-*/						
-$htmlContent .= '</table></div>';
+	//// Common Data
+	$htmlContent .= '<input type="hidden" value="'.count($rows).'" name="Tot_rows" id="Tot_rows" />';
+	////// End of Common Data
 
-//// Common Data
-$htmlContent .= '<input type="hidden" value="'.count($rows).'" name="Tot_rows" id="Tot_rows" />';
-////// End of Common Data
-
-			
-print $htmlContent;
+	return $htmlContent;
+}
 
 function DrawExtraHTMLCells($phase_space, $inner_columns, $remain_span)
 {
@@ -1195,6 +1201,8 @@ function DrawExtraHTMLCells($phase_space, $inner_columns, $remain_span)
 	
 	return $extraHTMLContent;
 }
+if(isset($_REQUEST['id']))
+print showProductTracker($_REQUEST['id'], 'PT');
 ?>
 <?
 if($db->loggedIn() && (strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE))
@@ -1208,7 +1216,6 @@ if($db->loggedIn() && (strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALS
 </html>
 <script language="javascript" type="text/javascript">
 change_view();
-//Set_Link_Height();
 </script>
 <?php
 function Download_reports()
@@ -1217,8 +1224,8 @@ function Download_reports()
 	if(!isset($_REQUEST['id'])) return;
 	$id = mysql_real_escape_string(htmlspecialchars($_REQUEST['id']));
 	if(!is_numeric($id)) return;
-	
-	$Return = DataGenerator($id);
+	$TrackerType = $_REQUEST['TrackerType'];
+	$Return = DataGenerator($id, $TrackerType);
 	///Required Data restored
 	$data_matrix = $Return['matrix'];
 	$Report_DisplayName = $Return['report_name'];
@@ -1295,7 +1302,7 @@ function Download_reports()
       											'vertical'   => PHPExcel_Style_Alignment::VERTICAL_CENTER,
      											'rotation'   => 0,
       											'wrap'       => false));
-		$objPHPExcel->getActiveSheet()->SetCellValue('B' . $Excel_HMCounter, $Report_Name.' Product Tracker');
+		$objPHPExcel->getActiveSheet()->SetCellValue('B' . $Excel_HMCounter, $Report_Name .(($TrackerType== 'CT') ? ' Company':'').' Product Tracker');
 		
 		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$Excel_HMCounter, 'Display Mode:');
 		$objPHPExcel->getActiveSheet()->mergeCells('B' . $Excel_HMCounter . ':BH' . $Excel_HMCounter);
@@ -1543,7 +1550,7 @@ function Download_reports()
 		{	
 			$row = $incr;
 			
-			if(isset($data_matrix[$row]['productIds']) && $data_matrix[$row]['productIds'] != NULL && !empty($areaId))
+			if(isset($data_matrix[$row]['productIds']) && $data_matrix[$row]['productIds'] != NULL)
 			{
 				$TSV_data .= $data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'] . ((trim($data_matrix[$row]['productTag']) != '') ? ' ['.$data_matrix[$row]['productTag'].']':''). " \t ";
 				if($mode == 'indlead')
@@ -1611,7 +1618,7 @@ function Download_reports()
 		$subColumn_width = 1.4;
 		
 		$pdf->SetFont('verdanab', '', 8);	//Set font size as 8
-		$Repo_Heading = $Report_Name.' Product Tracker, '.$pdftitle;
+		$Repo_Heading = $Report_Name .(($TrackerType== 'CT') ? ' Company':'') .' Product Tracker, '.$pdftitle;
 		$current_StringLength = $pdf->GetStringWidth($Repo_Heading, 'verdanab', '', 8);
 		$pdf->MultiCell($Page_Width, '', $Repo_Heading, $border=0, $align='C', $fill=0, $ln=1, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
 		$pdf->Ln(5);
@@ -1952,7 +1959,6 @@ function Download_reports()
 	//Start of Real Chart Excel
 	if($_POST['dwformat']=='excelchartdown')
 	{
-		$name = htmlspecialchars(strlen($name)>0?$name:('report '.$id.''));
 		$Repo_Heading = $Report_Name.', '.$pdftitle;
 		
 		$objPHPExcel = new PHPExcel();
@@ -1964,7 +1970,10 @@ function Download_reports()
 		$ExcelChartArray = array();	///Input array
 		
 		$FirstGraphPnt = 4;
-		$LastGraphPnt = round($FirstGraphPnt + (count($rows) * 2.5));
+		if(count($rows) < 6)
+			$LastGraphPnt = round($FirstGraphPnt + (count($rows) * 4));
+		else
+			$LastGraphPnt = round($FirstGraphPnt + (count($rows) * 2.6));
 		
 		//Start placing data after the 20 rows plus after our graph ends
 		$CurrentExcelRow = $LastGraphPnt + 20;
@@ -1988,7 +1997,7 @@ function Download_reports()
 		for($decr=(count($rows) - 1); $decr >= 0 ; $decr--)
 		{
 			$currentRow = $decr;
-			if(isset($data_matrix[$currentRow]['productIds']) && $data_matrix[$currentRow]['productIds'] != NULL && !empty($areaId))
+			if(isset($data_matrix[$currentRow]['productIds']) && $data_matrix[$currentRow]['productIds'] != NULL)
 			{
 				if($_POST['dwcount']=='active')
 					$CurrentExcelChartArray = array($data_matrix[$currentRow]['productName'].$data_matrix[$currentRow]['product_CompanyName'], $data_matrix[$currentRow]['active_phase_na'], $data_matrix[$currentRow]['active_phase_0'], $data_matrix[$currentRow]['active_phase_1'], $data_matrix[$currentRow]['active_phase_2'], $data_matrix[$currentRow]['active_phase_3'], $data_matrix[$currentRow]['active_phase_4']);
@@ -2075,7 +2084,7 @@ function Download_reports()
       											'vertical'   => PHPExcel_Style_Alignment::VERTICAL_CENTER,
      											'rotation'   => 0,
       											'wrap'       => false));
-		$objPHPExcel->getActiveSheet()->SetCellValue('B1', $Report_Name.' Product Tracker');
+		$objPHPExcel->getActiveSheet()->SetCellValue('B1', $Report_Name.(($TrackerType== 'CT') ? ' Company':'').' Product Tracker');
 		
 		$objPHPExcel->getActiveSheet()->SetCellValue('A2', 'Display Mode:');
 		$objPHPExcel->getActiveSheet()->mergeCells('B2:AA2');
@@ -2372,11 +2381,14 @@ $max = $valna;
 
 function sortTwoDimensionArrayByKey($arr, $arrKey, $sortOrder=SORT_DESC)
 {
-	foreach ($arr as $key => $row)
+	if(is_array($arr) && count($arr) > 0)
 	{
-		$key_arr[$key] = $row[$arrKey];
+		foreach ($arr as $key => $row)
+		{
+			$key_arr[$key] = $row[$arrKey];
+		}
+		array_multisort($key_arr, $sortOrder, $arr);
 	}
-	array_multisort($key_arr, $sortOrder, $arr);
 	return $arr;
 }
 
@@ -2424,4 +2436,43 @@ function TotalCountErr($data_matrix, $row, $ratio)
 	
 	return $Err;
 }
+
+/* Function to get Product Id's from Institution id */
+function GetProductsFromCompany($companyID)
+{
+	global $db;
+	global $now;
+	$Products = array();
+	$query = "SELECT pt.`id` FROM `products` pt LEFT JOIN `products_institutions` pi ON(pt.`id` = pi.`product`)  WHERE pi.`institution`='" . mysql_real_escape_string($companyID) . "'";
+	$res = mysql_query($query) or die('Bad SQL query getting products from institution id in PT');
+	
+	if($res)
+	{
+		while($row = mysql_fetch_array($res))
+		{
+			$Products[] = $row['id'];
+		}
+	}
+	return $Products;
+}
+
+/* Function to get Product Id's from MOA id */
+function GetProductsFromMOA($moaID)
+{
+	global $db;
+	global $now;
+	$Products = array();
+	$query = "SELECT pt.`id` FROM `products` pt LEFT JOIN `products_moas` pm ON(pt.`id` = pm.`product`)  WHERE pm.`moa`='" . mysql_real_escape_string($moaID) . "'";
+	$res = mysql_query($query) or die('Bad SQL query getting products from moa id in PT');
+	
+	if($res)
+	{
+		while($row = mysql_fetch_array($res))
+		{
+			$Products[] = $row['id'];
+		}
+	}
+	return $Products;
+}
+
 ?>

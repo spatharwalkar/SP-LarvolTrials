@@ -1,19 +1,47 @@
 <?php
 	require_once('db.php');
 	include('ss_product.php');
+	include('ss_institution.php');
 	
 	$RecordsPerPage = 50;
 	$SearchFlg = false;
 	$globalOptions['page'] = 1;
 	$DataArray = $CurrentPageResultArr = array();
 	$totalPages = $FoundRecords = 0;
+	$ProdFlg = false;
+	$CompanyFlg = false;
+	$ProdResultArr = array();
+	$CompanyResultArr = array();
+	$ResultArr = array();
+	
+	if($_REQUEST['SearchType'] != NULL && trim($_REQUEST['SearchType']) != '')
+		$CurrentSearchType = $_REQUEST['SearchType'];
+	else
+		$CurrentSearchType = 'PT';
+		
 	//print '<br/><br/>';
 	if($_REQUEST['TzSearch'] != NULL && $_REQUEST['TzSearch'] != '' && isset($_REQUEST['TzSearch']))
 	{
 		$SearchFlg = true;
 		$globalOptions['TzSearch'] = $_REQUEST['TzSearch'];
 		
-		$ResultArr = find_product($globalOptions['TzSearch']);
+		$ProdResultArr = find_product($globalOptions['TzSearch']);
+		$CompanyResultArr = find_institution($globalOptions['TzSearch']);
+		if(count($CompanyResultArr) > 0 && $CurrentSearchType == 'CT')
+		{
+			$CompanyFlg = true;
+			$ResultArr = $CompanyResultArr;
+		}
+		
+		if(count($ProdResultArr) > 0  && $CurrentSearchType == 'PT')
+		{
+			$ProdFlg = true;
+			$ResultArr = $ProdResultArr;
+		}
+		
+		if(count($CompanyResultArr) > 0 && count($ProdResultArr) > 0)
+		{$CompanyFlg = true; $ProdFlg = true; }
+		
 		if(is_array($ResultArr))
 		$FoundRecords = count($ResultArr);
 		
@@ -33,16 +61,26 @@
 			
 			foreach($CurrentPageResultArr as $index=> $id)
 			{
-				$result =  mysql_fetch_assoc(mysql_query("SELECT id, name, description, company FROM `products` WHERE id = '" . $id . "' "));
-				$DataArray[$index]['index'] = $index;
-				$DataArray[$index]['name'] = $result['name'];
-				$DataArray[$index]['id'] = $result['id'];
-				$DataArray[$index]['description'] = $result['description'];
-				if($result['company'] != NULL && trim($result['company']) != '')
+				if($CurrentSearchType == 'CT')
 				{
-					$result['company']=str_replace(',',', ',$result['company']);
-					$result['company']=str_replace(',  ',', ',$result['company']);
-					$DataArray[$index]['company'] = ' / '.$result['company'];
+					$result =  mysql_fetch_assoc(mysql_query("SELECT id, name FROM `institutions` WHERE id = '" . mysql_real_escape_string($id) . "' "));
+					$DataArray[$index]['index'] = $index;
+					$DataArray[$index]['name'] = $result['name'];
+					$DataArray[$index]['id'] = $result['id'];
+				}
+				else
+				{
+					$result =  mysql_fetch_assoc(mysql_query("SELECT id, name, description, company FROM `products` WHERE id = '" . mysql_real_escape_string($id) . "' "));
+					$DataArray[$index]['index'] = $index;
+					$DataArray[$index]['name'] = $result['name'];
+					$DataArray[$index]['id'] = $result['id'];
+					$DataArray[$index]['description'] = $result['description'];
+					if($result['company'] != NULL && trim($result['company']) != '')
+					{
+						$result['company']=str_replace(',',', ',$result['company']);
+						$result['company']=str_replace(',  ',', ',$result['company']);
+						$DataArray[$index]['company'] = ' / '.$result['company'];
+					}
 				}
 			}
 		}
@@ -148,6 +186,12 @@ a:visited {color:#6600bc;}  /* visited link */
 	padding: 2px 5px;
 }
 
+.searchTypes
+{
+	font-weight:bold;
+	font-size:12px;
+}
+
 </style>
 <script type="text/javascript">
 	$(function() 
@@ -192,11 +236,21 @@ a:visited {color:#6600bc;}  /* visited link */
 	        </td>
 	        <td width="600px" style="vertical-align:bottom; padding-left:20px;" align="left">
 	        	<input class="SearchBox" type="text" value="<?php echo htmlspecialchars($globalOptions['TzSearch']); ?>" autocomplete="off" style="font-weight:bold;" name="TzSearch" id="TzSearch" />
+                <input type="hidden" value="<?php echo $CurrentSearchType; ?>" name="SearchType" id="SearchType" />
 	        </td>
 	        <td style="vertical-align:bottom; padding-left:10px;" align="left">
 	        	<input type="submit" name="Search" title="Search" value="Search" style="vertical-align:bottom;" class="SearchBttn1" />
 	        </td>
 	    </tr>
+        <?php if($ProdFlg == true && $CompanyFlg == true) { ?>
+        <tr>
+        	<td width="300px">&nbsp;</td>
+            <td width="600px" style="font-weight:bold; padding-left:0px;" align="center">
+        		<a class="searchTypes" style="color:<?php (($CurrentSearchType == 'PT') ? print '#dd4b39;': print '#666666;') ?>" target="_self" href="trialzilla.php?<?php print 'TzSearch=' . $globalOptions['TzSearch'].'&amp;SearchType=PT'; ?>">Products</a>
+        		<a class="searchTypes" style="color:<?php (($CurrentSearchType == 'CT') ? print '#dd4b39;': print '#666666;') ?>" target="_self" href="trialzilla.php?<?php print 'TzSearch=' . $globalOptions['TzSearch'].'&amp;SearchType=CT'; ?>">Companies</a>
+        	</td>
+         </tr>
+        <?php } ?>
 	</table>
 </form>
 <!-- Number of Results -->
@@ -204,7 +258,7 @@ a:visited {color:#6600bc;}  /* visited link */
 <table width="100%" border="0" class="FoundResultsTb">
 	<tr>
     	<td width="50%" style="border:0; font-weight:bold; padding-left:5px;" align="left">
-        	Search Products
+        	Search Products / Companies
         </td>
         <td width="50%" style="border:0; font-weight:bold; padding-right:5px;" align="right">
         	<?php
@@ -230,16 +284,25 @@ a:visited {color:#6600bc;}  /* visited link */
 
 <!-- Displaying Records -->
 <br/>
-<table width="100%" border="0" style="">
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
 <?php
 	foreach($CurrentPageResultArr as $index=> $id)
 	{
+		if($CurrentSearchType == 'CT') $type ='Company'; else $type ='Product'; 
 		if($DataArray[$index]['id'] != '' && $DataArray[$index]['id'] != '' && $FoundRecords > 0)
 		{
 			print'<tr>
-    			  	<td style="border:0px; padding-left:5px;" align="left">
-    		      		<a href="'. trim(urlPath()) .'intermediary.php?p='. trim($DataArray[$index]['id']) .'" title="Product" target="_blank">'.formatBrandName($DataArray[$index]['name'], 'product') . $DataArray[$index]['company'] .'</a>
-    		        	<br /><br style="line-height:6px;" />
+					<td align="left"  width="80px">
+							<img src="images/'.$type.'arrow.gif" style="padding-bottom:5px;" width="80px" height="17px" />
+					</td>
+					<td style="padding-left:5px;" align="left">';
+					
+    		if($CurrentSearchType == 'CT')
+				print ' 		<a href="'. trim(urlPath()) .'trialzilla_company.php?CompanyId='. trim($DataArray[$index]['id']) .'" title="Company" target="_blank">'.$DataArray[$index]['name'].'</a>';
+			else
+				print ' 		<a href="'. trim(urlPath()) .'intermediary.php?p='. trim($DataArray[$index]['id']) .'" title="Product" target="_blank">'.formatBrandName($DataArray[$index]['name'], 'product') . $DataArray[$index]['company'] .'</a>';
+			
+    		print '      <br /><br style="line-height:6px;" />
 					</td>
     			  </tr>';
 		}
@@ -252,7 +315,25 @@ if($FoundRecords == 0 && $globalOptions['TzSearch'] != '' && $globalOptions['TzS
 ?>
 	<div id="norecord">
  	 	<div>
-		    <p>Your search - <strong><?php echo $globalOptions['TzSearch']; ?></strong> - did not match any products.</p>
+		    <p>
+            	Your search - 
+                	<strong>
+						<?php echo $globalOptions['TzSearch']; ?>
+                    </strong> - did not match any 
+                <?php
+                	if($ProdFlg == false && $CompanyFlg == false)
+					{
+						print ' products or companies';
+					}
+					else
+					{
+						if($CurrentSearchType == 'CT')
+							print ' companies';
+						else
+							print ' products';
+					}		
+				?>.
+               </p>
 			    <p>Suggestions:</p>
 			    <ul>
 			      <li>Make sure all words are spelled correctly.</li>
@@ -272,7 +353,7 @@ if($FoundRecords == 0 && $globalOptions['TzSearch'] != '' && $globalOptions['TzS
         	<?php
 				if($totalPages > 1)
 				{
-        			$paginate = pagination($globalOptions, $totalPages);
+        			$paginate = pagination($globalOptions, $totalPages, $CurrentSearchType);
 					print '<br/>'.$paginate[1];
 				}
 			?>
@@ -284,18 +365,18 @@ if($FoundRecords == 0 && $globalOptions['TzSearch'] != '' && $globalOptions['TzS
 </html>
 <?php
 
-function pagination($globalOptions = array(), $totalPages)
+function pagination($globalOptions = array(), $totalPages, $CurrentSearchType)
 {	
 	$url = '';
 	$stages = 1;
 			
 	if(isset($_REQUEST['TzSearch']))
 	{
-		$url .= '&amp;TzSearch=' . $_REQUEST['TzSearch'];
+		$url .= '&amp;TzSearch=' . $_REQUEST['TzSearch'].'&amp;SearchType='.$CurrentSearchType;
 	}
 	if( !isset($_REQUEST['TzSearch']) and isset($globalOptions['TzSearch']))
 	{
-		$url .= '&amp;TzSearch=' . $globalOptions['TzSearch'];
+		$url .= '&amp;TzSearch=' . $globalOptions['TzSearch'].'&amp;SearchType='.$CurrentSearchType;
 	}
 	
 	$rootUrl = 'trialzilla.php?';
