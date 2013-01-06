@@ -27,6 +27,10 @@
 		
 		$ProdResultArr = find_product($globalOptions['TzSearch']);
 		$CompanyResultArr = find_institution($globalOptions['TzSearch']);
+		
+		if(count($CompanyResultArr) > 0 && count($ProdResultArr) > 0)
+		$CompanyFlg = $ProdFlg = true;
+		
 		if(count($CompanyResultArr) > 0 && $CurrentSearchType == 'CT')
 		{
 			$CompanyFlg = true;
@@ -37,6 +41,19 @@
 		{
 			$ProdFlg = true;
 			$ResultArr = $ProdResultArr;
+		}
+		
+		if(count($ProdResultArr) > 0 && count($CompanyResultArr) == 0)
+		{
+			$ProdFlg = true;
+			$ResultArr = $ProdResultArr;
+			$CurrentSearchType = 'PT';
+		}
+		else if(count($ProdResultArr) == 0 && count($CompanyResultArr) > 0)
+		{
+			$CompanyFlg = true;
+			$ResultArr = $CompanyResultArr;
+			$CurrentSearchType = 'CT';
 		}
 		
 		if(count($CompanyResultArr) > 0 && count($ProdResultArr) > 0)
@@ -236,7 +253,7 @@ a:visited {color:#6600bc;}  /* visited link */
 	        </td>
 	        <td width="600px" style="vertical-align:bottom; padding-left:20px;" align="left">
 	        	<input class="SearchBox" type="text" value="<?php echo htmlspecialchars($globalOptions['TzSearch']); ?>" autocomplete="off" style="font-weight:bold;" name="TzSearch" id="TzSearch" />
-                <input type="hidden" value="<?php echo $CurrentSearchType; ?>" name="SearchType" id="SearchType" />
+                <!--<input type="hidden" value="<?php echo $CurrentSearchType; ?>" name="SearchType" id="SearchType" />-->
 	        </td>
 	        <td style="vertical-align:bottom; padding-left:10px;" align="left">
 	        	<input type="submit" name="Search" title="Search" value="Search" style="vertical-align:bottom;" class="SearchBttn1" />
