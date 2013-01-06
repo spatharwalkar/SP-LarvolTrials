@@ -20,16 +20,8 @@ if(isset($_POST['btnDownload']))
 	$resultIds = $_POST['resultIds'];
 	$globalOptions = $_POST['globalOptions'];
 	
-	if($_POST['dOption'] == 'all')
-	{
-		$globalOptions['type'] = 'allTrials';
-	}
-	else
-	{
-		$globalOptions['type'] = 'shownTrials';
-	}
+	$globalOptions['dOption'] = $_POST['dOption'];
 	
-	//pr($globalOptions);exit;
 	switch($_POST['wFormat'])
 	{
 		case 'excel': 
@@ -44,25 +36,7 @@ if(isset($_POST['btnDownload']))
 	}
 	$tt->generateTrialTracker($fileType, $resultIds, $globalOptions);
 	exit;
-	/*if(isset($_REQUEST['sphinx_s']))
-	{	
-		$Sphinx_search=$_REQUEST['sphinx_s'];
-		$globalOptions['sphinx_s']=$_REQUEST['sphinx_s'];
-	}
-	elseif(isset($globalOptions['sphinx_s']))
-	{	
-		$Sphinx_search=$globalOptions['sphinx_s'];
-	}
-	
-	if(($shownCnt != 0 && is_numeric($shownCnt)) || $_POST['dOption'] == 'all')
-	{
-		$tt->generateTrialTracker($fileType, $resultIds, $timeMachine, $ottType, $globalOptions);
-		exit;
-	}*/
 }
-$sortFields = array('phase' => 'pD', 'inactive_date' => 'iA', 'start_date' => 'sA', 'overall_status' => 'oA', 'enrollment' => 'eA');
-
-$globalOptions['sortOrder'] = $sortFields;
 
 $globalOptions['type'] = 'activeTrials';
 $globalOptions['enroll'] = '0';
