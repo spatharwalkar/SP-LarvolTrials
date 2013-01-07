@@ -39,12 +39,11 @@ function showProductTracker($id, $TrackerType='PT')
 	$areaId = $Return['areaId'];
 	$column_interval = $Return['column_interval'];
 	$TrackerType = $Return['TrackerType'];
-	$dtt = $Return['dtt'];
 	
 	if($TrackerType=='PT')
 	$HTMLContent .= TrackerHeaderHTMLContent($Report_DisplayName);
 	
-	$HTMLContent .= TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $inner_columns, $inner_width, $column_width, $ratio, $areaId, $column_interval, $TrackerType, $dtt);
+	$HTMLContent .= TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $inner_columns, $inner_width, $column_width, $ratio, $areaId, $column_interval, $TrackerType);
 	
 	return $HTMLContent;
 
@@ -74,7 +73,6 @@ function DataGenerator($id, $TrackerType)
 	$column_width = 80;
 	$max_count = 0;
 
-	$dtt = 0;
 	$Report_DisplayName = NULL;
 	$areaId = NULL;
 	//END DATA
@@ -84,7 +82,6 @@ function DataGenerator($id, $TrackerType)
 		$query = 'SELECT `name`, `user`, `footnotes`, `description`, `category`, `shared`, `total`, `dtt`, `display_name` FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
 		$res = mysql_query($query) or die('Bad SQL query getting master heatmap report');
 		$res = mysql_fetch_array($res) or die('Report not found.');
-		$dtt = $res['dtt'];
 		$Report_DisplayName=$res['display_name'];
 		
 		$query = 'SELECT `num`,`type`,`type_id`, `display_name`, `category`, `tag` FROM `rpt_masterhm_headers` WHERE `report`=' . $id . ' AND type = \'product\' ORDER BY num ASC';
@@ -329,7 +326,6 @@ function DataGenerator($id, $TrackerType)
 	$Return['areaId'] = $areaId;
 	$Return['column_interval'] = $column_interval;
 	$Return['TrackerType'] = $TrackerType;
-	$Return['dtt'] = $dtt;
 	
 	return $Return;
 }
@@ -931,10 +927,9 @@ function TrackerHeaderHTMLContent($Report_DisplayName)
 	return $htmlContent;
 }
 
-function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $inner_columns, $inner_width, $column_width, $ratio, $areaId, $column_interval, $TrackerType, $dtt)
+function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $inner_columns, $inner_width, $column_width, $ratio, $areaId, $column_interval, $TrackerType)
 {				
 	if(count($productIds) == 0 && $TrackerType == 'CT') return 'No Products Available for this Company';
-	if(!$dtt  && $TrackerType == 'PT') return 'Last Column DTT not Enabled';
 	if(count($productIds) == 0  && $TrackerType == 'PT') return 'No Products Available for this Heatmap';
 	
 	require_once('tcpdf/config/lang/eng.php');
