@@ -2,6 +2,7 @@
 	require_once('db.php');
 	include('ss_product.php');
 	include('ss_institution.php');
+	include('ss_moa.php');
 	
 	$RecordsPerPage = 50;
 	$SearchFlg = false;
@@ -10,8 +11,10 @@
 	$totalPages = $FoundRecords = 0;
 	$ProdFlg = false;
 	$CompanyFlg = false;
+	$MoaFlg = false;
 	$ProdResultArr = array();
 	$CompanyResultArr = array();
+	$MoaResultArr = array();
 	$ResultArr = array();
 	
 	//print '<br/><br/>';
@@ -22,10 +25,13 @@
 		
 		$ProdResultArr = find_product($globalOptions['TzSearch']);
 		$CompanyResultArr = find_institution($globalOptions['TzSearch']);
+		$MoaResultArr = find_moa($globalOptions['TzSearch']);
 		
 		if(count($CompanyResultArr) > 0) $CompanyFlg = true;
 		
 		if(count($ProdResultArr) > 0) $ProdFlg = true;
+		
+		if(count($MoaResultArr) > 0) $MoaFlg = true;
 		
 		$i = 0;
 		
@@ -53,6 +59,19 @@
 					$i++;
 				}
 			}
+		}
+		
+		if($MoaFlg)
+		{
+			foreach($MoaResultArr as $val)
+			{
+				if($val != NULL && $val != '')
+				{
+					$ResultArr[$i]['id'] = $val;
+					$ResultArr[$i]['type'] = 'Moa';
+					$i++;
+				}
+			}
 		}				
 		
 		if(is_array($ResultArr))
@@ -77,6 +96,14 @@
 				if($CurrentPageResultArr[$index]['type'] == 'Company')
 				{
 					$result =  mysql_fetch_assoc(mysql_query("SELECT id, name FROM `institutions` WHERE id = '" . mysql_real_escape_string($CurrentPageResultArr[$index]['id']) . "' "));
+					$DataArray[$index]['index'] = $index;
+					$DataArray[$index]['name'] = $result['name'];
+					$DataArray[$index]['id'] = $result['id'];
+					$DataArray[$index]['type'] = $CurrentPageResultArr[$index]['type'];
+				}
+				else if($CurrentPageResultArr[$index]['type'] == 'Moa')
+				{
+					$result =  mysql_fetch_assoc(mysql_query("SELECT id, name FROM `moas` WHERE id = '" . mysql_real_escape_string($CurrentPageResultArr[$index]['id']) . "' "));
 					$DataArray[$index]['index'] = $index;
 					$DataArray[$index]['name'] = $result['name'];
 					$DataArray[$index]['id'] = $result['id'];
@@ -227,8 +254,8 @@ a:visited {color:#6600bc;}  /* visited link */
 <!-- Heading border -->
 <table width="100%" border="0" class="TopBorder">
 	<tr>
-    	<td width="33%" style="font-weight:bold; color:#FFFFFF; padding-left:5px;">
-        	&nbsp;
+    	<td width="33%" style="font-weight:bold; color:#FFFFFF; padding-left:5px;">&nbsp;
+        	
         </td>
         <td width="33%" align="center">
 			<font style="color:#FFFFFF; font-size:11px; padding-top:0px; font-weight:bold;">
@@ -259,7 +286,7 @@ a:visited {color:#6600bc;}  /* visited link */
         <tr>
         	<td width="300px">&nbsp;</td>
             <td width="600px" style="font-weight:bold; padding-left:0px;" align="center">
-            	<font class="searchTypes" style="color:#666666;">Search for Company / Product</font>
+            	<font class="searchTypes" style="color:#666666;">Search for Company / Product / Moa</font>
         	</td>
          </tr>
     </table>
@@ -268,8 +295,8 @@ a:visited {color:#6600bc;}  /* visited link */
 <br/>
 <table width="100%" border="0" class="FoundResultsTb">
 	<tr>
-    	<td width="50%" style="border:0; font-weight:bold; padding-left:5px;" align="left">
-        	&nbsp;
+    	<td width="50%" style="border:0; font-weight:bold; padding-left:5px;" align="left">&nbsp;
+        	
         </td>
         <td width="50%" style="border:0; font-weight:bold; padding-right:5px;" align="right">
         	<?php
@@ -309,8 +336,10 @@ a:visited {color:#6600bc;}  /* visited link */
 					
     		if($DataArray[$index]['type'] == 'Company')
 				print ' 		<a href="'. trim(urlPath()) .'trialzilla_company.php?CompanyId='. trim($DataArray[$index]['id']) .'" title="Company" target="_blank">'.$DataArray[$index]['name'].'</a>';
-			else
-				print ' 		<a href="'. trim(urlPath()) .'intermediary.php?p='. trim($DataArray[$index]['id']) .'" title="Product" target="_blank">'.formatBrandName($DataArray[$index]['name'], 'product') . $DataArray[$index]['company'] .'</a>';
+			else if($DataArray[$index]['type'] == 'Moa')
+				print ' 		<a href="'. trim(urlPath()) .'trialzilla_moa.php?MoaId='. trim($DataArray[$index]['id']) .'" title="Moa" target="_blank">'.$DataArray[$index]['name'].'</a>';
+				else
+					print ' 		<a href="'. trim(urlPath()) .'intermediary.php?p='. trim($DataArray[$index]['id']) .'" title="Product" target="_blank">'.formatBrandName($DataArray[$index]['name'], 'product') . $DataArray[$index]['company'] .'</a>';
 			
     		print '      <br /><br style="line-height:6px;" />
 					</td>

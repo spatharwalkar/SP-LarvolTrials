@@ -930,6 +930,7 @@ function TrackerHeaderHTMLContent($Report_DisplayName)
 function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $inner_columns, $inner_width, $column_width, $ratio, $areaId, $column_interval, $TrackerType)
 {				
 	if(count($productIds) == 0 && $TrackerType == 'CT') return 'No Products Available for this Company';
+	if(count($productIds) == 0 && $TrackerType == 'MT') return 'No Products Available for this Moa';
 	if(count($productIds) == 0  && $TrackerType == 'PT') return 'No Products Available for this Heatmap';
 	
 	require_once('tcpdf/config/lang/eng.php');
@@ -1297,7 +1298,7 @@ function Download_reports()
       											'vertical'   => PHPExcel_Style_Alignment::VERTICAL_CENTER,
      											'rotation'   => 0,
       											'wrap'       => false));
-		$objPHPExcel->getActiveSheet()->SetCellValue('B' . $Excel_HMCounter, $Report_Name .(($TrackerType== 'CT') ? ' Company':'').' Product Tracker');
+		$objPHPExcel->getActiveSheet()->SetCellValue('B' . $Excel_HMCounter, $Report_Name .(($TrackerType== 'CT') ? ' Company':'').(($TrackerType== 'MT') ? ' Moa':'').' Product Tracker');
 		
 		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$Excel_HMCounter, 'Display Mode:');
 		$objPHPExcel->getActiveSheet()->mergeCells('B' . $Excel_HMCounter . ':BH' . $Excel_HMCounter);
@@ -1613,7 +1614,7 @@ function Download_reports()
 		$subColumn_width = 1.4;
 		
 		$pdf->SetFont('verdanab', '', 8);	//Set font size as 8
-		$Repo_Heading = $Report_Name .(($TrackerType== 'CT') ? ' Company':'') .' Product Tracker, '.$pdftitle;
+		$Repo_Heading = $Report_Name .(($TrackerType== 'CT') ? ' Company':'').(($TrackerType== 'MT') ? ' Moa':'') .' Product Tracker, '.$pdftitle;
 		$current_StringLength = $pdf->GetStringWidth($Repo_Heading, 'verdanab', '', 8);
 		$pdf->MultiCell($Page_Width, '', $Repo_Heading, $border=0, $align='C', $fill=0, $ln=1, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
 		$pdf->Ln(5);
@@ -2079,7 +2080,7 @@ function Download_reports()
       											'vertical'   => PHPExcel_Style_Alignment::VERTICAL_CENTER,
      											'rotation'   => 0,
       											'wrap'       => false));
-		$objPHPExcel->getActiveSheet()->SetCellValue('B1', $Report_Name.(($TrackerType== 'CT') ? ' Company':'').' Product Tracker');
+		$objPHPExcel->getActiveSheet()->SetCellValue('B1', $Report_Name.(($TrackerType== 'CT') ? ' Company':'').(($TrackerType== 'MT') ? ' Moa':'').' Product Tracker');
 		
 		$objPHPExcel->getActiveSheet()->SetCellValue('A2', 'Display Mode:');
 		$objPHPExcel->getActiveSheet()->mergeCells('B2:AA2');

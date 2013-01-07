@@ -1,14 +1,14 @@
 <?php
 	require_once('db.php');
 	require_once('product_tracker.php');
-	if($_REQUEST['CompanyId'] != NULL && $_REQUEST['CompanyId'] != '' && isset($_REQUEST['CompanyId']))
+	if($_REQUEST['MoaId'] != NULL && $_REQUEST['MoaId'] != '' && isset($_REQUEST['MoaId']))
 	{
-		$CompanyId = $_REQUEST['CompanyId'];
-		$query = 'SELECT `name`, `id` FROM `institutions` WHERE `id`=' . mysql_real_escape_string($CompanyId);
+		$MoaId = $_REQUEST['MoaId'];
+		$query = 'SELECT `name`, `id` FROM `moas` WHERE `id`=' . mysql_real_escape_string($MoaId);
 		$res = mysql_query($query) or die(mysql_error());
 		$header = mysql_fetch_array($res);
-		$CompanyId = $header['id'];
-		$CompanyName = $header['name'];				
+		$MoaId = $header['id'];
+		$MoaName = $header['name'];				
 	}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -451,7 +451,7 @@ function change_view()
 	        	<img src="images/Larvol-Trial-Logo-notag.png" width="300" height="47" />
 	        </td>
 	        <td width ="75%" style="vertical-align:bottom; padding-left:200px;" align="left">
-            	<font class="ReportHeading"><?php print $CompanyName; ?></font>
+            	<font class="ReportHeading"><?php print $MoaName; ?></font>
 	        </td>
 	    </tr>
 	</table>
@@ -461,7 +461,7 @@ function change_view()
 <table width="100%" border="0" class="FoundResultsTb">
 	<tr>
     	<td width="50%" style="border:0; font-weight:bold; padding-left:5px;" align="left">
-        	Product Tracker for "<?php print $CompanyName; ?>"
+        	Product Tracker for "<?php print $MoaName; ?>"
         </td>
     </tr>
 </table>
@@ -471,7 +471,7 @@ function change_view()
 <table width="100%" border="0" style="">
 <tr><td>
 <div id="PTContainer" class="PTContainer">
-<?php print showProductTracker($CompanyId, 'CT'); ?>
+<?php print showProductTracker($MoaId, 'MT'); ?>
 </div>
 </td></tr>
 </table>
