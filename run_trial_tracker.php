@@ -185,7 +185,7 @@ class TrialTracker
 			
 			if($globalOptions['includeProductsWNoData'] == "off")
 			{
-				if(isset($tvalue['Trials']))
+				if(isset($tvalue['naUpms']) || isset($tvalue['Trials']))
 				{
 					$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $tvalue['sectionHeader']);
 					$objPHPExcel->getActiveSheet()->mergeCells('A' . $i . ':BB'. $i);
@@ -1094,7 +1094,7 @@ class TrialTracker
 									$mvalue['result_link'] = NULL;
 								}
 							
-								if((isset($mvalue['edited']) && $mvalue['edited']['field'] == 'result_link') || ($mvalue['new'] == 'y')) 
+								/*if((isset($mvalue['edited']) && $mvalue['edited']['field'] == 'result_link') || ($mvalue['new'] == 'y')) 
 									$imgColor = 'red';
 								else 
 									$imgColor = 'black'; 
@@ -1103,20 +1103,26 @@ class TrialTracker
 								$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
 								$objDrawing->setOffsetX(40);
 								$objDrawing->setOffsetY(10);
+								$objDrawing->setCoordinates('L' . $i);*/
 								
 								if($mvalue['event_type'] == 'Clinical Data')
 								{
-									$objDrawing->setPath('images/' . $imgColor . '-diamond.png');
+									//$objDrawing->setPath('images/' . $imgColor . '-diamond.png');
+									$icon = '&#9830;';
 								}
 								else if($mvalue['status'] == 'Cancelled')
 								{
-									$objDrawing->setPath('images/' . $imgColor . '-cancel.png');
+									//$objDrawing->setPath('images/' . $imgColor . '-cancel.png');
+									$icon = '&#10006;';
 								}
 								else
 								{
-									$objDrawing->setPath('images/' . $imgColor . '-checkmark.png');
+									//$objDrawing->setPath('images/' . $imgColor . '-checkmark.png');
+									$icon = '&#10004;';
 								}
-								$objDrawing->setCoordinates('L' . $i);
+								
+								$objPHPExcel->getActiveSheet()->setCellValue('L' . $i, html_entity_decode($icon, ENT_QUOTES, 'UTF-8'));
+								$objPHPExcel->getActiveSheet()->getStyle('L' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 								if($mvalue['result_link'] != '' && $mvalue['result_link'] !== NULL)
 								{
 									$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl($mvalue['result_link']);
@@ -1126,12 +1132,16 @@ class TrialTracker
 							}
 							else if($mvalue['status'] == 'Pending')
 							{
-								$objDrawing = new PHPExcel_Worksheet_Drawing();
+								/*$objDrawing = new PHPExcel_Worksheet_Drawing();
 								$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
 								$objDrawing->setOffsetX(40);
 								$objDrawing->setOffsetY(10);
 								$objDrawing->setPath('images/hourglass.png');
-								$objDrawing->setCoordinates('L' . $i);
+								$objDrawing->setCoordinates('L' . $i);*/
+								
+								$icon = '&#8987;';
+								$objPHPExcel->getActiveSheet()->setCellValue('L' . $i, html_entity_decode($icon, ENT_QUOTES, 'UTF-8'));
+								$objPHPExcel->getActiveSheet()->getStyle('L' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 								if($mvalue['event_link'] != '' && $mvalue['event_link'] !== NULL)
 								{
 									$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl($mvalue['event_link']);
@@ -1475,7 +1485,6 @@ class TrialTracker
 			}
 			else if($uvalue["new"] == 'y')
 			{
-
 				$objPHPExcel->getActiveSheet()->getStyle('G' . $i)->applyFromArray($highlightChange);
 				if($eventLink != '' && $eventLink !== NULL)
 				{
@@ -1493,7 +1502,7 @@ class TrialTracker
 					$resultLink = NULL;
 				}
 								
-				if((isset($uvalue['edited']) && $uvalue['edited']['field'] == 'result_link') || ($uvalue['new'] == 'y')) 
+				/*if((isset($uvalue['edited']) && $uvalue['edited']['field'] == 'result_link') || ($uvalue['new'] == 'y')) 
 					$imgColor = 'red';
 				else 
 					$imgColor = 'black'; 
@@ -1502,20 +1511,27 @@ class TrialTracker
 				$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
 				$objDrawing->setOffsetX(40);
 				$objDrawing->setOffsetY(4);
+				$objDrawing->setCoordinates('H' . $i);*/
+				
 				if($uvalue['event_type'] == 'Clinical Data')
 				{
-					$objDrawing->setPath('images/' . $imgColor . '-diamond.png');
+					//$objDrawing->setPath('images/' . $imgColor . '-diamond.png');
+					$icon = '&#9830;';
 				}
 				else if($uvalue['status'] == 'Cancelled')
 				{
-					$objDrawing->setPath('images/' . $imgColor . '-cancel.png');
+					//$objDrawing->setPath('images/' . $imgColor . '-cancel.png');
+					$icon = '&#10006;';
 				}
 				else
 				{
-					$objDrawing->setPath('images/' . $imgColor . '-checkmark.png');
+					//$objDrawing->setPath('images/' . $imgColor . '-checkmark.png');
+					$icon = '&#10004;';
 				}
+				
+				$objPHPExcel->getActiveSheet()->setCellValue('H' . $i, html_entity_decode($icon, ENT_QUOTES, 'UTF-8'));
+				$objPHPExcel->getActiveSheet()->getStyle('H' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 				$uvalue['event_description'] = substr($uvalue['event_description'], 0, 255);
-				$objDrawing->setCoordinates('H' . $i);
 				if($resultLink != '' && $resultLink !== NULL) 
 				{
 					$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($resultLink);
@@ -1524,12 +1540,16 @@ class TrialTracker
 			}
 			elseif($uvalue['status'] == 'Pending')
 			{
-				$objDrawing = new PHPExcel_Worksheet_Drawing();
+				/*$objDrawing = new PHPExcel_Worksheet_Drawing();
 				$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
 				$objDrawing->setOffsetX(40);
 				$objDrawing->setOffsetY(4);
 				$objDrawing->setPath('images/hourglass.png');
-				$objDrawing->setCoordinates('H' . $i);
+				$objDrawing->setCoordinates('H' . $i);*/
+				
+				$icon = '&#8987;';
+				$objPHPExcel->getActiveSheet()->setCellValue('H' . $i, html_entity_decode($icon, ENT_QUOTES, 'UTF-8'));
+				$objPHPExcel->getActiveSheet()->getStyle('H' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 				if($eventLink != '' && $eventLink !== NULL)
 				{
 					$uvalue['event_description'] = substr($uvalue['event_description'], 0, 255);
