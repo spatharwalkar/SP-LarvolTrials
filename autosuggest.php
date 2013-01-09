@@ -7,7 +7,7 @@ $field = mysql_real_escape_string($_GET['field']);
 $hint = mysql_real_escape_string($_GET['hint']);
 $c_lid = mysql_real_escape_string($_GET['c_lid']);
 //filter input
-$autoSuggestTables = array('areas','upm','products','data_trials', 'redtags');
+$autoSuggestTables = array('areas','upm','products','data_trials', 'redtags', 'trialzilla');
 if(!in_array($table,$autoSuggestTables))die;
 
 if($table=='upm' && $field=='product')
@@ -25,6 +25,12 @@ elseif($table=='upm' && $field=='redtag')
 elseif($table=='products' || $table=='areas')
 {
 	$query = "select distinct $field, description from $table where $field like '%$search%' order by $field asc";
+}
+elseif($table=='trialzilla')
+{
+	$query = "select distinct `name` from `institutions` where `name` like '%$search%' limit 6";
+	$query2 = "select distinct `name` from `products` where `name` like '%$search%' limit 6";
+	$query3 = "select distinct `name` from `moas` where `name` like '%$search%' limit 6";
 }
 else
 {
@@ -54,6 +60,34 @@ if($table=='upm' && ($field=='product' || $field=='area' || $field=='redtag'))
 		else
 			$datas[] = $row['id'];
 	}	
+}
+else if($table=='trialzilla')
+{
+	$suggestions1 = $suggestions2 = $suggestions3 = array();
+	while($row1 = mysql_fetch_assoc($result))
+	{
+		$suggestions1[] = $row1['name'];
+	}
+	$result2 =  mysql_query($query2);
+	while($row2 = mysql_fetch_assoc($result2))
+	{
+		$suggestions2[] = $row2['name'];
+	}
+	$result3 =  mysql_query($query3);
+	while($row3 = mysql_fetch_assoc($result3))
+	{
+		$suggestions3[] = $row3['name'];
+	}
+	//take 2 suggestion from each table
+	$suggestions = array_merge(array_slice($suggestions1,0,2), array_slice($suggestions2,0,2), array_slice($suggestions3,0,2));
+	if(count($suggestions) < 6)	//if any table has less suggestion take extra suggestions from other tables
+	$suggestions = array_merge($suggestions, array_slice($suggestions1, 2, (6-count($suggestions))));
+	if(count($suggestions) < 6)
+	$suggestions = array_merge($suggestions, array_slice($suggestions2, 2, (6-count($suggestions))));
+	if(count($suggestions) < 6)
+	$suggestions = array_merge($suggestions, array_slice($suggestions3, 2, (6-count($suggestions))));
+	
+	$datas = $suggestions;
 }
 else 
 {

@@ -27,11 +27,11 @@
 		$CompanyResultArr = find_institution($globalOptions['TzSearch']);
 		$MoaResultArr = find_moa($globalOptions['TzSearch']);
 		
-		if(count($CompanyResultArr) > 0) $CompanyFlg = true;
+		if(count($CompanyResultArr) > 0 && is_array($CompanyResultArr)) $CompanyFlg = true;
 		
-		if(count($ProdResultArr) > 0) $ProdFlg = true;
+		if(count($ProdResultArr) > 0 && is_array($ProdResultArr)) $ProdFlg = true;
 		
-		if(count($MoaResultArr) > 0) $MoaFlg = true;
+		if(count($MoaResultArr) > 0 && is_array($MoaResultArr)) $MoaFlg = true;
 		
 		$i = 0;
 		
@@ -234,6 +234,41 @@ a:visited {color:#6600bc;}  /* visited link */
 	font-size:12px;
 }
 
+.autocomplete-w1 
+{ 
+	background:url(./images/shadow.png) no-repeat bottom right; 
+	position:absolute; 
+	top:0px; 
+	left:0px; 
+	margin:8px 0 0 6px; 
+	/* IE6 fix: */ _background:none; _margin:0; 
+}
+.autocomplete 
+{ 
+	border:1px solid #999; 
+	background:#FFF; 
+	cursor:default; 
+	text-align:left; 
+	max-height:350px; 
+	overflow:auto; 
+	margin:-6px 6px 6px -6px; 
+	/* IE6 specific: */ 
+	_height:350px;  
+	_margin:0;
+	_overflow-x:hidden;
+}
+.autocomplete .selected { 
+	background:#F0F0F0; 
+}
+.autocomplete div { 
+	padding:2px 5px; 
+	white-space:wrap;
+}
+.autocomplete strong { 
+	font-weight:normal; 
+	color:#3399FF; 
+}
+	
 </style>
 <script type="text/javascript">
 	$(function() 
@@ -247,6 +282,25 @@ a:visited {color:#6600bc;}  /* visited link */
 		});
 	}
 </script>
+<script type="text/javascript">
+function autoComplete(fieldID)
+{	
+	$(function()
+	{
+		if($('#'+fieldID).length > 0)
+		{	
+			var a = $('#'+fieldID).autocomplete({
+					serviceUrl:'autosuggest.php',
+					params:{table:'trialzilla', field:'name'},
+					minChars:3,
+					width:600
+			});
+		}
+	});
+}
+</script>
+<script type="text/javascript" src="scripts/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="scripts/autosuggest/jquery.autocomplete-min.js"></script>
 </head>
 
 <body>
@@ -277,7 +331,7 @@ a:visited {color:#6600bc;}  /* visited link */
 	        	<img src="images/Larvol-Trial-Logo-notag.png" width="300" height="47" />
 	        </td>
 	        <td width="600px" style="vertical-align:bottom; padding-left:20px;" align="left">
-	        	<input class="SearchBox" type="text" value="<?php echo htmlspecialchars($globalOptions['TzSearch']); ?>" autocomplete="off" style="font-weight:bold;" name="TzSearch" id="TzSearch" />
+	        	<input class="SearchBox" type="text" value="<?php echo htmlspecialchars($globalOptions['TzSearch']); ?>" autocomplete="off" style="font-weight:bold;" name="TzSearch" id="TzSearch" onkeyup="javascript:autoComplete('TzSearch')" />
             </td>
 	        <td style="vertical-align:bottom; padding-left:10px;" align="left">
 	        	<input type="submit" name="Search" title="Search" value="Search" style="vertical-align:bottom;" class="SearchBttn1" />
