@@ -451,6 +451,7 @@ function editor()
 		  toggles1 = new Array();
 		  toggles2 = new Array();
 		  toggles3 = new Array();
+		  toggles4 = new Array();
 		  if (document.getElementById) onload = function () {
 		    document.getElementById (\'more\').className = \'hide\';
 			document.getElementById (\'p_up_dt\').className = \'hide\';
@@ -493,7 +494,7 @@ function editor()
 				
 				if (t[i].getAttribute (\'name\') == \'li_moa\') 
 				{
-					toggles3.push (t[i]);
+					toggles4.push (t[i]);
 					t[i].onclick = function () 
 					{
 						document.getElementById (\'moa_up_dt\').className = toggles3[toggles3.length - 2].checked ? \'show\' : \'hide\';
