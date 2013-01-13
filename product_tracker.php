@@ -990,7 +990,13 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 	$htmlContent .= '<tr><th class="prod_col" align="right">Trials</th><th width="8px" class="graph_rightWhite">&nbsp;</th>';
 	$htmlContent .= '<th align="right" class="graph_rightWhite" colspan="1" width="8px">0</th>';
 	for($j=0; $j < $columns; $j++)
-	$htmlContent .= '<th align="right" class="graph_rightWhite" colspan="'.$inner_columns.'">'.(($j+1) * $column_interval).'</th>';
+	{
+		if($column_interval == 0){
+			$htmlContent .= '<th align="right" class="graph_rightWhite" colspan="'.$inner_columns.'">'.($j+1 == $columns ? ($j+1) * $column_interval : "").'</th>';
+		}else{
+			$htmlContent .= '<th align="right" class="graph_rightWhite" colspan="'.$inner_columns.'">'.(($j+1) * $column_interval).'</th>';
+		}
+	}		
 	$htmlContent .= '</tr>';
 	
 	$htmlContent .= '<tr class="last_tick_height"><th class="last_tick_height prod_col"><font style="line-height:4px;">&nbsp;</font></th><th class="graph_right"><font style="line-height:4px;">&nbsp;</font></th>';
