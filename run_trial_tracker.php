@@ -248,7 +248,8 @@ class TrialTracker
 					{ 
 						$ctLink = 'javascript:void(0)';
 					}
-					
+					$ctLink = urlencode($ctLink);
+                                        
 					$cellSpan = $i;
 					$rowspanLimit = 0;
 					
@@ -1076,8 +1077,8 @@ class TrialTracker
 							$edYear = date('Y', strtotime($mvalue['end_date']));
 							$upmTitle = htmlformat($mvalue['event_description']);
 							
-							$mvalue['event_link'] = trim($mvalue['event_link']);
-							$mvalue['result_link'] = trim($mvalue['result_link']);
+							$mvalue['event_link'] = urlencode(trim($mvalue['event_link']));
+							$mvalue['result_link'] = urlencode(trim($mvalue['result_link']));
 							
 							if(!$loggedIn && !$this->liLoggedIn())
 							{
