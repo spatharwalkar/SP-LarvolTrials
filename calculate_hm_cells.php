@@ -220,7 +220,7 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 						ON a.trial=p.trial
 						where a.area="'.$av['id'].'" and p.product="'.$pv['id'].'"';
 			*/
-			$query_m='	SELECT a.trial,d.source_id,d.is_active,d.institution_type,d.lastchanged_date,d.firstreceived_date,d.phase,d.overall_status from area_trials a 
+			$query_m='	SELECT a.trial,d.source_id,d.is_active,d.institution_type,d.source_id,d.lastchanged_date,d.firstreceived_date,d.phase,d.overall_status from area_trials a 
 						JOIN product_trials p ON a.`trial`=p.`trial`
 						LEFT JOIN data_trials d ON p.`trial`=d.`larvol_id`
 						where a.`area`="'.$av['id'].'" and p.`product`="'.$pv['id'].'" ';
@@ -292,12 +292,17 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 			$overall_statuses['not_authorized_active_indlead']=0;
 			$overall_statuses['prohibited_active_indlead']=0;
 			$overall_statuses['new_trials_active_indlead']=0;
-
+			$suspended_or_terminated=0;
 			
 			while ($row = mysql_fetch_assoc($res))
 			{	
 				if($row["trial"])
 				{
+				
+				if($row["overall_status"]=='Terminated' or $row["overall_status"]=='Suspended')
+				{
+					$suspended_or_terminated++;
+				}
 					$data[] = $row["trial"];
 					$isactive[] = $row["is_active"];
 					$instype[] = $row["institution_type"];
@@ -328,6 +333,7 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 								}
 						while ($row_dh = mysql_fetch_assoc($res_dh))
 						{	
+							
 							if($row_dh["larvol_id"] and $row_dh["overall_status_lastchanged"]>=$base_date)
 							{
 								//switch ($row_dh["overall_status_prev"]) 
@@ -509,8 +515,17 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 			//	$max_phase = 'N/A';
 				$max_phase = null;
 			}
+			 
 			
-			$bomb=getBombdtl();
+			//check if any of the trials has been terminated or suspended 
+			if(  $suspended_or_terminated > 0)  
+			{
+				$bomb=getBombdtl();
+			}
+			else
+			{
+				$bomb='none';
+			}
 			if($counter>=5000)
 			{
 				$counter=0;
@@ -891,32 +906,51 @@ function getBombdtl()
 		
 	if (count($data) == 0)
 		return "";
-	
+
 	$bombStatuses = '"Active, not recruiting","Not yet recruiting","Recruiting","Enrolling by invitation"';
-	$past = "'".date("Y-m-d H:i:s", time() - (int)(540*24*3600))."'";
-	
+	//$past = "'".date("Y-m-d H:i:s", time() - (int)(540*24*3600))."'";
+	$past = date('Y-m-d', strtotime("-180 days")); 
 	$tmpphase=array();
+	$cond1sb=false;  // first condition (terinated/suspended trial & > 18 months old)
+	$cond2sb=false;  // 2nd condition (trial with status 'not yet recruiting' , 'active not recruiting', 'enrolling by invitation', or 'recruiting' in the highest phase)
+	$bomb="none";
 	foreach($ldate as $key=>$ld)
 	{
-		if($ld < $past)
-			continue;
-		else
-			$tmpphase[]=$data[$key];
+		if( ($ostatus[$key]=='Terminated' or $ostatus[$key]=='Suspended') and $ld < $past )
+		{
+			$cond1sb=true;
+		}
+		elseif( ($ostatus[$key]=='Active, not recruiting' or $ostatus[$key]=='Not yet recruiting' or $ostatus[$key]=='Recruiting' or $ostatus[$key]=='Enrolling by invitation') )
+		{
+			$cond2sb=true;
+			$tmpphase[]=$phases[$key];  // to find highest phase of this section
+		}
+			$allphases[]=$phases[$key];  // to find highest phase of all trials
 	}
-	$phase = max($tmpphase);
-	$bomb="large";
-	foreach($ostatus as $key=>$ld)
+	if( $cond1sb and $cond2sb and (max($tmpphase)==max($allphases)) )  // all conditions met for small bomb
 	{
-		if	(
-				( 
-					($ld =="Active, not recruiting")or($ld =="Not yet recruiting")or( $ld =="Recruiting")or ($ld == "Enrolling by invitation") 
-				)
-				and $phases[$key] == $phase
-				and $ldate[$key] < $past 
-			)
-			$bomb="small";
-		else
-			continue;
+		$bomb="small";
+	}
+	else	// No small bomb, now check for large bomb
+	{
+		$cond1bb=false;  // first condition (terinated/suspended trial & > 18 months old)
+	
+		foreach($ldate as $key=>$ld)
+		{
+			if( ($ostatus[$key]=='Terminated' or $ostatus[$key]=='Suspended') and $ld < $past )
+			{
+				$cond1bb=true;
+			}
+			elseif( ($ostatus[$key]=='Active, not recruiting' or $ostatus[$key]=='Not yet recruiting' or $ostatus[$key]=='Recruiting' or $ostatus[$key]=='Enrolling by invitation') )
+			{
+				$tmpphase[]=$phases[$key];  // to find highest phase of this section
+			}
+				$allphases[]=$phases[$key];  // to find highest phase of all trials
+		}
+		if( $cond1bb and (@max($tmpphase)<>@max($allphases)) )  // all conditions met for big bomb
+		{
+			$bomb="large";
+		}
 	}
 	
 	
