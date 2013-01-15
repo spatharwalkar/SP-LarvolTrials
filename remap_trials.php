@@ -657,7 +657,7 @@ function remap($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_t
 						echo $log;
 						return false;
 					}
-
+					
 					$row = mysql_fetch_assoc($res);
 					$overridden = $row !== false;
 					
@@ -824,14 +824,15 @@ function remap($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_t
 
 function update_history($larvol_id,$fld,$val,$lastchanged_date)
 {
+
 			if(empty($larvol_id) or empty($fld) or empty($val)) return "";
-			$query = 'SELECT ' . $fld . ' FROM data_trials WHERE `larvol_id`="'. $larvol_id . '" limit 1';
+			$query = 'SELECT `' . $fld . '` FROM data_trials WHERE `larvol_id`="'. $larvol_id . '" limit 1';
 			if(!$res = mysql_query($query)) return false;
 			$row = mysql_fetch_assoc($res);
 			$oldval1=mysql_real_escape_string($row[$fld]);
 			$value1=mysql_real_escape_string($val);
 		
-			if(empty($value1)) $str1=$fld . "  = null "; else $str1= $fld . ' = "' . $value1 .'"';
+			if(empty($value1)) $str1='`'.$fld .'`'. "  = null "; else $str1= '`'.$fld .'`'. ' = "' . $value1 .'"';
 
 			 if(empty($lastchanged_date)) $lastchanged_date = (string)date("Y-m-d", strtotime('now'));
 			 
