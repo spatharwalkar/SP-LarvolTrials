@@ -1269,8 +1269,8 @@ class TrialTracker
 			$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':AX' . $i . '')->applyFromArray($styleThinBlueBorderOutline);
 			$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':AX' . $i . '')->getFont()->setSize(10);
 			
-			$eventLink = trim($uvalue['event_link']);
-			$resultLink = trim($uvalue['result_link']);
+			$eventLink = urlencode(trim($uvalue['event_link']));
+			$resultLink = urlencode(trim($uvalue['result_link']));
 			
 			if(!$loggedIn && !$this->liLoggedIn())
 			{
