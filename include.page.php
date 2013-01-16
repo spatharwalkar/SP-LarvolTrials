@@ -160,9 +160,9 @@ if($table !='upm')
 elseif($table=='upm')
 {
 	if($_GET['no_sort']!=1)
-	$query = "select upm.`id`, upm.`event_type`, upm.`event_description`, redtags.`name` as redtag, upm.`event_link`, upm.`result_link`, p.`name` as product, upm_areas.`area_id` as area, upm_trials.`larvol_id` as larvol_id, upm.`condition`, upm.`start_date`, upm.`start_date_type`, upm.`end_date`, upm.`end_date_type`, upm.`last_update` from upm left join products p on upm.product=p.id left join upm_areas on upm_areas.upm_id=upm.id left join upm_trials on upm_trials.upm_id = upm.id left join redtags on upm.redtag = redtags.id $where  group by upm.id $currentOrderBy $currentSortOrder limit $start , $limit";
+	$query = "select upm.`id`, upm.`event_type`, redtags.`name` as redtag, upm.`event_description`, upm.`event_link`, upm.`result_link`, p.`name` as product, upm_areas.`area_id` as area, upm_trials.`larvol_id` as larvol_id, upm.`condition`, upm.`start_date`, upm.`start_date_type`, upm.`end_date`, upm.`end_date_type`, upm.`last_update` from upm left join products p on upm.product=p.id left join upm_areas on upm_areas.upm_id=upm.id left join upm_trials on upm_trials.upm_id = upm.id left join redtags on upm.redtag = redtags.id $where  group by upm.id $currentOrderBy $currentSortOrder limit $start , $limit";
 	else
-	$query = "select upm.`id`, upm.`event_type`, upm.`event_description`, redtags.`name` as redtag, upm.`event_link`,upm.`result_link`,p.`name` as product, upm_areas.`area_id` as area, upm_trials.`larvol_id` as larvol_id, upm.`condition`, upm.`start_date`, upm.`start_date_type`, upm.`end_date`, upm.`end_date_type`, upm.`last_update` from upm left join products p on upm.product=p.id left join upm_areas on upm_areas.upm_id=upm.id left join upm_trials on upm_trials.upm_id = upm.id left join redtags on upm.redtag = redtags.id $where group by upm.id limit $start , $limit";
+	$query = "select upm.`id`, upm.`event_type`, redtags.`name` as redtag, upm.`event_description`, upm.`event_link`,upm.`result_link`,p.`name` as product, upm_areas.`area_id` as area, upm_trials.`larvol_id` as larvol_id, upm.`condition`, upm.`start_date`, upm.`start_date_type`, upm.`end_date`, upm.`end_date_type`, upm.`last_update` from upm left join products p on upm.product=p.id left join upm_areas on upm_areas.upm_id=upm.id left join upm_trials on upm_trials.upm_id = upm.id left join redtags on upm.redtag = redtags.id $where group by upm.id limit $start , $limit";
 }
 $res = mysql_query($query) or softDieSession('Cannot get '.$table.' data.'.$query);
 $i=0;
@@ -1744,7 +1744,7 @@ function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),
 	
 		);
 	
-		$res = ArrangeTableColumns($res, array('redtag'=>3));
+		$res = ArrangeTableColumns($res, array('redtag'=>2));
 	}
 	foreach($res as $row)
 	{
@@ -1911,7 +1911,7 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 	
 		);
 		
-		$res = ArrangeTableColumns($res, array('redtag'=>3));
+		$res = ArrangeTableColumns($res, array('redtag'=>2));
 	}	
 	$i=0;
 	
