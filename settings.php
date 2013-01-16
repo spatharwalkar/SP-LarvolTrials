@@ -11,7 +11,8 @@ $settingsFailSafe = array(
 	'YOURLS_USER'=>'root',
 	'YOURLS_PASS'=>'password',
 	'YOURLS_URL'=>'http://localhost/s/yourls-api.php',
-	'SITE_NAME'=>'Larvol Trials'
+	'SITE_NAME'=>'Larvol Trials',
+	'LI_API'=>'http://apistage.larvolinsight.com/api.ashx'
 );
 $settingsFailSafeKeys = array_keys($settingsFailSafe);
 
@@ -40,8 +41,6 @@ else
 }
 //Don't change these
 define('HASH_ALGO', 'tiger192,4');
-//define('LI_API', 'http://apistage.larvolinsight.com/api.ashx');
-define('LI_API', 'http://apidemo.larvolinsight.com/api.ashx');
 ini_set('magic_quotes_gpc','Off');
 ini_set('magic_quotes_runtime','Off');
 ini_set('magic_quotes_sybase','Off');
