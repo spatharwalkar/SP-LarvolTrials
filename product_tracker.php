@@ -2333,7 +2333,7 @@ function CreateLastTickBorder(&$pdf, $product_Col_Width, $Tic_dimension, $column
 		else
 		$Width = $inner_columns * $subColumn_width;
 		$border = 0;
-		$pdf->MultiCell($Width, $Tic_dimension, (($j+1) * $column_interval), $border, $align='R', $fill=0, $ln, '', '', $reseth=false, $stretch=0, $ishtml=false, $autopadding=false, $maxh=0);
+		$pdf->MultiCell($Width, $Tic_dimension, ($column_interval == 0 ? ($j+1 == $columns ? ($j+1) * $column_interval : "") :($j+1) * $column_interval), $border, $align='R', $fill=0, $ln, '', '', $reseth=false, $stretch=0, $ishtml=false, $autopadding=false, $maxh=0);
 		$Place_X = $Main_X+$Width;
 			
 		if($j == $columns-1) 
