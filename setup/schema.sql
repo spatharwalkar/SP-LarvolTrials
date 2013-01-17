@@ -1239,6 +1239,48 @@ CREATE TABLE IF NOT EXISTS `products_moas` (
  KEY `product` (`product`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+CREATE TABLE `entities` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `LI_id` varchar(63) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `class` enum('Product','Area','Coverage Area','Institution','MOA','Biomarker') CHARACTER SET latin1 NOT NULL,
+  `description` text COLLATE utf8_unicode_ci,
+  `display_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `client_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `category` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `comments` text CHARACTER SET latin1,
+  `product_type` varchar(255) CHARACTER SET latin1 DEFAULT NULL,
+  `licensing_mode` varchar(255) CHARACTER SET latin1 DEFAULT NULL,
+  `administration_mode` varchar(255) CHARACTER SET latin1 DEFAULT NULL,
+  `discontinuation_status` varchar(255) CHARACTER SET latin1 DEFAULT NULL,
+  `discontinuation_status_comment` varchar(255) CHARACTER SET latin1 DEFAULT NULL,
+  `is_key` tinyint(1) DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT NULL,
+  `created` datetime DEFAULT NULL,
+  `modified` datetime DEFAULT NULL,
+  `searchdata` text COLLATE utf8_unicode_ci COMMENT 'contains regex',
+  `company` varchar(127) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `brand_names` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `generic_names` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `code_names` varchar(127) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `search_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `approvals` varchar(255) CHARACTER SET latin1 DEFAULT NULL,
+  `xml` text CHARACTER SET latin1,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`),
+  UNIQUE KEY `LI_id` (`LI_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT;
+
+CREATE TABLE `entity_relations` (
+  `parent` int(10) unsigned NOT NULL,
+  `child` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`parent`,`child`),
+  KEY `parent` (`parent`),
+  KEY `child` (`child`),
+  CONSTRAINT `entity_relations_fk1` FOREIGN KEY (`parent`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `entity_relations_fk2` FOREIGN KEY (`child`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT;
+
 ALTER TABLE `products_moas`
   ADD CONSTRAINT `products_moas_ibfk_1` FOREIGN KEY (`product`) REFERENCES `products` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `products_moas_ibfk_2` FOREIGN KEY (`moa`) REFERENCES `moas` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
