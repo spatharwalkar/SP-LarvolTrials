@@ -3924,7 +3924,7 @@ function Download_reports()
 	
 		// Build sheet
 		$objPHPExcel->setActiveSheetIndex(0);
-		$objPHPExcel->getActiveSheet()->setTitle(substr($Report_Name,0,20).' Heatmap');
+		$objPHPExcel->getActiveSheet()->setTitle(substr(str_replace('/',' ',stripslashes($Report_Name)),0,20).' Heatmap');
 		//$objPHPExcel->getActiveSheet()->getStyle('A1:AA2000')->getAlignment()->setWrapText(true);
 		$objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(36);
 		
