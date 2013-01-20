@@ -947,165 +947,197 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 		$query = "select id,searchdata from products where LI_id='{$esclid}' OR name='{$escname}' limit 1";
 		$result = mysql_query($query);
 		$update = false;
-		ob_start();
-		while($row = mysql_fetch_assoc($result))
+		if($result)
 		{
-			$update = true;
-			$id = $row['id'];
-			$searchData = $row['searchdata'];
-		}
-		ob_end_clean();
-		if($update)
-		{
-			if($importVal['is_active'] == 0)
+			ob_start();
+			while($row = mysql_fetch_assoc($result))
 			{
-				//check if database has NULL searchdata and no UPM/MHM references.. in case of no linkages we can delete the product.
-				//return false can show as failed attempt on higher level controller so return 4 code is meant as delete.
-				$upmReferenceCount = count(getProductUpmAssociation($id));
-				$MHMReferenceCount = getMHMAssociation($id, 'products');
-				if($upmReferenceCount==0 && $MHMReferenceCount==0 && $searchData=='')
-				{
-					deleteData($id, $table);
-					return 4;
-				}
-			}			
-			$importVal = array_map(am1,$importKeys,array_values($importVal));
-			$query = "update $table set ".implode(',',$importVal)." where id=".$id;
-		}
-		else 
-		{
-			//if insert check the product is_active. We dont need it in an import, skipping...
-			if($importVal['is_active'] == 0)
-			{
-				//skipping.
-				//return false can show as failed attempt on higher level controller.
-				return 3;
+				$update = true;
+				$id = $row['id'];
+				$searchData = $row['searchdata'];
 			}
-			
-			$importVal = array_map(function ($v){return "'".mysql_real_escape_string($v)."'";},$importVal);
-			$query = "insert into $table (`".implode('`,`',$importKeys)."`) values (".implode(',',$importVal).")";
-		}
-		if(mysql_query($query))
-		{
-			if($id)
+			ob_end_clean();
+			if($update)
 			{
-				$_GET['id'] = $id;
-				$ProdID = $id;
+				if($importVal['is_active'] == 0)
+				{
+					//check if database has NULL searchdata and no UPM/MHM references.. in case of no linkages we can delete the product.
+					//return false can show as failed attempt on higher level controller so return 4 code is meant as delete.
+					$upmReferenceCount = count(getProductUpmAssociation($id));
+					$MHMReferenceCount = getMHMAssociation($id, 'products');
+					if($upmReferenceCount==0 && $MHMReferenceCount==0 && $searchData=='')
+					{
+						deleteData($id, $table);
+						return 4;
+					}
+				}			
+				$importVal = array_map(am1,$importKeys,array_values($importVal));
+				$query = "update $table set ".implode(',',$importVal)." where id=".$id;
 			}
 			else 
 			{
-				$_GET['id'] = mysql_insert_id();
-				$ProdID = $_GET['id'];
+				//if insert check the product is_active. We dont need it in an import, skipping...
+				if($importVal['is_active'] == 0)
+				{
+					//skipping.
+					//return false can show as failed attempt on higher level controller.
+					return 3;
+				}
+				
+				$importVal = array_map(function ($v){return "'".mysql_real_escape_string($v)."'";},$importVal);
+				$query = "insert into $table (`".implode('`,`',$importKeys)."`) values (".implode(',',$importVal).")";
 			}
-			ob_start();
-			require 'index_product.php';
-			ob_end_clean();	
-			
-			//Insert product instituttion association
-			ob_start();
-			foreach($extraData['institutionIdsArray'] as $KeyInst=> $InstId)
+			if(mysql_query($query))
 			{
-				$escInstlid = mysql_real_escape_string($InstId);
-				$escInstname = mysql_real_escape_string($extraData['institutionNamesArray'][$KeyInst]);
-				$Instquery = "select id from institutions where `LI_id`='{$escInstlid}' OR `name`='{$escInstname}' limit 1";
-				$Instresult = mysql_query($Instquery);
-				$InstPresent = false;
-				while($Instrow = mysql_fetch_assoc($Instresult))
+				if($id)
 				{
-					$InstPresent = true;
-					$InstIdLocal = $Instrow['id'];
+					$_GET['id'] = $id;
+					$ProdID = $id;
 				}
-				$InstAssoInsert = false;
-				if($InstPresent)
+				else 
 				{
-					$InstAssocquery = "select institution from products_institutions where `institution`='{$InstIdLocal}' AND `product`='{$ProdID}' limit 1";
-					$InstAssocresult = mysql_query($InstAssocquery);
-					$InstAssocPresent = false;
-					while($InstAssocrow = mysql_fetch_assoc($InstAssocresult))
-					{
-						$InstAssocPresent = true;
-					}
-					if(!$InstAssocPresent) $InstAssoInsert = true;
+					$_GET['id'] = mysql_insert_id();
+					$ProdID = $_GET['id'];
 				}
-				else
+				ob_start();
+				require 'index_product.php';
+				ob_end_clean();	
+				
+				//Insert product instituttion association
+				ob_start();
+				foreach($extraData['institutionIdsArray'] as $KeyInst=> $InstId)
 				{
-					require_once 'fetch_li_institutions.php';
-					fetch_li_institution_individual($InstId);
-					$Instquery_2 = "select id from institutions where `LI_id`='{$escInstlid}' OR `name`='{$escInstname}' limit 1";
-					$Instresult_2 = mysql_query($Instquery_2);
+					$escInstlid = mysql_real_escape_string($InstId);
+					$escInstname = mysql_real_escape_string($extraData['institutionNamesArray'][$KeyInst]);
+					$Instquery = "select id from institutions where `LI_id`='{$escInstlid}' OR `name`='{$escInstname}' limit 1";
+					$Instresult = mysql_query($Instquery);
 					$InstPresent = false;
-					while($Instrow_2 = mysql_fetch_assoc($Instresult_2))
+					if($Instresult)
 					{
-						$InstPresent = true;
-						$InstIdLocal = $Instrow_2['id'];
+						while($Instrow = mysql_fetch_assoc($Instresult))
+						{
+							$InstPresent = true;
+							$InstIdLocal = $Instrow['id'];
+						}
+						$InstAssoInsert = false;
+						if($InstPresent)
+						{
+							$InstAssocquery = "select institution from products_institutions where `institution`='{$InstIdLocal}' AND `product`='{$ProdID}' limit 1";
+							$InstAssocresult = mysql_query($InstAssocquery);
+							$InstAssocPresent = false;
+							while($InstAssocrow = mysql_fetch_assoc($InstAssocresult))
+							{
+								$InstAssocPresent = true;
+							}
+							if(!$InstAssocPresent) $InstAssoInsert = true;
+						}
+						else
+						{
+							require_once 'fetch_li_institutions.php';
+							fetch_li_institution_individual($InstId);
+							$Instquery_2 = "select id from institutions where `LI_id`='{$escInstlid}' OR `name`='{$escInstname}' limit 1";
+							$Instresult_2 = mysql_query($Instquery_2);
+							$InstPresent = false;
+							while($Instrow_2 = mysql_fetch_assoc($Instresult_2))
+							{
+								$InstPresent = true;
+								$InstIdLocal = $Instrow_2['id'];
+							}
+							if($InstPresent) $InstAssoInsert = true;
+						}
+						if($InstAssoInsert)
+						{
+							$InstAssocInsertquery = "INSERT INTO products_institutions (`product`, `institution`) VALUES ('{$ProdID}','{$InstIdLocal}')";
+							$InstAssocInsertresult = mysql_query($InstAssocInsertquery);
+						}
 					}
-					if($InstPresent) $InstAssoInsert = true;
-				}
-				if($InstAssoInsert)
-				{
-					$InstAssocInsertquery = "INSERT INTO products_institutions (`product`, `institution`) VALUES ('{$ProdID}','{$InstIdLocal}')";
-					$InstAssocInsertresult = mysql_query($InstAssocInsertquery);
-				}
-			}
-			ob_end_clean();	
-			//End of Insert product institue association
+					else
+					{
+						global $logger;
+						$log 	= 'ERROR: Bad SQL query for institutions sync inside product sync. ' . $Instquery . mysql_error();
+						$logger->error($log);
+						unset($log);
+					}
+				}	
+				ob_end_clean();	
+				//End of Insert product institue association
 			
-			//Insert product Moa association
-			ob_start();
-			foreach($extraData['moaIdsArray'] as $KeyMoa=> $MoaId)
-			{
-				$escMoalid = mysql_real_escape_string($MoaId);
-				$escMoaname = mysql_real_escape_string($extraData['moaNamesArray'][$KeyMoa]);
-				$Moaquery = "select id from moas where `LI_id`='{$escMoalid}' OR `name`='{$escMoaname}' limit 1";
-				$Moaresult = mysql_query($Moaquery);
-				$MoaPresent = false;
-				while($Moarow = mysql_fetch_assoc($Moaresult))
+				//Insert product Moa association
+				ob_start();
+				foreach($extraData['moaIdsArray'] as $KeyMoa=> $MoaId)
 				{
-					$MoaPresent = true;
-					$MoaIdLocal = $Moarow['id'];
-				}
-				$MoaAssoInsert = false;
-				if($MoaPresent)
-				{
-					$MoaAssocquery = "select moa from products_moas where `moa`='{$MoaIdLocal}' AND `product`='{$ProdID}' limit 1";
-					$MoaAssocresult = mysql_query($MoaAssocquery);
-					$MoaAssocPresent = false;
-					while($MoaAssocrow = mysql_fetch_assoc($MoaAssocresult))
-					{
-						$MoaAssocPresent = true;
-					}
-					if(!$MoaAssocPresent) $MoaAssoInsert = true;
-				}
-				else
-				{
-					require_once 'fetch_li_moas.php';
-					fetch_li_moa_individual($MoaId);
-					$Moaquery_2 = "select id from moas where `LI_id`='{$escMoalid}' OR `name`='{$escMoaname}' limit 1";
-					$Moaresult_2 = mysql_query($Moaquery_2);
+					$escMoalid = mysql_real_escape_string($MoaId);
+					$escMoaname = mysql_real_escape_string($extraData['moaNamesArray'][$KeyMoa]);
+					$Moaquery = "select id from moas where `LI_id`='{$escMoalid}' OR `name`='{$escMoaname}' limit 1";
+					$Moaresult = mysql_query($Moaquery);
 					$MoaPresent = false;
-					while($Moarow_2 = mysql_fetch_assoc($Moaresult_2))
+					if($Moaresult)
 					{
-						$MoaPresent = true;
-						$MoaIdLocal = $Moarow_2['id'];
+						while($Moarow = mysql_fetch_assoc($Moaresult))
+						{
+							$MoaPresent = true;
+							$MoaIdLocal = $Moarow['id'];
+						}
+						$MoaAssoInsert = false;
+						if($MoaPresent)
+						{
+							$MoaAssocquery = "select moa from products_moas where `moa`='{$MoaIdLocal}' AND `product`='{$ProdID}' limit 1";
+							$MoaAssocresult = mysql_query($MoaAssocquery);
+							$MoaAssocPresent = false;
+							while($MoaAssocrow = mysql_fetch_assoc($MoaAssocresult))
+							{
+								$MoaAssocPresent = true;
+							}
+							if(!$MoaAssocPresent) $MoaAssoInsert = true;
+						}
+						else
+						{
+							require_once 'fetch_li_moas.php';
+							fetch_li_moa_individual($MoaId);
+							$Moaquery_2 = "select id from moas where `LI_id`='{$escMoalid}' OR `name`='{$escMoaname}' limit 1";
+							$Moaresult_2 = mysql_query($Moaquery_2);
+							$MoaPresent = false;
+							while($Moarow_2 = mysql_fetch_assoc($Moaresult_2))
+							{
+								$MoaPresent = true;
+								$MoaIdLocal = $Moarow_2['id'];
+							}
+							if($MoaPresent) $MoaAssoInsert = true;
+						}
+						if($MoaAssoInsert)
+						{
+							$MoaAssocInsertquery = "INSERT INTO products_moas (`product`, `moa`) VALUES ('{$ProdID}','{$MoaIdLocal}')";
+							$MoaAssocInsertresult = mysql_query($MoaAssocInsertquery);
+						}
 					}
-					if($MoaPresent) $MoaAssoInsert = true;
+					else
+					{
+						global $logger;
+						$log 	= 'ERROR: Bad SQL query for moa sync inside product sync. ' . $Moaquery . mysql_error();
+						$logger->error($log);
+						unset($log);
+					}
 				}
-				if($MoaAssoInsert)
-				{
-					$MoaAssocInsertquery = "INSERT INTO products_moas (`product`, `moa`) VALUES ('{$ProdID}','{$MoaIdLocal}')";
-					$MoaAssocInsertresult = mysql_query($MoaAssocInsertquery);
-				}
+				ob_end_clean();	
+				//End of Insert product Moa association
+				
+				return 1;
 			}
-			ob_end_clean();	
-			//End of Insert product Moa association
-			
-			return 1;
+			else
+			{
+				echo 'Product Id : '.$product_id.' Fail !! <br/>'."\n";
+				softdie('Cannot import product id '.$importVal['LI_id'].'<br/>'.$query.'<br/>');
+				//softdie('Cannot import product id '.$importVal['LI_id'].'<br/>');
+				return 2;
+			}
 		}
 		else
 		{
-			echo 'Product Id : '.$product_id.' Fail !! <br/>'."\n";
+			global $logger;
+			$log 	= 'ERROR: Bad SQL query for MOA Sync. ' . $query . mysql_error();
+			$logger->error($log);
+			unset($log);
 			softdie('Cannot import product id '.$importVal['LI_id'].'<br/>'.$query.'<br/>');
-			//softdie('Cannot import product id '.$importVal['LI_id'].'<br/>');
 			return 2;
 		}
 	}
@@ -1118,54 +1150,66 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 		$escname = mysql_real_escape_string($importVal['name']);
 		$query = "select id from institutions where LI_id='{$esclid}' OR name='{$escname}' limit 1";
 		$result = mysql_query($query);
-		$update = false;
-		ob_start();
-		while($row = mysql_fetch_assoc($result))
+		if($result)
 		{
-			$update = true;
-			$id = $row['id'];
-		}
-		ob_end_clean();
-		if($update)
-		{
-			if($importVal['is_active'] == 0)
+			$update = false;
+			ob_start();
+			while($row = mysql_fetch_assoc($result))
 			{
-				deleteData($id, $table);
-				return 4;
-			}			
-			$importVal = array_map(am1,$importKeys,array_values($importVal));
-			$query = "update $table set ".implode(',',$importVal)." where id=".$id;
-		}
-		else 
-		{
-			//if insert check the institution is_active. We dont need it in an import, skipping...
-			if($importVal['is_active'] == 0)
-			{
-				//skipping.
-				//return false can show as failed attempt on higher level controller.
-				return 3;
+				$update = true;
+				$id = $row['id'];
 			}
-			
-			$importVal = array_map(function ($v){return "'".mysql_real_escape_string($v)."'";},$importVal);
-			$query = "insert into $table (`".implode('`,`',$importKeys)."`) values (".implode(',',$importVal).")";
-		}
-		if(mysql_query($query))
-		{
-			if($id)
+			ob_end_clean();
+			if($update)
 			{
-				$_GET['id'] = $id;
+				if($importVal['is_active'] == 0)
+				{
+					deleteData($id, $table);
+					return 4;
+				}			
+				$importVal = array_map(am1,$importKeys,array_values($importVal));
+				$query = "update $table set ".implode(',',$importVal)." where id=".$id;
 			}
 			else 
 			{
-				$_GET['id'] = mysql_insert_id();
+				//if insert check the institution is_active. We dont need it in an import, skipping...
+				if($importVal['is_active'] == 0)
+				{
+					//skipping.
+					//return false can show as failed attempt on higher level controller.
+					return 3;
+				}
+				
+				$importVal = array_map(function ($v){return "'".mysql_real_escape_string($v)."'";},$importVal);
+				$query = "insert into $table (`".implode('`,`',$importKeys)."`) values (".implode(',',$importVal).")";
 			}
-			return 1;
+			if(mysql_query($query))
+			{
+				if($id)
+				{
+					$_GET['id'] = $id;
+				}
+				else 
+				{
+					$_GET['id'] = mysql_insert_id();
+				}
+				return 1;
+			}
+			else
+			{
+				echo 'Institution Id : '.$importVal['LI_id'].' Fail !! <br/>'."\n";
+				softdie('Cannot import institution id '.$importVal['LI_id'].'<br/>'.$query.'<br/>');
+				//softdie('Cannot import product id '.$importVal['LI_id'].'<br/>');
+				return 2;
+			}
 		}
 		else
 		{
+			global $logger;
+			$log 	= 'ERROR: Bad SQL query for Institution sync. ' . $query . mysql_error();
+			$logger->error($log);
+			unset($log);
 			echo 'Institution Id : '.$importVal['LI_id'].' Fail !! <br/>'."\n";
-			softdie('Cannot import institution id '.$importVal['LI_id'].'<br/>'.$query.'<br/>');
-			//softdie('Cannot import product id '.$importVal['LI_id'].'<br/>');
 			return 2;
 		}
 	}
@@ -1179,53 +1223,65 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 		$query = "select id from moas where LI_id='{$esclid}' OR name='{$escname}' limit 1";
 		$result = mysql_query($query);
 		$update = false;
-		ob_start();
-		while($row = mysql_fetch_assoc($result))
+		if($result)
 		{
-			$update = true;
-			$id = $row['id'];
-		}
-		ob_end_clean();
-		if($update)
-		{
-			if($importVal['is_active'] == 0)
+			ob_start();
+			while($row = mysql_fetch_assoc($result))
 			{
-				deleteData($id, $table);
-				return 4;
-			}			
-			$importVal = array_map(am1,$importKeys,array_values($importVal));
-			$query = "update $table set ".implode(',',$importVal)." where id=".$id;
-		}
-		else 
-		{
-			//if insert check the moa is_active. We dont need it in an import, skipping...
-			if($importVal['is_active'] == 0)
-			{
-				//skipping.
-				//return false can show as failed attempt on higher level controller.
-				return 3;
+				$update = true;
+				$id = $row['id'];
 			}
-			
-			$importVal = array_map(function ($v){return "'".mysql_real_escape_string($v)."'";},$importVal);
-			$query = "insert into $table (`".implode('`,`',$importKeys)."`) values (".implode(',',$importVal).")";
-		}
-		if(mysql_query($query))
-		{
-			if($id)
+			ob_end_clean();
+			if($update)
 			{
-				$_GET['id'] = $id;
+				if($importVal['is_active'] == 0)
+				{
+					deleteData($id, $table);
+					return 4;
+				}			
+				$importVal = array_map(am1,$importKeys,array_values($importVal));
+				$query = "update $table set ".implode(',',$importVal)." where id=".$id;
 			}
 			else 
 			{
-				$_GET['id'] = mysql_insert_id();
+				//if insert check the moa is_active. We dont need it in an import, skipping...
+				if($importVal['is_active'] == 0)
+				{
+					//skipping.
+					//return false can show as failed attempt on higher level controller.
+					return 3;
+				}
+				
+				$importVal = array_map(function ($v){return "'".mysql_real_escape_string($v)."'";},$importVal);
+				$query = "insert into $table (`".implode('`,`',$importKeys)."`) values (".implode(',',$importVal).")";
 			}
-			return 1;
+			if(mysql_query($query))
+			{
+				if($id)
+				{
+					$_GET['id'] = $id;
+				}
+				else 
+				{
+					$_GET['id'] = mysql_insert_id();
+				}
+				return 1;
+			}
+			else
+			{
+				echo 'Moa Id : '.$importVal['LI_id'].' Fail !! <br/>'."\n";
+				softdie('Cannot import moa id '.$importVal['LI_id'].'<br/>'.$query.'<br/>');
+				//softdie('Cannot import product id '.$importVal['LI_id'].'<br/>');
+				return 2;
+			}
 		}
 		else
 		{
-			echo 'Moa Id : '.$importVal['LI_id'].' Fail !! <br/>'."\n";
+			global $logger;
+			$log 	= 'ERROR: Bad SQL query for MOA Sync. ' . $query . mysql_error();
+			$logger->error($log);
+			unset($log);
 			softdie('Cannot import moa id '.$importVal['LI_id'].'<br/>'.$query.'<br/>');
-			//softdie('Cannot import product id '.$importVal['LI_id'].'<br/>');
 			return 2;
 		}
 	}
@@ -2458,6 +2514,8 @@ function parseProductsXmlAndSave($xmlImport,$table)
 	}
 			
 	$importVal = array('LI_id'=>$product_id,'name'=>$prodname,'comments'=>$comments,'product_type'=>$product_type,'licensing_mode'=>$licensing_mode,'administration_mode'=>$administration_mode,'discontinuation_status'=>$discontinuation_status,'discontinuation_status_comment'=>$discontinuation_status_comment,'is_key'=>$is_key,'is_active'=>$is_active,'created'=>$created,'modified'=>$modified,'company'=>$company,'brand_names'=>$brand_names,'generic_names'=>$generic_names,'code_names'=>$code_names,'approvals'=>$approvals,'xml'=>$xmldump);
+	if(($product_id == NULL && trim($product_id) == '') || ($prodname == NULL && trim($prodname) == ''))
+		return array('success'=>$success,'fail'=>$fail,'skip'=>$skip,'delete'=>$delete, 'exitProcess'=>true);
 	//var_dump($importVal);
 	//ob_start();
 	$out = saveData(null,$table,1,$importKeys,$importVal,$k,array('institutionIdsArray'=>$inst_ids, 'institutionNamesArray'=>$inst_names, 'moaIdsArray'=>$moa_ids, 'moaNamesArray'=>$moa_names));
@@ -2484,7 +2542,7 @@ function parseProductsXmlAndSave($xmlImport,$table)
 		$delete ++;
 	}			
 	//ob_end_clean();
-	return array('success'=>$success,'fail'=>$fail,'skip'=>$skip,'delete'=>$delete);
+	return array('success'=>$success,'fail'=>$fail,'skip'=>$skip,'delete'=>$delete, 'exitProcess'=>false);
 }
 
 /**
@@ -2608,6 +2666,8 @@ function parseInstitutionsXmlAndSave($xmlImport,$table)
 	$xmldump = $xmlImport->saveXML($xmlImport);
 		
 	$importVal = array('LI_id'=>$institution_id,'name'=>$institution_name,'type'=>$type,'display_name'=>$display_name,'is_active'=>$is_active,'created'=>$created,'modified'=>$modified,'search_terms'=>$search_terms,'client_name'=>$client_names,'xml'=>$xmldump);
+	if(($institution_id == NULL && trim($institution_id) == '') || ($institution_name == NULL && trim($institution_name) == ''))
+		return array('success'=>$success,'fail'=>$fail,'skip'=>$skip,'delete'=>$delete, 'exitProcess'=>true);
 	//var_dump($importVal);
 	//ob_start();
 	$out = saveData(null,$table,1,$importKeys,$importVal,$k);
@@ -2634,7 +2694,7 @@ function parseInstitutionsXmlAndSave($xmlImport,$table)
 		$delete ++;
 	}			
 	//ob_end_clean();
-	return array('success'=>$success,'fail'=>$fail,'skip'=>$skip,'delete'=>$delete);
+	return array('success'=>$success,'fail'=>$fail,'skip'=>$skip,'delete'=>$delete, 'exitProcess'=>false);
 }
 
 /**
@@ -2661,6 +2721,10 @@ function parseMoasXmlAndSave($xmlImport,$table)
 		$xmldump = $xmlImport->saveXML($moa);
 			
 		$importVal = array('LI_id'=>$moa_id,'name'=>$moa_name,'display_name'=>$display_name,'is_active'=>$is_active,'created'=>$created,'modified'=>$modified,'xml'=>$xmldump);
+		
+		if(($moa_id == NULL && trim($moa_id) == '') || ($moa_name == NULL && trim($moa_name) == ''))
+		return array('success'=>$success,'fail'=>$fail,'skip'=>$skip,'delete'=>$delete, 'exitProcess'=>true);
+		
 		//var_dump($importVal);
 		//ob_start();
 		$out = saveData(null,$table,1,$importKeys,$importVal,$k);
@@ -2688,5 +2752,5 @@ function parseMoasXmlAndSave($xmlImport,$table)
 		}			
 		//ob_end_clean();
 	}
-	return array('success'=>$success,'fail'=>$fail,'skip'=>$skip,'delete'=>$delete);
+	return array('success'=>$success,'fail'=>$fail,'skip'=>$skip,'delete'=>$delete, 'exitProcess'=>false);
 }

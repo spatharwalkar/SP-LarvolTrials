@@ -54,7 +54,22 @@ function fetch_li_moas($lastrun)
 	foreach($xmlImportMoaList->getElementsByTagName('moa_id') as $Moa_ID)
 	{
 		$Moa_ID = $Moa_ID->nodeValue;
-		fetch_li_moa_individual($Moa_ID);
+		$out = fetch_li_moa_individual($Moa_ID);
+		
+		if($out['exitProcess'])	
+		{
+			$query = '	update update_status_fullhistory set er_message="Bad MOA XML data",	update_items_progress='. $i .', 
+				status=3, updated_time="' . date("Y-m-d H:i:s", strtotime('now')) . '"  
+				where update_id= "'. $up_id .'" limit 1'  ; 
+			if(!$res = mysql_query($query))
+			{
+				global $logger;
+				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				$logger->error($log);
+				echo $log;
+			}
+			return array('exitProcess'=> true);
+		}
 
 		$query = '	update update_status_fullhistory set process_id="'. $prid . '",er_message="",status="'. 2 . '",
 					trial_type="' . "LI_IMPORT" . '", update_items_total=' . $total_moas . ',
@@ -78,14 +93,14 @@ function fetch_li_moas($lastrun)
 				status=0, updated_time="' . date("Y-m-d H:i:s", strtotime('now')) . '"  
 				where update_id= "'. $up_id .'" limit 1'  ; 
 	if(!$res = mysql_query($query))
-		{
-			global $logger;
-			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-			$logger->error($log);
-			mysql_query('ROLLBACK');
-			echo $log;
-			return false;
-		}
+	{
+		global $logger;
+		$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+		$logger->error($log);
+		mysql_query('ROLLBACK');
+		echo $log;
+		return false;
+	}
 }
 /**
  * @name fetch_li_moa_individual
@@ -98,7 +113,13 @@ function fetch_li_moa_individual($Moa_ID)
 	$xmlImportMoa = new DOMDocument();
 	$xmlImportMoa->loadXML($liXmlMoa);
 	$out = parseMoasXmlAndSave($xmlImportMoa,'moas');
-	echo 'Imported '.$out['success'].' records, Failed entries '.$out['fail']."<br/>\n";	
+	echo 'Imported '.$out['success'].' records, Failed entries '.$out['fail']."<br/>\n";
+	
+	if($out['exitProcess'])	
+	{
+		echo "<br/>\nMOA Fetch process exited due to bad data<br/>\n";
+		return array('exitProcess'=> true);
+	} else return array('exitProcess'=> false);
 }
 
 //controller
