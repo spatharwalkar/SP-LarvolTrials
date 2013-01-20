@@ -586,6 +586,7 @@ class TrialTracker
 							{
 								$value .= $dvalue['edited']['collaborator'];
 							}
+
 							$value = substr($value, 0, 255);
 							$objPHPExcel->getActiveSheet()->getStyle('F' . $i)->applyFromArray($highlightChange);
 							$objPHPExcel->getActiveSheet()->getCell('F' . $i)->getHyperlink()->setUrl($ctLink);
@@ -1056,6 +1057,7 @@ class TrialTracker
 							'alignment' => array('horizontal'	=> PHPExcel_Style_Alignment::HORIZONTAL_LEFT,),
 							'borders'	=> array('top'     		=> array('style' => PHPExcel_Style_Border::BORDER_THIN)),
 							'fill'		=> array('type'       => PHPExcel_Style_Fill::FILL_GRADIENT_LINEAR,
+
 												'rotation'   => 90,
 												'startcolor' => array('argb' => 'FFA0A0A0'),
 												'endcolor'   => array('argb' => 'FFFFFFFF'))
@@ -1325,6 +1327,7 @@ class TrialTracker
 						$uvalue['edited']['event_description'] = 'Previous value: ' . substr($uvalue['edited']['event_description'], 0, 230);
 						$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip($uvalue['edited']['event_description']); 
 					}
+
 					else
 					{
 						$objPHPExcel->getActiveSheet()->getCell('C' . $i)->getHyperlink()->setTooltip('No Previous value'); 
@@ -2259,6 +2262,7 @@ class TrialTracker
 				$to = getColspanforExcelExport($from, 3);
 				$objPHPExcel->getActiveSheet()->mergeCells($from . $i . ':' . $to . $i);
 				$from = $to;
+
 				$from++;
 			} 
 			else if($endYear == $secondYear) 
@@ -6882,6 +6886,7 @@ class TrialTracker
 						}
 					}
 					
+
 					$Ids[$areaId]['area'] = $areaId;
 					$productSelector[$areaId] = $sectionHeader;
 					
@@ -8147,7 +8152,7 @@ class TrialTracker
 	
 	function compileOTTData($ottType, $TrialsInfo = array(), $Ids = array(), $globalOptions = array(), $display = 'web')
 	{	
-		global $logger, $maxEnrollLimit;
+		global $logger;
 		
 		$Values['Data'] = array();
 		$Values['activecount'] = 0;
@@ -8155,7 +8160,6 @@ class TrialTracker
 		$Values['totalcount'] = 0;
 		$Values['count'] = 0;
 		
-		$cCount = array();
 		$naUpms = array();
 		
 		$larvolIds = array();
@@ -8222,7 +8226,7 @@ class TrialTracker
 		$query .= $join . " LEFT OUTER JOIN `data_manual` dm ON dt.`larvol_id` = dm.`larvol_id` "
 						. " LEFT OUTER JOIN `data_history` dh ON dh.`larvol_id` = dt.`larvol_id` ";
 		
-		//calcultaing count and enrollment max value only for webpage display and not for file exports				
+		//calculating count value only for webpage display and not for file exports				
 		if($display == 'web')
 		{
 			$tQuery = "SELECT COUNT(*) AS totalcount "
@@ -8340,7 +8344,8 @@ class TrialTracker
 		unset($TrialsInfo);
 		
 		//fetching unmatched upms
-		$naUpms = $this->getUnMatchedUpms($globalOptions['onlyUpdates'], $pIds);
+		$naUpms = $this->getUnMatchedUpms($globalOptions, $pIds);
+              
 		foreach($naUpms as $nkey => $nvalue)
 		{
 			if($ottType != 'rowstacked')
@@ -8625,12 +8630,11 @@ class TrialTracker
 		
 		
 		//fetching matched upms
-		$dataUpms = $this->getMatchedUpms($globalOptions['onlyUpdates'], $larvolIds);
+		$dataUpms = $this->getMatchedUpms($globalOptions, $larvolIds);
 		foreach($Values['Data'] as $dkey => & $dvalue)
 		{
 			$Id = $dvalue['Id'];
 			if(isset($dvalue['Trials']))
-
 			{
 				foreach($dvalue['Trials'] as $tkey => & $tvalue)
 				{
@@ -8646,24 +8650,80 @@ class TrialTracker
 		return  $Values;
 	}
 	
-	function getUnMatchedUpms($onlyUpdates, $productIds = array())
+	function coverageAreaUpmIds($globalOptions = array())
+	{
+		global $logger;
+		$upmIds = array();
+		
+		if(isset($globalOptions['hm']) && $globalOptions['hm'] != '')
+		{
+			$hmId = $globalOptions['hm'];
+			
+			$Query = "SELECT ar.`coverage_area`, ar.`id` "
+					. " FROM `rpt_masterhm_headers` rmh "
+					. " JOIN `areas` ar ON  rmh.`type_id` = ar.`id` "
+					. " WHERE rmh.`report` = '" . $hmId . "' AND rmh.`type` = 'area' "
+					. " ORDER BY rmh.`num` DESC LIMIT 0,1 ";
+			$Res = m_query(__LINE__, $Query);
+			if($Res)
+			{
+				$Row = mysql_fetch_assoc($Res);
+				if($Row['coverage_area'])
+				{
+					$query = "SELECT upm_id FROM upm_areas where area_id = '" . $Row['id'] . "' ";
+					$res = m_query(__LINE__, $query);
+					if($res)
+					{
+						 while($row = mysql_fetch_assoc($res))
+						 {
+							 $upmIds[] = $row['upm_id'];
+						 }
+					}
+					else
+					{
+						$log 	= 'ERROR: Bad SQL query. ' . $query . mysql_error();
+						$logger->error($log);
+						unset($log);
+					}
+				}
+			}
+			else
+			{
+				$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
+				$logger->error($log);
+				unset($log);
+			}
+		}
+		
+		return $upmIds;
+	}
+        
+	function getUnMatchedUpms($globalOptions = array(), $productIds = array())
 	{
 		global $logger;
 		
-		$startRange = date('Y-m-d', strtotime($this->timeInterval ,$this->timeMachine));
-		$endRange = date('Y-m-d', $this->timeMachine);
-		
+		$onlyUpdates = $globalOptions['onlyUpdates'];
+		$subQuery = "";
+	
+		$Ids = $this->coverageAreaUpmIds($globalOptions);
+		if(!empty($Ids))
+		{
+			$subQuery = " AND u.`id` IN ('" . implode("', '", $Ids) . "') ";
+		}
+                
 		$result = array();
 		$upmIds = array();
 		$upmHistory = array();
 		
 		$query = "SELECT u.`id`, ut.`larvol_id`, u.`product`, u.`event_description`, u.`event_link`, "
-				. " u.`result_link`, u.`start_date`, u.`end_date`, u.`status`, u.`last_update`, rt.`name` AS redtag, u.`condition` "
-				. " FROM `upm` u "
-				. " LEFT OUTER JOIN `upm_trials` ut ON ut.`upm_id` = u.`id` "
-				. " LEFT OUTER JOIN `redtags` rt ON rt.`id` = u.`redtag` "
-				. " WHERE ut.`larvol_id` IS NULL AND u.`product` IN ('" . implode("', '", $productIds) . "') "
-				. " ORDER BY u.`end_date` ASC, u.`start_date` ASC ";
+                        . " u.`result_link`, u.`start_date`, u.`end_date`, u.`status`, u.`last_update`, rt.`name` AS redtag, u.`condition` "
+                        . " FROM `upm` u "
+                        . " LEFT OUTER JOIN `upm_trials` ut ON ut.`upm_id` = u.`id` "
+                        . " LEFT OUTER JOIN `redtags` rt ON rt.`id` = u.`redtag` "
+                        . " WHERE ut.`larvol_id` IS NULL "
+                        . " AND u.`product` IN ('" . implode("', '", $productIds) . "') "
+                        . $subQuery
+                        . " ORDER BY u.`end_date` ASC, u.`start_date` ASC ";
 		$res = m_query(__LINE__,$query);
 		if($res)
 		{
@@ -8720,13 +8780,19 @@ class TrialTracker
 		return $result;
 	}
 	
-	function getMatchedUpms($onlyUpdates, $larvolIds = array())
+	function getMatchedUpms($globalOptions = array(), $larvolIds = array())
 	{
 		global $logger;
 		
-		$startRange = date('Y-m-d', strtotime($this->timeInterval ,$this->timeMachine));
-		$endRange = date('Y-m-d', $this->timeMachine);
-		
+		$onlyUpdates = $globalOptions['onlyUpdates'];
+		$subQuery = "";
+                
+		$Ids = $this->coverageAreaUpmIds($globalOptions);
+		if(!empty($Ids))
+		{
+			$subQuery = " AND u.`id` IN ('" . implode("', '", $Ids) . "') ";
+		}
+                
 		$result = array();
 		$upmIds = array();
 		$upmHistory = array();
@@ -8735,7 +8801,8 @@ class TrialTracker
 					. " u.`result_link`, u.`start_date`, u.`end_date`, u.`status`, u.`last_update` "
 					. " FROM upm u "
 					. " LEFT OUTER JOIN upm_trials ut ON u.`id` = ut.`upm_id` "
-					. " WHERE ut.`larvol_id` IN ('" . implode("','", $larvolIds) . "') "
+					. " WHERE ut.`larvol_id` IN ('" . implode("', '", $larvolIds) . "') "
+                    . $subQuery
 					. " ORDER BY u.`end_date` ASC, u.`start_date` ASC ";	
 					
 		$res = m_query(__LINE__,$query);
@@ -9799,6 +9866,7 @@ class TrialTracker
 					if(!empty($missedElements))
 					{
 						foreach($missedElements as $mkey => $mvalue)
+
 						{
 							$sHeader = $Values['Data'][$mvalue]['sectionHeader'];
 							$nUpms = $Values['Data'][$mvalue]['naUpms'];
@@ -11752,7 +11820,13 @@ class TrialTracker
 			
 			if($value['redtag'] != '' && $value['redtag'] !== NULL)
 			{
-				$value['event_description'] = $value['redtag'] . ': ' . $value['event_description'];
+				$eventStr = $value['redtag'];
+				if($value['event_description'] != '' && $value['event_description'] !== NULL)
+				{
+					$eventStr .= ': ' . $value['event_description'];
+				}
+				
+				$value['event_description'] = $eventStr;
 			}
 			
 			//rendering unmatched upms
