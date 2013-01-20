@@ -584,7 +584,7 @@ if($Rotation_Flg == 1)	////Adjustment in area column width as per area name
 		if($columns_Span[$col] > 0 && $columnsCategoryName[$col] != 'Undefined')
 		{
 			$current_StringLength =strlen($columnsCategoryName[$col]);
-			if($columns_Span[$col] < 3 && $columnsCategoryName[$col] != 'Undefined')
+			if($columns_Span[$col] < 2 && $columnsCategoryName[$col] != 'Undefined')
 			{
 				$Cat_Area_Rotation[$col] = 1;
 				$Cat_Area_Rotation_Flg = 1;
@@ -640,7 +640,7 @@ if($Rotation_Flg == 1)	////Create width for area category cells and put forceful
 			
 			$Cat_Area_Col_width[$col] = $width +((($columns_Span[$col] == 1) ? 0:1) * ($columns_Span[$col]-1));
 			
-			if($columns_Span[$col] < 3 && $columnsCategoryName[$col] != 'Undefined')
+			if($columns_Span[$col] < 2 && $columnsCategoryName[$col] != 'Undefined')
 			{
 				$cols_Cat_Space[$col] = ceil((($area_Cat_Height < 130)? ($area_Cat_Height):($area_Cat_Height)) / $Bold_Char_Size);
 				//$cols_Cat_Lines[$col] = ceil(strlen(trim($columnsCategoryName[$col]))/$cols_Cat_Space[$col]);
