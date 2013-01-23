@@ -57,15 +57,7 @@ a:visited {color:#6600bc;}  /* visited link */
 /* As in IE6 hover css does not works, below htc file is added which contains js script which will be executed only in IE, the script convert simple as well as complex hover css into compatible format for IE6 by replacing hover by class css - this file is used so that help tab as well as product selector will work in IE6 without any changes of code as well as css code and script can be also useful for making other css to work in IE6 like :hover and :active for IE6+, and additionally :focus for IE7 and IE8. */
 ul, li, slideout { behavior:url("css/csshover3.htc"); }
 img { behavior: url("css/iepngfix.htc"); }
-.PTContainer 
-{ 
-	font-family:Verdana; 
-	font-size: 13px;
-	overflow-y:scroll; 
-	width:100%; 
-	height:400px; 
-	border:solid #CCCCCC 1px;
-}
+
 a, a:hover{ height:100%; width:100%; display:block; text-decoration:none;}
 
 .report_name {
@@ -100,7 +92,7 @@ a, a:hover{ height:100%; width:100%; display:block; text-decoration:none;}
 	_position:absolute;
 	top: 200px;
 	right: 0;
-	margin: 12px 26px 0 0;
+	margin: 12px 0px 0 0;
 }
 
 .slideout_inner {
@@ -394,23 +386,6 @@ function change_view()
 
 
 </head>
-<div id="slideout">
-    <img src="images/help.png" alt="Help" />
-    <div class="slideout_inner">
-        <table bgcolor="#FFFFFF" cellpadding="0" cellspacing="0" class="table-slide">
-       	<tr><td colspan="2" style="padding-right: 1px;">
-         <div style="float:left;padding-top:3px;">Phase&nbsp;</div>
-         <div class="gray">N/A</div>
-         <div class="blue">0</div>
-         <div class="green">1</div>
-         <div class="yellow">2</div>
-         <div class="orange">3</div>
-         <div class="red">4</div>
-         </td></tr>
-        </table>
-    </div>
-</div>
-
 <body>
 <!-- Name & Logo -->
 <form action="trialzilla.php" method="post" name="trialzillaFrm" id="trialzillaFrm">
@@ -439,9 +414,7 @@ function change_view()
 <br/>
 <table width="100%" border="0" style="">
 <tr><td>
-<div id="PTContainer" class="PTContainer">
 <?php print showProductTracker($MoaId, 'MT'); ?>
-</div>
 </td></tr>
 </table>
 </body>
@@ -454,13 +427,6 @@ function change_view()
 		//Start - Header recreation in case of window resizing
 		$(window).resize(function() {
 			$.fn.reverse = [].reverse;
-			if($('#slideout').offset().left > 25)
-			$(slideout).css('marginRight', 0 + 'px');
-			else
-			{
-				$(slideout).css('marginRight', 26 + 'px');
-			}
-			
 			var createGhostHeader = function (header, topOffset, leftOffset) {
                 // Recreate heaaderin case of window resizing even if there is current ghost header exists
               if (currentGhost)
@@ -507,16 +473,15 @@ function change_view()
                 return currentGhost;
             };
 
-            var currentScrollTop = $('#PTContainer').scrollTop();
+            var currentScrollTop = $(window).scrollTop();
 
             var activeHeader = null;
             var table = $('#ProdTrackerTable').first();
             var tablePosition = table.offset();
             var tableHeight = table.height();
-            tableHeight = 99999; // As we are not able to get actual height of table due to scroll set it to large value 
             
             var lastHeaderHeight = $(table).find('thead').last().height();
-            var topOffset = ($('#PTContainer').offset().top + 1);
+            var topOffset = 0;
             
             // Check that the table is visible and has space for a header
             if (tablePosition.top + tableHeight - lastHeaderHeight >= currentScrollTop)
@@ -560,128 +525,9 @@ function change_view()
 		});
 		//End - Header recreation in case of window resizing
 		
-        ///Start - Header creation or align header incase of vertical div scrolling
-		$('#PTContainer').scroll(function() {
-            $.fn.reverse = [].reverse;
-			if(!ScrollOn)
-			{
-            	ScrollOn = true;
-			}
-            var createGhostHeader = function (header, topOffset, leftOffset) {
-                // Don't recreate if it is the same as the current one
-                if (header == currentFixedHeader && currentGhost)
-                {
-                    currentGhost.css('top', topOffset + "px");
-					currentGhost.css('left',(-$(window).scrollLeft() + leftOffset) + "px");
-                    return currentGhost;
-                }
-                
-                if (currentGhost)
-                    $(currentGhost).remove();
-                
-                var realTable = $(header).parents('#ProdTrackerTable');
-                
-                var headerPosition = $(header).offset();
-                var tablePosition = $(realTable).offset();
-                
-                var container = $('<table border="0" cellspacing="0" cellpadding="0" style="vertical-align:middle; background-color:#FFFFFF;" id="ProdTrackerTable1"></table>');
-                
-                // Copy attributes from old table (may not be what you want)
-                for (var i = 0; i < realTable[0].attributes.length; i++) {
-                    var attr = realTable[0].attributes[i];
-					//We are not manually copying table attributes so below line is commented cause it does not work in IE6 and IE7
-                    //container.attr(attr.name, attr.value);
-                }
-                                
-                // Set up position of fixed row
-                container.css({
-                    position: 'fixed',
-                    top: topOffset,
-                    left: (-$(window).scrollLeft() + leftOffset),
-                    width: $(realTable).outerWidth()
-                });
-                
-                // Create a deep copy of our actual header and put it in our container
-                var newHeader = $(header).clone().appendTo(container);
-                
-                var collection2 = $(newHeader).find('td');
-                
-                // TODO: Copy the width of each <td> manually
-                $(header).find('td').each(function () {
-                    var matchingElement = $(collection2.eq($(this).index()));
-                    $(matchingElement).width(this.offsetWidth + 0.5);
-                });
-				
-                currentGhost = container;
-                currentFixedHeader = header;
-                
-                // Add this fixed row to the same parent as the table
-                $(table).parent().append(currentGhost);
-                return currentGhost;
-            };
-
-            var currentScrollTop = $('#PTContainer').scrollTop();
-
-            var activeHeader = null;
-            var table = $('#ProdTrackerTable').first();
-            var tablePosition = table.offset();
-            var tableHeight = table.height();
-            
-            var lastHeaderHeight = $(table).find('thead').last().height();
-            var topOffset = ($('#PTContainer').offset().top + 1);
-            tableHeight = 99999; // As we are not able to get actual height of table due to scroll set it to large value 
-            // Check that the table is visible and has space for a header
-            if (tablePosition.top + tableHeight - lastHeaderHeight >= currentScrollTop + 5)
-            {
-                var lastCheckedHeader = null;
-                // We do these in reverse as we want the last good header
-                var headers = $(table).find('thead').reverse().each(function () {
-                    var position = $(this).offset();
-                    
-                    if (position.top <= currentScrollTop)
-                    {
-                        activeHeader = this;
-                        return false;
-                    }
-                    
-                    lastCheckedHeader = this;
-                });
-                
-                if (lastCheckedHeader)
-                {
-                    var offset = $(lastCheckedHeader).offset();
-                    if (offset.top - currentScrollTop < $(activeHeader).height())
-                        topOffset = $(activeHeader).height() - (offset.top - currentScrollTop) + 1;
-                }
-            }
-            // No row is needed, get rid of one if there is one
-            if (activeHeader == null && currentGhost)
-
-            {
-                currentGhost.remove();
-
-                currentGhost = null;
-                currentFixedHeader = null;
-            }
-            
-            // We have what we need, make a fixed header row
-            if (activeHeader)
-			{
-                createGhostHeader(activeHeader, topOffset, ($('#ProdTrackerTable').offset().left));
-			}
-        });
-		///End - Header creation or align header incase of scrolling
-		
-		 ///Start - Header creation or align header incase of horizontal scrolling
+        ///Start - Header creation or align header incase of scrolling
 		$(window).scroll(function() {
             $.fn.reverse = [].reverse;
-			if($(window).scrollLeft() > 25)
-			$(slideout).css('marginRight', 0 + 'px');
-			else
-			{
-				$(slideout).css('marginRight', (26-$(window).scrollLeft()) + 'px');
-			}
-			
 			if(!ScrollOn)
 			{
             	ScrollOn = true;
@@ -690,7 +536,7 @@ function change_view()
                 // Don't recreate if it is the same as the current one
                 if (header == currentFixedHeader && currentGhost)
                 {
-                    currentGhost.css('top', topOffset + "px");
+                    currentGhost.css('top', -topOffset + "px");
 					currentGhost.css('left',(-$(window).scrollLeft() + leftOffset) + "px");
                     return currentGhost;
                 }
@@ -715,7 +561,7 @@ function change_view()
                 // Set up position of fixed row
                 container.css({
                     position: 'fixed',
-                    top: topOffset,
+                    top: -topOffset,
                     left: (-$(window).scrollLeft() + leftOffset),
                     width: $(realTable).outerWidth()
                 });
@@ -739,7 +585,7 @@ function change_view()
                 return currentGhost;
             };
 
-            var currentScrollTop = $('#PTContainer').scrollTop();
+            var currentScrollTop = $(window).scrollTop();
 
             var activeHeader = null;
             var table = $('#ProdTrackerTable').first();
@@ -747,10 +593,10 @@ function change_view()
             var tableHeight = table.height();
             
             var lastHeaderHeight = $(table).find('thead').last().height();
-            var topOffset = ($('#PTContainer').offset().top + 1);
-            tableHeight = 99999; // As we are not able to get actual height of table due to scroll set it to large value 
+            var topOffset = 0;
+            
             // Check that the table is visible and has space for a header
-            if (tablePosition.top + tableHeight - lastHeaderHeight >= currentScrollTop + 5)
+            if (tablePosition.top + tableHeight - lastHeaderHeight >= currentScrollTop)
             {
                 var lastCheckedHeader = null;
                 // We do these in reverse as we want the last good header
@@ -790,5 +636,4 @@ function change_view()
 			}
         });
 		///End - Header creation or align header incase of scrolling
-
 </script>

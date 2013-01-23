@@ -383,9 +383,9 @@ if($FoundRecords == 0 && $globalOptions['TzSearch'] != '' && $globalOptions['TzS
 						<?php echo $globalOptions['TzSearch']; ?>
                     </strong> - did not match any 
                 <?php
-                	if($ProdFlg == false && $CompanyFlg == false)
+                	if($ProdFlg == false && $CompanyFlg == false && $MoaFlg == false)
 					{
-						print ' products or companies';
+						print ' products or companies or moas';
 					}
 				?>.
                </p>

@@ -890,22 +890,6 @@ function change_view()
 		///End - Header creation or align header incase of scrolling
 </script>
 </head>
-<div id="slideout">
-    <img src="images/help.png" alt="Help" />
-    <div class="slideout_inner">
-        <table bgcolor="#FFFFFF" cellpadding="0" cellspacing="0" class="table-slide">
-       	<tr><td colspan="2" style="padding-right: 1px;">
-         <div style="float:left;padding-top:3px;">Phase&nbsp;</div>
-         <div class="gray">N/A</div>
-         <div class="blue">0</div>
-         <div class="green">1</div>
-         <div class="yellow">2</div>
-         <div class="orange">3</div>
-         <div class="red">4</div>
-         </td></tr>
-        </table>
-    </div>
-</div>
 <body bgcolor="#FFFFFF" style="background-color:#FFFFFF;">
 <?php 
 
@@ -929,9 +913,7 @@ function TrackerHeaderHTMLContent($Report_DisplayName)
 
 function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $inner_columns, $inner_width, $column_width, $ratio, $areaId, $column_interval, $TrackerType)
 {				
-	if(count($productIds) == 0 && $TrackerType == 'CT') return 'No Products Available for this Company';
-	if(count($productIds) == 0 && $TrackerType == 'MT') return 'No Products Available for this Moa';
-	if(count($productIds) == 0  && $TrackerType == 'PT') return 'No Products Available for this Heatmap';
+	if(count($productIds) == 0) return 'No Products Found';
 	
 	require_once('tcpdf/config/lang/eng.php');
 	require_once('tcpdf/tcpdf.php');  
@@ -1180,6 +1162,25 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 	//// Common Data
 	$htmlContent .= '<input type="hidden" value="'.count($rows).'" name="Tot_rows" id="Tot_rows" />';
 	////// End of Common Data
+	
+	///Add HELP Tab here only
+	$htmlContent .= '<div id="slideout">
+    					<img src="images/help.png" alt="Help" />
+    					<div class="slideout_inner">
+        					<table bgcolor="#FFFFFF" cellpadding="0" cellspacing="0" class="table-slide">
+       							<tr><td colspan="2" style="padding-right: 1px;">
+        			 					<div style="float:left;padding-top:3px;">Phase&nbsp;</div>
+        								<div class="gray">N/A</div>
+         								<div class="blue">0</div>
+         								<div class="green">1</div>
+         								<div class="yellow">2</div>
+         								<div class="orange">3</div>
+         								<div class="red">4</div>
+         						</td></tr>
+        					</table>
+    					</div>
+					</div>';
+
 
 	return $htmlContent;
 }
