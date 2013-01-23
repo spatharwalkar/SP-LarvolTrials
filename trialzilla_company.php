@@ -45,18 +45,6 @@ a:visited {color:#6600bc;}  /* visited link */
 	color:#FFFFFF;
 }
 
-.TopBorder
-{
-	filter:alpha(opacity=100);
-	position:absolute;
-	top:0;
-	width:100%;
-	z-index:990;
-	background-color:#4f2683;
-	height:27px;
-	left:0;
-}
-
 .FoundResultsTb
 {
 	background-color:#aa8ece;
@@ -424,28 +412,9 @@ function change_view()
 </div>
 
 <body>
-
-<!-- Heading border -->
-<table width="100%" border="0" class="TopBorder">
-	<tr>
-    	<td width="33%" style="font-weight:bold; color:#FFFFFF; padding-left:5px;">
-        	&nbsp;
-        </td>
-        <td width="33%" align="center">
-			<font style="color:#FFFFFF; font-size:11px; padding-top:0px; font-weight:bold;">
-            	<!--Interface work in progress<br/>-->
-            	Send feedback to 
-            	<a style="display:inline;color:#CCCCCC;" target="_self" href="mailto:larvoltrials@larvol.com">larvoltrials@larvol.com</a>
-            </font>
-        </td>
-        <td width="34%">&nbsp;
-        	
-        </td>
-    </tr>
-</table>
 <!-- Name & Logo -->
 <form action="trialzilla.php" method="post" name="trialzillaFrm" id="trialzillaFrm">
-	<table width="100%" border="0" style="padding-top:27px;">
+	<table width="100%" border="0" style="padding-top:2px;">
 		<tr>
 	    	<td width="25%">
 	        	<img src="images/Larvol-Trial-Logo-notag.png" width="300" height="47" />
