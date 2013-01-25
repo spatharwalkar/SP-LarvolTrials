@@ -1,4 +1,10 @@
 <?php
+//initiate logging actions
+require_once dirname(__FILE__).'/log4php/Logger.php';
+Logger::configure(dirname(__FILE__).'/setup/log.properties');
+$logger = Logger::getLogger('tlg');
+//	
+
 //failsafe settings array just in case settings array fails to load or values are missing.
 $settingsFailSafe = array(
 	'DB_SERVER'=>'127.0.0.1',

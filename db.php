@@ -1,10 +1,4 @@
 <?php
-//initiate logging actions
-require_once dirname(__FILE__).'/log4php/Logger.php';
-Logger::configure(dirname(__FILE__).'/setup/log.properties');
-$logger = Logger::getLogger('tlg');
-//	
-
 require_once('settings.php');
 require_once('include.util.php');
 ini_set('error_reporting', E_ALL ^ E_NOTICE);

@@ -1,5 +1,5 @@
 <?php
-require_once('db.php');
+require_once('settings.php');
 require_once('class.dbsync.php');
 require_once 'include.util.php';
 ini_set('max_execution_time','360000');	//100 hours
