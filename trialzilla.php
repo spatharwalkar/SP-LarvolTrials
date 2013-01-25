@@ -309,7 +309,7 @@ function autoComplete(fieldID)
         <tr>
         	<td width="300px">&nbsp;</td>
             <td width="600px" style="font-weight:bold; padding-left:0px;" align="center">
-            	<font class="searchTypes" style="color:#666666;">Search for Company / Product / Moa</font>
+            	<font class="searchTypes" style="color:#666666;">Search for Company / Product / MOA</font>
         	</td>
          </tr>
     </table>
@@ -360,7 +360,7 @@ function autoComplete(fieldID)
     		if($DataArray[$index]['type'] == 'Company')
 				print ' 		<a href="'. trim(urlPath()) .'trialzilla_company.php?CompanyId='. trim($DataArray[$index]['id']) .'" title="Company" target="_blank">'.$DataArray[$index]['name'].'</a>';
 			else if($DataArray[$index]['type'] == 'Moa')
-				print ' 		<a href="'. trim(urlPath()) .'trialzilla_moa.php?MoaId='. trim($DataArray[$index]['id']) .'" title="Moa" target="_blank">'.$DataArray[$index]['name'].'</a>';
+				print ' 		<a href="'. trim(urlPath()) .'trialzilla_moa.php?MoaId='. trim($DataArray[$index]['id']) .'" title="MOA" target="_blank">'.$DataArray[$index]['name'].'</a>';
 				else
 					print ' 		<a href="'. trim(urlPath()) .'intermediary.php?p='. trim($DataArray[$index]['id']) .'" title="Product" target="_blank">'.formatBrandName($DataArray[$index]['name'], 'product') . $DataArray[$index]['company'] .'</a>';
 			
@@ -385,7 +385,7 @@ if($FoundRecords == 0 && $globalOptions['TzSearch'] != '' && $globalOptions['TzS
                 <?php
                 	if($ProdFlg == false && $CompanyFlg == false && $MoaFlg == false)
 					{
-						print ' products or companies or moas';
+						print ' products or companies or MOAs';
 					}
 				?>.
                </p>

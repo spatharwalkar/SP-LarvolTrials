@@ -392,7 +392,7 @@ function change_view()
 	<table width="100%" border="0" style="padding-top:2px;">
 		<tr>
 	    	<td width="25%">
-	        	<img src="images/Larvol-Trial-Logo-notag.png" width="300" height="47" />
+	        	<a style="text-decoration:none;" href="trialzilla.php"><img src="images/Larvol-Trial-Logo-notag.png" width="300" height="47" /></a>
 	        </td>
 	        <td width ="75%" style="vertical-align:bottom; padding-left:200px;" align="left">
             	<font class="ReportHeading"><?php print $MoaName; ?></font>
