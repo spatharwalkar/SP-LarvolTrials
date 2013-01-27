@@ -132,7 +132,7 @@ class TrialTracker
 		$manualChange =  array('font' => array('color' => array('rgb' => 'FF7700')));
 		
 		$objPHPExcel->getActiveSheet()->getStyle('A1:BB1')->applyFromArray($styleThinBlueBorderOutline);
-		$objPHPExcel->getActiveSheet()->getStyle('A1:BB1')->getFont()->setSize(10);
+		$objPHPExcel->getActiveSheet()->getStyle('A1:BB1')->getFont()->setSize(8);
 			
 		$objPHPExcel->getProperties()->setCreator("The Larvol Group")
 										 ->setLastModifiedBy("TLG")
@@ -189,6 +189,7 @@ class TrialTracker
 				{
 					$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $tvalue['sectionHeader']);
 					$objPHPExcel->getActiveSheet()->mergeCells('A' . $i . ':BB'. $i);
+                                        $objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':BB'. $i)->getFont()->setSize(8);
 					$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':BB'. $i)->applyFromArray(
 								array('fill' => array(
 												'type'       => PHPExcel_Style_Fill::FILL_SOLID,
@@ -206,6 +207,7 @@ class TrialTracker
 			{
 				$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $tvalue['sectionHeader']);
 				$objPHPExcel->getActiveSheet()->mergeCells('A' . $i . ':BB'. $i);
+                                $objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':BB'. $i)->getFont()->setSize(8);
 				$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':BB'. $i)->applyFromArray(
 							array('fill' => array(
 											'type'       => PHPExcel_Style_Fill::FILL_SOLID,
@@ -218,7 +220,7 @@ class TrialTracker
 				));
 				$i++;
 			}
-			
+                        
 			if(isset($tvalue['Trials']) && !empty($tvalue['Trials']))
 			{
 				foreach($tvalue['Trials'] as $dkey => $dvalue)
@@ -298,7 +300,7 @@ class TrialTracker
 					/////END PART - MERGE CELLS AND APPLY BORDER AS - FOR LOOP WAS NOT WORKING SET INDIVIDUALLY
 					
 					$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':BB' . $i)->applyFromArray($styleThinBlueBorderOutline);
-					$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':BB' . $i)->getFont()->setSize(10);
+					$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':BB' . $i)->getFont()->setSize(8);
 					$objPHPExcel->getActiveSheet()->getStyle('A1:BA1')->applyFromArray($styleThinBlueBorderOutline);
 					
 					//nct id	
@@ -1089,7 +1091,7 @@ class TrialTracker
 								
 							//rendering diamonds in case of end date is prior to the current year
 							$objPHPExcel->getActiveSheet()->getStyle('L' . $i . ':BB' . $i)->applyFromArray($styleThinBlueBorderOutline);
-							$objPHPExcel->getActiveSheet()->getStyle('L' . $i . ':BB' . $i)->getFont()->setSize(10);
+							$objPHPExcel->getActiveSheet()->getStyle('L' . $i . ':BB' . $i)->getFont()->setSize(8);
 							if($mvalue['result_link'] != '' && $mvalue['result_link'] !== NULL)
 							{
 								if(!$loggedIn && !$this->liLoggedIn())
@@ -1110,17 +1112,14 @@ class TrialTracker
 								
 								if($mvalue['event_type'] == 'Clinical Data')
 								{
-									//$objDrawing->setPath('images/' . $imgColor . '-diamond.png');
 									$icon = '&#9830;';
 								}
 								else if($mvalue['status'] == 'Cancelled')
 								{
-									//$objDrawing->setPath('images/' . $imgColor . '-cancel.png');
 									$icon = '&#10006;';
 								}
 								else
 								{
-									//$objDrawing->setPath('images/' . $imgColor . '-checkmark.png');
 									$icon = '&#10004;';
 								}
 								
@@ -1135,13 +1134,7 @@ class TrialTracker
 							}
 							else if($mvalue['status'] == 'Pending')
 							{
-								/*$objDrawing = new PHPExcel_Worksheet_Drawing();
-								$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
-								$objDrawing->setOffsetX(40);
-								$objDrawing->setOffsetY(10);
-								$objDrawing->setPath('images/hourglass.png');
-								$objDrawing->setCoordinates('L' . $i);*/
-								
+							
 								$icon = '&#8987;';
 								$objPHPExcel->getActiveSheet()->setCellValue('L' . $i, html_entity_decode($icon, ENT_QUOTES, 'UTF-8'));
 								$objPHPExcel->getActiveSheet()->getStyle('L' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
@@ -1261,7 +1254,7 @@ class TrialTracker
 		$objPHPExcel->getActiveSheet()->mergeCells('AV1:AX1');
 		$objPHPExcel->getActiveSheet()->getStyle('A1:AX1')->applyFromArray($styleThinBlueBorderOutline);
 
-		$objPHPExcel->getActiveSheet()->getStyle('A1:AX1')->getFont()->setSize(10);
+		$objPHPExcel->getActiveSheet()->getStyle('A1:AX1')->getFont()->setSize(8);
 
 		$i = 2;
 		
@@ -1269,7 +1262,7 @@ class TrialTracker
 		foreach ($naUpms as $ukey => $uvalue)
 		{
 			$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':AX' . $i . '')->applyFromArray($styleThinBlueBorderOutline);
-			$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':AX' . $i . '')->getFont()->setSize(10);
+			$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':AX' . $i . '')->getFont()->setSize(8);
 			
 			$eventLink = urlencode(trim($uvalue['event_link']));
 			$resultLink = urlencode(trim($uvalue['result_link']));
@@ -1506,30 +1499,16 @@ class TrialTracker
 					$resultLink = NULL;
 				}
 								
-				/*if((isset($uvalue['edited']) && $uvalue['edited']['field'] == 'result_link') || ($uvalue['new'] == 'y')) 
-					$imgColor = 'red';
-				else 
-					$imgColor = 'black'; 
-					
-				$objDrawing = new PHPExcel_Worksheet_Drawing();
-				$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
-				$objDrawing->setOffsetX(40);
-				$objDrawing->setOffsetY(4);
-				$objDrawing->setCoordinates('H' . $i);*/
-				
 				if($uvalue['event_type'] == 'Clinical Data')
 				{
-					//$objDrawing->setPath('images/' . $imgColor . '-diamond.png');
 					$icon = '&#9830;';
 				}
 				else if($uvalue['status'] == 'Cancelled')
 				{
-					//$objDrawing->setPath('images/' . $imgColor . '-cancel.png');
 					$icon = '&#10006;';
 				}
 				else
 				{
-					//$objDrawing->setPath('images/' . $imgColor . '-checkmark.png');
 					$icon = '&#10004;';
 				}
 				
@@ -1544,13 +1523,7 @@ class TrialTracker
 			}
 			elseif($uvalue['status'] == 'Pending')
 			{
-				/*$objDrawing = new PHPExcel_Worksheet_Drawing();
-				$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
-				$objDrawing->setOffsetX(40);
-				$objDrawing->setOffsetY(4);
-				$objDrawing->setPath('images/hourglass.png');
-				$objDrawing->setCoordinates('H' . $i);*/
-				
+		
 				$icon = '&#8987;';
 				$objPHPExcel->getActiveSheet()->setCellValue('H' . $i, html_entity_decode($icon, ENT_QUOTES, 'UTF-8'));
 				$objPHPExcel->getActiveSheet()->getStyle('H' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
@@ -1570,7 +1543,8 @@ class TrialTracker
 					
 			$this->upmGnattChartforExcel($stMonth, $stYear, $edMonth, $edYear, $currentYear, $secondYear, $thirdYear, $uvalue['start_date'], 
 			$uvalue['end_date'], $eventLink, $uvalue["event_description"], $objPHPExcel, $i, 'I');
-				
+			
+                        
 			$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':G' . $i)->applyFromArray(
 					array('fill' => array(
 							'type'       => PHPExcel_Style_Fill::FILL_SOLID,
@@ -7214,7 +7188,7 @@ class TrialTracker
 				
 			if(empty($resultIds['product']))
 			{
-				$tHeader = 'No Product';
+				$tHeader = '';
 				$productIds = array();
 			}
 			else
@@ -7251,7 +7225,7 @@ class TrialTracker
 				
 			if(empty($resultIds['area']))
 			{
-				$tHeader = 'No Area';
+				$tHeader = '';
 				$areaIds = array();
 			}
 			else
@@ -7284,7 +7258,7 @@ class TrialTracker
 			if(empty($resultIds['product']) && empty($resultIds['area']))
 			{
 				$ottType = 'indexed';
-				$tHeader = 'No Area';
+				$tHeader = '';
 			}
 			else if(empty($resultIds['product']))
 			{
@@ -7308,7 +7282,7 @@ class TrialTracker
 			else if(empty($resultIds['area']))
 			{
 				$ottType = 'indexed';
-				$tHeader = 'No Area';
+				$tHeader = '';
 				
 				$productIds = $resultIds['product'];
 				
@@ -8716,7 +8690,8 @@ class TrialTracker
 		$upmHistory = array();
 		
 		$query = "SELECT u.`id`, ut.`larvol_id`, u.`product`, u.`event_description`, u.`event_link`, "
-                        . " u.`result_link`, u.`start_date`, u.`end_date`, u.`status`, u.`last_update`, rt.`name` AS redtag, u.`condition` "
+                        . " u.`result_link`, u.`start_date`, u.`end_date`, u.`status`, u.`last_update`,  u.`condition`, "
+                        . " rt.`name` AS redtag, rt.`type` AS redtagtype "
                         . " FROM `upm` u "
                         . " LEFT OUTER JOIN `upm_trials` ut ON ut.`upm_id` = u.`id` "
                         . " LEFT OUTER JOIN `redtags` rt ON rt.`id` = u.`redtag` "
@@ -8742,6 +8717,15 @@ class TrialTracker
 					$result[$productId][$upmId]['event_link'] 		= $row['event_link'];
 					$result[$productId][$upmId]['result_link'] 		= $row['result_link'];
 					$result[$productId][$upmId]['condition'] 		= $row['condition'];
+                                        
+                                        if($row['redtagtype'] != '' && $row['redtagtype'] !== NULL)
+                                        {
+                                            $result[$productId][$upmId]['event_type']           = $row['redtagtype'];
+                                        }
+                                        else
+                                        {
+                                            $result[$productId][$upmId]['event_type']           = $row['event_type'];
+                                        }
 					$result[$productId][$upmId]['start_date'] 		= $row['start_date'];
 					$result[$productId][$upmId]['end_date'] 		= $row['end_date'];
 					$result[$productId][$upmId]['product'] 			= $row['product'];
@@ -8798,11 +8782,13 @@ class TrialTracker
 		$upmHistory = array();
 		
 		$query = " SELECT u.`id`, ut.`larvol_id`, u.`product`, u.`event_type`, u.`event_description`, u.`event_link`, "
-					. " u.`result_link`, u.`start_date`, u.`end_date`, u.`status`, u.`last_update` "
+					. " u.`result_link`, u.`start_date`, u.`end_date`, u.`status`, u.`last_update`, "
+                                        . " rt.`type` AS redtagtype "
 					. " FROM upm u "
 					. " LEFT OUTER JOIN upm_trials ut ON u.`id` = ut.`upm_id` "
+                                        . " LEFT OUTER JOIN `redtags` rt ON rt.`id` = u.`redtag` "
 					. " WHERE ut.`larvol_id` IN ('" . implode("', '", $larvolIds) . "') "
-                    . $subQuery
+                                        . $subQuery
 					. " ORDER BY u.`end_date` ASC, u.`start_date` ASC ";	
 					
 		$res = m_query(__LINE__,$query);
@@ -8822,7 +8808,16 @@ class TrialTracker
 					$result[$larvolId][$upmId]['status'] 		= $row['status'];
 					$result[$larvolId][$upmId]['event_link'] 	= $row['event_link'];
 					$result[$larvolId][$upmId]['result_link']	= $row['result_link'];
-					$result[$larvolId][$upmId]['event_type'] 	= $row['event_type'];
+                                        
+                                        if($row['redtagtype'] != '' && $row['redtagtype'] !== NULL)
+                                        {
+                                            $result[$larvolId][$upmId]['event_type']    = $row['redtagtype'];
+                                        }
+                                        else
+                                        {
+                                            $result[$larvolId][$upmId]['event_type']    = $row['event_type'];
+                                        }
+                                        
 					$result[$larvolId][$upmId]['start_date'] 	= $row['start_date'];
 					$result[$larvolId][$upmId]['end_date'] 		= $row['end_date'];
 					$result[$larvolId][$upmId]['product'] 		= $row['product'];
