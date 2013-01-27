@@ -7263,7 +7263,7 @@ class TrialTracker
 			else if(empty($resultIds['product']))
 			{
 				$ottType = 'rowstacked';
-				$tHeader = 'No Product';
+				$tHeader = '';
 				
 				$areaIds = $resultIds['area'];
 
