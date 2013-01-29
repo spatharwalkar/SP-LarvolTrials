@@ -258,6 +258,9 @@ a:visited {color:#6600bc;}  /* visited link */
 }
 	
 </style>
+
+<script type="text/javascript" src="scripts/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="scripts/autosuggest/jquery.autocomplete-min.js"></script>
 <script type="text/javascript">
 	$(function() 
 	{
@@ -288,8 +291,6 @@ function autoComplete(fieldID)
 	});
 }
 </script>
-<script type="text/javascript" src="scripts/jquery-1.7.2.min.js"></script>
-<script type="text/javascript" src="scripts/autosuggest/jquery.autocomplete-min.js"></script>
 </head>
 <?php include "trialzilla_searchbox.php";?>
 <body>
