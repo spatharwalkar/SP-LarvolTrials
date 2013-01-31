@@ -18,7 +18,7 @@ $settingsFailSafe = array(
 	'YOURLS_PASS'=>'password',
 	'YOURLS_URL'=>'http://localhost/s/yourls-api.php',
 	'SITE_NAME'=>'Larvol Trials',
-	'LI_API'=>'http://apistage.larvolinsight.com/api.ashx'
+	'LI_API'=>'http://api.larvolinsight.com/api.ashx'
 );
 $settingsFailSafeKeys = array_keys($settingsFailSafe);
 
