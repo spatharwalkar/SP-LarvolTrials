@@ -425,48 +425,17 @@ CREATE TABLE IF NOT EXISTS `update_status_fullhistory` (  `update_id` int( 10  )
 `item_id` INT(11) NULL DEFAULT NULL  ,
  PRIMARY  KEY (  `update_id`  )  ) ENGINE  = InnoDB  DEFAULT CHARSET  = utf8 COLLATE  = utf8_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS `products` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `LI_id` varchar(63) COLLATE utf8_unicode_ci NULL,
-  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `description` text COLLATE utf8_unicode_ci DEFAULT NULL,
-  `category` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `comments` TEXT,
-  `product_type` VARCHAR( 255 ) DEFAULT NULL,
-  `licensing_mode` VARCHAR( 255 ) DEFAULT NULL,
-  `administration_mode` VARCHAR( 255 ) DEFAULT NULL,
-  `discontinuation_status` VARCHAR( 255 ) DEFAULT NULL,
-  `discontinuation_status_comment` VARCHAR( 255 ) DEFAULT NULL,
-  `is_key` BOOL DEFAULT NULL,
-  `is_active` BOOL DEFAULT NULL,
-  `created` DATETIME DEFAULT NULL,
-  `modified` DATETIME DEFAULT NULL,
-  `searchdata` text COLLATE utf8_unicode_ci COMMENT 'contains regex',
-  `company` varchar(127) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `brand_names` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `generic_names` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `code_names` varchar(127) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `search_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
- `approvals` VARCHAR( 255 ) DEFAULT NULL,
-  `xml` TEXT,  
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `LI_id` (`LI_id`),
-  UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+CREATE VIEW products AS
+SELECT id, LI_id, name, description, category, comments, product_type, licensing_mode, administration_mode, 
+discontinuation_status, discontinuation_status_comment, is_key,is_active, created, modified, searchdata, 
+company, brand_names, generic_names, code_names, search_name, approvals, xml
+FROM entities
+WHERE class='Product';
 
-CREATE TABLE IF NOT EXISTS `areas` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `LI_id` varchar(63) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `name` varchar(127) COLLATE utf8_unicode_ci NOT NULL,
-  `display_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `description` text COLLATE utf8_unicode_ci DEFAULT NULL,
-  `category` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `searchdata` text COLLATE utf8_unicode_ci NOT NULL,
-  `coverage_area` tinyint(1) NOT NULL DEFAULT '0',  
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `name` (`name`),
-  UNIQUE KEY `LI_id` (`LI_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+CREATE VIEW areas AS 
+SELECT id, LI_id, name, display_name, description, category, searchdata 
+FROM entities
+WHERE class='Area';
 
 CREATE TABLE IF NOT EXISTS `rpt_masterhm` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -1192,22 +1161,10 @@ CREATE TABLE IF NOT EXISTS `upm_trials` (
   CONSTRAINT `upm_trials_ibfk_2` FOREIGN KEY (`larvol_id`) REFERENCES `data_trials` (`larvol_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `institutions` (
- `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
- `LI_id` varchar(63) COLLATE utf8_unicode_ci DEFAULT NULL,
- `name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
- `type` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
- `display_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
- `is_active` tinyint(1) DEFAULT NULL,
- `created` datetime DEFAULT NULL,
- `modified` datetime DEFAULT NULL,
- `search_terms` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
- `client_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
- `xml` text COLLATE utf8_unicode_ci,
- PRIMARY KEY (`id`),
- UNIQUE KEY `LI_id` (`LI_id`),
- UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+CREATE VIEW institutions AS
+SELECT id, LI_id, name, category as 'type', display_name, is_active, created, modified, search_name as search_terms, client_name, xml 
+FROM entities
+WHERE class='Institution';
 
 CREATE TABLE IF NOT EXISTS `products_institutions` (
  `product` int(10) unsigned NOT NULL,
@@ -1217,19 +1174,11 @@ CREATE TABLE IF NOT EXISTS `products_institutions` (
  KEY `product` (`product`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS `moas` (
- `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
- `LI_id` varchar(63) COLLATE utf8_unicode_ci DEFAULT NULL,
- `name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
- `display_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
- `is_active` tinyint(1) DEFAULT NULL,
- `created` datetime DEFAULT NULL,
- `modified` datetime DEFAULT NULL,
- `xml` text COLLATE utf8_unicode_ci,
- PRIMARY KEY (`id`),
- UNIQUE KEY `LI_id` (`LI_id`),
- UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+CREATE VIEW moas AS
+SELECT id, LI_id, name, display_name, is_active, created, modified, xml 	
+FROM entities
+WHERE class='MOA';
+
 
 CREATE TABLE IF NOT EXISTS `products_moas` (
  `product` int(10) unsigned NOT NULL,
@@ -1267,8 +1216,8 @@ CREATE TABLE `entities` (
   `approvals` varchar(255) CHARACTER SET latin1 DEFAULT NULL,
   `xml` text CHARACTER SET latin1,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `name` (`name`),
-  UNIQUE KEY `LI_id` (`LI_id`)
+  UNIQUE KEY `name` (`name` ASC, `class` ASC),
+  UNIQUE KEY `LI_id` (`LI_id` ASC, `class` ASC) 
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT;
 
 CREATE TABLE `entity_relations` (
@@ -1282,16 +1231,16 @@ CREATE TABLE `entity_relations` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT;
 
 ALTER TABLE `products_moas`
-  ADD CONSTRAINT `products_moas_ibfk_1` FOREIGN KEY (`product`) REFERENCES `products` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `products_moas_ibfk_2` FOREIGN KEY (`moa`) REFERENCES `moas` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `products_moas_ibfk_1` FOREIGN KEY (`product`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `products_moas_ibfk_2` FOREIGN KEY (`moa`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `products_institutions`
-  ADD CONSTRAINT `products_institutions_ibfk_2` FOREIGN KEY (`institution`) REFERENCES `institutions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `products_institutions_ibfk_1` FOREIGN KEY (`product`) REFERENCES `products` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `products_institutions_ibfk_2` FOREIGN KEY (`institution`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `products_institutions_ibfk_1` FOREIGN KEY (`product`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 	
 ALTER TABLE `rpt_masterhm_cells`
-  ADD CONSTRAINT `rpt_masterhm_cells_ibfk_2` FOREIGN KEY (`area`) REFERENCES `areas` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `rpt_masterhm_cells_ibfk_1` FOREIGN KEY (`product`) REFERENCES `products` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `rpt_masterhm_cells_ibfk_2` FOREIGN KEY (`area`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `rpt_masterhm_cells_ibfk_1` FOREIGN KEY (`product`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `data_cats_in_study`
   ADD CONSTRAINT `data_cats_in_study_ibfk_1` FOREIGN KEY (`larvol_id`) REFERENCES `clinical_study` (`larvol_id`) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -1349,11 +1298,11 @@ ALTER TABLE `user_grants`
   ADD CONSTRAINT `user_grants_ibfk_2` FOREIGN KEY (`permission`) REFERENCES `user_permissions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `upm`
-  ADD CONSTRAINT `FK_product` FOREIGN KEY (`product`) REFERENCES `products` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  ADD CONSTRAINT `FK_product` FOREIGN KEY (`product`) REFERENCES `entities` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
   ADD CONSTRAINT `upm_ibfk_2` FOREIGN KEY (`redtag`) REFERENCES `redtags` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 ALTER TABLE `area_trials`
-  ADD CONSTRAINT `area_trials_ibfk_1` FOREIGN KEY (`area`) REFERENCES `areas` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `area_trials_ibfk_1` FOREIGN KEY (`area`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `area_trials_ibfk_2` FOREIGN KEY (`trial`) REFERENCES `data_trials` (`larvol_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `data_history`
@@ -1366,10 +1315,10 @@ ALTER TABLE `data_nct`
   ADD CONSTRAINT `data_nct_ibfk_2` FOREIGN KEY (`larvol_id`) REFERENCES `data_trials` (`larvol_id`) ON UPDATE CASCADE;
 
 ALTER TABLE `product_trials`
-  ADD CONSTRAINT `product_trials_ibfk_1` FOREIGN KEY (`product`) REFERENCES `products` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `product_trials_ibfk_1` FOREIGN KEY (`product`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `product_trials_ibfk_2` FOREIGN KEY (`trial`) REFERENCES `data_trials` (`larvol_id`) ON DELETE CASCADE ON UPDATE CASCADE;
   
 ALTER TABLE `upm_areas`
-  ADD CONSTRAINT `upm_areas_ibfk_2` FOREIGN KEY (`area_id`) REFERENCES `areas` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `upm_areas_ibfk_2` FOREIGN KEY (`area_id`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `upm_areas_ibfk_1` FOREIGN KEY (`upm_id`) REFERENCES `upm` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
   
