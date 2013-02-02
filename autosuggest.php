@@ -58,6 +58,7 @@ if($table=='upm' && ($field=='product' || $field=='area' || $field=='redtag'))
 			$datas[] = $row['name'];
 		else
 			$datas[] = $row['id'];
+		$suggestionsType[] = '';
 	}	
 }
 else if($table=='trialzilla')
@@ -77,7 +78,7 @@ else if($table=='trialzilla')
 			
 		}
 		else
-			$suggestionsType[] = ' ';	//If suggestion type is NULL make it blank
+			$suggestionsType[] = '';	//If suggestion type is NULL make it blank
 	}
 	$datas = $suggestions;
 }
@@ -95,6 +96,7 @@ else
 		}
 		else
 		$datas[] = $row[$field];
+		$suggestionsType[] = '';
 	}	
 }
 $json['query'] = $search;
