@@ -422,6 +422,9 @@ function autoComplete(fieldID)
 <?php print showProductTracker($MoaId, 'MT'); ?>
 </td></tr>
 </table>
+
+<?php include "trialzilla_footer.php" ?>
+
 </body>
 </html>
 <script type="text/javascript">

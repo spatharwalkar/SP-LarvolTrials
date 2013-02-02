@@ -396,6 +396,8 @@ if($FoundRecords == 0 && $globalOptions['TzSearch'] != '' && $globalOptions['TzS
     </tr>
 </table>
 
+<?php include "trialzilla_footer.php" ?>
+
 </body>
 </html>
 <?php
