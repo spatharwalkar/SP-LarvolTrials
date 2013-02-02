@@ -28,9 +28,7 @@ elseif($table=='products' || $table=='areas')
 }
 elseif($table=='trialzilla')
 {
-	$query = "select distinct `name` from `institutions` where `name` like '%$search%' limit 6";
-	$query2 = "select distinct `name` from `products` where `name` like '%$search%' limit 6";
-	$query3 = "select distinct `name` from `moas` where `name` like '%$search%' limit 6";
+	$query = "select distinct `name`, `description`, `class` from `entities` where `name` like '%$search%' AND `class` IN ('Product','Institution','MOA') limit 6";
 }
 else
 {
@@ -50,6 +48,7 @@ $data = array();
 $json = array();
 $suggestions = array();
 $datas = array();
+$suggestionsType = array();
 if($table=='upm' && ($field=='product' || $field=='area' || $field=='redtag'))
 {
 	while($row = mysql_fetch_assoc($result))
@@ -63,30 +62,23 @@ if($table=='upm' && ($field=='product' || $field=='area' || $field=='redtag'))
 }
 else if($table=='trialzilla')
 {
-	$suggestions1 = $suggestions2 = $suggestions3 = array();
-	while($row1 = mysql_fetch_assoc($result))
+	while($row = mysql_fetch_assoc($result))
 	{
-		$suggestions1[] = $row1['name'];
+		$suggestions[] = $row['name'];
+		if($row['class'] != NULL && $row['class'] != '')
+		{
+			switch($row['class'])
+			{
+				case 'Product' : $suggestionsType[] = $row['class']; break;	//Display type icon beside suggestion
+				case 'Institution' : $suggestionsType[] = 'Company'; break;	//Display type icon beside suggestion
+				case 'MOA' : $suggestionsType[] = 'Moa'; break;	//Display type icon beside suggestion
+				default : $suggestionsType[] = ''; break;
+			}
+			
+		}
+		else
+			$suggestionsType[] = ' ';	//If suggestion type is NULL make it blank
 	}
-	$result2 =  mysql_query($query2);
-	while($row2 = mysql_fetch_assoc($result2))
-	{
-		$suggestions2[] = $row2['name'];
-	}
-	$result3 =  mysql_query($query3);
-	while($row3 = mysql_fetch_assoc($result3))
-	{
-		$suggestions3[] = $row3['name'];
-	}
-	//take 2 suggestion from each table
-	$suggestions = array_merge(array_slice($suggestions1,0,2), array_slice($suggestions2,0,2), array_slice($suggestions3,0,2));
-	if(count($suggestions) < 6)	//if any table has less suggestion take extra suggestions from other tables
-	$suggestions = array_merge($suggestions, array_slice($suggestions1, 2, (6-count($suggestions))));
-	if(count($suggestions) < 6)
-	$suggestions = array_merge($suggestions, array_slice($suggestions2, 2, (6-count($suggestions))));
-	if(count($suggestions) < 6)
-	$suggestions = array_merge($suggestions, array_slice($suggestions3, 2, (6-count($suggestions))));
-	
 	$datas = $suggestions;
 }
 else 
@@ -105,10 +97,10 @@ else
 		$datas[] = $row[$field];
 	}	
 }
-
 $json['query'] = $search;
 $json['suggestions'] = $suggestions;
 $json['data'] = $datas;
+$json['suggestionsType'] = $suggestionsType;
 $data[] = $json;
 ob_end_clean();
 gzip_compression();
