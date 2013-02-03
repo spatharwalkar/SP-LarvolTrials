@@ -3,13 +3,16 @@
 <table width="100%" border="0" style="padding-top:2px;">
 <tr>
 <td width="300px">
-<a style="text-decoration:none;" href="trialzilla.php"><img src="images/Larvol-Trial-Logo-notag.png" width="300" height="47" /></a>
+<a style="text-decoration:none;" href="trialzilla.php"><img src="images/Larvol-Trial-Logo-notag.png" width="300" height="47" style="border: none;" /></a>
 </td>
 <td width="600px" style="vertical-align:bottom; padding-left:20px;" align="left">
 <input class="SearchBox" type="text" value="<?php echo htmlspecialchars($globalOptions['TzSearch']); ?>" autocomplete="off" style="font-weight:bold;" name="TzSearch" id="TzSearch" onkeyup="javascript:autoComplete('TzSearch')" />
 </td>
-<td style="vertical-align:bottom; padding-left:10px;" align="left">
+<td width="105px" style="vertical-align:bottom; padding-left:10px;" align="left">
 <input type="submit" name="Search" title="Search" value="Search" style="vertical-align:bottom;" class="SearchBttn1" />
+</td>
+<td style="vertical-align:middle; padding-left:10px;padding-top:15px;" align="left">
+<a href="trialzilla.php?Disease=true" style="text-decoration:underline;">List Diseases</a>
 </td>
 </tr>
 <tr>

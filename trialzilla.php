@@ -6,6 +6,7 @@
 	
 	$RecordsPerPage = 50;
 	$SearchFlg = false;
+	$DiseaseFlg = false;
 	$globalOptions['page'] = 1;
 	$DataArray = $CurrentPageResultArr = array();
 	$totalPages = $FoundRecords = 0;
@@ -16,6 +17,11 @@
 	$CompanyResultArr = array();
 	$MoaResultArr = array();
 	$ResultArr = array();
+	
+	if(isset($_REQUEST['page']) && is_numeric($_REQUEST['page']))
+	{
+		$globalOptions['page'] = mysql_real_escape_string($_REQUEST['page']);
+	}
 	
 	//print '<br/><br/>';
 	if($_REQUEST['TzSearch'] != NULL && $_REQUEST['TzSearch'] != '' && isset($_REQUEST['TzSearch']))
@@ -79,11 +85,6 @@
 		
 		if($FoundRecords > 0)
 		{
-			if(isset($_REQUEST['page']) && is_numeric($_REQUEST['page']))
-			{
-				$globalOptions['page'] = mysql_real_escape_string($_REQUEST['page']);
-			}
-			
 			$totalPages = ceil(count($ResultArr) / $RecordsPerPage);
 			
 			//Get only those product Ids which we are planning to display on current page to avoid unnecessary queries
@@ -126,6 +127,31 @@
 				}
 			}
 		}
+	}
+	else if($_REQUEST['Disease'] != NULL && $_REQUEST['Disease'] != '' && isset($_REQUEST['Disease']))
+	{
+		$ResultArrQuery = "SELECT `id`, `name`, `class` FROM `entities` WHERE `class` = 'Disease'";
+		$QueryResult = mysql_query($ResultArrQuery);
+		$FoundRecords = mysql_num_rows($QueryResult);
+		
+		$totalPages = ceil($FoundRecords / $RecordsPerPage);
+		
+		$StartSlice = ($globalOptions['page'] - 1) * $RecordsPerPage;
+		$EndSlice = $StartSlice + $RecordsPerPage;
+		$query = "SELECT `id`, `name`, `class` FROM `entities` WHERE `class` = 'Disease' LIMIT $StartSlice, $EndSlice";
+		$QueryResult = mysql_query($query);
+		$i=0;
+		while($result = mysql_fetch_assoc($QueryResult))
+		{
+			$i++;
+			$DataArray[$i]['index'] = $i;
+			$DataArray[$i]['name'] = $result['name'];
+			$DataArray[$i]['id'] = $result['id'];
+			$DataArray[$i]['type'] = $result['class'];
+		}
+		$CurrentPageResultArr = $DataArray;
+		$DiseaseFlg = true;
+		$globalOptions['Disease'] = 'true';
 	}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -292,8 +318,8 @@ function autoComplete(fieldID)
 }
 </script>
 </head>
-<?php include "trialzilla_searchbox.php";?>
 <body>
+<?php include "trialzilla_searchbox.php";?>
 <!-- Number of Results -->
 <br/>
 <table width="100%" border="0" class="FoundResultsTb">
@@ -303,7 +329,7 @@ function autoComplete(fieldID)
         </td>
         <td width="50%" style="border:0; font-weight:bold; padding-right:5px;" align="right">
         	<?php
-            	if(SearchFlg && $FoundRecords > 0)
+            	if($FoundRecords > 0)
 				{
 					$showResult = 'Showing';
 					if($totalPages == 1)
@@ -315,7 +341,11 @@ function autoComplete(fieldID)
 						$showResult .= ' Results '. ($StartSlice + 1) .' - '. ($StartSlice + count($CurrentPageResultArr));
 						$showResult .= ' of about '. $FoundRecords;
 					}
-					$showResult .= ' for '. $globalOptions['TzSearch'];
+					
+					if($DiseaseFlg)
+					$showResult .= ' for disease';
+					else
+					$showResult .= ' for "'. $globalOptions['TzSearch'] .'"';
 					print $showResult;
 				}
 			?>
@@ -341,8 +371,10 @@ function autoComplete(fieldID)
 				print ' 		<a href="'. trim(urlPath()) .'trialzilla_company.php?CompanyId='. trim($DataArray[$index]['id']) .'" title="Company" target="_blank">'.$DataArray[$index]['name'].'</a>';
 			else if($DataArray[$index]['type'] == 'Moa')
 				print ' 		<a href="'. trim(urlPath()) .'trialzilla_moa.php?MoaId='. trim($DataArray[$index]['id']) .'" title="MOA" target="_blank">'.$DataArray[$index]['name'].'</a>';
-				else
+				else if($DataArray[$index]['type'] == 'Product')
 					print ' 		<a href="'. trim(urlPath()) .'intermediary.php?p='. trim($DataArray[$index]['id']) .'" title="Product" target="_blank">'.formatBrandName($DataArray[$index]['name'], 'product') . $DataArray[$index]['company'] .'</a>';
+					else
+						print ' 		<a href="'. trim(urlPath()) .'trialzilla_disease.php?DiseaseId='. trim($DataArray[$index]['id']) .'" title="Disease" target="_blank">'.$DataArray[$index]['name'] .'</a>';
 			
     		print '      <br /><br style="line-height:6px;" />
 					</td>
@@ -352,28 +384,30 @@ function autoComplete(fieldID)
 ?>
 </table>
 <?php
-if($FoundRecords == 0 && $globalOptions['TzSearch'] != '' && $globalOptions['TzSearch'] != NULL)
+if($FoundRecords == 0 && (($globalOptions['TzSearch'] != '' && $globalOptions['TzSearch'] != NULL) || ($globalOptions['Disease'] != '' && $globalOptions['Disease'] != NULL)))
 {
 ?>
 	<div id="norecord">
  	 	<div>
-		    <p>
-            	Your search - 
-                	<strong>
-						<?php echo $globalOptions['TzSearch']; ?>
-                    </strong> - did not match any 
-                <?php
-                	if($ProdFlg == false && $CompanyFlg == false && $MoaFlg == false)
+		    
+            	<?php
+					if($globalOptions['Disease'] != '' && $globalOptions['Disease'] != NULL)
 					{
-						print ' products or companies or MOAs';
+						print '<p>No Disease found.</p>';
 					}
-				?>.
-               </p>
-			    <p>Suggestions:</p>
+                	else if($ProdFlg == false && $CompanyFlg == false && $MoaFlg == false)
+					{
+						print "<p>Your search - 
+                				<strong>
+									".$globalOptions['TzSearch']."
+                			    </strong> - did not match any products or companies or MOAs.</p>";
+				?>
+               <p>Suggestions:</p>
 			    <ul>
 			      <li>Make sure all words are spelled correctly.</li>
 			      <li>Try different keywords.</li>
 			    </ul>
+                <?php } ?>
 		  </div>
 	</div>
 <?php
@@ -411,9 +445,17 @@ function pagination($globalOptions = array(), $totalPages)
 	{
 		$url .= '&amp;TzSearch=' . $_REQUEST['TzSearch'];
 	}
-	if( !isset($_REQUEST['TzSearch']) and isset($globalOptions['TzSearch']))
+	else if( !isset($_REQUEST['TzSearch']) and isset($globalOptions['TzSearch']))
 	{
 		$url .= '&amp;TzSearch=' . $globalOptions['TzSearch'];
+	}
+	else if(isset($_REQUEST['Disease']))
+	{
+		$url .= '&amp;Disease=true';
+	}
+	else if( !isset($_REQUEST['Disease']) and isset($globalOptions['Disease']))
+	{
+		$url .= '&amp;Disease=true';
 	}
 	
 	$rootUrl = 'trialzilla.php?';
