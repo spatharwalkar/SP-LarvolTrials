@@ -24,6 +24,7 @@ function showProductTracker($id, $TrackerType='PT')
 {
 	$HTMLContent = '';
 	$Return = DataGenerator($id, $TrackerType);
+	$uniqueId = uniqid();
 
 	///Required Data restored
 	$data_matrix = $Return['matrix'];
@@ -40,10 +41,17 @@ function showProductTracker($id, $TrackerType='PT')
 	$column_interval = $Return['column_interval'];
 	$TrackerType = $Return['TrackerType'];
 	
+	$HTMLContent .= TrackerCommonCSS($uniqueId, $TrackerType);
+	
 	if($TrackerType=='PT')
 	$HTMLContent .= TrackerHeaderHTMLContent($Report_DisplayName);
 	
-	$HTMLContent .= TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $inner_columns, $inner_width, $column_width, $ratio, $areaId, $column_interval, $TrackerType);
+	$HTMLContent .= TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $inner_columns, $inner_width, $column_width, $ratio, $areaId, $column_interval, $TrackerType, $uniqueId);
+	
+	$HTMLContent .= TrackerCommonJScript($uniqueId);
+	
+	if($TrackerType=='PT')
+	$HTMLContent .= "<script language=\"javascript\" type=\"text/javascript\">change_view_".$uniqueId."_();</script>";
 	
 	return $HTMLContent;
 
@@ -125,6 +133,15 @@ function DataGenerator($id, $TrackerType)
 		$header = mysql_fetch_array($res);
 		$Report_DisplayName = $header['name'];
 		$productIds = GetProductsFromMOA($header['id']);
+		$id=$header['id'];
+	}
+	else if($TrackerType == 'DPT')
+	{
+		$query = 'SELECT `name`, `id` FROM `entities` WHERE id=' . $id;
+		$res = mysql_query($query) or die(mysql_error());
+		$header = mysql_fetch_array($res);
+		$Report_DisplayName = $header['name'];
+		$productIds = GetProductsFromDisease($header['id']);
 		$id=$header['id'];
 	}
 	
@@ -344,551 +361,584 @@ function DataGenerator($id, $TrackerType)
 <link href="css/popup_form.css" rel="stylesheet" type="text/css" media="all" />
 <link href="css/themes/cupertino/jquery-ui-1.8.17.custom.css" rel="stylesheet" type="text/css" media="screen" />
 <style type="text/css">
-
-/* As in IE6 hover css does not works, below htc file is added which contains js script which will be executed only in IE, the script convert simple as well as complex hover css into compatible format for IE6 by replacing hover by class css - this file is used so that help tab as well as product selector will work in IE6 without any changes of code as well as css code and script can be also useful for making other css to work in IE6 like :hover and :active for IE6+, and additionally :focus for IE7 and IE8. */
-ul, li, slideout { behavior:url("css/csshover3.htc"); }
-img { behavior: url("css/iepngfix.htc"); }
 body { font-family:Verdana; font-size: 13px;}
-a, a:hover{ height:100%; width:100%; display:block; text-decoration:none;}
-
 .report_name {
 	font-weight:bold;
 	font-size:18px;
 }
 
-.controls td{
-	border-bottom:1px solid #44F;
-	border-right:1px solid #44F;
-	padding: 10px 0 0 3px;
-    vertical-align: top;
-}
-.controls th{
-	font-weight:normal;
-	border-bottom: 1px solid #4444FF;
-    border-right: 1px solid #4444FF;
-}
-.right{
-	border-right:0px !important;
-}
-
-.bottom{
-	border-bottom:0px !important;
-}
-.controls input{
-	margin:0.1em;
-}
-
-#slideout {
-	position: fixed;
-	_position:absolute;
-	top: 40px;
-	right: 0;
-	margin: 12px 0 0 0;
-}
-
-.slideout_inner {
-	position:absolute;
-	top: 40px;
-	right: -255px;
-	display:none;
-}
-
-#slideout:hover .slideout_inner{
-	display : block;
-	position:absolute;
-	top: 2px;
-	right: 0px;
-	width: 280px;
-	z-index:10;
-}
-
-.table-slide{
-	border:1px solid #000;
-	height:100px;
-	width:280px;
-}
-.table-slide td{
-	border-right:1px solid #000;
-	padding:8px;
-	padding-right:20px;
-	border-bottom:1px solid #000;
-}
-
-.gray {
-	background-color:#CCCCCC;
-	width: 35px;
-	height: 18px;
-	float: left;
-	text-align: center;
-	margin-right: 1px;
-	padding-top:3px;
-}
-
-.blue {
-	background-color:#00ccff;
-	width: 35px;
-	height: 18px;
-	float: left;
-	text-align: center;
-	margin-right: 1px;
-	padding-top:3px;
-}
-
-.green {
-	background-color:#99cc00;
-	width: 35px;
-	height: 18px;
-	float: left;
-	text-align: center;
-	margin-right: 1px;
-	padding-top:3px;
-}
-
-.yellow {
-	background-color:#ffff00;
-	width: 35px;
-	height: 18px;
-	float: left;
-	text-align: center;
-	margin-right: 1px;
-	padding-top:3px;
-}
-
-.orange {
-	background-color:#ff9900;
-	width: 35px;
-	height: 18px;
-	float: left;
-	text-align: center;
-	margin-right: 1px;
-	padding-top:3px;
-}
-
-.red {
-	background-color:#ff0000;
-	width: 35px;
-	height: 18px;
-	float: left;
-	text-align: center;
-	margin-right: 1px;
-	padding-top:3px;
-}
-
-.downldbox {
-	height:auto;
-	width:310px;
-	font-weight:bold;
-}
-
-.downldbox ul{
-	list-style:none;
-	margin:5px;
-	padding:0px;
-}
-
-.downldbox ul li{
-	width: 130px;
-	float:left;
-	margin:2px;
-}
-
-.dropmenudiv{
-	position:absolute;
-	top: 0;
-	border: 1px solid #DDDDDD; /*THEME CHANGE HERE*/
-	/*border-bottom-width: 0;*/
-	font:normal 12px Verdana;
-	line-height:18px;
-	z-index:100;
-	background-color: white;
-	width: 50px;
-	visibility: hidden;
-}
-
-.break_words{
-	word-wrap: break-word;
-}
-
-.tag {
-	color:#120f3c;
-	font-weight:bold;
-}
-
-.graph_bottom {
-	border-bottom:1px solid #CCCCCC;
-}
-
-th { 
-	font-weight:normal; 
-}
-
-.last_tick_height {
-	height:4px;
-}
-
-.last_tick_width {
-	width:4px;
-}
-
-.graph_top {
-	border-top:1px solid #CCCCCC;
-}
-
-.graph_right {
-	border-right:1px solid #CCCCCC;
-}
-
-.graph_rightWhite {
-	border-right:1px solid #FFFFFF;
-}
-
-.prod_col {
-	width:420px;
-	max-width:420px;
-	word-wrap: break-word;
-}
-
-.side_tick_height {
-	height:1px;
-	line-height:1px;
-}
-
-.graph_gray {
-	background-color:#CCCCCC;
-}
-
-.graph_blue {
-	background-color:#00ccff;
-}
-
-.graph_green {
-	background-color:#99cc00;
-}
-
-.graph_yellow {
-	background-color:#ffff00;
-}
-
-.graph_orange {
-	background-color:#ff9900;
-}
-
-.graph_red {
-	background-color:#ff0000;
-}
-
-.Link {
-height:20px;
-min-height:20px;
-max-height:20px;
-padding:0px;
-margin:0px;
-_height:20px;
-}
-
-.tag {
-color:#120f3c;
-font-weight:normal;
-}
+					
 </style>
-<script language="javascript" type="text/javascript">
-function change_view()
+<?php
+function TrackerCommonCSS($uniqueId, $TrackerType)
 {
-	var limit = document.getElementById('Tot_rows').value;
-	var dwcount = document.getElementById('dwcount');
-	
-	var i=0;
-	for(i=0;i<limit;i++)
-	{
-		if(dwcount.value == 'active')
-		{
-			var row_type = document.getElementById('active_Graph_Row_A_'+i);
-			if(row_type != null && row_type != '')
-			{
-				<?php if(strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') == FALSE) { ?>
-				document.getElementById("active_Graph_Row_A_"+i).style.display = "table-row";
-				document.getElementById("active_Graph_Row_B_"+i).style.display = "table-row";
-				document.getElementById("active_Graph_Row_C_"+i).style.display = "table-row";
-				<? } else { ?>
-				document.getElementById("active_Graph_Row_A_"+i).style.display = "inline";
-				document.getElementById("active_Graph_Row_B_"+i).style.display = "inline";
-				document.getElementById("active_Graph_Row_C_"+i).style.display = "inline";
-				<?php } ?>
-				document.getElementById("total_Graph_Row_A_"+i).style.display = "none";
-				document.getElementById("total_Graph_Row_B_"+i).style.display = "none";
-				document.getElementById("total_Graph_Row_C_"+i).style.display = "none";
-				document.getElementById("indlead_Graph_Row_A_"+i).style.display = "none";
-				document.getElementById("indlead_Graph_Row_B_"+i).style.display = "none";
-				document.getElementById("indlead_Graph_Row_C_"+i).style.display = "none";
-			}
-		}
-		else if(dwcount.value == 'total')
-		{
-			var row_type = document.getElementById('total_Graph_Row_A_'+i);
-			if(row_type != null && row_type != '')
-			{
-				document.getElementById("active_Graph_Row_A_"+i).style.display = "none";
-				document.getElementById("active_Graph_Row_B_"+i).style.display = "none";
-				document.getElementById("active_Graph_Row_C_"+i).style.display = "none";
-				<?php if(strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') == FALSE) { /// IE does not support table-row and moziall does not support inline ?>
-				document.getElementById("total_Graph_Row_A_"+i).style.display = "table-row";
-				document.getElementById("total_Graph_Row_B_"+i).style.display = "table-row";
-				document.getElementById("total_Graph_Row_C_"+i).style.display = "table-row";
-				<? } else { ?>
-				document.getElementById("total_Graph_Row_A_"+i).style.display = "inline";
-				document.getElementById("total_Graph_Row_B_"+i).style.display = "inline";
-				document.getElementById("total_Graph_Row_C_"+i).style.display = "inline";
-				<?php } ?>
-				document.getElementById("indlead_Graph_Row_A_"+i).style.display = "none";
-				document.getElementById("indlead_Graph_Row_B_"+i).style.display = "none";
-				document.getElementById("indlead_Graph_Row_C_"+i).style.display = "none";
-			}
-		}
-		else
-		{
-			var row_type = document.getElementById('indlead_Graph_Row_A_'+i);
-			if(row_type != null && row_type != '')
-			{
-				document.getElementById("active_Graph_Row_A_"+i).style.display = "none";
-				document.getElementById("active_Graph_Row_B_"+i).style.display = "none";
-				document.getElementById("active_Graph_Row_C_"+i).style.display = "none";
-				document.getElementById("total_Graph_Row_A_"+i).style.display = "none";
-				document.getElementById("total_Graph_Row_B_"+i).style.display = "none";
-				document.getElementById("total_Graph_Row_C_"+i).style.display = "none";
-				<?php if(strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') == FALSE) { ?>
-				document.getElementById("indlead_Graph_Row_A_"+i).style.display = "table-row"; 
-				document.getElementById("indlead_Graph_Row_B_"+i).style.display = "table-row";
-				document.getElementById("indlead_Graph_Row_C_"+i).style.display = "table-row";
-				<? } else { ?>
-				document.getElementById("indlead_Graph_Row_A_"+i).style.display = "inline";
-				document.getElementById("indlead_Graph_Row_B_"+i).style.display = "inline";
-				document.getElementById("indlead_Graph_Row_C_"+i).style.display = "inline";
-				<?php } ?>
-			}
-		}
-			
-	}	
+	$htmlContent = '';
+	$htmlContent = '<style type="text/css">
+
+					/* As in IE6 hover css does not works, below htc file is added which contains js script which will be executed only in IE, the script convert simple as well as complex hover css into compatible format for IE6 by replacing hover by class css - this file is used so that help tab as well as product selector will work in IE6 without any changes of code as well as css code and script can be also useful for making other css to work in IE6 like :hover and :active for IE6+, and additionally :focus for IE7 and IE8. */
+					ul, li, '.$uniqueId.'slideout { behavior:url("css/csshover3.htc"); }
+					img { behavior: url("css/iepngfix.htc"); }					
+					a, a:hover{ height:100%; width:100%; display:block; text-decoration:none;}
+					
+					.controls td{
+						border-bottom:1px solid #44F;
+						border-right:1px solid #44F;
+						padding: 10px 0 0 3px;
+						vertical-align: top;
+					}
+					.controls th{
+						font-weight:normal;
+						border-bottom: 1px solid #4444FF;
+						border-right: 1px solid #4444FF;
+					}
+					.right{
+						border-right:0px !important;
+					}
+					
+					.bottom{
+						border-bottom:0px !important;
+					}
+					.controls input{
+						margin:0.1em;
+					}
+					
+					#slideout_'.$uniqueId.' {
+						position: fixed;
+						_position:absolute;
+						top: '.(($TrackerType != 'PT') ? '200':'40').'px;
+						right: 0;
+						margin: 12px 0 0 0;
+					}
+					
+					.slideout_inner {
+						position:absolute;
+						top: '.(($TrackerType != 'PT') ? '200':'40').'px;
+						right: -255px;
+						display:none;
+					}
+					
+					#slideout_'.$uniqueId.':hover .slideout_inner{
+						display : block;
+						position:absolute;
+						top: 2px;
+						right: 0px;
+						width: 280px;
+						z-index:10;
+					}
+					
+					.table-slide{
+						border:1px solid #000;
+						height:100px;
+						width:280px;
+					}
+					.table-slide td{
+						border-right:1px solid #000;
+						padding:8px;
+						padding-right:20px;
+						border-bottom:1px solid #000;
+					}
+					
+					.gray {
+						background-color:#CCCCCC;
+						width: 35px;
+						height: 18px;
+						float: left;
+						text-align: center;
+						margin-right: 1px;
+						padding-top:3px;
+					}
+					
+					.blue {
+						background-color:#00ccff;
+						width: 35px;
+						height: 18px;
+						float: left;
+						text-align: center;
+						margin-right: 1px;
+						padding-top:3px;
+					}
+					
+					.green {
+						background-color:#99cc00;
+						width: 35px;
+						height: 18px;
+						float: left;
+						text-align: center;
+						margin-right: 1px;
+						padding-top:3px;
+					}
+					
+					.yellow {
+						background-color:#ffff00;
+						width: 35px;
+						height: 18px;
+						float: left;
+						text-align: center;
+						margin-right: 1px;
+						padding-top:3px;
+					}
+					
+					.orange {
+						background-color:#ff9900;
+						width: 35px;
+						height: 18px;
+						float: left;
+						text-align: center;
+						margin-right: 1px;
+						padding-top:3px;
+					}
+					
+					.red {
+						background-color:#ff0000;
+						width: 35px;
+						height: 18px;
+						float: left;
+						text-align: center;
+						margin-right: 1px;
+						padding-top:3px;
+					}
+					
+					.downldbox {
+						height:auto;
+						width:310px;
+						font-weight:bold;
+					}
+					
+					.downldbox ul{
+						list-style:none;
+						margin:5px;
+						padding:0px;
+					}
+					
+					.downldbox ul li{
+						width: 130px;
+						float:left;
+						margin:2px;
+					}
+					
+					.dropmenudiv{
+						position:absolute;
+						top: 0;
+						border: 1px solid #DDDDDD; /*THEME CHANGE HERE*/
+						/*border-bottom-width: 0;*/
+						font:normal 12px Verdana;
+						line-height:18px;
+						z-index:100;
+						background-color: white;
+						width: 50px;
+						visibility: hidden;
+					}
+					
+					.break_words{
+						word-wrap: break-word;
+					}
+					
+					.tag {
+						color:#120f3c;
+						font-weight:bold;
+					}
+					
+					.graph_bottom {
+						border-bottom:1px solid #CCCCCC;
+					}
+					
+					th { 
+						font-weight:normal; 
+					}
+					
+					.last_tick_height {
+						height:4px;
+					}
+					
+					.last_tick_width {
+						width:4px;
+					}
+					
+					.graph_top {
+						border-top:1px solid #CCCCCC;
+					}
+					
+					.graph_right {
+						border-right:1px solid #CCCCCC;
+					}
+					
+					.graph_rightWhite {
+						border-right:1px solid #FFFFFF;
+					}
+					
+					.prod_col {
+						width:420px;
+						max-width:420px;
+						word-wrap: break-word;
+					}
+					
+					.side_tick_height {
+						height:1px;
+						line-height:1px;
+					}
+					
+					.graph_gray {
+						background-color:#CCCCCC;
+					}
+					
+					.graph_blue {
+						background-color:#00ccff;
+					}
+					
+					.graph_green {
+						background-color:#99cc00;
+					}
+					
+					.graph_yellow {
+						background-color:#ffff00;
+					}
+					
+					.graph_orange {
+						background-color:#ff9900;
+					}
+					
+					.graph_red {
+						background-color:#ff0000;
+					}
+					
+					.Link {
+					height:20px;
+					min-height:20px;
+					max-height:20px;
+					padding:0px;
+					margin:0px;
+					_height:20px;
+					}
+					
+					.tag {
+					color:#120f3c;
+					font-weight:normal;
+					}
+					</style>';
+	return $htmlContent;				
 }
-</script>
 
-<script type="text/javascript">
-        var currentFixedHeader;
-        var currentGhost;
-		var ScrollOn = false;
-		
-		//Start - Header recreation in case of window resizing
-		$(window).resize(function() {
-			$.fn.reverse = [].reverse;
-			var createGhostHeader = function (header, topOffset, leftOffset) {
-                // Recreate heaaderin case of window resizing even if there is current ghost header exists
-              if (currentGhost)
-                    $(currentGhost).remove();
-                
-                var realTable = $(header).parents('#ProdTrackerTable');
-                
-                var headerPosition = $(header).offset();
-                var tablePosition = $(realTable).offset();
-                
-                var container = $('<table border="0" cellspacing="0" cellpadding="0" style="vertical-align:middle; background-color:#FFFFFF;" id="ProdTrackerTable1"></table>');
-                
-                // Copy attributes from old table (may not be what you want)
-                for (var i = 0; i < realTable[0].attributes.length; i++) {
-                    var attr = realTable[0].attributes[i];
-					//We are not manually copying table attributes so below line is commented cause it does not work in IE6 and IE7
-                    //container.attr(attr.name, attr.value);
-                }
-                                
-                // Set up position of fixed row
-                container.css({
-                    position: 'fixed',
-                    top: -topOffset,
-                    left: (-$(window).scrollLeft() + leftOffset),
-                    width: $(realTable).outerWidth()
-                });
-                
-                // Create a deep copy of our actual header and put it in our container
-                var newHeader = $(header).clone().appendTo(container);
-                
-                var collection2 = $(newHeader).find('td');
-                
-                // TODO: Copy the width of each <td> manually
-                $(header).find('td').each(function () {
-                    var matchingElement = $(collection2.eq($(this).index()));
-                    $(matchingElement).width(this.offsetWidth + 0.5);
-                });
+function TrackerCommonJScript($uniqueId)
+{
+	$htmlContent = '';
+	
+	//Script for view change
+	$htmlContent .= "<script language=\"javascript\" type=\"text/javascript\">
+					function change_view_".$uniqueId."_()
+					{
+						var limit = document.getElementById('".$uniqueId."_Tot_rows').value;
+						var dwcount = document.getElementById('".$uniqueId."_dwcount');
+						$.browser.ie = /msie/.test(navigator.userAgent.toLowerCase()); 
 				
-                currentGhost = container;
-                currentFixedHeader = header;
-                
-                // Add this fixed row to the same parent as the table
-                $(table).parent().append(currentGhost);
-                return currentGhost;
-            };
+						var i=0;
+						for(i=0;i<limit;i++)
+						{
+							if(dwcount.value == 'active')
+							{
+								var row_type = document.getElementById('".$uniqueId."_active_Graph_Row_A_'+i);
+								if(row_type != null && row_type != '')
+								{
+									if(!$.browser.ie)
+									{
+										document.getElementById('".$uniqueId."_active_Graph_Row_A_'+i).style.display = 'table-row';
+										document.getElementById('".$uniqueId."_active_Graph_Row_B_'+i).style.display = 'table-row';
+										document.getElementById('".$uniqueId."_active_Graph_Row_C_'+i).style.display = 'table-row';
+									}
+									else
+									{
+										document.getElementById('".$uniqueId."_active_Graph_Row_A_'+i).style.display = 'inline';
+										document.getElementById('".$uniqueId."_active_Graph_Row_B_'+i).style.display = 'inline';
+										document.getElementById('".$uniqueId."_active_Graph_Row_C_'+i).style.display = 'inline';
+									}
+									document.getElementById('".$uniqueId."_total_Graph_Row_A_'+i).style.display = 'none';
+									document.getElementById('".$uniqueId."_total_Graph_Row_B_'+i).style.display = 'none';
+									document.getElementById('".$uniqueId."_total_Graph_Row_C_'+i).style.display = 'none';
+									document.getElementById('".$uniqueId."_indlead_Graph_Row_A_'+i).style.display = 'none';
+									document.getElementById('".$uniqueId."_indlead_Graph_Row_B_'+i).style.display = 'none';
+									document.getElementById('".$uniqueId."_indlead_Graph_Row_C_'+i).style.display = 'none';
+								}
+							}
+							else if(dwcount.value == 'total')
+							{
+								var row_type = document.getElementById('".$uniqueId."_total_Graph_Row_A_'+i);
+								if(row_type != null && row_type != '')
+								{
+									document.getElementById('".$uniqueId."_active_Graph_Row_A_'+i).style.display = 'none';
+									document.getElementById('".$uniqueId."_active_Graph_Row_B_'+i).style.display = 'none';
+									document.getElementById('".$uniqueId."_active_Graph_Row_C_'+i).style.display = 'none';
+									if(!$.browser.ie)
+									{
+										document.getElementById('".$uniqueId."_total_Graph_Row_A_'+i).style.display = 'table-row';
+										document.getElementById('".$uniqueId."_total_Graph_Row_B_'+i).style.display = 'table-row';
+										document.getElementById('".$uniqueId."_total_Graph_Row_C_'+i).style.display = 'table-row';
+									} 
+									else 
+									{
+										document.getElementById('".$uniqueId."_total_Graph_Row_A_'+i).style.display = 'inline';
+										document.getElementById('".$uniqueId."_total_Graph_Row_B_'+i).style.display = 'inline';
+										document.getElementById('".$uniqueId."_total_Graph_Row_C_'+i).style.display = 'inline';
+									}
+									document.getElementById('".$uniqueId."_indlead_Graph_Row_A_'+i).style.display = 'none';
+									document.getElementById('".$uniqueId."_indlead_Graph_Row_B_'+i).style.display = 'none';
+									document.getElementById('".$uniqueId."_indlead_Graph_Row_C_'+i).style.display = 'none';
+								}
+							}
+							else
+							{
+								var row_type = document.getElementById('".$uniqueId."_indlead_Graph_Row_A_'+i);
+								if(row_type != null && row_type != '')
+								{
+									document.getElementById('".$uniqueId."_active_Graph_Row_A_'+i).style.display = 'none';
+									document.getElementById('".$uniqueId."_active_Graph_Row_B_'+i).style.display = 'none';
+									document.getElementById('".$uniqueId."_active_Graph_Row_C_'+i).style.display = 'none';
+									document.getElementById('".$uniqueId."_total_Graph_Row_A_'+i).style.display = 'none';
+									document.getElementById('".$uniqueId."_total_Graph_Row_B_'+i).style.display = 'none';
+									document.getElementById('".$uniqueId."_total_Graph_Row_C_'+i).style.display = 'none';
+									if(!$.browser.ie)
+									{
+										document.getElementById('".$uniqueId."_indlead_Graph_Row_A_'+i).style.display = 'table-row'; 
+										document.getElementById('".$uniqueId."_indlead_Graph_Row_B_'+i).style.display = 'table-row';
+										document.getElementById('".$uniqueId."_indlead_Graph_Row_C_'+i).style.display = 'table-row';
+									}
+									else 
+									{
+										document.getElementById('".$uniqueId."_indlead_Graph_Row_A_'+i).style.display = 'inline';
+										document.getElementById('".$uniqueId."_indlead_Graph_Row_B_'+i).style.display = 'inline';
+										document.getElementById('".$uniqueId."_indlead_Graph_Row_C_'+i).style.display = 'inline';
+									}
+								}
+							}
+						}	
+					}
+					</script>";
+					//Script for view change ends
 
-            var currentScrollTop = $(window).scrollTop();
-
-            var activeHeader = null;
-            var table = $('#ProdTrackerTable').first();
-            var tablePosition = table.offset();
-            var tableHeight = table.height();
-            
-            var lastHeaderHeight = $(table).find('thead').last().height();
-            var topOffset = 0;
-            
-            // Check that the table is visible and has space for a header
-            if (tablePosition.top + tableHeight - lastHeaderHeight >= currentScrollTop)
-            {
-                var lastCheckedHeader = null;
-                // We do these in reverse as we want the last good header
-                var headers = $(table).find('thead').reverse().each(function () {
-                    var position = $(this).offset();
-                    
-                    if (position.top <= currentScrollTop)
-                    {
-                        activeHeader = this;
-                        return false;
-                    }
-                    
-                    lastCheckedHeader = this;
-                });
-                
-                if (lastCheckedHeader)
-                {
-                    var offset = $(lastCheckedHeader).offset();
-                    if (offset.top - currentScrollTop < $(activeHeader).height())
-                        topOffset = $(activeHeader).height() - (offset.top - currentScrollTop) + 1;
-                }
-            }
-            // No row is needed, get rid of one if there is one
-            if (activeHeader == null && currentGhost)
-
-            {
-                currentGhost.remove();
-
-                currentGhost = null;
-                currentFixedHeader = null;
-            }
-            
-            // We have what we need, make a fixed header row
-            if (activeHeader)
-			{
-                createGhostHeader(activeHeader, topOffset, ($('#ProdTrackerTable').offset().left));
-			}
-		});
-		//End - Header recreation in case of window resizing
+	//Script for Fixed header while resize
+	$htmlContent .= "<script type=\"text/javascript\">
+       				 var currentFixedHeader_".$uniqueId.";
+       				 var currentGhost_".$uniqueId.";
+					 var ScrollOn_".$uniqueId." = false;
 		
-        ///Start - Header creation or align header incase of scrolling
-		$(window).scroll(function() {
-            $.fn.reverse = [].reverse;
-			if(!ScrollOn)
-			{
-            	ScrollOn = true;
-			}
-            var createGhostHeader = function (header, topOffset, leftOffset) {
-                // Don't recreate if it is the same as the current one
-                if (header == currentFixedHeader && currentGhost)
-                {
-                    currentGhost.css('top', -topOffset + "px");
-					currentGhost.css('left',(-$(window).scrollLeft() + leftOffset) + "px");
-                    return currentGhost;
-                }
+					//Start - Header recreation in case of window resizing
+					$(window).resize(function() {
+							$.fn.reverse = [].reverse;
+							var createGhostHeader_".$uniqueId." = function (header, topOffset, leftOffset) {
+        			        // Recreate heaaderin case of window resizing even if there is current ghost header exists
+        			       if (currentGhost_".$uniqueId.")
+            		        $(currentGhost_".$uniqueId.").remove();
                 
-                if (currentGhost)
-                    $(currentGhost).remove();
+           			     var realTable = $(header).parents('#".$uniqueId."_ProdTrackerTable');
                 
-                var realTable = $(header).parents('#ProdTrackerTable');
+            		    var headerPosition = $(header).offset();
+           			    var tablePosition = $(realTable).offset();
                 
-                var headerPosition = $(header).offset();
-                var tablePosition = $(realTable).offset();
+          			    var container = $('<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\" style=\"vertical-align:middle; background-color:#FFFFFF;\" id=\"".$uniqueId."_ProdTrackerTable1\"></table>');
                 
-                var container = $('<table border="0" cellspacing="0" cellpadding="0" style="vertical-align:middle; background-color:#FFFFFF;" id="ProdTrackerTable1"></table>');
-                
-                // Copy attributes from old table (may not be what you want)
-                for (var i = 0; i < realTable[0].attributes.length; i++) {
-                    var attr = realTable[0].attributes[i];
-					//We are not manually copying table attributes so below line is commented cause it does not work in IE6 and IE7
-                    //container.attr(attr.name, attr.value);
-                }
+             		   // Copy attributes from old table (may not be what you want)
+          		      for (var i = 0; i < realTable[0].attributes.length; i++) {
+          		          var attr = realTable[0].attributes[i];
+						 //We are not manually copying table attributes so below line is commented cause it does not work in IE6 and IE7
+            	        //container.attr(attr.name, attr.value);
+            		    }
                                 
-                // Set up position of fixed row
-                container.css({
-                    position: 'fixed',
-                    top: -topOffset,
-                    left: (-$(window).scrollLeft() + leftOffset),
-                    width: $(realTable).outerWidth()
-                });
+                	// Set up position of fixed row
+          		    container.css({
+                    	position: 'fixed',
+                   		top: -topOffset,
+                    	left: (-$(window).scrollLeft() + leftOffset),
+                    	width: $(realTable).outerWidth()
+                	});
                 
-                // Create a deep copy of our actual header and put it in our container
-                var newHeader = $(header).clone().appendTo(container);
+                	// Create a deep copy of our actual header and put it in our container
+                	var newHeader = $(header).clone().appendTo(container);
                 
-                var collection2 = $(newHeader).find('td');
-                
-                // TODO: Copy the width of each <td> manually
-                $(header).find('td').each(function () {
-                    var matchingElement = $(collection2.eq($(this).index()));
-                    $(matchingElement).width(this.offsetWidth + 0.5);
-                });
+                	var collection2 = $(newHeader).find('td');
+               	 
+                	// TODO: Copy the width of each <td> manually
+                	$(header).find('td').each(function () {
+                	    var matchingElement = $(collection2.eq($(this).index()));
+                	    $(matchingElement).width(this.offsetWidth + 0.5);
+                	});
 				
-                currentGhost = container;
-                currentFixedHeader = header;
+                	currentGhost_".$uniqueId." = container;
+                	currentFixedHeader_".$uniqueId." = header;
                 
-                // Add this fixed row to the same parent as the table
-                $(table).parent().append(currentGhost);
-                return currentGhost;
-            };
+                	// Add this fixed row to the same parent as the table
+                	$(table_".$uniqueId.").parent().append(currentGhost_".$uniqueId.");
+                	return currentGhost_".$uniqueId.";
+            	};
 
-            var currentScrollTop = $(window).scrollTop();
+            	var currentScrollTop_".$uniqueId." = $(window).scrollTop();
 
-            var activeHeader = null;
-            var table = $('#ProdTrackerTable').first();
-            var tablePosition = table.offset();
-            var tableHeight = table.height();
+            	var activeHeader_".$uniqueId." = null;
+            	var table_".$uniqueId." = $('#".$uniqueId."_ProdTrackerTable').first();
+            	var tablePosition_".$uniqueId." = table_".$uniqueId.".offset();
+            	var tableHeight_".$uniqueId." = table_".$uniqueId.".height();
             
-            var lastHeaderHeight = $(table).find('thead').last().height();
-            var topOffset = 0;
+            	var lastHeaderHeight_".$uniqueId." = $(table_".$uniqueId.").find('thead').last().height();
+            	var topOffset_".$uniqueId." = 0;
             
-            // Check that the table is visible and has space for a header
-            if (tablePosition.top + tableHeight - lastHeaderHeight >= currentScrollTop)
-            {
-                var lastCheckedHeader = null;
-                // We do these in reverse as we want the last good header
-                var headers = $(table).find('thead').reverse().each(function () {
-                    var position = $(this).offset();
-                    
-                    if (position.top <= currentScrollTop)
-                    {
-                        activeHeader = this;
-                        return false;
-                    }
-                    
-                    lastCheckedHeader = this;
-                });
+            	if(tableHeight_".$uniqueId." != 0)//check if table is visible in tab then only create ghost header
+				{
+					// Check that the table is visible and has space for a header
+            		if (tablePosition_".$uniqueId.".top + tableHeight_".$uniqueId." - lastHeaderHeight_".$uniqueId." >= currentScrollTop_".$uniqueId.")
+            		{
+                		var lastCheckedHeader_".$uniqueId." = null;
+                		// We do these in reverse as we want the last good header
+                		var headers_".$uniqueId." = $(table_".$uniqueId.").find('thead').reverse().each(function () {
+                			var position_".$uniqueId." = $(this).offset();
+                		   
+                		   	if (position_".$uniqueId.".top <= currentScrollTop_".$uniqueId.")
+                		   	{
+                		       	activeHeader_".$uniqueId." = this;
+                		       	return false;
+                		   	}
+                		   
+                		   	lastCheckedHeader_".$uniqueId." = this;
+                		});
+                	
+                		if (lastCheckedHeader_".$uniqueId.")
+                		{
+                		    var offset_".$uniqueId." = $(lastCheckedHeader_".$uniqueId.").offset();
+                		    if (offset_".$uniqueId.".top - currentScrollTop_".$uniqueId." < $(activeHeader_".$uniqueId.").height())
+                		        topOffset_".$uniqueId." = $(activeHeader_".$uniqueId.").height() - (offset_".$uniqueId.".top - currentScrollTop_".$uniqueId.") + 1;
+                		}
+            		}
+            		// No row is needed, get rid of one if there is one
+            		if (activeHeader_".$uniqueId." == null && currentGhost_".$uniqueId.")
+	            	{
+	            	    currentGhost_".$uniqueId.".remove();
+		
+    		            currentGhost_".$uniqueId." = null;
+    	    	        currentFixedHeader_".$uniqueId." = null;
+    	        	}
+    	        
+    	        	// We have what we need, make a fixed header row
+    	        	if (activeHeader_".$uniqueId.")
+					{
+    	            	createGhostHeader_".$uniqueId."(activeHeader_".$uniqueId.", topOffset_".$uniqueId.", ($('#".$uniqueId."_ProdTrackerTable').offset().left));
+					}
+				}//end of if for checking table is visible or not in tab
+			});
+			//End - Header recreation in case of window resizing";
+		
+    //Script for Fixed header while resize
+	$htmlContent .= "///Start - Header creation or align header incase of scrolling
+					$(window).scroll(function() {
+    		        $.fn.reverse = [].reverse;
+					if(!ScrollOn_".$uniqueId.")
+					{
+    		        	ScrollOn_".$uniqueId." = true;
+					}
+    		        var createGhostHeader_".$uniqueId." = function (header_".$uniqueId.", topOffset_".$uniqueId.", leftOffset_".$uniqueId.") {
+    		            // Don't recreate if it is the same as the current one
+    		            if (header_".$uniqueId." == currentFixedHeader_".$uniqueId." && currentGhost_".$uniqueId.")
+        		        {
+            		        currentGhost_".$uniqueId.".css('top', -topOffset_".$uniqueId." + \"px\");
+							currentGhost_".$uniqueId.".css('left',(-$(window).scrollLeft() + leftOffset_".$uniqueId.") + \"px\");
+        		            return currentGhost_".$uniqueId.";
+        		        }
+        		     
+       		        if (currentGhost_".$uniqueId.")
+       	             $(currentGhost_".$uniqueId.").remove();
                 
-                if (lastCheckedHeader)
-                {
-                    var offset = $(lastCheckedHeader).offset();
-                    if (offset.top - currentScrollTop < $(activeHeader).height())
-                        topOffset = $(activeHeader).height() - (offset.top - currentScrollTop) + 1;
-                }
-            }
-            // No row is needed, get rid of one if there is one
-            if (activeHeader == null && currentGhost)
+       		         var realTable_".$uniqueId." = $(header_".$uniqueId.").parents('#".$uniqueId."_ProdTrackerTable');
+        	        
+            	    var headerPosition_".$uniqueId." = $(header_".$uniqueId.").offset();
+            	    var tablePosition_".$uniqueId." = $(realTable_".$uniqueId.").offset();
+                
+            	    var container_".$uniqueId." = $('<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\" style=\"vertical-align:middle; background-color:#FFFFFF;\" id=\"".$uniqueId."_ProdTrackerTable1\"></table>');
+                
+                	// Copy attributes from old table (may not be what you want)
+               		for (var i = 0; i < realTable_".$uniqueId."[0].attributes.length; i++) {
+                	    var attr_".$uniqueId." = realTable_".$uniqueId."[0].attributes[i];
+						//We are not manually copying table attributes so below line is commented cause it does not work in IE6 and IE7
+                	    //container.attr(attr.name, attr.value);
+                	}
+                                
+                	// Set up position of fixed row
+                	container_".$uniqueId.".css({
+                	    position: 'fixed',
+                	    top: -topOffset_".$uniqueId.",
+                	    left: (-$(window).scrollLeft() + leftOffset_".$uniqueId."),
+                	    width: $(realTable_".$uniqueId.").outerWidth()
+                	});
+                
+                	// Create a deep copy of our actual header and put it in our container
+                	var newHeader_".$uniqueId." = $(header_".$uniqueId.").clone().appendTo(container_".$uniqueId.");
+                	
+                	var collection2_".$uniqueId." = $(newHeader_".$uniqueId.").find('td');
+                	
+                	// TODO: Copy the width of each <td> manually
+                	$(header_".$uniqueId.").find('td').each(function () {
+                	    var matchingElement_".$uniqueId." = $(collection2_".$uniqueId.".eq($(this).index()));
+                	    $(matchingElement_".$uniqueId.").width(this.offsetWidth + 0.5);
+                	});
+				
+                	currentGhost_".$uniqueId." = container_".$uniqueId.";
+                	currentFixedHeader_".$uniqueId." = header_".$uniqueId.";
+                
+                	// Add this fixed row to the same parent as the table
+                	$(table_".$uniqueId.").parent().append(currentGhost_".$uniqueId.");
+                	return currentGhost_".$uniqueId.";
+            	};
 
-            {
-                currentGhost.remove();
-
-                currentGhost = null;
-                currentFixedHeader = null;
-            }
-            
-            // We have what we need, make a fixed header row
-            if (activeHeader)
-			{
-                createGhostHeader(activeHeader, topOffset, ($('#ProdTrackerTable').offset().left));
-			}
-        });
-		///End - Header creation or align header incase of scrolling
-</script>
+            	var currentScrollTop_".$uniqueId." = $(window).scrollTop();
+            	var activeHeader_".$uniqueId." = null;
+            	var table_".$uniqueId." = $('#".$uniqueId."_ProdTrackerTable').first();
+            	var tablePosition_".$uniqueId." = table_".$uniqueId.".offset();
+            	var tableHeight_".$uniqueId." = table_".$uniqueId.".height();
+				var lastHeaderHeight_".$uniqueId." = $(table_".$uniqueId.").find('thead').last().height();
+            	var topOffset_".$uniqueId." = 0;
+           
+		   		if(tableHeight_".$uniqueId." != 0)//check if table is visible in tab then only create ghost header
+		   		{
+					// Check that the table is visible and has space for a header
+            		if (tablePosition_".$uniqueId.".top + tableHeight_".$uniqueId." - lastHeaderHeight_".$uniqueId." >= currentScrollTop_".$uniqueId.")
+            		{
+            		    var lastCheckedHeader_".$uniqueId." = null;
+            		    // We do these in reverse as we want the last good header
+            		    var headers_".$uniqueId." = $(table_".$uniqueId.").find('thead').reverse().each(function () {
+            		        var position_".$uniqueId." = $(this).offset();
+            		        
+            		        if (position_".$uniqueId.".top <= currentScrollTop_".$uniqueId.")
+            		        {
+            		            activeHeader_".$uniqueId." = this;
+            		            return false;
+            		        }
+            		        
+            		        lastCheckedHeader_".$uniqueId." = this;
+            			});
+                	
+            		  	if (lastCheckedHeader_".$uniqueId.")
+            		 	{
+            		       	var offset_".$uniqueId." = $(lastCheckedHeader_".$uniqueId.").offset();
+            		       	if (offset_".$uniqueId.".top - currentScrollTop_".$uniqueId." < $(activeHeader_".$uniqueId.").height())
+            		       	    topOffset_".$uniqueId." = $(activeHeader_".$uniqueId.").height() - (offset_".$uniqueId.".top - currentScrollTop_".$uniqueId.") + 1;
+            		   	}
+            		}
+					// No row is needed, get rid of one if there is one
+            		if (activeHeader_".$uniqueId." == null && currentGhost_".$uniqueId.")	
+	            	{
+	            	    currentGhost_".$uniqueId.".remove();
+	
+		                currentGhost_".$uniqueId." = null;
+		                currentFixedHeader_".$uniqueId." = null;
+		            }
+	            
+		            // We have what we need, make a fixed header row
+		            if (activeHeader_".$uniqueId.")
+					{
+		                createGhostHeader_".$uniqueId."(activeHeader_".$uniqueId.", topOffset_".$uniqueId.", ($('#".$uniqueId."_ProdTrackerTable').offset().left));
+					}
+				}//end of if - checking table visible in tab
+	        });
+			///End - Header creation or align header incase of scrolling
+		</script>";
+		
+		return $htmlContent;
+}
+?>
 </head>
 <body bgcolor="#FFFFFF" style="background-color:#FFFFFF;">
 <?php 
@@ -901,7 +951,7 @@ function TrackerHeaderHTMLContent($Report_DisplayName)
 	if( ( (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE) || !isset($_SERVER['HTTP_REFERER']) ) && ( !isset($_REQUEST['LI']) || $_REQUEST['LI'] != 1) )
 	{
 		$htmlContent .= '<table cellspacing="0" cellpadding="0" width="100%" style="background-color:#FFFFFF;">'
-					   . '<tr><td width="33%" style="background-color:#FFFFFF;"><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" /></td>'
+					   . '<tr><td width="33%" style="background-color:#FFFFFF;"><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" /></td>'
 					   . '<td width="34%" align="center" style="background-color:#FFFFFF;" nowrap="nowrap"><span style="color:#ff0000;font-weight:normal;margin-left:40px;">Interface work in progress</span>'
 					   . '<br/><span style="font-weight:normal;">Send feedback to '
 					   . '<a style="display:inline;color:#0000FF;" target="_self" href="mailto:larvoltrials@larvol.com">'
@@ -911,7 +961,7 @@ function TrackerHeaderHTMLContent($Report_DisplayName)
 	return $htmlContent;
 }
 
-function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $inner_columns, $inner_width, $column_width, $ratio, $areaId, $column_interval, $TrackerType)
+function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $inner_columns, $inner_width, $column_width, $ratio, $areaId, $column_interval, $TrackerType, $uniqueId)
 {				
 	if(count($productIds) == 0) return 'No Products Found';
 	
@@ -927,22 +977,22 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 					.'<form action="product_tracker.php" method="post">'
 					. '<table width="264px" border="0" cellspacing="0" cellpadding="0" class="controls" align="center">'
 					. '<tr>'
-					. '<td class="bottom right"><select id="dwcount" name="dwcount" onchange="change_view();">'
+					. '<td class="bottom right"><select id="'.$uniqueId.'_dwcount" name="dwcount" onchange="change_view_'.$uniqueId.'_();">'
 					. '<option value="indlead" selected="selected">Active industry trials</option>'
 					. '<option value="active">Active trials</option>'
 					. '<option value="total">All trials</option></select></td>'
 					. '<td class="bottom right">'
-					. '<div style="border:1px solid #000000; float:right; margin-top: 0px; padding:2px; color:#000000;" id="chromemenu"><a rel="dropmenu"><span style="padding:2px; padding-right:4px; background-position:left center; background-repeat:no-repeat; background-image:url(\'./images/save.png\'); cursor:pointer; ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><font color="#000000">Export</font></b></span></a></div>'
+					. '<div style="border:1px solid #000000; float:right; margin-top: 0px; padding:2px; color:#000000;" id="'.$uniqueId.'_chromemenu"><a rel="'.$uniqueId.'_dropmenu"><span style="padding:2px; padding-right:4px; background-position:left center; background-repeat:no-repeat; background-image:url(\'./images/save.png\'); cursor:pointer; ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><font color="#000000">Export</font></b></span></a></div>'
 					. '</td>'
 					. '</tr>'
 					. '</table>';
 				
-	$htmlContent  .= '<div id="dropmenu" class="dropmenudiv" style="width: 310px;">'
+	$htmlContent  .= '<div id="'.$uniqueId.'_dropmenu" class="dropmenudiv" style="width: 310px;">'
 					.'<div style="height:100px; padding:6px;"><div class="downldbox"><div class="newtext">Download options</div>'
-					. '<input type="hidden" name="id" id="id" value="' . $id . '" />'
-					. '<input type="hidden" name="TrackerType" id="TrackerType" value="'. $TrackerType .'" />'
+					. '<input type="hidden" name="id" id="'.$uniqueId.'_id" value="' . $id . '" />'
+					. '<input type="hidden" name="TrackerType" id="'.$uniqueId.'_TrackerType" value="'. $TrackerType .'" />'
 					. '<ul><li><label>Which format: </label></li>'
-					. '<li><select id="dwformat" name="dwformat" size="3" style="height:50px">'
+					. '<li><select id="'.$uniqueId.'_dwformat" name="dwformat" size="3" style="height:50px">'
 					//. '<option value="exceldown" selected="selected">Excel</option>'
 					. '<option value="pdfdown">PDF</option>'
 					. '<option value="excelchartdown">Excel Chart</option>'
@@ -951,12 +1001,11 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 					. '</ul>'
 					. '<input type="submit" name="download" title="Download" value="Download file" style="margin-left:8px;"  />'
 					. '</div></div>'
-					. '</div><script type="text/javascript">cssdropdown.startchrome("chromemenu");</script>'
+					. '</div><script type="text/javascript">cssdropdown.startchrome("'.$uniqueId.'_chromemenu");</script>'
 					. '</form>';
 				
 						
-	$htmlContent .= '<div align="center" style="padding-left:10px; padding-right:15px; padding-top:20px; padding-bottom:20px;">'
-					. '<table border="0" align="center" width="'.(420+8+($inner_columns*$columns*8)+8+10).'px" style="vertical-align:middle;" cellpadding="0" cellspacing="0" id="ProdTrackerTable">'
+	$htmlContent .= '<table border="0" align="center" width="'.(420+8+($inner_columns*$columns*8)+8+10).'px" style="vertical-align:middle;" cellpadding="0" cellspacing="0" id="'.$uniqueId.'_ProdTrackerTable">'
 				    . '<thead>';
 	//scale
 	//Row to keep alignement perfect at time of floating headers
@@ -1015,7 +1064,7 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 		
 		$Max_ValueKey = Max_ValueKey($data_matrix[$row]['indlead_phase_na'], $data_matrix[$row]['indlead_phase_0'], $data_matrix[$row]['indlead_phase_1'], $data_matrix[$row]['indlead_phase_2'], $data_matrix[$row]['indlead_phase_3'], $data_matrix[$row]['indlead_phase_4']);
 						
-		$htmlContent .= '<tr id="indlead_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" id="ProdCol_'.$row.'" rowspan="3"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&itype=0' . (($TrackerType == 'PT') ? '&hm='.$id : '') . '" target="_blank" style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
+		$htmlContent .= '<tr id="'.$uniqueId.'_indlead_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" id="'.$uniqueId.'_ProdCol_'.$row.'" rowspan="3"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1&itype=0' . (($TrackerType == 'PT') ? '&hm='.$id : '') . '" target="_blank" style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
 	
 		///Below function will derive number of lines required to display product name, as our graph size is fixed due to fixed scale, we can calculate approx max area  
 		///for product column. From that we can calculate extra height which will be distributed to up and down rows of graph bar, So now IE6/7 as well as chrome will not 
@@ -1026,7 +1075,7 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 		{
 			$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
 		}
-		$htmlContent .= '<th></th></tr><tr id="indlead_Graph_Row_B_'.$row.'" class="Link" >';
+		$htmlContent .= '<th></th></tr><tr id="'.$uniqueId.'_indlead_Graph_Row_B_'.$row.'" class="Link" >';
 		
 		$total_cols = $inner_columns * $columns;
 		$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['indlead']);
@@ -1048,7 +1097,7 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 		if($remain_span > 0)
 		$htmlContent .= DrawExtraHTMLCells($phase_space, $inner_columns, $remain_span);
 		
-		$htmlContent .= '<th></th></tr><tr id="indlead_Graph_Row_C_'.$row.'">';
+		$htmlContent .= '<th></th></tr><tr id="'.$uniqueId.'_indlead_Graph_Row_C_'.$row.'">';
 		for($j=0; $j < $columns; $j++)
 		{
 			$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
@@ -1060,13 +1109,13 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 	
 		$Max_ValueKey = Max_ValueKey($data_matrix[$row]['active_phase_na'], $data_matrix[$row]['active_phase_0'], $data_matrix[$row]['active_phase_1'], $data_matrix[$row]['active_phase_2'], $data_matrix[$row]['active_phase_3'], $data_matrix[$row]['active_phase_4']);
 					
-		$htmlContent .= '<tr style="display:none;" id="active_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" rowspan="3"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1' . (($TrackerType == 'PT') ? '&hm='.$id : '') . '" target="_blank" style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
+		$htmlContent .= '<tr style="display:none;" id="'.$uniqueId.'_active_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" rowspan="3"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=1' . (($TrackerType == 'PT') ? '&hm='.$id : '') . '" target="_blank" style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
 	
 		for($j=0; $j < $columns; $j++)
 		{
 			$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
 		}
-		$htmlContent .= '<th></th></tr><tr style="display:none;" id="active_Graph_Row_B_'.$row.'" class="Link">';
+		$htmlContent .= '<th></th></tr><tr style="display:none;" id="'.$uniqueId.'_active_Graph_Row_B_'.$row.'" class="Link">';
 		
 		$total_cols = $inner_columns * $columns;
 		$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['active']);
@@ -1088,7 +1137,7 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 		if($remain_span > 0)
 		$htmlContent .= DrawExtraHTMLCells($phase_space, $inner_columns, $remain_span);
 		
-		$htmlContent .= '<th></th></tr><tr style="display:none;" id="active_Graph_Row_C_'.$row.'">';
+		$htmlContent .= '<th></th></tr><tr style="display:none;" id="'.$uniqueId.'_active_Graph_Row_C_'.$row.'">';
 		for($j=0; $j < $columns; $j++)
 		{
 			$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
@@ -1100,13 +1149,13 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 		
 		$Max_ValueKey = Max_ValueKey($data_matrix[$row]['total_phase_na'], $data_matrix[$row]['total_phase_0'], $data_matrix[$row]['total_phase_1'], $data_matrix[$row]['total_phase_2'], $data_matrix[$row]['total_phase_3'], $data_matrix[$row]['total_phase_4']);
 	
-		$htmlContent .= '<tr style="display:none;" id="total_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" rowspan="3"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=2' . (($TrackerType == 'PT') ? '&hm='.$id : '') . '" target="_blank" style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
+		$htmlContent .= '<tr style="display:none;" id="'.$uniqueId.'_total_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" rowspan="3"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . '&list=2' . (($TrackerType == 'PT') ? '&hm='.$id : '') . '" target="_blank" style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
 	
 		for($j=0; $j < $columns; $j++)
 		{
 			$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
 		}
-		$htmlContent .= '<th></th></tr><tr style="display:none;" id="total_Graph_Row_B_'.$row.'" class="Link" >';
+		$htmlContent .= '<th></th></tr><tr style="display:none;" id="'.$uniqueId.'_total_Graph_Row_B_'.$row.'" class="Link" >';
 	
 		$total_cols = $inner_columns * $columns;
 		$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['total']);
@@ -1128,7 +1177,7 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 		if($remain_span > 0)
 		$htmlContent .= DrawExtraHTMLCells($phase_space, $inner_columns, $remain_span);
 		
-		$htmlContent .= '<th></th></tr><tr style="display:none;" id="total_Graph_Row_C_'.$row.'">';
+		$htmlContent .= '<th></th></tr><tr style="display:none;" id="'.$uniqueId.'_total_Graph_Row_C_'.$row.'">';
 		for($j=0; $j < $columns; $j++)
 		{
 			$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
@@ -1157,14 +1206,14 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 	$htmlContent .= '</tr>';
 	//End of draw scale
 	*/						
-	$htmlContent .= '</table></div>';
+	$htmlContent .= '</table>';
 
 	//// Common Data
-	$htmlContent .= '<input type="hidden" value="'.count($rows).'" name="Tot_rows" id="Tot_rows" />';
+	$htmlContent .= '<input type="hidden" value="'.count($rows).'" name="Tot_rows" id="'.$uniqueId.'_Tot_rows" />';
 	////// End of Common Data
 	
 	///Add HELP Tab here only
-	$htmlContent .= '<div id="slideout">
+	$htmlContent .= '<div id="slideout_'.$uniqueId.'">
     					<img src="images/help.png" alt="Help" />
     					<div class="slideout_inner">
         					<table bgcolor="#FFFFFF" cellpadding="0" cellspacing="0" class="table-slide">
@@ -1217,9 +1266,6 @@ if($db->loggedIn() && (strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALS
 ?>
 </body>
 </html>
-<script language="javascript" type="text/javascript">
-change_view();
-</script>
 <?php
 function Download_reports()
 {
@@ -1305,7 +1351,8 @@ function Download_reports()
       											'vertical'   => PHPExcel_Style_Alignment::VERTICAL_CENTER,
      											'rotation'   => 0,
       											'wrap'       => false));
-		$objPHPExcel->getActiveSheet()->SetCellValue('B' . $Excel_HMCounter, $Report_Name .(($TrackerType== 'CT') ? ' Company':'').(($TrackerType== 'MT') ? ' MOA':'').' Product Tracker');
+		$TrackerName = (($TrackerType== 'CT') ? ' Company':'').(($TrackerType== 'MT') ? ' MOA':'').(($TrackerType== 'DPT') ? ' Disease':'');
+		$objPHPExcel->getActiveSheet()->SetCellValue('B' . $Excel_HMCounter, $Report_Name .$TrackerName.' Product Tracker');
 		
 		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$Excel_HMCounter, 'Display Mode:');
 		$objPHPExcel->getActiveSheet()->mergeCells('B' . $Excel_HMCounter . ':BH' . $Excel_HMCounter);
@@ -1621,7 +1668,8 @@ function Download_reports()
 		$subColumn_width = 1.4;
 		
 		$pdf->SetFont('verdanab', '', 8);	//Set font size as 8
-		$Repo_Heading = $Report_Name .(($TrackerType== 'CT') ? ' Company':'').(($TrackerType== 'MT') ? ' MOA':'') .' Product Tracker, '.$pdftitle;
+		$TrackerName = (($TrackerType== 'CT') ? ' Company':'').(($TrackerType== 'MT') ? ' MOA':'').(($TrackerType== 'DPT') ? ' Disease':'');
+		$Repo_Heading = $Report_Name.$TrackerName.' Product Tracker, '.$pdftitle;
 		$current_StringLength = $pdf->GetStringWidth($Repo_Heading, 'verdanab', '', 8);
 		$pdf->MultiCell($Page_Width, '', $Repo_Heading, $border=0, $align='C', $fill=0, $ln=1, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
 		$pdf->Ln(5);
@@ -2087,7 +2135,8 @@ function Download_reports()
       											'vertical'   => PHPExcel_Style_Alignment::VERTICAL_CENTER,
      											'rotation'   => 0,
       											'wrap'       => false));
-		$objPHPExcel->getActiveSheet()->SetCellValue('B1', $Report_Name.(($TrackerType== 'CT') ? ' Company':'').(($TrackerType== 'MT') ? ' MOA':'').' Product Tracker');
+		$TrackerName = (($TrackerType== 'CT') ? ' Company':'').(($TrackerType== 'MT') ? ' MOA':'').(($TrackerType== 'DPT') ? ' Disease':'');
+		$objPHPExcel->getActiveSheet()->SetCellValue('B1', $Report_Name.$TrackerName.' Product Tracker');
 		
 		$objPHPExcel->getActiveSheet()->SetCellValue('A2', 'Display Mode:');
 		$objPHPExcel->getActiveSheet()->mergeCells('B2:AA2');
@@ -2467,6 +2516,24 @@ function GetProductsFromMOA($moaID)
 	$Products = array();
 	$query = "SELECT pt.`id` FROM `products` pt LEFT JOIN `products_moas` pm ON(pt.`id` = pm.`product`)  WHERE pm.`moa`='" . mysql_real_escape_string($moaID) . "'";
 	$res = mysql_query($query) or die('Bad SQL query getting products from moa id in PT');
+	
+	if($res)
+	{
+		while($row = mysql_fetch_array($res))
+		{
+			$Products[] = $row['id'];
+		}
+	}
+	return $Products;
+}
+
+function GetProductsFromDisease($DiseaseID)
+{
+	global $db;
+	global $now;
+	$Products = array();
+	$query = "SELECT DISTINCT `id` FROM `entities` e JOIN `entity_trials` et ON(et.`entity` = e.`id`) WHERE e.`class` = 'Product' AND et.trial IN (select et2.`trial` FROM `entity_trials` et2 WHERE et2.`entity`='" . mysql_real_escape_string($DiseaseID) . "')";
+	$res = mysql_query($query) or die('Bad SQL query getting products from Disease id in PT');
 	
 	if($res)
 	{

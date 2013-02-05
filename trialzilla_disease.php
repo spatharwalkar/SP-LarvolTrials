@@ -1,5 +1,6 @@
 <?php
 	require_once('db.php');
+	require_once('product_tracker.php');
 	if($_REQUEST['DiseaseId'] != NULL && $_REQUEST['DiseaseId'] != '' && isset($_REQUEST['DiseaseId']))
 	{
 		$DiseaseId = $_REQUEST['DiseaseId'];
@@ -82,7 +83,9 @@ a:visited {color:#6600bc;}  /* visited link */
    border-bottom: 30px solid #6a4f8d;
    border-bottom-color: #6a4f8d;
    opacity: .8;
-   filter: alpha(opacity=80);      
+   filter: alpha(opacity=80);
+   display:inline;
+   width:auto;       
 }
 
 #disease_tabs a:hover
@@ -107,7 +110,8 @@ a:visited {color:#6600bc;}  /* visited link */
 
 #diseaseTab_content
 {
-    background-color: #fff;
+    background-color: #ffffff;
+    /*background-color: #fff;
     background-image: -webkit-gradient(linear, left top, left bottom, from(#fff), to(#ddd));
     background-image: -webkit-linear-gradient(top, #fff, #ddd); 
     background-image:    -moz-linear-gradient(top, #fff, #ddd); 
@@ -157,7 +161,8 @@ a:visited {color:#6600bc;}  /* visited link */
 
 <div id="diseaseTab_content"> 
     <div id="Products">        
-			Product Tracker
+			<?php print showProductTracker($DiseaseId, 'DPT'); ?>
+
     </div>
     <div id="Companies">
        Company Tracker
@@ -172,20 +177,35 @@ a:visited {color:#6600bc;}  /* visited link */
 </td></tr>
 </table>
 
+<br/><br/>
 <?php include "trialzilla_footer.php" ?>
 
 </body>
 </html>
 <script>
 $(document).ready(function() {
-	$("#diseaseTab_content div").hide(); // Initially hide all content
+	//$("#diseaseTab_content div").hide(); // Initially hide all content
+	///Hide all main divs
+	$("#Products").hide(); // Initially hide all content
+	$("#Companies").hide(); // Initially hide all content
+	$("#MOAs").hide(); // Initially hide all content
+	$("#Conferences").hide(); // Initially hide all content
+	///end
+	
 	$("#disease_tabs li:first").attr("id","current"); // Activate first tab
 	$("#diseaseTab_content div:first").fadeIn(); // Show first tab content
     
     $('#disease_tabs a').click(function(e) {
         e.preventDefault();        
-        $("#diseaseTab_content div").hide(); //Hide all content
-        $("#disease_tabs li").attr("id",""); //Reset id's
+        //$("#diseaseTab_content div").hide(); //Hide all content
+		///Hide all main divs
+		$("#Products").hide(); // Initially hide all content
+		$("#Companies").hide(); // Initially hide all content
+		$("#MOAs").hide(); // Initially hide all content
+		$("#Conferences").hide(); // Initially hide all content
+		///end
+        
+		$("#disease_tabs li").attr("id",""); //Reset id's
         $(this).parent().attr("id","current"); // Activate this
         $('#' + $(this).attr('title')).fadeIn(); // Show content for current tab
     });
