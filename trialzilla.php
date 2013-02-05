@@ -273,17 +273,17 @@ function autoComplete(fieldID)
 
 <!-- Displaying Records -->
 <br/>
-<table width="100%" border="0" cellspacing="0" cellpadding="0">
 <?php
 	foreach($CurrentPageResultArr as $index=> $data)
 	{
 		if($DataArray[$index]['id'] != '' && $DataArray[$index]['id'] != '' && $FoundRecords > 0)
 		{
-			if($DataArray[$index]['type'] == 'Institution' || $DataArray[$index]['type'] == 'MOA' || $DataArray[$index]['type'] == 'Product' || $DataArray[$index]['type'] == 'Disease')	// avoid displying row for other types
+			if($DataArray[$index]['type'] == 'Institution' || $DataArray[$index]['type'] == 'MOA' || $DataArray[$index]['type'] == 'Product' || $DataArray[$index]['type'] == 'Disease' || $DataArray[$index]['type'] == 'MOA_Category')	// avoid displying row for other types
 			{
-				print'<tr>
-						<td align="left"  width="80px">
-								<img src="images/'.$DataArray[$index]['type'].'arrow.gif" style="padding-bottom:5px;" width="80px" height="17px" />
+				print'<table width="100%" border="0" cellspacing="0" cellpadding="0">
+						<tr>
+						<td align="left"  width="100px" style="vertical-align:top;">
+								<img src="images/'.$DataArray[$index]['type'].'arrow.gif" style="padding-bottom:5px;" width="100px" height="17px" />
 						</td>
 						<td style="padding-left:5px;" align="left">';
 						
@@ -295,17 +295,20 @@ function autoComplete(fieldID)
 					print ' 		<a href="'. trim(urlPath()) .'intermediary.php?p='. trim($DataArray[$index]['id']) .'" title="Product" target="_blank">'.formatBrandName($DataArray[$index]['name'], 'product') . $DataArray[$index]['company'] .'</a>';
 				else if($DataArray[$index]['type'] == 'Disease')
 						print ' 		<a href="'. trim(urlPath()) .'trialzilla_disease.php?DiseaseId='. trim($DataArray[$index]['id']) .'" title="Disease" target="_blank">'.$DataArray[$index]['name'] .'</a>';
-						
-			
-    			print '      <br /><br style="line-height:6px;" />
-						</td>
-    				  </tr>';
+				else if($DataArray[$index]['type'] == 'MOA_Category')
+						print ' 	<a href="#" title="MOA Category"><b>'.$DataArray[$index]['name'] .'</b></a>';
+				
+				if($DataArray[$index]['type'] != 'MOA_Category') print '<br /><br style="line-height:6px;" />';
+    			print ' </td>
+    				  </tr>
+					  </table>';
+				if($DataArray[$index]['type'] == 'MOA_Category')
+					print MOAListing(trim($DataArray[$index]['id']));	  
 			}
-			//else print '<tr><td>&nbsp;</td><td>'.$DataArray[$index]['type'].'</td></tr>';					
+			//else print '<tr><td><img src="images/'.$DataArray[$index]['type'].'arrow.gif" style="padding-bottom:5px;" width="120px" height="17px" /></td><td>'.$DataArray[$index]['type'].'</td></tr>';					
 		}
 	}
 ?>
-</table>
 <?php
 if($FoundRecords == 0 && (($globalOptions['TzSearch'] != '' && $globalOptions['TzSearch'] != NULL) || ($globalOptions['Disease'] != '' && $globalOptions['Disease'] != NULL)))
 {
@@ -358,6 +361,34 @@ if($FoundRecords == 0 && (($globalOptions['TzSearch'] != '' && $globalOptions['T
 </body>
 </html>
 <?php
+
+function MOAListing($MOACat)
+{
+	$htmlContent = '';
+	$MOAQuery = "SELECT `id`, `name` FROM `entities` e JOIN `entity_relations` er ON(e.`id`=er.`child`) WHERE er.`parent` = '" . mysql_real_escape_string($MOACat) . "' ";
+			
+	$MOAResult = mysql_query($MOAQuery);
+	$i=0;
+	if($MOAResult &&  mysql_num_rows($MOAResult) > 0)
+	{
+		if($i)
+		$htmlContent .= '<br /><br style="line-height:6px;" />'; $i++;
+		$htmlContent .= '<table width="100%" border="0" cellspacing="0" cellpadding="0" style="padding-left:18px;">';
+		while($SMOA = mysql_fetch_assoc($MOAResult))
+		{
+			$htmlContent .='<tr>
+								<td align="left"  width="100px">
+									<img src="images/Moaarrow.gif" style="padding-bottom:5px;" width="100px" height="17px" />
+								</td>
+								<td style="padding-left:5px;" align="left">';
+			$htmlContent .= ' 		<a href="'. trim(urlPath()) .'trialzilla_moa.php?MoaId='. trim($SMOA['id']) .'" title="MOA" target="_blank">'.$SMOA['name'].'</a><br />';
+			$htmlContent .= '	</td>
+				   			</tr>';									
+		}
+		$htmlContent .='</table>';
+	}
+	return $htmlContent;
+}
 
 function pagination($globalOptions = array(), $totalPages)
 {	

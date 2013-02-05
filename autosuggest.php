@@ -28,7 +28,7 @@ elseif($table=='products' || $table=='areas')
 }
 elseif($table=='trialzilla')
 {
-	$query = "select distinct `name`, `description`, `class` from `entities` where `name` like '%$search%' AND `class` IN ('Product','Institution','MOA') limit 6";
+	$query = "select distinct `name`, `description`, `class` from `entities` where `name` like '%$search%' AND `class` IN ('Product','Institution','MOA','MOA_Category') limit 6";
 }
 else
 {
