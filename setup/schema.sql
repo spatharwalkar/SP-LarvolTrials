@@ -472,6 +472,13 @@ CREATE TABLE IF NOT EXISTS `area_trials` (
   KEY `trial` (`trial`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+CREATE TABLE IF NOT EXISTS `entity_trials` (
+  `entity` int(10) unsigned NOT NULL,
+  `trial` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`entity`,`trial`),
+  KEY `trial` (`trial`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 CREATE TABLE IF NOT EXISTS `data_history` (
   `larvol_id` int(10) unsigned NOT NULL,
   `brief_title_prev` text COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -1304,6 +1311,10 @@ ALTER TABLE `upm`
 ALTER TABLE `area_trials`
   ADD CONSTRAINT `area_trials_ibfk_1` FOREIGN KEY (`area`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `area_trials_ibfk_2` FOREIGN KEY (`trial`) REFERENCES `data_trials` (`larvol_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `entity_trials`
+  ADD CONSTRAINT `entity_trials_ibfk_1` FOREIGN KEY (`entity`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `entity_trials_ibfk_2` FOREIGN KEY (`trial`) REFERENCES `data_trials` (`larvol_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `data_history`
   ADD CONSTRAINT `data_history_ibfk_1` FOREIGN KEY (`larvol_id`) REFERENCES `data_trials` (`larvol_id`) ON DELETE CASCADE ON UPDATE CASCADE;
