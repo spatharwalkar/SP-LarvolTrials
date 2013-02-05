@@ -1,8 +1,6 @@
 <?php
 	require_once('db.php');
-	include('ss_product.php');
-	include('ss_institution.php');
-	include('ss_moa.php');
+	include('ss_entity.php');
 	
 	$RecordsPerPage = 50;
 	$SearchFlg = false;
@@ -10,12 +8,6 @@
 	$globalOptions['page'] = 1;
 	$DataArray = $CurrentPageResultArr = array();
 	$totalPages = $FoundRecords = 0;
-	$ProdFlg = false;
-	$CompanyFlg = false;
-	$MoaFlg = false;
-	$ProdResultArr = array();
-	$CompanyResultArr = array();
-	$MoaResultArr = array();
 	$ResultArr = array();
 	
 	if(isset($_REQUEST['page']) && is_numeric($_REQUEST['page']))
@@ -29,56 +21,7 @@
 		$SearchFlg = true;
 		$globalOptions['TzSearch'] = $_REQUEST['TzSearch'];
 		
-		$ProdResultArr = find_product($globalOptions['TzSearch']);
-		$CompanyResultArr = find_institution($globalOptions['TzSearch']);
-		$MoaResultArr = find_moa($globalOptions['TzSearch']);
-		
-		if(count($CompanyResultArr) > 0 && is_array($CompanyResultArr)) $CompanyFlg = true;
-		
-		if(count($ProdResultArr) > 0 && is_array($ProdResultArr)) $ProdFlg = true;
-		
-		if(count($MoaResultArr) > 0 && is_array($MoaResultArr)) $MoaFlg = true;
-		
-		$i = 0;
-		
-		if($CompanyFlg)
-		{
-			foreach($CompanyResultArr as $val)
-			{
-				if($val != NULL && $val != '')
-				{
-					$ResultArr[$i]['id'] = $val;
-					$ResultArr[$i]['type'] = 'Company';
-					$i++;
-				}
-			}
-		}
-		
-		if($ProdFlg)
-		{
-			foreach($ProdResultArr as $val)
-			{
-				if($val != NULL && $val != '')
-				{
-					$ResultArr[$i]['id'] = $val;
-					$ResultArr[$i]['type'] = 'Product';
-					$i++;
-				}
-			}
-		}
-		
-		if($MoaFlg)
-		{
-			foreach($MoaResultArr as $val)
-			{
-				if($val != NULL && $val != '')
-				{
-					$ResultArr[$i]['id'] = $val;
-					$ResultArr[$i]['type'] = 'Moa';
-					$i++;
-				}
-			}
-		}				
+		$ResultArr = find_entity($globalOptions['TzSearch']);
 		
 		if(is_array($ResultArr))
 		$FoundRecords = count($ResultArr);
@@ -94,37 +37,12 @@
 			
 			foreach($CurrentPageResultArr as $index=> $value)
 			{
-				if($CurrentPageResultArr[$index]['type'] == 'Company')
-				{
-					$result =  mysql_fetch_assoc(mysql_query("SELECT id, name FROM `institutions` WHERE id = '" . mysql_real_escape_string($CurrentPageResultArr[$index]['id']) . "' "));
-					$DataArray[$index]['index'] = $index;
-					$DataArray[$index]['name'] = $result['name'];
-					$DataArray[$index]['id'] = $result['id'];
-					$DataArray[$index]['type'] = $CurrentPageResultArr[$index]['type'];
-				}
-				else if($CurrentPageResultArr[$index]['type'] == 'Moa')
-				{
-					$result =  mysql_fetch_assoc(mysql_query("SELECT id, name FROM `moas` WHERE id = '" . mysql_real_escape_string($CurrentPageResultArr[$index]['id']) . "' "));
-					$DataArray[$index]['index'] = $index;
-					$DataArray[$index]['name'] = $result['name'];
-					$DataArray[$index]['id'] = $result['id'];
-					$DataArray[$index]['type'] = $CurrentPageResultArr[$index]['type'];
-				}
-				else
-				{
-					$result =  mysql_fetch_assoc(mysql_query("SELECT id, name, description, company FROM `products` WHERE id = '" . mysql_real_escape_string($CurrentPageResultArr[$index]['id']) . "' "));
-					$DataArray[$index]['index'] = $index;
-					$DataArray[$index]['name'] = $result['name'];
-					$DataArray[$index]['id'] = $result['id'];
-					$DataArray[$index]['type'] = $CurrentPageResultArr[$index]['type'];
-					$DataArray[$index]['description'] = $result['description'];
-					if($result['company'] != NULL && trim($result['company']) != '')
-					{
-						$result['company']=str_replace(',',', ',$result['company']);
-						$result['company']=str_replace(',  ',', ',$result['company']);
-						$DataArray[$index]['company'] = ' / '.$result['company'];
-					}
-				}
+				$result =  mysql_fetch_assoc(mysql_query("SELECT `id`, `name`, `class` FROM `entities` WHERE id = '" . mysql_real_escape_string($value) . "' "));
+				$DataArray[$index]['index'] = $index;
+				$DataArray[$index]['name'] = $result['name'];
+				$DataArray[$index]['id'] = $result['id'];
+				$DataArray[$index]['type'] = $result['class'];
+			
 			}
 		}
 	}
@@ -361,24 +279,29 @@ function autoComplete(fieldID)
 	{
 		if($DataArray[$index]['id'] != '' && $DataArray[$index]['id'] != '' && $FoundRecords > 0)
 		{
-			print'<tr>
-					<td align="left"  width="80px">
-							<img src="images/'.$DataArray[$index]['type'].'arrow.gif" style="padding-bottom:5px;" width="80px" height="17px" />
-					</td>
-					<td style="padding-left:5px;" align="left">';
-					
-    		if($DataArray[$index]['type'] == 'Company')
-				print ' 		<a href="'. trim(urlPath()) .'trialzilla_company.php?CompanyId='. trim($DataArray[$index]['id']) .'" title="Company" target="_blank">'.$DataArray[$index]['name'].'</a>';
-			else if($DataArray[$index]['type'] == 'Moa')
-				print ' 		<a href="'. trim(urlPath()) .'trialzilla_moa.php?MoaId='. trim($DataArray[$index]['id']) .'" title="MOA" target="_blank">'.$DataArray[$index]['name'].'</a>';
+			if($DataArray[$index]['type'] == 'Institution' || $DataArray[$index]['type'] == 'MOA' || $DataArray[$index]['type'] == 'Product' || $DataArray[$index]['type'] == 'Disease')	// avoid displying row for other types
+			{
+				print'<tr>
+						<td align="left"  width="80px">
+								<img src="images/'.$DataArray[$index]['type'].'arrow.gif" style="padding-bottom:5px;" width="80px" height="17px" />
+						</td>
+						<td style="padding-left:5px;" align="left">';
+						
+    			if($DataArray[$index]['type'] == 'Institution')
+					print ' 		<a href="'. trim(urlPath()) .'trialzilla_company.php?CompanyId='. trim($DataArray[$index]['id']) .'" title="Company" target="_blank">'.$DataArray[$index]['name'].'</a>';
+				else if($DataArray[$index]['type'] == 'MOA')
+					print ' 		<a href="'. trim(urlPath()) .'trialzilla_moa.php?MoaId='. trim($DataArray[$index]['id']) .'" title="MOA" target="_blank">'.$DataArray[$index]['name'].'</a>';
 				else if($DataArray[$index]['type'] == 'Product')
 					print ' 		<a href="'. trim(urlPath()) .'intermediary.php?p='. trim($DataArray[$index]['id']) .'" title="Product" target="_blank">'.formatBrandName($DataArray[$index]['name'], 'product') . $DataArray[$index]['company'] .'</a>';
-					else
+				else if($DataArray[$index]['type'] == 'Disease')
 						print ' 		<a href="'. trim(urlPath()) .'trialzilla_disease.php?DiseaseId='. trim($DataArray[$index]['id']) .'" title="Disease" target="_blank">'.$DataArray[$index]['name'] .'</a>';
+						
 			
-    		print '      <br /><br style="line-height:6px;" />
-					</td>
-    			  </tr>';
+    			print '      <br /><br style="line-height:6px;" />
+						</td>
+    				  </tr>';
+			}
+			//else print '<tr><td>&nbsp;</td><td>'.$DataArray[$index]['type'].'</td></tr>';					
 		}
 	}
 ?>
@@ -395,7 +318,7 @@ if($FoundRecords == 0 && (($globalOptions['TzSearch'] != '' && $globalOptions['T
 					{
 						print '<p>No Disease found.</p>';
 					}
-                	else if($ProdFlg == false && $CompanyFlg == false && $MoaFlg == false)
+                	else
 					{
 						print "<p>Your search - 
                 				<strong>

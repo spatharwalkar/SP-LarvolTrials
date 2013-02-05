@@ -68,14 +68,7 @@ else if($table=='trialzilla')
 		$suggestions[] = $row['name'];
 		if($row['class'] != NULL && $row['class'] != '')
 		{
-			switch($row['class'])
-			{
-				case 'Product' : $suggestionsType[] = $row['class']; break;	//Display type icon beside suggestion
-				case 'Institution' : $suggestionsType[] = 'Company'; break;	//Display type icon beside suggestion
-				case 'MOA' : $suggestionsType[] = 'Moa'; break;	//Display type icon beside suggestion
-				default : $suggestionsType[] = ''; break;
-			}
-			
+			$suggestionsType[] = $row['class'];	//Display type icon beside suggestion
 		}
 		else
 			$suggestionsType[] = '';	//If suggestion type is NULL make it blank
