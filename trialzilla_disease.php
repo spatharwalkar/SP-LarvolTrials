@@ -154,9 +154,9 @@ a:visited {color:#6600bc;}  /* visited link */
 <tr><td>
 <ul id="disease_tabs">
     <li><a href="#" title="Products">Products</a></li>
-    <li><a href="#" title="Companies">Companies</a></li>
+   <!-- <li><a href="#" title="Companies">Companies</a></li>
     <li><a href="#" title="MOAs">MOAs</a></li>
-    <li><a href="#" title="Conferences">Conferences</a></li>    
+    <li><a href="#" title="Conferences">Conferences</a></li> -->   
 </ul>
 
 <div id="diseaseTab_content"> 
