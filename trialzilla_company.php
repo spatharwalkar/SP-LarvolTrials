@@ -93,7 +93,7 @@ function autoComplete(fieldID)
 <br/>
 <table width="100%" border="0" style="">
 <tr><td>
-<?php print showProductTracker($CompanyId, 'CT'); ?>
+<?php print showProductTracker($CompanyId, 'CPT');	//CPT = COMPANY PRODUCT TRACKER ?>
 </td></tr>
 </table>
 <br/><br/>

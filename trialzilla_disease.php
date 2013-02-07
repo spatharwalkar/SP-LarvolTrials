@@ -161,7 +161,7 @@ a:visited {color:#6600bc;}  /* visited link */
 
 <div id="diseaseTab_content"> 
     <div id="Products">        
-			<?php print showProductTracker($DiseaseId, 'DPT'); ?>
+			<?php print showProductTracker($DiseaseId, 'DPT'); //DPT=DISEASE PRODUCT TRACKER ?>
 
     </div>
     <div id="Companies">

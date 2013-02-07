@@ -345,6 +345,175 @@ if(isset($LISyncTasks) and !empty($LISyncTasks))
 				$processOutput = fetch_li_moas(strtotime($syncTask['lastrun']));
 				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
 				break;
+			case 16:
+				//moa category sync
+				require_once 'fetch_li_moacategories.php';
+				$processOutput = fetch_li_moacategories(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				break;
+			case 17:
+				//product and moa category sync
+				require_once 'fetch_li_products.php';
+				$processOutput = fetch_li_products(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				require_once 'fetch_li_moacategories.php';
+				$processOutput = fetch_li_moacategories(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				break;
+			case 18:
+				//areas and moa category sync
+				require_once 'fetch_li_moacategories.php';
+				$processOutput = fetch_li_moacategories(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				break;
+			case 19:
+				//areas, product and moa category sync
+				require_once 'fetch_li_products.php';
+				$processOutput = fetch_li_products(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				require_once 'fetch_li_moacategories.php';
+				$processOutput = fetch_li_moacategories(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				break;
+			case 20:
+				//institution and moa category sync
+				require_once 'fetch_li_institutions.php';
+				$processOutput = fetch_li_institutions(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				require_once 'fetch_li_moacategories.php';
+				$processOutput = fetch_li_moacategories(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				break;
+			case 21:
+				//product, institution and moa category sync
+				require_once 'fetch_li_products.php';
+				$processOutput = fetch_li_products(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				require_once 'fetch_li_institutions.php';
+				$processOutput = fetch_li_institutions(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				require_once 'fetch_li_moacategories.php';
+				$processOutput = fetch_li_moacategories(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				break;
+			case 22:
+				//areas, institution and moa category sync
+				require_once 'fetch_li_institutions.php';
+				$processOutput = fetch_li_institutions(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				require_once 'fetch_li_moacategories.php';
+				$processOutput = fetch_li_moacategories(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				break;
+			case 23:
+				//areas, product, institution and moa category sync
+				require_once 'fetch_li_products.php';
+				$processOutput = fetch_li_products(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				require_once 'fetch_li_institutions.php';
+				$processOutput = fetch_li_institutions(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				require_once 'fetch_li_moacategories.php';
+				$processOutput = fetch_li_moacategories(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				break;
+			case 24:
+				//moa and moa category sync
+				require_once 'fetch_li_moas.php';
+				$processOutput = fetch_li_moas(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				require_once 'fetch_li_moacategories.php';
+				$processOutput = fetch_li_moacategories(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				break;
+			case 25:
+				//product, moa and moa category sync
+				require_once 'fetch_li_products.php';
+				$processOutput = fetch_li_products(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				require_once 'fetch_li_moas.php';
+				$processOutput = fetch_li_moas(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				require_once 'fetch_li_moacategories.php';
+				$processOutput = fetch_li_moacategories(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				break;
+			case 26:
+				//areas, moa and moa category sync
+				require_once 'fetch_li_moas.php';
+				$processOutput = fetch_li_moas(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				require_once 'fetch_li_moacategories.php';
+				$processOutput = fetch_li_moacategories(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				break;
+			case 27:
+				//areas, product, moa and moa category sync
+				require_once 'fetch_li_products.php';
+				$processOutput = fetch_li_products(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				require_once 'fetch_li_moas.php';
+				$processOutput = fetch_li_moas(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				require_once 'fetch_li_moacategories.php';
+				$processOutput = fetch_li_moacategories(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				break;
+			case 28:
+				//institution, moa and moa category sync
+				require_once 'fetch_li_institutions.php';
+				$processOutput = fetch_li_institutions(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				require_once 'fetch_li_moas.php';
+				$processOutput = fetch_li_moas(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				require_once 'fetch_li_moacategories.php';
+				$processOutput = fetch_li_moacategories(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				break;
+			case 29:
+				//product, institution, moa and moa category sync
+				require_once 'fetch_li_products.php';
+				$processOutput = fetch_li_products(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				require_once 'fetch_li_institutions.php';
+				$processOutput = fetch_li_institutions(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				require_once 'fetch_li_moas.php';
+				$processOutput = fetch_li_moas(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				require_once 'fetch_li_moacategories.php';
+				$processOutput = fetch_li_moacategories(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				break;
+			case 30:
+				//areas, institution, moa and moa category sync
+				require_once 'fetch_li_institutions.php';
+				$processOutput = fetch_li_institutions(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				require_once 'fetch_li_moas.php';
+				$processOutput = fetch_li_moas(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				require_once 'fetch_li_moacategories.php';
+				$processOutput = fetch_li_moacategories(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				break;
+			case 31:
+				//areas, product, institution, moa and moa category sync
+				require_once 'fetch_li_products.php';
+				$processOutput = fetch_li_products(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				require_once 'fetch_li_institutions.php';
+				$processOutput = fetch_li_institutions(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				require_once 'fetch_li_moas.php';
+				$processOutput = fetch_li_moas(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				require_once 'fetch_li_moacategories.php';
+				$processOutput = fetch_li_moacategories(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				break;
+				
 		}
 		//echo date('Y-m-d H:i:s',$now);die;
 		if($lastRunBkupFlg)	//if process is exited due to bad data set lastrun to previous value

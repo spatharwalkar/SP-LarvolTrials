@@ -4,7 +4,7 @@
 	if($_REQUEST['MoaId'] != NULL && $_REQUEST['MoaId'] != '' && isset($_REQUEST['MoaId']))
 	{
 		$MoaId = $_REQUEST['MoaId'];
-		$query = 'SELECT `name`, `id` FROM `moas` WHERE `id`=' . mysql_real_escape_string($MoaId);
+		$query = 'SELECT `name`, `id` FROM `entities` WHERE `id`=' . mysql_real_escape_string($MoaId);
 		$res = mysql_query($query) or die(mysql_error());
 		$header = mysql_fetch_array($res);
 		$MoaId = $header['id'];
@@ -92,7 +92,7 @@ function autoComplete(fieldID)
 <br/>
 <table width="100%" border="0" style="">
 <tr><td>
-<?php print showProductTracker($MoaId, 'MT'); ?>
+<?php print showProductTracker($MoaId, 'MPT');	//MPT= MOA PRODUCT TRACKER ?>
 </td></tr>
 </table>
 <br/><br/>

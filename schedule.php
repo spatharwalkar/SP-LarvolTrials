@@ -82,6 +82,7 @@ function editor()
 	$LISync['LI_sync2'] = 'LI Areas Sync';
 	$LISync['LI_sync4'] = 'LI Institutions Sync';
 	$LISync['LI_sync8'] = 'LI MOAs Sync';
+	$LISync['LI_sync16'] = 'LI MOA Categories Sync';
 	//end
 	
 	$selectedreports = array();
@@ -167,6 +168,87 @@ function editor()
 				$selectedLISync[] = 'LI_sync4';
 				$selectedLISync[] = 'LI_sync8';
 				break;
+			case '16':
+				$selectedLISync[] = 'LI_sync' . $row['LI_sync'];
+				break;
+			case '17':
+				$selectedLISync[] = 'LI_sync1';
+				$selectedLISync[] = 'LI_sync16';
+				break;
+			case '18':
+				$selectedLISync[] = 'LI_sync2';
+				$selectedLISync[] = 'LI_sync16';
+				break;
+			case '19':
+				$selectedLISync[] = 'LI_sync1';
+				$selectedLISync[] = 'LI_sync2';
+				$selectedLISync[] = 'LI_sync16';
+				break;
+			case '20':
+				$selectedLISync[] = 'LI_sync4';
+				$selectedLISync[] = 'LI_sync16';
+				break;
+			case '21':
+				$selectedLISync[] = 'LI_sync1';
+				$selectedLISync[] = 'LI_sync4';
+				$selectedLISync[] = 'LI_sync16';
+				break;
+			case '22':
+				$selectedLISync[] = 'LI_sync2';
+				$selectedLISync[] = 'LI_sync4';
+				$selectedLISync[] = 'LI_sync16';
+				break;
+			case '23':
+				$selectedLISync[] = 'LI_sync1';
+				$selectedLISync[] = 'LI_sync2';
+				$selectedLISync[] = 'LI_sync4';
+				$selectedLISync[] = 'LI_sync16';
+				break;
+			case '24':
+				$selectedLISync[] = 'LI_sync8';
+				$selectedLISync[] = 'LI_sync16';
+				break;
+			case '25':
+				$selectedLISync[] = 'LI_sync1';
+				$selectedLISync[] = 'LI_sync8';
+				$selectedLISync[] = 'LI_sync16';
+				break;
+			case '26':
+				$selectedLISync[] = 'LI_sync2';
+				$selectedLISync[] = 'LI_sync8';
+				$selectedLISync[] = 'LI_sync16';
+				break;
+			case '27':
+				$selectedLISync[] = 'LI_sync1';
+				$selectedLISync[] = 'LI_sync2';
+				$selectedLISync[] = 'LI_sync8';
+				$selectedLISync[] = 'LI_sync16';
+				break;
+			case '28':
+				$selectedLISync[] = 'LI_sync4';
+				$selectedLISync[] = 'LI_sync8';
+				$selectedLISync[] = 'LI_sync16';
+				break;
+			case '29':
+				$selectedLISync[] = 'LI_sync1';
+				$selectedLISync[] = 'LI_sync4';
+				$selectedLISync[] = 'LI_sync8';
+				$selectedLISync[] = 'LI_sync16';
+				break;
+			case '30':
+				$selectedLISync[] = 'LI_sync2';
+				$selectedLISync[] = 'LI_sync4';
+				$selectedLISync[] = 'LI_sync8';
+				$selectedLISync[] = 'LI_sync16';
+				break;
+			case '31':
+				$selectedLISync[] = 'LI_sync1';
+				$selectedLISync[] = 'LI_sync2';
+				$selectedLISync[] = 'LI_sync4';
+				$selectedLISync[] = 'LI_sync8';
+				$selectedLISync[] = 'LI_sync16';
+				break;
+					
 		}
 	}
 	//end

@@ -85,7 +85,7 @@ function DataGenerator($id, $TrackerType)
 	$areaId = NULL;
 	//END DATA
 	
-	if($TrackerType == 'PT')
+	if($TrackerType == 'PT')	//PT=PRODUCT TRACKER (MAIN PT PAGE)
 	{
 		$query = 'SELECT `name`, `user`, `footnotes`, `description`, `category`, `shared`, `total`, `dtt`, `display_name` FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
 		$res = mysql_query($query) or die('Bad SQL query getting master heatmap report');
@@ -117,7 +117,7 @@ function DataGenerator($id, $TrackerType)
 		$header = mysql_fetch_array($res);
 		$areaId = $header['type_id'];
 	}
-	else if($TrackerType == 'CT')
+	else if($TrackerType == 'CPT')	//CPT=COMPANY PRODUCT TRACKER
 	{
 		$query = 'SELECT `name`, `id` FROM `institutions` WHERE id=' . $id;
 		$res = mysql_query($query) or die(mysql_error());
@@ -126,16 +126,16 @@ function DataGenerator($id, $TrackerType)
 		$productIds = GetProductsFromCompany($header['id']);
 		$id=$header['id'];
 	}
-	else if($TrackerType == 'MT')
+	else if($TrackerType == 'MPT')	//MPT=MOA PRODUCT TRACKER
 	{
-		$query = 'SELECT `name`, `id` FROM `moas` WHERE id=' . $id;
+		$query = 'SELECT `name`, `id` FROM `entities` WHERE `class`="MOA" and id=' . $id;
 		$res = mysql_query($query) or die(mysql_error());
 		$header = mysql_fetch_array($res);
 		$Report_DisplayName = $header['name'];
 		$productIds = GetProductsFromMOA($header['id']);
 		$id=$header['id'];
 	}
-	else if($TrackerType == 'DPT')
+	else if($TrackerType == 'DPT')	//DPT=DISEASE PRODUCT TRACKER
 	{
 		$query = 'SELECT `name`, `id` FROM `entities` WHERE id=' . $id;
 		$res = mysql_query($query) or die(mysql_error());
@@ -1351,7 +1351,7 @@ function Download_reports()
       											'vertical'   => PHPExcel_Style_Alignment::VERTICAL_CENTER,
      											'rotation'   => 0,
       											'wrap'       => false));
-		$TrackerName = (($TrackerType== 'CT') ? ' Company':'').(($TrackerType== 'MT') ? ' MOA':'').(($TrackerType== 'DPT') ? ' Disease':'');
+		$TrackerName = (($TrackerType== 'CPT') ? ' Company':'').(($TrackerType== 'MPT') ? ' MOA':'').(($TrackerType== 'DPT') ? ' Disease':'');
 		$objPHPExcel->getActiveSheet()->SetCellValue('B' . $Excel_HMCounter, $Report_Name .$TrackerName.' Product Tracker');
 		
 		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$Excel_HMCounter, 'Display Mode:');
@@ -1668,7 +1668,7 @@ function Download_reports()
 		$subColumn_width = 1.4;
 		
 		$pdf->SetFont('verdanab', '', 8);	//Set font size as 8
-		$TrackerName = (($TrackerType== 'CT') ? ' Company':'').(($TrackerType== 'MT') ? ' MOA':'').(($TrackerType== 'DPT') ? ' Disease':'');
+		$TrackerName = (($TrackerType== 'CPT') ? ' Company':'').(($TrackerType== 'MPT') ? ' MOA':'').(($TrackerType== 'DPT') ? ' Disease':'');
 		$Repo_Heading = $Report_Name.$TrackerName.' Product Tracker, '.$pdftitle;
 		$current_StringLength = $pdf->GetStringWidth($Repo_Heading, 'verdanab', '', 8);
 		$pdf->MultiCell($Page_Width, '', $Repo_Heading, $border=0, $align='C', $fill=0, $ln=1, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
@@ -2135,7 +2135,7 @@ function Download_reports()
       											'vertical'   => PHPExcel_Style_Alignment::VERTICAL_CENTER,
      											'rotation'   => 0,
       											'wrap'       => false));
-		$TrackerName = (($TrackerType== 'CT') ? ' Company':'').(($TrackerType== 'MT') ? ' MOA':'').(($TrackerType== 'DPT') ? ' Disease':'');
+		$TrackerName = (($TrackerType== 'CPT') ? ' Company':'').(($TrackerType== 'MPT') ? ' MOA':'').(($TrackerType== 'DPT') ? ' Disease':'');
 		$objPHPExcel->getActiveSheet()->SetCellValue('B1', $Report_Name.$TrackerName.' Product Tracker');
 		
 		$objPHPExcel->getActiveSheet()->SetCellValue('A2', 'Display Mode:');
@@ -2514,7 +2514,7 @@ function GetProductsFromMOA($moaID)
 	global $db;
 	global $now;
 	$Products = array();
-	$query = "SELECT pt.`id` FROM `products` pt LEFT JOIN `products_moas` pm ON(pt.`id` = pm.`product`)  WHERE pm.`moa`='" . mysql_real_escape_string($moaID) . "'";
+	$query = "SELECT et.`id` FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`)  WHERE et.`class`='Product' and er.`child`='" . mysql_real_escape_string($moaID) . "'";
 	$res = mysql_query($query) or die('Bad SQL query getting products from moa id in PT');
 	
 	if($res)

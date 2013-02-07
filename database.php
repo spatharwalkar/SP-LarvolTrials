@@ -425,6 +425,57 @@ if (isset($_POST['li_moa']) and $_POST['li_moa']=="3" and ( isset($_POST['moa_lt
 	return;
 }
 
+if (isset($_POST['li_moacategory']) and $_POST['li_moacategory']=="1") 
+{
+	require_once('fetch_li_moacategories.php');
+	echo '<br><br>Importing all moa categories from LI<br><br>';
+	fetch_li_moacategories("0");
+	return;
+}
+if (isset($_POST['li_moacategory']) and $_POST['li_moacategory']=="2" and isset($_POST['moacategory_updt_since']) ) 
+{
+	$upds=strtotime(mysql_real_escape_string($_POST['moacategory_updt_since']));
+	if(!isset($upds) or empty($upds)) 
+	{
+		echo '<br> Invalid date entered:'.$litd.' Unable to proceed. ';
+		return false;
+	}
+	require_once('fetch_li_moacategories.php');
+	echo '<br><br>Importing moa categories updated since '.$_POST['moacategory_updt_since'].' from LI<br><br>';
+	fetch_li_moacategories($upds);
+	return;
+}
+
+if (isset($_POST['li_moacategory']) and $_POST['li_moacategory']=="3" and ( isset($_POST['moacategory_lt_id']) or isset($_POST['moacategory_li_id']) ) ) 
+{
+	if( isset($_POST['moacategory_li_id']) and !empty($_POST['moacategory_li_id']) ) $liid=mysql_real_escape_string($_POST['moacategory_li_id']);
+	elseif(isset($_POST['moacategory_lt_id']))
+	{
+		$litd=mysql_real_escape_string($_POST['moacategory_lt_id']);
+		
+		$query = 'select lI_id from `entities` where id="'.$litd.'" and `class`="MOA_Category" limit 1' ;print $query;
+					if(!$res = mysql_query($query))
+					{
+						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+						global $logger;
+						$logger->error($log);
+						echo $log;
+						return false;
+					}
+					$res = mysql_fetch_array($res) ;
+					if(isset($res['lI_id']))
+						$liid = $res['lI_id'];
+					else
+					{
+						echo '<br> Could not find id '.$litd.' in moa categories table.  ';
+						return false;
+					}
+	}
+	require_once('fetch_li_moacategories.php');
+	echo '<br><br>Importing moa categories with LI id:'.$liid.'<br><br>';
+	fetch_li_moacategory_individual($liid);
+	return;
+}
 
 /****************************/
 echo(editor());
@@ -452,6 +503,7 @@ function editor()
 		  toggles2 = new Array();
 		  toggles3 = new Array();
 		  toggles4 = new Array();
+		  toggles5 = new Array();
 		  if (document.getElementById) onload = function () {
 		    document.getElementById (\'more\').className = \'hide\';
 			document.getElementById (\'p_up_dt\').className = \'hide\';
@@ -460,6 +512,8 @@ function editor()
 			document.getElementById (\'inst_up_dt\').className = \'hide\';
 			document.getElementById (\'moa_sing\').className = \'hide\';
 			document.getElementById (\'moa_up_dt\').className = \'hide\';
+			document.getElementById (\'moacategory_sing\').className = \'hide\';
+			document.getElementById (\'moacategory_up_dt\').className = \'hide\';
 		    var t = document.getElementsByTagName (\'input\');
 		    for (var i = 0; i < t.length; i++) 
 			{
@@ -497,8 +551,18 @@ function editor()
 					toggles4.push (t[i]);
 					t[i].onclick = function () 
 					{
-						document.getElementById (\'moa_up_dt\').className = toggles3[toggles3.length - 2].checked ? \'show\' : \'hide\';
-						document.getElementById (\'moa_sing\').className = toggles3[toggles3.length - 1].checked ? \'show\' : \'hide\';
+						document.getElementById (\'moa_up_dt\').className = toggles4[toggles4.length - 2].checked ? \'show\' : \'hide\';
+						document.getElementById (\'moa_sing\').className = toggles4[toggles4.length - 1].checked ? \'show\' : \'hide\';
+					}
+				}
+				
+				if (t[i].getAttribute (\'name\') == \'li_moacategory\') 
+				{
+					toggles5.push (t[i]);
+					t[i].onclick = function () 
+					{
+						document.getElementById (\'moacategory_up_dt\').className = toggles5[toggles5.length - 2].checked ? \'show\' : \'hide\';
+						document.getElementById (\'moacategory_sing\').className = toggles5[toggles5.length - 1].checked ? \'show\' : \'hide\';
 					}
 				}
 				
@@ -739,12 +803,23 @@ function editor()
 			. '
 			<input type="radio" name="li_moa" value="1" selected="selcted"> All<br>
 			<input type="radio" name="li_moa" value="2"> Moas updated since <span id="moa_up_dt" name="moa_up_dt1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enter date as yyyy-mm-dd <input type="text" name="moa_updt_since" id="moa_updt_since" value="" size="10" length="10" title="( yyyy-mm-dd )"/></span> <br>
-			<input type="radio" name="li_moa" value="3"> Single institution (Either LT ID or LI ID) <span id="moa_sing" name="moa_sing1">LT ID: <input type="text" name="moa_lt_id" id="moa_ltid" value="" title="Enter LT id"/> LI ID: <input type="text" name="moa_li_id" id="moa_ltid" value="" title="Enter LI id"/></span><br>
+			<input type="radio" name="li_moa" value="3"> Single MOA (Either LT ID or LI ID) <span id="moa_sing" name="moa_sing1">LT ID: <input type="text" name="moa_lt_id" id="moa_ltid" value="" title="Enter LT id"/> LI ID: <input type="text" name="moa_li_id" id="moa_ltid" value="" title="Enter LI id"/></span><br>
 		
 				'
 			. '<br><input type="submit" value="Import" />'
 			. '</form></formset></fieldset></div>';
 
+	// LI moa scraper
+	$out .= '<div style="width:610px; padding:5px;float:left;"><fieldset class="schedule"><legend><b> IMPORT MOA CATEGORIES FROM LI </b></legend>'
+			. '<formset><form action="database.php" method="post">'
+			. '
+			<input type="radio" name="li_moacategory" value="1" selected="selcted"> All<br>
+			<input type="radio" name="li_moacategory" value="2"> Moa categories updated since <span id="moacategory_up_dt" name="moacategory_up_dt1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enter date as yyyy-mm-dd <input type="text" name="moacategory_updt_since" id="moacategory_updt_since" value="" size="10" length="10" title="( yyyy-mm-dd )"/></span> <br>
+			<input type="radio" name="li_moacategory" value="3"> Single MOA Category (Either LT ID or LI ID) <span id="moacategory_sing" name="moacategory_sing1">LT ID: <input type="text" name="moacategory_lt_id" id="moacategory_ltid" value="" title="Enter LT id"/> LI ID: <input type="text" name="moacategory_li_id" id="moacategory_ltid" value="" title="Enter LI id"/></span><br>
+		
+				'
+			. '<br><input type="submit" value="Import" />'
+			. '</form></formset></fieldset></div>';
 	
 $out .= '<div style="clear:both">&nbsp;</div><br /><br /><br />';
 			

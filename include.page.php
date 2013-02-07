@@ -1068,7 +1068,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 				{
 					$escMoalid = mysql_real_escape_string($MoaId);
 					$escMoaname = mysql_real_escape_string($extraData['moaNamesArray'][$KeyMoa]);
-					$Moaquery = "select id from moas where `LI_id`='{$escMoalid}' OR `name`='{$escMoaname}' limit 1";
+					$Moaquery = "select id from `entities` where `class`='MOA' and (`LI_id`='{$escMoalid}' OR `name`='{$escMoaname}') limit 1";
 					$Moaresult = mysql_query($Moaquery);
 					$MoaPresent = false;
 					if($Moaresult)
@@ -1081,7 +1081,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 						$MoaAssoInsert = false;
 						if($MoaPresent)
 						{
-							$MoaAssocquery = "select moa from products_moas where `moa`='{$MoaIdLocal}' AND `product`='{$ProdID}' limit 1";
+							$MoaAssocquery = "select `parent` from `entity_relations` where `child`='{$MoaIdLocal}' AND `parent`='{$ProdID}' limit 1";
 							$MoaAssocresult = mysql_query($MoaAssocquery);
 							$MoaAssocPresent = false;
 							while($MoaAssocrow = mysql_fetch_assoc($MoaAssocresult))
@@ -1094,7 +1094,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 						{
 							require_once 'fetch_li_moas.php';
 							fetch_li_moa_individual($MoaId);
-							$Moaquery_2 = "select id from moas where `LI_id`='{$escMoalid}' OR `name`='{$escMoaname}' limit 1";
+							$Moaquery_2 = "select id from `entities` where `LI_id`='{$escMoalid}' OR `name`='{$escMoaname}' limit 1";
 							$Moaresult_2 = mysql_query($Moaquery_2);
 							$MoaPresent = false;
 							while($Moarow_2 = mysql_fetch_assoc($Moaresult_2))
@@ -1106,7 +1106,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 						}
 						if($MoaAssoInsert)
 						{
-							$MoaAssocInsertquery = "INSERT INTO products_moas (`product`, `moa`) VALUES ('{$ProdID}','{$MoaIdLocal}')";
+							$MoaAssocInsertquery = "INSERT INTO `entity_relations` (`parent`, `child`) VALUES ('{$ProdID}','{$MoaIdLocal}')";
 							$MoaAssocInsertresult = mysql_query($MoaAssocInsertquery);
 						}
 					}
@@ -1220,7 +1220,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 		//check for insert update case
 		$esclid = mysql_real_escape_string($importVal['LI_id']);
 		$escname = mysql_real_escape_string($importVal['name']);
-		$query = "select id from moas where LI_id='{$esclid}' OR name='{$escname}' limit 1";
+		$query = "select id from `entities` where `class`='MOA' and (LI_id='{$esclid}' OR name='{$escname}') limit 1";
 		$result = mysql_query($query);
 		$update = false;
 		if($result)
@@ -1236,11 +1236,11 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			{
 				if($importVal['is_active'] == 0)
 				{
-					deleteData($id, $table);
+					deleteData($id, 'entities');
 					return 4;
 				}			
 				$importVal = array_map(am1,$importKeys,array_values($importVal));
-				$query = "update $table set ".implode(',',$importVal)." where id=".$id;
+				$query = "update `entities` set ".implode(',',$importVal)." where id=".$id;
 			}
 			else 
 			{
@@ -1253,18 +1253,79 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 				}
 				
 				$importVal = array_map(function ($v){return "'".mysql_real_escape_string($v)."'";},$importVal);
-				$query = "insert into $table (`".implode('`,`',$importKeys)."`) values (".implode(',',$importVal).")";
+				$query = "insert into `entities` (`".implode('`,`',$importKeys)."`) values (".implode(',',$importVal).")";
 			}
 			if(mysql_query($query))
 			{
 				if($id)
 				{
 					$_GET['id'] = $id;
+					$MOAID = $id;
 				}
 				else 
 				{
 					$_GET['id'] = mysql_insert_id();
+					$MOAID = $_GET['id'];
 				}
+				
+				//Insert MOA and MOA Category association
+				ob_start();
+				foreach($extraData['MoaCategoryIdsArray'] as $KeyMoaCat=> $MoaCatId)
+				{
+					$escMoaCatlid = mysql_real_escape_string($MoaCatId);
+					$MoaCatquery = "select id from `entities` where `LI_id`='{$escMoaCatlid}' and `class`='MOA_Category' limit 1";
+					$MoaCatresult = mysql_query($MoaCatquery);
+					$MoaCatPresent = false;
+					if($MoaCatresult)
+					{
+						while($MoaCatrow = mysql_fetch_assoc($MoaCatresult))
+						{
+							$MoaCatPresent = true;
+							$MoaCatIdLocal = $MoaCatrow['id'];
+						}
+						$MoaCatAssoInsert = false;
+						if($MoaCatPresent)
+						{
+							$MoaCatAssocquery = "select `parent` from `entity_relations` where `parent`='{$MoaCatIdLocal}' AND `child`='{$MOAID}' limit 1";
+							$MoaCatAssocresult = mysql_query($MoaCatAssocquery);
+							$MoaCatAssocPresent = false;
+							while($MoaCatAssocrow = mysql_fetch_assoc($MoaCatAssocresult))
+							{
+								$MoaCatAssocPresent = true;
+							}
+							if(!$MoaCatAssocPresent) $MoaCatAssoInsert = true;
+						}
+						else
+						{
+							require_once 'fetch_li_moacategories.php';
+							fetch_li_moacategory_individual($MoaCatId);
+							$MoaCatquery_2 = "select id from `entities` where `LI_id`='{$escMoaCatlid}' and `class`='MOA_Category' limit 1";
+							$MoaCatresult_2 = mysql_query($MoaCatquery_2);
+							$MoaCatPresent = false;
+							while($MoaCatrow_2 = mysql_fetch_assoc($MoaCatresult_2))
+							{
+								$MoaCatPresent = true;
+								$MoaCatIdLocal = $MoaCatrow_2['id'];
+							}
+							if($MoaCatPresent) $MoaCatAssoInsert = true;
+						}
+						if($MoaCatAssoInsert)
+						{
+							$MoaCatAssocInsertquery = "INSERT INTO `entity_relations` (`parent`, `child`) VALUES ('{$MoaCatIdLocal}','{$MOAID}')";
+							$MoaCatAssocInsertresult = mysql_query($MoaCatAssocInsertquery);
+						}
+					}
+					else
+					{
+						global $logger;
+						$log 	= 'ERROR: Bad SQL query for Moa Category sync inside moa sync. ' . $MoaCatquery . mysql_error();
+						$logger->error($log);
+						unset($log);
+					}
+				}
+				ob_end_clean();	
+				//End of Insert product MOA and MOA Category association
+				
 				return 1;
 			}
 			else
@@ -1282,6 +1343,78 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			$logger->error($log);
 			unset($log);
 			softdie('Cannot import moa id '.$importVal['LI_id'].'<br/>'.$query.'<br/>');
+			return 2;
+		}
+	}
+	
+	if($import==1 && $table=='moacategories')
+	{
+		ini_set('max_execution_time','360000');	//100 hours
+		//check for insert update case
+		$esclid = mysql_real_escape_string($importVal['LI_id']);
+		$escname = mysql_real_escape_string($importVal['name']);
+		$query = "select id from `entities` where `class`='MOA_Category' and (LI_id='{$esclid}' OR name='{$escname}') limit 1";
+		$result = mysql_query($query);
+		$update = false;
+		if($result)
+		{
+			ob_start();
+			while($row = mysql_fetch_assoc($result))
+			{
+				$update = true;
+				$id = $row['id'];
+			}
+			ob_end_clean();
+			if($update)
+			{
+				if($importVal['is_active'] == 0)
+				{
+					deleteData($id, 'entities');
+					return 4;
+				}			
+				$importVal = array_map(am1,$importKeys,array_values($importVal));
+				$query = "update `entities` set ".implode(',',$importVal)." where id=".$id;
+			}
+			else 
+			{
+				//if insert check the moa is_active. We dont need it in an import, skipping...
+				if($importVal['is_active'] == 0)
+				{
+					//skipping.
+					//return false can show as failed attempt on higher level controller.
+					return 3;
+				}
+				
+				$importVal = array_map(function ($v){return "'".mysql_real_escape_string($v)."'";},$importVal);
+				$query = "insert into `entities` (`".implode('`,`',$importKeys)."`) values (".implode(',',$importVal).")";
+			}
+			if(mysql_query($query))
+			{
+				if($id)
+				{
+					$_GET['id'] = $id;
+				}
+				else 
+				{
+					$_GET['id'] = mysql_insert_id();
+				}
+				return 1;
+			}
+			else
+			{
+				echo 'Moa category Id : '.$importVal['LI_id'].' Fail !! <br/>'."\n";
+				softdie('Cannot import moa category id '.$importVal['LI_id'].'<br/>'.$query.'<br/>');
+				//softdie('Cannot import product id '.$importVal['LI_id'].'<br/>');
+				return 2;
+			}
+		}
+		else
+		{
+			global $logger;
+			$log 	= 'ERROR: Bad SQL query for MOA Category Sync. ' . $query . mysql_error();
+			$logger->error($log);
+			unset($log);
+			softdie('Cannot import moa category id '.$importVal['LI_id'].'<br/>'.$query.'<br/>');
 			return 2;
 		}
 	}
@@ -2704,7 +2837,7 @@ function parseInstitutionsXmlAndSave($xmlImport,$table)
 */
 function parseMoasXmlAndSave($xmlImport,$table)
 {
-	$importKeys = array('LI_id', 'name', 'display_name', 'is_active', 'created', 'modified','xml');
+	$importKeys = array('LI_id', 'name', 'class', 'display_name', 'is_active', 'created', 'modified','xml');
 	$success = $fail = $skip = $delete = 0;
 	foreach($xmlImport->getElementsByTagName('Moa') as $moa)
 	{
@@ -2719,10 +2852,80 @@ function parseMoasXmlAndSave($xmlImport,$table)
 		$implodeStringForNames = ', ';
 	
 		$xmldump = $xmlImport->saveXML($moa);
+	}
+	
+	//Get associated moa categories id and names
+	$moa_categories_ids = array();
+	foreach($xmlImport->getElementsByTagName('MoaCategories') as $MoaCategories)
+	{
+		foreach($MoaCategories->getElementsByTagName('MoaCategory') as $MoaCategory)
+		{
+			$moa_categories_ids[] = $MoaCategory->getElementsByTagName('moa_category_id')->item(0)->nodeValue;
+		}
+	}
 			
-		$importVal = array('LI_id'=>$moa_id,'name'=>$moa_name,'display_name'=>$display_name,'is_active'=>$is_active,'created'=>$created,'modified'=>$modified,'xml'=>$xmldump);
+	$importVal = array('LI_id'=>$moa_id,'name'=>$moa_name,'class'=>'MOA', 'display_name'=>$display_name,'is_active'=>$is_active,'created'=>$created,'modified'=>$modified,'xml'=>$xmldump);
+	
+	if(($moa_id == NULL && trim($moa_id) == '') || ($moa_name == NULL && trim($moa_name) == ''))
+	return array('success'=>$success,'fail'=>$fail,'skip'=>$skip,'delete'=>$delete, 'exitProcess'=>true);
+	
+	//var_dump($moa_categories_ids);
+	//var_dump($importVal);
+	//ob_start();
+	$out = saveData(null,$table,1,$importKeys,$importVal,$k, array('MoaCategoryIdsArray'=>$moa_categories_ids));
+	if($out ==1)
+	{
+		$success ++;
+		ob_start();
+		echo 'Moa Id : '.$moa_id.' Done .. <br/>'."\n";
+		ob_end_flush();
+	}
+	elseif($out==2) 
+	{
+		echo 'Moa Id : '.$moa_id.' Fail !! <br/>'."\n";
+		$fail ++;
+	}
+	elseif($out==3)
+	{
+		echo 'Moa Id : '.$moa_id.' Skipped !! <br/>'."\n";
+		$skip ++;
+	}		
+	elseif($out==4)
+	{
+		echo 'Moa Id : '.$moa_id.' Deleted !! <br/>'."\n";
+		$delete ++;
+	}			
+	//ob_end_clean();
+	
+	return array('success'=>$success,'fail'=>$fail,'skip'=>$skip,'delete'=>$delete, 'exitProcess'=>false);
+}
+
+/**
+* @name parseMoacategoriesXmlAndSave
+* @tutorial parse and get ready Moa categories xml for saving.
+* @param $table,$searchdata,$id
+*/
+function parseMoacategoriesXmlAndSave($xmlImport,$table)
+{
+	$importKeys = array('LI_id', 'name', 'class', 'is_active', 'created', 'modified','xml');
+	$success = $fail = $skip = $delete = 0;
+	foreach($xmlImport->getElementsByTagName('MoaCategory') as $moacategory)
+	{
+		$importVal = array();
+		$moacategory_id = $moacategory->getElementsByTagName('moa_category_id')->item(0)->nodeValue;
+		$moacategory_name = $moacategory->getElementsByTagName('name')->item(0)->nodeValue;
+		$is_active = ($moacategory->getElementsByTagName('is_active')->item(0)->nodeValue == 'True')?1:0;
+		$created = date('y-m-d H:i:s',time($moacategory->getElementsByTagName('created')->item(0)->nodeValue));
+		$modified = date('y-m-d H:i:s',time($moacategory->getElementsByTagName('modified')->item(0)->nodeValue));
+		$optional_name = $moacategory->getElementsByTagName('optional_name')->item(0)->nodeValue;		
 		
-		if(($moa_id == NULL && trim($moa_id) == '') || ($moa_name == NULL && trim($moa_name) == ''))
+		$implodeStringForNames = ', ';
+	
+		$xmldump = $xmlImport->saveXML($moacategory);
+			
+		$importVal = array('LI_id'=>$moacategory_id,'name'=>$moacategory_name,'class'=>'MOA_Category','is_active'=>$is_active,'created'=>$created,'modified'=>$modified,'xml'=>$xmldump);
+		
+		if(($moacategory_id == NULL && trim($moacategory_id) == '') || ($moacategory_name == NULL && trim($moacategory_name) == ''))
 		return array('success'=>$success,'fail'=>$fail,'skip'=>$skip,'delete'=>$delete, 'exitProcess'=>true);
 		
 		//var_dump($importVal);
@@ -2732,22 +2935,22 @@ function parseMoasXmlAndSave($xmlImport,$table)
 		{
 			$success ++;
 			ob_start();
-			echo 'Moa Id : '.$moa_id.' Done .. <br/>'."\n";
+			echo 'Moacategory Id : '.$moacategory_id.' Done .. <br/>'."\n";
 			ob_end_flush();
 		}
 		elseif($out==2) 
 		{
-			echo 'Moa Id : '.$moa_id.' Fail !! <br/>'."\n";
+			echo 'Moacategory Id : '.$moacategory_id.' Fail !! <br/>'."\n";
 			$fail ++;
 		}
 		elseif($out==3)
 		{
-			echo 'Moa Id : '.$moa_id.' Skipped !! <br/>'."\n";
+			echo 'Moacategory Id : '.$moacategory_id.' Skipped !! <br/>'."\n";
 			$skip ++;
 		}		
 		elseif($out==4)
 		{
-			echo 'Moa Id : '.$moa_id.' Deleted !! <br/>'."\n";
+			echo 'Moacategory Id : '.$moacategory_id.' Deleted !! <br/>'."\n";
 			$delete ++;
 		}			
 		//ob_end_clean();
