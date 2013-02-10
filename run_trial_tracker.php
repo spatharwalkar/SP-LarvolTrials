@@ -6850,9 +6850,9 @@ class TrialTracker
 					}
 					else
 					{
-						if($row['display_name'] != '' && $row['display_name'] !== NULL)
+						if($row['global_display_name'] != '' && $row['global_display_name'] !== NULL)
 						{
-							$sectionHeader = $row['display_name'];
+							$sectionHeader = $row['global_display_name'];
 						}
 						else
 						{
