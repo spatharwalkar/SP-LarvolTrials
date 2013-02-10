@@ -23,6 +23,33 @@
 		
 		$ResultArr = find_entity($globalOptions['TzSearch']);
 		
+		//To remove repeated MOAs
+		$MOAArray = array();
+		if(is_array($ResultArr))
+		{
+			$MOACatQuery = "SELECT `id`, `name`, `class` FROM `entities` WHERE id IN (" . implode(',',$ResultArr) . ") ";
+			//print $MOACatQuery;
+			$MOACatQueryResult = mysql_query($MOACatQuery);
+			if($MOACatQueryResult)
+			{
+				while($MOAResult =  mysql_fetch_assoc($MOACatQueryResult))
+				{ 
+					if($MOAResult['class'] == 'MOA_Category')
+					{
+						$MOAQuery = "SELECT `id`, `name` FROM `entities` e JOIN `entity_relations` er ON(e.`id`=er.`child`) WHERE e.`class`='MOA' AND er.`parent` = '" . mysql_real_escape_string($MOAResult['id']) . "' ";			
+						$MOAResult = mysql_query($MOAQuery);
+						if($MOAResult &&  mysql_num_rows($MOAResult) > 0)
+						{
+							while($SMOA = mysql_fetch_assoc($MOAResult))
+							$MOAArray[] = $SMOA['id'];
+						}		
+					}
+				}
+			}						
+		}
+		$ResultArr = array_diff($ResultArr, $MOAArray);	//Remove moas if its category present
+		///End of remove repeated moas
+		
 		if(is_array($ResultArr))
 		$FoundRecords = count($ResultArr);
 		
@@ -278,7 +305,7 @@ function autoComplete(fieldID)
 	{
 		if($DataArray[$index]['id'] != '' && $DataArray[$index]['id'] != '' && $FoundRecords > 0)
 		{
-			if($DataArray[$index]['type'] == 'Institution' || $DataArray[$index]['type'] == 'MOA' || $DataArray[$index]['type'] == 'Product' || $DataArray[$index]['type'] == 'Disease' || $DataArray[$index]['type'] == 'MOA_Category')	// avoid displying row for other types
+			if($DataArray[$index]['type'] == 'Institution' || $DataArray[$index]['type'] == 'MOA' || $DataArray[$index]['type'] == 'Product' || ($DataArray[$index]['type'] == 'Disease' && $globalOptions['Disease'] == 'true') || $DataArray[$index]['type'] == 'MOA_Category')	// avoid displying row for other types
 			{
 				print'<table width="100%" border="0" cellspacing="0" cellpadding="0">
 						<tr>
@@ -365,7 +392,7 @@ if($FoundRecords == 0 && (($globalOptions['TzSearch'] != '' && $globalOptions['T
 function MOAListing($MOACat)
 {
 	$htmlContent = '';
-	$MOAQuery = "SELECT `id`, `name` FROM `entities` e JOIN `entity_relations` er ON(e.`id`=er.`child`) WHERE er.`parent` = '" . mysql_real_escape_string($MOACat) . "' ";
+	$MOAQuery = "SELECT `id`, `name` FROM `entities` e JOIN `entity_relations` er ON(e.`id`=er.`child`) WHERE e.`class`='MOA' AND er.`parent` = '" . mysql_real_escape_string($MOACat) . "' ";
 			
 	$MOAResult = mysql_query($MOAQuery);
 	$i=0;
