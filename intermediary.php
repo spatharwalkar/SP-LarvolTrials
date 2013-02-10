@@ -469,6 +469,7 @@ if(isset($_REQUEST['p']) || isset($_REQUEST['a']) || isset($_REQUEST['hm']))
 	if(isset($_REQUEST['hm']) && trim($_REQUEST['hm']) != '' && $_REQUEST['hm'] != NULL)
 	{
 		$globalOptions['hm'] = $_REQUEST['hm'];
+		$globalOptions['itype'][0] = 0;
 	}
 	
 	if(isset($_REQUEST['sphinx_s']))
