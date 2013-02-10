@@ -8682,7 +8682,7 @@ class TrialTracker
 		$Ids = $this->coverageAreaUpmIds($globalOptions);
 		if(!empty($Ids))
 		{
-			$subQuery = " AND u.`id` IN ('" . implode("', '", $Ids) . "') ";
+			$subQuery = " AND ( u.`id` IN ('" . implode("', '", $Ids) . "') OR ua.`upm_id` IS NULL ) ";
 		}
                 
 		$result = array();
@@ -8695,6 +8695,7 @@ class TrialTracker
                         . " FROM `upm` u "
                         . " LEFT OUTER JOIN `upm_trials` ut ON ut.`upm_id` = u.`id` "
                         . " LEFT OUTER JOIN `redtags` rt ON rt.`id` = u.`redtag` "
+                        . " LEFT OUTER JOIN `upm_areas` ua ON ua.`upm_id` = u.`id` "
                         . " WHERE ut.`larvol_id` IS NULL "
                         . " AND u.`product` IN ('" . implode("', '", $productIds) . "') "
                         . $subQuery
@@ -8718,14 +8719,14 @@ class TrialTracker
 					$result[$productId][$upmId]['result_link'] 		= $row['result_link'];
 					$result[$productId][$upmId]['condition'] 		= $row['condition'];
                                         
-                                        if($row['redtagtype'] != '' && $row['redtagtype'] !== NULL)
-                                        {
-                                            $result[$productId][$upmId]['event_type']           = $row['redtagtype'];
-                                        }
-                                        else
-                                        {
-                                            $result[$productId][$upmId]['event_type']           = $row['event_type'];
-                                        }
+                    if($row['redtagtype'] != '' && $row['redtagtype'] !== NULL)
+                    {
+                        $result[$productId][$upmId]['event_type']           = $row['redtagtype'];
+                    }
+                    else
+                    {
+                        $result[$productId][$upmId]['event_type']           = $row['event_type'];
+                    }
 					$result[$productId][$upmId]['start_date'] 		= $row['start_date'];
 					$result[$productId][$upmId]['end_date'] 		= $row['end_date'];
 					$result[$productId][$upmId]['product'] 			= $row['product'];
@@ -8774,7 +8775,7 @@ class TrialTracker
 		$Ids = $this->coverageAreaUpmIds($globalOptions);
 		if(!empty($Ids))
 		{
-			$subQuery = " AND u.`id` IN ('" . implode("', '", $Ids) . "') ";
+			$subQuery = " AND ( u.`id` IN ('" . implode("', '", $Ids) . "') OR ua.`upm_id` IS NULL ) ";
 		}
                 
 		$result = array();
@@ -8783,12 +8784,13 @@ class TrialTracker
 		
 		$query = " SELECT u.`id`, ut.`larvol_id`, u.`product`, u.`event_type`, u.`event_description`, u.`event_link`, "
 					. " u.`result_link`, u.`start_date`, u.`end_date`, u.`status`, u.`last_update`, "
-                                        . " rt.`type` AS redtagtype "
+                    . " rt.`type` AS redtagtype "
 					. " FROM upm u "
 					. " LEFT OUTER JOIN upm_trials ut ON u.`id` = ut.`upm_id` "
-                                        . " LEFT OUTER JOIN `redtags` rt ON rt.`id` = u.`redtag` "
+                    . " LEFT OUTER JOIN `redtags` rt ON rt.`id` = u.`redtag` "
+                    . " LEFT OUTER JOIN `upm_areas` ua ON ua.`upm_id` = u.`id` "
 					. " WHERE ut.`larvol_id` IN ('" . implode("', '", $larvolIds) . "') "
-                                        . $subQuery
+                    . $subQuery
 					. " ORDER BY u.`end_date` ASC, u.`start_date` ASC ";	
 					
 		$res = m_query(__LINE__,$query);
