@@ -378,7 +378,7 @@ function MOAListing($MOACat)
 		{
 			$htmlContent .='<tr>
 								<td align="left"  width="100px">
-									<img src="images/Moaarrow.gif" style="padding-bottom:5px;" width="100px" height="17px" />
+									<img src="images/MOAarrow.gif" style="padding-bottom:5px;" width="100px" height="17px" />
 								</td>
 								<td style="padding-left:5px;" align="left">';
 			$htmlContent .= ' 		<a href="'. trim(urlPath()) .'trialzilla_moa.php?MoaId='. trim($SMOA['id']) .'" title="MOA" target="_blank">'.$SMOA['name'].'</a><br />';

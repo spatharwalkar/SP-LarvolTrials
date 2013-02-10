@@ -1094,7 +1094,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 						{
 							require_once 'fetch_li_moas.php';
 							fetch_li_moa_individual($MoaId);
-							$Moaquery_2 = "select id from `entities` where `LI_id`='{$escMoalid}' OR `name`='{$escMoaname}' limit 1";
+							$Moaquery_2 = "select id from `entities` where `class`='MOA' and (`LI_id`='{$escMoalid}' OR `name`='{$escMoaname}') limit 1";
 							$Moaresult_2 = mysql_query($Moaquery_2);
 							$MoaPresent = false;
 							while($Moarow_2 = mysql_fetch_assoc($Moaresult_2))
