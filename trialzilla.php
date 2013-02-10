@@ -293,7 +293,7 @@ function autoComplete(fieldID)
 					print ' 		<a href="'. trim(urlPath()) .'trialzilla_moa.php?MoaId='. trim($DataArray[$index]['id']) .'" title="MOA" target="_blank">'.$DataArray[$index]['name'].'</a>';
 				else if($DataArray[$index]['type'] == 'Product')
 					print ' 		<a href="'. trim(urlPath()) .'intermediary.php?p='. trim($DataArray[$index]['id']) .'" title="Product" target="_blank">'.formatBrandName($DataArray[$index]['name'], 'product') . $DataArray[$index]['company'] .'</a>';
-				else if($DataArray[$index]['type'] == 'Disease')
+				else if($DataArray[$index]['type'] == 'Disease' && $globalOptions['Disease'] == 'true')
 						print ' 		<a href="'. trim(urlPath()) .'trialzilla_disease.php?DiseaseId='. trim($DataArray[$index]['id']) .'" title="Disease" target="_blank">'.$DataArray[$index]['name'] .'</a>';
 				else if($DataArray[$index]['type'] == 'MOA_Category')
 						print ' 	<a href="#" title="MOA Category"><b>'.$DataArray[$index]['name'] .'</b></a>';
