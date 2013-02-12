@@ -466,10 +466,17 @@ if(isset($_REQUEST['p']) || isset($_REQUEST['a']) || isset($_REQUEST['hm']))
 		$globalOptions['url'] = 'p=' . $_REQUEST['p'] . '&a=' . $_REQUEST['a'] . '&JSON_search=' . $_REQUEST['JSON_search'];
 		$globalOptions['JSON_search'] = $_REQUEST['JSON_search'];
 	}
+	
+	//pr($globalOptions['itype']);
 	if(isset($_REQUEST['hm']) && trim($_REQUEST['hm']) != '' && $_REQUEST['hm'] != NULL)
 	{
 		$globalOptions['hm'] = $_REQUEST['hm'];
-		$globalOptions['itype'][0] = 0;
+		
+		if(!isset($_REQUEST['itype']))
+		{
+			$globalOptions['itype'][0] = 0;
+		}
+		
 	}
 	
 	if(isset($_REQUEST['sphinx_s']))
@@ -481,6 +488,7 @@ if(isset($_REQUEST['p']) || isset($_REQUEST['a']) || isset($_REQUEST['hm']))
 	{
 		$globalOptions['sphinxSearch'] = $_REQUEST['ss'];
 	}
+	
 	
 	$tt->generateTrialTracker('indexed', array('product' => $_REQUEST['p'], 'area' => $_REQUEST['a']), $globalOptions);
 }

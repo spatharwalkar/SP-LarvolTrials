@@ -6833,34 +6833,15 @@ class TrialTracker
 					$sectionHeader = "";
 					$areaId = $row['type_id'];
 					
-					if($row['coverage_area'])
+					if($row['display_name'] != '' && $row['display_name'] !== NULL)
 					{
-						if($row['display_name'] != '' && $row['display_name'] !== NULL)
-						{
-							$sectionHeader = $row['display_name'];
-						}
-						else if($row['global_display_name'] != '' && $row['global_display_name'] !== NULL)
-						{
-							$sectionHeader = $row['global_display_name'];
-						}
-						else
-						{
-							$sectionHeader = 'Area ' . $areaId;
-						}
+						$sectionHeader = $row['display_name'];
 					}
 					else
 					{
-						if($row['global_display_name'] != '' && $row['global_display_name'] !== NULL)
-						{
-							$sectionHeader = $row['global_display_name'];
-						}
-						else
-						{
-							$sectionHeader = 'Area ' . $areaId;
-						}
+						$sectionHeader = 'Area ' . $areaId;
 					}
 					
-
 					$Ids[$areaId]['area'] = $areaId;
 					$productSelector[$areaId] = $sectionHeader;
 					
