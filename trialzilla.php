@@ -305,7 +305,7 @@ function autoComplete(fieldID)
 	{
 		if($DataArray[$index]['id'] != '' && $DataArray[$index]['id'] != '' && $FoundRecords > 0)
 		{
-			if($DataArray[$index]['type'] == 'Institution' || $DataArray[$index]['type'] == 'MOA' || $DataArray[$index]['type'] == 'Product' || ($DataArray[$index]['type'] == 'Disease' && $globalOptions['Disease'] == 'true') || $DataArray[$index]['type'] == 'MOA_Category')	// avoid displying row for other types
+			if($DataArray[$index]['type'] == 'Institution' || $DataArray[$index]['type'] == 'MOA' || $DataArray[$index]['type'] == 'Product' || $DataArray[$index]['type'] == 'Disease' || $DataArray[$index]['type'] == 'MOA_Category')	// avoid displying row for other types
 			{
 				print'<table width="100%" border="0" cellspacing="0" cellpadding="0">
 						<tr>
@@ -315,22 +315,30 @@ function autoComplete(fieldID)
 						<td style="padding-left:5px;" align="left">';
 						
     			if($DataArray[$index]['type'] == 'Institution')
-					print ' 		<a href="'. trim(urlPath()) .'trialzilla_company.php?CompanyId='. trim($DataArray[$index]['id']) .'" title="Company" target="_blank">'.$DataArray[$index]['name'].'</a>';
+					print ' 		<a href="'. trim(urlPath()) .'trialzilla_company.php?CompanyId='. trim($DataArray[$index]['id']) .'" title="Company" target="_blank">'.$DataArray[$index]['name'].'</a>&nbsp;&nbsp;('.GetProductsCountFromCompany(trim($DataArray[$index]['id'])).' Products)';
 				else if($DataArray[$index]['type'] == 'MOA')
-					print ' 		<a href="'. trim(urlPath()) .'trialzilla_moa.php?MoaId='. trim($DataArray[$index]['id']) .'" title="MOA" target="_blank">'.$DataArray[$index]['name'].'</a>';
+				{
+					print ' 		<a href="'. trim(urlPath()) .'trialzilla_moa.php?MoaId='. trim($DataArray[$index]['id']) .'" title="MOA" target="_blank">'.$DataArray[$index]['name'].'</a>&nbsp;&nbsp;('.GetProductsCountFromMOA(trim($DataArray[$index]['id'])).' Products)';
+				}
 				else if($DataArray[$index]['type'] == 'Product')
-					print ' 		<a href="'. trim(urlPath()) .'intermediary.php?p='. trim($DataArray[$index]['id']) .'" title="Product" target="_blank">'.formatBrandName($DataArray[$index]['name'], 'product') . $DataArray[$index]['company'] .'</a>';
+				{
+					print ' 		<a href="'. trim(urlPath()) .'intermediary.php?p='. trim($DataArray[$index]['id']) .'" title="Product" target="_blank">'.formatBrandName($DataArray[$index]['name'], 'product') . $DataArray[$index]['company'] .'</a>&nbsp;&nbsp;('.GetTrialsCountFromProduct(trim($DataArray[$index]['id'])).' Trials)';
+				}
 				else if($DataArray[$index]['type'] == 'Disease')
 						print ' 		<a href="'. trim(urlPath()) .'trialzilla_disease.php?DiseaseId='. trim($DataArray[$index]['id']) .'" title="Disease" target="_blank">'.$DataArray[$index]['name'] .'</a>';
 				else if($DataArray[$index]['type'] == 'MOA_Category')
+				{
 						print ' 	<a href="#" title="MOA Category"><b>'.$DataArray[$index]['name'] .'</b></a>';
+						$MOARes = MOAListing(trim($DataArray[$index]['id']));
+						print '&nbsp;&nbsp;('.$MOARes[1].' MOA'.(($MOARes[1] > 1) ? 's':'').')';
+				}
 				
 				if($DataArray[$index]['type'] != 'MOA_Category') print '<br /><br style="line-height:6px;" />';
     			print ' </td>
     				  </tr>
 					  </table>';
 				if($DataArray[$index]['type'] == 'MOA_Category')
-					print MOAListing(trim($DataArray[$index]['id']));	  
+					print $MOARes[0];	  
 			}
 			//else print '<tr><td><img src="images/'.$DataArray[$index]['type'].'arrow.gif" style="padding-bottom:5px;" width="120px" height="17px" /></td><td>'.$DataArray[$index]['type'].'</td></tr>';					
 		}
@@ -391,12 +399,14 @@ if($FoundRecords == 0 && (($globalOptions['TzSearch'] != '' && $globalOptions['T
 
 function MOAListing($MOACat)
 {
+	$Return = array();
 	$htmlContent = '';
 	$MOAQuery = "SELECT `id`, `name` FROM `entities` e JOIN `entity_relations` er ON(e.`id`=er.`child`) WHERE e.`class`='MOA' AND er.`parent` = '" . mysql_real_escape_string($MOACat) . "' ";
 			
 	$MOAResult = mysql_query($MOAQuery);
 	$i=0;
-	if($MOAResult &&  mysql_num_rows($MOAResult) > 0)
+	$MOAResultCount = mysql_num_rows($MOAResult);
+	if($MOAResult && $MOAResultCount > 0)
 	{
 		if($i)
 		$htmlContent .= '<br /><br style="line-height:6px;" />'; $i++;
@@ -414,7 +424,60 @@ function MOAListing($MOACat)
 		}
 		$htmlContent .='</table>';
 	}
-	return $htmlContent;
+	$Return[0] = $htmlContent;
+	$Return[1] = $MOAResultCount;
+	return $Return;
+}
+
+/* Function to get Product count from MOA id */
+function GetProductsCountFromMOA($moaID)
+{
+	global $db;
+	global $now;
+	$ProductsCount = 0;
+	$query = "SELECT count(et.`id`) as proCount FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`)  WHERE et.`class`='Product' and er.`child`='" . mysql_real_escape_string($moaID) . "'";
+	$res = mysql_query($query) or die('Bad SQL query getting products count from moa id in TZ');
+	
+	if($res)
+	{
+		while($row = mysql_fetch_array($res))
+		$ProductsCount = $row['proCount'];
+	}
+	return $ProductsCount;
+}
+
+/* Function to get Trials count from MOA id */
+function GetTrialsCountFromProduct($productID)
+{
+	global $db;
+	global $now;
+	$TrialsCount = 0;
+	$query = "SELECT count(dt.`larvol_id`) as trialCount FROM `data_trials` dt JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial`)  WHERE et.`entity`='" . mysql_real_escape_string($productID) . "'";
+	$res = mysql_query($query) or die('Bad SQL query getting trials count from product id in TZ');
+	
+	if($res)
+	{
+		while($row = mysql_fetch_array($res))
+		$TrialsCount = $row['trialCount'];
+	}
+	return $TrialsCount;
+}
+
+/* Function to get Product count from Institution id */
+function GetProductsCountFromCompany($companyID)
+{
+	global $db;
+	global $now;
+	$ProductsCount = 0;
+	$query = "SELECT count(et.`id`) as proCount FROM `entities` et LEFT JOIN `entity_relations` er ON(et.`id` = er.`parent`) WHERE et.`class`='Product' AND er.`child`='" . mysql_real_escape_string($companyID) . "'";
+	$res = mysql_query($query) or die('Bad SQL query getting products count from company id in TZ');
+	
+	if($res)
+	{
+		while($row = mysql_fetch_array($res))
+		$ProductsCount = $row['proCount'];
+	}
+	return $ProductsCount;
 }
 
 function pagination($globalOptions = array(), $totalPages)
