@@ -328,7 +328,7 @@ function autoComplete(fieldID)
 						print ' 		<a href="'. trim(urlPath()) .'trialzilla_disease.php?DiseaseId='. trim($DataArray[$index]['id']) .'" title="Disease" target="_blank">'.$DataArray[$index]['name'] .'</a>';
 				else if($DataArray[$index]['type'] == 'MOA_Category')
 				{
-						print ' 	<a href="#" title="MOA Category"><b>'.$DataArray[$index]['name'] .'</b></a>';
+						print ' 	<a href="'. trim(urlPath()) .'trialzilla_moacategory.php?MoaCatId='. trim($DataArray[$index]['id']) .'" title="MOA Category" target="_blank"><b>'.$DataArray[$index]['name'] .'</b></a>';
 						$MOARes = MOAListing(trim($DataArray[$index]['id']));
 						print '&nbsp;&nbsp;('.$MOARes[1].' MOA'.(($MOARes[1] > 1) ? 's':'').')';
 				}
@@ -418,7 +418,7 @@ function MOAListing($MOACat)
 									<img src="images/MOAarrow.gif" style="padding-bottom:5px;" width="100px" height="17px" />
 								</td>
 								<td style="padding-left:5px;" align="left">';
-			$htmlContent .= ' 		<a href="'. trim(urlPath()) .'trialzilla_moa.php?MoaId='. trim($SMOA['id']) .'" title="MOA" target="_blank">'.$SMOA['name'].'</a><br />';
+			$htmlContent .= ' 		<a href="'. trim(urlPath()) .'trialzilla_moa.php?MoaId='. trim($SMOA['id']) .'" title="MOA" target="_blank">'.$SMOA['name'].'</a>&nbsp;&nbsp;('.GetProductsCountFromMOA(trim($SMOA['id'])).' Products)<br />';
 			$htmlContent .= '	</td>
 				   			</tr>';									
 		}

@@ -76,7 +76,7 @@ function DataGeneratorForCompanyTracker($id, $TrackerType)
 		$res = mysql_query($query) or die(mysql_error());
 		$header = mysql_fetch_array($res);
 		$Report_DisplayName = $header['name'];
-		$CompanyIds = array_filter(GetCompaniesFromDisease_CompanyTracker($header['id']));
+		$CompanyIds = array_filter(array_unique(GetCompaniesFromDisease_CompanyTracker($header['id'])));
 		$id=$header['id'];
 	}
 		
@@ -1965,7 +1965,7 @@ function GetProductsFromCompany_CompanyTracker($companyID)
 			$Products[] = $row['id'];
 		}
 	}
-	return $Products;
+	return array_filter(array_unique($Products));
 }
 
 //Get Products from Disease
@@ -1984,7 +1984,7 @@ function GetProductsFromDisease_CompanyTracker($DiseaseID)
 			$Products[] = $row['id'];
 		}
 	}
-	return $Products;
+	return array_filter(array_unique($Products));
 }
 
 //Get Companies from Disease
@@ -2010,6 +2010,6 @@ function GetCompaniesFromDisease_CompanyTracker($DiseaseID)
 			}
 		}
 	}
-	return $Companies;
+	return array_filter(array_unique($Companies));
 }
 ?>
