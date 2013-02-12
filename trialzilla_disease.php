@@ -1,6 +1,7 @@
 <?php
 	require_once('db.php');
 	require_once('product_tracker.php');
+	require_once('company_tracker.php');
 	if($_REQUEST['DiseaseId'] != NULL && $_REQUEST['DiseaseId'] != '' && isset($_REQUEST['DiseaseId']))
 	{
 		$DiseaseId = $_REQUEST['DiseaseId'];
@@ -154,18 +155,17 @@ a:visited {color:#6600bc;}  /* visited link */
 <tr><td>
 <ul id="disease_tabs">
     <li><a href="#" title="Products">Products</a></li>
-   <!-- <li><a href="#" title="Companies">Companies</a></li>
-    <li><a href="#" title="MOAs">MOAs</a></li>
+    <li><a href="#" title="Companies">Companies</a></li>
+    <!-- <li><a href="#" title="MOAs">MOAs</a></li>
     <li><a href="#" title="Conferences">Conferences</a></li> -->   
 </ul>
 
 <div id="diseaseTab_content"> 
     <div id="Products">        
 			<?php print showProductTracker($DiseaseId, 'DPT'); //DPT=DISEASE PRODUCT TRACKER ?>
-
     </div>
     <div id="Companies">
-       Company Tracker
+       		<?php print showCompanyTracker($DiseaseId, 'DCT'); //DCT=DISEASE COMPANY TRACKER ?>
     </div>
     <div id="MOAs">
         MOA Tracker
