@@ -3,7 +3,7 @@
 <table width="100%" border="0" style="padding-top:2px;">
 <tr>
 <td width="300px">
-<a style="text-decoration:none;" href="trialzilla.php"><img src="images/Larvol-Trial-Logo-notag.png" width="300" height="47" style="border: none;" /></a>
+<a style="text-decoration:none;" href="trialzilla.php"><img src="images/larvol_sigma_logo.gif" width="300" height="50" style="border: none;" /></a>
 </td>
 <td width="600px" style="vertical-align:bottom; padding-left:20px;" align="left">
 <input class="SearchBox" type="text" value="<?php echo htmlspecialchars($globalOptions['TzSearch']); ?>" autocomplete="off" style="font-weight:bold;" name="TzSearch" id="TzSearch" onkeyup="javascript:autoComplete('TzSearch')" />
