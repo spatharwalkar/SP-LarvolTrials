@@ -21,13 +21,13 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 {
 	if($cat=='products') 
 	{
-		$table='product_trials'; 
-		$field='product';
+		$table='entity_trials'; 
+		$field='entity';
 	}
 	else 
 	{
-		$table='area_trials'; 
-		$field='area';
+		$table='entity_trials'; 
+		$field='entity';
 	}
 
 	global $logger,$now,$db;
@@ -41,18 +41,18 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 		if(is_null($productID))
 		{
 			
-			$query = 'SELECT `id`,`name`,`searchdata`' . $cmpny . ' from '. $cat .' where searchdata IS NOT NULL and  `searchdata` <>"" ';
+			$query = 'SELECT `id`,`name`,`searchdata`' . $cmpny . ' from '. 'entities' .' where searchdata IS NOT NULL and  `searchdata` <>"" ';
 			$ttype=$cat=='products' ? 'PRODUCT1' : 'AREA1';
 		}
 		else 
 		{
-			$query = 'SELECT `id`,`name`,`searchdata`' . $cmpny . ' from '. $cat .' where `searchdata` IS NOT NULL and  `searchdata` <>"" and `id`="' . $productID .'"' ;
+			$query = 'SELECT `id`,`name`,`searchdata`' . $cmpny . ' from '. 'entities' .' where `searchdata` IS NOT NULL and  `searchdata` <>"" and `id`="' . $productID .'"' ;
 			$ttype=$cat=='products' ? 'PRODUCT2' : 'AREA2';
 		}
 		
 		if(!$resu = mysql_query($query))
 		{
-			$log='Bad SQL query getting  details from '. $cat .' table.<br>Query=' . $query;
+			$log='Bad SQL query getting  details from '. 'entities' .' table.<br>Query=' . $query;
 			$logger->fatal($log);
 			echo $log;
 			return false;
@@ -106,7 +106,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					
 				if($query=='Invalid Json') // if searchdata contains invalid JSON
 				{
-					echo '<br> Invalid JSON in table <b>'. $cat .'</b> and id=<b>'.$cid.'</b> : <br>';
+					echo '<br> Invalid JSON in table <b>'. 'entities' .'</b> and id=<b>'.$cid.'</b> : <br>';
 					echo $searchdata;
 					echo '<br>';
 					--$total;
@@ -234,7 +234,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 //				exit;
 				if($query=='Invalid Json') 
 				{
-					echo '<br> Invalid JSON in table <b>'. $cat .'</b> and id=<b>'.$cid.'</b> : <br>';
+					echo '<br> Invalid JSON in table <b>'. 'entities' .'</b> and id=<b>'.$cid.'</b> : <br>';
 					echo $searchdata;
 					echo '<br>';
 					--$total;
@@ -275,7 +275,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					
 				
 						$query = '	update update_status_fullhistory set process_id="'. $prid . '",';
-						$query .= '	er_message="Invalid JSON. table:'. $cat .', id:'.$cid.'",status="2",';
+						$query .= '	er_message="Invalid JSON. table:'. 'entities' .', id:'.$cid.'",status="2",';
 						$query .= '	update_items_total = "' . $total . '",trial_type="' . $ttype . '" ';
 						$query .= '	where update_id= "'. $up_id .'" limit 1' ; 
 						
@@ -397,7 +397,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 						if($srch!==false) echo ''; else continue;
 					}
 					
-					$indextable=$cat=='products' ? 'product_trials' : 'area_trials';
+					$indextable=$cat=='products' ? 'entity_trials' : 'entity_trials';
 					$larvol_id=$value['larvol_id'];
 					if(!isset($larvol_id) or empty($larvol_id) or is_null($larvol_id)) 
 					{
@@ -642,8 +642,8 @@ Parameters :
 */
 function trial_indexed($larvol_id,$cat,$cid)
 {
-	$indextable=$cat=='products' ? 'product_trials' : 'area_trials';
-	$columnname=$cat=='products' ? 'product' : 'area';
+	$indextable=$cat=='products' ? 'entity_trials' : 'entity_trials';
+	$columnname=$cat=='products' ? 'entity' : 'entity';
 //	$nctid=padnct($nctid);
 	global $logger;
 //	$query = 'SELECT trial from  ' . $indextable . ' where trial="' . $nctid . '" LIMIT 1';

@@ -433,9 +433,10 @@ FROM entities
 WHERE class='Product';
 
 CREATE VIEW areas AS 
-SELECT id, LI_id, name, display_name, description, category, searchdata 
+SELECT id, LI_id, name, display_name, description, category, searchdata ,if(class='Disease',1,0) as coverage_area
 FROM entities
-WHERE class='Area';
+WHERE class='Area' or class='Disease';
+
 
 CREATE TABLE IF NOT EXISTS `rpt_masterhm` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -475,6 +476,7 @@ CREATE TABLE IF NOT EXISTS `area_trials` (
 CREATE TABLE IF NOT EXISTS `entity_trials` (
   `entity` int(10) unsigned NOT NULL,
   `trial` int(10) unsigned NOT NULL,
+  `sponsor_owned` TINYINT(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`entity`,`trial`),
   KEY `trial` (`trial`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
