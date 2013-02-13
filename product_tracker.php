@@ -205,6 +205,10 @@ function DataGenerator($id, $TrackerType)
 			{
 				$phase_query = "SELECT dt.`is_active`, dt.`phase`, dt.`institution_type` FROM rpt_masterhm_cells rpt JOIN product_trials pt ON (rpt.`product` = pt.`product`) JOIN area_trials ar ON (rpt.`area` = ar.`area`) JOIN data_trials dt ON (dt.`larvol_id` = pt.`trial` && dt.`larvol_id` = ar.`trial`) WHERE pt.`product`='" . $productIds[$row] . "' AND ar.`area`='". $areaId ."'";
 			}
+			else if($TrackerType == 'DPT')
+			{
+				$phase_query = "SELECT dt.`is_active`, dt.`phase`, dt.`institution_type` FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) WHERE et.`entity`='" . $productIds[$row] ."' AND dt.`larvol_id` IN (SELECT dt2.`larvol_id` FROM data_trials dt2 JOIN entity_trials et2 ON (dt2.`larvol_id` = et2.`trial`) WHERE et2.`entity`='" . $id ."')";
+			}
 			else
 			{
 				$phase_query = "SELECT dt.`is_active`, dt.`phase`, dt.`institution_type` FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) WHERE et.`entity`='" . $productIds[$row] ."'";
@@ -978,6 +982,7 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 	
 	$Line_Width = 20;
 	$phase_legend_nums = array('4', '3', '2', '1', '0', 'na');
+	
 
 	$htmlContent = '';
 	$htmlContent .= '<br style="line-height:11px;"/>'
@@ -1057,6 +1062,15 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 	for($incr=0; $incr < count($rows); $incr++)
 	{	
 		$row = $incr;
+		
+		$commonPart1 = trim(urlPath()) .'intermediary.php?e1=' . $data_matrix[$row]['productIds'];
+		$commonPart2 = '';
+		if($TrackerType == 'PTH') $commonPart2 = '&e2=' . $areaId . '&hm='.$id;
+		if($TrackerType == 'DPT') $commonPart2 = '&e2=' . $id;
+		$industryLink = $commonPart1 . $commonPart2 . '&list=1&itype=0';
+		$activeLink = $commonPart1 . $commonPart2 . '&list=1';
+		$totalLink = $commonPart1 . $commonPart2 . '&list=2';
+		
 		$htmlContent .= '<tr class="side_tick_height"><th class="prod_col side_tick_height">&nbsp;</th><th class="graph_right">&nbsp;</th>';
 		for($j=0; $j < $columns; $j++)
 		{
@@ -1071,7 +1085,7 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 		
 		$Max_ValueKey = Max_ValueKey($data_matrix[$row]['indlead_phase_na'], $data_matrix[$row]['indlead_phase_0'], $data_matrix[$row]['indlead_phase_1'], $data_matrix[$row]['indlead_phase_2'], $data_matrix[$row]['indlead_phase_3'], $data_matrix[$row]['indlead_phase_4']);
 						
-		$htmlContent .= '<tr id="'.$uniqueId.'_indlead_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" id="'.$uniqueId.'_ProdCol_'.$row.'" rowspan="3"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&list=1&itype=0' . (($TrackerType == 'PTH') ? '&a=' . $areaId . '&hm='.$id : '') . '" target="_blank" style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
+		$htmlContent .= '<tr id="'.$uniqueId.'_indlead_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" id="'.$uniqueId.'_ProdCol_'.$row.'" rowspan="3"><a href="'. $industryLink . '" target="_blank" style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
 	
 		///Below function will derive number of lines required to display product name, as our graph size is fixed due to fixed scale, we can calculate approx max area  
 		///for product column. From that we can calculate extra height which will be distributed to up and down rows of graph bar, So now IE6/7 as well as chrome will not 
@@ -1095,7 +1109,7 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 				$Color = getClassNColorforPhase($phase_nums);
 				$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['indlead_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
 				$phase_space =  $phase_space + $Mini_Bar_Width;					
-				$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="Link '.$Color[0].'" title="'.$data_matrix[$row]['indlead_phase_'.$phase_nums].'" style="height:20px; _height:20px;"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&list=1&itype=0&phase='.$phase_nums.'' . (($TrackerType == 'PTH') ? '&a=' . $areaId . '&hm='.$id : '') . '" target="_blank" class="Link" >&nbsp;</a></th>';
+				$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="Link '.$Color[0].'" title="'.$data_matrix[$row]['indlead_phase_'.$phase_nums].'" style="height:20px; _height:20px;"><a href="'. $industryLink . '&phase='.$phase_nums . '" target="_blank" class="Link" >&nbsp;</a></th>';
 			}
 		}
 	
@@ -1116,7 +1130,7 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 	
 		$Max_ValueKey = Max_ValueKey($data_matrix[$row]['active_phase_na'], $data_matrix[$row]['active_phase_0'], $data_matrix[$row]['active_phase_1'], $data_matrix[$row]['active_phase_2'], $data_matrix[$row]['active_phase_3'], $data_matrix[$row]['active_phase_4']);
 					
-		$htmlContent .= '<tr style="display:none;" id="'.$uniqueId.'_active_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" rowspan="3"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&list=1' . (($TrackerType == 'PTH') ? '&a=' . $areaId . '&hm='.$id : '') . '" target="_blank" style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
+		$htmlContent .= '<tr style="display:none;" id="'.$uniqueId.'_active_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" rowspan="3"><a href="'. $activeLink . '" target="_blank" style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
 	
 		for($j=0; $j < $columns; $j++)
 		{
@@ -1135,7 +1149,7 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 				$Color = getClassNColorforPhase($phase_nums);
 				$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['active_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
 				$phase_space =  $phase_space + $Mini_Bar_Width;					
-				$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="Link '.$Color[0].'" title="'.$data_matrix[$row]['active_phase_'.$phase_nums].'" style="height:20px; _height:20px;"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&list=1&phase='.$phase_nums.'' . (($TrackerType == 'PTH') ? '&a=' . $areaId . '&hm='.$id : '') . '" target="_blank" class="Link" >&nbsp;</a></th>';
+				$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="Link '.$Color[0].'" title="'.$data_matrix[$row]['active_phase_'.$phase_nums].'" style="height:20px; _height:20px;"><a href="'. $activeLink . '&phase='.$phase_nums . '" target="_blank" class="Link" >&nbsp;</a></th>';
 			}
 		}
 	
@@ -1156,7 +1170,7 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 		
 		$Max_ValueKey = Max_ValueKey($data_matrix[$row]['total_phase_na'], $data_matrix[$row]['total_phase_0'], $data_matrix[$row]['total_phase_1'], $data_matrix[$row]['total_phase_2'], $data_matrix[$row]['total_phase_3'], $data_matrix[$row]['total_phase_4']);
 	
-		$htmlContent .= '<tr style="display:none;" id="'.$uniqueId.'_total_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" rowspan="3"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&list=2' . (($TrackerType == 'PTH') ? '&a=' . $areaId . '&hm='.$id : '') . '" target="_blank" style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
+		$htmlContent .= '<tr style="display:none;" id="'.$uniqueId.'_total_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" rowspan="3"><a href="'. $totalLink . '" target="_blank" style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
 	
 		for($j=0; $j < $columns; $j++)
 		{
@@ -1175,7 +1189,7 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 				$Color = getClassNColorforPhase($phase_nums);
 				$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['total_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
 				$phase_space =  $phase_space + $Mini_Bar_Width;					
-				$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="Link '.$Color[0].'" title="'.$data_matrix[$row]['total_phase_'.$phase_nums].'" style="height:20px; _height:20px;"><a href="'. trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&list=2&phase='.$phase_nums.'' . (($TrackerType == 'PTH') ? '&a=' . $areaId . '&hm='.$id : '') . '" target="_blank" class="Link" >&nbsp;</a></th>';
+				$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="Link '.$Color[0].'" title="'.$data_matrix[$row]['total_phase_'.$phase_nums].'" style="height:20px; _height:20px;"><a href="'. $totalLink . '&phase='.$phase_nums . '" target="_blank" class="Link" >&nbsp;</a></th>';
 			}
 		}
 	
@@ -1304,24 +1318,28 @@ function Download_reports()
 	
 	$Report_Name = htmlspecialchars((trim($Report_DisplayName) != '' && $Report_DisplayName != NULL)? trim($Report_DisplayName):'report '.$id.'');
 	
+	$commonPart2 = '';
+	if($TrackerType == 'PTH') $commonPart2 = '&e2=' . $areaId . '&hm='.$id;
+	if($TrackerType == 'DPT') $commonPart2 = '&e2=' . $id;
+	
 	if($_POST['dwcount']=='active')
 	{
 		$tooltip=$title="Active trials";
 		$pdftitle="Active trials";
-		$link_part = '&list=1' . (($TrackerType == 'PTH') ? '&a=' . $areaId . '&hm='.$id : '');
+		$link_part = $commonPart2.'&list=1';
 		$mode = 'active';
 	}
 	elseif($_POST['dwcount']=='total')
 	{
 		$pdftitle=$tooltip=$title="All trials (Active + Inactive)";
-		$link_part = '&list=2' . (($TrackerType == 'PTH') ? '&a=' . $areaId . '&hm='.$id : '');
+		$link_part = $commonPart2.'&list=2';
 		$mode = 'total';
 	}
 	else
 	{
 		$tooltip=$title="Active industry lead sponsor trials";
 		$pdftitle="Active industry lead sponsor trials";
-		$link_part = '&list=1&itype=0' . (($TrackerType == 'PTH') ? '&a=' . $areaId . '&hm='.$id : '');
+		$link_part = $commonPart2.'&list=1&itype=0';
 		$mode = 'indlead';
 	}
 	
@@ -1414,7 +1432,7 @@ function Download_reports()
 				
 				$cell = $Prod_Col . $Excel_HMCounter;
 				$objPHPExcel->getActiveSheet()->SetCellValue($cell, $data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'].((trim($data_matrix[$row]['productTag']) != '') ? ' ['.$data_matrix[$row]['productTag'].']':''));
-				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?p=' . $data_matrix[$row]['productIds'].$link_part); 
+				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?e1=' . $data_matrix[$row]['productIds'].$link_part); 
 				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip($tooltip);
 				if($rdesc)
  			    {
@@ -1446,7 +1464,7 @@ function Download_reports()
 						{
 							$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['indlead_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
 							$phase_space =  $phase_space + $Mini_Bar_Width;
-							$url = urlPath() . 'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&phase=' . $phase_nums . $link_part;
+							$url = urlPath() . 'intermediary.php?e1=' . $data_matrix[$row]['productIds'] . $link_part . '&phase=' . $phase_nums;
 							$from = CreatePhaseCellforExcelExport($from, $Mini_Bar_Width, $url, $Excel_HMCounter, $data_matrix[$row]['indlead_phase_'.$phase_nums], $phase_nums, $objPHPExcel);
 						}
 					}
@@ -1464,7 +1482,7 @@ function Download_reports()
 						{
 							$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['active_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
 							$phase_space =  $phase_space + $Mini_Bar_Width;
-							$url = urlPath() . 'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&phase=' . $phase_nums . $link_part;
+							$url = urlPath() . 'intermediary.php?e1=' . $data_matrix[$row]['productIds'] . $link_part . '&phase=' . $phase_nums;
 							$from = CreatePhaseCellforExcelExport($from, $Mini_Bar_Width, $url, $Excel_HMCounter, $data_matrix[$row]['active_phase_'.$phase_nums], $phase_nums, $objPHPExcel);
 						}
 					}
@@ -1482,7 +1500,7 @@ function Download_reports()
 						{
 							$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['total_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
 							$phase_space =  $phase_space + $Mini_Bar_Width;
-							$url = urlPath() . 'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&phase=' . $phase_nums . $link_part;
+							$url = urlPath() . 'intermediary.php?e1=' . $data_matrix[$row]['productIds'] . $link_part . '&phase=' . $phase_nums;
 							$from = CreatePhaseCellforExcelExport($from, $Mini_Bar_Width, $url, $Excel_HMCounter, $data_matrix[$row]['total_phase_'.$phase_nums], $phase_nums, $objPHPExcel);
 						}
 					}
@@ -1763,7 +1781,7 @@ function Download_reports()
 			$Place_Y = $pdf->GetY();
 		
 			$ln=0;
-			$pdfContent = '<div align="right" style="vertical-align:top; float:none;"><a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . '&a=' . $areaId . $link_part . '" target="_blank" title="'. $title .'">'.$data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font style="color:#120f3c;">['.$data_matrix[$row]['productTag'].']</font>':'').'</div>';
+			$pdfContent = '<div align="right" style="vertical-align:top; float:none;"><a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?e1=' . $data_matrix[$row]['productIds'] . $link_part . '" target="_blank" title="'. $title .'">'.$data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font style="color:#120f3c;">['.$data_matrix[$row]['productTag'].']</font>':'').'</div>';
 			$border = array('mode' => 'ext', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(204,204,204)));
 			
 			$pdf->SetFont('freesans', ' ', 8, '', false); // Font size as 8
@@ -1835,7 +1853,7 @@ function Download_reports()
 						while($m < $Mini_Bar_Width)
 						{
 							$Color = getClassNColorforPhase($phase_nums);
-							$pdfContent = '<div align="center" style="vertical-align:top; float:none;"><a style="color:#'.$Color[1].'; text-decoration:none; line-height:2px;" href="'. urlPath() .'intermediary.php?p=' . $data_matrix[$row]['productIds'].'&phase='. $phase_nums . $link_part . '" target="_blank" title="'. $title .'">&nbsp;</a></div>';
+							$pdfContent = '<div align="center" style="vertical-align:top; float:none;"><a style="color:#'.$Color[1].'; text-decoration:none; line-height:2px;" href="'. urlPath() .'intermediary.php?e1=' . $data_matrix[$row]['productIds'] . $link_part .'&phase='. $phase_nums . '" target="_blank" title="'. $title .'">&nbsp;</a></div>';
 							$pdf->MultiCell($Width, $Line_Height, $pdfContent, $border=0, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$Line_Height);
 							$Place_X = $Place_X + $Width;
 							$m++;
@@ -1865,7 +1883,7 @@ function Download_reports()
 						while($m < $Mini_Bar_Width)
 						{
 							$Color = getClassNColorforPhase($phase_nums);
-							$pdfContent = '<div align="center" style="vertical-align:top; float:none;"><a style="color:#'.$Color[1].'; text-decoration:none; line-height:2px;" href="'. urlPath() .'intermediary.php?p=' . $data_matrix[$row]['productIds'] .'&phase='. $phase_nums . $link_part . '" target="_blank" title="'. $title .'">&nbsp;</a></div>';
+							$pdfContent = '<div align="center" style="vertical-align:top; float:none;"><a style="color:#'.$Color[1].'; text-decoration:none; line-height:2px;" href="'. urlPath() .'intermediary.php?e1=' . $data_matrix[$row]['productIds'] . $link_part .'&phase='. $phase_nums . '" target="_blank" title="'. $title .'">&nbsp;</a></div>';
 							$pdf->MultiCell($Width, $Line_Height, $pdfContent, $border=0, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$Line_Height);
 							$Place_X = $Place_X + $Width;
 							$m++;
@@ -1897,7 +1915,7 @@ function Download_reports()
 						while($m < $Mini_Bar_Width)
 						{
 							$Color = getClassNColorforPhase($phase_nums);
-							$pdfContent = '<div align="center" style="vertical-align:top; float:none;"><a style="color:#'.$Color[1].'; text-decoration:none; line-height:2px;" href="'. urlPath() .'intermediary.php?p=' . $data_matrix[$row]['productIds'] .'&phase='. $phase_nums . $link_part . '" target="_blank" title="'. $title .'">&nbsp;</a></div>';
+							$pdfContent = '<div align="center" style="vertical-align:top; float:none;"><a style="color:#'.$Color[1].'; text-decoration:none; line-height:2px;" href="'. urlPath() .'intermediary.php?e1=' . $data_matrix[$row]['productIds'] . $link_part .'&phase='. $phase_nums . '" target="_blank" title="'. $title .'">&nbsp;</a></div>';
 							$pdf->MultiCell($Width, $Line_Height, $pdfContent, $border=0, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$Line_Height);
 							$Place_X = $Place_X + $Width;
 							$m++;

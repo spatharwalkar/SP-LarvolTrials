@@ -45,9 +45,9 @@
 						}		
 					}
 				}
-			}						
+			}
+			$ResultArr = array_diff($ResultArr, $MOAArray);	//Remove moas if its category present								
 		}
-		$ResultArr = array_diff($ResultArr, $MOAArray);	//Remove moas if its category present
 		///End of remove repeated moas
 		
 		if(is_array($ResultArr))
@@ -398,7 +398,7 @@ function GetProductsCountFromMOA($moaID)
 	global $db;
 	global $now;
 	$ProductsCount = 0;
-	$query = "SELECT count(et.`id`) as proCount FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`)  WHERE et.`class`='Product' and er.`child`='" . mysql_real_escape_string($moaID) . "'";
+	$query = "SELECT count(Distinct(et.`id`)) as proCount FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`)  WHERE et.`class`='Product' and er.`child`='" . mysql_real_escape_string($moaID) . "'";
 	$res = mysql_query($query) or die('Bad SQL query getting products count from moa id in TZ');
 	
 	if($res)
@@ -415,7 +415,7 @@ function GetTrialsCountFromProduct($productID)
 	global $db;
 	global $now;
 	$TrialsCount = 0;
-	$query = "SELECT count(dt.`larvol_id`) as trialCount FROM `data_trials` dt JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial`)  WHERE et.`entity`='" . mysql_real_escape_string($productID) . "'";
+	$query = "SELECT count(Distinct(dt.`larvol_id`)) as trialCount FROM `data_trials` dt JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial`)  WHERE et.`entity`='" . mysql_real_escape_string($productID) . "'";
 	$res = mysql_query($query) or die('Bad SQL query getting trials count from product id in TZ');
 	
 	if($res)
@@ -432,7 +432,7 @@ function GetProductsCountFromCompany($companyID)
 	global $db;
 	global $now;
 	$ProductsCount = 0;
-	$query = "SELECT count(et.`id`) as proCount FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`) WHERE et.`class`='Product' AND er.`child`='" . mysql_real_escape_string($companyID) . "'";
+	$query = "SELECT count(Distinct(et.`id`)) as proCount FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`) WHERE et.`class`='Product' AND er.`child`='" . mysql_real_escape_string($companyID) . "'";
 	$res = mysql_query($query) or die('Bad SQL query getting products count from company id in TZ');
 	
 	if($res)
