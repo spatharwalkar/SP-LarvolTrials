@@ -812,6 +812,14 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 {
 	global $now;
 	global $db;
+	//temporary arrangement till the entity editing page is completed
+	switch($table)
+		{
+			case 'products': $table = "entities"; break;
+			case 'areas': $table = "entities"; break;
+		}
+	//
+
 	/*
 	unset($post['qw_login']);
 	unset($post['PHPSESSID']);
