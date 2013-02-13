@@ -54,27 +54,8 @@ a:visited {color:#6600bc;}  /* visited link */
 </style>
 <script src="scripts/jquery-1.7.1.min.js"></script>
 <script src="scripts/jquery-ui-1.8.17.custom.min.js"></script>
-<script type="text/javascript" src="scripts/autosuggest/jquery.autocomplete-min.js"></script>
 <script type="text/javascript" src="scripts/chrome.js"></script>
 <script type="text/javascript" src="scripts/iepngfix_tilebg.js"></script>
-<script type="text/javascript">
-function autoComplete(fieldID)
-{	
-	$(function()
-	{
-		if($('#'+fieldID).length > 0)
-		{	
-			var a = $('#'+fieldID).autocomplete({
-					serviceUrl:'autosuggest.php',
-					params:{table:'trialzilla', field:'name'},
-					minChars:3,
-					width:600
-			});
-		}
-	});
-}
-</script>
-
 </head>
 <body>
 <?php include "trialzilla_searchbox.php";?>

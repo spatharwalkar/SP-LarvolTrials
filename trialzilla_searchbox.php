@@ -6,7 +6,7 @@
 <a style="text-decoration:none;" href="trialzilla.php"><img src="images/larvol_sigma_logo.gif" width="300" height="50" style="border: none;" /></a>
 </td>
 <td width="600px" style="vertical-align:bottom; padding-left:20px;" align="left">
-<input class="SearchBox" type="text" value="<?php echo htmlspecialchars($globalOptions['TzSearch']); ?>" autocomplete="off" style="font-weight:bold;" name="TzSearch" id="TzSearch" onkeyup="javascript:autoComplete('TzSearch')" />
+<input class="SearchBox" type="text" value="<?php echo htmlspecialchars($globalOptions['TzSearch']); ?>" autocomplete="off" style="font-weight:bold;" name="TzSearch" id="TzSearch" />
 </td>
 <td width="105px" style="vertical-align:bottom; padding-left:10px;" align="left">
 <input type="submit" name="Search" title="Search" value="Search" style="vertical-align:bottom;" class="SearchBttn1" />
@@ -84,3 +84,34 @@
 	color:#3399FF; 
 }
 </style>
+<script type="text/javascript" src="scripts/autosuggest/jquery.autocomplete-min.js"></script>
+<script type="text/javascript">
+	$(function() 
+	{
+		$('body').keydown(function(e)
+		{	
+			if (e.keyCode == 13) 
+			{
+			  $('#trialzillaFrm').submit();
+			} 
+		});
+	}); 
+	
+</script>
+<script type="text/javascript">
+function autoComplete(fieldID)
+{	
+	$(function()
+	{
+		if($('#'+fieldID).length > 0)
+		{	
+			var a = $('#'+fieldID).autocomplete({
+					serviceUrl:'autosuggest.php',
+					params:{table:'trialzilla', field:'name'},
+					minChars:3,
+					width:600
+			});
+		}
+	});
+}
+</script>

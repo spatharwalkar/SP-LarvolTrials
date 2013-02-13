@@ -229,39 +229,7 @@ a:visited {color:#6600bc;}  /* visited link */
 }
 	
 </style>
-
 <script type="text/javascript" src="scripts/jquery-1.7.2.min.js"></script>
-<script type="text/javascript" src="scripts/autosuggest/jquery.autocomplete-min.js"></script>
-<script type="text/javascript">
-	$(function() 
-	{
-		$('body').keydown(function(e)
-		{	
-			if (e.keyCode == 13) 
-			{
-			  $('#trialzillaFrm').submit();
-			} 
-		});
-	}); 
-	
-</script>
-<script type="text/javascript">
-function autoComplete(fieldID)
-{	
-	$(function()
-	{
-		if($('#'+fieldID).length > 0)
-		{	
-			var a = $('#'+fieldID).autocomplete({
-					serviceUrl:'autosuggest.php',
-					params:{table:'trialzilla', field:'name'},
-					minChars:3,
-					width:600
-			});
-		}
-	});
-}
-</script>
 </head>
 <body>
 <?php include "trialzilla_searchbox.php";?>
@@ -328,9 +296,7 @@ function autoComplete(fieldID)
 						print ' 		<a href="'. trim(urlPath()) .'trialzilla_disease.php?DiseaseId='. trim($DataArray[$index]['id']) .'" title="Disease" target="_blank">'.$DataArray[$index]['name'] .'</a>';
 				else if($DataArray[$index]['type'] == 'MOA_Category')
 				{
-						print ' 	<a href="'. trim(urlPath()) .'trialzilla_moacategory.php?MoaCatId='. trim($DataArray[$index]['id']) .'" title="MOA Category" target="_blank"><b>'.$DataArray[$index]['name'] .'</b></a>';
-						$MOARes = MOAListing(trim($DataArray[$index]['id']));
-						print '&nbsp;&nbsp;('.$MOARes[1].' MOA'.(($MOARes[1] > 1) ? 's':'').')';
+						print ' 	<a href="'. trim(urlPath()) .'trialzilla_moacategory.php?MoaCatId='. trim($DataArray[$index]['id']) .'" title="MOA Category" target="_blank"><b>'.$DataArray[$index]['name'] .'</b></a>&nbsp;&nbsp;('.GetProductsCountFromMOACat(trim($DataArray[$index]['id'])).' Products)';
 				}
 				
 				if($DataArray[$index]['type'] != 'MOA_Category') print '<br /><br style="line-height:6px;" />';
@@ -338,7 +304,7 @@ function autoComplete(fieldID)
     				  </tr>
 					  </table>';
 				if($DataArray[$index]['type'] == 'MOA_Category')
-					print $MOARes[0];	  
+					print MOAListing(trim($DataArray[$index]['id']));
 			}
 			//else print '<tr><td><img src="images/'.$DataArray[$index]['type'].'arrow.gif" style="padding-bottom:5px;" width="120px" height="17px" /></td><td>'.$DataArray[$index]['type'].'</td></tr>';					
 		}
@@ -399,7 +365,6 @@ if($FoundRecords == 0 && (($globalOptions['TzSearch'] != '' && $globalOptions['T
 
 function MOAListing($MOACat)
 {
-	$Return = array();
 	$htmlContent = '';
 	$MOAQuery = "SELECT `id`, `name` FROM `entities` e JOIN `entity_relations` er ON(e.`id`=er.`child`) WHERE e.`class`='MOA' AND er.`parent` = '" . mysql_real_escape_string($MOACat) . "' ";
 			
@@ -424,9 +389,7 @@ function MOAListing($MOACat)
 		}
 		$htmlContent .='</table>';
 	}
-	$Return[0] = $htmlContent;
-	$Return[1] = $MOAResultCount;
-	return $Return;
+	return $htmlContent;
 }
 
 /* Function to get Product count from MOA id */
@@ -469,7 +432,24 @@ function GetProductsCountFromCompany($companyID)
 	global $db;
 	global $now;
 	$ProductsCount = 0;
-	$query = "SELECT count(et.`id`) as proCount FROM `entities` et LEFT JOIN `entity_relations` er ON(et.`id` = er.`parent`) WHERE et.`class`='Product' AND er.`child`='" . mysql_real_escape_string($companyID) . "'";
+	$query = "SELECT count(et.`id`) as proCount FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`) WHERE et.`class`='Product' AND er.`child`='" . mysql_real_escape_string($companyID) . "'";
+	$res = mysql_query($query) or die('Bad SQL query getting products count from company id in TZ');
+	
+	if($res)
+	{
+		while($row = mysql_fetch_array($res))
+		$ProductsCount = $row['proCount'];
+	}
+	return $ProductsCount;
+}
+
+/* Function to get Product count from MOA Category id */
+function GetProductsCountFromMOACat($moaCatID)
+{
+	global $db;
+	global $now;
+	$ProductsCount = 0;
+	$query = "SELECT count(Distinct(et.`id`)) as proCount FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`)  WHERE et.`class`='Product' and er.`child` IN (SELECT et2.`id` FROM `entities` et2 JOIN `entity_relations` er2 ON(et2.`id` = er2.`child`)  WHERE et2.`class`='MOA' AND er2.`parent`='". mysql_real_escape_string($moaCatID) ."')";
 	$res = mysql_query($query) or die('Bad SQL query getting products count from company id in TZ');
 	
 	if($res)
