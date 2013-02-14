@@ -2524,7 +2524,11 @@ function GetProductsFromCompany($companyID)
 	global $db;
 	global $now;
 	$Products = array();
-	$query = "SELECT et.`id` FROM `entities` et LEFT JOIN `entity_relations` er ON(et.`id` = er.`parent`) WHERE et.`class`='Product' AND er.`child`='" . mysql_real_escape_string($companyID) . "'";
+	/***************************below changes done so that report is generated from old relations table products_institutions   */
+//	$query = "SELECT et.`id` FROM `entities` et LEFT JOIN `entity_relations` er ON(et.`id` = er.`parent`) WHERE et.`class`='Product' AND er.`child`='" . mysql_real_escape_string($companyID) . "'";
+	$query = "SELECT pt.`id` FROM `products` pt LEFT JOIN `products_institutions` pi ON(pt.`id` = pi.`product`)  WHERE pi.`institution`='" . mysql_real_escape_string($companyID) . "'";
+	/**************************/
+	
 	$res = mysql_query($query) or die('Bad SQL query getting products from institution id in PT');
 	
 	if($res)

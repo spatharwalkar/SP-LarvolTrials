@@ -813,10 +813,11 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 	global $now;
 	global $db;
 	//temporary arrangement till the entity editing page is completed
+	$table_new=$table;
 	switch($table)
 		{
-			case 'products': $table = "entities"; break;
-			case 'areas': $table = "entities"; break;
+			case 'products': $table_new = "entities"; break;
+			case 'areas': $table_new = "entities"; break;
 		}
 	//
 
@@ -879,7 +880,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 				if($currentType != $typeWithoutQuotes)
 				{
 					echo $currentType."---".$typeWithoutQuotes."---".$name."<br/>";
-					$query = "update `$table` set `name`=$name, `type`=$type where `name`=$name";
+					$query = "update `$table_new` set `name`=$name, `type`=$type where `name`=$name";
 					if(mysql_query($query))
 					{
 						$updateCnt++;
@@ -899,7 +900,28 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			else
 			{
 				//insert
-				$query = "insert into `$table` (".implode(',',$importKeys).") values (".implode(',',$redTagArray).")";
+				$class="";
+				switch($table)
+				{
+					case 'products': $class = "Product"; break;
+					case 'areas': $class = "Area"; break;
+					case 'institutions': $class = "Institution"; break;
+					case 'moas': $class = "MOA"; break;
+					case 'moacategories': $class = "MOA_Category"; break;
+				}
+				if( $table == 'moacategories' or $table == 'moas'  )
+				{
+					$query = "insert into `entities` (".implode(',',$importKeys).") values (".implode(',',$redTagArray).")";
+				}
+				elseif( empty($class) )
+				{
+					$query = "insert into `$table_new` (".implode(',',$importKeys).") values (".implode(',',$redTagArray).")";
+				}
+				else
+				{
+					$query = "insert into `entities` (".implode(',',$importKeys)." ,class ) values (".implode(',',$redTagArray). ', "'. $class .'"' .")";
+					if($table=='institutions') {	$query = str_replace("type", "category", $query); $query = str_replace("search_terms", "search_name", $query); }
+				}
 				if(mysql_query($query))
 				{
 					$insertCnt++;
@@ -916,7 +938,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 		//delete non existing redtags
 		if(count($existingRegTagName)>0)
 		{
-			$query = "delete from $table where `name` not in(".implode(',',$existingRegTagName).")";
+			$query = "delete from $table_new where `name` not in(".implode(',',$existingRegTagName).")";
 			if(mysql_query($query))
 			{
 				$deleteCnt = mysql_affected_rows();
@@ -975,12 +997,12 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 					$MHMReferenceCount = getMHMAssociation($id, 'products');
 					if($upmReferenceCount==0 && $MHMReferenceCount==0 && $searchData=='')
 					{
-						deleteData($id, $table);
+						deleteData($id, $table_new);
 						return 4;
 					}
 				}			
 				$importVal = array_map(am1,$importKeys,array_values($importVal));
-				$query = "update $table set ".implode(',',$importVal)." where id=".$id;
+				$query = "update $table_new set ".implode(',',$importVal)." where id=".$id;
 			}
 			else 
 			{
@@ -993,7 +1015,33 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 				}
 				
 				$importVal = array_map(function ($v){return "'".mysql_real_escape_string($v)."'";},$importVal);
-				$query = "insert into $table (`".implode('`,`',$importKeys)."`) values (".implode(',',$importVal).")";
+				
+				
+				$class="";
+				switch($table)
+				{
+					case 'products': $class = "Product"; break;
+					case 'areas': $class = "Area"; break;
+					case 'institutions': $class = "Institution"; break;
+					case 'moas': $class = "MOA"; break;
+					case 'moacategories': $class = "MOA_Category"; break;
+				}
+				if( $table == 'moacategories' or $table == 'moas'  )
+				{
+					$query = "insert into `entities` (".implode(',',$importKeys).") values (".implode(',',$importVal).")";
+				}
+				elseif( empty($class) )
+				{
+					$query = "insert into $table_new (`".implode('`,`',$importKeys)."`) values (".implode(',',$importVal).")";
+				}
+				else
+				{
+					$query = "insert into `entities` (`".implode('`,`',$importKeys)."`,`class` ) values (".implode(',',$importVal). ', "'. $class .'"' .")";
+					if($table=='institutions') {	$query = str_replace("type", "category", $query); $query = str_replace("search_terms", "search_name", $query); }
+				}	
+					
+								
+				
 			}
 			if(mysql_query($query))
 			{
@@ -1172,11 +1220,11 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			{
 				if($importVal['is_active'] == 0)
 				{
-					deleteData($id, $table);
+					deleteData($id, $table_new);
 					return 4;
 				}			
 				$importVal = array_map(am1,$importKeys,array_values($importVal));
-				$query = "update $table set ".implode(',',$importVal)." where id=".$id;
+				$query = "update $table_new set ".implode(',',$importVal)." where id=".$id;
 			}
 			else 
 			{
@@ -1189,7 +1237,31 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 				}
 				
 				$importVal = array_map(function ($v){return "'".mysql_real_escape_string($v)."'";},$importVal);
-				$query = "insert into $table (`".implode('`,`',$importKeys)."`) values (".implode(',',$importVal).")";
+				
+				$class="";
+				switch($table)
+				{
+					case 'products': $class = "Product"; break;
+					case 'areas': $class = "Area"; break;
+					case 'institutions': $class = "Institution"; break;
+					case 'moas': $class = "MOA"; break;
+					case 'moacategories': $class = "MOA_Category"; break;
+				}
+				if( $table == 'moacategories' or $table == 'moas'  )
+				{
+					$query = "insert into `entities` (".implode(',',$importKeys).") values (".implode(',',$importVal).")";
+				}
+				elseif( empty($class) )
+				{
+					$query = "insert into $table_new (`".implode('`,`',$importKeys)."`) values (".implode(',',$importVal).")";
+				}
+				else
+				{
+					$query = "insert into `entities` (`".implode('`,`',$importKeys)."`,`class` ) values (".implode(',',$importVal). ', "'. $class .'"' .")";
+					if($table=='institutions') {	$query = str_replace("type", "category", $query); $query = str_replace("search_terms", "search_name", $query); }
+				}	
+				
+				
 			}
 			if(mysql_query($query))
 			{
@@ -1261,7 +1333,31 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 				}
 				
 				$importVal = array_map(function ($v){return "'".mysql_real_escape_string($v)."'";},$importVal);
-				$query = "insert into `entities` (`".implode('`,`',$importKeys)."`) values (".implode(',',$importVal).")";
+				
+				$class="";
+				switch($table)
+				{
+					case 'products': $class = "Product"; break;
+					case 'areas': $class = "Area"; break;
+					case 'institutions': $class = "Institution"; break;
+					case 'moas': $class = "MOA"; break;
+					case 'moacategories': $class = "MOA_Category"; break;
+				}
+				if( $table == 'moacategories' or $table == 'moas'  )
+				{
+					$query = "insert into `entities` (".implode(',',$importKeys).") values (".implode(',',$importVal).")";
+				}
+				elseif( empty($class) )
+				{
+					$query = "insert into $table_new (`".implode('`,`',$importKeys)."`) values (".implode(',',$importVal).")";
+				}
+				else
+				{
+					$query = "insert into `entities` (`".implode('`,`',$importKeys)."`,`class` ) values (".implode(',',$importVal). ', "'. $class .'"' .")";
+				}	
+				
+				
+				
 			}
 			if(mysql_query($query))
 			{
@@ -1394,7 +1490,32 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 				}
 				
 				$importVal = array_map(function ($v){return "'".mysql_real_escape_string($v)."'";},$importVal);
-				$query = "insert into `entities` (`".implode('`,`',$importKeys)."`) values (".implode(',',$importVal).")";
+				
+				
+				$class="";
+				switch($table)
+				{
+					case 'products': $class = "Product"; break;
+					case 'areas': $class = "Area"; break;
+					case 'institutions': $class = "Institution"; break;
+					case 'moas': $class = "MOA"; break;
+					case 'moacategories': $class = "MOA_Category"; break;
+				}
+				if( $table == 'moacategories' or $table == 'moas'  )
+				{
+					$query = "insert into `entities` (".implode(',',$importKeys).") values (".implode(',',$importVal).")";
+				}
+				elseif( empty($class) )
+				{
+					$query = "insert into $table_new (`".implode('`,`',$importKeys)."`) values (".implode(',',$importVal).")";
+				}
+				else
+				{
+					$query = "insert into `entities` (`".implode('`,`',$importKeys)."`,`class` ) values (".implode(',',$importVal). ', "'. $class .'"' .")";
+					if($table=='institutions') {	$query = str_replace("type", "category", $query); $query = str_replace("search_terms", "search_name", $query); }
+				}	
+				
+				
 			}
 			if(mysql_query($query))
 			{
@@ -1436,7 +1557,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			if($db->user->userlevel != 'user')
 			{
 				$post['searchdata'] = '';
-				$q = "UPDATE $table SET searchdata=null WHERE id=$id LIMIT 1";
+				$q = "UPDATE $table_new SET searchdata=null WHERE id=$id LIMIT 1";
 				mysql_query($q) or softDieSession('Bad SQL query deleting searchdata');
 			}
 		}
@@ -1457,7 +1578,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			$stat = json_decode(testQuery(1,1,$post['searchdata']));
 			if($stat->status==0)
 			{
-				softDieSession('Cannot insert '.$table.' entry. Search data corrupt!<br/>'.$stat->message);
+				softDieSession('Cannot insert '.$table_new.' entry. Search data corrupt!<br/>'.$stat->message);
 				return 0;
 			}
 		}
@@ -1521,8 +1642,31 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			unset($newpostKeys[$LarvolIdKey]);
 			unset($newpost[$LarvolIdKey]);
 		}
+		
+				$class="";
+				switch($table)
+				{
+					case 'products': $class = "Product"; break;
+					case 'areas': $class = "Area"; break;
+					case 'institutions': $class = "Institution"; break;
+					case 'moas': $class = "MOA"; break;
+					case 'moacategories': $class = "MOA_Category"; break;
+				}
+				if( $table == 'moacategories' or $table == 'moas'  )
+				{
+					$query = "insert into entities (`".implode('`,`',$newpostKeys)."`) values (".implode(',',$newpost).")";
+				}
+				elseif( empty($class) )
+				{
+					$query = "insert into $table_new (`".implode('`,`',$newpostKeys)."`) values (".implode(',',$newpost).")";
+				}
+				else
+				{
+					$query = "insert into `entities` (`".implode('`,`',$newpostKeys)."`,`class` ) values (".implode(',',$newpost). ', "'. $class .'"' .")";
+					if($table=='institutions') {	$query = str_replace("type", "category", $query); $query = str_replace("search_terms", "search_name", $query); }
+				}	
 			
-		$query = "insert into $table (`".implode('`,`',$newpostKeys)."`) values(".implode(',',$newpost).")";
+		
 		if(mysql_query($query))
 		{
 			if($table=='products')
@@ -1637,7 +1781,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			//pr($post);//die;
 		}
 		if($table<>'upm') $postnew = $post;
-		$query = "update $table set ".implode(',',$postnew)." where id=".$id;
+		$query = "update $table_new set ".implode(',',$postnew)." where id=".$id;
 		if(mysql_query($query))
 		{
 			//fire success actions upon successful save.
