@@ -4,11 +4,13 @@
 	if($_REQUEST['CompanyId'] != NULL && $_REQUEST['CompanyId'] != '' && isset($_REQUEST['CompanyId']))
 	{
 		$CompanyId = $_REQUEST['CompanyId'];
-		$query = 'SELECT `name`, `id` FROM `institutions` WHERE `id`=' . mysql_real_escape_string($CompanyId);
+		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class` = "Institution" AND `id`=' . mysql_real_escape_string($CompanyId);
 		$res = mysql_query($query) or die(mysql_error());
 		$header = mysql_fetch_array($res);
 		$CompanyId = $header['id'];
-		$CompanyName = $header['name'];				
+		$CompanyName = $header['name'];
+		if($header['display_name'] != NULL && $header['display_name'] != '')
+				$CompanyName = $header['display_name'];					
 	}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">

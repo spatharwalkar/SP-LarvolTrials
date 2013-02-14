@@ -5,11 +5,13 @@
 	if($_REQUEST['DiseaseId'] != NULL && $_REQUEST['DiseaseId'] != '' && isset($_REQUEST['DiseaseId']))
 	{
 		$DiseaseId = $_REQUEST['DiseaseId'];
-		$query = 'SELECT `name`, `id` FROM `entities` WHERE `id`=' . mysql_real_escape_string($DiseaseId);
+		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class` = "Disease" AND `id`=' . mysql_real_escape_string($DiseaseId);
 		$res = mysql_query($query) or die(mysql_error());
 		$header = mysql_fetch_array($res);
 		$DiseaseId = $header['id'];
-		$DiseaseName = $header['name'];				
+		$DiseaseName = $header['name'];
+		if($header['display_name'] != NULL && $header['display_name'] != '')
+				$DiseaseName = $header['display_name'];					
 	}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">

@@ -64,12 +64,13 @@
 			
 			foreach($CurrentPageResultArr as $index=> $value)
 			{
-				$result =  mysql_fetch_assoc(mysql_query("SELECT `id`, `name`, `class` FROM `entities` WHERE id = '" . mysql_real_escape_string($value) . "' "));
+				$result =  mysql_fetch_assoc(mysql_query("SELECT `id`, `name`, `class`, `display_name` FROM `entities` WHERE id = '" . mysql_real_escape_string($value) . "' "));
 				$DataArray[$index]['index'] = $index;
 				$DataArray[$index]['name'] = $result['name'];
 				$DataArray[$index]['id'] = $result['id'];
 				$DataArray[$index]['type'] = $result['class'];
-			
+				if($result['display_name'] != NULL && $result['display_name'] != '' && $DataArray[$index]['type'] != 'Product')
+					$DataArray[$i]['name'] = $result['display_name'];
 			}
 		}
 	}
@@ -83,7 +84,7 @@
 		
 		$StartSlice = ($globalOptions['page'] - 1) * $RecordsPerPage;
 		$EndSlice = $StartSlice + $RecordsPerPage;
-		$query = "SELECT `id`, `name`, `class` FROM `entities` WHERE `class` = 'Disease' LIMIT $StartSlice, $EndSlice";
+		$query = "SELECT `id`, `name`, `class`, `display_name` FROM `entities` WHERE `class` = 'Disease' ORDER BY `id` LIMIT $StartSlice, $EndSlice";
 		$QueryResult = mysql_query($query);
 		$i=0;
 		while($result = mysql_fetch_assoc($QueryResult))
@@ -93,6 +94,8 @@
 			$DataArray[$i]['name'] = $result['name'];
 			$DataArray[$i]['id'] = $result['id'];
 			$DataArray[$i]['type'] = $result['class'];
+			if($result['display_name'] != NULL && $result['display_name'] != '')
+				$DataArray[$i]['name'] = $result['display_name'];
 		}
 		$CurrentPageResultArr = $DataArray;
 		$DiseaseFlg = true;

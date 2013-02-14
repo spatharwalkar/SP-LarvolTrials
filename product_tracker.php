@@ -113,37 +113,45 @@ function DataGenerator($id, $TrackerType)
 	}
 	else if($TrackerType == 'CPT' || $TrackerType=='CPTH')	//CPT=COMPANY PRODUCT TRACKER CPTH=COMPANY PRODUCT TRACKER HEADER
 	{
-		$query = 'SELECT `name`, `id` FROM `entities` WHERE `class`="Institution" and id=' . $id;
+		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class`="Institution" and id=' . $id;
 		$res = mysql_query($query) or die(mysql_error());
 		$header = mysql_fetch_array($res);
 		$Report_DisplayName = $header['name'];
+		if($header['display_name'] != NULL && $header['display_name'] != '')
+				$Report_DisplayName = $header['display_name'];	
 		$productIds = GetProductsFromCompany($header['id']);
 		$id=$header['id'];
 	}
 	else if($TrackerType == 'MPT')	//MPT=MOA PRODUCT TRACKER
 	{
-		$query = 'SELECT `name`, `id` FROM `entities` WHERE `class`="MOA" and id=' . $id;
+		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class`="MOA" and id=' . $id;
 		$res = mysql_query($query) or die(mysql_error());
 		$header = mysql_fetch_array($res);
 		$Report_DisplayName = $header['name'];
+		if($header['display_name'] != NULL && $header['display_name'] != '')
+				$Report_DisplayName = $header['display_name'];	
 		$productIds = GetProductsFromMOA($header['id']);
 		$id=$header['id'];
 	}
 	else if($TrackerType == 'MCPT')	//MMPT= MOA CATEGORY PRODUCT TRACKER
 	{
-		$query = 'SELECT `name`, `id` FROM `entities` WHERE `class`="MOA_Category" and id=' . $id;
+		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class`="MOA_Category" and id=' . $id;
 		$res = mysql_query($query) or die(mysql_error());
 		$header = mysql_fetch_array($res);
 		$Report_DisplayName = $header['name'];
+		if($header['display_name'] != NULL && $header['display_name'] != '')
+				$Report_DisplayName = $header['display_name'];	
 		$productIds = GetProductsFromMOACategory($header['id']);
 		$id=$header['id'];
 	}
 	else if($TrackerType == 'DPT')	//DPT=DISEASE PRODUCT TRACKER
 	{
-		$query = 'SELECT `name`, `id` FROM `entities` WHERE `class`="Disease" and id=' . $id;
+		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class`="Disease" and id=' . $id;
 		$res = mysql_query($query) or die(mysql_error());
 		$header = mysql_fetch_array($res);
 		$Report_DisplayName = $header['name'];
+		if($header['display_name'] != NULL && $header['display_name'] != '')
+				$Report_DisplayName = $header['display_name'];	
 		$productIds = GetProductsFromDisease($header['id']);
 		$id=$header['id'];
 	}

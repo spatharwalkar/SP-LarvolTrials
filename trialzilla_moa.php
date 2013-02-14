@@ -4,11 +4,13 @@
 	if($_REQUEST['MoaId'] != NULL && $_REQUEST['MoaId'] != '' && isset($_REQUEST['MoaId']))
 	{
 		$MoaId = $_REQUEST['MoaId'];
-		$query = 'SELECT `name`, `id` FROM `entities` WHERE `id`=' . mysql_real_escape_string($MoaId);
+		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class` = "MOA" AND `id`=' . mysql_real_escape_string($MoaId);
 		$res = mysql_query($query) or die(mysql_error());
 		$header = mysql_fetch_array($res);
 		$MoaId = $header['id'];
-		$MoaName = $header['name'];				
+		$MoaName = $header['name'];
+		if($header['display_name'] != NULL && $header['display_name'] != '')
+				$MoaName = $header['display_name'];					
 	}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
