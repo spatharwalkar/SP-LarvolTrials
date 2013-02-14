@@ -12,7 +12,7 @@
 <input type="submit" name="Search" title="Search" value="Search" style="vertical-align:bottom;" class="SearchBttn1" />
 </td>
 <td style="vertical-align:middle; padding-left:10px;padding-top:15px;" align="left">
-<a href="trialzilla.php?Disease=true" style="text-decoration:underline;">List Diseases</a>
+<a href="trialzilla.php?Disease=true" style="text-decoration:underline; font-weight:bold; font-size:15px;">List Diseases</a>
 </td>
 </tr>
 <tr>
