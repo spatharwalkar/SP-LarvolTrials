@@ -432,7 +432,9 @@ function GetProductsCountFromCompany($companyID)
 	global $db;
 	global $now;
 	$ProductsCount = 0;
-	$query = "SELECT count(Distinct(et.`id`)) as proCount FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`) WHERE et.`class`='Product' AND er.`child`='" . mysql_real_escape_string($companyID) . "'";
+	/* COUNT QUERY THROUGH ENTITY_RELATIONS
+	$query = "SELECT count(Distinct(et.`id`)) as proCount FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`) WHERE et.`class`='Product' AND er.`child`='" . mysql_real_escape_string($companyID) . "'";*/
+	$query = "SELECT count(Distinct(et.`id`)) as proCount FROM `entities` et LEFT JOIN `products_institutions` pi ON(et.`id` = pi.`product`) WHERE et.`class`='Product' AND pi.`institution`='" . mysql_real_escape_string($companyID) . "'";
 	$res = mysql_query($query) or die('Bad SQL query getting products count from company id in TZ');
 	
 	if($res)
