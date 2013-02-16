@@ -34,6 +34,7 @@ if(isset($_POST['btnDownload']))
 			$fileType = 'tsv';
 			break;
 	}
+	
 	$tt->generateTrialTracker($fileType, $resultIds, $globalOptions);
 	exit;
 }
@@ -95,6 +96,9 @@ if(!(isset($_REQUEST['rflag'])))
 	unset($resetParams['p']);
 	unset($resetParams['a']);
 	unset($resetParams['JSON_search']);
+	
+	unset($resetParams['e1']);
+	unset($resetParams['e2']);
 	
 	if(!empty($resetParams))
 	{
@@ -491,6 +495,11 @@ if(isset($_REQUEST['p']) || isset($_REQUEST['a']) || isset($_REQUEST['hm']))
 	
 	
 	$tt->generateTrialTracker('indexed', array('product' => $_REQUEST['p'], 'area' => $_REQUEST['a']), $globalOptions);
+}
+else if(isset($_REQUEST['e1']) || isset($_REQUEST['e2']))
+{
+	$globalOptions['url'] = 'e1=' . $_REQUEST['e1'] . '&e2=' . $_REQUEST['e2'];	
+	$tt->generateTrialTracker('entities', array('e1' => $_REQUEST['e1'], 'e2' => $_REQUEST['e2']), $globalOptions);
 }
 else
 {
