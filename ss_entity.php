@@ -43,22 +43,28 @@ function find_entity($q)
 	$cl->SetSortMode(SPH_SORT_EXTENDED, 'class ASC,@relevance DESC');
 	
 	$cl->SetRankingMode ( $ranker );
+	/*
 	$res = $cl->Query ( '"^'.$q.'$"', $index );
 	if ( $res!==false )
 	{
 		if ( is_array($res["matches"]) )
 		{
-			$entity_ids=array();
+			$entity_ids1=array();
 			foreach ( $res["matches"] as $docinfo )
 			{
 				if($docinfo[weight]>1900)
 				{
-					$entity_ids[] = $docinfo[id];
+					$entity_ids1[] = $docinfo[id];
 				}
 			}
 		}
 	}
-	
+	*/
+	$pos = strpos($q, "-");
+	if ($pos !== false) 
+	{
+		$q = '"'.$q.'"';
+	}
 	if(strlen($q)>=2) $q = '*'.$q.'*';
 	$res = $cl->Query ( $q, $index );
 
@@ -81,6 +87,7 @@ function find_entity($q)
 					$entity_ids[] = $docinfo[id];
 				}
 				$n++;
+				pr($res["class"]);
 			}
 			$entity_ids=array_unique($entity_ids);
 		}
