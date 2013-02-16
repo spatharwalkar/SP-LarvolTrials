@@ -70,7 +70,7 @@
 				$DataArray[$index]['id'] = $result['id'];
 				$DataArray[$index]['type'] = $result['class'];
 				if($result['display_name'] != NULL && $result['display_name'] != '' && $DataArray[$index]['type'] != 'Product')
-					$DataArray[$i]['name'] = $result['display_name'];
+					$DataArray[$index]['name'] = $result['display_name'];
 			}
 		}
 	}
