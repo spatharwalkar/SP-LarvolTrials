@@ -40,7 +40,25 @@ function find_entity($q)
 	if ( $distinct )			$cl->SetGroupDistinct ( $distinct );
 	if ( $select )				$cl->SetSelect ( $select );
 	if ( $limit )				$cl->SetLimits ( $offset, $limit, ( $limit>1000 ) ? $limit : 1000 );
+	$cl->SetSortMode(SPH_SORT_EXTENDED, 'class ASC,@relevance DESC');
+	
 	$cl->SetRankingMode ( $ranker );
+	$res = $cl->Query ( '"^'.$q.'$"', $index );
+	if ( $res!==false )
+	{
+		if ( is_array($res["matches"]) )
+		{
+			$entity_ids=array();
+			foreach ( $res["matches"] as $docinfo )
+			{
+				if($docinfo[weight]>1900)
+				{
+					$entity_ids[] = $docinfo[id];
+				}
+			}
+		}
+	}
+	
 	if(strlen($q)>=2) $q = '*'.$q.'*';
 	$res = $cl->Query ( $q, $index );
 
@@ -55,7 +73,7 @@ function find_entity($q)
 		if ( is_array($res["matches"]) )
 		{
 			$n = 1;
-			$entity_ids=array();
+			if(!isset($entity_ids)) $entity_ids=array();
 			foreach ( $res["matches"] as $docinfo )
 			{
 				if($docinfo[weight]>1900)
@@ -64,6 +82,7 @@ function find_entity($q)
 				}
 				$n++;
 			}
+			$entity_ids=array_unique($entity_ids);
 		}
 	}
 	return $entity_ids;
