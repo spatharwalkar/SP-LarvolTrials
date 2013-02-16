@@ -9882,7 +9882,7 @@ class TrialTracker
 							. '<li><select id="wFormat" name="wFormat" size="3" style="height:54px;">'
 							. '<option value="excel" selected="selected">Excel</option>'
 							//comment the following line to hide pdf export
-							. '<option value="pdf">PDF</option>'
+							//. '<option value="pdf">PDF</option>'
 							. '<option value="tsv">TSV</option>'
 							. '</select></li></ul>'
 							. '<input type="hidden" name="shownCnt" value="' . $shownCnt . '" />'
@@ -9897,11 +9897,26 @@ class TrialTracker
 		global $li_user;
 		
 		if((isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') !== FALSE) 
-		|| (isset($_GET['LI']) && $_GET['LI'] == 1))
+		|| (isset($_GET['LI']) && $_GET['LI'] == 1)   )
 		{
 			echo '<input type="hidden" name="LI" value="1" />';
 			$li_user='YES';
 		}
+		elseif((isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'trialzilla') !== FALSE) 
+		|| (isset($_REQUEST['LS']) && $_REQUEST['LS'] == "1")   )
+		{
+			$_GET['LS']="1";
+			$li_user=null;
+			echo '<input type="hidden" name="LS" value="1" />';
+			echo '<table width="100%">'
+					. '<tr><td><img src="images/larvol_sigma_logo.gif" alt="Main" width="358" height="61" id="header" /></td>'
+					. '<td nowrap="nowrap"><span style="color:#ff0000;font-weight:normal;margin-left:40px;">Interface work in progress</span>'
+					. '<br/><span style="font-weight:normal;">Send feedback to '
+					. '<a style="display:inline;color:#0000FF;" target="_self" href="mailto:larvoltrials@larvol.com">'
+					. 'larvoltrials@larvol.com</a></span></td>'
+					. '<td class="result">' . $productAreaInfo . '</td></tr></table>';
+		}
+		
 		else
 		{
 			$li_user=null;
