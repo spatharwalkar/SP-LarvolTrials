@@ -2,6 +2,7 @@
 	require_once('db.php');
 	require_once('product_tracker.php');
 	require_once('company_tracker.php');
+	$page = 1;
 	if($_REQUEST['DiseaseId'] != NULL && $_REQUEST['DiseaseId'] != '' && isset($_REQUEST['DiseaseId']))
 	{
 		$DiseaseId = $_REQUEST['DiseaseId'];
@@ -11,7 +12,16 @@
 		$DiseaseId = $header['id'];
 		$DiseaseName = $header['name'];
 		if($header['display_name'] != NULL && $header['display_name'] != '')
-				$DiseaseName = $header['display_name'];					
+				$DiseaseName = $header['display_name'];	
+				
+		if(isset($_REQUEST['dwcount']))
+			$dwcount = $_REQUEST['dwcount'];
+		else
+			$dwcount = 'total';				
+	}
+	if(isset($_REQUEST['page']) && is_numeric($_REQUEST['page']))
+	{
+		$page = mysql_real_escape_string($_REQUEST['page']);
 	}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -146,7 +156,7 @@ a:visited {color:#6600bc;}  /* visited link */
 <table width="100%" border="0" class="FoundResultsTb">
 	<tr>
     	<td width="50%" style="border:0; font-weight:bold; padding-left:5px;" align="left">
-        	Details for "<?php print $DiseaseName; ?>"
+        	<?php print $DiseaseName; ?>
         </td>
     </tr>
 </table>
@@ -163,8 +173,8 @@ a:visited {color:#6600bc;}  /* visited link */
 </ul>
 
 <div id="diseaseTab_content"> 
-    <div id="Products">        
-			<?php print showProductTracker($DiseaseId, 'DPT'); //DPT=DISEASE PRODUCT TRACKER ?>
+    <div id="Products" align="center">        
+			<?php print showProductTracker($DiseaseId, $dwcount, 'DPT', $page); //DPT=DISEASE PRODUCT TRACKER ?>
     </div>
     <div id="Companies">
        		<?php //print showCompanyTracker($DiseaseId, 'DCT'); //DCT=DISEASE COMPANY TRACKER ?>

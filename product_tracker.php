@@ -11,17 +11,27 @@ if(!isset($_REQUEST['id'])) return;
 $id = mysql_real_escape_string(htmlspecialchars($_REQUEST['id']));
 if(!is_numeric($id)) return;
 
-if($_POST['dwformat'])
+if(isset($_REQUEST['dwcount']))
+	$dwcount = $_REQUEST['dwcount'];
+else
+	$dwcount = 'total';
+$page = 1;	
+if(isset($_REQUEST['page']) && is_numeric($_REQUEST['page']))
+{
+	$page = mysql_real_escape_string($_REQUEST['page']);
+}	
+
+if($_POST['download'])
 {
 	Download_reports();
 	exit;
 }
 
 ////Process Report Tracker
-function showProductTracker($id, $TrackerType)
+function showProductTracker($id, $dwcount, $TrackerType, $page=1)
 {
 	$HTMLContent = '';
-	$Return = DataGenerator($id, $TrackerType);
+	$Return = DataGenerator($id, $TrackerType, $page);
 	$uniqueId = uniqid();
 
 	///Required Data restored
@@ -38,25 +48,43 @@ function showProductTracker($id, $TrackerType)
 	$areaId = $Return['areaId'];
 	$column_interval = $Return['column_interval'];
 	$TrackerType = $Return['TrackerType'];
+	$TotalPages = $Return['TotalPages'];
+	
+	$MainPageURL = 'product_tracker.php';	//PT=PRODUCT TRACKER (MAIN PT PAGE)
+	if($TrackerType == 'CPT' || $TrackerType=='CPTH')	//CPT=COMPANY PRODUCT TRACKER CPTH=COMPANY PRODUCT TRACKER With HEADER
+		$MainPageURL = 'trialzilla_company.php';
+	else if($TrackerType == 'MPT')	//MPT=MOA PRODUCT TRACKER
+		$MainPageURL = 'trialzilla_moa.php';
+	else if($TrackerType == 'MCPT')	//MMPT= MOA CATEGORY PRODUCT TRACKER
+		$MainPageURL = 'trialzilla_moacategory.php';
+	else if($TrackerType == 'DPT')	//DPT=DISEASE PRODUCT TRACKER
+		$MainPageURL = 'trialzilla_disease.php';
+	
 	
 	$HTMLContent .= TrackerCommonCSS($uniqueId, $TrackerType);
 	
 	if($TrackerType=='PTH' || $TrackerType=='CPTH')
 	$HTMLContent .= TrackerHeaderHTMLContent($id, $Report_DisplayName, $TrackerType);
 	
-	$HTMLContent .= TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $inner_columns, $inner_width, $column_width, $ratio, $areaId, $column_interval, $TrackerType, $uniqueId);
+	$HTMLContent .= TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $inner_columns, $inner_width, $column_width, $ratio, $areaId, $column_interval, $TrackerType, $dwcount, $uniqueId);
 	
-	$HTMLContent .= TrackerCommonJScript($uniqueId);
+	if($TotalPages > 1)
+	{
+		$paginate = pagination($TrackerType, $TotalPages, $id, $dwcount, $page, $MainPageURL);
+		$HTMLContent .= '<br/><br/>'.$paginate[1];
+	}
+	
+	$HTMLContent .= TrackerCommonJScript($id, $TrackerType, $uniqueId, $page, $MainPageURL);
 	
 	if($TrackerType=='PTH' || $TrackerType=='CPTH')
-	$HTMLContent .= "<script language=\"javascript\" type=\"text/javascript\">change_view_".$uniqueId."_();</script>";
+	$HTMLContent .= "<script language=\"javascript\" type=\"text/javascript\">//change_view_".$uniqueId."_();</script>";
 	
 	return $HTMLContent;
 
 }
 ///End of Process Report Tracker
 
-function DataGenerator($id, $TrackerType)
+function DataGenerator($id, $TrackerType, $page=1)
 {
 	global $db;
 	global $now;
@@ -334,6 +362,21 @@ function DataGenerator($id, $TrackerType)
 	/// This function willl Sort multidimensional array according to industry lead column
 	$data_matrix = sortTwoDimensionArrayByKey($data_matrix,'indlead');
 	
+	///////////PAGING DATA
+	$RecordsPerPage = 50;
+	$TotalPages = 0;
+	if(!isset($_POST['download']))
+	{
+		$TotalPages = ceil(count($data_matrix) / $RecordsPerPage);
+		
+		//Get only those product Ids which we are planning to display on current page to avoid unnecessary queries
+		$StartSlice = ($page - 1) * $RecordsPerPage;
+		$EndSlice = $StartSlice + $RecordsPerPage;
+		$data_matrix = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
+		$rows = array_slice($rows, $StartSlice, $RecordsPerPage);
+	}
+	/////////PAGING DATA ENDS
+	
 	///// No of inner columns
 	$original_max_count = $max_count;
 	$max_count = ceil(($max_count / $columns)) * $columns;
@@ -358,6 +401,7 @@ function DataGenerator($id, $TrackerType)
 	$Return['areaId'] = $areaId;
 	$Return['column_interval'] = $column_interval;
 	$Return['TrackerType'] = $TrackerType;
+	$Return['TotalPages'] = $TotalPages;
 	
 	return $Return;
 }
@@ -629,104 +673,82 @@ function TrackerCommonCSS($uniqueId, $TrackerType)
 					color:#120f3c;
 					font-weight:normal;
 					}
+					
+					.pagination {
+						line-height: 1.6em;
+						width:100%;
+						float:none;
+						margin-right:10px;
+						float: left; 
+						padding-top:2px; 
+						vertical-align:bottom;
+						font-weight:bold;
+						padding-bottom:25px;
+						color:#4f2683;
+					}
+					
+					.pagination a:hover {
+						background-color: #aa8ece;
+						color: #FFFFFF;
+						font-weight:bold;
+						display:inline;
+					}
+					
+					.pagination a {
+						margin: 0 2px;
+						border: 1px solid #CCC;
+						background-color:#4f2683;
+						font-weight: bold;
+						padding: 2px 5px;
+						text-align: center;
+						color: #FFFFFF;
+						text-decoration: none;
+						display:inline;
+					}
+					
+					.pagination span {
+						padding: 2px 5px;
+					}
+
 					</style>';
 	return $htmlContent;				
 }
 
-function TrackerCommonJScript($uniqueId)
+function TrackerCommonJScript($id, $TrackerType, $uniqueId, $page, $MainPageURL)
 {
 	$htmlContent = '';
+	
+	$url = 'id=' . $id .'&page=' . $page;	//PT=PRODUCT TRACKER (MAIN PT PAGE)
+	if($TrackerType == 'CPT' || $TrackerType=='CPTH')	//CPT=COMPANY PRODUCT TRACKER CPTH=COMPANY PRODUCT TRACKER With HEADER
+		$url = 'CompanyId=' . $id .'&page=' . $page;
+	else if($TrackerType == 'MPT')	//MPT=MOA PRODUCT TRACKER
+		$url = 'MoaId=' . $id .'&page=' . $page;
+	else if($TrackerType == 'MCPT')	//MMPT= MOA CATEGORY PRODUCT TRACKER
+		$url = 'MoaCatId=' . $id .'&page=' . $page;
+	else if($TrackerType == 'DPT')	//DPT=DISEASE PRODUCT TRACKER
+		$url = 'DiseaseId=' . $id .'&page=' . $page;
 	
 	//Script for view change
 	$htmlContent .= "<script language=\"javascript\" type=\"text/javascript\">
 					function change_view_".$uniqueId."_()
 					{
-						var limit = document.getElementById('".$uniqueId."_Tot_rows').value;
 						var dwcount = document.getElementById('".$uniqueId."_dwcount');
-						$.browser.ie = /msie/.test(navigator.userAgent.toLowerCase()); 
-				
-						var i=0;
-						for(i=0;i<limit;i++)
+						if(dwcount.value == 'active')
 						{
-							if(dwcount.value == 'active')
-							{
-								var row_type = document.getElementById('".$uniqueId."_active_Graph_Row_A_'+i);
-								if(row_type != null && row_type != '')
-								{
-									if(!$.browser.ie)
-									{
-										document.getElementById('".$uniqueId."_active_Graph_Row_A_'+i).style.display = 'table-row';
-										document.getElementById('".$uniqueId."_active_Graph_Row_B_'+i).style.display = 'table-row';
-										document.getElementById('".$uniqueId."_active_Graph_Row_C_'+i).style.display = 'table-row';
-									}
-									else
-									{
-										document.getElementById('".$uniqueId."_active_Graph_Row_A_'+i).style.display = 'inline';
-										document.getElementById('".$uniqueId."_active_Graph_Row_B_'+i).style.display = 'inline';
-										document.getElementById('".$uniqueId."_active_Graph_Row_C_'+i).style.display = 'inline';
-									}
-									document.getElementById('".$uniqueId."_total_Graph_Row_A_'+i).style.display = 'none';
-									document.getElementById('".$uniqueId."_total_Graph_Row_B_'+i).style.display = 'none';
-									document.getElementById('".$uniqueId."_total_Graph_Row_C_'+i).style.display = 'none';
-									document.getElementById('".$uniqueId."_indlead_Graph_Row_A_'+i).style.display = 'none';
-									document.getElementById('".$uniqueId."_indlead_Graph_Row_B_'+i).style.display = 'none';
-									document.getElementById('".$uniqueId."_indlead_Graph_Row_C_'+i).style.display = 'none';
-								}
-							}
-							else if(dwcount.value == 'total')
-							{
-								var row_type = document.getElementById('".$uniqueId."_total_Graph_Row_A_'+i);
-								if(row_type != null && row_type != '')
-								{
-									document.getElementById('".$uniqueId."_active_Graph_Row_A_'+i).style.display = 'none';
-									document.getElementById('".$uniqueId."_active_Graph_Row_B_'+i).style.display = 'none';
-									document.getElementById('".$uniqueId."_active_Graph_Row_C_'+i).style.display = 'none';
-									if(!$.browser.ie)
-									{
-										document.getElementById('".$uniqueId."_total_Graph_Row_A_'+i).style.display = 'table-row';
-										document.getElementById('".$uniqueId."_total_Graph_Row_B_'+i).style.display = 'table-row';
-										document.getElementById('".$uniqueId."_total_Graph_Row_C_'+i).style.display = 'table-row';
-									} 
-									else 
-									{
-										document.getElementById('".$uniqueId."_total_Graph_Row_A_'+i).style.display = 'inline';
-										document.getElementById('".$uniqueId."_total_Graph_Row_B_'+i).style.display = 'inline';
-										document.getElementById('".$uniqueId."_total_Graph_Row_C_'+i).style.display = 'inline';
-									}
-									document.getElementById('".$uniqueId."_indlead_Graph_Row_A_'+i).style.display = 'none';
-									document.getElementById('".$uniqueId."_indlead_Graph_Row_B_'+i).style.display = 'none';
-									document.getElementById('".$uniqueId."_indlead_Graph_Row_C_'+i).style.display = 'none';
-								}
-							}
-							else
-							{
-								var row_type = document.getElementById('".$uniqueId."_indlead_Graph_Row_A_'+i);
-								if(row_type != null && row_type != '')
-								{
-									document.getElementById('".$uniqueId."_active_Graph_Row_A_'+i).style.display = 'none';
-									document.getElementById('".$uniqueId."_active_Graph_Row_B_'+i).style.display = 'none';
-									document.getElementById('".$uniqueId."_active_Graph_Row_C_'+i).style.display = 'none';
-									document.getElementById('".$uniqueId."_total_Graph_Row_A_'+i).style.display = 'none';
-									document.getElementById('".$uniqueId."_total_Graph_Row_B_'+i).style.display = 'none';
-									document.getElementById('".$uniqueId."_total_Graph_Row_C_'+i).style.display = 'none';
-									if(!$.browser.ie)
-									{
-										document.getElementById('".$uniqueId."_indlead_Graph_Row_A_'+i).style.display = 'table-row'; 
-										document.getElementById('".$uniqueId."_indlead_Graph_Row_B_'+i).style.display = 'table-row';
-										document.getElementById('".$uniqueId."_indlead_Graph_Row_C_'+i).style.display = 'table-row';
-									}
-									else 
-									{
-										document.getElementById('".$uniqueId."_indlead_Graph_Row_A_'+i).style.display = 'inline';
-										document.getElementById('".$uniqueId."_indlead_Graph_Row_B_'+i).style.display = 'inline';
-										document.getElementById('".$uniqueId."_indlead_Graph_Row_C_'+i).style.display = 'inline';
-									}
-								}
-							}
-						}	
+							location.href = \"".trim(urlPath()) . $MainPageURL ."?".$url."&dwcount=active\";
+						}
+						else if(dwcount.value == 'total')
+						{
+							location.href = \"".trim(urlPath()) . $MainPageURL ."?".$url."&dwcount=total\";
+						}
+						else
+						{
+							location.href = \"".trim(urlPath()) . $MainPageURL ."?".$url."&dwcount=indlead\";
+						}
 					}
-					</script>";
-					//Script for view change ends
+						</script>";
+		
+	//Script for view change ends
 
 	//Script for Fixed header while resize
 	$htmlContent .= "<script type=\"text/javascript\">
@@ -980,7 +1002,7 @@ function TrackerHeaderHTMLContent($id, $Report_DisplayName, $TrackerType)
 	return $htmlContent;
 }
 
-function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $inner_columns, $inner_width, $column_width, $ratio, $areaId, $column_interval, $TrackerType, $uniqueId)
+function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $inner_columns, $inner_width, $column_width, $ratio, $areaId, $column_interval, $TrackerType, $dwcount, $uniqueId)
 {				
 	if(count($productIds) == 0) return 'No Products Found';
 	
@@ -998,9 +1020,10 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 					. '<table width="264px" border="0" cellspacing="0" cellpadding="0" class="controls" align="center">'
 					. '<tr>'
 					. '<td class="bottom right"><select id="'.$uniqueId.'_dwcount" name="dwcount" onchange="change_view_'.$uniqueId.'_();">'
-					. '<option value="indlead" selected="selected">Active industry trials</option>'
-					. '<option value="active">Active trials</option>'
-					. '<option value="total">All trials</option></select></td>'
+					. '<option value="total" '. (($dwcount == 'total') ?  'selected="selected"' : '' ).'>All trials</option>'
+					. '<option value="indlead" '. (($dwcount == 'indlead') ?  'selected="selected"' : '' ).'>Active industry trials</option>'
+					. '<option value="active" '. (($dwcount == 'active') ?  'selected="selected"' : '' ).'>Active trials</option>'
+					. '</select></td>'
 					. '<td class="bottom right">'
 					. '<div style="border:1px solid #000000; float:right; margin-top: 0px; padding:2px; color:#000000;" id="'.$uniqueId.'_chromemenu"><a rel="'.$uniqueId.'_dropmenu"><span style="padding:2px; padding-right:4px; background-position:left center; background-repeat:no-repeat; background-image:url(\'./images/save.png\'); cursor:pointer; ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><font color="#000000">Export</font></b></span></a></div>'
 					. '</td>'
@@ -1089,130 +1112,136 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 		////// Color Graph - Bar Starts
 		
 		//// Code for Indlead
-		$Err = IndleadCountErr($data_matrix, $row, $ratio);
-		
-		$Max_ValueKey = Max_ValueKey($data_matrix[$row]['indlead_phase_na'], $data_matrix[$row]['indlead_phase_0'], $data_matrix[$row]['indlead_phase_1'], $data_matrix[$row]['indlead_phase_2'], $data_matrix[$row]['indlead_phase_3'], $data_matrix[$row]['indlead_phase_4']);
+		if($dwcount == 'indlead')
+		{
+			$Err = IndleadCountErr($data_matrix, $row, $ratio);
+			
+			$Max_ValueKey = Max_ValueKey($data_matrix[$row]['indlead_phase_na'], $data_matrix[$row]['indlead_phase_0'], $data_matrix[$row]['indlead_phase_1'], $data_matrix[$row]['indlead_phase_2'], $data_matrix[$row]['indlead_phase_3'], $data_matrix[$row]['indlead_phase_4']);
 						
-		$htmlContent .= '<tr id="'.$uniqueId.'_indlead_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" id="'.$uniqueId.'_ProdCol_'.$row.'" rowspan="3"><a href="'. $industryLink . '" target="_blank" style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
+			$htmlContent .= '<tr id="'.$uniqueId.'_indlead_Graph_Row_A_'.$row.'"  class="indlead_Graph"><th align="right" class="prod_col" id="'.$uniqueId.'_ProdCol_'.$row.'" rowspan="3"><a href="'. $industryLink . '" target="_blank" style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
 	
-		///Below function will derive number of lines required to display product name, as our graph size is fixed due to fixed scale, we can calculate approx max area  
-		///for product column. From that we can calculate extra height which will be distributed to up and down rows of graph bar, So now IE6/7 as well as chrome will not 
-		///have issue of unequal distrirbution of extra height due to rowspan and bar will remain in middle, without use of JS.
-		$ExtraAdjusterHeight = (($pdf->getNumLines($data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'], ((650)*17/90)) * $Line_Width)  - 20) / 2;
+			///Below function will derive number of lines required to display product name, as our graph size is fixed due to fixed scale, we can calculate approx max area  
+			///for product column. From that we can calculate extra height which will be distributed to up and down rows of graph bar, So now IE6/7 as well as chrome will not 
+			///have issue of unequal distrirbution of extra height due to rowspan and bar will remain in middle, without use of JS.
+			$ExtraAdjusterHeight = (($pdf->getNumLines($data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'], ((650)*17/90)) * $Line_Width)  - 20) / 2;
 		
-		for($j=0; $j < $columns; $j++)
-		{
-			$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
-		}
-		$htmlContent .= '<th></th></tr><tr id="'.$uniqueId.'_indlead_Graph_Row_B_'.$row.'" class="Link" >';
-		
-		$total_cols = $inner_columns * $columns;
-		$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['indlead']);
-		$phase_space = 0;
-	
-		foreach($phase_legend_nums as $key => $phase_nums)
-		{
-			if($data_matrix[$row]['indlead_phase_'.$phase_nums] > 0)
+			for($j=0; $j < $columns; $j++)
 			{
-				$Color = getClassNColorforPhase($phase_nums);
-				$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['indlead_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
-				$phase_space =  $phase_space + $Mini_Bar_Width;					
-				$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="Link '.$Color[0].'" title="'.$data_matrix[$row]['indlead_phase_'.$phase_nums].'" style="height:20px; _height:20px;"><a href="'. $industryLink . '&phase='.$phase_nums . '" target="_blank" class="Link" >&nbsp;</a></th>';
+				$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
 			}
-		}
+			$htmlContent .= '<th></th></tr><tr id="'.$uniqueId.'_indlead_Graph_Row_B_'.$row.'" class="Link indlead_Graph" >';
+			
+			$total_cols = $inner_columns * $columns;
+			$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['indlead']);
+			$phase_space = 0;
 	
-		$remain_span = $total_cols - $phase_space;
+			foreach($phase_legend_nums as $key => $phase_nums)
+			{
+				if($data_matrix[$row]['indlead_phase_'.$phase_nums] > 0)
+				{
+					$Color = getClassNColorforPhase($phase_nums);
+					$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['indlead_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
+					$phase_space =  $phase_space + $Mini_Bar_Width;					
+					$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="Link '.$Color[0].'" title="'.$data_matrix[$row]['indlead_phase_'.$phase_nums].'" style="height:20px; _height:20px;"><a href="'. $industryLink . '&phase='.$phase_nums . '" target="_blank" class="Link" >&nbsp;</a></th>';
+				}
+			}
 		
-		if($remain_span > 0)
-		$htmlContent .= DrawExtraHTMLCells($phase_space, $inner_columns, $remain_span);
-		
-		$htmlContent .= '<th></th></tr><tr id="'.$uniqueId.'_indlead_Graph_Row_C_'.$row.'">';
-		for($j=0; $j < $columns; $j++)
-		{
-			$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
+			$remain_span = $total_cols - $phase_space;
+			
+			if($remain_span > 0)
+			$htmlContent .= DrawExtraHTMLCells($phase_space, $inner_columns, $remain_span);
+			
+			$htmlContent .= '<th></th></tr><tr class="indlead_Graph" id="'.$uniqueId.'_indlead_Graph_Row_C_'.$row.'" >';
+			for($j=0; $j < $columns; $j++)
+			{
+				$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
+			}
+			$htmlContent .= '<th></th></tr>';
 		}
-		$htmlContent .= '<th></th></tr>';
-	
 		//// Code for Active
-		$Err = ActiveCountErr($data_matrix, $row, $ratio);
-	
-		$Max_ValueKey = Max_ValueKey($data_matrix[$row]['active_phase_na'], $data_matrix[$row]['active_phase_0'], $data_matrix[$row]['active_phase_1'], $data_matrix[$row]['active_phase_2'], $data_matrix[$row]['active_phase_3'], $data_matrix[$row]['active_phase_4']);
+		if($dwcount == 'active')
+		{
+			$Err = ActiveCountErr($data_matrix, $row, $ratio);
+		
+			$Max_ValueKey = Max_ValueKey($data_matrix[$row]['active_phase_na'], $data_matrix[$row]['active_phase_0'], $data_matrix[$row]['active_phase_1'], $data_matrix[$row]['active_phase_2'], $data_matrix[$row]['active_phase_3'], $data_matrix[$row]['active_phase_4']);
 					
-		$htmlContent .= '<tr style="display:none;" id="'.$uniqueId.'_active_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" rowspan="3"><a href="'. $activeLink . '" target="_blank" style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
+			$htmlContent .= '<tr class="active_Graph" id="'.$uniqueId.'_active_Graph_Row_A_'.$row.'" ><th align="right" class="prod_col" rowspan="3"><a href="'. $activeLink . '" target="_blank" style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
 	
-		for($j=0; $j < $columns; $j++)
-		{
-			$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
-		}
-		$htmlContent .= '<th></th></tr><tr style="display:none;" id="'.$uniqueId.'_active_Graph_Row_B_'.$row.'" class="Link">';
-		
-		$total_cols = $inner_columns * $columns;
-		$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['active']);
-		$phase_space = 0;
-	
-		foreach($phase_legend_nums as $key => $phase_nums)
-		{
-			if($data_matrix[$row]['active_phase_'.$phase_nums] > 0)
+			for($j=0; $j < $columns; $j++)
 			{
-				$Color = getClassNColorforPhase($phase_nums);
-				$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['active_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
-				$phase_space =  $phase_space + $Mini_Bar_Width;					
-				$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="Link '.$Color[0].'" title="'.$data_matrix[$row]['active_phase_'.$phase_nums].'" style="height:20px; _height:20px;"><a href="'. $activeLink . '&phase='.$phase_nums . '" target="_blank" class="Link" >&nbsp;</a></th>';
+				$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
 			}
-		}
-	
-		$remain_span = $total_cols - $phase_space;
+			$htmlContent .= '<th></th></tr><tr id="'.$uniqueId.'_active_Graph_Row_B_'.$row.'" class="Link active_Graph" >';
+			
+			$total_cols = $inner_columns * $columns;
+			$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['active']);
+			$phase_space = 0;
 		
-		if($remain_span > 0)
-		$htmlContent .= DrawExtraHTMLCells($phase_space, $inner_columns, $remain_span);
+			foreach($phase_legend_nums as $key => $phase_nums)
+			{
+				if($data_matrix[$row]['active_phase_'.$phase_nums] > 0)
+				{
+					$Color = getClassNColorforPhase($phase_nums);
+					$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['active_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
+					$phase_space =  $phase_space + $Mini_Bar_Width;					
+					$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="Link '.$Color[0].'" title="'.$data_matrix[$row]['active_phase_'.$phase_nums].'" style="height:20px; _height:20px;"><a href="'. $activeLink . '&phase='.$phase_nums . '" target="_blank" class="Link" >&nbsp;</a></th>';
+				}
+			}
 		
-		$htmlContent .= '<th></th></tr><tr style="display:none;" id="'.$uniqueId.'_active_Graph_Row_C_'.$row.'">';
-		for($j=0; $j < $columns; $j++)
-		{
-			$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
-		}
-		$htmlContent .= '<th></th></tr>';
-	
+			$remain_span = $total_cols - $phase_space;
+			
+			if($remain_span > 0)
+			$htmlContent .= DrawExtraHTMLCells($phase_space, $inner_columns, $remain_span);
+			
+			$htmlContent .= '<th></th></tr><tr class="active_Graph" id="'.$uniqueId.'_active_Graph_Row_C_'.$row.'" >';
+			for($j=0; $j < $columns; $j++)
+			{
+				$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
+			}
+			$htmlContent .= '<th></th></tr>';
+		}	
 		//// Code for Total
-		$Err = TotalCountErr($data_matrix, $row, $ratio);
-		
-		$Max_ValueKey = Max_ValueKey($data_matrix[$row]['total_phase_na'], $data_matrix[$row]['total_phase_0'], $data_matrix[$row]['total_phase_1'], $data_matrix[$row]['total_phase_2'], $data_matrix[$row]['total_phase_3'], $data_matrix[$row]['total_phase_4']);
-	
-		$htmlContent .= '<tr style="display:none;" id="'.$uniqueId.'_total_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" rowspan="3"><a href="'. $totalLink . '" target="_blank" style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
-	
-		for($j=0; $j < $columns; $j++)
+		if($dwcount == 'total')
 		{
-			$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
-		}
-		$htmlContent .= '<th></th></tr><tr style="display:none;" id="'.$uniqueId.'_total_Graph_Row_B_'.$row.'" class="Link" >';
+			$Err = TotalCountErr($data_matrix, $row, $ratio);
+			
+			$Max_ValueKey = Max_ValueKey($data_matrix[$row]['total_phase_na'], $data_matrix[$row]['total_phase_0'], $data_matrix[$row]['total_phase_1'], $data_matrix[$row]['total_phase_2'], $data_matrix[$row]['total_phase_3'], $data_matrix[$row]['total_phase_4']);
 	
-		$total_cols = $inner_columns * $columns;
-		$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['total']);
-		$phase_space = 0;
+			$htmlContent .= '<tr class="total_Graph" id="'.$uniqueId.'_total_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" rowspan="3"><a href="'. $totalLink . '" target="_blank" style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
 	
-		foreach($phase_legend_nums as $key => $phase_nums)
-		{
-			if($data_matrix[$row]['total_phase_'.$phase_nums] > 0)
+			for($j=0; $j < $columns; $j++)
 			{
-				$Color = getClassNColorforPhase($phase_nums);
-				$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['total_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
-				$phase_space =  $phase_space + $Mini_Bar_Width;					
-				$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="Link '.$Color[0].'" title="'.$data_matrix[$row]['total_phase_'.$phase_nums].'" style="height:20px; _height:20px;"><a href="'. $totalLink . '&phase='.$phase_nums . '" target="_blank" class="Link" >&nbsp;</a></th>';
+				$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
 			}
-		}
-	
-		$remain_span = $total_cols - $phase_space;
-	
-		if($remain_span > 0)
-		$htmlContent .= DrawExtraHTMLCells($phase_space, $inner_columns, $remain_span);
+			$htmlContent .= '<th></th></tr><tr id="'.$uniqueId.'_total_Graph_Row_B_'.$row.'" class="Link total_Graph" >';
 		
-		$htmlContent .= '<th></th></tr><tr style="display:none;" id="'.$uniqueId.'_total_Graph_Row_C_'.$row.'">';
-		for($j=0; $j < $columns; $j++)
-		{
-			$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
-		}
-		$htmlContent .= '<th></th></tr>';
+			$total_cols = $inner_columns * $columns;
+			$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['total']);
+			$phase_space = 0;
 		
+			foreach($phase_legend_nums as $key => $phase_nums)
+			{
+				if($data_matrix[$row]['total_phase_'.$phase_nums] > 0)
+				{
+					$Color = getClassNColorforPhase($phase_nums);
+					$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['total_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
+					$phase_space =  $phase_space + $Mini_Bar_Width;					
+					$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="Link '.$Color[0].'" title="'.$data_matrix[$row]['total_phase_'.$phase_nums].'" style="height:20px; _height:20px;"><a href="'. $totalLink . '&phase='.$phase_nums . '" target="_blank" class="Link" >&nbsp;</a></th>';
+				}
+			}
+	
+			$remain_span = $total_cols - $phase_space;
+		
+			if($remain_span > 0)
+			$htmlContent .= DrawExtraHTMLCells($phase_space, $inner_columns, $remain_span);
+			
+			$htmlContent .= '<th></th></tr><tr id="'.$uniqueId.'_total_Graph_Row_C_'.$row.'" class="total_Graph">';
+			for($j=0; $j < $columns; $j++)
+			{
+				$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
+			}
+			$htmlContent .= '<th></th></tr>';
+		}
 		////// End Of - Color Graph - Bar Starts
 		
 		$htmlContent .= '<tr class="side_tick_height"><th class="prod_col side_tick_height">&nbsp;</th><th class="'. (($incr == (count($rows)-1)) ? '':'graph_bottom') .' graph_right">&nbsp;</th>';
@@ -1282,10 +1311,117 @@ function DrawExtraHTMLCells($phase_space, $inner_columns, $remain_span)
 	
 	return $extraHTMLContent;
 }
+
+function pagination($TrackerType, $totalPages, $id, $dwcount, $CurrentPage, $MainPageURL)
+{	
+	$url = '';
+	$stages = 1;
+			
+	$url = 'id=' . $id .'&amp;dwcount=' . $dwcount;	//PT=PRODUCT TRACKER (MAIN PT PAGE)
+	if($TrackerType == 'CPT' || $TrackerType=='CPTH')	//CPT=COMPANY PRODUCT TRACKER CPTH=COMPANY PRODUCT TRACKER With HEADER
+		$url = 'CompanyId=' . $id .'&amp;dwcount=' . $dwcount;
+	else if($TrackerType == 'MPT')	//MPT=MOA PRODUCT TRACKER
+		$url = 'MoaId=' . $id .'&amp;dwcount=' . $dwcount;
+	else if($TrackerType == 'MCPT')	//MMPT= MOA CATEGORY PRODUCT TRACKER
+		$url = 'MoaCatId=' . $id .'&amp;dwcount=' . $dwcount;
+	else if($TrackerType == 'DPT')	//DPT=DISEASE PRODUCT TRACKER
+		$url = 'DiseaseId=' . $id .'&amp;dwcount=' . $dwcount;
+		
+	
+	$rootUrl = $MainPageURL.'?';
+	$paginateStr = '<table align="center"><tr><td><div class="pagination">';
+	
+	if($CurrentPage != 1)
+	{
+		$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . ($CurrentPage-1) . '\'>&laquo;</a>';
+	}
+	
+	if($totalPages < 7 + ($stages * 2))
+	{	
+		for($counter = 1; $counter <= $totalPages; $counter++)
+		{
+			if ($counter == $CurrentPage)
+			{
+				$paginateStr .= '<span>' . $counter . '</span>';
+			}
+			else
+			{
+				$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . $counter . '\'>' . $counter . '</a>';
+			}
+		}
+	}
+	elseif($totalPages > 5 + ($stages * 2))
+	{
+		if($CurrentPage < 1 + ($stages * 2))
+		{
+			for($counter = 1; $counter < 4 + ($stages * 2); $counter++)
+			{
+				if ($counter == $CurrentPage)
+				{
+					$paginateStr .= '<span>' . $counter . '</span>';
+				}
+				else
+				{
+					$paginateStr .='<a href=\'' . $rootUrl . $url . '&page=' . $counter . '\'>' . $counter . '</a>';
+				}
+			}
+			$paginateStr.= '<span>...</span>';
+			$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=' . ($totalPages-1) . '\'>' .  ($totalPages-1) . '</a>';
+			$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=' . $totalPages . '\'>' . $totalPages . '</a>';
+		}
+		elseif($totalPages - ($stages * 2) > $CurrentPage && $CurrentPage > ($stages * 2))
+		{
+			$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=1\'>1</a>';
+			$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=2\'>2</a>';
+			$paginateStr.= '<span>...</span>';
+			for($counter = $CurrentPage - $stages; $counter <= $CurrentPage + $stages; $counter++)
+			{
+				if ($counter == $CurrentPage)
+				{
+					$paginateStr.= '<span>' . $counter . '</span>';
+				}
+				else
+				{
+					$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=' . $counter . '\'>' . $counter . '</a>';
+				}
+			}
+			$paginateStr.= '<span>...</span>';
+			$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=' . ($totalPages-1) . '\'>' . ($totalPages-1) . '</a>';
+			$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=' . $totalPages . '\'>' . $totalPages . '</a>';
+		}
+		else
+		{
+			$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=1\'>1</a>';
+			$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=2\'>2</a>';
+			$paginateStr .= "<span>...</span>";
+			for($counter = $totalPages - (2 + ($stages * 2)); $counter <= $totalPages; $counter++)
+			{
+				if ($counter == $CurrentPage)
+				{
+					$paginateStr .= '<span>' . $counter . '</span>';
+				}
+				else
+				{
+					$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . $counter . '\'>' . $counter . '</a>';
+				}
+			}
+		}
+	}
+	
+	if($CurrentPage != $totalPages)
+	{
+		$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . ($CurrentPage+1) . '\'>&raquo;</a>';
+	}
+	$paginateStr .= '</td></tr></table></div>';
+	
+	return array($url, $paginateStr);
+}
+
+
 if(isset($_REQUEST['id']) && (isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'CPTH'))
-print showProductTracker($_REQUEST['id'], 'CPTH');	//CPTH - COMPANY PRODUCT TRACKER WITH HEADER
+print showProductTracker($_REQUEST['id'], $dwcount, 'CPTH', $page);	//CPTH - COMPANY PRODUCT TRACKER WITH HEADER
 else if(isset($_REQUEST['id']))
-print showProductTracker($_REQUEST['id'], 'PTH');	//PTH - Normal PRODUCT TRACKER WITH HEADER
+print showProductTracker($_REQUEST['id'], $dwcount, 'PTH', $page);	//PTH - Normal PRODUCT TRACKER WITH HEADER
 ?>
 <?
 if($db->loggedIn() && (strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE))

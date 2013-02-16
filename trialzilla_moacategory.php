@@ -1,6 +1,7 @@
 <?php
 	require_once('db.php');
 	require_once('product_tracker.php');
+	$page = 1;
 	if($_REQUEST['MoaCatId'] != NULL && $_REQUEST['MoaCatId'] != '' && isset($_REQUEST['MoaCatId']))
 	{
 		$MoaCatId = $_REQUEST['MoaCatId'];
@@ -10,14 +11,24 @@
 		$MoaCatId = $header['id'];
 		$MoaCatName = $header['name'];
 		if($header['display_name'] != NULL && $header['display_name'] != '')
-				$MoaCatName = $header['display_name'];				
+				$MoaCatName = $header['display_name'];
+				
+		if(isset($_REQUEST['dwcount']))
+			$dwcount = $_REQUEST['dwcount'];
+		else
+			$dwcount = 'total';					
+	}
+	
+	if(isset($_REQUEST['page']) && is_numeric($_REQUEST['page']))
+	{
+		$page = mysql_real_escape_string($_REQUEST['page']);
 	}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>Larvol Trials :: Trialzilla</title>
+<title>Larvol Trials</title>
 <style type="text/css">
 body
 {
@@ -66,7 +77,7 @@ a:visited {color:#6600bc;}  /* visited link */
 <table width="100%" border="0" class="FoundResultsTb">
 	<tr>
     	<td width="50%" style="border:0; font-weight:bold; padding-left:5px;" align="left">
-        	Product Tracker for "<?php print $MoaCatName; ?>"
+        	<?php print $MoaCatName; ?>
         </td>
     </tr>
 </table>
@@ -75,7 +86,7 @@ a:visited {color:#6600bc;}  /* visited link */
 <br/>
 <table width="100%" border="0" style="">
 <tr><td>
-<?php print showProductTracker($MoaCatId, 'MCPT');	//MCPT= MOA CATEGORY PRODUCT TRACKER ?>
+<?php print showProductTracker($MoaCatId, $dwcount, 'MCPT', $page);	//MCPT= MOA CATEGORY PRODUCT TRACKER ?>
 </td></tr>
 </table>
 <br/><br/>
