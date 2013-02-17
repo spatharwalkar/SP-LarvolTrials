@@ -87,7 +87,7 @@ function find_entity($q)
 					$entity_ids[] = $docinfo[id];
 				}
 				$n++;
-				pr($res["class"]);
+				//pr($res["class"]);
 			}
 			$entity_ids=array_unique($entity_ids);
 		}
