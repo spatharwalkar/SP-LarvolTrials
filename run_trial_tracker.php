@@ -7602,8 +7602,14 @@ class TrialTracker
 		$ids = implode("','", $Ids);
 		
 		$where = " WHERE 1 ";
-		$join = " JOIN `entity_trials` et ON dt.`larvol_id` = et.`trial` AND et.`entity`IN ('" . $ids . "') "
-					. " LEFT OUTER JOIN `data_manual` dm ON dt.`larvol_id` = dm.`larvol_id` "
+		$join = "";
+		
+		foreach($Ids as $ikey => $ivalue)
+		{
+			$join .= " JOIN `entity_trials` " . $ikey . " ON dt.`larvol_id` = " . $ikey . ".`trial` AND " . $ikey . ".`entity` IN ('" . $ivalue . "') ";
+		}
+		
+		$join .= " LEFT OUTER JOIN `data_manual` dm ON dt.`larvol_id` = dm.`larvol_id` "
 					. " LEFT OUTER JOIN `data_history` dh ON dh.`larvol_id` = dt.`larvol_id` ";
 		
 		$query = "SELECT SQL_CALC_FOUND_ROWS dt.`larvol_id`, dt.`source_id`, dt.`brief_title`, dt.`acronym`, dt.`lead_sponsor`, dt.`collaborator`, dt.`condition`,"
