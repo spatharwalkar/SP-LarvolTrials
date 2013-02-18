@@ -16,7 +16,11 @@ function tableColumns($table)
 	{	
 		while($row = mysql_fetch_assoc($res))
 		{
-			$columnList[] = $row['Field'];
+			//added this condition so that area edit page works fine with the view.
+			if($row['Field']<>'coverage_area')
+			{
+				$columnList[] = $row['Field'];
+			}
 		}
 	}
 	else
