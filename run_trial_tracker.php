@@ -9444,7 +9444,7 @@ class TrialTracker
 		if($ottType == 'indexed')
 			$globalOptions['includeProductsWNoData'] = "on";
 			
-		//echo '<input type="hidden" name="pr" id="product" value="' . implode(',', $globalOptions['product']) . '" />';
+		echo '<input type="hidden" name="pr" id="product" value="' . implode(',', $globalOptions['product']) . '" />';
 		
 		$count = $Values['count'];
 		$totalPages = ceil($count / $this->resultsPerPage);
