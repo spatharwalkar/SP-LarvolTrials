@@ -145,7 +145,6 @@ a:visited {color:#6600bc;}  /* visited link */
 <script src="scripts/jquery-1.7.1.min.js"></script>
 <script src="scripts/jquery-ui-1.8.17.custom.min.js"></script>
 <script type="text/javascript" src="scripts/chrome.js"></script>
-<script type="text/javascript" src="scripts/iepngfix_tilebg.js"></script>
 </head>
 
 <body style="background-color:#FFFFFF;">
@@ -176,7 +175,7 @@ a:visited {color:#6600bc;}  /* visited link */
     <div id="Products" align="center">        
 			<?php print showProductTracker($DiseaseId, $dwcount, 'DPT', $page); //DPT=DISEASE PRODUCT TRACKER ?>
     </div>
-    <div id="Companies">
+  <!--  <div id="Companies">
        		<?php //print showCompanyTracker($DiseaseId, 'DCT'); //DCT=DISEASE COMPANY TRACKER ?>
     </div>
     <div id="MOAs">
@@ -184,7 +183,7 @@ a:visited {color:#6600bc;}  /* visited link */
     </div>
     <div id="Conferences">
         Conferences
-    </div>
+    </div>-->
 </div>
 </td></tr>
 </table>
@@ -194,7 +193,7 @@ a:visited {color:#6600bc;}  /* visited link */
 
 </body>
 </html>
-<script>
+<script>/*
 $(document).ready(function() {
 	//$("#diseaseTab_content div").hide(); // Initially hide all content
 	///Hide all main divs
@@ -221,5 +220,5 @@ $(document).ready(function() {
         $(this).parent().attr("id","current"); // Activate this
         $('#' + $(this).attr('title')).fadeIn(); // Show content for current tab
     });
-});
+});*/
 </script>
