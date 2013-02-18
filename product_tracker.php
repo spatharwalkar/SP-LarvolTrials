@@ -14,7 +14,13 @@ if(!is_numeric($id)) return;
 if(isset($_REQUEST['dwcount']))
 	$dwcount = $_REQUEST['dwcount'];
 else
+{
+	if( ( (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE) || !isset($_SERVER['HTTP_REFERER']) ) && ( !isset($_REQUEST['LI']) || $_REQUEST['LI'] != 1) )
 	$dwcount = 'total';
+	else
+	$dwcount = 'indlead';
+}
+	
 $page = 1;	
 if(isset($_REQUEST['page']) && is_numeric($_REQUEST['page']))
 {
@@ -985,7 +991,7 @@ function TrackerCommonJScript($id, $TrackerType, $uniqueId, $page, $MainPageURL)
 
 function TrackerHeaderHTMLContent($id, $Report_DisplayName, $TrackerType)
 {	
-	if($TrackerType == 'PT')
+	if($TrackerType == 'PTH')
 		$Report_Name = ((trim($Report_DisplayName) != '' && $Report_DisplayName != NULL)? trim($Report_DisplayName):'report '.$id.'');
 	if($TrackerType == 'CPTH')
 		$Report_Name = $Report_DisplayName.' Company';
