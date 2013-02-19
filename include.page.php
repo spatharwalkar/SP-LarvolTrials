@@ -1082,7 +1082,8 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 						$InstAssoInsert = false;
 						if($InstPresent)
 						{
-							$InstAssocquery = "select institution from products_institutions where `institution`='{$InstIdLocal}' AND `product`='{$ProdID}' limit 1";
+							//$InstAssocquery = "select institution from products_institutions where `institution`='{$InstIdLocal}' AND `product`='{$ProdID}' limit 1";
+							$InstAssocquery = "select child from entity_relations where `child`='{$InstIdLocal}' AND `parent`='{$ProdID}' limit 1";
 							$InstAssocresult = mysql_query($InstAssocquery);
 							$InstAssocPresent = false;
 							while($InstAssocrow = mysql_fetch_assoc($InstAssocresult))
@@ -1107,7 +1108,8 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 						}
 						if($InstAssoInsert)
 						{
-							$InstAssocInsertquery = "INSERT INTO products_institutions (`product`, `institution`) VALUES ('{$ProdID}','{$InstIdLocal}')";
+							//$InstAssocInsertquery = "INSERT INTO products_institutions (`product`, `institution`) VALUES ('{$ProdID}','{$InstIdLocal}')";
+							$InstAssocInsertquery = "INSERT INTO entity_relations (`parent`, `child`) VALUES ('{$ProdID}','{$InstIdLocal}')";
 							$InstAssocInsertresult = mysql_query($InstAssocInsertquery);
 						}
 					}
