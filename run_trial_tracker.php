@@ -11139,7 +11139,7 @@ class TrialTracker
 						if($mvalue['result_link'] != '' && $mvalue['result_link'] !== NULL)
 						{
 							$outputStr .= '<a href="' . $mvalue['result_link'] . '" target="_blank">';
-							if($mvalue['event_type'] == 'Clinical Data')
+							if(strcasecmp($mvalue['event_type'], 'Clinical Data') == 0)
 							{
 								$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond"';
 							}
@@ -11155,7 +11155,7 @@ class TrialTracker
 						}
 						else
 						{
-							if($mvalue['event_type'] == 'Clinical Data')
+							if(strcasecmp($mvalue['event_type'], 'Clinical Data') == 0)
 							{
 								$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond"';
 							}
@@ -12553,7 +12553,7 @@ class TrialTracker
 				if($value['result_link'] != '' && $value['result_link'] !== NULL)
 				{
 					$outputStr .= '<a href="' . $value['result_link'] . '" ' . $target . '>';
-					if($value['event_type'] == 'Clinical Data')
+					if(strcasecmp($value['event_type'], 'Clinical Data') == 0)
 					{
 						$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond" border="0" />';
 					}
@@ -12569,7 +12569,7 @@ class TrialTracker
 				}
 				else
 				{
-					if($value['event_type'] == 'Clinical Data')
+					if(strcasecmp($value['event_type'], 'Clinical Data') == 0)
 					{
 						$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond" border="0" />';
 					}
