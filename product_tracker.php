@@ -2318,7 +2318,7 @@ function Download_reports()
      											'rotation'   => 0,
       											'wrap'       => false));
 		
-		$objPHPExcel->getActiveSheet()->SetCellValue('B1', $Report_Name.$TrackerName.' Product Tracker');
+		$objPHPExcel->getActiveSheet()->SetCellValue('B1', $Report_Name.$TrackerName.' Product Tracker')->getStyle('B1')->getFont()->setBold(true);;
 		
 		$objPHPExcel->getActiveSheet()->SetCellValue('A2', 'Display Mode:');
 		$objPHPExcel->getActiveSheet()->mergeCells('B2:AA2');
