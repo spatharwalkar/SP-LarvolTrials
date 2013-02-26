@@ -75,13 +75,19 @@ if($db->loggedIn())
 {
 	echo('Search (<a href="search.php">Main</a>,<a href="search_simple.php">Simple</a>,<a href="newsearch.php">New</a>) :: <a href="inspect.php">ID Lookup</a>');
 	echo(' :: ');
-	echo('<div class="drop">Import<br/>'
+	echo('<div class="drop">Editing<br/>'
 	.'<a href="import.php">XML Import</a><br/>'
-	.'<a href="edit_trials.php">Trial Entry</a>'
-	.'<a href="upm.php">UPM</a>'
-	.'<a href="areas.php">Areas</a>'
-	.'<a href="products.php">Products</a>'
-	.'<a href="redtags.php">Redtags</a>'
+	.'<a href="edit_trials.php">Trial Entry</a><br/>'
+	.'<a href="upm.php">UPM</a><br/>'
+	.'<a href="entities.php?entity=areas">Areas</a><br/>'
+	.'<a href="entities.php?entity=products">Products</a><br/>'
+	.'<a href="entities.php?entity=diseases">Diseases</a><br/>'
+	.'<a href="entities.php?entity=moas">MOAs</a><br/>'
+	.'<a href="entities.php?entity=moacategories"> MOA Categories </a><br/>'
+	.'<a href="entities.php?entity=institutions">Institutions</a><br/>');
+	if($db->user->userlevel=='admin'||$db->user->userlevel=='root')
+		echo ('<a href="entities.php?entity=entities">Entities</a><br/>');
+	echo ('<a href="redtags.php">Redtags</a><br/>'
 	.'</div>');
 	
 	if($db->user->userlevel=='root')

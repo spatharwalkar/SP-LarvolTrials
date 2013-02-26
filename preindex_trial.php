@@ -42,12 +42,12 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 		{
 			
 			$query = 'SELECT `id`,`name`,`searchdata`' . $cmpny . ' from '. 'entities' .' where searchdata IS NOT NULL and  `searchdata` <>"" ';
-			$ttype=$cat=='products' ? 'PRODUCT1' : 'AREA1';
+			$ttype='ENTITY';
 		}
 		else 
 		{
 			$query = 'SELECT `id`,`name`,`searchdata`' . $cmpny . ' from '. 'entities' .' where `searchdata` IS NOT NULL and  `searchdata` <>"" and `id`="' . $productID .'"' ;
-			$ttype=$cat=='products' ? 'PRODUCT2' : 'AREA2';
+			$ttype='ENTITY';
 		}
 		
 		if(!$resu = mysql_query($query))
@@ -287,6 +287,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 							echo $log;
 							return false;
 						}
+						
 					}
 					continue;
 				}
@@ -387,7 +388,6 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 						mysql_query('ROLLBACK');
 						return false;
 					}
-				 
 				
 				foreach($nctidz as $key => $value)
 				{
@@ -516,7 +516,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 				}
 				$proc_id = getmypid();
 				$i++;
-			//	$ttype=$cat=='products' ? 'PRODUCT' : 'AREA';
+			//	$ttype=$cat=='products' ? 'ENTITY' : 'ENTITY';
 			//update status
 				if( is_null($productID) and !$scraper_run )	
 				{

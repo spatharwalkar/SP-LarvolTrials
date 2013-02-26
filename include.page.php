@@ -9,8 +9,19 @@
 function tableColumns($table)
 {
 	global $logger;
+
+	$actual_table=$table;
+	switch($table)
+		{
+			case 'products': $actual_table = "entities"; break;
+			case 'areas': $actual_table = "entities"; break;
+			case 'institutions': $actual_table = "entities"; break;
+			case 'moas': $actual_table = "entities"; break;
+			case 'moacategories': $actual_table = "entities"; break;
+			case 'diseases': $actual_table = "entities"; break;
+		}	
 	
-	$query = "SHOW COLUMNS FROM $table";	
+	$query = "SHOW COLUMNS FROM $actual_table";	
 	$res = mysql_query($query);
 	if($res)
 	{	
@@ -52,8 +63,17 @@ function tableColumns($table)
 function tableColumnDetails($table)
 {
 	global $logger;
-	
-	$query = "SHOW COLUMNS FROM $table";
+	$actual_table=$table;
+	switch($table)
+		{
+			case 'products': $actual_table = "entities"; break;
+			case 'areas': $actual_table = "entities"; break;
+			case 'institutions': $actual_table = "entities"; break;
+			case 'moas': $actual_table = "entities"; break;
+			case 'moacategories': $actual_table = "entities"; break;
+			case 'diseases': $actual_table = "entities"; break;
+		}	
+	$query = "SHOW COLUMNS FROM $actual_table";
 	$res = mysql_query($query);
 	if($res)
 	{
@@ -84,13 +104,22 @@ function contentListing($start=0,$limit=50,$table,$script,$ignoreFields=array(),
 global $deleteFlag;
 if($options['delete']===false)
 $deleteFlag=false;
-	
 //get search params
-$where = calculateWhere($table);
-
+$actual_table=$table;
+$orig_table=$table;
+switch($table)
+	{
+		case 'products': $actual_table = "entities"; break;
+		case 'areas': $actual_table = "entities"; break;
+		case 'institutions': $actual_table = "entities"; break;
+		case 'moas': $actual_table = "entities"; break;
+		case 'moacategories': $actual_table = "entities"; break;
+		case 'diseases': $actual_table = "entities"; break;
+	}
+$where = calculateWhere($actual_table,$table);
 //calculate sortable fields
 //upm area field is included directly from upm custom query so ignore sort& other customizations for upm areas should be done elsewhere.
-$query = "SHOW COLUMNS FROM $table";
+$query = "SHOW COLUMNS FROM $actual_table";
 $res = mysql_query($query);
 $sortableRows = $options['extrasort'];
 while($row = mysql_fetch_assoc($res))
@@ -157,9 +186,9 @@ if(isset($_GET['sort_order']) && $_GET['sort_order']=='DESC' )
 if($table !='upm')
 {
 	if($_GET['no_sort']!=1)
-	$query = "select * from $table $where $currentOrderBy $currentSortOrder limit $start , $limit";
+	$query = "select * from $actual_table $where $currentOrderBy $currentSortOrder limit $start , $limit";
 	else
-	$query = "select * from $table $where limit $start , $limit";
+	$query = "select * from $actual_table $where limit $start , $limit";
 }
 elseif($table=='upm')
 {
@@ -182,6 +211,10 @@ while ($row = mysql_fetch_assoc($res))
 {
 	
 	if($table == 'areas' && $row['coverage_area'] == 1)
+	{
+		$defaultTdStyle = 'background-color:#7FBEFF';
+	}
+	elseif($table == 'diseases' && $row['class'] == 'Disease')
 	{
 		$defaultTdStyle = 'background-color:#7FBEFF';
 	}
@@ -215,8 +248,10 @@ while ($row = mysql_fetch_assoc($res))
 			$url=null;
 			
 			if($url)
-			echo '<a href="'.$url.'">';
-			
+			{
+				$url.='&entity='.$_REQUEST['entity'];
+				echo '<a href="'.$url.'">';
+			}
 			if($table == 'upm' && $columnName == 'larvol_id')
 			echo 'Trial Id';
 			else
@@ -249,7 +284,7 @@ while ($row = mysql_fetch_assoc($res))
 			if($columnName == 'id')
 			{
 				$upmId = $v;
-				echo '<td style="'.$defaultTdStyle.'"><a href="'.$script.'.php?id='.$v.'">';
+				echo '<td style="'.$defaultTdStyle.'"><a href="'.$script.'.php?id='.$v.'&entity='.$_GET['entity'].'">';
 				echo $v;
 				echo '</a></td>';				
 			}else
@@ -263,21 +298,21 @@ while ($row = mysql_fetch_assoc($res))
 			if($columnName == 'searchdata' && $table=='products')
 			{
 				echo '<td>';
-				echo input_tag(array('Field'=>'searchdata'),$v,array('table'=>$table,'id'=>$upmId,'callFrom'=>'contentListingProducts'));
+				echo input_tag(array('Field'=>'searchdata'),$v,array('table'=>$actual_table,'id'=>$upmId,'callFrom'=>'contentListingProducts'));
 				echo '</td>';				
 			}	
 			else
-			if($columnName == 'searchdata' && $table=='areas')
+			if($columnName == 'searchdata' && ($table=='areas' || $table=='diseases'))
 			{
 				echo '<td style="'.$defaultTdStyle.'">';
-				echo input_tag(array('Field'=>'searchdata'),$v,array('table'=>$table,'id'=>$upmId,'callFrom'=>'contentListingAreas'));
+				echo input_tag(array('Field'=>'searchdata'),$v,array('table'=>$actual_table,'id'=>$upmId,'callFrom'=>'contentListingAreas'));
 				echo '</td>';
 			}					
 			else
 			if($columnName == 'searchdata')
 			{
 				echo '<td style="'.$defaultTdStyle.'">';
-				echo input_tag(array('Field'=>'searchdata'),$v,array('table'=>$table,'id'=>$upmId));
+				echo input_tag(array('Field'=>'searchdata'),$v,array('table'=>$actual_table,'id'=>$upmId));
 				echo '</td>';				
 			}
 			else
@@ -309,7 +344,7 @@ while ($row = mysql_fetch_assoc($res))
 			}
 		}	
 		if($deleteFlag)
-		echo '<td><a onclick="return upmdelsure();" href="'.$script.'.php?deleteId='.$upmId.'&'.$deleteParams.'"><img src="images/not.png"/ alt="Delete '.$table.' id '.$upmId.'" title="Delete '.$table.' id '.$upmId.'" style="border:0"></a></td>';
+		echo '<td><a onclick="return upmdelsure();" href="'.$script.'.php?deleteId='.$upmId.'&'.$deleteParams.'"><img src="images/not.png"/ alt="Delete '.$table.' id '.$upmId.'" title="Delete '.$actual_table.' id '.$upmId.'" style="border:0"></a></td>';
 		echo '</tr>';	
 	}
 	else
@@ -322,7 +357,7 @@ while ($row = mysql_fetch_assoc($res))
 			if($columnName == 'id')
 			{
 				$upmId = $v;
-				echo '<td style="'.$defaultTdStyle.'"><a href="'.$script.'.php?id='.$v.'">';
+				echo '<td style="'.$defaultTdStyle.'"><a href="'.$script.'.php?id='.$v.'&entity='.$_GET['entity'].'">';
 				echo $v;
 				echo '</a></td>';				
 			}else
@@ -336,21 +371,21 @@ while ($row = mysql_fetch_assoc($res))
 			if($columnName == 'searchdata' && $table=='products')
 			{
 				echo '<td>';
-				echo input_tag(array('Field'=>'searchdata'),$v,array('table'=>$table,'id'=>$upmId,'callFrom'=>'contentListingProducts'));
+				echo input_tag(array('Field'=>'searchdata'),$v,array('table'=>$actual_table,'id'=>$upmId,'callFrom'=>'contentListingProducts'));
 				echo '</td>';				
 			}	
 			else
-			if($columnName == 'searchdata' && $table=='areas')
+			if($columnName == 'searchdata' && ($table=='areas' || $table=='diseases'))
 			{
 				echo '<td style="'.$defaultTdStyle.'">';
-				echo input_tag(array('Field'=>'searchdata'),$v,array('table'=>$table,'id'=>$upmId,'callFrom'=>'contentListingAreas'));
+				echo input_tag(array('Field'=>'searchdata'),$v,array('table'=>$actual_table,'id'=>$upmId,'callFrom'=>'contentListingAreas'));
 				echo '</td>';
 			}					
 			else
 			if($columnName == 'searchdata')
 			{
 				echo '<td>';
-				echo input_tag(array('Field'=>'searchdata'),$v,array('table'=>$table,'id'=>$upmId));
+				echo input_tag(array('Field'=>'searchdata'),$v,array('table'=>$actual_table,'id'=>$upmId));
 				echo '</td>';				
 			}
 			else 
@@ -382,7 +417,7 @@ while ($row = mysql_fetch_assoc($res))
 			}
 		}
 		if($deleteFlag)
-		echo '<td><a onclick="return upmdelsure();" href="'.$script.'.php?deleteId='.$upmId.'&'.$deleteParams.'"><img src="images/not.png"/ alt="Delete '.$table.' id '.$upmId.'" title="Delete '.$table.' id '.$upmId.'" style="border:0"></a></td>';
+		echo '<td><a onclick="return upmdelsure();" href="'.$script.'.php?deleteId='.$upmId.'&'.$deleteParams.'"><img src="images/not.png"/ alt="Delete '.$table.' id '.$upmId.'" title="Delete '.$actual_table.' id '.$upmId.'" style="border:0"></a></td>';
 		echo '</tr>';				
 	}
 	
@@ -483,7 +518,7 @@ function getUpmSourceIDFrmLarvolIDs($LarvolId)
  * @param $_GET['search_*
  * @author Jithu Thomas
  */
-function calculateWhere($table)
+function calculateWhere($table,$orig_table="")
 {
 	//pr($_GET);
 	$postKeys = array_keys($_GET);
@@ -506,7 +541,7 @@ function calculateWhere($table)
 			continue;
 		}
 	}
-	//pr($whereArr);die;
+	
 	
 	
 	//start bool checkbox filtering
@@ -593,7 +628,26 @@ function calculateWhere($table)
 	{
 		$where = null;
 	}
+	
+	switch($orig_table)
+		{
+			case 'products': $class = "Product"; break;
+			case 'areas': $class = "Area"; break;
+			case 'institutions': $class = "Institution"; break;
+			case 'moas': $class = "MOA"; break;
+			case 'moacategories': $class = "MOA_Category"; break;
+			case 'diseases': $class = "Disease"; break;
+		}
+
+	if(!empty($class))
+	{
+		if(empty($where))
+			$where=' where (class = "'.$class.'")';
+		else
+			$where=$where.' and (class = "'.$class.'")';
+	}
 	return $where;	
+
 }
 
 /**
@@ -605,7 +659,17 @@ function calculateWhere($table)
 function getTotalCount($table)
 {
 	global $db, $logger;
-	$where = calculateWhere($table);
+	$actual_table=$table;
+	switch($table)
+		{
+			case 'products': $actual_table = "entities"; break;
+			case 'areas': $actual_table = "entities"; break;
+			case 'institutions': $actual_table = "entities"; break;
+			case 'moas': $actual_table = "entities"; break;
+			case 'moacategories': $actual_table = "entities"; break;
+			case 'diseases': $actual_table = "entities"; break;
+		}
+	$where = calculateWhere($actual_table,$table);
 	if($table == 'upm')
 	{
 		$query = "select count(distinct upm.id) as cnt from $table left join upm_areas on $table.id=upm_areas.upm_id left join upm_trials on $table.id=upm_trials.upm_id $where";
@@ -616,7 +680,7 @@ function getTotalCount($table)
 	}
 	else
 	{
-		$query = "select count(id) as cnt from $table $where";
+		$query = "select count(id) as cnt from $actual_table $where";
 	}
 	$res = mysql_query($query);
 	if($res)
@@ -641,7 +705,17 @@ function getTotalCount($table)
  */
 function deleteData($id,$table)
 {
-	$query = "delete from $table where id=$id";
+	$actual_table=$table;
+	switch($table)
+		{
+			case 'products': $actual_table = "entities"; break;
+			case 'areas': $actual_table = "entities"; break;
+			case 'institutions': $actual_table = "entities"; break;
+			case 'moas': $actual_table = "entities"; break;
+			case 'moacategories': $actual_table = "entities"; break;
+			case 'diseases': $actual_table = "entities"; break;
+		}
+	$query = "delete from $actual_table where id=$id";
 	mysql_query($query) or softDieSession('Cannot delete '.$table.'. '.$query);
 	echo 'Successfully deleted '.$table.'.';
 	
@@ -816,26 +890,16 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 {
 	global $now;
 	global $db;
-	//temporary arrangement till the entity editing page is completed
-	$table_new=$table;
+	$actual_table=$table;
 	switch($table)
 		{
-			case 'products': $table_new = "entities"; break;
-			case 'areas': $table_new = "entities"; break;
+			case 'products': $actual_table = "entities"; break;
+			case 'areas': $actual_table = "entities"; break;
+			case 'institutions': $actual_table = "entities"; break;
+			case 'moas': $actual_table = "entities"; break;
+			case 'moacategories': $actual_table = "entities"; break;
+			case 'diseases': $actual_table = "entities"; break;
 		}
-	//
-
-	/*
-	unset($post['qw_login']);
-	unset($post['PHPSESSID']);
-	unset($post['__utma']);
-	unset($post['__utmc']);
-	unset($post['__utmz']);	//print_r($post);die;	
-	unset($post['li_user']);
-	*/
-	//import save
-	//pr($post);die;
-	
 	if($import ==1 && $table=='redtags')
 	{
 		//post values are already escaped before coming here.\
@@ -884,7 +948,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 				if($currentType != $typeWithoutQuotes)
 				{
 					echo $currentType."---".$typeWithoutQuotes."---".$name."<br/>";
-					$query = "update `$table_new` set `name`=$name, `type`=$type where `name`=$name";
+					$query = "update `$actual_table` set `name`=$name, `type`=$type where `name`=$name";
 					if(mysql_query($query))
 					{
 						$updateCnt++;
@@ -904,7 +968,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			else
 			{
 				//insert
-				$class="";
+				
 				switch($table)
 				{
 					case 'products': $class = "Product"; break;
@@ -912,6 +976,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 					case 'institutions': $class = "Institution"; break;
 					case 'moas': $class = "MOA"; break;
 					case 'moacategories': $class = "MOA_Category"; break;
+					case 'diseases': $class = "Disease"; break;
 				}
 				if( $table == 'moacategories' or $table == 'moas'  )
 				{
@@ -919,7 +984,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 				}
 				elseif( empty($class) )
 				{
-					$query = "insert into `$table_new` (".implode(',',$importKeys).") values (".implode(',',$redTagArray).")";
+					$query = "insert into `$actual_table` (".implode(',',$importKeys).") values (".implode(',',$redTagArray).")";
 				}
 				else
 				{
@@ -942,7 +1007,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 		//delete non existing redtags
 		if(count($existingRegTagName)>0)
 		{
-			$query = "delete from $table_new where `name` not in(".implode(',',$existingRegTagName).")";
+			$query = "delete from $actual_table where `name` not in(".implode(',',$existingRegTagName).")";
 			if(mysql_query($query))
 			{
 				$deleteCnt = mysql_affected_rows();
@@ -1001,12 +1066,12 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 					$MHMReferenceCount = getMHMAssociation($id, 'products');
 					if($upmReferenceCount==0 && $MHMReferenceCount==0 && $searchData=='')
 					{
-						deleteData($id, $table_new);
+						deleteData($id, $actual_table);
 						return 4;
 					}
 				}			
 				$importVal = array_map(am1,$importKeys,array_values($importVal));
-				$query = "update $table_new set ".implode(',',$importVal)." where id=".$id;
+				$query = "update $actual_table set ".implode(',',$importVal)." where id=".$id;
 			}
 			else 
 			{
@@ -1021,7 +1086,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 				$importVal = array_map(function ($v){return "'".mysql_real_escape_string($v)."'";},$importVal);
 				
 				
-				$class="";
+				
 				switch($table)
 				{
 					case 'products': $class = "Product"; break;
@@ -1029,6 +1094,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 					case 'institutions': $class = "Institution"; break;
 					case 'moas': $class = "MOA"; break;
 					case 'moacategories': $class = "MOA_Category"; break;
+					case 'diseases': $class = "Disease"; break;
 				}
 				if( $table == 'moacategories' or $table == 'moas'  )
 				{
@@ -1036,7 +1102,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 				}
 				elseif( empty($class) )
 				{
-					$query = "insert into $table_new (`".implode('`,`',$importKeys)."`) values (".implode(',',$importVal).")";
+					$query = "insert into $actual_table (`".implode('`,`',$importKeys)."`) values (".implode(',',$importVal).")";
 				}
 				else
 				{
@@ -1226,11 +1292,11 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			{
 				if($importVal['is_active'] == 0)
 				{
-					deleteData($id, $table_new);
+					deleteData($id, $actual_table);
 					return 4;
 				}			
 				$importVal = array_map(am1,$importKeys,array_values($importVal));
-				$query = "update $table_new set ".implode(',',$importVal)." where id=".$id;
+				$query = "update $actual_table set ".implode(',',$importVal)." where id=".$id;
 			}
 			else 
 			{
@@ -1244,7 +1310,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 				
 				$importVal = array_map(function ($v){return "'".mysql_real_escape_string($v)."'";},$importVal);
 				
-				$class="";
+				
 				switch($table)
 				{
 					case 'products': $class = "Product"; break;
@@ -1252,6 +1318,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 					case 'institutions': $class = "Institution"; break;
 					case 'moas': $class = "MOA"; break;
 					case 'moacategories': $class = "MOA_Category"; break;
+					case 'diseases': $class = "Disease"; break;
 				}
 				if( $table == 'moacategories' or $table == 'moas'  )
 				{
@@ -1259,7 +1326,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 				}
 				elseif( empty($class) )
 				{
-					$query = "insert into $table_new (`".implode('`,`',$importKeys)."`) values (".implode(',',$importVal).")";
+					$query = "insert into $actual_table (`".implode('`,`',$importKeys)."`) values (".implode(',',$importVal).")";
 				}
 				else
 				{
@@ -1340,7 +1407,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 				
 				$importVal = array_map(function ($v){return "'".mysql_real_escape_string($v)."'";},$importVal);
 				
-				$class="";
+				
 				switch($table)
 				{
 					case 'products': $class = "Product"; break;
@@ -1348,6 +1415,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 					case 'institutions': $class = "Institution"; break;
 					case 'moas': $class = "MOA"; break;
 					case 'moacategories': $class = "MOA_Category"; break;
+					case 'diseases': $class = "Disease"; break;
 				}
 				if( $table == 'moacategories' or $table == 'moas'  )
 				{
@@ -1355,7 +1423,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 				}
 				elseif( empty($class) )
 				{
-					$query = "insert into $table_new (`".implode('`,`',$importKeys)."`) values (".implode(',',$importVal).")";
+					$query = "insert into $actual_table (`".implode('`,`',$importKeys)."`) values (".implode(',',$importVal).")";
 				}
 				else
 				{
@@ -1498,7 +1566,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 				$importVal = array_map(function ($v){return "'".mysql_real_escape_string($v)."'";},$importVal);
 				
 				
-				$class="";
+				
 				switch($table)
 				{
 					case 'products': $class = "Product"; break;
@@ -1506,6 +1574,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 					case 'institutions': $class = "Institution"; break;
 					case 'moas': $class = "MOA"; break;
 					case 'moacategories': $class = "MOA_Category"; break;
+					case 'diseases': $class = "Disease"; break;
 				}
 				if( $table == 'moacategories' or $table == 'moas'  )
 				{
@@ -1513,7 +1582,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 				}
 				elseif( empty($class) )
 				{
-					$query = "insert into $table_new (`".implode('`,`',$importKeys)."`) values (".implode(',',$importVal).")";
+					$query = "insert into $actual_table (`".implode('`,`',$importKeys)."`) values (".implode(',',$importVal).")";
 				}
 				else
 				{
@@ -1563,7 +1632,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			if($db->user->userlevel != 'user')
 			{
 				$post['searchdata'] = '';
-				$q = "UPDATE $table_new SET searchdata=null WHERE id=$id LIMIT 1";
+				$q = "UPDATE $actual_table SET searchdata=null WHERE id=$id LIMIT 1";
 				mysql_query($q) or softDieSession('Bad SQL query deleting searchdata');
 			}
 		}
@@ -1576,7 +1645,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 	
 	$id = ($post['id'])?$post['id']:null;	
 	//precheck before attepting to insert/update
-	if($table=='products' || $table=='areas')
+	if($table=='products' || $table=='areas'  || $table=='diseases')
 	{
 		if(isset($post['searchdata']) && $post['searchdata']!='')
 		{
@@ -1584,7 +1653,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			$stat = json_decode(testQuery(1,1,$post['searchdata']));
 			if($stat->status==0)
 			{
-				softDieSession('Cannot insert '.$table_new.' entry. Search data corrupt!<br/>'.$stat->message);
+				softDieSession('Cannot insert '.$actual_table.' entry. Search data corrupt!<br/>'.$stat->message);
 				return 0;
 			}
 		}
@@ -1592,6 +1661,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 
 	//end precheck
 	//column input filtering
+	
 	$columnList = tableColumns($table);
 	
 	//start bool checkbox filtering 
@@ -1649,7 +1719,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			unset($newpost[$LarvolIdKey]);
 		}
 		
-				$class="";
+				
 				switch($table)
 				{
 					case 'products': $class = "Product"; break;
@@ -1657,6 +1727,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 					case 'institutions': $class = "Institution"; break;
 					case 'moas': $class = "MOA"; break;
 					case 'moacategories': $class = "MOA_Category"; break;
+					case 'diseases': $class = "Disease"; break;
 				}
 				if( $table == 'moacategories' or $table == 'moas'  )
 				{
@@ -1664,7 +1735,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 				}
 				elseif( empty($class) )
 				{
-					$query = "insert into $table_new (`".implode('`,`',$newpostKeys)."`) values (".implode(',',$newpost).")";
+					$query = "insert into $actual_table (`".implode('`,`',$newpostKeys)."`) values (".implode(',',$newpost).")";
 				}
 				else
 				{
@@ -1679,7 +1750,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			{
 				$_REQUEST['id'] = mysql_insert_id();
 			}
-			if($table=='areas')
+			if($table=='areas'  || $table=='diseases')
 			{
 				$_REQUEST['id'] = mysql_insert_id();
 			}
@@ -1787,7 +1858,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			//pr($post);//die;
 		}
 		if($table<>'upm') $postnew = $post;
-		$query = "update $table_new set ".implode(',',$postnew)." where id=".$id;
+		$query = "update $actual_table set ".implode(',',$postnew)." where id=".$id;
 		if(mysql_query($query))
 		{
 			//fire success actions upon successful save.
@@ -1983,9 +2054,20 @@ function fillUpmLarvolIDs($upmId,$LarvolIDs=array())
  * @param int $limit The total limit of records defined in the controller.
  * @author Jithu Thomas
  */
-function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),$options=array('import'=>true,'searchDataCheck'=>false,'search'=>true,'add_new_record'=>true))
+function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),$options=array('import'=>true,'searchDataCheck'=>false,'search'=>true,'add_new_record'=>true),$entity=null)
 {
 	global $page;	
+	$actual_table=$table;
+	switch($table)
+	{
+		case 'products': $actual_table = "entities"; break;
+		case 'areas': $actual_table = "entities"; break;
+		case 'institutions': $actual_table = "entities"; break;
+		case 'moas': $actual_table = "entities"; break;
+		case 'moacategories': $actual_table = "entities"; break;
+		case 'diseases': $actual_table = "entities"; break;
+	}
+	
 	$formOnSubmit = isset($options['formOnSubmit'])?$options['formOnSubmit']:null;
 	if(isset($_GET['next']))
 	$page = $_GET['oldval']+1;
@@ -1993,11 +2075,9 @@ function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),
 	$page = $_GET['oldval']-1;	
 	elseif(isset($_GET['jump']))
 	$page = $_GET['jumpno']-1;
-	
-	
 	$visualPage = $page+1;
 	$maxPage = ceil($totalCount/$limit);
-	
+	if($entity) $_GET['entity']=$entity;
 	$oldVal = $page;
 		
 	$pend  = ($visualPage*$limit)<=$totalCount?$visualPage*$limit:$totalCount;
@@ -2007,6 +2087,7 @@ function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),
 		 	. '<legend>Page ' . $visualPage . ' of '.$maxPage
 			. ': records '.$pstart.'-'.$pend.' of '.$totalCount
 			. '</legend>'
+			. '<input name="entity" type="hidden" value="' . $_REQUEST['entity'] . '" />'
 			. '<input type="submit" name="jump" value="Jump" style="width:0;height:0;border:0;padding:0;margin:0;"/> '
 			. '<input name="page" type="hidden" value="' . $page . '" /><input name="search" type="hidden" value="1" />'
 			. ($pstart > 1 ? '<input type="submit" name="back" value="&lt; Back"/>' : '')
@@ -2178,6 +2259,16 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 {
 	global $searchData;
 	global $db;
+	$actual_table=$table;
+	switch($table)
+		{
+			case 'products': $actual_table = "entities"; break;
+			case 'areas': $actual_table = "entities"; break;
+			case 'institutions': $actual_table = "entities"; break;
+			case 'moas': $actual_table = "entities"; break;
+			case 'moacategories': $actual_table = "entities"; break;
+			case 'diseases': $actual_table = "entities"; break;
+		}
 	$searchType = calculateSearchType($db->sources,unserialize(base64_decode($searchData)));
 	$insertEdit = 'Insert';
 	$area = $larvol_id = $source_id = array();
@@ -2197,10 +2288,11 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		}
 		else
 		{
-			$query = "SELECT * FROM $table WHERE id=$id";
+			$where = calculateWhere($actual_table,$table);
+			if(empty($where))	$query = "SELECT * FROM $actual_table WHERE id=$id";
+			else				$query = "SELECT * FROM $actual_table $where and id=$id";
 		}
 		$res = mysql_query($query) or die('Cannot get details for this '.$table.' id');
-		
 		if($table == 'upm')
 		{
 			while($row = mysql_fetch_assoc($res))
@@ -2233,7 +2325,7 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 	$columns = array();
 	//$query = "SHOW COLUMNS FROM $table";
 	//$res = mysql_query($query)or die('Cannot fetch column names from '.$table.' table.');
-	$res = tableColumnDetails($table);
+	$res = tableColumnDetails($actual_table);
 	//TODO: make it dynamic for future one to many relationship and custom non existing columns
 	if($table == 'upm')
 	{
@@ -2267,7 +2359,7 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 	echo '<div class="clr">';
 	echo '<fieldset>';
 	echo '<legend> '.$insertEdit.': </legend>';
-	echo '<form '.$formStyle.' id="umpInput" name="umpInput" '.$formOnSubmit.' method="POST" action="'.$script.'.php">';
+	echo '<form '.$formStyle.' id="umpInput" name="umpInput" '.$formOnSubmit.' method="POST" action="'.$script.'.php?entity='.$_REQUEST['entity'].'">';
 	echo '<table '.$mainTableStyle.'>';
 	//while($row = mysql_fetch_assoc($res))
 	foreach($res as $row)
@@ -2278,6 +2370,10 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 			$i++;
 			continue;
 		}
+		if( $insertEdit == 'Insert' && $row['Field'] == 'class' )
+		{
+			continue;
+		}
 		if(in_array($row['Field'], $skipArr))
 		{
 			continue;
@@ -2285,7 +2381,7 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		$dbVal = isset($upmDetails[$row['Field']])?$upmDetails[$row['Field']]:null;
 		
 		//check products table for LI_id
-		if($script=='products' && $row['Field']=='LI_id' && trim($dbVal)!='')
+		if($table=='products' && $row['Field']=='LI_id' && trim($dbVal)!='')
 		{
 			$options['deletebox'] = false;
 		}
@@ -2303,13 +2399,13 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		
 		if($row['Field'] == 'searchdata')
 		{
-			if($searchType ===false && ($script=='areas' || $script=='products'))
+			if($searchType ===false && ($table=='areas' || $table=='products' || $table=='diseases'))
 			{
 				$searchType = calculateSearchType($db->sources,unserialize(base64_decode($dbVal)));
 			}			
 			echo '<tr><td>'.ucwords(implode(' ',explode('_',$row['Field']))).' : </td>';
 			echo '<td>';
-			echo input_tag($row,$dbVal,array('table'=>$table,'id'=>$id,'callFrom'=>'addedit','saveStatusForInputTag'=>$saveStatusForInputTag));
+			echo input_tag($row,$dbVal,array('table'=>$actual_table,'id'=>$id,'callFrom'=>'addedit','saveStatusForInputTag'=>$saveStatusForInputTag));
 			echo '</td></tr>';	
 			$i++;
 			continue;			
@@ -2329,12 +2425,19 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		
 		$defaultOptions['style'] = $addEditGlobalInputStyle;
 		
-		$ProductReadOnlyArr = array('comments','product_type','licensing_mode','administration_mode','discontinuation_status','discontinuation_status_comment','is_key','created','modified','company','brand_names','generic_names','code_names','approvals','display_name');
+		if($table=='institutions' or $table=='moas' or $table=='moacategories')
+			$ProductReadOnlyArr = array('name','search_name','LI_id','client_name','is_active','class','description','display_name','category','searchdata','comments','product_type','licensing_mode','administration_mode','discontinuation_status','discontinuation_status_comment','is_key','created','modified','company','brand_names','generic_names','code_names','approvals','class');
+		elseif($table=='products')
+			$ProductReadOnlyArr = array('comments','is_active','product_type','licensing_mode','administration_mode','discontinuation_status','discontinuation_status_comment','is_key','created','modified','company','brand_names','generic_names','code_names','approvals','display_name');
+		else
+			$ProductReadOnlyArr = array('is_active');
+
+
 		
 		///default
 		if($row['Field']!='larvol_id' || $table!='upm')
 		{ 
-			if(in_array($row['Field'], $ProductReadOnlyArr) && $table=='products')
+			if(in_array($row['Field'], $ProductReadOnlyArr))
 			{
 				echo '<tr>';
 				if($row['Field'] == 'is_key')
@@ -2379,14 +2482,14 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		}
 		
 	}
-	if(($script == 'products' || $script == 'areas') && $searchType!==false)
+	if(($table == 'products' || $table == 'areas') && $searchType!==false)
 	{
 		echo '<tr>';
 		echo '<td>Type : </td><td>'.($searchType==1?'Auto':'SemiAuto').'</td>';
 		echo '</tr>';		
 	}
 	$altTitle='Delete';
-	if($script=='products')
+	if($table=='products')
 	{
 		$upmReference = getProductUpmAssociation($id);
 		$upmReferenceCount = count($upmReference);
@@ -2403,7 +2506,7 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		echo '<td>References : </td><td>'.$MHMReferenceCount.' MHM</td>';
 		echo '</tr>';
 	}
-	if($script=='areas')
+	if($table=='areas'  || $table=='diseases')
 	{
 		$MHMReferenceCount = getMHMAssociation($id,'product');
 		$disabled = ($MHMReferenceCount>0)?true:false;
@@ -2412,12 +2515,15 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		echo '<td>References : </td><td>'.$MHMReferenceCount.' MHM</td>';
 		echo '</tr>';
 	}	
+	/*********** disabled delete
+	
 	if($options['deletebox']===true && $id)
 	{
 		echo '<tr>';
 		echo '<td>Delete : </td><td>'.input_tag(null,null,array('deletebox'=>true,'id'=>$id,'disabled'=>$disabled,'alttitle'=>$altTitle)).'</td>';
 		echo '</tr>';
 	}
+	*/
 	if($searchData)
 	echo '<input type="hidden" name="searchdata" value="'.$searchData.'">';
 	if($table=='upm')
@@ -2429,7 +2535,7 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		$lnk='<a href="intermediary.php?p=' . $_GET['id'] . '" target="_blank">';
 	}
 		
-	elseif($table=='areas') 
+	elseif($table=='areas' || $table=='diseases') 
 	{
 		$lnk='<a href="intermediary.php?a=' . $_GET['id'] . '" target="_blank">';
 	}
@@ -2443,7 +2549,7 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		$lnk="";$lnk2="";
 	}
 	
-	if($table=='products' || $table=='areas' && isset($options['preindexProgress']) && isset($options['preindexStatus']) && $id)
+	if( ($table=='products' || $table=='areas'  || $table=='diseases') && isset($options['preindexProgress']) && isset($options['preindexStatus']) && $id)
 	{
 		$status = array('Completed','Ready','Running','Error','Cancelled');
 		echo "<tr><td>".$lnk."Preindex".$lnk2." Status:</td><td align=\"left\" class=\"norm\">";
@@ -2452,7 +2558,9 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		echo "&nbsp;<span>".((isset($options['preindexStatus']['er_message']) && $options['preindexStatus']['er_message']!='')? $options['preindexStatus']['er_message'].'.': '')."</span>";
 		echo "</td></tr>";	
 	}
-	echo '<tr>&nbsp;<td></td><td><input name ="save" type="submit" value="Save"/></td>';
+	echo '<tr>&nbsp;<td></td><td>
+	<input type="hidden" name="entity" value="'.$_REQUEST['entity'].'"/>
+	<input name ="save" type="submit" value="Save"/></td>';
 	echo '</table>';
 	echo '</form>';
 	//upm history 
@@ -2692,7 +2800,18 @@ function softDieSession($out,$raw=0,$log=0,$level='')
 function getSearchData($table,$searchdata,$id)
 {
 	global $db;
-	$query = "select $searchdata from $table where id=$id";
+	
+	$actual_table=$table;
+	switch($table)
+		{
+			case 'products': $actual_table = "entities"; break;
+			case 'areas': $actual_table = "entities"; break;
+			case 'institutions': $actual_table = "entities"; break;
+			case 'moas': $actual_table = "entities"; break;
+			case 'moacategories': $actual_table = "entities"; break;
+			case 'diseases': $actual_table = "entities"; break;
+		}
+	$query = "select $searchdata from $actual_table where id=$id";
 	$result = mysql_query($query);
 	$out = null;
 	while($row = mysql_fetch_assoc($result))
