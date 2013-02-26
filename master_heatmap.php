@@ -168,7 +168,7 @@ if(!$db->loggedIn())
 }
 
 require_once('report_common.php');
-
+require_once('slickgrid_data.php');
 
 $_GET['header']='<link href="css/status.css" rel="stylesheet" type="text/css" media="all" />';
 
@@ -762,20 +762,22 @@ if($count_upids<>0)
 	//Check if any update has terminated abruptly
 	for($i=0;$i < $count_upids; $i++)
 	{
-		
-		if(!in_array($update_pids[$i],$running_pids))
+		if(is_array($running_pids) && count($running_pids) > 0 )
 		{
-			$err[$i]='yes';
-		}
-		else
-		{
-			$err[$i]='no';
-		}
+			if(!in_array($update_pids[$i],$running_pids))
+			{
+				$err[$i]='yes';
+			}
+			else
+			{
+				$err[$i]='no';
+			}
+		}	
 	}
 	
 	for($i=0;$i < $count_upids; $i++)
 	{
-			if( !in_array($update_pids[$i],$running_pids) and $err[$i]=='yes')
+		if((is_array($running_pids) && count($running_pids) > 0 && !in_array($update_pids[$i],$running_pids) ) and $err[$i]=='yes')
 		{
 	/*		$query = 'UPDATE update_status_fullhistory SET `status`="'.ERROR.'",`process_id`="0" WHERE `update_id`="' . $update_ids[$i].'"';
 			if(!$res = mysql_query($query))
