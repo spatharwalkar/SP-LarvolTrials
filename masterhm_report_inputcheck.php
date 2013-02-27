@@ -30,20 +30,10 @@ while($row = mysql_fetch_array($res))
 	if($row['type_id'] != NULL && $row['type_id'] != '')
 	{
 		$out = '';
-		if($row['type'] == 'product')
-		{
-			$data_query = 'SELECT `searchdata`, `name` FROM `products` WHERE `id` =' . $row['type_id'];
-			$data_res = mysql_query($data_query) or die('Bad SQL query getting product in master heatmap report');
-			$data_res = mysql_fetch_array($data_res) or die('Report not found.');
-			$type='Row'.$data_res['num'];
-		}
-		else
-		{	
-			$data_query = 'SELECT `searchdata`, `name` FROM `areas` WHERE `id` = ' . $row['type_id'];
-			$data_res = mysql_query($data_query) or die('Bad SQL query getting area in master heatmap report');
-			$data_res = mysql_fetch_array($data_res) or die('Report not found.');
-			$type='Column'.$data_res['num'];
-		}
+		$data_query = 'SELECT `searchdata`, `name` FROM `entities` WHERE `id` = ' . $row['type_id'];
+		$data_res = mysql_query($data_query) or die('Bad SQL query getting entity in master heatmap report input check');
+		$data_res = mysql_fetch_array($data_res) or die('Report not found.');
+		$type= ucfirst($row['type']).$data_res['num'];
 		
 		$json = $data_res['searchdata'];
 		

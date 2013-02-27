@@ -7,7 +7,7 @@ $field = mysql_real_escape_string($_GET['field']);
 $hint = mysql_real_escape_string($_GET['hint']);
 $c_lid = mysql_real_escape_string($_GET['c_lid']);
 //filter input
-$autoSuggestTables = array('areas','upm','products','data_trials', 'redtags', 'trialzilla');
+$autoSuggestTables = array('areas','upm','products','data_trials', 'redtags', 'trialzilla', 'masterhm');
 if(!in_array($table,$autoSuggestTables))die;
 
 if($table=='upm' && $field=='product')
@@ -29,6 +29,10 @@ elseif($table=='products' || $table=='areas')
 elseif($table=='trialzilla')
 {
 	$query = "select distinct `name`, `description`, `class` from `entities` where `name` like '%$search%' AND `class` IN ('Product','Institution','MOA','MOA_Category') limit 6";
+}
+elseif($table=='masterhm')
+{
+	$query = "select distinct `name`, `description`, `class` from `entities` where `name` like '%$search%' AND `class` NOT IN ('MOA_Category') order by $field asc";
 }
 else
 {
@@ -61,7 +65,7 @@ if($table=='upm' && ($field=='product' || $field=='area' || $field=='redtag'))
 		$suggestionsType[] = '';
 	}	
 }
-else if($table=='trialzilla')
+else if($table=='trialzilla' || $table=='masterhm')
 {
 	while($row = mysql_fetch_assoc($result))
 	{

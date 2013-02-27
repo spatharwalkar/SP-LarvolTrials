@@ -30,20 +30,20 @@ if(isset($_GET['larvol_id']) && isset($_GET['op']) && $_GET['op'] == 'Inc_ViewCo
 //Count the Number of Views in OHM
 if(!is_array($_SESSION['OHM_array']))
 $_SESSION['OHM_array']=array(); 
-if(isset($_GET['product']) && isset($_GET['area']) && isset($_GET['Cell_ID']) && isset($_GET['op']) && $_GET['op'] == 'Inc_OHM_ViewCount')
+if(isset($_GET['entity1']) && isset($_GET['entity2']) && isset($_GET['Cell_ID']) && isset($_GET['op']) && $_GET['op'] == 'Inc_OHM_ViewCount')
 {
-	$product = trim($_GET['product']);
-	$area = trim($_GET['area']);
+	$entity1 = trim($_GET['entity1']);
+	$entity2 = trim($_GET['entity2']);
 	if(!$loggedIn)
 	{
-		if(!in_array($product.'&'.$area, $_SESSION['OHM_array']))
+		if(!in_array($entity1.'&'.$entity2, $_SESSION['OHM_array']))
 		{
-			$INCOHM_sql = "UPDATE `rpt_masterhm_cells` SET viewcount=viewcount+1 WHERE `product` = $product AND `area` = $area";
+			$INCOHM_sql = "UPDATE `rpt_masterhm_cells` SET viewcount=viewcount+1 WHERE `entity1` = $entity1 AND `entity2` = $entity2";
 			$INCOHM= mysql_query($INCOHM_sql) or die(mysql_error());
-			array_push($_SESSION['OHM_array'], $product.'&'.$area);
+			array_push($_SESSION['OHM_array'], $entity1.'&'.$entity2);
 		}
 	}	 
-	$NewOHM_query=mysql_query("select viewcount from `rpt_masterhm_cells` where `product` = $product AND `area` = $area");
+	$NewOHM_query=mysql_query("select viewcount from `rpt_masterhm_cells` where `entity1` = $entity1 AND `entity2` = $entity2");
 	while($res=mysql_fetch_array($NewOHM_query))
 	$ViewCount=$res['viewcount'];
 	

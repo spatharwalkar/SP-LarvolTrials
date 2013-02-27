@@ -457,7 +457,7 @@ CREATE TABLE IF NOT EXISTS `rpt_masterhm_headers` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `report` int(10) unsigned NOT NULL,
   `num` int(3) unsigned NOT NULL,
-  `type` enum('product','area') COLLATE utf8_unicode_ci NOT NULL,
+  `type` enum('row','column') COLLATE utf8_unicode_ci NOT NULL,
   `type_id` int(10) unsigned NULL COMMENT 'matches the id from the products/areas table',
   `display_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `category` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -864,8 +864,8 @@ CREATE TABLE IF NOT EXISTS `product_trials` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `rpt_masterhm_cells` (
-  `product` int(10) unsigned NOT NULL COMMENT 'Foreign key to product table ID',
-  `area` int(10) unsigned NOT NULL COMMENT 'Foreign key to area table ID',
+  `entity1` int(10) unsigned NOT NULL COMMENT 'Foreign key to entities table ID',
+  `entity2` int(10) unsigned NOT NULL COMMENT 'Foreign key to entities table ID',
   `count_total` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Total trials with this product and area',
   `count_total_prev` int(10) unsigned DEFAULT NULL,
   `count_active` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Count of only active trials',
@@ -942,8 +942,8 @@ CREATE TABLE IF NOT EXISTS `rpt_masterhm_cells` (
   `not_authorized_active_indlead`  int(10) unsigned NOT NULL DEFAULT '0',
   `prohibited_active_indlead` int(10) unsigned NOT NULL DEFAULT '0',
   `preclinical` tinyint(1) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`product`,`area`),
-  KEY `area` (`area`)
+  PRIMARY KEY (`entity1`,`entity2`),
+  KEY `entity2` (`entity2`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `nctids` (
@@ -1248,8 +1248,8 @@ ALTER TABLE `products_institutions`
   ADD CONSTRAINT `products_institutions_ibfk_1` FOREIGN KEY (`product`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 	
 ALTER TABLE `rpt_masterhm_cells`
-  ADD CONSTRAINT `rpt_masterhm_cells_ibfk_2` FOREIGN KEY (`area`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `rpt_masterhm_cells_ibfk_1` FOREIGN KEY (`product`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `rpt_masterhm_cells_ibfk_2` FOREIGN KEY (`entity2`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `rpt_masterhm_cells_ibfk_1` FOREIGN KEY (`entity1`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `data_cats_in_study`
   ADD CONSTRAINT `data_cats_in_study_ibfk_1` FOREIGN KEY (`larvol_id`) REFERENCES `clinical_study` (`larvol_id`) ON DELETE CASCADE ON UPDATE CASCADE,

@@ -12,36 +12,38 @@ if(!is_numeric($id)) return;
 $query = 'SELECT `name`, `user`, `footnotes`, `description`, `category`, `shared`, `total`, `dtt`, `display_name` FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
 $res = mysql_query($query) or die('Bad SQL query getting master heatmap report');
 $res = mysql_fetch_array($res) or die('Report not found.');
-$rptu = $res['user'];
-$shared = $res['shared'];
 $total_fld=$res['total'];
 $name = $res['name'];
 $dtt = $res['dtt'];
-$Report_DisplayName=$res['display_name'];
-$footnotes = htmlspecialchars($res['footnotes']);
-$description = htmlspecialchars($res['description']);
-$category = $res['category'];
+$ReportDisplayName=$res['display_name'];
 	
 $query = 'SELECT `num`,`type`,`type_id`, `display_name`, `category`, `tag` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' ORDER BY num ASC';
 $res = mysql_query($query) or die('Bad SQL query getting master heatmap report headers');
 $rows = array();
 $columns = array();
-$areaIds = array();
-$productIds = array();
+$entity2Ids = array();
+$entity1Ids = array();
+
 $columnsDisplayName = array();
 $rowsDisplayName = array();
+$columnsCompanyName = array();
+$rowsCompanyName = array();
+$columnsCategoryName = array();
+$rowsCategoryName = array();
+$columnsDescription = array();
+$rowsDescription = array();
+$columnsTagName = array();
+$rowsTagName = array();
 
-$rows_category = array('');
-$columns_category = array('');
-$columns_Span  = array();
-$rows_categorySpan = array();
-$rows_categoryProducts = array();
-$prev_area_category='';
-$prev_prod_category='';
-$prev_area='';
-$prev_prod='';
-$prev_areaSpan=0;
-$prev_prodSpan=0;
+$ColumnsSpan  = array();
+$rowsCategoryEntityIds1 = array();
+
+$prevEntity2Category='';
+$prevEntity1Category='';
+$prevEntity2='';
+$prevEntity1='';
+$prevEntity2Span=0;
+$prevEntity1Span=0;
 
 $Min_One_Liner=20;
 $Char_Size=8.5;
@@ -49,64 +51,87 @@ $Bold_Char_Size=9;
 
 while($header = mysql_fetch_array($res))
 {
-	if($header['type'] == 'area')
+	if($header['type'] == 'column')
 	{
+		$columnsCompanyName[$header['num']] = '';
+		$columnsTagName[$header['num']] = '';
 		if($header['type_id'] != NULL)
 		{
-			$result =  mysql_fetch_assoc(mysql_query("SELECT id, name, display_name, description FROM `areas` WHERE id = '" . $header['type_id'] . "' "));
+			$result =  mysql_fetch_assoc(mysql_query("SELECT `id`, `name`, `display_name`, `description`, `class`, `company` FROM `entities` WHERE id = '" . $header['type_id'] . "' "));
 			$columns[$header['num']] = $result['name'];
+			$columnsEntityType[$header['num']] = $result['class'];
+			$type = ''; if($type == 'Institution') $type = 'Company'; else if($type == 'MOA_Category') $type = 'MOA Category'; else $type = $result['class'];
+			if($result['company'] != NULL && trim($result['company']) != '' && $type = 'Product')
+			{
+				$result['company']=str_replace(',',', ',$result['company']);
+				$result['company']=str_replace(',  ',', ',$result['company']);
+				$columnsCompanyName[$header['num']] = ' / '.$result['company'];
+			} 
 			//$columnsDisplayName[$header['num']] = $result['display_name'];
-			$columnsDisplayName[$header['num']] = $header['display_name'];	///Display name from master hm header table
+			if($type == 'Product')
+				$columnsDisplayName[$header['num']] = $result['name'];
+			else 
+				$columnsDisplayName[$header['num']] = (($header['display_name'] != '' && $header['display_name'] != NULL) ? $header['display_name'] : $type .' '.$result['id']) ;	///Display name from master hm header table
 			$columnsDescription[$header['num']] = $result['description'];
-			$header['category']=trim($header['category']);
+			$header['category'] = trim($header['category']);
 			if($header['category'] == NULL || trim($header['category']) == '')
 			$header['category'] = 'Undefined';
 		}
 		else
 		{
 			$columns[$header['num']] = $header['type_id'];
-			
 			$header['category'] = 'Undefined';
 		}
-		$areaIds[$header['num']] = $header['type_id'];
+		$entity2Ids[$header['num']] = $header['type_id'];
 		
-		if($prev_area_category == $header['category'])
+		if($prevEntity2Category == $header['category'])
 		{
-			$columns_Span[$prev_area] = $prev_areaSpan+1;
-			$columns_Span[$header['num']] = 0;
-			$prev_area = $prev_area;
-			$prev_areaSpan = $prev_areaSpan+1;
+			$ColumnsSpan[$prevEntity2] = $prevEntity2Span+1;
+			$ColumnsSpan[$header['num']] = 0;
+			$prevEntity2 = $prevEntity2;
+			$prevEntity2Span = $prevEntity2Span+1;
 			$last_cat_col = $last_cat_col;
 		}
 		else
 		{
-			$columns_Span[$header['num']] = 1;
-			$prev_area = $header['num'];
-			$prev_areaSpan = 1;
+			$ColumnsSpan[$header['num']] = 1;
+			$prevEntity2 = $header['num'];
+			$prevEntity2Span = 1;
 			$second_last_cat_col = $last_cat_col;
 			$last_cat_col = $header['num'];
 		}
 		
-		$prev_area_category = $header['category'];
+		$prevEntity2Category = $header['category'];
 		$columnsCategoryName[$header['num']] = $header['category'];
+		if($header['tag'] != 'NULL')
+		$columnsTagName[$header['num']] = $header['tag'];
 		
 		$last_category = $header['category'];
 		$second_last_num = $last_num;
 		$last_num = $header['num'];
-		$last_area = $header['type_id'];
+		$LastEntity2 = $header['type_id'];
 	}
 	else
 	{
+		$rowsCompanyName[$header['num']] = '';
+		$rowsTagName[$header['num']] = '';
 		if($header['type_id'] != NULL)
 		{
-			$result =  mysql_fetch_assoc(mysql_query("SELECT id, name, description, company FROM `products` WHERE id = '" . $header['type_id'] . "' "));
+			$result =  mysql_fetch_assoc(mysql_query("SELECT `id`, `name`, `display_name`, `description`, `class`, `company` FROM `entities` WHERE id = '" . $header['type_id'] . "' "));
 			$rows[$header['num']] = $result['name'];
-			if($result['company'] != NULL && trim($result['company']) != '')
+			$rowsEntityType[$header['num']] = $result['class'];
+			$type = ''; if($type == 'Institution') $type = 'Company'; else if($type == 'MOA_Category') $type = 'MOA Category'; else $type = $result['class'];
+			if($result['company'] != NULL && trim($result['company']) != '' && $type = 'Product')
 			{
 				$result['company']=str_replace(',',', ',$result['company']);
 				$result['company']=str_replace(',  ',', ',$result['company']);
 				$rowsCompanyName[$header['num']] = ' / '.$result['company'];
-			} 
+			}
+			
+			if($type == 'Product')
+				$rowsDisplayName[$header['num']] = $result['name'];
+			else 
+				$rowsDisplayName[$header['num']] = (($header['display_name'] != '' && $header['display_name'] != NULL) ? $header['display_name'] : $type .' '.$result['id']) ;	///Display name from master hm header table
 			$rowsDescription[$header['num']] = $result['description'];
 			$header['category']=trim($header['category']);
 			if($header['category'] == NULL || trim($header['category']) == '')
@@ -115,29 +140,29 @@ while($header = mysql_fetch_array($res))
 		else
 		{
 			$rows[$header['num']] = $header['type_id'];
-			
 			$header['category'] = 'Undefined';
 		}
-		$productIds[$header['num']] = $header['type_id'];
+		$entity1Ids[$header['num']] = $header['type_id'];
 		
-		if($prev_prod_category == $header['category'])
+		if($prevEntity1Category == $header['category'])
 		{
-			$rows_Span[$prev_prod] = $prev_prodSpan+1;
-			$rows_Span[$header['num']] = 0;
-			$prev_prod = $prev_prod;
-			$prev_prodSpan = $prev_prodSpan+1;
+			$RowsSpan[$prevEntity1] = $prevEntity1Span+1;
+			$RowsSpan[$header['num']] = 0;
+			$prevEntity1 = $prevEntity1;
+			$prevEntity1Span = $prevEntity1Span+1;
 		}
 		else
 		{
-			$rows_Span[$header['num']] = 1;
-			$prev_prod = $header['num'];
-			$prev_prodSpan = 1;
+			$RowsSpan[$header['num']] = 1;
+			$prevEntity1 = $header['num'];
+			$prevEntity1Span = 1;
 		}
 		
-		$prev_prod_category = $header['category'];
+		$prevEntity1Category = $header['category'];
 		$rowsCategoryName[$header['num']] = $header['category'];
 		
-		$rows_categoryProducts[$header['category']][] = $header['type_id'];
+		$rowsCategoryEntityIds1[$header['category']][] = $header['type_id'];
+		if($header['tag'] != 'NULL')
 		$rowsTagName[$header['num']] = $header['tag'];
 	}
 }
@@ -148,8 +173,8 @@ foreach($columns as $col => $cval)
 {
 	if($dtt && $last_num == $col)
 	{
-		array_pop($areaIds); //In case of DTT enable skip last column vaules
-		$columns_Span[$last_cat_col] = $columns_Span[$last_cat_col] - 1;	/// Decrease last category column span
+		array_pop($entity2Ids); //In case of DTT enable skip last column vaules
+		$ColumnsSpan[$last_cat_col] = $ColumnsSpan[$last_cat_col] - 1;	/// Decrease last category column span
 	}
 	else
 	{
@@ -160,17 +185,6 @@ foreach($columns as $col => $cval)
 
 $columns=$new_columns;
 /////Rearrange Completes //////////
-
-
-
-	// SELECT MAX ROW AND MAX COL
-$query = 'SELECT MAX(`num`) AS `num` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' AND type = \'product\'';
-$res = mysql_query($query) or die(mysql_error());
-$max_row = mysql_fetch_array($res);
-
-$query = 'SELECT MAX(`num`) AS `num` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' AND type = \'area\'';
-$res = mysql_query($query) or die(mysql_error());
-$max_column = mysql_fetch_array($res);
 
 $row_total=array();
 $col_total=array();
@@ -197,9 +211,9 @@ foreach($rows as $row => $rval)
 {
 	foreach($columns as $col => $cval)
 	{
-		if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL)
+		if(isset($entity2Ids[$col]) && $entity2Ids[$col] != NULL && isset($entity1Ids[$row]) && $entity1Ids[$row] != NULL)
 		{
-			$cell_query = 'SELECT * FROM rpt_masterhm_cells WHERE `product`=' . $productIds[$row] . ' AND `area`='. $areaIds[$col] .'';
+			$cell_query = 'SELECT * FROM rpt_masterhm_cells WHERE (`entity1`=' . $entity1Ids[$row] . ' AND `entity2`='. $entity2Ids[$col] .') OR (`entity2`=' . $entity1Ids[$row] . ' AND `entity1`='. $entity2Ids[$col] .')';
 			$cell_res = mysql_query($cell_query) or die(mysql_error());
 			$cell_data = mysql_fetch_array($cell_res);
 			
@@ -376,60 +390,23 @@ foreach($rows as $row => $rval)
 			$data_matrix[$row][$col]['filing_lastchanged']=$cell_data['filing_lastchanged'];
 			$data_matrix[$row][$col]['phase_explain_lastchanged']=$cell_data['phase_explain_lastchanged'];
 			
-			$data_matrix[$row][$col]['not_yet_recruiting']=$cell_data['not_yet_recruiting'];
-			$data_matrix[$row][$col]['recruiting']=$cell_data['recruiting'];
-			$data_matrix[$row][$col]['enrolling_by_invitation']=$cell_data['enrolling_by_invitation'];
-			$data_matrix[$row][$col]['active_not_recruiting']=$cell_data['active_not_recruiting'];
-			$data_matrix[$row][$col]['completed']=$cell_data['completed'];
-			$data_matrix[$row][$col]['suspended']=$cell_data['suspended'];
-			$data_matrix[$row][$col]['terminated']=$cell_data['terminated'];
-			$data_matrix[$row][$col]['withdrawn']=$cell_data['withdrawn'];
-			$data_matrix[$row][$col]['available']=$cell_data['available'];
-			$data_matrix[$row][$col]['no_longer_available']=$cell_data['no_longer_available'];
-			$data_matrix[$row][$col]['approved_for_marketing']=$cell_data['approved_for_marketing'];
-			$data_matrix[$row][$col]['no_longer_recruiting']=$cell_data['no_longer_recruiting'];
-			$data_matrix[$row][$col]['withheld']=$cell_data['withheld'];
-			$data_matrix[$row][$col]['temporarily_not_available']=$cell_data['temporarily_not_available'];
-			$data_matrix[$row][$col]['ongoing']=$cell_data['ongoing'];
-			$data_matrix[$row][$col]['not_authorized']=$cell_data['not_authorized'];
-			$data_matrix[$row][$col]['prohibited']=$cell_data['prohibited'];
-			$data_matrix[$row][$col]['new_trials']=$cell_data['new_trials'];
+			$allTrialsStatusArray = array('not_yet_recruiting', 'recruiting', 'enrolling_by_invitation', 'active_not_recruiting', 'completed', 'suspended', 'terminated', 'withdrawn', 'available', 'no_longer_available', 'approved_for_marketing', 'no_longer_recruiting', 'withheld', 'temporarily_not_available', 'ongoing', 'not_authorized', 'prohibited', 'new_trials');
+			foreach($allTrialsStatusArray as $status)
+			{
+				$data_matrix[$row][$col][$status]=$cell_data[$status];
+			}
 			
-			$data_matrix[$row][$col]['not_yet_recruiting_active_indlead']=$cell_data['not_yet_recruiting_active_indlead'];
-			$data_matrix[$row][$col]['recruiting_active_indlead']=$cell_data['recruiting_active_indlead'];
-			$data_matrix[$row][$col]['enrolling_by_invitation_active_indlead']=$cell_data['enrolling_by_invitation_active_indlead'];
-			$data_matrix[$row][$col]['active_not_recruiting_active_indlead']=$cell_data['active_not_recruiting_active_indlead'];
-			$data_matrix[$row][$col]['completed_active_indlead']=$cell_data['completed_active_indlead'];
-			$data_matrix[$row][$col]['suspended_active_indlead']=$cell_data['suspended_active_indlead'];
-			$data_matrix[$row][$col]['terminated_active_indlead']=$cell_data['terminated_active_indlead'];
-			$data_matrix[$row][$col]['withdrawn_active_indlead']=$cell_data['withdrawn_active_indlead'];
-			$data_matrix[$row][$col]['available_active_indlead']=$cell_data['available_active_indlead'];
-			$data_matrix[$row][$col]['no_longer_available_active_indlead']=$cell_data['no_longer_available_active_indlead'];
-			$data_matrix[$row][$col]['approved_for_marketing_active_indlead']=$cell_data['approved_for_marketing_active_indlead'];
-			$data_matrix[$row][$col]['no_longer_recruiting_active_indlead']=$cell_data['no_longer_recruiting_active_indlead'];
-			$data_matrix[$row][$col]['withheld_active_indlead']=$cell_data['withheld_active_indlead'];
-			$data_matrix[$row][$col]['temporarily_not_available_active_indlead']=$cell_data['temporarily_not_available_active_indlead'];
-			$data_matrix[$row][$col]['ongoing_active_indlead']=$cell_data['ongoing_active_indlead'];
-			$data_matrix[$row][$col]['not_authorized_active_indlead']=$cell_data['not_authorized_active_indlead'];
-			$data_matrix[$row][$col]['prohibited_active_indlead']=$cell_data['prohibited_active_indlead'];
+			$activeIndleadStatusArray = array('not_yet_recruiting_active_indlead', 'recruiting_active_indlead', 'enrolling_by_invitation_active_indlead', 'active_not_recruiting_active_indlead', 'completed_active_indlead', 'suspended_active_indlead', 'terminated_active_indlead', 'withdrawn_active_indlead', 'available_active_indlead', 'no_longer_available_active_indlead', 'approved_for_marketing_active_indlead', 'no_longer_recruiting_active_indlead', 'withheld_active_indlead', 'temporarily_not_available_active_indlead', 'ongoing_active_indlead', 'not_authorized_active_indlead', 'prohibited_active_indlead');
+			foreach($activeIndleadStatusArray as $status)
+			{
+				$data_matrix[$row][$col][$status]=$cell_data[$status];
+			}
 			
-			$data_matrix[$row][$col]['not_yet_recruiting_active']=$cell_data['not_yet_recruiting_active'];
-			$data_matrix[$row][$col]['recruiting_active']=$cell_data['recruiting_active'];
-			$data_matrix[$row][$col]['enrolling_by_invitation_active']=$cell_data['enrolling_by_invitation_active'];
-			$data_matrix[$row][$col]['active_not_recruiting_active']=$cell_data['active_not_recruiting_active'];
-			$data_matrix[$row][$col]['completed_active']=$cell_data['completed_active'];
-			$data_matrix[$row][$col]['suspended_active']=$cell_data['suspended_active'];
-			$data_matrix[$row][$col]['terminated_active']=$cell_data['terminated_active'];
-			$data_matrix[$row][$col]['withdrawn_active']=$cell_data['withdrawn_active'];
-			$data_matrix[$row][$col]['available_active']=$cell_data['available_active'];
-			$data_matrix[$row][$col]['no_longer_available_active']=$cell_data['no_longer_available_active'];
-			$data_matrix[$row][$col]['approved_for_marketing_active']=$cell_data['approved_for_marketing_active'];
-			$data_matrix[$row][$col]['no_longer_recruiting_active']=$cell_data['no_longer_recruiting_active'];
-			$data_matrix[$row][$col]['withheld_active']=$cell_data['withheld_active'];
-			$data_matrix[$row][$col]['temporarily_not_available_active']=$cell_data['temporarily_not_available_active'];
-			$data_matrix[$row][$col]['ongoing_active']=$cell_data['ongoing_active'];
-			$data_matrix[$row][$col]['not_authorized_active']=$cell_data['not_authorized_active'];
-			$data_matrix[$row][$col]['prohibited_active']=$cell_data['prohibited_active'];
+			$activeStatusArray = array('not_yet_recruiting_active', 'recruiting_active', 'enrolling_by_invitation_active', 'active_not_recruiting_active', 'completed_active', 'suspended_active', 'terminated_active', 'withdrawn_active', 'available_active', 'no_longer_available_active', 'approved_for_marketing_active', 'no_longer_recruiting_active', 'withheld_active', 'temporarily_not_available_active', 'ongoing_active', 'not_authorized_active', 'prohibited_active');
+			foreach($activeStatusArray as $status)
+			{
+				$data_matrix[$row][$col][$status]=$cell_data[$status];
+			}
 			
 			///As stringlength of total will be more in all
 			$Width = $Width + (strlen($data_matrix[$row][$col]['total'])*($Char_Size+1));
@@ -472,40 +449,40 @@ foreach($rows as $row => $rval)
 
 $Page_Width = 1100;
 
-$Max_areaStringLength=0;
+$Max_entity2StringLength=0;
 foreach($columns as $col => $val)
 {
-	$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col] : 'Area '.$areaIds[$col];
-	if(isset($areaIds[$col]) && $areaIds[$col] != NULL && !empty($productIds))
+	$val = $columnsDisplayName[$col].$columnsCompanyName[$col].((trim($columnsTagName[$col]) != '') ? ' ['.$columnsTagName[$col].']':'');
+	if(isset($entity2Ids[$col]) && $entity2Ids[$col] != NULL && !empty($entity1Ids))
 	$current_StringLength =strlen($val);
 	else $current_StringLength = 0;
-	if($Max_areaStringLength < $current_StringLength)
-	$Max_areaStringLength = $current_StringLength;
+	if($Max_entity2StringLength < $current_StringLength)
+	$Max_entity2StringLength = $current_StringLength;
 }
-$area_Col_Height = $Max_areaStringLength * $Bold_Char_Size;
-if(($area_Col_Height) > 160)
-$area_Col_Height = 160;
+$Entity2ColHeight = $Max_entity2StringLength * $Bold_Char_Size;
+if(($Entity2ColHeight) > 160)
+$Entity2ColHeight = 160;
 
-$Max_productStringLength=0;
+$Max_entity1StringLength=0;
 foreach($rows as $row => $rval)
 {
-	if(isset($productIds[$row]) && $productIds[$row] != NULL && !empty($areaIds))
+	if(isset($entity1Ids[$row]) && $entity1Ids[$row] != NULL && !empty($entity2Ids))
 	{
-		$current_StringLength =strlen($rval.$rowsTagName[$row].$rowsCompanyName[$row]);
+		$current_StringLength =strlen($rowsDisplayName[$row].$rowsCompanyName[$row].((trim($rowsTagName[$row]) != '') ? ' ['.$rowsTagName[$row].']':''));
 	}
 	else $current_StringLength = 0;
-	if($Max_productStringLength < $current_StringLength)
-	$Max_productStringLength = $current_StringLength;
+	if($Max_entity1StringLength < $current_StringLength)
+	$Max_entity1StringLength = $current_StringLength;
 }	
 
-if(($Max_productStringLength * $Char_Size) > 400)
-$product_Col_Width = 400;
+if(($Max_entity1StringLength * $Char_Size) > 400)
+$entity1ColWidth = 400;
 else
-$product_Col_Width = $Max_productStringLength * $Char_Size;
+$entity1ColWidth = $Max_entity1StringLength * $Char_Size;
 
-$area_Col_Width=110;
+$entity2ColWidth=110;
 		
-$HColumn_Width = (((count($columns))+(($total_fld)? 1:0)) * ($area_Col_Width+1));
+$HColumn_Width = (((count($columns))+(($total_fld)? 1:0)) * ($entity2ColWidth+1));
 
 $RColumn_Width = 0; 
 
@@ -516,12 +493,12 @@ foreach($columns as $col => $val)
 	if($Max_ColWidth < $Width_matrix[$col]['width'])
 		$Max_ColWidth = $Width_matrix[$col]['width'];	
 		
-	$Cat_Area_Rotation[$col] = 0;
+	$CatEntity2Rotation[$col] = 0;
 }
 
-if(($HColumn_Width + $product_Col_Width) > $Page_Width)	////if hm lenth is greater than 1200 than move to rotate mode
+if(($HColumn_Width + $entity1ColWidth) > $Page_Width)	////if hm lenth is greater than 1200 than move to rotate mode
 {
-	$product_Col_Width = 450;
+	$entity1ColWidth = 450;
 	if($total_fld) 
 	{ 
 		$Total_Col_width = ((strlen($count_total) * $Bold_Char_Size) + 1);
@@ -533,41 +510,41 @@ if(($HColumn_Width + $product_Col_Width) > $Page_Width)	////if hm lenth is great
 }
 else
 {
-	if(($Max_productStringLength * $Char_Size) > 400)
-	$product_Col_Width = 400;
+	if(($Max_entity1StringLength * $Char_Size) > 400)
+	$entity1ColWidth = 400;
 	else
-	$product_Col_Width = $Max_productStringLength * $Char_Size;
+	$entity1ColWidth = $Max_entity1StringLength * $Char_Size;
 	
 	foreach($columns as $col => $val)
 	{
-		$Width_matrix[$col]['width'] = $area_Col_Width;
+		$Width_matrix[$col]['width'] = $entity2ColWidth;
 	}
-	$Total_Col_width = $area_Col_Width;
+	$Total_Col_width = $entity2ColWidth;
 	$Rotation_Flg = 0;
 }
 
 $Max_ColWidth = 0;
 //$Rotation_Flg = 1;
 $Line_Height = 16;
-$Max_H_AreaCatStringHeight = 0;
-$Max_V_AreaCatStringLength = 0;
-$Cat_Area_Rotation_Flg = 0;
-if($Rotation_Flg == 1)	////Adjustment in area column width as per area name
+$Max_H_Entity2CatStringHeight = 0;
+$Max_V_Entity2CatStringLength = 0;
+$CatEntity2Rotation_Flg = 0;
+if($Rotation_Flg == 1)	////Adjustment in Entity2 column width as per Entity2 name
 {
 	foreach($columns as $col => $val)
 	{
-		if(isset($areaIds[$col]) && $areaIds[$col] != NULL && !empty($productIds))
+		if(isset($entity2Ids[$col]) && $entity2Ids[$col] != NULL && !empty($entity1Ids))
 		{
-			$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col] : 'Area '.$areaIds[$col];;
-			$cols_Area_Space[$col] = ceil(($area_Col_Height) / $Bold_Char_Size);
-			//$cols_Area_Lines[$col] = ceil(strlen(trim($val))/$cols_Area_Space[$col]);
-			//$cols_Area_Lines[$col] = $pdf->getNumLines($val, ($area_Col_Height*20/90));
-			$cols_Area_Lines[$col] = getNumLinesHTML($val, $cols_Area_Space[$col], 'lines');
-			$width = ($cols_Area_Lines[$col] * $Line_Height);
+			$val = $columnsDisplayName[$col].$columnsCompanyName[$col].((trim($columnsTagName[$col]) != '') ? ' ['.$columnsTagName[$col].']':'');
+			$ColsEntity2Space[$col] = ceil(($Entity2ColHeight) / $Bold_Char_Size);
+			//$ColsEntity2Lines[$col] = ceil(strlen(trim($val))/$ColsEntity2Space[$col]);
+			//$ColsEntity2Lines[$col] = $pdf->getNumLines($val, ($Entity2ColHeight*20/90));
+			$ColsEntity2Lines[$col] = getNumLinesHTML($val, $ColsEntity2Space[$col], 'lines');
+			$width = ($ColsEntity2Lines[$col] * $Line_Height);
 			if($Width_matrix[$col]['width'] < $width)
 				$Width_matrix[$col]['width'] = $width;
 			
-			if($Max_ColWidth < $Width_matrix[$col]['width'] && $cols_Area_Lines[$col] <= 4) 	//// if column do not hv area name with more than 4 lines
+			if($Max_ColWidth < $Width_matrix[$col]['width'] && $ColsEntity2Lines[$col] <= 4) 	//// if column do not hv Entity2 name with more than 4 lines
 				$Max_ColWidth = $Width_matrix[$col]['width'];
 		}
 	}
@@ -576,37 +553,37 @@ if($Rotation_Flg == 1)	////Adjustment in area column width as per area name
 	foreach($columns as $col => $val)
 	{
 		/// Assign same width to all cloumns -  except columns expanding due to number of lines more than 4
-		if($Max_ColWidth > $Width_matrix[$col]['width'] && $cols_Area_Lines[$col] <= 4)
+		if($Max_ColWidth > $Width_matrix[$col]['width'] && $ColsEntity2Lines[$col] <= 4)
 		$Width_matrix[$col]['width'] = $Max_ColWidth;
 		$Total_Col_width = $Max_ColWidth;
 		
-		///// Category height calculation from horizontal and vertical area names
-		if($columns_Span[$col] > 0 && $columnsCategoryName[$col] != 'Undefined')
+		///// Category height calculation from horizontal and vertical Entity2 names
+		if($ColumnsSpan[$col] > 0 && $columnsCategoryName[$col] != 'Undefined')
 		{
 			$current_StringLength =strlen($columnsCategoryName[$col]);
-			if($columns_Span[$col] < 2 && $columnsCategoryName[$col] != 'Undefined')
+			if($ColumnsSpan[$col] < 2 && $columnsCategoryName[$col] != 'Undefined')
 			{
-				$Cat_Area_Rotation[$col] = 1;
-				$Cat_Area_Rotation_Flg = 1;
-				if($Max_V_AreaCatStringLength < $current_StringLength)
+				$CatEntity2Rotation[$col] = 1;
+				$CatEntity2Rotation_Flg = 1;
+				if($Max_V_Entity2CatStringLength < $current_StringLength)
 				{
-					$Max_V_AreaCatStringLength = $current_StringLength;
+					$Max_V_Entity2CatStringLength = $current_StringLength;
 				}
 			}
 			else
 			{
 				$i = 1; $width = 0; $col_id = $col;
-				while($i <= $columns_Span[$col])
+				while($i <= $ColumnsSpan[$col])
 				{
 					$width = $width + $Width_matrix[$col_id]['width'];
 					$i++; $col_id++;
 				}
-				$Cat_Area_Col_width[$col] = $width +((($columns_Span[$col] == 1) ? 0:1) * ($columns_Span[$col]-1));
-				$cols_Cat_Space[$col] = ceil($Cat_Area_Col_width[$col] / $Bold_Char_Size);
+				$CatEntity2Colwidth[$col] = $width +((($ColumnsSpan[$col] == 1) ? 0:1) * ($ColumnsSpan[$col]-1));
+				$cols_Cat_Space[$col] = ceil($CatEntity2Colwidth[$col] / $Bold_Char_Size);
 				$lines = ceil(strlen(trim($columnsCategoryName[$col]))/$cols_Cat_Space[$col]);
 				$height = ($lines * $Line_Height);
-				if($height > $Max_H_AreaCatStringHeight)
-					$Max_H_AreaCatStringHeight = $height;
+				if($height > $Max_H_Entity2CatStringHeight)
+					$Max_H_Entity2CatStringHeight = $height;
 			}
 		}
 	}
@@ -614,56 +591,56 @@ if($Rotation_Flg == 1)	////Adjustment in area column width as per area name
 
 
 
-if($Rotation_Flg == 1)	////Create width for area category cells and put forcefully line break in category text
+if($Rotation_Flg == 1)	////Create width for Entity2 category cells and put forcefully line break in category text
 {
-	if($Cat_Area_Rotation_Flg)
+	if($CatEntity2Rotation_Flg)
 	{
 		/// Assign minimum height to category row
-		if($Max_H_AreaCatStringHeight > 130)	/// if horizontal spanning category requires more height assign it
-			$area_Cat_Height = $Max_H_AreaCatStringHeight;
-		else if(($Max_V_AreaCatStringLength * $Bold_Char_Size) < 130)	//// if vertical spanning category requires less height assign it
-			$area_Cat_Height = $Max_V_AreaCatStringLength * $Bold_Char_Size;
+		if($Max_H_Entity2CatStringHeight > 130)	/// if horizontal spanning category requires more height assign it
+			$Entity2CatHeight = $Max_H_Entity2CatStringHeight;
+		else if(($Max_V_Entity2CatStringLength * $Bold_Char_Size) < 130)	//// if vertical spanning category requires less height assign it
+			$Entity2CatHeight = $Max_V_Entity2CatStringLength * $Bold_Char_Size;
 		else
-			$area_Cat_Height = 130;	/// Take default height
+			$Entity2CatHeight = 130;	/// Take default height
 	}
 	
 	foreach($columns as $col => $val)
 	{
-		if($columns_Span[$col] > 0)
+		if($ColumnsSpan[$col] > 0)
 		{
 			$i = 1; $width = 0; $col_id = $col;
-			while($i <= $columns_Span[$col])
+			while($i <= $ColumnsSpan[$col])
 			{
 				$width = $width + $Width_matrix[$col_id]['width'];
 				$i++; $col_id++;
 			}
 			
-			$Cat_Area_Col_width[$col] = $width +((($columns_Span[$col] == 1) ? 0:1) * ($columns_Span[$col]-1));
+			$CatEntity2Colwidth[$col] = $width +((($ColumnsSpan[$col] == 1) ? 0:1) * ($ColumnsSpan[$col]-1));
 			
-			if($columns_Span[$col] < 2 && $columnsCategoryName[$col] != 'Undefined')
+			if($ColumnsSpan[$col] < 2 && $columnsCategoryName[$col] != 'Undefined')
 			{
-				$cols_Cat_Space[$col] = ceil((($area_Cat_Height < 130)? ($area_Cat_Height):($area_Cat_Height)) / $Bold_Char_Size);
+				$cols_Cat_Space[$col] = ceil((($Entity2CatHeight < 130)? ($Entity2CatHeight):($Entity2CatHeight)) / $Bold_Char_Size);
 				//$cols_Cat_Lines[$col] = ceil(strlen(trim($columnsCategoryName[$col]))/$cols_Cat_Space[$col]);
-				//$cols_Cat_Lines[$col] = $pdf->getNumLines($columnsCategoryName[$col], ($area_Cat_Height*17/90));
+				//$cols_Cat_Lines[$col] = $pdf->getNumLines($columnsCategoryName[$col], ($Entity2CatHeight*17/90));
 				$cols_Cat_Lines[$col] = getNumLinesHTML($columnsCategoryName[$col], $cols_Cat_Space[$col], 'lines');
 				$width = ($cols_Cat_Lines[$col] * $Line_Height);
-				if($Cat_Area_Col_width[$col] < $width) /// Assign new width
+				if($CatEntity2Colwidth[$col] < $width) /// Assign new width
 				{
-					$extra_width = $width - $Cat_Area_Col_width[$col];
-					$Cat_Area_Col_width[$col] = $width;
+					$extra_width = $width - $CatEntity2Colwidth[$col];
+					$CatEntity2Colwidth[$col] = $width;
 					/// Distribute extra width equally to all spanning columns
 					$i = 1; $col_id = $col;
-					while($i <= $columns_Span[$col])
+					while($i <= $ColumnsSpan[$col])
 					{
-						$Width_matrix[$col_id]['width'] = $Width_matrix[$col_id]['width'] + ($extra_width/$columns_Span[$col]) - ((($columns_Span[$col] == 1) ? 0:1) * ($columns_Span[$col]-1));
+						$Width_matrix[$col_id]['width'] = $Width_matrix[$col_id]['width'] + ($extra_width/$ColumnsSpan[$col]) - ((($ColumnsSpan[$col] == 1) ? 0:1) * ($ColumnsSpan[$col]-1));
 						$i++; $col_id++;
 					}
 				}
 			}
 			else
 			{
-				$Cat_Area_Rotation[$col] = 0;
-				$cols_Cat_Space[$col] = ceil($Cat_Area_Col_width[$col] / $Bold_Char_Size);
+				$CatEntity2Rotation[$col] = 0;
+				$cols_Cat_Space[$col] = ceil($CatEntity2Colwidth[$col] / $Bold_Char_Size);
 			}
 		}
 	}
@@ -673,51 +650,51 @@ if($Rotation_Flg == 1)	////Create width for area category cells and put forceful
 if($Rotation_Flg == 1)
 {
 	//category height calculation
-	$Newarea_Cat_Height = 0;
-	$NewMaxarea_Cat_StrLength = 0;
+	$NewEntity2CatHeight = 0;
+	$NewMaxEntity2CatStrLength = 0;
 	foreach($columns as $col => $val)
 	{
-		if($columns_Span[$col] > 0)
+		if($ColumnsSpan[$col] > 0)
 		{
-			if($columnsCategoryName[$col] != 'Undefined' && $Cat_Area_Rotation[$col])
+			if($columnsCategoryName[$col] != 'Undefined' && $CatEntity2Rotation[$col])
 			{
 				$LineArray = getNumLinesHTML(trim($columnsCategoryName[$col]), $cols_Cat_Space[$col], 'array');
 				foreach($LineArray as $data1)
 				{
 					$current_StringLength =strlen($data1);
-					if($current_StringLength > $NewMaxarea_Cat_StrLength)
-					$NewMaxarea_Cat_StrLength = $current_StringLength;
+					if($current_StringLength > $NewMaxEntity2CatStrLength)
+					$NewMaxEntity2CatStrLength = $current_StringLength;
 				}
 			}
 		}
 	}
 	
-	$Newarea_Cat_Height = $NewMaxarea_Cat_StrLength * $Bold_Char_Size;
+	$NewEntity2CatHeight = $NewMaxEntity2CatStrLength * $Bold_Char_Size;
 	//If new height is less assign it
-	if($Newarea_Cat_Height < $area_Cat_Height && $Max_H_AreaCatStringHeight < $Newarea_Cat_Height)
-	$area_Cat_Height = $Newarea_Cat_Height;
+	if($NewEntity2CatHeight < $Entity2CatHeight && $Max_H_Entity2CatStringHeight < $NewEntity2CatHeight)
+	$Entity2CatHeight = $NewEntity2CatHeight;
 	
-	//Area cell height calcuation
-	$Newarea_Col_Height = 0;
-	$NewMax_areaStringLength = 0;
+	//Entity2 cell height calcuation
+	$NewEntity2ColHeight = 0;
+	$NewMaxEntity2StringLength = 0;
 	foreach($columns as $col => $val)
 	{
-		$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col] : 'Area '.$areaIds[$col];
-		if(isset($areaIds[$col]) && $areaIds[$col] != NULL && !empty($productIds))
+		$val = $columnsDisplayName[$col].$columnsCompanyName[$col].((trim($columnsTagName[$col]) != '') ? ' ['.$columnsTagName[$col].']':'');
+		if(isset($entity2Ids[$col]) && $entity2Ids[$col] != NULL && !empty($entity1Ids))
 		{
-			$LineArray = getNumLinesHTML(trim($val), $cols_Area_Space[$col], 'array');
+			$LineArray = getNumLinesHTML(trim($val), $ColsEntity2Space[$col], 'array');
 			foreach($LineArray as $data1)
 			{
 				$current_StringLength =strlen($data1);
-				if($NewMax_areaStringLength < $current_StringLength)
-				$NewMax_areaStringLength = $current_StringLength;
+				if($NewMaxEntity2StringLength < $current_StringLength)
+				$NewMaxEntity2StringLength = $current_StringLength;
 			}
 		}
 	}
-	$Newarea_Col_Height = $NewMax_areaStringLength * $Bold_Char_Size;
+	$NewEntity2ColHeight = $NewMaxEntity2StringLength * $Bold_Char_Size;
 	//If new height is less assign it
-	if($Newarea_Col_Height < $area_Col_Height)
-	$area_Col_Height = $Newarea_Col_Height;
+	if($NewEntity2ColHeight < $Entity2ColHeight)
+	$Entity2ColHeight = $NewEntity2ColHeight;
 }
 
 //Calculate line numbers
@@ -785,27 +762,27 @@ if($Rotation_Flg == 1)
 	foreach($columns as $col => $val)
 	{
 		print '
-		.Area_Row_Class_'.$col.' 
+		.Entity2_Row_Class_'.$col.' 
 		{
 			width:'.$Width_matrix[$col]['width'].'px;
 			max-width:'.$Width_matrix[$col]['width'].'px;
-			height:'.($area_Col_Height).'px;
-			max-height:'.($area_Col_Height).'px;
-			_height:'.($area_Col_Height).'px;
+			height:'.($Entity2ColHeight).'px;
+			max-height:'.($Entity2ColHeight).'px;
+			_height:'.($Entity2ColHeight).'px;
 		}
 		';
 		
-		if($columns_Span[$col] > 0)
+		if($ColumnsSpan[$col] > 0)
 		{
 			print '
-				.Cat_Area_Row_Class_'.$col.' 
+				.Cat_Entity2_Row_Class_'.$col.' 
 				{
-					width:'.$Cat_Area_Col_width[$col].'px;
-					max-width:'.$Cat_Area_Col_width[$col].'px;';
-					if($Cat_Area_Rotation_Flg)
+					width:'.$CatEntity2Colwidth[$col].'px;
+					max-width:'.$CatEntity2Colwidth[$col].'px;';
+					if($CatEntity2Rotation_Flg)
 					{
-						print '	height:'.($area_Cat_Height).'px;
-							_height:'.($area_Cat_Height).'px;';
+						print '	height:'.($Entity2CatHeight).'px;
+							_height:'.($Entity2CatHeight).'px;';
 					}
 			print '}';
 		}
@@ -814,8 +791,8 @@ if($Rotation_Flg == 1)
 	print '	
 		.Total_Row_Class_height 
 		{
-			height:'.($area_Col_Height).'px;
-			_height:'.($area_Col_Height).'px;
+			height:'.($Entity2ColHeight).'px;
+			_height:'.($Entity2ColHeight).'px;
 		}
 		
 		.Total_Row_Class_width 
@@ -830,7 +807,7 @@ else
 	foreach($columns as $col => $val)
 	{
 		print '
-		.Area_Row_Class_'.$col.' 
+		.Entity2_Row_Class_'.$col.' 
 		{
 			width:110px;
 			max-width:110px;
@@ -1049,7 +1026,7 @@ background-color:#FFFFFF;
 font-family:Arial;
 font-size:13px;
 }
-.Product_Col_WidthStyle {
+.entity1ColWidthStyle {
 min-width:250px;
 }
 </style>
@@ -1557,10 +1534,10 @@ function display_tooltip(type, id)
 
 function refresh_data(cell_id)
 {
-	var product_ele=document.getElementById("Product_value_"+cell_id);
-	var area_ele=document.getElementById("Area_value_"+cell_id);
-	product=product_ele.value.replace(/\s+/g, '');
-	area=area_ele.value.replace(/\s+/g, '');
+	var Entity1_ele=document.getElementById("Entity1_value_"+cell_id);
+	var Entity2_ele=document.getElementById("Entity2_value_"+cell_id);
+	Entity1=Entity1_ele.value.replace(/\s+/g, '');
+	Entity2=Entity2_ele.value.replace(/\s+/g, '');
 	
 	var limit = document.getElementById('Last_HM').value;
 	var i=1;
@@ -1572,15 +1549,15 @@ function refresh_data(cell_id)
 			var font_element=document.getElementById("Font_ID_"+i);
 			if(font_element != null && font_element != '')
 			{
-				var current_product_ele=document.getElementById("Product_value_"+i);
-				var current_area_ele=document.getElementById("Area_value_"+i);
+				var current_Entity1_ele=document.getElementById("Entity1_value_"+i);
+				var current_Entity2_ele=document.getElementById("Entity2_value_"+i);
 			
-				if((current_product_ele != null && current_product_ele != '') && (current_area_ele != '' && current_area_ele != null) && (i != cell_id))
+				if((current_Entity1_ele != null && current_Entity1_ele != '') && (current_Entity2_ele != '' && current_Entity2_ele != null) && (i != cell_id))
 				{
-					current_product=current_product_ele.value.replace(/\s+/g, '');
-					current_area=current_area_ele.value.replace(/\s+/g, '');
+					current_Entity1=current_Entity1_ele.value.replace(/\s+/g, '');
+					current_Entity2=current_Entity2_ele.value.replace(/\s+/g, '');
 				
-					if(current_product == product && current_area == area)
+					if(current_Entity1 == Entity1 && current_Entity2 == Entity2)
 					{
 						document.getElementById("ViewCount_value_"+i).value=document.getElementById("ViewCount_value_"+cell_id).value;
 						change_view();
@@ -1593,11 +1570,11 @@ function refresh_data(cell_id)
 </script>
 <script type="text/javascript">
 	//Count the Number of View of Records
-	function INC_ViewCount(product, area, cell_id)
+	function INC_ViewCount(Entity1, Entity2, cell_id)
 	{
 		 $.ajax({
 						type: 'GET',
-						url:  'viewcount.php' + '?op=Inc_OHM_ViewCount&product=' + product +'&area=' + area + '&Cell_ID=' + cell_id,
+						url:  'viewcount.php' + '?op=Inc_OHM_ViewCount&entity1=' + Entity1 +'&entity2=' + Entity2 + '&Cell_ID=' + cell_id,
 						success: function (data) {
 	        					//alert(data);
 								$("#ViewCount_"+cell_id).html(data);
@@ -1732,7 +1709,7 @@ function refresh_data(cell_id)
             $.fn.reverse = [].reverse;
 			if(!ScrollOn)
 			{
-            	setAreaColWidth();
+            	setEntity2ColWidth();
 				ScrollOn = true;
 			}
             var createGhostHeader = function (header, topOffset, leftOffset) {
@@ -1840,7 +1817,7 @@ function refresh_data(cell_id)
         });
 		///End - Header creation or align header incase of scrolling
 		
-	function setAreaColWidth()
+	function setEntity2ColWidth()
 	{
 		var limit = document.getElementById('Last_HM').value;
 		var i=1, k=1, first;
@@ -1865,7 +1842,7 @@ function refresh_data(cell_id)
 								var cell_col2 = document.getElementById("Cell_ColNum_"+k);
 								if(cell_type2 != null && cell_type2 != '' && cell_col2 != null && cell_col2 != '')
 								{
-									if(cell_type2.value.replace(/\s+/g, '') == 'area' && cell_col2.value.replace(/\s+/g, '') == cell_col.value.replace(/\s+/g, ''))
+									if(cell_type2.value.replace(/\s+/g, '') == 'Entity2' && cell_col2.value.replace(/\s+/g, '') == cell_col.value.replace(/\s+/g, ''))
 									{
 										cell_exist2.style.width = (cell_exist.offsetWidth) + "px";
 										$.browser.chrome = /chrome/.test(navigator.userAgent.toLowerCase()); 
@@ -1880,7 +1857,7 @@ function refresh_data(cell_id)
 							}
 						}
 					}
-					else if(cell_type.value.replace(/\s+/g, '') == 'product' && cell_row.value.replace(/\s+/g, '') == 1)
+					else if(cell_type.value.replace(/\s+/g, '') == 'Entity1' && cell_row.value.replace(/\s+/g, '') == 1)
 					{
 						first = i;
 					}
@@ -1903,7 +1880,7 @@ $online_HMCounter=0;
 
 $name = htmlspecialchars(strlen($name)>0?$name:('report '.$id.''));
 
-$Report_Name = ((trim($Report_DisplayName) != '' && $Report_DisplayName != NULL)? trim($Report_DisplayName):'report '.$id.'');
+$Report_Name = ((trim($ReportDisplayName) != '' && $ReportDisplayName != NULL)? trim($ReportDisplayName):'report '.$id.'');
 
 if( ( (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE) || !isset($_SERVER['HTTP_REFERER']) ) && ( !isset($_REQUEST['LI']) || $_REQUEST['LI'] != 1) )
 {
@@ -1969,11 +1946,11 @@ $htmlContent .='" class="display" id = "hmMainTable">'
 						
 foreach($columns as $col => $val)
 {
-	if($columns_Span[$col] > 0)
+	if($ColumnsSpan[$col] > 0)
 	{
 		$online_HMCounter++;
-		$htmlContent .= '<th class="Cat_Area_Row_Class_'.$col.'" width="'.$Cat_Area_Col_width[$col].'px" style="'.(($Cat_Area_Rotation[$col]) ? 'vertical-align:bottom;':'vertical-align:middle;').'max-width:'.$Cat_Area_Col_width[$col].'px;background-color:#FFFFFF; '.(($columnsCategoryName[$col] != 'Undefined') ? 'border-left:#000000 solid 2px; border-top:#000000 solid 2px; border-right:#000000 solid 2px;':'border:#FFFFFF solid 2px;').'" id="Cell_ID_'.$online_HMCounter.'" colspan="'.$columns_Span[$col].'" '.(($Cat_Area_Rotation[$col]) ? 'height="'.$area_Cat_Height.'px" align="left"':'align="center"').'><div class="'.(($Cat_Area_Rotation[$col]) ? 'box_rotate Cat_RowDiv_Class_'.$col.' ':'break_words').'">';
-		if($columnsCategoryName[$col] != 'Undefined' && $Rotation_Flg == 1 && $Cat_Area_Rotation[$col])
+		$htmlContent .= '<th class="Cat_Entity2_Row_Class_'.$col.'" width="'.$CatEntity2Colwidth[$col].'px" style="'.(($CatEntity2Rotation[$col]) ? 'vertical-align:bottom;':'vertical-align:middle;').'max-width:'.$CatEntity2Colwidth[$col].'px;background-color:#FFFFFF; '.(($columnsCategoryName[$col] != 'Undefined') ? 'border-left:#000000 solid 2px; border-top:#000000 solid 2px; border-right:#000000 solid 2px;':'border:#FFFFFF solid 2px;').'" id="Cell_ID_'.$online_HMCounter.'" colspan="'.$ColumnsSpan[$col].'" '.(($CatEntity2Rotation[$col]) ? 'height="'.$Entity2CatHeight.'px" align="left"':'align="center"').'><div class="'.(($CatEntity2Rotation[$col]) ? 'box_rotate Cat_RowDiv_Class_'.$col.' ':'break_words').'">';
+		if($columnsCategoryName[$col] != 'Undefined' && $Rotation_Flg == 1 && $CatEntity2Rotation[$col])
 		{
 			$cat_name = str_replace(' ',' ',trim($columnsCategoryName[$col]));
 			//$cat_name = preg_replace('/([^\s-]{'.$cols_Cat_Space[$col].'})(?=[^\s-])/','$1<br/>',$cat_name);
@@ -1993,40 +1970,40 @@ if($total_fld)
 {
 	$htmlContent .= '<th style="background-color:#FFFFFF; border:#FFFFFF solid 2px;" id="CatTotalCol">&nbsp;</th>';
 } 
-//width="'.$product_Col_Width.'px" currently not needed
-$htmlContent .= '</tr><tr><th '.(($Rotation_Flg == 1) ? 'height="'.$area_Col_Height.'px"':'').' class="Product_Row_Class" style="background-color:#FFFFFF;">&nbsp;</th>';
+//width="'.$entity1ColWidth.'px" currently not needed
+$htmlContent .= '</tr><tr><th '.(($Rotation_Flg == 1) ? 'height="'.$Entity2ColHeight.'px"':'').' class="Entity1_Row_Class" style="background-color:#FFFFFF;">&nbsp;</th>';
 
 
 foreach($columns as $col => $val)
 {
 	$online_HMCounter++;
-	$val = (isset($columnsDisplayName[$col]) && $columnsDisplayName[$col] != '')?$columnsDisplayName[$col] : 'Area '.$areaIds[$col];
+	$val = $columnsDisplayName[$col].$columnsCompanyName[$col].((trim($columnsTagName[$col]) != '') ? ' ['.$columnsTagName[$col].']':'');
 	$cdesc = (isset($columnsDescription[$col]) && $columnsDescription[$col] != '')?$columnsDescription[$col]:null;
 	$caltTitle = (isset($cdesc) && $cdesc != '')?' alt="'.$cdesc.'" title="'.$cdesc.'" ':null;
 	$cat = (isset($columnsCategoryName[$col]) && $columnsCategoryName[$col] != '')? ' ('.$columnsCategoryName[$col].') ':'';
 		
-	$htmlContent .= '<th style="'.(($Rotation_Flg == 1) ? 'vertical-align:bottom;':'vertical-align:middle;').'  background-color:#DDF;" class="Area_Row_Class_'.$col.'" id="Cell_ID_'.$online_HMCounter.'" '.(($Rotation_Flg == 1) ? 'height="'.$area_Col_Height.'px" align="left"':'align="center"').' '.$caltTitle.'><div class="'.(($Rotation_Flg == 1) ? 'box_rotate Area_RowDiv_Class_'.$col.'':'break_words').'" style="background-color:#DDF;">';
+	$htmlContent .= '<th style="'.(($Rotation_Flg == 1) ? 'vertical-align:bottom;':'vertical-align:middle;').'  background-color:#DDF;" class="Entity2_Row_Class_'.$col.'" id="Cell_ID_'.$online_HMCounter.'" '.(($Rotation_Flg == 1) ? 'height="'.$Entity2ColHeight.'px" align="left"':'align="center"').' '.$caltTitle.'><div class="'.(($Rotation_Flg == 1) ? 'box_rotate Entity2_RowDiv_Class_'.$col.'':'break_words').'" style="background-color:#DDF;">';
 	
-	$htmlContent .= '<input type="hidden" value="area" name="Cell_Type_'.$online_HMCounter.'" id="Cell_Type_'.$online_HMCounter.'" />';
+	$htmlContent .= '<input type="hidden" value="Entity2" name="Cell_Type_'.$online_HMCounter.'" id="Cell_Type_'.$online_HMCounter.'" />';
 	$htmlContent .= '<input type="hidden" value="'.$col.'" name="Cell_ColNum_'.$online_HMCounter.'" id="Cell_ColNum_'.$online_HMCounter.'" />';
 	
 	if($Rotation_Flg != 1)
 	$htmlContent .= '<p style="overflow:hidden; width:'.$Width_matrix[$col]['width'].'px; padding:0px; margin:0px;">';
 	
-	if(isset($areaIds[$col]) && $areaIds[$col] != NULL && !empty($productIds))
+	if(isset($entity2Ids[$col]) && $entity2Ids[$col] != NULL && !empty($entity1Ids))
 	{
 		$htmlContent .= '<input type="hidden" value="'.$col_active_total[$col].',endl,'.$col_count_total[$col].',endl,'.$col_indlead_total[$col].'" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
-		$htmlContent .= '<input type="hidden" value="'. trim(urlPath()) .'intermediary.php?a=' . $areaIds[$col]. '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />';
+		$htmlContent .= '<input type="hidden" value="'. trim(urlPath()) .'intermediary.php?e2=' . $entity2Ids[$col]. '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />';
 		
-		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. trim(urlPath()) .'intermediary.php?a=' . $areaIds[$col]. '&list=1&itype=0&hm=' . $id . '" target="_blank" style="text-decoration:underline; color:#000000;">';
+		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. trim(urlPath()) .'intermediary.php?e2=' . $entity2Ids[$col]. '&list=1&itype=0&hm=' . $id . '" target="_blank" style="text-decoration:underline; color:#000000;">';
 		
 		if($Rotation_Flg == 1)
 		{
-			$area_name = str_replace(' ',' ',trim($val));
-			//$area_name = preg_replace('/([^\s-]{'.$cols_Area_Space[$col].'})(?=[^\s-])/','$1<br/>',$area_name);
-			$area_name = wordwrap($area_name, $cols_Area_Space[$col], "<br />\n", true);
-			$area_name = str_replace('`',' ',$area_name);
-			$htmlContent .= formatBrandName($area_name, 'area').'</a>';
+			$Entity2Name = str_replace(' ',' ',trim($val));
+			//$Entity2Name = preg_replace('/([^\s-]{'.$ColsEntity2Space[$col].'})(?=[^\s-])/','$1<br/>',$Entity2Name);
+			$Entity2Name = wordwrap($Entity2Name, $ColsEntity2Space[$col], "<br />\n", true);
+			$Entity2Name = str_replace('`',' ',$Entity2Name);
+			$htmlContent .= formatBrandName($Entity2Name, 'area').'</a>';
 		}
 		else
 			$htmlContent .= trim(formatBrandName($val, 'area')).'</a>';
@@ -2043,15 +2020,15 @@ foreach($columns as $col => $val)
 if($total_fld)
 {
 	$online_HMCounter++;
-	$htmlContent .= '<th id="Cell_ID_'.$online_HMCounter.'" '.(($Rotation_Flg == 1) ? 'height="'.$area_Col_Height.'px" align="left"':'align="center"').' style="'.(($Rotation_Flg == 1) ? 'vertical-align:bottom;':'vertical-align:middle;').' background-color:#DDF; border:#DDF solid 2px;" class="Total_Row_Class_width Total_Row_Class_height"><div class="box_rotate Total_RowDiv_Class">';
-	if(!empty($productIds) && !empty($areaIds))
+	$htmlContent .= '<th id="Cell_ID_'.$online_HMCounter.'" '.(($Rotation_Flg == 1) ? 'height="'.$Entity2ColHeight.'px" align="left"':'align="center"').' style="'.(($Rotation_Flg == 1) ? 'vertical-align:bottom;':'vertical-align:middle;').' background-color:#DDF; border:#DDF solid 2px;" class="Total_Row_Class_width Total_Row_Class_height"><div class="box_rotate Total_RowDiv_Class">';
+	if(!empty($entity1Ids) && !empty($entity2Ids))
 	{
-		$productIds = array_filter($productIds);
-		$areaIds = array_filter($areaIds);
+		$entity1Ids = array_filter($entity1Ids);
+		$entity2Ids = array_filter($entity2Ids);
 		$htmlContent .= '<input type="hidden" value="'.$active_total.',endl,'.$count_total.',endl,'.$indlead_total.'" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
-		$htmlContent .= '<input type="hidden" value="'. trim(urlPath()) .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds). '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />';
+		$htmlContent .= '<input type="hidden" value="'. trim(urlPath()) .'intermediary.php?e1=' . implode(',', $entity1Ids) . '&e2=' . implode(',', $entity2Ids). '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />';
 		
-		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. trim(urlPath()) .'intermediary.php?p=' . implode(',', $productIds) . '&a=' . implode(',', $areaIds). '&list=1&itype=0&sr=now&er=1 month&hm=' . $id . '" target="_blank" style="color:#000000;"><b><font id="Tot_ID_'.$online_HMCounter.'">'.$indlead_total.'</font></b></a>';
+		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. trim(urlPath()) .'intermediary.php?e1=' . implode(',', $entity1Ids) . '&e2=' . implode(',', $entity2Ids). '&list=1&itype=0&sr=now&er=1 month&hm=' . $id . '" target="_blank" style="color:#000000;"><b><font id="Tot_ID_'.$online_HMCounter.'">'.$indlead_total.'</font></b></a>';
 	}
 	$htmlContent .= '</div></th>';
 }
@@ -2063,7 +2040,7 @@ foreach($rows as $row => $rval)
 	
 	$cat = (isset($rowsCategoryName[$row]) && $rowsCategoryName[$row] != '')? $rowsCategoryName[$row]:'Undefined';
 	
-	if($rows_Span[$row] > 0 && $cat != 'Undefined')
+	if($RowsSpan[$row] > 0 && $cat != 'Undefined')
 	{
 		$online_HMCounter++;
 		
@@ -2071,8 +2048,8 @@ foreach($rows as $row => $rval)
 		if($dtt)
 		{
 			$htmlContent .= '<input type="hidden" value="0,endl,0,endl,0" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
-			$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. trim(urlPath()) .'intermediary.php?p=' . implode(',', $rows_categoryProducts[$cat]) . '&a=' . $last_area . '&list=1&sr=now&er=1 month" target="_blank" class="ottlink" style="color:#000000;">';
-			$htmlContent .= '<input type="hidden" value="'. trim(urlPath()) .'intermediary.php?p=' . implode(',', $rows_categoryProducts[$cat]) . '&a=' . $last_area . '&list=1&itype=0&sr=now&er=1 month&hm=' . $id . '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />';
+			$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. trim(urlPath()) .'intermediary.php?e1=' . implode(',', $rowsCategoryEntityIds1[$cat]) . '&e2=' . $LastEntity2 . '&list=1&sr=now&er=1 month&hm=' . $id . '" target="_blank" class="ottlink" style="color:#000000;">';
+			$htmlContent .= '<input type="hidden" value="'. trim(urlPath()) .'intermediary.php?e1=' . implode(',', $rowsCategoryEntityIds1[$cat]) . '&e2=' . $LastEntity2 . '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />';
 		}
 		if($cat != 'Undefined')
 		{
@@ -2086,25 +2063,22 @@ foreach($rows as $row => $rval)
 	$htmlContent .= '<tr style="vertical-align:middle;">';
 	
 	$online_HMCounter++;
-	//$rval = (isset($rowsDisplayName[$row]) && $rowsDisplayName[$row] != '')?$rowsDisplayName[$row]:$rval; //Commente as as planned to ignore display name in Product only
+	//$rval = (isset($rowsDisplayName[$row]) && $rowsDisplayName[$row] != '')?$rowsDisplayName[$row]:$rval; //Commente as as planned to ignore display name in Entity1 only
 	$rdesc = (isset($rowsDescription[$row]) && $rowsDescription[$row] != '')?$rowsDescription[$row]:null;
 	$raltTitle = (isset($rdesc) && $rdesc != '')?' alt="'.$rdesc.'" title="'.$rdesc.'" ':null;
 	
-	
-	
-	
-	$htmlContent .='<th class="product_col break_words Product_Col_WidthStyle" style="padding-left:4px; vertical-align:middle; '.(($Rotation_Flg == 1) ? 'width:'.$product_Col_Width.'px; max-width:'.$product_Col_Width.'px;':'').'" id="Cell_ID_'.$online_HMCounter.'" '.$raltTitle.'><div align="left" style="vertical-align:middle;">';
+	$htmlContent .='<th class="Entity1_col break_words entity1ColWidthStyle" style="padding-left:4px; vertical-align:middle; '.(($Rotation_Flg == 1) ? 'width:'.$entity1ColWidth.'px; max-width:'.$entity1ColWidth.'px;':'').'" id="Cell_ID_'.$online_HMCounter.'" '.$raltTitle.'><div align="left" style="vertical-align:middle;">';
 			
-	$htmlContent .= '<input type="hidden" value="product" name="Cell_Type_'.$online_HMCounter.'" id="Cell_Type_'.$online_HMCounter.'" />';
+	$htmlContent .= '<input type="hidden" value="Entity1" name="Cell_Type_'.$online_HMCounter.'" id="Cell_Type_'.$online_HMCounter.'" />';
 	$htmlContent .= '<input type="hidden" value="'.$row.'" name="Cell_RowNum_'.$online_HMCounter.'" id="Cell_RowNum_'.$online_HMCounter.'" />';
 	$htmlContent .= '<input type="hidden" value="'.$col.'" name="Cell_ColNum_'.$online_HMCounter.'" id="Cell_ColNum_'.$online_HMCounter.'" />';
 	
-	if(isset($productIds[$row]) && $productIds[$row] != NULL && !empty($areaIds))
+	if(isset($entity1Ids[$row]) && $entity1Ids[$row] != NULL && !empty($entity2Ids))
 	{
 		$htmlContent .= '<input type="hidden" value="'.$row_active_total[$row].',endl,'.$row_count_total[$row].',endl,'.$row_indlead_total[$row].'" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
-		$htmlContent .= '<input type="hidden" value="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '" name="Link_value_'.$online_HMCounter.'&list=1&itype=0&sr=now&er=1 month" id="Link_value_'.$online_HMCounter.'" />';
+		$htmlContent .= '<input type="hidden" value="'. trim(urlPath()) .'intermediary.php?e1=' . $entity1Ids[$row] . '" name="Link_value_'.$online_HMCounter.'&list=1&itype=0&sr=now&er=1 month" id="Link_value_'.$online_HMCounter.'" />';
 		
-		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . implode(',', $areaIds). '&list=1&hm=' . $id . '" target="_blank" class="ottlink" style="text-decoration:underline; color:#000000;">'.formatBrandName($rval, 'product').$rowsCompanyName[$row].'</a>'.((trim($rowsTagName[$row]) != '') ? ' <font class="tag">['.$rowsTagName[$row].']</font>':'');
+		$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. trim(urlPath()) .'intermediary.php?e1=' . $entity1Ids[$row] . '&e2=' . implode(',', $entity2Ids). '&list=1&hm=' . $id . '" target="_blank" class="ottlink" style="text-decoration:underline; color:#000000;">'.formatBrandName($rowsDisplayName[$row], 'product').$rowsCompanyName[$row].'</a>'.((trim($rowsTagName[$row]) != '') ? ' <font class="tag">['.$rowsTagName[$row].']</font>':'');
 	}
 	$htmlContent .= '</div></th>';
 	
@@ -2123,7 +2097,7 @@ foreach($rows as $row => $rval)
 		}
 		else
 		{
-			if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL)
+			if(isset($entity2Ids[$col]) && $entity2Ids[$col] != NULL && isset($entity1Ids[$row]) && $entity1Ids[$row] != NULL)
 			{
 				$Td_Style = 'background-color:#e6e6e6; border:#e6e6e6 solid;';
 				$data_matrix[$row][$col]['color_code'] = 'e6e6e6';
@@ -2139,20 +2113,20 @@ foreach($rows as $row => $rval)
 		$htmlContent .= '<input type="hidden" value="'.$row.'" name="Cell_RowNum_'.$online_HMCounter.'" id="Cell_RowNum_'.$online_HMCounter.'" />';
 		$htmlContent .= '<input type="hidden" value="'.$col.'" name="Cell_ColNum_'.$online_HMCounter.'" id="Cell_ColNum_'.$online_HMCounter.'" />';
 	
-		if(isset($areaIds[$col]) && $areaIds[$col] != NULL && isset($productIds[$row]) && $productIds[$row] != NULL)
+		if(isset($entity2Ids[$col]) && $entity2Ids[$col] != NULL && isset($entity1Ids[$row]) && $entity1Ids[$row] != NULL)
 		{
 			
 			$htmlContent .= '<div id="Div_ID_'.$online_HMCounter.'" style="'.$data_matrix[$row][$col]['div_start_style'].' width:100%; height:100%; max-height:inherit; _height:100%;  vertical-align:middle; float:none; display:table;">';
 			
 			$htmlContent .= '<input type="hidden" value="'.$data_matrix[$row][$col]['active'].',endl,'.$data_matrix[$row][$col]['total'].',endl,'.$data_matrix[$row][$col]['indlead'].',endl,'.$data_matrix[$row][$col]['active_prev'].',endl,'.$data_matrix[$row][$col]['total_prev'].',endl,'.$data_matrix[$row][$col]['indlead_prev'].',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['last_update'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['last_update'])).',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['count_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['count_lastchanged'])).',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])).',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['filing_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['filing_lastchanged'])).',endl,'.$data_matrix[$row][$col]['color_code'].',endl,'.$data_matrix[$row][$col]['bomb']['value'].',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['phase_explain_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['phase_explain_lastchanged'])).',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['phase4_override_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['phase4_override_lastchanged'])).',endl,'.date('m/d/Y H:i:s', strtotime($data_matrix[$row][$col]['highest_phase_lastchanged'])).',endl,'.date('F d, Y', strtotime($data_matrix[$row][$col]['highest_phase_lastchanged'])).',endl,\''.$data_matrix[$row][$col]['highest_phase_prev'].'\'" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
 			
-			$htmlContent .= '<input type="hidden" value="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />';
-			$htmlContent .= '<input type="hidden" value="' . $productIds[$row] . '" name="Product_value_'.$online_HMCounter.'" id="Product_value_'.$online_HMCounter.'" />';
-			$htmlContent .= '<input type="hidden" value="' . $areaIds[$col]. '" name="Area_value_'.$online_HMCounter.'" id="Area_value_'.$online_HMCounter.'" />';
+			$htmlContent .= '<input type="hidden" value="'. trim(urlPath()) .'intermediary.php?e1=' . $entity1Ids[$row] . '&e2=' . $entity2Ids[$col]. '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />';
+			$htmlContent .= '<input type="hidden" value="' . $entity1Ids[$row] . '" name="Entity1_value_'.$online_HMCounter.'" id="Entity1_value_'.$online_HMCounter.'" />';
+			$htmlContent .= '<input type="hidden" value="' . $entity2Ids[$col]. '" name="Entity2_value_'.$online_HMCounter.'" id="Entity2_value_'.$online_HMCounter.'" />';
 			if($data_matrix[$row][$col]['total'] == 0)
 			$htmlContent .= '<input type="hidden" value="1" name="TotalZero_Flg_'.$online_HMCounter.'" id="TotalZero_Flg_'.$online_HMCounter.'" />';
 				
-			$htmlContent .= '<a onclick="INC_ViewCount(' . trim($productIds[$row]) . ',' . trim($areaIds[$col]) . ',' . $online_HMCounter .')" style="color:#000000; '.$data_matrix[$row][$col]['count_start_style'].' vertical-align:middle; padding-top:0px; padding-bottom:0px; line-height:13px; '.(($data_matrix[$row][$col]['total'] != 0) ? 'text-decoration:underline;' : 'text-decoration:none;').'" id="Cell_Link_'.$online_HMCounter.'" href="'. trim(urlPath()) .'intermediary.php?p=' . $productIds[$row] . '&a=' . $areaIds[$col]. '&list=1&itype=0&sr=now&er=1 month&hm=' . $id . '" target="_blank" title="'. $title .'"><b><font id="Font_ID_'.$online_HMCounter.'" style="color:#000000;">'. (($data_matrix[$row][$col]['total'] != 0) ? $data_matrix[$row][$col]['indlead'] : '&nbsp;') .'</font></b></a>';
+			$htmlContent .= '<a onclick="INC_ViewCount(' . trim($entity1Ids[$row]) . ',' . trim($entity2Ids[$col]) . ',' . $online_HMCounter .')" style="color:#000000; '.$data_matrix[$row][$col]['count_start_style'].' vertical-align:middle; padding-top:0px; padding-bottom:0px; line-height:13px; '.(($data_matrix[$row][$col]['total'] != 0) ? 'text-decoration:underline;' : 'text-decoration:none;').'" id="Cell_Link_'.$online_HMCounter.'" href="'. trim(urlPath()) .'intermediary.php?e1=' . $entity1Ids[$row] . '&e2=' . $entity2Ids[$col]. '&list=1&itype=0&sr=now&er=1 month&hm=' . $id . '" target="_blank" title="'. $title .'"><b><font id="Font_ID_'.$online_HMCounter.'" style="color:#000000;">'. (($data_matrix[$row][$col]['total'] != 0) ? $data_matrix[$row][$col]['indlead'] : '&nbsp;') .'</font></b></a>';
 					
 			if($data_matrix[$row][$col]['bomb']['src'] != 'new_square.png') //When bomb has square dont include it in pdf as size is big and no use
 			$htmlContent .= '<img id="Cell_Bomb_'.$online_HMCounter.'" title="'.$data_matrix[$row][$col]['bomb']['title'].'" src="'. trim(urlPath()) .'images/'.$data_matrix[$row][$col]['bomb']['src'].'"  style="'.$data_matrix[$row][$col]['bomb']['style'].' vertical-align:middle; margin-left:1px;" />';				
@@ -2192,107 +2166,17 @@ foreach($rows as $row => $rval)
 			$Status_Total_Flg=0;
 			$Status_Total ='<font id="Status_Total_List_'.$online_HMCounter.'" style="display:none;"><font class="Status_Label_Headers Status_Changes_Style">Status changes to:<br/></font><ul class="Status_ULStyle">';
 			
-			if($data_matrix[$row][$col]['not_yet_recruiting'] > 0)
-			{
-				$Status_Total_Flg=1;
-				$Status_Total .= '<li><font class="Status_Label_Style">Not yet recruiting</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['not_yet_recruiting'] .'</font></li>';
-			}
+			$allTrialsStatusArray = array('not_yet_recruiting', 'recruiting', 'enrolling_by_invitation', 'active_not_recruiting', 'completed', 'suspended', 'terminated', 'withdrawn', 'available', 'no_longer_available', 'approved_for_marketing', 'no_longer_recruiting', 'withheld', 'temporarily_not_available', 'ongoing', 'not_authorized', 'prohibited');
 			
-			if($data_matrix[$row][$col]['recruiting'] > 0)
+			foreach($allTrialsStatusArray as $currentStatus)
 			{
-				$Status_Total_Flg=1;
-				$Status_Total .= '<li><font class="Status_Label_Style">Recruiting</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['recruiting'] .'</font></li>';
-			}
+				if($data_matrix[$row][$col][$currentStatus] > 0)
+				{
+					$Status_Total_Flg=1;
+					$Status_Total .= '<li><font class="Status_Label_Style">'.ucfirst(str_replace('_',' ',$currentStatus)).'</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col][$currentStatus] .'</font></li>';
+				}
+			}			
 			
-			if($data_matrix[$row][$col]['enrolling_by_invitation'] > 0)
-			{
-				$Status_Total_Flg=1;
-				$Status_Total .= '<li><font class="Status_Label_Style">Enrolling by invitation</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['enrolling_by_invitation'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['active_not_recruiting'] > 0)
-			{
-				$Status_Total_Flg=1;
-				$Status_Total .= '<li><font class="Status_Label_Style">Active not recruiting</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['active_not_recruiting'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['completed'] > 0)
-			{
-				$Status_Total_Flg=1;
-				$Status_Total .= '<li><font class="Status_Label_Style">Completed</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['completed'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['suspended'] > 0)
-			{
-				$Status_Total_Flg=1;
-				$Status_Total .= '<li><font class="Status_Label_Style">Suspended</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['suspended'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['terminated'] > 0)
-			{
-				$Status_Total_Flg=1;
-				$Status_Total .= '<li><font class="Status_Label_Style">Terminated</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['terminated'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['withdrawn'] > 0)
-			{
-				$Status_Total_Flg=1;
-				$Status_Total .= '<li><font class="Status_Label_Style">Withdrawn</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['withdrawn'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['available'] > 0)
-			{
-				$Status_Total_Flg=1;
-				$Status_Total .= '<li><font class="Status_Label_Style">Available</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['available'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['no_longer_available'] > 0)
-			{
-				$Status_Total_Flg=1;
-				$Status_Total .= '<li><font class="Status_Label_Style">No longer available</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['no_longer_available'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['approved_for_marketing'] > 0)
-			{
-				$Status_Total_Flg=1;
-				$Status_Total .= '<li><font class="Status_Label_Style">Approved for marketing</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['approved_for_marketing'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['no_longer_recruiting'] > 0)
-			{
-				$Status_Total_Flg=1;
-				$Status_Total .= '<li><font class="Status_Label_Style">No longer recruiting</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['no_longer_recruiting'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['withheld'] > 0)
-			{
-				$Status_Total_Flg=1;
-				$Status_Total .= '<li><font class="Status_Label_Style">Withheld</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['withheld'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['temporarily_not_available'] > 0)
-			{
-				$Status_Total_Flg=1;
-				$Status_Total .= '<li><font class="Status_Label_Style">Temporarily not available</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['temporarily_not_available'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['ongoing'] > 0)
-			{
-				$Status_Total_Flg=1;
-				$Status_Total .= '<li><font class="Status_Label_Style">On going</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['ongoing'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['not_authorized'] > 0)
-			{
-				$Status_Total_Flg=1;
-				$Status_Total .= '<li><font class="Status_Label_Style">Not authorized</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['not_authorized'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['prohibited'] > 0)
-			{
-				$Status_Total_Flg=1;
-				$Status_Total .= '<li><font class="Status_Label_Style">Prohibited</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['prohibited'] .'</font></li>';
-			}
 			
 			if($Status_Total_Flg==1)
 			$htmlContent .= $Status_Total.'</ul></font>';
@@ -2300,106 +2184,15 @@ foreach($rows as $row => $rval)
 			$Status_Indlead_Flg=0;
 			$Status_Indlead ='<font id="Status_Indlead_List_'.$online_HMCounter.'" style="display:inline;"><font class="Status_Label_Headers Status_Changes_Style">Status changes to:</font><ul class="Status_ULStyle">';
 			
-			if($data_matrix[$row][$col]['not_yet_recruiting_active_indlead'] > 0)
-			{
-				$Status_Indlead_Flg=1;
-				$Status_Indlead .= '<li><font class="Status_Label_Style">Not yet recruiting</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['not_yet_recruiting_active_indlead'] .'</font></li>';
-			}
+			$activeIndleadStatusArray = array('not_yet_recruiting_active_indlead', 'recruiting_active_indlead', 'enrolling_by_invitation_active_indlead', 'active_not_recruiting_active_indlead', 'completed_active_indlead', 'suspended_active_indlead', 'terminated_active_indlead', 'withdrawn_active_indlead', 'available_active_indlead', 'no_longer_available_active_indlead', 'approved_for_marketing_active_indlead', 'no_longer_recruiting_active_indlead', 'withheld_active_indlead', 'temporarily_not_available_active_indlead', 'ongoing_active_indlead', 'not_authorized_active_indlead', 'prohibited_active_indlead');
 			
-			if($data_matrix[$row][$col]['recruiting_active_indlead'] > 0)
+			foreach($activeIndleadStatusArray as $currentStatus)
 			{
-				$Status_Indlead_Flg=1;
-				$Status_Indlead .= '<li><font class="Status_Label_Style">Recruiting</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['recruiting_active_indlead'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['enrolling_by_invitation_active_indlead'] > 0)
-			{
-				$Status_Indlead_Flg=1;
-				$Status_Indlead .= '<li><font class="Status_Label_Style">Enrolling by invitation</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['enrolling_by_invitation_active_indlead'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['active_not_recruiting_active_indlead'] > 0)
-			{
-				$Status_Indlead_Flg=1;
-				$Status_Indlead .= '<li><font class="Status_Label_Style">Active not recruiting</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['active_not_recruiting_active_indlead'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['completed_active_indlead'] > 0)
-			{
-				$Status_Indlead_Flg=1;
-				$Status_Indlead .= '<li><font class="Status_Label_Style">Completed</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['completed_active_indlead'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['suspended_active_indlead'] > 0)
-			{
-				$Status_Indlead_Flg=1;
-				$Status_Indlead .= '<li><font class="Status_Label_Style">Suspended</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['suspended_active_indlead'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['terminated_active_indlead'] > 0)
-			{
-				$Status_Indlead_Flg=1;
-				$Status_Indlead .= '<li><font class="Status_Label_Style">Terminated</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['terminated_active_indlead'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['withdrawn_active_indlead'] > 0)
-			{
-				$Status_Indlead_Flg=1;
-				$Status_Indlead .= '<li><font class="Status_Label_Style">Withdrawn</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['withdrawn_active_indlead'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['available_active_indlead'] > 0)
-			{
-				$Status_Indlead_Flg=1;
-				$Status_Indlead .= '<li><font class="Status_Label_Style">Available</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['available_active_indlead'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['no_longer_available_active_indlead'] > 0)
-			{
-				$Status_Indlead_Flg=1;
-				$Status_Indlead .= '<li><font class="Status_Label_Style">No longer available</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['no_longer_available_active_indlead'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['approved_for_marketing_active_indlead'] > 0)
-			{
-				$Status_Indlead_Flg=1;
-				$Status_Indlead .= '<li><font class="Status_Label_Style">Approved for marketing</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['approved_for_marketing_active_indlead'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['no_longer_recruiting_active_indlead'] > 0)
-			{
-				$Status_Indlead_Flg=1;
-				$Status_Indlead .= '<li><font class="Status_Label_Style">No longer recruiting</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['no_longer_recruiting_active_indlead'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['withheld_active_indlead'] > 0)
-			{
-				$Status_Indlead_Flg=1;
-				$Status_Indlead .= '<li><font class="Status_Label_Style">Withheld</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['withheld_active_indlead'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['temporarily_not_available_active_indlead'] > 0)
-			{
-				$Status_Indlead_Flg=1;
-				$Status_Indlead .= '<li><font class="Status_Label_Style">Temporarily not available</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['temporarily_not_available_active_indlead'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['ongoing_active_indlead'] > 0)
-			{
-				$Status_Indlead_Flg=1;
-				$Status_Indlead .= '<li><font class="Status_Label_Style">On going</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['ongoing_active_indlead'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['not_authorized_active_indlead'] > 0)
-			{
-				$Status_Indlead_Flg=1;
-				$Status_Indlead .= '<li><font class="Status_Label_Style">Not authorized</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['not_authorized_active_indlead'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['prohibited_active_indlead'] > 0)
-			{
-				$Status_Indlead_Flg=1;
-				$Status_Indlead .= '<li><font class="Status_Label_Style">Prohibited</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['prohibited_active_indlead'] .'</font></li>';
+				if($data_matrix[$row][$col][$currentStatus] > 0)
+				{
+					$Status_Indlead_Flg=1;
+					$Status_Indlead .= '<li><font class="Status_Label_Style">'.ucfirst(str_replace('_',' ',str_replace('_active_indlead','',$currentStatus))).'</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col][$currentStatus] .'</font></li>';
+				}
 			}
 			
 			if($Status_Indlead_Flg==1)
@@ -2408,108 +2201,17 @@ foreach($rows as $row => $rval)
 			$Status_Active_Flg=0;
 			$Status_Active ='<font id="Status_Active_List_'.$online_HMCounter.'" style="display:none;"><font class="Status_Label_Headers Status_Changes_Style">Status changes to:<br/></font><ul class="Status_ULStyle">';
 			
-			if($data_matrix[$row][$col]['not_yet_recruiting_active'] > 0)
-			{
-				$Status_Active_Flg=1;
-				$Status_Active .= '<li><font class="Status_Label_Style">Not yet recruiting</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['not_yet_recruiting_active'] .'</font></li>';
-			}
+			$activeStatusArray = array('not_yet_recruiting_active', 'recruiting_active', 'enrolling_by_invitation_active', 'active_not_recruiting_active', 'completed_active', 'suspended_active', 'terminated_active', 'withdrawn_active', 'available_active', 'no_longer_available_active', 'approved_for_marketing_active', 'no_longer_recruiting_active', 'withheld_active', 'temporarily_not_available_active', 'ongoing_active', 'not_authorized_active', 'prohibited_active');
 			
-			if($data_matrix[$row][$col]['recruiting_active'] > 0)
+			foreach($activeStatusArray as $currentStatus)
 			{
-				$Status_Active_Flg=1;
-				$Status_Active .= '<li><font class="Status_Label_Style">Recruiting</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['recruiting_active'] .'</font></li>';
+				if($data_matrix[$row][$col][$currentStatus] > 0)
+				{
+					$Status_Active_Flg=1;
+					$Status_Active .= '<li><font class="Status_Label_Style">'.ucfirst(str_replace('_',' ',str_replace('_active','',$currentStatus))).'</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col][$currentStatus] .'</font></li>';
+				}
 			}
-			
-			if($data_matrix[$row][$col]['enrolling_by_invitation_active'] > 0)
-			{
-				$Status_Active_Flg=1;
-				$Status_Active .= '<li><font class="Status_Label_Style">Enrolling by invitation</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['enrolling_by_invitation_active'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['active_not_recruiting_active'] > 0)
-			{
-				$Status_Active_Flg=1;
-				$Status_Active .= '<li><font class="Status_Label_Style">Active not recruiting</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['active_not_recruiting_active'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['completed_active'] > 0)
-			{
-				$Status_Active_Flg=1;
-				$Status_Active .= '<li><font class="Status_Label_Style">Completed</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['completed_active'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['suspended_active'] > 0)
-			{
-				$Status_Active_Flg=1;
-				$Status_Active .= '<li><font class="Status_Label_Style">Suspended</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['suspended_active'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['terminated_active'] > 0)
-			{
-				$Status_Active_Flg=1;
-				$Status_Active .= '<li><font class="Status_Label_Style">Terminated</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['terminated_active'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['withdrawn_active'] > 0)
-			{
-				$Status_Active_Flg=1;
-				$Status_Active .= '<li><font class="Status_Label_Style">Withdrawn</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['withdrawn_active'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['available_active'] > 0)
-			{
-				$Status_Active_Flg=1;
-				$Status_Active .= '<li><font class="Status_Label_Style">Available</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['available_active'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['no_longer_available_active'] > 0)
-			{
-				$Status_Active_Flg=1;
-				$Status_Active .= '<li><font class="Status_Label_Style">No longer available</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['no_longer_available_active'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['approved_for_marketing_active'] > 0)
-			{
-				$Status_Active_Flg=1;
-				$Status_Active .= '<li><font class="Status_Label_Style">Approved for marketing</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['approved_for_marketing_active'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['no_longer_recruiting_active'] > 0)
-			{
-				$Status_Active_Flg=1;
-				$Status_Active .= '<li><font class="Status_Label_Style">No longer recruiting</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['no_longer_recruiting_active'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['withheld_active'] > 0)
-			{
-				$Status_Active_Flg=1;
-				$Status_Active .= '<li><font class="Status_Label_Style">Withheld</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['withheld_active'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['temporarily_not_available_active'] > 0)
-			{
-				$Status_Active_Flg=1;
-				$Status_Active .= '<li><font class="Status_Label_Style">Temporarily not available</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['temporarily_not_available_active'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['ongoing_active'] > 0)
-			{
-				$Status_Active_Flg=1;
-				$Status_Active .= '<li><font class="Status_Label_Style">On going</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['ongoing_active'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['not_authorized_active'] > 0)
-			{
-				$Status_Active_Flg=1;
-				$Status_Active .= '<li><font class="Status_Label_Style">Not authorized</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['not_authorized_active'] .'</font></li>';
-			}
-			
-			if($data_matrix[$row][$col]['prohibited_active'] > 0)
-			{
-				$Status_Active_Flg=1;
-				$Status_Active .= '<li><font class="Status_Label_Style">Prohibited</font><font class="Status_Label_Style">: </font><font class="Status_Label_values">'. $data_matrix[$row][$col]['prohibited_active'] .'</font></li>';
-			}
-			
+						
 			if($Status_Active_Flg==1)
 			$htmlContent .= $Status_Active.'</ul></font>';
 			
@@ -2586,15 +2288,15 @@ if($Rotation_Flg == 1)
 
 	foreach($columns as $col => $val)
 	{
-		$width = $Width_matrix[$col]['width'] - ($cols_Area_Lines[$col]*($Line_Height));
+		$width = $Width_matrix[$col]['width'] - ($ColsEntity2Lines[$col]*($Line_Height));
 		
-		print "if(!$.browser.ie) { $('.Area_RowDiv_Class_".$col."').css('margin-left','".((($Line_Height)*$cols_Area_Lines[$col]) + ($width/1.8))."px'); } else { $('.Area_RowDiv_Class_".$col."').css('padding-right','".(($width/1.8))."px'); $('.Area_RowDiv_Class_".$col."').css('margin-left','1px'); }";
+		print "if(!$.browser.ie) { $('.Entity2_RowDiv_Class_".$col."').css('margin-left','".((($Line_Height)*$ColsEntity2Lines[$col]) + ($width/1.8))."px'); } else { $('.Entity2_RowDiv_Class_".$col."').css('padding-right','".(($width/1.8))."px'); $('.Entity2_RowDiv_Class_".$col."').css('margin-left','1px'); }";
 
-		if($columns_Span[$col] > 0)
+		if($ColumnsSpan[$col] > 0)
 		{
-			if($Cat_Area_Rotation[$col])
+			if($CatEntity2Rotation[$col])
 			{
-				$width = $Cat_Area_Col_width[$col] - ($cols_Cat_Lines[$col]*($Line_Height));
+				$width = $CatEntity2Colwidth[$col] - ($cols_Cat_Lines[$col]*($Line_Height));
 				
 				print "if(!$.browser.ie) { $('.Cat_RowDiv_Class_".$col."').css('margin-left','".((($Line_Height)*$cols_Cat_Lines[$col]) + ($width/1.8))."px'); } else { $('.Cat_RowDiv_Class_".$col."').css('padding-right','".(($width/1.8))."px'); }";
 			}
@@ -2617,11 +2319,11 @@ var docWidth = $(document).width();
 if (docWidth > winWidth)
 {
 //alert("Horizontal Scrollbar Present");
-$('.product_col').css('max-width','400px');
-$('.product_col').css('min-width','400px');
-$('.product_col').css('white-space','wrap');
-$('.product_col').css('word-wrap','break-word');
-$('.product_col').css('_width','400px');
+$('.Entity1_col').css('max-width','400px');
+$('.Entity1_col').css('min-width','400px');
+$('.Entity1_col').css('white-space','wrap');
+$('.Entity1_col').css('word-wrap','break-word');
+$('.Entity1_col').css('_width','400px');
 }
 // Default size
 document.getElementById("startrange").style.width = "30px";

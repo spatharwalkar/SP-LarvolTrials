@@ -51,7 +51,7 @@ function showProductTracker($id, $dwcount, $TrackerType, $page=1)
 	$inner_width = $Return['inner_width'];
 	$column_width = $Return['column_width'];
 	$ratio = $Return['ratio'];
-	$areaId = $Return['areaId'];
+	$entity2Id = $Return['entity2Id'];
 	$column_interval = $Return['column_interval'];
 	$TrackerType = $Return['TrackerType'];
 	$TotalPages = $Return['TotalPages'];
@@ -72,7 +72,7 @@ function showProductTracker($id, $dwcount, $TrackerType, $page=1)
 	if($TrackerType=='PTH' || $TrackerType=='CPTH')
 	$HTMLContent .= TrackerHeaderHTMLContent($id, $Report_DisplayName, $TrackerType);
 	
-	$HTMLContent .= TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $inner_columns, $inner_width, $column_width, $ratio, $areaId, $column_interval, $TrackerType, $dwcount, $uniqueId);
+	$HTMLContent .= TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $inner_columns, $inner_width, $column_width, $ratio, $entity2Id, $column_interval, $TrackerType, $dwcount, $uniqueId);
 	
 	if($TotalPages > 1)
 	{
@@ -110,7 +110,8 @@ function DataGenerator($id, $TrackerType, $page=1)
 	$max_count = 0;
 
 	$Report_DisplayName = NULL;
-	$areaId = NULL;
+	$entity2Id = NULL;
+	$entity2Type = NULL;
 	//END DATA
 	
 	if($TrackerType == 'PTH')	//PT=PRODUCT TRACKER (MAIN PT PAGE)
@@ -120,7 +121,8 @@ function DataGenerator($id, $TrackerType, $page=1)
 		$res = mysql_fetch_array($res) or die('Report not found.');
 		$Report_DisplayName=$res['display_name'];
 		
-		$query = 'SELECT `num`,`type`,`type_id`, `display_name`, `category`, `tag` FROM `rpt_masterhm_headers` WHERE `report`=' . $id . ' AND type = \'product\' ORDER BY num ASC';
+		//Get all products mentioned anywhere in HM report
+		$query = 'SELECT rpt.`num` AS num, rpt.`type` AS type, rpt.`type_id` AS type_id, rpt.`display_name` AS display_name, rpt.`category` AS category, rpt.`tag` AS tag, et.`class` AS class FROM `rpt_masterhm_headers` rpt JOIN `entities` et ON (et.`id` = rpt.`type_id`) WHERE rpt.`report`=' . $id . ' AND et.`class`="Product" ORDER BY rpt.`num` ASC';
 		$res = mysql_query($query) or die('Bad SQL query getting master heatmap report headers');
 		while($header = mysql_fetch_array($res))
 		{
@@ -135,15 +137,16 @@ function DataGenerator($id, $TrackerType, $page=1)
 		}
 		
 		// SELECT MAX NUM of Area
-		$query = 'SELECT MAX(`num`) AS `num` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' AND type = \'area\'';
+		$query = 'SELECT MAX(`num`) AS `num` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' AND type = \'column\'';
 		$res = mysql_query($query) or die(mysql_error());
 		$header = mysql_fetch_array($res);
 
 		// Max Area Id
-		$query = 'SELECT `type_id` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' AND type = \'area\' AND `num`='.$header['num'];
+		$query = 'SELECT rpt.`type_id` AS type_id, et.`class` AS class FROM `rpt_masterhm_headers` rpt JOIN `entities` et ON (et.`id` = rpt.`type_id`) WHERE report=' . $id . ' AND type = \'column\' AND `num`='.$header['num'];
 		$res = mysql_query($query) or die(mysql_error());
 		$header = mysql_fetch_array($res);
-		$areaId = $header['type_id'];
+		$entity2Id = $header['type_id'];
+		$entity2Type = $header['class'];
 	}
 	else if($TrackerType == 'CPT' || $TrackerType=='CPTH')	//CPT=COMPANY PRODUCT TRACKER CPTH=COMPANY PRODUCT TRACKER HEADER
 	{
@@ -245,10 +248,10 @@ function DataGenerator($id, $TrackerType, $page=1)
 			//// To avoid multiple queries to database, we are quering only one time and retrieveing all data and seprating each type
 			if($TrackerType == 'PTH')
 			{
-				//OLD QUERY TO GET TRIALS USING OLD RELATION TABLES
-				//$phase_query = "SELECT dt.`is_active`, dt.`phase`, dt.`institution_type` FROM rpt_masterhm_cells rpt JOIN product_trials pt ON (rpt.`product` = pt.`product`) JOIN area_trials ar ON (rpt.`area` = ar.`area`) JOIN data_trials dt ON (dt.`larvol_id` = pt.`trial` && dt.`larvol_id` = ar.`trial`) WHERE pt.`product`='" . $productIds[$row] . "' AND ar.`area`='". $areaId ."'";
-				//NEW QUERY TO GET TRIALS USING NEW RELATION TABLES
-				$phase_query = "SELECT dt.`is_active`, dt.`phase`, dt.`institution_type` FROM rpt_masterhm_cells rpt JOIN entity_trials et1 ON (rpt.`product` = et1.`entity`) JOIN entity_trials et2 ON (rpt.`area` = et2.`entity`) JOIN data_trials dt ON (dt.`larvol_id` = et1.`trial` && dt.`larvol_id` = et2.`trial`) WHERE et1.`entity`='" . $productIds[$row] . "' AND et2.`entity`='". $areaId ."'";
+				if($entity2Type != 'Disease')
+					$phase_query = "SELECT dt.`is_active`, dt.`phase`, dt.`institution_type` FROM rpt_masterhm_cells rpt JOIN entity_trials et1 ON (rpt.`entity1` = et1.`entity`) JOIN entity_trials et2 ON (rpt.`entity2` = et2.`entity`) JOIN data_trials dt ON (dt.`larvol_id` = et1.`trial` && dt.`larvol_id` = et2.`trial`) WHERE et1.`entity`='" . $productIds[$row] . "' AND et2.`entity`='". $entity2Id ."'";
+				else
+					$phase_query = "SELECT dt.`is_active`, dt.`phase`, dt.`institution_type` FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) WHERE et.`entity`='" . $productIds[$row] ."' AND dt.`larvol_id` IN (SELECT dt2.`larvol_id` FROM data_trials dt2 JOIN entity_trials et2 ON (dt2.`larvol_id` = et2.`trial`) WHERE et2.`entity`='" . $entity2Id ."')";
 			}
 			else if($TrackerType == 'DPT')
 			{
@@ -407,7 +410,7 @@ function DataGenerator($id, $TrackerType, $page=1)
 	$Return['inner_width'] = $inner_width;
 	$Return['column_width'] = $column_width;
 	$Return['ratio'] = $ratio;
-	$Return['areaId'] = $areaId;
+	$Return['entity2Id'] = $entity2Id;
 	$Return['column_interval'] = $column_interval;
 	$Return['TrackerType'] = $TrackerType;
 	$Return['TotalPages'] = $TotalPages;
@@ -1011,7 +1014,7 @@ function TrackerHeaderHTMLContent($id, $Report_DisplayName, $TrackerType)
 	return $htmlContent;
 }
 
-function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $inner_columns, $inner_width, $column_width, $ratio, $areaId, $column_interval, $TrackerType, $dwcount, $uniqueId)
+function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $inner_columns, $inner_width, $column_width, $ratio, $entity2Id, $column_interval, $TrackerType, $dwcount, $uniqueId)
 {				
 	if(count($productIds) == 0) return 'No Products Found';
 	
@@ -1105,7 +1108,7 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 		
 		$commonPart1 = trim(urlPath()) .'intermediary.php?e1=' . $data_matrix[$row]['productIds'];
 		$commonPart2 = '';
-		if($TrackerType == 'PTH') $commonPart2 = '&e2=' . $areaId . '&hm='.$id;
+		if($TrackerType == 'PTH') $commonPart2 = '&e2=' . $entity2Id . '&hm='.$id;
 		if($TrackerType == 'DPT') $commonPart2 = '&e2=' . $id;
 		$industryLink = $commonPart1 . $commonPart2 . '&list=1&itype=0';
 		$activeLink = $commonPart1 . $commonPart2 . '&list=1';
@@ -1462,7 +1465,7 @@ function Download_reports()
 	$inner_width = $Return['inner_width'];
 	$column_width = $Return['column_width'];
 	$ratio = $Return['ratio'];
-	$areaId = $Return['areaId'];
+	$entity2Id = $Return['entity2Id'];
 	$column_interval = $Return['column_interval'];
 	
 	$total_cols = $inner_columns * $columns;
@@ -1472,7 +1475,7 @@ function Download_reports()
 	$Report_Name = htmlspecialchars((trim($Report_DisplayName) != '' && $Report_DisplayName != NULL)? trim($Report_DisplayName):'report '.$id.'');
 	
 	$commonPart2 = '';
-	if($TrackerType == 'PTH') $commonPart2 = '&e2=' . $areaId . '&hm='.$id;
+	if($TrackerType == 'PTH') $commonPart2 = '&e2=' . $entity2Id . '&hm='.$id;
 	if($TrackerType == 'DPT') $commonPart2 = '&e2=' . $id;
 	
 	if($_POST['dwcount']=='active')
@@ -1577,7 +1580,7 @@ function Download_reports()
 			////// Color Graph - Bar Starts
 				
 			//// Code for Indlead
-			if(isset($data_matrix[$row]['productIds']) && $data_matrix[$row]['productIds'] != NULL && !empty($areaId))
+			if(isset($data_matrix[$row]['productIds']) && $data_matrix[$row]['productIds'] != NULL && !empty($entity2Id))
 			{
 				/// Product Column
 				$rdesc = (isset($rowsDescription[$row]) && $rowsDescription[$row] != '')?$rowsDescription[$row]:null;
