@@ -948,7 +948,10 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 				if($currentType != $typeWithoutQuotes)
 				{
 					echo $currentType."---".$typeWithoutQuotes."---".$name."<br/>";
-					$query = "update `$actual_table` set `name`=$name, `type`=$type where `name`=$name";
+					if($actual_table<>'entities')
+						$query = "update `$actual_table` set `name`=$name, `type`=$type where `name`=$name";
+					else
+						$query = "update `$actual_table` set `name`=$name, `class`=$type where `name`=$name";
 					if(mysql_query($query))
 					{
 						$updateCnt++;
@@ -1137,6 +1140,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 					$escInstname = mysql_real_escape_string($extraData['institutionNamesArray'][$KeyInst]);
 					$Instquery = "select id from institutions where `LI_id`='{$escInstlid}' OR `name`='{$escInstname}' limit 1";
 					$Instresult = mysql_query($Instquery);
+					
 					$InstPresent = false;
 					if($Instresult)
 					{
@@ -1175,8 +1179,26 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 						if($InstAssoInsert)
 						{
 							//$InstAssocInsertquery = "INSERT INTO products_institutions (`product`, `institution`) VALUES ('{$ProdID}','{$InstIdLocal}')";
-							$InstAssocInsertquery = "INSERT INTO entity_relations (`parent`, `child`) VALUES ('{$ProdID}','{$InstIdLocal}')";
+							$InstAssocInsertquery = "INSERT INTO entity_relations values ('" .  $ProdID  . "', '" . $InstIdLocal . "')";
 							$InstAssocInsertresult = mysql_query($InstAssocInsertquery);
+							if(!$InstAssocInsertresult)
+							{
+								pr('Cannot update entity relations  <br>Query:'.$InstAssocInsertquery.'<br/>');
+								pr(mysql_errno());
+								pr(mysql_error());
+								return false;
+							}
+							else
+							{
+								if(!mysql_query('COMMIT'))
+								{
+									$log='There seems to be a problem while committing the transaction. Error:' . mysql_error();
+									$logger->error($log);
+									mysql_query('ROLLBACK');
+									echo $log;
+									return false;
+								}
+							}
 						}
 					}
 					else
@@ -3045,7 +3067,7 @@ function ArrangeTableColumns($columnList, $NewFieldPos)
 */
 function parseInstitutionsXmlAndSave($xmlImport,$table)
 {
-	$importKeys = array('LI_id','name','type','display_name','is_active','created','modified','search_terms','client_name','xml');
+	$importKeys = array('LI_id','name','category','display_name','is_active','created','modified','search_name','client_name','xml');
 	$success = $fail = $skip = $delete = 0;
 	foreach($xmlImport->getElementsByTagName('Institution') as $institution)
 	{
