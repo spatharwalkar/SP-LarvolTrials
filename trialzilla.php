@@ -296,7 +296,7 @@ a:visited {color:#6600bc;}  /* visited link */
 					print ' 		<a href="'. trim(urlPath()) .'intermediary.php?p='. trim($DataArray[$index]['id']) .'" title="Product" target="_blank">'.formatBrandName($DataArray[$index]['name'], 'product') . $DataArray[$index]['company'] .'</a>&nbsp;&nbsp;('.GetTrialsCountFromProduct(trim($DataArray[$index]['id'])).' Trials)';
 				}
 				else if($DataArray[$index]['type'] == 'Disease')
-						print ' 		<a href="'. trim(urlPath()) .'trialzilla_disease.php?DiseaseId='. trim($DataArray[$index]['id']) .'" title="Disease" target="_blank">'.$DataArray[$index]['name'] .'</a>';
+						print ' 		<a href="'. trim(urlPath()) .'trialzilla_disease.php?DiseaseId='. trim($DataArray[$index]['id']) .'" title="Disease" target="_blank">'.$DataArray[$index]['name'] .'</a>&nbsp;&nbsp;('.GetProductsCountFromDisease(trim($DataArray[$index]['id'])).' Products)';
 				else if($DataArray[$index]['type'] == 'MOA_Category')
 				{
 						print ' 	<a href="'. trim(urlPath()) .'trialzilla_moacategory.php?MoaCatId='. trim($DataArray[$index]['id']) .'" title="MOA Category" target="_blank"><b>'.$DataArray[$index]['name'] .'</b></a>&nbsp;&nbsp;('.GetProductsCountFromMOACat(trim($DataArray[$index]['id'])).' Products)';
@@ -435,9 +435,10 @@ function GetProductsCountFromCompany($companyID)
 	global $db;
 	global $now;
 	$ProductsCount = 0;
-	/* COUNT QUERY THROUGH ENTITY_RELATIONS
-	$query = "SELECT count(Distinct(et.`id`)) as proCount FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`) WHERE et.`class`='Product' AND er.`child`='" . mysql_real_escape_string($companyID) . "'";*/
-	$query = "SELECT count(Distinct(et.`id`)) as proCount FROM `entities` et LEFT JOIN `products_institutions` pi ON(et.`id` = pi.`product`) WHERE et.`class`='Product' AND pi.`institution`='" . mysql_real_escape_string($companyID) . "'";
+	/* COUNT QUERY THROUGH ENTITY_RELATIONS*/
+	$query = "SELECT count(Distinct(et.`id`)) as proCount FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`) WHERE et.`class`='Product' AND er.`child`='" . mysql_real_escape_string($companyID) . "'";
+	/* COUNT QUERY THROUGH OLD RELATION TABLE*/
+	//$query = "SELECT count(Distinct(et.`id`)) as proCount FROM `entities` et JOIN `products_institutions` pi ON(et.`id` = pi.`product`) WHERE et.`class`='Product' AND pi.`institution`='" . mysql_real_escape_string($companyID) . "'";
 	$res = mysql_query($query) or die('Bad SQL query getting products count from company id in TZ');
 	
 	if($res)
@@ -455,6 +456,23 @@ function GetProductsCountFromMOACat($moaCatID)
 	global $now;
 	$ProductsCount = 0;
 	$query = "SELECT count(Distinct(et.`id`)) as proCount FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`)  WHERE et.`class`='Product' and er.`child` IN (SELECT et2.`id` FROM `entities` et2 JOIN `entity_relations` er2 ON(et2.`id` = er2.`child`)  WHERE et2.`class`='MOA' AND er2.`parent`='". mysql_real_escape_string($moaCatID) ."')";
+	$res = mysql_query($query) or die('Bad SQL query getting products count from company id in TZ');
+	
+	if($res)
+	{
+		while($row = mysql_fetch_array($res))
+		$ProductsCount = $row['proCount'];
+	}
+	return $ProductsCount;
+}
+
+/* Function to get Product count from Disease id */
+function GetProductsCountFromDisease($DiseaseID)
+{
+	global $db;
+	global $now;
+	$ProductsCount = 0;
+	$query = "SELECT count(DISTINCT (e.`id`)) as proCount FROM `entities` e JOIN `entity_trials` et ON(et.`entity` = e.`id`) JOIN `entity_trials` et2 ON(et2.`trial` = et.`trial`) WHERE e.`class` = 'Product' AND et2.`entity`='" . mysql_real_escape_string($DiseaseID) . "'";
 	$res = mysql_query($query) or die('Bad SQL query getting products count from company id in TZ');
 	
 	if($res)

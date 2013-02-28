@@ -145,6 +145,7 @@ a:visited {color:#6600bc;}  /* visited link */
 <script src="scripts/jquery-1.7.1.min.js"></script>
 <script src="scripts/jquery-ui-1.8.17.custom.min.js"></script>
 <script type="text/javascript" src="scripts/chrome.js"></script>
+<script type="text/javascript" src="scripts/iepngfix_tilebg.js"></script>
 </head>
 
 <body style="background-color:#FFFFFF;">
@@ -166,24 +167,24 @@ a:visited {color:#6600bc;}  /* visited link */
 <tr><td>
 <ul id="disease_tabs">
     <li><a href="#" title="Products">Products</a></li>
-    <!--<li><a href="#" title="Companies">Companies</a></li>
-    <li><a href="#" title="MOAs">MOAs</a></li>
-    <li><a href="#" title="Conferences">Conferences</a></li> -->   
+    <li><a href="#" title="Companies">Companies</a></li>
+   <!-- <li><a href="#" title="MOAs">MOAs</a></li>
+    <li><a href="#" title="Conferences">Conferences</a></li>  -->  
 </ul>
 
 <div id="diseaseTab_content"> 
     <div id="Products" align="center">        
 			<?php print showProductTracker($DiseaseId, $dwcount, 'DPT', $page); //DPT=DISEASE PRODUCT TRACKER ?>
     </div>
-  <!--  <div id="Companies">
-       		<?php //print showCompanyTracker($DiseaseId, 'DCT'); //DCT=DISEASE COMPANY TRACKER ?>
+    <div id="Companies">
+       		<?php print showCompanyTracker($DiseaseId, 'DCT'); //DCT=DISEASE COMPANY TRACKER ?>
     </div>
     <div id="MOAs">
         MOA Tracker
     </div>
     <div id="Conferences">
         Conferences
-    </div>-->
+    </div>
 </div>
 </td></tr>
 </table>
@@ -193,11 +194,11 @@ a:visited {color:#6600bc;}  /* visited link */
 
 </body>
 </html>
-<script>/*
+<script>
 $(document).ready(function() {
 	//$("#diseaseTab_content div").hide(); // Initially hide all content
 	///Hide all main divs
-	$("#Products").hide(); // Initially hide all content
+	//$("#Products").hide(); // Initially hide all content
 	$("#Companies").hide(); // Initially hide all content
 	$("#MOAs").hide(); // Initially hide all content
 	$("#Conferences").hide(); // Initially hide all content
@@ -220,5 +221,5 @@ $(document).ready(function() {
         $(this).parent().attr("id","current"); // Activate this
         $('#' + $(this).attr('title')).fadeIn(); // Show content for current tab
     });
-});*/
+});
 </script>

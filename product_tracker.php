@@ -16,10 +16,15 @@ if(isset($_REQUEST['dwcount']))
 else
 {
 	if( ( (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE) || !isset($_SERVER['HTTP_REFERER']) ) && ( !isset($_REQUEST['LI']) || $_REQUEST['LI'] != 1) )
-	$dwcount = 'total';
+		$dwcount = 'total';
 	else
-	$dwcount = 'indlead';
+		$dwcount = 'indlead';
 }
+$phase = 'na';
+if(isset($_REQUEST['phase']))
+{
+	$phase = mysql_real_escape_string($_REQUEST['phase']);
+}	
 	
 $page = 1;	
 if(isset($_REQUEST['page']) && is_numeric($_REQUEST['page']))
@@ -34,10 +39,10 @@ if($_POST['download'])
 }
 
 ////Process Report Tracker
-function showProductTracker($id, $dwcount, $TrackerType, $page=1)
+function showProductTracker($id, $dwcount, $TrackerType, $page=1, $phase='na')
 {
 	$HTMLContent = '';
-	$Return = DataGenerator($id, $TrackerType, $page);
+	$Return = DataGenerator($id, $TrackerType, $page, $phase);
 	$uniqueId = uniqid();
 
 	///Required Data restored
@@ -57,7 +62,7 @@ function showProductTracker($id, $dwcount, $TrackerType, $page=1)
 	$TotalPages = $Return['TotalPages'];
 	
 	$MainPageURL = 'product_tracker.php';	//PT=PRODUCT TRACKER (MAIN PT PAGE)
-	if($TrackerType == 'CPT' || $TrackerType=='CPTH')	//CPT=COMPANY PRODUCT TRACKER CPTH=COMPANY PRODUCT TRACKER With HEADER
+	if($TrackerType == 'CPT')	//CPT=COMPANY PRODUCT TRACKER CPTH=COMPANY PRODUCT TRACKER With HEADER
 		$MainPageURL = 'trialzilla_company.php';
 	else if($TrackerType == 'MPT')	//MPT=MOA PRODUCT TRACKER
 		$MainPageURL = 'trialzilla_moa.php';
@@ -72,7 +77,7 @@ function showProductTracker($id, $dwcount, $TrackerType, $page=1)
 	if($TrackerType=='PTH' || $TrackerType=='CPTH')
 	$HTMLContent .= TrackerHeaderHTMLContent($id, $Report_DisplayName, $TrackerType);
 	
-	$HTMLContent .= TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $inner_columns, $inner_width, $column_width, $ratio, $entity2Id, $column_interval, $TrackerType, $dwcount, $uniqueId);
+	$HTMLContent .= TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $inner_columns, $inner_width, $column_width, $ratio, $entity2Id, $column_interval, $TrackerType, $dwcount, $uniqueId, $phase);
 	
 	if($TotalPages > 1)
 	{
@@ -80,7 +85,7 @@ function showProductTracker($id, $dwcount, $TrackerType, $page=1)
 		$HTMLContent .= '<br/><br/>'.$paginate[1];
 	}
 	
-	$HTMLContent .= TrackerCommonJScript($id, $TrackerType, $uniqueId, $page, $MainPageURL);
+	$HTMLContent .= TrackerCommonJScript($id, $TrackerType, $uniqueId, $page, $MainPageURL, $phase);
 	
 	if($TrackerType=='PTH' || $TrackerType=='CPTH')
 	$HTMLContent .= "<script language=\"javascript\" type=\"text/javascript\">//change_view_".$uniqueId."_();</script>";
@@ -90,7 +95,7 @@ function showProductTracker($id, $dwcount, $TrackerType, $page=1)
 }
 ///End of Process Report Tracker
 
-function DataGenerator($id, $TrackerType, $page=1)
+function DataGenerator($id, $TrackerType, $page=1, $phase)
 {
 	global $db;
 	global $now;
@@ -148,7 +153,7 @@ function DataGenerator($id, $TrackerType, $page=1)
 		$entity2Id = $header['type_id'];
 		$entity2Type = $header['class'];
 	}
-	else if($TrackerType == 'CPT' || $TrackerType=='CPTH')	//CPT=COMPANY PRODUCT TRACKER CPTH=COMPANY PRODUCT TRACKER HEADER
+	else if($TrackerType == 'CPT' || $TrackerType=='CPTH')	//CPT=COMPANY PRODUCT TRACKER	//CPTH=COMPANY PRODUCT TRACKER HEADER
 	{
 		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class`="Institution" and id=' . $id;
 		$res = mysql_query($query) or die(mysql_error());
@@ -156,7 +161,7 @@ function DataGenerator($id, $TrackerType, $page=1)
 		$Report_DisplayName = $header['name'];
 		if($header['display_name'] != NULL && $header['display_name'] != '')
 				$Report_DisplayName = $header['display_name'];	
-		$productIds = GetProductsFromCompany($header['id']);
+		$productIds = GetProductsFromCompany($header['id'], $TrackerType, $phase);
 		$id=$header['id'];
 	}
 	else if($TrackerType == 'MPT')	//MPT=MOA PRODUCT TRACKER
@@ -726,12 +731,15 @@ function TrackerCommonCSS($uniqueId, $TrackerType)
 	return $htmlContent;				
 }
 
-function TrackerCommonJScript($id, $TrackerType, $uniqueId, $page, $MainPageURL)
+function TrackerCommonJScript($id, $TrackerType, $uniqueId, $page, $MainPageURL, $phase)
 {
 	$htmlContent = '';
 	
 	$url = 'id=' . $id .'&page=' . $page;	//PT=PRODUCT TRACKER (MAIN PT PAGE)
-	if($TrackerType == 'CPT' || $TrackerType=='CPTH')	//CPT=COMPANY PRODUCT TRACKER CPTH=COMPANY PRODUCT TRACKER With HEADER
+	
+	if($TrackerType=='CPTH')	//CPTH=COMPANY PRODUCT TRACKER With HEADER
+		$url .= '&TrackerType='.$TrackerType.'&phase=' . $phase;
+	else if($TrackerType == 'CPT')	//CPT=COMPANY PRODUCT TRACKER
 		$url = 'CompanyId=' . $id .'&page=' . $page;
 	else if($TrackerType == 'MPT')	//MPT=MOA PRODUCT TRACKER
 		$url = 'MoaId=' . $id .'&page=' . $page;
@@ -1014,7 +1022,7 @@ function TrackerHeaderHTMLContent($id, $Report_DisplayName, $TrackerType)
 	return $htmlContent;
 }
 
-function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $inner_columns, $inner_width, $column_width, $ratio, $entity2Id, $column_interval, $TrackerType, $dwcount, $uniqueId)
+function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $inner_columns, $inner_width, $column_width, $ratio, $entity2Id, $column_interval, $TrackerType, $dwcount, $uniqueId, $phase)
 {				
 	if(count($productIds) == 0) return 'No Products Found';
 	
@@ -1054,6 +1062,7 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 					. '<option value="tsvdown">TSV</option>'
 					. '</select></li>'
 					. '</ul>'
+					. (($TrackerType=='CPTH') ? '<input type="hidden" value="'.$phase.'" name="phase" />' : '')
 					. '<input type="submit" name="download" title="Download" value="Download file" style="margin-left:8px;"  />'
 					. '</div></div>'
 					. '</div><script type="text/javascript">cssdropdown.startchrome("'.$uniqueId.'_chromemenu");</script>'
@@ -1106,10 +1115,10 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 	{	
 		$row = $incr;
 		
-		$commonPart1 = trim(urlPath()) .'intermediary.php?e1=' . $data_matrix[$row]['productIds'];
+		$commonPart1 = trim(urlPath()) .'intermediary.php?p=' . $data_matrix[$row]['productIds'];
 		$commonPart2 = '';
-		if($TrackerType == 'PTH') $commonPart2 = '&e2=' . $entity2Id . '&hm='.$id;
-		if($TrackerType == 'DPT') $commonPart2 = '&e2=' . $id;
+		if($TrackerType == 'PTH') $commonPart2 = '&a=' . $entity2Id . '&hm='.$id;
+		if($TrackerType == 'DPT') $commonPart2 = '&a=' . $id;
 		$industryLink = $commonPart1 . $commonPart2 . '&list=1&itype=0';
 		$activeLink = $commonPart1 . $commonPart2 . '&list=1';
 		$totalLink = $commonPart1 . $commonPart2 . '&list=2';
@@ -1341,7 +1350,7 @@ function pagination($TrackerType, $totalPages, $id, $dwcount, $CurrentPage, $Mai
 		
 	
 	$rootUrl = $MainPageURL.'?';
-	$paginateStr = '<table align="center"><tr><td><div class="pagination">';
+	$paginateStr = '<table align="center"><tr><td><span class="pagination">';
 	
 	if($CurrentPage != 1)
 	{
@@ -1424,14 +1433,14 @@ function pagination($TrackerType, $totalPages, $id, $dwcount, $CurrentPage, $Mai
 	{
 		$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . ($CurrentPage+1) . '\'>&raquo;</a>';
 	}
-	$paginateStr .= '</td></tr></table></div>';
+	$paginateStr .= '</td></tr></table></span>';
 	
 	return array($url, $paginateStr);
 }
 
 
 if(isset($_REQUEST['id']) && (isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'CPTH'))
-print showProductTracker($_REQUEST['id'], $dwcount, 'CPTH', $page);	//CPTH - COMPANY PRODUCT TRACKER WITH HEADER
+print showProductTracker($_REQUEST['id'], $dwcount, 'CPTH', $page, $phase);	//CPTH - COMPANY PRODUCT TRACKER WITH HEADER
 else if(isset($_REQUEST['id']))
 print showProductTracker($_REQUEST['id'], $dwcount, 'PTH', $page);	//PTH - Normal PRODUCT TRACKER WITH HEADER
 ?>
@@ -1453,7 +1462,12 @@ function Download_reports()
 	$id = mysql_real_escape_string(htmlspecialchars($_REQUEST['id']));
 	if(!is_numeric($id)) return;
 	$TrackerType = $_REQUEST['TrackerType'];
-	$Return = DataGenerator($id, $TrackerType);
+	$phase = 'na';
+	if(isset($_REQUEST['phase']))
+	{
+		$phase = mysql_real_escape_string($_REQUEST['phase']);
+	}	
+	$Return = DataGenerator($id, $TrackerType, 1, $phase);
 	///Required Data restored
 	$data_matrix = $Return['matrix'];
 	$Report_DisplayName = $Return['report_name'];
@@ -1475,8 +1489,8 @@ function Download_reports()
 	$Report_Name = htmlspecialchars((trim($Report_DisplayName) != '' && $Report_DisplayName != NULL)? trim($Report_DisplayName):'report '.$id.'');
 	
 	$commonPart2 = '';
-	if($TrackerType == 'PTH') $commonPart2 = '&e2=' . $entity2Id . '&hm='.$id;
-	if($TrackerType == 'DPT') $commonPart2 = '&e2=' . $id;
+	if($TrackerType == 'PTH') $commonPart2 = '&a=' . $entity2Id . '&hm='.$id;
+	if($TrackerType == 'DPT') $commonPart2 = '&a=' . $id;
 	
 	if($_POST['dwcount']=='active')
 	{
@@ -1588,7 +1602,7 @@ function Download_reports()
 				
 				$cell = $Prod_Col . $Excel_HMCounter;
 				$objPHPExcel->getActiveSheet()->SetCellValue($cell, $data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'].((trim($data_matrix[$row]['productTag']) != '') ? ' ['.$data_matrix[$row]['productTag'].']':''));
-				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?e1=' . $data_matrix[$row]['productIds'].$link_part); 
+				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?p=' . $data_matrix[$row]['productIds'].$link_part); 
 				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip($tooltip);
 				if($rdesc)
  			    {
@@ -1620,7 +1634,7 @@ function Download_reports()
 						{
 							$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['indlead_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
 							$phase_space =  $phase_space + $Mini_Bar_Width;
-							$url = urlPath() . 'intermediary.php?e1=' . $data_matrix[$row]['productIds'] . $link_part . '&phase=' . $phase_nums;
+							$url = urlPath() . 'intermediary.php?p=' . $data_matrix[$row]['productIds'] . $link_part . '&phase=' . $phase_nums;
 							$from = CreatePhaseCellforExcelExport($from, $Mini_Bar_Width, $url, $Excel_HMCounter, $data_matrix[$row]['indlead_phase_'.$phase_nums], $phase_nums, $objPHPExcel);
 						}
 					}
@@ -1638,7 +1652,7 @@ function Download_reports()
 						{
 							$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['active_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
 							$phase_space =  $phase_space + $Mini_Bar_Width;
-							$url = urlPath() . 'intermediary.php?e1=' . $data_matrix[$row]['productIds'] . $link_part . '&phase=' . $phase_nums;
+							$url = urlPath() . 'intermediary.php?p=' . $data_matrix[$row]['productIds'] . $link_part . '&phase=' . $phase_nums;
 							$from = CreatePhaseCellforExcelExport($from, $Mini_Bar_Width, $url, $Excel_HMCounter, $data_matrix[$row]['active_phase_'.$phase_nums], $phase_nums, $objPHPExcel);
 						}
 					}
@@ -1656,7 +1670,7 @@ function Download_reports()
 						{
 							$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['total_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
 							$phase_space =  $phase_space + $Mini_Bar_Width;
-							$url = urlPath() . 'intermediary.php?e1=' . $data_matrix[$row]['productIds'] . $link_part . '&phase=' . $phase_nums;
+							$url = urlPath() . 'intermediary.php?p=' . $data_matrix[$row]['productIds'] . $link_part . '&phase=' . $phase_nums;
 							$from = CreatePhaseCellforExcelExport($from, $Mini_Bar_Width, $url, $Excel_HMCounter, $data_matrix[$row]['total_phase_'.$phase_nums], $phase_nums, $objPHPExcel);
 						}
 					}
@@ -1937,7 +1951,7 @@ function Download_reports()
 			$Place_Y = $pdf->GetY();
 		
 			$ln=0;
-			$pdfContent = '<div align="right" style="vertical-align:top; float:none;"><a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?e1=' . $data_matrix[$row]['productIds'] . $link_part . '" target="_blank" title="'. $title .'">'.$data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font style="color:#120f3c;">['.$data_matrix[$row]['productTag'].']</font>':'').'</div>';
+			$pdfContent = '<div align="right" style="vertical-align:top; float:none;"><a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . $link_part . '" target="_blank" title="'. $title .'">'.$data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font style="color:#120f3c;">['.$data_matrix[$row]['productTag'].']</font>':'').'</div>';
 			$border = array('mode' => 'ext', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(204,204,204)));
 			
 			$pdf->SetFont('freesans', ' ', 8, '', false); // Font size as 8
@@ -2009,7 +2023,7 @@ function Download_reports()
 						while($m < $Mini_Bar_Width)
 						{
 							$Color = getClassNColorforPhase($phase_nums);
-							$pdfContent = '<div align="center" style="vertical-align:top; float:none;"><a style="color:#'.$Color[1].'; text-decoration:none; line-height:2px;" href="'. urlPath() .'intermediary.php?e1=' . $data_matrix[$row]['productIds'] . $link_part .'&phase='. $phase_nums . '" target="_blank" title="'. $title .'">&nbsp;</a></div>';
+							$pdfContent = '<div align="center" style="vertical-align:top; float:none;"><a style="color:#'.$Color[1].'; text-decoration:none; line-height:2px;" href="'. urlPath() .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . $link_part .'&phase='. $phase_nums . '" target="_blank" title="'. $title .'">&nbsp;</a></div>';
 							$pdf->MultiCell($Width, $Line_Height, $pdfContent, $border=0, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$Line_Height);
 							$Place_X = $Place_X + $Width;
 							$m++;
@@ -2039,7 +2053,7 @@ function Download_reports()
 						while($m < $Mini_Bar_Width)
 						{
 							$Color = getClassNColorforPhase($phase_nums);
-							$pdfContent = '<div align="center" style="vertical-align:top; float:none;"><a style="color:#'.$Color[1].'; text-decoration:none; line-height:2px;" href="'. urlPath() .'intermediary.php?e1=' . $data_matrix[$row]['productIds'] . $link_part .'&phase='. $phase_nums . '" target="_blank" title="'. $title .'">&nbsp;</a></div>';
+							$pdfContent = '<div align="center" style="vertical-align:top; float:none;"><a style="color:#'.$Color[1].'; text-decoration:none; line-height:2px;" href="'. urlPath() .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . $link_part .'&phase='. $phase_nums . '" target="_blank" title="'. $title .'">&nbsp;</a></div>';
 							$pdf->MultiCell($Width, $Line_Height, $pdfContent, $border=0, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$Line_Height);
 							$Place_X = $Place_X + $Width;
 							$m++;
@@ -2071,7 +2085,7 @@ function Download_reports()
 						while($m < $Mini_Bar_Width)
 						{
 							$Color = getClassNColorforPhase($phase_nums);
-							$pdfContent = '<div align="center" style="vertical-align:top; float:none;"><a style="color:#'.$Color[1].'; text-decoration:none; line-height:2px;" href="'. urlPath() .'intermediary.php?e1=' . $data_matrix[$row]['productIds'] . $link_part .'&phase='. $phase_nums . '" target="_blank" title="'. $title .'">&nbsp;</a></div>';
+							$pdfContent = '<div align="center" style="vertical-align:top; float:none;"><a style="color:#'.$Color[1].'; text-decoration:none; line-height:2px;" href="'. urlPath() .'intermediary.php?p=' . $data_matrix[$row]['productIds'] . $link_part .'&phase='. $phase_nums . '" target="_blank" title="'. $title .'">&nbsp;</a></div>';
 							$pdf->MultiCell($Width, $Line_Height, $pdfContent, $border=0, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$Line_Height);
 							$Place_X = $Place_X + $Width;
 							$m++;
@@ -2675,15 +2689,42 @@ function TotalCountErr($data_matrix, $row, $ratio)
 }
 
 /* Function to get Product Id's from Institution id */
-function GetProductsFromCompany($companyID)
+function GetProductsFromCompany($companyID, $TrackerType, $phase)
 {
 	global $db;
 	global $now;
 	$Products = array();
-	/***************************below changes done so that report is generated from old relations table products_institutions   */
-//	$query = "SELECT et.`id` FROM `entities` et LEFT JOIN `entity_relations` er ON(et.`id` = er.`parent`) WHERE et.`class`='Product' AND er.`child`='" . mysql_real_escape_string($companyID) . "'";
-	$query = "SELECT pt.`id` FROM `products` pt LEFT JOIN `products_institutions` pi ON(pt.`id` = pi.`product`)  WHERE pi.`institution`='" . mysql_real_escape_string($companyID) . "'";
-	/**************************/
+	if($TrackerType == 'CPT')
+	{
+		$query = "SELECT et.`id` FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`) WHERE et.`class`='Product' AND er.`child`='" . mysql_real_escape_string($companyID) . "'";
+		/***************************below old relations table products_institutions   */
+		//$query = "SELECT pt.`id` FROM `products` pt LEFT JOIN `products_institutions` pi ON(pt.`id` = pi.`product`)  WHERE pi.`institution`='" . mysql_real_escape_string($companyID) . "'";
+		/**************************/
+	}
+	else
+	{
+		$includePhase = array();
+		$excludePhase = array();
+		$phase4 = array('4', '3/4', '3b/4');
+		$phase3 = array('3', '2/3', '2b/3', '3a', '3b');
+		$phase2 = array('2', '1/2', '1b/2', '1b/2a', '2a', '2a/2b', '2a/b', '2b');
+		$phase1 = array('1', '0/1', '1a', '1b', '1a/1b', '1c');
+		$phase0 = array('0');
+		$phasena = array('N/A','');
+		if($phase == '4')
+		{ $includePhaseArray = $phase4; $excludePhaseArray = array(); }
+		else if($phase == '3')
+		{ $includePhaseArray = $phase3; $excludePhaseArray = $phase4; }
+		else if($phase == '2')
+		{ $includePhaseArray = $phase2; $excludePhaseArray = array_merge($phase4, $phase3); }
+		else if($phase == '1')
+		{ $includePhaseArray = $phase1; $excludePhaseArray = array_merge($phase4, $phase3, $phase2); }
+		else if($phase == '0')
+		{ $includePhaseArray = $phase0; $excludePhaseArray = array_merge($phase4, $phase3, $phase2, $phase1); }
+		else
+		{ $includePhaseArray = $phasena; $excludePhaseArray = array_merge($phase4, $phase3, $phase2, $phase1, $phase0); }
+		$query = "SELECT et.`id` FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`)". (($phase != 'na') ? "  JOIN `entity_trials` etr ON(et.`id` = etr.`entity`) JOIN `data_trials` dt ON (dt.`larvol_id`= etr.`trial`)" : "") ." WHERE et.`class`='Product'". (($phase != 'na') ? " AND dt.`phase` IN ('". implode('\', \'',$includePhaseArray) ."')" : "") ." AND er.`child`='" . mysql_real_escape_string($companyID) . "' AND et.`id` NOT IN (SELECT DISTINCT et2.`id` FROM `entities` et2 JOIN `entity_trials` etr2 ON(et2.`id` = etr2.`entity`) JOIN `data_trials` dt2 ON (dt2.`larvol_id`= etr2.`trial`) WHERE dt2.`phase` IN ('". implode('\', \'',$excludePhaseArray) ."')) ";
+	}
 	
 	$res = mysql_query($query) or die('Bad SQL query getting products from institution id in PT');
 	
@@ -2722,7 +2763,7 @@ function GetProductsFromDisease($DiseaseID)
 	global $db;
 	global $now;
 	$Products = array();
-	$query = "SELECT DISTINCT `id` FROM `entities` e JOIN `entity_trials` et ON(et.`entity` = e.`id`) WHERE e.`class` = 'Product' AND et.trial IN (select et2.`trial` FROM `entity_trials` et2 WHERE et2.`entity`='" . mysql_real_escape_string($DiseaseID) . "')";
+	$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_trials` et ON(et.`entity` = e.`id`) JOIN `entity_trials` et2 ON(et2.`trial` = et.`trial`) WHERE e.`class` = 'Product' AND et2.`entity`='" . mysql_real_escape_string($DiseaseID) . "'";
 	$res = mysql_query($query) or die('Bad SQL query getting products from Disease id in PT');
 	
 	if($res)

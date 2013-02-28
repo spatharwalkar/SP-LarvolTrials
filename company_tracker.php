@@ -93,10 +93,15 @@ function DataGeneratorForCompanyTracker($id, $TrackerType)
 			$data_matrix[$key]['ColumnsLink'] = trim(urlPath()) .'product_tracker.php?id=' . $data_matrix[$key]['ID'] . '&TrackerType=CPTH';
 			
 			///// Initialize data
+			$data_matrix[$key]['phase_na']=0;
+			$data_matrix[$key]['phase_0']=0;
+			$data_matrix[$key]['phase_1']=0;
+			$data_matrix[$key]['phase_2']=0;
+			$data_matrix[$key]['phase_3']=0;
+			$data_matrix[$key]['phase_4']=0;
+			
 			$data_matrix[$key]['TotalCount'] = 0;
-			$data_matrix[$key]['HighPhasePNTR'] = 0;
-			$productIds = array();
-			$CurrentPhasePNTR = 0;
+			$productIds = array();			
 			
 			$productIds = GetProductsFromCompany_CompanyTracker($CompanyId);
 			
@@ -106,44 +111,49 @@ function DataGeneratorForCompanyTracker($id, $TrackerType)
 				
 			if($data_matrix[$key]['TotalCount'] > 0)
 			{
-				$phase_query = "SELECT distinct (dt.`phase`) FROM `data_trials` dt JOIN  `entity_trials` et ON (dt.`larvol_id` = et.`trial`) WHERE et.`entity` IN (" . implode(', ', $productIds) .")";	//SELECTING DISTINCT PHASES SO WE WILL HAVE MIN ROWS TO PROCESS
-				
-				$phase_res = mysql_query($phase_query) or die(mysql_error());
-				while($phase_row=mysql_fetch_array($phase_res))
+				foreach($productIds as $proId)
 				{
-					if($phase_row['phase'] == 'N/A' || $phase_row['phase'] == '' || $phase_row['phase'] === NULL)
+					$MAXPhasePNTR = 0;
+					$phase_query = "SELECT distinct (dt.`phase`) FROM `data_trials` dt JOIN  `entity_trials` et ON (dt.`larvol_id` = et.`trial`) WHERE et.`entity` = '". $proId ."'";	//SELECTING DISTINCT PHASES SO WE WILL HAVE MIN ROWS TO PROCESS
+				
+					$phase_res = mysql_query($phase_query) or die(mysql_error());
+					while($phase_row=mysql_fetch_array($phase_res))
 					{
-						$CurrentPhasePNTR = 0;
-					}
-					else if($phase_row['phase'] == '0')
-					{
-						$CurrentPhasePNTR = 1;
-					}
-					else if($phase_row['phase'] == '1' || $phase_row['phase'] == '0/1' || $phase_row['phase'] == '1a' 
-					|| $phase_row['phase'] == '1b' || $phase_row['phase'] == '1a/1b' || $phase_row['phase'] == '1c')
-					{
-						$CurrentPhasePNTR = 2;
-					}
-					else if($phase_row['phase'] == '2' || $phase_row['phase'] == '1/2' || $phase_row['phase'] == '1b/2' 
-					|| $phase_row['phase'] == '1b/2a' || $phase_row['phase'] == '2a' || $phase_row['phase'] == '2a/2b' 
-					|| $phase_row['phase'] == '2a/b' || $phase_row['phase'] == '2b')
-					{
-						$CurrentPhasePNTR = 3;
-					}
-					else if($phase_row['phase'] == '3' || $phase_row['phase'] == '2/3' || $phase_row['phase'] == '2b/3' 
-					|| $phase_row['phase'] == '3a' || $phase_row['phase'] == '3b')
-					{
-						$CurrentPhasePNTR = 4;
-					}	
-					else if($phase_row['phase'] == '4' || $phase_row['phase'] == '3/4' || $phase_row['phase'] == '3b/4')
-					{
-						$CurrentPhasePNTR = 5;	
-					}
-					
-					if($data_matrix[$key]['HighPhasePNTR'] < $CurrentPhasePNTR)
-						$data_matrix[$key]['HighPhasePNTR'] = $CurrentPhasePNTR;
-					
-				}	//END OF WHILE FETCH TRIALS FOR GETTTING PHASE
+						if($phase_row['phase'] == 'N/A' || $phase_row['phase'] == '' || $phase_row['phase'] === NULL)
+						{
+							$CurrentPhasePNTR = 0;
+						}
+						else if($phase_row['phase'] == '0')
+						{
+							$CurrentPhasePNTR = 1;
+						}
+						else if($phase_row['phase'] == '1' || $phase_row['phase'] == '0/1' || $phase_row['phase'] == '1a' 
+						|| $phase_row['phase'] == '1b' || $phase_row['phase'] == '1a/1b' || $phase_row['phase'] == '1c')
+						{
+							$CurrentPhasePNTR = 2;
+						}
+						else if($phase_row['phase'] == '2' || $phase_row['phase'] == '1/2' || $phase_row['phase'] == '1b/2' 
+						|| $phase_row['phase'] == '1b/2a' || $phase_row['phase'] == '2a' || $phase_row['phase'] == '2a/2b' 
+						|| $phase_row['phase'] == '2a/b' || $phase_row['phase'] == '2b')
+						{
+							$CurrentPhasePNTR = 3;
+						}
+						else if($phase_row['phase'] == '3' || $phase_row['phase'] == '2/3' || $phase_row['phase'] == '2b/3' 
+						|| $phase_row['phase'] == '3a' || $phase_row['phase'] == '3b')
+						{
+							$CurrentPhasePNTR = 4;
+						}	
+						else if($phase_row['phase'] == '4' || $phase_row['phase'] == '3/4' || $phase_row['phase'] == '3b/4')
+						{
+							$CurrentPhasePNTR = 5;	
+						}
+						
+						if($MAXPhasePNTR < $CurrentPhasePNTR)
+							$MAXPhasePNTR = $CurrentPhasePNTR;
+						
+					}	//END OF WHILE FETCH TRIALS FOR GETTTING PHASE
+					$data_matrix[$key]['phase_'.$PhaseArray[$MAXPhasePNTR]]++; //INCREASE COUNTER					
+				}	//FOREACH OF PRODUCT
 			}	//END OF IF TOTAL COUNT > 0
 		} //END OF IF - COMPANY ID NULL OR NOT			
 	}	//END OF FOREACH - COMPANY ID ARRAY
@@ -709,6 +719,7 @@ function CompanyTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inne
 	$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 	
 	$Line_Width = 20;
+	$phase_legend_nums = array('4', '3', '2', '1', '0', 'na');
 	
 	$htmlContent = '';
 	$htmlContent .= '<br style="line-height:11px;"/>'
@@ -752,7 +763,7 @@ function CompanyTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inne
 	$htmlContent .= '<th width="8px"></th></tr>';
 
 
-	$htmlContent .= '<tr><th class="RowHeader_col" align="right">Trials</th><th width="8px" class="graph_rightWhite">&nbsp;</th>';
+	$htmlContent .= '<tr><th class="RowHeader_col" align="right">Products</th><th width="8px" class="graph_rightWhite">&nbsp;</th>';
 	$htmlContent .= '<th align="right" class="graph_rightWhite" colspan="1" width="8px">0</th>';
 	for($j=0; $j < $columns; $j++)
 	{
@@ -799,7 +810,7 @@ function CompanyTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inne
 		///Below function will derive number of lines required to display product name, as our graph size is fixed due to fixed scale, we can calculate approx max area  
 		///for product column. From that we can calculate extra height which will be distributed to up and down rows of graph bar, So now IE6/7 as well as chrome will not 
 		///have issue of unequal distrirbution of extra height due to rowspan and bar will remain in middle, without use of JS.
-		$ExtraAdjusterHeight = (($pdf->getNumLines($data_matrix[$key]['HeaderLink'], ((650)*17/90)) * $Line_Width)  - 20) / 2;
+		$ExtraAdjusterHeight = (($pdf->getNumLines($data_matrix[$key]['RowHeader'], ((650)*17/90)) * $Line_Width)  - 20) / 2;
 		
 		for($j=0; $j < $columns; $j++)
 		{
@@ -807,18 +818,25 @@ function CompanyTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inne
 		}
 		$htmlContent .= '<th></th></tr><tr id="'.$uniqueId.'_Graph_Row_B_'.$key.'" class="Link" >';
 		
+		$Err = CountErr($data_matrix, $key, $ratio);
+			
+		$Max_ValueKey = Max_ValueKeyCompanyTracker($data_matrix[$key]['phase_na'], $data_matrix[$key]['phase_0'], $data_matrix[$key]['phase_1'], $data_matrix[$key]['phase_2'], $data_matrix[$key]['phase_3'], $data_matrix[$key]['phase_4']);
+			
 		$total_cols = $inner_columns * $columns;
 		$Total_Bar_Width = ceil($ratio * $data_matrix[$key]['TotalCount']);
-		if($Total_Bar_Width > $total_cols)	$Total_Bar_Width = $total_cols;
 		$phase_space = 0;
 	
-		if($data_matrix[$key]['TotalCount'] > 0)
+		foreach($phase_legend_nums as $phase_nums)
 		{
-			$Color = getClassNColorforPhaseCompanyTracker($PhaseArray[$data_matrix[$key]['HighPhasePNTR']]);
-			$phase_space =  $Total_Bar_Width;					
-			$htmlContent .= '<th colspan="'.$Total_Bar_Width.'" class="Link '.$Color[0].'" title="'.$data_matrix[$key]['TotalCount'].'" style="height:20px; _height:20px;"><a href="'. $data_matrix[$key]['ColumnsLink'] . '" target="_blank" class="Link" >&nbsp;</a></th>';
+			if($data_matrix[$key]['phase_'.$phase_nums] > 0)
+			{
+				$Color = getClassNColorforPhaseCompanyTracker($phase_nums);
+				$Mini_Bar_Width = CalculateMiniBarWidthCompanyTracker($ratio, $data_matrix[$key]['phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
+				$phase_space =  $phase_space + $Mini_Bar_Width;					
+				$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="Link '.$Color[0].'" title="'.$data_matrix[$key]['phase_'.$phase_nums].'" style="height:20px; _height:20px;"><a href="' . $data_matrix[$key]['ColumnsLink'] . '&phase='. $phase_nums . '" target="_blank" class="Link" >&nbsp;</a></th>';
+			}
 		}
-	
+		
 		$remain_span = $total_cols - $phase_space;
 		
 		if($remain_span > 0)
@@ -934,6 +952,8 @@ function DownloadCompanyTrackerReports()
 	
 	$total_cols = $inner_columns * $columns;
 	
+	$phase_legend_nums = array('4', '3', '2', '1', '0', 'na');
+	
 	$Report_Name = $Report_DisplayName;
 	
 	if($TrackerType == 'DCT')	$TrackerName = ' Disease';
@@ -1020,17 +1040,25 @@ function DownloadCompanyTrackerReports()
 			$from++;
 				
 			//// Graph starts
+			$Err = CountErr($data_matrix, $key, $ratio);
+			
+			$Max_ValueKey = Max_ValueKeyCompanyTracker($data_matrix[$key]['phase_na'], $data_matrix[$key]['phase_0'], $data_matrix[$key]['phase_1'], $data_matrix[$key]['phase_2'], $data_matrix[$key]['phase_3'], $data_matrix[$key]['phase_4']);
+			
 			$total_cols = $inner_columns * $columns;
 			$Total_Bar_Width = ceil($ratio * $data_matrix[$key]['TotalCount']);
-			if($Total_Bar_Width > $total_cols)	$Total_Bar_Width = $total_cols;
 			$phase_space = 0;
 			
-			if($data_matrix[$key]['TotalCount'] > 0)
+			foreach($phase_legend_nums as $phase_nums)
 			{
-				$phase_space =  $Total_Bar_Width;
-				$from = CreatePhaseCellforExcelExportCompanyTracker($from, $phase_space, $data_matrix[$key]['ColumnsLink'], $Excel_HMCounter, $data_matrix[$key]['TotalCount'], $PhaseArray[$data_matrix[$key]['HighPhasePNTR']], $objPHPExcel);
+				if($data_matrix[$key]['phase_'.$phase_nums] > 0)
+				{
+					$Mini_Bar_Width = CalculateMiniBarWidthCompanyTracker($ratio, $data_matrix[$key]['phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
+					$phase_space =  $phase_space + $Mini_Bar_Width;					
+					$url .= $data_matrix[$key]['ColumnsLink'] . '&phase='. $phase_nums;
+					$from = CreatePhaseCellforExcelExportCompanyTracker($from, $Mini_Bar_Width, $url, $Excel_HMCounter, $data_matrix[$key]['phase_'.$phase_nums], $phase_nums, $objPHPExcel);
+				}
 			}
-									
+			
 			$remain_span = $total_cols - $phase_space;
 		
 			if($remain_span > 0)
@@ -1146,11 +1174,12 @@ function DownloadCompanyTrackerReports()
 	{
 		$TSV_data = "";
 		
-		$TSV_data = "Company Name \t Highest Phase \t Product Count \n";
+		$TSV_data ="Company Name \t Phase 4 \t Phase 3 \t Phase 2 \t Phase 1 \t Phase 0 \t Phase N/A \n";
 		
 		foreach($IdsArray as $key => $Ids)
 		{
-			$TSV_data .= $data_matrix[$key]['RowHeader']. " \t " . getNameforPhaseCompanyTracker($PhaseArray[$data_matrix[$key]['HighPhasePNTR']]) . " \t " . $data_matrix[$key]['TotalCount']. " \n ";
+			$TSV_data .= $data_matrix[$key]['RowHeader']. " \t ";
+			$TSV_data .= $data_matrix[$key]['phase_4'] ." \t ". $data_matrix[$key]['phase_3'] ." \t ". $data_matrix[$key]['phase_2'] ." \t ". $data_matrix[$key]['phase_1'] ." \t ". $data_matrix[$key]['phase_0'] ." \t ". $data_matrix[$key]['phase_na'] ." \n";
 		}
 		
 		header("Pragma: public");
@@ -1337,28 +1366,36 @@ function DownloadCompanyTrackerReports()
 			$Place_X = $Middle_Place;
 			
 			//// Graph starts
+			$Err = CountErr($data_matrix, $key, $ratio);
+			$Max_ValueKey = Max_ValueKeyCompanyTracker($data_matrix[$key]['phase_na'], $data_matrix[$key]['phase_0'], $data_matrix[$key]['phase_1'], $data_matrix[$key]['phase_2'], $data_matrix[$key]['phase_3'], $data_matrix[$key]['phase_4']);
+				
 			$total_cols = $inner_columns * $columns;
 			$Total_Bar_Width = ceil($ratio * $data_matrix[$key]['TotalCount']);
-			if($Total_Bar_Width > $total_cols)	$Total_Bar_Width = $total_cols;
 			$phase_space = 0;
 			
-			$border = setStyleforPDFExportCompanyTracker($PhaseArray[$data_matrix[$key]['HighPhasePNTR']], $pdf);
-			$Width = $subColumn_width;
-			$Mini_Bar_Width = $Total_Bar_Width;
-			$phase_space =  $phase_space + $Mini_Bar_Width;
-					
-			$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$key]['TotalCount'], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
-					
-			$m=0;
-			while($m < $Mini_Bar_Width)
+			foreach($phase_legend_nums as $phase_nums)
 			{
-				$Color = getClassNColorforPhaseCompanyTracker($PhaseArray[$data_matrix[$key]['HighPhasePNTR']]);
-				$pdfContent = '<div align="center" style="vertical-align:top; float:none;"><a style="color:#'.$Color[1].'; text-decoration:none; line-height:2px;" href="'. $data_matrix[$key]['ColumnsLink'] . '" target="_blank">&nbsp;</a></div>';
-				$pdf->MultiCell($Width, $Line_Height, $pdfContent, $border=0, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$Line_Height);
-				$Place_X = $Place_X + $Width;
-				$m++;
-			}			
-			 			
+				if($data_matrix[$key]['phase_'.$phase_nums] > 0)
+				{
+					$border = setStyleforPDFExportCompanyTracker($phase_nums, $pdf);
+					$Width = $subColumn_width;
+					$Mini_Bar_Width = CalculateMiniBarWidthCompanyTracker($ratio, $data_matrix[$key]['phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
+					$phase_space =  $phase_space + $Mini_Bar_Width;
+						
+					$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$key]['phase_'.$phase_nums], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Products', 'Subj' => 'Information', 'C' => array()));	
+						
+					$m=0;
+					while($m < $Mini_Bar_Width)
+					{
+						$Color = getClassNColorforPhaseCompanyTracker($phase_nums);
+						$pdfContent = '<div align="center" style="vertical-align:top; float:none;"><a style="color:#'.$Color[1].'; text-decoration:none; line-height:2px;" href="'. $data_matrix[$key]['ColumnsLink'] . '&phase='. $phase_nums . '" target="_blank" >&nbsp;</a></div>';
+						$pdf->MultiCell($Width, $Line_Height, $pdfContent, $border=0, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$Line_Height);
+						$Place_X = $Place_X + $Width;
+						$m++;
+					}
+				}
+			} /// Foreach ends
+				 			
 			$remain_span = $total_cols - $phase_space;
 		
 			if($remain_span > 0)
@@ -1511,31 +1548,7 @@ function DownloadCompanyTrackerReports()
 			$CurrentExcelChartArray = array();
 			if(isset($data_matrix[$currentRow]['RowHeader']) && $data_matrix[$currentRow]['RowHeader'] != NULL)
 			{
-				$CurrentExcelChartArray[0] = $data_matrix[$currentRow]['RowHeader'];
-				if($data_matrix[$currentRow]['HighPhasePNTR'] == 0)
-					$CurrentExcelChartArray[1] = $data_matrix[$currentRow]['TotalCount'];
-				else
-					$CurrentExcelChartArray[1] = 0;
-				if($data_matrix[$currentRow]['HighPhasePNTR'] == 1)
-					$CurrentExcelChartArray[2] = $data_matrix[$currentRow]['TotalCount'];
-				else
-					$CurrentExcelChartArray[2] = 0;
-				if($data_matrix[$currentRow]['HighPhasePNTR'] == 2)
-					$CurrentExcelChartArray[3] = $data_matrix[$currentRow]['TotalCount'];
-				else
-					$CurrentExcelChartArray[3] = 0;
-				if($data_matrix[$currentRow]['HighPhasePNTR'] == 3)
-					$CurrentExcelChartArray[4] = $data_matrix[$currentRow]['TotalCount'];
-				else
-					$CurrentExcelChartArray[4] = 0;
-				if($data_matrix[$currentRow]['HighPhasePNTR'] == 4)
-					$CurrentExcelChartArray[5] = $data_matrix[$currentRow]['TotalCount'];
-				else
-					$CurrentExcelChartArray[5] = 0;
-				if($data_matrix[$currentRow]['HighPhasePNTR'] == 5)
-					$CurrentExcelChartArray[6] = $data_matrix[$currentRow]['TotalCount'];
-				else
-					$CurrentExcelChartArray[6] = 0;
+				$CurrentExcelChartArray = array($data_matrix[$currentRow]['RowHeader'], $data_matrix[$currentRow]['phase_na'], $data_matrix[$currentRow]['phase_0'], $data_matrix[$currentRow]['phase_1'], $data_matrix[$currentRow]['phase_2'], $data_matrix[$currentRow]['phase_3'], $data_matrix[$currentRow]['phase_4']);				
 			}
 			else
 			{
@@ -1848,7 +1861,7 @@ function CreateLastTickBorderCompanyTracker(&$pdf, $Header_Col_Width, $Tic_dimen
 	$Main_X = $pdf->GetX();
 	$Main_Y = $pdf->GetY();
 	/// Bypass product column
-	$pdf->MultiCell($Header_Col_Width, $Tic_dimension, 'Trials', 0, $align='R', $fill=0, $ln, $Main_X, $Main_Y, $reseth=false, $stretch=0, $ishtml=false, $autopadding=false, $maxh=0);
+	$pdf->MultiCell($Header_Col_Width, $Tic_dimension, 'Products', 0, $align='R', $fill=0, $ln, $Main_X, $Main_Y, $reseth=false, $stretch=0, $ishtml=false, $autopadding=false, $maxh=0);
 
 	$Place_X = $Main_X+$Header_Col_Width;
 	$Place_Y = $Main_Y;
@@ -1936,6 +1949,15 @@ $max = $valna;
 	return $key;
 }
 
+function CountErr($data_matrix, $key, $ratio)
+{
+	$Rounded = (($data_matrix[$key]['phase_4'] > 0 && round($ratio * $data_matrix[$key]['phase_4']) < 1) ? 1:round($ratio * $data_matrix[$key]['phase_4'])) + (($data_matrix[$key]['phase_3'] > 0 && round($ratio * $data_matrix[$key]['phase_3']) < 1) ? 1:round($ratio * $data_matrix[$key]['phase_3'])) + (($data_matrix[$key]['phase_2'] > 0 && round($ratio * $data_matrix[$key]['phase_2']) < 1) ? 1:round($ratio * $data_matrix[$key]['phase_2'])) + (($data_matrix[$key]['phase_1'] > 0 && round($ratio * $data_matrix[$key]['phase_1']) < 1) ? 1:round($ratio * $data_matrix[$key]['phase_1'])) + (($data_matrix[$key]['phase_0'] > 0 && round($ratio * $data_matrix[$key]['phase_0']) < 1) ? 1:round($ratio * $data_matrix[$key]['phase_0'])) + (($data_matrix[$key]['phase_na'] > 0 && round($ratio * $data_matrix[$key]['phase_na']) < 1) ? 1:round($ratio * $data_matrix[$key]['phase_na']));
+	$Actual = ($ratio * $data_matrix[$key]['phase_4']) + ($ratio * $data_matrix[$key]['phase_3']) + ($ratio * $data_matrix[$key]['phase_2']) + ($ratio * $data_matrix[$key]['phase_1']) + ($ratio * $data_matrix[$key]['phase_0'])+ ($ratio * $data_matrix[$key]['phase_na']);
+	$Err = floor($Rounded - $Actual);
+	
+	return $Err;
+}
+
 function sortTwoDimensionArrayByKeyCompanyTracker($arr, $arrKey, $sortOrder=SORT_DESC)
 {
 	if(is_array($arr) && count($arr) > 0)
@@ -1956,6 +1978,7 @@ function GetProductsFromCompany_CompanyTracker($companyID)
 	global $now;
 	$Products = array();
 	$query = "SELECT et.`id` FROM `entities` et LEFT JOIN `entity_relations` er ON(et.`id` = er.`parent`) WHERE et.`class`='Product' AND er.`child`='" . mysql_real_escape_string($companyID) . "'";
+	//$query = "SELECT pt.`id` FROM `products` pt LEFT JOIN `products_institutions` pi ON(pt.`id` = pi.`product`)  WHERE pi.`institution`='" . mysql_real_escape_string($companyID) . "'";
 	$res = mysql_query($query) or die('Bad SQL query getting products from institution id in company tracker');
 	
 	if($res)
@@ -2000,6 +2023,7 @@ function GetCompaniesFromDisease_CompanyTracker($DiseaseID)
 	if(count($Products) > 0)
 	{
 		$query = "SELECT DISTINCT `id` FROM `entities` e JOIN `entity_relations` er ON(er.`child` = e.`id`) WHERE e.`class` = 'Institution' AND er.`parent` IN (" . implode(',',$Products) . ")";
+		//$query = "SELECT DISTINCT `id` FROM `entities` e JOIN `products_institutions` er ON(er.`institution` = e.`id`) WHERE e.`class` = 'Institution' AND er.`product` IN (" . implode(',',$Products) . ")";
 		$res = mysql_query($query) or die('Bad SQL query getting companies from products ids in CT');
 	
 		if($res)
@@ -2011,5 +2035,23 @@ function GetCompaniesFromDisease_CompanyTracker($DiseaseID)
 		}
 	}
 	return array_filter(array_unique($Companies));
+}
+
+function CalculateMiniBarWidthCompanyTracker($Ratio, $countValue, $Key, $Max_ValueKey, $Err, $Total_Bar_Width)
+{
+	if(round($Ratio * $countValue) > 0)
+		$Mini_Bar_Width = round($Ratio * $countValue);
+	else
+		$Mini_Bar_Width = 1;
+	
+	if($Max_ValueKey == $Key && $Mini_Bar_Width > 1 && $Mini_Bar_Width > $Err)
+	$Mini_Bar_Width = $Mini_Bar_Width - $Err;
+	
+	if(($Total_Bar_Width - $Mini_Bar_Width) > 0)
+		$Total_Bar_Width = $Total_Bar_Width - $Mini_Bar_Width;
+	else
+		$Mini_Bar_Width = $Total_Bar_Width;
+		
+		return $Mini_Bar_Width;
 }
 ?>
