@@ -90,7 +90,7 @@ function DataGeneratorForCompanyTracker($id, $TrackerType)
 			$data_matrix[$key]['RowHeader'] = $result['name'];
 			$data_matrix[$key]['ID'] = $result['id'];
 			$data_matrix[$key]['HeaderLink'] = trim(urlPath()) .'trialzilla_company.php?CompanyId=' . $data_matrix[$key]['ID'];
-			$data_matrix[$key]['ColumnsLink'] = trim(urlPath()) .'product_tracker.php?id=' . $data_matrix[$key]['ID'] . '&TrackerType=CPTH';
+			$data_matrix[$key]['ColumnsLink'] = trim(urlPath()) .'trialzilla_company.php?CompanyId=' . $data_matrix[$key]['ID'] . '&TrackerType=SCPT';
 			
 			///// Initialize data
 			$data_matrix[$key]['phase_na']=0;

@@ -20,11 +20,6 @@ else
 	else
 		$dwcount = 'indlead';
 }
-$phase = 'na';
-if(isset($_REQUEST['phase']))
-{
-	$phase = mysql_real_escape_string($_REQUEST['phase']);
-}	
 	
 $page = 1;	
 if(isset($_REQUEST['page']) && is_numeric($_REQUEST['page']))
@@ -62,7 +57,9 @@ function showProductTracker($id, $dwcount, $TrackerType, $page=1, $phase='na')
 	$TotalPages = $Return['TotalPages'];
 	
 	$MainPageURL = 'product_tracker.php';	//PT=PRODUCT TRACKER (MAIN PT PAGE)
-	if($TrackerType == 'CPT')	//CPT=COMPANY PRODUCT TRACKER CPTH=COMPANY PRODUCT TRACKER With HEADER
+	if($TrackerType == 'SCPT')	//SCPT=SEGMENTED COMPANY PRODUCT TRACKER
+		$MainPageURL = 'trialzilla_company.php';
+	else if($TrackerType == 'CPT')	//CPT=COMPANY PRODUCT TRACKER
 		$MainPageURL = 'trialzilla_company.php';
 	else if($TrackerType == 'MPT')	//MPT=MOA PRODUCT TRACKER
 		$MainPageURL = 'trialzilla_moa.php';
@@ -74,20 +71,20 @@ function showProductTracker($id, $dwcount, $TrackerType, $page=1, $phase='na')
 	
 	$HTMLContent .= TrackerCommonCSS($uniqueId, $TrackerType);
 	
-	if($TrackerType=='PTH' || $TrackerType=='CPTH')
+	if($TrackerType=='PTH')
 	$HTMLContent .= TrackerHeaderHTMLContent($id, $Report_DisplayName, $TrackerType);
 	
 	$HTMLContent .= TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $inner_columns, $inner_width, $column_width, $ratio, $entity2Id, $column_interval, $TrackerType, $dwcount, $uniqueId, $phase);
 	
 	if($TotalPages > 1)
 	{
-		$paginate = pagination($TrackerType, $TotalPages, $id, $dwcount, $page, $MainPageURL);
+		$paginate = pagination($TrackerType, $TotalPages, $id, $dwcount, $page, $MainPageURL, $phase);
 		$HTMLContent .= '<br/><br/>'.$paginate[1];
 	}
 	
 	$HTMLContent .= TrackerCommonJScript($id, $TrackerType, $uniqueId, $page, $MainPageURL, $phase);
 	
-	if($TrackerType=='PTH' || $TrackerType=='CPTH')
+	if($TrackerType=='PTH')
 	$HTMLContent .= "<script language=\"javascript\" type=\"text/javascript\">//change_view_".$uniqueId."_();</script>";
 	
 	return $HTMLContent;
@@ -159,7 +156,7 @@ function DataGenerator($id, $TrackerType, $page=1, $phase)
 			exit();
 		}
 	}
-	else if($TrackerType == 'CPT' || $TrackerType=='CPTH')	//CPT=COMPANY PRODUCT TRACKER	//CPTH=COMPANY PRODUCT TRACKER HEADER
+	else if($TrackerType == 'CPT' || $TrackerType=='SCPT')	//CPT=COMPANY PRODUCT TRACKER	//SCPT=SEGMENETED COMPANY PRODUCT TRACKER
 	{
 		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class`="Institution" and id=' . $id;
 		$res = mysql_query($query) or die(mysql_error());
@@ -484,14 +481,14 @@ function TrackerCommonCSS($uniqueId, $TrackerType)
 					#slideout_'.$uniqueId.' {
 						position: fixed;
 						_position:absolute;
-						top: '.(($TrackerType != 'PTH' && $TrackerType != 'CPTH') ? '200':'80').'px;
+						top: '.(($TrackerType != 'PTH') ? '200':'80').'px;
 						right: 0;
 						margin: 12px 0 0 0;
 					}
 					
 					.slideout_inner {
 						position:absolute;
-						top: '.(($TrackerType != 'PTH' && $TrackerType != 'CPTH') ? '200':'80').'px;
+						top: '.(($TrackerType != 'PTH') ? '200':'80').'px;
 						right: -255px;
 						display:none;
 					}
@@ -740,8 +737,8 @@ function TrackerCommonJScript($id, $TrackerType, $uniqueId, $page, $MainPageURL,
 	
 	$url = 'id=' . $id .'&page=' . $page;	//PT=PRODUCT TRACKER (MAIN PT PAGE)
 	
-	if($TrackerType=='CPTH')	//CPTH=COMPANY PRODUCT TRACKER With HEADER
-		$url .= '&TrackerType='.$TrackerType.'&phase=' . $phase;
+	if($TrackerType=='SCPT')	//CPT=SEGMENTED COMPANY PRODUCT TRACKER
+		$url = 'CompanyId=' . $id .'&TrackerType='.$TrackerType.'&phase=' . $phase.'&page=' . $page;
 	else if($TrackerType == 'CPT')	//CPT=COMPANY PRODUCT TRACKER
 		$url = 'CompanyId=' . $id .'&page=' . $page;
 	else if($TrackerType == 'MPT')	//MPT=MOA PRODUCT TRACKER
@@ -1007,8 +1004,6 @@ function TrackerHeaderHTMLContent($id, $Report_DisplayName, $TrackerType)
 {	
 	if($TrackerType == 'PTH')
 		$Report_Name = ((trim($Report_DisplayName) != '' && $Report_DisplayName != NULL)? trim($Report_DisplayName):'report '.$id.'');
-	if($TrackerType == 'CPTH')
-		$Report_Name = $Report_DisplayName.' Company';
 	
 	$htmlContent = '';
 	
@@ -1065,7 +1060,7 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 					. '<option value="tsvdown">TSV</option>'
 					. '</select></li>'
 					. '</ul>'
-					. (($TrackerType=='CPTH') ? '<input type="hidden" value="'.$phase.'" name="phase" />' : '')
+					. (($TrackerType=='SCPT') ? '<input type="hidden" value="'.$phase.'" name="phase" />' : '')
 					. '<input type="submit" name="download" title="Download" value="Download file" style="margin-left:8px;"  />'
 					. '</div></div>'
 					. '</div><script type="text/javascript">cssdropdown.startchrome("'.$uniqueId.'_chromemenu");</script>'
@@ -1336,14 +1331,16 @@ function DrawExtraHTMLCells($phase_space, $inner_columns, $remain_span)
 	return $extraHTMLContent;
 }
 
-function pagination($TrackerType, $totalPages, $id, $dwcount, $CurrentPage, $MainPageURL)
+function pagination($TrackerType, $totalPages, $id, $dwcount, $CurrentPage, $MainPageURL, $phase)
 {	
 	$url = '';
 	$stages = 1;
 			
 	$url = 'id=' . $id .'&amp;dwcount=' . $dwcount;	//PT=PRODUCT TRACKER (MAIN PT PAGE)
-	if($TrackerType == 'CPT' || $TrackerType=='CPTH')	//CPT=COMPANY PRODUCT TRACKER CPTH=COMPANY PRODUCT TRACKER With HEADER
-		$url = 'CompanyId=' . $id .'&amp;dwcount=' . $dwcount;
+	if($TrackerType == 'SCPT')	//SCPT=COMPANY PRODUCT TRACKER
+		$url = 'CompanyId=' . $id .'&amp;dwcount=' . $dwcount .'&amp;TrackerType='.$TrackerType.'&amp;phase=' . $phase;
+	else if($TrackerType == 'CPT')	//CPT=COMPANY PRODUCT TRACKER 
+		$url = 'CompanyId=' . $id .'&amp;dwcount=' . $dwcount;	
 	else if($TrackerType == 'MPT')	//MPT=MOA PRODUCT TRACKER
 		$url = 'MoaId=' . $id .'&amp;dwcount=' . $dwcount;
 	else if($TrackerType == 'MCPT')	//MMPT= MOA CATEGORY PRODUCT TRACKER
@@ -1442,9 +1439,7 @@ function pagination($TrackerType, $totalPages, $id, $dwcount, $CurrentPage, $Mai
 }
 
 
-if(isset($_REQUEST['id']) && (isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'CPTH'))
-print showProductTracker($_REQUEST['id'], $dwcount, 'CPTH', $page, $phase);	//CPTH - COMPANY PRODUCT TRACKER WITH HEADER
-else if(isset($_REQUEST['id']))
+if(isset($_REQUEST['id']))
 print showProductTracker($_REQUEST['id'], $dwcount, 'PTH', $page);	//PTH - Normal PRODUCT TRACKER WITH HEADER
 ?>
 <?
@@ -1516,7 +1511,7 @@ function Download_reports()
 		$mode = 'indlead';
 	}
 	
-	$TrackerName = (($TrackerType== 'CPT') ? ' Company':'').(($TrackerType== 'MPT') ? ' MOA':'').(($TrackerType== 'DPT') ? ' Disease':'').(($TrackerType== 'CPTH') ? ' Company':'').(($TrackerType== 'MCPT') ? ' MOA Category':'');
+	$TrackerName = (($TrackerType== 'CPT') ? ' Company':'').(($TrackerType== 'MPT') ? ' MOA':'').(($TrackerType== 'DPT') ? ' Disease':'').(($TrackerType== 'SCPT') ? ' Company':'').(($TrackerType== 'MCPT') ? ' MOA Category':'');
 	
 	if($_POST['dwformat']=='exceldown')
 	{
