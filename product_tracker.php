@@ -141,17 +141,23 @@ function DataGenerator($id, $TrackerType, $page=1, $phase)
 			}
 		}
 		
-		// SELECT MAX NUM of Area
+		// SELECT MAX NUM of Entity2
 		$query = 'SELECT MAX(`num`) AS `num` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' AND type = \'column\'';
 		$res = mysql_query($query) or die(mysql_error());
 		$header = mysql_fetch_array($res);
 
-		// Max Area Id
+		// Max Entity2 Id
 		$query = 'SELECT rpt.`type_id` AS type_id, et.`class` AS class FROM `rpt_masterhm_headers` rpt JOIN `entities` et ON (et.`id` = rpt.`type_id`) WHERE report=' . $id . ' AND type = \'column\' AND `num`='.$header['num'];
 		$res = mysql_query($query) or die(mysql_error());
 		$header = mysql_fetch_array($res);
 		$entity2Id = $header['type_id'];
 		$entity2Type = $header['class'];
+		
+		if($entity2Type != 'Product' && $entity2Type != 'Disease' && $entity2Type != 'Area')	//In case of HM having strange last column exit PT by showing message.
+		{
+			print "Product Tracker not supported for ". (($entity2Type == 'Institution') ? 'Company' : $entity2Type) .".";
+			exit();
+		}
 	}
 	else if($TrackerType == 'CPT' || $TrackerType=='CPTH')	//CPT=COMPANY PRODUCT TRACKER	//CPTH=COMPANY PRODUCT TRACKER HEADER
 	{
@@ -253,14 +259,11 @@ function DataGenerator($id, $TrackerType, $page=1, $phase)
 			//// To avoid multiple queries to database, we are quering only one time and retrieveing all data and seprating each type
 			if($TrackerType == 'PTH')
 			{
-				if($entity2Type != 'Disease')
-					$phase_query = "SELECT dt.`is_active`, dt.`phase`, dt.`institution_type` FROM rpt_masterhm_cells rpt JOIN entity_trials et1 ON (rpt.`entity1` = et1.`entity`) JOIN entity_trials et2 ON (rpt.`entity2` = et2.`entity`) JOIN data_trials dt ON (dt.`larvol_id` = et1.`trial` && dt.`larvol_id` = et2.`trial`) WHERE et1.`entity`='" . $productIds[$row] . "' AND et2.`entity`='". $entity2Id ."'";
-				else
-					$phase_query = "SELECT dt.`is_active`, dt.`phase`, dt.`institution_type` FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) WHERE et.`entity`='" . $productIds[$row] ."' AND dt.`larvol_id` IN (SELECT dt2.`larvol_id` FROM data_trials dt2 JOIN entity_trials et2 ON (dt2.`larvol_id` = et2.`trial`) WHERE et2.`entity`='" . $entity2Id ."')";
+				$phase_query = "SELECT DISTINCT dt.`larvol_id`, dt.`is_active`, dt.`phase`, dt.`institution_type` FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) JOIN entity_trials et2 ON (dt.`larvol_id` = et2.`trial`) WHERE et.`entity`='" . $productIds[$row] ."' AND et2.`entity`='" . $entity2Id ."' AND et.`trial` = et2.`trial`";	
 			}
 			else if($TrackerType == 'DPT')
 			{
-				$phase_query = "SELECT dt.`is_active`, dt.`phase`, dt.`institution_type` FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) WHERE et.`entity`='" . $productIds[$row] ."' AND dt.`larvol_id` IN (SELECT dt2.`larvol_id` FROM data_trials dt2 JOIN entity_trials et2 ON (dt2.`larvol_id` = et2.`trial`) WHERE et2.`entity`='" . $id ."')";
+				$phase_query = "SELECT dt.`is_active`, dt.`phase`, dt.`institution_type` FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) JOIN entity_trials et2 ON (dt.`larvol_id` = et2.`trial`) WHERE et.`entity`='" . $productIds[$row] ."' AND et2.`entity`='" . $id ."' AND et.`trial` = et2.`trial`";
 			}
 			else
 			{
