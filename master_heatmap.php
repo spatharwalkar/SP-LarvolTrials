@@ -78,7 +78,7 @@ function get_products() // get list of products
 	$productz=array();
 	$id = mysql_real_escape_string($_GET['id']);
 	$query = '	SELECT `num`,`type`,`type_id`, `display_name`, `category` FROM `rpt_masterhm_headers` 
-				WHERE report=' . $id . ' and type="product" ORDER BY num ASC';
+				WHERE report=' . $id . ' and type="row" ORDER BY num ASC';
 
 	if(!$resu = mysql_query($query))
 	{
@@ -101,7 +101,7 @@ function get_areas() // get list of areas
 	$id = mysql_real_escape_string(htmlspecialchars($_GET['id']));
 	
 	$query = '	SELECT `num`,`type`,`type_id` FROM `rpt_masterhm_headers` 
-				WHERE report=' . $id . ' and type="area" ORDER BY num ASC';
+				WHERE report=' . $id . ' and type="column" ORDER BY num ASC';
 
 	if(!$resu = mysql_query($query))
 	{
@@ -142,10 +142,10 @@ function  recalc_values($aval,$pval) // recalculate values
 {
 	global $logger;
 	$parameters=array();
-	$parameters['area']=$aval;
-	$parameters['product']=$pval;
+	$parameters['entity1']=$aval;
+	$parameters['entity2']=$pval;
 	// recalculate only if both area and product are supplied.
-	if( isset($parameters['area']) and isset($parameters['product']) )
+	if( isset($parameters['entity1']) and isset($parameters['entity2']) )
 		calc_cells($parameters);
 	return true;
 }

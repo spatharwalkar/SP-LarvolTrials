@@ -22,14 +22,8 @@ $data=array();$isactive=array();$instype=array();$ldate=array();$phases=array();
 */
 function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 {
-	/*
-	pr($parameters);
-	pr('ABOVE PARAMETERS');
-	$x=array();
-	$x['area']=29;
-	pr($x);
-	*/
-	if(!mysql_query('SET autocommit = 1;'))
+	
+		if(!mysql_query('SET autocommit = 1;'))
 			{
 				global $logger;
 				$log='Unable to begin transaction. Query='.$query.' Error:' . mysql_error();
@@ -55,7 +49,7 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 			return false;
 		}
 	}
-	elseif(isset($parameters['area']))
+	elseif(isset($parameters['entity1']))
 	{
 	
 		$display_status='YES';
@@ -108,15 +102,16 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 		
 		 
 	}
-	//get area ids
-	if(isset($parameters['area']))
+
+	//get entity1 id (It can be any entity eg. area, product, disease etc.)
+	if(isset($parameters['entity1']))
 	{
-		$query='select `id` from areas where `id`="'.$parameters['area'].'"';
+		$query='select `id` from entities where `id`="'.$parameters['entity1'].'"';
 	}
 	
-	else // no area given, select all .
+	else // no entity1 id given, select all ids (Area & Disease for now.).
 	{
-		$query='select `id` from areas order by `id`';
+		$query='select `id` from entities where class in ("Area","Disease" ) order by `id`';
 		
 		// update query to fire the trigger (non-change)
 		$activate_trigger=' update upm set event_description=event_description
@@ -128,44 +123,53 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 							)';
 	}
 	$res = mysql_query($query);
+
 	if($res === false)
 	{
-		$log = 'Bad SQL query getting `id` from areas mysql_error=' . mysql_error() . ' query=' . $query;
+	
+		$log = 'Bad SQL query getting `id` 
+				from entities mysql_error=' . mysql_error() . ' query=' . $query;
 		global $logger;
 		$logger->fatal($log);
 		echo($log);
 		return false;
 	}
-	$areaids=array();
-	while($areaids[]=mysql_fetch_assoc($res));
+
+	$entity1ids=array();
+	while($entity1ids[]=mysql_fetch_assoc($res));
 	
-	//get product ids
-	if(isset($parameters['product']))
+	//get entity2 ids
+	if(isset($parameters['entity2']))
 	{
-		$query='select `id` from products where `id`="'.$parameters['product'].'"';
+		$query='select `id` from entities where `id`="'.$parameters['entity2'].'"';
 	}
-	else // no product given, select all products.
+	else // no id passed , select all .
 	{
-		$query='select id from products order by `id` ';
+		$query='select id from entities where class in ("Product") order by `id` ';
 	}
 	$res = mysql_query($query);
 	if($res === false)
 	{
-		$log = 'Bad SQL query getting id from products mysql_error=' . mysql_error() . ' query=' . $query;
+		$log = 'Bad SQL query getting id from entities mysql_error=' . mysql_error() . ' query=' . $query;
 		global $logger;
 		$logger->fatal($log);
 		echo ($log);
 		return false;
 	}
-	$productids=array();
-	while($productids[]=mysql_fetch_assoc($res));
+	$entity2ids=array();
+	while($entity2ids[]=mysql_fetch_assoc($res));
 
-	$x=count($areaids); $y=count($productids);
+	$x=count($entity1ids); $y=count($entity2ids);
 	
 	$totalcount=($x*$y)/4;
 	if($cron_run)
 	{
-	    $query = 'UPDATE update_status SET update_items_total="' . $totalcount . '",update_items_start_time="' . date("Y-m-d H:i:s", strtotime('now')) . '" WHERE update_id="' . $update_id . '"';
+	
+			$query = 	'UPDATE update_status 
+						SET update_items_total="' . $totalcount . '",update_items_start_time="' . 
+						date("Y-m-d H:i:s", strtotime('now')) . '" 
+						WHERE update_id="' . $update_id . '"
+						';
 		if(!$res = mysql_query($query))
 		{
 			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -190,41 +194,46 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 		}
 	}
 	
-	//pr($areaids);
-	//pr($productids);
+	//pr($entity1ids);
+	//pr($entity2ids);
 	$counter=0;
 	$progress_count = 0;
 	
-	foreach ($areaids as $ak=>$av)
+	foreach ($entity1ids as $ak=>$av)
 	{
-	
+		
 		if(!$av['id'] or is_null($av['id']) or empty($av['id']))
 		{
-			echo '<br>';
 			continue;
 		}
 
 		
-		foreach($productids as $pk=>$pv)
+		foreach($entity2ids as $pk=>$pv)
 		{
+			
 			$data=array();$isactive=array();$instype=array();$ldate=array();$phases=array();$ostatus=array();$cnt_total=0;
 		
 			if(!$pv['id'] or is_null($pv['id']) or empty($pv['id']))
 			{
-				echo '<br> ';
 				continue;
 			}      
+			
 			/*
 			$query_m='	SELECT a.trial from area_trials a 
 						JOIN product_trials p
 						ON a.trial=p.trial
+						JOIN area_trials a
+						ON a.trial=p.trial
 						where a.area="'.$av['id'].'" and p.product="'.$pv['id'].'"';
 			*/
-			$query_m='	SELECT a.trial,d.source_id,d.is_active,d.institution_type,d.source_id,d.lastchanged_date,d.firstreceived_date,d.phase,d.overall_status from area_trials a 
-						JOIN product_trials p ON a.`trial`=p.`trial`
-						LEFT JOIN data_trials d ON p.`trial`=d.`larvol_id`
-						where a.`area`="'.$av['id'].'" and p.`product`="'.$pv['id'].'" ';
 			
+			
+			$query_m=	'	SELECT 		a.trial,d.source_id,d.is_active,d.institution_type,d.source_id,d.lastchanged_date,
+										d.firstreceived_date,d.phase,d.overall_status from entity_trials a 
+							JOIN 		entity_trials p ON a.`trial`=p.`trial`
+							LEFT JOIN 	data_trials d ON p.`trial`=d.`larvol_id`
+							WHERE 		a.`entity`="'.$av['id'].'" and p.`entity`="'.$pv['id'].'" ';
+						
 			if(!$res = mysql_query($query_m))
 					{
 						$log='There seems to be a problem with the SQL Query:'.$query_m.' Error:' . mysql_error();
@@ -296,9 +305,10 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 			
 			while ($row = mysql_fetch_assoc($res))
 			{	
+				
 				if($row["trial"])
 				{
-				
+					
 				if($row["overall_status"]=='Terminated' or $row["overall_status"]=='Suspended')
 				{
 					$suspended_or_terminated++;
@@ -487,7 +497,7 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 				$counter++;
 				continue;
 			}
-
+			
 	//		pr($data);
 			$cnt_active=0;
 			foreach($isactive as $act)
@@ -602,20 +612,25 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 	return true;
 }			
 
-function add_data($arid,$prid,$cnt_total,$cnt_active,$cnt_active_indlead,$bomb,$max_phase,$overall_statuses=null,$ignore_changes=null)
+//
+
+function add_data($entity1id,$entity2id,$cnt_total,$cnt_active,$cnt_active_indlead,$bomb,$max_phase,$overall_statuses=null,$ignore_changes=null)
 {
 /*********/
-global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_total;
+	global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_total;
 
-	$query='SELECT `area`,`product`,`count_total`
-			from rpt_masterhm_cells
-			where `area`="'.$arid.'" and `product`="'.$prid.'" limit 1';
+	$query=	'	SELECT 	`entity1`,`entity2`,`count_total`
+				FROM 	rpt_masterhm_cells
+				WHERE	`entity1` IN ("' . $entity1id . '","' . $entity2id . '") 
+						AND `entity2` IN ("' . $entity1id . '","' . $entity2id . '") 
+				LIMIT 1';
 			/*
 			pr('---------------------------');
 			pr($overall_statuses);
 			pr('---------------------------');
 			*/
 	$curtime = date('Y-m-d H:i:s');
+	
 	if(!$res = mysql_query($query))
 		{
 			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -634,15 +649,18 @@ global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_total;
 		$highestPhaseUpdateString = "`highest_phase` = \"$max_phase\",";
 	
 
-	if($row["area"])
+	if($row["entity1"])
 	{
 		//get existing counts before updating
-		$query='select 
-				`count_active`,count_active_indlead,highest_phase,
-				`count_total` from rpt_masterhm_cells  where
-				`area`="'.$arid.'" and `product`="'.$prid.'" 
+		
+		$query=	'	SELECT  `count_active`,count_active_indlead,highest_phase,
+							`count_total` 
+					FROM	rpt_masterhm_cells  
+					WHERE	`entity1` IN ("' . $entity1id . '","' . $entity2id . '") 
+							AND `entity2` IN ("' . $entity1id . '","' . $entity2id . '") 
 				';
-				
+					
+					
 		if(!$res = mysql_query($query))
 		{
 			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -674,138 +692,140 @@ global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_total;
 	
 		if( empty($aa) && empty($bb) && empty($cc) && empty($dd))
 		{
-		$query='UPDATE rpt_masterhm_cells 
-				SET 
-				`count_active` ="'. $cnt_active.'",
-				`count_active_indlead` ="'. $cnt_active_indlead.'",
-				`bomb_auto` = "'. $bomb .'",'.
-				$highestPhaseUpdateString.
-				'`count_total` = "'. $cnt_total .'",
-				`not_yet_recruiting` = "'. $overall_statuses['not_yet_recruiting'] .'",
-				`recruiting` = "'. $overall_statuses['recruiting'] .'",
-				`enrolling_by_invitation` = "'. $overall_statuses['enrolling_by_invitation'] .'",
-				`active_not_recruiting` = "'. $overall_statuses['active_not_recruiting'] .'",
-				`completed` = "'. $overall_statuses['completed'] .'",
-				`suspended` = "'. $overall_statuses['suspended'] .'",
-				`terminated` = "'. $overall_statuses['terminated'] .'",
-				`withdrawn` = "'. $overall_statuses['withdrawn'] .'",
-				`available` = "'. $overall_statuses['available'] .'",
-				`no_longer_available` = "'. $overall_statuses['no_longer_available'] .'",
-				`approved_for_marketing` = "'. $overall_statuses['approved_for_marketing'] .'",
-				`no_longer_recruiting` = "'. $overall_statuses['no_longer_recruiting'] .'",
-				`withheld` = "'. $overall_statuses['withheld'] .'",
-				`temporarily_not_available` = "'. $overall_statuses['temporarily_not_available'] .'",
-				`ongoing` = "'. $overall_statuses['ongoing'] .'",
-				`not_authorized` = "'. $overall_statuses['not_authorized'] .'",
-				`prohibited` = "'. $overall_statuses['prohibited'] .'",
-				`not_yet_recruiting_active` = "'. $overall_statuses['not_yet_recruiting_active']. '",
-				`recruiting_active` = "'. $overall_statuses['recruiting_active']. '",
-				`enrolling_by_invitation_active` = "'. $overall_statuses['enrolling_by_invitation_active']. '",
-				`active_not_recruiting_active` = "'. $overall_statuses['active_not_recruiting_active']. '",
-				`completed_active` = "'. $overall_statuses['completed_active']. '",
-				`suspended_active` = "'. $overall_statuses['suspended_active']. '",
-				`terminated_active` = "'. $overall_statuses['terminated_active']. '",
-				`withdrawn_active` = "'. $overall_statuses['withdrawn_active']. '",
-				`available_active` = "'. $overall_statuses['available_active']. '",
-				`no_longer_available_active` = "'. $overall_statuses['no_longer_available_active']. '",
-				`approved_for_marketing_active` = "'. $overall_statuses['approved_for_marketing_active']. '",
-				`no_longer_recruiting_active` = "'. $overall_statuses['no_longer_recruiting_active']. '",
-				`withheld_active` = "'. $overall_statuses['withheld_active']. '",
-				`temporarily_not_available_active` = "'. $overall_statuses['temporarily_not_available_active']. '",
-				`ongoing_active` = "'. $overall_statuses['ongoing_active']. '",
-				`not_authorized_active` = "'. $overall_statuses['not_authorized_active']. '",
-				`prohibited_active` = "'. $overall_statuses['prohibited_active']. '",
-				`not_yet_recruiting_active_indlead` = "'. $overall_statuses['not_yet_recruiting_active_indlead']. '",
-				`recruiting_active_indlead` = "'. $overall_statuses['recruiting_active_indlead']. '",
-				`enrolling_by_invitation_active_indlead` = "'. $overall_statuses['enrolling_by_invitation_active_indlead']. '",
-				`active_not_recruiting_active_indlead` = "'. $overall_statuses['active_not_recruiting_active_indlead']. '",
-				`completed_active_indlead` = "'. $overall_statuses['completed_active_indlead']. '",
-				`suspended_active_indlead` = "'. $overall_statuses['suspended_active_indlead']. '",
-				`terminated_active_indlead` = "'. $overall_statuses['terminated_active_indlead']. '",
-				`withdrawn_active_indlead` = "'. $overall_statuses['withdrawn_active_indlead']. '",
-				`available_active_indlead` = "'. $overall_statuses['available_active_indlead']. '",
-				`no_longer_available_active_indlead` = "'. $overall_statuses['no_longer_available_active_indlead']. '",
-				`approved_for_marketing_active_indlead` = "'. $overall_statuses['approved_for_marketing_active_indlead']. '",
-				`no_longer_recruiting_active_indlead` = "'. $overall_statuses['no_longer_recruiting_active_indlead']. '",
-				`withheld_active_indlead` = "'. $overall_statuses['withheld_active_indlead']. '",
-				`temporarily_not_available_active_indlead` = "'. $overall_statuses['temporarily_not_available_active_indlead']. '",
-				`ongoing_active_indlead` = "'. $overall_statuses['ongoing_active_indlead']. '",
-				`not_authorized_active_indlead` = "'. $overall_statuses['not_authorized_active_indlead']. '",
-				`prohibited_active_indlead` = "'. $overall_statuses['prohibited_active_indlead']. '",				
-				`new_trials` = "'. $overall_statuses['new_trials'] .'",
-				`last_calc` = "'. $curtime .'" where
-				`area`="'.$arid.'" and `product`="'.$prid.'" 
-				';
+		
+			$query='UPDATE 	rpt_masterhm_cells 
+					SET 
+					`count_active` ="'. $cnt_active.'",
+					`count_active_indlead` ="'. $cnt_active_indlead.'",
+					`bomb_auto` = "'. $bomb .'",'. $highestPhaseUpdateString.
+					'`count_total` = "'. $cnt_total .'",
+					`not_yet_recruiting` = "'. $overall_statuses['not_yet_recruiting'] .'",
+					`recruiting` = "'. $overall_statuses['recruiting'] .'",
+					`enrolling_by_invitation` = "'. $overall_statuses['enrolling_by_invitation'] .'",
+					`active_not_recruiting` = "'. $overall_statuses['active_not_recruiting'] .'",
+					`completed` = "'. $overall_statuses['completed'] .'",
+					`suspended` = "'. $overall_statuses['suspended'] .'",
+					`terminated` = "'. $overall_statuses['terminated'] .'",
+					`withdrawn` = "'. $overall_statuses['withdrawn'] .'",
+					`available` = "'. $overall_statuses['available'] .'",
+					`no_longer_available` = "'. $overall_statuses['no_longer_available'] .'",
+					`approved_for_marketing` = "'. $overall_statuses['approved_for_marketing'] .'",
+					`no_longer_recruiting` = "'. $overall_statuses['no_longer_recruiting'] .'",
+					`withheld` = "'. $overall_statuses['withheld'] .'",
+					`temporarily_not_available` = "'. $overall_statuses['temporarily_not_available'] .'",
+					`ongoing` = "'. $overall_statuses['ongoing'] .'",
+					`not_authorized` = "'. $overall_statuses['not_authorized'] .'",
+					`prohibited` = "'. $overall_statuses['prohibited'] .'",
+					`not_yet_recruiting_active` = "'. $overall_statuses['not_yet_recruiting_active']. '",
+					`recruiting_active` = "'. $overall_statuses['recruiting_active']. '",
+					`enrolling_by_invitation_active` = "'. $overall_statuses['enrolling_by_invitation_active']. '",
+					`active_not_recruiting_active` = "'. $overall_statuses['active_not_recruiting_active']. '",
+					`completed_active` = "'. $overall_statuses['completed_active']. '",
+					`suspended_active` = "'. $overall_statuses['suspended_active']. '",
+					`terminated_active` = "'. $overall_statuses['terminated_active']. '",
+					`withdrawn_active` = "'. $overall_statuses['withdrawn_active']. '",
+					`available_active` = "'. $overall_statuses['available_active']. '",
+					`no_longer_available_active` = "'. $overall_statuses['no_longer_available_active']. '",
+					`approved_for_marketing_active` = "'. $overall_statuses['approved_for_marketing_active']. '",
+					`no_longer_recruiting_active` = "'. $overall_statuses['no_longer_recruiting_active']. '",
+					`withheld_active` = "'. $overall_statuses['withheld_active']. '",
+					`temporarily_not_available_active` = "'. $overall_statuses['temporarily_not_available_active']. '",
+					`ongoing_active` = "'. $overall_statuses['ongoing_active']. '",
+					`not_authorized_active` = "'. $overall_statuses['not_authorized_active']. '",
+					`prohibited_active` = "'. $overall_statuses['prohibited_active']. '",
+					`not_yet_recruiting_active_indlead` = "'. $overall_statuses['not_yet_recruiting_active_indlead']. '",
+					`recruiting_active_indlead` = "'. $overall_statuses['recruiting_active_indlead']. '",
+					`enrolling_by_invitation_active_indlead` = "'. $overall_statuses['enrolling_by_invitation_active_indlead']. '",
+					`active_not_recruiting_active_indlead` = "'. $overall_statuses['active_not_recruiting_active_indlead']. '",
+					`completed_active_indlead` = "'. $overall_statuses['completed_active_indlead']. '",
+					`suspended_active_indlead` = "'. $overall_statuses['suspended_active_indlead']. '",
+					`terminated_active_indlead` = "'. $overall_statuses['terminated_active_indlead']. '",
+					`withdrawn_active_indlead` = "'. $overall_statuses['withdrawn_active_indlead']. '",
+					`available_active_indlead` = "'. $overall_statuses['available_active_indlead']. '",
+					`no_longer_available_active_indlead` = "'. $overall_statuses['no_longer_available_active_indlead']. '",
+					`approved_for_marketing_active_indlead` = "'. $overall_statuses['approved_for_marketing_active_indlead']. '",
+					`no_longer_recruiting_active_indlead` = "'. $overall_statuses['no_longer_recruiting_active_indlead']. '",
+					`withheld_active_indlead` = "'. $overall_statuses['withheld_active_indlead']. '",
+					`temporarily_not_available_active_indlead` = "'. $overall_statuses['temporarily_not_available_active_indlead']. '",
+					`ongoing_active_indlead` = "'. $overall_statuses['ongoing_active_indlead']. '",
+					`not_authorized_active_indlead` = "'. $overall_statuses['not_authorized_active_indlead']. '",
+					`prohibited_active_indlead` = "'. $overall_statuses['prohibited_active_indlead']. '",				
+					`new_trials` = "'. $overall_statuses['new_trials'] .'",
+					`last_calc` = "'. $curtime .'" 
+					WHERE	`entity1` IN ("' . $entity1id . '","' . $entity2id . '") 
+							AND `entity2` IN ("' . $entity1id . '","' . $entity2id . '") 
+					';
 		}
 		else
 		{
 			$query='UPDATE rpt_masterhm_cells 
-				SET 
-				`count_active` ="'. $cnt_active.'",
-				`count_active_indlead` ="'. $cnt_active_indlead.'",
-				`bomb_auto` = "'. $bomb .'",'.
-				$highestPhaseUpdateString.
-				'`not_yet_recruiting` = "'. $overall_statuses['not_yet_recruiting'] .'",
-				`recruiting` = "'. $overall_statuses['recruiting'] .'",
-				`enrolling_by_invitation` = "'. $overall_statuses['enrolling_by_invitation'] .'",
-				`active_not_recruiting` = "'. $overall_statuses['active_not_recruiting'] .'",
-				`completed` = "'. $overall_statuses['completed'] .'",
-				`suspended` = "'. $overall_statuses['suspended'] .'",
-				`terminated` = "'. $overall_statuses['terminated'] .'",
-				`withdrawn` = "'. $overall_statuses['withdrawn'] .'",
-				`available` = "'. $overall_statuses['available'] .'",
-				`no_longer_available` = "'. $overall_statuses['no_longer_available'] .'",
-				`approved_for_marketing` = "'. $overall_statuses['approved_for_marketing'] .'",
-				`no_longer_recruiting` = "'. $overall_statuses['no_longer_recruiting'] .'",
-				`withheld` = "'. $overall_statuses['withheld'] .'",
-				`temporarily_not_available` = "'. $overall_statuses['temporarily_not_available'] .'",
-				`ongoing` = "'. $overall_statuses['ongoing'] .'",
-				`not_authorized` = "'. $overall_statuses['not_authorized'] .'",
-				`prohibited` = "'. $overall_statuses['prohibited'] .'",
-				`not_yet_recruiting_active` = "'. $overall_statuses['not_yet_recruiting_active']. '",
-				`recruiting_active` = "'. $overall_statuses['recruiting_active']. '",
-				`enrolling_by_invitation_active` = "'. $overall_statuses['enrolling_by_invitation_active']. '",
-				`active_not_recruiting_active` = "'. $overall_statuses['active_not_recruiting_active']. '",
-				`completed_active` = "'. $overall_statuses['completed_active']. '",
-				`suspended_active` = "'. $overall_statuses['suspended_active']. '",
-				`terminated_active` = "'. $overall_statuses['terminated_active']. '",
-				`withdrawn_active` = "'. $overall_statuses['withdrawn_active']. '",
-				`available_active` = "'. $overall_statuses['available_active']. '",
-				`no_longer_available_active` = "'. $overall_statuses['no_longer_available_active']. '",
-				`approved_for_marketing_active` = "'. $overall_statuses['approved_for_marketing_active']. '",
-				`no_longer_recruiting_active` = "'. $overall_statuses['no_longer_recruiting_active']. '",
-				`withheld_active` = "'. $overall_statuses['withheld_active']. '",
-				`temporarily_not_available_active` = "'. $overall_statuses['temporarily_not_available_active']. '",
-				`ongoing_active` = "'. $overall_statuses['ongoing_active']. '",
-				`not_authorized_active` = "'. $overall_statuses['not_authorized_active']. '",
-				`prohibited_active` = "'. $overall_statuses['prohibited_active']. '",
-				`not_yet_recruiting_active_indlead` = "'. $overall_statuses['not_yet_recruiting_active_indlead']. '",
-				`recruiting_active_indlead` = "'. $overall_statuses['recruiting_active_indlead']. '",
-				`enrolling_by_invitation_active_indlead` = "'. $overall_statuses['enrolling_by_invitation_active_indlead']. '",
-				`active_not_recruiting_active_indlead` = "'. $overall_statuses['active_not_recruiting_active_indlead']. '",
-				`completed_active_indlead` = "'. $overall_statuses['completed_active_indlead']. '",
-				`suspended_active_indlead` = "'. $overall_statuses['suspended_active_indlead']. '",
-				`terminated_active_indlead` = "'. $overall_statuses['terminated_active_indlead']. '",
-				`withdrawn_active_indlead` = "'. $overall_statuses['withdrawn_active_indlead']. '",
-				`available_active_indlead` = "'. $overall_statuses['available_active_indlead']. '",
-				`no_longer_available_active_indlead` = "'. $overall_statuses['no_longer_available_active_indlead']. '",
-				`approved_for_marketing_active_indlead` = "'. $overall_statuses['approved_for_marketing_active_indlead']. '",
-				`no_longer_recruiting_active_indlead` = "'. $overall_statuses['no_longer_recruiting_active_indlead']. '",
-				`withheld_active_indlead` = "'. $overall_statuses['withheld_active_indlead']. '",
-				`temporarily_not_available_active_indlead` = "'. $overall_statuses['temporarily_not_available_active_indlead']. '",
-				`ongoing_active_indlead` = "'. $overall_statuses['ongoing_active_indlead']. '",
-				`not_authorized_active_indlead` = "'. $overall_statuses['not_authorized_active_indlead']. '",
-				`prohibited_active_indlead` = "'. $overall_statuses['prohibited_active_indlead']. '",
-				`new_trials` = "'. $overall_statuses['new_trials'] .'",
-				`count_total` = "'. $cnt_total .'",'
-				. $aa . $bb . $cc . $dd .
-				'`count_lastchanged` = "'. $curtime .'",
-				`highest_phase_lastchanged` = "'. $curtime .'",
-				`last_calc` = "'. $curtime .'",
-				`last_update` = "'. $curtime .'" where
-				`area`="'.$arid.'" and `product`="'.$prid.'" 
-				';
+					SET 
+					`count_active` ="'. $cnt_active.'",
+					`count_active_indlead` ="'. $cnt_active_indlead.'",
+					`bomb_auto` = "'. $bomb .'",'. $highestPhaseUpdateString.
+					'`not_yet_recruiting` = "'. $overall_statuses['not_yet_recruiting'] .'",
+					`recruiting` = "'. $overall_statuses['recruiting'] .'",
+					`enrolling_by_invitation` = "'. $overall_statuses['enrolling_by_invitation'] .'",
+					`active_not_recruiting` = "'. $overall_statuses['active_not_recruiting'] .'",
+					`completed` = "'. $overall_statuses['completed'] .'",
+					`suspended` = "'. $overall_statuses['suspended'] .'",
+					`terminated` = "'. $overall_statuses['terminated'] .'",
+					`withdrawn` = "'. $overall_statuses['withdrawn'] .'",
+					`available` = "'. $overall_statuses['available'] .'",
+					`no_longer_available` = "'. $overall_statuses['no_longer_available'] .'",
+					`approved_for_marketing` = "'. $overall_statuses['approved_for_marketing'] .'",
+					`no_longer_recruiting` = "'. $overall_statuses['no_longer_recruiting'] .'",
+					`withheld` = "'. $overall_statuses['withheld'] .'",
+					`temporarily_not_available` = "'. $overall_statuses['temporarily_not_available'] .'",
+					`ongoing` = "'. $overall_statuses['ongoing'] .'",
+					`not_authorized` = "'. $overall_statuses['not_authorized'] .'",
+					`prohibited` = "'. $overall_statuses['prohibited'] .'",
+					`not_yet_recruiting_active` = "'. $overall_statuses['not_yet_recruiting_active']. '",
+					`recruiting_active` = "'. $overall_statuses['recruiting_active']. '",
+					`enrolling_by_invitation_active` = "'. $overall_statuses['enrolling_by_invitation_active']. '",
+					`active_not_recruiting_active` = "'. $overall_statuses['active_not_recruiting_active']. '",
+					`completed_active` = "'. $overall_statuses['completed_active']. '",
+					`suspended_active` = "'. $overall_statuses['suspended_active']. '",
+					`terminated_active` = "'. $overall_statuses['terminated_active']. '",
+					`withdrawn_active` = "'. $overall_statuses['withdrawn_active']. '",
+					`available_active` = "'. $overall_statuses['available_active']. '",
+					`no_longer_available_active` = "'. $overall_statuses['no_longer_available_active']. '",
+					`approved_for_marketing_active` = "'. $overall_statuses['approved_for_marketing_active']. '",
+					`no_longer_recruiting_active` = "'. $overall_statuses['no_longer_recruiting_active']. '",
+					`withheld_active` = "'. $overall_statuses['withheld_active']. '",
+					`temporarily_not_available_active` = "'. $overall_statuses['temporarily_not_available_active']. '",
+					`ongoing_active` = "'. $overall_statuses['ongoing_active']. '",
+					`not_authorized_active` = "'. $overall_statuses['not_authorized_active']. '",
+					`prohibited_active` = "'. $overall_statuses['prohibited_active']. '",
+					`not_yet_recruiting_active_indlead` = "'. $overall_statuses['not_yet_recruiting_active_indlead']. '",
+					`recruiting_active_indlead` = "'. $overall_statuses['recruiting_active_indlead']. '",
+					`enrolling_by_invitation_active_indlead` = "'. $overall_statuses['enrolling_by_invitation_active_indlead']. '",
+					`active_not_recruiting_active_indlead` = "'. $overall_statuses['active_not_recruiting_active_indlead']. '",
+					`completed_active_indlead` = "'. $overall_statuses['completed_active_indlead']. '",
+					`suspended_active_indlead` = "'. $overall_statuses['suspended_active_indlead']. '",
+					`terminated_active_indlead` = "'. $overall_statuses['terminated_active_indlead']. '",
+					`withdrawn_active_indlead` = "'. $overall_statuses['withdrawn_active_indlead']. '",
+					`available_active_indlead` = "'. $overall_statuses['available_active_indlead']. '",
+					`no_longer_available_active_indlead` = "'. $overall_statuses['no_longer_available_active_indlead']. '",
+					`approved_for_marketing_active_indlead` = "'. $overall_statuses['approved_for_marketing_active_indlead']. '",
+					`no_longer_recruiting_active_indlead` = "'. $overall_statuses['no_longer_recruiting_active_indlead']. '",
+					`withheld_active_indlead` = "'. $overall_statuses['withheld_active_indlead']. '",
+					`temporarily_not_available_active_indlead` = "'. $overall_statuses['temporarily_not_available_active_indlead']. '",
+					`ongoing_active_indlead` = "'. $overall_statuses['ongoing_active_indlead']. '",
+					`not_authorized_active_indlead` = "'. $overall_statuses['not_authorized_active_indlead']. '",
+					`prohibited_active_indlead` = "'. $overall_statuses['prohibited_active_indlead']. '",
+					`new_trials` = "'. $overall_statuses['new_trials'] .'",
+					`count_total` = "'. $cnt_total .'",'
+					. $aa . $bb . $cc . $dd .
+					'`count_lastchanged` = "'. $curtime .'",
+					`highest_phase_lastchanged` = "'. $curtime .'",
+					`last_calc` = "'. $curtime .'",
+					`last_update` = "'. $curtime .'" 
+					WHERE	`entity1` IN ("' . $entity1id . '","' . $entity2id . '") 
+						AND `entity2` IN ("' . $entity1id . '","' . $entity2id . '") 
+					';
 		}
+		
 		if(!$res = mysql_query($query))
 		{
 			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -817,69 +837,70 @@ global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_total;
 	}
 	else
 	{
-		$query='INSERT INTO rpt_masterhm_cells 
-				SET 
-				`product` = "'. $prid .'",
-				`area` = "'. $arid .'",
-				`count_active` ="'. $cnt_active.'",
-				`count_active_indlead` ="'. $cnt_active_indlead.'",
-				`bomb_auto` = "'. $bomb .'",
-				`not_yet_recruiting` = "'. $overall_statuses['not_yet_recruiting'] .'",
-				`recruiting` = "'. $overall_statuses['recruiting'] .'",
-				`enrolling_by_invitation` = "'. $overall_statuses['enrolling_by_invitation'] .'",
-				`active_not_recruiting` = "'. $overall_statuses['active_not_recruiting'] .'",
-				`completed` = "'. $overall_statuses['completed'] .'",
-				`suspended` = "'. $overall_statuses['suspended'] .'",
-				`terminated` = "'. $overall_statuses['terminated'] .'",
-				`withdrawn` = "'. $overall_statuses['withdrawn'] .'",
-				`available` = "'. $overall_statuses['available'] .'",
-				`no_longer_available` = "'. $overall_statuses['no_longer_available'] .'",
-				`approved_for_marketing` = "'. $overall_statuses['approved_for_marketing'] .'",
-				`no_longer_recruiting` = "'. $overall_statuses['no_longer_recruiting'] .'",
-				`withheld` = "'. $overall_statuses['withheld'] .'",
-				`temporarily_not_available` = "'. $overall_statuses['temporarily_not_available'] .'",
-				`ongoing` = "'. $overall_statuses['ongoing'] .'",
-				`not_authorized` = "'. $overall_statuses['not_authorized'] .'",
-				`prohibited` = "'. $overall_statuses['prohibited'] .'",
-				`not_yet_recruiting_active` = "'. $overall_statuses['not_yet_recruiting_active']. '",
-				`recruiting_active` = "'. $overall_statuses['recruiting_active']. '",
-				`enrolling_by_invitation_active` = "'. $overall_statuses['enrolling_by_invitation_active']. '",
-				`active_not_recruiting_active` = "'. $overall_statuses['active_not_recruiting_active']. '",
-				`completed_active` = "'. $overall_statuses['completed_active']. '",
-				`suspended_active` = "'. $overall_statuses['suspended_active']. '",
-				`terminated_active` = "'. $overall_statuses['terminated_active']. '",
-				`withdrawn_active` = "'. $overall_statuses['withdrawn_active']. '",
-				`available_active` = "'. $overall_statuses['available_active']. '",
-				`no_longer_available_active` = "'. $overall_statuses['no_longer_available_active']. '",
-				`approved_for_marketing_active` = "'. $overall_statuses['approved_for_marketing_active']. '",
-				`no_longer_recruiting_active` = "'. $overall_statuses['no_longer_recruiting_active']. '",
-				`withheld_active` = "'. $overall_statuses['withheld_active']. '",
-				`temporarily_not_available_active` = "'. $overall_statuses['temporarily_not_available_active']. '",
-				`ongoing_active` = "'. $overall_statuses['ongoing_active']. '",
-				`not_authorized_active` = "'. $overall_statuses['not_authorized_active']. '",
-				`prohibited_active` = "'. $overall_statuses['prohibited_active']. '",
-				`not_yet_recruiting_active_indlead` = "'. $overall_statuses['not_yet_recruiting_active_indlead']. '",
-				`recruiting_active_indlead` = "'. $overall_statuses['recruiting_active_indlead']. '",
-				`enrolling_by_invitation_active_indlead` = "'. $overall_statuses['enrolling_by_invitation_active_indlead']. '",
-				`active_not_recruiting_active_indlead` = "'. $overall_statuses['active_not_recruiting_active_indlead']. '",
-				`completed_active_indlead` = "'. $overall_statuses['completed_active_indlead']. '",
-				`suspended_active_indlead` = "'. $overall_statuses['suspended_active_indlead']. '",
-				`terminated_active_indlead` = "'. $overall_statuses['terminated_active_indlead']. '",
-				`withdrawn_active_indlead` = "'. $overall_statuses['withdrawn_active_indlead']. '",
-				`available_active_indlead` = "'. $overall_statuses['available_active_indlead']. '",
-				`no_longer_available_active_indlead` = "'. $overall_statuses['no_longer_available_active_indlead']. '",
-				`approved_for_marketing_active_indlead` = "'. $overall_statuses['approved_for_marketing_active_indlead']. '",
-				`no_longer_recruiting_active_indlead` = "'. $overall_statuses['no_longer_recruiting_active_indlead']. '",
-				`withheld_active_indlead` = "'. $overall_statuses['withheld_active_indlead']. '",
-				`temporarily_not_available_active_indlead` = "'. $overall_statuses['temporarily_not_available_active_indlead']. '",
-				`ongoing_active_indlead` = "'. $overall_statuses['ongoing_active_indlead']. '",
-				`not_authorized_active_indlead` = "'. $overall_statuses['not_authorized_active_indlead']. '",
-				`prohibited_active_indlead` = "'. $overall_statuses['prohibited_active_indlead']. '",
-				`new_trials` = "'. $overall_statuses['new_trials'] .'",'.
-				$highestPhaseUpdateString.
-				'`count_total` = "'. $cnt_total .'",
-				`last_update` = "'. $curtime .'"
-				';
+	
+		$query	=	'	INSERT INTO 	rpt_masterhm_cells 
+						SET 
+							`entity2` = "'. $entity2id .'",
+							`entity1` = "'. $entity1id .'",
+							`count_active` ="'. $cnt_active.'",
+							`count_active_indlead` ="'. $cnt_active_indlead.'",
+							`bomb_auto` = "'. $bomb .'",
+							`not_yet_recruiting` = "'. $overall_statuses['not_yet_recruiting'] .'",
+							`recruiting` = "'. $overall_statuses['recruiting'] .'",
+							`enrolling_by_invitation` = "'. $overall_statuses['enrolling_by_invitation'] .'",
+							`active_not_recruiting` = "'. $overall_statuses['active_not_recruiting'] .'",
+							`completed` = "'. $overall_statuses['completed'] .'",
+							`suspended` = "'. $overall_statuses['suspended'] .'",
+							`terminated` = "'. $overall_statuses['terminated'] .'",
+							`withdrawn` = "'. $overall_statuses['withdrawn'] .'",
+							`available` = "'. $overall_statuses['available'] .'",
+							`no_longer_available` = "'. $overall_statuses['no_longer_available'] .'",
+							`approved_for_marketing` = "'. $overall_statuses['approved_for_marketing'] .'",
+							`no_longer_recruiting` = "'. $overall_statuses['no_longer_recruiting'] .'",
+							`withheld` = "'. $overall_statuses['withheld'] .'",
+							`temporarily_not_available` = "'. $overall_statuses['temporarily_not_available'] .'",
+							`ongoing` = "'. $overall_statuses['ongoing'] .'",
+							`not_authorized` = "'. $overall_statuses['not_authorized'] .'",
+							`prohibited` = "'. $overall_statuses['prohibited'] .'",
+							`not_yet_recruiting_active` = "'. $overall_statuses['not_yet_recruiting_active']. '",
+							`recruiting_active` = "'. $overall_statuses['recruiting_active']. '",
+							`enrolling_by_invitation_active` = "'. $overall_statuses['enrolling_by_invitation_active']. '",
+							`active_not_recruiting_active` = "'. $overall_statuses['active_not_recruiting_active']. '",
+							`completed_active` = "'. $overall_statuses['completed_active']. '",
+							`suspended_active` = "'. $overall_statuses['suspended_active']. '",
+							`terminated_active` = "'. $overall_statuses['terminated_active']. '",
+							`withdrawn_active` = "'. $overall_statuses['withdrawn_active']. '",
+							`available_active` = "'. $overall_statuses['available_active']. '",
+							`no_longer_available_active` = "'. $overall_statuses['no_longer_available_active']. '",
+							`approved_for_marketing_active` = "'. $overall_statuses['approved_for_marketing_active']. '",
+							`no_longer_recruiting_active` = "'. $overall_statuses['no_longer_recruiting_active']. '",
+							`withheld_active` = "'. $overall_statuses['withheld_active']. '",
+							`temporarily_not_available_active` = "'. $overall_statuses['temporarily_not_available_active']. '",
+							`ongoing_active` = "'. $overall_statuses['ongoing_active']. '",
+							`not_authorized_active` = "'. $overall_statuses['not_authorized_active']. '",
+							`prohibited_active` = "'. $overall_statuses['prohibited_active']. '",
+							`not_yet_recruiting_active_indlead` = "'. $overall_statuses['not_yet_recruiting_active_indlead']. '",
+							`recruiting_active_indlead` = "'. $overall_statuses['recruiting_active_indlead']. '",
+							`enrolling_by_invitation_active_indlead` = "'. $overall_statuses['enrolling_by_invitation_active_indlead']. '",
+							`active_not_recruiting_active_indlead` = "'. $overall_statuses['active_not_recruiting_active_indlead']. '",
+							`completed_active_indlead` = "'. $overall_statuses['completed_active_indlead']. '",
+							`suspended_active_indlead` = "'. $overall_statuses['suspended_active_indlead']. '",
+							`terminated_active_indlead` = "'. $overall_statuses['terminated_active_indlead']. '",
+							`withdrawn_active_indlead` = "'. $overall_statuses['withdrawn_active_indlead']. '",
+							`available_active_indlead` = "'. $overall_statuses['available_active_indlead']. '",
+							`no_longer_available_active_indlead` = "'. $overall_statuses['no_longer_available_active_indlead']. '",
+							`approved_for_marketing_active_indlead` = "'. $overall_statuses['approved_for_marketing_active_indlead']. '",
+							`no_longer_recruiting_active_indlead` = "'. $overall_statuses['no_longer_recruiting_active_indlead']. '",
+							`withheld_active_indlead` = "'. $overall_statuses['withheld_active_indlead']. '",
+							`temporarily_not_available_active_indlead` = "'. $overall_statuses['temporarily_not_available_active_indlead']. '",
+							`ongoing_active_indlead` = "'. $overall_statuses['ongoing_active_indlead']. '",
+							`not_authorized_active_indlead` = "'. $overall_statuses['not_authorized_active_indlead']. '",
+							`prohibited_active_indlead` = "'. $overall_statuses['prohibited_active_indlead']. '",
+							`new_trials` = "'. $overall_statuses['new_trials'] .'",'. $highestPhaseUpdateString.
+							'`count_total` = "'. $cnt_total .'",
+							`last_update` = "'. $curtime .'"
+					';
+		
 		if(!$res = mysql_query($query))
 		{
 			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -893,7 +914,7 @@ global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_total;
 	/**************/
 	$curtime = date('Y-m-d H:i:s');
 	
-	echo '<br>'. $curtime . ' Area id : '. $arid .' Product id : '. $prid . ' - done.'. str_repeat("  ",800)  ;
+	echo '<br>'. $curtime . ' Entity1 id : '. $entity1id .' Entity2 id : '. $entity2id . ' - done.'. str_repeat("  ",800)  ;
 	
 	
 }
@@ -953,8 +974,7 @@ function getBombdtl()
 		}
 	}
 	
-	
-	return $bomb;
+		return $bomb;
 	
 }
 
