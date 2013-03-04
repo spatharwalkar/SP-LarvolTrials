@@ -1,8 +1,0 @@
-@charset "utf-8";
-/* Workarounds for brokenness in Internet Explorer 6 and lower */
-
-/* This is a general solution for simulating the missing :hover pseudo-class using
- a .hover real class plus Javascript. Feel free to include any tag that needs it */
-body{
-	behavior:url(css/csshover3.htc);
-}

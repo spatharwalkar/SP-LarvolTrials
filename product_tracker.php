@@ -451,8 +451,7 @@ function TrackerCommonCSS($uniqueId, $TrackerType)
 	$htmlContent = '';
 	$htmlContent = '<style type="text/css">
 
-					/* As in IE6 hover css does not works, below htc file is added which contains js script which will be executed only in IE, the script convert simple as well as complex hover css into compatible format for IE6 by replacing hover by class css - this file is used so that help tab as well as product selector will work in IE6 without any changes of code as well as css code and script can be also useful for making other css to work in IE6 like :hover and :active for IE6+, and additionally :focus for IE7 and IE8. */
-					ul, li, '.$uniqueId.'slideout { behavior:url("css/csshover3.htc"); }
+					/* To add support for transparancy of png images in IE6 below htc file is added alongwith iepngfix_tilebg.js */
 					img { behavior: url("css/iepngfix.htc"); }					
 					a, a:hover{ height:100%; width:100%; display:block; text-decoration:none;}
 					

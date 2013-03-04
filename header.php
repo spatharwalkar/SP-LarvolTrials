@@ -5,9 +5,6 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <title><?php echo(SITE_NAME); ?></title>
 <link href="css/main.css" rel="stylesheet" type="text/css" media="all" />
-<!--[if (lte IE 6)]>
-<link href="css/IE6fixes.css" rel="stylesheet" type="text/css" media="all" />
-<![endif]-->
 <link href="date/date_input.css" rel="stylesheet" type="text/css" media="all" />
 <link href="scripts/date/jdpicker.css" rel="stylesheet" type="text/css" media="screen" /> 
 <link href="krumo/skin.css" rel="stylesheet" type="text/css" media="all" />
