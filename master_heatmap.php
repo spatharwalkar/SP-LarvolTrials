@@ -3667,7 +3667,7 @@ function Download_reports()
      											'rotation'   => 0,
       											'wrap'       => false));
 		$objPHPExcel->getActiveSheet()->mergeCells('B' . $Excel_HMCounter . ':M' . $Excel_HMCounter);
-		$objPHPExcel->getActiveSheet()->SetCellValue('B' . $Excel_HMCounter, $Report_Name.' Heatmap');
+		$objPHPExcel->getActiveSheet()->SetCellValue('B' . $Excel_HMCounter, $Report_Name.' Heatmap')->getStyle('B1')->getFont()->setBold(true);
 		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$Excel_HMCounter, 'Display Mode:');
 		$objPHPExcel->getActiveSheet()->getStyle('B' . $Excel_HMCounter)->getAlignment()->applyFromArray(
       									array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_LEFT,
