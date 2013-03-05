@@ -3676,6 +3676,8 @@ function Download_reports()
       											'wrap'       => false));
 		$objPHPExcel->getActiveSheet()->SetCellValue('B' . $Excel_HMCounter, $tooltip);
 		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$Excel_HMCounter, '');
+		//freezepane
+		$objPHPExcel->getActiveSheet()->freezePane('B5');
 		
 		if($entity2_Category_Presence)
 		{
@@ -4096,20 +4098,22 @@ function Download_reports()
 		{
 			$objDrawing = new PHPExcel_Worksheet_Drawing();
 			$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
-			$objDrawing->setOffsetX(225);
+			$objDrawing->setOffsetX(5);
 			$objDrawing->setOffsetY(2);
 			$objDrawing->setPath('images/'.$helpTabImages_Src[$key]);
 			$objDrawing->setHeight(12);
 			$objDrawing->setWidth(12); 
 			$objDrawing->setDescription($helpTabImages_Desc[$key]);
-			$objDrawing->setCoordinates('A' . ++$Excel_HMCounter);
+			$objDrawing->setCoordinates('B' . ++$Excel_HMCounter);
+			if($key == 2)
+				$objPHPExcel->getActiveSheet()->mergeCells('B'. $Excel_HMCounter. ':C'. $Excel_HMCounter);
 			$objPHPExcel->getActiveSheet()->SetCellValue('B' . $Excel_HMCounter, $helpTabImage_Header[$key]);
-			$objPHPExcel->getActiveSheet()->getStyle('B' . $Excel_HMCounter)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+			$objPHPExcel->getActiveSheet()->getStyle('B' . $Excel_HMCounter)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
 		}
 		
-		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$Excel_HMCounter, 'Phase:  ');
-		$objPHPExcel->getActiveSheet()->getStyle('A' . $Excel_HMCounter)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
-		$col = 'A';
+		$objPHPExcel->getActiveSheet()->SetCellValue('B' . ++$Excel_HMCounter, 'Phase:  ');
+		$objPHPExcel->getActiveSheet()->getStyle('B' . $Excel_HMCounter)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
+		$col = 'B';
 		//get search results
 		$phases = array('N/A', 'Phase 0', 'Phase 1', 'Phase 2', 'Phase 3', 'Phase 4');
 		$phasenums = array(); foreach($phases as $k => $p)  $phasenums[$k] = str_ireplace(array('phase',' '),'',$p);
