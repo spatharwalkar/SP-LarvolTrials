@@ -61,9 +61,9 @@ function showProductTracker($id, $dwcount, $TrackerType, $page=1, $phase='na')
 		$MainPageURL = 'trialzilla_company.php';
 	else if($TrackerType == 'CPT')	//CPT=COMPANY PRODUCT TRACKER
 		$MainPageURL = 'trialzilla_company.php';
-	else if($TrackerType == 'MPT')	//MPT=MOA PRODUCT TRACKER
+	else if($TrackerType == 'MPT' || $TrackerType == 'SMPT')	//MPT=MOA PRODUCT TRACKER || SMPT=SEGMENTED MOA PRODUCT TRACKER
 		$MainPageURL = 'trialzilla_moa.php';
-	else if($TrackerType == 'MCPT')	//MMPT= MOA CATEGORY PRODUCT TRACKER
+	else if($TrackerType == 'MCPT' || $TrackerType == 'SMCPT')	//MCPT= MOA CATEGORY PRODUCT TRACKER || SMCPT=SEGMENTED MOA CATEGORY PRODUCT TRACKER
 		$MainPageURL = 'trialzilla_moacategory.php';
 	else if($TrackerType == 'DPT')	//DPT=DISEASE PRODUCT TRACKER
 		$MainPageURL = 'trialzilla_disease.php';
@@ -167,7 +167,7 @@ function DataGenerator($id, $TrackerType, $page=1, $phase)
 		$productIds = GetProductsFromCompany($header['id'], $TrackerType, $phase);
 		$id=$header['id'];
 	}
-	else if($TrackerType == 'MPT')	//MPT=MOA PRODUCT TRACKER
+	else if($TrackerType == 'MPT' || $TrackerType == 'SMPT')	//MPT=MOA PRODUCT TRACKER || SMPT=SEGMENTED MOA PRODUCT TRACKER
 	{
 		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class`="MOA" and id=' . $id;
 		$res = mysql_query($query) or die(mysql_error());
@@ -175,10 +175,10 @@ function DataGenerator($id, $TrackerType, $page=1, $phase)
 		$Report_DisplayName = $header['name'];
 		if($header['display_name'] != NULL && $header['display_name'] != '')
 				$Report_DisplayName = $header['display_name'];	
-		$productIds = GetProductsFromMOA($header['id']);
+		$productIds = GetProductsFromMOA($header['id'], $TrackerType, $phase);
 		$id=$header['id'];
 	}
-	else if($TrackerType == 'MCPT')	//MMPT= MOA CATEGORY PRODUCT TRACKER
+	else if($TrackerType == 'MCPT' || $TrackerType == 'SMCPT')	//MCPT= MOA CATEGORY PRODUCT TRACKER || SMCPT=SEGMENTED MOA CATEGORY PRODUCT TRACKER
 	{
 		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class`="MOA_Category" and id=' . $id;
 		$res = mysql_query($query) or die(mysql_error());
@@ -186,7 +186,7 @@ function DataGenerator($id, $TrackerType, $page=1, $phase)
 		$Report_DisplayName = $header['name'];
 		if($header['display_name'] != NULL && $header['display_name'] != '')
 				$Report_DisplayName = $header['display_name'];	
-		$productIds = GetProductsFromMOACategory($header['id']);
+		$productIds = GetProductsFromMOACategory($header['id'], $TrackerType, $phase);
 		$id=$header['id'];
 	}
 	else if($TrackerType == 'DPT')	//DPT=DISEASE PRODUCT TRACKER
@@ -742,8 +742,12 @@ function TrackerCommonJScript($id, $TrackerType, $uniqueId, $page, $MainPageURL,
 		$url = 'CompanyId=' . $id .'&page=' . $page;
 	else if($TrackerType == 'MPT')	//MPT=MOA PRODUCT TRACKER
 		$url = 'MoaId=' . $id .'&page=' . $page;
-	else if($TrackerType == 'MCPT')	//MMPT= MOA CATEGORY PRODUCT TRACKER
+	else if($TrackerType == 'SMPT')	//SMPT=SEGMENTED MOA PRODUCT TRACKER
+		$url = 'MoaId=' . $id .'&TrackerType='.$TrackerType.'&phase=' . $phase.'&page=' . $page;
+	else if($TrackerType == 'MCPT')	//MCPT= MOA CATEGORY PRODUCT TRACKER
 		$url = 'MoaCatId=' . $id .'&page=' . $page;
+	else if($TrackerType == 'SMCPT')	//SMCPT=SEGMENTED MOA CATEGORY PRODUCT TRACKER
+		$url = 'MoaCatId=' . $id .'&TrackerType='.$TrackerType.'&phase=' . $phase.'&page=' . $page;
 	else if($TrackerType == 'DPT')	//DPT=DISEASE PRODUCT TRACKER
 		$url = 'DiseaseId=' . $id .'&page=' . $page;
 	
@@ -1059,7 +1063,7 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 					. '<option value="tsvdown">TSV</option>'
 					. '</select></li>'
 					. '</ul>'
-					. (($TrackerType=='SCPT') ? '<input type="hidden" value="'.$phase.'" name="phase" />' : '')
+					. (($TrackerType=='SCPT' || $TrackerType=='SMPT' || $TrackerType=='SMCPT') ? '<input type="hidden" value="'.$phase.'" name="phase" />' : '')
 					. '<input type="submit" name="download" title="Download" value="Download file" style="margin-left:8px;"  />'
 					. '</div></div>'
 					. '</div><script type="text/javascript">cssdropdown.startchrome("'.$uniqueId.'_chromemenu");</script>'
@@ -1342,8 +1346,12 @@ function pagination($TrackerType, $totalPages, $id, $dwcount, $CurrentPage, $Mai
 		$url = 'CompanyId=' . $id .'&amp;dwcount=' . $dwcount;	
 	else if($TrackerType == 'MPT')	//MPT=MOA PRODUCT TRACKER
 		$url = 'MoaId=' . $id .'&amp;dwcount=' . $dwcount;
-	else if($TrackerType == 'MCPT')	//MMPT= MOA CATEGORY PRODUCT TRACKER
+	else if($TrackerType == 'SMPT')	//SMPT=SEGMENTED MOA PRODUCT TRACKER
+		$url = 'MoaId=' . $id .'&amp;dwcount=' . $dwcount .'&amp;TrackerType='.$TrackerType.'&amp;phase=' . $phase;
+	else if($TrackerType == 'MCPT')	//MCPT= MOA CATEGORY PRODUCT TRACKER
 		$url = 'MoaCatId=' . $id .'&amp;dwcount=' . $dwcount;
+	else if($TrackerType == 'SMCPT')	//SMCPT=SEGMENTED MOA CATEGORY PRODUCT TRACKER
+		$url = 'MoaCatId=' . $id .'&amp;dwcount=' . $dwcount .'&amp;TrackerType='.$TrackerType.'&amp;phase=' . $phase;
 	else if($TrackerType == 'DPT')	//DPT=DISEASE PRODUCT TRACKER
 		$url = 'DiseaseId=' . $id .'&amp;dwcount=' . $dwcount;
 		
@@ -1510,7 +1518,7 @@ function Download_reports()
 		$mode = 'indlead';
 	}
 	
-	$TrackerName = (($TrackerType== 'CPT') ? ' Company':'').(($TrackerType== 'MPT') ? ' MOA':'').(($TrackerType== 'DPT') ? ' Disease':'').(($TrackerType== 'SCPT') ? ' Company':'').(($TrackerType== 'MCPT') ? ' MOA Category':'');
+	$TrackerName = (($TrackerType== 'CPT') ? ' Company':'').(($TrackerType== 'MPT' || $TrackerType== 'SMPT') ? ' MOA':'').(($TrackerType== 'DPT') ? ' Disease':'').(($TrackerType== 'SCPT') ? ' Company':'').(($TrackerType== 'MCPT' || $TrackerType== 'SMCPT') ? ' MOA Category':'');
 	
 	if($_POST['dwformat']=='exceldown')
 	{
@@ -2694,33 +2702,14 @@ function GetProductsFromCompany($companyID, $TrackerType, $phase)
 	if($TrackerType == 'CPT')
 	{
 		$query = "SELECT et.`id` FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`) WHERE et.`class`='Product' AND er.`child`='" . mysql_real_escape_string($companyID) . "'";
-		/***************************below old relations table products_institutions   */
-		//$query = "SELECT pt.`id` FROM `products` pt LEFT JOIN `products_institutions` pi ON(pt.`id` = pi.`product`)  WHERE pi.`institution`='" . mysql_real_escape_string($companyID) . "'";
-		/**************************/
 	}
 	else
 	{
-		$includePhase = array();
-		$excludePhase = array();
-		$phase4 = array('4', '3/4', '3b/4');
-		$phase3 = array('3', '2/3', '2b/3', '3a', '3b');
-		$phase2 = array('2', '1/2', '1b/2', '1b/2a', '2a', '2a/2b', '2a/b', '2b');
-		$phase1 = array('1', '0/1', '1a', '1b', '1a/1b', '1c');
-		$phase0 = array('0');
-		$phasena = array('N/A','');
-		if($phase == '4')
-		{ $includePhaseArray = $phase4; $excludePhaseArray = array(); }
-		else if($phase == '3')
-		{ $includePhaseArray = $phase3; $excludePhaseArray = $phase4; }
-		else if($phase == '2')
-		{ $includePhaseArray = $phase2; $excludePhaseArray = array_merge($phase4, $phase3); }
-		else if($phase == '1')
-		{ $includePhaseArray = $phase1; $excludePhaseArray = array_merge($phase4, $phase3, $phase2); }
-		else if($phase == '0')
-		{ $includePhaseArray = $phase0; $excludePhaseArray = array_merge($phase4, $phase3, $phase2, $phase1); }
-		else
-		{ $includePhaseArray = $phasena; $excludePhaseArray = array_merge($phase4, $phase3, $phase2, $phase1, $phase0); }
-		$query = "SELECT et.`id` FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`)". (($phase != 'na') ? "  JOIN `entity_trials` etr ON(et.`id` = etr.`entity`) JOIN `data_trials` dt ON (dt.`larvol_id`= etr.`trial`)" : "") ." WHERE et.`class`='Product'". (($phase != 'na') ? " AND dt.`phase` IN ('". implode('\', \'',$includePhaseArray) ."')" : "") ." AND er.`child`='" . mysql_real_escape_string($companyID) . "' AND et.`id` NOT IN (SELECT DISTINCT et2.`id` FROM `entities` et2 JOIN `entity_trials` etr2 ON(et2.`id` = etr2.`entity`) JOIN `data_trials` dt2 ON (dt2.`larvol_id`= etr2.`trial`) WHERE dt2.`phase` IN ('". implode('\', \'',$excludePhaseArray) ."')) ";
+		$Return = GetIncludeExcludePhaseArray($phase);
+		$includePhaseArray = $Return['include'];
+		$excludePhaseArray = $Return['exclude'];
+		
+		$query = "SELECT et.`id` FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`)". (($phase != 'na') ? "  JOIN `entity_trials` etr ON(et.`id` = etr.`entity`) JOIN `data_trials` dt ON (dt.`larvol_id`= etr.`trial`)" : "") ." WHERE et.`class`='Product'". (($phase != 'na') ? " AND dt.`phase` IN ('". implode('\', \'',$includePhaseArray) ."')" : "") ." AND er.`child`='" . mysql_real_escape_string($companyID) . "' ". (($phase != '4') ? "AND et.`id` NOT IN (SELECT DISTINCT et2.`id` FROM `entities` et2 JOIN `entity_trials` etr2 ON(et2.`id` = etr2.`entity`) JOIN `data_trials` dt2 ON (dt2.`larvol_id`= etr2.`trial`) WHERE dt2.`phase` IN ('". implode('\', \'',$excludePhaseArray) ."')) " : "");
 	}
 	
 	$res = mysql_query($query) or die('Bad SQL query getting products from institution id in PT');
@@ -2736,12 +2725,23 @@ function GetProductsFromCompany($companyID, $TrackerType, $phase)
 }
 
 /* Function to get Product Id's from MOA id */
-function GetProductsFromMOA($moaID)
+function GetProductsFromMOA($moaID, $TrackerType, $phase)
 {
 	global $db;
 	global $now;
 	$Products = array();
-	$query = "SELECT et.`id` FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`)  WHERE et.`class`='Product' and er.`child`='" . mysql_real_escape_string($moaID) . "'";
+	if($TrackerType == 'MPT')
+	{
+		$query = "SELECT et.`id` FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`)  WHERE et.`class`='Product' and er.`child`='" . mysql_real_escape_string($moaID) . "'";
+	}
+	else
+	{
+		$Return = GetIncludeExcludePhaseArray($phase);
+		$includePhaseArray = $Return['include'];
+		$excludePhaseArray = $Return['exclude'];
+		
+		$query = "SELECT et.`id` FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`)". (($phase != 'na') ? "  JOIN `entity_trials` etr ON(et.`id` = etr.`entity`) JOIN `data_trials` dt ON (dt.`larvol_id`= etr.`trial`)" : "") ." WHERE et.`class`='Product'". (($phase != 'na') ? " AND dt.`phase` IN ('". implode('\', \'',$includePhaseArray) ."')" : "") ." AND er.`child`='" . mysql_real_escape_string($moaID) . "' ". (($phase != '4') ? "AND et.`id` NOT IN (SELECT DISTINCT et2.`id` FROM `entities` et2 JOIN `entity_trials` etr2 ON(et2.`id` = etr2.`entity`) JOIN `data_trials` dt2 ON (dt2.`larvol_id`= etr2.`trial`) WHERE dt2.`phase` IN ('". implode('\', \'',$excludePhaseArray) ."')) " : "");
+	}
 	$res = mysql_query($query) or die('Bad SQL query getting products from moa id in PT');
 	
 	if($res)
@@ -2774,12 +2774,23 @@ function GetProductsFromDisease($DiseaseID)
 }
 
 /* Function to get Product Id's from MOA Category id */
-function GetProductsFromMOACategory($moaCatID)
+function GetProductsFromMOACategory($moaCatID, $TrackerType, $phase)
 {
 	global $db;
 	global $now;
 	$Products = array();
-	$query = "SELECT et.`id` FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`)  WHERE et.`class`='Product' and er.`child` IN (SELECT et2.`id` FROM `entities` et2 JOIN `entity_relations` er2 ON(et2.`id` = er2.`child`)  WHERE et2.`class`='MOA' AND er2.`parent`='". mysql_real_escape_string($moaCatID) ."')";
+	if($TrackerType == 'MCPT')
+	{
+		$query = "SELECT et.`id` FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`) JOIN `entity_relations` er2 ON(er.`child` = er2.`child`) JOIN `entities` et2 ON (et2.`id` = er2.`parent`) WHERE et.`class`='Product'  AND et2.`class` = 'MOA_Category' AND et2.`id`='". mysql_real_escape_string($moaCatID) ."'";
+	}
+	else
+	{
+		$Return = GetIncludeExcludePhaseArray($phase);
+		$includePhaseArray = $Return['include'];
+		$excludePhaseArray = $Return['exclude'];
+		
+		$query = "SELECT et.`id` FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`) JOIN `entity_relations` er3 ON (er3.`child` = er.`child`) JOIN `entities` et3 ON (et3.`id` = er3.`parent`) ". (($phase != 'na') ? "  JOIN `entity_trials` etr ON(et.`id` = etr.`entity`) JOIN `data_trials` dt ON (dt.`larvol_id`= etr.`trial`)" : "") ." WHERE et.`class`='Product'". (($phase != 'na') ? " AND dt.`phase` IN ('". implode('\', \'',$includePhaseArray) ."')" : "") ." AND et3.`id` = '" . mysql_real_escape_string($moaCatID) . "' AND et3.`class` = 'MOA_Category' ". (($phase != '4') ? "AND et.`id` NOT IN (SELECT DISTINCT et2.`id` FROM `entities` et2 JOIN `entity_trials` etr2 ON(et2.`id` = etr2.`entity`) JOIN `data_trials` dt2 ON (dt2.`larvol_id`= etr2.`trial`) WHERE dt2.`phase` IN ('". implode('\', \'',$excludePhaseArray) ."')) " : "");
+	}
 	$res = mysql_query($query) or die('Bad SQL query getting products from moa id in PT');
 	
 	if($res)
@@ -2792,4 +2803,32 @@ function GetProductsFromMOACategory($moaCatID)
 	return array_filter(array_unique($Products));
 }
 
+function GetIncludeExcludePhaseArray($phase)
+{
+	$includePhaseArray = array();
+	$excludePhaseArray = array();
+	$phase4 = array('4', '3/4', '3b/4');
+	$phase3 = array('3', '2/3', '2b/3', '3a', '3b');
+	$phase2 = array('2', '1/2', '1b/2', '1b/2a', '2a', '2a/2b', '2a/b', '2b');
+	$phase1 = array('1', '0/1', '1a', '1b', '1a/1b', '1c');
+	$phase0 = array('0');
+	$phasena = array('N/A','');
+	if($phase == '4')
+	{ $includePhaseArray = $phase4; $excludePhaseArray = array(); }
+	else if($phase == '3')
+	{ $includePhaseArray = $phase3; $excludePhaseArray = $phase4; }
+	else if($phase == '2')
+	{ $includePhaseArray = $phase2; $excludePhaseArray = array_merge($phase4, $phase3); }
+	else if($phase == '1')
+	{ $includePhaseArray = $phase1; $excludePhaseArray = array_merge($phase4, $phase3, $phase2); }
+	else if($phase == '0')
+	{ $includePhaseArray = $phase0; $excludePhaseArray = array_merge($phase4, $phase3, $phase2, $phase1); }
+	else
+	{ $includePhaseArray = $phasena; $excludePhaseArray = array_merge($phase4, $phase3, $phase2, $phase1, $phase0); }
+	
+	$Return['include'] =  $includePhaseArray;
+	$Return['exclude'] = $excludePhaseArray;
+	
+	return $Return;
+}
 ?>

@@ -23,6 +23,12 @@
 	{
 		$page = mysql_real_escape_string($_REQUEST['page']);
 	}
+	
+	$phase = 'na';
+	if(isset($_REQUEST['phase']))
+	{
+		$phase = mysql_real_escape_string($_REQUEST['phase']);
+	}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -86,7 +92,12 @@ a:visited {color:#6600bc;}  /* visited link */
 <br/>
 <table width="100%" border="0" style="">
 <tr><td>
-<?php print showProductTracker($MoaCatId, $dwcount, 'MCPT', $page);	//MCPT= MOA CATEGORY PRODUCT TRACKER ?>
+<?php 
+	if(isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'SMCPT')
+		print showProductTracker($MoaCatId, $dwcount, 'SMCPT', $page, $phase);	//SMCPT= SEGEMENTED MOA CATEGORY PRODUCT TRACKER
+	else
+		print showProductTracker($MoaCatId, $dwcount, 'MCPT', $page);	//MCPT= MOA CATEGORY PRODUCT TRACKER 
+?>
 </td></tr>
 </table>
 <br/><br/>

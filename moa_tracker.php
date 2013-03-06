@@ -13,15 +13,15 @@ if(!is_numeric($id)) return;
 
 if($_POST['dwformat'])
 {
-	DownloadCompanyTrackerReports();
+	DownloadMOATrackerReports();
 	exit;
 }
 
 ////Process Report Tracker
-function showCompanyTracker($id, $TrackerType)
+function showMOATracker($id, $TrackerType)
 {
 	$HTMLContent = '';
-	$Return = DataGeneratorForCompanyTracker($id, $TrackerType);
+	$Return = DataGeneratorForMOATracker($id, $TrackerType);
 	$uniqueId = uniqid();
 	
 	///Required Data restored
@@ -37,27 +37,27 @@ function showCompanyTracker($id, $TrackerType)
 	$column_interval = $Return['column_interval'];
 	$PhaseArray = $Return['PhaseArray'];
 	
-	$HTMLContent .= CompanyTrackerCommonCSS($uniqueId, $TrackerType);
+	$HTMLContent .= MOATrackerCommonCSS($uniqueId, $TrackerType);
 	
-	if($TrackerType=='CTH')
-	$HTMLContent .= CompanyTrackerHeaderHTMLContent($Report_DisplayName, $TrackerType);
+	if($TrackerType=='MTH')
+	$HTMLContent .= MOATrackerHeaderHTMLContent($Report_DisplayName, $TrackerType);
 	
-	$HTMLContent .= CompanyTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_columns, $inner_width, $column_width, $ratio, $column_interval, $PhaseArray, $TrackerType, $uniqueId);
+	$HTMLContent .= MOATrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_columns, $inner_width, $column_width, $ratio, $column_interval, $PhaseArray, $TrackerType, $uniqueId);
 	
-	$HTMLContent .= CompanyTrackerCommonJScript($uniqueId);
+	$HTMLContent .= MOATrackerCommonJScript($uniqueId);
 	
 	return $HTMLContent;
 }
 ///End of Process Report Tracker
 
-function DataGeneratorForCompanyTracker($id, $TrackerType)
+function DataGeneratorForMOATracker($id, $TrackerType)
 {
 	global $db;
 	global $now;
 	global $logger;
 	
 	//IMP DATA
-	$CompanyIds = array();
+	$MOAOrMOACatIds = array();
 	$data_matrix=array();
 	
 	///// No of columns in our graph
@@ -70,27 +70,36 @@ function DataGeneratorForCompanyTracker($id, $TrackerType)
 	
 	//END DATA
 	
-	if($TrackerType == 'DCT')	//CTH - COMPANY TRACKER with HEADER DCT - DISEASE COMPANY TRACKER
+	if($TrackerType == 'DMT')	//MTH - MOA TRACKER with HEADER DMT - DISEASE MOA TRACKER
 	{
 		$query = 'SELECT `name`, `id` FROM `entities` WHERE `class`="Disease" AND id=' . $id;
 		$res = mysql_query($query) or die(mysql_error());
 		$header = mysql_fetch_array($res);
 		$Report_DisplayName = $header['name'];
-		$CompanyIds = array_filter(array_unique(GetCompaniesFromDisease_CompanyTracker($header['id'])));
-		$id=$header['id'];
+		$MOAOrMOACatIds = array_filter(array_unique(GetMOAsOrMOACatFromDisease_MOATracker($header['id'])));
+		$id = $header['id'];
 	}
 		
-	foreach($CompanyIds as $key=> $CompanyId)
+	foreach($MOAOrMOACatIds as $key=> $MOAOrMOACatId)
 	{
-		if(isset($CompanyId) && $CompanyId != NULL)
+		if(isset($MOAOrMOACatId) && $MOAOrMOACatId != NULL)
 		{
-			$result =  mysql_fetch_assoc(mysql_query("SELECT `name`, `id` FROM `entities` WHERE `class`='Institution' AND id = '" . $CompanyId . "' "));
+			$result =  mysql_fetch_assoc(mysql_query("SELECT `name`, `id`, `class` FROM `entities` WHERE (`class` = 'MOA' OR `class` = 'MOA_Category') AND id = '" . $MOAOrMOACatId . "' "));
 		
 			/// Fill up all data in Data Matrix only, so we can sort all data at one place
 			$data_matrix[$key]['RowHeader'] = $result['name'];
 			$data_matrix[$key]['ID'] = $result['id'];
-			$data_matrix[$key]['HeaderLink'] = trim(urlPath()) .'trialzilla_company.php?CompanyId=' . $data_matrix[$key]['ID'];
-			$data_matrix[$key]['ColumnsLink'] = trim(urlPath()) .'trialzilla_company.php?CompanyId=' . $data_matrix[$key]['ID'] . '&TrackerType=SCPT';
+			$data_matrix[$key]['class'] = $result['class'];
+			if($data_matrix[$key]['class'] == 'MOA')
+			{
+				$data_matrix[$key]['HeaderLink'] = trim(urlPath()) .'trialzilla_moa.php?MoaId=' . $data_matrix[$key]['ID'];
+				$data_matrix[$key]['ColumnsLink'] = trim(urlPath()) .'trialzilla_moa.php?MoaId=' . $data_matrix[$key]['ID'] . '&TrackerType=SMPT';
+			}
+			else if($data_matrix[$key]['class'] == 'MOA_Category')
+			{
+				$data_matrix[$key]['HeaderLink'] = trim(urlPath()) .'trialzilla_moacategory.php?MoaCatId=' . $data_matrix[$key]['ID'];
+				$data_matrix[$key]['ColumnsLink'] = trim(urlPath()) .'trialzilla_moacategory.php?MoaCatId=' . $data_matrix[$key]['ID'] . '&TrackerType=SMCPT';
+			}
 			
 			///// Initialize data
 			$data_matrix[$key]['phase_na']=0;
@@ -103,7 +112,7 @@ function DataGeneratorForCompanyTracker($id, $TrackerType)
 			$data_matrix[$key]['TotalCount'] = 0;
 			$productIds = array();			
 			
-			$productIds = GetProductsFromCompany_CompanyTracker($CompanyId);
+			$productIds = GetProductsFromMOAOrMOACatId_MOATracker($MOAOrMOACatId, $data_matrix[$key]['class']);
 			
 			$data_matrix[$key]['TotalCount'] = count($productIds);
 			if($max_count < $data_matrix[$key]['TotalCount'])
@@ -155,11 +164,11 @@ function DataGeneratorForCompanyTracker($id, $TrackerType)
 					$data_matrix[$key]['phase_'.$PhaseArray[$MAXPhasePNTR]]++; //INCREASE COUNTER					
 				}	//FOREACH OF PRODUCT
 			}	//END OF IF TOTAL COUNT > 0
-		} //END OF IF - COMPANY ID NULL OR NOT			
-	}	//END OF FOREACH - COMPANY ID ARRAY
+		} //END OF IF - MOA ID NULL OR NOT			
+	}	//END OF FOREACH - MOA ID ARRAY
 	
 	/// This function willl Sort multidimensional array according to Total count
-	$data_matrix = sortTwoDimensionArrayByKeyCompanyTracker($data_matrix,'TotalCount');
+	$data_matrix = sortTwoDimensionArrayByKeyMOATracker($data_matrix,'TotalCount');
 	
 	$original_max_count = $max_count;
 	$max_count = ceil(($max_count / $columns)) * $columns;
@@ -174,7 +183,7 @@ function DataGeneratorForCompanyTracker($id, $TrackerType)
 	$Return['report_name'] = $Report_DisplayName;
 	$Return['id'] = $id;
 	$Return['columns'] = $columns;
-	$Return['IdsArray'] = $CompanyIds;
+	$Return['IdsArray'] = $MOAOrMOACatIds;
 	$Return['inner_columns'] = $inner_columns;
 	$Return['inner_width'] = $inner_width;
 	$Return['column_width'] = $column_width;
@@ -190,7 +199,7 @@ function DataGeneratorForCompanyTracker($id, $TrackerType)
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>Larvol Trials :: Product Tracker</title>
+<title>Larvol Trials</title>
 <script type="text/javascript" src="scripts/popup-window.js"></script>
 <script src="scripts/jquery-1.7.1.min.js"></script>
 <script src="scripts/jquery-ui-1.8.17.custom.min.js"></script>
@@ -203,12 +212,10 @@ body { font-family:Verdana; font-size: 13px;}
 .report_name {
 	font-weight:bold;
 	font-size:18px;
-}
-
-					
+}					
 </style>
 <?php
-function CompanyTrackerCommonCSS($uniqueId, $TrackerType)
+function MOATrackerCommonCSS($uniqueId, $TrackerType)
 {
 	$htmlContent = '';
 	$htmlContent = '<style type="text/css">
@@ -242,14 +249,14 @@ function CompanyTrackerCommonCSS($uniqueId, $TrackerType)
 					#slideout_'.$uniqueId.' {
 						position: fixed;
 						_position:absolute;
-						top: '.(($TrackerType != 'CTH') ? '200':'40').'px;
+						top: '.(($TrackerType != 'MTH') ? '200':'40').'px;
 						right: 0;
 						margin: 12px 0 0 0;
 					}
 					
 					.slideout_inner {
 						position:absolute;
-						top: '.(($TrackerType != 'CTH') ? '200':'40').'px;
+						top: '.(($TrackerType != 'MTH') ? '200':'40').'px;
 						right: -255px;
 						display:none;
 					}
@@ -455,7 +462,7 @@ function CompanyTrackerCommonCSS($uniqueId, $TrackerType)
 	return $htmlContent;				
 }
 
-function CompanyTrackerCommonJScript($uniqueId)
+function MOATrackerCommonJScript($uniqueId)
 {
 	$htmlContent = '';	
 	
@@ -689,7 +696,7 @@ function CompanyTrackerCommonJScript($uniqueId)
 <body bgcolor="#FFFFFF" style="background-color:#FFFFFF;">
 <?php 
 
-function CompanyTrackerHeaderHTMLContent($Report_DisplayName, $TrackerType)
+function MOATrackerHeaderHTMLContent($Report_DisplayName, $TrackerType)
 {	
 	$Report_Name = $Report_DisplayName;
 	$htmlContent = '';
@@ -702,14 +709,14 @@ function CompanyTrackerHeaderHTMLContent($Report_DisplayName, $TrackerType)
 					   . '<br/><span style="font-weight:normal;">Send feedback to '
 					   . '<a style="display:inline;color:#0000FF;" target="_self" href="mailto:larvoltrials@larvol.com">'
 					   . 'larvoltrials@larvol.com</a></span></td>'
-					   . '<td width="33%" align="right" style="background-color:#FFFFFF; padding-right:20px;" class="report_name">Name: ' . htmlspecialchars($Report_Name) . ' Company Tracker</td></tr></table><br/>';
+					   . '<td width="33%" align="right" style="background-color:#FFFFFF; padding-right:20px;" class="report_name">Name: ' . htmlspecialchars($Report_Name) . ' MOA Tracker</td></tr></table><br/>';
 	}
 	return $htmlContent;
 }
 
-function CompanyTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_columns, $inner_width, $column_width, $ratio, $column_interval, $PhaseArray, $TrackerType, $uniqueId)
+function MOATrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_columns, $inner_width, $column_width, $ratio, $column_interval, $PhaseArray, $TrackerType, $uniqueId)
 {				
-	if(count($IdsArray) == 0 && ($TrackerType == 'CTH' || $TrackerType == 'DCT')) return 'No Company Found';
+	if(count($IdsArray) == 0 && ($TrackerType == 'MTH' || $TrackerType == 'DMT')) return 'No MOA Found';
 	
 	require_once('tcpdf/config/lang/eng.php');
 	require_once('tcpdf/tcpdf.php');  
@@ -720,7 +727,7 @@ function CompanyTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inne
 	
 	$htmlContent = '';
 	$htmlContent .= '<br style="line-height:11px;"/>'
-					.'<form action="company_tracker.php" method="post">'
+					.'<form action="moa_tracker.php" method="post">'
 					. '<table width="264px" border="0" cellspacing="0" cellpadding="0" class="controls" align="center">'
 					. '<tr>'
 					. '<td class="bottom right">'
@@ -815,9 +822,9 @@ function CompanyTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inne
 		}
 		$htmlContent .= '<th></th></tr><tr id="'.$uniqueId.'_Graph_Row_B_'.$key.'" class="Link" >';
 		
-		$Err = CountErr($data_matrix, $key, $ratio);
+		$Err = MOAsCountErr($data_matrix, $key, $ratio);
 			
-		$Max_ValueKey = Max_ValueKeyCompanyTracker($data_matrix[$key]['phase_na'], $data_matrix[$key]['phase_0'], $data_matrix[$key]['phase_1'], $data_matrix[$key]['phase_2'], $data_matrix[$key]['phase_3'], $data_matrix[$key]['phase_4']);
+		$Max_ValueKey = Max_ValueKeyMOATracker($data_matrix[$key]['phase_na'], $data_matrix[$key]['phase_0'], $data_matrix[$key]['phase_1'], $data_matrix[$key]['phase_2'], $data_matrix[$key]['phase_3'], $data_matrix[$key]['phase_4']);
 			
 		$total_cols = $inner_columns * $columns;
 		$Total_Bar_Width = ceil($ratio * $data_matrix[$key]['TotalCount']);
@@ -827,8 +834,8 @@ function CompanyTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inne
 		{
 			if($data_matrix[$key]['phase_'.$phase_nums] > 0)
 			{
-				$Color = getClassNColorforPhaseCompanyTracker($phase_nums);
-				$Mini_Bar_Width = CalculateMiniBarWidthCompanyTracker($ratio, $data_matrix[$key]['phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
+				$Color = getClassNColorforPhaseMOATracker($phase_nums);
+				$Mini_Bar_Width = CalculateMiniBarWidthMOATracker($ratio, $data_matrix[$key]['phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
 				$phase_space =  $phase_space + $Mini_Bar_Width;					
 				$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="Link '.$Color[0].'" title="'.$data_matrix[$key]['phase_'.$phase_nums].'" style="height:20px; _height:20px;"><a href="' . $data_matrix[$key]['ColumnsLink'] . '&phase='. $phase_nums . '" target="_blank" class="Link" >&nbsp;</a></th>';
 			}
@@ -837,7 +844,7 @@ function CompanyTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inne
 		$remain_span = $total_cols - $phase_space;
 		
 		if($remain_span > 0)
-		$htmlContent .= DrawExtraHTMLCellsCompanyTracker($phase_space, $inner_columns, $remain_span);
+		$htmlContent .= DrawExtraHTMLCellsMOATracker($phase_space, $inner_columns, $remain_span);
 		
 		$htmlContent .= '<th></th></tr><tr id="'.$uniqueId.'_Graph_Row_C_'.$key.'">';
 		for($j=0; $j < $columns; $j++)
@@ -892,7 +899,7 @@ function CompanyTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inne
 	return $htmlContent;
 }
 
-function DrawExtraHTMLCellsCompanyTracker($phase_space, $inner_columns, $remain_span)
+function DrawExtraHTMLCellsMOATracker($phase_space, $inner_columns, $remain_span)
 {
 	$aq_sp = 0;
 	while($aq_sp < $phase_space)
@@ -912,7 +919,7 @@ function DrawExtraHTMLCellsCompanyTracker($phase_space, $inner_columns, $remain_
 	return $extraHTMLContent;
 }
 if(isset($_REQUEST['id']))
-print showCompanyTracker($_REQUEST['id'], 'CTH');
+print showMOATracker($_REQUEST['id'], 'MTH');
 ?>
 <?
 if($db->loggedIn() && (strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE))
@@ -925,14 +932,14 @@ if($db->loggedIn() && (strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALS
 </body>
 </html>
 <?php
-function DownloadCompanyTrackerReports()
+function DownloadMOATrackerReports()
 {
 	ob_start();
 	if(!isset($_REQUEST['id'])) return;
 	$id = mysql_real_escape_string(htmlspecialchars($_REQUEST['id']));
 	if(!is_numeric($id)) return;
 	$TrackerType = $_REQUEST['TrackerType'];
-	$Return = DataGeneratorForCompanyTracker($id, $TrackerType);
+	$Return = DataGeneratorForMOATracker($id, $TrackerType);
 	
 	///Required Data restored
 	$data_matrix = $Return['matrix'];
@@ -990,7 +997,7 @@ function DownloadCompanyTrackerReports()
      											'rotation'   => 0,
       											'wrap'       => false));
 		
-		$objPHPExcel->getActiveSheet()->SetCellValue('B' . $Excel_HMCounter, $Report_Name.$TrackerName.' Company Tracker');
+		$objPHPExcel->getActiveSheet()->SetCellValue('B' . $Excel_HMCounter, $Report_Name.$TrackerName.' MOA Tracker');
 		
 		/// Extra Row
 		$Excel_HMCounter++;
@@ -998,7 +1005,7 @@ function DownloadCompanyTrackerReports()
 		$from++;
 		for($j=0; $j < $columns; $j++)
 		{
-			$to = getColspanforExcelExportCompanyTracker($from, $inner_columns);
+			$to = getColspanforExcelExportMOATracker($from, $inner_columns);
 			$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':'. $to . $Excel_HMCounter);
 			$from = $to;
 			$from++;
@@ -1037,9 +1044,9 @@ function DownloadCompanyTrackerReports()
 			$from++;
 				
 			//// Graph starts
-			$Err = CountErr($data_matrix, $key, $ratio);
+			$Err = MOAsCountErr($data_matrix, $key, $ratio);
 			
-			$Max_ValueKey = Max_ValueKeyCompanyTracker($data_matrix[$key]['phase_na'], $data_matrix[$key]['phase_0'], $data_matrix[$key]['phase_1'], $data_matrix[$key]['phase_2'], $data_matrix[$key]['phase_3'], $data_matrix[$key]['phase_4']);
+			$Max_ValueKey = Max_ValueKeyMOATracker($data_matrix[$key]['phase_na'], $data_matrix[$key]['phase_0'], $data_matrix[$key]['phase_1'], $data_matrix[$key]['phase_2'], $data_matrix[$key]['phase_3'], $data_matrix[$key]['phase_4']);
 			
 			$total_cols = $inner_columns * $columns;
 			$Total_Bar_Width = ceil($ratio * $data_matrix[$key]['TotalCount']);
@@ -1049,10 +1056,10 @@ function DownloadCompanyTrackerReports()
 			{
 				if($data_matrix[$key]['phase_'.$phase_nums] > 0)
 				{
-					$Mini_Bar_Width = CalculateMiniBarWidthCompanyTracker($ratio, $data_matrix[$key]['phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
+					$Mini_Bar_Width = CalculateMiniBarWidthMOATracker($ratio, $data_matrix[$key]['phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
 					$phase_space =  $phase_space + $Mini_Bar_Width;					
 					$url .= $data_matrix[$key]['ColumnsLink'] . '&phase='. $phase_nums;
-					$from = CreatePhaseCellforExcelExportCompanyTracker($from, $Mini_Bar_Width, $url, $Excel_HMCounter, $data_matrix[$key]['phase_'.$phase_nums], $phase_nums, $objPHPExcel);
+					$from = CreatePhaseCellforExcelExportMOATracker($from, $Mini_Bar_Width, $url, $Excel_HMCounter, $data_matrix[$key]['phase_'.$phase_nums], $phase_nums, $objPHPExcel);
 				}
 			}
 			
@@ -1067,7 +1074,7 @@ function DownloadCompanyTrackerReports()
 				$extra_sp = $aq_sp - $phase_space;
 				if($extra_sp > 0)
 				{
-					$to = getColspanforExcelExportCompanyTracker($from, $extra_sp);
+					$to = getColspanforExcelExportMOATracker($from, $extra_sp);
 					$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':' . $to . $Excel_HMCounter);
 					$from = $to;
 					$from++;
@@ -1076,7 +1083,7 @@ function DownloadCompanyTrackerReports()
 				$remain_span = $remain_span - $extra_sp;
 				while($remain_span > 0)
 				{
-					$to = getColspanforExcelExportCompanyTracker($from, $inner_columns);
+					$to = getColspanforExcelExportMOATracker($from, $inner_columns);
 					$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':' . $to . $Excel_HMCounter);
 					$from = $to;
 					$from++;
@@ -1093,7 +1100,7 @@ function DownloadCompanyTrackerReports()
 		$from++;
 		for($j=0; $j < $columns; $j++)
 		{
-			$to = getColspanforExcelExportCompanyTracker($from, $inner_columns);
+			$to = getColspanforExcelExportMOATracker($from, $inner_columns);
 			$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':'. $to . $Excel_HMCounter);
 			$from = $to;
 			$from++;
@@ -1104,7 +1111,7 @@ function DownloadCompanyTrackerReports()
 		$from = $Start_Char;
 		$from++;
 		
-		$to = getColspanforExcelExportCompanyTracker($from, 2);
+		$to = getColspanforExcelExportMOATracker($from, 2);
 		$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':'. $to . $Excel_HMCounter);
 		$objPHPExcel->getActiveSheet()->SetCellValue($from . $Excel_HMCounter, 0);
 		$from = $to;
@@ -1112,7 +1119,7 @@ function DownloadCompanyTrackerReports()
 			
 		for($j=0; $j < $columns; $j++)
 		{
-			$to = getColspanforExcelExportCompanyTracker($from, (($j==0)? $inner_columns : $inner_columns));
+			$to = getColspanforExcelExportMOATracker($from, (($j==0)? $inner_columns : $inner_columns));
 			$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':'. $to . $Excel_HMCounter);
 			$objPHPExcel->getActiveSheet()->SetCellValue($from . $Excel_HMCounter, (($j+1) * $column_interval));
 			$from = $to;
@@ -1139,7 +1146,7 @@ function DownloadCompanyTrackerReports()
 		$from++;
 		foreach($p_colors as $key => $color)
 		{
-			$to = getColspanforExcelExportCompanyTracker($from, $inner_columns);
+			$to = getColspanforExcelExportMOATracker($from, $inner_columns);
 			$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':'. $to . $Excel_HMCounter);
 			$objPHPExcel->getActiveSheet()->getStyle($from . $Excel_HMCounter)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID);
 			$objPHPExcel->getActiveSheet()->getStyle($from . $Excel_HMCounter)->getFill()->getStartColor()->setRGB($color);
@@ -1160,7 +1167,7 @@ function DownloadCompanyTrackerReports()
 		header("Content-Type: application/force-download");
 		header("Content-Type: application/download");
 		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-		header('Content-Disposition: attachment;filename="Larvol_' . substr($Report_Name,0,20) . '_Company_Analytic_Excel_' . date('Y-m-d_H.i.s') . '.xlsx"');
+		header('Content-Disposition: attachment;filename="Larvol_' . substr($Report_Name,0,20) . '_MOA_Analytic_Excel_' . date('Y-m-d_H.i.s') . '.xlsx"');
 			
 		header("Content-Transfer-Encoding: binary ");
 		$objWriter->save('php://output');
@@ -1171,7 +1178,7 @@ function DownloadCompanyTrackerReports()
 	{
 		$TSV_data = "";
 		
-		$TSV_data ="Company Name \t Phase 4 \t Phase 3 \t Phase 2 \t Phase 1 \t Phase 0 \t Phase N/A \n";
+		$TSV_data ="MOA Name \t Phase 4 \t Phase 3 \t Phase 2 \t Phase 1 \t Phase 0 \t Phase N/A \n";
 		
 		foreach($IdsArray as $key => $Ids)
 		{
@@ -1185,7 +1192,7 @@ function DownloadCompanyTrackerReports()
 		header("Cache-Control: no-cache, must-revalidate, post-check=0, pre-check=0");
 		header("Content-type: application/force-download"); 
 		header("Content-Type: application/tsv");
-		header('Content-Disposition: attachment;filename="' . substr($Report_Name,0,20) . '_Company_Tracker_' . date('Y-m-d_H.i.s'). '.tsv"');
+		header('Content-Disposition: attachment;filename="' . substr($Report_Name,0,20) . '_MOA_Tracker_' . date('Y-m-d_H.i.s'). '.tsv"');
 		header("Content-Transfer-Encoding: binary ");
 		echo $TSV_data;
 	}	/// TSV FUNCTION ENDS HERE
@@ -1199,7 +1206,7 @@ function DownloadCompanyTrackerReports()
 		$pdf->SetAuthor('Larvol Trials');
 		$pdf->SetTitle('Larvol Trials');
 		$pdf->SetSubject('Larvol Trials');
-		$pdf->SetKeywords('Larvol Trials Company Analytics, Larvol Trials Company Analytics PDF Export');
+		$pdf->SetKeywords('Larvol Trials MOA Analytics, Larvol Trials MOA Analytics PDF Export');
 		// In pdf we have used two kinds of font- Actual text we are going to display will have size 8
 		// While at other places like displying space in subcolumns of graph cell, we have used font size as 6, 
 		// cause to display font 8 or 7 we require more width upto 2mm
@@ -1230,7 +1237,7 @@ function DownloadCompanyTrackerReports()
 		
 		$pdf->SetFont('verdanab', '', 8);	//Set font size as 8
 		
-		$Repo_Heading = $Report_Name.$TrackerName.' Company Tracker';
+		$Repo_Heading = $Report_Name.$TrackerName.' MOA Tracker';
 		$current_StringLength = $pdf->GetStringWidth($Repo_Heading, 'verdanab', '', 8);
 		$pdf->MultiCell($Page_Width, '', $Repo_Heading, $border=0, $align='C', $fill=0, $ln=1, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
 		$pdf->Ln(5);
@@ -1267,7 +1274,7 @@ function DownloadCompanyTrackerReports()
 			if (($startY + $Total_Height) + $dimensions['bm'] > ($dimensions['hk']))
 			{
 				//this row will cause a page break, draw the bottom border on previous row and give this a top border
-				CreateLastTickBorderCompanyTracker($pdf, $Header_Col_Width, $Tic_dimension, $columns, $inner_columns, $subColumn_width, $column_interval);
+				CreateLastTickBorderMOATracker($pdf, $Header_Col_Width, $Tic_dimension, $columns, $inner_columns, $subColumn_width, $column_interval);
 				$pdf->AddPage();
 			}
 			
@@ -1363,8 +1370,8 @@ function DownloadCompanyTrackerReports()
 			$Place_X = $Middle_Place;
 			
 			//// Graph starts
-			$Err = CountErr($data_matrix, $key, $ratio);
-			$Max_ValueKey = Max_ValueKeyCompanyTracker($data_matrix[$key]['phase_na'], $data_matrix[$key]['phase_0'], $data_matrix[$key]['phase_1'], $data_matrix[$key]['phase_2'], $data_matrix[$key]['phase_3'], $data_matrix[$key]['phase_4']);
+			$Err = MOAsCountErr($data_matrix, $key, $ratio);
+			$Max_ValueKey = Max_ValueKeyMOATracker($data_matrix[$key]['phase_na'], $data_matrix[$key]['phase_0'], $data_matrix[$key]['phase_1'], $data_matrix[$key]['phase_2'], $data_matrix[$key]['phase_3'], $data_matrix[$key]['phase_4']);
 				
 			$total_cols = $inner_columns * $columns;
 			$Total_Bar_Width = ceil($ratio * $data_matrix[$key]['TotalCount']);
@@ -1374,9 +1381,9 @@ function DownloadCompanyTrackerReports()
 			{
 				if($data_matrix[$key]['phase_'.$phase_nums] > 0)
 				{
-					$border = setStyleforPDFExportCompanyTracker($phase_nums, $pdf);
+					$border = setStyleforPDFExportMOATracker($phase_nums, $pdf);
 					$Width = $subColumn_width;
-					$Mini_Bar_Width = CalculateMiniBarWidthCompanyTracker($ratio, $data_matrix[$key]['phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
+					$Mini_Bar_Width = CalculateMiniBarWidthMOATracker($ratio, $data_matrix[$key]['phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
 					$phase_space =  $phase_space + $Mini_Bar_Width;
 						
 					$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$key]['phase_'.$phase_nums], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Products', 'Subj' => 'Information', 'C' => array()));	
@@ -1384,7 +1391,7 @@ function DownloadCompanyTrackerReports()
 					$m=0;
 					while($m < $Mini_Bar_Width)
 					{
-						$Color = getClassNColorforPhaseCompanyTracker($phase_nums);
+						$Color = getClassNColorforPhaseMOATracker($phase_nums);
 						$pdfContent = '<div align="center" style="vertical-align:top; float:none;"><a style="color:#'.$Color[1].'; text-decoration:none; line-height:2px;" href="'. $data_matrix[$key]['ColumnsLink'] . '&phase='. $phase_nums . '" target="_blank" >&nbsp;</a></div>';
 						$pdf->MultiCell($Width, $Line_Height, $pdfContent, $border=0, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$Line_Height);
 						$Place_X = $Place_X + $Width;
@@ -1494,11 +1501,11 @@ function DownloadCompanyTrackerReports()
 			$pdf->SetY($Place_Y);
 		}
 				
-		CreateLastTickBorderCompanyTracker($pdf, $Header_Col_Width, $Tic_dimension, $columns, $inner_columns, $subColumn_width, $column_interval);
+		CreateLastTickBorderMOATracker($pdf, $Header_Col_Width, $Tic_dimension, $columns, $inner_columns, $subColumn_width, $column_interval);
 			
 		ob_end_clean();
 		//Close and output PDF document
-		$pdf->Output(''. substr($Report_Name,0,20) .'_Company_Tracker_'. date("Y-m-d_H.i.s") .'.pdf', 'D');
+		$pdf->Output(''. substr($Report_Name,0,20) .'_MOA_Tracker_'. date("Y-m-d_H.i.s") .'.pdf', 'D');
 	}	/// End of PDF Function
 	
 	//Start of Real Chart Excel
@@ -1507,7 +1514,7 @@ function DownloadCompanyTrackerReports()
 		$Repo_Heading = $Report_Name;
 		
 		$objPHPExcel = new PHPExcel();
-		$WorksheetName = 'Company_Tracker';
+		$WorksheetName = 'MOA_Tracker';
 		$objPHPExcel->getActiveSheet()->setTitle($WorksheetName);
 		$sheetPHPExcel = $objPHPExcel->getActiveSheet();
 		
@@ -1594,10 +1601,10 @@ function DownloadCompanyTrackerReports()
 		$plotarea = new PHPExcel_Chart_PlotArea(null, array($series));
 		$legend = new PHPExcel_Chart_Legend(PHPExcel_Chart_Legend::POSITION_RIGHT, null, false);
 		$title = new PHPExcel_Chart_Title('');
-		$X_Label = new PHPExcel_Chart_Title('Companies');
+		$X_Label = new PHPExcel_Chart_Title('MOAs');
 		$Y_Label = new PHPExcel_Chart_Title('Number of Products');
 		$chart = new PHPExcel_Chart(
-		  'Company Tracker',                                // name
+		  'MOA Tracker',                                // name
 		  $title,                                           // title
 		  $legend,                                        	// legend
 		  $plotarea,                                      	// plotArea
@@ -1624,7 +1631,7 @@ function DownloadCompanyTrackerReports()
      											'rotation'   => 0,
       											'wrap'       => false));
 		
-		$objPHPExcel->getActiveSheet()->SetCellValue('B1', $Report_Name.$TrackerName.' Company Tracker');
+		$objPHPExcel->getActiveSheet()->SetCellValue('B1', $Report_Name.$TrackerName.' MOA Tracker');
 		
 		$name = $Report_Name;
 		$objPHPExcel->getProperties()->setCreator(SITE_NAME);
@@ -1642,7 +1649,7 @@ function DownloadCompanyTrackerReports()
 		header("Content-Type: application/force-download");
 		header("Content-Type: application/download");
 		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-		header('Content-Disposition: attachment;filename="' . substr($Report_Name,0,20) . '_Company_Tracker_' . date('Y-m-d_H.i.s') . '.xlsx"');
+		header('Content-Disposition: attachment;filename="' . substr($Report_Name,0,20) . '_MOA_Tracker_' . date('Y-m-d_H.i.s') . '.xlsx"');
 		header("Content-Transfer-Encoding: binary ");
 		
 		$Writer->save('php://output');
@@ -1650,7 +1657,7 @@ function DownloadCompanyTrackerReports()
 	//End of Real Chart Excel
 }
 
-function getColspanforExcelExportCompanyTracker($cell, $inc)
+function getColspanforExcelExportMOATracker($cell, $inc)
 {
 	for($i = 1; $i < $inc; $i++)
 	{
@@ -1659,7 +1666,7 @@ function getColspanforExcelExportCompanyTracker($cell, $inc)
 	return $cell;
 }
 
-function getBGColorforExcelExportCompanyTracker($phase)
+function getBGColorforExcelExportMOATracker($phase)
 {
 	if($phase == '0')
 	{
@@ -1721,7 +1728,7 @@ function getBGColorforExcelExportCompanyTracker($phase)
 	return $bgColor;
 }
 
-function getClassNColorforPhaseCompanyTracker($phase)
+function getClassNColorforPhaseMOATracker($phase)
 {
 	$Color = array();
 	if($phase == '0')
@@ -1763,7 +1770,7 @@ function getClassNColorforPhaseCompanyTracker($phase)
 	return $Color;
 }
 
-function getNameforPhaseCompanyTracker($phase)
+function getNameforPhaseMOATracker($phase)
 {
 	$Name = '';
 	if($phase == '0')
@@ -1798,11 +1805,11 @@ function getNameforPhaseCompanyTracker($phase)
 	return $Name;
 }
 
-function CreatePhaseCellforExcelExportCompanyTracker($from, $Bar_Width, $url, $Excel_HMCounter, $countValue, $phase, &$objPHPExcel)
+function CreatePhaseCellforExcelExportMOATracker($from, $Bar_Width, $url, $Excel_HMCounter, $countValue, $phase, &$objPHPExcel)
 {
-	$to = getColspanforExcelExportCompanyTracker($from, $Bar_Width);
+	$to = getColspanforExcelExportMOATracker($from, $Bar_Width);
 	$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':' . $to . $Excel_HMCounter);
-	$objPHPExcel->getActiveSheet()->getStyle($from . $Excel_HMCounter)->applyFromArray(getBGColorforExcelExportCompanyTracker($phase));
+	$objPHPExcel->getActiveSheet()->getStyle($from . $Excel_HMCounter)->applyFromArray(getBGColorforExcelExportMOATracker($phase));
 	$objPHPExcel->getActiveSheet()->getCell($from . $Excel_HMCounter)->getHyperlink()->setUrl($url); 
 	$objPHPExcel->getActiveSheet()->getCell($from . $Excel_HMCounter)->getHyperlink()->setTooltip($countValue);
 	$from = $to;
@@ -1811,7 +1818,7 @@ function CreatePhaseCellforExcelExportCompanyTracker($from, $Bar_Width, $url, $E
 	return $from;
 }
 
-function setStyleforPDFExportCompanyTracker($phase, &$pdf)
+function setStyleforPDFExportMOATracker($phase, &$pdf)
 {
 	if($phase == '0')
 	{
@@ -1852,7 +1859,7 @@ function setStyleforPDFExportCompanyTracker($phase, &$pdf)
 	return $border;
 }
 
-function CreateLastTickBorderCompanyTracker(&$pdf, $Header_Col_Width, $Tic_dimension, $columns, $inner_columns, $subColumn_width, $column_interval)
+function CreateLastTickBorderMOATracker(&$pdf, $Header_Col_Width, $Tic_dimension, $columns, $inner_columns, $subColumn_width, $column_interval)
 {
 	$ln=0;
 	$Main_X = $pdf->GetX();
@@ -1908,7 +1915,7 @@ function CreateLastTickBorderCompanyTracker(&$pdf, $Header_Col_Width, $Tic_dimen
 	$pdf->SetY($Place_Y);
 }
 
-function Max_ValueKeyCompanyTracker($valna, $val0, $val1, $val2, $val3, $val4)
+function Max_ValueKeyMOATracker($valna, $val0, $val1, $val2, $val3, $val4)
 {
 $key = 'na';
 $max = $valna;
@@ -1946,7 +1953,7 @@ $max = $valna;
 	return $key;
 }
 
-function CountErr($data_matrix, $key, $ratio)
+function MOAsCountErr($data_matrix, $key, $ratio)
 {
 	$Rounded = (($data_matrix[$key]['phase_4'] > 0 && round($ratio * $data_matrix[$key]['phase_4']) < 1) ? 1:round($ratio * $data_matrix[$key]['phase_4'])) + (($data_matrix[$key]['phase_3'] > 0 && round($ratio * $data_matrix[$key]['phase_3']) < 1) ? 1:round($ratio * $data_matrix[$key]['phase_3'])) + (($data_matrix[$key]['phase_2'] > 0 && round($ratio * $data_matrix[$key]['phase_2']) < 1) ? 1:round($ratio * $data_matrix[$key]['phase_2'])) + (($data_matrix[$key]['phase_1'] > 0 && round($ratio * $data_matrix[$key]['phase_1']) < 1) ? 1:round($ratio * $data_matrix[$key]['phase_1'])) + (($data_matrix[$key]['phase_0'] > 0 && round($ratio * $data_matrix[$key]['phase_0']) < 1) ? 1:round($ratio * $data_matrix[$key]['phase_0'])) + (($data_matrix[$key]['phase_na'] > 0 && round($ratio * $data_matrix[$key]['phase_na']) < 1) ? 1:round($ratio * $data_matrix[$key]['phase_na']));
 	$Actual = ($ratio * $data_matrix[$key]['phase_4']) + ($ratio * $data_matrix[$key]['phase_3']) + ($ratio * $data_matrix[$key]['phase_2']) + ($ratio * $data_matrix[$key]['phase_1']) + ($ratio * $data_matrix[$key]['phase_0'])+ ($ratio * $data_matrix[$key]['phase_na']);
@@ -1955,7 +1962,7 @@ function CountErr($data_matrix, $key, $ratio)
 	return $Err;
 }
 
-function sortTwoDimensionArrayByKeyCompanyTracker($arr, $arrKey, $sortOrder=SORT_DESC)
+function sortTwoDimensionArrayByKeyMOATracker($arr, $arrKey, $sortOrder=SORT_DESC)
 {
 	if(is_array($arr) && count($arr) > 0)
 	{
@@ -1968,15 +1975,19 @@ function sortTwoDimensionArrayByKeyCompanyTracker($arr, $arrKey, $sortOrder=SORT
 	return $arr;
 }
 
-/* Function to get Product Id's from Institution id */
-function GetProductsFromCompany_CompanyTracker($companyID)
+/* Function to get Product Id's from MOA id / MOA Category id */
+function GetProductsFromMOAOrMOACatId_MOATracker($MOAOrMOACatId, $Class)
 {
 	global $db;
 	global $now;
 	$Products = array();
-	$query = "SELECT et.`id` FROM `entities` et LEFT JOIN `entity_relations` er ON(et.`id` = er.`parent`) WHERE et.`class`='Product' AND er.`child`='" . mysql_real_escape_string($companyID) . "'";
-	//$query = "SELECT pt.`id` FROM `products` pt LEFT JOIN `products_institutions` pi ON(pt.`id` = pi.`product`)  WHERE pi.`institution`='" . mysql_real_escape_string($companyID) . "'";
-	$res = mysql_query($query) or die('Bad SQL query getting products from institution id in company tracker');
+	
+	if($Class == 'MOA')
+		$query = "SELECT et.`id` FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`) WHERE et.`class`='Product' AND er.`child`='" . mysql_real_escape_string($MOAOrMOACatId) . "'";
+	else
+		$query = "SELECT et.`id` FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`) JOIN `entity_relations` er2 ON(er.`child` = er2.`child`) JOIN `entities` et2 ON (et2.`id` = er2.`parent`) WHERE et.`class`='Product' AND et2.`class`='MOA_Category' AND et2.`id`='" . mysql_real_escape_string($MOAOrMOACatId) . "'";
+		
+	$res = mysql_query($query) or die('Bad SQL query getting products from moa id / moa category id in moa tracker');
 	
 	if($res)
 	{
@@ -1989,13 +2000,13 @@ function GetProductsFromCompany_CompanyTracker($companyID)
 }
 
 //Get Products from Disease
-function GetProductsFromDisease_CompanyTracker($DiseaseID)
+function GetProductsFromDisease_MOATracker($DiseaseID)
 {
 	global $db;
 	global $now;
 	$Products = array();
-	$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_trials` et ON(et.`entity` = e.`id`) JOIN `entity_trials` et2 ON(et2.`trial` = et.`trial`) WHERE e.`class` = 'Product' AND et2.`entity`='" . mysql_real_escape_string($DiseaseID) . "'";
-	$res = mysql_query($query) or die('Bad SQL query getting products from Disease id in PT');
+	$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_trials` et ON(et.`entity` = e.`id`) JOIN `entity_trials` et2 ON(et.`trial` = et2.`trial`) WHERE e.`class` = 'Product' AND et2.`entity`='" . mysql_real_escape_string($DiseaseID) . "'";
+	$res = mysql_query($query) or die('Bad SQL query getting products from Disease id in MOA PT');
 	
 	if($res)
 	{
@@ -2007,33 +2018,50 @@ function GetProductsFromDisease_CompanyTracker($DiseaseID)
 	return array_filter(array_unique($Products));
 }
 
-//Get Companies from Disease
-function GetCompaniesFromDisease_CompanyTracker($DiseaseID)
+//Get MOAs/MOACategories from Disease
+function GetMOAsOrMOACatFromDisease_MOATracker($DiseaseID)
 {
 	global $db;
 	global $now;
 	$Products = array();
-	$Companies = array();
+	$MOAOrMOACats = array();
+	$onlymoas = array();
 	
-	$Products = GetProductsFromDisease_CompanyTracker($DiseaseID);
+	$Products = GetProductsFromDisease_MOATracker($DiseaseID);
 	
 	if(count($Products) > 0)
 	{
-		$query = "SELECT DISTINCT `id` FROM `entities` e JOIN `entity_relations` er ON(er.`child` = e.`id`) WHERE e.`class` = 'Institution' AND er.`parent` IN (" . implode(',',$Products) . ")";
-		$res = mysql_query($query) or die('Bad SQL query getting companies from products ids in CT');
+		//Get MOA Categoryids from Product id
+		$query = "SELECT e1.`id` as id, e2.`id` AS moaid FROM `entities` e1 JOIN `entity_relations` er1 ON(er1.`parent` = e1.`id`) JOIN `entities` e2 ON (er1.`child` = e2.`id`) JOIN `entity_relations` er2 ON(er2.`child` = e2.`id`) WHERE e1.`class` = 'MOA_Category' AND e2.`class` = 'MOA' AND er2.`parent` IN (" . implode(',',$Products) . ")";
+		$res = mysql_query($query) or die('Bad SQL query getting MOA Categories from products ids in MT');
+		
+		if($res)
+		{
+			while($row = mysql_fetch_array($res))
+			{
+				if(!in_array($row['id'], $MOAOrMOACats))
+					$MOAOrMOACats[] = $row['id'];
+				if(!in_array($row['moaid'], $onlymoas))
+					$onlymoas[] = $row['moaid'];
+			}
+		}
+		
+		//Get MOA which dont have related category from product id
+		$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON (er.`child` = e.`id`) WHERE e.`class` = 'MOA' AND er.`parent` IN (" . implode(',',$Products) . ") AND e.`id` NOT IN (" . implode(',',$onlymoas) . ")";
+		$res = mysql_query($query) or die('Bad SQL query getting MOAs from products ids in MT');
 	
 		if($res)
 		{
 			while($row = mysql_fetch_array($res))
 			{
-				$Companies[] = $row['id'];
+				$MOAOrMOACats[] = $row['id'];
 			}
 		}
 	}
-	return array_filter(array_unique($Companies));
+	return array_filter(array_unique($MOAOrMOACats));
 }
 
-function CalculateMiniBarWidthCompanyTracker($Ratio, $countValue, $Key, $Max_ValueKey, $Err, $Total_Bar_Width)
+function CalculateMiniBarWidthMOATracker($Ratio, $countValue, $Key, $Max_ValueKey, $Err, $Total_Bar_Width)
 {
 	if(round($Ratio * $countValue) > 0)
 		$Mini_Bar_Width = round($Ratio * $countValue);

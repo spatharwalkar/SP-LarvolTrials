@@ -2,6 +2,7 @@
 	require_once('db.php');
 	require_once('product_tracker.php');
 	require_once('company_tracker.php');
+	require_once('moa_tracker.php');
 	$page = 1;
 	if($_REQUEST['DiseaseId'] != NULL && $_REQUEST['DiseaseId'] != '' && isset($_REQUEST['DiseaseId']))
 	{
@@ -89,7 +90,7 @@ a:visited {color:#6600bc;}  /* visited link */
    padding: 0 30px;
    height: 0;
    line-height: 30px;
-   text-transform: uppercase;
+   /*text-transform: uppercase;*/
    text-decoration: none;
    color: #fff;      
    border-right: 30px solid transparent;
@@ -168,8 +169,8 @@ a:visited {color:#6600bc;}  /* visited link */
 <ul id="disease_tabs">
     <li><a href="#" title="Products">Products</a></li>
     <li><a href="#" title="Companies">Companies</a></li>
-   <!-- <li><a href="#" title="MOAs">MOAs</a></li>
-    <li><a href="#" title="Conferences">Conferences</a></li>  -->  
+    <li><a href="#" title="MOAs">MOAs</a></li>
+    <!--<li><a href="#" title="Conferences">Conferences</a></li>  -->  
 </ul>
 
 <div id="diseaseTab_content"> 
@@ -180,7 +181,7 @@ a:visited {color:#6600bc;}  /* visited link */
        		<?php print showCompanyTracker($DiseaseId, 'DCT'); //DCT=DISEASE COMPANY TRACKER ?>
     </div>
     <div id="MOAs">
-        MOA Tracker
+        	<?php print showMOATracker($DiseaseId, 'DMT'); //DMT=DISEASE MOA TRACKER ?>
     </div>
     <div id="Conferences">
         Conferences
