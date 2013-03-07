@@ -46,8 +46,10 @@ $globalOptions['itype'] = array();
 $globalOptions['region'] = array();
 $globalOptions['phase'] = array();
 
-
-$globalOptions['page'] = 1;
+if(isset($_REQUEST['page']) && is_numeric($_REQUEST['page']))
+	$globalOptions['page'] = mysql_real_escape_string($_REQUEST['page']);
+else
+	$globalOptions['page'] = 1;
 $globalOptions['onlyUpdates'] = "no";
 $globalOptions['LI'] = "0";
 $globalOptions['product'] = array();
@@ -461,7 +463,39 @@ if(isset($_REQUEST['pr']) && $_REQUEST['pr'] != '')
 	$globalOptions['product'] = array_filter($globalOptions['product'], 'iszero');
 }
 
-if(isset($_REQUEST['p']) || isset($_REQUEST['a']) || isset($_REQUEST['hm']))
+if(isset($_REQUEST['e1']) || isset($_REQUEST['e2'])|| isset($_REQUEST['hm']))
+{
+	$globalOptions['url'] = 'e1=' . $_REQUEST['e1'] . '&e2=' . $_REQUEST['e2'];	
+	if(isset($_REQUEST['JSON_search']))
+	{
+		$globalOptions['url'] .= '&JSON_search=' . $_REQUEST['JSON_search'];
+		$globalOptions['JSON_search'] = $_REQUEST['JSON_search'];
+	}
+	if(isset($_REQUEST['hm']) && trim($_REQUEST['hm']) != '' && $_REQUEST['hm'] != NULL)
+	{
+		$globalOptions['hm'] = $_REQUEST['hm'];
+		
+		if( !isset($_REQUEST['itype']))
+		{
+			if(isset($_REQUEST['page']) && is_numeric($_REQUEST['page']))
+			{}
+			else
+				$globalOptions['itype'][0] = 0;
+		}
+		
+	}
+	if(isset($_REQUEST['sphinx_s']))
+	{
+		$globalOptions['sphinx_s'] = $_REQUEST['sphinx_s'];
+	}
+	
+	if(isset($_REQUEST['ss']) && $_REQUEST['ss'] != '')
+	{
+		$globalOptions['sphinxSearch'] = $_REQUEST['ss'];
+	}
+	$tt->generateTrialTracker('entities', array('e1' => $_REQUEST['e1'], 'e2' => $_REQUEST['e2']), $globalOptions);
+}
+else if(isset($_REQUEST['p']) || isset($_REQUEST['a']) || isset($_REQUEST['hm']))
 {
 	$globalOptions['url'] = 'p=' . $_REQUEST['p'] . '&a=' . $_REQUEST['a'];	
 	
@@ -496,11 +530,7 @@ if(isset($_REQUEST['p']) || isset($_REQUEST['a']) || isset($_REQUEST['hm']))
 	
 	$tt->generateTrialTracker('indexed', array('product' => $_REQUEST['p'], 'area' => $_REQUEST['a']), $globalOptions);
 }
-else if(isset($_REQUEST['e1']) || isset($_REQUEST['e2']))
-{
-	$globalOptions['url'] = 'e1=' . $_REQUEST['e1'] . '&e2=' . $_REQUEST['e2'];	
-	$tt->generateTrialTracker('entities', array('e1' => $_REQUEST['e1'], 'e2' => $_REQUEST['e2']), $globalOptions);
-}
+
 else
 {
 	die('cell not set');
