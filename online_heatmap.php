@@ -70,18 +70,8 @@ while($header = mysql_fetch_array($res))
 			//$columnsDisplayName[$header['num']] = $result['display_name'];
 			if($type == 'Product')
 				$columnsDisplayName[$header['num']] = $result['name'];
-			else
-			{
-				if(trim($header['display_name']) != '' && $header['display_name'] != NULL && $header['display_name'] != 'NULL') //HM LEVEL Display name
-					$columnsDisplayName[$header['num']] = $header['display_name'];
-				else if(trim($result['display_name']) != '' && $result['display_name'] != NULL && $result['display_name'] != 'NULL') //Global Display name
-					$columnsDisplayName[$header['num']] = $result['display_name'];
-				else if($type == 'Area')
-					$columnsDisplayName[$header['num']] = $type .' '.$result['id'] ;	//For area display class n id
-				else
-					$columnsDisplayName[$header['num']] = $result['name'] ;	//For for other than Area take actual name
-			}
-				
+			else 
+				$columnsDisplayName[$header['num']] = (($header['display_name'] != '' && $header['display_name'] != NULL) ? $header['display_name'] : $type .' '.$result['id']) ;	///Display name from master hm header table
 			$columnsDescription[$header['num']] = $result['description'];
 			$header['category'] = trim($header['category']);
 			if($header['category'] == NULL || trim($header['category']) == '')
@@ -140,18 +130,8 @@ while($header = mysql_fetch_array($res))
 			
 			if($type == 'Product')
 				$rowsDisplayName[$header['num']] = $result['name'];
-			else
-			{
-				if(trim($header['display_name']) != '' && $header['display_name'] != NULL && $header['display_name'] != 'NULL') //HM LEVEL Display name
-					$rowsDisplayName[$header['num']] = $header['display_name'];
-				else if(trim($result['display_name']) != '' && $result['display_name'] != NULL && $result['display_name'] != 'NULL') //Global Display name
-					$rowsDisplayName[$header['num']] = $result['display_name'];
-				else if($type == 'Area')											//For area display class n id
-					$rowsDisplayName[$header['num']] = $type .' '.$result['id'] ;	
-				else																//For for other than Area take actual name
-					$rowsDisplayName[$header['num']] = $result['name'] ;	
-			}
-			
+			else 
+				$rowsDisplayName[$header['num']] = (($result['display_name'] != '' && $result['display_name'] != NULL) ? $result['display_name'] : $type .' '.$result['id']) ;	///Display name from master hm header table
 			$rowsDescription[$header['num']] = $result['description'];
 			$header['category']=trim($header['category']);
 			if($header['category'] == NULL || trim($header['category']) == '')
@@ -1447,6 +1427,9 @@ function change_view()
 			}	///Font Element If Ends
 		} /// Cell Data Exists if Ends
 	}	/// For Loop Ends
+	
+	//remake fixed column after slider operation
+	fixedColumnOnScrollHorizontal();
 }
 
 function timeEnum($timerange)
@@ -1620,6 +1603,8 @@ function refresh_data(cell_id)
         var currentFixedHeader;
         var currentGhost;
 		var ScrollOn = false;
+		var currentFixedColumn;
+		var currentRow;
 		
 		//Start - Header recreation in case of window resizing
 		$(window).resize(function() {
@@ -1719,6 +1704,9 @@ function refresh_data(cell_id)
 			{
                 createGhostHeader(activeHeader, topOffset, ($('#hmMainTable').offset().left));
 			}
+
+          //operation on horizontal scroll
+          fixedColumnOnWindowResize();
 		});
 		//End - Header recreation in case of window resizing
 		
@@ -1793,6 +1781,9 @@ function refresh_data(cell_id)
             var lastHeaderHeight = $(table).find('thead').last().height();
             var topOffset = 0;
             
+            // Operation on horizontal scroll
+            fixedColumnOnScrollHorizontal();
+			 
             // Check that the table is visible and has space for a header
             if (tablePosition.top + tableHeight - lastHeaderHeight >= currentScrollTop)
             {
@@ -1887,6 +1878,110 @@ function refresh_data(cell_id)
 			}
 		}
 	}
+
+
+	function fixedColumnOnWindowResize(){
+		//fixedColumnOnScrollHorizontal();
+	}
+	
+	function fixedColumnOnScrollHorizontal(){
+			var currentScrollLeft = $(window).scrollLeft();
+			var activeColumn = '';
+			var remakeColumn = true;
+			var table = $('#hmMainTable').first();
+			var tablePosition = table.offset();
+			var topOffset = 0;
+			var leftOffset = 0;
+			if (currentScrollLeft > tablePosition.left)
+			{
+				$("#hmMainTable").find('thead tr').each(function(k){
+			    	var position = $(this).find('th:nth-child(1)').offset();
+			        if (currentScrollLeft <= position.left)
+			        {
+			        	remakeColumn = false;
+			        }
+				});
+			
+			    $("#hmMainTable").find('tbody tr').each(function (i) {
+			        var wrapper_tr = $('<tr></tr>');
+			        if( $(this).find('th:nth-child(1)').html() != null){
+			            var position = $(this).find('th:nth-child(1)').offset();
+			        	wrapper_tr.append($(this).find('th:nth-child(1)').clone());
+					}else{
+						var position = $(this).find('td').offset();
+						wrapper_tr.append($(this).find('td').clone().attr('colspan',1));
+						wrapper_tr.css({'background-color':$(this).find('td').css('background-color')});//'#A2FF97'
+					}
+			        var required_height_tr = $(this).height();
+			    	activeColumn += '<tr style="vertical-align: middle;height:'+ required_height_tr +'px;">' + wrapper_tr.html() + '</tr>';
+			        if (currentScrollLeft <= position.left)
+			        {
+			        	remakeColumn = false;
+			        }
+			        
+			    }); 
+			
+				if(remakeColumn == false){
+					return false;
+				}
+			                  	
+			}  
+			// No colum formation needed when scroll left is zero
+			if (activeColumn == '' && currentRow)
+			{
+			    currentRow.remove();
+			    currentRow = null;
+			    currentFixedColumn = null;
+			}
+			leftOffset = currentScrollLeft;
+			// We have what we need, make a fixed first column
+			if (activeColumn)
+			{
+				// handle exception if hmMainTable1 does not exists
+				try{
+						topOffset = ($('#hmMainTable tbody').offset().top);
+							if($('#hmMainTable1').html() != null)
+							{
+								topOffset = $('#hmMainTable').offset().top + $('#hmMainTable1').outerHeight();// - currentScrollTop;
+								$('#hmMainTable1').css({'z-index':1});	
+							}	
+					}catch(e){
+						//
+					}
+				createFixedColumn(activeColumn, leftOffset, topOffset);
+			}
+	
+	}
+
+var createFixedColumn = function (column, leftOffset, topOffset) {  
+				var table = $('#hmMainTable').first();
+				var firstColumnWidth =  $('#hmMainTable').find('thead tr:nth-child(1) th:nth-child(1)').width();
+				var container2 = $('<table border="0" cellspacing="2" cellpadding="0" style="vertical-align:middle; background-color:#FFFFFF;" class="display" id="hmMainTable2"></table>');
+                if (column == currentFixedColumn && currentRow)
+                {                
+                	currentRow.css('top', topOffset -2 + "px");
+                	currentRow.css('left',leftOffset + "px");
+                    return currentRow;
+                }
+                if (currentRow)
+                    $(currentRow).remove();
+                
+                // Set up position of fixed column
+                container2.css({
+                    position: 'absolute',
+                    top: topOffset -2,//-topOffset,
+                    left: leftOffset,
+                    width: firstColumnWidth 
+                });
+                container2.append(column);
+                currentRow = container2;
+                currentFixedColumn = column;
+                
+                // Add this fixed/floating column to the same parent as the table
+                $(table).parent().append(currentRow);
+                return currentRow;
+            };
+            	
     </script>
 
 </head>
