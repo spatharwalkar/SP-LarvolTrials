@@ -131,7 +131,7 @@ while($header = mysql_fetch_array($res))
 			if($type == 'Product')
 				$rowsDisplayName[$header['num']] = $result['name'];
 			else 
-				$rowsDisplayName[$header['num']] = (($header['display_name'] != '' && $header['display_name'] != NULL) ? $header['display_name'] : $type .' '.$result['id']) ;	///Display name from master hm header table
+				$rowsDisplayName[$header['num']] = (($result['display_name'] != '' && $result['display_name'] != NULL) ? $result['display_name'] : $type .' '.$result['id']) ;	///Display name from master hm header table
 			$rowsDescription[$header['num']] = $result['description'];
 			$header['category']=trim($header['category']);
 			if($header['category'] == NULL || trim($header['category']) == '')
