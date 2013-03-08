@@ -138,7 +138,7 @@ if(isset($_REQUEST['deleteId']) && is_numeric($_REQUEST['deleteId']) && $deleteF
 if($_REQUEST['save']=='Save')
 {
 	//defined readonly table fields here as well to avoid them in query will be better
-	$ReadOnlyArr = array('comments','entity_type','licensing_mode','administration_mode','discontinuation_status','discontinuation_status_comment','is_key','created','modified','company','brand_names','generic_names','code_names','approvals','display_name');
+	$ReadOnlyArr = array('comments','entity_type','licensing_mode','administration_mode','discontinuation_status','discontinuation_status_comment','is_key','created','modified','company','brand_names','generic_names','code_names','approvals');
 	foreach($ReadOnlyArr as $Rfield)
 	{
 		if(array_key_exists($Rfield,$_GET))

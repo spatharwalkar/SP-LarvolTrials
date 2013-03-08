@@ -15,6 +15,10 @@ $tt = new TrialTracker;
 
 $maxEnrollLimit = 5000;
 
+/*******************************/
+if(isset($_REQUEST['p']) && !isset($_REQUEST['e1']))	$_REQUEST['e1']= $_REQUEST['p'];
+if(isset($_REQUEST['a']) && !isset($_REQUEST['e2']))	$_REQUEST['e2']= $_REQUEST['a'];
+/********************************/
 if(isset($_POST['btnDownload'])) 
 {	
 	$resultIds = $_POST['resultIds'];

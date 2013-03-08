@@ -76,7 +76,7 @@ class TrialTracker
 				$this->generateOnlineTT($resultIds, $globalOptions);
 				break;
 			case 'entities':
-				$this->generateOnlineTT2($resultIds, $globalOptions);
+				$this->generateEntitiesTT($resultIds, $globalOptions);
 				break;
 			default:
 				$this->generateOnlineTT($resultIds, $globalOptions);
@@ -171,7 +171,6 @@ class TrialTracker
 			{
 				$Arr = $this->processNonHmParams($resultIds, $globalOptions);
 			}
-			
 			$ottType = $Arr['ottType'];
 			$Ids = $Arr['Ids'];
 			$TrialsInfo = $Arr['TrialsInfo'];
@@ -182,7 +181,7 @@ class TrialTracker
 			}
 			else
 			{
-				$Values = $this->compileOTTData($ottType, $TrialsInfo, $Ids, $globalOptions, 'excel');
+				$Values = $this->compileOTTData2($ottType, $TrialsInfo, $Ids, $globalOptions, 'excel');
 			}
 			
 			unset($Ids, $productSelector, $TrialsInfo);
@@ -6770,11 +6769,12 @@ class TrialTracker
 			$where .= " AND pr.`id` IN ('" . implode("','", $productIds) . "') OR pr.LI_id IN ('" . implode("','", $productIds) . "') ";
 		}
 		
-		$Query = "SELECT pr.`id`, pr.`name`, pr.`company`, pr.`discontinuation_status`, rmh.`display_name`, rmh.`category`, rmh.`tag` "
+		$Query = "SELECT pr.`id`, pr.`name`, pr.`display_name` as dispname,pr.`class`,pr.`company`, pr.`discontinuation_status`, rmh.`display_name`, rmh.`category`, rmh.`tag` "
 						. " FROM `rpt_masterhm_headers` rmh "
 						. " JOIN `entities` pr ON pr.`id` = rmh.`type_id` "
 						. $where . " ORDER BY rmh.`num` ASC ";
 		$Res = m_query(__LINE__,$Query);
+		
 		if($Res)
 		{
 			if(mysql_num_rows($Res) > 0)
@@ -6792,8 +6792,13 @@ class TrialTracker
 					}
 					
 					$productSelector[$productId] = $row['name'];
-					$sectionHeader = formatBrandName($row['name'], 'product');
-					
+					if($row['class']=='Product')
+						$sectionHeader = formatBrandName($row['name'], 'product');
+					elseif(!empty($row['display_name']))
+						$sectionHeader = formatBrandName($row['display_name'], 'area');
+					else
+						$sectionHeader = formatBrandName($row['name'], 'area');
+						
 					if($row['company'] !== NULL && $row['company'] != '')
 					{
 						$productSelector[$productId] .= " / <i>" . $row['company'] . "</i>";
@@ -6839,6 +6844,7 @@ class TrialTracker
 		
 		$Query = "SELECT dtt FROM `rpt_masterhm` WHERE id = '" . $hmId . "' ";
 		$Res = m_query(__LINE__,$Query);
+		
 		if($Res)
 		{
 			$Row = mysql_fetch_assoc($Res);
@@ -6866,11 +6872,12 @@ class TrialTracker
 			$limit = " LIMIT 0,1 ";
 		}
 		
-		$Query = "SELECT rmh.`display_name`, rmh.`type_id`, rmh.`category`, ar.`coverage_area`, ar.`display_name` AS global_display_name "
+		$Query = "SELECT rmh.`display_name`, rmh.`type_id`, rmh.`category`, ar.`class`, ar.`display_name` AS global_display_name "
 					. " FROM `rpt_masterhm_headers` rmh "
-					. " JOIN `areas` ar ON  rmh.`type_id` = ar.`id` "
-					. " WHERE " . $where . " AND rmh.`report` = '" . $hmId . "' AND rmh.`type` = 'column' " . $orderby . $limit;
+					. " JOIN `entities` ar ON  rmh.`type_id` = ar.`id` "
+					. " WHERE " . $where . " AND ar.class<>'Product' AND rmh.`report` = '" . $hmId . "' AND rmh.`type` = 'column' " . $orderby . $limit;
 		$Res = m_query(__LINE__,$Query);
+		
 		if($Res)
 		{
 			if(mysql_num_rows($Res) > 0)
@@ -6880,19 +6887,17 @@ class TrialTracker
 					$sectionHeader = "";
 					$areaId = $row['type_id'];
 					
-					if($row['display_name'] != '' && $row['display_name'] !== NULL)
-					{
-						$sectionHeader = $row['display_name'];
-					}
+					if($row['class']=='Product')
+						$sectionHeader = formatBrandName($row['name'], 'product');
+					elseif(!empty($row['display_name']))
+						$sectionHeader = formatBrandName($row['display_name'], 'area');
 					else
-					{
-						$sectionHeader = 'Area ' . $areaId;
-					}
-					
+						$sectionHeader = formatBrandName($row['class'].' ' . $areaId, 'area');
+
 					$Ids[$areaId]['area'] = $areaId;
 					$productSelector[$areaId] = $sectionHeader;
 					
-					$TrialsInfo[$areaId]['sectionHeader'] = formatBrandName($sectionHeader, 'area');
+					$TrialsInfo[$areaId]['sectionHeader'] = $sectionHeader;
 					$TrialsInfo[$areaId]['Id'] = $areaId;
 				}
 			}
@@ -6964,7 +6969,7 @@ class TrialTracker
 					else	$new_A_array[]=$eid;
 				}
 			}
-			
+	/*		
 			if($resultIds['e2']) unset($resultIds['e2']);			
 			if($resultIds['e1']) unset($resultIds['e1']);
 			if(!empty($new_A_array)) $resultIds['e2']=$new_A_array;
@@ -6977,7 +6982,9 @@ class TrialTracker
 		{
 			$ottType = 'colstacked';
 			$tHeader = 'Area: Total';
-			$productIds = $resultIds['e1'];
+			$productIds  = $resultIds['e1'];
+			$productIds .= ','. $resultIds['e2'];
+
 			
 			$pDetails = $this->getProductHmHeaders($hmId, $productIds);
 			foreach($pDetails['Ids'] as $ikey => $ivalue)
@@ -7001,9 +7008,9 @@ class TrialTracker
 			{
 				$tHeader = 'All Products';
 				$productIds = array();
-				
 				$Query = "SELECT GROUP_CONCAT(type_id) AS type_id FROM `rpt_masterhm_headers` WHERE `report` = '" . $hmId . "' AND `type` = 'row' ";
 				$Res = m_query(__LINE__,$Query);
+				
 				if($Res)
 				{
 					if(mysql_num_rows($Res) > 0)
@@ -7021,17 +7028,29 @@ class TrialTracker
 			}
 			else
 			{
-				$tHeader = 'Product: ';
+				$tHeader = '';
 				$productIds = $resultIds['e1'];
 				
-				$Query = "SELECT `name`, `id` FROM `entities` WHERE id IN ('" . implode("','", $productIds) . "') OR LI_id IN ('" . implode("','", $productIds) . "') ";
+				$Query = "SELECT `name`, `id`, `class`,`display_name` FROM `entities` WHERE id IN ('" . implode("','", $productIds) . "') OR LI_id IN ('" . implode("','", $productIds) . "') ";
 				$Res = m_query(__LINE__,$Query);
+				
 				if($Res)
 				{
 					if(mysql_num_rows($Res) > 0)
 					{
 						$Row = mysql_fetch_assoc($Res);
-						$tHeader .= htmlformat(strip_tags($Row['name']));
+						if($Res['class']<>'Product' and !empty($Res['display_name']) )
+						{
+							$tHeader = 'Area: ';
+							$tHeader .= htmlformat(strip_tags($Row['display_name']));
+						}
+						else
+						{
+							$tHeader = 'Product: '.__LINE__;
+							$tHeader .= htmlformat(strip_tags($Row['name']));
+						}
+						
+							
 					}
 				}
 				else
@@ -7151,20 +7170,36 @@ class TrialTracker
 			else if(empty($resultIds['e2']))
 			{
 				$ottType = 'rowstacked';
-				$tHeader = 'Product: ';
+				$tHeader = '';
 				
 				$productIds = $resultIds['e1'];
 				if(!empty($productIds) && !is_array($productIds))	$productIds=array($productIds);
-				$Query = "SELECT `name`, `id` FROM `entities` WHERE id IN ('" . implode("','", $productIds) . "') OR LI_id IN ('" . implode("','", $productIds) . "') ";
+				$Query = "SELECT `name`, `id`, `class`,`display_name`  FROM `entities` WHERE id IN ('" . implode("','", $productIds) . "') OR LI_id IN ('" . implode("','", $productIds) . "') ";
 				$Res = m_query(__LINE__,$Query);
+				
 				if($Res)
 				{
 					if(mysql_num_rows($Res) > 0)
 					{
 						$row = mysql_fetch_assoc($Res);
-						$tHeader .= strip_tags(htmlformat($row['name']));
+						if($row['class']<>'Product' and !empty($row['display_name']) )
+						{
+							$tHeader = 'Area: ';
+							$tHeader .= strip_tags(htmlformat($row['display_name']));
+						}
+						elseif($row['class']<>'Product')
+						{
+							$tHeader = 'Area: ';
+							$tHeader .= strip_tags(htmlformat($row['name']));
+						}
+						else
+						{
+							$tHeader = 'Product: ';
+							$tHeader .= strip_tags(htmlformat($row['name']));
+						}
 					}
 				}
+						
 				else
 				{
 					$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
@@ -7226,13 +7261,13 @@ class TrialTracker
 		
 		$tHeader = '';
 		$ottType = '';
-		
 		if(count($resultIds['e1']) > 1 && count($resultIds['e2']) > 1)
 		{
 			$ottType = 'colstacked';
 			$tHeader = 'Area: Total';
 			
 			$productIds = $resultIds['e1'];
+			$productIds .= ','. $resultIds['e2'];
 			
 			$pDetails = $this->getProductHeaders($productIds);
 			
@@ -7280,7 +7315,6 @@ class TrialTracker
 			$Ids = $aDetails['Ids'];
 			$TrialsInfo = $aDetails['TrialsInfo'];
 			$productSelector = $aDetails['productSelector'];
-			
 			unset($pDetails);
 			unset($aDetails);
 		}
@@ -7351,7 +7385,6 @@ class TrialTracker
 				$tHeader = '';
 				
 				$productIds = $resultIds['e1'];
-				
 				$pDetails = $this->getProductHeaders($productIds);
 				foreach($pDetails['Ids'] as $ikey => $ivalue)
 				{
@@ -7404,10 +7437,11 @@ class TrialTracker
 		$TrialsInfo = array();
 		$Ids = array();
 		
-		$Query = "SELECT `name`, `id`, `company`, `discontinuation_status`, `discontinuation_status_comment` "
+		$Query = "SELECT `name`, `id`, `class`,`display_name`,`company`, `discontinuation_status`, `discontinuation_status_comment` "
 					. " FROM `entities` WHERE id IN ('" . implode("','", $productIds) . "') OR LI_id IN ('" . implode("','", $productIds) . "') "
 					. " ORDER BY FIELD(`id`, " . implode(",", $productIds) . ") ";
 		$Res = m_query(__LINE__,$Query);
+		
 		if($Res)
 		{	
 			if(mysql_num_rows($Res) > 0)
@@ -7424,15 +7458,28 @@ class TrialTracker
 						$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
 					}
 					
-
-					$productSelector[$productId] = $row['name'];
-					$sectionHeader = formatBrandName($row['name'], 'product');
+					if($row['class']=='Product')
+					{
+						$sectionHeader = formatBrandName($row['name'], 'product');
+						$productSelector[$productId] = $row['name'];	
+					}
+					elseif(!empty($row['display_name']))
+					{
+						$sectionHeader = formatBrandName($row['display_name'], 'area');
+						$productSelector[$productId] = $row['display_name'];
+					}
+					else
+					{
+						$sectionHeader = formatBrandName($row['class'].' ' . $areaId, 'area');
+						$productSelector[$productId] = $row['class'].' ' . $areaId;
+					}
 					
 					if($row['company'] !== NULL && $row['company'] != '')
 					{
 						$sectionHeader .= " / <i>" . $row['company'] . "</i>";
 						$productSelector[$productId] .= " / <i>" . $row['company'] . "</i>";
 					}
+			
 					
 					$sectionHeader .= $disContinuedTxt;
 					
@@ -7463,8 +7510,9 @@ class TrialTracker
 		$TrialsInfo = array();
 		$Ids = array();
 		
-		$Query = "SELECT `display_name`, `name`, `id`, `category` FROM `areas` WHERE id IN ('" . implode("','", $areaIds) . "') ";
+		$Query = "SELECT `display_name`, `name`, `id`, `class`,`category` FROM `entities` WHERE id IN ('" . implode("','", $areaIds) . "') ";
 		$Res = m_query(__LINE__,$Query);
+		
 		if($Res)
 		{
 			if(mysql_num_rows($Res) > 0)
@@ -7478,20 +7526,26 @@ class TrialTracker
 					{
 						$sectionHeader = $row['category'];
 					}
-					
-					if($row['display_name'] != '' && $row['display_name'] !== NULL)
+					if($row['class']=='Product')
 					{
-						$sectionHeader .= ' ' . $row['display_name'];
+						$sectionHeader = formatBrandName($row['name'], 'product');
+						$productSelector[$areaId] = $row['name'];	
+					}
+					elseif(!empty($row['display_name']))
+					{
+						$sectionHeader = formatBrandName($row['display_name'], 'area');
+						$productSelector[$areaId] = $row['display_name'];
 					}
 					else
 					{
-						$sectionHeader .= ' Area ' . $areaId;
+						$sectionHeader = formatBrandName($row['class'].' ' . $areaId, 'area');
+						$productSelector[$areaId] = $row['class'].' ' . $areaId;
 					}
-					
+				
 					$Ids[$areaId]['area'] = $areaId;
 					$productSelector[$areaId] = $sectionHeader;
 					
-					$TrialsInfo[$areaId]['sectionHeader'] = formatBrandName($sectionHeader, 'area');
+					$TrialsInfo[$areaId]['sectionHeader'] = $sectionHeader;
 					$TrialsInfo[$areaId]['Id'] = $areaId;
 				}
 			}
@@ -7551,6 +7605,7 @@ class TrialTracker
 		
 		$query = "SELECT id, name, class, display_name FROM entities WHERE id IN ('" . $ids . "') ";
 		$res = m_query(__LINE__, $query);
+		
 		if($res)
 		{
 			while($row = mysql_fetch_assoc($res))
@@ -7596,37 +7651,6 @@ class TrialTracker
 		return array('tHeader' => $tHeader, 'ottType' => $ottType, 'pId' => $pId, 'TrialsInfo' => $TrialsInfo);
 	}
 	
-	function generateEntitiesTT($resultIds, $globalOptions = array())
-	{
-		$this->timeParams($globalOptions);
-		echo '<form id="frmOtt" name="frmOtt" method="get" target="_self" action="intermediary.php">'
-				.'<input type="hidden" name="e1" value="' . $resultIds['e1'] . '" />'
-				. '<input type="hidden" name="e2" value="' . $resultIds['e2'] . '" />';
-
-				
-		/***********************/
-		if(isset($globalOptions['hm']) && trim($globalOptions['hm']) != '')
-		{
-			echo '<input type="hidden" name="hm" value="' . $globalOptions['hm'] . '" />';
-			$Arr = $this->processHmParams($resultIds, $globalOptions, 'webPage');
-		}
-		else
-		{
-			//$Arr = $this->processNonHmParams($resultIds, $globalOptions, 'webPage');
-			$Arr = $this->processEntitiesParams($resultIds, $globalOptions);
-		}
-		/**********************/
-		$productSelector = $Arr['productSelector'];
-		$Ids = $Arr['Ids'];
-		$this->displayHeader($Arr['tHeader']);
-		$ottType = $Arr['ottType'];
-		$pId = $Arr['pId'];
-		$TrialsInfo = $Arr['TrialsInfo'];
-		$Values = $this->compileEntitiesData($pId, $TrialsInfo, $Ids, $globalOptions);
-		
-		echo $this->displayWebPage($ottType, $resultIds, $Values, array(), $globalOptions);
-	}
-
 	function compileEntitiesData($pId, $TrialsInfo = array(), $Ids = array(), $globalOptions = array(), $display = 'web')
 	{
 		global $logger;
@@ -7773,8 +7797,8 @@ class TrialTracker
 			$Values['Data'][$pId]['naUpms'] = $nvalue;
 		}
 		
-		//echo "<br/>Query===>".$Query;
 		$res = m_query(__LINE__,$Query);
+		
 		if($res)
 		{
 			if(mysql_num_rows($res) > 0)
@@ -8051,7 +8075,7 @@ class TrialTracker
 		return  $Values;
 	}
 	
-	function generateOnlineTT2($resultIds, $globalOptions = array())
+	function generateEntitiesTT($resultIds, $globalOptions = array())
 	{	
 		$Values = array();
 		$Values['Data'] = array();
@@ -8500,6 +8524,7 @@ class TrialTracker
 			}
 			
 			$res = m_query(__LINE__,$Query);
+			
 			if($res)
 			{
 				if(mysql_num_rows($res) > 0)
@@ -8826,14 +8851,14 @@ class TrialTracker
 			$query .= ", pt.`entity` AS productid ";
 			$where .= " AND pt.`entity` IN ('" . implode("','", $pIds) . "') ";
 			$join .= " JOIN `entity_trials` pt ON dt.`larvol_id` = pt.`trial` ";
-			$join .= " JOIN `products` prdt ON pt.`entity` = prdt.id ";
+			$join .= " JOIN `entities` prdt ON pt.`entity` = prdt.id ";
 		}
 		if(!empty($aIds))
 		{
 			$query .= ", at.`entity` AS areaid ";
-			$where .= " AND at.`entity` IN ('" . implode("','", $aIds) . "') ";	
+			$where .= " and at.`entity` IN ('" . implode("','", $aIds) . "') ";	
 			$join .= " JOIN `entity_trials` at ON dt.`larvol_id` = at.`trial` ";
-			$join .= " JOIN `areas` areas ON at.`entity` = areas.id ";
+			$join .= " JOIN `entities` areas ON at.`entity` = areas.id ";
 		}
 		$query .= " FROM `data_trials` dt ";
 		$query .= $join . " LEFT OUTER JOIN `data_manual` dm ON dt.`larvol_id` = dm.`larvol_id` "
@@ -8971,6 +8996,7 @@ class TrialTracker
 			}
 		}
 		$res = m_query(__LINE__,$Query);
+		
 		if($res)
 		{
 			if(mysql_num_rows($res) > 0)
@@ -9772,16 +9798,16 @@ class TrialTracker
 		{
 			$hmId = $globalOptions['hm'];
 			
-			$Query = "SELECT ar.`coverage_area`, ar.`id` "
+			$Query = "SELECT ar.`class`, ar.`id` "
 					. " FROM `rpt_masterhm_headers` rmh "
-					. " JOIN `areas` ar ON  rmh.`type_id` = ar.`id` "
-					. " WHERE rmh.`report` = '" . $hmId . "' AND rmh.`type` = 'area' "
+					. " JOIN `entities` ar ON  rmh.`type_id` = ar.`id` "
+					. " WHERE rmh.`report` = '" . $hmId . "' AND rmh.`type` = 'column' "
 					. " ORDER BY rmh.`num` DESC LIMIT 0,1 ";
 			$Res = m_query(__LINE__, $Query);
 			if($Res)
 			{
 				$Row = mysql_fetch_assoc($Res);
-				if($Row['coverage_area'])
+				if($Row['class']=='Disease')
 				{
 					$query = "SELECT upm_id FROM upm_areas where area_id = '" . $Row['id'] . "' ";
 					$res = m_query(__LINE__, $query);
