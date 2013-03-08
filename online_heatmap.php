@@ -70,8 +70,18 @@ while($header = mysql_fetch_array($res))
 			//$columnsDisplayName[$header['num']] = $result['display_name'];
 			if($type == 'Product')
 				$columnsDisplayName[$header['num']] = $result['name'];
-			else 
-				$columnsDisplayName[$header['num']] = (($header['display_name'] != '' && $header['display_name'] != NULL) ? $header['display_name'] : $type .' '.$result['id']) ;	///Display name from master hm header table
+			else
+			{
+				if(trim($header['display_name']) != '' && $header['display_name'] != NULL && $header['display_name'] != 'NULL') //HM LEVEL Display name
+					$columnsDisplayName[$header['num']] = $header['display_name'];
+				else if(trim($result['display_name']) != '' && $result['display_name'] != NULL && $result['display_name'] != 'NULL') //Global Display name
+					$columnsDisplayName[$header['num']] = $result['display_name'];
+				else if($type == 'Area')
+					$columnsDisplayName[$header['num']] = $type .' '.$result['id'] ;	//For area display class n id
+				else
+					$columnsDisplayName[$header['num']] = $result['name'] ;	//For for other than Area take actual name
+			}
+				
 			$columnsDescription[$header['num']] = $result['description'];
 			$header['category'] = trim($header['category']);
 			if($header['category'] == NULL || trim($header['category']) == '')
@@ -131,7 +141,17 @@ while($header = mysql_fetch_array($res))
 			if($type == 'Product')
 				$rowsDisplayName[$header['num']] = $result['name'];
 			else 
-				$rowsDisplayName[$header['num']] = (($result['display_name'] != '' && $result['display_name'] != NULL) ? $result['display_name'] : $type .' '.$result['id']) ;	///Display name from master hm header table
+			{
+				if(trim($header['display_name']) != '' && $header['display_name'] != NULL && $header['display_name'] != 'NULL') //HM LEVEL Display name
+					$rowsDisplayName[$header['num']] = $header['display_name'];
+				else if(trim($result['display_name']) != '' && $result['display_name'] != NULL && $result['display_name'] != 'NULL') //Global Display name
+					$rowsDisplayName[$header['num']] = $result['display_name'];
+				else if($type == 'Area')											//For area display class n id
+					$rowsDisplayName[$header['num']] = $type .' '.$result['id'] ;
+				else																//For for other than Area take actual name
+					$rowsDisplayName[$header['num']] = $result['name'] ;
+			}
+					
 			$rowsDescription[$header['num']] = $result['description'];
 			$header['category']=trim($header['category']);
 			if($header['category'] == NULL || trim($header['category']) == '')
