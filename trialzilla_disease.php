@@ -68,79 +68,32 @@ a:visited {color:#6600bc;}  /* visited link */
 </style>
 <!--tab css-->
 <style>
-#disease_tabs
+.selectTab
 {
-   overflow: hidden;
-   width: 100%;
-   margin: 0;
-   padding: 0;
-   list-style: none;
+	background-image:url(images/selectTab.png); 
+	background-repeat:repeat-x;
 }
 
-#disease_tabs li
+.Tab
 {
-    float: left;
-	margin: 0 -15px 0 0;
+	background-image:url(images/Tab.png); 
+	background-repeat:repeat-x;
 }
 
 #disease_tabs a
 {
-   float: left;
-   position: relative;
-   padding: 0 30px;
-   height: 0;
-   line-height: 30px;
-   /*text-transform: uppercase;*/
-   text-decoration: none;
-   color: #fff;      
-   border-right: 30px solid transparent;
-   border-bottom: 30px solid #6a4f8d;
-   border-bottom-color: #6a4f8d;
-   opacity: .8;
-   filter: alpha(opacity=80);
-   display:inline;
-   width:auto;       
-}
-
-#disease_tabs a:hover
-{
-   border-bottom-color: #6a4f8d;
-   opacity: 1;
-   filter: alpha(opacity=100);
-}
-
-#disease_tabs a:focus
-{
-    outline: 0;
-}
-
-#disease_tabs #current a
-{
-    z-index: 3;
-	border-bottom-color: #4f2683;
-	opacity: 1;
-	filter: alpha(opacity=100);  
+	text-decoration:none;
+	color:#000000;
+	font-size:13px;
+	font-family:Arial, Helvetica, sans-serif;
+	display:block;
 }
 
 #diseaseTab_content
 {
     background-color: #ffffff;
-    /*background-color: #fff;
-    background-image: -webkit-gradient(linear, left top, left bottom, from(#fff), to(#ddd));
-    background-image: -webkit-linear-gradient(top, #fff, #ddd); 
-    background-image:    -moz-linear-gradient(top, #fff, #ddd); 
-    background-image:     -ms-linear-gradient(top, #fff, #ddd); 
-    background-image:      -o-linear-gradient(top, #fff, #ddd); 
-    background-image:         linear-gradient(top, #fff, #ddd);
-	filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0, startColorstr='#ffffff', endColorstr='#ebebeb'); /* for IE */
-	-moz-border-radius: 2px 2px 2px 2px;
-    -webkit-border-radius: 2px 2px 2px 2px;
-    border-radius: 2px 2px 2px 2px;
-    -moz-box-shadow: 0 2px 2px #000, 0 -1px 0 #fff inset;
-    -webkit-box-shadow: 0 2px 2px #000, 0 -1px 0 #fff inset;
-    box-shadow: 0 2px 2px #000, 0 -1px 0 #fff inset;
     padding: 30px;
-	border:#CCCCCC 1px solid;
+	border-top:#333333 solid 1px;
 }
 </style>
 <script src="scripts/jquery-1.7.1.min.js"></script>
@@ -164,27 +117,26 @@ a:visited {color:#6600bc;}  /* visited link */
 
 <!-- Displaying Records -->
 <br/>
-<table width="100%" border="0" style="">
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
 <tr><td>
-<ul id="disease_tabs">
-    <li><a href="#" title="Products">Products</a></li>
-    <li><a href="#" title="Companies">Companies</a></li>
-    <li><a href="#" title="MOAs">MOAs</a></li>
-    <!--<li><a href="#" title="Conferences">Conferences</a></li>  -->  
-</ul>
+	
+    <table cellpadding="0" cellspacing="0" id="disease_tabs">
+		<tr>
+		    <td><img id="ProductsImg" src="images/firstSelectTab.png" /></td><td id="ProductsTab" class="selectTab"><a href="#" title="Products">&nbsp;Products&nbsp;</a></td><td><img id="CompaniesImg" src="images/selectTabConn.png" /></td><td id="CompaniesTab" class="Tab"><a href="#" title="Companies">&nbsp;Companies&nbsp;</a></td><td><img id="MOAsImg" src="images/afterTab.png" /></td><td id="MOAsTab" class="Tab"><a href="#" title="MOAs">&nbsp;MOAs&nbsp;</a></td><td><img id="lastImg" src="images/lastTab.png" /></td><td></td>
+   		</tr>
+	</table>
 
-<div id="diseaseTab_content"> 
+</td></tr>
+<tr><td align="center">
+<div id="diseaseTab_content" align="center"> 
     <div id="Products" align="center">        
 			<?php print showProductTracker($DiseaseId, $dwcount, 'DPT', $page); //DPT=DISEASE PRODUCT TRACKER ?>
     </div>
-    <div id="Companies">
+    <div id="Companies" align="center" style="display:none;">
        		<?php print showCompanyTracker($DiseaseId, 'DCT'); //DCT=DISEASE COMPANY TRACKER ?>
     </div>
-    <div id="MOAs">
+    <div id="MOAs" align="center" style="display:none;">
         	<?php print showMOATracker($DiseaseId, 'DMT'); //DMT=DISEASE MOA TRACKER ?>
-    </div>
-    <div id="Conferences">
-        Conferences
     </div>
 </div>
 </td></tr>
@@ -197,30 +149,57 @@ a:visited {color:#6600bc;}  /* visited link */
 </html>
 <script>
 $(document).ready(function() {
-	//$("#diseaseTab_content div").hide(); // Initially hide all content
-	///Hide all main divs
-	//$("#Products").hide(); // Initially hide all content
-	$("#Companies").hide(); // Initially hide all content
-	$("#MOAs").hide(); // Initially hide all content
-	$("#Conferences").hide(); // Initially hide all content
-	///end
+
+	var mytabs = new Array();
+	mytabs[0] = "Products";
+	mytabs[1] = "Companies";
+	mytabs[2] = "MOAs";
+	//mytabs[3] = "Conferences";
 	
-	$("#disease_tabs li:first").attr("id","current"); // Activate first tab
-	$("#diseaseTab_content div:first").fadeIn(); // Show first tab content
-    
-    $('#disease_tabs a').click(function(e) {
+	for (var i=1; i<mytabs.length; i++)
+	{
+		$("#" + mytabs[i]).hide(); // Initially hide all content
+	}
+	
+	$('#disease_tabs a').click(function(e) {
         e.preventDefault();        
-        //$("#diseaseTab_content div").hide(); //Hide all content
-		///Hide all main divs
-		$("#Products").hide(); // Initially hide all content
-		$("#Companies").hide(); // Initially hide all content
-		$("#MOAs").hide(); // Initially hide all content
-		$("#Conferences").hide(); // Initially hide all content
+        ///Hide all main divs
+		for (var i=0; i<mytabs.length; i++)
+		{
+			$("#" + mytabs[i]).hide(); // Initially hide all content
+		}
 		///end
-        
-		$("#disease_tabs li").attr("id",""); //Reset id's
-        $(this).parent().attr("id","current"); // Activate this
         $('#' + $(this).attr('title')).fadeIn(); // Show content for current tab
-    });
+		
+		if($(this).attr('title') == mytabs[0])
+			$('#' + $(this).attr('title') + 'Img').attr('src', 'images/firstSelectTab.png');
+		else if	($(this).attr('title') != mytabs[0])
+			$('#' + mytabs[0] + 'Img').attr('src', 'images/firstTab.png');
+			
+		if($(this).attr('title') == mytabs[mytabs.length -1])
+			$('#lastImg').attr('src', 'images/selectLastTab.png');
+		else if	($(this).attr('title') != mytabs[mytabs.length -1])
+			$('#lastImg').attr('src', 'images/lastTab.png');	
+				
+		for (var i=0; i<mytabs.length; i++)
+		{
+			if($(this).attr('title') == mytabs[i])
+			{$('#' +  mytabs[i] + 'Tab').removeClass('Tab'); $('#' + mytabs[i] + 'Tab').removeClass('selectTab');	$('#' + mytabs[i] + 'Tab').addClass('selectTab');}
+			else
+			{$('#' + mytabs[i] + 'Tab').removeClass('Tab'); $('#' + mytabs[i] + 'Tab').removeClass('selectTab'); $('#' + mytabs[i] + 'Tab').addClass('Tab');}
+			
+			if(i < (mytabs.length -1) && $(this).attr('title') == mytabs[i])
+				$('#' + mytabs[i+1] + 'Img').attr('src', 'images/selectTabConn.png');
+			
+			if(i < (mytabs.length -1) && $(this).attr('title') == mytabs[i])
+				$('#' + mytabs[i+1] + 'Img').attr('src', 'images/selectTabConn.png');
+			
+			if(i < (mytabs.length -1) && $(this).attr('title') != mytabs[i] && $(this).attr('title')!= mytabs[i+1])
+				$('#' + mytabs[i+1] + 'Img').attr('src', 'images/afterTab.png');	
+			
+			if(i < (mytabs.length -1) && $(this).attr('title') != mytabs[i] && $(this).attr('title') == mytabs[i+1])
+				$('#' + mytabs[i+1] + 'Img').attr('src', 'images/middleTab.png');		
+		}
+	});
 });
 </script>
