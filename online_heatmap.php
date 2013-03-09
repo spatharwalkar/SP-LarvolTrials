@@ -1909,13 +1909,13 @@ function refresh_data(cell_id)
 			var activeColumn = '';
 			var remakeColumn = true;
 			var table = $('#hmMainTable').first();
-			var tablePosition = table.offset();
+			var tablePosition = table.position();
 			var topOffset = 0;
 			var leftOffset = 0;
 			if (currentScrollLeft > tablePosition.left)
 			{
 				$("#hmMainTable").find('thead tr').each(function(k){
-			    	var position = $(this).find('th:nth-child(1)').offset();
+			    	var position = $(this).find('th:nth-child(1)').position();
 			        if (currentScrollLeft <= position.left)
 			        {
 			        	remakeColumn = false;
@@ -1925,10 +1925,10 @@ function refresh_data(cell_id)
 			    $("#hmMainTable").find('tbody tr').each(function (i) {
 			        var wrapper_tr = $('<tr></tr>');
 			        if( $(this).find('th:nth-child(1)').html() != null){
-			            var position = $(this).find('th:nth-child(1)').offset();
+			            var position = $(this).find('th:nth-child(1)').position();
 			        	wrapper_tr.append($(this).find('th:nth-child(1)').clone());
 					}else{
-						var position = $(this).find('td').offset();
+						var position = $(this).find('td').position();
 						wrapper_tr.append($(this).find('td').clone().attr('colspan',1));
 						wrapper_tr.css({'background-color':$(this).find('td').css('background-color')});//'#A2FF97'
 					}
@@ -1959,14 +1959,20 @@ function refresh_data(cell_id)
 			{
 				// handle exception if hmMainTable1 does not exists
 				try{
-						topOffset = ($('#hmMainTable tbody').offset().top);
+						topOffset = ($('#hmMainTable tbody').position().top);
 							if($('#hmMainTable1').html() != null)
 							{
-								topOffset = $('#hmMainTable').offset().top + $('#hmMainTable1').outerHeight();// - currentScrollTop;
+								topOffset = $('#hmMainTable').position().top + $('#hmMainTable1').outerHeight();// - currentScrollTop;
 								$('#hmMainTable1').css({'z-index':1});	
 							}	
 					}catch(e){
 						//
+					}
+					// Adjust left and top in case of google chrome
+					$.browser.chrome = /chrome/.test(navigator.userAgent.toLowerCase()); 
+					if($.browser.chrome){
+						leftOffset = leftOffset -9;
+						topOffset  = topOffset +3;
 					}
 				createFixedColumn(activeColumn, leftOffset, topOffset);
 			}
