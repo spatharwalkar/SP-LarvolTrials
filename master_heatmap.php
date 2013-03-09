@@ -3697,7 +3697,13 @@ function Download_reports()
 		$objPHPExcel->getActiveSheet()->SetCellValue('B' . $Excel_HMCounter, $tooltip);
 		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$Excel_HMCounter, '');
 		//freezepane
-		$objPHPExcel->getActiveSheet()->freezePane('B5');
+		//$entity2_Category_Presence decides over the position of freeze pane
+		if($entity2_Category_Presence){
+			$objPHPExcel->getActiveSheet()->freezePane('B6');
+		}else{
+			$objPHPExcel->getActiveSheet()->freezePane('B5');
+		}
+		
 		
 		if($entity2_Category_Presence)
 		{
