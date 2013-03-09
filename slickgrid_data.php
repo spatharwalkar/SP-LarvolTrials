@@ -70,11 +70,11 @@ function slickgrid_data(){
 				$owner='Global';
 			}
 				
-			$row_query = 'SELECT max(num) as row FROM `rpt_masterhm_headers` WHERE `report`=' . $row['id'] . ' AND `type`=\'product\'';
+			$row_query = 'SELECT max(num) as row FROM `rpt_masterhm_headers` WHERE `report`=' . $row['id'] . ' AND `type`=\'row\'';
 			$row_res = mysql_query($row_query) or die('Bad SQL query retrieving Number of Row in master heatmap report list');
 			while($row_row = mysql_fetch_array($row_res))
 				$rows=$row_row['row'];
-			$col_query = 'SELECT max(num) as col FROM `rpt_masterhm_headers` WHERE `report`=' . $row['id'] . ' AND `type`=\'area\'';
+			$col_query = 'SELECT max(num) as col FROM `rpt_masterhm_headers` WHERE `report`=' . $row['id'] . ' AND `type`=\'column\'';
 			$col_res = mysql_query($col_query) or die('Bad SQL query retrieving Number of Columns in master heatmap report list');
 			while($col_row = mysql_fetch_array($col_res))
 				$cols=$col_row['col'];
