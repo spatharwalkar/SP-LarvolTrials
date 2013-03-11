@@ -749,7 +749,7 @@ function TrackerCommonJScript($id, $TrackerType, $uniqueId, $page, $MainPageURL,
 	else if($TrackerType == 'SMCPT')	//SMCPT=SEGMENTED MOA CATEGORY PRODUCT TRACKER
 		$url = 'MoaCatId=' . $id .'&TrackerType='.$TrackerType.'&phase=' . $phase.'&page=' . $page;
 	else if($TrackerType == 'DPT')	//DPT=DISEASE PRODUCT TRACKER
-		$url = 'DiseaseId=' . $id .'&page=' . $page;
+		$url = 'DiseaseId=' . $id .'&page=' . $page .'&tab=Products';
 	
 	//Script for view change
 	$htmlContent .= "<script language=\"javascript\" type=\"text/javascript\">
@@ -1353,7 +1353,7 @@ function pagination($TrackerType, $totalPages, $id, $dwcount, $CurrentPage, $Mai
 	else if($TrackerType == 'SMCPT')	//SMCPT=SEGMENTED MOA CATEGORY PRODUCT TRACKER
 		$url = 'MoaCatId=' . $id .'&amp;dwcount=' . $dwcount .'&amp;TrackerType='.$TrackerType.'&amp;phase=' . $phase;
 	else if($TrackerType == 'DPT')	//DPT=DISEASE PRODUCT TRACKER
-		$url = 'DiseaseId=' . $id .'&amp;dwcount=' . $dwcount;
+		$url = 'DiseaseId=' . $id .'&amp;dwcount=' . $dwcount .'&amp;tab=Products';
 		
 	
 	$rootUrl = $MainPageURL.'?';

@@ -11,17 +11,23 @@ if(!isset($_REQUEST['id'])) return;
 $id = mysql_real_escape_string(htmlspecialchars($_REQUEST['id']));
 if(!is_numeric($id)) return;
 
-if($_POST['dwformat'])
+if($_POST['download'])
 {
 	DownloadCompanyTrackerReports();
 	exit;
 }
 
+$page = 1;	
+if(isset($_REQUEST['page']) && is_numeric($_REQUEST['page']))
+{
+	$page = mysql_real_escape_string($_REQUEST['page']);
+}
+
 ////Process Report Tracker
-function showCompanyTracker($id, $TrackerType)
+function showCompanyTracker($id, $TrackerType, $page=1)
 {
 	$HTMLContent = '';
-	$Return = DataGeneratorForCompanyTracker($id, $TrackerType);
+	$Return = DataGeneratorForCompanyTracker($id, $TrackerType, $page);
 	$uniqueId = uniqid();
 	
 	///Required Data restored
@@ -36,6 +42,11 @@ function showCompanyTracker($id, $TrackerType)
 	$ratio = $Return['ratio'];
 	$column_interval = $Return['column_interval'];
 	$PhaseArray = $Return['PhaseArray'];
+	$TotalPages = $Return['TotalPages'];
+	
+	$MainPageURL = 'company_tracker.php';	//PT=COMPANY TRACKER (MAIN PT PAGE)
+	if($TrackerType == 'DCT')	//DPT=DISEASE COMPANY TRACKER
+		$MainPageURL = 'trialzilla_disease.php';
 	
 	$HTMLContent .= CompanyTrackerCommonCSS($uniqueId, $TrackerType);
 	
@@ -44,13 +55,19 @@ function showCompanyTracker($id, $TrackerType)
 	
 	$HTMLContent .= CompanyTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_columns, $inner_width, $column_width, $ratio, $column_interval, $PhaseArray, $TrackerType, $uniqueId);
 	
+	if($TotalPages > 1)
+	{
+		$paginate = CompanyTrackerpagination($TrackerType, $TotalPages, $id, $page, $MainPageURL);
+		$HTMLContent .= '<br/><br/>'.$paginate[1];
+	}
+	
 	$HTMLContent .= CompanyTrackerCommonJScript($uniqueId);
 	
 	return $HTMLContent;
 }
 ///End of Process Report Tracker
 
-function DataGeneratorForCompanyTracker($id, $TrackerType)
+function DataGeneratorForCompanyTracker($id, $TrackerType, $page)
 {
 	global $db;
 	global $now;
@@ -161,6 +178,20 @@ function DataGeneratorForCompanyTracker($id, $TrackerType)
 	/// This function willl Sort multidimensional array according to Total count
 	$data_matrix = sortTwoDimensionArrayByKeyCompanyTracker($data_matrix,'TotalCount');
 	
+	///////////PAGING DATA
+	$RecordsPerPage = 50;
+	$TotalPages = 0;
+	if(!isset($_POST['download']))
+	{
+		$TotalPages = ceil(count($data_matrix) / $RecordsPerPage);
+		
+		$StartSlice = ($page - 1) * $RecordsPerPage;
+		$EndSlice = $StartSlice + $RecordsPerPage;
+		$data_matrix = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
+		$CompanyIds = array_slice($CompanyIds, $StartSlice, $RecordsPerPage);
+	}
+	/////////PAGING DATA ENDS
+	
 	$original_max_count = $max_count;
 	$max_count = ceil(($max_count / $columns)) * $columns;
 	$column_interval = $max_count / $columns;
@@ -181,6 +212,7 @@ function DataGeneratorForCompanyTracker($id, $TrackerType)
 	$Return['ratio'] = $ratio;
 	$Return['column_interval'] = $column_interval;
 	$Return['PhaseArray'] = $PhaseArray;
+	$Return['TotalPages'] = $TotalPages;
 	
 	return $Return;
 }
@@ -450,6 +482,42 @@ function CompanyTrackerCommonCSS($uniqueId, $TrackerType)
 					.tag {
 					color:#120f3c;
 					font-weight:normal;
+					}
+					
+					.pagination {
+						line-height: 1.6em;
+						width:100%;
+						float:none;
+						margin-right:10px;
+						float: left; 
+						padding-top:2px; 
+						vertical-align:bottom;
+						font-weight:bold;
+						padding-bottom:25px;
+						color:#4f2683;
+					}
+					
+					.pagination a:hover {
+						background-color: #aa8ece;
+						color: #FFFFFF;
+						font-weight:bold;
+						display:inline;
+					}
+					
+					.pagination a {
+						margin: 0 2px;
+						border: 1px solid #CCC;
+						background-color:#4f2683;
+						font-weight: bold;
+						padding: 2px 5px;
+						text-align: center;
+						color: #FFFFFF;
+						text-decoration: none;
+						display:inline;
+					}
+					
+					.pagination span {
+						padding: 2px 5px;
 					}
 					</style>';
 	return $htmlContent;				
@@ -911,8 +979,107 @@ function DrawExtraHTMLCellsCompanyTracker($phase_space, $inner_columns, $remain_
 	
 	return $extraHTMLContent;
 }
+
+function CompanyTrackerpagination($TrackerType, $totalPages, $id, $CurrentPage, $MainPageURL)
+{	
+	$url = '';
+	$stages = 1;
+			
+	if($TrackerType == 'DCT')	//DCT=DISEASE COMPANY TRACKER
+		$url = 'DiseaseId=' . $id .'&amp;tab=Companies';
+		
+	
+	$rootUrl = $MainPageURL.'?';
+	$paginateStr = '<table align="center"><tr><td><span class="pagination">';
+	
+	if($CurrentPage != 1)
+	{
+		$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . ($CurrentPage-1) . '\'>&laquo;</a>';
+	}
+	
+	if($totalPages < 7 + ($stages * 2))
+	{	
+		for($counter = 1; $counter <= $totalPages; $counter++)
+		{
+			if ($counter == $CurrentPage)
+			{
+				$paginateStr .= '<span>' . $counter . '</span>';
+			}
+			else
+			{
+				$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . $counter . '\'>' . $counter . '</a>';
+			}
+		}
+	}
+	elseif($totalPages > 5 + ($stages * 2))
+	{
+		if($CurrentPage < 1 + ($stages * 2))
+		{
+			for($counter = 1; $counter < 4 + ($stages * 2); $counter++)
+			{
+				if ($counter == $CurrentPage)
+				{
+					$paginateStr .= '<span>' . $counter . '</span>';
+				}
+				else
+				{
+					$paginateStr .='<a href=\'' . $rootUrl . $url . '&page=' . $counter . '\'>' . $counter . '</a>';
+				}
+			}
+			$paginateStr.= '<span>...</span>';
+			$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=' . ($totalPages-1) . '\'>' .  ($totalPages-1) . '</a>';
+			$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=' . $totalPages . '\'>' . $totalPages . '</a>';
+		}
+		elseif($totalPages - ($stages * 2) > $CurrentPage && $CurrentPage > ($stages * 2))
+		{
+			$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=1\'>1</a>';
+			$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=2\'>2</a>';
+			$paginateStr.= '<span>...</span>';
+			for($counter = $CurrentPage - $stages; $counter <= $CurrentPage + $stages; $counter++)
+			{
+				if ($counter == $CurrentPage)
+				{
+					$paginateStr.= '<span>' . $counter . '</span>';
+				}
+				else
+				{
+					$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=' . $counter . '\'>' . $counter . '</a>';
+				}
+			}
+			$paginateStr.= '<span>...</span>';
+			$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=' . ($totalPages-1) . '\'>' . ($totalPages-1) . '</a>';
+			$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=' . $totalPages . '\'>' . $totalPages . '</a>';
+		}
+		else
+		{
+			$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=1\'>1</a>';
+			$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=2\'>2</a>';
+			$paginateStr .= "<span>...</span>";
+			for($counter = $totalPages - (2 + ($stages * 2)); $counter <= $totalPages; $counter++)
+			{
+				if ($counter == $CurrentPage)
+				{
+					$paginateStr .= '<span>' . $counter . '</span>';
+				}
+				else
+				{
+					$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . $counter . '\'>' . $counter . '</a>';
+				}
+			}
+		}
+	}
+	
+	if($CurrentPage != $totalPages)
+	{
+		$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . ($CurrentPage+1) . '\'>&raquo;</a>';
+	}
+	$paginateStr .= '</td></tr></table></span>';
+	
+	return array($url, $paginateStr);
+}
+
 if(isset($_REQUEST['id']))
-print showCompanyTracker($_REQUEST['id'], 'CTH');
+print showCompanyTracker($_REQUEST['id'], 'CTH', $page);
 ?>
 <?
 if($db->loggedIn() && (strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE))

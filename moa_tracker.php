@@ -11,17 +11,23 @@ if(!isset($_REQUEST['id'])) return;
 $id = mysql_real_escape_string(htmlspecialchars($_REQUEST['id']));
 if(!is_numeric($id)) return;
 
-if($_POST['dwformat'])
+if($_POST['download'])
 {
 	DownloadMOATrackerReports();
 	exit;
 }
 
+$page = 1;	
+if(isset($_REQUEST['page']) && is_numeric($_REQUEST['page']))
+{
+	$page = mysql_real_escape_string($_REQUEST['page']);
+}
+
 ////Process Report Tracker
-function showMOATracker($id, $TrackerType)
+function showMOATracker($id, $TrackerType, $page=1)
 {
 	$HTMLContent = '';
-	$Return = DataGeneratorForMOATracker($id, $TrackerType);
+	$Return = DataGeneratorForMOATracker($id, $TrackerType, $page);
 	$uniqueId = uniqid();
 	
 	///Required Data restored
@@ -36,6 +42,11 @@ function showMOATracker($id, $TrackerType)
 	$ratio = $Return['ratio'];
 	$column_interval = $Return['column_interval'];
 	$PhaseArray = $Return['PhaseArray'];
+	$TotalPages = $Return['TotalPages'];
+	
+	$MainPageURL = 'moa_tracker.php';	//PT=MOA TRACKER (MAIN PT PAGE)
+	if($TrackerType == 'DMT')	//DPT=DISEASE MOA TRACKER
+		$MainPageURL = 'trialzilla_disease.php';
 	
 	$HTMLContent .= MOATrackerCommonCSS($uniqueId, $TrackerType);
 	
@@ -44,13 +55,19 @@ function showMOATracker($id, $TrackerType)
 	
 	$HTMLContent .= MOATrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_columns, $inner_width, $column_width, $ratio, $column_interval, $PhaseArray, $TrackerType, $uniqueId);
 	
+	if($TotalPages > 1)
+	{
+		$paginate = MOATrackerpagination($TrackerType, $TotalPages, $id, $page, $MainPageURL);
+		$HTMLContent .= '<br/><br/>'.$paginate[1];
+	}
+	
 	$HTMLContent .= MOATrackerCommonJScript($uniqueId);
 	
 	return $HTMLContent;
 }
 ///End of Process Report Tracker
 
-function DataGeneratorForMOATracker($id, $TrackerType)
+function DataGeneratorForMOATracker($id, $TrackerType, $page)
 {
 	global $db;
 	global $now;
@@ -170,6 +187,20 @@ function DataGeneratorForMOATracker($id, $TrackerType)
 	/// This function willl Sort multidimensional array according to Total count
 	$data_matrix = sortTwoDimensionArrayByKeyMOATracker($data_matrix,'TotalCount');
 	
+	///////////PAGING DATA
+	$RecordsPerPage = 50;
+	$TotalPages = 0;
+	if(!isset($_POST['download']))
+	{
+		$TotalPages = ceil(count($data_matrix) / $RecordsPerPage);
+		
+		$StartSlice = ($page - 1) * $RecordsPerPage;
+		$EndSlice = $StartSlice + $RecordsPerPage;
+		$data_matrix = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
+		$MOAOrMOACatIds = array_slice($MOAOrMOACatIds, $StartSlice, $RecordsPerPage);
+	}
+	/////////PAGING DATA ENDS
+	
 	$original_max_count = $max_count;
 	$max_count = ceil(($max_count / $columns)) * $columns;
 	$column_interval = $max_count / $columns;
@@ -190,6 +221,7 @@ function DataGeneratorForMOATracker($id, $TrackerType)
 	$Return['ratio'] = $ratio;
 	$Return['column_interval'] = $column_interval;
 	$Return['PhaseArray'] = $PhaseArray;
+	$Return['TotalPages'] = $TotalPages;
 	
 	return $Return;
 }
@@ -457,6 +489,42 @@ function MOATrackerCommonCSS($uniqueId, $TrackerType)
 					.tag {
 					color:#120f3c;
 					font-weight:normal;
+					}
+					
+					.pagination {
+						line-height: 1.6em;
+						width:100%;
+						float:none;
+						margin-right:10px;
+						float: left; 
+						padding-top:2px; 
+						vertical-align:bottom;
+						font-weight:bold;
+						padding-bottom:25px;
+						color:#4f2683;
+					}
+					
+					.pagination a:hover {
+						background-color: #aa8ece;
+						color: #FFFFFF;
+						font-weight:bold;
+						display:inline;
+					}
+					
+					.pagination a {
+						margin: 0 2px;
+						border: 1px solid #CCC;
+						background-color:#4f2683;
+						font-weight: bold;
+						padding: 2px 5px;
+						text-align: center;
+						color: #FFFFFF;
+						text-decoration: none;
+						display:inline;
+					}
+					
+					.pagination span {
+						padding: 2px 5px;
 					}
 					</style>';
 	return $htmlContent;				
@@ -918,8 +986,107 @@ function DrawExtraHTMLCellsMOATracker($phase_space, $inner_columns, $remain_span
 	
 	return $extraHTMLContent;
 }
+
+function MOATrackerpagination($TrackerType, $totalPages, $id, $CurrentPage, $MainPageURL)
+{	
+	$url = '';
+	$stages = 1;
+			
+	if($TrackerType == 'DMT')	//DPT=DISEASE MOA TRACKER
+		$url = 'DiseaseId=' . $id .'&amp;tab=MOAs';
+		
+	
+	$rootUrl = $MainPageURL.'?';
+	$paginateStr = '<table align="center"><tr><td><span class="pagination">';
+	
+	if($CurrentPage != 1)
+	{
+		$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . ($CurrentPage-1) . '\'>&laquo;</a>';
+	}
+	
+	if($totalPages < 7 + ($stages * 2))
+	{	
+		for($counter = 1; $counter <= $totalPages; $counter++)
+		{
+			if ($counter == $CurrentPage)
+			{
+				$paginateStr .= '<span>' . $counter . '</span>';
+			}
+			else
+			{
+				$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . $counter . '\'>' . $counter . '</a>';
+			}
+		}
+	}
+	elseif($totalPages > 5 + ($stages * 2))
+	{
+		if($CurrentPage < 1 + ($stages * 2))
+		{
+			for($counter = 1; $counter < 4 + ($stages * 2); $counter++)
+			{
+				if ($counter == $CurrentPage)
+				{
+					$paginateStr .= '<span>' . $counter . '</span>';
+				}
+				else
+				{
+					$paginateStr .='<a href=\'' . $rootUrl . $url . '&page=' . $counter . '\'>' . $counter . '</a>';
+				}
+			}
+			$paginateStr.= '<span>...</span>';
+			$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=' . ($totalPages-1) . '\'>' .  ($totalPages-1) . '</a>';
+			$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=' . $totalPages . '\'>' . $totalPages . '</a>';
+		}
+		elseif($totalPages - ($stages * 2) > $CurrentPage && $CurrentPage > ($stages * 2))
+		{
+			$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=1\'>1</a>';
+			$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=2\'>2</a>';
+			$paginateStr.= '<span>...</span>';
+			for($counter = $CurrentPage - $stages; $counter <= $CurrentPage + $stages; $counter++)
+			{
+				if ($counter == $CurrentPage)
+				{
+					$paginateStr.= '<span>' . $counter . '</span>';
+				}
+				else
+				{
+					$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=' . $counter . '\'>' . $counter . '</a>';
+				}
+			}
+			$paginateStr.= '<span>...</span>';
+			$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=' . ($totalPages-1) . '\'>' . ($totalPages-1) . '</a>';
+			$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=' . $totalPages . '\'>' . $totalPages . '</a>';
+		}
+		else
+		{
+			$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=1\'>1</a>';
+			$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=2\'>2</a>';
+			$paginateStr .= "<span>...</span>";
+			for($counter = $totalPages - (2 + ($stages * 2)); $counter <= $totalPages; $counter++)
+			{
+				if ($counter == $CurrentPage)
+				{
+					$paginateStr .= '<span>' . $counter . '</span>';
+				}
+				else
+				{
+					$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . $counter . '\'>' . $counter . '</a>';
+				}
+			}
+		}
+	}
+	
+	if($CurrentPage != $totalPages)
+	{
+		$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . ($CurrentPage+1) . '\'>&raquo;</a>';
+	}
+	$paginateStr .= '</td></tr></table></span>';
+	
+	return array($url, $paginateStr);
+}
+
 if(isset($_REQUEST['id']))
-print showMOATracker($_REQUEST['id'], 'MTH');
+print showMOATracker($_REQUEST['id'], 'MTH', $page);
 ?>
 <?
 if($db->loggedIn() && (strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE))

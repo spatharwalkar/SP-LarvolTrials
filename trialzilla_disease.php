@@ -24,6 +24,12 @@
 	{
 		$page = mysql_real_escape_string($_REQUEST['page']);
 	}
+	$tab = 'Product';
+	if(isset($_REQUEST['tab']))
+	{
+		$tab = mysql_real_escape_string($_REQUEST['tab']);
+	}
+	$tabCommonUrl = trim(urlPath()).'trialzilla_disease.php?DiseaseId='.$DiseaseId.'&dwcount='.$dwcount;
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -109,7 +115,7 @@ a:visited {color:#6600bc;}  /* visited link */
 <br/>
 <table width="100%" border="0" class="FoundResultsTb">
 	<tr>
-    	<td width="50%" style="border:0; font-weight:bold; padding-left:5px;" align="left">
+    	<td width="50%" style="border:0; font-weight:bold; padding-left:5px; color:#FFFFFF; font-size:28px;" align="left">
         	<?php print $DiseaseName; ?>
         </td>
     </tr>
@@ -122,22 +128,23 @@ a:visited {color:#6600bc;}  /* visited link */
 	
     <table cellpadding="0" cellspacing="0" id="disease_tabs">
 		<tr>
-		    <td><img id="ProductsImg" src="images/firstSelectTab.png" /></td><td id="ProductsTab" class="selectTab"><a href="#" title="Products">&nbsp;Products&nbsp;</a></td><td><img id="CompaniesImg" src="images/selectTabConn.png" /></td><td id="CompaniesTab" class="Tab"><a href="#" title="Companies">&nbsp;Companies&nbsp;</a></td><td><img id="MOAsImg" src="images/afterTab.png" /></td><td id="MOAsTab" class="Tab"><a href="#" title="MOAs">&nbsp;MOAs&nbsp;</a></td><td><img id="lastImg" src="images/lastTab.png" /></td><td></td>
+		    <?php if($tab == 'Product') {  ?>
+            <td><img id="ProductsImg" src="images/firstSelectTab.png" /></td><td id="ProductsTab" class="selectTab"><a href="<?php print $tabCommonUrl.'&tab=Product'; ?>" title="Products">&nbsp;Products&nbsp;</a></td><td><img id="CompaniesImg" src="images/selectTabConn.png" /></td><td id="CompaniesTab" class="Tab"><a href="<?php print $tabCommonUrl.'&tab=Companies'; ?>" title="Companies">&nbsp;Companies&nbsp;</a></td><td><img id="MOAsImg" src="images/afterTab.png" /></td><td id="MOAsTab" class="Tab"><a href="<?php print $tabCommonUrl.'&tab=MOAs'; ?>" title="MOAs">&nbsp;MOAs&nbsp;</a></td><td><img id="lastImg" src="images/lastTab.png" /></td><td></td>
+            <?php } else if($tab == 'Companies') {  ?>
+            <td><img id="ProductsImg" src="images/firstTab.png" /></td><td id="ProductsTab" class="Tab"><a href="<?php print $tabCommonUrl.'&tab=Product'; ?>" title="Products">&nbsp;Products&nbsp;</a></td><td><img id="CompaniesImg" src="images/middleTab.png" /></td><td id="CompaniesTab" class="selectTab"><a href="<?php print $tabCommonUrl.'&tab=Companies'; ?>" title="Companies">&nbsp;Companies&nbsp;</a></td><td><img id="MOAsImg" src="images/selectTabConn.png" /></td><td id="MOAsTab" class="Tab"><a href="<?php print $tabCommonUrl.'&tab=MOAs'; ?>" title="MOAs">&nbsp;MOAs&nbsp;</a></td><td><img id="lastImg" src="images/lastTab.png" /></td><td></td>
+            <?php } else if($tab == 'MOAs') {  ?>
+            <td><img id="ProductsImg" src="images/firstTab.png" /></td><td id="ProductsTab" class="Tab"><a href="<?php print $tabCommonUrl.'&tab=Product'; ?>" title="Products">&nbsp;Products&nbsp;</a></td><td><img id="CompaniesImg" src="images/afterTab.png" /></td><td id="CompaniesTab" class="Tab"><a href="<?php print $tabCommonUrl.'&tab=Companies'; ?>" title="Companies">&nbsp;Companies&nbsp;</a></td><td><img id="MOAsImg" src="images/middleTab.png" /></td><td id="MOAsTab" class="selectTab"><a href="<?php print $tabCommonUrl.'&tab=MOAs'; ?>" title="MOAs">&nbsp;MOAs&nbsp;</a></td><td><img id="lastImg" src="images/selectLastTab.png" /></td><td></td>
+            <?php } ?>
+            
    		</tr>
 	</table>
 
 </td></tr>
 <tr><td align="center">
-<div id="diseaseTab_content" align="center"> 
-    <div id="Products" align="center">        
-			<?php print showProductTracker($DiseaseId, $dwcount, 'DPT', $page); //DPT=DISEASE PRODUCT TRACKER ?>
-    </div>
-    <div id="Companies" align="center" style="display:none;">
-       		<?php print showCompanyTracker($DiseaseId, 'DCT'); //DCT=DISEASE COMPANY TRACKER ?>
-    </div>
-    <div id="MOAs" align="center" style="display:none;">
-        	<?php print showMOATracker($DiseaseId, 'DMT'); //DMT=DISEASE MOA TRACKER ?>
-    </div>
+<div id="diseaseTab_content" align="center">             
+	<?php if($tab == 'Product') print '<div id="Products" align="center">'.showProductTracker($DiseaseId, $dwcount, 'DPT', $page).'</div>'; //DPT=DISEASE PRODUCT TRACKER ?>
+    <?php if($tab == 'Companies') print '<div id="Companies" align="center">'.showCompanyTracker($DiseaseId, 'DCT', $page).'</div>'; //DCT=DISEASE COMPANY TRACKER ?>
+    <?php if($tab == 'MOAs') print '<div id="MOAs" align="center">'.showMOATracker($DiseaseId, 'DMT', $page).'</div>'; //DMT=DISEASE MOA TRACKER ?>
 </div>
 </td></tr>
 </table>
@@ -147,59 +154,3 @@ a:visited {color:#6600bc;}  /* visited link */
 
 </body>
 </html>
-<script>
-$(document).ready(function() {
-
-	var mytabs = new Array();
-	mytabs[0] = "Products";
-	mytabs[1] = "Companies";
-	mytabs[2] = "MOAs";
-	//mytabs[3] = "Conferences";
-	
-	for (var i=1; i<mytabs.length; i++)
-	{
-		$("#" + mytabs[i]).hide(); // Initially hide all content
-	}
-	
-	$('#disease_tabs a').click(function(e) {
-        e.preventDefault();        
-        ///Hide all main divs
-		for (var i=0; i<mytabs.length; i++)
-		{
-			$("#" + mytabs[i]).hide(); // Initially hide all content
-		}
-		///end
-        $('#' + $(this).attr('title')).fadeIn(); // Show content for current tab
-		
-		if($(this).attr('title') == mytabs[0])
-			$('#' + $(this).attr('title') + 'Img').attr('src', 'images/firstSelectTab.png');
-		else if	($(this).attr('title') != mytabs[0])
-			$('#' + mytabs[0] + 'Img').attr('src', 'images/firstTab.png');
-			
-		if($(this).attr('title') == mytabs[mytabs.length -1])
-			$('#lastImg').attr('src', 'images/selectLastTab.png');
-		else if	($(this).attr('title') != mytabs[mytabs.length -1])
-			$('#lastImg').attr('src', 'images/lastTab.png');	
-				
-		for (var i=0; i<mytabs.length; i++)
-		{
-			if($(this).attr('title') == mytabs[i])
-			{$('#' +  mytabs[i] + 'Tab').removeClass('Tab'); $('#' + mytabs[i] + 'Tab').removeClass('selectTab');	$('#' + mytabs[i] + 'Tab').addClass('selectTab');}
-			else
-			{$('#' + mytabs[i] + 'Tab').removeClass('Tab'); $('#' + mytabs[i] + 'Tab').removeClass('selectTab'); $('#' + mytabs[i] + 'Tab').addClass('Tab');}
-			
-			if(i < (mytabs.length -1) && $(this).attr('title') == mytabs[i])
-				$('#' + mytabs[i+1] + 'Img').attr('src', 'images/selectTabConn.png');
-			
-			if(i < (mytabs.length -1) && $(this).attr('title') == mytabs[i])
-				$('#' + mytabs[i+1] + 'Img').attr('src', 'images/selectTabConn.png');
-			
-			if(i < (mytabs.length -1) && $(this).attr('title') != mytabs[i] && $(this).attr('title')!= mytabs[i+1])
-				$('#' + mytabs[i+1] + 'Img').attr('src', 'images/afterTab.png');	
-			
-			if(i < (mytabs.length -1) && $(this).attr('title') != mytabs[i] && $(this).attr('title') == mytabs[i+1])
-				$('#' + mytabs[i+1] + 'Img').attr('src', 'images/middleTab.png');		
-		}
-	});
-});
-</script>
