@@ -129,7 +129,10 @@ function DataGeneratorForMOATracker($id, $TrackerType, $page)
 			$data_matrix[$key]['TotalCount'] = 0;
 			$productIds = array();			
 			
-			$productIds = GetProductsFromMOAOrMOACatId_MOATracker($MOAOrMOACatId, $data_matrix[$key]['class']);
+			if($TrackerType == 'DMT')
+				$productIds = GetProductsFromMOAOrMOACatIdNDisease_MOATracker($id, $MOAOrMOACatId, $data_matrix[$key]['class']);
+			else
+				$productIds = GetProductsFromMOAOrMOACatId_MOATracker($MOAOrMOACatId, $data_matrix[$key]['class']);
 			
 			$data_matrix[$key]['TotalCount'] = count($productIds);
 			if($max_count < $data_matrix[$key]['TotalCount'])
@@ -137,10 +140,9 @@ function DataGeneratorForMOATracker($id, $TrackerType, $page)
 				
 			if($data_matrix[$key]['TotalCount'] > 0)
 			{
-				foreach($productIds as $proId)
+				if($TrackerType == 'DMT')
 				{
-					$MAXPhasePNTR = 0;
-					$phase_query = "SELECT distinct (dt.`phase`) FROM `data_trials` dt JOIN  `entity_trials` et ON (dt.`larvol_id` = et.`trial`) WHERE et.`entity` = '". $proId ."'";	//SELECTING DISTINCT PHASES SO WE WILL HAVE MIN ROWS TO PROCESS
+					$phase_query = "SELECT rpt.`highest_phase` AS phase FROM `rpt_masterhm_cells` rpt WHERE (rpt.`entity1` = '". $id ."' AND rpt.`entity2` IN ('". implode("','", $productIds) ."')) OR (rpt.`entity1` IN ('". implode("','", $productIds) ."') AND rpt.`entity2` = '". $id ."')";	//SELECTING DISTINCT PHASES SO WE WILL HAVE MIN ROWS TO PROCESS
 				
 					$phase_res = mysql_query($phase_query) or die(mysql_error());
 					while($phase_row=mysql_fetch_array($phase_res))
@@ -174,12 +176,56 @@ function DataGeneratorForMOATracker($id, $TrackerType, $page)
 							$CurrentPhasePNTR = 5;	
 						}
 						
-						if($MAXPhasePNTR < $CurrentPhasePNTR)
-							$MAXPhasePNTR = $CurrentPhasePNTR;
-						
-					}	//END OF WHILE FETCH TRIALS FOR GETTTING PHASE
-					$data_matrix[$key]['phase_'.$PhaseArray[$MAXPhasePNTR]]++; //INCREASE COUNTER					
-				}	//FOREACH OF PRODUCT
+						$MAXPhasePNTR = $CurrentPhasePNTR;
+						$data_matrix[$key]['phase_'.$PhaseArray[$MAXPhasePNTR]]++; //INCREASE COUNTER	
+					}									
+				}
+				else
+				{
+					foreach($productIds as $proId)
+					{
+						$MAXPhasePNTR = 0;
+						$phase_query = "SELECT distinct (dt.`phase`) FROM `data_trials` dt JOIN  `entity_trials` et ON (dt.`larvol_id` = et.`trial`) WHERE et.`entity` = '". $proId ."'";	//SELECTING DISTINCT PHASES SO WE WILL HAVE MIN ROWS TO PROCESS
+				
+						$phase_res = mysql_query($phase_query) or die(mysql_error());
+						while($phase_row=mysql_fetch_array($phase_res))
+						{
+							if($phase_row['phase'] == 'N/A' || $phase_row['phase'] == '' || $phase_row['phase'] === NULL)
+							{
+								$CurrentPhasePNTR = 0;
+							}
+							else if($phase_row['phase'] == '0')
+							{
+								$CurrentPhasePNTR = 1;
+							}
+							else if($phase_row['phase'] == '1' || $phase_row['phase'] == '0/1' || $phase_row['phase'] == '1a' 
+							|| $phase_row['phase'] == '1b' || $phase_row['phase'] == '1a/1b' || $phase_row['phase'] == '1c')
+							{
+								$CurrentPhasePNTR = 2;
+							}
+							else if($phase_row['phase'] == '2' || $phase_row['phase'] == '1/2' || $phase_row['phase'] == '1b/2' 
+							|| $phase_row['phase'] == '1b/2a' || $phase_row['phase'] == '2a' || $phase_row['phase'] == '2a/2b' 
+							|| $phase_row['phase'] == '2a/b' || $phase_row['phase'] == '2b')
+							{
+								$CurrentPhasePNTR = 3;
+							}
+							else if($phase_row['phase'] == '3' || $phase_row['phase'] == '2/3' || $phase_row['phase'] == '2b/3' 
+							|| $phase_row['phase'] == '3a' || $phase_row['phase'] == '3b')
+							{
+								$CurrentPhasePNTR = 4;
+							}	
+							else if($phase_row['phase'] == '4' || $phase_row['phase'] == '3/4' || $phase_row['phase'] == '3b/4')
+							{
+								$CurrentPhasePNTR = 5;	
+							}
+							
+							if($MAXPhasePNTR < $CurrentPhasePNTR)
+								$MAXPhasePNTR = $CurrentPhasePNTR;
+							
+						}	//END OF WHILE FETCH TRIALS FOR GETTTING PHASE
+						$data_matrix[$key]['phase_'.$PhaseArray[$MAXPhasePNTR]]++; //INCREASE COUNTER					
+					}	//FOREACH OF PRODUCT
+				}	//END OF ELSE - FOR DCT WE USE HEATMAP TABLE TO REDUCE PROCESSING	
 			}	//END OF IF TOTAL COUNT > 0
 		} //END OF IF - MOA ID NULL OR NOT			
 	}	//END OF FOREACH - MOA ID ARRAY
@@ -2153,6 +2199,30 @@ function GetProductsFromMOAOrMOACatId_MOATracker($MOAOrMOACatId, $Class)
 		$query = "SELECT et.`id` FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`) WHERE et.`class`='Product' AND er.`child`='" . mysql_real_escape_string($MOAOrMOACatId) . "'";
 	else
 		$query = "SELECT et.`id` FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`) JOIN `entity_relations` er2 ON(er.`child` = er2.`child`) JOIN `entities` et2 ON (et2.`id` = er2.`parent`) WHERE et.`class`='Product' AND et2.`class`='MOA_Category' AND et2.`id`='" . mysql_real_escape_string($MOAOrMOACatId) . "'";
+		
+	$res = mysql_query($query) or die('Bad SQL query getting products from moa id / moa category id in moa tracker');
+	
+	if($res)
+	{
+		while($row = mysql_fetch_array($res))
+		{
+			$Products[] = $row['id'];
+		}
+	}
+	return array_filter(array_unique($Products));
+}
+
+/* Function to get Product Id's from MOA id / MOA Category id and Disease Id */
+function GetProductsFromMOAOrMOACatIdNDisease_MOATracker($DiseaseID, $MOAOrMOACatId, $Class)
+{
+	global $db;
+	global $now;
+	$Products = array();
+	
+	if($Class == 'MOA')
+		$query = "SELECT e.`id` FROM `entities` e JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entity_trials` et ON(et.`entity` = e.`id`) JOIN `entity_trials` et2 ON(et2.`trial` = et.`trial`) JOIN `entities` e2 ON (e2.`id` = et2.`entity`) WHERE e.`class`='Product' AND e2.`class`='Disease' AND e2.`id`='".$DiseaseID."' AND er.`child`='" . mysql_real_escape_string($MOAOrMOACatId) . "'";
+	else
+		$query = "SELECT e.`id` FROM `entities` e JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entity_relations` er2 ON(er.`child` = er2.`child`) JOIN `entities` e2 ON (e2.`id` = er2.`parent`) JOIN `entity_trials` et ON(et.`entity` = e.`id`) JOIN `entity_trials` et2 ON(et2.`trial` = et.`trial`) JOIN `entities` e3 ON (e3.`id` = et2.`entity`) WHERE e.`class`='Product' AND e2.`class`='MOA_Category' AND e3.`class`='Disease' AND e3.`id`='".$DiseaseID."' AND e2.`id`='" . mysql_real_escape_string($MOAOrMOACatId) . "'";
 		
 	$res = mysql_query($query) or die('Bad SQL query getting products from moa id / moa category id in moa tracker');
 	
