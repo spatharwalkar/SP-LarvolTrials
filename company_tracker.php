@@ -133,42 +133,51 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page)
 			{
 				if($TrackerType == 'DCT')
 				{
-					$phase_query = "SELECT rpt.`highest_phase` AS phase FROM `rpt_masterhm_cells` rpt WHERE (rpt.`entity1` = '". $id ."' AND rpt.`entity2` IN ('". implode("','", $productIds) ."')) OR (rpt.`entity1` IN ('". implode("','", $productIds) ."') AND rpt.`entity2` = '". $id ."')";	//SELECTING DISTINCT PHASES SO WE WILL HAVE MIN ROWS TO PROCESS
+					$ProdExistance = array();
+					$phase_query = "SELECT rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2` FROM `rpt_masterhm_cells` rpt WHERE (rpt.`entity1` = '". $id ."' AND rpt.`entity2` IN ('". implode("','", $productIds) ."')) OR (rpt.`entity1` IN ('". implode("','", $productIds) ."') AND rpt.`entity2` = '". $id ."')";	//SELECTING DISTINCT PHASES SO WE WILL HAVE MIN ROWS TO PROCESS
 				
 					$phase_res = mysql_query($phase_query) or die(mysql_error());
 					while($phase_row=mysql_fetch_array($phase_res))
 					{
-						if($phase_row['phase'] == 'N/A' || $phase_row['phase'] == '' || $phase_row['phase'] === NULL)
+						if(($phase_row['entity1'] == $id && !in_array($phase_row['entity2'],$ProdExistance)) || ($phase_row['entity2'] == $id && !in_array($phase_row['entity1'],$ProdExistance)))	//Avoid duplicates like (1,2) and (2,1) type
 						{
-							$CurrentPhasePNTR = 0;
-						}
-						else if($phase_row['phase'] == '0')
-						{
-							$CurrentPhasePNTR = 1;
-						}
-						else if($phase_row['phase'] == '1' || $phase_row['phase'] == '0/1' || $phase_row['phase'] == '1a' 
-						|| $phase_row['phase'] == '1b' || $phase_row['phase'] == '1a/1b' || $phase_row['phase'] == '1c')
-						{
-							$CurrentPhasePNTR = 2;
-						}
-						else if($phase_row['phase'] == '2' || $phase_row['phase'] == '1/2' || $phase_row['phase'] == '1b/2' 
-						|| $phase_row['phase'] == '1b/2a' || $phase_row['phase'] == '2a' || $phase_row['phase'] == '2a/2b' 
-						|| $phase_row['phase'] == '2a/b' || $phase_row['phase'] == '2b')
-						{
-							$CurrentPhasePNTR = 3;
-						}
-						else if($phase_row['phase'] == '3' || $phase_row['phase'] == '2/3' || $phase_row['phase'] == '2b/3' 
-						|| $phase_row['phase'] == '3a' || $phase_row['phase'] == '3b')
-						{
-							$CurrentPhasePNTR = 4;
+							if($phase_row['entity1'] == $id)
+							$ProdExistance[] = $phase_row['entity2'];
+							else
+							$ProdExistance[] = $phase_row['entity1'];
+							
+							if($phase_row['phase'] == 'N/A' || $phase_row['phase'] == '' || $phase_row['phase'] === NULL)
+							{
+								$CurrentPhasePNTR = 0;
+							}
+							else if($phase_row['phase'] == '0')
+							{
+								$CurrentPhasePNTR = 1;
+							}
+							else if($phase_row['phase'] == '1' || $phase_row['phase'] == '0/1' || $phase_row['phase'] == '1a' 
+							|| $phase_row['phase'] == '1b' || $phase_row['phase'] == '1a/1b' || $phase_row['phase'] == '1c')
+							{
+								$CurrentPhasePNTR = 2;
+							}
+							else if($phase_row['phase'] == '2' || $phase_row['phase'] == '1/2' || $phase_row['phase'] == '1b/2' 
+							|| $phase_row['phase'] == '1b/2a' || $phase_row['phase'] == '2a' || $phase_row['phase'] == '2a/2b' 
+							|| $phase_row['phase'] == '2a/b' || $phase_row['phase'] == '2b')
+							{
+								$CurrentPhasePNTR = 3;
+							}
+							else if($phase_row['phase'] == '3' || $phase_row['phase'] == '2/3' || $phase_row['phase'] == '2b/3' 
+							|| $phase_row['phase'] == '3a' || $phase_row['phase'] == '3b')
+							{
+								$CurrentPhasePNTR = 4;
+							}	
+							else if($phase_row['phase'] == '4' || $phase_row['phase'] == '3/4' || $phase_row['phase'] == '3b/4')
+							{
+								$CurrentPhasePNTR = 5;	
+							}
+							
+							$MAXPhasePNTR = $CurrentPhasePNTR;
+							$data_matrix[$key]['phase_'.$PhaseArray[$MAXPhasePNTR]]++; //INCREASE COUNTER	
 						}	
-						else if($phase_row['phase'] == '4' || $phase_row['phase'] == '3/4' || $phase_row['phase'] == '3b/4')
-						{
-							$CurrentPhasePNTR = 5;	
-						}
-						
-						$MAXPhasePNTR = $CurrentPhasePNTR;
-						$data_matrix[$key]['phase_'.$PhaseArray[$MAXPhasePNTR]]++; //INCREASE COUNTER	
 					}									
 				}
 				else
