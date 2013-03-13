@@ -96,6 +96,8 @@ class TrialTracker
 		$currentYear = date('Y');
 		$secondYear	= date('Y')+1;
 		$thirdYear	= date('Y')+2;	
+		
+		$SpaceIcon = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
 
 		ob_start();
 		$objPHPExcel = new PHPExcel();
@@ -1139,7 +1141,7 @@ class TrialTracker
 									$icon = '&#10004;';
 								}
 								
-								$objPHPExcel->getActiveSheet()->setCellValue('L' . $i, html_entity_decode($icon, ENT_QUOTES, 'UTF-8'));
+								$objPHPExcel->getActiveSheet()->setCellValue('L' . $i, html_entity_decode($SpaceIcon.$icon.$SpaceIcon, ENT_QUOTES, 'UTF-8'));
 								$objPHPExcel->getActiveSheet()->getStyle('L' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 								if($mvalue['result_link'] != '' && $mvalue['result_link'] !== NULL)
 								{
@@ -1152,7 +1154,7 @@ class TrialTracker
 							{
 							
 								$icon = '&#8987;';
-								$objPHPExcel->getActiveSheet()->setCellValue('L' . $i, html_entity_decode($icon, ENT_QUOTES, 'UTF-8'));
+								$objPHPExcel->getActiveSheet()->setCellValue('L' . $i, html_entity_decode($SpaceIcon.$icon.$SpaceIcon, ENT_QUOTES, 'UTF-8'));
 								$objPHPExcel->getActiveSheet()->getStyle('L' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 								if($mvalue['event_link'] != '' && $mvalue['event_link'] !== NULL)
 								{
@@ -1528,7 +1530,7 @@ class TrialTracker
 					$icon = '&#10004;';
 				}
 				
-				$objPHPExcel->getActiveSheet()->setCellValue('H' . $i, html_entity_decode($icon, ENT_QUOTES, 'UTF-8'));
+				$objPHPExcel->getActiveSheet()->setCellValue('H' . $i, html_entity_decode($SpaceIcon.$icon.$SpaceIcon, ENT_QUOTES, 'UTF-8'));
 				$objPHPExcel->getActiveSheet()->getStyle('H' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 				$uvalue['event_description'] = substr($uvalue['event_description'], 0, 255);
 				if($resultLink != '' && $resultLink !== NULL) 
@@ -1541,7 +1543,7 @@ class TrialTracker
 			{
 		
 				$icon = '&#8987;';
-				$objPHPExcel->getActiveSheet()->setCellValue('H' . $i, html_entity_decode($icon, ENT_QUOTES, 'UTF-8'));
+				$objPHPExcel->getActiveSheet()->setCellValue('H' . $i, html_entity_decode($SpaceIcon.$icon.$SpaceIcon, ENT_QUOTES, 'UTF-8'));
 				$objPHPExcel->getActiveSheet()->getStyle('H' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 				if($eventLink != '' && $eventLink !== NULL)
 				{
