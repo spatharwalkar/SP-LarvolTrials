@@ -627,4 +627,31 @@ function formatBrandName($inputStr, $headerType)
 	}
 	return $outputStr;
 }
+
+function GetCompanyNames($productID)
+{
+	$CompanyNameArray = array();
+	$CompanyName = '';
+	$query = "SELECT e.`id`, e.`name`, e.`display_name` FROM `entities` e JOIN `entity_relations` er ON(e.`id` = er.`child`)  WHERE e.`class`='Institution' and er.`parent`='" . mysql_real_escape_string($productID) . "'";
+	
+	$res = mysql_query($query);
+	
+	if($res)
+	{
+		while($row = mysql_fetch_array($res))
+		{
+			if(trim($row['display_name']) != '' && $row['display_name'] != NULL && $row['display_name'] != 'NULL')
+			{
+				$CompanyNameArray[] = trim($row['display_name']);
+			}
+			else if(trim($row['name']) != '' && $row['name'] != NULL && $row['name'] != 'NULL')
+			{
+				$CompanyNameArray[] = trim($row['name']);
+			}			
+		}
+	}
+	if(count($CompanyNameArray) > 0)
+	$CompanyName = implode(', ',$CompanyNameArray);
+	return $CompanyName;
+}
 ?>

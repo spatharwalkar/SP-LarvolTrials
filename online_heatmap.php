@@ -60,21 +60,26 @@ while($header = mysql_fetch_array($res))
 			$result =  mysql_fetch_assoc(mysql_query("SELECT `id`, `name`, `display_name`, `description`, `class`, `company` FROM `entities` WHERE id = '" . $header['type_id'] . "' "));
 			$columns[$header['num']] = $result['name'];
 			$columnsEntityType[$header['num']] = $result['class'];
-			$type = ''; if($type == 'Institution') $type = 'Company'; else if($type == 'MOA_Category') $type = 'MOA Category'; else $type = $result['class'];
-			if($result['company'] != NULL && trim($result['company']) != '' && $type = 'Product')
+			
+			$type = ''; $type = $result['class']; if($type == 'Institution') $type = 'Company'; else if($type == 'MOA_Category') $type = 'MOA Category'; else $type = $result['class'];
+			
+			if($type == 'Product')
+				$result['company'] = GetCompanyNames($result['id']);
+			else 
+				$result['company'] = '';
+			if($result['company'] != NULL && trim($result['company']) != '')
 			{
-				$result['company']=str_replace(',',', ',$result['company']);
-				$result['company']=str_replace(',  ',', ',$result['company']);
 				$columnsCompanyName[$header['num']] = ' / '.$result['company'];
 			} 
+			
 			//$columnsDisplayName[$header['num']] = $result['display_name'];
 			if($type == 'Product')
 				$columnsDisplayName[$header['num']] = $result['name'];
 			else
 			{
-				if(trim($header['display_name']) != '' && $header['display_name'] != NULL && $header['display_name'] != 'NULL') //HM LEVEL Display name
+				if(trim($header['display_name']) != '' && $header['display_name'] != NULL && trim($header['display_name']) != 'NULL') //HM LEVEL Display name
 					$columnsDisplayName[$header['num']] = $header['display_name'];
-				else if(trim($result['display_name']) != '' && $result['display_name'] != NULL && $result['display_name'] != 'NULL') //Global Display name
+				else if(trim($result['display_name']) != '' && $result['display_name'] != NULL && trim($result['display_name']) != 'NULL') //Global Display name
 					$columnsDisplayName[$header['num']] = $result['display_name'];
 				else if($type == 'Area')
 					$columnsDisplayName[$header['num']] = $type .' '.$result['id'] ;	//For area display class n id
@@ -130,11 +135,16 @@ while($header = mysql_fetch_array($res))
 			$result =  mysql_fetch_assoc(mysql_query("SELECT `id`, `name`, `display_name`, `description`, `class`, `company` FROM `entities` WHERE id = '" . $header['type_id'] . "' "));
 			$rows[$header['num']] = $result['name'];
 			$rowsEntityType[$header['num']] = $result['class'];
-			$type = ''; if($type == 'Institution') $type = 'Company'; else if($type == 'MOA_Category') $type = 'MOA Category'; else $type = $result['class'];
-			if($result['company'] != NULL && trim($result['company']) != '' && $type = 'Product')
+			
+			$type = ''; $type = $result['class']; if($type == 'Institution') $type = 'Company'; else if($type == 'MOA_Category') $type = 'MOA Category'; else $type = $result['class'];
+			
+			if($type == 'Product')
+				$result['company'] = GetCompanyNames($result['id']);
+			else 
+				$result['company'] = '';
+				
+			if($result['company'] != NULL && trim($result['company']) != '')
 			{
-				$result['company']=str_replace(',',', ',$result['company']);
-				$result['company']=str_replace(',  ',', ',$result['company']);
 				$rowsCompanyName[$header['num']] = ' / '.$result['company'];
 			}
 			
@@ -142,9 +152,9 @@ while($header = mysql_fetch_array($res))
 				$rowsDisplayName[$header['num']] = $result['name'];
 			else 
 			{
-				if(trim($header['display_name']) != '' && $header['display_name'] != NULL && $header['display_name'] != 'NULL') //HM LEVEL Display name
+				if(trim($header['display_name']) != '' && $header['display_name'] != NULL && trim($header['display_name']) != 'NULL') //HM LEVEL Display name
 					$rowsDisplayName[$header['num']] = $header['display_name'];
-				else if(trim($result['display_name']) != '' && $result['display_name'] != NULL && $result['display_name'] != 'NULL') //Global Display name
+				else if(trim($result['display_name']) != '' && $result['display_name'] != NULL && trim($result['display_name']) != 'NULL') //Global Display name
 					$rowsDisplayName[$header['num']] = $result['display_name'];
 				else if($type == 'Area')											//For area display class n id
 					$rowsDisplayName[$header['num']] = $type .' '.$result['id'] ;

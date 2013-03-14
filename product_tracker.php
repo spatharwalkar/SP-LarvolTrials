@@ -207,10 +207,9 @@ function DataGenerator($id, $TrackerType, $page=1, $phase)
 	{
 		$result =  mysql_fetch_assoc(mysql_query("SELECT id, name, description, company FROM `entities` WHERE `class`='Product' and id = '" . $product . "' "));
 		$rows[$key] = $result['name'];
+		$result['company'] = GetCompanyNames($result['id']);
 		if($result['company'] != NULL && trim($result['company']) != '')
 		{
-			$result['company']=str_replace(',',', ',$result['company']);
-			$result['company']=str_replace(',  ',', ',$result['company']);
 			$rowsCompanyName[$key] = ' / '.$result['company'];
 		} 
 		$rowsDescription[$key] = $result['description'];

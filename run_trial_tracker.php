@@ -6800,7 +6800,10 @@ class TrialTracker
 						$sectionHeader = formatBrandName($row['display_name'], 'area');
 					else
 						$sectionHeader = formatBrandName($row['name'], 'area');
-						
+					
+					if($row['class']=='Product')	
+					$row['company'] = GetCompanyNames($productId);
+					
 					if($row['company'] !== NULL && $row['company'] != '')
 					{
 						$productSelector[$productId] .= " / <i>" . $row['company'] . "</i>";
@@ -7476,6 +7479,9 @@ class TrialTracker
 						$productSelector[$productId] = $row['class'].' ' . $areaId;
 					}
 					
+					if($row['class']=='Product')	
+					$row['company'] = GetCompanyNames($productId);
+					
 					if($row['company'] !== NULL && $row['company'] != '')
 					{
 						$sectionHeader .= " / <i>" . $row['company'] . "</i>";
@@ -7618,6 +7624,8 @@ class TrialTracker
 					$pId = $id;
 					$sectionHeader = formatBrandName($row['name'], 'product');
 				
+					$row['company'] = GetCompanyNames($pId);
+					
 					if($row['company'] !== NULL && $row['company'] != '')
 					{
 						$sectionHeader .= " / <i>" . $row['company'] . "</i>";
