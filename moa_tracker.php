@@ -2278,7 +2278,7 @@ function GetMOAsOrMOACatFromDisease_MOATracker($DiseaseID)
 	if(count($Products) > 0)
 	{
 		//Get MOA Categoryids from Product id
-		$query = "SELECT e1.`id` as id, e2.`id` AS moaid FROM `entities` e1 JOIN `entity_relations` er1 ON(er1.`parent` = e1.`id`) JOIN `entities` e2 ON (er1.`child` = e2.`id`) JOIN `entity_relations` er2 ON(er2.`child` = e2.`id`) WHERE e1.`class` = 'MOA_Category' AND e2.`class` = 'MOA' AND er2.`parent` IN (" . implode(',',$Products) . ")";
+		$query = "SELECT e1.`id` as id, e2.`id` AS moaid FROM `entities` e1 JOIN `entity_relations` er1 ON(er1.`parent` = e1.`id`) JOIN `entities` e2 ON (er1.`child` = e2.`id`) JOIN `entity_relations` er2 ON(er2.`child` = e2.`id`) WHERE e1.`class` = 'MOA_Category' AND e1.`name` <> 'Other' AND e2.`class` = 'MOA' AND er2.`parent` IN (" . implode(',',$Products) . ")";
 		$res = mysql_query($query) or die('Bad SQL query getting MOA Categories from products ids in MT');
 		
 		if($res)
