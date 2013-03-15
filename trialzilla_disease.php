@@ -24,7 +24,7 @@
 	{
 		$page = mysql_real_escape_string($_REQUEST['page']);
 	}
-	$tab = 'Product';
+	$tab = 'Products';
 	if(isset($_REQUEST['tab']))
 	{
 		$tab = mysql_real_escape_string($_REQUEST['tab']);
@@ -128,12 +128,12 @@ a:visited {color:#6600bc;}  /* visited link */
 	
     <table cellpadding="0" cellspacing="0" id="disease_tabs">
 		<tr>
-		    <?php if($tab == 'Product') {  ?>
-            <td><img id="ProductsImg" src="images/firstSelectTab.png" /></td><td id="ProductsTab" class="selectTab"><a href="<?php print $tabCommonUrl.'&tab=Product'; ?>" title="Products">&nbsp;Products&nbsp;</a></td><td><img id="CompaniesImg" src="images/selectTabConn.png" /></td><td id="CompaniesTab" class="Tab"><a href="<?php print $tabCommonUrl.'&tab=Companies'; ?>" title="Companies">&nbsp;Companies&nbsp;</a></td><td><img id="MOAsImg" src="images/afterTab.png" /></td><td id="MOAsTab" class="Tab"><a href="<?php print $tabCommonUrl.'&tab=MOAs'; ?>" title="MOAs">&nbsp;MOAs&nbsp;</a></td><td><img id="lastImg" src="images/lastTab.png" /></td><td></td>
+		    <?php if($tab == 'Products') {  ?>
+            <td><img id="ProductsImg" src="images/firstSelectTab.png" /></td><td id="ProductsTab" class="selectTab"><a href="<?php print $tabCommonUrl.'&tab=Products'; ?>" title="Products">&nbsp;Products&nbsp;</a></td><td><img id="CompaniesImg" src="images/selectTabConn.png" /></td><td id="CompaniesTab" class="Tab"><a href="<?php print $tabCommonUrl.'&tab=Companies'; ?>" title="Companies">&nbsp;Companies&nbsp;</a></td><td><img id="MOAsImg" src="images/afterTab.png" /></td><td id="MOAsTab" class="Tab"><a href="<?php print $tabCommonUrl.'&tab=MOAs'; ?>" title="MOAs">&nbsp;MOAs&nbsp;</a></td><td><img id="lastImg" src="images/lastTab.png" /></td><td></td>
             <?php } else if($tab == 'Companies') {  ?>
-            <td><img id="ProductsImg" src="images/firstTab.png" /></td><td id="ProductsTab" class="Tab"><a href="<?php print $tabCommonUrl.'&tab=Product'; ?>" title="Products">&nbsp;Products&nbsp;</a></td><td><img id="CompaniesImg" src="images/middleTab.png" /></td><td id="CompaniesTab" class="selectTab"><a href="<?php print $tabCommonUrl.'&tab=Companies'; ?>" title="Companies">&nbsp;Companies&nbsp;</a></td><td><img id="MOAsImg" src="images/selectTabConn.png" /></td><td id="MOAsTab" class="Tab"><a href="<?php print $tabCommonUrl.'&tab=MOAs'; ?>" title="MOAs">&nbsp;MOAs&nbsp;</a></td><td><img id="lastImg" src="images/lastTab.png" /></td><td></td>
+            <td><img id="ProductsImg" src="images/firstTab.png" /></td><td id="ProductsTab" class="Tab"><a href="<?php print $tabCommonUrl.'&tab=Products'; ?>" title="Products">&nbsp;Products&nbsp;</a></td><td><img id="CompaniesImg" src="images/middleTab.png" /></td><td id="CompaniesTab" class="selectTab"><a href="<?php print $tabCommonUrl.'&tab=Companies'; ?>" title="Companies">&nbsp;Companies&nbsp;</a></td><td><img id="MOAsImg" src="images/selectTabConn.png" /></td><td id="MOAsTab" class="Tab"><a href="<?php print $tabCommonUrl.'&tab=MOAs'; ?>" title="MOAs">&nbsp;MOAs&nbsp;</a></td><td><img id="lastImg" src="images/lastTab.png" /></td><td></td>
             <?php } else if($tab == 'MOAs') {  ?>
-            <td><img id="ProductsImg" src="images/firstTab.png" /></td><td id="ProductsTab" class="Tab"><a href="<?php print $tabCommonUrl.'&tab=Product'; ?>" title="Products">&nbsp;Products&nbsp;</a></td><td><img id="CompaniesImg" src="images/afterTab.png" /></td><td id="CompaniesTab" class="Tab"><a href="<?php print $tabCommonUrl.'&tab=Companies'; ?>" title="Companies">&nbsp;Companies&nbsp;</a></td><td><img id="MOAsImg" src="images/middleTab.png" /></td><td id="MOAsTab" class="selectTab"><a href="<?php print $tabCommonUrl.'&tab=MOAs'; ?>" title="MOAs">&nbsp;MOAs&nbsp;</a></td><td><img id="lastImg" src="images/selectLastTab.png" /></td><td></td>
+            <td><img id="ProductsImg" src="images/firstTab.png" /></td><td id="ProductsTab" class="Tab"><a href="<?php print $tabCommonUrl.'&tab=Products'; ?>" title="Products">&nbsp;Products&nbsp;</a></td><td><img id="CompaniesImg" src="images/afterTab.png" /></td><td id="CompaniesTab" class="Tab"><a href="<?php print $tabCommonUrl.'&tab=Companies'; ?>" title="Companies">&nbsp;Companies&nbsp;</a></td><td><img id="MOAsImg" src="images/middleTab.png" /></td><td id="MOAsTab" class="selectTab"><a href="<?php print $tabCommonUrl.'&tab=MOAs'; ?>" title="MOAs">&nbsp;MOAs&nbsp;</a></td><td><img id="lastImg" src="images/selectLastTab.png" /></td><td></td>
             <?php } ?>
             
    		</tr>
@@ -142,7 +142,7 @@ a:visited {color:#6600bc;}  /* visited link */
 </td></tr>
 <tr><td align="center">
 <div id="diseaseTab_content" align="center">             
-	<?php if($tab == 'Product') print '<div id="Products" align="center">'.showProductTracker($DiseaseId, $dwcount, 'DPT', $page).'</div>'; //DPT=DISEASE PRODUCT TRACKER ?>
+	<?php if($tab == 'Products') print '<div id="Products" align="center">'.showProductTracker($DiseaseId, $dwcount, 'DPT', $page).'</div>'; //DPT=DISEASE PRODUCT TRACKER ?>
     <?php if($tab == 'Companies') print '<div id="Companies" align="center">'.showCompanyTracker($DiseaseId, 'DCT', $page).'</div>'; //DCT=DISEASE COMPANY TRACKER ?>
     <?php if($tab == 'MOAs') print '<div id="MOAs" align="center">'.showMOATracker($DiseaseId, 'DMT', $page).'</div>'; //DMT=DISEASE MOA TRACKER ?>
 </div>
