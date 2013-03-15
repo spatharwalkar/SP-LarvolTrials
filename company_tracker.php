@@ -134,12 +134,12 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page)
 				if($TrackerType == 'DCT')
 				{
 					$ProdExistance = array();
-					$phase_query = "SELECT rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2` FROM `rpt_masterhm_cells` rpt WHERE (rpt.`entity1` = '". $id ."' AND rpt.`entity2` IN ('". implode("','", $productIds) ."')) OR (rpt.`entity1` IN ('". implode("','", $productIds) ."') AND rpt.`entity2` = '". $id ."')";	//SELECTING DISTINCT PHASES SO WE WILL HAVE MIN ROWS TO PROCESS
+					$phase_query = "SELECT rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt WHERE (rpt.`entity1` = '". $id ."' AND rpt.`entity2` IN ('". implode("','", $productIds) ."')) OR (rpt.`entity1` IN ('". implode("','", $productIds) ."') AND rpt.`entity2` = '". $id ."')";	//SELECTING DISTINCT PHASES SO WE WILL HAVE MIN ROWS TO PROCESS
 				
 					$phase_res = mysql_query($phase_query) or die(mysql_error());
 					while($phase_row=mysql_fetch_array($phase_res))
 					{
-						if(($phase_row['entity1'] == $id && !in_array($phase_row['entity2'],$ProdExistance)) || ($phase_row['entity2'] == $id && !in_array($phase_row['entity1'],$ProdExistance)))	//Avoid duplicates like (1,2) and (2,1) type
+						if($phase_row['count_total'] > 0 && (($phase_row['entity1'] == $id && !in_array($phase_row['entity2'],$ProdExistance)) || ($phase_row['entity2'] == $id && !in_array($phase_row['entity1'],$ProdExistance))))	//Avoid duplicates like (1,2) and (2,1) type
 						{
 							if($phase_row['entity1'] == $id)
 							$ProdExistance[] = $phase_row['entity2'];
