@@ -114,7 +114,8 @@ function reportListCommon($reportTable,$disperr=null)
 			
 		case 'rpt_master_heatmap':
 			
-			$slickgrid_data = slickgrid_data();
+			$slickgrid_data = slickgrid_data($_REQUEST['HMSearchId']);
+			$resetURL = urlPath() . 'master_heatmap.php'. ((isset($_REQUEST['id'])) ? '?id='.$_REQUEST['id'] : '');
 			$out =  '<script src="scripts/slickgrid/lib/firebugx.js"></script>'
 					.'<script src="scripts/slickgrid/lib/jquery.event.drag-2.0.min.js"></script>'
 					.'<script src="scripts/slickgrid/slick.core.js"></script>'
@@ -211,8 +212,9 @@ function reportListCommon($reportTable,$disperr=null)
 					.'<script src="scripts/slickgrid/slick_grid.js"></script>'
 					.'<div style="width:570px;padding:10px;">
 				    <div style="width:100%" class="grid-header">
-				      <form style="float:left;margin:0px;padding:0px;" action="master_heatmap.php" method="post"><label>Master Heatmap Reports</label> &nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" font-weight:bold"="" border-color:#009966;="" ;="" style="float:none; background-color:#009933; color:#FFFFFF" value="+ New" name="makenew"></form>
-				      <span onclick="toggleWholeGrid()" title="Toggle Grid" class="grid-showhide ui-icon ui-icon-carat-1-s ui-corner-all" style="float:right"></span>
+				      <form style="float:left;margin:0px;padding:0px;" action="master_heatmap.php" method="post"><label>Master Heatmap Reports</label> &nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" style="float:none; background-color:#009933; color:#FFFFFF;" value="+ New" name="makenew"></form>'
+					  .((isset($_REQUEST['HMSearchId'])) ? '&nbsp;&nbsp;<a style="display:inline; text-decoration:none;" href="' . $resetURL . '"><input type="button" value="Reset report list" title="Reset report list" style="float:none; background-color:#009933; color:#FFFFFF; margin-top:3px;" onclick="javascript: window.location.href(\'' . $resetURL . '\')" /></a>':'')
+				      .'<span onclick="toggleWholeGrid()" title="Toggle Grid" class="grid-showhide ui-icon ui-icon-carat-1-s ui-corner-all" style="float:right"></span>
 				      <span onclick="toggleFilterRow()" title="Toggle search panel" class="ui-icon ui-icon-search ui-state-default ui-corner-all" style="float:right"></span>
 				    </div>'
 				    .'<div id="inlineFilterPanel" style="display:none;background:#dddddd;padding:3px;color:black;">

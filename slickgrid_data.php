@@ -1,7 +1,15 @@
 <?php
-function slickgrid_data(){
+function slickgrid_data($HMSearchId){
 	global $db;
-	$query = 'SELECT id,name,user,category FROM `rpt_masterhm` '.(($db->user->userlevel != 'root') ? 'WHERE user IS NULL OR user=' . $db->user->id . ' OR shared=1 ' :'').'ORDER BY user';
+	
+	$ExtraTB = $ExtraWhere = '';
+	if($HMSearchId != NULL || $HMSearchId != '')
+	{
+		$ExtraTB = ' JOIN `rpt_masterhm_headers` rpth ON (rpth.`report` = rpt.`id`) JOIN `entities` et ON (et.`id` = rpth.`type_id`)';
+		$ExtraWhere = (($db->user->userlevel != 'root' || $ExtraWhere != '') ? ' AND':'').' et.`id`='.$HMSearchId;
+	}
+	
+	$query = 'SELECT distinct(rpt.`id`), rpt.`name`, rpt.`user`, rpt.`category` FROM `rpt_masterhm` rpt'. $ExtraTB . (($db->user->userlevel != 'root' || $ExtraWhere != '') ? ' WHERE':'') . (($db->user->userlevel != 'root') ? ' (user IS NULL OR user=' . $db->user->id . ' OR shared=1)' :''). $ExtraWhere . ' ORDER BY user';
 	$res = mysql_query($query) or die('Bad SQL query retrieving master heatmap report names');
 	$categoryArr  = array('');
 	$outArr = array();
@@ -84,7 +92,7 @@ function slickgrid_data(){
 			if($row['category']== $category)
 			{
 				$Uncategorized_Flg=1;
-				$report_name = '<a style="text-decoration:none;color:#000000;" href="master_heatmap.php?id=' . $row['id'] . '">'.htmlspecialchars(strlen($row['name'])>0?$row['name']:('(report '.$row['id'].')')) . '</a>';
+				$report_name = '<a style="text-decoration:none;color:#000000;" href="master_heatmap.php?id=' . $row['id']. (($HMSearchId != NULL || $HMSearchId != '') ? '&HMSearchId='.$HMSearchId:'') . '">'.htmlspecialchars(strlen($row['name'])>0?$row['name']:('(report '.$row['id'].')')) . '</a>';
 	
 				$dataArr['mhmcategory'] = ($report_name);
 				$dataArr['owner'] = $owner;

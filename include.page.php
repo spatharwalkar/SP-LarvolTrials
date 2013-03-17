@@ -1066,7 +1066,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 					//check if database has NULL searchdata and no UPM/MHM references.. in case of no linkages we can delete the product.
 					//return false can show as failed attempt on higher level controller so return 4 code is meant as delete.
 					$upmReferenceCount = count(getProductUpmAssociation($id));
-					$MHMReferenceCount = getMHMAssociation($id, 'products');
+					$MHMReferenceCount = getMHMAssociation($id);
 					if($upmReferenceCount==0 && $MHMReferenceCount==0 && $searchData=='')
 					{
 						deleteData($id, $actual_table);
@@ -2515,7 +2515,7 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 	{
 		$upmReference = getProductUpmAssociation($id);
 		$upmReferenceCount = count($upmReference);
-		$MHMReferenceCount = getMHMAssociation($id,'product');
+		$MHMReferenceCount = getMHMAssociation($id);
 		$disabled = ($upmReferenceCount>0 || $MHMReferenceCount>0)?true:false;
 		$altTitle = $disabled?'Cannot delete product as it is linked to other upms/MHM\'s. See References.':$altTitle;
 		echo '<tr>';
@@ -2524,17 +2524,16 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		echo '<tr>';
 		echo '<td>References : </td><td>'.(($upmReferenceCount>0)?input_tag(array('Type'=>'link','Field'=>'upm.php?search_id='.implode(',',$upmReference)),$upmReferenceCount,array('alttitle'=>'Click here to see the UPM references.','linkTarget'=>'_blank')):$upmReferenceCount).' UPM</td>';
 		echo '</tr>';
-		echo '<tr>';
-		echo '<td>References : </td><td>'.$MHMReferenceCount.' MHM</td>';
-		echo '</tr>';
 	}
-	if($table=='areas'  || $table=='diseases')
+	
+	if(in_array($table, array('areas', 'diseases', 'entities', 'moas', 'institutions', 'products')))
 	{
-		$MHMReferenceCount = getMHMAssociation($id,'product');
+		$MHMReferenceCount = getMHMAssociation($id);
 		$disabled = ($MHMReferenceCount>0)?true:false;
-		$altTitle = $disabled?'Cannot delete area as it is linked to other MHM\'s. See References.':$altTitle;
+		if($table!='entities') $entityType =substr($table, 0, -1); else $entityType = 'entity';
+		$altTitle = $disabled?'Cannot delete '.$entityType.' as it is linked to other MHM\'s. See References.':$altTitle;
 		echo '<tr>';
-		echo '<td>References : </td><td>'.$MHMReferenceCount.' MHM</td>';
+		echo '<td>References : </td><td>'.(($MHMReferenceCount>0)?input_tag(array('Type'=>'link','Field'=>'master_heatmap.php?HMSearchId='.$id),$MHMReferenceCount,array('alttitle'=>'Click here to see the MHM references.','linkTarget'=>'_blank')):$MHMReferenceCount).' MHM</td>';
 		echo '</tr>';
 	}	
 	/*********** disabled delete
@@ -2686,9 +2685,9 @@ function getProductUpmAssociation($id)
 * @param string $type[areas/products]
 * @author Jithu Thomas
 */
-function getMHMAssociation($id,$type)
+function getMHMAssociation($id,$type='')
 {
-	$query = "select count(h.type_id) as cnt from rpt_masterhm_headers h where h.type='$type' and h.type_id='$id'";
+	$query = "select count(distinct(h.`report`)) as cnt from rpt_masterhm_headers h where h.type_id='$id'";
 	$result = mysql_query($query);
 	while($row = mysql_fetch_assoc($result))
 	{
