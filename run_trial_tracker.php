@@ -10588,7 +10588,7 @@ class TrialTracker
 		echo '<table border="0" cellspacing="0" class="controls" align="center" style="_width:100%; table-layout: fixed;display: none;">'
 				. '<tr><td colspan="5" style="border: none;height:29px;"></td></tr>'
 				. '<tr><th style="width:113px">Active</th><th style="width:210px">Status</th>'
-				. '<th style="width:180px">Institution type</th>'
+				. '<th style="width:180px">Sponsor type</th>'
 				. '<th style="width:80px">Region</th>'
 				. '<th style="width:50px">Phase</th>'
 				. '<th class="right" style="width:340px">Filter</th></tr>'
