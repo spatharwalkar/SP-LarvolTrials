@@ -82,7 +82,7 @@ a:visited {color:#6600bc;}  /* visited link */
 <br/>
 <table width="100%" border="0" class="FoundResultsTb">
 	<tr>
-    	<td width="50%" style="border:0; font-weight:bold; padding-left:5px;" align="left">
+    	<td width="50%" style="border:0; font-weight:bold; padding-left:5px; color:#FFFFFF; font-size:28px;" align="left">
         	<?php print $MoaCatName; ?>
         </td>
     </tr>
