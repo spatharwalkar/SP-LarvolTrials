@@ -32,7 +32,7 @@ elseif($table=='trialzilla')
 }
 elseif($table=='masterhm')
 {
-	$query = "select distinct `name`, `description`, `class` from `entities` where `name` like '%$search%' AND `class` NOT IN ('MOA_Category') order by $field asc";
+	$query = "select distinct `name`, `description`, `class` from `entities` where `name` like '%$search%' AND `class` NOT IN ('MOA_Category') AND (`class` = 'Disease' AND (LI_id IS NOT NULL AND LI_id <> '') OR `class` <> 'Disease') order by $field asc";
 }
 else
 {
