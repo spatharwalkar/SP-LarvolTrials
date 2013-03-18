@@ -38,10 +38,15 @@ body
    </tr>
    <tr>
     	<td style="border:0; padding-left:5px;" align="left">
-        <br/>
-		<b>Larvol Sigma</b> is a pharmaceutical intelligence platform built by The <b>Larvol Group LLC</b>. Disclaimer of warranties and limitation of liability related with this site is provided by The Larvol Group, on an “as is” and “as available” basis. TLG makes no representations or warranties of any kind, express or implied, as to the operation of this site, or the information, content or materials included on this site. By using these results, you expressly agree that your use of this site is at your sole risk. This site applies TLG’s proprietary analytic method to the information available on ClinicalTrials.gov and EudraCT; it is intended for informational purposes only. We keep the information as current and as accurate as possible.
-		<br/><br/>
-		If you would like information on how to use these analyses or if you have any questions or concerns, please contact The Larvol Group at <a style="display:inline;color:#0000FF;" target="_self" href="mailto:larvoltrials@larvol.com">larvoltrials@larvol.com</a>
+        	<br/>
+			<b>Larvol Sigma</b> is a pharmaceutical intelligence platform built by <b>The Larvol Group, LLC</b>.  The information provided on this site by The Larvol Group is sourced from ClinicalTrials.gov, EudraCT, and several other third parties.
+			<br/><br/>
+        	The Larvol Group grants you a limited license to access and make personal use of this site, subject to the Terms. This site and any portion hereof may not be reproduced, duplicated, copied, downloaded, sold, resold, visited, or otherwise exploited for any commercial purpose without the express written consent of The Larvol Group. You may not frame or utilize framing techniques to enclose any trademark, logo or other proprietary information (including images, text, page layout and form) of The Larvol Group and/or its affiliates without the express written consent of The Larvol Group. You may not use any meta tags or any other “hidden text” utilizing The Larvol Group’s name or Marks without the express written consent of The Larvol Group. Any unauthorized use will result in the immediate termination of the license granted by The Larvol Group.
+        	<br/><br/>
+        	DISCLAIMER OF WARRANTIES AND LIMITATION OF LIABILITY THIS SITE IS PROVIDED BY THE LARVOL GROUP ON AN “AS IS” AND “AS AVAILABLE” BASIS. THE LARVOL GROUP MAKES NO REPRESENTATIONS OR WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED, AS TO THE OPERATION OF THIS SITE, OR THE INFORMATION, CONTENT OR MATERIALS INCLUDED ON THIS SITE. USER EXPRESSLY AGREES TO USE SITE AT OWN RISK.
+        	<br/><br/>
+        	TO THE FULLEST EXTENT PERMITTED BY APPLICABLE LAW, THE LARVOL GROUP DISCLAIMS ALL WARRANTIES, EXPRESS AND IMPLIED, INCLUDING, BUT NOT LIMITED TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE LARVOL GROUP WILL NOT BE LIABLE FOR ANY DAMAGES OF ANY KIND ARISING FROM THE USE OF THIS SITE, INCLUDING, BUT NOT LIMITED TO, DIRECT, INDIRECT, INCIDENTAL, CONSEQUENTIAL AND PUNITIVE DAMAGES.
+        	<br/>
         </td>
    </tr>
 </table>
