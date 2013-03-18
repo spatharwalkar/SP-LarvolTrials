@@ -1350,6 +1350,7 @@ Galaxy Pharma (Pvt) Limited
 Galderma
 Galderma Brasil Ltda.
 Galderma Laboratories, L.P.
+Galena Biopharma, Inc.
 Galil Medical
 Galmed Medical Reserch
 Galsor S.r.l.
@@ -2579,6 +2580,7 @@ PT. Schering-Plough. Tbk Indonesia
 PTC Therapeutics
 Pudue Pharma
 Pulmonx, Inc.
+Puma Biotechnology, Inc
 Purdue Pharma LP
 PuriCore, Inc.
 QDose Limited
@@ -3223,6 +3225,7 @@ Wound Solutions, Ltd
 Wright Medical Technology
 Wyeth
 Wyeth-Lederle Vaccines
+Wyeth Research Division of Wyeth Pharmaceuticals Inc.
 Xanodyne Pharmaceuticals
 Xanthus Pharmaceuticals, Inc.
 XBiotech, Inc.
