@@ -820,8 +820,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 	$total_fld=$res['total'];
 	$dtt_fld=$res['dtt'];
 	$Report_DisplayName=$res['display_name'];
-	//if($repoUser !== NULL && $repoUser != $db->user->id && !$shared && $db->user->userlevel != 'root') 
-	if(true)
+	if($repoUser !== NULL && $repoUser != $db->user->id && !$shared && $db->user->userlevel != 'root') 
 	{
 		echo '<br clear="all"/><br/><div style="padding:10px;">&nbsp;&nbsp;<fieldset class="floatl"><legend> <b>Message:</b> </legend> <font style="color:#FF0000;">You are not authorized to view report: '. (strlen($res['name'])>0?$res['name']:('(report '.$res['id'].')')) .'.</font></fieldset></div>';
 		return;	//prevent anyone from viewing others' private reports
