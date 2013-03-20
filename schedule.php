@@ -79,7 +79,7 @@ function editor()
 	
 	//put product/areas schedule list prodcuts=1 areas=2 using bitmask.
 	$LISync['LI_sync1'] = 'LI Product Sync';
-	$LISync['LI_sync2'] = 'LI Areas Sync';
+	$LISync['LI_sync2'] = 'LI Disease Sync';
 	$LISync['LI_sync4'] = 'LI Institutions Sync';
 	$LISync['LI_sync8'] = 'LI MOAs Sync';
 	$LISync['LI_sync16'] = 'LI MOA Categories Sync';

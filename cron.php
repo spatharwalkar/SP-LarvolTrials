@@ -235,12 +235,18 @@ if(isset($LISyncTasks) and !empty($LISyncTasks))
 				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
 				break;
 			case 2:
-				//area sync
+				//disease sync
+				require_once 'fetch_li_diseases.php';
+				$processOutput = fetch_li_diseases(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
 				break;
 			case 3:
-				//areas and product sync
+				//diseases and product sync
 				require_once 'fetch_li_products.php';
 				$processOutput = fetch_li_products(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				require_once 'fetch_li_diseases.php';
+				$processOutput = fetch_li_diseases(strtotime($syncTask['lastrun']));
 				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
 				break;
 			case 4:
@@ -259,15 +265,21 @@ if(isset($LISyncTasks) and !empty($LISyncTasks))
 				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
 				break;
 			case 6:
-				//areas and institution sync
+				//diseases and institution sync
+				require_once 'fetch_li_diseases.php';
+				$processOutput = fetch_li_diseases(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
 				require_once 'fetch_li_institutions.php';
 				$processOutput = fetch_li_institutions(strtotime($syncTask['lastrun']));
 				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
 				break;
 			case 7:
-				//areas, product and institutionsync
+				//diseases, product and institutionsync
 				require_once 'fetch_li_products.php';
 				$processOutput = fetch_li_products(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				require_once 'fetch_li_diseases.php';
+				$processOutput = fetch_li_diseases(strtotime($syncTask['lastrun']));
 				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
 				require_once 'fetch_li_institutions.php';
 				$processOutput = fetch_li_institutions(strtotime($syncTask['lastrun']));
@@ -289,15 +301,21 @@ if(isset($LISyncTasks) and !empty($LISyncTasks))
 				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
 				break;
 			case 10:
-				//areas and moas
+				//diseases and moas
+				require_once 'fetch_li_diseases.php';
+				$processOutput = fetch_li_diseases(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
 				require_once 'fetch_li_moas.php';
 				$processOutput = fetch_li_moas(strtotime($syncTask['lastrun']));
 				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
 				break;
 			case 11:
-				//areas, product and institution sync
+				//diseases, product and institution sync
 				require_once 'fetch_li_products.php';
 				$processOutput = fetch_li_products(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				require_once 'fetch_li_diseases.php';
+				$processOutput = fetch_li_diseases(strtotime($syncTask['lastrun']));
 				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
 				require_once 'fetch_li_moas.php';
 				$processOutput = fetch_li_moas(strtotime($syncTask['lastrun']));
@@ -325,7 +343,10 @@ if(isset($LISyncTasks) and !empty($LISyncTasks))
 				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
 				break;
 			case 14:
-				//areas, institution and moa sync
+				//diseases, institution and moa sync
+				require_once 'fetch_li_diseases.php';
+				$processOutput = fetch_li_diseases(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
 				require_once 'fetch_li_institutions.php';
 				$processOutput = fetch_li_institutions(strtotime($syncTask['lastrun']));
 				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
@@ -334,9 +355,12 @@ if(isset($LISyncTasks) and !empty($LISyncTasks))
 				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
 				break;
 			case 15:
-				//areas, product, institution and moa sync
+				//diseases, product, institution and moa sync
 				require_once 'fetch_li_products.php';
 				$processOutput = fetch_li_products(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				require_once 'fetch_li_diseases.php';
+				$processOutput = fetch_li_diseases(strtotime($syncTask['lastrun']));
 				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
 				require_once 'fetch_li_institutions.php';
 				$processOutput = fetch_li_institutions(strtotime($syncTask['lastrun']));
@@ -361,15 +385,21 @@ if(isset($LISyncTasks) and !empty($LISyncTasks))
 				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
 				break;
 			case 18:
-				//areas and moa category sync
+				//diseases and moa category sync
+				require_once 'fetch_li_diseases.php';
+				$processOutput = fetch_li_diseases(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
 				require_once 'fetch_li_moacategories.php';
 				$processOutput = fetch_li_moacategories(strtotime($syncTask['lastrun']));
 				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
 				break;
 			case 19:
-				//areas, product and moa category sync
+				//diseases, product and moa category sync
 				require_once 'fetch_li_products.php';
 				$processOutput = fetch_li_products(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				require_once 'fetch_li_diseases.php';
+				$processOutput = fetch_li_diseases(strtotime($syncTask['lastrun']));
 				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
 				require_once 'fetch_li_moacategories.php';
 				$processOutput = fetch_li_moacategories(strtotime($syncTask['lastrun']));
@@ -397,7 +427,10 @@ if(isset($LISyncTasks) and !empty($LISyncTasks))
 				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
 				break;
 			case 22:
-				//areas, institution and moa category sync
+				//diseases, institution and moa category sync
+				require_once 'fetch_li_diseases.php';
+				$processOutput = fetch_li_diseases(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
 				require_once 'fetch_li_institutions.php';
 				$processOutput = fetch_li_institutions(strtotime($syncTask['lastrun']));
 				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
@@ -406,9 +439,12 @@ if(isset($LISyncTasks) and !empty($LISyncTasks))
 				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
 				break;
 			case 23:
-				//areas, product, institution and moa category sync
+				//diseases, product, institution and moa category sync
 				require_once 'fetch_li_products.php';
 				$processOutput = fetch_li_products(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				require_once 'fetch_li_diseases.php';
+				$processOutput = fetch_li_diseases(strtotime($syncTask['lastrun']));
 				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
 				require_once 'fetch_li_institutions.php';
 				$processOutput = fetch_li_institutions(strtotime($syncTask['lastrun']));
@@ -439,7 +475,10 @@ if(isset($LISyncTasks) and !empty($LISyncTasks))
 				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
 				break;
 			case 26:
-				//areas, moa and moa category sync
+				//diseases, moa and moa category sync
+				require_once 'fetch_li_diseases.php';
+				$processOutput = fetch_li_diseases(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
 				require_once 'fetch_li_moas.php';
 				$processOutput = fetch_li_moas(strtotime($syncTask['lastrun']));
 				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
@@ -448,9 +487,12 @@ if(isset($LISyncTasks) and !empty($LISyncTasks))
 				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
 				break;
 			case 27:
-				//areas, product, moa and moa category sync
+				//diseases, product, moa and moa category sync
 				require_once 'fetch_li_products.php';
 				$processOutput = fetch_li_products(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				require_once 'fetch_li_diseases.php';
+				$processOutput = fetch_li_diseases(strtotime($syncTask['lastrun']));
 				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
 				require_once 'fetch_li_moas.php';
 				$processOutput = fetch_li_moas(strtotime($syncTask['lastrun']));
@@ -487,7 +529,10 @@ if(isset($LISyncTasks) and !empty($LISyncTasks))
 				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
 				break;
 			case 30:
-				//areas, institution, moa and moa category sync
+				//diseases, institution, moa and moa category sync
+				require_once 'fetch_li_diseases.php';
+				$processOutput = fetch_li_diseases(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
 				require_once 'fetch_li_institutions.php';
 				$processOutput = fetch_li_institutions(strtotime($syncTask['lastrun']));
 				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
@@ -499,9 +544,12 @@ if(isset($LISyncTasks) and !empty($LISyncTasks))
 				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
 				break;
 			case 31:
-				//areas, product, institution, moa and moa category sync
+				//diseases, product, institution, moa and moa category sync
 				require_once 'fetch_li_products.php';
 				$processOutput = fetch_li_products(strtotime($syncTask['lastrun']));
+				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
+				require_once 'fetch_li_diseases.php';
+				$processOutput = fetch_li_diseases(strtotime($syncTask['lastrun']));
 				if($processOutput['exitProcess']) { $lastRunBkupFlg = true; break;}
 				require_once 'fetch_li_institutions.php';
 				$processOutput = fetch_li_institutions(strtotime($syncTask['lastrun']));

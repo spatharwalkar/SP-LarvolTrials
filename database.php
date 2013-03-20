@@ -477,6 +477,58 @@ if (isset($_POST['li_moacategory']) and $_POST['li_moacategory']=="3" and ( isse
 	return;
 }
 
+if (isset($_POST['li_disease']) and $_POST['li_disease']=="1") 
+{
+	require_once('fetch_li_diseases.php');
+	echo '<br><br>Importing all diseases from LI<br><br>';
+	fetch_li_diseases("0");
+	return;
+}
+if (isset($_POST['li_disease']) and $_POST['li_disease']=="2" and isset($_POST['disease_updt_since']) ) 
+{
+	$upds=strtotime(mysql_real_escape_string($_POST['disease_updt_since']));
+	if(!isset($upds) or empty($upds)) 
+	{
+		echo '<br> Invalid date entered:'.$litd.' Unable to proceed. ';
+		return false;
+	}
+	require_once('fetch_li_diseases.php');
+	echo '<br><br>Importing diseases updated since '.$_POST['disease_updt_since'].' from LI<br><br>';
+	fetch_li_diseases($upds);
+	return;
+}
+
+if (isset($_POST['li_disease']) and $_POST['li_disease']=="3" and ( isset($_POST['disease_lt_id']) or isset($_POST['disease_li_id']) ) ) 
+{
+	if( isset($_POST['disease_li_id']) and !empty($_POST['disease_li_id']) ) $liid=mysql_real_escape_string($_POST['disease_li_id']);
+	elseif(isset($_POST['disease_lt_id']))
+	{
+		$litd=mysql_real_escape_string($_POST['disease_lt_id']);
+		
+		$query = 'select lI_id from `entities` where id="'.$litd.'" and `class` = "Disease" limit 1' ;
+					if(!$res = mysql_query($query))
+					{
+						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+						global $logger;
+						$logger->error($log);
+						echo $log;
+						return false;
+					}
+					$res = mysql_fetch_array($res) ;
+					if(isset($res['lI_id']))
+						$liid = $res['lI_id'];
+					else
+					{
+						echo '<br> Could not find id '.$litd.' in entities table.  ';
+						return false;
+					}
+	}
+	require_once('fetch_li_diseases.php');
+	echo '<br><br>Importing diseases with LI id:'.$liid.'<br><br>';
+	fetch_li_disease_individual($liid);
+	return;
+}
+
 /****************************/
 echo(editor());
 echo('</body></html>');
@@ -504,6 +556,7 @@ function editor()
 		  toggles3 = new Array();
 		  toggles4 = new Array();
 		  toggles5 = new Array();
+		  toggles6 = new Array();
 		  if (document.getElementById) onload = function () {
 		    document.getElementById (\'more\').className = \'hide\';
 			document.getElementById (\'p_up_dt\').className = \'hide\';
@@ -514,6 +567,8 @@ function editor()
 			document.getElementById (\'moa_up_dt\').className = \'hide\';
 			document.getElementById (\'moacategory_sing\').className = \'hide\';
 			document.getElementById (\'moacategory_up_dt\').className = \'hide\';
+			document.getElementById (\'disease_sing\').className = \'hide\';
+			document.getElementById (\'disease_up_dt\').className = \'hide\';
 		    var t = document.getElementsByTagName (\'input\');
 		    for (var i = 0; i < t.length; i++) 
 			{
@@ -563,6 +618,16 @@ function editor()
 					{
 						document.getElementById (\'moacategory_up_dt\').className = toggles5[toggles5.length - 2].checked ? \'show\' : \'hide\';
 						document.getElementById (\'moacategory_sing\').className = toggles5[toggles5.length - 1].checked ? \'show\' : \'hide\';
+					}
+				}
+				
+				if (t[i].getAttribute (\'name\') == \'li_disease\') 
+				{
+					toggles6.push (t[i]);
+					t[i].onclick = function () 
+					{
+						document.getElementById (\'disease_up_dt\').className = toggles6[toggles6.length - 2].checked ? \'show\' : \'hide\';
+						document.getElementById (\'disease_sing\').className = toggles6[toggles6.length - 1].checked ? \'show\' : \'hide\';
 					}
 				}
 				
@@ -816,6 +881,20 @@ function editor()
 			<input type="radio" name="li_moacategory" value="1" selected="selcted"> All<br>
 			<input type="radio" name="li_moacategory" value="2"> Moa categories updated since <span id="moacategory_up_dt" name="moacategory_up_dt1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enter date as yyyy-mm-dd <input type="text" name="moacategory_updt_since" id="moacategory_updt_since" value="" size="10" length="10" title="( yyyy-mm-dd )"/></span> <br>
 			<input type="radio" name="li_moacategory" value="3"> Single MOA Category (Either LT ID or LI ID) <span id="moacategory_sing" name="moacategory_sing1">LT ID: <input type="text" name="moacategory_lt_id" id="moacategory_ltid" value="" title="Enter LT id"/> LI ID: <input type="text" name="moacategory_li_id" id="moacategory_ltid" value="" title="Enter LI id"/></span><br>
+		
+				'
+			. '<br><input type="submit" value="Import" />'
+			. '</form></formset></fieldset></div>';
+
+$out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
+	
+	// LI disease scraper
+	$out .= '<div style="width:610px; padding:5px;float:left;"><fieldset class="schedule"><legend><b> IMPORT DISEASE\'s FROM LI </b></legend>'
+			. '<formset><form action="database.php" method="post">'
+			. '
+			<input type="radio" name="li_disease" value="1" selected="selcted"> All<br>
+			<input type="radio" name="li_disease" value="2"> Diseases updated since <span id="disease_up_dt" name="disease_up_dt1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enter date as yyyy-mm-dd <input type="text" name="disease_updt_since" id="disease_updt_since" value="" size="10" length="10" title="( yyyy-mm-dd )"/></span> <br>
+			<input type="radio" name="li_disease" value="3"> Single disease (Either LT ID or LI ID) <span id="disease_sing" name="disease_sing1">LT ID: <input type="text" name="disease_lt_id" id="disease_ltid" value="" title="Enter LT id"/> LI ID: <input type="text" name="disease_li_id" id="disease_ltid" value="" title="Enter LI id"/></span><br>
 		
 				'
 			. '<br><input type="submit" value="Import" />'

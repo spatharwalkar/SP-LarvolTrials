@@ -1645,6 +1645,103 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 		}
 	}
 	
+	if($import==1 && $table=='diseases')
+	{
+		ini_set('max_execution_time','360000');	//100 hours
+		//check for insert update case
+		$esclid = mysql_real_escape_string($importVal['LI_id']);
+		$escname = mysql_real_escape_string($importVal['name']);
+		$query = "select id from `entities` where `class`='Disease' and (LI_id='{$esclid}' OR name='{$escname}') limit 1";
+		$result = mysql_query($query);
+		$update = false;
+		if($result)
+		{
+			ob_start();
+			while($row = mysql_fetch_assoc($result))
+			{
+				$update = true;
+				$id = $row['id'];
+			}
+			ob_end_clean();
+			if($update)
+			{
+				if($importVal['is_active'] == 0)
+				{
+					deleteData($id, 'entities');
+					return 4;
+				}			
+				$importVal = array_map(am1,$importKeys,array_values($importVal));
+				$query = "update `entities` set ".implode(',',$importVal)." where id=".$id;
+			}
+			else 
+			{
+				//if insert check the moa is_active. We dont need it in an import, skipping...
+				if($importVal['is_active'] == 0)
+				{
+					//skipping.
+					//return false can show as failed attempt on higher level controller.
+					return 3;
+				}
+				
+				$importVal = array_map(function ($v){return "'".mysql_real_escape_string($v)."'";},$importVal);
+				
+				
+				
+				switch($table)
+				{
+					case 'products': $class = "Product"; break;
+					case 'areas': $class = "Area"; break;
+					case 'institutions': $class = "Institution"; break;
+					case 'moas': $class = "MOA"; break;
+					case 'moacategories': $class = "MOA_Category"; break;
+					case 'diseases': $class = "Disease"; break;
+				}
+				if( $table == 'moacategories' or $table == 'moas'  )
+				{
+					$query = "insert into `entities` (".implode(',',$importKeys).") values (".implode(',',$importVal).")";
+				}
+				elseif( empty($class) )
+				{
+					$query = "insert into $actual_table (`".implode('`,`',$importKeys)."`) values (".implode(',',$importVal).")";
+				}
+				else
+				{
+					$query = "insert into `entities` (`".implode('`,`',$importKeys)."`,`class` ) values (".implode(',',$importVal). ', "'. $class .'"' .")";
+					if($table=='institutions') {	$query = str_replace("type", "category", $query); $query = str_replace("search_terms", "search_name", $query); }
+				}	
+				
+				
+			}
+			if(mysql_query($query))
+			{
+				if($id)
+				{
+					$_GET['id'] = $id;
+				}
+				else 
+				{
+					$_GET['id'] = mysql_insert_id();
+				}
+				return 1;
+			}
+			else
+			{
+				echo 'Disease Id : '.$importVal['LI_id'].' Fail !! <br/>'."\n";
+				softdie('Cannot import disease id '.$importVal['LI_id'].'<br/>'.$query.'<br/>');
+				return 2;
+			}
+		}
+		else
+		{
+			global $logger;
+			$log 	= 'ERROR: Bad SQL query for Disease Sync. ' . $query . mysql_error();
+			$logger->error($log);
+			unset($log);
+			softdie('Cannot import disease id '.$importVal['LI_id'].'<br/>'.$query.'<br/>');
+			return 2;
+		}
+	}
+	
 	if(isset($post['delsearch']) && is_array($post['delsearch']))
 	{
 		foreach($post['delsearch'] as $id => $ok)
@@ -3255,3 +3352,63 @@ function parseMoacategoriesXmlAndSave($xmlImport,$table)
 	}
 	return array('success'=>$success,'fail'=>$fail,'skip'=>$skip,'delete'=>$delete, 'exitProcess'=>false);
 }
+
+/**
+* @name parseDiseasesXmlAndSave
+* @tutorial parse and get ready Moa categories xml for saving.
+* @param $table,$searchdata,$id
+*/
+function parseDiseasesXmlAndSave($xmlImport,$table)
+{
+	$importKeys = array('LI_id', 'name', 'is_active', 'created', 'modified','xml');
+	$success = $fail = $skip = $delete = 0;
+	foreach($xmlImport->getElementsByTagName('area') as $area)
+	{
+		$importVal = array();
+		$area_id = $area->getElementsByTagName('area_id')->item(0)->nodeValue;
+		$area_name = $area->getElementsByTagName('name')->item(0)->nodeValue;
+		$is_active = ($area->getElementsByTagName('is_active')->item(0)->nodeValue == 'True')?1:0;
+		$created = date('y-m-d H:i:s',time($area->getElementsByTagName('created')->item(0)->nodeValue));
+		$modified = date('y-m-d H:i:s',time($area->getElementsByTagName('modified')->item(0)->nodeValue));
+		$display_option = $area->getElementsByTagName('display_option')->item(0)->nodeValue;		
+		
+		$implodeStringForNames = ', ';
+	
+		$xmldump = $xmlImport->saveXML($area);
+			
+		$importVal = array('LI_id'=>$area_id, 'name'=>$area_name, 'is_active'=>$is_active, 'created'=>$created, 'modified'=>$modified, 'xml'=>$xmldump);
+		
+		if(($area_id == NULL && trim($area_id) == '') || ($area_name == NULL && trim($area_name) == ''))
+		return array('success'=>$success,'fail'=>$fail,'skip'=>$skip,'delete'=>$delete, 'exitProcess'=>true);
+		
+		//var_dump($importVal);
+		//ob_start();
+		$out = saveData(null,$table,1,$importKeys,$importVal,$k);
+		if($out ==1)
+		{
+			$success ++;
+			ob_start();
+			echo 'Disease Id : '.$area_id.' Done .. <br/>'."\n";
+			ob_end_flush();
+		}
+		elseif($out==2) 
+		{
+			echo 'Disease Id : '.$area_id.' Fail !! <br/>'."\n";
+			$fail ++;
+		}
+		elseif($out==3)
+		{
+			echo 'Disease Id : '.$area_id.' Skipped !! <br/>'."\n";
+			$skip ++;
+		}		
+		elseif($out==4)
+		{
+			echo 'Disease Id : '.$area_id.' Deleted !! <br/>'."\n";
+			$delete ++;
+		}			
+		//ob_end_clean();
+	}
+	return array('success'=>$success,'fail'=>$fail,'skip'=>$skip,'delete'=>$delete, 'exitProcess'=>false);
+}
+
+?>
