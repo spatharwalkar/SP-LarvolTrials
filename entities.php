@@ -189,8 +189,8 @@ $page=0;
 //pagination
 if($table=='products')
 {
-	$ignoreFields = array('searchdata','xml','old_id','display_name','client_name',);
-	$skipArr = array('xml','old_id','is_active','display_name','client_name');
+	$ignoreFields = array('searchdata','xml','old_id','display_name','client_name','mesh_name');
+	$skipArr = array('xml','old_id','is_active','display_name','client_name','mesh_name');
 }
 elseif($table=='diseases')
 {
@@ -199,13 +199,13 @@ elseif($table=='diseases')
 }
 elseif($table=='institutions' or $table=='moas' or $table=='moacategories')
 {
-	$ignoreFields = array('administration_mode','approvals','created','discontinuation_status_comment','discontinuation_status','generic_names','is_active','is_key','licensing_mode','modified','old_id','product_type','searchdata');
-	$skipArr = array('xml','old_id','class','searchdata','comments','created','modified','company','brand_names','generic_names','code_names','approvals','administration_mode','discontinuation_status','is_key','discontinuation_status_comment');
+	$ignoreFields = array('administration_mode','approvals','created','discontinuation_status_comment','discontinuation_status','generic_names','is_active','is_key','licensing_mode','modified','old_id','product_type','searchdata','mesh_name');
+	$skipArr = array('xml','old_id','class','searchdata','comments','created','modified','company','brand_names','generic_names','code_names','approvals','administration_mode','discontinuation_status','is_key','discontinuation_status_comment','mesh_name');
 }
 else
 {
-	$ignoreFields = array('LI_id','administration_mode','approvals','brand_names','client_name','code_names','comments','company','created','discontinuation_status_comment','discontinuation_status','generic_names','is_active','is_key','licensing_mode','modified','old_id','product_type','search_name','xml','searchdata');
-	$skipArr = array('xml','LI_id','old_id','is_active','client_name','comments','product_type','licensing_mode','administrative_mode','created','modified','company','brand_names','generic_names','code_names','approvals','search_name','administration_mode','discontinuation_status','is_key','discontinuation_status_comment');
+	$ignoreFields = array('LI_id','administration_mode','approvals','brand_names','client_name','code_names','comments','company','created','discontinuation_status_comment','discontinuation_status','generic_names','is_active','is_key','licensing_mode','modified','old_id','product_type','search_name','xml','searchdata','mesh_name');
+	$skipArr = array('xml','LI_id','old_id','is_active','client_name','comments','product_type','licensing_mode','administrative_mode','created','modified','company','brand_names','generic_names','code_names','approvals','search_name','administration_mode','discontinuation_status','is_key','discontinuation_status_comment','mesh_name');
 }
 $entity=$_REQUEST['entity'];
 pagePagination($limit,$totalCount,$table,$script,$ignoreFields, array('import'=>true,'searchDataCheck'=>true,'add_new_record'=>true,'search'=>true,$entity));

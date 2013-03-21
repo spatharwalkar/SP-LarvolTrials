@@ -114,7 +114,42 @@ switch($table)
 		case 'institutions': $actual_table = "entities"; break;
 		case 'moas': $actual_table = "entities"; break;
 		case 'moacategories': $actual_table = "entities"; break;
-		case 'diseases': $actual_table = "entities"; break;
+		case 'diseases': 
+			
+			/****** MESH ********/
+			
+			$mesh = $_GET['mesh_display'];
+			if ($mesh=='YES') 
+			{
+				$checked='checked="checked"';
+			}
+			else 
+			{
+				$checked = "";
+			}
+						
+			$url=fixurl(array('mesh_display'));
+
+			if ($mesh=='YES') 
+				{
+					$show_mesh=
+					'<form name="mesh" action="'. $url .'&mesh_display=NO" method="POST">'.
+					'<b><span style="color:red">Show MeSH</span></b>&nbsp;
+					<input type="checkbox" name="mesh_display" value="NO" onClick="submit();"'. $checked .'</span>'.
+					'</form><br>';
+				}
+			else		
+				{
+					$show_mesh=
+					'<form name="mesh" action="'. $url .'&mesh_display=YES" method="POST">'.
+					'<b><span style="color:red">Show MeSH</span></b>&nbsp;
+					<input type="checkbox" name="mesh_display" value="YES" onClick="submit();"'. $checked .'</span>'.
+					'</form><br>';
+				}
+			/*************/
+			
+			$actual_table = "entities"; 
+			break;
 	}
 $where = calculateWhere($actual_table,$table);
 //calculate sortable fields
@@ -185,10 +220,12 @@ if(isset($_GET['sort_order']) && $_GET['sort_order']=='DESC' )
 
 if($table !='upm')
 {
+	if($table =='diseases' && ( empty($mesh) ||  $mesh<>'YES'))
+		$where .= " and LI_id is not null and LI_id<>'' ";
 	if($_GET['no_sort']!=1)
-	$query = "select * from $actual_table $where $currentOrderBy $currentSortOrder limit $start , $limit";
+		$query = "select * from $actual_table $where $currentOrderBy $currentSortOrder limit $start , $limit";
 	else
-	$query = "select * from $actual_table $where limit $start , $limit";
+		$query = "select * from $actual_table $where limit $start , $limit";
 }
 elseif($table=='upm')
 {
@@ -206,6 +243,13 @@ $deleteParams = substr($_SERVER['REQUEST_URI'],strpos($_SERVER['REQUEST_URI'],'?
 $deleteParams = str_replace('&save=Save', '', $deleteParams);
 $deleteConnector = '&';
 echo '<div></div>';
+
+/** Show the checkbox to display mesh diseases. **/
+
+echo $show_mesh;
+
+/************************/
+
 echo '<table border="1" width="99%">';
 while ($row = mysql_fetch_assoc($res))
 {
@@ -214,7 +258,7 @@ while ($row = mysql_fetch_assoc($res))
 	{
 		$defaultTdStyle = 'background-color:#7FBEFF';
 	}
-	elseif($table == 'diseases' && $row['class'] == 'Disease')
+	elseif($table == 'diseases' && $row['class'] == 'Disease' && !empty($row['LI_id']) )
 	{
 		$defaultTdStyle = 'background-color:#7FBEFF';
 	}
@@ -284,7 +328,7 @@ while ($row = mysql_fetch_assoc($res))
 			if($columnName == 'id')
 			{
 				$upmId = $v;
-				echo '<td style="'.$defaultTdStyle.'"><a href="'.$script.'.php?id='.$v.'&entity='.$_GET['entity'].'">';
+				echo '<td style="'.$defaultTdStyle.'"><a href="'.$script.'.php?id='.$v.'&entity='.$_GET['entity'].'&mesh_display='.$_GET['mesh_display'].'">';
 				echo $v;
 				echo '</a></td>';				
 			}else
@@ -357,7 +401,7 @@ while ($row = mysql_fetch_assoc($res))
 			if($columnName == 'id')
 			{
 				$upmId = $v;
-				echo '<td style="'.$defaultTdStyle.'"><a href="'.$script.'.php?id='.$v.'&entity='.$_GET['entity'].'">';
+				echo '<td style="'.$defaultTdStyle.'"><a href="'.$script.'.php?id='.$v.'&entity='.$_GET['entity'].'&mesh_display='.$_GET['mesh_display'].'">';
 				echo $v;
 				echo '</a></td>';				
 			}else
@@ -2207,6 +2251,7 @@ function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),
 			. ': records '.$pstart.'-'.$pend.' of '.$totalCount
 			. '</legend>'
 			. '<input name="entity" type="hidden" value="' . $_REQUEST['entity'] . '" />'
+			. '<input name="mesh_display" type="hidden" value="' . $_REQUEST['mesh_display'] . '" />'
 			. '<input type="submit" name="jump" value="Jump" style="width:0;height:0;border:0;padding:0;margin:0;"/> '
 			. '<input name="page" type="hidden" value="' . $page . '" /><input name="search" type="hidden" value="1" />'
 			. ($pstart > 1 ? '<input type="submit" name="back" value="&lt; Back"/>' : '')
@@ -3409,6 +3454,37 @@ function parseDiseasesXmlAndSave($xmlImport,$table)
 		//ob_end_clean();
 	}
 	return array('success'=>$success,'fail'=>$fail,'skip'=>$skip,'delete'=>$delete, 'exitProcess'=>false);
+}
+
+function fixurl($filter = array()) 
+{
+	/*
+	$pageURL = isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == "on" ? "https://" : "http://";
+	$pageURL .= $_SERVER["SERVER_NAME"];
+	if ($_SERVER["SERVER_PORT"] != "80") 
+	{
+		$pageURL .= ":".$_SERVER["SERVER_PORT"];
+	}
+	*/
+	$pageURL = $_SERVER["REQUEST_URI"];
+
+	if (strlen($_SERVER["QUERY_STRING"]) > 0) 
+	{
+		$pageURL = rtrim(substr($pageURL, 0, -strlen($_SERVER["QUERY_STRING"])), '?');
+	}
+
+	$query = $_GET;
+	foreach ($filter as $key) 
+	{
+		unset($query[$key]);
+	}
+
+	if (sizeof($query) > 0) 
+	{
+		$pageURL .= '?' . http_build_query($query);
+	}
+
+	return $pageURL;
 }
 
 ?>
