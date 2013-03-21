@@ -96,13 +96,14 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page)
 		$CompanyIds = array_filter(array_unique(GetCompaniesFromDisease_CompanyTracker($header['id'])));
 		$id=$header['id'];
 	}
-		
-	foreach($CompanyIds as $key=> $CompanyId)
+	
+	$CompanyQueryResult =  mysql_query("SELECT DISTINCT(`id`), `name` FROM `entities` WHERE `class`='Institution' AND id IN ('" . implode("','",$CompanyIds) . "') ");
+	$key = 0;	
+	while($result = mysql_fetch_array($CompanyQueryResult))
 	{
+		$CompanyId = $result['id'];
 		if(isset($CompanyId) && $CompanyId != NULL)
 		{
-			$result =  mysql_fetch_assoc(mysql_query("SELECT `name`, `id` FROM `entities` WHERE `class`='Institution' AND id = '" . $CompanyId . "' "));
-		
 			/// Fill up all data in Data Matrix only, so we can sort all data at one place
 			$data_matrix[$key]['RowHeader'] = $result['name'];
 			$data_matrix[$key]['ID'] = $result['id'];
@@ -227,6 +228,7 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page)
 					}	//FOREACH OF PRODUCT
 				}	//END OF ELSE - FOR DCT WE USE HEATMAP TABLE TO REDUCE PROCESSING	
 			}	//END OF IF TOTAL COUNT > 0
+			$key++;
 		} //END OF IF - COMPANY ID NULL OR NOT			
 	}	//END OF FOREACH - COMPANY ID ARRAY
 	
@@ -2196,7 +2198,7 @@ function GetProductsFromCompany_CompanyTracker($companyID)
 	global $db;
 	global $now;
 	$Products = array();
-	$query = "SELECT et.`id` FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`) WHERE et.`class`='Product' AND er.`child`='" . mysql_real_escape_string($companyID) . "'";
+	$query = "SELECT DISTINCT et.`id` FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`) WHERE et.`class`='Product' AND er.`child`='" . mysql_real_escape_string($companyID) . "'";
 	
 	$res = mysql_query($query) or die('Bad SQL query getting products from institution id in company tracker');
 	
@@ -2216,28 +2218,9 @@ function GetProductsFromCompanyNDisease_CompanyTracker($DiseaseID, $companyID)
 	global $db;
 	global $now;
 	$Products = array();
-	$query = "SELECT e.`id` FROM `entities` e JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entity_trials` et ON(et.`entity` = e.`id`) JOIN `entity_trials` et2 ON(et2.`trial` = et.`trial`) JOIN `entities` e2 ON (e2.`id` = et2.`entity`) WHERE e.`class`='Product' AND e2.`class`='Disease' AND e2.`id`='".$DiseaseID."' AND er.`child`='" . mysql_real_escape_string($companyID) . "'";
+	$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entity_trials` et ON(et.`entity` = e.`id`) JOIN `entity_trials` et2 ON(et2.`trial` = et.`trial`) JOIN `entities` e2 ON (e2.`id` = et2.`entity`) WHERE e.`class`='Product' AND e2.`class`='Disease' AND e2.`id`='".$DiseaseID."' AND er.`child`='" . mysql_real_escape_string($companyID) . "'";
 	
 	$res = mysql_query($query) or die('Bad SQL query getting products from institution id in company tracker');
-	
-	if($res)
-	{
-		while($row = mysql_fetch_array($res))
-		{
-			$Products[] = $row['id'];
-		}
-	}
-	return array_filter(array_unique($Products));
-}
-
-//Get Products from Disease
-function GetProductsFromDisease_CompanyTracker($DiseaseID)
-{
-	global $db;
-	global $now;
-	$Products = array();
-	$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_trials` et ON(et.`entity` = e.`id`) JOIN `entity_trials` et2 ON(et2.`trial` = et.`trial`) WHERE e.`class` = 'Product' AND et2.`entity`='" . mysql_real_escape_string($DiseaseID) . "'";
-	$res = mysql_query($query) or die('Bad SQL query getting products from Disease id in PT');
 	
 	if($res)
 	{
@@ -2257,21 +2240,17 @@ function GetCompaniesFromDisease_CompanyTracker($DiseaseID)
 	$Products = array();
 	$Companies = array();
 	
-	$Products = GetProductsFromDisease_CompanyTracker($DiseaseID);
+	$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON(er.`child` = e.`id`) WHERE e.`class` = 'Institution' AND er.`parent` IN (SELECT DISTINCT e3.`id` FROM `entities` e3 JOIN `entity_trials` etr3 ON(etr3.`entity` = e3.`id`) JOIN `entity_trials` etr4 ON(etr4.`trial` = etr3.`trial`) WHERE e3.`class` = 'Product' AND etr4.`entity`='" . mysql_real_escape_string($DiseaseID) . "')";
+	$res = mysql_query($query) or die('Bad SQL query getting companies from products ids in CT');
 	
-	if(count($Products) > 0)
+	if($res)
 	{
-		$query = "SELECT DISTINCT `id` FROM `entities` e JOIN `entity_relations` er ON(er.`child` = e.`id`) WHERE e.`class` = 'Institution' AND er.`parent` IN (" . implode(',',$Products) . ")";
-		$res = mysql_query($query) or die('Bad SQL query getting companies from products ids in CT');
-	
-		if($res)
+		while($row = mysql_fetch_array($res))
 		{
-			while($row = mysql_fetch_array($res))
-			{
-				$Companies[] = $row['id'];
-			}
+			$Companies[] = $row['id'];
 		}
 	}
+	
 	return array_filter(array_unique($Companies));
 }
 
