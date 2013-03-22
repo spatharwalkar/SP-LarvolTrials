@@ -76,7 +76,7 @@
 	}
 	else if($_REQUEST['Disease'] != NULL && $_REQUEST['Disease'] != '' && isset($_REQUEST['Disease']))
 	{
-		$ResultArrQuery = "SELECT `id`, `name`, `class` FROM `entities` WHERE `class` = 'Disease'";
+		$ResultArrQuery = "SELECT count(`id`) FROM `entities` WHERE `class` = 'Disease'";
 		$QueryResult = mysql_query($ResultArrQuery);
 		$FoundRecords = mysql_num_rows($QueryResult);
 		

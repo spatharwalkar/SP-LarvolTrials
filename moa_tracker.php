@@ -67,7 +67,7 @@ function showMOATracker($id, $TrackerType, $page=1)
 }
 ///End of Process Report Tracker
 
-function DataGeneratorForMOATracker($id, $TrackerType, $page)
+function DataGeneratorForMOATracker($id, $TrackerType, $page=1)
 {
 	global $db;
 	global $now;

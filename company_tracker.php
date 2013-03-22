@@ -67,7 +67,7 @@ function showCompanyTracker($id, $TrackerType, $page=1)
 }
 ///End of Process Report Tracker
 
-function DataGeneratorForCompanyTracker($id, $TrackerType, $page)
+function DataGeneratorForCompanyTracker($id, $TrackerType, $page=1)
 {
 	global $db;
 	global $now;
