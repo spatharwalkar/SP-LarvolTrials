@@ -529,6 +529,14 @@ if (isset($_POST['li_disease']) and $_POST['li_disease']=="3" and ( isset($_POST
 	return;
 }
 
+
+//Import Mesh diseases
+if (isset($_POST['import_mesh_diseases']) and $_POST['import_mesh_diseases']=="YES") 
+{
+	require_once('fetch_diseases.php');
+	return;
+}
+
 /****************************/
 echo(editor());
 echo('</body></html>');
@@ -900,11 +908,16 @@ $out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
 			. '<br><input type="submit" value="Import" />'
 			. '</form></formset></fieldset></div>';
 	
-$out .= '<div style="clear:both">&nbsp;</div><br /><br /><br />';
+	// MeSH Diseases from clinicaltrials.gov
+	$out .= '<div style="width:610px; padding:5px;float:left;"><fieldset class="schedule"><legend><b> Import MeSH Diseases </b></legend>'
+			. '<formset><form action="database.php" method="post">'
+			. '<input type="hidden" name="import_mesh_diseases" value="YES">'
+			. '<br><input type="submit" value="Import" />'
+			. '</form></formset></fieldset></div>';
+	
+	$out .= '<div style="clear:both">&nbsp;</div><br /><br /><br />';
 			
 	return $out;
-	
-	
 
 }
 
