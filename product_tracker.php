@@ -376,7 +376,10 @@ function DataGenerator($id, $TrackerType, $page=1, $phase)
 	}
 	
 	/// This function willl Sort multidimensional array according to industry lead column
-	$data_matrix = sortTwoDimensionArrayByKey($data_matrix,'indlead');
+	if( ( (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE) || !isset($_SERVER['HTTP_REFERER']) ) && ( !isset($_REQUEST['LI']) || $_REQUEST['LI'] != 1) )
+		$data_matrix = sortTwoDimensionArrayByKey($data_matrix,'total');	//Sort according to default view as other than LI default view is total
+	else
+		$data_matrix = sortTwoDimensionArrayByKey($data_matrix,'indlead');
 	
 	///////////PAGING DATA
 	$RecordsPerPage = 50;
