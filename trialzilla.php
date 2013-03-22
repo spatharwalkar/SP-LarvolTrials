@@ -76,9 +76,9 @@
 	}
 	else if($_REQUEST['Disease'] != NULL && $_REQUEST['Disease'] != '' && isset($_REQUEST['Disease']))
 	{
-		$ResultArrQuery = "SELECT count(`id`) FROM `entities` WHERE `class` = 'Disease'";
-		$QueryResult = mysql_query($ResultArrQuery);
-		$FoundRecords = mysql_num_rows($QueryResult);
+		$ResultArrQuery = "SELECT count(`id`) as totalCnt FROM `entities` WHERE `class` = 'Disease'";
+		$QueryResult = mysql_fetch_assoc(mysql_query($ResultArrQuery));
+		$FoundRecords = $QueryResult['totalCnt'];
 		
 		$totalPages = ceil($FoundRecords / $RecordsPerPage);
 		
