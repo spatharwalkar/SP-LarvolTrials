@@ -3735,6 +3735,25 @@ function Download_reports()
      												'rotation'   => 0,
       												'wrap'       => false));
 					$objPHPExcel->getActiveSheet()->setCellValue($from . $Excel_HMCounter, $columnsCategoryName[$col]);
+					
+					$styleThinBlackAreaCatBorderOutline = array(
+						'borders' => array(
+						'left' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => '000000'),),
+						'top' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => '000000'),),
+						'right' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => '000000'),),
+										),
+					);	
+					
+					if($columnsCategoryName[$col] != 'Undefined')
+					{
+						$cellP = $from;
+						for($i = 0; $i < $ColumnsSpan[$col]; $i++)
+						{
+							$objPHPExcel->getActiveSheet()->getStyle($cellP . $Excel_HMCounter)->applyFromArray($styleThinBlackAreaCatBorderOutline); 
+							$cellP++;
+						}
+					}
+					
 				}
 			}
 		}
@@ -3743,6 +3762,18 @@ function Download_reports()
 		$Excel_HMCounter++;
 		foreach($columns as $col => $val)
 		{
+			$cell= num2char($col).$Excel_HMCounter;
+					
+			$styleThinBlackAreaBorderOutline = array(
+				'borders' => array(
+				'left' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => '000000'),),
+				'top' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => '000000'),),
+				'right' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => '000000'),),
+									),
+			);	
+				
+			$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($styleThinBlackAreaBorderOutline); 
+				
 			if(isset($entity2Ids[$col]) && $entity2Ids[$col] != NULL && !empty($entity1Ids))
 			{
 				if($mode=='active')
@@ -3758,7 +3789,6 @@ function Download_reports()
 					$count_val=' ('. $col_indlead_total[$col].')';
 				}
 				
-				$cell= num2char($col).$Excel_HMCounter;
 				//TODO
 				$val = $columnsDisplayName[$col].$columnsCompanyName[$col].((trim($columnsTagName[$col]) != '') ? ' ['.$columnsTagName[$col].']':'');
 				$cdesc = (isset($columnsDescription[$col]) && $columnsDescription[$col] != '')?$columnsDescription[$col]:null;
@@ -3792,8 +3822,9 @@ function Download_reports()
 		
 		if(isset($total_fld) && $total_fld == "1")
 		{
-			$objPHPExcel->getActiveSheet()->getColumnDimension(num2char($col+1))->setWidth(18);
-			$objPHPExcel->getActiveSheet()->getStyle(num2char($col+1))->getAlignment()->applyFromArray(
+			$cell = num2char($col+1);
+			$objPHPExcel->getActiveSheet()->getColumnDimension($cell)->setWidth(18);
+			$objPHPExcel->getActiveSheet()->getStyle($cell)->getAlignment()->applyFromArray(
       									array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
       											'vertical'   => PHPExcel_Style_Alignment::VERTICAL_CENTER,
      											'rotation'   => 0,
@@ -3823,10 +3854,39 @@ function Download_reports()
 				{
 					$objPHPExcel->getActiveSheet()->getCell($from . $Excel_HMCounter)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?e1=' . implode(',', $rowsCategoryEntityIds1[$cat]) . '&e2=' . $last_entity2 . $link_part);
 				}
+				
+				$styleThinBlackAreaCatBorderOutline = array(
+					'borders' => array(
+					'left' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => '000000'),),
+					'right' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => '000000'),),
+										),
+				);	
+				
+				$cellP = $from;
+				for($i = 0; $i < ((count($columns)+1)+(($total_fld)? 1:0)); $i++)
+				{
+					$objPHPExcel->getActiveSheet()->getStyle($cellP . $Excel_HMCounter)->applyFromArray($styleThinBlackAreaCatBorderOutline); 
+					$cellP++;
+				}
+			
 			}
 			
 			$Excel_HMCounter++;
 			
+			$cell='A'.($Excel_HMCounter);
+			
+			$styleThinBlackProductBorderOutline = array(
+				'borders' => array(
+				'left' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => '000000'),),
+				'top' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => '000000'),),
+				'right' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => '000000'),),
+				'bottom' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => '000000'),),
+									),
+			);	
+			
+			$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($styleThinBlackProductBorderOutline); 			    
+				
+				
 			if(isset($entity1Ids[$row]) && $entity1Ids[$row] != NULL && !empty($entity2Ids))
 			{
 				
@@ -3843,7 +3903,6 @@ function Download_reports()
 					$count_val=' ('.$row_indlead_total[$row].')';
 				}
 				
-				$cell='A'.($Excel_HMCounter);
 				//TODO
 				//$rval = (isset($rowsDisplayName[$row]) && $rowsDisplayName[$row] != '')?$rowsDisplayName[$row]:$rval;
 				$rdesc = (isset($rowsDescription[$row]) && $rowsDescription[$row] != '')?$rowsDescription[$row]:null;
@@ -3860,7 +3919,7 @@ function Download_reports()
  			    	$objCommentRichText->getFont()->setBold(true);
  			    	$objPHPExcel->getActiveSheet()->getComment($cell)->getText()->createTextRun("\r\n");
  			    	$objPHPExcel->getActiveSheet()->getComment($cell)->getText()->createTextRun($rdesc);
- 			    } 			    
+ 			    }
 				
 				/*$objPHPExcel->getActiveSheet()->getStyle($cell)->getAlignment()->applyFromArray(
       									array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_LEFT,
@@ -3872,6 +3931,65 @@ function Download_reports()
 			foreach($columns as $col => $cval)
 			{
 				$cell = num2char($col) . ($Excel_HMCounter);
+				
+				$styleThinRedBorderOutline = array(
+					'borders' => array(
+					'left' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => 'FF0000'),),
+					'top' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => 'FF0000'),),
+					'right' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => 'FF0000'),),
+					'bottom' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => 'FF0000'),),
+										),
+				);	
+					
+				$styleThinBlackLeftBorderOutline = array(
+					'borders' => array(
+					'left' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => '000000'),),
+										),
+				);
+					
+				$styleThinBlackTopBorderOutline = array(
+					'borders' => array(
+					'top' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => '000000'),),
+										),
+				);
+					
+				$styleThinBlackRightBorderOutline = array(
+					'borders' => array(
+					'right' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => '000000'),),
+										),
+				);
+					
+				$styleThinBlackBottomBorderOutline = array(
+					'borders' => array(
+					'bottom' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => '000000'),),
+										),
+				);
+							
+					
+				if($data_matrix[$row][$col]['update_flag'] == 1)
+				{
+					$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($styleThinRedBorderOutline);
+				}
+				else
+				{
+					//Apply Left Border
+					if(($col > 1  && $data_matrix[$row][$col-1]['update_flag'] != 1) || ($col == 1))
+					$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($styleThinBlackLeftBorderOutline);
+					
+					//Apply Right Border
+					if(($col >= 1  && $col < count($columns) && $data_matrix[$row][$col+1]['update_flag'] != 1) || ($col == count($columns)))
+					$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($styleThinBlackRightBorderOutline);
+					
+					//Apply Top Border
+					if(($row > 1  && ($data_matrix[$row-1][$col]['update_flag'] != 1 || (isset($rowsCategoryName[$row]) && $rowsCategoryName[$row] != '' && $rowsCategoryName[$row] != 'Undefined' && $rows_Span[$row] > 0))) || ($row == 1))
+					$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($styleThinBlackTopBorderOutline);
+					
+					//Apply Bottom Border
+					if(($row >= 1  && $row < count($rows) && ($data_matrix[$row+1][$col]['update_flag'] != 1 || (isset($rowsCategoryName[$row+1]) && $rowsCategoryName[$row+1] != '' && $rowsCategoryName[$row] != 'Undefined' && $rows_Span[$row+1] > 0))) || ($row == count($rows)))
+					$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($styleThinBlackBottomBorderOutline);
+						
+				}
+					
 				if(isset($entity2Ids[$col]) && $entity2Ids[$col] != NULL && isset($entity1Ids[$row]) && $entity1Ids[$row] != NULL)
 				{
 					if($mode=='active')
@@ -3889,17 +4007,7 @@ function Download_reports()
 						$count_val=$data_matrix[$row][$col]['indlead'];
 						$count_val_prev=$data_matrix[$row][$col]['indlead_prev'];
 					}
-					
-					$styleThinRedBorderOutline = array(
-						'borders' => array(
-						'inside' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => 'FF0000'),),
-						'outline' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => 'FF0000'),),
-											),
-						);
-						
-					if($data_matrix[$row][$col]['update_flag'] == 1)
-					$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($styleThinRedBorderOutline);
-					
+										
 					$red_font['font']['color']['rgb'] = '000000';
 					$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($red_font);
 					
@@ -4090,6 +4198,7 @@ function Download_reports()
 						$objPHPExcel->getActiveSheet()->getStyle($cell)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID);
 						$objPHPExcel->getActiveSheet()->getStyle($cell)->getFill()->getStartColor()->setRGB($blank_cell_bgcolor);
 					}
+					
 				}
 			}
 		}
@@ -4120,7 +4229,7 @@ function Download_reports()
 		++$Excel_HMCounter;
 		++$Excel_HMCounter;
 		
-		$helpTabImage_Header = array('Discontinued', 'Filing details', 'Red border (record updated)');
+		$helpTabImage_Header = array('Discontinued', 'Filing details', '  Red border (record updated)');
 		$helpTabImages_Src = array('new_lbomb.png', 'new_file.png', 'outline.png');
 		$helpTabImages_Desc = array('Bomb', 'Filing', 'Red Border');
 		
@@ -4136,9 +4245,14 @@ function Download_reports()
 			$objDrawing->setDescription($helpTabImages_Desc[$key]);
 			$objDrawing->setCoordinates('B' . ++$Excel_HMCounter);
 			if($key == 2)
+			{
 				$objPHPExcel->getActiveSheet()->mergeCells('B'. $Excel_HMCounter. ':C'. $Excel_HMCounter);
-			$objPHPExcel->getActiveSheet()->SetCellValue('B' . $Excel_HMCounter, $helpTabImage_Header[$key]);
+				$objPHPExcel->getActiveSheet()->getStyle('B' . $Excel_HMCounter)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+			}
+			else
 			$objPHPExcel->getActiveSheet()->getStyle('B' . $Excel_HMCounter)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
+			$objPHPExcel->getActiveSheet()->SetCellValue('B' . $Excel_HMCounter, $helpTabImage_Header[$key]);
+			
 		}
 		
 		$objPHPExcel->getActiveSheet()->SetCellValue('B' . ++$Excel_HMCounter, 'Phase:  ');
