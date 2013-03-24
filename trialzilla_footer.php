@@ -25,8 +25,7 @@ $(document).ready(function(){
 	}
 });
 $(window).scroll(function(){  
-    if($(window).scrollTop() + $(window).height() == $(document).height()) {  
-          console.log(' scrolled'); 
+    if($(window).scrollTop() + $(window).height() == $(document).height()) {   
           $("#footer").css('display', 'block'); 
     }else{
     	$("#footer").css('display', 'none');
