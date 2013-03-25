@@ -5396,9 +5396,9 @@ class TrialTracker
 		$pdfContent = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'
 						. '<html xmlns="http://www.w3.org/1999/xhtml">'
 						. '<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" />'
-						. '<title>Larvol PDF Export</title>'
-						. '<style type="text/css">'
-						.'body { font-family:Arial; font-color:black;}'
+						. '<title>Larvol PDF Export</title>';
+		$pdfStyle	 = 	'<style type="text/css">'
+						. 'body { font-family:Arial; font-color:black;}'
 						. 'a, a:hover{color:#000000;text-decoration:none;display:block;width:100%; height:100%;}'
 						.'td {vertical-align:top; border-right: 0.5px solid blue; border-left:0.5px solid blue; border-top: 0.5px solid blue; border-bottom: 
 						0.5px solid blue;}'
@@ -5421,9 +5421,57 @@ class TrialTracker
 						.'.nobr {white-space: nowrap}'
 						.'.startdatehighlight {border-right-color: red}'
 						.'.tag {color:#120f3c; font-weight:bold;}'
-						.'</style></head>'
+						.'</style>';	
+		
+		$pdfContent .= $pdfStyle;
+		$pdfContent .='</head>'
 						.'<body>'
 						.'<div align="center"><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="200" height="25" id="header" /></div><br/>';
+		
+		$headerContent = $pdfContent;
+		
+		require_once('tcpdf/config/lang/eng.php');
+		require_once('tcpdf/tcpdf.php');
+		$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+		
+		// set document information
+		//$pdf->SetCreator(PDF_CREATOR);
+		$pdf->SetAuthor('Larvol Trials');
+		$pdf->SetTitle('Larvol Trials');
+		$pdf->SetSubject('Larvol Trials');
+		$pdf->SetKeywords('Larvol Trials, Larvol Trials PDF Export');
+		
+		$pdf->SetFont('verdana', '', 6);
+		$pdf->setFontSubsetting(false);
+		//set margins
+		if($loggedIn)
+		{
+			$pdf->SetMargins(8.6, 15, 8.6);
+		}
+		else
+		{
+			$pdf->SetMargins(13.6, 15, 13.6);
+		}
+		
+		$pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
+		$pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
+		
+		// remove default header/footer
+		$pdf->setPrintHeader(false);
+		
+		//set some language-dependent strings
+		$pdf->setLanguageArray($l);
+		//set auto page breaks
+		
+		$pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+		$pdf->AddPage();
+
+		
+		track_time($n,'HTML to PDF conversion started');
+		$time_start = microtime(true);
+		
+		$headerContent = preg_replace('/(background-image|background-position|background-repeat):(\w)*\s/', '', $headerContent);
+		$pdf->writeHTML($headerContent, true, false, true, false, '');
 		
 		$Values = array();
 		$Ids = array();
@@ -5468,7 +5516,7 @@ class TrialTracker
 		}
 		
 		
-		$pdfContent .='<table style="border-collapse:collapse;" width="100%" cellpadding="0" cellspacing="0" class="manage">'
+		$tableHeader ='<table style="border-collapse:collapse;" width="100%" cellpadding="0" cellspacing="0" class="manage">'
 						 . '<thead><tr>'. (($loggedIn) ? '<th valign="bottom" align="center" style="width:30px; vertical-align:bottom;" >ID</th>' : '' )
 						 . '<th valign="bottom" height="11px" align="center" style="width:93px; vertical-align:bottom;">Title</th>'
 						 . '<th valign="bottom" align="center" style="width:18px; vertical-align:bottom;" title="Black: Actual&nbsp;&nbsp;Gray: Anticipated&nbsp;&nbsp;Red: Change greater than 20%">N</th>'
@@ -5503,7 +5551,11 @@ class TrialTracker
 						 . '<td border="0" style="width:24px; height:0px; border-top:none; border:none;" colspan="12"></td>'
 						 . '<td border="0" style="width:24px; height:0px; border-top:none; border:none;" colspan="12"></td>'
 						 . '<td border="0" style="width:24px; height:0px; border-top:none; border:none;" colspan="12"></td>'
-						 . '<td border="0" style="width:6px; height:0px; border-top:none; border:none;" colspan="3"></td></tr>';
+						 . '<td border="0" style="width:6px; height:0px; border-top:none; border:none;" colspan="3"></td></tr></table>';
+		
+		$tableHeader = preg_replace('/(background-image|background-position|background-repeat):(\w)*\s/', '', $tableHeader);
+		//print table header with style
+		$pdf->writeHTML($pdfStyle. $tableHeader, true, false, true, false, '');
 		
 		$counter = 0;
 		$outputStr = '';
@@ -5519,6 +5571,7 @@ class TrialTracker
 		
 		foreach($Values['Data'] as $dkey => $dvalue)
 		{
+			$outputStr = '';
 			$sectionHeader = $dvalue['sectionHeader'];
 			if($ottType == 'rowstacked')
 			{
@@ -6337,56 +6390,29 @@ class TrialTracker
 				//Rendering Upms
 				$outputStr .= $this->dUnmatchedUpmsPdf($globalOptions, $ottType, $sectionHeader, $naUpms, 'y');
 			}
+			$outputStr = preg_replace('/(background-image|background-position|background-repeat):(\w)*\s/', '', $outputStr);
+			$outputStr = '<table style="border-collapse:collapse;" width="100%" cellpadding="0" cellspacing="0" class="manage">'.$outputStr.'</table>';
+			$pdf->writeHTML($pdfStyle.$outputStr, true, false, true, false, '');
 		}
 		
 		$pdfContent .= $outputStr;
 		
 		//echo "<br/><br/>===>".
 		$pdfContent .= '</table></body></html>';
+		$endTableContent = '</body></html>';
+		$pdf->writeHTML($endTableContent, true, false, true, false, '');
 		//exit;
 		$pdfContent = preg_replace('/(background-image|background-position|background-repeat):(\w)*\s/', '', $pdfContent);
 		
-		require_once('tcpdf/config/lang/eng.php');
-		require_once('tcpdf/tcpdf.php');  
-		$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-		
-		// set document information
-		//$pdf->SetCreator(PDF_CREATOR);
-		$pdf->SetAuthor('Larvol Trials');
-		$pdf->SetTitle('Larvol Trials');
-		$pdf->SetSubject('Larvol Trials');
-		$pdf->SetKeywords('Larvol Trials, Larvol Trials PDF Export');
-		
-		$pdf->SetFont('verdana', '', 6);
-		$pdf->setFontSubsetting(false);
-		//set margins
-		if($loggedIn)
-		{
-			$pdf->SetMargins(8.6, 15, 8.6);
-		}
-		else
-		{
-			$pdf->SetMargins(13.6, 15, 13.6);
-		}
-		
-		$pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
-		$pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
-		
-		// remove default header/footer
-		$pdf->setPrintHeader(false); 
-
-		//set some language-dependent strings
-		$pdf->setLanguageArray($l);
-		//set auto page breaks
-		$pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
-		$pdf->AddPage();
-		
-		ini_set('pcre.backtrack_limit',strlen($pdfContent));
-		// output the HTML content
-		$pdf->writeHTML($pdfContent, true, false, true, false, '');
+		$time_end = microtime(true);
+		track_time_diff($n,'HTML to PDF conversion ended, time taken in miliseconds', $time_start, $time_end);
 		ob_end_clean();
 		//Close and output PDF document
+		track_time($n,'PDF download start');
+		$time_start = microtime(true);
 		$pdf->Output('Larvol PDF_'. date("Y-m-d_H.i.s") .'.pdf', 'D');
+		$time_end = microtime(true);
+		track_time_diff($n,'PDF download end, total time elapsed', $time_start, $time_end);
 		
 	}
 	
@@ -10535,7 +10561,7 @@ class TrialTracker
 							. '<li><select id="wFormat" name="wFormat" size="3" style="height:54px;">'
 							. '<option value="excel" selected="selected">Excel</option>'
 							//comment the following line to hide pdf export
-							//. '<option value="pdf">PDF</option>'
+							. '<option value="pdf">PDF</option>'
 							. '<option value="tsv">TSV</option>'
 							. '</select></li></ul>'
 							. '<input type="hidden" name="shownCnt" value="' . $shownCnt . '" />'
@@ -13421,5 +13447,24 @@ function m_query($n,$q)
 	$logger->debug($log);
 	unset($log);
 	return $res;
+}
+
+function track_time($n,$q)
+{
+	global $logger;
+	$time_start = microtime(true);
+	$log = 'TIME:'.$time_start.'  Process start time:'.$q.'  LINE# '.$n;
+	$logger->debug($log);
+	unset($log);
+}
+
+function track_time_diff($n,$q, $time_start, $time_end)
+{
+	global $logger;
+	//$time_start = microtime(true);
+	$time_taken = $time_end-$time_start;
+	$log = 'TIME ELAPSED:'.$time_taken.'  Operaton:'.$q.'  LINE# '.$n;
+	$logger->debug($log);
+	unset($log);
 }
 ?>
