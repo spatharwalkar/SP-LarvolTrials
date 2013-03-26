@@ -5398,7 +5398,7 @@ class TrialTracker
 						. '<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" />'
 						. '<title>Larvol PDF Export</title>';
 		$pdfStyle	 = 	'<style type="text/css">'
-						. 'body { font-family:Arial; font-color:black;}'
+						. 'body { font-family:Arial; font-color:black; font-size:8px;}'
 						. 'a, a:hover{color:#000000;text-decoration:none;display:block;width:100%; height:100%;}'
 						.'td {vertical-align:top; border-right: 0.5px solid blue; border-left:0.5px solid blue; border-top: 0.5px solid blue; border-bottom: 
 						0.5px solid blue;}'
@@ -5441,7 +5441,7 @@ class TrialTracker
 		$pdf->SetSubject('Larvol Trials');
 		$pdf->SetKeywords('Larvol Trials, Larvol Trials PDF Export');
 		
-		$pdf->SetFont('verdana', '', 6);
+		$pdf->SetFont('verdana', '', 8);
 		$pdf->setFontSubsetting(false);
 		//set margins
 		if($loggedIn)
