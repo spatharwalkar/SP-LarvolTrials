@@ -10434,6 +10434,7 @@ class TrialTracker
 				. $this->downloadOptions($count, $Values['totalcount'], $ottType, $resultIds, $globalOptions)
 				. '</div><script type="text/javascript">cssdropdown.startchrome("chromemenu");</script>';
 		}
+		if(!isset($globalOptions['DiseaseId']))
 		echo '<br/><br/><div style="height:50px;"></div>';
 	}
 	
