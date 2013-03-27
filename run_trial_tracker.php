@@ -7634,8 +7634,9 @@ class TrialTracker
 		$tHeader = 'Area: ';
 		
 		$TrialsInfo = array();
-		
-		$ids = implode("','", $resultIds);
+		//array merge to get combined array
+		$resultArray = array_merge($resultIds['e1'], $resultIds['e2']);
+		$ids = implode("','", $resultArray);
 		
 		$query = "SELECT id, name, class, display_name FROM entities WHERE id IN ('" . $ids . "') ";
 		$res = m_query(__LINE__, $query);
@@ -7710,17 +7711,21 @@ class TrialTracker
 		$lstart = ($globalOptions['page']-1) * $this->resultsPerPage;
 		$limit = " LIMIT " . $lstart . ", 100 ";
 		$Pids='';$Aids='';
-		foreach($Ids as $key=>$value) 
+
+		$Pids = implode(", ", $Ids['e1']);
+		$Aids = implode(", ", $Ids['e2']);
+/* 		foreach($Ids as $key=>$value) 
 		{
-			$Pids .= ",".$Ids[$key]['product'];
-			$Aids .= ",".$Ids[$key]['area'];
+			$Pids .= (($Ids[$key]['product'] != '') ? ",".$Ids[$key]['product'] : '');
+			$Aids .= (($Ids[$key]['area']) ? ",".$Ids[$key]['area'] : '');
 		}
-		$Pids=substr($Pids,1); $Aids=substr($Aids,1);
+
+		$Pids=substr($Pids,1); $Aids=substr($Aids,1); */
 		$where = " WHERE 1 ";
 		$join = "";
 		
-		$join .= " JOIN `entity_trials` et ON dt.`larvol_id` = et.`trial` AND et.`entity` IN (" . $Pids . ") ";
-		$join .= " JOIN `entity_trials` et2 ON dt.`larvol_id` = et2.`trial` AND et2.`entity` IN (" . $Aids . ") ";
+		$join .= " JOIN `entity_trials` et ON dt.`larvol_id` = et.`trial` AND et.`entity` IN ('" . $Pids . "') ";
+		$join .= " JOIN `entity_trials` et2 ON dt.`larvol_id` = et2.`trial` AND et2.`entity` IN ('" . $Aids . "') ";
 				
 		$join .= " LEFT OUTER JOIN `data_manual` dm ON dt.`larvol_id` = dm.`larvol_id` "
 					. " LEFT OUTER JOIN `data_history` dh ON dh.`larvol_id` = dt.`larvol_id` ";
@@ -7819,6 +7824,7 @@ class TrialTracker
 			}
 			else
 			{
+				$orderBy = ' ORDER BY dt.`phase` DESC, dt.`end_date` ASC, dt.`start_date` ASC, dt.`overall_status` ASC, dt.`enrollment` ASC';
 				$Query .= $filters . $orderBy;
 			}
 		}
