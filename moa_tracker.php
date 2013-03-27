@@ -2274,7 +2274,7 @@ function GetMOAsOrMOACatFromDisease_MOATracker($DiseaseID)
 	}
 		
 	//Get MOA which dont have related category from product id
-	$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON (er.`child` = e.`id`) WHERE e.`class` = 'MOA' AND er.`parent` IN (SELECT DISTINCT e3.`id` FROM `entities` e3 JOIN `entity_trials` etr3 ON(etr3.`entity` = e3.`id`) JOIN `entity_trials` etr4 ON(etr3.`trial` = etr4.`trial`) WHERE e3.`class` = 'Product' AND etr4.`entity`='" . mysql_real_escape_string($DiseaseID) . "') AND e.`id` NOT IN (" . implode(',',$onlymoas) . ")";
+	$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON (er.`child` = e.`id`) WHERE e.`class` = 'MOA' AND er.`parent` IN (SELECT DISTINCT e3.`id` FROM `entities` e3 JOIN `entity_trials` etr3 ON(etr3.`entity` = e3.`id`) JOIN `entity_trials` etr4 ON(etr3.`trial` = etr4.`trial`) WHERE e3.`class` = 'Product' AND etr4.`entity`='" . mysql_real_escape_string($DiseaseID) . "') ".((count($onlymoas) > 0) ? "AND e.`id` NOT IN (" . implode(',',$onlymoas) . ")" : "");
 	$res = mysql_query($query) or die('Bad SQL query getting MOAs from products ids in MT');
 	
 	if($res)
