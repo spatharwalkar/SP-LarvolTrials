@@ -1574,7 +1574,7 @@ function Download_reports()
 		$from++;
 		for($j=0; $j < $columns; $j++)
 		{
-			$to = getColspanforExcelExport($from, $inner_columns);
+			$to = getColspanforExcelExportPT($from, $inner_columns);
 			$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':'. $to . $Excel_HMCounter);
 			$from = $to;
 			$from++;
@@ -1694,7 +1694,7 @@ function Download_reports()
 					$extra_sp = $aq_sp - $phase_space;
 					if($extra_sp > 0)
 					{
-						$to = getColspanforExcelExport($from, $extra_sp);
+						$to = getColspanforExcelExportPT($from, $extra_sp);
 						$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':' . $to . $Excel_HMCounter);
 						$from = $to;
 						$from++;
@@ -1703,7 +1703,7 @@ function Download_reports()
 					$remain_span = $remain_span - $extra_sp;
 					while($remain_span > 0)
 					{
-						$to = getColspanforExcelExport($from, $inner_columns);
+						$to = getColspanforExcelExportPT($from, $inner_columns);
 						$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':' . $to . $Excel_HMCounter);
 						$from = $to;
 						$from++;
@@ -1721,7 +1721,7 @@ function Download_reports()
 		$from++;
 		for($j=0; $j < $columns; $j++)
 		{
-			$to = getColspanforExcelExport($from, $inner_columns);
+			$to = getColspanforExcelExportPT($from, $inner_columns);
 			$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':'. $to . $Excel_HMCounter);
 			$from = $to;
 			$from++;
@@ -1732,7 +1732,7 @@ function Download_reports()
 		$from = $Start_Char;
 		$from++;
 		
-		$to = getColspanforExcelExport($from, 2);
+		$to = getColspanforExcelExportPT($from, 2);
 		$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':'. $to . $Excel_HMCounter);
 		$objPHPExcel->getActiveSheet()->SetCellValue($from . $Excel_HMCounter, 0);
 		$from = $to;
@@ -1740,7 +1740,7 @@ function Download_reports()
 			
 		for($j=0; $j < $columns; $j++)
 		{
-			$to = getColspanforExcelExport($from, (($j==0)? $inner_columns : $inner_columns));
+			$to = getColspanforExcelExportPT($from, (($j==0)? $inner_columns : $inner_columns));
 			$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':'. $to . $Excel_HMCounter);
 			$objPHPExcel->getActiveSheet()->SetCellValue($from . $Excel_HMCounter, (($j+1) * $column_interval));
 			$from = $to;
@@ -1767,7 +1767,7 @@ function Download_reports()
 		$from++;
 		foreach($p_colors as $key => $color)
 		{
-			$to = getColspanforExcelExport($from, $inner_columns);
+			$to = getColspanforExcelExportPT($from, $inner_columns);
 			$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':'. $to . $Excel_HMCounter);
 			$objPHPExcel->getActiveSheet()->getStyle($from . $Excel_HMCounter)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID);
 			$objPHPExcel->getActiveSheet()->getStyle($from . $Excel_HMCounter)->getFill()->getStartColor()->setRGB($color);
@@ -2376,7 +2376,7 @@ function Download_reports()
 	//End of Real Chart Excel
 }
 
-function getColspanforExcelExport($cell, $inc)
+function getColspanforExcelExportPT($cell, $inc)
 {
 	for($i = 1; $i < $inc; $i++)
 	{
@@ -2491,7 +2491,7 @@ function getClassNColorforPhase($phase)
 
 function CreatePhaseCellforExcelExport($from, $Mini_Bar_Width, $url, $Excel_HMCounter, $countValue, $phase, &$objPHPExcel)
 {
-	$to = getColspanforExcelExport($from, $Mini_Bar_Width);
+	$to = getColspanforExcelExportPT($from, $Mini_Bar_Width);
 	$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':' . $to . $Excel_HMCounter);
 	$objPHPExcel->getActiveSheet()->getStyle($from . $Excel_HMCounter)->applyFromArray(getBGColorforExcelExport($phase));
 	$objPHPExcel->getActiveSheet()->getCell($from . $Excel_HMCounter)->getHyperlink()->setUrl($url); 

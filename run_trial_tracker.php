@@ -8125,9 +8125,13 @@ class TrialTracker
 		
 		$this->timeParams($globalOptions);
 		
-		echo '<form id="frmOtt" name="frmOtt" method="get" target="_self" action="intermediary.php">'
+		echo '<form id="frmOtt" name="frmOtt" method="get" target="_self" action="'. $globalOptions['pageLocation'] .'.php">'
 				.'<input type="hidden" name="e1" value="' . $resultIds['e1'] . '" />'
 				. '<input type="hidden" name="e2" value="' . $resultIds['e2'] . '" />';
+		
+		if(isset($globalOptions['DiseaseId']))		
+		echo '<input type="hidden" name="DiseaseId" value="' . $globalOptions['DiseaseId'] . '" />'
+				. '<input type="hidden" name="tab" value="DiseaseOTT" />';
 		
 		$resultIds['e1'] = explode(',', trim($resultIds['e1']));
 		$resultIds['e2'] = explode(',', trim($resultIds['e2']));
@@ -8145,6 +8149,7 @@ class TrialTracker
 			$Arr = $this->processNonHmParams($resultIds, $globalOptions, 'webPage');
 		}
 		
+		if(!isset($globalOptions['DiseaseId']))
 		$this->displayHeader($Arr['tHeader']);
 			
 		$ottType = $Arr['ottType'];
@@ -8182,7 +8187,7 @@ class TrialTracker
 		
 		$this->timeParams($globalOptions);
 		
-		echo '<form id="frmOtt" name="frmOtt" method="get" target="_self" action="intermediary.php">'
+		echo '<form id="frmOtt" name="frmOtt" method="get" target="_self" action="'. $globalOptions['pageLocation'] .'.php">'
 				.'<input type="hidden" name="p" value="' . $resultIds['product'] . '" />'
 				. '<input type="hidden" name="a" value="' . $resultIds['area'] . '" />';
 		
@@ -10144,7 +10149,7 @@ class TrialTracker
 			}
 		}
 		
-		echo '<div id="outercontainer"><p style="overflow:hidden;margin: 0;">';
+		echo '<div id="outercontainer" align="left"><p style="overflow:hidden;margin: 0;">';
 		
 		$lParams = array();
 		if($globalOptions['type'] == 'inactiveTrials')
@@ -10154,7 +10159,7 @@ class TrialTracker
 			$lUrl = http_build_query($lParams);
 			
 			echo '<span class="filters"><label>Inactive Trials</label>'
-				. '<a href="intermediary.php?' . $lUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
+				. '<a href="'. $globalOptions['pageLocation'] .'.php?' . $lUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
 		}
 		else if($globalOptions['type'] == 'allTrials')
 		{
@@ -10163,7 +10168,7 @@ class TrialTracker
 			$lUrl = http_build_query($lParams);
 			
 			echo '<span class="filters"><label>All Trials</label>'
-				. '<a href="intermediary.php?' . $lUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';;
+				. '<a href="'. $globalOptions['pageLocation'] .'.php?' . $lUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';;
 		}
 		
 		$sFilters = array();
@@ -10190,7 +10195,7 @@ class TrialTracker
 			$sUrl = http_build_query($sParams);
 			
 			echo '<span class="filters"><label>' .  $sFilters[$value] . '</label>'
-				. '<a href="intermediary.php?' . $sUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
+				. '<a href="'. $globalOptions['pageLocation'] .'.php?' . $sUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
 		}
 		unset($sFilters);
 		unset($sParams);
@@ -10210,7 +10215,7 @@ class TrialTracker
 			$val = $this->institutionFilters[$value];
 			$val = str_replace('_', ' ', ucfirst($val));
 			echo '<span class="filters"><label>' . $val . '</label>'
-					. '<a href="intermediary.php?' . $iUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
+					. '<a href="'. $globalOptions['pageLocation'] .'.php?' . $iUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
 
 		}
 		unset($iParams);
@@ -10228,7 +10233,7 @@ class TrialTracker
 			$rUrl = http_build_query($rParams);
 			
 			echo '<span class="filters"><label>' .  $this->regionFilters[$value] . '</label>'
-				. '<a href="intermediary.php?' . $rUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
+				. '<a href="'. $globalOptions['pageLocation'] .'.php?' . $rUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
 		}
 		unset($rParams);
 		unset($key);
@@ -10248,7 +10253,7 @@ class TrialTracker
 				$pUrl = http_build_query($pParams);
 
 				echo '<span class="filters"><label>Phase ' .  $phases[$value] . '</label>'
-				. '<a href="intermediary.php?' . $pUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
+				. '<a href="'. $globalOptions['pageLocation'] .'.php?' . $pUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
 			}
 		}
 		unset($phases);
@@ -10264,7 +10269,7 @@ class TrialTracker
 			$hUrl = http_build_query($hParams);
 			
 			echo '<span class="filters"><label>' . $globalOptions['startrange'] . ' - ' . $globalOptions['endrange'] . '</label>'
-					. '<a href="intermediary.php?' . $hUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
+					. '<a href="'. $globalOptions['pageLocation'] .'.php?' . $hUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
 		}
 		unset($hParams);
 		
@@ -10276,7 +10281,7 @@ class TrialTracker
 			$oUrl = http_build_query($oParams);
 			
 			echo '<span class="filters"><label>Only updates</label>'
-				. '<a href="intermediary.php?' . $oUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
+				. '<a href="'. $globalOptions['pageLocation'] .'.php?' . $oUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
 		}
 		unset($oParams);
 		
@@ -10297,7 +10302,7 @@ class TrialTracker
 			$eUrl = http_build_query($eParams);
 			
 			echo '<span class="filters"><label>' . $ev . '</label>'
-					. '<a href="intermediary.php?' . $eUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
+					. '<a href="'. $globalOptions['pageLocation'] .'.php?' . $eUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
 		}
 		unset($eParams);
 		
@@ -10312,7 +10317,7 @@ class TrialTracker
 				$dUrl = http_build_query($dParams);
 				$title = (($ottType == 'colstacked') ? 'Products' : 'Areas');
 				echo '<span class="filters"><label>' . $title . ' with no data</label>'
-						. '<a href="intermediary.php?' . $dUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
+						. '<a href="'. $globalOptions['pageLocation'] .'.php?' . $dUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
 			}
 		}
 		unset($dParams);
@@ -10330,7 +10335,7 @@ class TrialTracker
 				$tUrl = http_build_query($tParams);
 			
 				echo '<span class="filters"><label>' . $productSelector[$value] . '</label>'
-						. '<a href="intermediary.php?' . $tUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
+						. '<a href="'. $globalOptions['pageLocation'] .'.php?' . $tUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
 			}
 		}
 		unset($tParams);
@@ -10347,7 +10352,7 @@ class TrialTracker
 			. '<input type="text" name="ss" autocomplete="off" style="width:153px;" value="' . $globalOptions['sphinxSearch'] . '" />'
 			. '</div>';
 		
-		$resetUrl = 'intermediary.php?';
+		$resetUrl = ''. $globalOptions['pageLocation'] .'.php?';
 		$resetUrl .= $globalOptions['url'];
 		
 		$resetUrl .= str_replace(',', '&', $globalOptions['resetLink']);
@@ -10837,6 +10842,9 @@ class TrialTracker
 	{ 	
 		$url = $globalOptions['url'];
 		
+		if(isset($globalOptions['DiseaseId']))
+		$url .= '&amp;DiseaseId=' . $globalOptions['DiseaseId'] . '&amp;tab=DiseaseOTT';
+		
 		if(isset($globalOptions['startrange']))
 		{
 			$url .= '&amp;sr=' . $globalOptions['startrange'];
@@ -10924,10 +10932,12 @@ class TrialTracker
 		{
 			$url .= '&amp;rlink=' . $globalOptions['resetLink'];
 		}
+				
 		$url .= '&amp;rflag=1';
 		$stages = 1;
 		
-		$rootUrl = 'intermediary.php?';
+		$rootUrl = $globalOptions['pageLocation'].'.php?';
+		
 		$paginateStr = '<div class="pagination">';
 		///ALL Quotation Marks SIGN REPLACED BY Apostrophe, CAUSE JSON DATA URL GET PROBLEM WITH double quote.
 		// globalOptions Should always have Apostrophe instead of quote sign or data will not be passed
