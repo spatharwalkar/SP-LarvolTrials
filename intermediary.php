@@ -213,14 +213,15 @@ function DisplayOTT()
 	$mouseWheelJs 	= 'scripts/jquery.mousewheel.min.js';
 	$scrollBarJs 	= 'scripts/jquery.mCustomScrollbar.js';
 
+if(!isset($globalOptions['DiseaseId']))
 print	'<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 		<html xmlns="http://www.w3.org/1999/xhtml">
 		<head>
 			<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 			<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-			<title>Online Trial Tracker</title>
+			<title>Online Trial Tracker</title>';
 			
-			<link href="'. $intermediaryCss . '?t=' . filectime($intermediaryCss) .'" rel="stylesheet" type="text/css" media="all" />
+print	'	<link href="'. $intermediaryCss . '?t=' . filectime($intermediaryCss) .'" rel="stylesheet" type="text/css" media="all" />
 			<link href="'. $jueryUiCss . '?t=' . filectime($jueryUiCss) .'" rel="stylesheet" type="text/css" media="all" />
 			<link href="'. $dateInputCss . '?t=' . filectime($dateInputCss) .'" rel="stylesheet" type="text/css" media="all" />
 			<link href="'. $jdPickerCss . '?t=' . filectime($jdPickerCss) .'" rel="stylesheet" type="text/css" media="screen" />
@@ -420,9 +421,25 @@ print	'<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://ww
 				return;
 				
 			}
-			</script>
-			</head>
-		<body>';
+			</script>';
+
+if(!isset($globalOptions['DiseaseId']))			
+print	'
+<style type="text/css">
+html,body {
+	height: 100%;
+	margin:0px;
+	padding: 0px;
+}
+
+body {
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:13px;
+	background-color:#ffffff;
+	width: 100%;
+}
+</style>
+</head><body>';
 
 if(isset($_REQUEST['region']) && $_REQUEST['region'] != '')
 {
@@ -551,7 +568,6 @@ else if(isset($_REQUEST['p']) || isset($_REQUEST['a']) || isset($_REQUEST['hm'])
 }
 else if(isset($globalOptions['DiseaseId']))
 {
-	$DiseaseIDs = GetProductsFromDisease($globalOptions['DiseaseId']);
 	$globalOptions['url'] = 'e1='.$globalOptions['DiseaseId'];	
 	$tt->generateTrialTracker('entities', array('e1' => $globalOptions['DiseaseId'], 'e2' => ''), $globalOptions);
 }
@@ -769,6 +785,7 @@ print           '$("ul #productbox li").click(function () {
 		echo '<a href="li/larvolinsight.php?url='. $cpageURL .'"><span style="color:red;font-weight:bold;margin-left:10px;">LI view</span></a><br>';
 	}
 	
+if(!isset($globalOptions['DiseaseId']))		
 	print ' </body>
 			</html>';
 }

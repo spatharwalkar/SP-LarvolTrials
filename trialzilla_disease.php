@@ -103,6 +103,10 @@ a:visited {color:#6600bc;}  /* visited link */
 	border-top:#333333 solid 1px;
 }
 </style>
+<script src="scripts/jquery-1.7.1.min.js"></script>
+<script src="scripts/jquery-ui-1.8.17.custom.min.js"></script>
+<script type="text/javascript" src="scripts/chrome.js"></script>
+<script type="text/javascript" src="scripts/iepngfix_tilebg.js"></script>
 </head>
 
 <body style="background-color:#FFFFFF;">
