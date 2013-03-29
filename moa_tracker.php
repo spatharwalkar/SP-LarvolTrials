@@ -113,12 +113,18 @@ function DataGeneratorForMOATracker($id, $TrackerType, $page=1)
 			if($data_matrix[$key]['class'] == 'MOA')
 			{
 				$data_matrix[$key]['HeaderLink'] = trim(urlPath()) .'trialzilla_moa.php?MoaId=' . $data_matrix[$key]['ID'];
-				$data_matrix[$key]['ColumnsLink'] = trim(urlPath()) .'trialzilla_moa.php?MoaId=' . $data_matrix[$key]['ID'] . '&TrackerType=SMPT';
+				if($TrackerType == 'DMT')
+				$data_matrix[$key]['ColumnsLink'] = trim(urlPath()) .'trialzilla_moa.php?MoaId=' . $data_matrix[$key]['ID'] . '&DiseaseId=' . $id . '&TrackerType=DMPT';
+				else
+				$data_matrix[$key]['ColumnsLink'] = trim(urlPath()) .'trialzilla_moa.php?MoaId=' . $data_matrix[$key]['ID'] . '&TrackerType=MPT';
 			}
 			else if($data_matrix[$key]['class'] == 'MOA_Category')
 			{
 				$data_matrix[$key]['HeaderLink'] = trim(urlPath()) .'trialzilla_moacategory.php?MoaCatId=' . $data_matrix[$key]['ID'];
-				$data_matrix[$key]['ColumnsLink'] = trim(urlPath()) .'trialzilla_moacategory.php?MoaCatId=' . $data_matrix[$key]['ID'] . '&TrackerType=SMCPT';
+				if($TrackerType == 'DMT')
+				$data_matrix[$key]['ColumnsLink'] = trim(urlPath()) .'trialzilla_moacategory.php?MoaCatId=' . $data_matrix[$key]['ID'] . '&DiseaseId=' . $id . '&TrackerType=DMCPT';
+				else
+				$data_matrix[$key]['ColumnsLink'] = trim(urlPath()) .'trialzilla_moacategory.php?MoaCatId=' . $data_matrix[$key]['ID'] . '&TrackerType=MCPT';
 			}
 			
 			///// Initialize data
