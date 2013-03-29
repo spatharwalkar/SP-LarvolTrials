@@ -65,26 +65,26 @@ display:inline;
 <br/>
 <table width="100%" border="0" class="FoundResultsTb">
 	<tr>
-    	<td width="100%" style="border:0; font-weight:bold; padding-left:5px; color:#FFFFFF; font-size:23px;" align="left">
+    	<td width="100%" style="border:0; font-weight:bold; padding-left:5px; color:#FFFFFF; <?php ((isset($e2) || isset($phase)) ? print 'font-size:15px;' : print 'font-size:23px;'); ?> vertical-align:middle;" align="left">
         	<table><tr>
         	<?php 
 				if(isset($e1) && $e1 != NULL)
 				{
 					$LinkDetails = GetLinkNClass($e1);
 					if(isset($e2) && $e2 != NULL)
-					print '<td style="vertical-align:middle;"><a style="color:#FFFFFF; display:inline;" href="trialzilla_ott.php?e1='.$e2. ((isset($phase) && $phase != NULL) ? '&phase='.$phase:'').'&sourcepg=TZ"><img src="images/delicon.gif" width="30" height="30" style="padding-top:2px;" /></a>&nbsp;</td>';
-					print '<td style="vertical-align:middle;"><a style="color:#FFFFFF; display:inline; text-decoration:underline;" href="'.$LinkDetails['link'].'">'.GetEntityName($e1).'</a>&nbsp;</td>';
+					print '<td style="vertical-align:middle;"><a style="color:#FFFFFF; display:inline;" href="trialzilla_ott.php?e1='.$e2. ((isset($phase) && $phase != NULL) ? '&phase='.$phase:'').'&sourcepg=TZ"><img src="images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
+					print '<td style="vertical-align:top;"><a style="color:#FFFFFF; display:inline; text-decoration:underline;" href="'.$LinkDetails['link'].'">'.GetEntityName($e1).'</a>&nbsp;</td>';
 				}
 				if(isset($e2) && $e2 != NULL)
 				{
 					$LinkDetails = GetLinkNClass($e2);
-					print '<td style="vertical-align:middle;"> >> </td><td><a style="color:#FFFFFF; display:inline;" href="trialzilla_ott.php?e1='.$e1. ((isset($phase) && $phase != NULL) ? '&phase='.$phase:'').'&sourcepg=TZ"><img src="images/delicon.gif" width="30" height="30" style="padding-top:2px;" /></a>&nbsp;</td>';
-					print '<td style="vertical-align:middle;"><a style="color:#FFFFFF; display:inline; text-decoration:underline;" href="'.$LinkDetails['link'].'">'.GetEntityName($e2).'</a>&nbsp;</td>';
+					print '<td style="vertical-align:top;"> >> </td><td><a style="color:#FFFFFF; display:inline;" href="trialzilla_ott.php?e1='.$e1. ((isset($phase) && $phase != NULL) ? '&phase='.$phase:'').'&sourcepg=TZ"><img src="images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
+					print '<td style="vertical-align:top;"><a style="color:#FFFFFF; display:inline; text-decoration:underline;" href="'.$LinkDetails['link'].'">'.GetEntityName($e2).'</a>&nbsp;</td>';
 				}
 				if(isset($phase) && $phase != NULL)
 				{
-					print '<td style="vertical-align:middle;"> >> </td><td><a style="color:#FFFFFF; display:inline;" href="trialzilla_ott.php?e1='.$e1 . ((isset($e2) && $e2 != NULL) ? '&e2='.$e2:'').'&sourcepg=TZ"><img src="images/delicon.gif" width="30" height="30" style="padding-top:2px;" /></a>&nbsp;</td>';
-					print '<td style="vertical-align:middle;"><a style="color:#FFFFFF; display:inline;" href="#">';
+					print '<td style="vertical-align:top;"> >> </td><td><a style="color:#FFFFFF; display:inline;" href="trialzilla_ott.php?e1='.$e1 . ((isset($e2) && $e2 != NULL) ? '&e2='.$e2:'').'&sourcepg=TZ"><img src="images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
+					print '<td style="vertical-align:top;"><a style="color:#FFFFFF; display:inline;" href="#">';
 					$allPh = explode(',',$phase);
 					$phnm = '';
 					foreach($allPh as $p)	
