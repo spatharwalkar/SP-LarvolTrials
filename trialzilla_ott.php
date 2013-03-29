@@ -132,7 +132,7 @@ function GetLinkNClass($id)
 	else if($header['class'] == 'MOA_Category')
 		$LinkNClass['link'] = 'trialzilla_moacategory.php?MoaCatId='. $header['id'];
 	else
-		$LinkNClass['link'] = 'trialzilla_ott.php?e1='. $header['id'];
+		$LinkNClass['link'] = 'trialzilla_ott.php?e1='. $header['id'].'&&sourcepg=TZ';
 						
 	return $LinkNClass;
 }
