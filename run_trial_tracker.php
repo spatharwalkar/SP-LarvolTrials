@@ -7714,6 +7714,7 @@ class TrialTracker
 
 		$Pids = implode(", ", $Ids['e1']);
 		$Aids = implode(", ", $Ids['e2']);
+		
 /* 		foreach($Ids as $key=>$value) 
 		{
 			$Pids .= (($Ids[$key]['product'] != '') ? ",".$Ids[$key]['product'] : '');
@@ -7820,6 +7821,7 @@ class TrialTracker
 		{
 			if($globalOptions['dOption'] == 'all')
 			{
+				$orderBy = ' ORDER BY dt.`phase` DESC, dt.`end_date` ASC, dt.`start_date` ASC, dt.`overall_status` ASC, dt.`enrollment` ASC';
 				$Query .= $orderBy;
 			}
 			else
