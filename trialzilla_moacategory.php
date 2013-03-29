@@ -24,11 +24,19 @@
 		$page = mysql_real_escape_string($_REQUEST['page']);
 	}
 	
-	$phase = 'na';
+	$DiseaseId = NULL;
+	if(isset($_REQUEST['DiseaseId']))
+	{
+		$DiseaseId = mysql_real_escape_string($_REQUEST['DiseaseId']);
+	}
+	
+	$phase = NULL;
 	if(isset($_REQUEST['phase']))
 	{
 		$phase = mysql_real_escape_string($_REQUEST['phase']);
 	}
+
+	$OptionArray = array('DiseaseId'=>$DiseaseId, 'Phase'=> $phase);
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -82,8 +90,22 @@ a:visited {color:#6600bc;}  /* visited link */
 <br/>
 <table width="100%" border="0" class="FoundResultsTb">
 	<tr>
-    	<td width="50%" style="border:0; font-weight:bold; padding-left:5px; color:#FFFFFF; font-size:28px;" align="left">
-        	<?php print $MoaCatName; ?>
+    	<td width="100%" style="border:0; font-weight:bold; padding-left:5px; color:#FFFFFF; font-size:23px; vertical-align:top;" align="left">
+        	<table><tr>
+        	 <?php 
+				print '<td style="vertical-align:middle;"><a style="color:#FFFFFF; display:inline; text-decoration:underline;" href="trialzilla_moacategory.php?MoaCatId='.$MoaCatId.'">'.$MoaCatName.'</a>&nbsp;</td>';
+				if(isset($DiseaseId) && $DiseaseId != NULL)
+				{
+					print '<td style="vertical-align:middle;"> >> </td><td><a style="color:#FFFFFF; display:inline;" href="trialzilla_moacategory.php?MoaCatId='.$MoaCatId. ((isset($phase) && $phase != NULL) ? '&phase='.$phase.'&TrackerType=MCPT':'').'"><img src="images/delicon.gif" width="30" height="30" style="padding-top:2px;" /></a>&nbsp;</td>';
+					print '<td style="vertical-align:middle;"><a style="color:#FFFFFF; display:inline; text-decoration:underline;" href="trialzilla_disease.php?DiseaseId='.$DiseaseId.'">'.GetEntityName($DiseaseId).'</a>&nbsp;</td>';
+				}
+				if(isset($phase) && $phase != NULL)
+				{
+					print '<td style="vertical-align:middle;"> >> </td><td><a style="color:#FFFFFF; display:inline;" href="trialzilla_moacategory.php?MoaCatId='.$MoaCatId . ((isset($DiseaseId) && $DiseaseId != NULL) ? '&DiseaseId='.$DiseaseId.'&TrackerType=DMCPT':'').'"><img src="images/delicon.gif" width="30" height="30" style="padding-top:2px;" /></a>&nbsp;</td>';
+					print '<td style="vertical-align:middle;"><a style="color:#FFFFFF; display:inline;" href="#">'.GetPhaseName($phase).'</a></td>';
+				} 
+			?>
+            </tr></table>
         </td>
     </tr>
 </table>
@@ -93,10 +115,10 @@ a:visited {color:#6600bc;}  /* visited link */
 <table width="100%" border="0" style="">
 <tr><td>
 <?php 
-	if(isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'SMCPT')
-		print showProductTracker($MoaCatId, $dwcount, 'SMCPT', $page, $phase);	//SMCPT= SEGEMENTED MOA CATEGORY PRODUCT TRACKER
+	if(isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'DMCPT')
+		print showProductTracker($MoaCatId, $dwcount, 'DMCPT', $page, $OptionArray);	//DMCPT= DISEASE MOA CATEGORY PRODUCT TRACKER
 	else
-		print showProductTracker($MoaCatId, $dwcount, 'MCPT', $page);	//MCPT= MOA CATEGORY PRODUCT TRACKER 
+		print showProductTracker($MoaCatId, $dwcount, 'MCPT', $page, $OptionArray);	//MCPT= MOA CATEGORY PRODUCT TRACKER 
 ?>
 </td></tr>
 </table>

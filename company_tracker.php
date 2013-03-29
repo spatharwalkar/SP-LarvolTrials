@@ -107,8 +107,13 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page=1)
 			/// Fill up all data in Data Matrix only, so we can sort all data at one place
 			$data_matrix[$key]['RowHeader'] = $result['name'];
 			$data_matrix[$key]['ID'] = $result['id'];
+			
 			$data_matrix[$key]['HeaderLink'] = trim(urlPath()) .'trialzilla_company.php?CompanyId=' . $data_matrix[$key]['ID'];
-			$data_matrix[$key]['ColumnsLink'] = trim(urlPath()) .'trialzilla_company.php?CompanyId=' . $data_matrix[$key]['ID'] . '&TrackerType=SCPT';
+				
+			if($TrackerType == 'DCT')
+				$data_matrix[$key]['ColumnsLink'] = trim(urlPath()) .'trialzilla_company.php?CompanyId=' . $data_matrix[$key]['ID'] . '&DiseaseId=' . $id . '&TrackerType=DCPT';
+			else
+				$data_matrix[$key]['ColumnsLink'] = trim(urlPath()) .'trialzilla_company.php?CompanyId=' . $data_matrix[$key]['ID'] . '&TrackerType=CPT';			
 			
 			///// Initialize data
 			$data_matrix[$key]['phase_na']=0;

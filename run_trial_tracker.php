@@ -8138,6 +8138,9 @@ class TrialTracker
 		if(isset($globalOptions['DiseaseId']))		
 		echo '<input type="hidden" name="DiseaseId" value="' . $globalOptions['DiseaseId'] . '" />'
 				. '<input type="hidden" name="tab" value="DiseaseOTT" />';
+				
+		if($globalOptions['sourcepg'] == 'TZ')		
+		echo '<input type="hidden" name="sourcepg" value="TZ" />';
 		
 		$resultIds['e1'] = explode(',', trim($resultIds['e1']));
 		$resultIds['e2'] = explode(',', trim($resultIds['e2']));
@@ -8155,7 +8158,7 @@ class TrialTracker
 			$Arr = $this->processNonHmParams($resultIds, $globalOptions, 'webPage');
 		}
 		
-		if(!isset($globalOptions['DiseaseId']))
+		if(!isset($globalOptions['DiseaseId']) && $globalOptions['sourcepg'] != 'TZ')
 		$this->displayHeader($Arr['tHeader']);
 			
 		$ottType = $Arr['ottType'];
@@ -10440,7 +10443,7 @@ class TrialTracker
 				. $this->downloadOptions($count, $Values['totalcount'], $ottType, $resultIds, $globalOptions)
 				. '</div><script type="text/javascript">cssdropdown.startchrome("chromemenu");</script>';
 		}
-		if(!isset($globalOptions['DiseaseId']))
+		if(!isset($globalOptions['DiseaseId']) && $globalOptions['sourcepg'] != 'TZ')
 		echo '<br/><br/><div style="height:50px;"></div>';
 	}
 	
@@ -10851,6 +10854,9 @@ class TrialTracker
 		
 		if(isset($globalOptions['DiseaseId']))
 		$url .= '&amp;DiseaseId=' . $globalOptions['DiseaseId'] . '&amp;tab=DiseaseOTT';
+		
+		if($globalOptions['sourcepg'] == 'TZ')
+		$url .= '&amp;sourcepg=TZ';
 		
 		if(isset($globalOptions['startrange']))
 		{
