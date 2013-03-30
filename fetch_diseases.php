@@ -13,6 +13,8 @@ get_diseases(); //get list of diseases
 pr('Updating the entity mesh index ......'.str_repeat(" ",1025));
 update_diseases(); //sync them with LT's diseases, and also update the mesh index
 
+require_once 'link_diseases.php';  // associate diseases with products
+
 echo '<b>All Done.</b>';
 
 /*********************get list of all diseases and their urls ****************/
