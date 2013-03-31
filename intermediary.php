@@ -1,8 +1,13 @@
 <?php 
-header('P3P: CP="CAO PSA OUR"');
-session_start();
-//connect to Sphinx
-if(!isset($sphinx) or empty($sphinx)) $sphinx = @mysql_connect("127.0.0.1:9306") or $sphinx=false;
+//Below lines are lines should be kept on top of all like session start gives session error, sphinx also gives query related error
+// - so incase of TZ we place in these pages itself
+if(!isset($_REQUEST['DiseaseId']) && $_REQUEST['sourcepg'] != 'TZ')
+{
+	header('P3P: CP="CAO PSA OUR"');
+	session_start();
+	//connect to Sphinx
+	if(!isset($sphinx) or empty($sphinx)) $sphinx = @mysql_connect("127.0.0.1:9306") or $sphinx=false;
+}
 require_once('krumo/class.krumo.php');
 require_once('db.php');
 require_once('include.search.php');
@@ -72,6 +77,7 @@ function DisplayOTT()
 	{
 		$globalOptions['DiseaseId'] = $_REQUEST['DiseaseId'];
 		$globalOptions['pageLocation'] = "trialzilla_disease";
+		$_REQUEST['e1'] = $globalOptions['DiseaseId'];
 	}
 	if(isset($_REQUEST['sourcepg']) && $_REQUEST['sourcepg'] == 'TZ')
 	{
@@ -504,7 +510,7 @@ if(isset($_REQUEST['pr']) && $_REQUEST['pr'] != '')
 	$globalOptions['product'] = array_filter($globalOptions['product'], 'iszero');
 }
 
-if(isset($_REQUEST['e1']) || isset($_REQUEST['e2'])|| isset($_REQUEST['hm']))
+if(isset($_REQUEST['e1']) || isset($_REQUEST['e2'])|| isset($_REQUEST['hm']) || isset($globalOptions['DiseaseId']))
 {
 	$globalOptions['url'] = 'e1=' . $_REQUEST['e1'] . '&e2=' . $_REQUEST['e2'];	
 	if(isset($_REQUEST['JSON_search']))
@@ -570,11 +576,6 @@ else if(isset($_REQUEST['p']) || isset($_REQUEST['a']) || isset($_REQUEST['hm'])
 	
 	
 	$tt->generateTrialTracker('indexed', array('product' => $_REQUEST['p'], 'area' => $_REQUEST['a']), $globalOptions);
-}
-else if(isset($globalOptions['DiseaseId']))
-{
-	$globalOptions['url'] = 'e1='.$globalOptions['DiseaseId'];	
-	$tt->generateTrialTracker('entities', array('e1' => $globalOptions['DiseaseId'], 'e2' => ''), $globalOptions);
 }
 else
 {

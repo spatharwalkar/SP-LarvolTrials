@@ -1,4 +1,9 @@
 <?php
+	header('P3P: CP="CAO PSA OUR"');
+	session_start();
+	//connect to Sphinx
+	if(!isset($sphinx) or empty($sphinx)) $sphinx = @mysql_connect("127.0.0.1:9306") or $sphinx=false;
+	
 	require_once('db.php');
 	require_once('intermediary.php');
 	require_once('product_tracker.php');

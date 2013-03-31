@@ -1,4 +1,9 @@
 <?php
+	header('P3P: CP="CAO PSA OUR"');
+	session_start();
+	//connect to Sphinx
+	if(!isset($sphinx) or empty($sphinx)) $sphinx = @mysql_connect("127.0.0.1:9306") or $sphinx=false;
+	
 	require_once('db.php');
 	require_once('intermediary.php');
 	require_once('product_tracker.php');
@@ -65,7 +70,7 @@ display:inline;
 <br/>
 <table width="100%" border="0" class="FoundResultsTb">
 	<tr>
-    	<td width="100%" style="border:0; font-weight:bold; padding-left:5px; color:#FFFFFF; <?php ((isset($e2) || isset($phase)) ? print 'font-size:15px;' : print 'font-size:23px;'); ?> vertical-align:middle;" align="left">
+    	<td width="100%" style="border:0; font-weight:bold; padding-left:5px; color:#FFFFFF; <?php (((isset($e2) && $e2 != NULL) || (isset($phase) && $phase != NULL)) ? print 'font-size:15px;' : print 'font-size:23px;'); ?> vertical-align:middle;" align="left">
         	<table><tr>
         	<?php 
 				if(isset($e1) && $e1 != NULL)
