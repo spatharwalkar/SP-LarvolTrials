@@ -84,7 +84,7 @@
 		
 		$StartSlice = ($globalOptions['page'] - 1) * $RecordsPerPage;
 		$EndSlice = $StartSlice + $RecordsPerPage;
-		$query = "SELECT `id`, `name`, `class`, `display_name` FROM `entities` WHERE `class` = 'Disease' ORDER BY `id` LIMIT $StartSlice, $EndSlice";
+		$query = "SELECT `id`, `name`, `class`, `display_name` FROM `entities` WHERE `class` = 'Disease' ORDER BY `id` LIMIT $StartSlice, $RecordsPerPage";
 		$QueryResult = mysql_query($query);
 		$i=0;
 		while($result = mysql_fetch_assoc($QueryResult))
