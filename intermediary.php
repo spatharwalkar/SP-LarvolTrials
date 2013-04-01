@@ -85,6 +85,13 @@ function DisplayOTT()
 		$globalOptions['pageLocation'] = "trialzilla_ott";
 	}
 	
+	if((isset($_REQUEST['sourcepg']) && $_REQUEST['sourcepg'] == 'TZ') || (isset($_REQUEST['DiseaseId'])))
+	{
+		if(!isset($_REQUEST['list']))	//set default view all trials in case of TZ related OTT.
+		{
+			$_REQUEST['list']=2;
+		}
+	}	
 	//sphinx search option.
 	$globalOptions['sphinxSearch'] = '';
 	//$globalOptions['sphinx_s'] = '';
