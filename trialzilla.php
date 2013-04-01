@@ -76,7 +76,9 @@
 	}
 	else if($_REQUEST['Disease'] != NULL && $_REQUEST['Disease'] != '' && isset($_REQUEST['Disease']))
 	{
-		$ResultArrQuery = "SELECT count(`id`) as totalCnt FROM `entities` WHERE `class` = 'Disease'";
+		//JOINS ARE ADDED IN BELOW QUERIES SO WE WILL GET ONLY THOSE DISEASES WHICH HAS MORE THAN 0 PRODUCTS
+		$ResultArrQuery = "SELECT count(DISTINCT(e.`id`)) as totalCnt FROM `entities` e JOIN entity_relations er ON (er.`parent`=e.`id`) WHERE e.`class` = 'Disease'";
+		
 		$QueryResult = mysql_fetch_assoc(mysql_query($ResultArrQuery));
 		$FoundRecords = $QueryResult['totalCnt'];
 		
@@ -84,7 +86,7 @@
 		
 		$StartSlice = ($globalOptions['page'] - 1) * $RecordsPerPage;
 		$EndSlice = $StartSlice + $RecordsPerPage;
-		$query = "SELECT `id`, `name`, `class`, `display_name` FROM `entities` WHERE `class` = 'Disease' ORDER BY `id` LIMIT $StartSlice, $RecordsPerPage";
+		$query = "SELECT DISTINCT(`id`), `name`, `class`, `display_name` FROM `entities` JOIN entity_relations er ON (er.`parent`=`id`) WHERE `class` = 'Disease' ORDER BY `id` LIMIT $StartSlice, $RecordsPerPage";
 		$QueryResult = mysql_query($query);
 		$i=0;
 		while($result = mysql_fetch_assoc($QueryResult))
