@@ -96,14 +96,14 @@ a:visited {color:#6600bc;}  /* visited link */
 				
 				if(isset($DiseaseId) && $DiseaseId != NULL)
 				{
+					print '<td><a style="color:#FFFFFF; display:inline;" href="trialzilla_moacategory.php?MoaCatId='.$MoaCatId. ((isset($phase) && $phase != NULL) ? '&phase='.$phase.'&TrackerType=MCPT':'').'"><img src="images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
+					print '<td style="vertical-align:top;"><a style="color:#FFFFFF; display:inline; text-decoration:underline;" href="trialzilla_disease.php?DiseaseId='.$DiseaseId.'">'.GetEntityName($DiseaseId).'</a>&nbsp;</td><td style="vertical-align:top;"> >> </td>';
+				}
+				if(isset($DiseaseId) && $DiseaseId != NULL)
+				{
 					print '<td><a style="color:#FFFFFF; display:inline;" href="trialzilla_disease.php?DiseaseId='.$DiseaseId.'"><img src="images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
 				}
 				print '<td style="vertical-align:top;"><a style="color:#FFFFFF; display:inline; text-decoration:underline;" href="trialzilla_moacategory.php?MoaCatId='.$MoaCatId.'">'.$MoaCatName.'</a>&nbsp;</td>';
-				if(isset($DiseaseId) && $DiseaseId != NULL)
-				{
-					print '<td style="vertical-align:top;"> >> </td><td><a style="color:#FFFFFF; display:inline;" href="trialzilla_moacategory.php?MoaCatId='.$MoaCatId. ((isset($phase) && $phase != NULL) ? '&phase='.$phase.'&TrackerType=MCPT':'').'"><img src="images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
-					print '<td style="vertical-align:top;"><a style="color:#FFFFFF; display:inline; text-decoration:underline;" href="trialzilla_disease.php?DiseaseId='.$DiseaseId.'">'.GetEntityName($DiseaseId).'</a>&nbsp;</td>';
-				}
 				if(isset($phase) && $phase != NULL)
 				{
 					print '<td style="vertical-align:top;"> >> </td><td><a style="color:#FFFFFF; display:inline;" href="trialzilla_moacategory.php?MoaCatId='.$MoaCatId . ((isset($DiseaseId) && $DiseaseId != NULL) ? '&DiseaseId='.$DiseaseId.'&TrackerType=DMCPT':'').'"><img src="images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
