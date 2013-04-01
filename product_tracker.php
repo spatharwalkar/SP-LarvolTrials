@@ -270,13 +270,13 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 			$data_matrix[$row]['indlead_phase_4']=0;
 			
 			//// To avoid multiple queries to database, we are quering only one time and retrieveing all data and seprating each type
-			if($TrackerType == 'PTH' || $TrackerType=='DCPT' || $TrackerType=='DMCPT' || $TrackerType=='DMPT')
+			if($TrackerType == 'PTH')
 			{
 				$phase_query = "SELECT DISTINCT dt.`larvol_id`, dt.`is_active`, dt.`phase`, dt.`institution_type` FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) JOIN entity_trials et2 ON (dt.`larvol_id` = et2.`trial`) WHERE et.`entity`='" . $productIds[$row] ."' AND et2.`entity`='" . $entity2Id ."' AND et.`trial` = et2.`trial`";	
 			}
-			else if($TrackerType == 'DPT')
+			else if($TrackerType == 'DPT' || $TrackerType=='DCPT' || $TrackerType=='DMCPT' || $TrackerType=='DMPT')
 			{
-				$phase_query = "SELECT dt.`is_active`, dt.`phase`, dt.`institution_type` FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) JOIN entity_trials et2 ON (dt.`larvol_id` = et2.`trial`) WHERE et.`entity`='" . $productIds[$row] ."' AND et2.`entity`='" . $id ."' AND et.`trial` = et2.`trial`";
+				$phase_query = "SELECT DISTINCT dt.`larvol_id`, dt.`is_active`, dt.`phase`, dt.`institution_type` FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) JOIN entity_mesh_trials emt ON (dt.`larvol_id` = emt.`trial`) WHERE et.`entity`='" . $productIds[$row] ."' AND emt.`entity`='" . (($TrackerType == 'DPT') ? $id : $entity2Id) ."' AND et.`trial` = emt.`trial`";	
 			}
 			else
 			{
@@ -2887,7 +2887,7 @@ function GetProductsFromDisease($DiseaseID)
 	global $db;
 	global $now;
 	$Products = array();
-	$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_trials` et ON(et.`entity` = e.`id`) JOIN `entity_trials` et2 ON(et2.`trial` = et.`trial`) WHERE e.`class` = 'Product' AND et2.`entity`='" . mysql_real_escape_string($DiseaseID) . "'";
+	$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON(e.`id` = er.`child`) WHERE e.`class`='Product' AND er.`parent`='" . mysql_real_escape_string($DiseaseID) . "'";
 	$res = mysql_query($query) or die('Bad SQL query getting products from Disease id in PT');
 	
 	if($res)

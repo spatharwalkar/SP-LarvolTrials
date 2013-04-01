@@ -1353,6 +1353,8 @@ function DownloadMOATrackerReports()
 		{
 			$to = getColspanforExcelExportMOATracker($from, (($j==0)? $inner_columns : $inner_columns));
 			$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':'. $to . $Excel_HMCounter);
+
+
 			$objPHPExcel->getActiveSheet()->SetCellValue($from . $Excel_HMCounter, (($j+1) * $column_interval));
 			$from = $to;
 			$from++;
@@ -1793,6 +1795,7 @@ function DownloadMOATrackerReports()
 			
 			$ExcelChartArray[] = $CurrentExcelChartArray;
 			$CurrentExcelRow++;
+
 			foreach($DataColumns as $colId=>$colName)
 			{
 				$objPHPExcel->getActiveSheet()->setCellValue($colName.$CurrentExcelRow, $CurrentExcelChartArray[$colId]);
@@ -2239,9 +2242,9 @@ function GetProductsFromMOAOrMOACatIdNDisease_MOATracker($DiseaseID, $MOAOrMOACa
 	$Products = array();
 	
 	if($Class == 'MOA')
-		$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entity_trials` et ON(et.`entity` = e.`id`) JOIN `entity_trials` et2 ON(et2.`trial` = et.`trial`) JOIN `entities` e2 ON (e2.`id` = et2.`entity`) WHERE e.`class`='Product' AND e2.`class`='Disease' AND e2.`id`='".$DiseaseID."' AND er.`child`='" . mysql_real_escape_string($MOAOrMOACatId) . "'";
+		$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entity_relations` er2 ON(er2.`child` = e.`id`) WHERE e.`class`='Product' AND er2.`parent`='".$DiseaseID."' AND er.`child`='" . mysql_real_escape_string($MOAOrMOACatId) . "'";
 	else
-		$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entity_relations` er2 ON(er.`child` = er2.`child`) JOIN `entities` e2 ON (e2.`id` = er2.`parent`) JOIN `entity_trials` et ON(et.`entity` = e.`id`) JOIN `entity_trials` et2 ON(et2.`trial` = et.`trial`) JOIN `entities` e3 ON (e3.`id` = et2.`entity`) WHERE e.`class`='Product' AND e2.`class`='MOA_Category' AND e3.`class`='Disease' AND e3.`id`='".$DiseaseID."' AND e2.`id`='" . mysql_real_escape_string($MOAOrMOACatId) . "'";
+		$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entity_relations` er2 ON(er.`child` = er2.`child`) JOIN `entities` e2 ON (e2.`id` = er2.`parent`) JOIN `entity_relations` er3 ON(er3.`child` = e.`id`) WHERE e.`class`='Product' AND e2.`class`='MOA_Category' AND er3.`parent`='".$DiseaseID."' AND e2.`id`='" . mysql_real_escape_string($MOAOrMOACatId) . "'";
 		
 	$res = mysql_query($query) or die('Bad SQL query getting products from moa id / moa category id in moa tracker');
 	
@@ -2265,7 +2268,7 @@ function GetMOAsOrMOACatFromDisease_MOATracker($DiseaseID)
 	$onlymoas = array();
 	
 	//Get MOA Categoryids from Product id
-	$query = "SELECT e1.`id` as id, e2.`id` AS moaid FROM `entities` e1 JOIN `entity_relations` er1 ON(er1.`parent` = e1.`id`) JOIN `entities` e2 ON (er1.`child` = e2.`id`) JOIN `entity_relations` er2 ON(er2.`child` = e2.`id`) WHERE e1.`class` = 'MOA_Category' AND e1.`name` <> 'Other' AND e2.`class` = 'MOA' AND er2.`parent` IN (SELECT DISTINCT e3.`id` FROM `entities` e3 JOIN `entity_trials` etr3 ON(etr3.`entity` = e3.`id`) JOIN `entity_trials` etr4 ON(etr3.`trial` = etr4.`trial`) WHERE e3.`class` = 'Product' AND etr4.`entity`='" . mysql_real_escape_string($DiseaseID) . "')";
+	$query = "SELECT e1.`id` as id, e2.`id` AS moaid FROM `entities` e1 JOIN `entity_relations` er1 ON(er1.`parent` = e1.`id`) JOIN `entities` e2 ON (er1.`child` = e2.`id`) JOIN `entity_relations` er2 ON(er2.`child` = e2.`id`) JOIN `entities` e3 ON(e3.`id` = er2.`parent`) JOIN `entity_relations` er3 ON(er3.`child` = e3.`id`) WHERE e1.`class` = 'MOA_Category' AND e1.`name` <> 'Other' AND e2.`class` = 'MOA' AND e3.`class` = 'Product' AND er3.`parent`='" . mysql_real_escape_string($DiseaseID) . "'";
 	$res = mysql_query($query) or die('Bad SQL query getting MOA Categories from products ids in MT');
 		
 	if($res)
@@ -2280,7 +2283,7 @@ function GetMOAsOrMOACatFromDisease_MOATracker($DiseaseID)
 	}
 		
 	//Get MOA which dont have related category from product id
-	$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON (er.`child` = e.`id`) WHERE e.`class` = 'MOA' AND er.`parent` IN (SELECT DISTINCT e3.`id` FROM `entities` e3 JOIN `entity_trials` etr3 ON(etr3.`entity` = e3.`id`) JOIN `entity_trials` etr4 ON(etr3.`trial` = etr4.`trial`) WHERE e3.`class` = 'Product' AND etr4.`entity`='" . mysql_real_escape_string($DiseaseID) . "') ".((count($onlymoas) > 0) ? "AND e.`id` NOT IN (" . implode(',',$onlymoas) . ")" : "");
+	$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON (er.`child` = e.`id`) JOIN `entities` e2 ON (e2.`id` = er.`parent`) JOIN `entity_relations` er2 ON(er2.`child` = e2.`id`) WHERE e.`class` = 'MOA' AND e2.`class` = 'Product' AND er2.`parent`='" . mysql_real_escape_string($DiseaseID) . "' ".((count($onlymoas) > 0) ? "AND e.`id` NOT IN (" . implode(',',$onlymoas) . ")" : "");
 	$res = mysql_query($query) or die('Bad SQL query getting MOAs from products ids in MT');
 	
 	if($res)

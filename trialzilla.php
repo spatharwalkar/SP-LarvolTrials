@@ -472,7 +472,7 @@ function GetProductsCountFromDisease($DiseaseID)
 	global $db;
 	global $now;
 	$ProductsCount = 0;
-	$query = "SELECT count(DISTINCT (e.`id`)) as proCount FROM `entities` e JOIN `entity_trials` et ON(et.`entity` = e.`id`) JOIN `entity_trials` et2 ON(et2.`trial` = et.`trial`) WHERE e.`class` = 'Product' AND et2.`entity`='" . mysql_real_escape_string($DiseaseID) . "'";
+	$query = "SELECT count(Distinct(e.`id`)) as proCount FROM `entities` e JOIN `entity_relations` er ON(e.`id` = er.`child`) WHERE e.`class`='Product' AND er.`parent`='" . mysql_real_escape_string($DiseaseID) . "'";
 	$res = mysql_query($query) or die('Bad SQL query getting products count from company id in TZ');
 	
 	if($res)
