@@ -1263,8 +1263,10 @@ function criteria_process($text)
 					$line=trim($data2[$m2]);
 					/// If line not belongs to exclusion take line section from "Not" to comma or semi-colon whichever detected first 
 					//[period is not used as we break line at period at starting only]
+					$line=str_replace("e.g.,","e#.#g#.",$line); //Do not allow line break for comma of this string - so replace it with abnormal string
 					if($excl_header != 1)
-					$line = preg_replace('/(^(Not |not |No |no )(.*?)[,|;])/', '$0 \n ', $line);	
+					$line = preg_replace('/(^(Not |not |No |no )(.*?)[,|;])/', '$0 \n ', $line);
+					$line=str_replace("e#.#g#.","e.g.,",$line); //Do not allow line break for this string- replace it back
 					
 					$data3=explode('\n', $line);
 					for($m3=0;$m3< count($data3); $m3++)	/// data for loop -- third level
