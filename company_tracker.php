@@ -95,91 +95,87 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page=1)
 		$Report_DisplayName = $header['name'];
 		$CompanyIds = array_filter(array_unique(GetCompaniesFromDisease_CompanyTracker($header['id'])));
 		$id=$header['id'];
-	}
 	
-	$CompanyQuery = "SELECT e2.`id` AS CompId, e2.`name` AS CompName,e.`id` AS ProdId, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt JOIN `entities` e ON((rpt.`entity1`=e.`id` AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entities` e2 ON(e2.`id` = er.`child`) WHERE (rpt.`count_total` > 0) AND (rpt.`entity1` = '". $id ."' OR rpt.`entity2` = '". $id ."') AND e2.`id` IN ('" . implode("','",$CompanyIds) . "') AND e2.`class`='Institution'";	//SELECTING DISTINCT PHASES SO WE WILL HAVE MIN ROWS TO PROCESS
-	$CompanyQueryResult = mysql_query($CompanyQuery) or die(mysql_error());
-	
-	$key = 0;	
-	while($result = mysql_fetch_array($CompanyQueryResult))
-	{
-		$key = $CompanyId = $result['CompId'];
-		if(isset($CompanyId) && $CompanyId != NULL)
+		$CompanyQuery = "SELECT e2.`id` AS CompId, e2.`name` AS CompName,e.`id` AS ProdId, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt JOIN `entities` e ON((rpt.`entity1`=e.`id` AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entities` e2 ON(e2.`id` = er.`child`) WHERE (rpt.`count_total` > 0) AND (rpt.`entity1` = '". $id ."' OR rpt.`entity2` = '". $id ."') AND e2.`id` IN ('" . implode("','",$CompanyIds) . "') AND e2.`class`='Institution'";	//SELECTING DISTINCT PHASES SO WE WILL HAVE MIN ROWS TO PROCESS
+		$CompanyQueryResult = mysql_query($CompanyQuery) or die(mysql_error());
+		
+		$key = 0;	
+		while($result = mysql_fetch_array($CompanyQueryResult))
 		{
-			if($data_matrix[$key]['RowHeader'] == '' || $data_matrix[$key]['RowHeader'] == NULL)
+			$key = $CompanyId = $result['CompId'];
+			if(isset($CompanyId) && $CompanyId != NULL)
 			{
-				/// Fill up all data in Data Matrix only, so we can sort all data at one place
-				$data_matrix[$key]['RowHeader'] = $result['CompName'];
-				$data_matrix[$key]['ID'] = $result['CompId'];
-				
-				$data_matrix[$key]['HeaderLink'] = trim(urlPath()) .'trialzilla_company.php?CompanyId=' . $data_matrix[$key]['ID'];
+				if($data_matrix[$key]['RowHeader'] == '' || $data_matrix[$key]['RowHeader'] == NULL)
+				{
+					/// Fill up all data in Data Matrix only, so we can sort all data at one place
+					$data_matrix[$key]['RowHeader'] = $result['CompName'];
+					$data_matrix[$key]['ID'] = $result['CompId'];
 					
-				if($TrackerType == 'DCT')
-					$data_matrix[$key]['ColumnsLink'] = trim(urlPath()) .'trialzilla_company.php?CompanyId=' . $data_matrix[$key]['ID'] . '&DiseaseId=' . $id . '&TrackerType=DCPT';
-				else
-					$data_matrix[$key]['ColumnsLink'] = trim(urlPath()) .'trialzilla_company.php?CompanyId=' . $data_matrix[$key]['ID'] . '&TrackerType=CPT';			
-			
-				///// Initialize data
-				$data_matrix[$key]['phase_na']=0;
-				$data_matrix[$key]['phase_0']=0;
-				$data_matrix[$key]['phase_1']=0;
-				$data_matrix[$key]['phase_2']=0;
-				$data_matrix[$key]['phase_3']=0;
-				$data_matrix[$key]['phase_4']=0;
-			
-				$data_matrix[$key]['TotalCount'] = 0;
-				$data_matrix[$key]['productIds'] = array();	
-				$data_matrix[$key]['ProdExistance'] = array();		
-			}
+					$data_matrix[$key]['HeaderLink'] = trim(urlPath()) .'trialzilla_company.php?CompanyId=' . $data_matrix[$key]['ID'];
+						
+					$data_matrix[$key]['ColumnsLink'] = trim(urlPath()) .'trialzilla_company.php?CompanyId=' . $data_matrix[$key]['ID'] . '&DiseaseId=' . $id . '&TrackerType=DCPT';			
 				
-			if((($result['entity1'] == $id && !in_array($result['entity2'],$data_matrix[$key]['ProdExistance'])) || ($result['entity2'] == $id && !in_array($result['entity1'],$data_matrix[$key]['ProdExistance']))))	//Avoid duplicates like (1,2) and (2,1) type
-			{
-				if($result['entity1'] == $id)
-					$data_matrix[$key]['ProdExistance'][] = $result['entity2'];
-				else
-					$data_matrix[$key]['ProdExistance'][] = $result['entity1'];
-						
-				if($result['phase'] == 'N/A' || $result['phase'] == '' || $result['phase'] === NULL)
-				{
-					$CurrentPhasePNTR = 0;
-				}
-				else if($result['phase'] == '0')
-				{
-					$CurrentPhasePNTR = 1;
-				}
-				else if($result['phase'] == '1' || $result['phase'] == '0/1' || $result['phase'] == '1a' 
-				|| $result['phase'] == '1b' || $result['phase'] == '1a/1b' || $result['phase'] == '1c')
-				{
-					$CurrentPhasePNTR = 2;
-				}
-				else if($result['phase'] == '2' || $result['phase'] == '1/2' || $result['phase'] == '1b/2' 
-				|| $result['phase'] == '1b/2a' || $result['phase'] == '2a' || $result['phase'] == '2a/2b' 
-				|| $result['phase'] == '2a/b' || $result['phase'] == '2b')
-				{
-					$CurrentPhasePNTR = 3;
-				}
-				else if($result['phase'] == '3' || $result['phase'] == '2/3' || $result['phase'] == '2b/3' 
-				|| $result['phase'] == '3a' || $result['phase'] == '3b')
-				{
-					$CurrentPhasePNTR = 4;
-				}	
-				else if($result['phase'] == '4' || $result['phase'] == '3/4' || $result['phase'] == '3b/4')
-				{
-					$CurrentPhasePNTR = 5;	
-				}
-						
-				$MAXPhasePNTR = $CurrentPhasePNTR;
-				$data_matrix[$key]['phase_'.$PhaseArray[$MAXPhasePNTR]]++; //INCREASE COUNTER
-						
-				$data_matrix[$key]['productIds'][] = $result['ProdId'];
+					///// Initialize data
+					$data_matrix[$key]['phase_na']=0;
+					$data_matrix[$key]['phase_0']=0;
+					$data_matrix[$key]['phase_1']=0;
+					$data_matrix[$key]['phase_2']=0;
+					$data_matrix[$key]['phase_3']=0;
+					$data_matrix[$key]['phase_4']=0;
 				
-				$data_matrix[$key]['TotalCount'] = count($data_matrix[$key]['productIds']);
-				if($max_count < $data_matrix[$key]['TotalCount'])
-					$max_count = $data_matrix[$key]['TotalCount'];
-			}	//End of if Product Existsnace										
-		} //END OF IF - COMPANY ID NULL OR NOT			
-	}	//END OF While - Fetch data
-	
+					$data_matrix[$key]['TotalCount'] = 0;
+					$data_matrix[$key]['productIds'] = array();	
+					$data_matrix[$key]['ProdExistance'] = array();		
+				}
+					
+				if((($result['entity1'] == $id && !in_array($result['entity2'],$data_matrix[$key]['ProdExistance'])) || ($result['entity2'] == $id && !in_array($result['entity1'],$data_matrix[$key]['ProdExistance']))))	//Avoid duplicates like (1,2) and (2,1) type
+				{
+					if($result['entity1'] == $id)
+						$data_matrix[$key]['ProdExistance'][] = $result['entity2'];
+					else
+						$data_matrix[$key]['ProdExistance'][] = $result['entity1'];
+							
+					if($result['phase'] == 'N/A' || $result['phase'] == '' || $result['phase'] === NULL)
+					{
+						$CurrentPhasePNTR = 0;
+					}
+					else if($result['phase'] == '0')
+					{
+						$CurrentPhasePNTR = 1;
+					}
+					else if($result['phase'] == '1' || $result['phase'] == '0/1' || $result['phase'] == '1a' 
+					|| $result['phase'] == '1b' || $result['phase'] == '1a/1b' || $result['phase'] == '1c')
+					{
+						$CurrentPhasePNTR = 2;
+					}
+					else if($result['phase'] == '2' || $result['phase'] == '1/2' || $result['phase'] == '1b/2' 
+					|| $result['phase'] == '1b/2a' || $result['phase'] == '2a' || $result['phase'] == '2a/2b' 
+					|| $result['phase'] == '2a/b' || $result['phase'] == '2b')
+					{
+						$CurrentPhasePNTR = 3;
+					}
+					else if($result['phase'] == '3' || $result['phase'] == '2/3' || $result['phase'] == '2b/3' 
+					|| $result['phase'] == '3a' || $result['phase'] == '3b')
+					{
+						$CurrentPhasePNTR = 4;
+					}	
+					else if($result['phase'] == '4' || $result['phase'] == '3/4' || $result['phase'] == '3b/4')
+					{
+						$CurrentPhasePNTR = 5;	
+					}
+							
+					$MAXPhasePNTR = $CurrentPhasePNTR;
+					$data_matrix[$key]['phase_'.$PhaseArray[$MAXPhasePNTR]]++; //INCREASE COUNTER
+							
+					$data_matrix[$key]['productIds'][] = $result['ProdId'];
+					
+					$data_matrix[$key]['TotalCount'] = count($data_matrix[$key]['productIds']);
+					if($max_count < $data_matrix[$key]['TotalCount'])
+						$max_count = $data_matrix[$key]['TotalCount'];
+				}	//End of if Product Existsnace										
+			} //END OF IF - COMPANY ID NULL OR NOT			
+		}	//END OF While - Fetch data
+	}//End of DCT	
 	/// This function willl Sort multidimensional array according to Total count
 	$data_matrix = sortTwoDimensionArrayByKeyCompanyTracker($data_matrix,'TotalCount');
 	
