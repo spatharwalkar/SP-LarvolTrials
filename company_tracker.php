@@ -97,145 +97,88 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page=1)
 		$id=$header['id'];
 	}
 	
-	$CompanyQueryResult =  mysql_query("SELECT DISTINCT(`id`), `name` FROM `entities` WHERE `class`='Institution' AND id IN ('" . implode("','",$CompanyIds) . "') ");
+	$CompanyQuery = "SELECT e2.`id` AS CompId, e2.`name` AS CompName,e.`id` AS ProdId, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt JOIN `entities` e ON((rpt.`entity1`=e.`id` AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entities` e2 ON(e2.`id` = er.`child`) WHERE (rpt.`count_total` > 0) AND (rpt.`entity1` = '". $id ."' OR rpt.`entity2` = '". $id ."') AND e2.`id` IN ('" . implode("','",$CompanyIds) . "') AND e2.`class`='Institution'";	//SELECTING DISTINCT PHASES SO WE WILL HAVE MIN ROWS TO PROCESS
+	$CompanyQueryResult = mysql_query($CompanyQuery) or die(mysql_error());
+	
 	$key = 0;	
 	while($result = mysql_fetch_array($CompanyQueryResult))
 	{
-		$CompanyId = $result['id'];
+		$key = $CompanyId = $result['CompId'];
 		if(isset($CompanyId) && $CompanyId != NULL)
 		{
-			/// Fill up all data in Data Matrix only, so we can sort all data at one place
-			$data_matrix[$key]['RowHeader'] = $result['name'];
-			$data_matrix[$key]['ID'] = $result['id'];
-			
-			$data_matrix[$key]['HeaderLink'] = trim(urlPath()) .'trialzilla_company.php?CompanyId=' . $data_matrix[$key]['ID'];
-				
-			if($TrackerType == 'DCT')
-				$data_matrix[$key]['ColumnsLink'] = trim(urlPath()) .'trialzilla_company.php?CompanyId=' . $data_matrix[$key]['ID'] . '&DiseaseId=' . $id . '&TrackerType=DCPT';
-			else
-				$data_matrix[$key]['ColumnsLink'] = trim(urlPath()) .'trialzilla_company.php?CompanyId=' . $data_matrix[$key]['ID'] . '&TrackerType=CPT';			
-			
-			///// Initialize data
-			$data_matrix[$key]['phase_na']=0;
-			$data_matrix[$key]['phase_0']=0;
-			$data_matrix[$key]['phase_1']=0;
-			$data_matrix[$key]['phase_2']=0;
-			$data_matrix[$key]['phase_3']=0;
-			$data_matrix[$key]['phase_4']=0;
-			
-			$data_matrix[$key]['TotalCount'] = 0;
-			$productIds = array();			
-			
-			if($TrackerType == 'DCT')
-				$productIds = GetProductsFromCompanyNDisease_CompanyTracker($id, $CompanyId);
-			else
-				$productIds = GetProductsFromCompany_CompanyTracker($CompanyId);
-			
-			$data_matrix[$key]['TotalCount'] = count($productIds);
-			if($max_count < $data_matrix[$key]['TotalCount'])
-				$max_count = $data_matrix[$key]['TotalCount'];
-				
-			if($data_matrix[$key]['TotalCount'] > 0)
+			if($data_matrix[$key]['RowHeader'] == '' || $data_matrix[$key]['RowHeader'] == NULL)
 			{
+				/// Fill up all data in Data Matrix only, so we can sort all data at one place
+				$data_matrix[$key]['RowHeader'] = $result['CompName'];
+				$data_matrix[$key]['ID'] = $result['CompId'];
+				
+				$data_matrix[$key]['HeaderLink'] = trim(urlPath()) .'trialzilla_company.php?CompanyId=' . $data_matrix[$key]['ID'];
+					
 				if($TrackerType == 'DCT')
-				{
-					$ProdExistance = array();
-					$phase_query = "SELECT rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt WHERE (rpt.`count_total` > 0) AND ((rpt.`entity1` = '". $id ."' AND rpt.`entity2` IN ('". implode("','", $productIds) ."')) OR (rpt.`entity1` IN ('". implode("','", $productIds) ."') AND rpt.`entity2` = '". $id ."'))";	//SELECTING DISTINCT PHASES SO WE WILL HAVE MIN ROWS TO PROCESS
-				
-					$phase_res = mysql_query($phase_query) or die(mysql_error());
-					while($phase_row=mysql_fetch_array($phase_res))
-					{
-						if((($phase_row['entity1'] == $id && !in_array($phase_row['entity2'],$ProdExistance)) || ($phase_row['entity2'] == $id && !in_array($phase_row['entity1'],$ProdExistance))))	//Avoid duplicates like (1,2) and (2,1) type
-						{
-							if($phase_row['entity1'] == $id)
-							$ProdExistance[] = $phase_row['entity2'];
-							else
-							$ProdExistance[] = $phase_row['entity1'];
-							
-							if($phase_row['phase'] == 'N/A' || $phase_row['phase'] == '' || $phase_row['phase'] === NULL)
-							{
-								$CurrentPhasePNTR = 0;
-							}
-							else if($phase_row['phase'] == '0')
-							{
-								$CurrentPhasePNTR = 1;
-							}
-							else if($phase_row['phase'] == '1' || $phase_row['phase'] == '0/1' || $phase_row['phase'] == '1a' 
-							|| $phase_row['phase'] == '1b' || $phase_row['phase'] == '1a/1b' || $phase_row['phase'] == '1c')
-							{
-								$CurrentPhasePNTR = 2;
-							}
-							else if($phase_row['phase'] == '2' || $phase_row['phase'] == '1/2' || $phase_row['phase'] == '1b/2' 
-							|| $phase_row['phase'] == '1b/2a' || $phase_row['phase'] == '2a' || $phase_row['phase'] == '2a/2b' 
-							|| $phase_row['phase'] == '2a/b' || $phase_row['phase'] == '2b')
-							{
-								$CurrentPhasePNTR = 3;
-							}
-							else if($phase_row['phase'] == '3' || $phase_row['phase'] == '2/3' || $phase_row['phase'] == '2b/3' 
-							|| $phase_row['phase'] == '3a' || $phase_row['phase'] == '3b')
-							{
-								$CurrentPhasePNTR = 4;
-							}	
-							else if($phase_row['phase'] == '4' || $phase_row['phase'] == '3/4' || $phase_row['phase'] == '3b/4')
-							{
-								$CurrentPhasePNTR = 5;	
-							}
-							
-							$MAXPhasePNTR = $CurrentPhasePNTR;
-							$data_matrix[$key]['phase_'.$PhaseArray[$MAXPhasePNTR]]++; //INCREASE COUNTER	
-						}	
-					}									
-				}
+					$data_matrix[$key]['ColumnsLink'] = trim(urlPath()) .'trialzilla_company.php?CompanyId=' . $data_matrix[$key]['ID'] . '&DiseaseId=' . $id . '&TrackerType=DCPT';
 				else
-				{
-					foreach($productIds as $proId)
-					{
-						$MAXPhasePNTR = 0;
-						$phase_query = "SELECT distinct (dt.`phase`) FROM `data_trials` dt JOIN  `entity_trials` et ON (dt.`larvol_id` = et.`trial`) WHERE et.`entity` = '". $proId ."'";	//SELECTING DISTINCT PHASES SO WE WILL HAVE MIN ROWS TO PROCESS
+					$data_matrix[$key]['ColumnsLink'] = trim(urlPath()) .'trialzilla_company.php?CompanyId=' . $data_matrix[$key]['ID'] . '&TrackerType=CPT';			
+			
+				///// Initialize data
+				$data_matrix[$key]['phase_na']=0;
+				$data_matrix[$key]['phase_0']=0;
+				$data_matrix[$key]['phase_1']=0;
+				$data_matrix[$key]['phase_2']=0;
+				$data_matrix[$key]['phase_3']=0;
+				$data_matrix[$key]['phase_4']=0;
+			
+				$data_matrix[$key]['TotalCount'] = 0;
+				$data_matrix[$key]['productIds'] = array();	
+				$data_matrix[$key]['ProdExistance'] = array();		
+			}
 				
-						$phase_res = mysql_query($phase_query) or die(mysql_error());
-						while($phase_row=mysql_fetch_array($phase_res))
-						{
-							if($phase_row['phase'] == 'N/A' || $phase_row['phase'] == '' || $phase_row['phase'] === NULL)
-							{
-								$CurrentPhasePNTR = 0;
-							}
-							else if($phase_row['phase'] == '0')
-							{
-								$CurrentPhasePNTR = 1;
-							}
-							else if($phase_row['phase'] == '1' || $phase_row['phase'] == '0/1' || $phase_row['phase'] == '1a' 
-							|| $phase_row['phase'] == '1b' || $phase_row['phase'] == '1a/1b' || $phase_row['phase'] == '1c')
-							{
-								$CurrentPhasePNTR = 2;
-							}
-							else if($phase_row['phase'] == '2' || $phase_row['phase'] == '1/2' || $phase_row['phase'] == '1b/2' 
-							|| $phase_row['phase'] == '1b/2a' || $phase_row['phase'] == '2a' || $phase_row['phase'] == '2a/2b' 
-							|| $phase_row['phase'] == '2a/b' || $phase_row['phase'] == '2b')
-							{
-								$CurrentPhasePNTR = 3;
-							}
-							else if($phase_row['phase'] == '3' || $phase_row['phase'] == '2/3' || $phase_row['phase'] == '2b/3' 
-							|| $phase_row['phase'] == '3a' || $phase_row['phase'] == '3b')
-							{
-								$CurrentPhasePNTR = 4;
-							}	
-							else if($phase_row['phase'] == '4' || $phase_row['phase'] == '3/4' || $phase_row['phase'] == '3b/4')
-							{
-								$CurrentPhasePNTR = 5;	
-							}
-							
-							if($MAXPhasePNTR < $CurrentPhasePNTR)
-								$MAXPhasePNTR = $CurrentPhasePNTR;
-							
-						}	//END OF WHILE FETCH TRIALS FOR GETTTING PHASE
-						$data_matrix[$key]['phase_'.$PhaseArray[$MAXPhasePNTR]]++; //INCREASE COUNTER					
-					}	//FOREACH OF PRODUCT
-				}	//END OF ELSE - FOR DCT WE USE HEATMAP TABLE TO REDUCE PROCESSING	
-			}	//END OF IF TOTAL COUNT > 0
-			$key++;
+			if((($result['entity1'] == $id && !in_array($result['entity2'],$data_matrix[$key]['ProdExistance'])) || ($result['entity2'] == $id && !in_array($result['entity1'],$data_matrix[$key]['ProdExistance']))))	//Avoid duplicates like (1,2) and (2,1) type
+			{
+				if($result['entity1'] == $id)
+					$data_matrix[$key]['ProdExistance'][] = $result['entity2'];
+				else
+					$data_matrix[$key]['ProdExistance'][] = $result['entity1'];
+						
+				if($result['phase'] == 'N/A' || $result['phase'] == '' || $result['phase'] === NULL)
+				{
+					$CurrentPhasePNTR = 0;
+				}
+				else if($result['phase'] == '0')
+				{
+					$CurrentPhasePNTR = 1;
+				}
+				else if($result['phase'] == '1' || $result['phase'] == '0/1' || $result['phase'] == '1a' 
+				|| $result['phase'] == '1b' || $result['phase'] == '1a/1b' || $result['phase'] == '1c')
+				{
+					$CurrentPhasePNTR = 2;
+				}
+				else if($result['phase'] == '2' || $result['phase'] == '1/2' || $result['phase'] == '1b/2' 
+				|| $result['phase'] == '1b/2a' || $result['phase'] == '2a' || $result['phase'] == '2a/2b' 
+				|| $result['phase'] == '2a/b' || $result['phase'] == '2b')
+				{
+					$CurrentPhasePNTR = 3;
+				}
+				else if($result['phase'] == '3' || $result['phase'] == '2/3' || $result['phase'] == '2b/3' 
+				|| $result['phase'] == '3a' || $result['phase'] == '3b')
+				{
+					$CurrentPhasePNTR = 4;
+				}	
+				else if($result['phase'] == '4' || $result['phase'] == '3/4' || $result['phase'] == '3b/4')
+				{
+					$CurrentPhasePNTR = 5;	
+				}
+						
+				$MAXPhasePNTR = $CurrentPhasePNTR;
+				$data_matrix[$key]['phase_'.$PhaseArray[$MAXPhasePNTR]]++; //INCREASE COUNTER
+						
+				$data_matrix[$key]['productIds'][] = $result['ProdId'];
+				
+				$data_matrix[$key]['TotalCount'] = count($data_matrix[$key]['productIds']);
+				if($max_count < $data_matrix[$key]['TotalCount'])
+					$max_count = $data_matrix[$key]['TotalCount'];
+			}	//End of if Product Existsnace										
 		} //END OF IF - COMPANY ID NULL OR NOT			
-	}	//END OF FOREACH - COMPANY ID ARRAY
+	}	//END OF While - Fetch data
 	
 	/// This function willl Sort multidimensional array according to Total count
 	$data_matrix = sortTwoDimensionArrayByKeyCompanyTracker($data_matrix,'TotalCount');
@@ -2197,46 +2140,6 @@ function sortTwoDimensionArrayByKeyCompanyTracker($arr, $arrKey, $sortOrder=SORT
 	return $arr;
 }
 
-/* Function to get Product Id's from Institution id */
-function GetProductsFromCompany_CompanyTracker($companyID)
-{
-	global $db;
-	global $now;
-	$Products = array();
-	$query = "SELECT DISTINCT et.`id` FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`) WHERE et.`class`='Product' AND er.`child`='" . mysql_real_escape_string($companyID) . "'";
-	
-	$res = mysql_query($query) or die('Bad SQL query getting products from institution id in company tracker');
-	
-	if($res)
-	{
-		while($row = mysql_fetch_array($res))
-		{
-			$Products[] = $row['id'];
-		}
-	}
-	return array_filter(array_unique($Products));
-}
-
-/* Function to get Product Id's from Institution id and Disease ID */
-function GetProductsFromCompanyNDisease_CompanyTracker($DiseaseID, $companyID)
-{
-	global $db;
-	global $now;
-	$Products = array();
-	$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entity_relations` er2 ON(er2.`child` = e.`id`) WHERE e.`class`='Product' AND er2.`parent`='".$DiseaseID."' AND er.`child`='" . mysql_real_escape_string($companyID) . "'";
-	
-	$res = mysql_query($query) or die('Bad SQL query getting products from institution id in company tracker');
-	
-	if($res)
-	{
-		while($row = mysql_fetch_array($res))
-		{
-			$Products[] = $row['id'];
-		}
-	}
-	return array_filter(array_unique($Products));
-}
-
 //Get Companies from Disease
 function GetCompaniesFromDisease_CompanyTracker($DiseaseID)
 {
@@ -2245,7 +2148,7 @@ function GetCompaniesFromDisease_CompanyTracker($DiseaseID)
 	$Products = array();
 	$Companies = array();
 	
-	$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON(er.`child` = e.`id`) JOIN `entities` e2 ON(e2.`id` = er.`parent`) JOIN `entity_relations` er2 ON(er2.`child` = e2.`id`) WHERE e.`class` = 'Institution' AND e2.`class` = 'Product' AND er2.`parent`='" . mysql_real_escape_string($DiseaseID) . "'";
+	$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON(er.`child` = e.`id`) JOIN `entities` e2 ON(e2.`id` = er.`parent`) JOIN `entity_relations` er2 ON(er2.`child` = e2.`id`) WHERE e.`class` = 'Institution' AND e2.`class` = 'Product' AND er2.`parent`='" . mysql_real_escape_string($DiseaseID) . "'";	
 	$res = mysql_query($query) or die('Bad SQL query getting companies from products ids in CT');
 	
 	if($res)
