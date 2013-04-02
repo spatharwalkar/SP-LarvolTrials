@@ -75,6 +75,7 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page=1)
 	
 	//IMP DATA
 	$CompanyIds = array();
+	$NewCompanyIds = array();
 	$data_matrix=array();
 	
 	///// No of columns in our graph
@@ -110,6 +111,7 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page=1)
 					/// Fill up all data in Data Matrix only, so we can sort all data at one place
 					$data_matrix[$key]['RowHeader'] = $result['CompName'];
 					$data_matrix[$key]['ID'] = $result['CompId'];
+					$NewCompanyIds[] = $result['CompId'];
 					
 					$data_matrix[$key]['HeaderLink'] = trim(urlPath()) .'trialzilla_company.php?CompanyId=' . $data_matrix[$key]['ID'];
 						
@@ -189,7 +191,7 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page=1)
 		$StartSlice = ($page - 1) * $RecordsPerPage;
 		$EndSlice = $StartSlice + $RecordsPerPage;
 		$data_matrix = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
-		$CompanyIds = array_slice($CompanyIds, $StartSlice, $RecordsPerPage);
+		$NewCompanyIds = array_slice($NewCompanyIds, $StartSlice, $RecordsPerPage);
 	}
 	/////////PAGING DATA ENDS
 	
@@ -206,7 +208,7 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page=1)
 	$Return['report_name'] = $Report_DisplayName;
 	$Return['id'] = $id;
 	$Return['columns'] = $columns;
-	$Return['IdsArray'] = $CompanyIds;
+	$Return['IdsArray'] = $NewCompanyIds;
 	$Return['inner_columns'] = $inner_columns;
 	$Return['inner_width'] = $inner_width;
 	$Return['column_width'] = $column_width;

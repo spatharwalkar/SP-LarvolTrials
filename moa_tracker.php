@@ -75,6 +75,7 @@ function DataGeneratorForMOATracker($id, $TrackerType, $page=1)
 	
 	//IMP DATA
 	$MOAOrMOACatIds = array();
+	$NewMOAOrMOACatIds = array();
 	$data_matrix=array();
 	
 	///// No of columns in our graph
@@ -118,6 +119,7 @@ function DataGeneratorForMOATracker($id, $TrackerType, $page=1)
 						$data_matrix[$key]['RowHeader'] = $result['name'];
 						$data_matrix[$key]['ID'] = $result['id'];
 						$data_matrix[$key]['class'] = $result['class'];
+						$NewMOAOrMOACatIds[] = $result['id'];
 					
 						if($data_matrix[$key]['class'] == 'MOA')
 						{
@@ -211,7 +213,7 @@ function DataGeneratorForMOATracker($id, $TrackerType, $page=1)
 		$StartSlice = ($page - 1) * $RecordsPerPage;
 		$EndSlice = $StartSlice + $RecordsPerPage;
 		$data_matrix = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
-		$MOAOrMOACatIds = array_slice($MOAOrMOACatIds, $StartSlice, $RecordsPerPage);
+		$NewMOAOrMOACatIds = array_slice($NewMOAOrMOACatIds, $StartSlice, $RecordsPerPage);
 	}
 	/////////PAGING DATA ENDS
 	
@@ -228,7 +230,7 @@ function DataGeneratorForMOATracker($id, $TrackerType, $page=1)
 	$Return['report_name'] = $Report_DisplayName;
 	$Return['id'] = $id;
 	$Return['columns'] = $columns;
-	$Return['IdsArray'] = $MOAOrMOACatIds;
+	$Return['IdsArray'] = $NewMOAOrMOACatIds;
 	$Return['inner_columns'] = $inner_columns;
 	$Return['inner_width'] = $inner_width;
 	$Return['column_width'] = $column_width;
