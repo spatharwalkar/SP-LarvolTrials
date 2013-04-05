@@ -12,13 +12,13 @@
 <input type="submit" name="Search" title="Search" value="Search" style="vertical-align:bottom;" class="SearchBttn1" />
 </td>
 <td style="vertical-align:middle; padding-left:10px;padding-top:15px;" align="left">
-<a href="trialzilla.php?Disease=true" style="text-decoration:underline; font-weight:bold; font-size:15px;">List Diseases</a>
+&nbsp;
 </td>
 </tr>
 <tr>
 <td width="300px">&nbsp;</td>
 <td width="600px" style="font-weight:bold; padding-left:0px;" align="center">
-<font class="searchTypes" style="color:#666666;">Search for Company / Product / MOA</font>
+<font class="searchTypes" style="color:#666666;"><a href="trialzilla.php?class=Institution" style="display:inline; text-decoration:underline;">Companies</a> / <a href="trialzilla.php?class=Product" style="display:inline; text-decoration:underline;">Products</a> / <a href="trialzilla.php?class=MOA" style="display:inline; text-decoration:underline;">MOAs</a> / <a href="trialzilla.php?class=Disease" style="display:inline; text-decoration:underline;">Diseases</a></font>
 </td>
 </tr>
 </table>

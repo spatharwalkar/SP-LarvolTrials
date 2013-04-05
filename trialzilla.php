@@ -74,20 +74,20 @@
 			}
 		}
 	}
-	else if($_REQUEST['Disease'] != NULL && $_REQUEST['Disease'] != '' && isset($_REQUEST['Disease']))
+	else if($_REQUEST['class'] != NULL && $_REQUEST['class'] != '' && isset($_REQUEST['class']))
 	{
-		//JOINS ARE ADDED IN BELOW QUERIES SO WE WILL GET ONLY THOSE DISEASES WHICH HAS MORE THAN 0 PRODUCTS
-		$ResultArrQuery = "SELECT count(DISTINCT(e.`id`)) as totalCnt FROM `entities` e JOIN entity_relations er ON (er.`parent`=e.`id`) WHERE e.`class` = 'Disease'";
+		$globalOptions['class'] = $_REQUEST['class'];
+		$ClassFlg = true;
 		
-		$QueryResult = mysql_fetch_assoc(mysql_query($ResultArrQuery));
-		$FoundRecords = $QueryResult['totalCnt'];
+		if($globalOptions['class'] == 'MOA')
+		$ResultArrQuery = "SELECT DISTINCT(`id`), `name`, `class`, `display_name` FROM `entities` WHERE `class` = 'MOA_Category' AND `name` <> 'Other'";
+		else if($globalOptions['class'] == 'Disease')
+		$ResultArrQuery = "SELECT DISTINCT(e.`id`), e.`name`, e.`class`, e.`display_name` FROM `entities` e JOIN `entity_relations` er ON(er.`parent`=e.`id`) JOIN `entities` e2 ON(e2.`id`=er.`child`) WHERE e.`class` = 'Disease' AND e2.`class` = 'Product'";
+		else
+		$ResultArrQuery = "SELECT DISTINCT(`id`), `name`, `class`, `display_name` FROM `entities` WHERE `class` = '".$globalOptions['class']."'";
 		
-		$totalPages = ceil($FoundRecords / $RecordsPerPage);
+		$QueryResult = mysql_query($ResultArrQuery);
 		
-		$StartSlice = ($globalOptions['page'] - 1) * $RecordsPerPage;
-		$EndSlice = $StartSlice + $RecordsPerPage;
-		$query = "SELECT DISTINCT(`id`), `name`, `class`, `display_name` FROM `entities` JOIN entity_relations er ON (er.`parent`=`id`) WHERE `class` = 'Disease' ORDER BY `id` LIMIT $StartSlice, $RecordsPerPage";
-		$QueryResult = mysql_query($query);
 		$i=0;
 		while($result = mysql_fetch_assoc($QueryResult))
 		{
@@ -96,12 +96,42 @@
 			$DataArray[$i]['name'] = $result['name'];
 			$DataArray[$i]['id'] = $result['id'];
 			$DataArray[$i]['type'] = $result['class'];
-			if($result['display_name'] != NULL && $result['display_name'] != '')
+			if($result['display_name'] != NULL && $result['display_name'] != '' && $DataArray[$index]['type'] != 'Product')
 				$DataArray[$i]['name'] = $result['display_name'];
 		}
-		$CurrentPageResultArr = $DataArray;
-		$DiseaseFlg = true;
-		$globalOptions['Disease'] = 'true';
+		
+		if($globalOptions['class'] == 'MOA')	//IN CASE OF MOA  - GET MOA ID AS WELL WHO DOES NOT HAVE CATEGORY OR has Other Category
+		{
+			$ResultArrQuery = "SELECT DISTINCT(e.`id`), e.`name`, e.`class`, e.`display_name` FROM `entities` e LEFT OUTER JOIN `entity_relations` er ON(e.`id`=er.`child`) LEFT OUTER JOIN `entities` e2 ON(e2.`id`=er.`parent`) WHERE e.`class`='MOA' AND ((e2.`name` = 'Other' AND e2.`class` = 'MOA_Category') OR er.`parent` IS NULL)";
+		
+			$QueryResult = mysql_query($ResultArrQuery);
+		
+			while($result = mysql_fetch_assoc($QueryResult))
+			{
+				$i++;
+				$DataArray[$i]['index'] = $i;
+				$DataArray[$i]['name'] = $result['name'];
+				$DataArray[$i]['id'] = $result['id'];
+				$DataArray[$i]['type'] = $result['class'];
+				if($result['display_name'] != NULL && $result['display_name'] != '')
+					$DataArray[$i]['name'] = $result['display_name'];
+			}
+		}
+		
+		$FoundRecords = count($DataArray);
+		$totalPages = ceil($FoundRecords / $RecordsPerPage);
+		$StartSlice = ($globalOptions['page'] - 1) * $RecordsPerPage;
+		$EndSlice = $StartSlice + $RecordsPerPage;
+		
+		$DataArray = sortTwoDimensionArrayByKey($DataArray, 'name');	//SORT ARRAY USING PHP AS SOME RECORDS MAY NOT HAVE DISPLAY NAME
+			
+		$CurrentPageResultArr = array_slice($DataArray, $StartSlice, $RecordsPerPage);
+		$DataArray = $CurrentPageResultArr;
+		
+		if($globalOptions['class'] == 'Institution')
+			$globalOptions['classType'] = 'Company';
+		else
+			$globalOptions['classType'] = $globalOptions['class'];
 	}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -260,8 +290,8 @@ a:visited {color:#6600bc;}  /* visited link */
 						$showResult .= ' of about '. $FoundRecords;
 					}
 					
-					if($DiseaseFlg)
-					$showResult .= ' for disease';
+					if($ClassFlg)
+					$showResult .= ' for "'. $globalOptions['classType'] .'"';
 					else
 					$showResult .= ' for "'. $globalOptions['TzSearch'] .'"';
 					print $showResult;
@@ -316,23 +346,23 @@ a:visited {color:#6600bc;}  /* visited link */
 	}
 ?>
 <?php
-if($FoundRecords == 0 && (($globalOptions['TzSearch'] != '' && $globalOptions['TzSearch'] != NULL) || ($globalOptions['Disease'] != '' && $globalOptions['Disease'] != NULL)))
+if($FoundRecords == 0 && (($globalOptions['TzSearch'] != '' && $globalOptions['TzSearch'] != NULL) || $ClassFlg))
 {
 ?>
 	<div id="norecord">
  	 	<div>
 		    
             	<?php
-					if($globalOptions['Disease'] != '' && $globalOptions['Disease'] != NULL)
+					if($ClassFlg)
 					{
-						print '<p>No Disease found.</p>';
+						print '<p>No '. $globalOptions['classType'] .' found.</p>';
 					}
                 	else
 					{
 						print "<p>Your search - 
                 				<strong>
 									".$globalOptions['TzSearch']."
-                			    </strong> - did not match any products or companies or MOAs.</p>";
+                			    </strong> - did not match any products or companies or MOAs or diseases.</p>";
 				?>
                <p>Suggestions:</p>
 			    <ul>
@@ -371,7 +401,7 @@ if($FoundRecords == 0 && (($globalOptions['TzSearch'] != '' && $globalOptions['T
 function MOAListing($MOACat)
 {
 	$htmlContent = '';
-	$MOAQuery = "SELECT `id`, `name` FROM `entities` e JOIN `entity_relations` er ON(e.`id`=er.`child`) WHERE e.`class`='MOA' AND er.`parent` = '" . mysql_real_escape_string($MOACat) . "' ";
+	$MOAQuery = "SELECT `id`, `name`, `display_name` FROM `entities` e JOIN `entity_relations` er ON(e.`id`=er.`child`) WHERE e.`class`='MOA' AND er.`parent` = '" . mysql_real_escape_string($MOACat) . "'";
 			
 	$MOAResult = mysql_query($MOAQuery);
 	$i=0;
@@ -388,7 +418,7 @@ function MOAListing($MOACat)
 									<img src="images/MOAarrow.gif" style="padding-bottom:5px;" width="100px" height="17px" />
 								</td>
 								<td style="padding-left:5px;" align="left">';
-			$htmlContent .= ' 		<a href="'. trim(urlPath()) .'trialzilla_moa.php?MoaId='. trim($SMOA['id']) .'" title="MOA" target="_blank">'.$SMOA['name'].'</a>&nbsp;&nbsp;('.GetProductsCountFromMOA(trim($SMOA['id'])).' Products)<br />';
+			$htmlContent .= ' 		<a href="'. trim(urlPath()) .'trialzilla_moa.php?MoaId='. trim($SMOA['id']) .'" title="MOA" target="_blank">'.(($SMOA['display_name'] != NULL && $SMOA['display_name'] != '') ? $SMOA['display_name']:$SMOA['name']).'</a>&nbsp;&nbsp;('.GetProductsCountFromMOA(trim($SMOA['id'])).' Products)<br />';
 			$htmlContent .= '	</td>
 				   			</tr>';									
 		}
@@ -485,6 +515,20 @@ function GetProductsCountFromDisease($DiseaseID)
 	return $ProductsCount;
 }
 
+function sortTwoDimensionArrayByKey($arr, $arrKey)
+{
+	if(is_array($arr) && count($arr) > 0)
+	{
+		foreach ($arr as $key => $row)
+		{
+			$key_arr[$key] = $row[$arrKey];
+		}
+		$key_arr = array_map('strtolower', $key_arr);
+		array_multisort($key_arr, SORT_ASC, SORT_STRING, $arr);
+	}
+	return $arr;
+}
+
 function pagination($globalOptions = array(), $totalPages)
 {	
 	$url = '';
@@ -494,17 +538,17 @@ function pagination($globalOptions = array(), $totalPages)
 	{
 		$url .= '&amp;TzSearch=' . $_REQUEST['TzSearch'];
 	}
-	else if( !isset($_REQUEST['TzSearch']) and isset($globalOptions['TzSearch']))
+	else if(!isset($_REQUEST['TzSearch']) && isset($globalOptions['TzSearch']))
 	{
 		$url .= '&amp;TzSearch=' . $globalOptions['TzSearch'];
 	}
-	else if(isset($_REQUEST['Disease']))
+	else if(isset($_REQUEST['class']))
 	{
-		$url .= '&amp;Disease=true';
+		$url .= '&amp;class='.$_REQUEST['class'];
 	}
-	else if( !isset($_REQUEST['Disease']) and isset($globalOptions['Disease']))
+	else if( !isset($_REQUEST['class']) && isset($globalOptions['class']))
 	{
-		$url .= '&amp;Disease=true';
+		$url .= '&amp;class='.$globalOptions['class'];
 	}
 	
 	$rootUrl = 'trialzilla.php?';
