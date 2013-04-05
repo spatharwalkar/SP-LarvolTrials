@@ -82,6 +82,7 @@ function get_diseases()
  
 	foreach ($NCTdiseasenames as $value) 
 	{
+		$value='%22'.$value.'%22';
 		$value=str_replace(",","%2C",$value);
 		array_push($urllist, '&cond='.str_replace(" ","+",$value).'');  
 	}
