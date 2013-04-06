@@ -43,6 +43,7 @@ function showMOATracker($id, $TrackerType, $page=1)
 	$column_interval = $Return['column_interval'];
 	$PhaseArray = $Return['PhaseArray'];
 	$TotalPages = $Return['TotalPages'];
+	$TotalRecords = $Return['TotalRecords'];
 	
 	$MainPageURL = 'moa_tracker.php';	//PT=MOA TRACKER (MAIN PT PAGE)
 	if($TrackerType == 'DMT')	//DPT=DISEASE MOA TRACKER
@@ -53,7 +54,7 @@ function showMOATracker($id, $TrackerType, $page=1)
 	if($TrackerType=='MTH')
 	$HTMLContent .= MOATrackerHeaderHTMLContent($Report_DisplayName, $TrackerType);
 	
-	$HTMLContent .= MOATrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_columns, $inner_width, $column_width, $ratio, $column_interval, $PhaseArray, $TrackerType, $uniqueId);
+	$HTMLContent .= MOATrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_columns, $inner_width, $column_width, $ratio, $column_interval, $PhaseArray, $TrackerType, $uniqueId, $TotalRecords, $TotalPages, $page, $MainPageURL);
 	
 	if($TotalPages > 1)
 	{
@@ -77,6 +78,7 @@ function DataGeneratorForMOATracker($id, $TrackerType, $page=1)
 	$MOAOrMOACatIds = array();
 	$NewMOAOrMOACatIds = array();
 	$data_matrix=array();
+	$TotalRecords = array();
 	
 	///// No of columns in our graph
 	$columns = 10;
@@ -97,6 +99,8 @@ function DataGeneratorForMOATracker($id, $TrackerType, $page=1)
 		$Return = GetMOAsOrMOACatFromDisease_MOATracker($header['id']);
 		$MOAOrMOACatIds = $Return['all'];
 		$id = $header['id'];
+		$TotalRecords['moa'] = count($Return['moa']);
+		$TotalRecords['moacat'] = count($Return['moacat']);
 	
 		$types = array('MOA', 'MOA_Category');
 		foreach($types as $type)
@@ -238,6 +242,7 @@ function DataGeneratorForMOATracker($id, $TrackerType, $page=1)
 	$Return['column_interval'] = $column_interval;
 	$Return['PhaseArray'] = $PhaseArray;
 	$Return['TotalPages'] = $TotalPages;
+	$Return['TotalRecords'] = $TotalRecords;
 	
 	return $Return;
 }
@@ -275,7 +280,7 @@ function MOATrackerCommonCSS($uniqueId, $TrackerType)
 					.controls td{
 						border-bottom:1px solid #44F;
 						border-right:1px solid #44F;
-						padding: 10px 0 0 3px;
+						padding: 0px 0 0 15px;
 						vertical-align: top;
 					}
 					.controls th{
@@ -508,13 +513,11 @@ function MOATrackerCommonCSS($uniqueId, $TrackerType)
 					}
 					
 					.pagination {
-						line-height: 1.6em;
 						width:100%;
 						float:none;
-						margin-right:10px;
 						float: left; 
-						padding-top:2px; 
-						vertical-align:bottom;
+						padding-top:0px; 
+						vertical-align:top;
 						font-weight:bold;
 						padding-bottom:25px;
 						color:#4f2683;
@@ -541,6 +544,15 @@ function MOATrackerCommonCSS($uniqueId, $TrackerType)
 					
 					.pagination span {
 						padding: 2px 5px;
+					}
+					
+					.records {
+						background-color:#aa8ece;
+						color:#FFFFFF;
+						float:right;
+						font-weight: bold;
+						height: 16px;
+						padding: 2px;
 					}
 					</style>';
 	return $htmlContent;				
@@ -798,7 +810,7 @@ function MOATrackerHeaderHTMLContent($Report_DisplayName, $TrackerType)
 	return $htmlContent;
 }
 
-function MOATrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_columns, $inner_width, $column_width, $ratio, $column_interval, $PhaseArray, $TrackerType, $uniqueId)
+function MOATrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_columns, $inner_width, $column_width, $ratio, $column_interval, $PhaseArray, $TrackerType, $uniqueId, $TotalRecords, $TotalPages, $page, $MainPageURL)
 {				
 	if(count($IdsArray) == 0 && ($TrackerType == 'MTH' || $TrackerType == 'DMT')) return 'No MOA Found';
 	
@@ -812,9 +824,17 @@ function MOATrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_co
 	$htmlContent = '';
 	$htmlContent .= '<br style="line-height:11px;"/>'
 					.'<form action="moa_tracker.php" method="post">'
-					. '<table width="264px" border="0" cellspacing="0" cellpadding="0" class="controls" align="center">'
+					. '<table border="0" cellspacing="0" cellpadding="0" class="controls" align="center">'
 					. '<tr>'
-					. '<td class="bottom right">'
+					. '<td style="vertical-align:top; border:0px;"><div class="records">'. (($TotalRecords['moa'] > 0) ? $TotalRecords['moa'].'&nbsp;MOA':'') . (($TotalRecords['moa'] > 0 && $TotalRecords['moacat'] > 0) ? '&nbsp;&&nbsp;':'') . (($TotalRecords['moacat'] > 0) ? $TotalRecords['moacat'].'&nbsp;MOA Categories':'') . '</div></td>';
+					
+	if($TotalPages > 1)
+	{
+		$paginate = MOATrackerpagination($TrackerType, $TotalPages, $id, $page, $MainPageURL);
+		$htmlContent .= '<td style="padding-left:0px; vertical-align:top; border:0px;">'.$paginate[1].'</td>';
+	}				
+	
+	$htmlContent .= '<td class="bottom right">'
 					. '<div style="border:1px solid #000000; float:right; margin-top: 0px; padding:2px; color:#000000;" id="'.$uniqueId.'_chromemenu"><a rel="'.$uniqueId.'_dropmenu"><span style="padding:2px; padding-right:4px; background-position:left center; background-repeat:no-repeat; background-image:url(\'./images/save.png\'); cursor:pointer; ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><font color="#000000">Export</font></b></span></a></div>'
 					. '</td>'
 					. '</tr>'
@@ -1013,7 +1033,7 @@ function MOATrackerpagination($TrackerType, $totalPages, $id, $CurrentPage, $Mai
 		
 	
 	$rootUrl = $MainPageURL.'?';
-	$paginateStr = '<table align="center"><tr><td><span class="pagination">';
+	$paginateStr = '<table align="center"><tr><td style="border:0px;"><span class="pagination">';
 	
 	if($CurrentPage != 1)
 	{
@@ -1096,7 +1116,7 @@ function MOATrackerpagination($TrackerType, $totalPages, $id, $CurrentPage, $Mai
 	{
 		$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . ($CurrentPage+1) . '\'>&raquo;</a>';
 	}
-	$paginateStr .= '</td></tr></table></span>';
+	$paginateStr .= '</span></td></tr></table>';
 	
 	return array($url, $paginateStr);
 }

@@ -55,6 +55,7 @@ function showProductTracker($id, $dwcount, $TrackerType, $page=1, $OptionArray =
 	$column_interval = $Return['column_interval'];
 	$TrackerType = $Return['TrackerType'];
 	$TotalPages = $Return['TotalPages'];
+	$TotalRecords = $Return['TotalRecords'];
 	
 	$MainPageURL = 'product_tracker.php';	//PT=PRODUCT TRACKER (MAIN PT PAGE)
 	
@@ -73,7 +74,7 @@ function showProductTracker($id, $dwcount, $TrackerType, $page=1, $OptionArray =
 	if($TrackerType=='PTH')
 	$HTMLContent .= TrackerHeaderHTMLContent($id, $Report_DisplayName, $TrackerType);
 	
-	$HTMLContent .= TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $inner_columns, $inner_width, $column_width, $ratio, $entity2Id, $column_interval, $TrackerType, $dwcount, $uniqueId, $OptionArray);
+	$HTMLContent .= TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $inner_columns, $inner_width, $column_width, $ratio, $entity2Id, $column_interval, $TrackerType, $dwcount, $uniqueId, $TotalRecords, $TotalPages, $page, $MainPageURL, $OptionArray);
 	
 	if($TotalPages > 1)
 	{
@@ -401,6 +402,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 	///////////PAGING DATA
 	$RecordsPerPage = 50;
 	$TotalPages = 0;
+	$TotalRecords = count($rows);
 	if(!isset($_POST['download']))
 	{
 		$TotalPages = ceil(count($data_matrix) / $RecordsPerPage);
@@ -438,6 +440,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 	$Return['column_interval'] = $column_interval;
 	$Return['TrackerType'] = $TrackerType;
 	$Return['TotalPages'] = $TotalPages;
+	$Return['TotalRecords'] = $TotalRecords;
 	
 	return $Return;
 }
@@ -477,7 +480,7 @@ function TrackerCommonCSS($uniqueId, $TrackerType)
 					.controls td{
 						border-bottom:1px solid #44F;
 						border-right:1px solid #44F;
-						padding: 10px 0 0 3px;
+						padding: 0px 0 0 15px;
 						vertical-align: top;
 					}
 					.controls th{
@@ -710,13 +713,11 @@ function TrackerCommonCSS($uniqueId, $TrackerType)
 					}
 					
 					.pagination {
-						line-height: 1.6em;
 						width:100%;
 						float:none;
-						margin-right:10px;
 						float: left; 
-						padding-top:2px; 
-						vertical-align:bottom;
+						padding-top:0px; 
+						vertical-align:top;
 						font-weight:bold;
 						padding-bottom:25px;
 						color:#4f2683;
@@ -743,6 +744,15 @@ function TrackerCommonCSS($uniqueId, $TrackerType)
 					
 					.pagination span {
 						padding: 2px 5px;
+					}
+					
+					.records {
+						background-color:#aa8ece;
+						color:#FFFFFF;
+						float:right;
+						font-weight: bold;
+						height: 16px;
+						padding: 2px;
 					}
 
 					</style>';
@@ -1042,7 +1052,7 @@ function TrackerHeaderHTMLContent($id, $Report_DisplayName, $TrackerType)
 	return $htmlContent;
 }
 
-function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $inner_columns, $inner_width, $column_width, $ratio, $entity2Id, $column_interval, $TrackerType, $dwcount, $uniqueId, $OptionArray)
+function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $inner_columns, $inner_width, $column_width, $ratio, $entity2Id, $column_interval, $TrackerType, $dwcount, $uniqueId, $TotalRecords, $TotalPages, $page, $MainPageURL, $OptionArray)
 {				
 	if(count($productIds) == 0) return 'No Products Found';
 	
@@ -1057,9 +1067,15 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 	$htmlContent = '';
 	$htmlContent .= '<br style="line-height:11px;"/>'
 					.'<form action="product_tracker.php" method="post">'
-					. '<table width="264px" border="0" cellspacing="0" cellpadding="0" class="controls" align="center">'
+					. '<table border="0" cellspacing="0" cellpadding="0" class="controls" align="center">'
 					. '<tr>'
-					. '<td class="bottom right"><select id="'.$uniqueId.'_dwcount" name="dwcount" onchange="change_view_'.$uniqueId.'_();">'
+					. '<td style="vertical-align:top; border:0px;"><div class="records">'. $TotalRecords .'&nbsp;Products</div></td>';
+	if($TotalPages > 1)
+	{
+		$paginate = pagination($TrackerType, $TotalPages, $id, $dwcount, $page, $MainPageURL, $OptionArray);
+		$htmlContent .= '<td style="padding-left:0px; vertical-align:top; border:0px;">'.$paginate[1].'</td>';
+	}				
+	$htmlContent .= '<td class="bottom right"><select id="'.$uniqueId.'_dwcount" name="dwcount" onchange="change_view_'.$uniqueId.'_();">'
 					. '<option value="total" '. (($dwcount == 'total') ?  'selected="selected"' : '' ).'>All trials</option>'
 					. '<option value="indlead" '. (($dwcount == 'indlead') ?  'selected="selected"' : '' ).'>Active industry trials</option>'
 					. '<option value="active" '. (($dwcount == 'active') ?  'selected="selected"' : '' ).'>Active trials</option>'
@@ -1383,7 +1399,7 @@ function pagination($TrackerType, $totalPages, $id, $dwcount, $CurrentPage, $Mai
 		
 	
 	$rootUrl = $MainPageURL.'?';
-	$paginateStr = '<table align="center"><tr><td><span class="pagination">';
+	$paginateStr = '<table align="center"><tr><td style="border:0px;"><span class="pagination">';
 	
 	if($CurrentPage != 1)
 	{
@@ -1466,7 +1482,7 @@ function pagination($TrackerType, $totalPages, $id, $dwcount, $CurrentPage, $Mai
 	{
 		$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . ($CurrentPage+1) . '\'>&raquo;</a>';
 	}
-	$paginateStr .= '</td></tr></table></span>';
+	$paginateStr .= '</span></td></tr></table>';
 	
 	return array($url, $paginateStr);
 }

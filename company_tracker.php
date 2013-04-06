@@ -43,6 +43,7 @@ function showCompanyTracker($id, $TrackerType, $page=1)
 	$column_interval = $Return['column_interval'];
 	$PhaseArray = $Return['PhaseArray'];
 	$TotalPages = $Return['TotalPages'];
+	$TotalRecords = $Return['TotalRecords'];
 	
 	$MainPageURL = 'company_tracker.php';	//PT=COMPANY TRACKER (MAIN PT PAGE)
 	if($TrackerType == 'DCT')	//DPT=DISEASE COMPANY TRACKER
@@ -53,7 +54,7 @@ function showCompanyTracker($id, $TrackerType, $page=1)
 	if($TrackerType=='CTH')
 	$HTMLContent .= CompanyTrackerHeaderHTMLContent($Report_DisplayName, $TrackerType);
 	
-	$HTMLContent .= CompanyTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_columns, $inner_width, $column_width, $ratio, $column_interval, $PhaseArray, $TrackerType, $uniqueId);
+	$HTMLContent .= CompanyTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_columns, $inner_width, $column_width, $ratio, $column_interval, $PhaseArray, $TrackerType, $uniqueId, $TotalRecords, $TotalPages, $page, $MainPageURL);
 	
 	if($TotalPages > 1)
 	{
@@ -184,6 +185,7 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page=1)
 	///////////PAGING DATA
 	$RecordsPerPage = 50;
 	$TotalPages = 0;
+	$TotalRecords = count($NewCompanyIds);
 	if(!isset($_POST['download']))
 	{
 		$TotalPages = ceil(count($data_matrix) / $RecordsPerPage);
@@ -216,6 +218,7 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page=1)
 	$Return['column_interval'] = $column_interval;
 	$Return['PhaseArray'] = $PhaseArray;
 	$Return['TotalPages'] = $TotalPages;
+	$Return['TotalRecords'] = $TotalRecords;
 	
 	return $Return;
 }
@@ -255,7 +258,7 @@ function CompanyTrackerCommonCSS($uniqueId, $TrackerType)
 					.controls td{
 						border-bottom:1px solid #44F;
 						border-right:1px solid #44F;
-						padding: 10px 0 0 3px;
+						padding: 0px 0 0 15px;
 						vertical-align: top;
 					}
 					.controls th{
@@ -488,13 +491,11 @@ function CompanyTrackerCommonCSS($uniqueId, $TrackerType)
 					}
 					
 					.pagination {
-						line-height: 1.6em;
 						width:100%;
 						float:none;
-						margin-right:10px;
 						float: left; 
-						padding-top:2px; 
-						vertical-align:bottom;
+						padding-top:0px; 
+						vertical-align:top;
 						font-weight:bold;
 						padding-bottom:25px;
 						color:#4f2683;
@@ -521,6 +522,15 @@ function CompanyTrackerCommonCSS($uniqueId, $TrackerType)
 					
 					.pagination span {
 						padding: 2px 5px;
+					}
+					
+					.records {
+						background-color:#aa8ece;
+						color:#FFFFFF;
+						float:right;
+						font-weight: bold;
+						height: 16px;
+						padding: 2px;
 					}
 					</style>';
 	return $htmlContent;				
@@ -778,7 +788,7 @@ function CompanyTrackerHeaderHTMLContent($Report_DisplayName, $TrackerType)
 	return $htmlContent;
 }
 
-function CompanyTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_columns, $inner_width, $column_width, $ratio, $column_interval, $PhaseArray, $TrackerType, $uniqueId)
+function CompanyTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_columns, $inner_width, $column_width, $ratio, $column_interval, $PhaseArray, $TrackerType, $uniqueId, $TotalRecords, $TotalPages, $page, $MainPageURL)
 {				
 	if(count($IdsArray) == 0 && ($TrackerType == 'CTH' || $TrackerType == 'DCT')) return 'No Company Found';
 	
@@ -792,9 +802,16 @@ function CompanyTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inne
 	$htmlContent = '';
 	$htmlContent .= '<br style="line-height:11px;"/>'
 					.'<form action="company_tracker.php" method="post">'
-					. '<table width="264px" border="0" cellspacing="0" cellpadding="0" class="controls" align="center">'
+					. '<table border="0" cellspacing="0" cellpadding="0" class="controls" align="center">'
 					. '<tr>'
-					. '<td class="bottom right">'
+					. '<td style="vertical-align:top; border:0px;"><div class="records">'. $TotalRecords .'&nbsp;Companies</div></td>';
+	if($TotalPages > 1)
+	{
+		$paginate = CompanyTrackerpagination($TrackerType, $TotalPages, $id, $page, $MainPageURL);
+		$htmlContent .= '<td style="padding-left:0px; vertical-align:top; border:0px;">'.$paginate[1].'</td>';
+	}
+						
+	$htmlContent .= '<td class="bottom right">'
 					. '<div style="border:1px solid #000000; float:right; margin-top: 0px; padding:2px; color:#000000;" id="'.$uniqueId.'_chromemenu"><a rel="'.$uniqueId.'_dropmenu"><span style="padding:2px; padding-right:4px; background-position:left center; background-repeat:no-repeat; background-image:url(\'./images/save.png\'); cursor:pointer; ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><font color="#000000">Export</font></b></span></a></div>'
 					. '</td>'
 					. '</tr>'
@@ -993,7 +1010,7 @@ function CompanyTrackerpagination($TrackerType, $totalPages, $id, $CurrentPage, 
 		
 	
 	$rootUrl = $MainPageURL.'?';
-	$paginateStr = '<table align="center"><tr><td><span class="pagination">';
+	$paginateStr = '<table align="center"><tr><td style="border:0px;"><span class="pagination">';
 	
 	if($CurrentPage != 1)
 	{
@@ -1076,7 +1093,7 @@ function CompanyTrackerpagination($TrackerType, $totalPages, $id, $CurrentPage, 
 	{
 		$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . ($CurrentPage+1) . '\'>&raquo;</a>';
 	}
-	$paginateStr .= '</td></tr></table></span>';
+	$paginateStr .= '</span></td></tr></table>';
 	
 	return array($url, $paginateStr);
 }

@@ -11,14 +11,14 @@
 <td width="105px" style="vertical-align:bottom; padding-left:10px;" align="left">
 <input type="submit" name="Search" title="Search" value="Search" style="vertical-align:bottom;" class="SearchBttn1" />
 </td>
-<td style="vertical-align:middle; padding-left:10px;padding-top:15px;" align="left">
-&nbsp;
+<td style="vertical-align:middle; padding-left:10px;padding-top:15px;" align="left">&nbsp;
+
 </td>
 </tr>
 <tr>
 <td width="300px">&nbsp;</td>
 <td width="600px" style="font-weight:bold; padding-left:0px;" align="center">
-<font class="searchTypes" style="color:#666666;"><a href="trialzilla.php?class=Institution" style="display:inline; text-decoration:underline;">Companies</a> / <a href="trialzilla.php?class=Product" style="display:inline; text-decoration:underline;">Products</a> / <a href="trialzilla.php?class=MOA" style="display:inline; text-decoration:underline;">MOAs</a> / <a href="trialzilla.php?class=Disease" style="display:inline; text-decoration:underline;">Diseases</a></font>
+<font class="searchTypes" style="color:#666666;"><a href="trialzilla.php?class=Institution" class="ListItem">Companies</a> / <a href="trialzilla.php?class=Product" class="ListItem">Products</a> / <a href="trialzilla.php?class=MOA" class="ListItem">MOAs</a> / <a href="trialzilla.php?class=Disease" class="ListItem">Diseases</a></font>
 </td>
 </tr>
 </table>
@@ -82,6 +82,11 @@
 .autocomplete strong { 
 	font-weight:normal; 
 	color:#3399FF; 
+}
+.ListItem {
+	text-decoration:underline;
+	display:inline;
+	color:#1122cc;
 }
 </style>
 <script type="text/javascript" src="scripts/autosuggest/jquery.autocomplete-min.js"></script>
