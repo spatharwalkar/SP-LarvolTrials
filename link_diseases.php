@@ -6,9 +6,9 @@ ini_set('error_reporting', E_ALL ^E_NOTICE );
 
 $diseaseids=array();
 		
-$query = 'select distinct id from entities
-where li_id is null
-and class=\'disease\'' ;
+$query = "select distinct id from entities where 
+( li_id is null or (mesh_name is not null and mesh_name<>'') )
+and class='disease'" ;
 
 		$res = mysql_query($query) or die('Bad SQL query ');
 		while($data = mysql_fetch_assoc($res)) $diseaseids[]=$data['id'];
