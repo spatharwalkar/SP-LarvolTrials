@@ -44,7 +44,9 @@ echo '<br><br>All done.<br>';
 if(isset($_GET['ignore_changes']) and !empty($productID))
 {
 	$parameters=array(); 
-	$parameters['product']=$productID;
+	if($entity=='products') $parameters['entity2']=$productID;
+	else $parameters['entity1']=$productID;
+	if(isset($_GET['entity2'])) $parameters['entity2']=$_GET['entity2'];
 	require_once('calculate_hm_cells.php');
 	calc_cells($parameters,NULL,$_GET['ignore_changes']);
 }

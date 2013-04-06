@@ -7,7 +7,7 @@ ignore_user_abort(true);
 $data=array();$isactive=array();$instype=array();$ldate=array();$phases=array();$ostatus=array();$cnt_total=0;
 
 /*
-	if(isset($_GET['area']) or isset($_GET['product']))
+	if(isset($_GET['entity1']) or isset($_GET['entity2']))
 	{
 		$parameters=$_GET;
 		if(!calc_cells($parameters))	echo '<br><b>Could complete calculating cells, there was an error.<br></b>';
@@ -145,7 +145,17 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 	}
 	else // no id passed , select all .
 	{
-		$query='select id from entities where class in ("Product") order by `id` ';
+		if($parameters['entity1'])
+		{
+			$query='select `class` from entities where id= "'. $parameters['entity1'] .'" limit 1';
+			$res = mysql_query($query);
+			$row=mysql_fetch_assoc($res);
+			if($row['class']) $current_class=$row['class'];
+		}
+		if($current_class) $query='select id from entities where `class`<>"'.$current_class.'" and class in 
+		("Area","Disease","Product","Biomarker") order by `id` ';
+		else $query='select id from entities where `id`<>"'.$parameters['entity2'].'" and class in 
+		("Area","Disease","Product","Biomarker") order by `id` ';
 	}
 	$res = mysql_query($query);
 	if($res === false)
@@ -233,7 +243,7 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 							JOIN 		entity_trials p ON a.`trial`=p.`trial`
 							LEFT JOIN 	data_trials d ON p.`trial`=d.`larvol_id`
 							WHERE 		a.`entity`="'.$av['id'].'" and p.`entity`="'.$pv['id'].'" ';
-						
+			
 			if(!$res = mysql_query($query_m))
 					{
 						$log='There seems to be a problem with the SQL Query:'.$query_m.' Error:' . mysql_error();
