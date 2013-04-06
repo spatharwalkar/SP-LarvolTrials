@@ -276,7 +276,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 			}
 			else if($TrackerType == 'DPT' || $TrackerType=='DCPT' || $TrackerType=='DMCPT' || $TrackerType=='DMPT')
 			{
-				$phase_query = "SELECT DISTINCT dt.`larvol_id`, dt.`is_active`, dt.`phase`, dt.`institution_type` FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) JOIN entity_mesh_trials emt ON (dt.`larvol_id` = emt.`trial`) WHERE et.`entity`='" . $productIds[$row] ."' AND emt.`entity`='" . (($TrackerType == 'DPT') ? $id : $entity2Id) ."' AND et.`trial` = emt.`trial`";	
+				$phase_query = "SELECT DISTINCT dt.`larvol_id`, dt.`is_active`, dt.`phase`, dt.`institution_type` FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) JOIN entity_trials et2 ON (dt.`larvol_id` = et2.`trial`) WHERE et.`entity`='" . $productIds[$row] ."' AND et2.`entity`='" . (($TrackerType == 'DPT') ? $id : $entity2Id) ."'";	
 			}
 			else
 			{
