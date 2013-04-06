@@ -29,7 +29,8 @@ function index_disease($diseaseid)
 	if(empty($mesh_trials)) return;
 	
 	$query = 'select distinct entity from entity_trials where 
-	trial in ('.$mesh_trials.')';
+			  trial in ('.$mesh_trials.') and entity not in 
+			  (select id from entities where class="Disease")';
 	$productids=array();
 	$res = mysql_query($query) or die('Bad SQL query ');
 	while($data = mysql_fetch_assoc($res)) $productids[]=$data['entity'];
