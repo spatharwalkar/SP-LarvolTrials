@@ -16,7 +16,30 @@ function genPrint()
 	return hash(HASH_ALGO, $info);
 }
 
-function urlPath()  //gives the userland path to this file all the way from http://
+function urlPath()  // return current domain/path
+{
+	static $urlpath = '';
+	$out = '';
+	$current_path='';
+	if(file_exists('cache/urlpath.txt'))
+	{
+		$current_path = file_get_contents('cache/urlpath.txt');
+	}
+
+	$s = empty($_SERVER["HTTPS"]) ? '' : ($_SERVER["HTTPS"] == "on") ? "s" : "";
+	$protocol = strleft(strtolower($_SERVER["SERVER_PROTOCOL"]), "/").$s;
+	$port = ($_SERVER["SERVER_PORT"] == "80") ? "" : (":".$_SERVER["SERVER_PORT"]);
+	$full = $protocol."://".$_SERVER['SERVER_NAME'].$port.$_SERVER['REQUEST_URI'];
+	$beforeq = strpos($full,'?')===false?$full:substr($full,0,strpos($full,'?'));
+	$out = substr($beforeq,0,strrpos($beforeq,'/')+1);
+	$urlpath = $out;
+	
+	if($current_path<>$out)
+		file_put_contents('cache/urlpath.txt', $out);
+	return $out;
+}
+
+function oldurlPath()  // -- renamed this as we no longer use this function -- gives the userland path to this file all the way from http://
 {
 	static $urlpath = '';
 	$out = '';
