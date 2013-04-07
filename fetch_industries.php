@@ -1,7 +1,7 @@
 <?php
 require_once 'include.util.php';
 
-$NCTindustries = array();
+$NCTcontent = '';
 
 ini_set('memory_limit','-1');
 ini_set('max_execution_time','36000');	//10 hours
@@ -53,21 +53,19 @@ function get_industries()
 		exit;
 	}
 
-
-	//loop through the div and get disease names, and the url of their list of studies
 	$data = $divdata->nodeValue;
 
 	//replace story and stories from string and prepare an arry with industry names 
 	$industries_str = str_replace('See Sponsor/Collaborators by Category > Industry', '', $data);
 	$industries_replaced = preg_replace('/[0-9]{1,4}?\sstudy|[0-9]{1,4}?\sstudies/', '{***}', $industries_str);
-	//$industries = preg_replace ('/study/', '', $industries_str);
 	$industries = explode('{***}', $industries_replaced);
 	
-	global $NCTindustries;
+	global $NCTcontent;
 	foreach ($industries as $industry) 
 	{
-		$value = trim($industry);
-		array_push($NCTindustries, $value);  
+		$industry = iconv('UTF-8', 'ISO-8859-1', $industry);
+		$industry = trim($industry);
+		$NCTcontent .= $industry.PHP_EOL;
 	}
 	
 }
@@ -75,14 +73,11 @@ function get_industries()
 //create text file with this array
 function create_industries()
 {
-	global $NCTindustries;
-	$content = '';
-	foreach($NCTindustries as $NCTindustry){
-		$content .= $NCTindustry.PHP_EOL;
-	}
-	$file = fopen('derived/institution_type/industry.txt', 'w+'); // binary update mode
-	fwrite($file, $content);
-	fclose($file);
+	global $NCTcontent;
+
+	$handle = fopen('derived/institution_type/industry.txt', 'w+'); // binary update mode
+	fwrite($handle, $NCTcontent);
+	fclose($handle);
 
 }
 
