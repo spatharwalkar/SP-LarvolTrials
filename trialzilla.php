@@ -23,32 +23,47 @@
 		
 		$ResultArr = find_entity($globalOptions['TzSearch']);
 		
-		//To remove repeated MOAs
+		//To remove repeated MOAs / Non-Industry Institutions
 		$MOAArray = array();
+		$MOACatArray = array();
+		$NonIndustryArray = array();
 		if(is_array($ResultArr))
 		{
-			$MOACatQuery = "SELECT `id`, `name`, `class` FROM `entities` WHERE id IN (" . implode(',',$ResultArr) . ") ";
-			//print $MOACatQuery;
-			$MOACatQueryResult = mysql_query($MOACatQuery);
-			if($MOACatQueryResult)
+			$GetDataQuery = "SELECT `id`, `name`, `class`, `category` FROM `entities` WHERE id IN (" . implode(',',$ResultArr) . ") ";
+			//print $GetDataQuery;
+			$GetDataQueryResult = mysql_query($GetDataQuery);
+			if($GetDataQueryResult)
 			{
-				while($MOAResult =  mysql_fetch_assoc($MOACatQueryResult))
+				while($GetDataResult =  mysql_fetch_assoc($GetDataQueryResult))
 				{ 
-					if($MOAResult['class'] == 'MOA_Category')
+					if($GetDataResult['class'] == 'MOA_Category')
 					{
-						$MOAQuery = "SELECT `id`, `name` FROM `entities` e JOIN `entity_relations` er ON(e.`id`=er.`child`) WHERE e.`class`='MOA' AND er.`parent` = '" . mysql_real_escape_string($MOAResult['id']) . "' ";			
-						$MOAResult = mysql_query($MOAQuery);
-						if($MOAResult &&  mysql_num_rows($MOAResult) > 0)
-						{
-							while($SMOA = mysql_fetch_assoc($MOAResult))
-							$MOAArray[] = $SMOA['id'];
-						}		
+						$MOACatArray[] = $GetDataResult['id'];	
+					}
+					
+					if($GetDataResult['class'] == 'Institution')
+					{
+						if($GetDataResult['category'] != 'Industry')	//Remove Non-Industry Institutions
+						$NonIndustryArray[] = $GetDataResult['id'];	
 					}
 				}
 			}
-			$ResultArr = array_diff($ResultArr, $MOAArray);	//Remove moas if its category present								
+			
+			if(count($MOACatArray) > 0)
+			{
+				$MOAQuery = "SELECT `id`, `name` FROM `entities` e JOIN `entity_relations` er ON(e.`id`=er.`child`) WHERE e.`class`='MOA' AND er.`parent` IN ('" . implode("','",$MOACatArray) . "')";			
+				$MOAResult = mysql_query($MOAQuery);
+				if($MOAResult &&  mysql_num_rows($MOAResult) > 0)
+				{
+					while($SMOA = mysql_fetch_assoc($MOAResult))
+					$MOAArray[] = $SMOA['id'];
+				}	
+			}			
+			$ResultArr = array_diff($ResultArr, $MOAArray);	//Remove moas if its category present
+			
+			$ResultArr = array_diff($ResultArr, $NonIndustryArray);	//Remove Non-Industry Institutions				
 		}
-		///End of remove repeated moas
+		///End of remove repeated moas / Non-Industry Institutions
 		
 		if(is_array($ResultArr))
 		$FoundRecords = count($ResultArr);
@@ -76,6 +91,13 @@
 	}
 	else if($_REQUEST['class'] != NULL && $_REQUEST['class'] != '' && isset($_REQUEST['class']))
 	{
+		//Make Char code
+		$AlphaData = array();
+		$Char = 'A';
+		for($c=0; $c < 26; $c++) { $AlphaData[$Char]['Char']=$Char; $AlphaData[$Char]['Active']=false; $AlphaData[$Char]['Data']=array(); $Char++; }
+		$AlphaData['Other']['Char'] = 'Other'; $AlphaData['Other']['Active']=false; $AlphaData['Other']['Data']=array();
+		//End Char code
+		
 		$globalOptions['class'] = $_REQUEST['class'];
 		$ClassFlg = true;
 		
@@ -84,20 +106,29 @@
 		else if($globalOptions['class'] == 'Disease')
 		$ResultArrQuery = "SELECT DISTINCT(e.`id`), e.`name`, e.`class`, e.`display_name` FROM `entities` e JOIN `entity_relations` er ON(er.`parent`=e.`id`) JOIN `entities` e2 ON(e2.`id`=er.`child`) WHERE e.`class` = 'Disease' AND e2.`class` = 'Product'";
 		else
-		$ResultArrQuery = "SELECT DISTINCT(`id`), `name`, `class`, `display_name` FROM `entities` WHERE `class` = '".$globalOptions['class']."'";
+		$ResultArrQuery = "SELECT DISTINCT(`id`), `name`, `class`, `display_name`, `category` FROM `entities` WHERE `class` = '".$globalOptions['class']."'";
 		
 		$QueryResult = mysql_query($ResultArrQuery);
 		
 		$i=0;
 		while($result = mysql_fetch_assoc($QueryResult))
 		{
-			$i++;
-			$DataArray[$i]['index'] = $i;
-			$DataArray[$i]['name'] = $result['name'];
-			$DataArray[$i]['id'] = $result['id'];
-			$DataArray[$i]['type'] = $result['class'];
-			if($result['display_name'] != NULL && $result['display_name'] != '' && $DataArray[$index]['type'] != 'Product')
-				$DataArray[$i]['name'] = $result['display_name'];
+			if($result['class'] != 'Institution' || ($result['category'] == 'Industry' && $result['class'] == 'Institution'))	//AVOID NON-INDUSTRY INSTITUTIONS
+			{
+				$i++;
+				$DataArray[$i]['index'] = $i;
+				$DataArray[$i]['name'] = $result['name'];
+				$DataArray[$i]['id'] = $result['id'];
+				$DataArray[$i]['type'] = $result['class'];
+				if($result['display_name'] != NULL && $result['display_name'] != '' && $DataArray[$index]['type'] != 'Product')
+					$DataArray[$i]['name'] = $result['display_name'];
+				
+				//DETECT FIRST CHAR AND ACTIVATE FALG FOR THAT CHAR AND SEPARATE OUT DATA OF FOR EACH CHAR
+				$ch1 = strtoupper(substr(trim($DataArray[$i]['name']),0,1));
+				if(array_key_exists($ch1,$AlphaData))	{ $AlphaData[$ch1]['Active'] = true; $AlphaData[$ch1]['Data'][] = $DataArray[$i]; }
+				else { $AlphaData['Other']['Active'] = true; $AlphaData['Other']['Data'][] = $DataArray[$i]; }
+				//END OF PART
+			}		
 		}
 		
 		if($globalOptions['class'] == 'MOA')	//IN CASE OF MOA  - GET MOA ID AS WELL WHO DOES NOT HAVE CATEGORY OR has Other Category
@@ -115,7 +146,20 @@
 				$DataArray[$i]['type'] = $result['class'];
 				if($result['display_name'] != NULL && $result['display_name'] != '')
 					$DataArray[$i]['name'] = $result['display_name'];
+				
+				//DETECT FIRST CHAR AND ACTIVATE FALG FOR THAT CHAR AND SEPARATE OUT DATA OF FOR EACH CHAR
+				$ch1 = strtoupper(substr(trim($DataArray[$i]['name']),0,1));
+				if(array_key_exists($ch1,$AlphaData))	{ $AlphaData[$ch1]['Active'] = true; $AlphaData[$ch1]['Data'][] = $DataArray[$i]; }
+				else { $AlphaData['Other']['Active'] = true; $AlphaData['Other']['Data'][] = $DataArray[$i]; }
+				//END OF PART	
 			}
+		}
+		
+		if(isset($_REQUEST['Alpha']))
+		{
+			//MAKE CURRENT DATASET EQUAL TO THAT CHAR DATA
+			$globalOptions['Alpha'] = $_REQUEST['Alpha'];
+			$DataArray = $AlphaData[$globalOptions['Alpha']]['Data'];
 		}
 		
 		$FoundRecords = count($DataArray);
@@ -129,9 +173,9 @@
 		$DataArray = $CurrentPageResultArr;
 		
 		if($globalOptions['class'] == 'Institution')
-			$globalOptions['classType'] = 'Company';
+			$globalOptions['classType'] = 'Companies';
 		else
-			$globalOptions['classType'] = $globalOptions['class'];
+			$globalOptions['classType'] = $globalOptions['class'].'s';
 	}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -222,6 +266,47 @@ a:visited {color:#6600bc;}  /* visited link */
 	padding: 2px 5px;
 }
 
+.alpharow {
+	line-height: 1.6em;
+	width:100%;
+	float:none;
+	margin-right:10px;
+	float: left; 
+	padding-top:4px; 
+	vertical-align:bottom;
+	font-weight:bold;
+	padding-bottom:4px;
+	color:#4f2683;
+}
+
+.alpharow a:hover {
+	background-color: #aa8ece;
+	color: #FFFFFF;
+	font-weight:bold;
+}
+
+.alpharow a {
+	margin: 0 2px;
+	border: 1px solid #CCC;
+	/*background-color:#4f2683;*/
+	font-weight: bold;
+	padding: 2px 5px;
+	text-align: center;
+	color: #4f2683;
+	text-decoration: none;
+	display:inline;
+}
+
+.alphanormal {
+	font-weight:normal;
+	color:#000000;
+	font-size:13px;
+}
+
+.alpharow span {
+	padding: 2px 5px;
+}
+
 .searchTypes
 {
 	font-weight:bold;
@@ -294,12 +379,43 @@ a:visited {color:#6600bc;}  /* visited link */
 					$showResult .= ' for "'. $globalOptions['classType'] .'"';
 					else
 					$showResult .= ' for "'. $globalOptions['TzSearch'] .'"';
+					
+					if($globalOptions['Alpha'] != '')
+					$showResult .= ' Starting with Letter '. (($globalOptions['Alpha'] == 'Other') ? 'Other than "A-Z"' : '"'.$globalOptions['Alpha'] .'"');
+					
 					print $showResult;
 				}
 			?>
         </td>
     </tr>
 </table>
+<?php
+if($ClassFlg)
+{
+	print '<br/><table align="center" cellpadding="0" cellspacing="0">
+				<tr>
+					<td style="border-top:#CCCCCC solid 1px; border-bottom:#CCCCCC solid 1px;"><div class="alpharow"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;See '. $globalOptions['classType'] .' by First Letter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>';
+						
+	foreach($AlphaData as $key=> $Alpha)
+	{
+		if($globalOptions['Alpha'] == $key)
+		{ print '<a href="trialzilla.php?class='.$globalOptions['class'].'&Alpha='.$key.'" style="background-color: #4f2683; color:#FFFFFF;">'.$key.'</a>'; }
+		else if($Alpha['Active'])
+		{ print '<a href="trialzilla.php?class='.$globalOptions['class'].'&Alpha='.$key.'">'.$key.'</a>'; } 
+		else
+		{ print '<span class="alphanormal">'.$key.'</span>'; }
+	}
+	
+	if(!isset($globalOptions['Alpha']) || trim($globalOptions['Alpha']) == '' || $globalOptions['Alpha'] == NULL)
+	print '<a href="trialzilla.php?class='.$globalOptions['class'].'" style="background-color: #4f2683; color:#FFFFFF;">All</a>';
+	else
+	print '<a href="trialzilla.php?class='.$globalOptions['class'].'">All</a>';
+	
+	print '			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div></td>
+				</tr>
+			</table><br/>';
+}
+?>
 
 <!-- Displaying Records -->
 <br/>
@@ -549,6 +665,15 @@ function pagination($globalOptions = array(), $totalPages)
 	else if( !isset($_REQUEST['class']) && isset($globalOptions['class']))
 	{
 		$url .= '&amp;class='.$globalOptions['class'];
+	}
+	
+	if(isset($_REQUEST['Alpha']))
+	{
+		$url .= '&amp;Alpha='.$_REQUEST['Alpha'];
+	}
+	else if( !isset($_REQUEST['Alpha']) && isset($globalOptions['Alpha']))
+	{
+		$url .= '&amp;Alpha='.$globalOptions['Alpha'];
 	}
 	
 	$rootUrl = 'trialzilla.php?';
