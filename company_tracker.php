@@ -2163,7 +2163,7 @@ function GetCompaniesFromDisease_CompanyTracker($DiseaseID)
 	$Products = array();
 	$Companies = array();
 	
-	$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON(er.`child` = e.`id`) JOIN `entities` e2 ON(e2.`id` = er.`parent`) JOIN `entity_relations` er2 ON(er2.`child` = e2.`id`) WHERE e.`class` = 'Institution' AND e2.`class` = 'Product' AND er2.`parent`='" . mysql_real_escape_string($DiseaseID) . "'";	
+	$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON(er.`child` = e.`id`) JOIN `entities` e2 ON(e2.`id` = er.`parent`) JOIN `entity_relations` er2 ON(er2.`child` = e2.`id`) WHERE e.`class` = 'Institution' AND e.`category`='Industry' AND e2.`class` = 'Product' AND er2.`parent`='" . mysql_real_escape_string($DiseaseID) . "'";	
 	$res = mysql_query($query) or die('Bad SQL query getting companies from products ids in CT');
 	
 	if($res)
