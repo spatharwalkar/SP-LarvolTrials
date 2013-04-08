@@ -1,3280 +1,5101 @@
-.be Medical
-20/10 Perfect Vision
-22nd Century Limited, LLC
-23andMe, Inc.
-3M
-407 Doctors
-480 Biomedical, Inc.
-4SC AG
-7TM Pharma A/S
-A.G. Huppelschoten
-A.P. Pharma, Inc.
-Aardvark Medical Company
-Aaren Scientific Inc.
-Aastrom Biosciences
-Ab Medica Spa
-AB Science
-Abbott
-Abbott Biologicals
-Abbott Diabetes Care
-Abbott Diagnostics Division
-Abbott Medical Optics
-Abbott Molecular
-Abbott Northwestern Hospital
-Abbott Nutrition
-Abbott Products
-Abbott Research Group
-Abbott Vascular
-AbbVie
-Abdi Ibrahim Ilac San. ve Tic A.S.
-Abela Pharmaceuticals, Inc.
-Abgenix
-AbGenomics B.V Taiwan Branch
-Abiomed Inc.
-Ablynx
-Abnoba Gmbh
-Aboca Spa Societa' Agricola
-AboutSkin Dermatology and DermSurgery, PC
-Acacia Pharma Ltd
-ACADIA Pharmaceuticals Inc.
-Acasti Pharma Inc.
-Acceleron Pharma, Inc.
-Accentia Biopharmaceuticals
-Accera, Inc.
-Access Business Group
-Access Pharmaceuticals, Inc.
-Acclarent
-Accumetrics, Inc.
-Accuray Incorporated
-ACE Vision Group, Inc.
-Acea Bio (Hangzhou) Co., Ltd.
-AcelRx Pharmaceuticals, Inc.
-Acetylon Pharmaceuticals Incorporated
-Achaogen, Inc.
-Ache Laboratorios Farmaceuticos S.A.
-Achillion Pharmaceuticals
-Aciex Therapeutics, Inc.
-ACO Hud Nordic AB
-Acologix, Inc.
-Acorda Therapeutics
-Acorn Cardiovascular, Inc.
-ACORN Research, LLC
-ACOS
-Acrux DDS Pty Ltd
-ACT Biotech, Inc
-Actavis Inc.
-Actavis Mid-Atlantic LLC
-Actelion
-Action Contre la Faim
-Action Pharma A/S
-Activaero GmbH
-ActivBiotics
-ActivBiotics Pharma, LLC
-Active Biotech AB
-Active Implants Israel Ltd.
-ActiveO Inc.
-ActiViews Ltd.
-ActivX Biosciences, Inc.
-ActoGeniX N.V.
-ACU Medical Technologies Ltd
-Acucela Inc.
-AcuFocus, Inc.
-Acuity Medical International, Inc.
-Acura Pharmaceuticals Inc.
-Acusphere
-Adamas Pharmaceuticals, Inc.
-Adamis Pharmaceuticals Corporation
-Adams Respiratory Therapeutics
-Adapt Produtos Oftalmológicos Ltda. 
-Addex Pharma S.A.
-Addrenex Pharmaceuticals, Inc.
-Adelholzener Alpenquellen GmbH
-Adenobio N.V
-Adeona Pharmaceuticals
-Aderis Pharmaceuticals
-Adherex Technologies, Inc.
-Adimmune Corporation
-Adistem Ltd
-ADMA Biologics, Inc.
-Admetsys Corporation
-AdministrateurCIC
-Adnexus, A Bristol-Myers Squibb R&D Company
-Aduro BioTech, Inc.
-Advance Shockwave Technology GmbH
-Advanced Accelerator Applications
-Advanced BioHealing, Inc.
-Advanced Bionics
-Advanced Brain Monitoring, Inc.
-Advanced Cell Technology
-Advanced Life Sciences, Inc.
-Advanced Medical Diagnostics s.a.
-Advanced Peptides
-Advanced Technologies and Regenerative Medicine, LLC (ATRM)
-Advanced Viral Research Corp
-Advanced-J
-Advancell - Advanced In Vitro Cell Technologies, S.A.
-Advancis Pharmaceutical Corporation
-Advantage Health Physician Network
-Advantagene, Inc.
-Advaxis, Inc.
-Adventrx Pharmaceuticals
-Aegera Therapeutics
-Aegerion Pharmaceuticals, Inc.
-Aeon Astron Europe B.V.
-Aeos Biomedical Inc.
-Aerial BioPharma, LLC
-Aerie Pharmaceuticals
-Aeris Therapeutics
-Aerocrine AB
-Aerotel Ltd
-Aerovance, Inc.
-Aesculap AG
-Aesculap Implant Systems
-AesRx, LLC
-Aestus Therapeutics
-AEterna Zentaris
-Aetna, Inc.
-Afexa Life Sciences Inc
-Affectis Pharmaceuticals AG
-Afferent Pharmaceuticals, Inc.
-Affimed Therapeutics AG
-Affinium Pharmaceuticals, Ltd
-Affiris AG
-Affordance
-Affymax
-AFT Pharmaceuticals, Ltd.
-Agen Biomedical
-Agendia
-Agennix
-Agensys, Inc.
-Agentschap NL
-AGI Therapeutics, Inc.
-Agile Therapeutics
-AGIR à Dom 
-AGIRx Ltd.
-Agouron Pharmaceuticals
-Aguiflai Iberica, S.L.
-Ahn-Gook Pharmaceuticals Co.,Ltd
-AiCuris GmbH & Co.KG
-AIDS Arms Inc.
-AIM Therapeutics Inc.
-AIO-Studien-gGmbH
-Air Liquide SA
-Air Liquide Santé International 
-Aires Pharmaceuticals, Inc.
-Airsonett AB
-AirXpanders, Inc.
-AJI Pharma USA
-Ajinomoto USA, INC.
-Akebia Therapeutics
-Akela Pharma, Inc.
-Aker Biomarine Antarctic AS
-Akern USA LLC
-Akinion Pharmaceuticals AB
-Akloma Bioscience AB
-Akontis
-Akorn, Inc.
-AkPharma Inc.
-Akros Pharma Inc.
-Aktion Bronchialkarzinom e.V.
-Alabama Neurology Associates, PC
-Alacrity Biosciences, Inc.
-Alavita Pharmaceuticals Inc
-Alba Therapeutics
-Albany Molecular Research, Inc.
-Alberto DomÃƒÂ­nguez RodrÃƒÂ­guez
-Albireo
-Alchemia Oncology
-Alcobra Ltd.
-Alcon LenSx, Inc.
-Alcon Research
-Aldagen
-Alder Biopharmaceuticals, Inc.
-Alexion Pharmaceuticals
-Alexza Pharmaceuticals, Inc.
-Alfa Wassermann S.p.A.
-Alfacell
-Alfact Innovation
-Alfred E. Tiefenbacher (GmbH & Co. KG)
-AlgaeCal Inc.
-Algeta ASA
-AlgiPharma AS
-AlgoRx Pharmaceuticals
-Alimentary Health Ltd
-Alimera Sciences
-Alios Biopharma Inc.
-Alizyme
-ALK-abelló A/S
-Alkermes
-Alko Do Brasil Industria e Comercio Ltda
-Allegro Diagnostics, Corp.
-Allegro Ophthalmics, LLC
-Allerderm
-Allergan
-Allergan Medical
-Allergisa Pesquisa Dermato-Cosmetica LTDA
-Allergopharma Joachim Ganzer KG
-Allergy Therapeutics
-Allermed Laboratories, Inc.
-Alliancells Bioscience Corporation Limited
-Allina Health System
-Allium, Ltd.
-AlloCure Inc.
-Alloksys Life Sciences B.V.
-Allon Therapeutics
-Allos Therapeutics
-AlloSource
-Alma Lasers
-Almirall, S.A.
-Almirall, SAS
-Alnara Pharmaceuticals
-Alnylam Pharmaceuticals
-Alphacore Pharma, LLC
-Alpharma Pharmaceuticals LLC, a subsidiary of Pfizer Inc.
-Alphatec Spine, Inc.
-AlphaVax, Inc.
-Alseres Pharmaceuticals, Inc
-Altacor Ltd.
-Altair Therapeutics, Inc.
-ALTANA Pharma
-AltaRex
-Altea Therapeutics
-Altheos, Inc.
-Altheus Therapeutics, Inc.
-Altman Biomedical Consulting Pty. Ltd.
-Altor Bioscience Corporation
-Altura Medical Inc.
-Altus Pharmaceuticals
-Alung Technologies
-Alvine Pharmaceuticals Inc.
-ALZA
-Alza Corporation, DE, USA
-AMAG Pharmaceuticals, Inc.
-Amarillo Biosciences, Inc.
-Amarin Neuroscience Ltd
-Amarin Pharma Inc.
-Ambit Biosciences Corporation
-Ambrilia Biopharma, Inc.
-Ambrx, Inc.
-Ambryx Biotechnology
-Ambulatório de Bipolaridade
-Amedica Corporation
-American Oriental Bioengineering, Inc.
-American Scitech International
-AmeriSciences LP
-Amersham Buchler, GmbH & Co KG
-AMES Technology
-AMG Medical Inc.
-Amgen
-Amgen Research (Munich) GmbH
-Amicus Therapeutics
-Amneal Pharmaceuticals Co. India Private Limited
-Amneal Pharmaceuticals, LLC
-Amorcyte, Inc.
-Amorepacific Corporation
-Amorphical Ltd.
-Amp Orthopedics, Inc.
-AM-Pharma
-Amphastar Pharmaceuticals, Inc.
-AmpliMed Corporation
-Amplimmune
-Amsterdam Molecular Therapeutics
-Amylin Pharmaceuticals, Inc.
-Anaborex
-Anaconda Pharma
-Anacor Pharmaceuticals, Inc.
-Anadys Pharmaceuticals
-Anaeropharma Science, Inc.
-Analgesic Solutions
-AnaMar Medical AB
-Anaxsys Technology Ltd
-Anbics Management-Services Ag
-Anchen Pharmaceuticals, Inc
-Andon Health Co., Ltd
-Andon Medical Co.,Ltd
-Andromeda Biotech Ltd.
-AndroScience Corp
-Anesiva, Inc.
-Angel Medical Systems
-AnGes
-Angioblast Systems
-Angiochem Inc
-Angiodynamics, Inc.
-Angiogenix
-Angion Biomedica Corp
-AngioScore, Inc.
-Angiotech Pharmaceuticals
-Ångstrom Pharmaceuticals
-Anika Therapeutics, Inc.
-Animas Corporation
-ANM Adaptive Neuromodulation GmbH
-Anosys
-Another Way Products
-Antares Pharma Inc.
-Anterios Inc.
-Anterogen Co., Ltd.
-Anthera Pharmaceuticals
-Antigen Laboratories, Inc.
-Antigenics
-Antipodean Pharmaceuticals, Inc.
-Antisense Pharma
-Antisoma Research
-Antria
-Anulex Technologies, Inc.
-Anza Therapeutics, Inc.
-AOP Orphan Pharmaceuticals AG
-AORTICA Group
-AOSpine International
-AOTI Ltd.
-Apatech, Inc.
-Apceth GmbH & Co. KG
-Apeiron Biologics
-Apeptico Forschung und Entwicklung GmbH
-Aperion Biologics, Inc.
-Apex Bioscience
-Apexum Ltd.
-Apheresis Research Institute
-Aphton
-Apieron
-Apimeds, Inc.
-Apira Science, Inc.
-Apitope Technology (Bristol) Ltd.
-Apnex Medical, Inc.
-ApniCure, Inc.
-Apogenix GmbH
-APOGEPHA Arzneimittel GmbH
-Apollon
-ApoPharma
-Apos Medical and Sports Technology Ltd.
-Aposense Ltd.
-Apotex Inc.
-Applied Genetic Technologies Corp
-Applied Genetics
-Applied Molecular Evolution
-Applied Physiology Pty Ltd
-Applied Spectral Imaging Ltd.
-Applied Spine Technologies
-Aprea AB
-Apsen Farmaceutica S.A.
-APT Pharmaceuticals, Inc.
-Aptalis Pharma
-Aptus Endosystems
-Aqumen Biopharmaceuticals, N.A.
-AR Scientific, Inc.
-Aradigm Corporation
-Aragon Pharmaceuticals, Inc.
-Arana Therapeutics Ltd
-Arbeitsgemeinschaft fur Internistische Onkologie
-Arbor Pharmaceuticals, Inc.
-ARCA Biopharma, Inc.
-ARCAGY/ GINECO GROUP
-Archemix Corp.
-Archer Biosciences, Inc.
-Archimedes Development Ltd
-Archivel Farma S.L.
-Archus Orthopedics, Inc.
-Arcion Therapeutics Inc
-Ardana Bioscience Ltd
-Ardea Biosciences, Inc.
-Ardelyx
-Ardian Inc
-Arena Pharmaceuticals
-Arete Therapeutics
-Areva Med LLC
-Arginox Pharmaceuticals
-Argo Medical Technologies Ltd.
-Argos Therapeutics
-Argus Pharmaceuticals
-Århus Amt
-ARI Research Cell
-Aria Aesthetics Inc.
-Aria Diagnostics, Inc.
-Ariad Pharmaceuticals
-aRigen Pharmaceuticals, Inc.
-Ariston Pharmaceuticals, Inc.
-Ark Therapeutics Ltd
-Arkin
-Arla Foods
-Arno Therapeutics
-Arog Pharmaceuticals LLC
-Aronex Pharmaceuticals
-Aros Pharma ApS
-Arpida AG
-ArQule
-Array BioPharma
-Arresto Biosciences, Inc.
-Arrow Therapeutics
-Arstasis, Inc.
-ART Advanced Research Technologies Inc.
-Artann Laboratories
-Arteaus Therapeutics
-Arteriocyte, Inc.
-Arthrex, Inc.
-Arthritis & Rheumatic Disease Specialties Research
-Arthritis Northwest PLLC
-ArthroCare Corporation
-Artielle ImmunoTherapeutics
-Artimplant AB
-Artisan Pharma, Inc.
-Artu Biologicals
-ARYx Therapeutics
-Asahi Kasei Kuraray Medical Co.,Ltd.
-Asahi Kasei Pharma America Corporation
-Asahi Kasei Pharma Corporation
-Asalus Medical Instruments Limited
-ASCEND Therapeutics
-Ascendis Pharma A/S
-Ascension Orthopedics, Inc.
-Ascenta Therapeutics
-Ascentia Health, Inc.
-Ascopharm Groupe Novasco
-Ash Access Technology
-Ashgrove Research Practice
-Asklepion Pharmaceuticals, LLC
-Asklepios Kliniken Hamburg GmbH
-Asklepios proresearch
-ASL Cagliari
-Aslan Pharmaceuticals
-Asmacure Ltée 
-Aspire Medical
-ASQA a.s.
-Astellas
-Astellas Pharma Europe BV
-Astellas Pharma Europe Ltd.
-Astellas Pharma Global Development, Inc.
-Astellas Pharma Inc
-Astex Pharmaceuticals
-Asthmatx, Inc.
-Astion Pharma A/S
-Astra Tech AB
-Astra USA
-AstraZeneca
-Astute Medical, Inc.
-Asubio Pharmaceuticals, Inc.
-Athena Feminine Technologies, Inc.
-Athens Orthopedic Clinic, P.A.
-AtheroGenics
-AtheroMed, Inc
-Athersys, Inc
-Ativus Farmaceutica Ltda
-Atlanta Heart Specialists, LLC
-Atlanta VA Medical Center
-Atos Medical AB
-Atox Bio Ltd
-AtriCure, Inc.
-Atritech
-Atrium Innovations
-Atrium Medical Corporation
-Attenuon
-Aubrey Inc.
-Augmenix, Inc.
-Aultman Health Foundation
-AUM Cardiovascular, Inc.
-Auris Medical AG
-Auris Medical, Inc.
-Aurolab
-Auron Healthcare GmbH
-Ausio Pharmaceuticals, LLC
-Autoimmune Technologies, LLC
-Autonomic Technologies, Inc.
-AUVA
-Auxilium Pharmaceuticals
-Auxogyn, Inc.
-Avanir Pharmaceuticals
-Avant Immunotherapeutics
-Avanti Polar Lipids, Inc.
-Avantis Medical Systems
-AVAX Technologies
-Avedro, Inc.
-Aventis Pharmaceuticals
-Aventyn, Inc.
-AVEO Pharmaceuticals, Inc.
-Avera Pharmaceuticals
-Avexa
-AVI BioPharma, Inc.
-Avid Radiopharmaceuticals
-Avidia
-Avigen
-AviGenics
-Avila Therapeutics
-Avinger, Inc.
-AVIR Green Hills Biotechnology AG
-Avita Medical Americas, LLC
-Avraham Pharmaceuticals Ltd
-Avva Rus, JSC
-Awenydd GmbH
-Axaron Bioscience AG
-Axcan Pharma
-Axcentua Pharmaceuticals AB
-Axelar AB
-AxioMed Spine Corporation
-Axis Shield Diagnostics Ltd
-AxoGen, Inc
-Axxonis Pharma AG
-Ayanda AS
-AZ Jan Palfijn Gent
-Azaya Therapeutics, Inc.
-Azelon Pharmaceuticals
-Azevan Pharmaceuticals
-Aziende Chimiche Riunite Angelini Francesco S.p.A
-Azimuth Therapy Ltd.
-Azur Pharma, Inc
-AZ-VUB
-B. Braun Medical SA
-B. Braun Melsungen AG
-BÃ‚RRX Medical, Inc.
-Baker Norton Pharmaceuticals
-Balt International
-Bang & Olufsen Medicom
-Barnev, Inc.
-BaroSense Inc.
-Barr Laboratories
-Barrier Therapeutics/ Stiefel, a GSK Company
-Barron Associates, Inc.
-BASF
-Basilea Pharmaceutica
-Bavarian Nordic
-Baxano, Inc.
-Baxter BioScience
-Baxter Healthcare Corporation
-Bayer
-Bayer Healthcare Pharmaceuticals, Inc.
-Bayer HealthCare, Diabetes Care
-Bayer Schering Pharma
-Bayhill Therapeutics
-Baylis Medical Company
-BBN Technologies
-BC Research Inc.W
-Beckloff Associates, Inc.
-Becton, Dickinson and Company
-Beghin-Meiji
-Behavioral Health Services, Inc.
-Beike Biotech India Pvt.ltd
-Bellicum Pharmaceuticals
-Bellsystem24 , Inc.
-Bellus Health Inc
-BeneChill, Inc
-Benesis Corporation
-Berlin Heart, Inc
-Berlin-Chemie Menarini
-Berufsverband Deutscher Rheumatologen
-Best Vascular, Inc.
-Beta-Stim Ltd.
-Beximco
-Bezoloven, Inc.
-BG Medicine, Inc
-Bharat Biotech International Limited
-Bharat Serums and Vaccines Limited
-BIAFFIN GmbH
-Bial - Portela C S.A.
-Binex
-BioActor
-BioAlliance Pharma SA
-BioAnaLab
-BioBalance Corporation
-BioCancell Therapeutics Ltd
-Bio-Cancer Treatment International Limited
-BioCardia, Inc.
-Biocoat
-Biocodex
-Biocompatibles UK Ltd
-Biocon Limited
-BioControl Medical
-BioCryst Pharmaceuticals
-BioCytics, Inc.
-Biodel
-BioDelivery Sciences International
-BioElectronics Corporation
-Bioenergy Life Science, Inc.
-Bioenvision
-Bioforce AG
-BioForm Medical, Inc.
-BioFortis
-Biogen Idec
-Bioheart, Inc.
-BioHorizons, Inc.
-Bioiberica
-BioIncept LLC
-BioInvent International AB
-Bio-K Plus International Inc.
-Biokine Therapeutics Ltd
-Biokos Farma srl
-Biolab Sanus Farmaceutica
-Biolert
-Biolex Therapeutics, Inc.
-Biolight AB
-BioLineRx, Ltd.
-Biolipox AB
-BioLogic Engineering, Inc.
-Biologische Heilmittel Heel GmbH
-bioLytical Laboratories
-BioMarck Pharmaceuticals, Ltd.
-BioMarin Pharmaceutical
-BioMarin/Genzyme LLC
-BioMAS Ltd
-Biomatlante
-Biomed Research & Technologies, Inc.
-Biomedical Development Corporation
-Bio-Medical Research, Ltd.
-Bio-Medisinsk Innovasjon
-Biomedisyn Corporation
-Biomerieux
-Biomerix
-Biomet Biologics, LLC
-Biomet Japan, Inc.
-Biomet Nederland BV
-Biomet Norge A.S.
-Biomet Orthopedics, LLC
-Biomet Sports Medicine, LLC
-Biomet U.K. Ltd.
-Biomet, Inc.
-BioMimetic Therapeutics
-Biomoda Inc.
-BioMS Technology Corp.
-BiondVax Pharmaceuticals ltd.
-Bioness Inc
-Bionomics Limited
-Bionor Immuno AS
-Bionorica Research GmbH
-Bionovo
-BioNumerik Pharmaceuticals, Inc.
-BioPartners GmbH
-Biopeutics Co., Ltd
-BioPhausia
-BioPheresis GmbH
-BioPro Medical Ltd
-BioProtect
-Biopure Corporation
-BioResponse
-BIOrest Ltd.
-BioSante Pharmaceuticals
-Bio-Scaffold International Pte Ltd
-Biosense Webster EMEA
-Biosense Webster, Inc.
-Biosensors Europe SA
-Biosite
-Bioskin GmbH
-Biospecifics Technologies Corp.
-BioSpherix
-Biostime, Inc. (Guangzhou)
-Biostir, Inc.
-BioStratum
-BioSurface Engineering Technologies, Inc
-Biosyn
-BioSync Scientific Pvt. Ltd.
-Biosynexus Incorporated
-BioSyntech Canada Inc.
-Biota Scientific Management Pty Ltd
-Biotec Pharmacon ASA
-Biotech Equity Partners Pty Ltd
-BioTech Tools S.A.
-Biotechnology Institute IMASD
-Biotectid GmbH
-Biotest
-Biotest Pharmaceuticals Corporation
-BioTex, Inc.
-Biothera
-Biotie Therapies Corp.
-Biotronik AG
-Biotronik France
-Biotronik SE & Co. KG
-Biotronik, Inc.
-Biovail Laboratories International SRL
-Bioven Sdn. Bhd.
-BioVentrix
-Biovest International
-BioVex Limited
-Biovitrum
-Biowave Corporation
-BioWest Therapeutics Inc
-Bioxtract SA
-BiPar Sciences
-Birch Point Medical
-Birken GmbH
-Bitop AG
-Bledina
-BN ImmunoTherapeutics
-Boehringer Ingelheim Pharmaceuticals
-Boehringer Mannheim
-BOIRON
-Bolton Medical
-Boneca Corporation
-Boryung Pharmaceutical Co., Ltd
-Boston Scientific Corporation
-Bostwick Therapeutics
-Brabant Research
-Bracco Diagnostics, Inc
-Bradmer Pharmaceuticals Inc.
-Brahms AG
-Brahms France
-BrainCells Inc.
-BrainsGate
-Brainsway
-Braintree Laboratories
-Brava
-BRC Operations Pty. Ltd.
-BreakThrough Therapeutics
-Breathe Technologies, Inc.
-BreathID
-BreathQuant Medical, LLC
-Breezy Industries Ltd.
-BREG, Inc
-BridgePoint Medical
-Bristol-Myers Squibb
-Broncus Technologies
-BSN Medical Inc
-BSN-JOBST Inc.
-BSP Biological Signal Processing Ltd.
-Bukwang Pharmaceutical
-Bunker Industria Farmaceutica Ltda.
-Burroughs Wellcome
-Byrne Healthcare
-BZL Biologics
-C. R. Bard
-C.B. Fleet Company, Inc.
-CABYC
-Cadence Pharmaceuticals
-Cadila Pharnmaceuticals
-Cahaba Pharmaceuticals
-Calando Pharmaceuticals
-Calhoun Vision, Inc.
-Calibra Medical, Inc.
-Calistoga Pharmaceuticals, Inc.
-Calixa Therapeutics, Inc.
-Callisto Pharmaceuticals
-Camargo Pharmaceutical Services
-Cambridge Heart Inc.
-Cambridge Theranostics Ltd.
-Cameron Health, Inc.
-CanBas Co. Ltd.
-CancerVax Corporation
-Candela Corporation
-Can-Fite BioPharma
-Cangene Corporation
-Canyon Pharmaceuticals, Inc.
-Capnia, Inc.
-Capstone Therapeutics
-Cara Therapeutics, Inc.
-Carag AG
-Carbon Medical Technologies
-Carbylan BioSurgery, Inc.
-Cardiac Concepts, Inc.
-Cardiac Regeneration Technologies, LLC
-Cardialysis BV
-Cardica, Inc
-Cardio3 BioSciences
-CardioDex
-CardioDx
-CardioDynamics
-CardioFocus
-Cardiokine Biopharma, LLC
-CardioKine Inc.
-CardioKinetix, Inc
-CardioMag Imaging
-Cardiome Pharma
-CardioMEMS
-Cardiometabolics
-Cardionet
-CardioPolymers, Inc.
-CardioVascular BioTherapeutics, Inc.
-Cardiovascular Imaging Technologies
-Cardiovascular Systems Inc
-Cardioxyl Pharmaceuticals, Inc
-Cardium Therapeutics
-Carestream Health Inc.
-Cargill
-CaridianBCT
-Carl Zeiss Meditec, Inc.
-Carl Zeiss Surgical GmbH
-Carolinas Healthcare System
-Carticept Medical, Inc
-CAS Medical Systems, Inc.
-Cassella-med GmbH & Co. KG
-Catalysis SL
-Catalyst Pharmaceutical Partners, Inc
-Cato Research
-CBA Research
-CD Pharma India Pvt. Ltd.
-CDG Therapeutics, Inc.
-Celator Pharmaceuticals
-Celera
-Celgene Corporation
-Cell Biotech Co., Ltd.
-Cell Genesys
-Cell Medica Ltd
-Cell Pathways
-Cell Therapeutics
-Cell Therapeutics|Bayer
-Celladon Corporation
-CellCoTec B.V.
-Celldex Therapeutics
-Cellectar, Inc
-Cellegy Pharmaceuticals
-Cellerix
-Cellgate
-CellMed AG
-CellPoint LLC
-Celltrion
-Cellular Sciences
-Cellvizio Inc.
-CeloNova BioSciences, Inc.
-Celsion
-Celtic Pharma Development Services
-Cempra Pharmaceuticals
-CeNeRx BioPharma Inc.
-Centaur Pharmaceuticals
-Centocor BV
-Centocor Ortho Biotech Services, L.L.C.
-Centocor, Inc.
-Centro A.F. de Estudios Tecnologicos, S.A.
-Cephalon
-Ception Therapeutics
-Ceragenix Pharmaceuticals
-CeraPedics, Inc
-Ceregene
-Cerevast Therapeutics, Inc.
-Cerexa, Inc.
-Cerimon Pharmaceuticals
-Cerimon Pharmaceuticals|PPD
-Cerulean Pharma Inc.
-Cerulean Pharma Inc.
-Cerulean Pharma, Inc.
-Cerus Corporation
-Cetero Research
-Chadwick Optical Inc.
-Chakshu Research, Inc.
-Chavah Pty Ltd
-Cheetah Medical Inc.
-Chelsea Therapeutics
-Chembio Diagnostic Systems, Inc.
-ChemGenex Pharmaceuticals
-ChemGenex Therapeutics
-ChemoCentryx
-CherryPharm
-Chesson Laboratory Associates, Inc
-Chestnut Medical Technologies
-Chevron
-CHF Solutions
-Chiesi Farmaceutici S.p.A
-Chiesi Farmaceutici S.p.A.
-Chiesi Pharmaceuticals Inc.
-Chiltern International Inc.
-Chiltern Pesquisa Clinica Ltda
-Chimeric Therapies
-Chimerix
-ChiRhoClin, Inc.
-Chiron Corporation
-Chong Kun Dang Pharmaceutical
-Chongqing Jiachen Biotechnology Ltd.
-ChoongWae Pharma Corporation
-Chroma Therapeutics
-Chrono-Log Corporation
-Chrysantis, Inc.
-Chugai Pharma USA
-Chugai Pharmaceutical
-Ciba Vision, Inc.
-CID - Carbostent & Implantable Devices
-Cierra
-Cifarma Cientifica Farmaceutica Ltda
-Cipher Pharmaceuticals Inc.
-Ciphergen Biosystems
-Cipla
-Cipla Medpro
-Circassia Limited
-CircuLite, Inc.
-Cita NeuroPharmaceuticals
-Citizen Systems Japan Co., Ltd.
-CJ Cheiljedang Corporation
-CL Medical
-Clalit Health Services
-Clarus Therapeutics, Inc.
-Clasado
-Clavis Pharma
-Clearstream Technologies Ltd.
-Cleveland BioLabs
-Cleveland Medical Devices Inc
-ClinAssess GmbH
-Clinical Innovations
-Clinigene International Ltd.
-ClinPhone, Inc.
-Clinquest, Inc.
-ClinStar
-Clinuvel Pharmaceuticals Limited
-Closure Medical Corporation
-CloSys Corporation
-CMED HIFU Development Corporation
-CMP Therapeutics Ltd
-CNF Pharma
-Cnoga Medical Ltd.
-CNS Response
-Coapt Systems
-CoAxia
-Cochlear
-CoDa Therapeutics Inc.
-Codman & Shurtleff
-Coeruleus Ltd.
-Cogentus Pharmaceuticals
-Cognis
-Cognition Pharmaceuticals, LLC
-Cognitive Research Corporation
-CollaGenex Pharmaceuticals
-Coloplast A/S
-Colotech A/S
-CoLucid Pharmaceuticals
-Columbia Laboratories
-ColumbiSchering-Plough
-CombinatoRx
-CoMentis
-Commitum AB
-Complen Health GmbH
-Conatus Pharmaceuticals Inc.
-Conceivex
-Concentric Medical
-Concordia Pharmaceuticals, Inc
-Conducted under Salus Pharma, Inc.
-Confluent Surgical
-ConjuChem
-ConocoPhillips
-Conor Medsystems
-Control Delivery Systems
-Contura
-ConvaTec Inc.
-Cook Biotech Incorporated
-Cook Endoscopy
-Cook Ireland, Ltd.
-Cook Japan Incorporated
-Cook Medical Incorporated
-CoolSystems, Inc.
-CoolTouch, Inc
-Cooper Companies
-Coopervision, Inc.
-Copharos
-Corautus Genetics
-Corcept Therapeutics
-Cordis Corporation
-CoRepair, Inc.
-Coria Laboratories, Ltd.
-Corimmun GmbH
-Corin
-Corindus Inc.
-Corixa Corporation
-Corline Systems AB
-Cornerstone Pharmaceuticals, Inc.
-Coronado Biosciences, Inc.
-Corscience, Inc.
-Cortex Pharmaceuticals
-Corthera, Inc.
-Cortria Corporation
-Corventis, Inc.
-Cosmeta
-Cosmetique Active International
-Cosmo Bioscience
-Cosmo Technologies Ltd
-Cougar Biotechnology, Inc.
-Covance
-Covidien
-CovX Research, LLC
-CP Diagnostics, Inc.
-CPEX Pharmaceuticals Inc.
-Crafoord Foundation
-Creabilis Therapeutics
-Create Research
-Creative Peptides Sweden Inc.
-CreoMed, Inc.
-CristÃ¡lia Produtos QuÃ­micos FarmacÃªuticos Ltda.
-Critical Biologics Corporation
-Critical Diagnostics
-Critical Therapeutics
-CritiTech, Inc..
-CRM Biometrics GmbH
-Croel AB
-Crospon
-Crosstrees Medical Inc.
-Crucell Holland BV
-Crux Biomedical
-CryoCath Technologies Inc.
-CryoLife, Inc.
-CrystalGenomics, Inc.
-CSA Medical, Inc.
-CSC Pharmaceuticals
-CSL Behring
-CSL Limited
-CTI-1, LLC
-Cubist Pharmaceuticals
-Cumberland Pharmaceuticals
-Cura Biotech LLC
-Curaden Swiss
-CuraGen Corporation
-Cure Therapeutics
-Curemark
-CureTech Ltd
-CureVac GmbH
-Curis, Inc.
-Cutera Inc.
-CV Technologies
-CV Therapeutics
-CVRx, Inc.
-Cyberonics
-Cyclacel Pharmaceuticals, Inc.
-CyDex Pharmaceuticals, Inc.
-Cylene Pharmaceuticals
-Cypress Bioscience, Inc.
-Cyrenaic Pharmaceuticals
-Cytavis Biopharma GmbH
-Cytheris SA
-Cytheris, Inc.
-Cyto Pulse Sciences, Inc.
-Cytochroma Inc.
-CytoCore, Inc.
-CytoDyn, Inc.
-Cytogen Corporation
-Cytograft Tissue Engineering
-Cytokine PharmaSciences
-Cytokinetics
-Cytomedix
-Cytonet GmbH & Co. KG
-CytoPharm, Inc.
-CytoPherx, Inc
-Cytopia Research Pty Ltd
-Cytori Therapeutics
-Cytos Biotechnology AG
-Cytotech Labs, LLC
-CytoVac A/S
-Cytran
-CytRx
-Daewoong Pharmaceutical Co. LTD.
-Dafra Pharma
-Daiichi Pharmaceuticals
-Daiichi Sankyo Co., Ltd.
-Daiichi Sankyo Europe, GmbH
-Daiichi Sankyo Inc
-Daiichi Sankyo Inc.
-Dainippon Sumitomo Pharma
-Dainippon Sumitomo Pharma America
-Dainippon Sumitomo Pharma Europe LTd.
-Dako
-Danisco
-Dannon Company, Inc.
-Danone Research
-Danube Pharmaceuticals, Inc.
-DARA Therapeutics
-Darier
-Datascope Corp.
-Datascope Patient Monitoring
-Daval International Limited
-Davita Clinical Research
-Daxor Corporation
-DCS Innovative Diagnostik Systeme
-Debiopharm S.A.
-Debiovision
-Deciphera Pharmaceuticals LLC
-deCODE genetics
-Deep Breeze
-DEKK-TEC, Inc.
-Deltanoid Pharmaceuticals
-Dendreon
-Dentsply International
-Depomed
-DePuy International
-DePuy Mitek
-DePuy Orthopaedics
-DePuy Spine
-DePuy-Acromed, Inc.
-Derm Research @ 888 Inc.
-Derma Sciences, Inc.
-Desitin Arzneimittel GmbH
-Devax, Inc.
-DeveloGen Israel, Ltd.
-Dexa Medica Group
-Dexcel Pharma Technologies Ltd.
-DexCom, Inc.
-Dey
-Dharma Therapeutics Inc.
-Dhp Korea Co., Ltd.
-Diabetech
-Diabetes Care Center
-Diabetica Solutions Inc.
-Diacrin/Genzyme Corporation LLC
-Diagnostic Technology
-Diagnostica Stago
-DiaKine Therapeutics, Inc.
-Diamed Corporation
-Diamyd Inc
-Diamyd Therapeutics AB
-Diasome Pharmaceuticals
-DiaTech Oncology
-Diffusion Pharmaceuticals LLC
-Digestive Care, Inc.
-DigNA Biotech
-Dilafor AB
-DiObex
-Direct Therapeutics
-Dirinco B.V.
-Discovery Laboratories
-DJO Incorporated
-DNage B.V.
-DNP Canada
-DompÃ© pha.r.ma s.p.a.
-Dong-A Pharmaceutical Co., Ltd.
-Dong-A PharmTech Co., Ltd.
-Doublle Bioproduct Inc
-DOV Pharmaceutical, Inc.
-Dow Pharmaceutical Sciences
-D-Pharm Ltd.
-Dr. Carson Liu Med Corp.
-Dr. Reddy's Laboratories Limited
-Dr. Willmar Schwabe GmbH & Co. KG
-DSM Ltd.
-DSM Nutritional Products, Inc.
-Duchesnay Inc.
-Dune Medical Devices
-DuoCort AB
-Dupont Applied Biosciences
-Dupont Merck
-Duramed Research
-Durect
-Durect Corporation
-DUSA Pharmaceuticals, Inc.
-Dyax Corp.
-Dynamic Health Resources
-Dynamics Research Corporation
-Dynasplint Systems, Inc.
-Dynatherm Medical Inc.
-Dynavax Technologies Corporation
-Dynogen Pharmaceuticals
-DynPort Vaccine Company LLC, A CSC Company
-Eagle Pharmaceuticals, Inc.
-Eagle Vision Pharmaceutical Corp.
-EarlySense Ltd.
-Ebewe Neuro Pharma GmbH
-EBI, LLC dba Biomet Spine, Biomet Trauma, Biomet Osteobiologics and Biomet Bracing
-Echosense Ltd.
-Ecobrands, Ltd.
-EDAP Technomed
-EDAP TMS S.A.
-Edmond Pharma
-Edwards Lifesciences
-Egalet a/s
-EGEN, Inc.
-Ego Pharmaceuticals
-Eiger BioPharmaceuticals
-Eisai China Inc.
-Eisai Farmaceutica, S.A.
-Eisai GmbH
-Eisai Inc.
-Eisai Korea Inc.
-Eisai Limited
-Ekips Technologies
-EKR Therapeutics, Inc
-ELA Medical, Inc.
-Elan Drug Delivery Inc
-Elan Pharmaceuticals
-elbion AG
-ElectroCore LLC
-Electromed, Inc.
-Electro-Optical Sciences
-Eleos, Inc.
-Elesta S.R.L.
-Elgene Chemical
-Eli Lilly and Company
-Elixir Medical Corporation
-Elixir Pharmaceuticals
-Elvir SAS
-EMB Statistical Solutions, LLC
-Embera NeuroTherapeutics, Inc.
-Embil Pharmaceutical Co. Ltd
-EMD Serono
-Emergent BioSolutions
-EMET Pharmaceuticals, LLC
-Emisphere Technologies, Inc.
-Emissary International LLC
-EMKinetics, Inc
-Emmaus Medical, Inc.
-Emphasys Medical
-Emphycorp
-Empi, A DJO Company
-Enanta Pharmaceuticals
-Encore Medical, L.P.
-Encysive Pharmaceuticals
-Endo Pharmaceuticals Solutions Inc.
-Endocare, Inc.
-Endocyte
-EndoGastric Solutions
-Endogun Medical Systems Ltd.
-Endologix
-EndoPhotonix, Inc.
-Endovasc
-EndoVx, Inc.
-Endymion Medical Ltd
-Energex Systems, Inc.
-Engineers & Doctors Wallsten Medical Group
-Enobia Pharma
-Ensure Medical
-Entellus Medical, Inc.
-EnteroMedics
-Enteron Pharmaceuticals
-EntreMed
-ENTrigue Surgical, Inc.
-Enturia
-Envita Medical Center, Inc.
-EnVivo Pharmaceuticals, Inc.
-Envoy Medical Corporation
-Enzon Pharmaceuticals, Inc.
-EnzymeRx
-Enzymotec
-EnzySurge
-EP MedSystems
-Epeius Biotechnologies
-EpiCept Corporation
-Epigenomics, Inc
-Epimmune
-Epiphany Biosciences
-Epix Pharmaceuticals, Inc.
-Erchonia Medical, Inc.
-Erimos Pharmaceuticals
-Erkim Ilac A.S.
-erring Pharmaceuticals
-ERYtech Pharma
-ESanofi-Aventis
-ESBATech AG
-ESM Technologies, LLC
-Esperance Pharmaceuticals Inc
-Essentialis, Inc.
-Essex Pharma GmbH
-Essilor International
-Ethical Oncology Science
-Ethicon Endo-Surgery
-Ethicon Endo-Surgery (Europe) GmbH
-Ethicon, Inc.
-Etwal Ltd.
-Eudax S.r.l.
-Eunoe
-Eurand S.p.A.
-Eurocor GmbH
-Eurofarma Laboratorios Ltda
-Eurolens Research
-European Group for Blood and Marrow Transplantation
-EUSA Pharma (US), Inc.
-ev3 Endovascular, Inc.
-Evalve
-EVE Medical Systems Ltd.
-Evoke Pharma
-Evolutec Group
-Evotec Neurosciences GmbH
-Exactech
-Exalenz Bioscience LTD.
-Excaliard Pharmaceuticals, Inc.
-Excel PharmaStudies, Inc.
-Excel-Tech Ltd.
-Exciton Technologies Inc.
-Exelixis
-Eximias Pharmaceutical
-Exonhit Therapeutics
-Exsulin Corporation
-ExxonMobil Biomedical Sciences, Inc.
-Eyegate Pharmaceuticals, Inc.
-EyeKon Medical, Inc.
-Eyeon Therapeutics, Inc.
-EyeSense GmbH
-Eyetech Pharmaceuticals
-Facet Biotech
-Facet Solutions, Inc.
-Faes Farma, S.A.
-Farmacon
-Farmoquimica S.A.
-Faron Pharmaceuticals Ltd
-Fate Therapeutics
-Favrille
-Femasys Inc.
-FemmePharma Global Healthcare, Inc.
-Fermiscan Ltd
-Ferndale Laboratories, Inc.
-Ferozsons Laboratories Ltd.
-Ferrer Internacional S.A.
-Ferring Pharmaceuticals
-Ferris Mfg. Corp.
-FerroKin BioSciences, Inc.
-Ferrosan AS
-Fertiligent
-FeRx
-FFF Enterprises
-FGK Clinical
-FGK Clinical Research GmbH
-Fibrex Medical Research & Development GmbH
-FibroGen
-Finnsusp Ltd
-First Horizon
-Fisher and Paykel Healthcare
-Fisons
-Fitter International Inc.
-Five Prime Therapeutics, Inc.
-Flax Canada 2015 Inc
-Flexuspine, Inc.
-FlowMedic
-FlowMedica, Inc.
-Fluoropharma, Inc.
-Focus Diagnostics, Inc.
-Focus Surgery
-FoldRx Pharmaceuticals
-Fonden til LÃ
-Forbes Medi-Tech
-Foresight Biotherapeutics
-Foresight Regulatory Strategies, Inc.
-Forest Laboratories
-FORSIGHT Vision3
-Fovea Pharmaceuticals SA
-FoxHollow Technologies
-Fralex Therapeutics
-Free and Clear, Inc
-Free Radical Sciences
-Fresenius AG
-Fresenius Biotech GmbH
-Fresenius Biotech North America
-Fresenius Kabi
-Fresenius Kabi Japan
-Fresenius Kabi Oncology Ltd.
-Fresenius Medical Care France
-Fresenius Medical Care North America
-Fresenius Medical Care North America|Abbott
-Fresenius Medical Care North America|Medical Nutrition USA, Inc.
-FRM
-Fugeia NV
-Fujirebio Diagnostics, Inc.
-Fujisawa GmbH
-Fujisawa Pharmaceutical Co
-Fulcrum Pharma (Europe) Ltd
-Fulford India Limited
-Fundacio Clinic
-G D Searle
-Galapagos NV
-Galaxy Pharma (Pvt) Limited
-Galderma
-Galderma Brasil Ltda.
-Galderma Laboratories, L.P.
-Galena Biopharma, Inc.
-Galil Medical
-Galmed Medical Reserch
-Galsor S.r.l.
-Gambro Dialysatoren GmbH
-Gambro Lundia AB
-Gambro Renal Products, Inc.
-GAMIDA
-Gamma Medica-Ideas
-GammaCan
-Ganymed Pharmaceuticals AG
-Gardia Medical
-Garnet BioTherapeutics, Inc.
-Gaymar Industries, Inc.
-GE Healthcare
-Gebro Pharma GmbH
-Gedeon Richter Ltd.
-GEIGY Pharmaceuticals
-Geistlich Pharma AG
-GELITA
-Gem Pharmaceuticals
-Gemin X
-Genaera Corporation
-Genaissance Pharmaceuticals
-GenBasix Incorporated
-Gencare Incorporated
-Gene Logic
-Gene Security Network
-GeneFerm Biotechnology Co., Ltd.
-Genelabs Technologies
-Genelux Corporation
-Genentech
-General Nutrition Center, Inc
-Generex Biotechnology Corp.
-Generic Devices Consulting, Inc.
-Genetic Immunity
-Genexine Co., Ltd.
-Genitope Corporation
-Genmab
-Geno LLC
-Genomas, Inc
-Genovate Biotechnology Co., Ltd.
-Gen-Probe, Incorporated
-GenSpera, Inc.
-Genta Incorporated
-Gentium SpA
-Genuine Health
-GenVec
-Genzyme
-Gerber Products Company
-Gerhard Pejcl Medizintechnik GmbH
-Geron Corporation
-Getz Pharma
-GfE Medizintechnik GmbH
-GI Dynamics
-GI Stimulation, Inc.
-GI View Ltd.
-Gilead Sciences
-Given Imaging Ltd.
-Glaukos Corporation
-Glaxo Smith Kline Biovail
-Glaxo Wellcome
-GlaxoSmithKline
-GlaxoSmithKlineFoundation
-Glenmark Pharmaceuticals Europe Ltd. (R&D)
-Global Biotech
-Global Infusions
-GlobeImmune
-Globus Medical Inc
-Gloucester Pharmaceuticals
-Glycadia
-Glycaemic Index Testing, Inc.
-GlycaNova Norge AS
-Glycemic Index Laboratories, Inc
-GlycoMimetics Incorporated
-Glycotex, Inc.
-GlycoVaxyn AG
-Glytech, Inc
-GMP Endotherapeutics
-Golden Biotechnology Corporation
-GPC Biotech
-GP-Pharm
-GrÃ¼nenthal GmbH
-Graceway Pharmaceuticals, LLC
-Gradalis, Inc.
-Greer Laboratories
-Grifols Biologicals Inc.
-Groupe Ouest Est d'Etude des LeucÃ©mies et Autres Maladies du Sang GOELAMS
-GTC Biotherapeutics
-GTC Nutrition
-GTx
-GuangZhou WeiShiBo Biotechnology Co., ltd
-Guerbet
-Guidant Corporation
-Guided Delivery Systems Inc.
-Guided Therapeutics
-GW Pharmaceuticals Ltd.
-Gynesonics
-H. Lundbeck A/S
-Haag Streit USA
-Haelan Products, Inc.
-Haemonetics Corporation
-Haffkine Bio-Pharmaceutical Corporation Ltd.
-HairDx, LLC
-HAL Allergy
-Halcygen Pharmaceuticals Limited
-Halozyme Therapeutics
-Halt Medical, Inc
-Hamad Medical Corporation
-Hamilton Health Sciences
-Hamilton Medical AG
-Hana Biosciences, Inc
-Handok Pharmaceuticals Co., Ltd.
-Hangzhou Jiuyuan Gene Engineering Co. Ltd.
-Hanmi Pharmaceutical Company Limited
-Harbinger Medical, Inc.
-Harbor Medical Inc.
-Harras Pharma Curarina GmbH
-Harrison Clinical Research
-Harvest Technologies
-Hawaii Biotech, Inc.
-HDH Medical Ltd
-Healingstone Co., Ltd.
-HealOr
-Health Dialog Analytic Solutions, Inc.
-Health Enhancement Products, Inc.
-Health Ever Bio-Tech Co., Ltd.
-Healthanywhere Inc.
-Healthcare Providers Direct, Inc.
-Healthcare Technology Systems, Inc.
-HealthCore, Inc.
-Healthpoint
-Healthsystem Plus
-HealthWatchSystems, Inc.
-Healthways, Inc.
-Heartscape Technologies, Inc.
-HeartWare, Inc.
-Heidelberg Metasystems GmbH
-Helicor
-Helix Medical Systems
-Helse Nord
-Helsinn Healthcare SA
-Helsinn Therapeutics (U.S.), Inc
-HEM Research
-HemaQuest Pharmaceuticals Inc.
-HemCon Medical Technologies, Inc
-Hemispherx Biopharma
-Hemosol
-Hemosphere, Inc
-Hemosphere, Inc.
-HenKan Pharmaceutical Co., Ltd.
-Henogen
-Hepa Wash GmbH
-Hepasense
-Hepasome Pharmaceuticals
-Hetero USA
-Hill-Rom
-Hisamitsu Farmaceutica do Brasil Ltda
-Hisamitsu Pharmaceutical Co., Inc.
-Histogenics Corporation
-Hoechst Marion Roussel
-Hoffmann-La Roche
-Hollis-Eden Pharmaceuticals
-Hologic, Inc.
-Hope Pharmaceuticals
-Horizon Therapeutics, Inc.
-Hormos Medical Ltd.
-Hospira, Inc.
-Hoya ConBio, Inc.
-Hoya Surgical Optics, Inc.
-HRA Pharma
-Hualan Biological Bacterin Co. Ltd
-Human Genome Sciences
-Humanetics Corporation
-Humax Pharmaceutical
-Hunter-Fleming Ltd
-Hutchinson Technology Inc
-Hutchinson Technology Inc 
-Hutchison Medipharma Limited
-Hygieia, Inc
-Hyperion Therapeutics, Inc.
-HyperMed, Inc
-Hypo-Safe A/S
-i3 Research
-i3 Statprobe
-iBalance Medical
-IBD Column Therapies International AB
-IBSA Institut Biochimique SA
-Icagen
-Ichor Medical Systems Incorporated
-ICN Pharmaceuticals
-iCo Therapeutics Inc.
-ICON Bioscience Inc
-ICON Clinical Research
-ICOS Corporation
-ICOS-Texas Biotechnology
-ID Biomedical Corporation, Quebec
-IDEA AG
-Ideal Implant Incorporated
-Idenix Pharmaceuticals
-Idera Pharmaceuticals, Inc.
-IDev Technologies, Inc.
-Idiag AG
-Idun Pharmaceuticals
-I-Flow
-Igefarma Laboratorios S.A.
-Ikaria Holdings Inc.
-ikfe-CRO GmbH
-ILEX Oncology Services, Incorporated
-Illumina, Inc.
-IlluminOss Medical, Inc.
-Ilypsa
-ImaRx Therapeutics
-ImClone LLC
-IMD Tech Ltd
-IMK Almene Fond
-immatics Biotechnologies GmbH
-Immtech Pharmaceuticals, Inc
-Immune Cell Therapy Inc.
-Immune Control
-Immune Technologies & Medicine GmbH
-Immunex Corporation
-Immunicon
-ImmunoFrontier, Inc.
-ImmunoGen, Inc.
-Immunomedics, Inc.
-Immunotec Inc.
-Immunotope
-Immuno-US
-ImmunoVaccine Technologies, Inc.
-Immunovative Therapies, Ltd.
-Immutep S.A.
-Impact Medical Solutions
-IMPAX Laboratories, Inc.
-ImpediGuide Ltd
-ImpediMed Limited
-Impliant, Ltd.
-Impulse Dynamics
-Imsmed Incorporated
-Inamed
-Inamed Aesthetics
-INC Research Limited
-Incara Pharmaceuticals
-Incen AG
-Incept BioSystems, Inc.
-InCROM Europe Clinical Research
-Incyte Corporation
-Ineos Healthcare Limited
-Inex Pharmaceuticals
-InfaCare Pharmaceuticals Corporation
-Infinite Biomedical Technologies
-Infinity Pharmaceuticals
-Inflabloc Pharmaceuticals
-Inflazyme Pharmaceuticals Ltd
-Inflexxion
-InfraReDx
-InfraScan, Inc.
-Inion Oy
-InKine Pharmaceutical
-InLight Solutions
-Innate Pharma
-InnFocus LLC
-Innocell Corporation
-Innocoll Technologies
-Innogene Kalbiotech Pte. Ltd
-innoVactiv Inc.
-Innovative Implant Solutions
-Innovative Medical
-Innovative Neurotronics
-Innoventus Project AB
-Innovex, Inc
-Innovive Pharmaceuticals
-INO Therapeutics
-Inotek Pharmaceuticals Corporation
-Inovio Biomedical Corporation
-Inovise Medical
-InovoBiologic Inc.
-InSet Technologies
-InSightec
-InSightec-TxSonics
-InSite Vision
-Insmed
-Inspiration Biopharmaceuticals, Inc.
-Inspire Pharmaceuticals
-InspireMD
-Institut CatalÃ  d'Oncologia
-Institut fÃ¼r Atemwegsforschung GmbH|UCB, Inc.
-Institut Pasteur
-Institut Rosell Lallemand
-Institut Straumann AG
-Institute of Medicinal Molecular Design, Inc.
-Instituto Bioclon S.A. de C.V
-Instituto Bioclon S.A. de C.V.
-Instituto Grifols, S.A.
-Insuline Medical Ltd.
-Insys Therapeutics Inc
-Intact Medical Corporation
-Intarcia Therapeutics
-Intec Pharma Ltd.
-Integra LifeSciences Corporation
-Integra LifeSciences Services
-Integral Orthopedics Inc.
-Integrated Therapeutics Group
-Integrity Applications Ltd.
-Integrity Neutraceuticals, Inc. Sarasota, FL
-Integrium
-InteKrin Therapeutics, Inc.
-IntelliGeneScan, Inc.
-Intelligent Medical Implants GmbH
-Intellikine
-Intendis GmbH
-Interactive Medical Developments
-Intercell AG
-Intercell USA, Inc.
-Intercept Pharmaceuticals
-Intercytex
-Interferon Sciences
-Intergenetics, Inc.
-InterHealth Nutraceuticals Incorporated
-Interlace Medical, Inc.
-Interleukin Genetics, Inc.
-Intermountain Health Care, Inc.
-InterMune
-International Biomedical Systems S.p.A.
-International Technidyne Corporation
-Interrad Medical
-Interventional Spine, Inc.
-IntraBiotics Pharmaceuticals
-Intracel
-IntraPump Infusion 
-Intrexon Corporation
-Introgen Therapeutics
-IntroMedic USA Inc.
-InVasc Therapeutics, Inc.
-Invatec S.p.A.
-Invatec, Inc.
-Invendo Medical GmbH
-Inverness Medical Innovations
-Inverseon, Inc.
-Invitrox
-Ioltech
-iOMEDICO AG
-Ion Channel Innovations
-IOPtima Ltd.
-IPCA Laboratories Ltd.
-Iperboreal Pharma Srl
-Ipsen
-IRCCS San Raffaele
-Iroko Pharmaceuticals, LLC
-Ironwood Pharmaceuticals, Inc.
-Irrimax Corporation
-IRX Therapeutics
-Ischemix, LLC
-ISDIN
-Isifer AB
-Isis Pharmaceuticals
-Isolagen Technologies, Inc.
-IsoRay Medical, Inc.
-Isotechnika
-Isotrace Technologies
-ISS, Inc.
-ISTA Pharmaceuticals
-i-Stat Corporation
-Italfarmaco
-Italfarmacoi
-I-Therapeutix, Inc.
-Ivoclar Vivadent
-Ivy Life Sciences, Co., Ltd
-IWK Health Centre
-Izun Pharma Ltd
-J&M Shuler
-J. Uriach and Company
-J~pharma
-JAbbs, Inc
-Jacobus Pharmaceutical
-JADO Technologies GmbH
-JANSSEN Alzheimer Immunotherapy Research & Development, LLC
-Janssen Cilag N.V./S.A.
-Janssen Cilag Pharmaceutica S.A.C.I., Greece
-Janssen Cilag S.A.S.
-Janssen Korea, Ltd., Korea
-Janssen Pharmaceutica N.V., Belgium
-Janssen Pharmaceutical K.K.
-Janssen Pharmaceuticals
-Janssen Research & Development, LLC
-Janssen Research & Development, LLC
-Janssen, LP
-Janssen-Cilag A.G., Switzerland
-Janssen-Cilag B.V.
-Janssen-Cilag Farmaceutica Ltda.
-Janssen-Cilag G.m.b.H
-Janssen-Cilag International NV
-Janssen-Cilag Ltd.
-Janssen-Cilag Ltd.,Thailand
-Janssen-Cilag Pty Ltd
-Janssen-Cilag S.A., (formerly Janssen Sp)
-Janssen-Cilag S.p.A.
-Janssen-Cilag Turkey
-Janssen-Ortho Inc., Canada
-Janssen-Ortho LLC
-Jarrow Formulas Inc
-Jarrow Pharmaceuticals
-Jarvik Heart, Inc.
-Javelin Pharmaceuticals
-Jazz Pharmaceuticals
-JDS Pharmaceuticals
-Jeil Pharmaceutical Co., Ltd.
-Jeil-Kirin Pharmaceutical Inc.
-Jennerex Biotherapeutics
-Jerini AG
-Jerini Ophthalmic
-Jin Yang Pharmaceutical
-Johnson & Johnson
-Johnson & Johnson Consumer & Personal Products Worldwide
-Johnson & Johnson Medical, China
-Johnson & Johnson Pharmaceutical Research & Development, L.L.C.
-Johnson & Johnson Pte Ltd
-Johnson & Johnson Taiwan Ltd
-Johnson and Johnson Medical
-Johnson and Johnson, S.A.
-Jolife AB
-Jomaa Pharma GmbH
-JSS Medical Research Inc.
-Jubilant Innovation Ltd.
-Juvantia Pharma Ltd
-Juvaris BioTherapeutics, Inc.
-Juvent, Inc
-Juventas Therapeutics, Inc.
-JW Medical Systems Ltd
-KAI Pharmaceuticals
-Kai Sensors, Inc.
-Kaken Pharmaceutical
-Kalaco Scientific, Inc.
-KaloBios Pharmaceuticals
-Kalypsys, Inc.
-Kamada, Ltd.
-Kaneka Pharma America Corporation
-KangLaiTe USA
-Kanisa Pharmaceuticals
-KARL STORZ ENDOSCOPY-AMERICA, Inc.
-KarmelSonix Ltd.
-Karo Bio AB
-KC BioMediX, Inc
-KCI USA, Inc.
-KDL Inc.
-Kemia, Inc
-Kendle International
-Kensey Nash Corporation
-Kenta Biotech Ltd
-KeraCure
-Keraderm LLC
-Keryx / AOI Pharmaceuticals, Inc
-Keryx Biopharmaceuticals
-Key Pharmaceuticals
-KGK Synergize Inc.
-Kiadis Pharma
-Kibow Biotech Inc.
-Kinamed Incorporated
-KineMed
-Kinetic Concepts, Inc.
-Kinetic Muscles
-Kineticure
-Kinex Pharmaceuticals, LLC
-King Pharmaceuticals
-King Pharmaceuticals Research and Development
-King Systems Corporation
-Kingfisher Healthcare
-Kissei Pharmaceutical Co., Ltd.
-Klein Buendel, Inc.
-Knopp Neurosciences
-Kolding Sygehus
-Kolis Scientific
-Konica Minolta Medical Imaging, USA
-Koning Corporation
-Korea Otsuka International Asia Arab
-Korea Otsuka Pharmaceutical Co.,Ltd.
-Koronis Pharmaceuticals.
-Kos
-Kos Pharmaceuticals
-Kowa Company, Ltd.
-Kowa Research Europe
-Kowa Research Institute, Inc.
-Kraft Foods
-Kremers Urban Development Company
-Kringle Pharma Europe AB
-Kringle Pharma, Inc.
-KRKA
-KuDOS Pharmaceuticals Limited
-Kuhnil Pharmaceutical Co., Ltd.
-Kureha Corporation
-Kuros Biosurgery AG
-KV Pharmaceutical Company
-Kyorin Pharmaceutical Co.,Ltd
-Kyowa Hakko Kirin Company, Limited
-Kyowa Hakko Kirin Pharma, Inc.
-Kyowa Hakko Kirin UK, Ltd.
-Kyowa Hakko Kogyo Co., Ltd.
-Kythera Biopharmecuticals
-L.A.L Clinica Pesquisa e Desenvolvimento Ltda.
-La Jolla Pharmaceutical Company
-LAAx, Inc.
-Lab Discoveries Ltd.
-Labcoat, Ltd.
-Labopharm Inc.
-Laboratoire franÃ§ais de Fractionnement et de Biotechnologies
-Laboratoires Arkopharma
-Laboratoires Bailleul-Biorga
-Laboratoires CARILENE
-Laboratoires Expanscience S.A.
-Laboratoires GenÃ©vrier
-Laboratoires Mayoly Spindler
-Laboratoires NEGMA
-Laboratoires Organon
-Laboratoires Takeda
-Laboratoires Techni Pharma
-Laboratoires Thea
-Laboratoires URGO
-Laboratorios Almirall, SA
-Laboratorios Casen-Fleet S.L.U.
-Laboratorios Goulart S.A.
-Laboratorios Leti, S.L.
-Laboratorios Osorio de Moraes Ltda.
-Laboratorios Silanes S.A. de C.V.
-Laboratorios Sophia S.A de C.V.
-Laborie Medical Technologies Inc.
-LaborMed Pharma S.A.
-Labtec GmbH
-Laerdal Medical
-Lallemand SAS
-Lantheus Medical Imaging
-Lantibio
-Lanx, Inc.
-Larada Sciences, Inc.
-Lavi Cardiatec
-LDR Spine USA
-Lederle Laboratories
-Lederle-Praxis Biologicals
-Lee's Pharmaceutical Limited
-Leiner Health Products
-LeMaitre Vascular
-LensAR Incorporated
-Lenstec Incorporated
-LenSx Lasers Inc.
-LEO Pharma
-Leortec Medical Systems Ltd
-Lescuyer Laboratory
-Levitronix
-Lexicon Pharmaceuticals
-Lexicor Medical Technology, LLC
-Lexigen Pharmaceuticals
-Lexington International, LLC
-LG Life Sciences
-Lianyungang Kanion Group, Ltd.
-LIDCO Limited
-Lidds AB
-Life Measurement Inc.
-LifeCell
-LifeCycle Pharma A/S
-LifeNet Health
-LifeScan
-LifeScan Canada
-LifeTime Pharmaceuticals
-Lifeway Foods, Inc.
-Ligand Pharmaceuticals
-Light Sciences LLC
-Light Sciences Oncology
-LightLab Imaging
-LigoCyte Pharmaceuticals, Inc.
-Limerick BioPharma
-Link Medicine Corporation
-Lipha Pharmaceuticals
-Lipid Therapeutics GmbH
-Lipomed
-LipoScience, Inc.
-Liposome
-Lipotek Pty Ltd
-Lithera, Inc
-Litron Laboratories
-Living Cell Technologies
-Livzon Pharmaceutical Group Inc.
-Logical Therapeutics
-Lombard Medical
-London Health Sciences Centre
-L'Oreal
-Loreal USA
-Lorus Therapeutics
-Lotus Pharmaceutical
-Lpath, Inc.
-LTB4 Sweden AB
-Lucid, Inc.
-Luitpold Pharmaceuticals
-Lumen Biomedical
-Lumen Therapeutics
-Lumenis Ltd.
-LumeRx
-Lundbeck Foundation
-Lundbeck Israel
-Lung Rx
-Lutonix, Inc.
-Lux Biosciences, Inc.
-LXR Biotechnology
-LyphoMed
-Lytix Biopharma AS
-M et P Pharma
-MacroChem Corporation
-Macrocure Ltd.
-MacroGenics
-MacuCLEAR, Inc.
-MacuSight, Inc.
-Madaus Inc
-Madaus, S.A.
-Magna Pharmaceuticals, Inc.
-Mallinckrodt
-Manhattan Pharmaceuticals
-Mannkind Corporation
-Mantecorp Industria Quimica e Farmaceutica Ltd.
-MAP Pharmaceuticals, Inc.
-Maquet Cardiovascular
-Marinus Pharmaceuticals
-Marjan Industria e Comercio ltda
-Marshall Edwards, Inc
-Martek Biosciences Corporation
-Maruho Co., Ltd.
-Maruishi Pharmaceutical
-MAST Biosurgery, AG
-Materna Laboratories
-Matrix Pharmaceutical
-Matrixx Initiatives, Inc.
-Mauna Kea Technologies
-Max Zeller Soehne AG
-Maxillent ltd.
-Maxim Pharmaceuticals
-Maxygen ApS
-Maxygen Holdings Ltd.
-Maxygen, Inc.
-Mazor Surgical Technologies, Ltd.
-McNeil Consumer & Specialty Pharmaceuticals, a Division of McNeil-PPC, Inc.
-MDS Nordion
-MDS Pharma Services
-Mead Johnson
-Mebiopharm Co., Ltd
-MED Institute, Incorporated
-MEDA Pharma GmbH & Co. KG
-Meda Pharmaceuticals
-medac GmbH
-Medacta International SA
-Medacta USA
-MedAppraise, Inc.
-Medarex
-MedaSorb Technologies, Inc
-Medco Health Solutions, Inc.
-Med-El Corporation
-Medgenics Medical Israel Ltd.
-Medicago
-Medical Acoustics LLC
-Medical Carbon Research Institute, LLC
-Medical Compression Systems
-Medical Developments International Limited
-Medicis Pharmaceutical Corporation
-Medifacts International Corporation
-Medifast, Inc.
-MedImmune LLC
-Meditor Pharmaceuticals Ltd.
-Medpace, Inc.
-Medtronic
-Medtronic BRC
-Medtronic Vascular
-Medtronic Xomed, Inc.
-Memgen, LLC
-Menarini Group
-Menicon Co., Ltd.
-Mentor Corporation
-Mepha Ltd.
-Merck
-Merck Frosst Canada Ltd.
-Merck GmbH Ã–sterreich
-Merck KGaA
-Merck Serono International SA
-Meritage Pharma, Inc.
-Merrion Pharmaceuticals, LLC
-Merz Pharmaceuticals GmbH
-Metabolic Solutions Inc.
-Metacure
-MGP Ingredients, Inc
-Microbicide Trials Network
-Microbio Co Ltd
-MicroDose Defense Products L.L.C.
-Microlife
-Micromet AG
-MicroPhage, Inc.
-MicroPort Medical (Shanghai) Co. Ltd.
-Micrus Endovascular Corporation
-Milkhaus Laboratory
-Millennium Pharmaceuticals, Inc.
-Millennix
-Miltenyi Biotec GmbH
-Minerva SA
-Minimed Pharmaceuticals
-Minnow Medical, Inc.
-Miramar Labs
-Miravant Pharmaceuticals
-Mission Pharmacal
-Missouri Breaks Research Industries, Inc.
-Mithra Pharmaceuticals
-Mitos Pharmaceuticals
-Mitsubishi Kagaku Bio-Clinical Laboratories, inc
-Mitsubishi Tanabe Pharma Corporation
-MIV Therapeutics Inc.
-Moberg Derma AB
-Mochida Pharmaceutical
-Modern Cell and Tissue Technology
-Moleac Pte Ltd.
-Molecular Insight Pharmaceuticals, Inc.
-Molecular Partners AG
-MolMed S.p.A.
-Molnlycke Health Care AB
-Momenta Pharmaceuticals, Inc.
-Monteris Medical
-MorePharma Corporation
-MorphoSys AG
-Morphotek
-Morria Biopharmaceuticals PLC
-Movetis
-Mpex Pharmaceuticals
-M's Science Corporation
-Mucos Pharma GmbH and Co
-Mucosal Therapeutics
-MultiGene Vascular Systems Ltd.
-Multimed
-Mundipharma AB
-Mundipharma K.K.
-Mundipharma Medical Company
-Mundipharma Oy
-Mundipharma Research GmbH & Co KG
-Mutual Pharmaceutical Company, Inc.
-Mylan Bertek Pharmaceuticals
-Mylan Laboratories
-Mylan Pharmaceuticals
-Mymetics Corporation
-Myocor
-Myomo
-MyoScience, Inc
-Myriad Pharmaceuticals
-Myriad Therapeutics, Inc.
-Mytogen, Inc.
-N.M.B. Medical Applications Ltd
-Nabi Biopharmaceuticals
-Nanjing Sike Pharmaceutical Co., Ltd.
-NanoBio Corporation
-Nanogen, Inc.
-NanoMed Pharmaceuticals
-NanoPass Technologies Ltd
-Nanospectra Biosciences, Inc.
-Nanosphere, Inc.
-Nanovibronix
-Napp Pharmaceuticals Limited
-Naryx Pharma
-Nasoform, LLC
-Nastech Pharmaceutical Company, Inc.
-NasVax Ltd
-NatImmune A/S
-NatureGen
-Naurex, Inc
-Navigant Biotechnologies
-Navigenics, Inc.
-nContact Surgical Inc.
-NDI Medical, LLC
-NDO Surgical, Inc.
-NeilMed Pharmaceuticals
-Nektar Therapeutics
-Nellcor
-NEMA Research, Inc.
-Neodyne Biosciences, Inc.
-Neogenix Oncology, Inc.
-Neopharm
-Neopharm, Co., Ltd.
-Neoprobe Corporation
-Neosil, Inc.
-NeoStrata Company, Inc.
-NeoTherapeutics
-Neotropix
-Neovacs
-Neovasc Inc.
-NeoVista
-Nephrian
-Nereus Pharmaceuticals, Inc.
-Nerviano Medical Sciences
-NestlÃ© Nutrition Corporate
-Nestle Clinical Nutrition
-Nestle Nutrition USA
-Neuralieve
-Neuraltus Pharmaceuticals, Inc.
-NeurAxon Inc.
-Neuren Pharmaceuticals Limited
-Neurex
-Neurim Pharmaceuticals Ltd.
-Neuro Diagnostic Devices
-Neuro Resource Group
-Neurobiological Technologies
-Neurocom
-Neurocrine Biosciences
-Neurogen Corporation
-NeurogesX
-Neurognostics
-Neurologix, Inc.
-Neuromed Pharmaceuticals
-Neuromonics, Inc.
-Neuronetrix, Inc.
-Neuronyx
-NeuroPace
-Neuropharm
-NeuroSearch A/S
-Neurostream Technologies G.P.
-NeuroSystec Corporation
-Neurotech Pharmaceuticals
-NeuroVista Corporation
-NeuTec Pharma
-New Health Sciences, Inc.
-NewBiotics
-NewLink Genetics Corporation
-Newport Pharmaceuticals International
-Newron Pharmaceuticals S.p.A.
-Nexan Inc
-NexMed, Inc.
-Nexpep Pty Ltd
-Nexstar Pharmaceuticals
-Nexstim Ltd
-Nextrials, Inc.
-NextWave Pharmaceuticals
-Nexus Oncology Ltd
-Nfocus Neuromedical
-NicOx
-NicOx Inc.
-NIH
-Nihon Pharmaceutical Co., Ltd
-Nile Therapeutics
-NiliMedix
-Nimbic Systems, LLC
-Nippon Kayaku Co.,Ltd.
-Nissan Chemical Industries
-Nitec Pharma AG
-Niti Medical Technologies Ltd.
-NiTi Surgical Solutions
-Nitric BioTherapeutics, Inc
-Nitromed
-NITROX, LLC
-NKBio Co.Ltd.
-NMT Medical
-Nobel Biocare
-Nobelpharma
-Nomir Medical Technologies
-Nonin Medical, Inc
-Non-Linear Technologies
-NoNO Inc.
-Norgine
-NormaTec Industries LP
-Norpharma A/S
-North American Medical Corporation
-Northfield Laboratories
-Northgate Technologies
-Northstar Neuroscience
-Northwest Biotherapeutics
-Noscira SA
-Notal Vision Ltd
-NovaBay Pharmaceuticals, Inc.
-Novacea
-Novalar Pharmaceuticals, Inc.
-NovaLign Orthopaedics, Inc
-Novartis
-Novartis Korea Ltd.
-Novartis Pharmaceuticals
-Novartis Vaccines
-NovaRx Corporation
-NovaShunt AG
-Novavax
-NovaVision, Inc.
-Novelos Therapeutics
-Noven Pharmaceuticals
-Novexel Inc
-Novian Health Inc.
-NovImmune SA
-Novo Nordisk
-NovoCure Ltd.
-Novogen
-Noxxon Pharma AG
-NPS Pharmaceuticals
-NS Pharma, Inc.
-NTK Enterprises, Inc.
-Nu Skin Enterprises
-Nucryst Pharmaceuticals
-Nu-Magnetics Inc.
-Nuon Therapeutics, Inc.
-NuPathe Inc.
-NuRx Pharmaceuticals, Inc.
-Nutricia Liverpool
-Nutricia North America
-Nutricia UK Ltd
-Nutrinia
-Nutrisystem, Inc.
-Nutrition 21, Inc.
-NuVasive
-Nuvo Research Inc.
-Nventa Biopharmaceuticals Corporation
-Nycomed
-Nycomed US Inc.
-Nymox Corporation
-OBEcure Ltd.
-OccuLogix
-Ocean Nutrition
-Ocean Spray, Inc.
-Ocera Therapeutics
-Ochsner Health System
-Oclassen Pharmaceuticals
-Octagon Research Solutions, Inc.
-Octapharma
-Oculus Innovative Sciences, Inc.
-OcuSense, Inc
-ODF Medical
-ofradim Corporation
-ohnson & Johnson
-ohnson & Johnson Pharmaceutical Research & Development, L.L.C.
-Okuvision GmbH
-Olympic Medical
-Omega Pharma
-Omeros Corporation
-Omninvest Vaccine Manufacturing, Researching and Trading Ltd.
-OMRIX Biopharmaceuticals
-OncoGenex Pharmaceuticals
-OncoGenex Technologies
-Oncolytics Biotech
-OncoMed Pharmaceuticals, Inc.
-Onconova Therapeutics, Inc.
-Oncovir, Inc.
-Oncozyme Pharma Inc.
-Ondine Research Laboratories
-Oneness Biotech Co., Ltd.
-Ono Pharma
-ONY
-Onyx Pharmaceuticals
-Onyx Therapeutics, Inc.
-Opexa Therapeutics, Inc.
-Ophtec USA
-Ophthalmic Research Associates, Inc.
-Ophthotech Corporation
-Opko Health, Inc.
-OptiMedica Corporation
-Optimer Pharmaceuticals
-Optimum Therapeutics, LLC
-Optiscan Pty Ltd
-Optivasive Ltd.
-Opto Eletronica S.A.
-Ora Bio Ltd.
-ORA, Inc.
-OraPharma
-Orasi Medical, Inc.
-Oraya Therapeutics, Inc.
-OrbusNeich
-Ordway Research Institute
-Ore Pharmaceuticals, Inc.
-Orexigen Therapeutics, Inc
-Orexo AB
-Orfagen
-Organogenesis
-Organon
-Oridion
-ORIN Pharmaceuticals AG
-Orion Corporation
-Orion Corporation, Orion Pharma
-Orion Pharma
-Orphan Medical
-Orphan Therapeutics
-Orphanetics Pharma Entwicklungs GmbH
-Orphatech Pharmaceuticals, GmbH
-Orqis Medical Corporation
-Ortec International
-Ortho Biotech Clinical Affairs, L.L.C.
-Ortho Biotech Products, L.P.
-Ortho Biotech, Inc.
-Ortho Dermatologics
-Ortho Pharmaceuticals
-OrthoAccel Technologies Inc.
-Ortho-McNeil Janssen Scientific Affairs, LLC
-Ortho-McNeil Neurologics, Inc.
-Ortho-McNeil Pharmaceutical
-Ortho-McNeil, Inc.
-OrthoMediTec
-Osel, Inc.
-OSI Pharmaceuticals
-Osiris Therapeutics
-Osprey Pharmaceuticals USA, Inc.
-Ossacur Inc.
-Osteologix
-Osteotech, Inc
-Othera Pharmaceuticals
-Otic Pharma
-Otonomy, Inc.
-Otsuka America Pharmaceutical
-Otsuka Pharmaceutical Co., Ltd.
-Otsuka Pharmaceutical Development & Commercialization, Inc.
-Otsuka Pharmaceutical, Inc., Philippines
-Ovalum
-OverlÃ
-Oxagen Ltd
-Oxford BioMedica
-OXiGENE
-OXO Chemie
-Oxo Chemie GmbH
-OxThera
-Oxygen Biotherapeutics, Inc.
-OxyPharma
-Oystershell NV
-Ozmosis Research Inc.
-Pacific Beach BioSciences, Inc.
-Pacific Pharmaceuticals
-Pacira Pharmaceuticals, Inc
-Paddock Laboratories, Inc.
-Paieon Inc.
-Pain Therapeutics
-PainReform LTD
-PAION Deutschland GmbH
-Paion UK Ltd.
-Paladin Laboratories Inc
-Paladin Labs (USA) Inc.
-Palatin Technologies
-Palau Pharma S.A.
-PalJect Ltd.
-Palmetto Retina Center, LLC
-Paloma Pharmaceuticals, Inc.
-Palomar Medical Technologies, Inc.
-Pamlab, L.L.C.
-Pan American Laboratories
-Panacea Biotec Ltd
-PanGenetics UK Limited
-Pantarhei Bioscience
-Pantarhei Devices BV
-Paracor Medical, Inc
-Paradigm Spine
-Paragon Biomedical
-Paragon Vision Sciences
-ParaPro Pharmacuticals
-Paratek Pharmaceuticals Inc
-Parexel
-ParinGenix
-Parion Sciences
-Parke-Davis
-Partners HealthCare
-Pascoe Pharmazeutische Praeparate GmbH
-PathoLase, Inc.
-Pathway Medical Technologies Inc.
-Patient Safety Technologies, Inc.
-PaxVax, Inc.
-PBM Products
-PCI Biotech AS
-PDL BioPharma, Inc.
-Peak Surgical, Inc.
-Pearl Therapeutics, Inc.
-PediaMed Pharmaceuticals
-Peninsula Pharmaceuticals, Inc.
-Penumbra Inc.
-Penwest Pharmaceuticals Co.
-Peplin
-Pepscan Therapeutics
-PepTcell Limited
-Peptimmune
-Peptron, Inc.
-Percutaneous Systems, Inc.
-Peregrine Pharmaceuticals
-PerfAction Ltd.
-PeriTec Biosciences Ltd.
-Perkin Elmer Inc
-Perkin Elmer Inc.
-Perrigo Company
-Persee Medica
-Pervasis Therapeutics, Inc
-Peschke Meditrade, GmbH
-Pevion Biotech Ltd
-Pfizer
-Pfizer Incorporated - Ann Arbor
-PFM Medical, Inc
-pfm S.R.L.
-Pfrimmer Nutricia GmbH, Erlangen , Germany
-PGxHealth, LLC
-PGxHealth, LLC|PPD
-Phadia AB
-Phage Biotechnology
-Pharma Nord
-Pharma Power Biotec
-Pharmacia
-Pharmacia and Upjohn
-Pharmacia Corp. (Peapack, NJ)
-Pharmacogenetics Diagnostic Laboratory, LLC
-Pharmacopeia, Inc.
-Pharmacosmos A/S
-Pharmacyclics
-PharmaEngine
-Pharmalink AB
-PharmaLogic Development, Inc.
-PharmaMar
-PharmaNet
-PharmaNeuroBoost N.V.
-Pharmanex
-Pharmapart GmbH Wiesbaden
-PharmaResearch
-Pharmasset
-Pharmatech
-Pharmatech Oncology
-PharmAthene, Inc.
-PharmaVigilant
-Pharmavite
-Pharmaxis
-Pharmbio Korea Co., Ltd.
-Pharmena North America
-Pharmexa A/S
-Pharmexa-Epimmune
-Pharming Technologies B.V.
-Pharmos
-Pharna Vinci, Denmark
-Pharos Life Corporation
-Phenomix
-Philip Morris Products S.A.
-Philips Healthcare
-Philips Medical Systems
-PhiloMetron, Inc.
-Phoenix Eagle Company
-PhotoCure
-photonamic GmbH & Co. KG
-PhotoThera, Inc
-Photozig, Inc.
-Physicians Pharmaceuticals, Inc.
-PhytoCeutica
-PhytoHealth Corporation
-Phytopharm
-Phytotox SA
-pico-tesla Magnetic Therapies, LLC
-Pierre Fabre Dermatology
-Pierre Fabre Dermo Cosmetique
-Pierre Fabre Laboratories
-Pierre Fabre Medicament
-Pierre Fabre Pharma GmbH
-Pierrel Research USA. Inc
-Pileje
-Pioneer Surgical Technology, Inc.
-Piramal Life Sciences Limited
-Pivotal S.L.
-Plada Industriale Srl
-Planmed Oy
-Plasma Surgical Inc
-PledPharma AB
-Plethora Solutions Ltd
-Plexxikon
-Pluristem Ltd.
-Pluromed, Inc.
-PLx Pharma
-Pneumoflex Systems, LLC
-Pnn Medical A/S
-Point Biomedical
-Point Therapeutics
-Polyheal Ltd.
-Polyphenolics, Inc.
-POM Wonderful LLC
-Poniard Pharmaceuticals
-Portola Pharmaceuticals
-Posit Science Corporation
-Potentia Pharmaceuticals, Inc.
-PowderMed
-POZEN
-PPD
-PRA International
-PRAECIS Pharmaceuticals Inc.
-Prana Biotechnology Limited
-Precision Therapeutics
-PrECOG, LLC.
-Predictive Biosciences
-PregLem SA
-PreMD
-Premier Research Group plc
-Prestwick Pharmaceuticals
-PriCara, Unit of Ortho-McNeil, In
-PriCara, Unit of Ortho-McNeil, Inc.
-Price Vision Group
-Primaeva Medical, Inc.
-Primus Pharmaceuticals
-Prism Pharmaceuticals
-Pro Top & Mediking Company Limited
-Proacta, Incorporated
-Probiomics Ltd
-Procept
-ProChon Biotech Ltd
-Procorde GmbH
-Procris Pharmaceuticals
-Procter and Gamble
-ProEthic Pharmaceuticals
-Profil GmbH, Neuss, Germany
-Progenics Pharmaceuticals, Inc.
-Prolacta Bioscience
-Prolexys Pharmaceuticals
-Prologue Research International
-Prolor Biotech, Inc.
-Promedior, Inc.
-Prometheus Laboratories
-Prometheus Therapeutics and Diagnostics
-ProMetrics, Inc.
-Promius Pharma, LLC
-Pronova BioPharma ASA
-Pro-Pharmaceuticals
-ProRhythm, Inc.
-Prosensa Therapeutics
-Prospect Therapeutics, Inc.
-ProstaPlant Urology System Ltd.
-Prostrakan Pharmaceuticals
-Protalex, Inc.
-Protalix
-Protein Sciences Corporation
-Protez Pharmaceuticals, Inc.
-ProThera, Inc.
-Proto Pharma Ltd
-Protox Therapeutics
-Provectus Pharmaceuticals
-Proverum GmbH
-Providence Medical Technology, Inc.
-Provident Clinical Research
-PSI Foundation inc
-pSiVida Limited
-Psyadon Pharma
-Psychiatry Roskilde
-PT Otsuka Indonesia
-PT. Schering-Plough. Tbk Indonesia
-PTC Therapeutics
-Pudue Pharma
-Pulmonx, Inc.
-Puma Biotechnology, Inc
-Purdue Pharma LP
-PuriCore, Inc.
-QDose Limited
-QIAGEN Gaithersburg, Inc
-QLT Inc
-Q-Med AB
-Q-Med Scandinavia, Inc.
-Q-Pharm Pty Limited
-QR Pharma Inc.
-QRay Ltd.
-QRxPharma Inc.
-QualiLife Pharmaceuticals
-Qualitix Clinical Research Co., Ltd.
-Quark Pharmaceuticals
-QuatRx Pharmaceuticals Company
-Questcor Pharmaceutical, Inc.
-Quidel Corporation
-Quigley Pharma, Inc.
-Quinnova Pharmaceuticals, Inc.
-Quintessence Biosciences, Inc.
-Quintiles
-Radiant Medical
-Radius Health
-Rafa Laboratories
-Ranbaxy Inc.
-Ranbaxy Laboratories Limited
-Ranier Technology Limited
-Rapid Pathogen Screening
-Raptor Pharmaceutical Corp.
-Raptor Pharmaceuticals Corp
-Raven Biotechnologies
-RDD Pharma Ltd
-Real Imaging Ltd.
-Reata Pharmaceuticals, Inc.
-Recepta Biopharma
-Reckitt Benckiser Inc.
-Recoly N.V.
-Recordati Industria Chimica e Farmaceutica S.p.A.
-ReDent Nova
-Red-Ion Medical USA, LLC
-Regado Biosciences, Inc.
-Regeneron Pharmaceuticals
-RegeneRx Biopharmaceuticals, Inc.
-Regenesis Biomedical, Inc.
-Regentis Biomaterials
-Reliant Pharmaceuticals
-Relox Medical, LLC
-Relypsa, Inc
-Renovis
-Renovo
-Replidyne
-Repligen Corporation
-Reprogenetics
-Repros Therapeutics Inc.
-ReProtect Inc
-Research GmbH
-ResearchPoint
-Reset Medical, Inc.
-ReShape Medical, Inc.
-Resistentia Pharmaceuticals AB
-ResMed
-Resolvyx Pharmaceuticals, Inc
-Respinova LTD
-Respiratory Technology Corporation
-Respirics Inc.
-Respironics
-Respironics, California, Inc.
-Response Biomedical Corp.
-Restoration Robotics, Inc.
-Resverlogix Corp
-Retina Implant AG
-Revalesio Corporation
-Revance Therapeutics, Inc.
-Revivant Corporation
-Revogenex, Inc.
-Revotar Biopharmaceuticals AG
-Rex Medical
-Rexahn Pharmaceuticals, Inc.
-RFS Pharma, LLC
-Rhone-Poulenc Rorer
-Ribozyome
-Rib-X Pharmaceuticals, Inc.
-Richmond Pharmacology Limited
-Rigel Dermatology
-Rigel Pharmaceuticals
-RITA Medical Systems
-River Plate Biotechnology, Inc.
-RMT Medical Technologies, Ltd.
-Roberts Pharmaceutical
-Roche Diagnostic Ltd.
-Roche Global Development
-Roche Pharma AG
-Rockwell Medical Technologies, Inc.
-Romark Laboratories L.C.
-Rosetta Pharmamate Co., Ltd
-Ross Products
-Rottapharm
-Routin SA
-Rovi Pharmaceuticals Laboratories
-ROX Medical, Inc.
-Roxall Medizin
-Roxane Laboratories
-Roxro Pharma
-RTI Biologics
-Rubel GmbH, Heiligenhaus, Germany
-RXi Pharmaceuticals, Corp.
-RXi Pharmaceuticals, Corp.
-RxKinetix
-S*BIO
-S.L.A. Pharma AG
-Saebo, Inc.
-Saegis Pharmaceuticals
-Sage Products, Inc.
-Salient Surgical Technologies
-Salix Pharmaceuticals
-Samaritan Pharmaceuticals, Inc
-San Diego Radiosurgery
-Sanaria Inc.
-Sandhill Scientific Inc.
-Sandia National Laboratories
-Sandoz Inc.
-Sangamo Biosciences
-Sangstat Medical Corporation
-Sankyo Pharma Gmbh
-Sanofi Pasteur MSD
-Sanofi-Aventis
-Sanofi-Synthelabo
-Sanquin Research & Blood Bank Divisio
-Santaris Pharma
-Santarus
-Santen Inc.
-Santen Pharmaceutical Co., Ltd.
-Santhera Pharmaceuticals
-Santosh Yoga LLC
-SantoSolve AS
-SANUWAVE, Inc.
-Sarawak MediChem Pharmaceuticals
-SARcode Corporation
-Satiety, Inc.
-Savient Pharmaceuticals
-SBI Biotech Co., Ltd.
-Schaper & Bruemmer GmbH & Co KG
-Schering SA
-Schering-Plough
-Schwabe-Wenex International Ltd
-SciClone Pharmaceuticals
-Scientific Laboratory Products, Ltd.
-Scilex Ltd.
-Scios, Inc.
-Sciotec Diagnostic Technologies GmbH
-Scitech Produtos Medicos Ltda
-SCOLR Pharma, Inc.
-Seaside Therapeutics, LLC
-Seattle Genetics, Inc.
-Second Sight Medical Products
-Secretaria Nacional Antidrogas
-Seikagaku Corporation
-Semafore Pharmaceuticals
-Senju USA, Inc.
-Sensimed AG
-Sensory Medical, Inc.
-SentoClone AB
-Sentrx
-Sepracor, Inc.
-Sequel Pharmaceuticals, Inc
-Sequenom, Inc.
-Sequus Pharmaceuticals
-Serenex, Inc.
-Serenity Pharmaceuticals, Inc.
-Serentis Ltd.
-Serica Technologies, Inc.
-Servier
-Servier (Tianjin) Pharmaceutical Co. LTD.
-Sewon Cellontech Co., Ltd.
-SFBC Anapharm
-SFBC Ft. Myers, Inc
-SGS U.S. Testing Company Inc.
-SGX Pharmaceuticals, Inc.
-Shaman Pharmaceuticals
-Shandong Luye Pharmaceutical Co., Ltd.
-Shandong Simcere-Medgenn Bio-pharmaceutical Co., Ltd
-Shantha Biotechnics Limited
-Shell Chemicals
-Shenzhen Ausa Pharmed Co.,Ltd
-Shenzhen SiBiono GeneTech Co.,Ltd
-Shepherd Medical Company
-Shiken Corporation
-Shiny Horse Ltd
-Shionogi
-Shionogi Pharma, Inc.
-Shionogi USA, Inc.
-Shire Human Genetic Therapies, Inc.
-Shire Pharmaceutical Development
-Siemens Healthcare Diagnostics Inc
-Siemens Medical Solutions
-Siemens Medical Solutions USA - CSG
-Siemens Molecular Imaging
-Siemens-Betriebskrankenkasse
-Sientra, Inc.
-Sigma Tau Pharmaceuticals, Inc.
-sigma-tau i.f.r. S.p.A.
-Sigma-Tau Research, Inc.
-Sigmoid Pharma
-Sigvaris Corporation
-Silence Therapeutics AG
-Simbec Research
-Simmons Cancer Center
-Sindolor
-Sinexus Inc.
-Sino-Swed Pharmaceutical Corporation
-Sirion Therapeutics, Inc.
-Sirius Medicine
-Sirna Therapeutics Inc.
-Sirtex Medical
-SK Chemicals Co.,Ltd.
-SK Life Science
-Skingenix, Inc.
-SkyePharma AG
-Smart Medical Systems Ltd.
-Smith & Nephew, Inc.
-SmithKline Beecham
-SNBL Clinical Pharmacology Center Inc.
-Socar Research SA
-Sodilac
-SOFAR S.p.A.
-Sofradim Production
-Soft Protector
-Solae, LLC
-Sol-Gel Technologies, Ltd.
-Soligenix
-Solstice Neurosciences
-Soluble Systems, LLC
-Solvay Biologicals
-Solvay Pharmaceuticals
-SOLX, Inc.
-Somanetics Corporation
-Somaxon Pharmaceuticals
-Somerset Pharmaceuticals
-Somnus Therapeutics, Inc.
-Sonexa Therapeutics, Inc.
-Sonitus Medical Inc
-SonoCine, Inc.
-SonoSite, Inc.
-Sooft Italia
-Sopherion Therapeutics
-Sorin Group
-Sorin Group USA, Inc.
-Sosei
-Sound Surgical Technologies, LLC.
-Source MDx
-SPD Development Company Limited
-Speciality European Pharma Limited
-Spectranetics Corporation
-Spectrum Dynamics
-Spectrum Pharmaceuticals, Inc
-Speedel Pharma Ltd.
-Spherix Incorporated
-Spinal Restoration, Inc.
-Spineology, Inc
-Spiracur, Inc.
-Spiration, Inc.
-Spirocor
-Spirus Medical, Inc.
-Stallergenes
-Statistika Consultoria Ltda
-STEBA France
-Steelcase
-Stem Cell Therapeutics Corp.
-Stematix, Inc.
-StemCells, Inc.
-Stemnion, Inc.
-Stempeutics Research Pvt Ltd
-Stentys
-Stereotaxis
-Stiefel, a GSK Company
-STI-Medical Systems
-Stolle Milk Biologic International
-Storz Medical AG
-Strategic Biosciences
-Straub Medical AG
-Stromedix, Inc.
-Stryker Biotech
-Stryker Canada LP
-Stryker GI Ltd.
-Stryker Instruments
-Stryker Nordic
-Stryker Orthopaedics
-Stryker Spine
-Sucampo Pharmaceuticals, Inc.
-SUGEN
-Sumitomo Pharmaceutical (Suzhou) Co., Ltd.
-Sumitomo Pharmaceuticals America
-Summers Laboratories
-Summit Doppler Systems, Inc.
-Sun Pharma Advanced Research Company Limited
-Sun Pharmaceutical Industries Limited
-Sunesis Pharmaceuticals
-Suneva Medical, Inc.
-Sunshine Heart Inc.
-Sunstar Americas
-Sunstar, Inc.
-Suntory Pharmaceutical
-superDimension Ltd.
-SuperGen
-Supernus Pharmaceuticals, Inc.
-SuperSonic Imagine
-Surface Logix
-Surgi-Vision Inc
-SurgRx, Inc.
-SurModics, Inc.
-Surpass Medical Ltd.
-SVSE 2000 Ltd.
-Swedish Match AB
-Swiss-American Products, Inc
-Sygnis Bioscience GmbH & Co KG
-Sykehuset i Vestfold HF
-Sykehuset Innlandet HF
-Sylentis, S.A.
-SymBio Pharmaceuticals
-Symbion Research International
-Symbollon Pharmaceuticals
-Symphogen A/S
-Symphony Evolution, Inc.
-Symphony Medical, Inc.
-Symphony Neuro Development Company
-SynCardia Systems. Inc.
-Syndax Pharmaceuticals
-SynerGene Therapeutics, Inc.
-SynergEyes, Inc.
-Synergy Pharmaceuticals, Inc.
-Syneron Medical
-Synosia Therapeutics, Inc.
-Synovis Surgical Innovations
-Synta Pharmaceuticals Corp.
-Synteract, Inc.
-SyntheMed
-Synthes Inc.
-Synthes Spine
-Synvista Therapeutics, Inc
-Syral
-Sysmex America, Inc.
-Systems Medicine LLC
-Tactile Systems Technology Inc.
-Taewoong Medical Co., Ltd.
-TaiGen Biotechnology Co., Ltd.
-Taiho Pharmaceutical Co., Ltd.
-Taiko Pharmaceutical Co., Ltd.
-TaiMed Biologics Inc.
-Taisho Pharmaceutical Co., Ltd.
-Taisho Pharmaceutical R&D Inc.
-Taiwan Liposome Company
-Taiwan Otsuka Pharm. Co., Ltd
-Taiwan THL Co.LTd.
-Takeda Global Research & Development Center, Inc.
-Takeda Global Research & Development Centre (Europe) Ltd.
-Takeda Italia Farmaceutici S.p.A.
-Takeda Pharma GmbH
-Takeda Pharmaceutical Company Limited
-Takeda Pharmaceuticals North America, Inc.
-Talecris Biotherapeutics
-Talima Therapeutics, Inc.
-Tanox
-TAP Pharmaceutical Products Inc.
-Targacept Inc.
-Targanta Therapeutics Corporation
-TargeGen
-Targeted Genetics Corporation
-Taris Biomedical
-Tarix Pharmaceuticals
-Taro Pharmaceuticals USA
-Tasly Pharmaceuticals, Inc.
-TauroPharm
-TauRx Therapeutics Ltd
-Taxolog Inc.
-Taylor MicroTechnology
-TBF Genie Tissulaire
-TCA Cellular Therapy
-TCM Biotech International Corp.
-TD Vaccines A/S
-Technolas Perfect Vision GmbH
-Tedec-Meiji Farma, S.A.
-TEI Biosciences Inc.
-Teikoku Pharma USA
-Tenaxis Medical, Inc.
-Tendris Holding BV
-Tengion
-Tensegrity Prosthetics
-TenX BioPharma
-Tercica
-Terumo CVS
-Terumo Europe N.V.
-Terumo Heart Inc.
-Terumo Medical Corporation
-TetraLogic Pharmaceuticals
-Teva Global Respiratory Research LLC
-Teva GTC
-Teva Neuroscience, Inc.
-Teva Pharmaceutical Industries
-Teva Pharmaceuticals USA
-Texas Biotechnology Corporation
-Thallion Pharmaceuticals
-The Avicena Group
-The EMMES Corporation
-The Immune Response Corporation
-The Institute for Diabetes Discovery, LLC
-The Medicines Company
-The SmartPill Corporation
-The Vaccine Company
-Theraclion
-Theracos
-Theradex
-TheraGenetics Limited
-Theragenics Corporation
-Therakos
-Therapeutics, Inc.
-Theratechnologies
-Theravance
-TheraVida, Inc.
-TheraVitae Ltd.
-Theregen, Inc.
-ThermaRx, Inc.
-TherOx
-Thoratec Corporation
-Three Rivers Pharmaceuticals
-Threshold Pharmaceuticals
-ThromboGenics
-Thymon, LLC
-Tianjin Tasly Pharmaceutical Co., Ltd
-Tiba Medical, Inc.
-Tibotec Pharmaceutical Limited
-Tibotec Therapeutics, a Division of Ortho Biotech Products, L.P., USA
-Tibotec-Virco Virology BVBA
-TiGenix n.v.
-Tigris Pharmaceuticals
-Tillotts Pharma AG
-Tiltan Pharma Ltd.
-Tioga Pharmaceuticals
-Tissue Regeneration Technologies
-Tissue Regenix Ltd
-Tissue Repair Company
-TissueGene, Inc.
-Tisteron Ltd.
-Titan Pharmaceuticals
-TKL Research, Inc.
-Tobira Therapeutics, Inc.
-Tokai Pharmaceuticals
-Tolerx Inc
-Topaz Pharmaceuticals Inc
-Topcon Corporation
-Topcon Medical Systems, Inc.
-Topica Pharmaceuticals, Inc.
-Topigen Pharmaceuticals
-TopoTarget A/S
-TopSpin Medical
-Torax Medical Incorporated
-Toray Industries, Inc
-Tornier
-Torrent Pharmaceuticals Limited
-TorreyPines Therapeutics
-Toshiba America Medical Systems, Inc.
-Toyama Chemical Co., Ltd.
-Tracon Pharmaceuticals Inc.
-Tragara Pharmaceuticals, Inc.
-Trans Tech Pharmaceuticals
-Transave
-Transcend Medical, Inc.
-Transcept Pharmaceuticals
-Transdel Pharmaceuticals
-Transition Therapeutics
-Translational Research, Ltd.
-Translumina GmbH
-TransMedics
-TransMolecular
-Transoma Medical
-TransPharma Medical
-Transport Pharmaceuticals
-TransTech Pharma
-Tranzyme, Inc.
-Travanti Pharma Inc.
-Treague Ltd
-TRF Pharma, Inc
-Trial Form Support S.L.
-Triangle Pharmaceuticals
-Trident Clinical Research Pty Ltd
-Trig Medical Inc
-Trima, Israel Pharmaceutical Products
-Trimel Biopharma Inc.
-Trimeris
-Trine Pharmaceuticals
-Tripep AB
-Trius Therapeutics, Inc.
-TriVascular, Inc.
-Trophos
-Trubion Pharmaceuticals
-TrygFonden, Denmark
-Tsumura USA
-TTY Biopharm
-Tufts Medical Center
-TVAX Biomedical
-Twin Star Medical, Inc.
-Tyco Healthcare Group
-TYRX, Inc.
-U.S. Bioscience
-U3 Pharma GmbH
-UCB, Inc.
-Ucyclyd Pharma Inc.
-Ulthera, Inc
-UltraShape
-UMN Pharma Inc.
-Unigene Laboratories Inc.
-Unilever R&D
-Unimed Pharmaceuticals
-United Behavioral Health
-United Biomedical
-United Therapeutics
-Unither Pharmaceuticals
-Upjohn
-Upsher-Smith Laboratories
-UpSpring Baby, Ltd.
-Uptake Medical Corp
-Urigen
-Urodynamix Technologies Inc.
-Uromedica
-Uroplasty, Inc
-US Biotest, Inc.
-USHIFU, LLC
-U-Systems, Inc.
-VA Northern California Health Care System
-Vakzine Projekt Management GmbH
-Valeant Canada Limited
-Valeant Pharmaceuticals North America
-Valen Labs
-Valentis
-Valeritas, LLC
-Validus Pharmaceuticals
-Valio Ltd
-Valioravinto Ltd
-Valletta Health B.V.
-Vanda Pharmaceuticals
-Vantia Ltd
-Vapotherm, Inc.
-VascuActive LTD
-Vascular Biogenics Ltd. operating as VBL Therapeutics
-Vascular Pathways, Inc.
-Vascular Solutions, Inc
-Vasogen
-VaxGen
-Vaxin Inc.
-VaxInnate Corporation
-Vecta Ltd.
-Velomedix, Inc.
-VentiRx Pharmaceuticals Inc.
-Ventor Technologies
-Ventus Medical, Inc.
-VeraLight, Inc.
-Veridex, LLC
-Vernalis (R&D) Ltd
-VeroScience
-Vertex Pharmaceuticals Incorporated
-VertiFlex, Incorporated
-Vertigone Inc.
-Verto LTD
-Vertos Medical, Inc.
-VGX International, Inc.
-VGX Pharmaceuticals, LLC
-VIA Pharmaceuticals
-ViaCell
-Viacor
-Vical
-Vicor Technologies, Inc.
-Vicuron Pharmaceuticals
-Vicus Therapeutics
-Vifor Inc.
-Vifor Pharma
-Vigconic (International) Ltd.
-VIMRx Pharmaceuticals
-Vion Pharmaceuticals
-ViOptix Canada
-VioQuest Pharmaceuticals
-Viralytics
-Virax Pty. Ltd,
-Virchow Group
-Virco
-Virionyx Corporation Limited
-Virobay Inc.
-ViroChem Pharma
-ViroMed Co., Ltd.
-Viron Therapeutics Inc
-ViroPharma
-VirtualScopics, Inc.
-ViRx
-VIRxSYS Corporation
-Visiogen
-Vision Specialists of Birmingham
-VisionCare Ophthalmic Technologies, Inc.
-Visioncare Research Ltd.
-Vistakon
-Vistakon Pharmaceuticals
-Visualase, Inc.
-Vital Therapies, Inc.
-Vitatron France
-Vitreoretinal Technologies, Inc.
-Vitrolife
-Viventia Biotech
-Vivostat
-Vivoxid Ltd
-VIVUS, Inc.
-VNUS Medical Technologies, A Covidien Company
-Volcano Corporation
-Volighten Scientific, Ltd.
-Vomaris Innovations
-Voyager Pharmaceutical Corporation
-VPDiagnostics
-VQ OrthoCare
-VSL Pharmaceuticals
-VSM Geneesmiddelen b.v.
-W.L.Gore & Associates
-Wakunaga Pharmaceutical Co., Ltd.
-Walter Ritter GmbH & Co
-Warner Chilcott
-Watson Pharmaceuticals
-WaveLight AG
-WaveRx, Inc.
-WBL Peking Univ. Biotech Co. Ltd
-Welch Allyn
-Welch's, Inc.
-Weleda AG
-Welichem Biotech Inc.
-Wellcome Trust
-Wellstat Therapeutics
-Wex Pharmaceuticals Inc.
-WFD Ventures Incorporated
-Wicab
-WideMed LTD.
-Wilex
-William Cook Europe
-Windy Hill Medical, Inc.
-Winston Laboratories
-Wockhardt
-Woolsthorpe Technologies, LLC
-Wound Solutions, Ltd
-Wright Medical Technology
-Wyeth
-Wyeth-Lederle Vaccines
-Wyeth Research Division of Wyeth Pharmaceuticals Inc.
-Xanodyne Pharmaceuticals
-Xanthus Pharmaceuticals, Inc.
-XBiotech, Inc.
-Xcellerex, Inc.
-Xcyte Therapies
-XDx
-Xencor, Inc.
-Xenon Pharmaceuticals Inc.
-XenoPort, Inc.
-Xenova Biomedix
-Xian-Janssen Pharmaceutical Ltd.
-Xigo Health LLC
-Xoft, Inc.
-XOMA (US) LLC
-X-pert Med GmbH
-Xsira Pharmaceuticals
-XTL Biopharmaceuticals
-Xylos Corporation
-Yakult Honsha Co., LTD
-Yasoo Health
-Yaupon Therapeutics
-YM BioSciences
-Y's Therapeutics, Inc.
-Yuhan Corporation
-Yuyu Pharma, Inc.
-Zafgen, Inc.
-Zambon SpA
-ZARS Pharma Inc.
-Zealand Pharma
-ZeaVision, Inc.
-Zelos Therapeutics
-Zeltiq Aesthetics
-Zeneus Pharma
-Zeria Pharmaceutical
-Zhejiang Beta Pharma Inc.
-Zhejiang Otsuka Pharmaceutical Co., Ltd.
-Zimmer, Inc.
-ZIN Technologies, Inc
-ZIOPHARM
-Zodiac Produtos Farmaceuticos S.A.
-Zogenix, Inc.
-ZOLL Lifecor
-Zoll Medical Corporation
-Zone Laboratories, Inc.
-Zosano Pharma Inc.
-Zurita Laboratorio Farmaceutico Ltda.
-ZyCare Inc
-Zydus Pharmaceuticals USA, Inc.
-Zymenex A/S
-ZymeQuest
-ZymoGenetics
+A.P. Pharma, Inc.  
+AAIPharma  
+Aardvark Medical Company  
+Aaren Scientific Inc.  
+Aastrom Biosciences  
+Ab Medica Spa  
+AB Science  
+Abbott  
+Abbott (China)  
+Abbott (Egypt)  
+Abbott (Peru)  
+Abbott (Ukraine)  
+Abbott (Venezuela)  
+Abbott Biologicals  
+Abbott Biotherapeutics Corp.  
+Abbott Diabetes Care  
+Abbott Diagnostics Division  
+Abbott Japan Co.,Ltd  
+Abbott Medical Optics  
+Abbott Molecular  
+Abbott Nutrition  
+Abbott Point-of-Care  
+Abbott Products  
+Abbott Research Group  
+Abbott Vascular  
+AbbVie  
+AbbVie (prior sponsor, Abbott)  
+Abdi Ibrahim Ilac San. ve Tic A.S.  
+Abela Pharmaceuticals, Inc.  
+Abgenix  
+AbGenomics B.V Taiwan Branch  
+Abiant, Inc.  
+Abiogen Pharma  
+Abiomed Inc.  
+Ablynx  
+Abnoba Gmbh  
+Aboca Spa Societa' Agricola  
+AboutSkin Dermatology and DermSurgery, PC  
+Acacia Pharma Ltd  
+Academic Pediatric Association  
+Academy for Educational Development  
+Academy Military Medical Science, China  
+ACADIA Pharmaceuticals Inc.  
+Acasti Pharma Inc.  
+Accelerated Care Plus  
+Acceleron Pharma, Inc.  
+Accelovance Inc.  
+Accentia Biopharmaceuticals  
+Accera, Inc.  
+Access Business Group  
+Access Pharmaceuticals, Inc.  
+AccessClosure, Inc.  
+Acclarent  
+Accord Healthcare, Inc.  
+Accumetrics, Inc.  
+Accuray Incorporated  
+ACE Surgical Supply, Inc.  
+ACE Vision Group, Inc.  
+Acea Bio (Hangzhou) Co., Ltd.  
+AcelRx Pharmaceuticals, Inc.  
+Acetylon Pharmaceuticals Incorporated  
+Achaogen, Inc.  
+Ache Laboratorios Farmaceuticos S.A.  
+Achillion Pharmaceuticals  
+Aché Laboratórios Farmacêuticos Ltda  
+Aciex Therapeutics, Inc.  
+ACM Pivotal Global Central Laboratory  
+ACO Hud Nordic AB  
+Acologix, Inc.  
+Acorda Therapeutics  
+Acorn Cardiovascular, Inc.  
+Acrobio Healthcare Inc.  
+acromion GmbH  
+Acronet  
+Acrostak  
+Acrux DDS Pty Ltd  
+ACT Biotech, Inc  
+Actavis Inc.  
+Actavis Mid-Atlantic LLC  
+Actelion  
+Actinium Pharmaceuticals  
+Action Pharma A/S  
+Activaero GmbH  
+ActivBiotics  
+ActivBiotics Pharma, LLC  
+Active Biotech AB  
+Active Implants  
+ActiveO Inc.  
+ActiViews Ltd.  
+ActivX Biosciences, Inc.  
+ActoGeniX N.V.  
+ACU Medical Technologies Ltd  
+Acucela Inc.  
+AcuFocus, Inc.  
+Acuity Medical International, Inc.  
+Acura Pharmaceuticals Inc.  
+Acusphere  
+ACUTE Innovations, LLC  
+Adamas Pharmaceuticals, Inc.  
+Adamis Pharmaceuticals Corporation  
+Adams Laboratories  
+Adams Respiratory Therapeutics  
+Adapt Produtos Oftalmológicos Ltda.  
+Adaptimmune Ltd.  
+Addex Pharma S.A.  
+Addrenex Pharmaceuticals, Inc.  
+Adelholzener Alpenquellen GmbH  
+Adeona Pharmaceuticals  
+Aderans Research Institute  
+Aderis Pharmaceuticals  
+AdeTherapeutics Inc.  
+adexter GmbH  
+Adeza Biomedical  
+Adherex Technologies, Inc.  
+Adiga Life Sciences  
+Adimmune Corporation  
+Adistem Ltd  
+Aditech Pharma AB  
+Adknoma Health Research  
+ADMA Biologics, Inc.  
+Admetsys Corporation  
+Adnexus, A Bristol-Myers Squibb R&D Company  
+Aduro BioTech, Inc.  
+Advance Shockwave Technology GmbH  
+AdvanceCor GmbH  
+Advanced Accelerator Applications  
+Advanced Biochemical Compounds GmbH  
+Advanced Bionics  
+Advanced Bionics AG  
+Advanced Biotherapy, Inc.  
+Advanced Brain Monitoring, Inc.  
+Advanced Breast Care Imaging  
+Advanced Cell Technology  
+Advanced Circulatory Systems  
+Advanced Cosmetic Intervention  
+Advanced Dialysis Center of Easton  
+Advanced Dialysis Center of Potomac  
+Advanced Life Sciences, Inc.  
+Advanced Magnetic Research Institute International  
+Advanced Medical Diagnostics s.a.  
+Advanced Neuromodulation Systems  
+Advanced Ophthalmic Pharma  
+Advanced Peptides  
+Advanced Research Network  
+Advanced Viral Research Corp  
+Advanced Vision Research  
+Advancell - Advanced In Vitro Cell Technologies, S.A.  
+Advancis Pharmaceutical Corporation  
+Advantagene, Inc.  
+Advaxis, Inc.  
+Adynxx, Inc.  
+Aegera Therapeutics  
+Aegerion Pharmaceuticals, Inc.  
+Aeon Astron Europe B.V.  
+Aeos Biomedical Inc.  
+Aerial BioPharma, LLC  
+Aerie Pharmaceuticals  
+Aeris Therapeutics  
+Aerocrine AB  
+Aerotel Ltd  
+Aerovance, Inc.  
+Aerpio Therapeutics  
+AESCA Pharma GmbH  
+Aesculap AG  
+Aesculap Implant Systems  
+Aesculap, Inc.  
+AesRx, LLC  
+Aestus Therapeutics  
+AEterna Zentaris  
+Aetna, Inc.  
+Afexa Life Sciences Inc  
+Affectis Pharmaceuticals AG  
+Afferent Pharmaceuticals, Inc.  
+Affimed Therapeutics AG  
+Affinity Networks, Inc.  
+Affinium Pharmaceuticals, Ltd  
+Affiris AG  
+Affymax  
+Affymetrix, Inc.  
+African American Health Coalition  
+AFT Pharmaceuticals, Ltd.  
+AGA Medical Corporation  
+Ageless Regenerative Institute  
+Agen Biomedical  
+Agendia  
+Agennix  
+Agensys, Inc.  
+Agenus, Inc.  
+Aggredyne, Inc.  
+Agile Therapeutics  
+AGIRx Ltd.  
+Agouron Pharmaceuticals  
+Aguiflai Iberica, S.L.  
+Ahava Dead Sea Laboratories  
+Ahn-Gook Pharmaceuticals Co.,Ltd  
+Ahura Scientific, Inc.  
+AiCuris GmbH & Co.KG  
+AIDS Project Hartford  
+Aileron Therapeutics  
+AIM Therapeutics Inc.  
+Air Liquide SA  
+Air Liquide Santé International  
+AirCast LLC  
+Aires Pharmaceuticals, Inc.  
+Airsonett AB  
+AirXpanders, Inc.  
+Aix Scientifics  
+AJI Pharma USA  
+Ajinomoto Co., Inc.  
+Ajinomoto USA, INC.  
+Akaza Research  
+Akebia Therapeutics  
+Akela Pharma, Inc.  
+Aker Biomarine Antarctic AS  
+Akern USA LLC  
+Akinion Pharmaceuticals AB  
+Akloma Bioscience AB  
+Akontis  
+AkPharma Inc.  
+Akros Pharma Inc.  
+Akzo Nobel  
+Alacrity Biosciences, Inc.  
+Alavita Pharmaceuticals Inc  
+Alba Therapeutics  
+Albany Molecular Research, Inc.  
+Albireo  
+Alchemia Oncology  
+Alcobra Ltd.  
+Alcon Laboratories  
+Alcon LenSx, Inc.  
+Alcon Research  
+Aldagen  
+Alder Biopharmaceuticals, Inc.  
+Alere San Diego  
+Alere Wellbeing  
+Aleris Obesity  
+Aleva Neurotherapeutics SA  
+Alex's Lemonade Stand Foundation  
+Alexion International Sàrl  
+Alexion Pharmaceuticals  
+Alexza Pharmaceuticals, Inc.  
+Alfa Wassermann S.p.A.  
+Alfacell  
+Alfact Innovation  
+AlgaeCal Inc.  
+Algeta ASA  
+AlgiPharma AS  
+Algorithme Pharma Inc  
+AlgoRx Pharmaceuticals  
+Alimentary Health Ltd  
+Aliments ULTIMA Foods Inc.  
+Alimera Sciences  
+Alios Biopharma Inc.  
+Alizyme  
+ALK-Abelló A/S  
+Alkermes  
+Alko Do Brasil Industria e Comercio Ltda  
+All American Pharmaceutical  
+AlleCure  
+Allegro Diagnostics, Corp.  
+Allegro Ophthalmics, LLC  
+Allerderm  
+Allergan  
+Allergan Medical  
+Allergan S.A. DE C.V..  
+AllerGen NCE Inc.  
+Allergisa Pesquisa Dermato-Cosmetica LTDA  
+Allergopharma GmbH & Co. KG  
+Allergy & Asthma Research Center, San Antonio, TX  
+Allergy Therapeutics  
+Allermed Laboratories, Inc.  
+AllerQuest LLC  
+Allertein Therapeutics, LLC  
+Alliancells Bioscience Corporation Limited  
+Allied Research International  
+Allium, Ltd.  
+AlloCure Inc.  
+Allodynic Therapeutics, LLC  
+Alloksys Life Sciences B.V.  
+Allon Therapeutics  
+Allos Therapeutics  
+AlloSource  
+Alma Lasers  
+Alma Lasers Inc.  
+Almirall, SAS  
+Alnara Pharmaceuticals  
+Alnylam Pharmaceuticals  
+Alphacore Pharma, LLC  
+Alpharma ApS  
+Alpharma Pharmaceuticals LLC, a subsidiary of Pfizer Inc.  
+Alphatec Spine, Inc.  
+AlphaVax, Inc.  
+Alquest  
+Alseres Pharmaceuticals, Inc  
+Alsius Corporation  
+Altacor Ltd.  
+Altair Therapeutics, Inc.  
+AltaRex  
+Altea Therapeutics  
+Altheos, Inc.  
+Altheus Therapeutics, Inc.  
+Altman Biomedical Consulting Pty. Ltd.  
+Altmarc Inc.  
+Altor Bioscience Corporation  
+Altura Medical Inc.  
+Altus Pharmaceuticals  
+Alung Technologies  
+Alvine Pharmaceuticals Inc.  
+ALZA  
+Alza Corporation, DE, USA  
+AlzChem, LLC  
+AM-Pharma  
+AMAG Pharmaceuticals, Inc.  
+Amakem, NV  
+Amarillo Biosciences, Inc.  
+Amarin Neuroscience Ltd  
+Ambit Biosciences Corporation  
+Ambrilia Biopharma, Inc.  
+Ambrosia - SupHerb Ltd.  
+Ambrx, Inc.  
+Ambryx Biotechnology  
+Amedica Corporation  
+Amen Clinics, Inc.  
+American College of Nurse-Midwive - ACNM Foundation  
+American College of Radiology - Image Metrix  
+American Medical Systems  
+American Oriental Bioengineering, Inc.  
+Amerifit Brands Inc  
+AmeriSciences LP  
+Amersham Buchler, GmbH & Co KG  
+Amersham Health  
+AMES Technology  
+AMG Medical Inc.  
+Amgen  
+Amgen Research (Munich) GmbH  
+Amicus Therapeutics  
+Amino Up Chemical Company  
+Amneal Pharmaceuticals Co. India Private Limited  
+Amneal Pharmaceuticals, LLC  
+Amorcyte, Inc.  
+Amorepacific Corporation  
+Amorphical Ltd.  
+Amp Orthopedics, Inc.  
+Amphastar Pharmaceuticals, Inc.  
+Ampio Pharmaceuticals. Inc.  
+AmpliMed Corporation  
+Amplimmune  
+Amsterdam Molecular Therapeutics  
+Amylin Pharmaceuticals, LLC.  
+Anaborex  
+Anaconda Pharma  
+Anacor Pharmaceuticals, Inc.  
+Anaeropharma Science, Inc.  
+Analgesic Solutions  
+AnaMar Medical AB  
+Anapharm  
+Anaxsys Technology Ltd  
+Anbics Management-Services Ag  
+Anchen Pharmaceuticals, Inc  
+Anderson Clinical Research  
+Andon Health Co., Ltd  
+Andon Medical Co.,Ltd  
+Andromeda Biotech Ltd.  
+AndroScience Corp  
+Andrulis Pharmaceuticals  
+Anecare  
+Anecova  
+Anergis  
+Anesiva, Inc.  
+Anexon, Incorporated  
+Angel Medical Systems  
+Angelini  
+AnGes  
+Angimmune LLC  
+Angioblast Systems  
+Angiochem Inc  
+Angiogenix  
+Angion Biomedica Corp  
+AngioScore, Inc.  
+Angiotech Pharmaceuticals  
+Anika Therapeutics, Inc.  
+Animas Corporation  
+ANM Adaptive Neuromodulation GmbH  
+Anodyne Therapy, LLC  
+AnorMED  
+Anosys  
+Another Way Products  
+Ansun Biopharma, Inc.  
+Antares Pharma Inc.  
+Anterios Inc.  
+Anterogen Co., Ltd.  
+Anthera Pharmaceuticals  
+Anthra Pharmaceuticals  
+Antigen Express, Inc.  
+Antigen Laboratories, Inc.  
+Antipodean Pharmaceuticals, Inc.  
+Antisense Pharma  
+Antisoma Research  
+Antria  
+Anulex Technologies, Inc.  
+Anza Therapeutics, Inc.  
+AOP Orphan Pharmaceuticals AG  
+AOSpine Europe  
+AOSpine International  
+AOSpine North America  
+AOTI Ltd.  
+Apatech, Inc.  
+Apceth GmbH & Co. KG  
+Apeiron Biologics  
+Apeptico Forschung und Entwicklung GmbH  
+Aperion Biologics, Inc.  
+Apex Bioscience  
+Apexum Ltd.  
+Aphton  
+Apica Cardiovascular Limited  
+Apieron  
+Apimeds, Inc.  
+Apira Science, Inc.  
+Apitope Technology (Bristol) Ltd.  
+Apnex Medical, Inc.  
+ApniCure, Inc.  
+Apogenix GmbH  
+APOGEPHA Arzneimittel GmbH  
+Apollo Health Systems  
+Apollon  
+ApoPharma  
+Apos Medical and Sports Technology Ltd.  
+Aposense Ltd.  
+Apotex Inc.  
+Apple Medical Corporation  
+Applied Genetic Technologies Corp  
+Applied Genetics  
+Applied Immunesciences  
+Applied Medical Visualizations  
+Applied Molecular Evolution  
+Applied Spectral Imaging Ltd.  
+Applied Spine Technologies  
+Aprea AB  
+Apsara Medical Corporation  
+Apsen Farmaceutica S.A.  
+APT Pharmaceuticals, Inc.  
+Aptalis Pharma  
+Aptuit Inc.  
+Aptus Endosystems  
+AqueSys, Inc.  
+Aqumen Biopharmaceuticals, N.A.  
+Aradigm Corporation  
+Aragon Pharmaceuticals, Inc.  
+Arana Therapeutics Ltd  
+Arbi Group Srl  
+ArBlast Co.,Ltd.  
+Arbor Pharmaceuticals, Inc.  
+Arbor Vita Corporation  
+ARCA Biopharma, Inc.  
+Arch Medical Services Inc., DBA The Center for Cancer Care and Research  
+Archemix Corp.  
+Archer Biosciences, Inc.  
+Archer Daniels Midland Co.  
+Archimedes Development Ltd  
+Archivel Farma S.L.  
+Archus Orthopedics, Inc.  
+Arcion Therapeutics Inc  
+Ardana Bioscience Ltd  
+Ardea Biosciences, Inc.  
+Ardelyx  
+Arena Pharmaceuticals  
+Arete Therapeutics  
+Areva Med LLC  
+Arginox Pharmaceuticals  
+Argo Medical Technologies Ltd.  
+Argos Therapeutics  
+Argus Pharmaceuticals  
+Aria Aesthetics Inc.  
+Ariad Pharmaceuticals  
+aRigen Pharmaceuticals, Inc.  
+Ariosa Diagnostics, Inc  
+Ariston Pharmaceuticals, Inc.  
+Arizant Healthcare  
+Ark Therapeutics Ltd  
+Arkin  
+Arla Foods  
+Armstrong Pharmaceuticals, Inc.  
+Arno Therapeutics  
+Arog Pharmaceuticals LLC  
+Aromtech Ltd.  
+Aronex Pharmaceuticals  
+Aros Pharma ApS  
+Arpida AG  
+ArQule  
+Array BioPharma  
+Array Genomics  
+Arresto Biosciences, Inc.  
+Arriva Pharmaceuticals, Inc.  
+Arrow International  
+Arrow Therapeutics  
+Arstasis, Inc.  
+ART Advanced Research Technologies Inc.  
+Artann Laboratories  
+Artegraft, Inc.  
+Arterial Remodeling Technologies  
+Arteriocyte, Inc.  
+Arthrex, Inc.  
+Arthritis Northwest PLLC  
+ArthroLab Inc.  
+Arthrosurface, Inc.  
+Artielle ImmunoTherapeutics  
+Artimplant AB  
+Artisan Pharma, Inc.  
+Artu Biologicals  
+ARYx Therapeutics  
+Asahi Kasei Kuraray Medical Co.,Ltd.  
+Asahi Kasei Medical Europe GmbH  
+Asahi Kasei Pharma America Corporation  
+Asahi Kasei Pharma Corporation  
+Asalus Medical Instruments Limited  
+ASCEND Therapeutics  
+Ascendis Pharma A/S  
+Ascension Orthopedics, Inc.  
+Ascenta Therapeutics  
+Ascentia Health, Inc.  
+Ash Access Technology  
+ASKLEP Inc.  
+Asklepion Pharmaceuticals, LLC  
+Asklepios Biopharmaceutical, Inc.  
+Asklepios proresearch  
+Asmacure Ltée  
+ASPEN Rhoads Research Foundation  
+AspenBio Pharma, Inc.  
+Asphelia Pharmaceuticals  
+Aspire Bariatrics, Inc.  
+Aspire Medical  
+Aspreva Pharmaceuticals  
+ASQA a.s.  
+Association of Specialty Physicians, Inc.  
+Association of Teachers of Preventive Medicine  
+AssureRx  
+Astellas Pharma Canada, Inc.  
+Astellas Pharma China, Inc.  
+Astellas Pharma Europe BV  
+Astellas Pharma Europe Ltd.  
+Astellas Pharma Global Development, Inc.  
+Astellas Pharma GmbH  
+Astellas Pharma Inc  
+Astellas Pharma Indonesia Inc.  
+Astellas Pharma Korea, Inc.  
+Astellas Pharma Taiwan, Inc.  
+Astellas Pharma US, Inc.  
+Astex Pharmaceuticals  
+Asthmatx, Inc.  
+Astion Pharma A/S  
+Astra USA  
+AstraZeneca  
+Astute Medical, Inc.  
+Asubio Pharmaceuticals, Inc.  
+AtCor Medical, Inc.  
+Athena Feminine Technologies, Inc.  
+AtheroGenics  
+AtheroMed, Inc  
+Athersys, Inc  
+Ativus Farmaceutica Ltda  
+Atos Medical AB  
+Atox Bio Ltd  
+AtriCure, Inc.  
+Atritech  
+Atrium Innovations  
+Atrium Medical Corporation  
+Attenuon  
+Aubrey Inc.  
+Augmenix, Inc.  
+AUM Cardiovascular, Inc.  
+Aureon Biosciences, Inc.  
+Auris Medical AG  
+Auris Medical, Inc.  
+Auron Healthcare GmbH  
+Ausio Pharmaceuticals, LLC  
+Auspex Pharmaceuticals, Inc.  
+Australian Department of Industry, Tourism and Resources  
+Autoimmune Technologies, LLC  
+Autonomic Technologies, Inc.  
+Auxilium Pharmaceuticals  
+Auxogyn, Inc.  
+Avalanche Biotechnologies, Inc.  
+Avanir Pharmaceuticals  
+Avant Immunotherapeutics  
+Avanta  
+Avanti Polar Lipids, Inc.  
+Avantis Medical Systems  
+Avario Healthcare Inc.  
+AVAX Technologies  
+Avaxia Biologics, Incorporated  
+Avedro, Inc.  
+Aventis Pharmaceuticals  
+Aventyn, Inc.  
+AVEO Pharmaceuticals, Inc.  
+Avera Pharmaceuticals  
+Averion International Corporation  
+Avexa  
+Avid Radiopharmaceuticals  
+Avidia  
+Avigen  
+AviGenics  
+Avila Therapeutics  
+Avinger, Inc.  
+AVIR Green Hills Biotechnology AG  
+Aviron  
+Avita Medical  
+Avraham Pharmaceuticals Ltd  
+Avva Rus, JSC  
+AVVAA World Healthcare Products, Inc.  
+Awenydd GmbH  
+Axaron Bioscience AG  
+Axcan Pharma  
+Axcentua Pharmaceuticals AB  
+AxelaCare Health Solutions, LLC  
+Axelar AB  
+Axio Research. LLC  
+Axiom Worldwide, LLC  
+AxioMed Spine Corporation  
+Axis Shield Diagnostics Ltd  
+AxoGen, Inc  
+Axxonis Pharma AG  
+Ayanda AS  
+Azaya Therapeutics, Inc.  
+Azelon Pharmaceuticals  
+Azevan Pharmaceuticals  
+Aziende Chimiche Riunite Angelini Francesco S.p.A  
+Azimuth Therapy Ltd.  
+Azur Pharma, Inc  
+B. Braun Interventional Systems, Inc  
+B. Braun Ltd. Centre of Excellence Infection Control  
+B. Braun Medical Inc.  
+B. Braun Medical International Trading Company Ltd.  
+B. Braun Medical SA  
+B. Braun Melsungen AG  
+B.Braun Avitum AG  
+B.Braun Surgical SA  
+Bacchus Vascular  
+Bactiguard AB  
+Baker Norton Pharmaceuticals  
+BalanceSense LLC  
+Balt International  
+Balton Sp.zo.o.  
+Bang & Olufsen Medicom  
+Banyan Biomarkers, Inc  
+Bard Electrophysiology  
+Bard Ltd  
+Barnev, Inc.  
+BaroNova, Inc.  
+BaroSense Inc.  
+Barr Laboratories  
+Barron Associates, Inc.  
+BASF  
+Basilea Pharmaceutica  
+Basilea Pharmaceutica International Ltd  
+Bausch & Lomb Incorporated  
+Bavarian Nordic  
+Baxano, Inc.  
+Baxter BioScience  
+Baxter Healthcare Corporation  
+Baxter Innovations GmbH  
+Bayer  
+Bayer Healthcare Pharmaceuticals, Inc./Bayer Schering Pharma  
+Bayer HealthCare, Diabetes Care  
+Bayhill Therapeutics  
+Baylis Medical Company  
+BBN Technologies  
+BC Research Inc.  
+BCN Peptides  
+be Medical  
+Beacon Bioscience, Inc.  
+Beacon Health Strategies  
+Beck Medical Ltd.  
+Beckloff Associates, Inc.  
+Becton, Dickinson and Company  
+Beddit.com Ltd  
+Beech Tree Labs, Inc.  
+Beghin-Meiji  
+Behavior Therapy Associates, LLP  
+Behavioral Health Services, Inc.  
+Beijing Fresenius Kabi Pharmaceutical Co  
+Beijing Genova Biotech Company, Ltd.  
+Beijing Kawin Technology Share-Holding Co., Ltd.  
+Beijing Minhai Biotechnology Co., Ltd  
+Beijing Northland Biotech. Co., Ltd.  
+Beijing Novartis Pharma  
+Beijing Peking University WBL Biotech Co., Ltd.  
+Beike Biotech India Pvt.ltd  
+Bejing Vigoo Biological Co., LTD  
+Bellicum Pharmaceuticals  
+Bellsystem24 , Inc.  
+Bellus Health Inc  
+Belpharma s.a.  
+BeneChill, Inc  
+Benesis Corporation  
+Benvenue Medical, Inc.  
+Berg Pharma,LLC  
+Berkeley Analytics, Inc.  
+Berlex Laboratories, Inc.  
+Berlin Heart, Inc  
+Berlin-Chemie AG Menarini Group  
+Berlin-Chemie Menarini  
+Best Vascular, Inc.  
+Beta-Stim Ltd.  
+Beximco  
+Bezoloven, Inc.  
+BG Medicine, Inc  
+Bharat Biotech International Limited  
+Bharat Serums and Vaccines Limited  
+BHR Pharma, LLC  
+Bial - Portela C S.A.  
+BIAL Industrial Farmacéutica S.A.  
+BiancaMed Ltd  
+BIND Biosciences  
+Binex  
+Bio Analytical Research Corporation  
+Bio Sidus SA  
+Bio-Cancer Treatment International Limited  
+Bio-K Plus International Inc.  
+Bio-medical Carbon Technology Co., Ltd.  
+Bio-Medical Research, Ltd.  
+Bio-Medisinsk Innovasjon  
+Bio-Path Holdings, Inc.  
+Bio-Rad Laboratories  
+Bio-Scaffold International Pte Ltd  
+Bio-Signal Group Corp.  
+Bio-Tech Pharmacal, Inc.  
+BiO2 Medical  
+BioActor  
+BioAlliance Pharma SA  
+BioAlpha Inc.  
+BioAxone BioSciences, Inc.  
+BioBalance Corporation  
+BioBehavioral Diagnostics Company  
+Biocad  
+BioCancell Therapeutics Israel Ltd.  
+BioCardia, Inc.  
+Biocept, Inc.  
+BioChemics, Inc.  
+Biocine  
+Biocinese  
+BioCis Pharma Ltd  
+Biocoat  
+Biocodex  
+Biocompatibles UK Ltd  
+Biocon Limited  
+BioControl Medical  
+BioCryst Pharmaceuticals  
+BioCytics, Inc.  
+Biodel  
+BioDelivery Sciences International  
+BioElectronics Corporation  
+Bioenergy Life Science, Inc.  
+Bioenvision  
+Bioforce AG  
+BioGaia AB  
+Biogen Idec  
+Biogen-Dompé AG  
+BioGeneric Pharma  
+BioGenesis  
+Bioglane  
+Bioheart, Inc.  
+BioHorizons, Inc.  
+Bioiberica  
+BioIncept LLC  
+BioInvent International AB  
+Bioject Medical Technologies, Inc.  
+Biokine Therapeutics Ltd  
+Biolab Sanus Farmaceutica  
+Biolert  
+Biolex Therapeutics, Inc.  
+Biolight AB  
+BioLineRx, Ltd.  
+Biolipox AB  
+BioLite, Inc.  
+BioLogic Engineering, Inc.  
+Biologische Heilmittel Heel GmbH  
+bioLytical Laboratories  
+BioMarck Pharmaceuticals, Ltd.  
+BioMarin Pharmaceutical  
+BioMarin/Genzyme LLC  
+BioMark Technologies Inc.  
+BioMAS Ltd  
+Biomatlante  
+Biomay AG  
+Biomeasure Inc, Ipsen Group  
+Biomed Research & Technologies, Inc.  
+BioMed Valley Discoveries, Inc  
+Biomedical Development Corporation  
+Biomedical Enterprises Inc  
+BioMedicines  
+Biomedisyn Corporation  
+Biomerieux  
+Biomerix  
+Biomet Australia Pty Ltd.  
+Biomet Biologics, LLC  
+Biomet Denmark A/S  
+Biomet France SARL  
+Biomet Japan, Inc.  
+Biomet Nederland BV  
+Biomet Norge A.S.  
+Biomet Orthopedics, LLC  
+Biomet Polska Sp. z.o.o.  
+Biomet Spain Orthopaedics S.L.  
+Biomet Sports Medicine, LLC  
+Biomet U.K. Ltd.  
+Biomet, Inc.  
+BioMimetic Therapeutics  
+Biomoda Inc.  
+BioMS Technology Corp.  
+BiondVax Pharmaceuticals ltd.  
+Bioness Inc  
+Bioness Neuromodulation  
+Bioniche Life Sciences Inc.  
+Bioniche Pharma USA LLC  
+Bionomics Limited  
+Bionor Immuno AS  
+Bionorica Research GmbH  
+Bionorica SE  
+Bionov  
+Bionovo  
+BioNumerik Pharmaceuticals, Inc.  
+BioPartners GmbH  
+Biopeutics Co., Ltd  
+Biopharmica Limited  
+BioPhausia  
+BioPheresis GmbH  
+BioPoly LLC  
+BioPro Medical Ltd  
+BioProtect  
+Biopure Corporation  
+BioResponse  
+BIOrest Ltd.  
+BioSante Pharmaceuticals  
+BIOSANTECH  
+Biosense Webster EMEA  
+Biosense Webster, Inc.  
+Biosensors Europe SA  
+Bioskin GmbH  
+Biospecifics Technologies Corp.  
+Biospect Inc  
+BioSpherix  
+Biostable Science & Engineering  
+BioStat International, Inc.  
+BioStat Solutions, Inc., Mt. Airy, MD  
+Biostime, Inc.  
+Biostime, Inc. (Guangzhou)  
+Biostir, Inc.  
+BioStratum  
+Biosuccess Biotech Co., Ltd.  
+BioSurface Engineering Technologies, Inc  
+Biosyn  
+BioSync Scientific Pvt. Ltd.  
+Biosynexus Incorporated  
+BioSyntech Canada Inc.  
+Biota Scientific Management Pty Ltd  
+Biotec Pharmacon ASA  
+Biotech Equity Partners Pty Ltd  
+BioTech Tools S.A.  
+Biotechnology Institute IMASD  
+Biotectid GmbH  
+Biotest  
+Biotest Pharmaceuticals Corporation  
+BioTex, Inc.  
+Biothera  
+Biotie Therapies Corp.  
+Biotie Therapies Inc.  
+Biotoxtech Co., Ltd  
+Biotronik AG  
+Biotronik ApS  
+Biotronik France  
+Biotronik Japan, Inc.  
+Biotronik SE & Co. KG  
+Biotronik Vertriebs-GmbH  
+Biotronik, Inc.  
+Bioven Europe  
+Bioven Sdn. Bhd.  
+BioVentrix  
+Biovest International  
+BioVex Limited  
+Bioview, Inc.  
+Biovil Research Group, LLC  
+Biovo Technologies Ltd  
+Biowave Corporation  
+BioWest Therapeutics Inc  
+Bioxtract SA  
+BiPar Sciences  
+Birch Point Medical  
+Birken AG  
+Bitop AG  
+Bledina  
+bluebird bio  
+BN ImmunoTherapeutics  
+Boehringer Ingelheim Pharmaceuticals  
+Boehringer Mannheim  
+BOIRON  
+Bolton Medical  
+Bone Therapeutics S.A  
+Boneca Corporation  
+Boryung Pharmaceutical Co., Ltd  
+Boston Biomedical, Inc  
+Boston Scientific Corporation  
+Bostwick Laboratories  
+Bows Pharmaceuticals AG  
+Brabant Research  
+Bracco Diagnostics, Inc  
+Bradmer Pharmaceuticals Inc.  
+Brahms AG  
+Brahms France  
+Brain Plasticity, Inc.  
+BrainCells Inc.  
+BrainScope Company, Inc.  
+BrainsGate  
+Brainstorm-Cell Therapeutics  
+Brainsway  
+Braintree Laboratories  
+Brava  
+BRC Operations Pty. Ltd.  
+BreakThrough Therapeutics  
+Breas Medical S.A.R.L.  
+Breathe Technologies, Inc.  
+Breezy Industries Ltd.  
+BREG, Inc  
+Bridge BioResearch Ltd.  
+BridgePoint Medical  
+BrightOutcome  
+Bristol-Myers Squibb  
+Britannia Pharmaceuticals Ltd.  
+British Broadcasting Corporation  
+British Columbia Dental Hygienists' Association (BCDHA)  
+Broncus Technologies  
+BryTech, Inc.  
+BSN Medical Inc  
+BSN-JOBST Inc.  
+BSP Biological Signal Processing Ltd.  
+BTL Industries Ltd.  
+BTR Group  
+Bukwang Pharmaceutical  
+Bukwang Pharmaceutical, Co., Ltd.  
+Bunker Industria Farmaceutica Ltda.  
+Burdenko Neurosurgical Institute  
+Burroughs Wellcome  
+Byrne Healthcare  
+BZL Biologics  
+BÂRRX Medical, Inc.  
+C. R. Bard  
+C.B. Fleet Company, Inc.  
+C.T. Development America, Inc.  
+C2 Therapeutics, Inc.  
+C4Pain  
+C8 MediSensors, Inc.  
+Cabochon Aesthetics, Inc.  
+CABYC  
+Cadence Pharmaceuticals  
+Cadila Healthcare Limited  
+Cadila Pharnmaceuticals  
+Cahaba Pharmaceuticals  
+Calando Pharmaceuticals  
+Calibra Medical, Inc.  
+Calimmune, Inc.  
+Calixa Therapeutics, Inc.  
+Callisto Pharmaceuticals  
+Calosyn Pharma, Inc.  
+Camargo Pharmaceutical Services  
+Cambridge Heart Inc.  
+Cambridge Temperature Concepts  
+Cambridge Theranostics Ltd  
+Cameron Health, Inc.  
+Camurus AB  
+Can-Fite BioPharma  
+Canadian Association of Emergency Physicians  
+Canadian Association of Gastroenterology  
+Canadian Association of Radiation Oncology  
+Canadian Lung Association  
+Canadian Research & Education in Arthritis  
+Canadian Urological Association  
+CanBas Co. Ltd.  
+Cancer Prevention Pharmaceuticals, Inc.  
+CancerVax Corporation  
+Candela Corporation  
+Candela France  
+Cangene Corporation  
+Canyon Pharmaceuticals, Inc.  
+Capnia, Inc.  
+Capricor Inc.  
+Capso Vision, Inc.  
+Capstone Therapeutics  
+Cara Therapeutics, Inc.  
+Carag AG  
+Carbon Medical Technologies  
+Carbylan BioSurgery, Inc.  
+Cardiac Regeneration Technologies, LLC  
+Cardialysis BV  
+Cardiapex Ltd.  
+Cardiatis  
+Cardiavent Inc.  
+Cardica, Inc  
+Cardio3 BioSciences  
+CardioDex  
+CardioDx  
+CardioDynamics  
+CardioFocus  
+CardioGard Medical Ltd.  
+Cardiogenesis Corporation, a wholly-owned subsidiary of CryoLife, Inc.  
+Cardiokine Biopharma, LLC  
+CardioKine Inc.  
+CardioKinetix, Inc  
+CardioMag Imaging  
+Cardiome Pharma  
+CardioMEMS  
+Cardiometabolics  
+Cardionet  
+Cardiorentis  
+CardioVascular BioTherapeutics, Inc.  
+Cardiovascular Imaging Technologies  
+Cardiovascular Systems Inc  
+Cardiox Corporation  
+Cardioxyl Pharmaceuticals, Inc  
+Cardium Therapeutics  
+Cardiva Medical, Inc.  
+Cardoz AB  
+CareFusion  
+Carestream Health, Inc.  
+CareTelCom AB  
+Cargill  
+Caris Science, Inc.  
+Caritas Health Care, Inc  
+Carl Zeiss Meditec AG  
+Carl Zeiss Meditec, Inc.  
+Carl Zeiss Surgical GmbH  
+Carleton Optical Equipment Ltd.  
+Carmel Biosciences  
+Carticept Medical, Inc  
+Cartiheal (2009) Ltd  
+CAS Medical Systems, Inc.  
+Cassella-med GmbH & Co. KG  
+Catabasis Pharmaceuticals  
+Catalysis SL  
+Catalyst Pharmaceutical Partners, Inc  
+Catheter Robotics, Inc.  
+Cato Research  
+Cavu Medical, Inc.  
+CBA Research  
+CD Pharma India Pvt. Ltd.  
+CDA Research Group, Inc.  
+CDG Therapeutics, Inc.  
+Cebix Incorporated  
+Ceck Cap Ltd.  
+Cegedim Strategic Data  
+CEL-SCI Corporation  
+Celator Pharmaceuticals  
+Celera Genomics  
+Celestial Seasonings  
+Celgene Corporation  
+Cell Biotech Co., Ltd.  
+Cell Genesys  
+Cell Medica Ltd  
+Cell Pathways  
+Cell Therapeutics  
+Cell>Point LLC  
+Celladon Corporation  
+Cellceutix Pharmaceuticals  
+CellCoTec B.V.  
+Cellcura AS  
+Celldex Therapeutics  
+Cellectar, Inc  
+Cellegy Pharmaceuticals  
+Cellerant Therapeutics  
+Celleration, Inc.  
+Cellerix  
+Cellestis  
+Cellex, Inc.  
+CellMed AG, a subsidiary of BTG plc.  
+Cellonis Biotechnology Co. Ltd.  
+CellSeed France S.A.R.L.  
+Celltrion  
+Cellular Biomedicine Group Ltd.  
+Cellular Sciences  
+Cellvizio Inc.  
+CeloNova BioSciences, Inc.  
+Celsion  
+Celtic Biotech Ltd  
+Celtic Pharma Development Services  
+Cempra Pharmaceuticals  
+CeNeRx BioPharma Inc.  
+Centaur Pharmaceuticals  
+Center for Diabetes Control, Inc.  
+Centocor BV  
+Centocor Ortho Biotech Services, L.L.C.  
+Centocor Research & Development, Inc.  
+Centocor, Inc.  
+Centro A.F. de Estudios Tecnologicos, S.A.  
+Cephalon  
+Cepheid  
+Ceprodi S.A. Kot  
+Ception Therapeutics  
+CeQur Corporation  
+Ceragenix Pharmaceuticals  
+CeraPedics, Inc  
+cerbomed GmbH  
+Cereal Partners Worldwide  
+Cerecor Inc  
+Ceregene  
+Ceremed, Inc.  
+Cerenis Therapeutics, SA  
+Cerevast Therapeutics, Inc.  
+Cereve, Inc.  
+Cerexa, Inc.  
+Cerimon Pharmaceuticals  
+Cerulean Pharma Inc.  
+Cerus Corporation  
+Cervel Neurotech, Inc.  
+Cesa Projects International  
+CHA Bio & Diostech  
+Chadwick Optical Inc.  
+Chakshu Research, Inc.  
+Chang Jiang Bio-pharmaceutical Co., Ltd.  
+Changchun Huayang High-tech Co., Ltd  
+Changzheng-Cinkate  
+ChanRx Corporation  
+Charleston Laboratories, Inc  
+Charsire Biotechnology Corp.  
+Chavah Pty Ltd  
+Cheetah Medical Inc.  
+Chelsea Therapeutics  
+Chem Tech Research Incorporation  
+Chembio Diagnostic Systems, Inc.  
+ChemGenex Pharmaceuticals  
+Chemi S.p.A.  
+ChemoCentryx  
+Chen Yi Enterprise, Co., Ltd.  
+Chengdu Kanghong Biotech Co.,Ltd.  
+CherryPharm  
+CHF Solutions  
+Chiasma, Inc.  
+Chiesi Farmaceutici S.p.A.  
+Chiesi Pharmaceuticals Inc.  
+Children's Heart Center  
+Chiltern International Inc.  
+Chiltern Pesquisa Clinica Ltda  
+Chimeric Therapies  
+Chimerix  
+ChiRhoClin, Inc.  
+Chiron Corporation  
+Cholestech Corporation  
+Chong Kun Dang Pharmaceutical  
+Chongqing Fortune Pharmaceutical Co., Ltd.  
+Chongqing Jiachen Biotechnology Ltd.  
+Chr Hansen A/S  
+Christchurch Clinical Studies Trust Ltd  
+Christie Medical Holdings, Inc.  
+Chroma Therapeutics  
+ChromoLogic, LLC  
+ChronTech Pharma AB  
+Chrysantis, Inc.  
+Chugai Pharma Europe Ltd.  
+Chugai Pharma Taiwan  
+Chugai Pharma USA  
+Chugai Pharmaceutical  
+Church & Dwight Company, Inc.  
+CIBA VISION  
+CID - Carbostent & Implantable Devices  
+Cidat, S.A. de C.V.  
+Cierra  
+Cifarma Cientifica Farmaceutica Ltda  
+Cinogy GmbH  
+Cipher Pharmaceuticals Inc.  
+Ciphergen Biosystems  
+Cipla Ltd.  
+Cipla Medpro  
+Circadian Technologies Ltd.  
+Circassia Limited  
+CircuLite, Inc.  
+Cita NeuroPharmaceuticals  
+Citieffe S.r.l  
+Citizen Systems Japan Co., Ltd.  
+Civitas Therapeutics  
+CJ Cheiljedang Corporation  
+CL Medical  
+Clarassance, Inc.  
+Claret Medical  
+Clarus Therapeutics, Inc.  
+Clasado  
+Clasado Limited  
+Clavis Pharma  
+Clayton Sleep Insititute  
+Clearside Biomedical, Inc.  
+Clearstream Technologies Ltd.  
+Cleveland BioLabs  
+Cleveland Medical Devices Inc  
+ClinAssess GmbH  
+Clinical Innovations  
+Clinical Innovations, LLC  
+Clinical Research International Limited  
+Clinical Service, China  
+Clinical Solutions  
+Clinigene International Ltd  
+Clinipace LTD  
+ClinLogix. LLC  
+ClinPhone, Inc.  
+Clinquest, Inc.  
+Clinuvel Pharmaceuticals Limited  
+Clionsky Neuro Systems Inc.  
+Closter Pharma  
+CloSys Corporation  
+Clovis Oncology, Inc.  
+CM&D Pharma Limited  
+CMED HIFU Development Corporation  
+CMP Therapeutics Ltd  
+CMS Medical  
+Cnoga Medical Ltd.  
+CNS Response  
+CNS Therapeutics  
+CNSystems Medizintechnik AG  
+co.don AG  
+CoAxia  
+Cochlear  
+Cochlear Bone Anchored Solutions  
+CoDa Therapeutics Inc.  
+Codelco  
+Codman & Shurtleff  
+Coeruleus Ltd.  
+CogCubed, Corp  
+Cogentus Pharmaceuticals  
+Cognis  
+Cognition Pharmaceuticals, LLC  
+Cognitive Research Corporation  
+CogState Ltd.  
+Cohera Medical, Inc.  
+Coherex Medical  
+Colby Pharmaceutical Company  
+Cold Genesys, Inc.  
+Colgate Palmolive  
+CollaGenex Pharmaceuticals  
+Collegium Pharmaceutical, Inc.  
+Coloplast A/S  
+Colotech A/S  
+CoLucid Pharmaceuticals  
+Columbia Laboratories  
+Columbia Northwest Pharmaceuticals  
+Columbia Research Laboratories  
+CoMentis  
+Commitum AB  
+Complen Health GmbH  
+Compumedics Limited  
+Conatus Pharmaceuticals Inc.  
+ConBio, a Cynosure Company  
+Conceivex  
+Concentric Medical  
+Conceptus, Inc.  
+Concert Pharmaceuticals  
+Concordia Pharmaceuticals, Inc  
+Confluent Surgical  
+ConforMIS, Inc.  
+ConjuChem  
+Connaught Laboratories  
+Conor Medsystems  
+Consultants in Neurology  
+Contextual Change LLC  
+Contract Research Organization el AB  
+Control Delivery Systems  
+Contura  
+ConvaTec Inc.  
+Convergence Medical Devices  
+Convergence Pharmaceuticals  
+Convergent Engineering, Inc.  
+Cook  
+Cook Biotech Incorporated  
+Cook Endoscopy  
+Cook Ireland, Ltd.  
+Cook Japan Incorporated  
+Cook MyoSite  
+CoolSystems, Inc.  
+CoolTouch, Inc  
+Cooper Companies  
+Coopervision, Inc.  
+Copharos  
+Coramed Technologies LLC  
+CorAssist Cadiovascular Ltd.  
+Corautus Genetics  
+Corcept Therapeutics  
+Cordis Corporation  
+CoRepair, Inc.  
+Corestem, Inc.  
+Coria Laboratories, Ltd.  
+Corimmun GmbH  
+Corin  
+Corindus Inc.  
+Corixa Corporation  
+Corline Systems AB  
+CorMatrix Cardiovascular, Inc.  
+CorMedix  
+Cornerstone Pharmaceuticals, Inc.  
+Cornerstone Therapeutics Inc.  
+Coronado Biosciences, Inc.  
+Corscience, Inc.  
+Cortex Pharmaceuticals  
+Corthera, Inc.  
+Cortria Corporation  
+Corventis, Inc.  
+Cosmeta  
+Cosmetique Active International  
+Cosmo Bioscience  
+Cosmo Technologies Ltd  
+Cosmos Technical Center  
+Cougar Biotechnology, Inc.  
+Covance  
+Coventry Health Care, Inc.  
+Covidien  
+CPEX Pharmaceuticals Inc.  
+Creabilis SA  
+CreatiVasc Medical LLC  
+Creative Peptides Sweden Inc.  
+Credit Valley EyeCare  
+CreoMed, Inc.  
+Crescendo Bioscience  
+Cristália Produtos Químicos Farmacêuticos Ltda.  
+Critical Biologics Corporation  
+Critical Diagnostics  
+Critical Therapeutics  
+CritiTech, Inc.  
+Croel AB  
+Croma-Pharma GmbH  
+Crospon  
+Cross Research S.A.  
+Crosstrees Medical Inc.  
+Crucell Holland BV  
+Crux Biomedical  
+CryoCath Technologies Inc.  
+CryoLife, Inc.  
+CrystalGenomics, Inc.  
+CSA Medical, Inc.  
+CSC Pharmaceuticals  
+CSL Behring  
+CSL Limited  
+CSPC ZhongQi Pharmaceutical Technology Co., Ltd.  
+CSPC-NBP Pharmaceutical Co., Ltd.  
+CTI-1, LLC  
+Cttq  
+Cubist Pharmaceuticals  
+Cumberland Pharmaceuticals  
+Cupola Medical Ltd  
+Cura Biotech LLC  
+Curaden Swiss  
+CuraGen Corporation  
+Cure Therapeutics  
+CureDM  
+Curemark  
+CureTech Ltd  
+CureVac GmbH  
+Curis, Inc.  
+Cutanea Life Sciences, Inc.  
+Cutera Inc.  
+CV Technologies  
+CV Therapeutics  
+CVRx, Inc.  
+CW Optics, Inc.  
+Cxlusa  
+Cyathus Exquirere Pharmaforschungsgmbh  
+Cyberonics, Inc.  
+Cyclacel Pharmaceuticals, Inc.  
+Cyclomedica Australia PTY Limited  
+Cylene Pharmaceuticals  
+Cynosure, Inc.  
+Cypress Bioscience, Inc.  
+Cyrenaic Pharmaceuticals  
+Cytavis Biopharma GmbH  
+Cytheris SA  
+Cytheris, Inc.  
+Cyto Pulse Sciences, Inc.  
+Cytochroma Inc.  
+CytoCore, Inc.  
+CytoDyn, Inc.  
+Cytogen Corporation  
+Cytograft Tissue Engineering  
+Cytokinetics  
+Cytomedix  
+Cytonet GmbH & Co. KG  
+Cytopeutics Pte. Ltd.  
+CytoPharm, Inc.  
+CytoPherx, Inc  
+Cytori Therapeutics  
+Cytos Biotechnology AG  
+CytoVac A/S  
+Cytran  
+CytRx  
+D-Pharm Ltd.  
+D16 Pharma & Biotec Ltd.  
+Da Volterra  
+Daewon Pharmaceutical Co., Ltd.  
+Daewoong Pharmaceutical Co. LTD.  
+Dafra Pharma  
+Daiichi Pharmaceuticals  
+Daiichi Sankyo Co., Ltd.  
+Daiichi Sankyo Europe, GmbH  
+Daiichi Sankyo Inc.  
+Daiichi Sankyo Taiwan Ltd.  
+Dainippon Sumitomo Pharma  
+Dainippon Sumitomo Pharma America  
+Dainippon Sumitomo Pharma Europe LTd.  
+Dairy Management Inc.  
+Dako  
+Dalian Holley Kingkong Pharmaceutical Co., Ltd  
+Dalim BioTech Co., Ltd.  
+Danisco  
+Dannon Company, Inc.  
+Danone Asia Pacific Holdings Pte, Ltd.  
+Danone Japan  
+Danone Research  
+Danone Spain  
+Danube Pharmaceuticals, Inc.  
+DARA Therapeutics  
+Darier  
+Dart NeuroScience, LLC  
+Datascope Corp.  
+Datascope Patient Monitoring  
+Daval International Limited  
+David L Zisow MD LLC  
+Davita Clinical Research  
+DaVita Dialysis  
+Daxor Corporation  
+DBV Technologies  
+DC Devices, Inc.  
+DCPrime BV  
+Debiopharm S.A.  
+Debiovision  
+Deciphera Pharmaceuticals LLC  
+deCODE genetics  
+Deep Breeze  
+Defence Research and Development Canada  
+Deka Medical, Inc.  
+DEKK-TEC, Inc.  
+Del Mar Pharmaceuticals (BC), LTD  
+Delcath Systems Inc.  
+Delenex Therapeutics AG  
+Delray Research Associates  
+Delta-Fly Pharma, Inc.  
+Deltanoid Pharmaceuticals  
+DeltaPoint,Inc.  
+Deltex Medical, Inc.  
+Dendreon  
+Dentsply Implants  
+Dentsply Implants Manufacturing GmbH  
+Dentsply International  
+Depomed  
+DePuy International  
+DePuy Mitek  
+DePuy Orthopaedics  
+DePuy Spine  
+Depuy, Inc.  
+DePuy-Acromed, Inc.  
+Derm Research @ 888 Inc.  
+Derma Sciences, Inc.  
+DermaGen AB  
+DermiPsor, Ltd.  
+Dermira, Inc.  
+Desitin Arzneimittel GmbH  
+Deva Holding A.S.  
+DeveloGen Israel, Ltd.  
+DeVilbiss Healthcare LLC  
+Devirex AG  
+Dexa Medica Group  
+Dexcel Pharma Technologies Ltd.  
+DexCom, Inc.  
+DexTech Medical AB  
+Dey  
+DFINE Inc.  
+dgd Research, Inc.  
+DH Bio Co., Ltd.  
+Dharma Therapeutics Inc.  
+Dhp Korea Co., Ltd.  
+Diabetech  
+Diabetes Care Center  
+Diabetica Solutions Inc.  
+Diacardio LTD  
+Diacrin/Genzyme Corporation LLC  
+Diagnostic Photonics, Inc.  
+Diagnostic Technologies Ltd.  
+Diagnostic Technology  
+Diagnostic Ultrasound  
+Diagnostica Stago  
+DiaKine Therapeutics, Inc.  
+Diakron Pharmaceuticals  
+Dialysis Clinic, Inc.  
+Dialysis Solutions Inc.  
+Diamyd Inc  
+Diamyd Therapeutics AB  
+DIApedia, LLC  
+Diasome Pharmaceuticals  
+DiaTech Oncology  
+Dicentra Inc.  
+Diffusion Pharmaceuticals LLC  
+Digestive Care, Inc.  
+Digna Biotech S.L.  
+Dilafor AB  
+Dilaforette AB  
+Dimagi Inc.  
+DiObex  
+Dipexium Pharmaceuticals, LLC  
+Direct Flow Medical, Inc.  
+Direct Therapeutics  
+Dirinco B.V.  
+Discovery Laboratories  
+Distrac  
+Diurnal Limited  
+DJO Incorporated  
+DMG Dental Material Gesellschaft mbH  
+DNA Therapeutics  
+DNage B.V.  
+DNAtrix, Inc.  
+DNP Canada  
+Dolorgiet GmbH & Co. KG  
+Dompé s.p.a.  
+Dong Wha Pharmaceutical Co. Ltd.  
+Dong-A Pharmaceutical Co., Ltd.  
+Dong-A PharmTech Co., Ltd.  
+Dong-A ST Co., Ltd.  
+Doublle Bioproduct Inc  
+DOV Pharmaceutical, Inc.  
+Dow Pharmaceutical Sciences  
+DP Clinical, Inc.  
+Dr. Carson Liu Med Corp.  
+Dr. F. Köhler Chemie GmbH  
+Dr. Falk Pharma GmbH  
+Dr. Reddy's Laboratories Limited  
+Dr. Willmar Schwabe GmbH & Co. KG  
+Draeger and Hanse BKK  
+DreamPharma  
+DSC Services, s.r.o.  
+DSM Food Specialties  
+DSM Ltd  
+DSM Nutritional Products, Inc.  
+Duchesnay Inc.  
+Duke Vascular, Inc.  
+Dune Medical Devices  
+DuoCort AB  
+Dupont Applied Biosciences  
+Dupont Merck  
+Duramed Research  
+Durata Therapeutics, Inc.  
+Durect  
+DUSA Pharmaceuticals, Inc.  
+Dutch Arthritis Association  
+Dyax Corp.  
+Dynamic Health Resources  
+Dynamics Research Corporation  
+Dynasplint Systems, Inc.  
+Dynatherm Medical Inc.  
+Dynavax Technologies Corporation  
+Dynogen Pharmaceuticals  
+DynPort Vaccine Company LLC, A CSC Company  
+e-Therapeutics PLC  
+Eagle Pharmaceuticals, Inc.  
+Eagle Vision Pharmaceutical Corp.  
+Earlogic Korea, Inc.  
+EarlySense Ltd.  
+EasyGlide  
+EBI, LLC dba Biomet Spine, Biomet Trauma, Biomet Osteobiologics and Biomet Br...  
+EBR Systems, Inc.  
+Echosens  
+Echosense Ltd.  
+Eclectica Sas di Beccaria Franca, Ermacora Antonella e C.  
+Ecobrands, Ltd.  
+EcoNugenics  
+ECRI bv  
+Ectycell SASU  
+EDAP Technomed  
+EDAP TMS S.A.  
+Edimer Pharmaceuticals  
+Edison Pharmaceuticals Inc  
+Edmond Pharma  
+Education Development Center, Inc.  
+Edusa Pharmaceuticals, Inc.  
+Edwards Lifesciences  
+Effice Servicios Para la Investigacion S.L.  
+Egalet a/s  
+EGEN, Inc.  
+Ego Pharmaceuticals  
+Egret Medical Products Inc.  
+Egymedicalpedia  
+Eiger BioPharmaceuticals  
+Eisai China Inc.  
+Eisai Co., Ltd.  
+Eisai GmbH  
+Eisai Inc.  
+Eisai Korea Inc.  
+Eisai Limited  
+Ekips Technologies  
+Ekkyo  
+Ekomed LLC  
+EKOS Corporation  
+EKR Therapeutics, Inc  
+ELA Medical, Inc.  
+ELAB-Logistics  
+Elan Pharma International Limited  
+Elan Pharmaceuticals  
+Elastagen Pty Ltd  
+elbion AG  
+Elcelyx Therapeutics, Inc.  
+Electrochemical Oxygen Concepts, Inc.  
+ElectroCore LLC  
+Electromed, Inc.  
+Eleison Pharmaceuticals LLC.  
+Eleos, Inc.  
+Elesta S.R.L.  
+Eleven Biotherapeutics  
+Elgene Chemical  
+Eli Lilly and Company  
+Elixir Medical Corporation  
+Elixir Pharmaceuticals  
+Ellipse Technologies, Inc.  
+Ellman International  
+ElMindA Ltd  
+Elmore Oil Company Pty Ltd  
+Elpen Pharmaceutical Co. Inc.  
+Elro Pharma  
+Elvir SAS  
+Embera NeuroTherapeutics, Inc.  
+Embil Pharmaceutical Co. Ltd  
+EMD Inc., Canada  
+EMD Serono  
+EMD Serono Canada Inc.  
+EMD Serono, a division of EMD Inc., Canada  
+eMedtrain Inc.  
+Emergent BioSolutions  
+Emergent Product Development Seattle LLC  
+EMET Pharmaceuticals, LLC  
+Eminence  
+Emisphere Technologies, Inc.  
+Emissary International LLC  
+EMKinetics, Inc  
+Emmaus Medical, Inc.  
+Emotional Brain NY Inc.  
+Emphasys Medical  
+Emphycorp  
+Empi, A DJO Company  
+EMS  
+Enanta Pharmaceuticals  
+Encore Medical, L.P.  
+Encorium  
+Encysive Pharmaceuticals  
+Endo Pharmaceuticals  
+Endocare, Inc.  
+EndoCeutics Inc.  
+EndoControl  
+Endocyte  
+EndoGastric Solutions  
+Endogun Medical Systems Ltd.  
+Endologix  
+EndoPhotonix, Inc.  
+Endoscopic Technologies, Inc  
+Endosense  
+EndoStim Inc.  
+Endovasc  
+Endovascular Consultoria Limitada  
+EndoVx, Inc.  
+Endymion Medical Ltd  
+Energex Systems, Inc.  
+Engelhard Arzneimittel GmbH & Co.KG  
+Ennar Pharmaceuticals AF  
+Enovate Biolife Pvt Ltd  
+Ensure Medical  
+Entegrion, Inc.  
+Entellus Medical, Inc.  
+EnteroMedics  
+Enteron Pharmaceuticals  
+EntreMed  
+ENTrigue Surgical, Inc.  
+Envisioneering Medical Technologies  
+Envita Medical Center, Inc.  
+EnVivo Pharmaceuticals, Inc.  
+Envoy Medical Corporation  
+Enzon Pharmaceuticals, Inc.  
+EnzymeRx  
+Enzymotec  
+EnzySurge  
+EP MedSystems  
+Epeius Biotechnologies  
+Epic Imaging  
+Epic Research & Diagnostics, Inc.  
+Epic Sciences  
+Epicall LTD  
+EpiCept Corporation  
+Epigenomics, Inc  
+Epilepsiecentrum Kempenhaeghe  
+Epimmune  
+Epiphany Biosciences  
+Episurf Medical AB  
+Epix Pharmaceuticals, Inc.  
+Epizyme, Inc.  
+Erchonia Corporation  
+Erempharma  
+eResearch Technology, Inc.  
+Erimos Pharmaceuticals  
+Erkim Ilac A.S.  
+Erydel  
+ERYtech Pharma  
+Esanex Inc.  
+ESBATech AG  
+ESM Technologies, LLC  
+Esoterix Genetic Laboratories, LLC  
+Esoterix, Inc.  
+Esperance Pharmaceuticals Inc  
+Esperion Therapeutics  
+Essentialis, Inc.  
+Essex Pharma GmbH  
+Essilor International  
+Estetra S.A.  
+EstimME Ltd.  
+ethica Clinical Research Inc.  
+Ethical Oncology Science  
+Ethicon Endo-Surgery  
+Ethicon Endo-Surgery (Europe) GmbH  
+Ethicon, Inc.  
+Ethypharm  
+Etubics Corporation  
+Etwal Ltd.  
+EuBiologics Co.,Ltd  
+Eucatech AG  
+Eunoe  
+Eurand Pharmaceuticals  
+Eurocor GmbH  
+Eurodiet Scandinavia AS  
+Eurofarma Laboratorios S.A.  
+Eurolens Research  
+European Egyptian Pharmaceutical Industries  
+EUSA Pharma (US), Inc.  
+Euthymics BioScience, Inc.  
+ev3  
+ev3 International  
+Evaheart Medical USA, Inc.  
+Evalve  
+Evangelisches Krankenhaus Lutherhaus gGmbH  
+EVE Medical Systems Ltd.  
+Eventus Diagnostics Ltd  
+Ever Neuro Pharma GmbH  
+Evofem Inc.  
+Evoke Pharma  
+Evolutec Group  
+Evolva SA  
+Evotec Neurosciences GmbH  
+Exact Sciences Corporation  
+Exactech  
+Exactech Taiwan, Ltd.  
+Exalenz Bioscience LTD.  
+Excel PharmaStudies, Inc.  
+Excel-Tech Ltd.  
+Excelsior  
+Excited States, LLC  
+Exciton Technologies Inc.  
+Exelixis  
+Eximias Pharmaceutical  
+Exonhit  
+Exsar Corporation  
+Exsulin Corporation  
+Exxon Mobil  
+ExxonMobil Biomedical Sciences, Inc.  
+Eye Care and Cure  
+Eyegate Pharmaceuticals, Inc.  
+EyeKon Medical, Inc.  
+Eyemarker Systems, Inc  
+Eyeon Therapeutics, Inc.  
+EyeSense GmbH  
+Eyetech Pharmaceuticals  
+EyeTechCare  
+Facet Biotech  
+Facial Concepts, Inc.  
+Faes Farma, S.A.  
+Fallon Clinic  
+Far East Bio-Tec Co., Ltd  
+Farmacon  
+Farmoquimica S.A.  
+Faron Pharmaceuticals Ltd  
+Fate Therapeutics  
+Favrille  
+Femasys Inc.  
+FemmePharma Global Healthcare, Inc.  
+Fenwal, Inc.  
+Fermiscan Ltd  
+Ferndale Laboratories, Inc.  
+Ferozsons Laboratories Ltd.  
+Ferrer Internacional S.A.  
+Ferring Arzneimittel GmbH  
+Ferring Pharmaceuticals  
+Ferring SAU  
+Ferris Mfg. Corp.  
+FerroKin BioSciences, Inc.  
+Ferrosan AS  
+Fertiligent  
+Fertility Center of Las Vegas  
+FeRx  
+FFF Enterprises  
+FGK Clinical Research GmbH  
+FGK Representative Service GmbH  
+Fibrex Medical Research & Development GmbH  
+Fibrocell Technologies, Inc.  
+FibroGen  
+Fidia Farmaceutici s.p.a.  
+Fin-Ceramica Faenza Spa  
+FinnMedi Oy  
+Finnsusp Ltd.  
+Finox AG  
+Fisher and Paykel Healthcare  
+Fisher Bioservices  
+Fisons  
+Fitter International Inc.  
+Five Prime Therapeutics, Inc.  
+FKD Therapies Oy  
+Flax Canada 2015 Inc.  
+Flexible Stenting Solutions, Inc.  
+Flexion Therapeutics, Inc.  
+Flexuspine, Inc.  
+Floralis  
+FlowMedic  
+FlowMedica, Inc.  
+FluGen Inc  
+FluidDA nv  
+Fluoropharma, Inc.  
+Foamix Ltd.  
+Focus Diagnostics, Inc.  
+Focus Surgery  
+Fonterra Research Centre  
+Foot Levelers, Inc.  
+Forbes Medi-Tech  
+Foresight Biotherapeutics  
+Foresight Regulatory Strategies, Inc.  
+Forest Laboratories  
+FORSIGHT Vision3  
+Forsight Vision4  
+Fortuderm Ltd.  
+Forum Health  
+Forward-Pharma GmbH  
+Fougera Pharmaceuticals Inc.  
+Fovea Pharmaceuticals SA  
+FoxHollow Technologies  
+Fralex Therapeutics  
+Fraunhofer, Center for Molecular Biotechnology  
+Free Radical Sciences  
+Freedom Laser Therapy, Inc.  
+Freedom Meditech  
+Fresenius AG  
+Fresenius Biotech GmbH  
+Fresenius Biotech North America  
+Fresenius Kabi  
+Fresenius Kabi Japan  
+Fresenius Kabi Oncology Ltd.  
+Fresenius Medical Care Deutschland GmbH  
+Fresenius Medical Care France  
+Fresenius Medical Care Korea  
+Fresenius Medical Care North America  
+Fresh Medical Laboratories  
+Fruitura Bioscience Ltd.  
+Fugeia NV  
+Fujian Cosunter Pharmaceutical Co. Ltd  
+Fujifilm Medical Systems USA, Inc.  
+FujiFilm Pharmaceuticals U.S.A., Inc.  
+Fujirebio Diagnostics, Inc.  
+Fujisawa GmbH  
+Fujisawa Pharmaceutical Co  
+Functional Genetics Inc.  
+Functional Neuromodulation Ltd  
+Furiex Pharmaceuticals, Inc  
+G & W Laboratories Inc.  
+G D Searle  
+G&E Herbal Biotechnology Co., LTD  
+G-Tech Corporation  
+Gaba International AG  
+Gaia Medical Institute  
+Galapagos NV  
+Galaxy Pharma (Pvt) Limited  
+Galderma  
+Galderma Brasil Ltda.  
+Galderma Laboratories, L.P.  
+Galderma Laboratorium GmbH  
+Galderma R&D  
+Galectin Therapeutics Inc.  
+Galena Biopharma, Inc.  
+Galil Medical  
+Galmed Medical Reserch  
+Galsor S.r.l.  
+Gambat Institute of Medical Sciences  
+Gambro Dasco S.p.A.  
+Gambro Dialysatoren GmbH  
+Gambro Lundia AB  
+Gambro Renal Products, Inc.  
+Gamida Cell ltd  
+Gamma Medica-Ideas  
+GammaCan  
+Ganeden Biotech, Inc.  
+GangaGen, Inc.  
+Ganymed Pharmaceuticals AG  
+Gardia Medical  
+Garnet BioTherapeutics, Inc.  
+Gateway Health Alliance  
+Gaymar Industries, Inc.  
+GB-Veintech  
+GE Healthcare  
+Gebro Pharma GmbH  
+Gedeon Richter Ltd.  
+GEIGY Pharmaceuticals  
+Geistlich Pharma AG  
+GELITA  
+Gem Pharmaceuticals  
+Gema Diagnostics  
+Gemin X  
+Gen-Probe, Incorporated  
+Genaera Corporation  
+Genaissance Pharmaceuticals  
+GenBasix Incorporated  
+Gencare Incorporated  
+Gencor Pacific Group  
+Gene Logic  
+GeneCure Biotechnologies  
+GeneFerm Biotechnology Co., Ltd.  
+Genelabs Technologies  
+Genelux Corporation  
+Genelux GmbH  
+Genentech  
+General Electric  
+General Mills Inc.  
+General Nutrition Center, Inc  
+Generex Biotechnology Corp.  
+Generic Devices Consulting, Inc.  
+Generon (Shanghai) Corporation Ltd.  
+Genervon Biopharmaceuticals, LLC  
+GeneScience Pharmaceuticals Co., Ltd.  
+Genetic Immunity  
+Genetics Institute  
+GeNeuro Innovation SAS  
+Genexine Co., Ltd.  
+Genfit  
+Genitope Corporation  
+Genmab  
+GenMark Diagnostics  
+GenMont Biotech Incorporation  
+Geno LLC  
+Genocea Biosciences, Inc.  
+Genomas, Inc  
+Genome British Columbia  
+Genomic Health®, Inc.  
+Genomind, LLC  
+Genovate Biotechnology Co., Ltd.,  
+Genpharm ULC  
+GenSpera, Inc.  
+Genta Incorporated  
+Gentium SpA  
+Genuine Health  
+Genus Oncology, LLC  
+GenVec  
+Genzyme  
+GeoVax, Inc.  
+Gerber Products Company  
+Gerhard Pejcl Medizintechnik GmbH  
+Geron Corporation  
+Gesellschaft für Therapieforschung mbH  
+Getz Pharma  
+GI Dynamics  
+GI Stimulation, Inc.  
+GI View Ltd.  
+gicare Pharma Inc.  
+Gilead Sciences  
+GITR, Inc.  
+Given Imaging Ltd.  
+GL Pharm Tech Corporation  
+Glaukos Corporation  
+Glaxo Wellcome  
+GlaxoSmithKline  
+Glenmark Farmacêutica Ltda  
+Glenmark Pharmaceuticals Europe Ltd. (R&D)  
+Glenmark Pharmaceuticals Ltd. India  
+Glenmark Pharmaceuticals SA  
+Glenveigh Medical  
+Global BioClinical  
+Global Biotech  
+Global Genomics Group, LLC  
+Global Infusions  
+Global Orthopaedic Technology  
+GlobeImmune  
+Globus Medical Inc  
+GlucoVista  
+GluSense Ltd  
+Glycadia  
+Glycaemic Index Testing, Inc.  
+GlycaNova Norge AS  
+Glycemic Index Laboratories, Inc  
+GlycoMimetics Incorporated  
+Glycotex, Inc.  
+Glycotope Biotechnology GmbH  
+Glycotope GmbH  
+GlycoVaxyn AG  
+Glytech, Inc  
+GM Associates  
+GMP Endotherapeutics  
+Golden Biotechnology Corporation  
+Good Food Practice, Sweden  
+Google  
+GP-Pharm  
+Graceway Pharmaceuticals, LLC  
+Gradalis, Inc.  
+Great Lakes Drug Development, Inc.  
+Great Lakes NeuroTechnologies Inc.  
+Green Cross Corporation  
+Green Signal Biopharma Private Limited  
+Greer Laboratories  
+Grifols Biologicals Inc.  
+Grifols Italia S.p.A  
+Grifols Therapeutics Inc.  
+Groupe De Recherche En Rhumatologie Et Maladies Osseuses Inc.  
+Grünenthal Colombiana S.A.  
+Grünenthal GmbH  
+GTC Biotherapeutics  
+GTx  
+GuangZhou WeiShiBo Biotechnology Co., ltd  
+Guerbet  
+Guidant Corporation  
+Guided Therapeutics  
+Gunnar Kjems APS  
+GW Pharmaceuticals Ltd.  
+Gynesonics  
+Gynetech  
+Gyrus ACMI  
+H. Lundbeck A/S  
+Haag Streit USA  
+Haelan Products, Inc.  
+Haemonetics Corporation  
+Haffkine Bio-Pharmaceutical Corporation Ltd.  
+HairDx, LLC  
+HAL Allergy  
+Halcygen Pharmaceuticals Limited  
+Halozyme Therapeutics  
+Halscion, Inc.  
+Halt Medical, Inc  
+Hamad Medical Corporation  
+Hamilton Medical AG  
+HanAll BioPharma Co., Ltd.  
+Handok Pharmaceuticals Co., Ltd.  
+Hangzhou Jiuyuan Gene Engineering Co. Ltd.,  
+Hanita Lenses  
+Hanlim Pharm. Co., Ltd.  
+Hanmi Pharmaceutical Company Limited  
+Hansa Medical AB  
+Hansen Medical  
+Hanwha Chemical  
+Harbinger Medical, Inc.  
+Harbor Medical Inc.  
+Harbor Therapeutics  
+Harmonium International Inc.  
+Harras Pharma Curarina GmbH  
+Harrison Clinical Research  
+Harvest Technologies  
+Hatchtech Pty Ltd  
+Hawaii Biotech, Inc.  
+HDH Medical Ltd  
+Healingstone Co., Ltd.  
+HealOr  
+Health Beacons  
+Health Decisions  
+Health Dialog  
+Health Enhancement Products, Inc.  
+Health Ever Bio-Tech Co., Ltd.  
+Healthanywhere Inc.  
+Healthcare Providers Direct, Inc.  
+HealthCore, Inc.  
+healthEworks LLC  
+Healthpoint  
+HealthWatchSystems, Inc.  
+Healthways, Inc.  
+HeartFlow, Inc.  
+Hearthstone Alzheimer Care  
+Heartscape Technologies, Inc.  
+HeartWare, Inc.  
+Heat Biologics  
+Heidelberg Engineering GmbH  
+Heidelberg Metasystems GmbH  
+Heinz Italia SpA  
+Helicor  
+Helix Medical Systems  
+Helse Nord  
+Helsinn Healthcare SA  
+Helsinn Therapeutics (U.S.), Inc  
+HEM Research  
+HemaQuest Pharmaceuticals Inc.  
+HemCon Medical Technologies, Inc  
+Hemispherx Biopharma  
+Hemo Sapiens, Inc.  
+HemoSense  
+Hemosol  
+Hemosphere, Inc.  
+HenKan Pharmaceutical Co., Ltd.  
+Henogen  
+Hepa Wash GmbH  
+Hepasense  
+Hepasome Pharmaceuticals  
+HepQuant, LLC  
+Hero Institute for Infant Nutrition  
+Hewlett-Packard  
+Hexal AG  
+High Point Pharmaceuticals, LLC.  
+Highland Instruments, Inc.  
+Hill-Rom  
+HiPP GmbH & Co.  
+Hisamitsu Farmaceutica do Brasil Ltda  
+Hisamitsu Pharmaceutical Co., Inc.  
+Hispanic AIDS Forum, Inc.  
+Histogen  
+Histogenics Corporation  
+HistoSonics, Inc.  
+Hoechst Marion Roussel  
+Hoffmann-La Roche  
+Holaira  
+Hollister Incorporated  
+Hollister Wound Care LLC  
+Hologenix, LLC  
+Hologic, Inc.  
+Holux Technology, Inc.  
+Home Skinovations Ltd.  
+HomeoTherapy Co., Ltd  
+Hope Cancer Institute, Inc.  
+Hope Pharmaceuticals  
+Horizon Pharma, Inc.  
+Hormos Medical  
+Hospira, Inc.  
+Hospitech Respiration  
+Hoya Surgical Optics, Inc.  
+HRA Pharma  
+Hualan Biological Bacterin Co. Ltd  
+Hualan Biological Engineering, Inc.  
+Hugel  
+Humacyte, Inc.  
+Human Genome Sciences Inc., a GSK Company  
+Humana, Inc  
+Humanetics Corporation  
+Humax Pharmaceutical  
+Humedics GmbH  
+Hunter-Fleming Ltd  
+Huntleigh Healthcare Ltd  
+Hutchinson Technology Inc  
+Hutchison Medipharma Limited  
+Hutchison Whampoa Guangzhou Baiyunshan Chinese Medicine Company Limited  
+Hyben Vital ApS  
+HydroCision, Inc.  
+Hygieia, Inc  
+HyperBranch Medical Technology, Inc  
+Hyperion Therapeutics, Inc.  
+HyperMed, Inc  
+Hypnalgesics, LLC  
+Hypo-Safe A/S  
+Hyundai Pharmaceutical Co., LTD.  
+I-Flow  
+i-Stat Corporation  
+i3 Innovus  
+i3 Research  
+i3 Statprobe  
+IASO Pharma Inc.  
+IBD Column Therapies International AB  
+IBSA Institut Biochimique SA  
+Icad, Inc.  
+Icagen  
+Icare Finland Oy  
+IceCure Medical Ltd.  
+Ichor Medical Systems Incorporated  
+ICN Pharmaceuticals  
+iCo Therapeutics Inc.  
+ICON Bioscience Inc  
+ICON Clinical Research  
+ICOS Corporation  
+ICOS-Texas Biotechnology  
+ID Biomedical Corporation, Quebec  
+IDEA AG  
+Ideal Implant Incorporated  
+Idenix Pharmaceuticals  
+Identigene  
+Idera Pharmaceuticals, Inc.  
+IDev Technologies, Inc.  
+Idiag AG  
+Idun Pharmaceuticals  
+IDx LLC  
+IFAG AG  
+Igefarma Laboratorios S.A.  
+Igy Inc.  
+Ikaria Holdings Inc.  
+ikfe-CRO GmbH  
+Ikonisys, Inc.  
+IL Pharma Inc.  
+Il-Yang Pharm. Co., Ltd.  
+IlDong Pharmaceutical Co Ltd  
+ILEX Oncology Services, Incorporated  
+Illumina, Inc.  
+Ilypsa  
+IMAGE TECHNOLOGIES INC.  
+Imaging Diagnostic Systems  
+ImaRx Therapeutics  
+ImClone LLC  
+IMD Tech Ltd  
+immatics Biotechnologies GmbH  
+Immodulon Therapeutics Ltd  
+Immtech Pharmaceuticals, Inc  
+Immune Cell Therapy Inc.  
+Immune Control  
+Immune Pharmaceuticals  
+Immune System Key Ltd  
+Immune Targeting Systems Ltd  
+Immune Technologies & Medicine GmbH  
+ImmuneWorks  
+Immunex Corporation  
+Immunex/Berlex  
+Immunicon  
+Immunicum AB  
+Immunitor USA Inc.  
+Immuno-US  
+Immunobiology Research Institute  
+ImmunoCellular Therapeutics, Ltd.  
+Immunocore Ltd  
+ImmunoFrontier, Inc.  
+ImmunoGen, Inc.  
+Immunomedics, Inc.  
+Immunomic Therapeutics, Inc.  
+Immunotec Inc.  
+Immunotope  
+ImmunoVaccine Technologies, Inc.  
+Immunovative Therapies, Ltd.  
+Immuron Ltd.  
+Immutep S.A.  
+IMPAX Laboratories, Inc.  
+ImpediGuide Ltd  
+ImpediMed Limited  
+Implant Innovations  
+Impliant, Ltd.  
+Imprimis Pharmaceuticals, Inc.  
+Impulse Dynamics  
+ImQuest Pharmaceuticals, Inc.  
+Imsmed Incorporated  
+ImThera Medical, Inc.  
+Imugen  
+Inamed  
+Inamed Aesthetics  
+INC Research Limited  
+Incara Pharmaceuticals  
+Incen AG  
+Incept BioSystems, Inc.  
+Incline Therapeutics, Inc.  
+InCROM Europe Clinical Research  
+Incyte Corporation  
+IND Diagnostic Inc.  
+InDex Pharmaceuticals  
+Ineos Healthcare Limited  
+Inex Pharmaceuticals  
+InfaCare Pharmaceuticals Corporation  
+Infinite Biomedical Technologies  
+Infinity Pharmaceuticals, Inc.  
+Inflabloc Pharmaceuticals  
+InflaRx GmbH  
+Inflazyme Pharmaceuticals Ltd  
+Inflexxion, Inc.  
+InfoMedics, Inc.  
+Infoscitex Corporation  
+InfraReDx  
+InfraScan, Inc.  
+Inion Oy  
+Initia  
+Initiative Pour la Sante  
+InKine Pharmaceutical  
+InLight Solutions  
+Inmunotek S.L.  
+Innate Pharma  
+Innate Therapeutics Limited  
+InnaVirVax  
+Inner Mongolia Yili Industrial Group Co., Ltd  
+InnFocus LLC  
+Innocell Corporation  
+Innocoll Technologies  
+Innogene Kalbiotech Pte. Ltd  
+InnoPharma Inc.  
+InnoPharmax Inc.  
+Innotech International  
+innoVactiv Inc.  
+Innovative Implant Solutions  
+Innovative Medical  
+Innovative Neurotronics  
+Innovative Spinal Technologies, Inc.  
+Innovative Therapies, Inc.  
+Innoventus Project AB  
+Innovex, Inc  
+Innovive Pharmaceuticals  
+INO Therapeutics  
+Inotek Pharmaceuticals Corporation  
+Inovio Pharmaceuticals  
+Inovise Medical  
+InovoBiologic Inc.  
+InQpharm Group  
+InSet Technologies  
+InSightec  
+InSightec-TxSonics  
+InSite Vision  
+Insmed  
+Inspira Medical AB  
+Inspiration Biopharmaceuticals, Inc.  
+Inspire Medical Systems, Inc.  
+InspireMD  
+Institut für Atemwegsforschung GmbH  
+Institut für Pneumologie Hagen Ambrock eV  
+Institut Pasteur  
+Institut Rosell Lallemand  
+Institut Straumann AG  
+Institute for Clinical Research, Denmark  
+Institute for Food Safety and Health, United States  
+Institute of Medicinal Molecular Design, Inc.  
+Instituto Bioclon S.A. de C.V.  
+Instituto de Medicina Regenerativa, S.A. de C.V.  
+Instituto Grifols, S.A.  
+Instituto Lala  
+Insulet Corporation  
+Insuline Medical Ltd.  
+Insys Therapeutics Inc  
+Intact Medical Corporation  
+Intact Vascular  
+Intarcia Therapeutics  
+Intec Pharma Ltd.  
+Integra LifeSciences Corporation  
+Integra LifeSciences Services  
+Integral Orthopedics Inc.  
+Integrated Diagnostics  
+Integrated Therapeutics Group  
+Integrative Therapeutics, Inc.  
+Integrity Applications Ltd.  
+Integrity Neutraceuticals, Inc. Sarasota, FL  
+Integrium  
+Integrum  
+InteKrin Therapeutics, Inc.  
+Intelect Medical, Inc.  
+IntelliGeneScan, Inc.  
+Intelligent Automation, Inc.  
+Intelligent Medical Implants GmbH  
+Intendis GmbH  
+Interactive Medical Developments  
+Intercell AG  
+Intercell USA, Inc.  
+Intercept Pharmaceuticals  
+Intercytex  
+Interferon Sciences  
+Intergenetics, Inc.  
+InterHealth Nutraceuticals Incorporated  
+Interleukin Genetics, Inc.  
+InterMune  
+International Biomedical Systems S.p.A.  
+International Business Machines (IBM)  
+International Stemcell Services Limited  
+International Technidyne Corporation  
+Interrad Medical  
+Intersect ENT  
+Interventional Spine, Inc.  
+InterveXion Therapeutics, LLC  
+Intimate bridge 2 Conception, Inc.  
+Intra-Cellular Therapies, Inc.  
+IntraBiotics Pharmaceuticals  
+Intracel  
+IntraPace, Inc  
+IntraPump Infusion Systems  
+Intrepid Therapeutics, Inc.  
+Intrinsic Therapeutics  
+Introgen Therapeutics  
+Intuitive Surgical  
+Intuity Medical, Inc  
+InVasc Therapeutics, Inc.  
+Invasix  
+Invatec S.p.A.  
+Invendo Medical GmbH  
+Inverness Medical Innovations  
+Invion, Inc.  
+Inviragen (Singapore) Pte. Ltd.  
+Inviragen Inc.  
+Invitrox  
+invivodata, Inc.  
+Io Therapeutics  
+Ioltech  
+iOMEDICO AG  
+Ion Channel Innovations  
+Ionimed Analytik GmbH  
+IonMed Ltd  
+IOPtima Ltd.  
+IPCA Laboratories Ltd.  
+Ipe, LLC  
+Iperboreal Pharma Srl  
+Ipsen  
+iRhythm Technologies, Inc.  
+Iroko Pharmaceuticals, LLC  
+Iron Therapeutics  
+Ironwood Pharmaceuticals, Inc.  
+Irrimax Corporation  
+IRX Therapeutics  
+Ischemix, LLC  
+iScience Interventional Corporation  
+Isconova AB  
+ISDIN  
+Isifer AB  
+Isis Pharmaceuticals  
+Isofol Medical AB  
+iSonea  
+IsoRay Medical, Inc.  
+Isotechnika  
+ISS, Inc.  
+ISTO Technologies, Inc.  
+ISU Abxis Co., Ltd.  
+Italfarmaco  
+Itamar-Medical, Israel  
+iTech Medical, Inc.  
+ITGI Medical  
+Ivantis, Inc.  
+Iverson Genetic Diagnostics, Inc.  
+Iviomics  
+Ivoclar Vivadent  
+ivWatch, LLC  
+Ivy Life Sciences, Co., Ltd  
+Izun Pharma Ltd  
+J&M Shuler  
+J. Uriach and Company  
+Jacobus Pharmaceutical  
+JADO Technologies GmbH  
+Jan Medical, Inc.  
+JANSSEN Alzheimer Immunotherapy Research & Development, LLC  
+Janssen Biotech, Inc.  
+Janssen Cilag N.V./S.A.  
+Janssen Cilag Pharmaceutica S.A.C.I., Greece  
+Janssen Cilag S.A.S.  
+Janssen Inc.  
+Janssen Infectious Diseases BVBA  
+Janssen Korea, Ltd., Korea  
+Janssen Medical Affairs  
+Janssen Pharmaceutica  
+Janssen Pharmaceutica N.V., Belgium  
+Janssen Pharmaceutical K.K.  
+Janssen Pharmaceuticals  
+Janssen R&D Ireland  
+Janssen Research & Development, LLC  
+Janssen Scientific Affairs, LLC  
+Janssen Services, LLC  
+Janssen, LP  
+Janssen-Cilag A.G., Switzerland  
+Janssen-Cilag B.V.  
+Janssen-Cilag Farmaceutica Ltda.  
+Janssen-Cilag G.m.b.H  
+Janssen-Cilag International NV  
+Janssen-Cilag Ltd.  
+Janssen-Cilag Ltd.,Thailand  
+Janssen-Cilag Pty Ltd  
+Janssen-Cilag S.p.A.  
+Janssen-Cilag Turkey  
+Janssen-Cilag, S.A.  
+Janssen-Ortho Inc., Canada  
+Janssen-Ortho LLC  
+Japan Medical Association  
+Japan Stent Technology Europe GmbH  
+Japan Tobacco Inc.  
+Jarrow Formulas Inc  
+Jarvik Heart, Inc.  
+Javelin Pharmaceuticals  
+Jazz Pharmaceuticals  
+JDC Tech  
+JDS Pharmaceuticals  
+Jeder GmbH  
+Jeil Pharmaceutical Co., Ltd.  
+Jeil Pharmacy Co.  
+Jeil-Kirin Pharmaceutical Inc.  
+JenaValve Technology GmbH  
+Jennerex Biotherapeutics  
+Jenny Craig, Inc.  
+Jerini AG  
+Jerini Ophthalmic  
+JHP Pharmaceuticals LLC  
+Jiangsu Chia-tai Tianqing Pharmaceutical Co.,Ltd  
+Jiangsu Furui Pharmaceuticals Co., Ltd  
+Jiangsu Hansoh Pharmaceutical Co., Ltd.  
+Jiangsu HengRui Medicine Co., Ltd.  
+Jiangsu Kanion Pharmaceutical Co.,Ltd  
+Jiangsu Nhwa Pharmaceutical Co.,LTD  
+Jiangsu Simcere Pharmaceutical R&D Co. Ltd.  
+Jiangxi Qingfeng Pharmaceutical Co. Ltd.  
+Jin Yang Pharmaceutical  
+JN-International Medical Corporation  
+John Snow, Inc.  
+Johnson & Johnson  
+Johnson & Johnson Consumer and Personal Products Worldwide  
+Johnson & Johnson Consumer Products Company Division of Johnson & Johnson Con...  
+Johnson & Johnson GmbH  
+Johnson & Johnson Healthcare Products Division of McNEIL-PPC, Inc.  
+Johnson & Johnson K.K. Medical Company  
+Johnson & Johnson Medical Companies  
+Johnson & Johnson Medical, China  
+Johnson & Johnson Pharmaceutical Research & Development, L.L.C.  
+Johnson & Johnson Pte Ltd  
+Johnson & Johnson Taiwan Ltd  
+Johnson and Johnson, S.A.  
+Joimax GmbH  
+Jolife AB  
+Jomaa Pharma GmbH  
+Jotec GMBH  
+JSS Medical Research Inc.  
+Jubilant DraxImage Inc.  
+Jubilant Innovation Ltd.  
+Juvantia Pharma Ltd  
+Juvent, Inc  
+Juventas Therapeutics, Inc.  
+JW Life Science  
+JW Medical Systems Ltd  
+JW Pharmaceutical  
+J~pharma  
+Kadmon Corporation, LLC  
+Kadmon Pharmaceuticals  
+Kael-GemVax Co., Ltd.  
+Kai Medical, Inc.  
+KAI Pharmaceuticals  
+Kainos Medicine Inc.  
+Kaken Pharmaceutical  
+Kalaco Scientific, Inc.  
+KaloBios Pharmaceuticals  
+Kalypsys, Inc.  
+Kamada, Ltd.  
+Kamedis Ltd.  
+Kaneka Pharma America Corporation  
+KangLaiTe USA  
+Kanisa Pharmaceuticals  
+Kao Corporation  
+Kardium Inc.  
+KARL STORZ ENDOSCOPY-AMERICA, Inc.  
+KarmelSonix Ltd.  
+Karo Bio AB  
+Kasiak Research Pvt. Ltd.  
+Katena Products, Inc.  
+KC BioMediX, Inc  
+KCI USA, Inc.  
+KDL Inc.  
+Kedrion S.p.A.  
+Kellogg Company  
+Kemia, Inc  
+Kensey Nash Corporation  
+Kenta Biotech Ltd  
+KeraCure  
+Kerecis Ltd.  
+Keryx / AOI Pharmaceuticals, Inc.  
+Keryx Biopharmaceuticals  
+Kessler Institute for Rehabilitation  
+Key Biologics, LLC  
+Key Pharmaceuticals  
+Keystone Dental, Inc.  
+KGK Synergize Inc.  
+Kiadis Pharma  
+Kibow Biotech Inc.  
+Kimberly-Clark Corporation  
+Kinamed Incorporated  
+KineMed  
+Kinetic Concepts, Inc.  
+Kinetic Muscles  
+Kineticure  
+Kinex Pharmaceuticals, LLC  
+King Pharmaceuticals is now a wholly owned subsidiary of Pfizer  
+King Systems Corporation  
+Kingfisher Healthcare  
+Kips Bay Medical, Inc.  
+Kissei Pharmaceutical Co., Ltd.  
+Klein Buendel, Inc.  
+KLOX Technologies Inc.  
+Knee Creations, LLC  
+Knopp Neurosciences  
+Kobe University  
+Kolon Life Science  
+Kona Medical Inc.  
+Konan Medical, Inc.  
+Konica Minolta Medical Imaging, USA  
+Koning Corporation  
+Korea Otsuka International Asia Arab  
+Korea Otsuka Pharmaceutical Co.,Ltd.  
+Koronis Pharmaceuticals.  
+Kos Pharmaceuticals  
+Kowa Company, Ltd.  
+Kowa Research Europe  
+Kowa Research Institute, Inc.  
+Kremers Urban Development Company  
+Kringle Pharma Europe AB  
+KRKA  
+KT&G Corporation  
+KT&G Life Sciences Corp  
+KuDOS Pharmaceuticals Limited  
+Kuhnil Pharmaceutical Co., Ltd.  
+Kureha Corporation  
+Kuros Biosurgery AG  
+KV Pharmaceutical Company  
+Kwang Dong Pharmaceutical co., ltd.  
+Kyberg Vital GmbH  
+Kyorin Pharmaceutical Co.,Ltd  
+Kyowa Hakko Kirin Company, Limited  
+Kyowa Hakko Kirin Pharma, Inc.  
+Kyowa Hakko Kirin UK, Ltd.  
+Kyowa Hakko Kogyo Co., Ltd.  
+Kythera Biopharmaceuticals  
+L'Oreal  
+L.A.L Clinica Pesquisa e Desenvolvimento Ltda.  
+La Jolla Pharmaceutical Company  
+LAAx, Inc.  
+Lab Discoveries Ltd.  
+Labcoat, Ltd.  
+Labopharm Inc.  
+Laboratoire Ceraver-Osteal  
+Laboratoire français de Fractionnement et de Biotechnologies  
+Laboratoires Arkopharma  
+Laboratoires Bailleul-Biorga  
+Laboratoires Besins International  
+Laboratoires Bouchara-Recordati  
+Laboratoires CARILENE  
+Laboratoires Expanscience S.A.  
+Laboratoires Genévrier  
+Laboratoires Innothera  
+Laboratoires Iprad-Vegebom  
+Laboratoires Lyocentre  
+Laboratoires Mayoly Spindler  
+Laboratoires NEGMA  
+Laboratoires Nutrition et Cardiometabolisme  
+Laboratoires Takeda  
+Laboratoires Techni Pharma  
+Laboratoires Thea  
+Laboratoires URGO  
+Laboratorio Elea S.A.C.I.F. y A.  
+Laboratorio Pablo Cassará S.R.L.  
+Laboratorio Saude Ltda.  
+Laboratorios Casen-Fleet S.L.U.  
+Laboratorios del Dr. Esteve, S.A.  
+Laboratorios Goulart S.A.  
+Laboratorios Laproff S.A.  
+Laboratorios Leti, S.L.  
+Laboratorios Osorio de Moraes Ltda.  
+Laboratorios Silanes S.A. de C.V.  
+Laboratorios Sophia S.A de C.V.  
+Laboratory Corporation of America  
+Laboratório Químico Farmacêutico Bergamo Ltda.  
+Laborie Medical Technologies Inc.  
+LaborMed Pharma S.A.  
+Labtec GmbH  
+Lactalis  
+Laerdal Medical  
+Lafrancol S.A.  
+Lallemand SAS  
+Lama Medical Care s.r.o.  
+Landeskrankenanstalten-Betriebsgesellschaft  
+Lannett Company, Inc.  
+Lantheus Medical Imaging  
+Lantibio  
+Lanx, Inc.  
+Larada Sciences, Inc.  
+Larsen & Toubro Limited  
+Laurantis Pharma, Ltd.  
+Lavi Cardiatec  
+Lavilabor Natural Products Ltd  
+Lawley Pharmaceuticals  
+LDR Spine USA  
+Leap of Faith Technologies  
+Lederle Laboratories  
+Lederle-Praxis Biologicals  
+Lee's Pharmaceutical Limited  
+Legend Healthcare  
+LegoChem Biosciences, Inc  
+Leiner Health Products  
+LeMaitre Vascular  
+Lenetix Medical Screening Laboratory  
+LensAR Incorporated  
+Lenstec Incorporated  
+LenSx Lasers Inc.  
+Lenzi Egisto S.P.A.  
+LEO Pharma  
+Leortec Medical Systems Ltd  
+Les Laboratoires des Médicaments Stériles  
+Lesaffre International  
+Lescuyer Laboratory  
+Lesieur  
+Leti Pharma GmbH  
+Lexicon Pharmaceuticals  
+Lexicor Medical Technology, LLC  
+Lexigen Pharmaceuticals  
+Lexington International, LLC  
+LG Electronics Inc.  
+LG Life Sciences  
+Lianyungang Kanion Group, Ltd.  
+Liberty Mutual  
+Lidds AB  
+Life Measurement Inc.  
+Life Technologies Corporation  
+LifeBond Ltd.  
+LifeCell  
+LifeNet Health  
+LifeScan  
+LifeTime Pharmaceuticals  
+Lifeway Foods, Inc.  
+Ligand Pharmaceuticals  
+Light and Health Venture  
+Light Lab Imaging, Inc.  
+Light Sciences LLC  
+Light Sciences Oncology  
+LightLab Imaging  
+LigoCyte Pharmaceuticals, Inc.  
+Limerick BioPharma  
+Linde AG  
+Link America, Inc.  
+Link Medicine Corporation  
+Lipella Pharmaceuticals, Inc.  
+Lipha Pharmaceuticals  
+Lipid Therapeutics GmbH  
+Lipomed  
+Lipomedix Pharmaceuticals Inc.  
+Lipopharma Therapeutics SL  
+LipoScience, Inc.  
+Liposome  
+Lipotek Pty Ltd  
+Liquidia Technologies, Inc.  
+Lithera, Inc  
+Litron Laboratories  
+Living Cell Technologies  
+Livzon Pharmaceutical Group Inc.  
+LLC Merck, Russia  
+LMA North America, Inc.  
+Lo.Li.Pharma s.r.l  
+Loblaw Companies Limited  
+Loders Croklaan  
+Logical Therapeutics  
+Lombard Medical  
+LoneStar Heart, Inc.  
+Lonza Walkersville, Inc.  
+Loreal USA  
+Lorenz Biotech S.p.A.  
+Lorillard Tobacco Company  
+Lorus Therapeutics  
+Lotus Pharmaceutical  
+Lotus Tissue Repair, Inc.  
+Loxbridge Research LLP  
+Lpath, Inc.  
+LSK BioPartners Inc.  
+LTB4 Sweden AB  
+Lucid, Inc.  
+Luitpold Pharmaceuticals  
+Lumen Biomedical  
+Lumen Therapeutics  
+Lumenis Ltd.  
+LumeRx  
+Luminex Corporation  
+Luminex Molecular Diagnostics  
+Luminous Medical  
+Luna Innovations  
+Lundbeck Canada Inc.  
+Lundbeck Israel  
+Lundbeck Italia S.p.A.  
+Lundbeck Japan K. K.  
+Lundbeck LLC  
+Lung Rx  
+Lupin Ltd.  
+Lutonix, Inc.  
+Lux Biosciences, Inc.  
+LXR Biotechnology  
+LycoRed Ltd.  
+LyphoMed  
+LYSOGENE  
+Lytix Biopharma AS  
+M et P Pharma  
+M's Science Corporation  
+M.D. Lederman Consulting Ltd  
+MabVax Therapeutics, Inc.  
+MacroChem Corporation  
+Macrocure Ltd.  
+MacroGenics  
+MacuCLEAR, Inc.  
+MacuSight, Inc.  
+Madaus AG  
+Madaus Inc  
+Madrigal Pharmaceuticals, Inc.  
+Magna Pharmaceuticals, Inc.  
+Maitreya Kft.  
+MAKO Surgical Corp.  
+Mallinckrodt  
+Manhattan Pharmaceuticals  
+Mannkind Corporation  
+Mantecorp Industria Quimica e Farmaceutica Ltd.  
+MAP Pharmaceuticals, Inc.  
+Maquet Cardiopulmonary AG  
+Maquet Cardiovascular  
+Marealis AS  
+Marigot Ltd.  
+Marinus Pharmaceuticals  
+Marjan Industria e Comercio ltda  
+Mars, Inc.  
+Martek Biosciences Corporation  
+Maruho Co., Ltd.  
+Maruishi Pharmaceutical  
+Masimo Corporation  
+MAST Biosurgery, AG  
+Mast Cell Pharmaceuticals Inc.  
+Mast Therapeutics, Inc.  
+MasterFoods  
+Materia Medica Holding  
+Materna Laboratories  
+Matrix Pharmaceutical  
+Matrix45  
+Matrixx Initiatives, Inc.  
+Matrizyme Pharma Corporation  
+Mauna Kea Technologies  
+Max Institute of Neurosciences  
+Max Zeller Soehne AG  
+Maxim Pharmaceuticals  
+Maxygen ApS  
+Maxygen Holdings Ltd.  
+Maxygen, Inc.  
+Maya Medical  
+Mazor Surgical Technologies, Ltd.  
+McNeil AB  
+McNeil Consumer & Specialty Pharmaceuticals, a Division of McNeil-PPC, Inc.  
+McNeil Consumer Healthcare Division of McNEIL-PPC, Inc.  
+MD Scientific  
+MDCPharma Produtos Farmaceuticos LTDA  
+MDDX LLC  
+MDS Pharma Services  
+MDT Medical Device Testing GmbH  
+Mead Johnson Nutrition  
+Mebiopharm Co., Ltd  
+MED Institute, Incorporated  
+Med Pharma Co., Ltd.  
+Med-El Corporation  
+MEDA Pharma GmbH & Co. KG  
+Meda Pharmaceuticals  
+medac GmbH  
+Medacta International SA  
+Medacta USA  
+MedAppraise, Inc.  
+Medarex  
+MedaSorb Technologies, Inc  
+Medco Health Solutions, Inc.  
+MedDerm Associates  
+Medela AG  
+Medfavour (Beijing) Medical Co., Ltd  
+Medgenics Medical Israel Ltd.  
+Medic Mobile  
+Medicago  
+Medical Acoustics LLC  
+Medical Benefits Fund of Australia  
+Medical Carbon Research Institute, LLC  
+Medical Compression Systems  
+Medical Developments International Limited  
+Medical Device Works NV SA  
+Medical Diagnostic Laboratories, LLC  
+Medical Directions, Inc  
+Medical Enterprises Europe B.V.  
+Medical Nutrition USA, Inc.  
+Medical Prognosis Institute A/S  
+Medical Research Laboratories International  
+Medice Arzneimittel Pütter GmbH & Co KG  
+Medicine Invention Design, Inc  
+MediciNova  
+Medicis Aesthetics, Inc.  
+Medicis Global Service Corporation  
+Medicis Pharmaceutical Corporation  
+Medicis Technologies Corporation  
+Medicpen AB  
+Medicrea International  
+Medicrea, USA Corp.  
+Medicure  
+Medidata Solutions  
+Medifacts International Corporation  
+Medifast, Inc.  
+Medifocus, Inc.  
+Medigen Biotechnology Corporation  
+MediGene  
+Medigreen Biotechnology Corp.  
+MediGus Ltd  
+MedImmune LLC  
+MedImmune Ltd  
+Medingo Ltd  
+Medinol Ltd.  
+Medinova AG  
+Medinox, Inc.  
+Medipost Co Ltd.  
+MediQuest Therapeutics  
+Medisim Ltd  
+Medispec  
+Medistem Inc.  
+Meditate  
+Meditor Pharmaceuticals Ltd.  
+Meditor SAS  
+Meditrina Pharmaceuticals  
+Medivance, Inc.  
+Medivation, Inc.  
+Medivet Pty Ltd  
+Medivir  
+MediWound Ltd  
+Medline Industries  
+MedLogic Global Limited  
+Medlogics Device Corporation  
+MedMinder Systems Inc.  
+Medotech A/S  
+Medpace, Inc.  
+MEDRAD, Inc.  
+MedRelief  
+Medsearch  
+Medstone International  
+Medtentia International Ltd Oy  
+Medtox  
+Medtronic  
+Medtronic Atrial Fibrillation Solutions  
+Medtronic Bakken Research Center  
+Medtronic BRC  
+Medtronic Cardiac Rhythm Disease Management  
+Medtronic Cardiovascular  
+Medtronic Cardiovascular Asia Pacific  
+Medtronic Comercial Ltda.  
+Medtronic Corporate Technologies and New Ventures  
+Medtronic Diabetes  
+Medtronic Diabetes R&D Denmark  
+Medtronic Endovascular  
+Medtronic Heart Valves  
+
+Medtronic International Trading Sarl  
+Medtronic Italia  
+Medtronic Latin America  
+Medtronic Neuromodulation Europe  
+
+Medtronic Spinal & Biologics ECA  
+Medtronic Spinal and Biologics  
+Medtronic Spine LLC  
+Medtronic Surgical Technologies  
+Medtronic Vascular  
+Medtronic Xomed, Inc.  
+MedtronicNeuro  
+Medtronics, Inc.  
+MedVadis Research Corporation  
+Medy-Tox  
+Megadyne Medical Products Inc.  
+Mego Afek Ltd.  
+MEI Pharma, Inc.  
+Meiji Seika Pharma, Co., Ltd.  
+Mekos Laboratories AS  
+MELA Sciences, Inc.  
+Mellitor  
+Memgen, LLC  
+Memory Pharmaceuticals  
+Menarini Group  
+Menicon Co., Ltd.  
+Menopod Corp.  
+Menssana Research, Inc.  
+Mentor Worldwide, LLC  
+Mepha Ltd.  
+Merck  
+Merck A.B., Sweden  
+Merck A.E., Greece  
+Merck A/S, Denmark  
+Merck B.V., Netherlands  
+Merck d.o.o., Serbia  
+Merck Frosst Canada Ltd.  
+Merck Frosst-Schering Pharma, G.P.  
+Merck Gesellschaft mbH, Austria  
+Merck Inc., Philippines  
+Merck Kft., Hungary  
+Merck KGaA  
+Merck Ltd.  
+Merck Ltd., India  
+Merck Ltd., Taiwan  
+Merck Ltd., Thailand  
+Merck Medication Familiale  
+Merck OY, Finland  
+Merck Pharma, K.S., Slovakia  
+Merck Pte. Ltd., Singapore  
+Merck Quimica Argentina S.A.I.C  
+Merck S.A. de C.V., Mexico  
+Merck Serono Australia Pty Ltd  
+Merck Serono Co., Ltd., China  
+Merck Serono Co., Ltd., Japan  
+Merck Serono GmbH, Germany  
+Merck Serono International SA  
+Merck Serono Limited, UK  
+Merck Serono Middle East FZ LLC  
+Merck Serono Norway  
+Merck Serono S.A., Geneva  
+Merck Serono S.A.S, France  
+Merck Serono S.P.A., Italy  
+Merck Services U.K. Ltd, UK  
+Merck SP. Z.O.O., Poland  
+Merck spol. s r.o., Slovakia  
+Merck spol.s.r.o., Czech Republic  
+Merck, S.A., Portugal  
+Merck, S.L., Spain  
+Merckle GmbH  
+Merieux Institute  
+Meril Life Sciences Pvt. Ltd.  
+Merit Medical Systems, Inc.  
+Meritage Pharma, Inc.  
+MerLion Pharmaceuticals GmbH  
+Merrimack Pharmaceuticals  
+Merrion Pharmaceuticals, LLC  
+Mersana Therapeutics  
+Merz Aesthetics Inc.  
+Merz Pharmaceuticals GmbH  
+Merz Pharmaceuticals, LLC  
+Meso Scale Diagnostics, LLC.  
+Mesoblast, Ltd.  
+Mespere Lifesciences Inc.  
+Meta Pharm Development, LLC  
+Metabolex  
+Metabolic Solutions Development Company  
+Metabolic Solutions Inc.  
+Metabolic Technologies Inc.  
+Metabolife  
+Metacure  
+MetaCure (USA), Inc.  
+MetaPharm, Inc.  
+MetaPhore Pharmaceuticals  
+MetaProteomics LLC  
+Metastatix, Inc.  
+MethylGene Inc.  
+Metronome Therapeutics  
+Meyer Pharmaceuticals  
+MeYou Health, LLC  
+MGP Ingredients, Inc  
+MiCardia Corporation  
+Micell Technologies  
+Microbio Co Ltd  
+Microbiotix, Inc.  
+MicroDose Defense Products L.L.C.  
+MicroDose Therapeutx, Inc  
+Microlife  
+Micronics, Inc.  
+MicroPhage, Inc.  
+Micropharma Limited  
+MicroPort Medical (Shanghai) Co. Ltd.  
+MicroTransponder Inc.  
+Microvention-Terumo, Inc.  
+Mika Pharma GmbH  
+Miles  
+Milkhaus Laboratory  
+Millennium Pharmaceuticals, Inc.  
+Millennix  
+Millet Roux  
+Milliken Healthcare Products, LLC  
+Miltenyi Biotec GmbH  
+Miltenyi Biotec, Inc.  
+MiMedx Group, Inc.  
+Mimetica Pty Limited  
+Mimetogen Pharmaceuticals USA, Inc.  
+MinaPharm Pharmaceuticals  
+MindApps  
+MindFrame, Inc.  
+Minerva SA  
+Minerva Surgical, Inc.  
+Minimed Pharmaceuticals  
+Minnesota Eye Consultants, P.A.  
+Minnesota Medical Development, Inc.  
+Minster Research Ltd  
+MINVASYS  
+Miracor Medical Systems  
+Miramar Labs  
+Miravant Pharmaceuticals  
+MIS Implant Technologies, Ltd  
+Mission Pharmacal  
+Mithra Pharmaceuticals  
+Mitos Pharmaceuticals  
+Mitovie Pharma Ltd  
+Mitralign, Inc.  
+Mitsubishi Chemical Medience Corporation  
+Mitsubishi Kagaku Bio-Clinical Laboratories, inc  
+Mitsubishi Tanabe Pharma Corporation  
+Mitsukoshi Health and Welfare Foundation  
+MIV Therapeutics Inc.  
+MMJ Labs LLC  
+Moberg Derma AB  
+Mochida Pharmaceutical Company, Ltd.  
+Modern Cell and Tissue Technology  
+Moe Medical Devices  
+Moebius Medical Ltd.  
+Moleac Pte Ltd.  
+Molecular Biometrics, Inc.  
+Molecular Insight Pharmaceuticals, Inc.  
+Molecular Partners AG  
+Molecular Research Center, Inc.  
+Molecular Targeting Technologies, Inc.  
+MolMed S.p.A.  
+Molnlycke Health Care AB  
+Mologen AG  
+Momelan Technologies  
+Momenta Pharmaceuticals, Inc.  
+Momotaro-Gene Inc.  
+
+Monica Healthcare Ltd  
+MonoSol Rx  
+Monsanto Company, LLC  
+Monsea Ltd.  
+Monteris Medical  
+MorePharma Corporation  
+MorphoSys AG  
+Morphotek  
+Morria Biopharmaceuticals PLC  
+Mother's Choice Ltd  
+Motorola Canada Limited  
+Movetis  
+Moximed  
+MP Biomedicals, LLC  
+Mpex Pharmaceuticals  
+MSDx, Inc.  
+Mucos Pharma GmbH and Co  
+Mucosal Therapeutics  
+Multimed  
+Mundipharma  
+Mundipharma AB  
+Mundipharma K.K.  
+Mundipharma Medical Company  
+Mundipharma Oy  
+Mundipharma Pharmaceuticals B.V.  
+Mundipharma Research GmbH & Co KG  
+Mundipharma Research Limited  
+Mundipharma SAS  
+Mutual Pharmaceutical Company, Inc.  
+Mylan Bertek Pharmaceuticals  
+Mylan Laboratories  
+Mylan Pharmaceuticals  
+Mymetics Corporation  
+Myocor  
+Myomo  
+MyoScience, Inc  
+Myotec Therapeutics Ltd  
+Myrexis Inc.  
+Myriad Genetic Laboratories, Inc.  
+Myriad Therapeutics, Inc.  
+Mytogen, Inc.  
+N-Gene Research Laboratories, Inc.  
+N.M.B. Medical Applications Ltd  
+N30 Pharmaceuticals, Inc.  
+Nabi Biopharmaceuticals  
+Nabriva Therapeutics AG  
+Nang Kuang Pharmaceutical Co., Ltd.  
+Nanjing Sike Pharmaceutical Co., Ltd.  
+NanoBio Corporation  
+Nanobiotix  
+Nanocarrier Co., Ltd.  
+Nanogen, Inc.  
+NanoMed Pharmaceuticals  
+NanoPass Technologies Ltd  
+Nanospectra Biosciences, Inc.  
+Nanosphere, Inc.  
+Nanostim, Inc.  
+Nanotherapeutics, Inc.  
+Nanova, Inc  
+Nanovibronix  
+Napp Pharmaceuticals Limited  
+Naryx Pharma  
+Nasoform, LLC  
+Nastech Pharmaceutical Company, Inc.  
+NasVax Ltd  
+Natera, Inc.  
+NatImmune A/S  
+National Association of Chain Drug Stores  
+National Enzyme Company  
+National Healing Corporation  
+National Heart Centre of Singapore Pte Ltd  
+National Services for Health Improvement Ltd  
+National Starch LLC  
+Natreon, Inc.  
+Natrogen Therapeutics International, Inc  
+NatureGen  
+Naurex, Inc  
+Navidea Biopharmaceuticals  
+Navigenics, Inc.  
+Navipharm Corporation  
+Naviscan PET Systems  
+Navotek Medical, Ltd.  
+nContact Surgical Inc.  
+NDI Medical, LLC  
+NDO Surgical, Inc.  
+NeilMed Pharmaceuticals  
+Nektar Therapeutics  
+NEMA Research, Inc.  
+NeMoDevices AG  
+NeoChord  
+Neodyne Biosciences, Inc.  
+Neogenix Oncology, Inc.  
+Neomend, Inc.  
+Neosil, Inc.  
+NeoStrata Company, Inc.  
+NeoSync, Inc.  
+NeoTherapeutics  
+NeoTract, Inc.  
+Neotropix  
+Neovacs  
+Neovasc Inc.  
+NeoVista  
+Nephrian  
+NephroGenex, Inc.  
+Neptune  
+Neptune Technologies and Bioressources Inc.  
+Neptunus Pharmaceuticals Inc.  
+Nereus Pharmaceuticals, Inc.  
+Nerviano Medical Sciences  
+Nestlé  
+Neumedicines Inc.  
+Neuralieve  
+Neuralstem Inc.  
+Neuraltus Pharmaceuticals, Inc.  
+NeurAxon Inc.  
+Neuren Pharmaceuticals Limited  
+Neurex  
+Neurim Pharmaceuticals Ltd.  
+Neuro Kinetics  
+Neuro Resource Group  
+Neuro-Hitech  
+Neurobiological Technologies  
+NeuroBioPharm Inc.  
+Neurocom  
+Neurocrine Biosciences  
+NeuroDerm Ltd.  
+NeuroDx Development  
+Neurogen Corporation  
+NeuroGeneration  
+NeurogesX  
+Neurognostics  
+NeuroHealing Pharmaceuticals Inc.  
+Neurokeeper Technologies  
+Neurological Research Center  
+Neurologix, Inc.  
+NeuroMetrix, Inc.  
+Neuromonics, Inc.  
+Neuronetrix, Inc.  
+Neuronix Ltd  
+NeuroNova AB  
+Neuronyx  
+NeuroPace  
+Neuropharm  
+Neurophyxia B.V.  
+NeuroScience, Inc., Osceola, WI.  
+NeuroSearch A/S  
+NeuroSigma, Inc.  
+Neurostream Technologies G.P.  
+NeuroSystec Corporation  
+Neurotec Pharma  
+Neurotech Pharmaceuticals  
+Neurotune AG  
+Neurovance Australia PTY, LTD  
+NeuroVista Corporation  
+NeuroVive Pharmaceutical AB  
+NeuTec Pharma  
+Nevro Corp  
+New Discovery LLC  
+New Health Sciences, Inc.  
+New River Pharmaceuticals  
+New World Development Company Limited  
+NewBiotics  
+NewChapter, Inc.  
+NewLink Genetics Corporation  
+Newport Pharmaceuticals International  
+Newron Pharmaceuticals S.p.A.  
+Newtricious R&D BV  
+Nexan Inc  
+Nexgen Dermatologics, Inc.  
+NexMed, Inc.  
+Nexpep Pty Ltd  
+Nexstar Pharmaceuticals  
+Nexstim Ltd  
+Nextrials, Inc.  
+Nfocus Neuromedical  
+NGM Biopharmaceuticals, Inc  
+Nichi-Iko Pharmaceutical Co.,Ltd.  
+NicOx  
+NicOx Inc.  
+NicOx Research Institute S.r.l.  
+Nidek Co. LTD.  
+NIH AIDS Clinical Trials Information Service  
+Nihon Pharmaceutical Co., Ltd  
+Niiki Pharma Inc.  
+Nike  
+Nile Therapeutics  
+NiliMedix  
+Nimbic Systems, LLC  
+NinePoint Medical  
+Nippon Kayaku Co.,Ltd.  
+Nipro Europe N.V.  
+Nissan Chemical Industries  
+Niti Medical Technologies Ltd.  
+Nitric BioTherapeutics, Inc  
+Nitromed  
+NITROX, LLC  
+Niveus Medical, Inc.  
+NKBio Co.Ltd.  
+NKT Therapeutics  
+NMT Medical  
+Nobel Biocare  
+Nobel Pharmaceuticals  
+Nobelpharma  
+Noblewell  
+NOCwatch International  
+Nomir Medical Technologies  
+Non-Linear Technologies  
+Nonin Medical, Inc  
+Noninvasive Medical Technologies, Inc.  
+NoNO Inc.  
+NonWoTecc Medical GmbH  
+Nordic Bioscience A/S  
+Nordic Drugs AB  
+Nordic Nanovector  
+Nordic Naturals  
+Nordic Pharma SAS  
+Nordion (Canada) Inc.  
+Nordisk Rebalance A/S  
+Nordmark Arzneimittel GmbH & Co. KG  
+Norgine  
+NormaTec Industries LP  
+Norpharma A/S  
+North American Biologicals Inc  
+North American Medical Corporation  
+North China Pharmaceutical Group Corporation  
+Northern Therapeutics  
+Northfield Laboratories  
+Northgate Technologies  
+Northstar Neuroscience  
+Northwest Biotherapeutics  
+Noscira SA  
+Notal Vision Ltd  
+Nova Biomedical Corporation  
+Nova Laboratories Limited  
+Nova Laboratories Sdn Bhd  
+NovaBay Pharmaceuticals, Inc.  
+NovaCardia, Inc.  
+Novacea  
+Novadaq Technologies Inc.  
+NovaDigm Therapeutics, Inc.  
+Novagali Pharma  
+Novalar Pharmaceuticals, Inc.  
+Novalead Pharma Private Limited  
+NovaLign Orthopaedics, Inc  
+NovaMed Pharmaceuticals Inc.  
+Novan, Inc.  
+Novartis  
+Novartis Korea Ltd.  
+Novartis Pharmaceuticals  
+Novartis Vaccines  
+NovaRx Corporation  
+NovaShunt AG  
+Novasys Medical, Inc.  
+Novavax  
+NovaVision, Inc.  
+NovellusDx  
+Novelos Therapeutics  
+Noven Pharmaceuticals, Inc.  
+Noven Therapeutics  
+Novexel Inc  
+Novian Health Inc.  
+NovImmune SA  
+Novo Nordisk  
+Novocell  
+Novocol Pharmaceutical of Canada, Inc.  
+NovoCure Ltd.  
+Novogen  
+novoGI  
+NovoStent Corporation  
+Novum  
+Novum Pharmaceutical Research Services  
+Novus Scientific  
+Noxxon Pharma AG  
+NPM Pharma Inc.  
+NPS Pharmaceuticals  
+NS Pharma, Inc.  
+NSA, LLC  
+NsGene A/S  
+NTK Enterprises, Inc.  
+Nu Skin Enterprises  
+Nu-Magnetics Inc.  
+Nucitec  
+Nucryst Pharmaceuticals  
+NuMe Health  
+NuMedics, Inc.  
+Numoda  
+Nuon Therapeutics, Inc.  
+NuPathe Inc.  
+Nuron Biotech Inc.  
+NuRx Pharmaceuticals, Inc.  
+Nutricia Liverpool  
+Nutricia North America  
+Nutricia UK Ltd  
+Nutrinia  
+Nutrisystem, Inc.  
+Nutrition 21, Inc.  
+NuVasive  
+Nuvo Research GmbH  
+Nuvo Research Inc.  
+Nventa Biopharmaceuticals Corporation  
+Nycomed: A Takeda Company  
+Nymox Corporation  
+O. M. Neotech, Inc.  
+O2 MedTech, Inc.  
+Oakwood Laboratories, LLC  
+Oasmia Pharmaceutical AB  
+OB-Tools Ltd.  
+Obalon Therapeutics, Inc.  
+OBEcure Ltd.  
+Obslap Research LLC  
+Obstetrix Medical Group  
+Occlutech International AB  
+OccuLogix  
+Ocean Nutrition  
+Ocean Spray Cranberries, Inc.  
+Ocean Spray, Inc.  
+Oceana Therapeutics, Inc.  
+Ocera Therapeutics  
+Oclassen Pharmaceuticals  
+Ocon Medical Ltd.  
+Octagen Corporation  
+Octagon Research Solutions, Inc.  
+Octapharma  
+Ocular Systems, Inc.  
+Ocular Therapeutix, Inc.  
+Ocularis Pharma Inc.  
+Oculeve, Inc.  
+Oculex Pharmaceuticals  
+Oculus Innovative Sciences, Inc.  
+Ogenix Corporation  
+Ohio Willow Wood  
+Ohm Laboratories, Inc.  
+Ohr Pharmaceutical Inc.  
+Okairos  
+Okuvision GmbH  
+Olatec Industries LLC  
+Olive Lifesciences Pvt Ltd  
+Olympic Medical  
+Olympus  
+Olympus Biotech Corporation  
+Olympus Medical Systems Corporation  
+Omega Pharma  
+Omeros Corporation  
+Omicron Pharmaceuticals  
+Omneuron  
+Omnicare Clinical Research  
+Omninvest Vaccine Manufacturing, Researching and Trading Ltd.  
+Omnitura Therapeutics, Inc.  
+OMRIX Biopharmaceuticals  
+Omthera Pharmaceuticals, Inc  
+Onbone Oy  
+Onclave Therapeutics Limited, a wholly-owned subsidiary of Prothena Corporati...  
+OncoEthix  
+OncoGenex Pharmaceuticals  
+OncoGenex Technologies  
+Oncolix, Inc.  
+Oncolytics Biotech  
+OncoMed Pharmaceuticals, Inc.  
+Onconix, Inc  
+Onconova Therapeutics, Inc.  
+OncoPep, Inc.  
+Oncos Therapeutics  
+Oncoscience AG  
+OncoSec Medical Incorporated  
+Oncotech  
+Oncotherapeutics  
+OncoTherapy Science, Inc.  
+Oncothyreon Canada Inc.  
+Oncothyreon Inc.  
+Oncovir, Inc.  
+OncoVista, Inc.  
+Oncozyme Pharma Inc.  
+Ondine Research Laboratories  
+Oneness Biotech Co., Ltd.  
+Onkovis GmbH  
+Only For Children Pharmaceuticals  
+Ono Pharma USA Inc  
+Ono Pharmaceutical Co. Ltd  
+Ontario Centres of Excellence  
+ONY  
+Onyx Pharmaceuticals  
+Onyx Therapeutics, Inc.  
+Opexa Therapeutics, Inc.  
+Ophtec USA  
+Ophthalmic Research Associates, Inc.  
+Ophthonix Inc  
+Ophthotech Corporation  
+Opko Health, Inc.  
+Oplon-Pure Science Ltd.  
+Opsona Therapeutics Ltd.  
+Optical Imaging, Ltd.  
+Optimer Biotech, Inc.  
+Optimer Pharmaceuticals  
+Optimum Therapeutics, LLC  
+Optinose US Inc.  
+OptiScan Biomedical Corporation  
+Optiscan Pty Ltd  
+Optivasive Ltd.  
+OptMed, Inc.  
+Opto Eletronica S.A.  
+Optos, PLC.  
+Optovue  
+Ora Bio Ltd.  
+ORA, Inc.  
+Oragenics, Inc.  
+OraPharma  
+Orasi Medical, Inc.  
+Oravital Inc  
+Oraya Therapeutics, Inc.  
+OrbusNeich  
+Ore Pharmaceuticals, Inc.  
+Oregon Aesthetic Technologies  
+Oregon Center for Applied Science, Inc.  
+Oregon's Wild Harvest  
+Orexigen Therapeutics, Inc  
+Orexo AB  
+Orfagen  
+Organ, Tissue, Regeneration, Repair and Replacement  
+Organogenesis  
+Organon  
+Oridion  
+Orient Europharma Co., Ltd.  
+Orient Pharma Co., Ltd.  
+Origio A/S  
+ORION Clinical Services  
+Orion Corporation, Orion Pharma  
+OroScience, Inc.  
+Orphan Medical  
+Orphan Therapeutics  
+Orphanetics Pharma Entwicklungs GmbH  
+Orphatech Pharmaceuticals, GmbH  
+Orqis Medical Corporation  
+Ortec International  
+Ortho Biotech Clinical Affairs, L.L.C.  
+Ortho Biotech Products, L.P.  
+Ortho Biotech, Inc.  
+Ortho Dermatologics  
+Ortho Pharmaceuticals  
+Ortho-McNeil Janssen Scientific Affairs, LLC  
+Ortho-McNeil Neurologics, Inc.  
+Ortho-McNeil Pharmaceutical  
+Ortho-McNeil, Inc.  
+OrthoAccel Technologies Inc.  
+Orthofix Inc.  
+OrthoMediTec  
+Orthosensor, Inc.  
+Orthovita  
+Oryx GmbH & Co. KG  
+Osel, Inc.  
+Oshadi Drug Administration  
+OSI Pharmaceuticals  
+Osiris Therapeutics  
+Osmotica Pharmaceutical Corporation  
+Osprey Medical, Inc  
+Osprey Pharmaceuticals USA, Inc.  
+OSR Medical Inc.  
+Ossacur Inc.  
+OsteoBuild Ltd.  
+Osteologix  
+Osteotech, Inc  
+Othera Pharmaceuticals  
+Otic Pharma  
+Oticon Medical  
+Otologics LLC  
+Otonomy, Inc.  
+OtoSonics Inc.  
+Otsuka America Pharmaceutical  
+Otsuka Beijing Research Institute  
+Otsuka Frankfurt Research Institute GmbH  
+Otsuka Pakistan Limited  
+Otsuka Pharmaceutical Co., Ltd.  
+Otsuka Pharmaceutical Development & Commercialization, Inc.  
+Otsuka Pharmaceutical Europe Ltd  
+Otsuka Pharmaceutical, Inc., Philippines  
+Otto Bock Healthcare  
+Otto Bock Healthcare Products GmbH  
+Ouiheng International Healthcare Co., Ltd  
+Ovalum  
+OvaMed GmbH  
+Ovation Research Group  
+OVO R & D  
+Oxagen Ltd  
+Oxford BioMedica  
+OXiGENE  
+OXO Chemie  
+Oxo Chemie GmbH  
+OxThera  
+Oxygen Biotherapeutics, Inc.  
+OxyPharma  
+Oystershell NV  
+Ozmosis Research Inc.  
+P. Square Medical Ltd  
+P.T. Takeda Indonesia  
+Pacgen Biopharmaceuticals Corporation  
+Pacific Pharmaceuticals  
+Pacira Pharmaceuticals, Inc  
+Paddock Laboratories, Inc.  
+Paieon Inc.  
+Pain Cure Center, California  
+Pain Therapeutics  
+PainReform LTD  
+PAION Deutschland GmbH  
+Paion UK Ltd.  
+Paladin Labs (USA) Inc.  
+Palatin Technologies  
+Palau Pharma S.A.  
+PalJect Ltd.  
+Paloma Pharmaceuticals, Inc.  
+Palomar Medical Technologies, Inc.  
+Pamlab, Inc.  
+Pamlab, L.L.C.  
+Pan American Laboratories  
+Panacea Biotec Ltd  
+PanGenetics UK Limited  
+Panion & BF Biotech Inc.  
+Pantarhei Bioscience  
+PanTheryx, Inc.  
+Par Pharmaceutical, Inc.  
+Paracor Medical, Inc  
+Paradigm Spine  
+Paragon Biomedical  
+Paragon Vision Sciences  
+ParaPRO LLC  
+Paratek Pharmaceuticals Inc  
+Parexel  
+Pari Pharma GmbH  
+ParinGenix  
+Parion Sciences  
+Parke-Davis  
+Pascoe Pharmazeutische Praeparate GmbH  
+Passport Health  
+Passy Muir Inc.  
+Pasteur Merieux Connaught  
+Pathfinder Therapeutics  
+PathoLase, Inc.  
+Pathway Medical Technologies Inc.  
+Pathway Therapeutics, Inc.  
+Patient Safety Technologies, Inc.  
+Patrys Ltd.  
+Patton Medical Devices  
+PaxVax, Inc.  
+PBB Entrepreneur Ltd.  
+PBM Products  
+PCI Biotech AS  
+PDC Biotech GmbH  
+PDL BioPharma, Inc.  
+Pearl Therapeutics, Inc.  
+PediaMed Pharmaceuticals  
+PeerMedical Ltd.  
+Peninsula Pharmaceuticals, Inc.  
+Pennsylvania College of Optometry  
+PENTAX Europe GmbH  
+Penumbra Inc.  
+Penwest Pharmaceuticals Co.  
+PeP-Tonic Medical AB  
+Peplin  
+Pepscan Therapeutics  
+PepsiCo Global R&D  
+PepTcell Limited  
+Peptimmune  
+Peptron, Inc.  
+Percutaneous Systems, Inc.  
+Peregrine Pharmaceuticals  
+PerfAction Ltd.  
+Pergamum AB  
+PeriRx  
+PeriTec Biosciences Ltd.  
+Perkin Elmer Inc.  
+Perle Bioscience, LLC.  
+Perrigo Company  
+Persee Medica  
+Pervasis Therapeutics, Inc  
+Peschke Meditrade, GmbH  
+Pevion Biotech Ltd  
+Pfizer  
+pfm medical ag  
+pfm S.R.L.  
+Pfrimmer Nutricia GmbH, Erlangen , Germany  
+PH&T S.p.A.  
+Phafag AG  
+Phage Pharmaceuticals, Inc.  
+Pharbil Waltrop GmbH  
+Pharco Pharmaceuticals  
+Pharma Consulting Group AB  
+Pharma Nord  
+Pharma Power Biotec Co., Ltd.  
+PharmAbcine  
+PharmaBio Development Inc.  
+Pharmacia  
+Pharmacia and Upjohn  
+Pharmacosmos A/S  
+Pharmacyclics  
+PharmaEngine  
+PharmaEssentia  
+Pharmahungary Group  
+PharmaJet, Inc.  
+PharmaKing  
+Pharmalink AB  
+PharmaLogic Development, Inc.  
+Pharmalogica  
+PharmaLundensis AB  
+PharmaMar  
+PharmaNet  
+PharmaNeuroBoost N.V.  
+Pharmanex  
+PharmaResearch  
+Pharmasset  
+PharmaSurgics AB  
+Pharmatech  
+Pharmatech Oncology  
+PharmAthene UK Limited  
+PharmAthene, Inc.  
+Pharmavite  
+Pharmaxis  
+Pharmbio Korea Co., Ltd.  
+Pharmena North America  
+Pharmexa A/S  
+Pharmicell Co., Ltd.  
+Pharming Technologies B.V.  
+Pharmos  
+Pharmstandard  
+PhaseBio Pharmaceuticals Inc.  
+PHCC LP  
+Phenomix  
+Pherin Pharmaceuticals, Inc.  
+Philip Morris Products S.A.  
+Philip Morris USA, Inc.  
+Philips Healthcare  
+Philips Medical Systems  
+Philips Oral Healthcare  
+Philips Respironics  
+Philogen S.p.A.  
+PhiloMetron, Inc.  
+Philozon Geradores de Ozonio LTDA  
+Phoenix Eagle Company  
+Phonak AG, Switzerland  
+PhotoCure  
+photonamic GmbH & Co. KG  
+Photopharmica  
+PhotoThera, Inc  
+Photozig, Inc.  
+Physicians Pharmaceuticals, Inc.  
+Physio Care  
+Phythea  
+PhytoCeutica  
+Phytogen Medical Foods S.L.  
+PhytoHealth Corporation  
+Phytomedics Inc.  
+Phytopharm  
+Phytotox SA  
+pico-tesla Magnetic Therapies, LLC  
+Piedmont Heart Institute, Inc., Atlanta, GA  
+Pieris AG  
+Pierre Fabre Dermatology  
+Pierre Fabre Dermo Cosmetique  
+Pierre Fabre Laboratories  
+Pierre Fabre Medical Devices  
+Pierre Fabre Medicament  
+Pierre Fabre Pharma GmbH  
+Pierrel Research Europe GmbH  
+Pileje  
+Pinnacle Biologics Inc.  
+Pinnacle Pain Medicine  
+Pinnacle Pharmaceuticals, Inc.  
+Pioneer Surgical Technology, Inc.  
+Piramal Enterprises Limited  
+Piramal Healthcare Canada Ltd  
+Piramal Imaging SA  
+Pivot Medical Inc.  
+Pivotal S.L.  
+Pixel Velocity, Inc. / Epsilon Imaging  
+Planmed Oy  
+Plasma Services Group  
+Plasma Surgical Inc  
+PLC Medical Systems, Inc.  
+PledPharma AB  
+Plethora Solutions Ltd  
+Plexus Biomedical, Inc.  
+Plexxikon  
+Pluristem Ltd.  
+Pluromed, Inc.  
+PLx Pharma  
+PMG Pharm Co., Ltd  
+Pneumedicare Ltd.  
+Pneumoflex Systems, LLC  
+PneumRx, Inc.  
+Pnn Medical A/S  
+Pnn Medical DK  
+PNP Therapeutics, Inc.  
+Pocared Diagnostics  
+Point Biomedical  
+Point Therapeutics  
+Polaris Group  
+Polaris Health Directions  
+Pollogen  
+Polychrome Medical, Inc.  
+Polyheal Ltd.  
+PolyMedix, Inc.  
+Polymun Scientific GmbH  
+Polynoma LLC  
+Polyphenolics, Inc.  
+Polyphenon E International,Inc.  
+Polyphor Ltd.  
+POM Wonderful LLC  
+Pomegranate Health  
+Poniard Pharmaceuticals  
+Pope Research Corporation  
+Portola Pharmaceuticals  
+Posit Science Corporation  
+Potentia Pharmaceuticals, Inc.  
+PowderMed  
+POZEN  
+PPD  
+PRA International  
+PRAECIS Pharmaceuticals Inc.  
+Prairie Education and Research Cooperative  
+Prana Biotechnology Limited  
+Precision Therapeutics  
+Predictive Biosciences  
+PregLem SA  
+Premacure AB  
+PreMD  
+Premier Research Group plc  
+Presidio Pharmaceuticals, Inc.  
+Prestwick Pharmaceuticals  
+PREtest Consult  
+Prevail Health Solutions, LLC  
+PriCara, Unit of Ortho-McNeil, Inc.  
+Price Vision Group  
+Prima BioMed Ltd  
+Primus Pharmaceuticals  
+Prism Pharma Co., Ltd.  
+Prism Pharmaceuticals  
+Pro Top & Mediking Company Limited  
+Pro-Active Medical Pty Ltd  
+Pro-bio Biotech Co. Ltd.  
+Proacta, Incorporated  
+Proaparts srl  
+Proaxis Therapy  
+Probiomed S.A. de C.V.  
+Probiomics Ltd  
+Procept  
+ProCertus BioPharm, Inc  
+ProChon Biotech Ltd  
+Procris Pharmaceuticals  
+Procter and Gamble  
+Prodimed SAS  
+Productos Científicos S. A. de C. V.  
+ProEthic Pharmaceuticals  
+ProFibrix, Inc.  
+Profil Institut für Stoffwechselforschung GmbH  
+Progen Pharmaceuticals  
+Progenics Pharmaceuticals, Inc.  
+Prolacta Bioscience  
+Prolexys Pharmaceuticals  
+Prologue Research International  
+Prolor Biotech, Inc.  
+Promedior, Inc.  
+Promefarm S.r.l.  
+Promethera Biosciences  
+Prometheus Laboratories  
+ProMetrics, Inc.  
+Promius Pharma, LLC  
+Promyco Diagnostics  
+Pronai Therapeutics, Inc  
+Proneuron Biotechnologies  
+Pronova BioPharma  
+Pronova BioPharma ASA  
+Proportional Technologies, Inc.  
+ProRhythm, Inc.  
+Prosensa Therapeutics  
+Prosidion Ltd.  
+Prosonix Limited  
+Prospect Therapeutics, Inc.  
+ProstaPlant Urology System Ltd.  
+Prostrakan Pharmaceuticals  
+ProtAffin Biotechnologie AG  
+Protalex, Inc.  
+Protalix  
+Protein Sciences Corporation  
+ProteoGenix, Inc.  
+Proteon Therapeutics  
+Proteonomix, Inc.  
+ProteoSys AG  
+Proteus Digital Health, Inc.  
+Protez Pharmaceuticals, Inc.  
+Protgen Ltd  
+ProThera, Inc.  
+ProTiP Medical  
+Proto Pharma Ltd  
+Protox Therapeutics  
+Provectus Pharmaceuticals  
+Providence Medical Technology, Inc.  
+Provitro GmbH  
+pSiMedica Limited  
+pSivida Corp.  
+pSiVida Limited  
+Psyadon Pharma  
+Psychiatry Roskilde  
+PsychoGenics Inc.  
+Psychometrix Associates  
+PT Novell Pharmaceutical Laboratories  
+PT Otsuka Indonesia  
+PT. Sari Husada  
+PTC Therapeutics  
+Puleva Biotech  
+Pulmagen Therapeutics  
+Pulmatrix Inc.  
+Pulmonx International Sàrl  
+Pulmonx, Inc.  
+Pulse Therapeutics  
+Pulsion Medical Systems  
+Pulsion Medical Systems SE  
+Puma Biotechnology, Inc.  
+Purdue Frederick  
+Purdue Pharma LP  
+PurGenesis Technologies Inc.  
+PuriCore, Inc.  
+Purimed Co., Ltd.  
+PX'Therapeutics  
+Q-Med AB  
+Q-Med Scandinavia, Inc.  
+Q-Pharm Pty Limited  
+QDose Limited  
+QIAGEN Gaithersburg, Inc  
+Qidong Gaitianli Medicines Co., Ltd  
+QinetiQ Ltd  
+QLT Inc.  
+QR Pharma Inc.  
+QRay Ltd.  
+QRxPharma Inc.  
+Qu Biologics Inc.  
+QualiLife Pharmaceuticals  
+Qualitix Clinical Research Co., Ltd.  
+Quanta Medical  
+Quark Pharmaceuticals  
+QuatRx Pharmaceuticals  
+QuatRx Pharmaceuticals Company  
+Quest PharmaTech Inc.  
+Questcor Pharmaceuticals, Inc.  
+Quidel Corporation  
+Quigley Pharma, Inc.  
+Quinnova Pharmaceuticals, Inc.  
+Quintessence Biosciences, Inc.  
+Quintiles  
+R W Johnson Pharmaceutical Research Institute  
+R&R Inc.  
+R-Tech Ueno, Ltd.  
+R.J. Reynolds Tobacco Company  
+Rachiotek LLC  
+Radiancy  
+Radiant Medical  
+RadioMedix  
+Radiometer Medical ApS  
+RadioRx, Inc  
+Radius Health, Inc.  
+Radnor Registry Research, Inc  
+Rafa Laboratories  
+Raisio Group  
+Ranbaxy Inc.  
+Ranbaxy Laboratories Limited  
+Ranier Technology Limited  
+Rapid Medical  
+Rapid Pathogen Screening  
+RapiDx Ltd.  
+Raptor Pharmaceuticals Corp.  
+Raptor Therapeutics Inc.  
+Ratiopharm  
+Rayner Intraocular Lenses Limited  
+RDD Pharma Ltd  
+Reading Scientific Services Ltd.  
+Real Imaging Ltd.  
+Reata Pharmaceuticals, Inc.  
+Rebiscan, Inc.  
+Recepta Biopharma  
+Receptos, Inc.  
+Recerca Clínica S.L.  
+Reciprocal Labs  
+Reckitt Benckiser LLC  
+Reckitt Benckiser Pharmaceuticals Inc.  
+Recoly N.V.  
+Recombio SL  
+ReCor Medical, Inc.  
+Recordati Industria Chimica e Farmaceutica S.p.A.  
+Red de Terapia Celular  
+RedDress Ltd.  
+ReDent Nova  
+RedHill Biopharma Limited  
+Reflexion Health, Inc.  
+Refocus Group, Inc.  
+Regado Biosciences, Inc.  
+RegeneCure, Ltd.  
+Regenera Pharma Ltd  
+Regenerative Sciences, LLC  
+Regeneron Pharmaceuticals  
+RegeneRx Biopharmaceuticals, Inc.  
+Regenesis Biomedical, Inc.  
+Regentis Biomaterials  
+Regimmune Inc.  
+Reig Jofre Group  
+Reliant Pharmaceuticals  
+Reliant Technologies, Inc. Mountain View, CA  
+Relievant Medsystems, Inc.  
+Relox Medical, LLC  
+Relypsa, Inc.  
+Remedy Pharmaceuticals, Inc.  
+Rempex Pharmaceuticals  
+Renal Solutions, Inc.  
+RenaMed Biologics  
+ReNeuron Limited  
+Renew Life Formulas Inc  
+Renew Medical  
+Renovis  
+Renovo  
+Replidyne  
+Repligen Corporation  
+Reproductive Research Technologies, LP  
+Reproductive Science Center  
+Reprogenetics  
+Repros Therapeutics Inc.  
+ReProtect Inc  
+Research & Diagnostic Antibodies  
+ReSearch Pharmaceutical Services, Inc.  
+ResearchPoint  
+Reset Medical, Inc.  
+ReShape Medical, Inc.  
+Resistentia Pharmaceuticals AB  
+ResMed  
+Resolvyx Pharmaceuticals, Inc  
+Respicardia, Inc.  
+Respicopea Limited  
+Respinova LTD  
+Respiratory Technology Corporation  
+Respirics Inc.  
+Respirio Pty Ltd  
+Respironics International  
+Respironics, California, Inc.  
+Respivert Ltd  
+Response Biomedical Corp.  
+Restoration Robotics, Inc.  
+Resverlogix Corp  
+Retina Implant AG  
+Retrophin, LLC.  
+Retroscreen Virology Ltd.  
+REVA Medical, Inc.  
+Revalesio Corporation  
+Revance Therapeutics, Inc.  
+Reverse Medical Corporation  
+ReVision Optics, Inc.  
+Reviva Pharmaceuticals  
+Revivant Corporation  
+Revogenex, Inc.  
+Revotar Biopharmaceuticals AG  
+Rex Medical  
+Rexahn Pharmaceuticals, Inc.  
+RFS Pharma, LLC  
+Rhinomed AB  
+Rhodes Pharmaceuticals, L.P.  
+Rhone-Poulenc Rorer  
+Rhythm Pharmaceuticals, Inc.  
+Rhythmia Medical, Inc.  
+Rib-X Pharmaceuticals, Inc.  
+RiboCor, Inc.  
+Ribological GmbH  
+Ribozyome  
+Richmond Pharmacology Limited  
+Ridge Diagnostics Inc.  
+Rigel Pharmaceuticals  
+Rippe Lifestyle Institute  
+RITA Medical Systems  
+Ritter Pharmaceuticals, Inc.  
+River Plate Biotechnology, Inc.  
+RMT Medical Technologies, Ltd.  
+RNL Bio Company Ltd.  
+Roberts Pharmaceutical  
+Roche Diagnostic Ltd.  
+Roche Farma, S.A  
+Roche Pharma AG  
+Rock Creek Pharmaceuticals, Inc.  
+Rockwell Medical Technologies, Inc.  
+Rocky Mountain Biosystems, Inc.  
+Rocky Mountain Diabetes and Osteoporosis Center  
+Rogers Sciences Inc.  
+Roll International Corporation  
+Romark Laboratories L.C.  
+Roquette Freres  
+Ross Products  
+RostaQuo S.p.A.  
+Rottapharm  
+Rottapharm Spain  
+Routin SA  
+Rovi Pharmaceuticals Laboratories  
+ROX Medical, Inc.  
+Roxall Medizin  
+Roxane Laboratories  
+RS Medical  
+RTI Biologics  
+RXi Pharmaceuticals, Corp.  
+RxKinetix  
+RZN Nutraceuticals, Inc.  
+S*BIO  
+S-Evans Biosciences Co.,Ltd.  
+S.L.A. Pharma AG  
+Saebo, Inc.  
+Saegis Pharmaceuticals  
+Sage Products, Inc.  
+Sahajanand Medical Technologies Pvt. Ltd.  
+Saladax Biomedical, Inc.  
+Salient Pharmaceuticals Incorporated  
+Salient Surgical Technologies  
+Saliwell Ltd.  
+Salix Pharmaceuticals  
+Salus Ltd.  
+Salvat  
+SamA Pharmaceutical Co., Ltd  
+Samaritan Pharmaceuticals, Inc  
+Samyang Biopharmaceuticals Corporation  
+San Diego Radiosurgery  
+Sanaria Inc.  
+SanBio, Inc.  
+Sandia National Laboratories  
+Sandoz  
+Sandoz GmbH  
+Sandoz Inc.  
+Sandoz Korea  
+Sangamo Biosciences  
+Sangart  
+Sangath  
+Sangstat Medical Corporation  
+Sanguine Biosciences  
+Sankyo Pharma Gmbh  
+Sanofi  
+Sanofi Pasteur MSD  
+Sanofi Pasteur, a Sanofi Company  
+Sanofi-Synthelabo  
+Sanostec Corp.  
+Santaris Pharma A/S  
+Santarus  
+Santech, Inc  
+Santen Inc.  
+Santen Oy  
+Santen Pharmaceutical Co., Ltd.  
+Santhera Pharmaceuticals  
+Santosh Yoga LLC  
+SantoSolve AS  
+SANUWAVE, Inc.  
+Sanwa Kagaku Kenkyusho Co., Ltd.  
+Sapheon, Inc.  
+Sarah Cannon  
+Sarawak MediChem Pharmaceuticals  
+SARcode Bioscience  
+Sarepta Therapeutics  
+SaskTel  
+Satiety, Inc.  
+Sato Pharmaceutical  
+Sauflon Pharmaceuticals Ltd  
+Savara Inc.  
+Savient Pharmaceuticals  
+SBI Biotech Co., Ltd.  
+SBPharmaceutical IND, Co., LTD  
+Scancell Ltd  
+Scandinavian Customized Prosthesis (SCP)  
+Schaper & Bruemmer GmbH & Co KG  
+Schering-Plough  
+Schwabe-Wenex International Ltd  
+Schülke & Mayr GmbH  
+SciClone Pharmaceuticals  
+Sciderm GmbH  
+Scientific Laboratory Products, Ltd.  
+Scil Technology GmbH  
+Scilex Ltd.  
+Scios, Inc.  
+Sciotec Diagnostic Technologies GmbH  
+Scitech Produtos Medicos Ltda  
+SCOLR Pharma, Inc.  
+Scynexis Incorporated  
+Se-cure Pharmaceuticals Ltd.  
+Sealantis Ltd.  
+Seaside Therapeutics, Inc.  
+Seattle Genetics, Inc.  
+Seca GmbH & Co. Kg.  
+Second Sight Medical Products  
+SeeCure LLC  
+Seer Pharmaceuticals  
+Seibersdorf Labor GmbH  
+Seikagaku Corporation  
+Sekisui Diagnostics, LLC  
+Selecta Biosciences, Inc.  
+Semafore Pharmaceuticals  
+Semprus BioSciences, Inc.  
+Senesco Technologies, Inc.  
+SeneXta Therapeutics SA  
+Senju USA, Inc.  
+SenoRx, Inc.  
+Sensate LLC  
+Sense A/S  
+Sensimed AG  
+SentoClone AB  
+Sentrx  
+Seoul Pharma Co., Ltd.  
+Sepsicure  
+SeptRx, Inc.  
+Sepulveda Research Corporation  
+Sequana Medical AG  
+Sequel Pharmaceuticals, Inc  
+Sequella, Inc.  
+Sequenom, Inc.  
+Sequent Medical, Inc  
+Sequus Pharmaceuticals  
+Sera Prognostics, Inc.  
+Seraffix  
+Serenex, Inc.  
+Serenity Pharmaceuticals, Inc.  
+Serentis Ltd.  
+Serica Technologies, Inc.  
+Serum Institute of India Limited  
+Servier  
+Servier (Tianjin) Pharmaceutical Co. LTD.  
+SetPoint Medical Corporation  
+Seventh Sense Biosystems  
+Sewon Cellontech Co., Ltd.  
+SFBC Anapharm  
+SFBC Ft. Myers, Inc  
+SFJ Pharmaceuticals, Inc.  
+SGS U.S. Testing Company Inc.  
+SGX Pharmaceuticals, Inc.  
+Shaanxi Aierfu Activtissue Engineering  
+Shaman Pharmaceuticals  
+Shandong Lanjin Pharmaceuticals Co.,Ltd  
+Shandong Luye Pharmaceutical Co., Ltd.  
+Shandong Simcere-Medgenn Bio-pharmaceutical Co., Ltd  
+Shanghai CP Guojian Pharmaceutical Co.,Ltd.  
+Shanghai Fudan-Zhangjiang Bio-Pharmaceutical Co.,Ltd.  
+Shanghai Greenvalley Pharmaceutical Co., Ltd.  
+Shanghai Institute Of Biological Products  
+Shanghai Nancy Medical Sci-Tech Co. Ltd  
+Shanghai Rxmidas Pharmaceuticals Co. Ltd.  
+Shanghai Sundise Traditional Chinese Medicine Co., Ltd.  
+Shanghai Zerun Biotechnology Co.,Ltd  
+Shantha Biotechnics Limited  
+Shape Pharmaceuticals Pty Ltd.  
+Shape Pharmaceuticals, Inc.  
+Shell Chemicals  
+Sheng Chang Pharmaceutical  
+Shenyang Sunshine Pharmaceutical Co., LTD.  
+Shenzhen Ausa Pharmed Co.,Ltd  
+Shenzhen Beike Bio-Technology Co., Ltd.  
+Shenzhen Kangtai Biological Products Co., LTD  
+Shenzhen SiBiono GeneTech Co.,Ltd  
+Shenzhen Zhongxing Yangfan Biotech Co. Ltd.  
+Shepherd Medical Company  
+Shield Holdings  
+Shiken Corporation  
+Shin Nippon Biomedical Laboratories, Ltd.  
+Shin Poong Pharmaceutical Co. Ltd.  
+Shin Poong Pharmaceuticals  
+Shionogi  
+Shionogi Inc.  
+Shire Development LLC  
+Shire Human Genetic Therapies, Inc.  
+Shire Regenerative Medicine, Inc.  
+Shire-Movetis NV  
+SI-BONE, Inc.  
+Siemens AG  
+Siemens Healthcare Diagnostics Inc  
+Siemens Healthcare QT  
+Siemens Medical Solutions  
+Siemens Medical Solutions USA - CSG  
+Siemens Molecular Imaging  
+Siemens-Betriebskrankenkasse  
+Siena Biotech S.p.A.  
+Sientra, Inc.  
+Siesta Medical, Inc.  
+SIGA Technologies  
+Sigma Tau Pharmaceuticals, Inc.  
+Sigma Tau Research Switzerland SA  
+sigma-tau i.f.r. S.p.A.  
+Sigma-Tau Research, Inc.  
+Sigmoid Pharma  
+SignPath Pharma, Inc.  
+Sigvaris Corporation  
+Silbiotech  
+Silence Therapeutics AG  
+Silenseed Ltd  
+Silk Road Medical  
+Silliker, Inc.  
+Simbec Research  
+Simpletherapy  
+Sindolor  
+Singulex  
+Sino Medical Sciences Technology Inc.  
+Sino-Swed Pharmaceutical Corporation  
+Sinovac Biotech Co., Ltd  
+Sintesi Research Srl  
+SinuSys Corporation  
+Sirion Therapeutics, Inc.  
+Sirius Genomics Inc.  
+Sirius Medicine  
+Sirna Therapeutics Inc.  
+Siro Clinpharm Germany GmbH  
+SironRX Therapeutics, Inc.  
+Sirtex Medical  
+Sirtris, a GSK Company  
+SK Chemicals Co.,Ltd.  
+SK Life Science  
+SK Telecom Americas, Inc.  
+Skingenix, Inc.  
+SkyePharma AG  
+Skyline Diagnostics BV  
+Sleep To Live Institute  
+Sleepy, Inc  
+Small Bone Innovations, Inc.  
+Smart Medical Systems Ltd.  
+SmartFoods, Inc.  
+Smith & Nephew Medical (Shanghai) Ltd  
+Smith & Nephew Medical Ltd  
+Smith & Nephew Orthopaedics AG  
+Smith & Nephew Wound Management Inc  
+Smith & Nephew, Inc.  
+SmithKline Beecham  
+Smiths Medical, ASD, Inc.  
+Smoke-Break, Inc.  
+SMT Research and Development Ltd.  
+Society for the Advancement of Blood Management, Inc  
+Sodilac  
+SOFAR S.p.A.  
+Sofradim Corporation  
+Sofradim Production  
+Soft Protector  
+Soft Tissue Regeneration, Inc.  
+Sol-Gel Technologies, Ltd.  
+Solace Pharmaceuticals  
+Solace Therapeutics, Inc.  
+Solae, LLC  
+Solasia Pharma K.K.  
+Soligenix  
+Solstice Neurosciences  
+Solta Medical  
+Soluble Systems, LLC  
+Solvay Biologicals  
+Solvay Pharmaceuticals  
+SOLX, Inc.  
+Somanetics Corporation  
+Somaxon Pharmaceuticals  
+Somerset Pharmaceuticals  
+Somnetics International, Inc.  
+Somnus Therapeutics, Inc.  
+Sonexa Therapeutics, Inc.  
+Sonitus Medical Inc  
+SonoCine, Inc.  
+SonoMedica, Inc.  
+SonoSite, Inc.  
+Sooft Italia  
+Soothing Scents, Inc.  
+Sopherion Therapeutics  
+Sorbent Therapeutics  
+Soredab  
+Soricimed Biopharma Inc  
+Sorin Group  
+Sorin Group Canada  
+Sorin Group USA, Inc.  
+Sosei  
+Sotera Wireless, Inc.  
+Soterix Medical  
+Sound Pharmaceuticals, Incorporated  
+Sound Surgical Technologies, LLC.  
+Source MDx  
+Spartan Bioscience Inc.  
+SPD Development Company Limited  
+Spear Pharmaceuticals  
+Speciality European Pharma Limited  
+Spectral Diagnostics (US) Inc.  
+Spectranetics Corporation  
+Spectros Corporation  
+Spectrum Dynamics  
+Spectrum Pharmaceuticals, Inc  
+Speedel Pharma Ltd.  
+Sphere Healthcare  
+Sphere Medical Ltd.  
+Spherix Incorporated  
+Spinal Kinetics  
+Spinal Restoration, Inc.  
+Spinal Simplicity LLC  
+SpineForm LLC  
+Spinelab AG  
+Spiracur, Inc.  
+Spiration, Inc.  
+Spirig Pharma Ltd.  
+Spirocor  
+Spirus Medical, Inc.  
+Spital STS AG  
+Sponsor Name Pending  
+Sprim Italia  
+Sprout Pharmaceuticals, Inc  
+SRI International  
+St. Jude Medical  
+St. Renatus, LLC  
+Stability Plus, LLC  
+Stallergenes  
+Star Scientific, Inc  
+Starpharma Pty Ltd  
+Starx Research Center, LLC  
+Statistika Consultoria Ltda  
+Stealth Peptides, Inc.  
+STEBA France  
+Steelcase  
+StelKast, Inc.  
+Stellar Pharmaceuticals  
+Stem Cell Therapeutics Corp.  
+StemCells, Inc.  
+StemCyte, Inc.  
+Stemedica Cell Technologies, Inc.  
+Stemnion, Inc.  
+Stempeutics Research Pvt Ltd  
+Stentys  
+Stereotaxis  
+SterilMed, Inc.  
+Sterna Biologicals GmbH & Co. KG  
+STI-Medical Systems  
+Stiefel, a GSK Company  
+Stolle Milk Biologic International  
+Stratatech  
+Strategic Biosciences  
+Stratum Nutrition  
+Straub Medical AG  
+Stromatec, Inc.  
+Stromedix, Inc.  
+Stryker Biotech  
+Stryker Canada LP  
+Stryker GI Ltd.  
+Stryker Instruments  
+Stryker Neurovascular  
+Stryker Nordic  
+Stryker Orthopaedics  
+Stryker SA  
+Stryker Trauma GmbH  
+Sucampo Pharmaceuticals, Inc.  
+SUGEN  
+Sumagen  
+Sumitomo Pharmaceutical (Suzhou) Co., Ltd.  
+Summers Laboratories  
+Summit Doppler Systems, Inc.  
+Sun Pharma Advanced Research Company Limited  
+Sun Pharmaceutical Industries Limited  
+Sunesis Pharmaceuticals  
+Suneva Medical, Inc.  
+Sunovion  
+Sunovion Respiratory Development Inc.  
+Sunshine Heart Inc.  
+Sunstar Americas  
+Sunstar, Inc.  
+Suntory Pharmaceutical  
+superDimension Ltd.  
+Supernus Pharmaceuticals, Inc.  
+SuperSonic Imagine  
+SureGene, LLC  
+Surface Logix  
+Surgi C Limited  
+Surgi-Vision Inc  
+SurgSolutions, LLC  
+SurModics, Inc.  
+Surpass Medical Ltd.  
+Svelte Medical Systems Europe  
+Svelte Medical Systems, Inc.  
+SVSE 2000 Ltd.  
+Swedish Match AB  
+Swedish Orphan Biovitrum  
+Swiss-American Products, Inc  
+Sygnis Bioscience GmbH & Co KG  
+Sylentis, S.A.  
+SymBio Pharmaceuticals  
+Symbion Research International  
+Symbollon Pharmaceuticals  
+Symphogen A/S  
+Symphony Evolution, Inc.  
+Symphony Neuro Development Company  
+SymTrend Inc.  
+Symyoo  
+Synabridge Corporation  
+Synageva BioPharma Corp.  
+Synairgen Research Ltd.  
+SynapDx  
+Synapse Biomedical  
+SynCardia Systems. Inc.  
+SynCore Biotechnology Co., Ltd.  
+Syndax Pharmaceuticals  
+SynerGene Therapeutics, Inc.  
+SynergEyes, Inc.  
+Synergy Health Concepts, Inc.  
+Synergy Pharmaceuticals Pte. Ltd.  
+Synergy Pharmaceuticals, Inc.  
+Syneron Medical  
+Synerx Pharma, LLC  
+Synovis Surgical Innovations  
+Synta Pharmaceuticals Corp.  
+Syntellix AG  
+Synteract, Inc.  
+SyntheMed  
+Synthes Asia Pacific  
+Synthes Canada  
+Synthes GmbH  
+Synthes Inc.  
+Synthes USA HQ, Inc.  
+Synthon BV  
+Syntonix Pharmaceuticals, Inc.  
+Syntrix Biosystems, Inc.  
+Synvista Therapeutics, Inc  
+Syral  
+Sysmex America, Inc.  
+Systagenix Wound Management  
+Systemix  
+Systems Medicine LLC  
+Szabocsik and Associates, Inc.  
+T2 Biosystems  
+T4 Analytics  
+Tactical Therapeutics, Inc.  
+Tactile Systems Technology Inc.  
+Taewoong Medical Co., Ltd.  
+Tahitian Noni International, Inc.  
+Tai Tien Pharmaceuticals Co., Ltd.  
+TaiGen Biotechnology Co., Ltd.  
+Taiho Pharma USA, Inc.  
+Taiho Pharmaceutical Co., Ltd.  
+Taiko Pharmaceutical Co., Ltd.  
+TaiMed Biologics Inc.  
+Taisho Pharmaceutical Co., Ltd.  
+Taisho Pharmaceutical R&D Inc.  
+Taiwan Biotech Co., Ltd.  
+Taiwan Liposome Company  
+Taiwan Otsuka Pharm. Co., Ltd  
+Taiwan THL Co.LTd.  
+Takara Bio Inc.  
+Takeda Global Research & Development Center (Asia) Pte. Ltd  
+Takeda Global Research & Development Center, Inc.  
+Takeda Global Research & Development Centre (Europe) Ltd.  
+Takeda Italia Farmaceutici S.p.A.  
+Takeda México S.A. de C.V.  
+Takeda Pharma A/S  
+Takeda Pharma AG  
+Takeda Pharma GmbH  
+Takeda Pharmaceutical Company Limited  
+Takeda Pharmaceuticals International, Inc.  
+Takeda Pharmaceuticals North America, Inc.  
+Talaria, Inc  
+Talima Therapeutics, Inc.  
+Tallikut Pharmaceuticals, Inc.  
+Talon Therapeutics, Inc  
+Tamir Biotechnology, Inc.  
+Tandem Diabetes Care, Inc.  
+Tanox  
+TAP Pharmaceutical Products Inc.  
+Targacept Inc.  
+Targanta Therapeutics Corporation  
+TargeGen  
+Target Health Inc.  
+Targeted Genetics Corporation  
+Targeted Medical Pharma  
+TARIS Biomedical, Inc.  
+Tarix Pharmaceuticals  
+Taro Pharmaceuticals USA  
+Tarsa Therapeutics, Inc.  
+Tasly Pharmaceuticals, Inc.  
+Tate and Lyle Ingredients France  
+Tau Therapeutics LLC  
+TauroPharm  
+TauRx Therapeutics Ltd  
+TauTona Group  
+Tavor Ltd.  
+Taxolog Inc.  
+Taylor MicroTechnology  
+TBF Genie Tissulaire  
+TCA Cellular Therapy  
+TcLand Expression S.A.  
+TCM Biotech International Corp.  
+TD Vaccines A/S  
+TearLab Corporation  
+TearScience, Inc.  
+Technolas Perfect Vision GmbH  
+Techpool Bio-Pharma Co., Ltd.  
+Tecno Sun SRL  
+Tedec-Meiji Farma, S.A.  
+Tegra Analytics  
+TEI Biosciences Inc.  
+Teikoku Pharma USA  
+Tekmira Pharmaceuticals Corporation  
+Telcare, Inc  
+Telik  
+Telormedix SA  
+Telsar Pharma Inc.  
+Tenaxis Medical, Inc.  
+Tendris Holding BV  
+Tengion  
+Tensegrity Prosthetics  
+Tercica  
+Terumo BCT  
+Terumo BCTbio  
+Terumo Corporation  
+Terumo CVS  
+Terumo Europe N.V.  
+Terumo Heart Inc.  
+Terumo Medical Corporation  
+Tesaro, Inc.  
+TesoRx Pharma, LLC  
+Tessella Inc.  
+Tetec AG  
+TetraLogic Pharmaceuticals  
+Tetraphase Pharmaceuticals, Inc.  
+Teva Branded Pharmaceutical Products, R&D Inc.  
+Teva GTC  
+Teva Neuroscience, Inc.  
+Teva Pharma  
+Teva Pharma GmbH  
+Teva Pharmaceutical Industries  
+Teva Pharmaceuticals USA  
+Teva Women's Health  
+Texas Biotechnology Corporation  
+Texas Enterosorbents Incorporated  
+Texas Oncology Cancer Center  
+TFS Trial Form Support  
+TG Therapeutics, Inc.  
+Thai Otsuka Pharmaceutical Co.,Ltd.  
+Thallion Pharmaceuticals  
+Thar Pharmaceuticals, Inc  
+Thayer Intellectual Property, Inc.  
+The Avicena Group  
+The Boeing Company  
+The Chemo-Sero-Therapeutic Research Institute  
+The Coca-Cola Company  
+The Dial Corporation  
+The EMMES Corporation  
+The Hillshire Brands Company  
+The Immune Response Corporation  
+The Institute for Diabetes Discovery, LLC  
+The Kotsanis Institute  
+The Medicines Company  
+The National Institute of Lymphology  
+The Plasma Source  
+The SmartPill Corporation  
+The Vaccine Company  
+Therabel Pharma SA/NV  
+Theraclion  
+Theraclone Sciences, Inc.  
+TheraCoat Ltd.  
+Theracos  
+Theradex  
+TheraGenetics Limited  
+Theragenics Corporation  
+Therakos  
+Theramex  
+Theranor s.p.r.l  
+Therapeutics, Inc.  
+Therapeutics: 101 Inc.  
+Theratechnologies  
+Theravance, Inc.  
+Theravant Corporation  
+TheraVasc Inc.  
+TheraVida, Inc.  
+TheraVitae Ltd.  
+Theregen, Inc.  
+Therion Biologics Corporation  
+ThermaRx, Inc.  
+ThermoFisher Scientific Brahms Biomarkers France  
+Thermogenesis Corp.  
+TherOx  
+Thoratec Corporation  
+Thoratec Europe Ltd  
+Threshold Pharmaceuticals  
+ThromboGenics  
+Thrombologic ApS  
+Thrombotargets Europe S.L  
+Thrombotech Ltd.  
+ThromboVision, Inc.  
+Thuasne  
+Thymon, LLC  
+Tian Medical Inc.  
+Tianhe Stem Cell Biotechnologies Inc.  
+Tianjin Tasly Pharmaceutical Co., Ltd  
+Tiba Medical, Inc.  
+Tibion Bionics, Inc.  
+Tibotec BVBA  
+Tibotec Pharmaceutical Limited  
+Tibotec Pharmaceuticals, Ireland  
+Tibotec Therapeutics, a Division of Ortho Biotech Products, L.P., USA  
+Tibotec, Inc  
+TiGenix n.v.  
+TiGenix S.A.U.  
+Tigris Pharmaceuticals  
+Tillotts Pharma AG  
+Tiltan Pharma Ltd.  
+Tinea Pharmaceuticals  
+Tioga Pharmaceuticals  
+Tiohundra AB  
+Tissue Genesis, Inc.  
+Tissue Regeneration Technologies  
+Tissue Regenix Ltd  
+Tissue Repair Company  
+Tissue Tech Inc.  
+TissueGene, Inc.  
+Tisteron Ltd.  
+Titan Pharmaceuticals  
+TKL Research, Inc.  
+to-BBB technologies B.V.  
+Tobira Therapeutics, Inc.  
+Tocagen Inc.  
+Tokai Pharmaceuticals  
+Tolera Therapeutics, Inc  
+Tonix Pharmaceuticals, Inc.  
+Topaz Pharmaceuticals Inc  
+Topcon Corporation  
+Topcon Medical Systems, Inc.  
+Topica Pharmaceuticals  
+Topical Solutions Ltd.  
+TopMD Skin Care, Inc.  
+Topokine Therapeutics, Inc.  
+TopoTarget A/S  
+TopSpin Medical  
+Torax Medical Incorporated  
+Toray Industries, Inc  
+Tornier  
+Torrent Pharmaceuticals Limited  
+TorreyPines Therapeutics  
+Toshiba America Medical Systems, Inc.  
+TotipotentRX Cell Therapy Pvt. Ltd.  
+TotipotentSC Scientific Product Pvt. Ltd.  
+Toyama Chemical Co., Ltd.  
+Tracon Pharmaceuticals Inc.  
+Tragara Pharmaceuticals, Inc.  
+TranS1, Inc.  
+Transcend Medical, Inc.  
+Transcept Pharmaceuticals  
+Transgene  
+Transition Therapeutics  
+Translumina GmbH  
+TransMedics  
+TransMolecular  
+Transoma Medical  
+Transonic Systems Inc.  
+TransPharma Medical  
+Transport Pharmaceuticals  
+TransTech Pharma  
+Tranzyme, Inc.  
+Traslational Cancer Drugs Pharma, SL  
+Travanti Pharma Inc.  
+TRB Chemedica  
+TRB Chemedica AG  
+Treague Ltd  
+Trevena Inc.  
+TRF Pharma, Inc  
+Triangle Pharmaceuticals  
+TrichoScience Innovations, Inc.  
+Trident Clinical Research Pty Ltd  
+Trident Pharmaceuticals Inc  
+Trig Medical Inc  
+Triligent International  
+Trillennium Medical Imaging, Inc.  
+Trillium Therapeutics Inc.  
+Trima, Israel Pharmaceutical Products  
+Trimed Biotech GmbH  
+Trimel Biopharma SRL  
+Trimeris  
+Trin Therapeutics GmbH  
+Trio Medicines Ltd.  
+Tripep AB  
+Triphase Research and Development I Corporation  
+TriReme Medical, Inc.  
+TriTech Manufacturing  
+Trium Analysis Online GmbH  
+Trius Therapeutics, Inc.  
+TriVascular, Inc.  
+Trophos  
+TrueCells, LLC  
+TrygFonden, Denmark  
+Tryton Medical, Inc.  
+TSH Biopharm Corporation Limited  
+TSI, LLC  
+Tsumura and Company, Tokyo, Japan  
+Tsumura USA  
+TTY Biopharm  
+Tularik  
+Tulip Medical Ltd.  
+TVAX Biomedical  
+TWi Biotechnology, Inc.  
+Twin Star Medical, Inc.  
+Tyco Healthcare Group  
+Tyrogenex  
+TYRX, Inc.  
+U-Systems, Inc.  
+U.S. Bioscience  
+U3 Pharma GmbH  
+UC Care, Ltd.  
+UCB BIOSCIENCES GmbH  
+UCB BIOSCIENCES, Inc.  
+UCB Japan Co. Ltd.  
+UCB Pharma GmbH  
+UCB Pharma SA  
+UCB, Inc.  
+Ulthera, Inc  
+Ultragenyx Pharmaceutical Inc  
+UltraShape  
+ULURU  
+Uman Pharma  
+UMN Pharma Inc.  
+Unfo Ltd.  
+Uni-Pharma  
+Unigene Laboratories Inc.  
+Unilever Israel  
+Unilever R&D  
+Unilever SEAC  
+Unimed Pharmaceuticals  
+United Allergy Services  
+United Behavioral Health  
+United Biomedical  
+United BioSource Corporation  
+United Clinic Management GmbH  
+United Therapeutics  
+UnitedHealth Group  
+Unither Pharmaceuticals  
+Univax Biologics Inc  
+Universal Biosensors Pty Ltd  
+Universal Enterprises  
+University Emergency Physicians  
+University of Kansas Medical Center Research Institute, Inc.  
+University Research Co, LLC (subcontract)  
+Upjohn  
+Upsher-Smith Laboratories  
+UpSpring Baby, Ltd.  
+Uptake Medical Corp  
+Urigen  
+Uro-Research, LLC  
+Urologix  
+Uromedica  
+Uroplasty, Inc  
+Ursapharm Arzneimittel GmbH  
+US Biotest, Inc.  
+US Endoscopy  
+US Oncology Research  
+US WorldMeds LLC  
+USGI Medical  
+USHIFU, LLC  
+Uteron Pharma S.A.  
+Vac4All  
+Vaccinex Inc.  
+Vakzine Projekt Management GmbH  
+Valam Corp.  
+Valeant Canada Limited  
+Valeant Pharmaceuticals International, Inc.  
+Valen Labs  
+Valentis  
+ValenTx, Inc.  
+Valeritas, Inc.  
+Valexfarm  
+Validus Pharmaceuticals  
+Valio Ltd  
+Valletta Health B.V.  
+Valtech Cardio Ltd  
+Vanda Pharmaceuticals  
+Vantia Ltd  
+Vapotherm, Inc.  
+Varian Medical Systems  
+VascuActive LTD  
+Vascular Biogenics Ltd. operating as VBL Therapeutics  
+Vascular Concepts Limited  
+Vascular Grafts Solutions Ltd.  
+Vascular Pathways, Inc.  
+Vascular Solutions, Inc  
+Vascutek Ltd.  
+Vasogen  
+VasoNova, Inc.  
+Vasorum Ltd  
+Vaxart  
+VaxGen  
+Vaxil Therapeutics Ltd.  
+Vaximm GmbH  
+Vaxin Inc.  
+VaxInnate Corporation  
+Vecta Ltd.  
+Vectura Limited  
+Vedic Lifesciences Pvt. Ltd.  
+Vegenat, S.A.  
+Velomedix, Inc.  
+Veloxis Pharmaceuticals  
+Veniti  
+Venous Health Systems, Inc.  
+VentiRx Pharmaceuticals Inc.  
+Ventor Technologies  
+Ventracor  
+Ventria Bioscience  
+VentriPoint Diagnostics Ltd.  
+Ventrus Biosciences, Inc  
+Ventus Medical, Inc.  
+Venus Concept  
+Venus MedTech (HangZhou) Inc.  
+VeraLight, Inc.  
+Veran Medical Technologies  
+Verastem, Inc.  
+Verathon Inc.  
+Veridex, LLC  
+Verinata Health, Inc.  
+Veritas Health Solutions LLC  
+Verium Diagnostics, Inc.  
+Verman Oy Ab  
+Vernalis (R&D) Ltd  
+Veropharm  
+VeroScience  
+Versartis Inc.  
+Vertebral Technologies, Inc.  
+Vertex Pharmaceuticals Incorporated  
+VertiFlex, Incorporated  
+Vertigone Inc.  
+Verto LTD  
+Vertos Medical, Inc.  
+Vessix Vascular, Inc  
+VGX International, Inc.  
+VGX Pharmaceuticals, LLC  
+ViaCell  
+Viacor  
+Vibrant Ltd.  
+Vical  
+Vicept Therapeutics, Inc.  
+Vicor Technologies, Inc.  
+Vicuron Pharmaceuticals  
+Vicus Therapeutics  
+Vidacare Corporation  
+Vidfarma Indústria de Medicamentos Ltda.  
+Vifor Inc.  
+Vifor Pharma  
+Vigconic (International) Ltd.  
+ViiV Healthcare  
+VIMRx Pharmaceuticals  
+Vion Pharmaceuticals  
+ViOptix Canada  
+VioQuest Pharmaceuticals  
+ViraCor Laboratories  
+Viralytics  
+Virax Pty. Ltd,  
+Virchow Group  
+Virco  
+Virionyx Corporation Limited  
+Virobay Inc.  
+ViroChem Pharma  
+ViroMed Co., Ltd.  
+ViroMed Laboratories, Inc.  
+Viron Therapeutics Inc  
+ViroPharma  
+ViroStatics srl  
+ViroXis Corporation  
+Virttu Biologics Limited  
+VirtualScopics, Inc.  
+ViRx  
+VIRxSYS Corporation  
+Viscogel AB  
+Vision Renu Taiwan Corporation  
+Vision Share, Inc.  
+VisionCare Ophthalmic Technologies, Inc.  
+Visioncare Research Ltd.  
+VisionQuest Biomedical LLC  
+VisionScope Technologies  
+VistaGen Therapeutics, Inc.  
+Vistakon  
+Vistakon Pharmaceuticals  
+Visualase, Inc.  
+Vitacare Gmbh & Co. KG  
+Vitae Pharmaceuticals, Inc.  
+Vital Access Corp.  
+Vital Art and Science Incorporated  
+Vital Therapies, Inc.  
+Vitatron France  
+Vitatron GmbH  
+Vitatron Medical Italia  
+Vitreoretinal Technologies, Inc.  
+Vitrolife  
+Viventia Biotech  
+Vivostat  
+Vivoxid Ltd  
+VIVUS, Inc.  
+VM Biopharma  
+VNUS Medical Technologies, A Covidien Company  
+Volcano Corporation  
+Volighten Scientific, Ltd.  
+Vomaris Innovations  
+Voyager Pharmaceutical Corporation  
+VPDiagnostics  
+VQ OrthoCare  
+VSL Pharmaceuticals  
+VSM Geneesmiddelen b.v.  
+Vygon GmbH & Co. KG  
+W.L.Gore & Associates  
+Wako Diagnostics  
+Wakunaga Pharmaceutical Co., Ltd.  
+Walter Ritter GmbH & Co  
+Warner Chilcott  
+Warner Lambert - Parke Davis  
+Water-Jel  
+Watson Laboratories, Inc.  
+Watson Pharmaceuticals  
+WaveLight AG  
+Wedgewood Pharmacy  
+Weinberg Medical Physics LLC  
+Weinmann Geräte für Medizin GmbH + Co. KG  
+Welch Allyn  
+Welch Foods Incorporated  
+Welch's, Inc.  
+Weleda AG  
+Welichem Biotech Inc.  
+Wellspect HealthCare  
+Wellstat Therapeutics  
+West-Ward Pharmaceutical  
+Westwood Institute for Anxiety Disorders, Inc  
+Wex Pharmaceuticals Inc.  
+WFD Ventures Incorporated  
+Whanin Pharmaceutical Company  
+WhiteWave Foods, Inc.  
+Wicab  
+WideMed LTD.  
+Wilex  
+William Cook Australia  
+William Cook Europe  
+Williams LifeSkills  
+Winclove Bio Industries BV  
+Windy Hill Medical, Inc.  
+Winston Laboratories  
+Wm. Wrigley Jr. Company  
+Wockhardt  
+Wonik Trade Company, Korea  
+Woolsthorpe Technologies, LLC  
+World Heart Corporation  
+Wound Care Technologies, Inc.  
+Wright Medical Technology  
+Wyeth is now a wholly owned subsidiary of Pfizer  
+Wyeth-Lederle Vaccines  
+X-pert Med GmbH  
+Xanodyne Pharmaceuticals  
+Xanthus Pharmaceuticals, Inc.  
+XBiotech, Inc.  
+Xcellerex, Inc.  
+Xcovery Holding Company, LLC  
+Xcovery Vision, LLC  
+Xcyte Therapies  
+XDx  
+Xencor, Inc.  
+Xenon Pharmaceuticals Inc.  
+XenoPort, Inc.  
+Xenova Biomedix  
+Xiamen Amoytop Biotech Co., Ltd.  
+Xiamen Innovax Biotech Co., Ltd  
+Xian-Janssen Pharmaceutical Ltd.  
+Xiangbei Welman Pharmaceutical Co., Ltd  
+Xigen SA  
+Xigo Health LLC  
+Xinjiang Biochemical Pharmaceutical Co., Ltd.  
+Xlumena, Inc.  
+Xoft, Inc.  
+XOMA (US) LLC  
+Xsira Pharmaceuticals  
+XTL Biopharmaceuticals  
+XVIVO Perfusion  
+Xylos Corporation  
+Y's Therapeutics, Inc.  
+Yaffa Golan, Ltd.  
+Yakult Honsha Co., LTD  
+Yantai Medgenn Ltd.  
+Yasoo Health  
+Yaupon Therapeutics  
+YM BioSciences  
+YM BioSciences Australia Pty Ltd.  
+Yuhan Corporation  
+Yuyu Pharma, Inc.  
+Zafgen, Inc.  
+Zalicus  
+Zambon SpA  
+Zarbee's Inc.  
+ZARS Pharma Inc.  
+Zealand Pharma  
+ZeaVision, Inc.  
+ZeaVision, LLC  
+Zelos Therapeutics  
+Zeltiq Aesthetics  
+Zeneus Pharma  
+Zensun Sci. & Tech. Co., Ltd.  
+Zensun USA Inc.  
+Zentopharm GmbH  
+Zenyaku Kogyo Co., Ltd.  
+Zeria Pharmaceutical  
+Zetiq Technologies  
+Zhejiang Beta Pharma Inc.  
+Zhejiang Otsuka Pharmaceutical Co., Ltd.  
+ZhuGuangYing  
+Zimmer Dental  
+Zimmer Orthobiologics, Inc.  
+Zimmer Spine  
+Zimmer, Inc.  
+ZIN Technologies, Inc.  
+ZIOPHARM  
+Zivena  
+Zodiac Produtos Farmaceuticos S.A.  
+Zogenix, Inc.  
+ZOLL Circulation, Inc., USA  
+Zoll Medical Corporation  
+Zone Laboratories, Inc.  
+Zosano Pharma Inc.  
+ZS Pharma, Inc.  
+Zurita Laboratorio Farmaceutico Ltda.  
+ZyCare Inc  
+Zydus Pharmaceuticals USA, Inc.  
+Zymenex A/S  
+ZymeQuest  
+ZymoGenetics  
+Zynex Monitoring Solutions  
+ZZ Biotech, LLC  
+Ångstrom Pharmaceuticals  
+20/10 Perfect Vision  
+22nd Century Limited, LLC  
+23andMe, Inc.  
+2ConduCT  
+3M  
+480 Biomedical, Inc.  
+4Pharma Ltd.  
+4SC AG  
+7TM Pharma A/S  
+
