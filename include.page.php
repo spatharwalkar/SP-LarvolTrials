@@ -943,6 +943,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			case 'moas': $actual_table = "entities"; break;
 			case 'moacategories': $actual_table = "entities"; break;
 			case 'diseases': $actual_table = "entities"; break;
+			case 'therapeuticareas': $actual_table = "entities"; break;
 		}
 	if($import ==1 && $table=='redtags')
 	{
@@ -1024,6 +1025,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 					case 'moas': $class = "MOA"; break;
 					case 'moacategories': $class = "MOA_Category"; break;
 					case 'diseases': $class = "Disease"; break;
+					case 'therapeuticareas': $class = "Therapeutic_Area"; break;
 				}
 				if( $table == 'moacategories' or $table == 'moas'  )
 				{
@@ -1142,6 +1144,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 					case 'moas': $class = "MOA"; break;
 					case 'moacategories': $class = "MOA_Category"; break;
 					case 'diseases': $class = "Disease"; break;
+					case 'therapeuticareas': $class = "Therapeutic_Area"; break;
 				}
 				if( $table == 'moacategories' or $table == 'moas'  )
 				{
@@ -1385,6 +1388,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 					case 'moas': $class = "MOA"; break;
 					case 'moacategories': $class = "MOA_Category"; break;
 					case 'diseases': $class = "Disease"; break;
+					case 'therapeuticareas': $class = "Therapeutic_Area"; break;
 				}
 				if( $table == 'moacategories' or $table == 'moas'  )
 				{
@@ -1482,6 +1486,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 					case 'moas': $class = "MOA"; break;
 					case 'moacategories': $class = "MOA_Category"; break;
 					case 'diseases': $class = "Disease"; break;
+					case 'therapeuticareas': $class = "Therapeutic_Area"; break;
 				}
 				if( $table == 'moacategories' or $table == 'moas'  )
 				{
@@ -1641,6 +1646,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 					case 'moas': $class = "MOA"; break;
 					case 'moacategories': $class = "MOA_Category"; break;
 					case 'diseases': $class = "Disease"; break;
+					case 'therapeuticareas': $class = "Therapeutic_Area"; break;
 				}
 				if( $table == 'moacategories' or $table == 'moas'  )
 				{
@@ -1739,6 +1745,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 					case 'moas': $class = "MOA"; break;
 					case 'moacategories': $class = "MOA_Category"; break;
 					case 'diseases': $class = "Disease"; break;
+					case 'therapeuticareas': $class = "Therapeutic_Area"; break;
 				}
 				if( $table == 'moacategories' or $table == 'moas'  )
 				{
@@ -1782,6 +1789,165 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			$logger->error($log);
 			unset($log);
 			softdie('Cannot import disease id '.$importVal['LI_id'].'<br/>'.$query.'<br/>');
+			return 2;
+		}
+	}
+	
+	if($import==1 && $table=='therapeuticareas')
+	{
+		ini_set('max_execution_time','360000');	//100 hours
+		//check for insert update case
+		$esclid = mysql_real_escape_string($importVal['LI_id']);
+		$escname = mysql_real_escape_string($importVal['name']);
+		$query = "select id from `entities` where `class`='Therapeutic_Area' and (LI_id='{$esclid}' OR name='{$escname}') limit 1";
+		$result = mysql_query($query);
+		$update = false;
+		if($result)
+		{
+			ob_start();
+			while($row = mysql_fetch_assoc($result))
+			{
+				$update = true;
+				$id = $row['id'];
+			}
+			ob_end_clean();
+			if($update)
+			{
+				if($importVal['is_active'] == 0)
+				{
+					deleteData($id, 'entities');
+					return 4;
+				}			
+				$importVal = array_map(am1,$importKeys,array_values($importVal));
+				$query = "update `entities` set ".implode(',',$importVal)." where id=".$id;
+			}
+			else 
+			{
+				//if insert check the moa is_active. We dont need it in an import, skipping...
+				if($importVal['is_active'] == 0)
+				{
+					//skipping.
+					//return false can show as failed attempt on higher level controller.
+					return 3;
+				}
+				
+				$importVal = array_map(function ($v){return "'".mysql_real_escape_string($v)."'";},$importVal);
+				
+				
+				switch($table)
+				{
+					case 'products': $class = "Product"; break;
+					case 'areas': $class = "Area"; break;
+					case 'institutions': $class = "Institution"; break;
+					case 'moas': $class = "MOA"; break;
+					case 'moacategories': $class = "MOA_Category"; break;
+					case 'diseases': $class = "Disease"; break;
+					case 'therapeuticareas': $class = "Therapeutic_Area"; break;
+				}
+				if( $table == 'moacategories' or $table == 'moas'  )
+				{
+					$query = "insert into `entities` (".implode(',',$importKeys).") values (".implode(',',$importVal).")";
+				}
+				elseif( empty($class) )
+				{
+					$query = "insert into $actual_table (`".implode('`,`',$importKeys)."`) values (".implode(',',$importVal).")";
+				}
+				else
+				{
+					$query = "insert into `entities` (`".implode('`,`',$importKeys)."`,`class` ) values (".implode(',',$importVal). ', "'. $class .'"' .")";
+				}	
+				
+				
+				
+			}
+			if(mysql_query($query))
+			{
+				if($id)
+				{
+					$_GET['id'] = $id;
+					$TherapeuticArea_ID = $id;
+				}
+				else 
+				{
+					$_GET['id'] = mysql_insert_id();
+					$TherapeuticArea_ID = $_GET['id'];
+				}
+				
+				//Insert Therapeutic Area and Disease association
+				ob_start();
+				foreach($extraData['DiseaseIdsArray'] as $KeyDisease=> $DiseaseId)
+				{
+					$escDiseaselid = mysql_real_escape_string($DiseaseId);
+					$Diseasequery = "select id from `entities` where `LI_id`='{$escDiseaselid}' and `class`='Disease' limit 1";
+					$Diseaseresult = mysql_query($Diseasequery);
+					$DiseasePresent = false;
+					if($Diseaseresult)
+					{
+						while($Diseaserow = mysql_fetch_assoc($Diseaseresult))
+						{
+							$DiseasePresent = true;
+							$DiseaseIdLocal = $Diseaserow['id'];
+						}
+						$DiseaseAssoInsert = false;
+						if($DiseasePresent)
+						{
+							$DiseaseAssocquery = "select `parent` from `entity_relations` where `parent`='{$TherapeuticArea_ID}' AND `child`='{$DiseaseIdLocal}' limit 1";
+							$DiseaseAssocresult = mysql_query($DiseaseAssocquery);
+							$DiseaseAssocPresent = false;
+							while($DiseaseAssocrow = mysql_fetch_assoc($DiseaseAssocresult))
+							{
+								$DiseaseAssocPresent = true;
+							}
+							if(!$DiseaseAssocPresent) $DiseaseAssoInsert = true;
+						}
+						else
+						{
+							require_once 'fetch_li_diseases.php';
+							fetch_li_disease_individual($DiseaseId);
+							$Diseasequery_2 = "select id from `entities` where `LI_id`='{$escDiseaselid}' and `class`='Disease' limit 1";
+							$Diseaseresult_2 = mysql_query($Diseasequery_2);
+							$DiseasePresent = false;
+							while($Diseaserow_2 = mysql_fetch_assoc($Diseaseresult_2))
+							{
+								$DiseasePresent = true;
+								$DiseaseIdLocal = $Diseaserow_2['id'];
+							}
+							if($DiseasePresent) $DiseaseAssoInsert = true;
+						}
+						if($DiseaseAssoInsert)
+						{
+							$DiseaseAssocInsertquery = "INSERT INTO `entity_relations` (`parent`, `child`) VALUES ('{$TherapeuticArea_ID}','{$DiseaseIdLocal}')";
+							$DiseaseAssocInsertresult = mysql_query($DiseaseAssocInsertquery);
+						}
+					}
+					else
+					{
+						global $logger;
+						$log 	= 'ERROR: Bad SQL query for Disease sync inside Therapeutic Area sync. ' . $Diseasequery . mysql_error();
+						$logger->error($log);
+						unset($log);
+					}
+				}
+				ob_end_clean();	
+				//End of Insert product MOA and MOA Category association
+				
+				return 1;
+			}
+			else
+			{
+				echo 'Therapeutic Area Id : '.$importVal['LI_id'].' Fail !! <br/>'."\n";
+				softdie('Cannot import Therapeutic Area Id '.$importVal['LI_id'].'<br/>'.$query.'<br/>');
+				//softdie('Cannot import product id '.$importVal['LI_id'].'<br/>');
+				return 2;
+			}
+		}
+		else
+		{
+			global $logger;
+			$log 	= 'ERROR: Bad SQL query for Therapeutic Area Sync. ' . $query . mysql_error();
+			$logger->error($log);
+			unset($log);
+			softdie('Cannot import Therapeutic Area Id '.$importVal['LI_id'].'<br/>'.$query.'<br/>');
 			return 2;
 		}
 	}
@@ -3453,6 +3619,77 @@ function parseDiseasesXmlAndSave($xmlImport,$table)
 		}			
 		//ob_end_clean();
 	}
+	return array('success'=>$success,'fail'=>$fail,'skip'=>$skip,'delete'=>$delete, 'exitProcess'=>false);
+}
+
+
+/**
+* @name parseTherapeuticAreasXmlAndSave
+* @tutorial parse and get ready Therapeutic Areas xml for saving.
+* @param $table,$searchdata,$id
+*/
+function parseTherapeuticAreasXmlAndSave($xmlImport,$table)
+{
+	$importKeys = array('LI_id', 'name', 'is_active', 'created', 'modified', 'display_name', 'xml');
+	$success = $fail = $skip = $delete = 0;
+	foreach($xmlImport->getElementsByTagName('TherapeuticArea') as $TherapeuticArea)
+	{
+		$importVal = array();
+		$TherapeuticArea_id = $TherapeuticArea->getElementsByTagName('therapeutic_area_id')->item(0)->nodeValue;
+		$TherapeuticArea_name = $TherapeuticArea->getElementsByTagName('name')->item(0)->nodeValue;
+		$is_active = ($TherapeuticArea->getElementsByTagName('is_active')->item(0)->nodeValue == 'True')?1:0;
+		$created = date('y-m-d H:i:s',time($TherapeuticArea->getElementsByTagName('created')->item(0)->nodeValue));
+		$modified = date('y-m-d H:i:s',time($TherapeuticArea->getElementsByTagName('modified')->item(0)->nodeValue));
+		$display_name = $TherapeuticArea->getElementsByTagName('display_name')->item(0)->nodeValue;		
+		
+		$implodeStringForNames = ', ';
+	
+		$xmldump = $xmlImport->saveXML($TherapeuticArea);
+			
+		$importVal = array('LI_id'=>$TherapeuticArea_id,'name'=>$TherapeuticArea_name,'is_active'=>$is_active,'created'=>$created,'modified'=>$modified,'display_name'=>$display_name,'xml'=>$xmldump);
+		
+		if(($TherapeuticArea_id == NULL && trim($TherapeuticArea_id) == '') || ($TherapeuticArea_name == NULL && trim($TherapeuticArea_name) == ''))
+		return array('success'=>$success,'fail'=>$fail,'skip'=>$skip,'delete'=>$delete, 'exitProcess'=>true);
+	
+	}
+	
+	//Get associated disease ids
+	$area_ids = array();
+	foreach($xmlImport->getElementsByTagName('Areas') as $Diseases)
+	{
+		foreach($Diseases->getElementsByTagName('area') as $Disease)
+		{
+			$area_ids[] = $Disease->getElementsByTagName('area_id')->item(0)->nodeValue;
+		}
+	}
+	
+	//var_dump($importVal);
+	//ob_start();
+	$out = saveData(null,$table,1,$importKeys,$importVal,$k, array('DiseaseIdsArray'=>$area_ids));
+	if($out ==1)
+	{
+		$success ++;
+		ob_start();
+		echo 'Therapeutic Area Id : '.$TherapeuticArea_id.' Done .. <br/>'."\n";
+		ob_end_flush();
+	}
+	elseif($out==2) 
+	{
+		echo 'Therapeutic Area Id : '.$TherapeuticArea_id.' Fail !! <br/>'."\n";
+		$fail ++;
+	}
+	elseif($out==3)
+	{
+		echo 'Therapeutic Area Id : '.$TherapeuticArea_id.' Skipped !! <br/>'."\n";
+		$skip ++;
+	}		
+	elseif($out==4)
+	{
+		echo 'Therapeutic Area Id : '.$TherapeuticArea_id.' Deleted !! <br/>'."\n";
+		$delete ++;
+	}			
+	//ob_end_clean();
+	
 	return array('success'=>$success,'fail'=>$fail,'skip'=>$skip,'delete'=>$delete, 'exitProcess'=>false);
 }
 

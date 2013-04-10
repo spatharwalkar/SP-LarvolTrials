@@ -544,6 +544,59 @@ if (isset($_POST['import_industries']) and $_POST['import_industries']=="YES")
 	return;
 }
 
+//Tmport Therapeutic Area
+if (isset($_POST['li_therapeuticarea']) and $_POST['li_therapeuticarea']=="1") 
+{
+	require_once('fetch_li_therapeuticareas.php');
+	echo '<br><br>Importing all therapeutic areas from LI<br><br>';
+	fetch_li_therapeuticareas("0");
+	return;
+}
+if (isset($_POST['li_therapeuticarea']) and $_POST['li_therapeuticarea']=="2" and isset($_POST['therapeuticarea_updt_since']) ) 
+{
+	$upds=strtotime(mysql_real_escape_string($_POST['therapeuticarea_updt_since']));
+	if(!isset($upds) or empty($upds)) 
+	{
+		echo '<br> Invalid date entered:'.$litd.' Unable to proceed. ';
+		return false;
+	}
+	require_once('fetch_li_therapeuticareas.php');
+	echo '<br><br>Importing therapeutic areas updated since '.$_POST['therapeuticarea_updt_since'].' from LI<br><br>';
+	fetch_li_therapeuticareas($upds);
+	return;
+}
+
+if (isset($_POST['li_therapeuticarea']) and $_POST['li_therapeuticarea']=="3" and ( isset($_POST['therapeuticarea_lt_id']) or isset($_POST['therapeuticarea_li_id']) ) ) 
+{
+	if( isset($_POST['therapeuticarea_li_id']) and !empty($_POST['therapeuticarea_li_id']) ) $liid=mysql_real_escape_string($_POST['therapeuticarea_li_id']);
+	elseif(isset($_POST['therapeuticarea_lt_id']))
+	{
+		$litd=mysql_real_escape_string($_POST['therapeuticarea_lt_id']);
+		
+		$query = 'select lI_id from `entities` where id="'.$litd.'" and `class` = "Therapeutic_Area" limit 1' ;
+					if(!$res = mysql_query($query))
+					{
+						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+						global $logger;
+						$logger->error($log);
+						echo $log;
+						return false;
+					}
+					$res = mysql_fetch_array($res) ;
+					if(isset($res['lI_id']))
+						$liid = $res['lI_id'];
+					else
+					{
+						echo '<br> Could not find id '.$litd.' in entities table.  ';
+						return false;
+					}
+	}
+	require_once('fetch_li_therapeuticareas.php');
+	echo '<br><br>Importing Therapeutic Areas with LI id:'.$liid.'<br><br>';
+	fetch_li_therapeuticarea_individual($liid);
+	return;
+}
+
 /****************************/
 echo(editor());
 echo('</body></html>');
@@ -572,6 +625,7 @@ function editor()
 		  toggles4 = new Array();
 		  toggles5 = new Array();
 		  toggles6 = new Array();
+		  toggles7 = new Array();
 		  if (document.getElementById) onload = function () {
 		    document.getElementById (\'more\').className = \'hide\';
 			document.getElementById (\'p_up_dt\').className = \'hide\';
@@ -584,6 +638,8 @@ function editor()
 			document.getElementById (\'moacategory_up_dt\').className = \'hide\';
 			document.getElementById (\'disease_sing\').className = \'hide\';
 			document.getElementById (\'disease_up_dt\').className = \'hide\';
+			document.getElementById (\'therapeuticarea_sing\').className = \'hide\';
+			document.getElementById (\'therapeuticarea_up_dt\').className = \'hide\';
 		    var t = document.getElementsByTagName (\'input\');
 		    for (var i = 0; i < t.length; i++) 
 			{
@@ -643,6 +699,16 @@ function editor()
 					{
 						document.getElementById (\'disease_up_dt\').className = toggles6[toggles6.length - 2].checked ? \'show\' : \'hide\';
 						document.getElementById (\'disease_sing\').className = toggles6[toggles6.length - 1].checked ? \'show\' : \'hide\';
+					}
+				}
+				
+				if (t[i].getAttribute (\'name\') == \'li_therapeuticarea\') 
+				{
+					toggles7.push (t[i]);
+					t[i].onclick = function () 
+					{
+						document.getElementById (\'therapeuticarea_up_dt\').className = toggles7[toggles7.length - 2].checked ? \'show\' : \'hide\';
+						document.getElementById (\'therapeuticarea_sing\').className = toggles7[toggles7.length - 1].checked ? \'show\' : \'hide\';
 					}
 				}
 				
@@ -924,6 +990,18 @@ $out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
 	
 $out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
 	
+	// LI therapeutic area
+	$out .= '<div style="width:610px; padding:5px;float:left;"><fieldset class="schedule"><legend><b> IMPORT THERAPEUTIC AREA\'s FROM LI </b></legend>'
+			. '<formset><form action="database.php" method="post">'
+			. '
+			<input type="radio" name="li_therapeuticarea" value="1" selected="selcted"> All<br>
+			<input type="radio" name="li_therapeuticarea" value="2"> Therapeutic Areas updated since <span id="therapeuticarea_up_dt" name="therapeuticarea_up_dt1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enter date as yyyy-mm-dd <input type="text" name="therapeuticarea_updt_since" id="therapeuticarea_updt_since" value="" size="10" length="10" title="( yyyy-mm-dd )"/></span> <br>
+			<input type="radio" name="li_therapeuticarea" value="3"> Single Therapeutic Area (Either LT ID or LI ID) <span id="therapeuticarea_sing" name="therapeuticarea_sing1">LT ID: <input type="text" name="therapeuticarea_lt_id" id="therapeuticarea_ltid" value="" title="Enter LT id"/> LI ID: <input type="text" name="therapeuticarea_li_id" id="therapeuticarea_ltid" value="" title="Enter LI id"/></span><br>
+		
+				'
+			. '<br><input type="submit" value="Import" />'
+			. '</form></formset></fieldset></div>';
+			
 	// import industr institutions
 	$out .= '<div style="width:610px; padding:5px;float:left;"><fieldset class="schedule"><legend><b> IMPORT INDUSTRY INSTITUTIONS</b></legend>'
 	. '<formset><form action="database.php" method="post">'

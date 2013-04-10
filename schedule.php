@@ -78,11 +78,14 @@ function editor()
 	}
 	
 	//put product/areas schedule list prodcuts=1 areas=2 using bitmask.
+	//Adding or modifying any sycn here should also modify in cron.php as well to kept all correct
 	$LISync['LI_sync1'] = 'LI Product Sync';
 	$LISync['LI_sync2'] = 'LI Disease Sync';
 	$LISync['LI_sync4'] = 'LI Institutions Sync';
 	$LISync['LI_sync8'] = 'LI MOAs Sync';
 	$LISync['LI_sync16'] = 'LI MOA Categories Sync';
+	$LISync['LI_sync32'] = 'LI Therapeutic Sync';
+	$LastSyncId = 32;	//Put Last Sync Id here - current its 32
 	//end
 	
 	$selectedreports = array();
@@ -104,152 +107,21 @@ function editor()
 	$res = mysql_query($query) or die('Bad SQL query getting LI sync data.');
 	while($row = mysql_fetch_assoc($res))
 	{
-		switch($row['LI_sync'])
+		$LI_syncDecode = $row['LI_sync'];
+		while($LI_syncDecode)
 		{
-			case '1':
-				$selectedLISync[] = 'LI_sync' . $row['LI_sync'];
-				break;
-			case '2':
-				$selectedLISync[] = 'LI_sync' . $row['LI_sync'];
-				break;
-			case '3':
-				$selectedLISync[] = 'LI_sync1';
-				$selectedLISync[] = 'LI_sync2';
-				break;
-			case '4':
-				$selectedLISync[] = 'LI_sync' . $row['LI_sync'];
-				break;
-			case '5':
-				$selectedLISync[] = 'LI_sync1';
-				$selectedLISync[] = 'LI_sync4';
-				break;
-			case '6':
-				$selectedLISync[] = 'LI_sync2';
-				$selectedLISync[] = 'LI_sync4';
-				break;
-			case '7':
-				$selectedLISync[] = 'LI_sync1';
-				$selectedLISync[] = 'LI_sync2';
-				$selectedLISync[] = 'LI_sync4';
-				break;
-			case '8':
-				$selectedLISync[] = 'LI_sync' . $row['LI_sync'];
-				break;
-			case '9':
-				$selectedLISync[] = 'LI_sync1';
-				$selectedLISync[] = 'LI_sync8';
-				break;
-			case '10':
-				$selectedLISync[] = 'LI_sync2';
-				$selectedLISync[] = 'LI_sync8';
-				break;
-			case '11':
-				$selectedLISync[] = 'LI_sync1';
-				$selectedLISync[] = 'LI_sync2';
-				$selectedLISync[] = 'LI_sync8';
-				break;
-			case '12':
-				$selectedLISync[] = 'LI_sync4';
-				$selectedLISync[] = 'LI_sync8';
-				break;
-			case '13':
-				$selectedLISync[] = 'LI_sync1';
-				$selectedLISync[] = 'LI_sync4';
-				$selectedLISync[] = 'LI_sync8';
-				break;
-			case '14':
-				$selectedLISync[] = 'LI_sync2';
-				$selectedLISync[] = 'LI_sync4';
-				$selectedLISync[] = 'LI_sync8';
-				break;
-			case '15':
-				$selectedLISync[] = 'LI_sync1';
-				$selectedLISync[] = 'LI_sync2';
-				$selectedLISync[] = 'LI_sync4';
-				$selectedLISync[] = 'LI_sync8';
-				break;
-			case '16':
-				$selectedLISync[] = 'LI_sync' . $row['LI_sync'];
-				break;
-			case '17':
-				$selectedLISync[] = 'LI_sync1';
-				$selectedLISync[] = 'LI_sync16';
-				break;
-			case '18':
-				$selectedLISync[] = 'LI_sync2';
-				$selectedLISync[] = 'LI_sync16';
-				break;
-			case '19':
-				$selectedLISync[] = 'LI_sync1';
-				$selectedLISync[] = 'LI_sync2';
-				$selectedLISync[] = 'LI_sync16';
-				break;
-			case '20':
-				$selectedLISync[] = 'LI_sync4';
-				$selectedLISync[] = 'LI_sync16';
-				break;
-			case '21':
-				$selectedLISync[] = 'LI_sync1';
-				$selectedLISync[] = 'LI_sync4';
-				$selectedLISync[] = 'LI_sync16';
-				break;
-			case '22':
-				$selectedLISync[] = 'LI_sync2';
-				$selectedLISync[] = 'LI_sync4';
-				$selectedLISync[] = 'LI_sync16';
-				break;
-			case '23':
-				$selectedLISync[] = 'LI_sync1';
-				$selectedLISync[] = 'LI_sync2';
-				$selectedLISync[] = 'LI_sync4';
-				$selectedLISync[] = 'LI_sync16';
-				break;
-			case '24':
-				$selectedLISync[] = 'LI_sync8';
-				$selectedLISync[] = 'LI_sync16';
-				break;
-			case '25':
-				$selectedLISync[] = 'LI_sync1';
-				$selectedLISync[] = 'LI_sync8';
-				$selectedLISync[] = 'LI_sync16';
-				break;
-			case '26':
-				$selectedLISync[] = 'LI_sync2';
-				$selectedLISync[] = 'LI_sync8';
-				$selectedLISync[] = 'LI_sync16';
-				break;
-			case '27':
-				$selectedLISync[] = 'LI_sync1';
-				$selectedLISync[] = 'LI_sync2';
-				$selectedLISync[] = 'LI_sync8';
-				$selectedLISync[] = 'LI_sync16';
-				break;
-			case '28':
-				$selectedLISync[] = 'LI_sync4';
-				$selectedLISync[] = 'LI_sync8';
-				$selectedLISync[] = 'LI_sync16';
-				break;
-			case '29':
-				$selectedLISync[] = 'LI_sync1';
-				$selectedLISync[] = 'LI_sync4';
-				$selectedLISync[] = 'LI_sync8';
-				$selectedLISync[] = 'LI_sync16';
-				break;
-			case '30':
-				$selectedLISync[] = 'LI_sync2';
-				$selectedLISync[] = 'LI_sync4';
-				$selectedLISync[] = 'LI_sync8';
-				$selectedLISync[] = 'LI_sync16';
-				break;
-			case '31':
-				$selectedLISync[] = 'LI_sync1';
-				$selectedLISync[] = 'LI_sync2';
-				$selectedLISync[] = 'LI_sync4';
-				$selectedLISync[] = 'LI_sync8';
-				$selectedLISync[] = 'LI_sync16';
-				break;
-					
-		}
+			if($LastSyncId <= $LI_syncDecode)
+			{
+				$selectedLISync[] = 'LI_sync' . $LastSyncId;	//Add selected sync in array
+				$LI_syncDecode = $LI_syncDecode - $LastSyncId;
+				$LastSyncId = $LastSyncId/2;
+			}
+			else
+			{
+				$LastSyncId = $LastSyncId/2;
+			}
+			
+		}		
 	}
 	//end
 	$out .= '<label>Run these reports: ' . makeDropdown('reports',$reports,10,$selectedreports,true) . '</label><br clear="all"/>'

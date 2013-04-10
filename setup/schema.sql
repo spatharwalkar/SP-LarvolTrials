@@ -1201,7 +1201,7 @@ CREATE TABLE `entities` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `LI_id` varchar(63) COLLATE utf8_unicode_ci DEFAULT NULL,
   `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `class` enum('Product','Area','Disease','Institution','MOA','Biomarker','MOA_Category') CHARACTER SET latin1 NOT NULL,
+  `class` enum('Product','Area','Disease','Institution','MOA','Biomarker','MOA_Category','Therapeutic_Area') CHARACTER SET latin1 NOT NULL,
   `description` text COLLATE utf8_unicode_ci,
   `display_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `client_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
