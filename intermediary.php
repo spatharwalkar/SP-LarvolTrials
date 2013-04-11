@@ -528,15 +528,7 @@ if(isset($_REQUEST['e1']) || isset($_REQUEST['e2'])|| isset($_REQUEST['hm']) || 
 	if(isset($_REQUEST['hm']) && trim($_REQUEST['hm']) != '' && $_REQUEST['hm'] != NULL)
 	{
 		$globalOptions['hm'] = $_REQUEST['hm'];
-		
-		if( !isset($_REQUEST['itype']))
-		{
-			if(isset($_REQUEST['page']) && is_numeric($_REQUEST['page']))
-			{}
-			else
-				$globalOptions['itype'][0] = 0;
-		}
-		
+	
 	}
 	if(isset($_REQUEST['sphinx_s']))
 	{

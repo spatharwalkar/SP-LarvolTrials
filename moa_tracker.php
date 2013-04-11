@@ -101,6 +101,7 @@ function DataGeneratorForMOATracker($id, $TrackerType, $page=1)
 		$id = $header['id'];
 		$TotalRecords['moa'] = count($Return['moa']);
 		$TotalRecords['moacat'] = count($Return['moacat']);
+		$TotalRecords['all'] = count($Return['all']);
 	
 		$types = array('MOA', 'MOA_Category');
 		foreach($types as $type)
@@ -826,7 +827,7 @@ function MOATrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_co
 					.'<form action="moa_tracker.php" method="post">'
 					. '<table border="0" cellspacing="0" cellpadding="0" class="controls" align="center">'
 					. '<tr>'
-					. '<td style="vertical-align:top; border:0px;"><div class="records">'. (($TotalRecords['moa'] > 0) ? $TotalRecords['moa'].'&nbsp;MOA':'') . (($TotalRecords['moa'] > 0 && $TotalRecords['moacat'] > 0) ? '&nbsp;&&nbsp;':'') . (($TotalRecords['moacat'] > 0) ? $TotalRecords['moacat'].'&nbsp;MOA Categories':'') . '</div></td>';
+					. '<td style="vertical-align:top; border:0px;"><div class="records">'. $TotalRecords['all'].'&nbsp;MOA'. (($TotalRecords['all'] == 1) ? '':'s') . '</div></td>';
 					
 	if($TotalPages > 1)
 	{

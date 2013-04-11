@@ -1072,7 +1072,7 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 					.'<form action="product_tracker.php" method="post">'
 					. '<table border="0" cellspacing="0" cellpadding="0" class="controls" align="center">'
 					. '<tr>'
-					. '<td style="vertical-align:top; border:0px;"><div class="records">'. $TotalRecords .'&nbsp;Products</div></td>';
+					. '<td style="vertical-align:top; border:0px;"><div class="records">'. $TotalRecords .'&nbsp;Product'. (($TotalRecords == 1) ? '':'s') .'</div></td>';
 	if($TotalPages > 1)
 	{
 		$paginate = pagination($TrackerType, $TotalPages, $id, $dwcount, $page, $MainPageURL, $OptionArray);

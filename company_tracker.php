@@ -804,7 +804,7 @@ function CompanyTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inne
 					.'<form action="company_tracker.php" method="post">'
 					. '<table border="0" cellspacing="0" cellpadding="0" class="controls" align="center">'
 					. '<tr>'
-					. '<td style="vertical-align:top; border:0px;"><div class="records">'. $TotalRecords .'&nbsp;Companies</div></td>';
+					. '<td style="vertical-align:top; border:0px;"><div class="records">'. $TotalRecords .'&nbsp;'. (($TotalRecords == 1) ? 'Company':'Companies') .'</div></td>';
 	if($TotalPages > 1)
 	{
 		$paginate = CompanyTrackerpagination($TrackerType, $TotalPages, $id, $page, $MainPageURL);
