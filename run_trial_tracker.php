@@ -6390,11 +6390,13 @@ class TrialTracker
 				//Rendering Upms
 				$outputStr .= $this->dUnmatchedUpmsPdf($globalOptions, $ottType, $sectionHeader, $naUpms, 'y');
 			}
-			$outputStr = preg_replace('/(background-image|background-position|background-repeat):(\w)*\s/', '', $outputStr);
-			$outputStr = '<table style="border-collapse:collapse;" width="100%" cellpadding="0" cellspacing="0" class="manage">'.$outputStr.'</table>';
-			$pdf->writeHTML($pdfStyle.$outputStr, true, false, true, false, '');
+			if($outputStr != ''){
+				$outputStr = preg_replace('/(background-image|background-position|background-repeat):(\w)*\s/', '', $outputStr);
+				$outputStr = '<table style="border-collapse:collapse;" width="100%" cellpadding="0" cellspacing="0" class="manage">'.$outputStr.'</table>';
+				$pdf->writeHTML($pdfStyle.$outputStr, true, false, true, false, '');
+			}
 		}
-		
+
 		$pdfContent .= $outputStr;
 		
 		//echo "<br/><br/>===>".
@@ -10578,7 +10580,7 @@ class TrialTracker
 							. '<li><select id="wFormat" name="wFormat" size="3" style="height:54px;">'
 							. '<option value="excel" selected="selected">Excel</option>'
 							//comment the following line to hide pdf export
-							. '<option value="pdf">PDF</option>'
+							//. '<option value="pdf">PDF</option>'
 							. '<option value="tsv">TSV</option>'
 							. '</select></li></ul>'
 							. '<input type="hidden" name="shownCnt" value="' . $shownCnt . '" />'
