@@ -18,7 +18,7 @@
 <tr>
 <td width="300px">&nbsp;</td>
 <td width="600px" style="font-weight:bold; padding-left:0px;" align="center">
-<font class="searchTypes" style="color:#666666;"><a href="trialzilla.php?class=Institution" class="ListItem">Companies</a> / <a href="trialzilla.php?class=Product" class="ListItem">Products</a> / <a href="trialzilla.php?class=MOA" class="ListItem">MOAs</a> / <a href="trialzilla.php?class=Disease" class="ListItem">Diseases</a></font>
+<font class="searchTypes" style="color:#666666;"><a href="trialzilla.php?class=Institution" style="text-decoration:underline; display:inline; color:#1122cc;">Companies</a> / <a href="trialzilla.php?class=Product" style="text-decoration:underline; display:inline; color:#1122cc;">Products</a> / <a href="trialzilla.php?class=MOA" style="text-decoration:underline; display:inline; color:#1122cc;">MOAs</a> / <a href="trialzilla.php?class=Disease" style="text-decoration:underline; display:inline; color:#1122cc;">Diseases</a></font>
 </td>
 </tr>
 </table>
@@ -82,11 +82,6 @@
 .autocomplete strong { 
 	font-weight:normal; 
 	color:#3399FF; 
-}
-.ListItem {
-	text-decoration:underline;
-	display:inline;
-	color:#1122cc;
 }
 </style>
 <script type="text/javascript" src="scripts/autosuggest/jquery.autocomplete-min.js"></script>

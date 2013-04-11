@@ -166,7 +166,8 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 				$Report_DisplayName = $header['display_name'];	
 		$productIds = GetProductsFromCompany($header['id'], $TrackerType, $OptionArray);
 		$id=$header['id'];
-		$Report_DisplayName .= GetReportNameExtension($OptionArray);			
+		$ExtName = GetReportNameExtension($OptionArray);	
+		$Report_DisplayName = $ExtName['ReportName1'] . $Report_DisplayName . $ExtName['ReportName2'];
 		if($TrackerType == 'DCPT')
 		{
 			$entity2Id = $OptionArray['DiseaseId'];
@@ -183,7 +184,8 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 				$Report_DisplayName = $header['display_name'];	
 		$productIds = GetProductsFromMOA($header['id'], $TrackerType, $OptionArray);
 		$id=$header['id'];
-		$Report_DisplayName .= GetReportNameExtension($OptionArray);			
+		$ExtName = GetReportNameExtension($OptionArray);	
+		$Report_DisplayName = $ExtName['ReportName1'] . $Report_DisplayName . $ExtName['ReportName2'];		
 		if($TrackerType == 'DMPT')
 		{
 			$entity2Id = $OptionArray['DiseaseId'];
@@ -200,7 +202,8 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 				$Report_DisplayName = $header['display_name'];	
 		$productIds = GetProductsFromMOACategory($header['id'], $TrackerType, $OptionArray);
 		$id=$header['id'];
-		$Report_DisplayName .= GetReportNameExtension($OptionArray);			
+		$ExtName = GetReportNameExtension($OptionArray);	
+		$Report_DisplayName = $ExtName['ReportName1'] . $Report_DisplayName . $ExtName['ReportName2'];	
 		if($TrackerType == 'DMCPT')
 		{
 			$entity2Id = $OptionArray['DiseaseId'];
@@ -1482,7 +1485,7 @@ function pagination($TrackerType, $totalPages, $id, $dwcount, $CurrentPage, $Mai
 	{
 		$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . ($CurrentPage+1) . '\'>&raquo;</a>';
 	}
-	$paginateStr .= '</span></td></tr></table>';
+	$paginateStr .= '</td></tr></table></span>';
 	
 	return array($url, $paginateStr);
 }
@@ -2770,7 +2773,7 @@ function GetProductsFromCompany($companyID, $TrackerType, $OptionArray)
 	if($TrackerType == 'CPT')
 	{
 		if(!isset($OptionArray['Phase']) || $OptionArray['Phase'] == NULL)
-		$query = "SELECT et.`id` FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`) WHERE et.`class`='Product' AND er.`child`='" . mysql_real_escape_string($companyID) . "'";
+		$query = "SELECT et.`id` FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`) WHERE et.`class`='Product' AND er.`child`='" . mysql_real_escape_string($companyID) . "' AND (et.`is_active` <> '0' OR et.`is_active` IS NULL)";
 		else
 		{
 			$phase = $OptionArray['Phase'];
@@ -2778,7 +2781,7 @@ function GetProductsFromCompany($companyID, $TrackerType, $OptionArray)
 			$includePhaseArray = $Return['include'];
 			$excludePhaseArray = $Return['exclude'];
 			
-			$query = "SELECT et.`id` FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`)". (($phase != 'na') ? "  JOIN `entity_trials` etr ON(et.`id` = etr.`entity`) JOIN `data_trials` dt ON (dt.`larvol_id`= etr.`trial`)" : "") ." WHERE et.`class`='Product'". (($phase != 'na') ? " AND dt.`phase` IN ('". implode('\', \'',$includePhaseArray) ."')" : "") ." AND er.`child`='" . mysql_real_escape_string($companyID) . "' ". (($phase != '4') ? "AND et.`id` NOT IN (SELECT DISTINCT et2.`id` FROM `entities` et2 JOIN `entity_trials` etr2 ON(et2.`id` = etr2.`entity`) JOIN `data_trials` dt2 ON (dt2.`larvol_id`= etr2.`trial`) WHERE dt2.`phase` IN ('". implode('\', \'',$excludePhaseArray) ."')) " : "");
+			$query = "SELECT et.`id` FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`)". (($phase != 'na') ? "  JOIN `entity_trials` etr ON(et.`id` = etr.`entity`) JOIN `data_trials` dt ON (dt.`larvol_id`= etr.`trial`)" : "") ." WHERE et.`class`='Product' AND (et.`is_active` <> '0' OR et.`is_active` IS NULL) ". (($phase != 'na') ? " AND dt.`phase` IN ('". implode('\', \'',$includePhaseArray) ."')" : "") ." AND er.`child`='" . mysql_real_escape_string($companyID) . "' ". (($phase != '4') ? "AND et.`id` NOT IN (SELECT DISTINCT et2.`id` FROM `entities` et2 JOIN `entity_trials` etr2 ON(et2.`id` = etr2.`entity`) JOIN `data_trials` dt2 ON (dt2.`larvol_id`= etr2.`trial`) WHERE dt2.`phase` IN ('". implode('\', \'',$excludePhaseArray) ."')) " : "");
 		}
 		
 		$res = mysql_query($query) or die('Bad SQL query getting products from institution id in PT');
@@ -2838,7 +2841,7 @@ function GetProductsFromMOA($moaID, $TrackerType, $OptionArray)
 	if($TrackerType == 'MPT')
 	{
 		if(!isset($OptionArray['Phase']) || $OptionArray['Phase'] == NULL)
-			$query = "SELECT et.`id` FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`)  WHERE et.`class`='Product' and er.`child`='" . mysql_real_escape_string($moaID) . "'";
+			$query = "SELECT et.`id` FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`)  WHERE et.`class`='Product' and (et.`is_active` <> '0' OR et.`is_active` IS NULL) and er.`child`='" . mysql_real_escape_string($moaID) . "'";
 		else
 		{
 			$phase = $OptionArray['Phase'];
@@ -2846,7 +2849,7 @@ function GetProductsFromMOA($moaID, $TrackerType, $OptionArray)
 			$includePhaseArray = $Return['include'];
 			$excludePhaseArray = $Return['exclude'];
 			
-			$query = "SELECT et.`id` FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`)". (($phase != 'na') ? "  JOIN `entity_trials` etr ON(et.`id` = etr.`entity`) JOIN `data_trials` dt ON (dt.`larvol_id`= etr.`trial`)" : "") ." WHERE et.`class`='Product'". (($phase != 'na') ? " AND dt.`phase` IN ('". implode('\', \'',$includePhaseArray) ."')" : "") ." AND er.`child`='" . mysql_real_escape_string($moaID) . "' ". (($phase != '4') ? "AND et.`id` NOT IN (SELECT DISTINCT et2.`id` FROM `entities` et2 JOIN `entity_trials` etr2 ON(et2.`id` = etr2.`entity`) JOIN `data_trials` dt2 ON (dt2.`larvol_id`= etr2.`trial`) WHERE dt2.`phase` IN ('". implode('\', \'',$excludePhaseArray) ."')) " : "");
+			$query = "SELECT et.`id` FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`)". (($phase != 'na') ? "  JOIN `entity_trials` etr ON(et.`id` = etr.`entity`) JOIN `data_trials` dt ON (dt.`larvol_id`= etr.`trial`)" : "") ." WHERE et.`class`='Product' AND (et.`is_active` <> '0' OR et.`is_active` IS NULL) ". (($phase != 'na') ? " AND dt.`phase` IN ('". implode('\', \'',$includePhaseArray) ."')" : "") ." AND er.`child`='" . mysql_real_escape_string($moaID) . "' ". (($phase != '4') ? "AND et.`id` NOT IN (SELECT DISTINCT et2.`id` FROM `entities` et2 JOIN `entity_trials` etr2 ON(et2.`id` = etr2.`entity`) JOIN `data_trials` dt2 ON (dt2.`larvol_id`= etr2.`trial`) WHERE dt2.`phase` IN ('". implode('\', \'',$excludePhaseArray) ."')) " : "");
 		}
 		
 		$res = mysql_query($query) or die('Bad SQL query getting products from moa id in PT');
@@ -2903,7 +2906,7 @@ function GetProductsFromDisease($DiseaseID)
 	global $db;
 	global $now;
 	$Products = array();
-	$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON(e.`id` = er.`child`) WHERE e.`class`='Product' AND er.`parent`='" . mysql_real_escape_string($DiseaseID) . "'";
+	$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON(e.`id` = er.`child`) WHERE e.`class`='Product' AND er.`parent`='" . mysql_real_escape_string($DiseaseID) . "' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";
 	$res = mysql_query($query) or die('Bad SQL query getting products from Disease id in PT');
 	
 	if($res)
@@ -2925,7 +2928,7 @@ function GetProductsFromMOACategory($moaCatID, $TrackerType, $OptionArray)
 	if($TrackerType == 'MCPT')
 	{
 		if(!isset($OptionArray['Phase']) || $OptionArray['Phase'] == NULL)
-			$query = "SELECT et.`id` FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`) JOIN `entity_relations` er2 ON(er.`child` = er2.`child`) JOIN `entities` et2 ON (et2.`id` = er2.`parent`) WHERE et.`class`='Product'  AND et2.`class` = 'MOA_Category' AND et2.`id`='". mysql_real_escape_string($moaCatID) ."'";
+			$query = "SELECT et.`id` FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`) JOIN `entity_relations` er2 ON(er.`child` = er2.`child`) JOIN `entities` et2 ON (et2.`id` = er2.`parent`) WHERE et.`class`='Product' AND (et.`is_active` <> '0' OR et.`is_active` IS NULL) AND et2.`class` = 'MOA_Category' AND et2.`id`='". mysql_real_escape_string($moaCatID) ."'";
 		else
 		{
 			$phase = $OptionArray['Phase'];
@@ -2933,7 +2936,7 @@ function GetProductsFromMOACategory($moaCatID, $TrackerType, $OptionArray)
 			$includePhaseArray = $Return['include'];
 			$excludePhaseArray = $Return['exclude'];
 			
-			$query = "SELECT et.`id` FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`) JOIN `entity_relations` er3 ON (er3.`child` = er.`child`) JOIN `entities` et3 ON (et3.`id` = er3.`parent`) ". (($phase != 'na') ? "  JOIN `entity_trials` etr ON(et.`id` = etr.`entity`) JOIN `data_trials` dt ON (dt.`larvol_id`= etr.`trial`)" : "") ." WHERE et.`class`='Product'". (($phase != 'na') ? " AND dt.`phase` IN ('". implode('\', \'',$includePhaseArray) ."')" : "") ." AND et3.`id` = '" . mysql_real_escape_string($moaCatID) . "' AND et3.`class` = 'MOA_Category' ". (($phase != '4') ? "AND et.`id` NOT IN (SELECT DISTINCT et2.`id` FROM `entities` et2 JOIN `entity_trials` etr2 ON(et2.`id` = etr2.`entity`) JOIN `data_trials` dt2 ON (dt2.`larvol_id`= etr2.`trial`) WHERE dt2.`phase` IN ('". implode('\', \'',$excludePhaseArray) ."')) " : "");
+			$query = "SELECT et.`id` FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`) JOIN `entity_relations` er3 ON (er3.`child` = er.`child`) JOIN `entities` et3 ON (et3.`id` = er3.`parent`) ". (($phase != 'na') ? "  JOIN `entity_trials` etr ON(et.`id` = etr.`entity`) JOIN `data_trials` dt ON (dt.`larvol_id`= etr.`trial`)" : "") ." WHERE et.`class`='Product' AND (et.`is_active` <> '0' OR et.`is_active` IS NULL) ". (($phase != 'na') ? " AND dt.`phase` IN ('". implode('\', \'',$includePhaseArray) ."')" : "") ." AND et3.`id` = '" . mysql_real_escape_string($moaCatID) . "' AND et3.`class` = 'MOA_Category' ". (($phase != '4') ? "AND et.`id` NOT IN (SELECT DISTINCT et2.`id` FROM `entities` et2 JOIN `entity_trials` etr2 ON(et2.`id` = etr2.`entity`) JOIN `data_trials` dt2 ON (dt2.`larvol_id`= etr2.`trial`) WHERE dt2.`phase` IN ('". implode('\', \'',$excludePhaseArray) ."')) " : "");
 		}
 		
 		$res = mysql_query($query) or die('Bad SQL query getting products from moa id in PT');
@@ -3039,19 +3042,21 @@ function GetPhaseArray($phase)
 
 function GetReportNameExtension($OptionArray)
 {
-	$ReportName = '';
+	$ReportName1 = '';
 	if(isset($OptionArray['DiseaseId']) && $OptionArray['DiseaseId'] != NULL)
 	{
 		$DiseaseName = GetEntityName($OptionArray['DiseaseId']);	
-		$ReportName .= " >> " . $DiseaseName;		
+		$ReportName1 = $DiseaseName . " >> ";		
 	}
 	
+	$ReportName2 = '';
 	if(isset($OptionArray['Phase']) && $OptionArray['Phase'] != NULL)
 	{
 		$phasenm = GetPhaseName($OptionArray['Phase']);
-		$ReportName .= " >> " . $phasenm;
+		$ReportName2 = " >> " . $phasenm;
 	}
 	
+	$ReportName = array('ReportName1'=> $ReportName1, 'ReportName2' => $ReportName2);
 	return 	$ReportName;	
 }
 
