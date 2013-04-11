@@ -24,7 +24,7 @@ elseif($table=='upm' && $field=='redtag')
 }
 elseif($table=='products' || $table=='areas')
 {
-	//$query = "select distinct $field, description from $table where $field like '%$search%' order by $field asc";
+	$query = "select distinct $field, description from $table where $field like '%$search%' order by $field asc";
 }
 elseif($table=='trialzilla')
 {
