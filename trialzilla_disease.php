@@ -147,7 +147,7 @@ a:visited {color:#6600bc;}  /* visited link */
 			$CountExt = (($TabCompanyCount == 1) ? 'Company':'Companies');
 			$compLinkName = '<a href="'.$tabCommonUrl.'&tab=Companies" title="Company ['.$TabCompanyCount.' '.$CountExt.']">&nbsp;Company&nbsp;['.$TabCompanyCount.'&nbsp;'.$CountExt.']&nbsp;</a>';
 			$CountExt = (($TabMOACount == 1) ? 'MOA':'MOAs');
-			$moaLinkName = '<a href="'.$tabCommonUrl.'&tab=MOAs" title="MOA ['.$TabMOACount.' '.$CountExt.']">&nbsp;MOA&nbsp;['.$TabMOACount.'&nbsp;'.$CountExt.']&nbsp;</a>';
+			$moaLinkName = '<a href="'.$tabCommonUrl.'&tab=MOAs" title="Mechanisms of Action ['.$TabMOACount.' '.$CountExt.']">&nbsp;Mechanisms of Action&nbsp;['.$TabMOACount.'&nbsp;'.$CountExt.']&nbsp;</a>';
 			$CountExt = (($TabTrialCount == 1) ? 'Trial':'Trials');
 			$ottLinkName = '<a href="'.$tabCommonUrl.'&tab=DiseaseOTT" title="Trials ['.$TabTrialCount.' '.$CountExt.']">&nbsp;Trials&nbsp;['.$TabTrialCount.'&nbsp;'.$CountExt.']&nbsp;</a>';
 			
