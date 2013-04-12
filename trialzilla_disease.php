@@ -142,10 +142,14 @@ a:visited {color:#6600bc;}  /* visited link */
 		<tr>
 		    <?php 
 			
-			$prodLinkName = '<a href="'.$tabCommonUrl.'&tab=Products" title="Products '.$TabProductCount.' ">&nbsp;Products&nbsp;'.$TabProductCount.'&nbsp;</a>';
-			$compLinkName = '<a href="'.$tabCommonUrl.'&tab=Companies" title="Companies '.$TabCompanyCount.'">&nbsp;Companies&nbsp;'.$TabCompanyCount.'&nbsp;</a>';
-			$moaLinkName = '<a href="'.$tabCommonUrl.'&tab=MOAs" title="Mechanisms of Action '.$TabMOACount.'">&nbsp;Mechanisms of Action&nbsp;'.$TabMOACount.'&nbsp;</a>';
-			$ottLinkName = '<a href="'.$tabCommonUrl.'&tab=DiseaseOTT" title="Trials '.$TabTrialCount.'">&nbsp;Trials&nbsp;'.$TabTrialCount.'&nbsp;</a>';
+			$CountExt = (($TabProductCount == 1) ? 'Product':'Products');
+			$prodLinkName = '<a href="'.$tabCommonUrl.'&tab=Products" title="'.$TabProductCount.' '.$CountExt.'">&nbsp;'.$TabProductCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
+			$CountExt = (($TabCompanyCount == 1) ? 'Company':'Companies');
+			$compLinkName = '<a href="'.$tabCommonUrl.'&tab=Companies" title="'.$TabCompanyCount.' '.$CountExt.'">&nbsp;'.$TabCompanyCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
+			$CountExt = (($TabMOACount == 1) ? 'Mechanisms of Action':'Mechanisms of Action');
+			$moaLinkName = '<a href="'.$tabCommonUrl.'&tab=MOAs" title="'.$TabMOACount.' '.$CountExt.'">&nbsp;'.$TabMOACount.'&nbsp;'.$CountExt.'&nbsp;</a>';
+			$CountExt = (($TabTrialCount == 1) ? 'Trial':'Trials');
+			$ottLinkName = '<a href="'.$tabCommonUrl.'&tab=DiseaseOTT" title="'.$TabTrialCount.' '.$CountExt.'">&nbsp;'.$TabTrialCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
 			
 			if($tab == 'Products') {  ?>
             <td><img id="ProductsImg" src="images/firstSelectTab.png" /></td><td id="ProductsTab" class="selectTab"><?php print $prodLinkName; ?></td><td><img id="CompaniesImg" src="images/selectTabConn.png" /></td><td id="CompaniesTab" class="Tab"><?php print $compLinkName; ?></td><td><img id="MOAsImg" src="images/afterTab.png" /></td><td id="MOAsTab" class="Tab"><?php print $moaLinkName; ?></td><td><img id="DiseaseOTTImg" src="images/afterTab.png" /></td><td id="DiseaseOTTTab" class="Tab"><?php print $ottLinkName; ?></td></td><td><img id="lastImg" src="images/lastTab.png" /></td><td></td>
