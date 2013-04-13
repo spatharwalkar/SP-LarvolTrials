@@ -489,7 +489,7 @@ CREATE TABLE `entity_mesh_trials`
   KEY `trial` (`trial`),
   CONSTRAINT `entity_mesh_trials_ibfk_1` FOREIGN KEY (`entity`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `entity_mesh_trials_ibfk_2` FOREIGN KEY (`trial`) REFERENCES `data_trials` (`larvol_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
 
 CREATE TABLE IF NOT EXISTS `data_history` (
   `larvol_id` int(10) unsigned NOT NULL,
