@@ -481,6 +481,16 @@ CREATE TABLE IF NOT EXISTS `entity_trials` (
   KEY `trial` (`trial`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+CREATE TABLE `entity_mesh_trials` 
+(
+  `entity` int(10) unsigned NOT NULL,
+  `trial` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`entity`,`trial`),
+  KEY `trial` (`trial`),
+  CONSTRAINT `entity_mesh_trials_ibfk_1` FOREIGN KEY (`entity`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `entity_mesh_trials_ibfk_2` FOREIGN KEY (`trial`) REFERENCES `data_trials` (`larvol_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT
+
 CREATE TABLE IF NOT EXISTS `data_history` (
   `larvol_id` int(10) unsigned NOT NULL,
   `brief_title_prev` text COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -1224,6 +1234,7 @@ CREATE TABLE `entities` (
   `search_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `approvals` varchar(255) CHARACTER SET latin1 DEFAULT NULL,
   `xml` text CHARACTER SET latin1,
+  `mesh_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name` ASC, `class` ASC),
   UNIQUE KEY `LI_id` (`LI_id` ASC, `class` ASC) 
