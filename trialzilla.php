@@ -461,7 +461,8 @@ if($ClassFlg)
 				}
 				else if($DataArray[$index]['type'] == 'Product')
 				{
-					print ' 		<a href="'. trim(urlPath()) .'trialzilla_ott.php?e1='. trim($DataArray[$index]['id']) .'&sourcepg=TZ" title="Product" target="_blank">'.formatBrandName($DataArray[$index]['name'], 'product') . $DataArray[$index]['company'] .'</a>&nbsp;&nbsp;('.GetTrialsCountFromProduct(trim($DataArray[$index]['id'])).' Trials)';
+					$ProdRelateCompany = GetCompanyNames($DataArray[$index]['id']);
+					print ' 		<a href="'. trim(urlPath()) .'trialzilla_ott.php?e1='. trim($DataArray[$index]['id']) .'&sourcepg=TZ" title="Product" target="_blank"><b>'.$DataArray[$index]['name'] . '</b>' . ((trim($ProdRelateCompany) != '') ? ' / '.$ProdRelateCompany:'') .'</a>&nbsp;&nbsp;('.GetTrialsCountFromProduct(trim($DataArray[$index]['id'])).' Trials)';
 				}
 				else if($DataArray[$index]['type'] == 'Disease')
 						print ' 		<a href="'. trim(urlPath()) .'trialzilla_disease.php?DiseaseId='. trim($DataArray[$index]['id']) .'" title="Disease" target="_blank">'.$DataArray[$index]['name'] .'</a>&nbsp;&nbsp;('.GetProductsCountFromDisease(trim($DataArray[$index]['id'])).' Products)';
@@ -510,8 +511,14 @@ if($FoundRecords == 0 && (($globalOptions['TzSearch'] != '' && $globalOptions['T
 	</div>
 <?php
 }
+if((trim($globalOptions['TzSearch']) == '' || $globalOptions['TzSearch'] == NULL) && !$ClassFlg)
+{
 ?>
-
+<br/>
+<div align="center" style="padding-top:25px; color:#4f2683; font-weight:normal; font-size:16px">Welcome to <b>Larvol Sigma</b>. To find information please use the search field above or click on the links under it for a full list of covered items.</div>
+<?php
+}
+?>
 <!-- Displaying Records -->
 <br/>
 <table width="100%" border="0" style="">
