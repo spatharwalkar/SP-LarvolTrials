@@ -6,8 +6,9 @@ $table = mysql_real_escape_string($_GET['table']);
 $field = mysql_real_escape_string($_GET['field']);
 $hint = mysql_real_escape_string($_GET['hint']);
 $c_lid = mysql_real_escape_string($_GET['c_lid']);
+$mesh_display=mysql_real_escape_string($_GET['mesh']);
 //filter input
-$autoSuggestTables = array('areas','upm','products','data_trials', 'redtags', 'trialzilla', 'masterhm');
+$autoSuggestTables = array('areas','upm','products','data_trials', 'redtags', 'trialzilla', 'masterhm','diseases');
 if(!in_array($table,$autoSuggestTables))die;
 
 if($table=='upm' && $field=='product')
@@ -22,9 +23,19 @@ elseif($table=='upm' && $field=='redtag')
 {
 	$query = "select r.name from redtags r where r.name like '%$search%' order by name asc";
 }
-elseif($table=='products' || $table=='areas')
+elseif($table=='products')
 {
-	$query = "select distinct $field, description from $table where $field like '%$search%' order by $field asc";
+    $query = "select distinct $field, description from $table where $field like '%$search%' order by $field asc";	
+}
+elseif($table=='areas' || $table=='diseases')
+{
+	//$field="display_name";
+	//$table="entities";
+	if($mesh_display=="YES")
+	{
+		$mesh_condition=" AND mesh_name!=''";
+	}
+	$query = "select distinct $field, description from $table where $field like '%$search%' $mesh_condition order by $field asc";
 }
 elseif($table=='trialzilla')
 {
@@ -36,6 +47,7 @@ elseif($table=='masterhm')
 }
 else
 {
+	$table="entities";
 	$query = "select distinct $field from $table where $field like '%$search%' order by $field asc";
 }
 
