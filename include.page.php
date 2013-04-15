@@ -1875,6 +1875,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 				
 				//Insert Therapeutic Area and Disease association
 				ob_start();
+				$SkipDiseaseArray = array();
 				foreach($extraData['DiseaseIdsArray'] as $KeyDisease=> $DiseaseId)
 				{
 					$escDiseaselid = mysql_real_escape_string($DiseaseId);
@@ -1902,17 +1903,8 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 						}
 						else
 						{
-							require_once 'fetch_li_diseases.php';
-							fetch_li_disease_individual($DiseaseId);
-							$Diseasequery_2 = "select id from `entities` where `LI_id`='{$escDiseaselid}' and `class`='Disease' limit 1";
-							$Diseaseresult_2 = mysql_query($Diseasequery_2);
-							$DiseasePresent = false;
-							while($Diseaserow_2 = mysql_fetch_assoc($Diseaseresult_2))
-							{
-								$DiseasePresent = true;
-								$DiseaseIdLocal = $Diseaserow_2['id'];
-							}
-							if($DiseasePresent) $DiseaseAssoInsert = true;
+							//IF DISEASE IS NOT PRESENT IN DB JUST PUT IT IN SKIPP DISEASE ARRAY OF THAT TA
+							$SkipDiseaseArray[] = $DiseaseId;
 						}
 						if($DiseaseAssoInsert)
 						{
@@ -1927,6 +1919,14 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 						$logger->error($log);
 						unset($log);
 					}
+				}
+				
+				if(count($SkipDiseaseArray) > 0)
+				{
+					global $logger;
+					$log 	= 'WARN: '. count($SkipDiseaseArray) .' Diseases skipped inside Therapeutic Area sync of having LI ID '.$importVal['LI_id'].'. Following disease skipped( '. implode(',',$SkipDiseaseArray) .' )';
+					$logger->error($log);
+					unset($log);
 				}
 				ob_end_clean();	
 				//End of Insert product MOA and MOA Category association
