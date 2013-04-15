@@ -25,6 +25,15 @@ global $db,$page,$deleteFlag,$searchFormData;
 $searchFormData = null;
 
 $table = $_REQUEST['entity'];
+
+if($_REQUEST['mesh_display'])
+{
+$mesh = $_REQUEST['mesh_display'];
+}
+else
+{
+$mesh="NO";	
+}
 $script = 'entities';
 
 if(isset($_POST['searchformdata']))
@@ -107,7 +116,10 @@ function upmdelsure(){ return confirm("Are you sure you want to delete this enti
 $(document).ready(function(){
 	var options, a,b;
 	jQuery(function(){
-	  options = { serviceUrl:'autosuggest.php',params:{table:<?php echo "'$table'"?>,field:'name'}, showOnSelect:true };
+	  
+        <?php //echo $_GET['mesh_display']; ?>
+	  
+	  options = { serviceUrl:'autosuggest.php',params:{table:<?php echo "'$table'"?>,field:'name',mesh:<?php echo "'$mesh'"?>}, showOnSelect:true };
 	  if($('#name').length>0)
 	  a = $('#name').autocomplete(options);
 	  b = $('#search_name').autocomplete(options);
