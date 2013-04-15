@@ -29,8 +29,8 @@ elseif($table=='products')
 }
 elseif($table=='areas' || $table=='diseases')
 {
-	//$field="display_name";
-	//$table="entities";
+	$field="display_name";
+	$table="entities";
 	if($mesh_display=="YES")
 	{
 		$mesh_condition=" AND mesh_name!=''";
