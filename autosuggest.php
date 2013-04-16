@@ -29,13 +29,21 @@ elseif($table=='products')
 }
 elseif($table=='areas' || $table=='diseases')
 {
+	if($table=='areas')
+	{
+		$class='Area';
+	}
+	else
+	{
+		$class='Disease';
+	}
 	$field="display_name";
 	$table="entities";
 	if($mesh_display=="YES")
 	{
 		$mesh_condition=" AND mesh_name!=''";
 	}
-	$query = "select distinct $field, description from $table where $field like '%$search%'  $mesh_condition order by $field asc";
+	$query = "select distinct $field, description from $table where $field like '%$search%' and class='$class' $mesh_condition  order by $field asc";
 }
 elseif($table=='trialzilla')
 {
