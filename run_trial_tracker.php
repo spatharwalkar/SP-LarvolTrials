@@ -5509,7 +5509,7 @@ class TrialTracker
 			}
 			else
 			{	
-				$Values = $this->compileOTTData($ottType, $TrialsInfo, $Ids, $globalOptions, 'pdf');	
+				$Values = $this->compileOTTData2($ottType, $TrialsInfo, $Ids, $globalOptions, 'pdf');	
 			}
 			
 			unset($Ids, $productSelector, $TrialsInfo);
