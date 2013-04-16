@@ -30,12 +30,12 @@ elseif($table=='products')
 elseif($table=='areas' || $table=='diseases')
 {
 	$field="display_name";
-	$table="areas";
+	$table="entities";
 	if($mesh_display=="YES")
 	{
 		$mesh_condition=" AND mesh_name!=''";
 	}
-	$query = "select distinct $field, description from $table where $field like '%$search%' $mesh_condition order by $field asc";
+	$query = "select distinct $field, description from $table where $field like '%$search%'  $mesh_condition order by $field asc";
 }
 elseif($table=='trialzilla')
 {
