@@ -37,7 +37,7 @@ elseif($table=='areas' || $table=='diseases')
 	{
 		$class='Disease';
 	}
-	$field="display_name";
+	
 	$table="entities";
 	if($mesh_display=="YES")
 	{
