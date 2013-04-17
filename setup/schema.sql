@@ -424,6 +424,40 @@ CREATE TABLE IF NOT EXISTS `update_status_fullhistory` (  `update_id` int( 10  )
 `trial_type` VARCHAR( 255 ) NULL DEFAULT NULL ,
 `item_id` INT(11) NULL DEFAULT NULL  ,
  PRIMARY  KEY (  `update_id`  )  ) ENGINE  = InnoDB  DEFAULT CHARSET  = utf8 COLLATE  = utf8_unicode_ci;
+ 
+ CREATE TABLE `entities` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `LI_id` varchar(63) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `class` enum('Product','Area','Disease','Institution','MOA','Biomarker','MOA_Category','Therapeutic_Area') CHARACTER SET latin1 NOT NULL,
+  `description` text COLLATE utf8_unicode_ci,
+  `display_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `client_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `category` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `comments` text CHARACTER SET latin1,
+  `product_type` varchar(255) CHARACTER SET latin1 DEFAULT NULL,
+  `licensing_mode` varchar(255) CHARACTER SET latin1 DEFAULT NULL,
+  `administration_mode` varchar(255) CHARACTER SET latin1 DEFAULT NULL,
+  `discontinuation_status` varchar(255) CHARACTER SET latin1 DEFAULT NULL,
+  `discontinuation_status_comment` varchar(255) CHARACTER SET latin1 DEFAULT NULL,
+  `is_key` tinyint(1) DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT NULL,
+  `created` datetime DEFAULT NULL,
+  `modified` datetime DEFAULT NULL,
+  `searchdata` text COLLATE utf8_unicode_ci COMMENT 'contains regex',
+  `company` varchar(127) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `brand_names` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `generic_names` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `code_names` varchar(127) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `search_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `approvals` varchar(255) CHARACTER SET latin1 DEFAULT NULL,
+  `xml` text CHARACTER SET latin1,
+  `mesh_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name` ASC, `class` ASC),
+  UNIQUE KEY `LI_id` (`LI_id` ASC, `class` ASC) 
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT;
+
 
 CREATE VIEW products AS
 SELECT id, LI_id, name, description, category, comments, product_type, licensing_mode, administration_mode, 
@@ -486,9 +520,7 @@ CREATE TABLE `entity_mesh_trials`
   `entity` int(10) unsigned NOT NULL,
   `trial` int(10) unsigned NOT NULL,
   PRIMARY KEY (`entity`,`trial`),
-  KEY `trial` (`trial`),
-  CONSTRAINT `entity_mesh_trials_ibfk_1` FOREIGN KEY (`entity`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `entity_mesh_trials_ibfk_2` FOREIGN KEY (`trial`) REFERENCES `data_trials` (`larvol_id`) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY `trial` (`trial`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
 
 CREATE TABLE IF NOT EXISTS `data_history` (
@@ -1207,38 +1239,6 @@ CREATE TABLE IF NOT EXISTS `products_moas` (
  KEY `product` (`product`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-CREATE TABLE `entities` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `LI_id` varchar(63) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `class` enum('Product','Area','Disease','Institution','MOA','Biomarker','MOA_Category','Therapeutic_Area') CHARACTER SET latin1 NOT NULL,
-  `description` text COLLATE utf8_unicode_ci,
-  `display_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `client_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `category` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `comments` text CHARACTER SET latin1,
-  `product_type` varchar(255) CHARACTER SET latin1 DEFAULT NULL,
-  `licensing_mode` varchar(255) CHARACTER SET latin1 DEFAULT NULL,
-  `administration_mode` varchar(255) CHARACTER SET latin1 DEFAULT NULL,
-  `discontinuation_status` varchar(255) CHARACTER SET latin1 DEFAULT NULL,
-  `discontinuation_status_comment` varchar(255) CHARACTER SET latin1 DEFAULT NULL,
-  `is_key` tinyint(1) DEFAULT NULL,
-  `is_active` tinyint(1) DEFAULT NULL,
-  `created` datetime DEFAULT NULL,
-  `modified` datetime DEFAULT NULL,
-  `searchdata` text COLLATE utf8_unicode_ci COMMENT 'contains regex',
-  `company` varchar(127) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `brand_names` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `generic_names` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `code_names` varchar(127) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `search_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `approvals` varchar(255) CHARACTER SET latin1 DEFAULT NULL,
-  `xml` text CHARACTER SET latin1,
-  `mesh_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `name` (`name` ASC, `class` ASC),
-  UNIQUE KEY `LI_id` (`LI_id` ASC, `class` ASC) 
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT;
 
 CREATE TABLE `entity_relations` (
   `parent` int(10) unsigned NOT NULL,
@@ -1345,4 +1345,7 @@ ALTER TABLE `product_trials`
 ALTER TABLE `upm_areas`
   ADD CONSTRAINT `upm_areas_ibfk_2` FOREIGN KEY (`area_id`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `upm_areas_ibfk_1` FOREIGN KEY (`upm_id`) REFERENCES `upm` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-  
+
+ALTER TABLE `entity_mesh_trials`  
+  ADD CONSTRAINT `entity_mesh_trials_ibfk_1` FOREIGN KEY (`entity`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `entity_mesh_trials_ibfk_2` FOREIGN KEY (`trial`) REFERENCES `data_trials` (`larvol_id`) ON DELETE CASCADE ON UPDATE CASCADE;
