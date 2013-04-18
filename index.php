@@ -10,7 +10,7 @@ if($db->loggedIn())
 	/*$welcome = @file_get_contents('welcome.html');
 	if($welcome === false)
 	{*/
-		echo('Please <a href="login.php">login</a>!');
+		echo('Editors: <a href="login.php">login</a> or click <a href="trialzilla.php">here</a> to go to Larvol Sigma');
 	/*}else{
 		echo($welcome);
 	}*/
