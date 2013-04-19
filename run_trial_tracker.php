@@ -10386,7 +10386,7 @@ class TrialTracker
 		}
 		
 		echo '<table cellpadding="0" cellspacing="0" class="manage">'
-					 . '<tr>' . (($loggedIn) ? '<th style="width:70px;">ID</th>' : '<th style="width:70px;">ID</th>' )
+					 . '<tr>' . (($loggedIn) ? '<th style="width:70px;">ID</th>' : '' )
 					 . '<th style="width:270px;">Title</th>'
 					 . '<th style="width:30px;" title="Red: Change greater than 20%">N</th>'
 					 . '<th style="width:64px;" title="&quot;RoW&quot; = Rest of World">Region</th>'
@@ -11163,7 +11163,7 @@ class TrialTracker
 			
 			
 			//nctid column
-			if($loggedIn || !$loggedIn) 
+			if($loggedIn) 
 			{ 
 				$outputStr .= '<td class="' . $rowOneType . '" ' . (($tvalue['new'] == 'y') ? 'title="New record"' : ''). ' ><div class="rowcollapse">';
 				if(strpos($tvalue['full_id'], 'NCT') !== FALSE)
