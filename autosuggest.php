@@ -50,21 +50,21 @@ elseif($table=='institutions')
 {
 	$tables="entities";
 	$class=$table;
-	$query = "select distinct $field, description from $table where $field like '%$search%' and class='$class' order by $field asc";
+	$query = "select distinct $field, description from $table where $field like '%$search%' and class='Product' order by $field asc";
     
 }
 elseif($table=='moas')
 {
 	$tables="entities";
-	$class=$table;
-	$query = "select distinct $field, description from $table where $field like '%$search%' and class='$class' order by $field asc";
+	
+	$query = "select distinct $field, description from $table where $field like '%$search%' and class='Product' order by $field asc";
     
 }
 elseif($table=='moacategories')
 {
 	$tables="entities";
-	$class=$table;
-	$query = "select distinct $field, description from $table where $field like '%$search%' and class='$class' order by $field asc";
+	
+	$query = "select distinct $field, description from $table where $field like '%$search%' and class='Product' order by $field asc";
     
 }
 elseif($table=='trialzilla')
