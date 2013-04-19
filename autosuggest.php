@@ -7,8 +7,9 @@ $field = mysql_real_escape_string($_GET['field']);
 $hint = mysql_real_escape_string($_GET['hint']);
 $c_lid = mysql_real_escape_string($_GET['c_lid']);
 $mesh_display=mysql_real_escape_string($_GET['mesh']);
+
 //filter input
-$autoSuggestTables = array('areas','upm','products','data_trials', 'redtags', 'trialzilla', 'masterhm','diseases');
+$autoSuggestTables = array('areas','upm','products','data_trials', 'redtags', 'trialzilla', 'masterhm','diseases','institutions','moas','moacategories');
 if(!in_array($table,$autoSuggestTables))die;
 
 if($table=='upm' && $field=='product')
@@ -45,6 +46,27 @@ elseif($table=='areas' || $table=='diseases')
 	}
 	$query = "select distinct $field, description from $table where $field like '%$search%' and class='$class' $mesh_condition  order by $field asc";
 }
+elseif($table=='institutions')
+{
+	$tables="entities";
+	$class=$table;
+	$query = "select distinct $field, description from $table where $field like '%$search%' and class='$class' order by $field asc";
+    
+}
+elseif($table=='moas')
+{
+	$tables="entities";
+	$class=$table;
+	$query = "select distinct $field, description from $table where $field like '%$search%' and class='$class' order by $field asc";
+    
+}
+elseif($table=='moacategories')
+{
+	$tables="entities";
+	$class=$table;
+	$query = "select distinct $field, description from $table where $field like '%$search%' and class='$class' order by $field asc";
+    
+}
 elseif($table=='trialzilla')
 {
 	$query = "select distinct `name`, `description`, `class` from `entities` where `name` like '%$search%' AND `class` IN ('Product','Institution','MOA','MOA_Category') limit 6";
@@ -53,6 +75,7 @@ elseif($table=='masterhm')
 {
 	$query = "select distinct `name`, `description`, `class` from `entities` where `name` like '%$search%' AND `class` NOT IN ('MOA_Category') AND (`class` = 'Disease' AND (LI_id IS NOT NULL AND LI_id <> '') OR `class` <> 'Disease') order by $field asc";
 }
+
 else
 {
 	$table="entities";
