@@ -111,7 +111,9 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 	
 	else // no entity1 id given, select all ids (Area & Disease for now.).
 	{
-		$query='select `id` from entities where class in ("Area","Disease" ) order by `id`';
+		// exclude mesh diseases from calculation.  their searchdata is empty.
+		//$query='select `id` from entities where class in ("Area","Disease" ) order by `id`';
+		$query='select `id` from entities where (searchdata is not null and searchdata<>\'\') and class in ("Area","Disease" ) order by `id`';
 		
 		// update query to fire the trigger (non-change)
 		$activate_trigger=' update upm set event_description=event_description
@@ -152,10 +154,10 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 			$row=mysql_fetch_assoc($res);
 			if($row['class']) $current_class=$row['class'];
 		}
+		// below queries exclude mesh diseases.  searchdata of mesh diseases are empty.
 		if($current_class) $query='select id from entities where `class`<>"'.$current_class.'" and class in 
-		("Area","Disease","Product","Biomarker") order by `id` ';
-		else $query='select id from entities where `id`<>"'.$parameters['entity2'].'" and class in 
-		("Area","Disease","Product","Biomarker") order by `id` ';
+		("Area","Disease","Product","Biomarker") and (searchdata is not null and searchdata<>\'\') order by `id` ';
+		else $query='select id from entities where class in ("Product","Biomarker") and (searchdata is not null and searchdata<>\'\') order by `id` ';
 	}
 	$res = mysql_query($query);
 	if($res === false)
