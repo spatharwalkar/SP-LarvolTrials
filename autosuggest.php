@@ -7,7 +7,7 @@ $field = mysql_real_escape_string($_GET['field']);
 $hint = mysql_real_escape_string($_GET['hint']);
 $c_lid = mysql_real_escape_string($_GET['c_lid']);
 $mesh_display=mysql_real_escape_string($_GET['mesh']);
-
+//echo 'hai';
 //filter input
 $autoSuggestTables = array('areas','upm','products','data_trials', 'redtags', 'trialzilla', 'masterhm','diseases','institutions','moas','moacategories');
 if(!in_array($table,$autoSuggestTables))die;
@@ -49,7 +49,7 @@ elseif($table=='areas' || $table=='diseases')
 elseif($table=='institutions')
 {
 	$tables="entities";
-	$class=$table;
+	
 	$query = "select distinct $field, description from $table where $field like '%$search%' and class='Product' order by $field asc";
     
 }
@@ -57,7 +57,8 @@ elseif($table=='moas')
 {
 	$tables="entities";
 	
-	$query = "select distinct $field, description from $table where $field like '%$search%' and class='Product' order by $field asc";
+	$query = "select distinct $field, description from $tables where $field like '%$search%' and class='Product' order by $field asc";
+ 
     
 }
 elseif($table=='moacategories')
