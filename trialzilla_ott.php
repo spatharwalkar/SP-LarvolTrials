@@ -85,9 +85,18 @@ display:inline;
 				if(isset($e1) && $e1 != NULL)
 				{
 					$LinkDetails = GetLinkNClass($e1);
+					
+					if($LinkDetails['class'] == 'Product' && (!isset($e2) || $e2 == NULL || trim($e2) == ''))
+					{
+						$ProdRelateCompany = GetCompanyNames($e1);
+						$e1name = '<b>'. GetEntityName($e1) .'</b>'. ((trim($ProdRelateCompany) != '') ? ' / '.$ProdRelateCompany:'');
+					}	
+					else
+					$e1name = GetEntityName($e1);
+					
 					if(isset($e2) && $e2 != NULL)
 					print '<td style="vertical-align:middle;"><a style="color:#FFFFFF; display:inline;" href="trialzilla_ott.php?e1='.$e2. ((isset($phase) && $phase != NULL) ? '&phase='.$phase:'').'&sourcepg=TZ"><img src="images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
-					print '<td style="vertical-align:top;"><a style="color:#FFFFFF; display:inline; text-decoration:underline;" href="'.$LinkDetails['link'].'">'.GetEntityName($e1).'</a>&nbsp;</td>';
+					print '<td style="vertical-align:top;"><a style="color:#FFFFFF; display:inline; text-decoration:underline;" href="'.$LinkDetails['link'].'">'.$e1name.'</a>&nbsp;</td>';
 				}
 				if(isset($e2) && $e2 != NULL)
 				{

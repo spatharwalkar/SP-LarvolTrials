@@ -18,7 +18,7 @@
 <tr>
 <td width="300px">&nbsp;</td>
 <td width="600px" style="font-weight:bold; padding-left:0px;" align="center">
-<font class="searchTypes" style="color:#666666;"><a href="trialzilla.php?class=Institution" style="text-decoration:underline; display:inline; color:#1122cc;">Companies</a> / <a href="trialzilla.php?class=Product" style="text-decoration:underline; display:inline; color:#1122cc;">Products</a> / <a href="trialzilla.php?class=MOA" style="text-decoration:underline; display:inline; color:#1122cc;">MOAs</a> / <a href="trialzilla.php?class=Disease" style="text-decoration:underline; display:inline; color:#1122cc;">Diseases</a></font>
+<font class="searchTypes" style="color:#666666;"><a href="trialzilla.php?class=Institution" style="text-decoration:underline; display:inline; color:#1122cc;">Companies</a> / <a href="trialzilla.php?class=Product" style="text-decoration:underline; display:inline; color:#1122cc;">Products</a> / <a href="trialzilla.php?class=MOA" style="text-decoration:underline; display:inline; color:#1122cc;">Mechanisms of Action</a> / <a href="trialzilla.php?class=Disease" style="text-decoration:underline; display:inline; color:#1122cc;">Diseases</a></font>
 </td>
 </tr>
 </table>
