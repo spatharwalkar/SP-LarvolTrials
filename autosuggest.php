@@ -50,7 +50,7 @@ elseif($table=='institutions')
 {
 	$tables="entities";
 	
-	$query = "select distinct $field, description from $table where $field like '%$search%' and class='Product' order by $field asc";
+	$query = "select distinct $field, description from $tables where $field like '%$search%' and class='Product' order by $field asc";
     
 }
 elseif($table=='moas')
@@ -65,7 +65,7 @@ elseif($table=='moacategories')
 {
 	$tables="entities";
 	
-	$query = "select distinct $field, description from $table where $field like '%$search%' and class='Product' order by $field asc";
+	$query = "select distinct $field, description from $tables where $field like '%$search%' and class='Product' order by $field asc";
     
 }
 elseif($table=='trialzilla')
