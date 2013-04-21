@@ -826,8 +826,10 @@ function MOATrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_co
 	$htmlContent .= '<br style="line-height:11px;"/>'
 					.'<form action="moa_tracker.php" method="post">'
 					. '<table border="0" cellspacing="0" cellpadding="0" class="controls" align="center">'
-					. '<tr>'
-					. '<td style="vertical-align:top; border:0px;"><div class="records">'. $TotalRecords['all'].'&nbsp;MOA'. (($TotalRecords['all'] == 1) ? '':'s') . '</div></td>';
+					. '<tr>';
+					
+	if($TrackerType != 'DMT')				
+	$htmlContent .= '<td style="vertical-align:top; border:0px;"><div class="records">'. $TotalRecords['all'].'&nbsp;MOA'. (($TotalRecords['all'] == 1) ? '':'s') . '</div></td>';
 					
 	if($TotalPages > 1)
 	{
