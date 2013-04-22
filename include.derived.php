@@ -554,7 +554,8 @@ function institutionMapping()
 	            $institutionFile = file('derived/institution_type/'.$file,FILE_IGNORE_NEW_LINES|FILE_SKIP_EMPTY_LINES);
 	        	foreach($institutionFile as $institutionList)
 				{
-					$out[$institutionList] = $institutionEntry;
+					$institutionList = iconv('UTF-8', 'UTF-8//IGNORE', $institutionList);
+					$out[trim($institutionList)] = trim($institutionEntry);
 				}	            
 	        }
 	    }
@@ -739,7 +740,6 @@ function getInstitutionType($collaborator,$lead_sponsor,$larvol_id)
 	$lead_sponsors = array();
 	$collaborators = array();
 	$instMap = institutionMapping();
-//	pr($instMap);	
 	//create the generic array for institution_type decision making.
 	if(isset($collaborator))
 	{
