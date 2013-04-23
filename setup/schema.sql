@@ -510,7 +510,6 @@ CREATE TABLE IF NOT EXISTS `area_trials` (
 CREATE TABLE IF NOT EXISTS `entity_trials` (
   `entity` int(10) unsigned NOT NULL,
   `trial` int(10) unsigned NOT NULL,
-  `sponsor_owned` TINYINT(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`entity`,`trial`),
   KEY `trial` (`trial`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -900,7 +899,6 @@ CREATE TABLE IF NOT EXISTS `data_trials` (
 CREATE TABLE IF NOT EXISTS `product_trials` (
   `product` int(10) unsigned NOT NULL,
   `trial` int(10) unsigned NOT NULL,
-  `sponsor_owned` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`product`,`trial`),
   KEY `trial` (`trial`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

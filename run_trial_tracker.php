@@ -7903,7 +7903,6 @@ class TrialTracker
 					$result['viewcount'] 			= $row['viewcount']; 
 					$result['source'] 				= $row['source']; 
 					$result['source_id'] 			= $row['source_id']; 
-					$result['sponsor_owned'] 		= $row['sponsor_owned'];
 					
 					$result['manual_brief_title'] 		= $row['manual_brief_title']; 
 					$result['manual_acronym'] 			= $row['manual_acronym']; 
@@ -8636,7 +8635,6 @@ class TrialTracker
 						$result['viewcount'] 			= $row['viewcount']; 
 						$result['source'] 				= $row['source']; 
 						$result['source_id'] 			= $row['source_id']; 
-						$result['sponsor_owned'] 		= $row['sponsor_owned'];
 						
 						$result['manual_brief_title'] 		= $row['manual_brief_title']; 
 						$result['manual_acronym'] 			= $row['manual_acronym']; 
@@ -9123,7 +9121,6 @@ class TrialTracker
 					$result['viewcount'] 			= $row['viewcount']; 
 					$result['source'] 				= $row['source']; 
 					$result['source_id'] 			= $row['source_id']; 
-					$result['sponsor_owned'] 		= $row['sponsor_owned'];
 					
 					$result['manual_brief_title'] 		= $row['manual_brief_title']; 
 					$result['manual_acronym'] 			= $row['manual_acronym']; 
@@ -9624,7 +9621,6 @@ class TrialTracker
 					$result['viewcount'] 			= $row['viewcount']; 
 					$result['source'] 				= $row['source']; 
 					$result['source_id'] 			= $row['source_id']; 
-					$result['sponsor_owned'] 		= $row['sponsor_owned'];
 					
 					$result['manual_brief_title'] 		= $row['manual_brief_title']; 
 					$result['manual_acronym'] 			= $row['manual_acronym']; 
@@ -10803,9 +10799,7 @@ class TrialTracker
 				. '<label style="font-size:x-small;" for="ipwnd">Include ' . $title . ' with no data</label>';
 		}
 		
-		/*echo '<br/><input type="checkbox" id="tspo" name="tspo" ' . (($globalOptions['showTrialsSponsoredByProductOwner'] == "on") ? 'checked="checked"' : '') . ' />'
-				. '<label style="font-size:x-small;" for="tspo">Show only trials sponsored by product owner</label>';*/
-				
+		
 		echo  '</td></tr><tr>'
 				. '<td class="bottom">&nbsp;</td><td class="bottom">&nbsp;</td>'
 				. '<td class="bottom">&nbsp;</td><td class="bottom">&nbsp;</td>'
@@ -10935,11 +10929,7 @@ class TrialTracker
 			$url .= '&amp;ss=' . $globalOptions['sphinxSearch'];
 		}
 
-		if(isset($globalOptions['showTrialsSponsoredByProductOwner']) && $globalOptions['showTrialsSponsoredByProductOwner'] == "on")
-		{
-			$url .= '&amp;tspo=on';
-		}
-		
+	
 		if(isset($globalOptions['hm']) && $globalOptions['hm'] != '')
 		{
 			$url .= '&amp;hm=' . $globalOptions['hm'];

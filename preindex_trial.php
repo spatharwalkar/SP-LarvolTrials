@@ -303,34 +303,6 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 				$query=str_replace('intervention_other_name','intervention_name',$query) ;
 				//pr($query);
 				
-				/** add columns: source, lead_sponsor and collaborator to the query */
-				$findme   = 'FROM data_trials';
-				$findme2   = 'FROM `data_trials`';
-				$pos = stripos($query, $findme);
-//				$pos2 = stripos($query, $findme, $pos + strlen($findme));
-				
-				if ($pos === false) 
-				{
-					$log='Error in MySql Query (no "FROM" clause is used in the query)  :' . $query;
-					$logger->fatal($log);
-					mysql_query('ROLLBACK');
-					echo $log;
-					return false;
-				} 
-				else 
-				{
-
-					$query = substr($query,0,$pos-1). ', dt.source, dt.lead_sponsor, dt.collaborator ' . substr($query,$pos-1) ;
-					
-				}  
-				$pos3 = stripos($query, $findme2, $pos + 16);
-				if ($pos3 !== false) 
-				{
-
-					$query = substr($query,0,$pos3-1). ', dt.source, dt.lead_sponsor, dt.collaborator ' . substr($query,$pos3-1) ;
-					
-				}
-				 /************/
 				if(!$resu = mysql_query($query))
 				{
 					$log='Bad SQL query getting larvol_id from data_trials table.<br>Query=' . $query . ' Mysql error:'. mysql_error();
@@ -413,59 +385,15 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					}
 					else
 					{
-							/**** Mark sponsor owned trials *****/
-							
-							if(is_array($company_name) and !empty($company_name[0]))
-							{
-								foreach($company_name as $cmp)
-								{
-									$pos1 = stripos($value['lead_sponsor'], trim($cmp));
-									if( $pos1 !== false ) 
-									{
-										$sponsor_owned=1;
-									}
-									else
-									{
-										$sponsor_owned=0;
-									}
-								}
-							}
-							/*******************************/
 					
 						if(trial_indexed($larvol_id,$cat,$cid)) // check if the trial+product/trial+area index already exists
 						{
-							if(!isset($sponsor_owned) or empty($sponsor_owned))	$sponsor_owned=0;
-							if($cat=='products')
-							{
-								$query='UPDATE `'. $table .'`
-										SET `sponsor_owned` = ' . $sponsor_owned .'
-										WHERE `'. $field .'` = "' . $cid . '" AND  `trial` = "' . $larvol_id .'"';
-								$res = mysql_query($query);
-								if($res === false)
-								{
-									$log = 'Bad SQL query pre-indexing trial***. Query : ' . $query . '<br> MySql Error:'.mysql_error();
-									mysql_query('ROLLBACK');
-									$query = 'update update_status_fullhistory set 
-									er_message="' . $log . '" where update_id= "'. $up_id .'" limit 1' ; 
-									mysql_query($query);
-									$logger->fatal($log);
-									echo $log;
-									return false;
-								}
-								echo '<br>Larvol ID:'.$larvol_id . ' is already indexed. <br>';
-							}
+							echo '<br>Larvol ID:'.$larvol_id . ' is already indexed. <br>';
 						}
 						else
 						{
 							echo '<br>'. date("Y-m-d H:i:s", strtotime('now')) . ' - Indexing Larvol ID:'.$larvol_id . '<br>';
-							$sp1="";$sp2='"';
-							if($cat=='products')
-							{
-								$sp1=", `sponsor_owned`";
-								$sp2='" , "' . $sponsor_owned .'"';
-							}
-							
-							$query='INSERT INTO `'. $table .'` (`'. $field .'`, `trial`' . $sp1 . ' ) VALUES ("' . $cid . '", "' . $larvol_id .$sp2 .') ';
+							$query='INSERT INTO `'. $table .'` (`'. $field .'`, `trial` ) VALUES ("' . $cid . '", "' . $larvol_id .'") ';
 							$res = mysql_query($query);
 							if($res === false)
 							{

@@ -452,6 +452,84 @@ function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL  )
 						echo $log;
 						return false;
 					}
+					
+					/* UPDATE owner sponsored institution type */
+					
+					//see if the trial has a sponsor
+					$query="select lead_sponsor from data_trials where larvol_id='" .$larvol_id . "' limit 1";
+					$res=mysql_query($query);
+					$row = mysql_fetch_assoc($res);
+					$sponsor=$row['lead_sponsor'];
+					if(!empty($sponsor))
+					{
+						//get all products related to this trial
+						$query="select et.entity from entity_trials et, entities e where et.trial='" .$larvol_id . "' and et.entity=e.id and e.class='product'";
+						$res=mysql_query($query);
+						$productids=array();
+						while($row = mysql_fetch_assoc($res)) 
+						{ 
+							$productids[] = $row['entity'];
+						}	
+						
+						//get all companies associated with these products
+						$pids = implode(",", $productids);
+						pr($pids);
+						if(!empty($productids))
+						{
+							$query="select er.child from entity_relations er,entities e 
+									where er.parent in (" . $pids . ")
+									and er.child=e.id and e.class = 'Institution'";
+							$res=mysql_query($query);
+							$companyids=array();
+							while($row = mysql_fetch_assoc($res)) 
+							{ 
+								$companyids[] = $row['child'];
+							}	
+							pr($companyids);
+							//get name,search_name of these companies 
+							$cids = implode(",", $companyids);
+							$query="select name,search_name from entities where id in (" . $cids . ")	and class='institution'";
+							$res=mysql_query($query);
+							$csearchnames=array();
+							while($row = mysql_fetch_assoc($res)) 
+							{ 
+								//if searchname has multiple names then store each of them separately into the array
+								if(stripos($row['search_name'],"|"))
+								{
+									$searchname=explode("|", $row['search_name']);
+									foreach($searchname as $name) $csearchnames[] = $name;
+								}
+								else $csearchnames[]=$row['search_name'];
+								
+								$csearchnames[] = $row['name'];
+								
+							}
+							pr($csearchnames);
+							//now loop through the list and see if any of them matches with the trial's sponsor name
+							$ownersponsored='No';
+							foreach($csearchnames as $name)
+							{
+								$name='xxx.'.$name;
+								pr('SPONSOR='.$sponsor.' NAME='.$name);
+								$pos = stripos($name,trim($sponsor));
+								pr($pos);
+								if(!empty($pos) and $pos>0 )	
+								{
+									$ownersponsored='Yes';
+									break;
+								}
+							}
+							if($ownersponsored=='Yes')
+							{
+								$query="update data_trials set institution_type = 'owner_sponsored' where larvol_id='" .$larvol_id . "' limit 1 ";
+								$res=mysql_query($query);
+								pr('YES, O S');
+							}
+							else pr('NO, NOT');
+						}
+						
+					}
+					/************************/
 						
 					$query = 'SELECT `larvol_id` FROM data_history where `larvol_id`="' . $larvol_id . '"  LIMIT 1';
 					if(!$res = mysql_query($query))
