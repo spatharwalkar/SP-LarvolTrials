@@ -60,39 +60,130 @@ function find_entity($q)
 		}
 	}
 	*/
-	$pos = strpos($q, "-");
-	if ($pos !== false) 
-	{
-		$q = '"'.$q.'"';
-	}
-	if(strlen($q)>=2) $q = '*'.$q.'*';
-	$res = $cl->Query ( $q, $index );
+		$orig_q=$q;
+		$pos = strpos($q, "-");
+		if ($pos !== false) 
+		{
+			$q = '"'.$q.'"';
+		}
+		if(strlen($q)>=2) $q = '*'.$q.'*';
+		$res = $cl->Query ( $q, $index );
 
-	if ( $res===false )
+		if ( $res===false )
+		{
+	//		print "Query failed: " . $cl->GetLastError() . ".\n";
+			return false;
+		} 
+		else
+		{
+
+			if ( is_array($res["matches"]) )
+			{
+				$n = 1;
+				if(!isset($entity_ids)) $entity_ids=array();
+				foreach ( $res["matches"] as $docinfo )
+				{
+					if($docinfo[weight]>1900)
+					{
+						$entity_ids[] = $docinfo[id];
+					}
+					$n++;
+					//pr($res["class"]);
+				}
+				$entity_ids=array_unique($entity_ids);
+			}
+		}
+	if($entity_ids && count($entity_ids)>0)
 	{
-//		print "Query failed: " . $cl->GetLastError() . ".\n";
-		return false;
-	} 
+		return $entity_ids;
+	}
 	else
 	{
-
-		if ( is_array($res["matches"]) )
+		$q=$orig_q;
+		//  make it capable of searching for limited words 
+		preg_match_all('# #', $q, $matches, PREG_OFFSET_CAPTURE);
+		$words = array();
+		foreach($matches[0] as $match)
 		{
-			$n = 1;
-			if(!isset($entity_ids)) $entity_ids=array();
-			foreach ( $res["matches"] as $docinfo )
-			{
-				if($docinfo[weight]>1900)
-				{
-					$entity_ids[] = $docinfo[id];
-				}
-				$n++;
-				//pr($res["class"]);
-			}
-			$entity_ids=array_unique($entity_ids);
+		   $words[] = $match[1];
 		}
+		if(count($words)>1)
+		{
+			$q2=substr($q,0,$words[1]);
+			/******************/
+			$pos = strpos($q2, "-");
+			if ($pos !== false) 
+			{
+				$q2 = '"'.$q2.'"';
+			}
+			if(strlen($q2)>=2) $q2 = '*'.$q2.'*';
+			$res = $cl->Query ( $q2, $index );
+			if ( $res===false )
+			{
+				return false;
+			} 
+			else
+			{
+				if ( is_array($res["matches"]) )
+				{
+					$n = 1;
+					if(!$entity_ids || !count($entity_ids)>0) $entity_ids=array();
+					foreach ( $res["matches"] as $docinfo )
+					{
+						if($docinfo[weight]>1900)
+						{
+							$entity_ids[] = $docinfo[id];
+						}
+						$n++;
+					}
+					$entity_ids=array_unique($entity_ids);
+				}
+			}
+			/******************/
+		}
+		if($entity_ids && count($entity_ids)>0)
+		{
+			return $entity_ids;
+		}
+		elseif (count($words)>0)
+		{
+			$q=$orig_q;
+			$q1=substr($q,0,$words[0]);
+			/******************/
+			$pos = strpos($q1, "-");
+			if ($pos !== false) 
+			{
+				$q1 = '"'.$q1.'"';
+			}
+			if(strlen($q1)>=2) $q1 = '*'.$q1.'*';
+			$res = $cl->Query ( $q1, $index );
+			if ( $res===false )
+			{
+				return false;
+			} 
+			else
+			{
+				if ( is_array($res["matches"]) )
+				{
+					$n = 1;
+					if(!$entity_ids || !count($entity_ids)>0) $entity_ids=array();
+					foreach ( $res["matches"] as $docinfo )
+					{
+						if($docinfo[weight]>1900)
+						{
+							$entity_ids[] = $docinfo[id];
+						}
+						$n++;
+					}
+				$entity_ids=array_unique($entity_ids);
+				}
+			}
+			/******************/
+		}
+		return $entity_ids;
 	}
-	return $entity_ids;
+	//
+
 }
 
 ?>
