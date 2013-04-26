@@ -10405,7 +10405,7 @@ class TrialTracker
 		}
 		else
 		{
-			$outputStr = '';
+			$outputStr = 'No results found';
 			foreach($Values['Data'] as $dkey => $dvalue)
 			{
 				$sectionHeader = $dvalue['sectionHeader'];
@@ -10419,7 +10419,7 @@ class TrialTracker
 					$naUpms = $dvalue['naUpms'];
 				}
 				
-				$outputStr .= $this->dUnmatchedUpms($globalOptions, $ottType, $sectionHeader, $naUpms);
+				//$outputStr .= $this->dUnmatchedUpms($globalOptions, $ottType, $sectionHeader, $naUpms);
 			}
 			
 			echo $outputStr;
