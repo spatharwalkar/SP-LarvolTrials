@@ -1599,21 +1599,37 @@ function Download_reports()
 	if(!isset($_POST['id'])) return;
 	$id = mysql_real_escape_string(htmlspecialchars($_POST['id']));
 	if(!is_numeric($id)) return;
-	$query = 'SELECT `name`, `user`, `footnotes`, `description`, `category`, `shared`, `total`, `dtt`, `display_name` FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
-	$res = mysql_query($query) or die('Bad SQL query getting master heatmap report'.$query);
-	$res = mysql_fetch_array($res) or die('Report not found.');
-	$repoUser = $res['user'];
-	$shared = $res['shared'];
-	$total_fld=$res['total'];
-	$dtt = $res['dtt'];
-	$name = $res['name'];
-	$Report_DisplayName=$res['display_name'];
-	$footnotes = htmlspecialchars($res['footnotes']);
-	$description = htmlspecialchars($res['description']);
-	$category = $res['category'];
 	
-	$query = 'SELECT `num`,`type`,`type_id`, `display_name`, `category`, `tag` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' ORDER BY num ASC';
-	$res = mysql_query($query) or die('Bad SQL query getting master heatmap report headers'.$query);
+	if(isset($_REQUEST['ohmtype']))
+	$ohm = $_REQUEST['ohmtype'];
+	else
+	$ohm = 'SOHM';
+	
+	if($ohm == 'SOHM')
+	{
+		$query = 'SELECT `name`, `user`, `footnotes`, `description`, `category`, `shared`, `total`, `dtt`, `display_name` FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
+		$res = mysql_query($query) or die('Bad SQL query getting master heatmap report');
+		$res = mysql_fetch_array($res) or die('Report not found.');
+		$total_fld=$res['total'];
+		$name = $res['name'];
+		$dtt = $res['dtt'];
+		$ReportDisplayName=$res['display_name'];
+		if($res['display_name'] == NULL && trim($res['display_name']) == '')
+		$ReportDisplayName = 'report '.$id;
+	}
+	else
+	{
+		$query = 'SELECT `name`, `display_name` FROM `entities` WHERE id=' . $id . ' LIMIT 1';
+		$res = mysql_query($query) or die('Bad SQL query getting master heatmap report');
+		$res = mysql_fetch_array($res) or die('Report not found.');
+		$total_fld = 0;
+		$dtt = 0;
+		if($res['display_name'] != NULL && trim($res['display_name']) != '')
+			$ReportDisplayName=$res['display_name'];
+		else
+			$ReportDisplayName=$res['name'];
+	}	
+	
 	$rows = array();
 	$columns = array();
 	$entity2Ids = array();
@@ -1632,6 +1648,7 @@ function Download_reports()
 	
 	$ColumnsSpan  = array();
 	$rowsCategoryEntityIds1 = array();
+	
 	$prevEntity2Category='';
 	$prevEntity1Category='';
 	$prevEntity2='';
@@ -1641,147 +1658,270 @@ function Download_reports()
 	$last_cat_col = '';
 	$entity2_Category_Presence = 0;
 	
-	while($header = mysql_fetch_array($res))
+	if($ohm == 'SOHM')
 	{
-		if($header['type'] == 'column')
+		$query = 'SELECT `num`,`type`,`type_id`, `display_name`, `category`, `tag` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' ORDER BY num ASC';
+		$res = mysql_query($query) or die('Bad SQL query getting master heatmap report headers');
+		
+		while($header = mysql_fetch_array($res))
 		{
-			if($header['type_id'] != NULL)
+			if($header['type'] == 'column')
 			{
-				$result =  mysql_fetch_assoc(mysql_query("SELECT `id`, `name`, `display_name`, `description`, `class`, `company` FROM `entities` WHERE id = '" . $header['type_id'] . "' "));
-				$columns[$header['num']] = $result['name'];
-				$columnsEntityType[$header['num']] = $result['class'];
-				$type = ''; if($type == 'Institution') $type = 'Company'; else if($type == 'MOA_Category') $type = 'MOA Category'; else $type = $result['class'];
-				if($result['company'] != NULL && trim($result['company']) != '' && $type = 'Product')
+				$columnsCompanyName[$header['num']] = '';
+				$columnsTagName[$header['num']] = '';
+				if($header['type_id'] != NULL)
 				{
-					$result['company']=str_replace(',',', ',$result['company']);
-					$result['company']=str_replace(',  ',', ',$result['company']);
-					$columnsCompanyName[$header['num']] = ' / '.$result['company'];
-				} 
-				//$columnsDisplayName[$header['num']] = $result['display_name'];
-				if($type == 'Product')
-				$columnsDisplayName[$header['num']] = $result['name'];
+					$result =  mysql_fetch_assoc(mysql_query("SELECT `id`, `name`, `display_name`, `description`, `class`, `company` FROM `entities` WHERE id = '" . $header['type_id'] . "' "));
+					$columns[$header['num']] = $result['id'];
+					$columnsEntityType[$header['num']] = $result['class'];
+					
+					$type = ''; $type = $result['class']; if($type == 'Institution') $type = 'Company'; else if($type == 'MOA_Category') $type = 'MOA Category'; else $type = $result['class'];
+					
+					if($type == 'Product')
+						$result['company'] = GetCompanyNames($result['id']);
+					else 
+						$result['company'] = '';
+					if($result['company'] != NULL && trim($result['company']) != '')
+					{
+						$columnsCompanyName[$header['num']] = ' / '.$result['company'];
+					} 
+					
+					//$columnsDisplayName[$header['num']] = $result['display_name'];
+					if($type == 'Product')
+						$columnsDisplayName[$header['num']] = $result['name'];
+					else
+					{
+						if(trim($header['display_name']) != '' && $header['display_name'] != NULL && trim($header['display_name']) != 'NULL') //HM LEVEL Display name
+							$columnsDisplayName[$header['num']] = $header['display_name'];
+						else if(trim($result['display_name']) != '' && $result['display_name'] != NULL && trim($result['display_name']) != 'NULL') //Global Display name
+							$columnsDisplayName[$header['num']] = $result['display_name'];
+						else if($type == 'Area')
+							$columnsDisplayName[$header['num']] = $type .' '.$result['id'] ;	//For area display class n id
+						else
+							$columnsDisplayName[$header['num']] = $result['name'] ;	//For for other than Area take actual name
+					}
+						
+					$columnsDescription[$header['num']] = $result['description'];
+					$header['category'] = trim($header['category']);
+					if($header['category'] == NULL || trim($header['category']) == '')
+					$header['category'] = 'Undefined';
+				}
 				else
 				{
-					if(trim($header['display_name']) != '' && $header['display_name'] != NULL && $header['display_name'] != 'NULL') //HM LEVEL Display name
-						$columnsDisplayName[$header['num']] = $header['display_name'];
-					else if(trim($result['display_name']) != '' && $result['display_name'] != NULL && $result['display_name'] != 'NULL') //Global Display name
-						$columnsDisplayName[$header['num']] = $result['display_name'];
-					else if($type == 'Area')
-						$columnsDisplayName[$header['num']] = $type .' '.$result['id'] ;	//For area display class n id
-					else
-						$columnsDisplayName[$header['num']] = $result['name'] ;	//For for other than Area take actual name
+					$columns[$header['num']] = $header['type_id'];
+					$header['category'] = 'Undefined';
 				}
-				$columnsDescription[$header['num']] = $result['description'];
-				$header['category']=trim($header['category']);
-				if($header['category'] == NULL || trim($header['category']) == '')
-				$header['category'] = 'Undefined';
+				$entity2Ids[$header['num']] = $header['type_id'];
+				
+				if($prevEntity2Category == $header['category'])
+				{
+					$ColumnsSpan[$prevEntity2] = $prevEntity2Span+1;
+					$ColumnsSpan[$header['num']] = 0;
+					$prevEntity2 = $prevEntity2;
+					$prevEntity2Span = $prevEntity2Span+1;
+					$last_cat_col = $last_cat_col;
+				}
+				else
+				{
+					$ColumnsSpan[$header['num']] = 1;
+					$prevEntity2 = $header['num'];
+					$prevEntity2Span = 1;
+					$second_last_cat_col = $last_cat_col;
+					$last_cat_col = $header['num'];
+				}
+				
+				$prevEntity2Category = $header['category'];
+				$columnsCategoryName[$header['num']] = $header['category'];
+				if($header['tag'] != 'NULL')
+				$columnsTagName[$header['num']] = $header['tag'];
+				
+				$last_category = $header['category'];
+				$second_last_num = $last_num;
+				$last_num = $header['num'];
+				$LastEntity2 = $header['type_id'];
+				
+				if(!$entity2_Category_Presence && $header['category'] != 'Undefined')
+					$entity2_Category_Presence = 1;
 			}
 			else
 			{
-				$columns[$header['num']] = $header['type_id'];
+				$rowsCompanyName[$header['num']] = '';
+				$rowsTagName[$header['num']] = '';
+				if($header['type_id'] != NULL)
+				{
+					$result =  mysql_fetch_assoc(mysql_query("SELECT `id`, `name`, `display_name`, `description`, `class`, `company` FROM `entities` WHERE id = '" . $header['type_id'] . "' "));
+					$rows[$header['num']] = $result['id'];
+					$rowsEntityType[$header['num']] = $result['class'];
+					
+					$type = ''; $type = $result['class']; if($type == 'Institution') $type = 'Company'; else if($type == 'MOA_Category') $type = 'MOA Category'; else $type = $result['class'];
+					
+					if($type == 'Product')
+						$result['company'] = GetCompanyNames($result['id']);
+					else 
+						$result['company'] = '';
+						
+					if($result['company'] != NULL && trim($result['company']) != '')
+					{
+						$rowsCompanyName[$header['num']] = ' / '.$result['company'];
+					}
+					
+					if($type == 'Product')
+						$rowsDisplayName[$header['num']] = $result['name'];
+					else 
+					{
+						if(trim($header['display_name']) != '' && $header['display_name'] != NULL && trim($header['display_name']) != 'NULL') //HM LEVEL Display name
+							$rowsDisplayName[$header['num']] = $header['display_name'];
+						else if(trim($result['display_name']) != '' && $result['display_name'] != NULL && trim($result['display_name']) != 'NULL') //Global Display name
+							$rowsDisplayName[$header['num']] = $result['display_name'];
+						else if($type == 'Area')											//For area display class n id
+							$rowsDisplayName[$header['num']] = $type .' '.$result['id'] ;
+						else																//For for other than Area take actual name
+							$rowsDisplayName[$header['num']] = $result['name'] ;
+					}
+							
+					$rowsDescription[$header['num']] = $result['description'];
+					$header['category']=trim($header['category']);
+					if($header['category'] == NULL || trim($header['category']) == '')
+					$header['category'] = 'Undefined';
+				}
+				else
+				{
+					$rows[$header['num']] = $header['type_id'];
+					$header['category'] = 'Undefined';
+				}
+				$entity1Ids[$header['num']] = $header['type_id'];
 				
-				$header['category'] = 'Undefined';
+				if($prevEntity1Category == $header['category'])
+				{
+					$RowsSpan[$prevEntity1] = $prevEntity1Span+1;
+					$RowsSpan[$header['num']] = 0;
+					$prevEntity1 = $prevEntity1;
+					$prevEntity1Span = $prevEntity1Span+1;
+				}
+				else
+				{
+					$RowsSpan[$header['num']] = 1;
+					$prevEntity1 = $header['num'];
+					$prevEntity1Span = 1;
+				}
+				
+				$prevEntity1Category = $header['category'];
+				$rowsCategoryName[$header['num']] = $header['category'];
+				
+				$rowsCategoryEntityIds1[$header['category']][] = $header['type_id'];
+				if($header['tag'] != 'NULL')
+				$rowsTagName[$header['num']] = $header['tag'];
 			}
-			$entity2Ids[$header['num']] = $header['type_id'];
+		}	//END OF WHILE
+	}	//END OF SOHM
+	else
+	{
+		$query = "SELECT DISTINCT(e.`id`), e.`name`, e.`description` FROM `entities` e JOIN `entity_relations` er ON (e.`id`=er.`child`) WHERE er.`parent`='" . $id . "' AND e.`class`='Product'";
+		$res = mysql_query($query) or die('Bad SQL query getting products from disease heatmap report headers');
+		
+		$counter = 0;
+		while($result = mysql_fetch_array($res))
+		{
+			$counter++;
+			$rows[$counter] = $result['id'];
+			$rowsEntityType[$counter] = $result['class'];
+					
+			$result['company'] = GetCompanyNames($result['id']);
+			if($result['company'] != NULL && trim($result['company']) != '')
+			$rowsCompanyName[$counter] = ' / '.$result['company'];
+					
+			$rowsDisplayName[$counter] = $result['name'];
+			$rowsDescription[$counter] = $result['description'];
+			$header['category'] = 'Undefined';
 			
+			$entity1Ids[$counter] = $result['id'];
+				
+			if($prevEntity1Category == $header['category'])
+			{
+				$RowsSpan[$prevEntity1] = $prevEntity1Span+1;
+				$RowsSpan[$counter] = 0;
+				$prevEntity1 = $prevEntity1;
+				$prevEntity1Span = $prevEntity1Span+1;
+			}
+			else
+			{
+				$RowsSpan[$counter] = 1;
+				$prevEntity1 = $counter;
+				$prevEntity1Span = 1;
+			}
+			
+			$prevEntity1Category = $header['category'];
+			$rowsCategoryName[$counter] = $header['category'];
+			
+			$rowsCategoryEntityIds1[$header['category']][] = $result['id'];
+			$rowsTagName[$counter] = '';
+		}//END OF WHILE - ADDITION OF ROW DATA COMPLETES
+		
+		$meshFlg = false;
+		$query = "SELECT `mesh_name` FROM `entities` WHERE `id`='" . mysql_real_escape_string($id) . "'";
+		$res = mysql_query($query) or die('Bad SQL query getting disease mesh flag in OHM');
+	
+		if($res)
+		{
+			while($row = mysql_fetch_array($res))
+			if($row['mesh_name'] != NULL && trim($row['mesh_name']) != '')
+			$meshFlg = true;
+		}
+		
+		$query = "SELECT DISTINCT(e.`id`), e.`name`, e.`display_name`, e.`description`, e.`mesh_name` FROM `entities` e JOIN `entity_relations` er ON (e.`id`=er.`parent`) WHERE er.`child` IN ('" . implode("','",$entity1Ids) . "') AND e.`class`='Disease' ". (($meshFlg) ? "AND e.`mesh_name` <> '' AND e.`mesh_name` IS NOT NULL":"") ."";
+		$res = mysql_query($query) or die('Bad SQL query getting products from disease heatmap report headers');
+		
+		$counter = 0;
+		while($result = mysql_fetch_array($res))
+		{
+			$counter++;
+			$columns[$counter] = $result['id'];
+			$columnsEntityType[$counter] = $result['class'];
+			$columnsCompanyName[$counter] = '';
+			
+			if($meshFlg)
+				$columnsDisplayName[$counter] = $result['mesh_name'];
+			else if(trim($result['display_name']) != '' && $result['display_name'] != NULL && trim($result['display_name']) != 'NULL') //Global Display name
+				$columnsDisplayName[$counter] = $result['display_name'];
+			else
+				$columnsDisplayName[$counter] = $result['name'] ;	//For for other than Area take actual name
+						
+			$columnsDescription[$counter] = $result['description'];
+			$header['category'] = 'Undefined';
+			$entity2Ids[$counter] = $result['id'];
+				
 			if($prevEntity2Category == $header['category'])
 			{
 				$ColumnsSpan[$prevEntity2] = $prevEntity2Span+1;
-				$ColumnsSpan[$header['num']] = 0;
+				$ColumnsSpan[$counter] = 0;
 				$prevEntity2 = $prevEntity2;
 				$prevEntity2Span = $prevEntity2Span+1;
 				$last_cat_col = $last_cat_col;
 			}
 			else
 			{
-				$ColumnsSpan[$header['num']] = 1;
-				$prevEntity2 = $header['num'];
+				$ColumnsSpan[$counter] = 1;
+				$prevEntity2 = $counter;
 				$prevEntity2Span = 1;
 				$second_last_cat_col = $last_cat_col;
-				$last_cat_col = $header['num'];
+				$last_cat_col = $counter;
 			}
 				
 			$prevEntity2Category = $header['category'];
-			$columnsCategoryName[$header['num']] = $header['category'];
-			
-			$second_last_category = $last_category;
+			$columnsCategoryName[$counter] = $header['category'];
+			$columnsTagName[$counter] = '';
+				
 			$last_category = $header['category'];
 			$second_last_num = $last_num;
-			$last_num = $header['num'];
-			$last_entity2 = $header['type_id'];
-			
-			if($header['tag'] != 'NULL')
-				$columnsTagName[$header['num']] = $header['tag'];
-			
-			if(!$entity2_Category_Presence && $header['category'] != 'Undefined')
-			$entity2_Category_Presence = 1;
-		}
-		else
-		{
-			if($header['type_id'] != NULL)
-			{
-				$result =  mysql_fetch_assoc(mysql_query("SELECT `id`, `name`, `display_name`, `description`, `class`, `company` FROM `entities` WHERE id = '" . $header['type_id'] . "' "));
-				$rows[$header['num']] = $result['name'];
-				$rowsEntityType[$header['num']] = $result['class'];
-				$type = ''; if($type == 'Institution') $type = 'Company'; else if($type == 'MOA_Category') $type = 'MOA Category'; else $type = $result['class'];
-				if($result['company'] != NULL && trim($result['company']) != '')
-				{
-					$result['company']=str_replace(',',', ',$result['company']);
-					$result['company']=str_replace(',  ',', ',$result['company']);
-					$rowsCompanyName[$header['num']] = ' / '.$result['company'];
-				} 
-				
-				if($type == 'Product')
-				$rowsDisplayName[$header['num']] = $result['name'];
-				else
-				{
-					if(trim($header['display_name']) != '' && $header['display_name'] != NULL && $header['display_name'] != 'NULL') //HM LEVEL Display name
-						$rowsDisplayName[$header['num']] = $header['display_name'];
-					else if(trim($result['display_name']) != '' && $result['display_name'] != NULL && $result['display_name'] != 'NULL') //Global Display name
-						$rowsDisplayName[$header['num']] = $result['display_name'];
-					else if($type == 'Area')											//For area display class n id
-						$rowsDisplayName[$header['num']] = $type .' '.$result['id'] ;	
-					else																//For for other than Area take actual name
-						$rowsDisplayName[$header['num']] = $result['name'] ;	
-				}
-			
-				$rowsDescription[$header['num']] = $result['description'];
-				$header['category']=trim($header['category']);
-				if($header['category'] == NULL || trim($header['category']) == '')
-				$header['category'] = 'Undefined';
-			}
-			else
-			{
-				$rows[$header['num']] = $header['type_id'];
-				
-				$header['category'] = 'Undefined';
-			}
-			$entity1Ids[$header['num']] = $header['type_id'];
-			
-			if($prevEntity1Category == $header['category'])
-			{
-				$rows_Span[$prevEntity1] = $prevEntity1Span+1;
-				$rows_Span[$header['num']] = 0;
-				$prevEntity1 = $prevEntity1;
-				$prevEntity1Span = $prevEntity1Span+1;
-			}
-			else
-			{
-				$rows_Span[$header['num']] = 1;
-				$prevEntity1 = $header['num'];
-				$prevEntity1Span = 1;
-			}
-			
-			$prevEntity1Category = $header['category'];
-			$rowsCategoryName[$header['num']] = $header['category'];
-			
-			$rowsCategoryEntityIds1[$header['category']][] = $header['type_id'];
-			
-			if($header['tag'] != 'NULL')
-				$rowsTagName[$header['num']] = $header['tag'];
-		}
-	}
+			$last_num = $counter;
+			$LastEntity2 = $result['id'];
+		}//END OF WHILE - ADDITION OF COLUMN DATA COMPLETES
+	}//END OF ELSE FOR DISEASE OHM
 
+	
+	// SELECT MAX ROW AND MAX COL
+	$max_row = count($entity1Ids);
+	$max_column = count($entity2Ids);
 	
 	/////Remove last column at start only //////////
 	$new_columns = array();
@@ -1834,14 +1974,7 @@ function Download_reports()
 	print_r($rowsDisplayName);
 	print_r($rowsDescription);
 	die; */
-	// SELECT MAX ROW AND MAX COL
-	$query = 'SELECT MAX(`num`) AS `num` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' AND type = \'row\'';
-	$res = mysql_query($query) or die(mysql_error());
-	$max_row = mysql_fetch_array($res);
 	
-	$query = 'SELECT MAX(`num`) AS `num` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' AND type = \'column\'';
-	$res = mysql_query($query) or die(mysql_error());
-	$max_column = mysql_fetch_array($res);
 	
 	$row_total=array();
 	$col_total=array();
@@ -1864,10 +1997,15 @@ function Download_reports()
 	$tidy = new tidy(); /// Create Tidy Object
 	
 	
-	foreach($rows as $row => $rval)
+	foreach($rows as $row => $rid)
 	{
-		foreach($columns as $col => $cval)
+		$PhaseRowMatrix[$row]['oldrow'] = $row;
+		$PhaseRowMatrix[$row]['entity'] = $rid;
+		foreach($columns as $col => $cid)
 		{
+			$PhaseColumnMatrix[$col]['oldcol'] = $col;
+			$PhaseColumnMatrix[$col]['entity'] = $cid;
+			
 			if(isset($entity2Ids[$col]) && $entity2Ids[$col] != NULL && isset($entity1Ids[$row]) && $entity1Ids[$row] != NULL)
 			{
 				$cell_query = 'SELECT * FROM rpt_masterhm_cells WHERE (`entity1`=' . $entity1Ids[$row] . ' AND `entity2`='. $entity2Ids[$col] .') OR (`entity2`=' . $entity1Ids[$row] . ' AND `entity1`='. $entity2Ids[$col] .')';
@@ -1884,223 +2022,266 @@ function Download_reports()
 				$indlead_total=$cell_data['count_active_indlead']+$indlead_total;
 				
 				if($cell_data['count_active'] != '' && $cell_data['count_active'] != NULL)
-				$data_matrix[$row][$col]['active']=$cell_data['count_active'];
+				$data_matrix[$rid][$cid]['active']=$cell_data['count_active'];
 				else
-				$data_matrix[$row][$col]['active']=0;
+				$data_matrix[$rid][$cid]['active']=0;
 				
 				if($cell_data['count_total'] != '' && $cell_data['count_total'] != NULL)
-				$data_matrix[$row][$col]['total']=$cell_data['count_total'];
+				$data_matrix[$rid][$cid]['total']=$cell_data['count_total'];
 				else
-				$data_matrix[$row][$col]['total']=0;
+				$data_matrix[$rid][$cid]['total']=0;
 				
 				if($cell_data['count_active_indlead'] != '' && $cell_data['count_active_indlead'] != NULL)
-				$data_matrix[$row][$col]['indlead']=$cell_data['count_active_indlead'];
+				$data_matrix[$rid][$cid]['indlead']=$cell_data['count_active_indlead'];
 				else
-				$data_matrix[$row][$col]['indlead']=0;
+				$data_matrix[$rid][$cid]['indlead']=0;
 				
-				$data_matrix[$row][$col]['bomb_explain']=trim($cell_data['bomb_explain']);
+				if($ohm == 'SOHM')
+				{
+					$data_matrix[$rid][$cid]['phase_explain']=trim($cell_data['phase_explain']);
+					$data_matrix[$rid][$cid]['bomb_explain']=trim($cell_data['bomb_explain']);
+					$data_matrix[$rid][$cid]['filing']=trim($cell_data['filing']);
+					
+					$data_matrix[$rid][$cid]['bomb_lastchanged']=$cell_data['bomb_lastchanged'];
+					$data_matrix[$rid][$cid]['filing_lastchanged']=$cell_data['filing_lastchanged'];
+					$data_matrix[$rid][$cid]['phase_explain_lastchanged']=$cell_data['phase_explain_lastchanged'];
+				
+					$data_matrix[$rid][$cid]['phase4_override']=$cell_data['phase4_override'];
+					$data_matrix[$rid][$cid]['phase4_override_lastchanged']=$cell_data['phase4_override_lastchanged'];
+					
+					$data_matrix[$rid][$cid]['preclinical']=$cell_data['preclinical'];
+				}
+				else	//FOR OHM OTHER THAN NORMAL OHM MAKE CELL LEVEL DATA NULL
+				{
+					$data_matrix[$rid][$cid]['phase_explain']='';
+					$data_matrix[$rid][$cid]['bomb_explain']='';
+					$data_matrix[$rid][$cid]['filing']='';
+					
+					$data_matrix[$rid][$cid]['bomb_lastchanged']='';
+					$data_matrix[$rid][$cid]['filing_lastchanged']='';
+					$data_matrix[$rid][$cid]['phase_explain_lastchanged']='';
+				
+					$data_matrix[$rid][$cid]['phase4_override']='';
+					$data_matrix[$rid][$cid]['phase4_override_lastchanged']='';
+					
+					$data_matrix[$rid][$cid]['preclinical']=0;
+					$cell_data['phase4_override']=0;
+					
+					$cell_data['bomb']='';
+					$cell_data['bomb_auto']='';
+				}
+				$data_matrix[$rid][$cid]['highest_phase_prev']=$cell_data['highest_phase_prev'];
+				$data_matrix[$rid][$cid]['highest_phase_lastchanged']=$cell_data['highest_phase_lastchanged'];
+				
+				$data_matrix[$rid][$cid]['count_lastchanged']=$cell_data['count_lastchanged'];
+
 				/// Clean HTML using Tidy
-				$tidy = tidy_parse_string($data_matrix[$row][$col]['bomb_explain'], $tidy_config, 'UTF8');
+				$tidy = tidy_parse_string($data_matrix[$rid][$cid]['bomb_explain'], $tidy_config, 'UTF8');
 				$tidy->cleanRepair(); 
-				$data_matrix[$row][$col]['bomb_explain']=trim($tidy);
+				$data_matrix[$rid][$cid]['bomb_explain']=trim($tidy);
 				
-				$data_matrix[$row][$col]['filing']=trim($cell_data['filing']);
 				/// Clean HTML using Tidy
-				$tidy = tidy_parse_string($data_matrix[$row][$col]['filing'], $tidy_config, 'UTF8');
+				$tidy = tidy_parse_string($data_matrix[$rid][$cid]['filing'], $tidy_config, 'UTF8');
 				$tidy->cleanRepair(); 
-				$data_matrix[$row][$col]['filing']=trim($tidy);
+				$data_matrix[$rid][$cid]['filing']=trim($tidy);
 				
-				$data_matrix[$row][$col]['phase_explain']=trim($cell_data['phase_explain']);
 				/// Clean HTML using Tidy
-				$tidy = tidy_parse_string($data_matrix[$row][$col]['phase_explain'], $tidy_config, 'UTF8');
+				$tidy = tidy_parse_string($data_matrix[$rid][$cid]['phase_explain'], $tidy_config, 'UTF8');
 				$tidy->cleanRepair(); 
-				$data_matrix[$row][$col]['phase_explain']=trim($tidy);
+				$data_matrix[$rid][$cid]['phase_explain']=trim($tidy);
 				
-				$data_matrix[$row][$col]['preclinical']=$cell_data['preclinical'];
+				$data_matrix[$rid][$cid]['preclinical']=$cell_data['preclinical'];
 				
 				$Width = 0;
 				
 				if($cell_data['bomb_auto'] == 'small')
 				{
-					$data_matrix[$row][$col]['bomb_auto']['value']=$cell_data['bomb_auto'];
-					$data_matrix[$row][$col]['bomb_auto']['src']='sbomb.png';
-					$data_matrix[$row][$col]['bomb_auto']['alt']='Small bomb';
-					$data_matrix[$row][$col]['bomb_auto']['style']='width:10px; height:11px;';
-					$data_matrix[$row][$col]['bomb_auto']['title']='Suggested';
+					$data_matrix[$rid][$cid]['bomb_auto']['value']=$cell_data['bomb_auto'];
+					$data_matrix[$rid][$cid]['bomb_auto']['src']='sbomb.png';
+					$data_matrix[$rid][$cid]['bomb_auto']['alt']='Small bomb';
+					$data_matrix[$rid][$cid]['bomb_auto']['style']='width:10px; height:11px;';
+					$data_matrix[$rid][$cid]['bomb_auto']['title']='Suggested';
 				}
 				elseif($cell_data['bomb_auto'] == 'large')
 				{
-					$data_matrix[$row][$col]['bomb_auto']['value']=$cell_data['bomb_auto'];
-					$data_matrix[$row][$col]['bomb_auto']['src']='lbomb.png';
-					$data_matrix[$row][$col]['bomb_auto']['alt']='Large bomb';
-					$data_matrix[$row][$col]['bomb_auto']['style']='width:18px; height:20px;';
-					$data_matrix[$row][$col]['bomb_auto']['title']='Suggested';
+					$data_matrix[$rid][$cid]['bomb_auto']['value']=$cell_data['bomb_auto'];
+					$data_matrix[$rid][$cid]['bomb_auto']['src']='lbomb.png';
+					$data_matrix[$rid][$cid]['bomb_auto']['alt']='Large bomb';
+					$data_matrix[$rid][$cid]['bomb_auto']['style']='width:18px; height:20px;';
+					$data_matrix[$rid][$cid]['bomb_auto']['title']='Suggested';
 				}
 				else
 				{
-					$data_matrix[$row][$col]['bomb_auto']['value']=$cell_data['bomb_auto'];
-					$data_matrix[$row][$col]['bomb_auto']['src']='trans.gif';
-					$data_matrix[$row][$col]['bomb_auto']['alt']='None';
-					$data_matrix[$row][$col]['bomb_auto']['style']='width:10px; height:11px;';
-					$data_matrix[$row][$col]['bomb_auto']['title']='';
+					$data_matrix[$rid][$cid]['bomb_auto']['value']=$cell_data['bomb_auto'];
+					$data_matrix[$rid][$cid]['bomb_auto']['src']='trans.gif';
+					$data_matrix[$rid][$cid]['bomb_auto']['alt']='None';
+					$data_matrix[$rid][$cid]['bomb_auto']['style']='width:10px; height:11px;';
+					$data_matrix[$rid][$cid]['bomb_auto']['title']='';
 				}
 				
 				
-				$data_matrix[$row][$col]['last_update']=$cell_data['last_update'];
-				$data_matrix[$row][$col]['count_lastchanged']=$cell_data['count_lastchanged'];
-				$data_matrix[$row][$col]['bomb_lastchanged']=$cell_data['bomb_lastchanged'];
-				$data_matrix[$row][$col]['filing_lastchanged']=$cell_data['filing_lastchanged'];
-				$data_matrix[$row][$col]['phase_explain_lastchanged']=$cell_data['phase_explain_lastchanged'];
-				$data_matrix[$row][$col]['highest_phase_prev']=$cell_data['highest_phase_prev'];
-				$data_matrix[$row][$col]['highest_phase_lastchanged']=$cell_data['highest_phase_lastchanged'];
+				$data_matrix[$rid][$cid]['last_update']=$cell_data['last_update'];
+				
+				$data_matrix[$rid][$cid]['active_prev']=$cell_data['count_active_prev'];
+				$data_matrix[$rid][$cid]['total_prev']=$cell_data['count_total_prev'];
+				$data_matrix[$rid][$cid]['indlead_prev']=$cell_data['count_active_indlead_prev'];
 				
 				
-				$data_matrix[$row][$col]['active_prev']=$cell_data['count_active_prev'];
-				$data_matrix[$row][$col]['total_prev']=$cell_data['count_total_prev'];
-				$data_matrix[$row][$col]['indlead_prev']=$cell_data['count_active_indlead_prev'];
+				$data_matrix[$rid][$cid]['update_flag'] = 0;
 				
 				
-				$data_matrix[$row][$col]['update_flag'] = 0;
-				
-				
-				if(date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['filing_lastchanged'])) <= date('Y-m-d H:i:s', strtotime($start_range, $now)) && date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['filing_lastchanged'])) >= date('Y-m-d H:i:s', strtotime($end_range, $now)))
+				if(date('Y-m-d H:i:s', strtotime($data_matrix[$rid][$cid]['filing_lastchanged'])) <= date('Y-m-d H:i:s', strtotime($start_range, $now)) && date('Y-m-d H:i:s', strtotime($data_matrix[$rid][$cid]['filing_lastchanged'])) >= date('Y-m-d H:i:s', strtotime($end_range, $now)))
 				{
-					$data_matrix[$row][$col]['filing_image']='images/newred_file.png';
-					$data_matrix[$row][$col]['exec_filing_image']='images/newred_file'; //Excel file image
-					$data_matrix[$row][$col]['update_flag'] = 1;
+					$data_matrix[$rid][$cid]['filing_image']='images/newred_file.png';
+					$data_matrix[$rid][$cid]['exec_filing_image']='images/newred_file'; //Excel file image
+					$data_matrix[$rid][$cid]['update_flag'] = 1;
 				}
 				else
 				{
-					$data_matrix[$row][$col]['filing_image']='images/new_file.png';
-					$data_matrix[$row][$col]['exec_filing_image']='images/new_file'; //Excel file image
+					$data_matrix[$rid][$cid]['filing_image']='images/new_file.png';
+					$data_matrix[$rid][$cid]['exec_filing_image']='images/new_file'; //Excel file image
 				}
 				
 				
-				if(date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['phase_explain_lastchanged'])) <= date('Y-m-d H:i:s', strtotime($start_range, $now)) && date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['phase_explain_lastchanged'])) >= date('Y-m-d H:i:s', strtotime($end_range, $now)))
+				if(date('Y-m-d H:i:s', strtotime($data_matrix[$rid][$cid]['phase_explain_lastchanged'])) <= date('Y-m-d H:i:s', strtotime($start_range, $now)) && date('Y-m-d H:i:s', strtotime($data_matrix[$rid][$cid]['phase_explain_lastchanged'])) >= date('Y-m-d H:i:s', strtotime($end_range, $now)))
 				{
-					$data_matrix[$row][$col]['phase_explain_image']='images/phaseexp_red.png';
-					$data_matrix[$row][$col]['update_flag'] = 1;
+					$data_matrix[$rid][$cid]['phase_explain_image']='images/phaseexp_red.png';
+					$data_matrix[$rid][$cid]['update_flag'] = 1;
 				}
 				else
-				$data_matrix[$row][$col]['phase_explain_image']='images/phaseexp.png';
+				$data_matrix[$rid][$cid]['phase_explain_image']='images/phaseexp.png';
 				
-				if((date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['highest_phase_lastchanged'])) <= date('Y-m-d H:i:s', strtotime($start_range, $now))) && (date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['highest_phase_lastchanged'])) >= date('Y-m-d H:i:s', strtotime($end_range, $now))) && ($data_matrix[$row][$col]['highest_phase_prev'] != NULL && $data_matrix[$row][$col]['highest_phase_prev'] != ''))
+				if((date('Y-m-d H:i:s', strtotime($data_matrix[$rid][$cid]['highest_phase_lastchanged'])) <= date('Y-m-d H:i:s', strtotime($start_range, $now))) && (date('Y-m-d H:i:s', strtotime($data_matrix[$rid][$cid]['highest_phase_lastchanged'])) >= date('Y-m-d H:i:s', strtotime($end_range, $now))) && ($data_matrix[$rid][$cid]['highest_phase_prev'] != NULL && $data_matrix[$rid][$cid]['highest_phase_prev'] != ''))
 				{
-					$data_matrix[$row][$col]['highest_phase_lastchanged_value']=1;
-					$data_matrix[$row][$col]['update_flag'] = 1;
+					$data_matrix[$rid][$cid]['highest_phase_lastchanged_value']=1;
+					$data_matrix[$rid][$cid]['update_flag'] = 1;
 				}
 				
 				if(trim($cell_data['bomb']) == 'small')
 				{
-					$data_matrix[$row][$col]['bomb']['value']=trim($cell_data['bomb']);
+					$data_matrix[$rid][$cid]['bomb']['value']=trim($cell_data['bomb']);
 					$Width = $Width + 3.2 + 0.2;
 					
-					if(date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])) <= date('Y-m-d H:i:s', strtotime($start_range, $now)) && date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])) >= date('Y-m-d H:i:s', strtotime($end_range, $now)))
+					if(date('Y-m-d H:i:s', strtotime($data_matrix[$rid][$cid]['bomb_lastchanged'])) <= date('Y-m-d H:i:s', strtotime($start_range, $now)) && date('Y-m-d H:i:s', strtotime($data_matrix[$rid][$cid]['bomb_lastchanged'])) >= date('Y-m-d H:i:s', strtotime($end_range, $now)))
 					{
-						$data_matrix[$row][$col]['bomb']['src']='newred_sbomb.png';
-						$data_matrix[$row][$col]['exec_bomb']['src']='newred_sbomb'; //Excel bomb image
-						$data_matrix[$row][$col]['update_flag'] = 1;
+						$data_matrix[$rid][$cid]['bomb']['src']='newred_sbomb.png';
+						$data_matrix[$rid][$cid]['exec_bomb']['src']='newred_sbomb'; //Excel bomb image
+						$data_matrix[$rid][$cid]['update_flag'] = 1;
 					}
 					else
 					{
-						$data_matrix[$row][$col]['bomb']['src']='new_sbomb.png';
-						$data_matrix[$row][$col]['exec_bomb']['src']='new_sbomb'; //Excel bomb image
+						$data_matrix[$rid][$cid]['bomb']['src']='new_sbomb.png';
+						$data_matrix[$rid][$cid]['exec_bomb']['src']='new_sbomb'; //Excel bomb image
 					}
-					$data_matrix[$row][$col]['bomb']['alt']='Small bomb';
-					$data_matrix[$row][$col]['bomb']['style']='width:11px; height:11px;';
-					$data_matrix[$row][$col]['bomb']['title']='Bomb Details';
+					$data_matrix[$rid][$cid]['bomb']['alt']='Small bomb';
+					$data_matrix[$rid][$cid]['bomb']['style']='width:11px; height:11px;';
+					$data_matrix[$rid][$cid]['bomb']['title']='Bomb Details';
 				}
 				elseif(trim($cell_data['bomb']) == 'large')
 				{
-					$data_matrix[$row][$col]['bomb']['value']=trim($cell_data['bomb']);
+					$data_matrix[$rid][$cid]['bomb']['value']=trim($cell_data['bomb']);
 					$Width = $Width + 3.2 + 0.2;
 					
-					if((date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])) <= date('Y-m-d H:i:s', strtotime($start_range, $now))) && (date('Y-m-d H:i:s', strtotime($data_matrix[$row][$col]['bomb_lastchanged'])) >= date('Y-m-d H:i:s', strtotime($end_range, $now))))
+					if((date('Y-m-d H:i:s', strtotime($data_matrix[$rid][$cid]['bomb_lastchanged'])) <= date('Y-m-d H:i:s', strtotime($start_range, $now))) && (date('Y-m-d H:i:s', strtotime($data_matrix[$rid][$cid]['bomb_lastchanged'])) >= date('Y-m-d H:i:s', strtotime($end_range, $now))))
 					{
-						$data_matrix[$row][$col]['bomb']['src']='newred_lbomb.png';
-						$data_matrix[$row][$col]['exec_bomb']['src']='newred_lbomb';
-						$data_matrix[$row][$col]['update_flag'] = 1;
+						$data_matrix[$rid][$cid]['bomb']['src']='newred_lbomb.png';
+						$data_matrix[$rid][$cid]['exec_bomb']['src']='newred_lbomb';
+						$data_matrix[$rid][$cid]['update_flag'] = 1;
 					}
 					else
 					{
-						$data_matrix[$row][$col]['bomb']['src']='new_lbomb.png';
-						$data_matrix[$row][$col]['exec_bomb']['src']='new_lbomb';
+						$data_matrix[$rid][$cid]['bomb']['src']='new_lbomb.png';
+						$data_matrix[$rid][$cid]['exec_bomb']['src']='new_lbomb';
 					}
-					$data_matrix[$row][$col]['bomb']['alt']='Large bomb';
-					$data_matrix[$row][$col]['bomb']['style']='width:11px; height:11px;';
-					$data_matrix[$row][$col]['bomb']['title']='Bomb Details';
+					$data_matrix[$rid][$cid]['bomb']['alt']='Large bomb';
+					$data_matrix[$rid][$cid]['bomb']['style']='width:11px; height:11px;';
+					$data_matrix[$rid][$cid]['bomb']['title']='Bomb Details';
 				}
 				else
 				{
-					$data_matrix[$row][$col]['bomb']['value']=$cell_data['bomb'];
-					$data_matrix[$row][$col]['bomb']['src']='new_square.png';
-					$data_matrix[$row][$col]['exec_bomb']['src']='new_square.png';
-					$data_matrix[$row][$col]['bomb']['alt']='None';
-					$data_matrix[$row][$col]['bomb']['style']='width:11px; height:11px;';
-					$data_matrix[$row][$col]['bomb']['title']='Bomb details';
+					$data_matrix[$rid][$cid]['bomb']['value']=$cell_data['bomb'];
+					$data_matrix[$rid][$cid]['bomb']['src']='new_square.png';
+					$data_matrix[$rid][$cid]['exec_bomb']['src']='new_square.png';
+					$data_matrix[$rid][$cid]['bomb']['alt']='None';
+					$data_matrix[$rid][$cid]['bomb']['style']='width:11px; height:11px;';
+					$data_matrix[$rid][$cid]['bomb']['title']='Bomb details';
 				}
-				
-				$data_matrix[$row][$col]['phase4_override']=$cell_data['phase4_override'];
-				
-				
 				
 				if($cell_data['highest_phase'] == 'N/A' || $cell_data['highest_phase'] == '' || $cell_data['highest_phase'] === NULL)
 				{
-					$data_matrix[$row][$col]['color']='background-color:#BFBFBF;';
-					$data_matrix[$row][$col]['color_code']='BFBFBF';
+					$data_matrix[$rid][$cid]['color']='background-color:#BFBFBF;';
+					$data_matrix[$rid][$cid]['color_code']='BFBFBF';
+					
+					$PhaseRowMatrix[$row]['na'] = $PhaseRowMatrix[$row]['na'] + 1;
+					$PhaseColumnMatrix[$col]['na'] = $PhaseColumnMatrix[$col]['na'] + 1;
 				}
 				else if($cell_data['highest_phase'] == '0')
 				{
-					$data_matrix[$row][$col]['color']='background-color:#00CCFF;';
-					$data_matrix[$row][$col]['color_code']='00CCFF';
+					$data_matrix[$rid][$cid]['color']='background-color:#00CCFF;';
+					$data_matrix[$rid][$cid]['color_code']='00CCFF';
+					
+					$PhaseRowMatrix[$row]['0'] = $PhaseRowMatrix[$row]['0'] + 1;
+					$PhaseColumnMatrix[$col]['0'] = $PhaseColumnMatrix[$col]['0'] + 1;
 				}
 				else if($cell_data['highest_phase'] == '1' || $cell_data['highest_phase'] == '0/1' || $cell_data['highest_phase'] == '1a' 
 				|| $cell_data['highest_phase'] == '1b' || $cell_data['highest_phase'] == '1a/1b' || $cell_data['highest_phase'] == '1c')
 				{
-					$data_matrix[$row][$col]['color']='background-color:#99CC00;';
-					$data_matrix[$row][$col]['color_code']='99CC00';
+					$data_matrix[$rid][$cid]['color']='background-color:#99CC00;';
+					$data_matrix[$rid][$cid]['color_code']='99CC00';
+					
+					$PhaseRowMatrix[$row]['1'] = $PhaseRowMatrix[$row]['1'] + 1;
+					$PhaseColumnMatrix[$col]['1'] = $PhaseColumnMatrix[$col]['1'] + 1;
 				}
 				else if($cell_data['highest_phase'] == '2' || $cell_data['highest_phase'] == '1/2' || $cell_data['highest_phase'] == '1b/2' 
 				|| $cell_data['highest_phase'] == '1b/2a' || $cell_data['highest_phase'] == '2a' || $cell_data['highest_phase'] == '2a/2b' 
 				|| $cell_data['highest_phase'] == '2a/b' || $cell_data['highest_phase'] == '2b')
 				{
-					$data_matrix[$row][$col]['color']='background-color:#FFFF00;';
-					$data_matrix[$row][$col]['color_code']='FFFF00';
+					$data_matrix[$rid][$cid]['color']='background-color:#FFFF00;';
+					$data_matrix[$rid][$cid]['color_code']='FFFF00';
+					
+					$PhaseRowMatrix[$row]['2'] = $PhaseRowMatrix[$row]['2'] + 1;
+					$PhaseColumnMatrix[$col]['2'] = $PhaseColumnMatrix[$col]['2'] + 1;
 				}
 				else if($cell_data['highest_phase'] == '3' || $cell_data['highest_phase'] == '2/3' || $cell_data['highest_phase'] == '2b/3' 
 				|| $cell_data['highest_phase'] == '3a' || $cell_data['highest_phase'] == '3b')
 				{
-					$data_matrix[$row][$col]['color']='background-color:#FF9900;';
-					$data_matrix[$row][$col]['color_code']='FF9900';
+					$data_matrix[$rid][$cid]['color']='background-color:#FF9900;';
+					$data_matrix[$rid][$cid]['color_code']='FF9900';
+					
+					$PhaseRowMatrix[$row]['3'] = $PhaseRowMatrix[$row]['3'] + 1;
+					$PhaseColumnMatrix[$col]['3'] = $PhaseColumnMatrix[$col]['3'] + 1;
 				}
 				else if($cell_data['highest_phase'] == '4' || $cell_data['highest_phase'] == '3/4' || $cell_data['highest_phase'] == '3b/4')
 				{
-					$data_matrix[$row][$col]['color']='background-color:#FF0000;';
-					$data_matrix[$row][$col]['color_code']='FF0000';	
+					$data_matrix[$rid][$cid]['color']='background-color:#FF0000;';
+					$data_matrix[$rid][$cid]['color_code']='FF0000';
+					
+					$PhaseRowMatrix[$row]['4'] = $PhaseRowMatrix[$row]['4'] + 1;	
+					$PhaseColumnMatrix[$col]['4'] = $PhaseColumnMatrix[$col]['4'] + 1;	
 				}
 				
 				if($cell_data['phase4_override'])
 				{
-					$data_matrix[$row][$col]['color']='background-color:#FF0000;';
-					$data_matrix[$row][$col]['color_code']='FF0000';
+					$data_matrix[$rid][$cid]['color']='background-color:#FF0000;';
+					$data_matrix[$rid][$cid]['color_code']='FF0000';
 				}
 				
 				$allTrialsStatusArray = array('not_yet_recruiting', 'recruiting', 'enrolling_by_invitation', 'active_not_recruiting', 'completed', 'suspended', 'terminated', 'withdrawn', 'available', 'no_longer_available', 'approved_for_marketing', 'no_longer_recruiting', 'withheld', 'temporarily_not_available', 'ongoing', 'not_authorized', 'prohibited', 'new_trials');
 				foreach($allTrialsStatusArray as $status)
 				{
-					$data_matrix[$row][$col][$status]=$cell_data[$status];
+					$data_matrix[$rid][$cid][$status]=$cell_data[$status];
 				}
 			
 				$activeIndleadStatusArray = array('not_yet_recruiting_active_indlead', 'recruiting_active_indlead', 'enrolling_by_invitation_active_indlead', 'active_not_recruiting_active_indlead', 'completed_active_indlead', 'suspended_active_indlead', 'terminated_active_indlead', 'withdrawn_active_indlead', 'available_active_indlead', 'no_longer_available_active_indlead', 'approved_for_marketing_active_indlead', 'no_longer_recruiting_active_indlead', 'withheld_active_indlead', 'temporarily_not_available_active_indlead', 'ongoing_active_indlead', 'not_authorized_active_indlead', 'prohibited_active_indlead');
 				foreach($activeIndleadStatusArray as $status)
 				{
-					$data_matrix[$row][$col][$status]=$cell_data[$status];
+					$data_matrix[$rid][$cid][$status]=$cell_data[$status];
 				}
 			
 				$activeStatusArray = array('not_yet_recruiting_active', 'recruiting_active', 'enrolling_by_invitation_active', 'active_not_recruiting_active', 'completed_active', 'suspended_active', 'terminated_active', 'withdrawn_active', 'available_active', 'no_longer_available_active', 'approved_for_marketing_active', 'no_longer_recruiting_active', 'withheld_active', 'temporarily_not_available_active', 'ongoing_active', 'not_authorized_active', 'prohibited_active');
 				foreach($activeStatusArray as $status)
 				{
-					$data_matrix[$row][$col][$status]=$cell_data[$status];
+					$data_matrix[$rid][$cid][$status]=$cell_data[$status];
 				}
 				
 				////// Remaining Width calculation
@@ -2110,30 +2291,30 @@ function Download_reports()
 		
 				if($_POST['dwcount']=='active')
 				{
-					if($data_matrix[$row][$col]['active'] != NULL && $data_matrix[$row][$col]['active'] != '')
+					if($data_matrix[$rid][$cid]['active'] != NULL && $data_matrix[$rid][$cid]['active'] != '')
 					{
-						$Width = $Width + $pdf->GetStringWidth($data_matrix[$row][$col]['active'], 'freesansb', 'B', 8) + 0.6;
+						$Width = $Width + $pdf->GetStringWidth($data_matrix[$rid][$cid]['active'], 'freesansb', 'B', 8) + 0.6;
 					}
 				}
 				elseif($_POST['dwcount']=='total')
 				{
-					if($data_matrix[$row][$col]['total'] != NULL && $data_matrix[$row][$col]['total'] != '')
+					if($data_matrix[$rid][$cid]['total'] != NULL && $data_matrix[$rid][$cid]['total'] != '')
 					{
-						$Width = $Width + $pdf->GetStringWidth($data_matrix[$row][$col]['total'], 'freesansb', 'B', 8) + 0.6;
+						$Width = $Width + $pdf->GetStringWidth($data_matrix[$rid][$cid]['total'], 'freesansb', 'B', 8) + 0.6;
 					}
 				}
 				else
 				{
-					if($data_matrix[$row][$col]['indlead'] != NULL && $data_matrix[$row][$col]['indlead'] != '')
+					if($data_matrix[$rid][$cid]['indlead'] != NULL && $data_matrix[$rid][$cid]['indlead'] != '')
 					{
-						$Width = $Width + $pdf->GetStringWidth($data_matrix[$row][$col]['indlead'], 'freesansb', 'B', 8) + 0.6;
+						$Width = $Width + $pdf->GetStringWidth($data_matrix[$rid][$cid]['indlead'], 'freesansb', 'B', 8) + 0.6;
 					}
 				}
 				
-				if(trim($data_matrix[$row][$col]['filing']) != '' && $data_matrix[$row][$col]['filing'] != NULL)
+				if(trim($data_matrix[$rid][$cid]['filing']) != '' && $data_matrix[$rid][$cid]['filing'] != NULL)
 				$Width = $Width + 3.4 + 0.2;
 				
-				if($data_matrix[$row][$col]['update_flag'] == 1)	// As we produce white border
+				if($data_matrix[$rid][$cid]['update_flag'] == 1)	// As we produce white border
 				$Width = $Width + 0.8;
 				
 				if($Width < $Min_One_Liner)
@@ -2146,28 +2327,121 @@ function Download_reports()
 			}
 			else
 			{
-				$data_matrix[$row][$col]['active']=0;
-				$data_matrix[$row][$col]['total']=0;
+				$data_matrix[$rid][$cid]['active']=0;
+				$data_matrix[$rid][$cid]['total']=0;
 				$col_active_total[$col]=0+$col_active_total[$col];
 				$row_active_total[$row]=0+$row_active_total[$row];
 				$col_count_total[$col]=0+$col_count_total[$col];
 				$row_count_total[$row]=0+$row_count_total[$row];
-				$data_matrix[$row][$col]['bomb_auto']['src']='';
-				$data_matrix[$row][$col]['bomb']['src']='';
-				$data_matrix[$row][$col]['bomb_explain']='';
-				$data_matrix[$row][$col]['filing']='';
-				$data_matrix[$row][$col]['color']='background-color:#DDF;';
-				$data_matrix[$row][$col]['color_code']='DDF';
-				$data_matrix[$row][$col]['update_flag'] = 0;
+				$data_matrix[$rid][$cid]['bomb_auto']['src']='';
+				$data_matrix[$rid][$cid]['bomb']['src']='';
+				$data_matrix[$rid][$cid]['bomb_explain']='';
+				$data_matrix[$rid][$cid]['filing']='';
+				$data_matrix[$rid][$cid]['color']='background-color:#DDF;';
+				$data_matrix[$rid][$cid]['color_code']='DDF';
+				$data_matrix[$rid][$cid]['update_flag'] = 0;
 				$Width = $Bold_Line_Height;
 				//if($Width_matrix[$col]['width'] < $Width || $Width_matrix[$col]['width'] == '' || $Width_matrix[$col]['width'] == 0)
 				//$Width_matrix[$col]['width']=$Width+2;
 				
 				if($Width_matrix[$col]['width'] < $Min_One_Liner)
 				$Width_matrix[$col]['width'] = $Min_One_Liner;
+				
+				$PhaseRowMatrix[$row]['blank'] = $PhaseRowMatrix[$row]['blank'] + 1;
+				$PhaseColumnMatrix[$col]['blank'] = $PhaseColumnMatrix[$col]['blank'] + 1;
 			}
 		}
 	}
+	
+	if($ohm != 'SOHM') //IF NOT NORMAL OHM THEN SORT IT BY PHASE COUNT
+	{
+		// SORT ROWS AND REARRANGE ALL ROW RELATED DATA
+		foreach ($PhaseRowMatrix as $key => $p) {
+			$phna[$key]  = $p['na'];
+			$ph0[$key] = $p['0'];
+			$ph1[$key] = $p['1'];
+			$ph2[$key] = $p['2'];
+			$ph3[$key] = $p['3'];
+			$ph4[$key] = $p['4'];
+			$phblank[$key] = $p['blank'];
+		}
+		array_multisort($ph4, SORT_DESC, $ph3, SORT_DESC, $ph2, SORT_DESC, $ph1, SORT_DESC, $ph0, SORT_DESC,  $phna, SORT_DESC,  $phblank, SORT_DESC, $PhaseRowMatrix);
+		
+		$row_active_totalCopy=$row_active_total;
+		$row_count_totalCopy=$row_count_total;
+		$row_indlead_totalCopy=$row_indlead_total;
+		$rowsCopy = $rows;
+		$rowsCompanyNameCopy = $rowsCompanyName;
+		$rowsDisplayNameCopy = $rowsDisplayName;
+		$rowsDescriptionCopy = $rowsDescription;
+		$entity1IdsCopy = $entity1Ids;
+			
+		foreach($PhaseRowMatrix as $k=>$r)
+		{
+			$row_active_total[$k+1]=$row_active_totalCopy[$r['oldrow']];
+			$row_count_total[$k+1]=$row_count_totalCopy[$r['oldrow']];
+			$row_indlead_total[$k+1]=$row_indlead_totalCopy[$r['oldrow']];
+			$rows[$k+1] = $rowsCopy[$r['oldrow']];
+			$rowsCompanyName[$k+1] = $rowsCompanyNameCopy[$r['oldrow']];
+			$rowsDisplayName[$k+1] = $rowsDisplayNameCopy[$r['oldrow']];
+			$rowsDescription[$k+1] = $rowsDescriptionCopy[$r['oldrow']];
+			$entity1Ids[$k+1] = $entity1IdsCopy[$r['oldrow']];
+		}
+		// END OF - SORT ROWS AND REARRANGE ALL ROW RELATED DATA
+		
+		// SORT COLUMNS AND REARRANGE ALL COLUMN RELATED DATA
+		foreach ($PhaseColumnMatrix as $key => $p) {
+			$rphna[$key]  = $p['na'];
+			$rph0[$key] = $p['0'];
+			$rph1[$key] = $p['1'];
+			$rph2[$key] = $p['2'];
+			$rph3[$key] = $p['3'];
+			$rph4[$key] = $p['4'];
+			$rphblank[$key] = $p['blank'];
+		}
+		array_multisort($rph4, SORT_DESC, $rph3, SORT_DESC, $rph2, SORT_DESC, $rph1, SORT_DESC, $rph0, SORT_DESC,  $rphna, SORT_DESC,  $rphblank, SORT_DESC, $PhaseColumnMatrix);
+		
+		$counter = 1;
+		$NewPhaseColumnMatrix = array();
+		foreach($PhaseColumnMatrix as $k=>$r)
+		{
+			if($id == $r['entity'])
+			{
+				$NewPhaseColumnMatrix[0] = $r;
+			}
+			else
+			{
+				$NewPhaseColumnMatrix[$counter] = $r;
+				$counter++;
+			}
+		}
+		$PhaseColumnMatrix = $NewPhaseColumnMatrix;
+		
+		$col_active_totalCopy=$col_active_total;
+		$col_count_totalCopy=$col_count_total;
+		$col_indlead_totalCopy=$col_indlead_total;
+		$columnsCopy = $columns;
+		$columnsCompanyNameCopy = $columnsCompanyName;
+		$columnsDisplayNameCopy = $columnsDisplayName;
+		$columnsDescriptionCopy = $columnsDescription;
+		$entity2IdsCopy = $entity2Ids;
+			
+		foreach($PhaseColumnMatrix as $k=>$r)
+		{
+			$col_active_total[$k+1]=$col_active_totalCopy[$r['oldcol']];
+			$col_count_total[$k+1]=$col_count_totalCopy[$r['oldcol']];
+			$col_indlead_total[$k+1]=$col_indlead_totalCopy[$r['oldcol']];
+			$columns[$k+1] = $columnsCopy[$r['oldcol']];
+			$columnsCompanyName[$k+1] = $columnsCompanyNameCopy[$r['oldcol']];
+			$columnsDisplayName[$k+1] = $columnsDisplayNameCopy[$r['oldcol']];
+			$columnsDescription[$k+1] = $columnsDescriptionCopy[$r['oldcol']];
+			$entity2Ids[$k+1] = $entity2IdsCopy[$r['oldcol']];
+		}
+		$last_num = count($entity2Ids);
+		$second_last_num = $last_num-1;
+		$LastEntity2 = $entity2Ids[count($entity2Ids)];
+		// END OF - SORT COLS AND REARRANGE ALL ROW RELATED DATA
+	}//END OF SORT IF
 	
 	$count_fillbomb=0;	
 	if($_POST['dwcount']=='active')
@@ -2195,11 +2469,17 @@ function Download_reports()
 	{
 		$link_part .= '&sr='.$sr.'&er='.$er;
 	}
+	if($ohm == 'SOHM')
 	$link_part .= '&hm=' . $id;
+	
+	if($ohm == 'SOHM' || $ohm == 'EOHMH')
+		$CommonLinkForAll = urlPath() .'intermediary.php?';
+	else
+		$CommonLinkForAll = urlPath() .'trialzilla_ott.php?sourcepg=TZ&';	
 	
 	$link_part=str_replace(' ','+',$link_part);	
 	
-	$Report_Name = htmlspecialchars((trim($Report_DisplayName) != '' && $Report_DisplayName != NULL)? trim($Report_DisplayName):'report '.$id.'');
+	$Report_Name = $ReportDisplayName;
 	
 	if($_POST['dwformat']=='pdfdown')
 	{
@@ -2247,7 +2527,7 @@ function Download_reports()
 		$PageNum = 1;
 		
 		//ini_set('pcre.backtrack_limit',strlen($pdfContent));	
-		$name = htmlspecialchars(strlen($name)>0?$name:('report '.$id.''));
+		$name = $ReportDisplayName;
 		
 		////40% width formula - Now entity1 column will expand maximum upto 40% of the page width not more than that at initial stage only
 		$Entity1_Width40 = 200.66 * 40 / 100;	/// give entity1 column upto 40% width of normal page orienation
@@ -2257,7 +2537,7 @@ function Download_reports()
 		$Current_entity1_Col_Width = $entity1_Col_Width;
 		if($Avail_Entity1_Col_width > $entity1_Col_Width)
 		{
-			foreach($rows as $row => $rval)
+			foreach($rows as $row => $rid)
 			{
 				if(isset($entity1Ids[$row]) && $entity1Ids[$row] != NULL && !empty($entity2Ids))
 				{
@@ -2407,7 +2687,7 @@ function Download_reports()
 		$Current_entity1_Col_Width = $entity1_Col_Width;
 		if($Avail_Entity1_Col_width > 0)
 		{
-			foreach($rows as $row => $rval)
+			foreach($rows as $row => $rid)
 			{
 				if(isset($entity1Ids[$row]) && $entity1Ids[$row] != NULL && !empty($entity2Ids))
 				{
@@ -2519,7 +2799,7 @@ function Download_reports()
 		$pdf->SetFont('freesans', ' ', 8, '', false); // Normal Font
 		
 		///Calculate height for entity1 row
-		foreach($rows as $row => $rval)
+		foreach($rows as $row => $rid)
 		{
 			$data = trim($rowsCompanyName[$row]).((trim($rowsTagName[$row]) != '') ? ' ['.$rowsTagName[$row].']':'');
 			$RownHeight = getNumLinesPDFExport($rowsDisplayName[$row], $data, $entity1_Col_Width, $Bold_Line_Height, $Line_Height, $pdf);
@@ -2702,7 +2982,7 @@ function Download_reports()
 				}
 				////////End of part added for padding
 				
-				$pdfContent .= '<a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?e2=' . $entity2Ids[$col]. $link_part . '" target="_blank" title="'. $caltTitle .'">'.$val.'</a></div>';
+				$pdfContent .= '<a style="color:#000000; text-decoration:none;" href="'. $CommonLinkForAll .'e2=' . $entity2Ids[$col]. $link_part . '" target="_blank" title="'. $caltTitle .'">'.$val.'</a></div>';
 				
 				if($Rotation_Flg == 1)
 				{
@@ -2793,7 +3073,7 @@ function Download_reports()
 				//$pdfContent .= '<br style="line-height:'.((($extra_space* 72 / 96)/2)).'px;" />';
 				$pdf->setCellPaddings(0, ($extra_space/2), 0, 0);
 				
-				$pdfContent .= '<a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?e1=' . implode(',', $entity1Ids) . '&e2=' . implode(',', $entity2Ids). $link_part . '" target="_blank" title="'. $title .'">'.$count_val.'</a></div>';
+				$pdfContent .= '<a style="color:#000000; text-decoration:none;" href="'. $CommonLinkForAll .'e1=' . implode(',', $entity1Ids) . '&e2=' . implode(',', $entity2Ids). $link_part . '" target="_blank" title="'. $title .'">'.$count_val.'</a></div>';
 				
 				if($Rotation_Flg == 1)
 				{
@@ -2836,7 +3116,7 @@ function Download_reports()
 		$pdf->SetY(($Place_Y_Bk + $Entity2_Row_height + 0.5));
 		
 		
-		foreach($rows as $row => $rval)
+		foreach($rows as $row => $rid)
 		{
 			$dimensions = $pdf->getPageDimensions();
 			$startY = $pdf->GetY();
@@ -3045,7 +3325,7 @@ function Download_reports()
 						}
 						////////End of part added for padding
 						
-						$pdfContent .= '<a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?e2=' . $entity2Ids[$col]. $link_part . '" target="_blank" title="'. $caltTitle .'">'.$val.'</a></div>';
+						$pdfContent .= '<a style="color:#000000; text-decoration:none;" href="'. $CommonLinkForAll .'e2=' . $entity2Ids[$col]. $link_part . '" target="_blank" title="'. $caltTitle .'">'.$val.'</a></div>';
 						
 						if($Rotation_Flg == 1)
 						{
@@ -3136,7 +3416,7 @@ function Download_reports()
 						//$pdfContent .= '<br style="line-height:'.((($extra_space* 72 / 96)/2)).'px;" />';
 						$pdf->setCellPaddings(0, ($extra_space/2), 0, 0);
 						
-						$pdfContent .= '<a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?e1=' . implode(',', $entity1Ids) . '&e2=' . implode(',', $entity2Ids). $link_part . '" target="_blank" title="'. $title .'">'.$count_val.'</a></div>';
+						$pdfContent .= '<a style="color:#000000; text-decoration:none;" href="'. $CommonLinkForAll .'e1=' . implode(',', $entity1Ids) . '&e2=' . implode(',', $entity2Ids). $link_part . '" target="_blank" title="'. $title .'">'.$count_val.'</a></div>';
 				
 						if($Rotation_Flg == 1)
 						{
@@ -3187,7 +3467,6 @@ function Download_reports()
 			} else {
 				//normal cell
 			}
-			//$rowcount = $pdf->getStringHeight(30,$rval,$reseth = true,$autopadding = true,$cellpadding = '',$border) ;
 			
 			$Place_X = $pdf->GetX();
 			$Place_Y = $pdf->GetY();
@@ -3229,7 +3508,7 @@ function Download_reports()
 				{
 					$count_val=$row_indlead_total[$row];
 				}
-				$pdfContent = '<a style="color:#000000; text-decoration:none;" href="'. urlPath() .'intermediary.php?e1=' . $entity1Ids[$row] . $link_part . '" target="_blank" title="'. $raltTitle .'">'.trim(formatBrandName($rowsDisplayName[$row], 'product')).$rowsCompanyName[$row].'</a>'.((trim($rowsTagName[$row]) != '') ? ' <font style="color:#120f3c;">['.$rowsTagName[$row].']</font>':'');
+				$pdfContent = '<a style="color:#000000; text-decoration:none;" href="'. $CommonLinkForAll .'e1=' . $entity1Ids[$row] . $link_part . '" target="_blank" title="'. $raltTitle .'">'.trim(formatBrandName($rowsDisplayName[$row], 'product')).$rowsCompanyName[$row].'</a>'.((trim($rowsTagName[$row]) != '') ? ' <font style="color:#120f3c;">['.$rowsTagName[$row].']</font>':'');
 				
 				$Place_X = $pdf->GetX();
 				$Place_Y = $pdf->GetY();
@@ -3253,7 +3532,7 @@ function Download_reports()
 			$Place_X = $Place_X + $entity1_Col_Width + 0.5;
 			
 			
-			foreach($columns as $col => $cval)
+			foreach($columns as $col => $cid)
 			{
 				if(isset($total_fld) && $total_fld == "1")
 				$ln=0;
@@ -3276,18 +3555,18 @@ function Download_reports()
 				
 					if($mode=='active')
 					{
-						$count_val=$data_matrix[$row][$col]['active'];
-						$count_val_prev=$data_matrix[$row][$col]['active_prev'];
+						$count_val=$data_matrix[$rid][$cid]['active'];
+						$count_val_prev=$data_matrix[$rid][$cid]['active_prev'];
 					}
 					elseif($mode=='total')
 					{
-						$count_val=$data_matrix[$row][$col]['total'];
-						$count_val_prev=$data_matrix[$row][$col]['total_prev'];
+						$count_val=$data_matrix[$rid][$cid]['total'];
+						$count_val_prev=$data_matrix[$rid][$cid]['total_prev'];
 					}
 					else
 					{
-						$count_val=$data_matrix[$row][$col]['indlead'];
-						$count_val_prev=$data_matrix[$row][$col]['indlead_prev'];
+						$count_val=$data_matrix[$rid][$cid]['indlead'];
+						$count_val_prev=$data_matrix[$rid][$cid]['indlead_prev'];
 					}
 					
 					
@@ -3298,14 +3577,14 @@ function Download_reports()
 					$pdfContent ='';
 					
 					$annotation_text = '';
-					if($data_matrix[$row][$col]['highest_phase_lastchanged_value']==1)
-					$annotation_text .= "Highest Phase updated from: Phase ".$data_matrix[$row][$col]['highest_phase_prev']."\n";
-					if($data_matrix[$row][$col]['bomb_explain'] != NULL && trim($data_matrix[$row][$col]['bomb_explain']) != '' && ($data_matrix[$row][$col]['bomb']['value'] == 'small' || $data_matrix[$row][$col]['bomb']['value'] == 'large')) 
-					$annotation_text .= "Bomb details: ".$data_matrix[$row][$col]['bomb_explain']."\n";
-					if($data_matrix[$row][$col]['filing'] != NULL && trim($data_matrix[$row][$col]['filing']) != '')
-					$annotation_text .= "Filing details: ".$data_matrix[$row][$col]['filing']."\n";
-					if($data_matrix[$row][$col]['phase_explain'] != NULL && trim($data_matrix[$row][$col]['phase_explain']) != '')
-					$annotation_text .= "Phase explanation: ".$data_matrix[$row][$col]['phase_explain']."\n";
+					if($data_matrix[$rid][$cid]['highest_phase_lastchanged_value']==1)
+					$annotation_text .= "Highest Phase updated from: Phase ".$data_matrix[$rid][$cid]['highest_phase_prev']."\n";
+					if($data_matrix[$rid][$cid]['bomb_explain'] != NULL && trim($data_matrix[$rid][$cid]['bomb_explain']) != '' && ($data_matrix[$rid][$cid]['bomb']['value'] == 'small' || $data_matrix[$rid][$cid]['bomb']['value'] == 'large')) 
+					$annotation_text .= "Bomb details: ".$data_matrix[$rid][$cid]['bomb_explain']."\n";
+					if($data_matrix[$rid][$cid]['filing'] != NULL && trim($data_matrix[$rid][$cid]['filing']) != '')
+					$annotation_text .= "Filing details: ".$data_matrix[$rid][$cid]['filing']."\n";
+					if($data_matrix[$rid][$cid]['phase_explain'] != NULL && trim($data_matrix[$rid][$cid]['phase_explain']) != '')
+					$annotation_text .= "Phase explanation: ".$data_matrix[$rid][$cid]['phase_explain']."\n";
 					
 					
 					$annotation_text2 = '';
@@ -3313,10 +3592,10 @@ function Download_reports()
 					$Status_New_Trials_Flg=0;
 					$Status_New_Trials = '';
 					
-					/*if($data_matrix[$row][$col]['new_trials'] > 0)
+					/*if($data_matrix[$rid][$cid]['new_trials'] > 0)
 					{
 						$Status_New_Trials_Flg=1;
-						$Status_New_Trials = "New trials: ". $data_matrix[$row][$col]['new_trials'] ."\n";
+						$Status_New_Trials = "New trials: ". $data_matrix[$rid][$cid]['new_trials'] ."\n";
 					}*/
 					
 					if($Status_New_Trials_Flg==1)
@@ -3329,10 +3608,10 @@ function Download_reports()
 			
 					foreach($allTrialsStatusArray as $currentStatus)
 					{
-						if($data_matrix[$row][$col][$currentStatus] > 0)
+						if($data_matrix[$rid][$cid][$currentStatus] > 0)
 						{
 							$Status_Total_Flg=1;
-							$Status_Total .= " \"".ucfirst(str_replace('_',' ',$currentStatus)) ."\": ". $data_matrix[$row][$col][$currentStatus] ."\n";
+							$Status_Total .= " \"".ucfirst(str_replace('_',' ',$currentStatus)) ."\": ". $data_matrix[$rid][$cid][$currentStatus] ."\n";
 						}
 					}
 					
@@ -3349,10 +3628,10 @@ function Download_reports()
 			
 					foreach($activeStatusArray as $currentStatus)
 					{
-						if($data_matrix[$row][$col][$currentStatus] > 0)
+						if($data_matrix[$rid][$cid][$currentStatus] > 0)
 						{
 							$Status_Active_Flg=1;
-							$Status_Active .= " \"".ucfirst(str_replace('_',' ',str_replace('_active','',$currentStatus))) ."\": ". $data_matrix[$row][$col][$currentStatus] ."\n";
+							$Status_Active .= " \"".ucfirst(str_replace('_',' ',str_replace('_active','',$currentStatus))) ."\": ". $data_matrix[$rid][$cid][$currentStatus] ."\n";
 						}
 					}
 
@@ -3369,10 +3648,10 @@ function Download_reports()
 			
 					foreach($activeIndleadStatusArray as $currentStatus)
 					{
-						if($data_matrix[$row][$col][$currentStatus] > 0)
+						if($data_matrix[$rid][$cid][$currentStatus] > 0)
 						{
 							$Status_Indlead_Flg=1;
-							$Status_Indlead .= " \"".ucfirst(str_replace('_',' ',str_replace('_active_indlead','',$currentStatus)))."\": ". $data_matrix[$row][$col][$currentStatus]."\n";
+							$Status_Indlead .= " \"".ucfirst(str_replace('_',' ',str_replace('_active_indlead','',$currentStatus)))."\": ". $data_matrix[$rid][$cid][$currentStatus]."\n";
 						}
 					}
 
@@ -3382,7 +3661,7 @@ function Download_reports()
 					else
 						$Status_Indlead_Flg=0;
 					
-					if($data_matrix[$row][$col]['total'] != 0 && ($Status_New_Trials_Flg==1 || $Status_Total_Flg==1 || $Status_Active_Flg || $Status_Indlead_Flg) && (date('Y-m-d H:i:s', strtotime($end_range, $now)) == date('Y-m-d H:i:s', strtotime('-1 Month', $now))))
+					if($data_matrix[$rid][$cid]['total'] != 0 && ($Status_New_Trials_Flg==1 || $Status_Total_Flg==1 || $Status_Active_Flg || $Status_Indlead_Flg) && (date('Y-m-d H:i:s', strtotime($end_range, $now)) == date('Y-m-d H:i:s', strtotime('-1 Month', $now))))
 					$annotation_text = $annotation_text.$annotation_text2;
 					
 					$annotation_text = htmlspecialchars_decode(strip_tags($annotation_text));	///Strip HTML tags then Convert special HTML entities back to characters like &amp; to &
@@ -3391,7 +3670,7 @@ function Download_reports()
 					
 					$pdfContent .= '<div align="left" style="vertical-align:middle; float:none;">';
 					$extra_space = $entity1_row_height - $Line_Height + 0.4;
-					if($data_matrix[$row][$col]['update_flag'] == 1)
+					if($data_matrix[$rid][$cid]['update_flag'] == 1)
 					$extra_space = $extra_space - 0.6;
 					//$pdfContent .= '<br style="line-height:'.((($extra_space * 72 / 96)/2)+0.8).'px;" />';
 					
@@ -3400,9 +3679,9 @@ function Download_reports()
 						$pdf->Annotation($Place_X, $Place_Y, ($Width_matrix[$col]['width']*3/4), ($entity1_row_height*4/5), $annotation_text, array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Details', 'Subj' => 'Information', 'C' => array()));	
 					}
 					
-					if($data_matrix[$row][$col]['update_flag'] == 1)
+					if($data_matrix[$rid][$cid]['update_flag'] == 1)
 					{ 
-						$data_matrix[$row][$col]['bordercolor_code']='#FF0000';
+						$data_matrix[$rid][$cid]['bordercolor_code']='#FF0000';
 						$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255,0,0)));
 						$pdf->SetFillColor(255,0,0);
 						$pdf->MultiCell($Width_matrix[$col]['width'], $entity1_row_height, '', $border, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$entity1_row_height, 'M');
@@ -3410,29 +3689,29 @@ function Download_reports()
 					
 					$Aq_L = 0;
 					$Ex_L = $Wrd_L = 0;
-					if($count_val != '' && $count_val != NULL && $data_matrix[$row][$col]['total'] != 0)
+					if($count_val != '' && $count_val != NULL && $data_matrix[$rid][$cid]['total'] != 0)
 					{
 						$Wrd_L = $pdf->GetStringWidth($count_val, 'freesans', '', 8) + 0.2;
 						$Aq_L = $Aq_L + $Wrd_L;
 					}
-					if($data_matrix[$row][$col]['bomb']['value'] == 'small' || $data_matrix[$row][$col]['bomb']['value'] == 'large')
+					if($data_matrix[$rid][$cid]['bomb']['value'] == 'small' || $data_matrix[$rid][$cid]['bomb']['value'] == 'large')
 					$Aq_L = $Aq_L + 3.1 + 0.2;
-					if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
+					if($data_matrix[$rid][$cid]['filing'] != NULL && $data_matrix[$rid][$cid]['filing'] != '')
 					$Aq_L = $Aq_L + 3.1;
 					
 					$Av_L = $Width_matrix[$col]['width'];
 					
 					$Ex_L = ($Av_L - $Aq_L)/2;
 					
-					if($data_matrix[$row][$col]['total'] != 0)
-					$pdfContent .= '<a href="'. urlPath() .'intermediary.php?e1=' . $entity1Ids[$row] . '&e2=' . $entity2Ids[$col]. $link_part . '" target="_blank" title="'. $title .'" ><font style="color:#000000;" >'.$count_val.'</font></a>';
+					if($data_matrix[$rid][$cid]['total'] != 0)
+					$pdfContent .= '<a href="'. $CommonLinkForAll .'e1=' . $entity1Ids[$row] . '&e2=' . $entity2Ids[$col]. $link_part . '" target="_blank" title="'. $title .'" ><font style="color:#000000;" >'.$count_val.'</font></a>';
 					
-					if($data_matrix[$row][$col]['bomb']['value'] == 'small' || $data_matrix[$row][$col]['bomb']['value'] == 'large')
+					if($data_matrix[$rid][$cid]['bomb']['value'] == 'small' || $data_matrix[$rid][$cid]['bomb']['value'] == 'large')
 					$bomb_PR = 1;
 					else
 					$bomb_PR = 0;
 					
-					if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
+					if($data_matrix[$rid][$cid]['filing'] != NULL && $data_matrix[$rid][$cid]['filing'] != '')
 					$fill_PR = 1;
 					else
 					$fill_PR = 0;
@@ -3440,7 +3719,7 @@ function Download_reports()
 					if($bomb_PR)
 					{
 						$bomb_x=($Place_X + $Ex_L + $Wrd_L);
-						if($data_matrix[$row][$col]['update_flag'] == 1)
+						if($data_matrix[$rid][$cid]['update_flag'] == 1)
 						$bomb_x = $bomb_x + 0.3;
 					}
 					
@@ -3451,75 +3730,75 @@ function Download_reports()
 						else
 							$fill_x=($Place_X + $Ex_L + $Wrd_L);
 							
-						if($data_matrix[$row][$col]['update_flag'] == 1)
+						if($data_matrix[$rid][$cid]['update_flag'] == 1)
 						$fill_x = $fill_x + 0.3;
 					}
 					
 					$y=($Place_Y+($entity1_row_height/2)-(3.1/2));
 					/////// End of Space and co-ordinates pixel calculation
 					
-					if($data_matrix[$row][$col]['update_flag'] == 1)
+					if($data_matrix[$rid][$cid]['update_flag'] == 1)
 					$Ex_L = $Ex_L - 0.3;
 					
 					$pdf->setCellPaddings($Ex_L, ($extra_space/2), 0, 0);
 					
-					if($data_matrix[$row][$col]['bomb']['value'] == 'small' || $data_matrix[$row][$col]['bomb']['value'] == 'large')
+					if($data_matrix[$rid][$cid]['bomb']['value'] == 'small' || $data_matrix[$rid][$cid]['bomb']['value'] == 'large')
 					{
-						$pdf->Image('images/'.$data_matrix[$row][$col]['bomb']['src'], $bomb_x, $y, 3.1, 3.1, '', '', '', false, 300, '', false, false, 0, false, false, false);
+						$pdf->Image('images/'.$data_matrix[$rid][$cid]['bomb']['src'], $bomb_x, $y, 3.1, 3.1, '', '', '', false, 300, '', false, false, 0, false, false, false);
 					}
 						
-					if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
+					if($data_matrix[$rid][$cid]['filing'] != NULL && $data_matrix[$rid][$cid]['filing'] != '')
 					{
-						$pdf->Image($data_matrix[$row][$col]['filing_image'], $fill_x, $y, 3.1, 3.1, '', '', '', false, 300, '', false, false, 0, false, false, false);
+						$pdf->Image($data_matrix[$rid][$cid]['filing_image'], $fill_x, $y, 3.1, 3.1, '', '', '', false, 300, '', false, false, 0, false, false, false);
 					}
 						
 					$pdfContent .= '</div>';
 					
-					if($data_matrix[$row][$col]['color_code']=='BFBFBF')
+					if($data_matrix[$rid][$cid]['color_code']=='BFBFBF')
 					{
 						$pdf->SetFillColor(191,191,191);
 						$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(191,191,191)));
 					}
-					else if($data_matrix[$row][$col]['color_code']=='00CCFF')
+					else if($data_matrix[$rid][$cid]['color_code']=='00CCFF')
 					{
 						$pdf->SetFillColor(0,204,255);
 						$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0,204,255)));
 					}
-					else if($data_matrix[$row][$col]['color_code']=='99CC00')
+					else if($data_matrix[$rid][$cid]['color_code']=='99CC00')
 					{
 						$pdf->SetFillColor(153,204,0);
 						$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(153,204,0)));
 					}
-					else if($data_matrix[$row][$col]['color_code']=='FFFF00')
+					else if($data_matrix[$rid][$cid]['color_code']=='FFFF00')
 					{
 						$pdf->SetFillColor(255,255,0);
 						$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255,255,0)));
 					}
-					else if($data_matrix[$row][$col]['color_code']=='FF9900')
+					else if($data_matrix[$rid][$cid]['color_code']=='FF9900')
 					{
 						$pdf->SetFillColor(255,153,0);
 						$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255,153,0)));
 					}
-					else if($data_matrix[$row][$col]['color_code']='FF0000')
+					else if($data_matrix[$rid][$cid]['color_code']='FF0000')
 					{
 						$pdf->SetFillColor(255,0,0);
 						$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255,0,0)));	
 					}
 					
-					if($data_matrix[$row][$col]['total'] == 0)
+					if($data_matrix[$rid][$cid]['total'] == 0)
 					{
 						$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(230,230,230)));
 						$pdf->SetFillColor(230,230,230);
 					}
 					
-					if($data_matrix[$row][$col]['update_flag'] == 1)
+					if($data_matrix[$rid][$cid]['update_flag'] == 1)
 					{ 
-						$data_matrix[$row][$col]['bordercolor_code']='#FFFFFF';
+						$data_matrix[$rid][$cid]['bordercolor_code']='#FFFFFF';
 						$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255,255,255)));
 						//$pdf->SetFillColor(255,255,255);
 					}
 					
-					if($data_matrix[$row][$col]['update_flag'] == 1)
+					if($data_matrix[$rid][$cid]['update_flag'] == 1)
 					{
 						$pdf->MultiCell($Width_matrix[$col]['width']-0.6, $entity1_row_height-0.6, $pdfContent, $border, $align='L', $fill=1, $ln, $Place_X+0.3, $Place_Y+0.3, $reseth=false, $stretch=0, $ishtml=true, $autopadding=true, $maxh=$entity1_row_height-0.6, 'M');
 					}
@@ -3535,12 +3814,12 @@ function Download_reports()
 					$pdfContent = '<div align="center" style="vertical-align:middle; float:none;">&nbsp;</div>';
 					if(isset($entity2Ids[$col]) && $entity2Ids[$col] != NULL && isset($entity1Ids[$row]) && $entity1Ids[$row] != NULL)
 					{
-						if($data_matrix[$row][$col]['phase4_override'])
+						if($data_matrix[$rid][$cid]['phase4_override'])
 						{
 							$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255,0,0)));
 							$pdf->SetFillColor(255,0,0);
 						}
-						else if($data_matrix[$row][$col]['preclinical'])
+						else if($data_matrix[$rid][$cid]['preclinical'])
 						{
 							$border = array('mode' => 'int', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(174,211,220)));
 							$pdf->SetFillColor(174,211,220);
@@ -3832,7 +4111,7 @@ function Download_reports()
 		}
 		
 		
-		foreach($rows as $row => $rval)
+		foreach($rows as $row => $rid)
 		{
 			$cat = (isset($rowsCategoryName[$row]) && $rowsCategoryName[$row] != '')? $rowsCategoryName[$row]:'Undefined';
 	
@@ -3904,7 +4183,6 @@ function Download_reports()
 				}
 				
 				//TODO
-				//$rval = (isset($rowsDisplayName[$row]) && $rowsDisplayName[$row] != '')?$rowsDisplayName[$row]:$rval;
 				$rdesc = (isset($rowsDescription[$row]) && $rowsDescription[$row] != '')?$rowsDescription[$row]:null;
 				$raltTitle = (isset($rdesc) && $rdesc != '')?' alt="'.$rdesc.'" title="'.$rdesc.'" ':null;
 				
@@ -3928,7 +4206,7 @@ function Download_reports()
       											'wrap'       => true));*/
 			}
 			
-			foreach($columns as $col => $cval)
+			foreach($columns as $col => $cid)
 			{
 				$cell = num2char($col) . ($Excel_HMCounter);
 				
@@ -3966,26 +4244,26 @@ function Download_reports()
 				);
 							
 					
-				if($data_matrix[$row][$col]['update_flag'] == 1)
+				if($data_matrix[$rid][$cid]['update_flag'] == 1)
 				{
 					$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($styleThinRedBorderOutline);
 				}
 				else
 				{
 					//Apply Left Border
-					if(($col > 1  && $data_matrix[$row][$col-1]['update_flag'] != 1) || ($col == 1))
+					if(($col > 1  && $data_matrix[$rows[$row]][$columns[$col-1]]['update_flag'] != 1) || ($col == 1))
 					$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($styleThinBlackLeftBorderOutline);
 					
 					//Apply Right Border
-					if(($col >= 1  && $col < count($columns) && $data_matrix[$row][$col+1]['update_flag'] != 1) || ($col == count($columns)))
+					if(($col >= 1  && $col < count($columns) && $data_matrix[$rows[$row]][$columns[$col+1]]['update_flag'] != 1) || ($col == count($columns)))
 					$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($styleThinBlackRightBorderOutline);
 					
 					//Apply Top Border
-					if(($row > 1  && ($data_matrix[$row-1][$col]['update_flag'] != 1 || (isset($rowsCategoryName[$row]) && $rowsCategoryName[$row] != '' && $rowsCategoryName[$row] != 'Undefined' && $rows_Span[$row] > 0))) || ($row == 1))
+					if(($row > 1  && ($data_matrix[$rows[$row-1]][$columns[$col]]['update_flag'] != 1 || (isset($rowsCategoryName[$row]) && $rowsCategoryName[$row] != '' && $rowsCategoryName[$row] != 'Undefined' && $rows_Span[$row] > 0))) || ($row == 1))
 					$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($styleThinBlackTopBorderOutline);
 					
 					//Apply Bottom Border
-					if(($row >= 1  && $row < count($rows) && ($data_matrix[$row+1][$col]['update_flag'] != 1 || (isset($rowsCategoryName[$row+1]) && $rowsCategoryName[$row+1] != '' && $rowsCategoryName[$row] != 'Undefined' && $rows_Span[$row+1] > 0))) || ($row == count($rows)))
+					if(($row >= 1  && $row < count($rows) && ($data_matrix[$rows[$row+1]][$columns[$col]]['update_flag'] != 1 || (isset($rowsCategoryName[$row+1]) && $rowsCategoryName[$row+1] != '' && $rowsCategoryName[$row] != 'Undefined' && $rows_Span[$row+1] > 0))) || ($row == count($rows)))
 					$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($styleThinBlackBottomBorderOutline);
 						
 				}
@@ -3994,38 +4272,38 @@ function Download_reports()
 				{
 					if($mode=='active')
 					{
-						$count_val=$data_matrix[$row][$col]['active'];
-						$count_val_prev=$data_matrix[$row][$col]['active_prev'];
+						$count_val=$data_matrix[$rid][$cid]['active'];
+						$count_val_prev=$data_matrix[$rid][$cid]['active_prev'];
 					}
 					elseif($mode=='total')
 					{
-						$count_val=$data_matrix[$row][$col]['total'];
-						$count_val_prev=$data_matrix[$row][$col]['total_prev'];
+						$count_val=$data_matrix[$rid][$cid]['total'];
+						$count_val_prev=$data_matrix[$rid][$cid]['total_prev'];
 					}
 					else
 					{
-						$count_val=$data_matrix[$row][$col]['indlead'];
-						$count_val_prev=$data_matrix[$row][$col]['indlead_prev'];
+						$count_val=$data_matrix[$rid][$cid]['indlead'];
+						$count_val_prev=$data_matrix[$rid][$cid]['indlead_prev'];
 					}
 										
 					$red_font['font']['color']['rgb'] = '000000';
 					$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($red_font);
 					
-					if($data_matrix[$row][$col]['total'] != 0)	///In case of zero trials dont disply count
+					if($data_matrix[$rid][$cid]['total'] != 0)	///In case of zero trials dont disply count
 					$objPHPExcel->getActiveSheet()->setCellValue($cell, $count_val);
 					
 					//we require to set hyperlink to to zero trials cell as well cause without hyperlink we cant display mouseover text 
 					// and it will give excel error
 					$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?e1=' . $entity1Ids[$row] . '&e2=' . $entity2Ids[$col].$link_part); 
  			    	$annotation_text = '';
-					if($data_matrix[$row][$col]['bomb_explain'] != NULL && trim($data_matrix[$row][$col]['bomb_explain']) != '' && ($data_matrix[$row][$col]['bomb']['value'] == 'small' || $data_matrix[$row][$col]['bomb']['value'] == 'large')) 
-					$annotation_text .= "Bomb details: ".$data_matrix[$row][$col]['bomb_explain']."\n";
-					if($data_matrix[$row][$col]['filing'] != NULL && trim($data_matrix[$row][$col]['filing']) != '')
-					$annotation_text .= "Filing details: ".$data_matrix[$row][$col]['filing']."\n";
-					if($data_matrix[$row][$col]['phase_explain'] != NULL && trim($data_matrix[$row][$col]['phase_explain']) != '')
-					$annotation_text .= "Phase explanation: ".$data_matrix[$row][$col]['phase_explain']."\n";
-					if($data_matrix[$row][$col]['highest_phase_lastchanged_value']==1)
-					$annotation_text .= "Highest Phase updated from: Phase ".$data_matrix[$row][$col]['highest_phase_prev']."\n";
+					if($data_matrix[$rid][$cid]['bomb_explain'] != NULL && trim($data_matrix[$rid][$cid]['bomb_explain']) != '' && ($data_matrix[$rid][$cid]['bomb']['value'] == 'small' || $data_matrix[$rid][$cid]['bomb']['value'] == 'large')) 
+					$annotation_text .= "Bomb details: ".$data_matrix[$rid][$cid]['bomb_explain']."\n";
+					if($data_matrix[$rid][$cid]['filing'] != NULL && trim($data_matrix[$rid][$cid]['filing']) != '')
+					$annotation_text .= "Filing details: ".$data_matrix[$rid][$cid]['filing']."\n";
+					if($data_matrix[$rid][$cid]['phase_explain'] != NULL && trim($data_matrix[$rid][$cid]['phase_explain']) != '')
+					$annotation_text .= "Phase explanation: ".$data_matrix[$rid][$cid]['phase_explain']."\n";
+					if($data_matrix[$rid][$cid]['highest_phase_lastchanged_value']==1)
+					$annotation_text .= "Highest Phase updated from: Phase ".$data_matrix[$rid][$cid]['highest_phase_prev']."\n";
 					
 					
 					$annotation_text2 = '';
@@ -4033,10 +4311,10 @@ function Download_reports()
 					$Status_New_Trials_Flg=0;
 					$Status_New_Trials = '';
 					
-					/*if($data_matrix[$row][$col]['new_trials'] > 0)
+					/*if($data_matrix[$rid][$cid]['new_trials'] > 0)
 					{
 						$Status_New_Trials_Flg=1;
-						$Status_New_Trials = "New trials: ". $data_matrix[$row][$col]['new_trials'] ."\n";
+						$Status_New_Trials = "New trials: ". $data_matrix[$rid][$cid]['new_trials'] ."\n";
 					}*/
 					
 					if($Status_New_Trials_Flg==1)
@@ -4049,10 +4327,10 @@ function Download_reports()
 			
 					foreach($allTrialsStatusArray as $currentStatus)
 					{
-						if($data_matrix[$row][$col][$currentStatus] > 0)
+						if($data_matrix[$rid][$cid][$currentStatus] > 0)
 						{
 							$Status_Total_Flg=1;
-							$Status_Total .= " \"".ucfirst(str_replace('_',' ',$currentStatus)) ."\": ". $data_matrix[$row][$col][$currentStatus] ."\n";
+							$Status_Total .= " \"".ucfirst(str_replace('_',' ',$currentStatus)) ."\": ". $data_matrix[$rid][$cid][$currentStatus] ."\n";
 						}
 					}
 					
@@ -4069,10 +4347,10 @@ function Download_reports()
 			
 					foreach($activeStatusArray as $currentStatus)
 					{
-						if($data_matrix[$row][$col][$currentStatus] > 0)
+						if($data_matrix[$rid][$cid][$currentStatus] > 0)
 						{
 							$Status_Active_Flg=1;
-							$Status_Active .= " \"".ucfirst(str_replace('_',' ',str_replace('_active','',$currentStatus))) ."\": ". $data_matrix[$row][$col][$currentStatus] ."\n";
+							$Status_Active .= " \"".ucfirst(str_replace('_',' ',str_replace('_active','',$currentStatus))) ."\": ". $data_matrix[$rid][$cid][$currentStatus] ."\n";
 						}
 					}
 					
@@ -4087,10 +4365,10 @@ function Download_reports()
 			
 					foreach($activeIndleadStatusArray as $currentStatus)
 					{
-						if($data_matrix[$row][$col][$currentStatus] > 0)
+						if($data_matrix[$rid][$cid][$currentStatus] > 0)
 						{
 							$Status_Indlead_Flg=1;
-							$Status_Indlead .= " \"".ucfirst(str_replace('_',' ',str_replace('_active_indlead','',$currentStatus)))."\": ". $data_matrix[$row][$col][$currentStatus]."\n";
+							$Status_Indlead .= " \"".ucfirst(str_replace('_',' ',str_replace('_active_indlead','',$currentStatus)))."\": ". $data_matrix[$rid][$cid][$currentStatus]."\n";
 						}
 					}
 					
@@ -4100,53 +4378,53 @@ function Download_reports()
 					else
 						$Status_Indlead_Flg=0;
 					
-					if($data_matrix[$row][$col]['total'] != 0 && ($Status_New_Trials_Flg==1 || $Status_Total_Flg==1 || $Status_Active_Flg || $Status_Indlead_Flg) && (date('Y-m-d H:i:s', strtotime($end_range, $now)) == date('Y-m-d H:i:s', strtotime('-1 Month', $now))))
+					if($data_matrix[$rid][$cid]['total'] != 0 && ($Status_New_Trials_Flg==1 || $Status_Total_Flg==1 || $Status_Active_Flg || $Status_Indlead_Flg) && (date('Y-m-d H:i:s', strtotime($end_range, $now)) == date('Y-m-d H:i:s', strtotime('-1 Month', $now))))
 					$annotation_text = $annotation_text.$annotation_text2;
 					
 					$annotation_text = htmlspecialchars_decode(strip_tags($annotation_text));	///Strip HTML tags then Convert special HTML entities back to characters like &amp; to &
 					
 					$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip(substr($annotation_text,0,255) );
 					$bomb_PR = 0;
-					if($data_matrix[$row][$col]['exec_bomb']['src'] != '' && $data_matrix[$row][$col]['exec_bomb']['src'] != NULL && $data_matrix[$row][$col]['exec_bomb']['src'] !='new_square.png')
+					if($data_matrix[$rid][$cid]['exec_bomb']['src'] != '' && $data_matrix[$rid][$cid]['exec_bomb']['src'] != NULL && $data_matrix[$rid][$cid]['exec_bomb']['src'] !='new_square.png')
 					{
 						$objDrawing = new PHPExcel_Worksheet_Drawing();
 						$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
-						if($data_matrix[$row][$col]['total'] == 0)
+						if($data_matrix[$rid][$cid]['total'] == 0)
 						$objDrawing->setOffsetX(60);
 						else
 						$objDrawing->setOffsetX(80);
 						$objDrawing->setOffsetY(1);
 						
-						$img = $data_matrix[$row][$col]['exec_bomb']['src'];
-						if($data_matrix[$row][$col]['total'] != 0)
-						$img .= '_'.$data_matrix[$row][$col]['color_code'];
+						$img = $data_matrix[$rid][$cid]['exec_bomb']['src'];
+						if($data_matrix[$rid][$cid]['total'] != 0)
+						$img .= '_'.$data_matrix[$rid][$cid]['color_code'];
 						
 						$objDrawing->setPath('images/'.$img.'.png');
 						$objDrawing->setHeight(12);
 						$objDrawing->setWidth(12); 
-						$objDrawing->setDescription($data_matrix[$row][$col]['bomb']['title']);
+						$objDrawing->setDescription($data_matrix[$rid][$cid]['bomb']['title']);
 						$objDrawing->setCoordinates($cell);
 						$bomb_PR = 1;
 					}
 					
-					if($data_matrix[$row][$col]['filing'] != NULL && $data_matrix[$row][$col]['filing'] != '')
+					if($data_matrix[$rid][$cid]['filing'] != NULL && $data_matrix[$rid][$cid]['filing'] != '')
 					{
 						if($bomb_PR)
 						{
-							if($data_matrix[$row][$col]['total'] == 0) $ptr_x = 80; else $ptr_x = 100;
+							if($data_matrix[$rid][$cid]['total'] == 0) $ptr_x = 80; else $ptr_x = 100;
 						}
 						else
 						{
-							if($data_matrix[$row][$col]['total'] == 0) $ptr_x = 60; else $ptr_x = 80;
+							if($data_matrix[$rid][$cid]['total'] == 0) $ptr_x = 60; else $ptr_x = 80;
 						}
 						$objDrawing = new PHPExcel_Worksheet_Drawing();
 						$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
 						$objDrawing->setOffsetX($ptr_x);
 						$objDrawing->setOffsetY(1);
 						
-						$img = $data_matrix[$row][$col]['exec_filing_image'];
-						if($data_matrix[$row][$col]['total'] != 0)
-						$img .= '_'.$data_matrix[$row][$col]['color_code'];
+						$img = $data_matrix[$rid][$cid]['exec_filing_image'];
+						if($data_matrix[$rid][$cid]['total'] != 0)
+						$img .= '_'.$data_matrix[$rid][$cid]['color_code'];
 						
 						$objDrawing->setPath($img.'.png');
 						$objDrawing->setHeight(12);
@@ -4155,10 +4433,10 @@ function Download_reports()
 						$objDrawing->setCoordinates($cell);
 					}
 					
-					if($data_matrix[$row][$col]['total'] != 0)
+					if($data_matrix[$rid][$cid]['total'] != 0)
 					{
 						$objPHPExcel->getActiveSheet()->getStyle($cell)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID);
-						$objPHPExcel->getActiveSheet()->getStyle($cell)->getFill()->getStartColor()->setRGB($data_matrix[$row][$col]['color_code']);
+						$objPHPExcel->getActiveSheet()->getStyle($cell)->getFill()->getStartColor()->setRGB($data_matrix[$rid][$cid]['color_code']);
 					}
 					$objPHPExcel->getActiveSheet()->getStyle($cell)->getAlignment()->applyFromArray(
       									array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
@@ -4170,13 +4448,13 @@ function Download_reports()
 				{
 					/////// To avoid entity1 name overflow on side column when, first columns is empty - putting 0 value with background color
 					$blank_cell_bgSet = false;
-					if($data_matrix[$row][$col]['phase4_override'])
+					if($data_matrix[$rid][$cid]['phase4_override'])
 					{
-						$blank_cell_font['font']['color']['rgb'] = $data_matrix[$row][$col]['color_code'];
-						$blank_cell_bgcolor = $data_matrix[$row][$col]['color_code'];
+						$blank_cell_font['font']['color']['rgb'] = $data_matrix[$rid][$cid]['color_code'];
+						$blank_cell_bgcolor = $data_matrix[$rid][$cid]['color_code'];
 						$blank_cell_bgSet = true;
 					}
-					else if($data_matrix[$row][$col]['preclinical'])
+					else if($data_matrix[$rid][$cid]['preclinical'])
 					{
 						$blank_cell_font['font']['color']['rgb'] = 'aed3dc';
 						$blank_cell_bgcolor = 'aed3dc';
@@ -4308,7 +4586,7 @@ function PrintEntity1CategoryforPDFExport($dtt, $rowsCategoryEntityIds1, $last_e
 	$pdfContent = '';
 	if($dtt)
 	{
-		$pdfContent = '<a href="'. urlPath() .'intermediary.php?e1=' . implode(',', $rowsCategoryEntityIds1) . '&e2=' . $last_entity2 . $link_part .'" target="_blank" style="color:#000000; text-decoration:none;">';
+		$pdfContent = '<a href="'. $CommonLinkForAll .'e1=' . implode(',', $rowsCategoryEntityIds1) . '&e2=' . $last_entity2 . $link_part .'" target="_blank" style="color:#000000; text-decoration:none;">';
 	}
 	if($cat != 'Undefined')
 	{
