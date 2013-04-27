@@ -747,6 +747,7 @@ function add_data($entity1id,$entity2id,$cnt_total,$cnt_active,$cnt_active_indle
 			if($cnt_indlead_old<>$cnt_active_indlead) $cc='`count_active_indlead_prev` = "'. $cnt_indlead_old .'",';
 			if($cnt_owner_sponsored_old<>$cnt_active_owner_sponsored) $ee='`count_active_owner_sponsored_prev` = "'. $cnt_owner_sponsored_old .'",';
 			if($highest_phase_old<>$max_phase) $dd='`highest_phase_prev` = "'. $highest_phase_old .'",';
+			if($cnt_total==0) $dd='`highest_phase_prev` = null,';
 		}
 		
 	
