@@ -732,6 +732,7 @@ function DisplayOHM($id, $ohm)
 		$columnsDisplayNameCopy = $columnsDisplayName;
 		$columnsDescriptionCopy = $columnsDescription;
 		$entity2IdsCopy = $entity2Ids;
+		$Width_matrixCopy = $Width_matrix;
 			
 		foreach($PhaseColumnMatrix as $k=>$r)
 		{
@@ -743,6 +744,7 @@ function DisplayOHM($id, $ohm)
 			$columnsDisplayName[$k+1] = $columnsDisplayNameCopy[$r['oldcol']];
 			$columnsDescription[$k+1] = $columnsDescriptionCopy[$r['oldcol']];
 			$entity2Ids[$k+1] = $entity2IdsCopy[$r['oldcol']];
+			$Width_matrix[$k+1] = $Width_matrixCopy[$r['oldcol']];
 		}
 		$last_num = count($entity2Ids);
 		$second_last_num = $last_num-1;
