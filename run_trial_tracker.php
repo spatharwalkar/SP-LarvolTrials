@@ -10722,7 +10722,7 @@ class TrialTracker
 			foreach($this->institutionFilters as $ikey => $ivalue)
 			{
 				echo '<input type="checkbox" value="' . $ikey . '" id="institution_type_' . $ikey . '" class="institution" '
-						. (in_array($ikey, $globalOptions['itype']) ? ' checked="checked" ' : ($ikey == '1') ? ' checked="checked" '  : '' ) . '/>'
+						. (in_array($ikey, $globalOptions['itype']) ? ' checked="checked" ' : '' ) . '/>'
 						. '<label for="institution_type_' . $ikey . '">' . str_replace('_', ' ', ucfirst($ivalue)) . '</label><br />';
 			}
 			echo '</div></td>';
