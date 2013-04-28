@@ -2764,18 +2764,7 @@ function DisplayOHM($id, $ohm)
 			
 			<script language="javascript" type="text/javascript">
 			change_view();
-			var winWidth = $(window).width();
-			var docWidth = $(document).width();
-			//adjust for too small resolutions
-			if (docWidth > winWidth)
-			{
-			//alert("Horizontal Scrollbar Present");
-			$(".Entity1_col").css("max-width","400px");
-			$(".Entity1_col").css("min-width","400px");
-			$(".Entity1_col").css("white-space","wrap");
-			$(".Entity1_col").css("word-wrap","break-word");
-			$(".Entity1_col").css("_width","400px");
-			}
+
 			// Default size
 			document.getElementById("startrange").style.width = "30px";
 			document.getElementById("endrange").style.width = "70px";
