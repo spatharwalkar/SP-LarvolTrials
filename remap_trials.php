@@ -473,7 +473,6 @@ function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL  )
 						
 						//get all companies associated with these products
 						$pids = implode(",", $productids);
-						pr($pids);
 						if(!empty($productids))
 						{
 							$query="select er.child from entity_relations er,entities e 
@@ -485,7 +484,6 @@ function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL  )
 							{ 
 								$companyids[] = $row['child'];
 							}	
-							pr($companyids);
 							//get name,search_name of these companies 
 							$cids = implode(",", $companyids);
 							$query="select name,search_name from entities where id in (" . $cids . ")	and class='institution'";
@@ -504,15 +502,12 @@ function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL  )
 								$csearchnames[] = $row['name'];
 								
 							}
-							pr($csearchnames);
 							//now loop through the list and see if any of them matches with the trial's sponsor name
 							$ownersponsored='No';
 							foreach($csearchnames as $name)
 							{
 								$name='xxx.'.$name;
-								pr('SPONSOR='.$sponsor.' NAME='.$name);
 								$pos = stripos($name,trim($sponsor));
-								pr($pos);
 								if(!empty($pos) and $pos>0 )	
 								{
 									$ownersponsored='Yes';
@@ -523,9 +518,7 @@ function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL  )
 							{
 								$query="update data_trials set institution_type = 'owner_sponsored' where larvol_id='" .$larvol_id . "' limit 1 ";
 								$res=mysql_query($query);
-								pr('YES, O S');
 							}
-							else pr('NO, NOT');
 						}
 						
 					}
