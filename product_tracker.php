@@ -254,6 +254,8 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 			
 			$data_matrix[$row]['indlead']=0;
 			
+			$data_matrix[$row]['owner_sponsored']=0;
+			
 			$data_matrix[$row]['total_phase_na']=0;
 			$data_matrix[$row]['active_phase_na']=0;
 			$data_matrix[$row]['indlead_phase_na']=0;
@@ -272,6 +274,13 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 			$data_matrix[$row]['total_phase_4']=0;
 			$data_matrix[$row]['active_phase_4']=0;
 			$data_matrix[$row]['indlead_phase_4']=0;
+			
+			$data_matrix[$row]['owner_sponsored_phase_na']=0;
+			$data_matrix[$row]['owner_sponsored_phase_0']=0;
+			$data_matrix[$row]['owner_sponsored_phase_1']=0;
+			$data_matrix[$row]['owner_sponsored_phase_2']=0;
+			$data_matrix[$row]['owner_sponsored_phase_3']=0;
+			$data_matrix[$row]['owner_sponsored_phase_4']=0;
 			
 			//// To avoid multiple queries to database, we are quering only one time and retrieveing all data and seprating each type
 			if($TrackerType == 'PTH')
@@ -296,6 +305,8 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 					$data_matrix[$row]['active']++;
 					if($phase_row['institution_type'] == 'industry_lead_sponsor')
 					$data_matrix[$row]['indlead']++;
+					if($phase_row['institution_type'] == 'owner_sponsored')
+					$data_matrix[$row]['owner_sponsored']++;
 				}
 					
 				if($phase_row['phase'] == 'N/A' || $phase_row['phase'] == '' || $phase_row['phase'] === NULL)
@@ -306,6 +317,8 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 						$data_matrix[$row]['active_phase_na']++;
 						if($phase_row['institution_type'] == 'industry_lead_sponsor')
 						$data_matrix[$row]['indlead_phase_na']++;
+						if($phase_row['institution_type'] == 'owner_sponsored')
+						$data_matrix[$row]['owner_sponsored_phase_na']++;
 					}
 				}
 				else if($phase_row['phase'] == '0')
@@ -316,6 +329,8 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 						$data_matrix[$row]['active_phase_0']++;
 						if($phase_row['institution_type'] == 'industry_lead_sponsor')
 						$data_matrix[$row]['indlead_phase_0']++;
+						if($phase_row['institution_type'] == 'owner_sponsored')
+						$data_matrix[$row]['owner_sponsored_phase_0']++;
 					}
 				}
 				else if($phase_row['phase'] == '1' || $phase_row['phase'] == '0/1' || $phase_row['phase'] == '1a' 
@@ -327,6 +342,8 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 						$data_matrix[$row]['active_phase_1']++;
 						if($phase_row['institution_type'] == 'industry_lead_sponsor')
 						$data_matrix[$row]['indlead_phase_1']++;
+						if($phase_row['institution_type'] == 'owner_sponsored')
+						$data_matrix[$row]['owner_sponsored_phase_1']++;
 					}
 				}
 				else if($phase_row['phase'] == '2' || $phase_row['phase'] == '1/2' || $phase_row['phase'] == '1b/2' 
@@ -339,6 +356,8 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 						$data_matrix[$row]['active_phase_2']++;
 						if($phase_row['institution_type'] == 'industry_lead_sponsor')
 						$data_matrix[$row]['indlead_phase_2']++;
+						if($phase_row['institution_type'] == 'owner_sponsored')
+						$data_matrix[$row]['owner_sponsored_phase_2']++;
 					}
 				}
 				else if($phase_row['phase'] == '3' || $phase_row['phase'] == '2/3' || $phase_row['phase'] == '2b/3' 
@@ -350,6 +369,8 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 						$data_matrix[$row]['active_phase_3']++;
 						if($phase_row['institution_type'] == 'industry_lead_sponsor')
 						$data_matrix[$row]['indlead_phase_3']++;
+						if($phase_row['institution_type'] == 'owner_sponsored')
+						$data_matrix[$row]['owner_sponsored_phase_3']++;
 					}
 				}
 				else if($phase_row['phase'] == '4' || $phase_row['phase'] == '3/4' || $phase_row['phase'] == '3b/4')
@@ -360,6 +381,8 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 						$data_matrix[$row]['active_phase_4']++;
 						if($phase_row['institution_type'] == 'industry_lead_sponsor')
 						$data_matrix[$row]['indlead_phase_4']++;
+						if($phase_row['institution_type'] == 'owner_sponsored')
+						$data_matrix[$row]['owner_sponsored_phase_4']++;
 					}	
 				}
 			}	//// End of while
@@ -371,6 +394,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 			$data_matrix[$row]['active']=0;
 			$data_matrix[$row]['total']=0;
 			$data_matrix[$row]['indlead']=0;
+			$data_matrix[$row]['owner_sponsored']=0;
 			
 			$data_matrix[$row]['total_phase_na']=0;
 			$data_matrix[$row]['active_phase_na']=0;
@@ -390,6 +414,13 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 			$data_matrix[$row]['total_phase_4']=0;
 			$data_matrix[$row]['active_phase_4']=0;
 			$data_matrix[$row]['indlead_phase_4']=0;
+			
+			$data_matrix[$row]['owner_sponsored_phase_na']=0;
+			$data_matrix[$row]['owner_sponsored_phase_0']=0;
+			$data_matrix[$row]['owner_sponsored_phase_1']=0;
+			$data_matrix[$row]['owner_sponsored_phase_2']=0;
+			$data_matrix[$row]['owner_sponsored_phase_3']=0;
+			$data_matrix[$row]['owner_sponsored_phase_4']=0;
 			
 			if($data_matrix[$row]['total'] < $max_count)
 			$max_count = $data_matrix[$row]['total'];
@@ -796,6 +827,10 @@ function TrackerCommonJScript($id, $TrackerType, $uniqueId, $page, $MainPageURL,
 						{
 							location.href = \"".trim(urlPath()) . $MainPageURL ."?".$url."&dwcount=total\";
 						}
+						else if(dwcount.value == 'owner_sponsored')
+						{
+							location.href = \"".trim(urlPath()) . $MainPageURL ."?".$url."&dwcount=owner_sponsored\";
+						}
 						else
 						{
 							location.href = \"".trim(urlPath()) . $MainPageURL ."?".$url."&dwcount=indlead\";
@@ -1084,6 +1119,7 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 	$htmlContent .= '<td class="bottom right"><select id="'.$uniqueId.'_dwcount" name="dwcount" onchange="change_view_'.$uniqueId.'_();">'
 					. '<option value="total" '. (($dwcount == 'total') ?  'selected="selected"' : '' ).'>All trials</option>'
 					. '<option value="indlead" '. (($dwcount == 'indlead') ?  'selected="selected"' : '' ).'>Active industry trials</option>'
+					. '<option value="owner_sponsored" '. (($dwcount == 'owner_sponsored') ?  'selected="selected"' : '' ).'>Active owner-sponsored trials</option>'
 					. '<option value="active" '. (($dwcount == 'active') ?  'selected="selected"' : '' ).'>Active trials</option>'
 					. '</select></td>'
 					. '<td class="bottom right">'
@@ -1168,7 +1204,8 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 		if($TrackerType == 'DCPT' || $TrackerType == 'DMCPT' || $TrackerType == 'DMPT') $commonPart2 = '&e2=' . $entity2Id;
 		if($TrackerType != 'PTH') $commonPart2 .= '&sourcepg=TZ';
 		
-		$industryLink = $commonPart1 . $commonPart2 . '&list=1&itype=0';
+		$industryLink = $commonPart1 . $commonPart2 . '&list=1&itype=1';
+		$ownerSponsoredLink = $commonPart1 . $commonPart2 . '&list=1&itype=0';
 		$activeLink = $commonPart1 . $commonPart2 . '&list=1';
 		$totalLink = $commonPart1 . $commonPart2 . '&list=2';
 		
@@ -1306,6 +1343,54 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 			$htmlContent .= DrawExtraHTMLCells($phase_space, $inner_columns, $remain_span);
 			
 			$htmlContent .= '<th></th></tr><tr id="'.$uniqueId.'_total_Graph_Row_C_'.$row.'" class="total_Graph">';
+			for($j=0; $j < $columns; $j++)
+			{
+				$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
+			}
+			$htmlContent .= '<th></th></tr>';
+		}
+
+		//// Code for owner_sponsored
+		if($dwcount == 'owner_sponsored')
+		{
+			$Err = OwnerSponsoredCountErr($data_matrix, $row, $ratio);
+			
+			$Max_ValueKey = Max_ValueKey($data_matrix[$row]['owner_sponsored_phase_na'], $data_matrix[$row]['owner_sponsored_phase_0'], $data_matrix[$row]['owner_sponsored_phase_1'], $data_matrix[$row]['owner_sponsored_phase_2'], $data_matrix[$row]['owner_sponsored_phase_3'], $data_matrix[$row]['owner_sponsored_phase_4']);
+						
+			$htmlContent .= '<tr id="'.$uniqueId.'_owner_sponsored_Graph_Row_A_'.$row.'"  class="owner_sponsored_Graph"><th align="right" class="prod_col" id="'.$uniqueId.'_ProdCol_'.$row.'" rowspan="3"><a href="'. (($TrackerType != 'PTH') ? $commonPart1.'&sourcepg=TZ': $ownerSponsoredLink) . '" target="_blank" style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
+	
+			///Below function will derive number of lines required to display product name, as our graph size is fixed due to fixed scale, we can calculate approx max area  
+			///for product column. From that we can calculate extra height which will be distributed to up and down rows of graph bar, So now IE6/7 as well as chrome will not 
+			///have issue of unequal distrirbution of extra height due to rowspan and bar will remain in middle, without use of JS.
+			$ExtraAdjusterHeight = (($pdf->getNumLines($data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'], ((650)*17/90)) * $Line_Width)  - 20) / 2;
+		
+			for($j=0; $j < $columns; $j++)
+			{
+				$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
+			}
+			$htmlContent .= '<th></th></tr><tr id="'.$uniqueId.'_owner_sponsored_Graph_Row_B_'.$row.'" class="Link owner_sponsored_Graph" >';
+			
+			$total_cols = $inner_columns * $columns;
+			$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['owner_sponsored']);
+			$phase_space = 0;
+	
+			foreach($phase_legend_nums as $key => $phase_nums)
+			{
+				if($data_matrix[$row]['owner_sponsored_phase_'.$phase_nums] > 0)
+				{
+					$Color = getClassNColorforPhase($phase_nums);
+					$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['owner_sponsored_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
+					$phase_space =  $phase_space + $Mini_Bar_Width;					
+					$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="Link '.$Color[0].'" title="'.$data_matrix[$row]['owner_sponsored_phase_'.$phase_nums].'" style="height:20px; _height:20px;"><a href="'. $ownerSponsoredLink . '&phase='.$phase_nums . '" target="_blank" class="Link" >&nbsp;</a></th>';
+				}
+			}
+		
+			$remain_span = $total_cols - $phase_space;
+			
+			if($remain_span > 0)
+			$htmlContent .= DrawExtraHTMLCells($phase_space, $inner_columns, $remain_span);
+			
+			$htmlContent .= '<th></th></tr><tr class="owner_sponsored_Graph" id="'.$uniqueId.'_owner_sponsored_Graph_Row_C_'.$row.'" >';
 			for($j=0; $j < $columns; $j++)
 			{
 				$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
@@ -1568,11 +1653,17 @@ function Download_reports()
 		$link_part = $commonPart2.'&list=2';
 		$mode = 'total';
 	}
+	elseif($_POST['dwcount']=='owner_sponsored')
+	{
+		$pdftitle=$tooltip=$title="Active owner-sponsored trials";
+		$link_part = $commonPart2.'&list=1&itype=0';
+		$mode = 'owner_sponsored';
+	}
 	else
 	{
 		$tooltip=$title="Active industry lead sponsor trials";
 		$pdftitle="Active industry lead sponsor trials";
-		$link_part = $commonPart2.'&list=1&itype=0';
+		$link_part = $commonPart2.'&list=1&itype=1';
 		$mode = 'indlead';
 	}
 	
@@ -1729,6 +1820,24 @@ function Download_reports()
 						}
 					}
 				}
+				else if($mode == 'owner_sponsored')
+				{
+					$Err = OwnerSponsoredCountErr($data_matrix, $row, $ratio);
+					$Max_ValueKey = Max_ValueKey($data_matrix[$row]['owner_sponsored_phase_na'], $data_matrix[$row]['owner_sponsored_phase_0'], $data_matrix[$row]['owner_sponsored_phase_1'], $data_matrix[$row]['owner_sponsored_phase_2'], $data_matrix[$row]['owner_sponsored_phase_3'], $data_matrix[$row]['owner_sponsored_phase_4']);
+					$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['owner_sponsored']);
+					$phase_space = 0;
+					
+					foreach($phase_legend_nums as $key => $phase_nums)
+					{
+						if($data_matrix[$row]['owner_sponsored_phase_'.$phase_nums] > 0)
+						{
+							$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['owner_sponsored_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
+							$phase_space =  $phase_space + $Mini_Bar_Width;
+							$url =  $fullLink . '&phase=' . $phase_nums;
+							$from = CreatePhaseCellforExcelExport($from, $Mini_Bar_Width, $url, $Excel_HMCounter, $data_matrix[$row]['owner_sponsored_phase_'.$phase_nums], $phase_nums, $objPHPExcel);
+						}
+					}
+				}
 				else
 				{
 					$Err = TotalCountErr($data_matrix, $row, $ratio);
@@ -1880,6 +1989,10 @@ function Download_reports()
 				else if($mode == 'active')
 				{
 					$TSV_data .= $data_matrix[$row]['active_phase_4'] ." \t ". $data_matrix[$row]['active_phase_3'] ." \t ". $data_matrix[$row]['active_phase_2'] ." \t ". $data_matrix[$row]['active_phase_1'] ." \t ". $data_matrix[$row]['active_phase_0'] ." \t ". $data_matrix[$row]['active_phase_na'] ." \n";
+				}
+				else if($mode == 'owner_sponsored')
+				{
+					$TSV_data .= $data_matrix[$row]['owner_sponsored_phase_4'] ." \t ". $data_matrix[$row]['owner_sponsored_phase_3'] ." \t ". $data_matrix[$row]['owner_sponsored_phase_2'] ." \t ". $data_matrix[$row]['owner_sponsored_phase_1'] ." \t ". $data_matrix[$row]['owner_sponsored_phase_0'] ." \t ". $data_matrix[$row]['owner_sponsored_phase_na'] ." \n";
 				}
 				else
 				{
@@ -2172,6 +2285,36 @@ function Download_reports()
 					}
 				} ///Foreach ends
 			}
+			else if($mode == 'owner_sponsored')
+			{
+				$Err = OwnerSponsoredCountErr($data_matrix, $row, $ratio);
+				$Max_ValueKey = Max_ValueKey($data_matrix[$row]['owner_sponsored_phase_na'], $data_matrix[$row]['owner_sponsored_phase_0'], $data_matrix[$row]['owner_sponsored_phase_1'], $data_matrix[$row]['owner_sponsored_phase_2'], $data_matrix[$row]['owner_sponsored_phase_3'], $data_matrix[$row]['owner_sponsored_phase_4']);
+				$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['owner_sponsored']);
+				$phase_space = 0;
+				
+				foreach($phase_legend_nums as $key => $phase_nums)
+				{
+					if($data_matrix[$row]['owner_sponsored_phase_'.$phase_nums] > 0)
+					{
+						$border = setStyleforPDFExport($phase_nums, $pdf);
+						$Width = $subColumn_width;
+						$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['owner_sponsored_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
+						$phase_space =  $phase_space + $Mini_Bar_Width;
+						
+						$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$row]['owner_sponsored_phase_'.$phase_nums], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Trials', 'Subj' => 'Information', 'C' => array()));	
+						
+						$m=0;
+						while($m < $Mini_Bar_Width)
+						{
+							$Color = getClassNColorforPhase($phase_nums);
+							$pdfContent = '<div align="center" style="vertical-align:top; float:none;"><a style="color:#'.$Color[1].'; text-decoration:none; line-height:2px;" href="'. $fullLink .'&phase='. $phase_nums . '" target="_blank" title="'. $title .'">&nbsp;</a></div>';
+							$pdf->MultiCell($Width, $Line_Height, $pdfContent, $border=0, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$Line_Height);
+							$Place_X = $Place_X + $Width;
+							$m++;
+						}
+					}
+				} /// Foreach ends
+			}
 			
 			$total_cols = $inner_columns * $columns;
 			$remain_span = $total_cols - $phase_space;
@@ -2330,9 +2473,10 @@ function Download_reports()
 			{
 				if($_POST['dwcount']=='active')
 					$CurrentExcelChartArray = array($data_matrix[$currentRow]['productName'].$data_matrix[$currentRow]['product_CompanyName'], $data_matrix[$currentRow]['active_phase_na'], $data_matrix[$currentRow]['active_phase_0'], $data_matrix[$currentRow]['active_phase_1'], $data_matrix[$currentRow]['active_phase_2'], $data_matrix[$currentRow]['active_phase_3'], $data_matrix[$currentRow]['active_phase_4']);
-				else 
-					if($_POST['dwcount']=='total')
+				else if($_POST['dwcount']=='total')
 						$CurrentExcelChartArray = array($data_matrix[$currentRow]['productName'].$data_matrix[$currentRow]['product_CompanyName'], $data_matrix[$currentRow]['total_phase_na'], $data_matrix[$currentRow]['total_phase_0'], $data_matrix[$currentRow]['total_phase_1'], $data_matrix[$currentRow]['total_phase_2'], $data_matrix[$currentRow]['total_phase_3'], $data_matrix[$currentRow]['total_phase_4']);
+					else if($_POST['dwcount']=='owner_sponsored')
+					$CurrentExcelChartArray = array($data_matrix[$currentRow]['productName'].$data_matrix[$currentRow]['product_CompanyName'], $data_matrix[$currentRow]['owner_sponsored_phase_na'], $data_matrix[$currentRow]['owner_sponsored_phase_0'], $data_matrix[$currentRow]['owner_sponsored_phase_1'], $data_matrix[$currentRow]['owner_sponsored_phase_2'], $data_matrix[$currentRow]['owner_sponsored_phase_3'], $data_matrix[$currentRow]['owner_sponsored_phase_4']);
 					else
 						$CurrentExcelChartArray = array($data_matrix[$currentRow]['productName'].$data_matrix[$currentRow]['product_CompanyName'], $data_matrix[$currentRow]['indlead_phase_na'], $data_matrix[$currentRow]['indlead_phase_0'], $data_matrix[$currentRow]['indlead_phase_1'], $data_matrix[$currentRow]['indlead_phase_2'], $data_matrix[$currentRow]['indlead_phase_3'], $data_matrix[$currentRow]['indlead_phase_4']);
 			}
@@ -2744,6 +2888,15 @@ function IndleadCountErr($data_matrix, $row, $ratio)
 {
 	$Rounded = (($data_matrix[$row]['indlead_phase_4'] > 0 && round($ratio * $data_matrix[$row]['indlead_phase_4']) < 1) ? 1:round($ratio * $data_matrix[$row]['indlead_phase_4'])) + (($data_matrix[$row]['indlead_phase_3'] > 0 && round($ratio * $data_matrix[$row]['indlead_phase_3']) < 1) ? 1:round($ratio * $data_matrix[$row]['indlead_phase_3'])) + (($data_matrix[$row]['indlead_phase_2'] > 0 && round($ratio * $data_matrix[$row]['indlead_phase_2']) < 1) ? 1:round($ratio * $data_matrix[$row]['indlead_phase_2'])) + (($data_matrix[$row]['indlead_phase_1'] > 0 && round($ratio * $data_matrix[$row]['indlead_phase_1']) < 1) ? 1:round($ratio * $data_matrix[$row]['indlead_phase_1'])) + (($data_matrix[$row]['indlead_phase_0'] > 0 && round($ratio * $data_matrix[$row]['indlead_phase_0']) < 1) ? 1:round($ratio * $data_matrix[$row]['indlead_phase_0'])) + (($data_matrix[$row]['indlead_phase_na'] > 0 && round($ratio * $data_matrix[$row]['indlead_phase_na']) < 1) ? 1:round($ratio * $data_matrix[$row]['indlead_phase_na']));
 	$Actual = ($ratio * $data_matrix[$row]['indlead_phase_4']) + ($ratio * $data_matrix[$row]['indlead_phase_3']) + ($ratio * $data_matrix[$row]['indlead_phase_2']) + ($ratio * $data_matrix[$row]['indlead_phase_1']) + ($ratio * $data_matrix[$row]['indlead_phase_0'])+ ($ratio * $data_matrix[$row]['indlead_phase_na']);
+	$Err = floor($Rounded - $Actual);
+	
+	return $Err;
+}
+
+function OwnerSponsoredCountErr($data_matrix, $row, $ratio)
+{
+	$Rounded = (($data_matrix[$row]['owner_sponsored_phase_4'] > 0 && round($ratio * $data_matrix[$row]['owner_sponsored_phase_4']) < 1) ? 1:round($ratio * $data_matrix[$row]['owner_sponsored_phase_4'])) + (($data_matrix[$row]['owner_sponsored_phase_3'] > 0 && round($ratio * $data_matrix[$row]['owner_sponsored_phase_3']) < 1) ? 1:round($ratio * $data_matrix[$row]['owner_sponsored_phase_3'])) + (($data_matrix[$row]['owner_sponsored_phase_2'] > 0 && round($ratio * $data_matrix[$row]['owner_sponsored_phase_2']) < 1) ? 1:round($ratio * $data_matrix[$row]['owner_sponsored_phase_2'])) + (($data_matrix[$row]['owner_sponsored_phase_1'] > 0 && round($ratio * $data_matrix[$row]['owner_sponsored_phase_1']) < 1) ? 1:round($ratio * $data_matrix[$row]['owner_sponsored_phase_1'])) + (($data_matrix[$row]['owner_sponsored_phase_0'] > 0 && round($ratio * $data_matrix[$row]['owner_sponsored_phase_0']) < 1) ? 1:round($ratio * $data_matrix[$row]['owner_sponsored_phase_0'])) + (($data_matrix[$row]['owner_sponsored_phase_na'] > 0 && round($ratio * $data_matrix[$row]['owner_sponsored_phase_na']) < 1) ? 1:round($ratio * $data_matrix[$row]['owner_sponsored_phase_na']));
+	$Actual = ($ratio * $data_matrix[$row]['owner_sponsored_phase_4']) + ($ratio * $data_matrix[$row]['owner_sponsored_phase_3']) + ($ratio * $data_matrix[$row]['owner_sponsored_phase_2']) + ($ratio * $data_matrix[$row]['owner_sponsored_phase_1']) + ($ratio * $data_matrix[$row]['owner_sponsored_phase_0'])+ ($ratio * $data_matrix[$row]['owner_sponsored_phase_na']);
 	$Err = floor($Rounded - $Actual);
 	
 	return $Err;

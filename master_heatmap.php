@@ -925,15 +925,20 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 				$cell_query = 'SELECT * FROM rpt_masterhm_cells WHERE (`entity1`=' . $entity1Ids[$row] . ' AND `entity2`='. $entity2Ids[$col] .') OR (`entity2`=' . $entity1Ids[$row] . ' AND `entity1`='. $entity2Ids[$col] .')';
 				$cell_res = mysql_query($cell_query) or die(mysql_error());
 				$cell_data = mysql_fetch_array($cell_res);
+				
 				$col_active_total[$col]=$cell_data['count_active']+$col_active_total[$col];
 				$row_active_total[$row]=$cell_data['count_active']+$row_active_total[$row];
 				$col_count_total[$col]=$cell_data['count_total']+$col_count_total[$col];
 				$row_count_total[$row]=$cell_data['count_total']+$row_count_total[$row];
 				$col_indlead_total[$col]=$cell_data['count_active_indlead']+$col_indlead_total[$col];
 				$row_indlead_total[$row]=$cell_data['count_active_indlead']+$row_indlead_total[$row];
+				$col_active_owner_sponsored_total[$col]=$cell_data['count_active_owner_sponsored']+$col_active_owner_sponsored_total[$col];
+				$row_active_owner_sponsored_total[$row]=$cell_data['count_active_owner_sponsored']+$row_active_owner_sponsored_total[$row];
+				
 				$active_total=$cell_data['count_active']+$active_total;
 				$count_total=$cell_data['count_total']+$count_total;
 				$indlead_total=$cell_data['count_active_indlead']+$indlead_total;
+				$active_owner_sponsored_total=$cell_data['count_active_owner_sponsored']+$active_owner_sponsored_total;
 				
 				if($cell_data['count_active'] != '' && $cell_data['count_active'] != NULL)
 				$data_matrix[$row][$col]['active']=$cell_data['count_active'];
@@ -949,6 +954,11 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 				$data_matrix[$row][$col]['indlead']=$cell_data['count_active_indlead'];
 				else
 				$data_matrix[$row][$col]['indlead']=0;
+				
+				if($cell_data['count_active_owner_sponsored'] != '' && $cell_data['count_active_owner_sponsored'] != NULL)
+					$data_matrix[$row][$col]['active_owner_sponsored']=$cell_data['count_active_owner_sponsored'];
+				else
+					$data_matrix[$row][$col]['active_owner_sponsored']=0;
 				
 				$data_matrix[$row][$col]['phase_explain']=$cell_data['phase_explain'];
 
@@ -1057,16 +1067,25 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 				$data_matrix[$row][$col]['active_prev']=$cell_data['count_active_prev'];
 				$data_matrix[$row][$col]['total_prev']=$cell_data['count_total_prev'];
 				$data_matrix[$row][$col]['indlead_prev']=$cell_data['count_active_indlead_prev'];
+				$data_matrix[$row][$col]['active_owner_sponsored_prev']=$cell_data['count_active_owner_sponsored_prev'];
 				
 			}
 			else
 			{
-				$data_matrix[$row][$col]['active']=0;
-				$data_matrix[$row][$col]['total']=0;
+				$data_matrix[$rid][$cid]['active']=0;
+				$data_matrix[$rid][$cid]['total']=0;
+				$data_matrix[$rid][$cid]['indlead']=0;
+				$data_matrix[$rid][$cid]['active_owner_sponsored']=0;
+				
 				$col_active_total[$col]=0+$col_active_total[$col];
 				$row_active_total[$row]=0+$row_active_total[$row];
 				$col_count_total[$col]=0+$col_count_total[$col];
 				$row_count_total[$row]=0+$row_count_total[$row];
+				$col_count_indlead[$col]=0+$col_count_indlead[$col];
+				$row_count_indlead[$row]=0+$row_count_indlead[$row];
+				$col_active_owner_sponsored[$col]=0+$col_active_owner_sponsored[$col];
+				$row_active_owner_sponsored[$row]=0+$row_active_owner_sponsored[$row];
+				
 				$data_matrix[$row][$col]['bomb_auto']['src']='';
 				$data_matrix[$row][$col]['bomb']['src']='';
 				$data_matrix[$row][$col]['bomb_explain']='';
@@ -1088,15 +1107,22 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 		$view_tp='active';
 		$link_part = '&list=1&hm=' . $id;
 	}
+	else if($_GET['view_type']=='active_owner_sponsored')
+	{
+		$title="Active owner sponsored trials";
+		$view_tp='active_owner_sponsored';
+		$link_part = '&list=1&itype=0&hm=' . $id;
+	}
 	else
 	{
 		$title="Active industry lead sponsor trials";
 		$view_tp='indlead';
-		$link_part = '&list=1&itype=0&hm=' . $id;
+		$link_part = '&list=1&itype=1&hm=' . $id;
 	}
 
 	$out = '<br/>&nbsp;&nbsp;<b>View type: </b> <select id="view_type" name="view_type" onchange="window.location.href=\'master_heatmap.php?id='.$_GET['id'].'&view_type=\'+this.value+\'\'">'
 			. '<option value="indlead"'.(($view_tp=='indlead')? "selected=\"selected\"":"").'>Active Industry trials</option>'
+			. '<option value="active_owner_sponsored"'.(($view_tp=='active_owner_sponsored')? "selected=\"selected\"":"").'>Active owner-sponsored trials</option>'
 			. '<option value="active" '.(($view_tp=='active')? "selected=\"selected\"":"").'>Active trials</option>'
 			. '<option value="total" '.(($view_tp=='total')? "selected=\"selected\"":"").'>All trials</option></select><br/>';
 			
@@ -1114,6 +1140,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 		. '</select><br/><br/>';
 	$out .='<b>Counts display: </b><select id="dwcount" name="dwcount">'
 		. '<option value="indlead" '.(($view_tp=='indlead')? "selected=\"selected\"":"").'>Active industry trials</option>'
+		. '<option value="active_owner_sponsored"'.(($view_tp=='active_owner_sponsored')? "selected=\"selected\"":"").'>Active owner-sponsored trials</option>'
 		. '<option value="active" '.(($view_tp=='active')? "selected=\"selected\"":"").'>Active trials</option>'
 		. '<option value="total" '.(($view_tp=='total')? "selected=\"selected\"":"").'>All trials</option></select><br/><br/><input type="submit" name="download" value="Download" title="Download" />'
 		. '</fieldset></form>';	
@@ -1310,6 +1337,10 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 			{
 				$count_val=$col_indlead_total[$col];
 			}
+			else if($view_tp =='active_owner_sponsored')
+			{
+				$count_val=$col_active_owner_sponsored_total[$col];
+			}
 			
 			//In case of last column DTT just get hm id and view type
 			$out .= '<a href="intermediary.php?' . (($dtt_fld && ($max_column['num'] == $col)) ? substr($link_part, 1) : 'e2='.$entity2Ids[$col] . $link_part) .'" target="_blank" class="ottlink" title="'.$title.'">'.$count_val.'</a>';
@@ -1336,6 +1367,10 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 			else if($view_tp == 'indlead')
 			{
 				$count_val='<b>'.$indlead_total.'</b>';
+			}
+			else if($view_tp == 'active_owner_sponsored')
+			{
+				$count_val='<b>'.$active_owner_sponsored_total.'</b>';
 			}
 				
 			$entity1Ids = array_filter($entity1Ids);
@@ -1400,6 +1435,10 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 			{
 				$count_val='<b>'.$row_indlead_total[$row].'</b>';
 			}
+			else if($view_tp == 'active_owner_sponsored')
+			{
+				$count_val='<b>'.$row_active_owner_sponsored_total[$row].'</b>';
+			}
 				
 			$out .= '<a href="intermediary.php?e1=' . $entity1Ids[$row] . $link_part . '" target="_blank" class="ottlink" title="'.$title.'">'.$count_val.'</a>';
 		}
@@ -1429,6 +1468,11 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 				{
 					$count_val='<b>'.$data_matrix[$row][$col]['indlead'].'</b>';
 					$prev_count_val='<b>'.$data_matrix[$row][$col]['indlead_prev'].'</b>';
+				}
+				else if($view_tp == 'active_owner_sponsored')
+				{
+					$count_val='<b>'.$data_matrix[$row][$col]['active_owner_sponsored'].'</b>';
+					$prev_count_val='<b>'.$data_matrix[$row][$col]['active_owner_sponsored_prev'].'</b>';
 				}
 					
 				$out .= '<a href="intermediary.php?e1=' . $entity1Ids[$row] . '&e2=' . $entity2Ids[$col] . $link_part . '" target="_blank" class="ottlink" title="'.$title.'">'.$count_val.'</a><br/><br/>';
@@ -2011,15 +2055,20 @@ function Download_reports()
 				$cell_query = 'SELECT * FROM rpt_masterhm_cells WHERE (`entity1`=' . $entity1Ids[$row] . ' AND `entity2`='. $entity2Ids[$col] .') OR (`entity2`=' . $entity1Ids[$row] . ' AND `entity1`='. $entity2Ids[$col] .')';
 				$cell_res = mysql_query($cell_query) or die(mysql_error());
 				$cell_data = mysql_fetch_array($cell_res);
+				
 				$col_active_total[$col]=$cell_data['count_active']+$col_active_total[$col];
 				$row_active_total[$row]=$cell_data['count_active']+$row_active_total[$row];
 				$col_count_total[$col]=$cell_data['count_total']+$col_count_total[$col];
 				$row_count_total[$row]=$cell_data['count_total']+$row_count_total[$row];
 				$col_indlead_total[$col]=$cell_data['count_active_indlead']+$col_indlead_total[$col];
 				$row_indlead_total[$row]=$cell_data['count_active_indlead']+$row_indlead_total[$row];
+				$col_active_owner_sponsored_total[$col]=$cell_data['count_active_owner_sponsored']+$col_active_owner_sponsored_total[$col];
+				$row_active_owner_sponsored_total[$row]=$cell_data['count_active_owner_sponsored']+$row_active_owner_sponsored_total[$row];
+				
 				$active_total=$cell_data['count_active']+$active_total;
 				$count_total=$cell_data['count_total']+$count_total;
 				$indlead_total=$cell_data['count_active_indlead']+$indlead_total;
+				$active_owner_sponsored_total=$cell_data['count_active_owner_sponsored']+$active_owner_sponsored_total;
 				
 				if($cell_data['count_active'] != '' && $cell_data['count_active'] != NULL)
 				$data_matrix[$rid][$cid]['active']=$cell_data['count_active'];
@@ -2035,6 +2084,11 @@ function Download_reports()
 				$data_matrix[$rid][$cid]['indlead']=$cell_data['count_active_indlead'];
 				else
 				$data_matrix[$rid][$cid]['indlead']=0;
+				
+				if($cell_data['count_active_owner_sponsored'] != '' && $cell_data['count_active_owner_sponsored'] != NULL)
+					$data_matrix[$rid][$cid]['active_owner_sponsored']=$cell_data['count_active_owner_sponsored'];
+				else
+					$data_matrix[$rid][$cid]['active_owner_sponsored']=0;	
 				
 				if($ohm == 'SOHM')
 				{
@@ -2125,7 +2179,7 @@ function Download_reports()
 				$data_matrix[$rid][$cid]['active_prev']=$cell_data['count_active_prev'];
 				$data_matrix[$rid][$cid]['total_prev']=$cell_data['count_total_prev'];
 				$data_matrix[$rid][$cid]['indlead_prev']=$cell_data['count_active_indlead_prev'];
-				
+				$data_matrix[$rid][$cid]['active_owner_sponsored_prev']=$cell_data['count_active_owner_sponsored_prev'];
 				
 				$data_matrix[$rid][$cid]['update_flag'] = 0;
 				
@@ -2266,23 +2320,28 @@ function Download_reports()
 					$data_matrix[$rid][$cid]['color_code']='FF0000';
 				}
 				
-				$allTrialsStatusArray = array('not_yet_recruiting', 'recruiting', 'enrolling_by_invitation', 'active_not_recruiting', 'completed', 'suspended', 'terminated', 'withdrawn', 'available', 'no_longer_available', 'approved_for_marketing', 'no_longer_recruiting', 'withheld', 'temporarily_not_available', 'ongoing', 'not_authorized', 'prohibited', 'new_trials');
+				$allTrialsStatusArray = array('not_yet_recruiting', 'recruiting', 'enrolling_by_invitation', 'active_not_recruiting', 'completed', 'suspended', 'terminated', 'withdrawn', 'available', 'no_longer_available', 'approved_for_marketing', 'no_longer_recruiting', 'withheld', 'temporarily_not_available', 'ongoing', 'not_authorized', 'prohibited');
 				foreach($allTrialsStatusArray as $status)
 				{
 					$data_matrix[$rid][$cid][$status]=$cell_data[$status];
 				}
-			
-				$activeIndleadStatusArray = array('not_yet_recruiting_active_indlead', 'recruiting_active_indlead', 'enrolling_by_invitation_active_indlead', 'active_not_recruiting_active_indlead', 'completed_active_indlead', 'suspended_active_indlead', 'terminated_active_indlead', 'withdrawn_active_indlead', 'available_active_indlead', 'no_longer_available_active_indlead', 'approved_for_marketing_active_indlead', 'no_longer_recruiting_active_indlead', 'withheld_active_indlead', 'temporarily_not_available_active_indlead', 'ongoing_active_indlead', 'not_authorized_active_indlead', 'prohibited_active_indlead');
-				foreach($activeIndleadStatusArray as $status)
+				
+				foreach($allTrialsStatusArray as $status)
 				{
-					$data_matrix[$rid][$cid][$status]=$cell_data[$status];
+					$data_matrix[$rid][$cid][$status.'_active_indlead']=$cell_data[$status.'_active_indlead'];
 				}
-			
-				$activeStatusArray = array('not_yet_recruiting_active', 'recruiting_active', 'enrolling_by_invitation_active', 'active_not_recruiting_active', 'completed_active', 'suspended_active', 'terminated_active', 'withdrawn_active', 'available_active', 'no_longer_available_active', 'approved_for_marketing_active', 'no_longer_recruiting_active', 'withheld_active', 'temporarily_not_available_active', 'ongoing_active', 'not_authorized_active', 'prohibited_active');
-				foreach($activeStatusArray as $status)
+				
+				foreach($allTrialsStatusArray as $status)
 				{
-					$data_matrix[$rid][$cid][$status]=$cell_data[$status];
+					$data_matrix[$rid][$cid][$status.'_active']=$cell_data[$status.'_active'];
 				}
+				
+				foreach($allTrialsStatusArray as $status)
+				{
+					$data_matrix[$rid][$cid][$status.'_active_owner_sponsored']=$cell_data[$status.'_active_owner_sponsored'];
+				}
+				
+				$data_matrix[$rid][$cid]['new_trials']=$cell_data['new_trials'];
 				
 				////// Remaining Width calculation
 				require_once('tcpdf/config/lang/eng.php');
@@ -2301,6 +2360,13 @@ function Download_reports()
 					if($data_matrix[$rid][$cid]['total'] != NULL && $data_matrix[$rid][$cid]['total'] != '')
 					{
 						$Width = $Width + $pdf->GetStringWidth($data_matrix[$rid][$cid]['total'], 'freesansb', 'B', 8) + 0.6;
+					}
+				}
+				elseif($_POST['dwcount']=='active_owner_sponsored')
+				{
+					if($data_matrix[$rid][$cid]['active_owner_sponsored'] != NULL && $data_matrix[$rid][$cid]['active_owner_sponsored'] != '')
+					{
+						$Width = $Width + $pdf->GetStringWidth($data_matrix[$rid][$cid]['active_owner_sponsored'], 'freesansb', 'B', 8) + 0.6;
 					}
 				}
 				else
@@ -2329,10 +2395,18 @@ function Download_reports()
 			{
 				$data_matrix[$rid][$cid]['active']=0;
 				$data_matrix[$rid][$cid]['total']=0;
+				$data_matrix[$rid][$cid]['indlead']=0;
+				$data_matrix[$rid][$cid]['active_owner_sponsored']=0;
+				
 				$col_active_total[$col]=0+$col_active_total[$col];
 				$row_active_total[$row]=0+$row_active_total[$row];
 				$col_count_total[$col]=0+$col_count_total[$col];
 				$row_count_total[$row]=0+$row_count_total[$row];
+				$col_count_indlead[$col]=0+$col_count_indlead[$col];
+				$row_count_indlead[$row]=0+$row_count_indlead[$row];
+				$col_active_owner_sponsored[$col]=0+$col_active_owner_sponsored[$col];
+				$row_active_owner_sponsored[$row]=0+$row_active_owner_sponsored[$row];
+				
 				$data_matrix[$rid][$cid]['bomb_auto']['src']='';
 				$data_matrix[$rid][$cid]['bomb']['src']='';
 				$data_matrix[$rid][$cid]['bomb_explain']='';
@@ -2370,6 +2444,7 @@ function Download_reports()
 		$row_active_totalCopy=$row_active_total;
 		$row_count_totalCopy=$row_count_total;
 		$row_indlead_totalCopy=$row_indlead_total;
+		$row_active_owner_sponsored_totalCopy=$row_active_owner_sponsored_total;
 		$rowsCopy = $rows;
 		$rowsCompanyNameCopy = $rowsCompanyName;
 		$rowsDisplayNameCopy = $rowsDisplayName;
@@ -2381,6 +2456,7 @@ function Download_reports()
 			$row_active_total[$k+1]=$row_active_totalCopy[$r['oldrow']];
 			$row_count_total[$k+1]=$row_count_totalCopy[$r['oldrow']];
 			$row_indlead_total[$k+1]=$row_indlead_totalCopy[$r['oldrow']];
+			$row_active_owner_sponsored_total[$k+1]=$row_active_owner_sponsored_totalCopy[$r['oldrow']];
 			$rows[$k+1] = $rowsCopy[$r['oldrow']];
 			$rowsCompanyName[$k+1] = $rowsCompanyNameCopy[$r['oldrow']];
 			$rowsDisplayName[$k+1] = $rowsDisplayNameCopy[$r['oldrow']];
@@ -2420,6 +2496,7 @@ function Download_reports()
 		$col_active_totalCopy=$col_active_total;
 		$col_count_totalCopy=$col_count_total;
 		$col_indlead_totalCopy=$col_indlead_total;
+		$col_active_owner_sponsored_totalCopy=$col_active_owner_sponsored_total;
 		$columnsCopy = $columns;
 		$columnsCompanyNameCopy = $columnsCompanyName;
 		$columnsDisplayNameCopy = $columnsDisplayName;
@@ -2431,6 +2508,7 @@ function Download_reports()
 			$col_active_total[$k+1]=$col_active_totalCopy[$r['oldcol']];
 			$col_count_total[$k+1]=$col_count_totalCopy[$r['oldcol']];
 			$col_indlead_total[$k+1]=$col_indlead_totalCopy[$r['oldcol']];
+			$col_active_owner_sponsored_total[$k+1]=$col_active_owner_sponsored_totalCopy[$r['oldcol']];
 			$columns[$k+1] = $columnsCopy[$r['oldcol']];
 			$columnsCompanyName[$k+1] = $columnsCompanyNameCopy[$r['oldcol']];
 			$columnsDisplayName[$k+1] = $columnsDisplayNameCopy[$r['oldcol']];
@@ -2457,11 +2535,17 @@ function Download_reports()
 		$link_part = '&list=2';
 		$mode = 'total';
 	}
+	elseif($_POST['dwcount']=='active_owner_sponsored')
+	{
+		$pdftitle=$tooltip=$title="Active owner sponsored trials";
+		$link_part = '&list=1&itype=0';
+		$mode = 'active_owner_sponsored';
+	}
 	else
 	{
 		$tooltip=$title="Active industry lead sponsor trials";
 		$pdftitle="Active industry lead sponsor trials";
-		$link_part = '&list=1&itype=0';
+		$link_part = '&list=1&itype=1';
 		$mode = 'indlead';
 	}
 	//if slider has default range dont add these parameters in links as OTT has same default range
@@ -2573,6 +2657,10 @@ function Download_reports()
 			elseif($mode=='total')
 			{
 				$count_val=$count_total;
+			}
+			elseif($mode=='active_owner_sponsored')
+			{
+				$count_val=$active_owner_sponsored_total;
 			}
 			else
 			{
@@ -2940,6 +3028,10 @@ function Download_reports()
 				{
 					$count_val=$col_count_total[$col];
 				}
+				elseif($mode=='active_owner_sponsored')
+				{
+					$count_val=$col_active_owner_sponsored_total[$col];
+				}
 				else
 				{
 					$count_val=$col_indlead_total[$col];
@@ -3033,6 +3125,10 @@ function Download_reports()
 				elseif($mode=='total')
 				{
 					$count_val=$count_total;
+				}
+				elseif($mode=='active_owner_sponsored')
+				{
+					$count_val=$active_owner_sponsored_total;
 				}
 				else
 				{
@@ -3283,6 +3379,10 @@ function Download_reports()
 						{
 							$count_val=$col_count_total[$col];
 						}
+						elseif($mode=='active_owner_sponsored')
+						{
+							$count_val=$col_active_owner_sponsored_total[$col];
+						}
 						else
 						{
 							$count_val=$col_indlead_total[$col];
@@ -3376,6 +3476,10 @@ function Download_reports()
 						elseif($mode=='total')
 						{
 							$count_val=$count_total;
+						}
+						elseif($mode=='active_owner_sponsored')
+						{
+							$count_val=$active_owner_sponsored_total;
 						}
 						else
 						{
@@ -3504,6 +3608,10 @@ function Download_reports()
 				{
 					$count_val=$row_count_total[$row];
 				}
+				elseif($mode=='active_owner_sponsored')
+				{
+					$count_val=$row_active_owner_sponsored_total[$row];
+				}
 				else
 				{
 					$count_val=$row_indlead_total[$row];
@@ -3563,6 +3671,11 @@ function Download_reports()
 						$count_val=$data_matrix[$rid][$cid]['total'];
 						$count_val_prev=$data_matrix[$rid][$cid]['total_prev'];
 					}
+					elseif($mode=='active_owner_sponsored')
+					{
+						$count_val=$data_matrix[$rid][$cid]['active_owner_sponsored'];
+						$count_val_prev=$data_matrix[$rid][$cid]['active_owner_sponsored_prev'];
+					}
 					else
 					{
 						$count_val=$data_matrix[$rid][$cid]['indlead'];
@@ -3621,47 +3734,61 @@ function Download_reports()
 					else
 						$Status_Total_Flg=0;
 					
+					
 					$Status_Active_Flg=0;
 					$Status_Active = "Status changes to:\n";
 					
-					$activeStatusArray = array('not_yet_recruiting_active', 'recruiting_active', 'enrolling_by_invitation_active', 'active_not_recruiting_active', 'completed_active', 'suspended_active', 'terminated_active', 'withdrawn_active', 'available_active', 'no_longer_available_active', 'approved_for_marketing_active', 'no_longer_recruiting_active', 'withheld_active', 'temporarily_not_available_active', 'ongoing_active', 'not_authorized_active', 'prohibited_active');
-			
-					foreach($activeStatusArray as $currentStatus)
+					foreach($allTrialsStatusArray as $currentStatus)
 					{
-						if($data_matrix[$rid][$cid][$currentStatus] > 0)
+						if($data_matrix[$rid][$cid][$currentStatus.'_active'] > 0)
 						{
 							$Status_Active_Flg=1;
-							$Status_Active .= " \"".ucfirst(str_replace('_',' ',str_replace('_active','',$currentStatus))) ."\": ". $data_matrix[$rid][$cid][$currentStatus] ."\n";
+							$Status_Active .= " \"".ucfirst(str_replace('_',' ',$currentStatus)) ."\": ". $data_matrix[$rid][$cid][$currentStatus.'_active'] ."\n";
 						}
 					}
 
-					
 					if($Status_Active_Flg==1 && $mode=='active')
 						$annotation_text2 .= $Status_Active;
 					else
 						$Status_Active_Flg=0;
 					
+					
 					$Status_Indlead_Flg=0;
 					$Status_Indlead = "Status changes to:\n";
 					
-					$activeIndleadStatusArray = array('not_yet_recruiting_active_indlead', 'recruiting_active_indlead', 'enrolling_by_invitation_active_indlead', 'active_not_recruiting_active_indlead', 'completed_active_indlead', 'suspended_active_indlead', 'terminated_active_indlead', 'withdrawn_active_indlead', 'available_active_indlead', 'no_longer_available_active_indlead', 'approved_for_marketing_active_indlead', 'no_longer_recruiting_active_indlead', 'withheld_active_indlead', 'temporarily_not_available_active_indlead', 'ongoing_active_indlead', 'not_authorized_active_indlead', 'prohibited_active_indlead');
-			
-					foreach($activeIndleadStatusArray as $currentStatus)
+					foreach($allTrialsStatusArray as $currentStatus)
 					{
-						if($data_matrix[$rid][$cid][$currentStatus] > 0)
+						if($data_matrix[$rid][$cid][$currentStatus.'_active_indlead'] > 0)
 						{
 							$Status_Indlead_Flg=1;
-							$Status_Indlead .= " \"".ucfirst(str_replace('_',' ',str_replace('_active_indlead','',$currentStatus)))."\": ". $data_matrix[$rid][$cid][$currentStatus]."\n";
+							$Status_Indlead .= " \"".ucfirst(str_replace('_',' ',$currentStatus))."\": ". $data_matrix[$rid][$cid][$currentStatus.'_active_indlead']."\n";
 						}
 					}
 
-					
 					if($Status_Indlead_Flg==1 && $mode=='indlead')
 						$annotation_text2 .= $Status_Indlead;
 					else
 						$Status_Indlead_Flg=0;
+						
 					
-					if($data_matrix[$rid][$cid]['total'] != 0 && ($Status_New_Trials_Flg==1 || $Status_Total_Flg==1 || $Status_Active_Flg || $Status_Indlead_Flg) && (date('Y-m-d H:i:s', strtotime($end_range, $now)) == date('Y-m-d H:i:s', strtotime('-1 Month', $now))))
+					$Status_Active_Owner_Sponsored_Flg=0;
+					$Status_Active_Owner_Sponsored = "Status changes to:\n";
+					
+					foreach($allTrialsStatusArray as $currentStatus)
+					{
+						if($data_matrix[$rid][$cid][$currentStatus.'_active_owner_sponsored'] > 0)
+						{
+							$Status_Active_Owner_Sponsored_Flg=1;
+							$Status_Active_Owner_Sponsored .= " \"".ucfirst(str_replace('_',' ',$currentStatus))."\": ". $data_matrix[$rid][$cid][$currentStatus.'_active_owner_sponsored']."\n";
+						}
+					}
+
+					if($Status_Active_Owner_Sponsored_Flg==1 && $mode=='active_owner_sponsored')
+						$annotation_text2 .= $Status_Active_Owner_Sponsored;
+					else
+						$Status_Active_Owner_Sponsored_Flg=0;	
+					
+					if($data_matrix[$rid][$cid]['total'] != 0 && ($Status_New_Trials_Flg==1 || $Status_Total_Flg==1 || $Status_Active_Flg || $Status_Indlead_Flg || $Status_Active_Owner_Sponsored_Flg) && (date('Y-m-d H:i:s', strtotime($end_range, $now)) == date('Y-m-d H:i:s', strtotime('-1 Month', $now))))
 					$annotation_text = $annotation_text.$annotation_text2;
 					
 					$annotation_text = htmlspecialchars_decode(strip_tags($annotation_text));	///Strip HTML tags then Convert special HTML entities back to characters like &amp; to &
@@ -4063,6 +4190,10 @@ function Download_reports()
 				{
 					$count_val=' ('. $col_count_total[$col] .')';
 				}
+				elseif($mode=='active_owner_sponsored')
+				{
+					$count_val=' ('. $col_active_owner_sponsored_total[$col] .')';
+				}
 				else
 				{
 					$count_val=' ('. $col_indlead_total[$col].')';
@@ -4177,6 +4308,10 @@ function Download_reports()
 				{
 					$count_val=' ('. $row_count_total[$row] .')';
 				}
+				elseif($mode=='active_owner_sponsored')
+				{
+					$count_val=' ('. $row_active_owner_sponsored_total[$row] .')';
+				}
 				else
 				{
 					$count_val=' ('.$row_indlead_total[$row].')';
@@ -4280,6 +4415,11 @@ function Download_reports()
 						$count_val=$data_matrix[$rid][$cid]['total'];
 						$count_val_prev=$data_matrix[$rid][$cid]['total_prev'];
 					}
+					elseif($mode=='active_owner_sponsored')
+					{
+						$count_val=$data_matrix[$rid][$cid]['active_owner_sponsored'];
+						$count_val_prev=$data_matrix[$rid][$cid]['active_owner_sponsored_prev'];
+					}
 					else
 					{
 						$count_val=$data_matrix[$rid][$cid]['indlead'];
@@ -4334,23 +4474,21 @@ function Download_reports()
 						}
 					}
 					
-					
 					if($Status_Total_Flg==1 && $mode=='total')
 						$annotation_text2 .= $Status_Total;
 					else
 						$Status_Total_Flg=0;
 					
+					
 					$Status_Active_Flg=0;
 					$Status_Active = "Status changes to:\n";
 					
-					$activeStatusArray = array('not_yet_recruiting_active', 'recruiting_active', 'enrolling_by_invitation_active', 'active_not_recruiting_active', 'completed_active', 'suspended_active', 'terminated_active', 'withdrawn_active', 'available_active', 'no_longer_available_active', 'approved_for_marketing_active', 'no_longer_recruiting_active', 'withheld_active', 'temporarily_not_available_active', 'ongoing_active', 'not_authorized_active', 'prohibited_active');
-			
-					foreach($activeStatusArray as $currentStatus)
+					foreach($allTrialsStatusArray as $currentStatus)
 					{
-						if($data_matrix[$rid][$cid][$currentStatus] > 0)
+						if($data_matrix[$rid][$cid][$currentStatus.'_active'] > 0)
 						{
 							$Status_Active_Flg=1;
-							$Status_Active .= " \"".ucfirst(str_replace('_',' ',str_replace('_active','',$currentStatus))) ."\": ". $data_matrix[$rid][$cid][$currentStatus] ."\n";
+							$Status_Active .= " \"".ucfirst(str_replace('_',' ',$currentStatus)) ."\": ". $data_matrix[$rid][$cid][$currentStatus.'_active'] ."\n";
 						}
 					}
 					
@@ -4359,16 +4497,16 @@ function Download_reports()
 					else
 						$Status_Active_Flg=0;
 					
+					
 					$Status_Indlead_Flg=0;
 					$Status_Indlead = "Status changes to:\n";
-					$activeIndleadStatusArray = array('not_yet_recruiting_active_indlead', 'recruiting_active_indlead', 'enrolling_by_invitation_active_indlead', 'active_not_recruiting_active_indlead', 'completed_active_indlead', 'suspended_active_indlead', 'terminated_active_indlead', 'withdrawn_active_indlead', 'available_active_indlead', 'no_longer_available_active_indlead', 'approved_for_marketing_active_indlead', 'no_longer_recruiting_active_indlead', 'withheld_active_indlead', 'temporarily_not_available_active_indlead', 'ongoing_active_indlead', 'not_authorized_active_indlead', 'prohibited_active_indlead');
-			
-					foreach($activeIndleadStatusArray as $currentStatus)
+					
+					foreach($allTrialsStatusArray as $currentStatus)
 					{
-						if($data_matrix[$rid][$cid][$currentStatus] > 0)
+						if($data_matrix[$rid][$cid][$currentStatus.'_active_indlead'] > 0)
 						{
 							$Status_Indlead_Flg=1;
-							$Status_Indlead .= " \"".ucfirst(str_replace('_',' ',str_replace('_active_indlead','',$currentStatus)))."\": ". $data_matrix[$rid][$cid][$currentStatus]."\n";
+							$Status_Indlead .= " \"".ucfirst(str_replace('_',' ',$currentStatus))."\": ". $data_matrix[$rid][$cid][$currentStatus.'_active_indlead']."\n";
 						}
 					}
 					
@@ -4377,8 +4515,27 @@ function Download_reports()
 						$annotation_text2 .= $Status_Indlead;
 					else
 						$Status_Indlead_Flg=0;
+						
+						
+					$Status_Active_Owner_Sponsored_Flg=0;
+					$Status_Active_Owner_Sponsored = "Status changes to:\n";
 					
-					if($data_matrix[$rid][$cid]['total'] != 0 && ($Status_New_Trials_Flg==1 || $Status_Total_Flg==1 || $Status_Active_Flg || $Status_Indlead_Flg) && (date('Y-m-d H:i:s', strtotime($end_range, $now)) == date('Y-m-d H:i:s', strtotime('-1 Month', $now))))
+					foreach($allTrialsStatusArray as $currentStatus)
+					{
+						if($data_matrix[$rid][$cid][$currentStatus.'_active_owner_sponsored'] > 0)
+						{
+							$Status_Active_Owner_Sponsored_Flg=1;
+							$Status_Active_Owner_Sponsored .= " \"".ucfirst(str_replace('_',' ',$currentStatus))."\": ". $data_matrix[$rid][$cid][$currentStatus.'_active_owner_sponsored']."\n";
+						}
+					}
+					
+					
+					if($Status_Active_Owner_Sponsored_Flg==1 && $mode=='active_owner_sponsored')
+						$annotation_text2 .= $Status_Active_Owner_Sponsored;
+					else
+						$Status_Active_Owner_Sponsored_Flg=0;	
+					
+					if($data_matrix[$rid][$cid]['total'] != 0 && ($Status_New_Trials_Flg==1 || $Status_Total_Flg==1 || $Status_Active_Flg || $Status_Indlead_Flg || $Status_Active_Owner_Sponsored_Flg) && (date('Y-m-d H:i:s', strtotime($end_range, $now)) == date('Y-m-d H:i:s', strtotime('-1 Month', $now))))
 					$annotation_text = $annotation_text.$annotation_text2;
 					
 					$annotation_text = htmlspecialchars_decode(strip_tags($annotation_text));	///Strip HTML tags then Convert special HTML entities back to characters like &amp; to &
@@ -4490,6 +4647,10 @@ function Download_reports()
 			elseif($mode=='total')
 			{
 				$count_val=$count_total;
+			}
+			elseif($mode=='active_owner_sponsored')
+			{
+				$count_val=$active_owner_sponsored_total;
 			}
 			else
 			{
