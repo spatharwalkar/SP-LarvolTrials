@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS `clinical_study` (
   `larvol_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `institution_type` ENUM( 'owner_sponsored', 'industry_lead_sponsor', 'industry_collaborator', 'coop', 'other' ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT 'other',
+  `institution_type` ENUM( 'industry_lead_sponsor', 'industry_collaborator', 'coop', 'other', 'owner_sponsored') CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT 'other',
   `import_time` datetime NOT NULL,
   `last_change` datetime NOT NULL,
   `region` varchar(63) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
