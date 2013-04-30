@@ -183,7 +183,7 @@ function update_mesh_preindex($nctids,$diseaseid)
 		return false;
 	}
 //	mysql_query("START TRANSACTION");
-	$res=mysql_query("delete from entity_mesh_trials where entity=".$diseaseid." ;") or die("Error deleting records from entity_mesh_trials ". mysql_errror());
+	$res=mysql_query("delete from entity_trials where entity=".$diseaseid." ;") or die("Error deleting records from entity_trials ". mysql_errror());
 	foreach ($nctids as $nctid=>$ts)
 	{
 		$larvol_id=get_larvolID($nctid);
@@ -192,17 +192,17 @@ function update_mesh_preindex($nctids,$diseaseid)
 //			pr('NCTID '.$nctid.' does not exist in database !');
 			continue;
 		}
-		$query='INSERT INTO `entity_mesh_trials` (`entity`, `trial`) 
+		$query='INSERT INTO `entity_trials` (`entity`, `trial`) 
 				VALUES ("' . $diseaseid . '", "' . $larvol_id .'") ';
 		$res = mysql_query($query);
 		if($res === false)
 		{
-			$log = 'Bad SQL query adding records to entity_mesh_trials . Query : ' . $query . '<br> MySql Error:'.mysql_error();
+			$log = 'Bad SQL query adding records to entity_trials . Query : ' . $query . '<br> MySql Error:'.mysql_error();
 			//mysql_query('ROLLBACK');
 		 	echo $log;
 			return false;
 		}
-		//$res=mysql_query("select * from entity_mesh_trials where entity=".$diseaseid." and trial=".$nctid." limit 1;") or die("Error in geting data from entity_mesh_trials ". mysql_errror());
+		//$res=mysql_query("select * from entity_trials where entity=".$diseaseid." and trial=".$nctid." limit 1;") or die("Error in geting data from entity_trials ". mysql_errror());
 	}
 //	mysql_query("COMMIT;");
 }

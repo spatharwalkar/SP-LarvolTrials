@@ -20,7 +20,7 @@ function index_disease($diseaseid)
 	pr('Associating disease id : '.$diseaseid);
 	$diseaseids=array();
 	
-	$query = 'select distinct trial from entity_mesh_trials where 
+	$query = 'select distinct trial from entity_trials where 
 	entity="'.$diseaseid.'"';
 	$mesh_trials='';
 	$res = mysql_query($query) or die('Bad SQL query ');

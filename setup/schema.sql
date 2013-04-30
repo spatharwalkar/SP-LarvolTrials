@@ -514,14 +514,6 @@ CREATE TABLE IF NOT EXISTS `entity_trials` (
   KEY `trial` (`trial`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE `entity_mesh_trials` 
-(
-  `entity` int(10) unsigned NOT NULL,
-  `trial` int(10) unsigned NOT NULL,
-  PRIMARY KEY (`entity`,`trial`),
-  KEY `trial` (`trial`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
-
 CREATE TABLE IF NOT EXISTS `data_history` (
   `larvol_id` int(10) unsigned NOT NULL,
   `brief_title_prev` text COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -1366,6 +1358,3 @@ ALTER TABLE `upm_areas`
   ADD CONSTRAINT `upm_areas_ibfk_2` FOREIGN KEY (`area_id`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `upm_areas_ibfk_1` FOREIGN KEY (`upm_id`) REFERENCES `upm` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
-ALTER TABLE `entity_mesh_trials`  
-  ADD CONSTRAINT `entity_mesh_trials_ibfk_1` FOREIGN KEY (`entity`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `entity_mesh_trials_ibfk_2` FOREIGN KEY (`trial`) REFERENCES `data_trials` (`larvol_id`) ON DELETE CASCADE ON UPDATE CASCADE;
