@@ -5607,7 +5607,8 @@ class TrialTracker
 							
 					$rowspan = 1;
 					$titleLinkColor = '#000000;';
-					$nctId = $tvalue['NCT/nct_id'];	
+					//$nctId = $tvalue['NCT/nct_id'];
+					$nctId = $tvalue['nct_id'];
 					
 					if(isset($tvalue['upms']))  
 						$rowspan = count($tvalue['upms'])+1; 
