@@ -10577,7 +10577,7 @@ class TrialTracker
 							. '<li><select id="wFormat" name="wFormat" size="3" style="height:54px;">'
 							. '<option value="excel" selected="selected">Excel</option>'
 							//comment the following line to hide pdf export
-							. '<option value="pdf">PDF</option>'
+							//. '<option value="pdf">PDF</option>'
 							. '<option value="tsv">TSV</option>'
 							. '</select></li></ul>'
 							. '<input type="hidden" name="shownCnt" value="' . $shownCnt . '" />'
