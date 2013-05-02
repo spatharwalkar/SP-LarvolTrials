@@ -506,8 +506,8 @@ function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL  )
 							$ownersponsored='No';
 							foreach($csearchnames as $name)
 							{
-								$name='xxx.'.$name;
-								$pos = stripos($name,trim($sponsor));
+								$sponsor='xxx.'.$sponsor;
+								$pos = stripos($sponsor,trim($name));
 								if(!empty($pos) and $pos>0 )	
 								{
 									$ownersponsored='Yes';
